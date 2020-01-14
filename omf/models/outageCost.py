@@ -10,9 +10,9 @@ import plotly as py
 import plotly.graph_objs as go
 # OMF imports
 import omf
-from omf import geo
-from omf.solvers import gridlabd
+import omf.geo
 from omf.models import __neoMetaModel__
+from omf.models.__neoMetaModel__ import *
 
 # Model metadata:
 tooltip = 'outageCost calculates reliability metrics and creates a leaflet graph based on data from an input csv file.'
@@ -639,7 +639,7 @@ def randomFaultsRefined(pathToCsv, pathToOmd, workDir, gridLines, faultsGenerate
 	# create a DataFrame with the line name and the coordinates of its edges
 	with open(pathToOmd) as inFile:
 		tree = json.load(inFile)['tree']
-	outageMap = geo.omdGeoJson(pathToOmd, conversion = False)
+	outageMap = omf.geo.omdGeoJson(pathToOmd, conversion = False)
 	with open(workDir + '/lines.csv', mode='w', newline='') as lines:
 
 		fieldnames = ['line_name', 'coords1', 'coords2']
@@ -836,7 +836,7 @@ def outageCostAnalysis(pathToOmd, pathToCsv, workDir, generateRandom, graphData,
 			statsFile.write('No outage stats are available given the input data provided by the user.')
 
 	# Draw a leaflet graph of the feeder with outages
-	outageMap = geo.omdGeoJson(pathToOmd, conversion=False)
+	outageMap = omf.geo.omdGeoJson(pathToOmd, conversion=False)
 
 	mc = pd.read_csv(pathToCsv)
 
