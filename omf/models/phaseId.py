@@ -13,6 +13,7 @@ from sklearn import preprocessing
 from sklearn.metrics import confusion_matrix
 
 from omf.models import __neoMetaModel__
+from omf.models.__neoMetaModel__ import *
 
 # Model metadata:
 modelName, template = __neoMetaModel__.metadata(__file__)
