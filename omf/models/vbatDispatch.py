@@ -1,15 +1,16 @@
 ''' Evaluate demand response energy and economic savings available using PNNL VirtualBatteries (VBAT) model. '''
 
-import json, shutil, subprocess, csv, pulp, os
+import shutil, csv, pulp, os
 from os.path import join as pJoin
 import numpy as np
 from numpy import npv
-#import platform
+#import platform, subprocess
 #from numpy import arctan as atan, array
 
-from omf.models import __neoMetaModel__
 from omf.solvers import VB
 from omf import forecast as fc
+from omf.models import __neoMetaModel__
+from omf.models.__neoMetaModel__ import *
 
 # Model metadata:
 modelName, template = __neoMetaModel__.metadata(__file__)
