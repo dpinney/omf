@@ -22,14 +22,15 @@ Note that db_network and db_equipment can be the same file is both network and e
 """
 
 
-import csv, random, math, copy, subprocess, locale, tempfile, warnings, sys, os, json, traceback, shutil, platform
+import csv, random, math, copy, subprocess, locale, warnings, os, json, traceback, shutil, platform
+#import tempfile
 from os.path import join as pJoin
 import matplotlib
 from matplotlib import pyplot as plt
 import numpy as np
 from numpy.linalg import inv
 from omf.solvers import gridlabd
-from omf import feeder
+import omf.feeder
 
 
 matplotlib.pyplot.switch_backend("Agg")
@@ -3417,7 +3418,7 @@ def _tests(keepFiles=True):
 		try:
 			# Main conversion of CYME model.
 			cyme_base = convertCymeModel(inputDir + db_network, inputDir)
-			glmString = feeder.sortedWrite(cyme_base)
+			glmString = omf.feeder.sortedWrite(cyme_base)
 			testFilename = db_network[:-4]
 			with open(inputDir + testFilename + ".glm", 'w') as f:
 				f.write(glmString)
@@ -3425,7 +3426,7 @@ def _tests(keepFiles=True):
 			outFileStats = os.stat(pJoin(inputDir, testFilename + ".glm"))
 			inFileSize = inFileStats.st_size
 			outFileSize = outFileStats.st_size
-			treeObj = feeder.parse(inputDir + testFilename + ".glm")
+			treeObj = omf.feeder.parse(inputDir + testFilename + ".glm")
 			print("WROTE GLM FOR " + db_network)
 			with open(pJoin(outputDir, "convResults.txt"), "a") as resultsFile:
 				resultsFile.write("WROTE GLM FOR " + testFilename + "\n")
@@ -3463,8 +3464,8 @@ def _tests(keepFiles=True):
 			traceback.print_exc()
 		try:
 			# Draw the GLM.
-			myGraph = feeder.treeToNxGraph(cyme_base)
-			feeder.latLonNxGraph(myGraph, neatoLayout=False)
+			myGraph = omf.feeder.treeToNxGraph(cyme_base)
+			omf.feeder.latLonNxGraph(myGraph, neatoLayout=False)
 			plt.savefig(outputDir + testFilename + ".png")
 			with open(pJoin(outputDir, "convResults.txt"), "a") as resultsFile:
 				resultsFile.write("DREW GLM FOR " + testFilename + "\n")
