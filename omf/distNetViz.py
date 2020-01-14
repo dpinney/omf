@@ -2,11 +2,11 @@
 Load an OMF feeder in to the new viewer.
 """
 
-import tempfile, shutil, os, fileinput, json, platform, webbrowser, sys
+import tempfile, shutil, os, fileinput, json, webbrowser, sys
 import networkx as nx
 from jinja2 import Template
 import omf
-from omf import feeder
+import omf.feeder
 
 
 def main():
@@ -38,7 +38,7 @@ def insert_coordinates(tree):
 	"""Insert additional latitude and longitude data into the dictionary."""
 	print("Force laying out the graph...")
 	# Use graphviz to lay out the graph.
-	inGraph = feeder.treeToNxGraph(tree)
+	inGraph = omf.feeder.treeToNxGraph(tree)
 	# HACK: work on a new graph without attributes because graphViz tries to read attrs.
 	cleanG = nx.Graph(inGraph.edges())
 	# HACK2: might miss nodes without edges without the following.
@@ -90,7 +90,7 @@ def viz(pathToOmdOrGlm, forceLayout=False, outputPath=None, outputName='viewer.h
 		if pathToOmdOrGlm.endswith('.omd'):
 			thisFeed = {'tree':json.load(feedFile)['tree']} # TODO: later bring back attachments.
 		elif pathToOmdOrGlm.endswith('.glm'):
-			thisFeed = {'tree':feeder.parse(pathToOmdOrGlm, filePath=True)}
+			thisFeed = {'tree':omf.feeder.parse(pathToOmdOrGlm, filePath=True)}
 		tree = thisFeed['tree']
 	## Force layout of feeders with no lat/lon information so we can actually see what's there.
 	if forceLayout:
