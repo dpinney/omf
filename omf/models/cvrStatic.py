@@ -1,15 +1,15 @@
 ''' Calculate CVR impacts using a targetted set of static loadflows. '''
 
-import json, os, sys, shutil, math, base64
+import json, os, shutil, math, base64
 from copy import copy
 from os.path import join as pJoin
-from jinja2 import Template
 from matplotlib import pyplot as plt
 from omf.models import __neoMetaModel__
+from omf.models.__neoMetaModel__ import *
 
 # OMF imports
-from omf import feeder
-from omf.solvers import gridlabd
+import omf.feeder
+import omf.solvers.gridlabd
 
 # Model metadata:
 modelName, template = __neoMetaModel__.metadata(__file__)
@@ -63,8 +63,8 @@ def work(modelDir, inputDict):
 	outData["monthName"] = [name[0:3] for name in monthNames]
 	# Graph feeder.
 	fig = plt.figure(figsize=(10,10))
-	myGraph = feeder.treeToNxGraph(tree)
-	feeder.latLonNxGraph(myGraph, neatoLayout=False)
+	myGraph = omf.feeder.treeToNxGraph(tree)
+	omf.feeder.latLonNxGraph(myGraph, neatoLayout=False)
 	plt.savefig(pJoin(modelDir,"feederChart.png"))
 	with open(pJoin(modelDir,"feederChart.png"),"rb") as inFile:
 		outData["feederChart"] = base64.standard_b64encode(inFile.read()).decode('ascii')
@@ -223,7 +223,7 @@ def work(modelDir, inputDict):
 				tree[regConfIndex]['tap_pos_B'] = str(newTapPos)
 				tree[regConfIndex]['tap_pos_C'] = str(newTapPos)
 			# Run the model through gridlab and put outputs in the table.
-			output = gridlabd.runInFilesystem(tree, attachments=attachments,
+			output = omf.solvers.gridlabd.runInFilesystem(tree, attachments=attachments,
 				keepFiles=True, workDir=modelDir)
 			os.remove(pJoin(modelDir,"PID.txt"))
 			p = output['Zregulator.csv']['power_in.real'][0]
