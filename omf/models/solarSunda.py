@@ -5,9 +5,10 @@ from numpy import npv, pmt, ppmt, ipmt, irr
 from os.path import join as pJoin
 
 # OMF imports
-from omf.models import __neoMetaModel__
+import omf.weather
 from omf.solvers import nrelsam2013
-from omf.weather import zipCodeToClimateName
+from omf.models import __neoMetaModel__
+from omf.models.__neoMetaModel__ import *
 
 # Model metadata:
 modelName, template = __neoMetaModel__.metadata(__file__)
@@ -23,7 +24,7 @@ def work(modelDir, inputDict):
 	startDateTime = simStartDate + " 00:00:00 UTC"		
 	simLengthUnits = "hours"
 	# Associate zipcode to climate data
-	inputDict["climateName"] = zipCodeToClimateName(inputDict["zipCode"])
+	inputDict["climateName"] = omf.weather.zipCodeToClimateName(inputDict["zipCode"])
 	inverterSizeAC = float(inputDict.get("inverterSize",0))
 	if (inputDict.get("systemSize",0) == "-"):
 		arraySizeDC = 1.3908 * inverterSizeAC
