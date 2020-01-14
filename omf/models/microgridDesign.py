@@ -1,10 +1,12 @@
-import warnings, csv, json, plotly
+import warnings, csv, json
 from os.path import join as pJoin
 import numpy as np
+import plotly
 import plotly.graph_objs as go
 import omf
+import omf.solvers.REopt as REopt
 from omf.models import __neoMetaModel__
-import omf.solvers.REopt as reopt
+from omf.models.__neoMetaModel__ import *
 
 warnings.filterwarnings('ignore')
 
@@ -146,12 +148,12 @@ def work(modelDir, inputDict):
 			json.dump(scenario, jsonFile)
 
 		# Run REopt API script
-		reopt.run(pJoin(modelDir, 'Scenario_test_POST.json'), pJoin(modelDir, 'results.json'))
+		REopt.run(pJoin(modelDir, 'Scenario_test_POST.json'), pJoin(modelDir, 'results.json'))
 		with open(pJoin(modelDir, 'results.json')) as jsonFile:
 			results = json.load(jsonFile)
 		
 		runID = results['outputs']['Scenario']['run_uuid']
-		reopt.runResilience(runID, pJoin(modelDir, 'resultsResilience.json'))
+		REopt.runResilience(runID, pJoin(modelDir, 'resultsResilience.json'))
 		with open(pJoin(modelDir, 'resultsResilience.json')) as jsonFile:
 			resultsResilience = json.load(jsonFile)
 
