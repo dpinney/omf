@@ -1,18 +1,16 @@
 """ Anomaly detection. """
-import os, sys, shutil, csv, hashlib, plotly, json
+import sys, shutil, csv, hashlib, plotly, json
 from os.path import isdir, join as pJoin
 from io import StringIO
-from datetime import datetime as dt, timedelta
 import numpy as np
 from numpy import npv
 import pandas as pd
-import matplotlib.pyplot as plt
 from sklearn.neighbors import LocalOutlierFactor
 from sklearn.ensemble import IsolationForest
 import plotly.graph_objs as go
-import plotly.express as px
 from omf import anomalyDetection
 from omf.models import __neoMetaModel__
+from omf.models.__neoMetaModel__ import *
 
 
 # Model metadata:
