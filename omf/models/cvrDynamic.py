@@ -1,15 +1,15 @@
 ''' Calculate CVR impacts using a targetted set of dynamic loadflows. '''
 
-import json, os, webbrowser, shutil, math, calendar
+import json, os, shutil, math, calendar
 from datetime import datetime as dt, timedelta
 from os.path import join as pJoin
-from jinja2 import Template
 from matplotlib import pyplot as plt
 
 # OMF imports
+import omf.feeder
+import omf.solvers.gridlabd
 from omf.models import __neoMetaModel__
-from omf import feeder
-from omf.solvers import gridlabd
+from omf.models.__neoMetaModel__ import *
 
 # Model metadata:
 tooltip = 'The cvrDynamic model calculates the expected costs and benefits for implementing conservation voltage reduction on a given feeder circuit.'
@@ -108,8 +108,8 @@ def work(modelDir,inputDict):
 	#run a reference load flow
 	HOURS = float(inputDict['simLengthHours'])
 	simStartDate = inputDict['simStart']
-	feeder.adjustTime(localTree,HOURS,'hours',simStartDate)
-	output = gridlabd.runInFilesystem(localTree, attachments, keepFiles=False,workDir=modelDir)
+	omf.feeder.adjustTime(localTree,HOURS,'hours',simStartDate)
+	output = omf.solvers.gridlabd.runInFilesystem(localTree, attachments, keepFiles=False,workDir=modelDir)
 	try: os.remove(pJoin(modelDir,'PID.txt'))
 	except: pass
 	p = output['Zregulator.csv']['power_in.real']
@@ -145,8 +145,8 @@ def work(modelDir,inputDict):
 		'voltage_measurements': str(inputDict.get('voltageNodes', 'IVVC1')),
 	}
 	#running powerflow analysis via gridalab after attaching a regulator
-	feeder.adjustTime(localTree,HOURS,'hours',simStartDate)
-	output1 = gridlabd.runInFilesystem(localTree,attachments,keepFiles=True,workDir=modelDir)
+	omf.feeder.adjustTime(localTree,HOURS,'hours',simStartDate)
+	output1 = omf.solvers.gridlabd.runInFilesystem(localTree,attachments,keepFiles=True,workDir=modelDir)
 	os.remove(pJoin(modelDir,'PID.txt'))
 	pnew = output1['NewZregulator.csv']['power_in.real']
 	qnew = output1['NewZregulator.csv']['power_in.imag']
