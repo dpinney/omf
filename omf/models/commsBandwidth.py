@@ -1,10 +1,12 @@
 ''' Comms Bandwidth Model '''
 
-import json, os, sys, tempfile, datetime, shutil, tempfile
+import os, datetime, shutil
 from os.path import join as pJoin
 import networkx as nx
-from omf.models import __neoMetaModel__
 from omf import comms
+from omf.models import __neoMetaModel__
+from omf.models.__neoMetaModel__ import *
+
 
 # Model metadata:
 tooltip = "Calculate the bandwidth requirements for a communications system on a feeder"
