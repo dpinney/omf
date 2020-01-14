@@ -2,9 +2,7 @@
 
 import json, os, shutil, csv, warnings, base64
 from os.path import join as pJoin
-from matplotlib import pyplot as plt
-from omf.models import __neoMetaModel__
-from omf.models.voltageDrop import drawPlot
+#from matplotlib import pyplot as plt
 #plt.switch_backend('Agg')
 
 # dateutil imports
@@ -12,8 +10,11 @@ from dateutil import parser
 from dateutil.relativedelta import *
 
 # OMF imports
-from omf import feeder
-from omf.solvers import gridlabd
+import omf
+import omf.feeder
+import omf.models.voltageDrop
+from omf.models import __neoMetaModel__
+from omf.models.__neoMetaModel__ import *
 
 # Model metadata:
 modelName, template = __neoMetaModel__.metadata(__file__)
@@ -78,7 +79,7 @@ def work(modelDir, inputDict):
 	else:
 		faultTypeValue = inputDict["faultType"]
 
-	chart = drawPlot(
+	chart = omf.models.voltageDrop.drawPlot(
 		pJoin(modelDir,feederName + ".omd"),
 		neatoLayout = neato,
 		edgeCol = edgeColValue,
@@ -142,7 +143,7 @@ def _testingPlot():
 	# FNAME = 'test_smsSingle.glm'
 	# Hack: Agg backend doesn't work for interactivity. Switch to something we can use:
 	# plt.switch_backend('MacOSX')
-	chart = drawPlot(PREFIX + FNAME, neatoLayout=True, edgeCol="Current", nodeCol=None, nodeLabs="Name", edgeLabs=None, faultLoc="node713-704", faultType="TLG", customColormap=False, scaleMin=None, scaleMax=None, rezSqIn=225, simTime='2000-01-01 0:00:00')
+	chart = omf.models.voltageDrop.drawPlot(PREFIX + FNAME, neatoLayout=True, edgeCol="Current", nodeCol=None, nodeLabs="Name", edgeLabs=None, faultLoc="node713-704", faultType="TLG", customColormap=False, scaleMin=None, scaleMax=None, rezSqIn=225, simTime='2000-01-01 0:00:00')
 	chart.savefig(PREFIX + "YO_WHATS_GOING_ON.png")
 	# plt.show()
 
