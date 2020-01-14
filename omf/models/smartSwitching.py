@@ -9,15 +9,16 @@ import plotly.graph_objs as go
 from plotly.tools import make_subplots
 import networkx as nx
 
+# dateutil imports
+from dateutil import parser
+from dateutil.relativedelta import *
+
 # OMF imports
 import omf
 import omf.feeder
 import omf.geo
 from omf.models import __neoMetaModel__
-
-# dateutil imports
-from dateutil import parser
-from dateutil.relativedelta import *
+from omf.models.__neoMetaModel__ import *
 
 # Model metadata:
 tooltip = 'smartSwitching gives the expected reliability improvement from adding reclosers to a circuit.'
@@ -1119,8 +1120,8 @@ def work(modelDir, inputDict):
 	#bestLocationForRecloser(omf.omfDir + '/scratch/CIGAR/test_ieee37nodeFaultTester.glm', None, 'underground_line', 'node709-708', 'EXPONENTIAL', '3.858e-7', '0.0', 'PARETO', '1.0', '1.0002778', '432000 s', '2000-01-01 0:00:00', 'TLG', '300')
 	
 	# Textual outputs of cost statistic
-	with open(pJoin(modelDir,'costStatsCalc.html'),'rb') as inFile:
-		outData['costStatsHtml'] = base64.standard_b64encode(inFile.read()).decode()
+	with open(pJoin(modelDir,'costStatsCalc.html')) as inFile:
+		outData['costStatsHtml'] = inFile.read()
 	
 	# Image outputs.
 	with open(pJoin(modelDir,'feeder_chart.png'),'rb') as inFile:
