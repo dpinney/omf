@@ -14,12 +14,10 @@ from dateutil.relativedelta import *
 
 # OMF imports
 import omf
-from omf import feeder
+import omf.models.voltageDrop, omf.models.faultAnalysis
+import omf.solvers.REopt as REopt
 from omf.models import __neoMetaModel__
-from omf.models.voltageDrop import drawPlot
-from omf.models.faultAnalysis import drawTable
-from omf.solvers import gridlabd
-from omf.solvers.REopt import run as runREopt
+from omf.models.__neoMetaModel__ import *
 
 # Model metadata:
 modelName, template = __neoMetaModel__.metadata(__file__)
@@ -181,7 +179,7 @@ def work(modelDir, inputDict):
 	outData["fuelCostCalcHtml"] = fuelCostHtml
 
 	#run and display voltage drop image and protective device status table
-	voltPlotChart = drawPlot(
+	voltPlotChart = omf.models.voltageDrop.drawPlot(
 		pJoin(modelDir,feederName + ".omd"),
 		neatoLayout = neato,
 		edgeCol = "PercentOfRating",
@@ -199,7 +197,7 @@ def work(modelDir, inputDict):
 	voltPlotChart.savefig(pJoin(modelDir, "output.png"))
 	with open(pJoin(modelDir, "output.png"),"rb") as inFile:
 		outData["voltageDrop"] = base64.standard_b64encode(inFile.read()).decode('ascii')
-	protDevTable = drawTable(
+	protDevTable = omf.models.faultAnalysis.drawTable(
 		pJoin(modelDir,feederName + ".omd"),
 		workDir = modelDir)
 	with open(pJoin(modelDir, "statusTable.html"), "w") as tabFile:
@@ -247,7 +245,7 @@ def work(modelDir, inputDict):
 					with open(modelDir + '/' + feederName2, "w+") as write_file:
 						json.dump(omd, write_file)
 
-					tempVoltPlotChart = drawPlot(
+					tempVoltPlotChart = omf.models.voltageDrop.drawPlot(
 						pJoin(modelDir,feederName2),
 						neatoLayout = neato,
 						edgeCol = "PercentOfRating",
@@ -269,7 +267,7 @@ def work(modelDir, inputDict):
 					# outData['loadProtDevTableHtml'] = loadProtDevTable
 					# with open(pJoin(modelDir, "loadVoltPlot.png"),"rb") as inFile:
 					# 	outData["loadVoltageDrop"] = inFile.read().encode("base64")
-					tempProtDevTable = drawTable(
+					tempProtDevTable = omf.models.faultAnalysis.drawTable(
 						pJoin(modelDir,feederName2),
 						workDir = modelDir)
 					return tempVoltPlotChart, tempProtDevTable
@@ -319,7 +317,7 @@ def work(modelDir, inputDict):
 	with open(pJoin(modelDir, "Scenario_test_POST.json"), "w") as jsonFile:
 		json.dump(scenario, jsonFile)
 	# Run REopt API script
-	runREopt(pJoin(modelDir, 'Scenario_test_POST.json'), pJoin(modelDir, 'results.json'))
+	REopt.run(pJoin(modelDir, 'Scenario_test_POST.json'), pJoin(modelDir, 'results.json'))
 
 	#read results from json generated from REopt
 	with open(pJoin(modelDir, "results.json"), "r") as REoptFile:
