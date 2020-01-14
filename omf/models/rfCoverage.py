@@ -1,10 +1,11 @@
 ''' RF Coverage Model'''
 
-import json, datetime, shutil, subprocess, requests, tempfile, xml.etree.ElementTree as ET, base64
+import datetime, shutil, subprocess, requests, tempfile, xml.etree.ElementTree as ET, base64
 from zipfile import ZipFile
 from os.path import join as pJoin
 from PIL import Image
 from omf.models import __neoMetaModel__
+from omf.models.__neoMetaModel__ import *
 
 # Model metadata:
 tooltip = "The rfCoverage model provides a visualization of radio frequency propogation"
