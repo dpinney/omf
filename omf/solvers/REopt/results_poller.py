@@ -3,7 +3,7 @@ function for polling reopt api results url
 """
 import json, time
 import requests
-import omf.solvers.REopt.logger as logger
+from omf.solvers.REopt import logger
 
 
 def poller(url, poll_interval=2):

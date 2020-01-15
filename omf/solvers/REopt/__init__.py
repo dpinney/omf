@@ -1,7 +1,7 @@
 import json
 import requests
-import omf.solvers.REopt.logger as logger
-import omf.solvers.REopt.results_poller as results_poller
+from omf.solvers.REopt import logger
+from omf.solvers.REopt import results_poller
 
 def run(inJSONPath, outputPath):
 	API_KEY = 'WhEzm6QQQrks1hcsdN0Vrd56ZJmUyXJxTJFg6pn9'  # REPLACE WITH YOUR API KEY
