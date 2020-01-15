@@ -1,16 +1,16 @@
 ''' Apply PNNL VirtualBatteries (VBAT) load model to day ahead forecast.'''
+from os.path import isdir, join as pJoin
 import pandas as pd
 import numpy as np
 from sklearn import linear_model
 import pulp
-from os.path import isdir, join as pJoin
-import __neoMetaModel__
-from __neoMetaModel__ import *
-from solvers import VB
-import VB
+from omf.solvers import VB
+#from . import VB
+from omf.models import __neoMetaModel__
+from omf.models.__neoMetaModel__ import *
 
 # Model metadata:
-modelName, template = metadata(__file__)
+modelName, template = __neoMetaModel__.metadata(__file__)
 tooltip = ('Calculate the virtual battery capacity for a collection of '
 	'thermostically controlled loads with day-ahead forecasting.')
 hidden = True
@@ -157,7 +157,7 @@ def work(modelDir, ind):
 			VB_power.extend([0]*24)
 			VB_energy.extend([0]*24)
 
-	print len(VB_power), len(VB_energy)
+	print(len(VB_power), len(VB_energy))
 	o['predicted_load'] = clf.predict(X_test)
 	o['train accuracy'] = clf.score(X_train, y_train)
 	o['test accuracy'] = clf.score(X_test, y_test)
@@ -232,7 +232,7 @@ def new(modelDir):
 		#"tempFileName": "weatherNoaaTemp.csv",
 		#"modelType": modelName
 	}
-	creationCode = __neoMetaModel__.new(modelDir, defaultInputs)
+	creationCode = __neoMetaModel__.new(modelDir, ind)
 	return creationCode
 
 def _tests():
@@ -240,9 +240,9 @@ def _tests():
 	if isdir(modelLoc):
 		shutil.rmtree(modelLoc)
 	new(modelLoc) # Create New.
-	renderAndShow(modelLoc) # Pre-run.
-	runForeground(modelLoc) # Run the model.	
-	renderAndShow(modelLoc) # Show the output.
+	__neoMetaModel__.renderAndShow(modelLoc) # Pre-run.
+	__neoMetaModel__.runForeground(modelLoc) # Run the model.
+	__neoMetaModel__.renderAndShow(modelLoc) # Show the output.
 
 if __name__ == '__main__':
 	_tests()
