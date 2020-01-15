@@ -1084,7 +1084,7 @@ def new(modelDir):
 	''' Create a new instance of this model. Returns true on success, false on failure. '''
 	defaultInputs = {
 		'modelType': modelName,
-		'feederName1': 'OlinBarreGeo',
+		'feederName1': 'Olin Barre Geo',
 		'generateRandom': '2',
 		'graphData': '2',
 		'numberOfCustomers': '192',
