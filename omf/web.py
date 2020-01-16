@@ -20,9 +20,9 @@ except:
 	(fcntl.LOCK_EX, fcntl.LOCK_SH, fcntl.LOCK_UN, fcntl.LOCK_NB) = (0, 0, 0, 0)
 import omf
 from omf import models, feeder, network, milToGridlab, cymeToGridlab, weather, anonymization
-from omf.calibrate import omfCalibrate
-from omf.omfStats import genAllImages
-from omf.loadModelingAmi import writeNewGlmAndPlayers
+import omf.calibrate
+import omf.omfStats
+import omf.loadModelingAmi
 
 app = Flask("web")
 Compress(app)
@@ -331,7 +331,7 @@ def regenOmfStats():
 	'''Regenarate stats images.'''
 	if User.cu() != "admin":
 		return redirect("/")
-	genImagesProc = Process(target=genAllImages, args=[])
+	genImagesProc = Process(target=omf.omfStats.genAllImages, args=[])
 	genImagesProc.start()
 	return redirect("/omfStats")
 
@@ -587,12 +587,8 @@ def get_model_metadata(owner, model_name):
 
 
 @contextmanager
-#def locked_open(filepath, mode='r', timeout=180, io_open=True, **io_open_args):
 def locked_open(filepath, mode='r', timeout=180, **io_open_args):
-	"""
-	Open a file and lock it depending on the file access mode. An IOError will be raised if the lock cannot be acquired within the timeout.
-	- Either regular open() or io.open() can be used with this function
-	"""
+	'''Open a file and lock it depending on the file access mode. An IOError will be raised if the lock cannot be acquired within the timeout.'''
 	if 'r' in mode and '+' not in mode:
 		lock_mode = fcntl.LOCK_SH
 	else:
@@ -952,7 +948,7 @@ def backgroundScadaLoadshape(owner, modelName, feederName, loadName):
 		solver = 'FBS'
 		calibrateError = (0.05, 5)
 		trim = 5
-		omfCalibrate(workDir, feederPath, scadaPath, simStartDate, simLength, simLengthUnits, solver, calibrateError, trim)
+		omf.calibrate.omfCalibrate(workDir, feederPath, scadaPath, simStartDate, simLength, simLengthUnits, solver, calibrateError, trim)
 		# move calibrated file to model folder, old omd files are backedup
 		if feederPath.endswith('.omd'):
 			os.rename(feederPath, feederPath + '.backup')
@@ -990,7 +986,7 @@ def backgroundLoadModelingAmi(owner, modelName, feederName, loadName):
 		request.files['amiFile'].save(ami_filepath)
 		with locked_open(pid_filepath, 'w') as pid_file:
 			pid_file.write(str(os.getpid()))
-		writeNewGlmAndPlayers(omdPath, ami_filepath, outDir)
+		omf.loadModelingAmi.writeNewGlmAndPlayers(omdPath, ami_filepath, outDir)
 		os.remove(pid_filepath)
 	except Exception:
 		with locked_open(error_filepath, 'w') as errorFile:
@@ -1402,7 +1398,7 @@ def backgroundClimateChange(owner, modelName, feederName):
 			pass
 	except Exception as e:
 		with locked_open(error_filepath, 'w') as errorFile:
-			message = "climateError" if e.message == '' else e.message
+			message = 'climateError' if len(e.args) == 0 else e.args[0]
 			errorFile.write(message)
 
 
@@ -1494,17 +1490,13 @@ def background_zillow_houses(model_dir):
 		with locked_open(pid_filepath, 'w') as pid_file:
 			pid_file.write(str(os.getpid()))
 		triplex_objects = json.loads(request.form.get("triplexObjects"))
-		#triplex_objects = request.form.get("triplexObjects") # error test
 		zillow_houses = {}
 		for obj in triplex_objects:
-			try:
-				# Try to get real house data
-				house = omf.loadModeling.zillowHouse(obj["latitude"], obj["longitude"])
-				zillow_houses[obj["key"]] = house
-			except:
+			house = omf.loadModeling.get_zillow_configured_new_house(obj['latitude'], obj['longitude'])
+			if house is None:
 				# If a request for some house fails, get a random house
-				house = omf.loadModeling.zillowHouse(0, 0, pureRandom=True)
-				zillow_houses[obj["key"]] = house
+				house = omf.loadModeling.get_random_new_house()
+			zillow_houses[obj['key']] = house
 			# The APIs we use require us to limit our requests to a maximum of 1 per second. Exceeding that throughput will get us IP banned faster.
 			time.sleep(1)
 		payload_filepath = os.path.join(model_dir, "zillow_houses.json")
@@ -1513,7 +1505,7 @@ def background_zillow_houses(model_dir):
 		os.remove(pid_filepath)
 	except Exception as e:
 		with locked_open(os.path.join(model_dir, "error.txt"), 'w') as error_file:
-			message = "zillow_error" if e.message == '' else e.message
+			message = 'zillowError' if len(e.args) == 0 else e.args[0]
 			error_file.write(message)
 
 
@@ -1715,7 +1707,7 @@ def root():
 	modelTips = {}
 	for name in models.__all__:
 		try:
-			modelTips[name] = getattr(omf.models,name).tooltip
+			modelTips[name] = getattr(omf.models, name).tooltip
 		except:
 			pass
 	# Generate list of model types.
