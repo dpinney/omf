@@ -6,6 +6,7 @@ from copy import deepcopy
 
 # OMF imports.
 import omf
+import omf.feeder
 
 def checkStatus(modelDir):
 	'''Reads a current gridlabD simulation time from stdErr.txt,
