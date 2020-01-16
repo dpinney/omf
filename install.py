@@ -7,15 +7,14 @@ def pipInstallInOrder(pipCommandString):
 	# Removes pip log files.
 	os.system("rm \\=*")
 
-# Note: all installations require git to clone the omf first.
 if platform.system() == "Linux" and platform.linux_distribution()[0] in ["Ubuntu","debian"]:
-	os.system("sudo apt-get -y update") # Make sure apt-get is updated to prevent any weird package installation issues
+	os.system("sudo apt-get -y update && sudo apt-get -y upgrade") # Make sure apt-get is updated to prevent any weird package installation issues
 	os.system("sudo apt-get -y install language-pack-en") # Install English locale 
-	os.system("sudo apt-get -y install python-pip git unixodbc-dev libfreetype6-dev \
-	pkg-config python-dev python-numpy alien graphviz python-pygraphviz libgraphviz-dev \
-	python-pydot mdbtools python-tk octave libblas-dev liblapack-dev libatlas-base-dev gfortran wget splat")
+	os.system("sudo DEBIAN_FRONTEND=noninteractive apt-get -y install git python3-pip python3-dev python3-numpy python3-pygraphviz graphviz \
+		unixodbc-dev libfreetype6-dev pkg-config alien libgraphviz-dev python3-pydot mdbtools python3-tk octave libblas-dev liblapack-dev \
+		libatlas-base-dev gfortran wget splat")
 	try:
-		os.system("sudo apt-get -y install ffmpeg python-cairocffi")
+		os.system("sudo apt-get -y install ffmpeg python3-cairocffi")
 	except:
 		pass # Debian won't bundle a couple packages.
 	os.system("wget https://sourceforge.net/projects/gridlab-d/files/gridlab-d/Candidate%20release/gridlabd-4.0.0-1.el6.x86_64.rpm")
@@ -25,6 +24,7 @@ if platform.system() == "Linux" and platform.linux_distribution()[0] in ["Ubuntu
 	os.system("pip install --upgrade pip")
 	pipInstallInOrder("pip")
 	os.system("python setup.py develop")
+# TODO: Double check CentOS installation to support Python 3.7 or up
 elif platform.system() == "Linux" and platform.linux_distribution()[0]=="CentOS Linux":
 	# CentOS Docker image appears to come with en_US.UTF-8 locale built-in, but we might need to install that locale in the future. That currently is
 	# not done here.
@@ -42,6 +42,7 @@ elif platform.system() == "Linux" and platform.linux_distribution()[0]=="CentOS 
 	pipInstallInOrder("pip")
 	os.system("pip install --ignore-installed six")
 	os.system("python setup.py develop")
+# TODO: Modify Windows installation to support Python 3.7 or up
 elif platform.system()=='Windows':
 	# Choco install.
 	# chocoString = @"%SystemRoot%\System32\WindowsPowerShell\v1.0\powershell.exe" -NoProfile -InputFormat None -ExecutionPolicy Bypass -Command "iex ((New-Object System.Net.WebClient).DownloadString('https://chocolatey.org/install.ps1'))" && SET "PATH=%PATH%;%ALLUSERSPROFILE%\chocolatey\bin"
@@ -77,7 +78,7 @@ elif platform.system()=='Windows':
 	# HACK: more refreshes of the environment.
 	os.system("timeout 5")
 	os.system("refreshenv")
-        os.system("C:\\Python27\\python.exe -m pip install scipy")
+	os.system("C:\\Python27\\python.exe -m pip install scipy")
 	os.system("C:\\Python27\\python.exe -m pip install setuptools>=33.1.1")
 	pipInstallInOrder("C:\\Python27\\python.exe -m pip")
 	os.system("C:\\Python27\\python.exe -m setup.py develop")
@@ -99,4 +100,4 @@ elif platform.system()=="Darwin": # MacOS
 	pipInstallInOrder("pip2")
 	os.system("python2 setup.py develop")
 else:
-	print "Your operating system is not currently supported. Platform detected: " + str(platform.system()) + str(platform.linux_distribution())
+	print("Your operating system is not currently supported. Platform detected: " + str(platform.system()) + str(platform.linux_distribution()))
