@@ -1,7 +1,8 @@
+dist: bionic
 language: python
 sudo: required
 python:
-  - "2.7"
+  - "3.6"
 addons:
   apt:
     update: true
@@ -10,8 +11,8 @@ env:
 services:
   - xvfb
 before_install:
-  - python install.py
+  - python3 install.py
   - export BOTO_CONFIG=/dev/null
-install: "python setup.py develop"
+install: "python3 setup.py develop"
 script:
-  - python ./omf/runAllTests.py omf
+  - python3 ./omf/runAllTests.py omf
