@@ -119,8 +119,10 @@ def _addGldToPath():
 			# Platform not supported, so just return the standard binary and pray it works:
 			return "gridlabd"
 
-def runInFilesystem(feederTree, attachments=[], keepFiles=False, workDir=None, glmName=None, gldBinary=None):
+def runInFilesystem(feederTree, attachments=[], keepFiles=False, workDir=None, glmName=None, gldBinary=None, mac_check=False):
 	''' Execute gridlab in the local filesystem. Return a nice dictionary of results. '''
+	if sys.platform == 'darwin' and not mac_check:
+		return runToCompletionForMacOS(feederTree, attachments=attachments, keepFiles=keepFiles, workDir=workDir, glmName=glmName, gldBinary=gldBinary)
 	try:
 		#Runs standard gridlabd binary if binary is not specified, runs gldBinary parameter path if specified. 
 		#gldBinary must be path to binary
@@ -206,9 +208,16 @@ def _strClean(x):
 	else:
 		return x
 
-def runToCompletionForMacOS():
+def runToCompletionForMacOS(feederTree, attachments=[], keepFiles=False, workDir=None, glmName=None, gldBinary=None):
 	#TODO: port repeated running code from Kevin in here.
-	pass
+	MAX_ERROR_RUN = 6
+	for i in range(MAX_ERROR_RUN):
+		gridlabOut = runInFilesystem(
+			feederTree, attachments=attachments, keepFiles=keepFiles, workDir=workDir, 
+			glmName=glmName, gldBinary=gldBinary, mac_check=True)
+		if 'error when setting parent' not in gridlabOut.get('stderr','OOPS'):
+			break
+	return gridlabOut
 
 def csvToArray(fileName):
 	''' Take a Gridlab-export csv filename, return a list of timeseries vectors.'''

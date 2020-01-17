@@ -245,11 +245,11 @@
 				</select>
 			</div>
 			<div class="shortInput">
-				<label class="tooltip">Color Min<span class="classic">What kW outliers would you like observed? Otherwise, submit "auto".</span></label>
+				<label class="tooltip">Color Min<span class="classic">What W outliers would you like observed? Otherwise, submit "auto".</span></label>
 				<input type="text" id="colorMin" name="colorMin"/>
 			</div>
 			<div class="shortInput">
-				<label class="tooltip">Color Max<span class="classic">What kW outliers would you like observed? Otherwise, submit "auto".</span></label>
+				<label class="tooltip">Color Max<span class="classic">What W outliers would you like observed? Otherwise, submit "auto".</span></label>
 				<input type="text" id="colorMax" name="colorMax"/>
 			</div>
 			<div class="shortInput">
@@ -311,19 +311,19 @@
 					<th>Controlled Solar</th>
 				</tr>
 				<tr>
-					<td>Load (kW)</td>
+					<td>Load (W)</td>
 					<td>{{allOutputDataDict['service_cost']['load']['base']}}</td>
 					<td>{{allOutputDataDict['service_cost']['load']['solar']}}</td>
 					<td>{{allOutputDataDict['service_cost']['load']['controlled']}}</td>
 				</tr>
 				<tr>
-					<td>Distributed Generation (kW)</td>
+					<td>Distributed Generation (W)</td>
 					<td>{{allOutputDataDict['service_cost']['distributed_gen']['base']}}</td>
 					<td>{{allOutputDataDict['service_cost']['distributed_gen']['solar']}}</td>
 					<td>{{allOutputDataDict['service_cost']['distributed_gen']['controlled']}}</td>
 				</tr>
 				<tr>
-					<td>Losses (kW)</td>
+					<td>Losses (W)</td>
 					<td>{{allOutputDataDict['service_cost']['losses']['base']}}</td>
 					<td>{{allOutputDataDict['service_cost']['losses']['solar']}}</td>
 					<td>{{allOutputDataDict['service_cost']['losses']['controlled']}}</td>
