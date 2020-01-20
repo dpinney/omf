@@ -493,7 +493,7 @@ def work(modelDir, inputDict):
 		#HACK: force use of Java8 on MacOS.
 		#javaCmd = '/Library/Java/JavaVirtualMachines/jdk1.8.0_181.jdk/Contents/Home/bin/java'
 		#HACK HACK: use my version of Java 8 for now
-		javaCmd = '/Library/Java/JavaVirtualMachines/jdk1.8.0_202.jdk/Contents/Home/bin/java'
+		javaCmd = '/Library/Java/JavaVirtualMachines/jdk1.8.0_181.jdk/Contents/Home/bin/java'
 	else:
 		javaCmd = 'java'
 	proc = subprocess.Popen(
@@ -631,7 +631,7 @@ def work(modelDir, inputDict):
 	proc = subprocess.Popen(['java', "-Djna.library.path=" + rdtSolverFolder, '-jar', rdtJarPath, '-c', rdtInputFilePath, '-e', rdtOutFile], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 	(stdout,stderr) = proc.communicate()
 	with open(pJoin(modelDir, "rdtConsoleOut.txt"), "w") as rdtConsoleOut:
-		rdtConsoleOut.write(stdout.decode)
+		rdtConsoleOut.write(str(stdout))
 	with open(rdtOutFile) as f:
 		rdtRawOut = f.read()
 	outData['rdtRawOut'] = rdtRawOut
@@ -750,7 +750,6 @@ def new(modelDir):
 	except:
 		return False
 	return creationCode
-
 
 def _runModel():
 	# Testing the hazard class.
