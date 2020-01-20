@@ -316,7 +316,7 @@ def _calibrate_omd(start_date, omd_path, csv_path):
 	tree = omd["tree"]
 	# Delete all climate objects from the feeder. Also delete any csv_reader objects that are also named "WeatherReader"
 	weather_reader_name = "WeatherReader"
-	for key in tree.keys():
+	for key in list(tree.keys()):
 		object_type = tree[key].get("object")	
 		object_name = tree[key].get("name")
 		if object_type == "climate" or (object_type == "csv_reader" and object_name == weather_reader_name):
@@ -834,7 +834,7 @@ def getRadiationYears(radiation_type, site, year):
 def create_tsv(data, radiation_type, site, year):
 	'''Create tsv file from dict '''
 	column_count = len(data[0])
-	with open('{}-{}-{}.tsv'.format(radiation_type, site, year), 'w') as f:
+	with open('{}-{}-{}.tsv'.format(radiation_type, site, year), 'w', newline='') as f:
 		output = csv.DictWriter(f, fieldnames=['col{}'.format(x) for x in range(column_count)], delimiter='\t')
 		for item in data:
 			output.writerow(item)
