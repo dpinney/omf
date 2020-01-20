@@ -231,11 +231,12 @@ def drawPlot(path, workDir=None, neatoLayout=False, edgeLabs=None, nodeLabs=None
 	if not workDir:
 		workDir = tempfile.mkdtemp()
 		print('@@@@@@', workDir)
-	for i in range(6):
-		gridlabOut = omf.solvers.gridlabd.runInFilesystem(tree, attachments=attachments, workDir=workDir)
-		#HACK: workaround for shoddy macOS gridlabd build.
-		if 'error when setting parent' not in gridlabOut.get('stderr','OOPS'):
-			break
+	# for i in range(6):
+	# 	gridlabOut = omf.solvers.gridlabd.runInFilesystem(tree, attachments=attachments, workDir=workDir)
+	# 	#HACK: workaround for shoddy macOS gridlabd build.
+	# 	if 'error when setting parent' not in gridlabOut.get('stderr','OOPS'):
+	# 		break
+	gridlabOut = omf.solvers.gridlabd.runInFilesystem(tree, attachments=attachments, workDir=workDir)
 
 	#Record final status readout of each fuse/recloser/switch/sectionalizer after running
 	try:

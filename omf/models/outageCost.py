@@ -1110,7 +1110,7 @@ def new(modelDir):
 		outage_data = f.read()
 	defaultInputs = {
 		'modelType': modelName,
-		'feederName1': 'Olin Barre Fault',
+		'feederName1': 'Olin Barre Geo',
 		'generateRandom': '2',
 		'graphData': '2',
 		'numberOfCustomers': '192',
