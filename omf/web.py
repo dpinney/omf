@@ -1780,6 +1780,7 @@ def uniqObjName(objtype, owner, name, modelName=False):
 if __name__ == "__main__":
 	if platform.system() == "Darwin":  # MacOS
 		os.environ['no_proxy'] = '*' # Workaround for macOS fork behavior with multiprocessing and urllib.
+		os.environ['NO_PROXY'] = '*' # Workaround for above in python3.
 	template_files = ["templates/"+ x  for x in safeListdir("templates")]
 	model_files = ["models/" + x for x in safeListdir("models")]
 	app.run(debug=True, host="0.0.0.0", extra_files=template_files + model_files)
