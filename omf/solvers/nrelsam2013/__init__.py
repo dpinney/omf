@@ -24,7 +24,7 @@ class SSCAPI():
 			os.chdir(cachedDir)
 	elif sys.platform == 'darwin':
 		_dll = CDLL(os.path.join(myDir,"ssc64.dylib"))
-	elif sys.platform == 'Linux':
+	elif sys.platform == 'linux':
 		_dll = CDLL(os.path.join(myDir,"ssc64.so"))
 	else:
 		print("Platform not supported ", sys.platform)
