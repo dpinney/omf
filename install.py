@@ -85,8 +85,10 @@ elif platform.system()=='Windows':
 elif platform.system()=="Darwin": # MacOS
 	# Might need to install en_US.UTF-8 locale, like for Ubuntu? That currently is not done in this script. macOS might already come with this locale anyway.
 	# Install homebrew
-	os.system('/usr/bin/ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"')
-	os.system("brew install wget python@2 ffmpeg git graphviz octave mdbtools")
+	brew_exit_code = os.system("brew --version")
+	if brew_exit_code != 0:
+		os.system('/usr/bin/ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"')
+	os.system("brew install wget python@3 ffmpeg git graphviz octave mdbtools")
 	os.system("brew link --overwrite python")
 	os.system("wget -O gridlabd.dmg --no-check-certificate https://sourceforge.net/projects/gridlab-d/files/gridlab-d/Candidate%20release/gridlabd_4.0.0.dmg")
 	os.system("sudo hdiutil attach gridlabd.dmg")
@@ -97,7 +99,8 @@ elif platform.system()=="Darwin": # MacOS
 	#os.system("sudo tar -xvzf splat-1.4.2-osx.tgz")
 	#os.system("sudo exec splat-1.4.2/configure")
 	os.system("cd omf")
-	pipInstallInOrder("pip2")
-	os.system("python2 setup.py develop")
+	os.system('pip3 install --install-option="--include-path=/usr/local/include/" --install-option="--library-path=/usr/local/lib/" pygraphviz')
+	pipInstallInOrder("pip3")
+	os.system("python3 setup.py develop")
 else:
 	print("Your operating system is not currently supported. Platform detected: " + str(platform.system()) + str(platform.linux_distribution()))
