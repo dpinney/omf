@@ -34,3 +34,4 @@ pyproj
 gunicorn
 Pillow
 #fbprophet
+#tensorflow
