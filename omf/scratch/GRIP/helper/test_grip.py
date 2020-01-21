@@ -1,28 +1,13 @@
-'''
-Start GRIP container, test the API endpoints.
-
-TODO
-XXX Docker build.
-XXX Test interface.
-XXX File handling backend and test.
-XXX What routes? https://docs.google.com/presentation/d/17KTL5q3Nd8E_iUehLKGhCDZar8nkyn7hm8JOu6RMZ4Y/edit#slide=id.g389c95e613_0_15
-XXX Implement a route.
-XXX Implement the rest of the routes.
-OOO Add an option to test against the container.
-'''
+'''Start GRIP container, test the API endpoints.'''
 
 
-#import webbrowser
-#from multiprocessing import Process
-import io, os, omf, grip, requests, pytest, json
+import io, os, json
+import requests
+import pytset
 import omf
+import omf.scratch.GRIP.grip as grip
 from flask import url_for
 
-# Start the server.
-#p = Process(target=grip.serve, args=())
-#p.start()
-# Shouldn't I join() here? Block the execution of the testing code until the server process finishes. Well, the server process never finishes.
-# Can I send some kind of signal? I'll worry about that later. Just do something.
 
 @pytest.fixture(scope="module") # The client should only be created once
 def client():
@@ -61,7 +46,7 @@ class Test_oneLineGridlab_start(object):
         filename = 'test_ieee123nodeBetter.glm' 
         glm_path = os.path.join(os.path.dirname(__file__), filename)
         with open(glm_path) as f:
-            b_io = io.BytesIO(f.read())
+            b_io = io.BytesIO(bytes(f.read(), 'ascii'))
         data = {
             'glm': (b_io, filename),
             'useLatLons': 'True'
@@ -70,14 +55,14 @@ class Test_oneLineGridlab_start(object):
         assert response.status_code == 422
         response_data = json.loads(response.data)
         assert response_data == {
-            u'job': {
-                u'state': u'failed'
+            'job': {
+                'state': 'failed'
             },
-            u'errors': [{
-                u'http code': 422,
-                u'source': {u'useLatLons': u'True'},
-                u'title': u'Invalid Parameter Value Combination',
-                u'detail': (u"Since the submitted GLM contained no coordinates, or the coordinates could not be parsed as floats, "
+            'errors': [{
+                'http code': 422,
+                'source': {'useLatLons': 'True'},
+                'title': 'Invalid Parameter Value Combination',
+                'detail': ("Since the submitted GLM contained no coordinates, or the coordinates could not be parsed as floats, "
                     "'useLatLons' must be 'False' because artificial coordinates must be used to draw the GLM.")
             }]
         }
@@ -95,14 +80,14 @@ class Test_oneLineGridlab_start(object):
         assert response.status_code == 422
         response_data = json.loads(response.data)
         assert response_data == {
-            u'job': {
-                u'state': u'failed'
+            'job': {
+                'state': 'failed'
             },
-            u'errors': [{
-                u'http code': 422,
-                u'source': {u'useLatLons': u'True'},
-                u'title': u'Invalid Parameter Value Combination',
-                u'detail': (u"Since the submitted GLM contained no coordinates, or the coordinates could not be parsed as floats, "
+            'errors': [{
+                'http code': 422,
+                'source': {'useLatLons': 'True'},
+                'title': 'Invalid Parameter Value Combination',
+                'detail': ("Since the submitted GLM contained no coordinates, or the coordinates could not be parsed as floats, "
                     "'useLatLons' must be 'False' because artificial coordinates must be used to draw the GLM.")
             }]
         }
@@ -111,7 +96,7 @@ class Test_oneLineGridlab_start(object):
         filename = 'test_ieee123nodeBetter.glm' 
         glm_path = os.path.join(os.path.dirname(__file__), filename)
         with open(glm_path) as f:
-            b_io = io.BytesIO(f.read())
+            b_io = io.BytesIO(bytes(f.read(), 'ascii'))
         data = {
             'glm': (b_io, filename),
         }
@@ -119,14 +104,14 @@ class Test_oneLineGridlab_start(object):
         assert response.status_code == 400
         response_data = json.loads(response.data)
         assert response_data == {
-            u'job': {
-                u'state': u'failed'
+            'job': {
+                'state': 'failed'
             },
-            u'errors': [{
-                u'http code': 400,
-                u'source': {u'useLatLons': None},
-                u'title': u'Invalid Parameter Value',
-                u'detail': u"The parameter 'useLatLons' of type '<type 'bool'>' is required, but it was not submitted."
+            'errors': [{
+                'http code': 400,
+                'source': {'useLatLons': None},
+                'title': 'Invalid Parameter Value',
+                'detail': "The parameter 'useLatLons' of type '<class 'bool'>' is required, but it was not submitted."
             }]
         }
 
@@ -139,14 +124,14 @@ class Test_oneLineGridlab_start(object):
         assert response.status_code == 400
         response_data = json.loads(response.data)
         assert response_data == {
-            u'job': {
-                u'state': u'failed'
+            'job': {
+                'state': 'failed'
             },
-            u'errors': [{
-                u'http code': 400,
-                u'source': {u'glm': None},
-                u'title': u'Invalid Parameter Value',
-                u"detail": u"The parameter 'glm' of type 'file' is required, but it was not submitted."
+            'errors': [{
+                'http code': 400,
+                'source': {'glm': None},
+                'title': 'Invalid Parameter Value',
+                'detail': "The parameter 'glm' of type 'file' is required, but it was not submitted."
             }]
         }
 
@@ -155,7 +140,7 @@ class Test_oneLineGridlab_start(object):
         filename = 'test_ieee123nodeBetter.glm' 
         glm_path = os.path.join(os.path.dirname(__file__), filename)
         with open(glm_path) as f:
-            b_io = io.BytesIO(f.read())
+            b_io = io.BytesIO(bytes(f.read(), 'ascii'))
         data = {
             'glm': (b_io, filename),
             'useLatLons': useLatLons
@@ -164,14 +149,14 @@ class Test_oneLineGridlab_start(object):
         assert response.status_code == 400
         response_data = json.loads(response.data)
         assert response_data == {
-            u'job': {
-                u'state': u'failed'
+            'job': {
+                'state': 'failed'
             },
-            u'errors': [{
-                u'http code': 400,
-                u'source': {u'useLatLons': unicode(useLatLons)},
-                u'title': u'Invalid Parameter Value',
-                u"detail": u"The parameter 'useLatLons' could not be converted into the required type '<type 'bool'>'."
+            'errors': [{
+                'http code': 400,
+                'source': {'useLatLons': str(useLatLons)},
+                'title': 'Invalid Parameter Value',
+                'detail': "The parameter 'useLatLons' could not be converted into the required type '<class 'bool'>'."
             }]
         } 
 
@@ -200,7 +185,7 @@ class xTest_oneLineGridlab_download(object):
         filename = 'test_ieee123nodeBetter.glm' 
         test_file_path = os.path.join(os.path.dirname(__file__), filename)
         with open(test_file_path) as f:
-            b_io = io.BytesIO(f.read())
+            b_io = io.BytesIO(bytes(f.read(), 'ascii'))
         data = {
             'glm': (b_io, filename),
             'useLatLons': False
@@ -220,40 +205,40 @@ class Test_milsoftToGridlab_start(object):
     def test_omittedSEQFile_returns400_and_returnsCorrectJSON(self, client):
         std_path = os.path.join(omf.omfDir, "static/testFiles/IEEE13.std")
         with open(std_path) as f:
-            b_io_std = io.BytesIO(f.read())
+            b_io_std = io.BytesIO(bytes(f.read(), 'ascii'))
         data = {"std": (b_io_std, "IEEE13.std")}
         response = client.post("/milsoftToGridlab", data=data)
         assert response.status_code == 400
         response_data = json.loads(response.data)
         assert response_data == {
-            u'job': {
-                u'state': u'failed'
+            'job': {
+                'state': 'failed'
             },
-            u'errors': [{
-                u'http code': 400,
-                u'source': {u'seq': None},
-                u'title': u'Invalid Parameter Value',
-                u'detail': u"The parameter 'seq' of type 'file' is required, but it was not submitted."
+            'errors': [{
+                'http code': 400,
+                'source': {'seq': None},
+                'title': 'Invalid Parameter Value',
+                'detail': "The parameter 'seq' of type 'file' is required, but it was not submitted."
             }]
         }
 
     def test_omittedSTDFile_returns400_and_returnsCorrectJSON(self, client):
         seq_path = os.path.join(omf.omfDir, "static/testFiles/IEEE13.seq") 
         with open(seq_path) as f:
-            b_io_seq = io.BytesIO(f.read())
+            b_io_seq = io.BytesIO(bytes(f.read(), 'ascii'))
         data = {"seq": (b_io_seq, "IEEE13.seq")}
         response = client.post("/milsoftToGridlab", data=data)
         assert response.status_code == 400
         response_data = json.loads(response.data)
         assert response_data == {
-            u'job': {
-                u'state': u'failed'
+            'job': {
+                'state': 'failed'
             },
-            u'errors': [{
-                u'http code': 400,
-                u'source': {u'std': None},
-                u'title': u'Invalid Parameter Value',
-                u'detail': u"The parameter 'std' of type 'file' is required, but it was not submitted."
+            'errors': [{
+                'http code': 400,
+                'source': {'std': None},
+                'title': 'Invalid Parameter Value',
+                'detail': "The parameter 'std' of type 'file' is required, but it was not submitted."
             }]
         }
 
@@ -278,14 +263,14 @@ class TestCymeToGridlab(object):
         assert response.status_code == 400
         response_data = json.loads(response.data)
         assert response_data == {
-            u'job': {
-                u'state': u'failed'
+            'job': {
+                'state': 'failed'
             },
-            u'errors': [{
-                u'http code': 400,
-                u'source': {u'mdb': None},
-                u'title': u'Invalid Parameter Value',
-                u'detail': u"The parameter 'mdb' of type 'file' is required, but it was not submitted."
+            'errors': [{
+                'http code': 400,
+                'source': {'mdb': None},
+                'title': 'Invalid Parameter Value',
+                'detail': "The parameter 'mdb' of type 'file' is required, but it was not submitted."
             }]
         }
 
@@ -298,14 +283,14 @@ class TestGridlabRun(object):
         assert response.status_code == 400
         response_data = json.loads(response.data)
         assert response_data == {
-            u'job': {
-                u'state': u'failed'
+            'job': {
+                'state': 'failed'
             },
-            u'errors': [{
-                u'http code': 400,
-                u'source': {u'glm': None},
-                u'title': u'Invalid Parameter Value',
-                u'detail': u"The parameter 'glm' of type 'file' is required, but it was not submitted."
+            'errors': [{
+                'http code': 400,
+                'source': {'glm': None},
+                'title': 'Invalid Parameter Value',
+                'detail': "The parameter 'glm' of type 'file' is required, but it was not submitted."
             }]
         }
 
@@ -315,7 +300,7 @@ class TestGridlabdToGfm(object):
         filename = "test_ieee123nodeBetter.glm" 
         glm_path = os.path.join(os.path.dirname(__file__), filename)
         with open(glm_path) as f:
-            b_io = io.BytesIO(f.read())
+            b_io = io.BytesIO(bytes(f.read(), 'ascii'))
         data = {
             "glm": (b_io, filename),
             "phase_variation": "1.01",
@@ -324,14 +309,14 @@ class TestGridlabdToGfm(object):
         assert response.status_code == 400
         response_data = json.loads(response.data)
         assert response_data == {
-            u'job': {
-                u'state': u'failed'
+            'job': {
+                'state': 'failed'
             },
-            u'errors': [{
-                u'http code': 400,
-                u'source': {u'phase_variation': 1.01},
-                u'title': u'Invalid Parameter Value',
-                u'detail': u"The parameter 'phase_variation' was greater than the maximum bound of '1'."
+            'errors': [{
+                'http code': 400,
+                'source': {'phase_variation': 1.01},
+                'title': 'Invalid Parameter Value',
+                'detail': "The parameter 'phase_variation' was greater than the maximum bound of '1'."
             }]
         }
 
@@ -345,7 +330,7 @@ class TestSamRun(object):
     def test_derateBelowMinBound_returns400_and_returnsCorrectJSON(self, client):
         tmy2_path = os.path.join(omf.omfDir, "data/Climate/CA-SAN_FRANCISCO.tmy2")
         with open(tmy2_path) as f:
-            b_io = io.BytesIO(f.read())
+            b_io = io.BytesIO(bytes(f.read(), 'ascii'))
         data = {
             "tmy2": (b_io, "CA-SAN_FRANCISCO.tmy2"),
             "derate": -.01,
@@ -354,14 +339,14 @@ class TestSamRun(object):
         assert response.status_code == 400
         response_data = json.loads(response.data)
         assert response_data == {
-            u'job': {
-                u'state': u'failed'
+            'job': {
+                'state': 'failed'
             },
-            u'errors': [{
-                u'http code': 400,
-                u'source': {u'derate': -0.01},
-                u'title': u'Invalid Parameter Value',
-                u'detail': u"The parameter 'derate' was less than the minimum bound of '0'."
+            'errors': [{
+                'http code': 400,
+                'source': {'derate': -0.01},
+                'title': 'Invalid Parameter Value',
+                'detail': "The parameter 'derate' was less than the minimum bound of '0'."
             }]
         }
 
@@ -374,7 +359,7 @@ class TestTransmissionPowerflow(object):
 
     def test_algorithmNotInAllowedValues_returns400_and_returnsCorrectJSON(self, client):
         with open(os.path.join(omf.omfDir, "static/testFiles/case9.omt")) as f:
-            b_io = io.BytesIO(f.read())
+            b_io = io.BytesIO(bytes(f.read(), 'ascii'))
         data = {
             "omt": (b_io, "case9.omt"),
             'algorithm': 'foobar'
@@ -383,14 +368,14 @@ class TestTransmissionPowerflow(object):
         assert response.status_code == 400
         response_data = json.loads(response.data)
         assert response_data == {
-            u'job': {
-                u'state': u'failed'
+            'job': {
+                'state': 'failed'
             },
-            u'errors': [{
-                u'http code': 400,
-                u'source': {u'algorithm': u'foobar'},
-                u'title': u'Invalid Parameter Value',
-                u'detail': u"The parameter 'algorithm' was not one of the allowed values: '('NR', 'FDXB', 'FDBX', 'GS')'."
+            'errors': [{
+                'http code': 400,
+                'source': {'algorithm': 'foobar'},
+                'title': 'Invalid Parameter Value',
+                'detail': "The parameter 'algorithm' was not one of the allowed values: '('NR', 'FDXB', 'FDBX', 'GS')'."
             }]
         }
 

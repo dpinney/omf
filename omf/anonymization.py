@@ -3,9 +3,6 @@
 import json, math, random, datetime, os
 from os.path import join as pJoin
 
-omfDir=os.path.dirname(os.path.dirname(__file__))
-
-
 # DISTRIBUTION FEEDER FUNCTIONS
 def distPseudomizeNames(inFeeder):
 	''' Replace all names in the inFeeder distribution system with pseudonames composed from the object type and a random ID. Return a key with name and ID pairs. '''
@@ -65,7 +62,7 @@ def distRandomizeNames(inFeeder):
 	''' Replace all names in the inFeeder distribution system with a random ID number. '''
 	#Works, tested, even when addnoise used
 	newNameKey = {}
-	allKeys = range(len(inFeeder['tree'].keys()))
+	allKeys = list(range(len(inFeeder['tree'].keys())))
 	random.shuffle(allKeys)
 	# Create nameKey dictionary
 	for count, key in enumerate(inFeeder['tree']):
@@ -154,7 +151,7 @@ def distTranslateLocations(inFeeder, translationRight, translationUp, rotation):
 			inFeeder['tree'][key]['latitude']=latitude+translationUp
 	#Find composite midpoint to rotate around. It is the average point of the feeder's extrema
 	#Find greatest Lat, least lat, great lon, least lon, then midpoint
-	for key, value1 in inFeeder['tree'].iteritems():
+	for key, value1 in inFeeder['tree'].items():
 		if 'latitude' in value1:
 			if value1['latitude']>biggestLat:
 				biggestLat = value1['latitude']
@@ -165,8 +162,8 @@ def distTranslateLocations(inFeeder, translationRight, translationUp, rotation):
 				biggestLon = value1['longitude']
 			if value1['longitude'] < smallestLon:
 				smallestLat = value1['longitude']
-	midLon = float((biggestLon + smallestLon))/2
-	midLat = float((biggestLat +smallestLat))/2
+	midLon = (biggestLon + smallestLon) / 2
+	midLat = (biggestLat + smallestLat) / 2
 	#Rotate
 	for key in inFeeder['tree']:
 		if ('longitude' in inFeeder['tree'][key]) or ('latitude' in inFeeder['tree'][key]):
@@ -190,7 +187,7 @@ def distAddNoise(inFeeder, noisePerc):
 		for prop in inFeeder['tree'][key]:
 			# Scramble valid properties
 			if prop in ['latitude', 'longitude','climate', 'ambient_temperature']:
-				print prop
+				print(prop)
 				val = inFeeder['tree'][key][prop]
 				try:
 					parseVal = float(val)
@@ -303,7 +300,7 @@ def distShuffleLoads(inFeeder, shufPerc):
 
 def distModifyTriplexLengths(inFeeder):
 	''' Modifies triplex line length and diameter properties while preserving original impedance in the inFeeder distribution system. '''
-	print "distModifyTriplexLengths activated!"
+	print("distModifyTriplexLengths activated!")
 	tLookup = {}
 	for key in inFeeder['tree']:
 		tDict = {}
@@ -446,7 +443,7 @@ def distSmoothLoads(inFeeder):
 			except:
 				continue
 			agList.append([agDate, agHour, agAmount])
-	agZip = zip(*agList)
+	agZip = list(zip(*agList))
 	for i in range(len(agZip[0])):
 		date = str(agZip[0][i])
 		hr = str(agZip[1][i])
@@ -465,7 +462,7 @@ def tranPseudomizeNames(inNetwork):
 	newBusKey = {}
 	randomID = random.randint(0,100)
 	# Create busKey dictionary
-	for i in inNetwork['bus'].keys():
+	for i in list(inNetwork['bus'].keys()):
 		if 'bus_i' in inNetwork['bus'][i]:
 			oldBus = inNetwork['bus'][i]['bus_i']
 			newBus = str(randomID)
@@ -494,7 +491,7 @@ def tranRandomizeNames(inNetwork):
 	newBusKey = {}
 	randomID = random.randint(0,100)
 	# Create busKey dictionary
-	for i in inNetwork['bus'].keys():
+	for i in list(inNetwork['bus'].keys()):
 		if 'bus_i' in inNetwork['bus'][i]:
 			oldBus = inNetwork['bus'][i]['bus_i']
 			newBus = str(randomID)
@@ -557,7 +554,7 @@ def tranTranslateLocations(inNetwork, translationRight, translationUp, rotation)
 			inNetwork['bus'][i]['latitude']=latitude+translationUp
 	#Find composite midpoint to rotate around. It is the average point of the feeder's extrema
 	#Find greatest Lat, least lat, great lon, least lon, then midpoint
-	for key, value1 in inNetwork['bus'].iteritems():
+	for key, value1 in inNetwork['bus'].items():
 		if 'latitude' in value1:
 			if value1['latitude']>biggestLat:
 				biggestLat = value1['latitude']
@@ -568,8 +565,8 @@ def tranTranslateLocations(inNetwork, translationRight, translationUp, rotation)
 				biggestLon = value1['longitude']
 			if value1['longitude'] < smallestLon:
 				smallestLat = value1['longitude']
-	midLon = float((biggestLon + smallestLon))/2
-	midLat = float((biggestLat +smallestLat))/2
+	midLon = (biggestLon + smallestLon) / 2
+	midLat = (biggestLat + smallestLat) / 2
 	#Rotate
 	for i in inNetwork['bus']:
 		if ('longitude' in inNetwork['bus'][i]) or ('latitude' in inNetwork['bus'][i]):
@@ -599,7 +596,7 @@ def tranAddNoise(inNetwork, noisePerc):
 							randVal = parseVal + parseVal * randNoise 
 							inNetwork[array][i][key] = str(randVal)
 						except ValueError:
-							print 'error'
+							print('error')
 							continue
 			arrayId += 1
 
@@ -649,174 +646,44 @@ def tranShuffleLoadsAndGens(inNetwork, shufPerc):
 			genId += 1
 
 
-# def _tests():
-# # 	pass
-# # 	# DISTRIBUTION FEEDER TESTS
-# 	# Test distPseudomizeNames
-# 	FNAME = "Simple Market System AnonTest.omd"
-# 	FNAME=pJoin(omfDir,'omf','static','publicFeeders', FNAME)
-# 	with open(FNAME, "r") as inFile:
-# 		inFeeder = json.load(inFile)
-# 		nameKey = distPseudomizeNames(inFeeder)
-# 		print nameKey
-# 	FNAMEOUT = "simpleMarket_distPseudomizeNames.omd"
-# 	with open(FNAMEOUT, "w") as outFile:
-# 		json.dump(inFeeder, outFile, indent=4)
-
-# # # 	# Test distRandomizeNames
-	# FNAME = "Simple Market System AnonTest.omd"
-	# FNAME=pJoin(omfDir,'omf','static','publicFeeders', FNAME)
-	# with open(FNAME, "r") as inFile:
-	# 	inFeeder = json.load(inFile)
-	# 	distRandomizeNames(inFeeder)
-	# FNAMEOUT = "simpleMarket_distRandomizeNames.omd"
-	# with open(FNAMEOUT, "w") as outFile:
-	# 	json.dump(inFeeder, outFile, indent=4)
-
-# 	# Test distRandomizeLocations
-	# FNAME = "Simple Market System AnonTest.omd"
-	# FNAME=pJoin(omfDir,'omf','static','publicFeeders', FNAME)
-	# with open(FNAME, "r") as inFile:
-	# 	inFeeder = json.load(inFile)
-	# 	distRandomizeLocations(inFeeder)
-	# FNAMEOUT = "simpleMarket_distRandomizeLocations.omd"
-	# with open(FNAMEOUT, "w") as outFile:
-	# 	json.dump(inFeeder, outFile, indent=4)
-
-# # 	# Test distTranslateLocations
-	# FNAME = "Simple Market System AnonTest.omd"
-	# FNAME=pJoin(omfDir,'omf','static','publicFeeders', FNAME)
-	# with open(FNAME, "r") as inFile:
-	# 	inFeeder = json.load(inFile)
-	# 	translationRight = 20
-	# 	translationUp = 20
-	# 	rotation = 20
-	# 	distTranslateLocations(inFeeder, translationRight, translationUp, rotation)
-	# FNAMEOUT = "simpleMarket_distTranslateLocations.omd"
-	# with open(FNAMEOUT, "w") as outFile:
-	# 	json.dump(inFeeder, outFile, indent=4)
-
-	# Test distAddNoise
-	# FNAME = "Simple Market System AnonTest.omd"
-	# FNAME=pJoin(omfDir,'omf','static','publicFeeders', FNAME)
-	# with open(FNAME, "r") as inFile:
-	# 	inFeeder = json.load(inFile)
-	# 	noisePerc = 50
-	# 	distAddNoise(inFeeder, noisePerc)
-	# FNAMEOUT = "simpleMarket_distAddNoise.omd"
-	# with open(FNAMEOUT, "w") as outFile:
-	# 	json.dump(inFeeder, outFile, indent=4)
-
-# # 	# Test distShuffleLoads
-	# FNAME = "Simple Market System AnonTest.omd"
-	# FNAME=pJoin(omfDir,'omf','static','publicFeeders', FNAME)
-	# with open(FNAME, "r") as inFile:
-	# 	inFeeder = json.load(inFile)
-	# 	shufPerc = 100
-	# 	distShuffleLoads(inFeeder, shufPerc)
-	# FNAMEOUT = "simpleMarket_distShuffleLoads.omd"
-	# with open(FNAMEOUT, "w") as outFile:
-	# 	json.dump(inFeeder, outFile, indent=4)
-
-# 	# Test distModifyTriplexLengths
-	# FNAME = "Simple Market System AnonTest.omd"
-	# FNAME=pJoin(omfDir,'omf','static','publicFeeders', FNAME)
-	# with open(FNAME, "r") as inFile:
-	# 	inFeeder = json.load(inFile)
-	# 	distModifyTriplexLengths(inFeeder)
-	# FNAMEOUT = "simpleMarket_distModifyTriplexLengths.omd"
-	# with open(FNAMEOUT, "w") as outFile:
-	# 	json.dump(inFeeder, outFile, indent=4)
-
-# 	# Test distModifyConductorLengths
-	# FNAME = "Olin Barre GH.omd"
-	# FNAME=pJoin(omfDir,'omf','static','publicFeeders', FNAME)
-	# with open(FNAME, "r") as inFile:
-	# 	inFeeder = json.load(inFile)
-	# 	distModifyConductorLengths(inFeeder)
-	# FNAMEOUT = "olinBarreGH_distModifyConductorLengths.omd"
-	# with open(FNAMEOUT, "w") as outFile:
-	# 	json.dump(inFeeder, outFile, indent=4)
-
-	# Test distSmoothLoads
-	# FNAME = "Calibrated Feeder1.omd"
-	# FNAME=pJoin(omfDir,'data','model','public', FNAME)
-	# FNAME = "Simple Market System AnonTest.omd"
-	# FNAME=pJoin(omfDir,'omf','static','publicFeeders', FNAME)
-	# with open(FNAME, "r") as inFile:
-	# 	inFeeder = json.load(inFile)
-	# 	distSmoothLoads(inFeeder)
-	# FNAMEOUT = "calibrated_distSmoothLoads.omd"
-	# with open(FNAMEOUT, "w") as outFile:
-	# 	json.dump(inFeeder, outFile, indent=4)
+def _tests():
+	'''TODO: Possible issues with distSmoothLoads()?'''
+	import tempfile
+	temp_dir = tempfile.mkdtemp()
+	print('Working in {}'.format(temp_dir))
+	operations = [
+		('Simple Market System AnonTest.omd', 'simpleMarket_distPseudomizeNames.omd', distPseudomizeNames), # Works
+		('Simple Market System AnonTest.omd', 'simpleMarket_distRandomizeNames.omd', distRandomizeNames), # Works
+		('Simple Market System AnonTest.omd', 'simpleMarket_distRandomizeLocations.omd', distRandomizeLocations), # Works
+		('Simple Market System AnonTest.omd', 'simpleMarket_distTranslateLocations.omd', lambda inFeeder: distTranslateLocations(inFeeder, translationRight=20, translationUp=20, rotation=20)), # Works
+		('Simple Market System AnonTest.omd', 'simpleMarket_distAddNoise.omd', lambda inFeeder: distAddNoise(inFeeder, noisePerc=50)), # This only affects longitude and latitude because they are the only non-string numeric properties
+		('Simple Market System AnonTest.omd', 'simpleMarket_distShuffleLoads.omd', lambda inFeeder: distShuffleLoads(inFeeder, shufPerc=100)), # It changes the "parent" property, so I guess it's working
+		('Simple Market System AnonTest.omd', 'simpleMarket_distModifyTriplexLengths.omd', distModifyTriplexLengths), # Changes lengths of triplex_lines
+		('Olin Barre GH.omd', 'olinBarreGH_distModifyConductorLengths.omd', distModifyConductorLengths), # Changes resistance and geometric_mean_radius of line_conductor objects
+		#('Simple Market System AnonTest.omd', 'simpleMarket_distSmoothLoads.omd', distSmoothLoads), # Not working. Requires a calibrated feeder (see omf.calibrate)
+		('SimpleNetwork.json', '118_tranPseudomizeNames.omt', tranPseudomizeNames), # Works
+		('case9.omt', '118_tranRandomizeNames.omt', tranRandomizeNames), # Works
+		('SimpleNetwork.json', '118_tranRandomizeLocations.omt', tranRandomizeLocations), # Works
+		('case9.omt', 'case9_transTranslate.omt', lambda inNetwork: tranTranslateLocations(inNetwork, translationRight=100, translationUp=100, rotation=45)), # Works
+		('SimpleNetwork.json', 'case9_transAddNoise.omt', lambda inNetwork: tranAddNoise(inNetwork, noisePerc=100)), # Works. Changes almost every property
+		('SimpleNetwork.json', '118_tranShuffleLoadsAndGens.omt', lambda inNetwork: tranShuffleLoadsAndGens(inNetwork, shufPerc=100)) # Only changes the 'Pd' property of some objects
+	]
+	omfDir = os.path.abspath(os.path.dirname(__file__))
+	for o in operations:
+		input_filename = o[0]
+		if input_filename.split('.')[-1] == 'omd':
+			input_filepath = os.path.join(omfDir, 'static', 'publicFeeders', input_filename)
+		else:
+			input_filepath = os.path.join(omfDir, 'static', input_filename)
+		with open(input_filepath) as f:
+			feeder_or_network = json.load(f)
+		o[2](feeder_or_network)
+		#output = o[2](inFeeder)
+		#print(output)
+		output_filepath = os.path.join(temp_dir, o[1])
+		with open(output_filepath, 'w') as f:
+			json.dump(feeder_or_network, f, indent=4)
 
 
-# 	TRANSMISSION NETWORK TESTS
-	# # Test tranPseudomizeNames	
-	# FNAME = "SimpleNetwork.json"
-	# FNAME=pJoin(omfDir,'omf','static', FNAME)
-	# with open(FNAME, "r") as inFile:
-	# 	inNetwork = json.load(inFile)
-	# 	tranPseudomizeNames(inNetwork)
-	# FNAMEOUT = "118_tranPseudomizeNames.omt"
-	# with open(FNAMEOUT, "w") as outFile:
-	# 	json.dump(inNetwork, outFile, indent=4)
-
-# 	# Test tranRandomizeNames
-	# Probably not necessary
-	# FNAME = "case9.omt"
-	# FNAME=pJoin(omfDir,'omf','static', FNAME)
-	# with open(FNAME, "r") as inFile:
-	# 	inNetwork = json.load(inFile)
-	# 	tranRandomizeNames(inNetwork)
-	# FNAMEOUT = "118_tranRandomizeNames.omt"
-	# with open(FNAMEOUT, "w") as outFile:
-	# 	json.dump(inNetwork, outFile, indent=4)
-
-	# Test tranRandomizeLocations
-	# FNAME = "SimpleNetwork.json"
-	# FNAME=pJoin(omfDir,'omf','static', FNAME)
-	# with open(FNAME, "r") as inFile:
-	# 	inNetwork = json.load(inFile)
-	# 	tranRandomizeLocations(inNetwork)
-	# FNAMEOUT = "118_tranRandomizeLocations.omt"
-	# with open(FNAMEOUT, "w") as outFile:
-	# 	json.dump(inNetwork, outFile, indent=4)
-
-	# Test tranTranslateLocation
-	# FNAME = "case9.omt"
-	# FNAME=pJoin(omfDir,'omf','static', FNAME)
-	# with open(FNAME, "r") as inFile:
-	# 	inNetwork = json.load(inFile)
-	# 	translationRight = 100
-	# 	translationUp = 100 
-	# 	rotation = 45
-	# 	tranTranslateLocations(inNetwork, translationRight, translationUp, rotation)
-	# FNAMEOUT = "case9_transTranslate.omt"
-	# with open(FNAMEOUT, "w") as outFile:
-	# 	json.dump(inNetwork, outFile, indent=4)
-
-	# Testing tranAddNoise
-	# FNAME = "SimpleNetwork.json"
-	# FNAME=pJoin(omfDir,'omf','static', FNAME)
-	# with open(FNAME, "r") as inFile:
-	# 	inNetwork = json.load(inFile)
-	# 	noisePerc = 100
-	# 	tranAddNoise(inNetwork, noisePerc)
-	# FNAMEOUT = "case9_transAddNoise.omt"
-	# with open(FNAMEOUT, "w") as outFile:
-	# 	json.dump(inNetwork, outFile, indent=4)
-
-# 	# Testing tranShuffleLoadsAndGens
-	# FNAME = "SimpleNetwork.json"
-	# FNAME=pJoin(omfDir,'omf','static', FNAME)
-	# with open(FNAME, "r") as inFile:
-	# 	inNetwork = json.load(inFile)
-	# 	shufPerc = 100
-	# 	tranShuffleLoadsAndGens(inNetwork, shufPerc)
-	# FNAMEOUT = "118_tranShuffleLoadsAndGens.omt"
-	# with open(FNAMEOUT, "w") as outFile:
-	# 	json.dump(inNetwork, outFile, indent=4)
-
-# if __name__ == '__main__':
-# 	_tests()
+if __name__ == '__main__':
+	_tests()

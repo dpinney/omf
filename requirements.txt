@@ -5,14 +5,13 @@ MarkupSafe>=0.18
 Werkzeug>=0.9.4
 argparse>=1.2.1
 backports.ssl-match-hostname>=3.4.0.2
-boto==2.24.0
+boto3
 networkx==1.11
 passlib>=1.6.2
 pyparsing>=2.0.1
 python-dateutil>=2.2
 six>=1.5.2
 tornado>=3.2
-wsgiref>=0.1.2
 numpy>=1.8.0
 matplotlib>=1.4.0,<3.0.0
 xlwt>=0.7.5
@@ -35,3 +34,4 @@ pyproj
 gunicorn
 Pillow
 #fbprophet
+#tensorflow

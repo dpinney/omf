@@ -21,21 +21,19 @@ conductors is the full path to a .csv file containing conductor information for 
 Note that db_network and db_equipment can be the same file is both network and equipment databases were exported to one .mdb file from CYME.
 """
 
-import feeder, csv, random, math, copy, subprocess, locale, tempfile, traceback
-from os.path import join as pJoin
-import warnings
-from StringIO import StringIO
-import sys, os, json, traceback, shutil
-from omf.solvers import gridlabd
-from pathlib import Path
-import matplotlib
 
-matplotlib.pyplot.switch_backend("Agg")
+import csv, random, math, copy, subprocess, locale, warnings, os, json, traceback, shutil, platform
+#import tempfile
+from os.path import join as pJoin
+import matplotlib
 from matplotlib import pyplot as plt
 import numpy as np
 from numpy.linalg import inv
-import platform
+from omf.solvers import gridlabd
+import omf.feeder
 
+
+matplotlib.pyplot.switch_backend("Agg")
 m2ft = 1.0 / 0.3048  # Conversion factor for meters to feet
 
 
@@ -43,10 +41,10 @@ def flatten(*args, **kwargs):
 	dicty = dict(*args, **kwargs)
 	for arg in args:
 		if isinstance(arg, dict):
-			for k, v in arg.iteritems():
+			for k, v in arg.items():
 				dicty[k] = v
 	if kwargs:
-		for k, v in kwargs.iteritems():
+		for k, v in kwargs.items():
 			dicty[k] = v
 	return dicty
 
@@ -55,19 +53,19 @@ def _csvDump(database_file, modelDir):
 	# Get the list of table names with "mdb-tables"
 	if platform.system() == "Linux" or platform.system() == "Darwin":
 		table_names = subprocess.Popen(
-			["mdb-tables", "-1", database_file], stdout=subprocess.PIPE
+			["mdb-tables", "-1", database_file], stdout=subprocess.PIPE, text=True
 		).communicate()[0]
-		tables = table_names.split("\n")
+		tables = table_names.split('\n')
 		if not os.path.isdir((pJoin(modelDir, "cymeCsvDump"))):
 			os.makedirs((pJoin(modelDir, "cymeCsvDump")))
 			# Dump each table as a CSV file using "mdb-export",
 			# converting " " in table names to "_" for the CSV filenames.
 		for table in tables:
 			if table != "":
-				filename = table.replace(" ", "_") + ".csv"
+				filename = table.replace(' ', '_') + '.csv'
 				f = open(pJoin(modelDir, "cymeCsvDump", filename), "w+")
 				contents = subprocess.Popen(
-					["mdb-export", database_file, table], stdout=subprocess.PIPE
+					["mdb-export", database_file, table], stdout=subprocess.PIPE, text=True
 				).communicate()[0]
 				f.write(contents)
 				f.close()
@@ -80,9 +78,9 @@ def _csvDump(database_file, modelDir):
 		os.chdir(modelDir)
 		database_file = database_file.split("\\")[-1]
 		table_names = subprocess.Popen(
-			["bash", "-c", "mdb-tables -1 " + database_file], stdout=subprocess.PIPE
+			["bash", "-c", "mdb-tables -1 " + database_file], stdout=subprocess.PIPE, text=True
 		).communicate()[0]
-		tables = table_names.split("\n")
+		tables = table_names.split('\n')
 		if not os.path.isdir((pJoin(modelDir, "cymeCsvDump"))):
 			os.makedirs((pJoin(modelDir, "cymeCsvDump")))
 			# Dump each table as a CSV file using "mdb-export",
@@ -92,8 +90,7 @@ def _csvDump(database_file, modelDir):
 				filename = table.replace(" ", "_") + ".csv"
 				file = open(pJoin(modelDir, "cymeCsvDump", filename), "w+")
 				contents = subprocess.Popen(
-					["bash", "-c", "mdb-export " + database_file + " " + table],
-					stdout=subprocess.PIPE,
+					["bash", "-c", "mdb-export " + database_file + " " + table], stdout=subprocess.PIPE, text=True
 				).communicate()[0]
 				file.write(contents)
 				file.close()
@@ -101,12 +98,13 @@ def _csvDump(database_file, modelDir):
 
 
 def _findNetworkId(csvFile):
-	csvDict = csv.DictReader(open(csvFile, "r"))
 	networks = []
-	for row in csvDict:
-		networks.append(row["NetworkId"])
-		# HACK: For multi-source networks (Titanium), select the second source
-		# Need to find a way to do this better
+	with open(csvFile, newline='') as f:
+		csvDict = csv.DictReader(f)
+		for row in csvDict:
+			networks.append(row["NetworkId"])
+			# HACK: For multi-source networks (Titanium), select the second source
+			# Need to find a way to do this better
 	if len(networks) > 1:
 		return networks[1]
 	else:
@@ -171,7 +169,7 @@ def _convertLoadClass(class_from_db):
 
 def _csvToArray(csvFileName):
 	""" Simple .csv data ingester. """
-	with open(csvFileName, "r") as csvFile:
+	with open(csvFileName, newline='') as csvFile:
 		csvReader = csv.reader(csvFile)
 		outArray = []
 		for row in csvReader:
@@ -185,15 +183,17 @@ def _csvToDictList(csvFileName, feederId):
 	mapped = []
 	deleteRows = []
 	content = []
-	sourceFile = csv.reader(open(csvFileName))
-	header = sourceFile.next()
-	csvDict = csv.DictReader(open(csvFileName, "r"))
-	for row in csvDict:
-		# Equipment files, all equipment gets added
-		if "NetworkId" not in header:
-			mapped.append(flatten(row))
-		elif row["NetworkId"] == feederId:
-			mapped.append(flatten(row))
+	with open(csvFileName, newline='') as f:
+		sourceFile = csv.reader(f)
+		header = next(sourceFile)
+	with open(csvFileName, newline='') as f:
+		csvDict = csv.DictReader(f)
+		for row in csvDict:
+			# Equipment files, all equipment gets added
+			if "NetworkId" not in header:
+				mapped.append(flatten(row))
+			elif row["NetworkId"] == feederId:
+				mapped.append(flatten(row))
 	return mapped
 
 
@@ -344,13 +344,13 @@ def _readSource(feederId, _type, modelDir):
 		)
 	else:
 		try:
-			print "NetworkId", feeder_db_net
+			print("NetworkId", feeder_db_net)
 		except:
 			pass
 	"""MICHAEL JACKSON debug"""
 	# if feederId arg is none (from findNetworkId call on CYMNETWORK.csv)
 	if feederId == None:
-		print "NO FEEDER ID\n"
+		print("NO FEEDER ID\n")
 		if len(feeder_db) == 1:
 			try:
 				row = feeder_db[0]
@@ -375,7 +375,7 @@ def _readSource(feederId, _type, modelDir):
 				"The was no feeder id given and the network database contians more than one feeder. Please specify a feeder id to extract."
 			)
 	else:
-		print "FEEDER ID", feederId
+		print("FEEDER ID", feederId)
 		try:
 			feeder_index = [
 				row["NetworkId"] for row in (feeder_db if _type == 1 else feeder_db_net)
@@ -507,7 +507,7 @@ def _readOverheadByPhase(feederId, modelDir):
 				tmp = float(row["Length"]) * m2ft
 				data_dict[device_no]["length"] = tmp if tmp != 0 else 1.0
 
-				for key, config in olc.iteritems():
+				for key, config in olc.items():
 					if overheadLineConfiguration == config:
 						data_dict[device_no]["configuration"] = key
 				if data_dict[device_no]["configuration"] is None:
@@ -720,7 +720,7 @@ def _readSectionDevice(feederId, modelDir):
 				data_dict[device_no]["location"] = int(row["Location"])
 			else:
 				# JOHN FITZGERALD KENNEDY. A better fix is needed.
-				print "Found duplicate device ID: " + device_no + ".  Rename device in Cyme or the device will be overwritten."
+				print("Found duplicate device ID: " + device_no + ".  Rename device in Cyme or the device will be overwritten.")
 	return data_dict
 
 
@@ -771,7 +771,7 @@ def _splitLinkObjects(sectionDict, deviceDict, linkDict, overheadDict, undergrou
 
 def _findParents(sectionDict, deviceDict, loadDict):
 	"""store parent information for load type objects"""
-	for lineId, loaddevices in loadDict.iteritems():
+	for lineId, loaddevices in loadDict.items():
 		# if it's not a list, put it into a list on len 1
 		loaddevices = loaddevices if type(loaddevices) == list else [loaddevices]
 		for loaddevice in loaddevices:
@@ -975,7 +975,7 @@ def _readShuntCapacitor(feederId, modelDir):
 		# if shunt capacitor table has KVARBC as a column use this block:
 		for row in shuntcapacitor_db:
 			device_no = _fixName(row["DeviceNumber"])
-			if not row.has_key("EquipmentId"):
+			if "EquipmentId" not in row:
 				row["EquipmentId"] = "DEFAULT"
 			eq_id = _fixName(row["EquipmentId"])
 
@@ -1055,7 +1055,7 @@ def _readShuntCapacitor(feederId, modelDir):
 					elif row["SwitchingMode"] == "1":
 						data_dict[device_no]["control_level"] = "INDIVIDUAL"
 					else:
-						print "could not find capacitor switching mode.  defaulting to INDIVIDUAL"
+						print("could not find capacitor switching mode.  defaulting to INDIVIDUAL")
 						data_dict[device_no]["control_level"] = "INDIVIDUAL"
 					for p in "ABC":
 						if float(row["SwictchedKVAR" + p]) > 0:
@@ -2053,7 +2053,7 @@ def convertCymeModel(network_db, modelDir, test=False, _type=1, feeder_id=None):
 	fromNodes = []
 	toNodes = []
 	cleanToNodes = []
-	for link, section in cymsection.iteritems():
+	for link, section in cymsection.items():
 		if "from" in section:
 			if section["from"] not in fromNodes:
 				fromNodes.append(section["from"])
@@ -2069,7 +2069,7 @@ def convertCymeModel(network_db, modelDir, test=False, _type=1, feeder_id=None):
 	nislands = len(islandNodes)
 	while nislands != islands:
 		islands = len(islandNodes)
-		for link, section in cymsection.iteritems():
+		for link, section in cymsection.items():
 			if "from" in section.keys():
 				if section["from"] in islandNodes and section["to"] not in islandNodes:
 					islandNodes.add(section["to"])
@@ -2077,7 +2077,7 @@ def convertCymeModel(network_db, modelDir, test=False, _type=1, feeder_id=None):
 
 	deleteSections = set()
 	for node in islandNodes:
-		for link, section in cymsection.iteritems():
+		for link, section in cymsection.items():
 			if (
 				node == section["from"] or node == section["to"]
 			) and link not in deleteSections:
@@ -2093,7 +2093,7 @@ def convertCymeModel(network_db, modelDir, test=False, _type=1, feeder_id=None):
 		"""
 
 	# Group each type of device.
-	for device, value in cymsectiondevice.iteritems():
+	for device, value in cymsectiondevice.items():
 		dType = value["device_type"]
 		sName = value["section_name"]
 
@@ -2209,7 +2209,7 @@ def convertCymeModel(network_db, modelDir, test=False, _type=1, feeder_id=None):
 	# Check number of sources
 	meters = {}
 	if len(cymsource) > 1:
-		print "There is more than one swing bus for feeder_id ", feeder_id, "\n"
+		print("There is more than one swing bus for feeder_id ", feeder_id, "\n")
 	for x in cymsource.keys():
 		meters[x] = {
 			"object": "meter",
@@ -2229,7 +2229,7 @@ def convertCymeModel(network_db, modelDir, test=False, _type=1, feeder_id=None):
 	for link in cymsection.keys():
 		if "from" in cymsection[link].keys() and "to" in cymsection[link].keys():
 			if {cymsection[link]["from"], cymsection[link]["to"]} in fromTo:
-				for key, value in cymsectiondevice.iteritems():
+				for key, value in cymsectiondevice.items():
 					if value["section_name"] == link:
 						parallelLinks.append(key)
 						break
@@ -2290,7 +2290,7 @@ def convertCymeModel(network_db, modelDir, test=False, _type=1, feeder_id=None):
 
 					# Create overhead line conductor dictionaries
 	ohl_conds = {}
-	print "REACHED"
+	print("REACHED")
 	for src in (OH_conductors, cymeqconductor):
 		for olc in src:
 			if olc in cymeqconductor:
@@ -2305,7 +2305,7 @@ def convertCymeModel(network_db, modelDir, test=False, _type=1, feeder_id=None):
 					),
 				}
 			else:
-				print "There is no conductor spec for ", olc, " in the equipment database provided.\n"
+				print("There is no conductor spec for ", olc, " in the equipment database provided.\n")
 
 	ohl_configs = {}
 	for ohlc in cymeqoverheadline:
@@ -2341,7 +2341,7 @@ def convertCymeModel(network_db, modelDir, test=False, _type=1, feeder_id=None):
 						cymeqgeometricalarrangement[ols]["distance_" + pp]
 					)
 			else:
-				print "There is no line spacing spec for ", ols, "in the equipment database provided.\n"
+				print("There is no line spacing spec for ", ols, "in the equipment database provided.\n")
 
 				# Create overhead line configuration dictionaries
 	ohl_cfgs = {}
@@ -2359,7 +2359,7 @@ def convertCymeModel(network_db, modelDir, test=False, _type=1, feeder_id=None):
 			if ohl_cfg not in ohl_cfgs.keys():
 				ohl_cfgs[ohl_cfg] = copy.deepcopy(cymeqoverheadlineunbalanced[ohl_cfg])
 		else:
-			print "There is no overhead line configuration for", ohl_cfg, " in the equipment database provided."
+			print("There is no overhead line configuration for", ohl_cfg, " in the equipment database provided.")
 
 	def split_parallel(target_dict, line_key, struct, nodes):
 		# if a line is a parallel link, split it in two and add a parNode
@@ -2496,10 +2496,10 @@ def convertCymeModel(network_db, modelDir, test=False, _type=1, feeder_id=None):
 	}
 
 	# Create overhead line dictionaries
-	for dev_key, dev_dict in cymsectiondevice.iteritems():
+	for dev_key, dev_dict in cymsectiondevice.items():
 		if dev_dict["device_type"] == 3:
 			if dev_key not in cymoverheadbyphase.keys():
-				print "There is no line spec for ", dev_key, " in the network database provided.\n"
+				print("There is no line spec for ", dev_key, " in the network database provided.\n")
 			elif dev_key not in ohls.keys():
 				struct = {
 					"object": "overhead_line",
@@ -2514,7 +2514,7 @@ def convertCymeModel(network_db, modelDir, test=False, _type=1, feeder_id=None):
 
 		elif dev_dict["device_type"] == 2:
 			if dev_key not in cymoverheadline.keys():
-				print "There is no line spec for ", dev_key, " in the network database provided.\n"
+				print("There is no line spec for ", dev_key, " in the network database provided.\n")
 			elif dev_key not in ohls.keys():
 				if dev_key not in parallelLinks:
 					ohls[dev_key] = {
@@ -2531,7 +2531,7 @@ def convertCymeModel(network_db, modelDir, test=False, _type=1, feeder_id=None):
 		elif dev_dict["device_type"] == 23:
 			# very similar to device 3
 			if dev_key not in cymUnbalancedOverheadLine.keys():
-				print "There is no line spec for ", oh1, " in the network database provided.\n"
+				print("There is no line spec for ", oh1, " in the network database provided.\n")
 			elif dev_key not in ohls.keys():
 				struct = {
 					"object": "overhead_line",
@@ -2552,7 +2552,7 @@ def convertCymeModel(network_db, modelDir, test=False, _type=1, feeder_id=None):
 		elif dev_dict["device_type"] == 1:
 			ph = dev_dict["phases"]
 			if dev_key not in cymundergroundline.keys():
-				print "There is no line spec for ", dev_key, " in the network database provided.\n"
+				print("There is no line spec for ", dev_key, " in the network database provided.\n")
 			else:
 				ph = _cleanPhases(ph)
 				config_name = cymundergroundline[dev_key]["cable_id"] + "ph" + ph
@@ -2595,7 +2595,7 @@ def convertCymeModel(network_db, modelDir, test=False, _type=1, feeder_id=None):
 					gableid = ref_dict["cable_id"]
 		elif dev_dict["device_type"] == 13:
 			if dev_key not in cymswitch.keys():
-				print "There is no switch spec for  ", dev_key, " in the network database provided.\n"
+				print("There is no switch spec for  ", dev_key, " in the network database provided.\n")
 			elif dev_key not in swObjs.keys():
 				swObjs[dev_key] = {
 					"object": "switch",
@@ -2616,7 +2616,7 @@ def convertCymeModel(network_db, modelDir, test=False, _type=1, feeder_id=None):
 					# Create recloser dictionaries
 		elif dev_dict["device_type"] == 10:
 			if dev_key not in cymrecloser.keys():
-				print "There is no recloster spec for ", rc1, " in the network database provided.\n"
+				print("There is no recloster spec for ", rc1, " in the network database provided.\n")
 			elif dev_key not in rcls.keys():
 				rcls[dev_key] = {
 					"object": "recloser",
@@ -2637,7 +2637,7 @@ def convertCymeModel(network_db, modelDir, test=False, _type=1, feeder_id=None):
 					# Create sectionalizer dictionaries
 		elif dev_dict["device_type"] == 12:
 			if dev_key not in cymsectionalizer.keys():
-				print "There is no sectionalizer spec for ", dev_key, " in the network database provided.\n"
+				print("There is no sectionalizer spec for ", dev_key, " in the network database provided.\n")
 			elif dev_key not in sxnlrs.keys():
 				sxnlrs[dev_key] = {
 					"object": "sectionalizer",
@@ -2657,7 +2657,7 @@ def convertCymeModel(network_db, modelDir, test=False, _type=1, feeder_id=None):
 					# Create fuse dictionaries
 		elif dev_dict["device_type"] == 14:
 			if dev_key not in cymfuse.keys():
-				print "There is no fuse spec for ", dev_key, " in the network database provided.\n"
+				print("There is no fuse spec for ", dev_key, " in the network database provided.\n")
 			elif dev_key not in fuses.keys():
 				fuses[dev_key] = {
 					"object": "fuse",
@@ -2679,7 +2679,7 @@ def convertCymeModel(network_db, modelDir, test=False, _type=1, feeder_id=None):
 					# JOHN FITZGERALD KENNEDY.  added all this reactor code
 		elif dev_dict["device_type"] == 16:
 			if dev_key not in cymreactor.keys():
-				print "There is no reactor spec for ", dev_key, " in the network database provice. \n"
+				print("There is no reactor spec for ", dev_key, " in the network database provice. \n")
 			elif dev_key not in reactors.keys():
 				reactors[dev_key] = {
 					"object": "series_reactor",
@@ -2698,7 +2698,7 @@ def convertCymeModel(network_db, modelDir, test=False, _type=1, feeder_id=None):
 					# Create capacitor dictionaries
 		elif dev_dict["device_type"] == 17:
 			if dev_key not in cymshuntcapacitor.keys():
-				print "There is no capacitor spec for ", dev_key, " in the network database provided.\n"
+				print("There is no capacitor spec for ", dev_key, " in the network database provided.\n")
 			elif dev_key not in caps.keys():
 				# a temporary variable to shorten some of these long lookups
 				ref_dict = cymshuntcapacitor[dev_key]
@@ -2756,7 +2756,7 @@ def convertCymeModel(network_db, modelDir, test=False, _type=1, feeder_id=None):
 						# Create load dictionaries
 		elif dev_dict["device_type"] == 20:
 			if dev_key not in cymcustomerload.keys():
-				print "There is no load spec for ", dev_key, " in the network database provided.\n"
+				print("There is no load spec for ", dev_key, " in the network database provided.\n")
 				continue
 
 			ref_dict = cymcustomerload[dev_key]
@@ -2848,7 +2848,7 @@ def convertCymeModel(network_db, modelDir, test=False, _type=1, feeder_id=None):
 					# Create regulator dictionaries
 		elif dev_dict["device_type"] == 4:
 			if dev_key not in cymregulator.keys():
-				print "There is no regulator spec for ", dev_key, " in the network database provided.\n"
+				print("There is no regulator spec for ", dev_key, " in the network database provided.\n")
 			else:
 				# NOTE: by the way we construct cymregulator, this should be the same as dev_key (the equipmentId)
 				regEq = cymregulator[dev_key]["equipment_name"]
@@ -2915,7 +2915,7 @@ def convertCymeModel(network_db, modelDir, test=False, _type=1, feeder_id=None):
 					# Create photovoltaic, inverter, and meter dictionaries
 		elif dev_dict["device_type"] == 45:
 			if dev_key not in cymphotovoltaic.keys():
-				print "There is no PV spec for ", dev_key, " in the network database provided.\n"
+				print("There is no PV spec for ", dev_key, " in the network database provided.\n")
 			else:
 				config = cymeqphotovoltaic[cymphotovoltaic[dev_key]["configuration"]]
 				pv_sec[dev_key + "meter"] = {
@@ -2948,7 +2948,7 @@ def convertCymeModel(network_db, modelDir, test=False, _type=1, feeder_id=None):
 				# Create battery dictionaries
 		elif dev_dict["device_type"] == 80:
 			if dev_key not in cymbattery.keys():
-				print "There is no battery spec for ", dev_key, " in the network database provided.\n"
+				print("There is no battery spec for ", dev_key, " in the network database provided.\n")
 			else:
 				config = cymeqbattery[cymbattery[dev_key]["configuration"]]
 				bat_sec[dev_dict["section_name"]] = {
@@ -2993,7 +2993,7 @@ def convertCymeModel(network_db, modelDir, test=False, _type=1, feeder_id=None):
 				# Create generator dictionaries
 		elif dev_dict["device_type"] == 37:
 			if dev_key not in cymgenerator.keys():
-				print "There is no generator spec for ", dev_key, " in the network database provided.\n"
+				print("There is no generator spec for ", dev_key, " in the network database provided.\n")
 			else:
 				gen_secs[dev_key] = {
 					"object": "diesel_dg",
@@ -3021,7 +3021,7 @@ def convertCymeModel(network_db, modelDir, test=False, _type=1, feeder_id=None):
 			cym_dict = cym3wxfmr if threeway else cymxfmr
 
 			if dev_key not in cym_dict.keys():
-				print "There is no xmfr spec for ", dev_key, " in the network database provided.\n"
+				print("There is no xmfr spec for ", dev_key, " in the network database provided.\n")
 			else:
 				xfmrEq = cym_dict[dev_key]["equipment_name"]
 				if xfmrEq == dev_key:
@@ -3033,7 +3033,7 @@ def convertCymeModel(network_db, modelDir, test=False, _type=1, feeder_id=None):
 				phNum = len(_cleanPhases(ph))
 
 				if xfmrEq not in cymeq_dict.keys():
-					print "There is no xmfr spec for ", xfmrEq, " in the network database provided.\n"
+					print("There is no xmfr spec for ", xfmrEq, " in the network database provided.\n")
 				else:
 					if xfmrEq not in xfmr_cfgs.keys():
 						xfmr_cfgs[xfmrEq] = {
@@ -3099,7 +3099,7 @@ def convertCymeModel(network_db, modelDir, test=False, _type=1, feeder_id=None):
 		{"module": "residential", "implicit_enduses": "NONE"},
 		{"solver_method": "NR", "NR_iteration_limit": "50", "module": "powerflow"},
 	]
-	for headId in xrange(len(genericHeaders)):
+	for headId in range(len(genericHeaders)):
 		glmTree[headId] = genericHeaders[headId]
 	key = len(glmTree)
 	objectList = [
@@ -3155,7 +3155,7 @@ def convertCymeModel(network_db, modelDir, test=False, _type=1, feeder_id=None):
 			glmTree[x]["parent"] = "n" + glmTree[x]["parent"]
 			# FINISHED CONVERSION FROM THE DATABASES****************************************************************************************************************************************************
 			# Deletign malformed lniks
-	for key in glmTree.keys():
+	for key in list(glmTree.keys()):
 		if (
 			"object" in glmTree[key].keys()
 			and glmTree[key]["object"]
@@ -3355,7 +3355,7 @@ def convertCymeModel(network_db, modelDir, test=False, _type=1, feeder_id=None):
 				if "N" not in glmTree[x]["phases"]:
 					glmTree[x]["phases"] = glmTree[x]["phases"] + "N"
 			except Exception as e:
-				print e
+				print(e)
 				pass
 				# TODO: have this missing nodes report not put files all over the place.
 				# checkMissingNodes(nodes, cymsectiondevice, objectList, feeder_id, modelDir, cymsection)
@@ -3403,9 +3403,9 @@ def convertCymeModel(network_db, modelDir, test=False, _type=1, feeder_id=None):
 
 def _tests(keepFiles=True):
 	testFile = ["IEEE13.mdb"]
-	inputDir = "./static/testFiles/"
+	inputDir = os.path.join(os.path.dirname(__file__), 'static/testFiles/')
 	# outputDir = tempfile.mkdtemp()
-	outputDir = "./scratch/cymeToGridlabTests/"
+	outputDir = os.path.join(os.path.dirname(__file__), 'scratch/cymeToGridlabTests/')
 	exceptionCount = 0
 	try:
 		shutil.rmtree(outputDir)
@@ -3418,31 +3418,30 @@ def _tests(keepFiles=True):
 		try:
 			# Main conversion of CYME model.
 			cyme_base = convertCymeModel(inputDir + db_network, inputDir)
-			glmString = feeder.sortedWrite(cyme_base)
+			glmString = omf.feeder.sortedWrite(cyme_base)
 			testFilename = db_network[:-4]
-			gfile = open(inputDir + testFilename + ".glm", "w")
-			gfile.write(glmString)
-			gfile.close()
+			with open(inputDir + testFilename + ".glm", 'w') as f:
+				f.write(glmString)
 			inFileStats = os.stat(pJoin(inputDir, db_network))
 			outFileStats = os.stat(pJoin(inputDir, testFilename + ".glm"))
 			inFileSize = inFileStats.st_size
 			outFileSize = outFileStats.st_size
-			treeObj = feeder.parse(inputDir + testFilename + ".glm")
-			print "WROTE GLM FOR " + db_network
+			treeObj = omf.feeder.parse(inputDir + testFilename + ".glm")
+			print("WROTE GLM FOR " + db_network)
 			with open(pJoin(outputDir, "convResults.txt"), "a") as resultsFile:
 				resultsFile.write("WROTE GLM FOR " + testFilename + "\n")
 				resultsFile.write(
 					"Input .mdb File Size: "
-					+ str(locale.format("%d", inFileSize, grouping=True))
+					+ str(locale.format_string("%d", inFileSize, grouping=True))
 					+ "\n"
 				)
 				resultsFile.write(
 					"Output .glm File Size: "
-					+ str(locale.format("%d", outFileSize, grouping=True))
+					+ str(locale.format_string("%d", outFileSize, grouping=True))
 					+ "\n"
 				)
 		except:
-			print "FAILED CONVERTING"
+			print("FAILED CONVERTING")
 			testFilename = "failed"
 			with open(pJoin(outputDir, "convResults.txt"), "a") as resultsFile:
 				resultsFile.write("FAILED CONVERTING " + testFilename + "\n")
@@ -3461,21 +3460,21 @@ def _tests(keepFiles=True):
 			treeObj = fixOrphanedLoads(treeObj)
 			# run milToGridlab fixes
 		except:
-			print "THE DARK LORD'S BEHAVIOR IS OUTRAGEOUS"
+			print("THE DARK LORD'S BEHAVIOR IS OUTRAGEOUS")
 			traceback.print_exc()
 		try:
 			# Draw the GLM.
-			myGraph = feeder.treeToNxGraph(cyme_base)
-			feeder.latLonNxGraph(myGraph, neatoLayout=False)
+			myGraph = omf.feeder.treeToNxGraph(cyme_base)
+			omf.feeder.latLonNxGraph(myGraph, neatoLayout=False)
 			plt.savefig(outputDir + testFilename + ".png")
 			with open(pJoin(outputDir, "convResults.txt"), "a") as resultsFile:
 				resultsFile.write("DREW GLM FOR " + testFilename + "\n")
-			print "DREW GLM OF " + db_network
+			print("DREW GLM OF " + db_network)
 		except:
 			exceptionCount += 1
 			with open(pJoin(outputDir, "convResults.txt"), "a") as resultsFile:
 				resultsFile.write("FAILED DRAWING" + testFilename + "\n")
-			print "FAILED DRAWING " + db_network
+			print("FAILED DRAWING " + db_network)
 		try:
 			# Run powerflow on the GLM.
 			output = gridlabd.runInFilesystem(
@@ -3490,12 +3489,12 @@ def _tests(keepFiles=True):
 			with open(pJoin(outputDir, "convResults.txt"), "a") as resultsFile:
 				resultsFile.write("RAN GRIDLAB ON " + testFilename + "\n")
 				resultsFile.write("STDERR: " + gridlabdStderr + "\n\n")
-			print "RAN GRIDLAB ON " + db_network
+			print("RAN GRIDLAB ON " + db_network)
 		except:
 			exceptionCount += 1
 			with open(pJoin(outputDir, "convResults.txt"), "a") as resultsFile:
 				resultsFile.write("POWERFLOW FAILED FOR " + testFilename + "\n")
-			print "POWERFLOW FAILED"
+			print("POWERFLOW FAILED")
 	if not keepFiles:
 		shutil.rmtree(outputDir)
 	return exceptionCount

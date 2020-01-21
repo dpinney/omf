@@ -5,7 +5,7 @@ import time
 import matplotlib.pyplot as plt
 import pandas as pd
 import warnings
-import sys, os
+import sys
 
 plt.switch_backend('Agg')
 warnings.filterwarnings('ignore')

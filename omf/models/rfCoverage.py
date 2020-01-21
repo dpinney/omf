@@ -1,15 +1,15 @@
 ''' RF Coverage Model'''
 
-import json, os, sys, tempfile, datetime, shutil, subprocess, requests, tempfile, xml.etree.ElementTree as ET
+import datetime, shutil, subprocess, requests, tempfile, xml.etree.ElementTree as ET, base64
 from zipfile import ZipFile
-from PIL import Image
 from os.path import join as pJoin
+from PIL import Image
 from omf.models import __neoMetaModel__
-from __neoMetaModel__ import *
+from omf.models.__neoMetaModel__ import *
 
 # Model metadata:
 tooltip = "The rfCoverage model provides a visualization of radio frequency propogation"
-modelName, template = metadata(__file__)
+modelName, template = __neoMetaModel__.metadata(__file__)
 hidden = True
 
 def work(modelDir, inputDict):
@@ -117,7 +117,7 @@ def work(modelDir, inputDict):
 		scale = Image.open(pJoin(modelDir, "coverageMap-ck.ppm"))
 		scale.save(pJoin(modelDir,"rfScale.png"))
 		with open(pJoin(modelDir,"rfScale.png"),"rb") as inFile:
-			outData["rfScale"] = inFile.read().encode("base64")
+			outData["rfScale"] = base64.standard_b64encode(inFile.read()).decode()
 
 
 	#parse kml for image bounding box
@@ -139,7 +139,7 @@ def work(modelDir, inputDict):
 	outData['towerLatitude'] = inputDict['towerLatitude']
 	outData['towerLongitude'] = inputDict['towerLongitude']
 	with open(pJoin(modelDir,"coverageMap.png"),"rb") as inFile:
-		outData["coverageMap"] = inFile.read().encode("base64")
+		outData["coverageMap"] = base64.standard_b64encode(inFile.read()).decode()
 	outData['north'] = north
 	outData['south'] = south
 	outData['west'] = west
@@ -176,11 +176,11 @@ def _tests():
 	# Create New.
 	new(modelLoc)
 	# Pre-run.
-	renderAndShow(modelLoc)
+	__neoMetaModel__.renderAndShow(modelLoc)
 	# Run the model.
-	runForeground(modelLoc)
+	__neoMetaModel__.runForeground(modelLoc)
 	# Show the output.
-	renderAndShow(modelLoc)
+	__neoMetaModel__.renderAndShow(modelLoc)
 
 if __name__ == '__main__':
 	_tests()

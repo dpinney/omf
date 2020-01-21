@@ -1,21 +1,18 @@
 ''' Calculate CVR impacts using a targetted set of static loadflows. '''
 
-import json, os, sys, tempfile, webbrowser, time, shutil, datetime, subprocess, traceback
-import math, re
-import multiprocessing
+import json, os, shutil, math, base64
 from copy import copy
 from os.path import join as pJoin
-from jinja2 import Template
 from matplotlib import pyplot as plt
 from omf.models import __neoMetaModel__
-from __neoMetaModel__ import *
+from omf.models.__neoMetaModel__ import *
 
 # OMF imports
-import omf.feeder as feeder
-from omf.solvers import gridlabd
+import omf.feeder
+import omf.solvers.gridlabd
 
 # Model metadata:
-modelName, template = metadata(__file__)
+modelName, template = __neoMetaModel__.metadata(__file__)
 tooltip = "The cvrStatic model calculates the expected costs and benefits (including energy, loss, and peak reductions) for implementing conservation voltage reduction on a given feeder circuit."
 
 def work(modelDir, inputDict):
@@ -24,7 +21,8 @@ def work(modelDir, inputDict):
 	feederName = [x for x in os.listdir(modelDir) if x.endswith('.omd')][0][:-4]
 	inputDict["feederName1"] = feederName
 	feederPath = pJoin(modelDir,feederName+'.omd')
-	feederJson = json.load(open(feederPath))
+	with open(feederPath) as f:
+		feederJson = json.load(f)
 	tree = feederJson.get("tree",{})
 	attachments = feederJson.get("attachments",{})
 	outData = {}
@@ -51,7 +49,7 @@ def work(modelDir, inputDict):
 	indices = [r['monthName'] for r in monthData]
 	d1 = [r['histPeak']/(10**3) for r in monthData]
 	d2 = [r['histAverage']/(10**3) for r in monthData]
-	ticks = range(len(d1))
+	ticks = list(range(len(d1)))
 	bar_peak = plt.bar(ticks,d1,color='gray')
 	bar_avg = plt.bar(ticks,d2,color='dimgray')
 	plt.legend([bar_peak[0],bar_avg[0]],['histPeak','histAverage'],bbox_to_anchor=(0., 1.015, 1., .102), loc=3,
@@ -65,18 +63,18 @@ def work(modelDir, inputDict):
 	outData["monthName"] = [name[0:3] for name in monthNames]
 	# Graph feeder.
 	fig = plt.figure(figsize=(10,10))
-	myGraph = feeder.treeToNxGraph(tree)
-	feeder.latLonNxGraph(myGraph, neatoLayout=False)
+	myGraph = omf.feeder.treeToNxGraph(tree)
+	omf.feeder.latLonNxGraph(myGraph, neatoLayout=False)
 	plt.savefig(pJoin(modelDir,"feederChart.png"))
 	with open(pJoin(modelDir,"feederChart.png"),"rb") as inFile:
-		outData["feederChart"] = inFile.read().encode("base64")
+		outData["feederChart"] = base64.standard_b64encode(inFile.read()).decode('ascii')
 	# Get the load levels we need to test.
 	allLoadLevels = [x.get('histPeak',0) for x in monthData] + [y.get('histAverage',0) for y in monthData]
 	maxLev = _roundOne(max(allLoadLevels),'up')
 	minLev = _roundOne(min(allLoadLevels),'down')
-	tenLoadLevels = range(int(minLev),int(maxLev),int((maxLev-minLev)/10))
+	tenLoadLevels = list(range(int(minLev),int(maxLev),int((maxLev-minLev)/10)))
 	# Gather variables from the feeder.
-	for key in tree.keys():
+	for key in list(tree.keys()):
 		# Set clock to single timestep.
 		if tree[key].get('clock','') == 'clock':
 			tree[key] = {"timezone":"PST+8PDT",
@@ -225,7 +223,7 @@ def work(modelDir, inputDict):
 				tree[regConfIndex]['tap_pos_B'] = str(newTapPos)
 				tree[regConfIndex]['tap_pos_C'] = str(newTapPos)
 			# Run the model through gridlab and put outputs in the table.
-			output = gridlabd.runInFilesystem(tree, attachments=attachments,
+			output = omf.solvers.gridlabd.runInFilesystem(tree, attachments=attachments,
 				keepFiles=True, workDir=modelDir)
 			os.remove(pJoin(modelDir,"PID.txt"))
 			p = output['Zregulator.csv']['power_in.real'][0]
@@ -305,13 +303,13 @@ def work(modelDir, inputDict):
 		plt.tight_layout()
 		plt.table(cellText=[row for row in inData[1:]],
 			loc = 'center',
-			rowLabels = range(len(inData)-1),
+			rowLabels = list(range(len(inData)-1)),
 			colLabels = inData[0])
 	def dictalToMatrix(dictList):
 		''' Take our dictal format to a matrix. '''
-		matrix = [dictList[0].keys()]
+		matrix = [list(dictList[0].keys())]
 		for row in dictList:
-			matrix.append(row.values())
+			matrix.append(list(row.values()))
 		return matrix
 	# Powerflow results.
 	plotTable(dictalToMatrix(powerflows))
@@ -337,7 +335,7 @@ def work(modelDir, inputDict):
 	d1 = [r['energyReductionDollars'] for r in monthData]
 	d2 = [r['lossReductionDollars'] for r in monthData]
 	d3 = [r['peakReductionDollars'] for r in monthData]
-	ticks = range(len(d1))
+	ticks = list(range(len(d1)))
 	bar_erd = plt.bar(ticks,d1,color='red')
 	bar_lrd = plt.bar(ticks,d2,color='green')
 	bar_prd = plt.bar(ticks,d3,color='blue',yerr=d2)
@@ -442,11 +440,11 @@ def _tests():
 	# Create New.
 	new(modelLoc)
 	# Pre-run.
-	renderAndShow(modelLoc)
+	__neoMetaModel__.renderAndShow(modelLoc)
 	# Run the model.
-	runForeground(modelLoc)
+	__neoMetaModel__.runForeground(modelLoc)
 	# Show the output.
-	renderAndShow(modelLoc)
+	__neoMetaModel__.renderAndShow(modelLoc)
 
 if __name__ == '__main__':
 	_tests()

@@ -1,39 +1,25 @@
-import json, os, sys, tempfile, webbrowser, time, shutil, subprocess, datetime as dt, csv, math, warnings
-import traceback
+import json, os, tempfile, shutil, csv, math, re, base64
 from os.path import join as pJoin
-from jinja2 import Template
 import pandas as pd
-import numpy as np
-import math
 from matplotlib import pyplot as plt
-import omf
 import networkx as nx
-import scipy.stats as stats
-import csv
-from operator import itemgetter
-import re
-import pickle
 from sklearn import svm
 from sklearn import metrics
 from numpy import array
-from networkx.drawing.nx_agraph import graphviz_layout
-import networkx as nx
-from jinja2 import Template
-from __neoMetaModel__ import *
-from omf.models import __neoMetaModel__
-
-# OMF imports
-import omf.feeder as feeder
-from omf.solvers import gridlabd
-from omf import geo, feeder
 
 # dateutil imports
 from dateutil import parser
 from dateutil.relativedelta import *
 
+# OMF imports
+import omf
+import omf.feeder, omf.geo
+from omf.models import __neoMetaModel__
+from omf.models.__neoMetaModel__ import *
+
 # Model metadata:
 tooltip = 'networkStructure determines whether connectivity information is correct, given voltage and/or distance information.'
-modelName, template = metadata(__file__)
+modelName, template = __neoMetaModel__.metadata(__file__)
 hidden = True
 	
 def nodeToCoords(outageMap, nodeName):
@@ -52,21 +38,22 @@ workDir = None
 
 def generateData(pathToOmd, pathToCsv, workDir, useDist, useVolt):
 	'create graphs and associated adjacency matrices based on input voltage and distance data'
-	omd = json.load(open(pathToOmd))
+	with open(pathToOmd) as f:
+		omd = json.load(f)
 	tree = omd.get('tree', {})
 	attachments = omd.get('attachments',[])
 
 	# check to see if work directory is specified
 	if not workDir:
 		workDir = tempfile.mkdtemp()
-		print '@@@@@@', workDir
+		print('@@@@@@', workDir)
 
 	# create outageMap to get the distance data for the given feeder system and actual connectivity data
-	outageMap = geo.omdGeoJson(pathToOmd, conversion = False)
+	outageMap = omf.geo.omdGeoJson(pathToOmd, conversion = False)
 
 	# create a dataframe that stores the location data of each of the nodes in the feeder system
 	if useDist == 'True':
-		with open(workDir + '/nodes.csv', mode='wb') as nodes:
+		with open(workDir + '/nodes.csv', 'w', newline='') as nodes:
 
 			fieldnames = ['node_name', 'coord1', 'coord2']
 			writer = csv.DictWriter(nodes, fieldnames)
@@ -80,7 +67,7 @@ def generateData(pathToOmd, pathToCsv, workDir, useDist, useVolt):
 		nodes.close()
 
 	# create a dataframe storing data of which nodes are actually connected according to the .omd file
-	with open(workDir + '/connectivity.csv', mode= 'wb') as connectivity:
+	with open(workDir + '/connectivity.csv', 'w', newline='') as connectivity:
 
 		fieldnames = ['first_node', 'second_node']
 		writer = csv.DictWriter(connectivity, fieldnames)
@@ -323,7 +310,7 @@ def testingSimple(testPath, pathToCsv, workDir, useDist, useVolt):
 					try: outGraph.node[item['name']]['pos']=(float(item.get('latitude',0)),float(item.get('longitude',0)))
 					except: outGraph.node[item['name']]['pos']=(0.0,0.0)
 				elif 'from' in item.keys():
-					myPhase = feeder._phaseCount(item.get('phases','AN'))
+					myPhase = omf.feeder._phaseCount(item.get('phases','AN'))
 					# outGraph.add_edge(item['from'],item['to'],attr_dict={'name':item.get('name',''),'type':item['object'],'phases':myPhase})
 				elif item['name'] in outGraph:
 					# Edge already led to node's addition, so just set the attributes:
@@ -359,7 +346,7 @@ def testingSimple(testPath, pathToCsv, workDir, useDist, useVolt):
 						outGraph.add_edge(str(volt.loc[row,'node_name']),str(volt.loc[column,'node_name']), attr_dict={'type':'load'})
 				column += 1
 			row += 1
-		feeder.latLonNxGraph(outGraph, labels=True, neatoLayout=True, showPlot=True)
+		omf.feeder.latLonNxGraph(outGraph, labels=True, neatoLayout=True, showPlot=True)
 		plt.savefig(workDir + graphname)
 
 	# graph the actual, distance, and voltage MSTs
@@ -548,17 +535,17 @@ def work(modelDir, inputDict):
 
 	# Image outputs.
 	with open(pJoin(modelDir,'distance_graph.png'),'rb') as inFile:
-		outData['distance_graph.png'] = inFile.read().encode('base64')
+		outData['distance_graph.png'] = base64.standard_b64encode(inFile.read()).decode('ascii')
 	with open(pJoin(modelDir,'voltage_graph.png'),'rb') as inFile:
-		outData['voltage_graph.png'] = inFile.read().encode('base64')
+		outData['voltage_graph.png'] = base64.standard_b64encode(inFile.read()).decode('ascii')
 	with open(pJoin(modelDir,'actual_graph.png'),'rb') as inFile:
-		outData['actual_graph.png'] = inFile.read().encode('base64')
+		outData['actual_graph.png'] = base64.standard_b64encode(inFile.read()).decode('ascii')
 
 	# Textual outputs of cost statistic
 	with open(pJoin(modelDir,'statsCalc.html'),'rb') as inFile:
-		outData['statsCalc'] = inFile.read()
+		outData['statsCalc'] = inFile.read().decode()
 	with open(pJoin(modelDir,'svmCalc.html'),'rb') as inFile:
-		outData['svmCalc'] = inFile.read()
+		outData['svmCalc'] = inFile.read().decode()
 
 	# Stdout/stderr.
 	outData['stdout'] = 'Success'
@@ -567,6 +554,10 @@ def work(modelDir, inputDict):
 
 def new(modelDir):
 	''' Create a new instance of this model. Returns true on success, false on failure. '''
+	with open(pJoin(__neoMetaModel__._omfDir,'scratch','smartSwitching','volt1.csv')) as f:
+		voltage_data = f.read()
+	with open(pJoin(__neoMetaModel__._omfDir,'scratch','smartSwitching','training.csv')) as f:
+		training_data = f.read()
 	defaultInputs = {
 		'modelType': modelName,
 		'feederName1': 'ieee37NodeFaultTester',
@@ -574,9 +565,9 @@ def new(modelDir):
 		'useVolt': 'True',
 		'useSVM': 'True',
 		'voltageFileName': 'volt1.csv',
-		'voltageData': open(pJoin(__neoMetaModel__._omfDir,'scratch','smartSwitching','volt1.csv'), 'r').read(),
+		'voltageData': voltage_data,
 		'trainingFileName': 'training.csv',
-		'trainingData': open(pJoin(__neoMetaModel__._omfDir,'scratch','smartSwitching','training.csv'), 'r').read(),
+		'trainingData': training_data,
 	}
 	creationCode = __neoMetaModel__.new(modelDir, defaultInputs)
 	try:
@@ -599,9 +590,9 @@ def _tests():
 	# Pre-run.
 	# renderAndShow(modelLoc)
 	# Run the model.
-	runForeground(modelLoc)
+	__neoMetaModel__.runForeground(modelLoc)
 	# Show the output.
-	renderAndShow(modelLoc)
+	__neoMetaModel__.renderAndShow(modelLoc)
 
 if __name__ == '__main__':
 	_tests()

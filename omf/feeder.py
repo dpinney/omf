@@ -1,6 +1,7 @@
 ''' Functions for manipulting electrical distribution feeder models. '''
 
 import datetime, copy, os, re, warnings, networkx as nx, json, matplotlib
+from functools import reduce
 from matplotlib import pyplot as plt
 
 # Wireframe for new feeder objects:
@@ -73,18 +74,20 @@ def glmToOmd(glmPath, omdPath, attachFilePaths=[]):
 	# Add attachment files.
 	for attPath in attachFilePaths:
 		dirs, fname = os.path.split(attPath)
-		omf['attachments'][fname] = open(attPath).read()
+		with open(attPath) as f:
+			omf['attachments'][fname] = f.read()
 	with open(omdPath, 'w') as outFile:
 		json.dump(omd, outFile, indent=4)
 
 def omdToGlm(omdPath, outDir):
 	''' Write an .omd to a .glm and associated files. '''
 	# Read the omd
-	omd = json.load(open(omdPath))
+	with open(omdPath) as f:
+		omd = json.load(f)
 	# Write attachments and glm.
 	attachments = omd.get('attachments','')
 	for attach in attachments:
-		with open (os.path.join(outDir, attach),'w') as attachFile:
+		with open(os.path.join(outDir, attach),'w') as attachFile:
 			attachFile.write(attachments[attach])
 	# Write the glm.
 	glmString = sortedWrite(omd['tree'])
@@ -160,7 +163,7 @@ def fullyDeEmbed(glmTree):
 
 def _mergeContigLinesOnce(tree):
 	''' helper function for mergeContigLines.'''
-	obs = tree.values()
+	obs = list(tree.values())
 	n2k = nameIndex(tree)
 	for o in obs:
 		if 'to' in o:
@@ -401,7 +404,7 @@ def latLonNxGraph(inGraph, labels=False, neatoLayout=False, showPlot=False):
 			nx.draw_networkx_edges(inGraph,pos,**standArgs)
 	# Draw nodes and optional labels.
 	nx.draw_networkx_nodes(inGraph,pos,
-						   nodelist=pos.keys(),
+						   nodelist=list(pos.keys()),
 						   node_color=[_obToCol(inGraph.node[n].get('type','underground_line')) for n in inGraph],
 						   linewidths=0,
 						   node_size=40)
@@ -437,7 +440,7 @@ def _tokenizeGlm(inputStr, filePath=True):
 	# Tokenize around semicolons, braces and whitespace.
 	tokenized = re.split(r'(;|\}|\{|\s)',data)
 	# Get rid of whitespace strings.
-	basicList = filter(lambda x:x!='' and x!=' ', tokenized)
+	basicList = [x for x in tokenized if x != '' and x != ' ']
 	return basicList
 
 def _parseTokenList(tokenList):
@@ -632,21 +635,21 @@ def _tests():
 	tokens = ['clock','{','clockey','valley','}','object','house','{','name','myhouse',';',
 		'object','ZIPload','{','inductance','bigind',';','power','newpower','}','size','234sqft','}']
 	obType = type(_parseTokenList(tokens))
-	print 'Parsed tokens into object of type:', obType
+	print('Parsed tokens into object of type:', obType)
 	assert obType is dict
 	# GLM parsing test.
-	smsTree = parse('scratch/simpleMarket/sms.glm', filePath=True)
+	smsTree = parse(os.path.join(os.path.dirname(__file__), 'scratch/simpleMarket/sms.glm'), filePath=True)
 	keyLen = len(smsTree.keys())
-	print 'Parsed a test glm file with', keyLen, 'keys.'
+	print('Parsed a test glm file with', keyLen, 'keys.')
 	assert keyLen == 41
 	# Recorder Attachment Test
-	with open('static/publicFeeders/Olin Barre Geo.omd') as inFile:
+	with open(os.path.join(os.path.dirname(__file__), 'static/publicFeeders/Olin Barre Geo.omd')) as inFile:
 		tree = json.load(inFile)['tree']
 	attachRecorders(tree, 'Regulator', 'object', 'regulator')
 	attachRecorders(tree, 'Voltage', 'object', 'node')
-	print 'All the objects after recorder attach: ', set([ob.get('object','') for ob in tree.values()])
+	print('All the objects after recorder attach: ', set([ob.get('object','') for ob in tree.values()]))
 	# Testing The De-Embedding
-	with open('static/publicFeeders/13 Node Embedded DO NOT SAVE.omd') as inFile:
+	with open(os.path.join(os.path.dirname(__file__), 'static/publicFeeders/13 Node Embedded DO NOT SAVE.omd')) as inFile:
 		tree = json.load(inFile)['tree']
 	fullyDeEmbed(tree)
 	embeddedDicts = 0
@@ -654,29 +657,30 @@ def _tests():
 		for subOb in ob.values():
 			if type(subOb) == 'dict':
 				embeddedDicts += 1
-	print 'Number of objects still embedded:', embeddedDicts
+	print('Number of objects still embedded:', embeddedDicts)
 	assert embeddedDicts == 0, 'Some objects failed to disembed.'
 	# groupSwingKids test
-	with open('static/publicFeeders/13 Node Ref Feeder Flat.omd') as inFile:
+	with open(os.path.join(os.path.dirname(__file__), 'static/publicFeeders/13 Node Ref Feeder Flat.omd')) as inFile:
 		tree = json.load(inFile)['tree']
 	groupSwingKids(tree)
 	for ob in tree.values():
 		if ob.get('object','') == 'collector':
-			print 'Swing collector:', ob
+			print('Swing collector:', ob)
 	# Time Adjustment Test
-	with open('static/publicFeeders/Simple Market System.omd') as inFile:
+	with open(os.path.join(os.path.dirname(__file__), 'static/publicFeeders/Simple Market System.omd')) as inFile:
 		tree = json.load(inFile)['tree']
 	adjustTime(tree, 100, 'hours', '2000-09-01')
 	for ob in tree.values():
 		if ob.get('object','') in ['recorder','collector']:
-			print 'Time-adjusted collector:', ob 
+			print('Time-adjusted collector:', ob)
 	# Graph Test
-	with open('static/publicFeeders/Olin Barre Geo.omd') as inFile:
+	with open(os.path.join(os.path.dirname(__file__), 'static/publicFeeders/Olin Barre Geo.omd')) as inFile:
 		tree = json.load(inFile)['tree']
 	nxG = treeToNxGraph(tree)
 	x = latLonNxGraph(nxG)
 	# Contig line merging test
 	mergeContigLines(tree)
+
 
 if __name__ == '__main__':
 	_tests()

@@ -1,19 +1,14 @@
 ''' A model skeleton for future models: Calculates the sum of two integers. '''
 
-import json, os, sys, tempfile, webbrowser, time, shutil, subprocess, datetime, traceback
+import shutil, datetime
 from os.path import join as pJoin
-from jinja2 import Template
-import __neoMetaModel__
-from __neoMetaModel__ import *
 
 # OMF imports
-sys.path.append(__neoMetaModel__._omfDir)
-import feeder
-from solvers import nrelsam2013
-from weather import zipCodeToClimateName
+from omf.models import __neoMetaModel__
+from omf.models.__neoMetaModel__ import *
 
 # Model metadata:
-modelName, template = metadata(__file__)
+modelName, template = __neoMetaModel__.metadata(__file__)
 hidden = True
 
 def work(modelDir, inputDict):
@@ -54,11 +49,11 @@ def _tests():
 	# Create New.
 	new(modelLoc)
 	# Pre-run.
-	renderAndShow(modelLoc)
+	__neoMetaModel__.renderAndShow(modelLoc)
 	# Run the model.
-	runForeground(modelLoc)
+	__neoMetaModel__.runForeground(modelLoc)
 	# Show the output.
-	renderAndShow(modelLoc)
+	__neoMetaModel__.renderAndShow(modelLoc)
 
 if __name__ == '__main__':
 	_tests()

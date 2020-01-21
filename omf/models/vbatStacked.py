@@ -1,18 +1,19 @@
 ''' Evaluate demand response energy and economic savings available using PNNL VirtualBatteries (VBAT) model. '''
 
-import shutil, csv, os, math
+import shutil, os
+from datetime import datetime as dt, timedelta
 from os.path import join as pJoin
+#import csv
 import pandas as pd
 import numpy as np
-from datetime import datetime as dt, timedelta
 from numpy import npv
 
-import __neoMetaModel__
-from __neoMetaModel__ import *
-from solvers import VB
+from omf.solvers import VB
+from omf.models import __neoMetaModel__
+from omf.models.__neoMetaModel__ import *
 
 # Model metadata:
-modelName, template = metadata(__file__)
+modelName, template = __neoMetaModel__.metadata(__file__)
 tooltip = "Calculate the energy storage capacity for a collection of thermostatically controlled loads."
 # hidden = True
 
@@ -161,6 +162,12 @@ def work(modelDir, ind):
 
 def new(modelDir):
 	''' Create a new instance of this model. Returns true on success, false on failure. '''
+	with open(pJoin(__neoMetaModel__._omfDir,"static","testFiles","fhec_2017_gt.csv")) as f:
+		gt_demand_curve = f.read()
+	with open(pJoin(__neoMetaModel__._omfDir,"static","testFiles","Texas_1yr_Temp.csv")) as f:
+		temp_curve = f.read()
+	with open(pJoin(__neoMetaModel__._omfDir,"static","testFiles","fhec_knievel_demand_reduction_input.csv")) as f:
+		input_csv = f.read()
 	defaultInputs = {
 		"user": "admin",
 		# options for dispatch
@@ -192,16 +199,16 @@ def new(modelDir):
 		"electricityCost":"0.041",
 		"peakMultiplier": "5",
 		"peakPercentile": "0.99",
-		"gt_demandCurve": open(pJoin(__neoMetaModel__._omfDir,"static","testFiles","fhec_2017_gt.csv")).read(),
+		"gt_demandCurve": gt_demand_curve,
 		"gt_demandCurveFileName": "fhec_2017_gt.csv",
 		# Deferral
 		"transformerThreshold": "3500",
 		"avoidedCost": "2000000",
 		"yearsToReplace": "2",
 		"carryingCost": "7",
-		"tempCurve": open(pJoin(__neoMetaModel__._omfDir,"static","testFiles","Texas_1yr_Temp.csv")).read(),
+		"tempCurve": temp_curve,
 		"tempCurveFileName": "Texas_1yr_Temp.csv",
-		"inputCsv": open(pJoin(__neoMetaModel__._omfDir,"static","testFiles","fhec_knievel_demand_reduction_input.csv")).read(),
+		"inputCsv": input_csv,
 		"inputCsvFileName": "fhec_knievel_demand_reduction_input.csv",
 		"modelType": modelName,
 		## FORECAST ##
@@ -218,9 +225,9 @@ def _simpleTest():
 	if os.path.isdir(modelLoc):
 		shutil.rmtree(modelLoc)
 	new(modelLoc) # Create New.
-	renderAndShow(modelLoc) # Pre-run.
-	runForeground(modelLoc) # Run the model.
-	renderAndShow(modelLoc) # Show the output.
+	__neoMetaModel__.renderAndShow(modelLoc) # Pre-run.
+	__neoMetaModel__.runForeground(modelLoc) # Run the model.
+	__neoMetaModel__.renderAndShow(modelLoc) # Show the output.
 
 if __name__ == '__main__':
 	_simpleTest()

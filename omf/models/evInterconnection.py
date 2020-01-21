@@ -1,35 +1,26 @@
 ''' Graph the voltage drop on a feeder. '''
 
-import json, os, sys, tempfile, webbrowser, time, shutil, subprocess, datetime as dt, csv, math, warnings
-import traceback
+import json, os, shutil, csv, warnings, base64
 from os.path import join as pJoin
-from jinja2 import Template
 from random import randint, uniform
 import numpy as np
 from matplotlib import pyplot as plt
-import matplotlib
-from networkx.drawing.nx_agraph import graphviz_layout
-import networkx as nx
-from omf.models import __neoMetaModel__
-from __neoMetaModel__ import *
-from omf.models.voltageDrop import drawPlot
-from omf.models.faultAnalysis import drawTable
-plt.switch_backend('Agg')
-plt.style.use('seaborn')
-import csv
-
-# OMF imports 
-import omf.feeder as feeder
-from omf.solvers import gridlabd
+#plt.switch_backend('Agg')
+#plt.style.use('seaborn')
 
 # dateutil imports
 from dateutil import parser
 from dateutil.relativedelta import *
 
-from omf.solvers.REopt import run as runREopt
+# OMF imports
+import omf
+import omf.models.voltageDrop, omf.models.faultAnalysis
+import omf.solvers.REopt as REopt
+from omf.models import __neoMetaModel__
+from omf.models.__neoMetaModel__ import *
 
 # Model metadata:
-modelName, template = metadata(__file__)
+modelName, template = __neoMetaModel__.metadata(__file__)
 tooltip = "Injects faults in to circuits and measures fault currents, voltages, and protective device response."
 hidden = False
 
@@ -41,7 +32,8 @@ def work(modelDir, inputDict):
 	inputDict["feederName1"] = feederName
 	# Create voltage drop plot.
 	# print "*DEBUG: feederName:", feederName
-	omd = json.load(open(pJoin(modelDir,feederName + '.omd')))
+	with open(pJoin(modelDir,feederName + '.omd')) as f:
+		omd = json.load(f)
 	if inputDict.get("layoutAlgorithm", "geospatial") == "geospatial":
 		neato = False
 	else:
@@ -142,7 +134,7 @@ def work(modelDir, inputDict):
 		loadShapeFile.write(inputDict['loadShape'])
 	try:
 		loadShapeList = []
-		with open(pJoin(modelDir,"loadShape.csv")) as inFile:
+		with open(pJoin(modelDir,"loadShape.csv"), newline='') as inFile:
 			reader = csv.reader(inFile)
 			for row in reader:
 				loadShapeList.append(row) 
@@ -169,11 +161,10 @@ def work(modelDir, inputDict):
 		loadShape = loadShapeValue)
 	demandImg.savefig(pJoin(modelDir, "evChargingDemand.png"))
 	with open(pJoin(modelDir, "evChargingDemand.png"),"rb") as evFile:
-		outData["evChargingDemand"] = evFile.read().encode("base64")
+		outData["evChargingDemand"] = base64.standard_b64encode(evFile.read()).decode('ascii')
 	carpetPlotImg.savefig(pJoin(modelDir, "carpetPlot.png"))
 	with open(pJoin(modelDir, "carpetPlot.png"),"rb") as cpFile:
-		outData["carpetPlot"] = cpFile.read().encode("base64")
-	
+		outData["carpetPlot"] = base64.standard_b64encode(cpFile.read()).decode('ascii')
 	#run and display fuel cost calculation
 	fuelCostHtml = fuelCostCalc(
 		numVehicles = numVehiclesValue,
@@ -188,7 +179,7 @@ def work(modelDir, inputDict):
 	outData["fuelCostCalcHtml"] = fuelCostHtml
 
 	#run and display voltage drop image and protective device status table
-	voltPlotChart = drawPlot(
+	voltPlotChart = omf.models.voltageDrop.drawPlot(
 		pJoin(modelDir,feederName + ".omd"),
 		neatoLayout = neato,
 		edgeCol = "PercentOfRating",
@@ -205,8 +196,8 @@ def work(modelDir, inputDict):
 		workDir = modelDir)
 	voltPlotChart.savefig(pJoin(modelDir, "output.png"))
 	with open(pJoin(modelDir, "output.png"),"rb") as inFile:
-		outData["voltageDrop"] = inFile.read().encode("base64")
-	protDevTable = drawTable(
+		outData["voltageDrop"] = base64.standard_b64encode(inFile.read()).decode('ascii')
+	protDevTable = omf.models.faultAnalysis.drawTable(
 		pJoin(modelDir,feederName + ".omd"),
 		workDir = modelDir)
 	with open(pJoin(modelDir, "statusTable.html"), "w") as tabFile:
@@ -215,7 +206,8 @@ def work(modelDir, inputDict):
 
 	def voltplot_protdev(max_value=None, load_name=None):
 		warnings.filterwarnings("ignore")
-		omd = json.load(open(pJoin(modelDir,feederName + ".omd")))
+		with open(pJoin(modelDir,feederName + ".omd")) as f:
+			omd = json.load(f)
 		tree = omd.get('tree', {})
 		attachments = omd.get('attachments',[])
 
@@ -253,7 +245,7 @@ def work(modelDir, inputDict):
 					with open(modelDir + '/' + feederName2, "w+") as write_file:
 						json.dump(omd, write_file)
 
-					tempVoltPlotChart = drawPlot(
+					tempVoltPlotChart = omf.models.voltageDrop.drawPlot(
 						pJoin(modelDir,feederName2),
 						neatoLayout = neato,
 						edgeCol = "PercentOfRating",
@@ -275,20 +267,20 @@ def work(modelDir, inputDict):
 					# outData['loadProtDevTableHtml'] = loadProtDevTable
 					# with open(pJoin(modelDir, "loadVoltPlot.png"),"rb") as inFile:
 					# 	outData["loadVoltageDrop"] = inFile.read().encode("base64")
-					tempProtDevTable = drawTable(
+					tempProtDevTable = omf.models.faultAnalysis.drawTable(
 						pJoin(modelDir,feederName2),
 						workDir = modelDir)
 					return tempVoltPlotChart, tempProtDevTable
 				else:
-					print "Didn't find the gridlab object named " + loadName
+					print("Didn't find the gridlab object named " + loadName)
 					#raise an exception if loadName isn't in the tree
 					raise Exception('Specified load name does not correspond to an object in the tree.')
 			else:
-				print "loadName is None"
+				print("loadName is None")
 				#raise an exception if loadName isn't specified
 				raise Exception('Invalid request. Load Name must be specified.')
 		else:
-			print "maxValue is None"
+			print("maxValue is None")
 			#raise an exception if maximum load value is not being passed in
 			raise Exception('Error retrieving maximum load value from load shape.')
 
@@ -299,8 +291,7 @@ def work(modelDir, inputDict):
 		tabFile.write(loadProtDevTable)
 	outData['loadProtDevTableHtml'] = loadProtDevTable
 	with open(pJoin(modelDir, "loadVoltPlot.png"),"rb") as inFile:
-		outData["loadVoltageDrop"] = inFile.read().encode("base64")
-
+		outData["loadVoltageDrop"] = base64.standard_b64encode(inFile.read()).decode('ascii')
 	# Create the input JSON file for REopt
 	scenario = {
 		"Scenario": {
@@ -326,19 +317,19 @@ def work(modelDir, inputDict):
 	with open(pJoin(modelDir, "Scenario_test_POST.json"), "w") as jsonFile:
 		json.dump(scenario, jsonFile)
 	# Run REopt API script
-	runREopt(pJoin(modelDir, 'Scenario_test_POST.json'), pJoin(modelDir, 'results.json'))
+	REopt.run(pJoin(modelDir, 'Scenario_test_POST.json'), pJoin(modelDir, 'results.json'))
 
 	#read results from json generated from REopt
 	with open(pJoin(modelDir, "results.json"), "r") as REoptFile:
 		REopt_output = json.load(REoptFile)
 		#print REopt_output
-	print pJoin(modelDir, "results.json")
+	print(pJoin(modelDir, "results.json"))
 	# ********* If testing, set test_results_on_fail to True **********
 	test_results_on_fail = False
 	#check to see if REopt worked correctly. If not, use a cached results file for testing or raise exception. 
 	if REopt_output["outputs"]["Scenario"]["status"] != "optimal":
 		if test_results_on_fail:
-			print "Continuing simulation with cached results in dummyResults.json..."
+			print("Continuing simulation with cached results in dummyResults.json...")
 			with open(pJoin(omf.omfDir, "static", "testFiles", "REoptDummyResults.json"), "r") as dummyResults:
 				REopt_output = json.load(dummyResults)
 		else:
@@ -375,11 +366,10 @@ def work(modelDir, inputDict):
 		REopt_load = REoptLoadShape)
 	maxLoadShapeImg.savefig(pJoin(modelDir, "maxLoadShape.png"))
 	with open(pJoin(modelDir, "maxLoadShape.png"),"rb") as evFile:
-		outData["maxLoadShape"] = evFile.read().encode("base64")
+		outData["maxLoadShape"] = base64.standard_b64encode(evFile.read()).decode('ascii')
 	REoptCarpetPlotImg.savefig(pJoin(modelDir, "REoptCarpetPlot.png"))
 	with open(pJoin(modelDir, "REoptCarpetPlot.png"),"rb") as cpFile:
-		outData["REoptCarpetPlot"] = cpFile.read().encode("base64")
-
+		outData["REoptCarpetPlot"] = base64.standard_b64encode(cpFile.read()).decode('ascii')
 	#Create 3rd powerflow run with maximum load from new ReOpt output load shape
 	REoptVoltPlotChart, REoptProtDevTable = voltplot_protdev(max_value=max(REoptLoadShape), load_name=loadNameValue)
 	REoptVoltPlotChart.savefig(pJoin(modelDir, "REoptVoltPlot.png"))
@@ -387,12 +377,14 @@ def work(modelDir, inputDict):
 		tabFile.write(REoptProtDevTable)
 	outData['REoptProtDevTableHtml'] = REoptProtDevTable
 	with open(pJoin(modelDir, "REoptVoltPlot.png"),"rb") as inFile:
-		outData["REoptVoltageDrop"] = inFile.read().encode("base64")
+		outData["REoptVoltageDrop"] = base64.standard_b64encode(inFile.read()).decode('ascii')
 	return outData
 
 def new(modelDir):
 	''' Create a new instance of this model. Returns true on success, false on failure. '''
 	fName = "input - 200 Employee Office, Springfield Illinois, 2001.csv"
+	with open(pJoin(omf.omfDir, "static", "testFiles", fName)) as f:
+		load_shape = f.read()
 	defaultInputs = {
 		"feederName1": "Olin Barre Fault",
 		"modelType": modelName,
@@ -411,7 +403,7 @@ def new(modelDir):
 		"maxCharge" : "50",
 		"gasCost" : "2.70",
 		"workload" : "40",
-		"loadShape" : open(pJoin(omf.omfDir, "static", "testFiles", fName)).read(),
+		"loadShape" : load_shape,
 		"fileName" : fName,
 		"loadName" : "62474211556",
 		"rezSqIn" : "400",
@@ -454,7 +446,7 @@ def plotMaxLoadShape(loadShape=None, combined_load=None, hourly_con=None, REopt_
 	max_index = combined_load.index(max_val)
 
 	#find the day that the max load value occurs
-	max_day_val = (max_index)/24
+	max_day_val = int((max_index)/24)
 	max_hour_val = (max_index)%24
 	day_shape = base_shape[max_day_val*24:max_day_val*24+24]
 
@@ -464,7 +456,7 @@ def plotMaxLoadShape(loadShape=None, combined_load=None, hourly_con=None, REopt_
 	max_index_REopt = com_shape_REopt.index(max_val_REopt)
 
 	#find the day that the max REopt load value occurs
-	max_day_val_REopt = (max_index_REopt)/24
+	max_day_val_REopt = int((max_index_REopt)/24)
 	max_hour_val_REopt = (max_index_REopt)%24
 	day_shape_REopt = com_shape_REopt[max_day_val_REopt*24:max_day_val_REopt*24+24]
 
@@ -476,7 +468,7 @@ def plotMaxLoadShape(loadShape=None, combined_load=None, hourly_con=None, REopt_
 		plt.style.use('seaborn')
 		plt.ylim(0.0, 1.15*max_val)
 		if len(load_vec) != 0:
-			plt.stackplot(range(len(load_vec)), load_vec, daily_vec)
+			plt.stackplot(list(range(len(load_vec))), load_vec, daily_vec)
 		if len(REopt_vec) != 0:
 			plt.plot(day_shape_REopt, color='black', linestyle='dotted', label='with REopt Optimization')
 		plt.title('Maximum Daily Load Shape')
@@ -503,11 +495,11 @@ def plotMaxLoadShape(loadShape=None, combined_load=None, hourly_con=None, REopt_
 			plt.axis('off')
 			plt.ylim(0.0, max_val) # Should this be the same max value as the original combined carpet plot for better side-by-side comparison? It would only be an issue if for some reason REopt load values were higher than the originals, which shouldn't ever happen
 			if len(x) != 0:
-				plt.stackplot(range(len(x)), x, daily_vec)
+				plt.stackplot(list(range(len(x))), x, daily_vec)
 			if i <= 12:
 				plt.title(i)
 			if i % 12 == 1:
-				plt.text(-5.0, 0.1, str(1 + i / 12), horizontalalignment='left',verticalalignment='center')
+				plt.text(-5.0, 0.1, str(int(1 + i / 12)), horizontalalignment='left',verticalalignment='center')
 		#plt.show()
 		plt.close()
 		return carpetPlotImg
@@ -551,19 +543,19 @@ def plotEVShape(modelDir, numVehicles=None, chargeRate=None, batterySize=None, s
 	# Plot the EV shape.
 	evShape = plt.figure()
 	plt.title('EV Charging Demand')
-	plt.stackplot(range(max_minutes), shapes2)
+	plt.stackplot(list(range(max_minutes)), shapes2)
 	plt.ylabel('Demand (KW)')
 	plt.xlabel('Time of Day (Hour)')
 	plt.plot(sum(shapes), color='black', label='Total (Uncontrolled)')
 	plt.plot(sum(shapes2), color='black', linestyle='dotted', label='Total (Controlled)')
-	plt.xticks([x*60 for x in range(max_minutes/60)], range(max_minutes/60))
+	plt.xticks([x*60 for x in range(int(max_minutes/60))], list(range(int(max_minutes/60))))
 	plt.legend()
 	plt.close()
 	#plt.show()
 
 	# Make a charging shape.
 	con_charge = sum(shapes2)
-	hourly_con = range(24)
+	hourly_con = list(range(24))
 	for i in range(24):
 		hourly_con[i] = float(sum(con_charge[i * 60:i * 60 + 60])/60.0)
 
@@ -592,11 +584,11 @@ def plotEVShape(modelDir, numVehicles=None, chargeRate=None, batterySize=None, s
 			plt.axis('off')
 			plt.ylim(0.0, max(combined))
 			if len(x) != 0:
-				plt.stackplot(range(len(x)), x, daily_vec)
+				plt.stackplot(list(range(len(x))), x, daily_vec)
 			if i <= 12:
 				plt.title(i)
 			if i % 12 == 1:
-				plt.text(-5.0, 0.1, str(1 + i / 12), horizontalalignment='left',verticalalignment='center')
+				plt.text(-5.0, 0.1, str(int(1 + i / 12)), horizontalalignment='left',verticalalignment='center')
 		#plt.show()
 		plt.close()
 		return carpetPlotImg
@@ -676,9 +668,9 @@ def _debugging():
 	# Pre-run.
 	# renderAndShow(modelLoc)
 	# Run the model.
-	runForeground(modelLoc)
+	__neoMetaModel__.runForeground(modelLoc)
 	# Show the output.
-	renderAndShow(modelLoc)
+	__neoMetaModel__.renderAndShow(modelLoc)
 
 if __name__ == '__main__':
 	_debugging()

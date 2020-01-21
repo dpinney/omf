@@ -1,25 +1,24 @@
 ''' Evaluate demand response energy and economic savings available using PNNL VirtualBatteries (VBAT) model. '''
 
-import json, shutil, subprocess, platform, csv, pulp
-import os
+import shutil, csv, pulp, os
 from os.path import join as pJoin
-from sklearn import linear_model
-import pandas as pd
-from datetime import datetime as dt
 import numpy as np
-from numpy import array, npv, arctan as atan
-import __neoMetaModel__
-from __neoMetaModel__ import *
-from solvers import VB
+from numpy import npv
+#import platform, subprocess
+#from numpy import arctan as atan, array
+
+from omf.solvers import VB
 from omf import forecast as fc
+from omf.models import __neoMetaModel__
+from omf.models.__neoMetaModel__ import *
 
 # Model metadata:
-modelName, template = metadata(__file__)
+modelName, template = __neoMetaModel__.metadata(__file__)
 tooltip = "Calculate the energy storage capacity for a collection of thermostatically controlled loads."
 
 def pyVbat(modelDir, i):
 	vbType = i['load_type']
-	with open(pJoin(modelDir, 'temp.csv')) as f:
+	with open(pJoin(modelDir, 'temp.csv'), newline='') as f:
 		ambient = np.array([float(r[0]) for r in csv.reader(f)])
 	variables = [i['capacitance'], i['resistance'], i['power'], i['cop'], 
 		i['deadband'], float(i['setpoint']), i['number_devices']]
@@ -79,9 +78,9 @@ def work(modelDir, inputDict):
 	out = {}
 	with open(pJoin(modelDir, 'demand.csv'), 'w') as f:
 		f.write(inputDict['demandCurve'].replace('\r', ''))
-	with open(pJoin(modelDir, 'demand.csv')) as f:
+	with open(pJoin(modelDir, 'demand.csv'), newline='') as f:
 		demand = [float(r[0]) for r in csv.reader(f)]
- 		assert len(demand) == 8760	
+		assert len(demand) == 8760
 	
 	with open(pJoin(modelDir, 'temp.csv'), 'w') as f:
 		lines = inputDict['tempCurve'].split('\n')
@@ -151,6 +150,10 @@ def work(modelDir, inputDict):
 
 def new(modelDir):
 	''' Create a new instance of this model. Returns true on success, false on failure. '''
+	with open(pJoin(__neoMetaModel__._omfDir,"static","testFiles","Texas_1yr_Load.csv")) as f:
+		demand_curve = f.read()
+	with open(pJoin(__neoMetaModel__._omfDir,"static","testFiles","Texas_1yr_Temp.csv")) as f:
+		temp_curve = f.read()
 	defaultInputs = {
 		"user": "admin",
 		"load_type": "1",
@@ -167,8 +170,8 @@ def new(modelDir):
 		"discountRate":"2",
 		"unitDeviceCost":"150",
 		"unitUpkeepCost":"5",
-		"demandCurve": open(pJoin(__neoMetaModel__._omfDir,"static","testFiles","Texas_1yr_Load.csv")).read(),
-		"tempCurve": open(pJoin(__neoMetaModel__._omfDir,"static","testFiles","Texas_1yr_Temp.csv")).read(),
+		"demandCurve": demand_curve,
+		"tempCurve": temp_curve,
 		"fileName": "Texas_1yr_Load.csv",
 		"tempFileName": "Texas_1yr_Temp.csv",
 		"modelType": modelName,
@@ -180,9 +183,9 @@ def _simpleTest():
 	if os.path.isdir(modelLoc):
 		shutil.rmtree(modelLoc)
 	new(modelLoc) # Create New.
-	renderAndShow(modelLoc) # Pre-run.
-	runForeground(modelLoc) # Run the model.
-	renderAndShow(modelLoc) # Show the output.
+	__neoMetaModel__.renderAndShow(modelLoc) # Pre-run.
+	__neoMetaModel__.runForeground(modelLoc) # Run the model.
+	__neoMetaModel__.renderAndShow(modelLoc) # Show the output.
 
 if __name__ == '__main__':
 	_simpleTest ()

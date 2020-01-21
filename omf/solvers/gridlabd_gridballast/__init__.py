@@ -1,5 +1,6 @@
 ''' Code for running Gridlab and getting results into pythonic data structures. '''
 
+from __future__ import print_function
 import sys, os, subprocess, platform, re, datetime, shutil, traceback, math, time, tempfile, json
 from os.path import join as pJoin
 from copy import deepcopy
@@ -7,10 +8,10 @@ from copy import deepcopy
 # Locational variables so we don't have to rely on OMF being in the system path.
 _myDir = os.path.dirname(os.path.abspath(__file__))
 _omfDir = os.path.dirname(os.path.dirname(_myDir))
-sys.path.append(_omfDir)
+#sys.path.append(_omfDir)
 
 # OMF imports.
-import feeder
+import omf.feeder
 
 def checkStatus(modelDir):
 	'''Reads a current gridlabD simulation time from stdErr.txt,
@@ -28,10 +29,10 @@ def checkStatus(modelDir):
 			gridlabDTest = gridlabDTime.split('\r')
 			gridlabDTest = gridlabDTest[len(gridlabDTest)-1]
 			gridlabDTimeFormatted = gridlabDTest.split('Processing ')[1].split('PST...')[0].lstrip().rstrip()
-			gridlabDTimeFormatted = datetime.datetime.strptime(gridlabDTimeFormatted, '%Y-%m-%d %H:%M:%S')	
-			print "\n   gridlabDTime=", gridlabDTimeFormatted							
+			gridlabDTimeFormatted = datetime.datetime.strptime(gridlabDTimeFormatted, '%Y-%m-%d %H:%M:%S')
+			print("\n   gridlabDTime=", gridlabDTimeFormatted)
 			difference = (endDate - gridlabDTimeFormatted)
-			print "\n   difference=", difference
+			print("\n   difference=", difference)
 			if simLengthUnits == 'hours':
 				floatPercentageStatus = -1*(difference.total_seconds()/3600)/(float(simLength)) + 1.0
 			elif simLengthUnits == 'days':
@@ -39,7 +40,7 @@ def checkStatus(modelDir):
 			elif simLengthUnits == 'minutes':
 				floatPercentageStatus = -1*(difference.total_seconds()/60)/(float(simLength)) + 1.0
 		except:
-			print "\n   No std error file, passing."
+			print("\n   No std error file, passing.")
 			floatPercentageStatus = 0.0
 			pass
 		return floatPercentageStatus
@@ -62,12 +63,13 @@ def checkStatus(modelDir):
 		elif simLengthUnits == "days":
 			endDate = startDate + datetime.timedelta(days=float(simLength))
 		return endDate
-	inputDict = json.load(open(pJoin(modelDir, "allInputData.json")))	
+	with open(pJoin(modelDir, "allInputData.json")) as f:
+		inputDict = json.load(f)
 	(simStartDate, simLength, simLengthUnits) = \
 				[inputDict[x] for x in ('simStartDate', 'simLength', 'simLengthUnits')]
 	startDate = datetime.datetime.strptime(simStartDate, '%Y-%m-%d')
 	endDate = convertSimLengthToEndDate(simStartDate, simLength, simLengthUnits)
-	print "\n   Simulation startDate=", startDate, ", endDate=", endDate
+	print("\n   Simulation startDate=", startDate, ", endDate=", endDate)
 	time.sleep(5) # It takes about 5 seconds to start
 	# Reads stdErr output every second, stdErr sometimes doesn't end on the final 
 	# time, so if stdOut exists, the gridlabD simulation for the feeder is complete.
@@ -75,16 +77,16 @@ def checkStatus(modelDir):
 		if key.startswith("feederName"):
 			feederDir, feederName = inputDict[key].split("___")
 			workDir = pJoin(modelDir, feederName)
-			print "\n   Computing progress for first feeder:", feederName
+			print("\n   Computing progress for first feeder:", feederName)
 			floatPercentageStatus = 0.0
 			while floatPercentageStatus < 1.0:
 				floatPercentageOld = floatPercentageStatus
 				floatPercentageStatus = getFloatPercentage(workDir, endDate, simLength, simLengthUnits)
 				if (floatPercentageOld == floatPercentageStatus) and (checkstdOutExists(workDir) == True):
-					print '\n   The stdOut exists, so the gridlabD simulation is complete for feeder:', feederName
+					print('\n   The stdOut exists, so the gridlabD simulation is complete for feeder:', feederName)
 					floatPercentageStatus = 1.0
 					break
-				print "\n   Current percent complete: ", floatPercentageStatus
+				print("\n   Current percent complete: ", floatPercentageStatus)
 				time.sleep(1)
 
 def _addGldToPath():
@@ -121,10 +123,10 @@ def runInFilesystem(feederTree, attachments=[], keepFiles=False, workDir=None, g
 		# Create a running directory and fill it, unless we've specified where we're running.
 		if not workDir:
 			workDir = tempfile.mkdtemp()
-			print "gridlabD runInFilesystem with no specified workDir. Working in", workDir
+			print("gridlabD runInFilesystem with no specified workDir. Working in", workDir)
 		# Need to zero out lat/lon data on copy because it frequently breaks Gridlab.
 		localTree = deepcopy(feederTree)
-		for key in localTree.keys():
+		for key in list(localTree.keys()):
 			try:
 				del localTree[key]["latitude"]
 				del localTree[key]["longitude"]
@@ -132,9 +134,9 @@ def runInFilesystem(feederTree, attachments=[], keepFiles=False, workDir=None, g
 				pass # No lat lons.
 		# Write attachments and glm.
 		for attach in attachments:
-			with open (pJoin(workDir,attach),'w') as attachFile:
+			with open(pJoin(workDir,attach),'w') as attachFile:
 				attachFile.write(attachments[attach])
-		glmString = feeder.sortedWrite(localTree)
+		glmString = omf.feeder.sortedWrite(localTree)
 		if not glmName:
 			glmName = "main." + datetime.datetime.now().strftime('%Y-%m-%d-%H-%M-%S') + ".glm"
 		with open(pJoin(workDir, glmName),'w') as glmFile:
@@ -182,8 +184,8 @@ def _strClean(x):
 		if len(matches)==0:
 			return 0.0
 		else:
-			floatConv = map(float, matches[0])
-			squares = map(lambda x:x**2, floatConv)
+			floatConv = list(map(float, matches[0]))
+			squares = [x**2 for x in floatConv]
 			return math.sqrt(sum(squares))
 	elif re.findall('^([+-]?\d+\.?\d*e?[+-]?\d*)$',x) != []:
 		matches = re.findall('([+-]?\d+\.?\d*e?[+-]?\d*)',x)
@@ -200,8 +202,8 @@ def csvToArray(fileName):
 	with open(fileName) as openfile:
 		data = openfile.read()
 	lines = data.splitlines()
-	array = map(lambda x:x.split(','), lines)
-	cleanArray = [map(_strClean, x) for x in array]
+	array = [x.split(',') for x in lines]
+	cleanArray = [list(map(_strClean, x)) for x in array]
 	# Magic number 8 is the number of header rows in each GridlabD csv.
 	arrayNoHeaders = cleanArray[8:]
 	# Drop the timestamp column:
@@ -222,8 +224,8 @@ def anaDataTree(studyPath, fileNameTest):
 	return data
 
 def _tests():
-	print "Full path to Gridlab executable we're using:", _addGldToPath()
-	print "Testing string cleaning."
+	print("Full path to Gridlab executable we're using:", _addGldToPath())
+	print("Testing string cleaning.")
 	strTestCases = [("+954.877", 954.877),
 		("+2.18351e+006", 2183510.0),
 		("+7244.99+1.20333e-005d", 7244.99),
@@ -236,7 +238,7 @@ def _tests():
 	for (string, result) in strTestCases:
 		assert _strClean(string) == result, "A _strClean operation failed on: " + string
 	# Get a test feeder and test climate.
-	print "Testing GridlabD solver."
+	print("Testing GridlabD solver.")
 	with open(pJoin(_omfDir,"static","publicFeeders","Simple Market System.omd"),"r") as feederFile:
 		feederJson = json.load(feederFile)
 	with open(pJoin(_omfDir,"data","Climate","AL-HUNTSVILLE.tmy2"),"r") as climateFile:
@@ -245,8 +247,8 @@ def _tests():
 	feederJson["attachments"]["climate.tmy2"] = tmyStr
 	testStudy = runInFilesystem(feederJson["tree"], feederJson["attachments"])
 	assert testStudy != {}, "Gridlab run failed and we got blank output."
-	print "GridlabD standard error:", testStudy['stderr']
-	print "GridlabD standard output:", testStudy['stdout']
+	print("GridlabD standard error:", testStudy['stderr'])
+	print("GridlabD standard output:", testStudy['stdout'])
 
 if __name__ == '__main__':
 	_tests()

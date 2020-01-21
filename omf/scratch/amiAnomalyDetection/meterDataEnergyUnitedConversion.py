@@ -1,15 +1,10 @@
 ''' Convert meter data from EU format to our anomly detection input format. '''
 '''A script to read data from inCSV, and write it to outCSV'''
-import csv, json
-import os
+import csv, os, datetime, operator
 from os.path import join as pJoin
-import matplotlib.pyplot as plt
-import datetime as datetime
-import time 
-import pprint as pprint
-import operator
-import random
-import numpy as np 
+#import json, pprint, random
+#import matplotlib.pyplot as plt
+#import numpy as np 
 
 # Path variables
 workDir = os.getcwd()
@@ -32,13 +27,13 @@ def dateFormatter(dateStr):
 		except:
 			continue
 	error = "We don't have a test case for our date: "+dateStr+" :("
-	print error
+	print(error)
 	return error
 
 def readToArr(inCSV):
 	# Read data into dict.
 	subStationData = []
-	with open(inCSV,"r") as amiFile:
+	with open(inCSV, newline='') as amiFile:
 			amiReader = csv.DictReader(amiFile, delimiter=',')
 			for row in amiReader:
 				subStation = row['SUBSTATION']
@@ -77,7 +72,7 @@ for row in outArr:
                         outData[meterName]['dates'].append(date)
 i = 0
 for key in outData.keys():
-	print outData[key]
+	print(outData[key])
 	i = i+1
 	if i == 10:
 		break

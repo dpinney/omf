@@ -1,22 +1,17 @@
 ''' Calculate solar photovoltaic system output using our special financial model. '''
 
-import json, os, sys, tempfile, webbrowser, time, shutil, subprocess, math, datetime as dt
+import json, shutil, math, datetime as dt
 from numpy import npv, pmt, ppmt, ipmt, irr
 from os.path import join as pJoin
-from os import walk
-from jinja2 import Template
-from random import random
-import traceback, csv
-from omf.models import __neoMetaModel__
-from __neoMetaModel__ import *
 
 # OMF imports
-import omf.feeder as feeder
+import omf.weather
 from omf.solvers import nrelsam2013
-from omf.weather import zipCodeToClimateName
+from omf.models import __neoMetaModel__
+from omf.models.__neoMetaModel__ import *
 
 # Model metadata:
-modelName, template = metadata(__file__)
+modelName, template = __neoMetaModel__.metadata(__file__)
 tooltip = "The solarSunda model allows you to run multiple instances of the SUNDA Solar Costing Financing Screening Tool and compare their output visually."
 hidden = False
 
@@ -29,7 +24,7 @@ def work(modelDir, inputDict):
 	startDateTime = simStartDate + " 00:00:00 UTC"		
 	simLengthUnits = "hours"
 	# Associate zipcode to climate data
-	inputDict["climateName"] = zipCodeToClimateName(inputDict["zipCode"])
+	inputDict["climateName"] = omf.weather.zipCodeToClimateName(inputDict["zipCode"])
 	inverterSizeAC = float(inputDict.get("inverterSize",0))
 	if (inputDict.get("systemSize",0) == "-"):
 		arraySizeDC = 1.3908 * inverterSizeAC
@@ -55,18 +50,18 @@ def work(modelDir, inputDict):
 	ssc = nrelsam2013.SSCAPI()
 	dat = ssc.ssc_data_create()
 	# Required user inputs.
-	ssc.ssc_data_set_string(dat, "file_name", modelDir + "/climate.tmy2")
-	ssc.ssc_data_set_number(dat, "system_size", arraySizeDC)
-	ssc.ssc_data_set_number(dat, "derate", float(inputDict.get("inverterEfficiency", 96))/100 * float(inputDict.get("nonInverterEfficiency", 87))/100)
-	ssc.ssc_data_set_number(dat, "track_mode", float(trackingMode))
-	ssc.ssc_data_set_number(dat, "azimuth", float(inputDict.get("azimuth", 180)))
+	ssc.ssc_data_set_string(dat, b'file_name', bytes(modelDir + '/climate.tmy2', 'ascii'))
+	ssc.ssc_data_set_number(dat, b'system_size', arraySizeDC)
+	ssc.ssc_data_set_number(dat, b'derate', float(inputDict.get('inverterEfficiency', 96))/100 * float(inputDict.get('nonInverterEfficiency', 87))/100)
+	ssc.ssc_data_set_number(dat, b'track_mode', float(trackingMode))
+	ssc.ssc_data_set_number(dat, b'azimuth', float(inputDict.get('azimuth', 180)))
 	# Advanced inputs with defaults.
-	ssc.ssc_data_set_number(dat, "rotlim", float(rotlim))
-	ssc.ssc_data_set_number(dat, "gamma", float(-gamma/100))
-	ssc.ssc_data_set_number(dat, "tilt", manualTilt)
-	ssc.ssc_data_set_number(dat, "tilt_eq_lat", 0.0)
+	ssc.ssc_data_set_number(dat, b'rotlim', float(rotlim))
+	ssc.ssc_data_set_number(dat, b'gamma', float(-gamma/100))
+	ssc.ssc_data_set_number(dat, b'tilt', manualTilt)
+	ssc.ssc_data_set_number(dat, b'tilt_eq_lat', 0.0)
 	# Run PV system simulation.
-	mod = ssc.ssc_module_create("pvwattsv1")
+	mod = ssc.ssc_module_create(b'pvwattsv1')
 	ssc.ssc_module_exec(mod, dat)
 	# Timestamp output.
 	outData = {}
@@ -76,22 +71,22 @@ def work(modelDir, inputDict):
 	# Geodata output.
 	outData["minLandSize"] = round((arraySizeDC/1390.8*5 + 1)*math.cos(math.radians(22.5))/math.cos(math.radians(30.0)),0)
 	landAmount = float(inputDict.get("landAmount", 6.0))
-	outData["city"] = ssc.ssc_data_get_string(dat, "city")
-	outData["state"] = ssc.ssc_data_get_string(dat, "state")
-	outData["lat"] = ssc.ssc_data_get_number(dat, "lat")
-	outData["lon"] = ssc.ssc_data_get_number(dat, "lon")
-	outData["elev"] = ssc.ssc_data_get_number(dat, "elev")
+	outData['city'] = ssc.ssc_data_get_string(dat, b'city').decode()
+	outData['state'] = ssc.ssc_data_get_string(dat, b'state').decode()
+	outData['lat'] = ssc.ssc_data_get_number(dat, b'lat')
+	outData['lon'] = ssc.ssc_data_get_number(dat, b'lon')
+	outData['elev'] = ssc.ssc_data_get_number(dat, b'elev')
 	# Weather output.
-	outData["climate"] = {}
-	outData["climate"]["Global Horizontal Radiation (W/m^2)"] = ssc.ssc_data_get_array(dat, "gh")
-	outData["climate"]["Plane of Array Irradiance (W/m^2)"] = ssc.ssc_data_get_array(dat, "poa")
-	outData["climate"]["Ambient Temperature (F)"] = ssc.ssc_data_get_array(dat, "tamb")
-	outData["climate"]["Cell Temperature (F)"] = ssc.ssc_data_get_array(dat, "tcell")
-	outData["climate"]["Wind Speed (m/s)"] = ssc.ssc_data_get_array(dat, "wspd")
+	outData['climate'] = {}
+	outData['climate']['Global Horizontal Radiation (W/m^2)'] = ssc.ssc_data_get_array(dat, b'gh')
+	outData['climate']['Plane of Array Irradiance (W/m^2)'] = ssc.ssc_data_get_array(dat, b'poa')
+	outData['climate']['Ambient Temperature (F)'] = ssc.ssc_data_get_array(dat, b'tamb')
+	outData['climate']['Cell Temperature (F)'] = ssc.ssc_data_get_array(dat, b'tcell')
+	outData['climate']['Wind Speed (m/s)'] = ssc.ssc_data_get_array(dat, b'wspd')
 	# Power generation.
-	outData["powerOutputAc"] = ssc.ssc_data_get_array(dat, "ac")
+	outData['powerOutputAc'] = ssc.ssc_data_get_array(dat, b'ac')
 	# Calculate clipping.
-	outData["powerOutputAc"] = ssc.ssc_data_get_array(dat, "ac")
+	outData['powerOutputAc'] = ssc.ssc_data_get_array(dat, b'ac')
 	invSizeWatts = inverterSizeAC * 1000
 	outData["powerOutputAcInvClipped"] = [x if x < invSizeWatts else invSizeWatts for x in outData["powerOutputAc"]]
 	try:
@@ -220,7 +215,7 @@ def work(modelDir, inputDict):
 		costToCustomerDirect.append((netCoopPaymentsDirect[i-1] - distAdderDirect[i-1]))
 	#Output - Direct Loan [F53] 
 	NPVLoanDirect = npv(float(inputDict.get("discRate",0))/100, [0,0] + costToCustomerDirect)
-	NPVallYearGenerationMWh = npv(float(inputDict.get("discRate",0))/100, [0,0] + outData["allYearGenerationMWh"].values())
+	NPVallYearGenerationMWh = npv(float(inputDict.get("discRate",0))/100, [0,0] + list(outData["allYearGenerationMWh"].values()))
 	Rate_Levelized_Direct = -NPVLoanDirect/NPVallYearGenerationMWh	
 	#Master Output [Direct Loan]
 	outData["levelCostDirect"] = Rate_Levelized_Direct
@@ -578,11 +573,11 @@ def _tests():
 	# Create New.
 	new(modelLoc)
 	# Pre-run.
-	renderAndShow(modelLoc)
+	__neoMetaModel__.renderAndShow(modelLoc)
 	# Run the model.
-	runForeground(modelLoc)
+	__neoMetaModel__.runForeground(modelLoc)
 	# Show the output.
-	renderAndShow(modelLoc)
+	__neoMetaModel__.renderAndShow(modelLoc)
 
 if __name__ == '__main__':
 	_tests()

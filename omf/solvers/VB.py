@@ -1,10 +1,6 @@
-import pulp
 import pandas as pd
-import argparse
-import cProfile
-import matplotlib.pyplot as plt
+import pulp
 import numpy as np
-import time
 from numpy import *
 
 class VirtualBattery(object):

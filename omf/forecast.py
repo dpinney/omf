@@ -123,7 +123,7 @@ def exponentiallySmoothedForecast(rawData, alpha, beta):
 	The second column rawData[:][1] holds the hourly temperature for one year
 	"""
 	forecasted = [None] * 2 * 24
-	actual = [rawData[i][0] for i in xrange(2 * 24)]
+	actual = [rawData[i][0] for i in range(2 * 24)]
 	smotted = [None] * 2 * 24
 	tronds = [None] * 2 * 24
 
@@ -306,23 +306,23 @@ def _cleanse_params(params):
 	"""Fills in default values for a single model's params"""
 	has_lists = False
 	ret = _default_params.copy()
-	for k, v in params.iteritems():
+	for k, v in params.items():
 		if k == "peakTimeRegressor":
 			# overwrite morning & afternoon
-			for kwarg, kwvalue in v.iteritems():
+			for kwarg, kwvalue in v.items():
 				if type(kwvalue) is list:
 					has_lists = True
 				ret["peakTimeRegressorMorning"][kwarg] = kwvalue
 				ret["peakTimeRegressorAfternoon"][kwarg] = kwvalue
 		else:
-			for kwarg, kwvalue in v.iteritems():
+			for kwarg, kwvalue in v.items():
 				if type(kwvalue) is list:
 					has_lists = True
 				ret[k][kwarg] = kwvalue
 
 	if has_lists:
-		for k, v in params.iteritems():
-			for l, w in v.iteritems():
+		for k, v in params.items():
+			for l, w in v.items():
 				if type(w) is not list:
 					ret[k][l] = [w]
 
@@ -401,7 +401,7 @@ class svmNextDayPeakTime:
 			"r2_score": r2_score,
 		}
 		if metric not in metric_string_to_function.keys():
-			print "Metric not recognized"
+			print("Metric not recognized")
 			return np.nan
 		df = pd.read_csv(csv).dropna()
 		y = df.tmr_peak_time
@@ -515,8 +515,8 @@ def makeUsefulDf(df, noise=2.5, hours_prior=24):
 		return m1 | m2
 
 	this_directory = os.path.dirname(os.path.realpath(__file__))
-	with open(pJoin(this_directory, 'static', 'testFiles', 'holidays.pickle')) as f:
-		nerc6 = pickle.load(f)
+	with open(pJoin(this_directory, 'static', 'testFiles', 'holidays.pickle'), 'rb') as f:
+		nerc6 = pickle.load(f, encoding='latin_1') # Is this the right codec? It might be cp1252
 
 	
 	if 'dates' not in df.columns:

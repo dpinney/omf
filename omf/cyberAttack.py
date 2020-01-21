@@ -8,7 +8,7 @@ class AlertAgent(object):
 
 	def readStep(self, time):
 		if time == self.alertTime:
-			print '!!!!!Alerting because it is now ', self.alertTime, '!!!!!!!'
+			print('!!!!!Alerting because it is now ', self.alertTime, '!!!!!!!')
 			return [{'cmd':'readClock'}]
 		return []
 

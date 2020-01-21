@@ -6,6 +6,7 @@
 # #####################################################################
 
 
+from __future__ import print_function
 import string, sys, struct, math, os
 from ctypes import *
 
@@ -26,7 +27,7 @@ class SSCAPI():
 		_dll = CDLL(os.path.join(myDir,"ssc64.so"))
 #		return _dll
 	else:
-		print "Platform not supported ", sys.platform
+		print("Platform not supported ", sys.platform)
 	# print "\n   _dll chosen=", _dll, "(for ", sys.platform, ")"
 	
 
@@ -259,47 +260,44 @@ class API:
 	MATRIX=4
 	TABLE=5
 
-    
-    
 	def version(self):
 		return SSCAPI.ssc_version()
-    
+
 	def build_info(self):
 		return SSCAPI.ssc_build_info()
 	
 	
 	
 
-    
 class Entry:
 
 	def __init__(self):
-	        self._idx = 0
+		self._idx = 0
 		
 	def reset(self):
 		self._idx = 0
-    
+
 	def get(self):
-	        self._entry = SSCAPI.ssc_module_entry(self._idx)
-	        if (self._entry is None):
+		self._entry = SSCAPI.ssc_module_entry(self._idx)
+		if (self._entry is None):
 			self.reset()
 			return False
 		else:
 			self._idx += 1
 			return True
-    
+
 	def name(self):
 		if (self._entry is not None):
 			return SSCAPI.ssc_entry_name(self._entry)
 		else: 
 			return None
-    
+
 	def description(self):
 		if (self._entry is not None):
 			return SSCAPI.ssc_entry_description(self._entry)
 		else:
 			return null
-    
+
 	def version(self):
 		if (self._entry is not None):
 			return SSCAPI.ssc_entry_version(self._entry)
@@ -309,7 +307,7 @@ class Entry:
 	
 
 class Data:
-	    
+
 	def __init__(self, data = None):
 		if (data is None):
 			self._data = SSCAPI.ssc_data_create()
@@ -323,59 +321,59 @@ class Data:
 	def __del__(self):
 		if (self._owned) and (self._data != None):
 			SSCAPI.ssc_data_free(self._data)
-	    
+
 	def clear(self):
 		SSCAPI.ssc_data_clear(self._data)
-	    
+
 	def first(self):
 		p = SSCAPI.ssc_data_first(self._data)
 		if (p is not None) and (len(p)>0):
 			return p
 		else:
 			return None
-	    
+
 	def next(self):
 		p = SSCAPI.ssc_data_next(self._data)
 		if (p is not None) and (len(p)>0):
 			return p
 		else:
 			return None
-    
+
 	def query(self, name):
 		return SSCAPI.ssc_data_query(self._data, name)
-	    
+
 	def set_number(self, name, value):
 		SSCAPI.ssc_data_set_number(self._data, name, value)
-	    
+
 	def get_number(self, name):
 		val = float('nan')
 		val = SSCAPI.ssc_data_get_number(self._data, name)
 		return val
-	    
+
 	def set_string(self, name, value):
 		SSCAPI.ssc_data_set_string(self._data, name, value)
-	    
+
 	def get_string(self, name):
 		return SSCAPI.ssc_data_get_string(self._data, name)
-	    
+
 	def set_array(self, name, data):
 		SSCAPI.ssc_data_set_array(self._data, name, data)
-	    
+
 	def get_array(self, name):
 		return SSCAPI.ssc_data_get_array(self._data, name)
-	    
+
 	def set_matrix(self, name, mat):
 		SSCAPI.ssc_data_set_matrix(self._data, name, mat)
-	    
+
 	def get_matrix(self, name):
 		return SSCAPI.ssc_data_get_matrix(self._data, name)
-	    
+
 	def set_table(self, name, table):
 		SSCAPI.ssc_data_set_table(self._data, name, table)
-	    
+
 	def get_table(self, name):
 		return SSCAPI.ssc_data_get_table(self._data, name)
-	    
+
 	def get_data_handle(self):
 		return self._data
 
@@ -460,13 +458,10 @@ class Module:
 	
 	def __init__(self, name):
 		self._mod = SSCAPI.ssc_module_create(name)
-		
-		
-		
+
 	def __del__(self):
 		if (self._mod is not None):
 			SSCAPI.ssc_module_free(self._mod)
-	    
 
 	def is_ok(self):
 		return self._mod is not None

@@ -1,27 +1,27 @@
 ''' Graph the voltage drop on a feeder. '''
 
-import json, os, sys, tempfile, webbrowser, time, shutil, subprocess, datetime as dt, csv, math, warnings
-import traceback
+import json, os, tempfile, shutil, csv, math, warnings, base64
 from os.path import join as pJoin
-from jinja2 import Template
-from matplotlib import pyplot as plt
 import matplotlib
-from networkx.drawing.nx_agraph import graphviz_layout
+from matplotlib import pyplot as plt
 import networkx as nx
-from omf.models import __neoMetaModel__
-from __neoMetaModel__ import *
-plt.switch_backend('Agg')
+from networkx.drawing.nx_agraph import graphviz_layout
 
-# OMF imports 
-import omf.feeder as feeder
-from omf.solvers import gridlabd
+plt.switch_backend('Agg')
 
 # dateutil imports
 from dateutil import parser
 from dateutil.relativedelta import *
 
+# OMF imports 
+import omf
+import omf.feeder
+import omf.solvers.gridlabd
+from omf.models import __neoMetaModel__
+from omf.models.__neoMetaModel__ import *
+
 # Model metadata:
-modelName, template = metadata(__file__)
+modelName, template = __neoMetaModel__.metadata(__file__)
 tooltip = "The voltageDrop model runs loadflow to show system voltages at all nodes."
 hidden = False
 
@@ -32,8 +32,9 @@ def work(modelDir, inputDict):
 	feederName = [x for x in os.listdir(modelDir) if x.endswith('.omd')][0][:-4]
 	inputDict["feederName1"] = feederName
 	# Create voltage drop plot.
-	print "*DEBUG: feederName:", feederName
-	omd = json.load(open(pJoin(modelDir,feederName + '.omd')))
+	print("*DEBUG: feederName:", feederName)
+	with open(pJoin(modelDir,feederName + '.omd')) as f:
+		omd = json.load(f)
 	if inputDict.get("layoutAlgorithm", "geospatial") == "geospatial":
 		neato = False
 	else:
@@ -76,7 +77,7 @@ def work(modelDir, inputDict):
 		rezSqIn = int(inputDict["rezSqIn"]))
 	chart.savefig(pJoin(modelDir,"output.png"))
 	with open(pJoin(modelDir,"output.png"),"rb") as inFile:
-		outData["voltageDrop"] = inFile.read().encode("base64")
+		outData["voltageDrop"] = base64.standard_b64encode(inFile.read()).decode('ascii')
 	return outData
 
 def drawPlot(path, workDir=None, neatoLayout=False, edgeLabs=None, nodeLabs=None, edgeCol=None, nodeCol=None, faultLoc=None, faultType=None, customColormap=False, scaleMin=None, scaleMax=None, rezSqIn=400, simTime='2000-01-01 0:00:00', loadLoc=None):
@@ -97,7 +98,8 @@ def drawPlot(path, workDir=None, neatoLayout=False, edgeLabs=None, nodeLabs=None
 		tree = omf.feeder.parse(path)
 		attachments = []
 	elif path.endswith('.omd'):
-		omd = json.load(open(path))
+		with open(path) as f:
+			omd = json.load(f)
 		tree = omd.get('tree', {})
 		attachments = omd.get('attachments',[])
 	else:
@@ -143,7 +145,7 @@ def drawPlot(path, workDir=None, neatoLayout=False, edgeLabs=None, nodeLabs=None
 	# Map to speed up name lookups.
 	nameToIndex = {tree[key].get('name',''):key for key in tree.keys()}
 	# Get rid of schedules and climate and check for all edge types:
-	for key in tree.keys():
+	for key in list(tree.keys()):
 		obtype = tree[key].get("object","")
 		if obtype == 'underground_line':
 			edge_bools['underground_line'] = True
@@ -228,7 +230,7 @@ def drawPlot(path, workDir=None, neatoLayout=False, edgeLabs=None, nodeLabs=None
 	# Run Gridlab.
 	if not workDir:
 		workDir = tempfile.mkdtemp()
-		print '@@@@@@', workDir
+		print('@@@@@@', workDir)
 	# for i in range(6):
 	# 	gridlabOut = omf.solvers.gridlabd.runInFilesystem(tree, attachments=attachments, workDir=workDir)
 	# 	#HACK: workaround for shoddy macOS gridlabd build.
@@ -241,7 +243,7 @@ def drawPlot(path, workDir=None, neatoLayout=False, edgeLabs=None, nodeLabs=None
 		for key in protDevices.keys():
 			if protDevices[key]:
 				for phase in ['A', 'B', 'C']:
-					with open(pJoin(workDir,key+'_phase_'+phase+'_state.csv'),'r') as statusFile:
+					with open(pJoin(workDir, key + '_phase_' + phase + '_state.csv'), newline='') as statusFile:
 						reader = csv.reader(statusFile)
 						# loop past the header, 
 						keys = []
@@ -251,7 +253,7 @@ def drawPlot(path, workDir=None, neatoLayout=False, edgeLabs=None, nodeLabs=None
 								keys = row
 								i = keys.index('# timestamp')
 								keys.pop(i)
-								vals = reader.next()
+								vals = next(reader)
 								vals.pop(i)
 						for pos,key2 in enumerate(keys):
 							protDevFinalStatus[key2][phase] = vals[pos]
@@ -263,30 +265,25 @@ def drawPlot(path, workDir=None, neatoLayout=False, edgeLabs=None, nodeLabs=None
 	#print cmp(protDevInitStatus, protDevFinalStatus)
 	#find which values changed
 	changedStates = {}
-
-
 	#read voltDump values into a dictionary.
 	try:
-		dumpFile = open(pJoin(workDir,'voltDump.csv'),'r')
+		with open(pJoin(workDir, 'voltDump.csv'), newline='') as dumpFile:
+			reader = csv.reader(dumpFile)
+			next(reader) # Burn the header.
+			keys = next(reader)
+			voltTable = []
+			for row in reader:
+				rowDict = {}
+				for pos,key in enumerate(keys):
+					rowDict[key] = row[pos]
+				voltTable.append(rowDict)
 	except:
 		raise Exception('GridLAB-D failed to run with the following errors:\n' + gridlabOut['stderr'])
-	reader = csv.reader(dumpFile)
-	reader.next() # Burn the header.
-	keys = reader.next()
-	
-	
-
-	voltTable = []
-	for row in reader:
-		rowDict = {}
-		for pos,key in enumerate(keys):
-			rowDict[key] = row[pos]
-		voltTable.append(rowDict)
 	# read currDump values into a dictionary
-	with open(pJoin(workDir,'currDump.csv'),'r') as currDumpFile:
+	with open(pJoin(workDir, 'currDump.csv'), newline='') as currDumpFile:
 		reader = csv.reader(currDumpFile)
-		reader.next() # Burn the header.
-		keys = reader.next()
+		next(reader) # Burn the header.
+		keys = next(reader)
 		currTable = []
 		for row in reader:
 			rowDict = {}
@@ -298,7 +295,7 @@ def drawPlot(path, workDir=None, neatoLayout=False, edgeLabs=None, nodeLabs=None
 	rating_in_VA = []
 	for key1 in edge_bools.keys():
 		if edge_bools[key1]:		
-			with open(pJoin(workDir,key1+'_cont_rating.csv'),'r') as ratingFile:
+			with open(pJoin(workDir, key1 + '_cont_rating.csv'), newline='') as ratingFile:
 				reader = csv.reader(ratingFile)
 				# loop past the header, 
 				keys = []
@@ -308,7 +305,7 @@ def drawPlot(path, workDir=None, neatoLayout=False, edgeLabs=None, nodeLabs=None
 						keys = row
 						i = keys.index('# timestamp')
 						keys.pop(i)
-						vals = reader.next()
+						vals = next(reader)
 						vals.pop(i)
 				for pos,key2 in enumerate(keys):
 					lineRatings[key2] = abs(float(vals[pos]))
@@ -523,7 +520,7 @@ def drawPlot(path, workDir=None, neatoLayout=False, edgeLabs=None, nodeLabs=None
 			drawColorbar = True
 		else:
 			edgeList = [emptyColors.get(n,.6) for n in edgeNames]
-			print "WARNING: edgeCol property must be 'Current', 'Power', 'Rating', 'PercentOfRating', or None"
+			print("WARNING: edgeCol property must be 'Current', 'Power', 'Rating', 'PercentOfRating', or None")
 	else:
 		edgeList = [emptyColors.get(n,.6) for n in edgeNames]
 	edgeIm = nx.draw_networkx_edges(
@@ -550,12 +547,12 @@ def drawPlot(path, workDir=None, neatoLayout=False, edgeLabs=None, nodeLabs=None
 				edgeLabels = edgeTupleValsPU
 			else:
 				edgeLabels = None
-				print "WARNING: edgeCol property cannot be set to None when edgeLabs property is set to 'Value'"
+				print("WARNING: edgeCol property cannot be set to None when edgeLabs property is set to 'Value'")
 		elif edgeLabs == "ProtDevs":
 			edgeLabels = edgeTupleProtDevs
 		else:
 			edgeLabs = None
-			print "WARNING: edgeLabs property must be either 'Name', 'Value', or None"
+			print("WARNING: edgeLabs property must be either 'Name', 'Value', or None")
 	if edgeLabs != None:
 		edgeLabelsIm = nx.draw_networkx_edge_labels(fGraph,
 			pos = positions,
@@ -577,7 +574,7 @@ def drawPlot(path, workDir=None, neatoLayout=False, edgeLabs=None, nodeLabs=None
 			drawColorbar = True
 		else:
 			nodeList = [emptyColors.get(n,1) for n in fGraph.nodes()]
-			print "WARNING: nodeCol property must be 'Voltage', 'VoltageImbalance', 'perUnitVoltage', 'perUnit120Voltage', or None"
+			print("WARNING: nodeCol property must be 'Voltage', 'VoltageImbalance', 'perUnitVoltage', 'perUnit120Voltage', or None")
 	else:
 		nodeList = [emptyColors.get(n,.6) for n in fGraph.nodes()]
 
@@ -605,13 +602,13 @@ def drawPlot(path, workDir=None, neatoLayout=False, edgeLabs=None, nodeLabs=None
 				nodeLabels = nodeVoltsPU120
 			else:
 				nodeLabels = None
-				print "WARNING: nodeCol property cannot be set to None when nodeLabs property is set to 'Value'"
+				print("WARNING: nodeCol property cannot be set to None when nodeLabs property is set to 'Value'")
 		#HACK: add hidden node label option for displaying specified load name
 		elif nodeLabs == "Load":
 			nodeLabels = nodeLoadNames
 		else:
 			nodeLabs = None
-			print "WARNING: nodeLabs property must be either 'Name', 'Value', or None"
+			print("WARNING: nodeLabs property must be either 'Name', 'Value', or None")
 	if nodeLabs != None:
 		nodeLabelsIm = nx.draw_networkx_labels(fGraph,
 			pos = positions,
@@ -626,13 +623,13 @@ def drawPlot(path, workDir=None, neatoLayout=False, edgeLabs=None, nodeLabs=None
 def glmToModel(glmPath, modelDir):
 	''' One shot model creation from glm. '''
 	tree = omf.feeder.parse(glmPath)
-	print "glmPath:    " + glmPath
-	print "modelDir:   " + modelDir
+	print("glmPath:    " + glmPath)
+	print("modelDir:   " + modelDir)
 	# Run powerflow. First name the folder for it.
 	# Remove old copy of the model.
 	shutil.rmtree(modelDir, ignore_errors=True)
 	# Create the model directory.
-	omf.models.voltageDrop.new(modelDir)
+	new(modelDir)
 	# Create the .omd.
 	os.remove(modelDir + '/Olin Barre Geo.omd')
 	with open(modelDir + '/Olin Barre Geo.omd','w') as omdFile:
@@ -690,9 +687,9 @@ def _debugging():
 	# Pre-run.
 	# renderAndShow(modelLoc)
 	# Run the model.
-	runForeground(modelLoc)
+	__neoMetaModel__.runForeground(modelLoc)
 	# Show the output.
-	renderAndShow(modelLoc)
+	__neoMetaModel__.renderAndShow(modelLoc)
 
 if __name__ == '__main__':
 	_debugging()

@@ -1,13 +1,16 @@
 ''' Attach loadshapes from an AMI data file to a OMF distribution model. '''
 
-import omf, csv, json, os, shutil, datetime
+import csv, json, os, shutil, datetime
 from os.path import join as pJoin
 from os.path import basename
+import omf
+from omf import feeder
+
 
 def amiImport(filepath):
 	'''Take in a CSV, return a [{...},{...},...] database of the data.'''
 	amiData = []
-	with open(filepath, 'r') as inFile:
+	with open(filepath, newline='') as inFile:
 		dictReader = csv.DictReader(inFile)
 		for row in dictReader:
 			amiData.append(row)
@@ -38,12 +41,12 @@ def writeNewGlmAndPlayers(omdPath, amiPath, outputDir):
 	# Attach the player class to feeder if needed.
 	omfTypes = set([feederObj[k].get('omftype','') for k in feederObj])
 	if 'class player' not in omfTypes:
-		newKey = omf.feeder.getMaxKey(feederObj)
+		newKey = feeder.getMaxKey(feederObj)
 		feederObj[newKey + 1] = {'omftype':'class player','argument':'{double value;}'}
 	# All meter names we have in the AMI data set.
 	meterNames = set([x.get('meterName','') for x in amiData])
 	# Attach all the players.
-	for key in feederObj.keys():
+	for key in list(feederObj.keys()):
 		objName = feederObj[key].get('name','')
 		dataPhases = set([x.get('phase','') for x in amiData if x.get('meterName','') == objName])
 		# Handle primary system loads.
@@ -52,18 +55,18 @@ def writeNewGlmAndPlayers(omdPath, amiPath, outputDir):
 				# Write the player file:
 				createPlayerFile(amiData, objName, phase, outputDir + '/player_' + objName + '_' + phase + '.csv')
 				# Put the object in the GLM:
-				newKey = omf.feeder.getMaxKey(feederObj)
+				newKey = feeder.getMaxKey(feederObj)
 				feederObj[newKey + 1] = {'object':'player', 'property':'constant_power_' + phase, 'file':'player_' + objName + '_' + phase +'.csv', 'parent':objName}
 		# Handle secondary system loads.
 		elif feederObj[key].get('object','') == 'triplex_node' and objName in meterNames:
 			# Write the player file:
 			createPlayerFile(amiData, objName, 'S', outputDir + '/player_' + objName + '_S.csv')
 			# Put the object in the GLM:
-			newKey = omf.feeder.getMaxKey(feederObj)
+			newKey = feeder.getMaxKey(feederObj)
 			feederObj[newKey + 1] = {'object':'player', 'property':'power_12', 'file':'player_' + objName + '_S.csv', 'parent':objName}
 	# Write the GLM.
 	with open(outputDir + '/out.glm', 'w') as outGlmFile:
-		outString = omf.feeder.sortedWrite(feederObj)
+		outString = feeder.sortedWrite(feederObj)
 		outGlmFile.write(outString)
 	#TODO: update omdObj tree object to match feederObj, and insert all .csv files in to the attachments, then write new .omd to outputDir.
 	# omd = json.load(open('feederName.omd'))

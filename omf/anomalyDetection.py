@@ -1,12 +1,13 @@
+import os
+from os.path import join as pJoin
 import numpy as np
 import pandas as pd
 try:
 	from fbprophet import Prophet
 except:
 	pass # fbprophet is very badly behaved at runtime and also at install time.
+import omf
 from omf.forecast import suppress_stdout_stderr
-from os.path import join as pJoin
-import os, omf
 
 
 def train_prophet(df, modelDir, confidence=0.99):
@@ -18,7 +19,7 @@ def train_prophet(df, modelDir, confidence=0.99):
 		m.fit(df)
 
 		# Predict the future.
-	print "PREDICTING!"
+	print("PREDICTING!")
 	future = m.make_future_dataframe(periods=0)
 	forecast = m.predict(future)
 	# Merge in the historical data.

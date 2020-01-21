@@ -1,29 +1,21 @@
 ''' Run micot-GFM, micot-RDT, and GridLAB-D to determine an optimal distribution resiliency investment. '''
-import json, os, sys, tempfile, webbrowser, time, shutil, subprocess, datetime as dt, csv, math
-import traceback
-import platform, re
-from os.path import join as pJoin
-from jinja2 import Template
-from numpy import interp
-from matplotlib import pyplot as plt
-import matplotlib
-import networkx as nx
-from omf.models import __neoMetaModel__
-from __neoMetaModel__ import *
-import subprocess, random, webbrowser, multiprocessing
-import pprint as pprint
-import copy
+
+import json, os, shutil, subprocess, datetime, platform, re, random, copy, warnings, base64
 import os.path
-import warnings
+from os.path import join as pJoin
 import numpy as np
+import matplotlib
+from matplotlib import pyplot as plt
+import networkx as nx
 
 # OMF imports
-import omf.feeder as feeder
-from omf.solvers import gridlabd
-from omf.weather import zipCodeToClimateName
+import omf
+import omf.feeder, omf.weather
+from omf.models import __neoMetaModel__
+from omf.models.__neoMetaModel__ import *
 
 # Model metadata:
-modelName, template = metadata(__file__)
+modelName, template = __neoMetaModel__.metadata(__file__)
 tooltip = "Model extreme weather and determine optimal investment for distribution resiliency."
 hidden = False
 
@@ -46,10 +38,10 @@ class HazardField(object):
 		field = []
 		for i in range(len(content)): 
 			if i <= 5: # First, get the the parameters for the export function below. Each gets their own entry in our object.
-				line = re.split(r"\s*",content[i])
+				line = re.split(r"\s+",content[i])
 				hazardObj[line[0]] = float(line[1])
 			if i > 5: # Then, get the numerical data, mapping each number to its appropriate parameter.
-				field.insert((i-6),map(float,content[i].split(" "))) 
+				field.insert((i-6), list(map(float,content[i].split(" "))))
 		field = np.array(field)
 		hazardObj["field"] = field
 		return hazardObj
@@ -65,7 +57,7 @@ class HazardField(object):
 		output = ncols + nrows + xllcorner + yllcorner + cellsize + NODATA_value
 		fieldList = self.hazardObj["field"].tolist() # Get numerical data, convert each number to a string and add that onto the to-be exported data. 
 		for i in range(len(fieldList)):
-			output = output + " ".join(map(str, fieldList[i])) + "\n"
+			output = output + " ".join(list(map(str, fieldList[i]))) + "\n"
 		with open(outPath, "w") as newHazardFile: # Export to new file.
 			newHazardFile.write("%s" % output)
 
@@ -178,7 +170,7 @@ def convertToGFM(gfmInputTemplate, feederModel):
 	critLoads = gfmInputTemplate["criticalLoads"].strip().replace(' ', '').split(',')
 	objToFind = ['transformer', 'regulator', 'underground_line', 'overhead_line', 'fuse', 'switch']
 	lineCount = 0
-	for key, line in jsonTree.iteritems():
+	for key, line in jsonTree.items():
 		if 'from' in line.keys() and 'to' in line.keys():
 			gfmJson['lineLikeObjs'].append(line['name'])
 		if line.get('object','') in objToFind:
@@ -191,11 +183,11 @@ def convertToGFM(gfmInputTemplate, feederModel):
 				'node2_id' : line.get('to','')+'_bus',
 				'length' : float(line.get('length',100)), #* Units match line code entries.
 			}
- 			gfmJson['lines'].append(newLine)
+			gfmJson['lines'].append(newLine)
 			lineCount+=1
 	# Bus creation:
 	objToFind = ['node', 'load', 'triplex_meter']
-	for key, bus in jsonTree.iteritems():
+	for key, bus in jsonTree.items():
 		objType = bus.get('object','')
 		# HACK: some loads can be parented to other things. Don't make buses for them.
 		hasParent = 'parent' in bus
@@ -224,7 +216,7 @@ def convertToGFM(gfmInputTemplate, feederModel):
 	# Load creation:
 	objToFind = ['load']
 	phaseNames = {'A':0, 'B':1, 'C':2}
-	for key, load in jsonTree.iteritems():
+	for key, load in jsonTree.items():
 		objType = load.get('object','')
 		hasParent = 'parent' in load
 		if objType in objToFind:
@@ -246,7 +238,7 @@ def convertToGFM(gfmInputTemplate, feederModel):
 				newLoad['node_id'] = load['name'] + '_bus'
 			voltage = float(load.get('nominal_voltage','4800'))
 			newLoad['nominal_voltage'] = voltage
-			for phaseName, index in phaseNames.iteritems():
+			for phaseName, index in phaseNames.items():
 				impedance = 'constant_impedance_' + phaseName
 				power = 'constant_power_' + phaseName
 				current = 'constant_current_' + phaseName
@@ -277,7 +269,7 @@ def convertToGFM(gfmInputTemplate, feederModel):
 			gfmJson['loads'].append(newLoad)
 	# Generator creation:
 	genCands = gfmInputTemplate['generatorCandidates'].strip().replace(' ', '').split(',')
-	for key, glmOb in jsonTree.iteritems():
+	for key, glmOb in jsonTree.items():
 		# Check for a swing node:
 		isSwing = glmOb.get('bustype','') == 'SWING'
 		if glmOb.get('name', None) in genCands or isSwing:
@@ -328,14 +320,14 @@ def genDiagram(outputDir, feederJson, damageDict, critLoads, damagedLoads, edgeL
 								if key=='x': leaf['latitude'] = link[typeLink][key]
 								else: leaf['longitude'] = link[typeLink][key]
 	# Remove even more things (no lat, lon or from = node without a position).
-	for key in tree.keys():
+	for key in list(tree.keys()):
 		aLat = tree[key].get('latitude')
 		aLon = tree[key].get('longitude')
 		aFrom = tree[key].get('from')
 		if aLat is None and aLon is None and aFrom is None:
 			 tree.pop(key)
 	# Create and save the graphic.
-	inGraph = feeder.treeToNxGraph(tree)
+	inGraph = omf.feeder.treeToNxGraph(tree)
 	labels=True
 	neatoLayout=False 
 	showPlot=False
@@ -470,7 +462,7 @@ def work(modelDir, inputDict):
 	with open(pJoin(modelDir, feederName + '.omd'), "r") as jsonIn:
 		feederModel = json.load(jsonIn)
 	# Create GFM input file.
-	print "RUNNING GFM FOR", modelDir
+	print("RUNNING GFM FOR", modelDir)
 	critLoads = inputDict['criticalLoads']
 	gfmInputTemplate = {
 		'phase_variation' : float(inputDict['phaseVariation']),
@@ -499,13 +491,22 @@ def work(modelDir, inputDict):
 	rdtInputName = 'rdtInput.json'
 	if platform.system() == 'Darwin':
 		#HACK: force use of Java8 on MacOS.
+		#javaCmd = '/Library/Java/JavaVirtualMachines/jdk1.8.0_181.jdk/Contents/Home/bin/java'
+		#HACK HACK: use my version of Java 8 for now
 		javaCmd = '/Library/Java/JavaVirtualMachines/jdk1.8.0_181.jdk/Contents/Home/bin/java'
 	else:
 		javaCmd = 'java'
-	proc = subprocess.Popen([javaCmd,'-jar', gfmBinaryPath, '-r', gfmInputFilename, '-wf', inputDict['weatherImpactsFileName'],'-num',inputDict['scenarioCount'],'-ro',rdtInputName], stdout=subprocess.PIPE, stderr=subprocess.PIPE, cwd=modelDir)
+	proc = subprocess.Popen(
+		[javaCmd,'-jar', gfmBinaryPath, '-r', gfmInputFilename, '-wf', inputDict['weatherImpactsFileName'],
+		'-num',inputDict['scenarioCount'],'-ro',rdtInputName
+		],
+		stdout=subprocess.PIPE,
+		stderr=subprocess.PIPE,
+		cwd=modelDir
+	)
 	(stdout,stderr) = proc.communicate()
 	with open(pJoin(modelDir, "gfmConsoleOut.txt"), "w") as gfmConsoleOut:
-		gfmConsoleOut.write(stdout)
+		gfmConsoleOut.write(stdout.decode())
 	rdtInputFilePath = pJoin(modelDir,'rdtInput.json')
 	# Pull GFM input data on lines and generators for HTML presentation.
 	with open(rdtInputFilePath, 'r') as rdtInputFile:
@@ -528,7 +529,7 @@ def work(modelDir, inputDict):
 		with open(pJoin(rdtInputFilePath), "w") as rdtInputFile:
 			json.dump(rdtJson, rdtInputFile, indent=4)
 	# Run GridLAB-D first time to generate xrMatrices.
-	print "RUNNING 1ST GLD RUN FOR", modelDir
+	print("RUNNING 1ST GLD RUN FOR", modelDir)
 	omdPath = pJoin(modelDir, feederName + ".omd")
 	with open(omdPath, "r") as omd:
 		omd = json.load(omd)
@@ -552,7 +553,7 @@ def work(modelDir, inputDict):
 		with open(os.path.join(modelDir, fileName),'w') as file:
 			file.write(omd['attachments'][fileName])
 	#Wire in the file the user specifies via zipcode.
-	climateFileName = zipCodeToClimateName(inputDict["simulationZipCode"])
+	climateFileName = omf.weather.zipCodeToClimateName(inputDict["simulationZipCode"])
 	shutil.copy(pJoin(__neoMetaModel__._omfDir, "data", "Climate", climateFileName + ".tmy2"), pJoin(modelDir, 'climate.tmy2'))
 	# Platform specific binaries for GridLAB-D First Run.
 	if platform.system() == "Linux":
@@ -570,7 +571,7 @@ def work(modelDir, inputDict):
 	proc = subprocess.Popen(commandString, stdout=subprocess.PIPE, shell=True, cwd=modelDir, env=myEnv)
 	(out, err) = proc.communicate()
 	with open(pJoin(modelDir, "gldConsoleOut.txt"), "w") as gldConsoleOut:
-		gldConsoleOut.write(out)
+		gldConsoleOut.write(out.decode())
 	with open(pJoin(modelDir, "JSON_dump_line.json"), "r") as gldOut:
 		gld_json_line_dump = json.load(gldOut)
 	outData['gridlabdRawOut'] = gld_json_line_dump
@@ -622,7 +623,7 @@ def work(modelDir, inputDict):
 	with open(rdtInputFilePath, "w") as outFile:
 		json.dump(rdtJson, outFile, indent=4)
 	# Run RDT.
-	print "RUNNING RDT FOR", modelDir
+	print("RUNNING RDT FOR", modelDir)
 	rdtOutFile = modelDir + '/rdtOutput.json'
 	rdtSolverFolder = pJoin(__neoMetaModel__._omfDir,'solvers','rdt')
 	rdtJarPath = pJoin(rdtSolverFolder,'micot-rdt.jar')
@@ -630,15 +631,16 @@ def work(modelDir, inputDict):
 	proc = subprocess.Popen(['java', "-Djna.library.path=" + rdtSolverFolder, '-jar', rdtJarPath, '-c', rdtInputFilePath, '-e', rdtOutFile], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 	(stdout,stderr) = proc.communicate()
 	with open(pJoin(modelDir, "rdtConsoleOut.txt"), "w") as rdtConsoleOut:
-		rdtConsoleOut.write(stdout)
-	rdtRawOut = open(rdtOutFile).read()
+		rdtConsoleOut.write(str(stdout))
+	with open(rdtOutFile) as f:
+		rdtRawOut = f.read()
 	outData['rdtRawOut'] = rdtRawOut
 	# Indent the RDT output nicely.
 	with open(pJoin(rdtOutFile),"w") as outFile:
 		rdtOut = json.loads(rdtRawOut)
 		json.dump(rdtOut, outFile, indent = 4)
 	# Generate and run 2nd copy of GridLAB-D model with changes specified by RDT.
-	print "RUNNING 2ND GLD RUN FOR", modelDir
+	print("RUNNING 2ND GLD RUN FOR", modelDir)
 	feederCopy = copy.deepcopy(feederModel)
 	lineSwitchList = []
 	edgeLabels = {}
@@ -669,7 +671,7 @@ def work(modelDir, inputDict):
 			if (line['hardened'] == True):
 				edgeLabels[line['id']] = "H"
 	# Remove nonessential lines in second model as indicated by RDT output.
-	for key in feederCopy['tree'].keys():
+	for key in list(feederCopy['tree'].keys()):
 		value = feederCopy['tree'][key]
 		if('object' in value):
 			if (value['object'] == 'underground_line') or (value['object'] == 'overhead_line'):
@@ -701,19 +703,22 @@ def work(modelDir, inputDict):
 				damageDict[line] = 1
 	genDiagram(modelDir, feederModel, damageDict, critLoads, damagedLoads, edgeLabels, generatorList)
 	with open(pJoin(modelDir,"feederChart.png"),"rb") as inFile:
-		outData["oneLineDiagram"] = inFile.read().encode("base64")
+		outData["oneLineDiagram"] = base64.standard_b64encode(inFile.read()).decode()
 	# And we're done.
 	return outData
 
 def new(modelDir):
 	''' Create a new instance of this model. Returns true on success, false on failure. '''
+	with open(pJoin(__neoMetaModel__._omfDir,"static","testFiles","wf_clip.asc")) as f:
+		weather_impacts = f.read()
+
 	defaultInputs = {
 		"feederName1": "trip37", # "trip37" "UCS Winter 2017 Fixed" "SVECNoIslands"
 		"modelType": modelName,
 		"layoutAlgorithm": "geospatial",
 		"modelName": modelDir,
 		"user": "admin",
-		"created": str(dt.datetime.now()),
+		"created": str(datetime.datetime.now()),
 		"lineUnitCost": "3000.0",
 		"switchCost": "10000.0",
 		"dgUnitCost": "1000000.0",
@@ -728,7 +733,7 @@ def new(modelDir):
 		"nonCriticalLoadMet": "0.5",
 		"chanceConstraint": "1.0",
 		"phaseVariation": "0.15",
-		"weatherImpacts": open(pJoin(__neoMetaModel__._omfDir,"static","testFiles","wf_clip.asc")).read(),
+		"weatherImpacts": weather_impacts,
 		"weatherImpactsFileName": "wf_clip.asc", # "wf_clip.asc" "wind_grid_1UCS.asc" "wf_clipSVEC.asc"
 		"scenarios": "",
 		"scenariosFileName": "",
@@ -746,7 +751,6 @@ def new(modelDir):
 		return False
 	return creationCode
 
-
 def _runModel():
 	# Testing the hazard class.
 	_testHazards()
@@ -763,9 +767,9 @@ def _runModel():
 	# Pre-run.
 	# renderAndShow(modelLoc)
 	# Run the model.
-	runForeground(modelLoc)
+	__neoMetaModel__.runForeground(modelLoc)
 	# Show the output.
-	renderAndShow(modelLoc)
+	__neoMetaModel__.renderAndShow(modelLoc)
 
 if __name__ == '__main__':
 	_runModel()

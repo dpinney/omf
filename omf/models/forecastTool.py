@@ -1,22 +1,21 @@
 ''' Calculate the costs and benefits of energy storage from a distribution utility perspective. '''
 
-import os, sys, shutil, csv
+import shutil, base64
 from datetime import datetime as dt, timedelta
 from os.path import isdir, join as pJoin
 import pandas as pd
-from omf.models import __neoMetaModel__
-from __neoMetaModel__ import *
-from omf import forecast as lf
 try:
 	import tensorflow as tf
 except:
 	pass
 import numpy as np
 from scipy.stats import norm
-import re
+from omf import forecast as lf
+from omf.models import __neoMetaModel__
+from omf.models.__neoMetaModel__ import *
 
 # Model metadata:
-modelName, template = metadata(__file__)
+modelName, template = __neoMetaModel__.metadata(__file__)
 tooltip = "This model predicts whether the following day will be a monthly peak."
 
 def peak_likelihood(hist=None, tomorrow=None, tomorrow_std=None, two_day=None, two_day_std=None, three_day=None, three_day_std=None):
@@ -34,8 +33,8 @@ def highest_peak_this_month(df, predicted_day):
 
 def autofill(df):
 	def estimate(df, last_dt, hour, item):
-		prev_d = last_dt - datetime.timedelta(days=1)
-		prev_w = last_dt - datetime.timedelta(days=7)
+		prev_d = last_dt - timedelta(days=1)
+		prev_w = last_dt - timedelta(days=7)
 
 		df_pd = df[df.dates.dt.date == prev_d.date()]
 		df_pw = df[df.dates.dt.date == prev_w.date()]
@@ -110,7 +109,7 @@ def work(modelDir, ind):
 	if ind['newModel'] == 'False':
 		for day in ['one_day_model', 'two_day_model', 'three_day_model']:
 			with open(pJoin(modelDir, ind[day+'_filename']), 'wb') as f:
-					f.write(ind[day].decode('base64'))
+					f.write(base64.standard_b64decode(ind[day]))
 
 	#load prediction
 	tomorrow_load, model, tomorrow_accuracy = lf.neural_net_next_day(
@@ -181,7 +180,7 @@ def work(modelDir, ind):
 	l = []
 	for d in previous_months:
 		l.append({
-			'name': d['year'],
+			'name': d['year'].item(),
 			'color': 'lightgrey',
 			'data': d['load'],
 			'type': 'line',
@@ -233,19 +232,37 @@ def work(modelDir, ind):
 
 	o['stderr'] = ''
 
-	# re-input values
+	with open(pJoin(modelDir,'one_day_model.h5'), 'rb') as f:
+		one_day_model = base64.standard_b64encode(f.read()).decode()
+	with open(pJoin(modelDir,'two_day_model.h5'), 'rb') as f:
+		two_day_model = base64.standard_b64encode(f.read()).decode()
+	with open(pJoin(modelDir,'three_day_model.h5'), 'rb') as f:
+		three_day_model = base64.standard_b64encode(f.read()).decode()
+
+	# re-input values (i.e. modify the mutable dictionary that is used in heavyprocessing!!!!!!)
 	ind['newModel'] = 'False',
-	ind['one_day_model'] = open(pJoin(modelDir,'one_day_model.h5')).read().encode("base64"),
+	ind['one_day_model'] = one_day_model,
 	ind['one_day_model_filename'] = 'one_day_model.h5',
-	ind['two_day_model'] = open(pJoin(modelDir,'two_day_model.h5')).read().encode("base64"),
+	ind['two_day_model'] = two_day_model,
 	ind['two_day_model_filename'] = 'two_day_model.h5',
-	ind['three_day_model'] = open(pJoin(modelDir,'three_day_model.h5')).read().encode("base64"),
+	ind['three_day_model'] = three_day_model,
 	ind['three_day_model_filename'] = 'three_day_model.h5',
 
 	return o
 
 def new(modelDir):
 	''' Create a new instance of this model. Returns true on success, false on failure. '''
+	with open(pJoin(__neoMetaModel__._omfDir,"static","testFiles","72hr_TexasTemp.csv")) as f:
+		temp_curve = f.read()
+	with open(pJoin(__neoMetaModel__._omfDir,"static","testFiles","Texas_1pm.csv")) as f:
+		hist_curve = f.read()
+	with open(pJoin(__neoMetaModel__._omfDir,'static','testFiles','one_day_model.h5'), 'rb') as f:
+		one_day_model = base64.standard_b64encode(f.read()).decode()
+	with open(pJoin(__neoMetaModel__._omfDir,'static','testFiles','two_day_model.h5'), 'rb') as f:
+		two_day_model = base64.standard_b64encode(f.read()).decode()
+	with open(pJoin(__neoMetaModel__._omfDir,'static','testFiles','three_day_model.h5'), 'rb') as f:
+		three_day_model = base64.standard_b64encode(f.read()).decode()
+
 	defaultInputs = {
 		'created': '2015-06-12 17:20:39.308239',
 		'modelType': modelName,
@@ -255,19 +272,17 @@ def new(modelDir):
 		# 'histFileName': 'd_Texas_17yr_TempAndLoad_Dec.csv',
 		# "histCurve": open(pJoin(__neoMetaModel__._omfDir,"static","testFiles","d_Texas_17yr_TempAndLoad_Dec.csv"), 'rU').read(),
 		'tempFileName': '72hr_TexasTemp.csv',
-		'tempCurve': open(pJoin(__neoMetaModel__._omfDir,"static","testFiles","72hr_TexasTemp.csv"), 'rU').read(),
-		
+		'tempCurve': temp_curve,
 		# autofill
 		'histFileName': 'Texas_1pm.csv',
-		"histCurve": open(pJoin(__neoMetaModel__._omfDir,"static","testFiles","Texas_1pm.csv"), 'rU').read(),		
-
+		"histCurve": hist_curve,
 		# upload models
 		'newModel': 'False',
-		'one_day_model': open(pJoin(__neoMetaModel__._omfDir,'static','testFiles','one_day_model.h5')).read().encode("base64"),
+		'one_day_model': one_day_model,
 		'one_day_model_filename': 'one_day_model.h5',
-		'two_day_model': open(pJoin(__neoMetaModel__._omfDir,'static','testFiles','two_day_model.h5')).read().encode("base64"),
+		'two_day_model': two_day_model,
 		'two_day_model_filename': 'two_day_model.h5',
-		'three_day_model': open(pJoin(__neoMetaModel__._omfDir,'static','testFiles','three_day_model.h5')).read().encode("base64"),
+		'three_day_model': three_day_model,
 		'three_day_model_filename': 'three_day_model.h5',
 	}
 	return __neoMetaModel__.new(modelDir, defaultInputs)
@@ -278,9 +293,9 @@ def _tests():
 	if isdir(modelLoc):
 		shutil.rmtree(modelLoc)	
 	new(modelLoc)  # Create New.
-	renderAndShow(modelLoc)  # Pre-run.
-	runForeground(modelLoc)  # Run the model.
-	renderAndShow(modelLoc)  # Show the output.
+	__neoMetaModel__.renderAndShow(modelLoc)  # Pre-run.
+	__neoMetaModel__.runForeground(modelLoc)  # Run the model.
+	__neoMetaModel__.renderAndShow(modelLoc)  # Show the output.
 
 if __name__ == '__main__':
 	_tests()

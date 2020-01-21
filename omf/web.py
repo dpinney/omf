@@ -1,11 +1,14 @@
 ''' Web server for model-oriented OMF interface. '''
 
-from flask import (Flask, send_from_directory, request, redirect, render_template, session, abort, jsonify, url_for)
-from jinja2 import Template
+import json, os, hashlib, random, time, datetime as dt, shutil, csv, sys, platform, errno, io, signal
+from contextlib import contextmanager
 from multiprocessing import Process
 from passlib.hash import pbkdf2_sha512
 from functools import wraps
-import json, os, flask_login, hashlib, random, time, datetime as dt, shutil, boto.ses, csv, sys, platform, errno, io
+from flask import (Flask, send_from_directory, request, redirect, render_template, session, abort, jsonify, url_for)
+import flask_login, boto3
+from flask_compress import Compress
+from jinja2 import Template
 try:
 	import fcntl
 except:
@@ -15,12 +18,11 @@ except:
 		return
 	fcntl.flock = flock
 	(fcntl.LOCK_EX, fcntl.LOCK_SH, fcntl.LOCK_UN, fcntl.LOCK_NB) = (0, 0, 0, 0)
-import models, feeder, network, milToGridlab, cymeToGridlab, signal, weather, anonymization
 import omf
-from omf.calibrate import omfCalibrate
-from omf.omfStats import genAllImages
-from omf.loadModelingAmi import writeNewGlmAndPlayers
-from flask_compress import Compress
+from omf import models, feeder, network, milToGridlab, cymeToGridlab, weather, anonymization
+import omf.calibrate
+import omf.omfStats
+import omf.loadModelingAmi
 
 app = Flask("web")
 Compress(app)
@@ -94,7 +96,7 @@ def cryptoRandomString():
 	if 'COOKIE_KEY' in globals():
 		return COOKIE_KEY
 	else:
-		return hashlib.md5(str(random.random())+str(time.time())).hexdigest()
+		return hashlib.md5(str(random.random()).encode('utf-8') + str(time.time()).encode('utf-8')).hexdigest()
 
 
 login_manager = flask_login.LoginManager()
@@ -103,21 +105,32 @@ login_manager.login_view = "login_page"
 app.secret_key = cryptoRandomString()
 
 
-def send_link(email, message, u={}):
-	''' Send message to email using Amazon SES. '''
+def _send_email(recipient, subject, message):
+	with open('emailCredentials.key') as f:
+		key = f.read()
+	c = boto3.client('ses', aws_access_key_id='AKIAJLART4NXGCNFEJIQ', aws_secret_access_key=key, region_name='us-east-1')
+	email_content = {
+		'Source': 'admin@omf.coop',
+		'Destination': {'ToAddresses': [email]},
+		'Message': {
+			'Subject': {'Data': subject, 'Charset': 'UTF-8'},
+			'Body': {'Text': {'Data': message, 'Charset': 'UTF-8' }}
+		}
+	}
+	c.send_email(**email_content)
+
+
+def send_link(email, message, u=None):
+	'''Send message to email using Amazon SES.'''
+	if u is None:
+		u = {}
 	try:
-		with open("emailCredentials.key") as f:
-			key = f.read()
-		c = boto.ses.connect_to_region("us-east-1",
-			aws_access_key_id="AKIAJLART4NXGCNFEJIQ",
-			aws_secret_access_key=key)
-		reg_key = hashlib.md5(str(time.time())+str(random.random())).hexdigest()
+		_send_email(email, 'OMF Registration Link', message.replace('reg_link', URL + '/register/' + email + '/' + reg_key))
+		reg_key = hashlib.md5(str(random.random()).encode('utf-8') + str(time.time()).encode('utf-8')).hexdigest()
 		u["reg_key"] = reg_key
 		u["timestamp"] = dt.datetime.strftime(dt.datetime.now(), format="%c")
 		u["registered"] = False
 		u["email"] = email
-		outDict = c.send_email("admin@omf.coop", "OMF Registration Link",
-			message.replace("reg_link", URL+"/register/"+email+"/"+reg_key), [email])
 		with locked_open(os.path.join(_omfDir, 'data', 'User', email + '.json'), 'w') as f:
 			json.dump(u, f, indent=4)
 		return "Success"
@@ -182,10 +195,10 @@ def deleteUser():
 	# Clean up user data.
 	try:
 		shutil.rmtree("data/Model/" + username)
-	except Exception, e:
-		print "USER DATA DELETION FAILED FOR", e
+	except Exception as e:
+		print("USER DATA DELETION FAILED FOR", e)
 	os.remove("data/User/" + username + ".json")
-	print "SUCCESFULLY DELETE USER", username
+	print("SUCCESFULLY DELETE USER", username)
 	return "Success"
 
 
@@ -213,8 +226,8 @@ def forgotpwd(email):
 			return "We have sent a password reset link to " + email
 		else:
 			raise Exception
-	except Exception, e:
-		print "ERROR: failed to password reset user", email, "with exception", e
+	except Exception as e:
+		print("ERROR: failed to password reset user", email, "with exception", e)
 		return "We do not have a record of a user with that email address. Please click back and create an account."
 
 
@@ -230,10 +243,7 @@ def fastNewUser(email):
 		with locked_open(os.path.join(_omfDir, 'data', 'User', user['username'] + '.json'), 'w') as f:
 			json.dump(user, f, indent=4)
 		message = "Thank you for registering an account on OMF.coop.\n\nYour password is: " + randomPass + "\n\n You can change this password after logging in."
-		with open('emailCredentials.key') as f:
-			key = f.read()
-		c = boto.ses.connect_to_region("us-east-1", aws_access_key_id="AKIAJLART4NXGCNFEJIQ", aws_secret_access_key=key)
-		mailResult = c.send_email("admin@omf.coop", "OMF.coop User Account", message, [email])
+		_send_email(email, 'OMF.coop User Account', message)
 		nextUrl = str(request.args.get("next","/"))
 		return redirect(nextUrl)
 
@@ -321,7 +331,7 @@ def regenOmfStats():
 	'''Regenarate stats images.'''
 	if User.cu() != "admin":
 		return redirect("/")
-	genImagesProc = Process(target=genAllImages, args=[])
+	genImagesProc = Process(target=omf.omfStats.genAllImages, args=[])
 	genImagesProc.start()
 	return redirect("/omfStats")
 
@@ -493,7 +503,7 @@ def shareModel():
 	# Check for nonexistant users
 	emails = list(set(request.form.getlist("email"))) if len(request.form.getlist("email")) != 0 else None
 	if emails is not None:
-		invalid_emails = filter(lambda e: e == User.cu() or e == 'admin' or not os.path.isfile(os.path.join(_omfDir, 'data', 'User', e + '.json')), emails)
+		invalid_emails = [e for e in emails if e == User.cu() or e == 'admin' or not os.path.isfile(os.path.join(_omfDir, 'data', 'User', e + '.json'))]
 		if len(invalid_emails) != 0:
 			response = jsonify(invalid_emails)
 			response.status_code = 400
@@ -501,8 +511,7 @@ def shareModel():
 	# Check the state of the model
 	owner = request.form.get("user")
 	model_name = request.form.get("modelName")
-	from models import __neoMetaModel__
-	status = __neoMetaModel__.getStatus(os.path.join(_omfDir, 'data', 'Model', owner, model_name))
+	status = models.__neoMetaModel__.getStatus(os.path.join(_omfDir, 'data', 'Model', owner, model_name))
 	if status == 'running':
 		return ("The model cannot be shared while it is running. Please wait until the model finishes running.", 409)
 	# Load the list of old viewers
@@ -577,23 +586,14 @@ def get_model_metadata(owner, model_name):
 	return model_metadata
 
 
-from contextlib import contextmanager
 @contextmanager
-def locked_open(filepath, mode='r', timeout=180, io_open=False, **io_open_args):
-	"""
-	Open a file and lock it depending on the file access mode. An IOError will be raised if the lock cannot be acquired within the timeout.
-	- Either regular open() or io.open() can be used with this function
-	"""
-	if mode in ['r', 'rb']:
+def locked_open(filepath, mode='r', timeout=180, **io_open_args):
+	'''Open a file and lock it depending on the file access mode. An IOError will be raised if the lock cannot be acquired within the timeout.'''
+	if 'r' in mode and '+' not in mode:
 		lock_mode = fcntl.LOCK_SH
-	elif mode in ['r+', 'r+b', 'w', 'wb', 'w+', 'w+b', 'a', 'ab', 'a+', 'a+b']:
+	else:
 		lock_mode = fcntl.LOCK_EX
-	else:
-		raise Exception("Unrecognized file access mode")
-	if io_open:
-		f = io.open(filepath, mode, **io_open_args)
-	else:
-		f = open(filepath, mode)
+	f = open(filepath, mode, **io_open_args)
 	start_time = time.time()
 	while True:
 		try:
@@ -732,7 +732,7 @@ def checkConversion(modelName, owner=None):
 	conversion hasn't started yet or 2) the conversion is finished because the ZPID.txt file is gone. If an error file exists, the the conversion
 	failed and the client should be notified.
 	"""
-	print modelName
+	print(modelName)
 	# First check for error files
 	for filename in ['gridError.txt', 'error.txt', 'weatherError.txt']:
 		filepath = os.path.join(_omfDir, 'data', 'Model', owner, modelName, filename)
@@ -754,7 +754,7 @@ def checkConversion(modelName, owner=None):
 def milsoftImport(owner):
 	''' API for importing a milsoft feeder. '''
 	modelName = request.form.get("modelName","")
-	model_dir, error_filepath = [os.path.join(_omfDir, 'data', 'Model', owner, modelName, filename) for filename in '', 'gridError.txt']
+	model_dir, error_filepath = [os.path.join(_omfDir, 'data', 'Model', owner, modelName, filename) for filename in ('', 'gridError.txt')]
 	# Delete exisitng .std and .seq, .glm files to not clutter model file
 	for filename in safeListdir(model_dir):
 		if filename.endswith(".glm") or filename.endswith(".std") or filename.endswith(".seq"):
@@ -770,8 +770,13 @@ def milImportBackground(owner, modelName):
 	''' Function to run in the background for Milsoft import. '''
 	try:
 		feederName = str(request.form.get('feederNameM', 'feeder'))
-		std_filepath, seq_filepath, pid_filepath, feeder_filepath, model_dir, error_filepath = [os.path.join(_omfDir, 'data', 'Model', owner, modelName, filename) for filename in 
-			[feederName + '.std', feederName + '.seq', 'ZPID.txt', feederName + '.omd', '', 'gridError.txt']
+		std_filepath, seq_filepath, pid_filepath, feeder_filepath, model_dir, error_filepath = [
+			os.path.join(_omfDir, 'data', 'Model', owner, modelName, filename) for filename in
+				[feederName + '.std',
+				feederName + '.seq',
+				'ZPID.txt',
+				feederName + '.omd',
+				'', 'gridError.txt']
 		]
 		request.files.get('stdFile').save(std_filepath)
 		request.files.get('seqFile').save(seq_filepath)
@@ -806,7 +811,7 @@ def milImportBackground(owner, modelName):
 def matpowerImport(owner):
 	''' API for importing a MATPOWER network. '''
 	modelName = request.form.get('modelName', '')
-	model_dir, con_file_path = [os.path.join(_omfDir, 'data', 'Model', owner, modelName, filename) for filename in '', 'ZPID.txt']
+	model_dir, con_file_path = [os.path.join(_omfDir, 'data', 'Model', owner, modelName, filename) for filename in ('', 'ZPID.txt')]
 	# Delete existing .m files to not clutter model.
 	for filename in safeListdir(model_dir):
 		if filename.endswith(".m"):
@@ -846,7 +851,7 @@ def matImportBackground(owner, modelName):
 def gridlabdImport(owner):
 	'''This function is used for gridlabdImporting'''
 	modelName = request.form.get("modelName","")
-	error_path, modelDir = [os.path.join(_omfDir, 'data', 'Model', owner, modelName, filename) for filename in 'gridError.txt', '']
+	error_path, modelDir = [os.path.join(_omfDir, 'data', 'Model', owner, modelName, filename) for filename in ('gridError.txt', '')]
 	# Delete exisitng .std and .seq, .glm files to not clutter model file
 	for filename in safeListdir(modelDir):
 		if filename.endswith(".glm") or filename.endswith(".std") or filename.endswith(".seq"):
@@ -898,7 +903,7 @@ def scadaLoadshape(owner, feederName):
 	loadName = 'calibration'
 	modelName = request.form.get("modelName","")
 	# delete calibration csv, calibration folder, and error file if they exist
-	filepaths = [os.path.join(_omfDir, 'data', 'Model', owner, modelName, filename) for filename in 'error.txt', 'calibration.csv', 'calibration']
+	filepaths = [os.path.join(_omfDir, 'data', 'Model', owner, modelName, filename) for filename in ('error.txt', 'calibration.csv', 'calibration')]
 	for fp in filepaths:
 		if os.path.isfile(fp):
 			os.remove(fp)
@@ -926,7 +931,7 @@ def backgroundScadaLoadshape(owner, modelName, feederName, loadName):
 		# TODO: parse the csv using .csv library, set simStartDate to earliest timeStamp, length to number of rows, units to difference between first 2
 		# timestamps (which is a function in datetime library). We'll need a link to the docs in the import dialog and a short blurb saying how the CSV
 		# should be built.
-		with locked_open(scadaPath) as csv_file:
+		with locked_open(scadaPath, newline='') as csv_file:
 			#reader = csv.DictReader(csvFile, delimiter='\t')
 			rows = [row for row in csv.DictReader(csv_file)]
 			#reader = csv.DictReader(csvFile)
@@ -943,7 +948,7 @@ def backgroundScadaLoadshape(owner, modelName, feederName, loadName):
 		solver = 'FBS'
 		calibrateError = (0.05, 5)
 		trim = 5
-		omfCalibrate(workDir, feederPath, scadaPath, simStartDate, simLength, simLengthUnits, solver, calibrateError, trim)
+		omf.calibrate.omfCalibrate(workDir, feederPath, scadaPath, simStartDate, simLength, simLengthUnits, solver, calibrateError, trim)
 		# move calibrated file to model folder, old omd files are backedup
 		if feederPath.endswith('.omd'):
 			os.rename(feederPath, feederPath + '.backup')
@@ -964,7 +969,7 @@ def loadModelingAmi(owner, feederName):
 	#feederNum = request.form.get('feederNum', 1)
 	loadName = 'ami'
 	modelName = request.form.get('modelName', '')
-	filepaths = [os.path.join(_omfDir, 'data', 'Model', owner, modelName, filename) for filename in 'amiError.txt', 'amiLoad.csv']
+	filepaths = [os.path.join(_omfDir, 'data', 'Model', owner, modelName, filename) for filename in ('amiError.txt', 'amiLoad.csv')]
 	for fp in filepaths:
 		if os.path.isfile(fp):
 			os.remove(fp)
@@ -981,7 +986,7 @@ def backgroundLoadModelingAmi(owner, modelName, feederName, loadName):
 		request.files['amiFile'].save(ami_filepath)
 		with locked_open(pid_filepath, 'w') as pid_file:
 			pid_file.write(str(os.getpid()))
-		writeNewGlmAndPlayers(omdPath, ami_filepath, outDir)
+		omf.loadModelingAmi.writeNewGlmAndPlayers(omdPath, ami_filepath, outDir)
 		os.remove(pid_filepath)
 	except Exception:
 		with locked_open(error_filepath, 'w') as errorFile:
@@ -1012,7 +1017,7 @@ def cymeImportBackground(owner, modelName):
 			['ZPID.txt', 'gridError.txt', mdbFileObject.filename, feederName + '.omd', '']
 		]
 		mdbFileObject.save(mdb_filepath)
-		print mdbFileObject.filename
+		print(mdbFileObject.filename)
 		with locked_open(pid_filepath, 'w') as pid_file:
 			pid_file.write(str(os.getpid()))
 		newFeeder = dict(**feeder.newFeederWireframe)
@@ -1081,7 +1086,7 @@ def newBlankFeeder(owner):
 	modelDir = os.path.join(_omfDir, "data","Model", owner, modelName)
 	try:
 		os.remove("data/Model/"+owner+"/"+modelName+'/' + "ZPID.txt")
-		print "removed, ", ("data/Model/"+owner+"/"+modelName+'/' + "ZPID.txt")
+		print("removed, ", ("data/Model/"+owner+"/"+modelName+'/' + "ZPID.txt"))
 	except: pass
 	removeFeeder(owner, modelName, feederNum)
 	newSimpleFeeder(owner, modelName, feederNum, False, feederName)
@@ -1103,7 +1108,7 @@ def newBlankNetwork(owner):
 	modelDir = os.path.join(_omfDir, "data","Model", owner, modelName)
 	try:
 		os.remove("data/Model/"+owner+"/"+modelName+'/' + "ZPID.txt")
-		print "removed, ", ("data/Model/"+owner+"/"+modelName+'/' + "ZPID.txt")
+		print("removed, ", ("data/Model/"+owner+"/"+modelName+'/' + "ZPID.txt"))
 	except: pass
 	removeNetwork(owner, modelName, networkNum)
 	newSimpleNetwork(owner, modelName, networkNum, False, networkName)
@@ -1138,7 +1143,7 @@ def networkData(owner, modelName, networkName):
 @write_permission_function
 def saveFeeder(owner, modelName, feederName, feederNum):
 	"""Save feeder data. Also used for cancelling a file import, file conversion, or feeder-load overwrite."""
-	print "Saving feeder for:%s, with model: %s, and feeder: %s"%(owner, modelName, feederName)
+	print("Saving feeder for:%s, with model: %s, and feeder: %s"%(owner, modelName, feederName))
 	model_dir = os.path.join(_omfDir, "data/Model", owner, modelName)
 	for filename in ["gridError.txt", "error.txt", "weatherError.txt"]:
 		error_file = os.path.join(model_dir, filename)
@@ -1193,7 +1198,7 @@ def saveFeeder(owner, modelName, feederName, feederNum):
 @write_permission_function
 def saveNetwork(owner, modelName, networkName):
 	''' Save network data. '''
-	print "Saving network for:%s, with model: %s, and network: %s"%(owner, modelName, networkName)
+	print("Saving network for:%s, with model: %s, and network: %s"%(owner, modelName, networkName))
 	filepath = os.path.join(_omfDir, 'data/Model', owner, modelName, networkName + '.omt')
 	payload = json.loads(request.form.get('networkObjectJson', '{}'))
 	with locked_open(filepath, 'r+') as f:
@@ -1224,7 +1229,7 @@ def renameFeeder(owner, modelName, oldName, newName, feederNum):
 def renameNetwork(owner, modelName, oldName, networkName, networkNum):
 	''' rename a feeder. '''
 	model_dir, new_network_filepath, old_network_filepath = [
-		os.path.join(_omfDir, 'data', 'Model', owner, modelName, filename) for filename in '', networkName + '.omt', oldName + '.omt'
+		os.path.join(_omfDir, 'data', 'Model', owner, modelName, filename) for filename in ('', networkName + '.omt', oldName + '.omt')
 	]
 	if os.path.isfile(new_network_filepath) or not os.path.isfile(old_network_filepath):
 		return "Failure"
@@ -1247,7 +1252,7 @@ def removeFeeder(owner, modelName, feederNum, feederName=None):
 			feederName = str(allInput.get('feederName'+str(feederNum)))
 			os.remove(os.path.join(modelDir, feederName +'.omd'))
 		except: 
-			print "Couldn't remove feeder file in web.removeFeeder()."
+			print("Couldn't remove feeder file in web.removeFeeder().")
 		allInput.pop("feederName" + str(feederNum))
 		with locked_open(os.path.join(modelDir, 'allInputData.json'), 'r+') as f:
 			f.truncate(0)
@@ -1267,7 +1272,7 @@ def loadFeeder(frfeederName, frmodelName, modelName, feederNum, frUser, owner):
 		frmodelDir = os.path.join(_omfDir, 'data/Model', frUser, frmodelName)
 	elif frUser == "public":
 		frmodelDir = os.path.join(_omfDir, 'static/publicFeeders')
-	print "Entered loadFeeder with info: frfeederName %s, frmodelName: %s, modelName: %s, feederNum: %s"%(frfeederName, frmodelName, str(modelName), str(feederNum))
+	print("Entered loadFeeder with info: frfeederName %s, frmodelName: %s, modelName: %s, feederNum: %s"%(frfeederName, frmodelName, str(modelName), str(feederNum)))
 	# I can't use shutil.copyfile() becasue I need locks on the source and destination file
 	#shutil.copyfile(os.path.join(frmodelDir, frfeederName + '.omd'), os.path.join(modelDir, feederName + '.omd'))
 	with locked_open(os.path.join(frmodelDir, frfeederName + '.omd')) as inFeeder:
@@ -1320,7 +1325,7 @@ def removeNetwork(owner, modelName, networkNum, networkName=None):
 			networkName = str(allInput.get('networkName'+str(networkNum)))
 			os.remove(os.path.join(modelDir, networkName +'.omt'))
 		except: 
-			print "Couldn't remove network file in web.removeNetwork()."
+			print("Couldn't remove network file in web.removeNetwork().")
 		allInput.pop("networkName"+str(networkNum))
 		with locked_open(modelDir + "/allInputData.json", 'r+') as f:
 			f.truncate(0)
@@ -1393,7 +1398,7 @@ def backgroundClimateChange(owner, modelName, feederName):
 			pass
 	except Exception as e:
 		with locked_open(error_filepath, 'w') as errorFile:
-			message = "climateError" if e.message == '' else e.message
+			message = 'climateError' if len(e.args) == 0 else e.args[0]
 			errorFile.write(message)
 
 
@@ -1485,17 +1490,13 @@ def background_zillow_houses(model_dir):
 		with locked_open(pid_filepath, 'w') as pid_file:
 			pid_file.write(str(os.getpid()))
 		triplex_objects = json.loads(request.form.get("triplexObjects"))
-		#triplex_objects = request.form.get("triplexObjects") # error test
 		zillow_houses = {}
 		for obj in triplex_objects:
-			try:
-				# Try to get real house data
-				house = omf.loadModeling.zillowHouse(obj["latitude"], obj["longitude"])
-				zillow_houses[obj["key"]] = house
-			except:
+			house = omf.loadModeling.get_zillow_configured_new_house(obj['latitude'], obj['longitude'])
+			if house is None:
 				# If a request for some house fails, get a random house
-				house = omf.loadModeling.zillowHouse(0, 0, pureRandom=True)
-				zillow_houses[obj["key"]] = house
+				house = omf.loadModeling.get_random_new_house()
+			zillow_houses[obj['key']] = house
 			# The APIs we use require us to limit our requests to a maximum of 1 per second. Exceeding that throughput will get us IP banned faster.
 			time.sleep(1)
 		payload_filepath = os.path.join(model_dir, "zillow_houses.json")
@@ -1504,7 +1505,7 @@ def background_zillow_houses(model_dir):
 		os.remove(pid_filepath)
 	except Exception as e:
 		with locked_open(os.path.join(model_dir, "error.txt"), 'w') as error_file:
-			message = "zillow_error" if e.message == '' else e.message
+			message = 'zillowError' if len(e.args) == 0 else e.args[0]
 			error_file.write(message)
 
 
@@ -1706,7 +1707,7 @@ def root():
 	modelTips = {}
 	for name in models.__all__:
 		try:
-			modelTips[name] = getattr(omf.models,name).tooltip
+			modelTips[name] = getattr(omf.models, name).tooltip
 		except:
 			pass
 	# Generate list of model types.
@@ -1758,7 +1759,7 @@ def downloadModelData(owner, modelName, fullPath):
 @read_permission_function # This route needs read permissions because duplicate model uses it
 def uniqObjName(objtype, owner, name, modelName=False):
 	"""Checks if a given object type/owner/name is unique. More like checks if a file exists on the server"""
-	print "Entered uniqobjname", owner, name, modelName
+	print("Entered uniqobjname", owner, name, modelName)
 	path_prefix = os.path.join(_omfDir, 'data', 'Model', owner)
 	if objtype == 'Model':
 		path = os.path.join(path_prefix, name)
@@ -1779,6 +1780,7 @@ def uniqObjName(objtype, owner, name, modelName=False):
 if __name__ == "__main__":
 	if platform.system() == "Darwin":  # MacOS
 		os.environ['no_proxy'] = '*' # Workaround for macOS fork behavior with multiprocessing and urllib.
+		os.environ['NO_PROXY'] = '*' # Workaround for above in python3.
 	template_files = ["templates/"+ x  for x in safeListdir("templates")]
 	model_files = ["models/" + x for x in safeListdir("models")]
 	app.run(debug=True, host="0.0.0.0", extra_files=template_files + model_files)

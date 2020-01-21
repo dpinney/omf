@@ -1,15 +1,12 @@
 ''' Display circuit simulator in real time. '''
 
-import json, os, sys, tempfile, webbrowser, time, shutil, subprocess, datetime
+import shutil
 from os.path import join as pJoin
-from jinja2 import Template
-import __neoMetaModel__
-from __neoMetaModel__ import *
-# OMF imports
-sys.path.append(__neoMetaModel__._omfDir)
+from omf.models import __neoMetaModel__
+from omf.models.__neoMetaModel__ import *
 
 # Model metadata:
-modelName, template = metadata(__file__)
+modelName, template = __neoMetaModel__.metadata(__file__)
 tooltip = 'Real time circuit simulator'
 
 def work(modelDir, inputDict):
@@ -40,7 +37,7 @@ def _tests():
 	# Create New.
 	new(modelLoc)
 	# Pre-run.
-	renderAndShow(modelLoc)
+	__neoMetaModel__.renderAndShow(modelLoc)
 
 if __name__ == '__main__':
 	_tests()

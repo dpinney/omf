@@ -5,7 +5,7 @@ from datetime import datetime as dt, timedelta
 from os.path import isdir, join as pJoin
 from numpy import npv
 from omf.models import __neoMetaModel__
-from __neoMetaModel__ import *
+from omf.models.__neoMetaModel__ import *
 
 # Model metadata:
 modelName, template = metadata(__file__)
@@ -39,7 +39,7 @@ def work(modelDir, inputDict):
 	dates = [dt(2011, 1, 1)+timedelta(hours=1)*x for x in range(8760)]
 	dc = []
 	try:
-		with open(pJoin(modelDir, 'demand.csv')) as f:
+		with open(pJoin(modelDir, 'demand.csv'), newline='') as f:
 			for row, date in zip(csv.reader(f), dates):
 				dc.append({ 'month': date.month - 1,
 							'power': float(row[0])})
@@ -49,10 +49,10 @@ def work(modelDir, inputDict):
 			raise Exception("Demand CSV file is incorrect format.")
 	#Add price to dc table
 	try:
-		with open(pJoin(modelDir,'priceCurve.csv')) as f:
-	 		for row, d in zip(csv.reader(f), dc):
-	 			d['price'] = float(row[0])
-	 	assert all(['price' in r for r in dc]) 
+		with open(pJoin(modelDir,'priceCurve.csv'), newline='') as f:
+			for row, d in zip(csv.reader(f), dc):
+				d['price'] = float(row[0])
+		assert all(['price' in r for r in dc])
 	except:
 		if str(sys.exc_info()[0]) != "<type 'exceptions.SystemExit'>":
 			raise Exception("Price Curve File is in an incorrect format.")
@@ -144,6 +144,10 @@ def work(modelDir, inputDict):
 
 def new(modelDir):
 	''' Create a new instance of this model. Returns true on success, false on failure. '''
+	with open(pJoin(__neoMetaModel__._omfDir,"static","testFiles","FrankScadaValidCSV_Copy.csv")) as f:
+		demandCurve = f.read()
+	with open(pJoin(__neoMetaModel__._omfDir,"static","testFiles","priceCurve_Copy.csv")) as f:
+		priceCurve = f.read()
 	defaultInputs = {
 		"batteryEfficiency": "92",
 		"inverterEfficiency": "97.5",
@@ -153,9 +157,9 @@ def new(modelDir):
 		"dischargeRate": "5",
 		"modelType": modelName,
 		"chargeRate": "5",
-		"demandCurve": open(pJoin(__neoMetaModel__._omfDir,"static","testFiles","FrankScadaValidCSV_Copy.csv")).read(),
+		"demandCurve": demandCurve,
 		"fileName": "FrankScadaValidCSV_Copy.csv",
-		"priceCurve": open(pJoin(__neoMetaModel__._omfDir,"static","testFiles","priceCurve_Copy.csv")).read(),
+		"priceCurve": priceCurve,
 		"fileNamed":"priceCurve_Copy.csv",
 		"cellCost": "7140",
 		"cellQuantity": "10",

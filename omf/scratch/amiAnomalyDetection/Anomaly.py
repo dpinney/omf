@@ -1,40 +1,37 @@
 ''' Anomaly Detection Model '''
 
-import json, os, sys, tempfile, webbrowser, time, shutil, subprocess, datetime, traceback
+import json, os, tempfile, shutil, datetime, traceback, csv, operator
 from os.path import join as pJoin
+from pprint import pprint
 from jinja2 import Template
-import omf
-import csv
-import matplotlib.pyplot as plt
-from omf import models
-from models import __metaModel__
-from __metaModel__ import *
 import numpy as np
-from numpy import diff
-import operator
-import jinja2
-from pprint import pprint 
 
-# OMF imports
-import feeder
+import omf
+from omf.models import __neoMetaModel__
 
 # Our HTML template for the interface:
 with open(pJoin("./Anomaly.html"),"r") as tempFile:
 	template = Template(tempFile.read())
+# HACK: this file is reallly old, so add the Anomaly template
+import omf.models
+from types import SimpleNamespace
+o = SimpleNamespace()
+o.template = template
+setattr(omf.models, 'Anomaly', o)
 
 def renderTemplate(template, modelDir="", absolutePaths=False, datastoreNames={}):
-	return __metaModel__.renderTemplate(template, modelDir, absolutePaths, datastoreNames)
+	return __neoMetaModel__.renderTemplate(template, modelDir, absolutePaths, datastoreNames)
 
 def quickRender(template, modelDir="", absolutePaths=False, datastoreNames={}):
 	''' Presence of this function indicates we can run the model quickly via a public interface. '''
-	return __metaModel__.renderTemplate(template, modelDir, absolutePaths, datastoreNames, quickRender=True)
+	return __neoMetaModel__.renderTemplate(template, modelDir, absolutePaths, datastoreNames, quickRender=True)
 
 def run(modelDir, inputDict):
 	''' Run the model in its directory. '''
 	# Delete output file every run if it exists
 	try:
 		os.remove(pJoin(modelDir,"allOutputData.json"))
-	except Exception, e:
+	except Exception as e:
 		pass
 	# Check whether model exist or not
 	try:
@@ -63,7 +60,7 @@ def run(modelDir, inputDict):
 		# If input range wasn't valid delete output, write error to disk.
 		cancel(modelDir)
 		thisErr = traceback.format_exc()
-		print 'ERROR IN MODEL', modelDir, thisErr
+		print('ERROR IN MODEL', modelDir, thisErr)
 		inputDict['stderr'] = thisErr
 		with open(os.path.join(modelDir,'stderr.txt'),'w') as errorFile:
 			errorFile.write(thisErr)
@@ -80,13 +77,13 @@ def dateFormatter(dateStr):
 		except:
 			continue
 	error = "We don't have a test case for our date: "+dateStr+" :("
-	print error
+	print(error)
 	return error
 
 def getAMIData(inCSV):
 	# This gets the data and returns a sorted array of data by Sub--Meter--Time
 	subStationData = []
-	with open(inCSV,"r") as amiFile:
+	with open(inCSV, newline='') as amiFile:
 			amiReader = csv.DictReader(amiFile, delimiter=',')
 			for row in amiReader:
 				subStation = row['SUBSTATION']
@@ -174,7 +171,7 @@ def computeAMIResults(inCSV, devFromAve,  MinDetRunTime, outData):
 					deviation = round(min(dev),2)
 				else:
 					deviation = round(max(dev),2)
-				#print devValues 
+				#print devValues
 				tempDict['outputDeviateds'].append([meter,str(time1),duration,str(deviation)])
 				metersToKeep.append(meter)
 				#print "FOUND %s consecutive values at index, endpoint: (%s,%s) for %s duration (%s)"%(endPoint-index+1, index, endPoint, duration, devValues)
@@ -190,7 +187,7 @@ def computeAMIResults(inCSV, devFromAve,  MinDetRunTime, outData):
 	for row in output:
 		meterID = row[0]
 		if meterID in metersToKeep:
-			if outData['anomalyMeters'].get(meterID,'') == '': 
+			if outData['anomalyMeters'].get(meterID,'') == '':
 				outData['anomalyMeters'][meterID] = {'energy':[], 'time':[], 'avg':[row[3]]}
 				startDate = row[1]
 			outData['anomalyMeters'][meterID]['time'].append(row[1])
@@ -198,7 +195,7 @@ def computeAMIResults(inCSV, devFromAve,  MinDetRunTime, outData):
 
 def _tests():
 	# Variables
-	workDir = pJoin(__metaModel__._omfDir,"data","Model")
+	workDir = pJoin(__neoMetaModel__._omfDir,"data","Model")
 	inData = {"simStartDate": "2012-04-01",
 		"simLengthUnits": "hours",
 		"modelType": "Anomaly",
@@ -218,7 +215,7 @@ def _tests():
 	# renderAndShow(template)
 	# Run the model and show the output.
 	run(modelLoc, inData)
-	renderAndShow(template, modelDir = modelLoc)
+	__neoMetaModel__.renderAndShow(modelLoc)
 
 if __name__ == '__main__':
 	_tests()

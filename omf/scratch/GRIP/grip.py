@@ -1,15 +1,17 @@
 ''' Web server exposing HTTP API for GRIP. '''
-import omf
-import os, traceback, tempfile, platform, subprocess, zipfile, subprocess, time, shutil, sys, threading, datetime, numbers
+import os, traceback, tempfile, platform, zipfile, subprocess, time, shutil, sys, datetime, numbers
 from functools import wraps
 from multiprocessing import Process
 import matplotlib.pyplot as plt
 from flask import Flask, request, send_from_directory, make_response, json, abort, redirect, url_for, jsonify
-from grip_config import Config
-
+import omf
+import omf.distNetViz, omf.feeder, omf.milToGridlab, omf.cymeToGridlab, omf.network
+import omf.models.transmission, omf.models.resilientDist
+import omf.solvers.gridlabd, omf.solvers.nrelsam2013
+from omf.scratch.GRIP import grip_config
 
 app = Flask(__name__)
-app.config.from_object(Config)
+app.config.from_object(grip_config.Config)
 
 
 # Change the dictionary values to change the output file names. Don't change the keys unless you also update the rest of the dictionary references in
@@ -600,9 +602,9 @@ def runGfm(temp_dir):
 	gfmOutPath = os.path.join(temp_dir, outName)
 	try:
 		with open(gfmOutPath) as f:
-			out = json.load(f)
+			out = json.load(f).decode()
 	except:
-		out = stdout
+		out = stdout.decode()
 	with open(os.path.join(temp_dir, filenames["rungfm"]), 'w') as f:
 		f.write(out)
 
@@ -667,44 +669,44 @@ def samRun(temp_dir):
 	ssc = omf.solvers.nrelsam2013.SSCAPI()
 	dat = ssc.ssc_data_create()
 	# Set the inputs.
-	ssc.ssc_data_set_string(dat, "file_name", tmy2_path)
+	ssc.ssc_data_set_string(dat, b'file_name', bytes(tmy2_path, 'ascii'))
 	for key in request.form.keys():
-		ssc.ssc_data_set_number(dat, key, float(request.form.get(key)))
+		ssc.ssc_data_set_number(dat, bytes(key, 'ascii'), float(request.form.get(key)))
 	# Enter required parameters
 	system_size = int(request.form.get('system_size', 4))
-	ssc.ssc_data_set_number(dat, 'system_size', system_size)
+	ssc.ssc_data_set_number(dat, b'system_size', system_size)
 	derate = float(request.form.get('derate', .77))
-	ssc.ssc_data_set_number(dat, 'derate', derate)
+	ssc.ssc_data_set_number(dat, b'derate', derate)
 	track_mode = int(request.form.get('track_mode', 0))
-	ssc.ssc_data_set_number(dat, 'track_mode', track_mode)
+	ssc.ssc_data_set_number(dat, b'track_mode', track_mode)
 	azimuth = float(request.form.get('azimuth', 180))
-	ssc.ssc_data_set_number(dat, 'azimuth', azimuth)
+	ssc.ssc_data_set_number(dat, b'azimuth', azimuth)
 	tilt = float(request.form.get('tilt', 30))
-	ssc.ssc_data_set_number(dat, 'tilt', tilt)
+	ssc.ssc_data_set_number(dat, b'tilt', tilt)
 	# Run PV system simulation.
-	mod = ssc.ssc_module_create("pvwattsv1")
+	mod = ssc.ssc_module_create(b'pvwattsv1')
 	ssc.ssc_module_exec(mod, dat)
 	# Geodata output.
 	outData = {}
-	outData["city"] = ssc.ssc_data_get_string(dat, "city")
-	outData["state"] = ssc.ssc_data_get_string(dat, "state")
-	outData["lat"] = ssc.ssc_data_get_number(dat, "lat")
-	outData["lon"] = ssc.ssc_data_get_number(dat, "lon")
-	outData["elev"] = ssc.ssc_data_get_number(dat, "elev")
+	outData['city'] = ssc.ssc_data_get_string(dat, b'city').decode()
+	outData['state'] = ssc.ssc_data_get_string(dat, b'state').decode()
+	outData['lat'] = ssc.ssc_data_get_number(dat, b'lat')
+	outData['lon'] = ssc.ssc_data_get_number(dat, b'lon')
+	outData['elev'] = ssc.ssc_data_get_number(dat, b'elev')
 	# Weather output.
-	outData["climate"] = {}
-	outData["climate"]["Plane of Array Irradiance (W/m^2)"] = ssc.ssc_data_get_array(dat, "poa")
-	outData["climate"]["Beam Normal Irradiance (W/m^2)"] = ssc.ssc_data_get_array(dat, "dn")
-	outData["climate"]["Diffuse Irradiance (W/m^2)"] = ssc.ssc_data_get_array(dat, "df")
-	outData["climate"]["Ambient Temperature (F)"] = ssc.ssc_data_get_array(dat, "tamb")
-	outData["climate"]["Cell Temperature (F)"] = ssc.ssc_data_get_array(dat, "tcell")
-	outData["climate"]["Wind Speed (m/s)"] = ssc.ssc_data_get_array(dat, "wspd")
+	outData['climate'] = {}
+	outData['climate']['Plane of Array Irradiance (W/m^2)'] = ssc.ssc_data_get_array(dat, b'poa')
+	outData['climate']['Beam Normal Irradiance (W/m^2)'] = ssc.ssc_data_get_array(dat, b'dn')
+	outData['climate']['Diffuse Irradiance (W/m^2)'] = ssc.ssc_data_get_array(dat, b'df')
+	outData['climate']['Ambient Temperature (F)'] = ssc.ssc_data_get_array(dat, b'tamb')
+	outData['climate']['Cell Temperature (F)'] = ssc.ssc_data_get_array(dat, b'tcell')
+	outData['climate']['Wind Speed (m/s)'] = ssc.ssc_data_get_array(dat, b'wspd')
 	# Power generation.
-	outData["Consumption"] = {}
-	outData["Consumption"]["Power"] = ssc.ssc_data_get_array(dat, "ac")
-	outData["Consumption"]["Losses"] = ssc.ssc_data_get_array(dat, "ac")
-	outData["Consumption"]["DG"] = ssc.ssc_data_get_array(dat, "ac")
-	with open(os.path.join(temp_dir, filenames["samrun"]), 'w') as f:
+	outData['Consumption'] = {}
+	outData['Consumption']['Power'] = ssc.ssc_data_get_array(dat, b'ac')
+	outData['Consumption']['Losses'] = ssc.ssc_data_get_array(dat, b'ac')
+	outData['Consumption']['DG'] = ssc.ssc_data_get_array(dat, b'ac')
+	with open(os.path.join(temp_dir, filenames['samrun']), 'w') as f:
 		json.dump(outData, f)
 
 

@@ -3,19 +3,18 @@ Requirements: GNU octave
 Tested on Linux and macOS.
 '''
 
-import json, os, sys, tempfile, webbrowser, time, shutil, subprocess, datetime, traceback, math
-import multiprocessing, platform
+import json, os, shutil, subprocess, math, platform, base64
 from os.path import join as pJoin
-from jinja2 import Template
-import __neoMetaModel__
-from __neoMetaModel__ import *
 import matplotlib
 import matplotlib.cm as cm
 from matplotlib import pyplot as plt
-import omf.network as network
+
+import omf.network
+from omf.models import __neoMetaModel__
+from omf.models.__neoMetaModel__ import *
 
 # Model metadata:
-modelName, template = metadata(__file__)
+modelName, template = __neoMetaModel__.metadata(__file__)
 tooltip = "The transmission model imports, runs and visualizes MATPOWER transmission and generation simulations."
 hidden = False
 
@@ -32,10 +31,11 @@ def work(modelDir, inputDict):
 		networkName = [x for x in os.listdir(modelDir) if x.endswith('.omt')][0][0:-4]
 	except:
 		networkName = 'case9'
-	networkJson = json.load(open(pJoin(modelDir,networkName+".omt")))
+	with open(pJoin(modelDir,networkName+".omt")) as f:
+		networkJson = json.load(f)
 	matName = 'matIn'
 	matFileName = matName + '.m'
-	matStr = network.netToMat(networkJson, matName)
+	matStr = omf.network.netToMat(networkJson, matName)
 	with open(pJoin(modelDir, matFileName),"w") as outMat:
 		for row in matStr: outMat.write(row)		
 	# Build the MATPOWER command.
@@ -71,7 +71,7 @@ def work(modelDir, inputDict):
 		mpoptArg = "mpopt = mpoption("+pfArg+", "+modelArg+", "+pfItArg+", "+pfTolArg+", "+pfEnflArg+"); "
 		command = "octave -p " + matPath + "--no-gui --eval \""+mpoptArg+"runpf('"+pJoin(modelDir,matFileName)+"', mpopt)\" > \"" + pJoin(modelDir,"matout.txt") + "\""
 		proc = subprocess.Popen(command, stdout=subprocess.PIPE, shell=True)
-		print command
+		print(command)
 		(out, err) = proc.communicate()
 	imgSrc = pJoin(__neoMetaModel__._omfDir,'scratch','transmission','inData')
 	# Read matout.txt and parse into outData.
@@ -93,7 +93,7 @@ def work(modelDir, inputDict):
 				lineNo = i
 			# Parse lines.
 			line = line.split(' ')
-			line = filter(lambda a: a!= '', line)
+			line = [a for a in line if a != '']
 			if todo=="count":
 				if "Buses" in line:
 					busCount = int(line[1])
@@ -170,7 +170,7 @@ def work(modelDir, inputDict):
 		plt.plot([x1, x2], [y1,y2], color='black', marker = '', zorder=0)
 	plt.savefig(modelDir + '/output.png')
 	with open(pJoin(modelDir,"output.png"),"rb") as inFile:
-		outData["chart"] = inFile.read().encode("base64")
+		outData["chart"] = base64.standard_b64encode(inFile.read()).decode('ascii')
 	# Stdout/stderr.
 	outData["stdout"] = "Success"
 	outData["stderr"] = ""
@@ -208,9 +208,9 @@ def _tests():
 	# Pre-run.
 	# renderAndShow(modelLoc)
 	# Run the model.
-	runForeground(modelLoc)
+	__neoMetaModel__.runForeground(modelLoc)
 	# Show the output.
-	renderAndShow(modelLoc)
+	__neoMetaModel__.renderAndShow(modelLoc)
 
 if __name__ == '__main__':
 	_tests()

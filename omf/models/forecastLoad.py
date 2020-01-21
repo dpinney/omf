@@ -1,14 +1,14 @@
-import csv, math
+import json
+from os.path import join as pJoin
+from datetime import datetime as dt
 import numpy as np
 import pandas as pd
-from datetime import datetime as dt
-import matplotlib.pyplot as plt
-import __neoMetaModel__, json
-from __neoMetaModel__ import *
 from omf import forecast as loadForecast
+from omf.models import __neoMetaModel__
+from omf.models.__neoMetaModel__ import *
 
 # Model metadata:
-modelName, template = metadata(__file__)
+modelName, template = __neoMetaModel__.metadata(__file__)
 tooltip = "Forecasts hourly load day-ahead using multiple methods"
 hidden = False
 
@@ -24,12 +24,12 @@ def work(modelDir, inputDict):
 		demandTempFile.write(inputDict["demandTemp"].replace("\r", ""))
 
 	try:
-	 	with open(pJoin(modelDir, 'hist.csv'), 'w') as f:
-	 		f.write(inputDict['nn'].replace('\r', ''))
+		with open(pJoin(modelDir, 'hist.csv'), 'w') as f:
+			f.write(inputDict['nn'].replace('\r', ''))
 		df = pd.read_csv(pJoin(modelDir, 'hist.csv'))
 		assert df.shape[0] >= 26280 # must be longer than 3 years
-	 	if 'dates' not in df.columns:
-		 	df['dates'] = df.apply(
+		if 'dates' not in df.columns:
+			df['dates'] = df.apply(
 				lambda x: dt(
 					int(x['year']), 
 					int(x['month']), 
@@ -54,7 +54,7 @@ def work(modelDir, inputDict):
 			df["dates"] = pd.date_range(
 				start=inputDict["simStartDate"], freq="H", periods=df.shape[0]
 			)
-			print df.shape[0]
+			print(df.shape[0])
 	except ZeroDivisionError:
 		errorMessage = "CSV file is incorrect format. Please see valid format definition at <a target='_blank' href = 'https://github.com/dpinney/omf/wiki/Models-~-storagePeakShave#demand-file-csv-format'>\nOMF Wiki storagePeakShave - Demand File CSV Format</a>"
 		raise Exception(errorMessage)
@@ -119,18 +119,15 @@ def work(modelDir, inputDict):
 
 def new(modelDir):
 	""" Create a new instance of this model. Returns true on success, false on failure. """
+	with open(pJoin(__neoMetaModel__._omfDir, "static", "testFiles", "d_Texas_17yr_TempAndLoad.csv")) as f:
+		nn = f.read()
+	with open(pJoin(__neoMetaModel__._omfDir, "static", "testFiles", "ERCOT_south_shortened.csv")) as f:
+		demand_temp = f.read()
 	defaultInputs = {
 		"user": "admin",
-		"demandTemp": open(
-			pJoin(
-				__neoMetaModel__._omfDir,
-				"static",
-				"testFiles",
-				"ERCOT_south_shortened.csv",
-			)
-		).read(),
+		"demandTemp": demand_temp,
 		"fileName": "ERCOT_south_shortened.csv",
-		"nn": open(pJoin(__neoMetaModel__._omfDir, "static", "testFiles", "d_Texas_17yr_TempAndLoad.csv")).read(),
+		"nn": nn,
 		"nnFileName": "d_Texas_17yr_TempAndLoad.csv",
 		"lowBound": 0.95,
 		"upBound": 1.05,
@@ -164,9 +161,9 @@ def _simpleTest():
 	# Pre-run.
 	# renderAndShow(modelLoc)
 	# Run the model.
-	runForeground(modelLoc)
+	__neoMetaModel__.runForeground(modelLoc)
 	# Show the output.
-	renderAndShow(modelLoc)
+	__neoMetaModel__.renderAndShow(modelLoc)
 
 
 if __name__ == "__main__":

@@ -3,7 +3,6 @@
 import datetime, copy, os, re, warnings, networkx as nx, json, math, tempfile, shutil, fileinput, webbrowser
 from os.path import join as pJoin
 from matplotlib import pyplot as plt
-import omf
 # import matpower
 
 def parse(inputStr, filePath=True):
@@ -50,18 +49,22 @@ def _dictConversion(inputStr, filePath=True):
 	for i,line in enumerate(data):
 		if todo!=None:
 			# Parse lines.
-			line = line.translate(None,'\r;\n')
+			line = line.translate({
+				ord('\r'): None,
+				ord('\n'): None,
+				ord(';'): None
+			})
 			if "]" in line:
 				todo = None
 			if todo in ['bus','gen','bus','branch']:
 				line = line.split('\t')
 			else:
 				line = line.split(' ')
-			line = filter(lambda a: a!= '', line)
+			line = [a for a in line if a != '']
 			if todo=="version":
-				version = line[-1][1]
-				if version<2:
-					print "MATPOWER VERSION MUST BE 2: %s"%(version)
+				version = float(line[-1][1])
+				if version < 2:
+					print("MATPOWER VERSION MUST BE 2: %s"%(version))
 					break
 				todo = None
 			elif todo=="mva":
@@ -102,7 +105,7 @@ def netToNxGraph(inNet):
 	''' Convert network.omt to networkx graph. '''
 	outGraph = nx.Graph()
 	for compType in ['bus','gen','branch']:
-		for idNum, item in inNet[compType].iteritems():
+		for idNum, item in inNet[compType].items():
 			if 'fbus' in item.keys():
 				outGraph.add_edge(item['fbus'],item['tbus'],attr_dict={'type':'branch'})
 			elif compType=='bus':
@@ -120,7 +123,7 @@ def latlonToNet(inGraph, inNet):
 	cleanG = nx.Graph(inGraph.edges())
 	cleanG.add_nodes_from(inGraph)
 	pos = nx.nx_agraph.graphviz_layout(cleanG, prog='neato')
-	for idnum, item in inNet['bus'].iteritems():
+	for idnum, item in inNet['bus'].items():
 		obName = item.get('bus_i')
 		thisPos = pos.get(obName, None)
 		if thisPos != None:
@@ -161,7 +164,8 @@ def netToMat(inNet, networkName):
 	return matStr
 
 def get_file_contents(filepath):
-	with open(filepath) as f: return f.read()
+	with open(filepath) as f:
+		return f.read()
 
 def get_abs_path(relative_path):
 	return os.path.join(os.path.dirname(os.path.abspath(__file__)), relative_path)
@@ -190,9 +194,9 @@ def viz(omt_filepath, output_path=None, output_name="viewer.html", open_file=Tru
 		elif line.lstrip().startswith('<link rel="shortcut icon" href="/static/favicon.ico"/>'):
 			print('<link rel="shortcut icon" href="data:image/x-icon;base64,AAABAAEAEBAQAAAAAAAoAQAAFgAAACgAAAAQAAAAIAAAAAEABAAAAAAAgAAAAAAAAAAAAAAAEAAAAAAAAAAAAAAAioqKAGlpaQDU1NQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAIiIiIiIiIAAgACAAIAAgACAzIzMjMyMwIDAgMCAwIDAiIiIiIiIgMCAwEDAgMCAwIDMTMyMzIzAgMBAwIDAgMCIiIiIiIiAwIDAQMCAwIDAgMxMzIzMjMCAwEDAgMCAwIiIiIiIiIDAAMAAwADAAMAAzMzMzMzMwAAAAAAAAAAAABwAAd3cAAEABAABVVQAAAAUAAFVVAABAAQAAVVUAAAAFAABVVQAAQAEAAFVVAAAABQAA3d0AAMABAAD//wAA"/>')
 		elif line.lstrip().startswith('{%'):
-			print ""
+			print("")
 		else:
-			print line.rstrip()
+			print(line.rstrip())
 	if open_file is True:
 		webbrowser.open_new("file://" + viewer_path)
 
@@ -200,30 +204,39 @@ def viz(omt_filepath, output_path=None, output_name="viewer.html", open_file=Tru
 def _tests():
 	# Parse mat to dictionary.
 	networkName = 'case9'
-	networkJson = parse(pJoin(omf.omfDir,'solvers','matpower5.1',networkName+'.m'), filePath=True)
+	networkJson = parse(os.path.join(os.path.dirname(__file__), 'solvers', 'matpower5.1', networkName + '.m'), filePath=True)
 	keyLen = len(networkJson.keys())
-	print 'Parsed MAT file with %s buses, %s generators, and %s branches.'%(len(networkJson['bus']),len(networkJson['gen']),len(networkJson['branch']))
+	print('Parsed MAT file with %s buses, %s generators, and %s branches.'%(len(networkJson['bus']),len(networkJson['gen']),len(networkJson['branch'])))
 	# Use python nxgraph to add lat/lon to .omt.json.
 	nxG = netToNxGraph(networkJson)
 	networkJson = latlonToNet(nxG, networkJson)
-	# with open(pJoin(os.getcwd(),'scratch','transmission','outData',networkName+'.omt'),'w') as inFile:
-	# 	json.dump(networkJson, inFile, indent=4)
-	# print 'Wrote network to: %s'%(pJoin(os.getcwd(),'scratch','transmission',"outData",networkName+".omt"))
+	import tempfile
+	temp_dir = tempfile.mkdtemp()
+	omt_path = os.path.join(temp_dir, networkName + '.omt')
+	with open(omt_path,'w') as inFile:
+	#with open(pJoin(os.getcwd(),'scratch','transmission','outData',networkName+'.omt'),'w') as inFile:
+		json.dump(networkJson, inFile, indent=4)
+	print('Wrote network to: %s' % (omt_path))
+	#print('Wrote network to: %s'%(pJoin(os.getcwd(),'scratch','transmission','outData',networkName+'.omt')))
 	# Convert back to .mat and run matpower.
 	matStr = netToMat(networkJson, networkName)
-	# with open(pJoin(os.getcwd(),'scratch','transmission',"outData",networkName+".m"),"w") as outMat:
-	# 	for row in matStr: outMat.write(row)
-	# print 'Converted .omt back to .m at: %s'%(pJoin(os.getcwd(),'scratch','transmission',"outData",networkName+".m"))
-	# inputDict = {
-	# 	"algorithm" : "FDBX",
-	# 	"model" : "DC",
-	# 	"iteration" : 10,
-	# 	"tolerance" : math.pow(10,-8),
-	# 	"genLimits" : 0,
-	# 	}
-	# matpower.runSim(pJoin(os.getcwd(),'scratch','transmission',"outData",networkName), inputDict, debug=False)
-	#viz(os.path.join(os.path.dirname(__file__), "static/SimpleNetwork.json")
+	mat_path = os.path.join(temp_dir, networkName + '.m')
+	with open(mat_path, 'w') as outMat:
+	#with open(pJoin(os.getcwd(),'scratch','transmission','outData',networkName+'.m'),'w') as outMat:
+		for row in matStr: outMat.write(row)
+	print('Converted .omt back to .m at: %s' % (mat_path))
+	#print('Converted .omt back to .m at: %s'%(pJoin(os.getcwd(),'scratch','transmission','outData',networkName+'.m')))
+	#inputDict = {
+	#	'algorithm' : 'FDBX',
+	#	'model' : 'DC',
+	#	'iteration' : 10,
+	#	'tolerance' : math.pow(10,-8),
+	#	'genLimits' : 0,
+	#	}
+	#matpower.runSim(os.path.join(temp_dir, networkName), inputDict, debug=False)
+	#matpower.runSim(pJoin(os.getcwd(),'scratch','transmission','outData',networkName), inputDict, debug=False)
+	#viz(os.path.join(os.path.dirname(__file__), 'static/SimpleNetwork.json')
 
 if __name__ == '__main__':
-	viz(os.path.join(os.path.dirname(__file__), "static/SimpleNetwork.json"))
-	#_tests()
+	#viz(os.path.join(os.path.dirname(__file__), "static/SimpleNetwork.json"))
+	_tests()

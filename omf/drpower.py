@@ -1,4 +1,6 @@
-import omf, os, web, json
+import os, json
+import omf
+from omf import web
 from gevent.pywsgi import WSGIServer
 
 def sigh():
@@ -55,11 +57,17 @@ if __name__ == '__main__':
 	# web.app.add_url_rule('/crash','crash',view_func=crash)
 	# Remove the bogus old publishModel route.
 	allRules = web.app.url_map._rules
-	del web.app.url_map._rules_by_endpoint['publishModel']
+	try:
+		del web.app.url_map._rules_by_endpoint['publishModel']
+	except:
+		pass
 	for index, rule in enumerate(allRules):
 		if rule.endpoint == 'publishModel':
 			delIndex = index
-	del allRules[delIndex]
+	try:
+		del allRules[delIndex]
+	except:
+		pass
 	# Start the server.
 	server = WSGIServer(('0.0.0.0', 5001), web.app)
 	server.serve_forever()

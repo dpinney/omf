@@ -1,28 +1,22 @@
+import json, datetime, csv, os, shutil, re, warnings, itertools, base64
+from os.path import join as pJoin
+from base64 import b64decode
+from zipfile import ZipFile
 import matplotlib.pyplot as plt
-import __neoMetaModel__
-import json
-from __neoMetaModel__ import *
 import numpy as np
-import datetime
-import csv
 import pandas as pd
-from dateutil import parser
-import os
-import shutil
-import re
-import warnings
-import itertools
 import plotly.graph_objs as go
-from plotly import tools
+#from plotly import tools
 import plotly.offline
 from scipy.stats import linregress
 from sklearn import preprocessing
 from sklearn.metrics import confusion_matrix
-from zipfile import ZipFile
-from base64 import b64encode, b64decode
+
+from omf.models import __neoMetaModel__
+from omf.models.__neoMetaModel__ import *
 
 # Model metadata:
-modelName, template = metadata(__file__)
+modelName, template = __neoMetaModel__.metadata(__file__)
 tooltip = "Identifies true meter phases by comparing AMI and SCADA data."
 hidden = True
 
@@ -262,13 +256,13 @@ def work(modelDir, inputDict):
 	for phase in ['V_A','V_B','V_C']:
 		df_test[[phase]] = min_max_scaler.fit_transform(df_test[[phase]])
 		# Check for non-zero data.
-		if max(df_test[[phase]]) > 0.0:
+		if max(df_test[phase]) > 0.0:
 			selectedPhase = phase
 	y0 = df_ss['V_A']
 	y1 = df_ss['V_B']
 	y2 = df_ss['V_C']
 	y3 = df_test[selectedPhase]
-	new_x = range(len(y0))
+	new_x = list(range(len(y0)))
 	# Create traces
 	trace0 = go.Scatter(
 		x = new_x,
@@ -342,8 +336,8 @@ def work(modelDir, inputDict):
 	shutil.rmtree(pJoin(modelDir, 'Revised Substation Voltage Files'), ignore_errors=True)
 	# write our outData
 	with open(pJoin(modelDir,"output-conf-matrix.png"),"rb") as inFile:
-		outData["confusionMatrixImg"] = inFile.read().encode("base64")
-	with open(pJoin(modelDir,"output-regression-result.csv"), "r") as inFile:
+		outData["confusionMatrixImg"] = base64.standard_b64encode(inFile.read()).decode()
+	with open(pJoin(modelDir,"output-regression-result.csv"), newline='') as inFile:
 		outData["regressionResult"] = list(csv.reader(inFile))
 	outData["meterDetailData"] = json.dumps(data, cls=plotly.utils.PlotlyJSONEncoder)
 	outData["meterDetailLayout"] = json.dumps(meterDetailLayout, cls=plotly.utils.PlotlyJSONEncoder)
@@ -351,25 +345,15 @@ def work(modelDir, inputDict):
 
 def new(modelDir):
 	""" Create a new instance of this model. Returns true on success, false on failure. """
+	with open(pJoin(__neoMetaModel__._omfDir, "static", "testFiles", "combined.csv")) as f:
+		ami_meter_data = f.read()
+	with open(pJoin(__neoMetaModel__._omfDir, "static", "testFiles", "rec_sub_meter.csv")) as f:
+		sub_meter_data = f.read()
 	defaultInputs = {
 		"user": "admin",
-		"subMeterData": open(
-			pJoin(
-				__neoMetaModel__._omfDir,
-				"static",
-				"testFiles",
-				"rec_sub_meter.csv",
-			)
-		).read(),
+		"subMeterData": sub_meter_data,
 		"subMeterFileName": "rec_sub_meter.csv",
-		"amiMeterData": open(
-			pJoin(
-				__neoMetaModel__._omfDir,
-				"static",
-				"testFiles",
-				"combined.csv"
-			)
-		).read(),
+		"amiMeterData": ami_meter_data,
 		"amiMeterDataName": "combined.csv",
 		"checkMeter": 'Meter_17.csv',
 		"modelType": modelName
@@ -393,9 +377,9 @@ def _simpleTest():
 	# Pre-run.
 	# renderAndShow(modelLoc)
 	# Run the model.
-	runForeground(modelLoc)
+	__neoMetaModel__.runForeground(modelLoc)
 	# Show the output.
-	renderAndShow(modelLoc)
+	__neoMetaModel__.renderAndShow(modelLoc)
 
 if __name__ == "__main__":
 	_simpleTest()
