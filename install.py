@@ -39,9 +39,9 @@ elif platform.system() == "Linux" and platform.linux_distribution()[0]=="CentOS 
 	os.system("wget --no-check-certificate https://sourceforge.net/projects/gridlab-d/files/gridlab-d/Candidate%20release/gridlabd-4.0.0-1.el6.x86_64.rpm")
 	os.system("rpm -Uvh gridlabd-4.0.0-1.el6.x86_64.rpm")
 	os.system("cd omf")
-	pipInstallInOrder("pip")
-	os.system("pip install --ignore-installed six")
-	os.system("python setup.py develop")
+	pipInstallInOrder("pip3")
+	os.system("pip3 install --ignore-installed six")
+	os.system("python3 setup.py develop")
 # TODO: Modify Windows installation to support Python 3.7 or up
 elif platform.system()=='Windows':
 	# Choco install.
@@ -50,7 +50,7 @@ elif platform.system()=='Windows':
 	# Check for right Python version.
 	version = sys.version.split('\n')[0] 
 	if not version.startswith('2.'):
-		os.system("choco install -y python2")
+		os.system("choco install -y python3")
 	# Install choco packages.
 	os.system("choco install -y wget")
 	os.system("choco install -y vcredist2008")
@@ -70,18 +70,18 @@ elif platform.system()=='Windows':
 	#os.system(Splat-1.3.0/Splat-1-3-1-SD-mx64.exe)
 	# Install pygraphviz.
 	if platform.architecture()[0] == '32bit':
-		os.system("C:\\Python27\\python.exe -m pip install omf\\static\\pygraphviz-1.3.1-cp27-none-win32.whl")
+		os.system("C:\\Python27\\python.exe -m pip install omf\\static\\pygraphviz-1.3.1-cp36-none-win32.whl")
 	elif platform.architecture()[0] == '64bit':
-		os.system("C:\\Python27\\python.exe -m pip install omf\\static\\pygraphviz-1.3.1-cp27-none-win_amd64.whl")
+		os.system("C:\\Python27\\python.exe -m pip install omf\\static\\pygraphviz-1.3.1-cp36-none-win_amd64.whl")
 	# Finish up installation with pip.
 	os.system("cd omf")
 	# HACK: more refreshes of the environment.
 	os.system("timeout 5")
 	os.system("refreshenv")
-	os.system("C:\\Python27\\python.exe -m pip install scipy")
-	os.system("C:\\Python27\\python.exe -m pip install setuptools>=33.1.1")
-	pipInstallInOrder("C:\\Python27\\python.exe -m pip")
-	os.system("C:\\Python27\\python.exe -m setup.py develop")
+	os.system("python3.exe -m pip install scipy")
+	os.system("python3.exe -m pip install setuptools>=33.1.1")
+	pipInstallInOrder("python3.exe -m pip")
+	os.system("python3.exe -m setup.py develop")
 elif platform.system()=="Darwin": # MacOS
 	# Might need to install en_US.UTF-8 locale, like for Ubuntu? That currently is not done in this script. macOS might already come with this locale anyway.
 	# Install homebrew
