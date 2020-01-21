@@ -1,20 +1,20 @@
 # imports --------------------------------------------------------------------------
 
-import json, csv, datetime
+import json, csv, datetime, time
 from omf import omfDir, feeder
 from omf.solvers import gridlabd
 
-# user inpots ----------------------------------------------------------------------
+# user inputs ----------------------------------------------------------------------
 
 WORKING_DIR = omfDir + '/scratch/faultLabeledMeterData'
-CIRCUIT_PATH = omfDir + '/static/publicFeeders/Olin Barre Fault.omd'
+CIRCUIT_PATH = omfDir + '/static/publicFeeders/Olin Barre GH.omd'
 
 TIMEZONE = 'PST+8PDT'
 TIME_FORMAT = '%Y-%m-%d %H:%M:%S'
 SIM_START_TIME = '2000-01-01 00:00:00 PST'
-SIM_STOP_TIME = '2000-03-01 00:00:00 PST'
+SIM_STOP_TIME = '2000-02-01 00:00:00 PST'
 FAULT_START_TIME = '2000-01-01 00:00:00 PST'
-FAULT_STOP_TIME = '2000-01-05 00:00:00 PST'
+FAULT_STOP_TIME = '2000-02-01 00:00:00 PST'
 FAULT_METER = 'node62463133906T62463072031'
 FAULT_LOCATION = '19384'
 # FAULT_METER = 'node62463000348T62463000400'
@@ -25,8 +25,19 @@ FAULT_TYPE = 'SLG-A'
 
 RECORDER_INTERVAL_SECS = 900
 RECORDER_LIMIT = 40000 
+METRIC_OF_INTEREST = 'measured_voltage_1.real, ' + \
+'measured_voltage_2.real, ' + \
+'measured_voltage_N.real, ' + \
+'measured_current_1.real, ' + \
+'measured_current_2.real, ' + \
+'measured_current_N.real, ' + \
+'indiv_measured_power_1.real, ' + \
+'indiv_measured_power_2.real, ' + \
+'indiv_measured_power_N.real'
+
 
 METER_FILENAME = 'meter.csv'
+OUTPUT_FILENAME = 'faultyData.csv'
 
 # load circuit ---------------------------------------------------------------------
 
@@ -82,7 +93,7 @@ tree[feeder.getMaxKey(tree) + 1] = {
 	'object': 'recorder', 
 	'name': 'meterRecorder',
 	'parent': '\"' + FAULT_METER + '\"',
-	'property': 'measured_real_power',
+	'property': METRIC_OF_INTEREST,
 	'file': METER_FILENAME,
 	'interval': RECORDER_INTERVAL_SECS,
 	'limit': RECORDER_LIMIT
@@ -141,15 +152,17 @@ if (faultStopTime >= simStartTime):
 
 # Run Gridlab ----------------------------------------------------------------------
 
+start = time.time()
 gridlabOut = gridlabd.runInFilesystem( tree, 
 	attachments=attachments, workDir=WORKING_DIR )
+end = time.time()
+print((end - start)/60.0)
 
 # Generate clean csv ---------------------------------------------------------------
 
-
 with open( METER_FILENAME,'r' ) as meterFile:
 	reader = csv.reader(meterFile, delimiter=',')
-	with open( 'data.csv', 'w' ) as outputFile:
+	with open( OUTPUT_FILENAME, 'w' ) as outputFile:
 		writer = csv.writer(outputFile, delimiter=',')
 
 		#loop past header
