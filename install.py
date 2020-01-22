@@ -21,8 +21,8 @@ if platform.system() == "Linux" and platform.linux_distribution()[0] in ["Ubuntu
 	os.system("sudo alien -i gridlabd-4.0.0-1.el6.x86_64.rpm")
 	os.system("sudo apt-get install -f")
 	os.system("cd omf")
-	os.system("pip install --upgrade pip")
-	pipInstallInOrder("pip")
+	os.system("pip3 install --upgrade pip")
+	pipInstallInOrder("pip3")
 	os.system("python setup.py develop")
 # TODO: Double check CentOS installation to support Python 3.7 or up
 elif platform.system() == "Linux" and platform.linux_distribution()[0]=="CentOS Linux":
