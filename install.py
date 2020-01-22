@@ -23,7 +23,7 @@ if platform.system() == "Linux" and platform.linux_distribution()[0] in ["Ubuntu
 	os.system("cd omf")
 	os.system("pip3 install --upgrade pip")
 	pipInstallInOrder("pip3")
-	os.system("python setup.py develop")
+	os.system("python3 setup.py develop")
 # TODO: Double check CentOS installation to support Python 3.7 or up
 elif platform.system() == "Linux" and platform.linux_distribution()[0]=="CentOS Linux":
 	# CentOS Docker image appears to come with en_US.UTF-8 locale built-in, but we might need to install that locale in the future. That currently is

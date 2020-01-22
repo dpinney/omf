@@ -187,7 +187,7 @@ def distAddNoise(inFeeder, noisePerc):
 		for prop in inFeeder['tree'][key]:
 			# Scramble valid properties
 			if prop in ['latitude', 'longitude','climate', 'ambient_temperature']:
-				print(prop)
+				# print(prop)
 				val = inFeeder['tree'][key][prop]
 				try:
 					parseVal = float(val)
