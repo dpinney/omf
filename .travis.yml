@@ -19,7 +19,6 @@ services:
 before_install:
   - if [ "$TRAVIS_OS_NAME" = "linux" ]; then sudo apt-get -y install python3; sudo apt-get -y install python3-setuptools; fi
   - if [ "$TRAVIS_OS_NAME" = "windows" ]; then choco install python3; fi
-  - if [ "$TRAVIS_OS_NAME" = "windows" ]; then cmd.exe //c "RefreshEnv.cmd"; fi
   - if [ "$TRAVIS_OS_NAME" = "windows" ]; then alias python3='/c/Python38/python'; fi
   - python3 install.py
   - export BOTO_CONFIG=/dev/null
