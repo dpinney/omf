@@ -2,6 +2,11 @@
 os:
   - osx
   - linux
+  - windows
+jobs:
+  allow_failures:
+    - os: osx
+    - os: windows
 language: generic
 dist: bionic
 addons:
