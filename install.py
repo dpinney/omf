@@ -88,7 +88,7 @@ elif platform.system()=="Darwin": # MacOS
 	brew_exit_code = os.system("brew --version")
 	if brew_exit_code != 0:
 		os.system('/usr/bin/ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"')
-	os.system("brew install wget python@3 ffmpeg git graphviz octave mdbtools")
+	os.system("brew install wget python@3 ffmpeg git graphviz octave mdbtools numpy")
 	os.system("brew link --overwrite python")
 	os.system("wget -O gridlabd.dmg --no-check-certificate https://sourceforge.net/projects/gridlab-d/files/gridlab-d/Candidate%20release/gridlabd_4.0.0.dmg")
 	os.system("sudo hdiutil attach gridlabd.dmg")
