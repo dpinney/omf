@@ -1,21 +1,17 @@
-language: generic
-
-jobs:
-  include:
-    - os: linux
-    dist: bionic
-    sudo: required
-    addons:
-      apt:
-        update: true
-    env:
-      - DISPLAY=:99.0
-    services:
-      - xvfb
-  include:
-    - os: osx
+# FYI, you can validate this file here: https://config.travis-ci.com/explore
+os: linux
+dist: bionic
+language: python
+python:
+  - "3.6"
+addons:
+  apt:
+    update: true
+env:
+  - DISPLAY=:99.0
+services:
+  - xvfb
 before_install:
-  - if [ "$TRAVIS_OS_NAME" = "osx" ]; then brew install python3; fi
   - python3 install.py
   - export BOTO_CONFIG=/dev/null
 install: "python3 setup.py develop"
