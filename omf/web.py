@@ -22,7 +22,8 @@ import omf
 from omf import models, feeder, network, milToGridlab, cymeToGridlab, weather, anonymization
 import omf.calibrate
 import omf.omfStats
-import omf.loadModelingAmi
+from omf import loadModelingAmi
+from omf import loadModeling
 
 app = Flask("web")
 Compress(app)
@@ -986,7 +987,7 @@ def backgroundLoadModelingAmi(owner, modelName, feederName, loadName):
 		request.files['amiFile'].save(ami_filepath)
 		with locked_open(pid_filepath, 'w') as pid_file:
 			pid_file.write(str(os.getpid()))
-		omf.loadModelingAmi.writeNewGlmAndPlayers(omdPath, ami_filepath, outDir)
+		loadModelingAmi.writeNewGlmAndPlayers(omdPath, ami_filepath, outDir)
 		os.remove(pid_filepath)
 	except Exception:
 		with locked_open(error_filepath, 'w') as errorFile:
@@ -1150,7 +1151,7 @@ def saveFeeder(owner, modelName, feederName, feederNum):
 		if os.path.isfile(error_file):
 			try:
 				os.remove(error_file)
-			except OSError as e:
+			except FileNotFoundError as e:
 				if e.errno ==2:
 					# Tried to remove a nonexistant file
 					pass
@@ -1163,18 +1164,15 @@ def saveFeeder(owner, modelName, feederName, feederNum):
 					pid = f.read()
 				os.remove(pid_filepath)
 				os.kill(int(pid), signal.SIGTERM)
-			except IOError as e:
+			except FileNotFoundError as e:
 				if e.errno == 2:
 					# Tried to open a nonexistent file. Presumably, some other process opened the used the pid file and deleted it before this process
 					# could use it
 					pass
 				else:
 					raise
-			except OSError as e:
-				if e.errno == 2:
-					# Tried to remove a nonexistent file
-					pass
-				elif e.errno == 3:
+			except ProcessLookupError as e:
+				if e.errno == 3:
 					# Tried to kill a process with a pid that doesn't map to an existing process.
 					pass
 				else:
@@ -1492,10 +1490,10 @@ def background_zillow_houses(model_dir):
 		triplex_objects = json.loads(request.form.get("triplexObjects"))
 		zillow_houses = {}
 		for obj in triplex_objects:
-			house = omf.loadModeling.get_zillow_configured_new_house(obj['latitude'], obj['longitude'])
+			house = loadModeling.get_zillow_configured_new_house(obj['latitude'], obj['longitude'])
 			if house is None:
 				# If a request for some house fails, get a random house
-				house = omf.loadModeling.get_random_new_house()
+				house = loadModeling.get_random_new_house()
 			zillow_houses[obj['key']] = house
 			# The APIs we use require us to limit our requests to a maximum of 1 per second. Exceeding that throughput will get us IP banned faster.
 			time.sleep(1)
