@@ -16,7 +16,7 @@ def runAllTests(startingdir):
 				file_content = f.read()
 			if 'def _tests():' in file_content:
 				print("********** TESTING", item, "************")
-				p = subprocess.Popen(["python", item], stderr=subprocess.PIPE)
+				p = subprocess.Popen(["python3", item], stderr=subprocess.PIPE)
 				p.wait()
 				if p.returncode:
 					the_errors += 1
