@@ -1111,8 +1111,8 @@ def new(modelDir):
 	defaultInputs = {
 		'modelType': modelName,
 		'feederName1': 'Olin Barre Geo',
-		'generateRandom': '2',
-		'graphData': '2',
+		'generateRandom': '0',
+		'graphData': '1',
 		'numberOfCustomers': '192',
 		'sustainedOutageThreshold': '200',
 		'causeFilter': '0',
