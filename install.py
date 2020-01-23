@@ -99,7 +99,7 @@ elif platform.system()=="Darwin": # MacOS
 	#os.system("sudo exec splat-1.4.2/configure")
 	os.system("cd omf")
 	os.system('pip3 install --install-option="--include-path=/usr/local/include/" --install-option="--library-path=/usr/local/lib/" pygraphviz')
-	os.system("pip3 install --only-binary numpy")
+	os.system('pip3 install "ecos >= 2.0.7rc2"')
 	pipInstallInOrder("pip3")
 	os.system("python3 setup.py develop")
 else:
