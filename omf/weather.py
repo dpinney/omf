@@ -185,7 +185,8 @@ def pullUscrn(year, station, datatype):
 		# #Subtract diffuse from raw to get direct component
 		direct = list(map(lambda x, y: x-y,rawData, diffuse))
 		direct_diffuse = list(zip(direct, diffuse))
-		return direct_diffuse
+		raw_diffuse = list(zip(rawData, diffuse))
+		return raw_diffuse #direct_diffuse
 	return rawData
 
 
@@ -879,7 +880,11 @@ def get_diffuse_solar_component(solarTotalTransmission):
 		#Brackets becomes negative becayse exp is greater
 		#than 1
 		# print(exponent, brackets)
-	return T_diffuse
+	#Convert from  MJ to J
+	T_diffuse = T_diffuse * (10**6)
+	#Convert from J/day to W
+	T_diffuse = T_diffuse * 0.000012
+	return abs(T_diffuse)
 
 
 def _tests():
@@ -895,8 +900,11 @@ def _tests():
 	#print(airportCodeToLatLon("IAD"))
 	## Testing USCRN (Works)
 	#print('USCRN (NOAA) data pulled to ' + tmpdir)
-	# data = pullUscrn('2017', 'KY_Versailles_3_NNW', "SOLARAD") # Does not write to a file by itself
+	# data = pullUscrn('2017', 'KY_Versailles_3_NNW', "IRRADIENCE_DIFFUSE") # Does not write to a file by itself
 	# print(data)
+	# import matplotlib.pyplot as plt
+	# plt.plot(data)
+	# plt.show()
 	## Testing ASOS (Works)
 	#pullAsos('2017','CHO', 'tmpc') # Does not write to a file by itself
 	#print('ASOS (Iowa) data pulled to ' + tmpdir)
