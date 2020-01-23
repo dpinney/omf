@@ -9,7 +9,7 @@ from urllib.request import urlretrieve # Might be depreciated in future versions
 from urllib.request import Request, urlopen
 from os.path import join as pJoin
 from datetime import timedelta, datetime
-from math import cos, asin, sqrt
+from math import cos, asin, sqrt, exp
 import requests
 from dateutil.parser import parse as parse_dt
 from omf import feeder
@@ -173,10 +173,22 @@ def pullUscrn(year, station, datatype):
 		"SOIL_TEMP_10": 34,
 		"SOIL_TEMP_20": 35,
 		"SOIL_TEMP_50": 36,
-		"SOIL_TEMP_100": 37 }
+		"SOIL_TEMP_100": 37,
+		"IRRADIENCE_DIFFUSE":13 }
+	#IF datatype is "irradiance estimate", then run the diffuse/direct_seperator method 
 	assert datatype in datatypeDict, "This datatype isn't listed in options!"
 	datatypeID = datatypeDict[datatype]
-	return [float(x.split()[datatypeID]) for x in r.text.splitlines() if len(x) != 0]
+	rawData = [float(x.split()[datatypeID]) for x in r.text.splitlines() if len(x) != 0]
+	if datatype == "IRRADIENCE_DIFFUSE":
+		#Now get diffuse component, write in place in data array
+		diffuse = list(map(get_diffuse_solar_component, rawData))
+		# #Subtract diffuse from raw to get direct component
+		direct = list(map(lambda x, y: x-y,rawData, diffuse))
+		direct_diffuse = list(zip(direct, diffuse))
+		raw_diffuse = list(zip(rawData, diffuse))
+		return raw_diffuse #direct_diffuse
+	return rawData
+
 
 
 def _pullWeatherWunderground(start, end, airport, workDir):
@@ -847,6 +859,33 @@ def get_radiation_data(radiation_type, site, year, out_file=None):
 	else:
 		return allYears
 
+def get_diffuse_solar_component(solarTotalTransmission):
+	"""
+	Td = TT [1 -- exp {0.6 (1 --B/TT)/(B -- 0.4)}] 
+	Where Td = Diffuse solar component
+	"""
+	#If no solar detected, return 0
+	if solarTotalTransmission <= 0:
+		return 0
+	#B constant at 0.76 per paper
+	B = 0.76
+	#Multipy solar measurements by 0.0864
+	#Because measurements are in in W/second, equation uses MJ/day
+	solarTotalTransmission = solarTotalTransmission * 0.0864
+	exponent = 0.6 * (1-(B/solarTotalTransmission))/(B-0.4)
+	brackets = 1 - exp(exponent)
+	T_diffuse = solarTotalTransmission * brackets
+	# if T_diffuse < 0:
+		#Problem is when brackets is negative
+		#Brackets becomes negative becayse exp is greater
+		#than 1
+		# print(exponent, brackets)
+	#Convert from  MJ to J
+	T_diffuse = T_diffuse * (10**6)
+	#Convert from J/day to W
+	T_diffuse = T_diffuse * 0.000012
+	return abs(T_diffuse)
+
 
 def _tests():
 	print('weather.py tests currently disabled to keep them from sending too many HTTP requests.')
@@ -861,7 +900,11 @@ def _tests():
 	#print(airportCodeToLatLon("IAD"))
 	## Testing USCRN (Works)
 	#print('USCRN (NOAA) data pulled to ' + tmpdir)
-	#data = pullUscrn('2017', 'KY_Versailles_3_NNW', 'T_CALC') # Does not write to a file by itself
+	# data = pullUscrn('2017', 'KY_Versailles_3_NNW', "IRRADIENCE_DIFFUSE") # Does not write to a file by itself
+	# print(data)
+	# import matplotlib.pyplot as plt
+	# plt.plot(data)
+	# plt.show()
 	## Testing ASOS (Works)
 	#pullAsos('2017','CHO', 'tmpc') # Does not write to a file by itself
 	#print('ASOS (Iowa) data pulled to ' + tmpdir)
