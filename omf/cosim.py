@@ -402,6 +402,26 @@ def _test8():
 	coord = Coordinator(agents, cosimProps)
 	print(coord.drawPrettyResults())
 
+def _test9():
+	# test KillAllAtTime agent
+	glmPath = omf.omfDir + '/scratch/CIGAR/test_smsSingle.glm'
+	from omf import cyberAttack
+	cosimProps = {'port':'6267', 'hostname':'localhost', 'glmPath':glmPath, 'startTime':'2000-01-01 00:00:00','endTime':'2000-01-05 00:00:00', 'stepSizeSeconds':3600}
+	# Gather the things to attack
+	from omf import feeder
+	tree = feeder.parse(glmPath)
+	namesOfInverters = []
+	for key in tree:
+		ob = tree[key]
+		if ob.get('object','') == 'inverter' and 'name' in ob:
+			namesOfInverters.append(ob['name'])
+	# Set up the agents and the simulation
+	agents = []
+	agents.append(cyberAttack.KillAllAtTime('KillAllInverters', '2000-01-01 12:00:00', 'MagnitudeOfKillInput', namesOfInverters))
+	print('Starting co-sim with the KillAllInverters agent.')
+	coord = Coordinator(agents, cosimProps)
+	print(coord.drawPrettyResults())
+
 def _testfault():
 	from omf import cyberAttack
 	cosimProps = {'port':'6267', 'hostname':'localhost', 'glmPath':omf.omfDir + '/scratch/CIGAR/test_Exercise_4_2_1.glm', 'startTime':'2000-01-01 05:00:00','endTime':'2000-01-01 05:30:00', 'stepSizeSeconds':60}
