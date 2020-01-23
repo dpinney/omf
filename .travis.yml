@@ -18,8 +18,9 @@ services:
   - xvfb
 before_install:
   - if [ "$TRAVIS_OS_NAME" = "linux" ]; then sudo apt-get -y install python3; sudo apt-get -y install python3-setuptools; fi
-  - if [ "$TRAVIS_OS_NAME" = "windows" ]; then choco install python3; alias python3='/c/Python38/python'; alias pip3='/c/Python38/Scripts/pip'; fi
-  - if [ "$TRAVIS_OS_NAME" = "windows" ]; then alias python3='/c/Python38/python'; fi
+  - if [ "$TRAVIS_OS_NAME" = "windows" ]; then choco install python3; fi
+  - if [ "$TRAVIS_OS_NAME" = "windows" ]; then echo $PATH; fi
+  - if [ "$TRAVIS_OS_NAME" = "windows" ]; then ln -s /c/Python38/python /usr/local/bin/python3; ln -s /c/Python38/Scripts/pip /usr/local/bin/pip3; fi
   - python3 install.py
   - export BOTO_CONFIG=/dev/null
 install: "sudo python3 setup.py develop"
