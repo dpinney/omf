@@ -23,6 +23,6 @@ before_install:
   - if [ "$TRAVIS_OS_NAME" = "windows" ]; then ln -s /c/Python36/python /usr/bin/python3; ln -s /c/Python36/Scripts/pip /usr/bin/pip3; fi
   - python3 install.py
   - export BOTO_CONFIG=/dev/null
-install: "sudo python3 setup.py develop"
+install: "sudo python3 setup.py develop || python setup.py develop"
 script:
   - python3 ./omf/runAllTests.py omf
