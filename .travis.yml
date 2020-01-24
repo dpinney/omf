@@ -1,5 +1,4 @@
 # FYI, you can validate this file here: https://config.travis-ci.com/explore
-
 os:
   - osx
   - linux
