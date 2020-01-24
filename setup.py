@@ -14,15 +14,14 @@ from setuptools import find_packages
 
 setup(
 	name = 'omf',
-	version = '0.2',
+	version = '1.0.0',
 	description = 'An Open Modeling Framework (omf) for power systems simulation.',
 	long_description = __doc__,
 	author = 'David Pinney',
-	author_email = 'david.pinney@nreca.coop',
+	author_email = 'david.pinney@nreca.coop',	
 	url = 'http://github.com/dpinney/omf/',
-	packages = find_packages(), # TODO: Fix either project layout or package list.
-	# py_modules = ['omf'],
-	# ext_modules = '',
+	packages = ['omf'],
+	include_package_data=True,
 	classifiers=[
 		'Development Status :: 4 - Beta',
 		'Environment :: Web Environment',
@@ -34,23 +33,7 @@ setup(
 		'Topic :: Internet :: WWW/HTTP :: Dynamic Content',
 		'Topic :: Software Development :: Libraries :: Python Modules'],
 	license = 'GPLv2',
-	# keywords = [],
 	platforms = 'any',
-	# cmdclass = [],
-	# data_files = [],
-	# package_dir = {},
-	## NOTE: the following keywords are from setuptools package.
-	# include_package_data = True,
-	# exclude_package_data = {},
-	# package_data = {},
 	zip_safe = False, 
 	install_requires = open("requirements.txt").readlines(),
-	# extras_require = {},
-	# setup_requires = [],
-	# dependency_links = '',
-	# namespace_packages = [],
-	# test_suite = '',
-	# tests_require = [],
-	# test_loader = '',
-	# eager_resources = [],
-) 
+)
