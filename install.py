@@ -77,10 +77,10 @@ elif platform.system()=='Windows':
 	# HACK: more refreshes of the environment.
 	os.system("timeout 5")
 	os.system("refreshenv")
-	os.system("python3.exe -m pip install scipy")
-	os.system("python3.exe -m pip install setuptools>=33.1.1")
-	pipInstallInOrder("python3.exe -m pip")
-	os.system("python3.exe -m setup.py develop")
+	os.system("python3 -m pip install scipy")
+	os.system("python3 -m pip install setuptools>=33.1.1")
+	pipInstallInOrder("python3 -m pip")
+	os.system("python3 -m setup.py develop")
 elif platform.system()=="Darwin": # MacOS
 	# Might need to install en_US.UTF-8 locale, like for Ubuntu? That currently is not done in this script. macOS might already come with this locale anyway.
 	# Install homebrew
