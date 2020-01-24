@@ -21,8 +21,6 @@ before_install:
   - if [ "$TRAVIS_OS_NAME" = "windows" ]; then choco install python3; fi
   - if [ "$TRAVIS_OS_NAME" = "windows" ]; then ln -s /c/Python38/python /usr/bin/python3; ln -s /c/Python38/Scripts/pip /usr/bin/pip3; fi
   - if [ "$TRAVIS_OS_NAME" = "windows" ]; then export PATH="/c/Python37:/c/Python37/Scripts:$PATH"; fi
-  - if [ "$TRAVIS_OS_NAME" = "windows" ]; then python --version; fi
-  - if [ "$TRAVIS_OS_NAME" = "windows" ]; then python install.py; fi
   - python3 install.py
   - export BOTO_CONFIG=/dev/null
 install: "sudo python3 setup.py develop"
