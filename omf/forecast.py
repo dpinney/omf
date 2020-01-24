@@ -518,7 +518,6 @@ def makeUsefulDf(df, noise=2.5, hours_prior=24):
 	with open(pJoin(this_directory, 'static', 'testFiles', 'holidays.pickle'), 'rb') as f:
 		nerc6 = pickle.load(f, encoding='latin_1') # Is this the right codec? It might be cp1252
 
-	
 	if 'dates' not in df.columns:
 		df['dates'] = df.apply(lambda x: dt(int(x['year']), int(x['month']), int(x['day']), int(x['hour'])), axis=1)
 
@@ -581,19 +580,20 @@ def train_neural_net(X_train, y_train, epochs):
 	)
 
 	early_stop = tf.keras.callbacks.EarlyStopping(monitor="loss", patience=20)
-
-	history = model.fit(X_train, y_train, epochs=epochs, verbose=0, callbacks=[early_stop])
+	x = X_train.values.tolist()
+	y = y_train.tolist()
+	history = model.fit(np.asarray(x), np.asarray(y), epochs=epochs, verbose=0, callbacks=[early_stop])
 
 	return model
 
-def neural_net_predictions(all_X, all_y, epochs=100, model=None, save_file=None):
+def neural_net_predictions(all_X, all_y, epochs=20, model=None, save_file=None):
 	X_train, y_train = all_X[:-8760], all_y[:-8760]
 
 	if model == None:
 		model = train_neural_net(X_train, y_train, epochs)
 	
-	predictions = [float(f) for f in model.predict(all_X[-8760:])]
-	train = [float(f) for f in model.predict(all_X[:-8760])]
+	predictions = [float(f) for f in model.predict(np.asarray(all_X[-8760:].values.tolist()))]
+	train = [float(f) for f in model.predict(np.asarray(all_X[:-8760].values.tolist()))]
 	accuracy = {
 		'test': MAPE(predictions, all_y[-8760:]),
 		'train': MAPE(train, all_y[:-8760])
@@ -602,9 +602,9 @@ def neural_net_predictions(all_X, all_y, epochs=100, model=None, save_file=None)
 	if save_file != None:
 		model.save(save_file)
 
-	return [float(f) for f in model.predict(all_X[-8760:])], accuracy
+	return [float(f) for f in model.predict(np.asarray(all_X[-8760:].values.tolist()))], accuracy
 
-def neural_net_next_day(all_X, all_y, epochs=100, hours_prior=24, save_file=None, model=None):
+def neural_net_next_day(all_X, all_y, epochs=20, hours_prior=24, save_file=None, model=None):
 	all_X_n, all_y_n = all_X[:-hours_prior], all_y[:-hours_prior]
 	X_train = all_X_n[:-8760]
 	y_train = all_y_n[:-8760]
@@ -615,8 +615,8 @@ def neural_net_next_day(all_X, all_y, epochs=100, hours_prior=24, save_file=None
 		model = train_neural_net(X_train, y_train, epochs)
 
 
-	predictions_test = [float(f) for f in model.predict(X_test)]
-	train = [float(f) for f in model.predict(X_train)]
+	predictions_test = [float(f) for f in model.predict(np.asarray(X_test.values.tolist()))]
+	train = [float(f) for f in model.predict(np.asarray(X_train.values.tolist()))]
 	accuracy = {
 		'test': MAPE(predictions_test, y_test),
 		'train': MAPE(train, y_train)
@@ -625,7 +625,7 @@ def neural_net_next_day(all_X, all_y, epochs=100, hours_prior=24, save_file=None
 	if model == None:
 		model.fit(X_test, y_test, epochs=epochs, verbose=0)
 
-	predictions = [float(f) for f in model.predict(all_X[-24:])]
+	predictions = [float(f) for f in model.predict(np.asarray(all_X[-24:].values.tolist()))]
 
 	if save_file != None:
 		model.save(save_file)

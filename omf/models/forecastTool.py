@@ -112,6 +112,7 @@ def work(modelDir, ind):
 					f.write(base64.standard_b64decode(ind[day]))
 
 	#load prediction
+	
 	tomorrow_load, model, tomorrow_accuracy = lf.neural_net_next_day(
 		all_X, all_y, 
 		epochs=epochs, save_file=pJoin(modelDir, 'one_day_model.h5'),
@@ -277,7 +278,7 @@ def new(modelDir):
 		'histFileName': 'Texas_1pm.csv',
 		"histCurve": hist_curve,
 		# upload models
-		'newModel': 'False',
+		'newModel': 'True',
 		'one_day_model': one_day_model,
 		'one_day_model_filename': 'one_day_model.h5',
 		'two_day_model': two_day_model,
