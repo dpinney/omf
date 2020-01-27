@@ -522,7 +522,7 @@
                         </div>
                     </div>
                     <div class="modalContentButtons">
-                        <button data-buttonfunction="toggle">Cancel</button>
+                        <button data-buttonfunction="toggle">Close</button>
                     </div>
                 </div>
             </div>
@@ -547,7 +547,7 @@
                             </tbody>
                         </table>
                         <div class="modalContentButtons">
-                            <button type="button" data-buttonfunction="toggle">Cancel</button>
+                            <button type="button" data-buttonfunction="toggle">Close</button>
                             <button type="submit">Create</button>
                         </div>
                     </form>
@@ -582,7 +582,7 @@
                             </tbody>
                         </table> 
                         <div class="modalContentButtons">
-                            <button type="button" data-buttonfunction="toggle">Cancel</button>
+                            <button type="button" data-buttonfunction="toggle">Close</button>
                             <button type="submit">Import</button>
                         </div>
                     </form>
@@ -613,7 +613,7 @@
                             </tbody>
                         </table>
                         <div class="modalContentButtons">
-                            <button type="button" data-buttonfunction="toggle">Cancel</button>
+                            <button type="button" data-buttonfunction="toggle">Close</button>
                             <button type="submit">Import</button>
                         </div>
                     </form>
@@ -644,7 +644,7 @@
                             </tbody>
                         </table>
                         <div class="modalContentButtons">
-                            <button type="button" data-buttonfunction="toggle">Cancel</button>
+                            <button type="button" data-buttonfunction="toggle">Close</button>
                             <button type="submit">Import</button>
                         </div>
                     </form>
@@ -672,7 +672,7 @@
                             </tbody>
                         </table>
                         <div class="modalContentButtons">
-                            <button type="button" data-buttonfunction="toggle">Cancel</button>
+                            <button type="button" data-buttonfunction="toggle">Close</button>
                             <button type="submit">Import</button>
                         </div>
                     </form>
@@ -704,7 +704,7 @@
                             </tbody>
                         </table>
                         <div class="modalContentButtons">
-                            <button type="button" data-buttonfunction="toggle">Cancel</button>
+                            <button type="button" data-buttonfunction="toggle">Close</button>
                             <button type="submit">Import</button>
                         </div>
                     </form>
@@ -748,7 +748,7 @@
                             </tbody>
                         </table>
                         <div class="modalContentButtons">
-                            <button type="button" data-buttonfunction="toggle">Cancel</button>
+                            <button type="button" data-buttonfunction="toggle">Close</button>
                             <button type="submit">Apply</button>
                         </div>
                     </form>
@@ -835,7 +835,7 @@
                             </tbody>
                         </table>
                         <div class="modalContentButtons">
-                            <button type="button" data-buttonfunction="toggle">Cancel</button>
+                            <button type="button" data-buttonfunction="toggle">Close</button>
                             <button type="submit">Apply</button>
                         </div>
                     </form>
@@ -863,7 +863,7 @@
                         </tbody>
                     </table>
                     <div class="modalContentButtons">
-                        <button data-buttonfunction="cancel">Cancel</button>
+                        <button data-buttonfunction="cancel">Close</button>
                         <button data-buttonfunction="submit">Apply</button>
                     </div>
                 </div>
@@ -875,7 +875,7 @@
                     <div class="scrollableList" data-tableinsert></div>
                     <!--<div style="text-align:center; padding: 10px;">-->
                     <div class="modalContentButtons">
-                        <button data-buttonfunction="cancel">Cancel</button>
+                        <button data-buttonfunction="cancel">Close</button>
                     </div>
                 </div>
             </div>
@@ -918,7 +918,7 @@
                         </tbody>
                     </table>
                     <div class="modalContentButtons">
-                        <button data-buttonfunction="toggle">Cancel</button>
+                        <button data-buttonfunction="toggle">Close</button>
                         <button onclick="massEdit();">Apply</button>
                     </div>
                 </div>
@@ -932,7 +932,7 @@
                         </tbody>
                     </table>
                     <div class="modalContentButtons">
-                        <button data-buttonfunction="toggle">Cancel</button>
+                        <button data-buttonfunction="toggle">Close</button>
                         <button data-buttonfunction="toggle" onclick="editAttachment()">Select</button>
                     </div>
                 </div>
@@ -946,7 +946,7 @@
                         </tbody>
                     </table>
                     <div class="modalContentButtons">
-                        <button data-buttonfunction="toggle">Cancel</button>
+                        <button data-buttonfunction="toggle">Close</button>
                         <button data-buttonfunction="toggle" onclick="saveAttachment();">Save</button>
                     </div>
                 </div>
@@ -1579,7 +1579,6 @@ const addManagerPrototype = {
             let modal;
             modal = createProgressModal({
                 startMessage: `Adding a "${component.object}" object to every "${targetObject}" object. This could take a few seconds.`,
-                promptAfterComplete: true,
                 endMessage: '',
                 finishFunc: () => modal.hide()
             });
@@ -2674,7 +2673,6 @@ function convertStaticLoadsIntoHouses() {
     let modal;
     modal = createProgressModal({
         startMessage: `Converting every triplex load and/or triplex node into a house with children. This could take a few seconds.`,
-        promptAfterComplete: true,
         endMessage: `${keys.length} triplex objects were converted into houses with children.`,
         finishFunc: () => modal.hide()    
     });
@@ -3045,7 +3043,6 @@ function startZillowHouses() {
     let modal;
     modal = createProgressModal({
         startMessage: "Submitting your triplex objects for conversion...",
-        promptAfterComplete: true,
         endMessage: '',
         finishFunc: () => modal.hide(),
         // No need to cancel anything b/c nothing happened
@@ -3082,7 +3079,6 @@ function pollZillowHouses() {
     let modal;
     modal = createProgressModal({
         startMessage: "Converting triplex objects into real-world Zillow houses. This could take many minutes...",
-        promptAfterComplete: true,
         endMessage: "",
         // The operation must be cancellable, thus the user must be reprompted
         cancelFunc: () => {
@@ -3155,8 +3151,8 @@ function saveFeeder(feeder) {
     let modal;
     if (feeder === gReadFeeder) {
         modal = createProgressModal({
-            startMessage: "Re-saving your old data...",
-            endMessage: "Success. The previous operation was undone.",
+            startMessage: "Re-saving the data from your most recent save...",
+            endMessage: "Success. Your data was restored to the most recent save.",
             finishFunc: () => modal.hide()
         });
         postRequest.done(function() {
@@ -3169,20 +3165,17 @@ function saveFeeder(feeder) {
         let cancelled = false;
         modal = createProgressModal({
             startMessage: "Saving changes to your file...",
-            //endMessage: "Success. Your recent changes were saved.", // Never shown
-            endMessage: '',
             finishFunc: () => {
                 modal.hide();
                 // Need to do this to make sure rename doesn't break if the user saves and remains on the page.
                 gReadFeeder = deepCopy(gWriteFeeder);
             },
-            // We must keep the cancelFunc in case the server throws an exception
-            cancelFunc: () => {
-                cancelled = true;
-                saveFeeder(gReadFeeder);
-            }
+            // Don't keep cancelFunc b/c we don't care if server throws an exception. Also we don't cancel saves
+            //cancelFunc: () => {
+            //    cancelled = true;
+            //    saveFeeder(gReadFeeder);
+            //}
         });
-        modal.cancelButton.style.display = 'none'; // Hide the cancel button because we don't cancel saves
         postRequest.done(function() {
             if (!cancelled) {
                 //modal.finish(); // Normally, this shows the "OK" and/or "Cancel" buttons, but we hide them
@@ -3191,10 +3184,10 @@ function saveFeeder(feeder) {
         }).fail(function() {
             if (!cancelled) {
                 modal.endMessage = "The server raised an internal exception during the save operation."
+                /* hide the cancel button b/c The user probably doesn't want to re-save their old work and lose all of their current work. They
+                probably just want to try saving normally again */
+                //modal.cancelButton.style.display = 'none'; 
                 modal.finish();
-                modal.finishButton.style.display = 'none'; // hide the OK button
-                modal.cancelButton.textContent = 'Recover';
-                modal.cancelButton.removeAttribute('style'); // Only show the cancel button
             }
         });
     }
@@ -3239,8 +3232,10 @@ async function loadFeeder(serverFeederName, serverModelName, owner) {
             saveFeeder(gReadFeeder);
         },
         finishFunc: () => {
-            reloadWrapper();
             modal.hide();
+            if (modal.endMessage !== "The server raised an internal exception while loading the feeder.") {
+                reloadWrapper(); // Only reload on successful feeder load
+            }
         } 
     });
     $.ajax({
@@ -3254,11 +3249,13 @@ async function loadFeeder(serverFeederName, serverModelName, owner) {
         contentType: false,
     }).done(function() {
         if (!cancelled) {
+            modal.cancelButton.textContent = 'Undo';
             modal.finish();
         }
     }).fail(function() {
         if (!cancelled) {
             modal.endMessage = "The server raised an internal exception while loading the feeder."
+            modal.cancelButton.style.display = "none"; // hide the "Undo" button before reprompt b/c there is nothing to undo
             modal.finish();
         }
     });
@@ -3289,7 +3286,6 @@ function validateClimateModal() {
     return true;
 }
 
-//TODO: check that gReadFeeder.equals(gWriteFeeder) are prompt user to save before initiating a file operation.
 /** 
  * Submit a from to do one of the following:
  * 1) Import a Milsoft, GridLAB-D, or CYME file into this .omd file.
@@ -3334,8 +3330,7 @@ async function submitForm({formId, pollUrl, inputId}) {
             cancelled = true;
             /* In cases where the initial operation changed the name of the .omd file on the server, we must rename the .omd file to its previous name
             in order to completely undo the operation */
-            // scadaForm??? amiForm???
-            // no climateForm, no anonymizeForm
+            // These operations don't change the .omd name: climate, anonymize, scada, ami
             if (["blankFeederForm", "milsoftForm", "gridlabdForm", "cymeForm"].includes(formId)) {
                 let oldServerName;
                 if (formId === "blankFeederForm") {
@@ -3370,6 +3365,7 @@ async function submitForm({formId, pollUrl, inputId}) {
         // We don't want to poll the server. Just reload the page.
         formRequest.done(function() {
             if (!cancelled) {
+                modal.cancelButton.textContent = 'Undo';
                 modal.finish();
             }
         }).fail(function() {
@@ -3393,6 +3389,7 @@ async function submitForm({formId, pollUrl, inputId}) {
                             // None of these error messages get shown because the server operation just throws an exception and fails to complete.
                             clearInterval(intervalId);
                             if (data.exists === false) {
+                                modal.cancelButton.textContent = 'Undo';
                                 modal.finish();
                             } else if (data === "milError") {
                                 modal.endMessage = "The .std and .seq files used were incorrectly formatted. Please click \"Cancel\" to undo the operation.";
@@ -3513,13 +3510,9 @@ const progressModalPrototype = {
      */
     finish(func) {
         if (func != null) func(); // This line makes it possible to execute ANOTHER function during "modal.finish()", although it isn't used anywhere
-        if (this.promptAfterComplete === true) {
-            this.self.querySelector("h2").textContent = this.endMessage;
-            this.spinner.style.display = "none";
-            this.finishButton.removeAttribute("style");
-        } else {
-            this.hide();
-        }
+        this.self.querySelector("h2").textContent = this.endMessage;
+        this.spinner.style.display = "none";
+        this.finishButton.removeAttribute("style");
     },
 
     hide() {
@@ -3531,14 +3524,12 @@ const progressModalPrototype = {
  * @param {string} startMessage - (required) the initial message to show the user while a task is executing on the server
  * @param {Function} cancelFunc - (optional) if provided, this function will execute when the "Cancel" button is clicked on the modal. If not
  *     provided, the "Cancel" button is never shown to the user
- * @param {boolean} promptAfterComplete - (optional) if true, the user will be prompted to click "OK" or "Cancel" after their task completes. If
- *     false, the modal disappears on its own
+ * @param {boolean} promptAfterComplete - (optional) removed. Just don't call <modal>.finish() if I don't want a prompt
  * @param {string} endMessage - (optional) the message to show the user once the task has completed. It is only shown if promptAfterComplete is true
  * @param {Function} finishFunc - (optional) if provided, this function will execute when the "OK" button is clicked on the modal
  */
-function createProgressModal({startMessage, cancelFunc=null, promptAfterComplete=false, endMessage=null, finishFunc=null}) {
+function createProgressModal({startMessage, cancelFunc=null, endMessage=null, finishFunc=null}) {
     const obj = Object.create(progressModalPrototype);
-    obj.promptAfterComplete = promptAfterComplete;
     obj.startMessage = startMessage;
     obj.self = document.getElementById("progressModal");
     obj.self.querySelector("h2").textContent = obj.startMessage;
@@ -3547,14 +3538,9 @@ function createProgressModal({startMessage, cancelFunc=null, promptAfterComplete
     obj.finishButton = obj.self.querySelector("button[data-buttonfunction='submit']");
     obj.finishButton.textContent = 'OK'; // reset the "OK" button just in case it was changed
     obj.finishButton.style.display = "none"; // Always hide the "OK" button initially
-    if (promptAfterComplete === true) {
-        if (endMessage == null || finishFunc == null) {
-            throw Error('If the progress modal prompts the user after an operation is complete, there must be a supplied endMessage and finishFunc')
-        }
-        obj.endMessage = endMessage;
-        obj.finishFunc = finishFunc;
-        obj.finishButton.onclick = obj.finishFunc;
-    }
+    obj.finishFunc = finishFunc; // Always need a finishFunc for simulated clicks
+    obj.finishButton.onclick = obj.finishFunc;
+    obj.endMessage = endMessage;
     if (cancelFunc == null) {
         obj.cancelButton.style.display = "none";
         obj.cancelButton.onclick = null;
@@ -5673,6 +5659,10 @@ async function initializeInterface() {
         }
     }
     createInterface();
+    if (!interfaceIsStatic() && feederNeedsSave()) {
+        // Save to account for objects that were given artifical grid coordinates. This will make the interface less annoying
+        saveFeeder(gWriteFeeder);
+    }
     attachHandlers();
     document.getElementById("loadingMessage").style.display = "none"
 }
