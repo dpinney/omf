@@ -5759,11 +5759,13 @@ function checkServerConversion() {
     }, 2000);
     */
 
-//ADD PROMPT TO SAVE CHANGES BEFORE EXIT
 {% if showFileMenu %}
-    // Browsers don't show custom 'beforeunload' messages anymore due to spamming users, so don't bother setting it
+    /* Browsers don't show custom 'beforeunload' messages anymore due to spamming users, so don't bother setting it. Only set this listener if the
+    user has unsaved changes */
     window.onbeforeunload = function(event) {
-        return "";
+        if (feederNeedsSave()) {
+            return "";
+        }
     }
 {% endif %}
 </script>
