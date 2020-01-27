@@ -3233,7 +3233,7 @@ async function loadFeeder(serverFeederName, serverModelName, owner) {
         },
         finishFunc: () => {
             modal.hide();
-            if (modal.endMessage !== "The server raised an internal exception while loading the feeder.") {
+            if (modal.endMessage === "Success. This feeder has been overwritten with the selected feeder.") {
                 reloadWrapper(); // Only reload on successful feeder load
             }
         } 
@@ -3309,7 +3309,6 @@ async function submitForm({formId, pollUrl, inputId}) {
         await $.ajax({
             url: `/uniqObjName/Feeder/${gThisOwner}/${fileName}/${gThisModelName}`//good
         }).done(function(data) {
-            //console.log(data);
             if (data.exists === true) {
                 alert(`You already have a feeder named "${fileName}". Please choose a different name.`);
             } else {
@@ -3348,10 +3347,17 @@ async function submitForm({formId, pollUrl, inputId}) {
         },
         finishFunc: () => {
             modal.hide();
-            reloadWrapper();
+            if (modal.endMessage == "Success. Your file was loaded into this feeder.") {
+                reloadWrapper(); // Only reload upon successful completion
+            }
         }
     });
-    // Submit the form to the server with an ajax request
+    //Provide estimate
+
+    //Provide estimate
+    if (formId === 'anonymizeForm') {
+        modal.endMessage = 'Success. File was anonymized.';
+    }
     const form = document.getElementById(formId);
     const formData = new FormData(form);
     const formRequest = $.ajax({
@@ -3371,6 +3377,7 @@ async function submitForm({formId, pollUrl, inputId}) {
         }).fail(function() {
             if (!cancelled) {
                 modal.endMessage = "The server raised an internal exception during form submission."
+                modal.cancelButton.style.display = "none"; // hide the "Undo" button before reprompt b/c there is nothing to undo
                 modal.finish();
             }
         });
@@ -3384,26 +3391,27 @@ async function submitForm({formId, pollUrl, inputId}) {
                 }).done(function(data) {
                     if (!cancelled) {
                         if (data.exists === true) {
-                            //processing is ongoing 
+                            // processing is ongoing
                         } else {
-                            // None of these error messages get shown because the server operation just throws an exception and fails to complete.
                             clearInterval(intervalId);
+                            modal.cancelButton.textContent = 'Undo';
+                            modal.cancelButton.style.display = "none"; // hide the "Undo" button before reprompt b/c there is nothing to undo
                             if (data.exists === false) {
-                                modal.cancelButton.textContent = 'Undo';
-                                modal.finish();
+                                // process is complete
+                                modal.cancelButton.removeAttribute('style'); // show "Undo" button
                             } else if (data === "milError") {
-                                modal.endMessage = "The .std and .seq files used were incorrectly formatted. Please click \"Cancel\" to undo the operation.";
-                                modal.finish();
+                                modal.endMessage = "The .std and .seq files used were incorrectly formatted.";
                             } else if (data === "glmError") {
-                                modal.endMessage = "The .glm file used was incorrectly formatted. Please click \"Cancel\" to undo the operation.";
-                                modal.finish();
+                                modal.endMessage = "The .glm file used was incorrectly formatted.";
+                            } else if (data === 'amiError') {
+                                modal.endMessage = 'The AMI file used was incorrectly formatted.';
                             } else {
                                 if (!data.endsWith(".")) {
                                     data += ".";
                                 }
-                                modal.endMessage = data + " Please click \"Cancel\" to undo the operation.";
-                                modal.finish();
+                                modal.endMessage = data;
                             }
+                            modal.finish();
                         }
                     } else {
                         clearInterval(intervalId);
@@ -3412,6 +3420,7 @@ async function submitForm({formId, pollUrl, inputId}) {
                     clearInterval(intervalId);
                     if (!cancelled) {
                         modal.endMessage = "The server raised an internal exception during the file operation."
+                        modal.cancelButton.style.display = "none"; // hide the "Undo" button before reprompt b/c there is nothing to undo
                         modal.finish();
                     }
                 });
