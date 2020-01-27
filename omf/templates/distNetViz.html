@@ -1579,9 +1579,10 @@ const addManagerPrototype = {
             let modal;
             modal = createProgressModal({
                 startMessage: `Adding a "${component.object}" object to every "${targetObject}" object. This could take a few seconds.`,
-                finishFunc: () => modal.hide(),
+                promptAfterComplete: true,
+                endMessage: '',
+                finishFunc: () => modal.hide()
             });
-            const that = this;
             setTimeout(() => {
                 Object.keys(gTree.tree).forEach(key => {
                     if (gTree.getObject(key).object === targetObject && Math.random() < probability) {
@@ -2673,6 +2674,7 @@ function convertStaticLoadsIntoHouses() {
     let modal;
     modal = createProgressModal({
         startMessage: `Converting every triplex load and/or triplex node into a house with children. This could take a few seconds.`,
+        promptAfterComplete: true,
         endMessage: `${keys.length} triplex objects were converted into houses with children.`,
         finishFunc: () => modal.hide()    
     });
@@ -3043,12 +3045,14 @@ function startZillowHouses() {
     let modal;
     modal = createProgressModal({
         startMessage: "Submitting your triplex objects for conversion...",
-        endMessage: "",
+        promptAfterComplete: true,
+        endMessage: '',
         finishFunc: () => modal.hide(),
-        cancelFunc: () => {
-            cancelled = true;
-            saveFeeder(gReadFeeder);
-        }
+        // No need to cancel anything b/c nothing happened
+        //cancelFunc: () => {
+        //    cancelled = true;
+        //    saveFeeder(gReadFeeder);
+        //}
     });
     const request = $.ajax({
         type: "POST",
@@ -3062,10 +3066,10 @@ function startZillowHouses() {
         }
     }).fail(function(jqXHR, textStatus, errorThrown) {
         if (!cancelled) {
-            modal.endMessage = "Operation failed. We were unable to submit your triplex objects. Check the console for more information.";
+            modal.endMessage = "Operation failed. We were unable to submit your triplex objects.";
             modal.finish();
-            console.log(jqXHR.status); // 500
-            console.log(jqXHR.responseText); // Error message
+            //console.log(jqXHR.status); // 500
+            //console.log(jqXHR.responseText); // Error message
         }
     });
 }
@@ -3078,18 +3082,17 @@ function pollZillowHouses() {
     let modal;
     modal = createProgressModal({
         startMessage: "Converting triplex objects into real-world Zillow houses. This could take many minutes...",
+        promptAfterComplete: true,
         endMessage: "",
+        // The operation must be cancellable, thus the user must be reprompted
         cancelFunc: () => {
             cancelled = true;
             modal.endMessage = "You cancelled the operation.";
-            modal.cancelButton.style.display = "none";
+            modal.cancelButton.style.display = "none"; // hide the cancel button upon reprompt
             modal.finish();
             // Don't re-save. No need to.
         },
-        finishFunc: () => {
-            modal.hide();
-            // don't reload. No need to.
-        }
+        finishFunc: () => modal.hide() // don't reload. No need to
     });
     const formData = new FormData();
     formData.set("owner", gThisOwner);
@@ -3112,6 +3115,7 @@ function pollZillowHouses() {
                     });
                     createSvgData(keys).draw(gViewport); // redraw so nodes are proper color
                     modal.endMessage = `Success. ${keys.length} triplex objects were converted into Zillow houses.`;
+                    modal.cancelButton.style.display = "none"; // hide the cancel button before reprompt
                     modal.finish();
                 }
             } else {
@@ -3121,10 +3125,11 @@ function pollZillowHouses() {
         }).fail(function(jqXHR, textStatus, errorThrown) {
             clearInterval(intervalId);
             if (!cancelled) {
-                modal.endMessage = "We were unable to get the house data to convert triplex objects into Zillow houses. Operation failed. Check the console for more information.";
+                modal.endMessage = "Operation failed. We were unable to get the house data to convert triplex objects into Zillow houses.";
+                modal.cancelButton.style.display = "none"; // hide the cancel button before reprompt
                 modal.finish();
-                console.log(jqXHR.status); // 500
-                console.log(jqXHR.responseText); // server response
+                //console.log(jqXHR.status); // 500
+                //console.log(jqXHR.responseText); // server response
             }
         });
     }, 5000);
@@ -3150,7 +3155,7 @@ function saveFeeder(feeder) {
     let modal;
     if (feeder === gReadFeeder) {
         modal = createProgressModal({
-            startMessage: "Undoing the previous operation...",
+            startMessage: "Re-saving your old data...",
             endMessage: "Success. The previous operation was undone.",
             finishFunc: () => modal.hide()
         });
@@ -3164,27 +3169,32 @@ function saveFeeder(feeder) {
         let cancelled = false;
         modal = createProgressModal({
             startMessage: "Saving changes to your file...",
-            endMessage: "Success. Your recent changes were saved.",
+            //endMessage: "Success. Your recent changes were saved.", // Never shown
+            endMessage: '',
             finishFunc: () => {
                 modal.hide();
                 // Need to do this to make sure rename doesn't break if the user saves and remains on the page.
                 gReadFeeder = deepCopy(gWriteFeeder);
             },
+            // We must keep the cancelFunc in case the server throws an exception
             cancelFunc: () => {
                 cancelled = true;
                 saveFeeder(gReadFeeder);
             }
         });
-        //modal.cancelButton.setAttribute("style", "display:none"); // make the cancel button invisible
+        modal.cancelButton.style.display = 'none'; // Hide the cancel button because we don't cancel saves
         postRequest.done(function() {
             if (!cancelled) {
-                //modal.cancelButton.removeAttribute("style"); // make the cancel button visible
-                modal.finish();
+                //modal.finish(); // Normally, this shows the "OK" and/or "Cancel" buttons, but we hide them
+                modal.finishButton.click(); // This makes it so that there is always a simulated click on "OK"
             }
         }).fail(function() {
             if (!cancelled) {
                 modal.endMessage = "The server raised an internal exception during the save operation."
                 modal.finish();
+                modal.finishButton.style.display = 'none'; // hide the OK button
+                modal.cancelButton.textContent = 'Recover';
+                modal.cancelButton.removeAttribute('style'); // Only show the cancel button
             }
         });
     }
@@ -3383,7 +3393,7 @@ async function submitForm({formId, pollUrl, inputId}) {
                             // None of these error messages get shown because the server operation just throws an exception and fails to complete.
                             clearInterval(intervalId);
                             if (data.exists === false) {
-                                modal.finish();                          
+                                modal.finish();
                             } else if (data === "milError") {
                                 modal.endMessage = "The .std and .seq files used were incorrectly formatted. Please click \"Cancel\" to undo the operation.";
                                 modal.finish();
@@ -3498,13 +3508,18 @@ function reloadWrapper() {
 
 const progressModalPrototype = {
     /**
-     * @param {Function} func - An additional function to execute when the modal finishes
+     * This function is called to either present the "OK" button to the user or just hide the modal once a task is done
+     * @param {Function} func - An additional function to execute when the "OK" button is clicked
      */
     finish(func) {
-        if (func != null) func;
-        this.self.querySelector("h2").textContent = this.endMessage;
-        this.spinner.style.display = "none";
-        this.finishButton.removeAttribute("style");
+        if (func != null) func(); // This line makes it possible to execute ANOTHER function during "modal.finish()", although it isn't used anywhere
+        if (this.promptAfterComplete === true) {
+            this.self.querySelector("h2").textContent = this.endMessage;
+            this.spinner.style.display = "none";
+            this.finishButton.removeAttribute("style");
+        } else {
+            this.hide();
+        }
     },
 
     hide() {
@@ -3513,31 +3528,42 @@ const progressModalPrototype = {
 }
 
 /**
- * Create a progress modal in 1 of 2 modes: First mode will show a cancel button which if clicked allows the operation to be undone. Second mode will
- * not show a cancel button. startMessage and finishFunc are required parameters. Sometimes you have to set with endMessage after the progress modal
- * has been constructed.
- * @param {Function} finishFunc - will be executed when the user clicks the "OK" button after an operation has completed
+ * @param {string} startMessage - (required) the initial message to show the user while a task is executing on the server
+ * @param {Function} cancelFunc - (optional) if provided, this function will execute when the "Cancel" button is clicked on the modal. If not
+ *     provided, the "Cancel" button is never shown to the user
+ * @param {boolean} promptAfterComplete - (optional) if true, the user will be prompted to click "OK" or "Cancel" after their task completes. If
+ *     false, the modal disappears on its own
+ * @param {string} endMessage - (optional) the message to show the user once the task has completed. It is only shown if promptAfterComplete is true
+ * @param {Function} finishFunc - (optional) if provided, this function will execute when the "OK" button is clicked on the modal
  */
-function createProgressModal({startMessage, endMessage, cancelFunc, finishFunc}) {
+function createProgressModal({startMessage, cancelFunc=null, promptAfterComplete=false, endMessage=null, finishFunc=null}) {
     const obj = Object.create(progressModalPrototype);
-    obj.self = document.getElementById("progressModal");
-    obj.spinner = obj.self.querySelector("img");
+    obj.promptAfterComplete = promptAfterComplete;
     obj.startMessage = startMessage;
-    obj.endMessage = endMessage;
+    obj.self = document.getElementById("progressModal");
+    obj.self.querySelector("h2").textContent = obj.startMessage;
     obj.cancelButton = obj.self.querySelector("button[data-buttonfunction='cancel']");
-    obj.cancelFunc = cancelFunc;
-    obj.finishFunc = finishFunc;
+    obj.cancelButton.textContent = 'Cancel'; // reset the "Cancel" button just in case it was changed
     obj.finishButton = obj.self.querySelector("button[data-buttonfunction='submit']");
-    obj.self.querySelector("h2").textContent = startMessage;
-    obj.cancelButton.style.display = "none";
-    obj.finishButton.style.display = "none";
-    obj.finishButton.onclick = obj.finishFunc;
+    obj.finishButton.textContent = 'OK'; // reset the "OK" button just in case it was changed
+    obj.finishButton.style.display = "none"; // Always hide the "OK" button initially
+    if (promptAfterComplete === true) {
+        if (endMessage == null || finishFunc == null) {
+            throw Error('If the progress modal prompts the user after an operation is complete, there must be a supplied endMessage and finishFunc')
+        }
+        obj.endMessage = endMessage;
+        obj.finishFunc = finishFunc;
+        obj.finishButton.onclick = obj.finishFunc;
+    }
     if (cancelFunc == null) {
+        obj.cancelButton.style.display = "none";
         obj.cancelButton.onclick = null;
     } else {
-        obj.cancelButton.removeAttribute("style");
+        obj.cancelFunc = cancelFunc;
         obj.cancelButton.onclick = obj.cancelFunc;
+        obj.cancelButton.removeAttribute("style");
     }
+    obj.spinner = obj.self.querySelector("img");
     obj.spinner.removeAttribute("style");
     obj.self.removeAttribute("style");
     return obj;
