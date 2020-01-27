@@ -5163,7 +5163,6 @@ function createSelectionTable(ids, tree) {
     const table = document.createElement("table");
     const tHead = document.createElement("thead");
     const tBody = document.createElement("tbody"); 
-
     const titleRow = createRow({key: "Selected Elements"});
     Array.from(titleRow.self.children).forEach(td => { 
         td.classList.add("tableTitle");
@@ -5171,12 +5170,10 @@ function createSelectionTable(ids, tree) {
     });
     titleRow.self.children[1].setAttribute("colspan", "2");
     titleRow.self.children[2].remove();
-
     tHead.append(titleRow.self);
     table.append(tHead);
     table.append(tBody);
     table.classList.add("dataTable");
-
     // duplicate
     const buttonRow = document.createElement("tr");
     buttonRow.classList.add("buttonRow");
@@ -5190,7 +5187,6 @@ function createSelectionTable(ids, tree) {
     buttonRow.append(buttonCell);
     tBody.append(buttonRow);
     // duplicate
-
     ids.forEach(id => {
         let obj = tree.getObject(id);
         let name = obj.name != null ? obj.name : obj.object != null ? obj.object : Object.keys(obj)[0];
@@ -5549,22 +5545,26 @@ const rowPrototype = {
             } else {
                 // Display value within TreeObject.data
                 const value = this.key === "" ? "" : this.tObject.data[this.key];
-                if (nonModifiableProperties.includes(this.key)) {
+                if (this.key === 'object') {
                     td.textContent = value;
+                    return td;
+                }
+                const input = document.createElement("input");
+                input.classList.add("modalInput");
+                input.value = value;
+                td.appendChild(input);
+                if (nonModifiableProperties.includes(this.key)) {
+                    input.readOnly = true;
                 } else {
-                    const input = document.createElement("input");
                     if (this.key === "longitude") {
                         input.dataset.coordinate = "longitude";
                     } else if (this.key === "latitude") {
                         input.dataset.coordinate = "latitude";
                     }
-                    input.classList.add("modalInput");
-                    td.appendChild(input);
                     const that = this;
                     input.addEventListener("change", function() {
                         that.updateMapValue(this);
                     });
-                    input.value = value;
                 }
                 return td;
             }
