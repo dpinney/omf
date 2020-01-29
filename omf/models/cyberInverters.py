@@ -410,12 +410,12 @@ def stringToMag(s):
 def new(modelDir):
 	''' Create a new instance of this model. Returns true on success, false on failure. '''
 	defaultInputs = {
-		"simStartDate": "2019-08-01",
-		"simLengthUnits": "hours",
+		"simStartDate": "2019-07-01",
+		"simLengthUnits": "minutes",
 		"feederName1": "Olin Barre GH EOL Solar AVolts CapReg",
 		"modelType": modelName,
 		"zipCode": "59001",
-		"simLength": "72"
+		"simLength": "1440"
 	}
 	creationCode = __neoMetaModel__.new(modelDir, defaultInputs)
 	try:
