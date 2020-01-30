@@ -1,4 +1,4 @@
-import csv, time
+import csv, time, itertools
 import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.colors import ListedColormap
@@ -13,8 +13,40 @@ from sklearn.tree import DecisionTreeClassifier
 from sklearn.ensemble import RandomForestClassifier, AdaBoostClassifier
 from sklearn.naive_bayes import GaussianNB
 from sklearn.discriminant_analysis import QuadraticDiscriminantAnalysis
+from sklearn.metrics import confusion_matrix
 
-h = 1  # step size in the mesh
+PLOTTING_FEATURE_NUM_1 = 0
+PLOTTING_FEATURE_NUM_2 = 7
+
+def plot_confusion_matrix(cm, classes,
+                          normalize=False,
+                          title='Confusion matrix',
+                          cmap=plt.cm.Blues):
+    """
+    This function prints and plots the confusion matrix.
+    Normalization can be applied by setting `normalize=True`.
+    """
+    if normalize:
+        cm = cm.astype('float') / cm.sum(axis=1)[:, np.newaxis]
+
+    plt.imshow(cm, interpolation='nearest', cmap=cmap)
+    plt.title(title)
+    plt.colorbar()
+    tick_marks = np.arange(len(classes))
+    plt.xticks(tick_marks, classes, rotation=45)
+    plt.yticks(tick_marks, classes)
+
+    fmt = '.2f' if normalize else 'd'
+    thresh = cm.max() / 2.
+    for i, j in itertools.product(range(cm.shape[0]), range(cm.shape[1])):
+        plt.text(j, i, format(cm[i, j], fmt),
+                 horizontalalignment="center",
+                 color="white" if cm[i, j] > thresh else "black")
+
+    plt.tight_layout()
+    plt.ylabel('True label')
+    plt.xlabel('Predicted label')
+
 
 names = ["Nearest Neighbors", "Linear SVM", "RBF SVM", "Gaussian Process",
          "Decision Tree", "Random Forest", "Neural Net", "AdaBoost",
@@ -33,58 +65,74 @@ classifiers = [
     QuadraticDiscriminantAnalysis()]
 
 # preprocess dataset, split into training and test part
-X, y = [], []
-count = 0
-firstNonFault = False
+x, y, header, colorList, uniqueLabels = [], [], [], [], []
+colorNum = -1
+lastLabel = ''
 
-with open( 'extractedData.csv','r' ) as dataFile:
+with open( 'data.csv','r' ) as dataFile:
     reader = csv.reader(dataFile, delimiter=',')
     
     for row in reader:
         
-        datapoint = []
-        label = -1
-        
-        # if fault, label is 1; otherwise label is 0
-        if row[-1] != 'None':
-            label = 1
-        
+        if 'meterID' in row:
+            header = row
+
         else:
-            label = 0
 
-            # restart counter when we transition from faulty data to fault free data
-            if firstNonFault == False:
-                firstNonFault = True
+            datapoint = []
+            label = row[-1]
+
+            # restart counter when we transition to new label and update colorNum
+            if label != lastLabel:
                 count = 0
-        
-        datapoint.append(count)
-        count += 1
-
-        for index,data in enumerate(row):
-
-            # if not label, convert to float
-            if index != (len(row)-1):
-                datapoint.append(float(data))
+                colorNum += 1
+                uniqueLabels.append(label)
             
-    
-        X.append( datapoint )
-        y.append( label )
+            datapoint.append(count)
+            colorList.append(colorNum)
 
+            # populate datapoint
+            for index,data in enumerate(row):
 
-newX = np.array(X)
-plt.scatter(newX[:,0], newX[:,1], c=y)
-plt.colorbar()
-plt.show()
+                # timestamp and meterID and label are not part of the datapoint 
+                # convert everything to float
+                if (index>1) and (index != (len(row)-1)):
+                    datapoint.append(float(data))
+                    
+            x.append( datapoint )
+            y.append( label )
+            
+            count += 1
+            lastLabel = label
 
-#raise Exception('STOP')
+print('labels for confMats', uniqueLabels)
+
 
 # normalize data and split into train/test
-X = StandardScaler().fit_transform(X)
-X_train, X_test, y_train, y_test = \
-    train_test_split(X, y, test_size=.4, random_state=42)
+x = StandardScaler().fit_transform(x)
+xTrain, xTest, yTrain, yTest = \
+    train_test_split(x, y, test_size=.4, random_state=42)
 
 # iterate over classifiers
 for name, clf in zip(names, classifiers):
-    clf.fit(X_train, y_train)
-    score = clf.score(X_test, y_test)
+    
+    clf.fit(xTrain, yTrain)
+    yPredicted = clf.predict(xTest)
+
+    confMat = confusion_matrix(yTest, yPredicted, labels=uniqueLabels)
+    score = clf.score(xTest, yTest)
+    
+    plt.figure()
+    plot_confusion_matrix(confMat, uniqueLabels, normalize=True, title=name)
     print(name,score)
+
+# plot data
+newX = np.array(x)
+header = ['timepoint'] + header[2:-1]
+plt.figure()
+plt.scatter(newX[:,PLOTTING_FEATURE_NUM_1], newX[:,PLOTTING_FEATURE_NUM_2], c=colorList)
+plt.colorbar()
+plt.tight_layout()
+plt.ylabel(header[PLOTTING_FEATURE_NUM_2])
+plt.xlabel(header[PLOTTING_FEATURE_NUM_1])
+plt.show()
