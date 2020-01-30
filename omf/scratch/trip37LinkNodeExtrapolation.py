@@ -1,18 +1,8 @@
-import json, os, sys, tempfile, webbrowser, time, shutil, subprocess, datetime as dt, csv, math
-import traceback, copy, platform
+import json, copy, random
 from os.path import join as pJoin
-from jinja2 import Template
-from matplotlib import pyplot as plt
-import networkx as nx
-from omf.models import __neoMetaModel__
-from __neoMetaModel__ import *
-import subprocess, random, webbrowser, multiprocessing
-import pprint as pprint
 
-# OMF imports
-import omf.feeder as feeder
-from omf.solvers import gridlabd
-from omf.weather import zipCodeToClimateName
+from omf.models import __neoMetaModel__
+from omf.models.__neoMetaModel__ import *
 
 def highLow():
 	feederName = "Simple Market System"
@@ -37,10 +27,10 @@ def highLow():
 		if lowestY > node["y"]:
 			lowestY = node["y"]
 
-	print "highestX: " + str(highestX)
-	print "lowestX: " + str(lowestX)
-	print "highestY :" + str(highestY)
-	print  "lowestY: " + str(lowestY)
+	print("highestX: " + str(highestX))
+	print("lowestX: " + str(lowestX))
+	print("highestY :" + str(highestY))
+	print("lowestY: " + str(lowestY))
 
 
 def function():
@@ -50,31 +40,31 @@ def function():
 
 	linkTemplate = {
 		"source": {
-		    "index": 9, 
-		    "name": "n630", 
-		    "weight": 3, 
-		    "px": 515.8855720607148, 
-		    "py": 506.4381606171009, 
-		    "objectType": "gridNode", 
-		    "y": 506.4381606171009, 
-		    "x": 515.8855720607148, 
-		    "fixed": True, 
-		    "chargeMultiple": 1, 
-		    "treeIndex": 18
+			"index": 9,
+			"name": "n630",
+			"weight": 3,
+			"px": 515.8855720607148,
+			"py": 506.4381606171009,
+			"objectType": "gridNode",
+			"y": 506.4381606171009,
+			"x": 515.8855720607148,
+			"fixed": True,
+			"chargeMultiple": 1,
+			"treeIndex": 18
 		}, 
 		"treeIndex": 19, 
 		"target": {
-		    "index": 12, 
-		    "name": "tn_1", 
-		    "weight": 2, 
-		    "px": 509.61450605689737, 
-		    "py": 511.73425866525673, 
-		    "objectType": "triplex_node", 
-		    "y": 511.73425866525673, 
-		    "x": 509.61450605689737, 
-		    "fixed": 1, 
-		    "chargeMultiple": 1, 
-		    "treeIndex": 23
+			"index": 12,
+			"name": "tn_1",
+			"weight": 2,
+			"px": 509.61450605689737,
+			"py": 511.73425866525673,
+			"objectType": "triplex_node",
+			"y": 511.73425866525673,
+			"x": 509.61450605689737,
+			"fixed": 1,
+			"chargeMultiple": 1,
+			"treeIndex": 23
 		}, 
 		"objectType": "fromTo"
 	}
@@ -82,43 +72,43 @@ def function():
 	'''
 	LINE EXAMPLE
 	"13": {
-            "phases": "\"ABC\"", 
-            "from": "A_node711", 
-            "name": "TIE_A_to_C", 
-            "object": "underground_line", 
-            "to": "C_node707", 
-            "length": "400", 
-            "configuration": "lc_7231"
-        },
+			"phases": "\"ABC\"",
+			"from": "A_node711",
+			"name": "TIE_A_to_C",
+			"object": "underground_line",
+			"to": "C_node707",
+			"length": "400",
+			"configuration": "lc_7231"
+		},
 
 	NODE EXAMPLE:
 		"205": {
-            "phases": "\"ABC\"", 
-            "name": "C_node707", 
-            "object": "node", 
-            "voltage_B": "-2400.000000 -1385.640646j", 
-            "voltage_C": "0.000000+2771.281292j", 
-            "voltage_A": "2400.000000 -1385.640646j", 
-            "nominal_voltage": "4800"
-        }, 
-        ''' 
+			"phases": "\"ABC\"",
+			"name": "C_node707",
+			"object": "node",
+			"voltage_B": "-2400.000000 -1385.640646j",
+			"voltage_C": "0.000000+2771.281292j",
+			"voltage_A": "2400.000000 -1385.640646j",
+			"nominal_voltage": "4800"
+		},
+		'''
 
-   	nodeTemplate = {
-        "index": 0, 
-        "treeIndex": 8, 
-        "weight": 0, 
-        "px": 530.4008195466031, 
-        "py": 493.0561704740412, 
-        "y": 493.0561704740412, 
-        "x": 530.4008195466031, 
-        "fixed": True, 
-        "chargeMultiple": 1
-    }
+	nodeTemplate = {
+		"index": 0,
+		"treeIndex": 8,
+		"weight": 0,
+		"px": 530.4008195466031,
+		"py": 493.0561704740412,
+		"y": 493.0561704740412,
+		"x": 530.4008195466031,
+		"fixed": True,
+		"chargeMultiple": 1
+	}
 
 	nodeDict = {}
 	typeDict = {}
 
-    #two runthroughs are required, to populate all nodes before lines
+	#two runthroughs are required, to populate all nodes before lines
 	for key,value in feederModel["tree"].items():
 		nodeIndexCounter = 0
 		if "object" in value:
@@ -164,7 +154,7 @@ def function():
 				newLine["target"]["y"] =nodeDict[targetNodeName]["y"]
 				feederModel["links"].append(newLine)
 
-	print typeDict
+	print(typeDict)
 	modelName = "resilientDist"
 	with open(pJoin(__neoMetaModel__._omfDir, "static", "publicFeeders", feederName + '_new.omd'), 'w') as outfile:
 		json.dump(feederModel, outfile, indent = 4)
