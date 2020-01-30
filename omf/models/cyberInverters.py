@@ -229,11 +229,13 @@ def work(modelDir, inputDict):
 			imagB = rawOut[key]['sum(power_losses_B.imag)']
 			realC = rawOut[key]['sum(power_losses_C.real)']
 			imagC = rawOut[key]['sum(power_losses_C.imag)']
-			oneLoss = hdmAgg(vecSum(vecPyth(realA,imagA),vecPyth(realB,imagB),vecPyth(realC,imagC)), avg, level)
-			if 'Losses' not in outData['Consumption']:
-				outData['Consumption']['Losses'] = oneLoss
-			else:
-				outData['Consumption']['Losses'] = vecSum(oneLoss,outData['Consumption']['Losses'])
+			#TODO: fix this
+			outData['Consumption']['Losses'] = 0.0
+			# oneLoss = hdmAgg(vecSum(vecPyth(realA,imagA),vecPyth(realB,imagB),vecPyth(realC,imagC)), avg, level)
+			# if 'Losses' not in outData['Consumption']:
+			# 	outData['Consumption']['Losses'] = oneLoss
+			# else:
+			# 	outData['Consumption']['Losses'] = vecSum(oneLoss,outData['Consumption']['Losses'])
 		elif key.startswith('Regulator_') and key.endswith('.csv'):
 			#split function to strip off .csv from filename and user rest of the file name as key. for example- Regulator_VR10.csv -> key would be Regulator_VR10
 			regName=""
@@ -319,9 +321,10 @@ def work(modelDir, inputDict):
 	if latPerc < 0.25: doNeato = True
 	else: doNeato = False
 	# Generate the frames for the system voltage map time traveling chart.
-	genTime, mapTimestamp = omf.models.solarEngineering.generateVoltChart(tree, rawOut, modelDir, neatoLayout=doNeato)
-	outData['genTime'] = genTime
-	outData['mapTimestamp'] = mapTimestamp
+	# TODO: fix voltChart in python3
+	# genTime, mapTimestamp = omf.models.solarEngineering.generateVoltChart(tree, rawOut, modelDir, neatoLayout=doNeato)
+	# outData['genTime'] = genTime
+	# outData['mapTimestamp'] = mapTimestamp
 	# Aggregate up the timestamps:
 	if level=='days':
 		outData['timeStamps'] = aggSeries(stamps, stamps, lambda x:x[0][0:10], 'days')
@@ -411,11 +414,11 @@ def new(modelDir):
 	''' Create a new instance of this model. Returns true on success, false on failure. '''
 	defaultInputs = {
 		"simStartDate": "2019-07-01",
-		"simLengthUnits": "minutes",
-		"feederName1": "Olin Barre GH EOL Solar AVolts CapReg",
+		"simLengthUnits": "seconds",
+		"feederName1": "ieee37fixed",
 		"modelType": modelName,
 		"zipCode": "59001",
-		"simLength": "1440"
+		"simLength": "600"
 	}
 	creationCode = __neoMetaModel__.new(modelDir, defaultInputs)
 	try:
@@ -436,7 +439,7 @@ def _tests():
 	# Create New.
 	new(modelLoc)
 	# Pre-run.
-	__neoMetaModel__.renderAndShow(modelLoc)
+	# __neoMetaModel__.renderAndShow(modelLoc)
 	# Run the model.
 	__neoMetaModel__.runForeground(modelLoc)
 	# Show the output.
