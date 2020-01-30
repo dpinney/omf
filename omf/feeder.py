@@ -114,7 +114,10 @@ def getMaxKey(inTree):
 def adjustTime(tree, simLength, simLengthUnits, simStartDate):
 	''' Adjust a GLM clock and recorders to start/stop/step specified. '''
 	# translate LengthUnits to minutes.
-	if simLengthUnits == 'minutes':
+	if simLengthUnits == 'seconds':
+		lengthInSeconds = simLength
+		interval =  1
+	elif simLengthUnits == 'minutes':
 		lengthInSeconds = simLength * 60
 		interval = 60
 	elif simLengthUnits == 'hours':

@@ -4,7 +4,7 @@ After=syslog.target network.target
 
 [Service]
 WorkingDirectory=/omf/omf/
-ExecStart=/usr/bin/python webProd.py
+ExecStart=/usr/bin/python3 webProd.py
 ExecStop=
 Restart=on-failure
 
