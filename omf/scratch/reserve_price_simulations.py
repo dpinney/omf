@@ -4,7 +4,6 @@ Argonne National Laboratory 'Survey of US Ancillary Services Markets' ANL/ESD-16
 January 2016 
 ''' 
 
-import numpy as np 
 from scipy.stats import truncnorm
 from random import randint 
 import math
