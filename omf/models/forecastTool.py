@@ -103,7 +103,7 @@ def work(modelDir, ind):
 	df = df[df['dates'].dt.date.apply(lambda x: d[x] == 24)] # find all non-24
 
 	df, tomorrow = lf.add_day(df, weather[:24])
-	all_X = lf.makeUsefulDf(df)
+	all_X = lf.makeUsefulDf_3d(df)
 	all_y = df['load']
 
 	if ind['newModel'] == 'False':
@@ -111,10 +111,13 @@ def work(modelDir, ind):
 			with open(pJoin(modelDir, ind[day+'_filename']), 'wb') as f:
 					f.write(base64.standard_b64decode(ind[day]))
 
+	all_y_3d = lf.data_transform_3d(all_y, var='y')
+	all_X_3d = lf.data_transform_3d(all_X, var='x')
+
 	#load prediction
 	
-	tomorrow_load, model, tomorrow_accuracy = lf.neural_net_next_day(
-		all_X, all_y, 
+	tomorrow_load, model, tomorrow_accuracy = lf.neural_net_next_day_3d(
+		all_X_3d, all_y_3d, 
 		epochs=epochs, save_file=pJoin(modelDir, 'one_day_model.h5'),
 		model=(None if ind['newModel'] == 'True' else tf.keras.models.load_model(pJoin(modelDir, ind['one_day_model_filename'])))
 	)
@@ -126,10 +129,12 @@ def work(modelDir, ind):
 	# second day
 	df, second_day = lf.add_day(df, weather[24:48])
 	if second_day.month == tomorrow.month:
-		all_X = lf.makeUsefulDf(df, hours_prior=48, noise=5)
+		all_X = lf.makeUsefulDf_3d(df, hours_prior=48, noise=5)
 		all_y = df['load']
-		two_day_predicted_load, two_day_model, two_day_load_accuracy = lf.neural_net_next_day(
-			all_X, all_y, 
+		all_y_3d = lf.data_transform_3d(all_y, var='y')
+		all_X_3d = lf.data_transform_3d(all_X, var='x')
+		two_day_predicted_load, two_day_model, two_day_load_accuracy = lf.neural_net_next_day_3d(
+			all_X_3d, all_y_3d, 
 			epochs=epochs, hours_prior=48, 
 			save_file=pJoin(modelDir, 'two_day_model.h5'),
 			model=(None if ind['newModel'] == 'True' else tf.keras.models.load_model(pJoin(modelDir, ind['two_day_model_filename'])))
@@ -139,10 +144,12 @@ def work(modelDir, ind):
 		# third day
 		df, third_day = lf.add_day(df, weather[48:72])
 		if third_day.month == tomorrow.month:
-			all_X = lf.makeUsefulDf(df, hours_prior=72, noise=15)
+			all_X = lf.makeUsefulDf_3d(df, hours_prior=72, noise=15)
 			all_y = df['load']
-			three_day_predicted_load, three_day_model, three_day_load_accuracy = lf.neural_net_next_day(
-				all_X, all_y, 
+			all_y_3d = lf.data_transform_3d(all_y, var='y')
+			all_X_3d = lf.data_transform_3d(all_X, var='x')
+			three_day_predicted_load, three_day_model, three_day_load_accuracy = lf.neural_net_next_day_3d(
+				all_X_3d, all_y_3d, 
 				epochs=epochs, hours_prior=72, 
 				save_file=pJoin(modelDir, 'three_day_model.h5'),
 				model=(None if ind['newModel'] == 'True' else tf.keras.models.load_model(pJoin(modelDir, ind['three_day_model_filename'])))
@@ -204,8 +211,8 @@ def work(modelDir, ind):
 
 	l.append({
 		'id': 'transparent',
-        'color': 'rgba(255,255,255,0)',
-        'data': [None]*(len(load_leading_up) - 72) + [x*(1-round(tomorrow_accuracy['test'], 2)*.01) for x in o['tomorrow_load']]
+		'color': 'rgba(255,255,255,0)',
+		'data': [None]*(len(load_leading_up) - 72) + [x*(1-round(tomorrow_accuracy['test'], 2)*.01) for x in o['tomorrow_load']]
 	})
 	
 
@@ -268,7 +275,7 @@ def new(modelDir):
 		'created': '2015-06-12 17:20:39.308239',
 		'modelType': modelName,
 		'runTime': '0:01:03',
-		'epochs': '1',
+		'epochs': '20',
 		# 'autoFill': "off",
 		# 'histFileName': 'd_Texas_17yr_TempAndLoad_Dec.csv',
 		# "histCurve": open(pJoin(__neoMetaModel__._omfDir,"static","testFiles","d_Texas_17yr_TempAndLoad_Dec.csv"), 'rU').read(),
@@ -278,7 +285,7 @@ def new(modelDir):
 		'histFileName': 'Texas_1pm.csv',
 		"histCurve": hist_curve,
 		# upload models
-		'newModel': 'True',
+		'newModel': 'False',
 		'one_day_model': one_day_model,
 		'one_day_model_filename': 'one_day_model.h5',
 		'two_day_model': two_day_model,
