@@ -5,11 +5,10 @@ Source options include NOAA's USCRN, Iowa State University's METAR, and Weather 
 
 
 import os, csv, re, json
-from urllib.request import urlretrieve # Might be depreciated in future versions of Python 3
-from urllib.request import Request, urlopen
+from math import sqrt, exp
 from os.path import join as pJoin
 from datetime import timedelta, datetime
-from math import cos, asin, sqrt, exp
+from urllib.request import Request, urlopen
 import requests
 from dateutil.parser import parse as parse_dt
 from omf import feeder
@@ -190,7 +189,6 @@ def pullUscrn(year, station, datatype):
 	return rawData
 
 
-
 def _pullWeatherWunderground(start, end, airport, workDir):
 	'''	NOTE: WeatherUnderground moved behind a paywall but we'll keep this in case we get a license. 
 	Download weather CSV data to workDir. 1 file for each day between start and 
@@ -213,7 +211,11 @@ def _pullWeatherWunderground(start, end, airport, workDir):
 		if os.path.isfile(filename):
 			continue # We have the file already, don't re-download it.
 		try:
-			f = urlretrieve(address, filename)
+			with urlopen(address) as f:
+				data = str(f.read(), 'utf-8')
+			with open(filename) as f:
+				f.write(data)
+			#f = urlretrieve(address, filename)
 		except:
 			print("ERROR: unable to get data from URL " + address)
 			continue # Just try to grab the next one.
@@ -900,11 +902,11 @@ def _tests():
 	#print(airportCodeToLatLon("IAD"))
 	## Testing USCRN (Works)
 	#print('USCRN (NOAA) data pulled to ' + tmpdir)
-	# data = pullUscrn('2017', 'KY_Versailles_3_NNW', "IRRADIENCE_DIFFUSE") # Does not write to a file by itself
-	# print(data)
-	# import matplotlib.pyplot as plt
-	# plt.plot(data)
-	# plt.show()
+	#data = pullUscrn('2017', 'KY_Versailles_3_NNW', "IRRADIENCE_DIFFUSE") # Does not write to a file by itself
+	#print(data)
+	#import matplotlib.pyplot as plt
+	#plt.plot(data)
+	#plt.show()
 	## Testing ASOS (Works)
 	#pullAsos('2017','CHO', 'tmpc') # Does not write to a file by itself
 	#print('ASOS (Iowa) data pulled to ' + tmpdir)
@@ -917,7 +919,7 @@ def _tests():
 	## Testing getRadiationYears (Works, but not used anywhere)
 	#get_radiation_data('surfrad', 'Boulder_CO', 2019, True)
 	#get_radiation_data('solrad', 'bis', 2019)
-	## Testing NSRDB (Works, but not usd anywhere)
+	## Testing NSRDB (Works, but not used anywhere)
 	#get_nrsdb_data('psm',-99.49218,43.83452,'2017', 'rnvNJxNENljf60SBKGxkGVwkXls4IAKs1M8uZl56', interval=60, filename=os.path.join(tmpdir, 'psm.csv'))
 	#print(get_nrsdb_data('psm',-99.49218,43.83452,'2017', 'rnvNJxNENljf60SBKGxkGVwkXls4IAKs1M8uZl56', interval=60))
 	#get_nrsdb_data('psm_tmy',-99.49218,43.83452,'tdy-2017', 'rnvNJxNENljf60SBKGxkGVwkXls4IAKs1M8uZl56', filename='psm_tmy.csv')

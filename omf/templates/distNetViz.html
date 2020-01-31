@@ -522,7 +522,7 @@
                         </div>
                     </div>
                     <div class="modalContentButtons">
-                        <button data-buttonfunction="toggle">Cancel</button>
+                        <button data-buttonfunction="toggle">Close</button>
                     </div>
                 </div>
             </div>
@@ -547,7 +547,7 @@
                             </tbody>
                         </table>
                         <div class="modalContentButtons">
-                            <button type="button" data-buttonfunction="toggle">Cancel</button>
+                            <button type="button" data-buttonfunction="toggle">Close</button>
                             <button type="submit">Create</button>
                         </div>
                     </form>
@@ -582,7 +582,7 @@
                             </tbody>
                         </table> 
                         <div class="modalContentButtons">
-                            <button type="button" data-buttonfunction="toggle">Cancel</button>
+                            <button type="button" data-buttonfunction="toggle">Close</button>
                             <button type="submit">Import</button>
                         </div>
                     </form>
@@ -613,7 +613,7 @@
                             </tbody>
                         </table>
                         <div class="modalContentButtons">
-                            <button type="button" data-buttonfunction="toggle">Cancel</button>
+                            <button type="button" data-buttonfunction="toggle">Close</button>
                             <button type="submit">Import</button>
                         </div>
                     </form>
@@ -644,7 +644,7 @@
                             </tbody>
                         </table>
                         <div class="modalContentButtons">
-                            <button type="button" data-buttonfunction="toggle">Cancel</button>
+                            <button type="button" data-buttonfunction="toggle">Close</button>
                             <button type="submit">Import</button>
                         </div>
                     </form>
@@ -672,7 +672,7 @@
                             </tbody>
                         </table>
                         <div class="modalContentButtons">
-                            <button type="button" data-buttonfunction="toggle">Cancel</button>
+                            <button type="button" data-buttonfunction="toggle">Close</button>
                             <button type="submit">Import</button>
                         </div>
                     </form>
@@ -704,7 +704,7 @@
                             </tbody>
                         </table>
                         <div class="modalContentButtons">
-                            <button type="button" data-buttonfunction="toggle">Cancel</button>
+                            <button type="button" data-buttonfunction="toggle">Close</button>
                             <button type="submit">Import</button>
                         </div>
                     </form>
@@ -748,7 +748,7 @@
                             </tbody>
                         </table>
                         <div class="modalContentButtons">
-                            <button type="button" data-buttonfunction="toggle">Cancel</button>
+                            <button type="button" data-buttonfunction="toggle">Close</button>
                             <button type="submit">Apply</button>
                         </div>
                     </form>
@@ -835,7 +835,7 @@
                             </tbody>
                         </table>
                         <div class="modalContentButtons">
-                            <button type="button" data-buttonfunction="toggle">Cancel</button>
+                            <button type="button" data-buttonfunction="toggle">Close</button>
                             <button type="submit">Apply</button>
                         </div>
                     </form>
@@ -863,7 +863,7 @@
                         </tbody>
                     </table>
                     <div class="modalContentButtons">
-                        <button data-buttonfunction="cancel">Cancel</button>
+                        <button data-buttonfunction="cancel">Close</button>
                         <button data-buttonfunction="submit">Apply</button>
                     </div>
                 </div>
@@ -875,7 +875,7 @@
                     <div class="scrollableList" data-tableinsert></div>
                     <!--<div style="text-align:center; padding: 10px;">-->
                     <div class="modalContentButtons">
-                        <button data-buttonfunction="cancel">Cancel</button>
+                        <button data-buttonfunction="cancel">Close</button>
                     </div>
                 </div>
             </div>
@@ -918,7 +918,7 @@
                         </tbody>
                     </table>
                     <div class="modalContentButtons">
-                        <button data-buttonfunction="toggle">Cancel</button>
+                        <button data-buttonfunction="toggle">Close</button>
                         <button onclick="massEdit();">Apply</button>
                     </div>
                 </div>
@@ -932,7 +932,7 @@
                         </tbody>
                     </table>
                     <div class="modalContentButtons">
-                        <button data-buttonfunction="toggle">Cancel</button>
+                        <button data-buttonfunction="toggle">Close</button>
                         <button data-buttonfunction="toggle" onclick="editAttachment()">Select</button>
                     </div>
                 </div>
@@ -946,7 +946,7 @@
                         </tbody>
                     </table>
                     <div class="modalContentButtons">
-                        <button data-buttonfunction="toggle">Cancel</button>
+                        <button data-buttonfunction="toggle">Close</button>
                         <button data-buttonfunction="toggle" onclick="saveAttachment();">Save</button>
                     </div>
                 </div>
@@ -1579,9 +1579,9 @@ const addManagerPrototype = {
             let modal;
             modal = createProgressModal({
                 startMessage: `Adding a "${component.object}" object to every "${targetObject}" object. This could take a few seconds.`,
-                finishFunc: () => modal.hide(),
+                endMessage: '',
+                finishFunc: () => modal.hide()
             });
-            const that = this;
             setTimeout(() => {
                 Object.keys(gTree.tree).forEach(key => {
                     if (gTree.getObject(key).object === targetObject && Math.random() < probability) {
@@ -3043,12 +3043,13 @@ function startZillowHouses() {
     let modal;
     modal = createProgressModal({
         startMessage: "Submitting your triplex objects for conversion...",
-        endMessage: "",
+        endMessage: '',
         finishFunc: () => modal.hide(),
-        cancelFunc: () => {
-            cancelled = true;
-            saveFeeder(gReadFeeder);
-        }
+        // No need to cancel anything b/c nothing happened
+        //cancelFunc: () => {
+        //    cancelled = true;
+        //    saveFeeder(gReadFeeder);
+        //}
     });
     const request = $.ajax({
         type: "POST",
@@ -3062,10 +3063,10 @@ function startZillowHouses() {
         }
     }).fail(function(jqXHR, textStatus, errorThrown) {
         if (!cancelled) {
-            modal.endMessage = "Operation failed. We were unable to submit your triplex objects. Check the console for more information.";
+            modal.endMessage = "Operation failed. We were unable to submit your triplex objects.";
             modal.finish();
-            console.log(jqXHR.status); // 500
-            console.log(jqXHR.responseText); // Error message
+            //console.log(jqXHR.status); // 500
+            //console.log(jqXHR.responseText); // Error message
         }
     });
 }
@@ -3079,17 +3080,15 @@ function pollZillowHouses() {
     modal = createProgressModal({
         startMessage: "Converting triplex objects into real-world Zillow houses. This could take many minutes...",
         endMessage: "",
+        // The operation must be cancellable, thus the user must be reprompted
         cancelFunc: () => {
             cancelled = true;
             modal.endMessage = "You cancelled the operation.";
-            modal.cancelButton.style.display = "none";
+            modal.cancelButton.style.display = "none"; // hide the cancel button upon reprompt
             modal.finish();
             // Don't re-save. No need to.
         },
-        finishFunc: () => {
-            modal.hide();
-            // don't reload. No need to.
-        }
+        finishFunc: () => modal.hide() // don't reload. No need to
     });
     const formData = new FormData();
     formData.set("owner", gThisOwner);
@@ -3112,6 +3111,7 @@ function pollZillowHouses() {
                     });
                     createSvgData(keys).draw(gViewport); // redraw so nodes are proper color
                     modal.endMessage = `Success. ${keys.length} triplex objects were converted into Zillow houses.`;
+                    modal.cancelButton.style.display = "none"; // hide the cancel button before reprompt
                     modal.finish();
                 }
             } else {
@@ -3121,10 +3121,11 @@ function pollZillowHouses() {
         }).fail(function(jqXHR, textStatus, errorThrown) {
             clearInterval(intervalId);
             if (!cancelled) {
-                modal.endMessage = "We were unable to get the house data to convert triplex objects into Zillow houses. Operation failed. Check the console for more information.";
+                modal.endMessage = "Operation failed. We were unable to get the house data to convert triplex objects into Zillow houses.";
+                modal.cancelButton.style.display = "none"; // hide the cancel button before reprompt
                 modal.finish();
-                console.log(jqXHR.status); // 500
-                console.log(jqXHR.responseText); // server response
+                //console.log(jqXHR.status); // 500
+                //console.log(jqXHR.responseText); // server response
             }
         });
     }, 5000);
@@ -3150,8 +3151,8 @@ function saveFeeder(feeder) {
     let modal;
     if (feeder === gReadFeeder) {
         modal = createProgressModal({
-            startMessage: "Undoing the previous operation...",
-            endMessage: "Success. The previous operation was undone.",
+            startMessage: "Re-saving the data from your most recent save...",
+            endMessage: "Success. Your data was restored to the most recent save.",
             finishFunc: () => modal.hide()
         });
         postRequest.done(function() {
@@ -3164,26 +3165,28 @@ function saveFeeder(feeder) {
         let cancelled = false;
         modal = createProgressModal({
             startMessage: "Saving changes to your file...",
-            endMessage: "Success. Your recent changes were saved.",
             finishFunc: () => {
                 modal.hide();
                 // Need to do this to make sure rename doesn't break if the user saves and remains on the page.
                 gReadFeeder = deepCopy(gWriteFeeder);
             },
-            cancelFunc: () => {
-                cancelled = true;
-                saveFeeder(gReadFeeder);
-            }
+            // Don't keep cancelFunc b/c we don't care if server throws an exception. Also we don't cancel saves
+            //cancelFunc: () => {
+            //    cancelled = true;
+            //    saveFeeder(gReadFeeder);
+            //}
         });
-        //modal.cancelButton.setAttribute("style", "display:none"); // make the cancel button invisible
         postRequest.done(function() {
             if (!cancelled) {
-                //modal.cancelButton.removeAttribute("style"); // make the cancel button visible
-                modal.finish();
+                //modal.finish(); // Normally, this shows the "OK" and/or "Cancel" buttons, but we hide them
+                modal.finishButton.click(); // This makes it so that there is always a simulated click on "OK"
             }
         }).fail(function() {
             if (!cancelled) {
                 modal.endMessage = "The server raised an internal exception during the save operation."
+                /* hide the cancel button b/c The user probably doesn't want to re-save their old work and lose all of their current work. They
+                probably just want to try saving normally again */
+                //modal.cancelButton.style.display = 'none'; 
                 modal.finish();
             }
         });
@@ -3229,8 +3232,10 @@ async function loadFeeder(serverFeederName, serverModelName, owner) {
             saveFeeder(gReadFeeder);
         },
         finishFunc: () => {
-            reloadWrapper();
             modal.hide();
+            if (modal.endMessage === "Success. This feeder has been overwritten with the selected feeder.") {
+                reloadWrapper(); // Only reload on successful feeder load
+            }
         } 
     });
     $.ajax({
@@ -3244,11 +3249,13 @@ async function loadFeeder(serverFeederName, serverModelName, owner) {
         contentType: false,
     }).done(function() {
         if (!cancelled) {
+            modal.cancelButton.textContent = 'Undo';
             modal.finish();
         }
     }).fail(function() {
         if (!cancelled) {
             modal.endMessage = "The server raised an internal exception while loading the feeder."
+            modal.cancelButton.style.display = "none"; // hide the "Undo" button before reprompt b/c there is nothing to undo
             modal.finish();
         }
     });
@@ -3279,7 +3286,6 @@ function validateClimateModal() {
     return true;
 }
 
-//TODO: check that gReadFeeder.equals(gWriteFeeder) are prompt user to save before initiating a file operation.
 /** 
  * Submit a from to do one of the following:
  * 1) Import a Milsoft, GridLAB-D, or CYME file into this .omd file.
@@ -3303,7 +3309,6 @@ async function submitForm({formId, pollUrl, inputId}) {
         await $.ajax({
             url: `/uniqObjName/Feeder/${gThisOwner}/${fileName}/${gThisModelName}`//good
         }).done(function(data) {
-            //console.log(data);
             if (data.exists === true) {
                 alert(`You already have a feeder named "${fileName}". Please choose a different name.`);
             } else {
@@ -3324,8 +3329,7 @@ async function submitForm({formId, pollUrl, inputId}) {
             cancelled = true;
             /* In cases where the initial operation changed the name of the .omd file on the server, we must rename the .omd file to its previous name
             in order to completely undo the operation */
-            // scadaForm??? amiForm???
-            // no climateForm, no anonymizeForm
+            // These operations don't change the .omd name: climate, anonymize, scada, ami
             if (["blankFeederForm", "milsoftForm", "gridlabdForm", "cymeForm"].includes(formId)) {
                 let oldServerName;
                 if (formId === "blankFeederForm") {
@@ -3343,10 +3347,17 @@ async function submitForm({formId, pollUrl, inputId}) {
         },
         finishFunc: () => {
             modal.hide();
-            reloadWrapper();
+            if (modal.endMessage == "Success. Your file was loaded into this feeder.") {
+                reloadWrapper(); // Only reload upon successful completion
+            }
         }
     });
-    // Submit the form to the server with an ajax request
+    //Provide estimate
+
+    //Provide estimate
+    if (formId === 'anonymizeForm') {
+        modal.endMessage = 'Success. File was anonymized.';
+    }
     const form = document.getElementById(formId);
     const formData = new FormData(form);
     const formRequest = $.ajax({
@@ -3360,11 +3371,13 @@ async function submitForm({formId, pollUrl, inputId}) {
         // We don't want to poll the server. Just reload the page.
         formRequest.done(function() {
             if (!cancelled) {
+                modal.cancelButton.textContent = 'Undo';
                 modal.finish();
             }
         }).fail(function() {
             if (!cancelled) {
                 modal.endMessage = "The server raised an internal exception during form submission."
+                modal.cancelButton.style.display = "none"; // hide the "Undo" button before reprompt b/c there is nothing to undo
                 modal.finish();
             }
         });
@@ -3378,25 +3391,27 @@ async function submitForm({formId, pollUrl, inputId}) {
                 }).done(function(data) {
                     if (!cancelled) {
                         if (data.exists === true) {
-                            //processing is ongoing 
+                            // processing is ongoing
                         } else {
-                            // None of these error messages get shown because the server operation just throws an exception and fails to complete.
                             clearInterval(intervalId);
+                            modal.cancelButton.textContent = 'Undo';
+                            modal.cancelButton.style.display = "none"; // hide the "Undo" button before reprompt b/c there is nothing to undo
                             if (data.exists === false) {
-                                modal.finish();                          
+                                // process is complete
+                                modal.cancelButton.removeAttribute('style'); // show "Undo" button
                             } else if (data === "milError") {
-                                modal.endMessage = "The .std and .seq files used were incorrectly formatted. Please click \"Cancel\" to undo the operation.";
-                                modal.finish();
+                                modal.endMessage = "The .std and .seq files used were incorrectly formatted.";
                             } else if (data === "glmError") {
-                                modal.endMessage = "The .glm file used was incorrectly formatted. Please click \"Cancel\" to undo the operation.";
-                                modal.finish();
+                                modal.endMessage = "The .glm file used was incorrectly formatted.";
+                            } else if (data === 'amiError') {
+                                modal.endMessage = 'The AMI file used was incorrectly formatted.';
                             } else {
                                 if (!data.endsWith(".")) {
                                     data += ".";
                                 }
-                                modal.endMessage = data + " Please click \"Cancel\" to undo the operation.";
-                                modal.finish();
+                                modal.endMessage = data;
                             }
+                            modal.finish();
                         }
                     } else {
                         clearInterval(intervalId);
@@ -3405,6 +3420,7 @@ async function submitForm({formId, pollUrl, inputId}) {
                     clearInterval(intervalId);
                     if (!cancelled) {
                         modal.endMessage = "The server raised an internal exception during the file operation."
+                        modal.cancelButton.style.display = "none"; // hide the "Undo" button before reprompt b/c there is nothing to undo
                         modal.finish();
                     }
                 });
@@ -3498,10 +3514,11 @@ function reloadWrapper() {
 
 const progressModalPrototype = {
     /**
-     * @param {Function} func - An additional function to execute when the modal finishes
+     * This function is called to either present the "OK" button to the user or just hide the modal once a task is done
+     * @param {Function} func - An additional function to execute when the "OK" button is clicked
      */
     finish(func) {
-        if (func != null) func;
+        if (func != null) func(); // This line makes it possible to execute ANOTHER function during "modal.finish()", although it isn't used anywhere
         this.self.querySelector("h2").textContent = this.endMessage;
         this.spinner.style.display = "none";
         this.finishButton.removeAttribute("style");
@@ -3513,31 +3530,35 @@ const progressModalPrototype = {
 }
 
 /**
- * Create a progress modal in 1 of 2 modes: First mode will show a cancel button which if clicked allows the operation to be undone. Second mode will
- * not show a cancel button. startMessage and finishFunc are required parameters. Sometimes you have to set with endMessage after the progress modal
- * has been constructed.
- * @param {Function} finishFunc - will be executed when the user clicks the "OK" button after an operation has completed
+ * @param {string} startMessage - (required) the initial message to show the user while a task is executing on the server
+ * @param {Function} cancelFunc - (optional) if provided, this function will execute when the "Cancel" button is clicked on the modal. If not
+ *     provided, the "Cancel" button is never shown to the user
+ * @param {boolean} promptAfterComplete - (optional) removed. Just don't call <modal>.finish() if I don't want a prompt
+ * @param {string} endMessage - (optional) the message to show the user once the task has completed. It is only shown if promptAfterComplete is true
+ * @param {Function} finishFunc - (optional) if provided, this function will execute when the "OK" button is clicked on the modal
  */
-function createProgressModal({startMessage, endMessage, cancelFunc, finishFunc}) {
+function createProgressModal({startMessage, cancelFunc=null, endMessage=null, finishFunc=null}) {
     const obj = Object.create(progressModalPrototype);
-    obj.self = document.getElementById("progressModal");
-    obj.spinner = obj.self.querySelector("img");
     obj.startMessage = startMessage;
-    obj.endMessage = endMessage;
+    obj.self = document.getElementById("progressModal");
+    obj.self.querySelector("h2").textContent = obj.startMessage;
     obj.cancelButton = obj.self.querySelector("button[data-buttonfunction='cancel']");
-    obj.cancelFunc = cancelFunc;
-    obj.finishFunc = finishFunc;
+    obj.cancelButton.textContent = 'Cancel'; // reset the "Cancel" button just in case it was changed
     obj.finishButton = obj.self.querySelector("button[data-buttonfunction='submit']");
-    obj.self.querySelector("h2").textContent = startMessage;
-    obj.cancelButton.style.display = "none";
-    obj.finishButton.style.display = "none";
+    obj.finishButton.textContent = 'OK'; // reset the "OK" button just in case it was changed
+    obj.finishButton.style.display = "none"; // Always hide the "OK" button initially
+    obj.finishFunc = finishFunc; // Always need a finishFunc for simulated clicks
     obj.finishButton.onclick = obj.finishFunc;
+    obj.endMessage = endMessage;
     if (cancelFunc == null) {
+        obj.cancelButton.style.display = "none";
         obj.cancelButton.onclick = null;
     } else {
-        obj.cancelButton.removeAttribute("style");
+        obj.cancelFunc = cancelFunc;
         obj.cancelButton.onclick = obj.cancelFunc;
+        obj.cancelButton.removeAttribute("style");
     }
+    obj.spinner = obj.self.querySelector("img");
     obj.spinner.removeAttribute("style");
     obj.self.removeAttribute("style");
     return obj;
@@ -5151,7 +5172,6 @@ function createSelectionTable(ids, tree) {
     const table = document.createElement("table");
     const tHead = document.createElement("thead");
     const tBody = document.createElement("tbody"); 
-
     const titleRow = createRow({key: "Selected Elements"});
     Array.from(titleRow.self.children).forEach(td => { 
         td.classList.add("tableTitle");
@@ -5159,12 +5179,10 @@ function createSelectionTable(ids, tree) {
     });
     titleRow.self.children[1].setAttribute("colspan", "2");
     titleRow.self.children[2].remove();
-
     tHead.append(titleRow.self);
     table.append(tHead);
     table.append(tBody);
     table.classList.add("dataTable");
-
     // duplicate
     const buttonRow = document.createElement("tr");
     buttonRow.classList.add("buttonRow");
@@ -5178,7 +5196,6 @@ function createSelectionTable(ids, tree) {
     buttonRow.append(buttonCell);
     tBody.append(buttonRow);
     // duplicate
-
     ids.forEach(id => {
         let obj = tree.getObject(id);
         let name = obj.name != null ? obj.name : obj.object != null ? obj.object : Object.keys(obj)[0];
@@ -5260,7 +5277,7 @@ function createDescriptionTable(id) {
         svg.remove(gViewport);
         gTree.insert(tObject);// re-insert the updated object. It is remapped in the process.
         svg.draw(gViewport);
-        alert("Object saved");
+        // alert("Object saved");
     });
     Object.keys(tObject.data).forEach(key => {
         let row;
@@ -5537,22 +5554,26 @@ const rowPrototype = {
             } else {
                 // Display value within TreeObject.data
                 const value = this.key === "" ? "" : this.tObject.data[this.key];
-                if (nonModifiableProperties.includes(this.key)) {
+                if (this.key === 'object') {
                     td.textContent = value;
+                    return td;
+                }
+                const input = document.createElement("input");
+                input.classList.add("modalInput");
+                input.value = value;
+                td.appendChild(input);
+                if (nonModifiableProperties.includes(this.key)) {
+                    input.readOnly = true;
                 } else {
-                    const input = document.createElement("input");
                     if (this.key === "longitude") {
                         input.dataset.coordinate = "longitude";
                     } else if (this.key === "latitude") {
                         input.dataset.coordinate = "latitude";
                     }
-                    input.classList.add("modalInput");
-                    td.appendChild(input);
                     const that = this;
                     input.addEventListener("change", function() {
                         that.updateMapValue(this);
                     });
-                    input.value = value;
                 }
                 return td;
             }
@@ -5647,6 +5668,10 @@ async function initializeInterface() {
         }
     }
     createInterface();
+    if (!interfaceIsStatic() && feederNeedsSave()) {
+        // Save to account for objects that were given artifical grid coordinates. This will make the interface less annoying
+        saveFeeder(gWriteFeeder);
+    }
     attachHandlers();
     document.getElementById("loadingMessage").style.display = "none"
 }
@@ -5743,11 +5768,13 @@ function checkServerConversion() {
     }, 2000);
     */
 
-//ADD PROMPT TO SAVE CHANGES BEFORE EXIT
 {% if showFileMenu %}
-    // Browsers don't show custom 'beforeunload' messages anymore due to spamming users, so don't bother setting it
+    /* Browsers don't show custom 'beforeunload' messages anymore due to spamming users, so don't bother setting it. Only set this listener if the
+    user has unsaved changes */
     window.onbeforeunload = function(event) {
-        return "";
+        if (feederNeedsSave()) {
+            return "";
+        }
     }
 {% endif %}
 </script>

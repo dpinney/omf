@@ -1,4 +1,5 @@
 import json, os, shutil, math, tempfile, random, webbrowser
+from pathlib import Path
 from os.path import join as pJoin
 from pyproj import Proj, transform
 import requests
@@ -9,6 +10,7 @@ from scipy.spatial import ConvexHull
 from sklearn.cluster import KMeans
 from flask import Flask, send_file, render_template
 import omf
+from omf import feeder
 
 # Source: https://github.com/fitnr/stateplane/blob/master/stateplane/dicts.py
 # These are NAD83 EPSG identifiers.
@@ -49,7 +51,7 @@ def dms2dd(degrees, minutes, seconds, direction):
 	dd = float(degrees) + float(minutes)/60 + float(seconds)/(60*60);
 	if direction == 'E' or direction == 'N':
 		dd *= -1
-	return dd;
+	return dd
 
 def openInGoogleMaps(lat, lon):
 	"Open a browser to the (lat, lon) in Google Maps"
@@ -61,7 +63,7 @@ def hullOfOmd(pathToOmdFile, conversion=False):
 	if not conversion:
 		with open(pathToOmdFile) as inFile:
 			tree = json.load(inFile)['tree']
-		nxG = omf.feeder.treeToNxGraph(tree)
+		nxG = feeder.treeToNxGraph(tree)
 		nxG = graphValidator(pathToOmdFile, nxG)
 	#use conversion for testing other feeders
 	if conversion:
@@ -89,7 +91,7 @@ def omdGeoJson(pathToOmdFile, conversion=False):
 	'''Create a geojson standards compliant file (https://tools.ietf.org/html/rfc7946) from an omd.'''
 	with open(pathToOmdFile) as inFile:
 		tree = json.load(inFile)['tree']
-	nxG = omf.feeder.treeToNxGraph(tree)
+	nxG = feeder.treeToNxGraph(tree)
 	#use conversion for testing other feeders
 	nxG = graphValidator(pathToOmdFile, nxG)
 	if conversion:
@@ -164,7 +166,7 @@ def mapOmd(pathToOmdFile, outputPath, fileFormat, openBrowser=False, conversion=
 		if not conversion:
 			with open(pathToOmdFile) as inFile:
 				tree = json.load(inFile)['tree']
-			nxG = omf.feeder.treeToNxGraph(tree)
+			nxG = feeder.treeToNxGraph(tree)
 			nxG = graphValidator(pathToOmdFile, nxG)
 		#use conversion for testing other feeders
 		if conversion:
@@ -203,11 +205,13 @@ def mapOmd(pathToOmdFile, outputPath, fileFormat, openBrowser=False, conversion=
 					northEast = transform(wgs84,epsg3857,currentTileEdges[3], currentTileEdges[2])
 					#Get map background from tile
 					url = 'https://a.tile.openstreetmap.org/%s/%s/%s.png' % (zoomLevel, tileX, tileY)
-					response = requests.get(url, stream=True)
-					imgFile = tempfile.TemporaryFile(suffix=".png")
-					shutil.copyfileobj(response.raw, imgFile)
-					del response
-					img = plt.imread(imgFile)
+					# Spoof the User-Agent so we don't get 429
+					response = requests.request('GET', url, stream=True, headers={
+						'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10.13; rv:71.0) Gecko/20100101 Firefox/71.0'
+					})
+					with tempfile.NamedTemporaryFile() as f:
+						f.write(response.raw.read())
+						img = plt.imread(f)
 					plt.imshow(img, extent=(southWest[0], northEast[0],southWest[1], northEast[1]))
 			plt.ylim(top=mainnorthEast[1], bottom=mainsouthWest[1])
 			plt.xlim(mainsouthWest[0], mainnorthEast[0])
@@ -222,7 +226,7 @@ def simplifiedOmdShape(pathToOmdFile, conversion=False):
 	if not conversion:
 		with open(pathToOmdFile) as inFile:
 			tree = json.load(inFile)['tree']
-		nxG = omf.feeder.treeToNxGraph(tree)
+		nxG = feeder.treeToNxGraph(tree)
 		nxG = graphValidator(pathToOmdFile, nxG)
 		simplifiedGeoDict = hullOfOmd(pathToOmdFile)
 	#use conversion for testing other feeders
@@ -311,7 +315,7 @@ def shortestPathOmd(pathToOmdFile, sourceObjectName, targetObjectName):
 	'''Get the shortest path between two points on a feeder'''
 	with open(pathToOmdFile) as inFile:
 		tree = json.load(inFile)['tree']
-	nxG = omf.feeder.treeToNxGraph(tree)
+	nxG = feeder.treeToNxGraph(tree)
 	nxG = graphValidator(pathToOmdFile, nxG)
 	tracePath = nx.bidirectional_shortest_path(nxG, sourceObjectName, targetObjectName)
 	return tracePath
@@ -375,7 +379,7 @@ def rasterTilesFromOmd(pathToOmdFile, outputPath, conversion=False):
 		with open(pathToOmdFile) as inFile:
 			tree = json.load(inFile)['tree']
 		#networkx graph to work with
-		nxG = omf.feeder.treeToNxGraph(tree)
+		nxG = feeder.treeToNxGraph(tree)
 		nxG = graphValidator(pathToOmdFile, nxG)
 	#use conversion for testing other feeders
 	if conversion:
@@ -546,28 +550,29 @@ def showOnMap(geoJson):
 def _tests():
 	e, n = 249.2419752733258, 1186.1488466689188
 	lat, lon = statePlaneToLatLon(e, n, 2205)
+	#openInGoogleMaps(lat, lon)
 	print (lat, lon) #(37.37267827914456, -89.89482331256504)
 	e2, n2 = latLonToStatePlane(lat, lon, epsg=2205)
 	print (e2, n2) # (249.24197527189972, 1186.1488466408398)
-	#mapOmd('static/publicFeeders/Olin Barre LatLon.omd', 'testOutput', 'png', openBrowser=True, conversion=False)
-	# mapOmd('static/publicFeeders/Olin Barre LatLon.omd', 'testOutput', 'html', openBrowser=True, conversion=False)
-	#showOnMap(hullOfOmd('static/publicFeeders/Olin Barre LatLon.omd', conversion=False))
-	#showOnMap(simplifiedOmdShape('static/publicFeeders/Olin Barre LatLon.omd', conversion=False))
-	# showOnMap(omdGeoJson('static/publicFeeders/Olin Barre LatLon.omd', conversion=False))
-	#shortestPathOmd('static/publicFeeders/Olin Barre LatLon.omd', 'node62474203981T62474203987_B', 'node1667616792')
-	#rasterTilesFromOmd('static/publicFeeders/Olin Barre LatLon.omd', 'scratch/omdTests/tiles', conversion=False)
-	#serveTiles('scratch/omdTests/tiles')
-	#Testing larger feeder using temporary conversion method for valid lat/lons from sources/targets
-	#mapOmd('static/publicFeeders/Autocli Alberich Calibrated.omd', 'testOutput', 'png', openBrowser=True, conversion=True)
-	#ABEC Frank LO Houses works with conversion on or off
-	#mapOmd('static/publicFeeders/Autocli Alberich Calibrated.omd', 'testOutput', 'html', openBrowser=True, conversion=False)
-	#mapOmd('static/publicFeeders/ABEC Frank LO Houses.omd', 'testOutput', 'html', openBrowser=True, conversion=False)
-	#showOnMap(hullOfOmd('static/publicFeeders/Autocli Alberich Calibrated.omd', conversion=True))
-	#showOnMap(simplifiedOmdShape('static/publicFeeders/ABEC Frank LO Houses.omd', conversion=False))
-	# showOnMap(omdGeoJson('static/publicFeeders/ABEC Frank LO Houses.omd', conversion=False))
-	#rasterTilesFromOmd('static/publicFeeders/Autocli Alberich Calibrated.omd', 'scratch/omdTests/autoclitiles', conversion=True)
-	#print(convertOmd('static/publicFeeders/Autocli Alberich Calibrated.omd'))
-	# openInGoogleMaps(lat, lon)
+	#prefix = Path(__file__).parent
+	#mapOmd(prefix / 'static/publicFeeders/Olin Barre LatLon.omd', 'testOutput', 'png', openBrowser=True, conversion=False)
+	#mapOmd(prefix / 'static/publicFeeders/Olin Barre LatLon.omd', 'testOutput', 'html', openBrowser=True, conversion=False)
+	#showOnMap(hullOfOmd(prefix / 'static/publicFeeders/Olin Barre LatLon.omd', conversion=False))
+	#showOnMap(simplifiedOmdShape(prefix / 'static/publicFeeders/Olin Barre LatLon.omd', conversion=False))
+	#showOnMap(omdGeoJson(prefix / 'static/publicFeeders/Olin Barre LatLon.omd', conversion=False))
+	#print(shortestPathOmd(prefix / 'static/publicFeeders/Olin Barre LatLon.omd', 'node62474203981T62474203987_B', 'node1667616792'))
+	#rasterTilesFromOmd(prefix / 'static/publicFeeders/Olin Barre LatLon.omd', prefix / 'scratch/omdTests/tiles', conversion=False)
+	#serveTiles(prefix / 'scratch/omdTests/tiles') # Need to launch in correct directory
+	## Testing larger feeder using temporary conversion method for valid lat/lons from sources/targets
+	#mapOmd(prefix / 'static/publicFeeders/Autocli Alberich Calibrated.omd', prefix / 'testOutput', 'png', openBrowser=True, conversion=True) # This takes FOREVER to run (30+ minutes? but it works!)
+	## ABEC Frank LO Houses works with conversion on or off
+	#mapOmd(prefix / 'static/publicFeeders/Autocli Alberich Calibrated.omd', prefix / 'testOutput', 'html', openBrowser=True, conversion=False)
+	#mapOmd(prefix / 'static/publicFeeders/ABEC Frank LO Houses.omd', prefix / 'testOutput', 'html', openBrowser=True, conversion=False)
+	#showOnMap(hullOfOmd(prefix / 'static/publicFeeders/Autocli Alberich Calibrated.omd', conversion=True))
+	#showOnMap(simplifiedOmdShape(prefix / 'static/publicFeeders/ABEC Frank LO Houses.omd', conversion=False))
+	#showOnMap(omdGeoJson(prefix / 'static/publicFeeders/ABEC Frank LO Houses.omd', conversion=False))
+	#rasterTilesFromOmd(prefix / 'static/publicFeeders/Autocli Alberich Calibrated.omd', prefix / 'scratch/omdTests/autoclitiles', conversion=True)
+	#print(convertOmd(prefix / 'static/publicFeeders/Autocli Alberich Calibrated.omd'))
 
 if __name__ == '__main__':
 	_tests()

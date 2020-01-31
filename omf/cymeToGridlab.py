@@ -53,8 +53,9 @@ def _csvDump(database_file, modelDir):
 	# Get the list of table names with "mdb-tables"
 	if platform.system() == "Linux" or platform.system() == "Darwin":
 		table_names = subprocess.Popen(
-			["mdb-tables", "-1", database_file], stdout=subprocess.PIPE, text=True
+			["mdb-tables", "-1", database_file], stdout=subprocess.PIPE
 		).communicate()[0]
+		table_names = table_names.decode('utf-8')
 		tables = table_names.split('\n')
 		if not os.path.isdir((pJoin(modelDir, "cymeCsvDump"))):
 			os.makedirs((pJoin(modelDir, "cymeCsvDump")))
@@ -65,8 +66,9 @@ def _csvDump(database_file, modelDir):
 				filename = table.replace(' ', '_') + '.csv'
 				f = open(pJoin(modelDir, "cymeCsvDump", filename), "w+")
 				contents = subprocess.Popen(
-					["mdb-export", database_file, table], stdout=subprocess.PIPE, text=True
+					["mdb-export", database_file, table], stdout=subprocess.PIPE
 				).communicate()[0]
+				contents = contents.decode('utf-8')
 				f.write(contents)
 				f.close()
 	elif platform.system() == "Windows":
@@ -78,8 +80,9 @@ def _csvDump(database_file, modelDir):
 		os.chdir(modelDir)
 		database_file = database_file.split("\\")[-1]
 		table_names = subprocess.Popen(
-			["bash", "-c", "mdb-tables -1 " + database_file], stdout=subprocess.PIPE, text=True
+			["bash", "-c", "mdb-tables -1 " + database_file], stdout=subprocess.PIPE
 		).communicate()[0]
+		table_names = table_names.decode('utf-8')
 		tables = table_names.split('\n')
 		if not os.path.isdir((pJoin(modelDir, "cymeCsvDump"))):
 			os.makedirs((pJoin(modelDir, "cymeCsvDump")))
@@ -92,6 +95,7 @@ def _csvDump(database_file, modelDir):
 				contents = subprocess.Popen(
 					["bash", "-c", "mdb-export " + database_file + " " + table], stdout=subprocess.PIPE, text=True
 				).communicate()[0]
+				contents = contents.decode('utf-8')
 				file.write(contents)
 				file.close()
 		os.chdir(originaldir)
