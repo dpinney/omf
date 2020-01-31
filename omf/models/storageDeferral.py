@@ -32,22 +32,17 @@ def work(modelDir, inputDict):
 	inverterEfficiency = float(inputDict.get("inverterEfficiency", 92)) / 100.0
 	# NOTE: Inverter Efficiency is round-trip
 	battEff = float(inputDict.get("batteryEfficiency", 92)) / 100.0 * inverterEfficiency ** 2
-	
-	with open(pJoin(modelDir,'demand.csv'),'w') as f:
-		f.write(inputDict['demandCurve'])
-	
+		
 	dc = []
-	try:	
-		with open(pJoin(modelDir,'demand.csv'), newline='') as f:
-			for r in csv.reader(f):
-				dc.append({	'power': abs(float(r[0])),
-							'excessDemand': abs(float(r[0])) - threshold,
-							'negative': True if float(r[0]) < 0 else False })
-			assert len(dc) == 8760
-	except:
-		if str(sys.exc_info()[0]) != "<type 'exceptions.SystemExit'>":
-			raise Exception("Demand CSV file is incorrect format.")
-	
+
+	csv_output = csvValidateAndLoad(inputDict['demandCurve'], modelDir, header=None, ignore_nans=False, save_file='demand.csv')
+	demand = csv_output[0]
+	dc = [{	
+		'power': abs(float(x)),
+		'excessDemand': abs(float(x)) - threshold,
+		'negative': True if float(x) < 0 else False 
+	} for x in demand]
+
 	'''
 	Find when demand surpasses the threshold. Sum the excessDemand until 
 	its negative component can appropriately charge a battery that 
