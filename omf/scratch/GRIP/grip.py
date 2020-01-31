@@ -346,6 +346,8 @@ def milsoftToGridlab(temp_dir):
 	with open(seqPath) as f:
 		seqFile = f.read()
 	tree = omf.milToGridlab.convert(stdFile, seqFile, rescale=True)
+	# Remove '#include "schedules.glm' objects from the tree. Would be faster if this was incorported in sortedWrite() or something
+	tree = {k: v for k, v in tree.items() if v.get('omftype') != '#include'}
 	with open(os.path.join(temp_dir, filenames['msgl']), 'w') as outFile:
 		outFile.write(omf.feeder.sortedWrite(tree))
 
@@ -393,6 +395,8 @@ def cymeToGridlab(temp_dir):
 	import locale
 	locale.setlocale(locale.LC_ALL, 'en_US.UTF-8')
 	tree = omf.cymeToGridlab.convertCymeModel(mdbPath, temp_dir)
+	# Remove '#include "schedules.glm' objects from the tree. Would be faster if this was incorported in sortedWrite() or something
+	tree = {k: v for k, v in tree.items() if v.get('omftype') != '#include'}
 	with open(os.path.join(temp_dir, filenames["cygl"]), 'w') as outFile:
 		outFile.write(omf.feeder.sortedWrite(tree))
 
