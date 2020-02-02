@@ -5,10 +5,12 @@ from multiprocessing import Process
 import matplotlib.pyplot as plt
 from flask import Flask, request, send_from_directory, make_response, json, abort, redirect, url_for, jsonify
 import omf
-import omf.distNetViz, omf.feeder, omf.milToGridlab, omf.cymeToGridlab, omf.network
-import omf.models.transmission, omf.models.resilientDist
-import omf.solvers.gridlabd, omf.solvers.nrelsam2013
+from omf import distNetViz, feeder, milToGridlab, network
+from omf import cymeToGridlab as cymeToGridlab_
+from omf.models import transmission, resilientDist
+from omf.solvers import gridlabd, nrelsam2013
 from omf.scratch.GRIP import grip_config
+
 
 app = Flask(__name__)
 app.config.from_object(grip_config.Config)
@@ -17,17 +19,18 @@ app.config.from_object(grip_config.Config)
 # Change the dictionary values to change the output file names. Don't change the keys unless you also update the rest of the dictionary references in
 # the code
 filenames = {
-	"ongl": "onelinegridlab.png",
-	"msgl": "milsofttogridlab.glm",
-	"cygl": "cymetogridlab.glm",
-	"glrun": "gridlabrun.json",
-	"glgfm": "gridlabtogfm.gfm",
-	"rungfm": "rungfm.txt",
-	"samrun": "samrun.json",
-	"tmomt": "transmissionmattoomt.json",
-	"tmpf": "transmissionpowerflow.zip",
-	"tv": "network-viewer.html",
-	"dv": "distnetviz-viewer.html"
+	'ongl': 'onelinegridlab.png',
+	'msgl': 'milsofttogridlab.glm',
+	'cygl': 'cymetogridlab.glm',
+	'glrun': 'gridlabrun.json',
+	'glgfm': 'gridlabtogfm.gfm',
+	'rungfm': 'rungfm.txt',
+	'samrun': 'samrun.json',
+	'tmomt': 'transmissionmattoomt.json',
+	'tmpf': 'transmissionpowerflow.zip',
+	'tv': 'network-viewer.html',
+	'dv': 'distnetviz-viewer.html',
+	'gfl': 'glmforcelayout.glm'
 }
 
 
@@ -75,11 +78,17 @@ def _get_failure_time(temp_dir):
 
 
 def _validate_input(input_metadata):
-	'''TODO'''
+	'''
+	Validate the incoming request input, given the input_metadata dictionary that specifies:
+	- The name of the form parameter
+	- The Python type of the form parameter
+	- Whether or not the form parameter is required
+	- The permitted range of values of the form parameter
+	'''
 	name = input_metadata['name']
 	input_type = input_metadata['type']
 	input_ = request.files.get(name) if input_type == 'file' else request.form.get(name)
-	if input_ is None:
+	if input_ is None or (input_type == 'file' and input_.filename == ''):
 		if input_metadata['required']:
 			return ({ name: None }, "The parameter '{}' of type '{}' is required, but it was not submitted.".format(name, input_type))
 		return (None, None)
@@ -91,19 +100,19 @@ def _validate_input(input_metadata):
 			else:
 				input_ = input_type(input_)
 		except:
-			return ({ name: input_}, "The parameter '{}' could not be converted into the required type '{}'.".format(name, input_type))
+			return ({name: input_}, "The parameter '{}' could not be converted into the required type '{}'.".format(name, input_type))
 		input_range = input_metadata.get('range')
 		if input_range is not None:
-			if issubclass(input_type, str):	
+			if input_type == str:
 				if input_ not in input_range:
-					return ({ name: input_ }, "The parameter '{}' was not one of the allowed values: '{}'.".format(name, input_range))
+					return ({name: input_}, "The parameter '{}' was not one of the allowed values: '{}'.".format(name, input_range))
 			elif issubclass(input_type, numbers.Number):
-				min = input_range.get('min')
-				if min is not None and input_ < min:
-					return ({ name: input_ }, "The parameter '{}' was less than the minimum bound of '{}'.".format(name, min))
-				max = input_range.get('max')
-				if max is not None and input_ > max:
-					return ({ name: input_ }, "The parameter '{}' was greater than the maximum bound of '{}'.".format(name, max))
+				min_ = input_range.get('min')
+				if min_ is not None and input_ < min_:
+					return ({name: input_}, "The parameter '{}' was less than the minimum bound of '{}'.".format(name, min_))
+				max_ = input_range.get('max')
+				if max_ is not None and input_ > max_:
+					return ({name: input_}, "The parameter '{}' was greater than the maximum bound of '{}'.".format(name, max_))
 	return (None, None)
 
 
@@ -243,8 +252,8 @@ def _validate_oneLineGridlab(temp_dir):
 	'''TODO'''
 	glm_path = os.path.join(temp_dir, 'in.glm')
 	request.files['glm'].save(glm_path)
-	tree = omf.feeder.parse(glm_path)
-	if not omf.distNetViz.contains_valid_coordinates(tree) and request.form['useLatLons'] == 'True':
+	tree = feeder.parse(glm_path)
+	if not distNetViz.contains_valid_coordinates(tree) and request.form['useLatLons'] == 'True':
 		return (
 			{'useLatLons': 'True'},
 			("Since the submitted GLM contained no coordinates, or the coordinates could not be parsed as floats, "
@@ -282,14 +291,14 @@ def oneLineGridlab(temp_dir):
 	:run-time: about 1 to 30 seconds.
 	''' 
 	glm_path = os.path.join(temp_dir, 'in.glm')
-	feed = omf.feeder.parse(glm_path)
-	graph = omf.feeder.treeToNxGraph(feed)
+	feed = feeder.parse(glm_path)
+	graph = feeder.treeToNxGraph(feed)
 	neatoLayout = True if request.form.get('useLatLons') == 'False' else False
 	# Clear old plots.
 	plt.clf()
 	plt.close()
 	# Plot new plot.
-	omf.feeder.latLonNxGraph(graph, labels=False, neatoLayout=neatoLayout, showPlot=False)
+	feeder.latLonNxGraph(graph, labels=False, neatoLayout=neatoLayout, showPlot=False)
 	plt.savefig(os.path.join(temp_dir, filenames["ongl"]))
 
 
@@ -345,11 +354,11 @@ def milsoftToGridlab(temp_dir):
 		stdFile = f.read()
 	with open(seqPath) as f:
 		seqFile = f.read()
-	tree = omf.milToGridlab.convert(stdFile, seqFile, rescale=True)
+	tree = milToGridlab.convert(stdFile, seqFile, rescale=True)
 	# Remove '#include "schedules.glm' objects from the tree. Would be faster if this was incorported in sortedWrite() or something
 	tree = {k: v for k, v in tree.items() if v.get('omftype') != '#include'}
 	with open(os.path.join(temp_dir, filenames['msgl']), 'w') as outFile:
-		outFile.write(omf.feeder.sortedWrite(tree))
+		outFile.write(feeder.sortedWrite(tree))
 
 
 @app.route('/milsoftToGridlab/<path:temp_dir>', methods=['GET', 'DELETE'])
@@ -394,11 +403,11 @@ def cymeToGridlab(temp_dir):
 	request.files["mdb"].save(mdbPath)
 	import locale
 	locale.setlocale(locale.LC_ALL, 'en_US.UTF-8')
-	tree = omf.cymeToGridlab.convertCymeModel(mdbPath, temp_dir)
+	tree = cymeToGridlab_.convertCymeModel(mdbPath, temp_dir)
 	# Remove '#include "schedules.glm' objects from the tree. Would be faster if this was incorported in sortedWrite() or something
 	tree = {k: v for k, v in tree.items() if v.get('omftype') != '#include'}
 	with open(os.path.join(temp_dir, filenames["cygl"]), 'w') as outFile:
-		outFile.write(omf.feeder.sortedWrite(tree))
+		outFile.write(feeder.sortedWrite(tree))
 
 
 @app.route("/cymeToGridlab/<path:temp_dir>", methods=['GET', 'DELETE'])
@@ -444,8 +453,8 @@ def gridlabRun(temp_dir):
 	f = request.files['glm']
 	glmOnDisk = os.path.join(temp_dir, fName)
 	f.save(glmOnDisk)
-	feed = omf.feeder.parse(glmOnDisk)
-	outDict = omf.solvers.gridlabd.runInFilesystem(feed, attachments=[], keepFiles=True, workDir=temp_dir, glmName='out.glm')
+	feed = feeder.parse(glmOnDisk)
+	outDict = gridlabd.runInFilesystem(feed, attachments=[], keepFiles=True, workDir=temp_dir, glmName='out.glm')
 	with open(os.path.join(temp_dir, filenames["glrun"]), 'w') as f:
 		json.dump(outDict, f)
 
@@ -528,9 +537,9 @@ def gridlabdToGfm(temp_dir):
 	}
 	feederModel = {
 		'nodes': [], # Don't need these.
-		'tree': omf.feeder.parse(glmPath)
+		'tree': feeder.parse(glmPath)
 	}
-	gfmDict = omf.models.resilientDist.convertToGFM(gfmInputTemplate, feederModel)
+	gfmDict = resilientDist.convertToGFM(gfmInputTemplate, feederModel)
 	with open(os.path.join(temp_dir, filenames["glgfm"]), 'w') as f:
 		json.dump(gfmDict, f)
 
@@ -670,7 +679,7 @@ def samRun(temp_dir):
 	tmy2_path = os.path.join(temp_dir, "in.tmy2")
 	request.files["tmy2"].save(tmy2_path)
 	# Set up SAM data structures.
-	ssc = omf.solvers.nrelsam2013.SSCAPI()
+	ssc = nrelsam2013.SSCAPI()
 	dat = ssc.ssc_data_create()
 	# Set the inputs.
 	ssc.ssc_data_set_string(dat, b'file_name', bytes(tmy2_path, 'ascii'))
@@ -754,11 +763,11 @@ def transmissionMatToOmt(temp_dir):
 	'''
 	mat_path = os.path.join(temp_dir, "input.mat")
 	request.files["matpower"].save(mat_path)
-	omt_json = omf.network.parse(mat_path, filePath=True)
+	omt_json = network.parse(mat_path, filePath=True)
 	if omt_json == {"baseMVA":"100.0","mpcVersion":"2.0","bus":{},"gen":{}, "branch":{}}:
 		raise Exception("The submitted .m file was invalid or could not be parsed correctly.")
-	nxG = omf.network.netToNxGraph(omt_json)
-	omt_json = omf.network.latlonToNet(nxG, omt_json)
+	nxG = network.netToNxGraph(omt_json)
+	omt_json = network.latlonToNet(nxG, omt_json)
 	with open(os.path.join(temp_dir, filenames["tmomt"]), 'w') as f:
 		json.dump(omt_json, f)
 
@@ -829,7 +838,7 @@ def transmissionPowerflow(temp_dir):
 		'genLimits': genLimits
 	}
 	model_dir = os.path.join(temp_dir, "transmission")
-	if omf.models.transmission.new(model_dir):
+	if transmission.new(model_dir):
 		omt_path = os.path.join(model_dir, "case9.omt")
 		request.files["omt"].save(omt_path)
 		with open(os.path.join(model_dir, "allInputData.json")) as f:
@@ -837,7 +846,7 @@ def transmissionPowerflow(temp_dir):
 		merged = {key: inputDict.get(key) if inputDict.get(key) is not None else defaults[key] for key in defaults}
 		with open(os.path.join(model_dir, "allInputData.json"), 'w') as f:
 			json.dump(merged, f)
-		outputDict = omf.models.transmission.work(model_dir, merged)
+		outputDict = transmission.work(model_dir, merged)
 		with open(os.path.join(model_dir, "allOutputData.json"), 'w') as f:
 			json.dump(outputDict, f)
 		with zipfile.ZipFile(os.path.join(model_dir, filenames["tmpf"]), 'w', zipfile.ZIP_DEFLATED) as z:
@@ -893,7 +902,7 @@ def transmissionViz(temp_dir):
 			json.load(f)
 	except:
 		raise Exception("Could not parse the omt file as json")
-	omf.network.viz(omt_path, output_path=temp_dir, output_name=filenames["tv"], open_file=False)
+	network.viz(omt_path, output_path=temp_dir, output_name=filenames["tv"], open_file=False)
 
 
 @app.route("/transmissionViz/<path:temp_dir>", methods=['GET', 'DELETE'])
@@ -941,7 +950,7 @@ def distributionViz(temp_dir):
 			json.load(f)
 	except:
 		raise Exception("Could not parse omd file as json")
-	omf.distNetViz.viz(omd_path, outputPath=temp_dir, outputName=filenames["dv"], open_file=False)
+	distNetViz.viz(omd_path, outputPath=temp_dir, outputName=filenames["dv"], open_file=False)
 
 
 @app.route("/distributionViz/<path:temp_dir>", methods=['GET', 'DELETE'])
@@ -960,6 +969,55 @@ def distributionViz_status(temp_dir):
 @get_download
 def distributionViz_download(temp_dir):
 	return send_from_directory(temp_dir, filenames["dv"])
+
+
+@app.route('/glmForceLayout', methods=['POST'])
+@start_process(inputs_metadata=({'name': 'glm', 'required': True, 'type': 'file'},))
+def glmForceLayout_start(temp_dir):
+	p = Process(target=glmForceLayout, args=(temp_dir,))
+	p.start()
+	return url_for('glmForceLayout_status', temp_dir=_get_rel_path(temp_dir))
+
+
+@try_except
+def glmForceLayout(temp_dir):
+	'''
+	Inject artifical coordinates into a GridLAB-D .glm and return the .glm.
+
+	Form parameters:
+	:param glm: a GLM file
+
+	Details:
+	:OMF function: omf.distNetViz.insert_coordinates()
+	:run-time: a few seconds
+	'''
+	# Get original filename
+	glm_path = os.path.join(temp_dir, 'in.glm')
+	glm_file = request.files['glm']
+	glm_file.save(glm_path)
+	tree = feeder.parse(glm_path)
+	distNetViz.insert_coordinates(tree)
+	# Remove #include?
+	with open(os.path.join(temp_dir, filenames['gfl']), 'w') as f:
+		f.write(feeder.sortedWrite(tree))
+
+
+@app.route('/glmForceLayout/<path:temp_dir>', methods=['GET', 'DELETE'])
+@get_status
+def glmForceLayout_status(temp_dir):
+	glm_path = os.path.join(temp_dir, filenames['gfl'])
+	temp_dir = _get_rel_path(temp_dir)
+	status_url = url_for('glmForceLayout_status', temp_dir=temp_dir)
+	download_url = url_for('glmForceLayout_download', temp_dir=temp_dir)
+	if os.path.isfile(glm_path):
+		return (os.path.getmtime(glm_path), status_url, download_url)
+	return (None, status_url, download_url)
+
+
+@app.route('/glmForceLayout/<path:temp_dir>/download')
+@get_download
+def glmForceLayout_download(temp_dir):
+	return send_from_directory(temp_dir, filenames['gfl'], mimetype='text/plain')
 
 
 def serve_production():
