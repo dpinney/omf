@@ -652,3 +652,119 @@ def add_day(df, weather):
 	df = df.append(d_24, ignore_index=True)
 
 	return df, predicted_day
+
+def makeUsefulDf_3d(df, noise=2.5, hours_prior=24):
+	"""
+	Turn a dataframe of datetime and load data into a dataframe useful for
+	machine learning. Normalize values.
+	"""
+	def _isHoliday(holiday, df):
+		m1 = None
+		if holiday == "New Year's Day":
+			m1 = (df["dates"].dt.month == 1) & (df["dates"].dt.day == 1)
+		if holiday == "Independence Day":
+			m1 = (df["dates"].dt.month == 7) & (df["dates"].dt.day == 4)
+		if holiday == "Christmas Day":
+			m1 = (df["dates"].dt.month == 12) & (df["dates"].dt.day == 25)
+		m1 = df["dates"].dt.date.isin(nerc6[holiday]) if m1 is None else m1
+		m2 = df["dates"].dt.date.isin(nerc6.get(holiday + " (Observed)", []))
+		return m1 | m2
+
+	this_directory = os.path.dirname(os.path.realpath(__file__))
+	with open(pJoin(this_directory, 'static', 'testFiles', 'holidays.pickle'), 'rb') as f:
+		nerc6 = pickle.load(f, encoding='latin_1') # Is this the right codec? It might be cp1252
+
+	if 'dates' not in df.columns:
+		df['dates'] = df.apply(lambda x: dt(int(x['year']), int(x['month']), int(x['day']), int(x['hour'])), axis=1)
+
+	r_df = pd.DataFrame()
+	
+	# LOAD
+	r_df["load_n"] = zscore(df["load"])
+	r_df["load_prev_n"] = r_df["load_n"].shift(hours_prior)
+	r_df["load_prev_n"].bfill(inplace=True)
+	
+	r_df.drop(['load_n'], axis=1, inplace=True)
+	
+	# DATE
+	r_df["years_n"] = zscore(df["dates"].dt.year)
+	r_df = pd.concat([r_df, pd.get_dummies(df.dates.dt.hour, prefix='hour')], axis=1)
+	r_df = pd.concat([r_df, pd.get_dummies(df.dates.dt.dayofweek, prefix='day')], axis=1)
+	r_df = pd.concat([r_df, pd.get_dummies(df.dates.dt.month, prefix='month')], axis=1)
+	for holiday in ["New Year's Day", "Memorial Day", "Independence Day", "Labor Day", "Thanksgiving", "Christmas Day"]:
+		r_df[holiday] = _isHoliday(holiday, df)
+
+	# TEMP
+	temp_noise = df['tempc'] + np.random.normal(0, noise, df.shape[0])
+	r_df["temp_n"] = zscore(temp_noise)
+	r_df['temp_n^2'] = zscore([x*x for x in temp_noise])
+
+	return r_df
+
+def data_transform_3d(data, timesteps=24, var='x'):
+	m = []
+	s = data.to_numpy()
+	for i in range(s.shape[0]-timesteps):
+		m.append(s[i:i+timesteps].tolist())
+
+	if var == 'x':
+		t = np.zeros((len(m), len(m[0]), len(m[0][0])))
+		for i, x in enumerate(m):
+			for j, y in enumerate(x):
+				for k, z in enumerate(y):
+					t[i, j, k] = z
+	else:
+		t = np.zeros((len(m), len(m[0])))
+		for i, x in enumerate(m):
+			for j, y in enumerate(x):
+				t[i, j] = y
+
+	return t
+
+def neural_net_next_day_3d(all_X, all_y, epochs=20, hours_prior=24, save_file=None, model=None):
+	all_X_n, all_y_n = all_X[:-hours_prior], all_y[:-hours_prior]
+	X_train = all_X_n[:-8760]
+	y_train = all_y_n[:-8760]
+	X_test = all_X_n[-8760:]
+	y_test = all_y_n[-8760:]
+
+	if model == None:
+		model = train_neural_net_3d(X_train, y_train, epochs)
+
+	print(X_test.shape)
+	print(X_train.shape)
+
+	accuracy = {
+		'test': model.evaluate(X_test, y_test),
+		'train': model.evaluate(X_train, y_train)
+	}
+
+	predictions = [float(f) for f in model.predict(np.array([all_X[-1]]))[0]]
+
+	if save_file != None:
+		model.save(save_file)
+	
+	return predictions, model, accuracy
+
+def train_neural_net_3d(X_train, y_train, epochs, HOURS_AHEAD=24):
+	import tensorflow as tf
+	from tensorflow.keras import layers
+
+	s = X_train.shape[2]
+	model = tf.keras.Sequential()
+	model.add(layers.Dense(s, activation=tf.nn.relu, input_shape=(HOURS_AHEAD, s)))
+	model.add(layers.Dense(s, activation=tf.nn.relu))
+	model.add(layers.Dense(s, activation=tf.nn.relu))
+	model.add(layers.Dense(s, activation=tf.nn.relu))
+	model.add(layers.Dense(s, activation=tf.nn.relu))
+	model.add(layers.Flatten())
+	model.add(layers.Dense(s*HOURS_AHEAD//2, activation=tf.nn.relu))
+	model.add(layers.Dense(HOURS_AHEAD))
+
+	nadam = tf.keras.optimizers.Nadam(learning_rate=0.002, beta_1=0.9, beta_2=0.999)
+	model.compile(optimizer=nadam, loss='mape')
+	model.fit(X_train, y_train, epochs=epochs)
+
+	optimizer = tf.keras.optimizers.RMSprop(0.0001)
+
+	return model
