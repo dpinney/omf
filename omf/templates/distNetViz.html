@@ -5624,10 +5624,12 @@ async function initializeInterface() {
         }
     }
     createInterface();
+    {% if showFileMenu %}
     if (!interfaceIsStatic() && feederNeedsSave()) {
         // Save to account for objects that were given artifical grid coordinates. This will make the interface less annoying
         saveFeeder(gWriteFeeder);
     }
+    {% endif %}
     attachHandlers();
     document.getElementById("loadingMessage").style.display = "none"
 }
