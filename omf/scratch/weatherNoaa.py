@@ -83,7 +83,7 @@ def annualDataHourlyToCsv(token, zipCode, dataSet, dataTypeList, csvPath):
 			data2 = []
 			data3 = []
 			data4 = []			
-		with open(csvPath,'w') as file:
+		with open(csvPath,'w', newline='') as file:
 			writer = csv.writer(file,lineterminator = '\n')
 			for month in calendar:
 				for day in range(calendar[month]):
@@ -144,8 +144,8 @@ def annualDataHourlyToCsv(token, zipCode, dataSet, dataTypeList, csvPath):
 
 
 def _tests():
-	checkDatasets(DEFAULT_TOKEN, '40510') #Lexington, KY (LEX airport)
-	pullOneDayHourly(DEFAULT_TOKEN, '22202', '2010','01','01')
+	print(checkDatasets(DEFAULT_TOKEN, '40510')) #Lexington, KY (LEX airport)
+	print(pullOneDayHourly(DEFAULT_TOKEN, '22202', '2010','01','01'))
 	#annualDataHourlyToCsv(DEFAULT_TOKEN, '11430', [], 'weatherNoaaTemp.csv')
 	#annualDataHourlyToCsv(DEFAULT_TOKEN, '40510', 'NORMAL_HLY', 'HLY-TEMP-NORMAL', 'weatherNoaaTemp.csv')
 	#annualDataHourlyToCsv(DEFAULT_TOKEN, '40510', 'NORMAL_HLY', ['HLY-TEMP-NORMAL','HLY-WIND-1STPCT'], 'weatherNoaaTemp.csv')

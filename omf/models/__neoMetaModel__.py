@@ -4,6 +4,8 @@ import json, os, tempfile, webbrowser, math, shutil, datetime, multiprocessing, 
 from jinja2 import Template
 from os.path import join as pJoin
 from os.path import split as pSplit
+import os
+import pandas as pd
 import omf.models
 from omf import web
 
@@ -257,6 +259,87 @@ def roundSig(x, sig=3):
 	elif x!=x: return 0 # This is handling float's NaN.
 	elif x < 0: return -1*roundPosSig(-1*x, sig)
 	else: return roundPosSig(x, sig)
+
+def safe_assert(bool_statement, error_str, keep_running):
+	if keep_running:
+		if not bool_statement:
+			print(error_str)
+	else:
+		assert bool_statement, error_str
+
+
+def csvValidateAndLoad(file_input, modelDir, header=0, nrows=8760, ncols=1, dtypes=[], return_type='list_by_col', ignore_nans=False, save_file=None, ignore_errors=False):
+	"""
+		Safely validates, loads, and saves user's file input for model's use.
+
+		Parameters:
+		file_input: stream from input_dict to be read
+		modelDir: a temporary or permanent file saved to given location
+		header: row of header, enter "None" if no header provided.
+		nrows: skip confirmation if None
+		ncols: skip confirmation if None
+		dtypes: dtypes as columns should be parsed. If empty, no parsing. 
+						Use "False" for column index where there should be no parsing.
+					 	This can be used as any mapping function.
+		return_type: options: 'dict', 'df', 'list_by_col', 'list_by_row'
+		ignore_nans: Ignore NaN values
+		save_file: if not None, save file with given *relative* pathname. It will be appended to modelDir
+		ignore_errors (bool): if True, allow program to keep running when errors found and print
+
+		Returns:
+		Datatype as dictated by input parameters
+	"""
+
+	# save temporary file
+	temp_path = os.path.join(modelDir, 'csv_temp.csv') if save_file == None else os.path.join(modelDir, save_file)
+	with open(temp_path, 'w') as f:
+		f.write(file_input)
+	df = pd.read_csv(temp_path, header=header)
+	
+	# confirm nrows & ncols
+	safe_assert( (df.shape[0] == nrows) and (df.shape[1] == ncols), (
+		f'Incorrect CSV size. Required: {ncols} columns, {nrows} rows. Given: {df.shape[1]} columns, {df.shape[0]} rows.'
+	), ignore_errors)
+	
+	# NaNs
+	if not ignore_nans:
+		d = df.isna().any().to_dict()
+		nan_columns = [k for k, v in d.items() if v]
+		safe_assert( 
+			len(nan_columns) == 0, 
+			f'NaNs detected in columns {nan_columns}. Please adjust your CSV accordingly.',
+			ignore_errors
+		)
+	
+	# parse datatypes
+	safe_assert(
+		(len(dtypes) == 0) or (len(dtypes) == ncols), 
+		f"Length of dtypes parser must match ncols, you've entered {len(dtypes)}. If no parsing, provide empty array.",
+		ignore_errors
+	)
+	for t, x in zip(dtypes, df.columns):
+		if t != False:
+			df[x] = df[x].map(lambda x: t(x))
+	
+	# delete file if requested
+	if save_file == None:
+		os.remove(temp_path)
+
+	# return proper type
+	OPTIONS = ['dict', 'df', 'list_by_col', 'list_by_row']
+	safe_assert(
+		return_type in OPTIONS, 
+		f'return_type not recognized. Options are {OPTIONS}.',
+		ignore_errors
+	)
+	if return_type == 'list_by_col':
+		return [df[x].tolist() for x in df.columns]
+	elif return_type == 'list_by_row':
+		return df.values.tolist()
+	elif return_type == 'df':
+		return df
+	elif return_type == 'dict':
+		return [{k: v for k, v in row.items()} for _, row in df.iterrows()]
 
 def _test():
 	""" No test required for this file. """

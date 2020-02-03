@@ -1,29 +1,21 @@
-import json, os, sys, tempfile, webbrowser, time, shutil, subprocess, datetime as dt, csv, math, warnings
-import traceback
+import json, os, tempfile, shutil, datetime as dt, csv, base64
+import itertools as it
 from os.path import join as pJoin
-from jinja2 import Template
 import pandas as pd
 import numpy as np
 from matplotlib import pyplot as plt
-import matplotlib
 import scipy.stats as stats
-from plotly import tools
 import plotly as py
-import json
 import plotly.graph_objs as go
-import plotly.figure_factory as ff
 from plotly.tools import make_subplots
-from networkx.drawing.nx_agraph import graphviz_layout
 import networkx as nx
-import itertools as it
-from shutil import copyfile
-from __neoMetaModel__ import *
-from omf.models import __neoMetaModel__
-import random
 
 # OMF imports
-import omf.feeder as feeder
+import omf
+from omf import feeder
 from omf.solvers import gridlabd
+from omf.models.__neoMetaModel__ import *
+from omf.models import __neoMetaModel__
 
 # dateutil imports
 from dateutil import parser
@@ -40,12 +32,12 @@ def pullOutValues(tree, workDir, sustainedOutageThreshold):
 	# Run Gridlab.
 	if not workDir:
 		workDir = tempfile.mkdtemp()
-		print '@@@@@@', workDir
-	gridlabOut = omf.solvers.gridlabd.runInFilesystem(tree, attachments=attachments, workDir=workDir)
+		print('@@@@@@', workDir)
+	gridlabOut = gridlabd.runInFilesystem(tree, attachments=attachments, workDir=workDir)
 
 	#Pull out number of customers
 	numberOfCustomers = 0.0
-	with open(workDir + '/Metrics_Output.csv', 'rb') as csvfile:
+	with open(workDir + '/Metrics_Output.csv', newline='') as csvfile:
 		file = csv.reader(csvfile)
 		for line in file:
 			k = 0
@@ -139,7 +131,7 @@ def manualOutageStats(numberOfCustomers, mc_orig, sustainedOutageThreshold):
 
 def setupSystem(pathToGlm, pathToCsv, workDir, lineFaultType, failureDistribution, failure_1, failure_2, restorationDistribution, rest_1, rest_2, maxOutageLength, simTime, faultType):
 	'helper function to set-up reliability module on a glm given its path'
-	tree = omf.feeder.parse(pathToGlm)
+	tree = feeder.parse(pathToGlm)
 	mc = pd.read_csv(pathToCsv)
 	
 	#add fault object to tree
@@ -218,7 +210,7 @@ def setupSystem(pathToGlm, pathToCsv, workDir, lineFaultType, failureDistributio
 	# Map to speed up name lookups.
 	nameToIndex = {tree[key].get('name',''):key for key in tree.keys()}
 	# Get rid of schedules and climate and check for all edge types:
-	for key in tree.keys():
+	for key in list(tree.keys()):
 		obtype = tree[key].get("object","")
 		if obtype == 'underground_line':
 			edge_bools['underground_line'] = True
@@ -242,12 +234,12 @@ def setupSystem(pathToGlm, pathToCsv, workDir, lineFaultType, failureDistributio
 	tree[str(biggestKey*10 + 6)] = {"object":"currdump","filename":"currDump.csv"}
 	
 	# Line rating dumps
-	tree[omf.feeder.getMaxKey(tree) + 1] = {
+	tree[feeder.getMaxKey(tree) + 1] = {
 		'module': 'tape'
 	}
 	for key in edge_bools.keys():
 		if edge_bools[key]:
-			tree[omf.feeder.getMaxKey(tree) + 1] = {
+			tree[feeder.getMaxKey(tree) + 1] = {
 				'object':'group_recorder', 
 				'group':'"class='+key+'"',
 				'property':'continuous_rating',
@@ -288,14 +280,14 @@ def setupSystem(pathToGlm, pathToCsv, workDir, lineFaultType, failureDistributio
 		if protDevices[key]:
 			for phase in ['A', 'B', 'C']:
 				if key != 'fuse':
-					tree[omf.feeder.getMaxKey(tree) + 1] = {
+					tree[feeder.getMaxKey(tree) + 1] = {
 						'object':'group_recorder', 
 						'group':'"class='+key+'"',
 						'property':'phase_' + phase + '_state',
 						'file':key + '_phase_' + phase + '_state.csv'
 					}
 				else:
-					tree[omf.feeder.getMaxKey(tree) + 1] = {
+					tree[feeder.getMaxKey(tree) + 1] = {
 						'object':'group_recorder', 
 						'group':'"class='+key+'"',
 						'property':'phase_' + phase + '_status',
@@ -342,14 +334,14 @@ def protection(tree):
 		if protDevices[key]:
 			for phase in ['A', 'B', 'C']:
 				if key != 'fuse':
-					tree[omf.feeder.getMaxKey(tree) + 1] = {
+					tree[feeder.getMaxKey(tree) + 1] = {
 									'object':'group_recorder', 
 									'group':'"class='+key+'"',
 									'property':'phase_' + phase + '_state',
 									'file':key + '_phase_' + phase + '_state.csv'
 								}
 				else:
-					tree[omf.feeder.getMaxKey(tree) + 1] = {
+					tree[feeder.getMaxKey(tree) + 1] = {
 									'object':'group_recorder', 
 									'group':'"class='+key+'"',
 									'property':'phase_' + phase + '_status',
@@ -365,7 +357,7 @@ def recloserAnalysis(pathToGlm, pathToCsv, workDir, lineFaultType, lineNameForRe
 
 	numberOfCustomers, noReclSAIFI, noReclSAIDI, noReclMAIFI, mc1 = pullOutValues(tree, workDir, sustainedOutageThreshold)
 	#add a recloser
-	for key in tree:
+	for key in list(tree.keys()):
 		if tree[key].get('name', '') == lineNameForRecloser:
 			tree[str(biggestKey*10 + index)] = {'object':'recloser','phases':tree[key]['phases'],'name':tree[key]['name'] + '_addedRecloser' , 'from':tree[key]['from'], 'to':tree[key]['to'], 'retry_time': '1 s', 'max_number_of_tries': '3'}
 			del tree[key]
@@ -400,7 +392,7 @@ def optimalRecloserAnalysis(pathToGlm, pathToCsv, workDir, lineFaultType, failur
 
 	tree2 = tree.copy()
 	# Find the optimal recloser placement based on SAIDI values
-	for key in tree2:
+	for key in list(tree2.keys()):
 		if tree2[key].get('object','') in ['underground_line', 'overhead_line', 'triplex_line']:
 			if 'parent' not in tree2[key]:
 				tree = tree2.copy()
@@ -456,7 +448,7 @@ def valueOfAdditionalRecloser(pathToGlm, pathToCsv, workDir, lineFaultType, line
 	# check to see if work directory is specified
 	if not workDir:
 		workDir = tempfile.mkdtemp()
-		print '@@@@@@', workDir
+		print('@@@@@@', workDir)
 
 	# Find SAIDI/SAIFI/MAIFI manually from Metrics_Output
 	manualNoReclSAIDI, manualNoReclSAIFI, manualNoReclMAIFI = manualOutageStats(numberOfCustomers, mc1, sustainedOutageThreshold)
@@ -715,8 +707,10 @@ def distributiongraph(dist, param_1, param_2, nameOfGraph):
 		trace = go.Scatter(x=x, y=dist, name=nameOfGraph)
 	return trace
 
-valueOfAdditionalRecloser("C:/Users/granb/omf/omf/static/publicFeeders" + '/' + "Olin Barre Fault" + '.glm',
-		"C:/Users/granb/omf/omf/scratch/SmartSwitching/outagesNew3.csv",
+#valueOfAdditionalRecloser("C:/Users/granb/omf/omf/static/publicFeeders" + '/' + "Olin Barre Fault" + '.glm',
+#		"C:/Users/granb/omf/omf/scratch/SmartSwitching/outagesNew3.csv",
+valueOfAdditionalRecloser(os.path.join(omf.omfDir, 'static/publicFeeders/Olin Barre Fault.glm'),
+		os.path.join(omf.omfDir, 'scratch/SmartSwitching/outagesNew3.csv'),
 		None,
 		'underground_line',
 		"18098",
@@ -740,7 +734,7 @@ def work(modelDir, inputDict):
 	# Write the feeder
 	feederName = [x for x in os.listdir(modelDir) if x.endswith('.omd')][0][:-4]
 	inputDict["feederName1"] = feederName
-	omf.feeder.omdToGlm(modelDir + '/' + feederName + '.omd', modelDir)
+	feeder.omdToGlm(modelDir + '/' + feederName + '.omd', modelDir)
 	#test the main functions of the program
 	plotOuts = valueOfAdditionalRecloser(
 		modelDir + '/' + feederName + '.glm', #GLM Path
@@ -765,11 +759,11 @@ def work(modelDir, inputDict):
 	
 	# Textual outputs of cost statistic
 	with open(pJoin(modelDir,"costStatsCalc.html"),"rb") as inFile:
-		outData["costStatsHtml"] = inFile.read()
+		outData["costStatsHtml"] = base64.standard_b64encode(inFile.read()).decode('ascii')
 	
 	# Image outputs.
 	with open(pJoin(modelDir,"feeder_chart.png"),"rb") as inFile:
-		outData["feeder_chart.png"] = inFile.read().encode("base64")
+		outData["feeder_chart.png"] = base64.standard_b64encode(inFile.read()).decode('ascii')
 	
 	# Plotly outputs.
 	layoutOb = go.Layout()
@@ -792,7 +786,7 @@ def new(modelDir):
 	defaultInputs = {
 		"modelType": modelName,
 		"feederName1": "Olin Barre Fault",
-		"pathToCsv": "C:/Users/granb/omf/omf/scratch/SmartSwitching/outagesNew3.csv",
+		"pathToCsv": os.path.join(os.path.dirname(__file__), 'SmartSwitching/outagesNew3.csv'),
 		"lineTypeForFaults": 'underground_line',
 		"recloserLocation": "18098",
 		'failureDistribution': 'EXPONENTIAL',

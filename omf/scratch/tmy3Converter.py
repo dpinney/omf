@@ -15,18 +15,18 @@ def renameTmy2s():
     for fName in allNames:
         with open(fName,'r') as inFile:
             code, city, state = inFile.readline().split()[0:3]
-            print city, state
+            print(city, state)
         shutil.copyfile(fName, state + '-' + city + '.tmy2')
 
 def convertTmy3(csvPath):
-    readFile = open(csvPath, "rb")
+    readFile = open(csvPath, newline='')
     reader = csv.reader(readFile)
-    firstRow = reader.next()
+    firstRow = next(reader)
     origName = str(firstRow[1])
     newName = re.sub(r'\W', '', origName.replace(" ", "_"))
     firstRow[1] = '"' + newName + '"'
     outName = firstRow[2] + "-" + newName + "-V3.tmy2.txt"
-    writeFile = open(outName, "wb")
+    writeFile = open(outName, "w", newline='')
     writeFile.write(",".join(firstRow))     
     writer = csv.writer(writeFile, quotechar="'")
     for row in reader:

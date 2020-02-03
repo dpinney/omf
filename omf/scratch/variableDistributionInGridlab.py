@@ -18,11 +18,11 @@ def doCalc():
 	del bigDict['location']
 	del bigDict['temperature']
 
-	print '{'
+	print('{')
 	for key in bigDict:
-		fixedArray = map(float,bigDict[key])
-		print '"' + key + '":' + str(fixedArray) + ','
-	print '}'
+		fixedArray = list(map(float,bigDict[key]))
+		print('"' + key + '":' + str(fixedArray) + ',')
+	print('}')
 
 '''
 Okay, here are the derived rules. Note that we had to go into Mathematica to get the histograms.
