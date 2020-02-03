@@ -109,7 +109,7 @@ def _send_email(recipient, subject, message):
 	c = boto3.client('ses', aws_access_key_id='AKIAJLART4NXGCNFEJIQ', aws_secret_access_key=key, region_name='us-east-1')
 	email_content = {
 		'Source': 'admin@omf.coop',
-		'Destination': {'ToAddresses': [email]},
+		'Destination': {'ToAddresses': [recipient]},
 		'Message': {
 			'Subject': {'Data': subject, 'Charset': 'UTF-8'},
 			'Body': {'Text': {'Data': message, 'Charset': 'UTF-8' }}
