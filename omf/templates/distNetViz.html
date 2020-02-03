@@ -1647,7 +1647,9 @@ const addManagerPrototype = {
         const relationships = getRelationshipsWithTypes();
         const types = []; // I need a "types" array because I want to sort all of the types together
         Object.keys(relationships).filter(r => r !== "configurationNode").forEach(relationship => {
-            relationships[relationship].forEach(type => types.push(type));
+            relationships[relationship].forEach(type => {
+                if (!types.includes(type)) types.push(type);
+            });
         });
         alphabeticalForEach.bind(types)(type => {
             const option = document.createElement("option");
