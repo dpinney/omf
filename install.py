@@ -66,7 +66,7 @@ elif platform.system()=='Windows':
 	os.system("wget --no-check-certificate https://sourceforge.net/projects/gridlab-d/files/gridlab-d/Candidate%20release/gridlabd-4.0_RC1.exe")
 	os.system("gridlabd-4.0_RC1.exe/silent")
 	os.system("refreshenv")
-	#Install splatl
+	#Install splat
 	#os.system(wget https://www.qsl.net/kd2bd/Splat-1.3.0.zip)
 	#os.system(Splat-1.3.0/Splat-1-3-1-SD-mx64.exe)
 	# Install pygraphviz.
