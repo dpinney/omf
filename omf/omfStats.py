@@ -10,7 +10,7 @@ import os, csv, json, time, collections, zipfile
 from datetime import datetime
 from matplotlib import pyplot as plt
 try:
-	from geoip import geolite2
+	from geolite2 import geolite2
 except:
 	pass
 from iso3166 import countries

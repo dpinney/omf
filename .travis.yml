@@ -7,7 +7,7 @@ jobs:
   allow_failures:
     - os: osx
     - os: windows
-language: generic
+language: shell
 dist: bionic
 addons:
   apt:
