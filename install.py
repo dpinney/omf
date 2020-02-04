@@ -61,11 +61,11 @@ elif platform.system()=='Windows':
 	os.system("choco install -y octave.portable")
 	#TODO: find way to install mdbtools.
 	# HACK: timeout and refreshenv should get all the choco binaries on to the path.
-	os.system("timeout 5")
 	os.system("refreshenv")
 	# Install GridLAB-D.
 	os.system("wget --no-check-certificate https://sourceforge.net/projects/gridlab-d/files/gridlab-d/Candidate%20release/gridlabd-4.0_RC1.exe")
 	os.system("gridlabd-4.0_RC1.exe/silent")
+	os.system("refreshenv")
 	#Install splatl
 	#os.system(wget https://www.qsl.net/kd2bd/Splat-1.3.0.zip)
 	#os.system(Splat-1.3.0/Splat-1-3-1-SD-mx64.exe)
@@ -75,10 +75,6 @@ elif platform.system()=='Windows':
 	elif platform.architecture()[0] == '64bit':
 		os.system("python3.exe -m pip install omf\\static\\pygraphviz-1.3.1-cp36-none-win_amd64.whl")
 	# Finish up installation with pip.
-	os.system("cd omf")
-	# HACK: more refreshes of the environment.
-	os.system("timeout 5")
-	os.system("refreshenv")
 	os.system("python3 -m pip install scipy")
 	os.system("python3 -m pip install setuptools>=33.1.1")
 	pipInstallInOrder("python3 -m pip")
