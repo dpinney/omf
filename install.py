@@ -48,8 +48,10 @@ elif platform.system()=='Windows':
 	# os.system(chocoString)
 	# Check for right Python version.
 	version = sys.version.split('\n')[0] 
-	if not version.startswith('2.'):
-		os.system("choco install -y python3")
+	if not version.startswith('3.6'):
+		os.system('choco install -y python --version 3.6.8')
+	# Hack to create a python3 binary on the path.
+	os.system("cp C:\\Python36\\python.exe C:\\Python38\\python3.exe")
 	# Install choco packages.
 	os.system("choco install -y wget")
 	os.system("choco install -y vcredist2008")
@@ -64,7 +66,7 @@ elif platform.system()=='Windows':
 	# Install GridLAB-D.
 	os.system("wget --no-check-certificate https://sourceforge.net/projects/gridlab-d/files/gridlab-d/Candidate%20release/gridlabd-4.0_RC1.exe")
 	os.system("gridlabd-4.0_RC1.exe/silent")
-	#Install splat
+	#Install splatl
 	#os.system(wget https://www.qsl.net/kd2bd/Splat-1.3.0.zip)
 	#os.system(Splat-1.3.0/Splat-1-3-1-SD-mx64.exe)
 	# Install pygraphviz.
