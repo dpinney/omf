@@ -14,14 +14,14 @@ myDir = os.path.dirname(__file__)
 c_number = c_float # must be c_double or c_float depending on how defined in sscapi.h
 class SSCAPI():
 	if sys.platform == 'win32' or sys.platform == 'cygwin':
+		# HACK: Windows cannot import a DLL unless it's in the same directory as the process!
+		cachedDir = os.getcwd()
+		os.chdir(myDir)
 		if 8*struct.calcsize("P") == 64:
 			_dll = CDLL(os.path.join(myDir,"ssc64.dll")) 
 		else:
-			# HACK: Windows cannot import a DLL unless it's in the same directory as the process!
-			cachedDir = os.getcwd()
-			os.chdir(myDir)
 			_dll = CDLL("ssc32.dll")
-			os.chdir(cachedDir)
+		os.chdir(cachedDir)
 	elif sys.platform == 'darwin':
 		_dll = CDLL(os.path.join(myDir,"ssc64.dylib"))
 	elif sys.platform == 'linux':
