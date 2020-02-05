@@ -18,7 +18,7 @@ class SSCAPI():
 		cachedDir = os.getcwd()
 		os.chdir(myDir)
 		if 8*struct.calcsize("P") == 64:
-			_dll = CDLL(os.path.join(myDir,"ssc64.dll")) 
+			_dll = CDLL("ssc64.dll") 
 		else:
 			_dll = CDLL("ssc32.dll")
 		os.chdir(cachedDir)

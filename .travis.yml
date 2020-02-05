@@ -31,5 +31,7 @@ before_install:
   - export BOTO_CONFIG=/dev/null
 install:
   - sudo python3 setup.py develop || python setup.py develop
+before_script:
+  - if [ "$TRAVIS_OS_NAME" = "windows" ]; then export "PATH=/c/Python36:/c/Python36/Scripts:/c/Program Files/GridLAB-D/bin:/c/Program files (x86)/Graphviz2.38/bin:$PATH"; fi
 script:
   - python3 ./omf/runAllTests.py omf
