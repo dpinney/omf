@@ -37,8 +37,8 @@ def new(modelDir):
 		"stationUSCRN": "KY_Versailles_3_NNW",
 		"weatherParameterUSCRN": "SOLARAD",
 		"weatherParameterASOS": "tmpc",
-		"darkSkyLat": "00.00",
-		"darkSkyLon": "00.00",
+		"darkSkyLat": "39.828362",
+		"darkSkyLon": "-98.579490",
 		"modelType": modelName}
 	return __neoMetaModel__.new(modelDir, defaultInputs)
 
