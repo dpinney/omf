@@ -557,9 +557,9 @@ def _tests():
 	prefix = Path(__file__).parent
 	# mapOmd(prefix / 'static/publicFeeders/Olin Barre LatLon.omd', 'testOutput', 'png', openBrowser=True, conversion=False)
 	mapOmd(prefix / 'static/publicFeeders/Olin Barre LatLon.omd', 'testOutput', 'html', openBrowser=True, conversion=False)
-	showOnMap(hullOfOmd(prefix / 'static/publicFeeders/Olin Barre LatLon.omd', conversion=False))
-	showOnMap(simplifiedOmdShape(prefix / 'static/publicFeeders/Olin Barre LatLon.omd', conversion=False))
-	showOnMap(omdGeoJson(prefix / 'static/publicFeeders/Olin Barre LatLon.omd', conversion=False))
+	# showOnMap(hullOfOmd(prefix / 'static/publicFeeders/Olin Barre LatLon.omd', conversion=False))
+	# showOnMap(simplifiedOmdShape(prefix / 'static/publicFeeders/Olin Barre LatLon.omd', conversion=False))
+	# showOnMap(omdGeoJson(prefix / 'static/publicFeeders/Olin Barre LatLon.omd', conversion=False))
 	print(shortestPathOmd(prefix / 'static/publicFeeders/Olin Barre LatLon.omd', 'node62474203981T62474203987_B', 'node1667616792'))
 	# Server tests.
 	# rasterTilesFromOmd(prefix / 'static/publicFeeders/Olin Barre LatLon.omd', prefix / 'scratch/omdTests/tiles', conversion=False)
