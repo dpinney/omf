@@ -513,7 +513,7 @@ def makeUsefulDf(df, noise=2.5, hours_prior=24, structure=None):
 		m1 = df["dates"].dt.date.isin(nerc6[holiday]) if m1 is None else m1
 		m2 = df["dates"].dt.date.isin(nerc6.get(holiday + " (Observed)", []))
 		return m1 | m2
-	def data_transform_3d(data, timesteps=24, var='x'):
+	def _data_transform_3d(data, timesteps=24, var='x'):
 		m = []
 		s = data.to_numpy()
 		for i in range(s.shape[0]-timesteps):
@@ -572,10 +572,7 @@ def makeUsefulDf(df, noise=2.5, hours_prior=24, structure=None):
 	r_df["temp_n"] = zscore(temp_noise)
 	r_df['temp_n^2'] = zscore([x*x for x in temp_noise])
 
-	if structure != '3D':
-		return r_df, df['load']
-	else:
-		return data_transform_3d(r_df, var='x'), data_transform_3d(df['load'], var='y')
+	return r_df, df['load'] if structure != '3D' else _data_transform_3d(r_df, var='x'), _data_transform_3d(df['load'], var='y')
 
 def MAPE(predictions, answers):
 	assert len(predictions) == len(answers)
