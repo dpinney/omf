@@ -8,7 +8,7 @@ jobs:
     - os: osx
     - os: windows
 language: shell
-dist: bionic
+dist: generic
 addons:
   apt:
     update: true
