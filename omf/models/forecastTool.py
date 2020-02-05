@@ -103,23 +103,18 @@ def work(modelDir, ind):
 	df = df[df['dates'].dt.date.apply(lambda x: d[x] == 24)] # find all non-24
 
 	df, tomorrow = lf.add_day(df, weather[:24])
-	all_X = lf.makeUsefulDf_3d(df)
-	all_y = df['load']
+	all_X, all_y = lf.makeUsefulDf(df, structure="3D")
 
 	if ind['newModel'] == 'False':
 		for day in ['one_day_model', 'two_day_model', 'three_day_model']:
 			with open(pJoin(modelDir, ind[day+'_filename']), 'wb') as f:
 					f.write(base64.standard_b64decode(ind[day]))
-
-	all_y_3d = lf.data_transform_3d(all_y, var='y')
-	all_X_3d = lf.data_transform_3d(all_X, var='x')
-
-	#load prediction
 	
-	tomorrow_load, model, tomorrow_accuracy = lf.neural_net_next_day_3d(
-		all_X_3d, all_y_3d, 
+	tomorrow_load, model, tomorrow_accuracy = lf.neural_net_next_day(
+		all_X, all_y, 
 		epochs=epochs, save_file=pJoin(modelDir, 'one_day_model.h5'),
-		model=(None if ind['newModel'] == 'True' else tf.keras.models.load_model(pJoin(modelDir, ind['one_day_model_filename'])))
+		model=(None if ind['newModel'] == 'True' else tf.keras.models.load_model(pJoin(modelDir, ind['one_day_model_filename']))),
+		structure="3D"
 	)
 
 	o['tomorrow_load'] = tomorrow_load
@@ -129,30 +124,26 @@ def work(modelDir, ind):
 	# second day
 	df, second_day = lf.add_day(df, weather[24:48])
 	if second_day.month == tomorrow.month:
-		all_X = lf.makeUsefulDf_3d(df, hours_prior=48, noise=5)
-		all_y = df['load']
-		all_y_3d = lf.data_transform_3d(all_y, var='y')
-		all_X_3d = lf.data_transform_3d(all_X, var='x')
-		two_day_predicted_load, two_day_model, two_day_load_accuracy = lf.neural_net_next_day_3d(
-			all_X_3d, all_y_3d, 
+		all_X, all_y = lf.makeUsefulDf(df, hours_prior=48, noise=5, structure="3D")
+		two_day_predicted_load, two_day_model, two_day_load_accuracy = lf.neural_net_next_day(
+			all_X, all_y, 
 			epochs=epochs, hours_prior=48, 
 			save_file=pJoin(modelDir, 'two_day_model.h5'),
-			model=(None if ind['newModel'] == 'True' else tf.keras.models.load_model(pJoin(modelDir, ind['two_day_model_filename'])))
+			model=(None if ind['newModel'] == 'True' else tf.keras.models.load_model(pJoin(modelDir, ind['two_day_model_filename']))),
+			structure="3D"
 		)
 		two_day_peak = max(two_day_predicted_load)
 
 		# third day
 		df, third_day = lf.add_day(df, weather[48:72])
 		if third_day.month == tomorrow.month:
-			all_X = lf.makeUsefulDf_3d(df, hours_prior=72, noise=15)
-			all_y = df['load']
-			all_y_3d = lf.data_transform_3d(all_y, var='y')
-			all_X_3d = lf.data_transform_3d(all_X, var='x')
-			three_day_predicted_load, three_day_model, three_day_load_accuracy = lf.neural_net_next_day_3d(
-				all_X_3d, all_y_3d, 
+			all_X, all_y = lf.makeUsefulDf(df, hours_prior=72, noise=15, structure="3D")
+			three_day_predicted_load, three_day_model, three_day_load_accuracy = lf.neural_net_next_day(
+				all_X, all_y, 
 				epochs=epochs, hours_prior=72, 
 				save_file=pJoin(modelDir, 'three_day_model.h5'),
-				model=(None if ind['newModel'] == 'True' else tf.keras.models.load_model(pJoin(modelDir, ind['three_day_model_filename'])))
+				model=(None if ind['newModel'] == 'True' else tf.keras.models.load_model(pJoin(modelDir, ind['three_day_model_filename']))),
+				structure="3D"
 			)
 			three_day_peak = max(three_day_predicted_load)
 		else:

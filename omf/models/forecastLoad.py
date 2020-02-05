@@ -41,8 +41,7 @@ def work(modelDir, inputDict):
 		raise Exception("Neural Net CSV file is incorrect format.")
 
 	# neural net time
-	all_X = loadForecast.makeUsefulDf(df)
-	all_y = df["load"]
+	all_X, all_y = loadForecast.makeUsefulDf(df)
 	nn_pred, nn_accuracy = loadForecast.neural_net_predictions(all_X, all_y)
 	outData["actual_nn"] = df['load'][-8760:].tolist()
 
