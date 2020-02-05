@@ -63,6 +63,7 @@
 				<select id="source" name="source" onchange="loadWeatherParameters()" >
 					<option value="ASOS">ASOS</option>
 					<option value="USCRN">USCRN</option>
+					<option value="darkSky">darkSky</option>
 				</select>
 			</div>
 			 <div class="shortInput">
@@ -289,6 +290,33 @@
 					<option value="SOIL_TEMP_100">Average soil temperature at 100 cm below the surface (Celsius)</option>					
 				</select>
 			</div>
+			<!-- NEED TO VERIFY UNITS FROM DARKSKY API -->
+			<div class="shortInput">
+				<label class="tooltip">Weather Parameter - darkSky<span class="classic">Data that should be pulled</span></label>
+				<select id="weatherParameterdarkSky" name="weatherParameterdarkSky" required="required">
+					<option value="temperature">Temperature (Celsius)</option>
+					<option value="apparentTemperature">Apparent Temperature (Celsius)</option>
+					<option value="dewPoint">Dew Point (Celcius)</option>
+					<option value="humidity">Humidity (%)</option>
+					<option value="pressure">Pressure (Hectopascals)</option>
+					<option value="windSpeed">Wind Speed (kph)</option>
+					<option value="windGust">Wind Gust (kph)</option>
+					<option value="windBearing">Wind Direction (degrees)</option>
+					<option value="cloudCover">Cloud Cover (%)</option>
+					<option value="uvIndex">UV Index</option>
+					<option value="visibility">Visibilit (km)</option>
+					<option value="horizontal">Ozone (Dobsons)</option>
+				</select>
+			</div>
+			<div class="shortInput">
+				<label class="tooltip">Dark Sky Lat<span class="classic">Enter in Latitude of location</span></label>
+				<input type="text" id="darkSkyLat" name="darkSkyLat" pattern="[-+]?[0-9]*\.?[0-9]+" required="required"/>
+			</div>
+			<div class="shortInput">
+				<label class="tooltip">Dark Sky Lon<span class="classic">Enter in Longitude of location</span></label>
+				<input type="text" id="darkSkyLon" name="darkSkyLon" pattern="[-+]?[0-9]*\.?[0-9]+" required="required"/>
+			</div>
+
 			<!-- Required Buttons -->
 			<div class="wideInput" style="text-align:right">
 				<button id="deleteButton" type="button" class="stoppedInline postRunInline" onclick="deleteModel()">Delete</button>
