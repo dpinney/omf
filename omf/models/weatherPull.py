@@ -13,6 +13,7 @@ hidden = False
 
 def work(modelDir, inputDict):
 	''' Run the model in its directory.'''
+	print(inputDict)
 	source = inputDict['source']
 	station = inputDict['stationASOS'] if source == 'ASOS' else inputDict['stationUSCRN']
 	parameter = inputDict['weatherParameterASOS'] if source == 'ASOS' else inputDict['weatherParameterUSCRN']
@@ -36,6 +37,8 @@ def new(modelDir):
 		"stationUSCRN": "KY_Versailles_3_NNW",
 		"weatherParameterUSCRN": "SOLARAD",
 		"weatherParameterASOS": "tmpc",
+		"darkSkyLat": "00.00",
+		"darkSkyLon": "00.00",
 		"modelType": modelName}
 	return __neoMetaModel__.new(modelDir, defaultInputs)
 
