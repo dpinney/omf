@@ -468,6 +468,12 @@
 			</table>
 		</div>
 	</div>
+	<p class="reportTitle postRun">Raw Input and Output Files</p>
+    <div id="rawOutput" class="content postRun" style="margin-top:0px">
+        {% for name in allOutputDataDict['fileNames'] %}
+            {% if loop.index > 1 %}<br> {% endif %}<a href="/downloadModelData/{{allInputDataDict['user']}}/{{allInputDataDict['modelName']}}/{{name}}">{{name}}</a>
+        {% endfor %}
+    </div>
 </body>
 
 		<!-- <p class="reportTitle postRun">Simulation Location</p>
