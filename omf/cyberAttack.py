@@ -186,3 +186,62 @@ class CopycatAgent(object):
 						writeReqs.append({'cmd':'write','obName':obNameToPaste,'propName':obPropToPaste,'value':rez.get('value')})
 					return writeReqs
 		return []
+
+class AttackAllObTypeAgent(object):
+	__slots__ = 'agentName', 'attackTime', 'obTypeToAttack', 'obPropsAndTargets'
+	# e.g. e.g. "InverterAttackAgent", "2000-01-02 16:00:00", "inverter", [{"obPropToAttack":"power_factor", "value":"0.0"}, {"obPropToAttack":"generator_status", "value":"OFFLINE"}]
+
+	def __init__(self, agentName, attackTime, obTypeToAttack, obPropsAndTargets):
+		self.agentName = agentName
+		self.attackTime = attackTime
+		self.obTypeToAttack = obTypeToAttack
+		self.obPropsAndTargets = obPropsAndTargets
+
+	def readStep(self, time):
+		if time == self.attackTime:
+			return [{'cmd':'findByType','obType':self.obTypeToAttack}]
+		return []
+
+	def writeStep(self, time, rezList):
+		if time == self.attackTime:
+			for rez in rezList:
+				if (rez.get('obType') == self.obTypeToAttack):
+					nameList = rez.get('obNameList')
+					writeReqs = []
+					for obName in obNameList:
+						for obPropAndTarget in self.obPropsAndTargets:
+							obProp = obPropAndTarget.get('obPropToAttack')
+							propTarget = obPropAndTarget.get('value')
+							writeReqs.append({'cmd':'write','obName':obName,'propName':obProp,'value':propTarget})
+					return writeReqs
+		return []
+
+class AttackAllInverterAgent(object):
+	__slots__ = 'agentName', 'attackTime', 'obPropsAndTargets'
+	# Simply a copy of AttackAllObTypeAgent with the obTypeToAttack hardcoded to be 'inverter'
+	# e.g. e.g. "InverterAttackAgent", "2000-01-02 16:00:00", [{"obPropToAttack":"power_factor", "value":"0.0"}, {"obPropToAttack":"generator_status", "value":"OFFLINE"}]
+
+	def __init__(self, agentName, attackTime, obTypeToAttack, obPropsAndTargets):
+		self.agentName = agentName
+		self.attackTime = attackTime
+		self.obTypeToAttack = 'inverter'
+		self.obPropsAndTargets = obPropsAndTargets
+
+	def readStep(self, time):
+		if time == self.attackTime:
+			return [{'cmd':'findByType','obType':self.obTypeToAttack}]
+		return []
+
+	def writeStep(self, time, rezList):
+		if time == self.attackTime:
+			for rez in rezList:
+				if (rez.get('obType') == self.obTypeToAttack):
+					nameList = rez.get('obNameList')
+					writeReqs = []
+					for obName in obNameList:
+						for obPropAndTarget in self.obPropsAndTargets:
+							obProp = obPropAndTarget.get('obPropToAttack')
+							propTarget = obPropAndTarget.get('value')
+							writeReqs.append({'cmd':'write','obName':obName,'propName':obProp,'value':propTarget})
+					return writeReqs
+		return []
