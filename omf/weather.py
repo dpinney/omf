@@ -911,7 +911,7 @@ def _tests():
 	# Testing ASOS (Works)
 	pullAsos('2017','CHO', 'tmpc') # Does not write to a file by itself
 	print('ASOS (Iowa) data pulled to ' + tmpdir)
-	pullAsosStations(os.path.join(tmpdir, 'asosStationTable.csv'))
+	# pullAsosStations(os.path.join(tmpdir, 'asosStationTable.csv'))
 	# Testing DarkSky (Works as long as you have an API key)
 	# pullDarksky(2018, 36.64, -93.30, 'temperature', path=tmpdir)
 	# print('Darksky data pulled to ' + tmpdir)
@@ -922,8 +922,8 @@ def _tests():
 	# get_radiation_data('surfrad', 'Boulder_CO', 2019, True)
 	# get_radiation_data('solrad', 'bis', 2019)
 	# Testing NSRDB (Works, but not used anywhere)
-	nsrdbkey = 'rnvNJxNENljf60SBKGxkGVwkXls4IAKs1M8uZl56'
-	get_nrsdb_data('psm',-99.49218,43.83452,'2017', nsrdbkey, interval=60, filename=os.path.join(tmpdir, 'psm.csv'))
+	# nsrdbkey = 'rnvNJxNENljf60SBKGxkGVwkXls4IAKs1M8uZl56'
+	# get_nrsdb_data('psm',-99.49218,43.83452,'2017', nsrdbkey, interval=60, filename=os.path.join(tmpdir, 'psm.csv'))
 	# print(get_nrsdb_data('psm',-99.49218,43.83452,'2017', nsrdbkey, interval=60))
 	# get_nrsdb_data('psm_tmy',-99.49218,43.83452,'tdy-2017', nsrdbkey, filename='psm_tmy.csv')
 	# print(get_nrsdb_data('psm_tmy',-99.49218,43.83452,'tdy-2017', nsrdbkey))
