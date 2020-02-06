@@ -56,7 +56,7 @@ elif platform.system()=='Windows':
 	os.system("python3 -m pip install --upgrade pip")
 	# Install choco packages.
 	os.system("choco install -y wget")
-	os.system("choco install -y vcredist2008")
+	os.system("choco install -y vcredist-all")
 	os.system("choco install -y ffmpeg")
 	os.system("choco install -y graphviz")
 	os.system("choco install -y pip")
