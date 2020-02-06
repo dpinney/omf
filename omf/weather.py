@@ -12,6 +12,7 @@ from urllib.request import Request, urlopen
 import requests
 from dateutil.parser import parse as parse_dt
 from omf import feeder
+import platform
 
 def pullAsos(year, station, datatype):
 	'''This model pulls hourly data for a specified year and ASOS station. 
@@ -737,7 +738,7 @@ def nearest_tmy3_station(latitude, longitude):
 	data = requests.get(file_path)
 	csv_lines = [line.decode() for line in data.iter_lines()]
 	reader = csv.DictReader(csv_lines, delimiter=',')
-	#SHould file be local?
+	#Should file be local?
 	#with open('TMY3_StationsMeta.csv', 'r') as metafile:
 	#reader = csv.DictReader(metafile, delimiter=',')
 	tmy3_stations = [station for station in reader]
@@ -915,7 +916,9 @@ def _tests():
 	# pullDarksky(2018, 36.64, -93.30, 'temperature', path=tmpdir)
 	# print('Darksky data pulled to ' + tmpdir)
 	# Testing tmy3 (Works)
-	tmy3_pull(nearest_tmy3_station(41, -78), out_file=os.path.join(tmpdir, 'tmy3_test.csv'))
+	if platform.system() != 'Windows':
+		tmy3_test_station = nearest_tmy3_station(41, -78), out_file=os.path.join(tmpdir, 'tmy3_test.csv')
+		tmy3_pull(tmy3_test_station)
 	# Testing getRadiationYears (Works, but not used anywhere)
 	# get_radiation_data('surfrad', 'Boulder_CO', 2019, True)
 	# get_radiation_data('solrad', 'bis', 2019)
