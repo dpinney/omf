@@ -151,7 +151,7 @@ class Coordinator(object):
 						if 'status' in res:
 							temp_str = "<b>" + res.get('status') + "</b> : " + res.get('obName') + " &rarr; " + res.get('propName') + " = " + res.get('value') + "<br/>"
 						else:
-							temp_str = res.get('obName') + " &rarr; " + res.get('propName') + " = " + res.get('value') + "<br/>"
+							temp_str = res.get('obName') + " &rarr; " + res.get('propName') + " = " + str(res.get('value')) + "<br/>"
 						res_str += temp_str 
 				res_str += "</p></td>"
 				row_str += reqs_str + res_str
@@ -165,7 +165,7 @@ class Coordinator(object):
 			</body>
 		</html>"""
 		if outputPath is None:
-			Html_file = open("AgentLog/output.html", "w")
+			Html_file = open("./output.html", "w")
 		else:
 			Html_file = open(outputPath, "w")
 		Html_file.write(html_str)
