@@ -917,8 +917,7 @@ def _tests():
 	# print('Darksky data pulled to ' + tmpdir)
 	# Testing tmy3 (Works)
 	if platform.system() != 'Windows':
-		tmy3_test_station = nearest_tmy3_station(41, -78), out_file=os.path.join(tmpdir, 'tmy3_test.csv')
-		tmy3_pull(tmy3_test_station)
+		tmy3_pull(nearest_tmy3_station(41, -78), out_file=os.path.join(tmpdir, 'tmy3_test.csv'))
 	# Testing getRadiationYears (Works, but not used anywhere)
 	# get_radiation_data('surfrad', 'Boulder_CO', 2019, True)
 	# get_radiation_data('solrad', 'bis', 2019)
