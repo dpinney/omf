@@ -223,7 +223,7 @@ def anaDataTree(studyPath, fileNameTest):
 			data[cName] = _seriesTranspose(arr)
 	return data
 
-def _tests():
+def _debug():
 	print("Full path to Gridlab executable we're using:", _addGldToPath())
 	print("Testing string cleaning.")
 	strTestCases = [("+954.877", 954.877),
@@ -251,4 +251,4 @@ def _tests():
 	print("GridlabD standard output:", testStudy['stdout'])
 
 if __name__ == '__main__':
-	_tests()
+	_debug()
