@@ -554,25 +554,26 @@ def _tests():
 	print (lat, lon) #(37.37267827914456, -89.89482331256504)
 	e2, n2 = latLonToStatePlane(lat, lon, epsg=2205)
 	print (e2, n2) # (249.24197527189972, 1186.1488466408398)
-	#prefix = Path(__file__).parent
-	#mapOmd(prefix / 'static/publicFeeders/Olin Barre LatLon.omd', 'testOutput', 'png', openBrowser=True, conversion=False)
-	#mapOmd(prefix / 'static/publicFeeders/Olin Barre LatLon.omd', 'testOutput', 'html', openBrowser=True, conversion=False)
-	#showOnMap(hullOfOmd(prefix / 'static/publicFeeders/Olin Barre LatLon.omd', conversion=False))
-	#showOnMap(simplifiedOmdShape(prefix / 'static/publicFeeders/Olin Barre LatLon.omd', conversion=False))
-	#showOnMap(omdGeoJson(prefix / 'static/publicFeeders/Olin Barre LatLon.omd', conversion=False))
-	#print(shortestPathOmd(prefix / 'static/publicFeeders/Olin Barre LatLon.omd', 'node62474203981T62474203987_B', 'node1667616792'))
-	#rasterTilesFromOmd(prefix / 'static/publicFeeders/Olin Barre LatLon.omd', prefix / 'scratch/omdTests/tiles', conversion=False)
-	#serveTiles(prefix / 'scratch/omdTests/tiles') # Need to launch in correct directory
-	## Testing larger feeder using temporary conversion method for valid lat/lons from sources/targets
-	#mapOmd(prefix / 'static/publicFeeders/Autocli Alberich Calibrated.omd', prefix / 'testOutput', 'png', openBrowser=True, conversion=True) # This takes FOREVER to run (30+ minutes? but it works!)
-	## ABEC Frank LO Houses works with conversion on or off
-	#mapOmd(prefix / 'static/publicFeeders/Autocli Alberich Calibrated.omd', prefix / 'testOutput', 'html', openBrowser=True, conversion=False)
-	#mapOmd(prefix / 'static/publicFeeders/ABEC Frank LO Houses.omd', prefix / 'testOutput', 'html', openBrowser=True, conversion=False)
-	#showOnMap(hullOfOmd(prefix / 'static/publicFeeders/Autocli Alberich Calibrated.omd', conversion=True))
-	#showOnMap(simplifiedOmdShape(prefix / 'static/publicFeeders/ABEC Frank LO Houses.omd', conversion=False))
-	#showOnMap(omdGeoJson(prefix / 'static/publicFeeders/ABEC Frank LO Houses.omd', conversion=False))
-	#rasterTilesFromOmd(prefix / 'static/publicFeeders/Autocli Alberich Calibrated.omd', prefix / 'scratch/omdTests/autoclitiles', conversion=True)
-	#print(convertOmd(prefix / 'static/publicFeeders/Autocli Alberich Calibrated.omd'))
+	prefix = Path(__file__).parent
+	# mapOmd(prefix / 'static/publicFeeders/Olin Barre LatLon.omd', 'testOutput', 'png', openBrowser=True, conversion=False)
+	# mapOmd(prefix / 'static/publicFeeders/Olin Barre LatLon.omd', 'testOutput', 'html', openBrowser=True, conversion=False)
+	# showOnMap(hullOfOmd(prefix / 'static/publicFeeders/Olin Barre LatLon.omd', conversion=False))
+	# showOnMap(simplifiedOmdShape(prefix / 'static/publicFeeders/Olin Barre LatLon.omd', conversion=False))
+	# showOnMap(omdGeoJson(prefix / 'static/publicFeeders/Olin Barre LatLon.omd', conversion=False))
+	print(shortestPathOmd(prefix / 'static/publicFeeders/Olin Barre LatLon.omd', 'node62474203981T62474203987_B', 'node1667616792'))
+	# Server tests.
+	# rasterTilesFromOmd(prefix / 'static/publicFeeders/Olin Barre LatLon.omd', prefix / 'scratch/omdTests/tiles', conversion=False)
+	# serveTiles(prefix / 'scratch/omdTests/tiles') # Need to launch in correct directory
+	# Testing larger feeder using temporary conversion method for valid lat/lons from sources/targets. This takes FOREVER to run (30+ minutes? but it works?)
+	# mapOmd(prefix / 'static/publicFeeders/Autocli Alberich Calibrated.omd', prefix / 'testOutput', 'png', openBrowser=True, conversion=True)
+	# ABEC Frank LO Houses works with conversion on or off
+	# mapOmd(prefix / 'static/publicFeeders/Autocli Alberich Calibrated.omd', prefix / 'testOutput', 'html', openBrowser=True, conversion=False)
+	# mapOmd(prefix / 'static/publicFeeders/ABEC Frank LO Houses.omd', prefix / 'testOutput', 'html', openBrowser=True, conversion=False)
+	# showOnMap(hullOfOmd(prefix / 'static/publicFeeders/Autocli Alberich Calibrated.omd', conversion=True))
+	# showOnMap(simplifiedOmdShape(prefix / 'static/publicFeeders/ABEC Frank LO Houses.omd', conversion=False))
+	# showOnMap(omdGeoJson(prefix / 'static/publicFeeders/ABEC Frank LO Houses.omd', conversion=False))
+	# rasterTilesFromOmd(prefix / 'static/publicFeeders/Autocli Alberich Calibrated.omd', prefix / 'scratch/omdTests/autoclitiles', conversion=True)
+	# print(convertOmd(prefix / 'static/publicFeeders/Autocli Alberich Calibrated.omd'))
 
 if __name__ == '__main__':
 	_tests()

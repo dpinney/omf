@@ -1,9 +1,13 @@
 import subprocess, time, warnings
-from urllib import request
+try:
+	from urllib.request import urlopen
+except ImportError:
+    from urllib2 import urlopen
 from datetime import datetime, timedelta
 #import webbrowser, os
 from http.client import BadStatusLine
 import omf
+import omf.feeder
 
 def parseDt(dtString):
 	'Parse GridLAB-D date time strings'
@@ -151,7 +155,7 @@ class Coordinator(object):
 						if 'status' in res:
 							temp_str = "<b>" + res.get('status') + "</b> : " + res.get('obName') + " &rarr; " + res.get('propName') + " = " + res.get('value') + "<br/>"
 						else:
-							temp_str = res.get('obName') + " &rarr; " + res.get('propName') + " = " + res.get('value') + "<br/>"
+							temp_str = res.get('obName') + " &rarr; " + res.get('propName') + " = " + str(res.get('value')) + "<br/>"
 						res_str += temp_str 
 				res_str += "</p></td>"
 				row_str += reqs_str + res_str
@@ -165,7 +169,7 @@ class Coordinator(object):
 			</body>
 		</html>"""
 		if outputPath is None:
-			Html_file = open("AgentLog/output.html", "w")
+			Html_file = open("./output.html", "w")
 		else:
 			Html_file = open(outputPath, "w")
 		Html_file.write(html_str)
@@ -184,7 +188,7 @@ class GridLabWorld(object):
 
 	def doRequests(self, reqList):
 		'Do multiple requests.'
-		# E.g. reqList = [{'cmd':'readClock|read|write', 'obName':'', 'propName':'', 'value':''}]
+		# E.g. reqList = [{'cmd':'readClock|findByType|read|write', 'obName':'', 'propName':'', 'value':''}]
 		results = []
 		for req in reqList:
 			reqType = req.get('cmd','')
@@ -193,6 +197,8 @@ class GridLabWorld(object):
 			value = req.get('value', '')
 			if reqType == 'readClock':
 				results.append(self.readClock())
+			elif reqType == 'findByType':
+				reuslts.append({'obType':obType, 'obNameList':self.findByType(obType)})
 			elif reqType == 'read':
 				results.append({'obName':obName, 'propName':propName, 'value':self.read(obName, propName)})
 			elif reqType == 'write':
@@ -214,6 +220,33 @@ class GridLabWorld(object):
 					currentTime = (f.read()[0:-4]).decode()
 		except:
 			warnings.warn("Wait until " + targetTime + " failed!")
+
+	def findByType(self, obType):
+		'Find all instances of an object type and return a list of those object names'
+		path = self.GLM_PATH
+		try:
+			if path.endswith('.glm'):
+				tree = omf.feeder.parse(path)
+				attachments = []
+			elif path.endswith('.omd'):
+				with open(path) as f:
+					omd = json.load(f)
+				tree = omd.get('tree', {})
+				attachments = omd.get('attachments',[])
+			else:
+				raise Exception('Invalid input file type. We require a .glm or .omd.')
+			#create an empty list to fill with names of objects of type obType
+			nameList = []
+			#for each of the elements in the circuit, check object type
+			for key in list(tree.keys()):
+				tempObType = tree[key].get("object","")
+				if tempObType == obType:
+					#add matched object's name to nameList
+					nameList.append(tree[key].get("name",""))
+			return nameList
+		except:
+			warnings.warn("Failed to find objects of type " + obType)
+			return "ERROR"
 
 	def read(self, obName, propName):
 		'Read a value from the GLD simulation.'
@@ -430,8 +463,18 @@ def _testfault():
 	coord = Coordinator(agents, cosimProps)
 	print(coord.drawPrettyResults())
 
+def _testInverterAttack():
+	from omf import cyberAttack
+	cosimProps = {'port':'6267', 'hostname':'localhost', 'glmPath':omf.omfDir + '/scratch/CIGAR/test_R1-12.47-1-AddSolar-Wye.glm', 'startTime':'2000-01-01 05:00:00','endTime':'2000-01-01 05:30:00', 'stepSizeSeconds':60}
+	agents = []
+	agents.append(cyberAttack.AttackAllObTypeAgent('InverterAttacker1', '2000-01-01 05:02:00', 'inverter', [{"obPropToAttack":"power_factor", "value":"0.5"}]))
+	#agents.append(cyberAttack.AttackAllInverterAgent('InverterAttacker2', '2000-01-01 05:02:00', [{"obPropToAttack":"power_factor", "value":"0.5"}]))
+	coord = Coordinator(agents, cosimProps)
+	print(coord.drawPrettyResults())
+
 if __name__ == '__main__':
-	_test1()
+	# _test3()
 	# _testfault()
+	_testInverterAttack()
 	# thisDir = os.path.dirname(__file__)
 	# webbrowser.open_new("file://" + thisDir + "/AgentLog/output.html")

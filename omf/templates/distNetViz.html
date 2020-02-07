@@ -182,6 +182,9 @@
                 max-width: 80vw;
 
 			}
+            .progressModalMessages {
+                padding: 20px;
+            }
             .modalContentButtons {
                 padding: 50px 0px 0px 0px;
                 text-align: center;
@@ -272,20 +275,6 @@
                 color: white;
                 background-color: green;
             }
-            /*
-            input:valid {
-                border: 1px solid white; 
-            }
-            */
-            input:invalid {
-                /*Aborder: 1px solid red;*/
-            }            
-
-            /* Tree tables */
-
-            .buttonRow {
-                /*text-align: center;*/
-            }
             .buttonRow button {
                 margin-right: 5px;
             }
@@ -341,20 +330,15 @@
             .dataTable tr:last-child {
                 border: 0px;
             }
-            /*.dataTable p {
-                margin: 0px;
-            }*/
             .tableTitle {
                 background-color: black;
                 color: white;
             }
 			tbody {
-				/*border: 1px solid black;*/
                 border-collapse: collapse;
 			}
 			td {
 				background:white;
-				/*padding: 5px 0px 5px 0px;*/
 				border-collapse: collapse;
 			}
             .verticalPadded {
@@ -501,10 +485,9 @@
             <div id="progressModal" class="modal" style="display: none">
                 <div class="modalContent centered">
                     <img src="/static/spinner.gif">
-                    <h2>text...</h2>
-                    <div class="modalContentButtons">
-                        <button class="deleteButton" data-buttonfunction="cancel" style="margin-right:300px;">Cancel</button>
-                        <button data-buttonfunction="submit">OK</button>
+                    <div class='progressModalMessages'></div>
+                    <button class="deleteButton" data-buttonfunction="cancel" style="margin-right:300px;">Cancel</button>
+                    <button data-buttonfunction="submit">OK</button>
                     </div>
                 </div>
             </div>
@@ -1571,17 +1554,13 @@ const addManagerPrototype = {
      * not tested.
      */ 
     massAdd() {
+        const modal = createProgressModal();
         const component = this.component;
         const targetObject = this.target;
-        const probability = this.probability;
-        if (component.object === "recorder" || getRelationship(gComponentManager.getFirst(targetObject)) !== "line") {
+        if (component.object === 'recorder' || getRelationship(gComponentManager.getFirst(targetObject)) !== 'line') {
+            const probability = this.probability;
             const newObjects = [];
-            let modal;
-            modal = createProgressModal({
-                startMessage: `Adding a "${component.object}" object to every "${targetObject}" object. This could take a few seconds.`,
-                endMessage: '',
-                finishFunc: () => modal.hide()
-            });
+            modal.clearAndAddMessage(`Adding a "${component.object}" object to every "${targetObject}" object. This could take a few seconds.`);
             setTimeout(() => {
                 Object.keys(gTree.tree).forEach(key => {
                     if (gTree.getObject(key).object === targetObject && Math.random() < probability) {
@@ -1592,11 +1571,12 @@ const addManagerPrototype = {
                     }
                 });
                 createSvgData(newObjects).draw(gViewport);
-                modal.endMessage = `${newObjects.length} "${component.name}" objects were added to the feeder.`,
+                modal.clearAndAddMessage(`${newObjects.length} "${component.name}" objects were added to the feeder.`);
                 modal.finish();
             }, 10);
         } else {
-            alert("Mass add failed. No object can be added as a child of a line, except for recorder objects.");
+            modal.clearAndAddMessage('Mass add failed. No object can be added as a child of a line, except for recorder objects.');
+            modal.finish();
         }
     },
 
@@ -1667,7 +1647,9 @@ const addManagerPrototype = {
         const relationships = getRelationshipsWithTypes();
         const types = []; // I need a "types" array because I want to sort all of the types together
         Object.keys(relationships).filter(r => r !== "configurationNode").forEach(relationship => {
-            relationships[relationship].forEach(type => types.push(type));
+            relationships[relationship].forEach(type => {
+                if (!types.includes(type)) types.push(type);
+            });
         });
         alphabeticalForEach.bind(types)(type => {
             const option = document.createElement("option");
@@ -2662,26 +2644,24 @@ Don't ever replace regular load objects
 -There are no files with both triplex loads and triplex nodes.
 */
 function convertStaticLoadsIntoHouses() {
+    const modal = createProgressModal();
     const keys = Object.keys(gTree.tree).filter(key => {
         const object = gTree.getObject(key).object;
-        return object === "triplex_load" || object === "triplex_node";
+        return object === 'triplex_load' || object === 'triplex_node';
     });
     if (keys.length === 0) {
-        alert(`This data has no triplex load or triplex node objects that can be converted into houses.`);
+        modal.clearAndAddMessage('This data has no triplex load or triplex node objects that can be converted into houses.');
+        modal.finish();
         return;
     }
-    let modal;
-    modal = createProgressModal({
-        startMessage: `Converting every triplex load and/or triplex node into a house with children. This could take a few seconds.`,
-        endMessage: `${keys.length} triplex objects were converted into houses with children.`,
-        finishFunc: () => modal.hide()    
-    });
+    modal.clearAndAddMessage(`Converting every triplex load and/or triplex node into a house with children. This could take a few seconds.`);
     setTimeout(function() {
         keys.forEach(key => { 
             gTree.replaceNode(key, gComponentManager.get("house", "R1_SingleFamilyHome_1990-2005"));
             addLoadsToHouse(key);
         });
         createSvgData(keys).draw(gViewport);
+        modal.clearAndAddMessage(`${keys.length} triplex objects were converted into houses with children.`)
         modal.finish();
     }, 10);
 }
@@ -3026,31 +3006,28 @@ function fillClimateModalOptions() {
  * Start the server process to convert every triplex load and/or triplex node into a Zillow house.
  */
 function startZillowHouses() {
+    let cancelled = false
+    let modal;
+    modal = createProgressModal(() => {
+        cancelled = true;
+        modal.hide();
+    });
     const triplexObjects = Object.entries(gTree.tree).filter(([key, obj]) => 
-        obj.object === "triplex_load" || obj.object === "triplex_node"
+        obj.object === 'triplex_load' || obj.object === 'triplex_node'
         ).map(([key, obj]) => 
             ({ key: key, latitude: obj.latitude, longitude: obj.longitude })
         );
     if (triplexObjects.length === 0) {
-        alert("This data has no triplex load or triplex node objects that can be converted into Zillow houses.");
+        modal.clearAndAddMessage('This data has no triplex load or triplex node objects that can be converted into Zillow houses.');
+        modal.hideCancelButton();
+        modal.finish();
         return;
     }
+    modal.clearAndAddMessage('Submitting your triplex objects for conversion...')
     const formData = new FormData();
-    formData.set("triplexObjects", JSON.stringify(triplexObjects));
-    formData.set("owner", gThisOwner);
-    formData.set("modelName", gThisModelName);
-    let cancelled = false
-    let modal;
-    modal = createProgressModal({
-        startMessage: "Submitting your triplex objects for conversion...",
-        endMessage: '',
-        finishFunc: () => modal.hide(),
-        // No need to cancel anything b/c nothing happened
-        //cancelFunc: () => {
-        //    cancelled = true;
-        //    saveFeeder(gReadFeeder);
-        //}
-    });
+    formData.set('triplexObjects', JSON.stringify(triplexObjects));
+    formData.set('owner', gThisOwner);
+    formData.set('modelName', gThisModelName);
     const request = $.ajax({
         type: "POST",
         url: "/zillowHouses",
@@ -3062,8 +3039,9 @@ function startZillowHouses() {
             pollZillowHouses();
         }
     }).fail(function(jqXHR, textStatus, errorThrown) {
-        if (!cancelled) {
-            modal.endMessage = "Operation failed. We were unable to submit your triplex objects.";
+        if (!cancelled) { // Don't show the user an error message because they don't care
+            modal.clearAndAddMessage('Operation failed. We were unable to submit your triplex objects.');
+            modal.hideCancelButton();
             modal.finish();
             //console.log(jqXHR.status); // 500
             //console.log(jqXHR.responseText); // Error message
@@ -3077,26 +3055,18 @@ function startZillowHouses() {
 function pollZillowHouses() {
     let cancelled = false;
     let modal;
-    modal = createProgressModal({
-        startMessage: "Converting triplex objects into real-world Zillow houses. This could take many minutes...",
-        endMessage: "",
-        // The operation must be cancellable, thus the user must be reprompted
-        cancelFunc: () => {
-            cancelled = true;
-            modal.endMessage = "You cancelled the operation.";
-            modal.cancelButton.style.display = "none"; // hide the cancel button upon reprompt
-            modal.finish();
-            // Don't re-save. No need to.
-        },
-        finishFunc: () => modal.hide() // don't reload. No need to
+    modal = createProgressModal(() => {
+        cancelled = true;
+        modal.hide();
     });
+    modal.clearAndAddMessage('Converting triplex objects into real-world Zillow houses. This could take many minutes...');
     const formData = new FormData();
-    formData.set("owner", gThisOwner);
-    formData.set("modelName", gThisModelName);
+    formData.set('owner', gThisOwner);
+    formData.set('modelName', gThisModelName);
     const intervalId = setInterval(function() {
         $.ajax({
-            type: "POST",
-            url: "/checkZillowHouses",
+            type: 'POST',
+            url: '/checkZillowHouses',
             data: formData,
             processData: false,
             contentType: false
@@ -3110,19 +3080,18 @@ function pollZillowHouses() {
                         gTree.tree[key].name = "zillow_house" + key;
                     });
                     createSvgData(keys).draw(gViewport); // redraw so nodes are proper color
-                    modal.endMessage = `Success. ${keys.length} triplex objects were converted into Zillow houses.`;
-                    modal.cancelButton.style.display = "none"; // hide the cancel button before reprompt
+                    modal.clearAndAddMessage(`Success. ${keys.length} triplex objects were converted into Zillow houses.`);
+                    modal.hideCancelButton();
                     modal.finish();
                 }
             } else {
                 clearInterval(intervalId);
-                // No need to do anything else.
             }
         }).fail(function(jqXHR, textStatus, errorThrown) {
-            clearInterval(intervalId);
             if (!cancelled) {
-                modal.endMessage = "Operation failed. We were unable to get the house data to convert triplex objects into Zillow houses.";
-                modal.cancelButton.style.display = "none"; // hide the cancel button before reprompt
+                clearInterval(intervalId);
+                modal.clearAndAddMessage('Operation failed. We were unable to get the house data to convert triplex objects into Zillow houses.');
+                modal.hideCancelButton();
                 modal.finish();
                 //console.log(jqXHR.status); // 500
                 //console.log(jqXHR.responseText); // server response
@@ -3148,47 +3117,24 @@ function saveFeeder(feeder) {
         processData: false,
         contentType: false,
     });
-    let modal;
+    const modal = createProgressModal();
     if (feeder === gReadFeeder) {
-        modal = createProgressModal({
-            startMessage: "Re-saving the data from your most recent save...",
-            endMessage: "Success. Your data was restored to the most recent save.",
-            finishFunc: () => modal.hide()
-        });
+        modal.clearAndAddMessage('Re-saving the data from your most recent save...');
         postRequest.done(function() {
+            modal.clearAndAddMessage('Success. Your data was restored to the most recent save.');
             modal.finish();
         }).fail(function() {
-            modal.endMessage = "The server raised an internal exception during the save operation."
+            modal.clearAndAddMessage('The server raised an internal exception during the save operation.');
             modal.finish();
         });
     } else if (feeder === gWriteFeeder) {
-        let cancelled = false;
-        modal = createProgressModal({
-            startMessage: "Saving changes to your file...",
-            finishFunc: () => {
-                modal.hide();
-                // Need to do this to make sure rename doesn't break if the user saves and remains on the page.
-                gReadFeeder = deepCopy(gWriteFeeder);
-            },
-            // Don't keep cancelFunc b/c we don't care if server throws an exception. Also we don't cancel saves
-            //cancelFunc: () => {
-            //    cancelled = true;
-            //    saveFeeder(gReadFeeder);
-            //}
-        });
+        modal.clearAndAddMessage('Saving changes to your file...');
         postRequest.done(function() {
-            if (!cancelled) {
-                //modal.finish(); // Normally, this shows the "OK" and/or "Cancel" buttons, but we hide them
-                modal.finishButton.click(); // This makes it so that there is always a simulated click on "OK"
-            }
+            modal.hide();
+            gReadFeeder = deepCopy(gWriteFeeder);
         }).fail(function() {
-            if (!cancelled) {
-                modal.endMessage = "The server raised an internal exception during the save operation."
-                /* hide the cancel button b/c The user probably doesn't want to re-save their old work and lose all of their current work. They
-                probably just want to try saving normally again */
-                //modal.cancelButton.style.display = 'none'; 
-                modal.finish();
-            }
+            modal.clearAndAddMessage('The server raised an internal exception during the save operation.');
+            modal.finish();
         });
     }
 }
@@ -3200,44 +3146,37 @@ function saveFeeder(feeder) {
  * @param {string} owner - either "public" or the current user.
  */
 async function loadFeeder(serverFeederName, serverModelName, owner) {
+    let cancelled = false;
+    const modal = createProgressModal(() => {
+        cancelled = true;
+        saveFeeder(gReadFeeder);
+    });
     if (feederNeedsSave()) {
-        alert("You have unsaved changes. Please save this feeder before loading a new feeder.");
+        modal.clearAndAddMessage('You have unsaved changes. Please save this feeder before loading a new feeder.');
+        modal.hideCancelButton();
+        modal.finish();
         return;
     }
     let submitForm = false;
-    await $.ajax({
-        // I need to check if a user's feeder still exists.
-        url: `/uniqObjName/Feeder/${owner}/${serverFeederName}/${serverModelName}`//good
+    await $.ajax({ // I need to check if a user's feeder still exists.
+        url: `/uniqObjName/Feeder/${owner}/${serverFeederName}/${serverModelName}`// good
     }).done(function(data) {
-        if (data.exists) {
+        if (data.exists) { 
             submitForm = true;
         } else {
-            alert("This feeder no longer exists. Please refresh the page, or select another feeder.");
+            modal.clearAndAddMessage('This feeder no longer exists. Please refresh the page, or select another feeder.');
+            modal.hideCancelButton();
+            modal.finish();
         }
     }).fail(function() {
-        alert("The AJAX request failed to get a successful response from the server.");
-    })
-    if (submitForm === false) {
-        return;
-    }
-    let formData = new FormData();
-    formData.set("referrer", "distribution");
-    let modal;
-    let cancelled = false;
-    modal = createProgressModal({
-        startMessage: "Loading feeder from the server...",
-        endMessage: "Success. This feeder has been overwritten with the selected feeder.",
-        cancelFunc: () => {
-            cancelled = true;
-            saveFeeder(gReadFeeder);
-        },
-        finishFunc: () => {
-            modal.hide();
-            if (modal.endMessage === "Success. This feeder has been overwritten with the selected feeder.") {
-                reloadWrapper(); // Only reload on successful feeder load
-            }
-        } 
+        modal.clearAndAddMessage('The AJAX request failed to get a successful response from the server.');
+        modal.hideCancelButton();
+        modal.finish();
     });
+    if (submitForm === false) return;
+    modal.clearAndAddMessage('Loading feeder from the server...');
+    let formData = new FormData();
+    formData.set('referrer', 'distribution');
     $.ajax({
         type: "POST",
         // {owner} is correct. {owner} is either "public" to load from public feeders or <current user> to load from the users feeders. {gThisOwner}
@@ -3248,14 +3187,19 @@ async function loadFeeder(serverFeederName, serverModelName, owner) {
         processData: false,
         contentType: false,
     }).done(function() {
-        if (!cancelled) {
+        if (!cancelled) { // This is to prevent this modal from overwriting the active save modal
+            modal.clearAndAddMessage('Success. This feeder has been overwritten with the selected feeder.');
             modal.cancelButton.textContent = 'Undo';
+            modal.finishButton.onclick = () => {
+                modal.hide();
+                reloadWrapper();
+            }
             modal.finish();
         }
     }).fail(function() {
         if (!cancelled) {
-            modal.endMessage = "The server raised an internal exception while loading the feeder."
-            modal.cancelButton.style.display = "none"; // hide the "Undo" button before reprompt b/c there is nothing to undo
+            modal.clearAndAddMessage('The server raised an internal exception while loading the feeder.');
+            modal.hideCancelButton();
             modal.finish();
         }
     });
@@ -3296,70 +3240,67 @@ function validateClimateModal() {
  * 6) Modify this .omd file with anonymization
  */
 async function submitForm({formId, pollUrl, inputId}) {
+    let cancelled = false;
+    const modal = createProgressModal(() => {
+        cancelled = true;
+        // In cases where the initial operation changed the name of the .omd file on the server, we must rename the .omd file to its previous name
+        // in order to completely undo the operation. These operations don't change the .omd name: climate, anonymize, scada, ami
+        if (['blankFeederForm', 'milsoftForm', 'gridlabdForm', 'cymeForm'].includes(formId)) {
+            let oldServerName;
+            if (formId === 'blankFeederForm') {
+                oldServerName = document.getElementById('blankFeederInput').value;
+            } else if (formId === 'milsoftForm') {
+                oldServerName = document.getElementById('milsoftInput').value;
+            } else if (formId === 'gridlabdForm') {
+                oldServerName = document.getElementById('gridlabdInput').value;
+            } else if (formId === 'cymeForm') {
+                oldServerName = document.getElementById('cymeInput').value;
+            }
+            renameFeeder(oldServerName, gThisFeederName, false);
+        }
+        saveFeeder(gReadFeeder);
+    });
     if (feederNeedsSave()) {
-        alert("You have unsaved changes. Please save your feeder before modifying it.");
+        modal.clearAndAddMessage('You have unsaved changes. Please save your feeder before modifying it.');
+        modal.hideCancelButton();
+        modal.finish();
         return;
     }
     let submitForm = true;
-    if (inputId !== undefined) {
-        // inputId was defined, therefore we need to check the file name on the server before submitting the form
+    if (inputId !== undefined) { // inputId was defined, therefore we need to check the file name on the server before submitting the form
         submitForm = false;
         const fileName = document.getElementById(inputId).value;
-        // Check if the file exists, using the user-provided fileName
-        await $.ajax({
-            url: `/uniqObjName/Feeder/${gThisOwner}/${fileName}/${gThisModelName}`//good
+        await $.ajax({ // Check if the file exists, using the user-provided fileName
+            url: `/uniqObjName/Feeder/${gThisOwner}/${fileName}/${gThisModelName}` // good
         }).done(function(data) {
             if (data.exists === true) {
-                alert(`You already have a feeder named "${fileName}". Please choose a different name.`);
+                modal.clearAndAddMessage(`You already have a feeder named "${fileName}". Please choose a different name.`);
+                modal.hideCancelButton();
+                modal.finish();
             } else {
-                // The file does not exist. Submit the form.
-                submitForm = true;
+                submitForm = true; // The file does not exist. Submit the form.
             }
         }).fail(function() {
-            alert("The AJAX request failed to get a successful response from the server");
+            modal.clearAndAddMessage('The AJAX request failed to get a successful response from the server');
+            modal.hideCancelButton();
+            modal.finish();
         });
     }
     if (submitForm === false) return;
-    let cancelled = false;
-    let modal;
-    modal = createProgressModal({
-        startMessage: "Submitting your file...",
-        endMessage: "Success. Your file was loaded into this feeder.",
-        cancelFunc: () => {
-            cancelled = true;
-            /* In cases where the initial operation changed the name of the .omd file on the server, we must rename the .omd file to its previous name
-            in order to completely undo the operation */
-            // These operations don't change the .omd name: climate, anonymize, scada, ami
-            if (["blankFeederForm", "milsoftForm", "gridlabdForm", "cymeForm"].includes(formId)) {
-                let oldServerName;
-                if (formId === "blankFeederForm") {
-                    oldServerName = document.getElementById("blankFeederInput").value;
-                } else if (formId === "milsoftForm") {
-                    oldServerName = document.getElementById("milsoftInput").value;
-                } else if (formId === "gridlabdForm") {
-                    oldServerName = document.getElementById("gridlabdInput").value;
-                } else if (formId === "cymeForm") {
-                    oldServerName = document.getElementById("cymeInput").value;
-                }
-                renameFeeder(oldServerName, gThisFeederName, false);
-            }
-            saveFeeder(gReadFeeder);
-        },
-        finishFunc: () => {
-            modal.hide();
-            if (modal.endMessage == "Success. Your file was loaded into this feeder.") {
-                reloadWrapper(); // Only reload upon successful completion
-            }
-        }
-    });
-    //Provide estimate
-
-    //Provide estimate
-    if (formId === 'anonymizeForm') {
-        modal.endMessage = 'Success. File was anonymized.';
-    }
+    modal.clearAndAddMessage('Submitting your file...');
     const form = document.getElementById(formId);
     const formData = new FormData(form);
+    if (formId === 'milsoftForm') {
+        const stdFileSize = formData.get('stdFile').size;
+        let conversionTime = Math.round(0.8860308267 * Math.E ** (0.000000460300437 * stdFileSize));
+        if (conversionTime === 0) {
+            modal.addMessage('Estimated conversion duration: < 1 minute');
+        } else if (conversionTime === 1) {
+            modal.addMessage('Estimated conversion duration: 1 minute');
+        } else {
+            modal.addMessage(`Estimated conversion duration: ${conversionTime} minutes`);
+        }
+    }
     const formRequest = $.ajax({
         type: "POST",
         url: form.action,
@@ -3367,60 +3308,74 @@ async function submitForm({formId, pollUrl, inputId}) {
         processData: false,
         contentType: false,
     });
-    if (pollUrl === undefined) {
-        // We don't want to poll the server. Just reload the page.
+    if (pollUrl === undefined) { // We don't want to poll the server. Just reload the page.
         formRequest.done(function() {
             if (!cancelled) {
+                modal.clearAndAddMessage('Success. Your file was loaded into this feeder.');
                 modal.cancelButton.textContent = 'Undo';
+                modal.finishButton.onclick = () => {
+                    modal.hide();
+                    reloadWrapper();
+                }
                 modal.finish();
             }
         }).fail(function() {
             if (!cancelled) {
-                modal.endMessage = "The server raised an internal exception during form submission."
-                modal.cancelButton.style.display = "none"; // hide the "Undo" button before reprompt b/c there is nothing to undo
+                modal.clearAndAddMessage('The server raised an internal exception during form submission.')
+                modal.hideCancelButton();
                 modal.finish();
             }
         });
     } else {
         formRequest.done(function(data) {
-            // Poll the server
             const intervalId = setInterval(function() {
-                // This is supposed to be a GET request
                 $.ajax({
                     url: pollUrl
-                }).done(function(data) {
-                    if (!cancelled) {
-                        if (data.exists === true) {
-                            // processing is ongoing
-                        } else {
+                }).done(function(data) { // Try not to modify this section. The only way this section can be improved is if the server code is improved first
+                    if (cancelled) {
+                        clearInterval(intervalId); // If operation was canceled, stop polling. The cancelFunc() will do the rest.
+                    } else { // data can be a string, or it can be json with an "exists" property
+                        if (data.exists === false) { // processing completed successfully
                             clearInterval(intervalId);
-                            modal.cancelButton.textContent = 'Undo';
-                            modal.cancelButton.style.display = "none"; // hide the "Undo" button before reprompt b/c there is nothing to undo
-                            if (data.exists === false) {
-                                // process is complete
-                                modal.cancelButton.removeAttribute('style'); // show "Undo" button
-                            } else if (data === "milError") {
-                                modal.endMessage = "The .std and .seq files used were incorrectly formatted.";
-                            } else if (data === "glmError") {
-                                modal.endMessage = "The .glm file used was incorrectly formatted.";
-                            } else if (data === 'amiError') {
-                                modal.endMessage = 'The AMI file used was incorrectly formatted.';
+                            if (formId == 'anonymizeForm') {
+                                modal.clearAndAddMessage('Success. Your file was anonymized.');
+                            } else if (formId === 'climateForm') {
+                                modal.clearAndAddMessage('Success. Climate data was added.');
+                            } else if (formId === 'scadaForm') {
+                                modal.clearAndAddMessage('Success. SCADA data was added.');
+                            } else if (formId === 'amiForm') {
+                                modal.clearAndAddMessage('Success. AMI data was added.');
                             } else {
-                                if (!data.endsWith(".")) {
-                                    data += ".";
-                                }
-                                modal.endMessage = data;
+                                modal.clearAndAddMessage('Success. Your file was loaded into this feeder.');
+                            }
+                            modal.cancelButton.textContent = 'Undo';
+                            modal.finishButton.onclick = () => {
+                                modal.hide();
+                                reloadWrapper();
                             }
                             modal.finish();
+                        } else if (data.exists == null) { // processing ended in error
+                            clearInterval(intervalId);
+                            if (data === 'milError') {
+                                modal.clearAndAddMessage('The .std and .seq files used were incorrectly formatted.');
+                            } else if (data === 'glmError') {
+                                modal.clearAndAddMessage('The .glm file used was incorrectly formatted.');
+                            } else if (data === 'amiError') {
+                                modal.clearAndAddMessage('The AMI file used was incorrectly formatted.');
+                            } else {
+                                if (!data.endsWith('.')) data += '.';
+                                modal.clearAndAddMessage(data);
+                            }
+                            modal.cancelButton.textContent = 'Undo';
+                            modal.hideCancelButton();
+                            modal.finish();
                         }
-                    } else {
-                        clearInterval(intervalId);
                     }
                 }).fail(function() {
                     clearInterval(intervalId);
                     if (!cancelled) {
-                        modal.endMessage = "The server raised an internal exception during the file operation."
-                        modal.cancelButton.style.display = "none"; // hide the "Undo" button before reprompt b/c there is nothing to undo
+                        modal.clearAndAddMessage('The server raised an internal exception during the file operation.')
+                        modal.hideCancelButton();
                         modal.finish();
                     }
                 });
@@ -3430,24 +3385,30 @@ async function submitForm({formId, pollUrl, inputId}) {
 }
 
 async function getNewFeederName() {
+    const modal = createProgressModal();
     if (feederNeedsSave()) {
-		alert("You have unsaved changes. Please save the feeder before renaming.");
+        modal.clearAndAddMessage('You have unsaved changes. Please save the feeder before renaming.');
+        modal.finish();
         return;
     }
-    let newName = prompt("Rename the feeder to", `${gThisFeederName}`);
+    let newName = prompt('Rename the feeder to', `${gThisFeederName}`);
     while (/\W/.test(newName)) {
-        newName = prompt("Only letters, digits and underscore are allowed.\nPlease enter a different name", `${gThisFeederName}`);
+        newName = prompt('Only letters, digits and underscore are allowed.\nPlease enter a different name', `${gThisFeederName}`);
     }
     if (newName != null) {
         await $.ajax({
-            url: `/uniqObjName/Feeder/${gThisOwner}/${newName}/${gThisModelName}`//good because of course I am renaming THIS feeder file
+            url: `/uniqObjName/Feeder/${gThisOwner}/${newName}/${gThisModelName}` // good because of course I am renaming THIS feeder file
         }).done(function(data) {
             if (data.exists) {
-                alert(`You already have a feeder named "${newName}". Please choose a different name.`);
+                modal.clearAndAddMessage(`You already have a feeder named "${newName}". Please choose a different name.`);
+                modal.finish();
+                return;
             } else {
                 renameFeeder(gThisFeederName, newName);
             }
         });
+    } else {
+        modal.hide();
     }
 }
 
@@ -3455,112 +3416,110 @@ async function getNewFeederName() {
  * The modal shouldn't be shown when the rename operation is being used to undo a newBlankFeeder operation
  */
 async function renameFeeder(oldServerName, newName, showModal=true) {
-    let modal = null;
-    let cancelled = false;
+    let modal;
     if (showModal === true) {
-        if (newName === gThisFeederName) {
-            // We are undoing a previous rename operation
-            modal = createProgressModal({
-                startMessage: "Undoing the previous rename...",
-                endMessage: "Success. The previous rename operation was undone.",
-                finishFunc: () => {
-                    modal.hide();
-                }
+        if (newName === gThisFeederName) { // We are undoing a previous rename operation
+            modal = createProgressModal();
+            modal.clearAndAddMessage('Undoing the previous rename...');
+        } else { // We are using a new name
+            modal = createProgressModal(() => {
+                renameFeeder(newName, oldServerName);
             });
-        } else {
-            // We are using a new name
-            modal = createProgressModal({
-                startMessage:  "Renaming this feeder file...",
-                endMessage: "Success. This feeder file was renamed.",
-                cancelFunc: () => {
-                    cancelled = true;
-                    renameFeeder(newName, oldServerName);
-                },
-                finishFunc: () => {
-                    // good
-                    gThisFeederName = newName;
-                    document.getElementById("menuLeft").querySelector("h4").textContent = newName;
-                    modal.hide();
-                }
-            });
+            modal.clearAndAddMessage('Renaming this feeder file...');
+            modal.finishButton.onclick = () => { // good
+                gThisFeederName = newName;
+                document.getElementById('menuLeft').querySelector('h4').textContent = newName;
+                modal.hide();
+            }
         }
     }
     await $.ajax({
         url: `/renameFeeder/${gThisOwner}/${gThisModelName}/${oldServerName}/${newName}/${gThisFeederNum}`
     }).done(function(data) {
-        if (!cancelled && modal != null) {
-            if (data === "Failure") {
-                modal.endMessage = "Rename operation failed."
+        if (showModal === true) {
+            if (data === 'Failure') {
+                modal.clearAndAddMessage('Rename operation failed.');
+                modal.hideCancelButton();
+            } else {
+                modal.clearAndAddMessage('Success. This feeder file was renamed.');
             }
             modal.finish();
         }
     }).fail(function() {
-        if (!cancelled && modal != null) {
-            modal.endMessage = "The server raised an internal exception during the rename operation."
-            modal.finish();
-        }
+        modal.clearAndAddMessage('The server raised an internal exception during the rename operation.')
+        modal.hideCancelButton();
+        modal.finish();
     });
 }
 
 {% endif %}
 
-/** This is done for testing reasons.
- */
 function reloadWrapper() {
-    /* Force the client to always request new files from the server without using the browser cache. 
-    */
+    // Force the client to always request new files from the server without using the browser cache. 
     window.location.reload(true);
 }
 
 const progressModalPrototype = {
     /**
-     * This function is called to either present the "OK" button to the user or just hide the modal once a task is done
+     * This function is called to remove the spinner and show the "OK" button
      * @param {Function} func - An additional function to execute when the "OK" button is clicked
      */
     finish(func) {
         if (func != null) func(); // This line makes it possible to execute ANOTHER function during "modal.finish()", although it isn't used anywhere
-        this.self.querySelector("h2").textContent = this.endMessage;
-        this.spinner.style.display = "none";
-        this.finishButton.removeAttribute("style");
+        this.spinner.style.display = 'none';
+        this.finishButton.removeAttribute('style');
     },
 
     hide() {
-        this.self.style.display = "none";
+        this.self.style.display = 'none';
+    },
+
+    _clearMessages() {
+        Array.from(this.messageDiv.children).forEach(element => element.remove());
+    },
+
+    clearAndAddMessage(message) {
+        this._clearMessages();
+        this.addMessage(message);
+    },
+
+    addMessage(message) {
+        const h2 = document.createElement('h2');
+        h2.textContent = message;
+        this.messageDiv.append(h2);
+    },
+
+    hideCancelButton() {
+        this.cancelButton.style.display = 'none';
     }
 }
 
 /**
- * @param {string} startMessage - (required) the initial message to show the user while a task is executing on the server
  * @param {Function} cancelFunc - (optional) if provided, this function will execute when the "Cancel" button is clicked on the modal. If not
  *     provided, the "Cancel" button is never shown to the user
- * @param {boolean} promptAfterComplete - (optional) removed. Just don't call <modal>.finish() if I don't want a prompt
- * @param {string} endMessage - (optional) the message to show the user once the task has completed. It is only shown if promptAfterComplete is true
- * @param {Function} finishFunc - (optional) if provided, this function will execute when the "OK" button is clicked on the modal
  */
-function createProgressModal({startMessage, cancelFunc=null, endMessage=null, finishFunc=null}) {
+function createProgressModal(cancelFunc=null) {
     const obj = Object.create(progressModalPrototype);
-    obj.startMessage = startMessage;
-    obj.self = document.getElementById("progressModal");
-    obj.self.querySelector("h2").textContent = obj.startMessage;
+    obj.self = document.getElementById('progressModal');
+    obj.messageDiv = obj.self.querySelector('div.progressModalMessages');
+    obj._clearMessages();
     obj.cancelButton = obj.self.querySelector("button[data-buttonfunction='cancel']");
     obj.cancelButton.textContent = 'Cancel'; // reset the "Cancel" button just in case it was changed
     obj.finishButton = obj.self.querySelector("button[data-buttonfunction='submit']");
     obj.finishButton.textContent = 'OK'; // reset the "OK" button just in case it was changed
-    obj.finishButton.style.display = "none"; // Always hide the "OK" button initially
-    obj.finishFunc = finishFunc; // Always need a finishFunc for simulated clicks
-    obj.finishButton.onclick = obj.finishFunc;
-    obj.endMessage = endMessage;
+    obj.finishButton.style.display = 'none'; // Always hide the "OK" button initially
+    obj.finishButton.onclick = () => { obj.hide(); }
     if (cancelFunc == null) {
-        obj.cancelButton.style.display = "none";
+        obj.cancelButton.style.display = 'none';
         obj.cancelButton.onclick = null;
     } else {
         obj.cancelFunc = cancelFunc;
         obj.cancelButton.onclick = obj.cancelFunc;
-        obj.cancelButton.removeAttribute("style");
+        obj.cancelButton.removeAttribute('style');
     }
-    obj.spinner = obj.self.querySelector("img");
-    obj.spinner.removeAttribute("style");
-    obj.self.removeAttribute("style");
+    obj.spinner = obj.self.querySelector('img');
+    obj.spinner.removeAttribute('style');
+    obj.self.removeAttribute('style');
     return obj;
 }
 
@@ -5664,14 +5623,15 @@ async function initializeInterface() {
         try {
             await checkServerConversion();
         } catch (e) {
-            alert(e)
         }
     }
     createInterface();
+    {% if showFileMenu %}
     if (!interfaceIsStatic() && feederNeedsSave()) {
         // Save to account for objects that were given artifical grid coordinates. This will make the interface less annoying
         saveFeeder(gWriteFeeder);
     }
+    {% endif %}
     attachHandlers();
     document.getElementById("loadingMessage").style.display = "none"
 }
@@ -5694,22 +5654,17 @@ function createInterface() {
 }
 
 function checkServerConversion() {
-    let cancelled = false;
-    let reload = false;
-    let modal;
     return new Promise(function(resolve, reject) {
-        modal = createProgressModal({
-            startMessage: "Checking for an in-progress server file conversion...",
-            endMessage: "Server file conversion has completed. Click \"OK\" to reload the page.",
-            finishFunc: () => reloadWrapper(),
-            cancelFunc: () => {
-                if (confirm("Are you sure you want to cancel the in-progress server file conversion?")) {
-                    cancelled = true;
-                    saveFeeder(gReadFeeder);
-                    resolve();
-                }
-            },
+        let cancelled = false;
+        let reload = false;
+        const modal = createProgressModal(() => {
+            if (confirm('Are you sure you want to cancel the in-progress server file conversion?')) {
+                cancelled = true;
+                saveFeeder(gReadFeeder);
+                resolve();
+            }
         });
+        modal.clearAndAddMessage('Checking for an in-progress server file conversion...')
         const intervalId = setInterval(function pollServer() {
             $.ajax({
                 type: "POST",
@@ -5717,38 +5672,38 @@ function checkServerConversion() {
             }).done((data) => {
                 if (!cancelled) {
                     if (data.exists === true) {
-                        // There is an in-progress file conversion. Need to reload the page when it's done.
                         reload = true
-                        modal.self.querySelector("h2").textContent = "Waiting for an in-progress server file conversion to complete...";
+                        modal.clearAndAddMessage('Waiting for an in-progress server file conversion to complete...');
                     } else if (data.exists === false) {
+                        clearInterval(intervalId);
                         if (reload) {
-                            // There was a previous in-progress conversion that just completed, so reload the page
-                            modal.finish();
-                        } else {
-                            // There was never an in-progress file conversion, so don't bother to reload the page
-                            clearInterval(intervalId);
+                            reloadWrapper();
+                        } else { // There was never an in-progress file conversion, so don't bother to reload the page
                             modal.hide();
                             resolve();
                         }
                     } else {
-                        // there was an error? Notify the user, proceed as normal.
+                        // There was an error? Notify the user, proceed as normal.
                         clearInterval(intervalId);
-                        modal.hide();
-                        reject("An error occurred on the server during the file conversion process. You may save your feeder to prevent this message from appearing.");
+                        modal.clearAndAddMessage('An error occurred on the server during the file conversion process. You may save your feeder to prevent this message from appearing.')
+                        modal.hideCancelButton();
+                        modal.finish();
+                        reject();
                     }
                 } else {
                     clearInterval(intervalId);
                 }
-            }).fail(() => {
-                clearInterval(intervalId);
+            }).fail(function() {
                 if (!cancelled) {
-                    modal.hide();
-                    reject("The server raised an internal exception while checking for an ongoing file operation.");
+                    clearInterval(intervalId);
+                    modal.clearAndAddMessage('The server raised an internal exception while checking for an ongoing file operation.');
+                    modal.hideCancelButton();
+                    modal.finish();
+                    reject();
                 }
             });
             return pollServer;
-        // Execute pollServer immediately once, then return it to setInterval so that it continues to execute every 5 seconds
-        }(), 5000)
+        }(), 5000) // Execute pollServer immediately once, then return it to setInterval so that it continues to execute every 5 seconds
     });
 }
 

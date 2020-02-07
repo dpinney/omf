@@ -9,7 +9,10 @@ OOO Think about what to do with the error log.
 import os, csv, json, time, collections, zipfile
 from datetime import datetime
 from matplotlib import pyplot as plt
-from geoip import geolite2
+try:
+	from geolite2 import geolite2
+except:
+	pass
 from iso3166 import countries
 from dateutil.parser import parse as parseDt
 from jinja2 import Template

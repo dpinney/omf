@@ -1,12 +1,12 @@
-'''Start GRIP container, test the API endpoints.'''
+'''Test grip.py with pytest'''
 
 
 import io, os, json
 import requests
-import pytset
+import pytest
 import omf
 import omf.scratch.GRIP.grip as grip
-from flask import url_for
+from flask import url_for, request
 
 
 @pytest.fixture(scope="module") # The client should only be created once
@@ -19,6 +19,7 @@ def client():
     yield client
     # Could put teardown code here if needed
 
+
 post_routes = [
     '/oneLineGridlab',
     '/milsoftToGridlab',
@@ -30,7 +31,8 @@ post_routes = [
     '/transmissionMatToOmt',
     '/transmissionPowerflow',
     '/transmissionViz',
-    '/distributionViz'
+    '/distributionViz',
+    '/glmForceLayout'
 ]
 
 
@@ -40,13 +42,81 @@ def test_GETRequestToPOSTRoute_returns405(url_route, client):
     assert response.status_code == 405
 
 
-class Test_oneLineGridlab_start(object):
+class Test_validateInput:
+    '''
+    Normally I don't want to test a private method but this is a rare exception
+    - All of these tests must operate within a requests context
+    '''
+
+    def test_validMetadataInputType_returnsCorrectTuple(self):
+        request_data = {'my_input': 4}
+        with grip.app.test_request_context(data=request_data):
+            input_metadata = {
+                'name': 'my_input',
+                'required': True,
+                'type': float
+            }
+            t = grip._validate_input(input_metadata)
+        assert t == (None, None)
+
+    def test_emptyFormFileInput_returnsCorrectTuple(self):
+        request_data = {
+            'my_file': (io.BytesIO(), '') # Simulate sending HTML file input that hasn't had a file selected
+        }
+        with grip.app.test_request_context(data=request_data):
+            input_metadata = {
+                'name': 'my_file',
+                'required': True,
+                'type': 'file'
+            }
+            t = grip._validate_input(input_metadata)
+        assert t == ({'my_file': None}, "The parameter 'my_file' of type 'file' is required, but it was not submitted.")
+
+    def test_nonexistentFormFileInput_returnsCorrectTuple(self):
+        # We need to check for if a file form parameter was not submitted at all
+        request_data = {}
+        with grip.app.test_request_context(data=request_data):
+            input_metadata = {
+                'name': 'my_file',
+                'required': True,
+                'type': 'file'
+            }
+            t = grip._validate_input(input_metadata)
+        assert t == ({'my_file': None}, "The parameter 'my_file' of type 'file' is required, but it was not submitted.")
+
+    def test_nonexistentMetadataInputType_returnsCorrectTuple(self):
+        # There is no such thing as a 'foobar' type. This test is to catch any programmer error where the 'type' attribute is set to anything that
+        # isn't a real Python type
+        request_data = {'my_input': 'blah'}
+        with grip.app.test_request_context(data=request_data):
+            input_metadata = {
+                'name': 'my_input',
+                'required': True,
+                'type': 'foobar'
+            }
+            t = grip._validate_input(input_metadata)
+        assert t == ({'my_input': 'blah'}, "The parameter 'my_input' could not be converted into the required type 'foobar'.")
+
+    def test_invalidMetadataInputType_returnsCorrectTuple(self):
+        # This will catch when the user submits something that is supposed to be castable to a int, but isn't
+        request_data = {'my_input': '?'}
+        with grip.app.test_request_context(data=request_data):
+            input_metadata = {
+                'name': 'my_input',
+                'required': True,
+                'type': int
+            }
+            t = grip._validate_input(input_metadata)
+        assert t == ({'my_input': '?'}, "The parameter 'my_input' could not be converted into the required type '<class 'int'>'.")
+
+
+class Test_oneLineGridlab_start:
 
     def test_GLMHasNoCoordinates_and_useLatLonsIsTrue_returns422_and_returnsCorrectJSON(self, client):
         filename = 'test_ieee123nodeBetter.glm' 
         glm_path = os.path.join(os.path.dirname(__file__), filename)
-        with open(glm_path) as f:
-            b_io = io.BytesIO(bytes(f.read(), 'ascii'))
+        with open(glm_path, 'rb') as f:
+            b_io = io.BytesIO(f.read())
         data = {
             'glm': (b_io, filename),
             'useLatLons': 'True'
@@ -70,7 +140,7 @@ class Test_oneLineGridlab_start(object):
     def test_GLMHasInvalidCoordinates_and_useLatLonsIsTrue_returns422_and_returnsCorrectJSON(self, client):
         filename = 'ieee123_pole_vulnerability.glm'
         glm_path = os.path.join(os.path.dirname(__file__), filename)
-        with open(glm_path) as f:
+        with open(glm_path, 'rb') as f:
             b_io = io.BytesIO(f.read())
         data = {
             'glm': (b_io, filename),
@@ -93,13 +163,7 @@ class Test_oneLineGridlab_start(object):
         }
 
     def test_omittedUseLatLonsFormParameter_returns400_and_returnsCorrectJSON(self, client):
-        filename = 'test_ieee123nodeBetter.glm' 
-        glm_path = os.path.join(os.path.dirname(__file__), filename)
-        with open(glm_path) as f:
-            b_io = io.BytesIO(bytes(f.read(), 'ascii'))
-        data = {
-            'glm': (b_io, filename),
-        }
+        data = {'glm': (io.BytesIO(), 'filename')}
         response = client.post("/oneLineGridlab", data=data)
         assert response.status_code == 400
         response_data = json.loads(response.data)
@@ -116,10 +180,7 @@ class Test_oneLineGridlab_start(object):
         }
 
     def test_omittedGLMFile_returns400_and_returnsCorrectJSON(self, client):
-        data = {
-            'glm': None,
-            'useLatLons': True
-        }
+        data = {'useLatLons': 'True'}
         response = client.post("/oneLineGridlab", data=data)
         assert response.status_code == 400
         response_data = json.loads(response.data)
@@ -137,12 +198,8 @@ class Test_oneLineGridlab_start(object):
 
     @pytest.mark.parametrize('useLatLons', ('true', 'false', 5, None))
     def test_useLatLonsFormParameterIsNotTheStringTrueNorFalse_returns400(self, client, useLatLons):
-        filename = 'test_ieee123nodeBetter.glm' 
-        glm_path = os.path.join(os.path.dirname(__file__), filename)
-        with open(glm_path) as f:
-            b_io = io.BytesIO(bytes(f.read(), 'ascii'))
         data = {
-            'glm': (b_io, filename),
+            'glm': (io.BytesIO(), 'filename'),
             'useLatLons': useLatLons
         }
         response = client.post("/oneLineGridlab", data=data)
@@ -161,11 +218,11 @@ class Test_oneLineGridlab_start(object):
         } 
 
 
-class Test_oneLineGridlab_status(object):
+class Test_oneLineGridlab_status:
     pass
 
 
-class xTest_oneLineGridlab_download(object):
+class xTest_oneLineGridlab_download:
     pass
 
     def test_glmHasNoCoordinates_returnsCorrectPNG(self, client):
@@ -174,7 +231,7 @@ class xTest_oneLineGridlab_download(object):
         1) Spy on mkdtemp(). Send a GET request to onelineGridlab as normal. Instead of polling, send the GET request to onelineGridlab_download when
            I detect the temp_dir has the desired arguments. This isn't any better than the second approach, and is in fact just a worse integration
            test.
-            - If this were a real unit test of onelineGridlab_download itself, I would just be creating a fake file in the temp_dir and make sure that
+            - If this were a real unit test of onelineGridlab_download itself, I would just be creating a fake file in the temp_dir and making sure that
               onelineGridlab_download would return it. Since the logic of onelineGridlab_download is so simple, it doesn't make sense to unit test this
         2) POST to /onlineGridlab as normal. Get the response JSON (This is an integration test, which isn't a bad thing). 
             - Poll the status URL until I get the download URL, then GET the download URL and inspect the contents
@@ -200,14 +257,13 @@ class xTest_oneLineGridlab_download(object):
     #    pass
 
 
-class Test_milsoftToGridlab_start(object):
+class Test_milsoftToGridlab_start:
 
     def test_omittedSEQFile_returns400_and_returnsCorrectJSON(self, client):
-        std_path = os.path.join(omf.omfDir, "static/testFiles/IEEE13.std")
-        with open(std_path) as f:
-            b_io_std = io.BytesIO(bytes(f.read(), 'ascii'))
-        data = {"std": (b_io_std, "IEEE13.std")}
-        response = client.post("/milsoftToGridlab", data=data)
+        data = {
+            'std': (io.BytesIO(), 'filename')
+        }
+        response = client.post('/milsoftToGridlab', data=data)
         assert response.status_code == 400
         response_data = json.loads(response.data)
         assert response_data == {
@@ -223,11 +279,8 @@ class Test_milsoftToGridlab_start(object):
         }
 
     def test_omittedSTDFile_returns400_and_returnsCorrectJSON(self, client):
-        seq_path = os.path.join(omf.omfDir, "static/testFiles/IEEE13.seq") 
-        with open(seq_path) as f:
-            b_io_seq = io.BytesIO(bytes(f.read(), 'ascii'))
-        data = {"seq": (b_io_seq, "IEEE13.seq")}
-        response = client.post("/milsoftToGridlab", data=data)
+        data = {'seq': (io.BytesIO(), 'filename')}
+        response = client.post('/milsoftToGridlab', data=data)
         assert response.status_code == 400
         response_data = json.loads(response.data)
         assert response_data == {
@@ -243,21 +296,17 @@ class Test_milsoftToGridlab_start(object):
         }
 
 
-class Test_milsoftToGridlab_status(object):
+class Test_milsoftToGridlab_status:
     pass
 
 
-class Test_milsoftToGridlab_download(object):
+class Test_milsoftToGridlab_download:
     pass
 
 
-class TestCymeToGridlab(object):
+class Test_cymeToGridlab_start:
 
     def test_omittedMDBFile_returns400_and_returnsCorrectJSON(self, client):
-        #mdb_path = os.path.join(omf.omfDir, "static/testFiles/IEEE13.mdb")
-        #with open(mdb_path) as f:
-        #    b_io = io.BytesIO(f.read())
-        #data = {"mdb": (b_io, "IEEE13.mdb")}
         data = {}
         response = client.post("/cymeToGridlab", data=data)
         assert response.status_code == 400
@@ -275,7 +324,15 @@ class TestCymeToGridlab(object):
         }
 
 
-class TestGridlabRun(object):
+class Test_cymeToGridlab_status:
+    pass
+
+
+class Test_cymeToGridlab_download:
+    pass
+
+
+class Test_gridlabRun_start:
 
     def test_omittedGLMFile_returns400_and_returnsCorrectJSON(self, client):
         data = {}
@@ -294,16 +351,21 @@ class TestGridlabRun(object):
             }]
         }
 
-class TestGridlabdToGfm(object):
+
+class Test_gridlabRun_status:
+    pass
+
+
+class Test_gridlabRun_download:
+    pass
+
+
+class Test_gridlabdToGfm_start:
 
     def test_phaseVariationAboveMaxBound_returns400_and_returnsCorrectJSON(self, client):
-        filename = "test_ieee123nodeBetter.glm" 
-        glm_path = os.path.join(os.path.dirname(__file__), filename)
-        with open(glm_path) as f:
-            b_io = io.BytesIO(bytes(f.read(), 'ascii'))
         data = {
-            "glm": (b_io, filename),
-            "phase_variation": "1.01",
+            "glm": (io.BytesIO(), 'filename'),
+            "phase_variation": "1.01"
         }
         response = client.post("/gridlabdToGfm", data=data)
         assert response.status_code == 400
@@ -321,19 +383,32 @@ class TestGridlabdToGfm(object):
         }
 
 
-class TestRunGfm(object):
+class Test_gridlabdToGfm_status():
     pass
 
 
-class TestSamRun(object):
+class Test_gridlabdToGfm_download():
+    pass
+
+
+class Test_runGfm_start:
+    pass
+
+
+class Test_runGfm_status:
+    pass
+
+
+class Test_runGfm_download:
+    pass
+
+
+class Test_samRun_start:
     
     def test_derateBelowMinBound_returns400_and_returnsCorrectJSON(self, client):
-        tmy2_path = os.path.join(omf.omfDir, "data/Climate/CA-SAN_FRANCISCO.tmy2")
-        with open(tmy2_path) as f:
-            b_io = io.BytesIO(bytes(f.read(), 'ascii'))
         data = {
-            "tmy2": (b_io, "CA-SAN_FRANCISCO.tmy2"),
-            "derate": -.01,
+            'tmy2': (io.BytesIO(), 'filename'),
+            'derate': -.01,
         }
         response = client.post("/samRun", data=data)
         assert response.status_code == 400
@@ -350,21 +425,34 @@ class TestSamRun(object):
             }]
         }
 
-
-class TestTransmissionMatToOmt(object):
+class Test_samRun_status:
     pass
 
 
-class TestTransmissionPowerflow(object):
+class Test_samRun_download:
+    pass
+
+
+class Test_transmissionMatToOmt_start:
+    pass
+
+
+class Test_transmissionMatToOmt_status:
+    pass
+
+
+class Test_transmissionMatToOmt_download:
+    pass
+
+
+class Test_transmissionPowerflow_start:
 
     def test_algorithmNotInAllowedValues_returns400_and_returnsCorrectJSON(self, client):
-        with open(os.path.join(omf.omfDir, "static/testFiles/case9.omt")) as f:
-            b_io = io.BytesIO(bytes(f.read(), 'ascii'))
         data = {
-            "omt": (b_io, "case9.omt"),
+            'omt': (io.BytesIO(), 'filename'),
             'algorithm': 'foobar'
         }
-        response = client.post("/transmissionPowerflow", data=data)
+        response = client.post('/transmissionPowerflow', data=data)
         assert response.status_code == 400
         response_data = json.loads(response.data)
         assert response_data == {
@@ -380,11 +468,63 @@ class TestTransmissionPowerflow(object):
         }
 
 
-class TestTransmissionViz(object):
+class Test_transmissionPowerflow_status:
     pass
 
 
-class TestDistributionViz(object):
+class Test_transmissionPowerflow_download:
+    pass
+
+
+class Test_transmissionViz_start:
+    pass
+
+
+class Test_transmissionViz_status:
+    pass
+
+
+class Test_transmissionViz_download:
+    pass
+
+
+class Test_distributionViz_start:
+    pass
+
+
+class Test_distributionViz_status:
+    pass
+
+
+class Test_distributionViz_download:
+    pass
+
+
+class Test_glmForceLayout_start:
+
+    def test_omittedGLMFile_returns400_and_returnsCorrectJSON(self, client):
+        data = {}
+        response = client.post('/glmForceLayout', data=data)
+        assert response.status_code == 400
+        response_data = json.loads(response.data)
+        assert response_data == {
+            'job': {
+                'state': 'failed'
+            },
+            'errors': [{
+                'http code': 400,
+                'source': {'glm': None},
+                'title': 'Invalid Parameter Value',
+                'detail': "The parameter 'glm' of type 'file' is required, but it was not submitted."
+            }]
+        }
+
+
+class Test_glmForceLayout_status:
+    pass
+
+
+class Test_glmForceLayout_download:
     pass
 
 

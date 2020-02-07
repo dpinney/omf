@@ -1,11 +1,16 @@
 ''' A model skeleton for future models: Calculates the sum of two integers. '''
 
+import warnings
+warnings.filterwarnings("ignore")
+
 import shutil, datetime
 from os.path import join as pJoin
 
 # OMF imports
 from omf.models import __neoMetaModel__
 from omf.models.__neoMetaModel__ import *
+import omf.feeder as feeder
+from omf.models.voltageDrop import drawPlot
 
 # Model metadata:
 modelName, template = __neoMetaModel__.metadata(__file__)
@@ -39,7 +44,7 @@ def new(modelDir):
 
 def _tests():
 	# Location
-	modelLoc = pJoin(__neoMetaModel__._omfDir,"data","Model","admin","Automated pvWatts Testing")
+	modelLoc = pJoin(__neoMetaModel__._omfDir,"data","Model","admin","Automated Testing of " + modelName)
 	# Blow away old test results if necessary.
 	try:
 		shutil.rmtree(modelLoc)

@@ -109,7 +109,7 @@ def _send_email(recipient, subject, message):
 	c = boto3.client('ses', aws_access_key_id='AKIAJLART4NXGCNFEJIQ', aws_secret_access_key=key, region_name='us-east-1')
 	email_content = {
 		'Source': 'admin@omf.coop',
-		'Destination': {'ToAddresses': [email]},
+		'Destination': {'ToAddresses': [recipient]},
 		'Message': {
 			'Subject': {'Data': subject, 'Charset': 'UTF-8'},
 			'Body': {'Text': {'Data': message, 'Charset': 'UTF-8' }}
@@ -123,8 +123,8 @@ def send_link(email, message, u=None):
 	if u is None:
 		u = {}
 	try:
-		_send_email(email, 'OMF Registration Link', message.replace('reg_link', URL + '/register/' + email + '/' + reg_key))
 		reg_key = hashlib.md5(str(random.random()).encode('utf-8') + str(time.time()).encode('utf-8')).hexdigest()
+		_send_email(email, 'OMF Registration Link', message.replace('reg_link', URL + '/register/' + email + '/' + reg_key))
 		u["reg_key"] = reg_key
 		u["timestamp"] = dt.datetime.strftime(dt.datetime.now(), format="%c")
 		u["registered"] = False

@@ -47,38 +47,36 @@ elif platform.system()=='Windows':
 	# chocoString = @"%SystemRoot%\System32\WindowsPowerShell\v1.0\powershell.exe" -NoProfile -InputFormat None -ExecutionPolicy Bypass -Command "iex ((New-Object System.Net.WebClient).DownloadString('https://chocolatey.org/install.ps1'))" && SET "PATH=%PATH%;%ALLUSERSPROFILE%\chocolatey\bin"
 	# os.system(chocoString)
 	# Check for right Python version.
-	version = sys.version.split('\n')[0] 
-	if not version.startswith('2.'):
-		os.system("choco install -y python3")
+	version = sys.version.split("\n")[0] 
+	if not version.startswith("3.6"):
+		os.system("choco install -y python --version 3.6.8")
+	# Hack to create a python3 binary on the path.
+	os.system("copy C:\\Python36\\python.exe C:\\Python36\\python3.exe")
+	# Update pip to remove warnings
+	os.system("python3 -m pip install --upgrade pip")
 	# Install choco packages.
 	os.system("choco install -y wget")
-	os.system("choco install -y vcredist2008")
+	os.system("choco install -y vcredist-all")
 	os.system("choco install -y ffmpeg")
 	os.system("choco install -y graphviz")
 	os.system("choco install -y pip")
 	os.system("choco install -y octave.portable")
 	#TODO: find way to install mdbtools.
 	# HACK: timeout and refreshenv should get all the choco binaries on to the path.
-	os.system("timeout 5")
 	os.system("refreshenv")
 	# Install GridLAB-D.
 	os.system("wget --no-check-certificate https://sourceforge.net/projects/gridlab-d/files/gridlab-d/Candidate%20release/gridlabd-4.0_RC1.exe")
 	os.system("gridlabd-4.0_RC1.exe/silent")
+	os.system("refreshenv")
 	#Install splat
 	#os.system(wget https://www.qsl.net/kd2bd/Splat-1.3.0.zip)
 	#os.system(Splat-1.3.0/Splat-1-3-1-SD-mx64.exe)
-	# Install pygraphviz.
-	if platform.architecture()[0] == '32bit':
-		os.system("python3.exe -m pip install omf\\static\\pygraphviz-1.3.1-cp36-none-win32.whl")
-	elif platform.architecture()[0] == '64bit':
-		os.system("python3.exe -m pip install omf\\static\\pygraphviz-1.3.1-cp36-none-win_amd64.whl")
+	# Install pygraphviz from wheel because it's finicky
+	graphVizBinPath = "C:\\Program Files (x86)\\Graphviz2.38\\bin"
+	os.system(f'setx path "%path%;{graphVizBinPath}"')
+	os.system(f"set PATH=%PATH%;{graphVizBinPath}")
+	os.system("python3.exe -m pip install omf\\static\\pygraphviz-1.5-cp36-cp36m-win_amd64.whl")
 	# Finish up installation with pip.
-	os.system("cd omf")
-	# HACK: more refreshes of the environment.
-	os.system("timeout 5")
-	os.system("refreshenv")
-	os.system("python3 -m pip install scipy")
-	os.system("python3 -m pip install setuptools>=33.1.1")
 	pipInstallInOrder("python3 -m pip")
 	os.system("python3 -m setup.py develop")
 elif platform.system()=="Darwin": # MacOS
