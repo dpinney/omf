@@ -144,4 +144,4 @@ def cutoffFault(pathToOmd, faultedLine, workDir=None):
 	gridlabOut = omf.solvers.gridlabd.runInFilesystem(tree, attachments=attachments, workDir=workDir)
 
 
-cutoffFault('C:/Users/granb/omf/omf/static/publicFeeders/ABECColumbia.omd', "81800")
+# cutoffFault('C:/Users/granb/omf/omf/static/publicFeeders/ABECColumbia.omd', "824984")
