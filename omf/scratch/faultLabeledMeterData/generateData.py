@@ -1,8 +1,11 @@
 # imports --------------------------------------------------------------------------
 
 import json, csv, datetime, time, copy
+import numpy as np
+from datetime import datetime, timedelta
 from omf import omfDir, feeder
 from omf.solvers import gridlabd
+
 
 # user inputs ----------------------------------------------------------------------
 
@@ -10,16 +13,25 @@ WORKING_DIR = omfDir + '/scratch/faultLabeledMeterData'
 CIRCUIT_PATH = omfDir + '/static/publicFeeders/Olin Barre GH.omd'
 
 TIMEZONE = 'PST+8PDT'
+TIME_FORMAT = '%Y-%m-%d %H:%M:%S'
 SIM_START_TIME = '2000-01-01 00:00:00 PST'
 SIM_STOP_TIME = '2000-01-02 00:00:00 PST'
 CONDITION_LINE = '70924'
 CONDITION_METER = 'node62463133906T62463072031'
 CONDITION_TRANSFORMER = 'T62463072031'
+# CONDITION_TYPES = ['theft', 'None']
 CONDITION_TYPES = ['None', 'TLG', 'theft', 'equipmentMafunction']
 # CONDITION_TYPES = [ 'None',
 # 	'SLG-A', 'SLG-B', 'SLG-C', 'DLG-AB', 'DLG-BC', 'DLG-CA', 'LL-AB',
 # 	'LL-BC', 'LL-CA', 'TLG', 'OC1-A', 'OC1-B', 'OC1-C', 'OC2-AB', 
 # 	'OC2-BC', 'OC2-CA', 'OC3', 'theft', 'equipmentMafunction']
+
+THEFT_LINE_LENGTH = 100
+THEFT_ON_TIME = 12*3600
+THEFT_OFF_TIME = 12*3600
+THEFT_POWER = 8000
+THEFT_POWER_STDDEV = 10
+MALFUNCTION_POWER = 4000
 
 METER_FILENAME = 'meter.csv'
 OUTPUT_FILENAME = 'data.csv'
@@ -45,13 +57,43 @@ def generateTreeWithCondition(tree, condition):
 		pass
 	
 	elif condition == 'theft':
-		# model load on transformer
 		
-		seenMeter, seenTransformer = False, False
+		timezoneString = SIM_START_TIME[-4:]
+		startTime = datetime.strptime(SIM_START_TIME[:-4], TIME_FORMAT)
+		stopTime = datetime.strptime(SIM_STOP_TIME[:-4], TIME_FORMAT)
+		delta = timedelta(seconds=RECORDER_INTERVAL_SECS)
+		
+		currentTime = startTime
+		switchTime = startTime
+		off = True
+		
+		with open( 'theftLoad.csv', 'w' ) as outputFile:
+			writer = csv.writer(outputFile, delimiter=',')
+		
+			while currentTime <= stopTime:
 
+				timestamp = currentTime.strftime(TIME_FORMAT) + ' ' + TIMEZONE[0:3]
+				
+				timeSinceSwitch = (currentTime - switchTime).seconds
+				if off:
+					value = 0
+					if timeSinceSwitch >= THEFT_OFF_TIME:
+						off = not off
+						switchTime = currentTime
+				else:
+					value = THEFT_POWER + np.random.normal(0,THEFT_POWER_STDDEV)
+					if timeSinceSwitch >= THEFT_ON_TIME:
+						off = not off
+						switchTime = currentTime
+
+				writer.writerow([timestamp, value])
+				currentTime = currentTime + delta
+
+		seenMeter, seenTransformer, seenConfig = False, False, False
 		for key in treeCopy:
 			
 			objectName = treeCopy[key].get('name','')
+			objectType = treeCopy[key].get('object','')
 			if objectName == CONDITION_METER:
 				phases = treeCopy[key]['phases']
 				voltage = treeCopy[key]['nominal_voltage']
@@ -60,8 +102,11 @@ def generateTreeWithCondition(tree, condition):
 				transformerTo = treeCopy[key]['to']
 				treeCopy[key]['to'] = 'theftLoc'
 				seenTransformer = True
+			elif objectType == 'line_configuration':
+				configuration = objectName
+				seenConfig = True
 
-			if seenMeter and seenTransformer:
+			if seenMeter and seenTransformer and seenConfig:
 				break
 
 		treeCopy[feeder.getMaxKey(treeCopy) + 1] = {
@@ -70,20 +115,105 @@ def generateTreeWithCondition(tree, condition):
 			'phases': phases,
 			'nominal_voltage': voltage }
 
+		# treeCopy[feeder.getMaxKey(treeCopy) + 1] = {
+		# 	'object': 'link',
+		# 	'name': 'theftLocToMeter',
+		# 	'phases': phases,
+		# 	'from': 'theftLoc',
+		# 	'to': CONDITION_METER }
+
+		# treeCopy[feeder.getMaxKey(treeCopy) + 1] = {
+		# 	'object': 'overhead_line',
+		# 	'name': 'theftLocToMeter',
+		# 	'phases': phases,
+		# 	'from': 'theftLoc',
+		# 	'to': CONDITION_METER,
+		# 	'length': THEFT_LINE_LENGTH,
+		# 	'configuration': configuration }
+
 		treeCopy[feeder.getMaxKey(treeCopy) + 1] = {
-			'object': 'link',
+			'object': 'triplex_line_conductor',
+			'name': 'triplexLineConductor',
+			'geometric_mean_radius': 0.01111,
+			'resistance': 0.97 }
+
+		treeCopy[feeder.getMaxKey(treeCopy) + 1] = {
+			'object': 'triplex_line_configuration',
+			'name': 'triplexLineonfiguration',
+			'diameter': 0.368,
+			'conductor_1': 'triplexLineConductor',
+			'conductor_2': 'triplexLineConductor',
+			'conductor_N': 'triplexLineConductor',
+			'insulation_thickness': 0.08 }
+
+		treeCopy[feeder.getMaxKey(treeCopy) + 1] = {
+			'object': 'triplex_line',
 			'name': 'theftLocToMeter',
 			'phases': phases,
 			'from': 'theftLoc',
-			'to': CONDITION_METER }
+			'to': CONDITION_METER,
+			'length': THEFT_LINE_LENGTH,
+			'configuration': 'triplexLineonfiguration' }
+
+		# seenTransformer, seenLoad = False, False
+		# for key in treeCopy:
+
+		# 	objectName = treeCopy[key].get('name','')
+		# 	objectType = treeCopy[key].get('object','')
+		# 	if objectName == CONDITION_TRANSFORMER:
+		# 		transformerFrom = treeCopy[key]['from']
+		# 		seenTransformer = True
+		# 	elif objectType == 'ZIPload':
+		# 		load = copy.deepcopy(treeCopy[key])
+		# 		seenLoad = True
+
+		# 	if seenTransformer and seenLoad:
+		# 		break
+
+		# for key in treeCopy:
+		# 	objectName = treeCopy[key].get('name','')
+		# 	if objectName == transformerFrom:
+		# 		phases = treeCopy[key]['phases']
+		# 		voltage = treeCopy[key]['nominal_voltage']
+		# 		break
 
 		treeCopy[feeder.getMaxKey(treeCopy) + 1] = {
-			'object': 'triplex_node',
+			'class': 'player',
+			'double': 'value' }
+
+		treeCopy[feeder.getMaxKey(treeCopy) + 1] = {
+			'object': 'player',
+			'file': 'theftLoad.csv',
+			'property': 'value',
+			'name': 'theftLoads',
+			'loop': 0 }
+
+		treeCopy[feeder.getMaxKey(treeCopy) + 1] = {
+			'object': 'triplex_load', 
+			'impedance_pf_12': 1,
 			'name': 'theftLoad',
-			'power_12': 100,
 			'parent': 'theftLoc',
 			'phases': phases,
-			'nominal_voltage': voltage }
+			'power_pf_12': 1,
+			'power_fraction_12': 1,
+			'impedance_fraction_12': 1,
+			'nominal_voltage': voltage,
+			'base_power_12': 'theftLoads.value' }
+
+		# load['name'] = 'theftLoad'
+		# load['base_power'] = THEFT_POWER#'theftLoads.value'
+		# load['parent'] = 'theftLoc'
+		# if load.get('schedule_skew') != None:
+		# 	del load['schedule_skew']
+		# treeCopy[feeder.getMaxKey(treeCopy) + 1] = load
+
+		# treeCopy[feeder.getMaxKey(treeCopy) + 1] = {
+		# 	'object': 'triplex_node',
+		# 	'name': 'theftLoad',
+		# 	'power_12': 'theftLoads.value',
+		# 	'parent': transformerFrom,
+		# 	'phases': phases,
+		# 	'nominal_voltage': voltage }
 			
 		
 	elif condition == 'equipmentMafunction':
@@ -99,7 +229,7 @@ def generateTreeWithCondition(tree, condition):
 		treeCopy[feeder.getMaxKey(treeCopy) + 1] = {
 			'object': 'triplex_node',
 			'name': 'malfunctionLoad',
-			'power_12': 100,
+			'power_12': MALFUNCTION_POWER,
 			'parent': objectName,
 			'phases': phases,
 			'nominal_voltage': voltage }
@@ -167,7 +297,6 @@ elif CIRCUIT_PATH.endswith('.omd'):
 
 else: # incorrect file type
 	raise Exception('Invalid input file type. We require a .glm or .omd.')
-
 
 # modify circuit to enable data recording ------------------------------------------
 

@@ -107,6 +107,10 @@ with open( 'data.csv','r' ) as dataFile:
 
 print('labels for confMats', uniqueLabels)
 
+# plot data
+newX = np.array(x)
+
+# raise Exception('STOP')
 
 # normalize data and split into train/test
 x = StandardScaler().fit_transform(x)
@@ -126,8 +130,6 @@ for name, clf in zip(names, classifiers):
     plot_confusion_matrix(confMat, uniqueLabels, normalize=True, title=name)
     print(name,score)
 
-# plot data
-newX = np.array(x)
 header = ['timepoint'] + header[2:-1]
 plt.figure()
 plt.scatter(newX[:,PLOTTING_FEATURE_NUM_1], newX[:,PLOTTING_FEATURE_NUM_2], c=colorList)

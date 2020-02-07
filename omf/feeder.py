@@ -633,6 +633,39 @@ def _obToCol(obStr):
 		'underground_line':'black'}
 	return obToColor.get(obStr,'black')
 
+def insert(tree, gridlabdObject, index=None):
+
+	treeCopy = copy.deepcopy(tree)
+
+	if index == None:
+		treeCopy[str(getMaxKey(treeCopy) + 1)] = gridlabdObject
+	
+	elif treeCopy.get(str(index),None) is None:
+		treeCopy[str(index)] = gridlabdObject
+
+	else:
+		
+		swap = treeCopy[str(index)]
+		treeCopy[str(index)] = gridlabdObject
+		treeCopy = insert(treeCopy, swap, index+1)
+
+	return treeCopy
+
+def rekey(tree):
+	
+	rekeyedTree = {}
+	sortedKeys = tree.keys()
+	sortedKeys = [int(x) for x in sortedKeys]
+	sortedKeys.sort()
+	sortedKeys = [str(x) for x in sortedKeys]
+
+	for index, key in enumerate(sortedKeys):
+		rekeyedTree[str(index)] = tree[key] 
+
+	return rekeyedTree
+
+
+
 def _tests():
 	# Parser Test
 	tokens = ['clock','{','clockey','valley','}','object','house','{','name','myhouse',';',
