@@ -12,6 +12,7 @@ from urllib.request import Request, urlopen
 import requests
 from dateutil.parser import parse as parse_dt
 from omf import feeder
+import platform
 
 def pullAsos(year, station, datatype):
 	'''This model pulls hourly data for a specified year and ASOS station. 
@@ -737,7 +738,7 @@ def nearest_tmy3_station(latitude, longitude):
 	data = requests.get(file_path)
 	csv_lines = [line.decode() for line in data.iter_lines()]
 	reader = csv.DictReader(csv_lines, delimiter=',')
-	#SHould file be local?
+	#Should file be local?
 	#with open('TMY3_StationsMeta.csv', 'r') as metafile:
 	#reader = csv.DictReader(metafile, delimiter=',')
 	tmy3_stations = [station for station in reader]
@@ -910,18 +911,19 @@ def _tests():
 	# Testing ASOS (Works)
 	pullAsos('2017','CHO', 'tmpc') # Does not write to a file by itself
 	print('ASOS (Iowa) data pulled to ' + tmpdir)
-	pullAsosStations(os.path.join(tmpdir, 'asosStationTable.csv'))
+	# pullAsosStations(os.path.join(tmpdir, 'asosStationTable.csv'))
 	# Testing DarkSky (Works as long as you have an API key)
 	# pullDarksky(2018, 36.64, -93.30, 'temperature', path=tmpdir)
 	# print('Darksky data pulled to ' + tmpdir)
 	# Testing tmy3 (Works)
-	tmy3_pull(nearest_tmy3_station(41, -78), out_file=os.path.join(tmpdir, 'tmy3_test.csv'))
+	if platform.system() != 'Windows':
+		tmy3_pull(nearest_tmy3_station(41, -78), out_file=os.path.join(tmpdir, 'tmy3_test.csv'))
 	# Testing getRadiationYears (Works, but not used anywhere)
 	# get_radiation_data('surfrad', 'Boulder_CO', 2019, True)
 	# get_radiation_data('solrad', 'bis', 2019)
 	# Testing NSRDB (Works, but not used anywhere)
-	nsrdbkey = 'rnvNJxNENljf60SBKGxkGVwkXls4IAKs1M8uZl56'
-	get_nrsdb_data('psm',-99.49218,43.83452,'2017', nsrdbkey, interval=60, filename=os.path.join(tmpdir, 'psm.csv'))
+	# nsrdbkey = 'rnvNJxNENljf60SBKGxkGVwkXls4IAKs1M8uZl56'
+	# get_nrsdb_data('psm',-99.49218,43.83452,'2017', nsrdbkey, interval=60, filename=os.path.join(tmpdir, 'psm.csv'))
 	# print(get_nrsdb_data('psm',-99.49218,43.83452,'2017', nsrdbkey, interval=60))
 	# get_nrsdb_data('psm_tmy',-99.49218,43.83452,'tdy-2017', nsrdbkey, filename='psm_tmy.csv')
 	# print(get_nrsdb_data('psm_tmy',-99.49218,43.83452,'tdy-2017', nsrdbkey))

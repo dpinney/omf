@@ -13,12 +13,24 @@ hidden = False
 
 def work(modelDir, inputDict):
 	''' Run the model in its directory.'''
-	print(inputDict)
 	source = inputDict['source']
-	station = inputDict['stationASOS'] if source == 'ASOS' else inputDict['stationUSCRN']
-	parameter = inputDict['weatherParameterASOS'] if source == 'ASOS' else inputDict['weatherParameterUSCRN']
-	inputs = [inputDict['year'], station, parameter]
-	data = omf.weather.pullAsos(*inputs) if source == 'ASOS' else omf.weather.pullUscrn(*inputs)
+	if source =='ASOS':
+		station = inputDict['stationASOS']
+		parameter = inputDict['weatherParameterASOS']
+		data = omf.weather.pullAsos(inputDict['year'], station, parameter)
+	elif source == 'USCRN':
+		station = inputDict['stationUSCRN']
+		parameter = inputDict['weatherParameterUSCRN']
+		data = omf.weather.pullUscrn(inputDict['year'], station, parameter)
+	elif source == 'darkSky':
+		lat = inputDict['darkSkyLat']
+		lon = inputDict['darkSkyLon']
+		parameter = inputDict['weatherParameterdarkSky']
+		data = omf.weather.pullDarksky(inputDict['year'], lat, lon, parameter, units='si')
+	# station = inputDict['stationASOS'] if source == 'ASOS' else inputDict['stationUSCRN']
+	# parameter = inputDict['weatherParameterASOS'] if source == 'ASOS' else inputDict['weatherParameterUSCRN']
+	# inputs = [inputDict['year'], station, parameter]
+	# data = omf.weather.pullAsos(*inputs) if source == 'ASOS' else omf.weather.pullUscrn(*inputs)
 	with open(pJoin(modelDir,'weather.csv'), 'w', newline='') as f:
 		csv.writer(f).writerows([[x] for x in data])
 	return {
