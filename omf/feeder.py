@@ -5,9 +5,15 @@ from functools import reduce
 from matplotlib import pyplot as plt
 
 # Wireframe for new feeder objects:
-newFeederWireframe = {"links":[],"hiddenLinks":[],"nodes":[],"hiddenNodes":[],
-	"layoutVars":{"theta":"0.8","gravity":"0.01","friction":"0.9","linkStrength":"5",
-	"linkDistance":"5","charge":"-5"},"attachments":{}}
+newFeederWireframe = {
+	"links":[],
+	"hiddenLinks":[],
+	"nodes":[],
+	"hiddenNodes":[],
+	"layoutVars":{"theta":"0.8","gravity":"0.01","friction":"0.9","linkStrength":"5","linkDistance":"5","charge":"-5"},
+	"tree": {},
+	"attachments":{}
+}
 
 def load(inPath, attachPaths=[]):
 	'''Load a .omd or .glm file in to an in-memory feeder object.
@@ -110,6 +116,29 @@ def getMaxKey(inTree):
 	''' Find the largest key value in the tree. We need this because de-embedding causes noncontiguous keys. '''
 	keys = [int(x) for x in inTree.keys()]
 	return max(keys)
+
+def insert(tree, gridlabdObject, index=None):
+	''' Add an object to the tree; if index=None put it on the end.
+	WARNING: the tree will be modified in-place. Consider making a copy.deepcopy of the original tree. '''
+	if index == None:
+		tree[str(getMaxKey(tree) + 1)] = gridlabdObject	
+	elif tree.get(str(index), None) is None:
+		tree[str(index)] = gridlabdObject
+	else:
+		swap = tree[str(index)]
+		tree[str(index)] = gridlabdObject
+		tree = insert(tree, swap, index + 1)
+
+def rekey(tree):
+	''' Update the keys in the tree to be continues integers (cast as strings for web-safety). '''
+	rekeyedTree = {}
+	sortedKeys = tree.keys()
+	sortedKeys = [int(x) for x in sortedKeys]
+	sortedKeys.sort()
+	sortedKeys = [str(x) for x in sortedKeys]
+	for index, key in enumerate(sortedKeys):
+		rekeyedTree[str(index)] = tree[key] 
+	return rekeyedTree
 
 def adjustTime(tree, simLength, simLengthUnits, simStartDate):
 	''' Adjust a GLM clock and recorders to start/stop/step specified. '''
@@ -632,39 +661,6 @@ def _obToCol(obStr):
 		'parentChild':'gray',
 		'underground_line':'black'}
 	return obToColor.get(obStr,'black')
-
-def insert(tree, gridlabdObject, index=None):
-
-	treeCopy = copy.deepcopy(tree)
-
-	if index == None:
-		treeCopy[str(getMaxKey(treeCopy) + 1)] = gridlabdObject
-	
-	elif treeCopy.get(str(index),None) is None:
-		treeCopy[str(index)] = gridlabdObject
-
-	else:
-		
-		swap = treeCopy[str(index)]
-		treeCopy[str(index)] = gridlabdObject
-		treeCopy = insert(treeCopy, swap, index+1)
-
-	return treeCopy
-
-def rekey(tree):
-	
-	rekeyedTree = {}
-	sortedKeys = tree.keys()
-	sortedKeys = [int(x) for x in sortedKeys]
-	sortedKeys.sort()
-	sortedKeys = [str(x) for x in sortedKeys]
-
-	for index, key in enumerate(sortedKeys):
-		rekeyedTree[str(index)] = tree[key] 
-
-	return rekeyedTree
-
-
 
 def _tests():
 	# Parser Test
