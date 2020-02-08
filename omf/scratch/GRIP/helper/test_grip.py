@@ -15,13 +15,12 @@ from omf.scratch.GRIP import grip
 # Place to hack on stuff. Not intended to be run with real tests via pytest
 if __name__ == '__main__':
 	temp_dir = tempfile.mkdtemp()
-	#path = Path(omf.omfDir) / 'scratch/CIGAR/test_ieee123nodeBetter.glm'
-	path = Path(__file__).parent / 'test-files/ieee123_pole_vulnerability.glm'
+	path = Path(omf.omfDir) / 'scratch/CIGAR/test_ieee123nodeBetter.glm'
+	#path = Path(__file__).parent / 'test-files/ieee123_pole_vulnerability.glm'
 	feed = feeder.parse(path)
-	import pdb; pdb.set_trace()
+	#import pdb; pdb.set_trace()
 	outDict = gridlabd.runInFilesystem(feed, attachments=[], keepFiles=True, workDir=temp_dir, glmName='out.glm')
 	print(outDict)
-
 
 
 @pytest.fixture(scope="module") # The client should only be created once
