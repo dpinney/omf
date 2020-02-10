@@ -1,10 +1,10 @@
 """ Common functions for all models """
 
 import json, os, tempfile, webbrowser, math, shutil, datetime, multiprocessing, traceback, hashlib, re
-from jinja2 import Template
 from os.path import join as pJoin
 from os.path import split as pSplit
-import os
+from functools import wraps
+from jinja2 import Template
 import pandas as pd
 import omf.models
 from omf import web
@@ -23,7 +23,7 @@ def metadata(fileUnderObject):
 		template = Template(f.read()) #HTML Template for showing output.
 	return modelName, template
 
-def heavyProcessing(modelDir):
+def heavyProcessing(modelDir, test_mode=False):
 	''' Wrapper to handle model running safely and uniformly. '''
 	try:
 		# Start a timer.
@@ -38,7 +38,9 @@ def heavyProcessing(modelDir):
 		work = getattr(omf.models, inputDict['modelType']).work
 		#This grabs the new outData model
 		outData = work(modelDir, inputDict)
-	except:
+	except Exception as e:
+		if test_mode == True:
+			raise e
 		# If input range wasn't valid delete output, write error to disk.
 		cancel(modelDir)
 		thisErr = traceback.format_exc()
@@ -340,6 +342,15 @@ def csvValidateAndLoad(file_input, modelDir, header=0, nrows=8760, ncols=1, dtyp
 		return df
 	elif return_type == 'dict':
 		return [{k: v for k, v in row.items()} for _, row in df.iterrows()]
+
+
+def test_setup(function):
+	@wraps(function)
+	def test_setup_wrapper(*args, **kwargs):
+		heavyProcessing.__defaults__ = (True,)
+		return function()
+	return test_setup_wrapper
+
 
 def _test():
 	""" No test required for this file. """
