@@ -3,7 +3,7 @@ from os.path import join as pJoin
 from omf.models import __neoMetaModel__
 from omf.models.__neoMetaModel__ import *
 
-warnings.filterwarnings('ignore')
+# warnings.filterwarnings('ignore')
 
 # Model metadata:
 modelName, template = __neoMetaModel__.metadata(__file__)

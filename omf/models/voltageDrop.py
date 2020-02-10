@@ -93,7 +93,7 @@ def drawPlot(path, workDir=None, neatoLayout=False, edgeLabs=None, nodeLabs=None
 	faultType and faultLoc are the type of fault and the name of the line that it occurs on.
 	Returns a matplotlib object.'''
 	# Be quiet matplotlib:
-	warnings.filterwarnings("ignore")
+	# warnings.filterwarnings("ignore")
 	if path.endswith('.glm'):
 		tree = omf.feeder.parse(path)
 		attachments = []

@@ -205,7 +205,7 @@ def work(modelDir, inputDict):
 	outData['protDevTableHtml'] = protDevTable
 
 	def voltplot_protdev(max_value=None, load_name=None):
-		warnings.filterwarnings("ignore")
+		# warnings.filterwarnings("ignore")
 		with open(pJoin(modelDir,feederName + ".omd")) as f:
 			omd = json.load(f)
 		tree = omd.get('tree', {})

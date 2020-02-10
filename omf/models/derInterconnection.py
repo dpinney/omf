@@ -619,7 +619,7 @@ def drawPlot(tree, nodeDict=None, edgeDict=None, edgeLabsDict=None, displayLabs=
 	customColormap=True means use a one that is nicely scaled to perunit values highlighting extremes.
 	Returns a matplotlib object.'''
 	# Be quiet matplotlib:
-	warnings.filterwarnings('ignore')
+	# warnings.filterwarnings('ignore')
 
 	# Build the graph.
 	fGraph = omf.feeder.treeToNxGraph(tree)

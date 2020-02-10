@@ -150,7 +150,7 @@ def _testingPlot():
 def drawTable(path, workDir=None):
 	#return self.log
 	
-	warnings.filterwarnings("ignore")
+	# warnings.filterwarnings("ignore")
 	if path.endswith('.glm'):
 		tree = omf.feeder.parse(path)
 		attachments = []
