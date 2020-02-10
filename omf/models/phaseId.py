@@ -361,7 +361,7 @@ def new(modelDir):
 	creationCode = __neoMetaModel__.new(modelDir, defaultInputs)
 	return creationCode
 
-def _simpleTest():
+def _tests():
 	# Location
 	modelLoc = pJoin(
 		__neoMetaModel__._omfDir,
@@ -382,4 +382,4 @@ def _simpleTest():
 	__neoMetaModel__.renderAndShow(modelLoc)
 
 if __name__ == "__main__":
-	_simpleTest()
+	_tests()
