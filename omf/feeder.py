@@ -569,8 +569,14 @@ def _dictToString(inDict):
 	elif 'module' in inDict:
 		return 'module ' + inDict['module'] + ' {\n' + _gatherKeyValues(inDict, 'module') + '};\n'
 	elif 'clock' in inDict:
-		# This object has known property order issues writing it out explicitly
-		clock_string = 'clock {\n' + '\ttimezone ' + inDict['timezone'] + ';\n' + '\tstarttime ' + inDict['starttime'] + ';\n' + '\tstoptime ' + inDict['stoptime'] + ';\n};\n'
+		## This object has known property order issues writing it out explicitly
+		clock_string = 'clock {\n'
+		timezone = inDict.get('timezone')
+		if timezone is not None:
+			clock_string += '\ttimezone ' + timezone + ';\n'
+		else:
+			warnings.warn('clock object did not have a timezone property', RuntimeWarning)
+		clock_string += '\tstarttime ' + inDict['starttime'] + ';\n' + '\tstoptime ' + inDict['stoptime'] + ';\n};\n'
 		return clock_string
 	elif 'object' in inDict and inDict['object'] == 'schedule':
 		return 'schedule ' + inDict['name'] + ' {\n' + inDict['cron'] + '\n};\n'
