@@ -39,10 +39,10 @@ def heavyProcessing(modelDir, test_mode=False):
 		#This grabs the new outData model
 		outData = work(modelDir, inputDict)
 	except Exception as e:
+		cancel(modelDir)
 		if test_mode == True:
 			raise e
 		# If input range wasn't valid delete output, write error to disk.
-		cancel(modelDir)
 		thisErr = traceback.format_exc()
 		print('ERROR IN MODEL', modelDir, thisErr)
 		inputDict['stderr'] = thisErr
