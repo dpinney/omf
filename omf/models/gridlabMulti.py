@@ -137,7 +137,7 @@ def run(modelDir):
 	with open(pJoin(modelDir, "PPID.txt"),"w+") as pPidFile:
 		pPidFile.write(str(backProc.pid))
 
-def runForeground(modelDir):
+def runForeground(modelDir, test_mode=False):
 	''' Run the model in its directory. WARNING: GRIDLAB CAN TAKE HOURS TO COMPLETE. '''
 	with open(pJoin(modelDir, 'allInputData.json')) as f:
 		inputDict = json.load(f)
@@ -304,6 +304,8 @@ def runForeground(modelDir):
 			os.remove(pJoin(modelDir, feederName,"PID.txt"))
 			print("DONE RUNNING GRIDLABMULTI", modelDir, feederName)
 		except Exception as e:
+			if test_mode == True:
+				raise e
 			print("MODEL CRASHED GRIDLABMULTI", e, modelDir, feederName)
 			cancel(pJoin(modelDir, feederName))
 			with open(pJoin(modelDir, feederName, "stderr.txt"), "a+") as stderrFile:
@@ -502,7 +504,7 @@ def _tests():
 	# No-input template.
 	renderAndShow(modelLoc)
 	# Run the model.
-	runForeground(modelLoc)
+	runForeground(modelLoc, test_mode=True)
 	## Cancel the model.
 	# time.sleep(2)
 	# cancel(modelLoc)

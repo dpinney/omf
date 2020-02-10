@@ -1138,6 +1138,7 @@ def new(modelDir):
 		return False
 	return __neoMetaModel__.new(modelDir, defaultInputs)
 
+@neoMetaModel_test_setup
 def _tests():
 	# outageCostAnalysis(omf.omfDir + '/static/publicFeeders/Olin Barre LatLon.omd', omf.omfDir + '/scratch/smartSwitching/Outages.csv', None, '60', '1')
 	# Location

@@ -520,6 +520,7 @@ def returnMag(complexStr):
 				imag = 0.0
 	return (math.sqrt(real**2+imag**2))/60.0
 
+@neoMetaModel_test_setup
 def _tests():
 	# Location
 	modelLoc = pJoin(__neoMetaModel__._omfDir,'data','Model','admin','Automated Testing of ' + modelName)

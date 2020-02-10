@@ -499,6 +499,7 @@ def new(modelDir):
 	return __neoMetaModel__.new(modelDir, defaultInputs)
 
 
+@neoMetaModel_test_setup
 def _tests():
 	modelLoc = pJoin(
 		__neoMetaModel__._omfDir,

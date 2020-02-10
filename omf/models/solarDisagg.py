@@ -281,6 +281,7 @@ def pullAsosRevised(start, station, datatype, end=None):
 	data = r.text
 	return data
 
+@neoMetaModel_test_setup
 def _tests():
 	# Location
 	modelLoc = pJoin(__neoMetaModel__._omfDir,"data","Model","admin","Automated Testing of " + modelName)

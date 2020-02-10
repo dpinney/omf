@@ -393,6 +393,7 @@ def new(modelDir):
 		defaultInputs[key] = monthlyData[key]
 	return __neoMetaModel__.new(modelDir, defaultInputs)
 
+@neoMetaModel_test_setup
 def _tests():
 	# Location
 	modelLoc = pJoin(__neoMetaModel__._omfDir,"data","Model","admin","Automated Testing of " + modelName)

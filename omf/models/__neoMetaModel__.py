@@ -344,7 +344,7 @@ def csvValidateAndLoad(file_input, modelDir, header=0, nrows=8760, ncols=1, dtyp
 		return [{k: v for k, v in row.items()} for _, row in df.iterrows()]
 
 
-def test_setup(function):
+def neoMetaModel_test_setup(function):
 	@wraps(function)
 	def test_setup_wrapper(*args, **kwargs):
 		heavyProcessing.__defaults__ = (True,)
