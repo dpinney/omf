@@ -344,21 +344,21 @@ def treeToNxGraph(inTree):
 		if 'name' in item.keys():
 			if 'parent' in item.keys():
 				outGraph.add_edge(item['name'],item['parent'], attr_dict={'type':'parentChild','phases':1})
-				outGraph.node[item['name']]['type']=item['object']
+				outGraph.nodes[item['name']]['type']=item['object']
 				# Note that attached houses via gridEdit.html won't have lat/lon values, so this try is a workaround.
-				try: outGraph.node[item['name']]['pos']=(float(item.get('latitude',0)),float(item.get('longitude',0)))
-				except: outGraph.node[item['name']]['pos']=(0.0,0.0)
+				try: outGraph.nodes[item['name']]['pos']=(float(item.get('latitude',0)),float(item.get('longitude',0)))
+				except: outGraph.nodes[item['name']]['pos']=(0.0,0.0)
 			elif 'from' in item.keys():
 				myPhase = _phaseCount(item.get('phases','AN'))
 				outGraph.add_edge(item['from'],item['to'],attr_dict={'name':item.get('name',''),'type':item['object'],'phases':myPhase})
 			elif item['name'] in outGraph:
 				# Edge already led to node's addition, so just set the attributes:
-				outGraph.node[item['name']]['type']=item['object']
+				outGraph.nodes[item['name']]['type']=item['object']
 			else:
 				outGraph.add_node(item['name'],attr_dict={'type':item['object']})
 			if 'latitude' in item.keys() and 'longitude' in item.keys():
-				try: outGraph.node.get(item['name'],{})['pos']=(float(item['latitude']),float(item['longitude']))
-				except: outGraph.node.get(item['name'],{})['pos']=(0.0,0.0)
+				try: outGraph.nodes.get(item['name'],{})['pos']=(float(item['latitude']),float(item['longitude']))
+				except: outGraph.nodes.get(item['name'],{})['pos']=(0.0,0.0)
 	return outGraph
 
 def treeToDiNxGraph(inTree):
@@ -374,24 +374,24 @@ def treeToDiNxGraph(inTree):
 		if 'name' in item.keys():#sometimes network objects aren't named!
 			if 'parent' in item.keys():
 				outGraph.add_edge(item['parent'], item['name'], attr_dict={'type':'parentChild','phases':1, 'length': 0})#jfk. swapped from,to
-				outGraph.node[item['name']]['type']=item['object']
-				outGraph.node[item['name']]['pos']=(float(item.get('latitude',0)),float(item.get('longitude',0)))
+				outGraph.nodes[item['name']]['type']=item['object']
+				outGraph.nodes[item['name']]['pos']=(float(item.get('latitude',0)),float(item.get('longitude',0)))
 			elif 'from' in item.keys():
 				myPhase = _phaseCount(item.get('phases','AN'))
 				outGraph.add_edge(item['from'],item['to'],attr_dict={'type':item['object'],'phases':myPhase, 'length': float(item.get('length',0))})
 			elif item['name'] in outGraph:
 				# Edge already led to node's addition, so just set the attributes:
-				outGraph.node[item['name']]['type']=item['object']
+				outGraph.nodes[item['name']]['type']=item['object']
 			else:
 				outGraph.add_node(item['name'],attr_dict={'type':item['object']})
 			if 'latitude' in item.keys() and 'longitude' in item.keys():
-				outGraph.node.get(item['name'],{})['pos']=(float(item['latitude']),float(item['longitude']))
+				outGraph.nodes.get(item['name'],{})['pos']=(float(item['latitude']),float(item['longitude']))
 		elif 'object' in item.keys() and item['object'] in network_objects:#when name doesn't exist
 			if 'from' in item.keys():
 				myPhase = _phaseCount(item.get('phases','AN'))
 				outGraph.add_edge(item['from'],item['to'],attr_dict={'type':item['object'],'phases':myPhase, 'length': float(item.get('length',0))})
 			if 'latitude' in item.keys() and 'longitude' in item.keys():
-				outGraph.node.get(item['name'],{})['pos']=(float(item['latitude']),float(item['longitude']))
+				outGraph.nodes.get(item['name'],{})['pos']=(float(item['latitude']),float(item['longitude']))
 	return outGraph
 
 def latLonNxGraph(inGraph, labels=False, neatoLayout=False, showPlot=False):
@@ -406,15 +406,21 @@ def latLonNxGraph(inGraph, labels=False, neatoLayout=False, showPlot=False):
 	# Layout the graph via GraphViz neato. Handy if there's no lat/lon data.
 	if neatoLayout:
 		# HACK: work on a new graph without attributes because graphViz tries to read attrs.
-		cleanG = nx.Graph(inGraph.edges())
+
+		cleanG = nx.Graph(inGraph.edges()) # Return a list of edges
+		#cleanG = nx.Graph(inGraph.edges()) # Return a list of edges
+
 		# HACK2: might miss nodes without edges without the following.
 		cleanG.add_nodes_from(inGraph)
 		pos = nx.nx_agraph.graphviz_layout(cleanG, prog='neato')
 	else:
-		pos = {n:inGraph.node[n].get('pos',(0,0)) for n in inGraph}
+		pos = {n:inGraph.nodes[n].get('pos',(0,0)) for n in inGraph}
 	# Draw all the edges.
 	for e in inGraph.edges():
+
 		eType = inGraph.edge[e[0]][e[1]].get('type','underground_line')
+		#eType = inGraph.edges[e[0], e[1]].get('type','underground_line')
+
 		ePhases = inGraph.edge[e[0]][e[1]].get('phases',1)
 		standArgs = {'edgelist':[e],
 					 'edge_color':_obToCol(eType),
@@ -437,7 +443,7 @@ def latLonNxGraph(inGraph, labels=False, neatoLayout=False, showPlot=False):
 	# Draw nodes and optional labels.
 	nx.draw_networkx_nodes(inGraph,pos,
 						   nodelist=list(pos.keys()),
-						   node_color=[_obToCol(inGraph.node[n].get('type','underground_line')) for n in inGraph],
+						   node_color=[_obToCol(inGraph.nodes[n].get('type','underground_line')) for n in inGraph],
 						   linewidths=0,
 						   node_size=40)
 	if labels:
