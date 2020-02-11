@@ -619,7 +619,7 @@ def drawPlot(tree, nodeDict=None, edgeDict=None, edgeLabsDict=None, displayLabs=
 	customColormap=True means use a one that is nicely scaled to perunit values highlighting extremes.
 	Returns a matplotlib object.'''
 	# Be quiet matplotlib:
-	warnings.filterwarnings('ignore')
+	# warnings.filterwarnings('ignore')
 
 	# Build the graph.
 	fGraph = omf.feeder.treeToNxGraph(tree)
@@ -772,7 +772,7 @@ def _testingPlot():
 	chart.savefig(PREFIX + "YO_WHATS_GOING_ON.png")
 	plt.show()
 
-def _debugging():
+def _tests():
 	# Location
 	modelLoc = pJoin(__neoMetaModel__._omfDir,"data","Model","admin","Automated Testing of " + modelName)
 	# Blow away old test results if necessary.
@@ -791,5 +791,5 @@ def _debugging():
 	__neoMetaModel__.renderAndShow(modelLoc)
 
 if __name__ == '__main__':
-	_debugging()
+	_tests()
 	#_testingPlot()
