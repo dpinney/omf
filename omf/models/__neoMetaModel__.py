@@ -125,7 +125,6 @@ def renderTemplate(modelDir, absolutePaths=False, datastoreNames={}):
 		try:
 			#Needed? Should this be handled a different way? Add hashes to the output if they are not yet present
 			if ('pythonHash' not in outJson) or ('htmlHash' not in outJson):
-				print('new model')
 				outJson['htmlHash'] = currentHtmlHash
 				outJson['pythonHash'] = currentPythonHash
 				outJson['oldVersion'] = False
@@ -159,7 +158,7 @@ def renderAndShow(modelDir, datastoreNames={}):
 
 def renderTemplateToFile(modelDir, datastoreNames={}):
 	''' Render and open a template (blank or with output) in a local browser. '''
-	with tempfile.NamedTemporaryFile('w', suffix=".html", delete=False) as baseTemplate:
+	with tempfile.NamedTemporaryFile('w+', suffix=".html", delete=False) as baseTemplate:
 		baseTemplate.write(renderTemplate(modelDir, absolutePaths=False))
 		baseTemplate.flush()
 		baseTemplate.seek(0)
