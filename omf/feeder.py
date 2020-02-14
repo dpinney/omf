@@ -447,7 +447,7 @@ def latLonNxGraph(inGraph, labels=False, neatoLayout=False, showPlot=False):
 		inGraph,
 		pos,
 		nodelist=list(pos.keys()),
-		node_color=[_obToCol(inGraph.node[n].get('type','underground_line')) for n in inGraph],
+		node_color=[_obToCol(inGraph.nodes[n].get('type','underground_line')) for n in inGraph],
 		linewidths=0,
 	 	node_size=40
 	)
