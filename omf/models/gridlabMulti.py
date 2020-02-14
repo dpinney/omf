@@ -322,14 +322,14 @@ def runForeground(modelDir, test_mode=False):
 		for root, dirs, files in os.walk(modelDir):
 			# dump error info into dict
 			if "stderr.txt" in files:
-				with open(pJoin(modelDir, root, "stderr.txt"), "r") as stderrFile:
+				with open(pJoin(root, "stderr.txt"), "r") as stderrFile:
 					tempString = stderrFile.read()
 					if "ERROR" in tempString or "FATAL" in tempString or "Traceback" in tempString:
 						output["failures"]["feeder_" + str(os.path.split(root)[-1])] = {"stderr": tempString}
 						continue
 			# dump simulated data into dict
 			if "allOutputData.json" in files:
-				with open(pJoin(modelDir, root, "allOutputData.json"), "r") as feederOutputData:
+				with open(pJoin(root, "allOutputData.json"), "r") as feederOutputData:
 					numOfFeeders += 1
 					feederOutput = json.load(feederOutputData)
 					# TODO: a better feeder name
@@ -385,8 +385,7 @@ def runForeground(modelDir, test_mode=False):
 			message = "The model " + "<i>" + str(modelName) + "</i>" + " has failed to complete running. It ran for a total of " + str(inputDict["runTime"]) + " seconds from " + str(beginTime) + ", to " + str(finishTime) + "."
 			return omf.web.send_link(email, message, user)
 		except Exception as e:
-			print("ERROR: Failed sending model status email to user: ", email, ", with exception: \n", e)
-
+			print("Failed sending model status email to user: ", email, ", with exception: \n", e)
 
 def avg(inList):
 	''' Average a list. Really wish this was built-in. '''

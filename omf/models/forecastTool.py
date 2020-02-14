@@ -149,12 +149,15 @@ def work(modelDir, ind):
 		else:
 			three_day_peak = 0
 			three_day_load_accuracy = {'test': np.nan, 'train': np.nan}
+			three_day_predicted_load = []
 			
 	else:
 		two_day_peak = 0
 		two_day_load_accuracy = {'test': np.nan, 'train': np.nan}
+		two_day_predicted_load = []
 		three_day_peak = 0
 		three_day_load_accuracy = {'test': np.nan, 'train': np.nan}
+		three_day_predicted_load = []
 
 	tomorrow_peak = max(tomorrow_load)
 	m = df[(df['month'] == tomorrow.month) & (df['year'] != tomorrow.year) ]
@@ -187,23 +190,24 @@ def work(modelDir, ind):
 			'enableMouseTracking': False
 		})
 
+	all_load = tomorrow_load + two_day_predicted_load + three_day_predicted_load
 	load_leading_up = df[(df['month'] == tomorrow.month) & (df['year'] == tomorrow.year)]['load'].tolist()
 	l.append({'name': tomorrow.year, 'color': 'black', 'data': load_leading_up[:-72], 'type': 'line'})
-	l.append({'name':'forecast','color':'blue','data': [None]*(len(load_leading_up) - 72) + o['tomorrow_load'],'type': 'line', 'zIndex': 5})
+	l.append({'name':'forecast','color':'blue', 'data': [None]*(len(load_leading_up) - 72) + all_load, 'type': 'line', 'zIndex': 5 })
 
 	# add uncertainty
-
+	uncertainty = [2.02, 2.41, 2.78, 2.91, 3.48, 4.02, 4.2, 3.96, 3.63, 3.68, 4.19, 4.45, 4.77, 4.94, 4.79, 5.22, 5.58, 5.32, 5.44, 4.85, 5.05, 5.51, 5.71, 5.96, 7.84, 8.44, 8.96, 9.06, 8.81, 8.53, 8.4, 8.06, 7.33, 6.5, 6.15, 6.23, 6.43, 6.34, 6.84, 6.76, 7.17, 7.2, 6.93, 6.83, 6.71, 7.39, 8.49, 9.24, 9.36, 10.64, 9.95, 9.4, 9.6, 9.28, 8.52, 8.78, 8.71, 8.59, 8.34, 8.81, 9.12, 9.53, 10.3, 10.67, 10.89, 10.47, 9.67, 8.95, 8.79, 9.18, 9.92, 10.25]
+	print(tomorrow_accuracy['test'])
 	l.append({
 		'name': 'uncertainty',
-		'color': '#D57560',
-		'opacity': 0.05,
-		'data': [None]*(len(load_leading_up) - 72) + [x*round(tomorrow_accuracy['test'], 2)*.01*2 for x in o['tomorrow_load']],
+		'color': '#b3b3ff',
+		'data': [None]*(len(load_leading_up) - 72) + [x*u*.01*2 for u, x in zip(uncertainty, all_load)],
 	})
 
 	l.append({
 		'id': 'transparent',
 		'color': 'rgba(255,255,255,0)',
-		'data': [None]*(len(load_leading_up) - 72) + [x*(1-round(tomorrow_accuracy['test'], 2)*.01) for x in o['tomorrow_load']]
+		'data': [None]*(len(load_leading_up) - 72) + [x*(1-u*.01) for u, x in zip(uncertainty, all_load)]
 	})
 	
 

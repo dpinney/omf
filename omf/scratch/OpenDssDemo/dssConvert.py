@@ -91,8 +91,8 @@ def schemaConvert(treeObject, kind):
 	pass #TODO: maybe implement?
 
 if __name__ == '__main__':
-	tree = dssToTree('ieee37.dss')
-	treeToDss(tree, 'ieee37p.dss')
+	# tree = dssToTree('ieee37_ours.dss')
+	# treeToDss(tree, 'ieee37p.dss')
 	# dssToMem('ieee37.dss')
 	# dssToGridLab('ieee37.dss', 'Model.glm') # this kind of works
-	# gridLabToDSS('Model.glm', 'ieee37-round-trip.dss') # this fails miserably
+	gridLabToDSS('ieee37_fixed.glm', 'ieee37_conv.dss') # this fails miserably

@@ -227,7 +227,7 @@ def capacityPlot(filePath):
 
 if __name__ == "__main__":
 	# Make core output
-	FPATH = 'test/ieee37.dss'
+	FPATH = 'test/ieee37_ours.dss'
 	# Just run DSS
 	# runDSS(FPATH)
 	# Generate plots, note output is in FPATH dir.
