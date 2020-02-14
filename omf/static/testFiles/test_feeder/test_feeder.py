@@ -25,5 +25,10 @@ class Test_latLonNxGraph:
     def test_newNetworkxAPI_returns_sameGraphAsOldNetworkXAPI(self):
         with open(Path(omf.omfDir) / 'static/publicFeeders/Olin Barre Geo.omd') as inFile:
             tree = json.load(inFile)['tree']
-        nxG = feeder.treeToNxGraph(tree)
+        nxG = feeder.treeToNxGraph(tree) # networkx 2.4 API
         x = latLonNxGraph(nxG)
+
+
+if __name__ == '__main__':
+    t = Test_latLonNxGraph()
+    t.test_newNetworkxAPI_returns_sameGraphAsOldNetworkXAPI()
