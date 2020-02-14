@@ -397,7 +397,7 @@ def treeToDiNxGraph(inTree):
 def latLonNxGraph(inGraph, labels=False, neatoLayout=False, showPlot=False):
 	''' Draw a networkx graph representing a feeder.'''
 	# Be quiet Matplotlib.
-	warnings.filterwarnings("ignore",category=matplotlib.cbook.mplDeprecation)
+	# warnings.filterwarnings("ignore",category=matplotlib.cbook.mplDeprecation)
 	# Set up figure.
 	plt.axis('off')
 	plt.tight_layout()
@@ -422,10 +422,12 @@ def latLonNxGraph(inGraph, labels=False, neatoLayout=False, showPlot=False):
 		#eType = inGraph.edges[e[0], e[1]].get('type','underground_line')
 
 		ePhases = inGraph.edge[e[0]][e[1]].get('phases',1)
-		standArgs = {'edgelist':[e],
-					 'edge_color':_obToCol(eType),
-					 'width':2,
-					 'style':{'parentChild':'dotted','underground_line':'dashed'}.get(eType,'solid') }
+		standArgs = {
+			'edgelist':[e],
+			'edge_color':_obToCol(eType),
+			'width':2,
+			'style':{'parentChild':'dotted','underground_line':'dashed'}.get(eType,'solid')
+		}
 		if ePhases==3:
 			standArgs.update({'width':5})
 			nx.draw_networkx_edges(inGraph,pos,**standArgs)
@@ -441,16 +443,21 @@ def latLonNxGraph(inGraph, labels=False, neatoLayout=False, showPlot=False):
 		else:
 			nx.draw_networkx_edges(inGraph,pos,**standArgs)
 	# Draw nodes and optional labels.
-	nx.draw_networkx_nodes(inGraph,pos,
-						   nodelist=list(pos.keys()),
-						   node_color=[_obToCol(inGraph.nodes[n].get('type','underground_line')) for n in inGraph],
-						   linewidths=0,
-						   node_size=40)
+	nx.draw_networkx_nodes(
+		inGraph,
+		pos,
+		nodelist=list(pos.keys()),
+		node_color=[_obToCol(inGraph.node[n].get('type','underground_line')) for n in inGraph],
+		linewidths=0,
+	 	node_size=40
+	)
 	if labels:
-		nx.draw_networkx_labels(inGraph,pos,
-								font_color='black',
-								font_weight='bold',
-								font_size=0.25)
+		nx.draw_networkx_labels(
+			inGraph,pos,
+			font_color='black',
+			font_weight='bold',
+			font_size=0.25
+		)
 	if showPlot: plt.show()
 
 def _tokenizeGlm(inputStr, filePath=True):

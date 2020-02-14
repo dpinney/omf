@@ -93,7 +93,7 @@ def drawPlot(path, workDir=None, neatoLayout=False, edgeLabs=None, nodeLabs=None
 	faultType and faultLoc are the type of fault and the name of the line that it occurs on.
 	Returns a matplotlib object.'''
 	# Be quiet matplotlib:
-	warnings.filterwarnings("ignore")
+	# warnings.filterwarnings("ignore")
 	if path.endswith('.glm'):
 		tree = omf.feeder.parse(path)
 		attachments = []
@@ -673,7 +673,7 @@ def _testingPlot():
 	chart.savefig(PREFIX + "YO_WHATS_GOING_ON.png")
 	# plt.show()
 
-def _debugging():
+def _tests():
 	# Location
 	modelLoc = pJoin(__neoMetaModel__._omfDir,"data","Model","admin","Automated Testing of " + modelName)
 	# Blow away old test results if necessary.
@@ -692,5 +692,5 @@ def _debugging():
 	__neoMetaModel__.renderAndShow(modelLoc)
 
 if __name__ == '__main__':
-	_debugging()
+	_tests()
 	# _testingPlot()

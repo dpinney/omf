@@ -150,7 +150,7 @@ def _testingPlot():
 def drawTable(path, workDir=None):
 	#return self.log
 	
-	warnings.filterwarnings("ignore")
+	# warnings.filterwarnings("ignore")
 	if path.endswith('.glm'):
 		tree = omf.feeder.parse(path)
 		attachments = []
@@ -258,7 +258,7 @@ def drawTable(path, workDir=None):
 	html_str += """</tbody></table>"""
 	return html_str
 
-def _debugging():
+def _tests():
 	# Location
 	modelLoc = pJoin(__neoMetaModel__._omfDir,"data","Model","admin","Automated Testing of " + modelName)
 	# Blow away old test results if necessary.
@@ -277,5 +277,5 @@ def _debugging():
 	__neoMetaModel__.renderAndShow(modelLoc)
 
 if __name__ == '__main__':
-	_debugging()
+	_tests()
 	# _testingPlot()
