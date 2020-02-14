@@ -15,8 +15,9 @@ def main():
 	errorMessage = 'Incorrect inputs. Usage: distNetViz -f <Path_to_feeder.glm or .omd>'
 	if argCount == 1:
 		print('Running tests. Normal usage: distNetViz -f <Path_to_feeder.glm or .omd>')
-		FEEDER_PATH = omf.omfDir + '/static/publicFeeders/Simple Market System.omd'
-		DO_FORCE_LAYOUT = True
+		_tests()
+		return
+		#DO_FORCE_LAYOUT = True
 	elif argCount == 2:
 		print('Beginning display of ' + sys.argv[1])
 		DO_FORCE_LAYOUT = False
@@ -70,6 +71,7 @@ def contains_valid_coordinates(tree):
 					return True
 	return False
 
+
 def get_components():
 	directory = os.path.join(omf.omfDir, "data/Component")
 	components = {}
@@ -80,6 +82,7 @@ def get_components():
 				with open(path) as f:
 					components[name[0:-5]] = json.load(f) # Load the file as a regular object into the dictionary
 	return json.dumps(components) # Turn the dictionary of objects into a string
+
 
 def viz(pathToOmdOrGlm, forceLayout=False, outputPath=None, outputName='viewer.html', open_file=True):
 	''' Vizualize a distribution system.'''
@@ -171,11 +174,20 @@ def viz(pathToOmdOrGlm, forceLayout=False, outputPath=None, outputName='viewer.h
 	if open_file:
 		open_browser(tempDir, outputName)
 
+
 def open_browser(tempDir, outputName):
 	webbrowser.open_new("file://" + tempDir + '/' + outputName)
+
+
+def _tests():
+	viz(omf.omfDir + '/static/publicFeeders/Simple Market System.omd', forceLayout=True, open_file=False) # No coordinates
+	viz(omf.omfDir + '/static/publicFeeders/Simple Market System.omd', forceLayout=False, open_file=False) # No coordinates
+	viz(omf.omfDir + '/static/testFiles/IEEE13.glm', forceLayout=True, open_file=False) # Has coordinates
+	viz(omf.omfDir + '/static/testFiles/IEEE13.glm', forceLayout=False, open_file=False) # Has coordinates
+
 
 if __name__ == '__main__':
 	main()
 	#viz('/Users/tuomastalvitie/OneDrive/NRECA Code/DEC Robinsonville Original.omd', forceLayout=False, outputPath=None)
 	#viz('C:\Users\Tuomas\SkyDrive\NRECA Code\Utility Data\DEC Robinsonville Substation\DEC Robinsonville Original.omd', forceLayout=False, outputPath=None)
-	# viz('/Users/dpinney/Desktop/LATERBASE/NRECA/GridBallast/DM1.3.1 Go-No-Go - Demonstration of GridBallast Performance in Simulation - FINISHED/Utility Data/DEC Robinsonville Substation/DEC Robinsonville Original.omd', forceLayout=False, outputPath=None)
+	#viz('/Users/dpinney/Desktop/LATERBASE/NRECA/GridBallast/DM1.3.1 Go-No-Go - Demonstration of GridBallast Performance in Simulation - FINISHED/Utility Data/DEC Robinsonville Substation/DEC Robinsonville Original.omd', forceLayout=False, outputPath=None)

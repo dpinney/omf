@@ -654,6 +654,7 @@ def energyCostCalc(max_bau_load_shape = None, sum_bau_load_shape = None, demand_
 		</div>"""
 	return html_str
 
+@neoMetaModel_test_setup
 def _tests():
 	# Location
 	modelLoc = pJoin(__neoMetaModel__._omfDir,"data","Model","admin","Automated Testing of " + modelName)

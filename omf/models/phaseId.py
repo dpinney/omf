@@ -361,6 +361,7 @@ def new(modelDir):
 	creationCode = __neoMetaModel__.new(modelDir, defaultInputs)
 	return creationCode
 
+@neoMetaModel_test_setup
 def _tests():
 	# Location
 	modelLoc = pJoin(

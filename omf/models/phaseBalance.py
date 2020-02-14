@@ -555,6 +555,7 @@ def new(modelDir):
 		return False
 	return creationCode
 
+@neoMetaModel_test_setup
 def _tests():
 	modelLoc = pJoin(__neoMetaModel__._omfDir,"data","Model","admin","Automated Testing of " + modelName)
 	if os.path.isdir(modelLoc):

@@ -258,6 +258,7 @@ def drawTable(path, workDir=None):
 	html_str += """</tbody></table>"""
 	return html_str
 
+@neoMetaModel_test_setup
 def _tests():
 	# Location
 	modelLoc = pJoin(__neoMetaModel__._omfDir,"data","Model","admin","Automated Testing of " + modelName)

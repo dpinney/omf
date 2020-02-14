@@ -81,6 +81,9 @@ class Test_JasmineTests:
         browser.switch_to.window(tabs[1])
         # I should be able to simply create and load the jasmine script files in the proper order, but when I do normally, I get "jasmineRequire" not
         # defined. This goes away if I sleep after loading jasmine.js ¯\_(ツ)_/¯
+        # - I think the problem is that the jasmine scripts need to be loaded into <head> BEFORE the rest of the document is parsed. There doesn't
+        #   seem to be a way to "reload the page with new inserted scripts" in JS, so I'll need ANOTHER helper script that ...
+        #   - But the point is that I don't want a helper script. Selenium is supposed to test the page using a full, normal integration test
         browser.execute_script('\
         \
         \
