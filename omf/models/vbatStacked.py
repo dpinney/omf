@@ -220,7 +220,7 @@ def new(modelDir):
 	}
 	return __neoMetaModel__.new(modelDir, defaultInputs)
 
-def _simpleTest():
+def _tests():
 	modelLoc = pJoin(__neoMetaModel__._omfDir,"data","Model","admin","Automated Testing of " + modelName)
 	if os.path.isdir(modelLoc):
 		shutil.rmtree(modelLoc)
@@ -230,4 +230,4 @@ def _simpleTest():
 	__neoMetaModel__.renderAndShow(modelLoc) # Show the output.
 
 if __name__ == '__main__':
-	_simpleTest()
+	_tests()

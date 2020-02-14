@@ -991,13 +991,11 @@ def glmForceLayout(temp_dir):
 	:OMF function: omf.distNetViz.insert_coordinates()
 	:run-time: a few seconds
 	'''
-	# Get original filename
 	glm_path = os.path.join(temp_dir, 'in.glm')
 	glm_file = request.files['glm']
 	glm_file.save(glm_path)
 	tree = feeder.parse(glm_path)
 	distNetViz.insert_coordinates(tree)
-	# Remove #include?
 	with open(os.path.join(temp_dir, filenames['gfl']), 'w') as f:
 		f.write(feeder.sortedWrite(tree))
 

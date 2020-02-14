@@ -205,7 +205,7 @@ def work(modelDir, inputDict):
 	outData['protDevTableHtml'] = protDevTable
 
 	def voltplot_protdev(max_value=None, load_name=None):
-		warnings.filterwarnings("ignore")
+		# warnings.filterwarnings("ignore")
 		with open(pJoin(modelDir,feederName + ".omd")) as f:
 			omd = json.load(f)
 		tree = omd.get('tree', {})
@@ -654,7 +654,7 @@ def energyCostCalc(max_bau_load_shape = None, sum_bau_load_shape = None, demand_
 		</div>"""
 	return html_str
 
-def _debugging():
+def _tests():
 	# Location
 	modelLoc = pJoin(__neoMetaModel__._omfDir,"data","Model","admin","Automated Testing of " + modelName)
 	# Blow away old test results if necessary.
@@ -673,5 +673,5 @@ def _debugging():
 	__neoMetaModel__.renderAndShow(modelLoc)
 
 if __name__ == '__main__':
-	_debugging()
+	_tests()
 	# _testingPlot()

@@ -8,7 +8,7 @@ import warnings
 import sys
 
 plt.switch_backend('Agg')
-warnings.filterwarnings('ignore')
+# warnings.filterwarnings('ignore')
 
 algorithm = sys.argv[1]
 trainPath = sys.argv[2]

@@ -1,7 +1,7 @@
 ''' A model skeleton for future models: Calculates the sum of two integers. '''
 
 import warnings
-warnings.filterwarnings("ignore")
+# warnings.filterwarnings("ignore")
 
 import shutil, datetime
 from os.path import join as pJoin

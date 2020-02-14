@@ -1138,7 +1138,7 @@ def new(modelDir):
 		return False
 	return __neoMetaModel__.new(modelDir, defaultInputs)
 
-def _tests():
+def _debugging():
 	# outageCostAnalysis(omf.omfDir + '/static/publicFeeders/Olin Barre LatLon.omd', omf.omfDir + '/scratch/smartSwitching/Outages.csv', None, '60', '1')
 	# Location
 	modelLoc = pJoin(__neoMetaModel__._omfDir,'data','Model','admin','Automated Testing of ' + modelName)
@@ -1158,4 +1158,4 @@ def _tests():
 	__neoMetaModel__.renderAndShow(modelLoc)
 
 if __name__ == '__main__':
-	_tests()
+	_debugging()
