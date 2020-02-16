@@ -482,8 +482,8 @@ def _readCSV(filename, voltage=True):
 		df = df[df.columns[:-2]]
 	df = df[~df.index.str.startswith('#')]
 	df[0] = [complex(i) if i != '+0+0i' else complex(0) for i in df[0]]
-	df['imag'] = df[0].imag.astype(float)
-	df['real'] = df[0].real.astype(float)
+	df['imag'] = df[0].to_numpy().imag
+	df['real'] = df[0].to_numpy().real
 	df = df.drop([0], axis=1)
 	return df
 
