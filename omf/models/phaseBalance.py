@@ -555,7 +555,7 @@ def new(modelDir):
 		return False
 	return creationCode
 
-def _debugging():
+def _tests():
 	modelLoc = pJoin(__neoMetaModel__._omfDir,"data","Model","admin","Automated Testing of " + modelName)
 	if os.path.isdir(modelLoc):
 		shutil.rmtree(modelLoc)
@@ -565,4 +565,4 @@ def _debugging():
 	__neoMetaModel__.renderAndShow(modelLoc)
 
 if __name__ == '__main__':
-	_debugging()
+	_tests()

@@ -133,7 +133,7 @@ def work(modelDir, inputDict):
 	# Perform linear regression and make output csv file.
 	# Read transformed files and perform regression
 	# Ignore scipy warnings.
-	warnings.filterwarnings('ignore', category=RuntimeWarning)
+	# warnings.filterwarnings('ignore', category=RuntimeWarning)
 	df_ss = pd.read_csv(ssdir)
 	min_max_scaler = preprocessing.MinMaxScaler()
 	df_ss[['V_A', 'V_B', 'V_C']] = min_max_scaler.fit_transform(df_ss[['V_A', 'V_B', 'V_C']])
@@ -361,7 +361,7 @@ def new(modelDir):
 	creationCode = __neoMetaModel__.new(modelDir, defaultInputs)
 	return creationCode
 
-def _simpleTest():
+def _tests():
 	# Location
 	modelLoc = pJoin(
 		__neoMetaModel__._omfDir,
@@ -382,4 +382,4 @@ def _simpleTest():
 	__neoMetaModel__.renderAndShow(modelLoc)
 
 if __name__ == "__main__":
-	_simpleTest()
+	_tests()

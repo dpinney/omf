@@ -1,6 +1,5 @@
 # A Dockerfile for running the Open Modeling Framework
 # Tested on 2018-11-08 with Docker Version 18.06.1-ce-mac73 (26764)
-# Updated 2/5/20
 FROM ubuntu:18.04
 LABEL maintainer="<david.pinney@nreca.coop>"
 RUN apt-get -y update && apt-get -y upgrade
@@ -17,5 +16,8 @@ COPY setup.py .
 RUN python install.py
 RUN pip install -r requirements.txt
 WORKDIR /home/omf/omf/scratch/GRIP
+ENV LC_ALL C.UTF-8
+ENV LANG C.UTF-8
+ENV LANGUAGE C.UTF-8
 ENTRYPOINT ["python"]
 CMD ["-m", "grip"]

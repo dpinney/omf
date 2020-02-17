@@ -5,9 +5,15 @@ from functools import reduce
 from matplotlib import pyplot as plt
 
 # Wireframe for new feeder objects:
-newFeederWireframe = {"links":[],"hiddenLinks":[],"nodes":[],"hiddenNodes":[],
-	"layoutVars":{"theta":"0.8","gravity":"0.01","friction":"0.9","linkStrength":"5",
-	"linkDistance":"5","charge":"-5"},"attachments":{}}
+newFeederWireframe = {
+	"links":[],
+	"hiddenLinks":[],
+	"nodes":[],
+	"hiddenNodes":[],
+	"layoutVars":{"theta":"0.8","gravity":"0.01","friction":"0.9","linkStrength":"5","linkDistance":"5","charge":"-5"},
+	"tree": {},
+	"attachments":{}
+}
 
 def load(inPath, attachPaths=[]):
 	'''Load a .omd or .glm file in to an in-memory feeder object.
@@ -110,6 +116,29 @@ def getMaxKey(inTree):
 	''' Find the largest key value in the tree. We need this because de-embedding causes noncontiguous keys. '''
 	keys = [int(x) for x in inTree.keys()]
 	return max(keys)
+
+def insert(tree, gridlabdObject, index=None):
+	''' Add an object to the tree; if index=None put it on the end.
+	WARNING: the tree will be modified in-place. Consider making a copy.deepcopy of the original tree. '''
+	if index == None:
+		tree[str(getMaxKey(tree) + 1)] = gridlabdObject	
+	elif tree.get(str(index), None) is None:
+		tree[str(index)] = gridlabdObject
+	else:
+		swap = tree[str(index)]
+		tree[str(index)] = gridlabdObject
+		tree = insert(tree, swap, index + 1)
+
+def rekey(tree):
+	''' Update the keys in the tree to be continues integers (cast as strings for web-safety). '''
+	rekeyedTree = {}
+	sortedKeys = tree.keys()
+	sortedKeys = [int(x) for x in sortedKeys]
+	sortedKeys.sort()
+	sortedKeys = [str(x) for x in sortedKeys]
+	for index, key in enumerate(sortedKeys):
+		rekeyedTree[str(index)] = tree[key] 
+	return rekeyedTree
 
 def adjustTime(tree, simLength, simLengthUnits, simStartDate):
 	''' Adjust a GLM clock and recorders to start/stop/step specified. '''
@@ -368,7 +397,7 @@ def treeToDiNxGraph(inTree):
 def latLonNxGraph(inGraph, labels=False, neatoLayout=False, showPlot=False):
 	''' Draw a networkx graph representing a feeder.'''
 	# Be quiet Matplotlib.
-	warnings.filterwarnings("ignore",category=matplotlib.cbook.mplDeprecation)
+	# warnings.filterwarnings("ignore",category=matplotlib.cbook.mplDeprecation)
 	# Set up figure.
 	plt.axis('off')
 	plt.tight_layout()
@@ -387,10 +416,12 @@ def latLonNxGraph(inGraph, labels=False, neatoLayout=False, showPlot=False):
 	for e in inGraph.edges():
 		eType = inGraph.edge[e[0]][e[1]].get('type','underground_line')
 		ePhases = inGraph.edge[e[0]][e[1]].get('phases',1)
-		standArgs = {'edgelist':[e],
-					 'edge_color':_obToCol(eType),
-					 'width':2,
-					 'style':{'parentChild':'dotted','underground_line':'dashed'}.get(eType,'solid') }
+		standArgs = {
+			'edgelist':[e],
+			'edge_color':_obToCol(eType),
+			'width':2,
+			'style':{'parentChild':'dotted','underground_line':'dashed'}.get(eType,'solid')
+		}
 		if ePhases==3:
 			standArgs.update({'width':5})
 			nx.draw_networkx_edges(inGraph,pos,**standArgs)
@@ -406,16 +437,21 @@ def latLonNxGraph(inGraph, labels=False, neatoLayout=False, showPlot=False):
 		else:
 			nx.draw_networkx_edges(inGraph,pos,**standArgs)
 	# Draw nodes and optional labels.
-	nx.draw_networkx_nodes(inGraph,pos,
-						   nodelist=list(pos.keys()),
-						   node_color=[_obToCol(inGraph.node[n].get('type','underground_line')) for n in inGraph],
-						   linewidths=0,
-						   node_size=40)
+	nx.draw_networkx_nodes(
+		inGraph,
+		pos,
+		nodelist=list(pos.keys()),
+		node_color=[_obToCol(inGraph.node[n].get('type','underground_line')) for n in inGraph],
+		linewidths=0,
+	 	node_size=40
+	)
 	if labels:
-		nx.draw_networkx_labels(inGraph,pos,
-								font_color='black',
-								font_weight='bold',
-								font_size=0.25)
+		nx.draw_networkx_labels(
+			inGraph,pos,
+			font_color='black',
+			font_weight='bold',
+			font_size=0.25
+		)
 	if showPlot: plt.show()
 
 def _tokenizeGlm(inputStr, filePath=True):
@@ -540,8 +576,14 @@ def _dictToString(inDict):
 	elif 'module' in inDict:
 		return 'module ' + inDict['module'] + ' {\n' + _gatherKeyValues(inDict, 'module') + '};\n'
 	elif 'clock' in inDict:
-		# This object has known property order issues writing it out explicitly
-		clock_string = 'clock {\n' + '\ttimezone ' + inDict['timezone'] + ';\n' + '\tstarttime ' + inDict['starttime'] + ';\n' + '\tstoptime ' + inDict['stoptime'] + ';\n};\n'
+		## This object has known property order issues writing it out explicitly
+		clock_string = 'clock {\n'
+		timezone = inDict.get('timezone')
+		if timezone is not None:
+			clock_string += '\ttimezone ' + timezone + ';\n'
+		else:
+			warnings.warn('clock object did not have a timezone property', RuntimeWarning)
+		clock_string += '\tstarttime ' + inDict['starttime'] + ';\n' + '\tstoptime ' + inDict['stoptime'] + ';\n};\n'
 		return clock_string
 	elif 'object' in inDict and inDict['object'] == 'schedule':
 		return 'schedule ' + inDict['name'] + ' {\n' + inDict['cron'] + '\n};\n'
@@ -632,39 +674,6 @@ def _obToCol(obStr):
 		'parentChild':'gray',
 		'underground_line':'black'}
 	return obToColor.get(obStr,'black')
-
-def insert(tree, gridlabdObject, index=None):
-
-	treeCopy = copy.deepcopy(tree)
-
-	if index == None:
-		treeCopy[str(getMaxKey(treeCopy) + 1)] = gridlabdObject
-	
-	elif treeCopy.get(str(index),None) is None:
-		treeCopy[str(index)] = gridlabdObject
-
-	else:
-		
-		swap = treeCopy[str(index)]
-		treeCopy[str(index)] = gridlabdObject
-		treeCopy = insert(treeCopy, swap, index+1)
-
-	return treeCopy
-
-def rekey(tree):
-	
-	rekeyedTree = {}
-	sortedKeys = tree.keys()
-	sortedKeys = [int(x) for x in sortedKeys]
-	sortedKeys.sort()
-	sortedKeys = [str(x) for x in sortedKeys]
-
-	for index, key in enumerate(sortedKeys):
-		rekeyedTree[str(index)] = tree[key] 
-
-	return rekeyedTree
-
-
 
 def _tests():
 	# Parser Test

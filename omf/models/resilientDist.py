@@ -303,7 +303,7 @@ def convertToGFM(gfmInputTemplate, feederModel):
 
 def genDiagram(outputDir, feederJson, damageDict, critLoads, damagedLoads, edgeLabelsToAdd, generatorList):
 	# print damageDict
-	warnings.filterwarnings("ignore")
+	# warnings.filterwarnings("ignore")
 	# Load required data.
 	tree = feederJson.get("tree",{})
 	links = feederJson.get("links",{})
