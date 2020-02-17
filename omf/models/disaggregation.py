@@ -34,8 +34,8 @@ def work(modelDir, inputDict):
 		testPath = getPath(inputDict['testSet'])
 
 	# if nilmtk is not installed, install it
-	#if not(os.path.isdir('./solvers/nilmtk/nilmtk')):
-	#	installNilm()
+	if not(os.path.isdir('./solvers/nilmtk/nilmtk')):
+		installNilm()
 
 	# run the dissag script using python 3 because nilmtk requires it
 	#dissagScript = './solvers/nilmtk/nilmtk/dissagScript.py'
@@ -46,7 +46,7 @@ def work(modelDir, inputDict):
 	python3Script = 'python3 ' + disagg_script_path + ' ' + algorithm + ' ' + \
 		trainPath + ' ' + testPath   + ' ' + \
 		trainBuilding  + ' ' + testBuilding + ' ' +\
-		modelDir
+		modelDirz
 	process = subprocess.Popen(python3Script.split(), stdout=subprocess.PIPE)
 	process.wait()
 	output, error = process.communicate()
