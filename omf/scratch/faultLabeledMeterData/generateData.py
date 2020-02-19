@@ -15,12 +15,11 @@ CIRCUIT_PATH = omfDir + '/static/publicFeeders/Olin Barre GH.omd'
 TIMEZONE = 'PST+8PDT'
 TIME_FORMAT = '%Y-%m-%d %H:%M:%S'
 SIM_START_TIME = '2000-01-01 00:00:00 PST'
-SIM_STOP_TIME = '2000-01-02 00:00:00 PST'
+SIM_STOP_TIME = '2000-07-01 00:00:00 PST'
 CONDITION_LINE = '70924'
 CONDITION_METER = 'node62463133906T62463072031'
 CONDITION_TRANSFORMER = 'T62463072031'
-# CONDITION_TYPES = ['theft', 'None']
-CONDITION_TYPES = ['None', 'TLG', 'theft', 'equipmentMafunction']
+CONDITION_TYPES = ['None', 'theft', 'equipmentMafunction']
 # CONDITION_TYPES = [ 'None',
 # 	'SLG-A', 'SLG-B', 'SLG-C', 'DLG-AB', 'DLG-BC', 'DLG-CA', 'LL-AB',
 # 	'LL-BC', 'LL-CA', 'TLG', 'OC1-A', 'OC1-B', 'OC1-C', 'OC2-AB', 
