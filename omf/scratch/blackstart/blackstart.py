@@ -12,6 +12,7 @@ incidence = [[0,1],[1,3],[1,4],[2,3],[3,6],[3,4],[4,5],[4,6],[6,7]]
 bidir_inc = incidence + [[x[1],x[0]] for x in incidence]
 g = nx.DiGraph(bidir_inc)
 
+#initialize buses in pandapower
 bus0 = pp.create_bus(net, vn_kv=110.)
 bus1 = pp.create_bus(net, vn_kv=110.)
 bus2 = pp.create_bus(net, vn_kv=110.)
@@ -21,15 +22,16 @@ bus5 = pp.create_bus(net, vn_kv=110.)
 bus6 = pp.create_bus(net, vn_kv=110.)
 bus7 = pp.create_bus(net, vn_kv=110.)
 
-pp.create_line(net, bus0, bus1, length_km=70., std_type='149-AL1/24-ST1A 110.0')
-pp.create_line(net, bus1, bus3, length_km=70., std_type='149-AL1/24-ST1A 110.0')
-pp.create_line(net, bus1, bus4, length_km=70., std_type='149-AL1/24-ST1A 110.0')
-pp.create_line(net, bus2, bus3, length_km=70., std_type='149-AL1/24-ST1A 110.0')
-pp.create_line(net, bus3, bus6, length_km=70., std_type='149-AL1/24-ST1A 110.0')
-pp.create_line(net, bus3, bus4, length_km=70., std_type='149-AL1/24-ST1A 110.0')
-pp.create_line(net, bus4, bus5, length_km=70., std_type='149-AL1/24-ST1A 110.0')
-pp.create_line(net, bus4, bus6, length_km=70., std_type='149-AL1/24-ST1A 110.0')
-pp.create_line(net, bus6, bus7, length_km=70., std_type='149-AL1/24-ST1A 110.0')
+#initialize lines in pandapower
+pp.create_line(net, bus0, bus1, length_km=70., std_type='149-AL1/24-ST1A 110.0', max_loading_percent=50)
+pp.create_line(net, bus1, bus3, length_km=70., std_type='149-AL1/24-ST1A 110.0', max_loading_percent=75)
+pp.create_line(net, bus1, bus4, length_km=70., std_type='149-AL1/24-ST1A 110.0', max_loading_percent=100)
+pp.create_line(net, bus2, bus3, length_km=70., std_type='149-AL1/24-ST1A 110.0', max_loading_percent=100)
+pp.create_line(net, bus3, bus6, length_km=70., std_type='149-AL1/24-ST1A 110.0', max_loading_percent=20)
+pp.create_line(net, bus3, bus4, length_km=70., std_type='149-AL1/24-ST1A 110.0', max_loading_percent=60)
+pp.create_line(net, bus4, bus5, length_km=70., std_type='149-AL1/24-ST1A 110.0', max_loading_percent=70)
+pp.create_line(net, bus4, bus6, length_km=70., std_type='149-AL1/24-ST1A 110.0', max_loading_percent=50)
+pp.create_line(net, bus6, bus7, length_km=70., std_type='149-AL1/24-ST1A 110.0', max_loading_percent=30)
 
 # Add load and gen and color by capability to self-support.
 def constrained_sum_sample_pos(n, total):
@@ -43,6 +45,28 @@ def constrained_sum_sample_pos(n, total):
 nodeCount = len(g.nodes())
 load_amounts = constrained_sum_sample_pos(nodeCount, 20)
 gen_amounts = [x for x in constrained_sum_sample_pos(nodeCount, 20)]
+
+# create loads for pandapower
+pp.create_load(net, bus0, p_mw=load_amounts[0], controllable=False)
+pp.create_load(net, bus1, p_mw=load_amounts[1], controllable=False)
+pp.create_load(net, bus2, p_mw=load_amounts[2], controllable=False)
+pp.create_load(net, bus3, p_mw=load_amounts[3], controllable=False)
+pp.create_load(net, bus4, p_mw=load_amounts[4], controllable=False)
+pp.create_load(net, bus5, p_mw=load_amounts[5], controllable=False)
+pp.create_load(net, bus6, p_mw=load_amounts[6], controllable=False)
+pp.create_load(net, bus7, p_mw=load_amounts[7], controllable=False)
+
+# create generators for pandapower
+eg = pp.create_ext_grid(net, bus4, min_p_mw=-1000, max_p_mw=1000)
+g0 = pp.create_gen(net, bus0, p_mw=gen_amounts[0], min_p_mw=0, max_p_mw=gen_amounts[0],  vm_pu=1.01, controllable=True)
+g1 = pp.create_gen(net, bus1, p_mw=gen_amounts[1], min_p_mw=0, max_p_mw=gen_amounts[1],  vm_pu=1.01, controllable=True)
+g2 = pp.create_gen(net, bus2, p_mw=gen_amounts[2], min_p_mw=0, max_p_mw=gen_amounts[2],  vm_pu=1.01, controllable=True)
+g3 = pp.create_gen(net, bus3, p_mw=gen_amounts[3], min_p_mw=0, max_p_mw=gen_amounts[3],  vm_pu=1.01, controllable=True)
+g4 = pp.create_gen(net, bus4, p_mw=gen_amounts[4], min_p_mw=0, max_p_mw=gen_amounts[4],  vm_pu=1.01, controllable=True)
+g5 = pp.create_gen(net, bus5, p_mw=gen_amounts[5], min_p_mw=0, max_p_mw=gen_amounts[5],  vm_pu=1.01, controllable=True)
+g6 = pp.create_gen(net, bus6, p_mw=gen_amounts[6], min_p_mw=0, max_p_mw=gen_amounts[6],  vm_pu=1.01, controllable=True)
+g7 = pp.create_gen(net, bus7, p_mw=gen_amounts[7], min_p_mw=0, max_p_mw=gen_amounts[7],  vm_pu=1.01, controllable=True)
+
 # Put the loads and gens on the graph.
 for n_i in g.nodes():
     g.node[n_i]['load'] = load_amounts[n_i]
@@ -130,3 +154,29 @@ gpos = nx.spring_layout(G)
 nx.draw_networkx_nodes(G, gpos, node_size=700)
 nx.draw_networkx_edges(G, gpos, width=widths)
 plt.show()
+
+# specify (same) costs for the power and generators
+costeg = pp.create_poly_cost(net, 4, 'ext_grid', cp1_eur_per_mw=10)
+costgen0 = pp.create_poly_cost(net, 0, 'gen', cp1_eur_per_mw=10)
+costgen1 = pp.create_poly_cost(net, 1, 'gen', cp1_eur_per_mw=10)
+costgen2 = pp.create_poly_cost(net, 2, 'gen', cp1_eur_per_mw=10)
+costgen3 = pp.create_poly_cost(net, 3, 'gen', cp1_eur_per_mw=10)
+costgen4 = pp.create_poly_cost(net, 4, 'gen', cp1_eur_per_mw=10)
+costgen5 = pp.create_poly_cost(net, 5, 'gen', cp1_eur_per_mw=10)
+costgen6 = pp.create_poly_cost(net, 6, 'gen', cp1_eur_per_mw=10)
+costgen7 = pp.create_poly_cost(net, 7, 'gen', cp1_eur_per_mw=10)
+
+# run powerflow
+pp.runopp(net, verbose=True)
+
+# # check external grid generation
+# print(net.res_ext_grid)
+
+# # check all bus voltages and summed bus power injections
+# print(net.res_gen)
+
+# # check dispatch cost
+# print(net.res_cost)
+
+# #check line loading constraint
+# print(net.res_line.loading_percent)
