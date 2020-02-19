@@ -336,7 +336,7 @@
 					if (regNamesArray.length == 0){
 							$("#newRegulatorReport").html("<p>&#160;&#160;&#160;No Regulators were found on the feeder.</p>")
 						}
-					for (var i in regNamesArray){
+					for (var i in regNamesArray) {
 						reg = regNamesArray[i]
 						$("<div/>").appendTo("#newRegulatorReport")
 							.attr("class", "regContainer")
@@ -368,8 +368,7 @@
 							"data":eval(regNamesArray[i].concat(".RegTapC")),
 							"name":"C",
 						}
-					}
-						phaseValue= eval(reg.concat(".RegPhases"))
+						phaseValue = eval(reg.concat(".RegPhases"))
 						var localHighChart = JSON.parse(JSON.stringify(highChartsTemplate))
 						localHighChart["chart"]["renderTo"] = "regulatorSeries_" + reg
 						localHighChart["chart"]["inverted"] = false
@@ -406,8 +405,7 @@
 						{
 	  						chart.addSeries(reg1CTSeries)
 	  					}
-
-
+					}
 				</script>
 			</div>
 			<p class="reportTitle postRun">Cap Bank Activation <a target="_self" class="toggle">Hide / Show</a></p>
