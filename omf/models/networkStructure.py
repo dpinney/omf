@@ -560,7 +560,7 @@ def new(modelDir):
 		training_data = f.read()
 	defaultInputs = {
 		'modelType': modelName,
-		'feederName1': 'ieee37NodeFaultTester',
+		'feederName1': 'ieee37nodeFaultTester',
 		'useDist': 'True',
 		'useVolt': 'True',
 		'useSVM': 'True',
