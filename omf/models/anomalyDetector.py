@@ -458,12 +458,11 @@ def workSAX(modelDir, inputDict):
 
 	return plotData
 
-
 def work(modelDir, inputDict):
 	""" Model processing done here. """
 
 	outData = {}
-	outData = workProphet(modelDir, inputDict)
+	#outData = workProphet(modelDir, inputDict)
 	plotData = workLof(modelDir, inputDict)
 	outData['plotLof'] = json.dumps(plotData, cls=plotly.utils.PlotlyJSONEncoder)
 	plotData = workIso(modelDir, inputDict)
