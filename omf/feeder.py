@@ -81,7 +81,7 @@ def glmToOmd(glmPath, omdPath, attachFilePaths=[]):
 	for attPath in attachFilePaths:
 		dirs, fname = os.path.split(attPath)
 		with open(attPath) as f:
-			omf['attachments'][fname] = f.read()
+			omd['attachments'][fname] = f.read()
 	with open(omdPath, 'w') as outFile:
 		json.dump(omd, outFile, indent=4)
 
