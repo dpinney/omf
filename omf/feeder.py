@@ -2,6 +2,8 @@
 
 import datetime, copy, os, re, warnings, networkx as nx, json, matplotlib
 from functools import reduce
+import matplotlib
+matplotlib.use('Agg')
 from matplotlib import pyplot as plt
 
 # Wireframe for new feeder objects:
