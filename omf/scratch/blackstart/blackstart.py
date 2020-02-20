@@ -57,7 +57,7 @@ pp.create_load(net, bus6, p_mw=load_amounts[6], controllable=False)
 pp.create_load(net, bus7, p_mw=load_amounts[7], controllable=False)
 
 # create generators for pandapower
-eg = pp.create_ext_grid(net, bus4, min_p_mw=-1000, max_p_mw=1000)
+eg = pp.create_ext_grid(net, bus4, min_p_mw=-1000, max_p_mw=1)
 g0 = pp.create_gen(net, bus0, p_mw=gen_amounts[0], min_p_mw=0, max_p_mw=gen_amounts[0],  vm_pu=1.01, controllable=True)
 g1 = pp.create_gen(net, bus1, p_mw=gen_amounts[1], min_p_mw=0, max_p_mw=gen_amounts[1],  vm_pu=1.01, controllable=True)
 g2 = pp.create_gen(net, bus2, p_mw=gen_amounts[2], min_p_mw=0, max_p_mw=gen_amounts[2],  vm_pu=1.01, controllable=True)
