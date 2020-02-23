@@ -61,11 +61,7 @@ def pulp24hrBattery(day_load, RATING, CAPACITY, battEff):
 		model += pDemand >= day_load[i] + power[i]
 	model.solve()
 
-	return (
-		# heat([power[i].varValue for i in range(24)]),
-		[power[i].varValue for i in range(24)],
-		[energy[i].varValue for i in range(24)]
-	)
+	return ([power[i].varValue for i in range(24)], [energy[i].varValue for i in range(24)])
 
 def work(modelDir, inputDict):
 	''' Model processing done here. '''
@@ -88,28 +84,26 @@ def work(modelDir, inputDict):
 	# Note: inverterEfficiency is squared to get round trip efficiency.
 	battEff = float(inputDict.get('batteryEfficiency')) / 100.0 * (inverterEfficiency ** 2)
 
-	with open(pJoin(modelDir, 'demand.csv'), 'w') as f:
-		f.write(inputDict['demandCurve'])
-	if dispatchStrategy == 'customDispatch':
-		with open(pJoin(modelDir, 'dispatchStrategy.csv'), 'w') as f:
-			f.write(inputDict['customDispatchStrategy'])
+	demand = csvValidateAndLoad(
+		inputDict['demandCurve'], 
+		modelDir, header=None, 
+		ignore_nans=False,
+		save_file='demand.csv'
+	)[0]
 
-	dc = [] # main data table
-	try:
-		dates = [(dt(2011, 1, 1) + timedelta(hours=1)*x) for x in range(8760)]
-		with open(pJoin(modelDir, 'demand.csv'), newline='') as f:
-			reader = csv.reader(f)
-			for row, date in zip(reader, dates):
-				dc.append({	'power': float(row[0]), # row is a list of length 1
-							'month': date.month - 1,
-							'hour': date.hour })
-		assert len(dc) == 8760
-	except:
-		if str(sys.exc_info()[0]) != "<type 'exceptions.SystemExit'>":
-			raise Exception("CSV file is incorrect format. Please see valid "
-				"format definition at <a target='_blank' href = 'https://github.com/"
-				"dpinney/omf/wiki/Models-~-storagePeakShave#demand-file-csv-format'>"
-				"\nOMF Wiki storagePeakShave - Demand File CSV Format</a>")
+	dates = [(dt(2011, 1, 1) + timedelta(hours=1)*x) for x in range(8760)]
+	dc = [{'power': load, 'month': date.month -1, 'hour': date.hour} for load, date in zip(demand, dates)]
+
+	if dispatchStrategy == 'customDispatch':
+		customDispatch = csvValidateAndLoad(
+			inputDict['demandCurve'], 
+			modelDir, header=None, 
+			ignore_nans=False,
+			save_file='dispatchStrategy.csv'
+		)[0]
+		for c, d in zip(customDispatch, dc):
+			d['dispatch'] = c
+		assert all(['dispatch' in d for d in dc])  # ensure each row is filled
 
 	# list of 12 lists of monthly demands
 	demandByMonth = [[t['power'] for t in dc if t['month']==x] for x in range(12)]
@@ -150,20 +144,6 @@ def work(modelDir, inputDict):
 			SoC += charge
 			r['battSoC'] = SoC
 	elif dispatchStrategy == 'customDispatch':
-		try:
-			with open(pJoin(modelDir,'dispatchStrategy.csv'), newline='') as f:
-				reader = csv.reader(f)
-				for d, r in zip(dc, reader):
-					d['dispatch'] = int(r[0])
-				assert all(['dispatch' in r for r in dc])  # ensure each row is filled
-		except:
-			if str(sys.exc_info()[0]) != "<type 'exceptions.SystemExit'>":
-				raise Exception("Dispatch Strategy file is in an incorrect " 
-					"format. Please see valid format definition at <a target "
-					"= '_blank' href = 'https://github.com/dpinney/omf/wiki/"
-					"Models-~-storagePeakShave#custom-dispatch-strategy-file-"
-					"csv-format'>\nOMF Wiki storagePeakShave - Custom "
-					"Dispatch Strategy File Format</a>")
 		for r in dc:
 			# Discharge if there is a 1 in the dispatch strategy csv, otherwise charge the battery.
 			charge = (-1*min(battDischarge, SoC) if r['dispatch'] == 1 
@@ -176,7 +156,6 @@ def work(modelDir, inputDict):
 	netByMonth = [[t['netpower'] for t in dc if t['month']==x] for x in range(12)]
 	monthlyPeakNet = [max(net) for net in netByMonth]
 	ps = [h-s for h, s in zip(monthlyPeakDemand, monthlyPeakNet)]
-	dischargeByMonth = [[i-j for i, j in zip(k, l) if i-j < 0] for k, l in zip(netByMonth, demandByMonth)]
 
 	# Monthly Cost Comparison Table
 	out['monthlyDemand'] = [sum(lDemand)/1000 for lDemand in demandByMonth]
@@ -218,7 +197,6 @@ def work(modelDir, inputDict):
 	out['stderr'] = ''
 	# Seemingly unimportant. Ask permission to delete.
 	out['stdout'] = 'Success' 
-	out['months'] = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"]
 
 	return out
 
@@ -239,26 +217,18 @@ def forecastWork(modelDir, ind):
 
 	o = {}
 
-	try:
-		with open(pJoin(modelDir, 'hist.csv'), 'w') as f:
-			f.write(ind['histCurve'].replace('\r', ''))
-		df = pd.read_csv(pJoin(modelDir, 'hist.csv'))
-		assert df.shape[0] >= 26280 # must be longer than 3 years
-		if df.shape[1] == 6:
-			df['dates'] = df.apply(
-				lambda x: dt(
-					int(x['year']), 
-					int(x['month']), 
-					int(x['day']), 
-					int(x['hour'])), 
-				axis=1
-			)
-		else:
-			df = pd.read_csv(pJoin(modelDir, 'hist.csv'), parse_dates=['dates'])
-			df['month'] = df.dates.dt.month
-		df['dayOfYear'] = df['dates'].dt.dayofyear
-	except:
-		raise Exception("CSV file is incorrect format.")
+	df = csvValidateAndLoad(
+		ind['histCurve'], modelDir, 
+		header=None, nrows=None, ncols=None, 
+		return_type='df', save_file='hist.csv'
+	)
+	assert df.shape[0] >= 26280 # must be longer than 3 years
+	if df.shape[1] == 6:
+		df['dates'] = df.apply(lambda x: dt(int(x['year']), int(x['month']), int(x['day']), int(x['hour'])), axis=1)
+	else:
+		df = pd.read_csv(pJoin(modelDir, 'hist.csv'), parse_dates=['dates'])
+		df['month'] = df.dates.dt.month
+	df['dayOfYear'] = df['dates'].dt.dayofyear
 
 	# ---------------------- MAKE PREDICTIONS ------------------------------- #
 	# train model on previous data
