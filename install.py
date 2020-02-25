@@ -1,6 +1,7 @@
 import platform, os, sys
 
 def pipInstallInOrder(pipCommandString):
+	''' This shouldn't be required, but pip doesn't resolve dependencies correctly unless we do this.'''
 	with open("requirements.txt","r") as f:
 		for line in f:
 			os.system(pipCommandString + " install " + line)
@@ -41,14 +42,15 @@ elif platform.system() == "Linux" and platform.linux_distribution()[0]=="CentOS 
 	pipInstallInOrder("pip3")
 	os.system("pip3 install --ignore-installed six")
 	os.system("python3 setup.py develop")
-# TODO: Modify Windows installation to support Python 3.7 or up
 elif platform.system()=='Windows':
 	# Choco install.
 	# chocoString = @"%SystemRoot%\System32\WindowsPowerShell\v1.0\powershell.exe" -NoProfile -InputFormat None -ExecutionPolicy Bypass -Command "iex ((New-Object System.Net.WebClient).DownloadString('https://chocolatey.org/install.ps1'))" && SET "PATH=%PATH%;%ALLUSERSPROFILE%\chocolatey\bin"
 	# os.system(chocoString)
 	# Check for right Python version.
-	version = sys.version.split("\n")[0] 
-	if not version.startswith("3.6"):
+	pybin = os.popen('where python').read()
+	goodbin = 'C:\\Python36\\python.exe'
+	if pybin != goodbin:
+		print('Non-standard python install detected. We will attempt to continue with choco.')
 		os.system("choco install -y python --version 3.6.8")
 	# Hack to create a python3 binary on the path.
 	os.system("copy C:\\Python36\\python.exe C:\\Python36\\python3.exe")

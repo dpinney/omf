@@ -31,41 +31,6 @@ def highest_peak_this_month(df, predicted_day):
 	return_v = df[(df['year'] == y) & (df['month'] == m) & (df['day'] != d)]['load'].max()
 	return 0 if np.isnan(return_v) else return_v
 
-def autofill(df):
-	def estimate(df, last_dt, hour, item):
-		prev_d = last_dt - timedelta(days=1)
-		prev_w = last_dt - timedelta(days=7)
-
-		df_pd = df[df.dates.dt.date == prev_d.date()]
-		df_pw = df[df.dates.dt.date == prev_w.date()]
-
-		est_pd = float(df_pd[df_pd['hour'] == hour][item])
-		est_pw = float(df_pw[df_pw['hour'] == hour][item])
-
-		return (est_pd + est_pw)/2
-
-	
-	last_dt = df.dates.max()
-	if last_dt.hour != 23:
-		ds_to_add = []
-		for hour in range(last_dt.hour+1, 24):
-			load = estimate(df, last_dt, hour, 'load')
-			weather = estimate(df, last_dt, hour, 'tempc')
-			d = {
-				'load': load, 
-				'tempc': weather, 
-				'year': last_dt.year,
-				'day': last_dt.day, 
-				'hour': hour, 
-				'month': last_dt.month, 
-				'dates': dt(last_dt.year, last_dt.month, last_dt.day, hour)
-			}
-			ds_to_add.append(d)
-
-		return df.append(ds_to_add, ignore_index=True)
-	else:
-		return df
-
 def work(modelDir, ind):
 	''' Model processing done here. '''
 	epochs = int(ind['epochs'])
@@ -98,7 +63,7 @@ def work(modelDir, ind):
 	# ---------------------- MAKE PREDICTIONS ------------------------------- #
 
 	df = df.sort_values('dates')
-	df = autofill(df)
+	# df = autofill(df)
 	d = dict(df.groupby(df.dates.dt.date)['dates'].count())
 	df = df[df['dates'].dt.date.apply(lambda x: d[x] == 24)] # find all non-24
 
@@ -271,9 +236,6 @@ def new(modelDir):
 		'modelType': modelName,
 		'runTime': '0:01:03',
 		'epochs': '20',
-		# 'autoFill': "off",
-		# 'histFileName': 'd_Texas_17yr_TempAndLoad_Dec.csv',
-		# "histCurve": open(pJoin(__neoMetaModel__._omfDir,"static","testFiles","d_Texas_17yr_TempAndLoad_Dec.csv"), 'rU').read(),
 		'tempFileName': '72hr_TexasTemp.csv',
 		'tempCurve': temp_curve,
 		# autofill
