@@ -1,24 +1,14 @@
 """
-Created on Nov 19, 2013
-
-@author: fish334
-
-PREREQS!!!!!! sudo apt-get install mdbtools libmdbodbc1
-
 This script converts a CYME feeder model database to an OMF feeder tree dictionary object. The out put is similar to that produced by milToGridlab.py
 
 An example of how to call the script is shown below:
-	import convert_cyme_model
-	feederTree = convert_cyme_model.convertCymeModel(db_network, db_equipment, id_feeder, conductors)
+	from omf.cymeToGridlab import convertCymeModel
+	feederTree = convertCymeModel(network_db, modelDir)
 
 where:
 
-db_network is the full path to the CYME network .mdb database file.
-db_equipment is the full path to the CYME equipment .mdb database file.
-id_feeder is a string of the NetworkId associated with the particular feeder.
-conductors is the full path to a .csv file containing conductor information for underground concentric neutral and tape shield cables used in the CYME model.
-
-Note that db_network and db_equipment can be the same file is both network and equipment databases were exported to one .mdb file from CYME.
+network_db is the full path to the CYME network and equipment .mdb database file.
+modelDir is the working directory for intermediate file output
 """
 
 
