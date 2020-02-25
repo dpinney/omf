@@ -239,7 +239,7 @@ def new(modelDir):
 		'tempFileName': '72hr_TexasTemp.csv',
 		'tempCurve': temp_curve,
 		# autofill
-		'histFileName': 'Texas_1pm.csv',
+		'histFileName': 'Texas_tiny.csv',
 		"histCurve": hist_curve,
 		# upload models
 		'newModel': 'False',
