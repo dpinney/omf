@@ -295,10 +295,15 @@ def csvValidateAndLoad(file_input, modelDir, header=0, nrows=8760, ncols=1, dtyp
 		f.write(file_input)
 	df = pd.read_csv(temp_path, header=header)
 	
-	# confirm nrows & ncols
-	safe_assert( (df.shape[0] == nrows) and (df.shape[1] == ncols), (
-		f'Incorrect CSV size. Required: {ncols} columns, {nrows} rows. Given: {df.shape[1]} columns, {df.shape[0]} rows.'
-	), ignore_errors)
+	if nrows != None:
+		safe_assert( df.shape[0] == nrows, (
+			f'Incorrect CSV size. Required: {nrows} rows. Given: {df.shape[0]} rows.'
+		), ignore_errors)
+
+	if ncols != None:
+		safe_assert( df.shape[1] == ncols, (
+			f'Incorrect CSV size. Required: {ncols} columns. Given: {df.shape[1]} columns.'
+		), ignore_errors)
 	
 	# NaNs
 	if not ignore_nans:
