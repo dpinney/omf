@@ -10,21 +10,12 @@ from omf.solvers import gridlabd
 # user inputs ----------------------------------------------------------------------
 
 WORKING_DIR = omfDir + '/scratch/faultLabeledMeterData'
-CIRCUIT_PATH = omfDir + '/static/publicFeeders/Olin Barre GH.omd'
+
 
 TIMEZONE = 'PST+8PDT'
 TIME_FORMAT = '%Y-%m-%d %H:%M:%S'
 SIM_START_TIME = '2000-01-01 00:00:00 PST'
-SIM_STOP_TIME = '2000-01-02 00:00:00 PST'
-CONDITION_LINE = '70924'
-CONDITION_METER = 'node62463133906T62463072031'
-CONDITION_TRANSFORMER = 'T62463072031'
-# CONDITION_TYPES = ['theft', 'None']
-CONDITION_TYPES = ['None', 'TLG', 'theft', 'equipmentMafunction']
-# CONDITION_TYPES = [ 'None',
-# 	'SLG-A', 'SLG-B', 'SLG-C', 'DLG-AB', 'DLG-BC', 'DLG-CA', 'LL-AB',
-# 	'LL-BC', 'LL-CA', 'TLG', 'OC1-A', 'OC1-B', 'OC1-C', 'OC2-AB', 
-# 	'OC2-BC', 'OC2-CA', 'OC3', 'theft', 'equipmentMafunction']
+SIM_STOP_TIME = '2000-01-01 10:00:00 PST'
 
 THEFT_LINE_LENGTH = 100
 THEFT_ON_TIME = 12*3600
@@ -33,8 +24,28 @@ THEFT_POWER = 8000
 THEFT_POWER_STDDEV = 10
 MALFUNCTION_POWER = 4000
 
-METER_FILENAME = 'meter.csv'
-OUTPUT_FILENAME = 'data.csv'
+SHORTED_TRANSFORMER_PERCENTAGE = 0.9
+
+CIRCUIT_PATHS = ['/static/publicFeeders/DEC Red Base.omd', 
+	'/static/publicFeeders/ABEC Columbia.omd', 
+	'/static/publicFeeders/Olin Barre GH.omd'
+]
+
+CONDITION_METERS = ['tn_B_645', 'nodeS1808-31-0011808-31-003_A', 
+	'node62463133906T62463072031'
+]
+
+CONDITION_LINES = ['632-645', '825275', '70924']
+CONDITION_TRANSFORMERS = ['CTTF_B_645', '1808-31-003_A', 'T62463072031']
+METER_FILENAMES = ['meterDEC.csv', 'meterABEC.csv', 'meterOlin.csv']
+OUTPUT_FILENAMES = ['dataDEC.csv', 'dataABEC.csv', 'dataOlin.csv']
+
+CONDITION_TYPES = ['None']#, ''transformerShort', theft', 'equipmentMafunction']
+# CONDITION_TYPES = [ 'None', 'theft', 'equipmentMafunction', 'transformerShort'
+# 	'SLG-A', 'SLG-B', 'SLG-C', 'DLG-AB', 'DLG-BC', 'DLG-CA', 'LL-AB',
+# 	'LL-BC', 'LL-CA', 'TLG', 'OC1-A', 'OC1-B', 'OC1-C', 'OC2-AB', 
+# 	'OC2-BC', 'OC2-CA', 'OC3']
+
 METRICS_OF_INTEREST = 'measured_voltage_1.real, ' + \
 'measured_voltage_2.real, ' + \
 'measured_voltage_N.real, ' + \
@@ -55,6 +66,33 @@ def generateTreeWithCondition(tree, condition):
 
 	if condition == 'None':
 		pass
+
+	elif condition == 'transformerShort':
+
+		for key in treeCopy:
+			objectName = treeCopy[key].get('name','')
+			if objectName == CONDITION_TRANSFORMER:
+				config = treeCopy[key]['configuration']
+				treeCopy[key]['configuration'] = 'shortedTransformer' 
+				break;
+
+		for key in treeCopy:
+			objectName = treeCopy[key].get('name','')
+			if objectName == config:
+				shortedTransformer = copy.deepcopy(treeCopy[key])
+				secondaryVoltage = shortedTransformer.get('secondary_voltage')
+				if secondaryVoltage is not None:
+					secondaryVoltage = float(secondaryVoltage)
+					break;
+
+		if secondaryVoltage is None:
+			raise Exception('Secondary voltage not specified for transformer')
+
+		shortedTransformer['name'] = 'shortedTransformer' 
+		shortedTransformer['secondary_voltage'] = SHORTED_TRANSFORMER_PERCENTAGE \
+		 * secondaryVoltage
+		treeCopy[feeder.getMaxKey(treeCopy) + 1] = shortedTransformer
+
 	
 	elif condition == 'theft':
 		
@@ -115,22 +153,6 @@ def generateTreeWithCondition(tree, condition):
 			'phases': phases,
 			'nominal_voltage': voltage }
 
-		# treeCopy[feeder.getMaxKey(treeCopy) + 1] = {
-		# 	'object': 'link',
-		# 	'name': 'theftLocToMeter',
-		# 	'phases': phases,
-		# 	'from': 'theftLoc',
-		# 	'to': CONDITION_METER }
-
-		# treeCopy[feeder.getMaxKey(treeCopy) + 1] = {
-		# 	'object': 'overhead_line',
-		# 	'name': 'theftLocToMeter',
-		# 	'phases': phases,
-		# 	'from': 'theftLoc',
-		# 	'to': CONDITION_METER,
-		# 	'length': THEFT_LINE_LENGTH,
-		# 	'configuration': configuration }
-
 		treeCopy[feeder.getMaxKey(treeCopy) + 1] = {
 			'object': 'triplex_line_conductor',
 			'name': 'triplexLineConductor',
@@ -154,28 +176,6 @@ def generateTreeWithCondition(tree, condition):
 			'to': CONDITION_METER,
 			'length': THEFT_LINE_LENGTH,
 			'configuration': 'triplexLineonfiguration' }
-
-		# seenTransformer, seenLoad = False, False
-		# for key in treeCopy:
-
-		# 	objectName = treeCopy[key].get('name','')
-		# 	objectType = treeCopy[key].get('object','')
-		# 	if objectName == CONDITION_TRANSFORMER:
-		# 		transformerFrom = treeCopy[key]['from']
-		# 		seenTransformer = True
-		# 	elif objectType == 'ZIPload':
-		# 		load = copy.deepcopy(treeCopy[key])
-		# 		seenLoad = True
-
-		# 	if seenTransformer and seenLoad:
-		# 		break
-
-		# for key in treeCopy:
-		# 	objectName = treeCopy[key].get('name','')
-		# 	if objectName == transformerFrom:
-		# 		phases = treeCopy[key]['phases']
-		# 		voltage = treeCopy[key]['nominal_voltage']
-		# 		break
 
 		treeCopy[feeder.getMaxKey(treeCopy) + 1] = {
 			'class': 'player',
@@ -281,104 +281,113 @@ def generateTreeWithCondition(tree, condition):
 
 	return treeCopy
 
-
 # load circuit ---------------------------------------------------------------------
 
-# if circuit is defined in a glm file 
-if CIRCUIT_PATH.endswith('.glm'):
-	tree = feeder.parse(CIRCUIT_PATH)
-	attachments = []
+for circuitNum in [1]:
 
-# if circuit is defined in a omd file
-elif CIRCUIT_PATH.endswith('.omd'):
-	omd = json.load(open(CIRCUIT_PATH))
-	tree = omd.get('tree', {})
-	attachments = omd.get('attachments',[])
+	CIRCUIT_PATH = omfDir + CIRCUIT_PATHS[circuitNum]
+	CONDITION_METER = CONDITION_METERS[circuitNum]
+	CONDITION_LINE = CONDITION_LINES[circuitNum]
+	CONDITION_TRANSFORMER = CONDITION_TRANSFORMERS[circuitNum]
+	METER_FILENAME = METER_FILENAMES[circuitNum]
+	OUTPUT_FILENAME = OUTPUT_FILENAMES[circuitNum]
 
-else: # incorrect file type
-	raise Exception('Invalid input file type. We require a .glm or .omd.')
+	# if circuit is defined in a glm file 
+	if CIRCUIT_PATH.endswith('.glm'):
+		tree = feeder.parse(CIRCUIT_PATH)
+		attachments = []
 
-# modify circuit to enable data recording ------------------------------------------
+	# if circuit is defined in a omd file
+	elif CIRCUIT_PATH.endswith('.omd'):
+		omd = json.load(open(CIRCUIT_PATH))
+		tree = omd.get('tree', {})
+		attachments = omd.get('attachments',[])
 
-# assume circuit doesnt have a clock for keeping time or a tape module for recording
-clockExists = False
-tapeModuleExists = False
+	else: # incorrect file type
+		raise Exception('Invalid input file type. We require a .glm or .omd.')
 
-# go through every entry in the circuit definition
-for key in tree.keys():
+	# modify circuit to enable data recording ------------------------------------------
 
-	# check to see if the clock actually exists and update timings if it does
-	if clockExists == False and tree[key].get('clock','') != '':
-		clockExists = True
-		tree[key]['starttime'] = '\"' + SIM_START_TIME + '\"'
-		tree[key]['stoptime'] = '\"' + SIM_STOP_TIME + '\"'
+	# assume circuit doesnt have a clock for keeping time or a tape module for recording
+	clockExists = False
+	tapeModuleExists = False
 
-	# check to see if the tape module actually exists
-	if tapeModuleExists == False and tree[key].get('argument','') == 'tape':
-		tapeModuleExists = True
+	# go through every entry in the circuit definition
+	for key in tree.keys():
 
-# if there is no clock, add it
-if clockExists == False:
+		# check to see if the clock actually exists and update timings if it does
+		if clockExists == False and tree[key].get('clock','') != '':
+			clockExists = True
+			tree[key]['starttime'] = '\"' + SIM_START_TIME + '\"'
+			tree[key]['stoptime'] = '\"' + SIM_STOP_TIME + '\"'
+
+		# check to see if the tape module actually exists
+		if tapeModuleExists == False and tree[key].get('argument','') == 'tape':
+			tapeModuleExists = True
+
+	# if there is no clock, add it
+	if clockExists == False:
+		tree[feeder.getMaxKey(tree) + 1] = {
+			'clock': 'clock',
+			'timezone': TIMEZONE, 
+			'starttime': '\"' + SIM_START_TIME + '\"', 
+			'stoptime': '\"' + SIM_STOP_TIME + '\"',
+		}
+
+	# if there is no tape module, add it
+	if tapeModuleExists == False:
+		tree[feeder.getMaxKey(tree) + 1] = {'module': 'tape'}
+
+	# add recorder object
 	tree[feeder.getMaxKey(tree) + 1] = {
-		'clock': 'clock',
-		'timezone': TIMEZONE, 
-		'starttime': '\"' + SIM_START_TIME + '\"', 
-		'stoptime': '\"' + SIM_STOP_TIME + '\"',
+		'object': 'recorder', 
+		'name': 'meterRecorder',
+		'parent': '\"' + CONDITION_METER + '\"',
+		'property': METRICS_OF_INTEREST,
+		'file': METER_FILENAME,
+		'interval': RECORDER_INTERVAL_SECS,
+		'limit': RECORDER_LIMIT
 	}
 
-# if there is no tape module, add it
-if tapeModuleExists == False:
-	tree[feeder.getMaxKey(tree) + 1] = {'module': 'tape'}
+	# Run Gridlab simutlations and generate data ---------------------------------------
 
-# add recorder object
-tree[feeder.getMaxKey(tree) + 1] = {
-	'object': 'recorder', 
-	'name': 'meterRecorder',
-	'parent': '\"' + CONDITION_METER + '\"',
-	'property': METRICS_OF_INTEREST,
-	'file': METER_FILENAME,
-	'interval': RECORDER_INTERVAL_SECS,
-	'limit': RECORDER_LIMIT
-}
+	print(OUTPUT_FILENAME)
+	with open( OUTPUT_FILENAME, 'w' ) as outputFile:
+		writer = csv.writer(outputFile, delimiter=',')
 
-# Run Gridlab simutlations and generate data ---------------------------------------
+		headerCreated = False
+		for condition in CONDITION_TYPES:
 
-with open( OUTPUT_FILENAME, 'w' ) as outputFile:
-	writer = csv.writer(outputFile, delimiter=',')
+			treeCopy = generateTreeWithCondition( tree, condition )
 
-	headerCreated = False
-	for condition in CONDITION_TYPES:
+			start = time.time()
+			gridlabOut = gridlabd.runInFilesystem( treeCopy, 
+				attachments=attachments, workDir=WORKING_DIR )
+			end = time.time()
+			print((end - start)/60.0)
 
-		treeCopy = generateTreeWithCondition( tree, condition )
+			with open( METER_FILENAME,'r' ) as meterFile:
+				reader = csv.reader(meterFile, delimiter=',')
 
-		start = time.time()
-		gridlabOut = gridlabd.runInFilesystem( treeCopy, 
-			attachments=attachments, workDir=WORKING_DIR )
-		end = time.time()
-		print((end - start)/60.0)
+				#loop past header
+				for row in reader:
+					if '# timestamp' in row:
+						if headerCreated == False:
+							# create header
+							toWrite = ['meterID', 'timestamp']
+							toWrite += row[1:]
+							toWrite.append('condition')
+							writer.writerow(toWrite)
+							headerCreated = True
+						break
 
-		with open( METER_FILENAME,'r' ) as meterFile:
-			reader = csv.reader(meterFile, delimiter=',')
+				# read acctual data
+				for row in reader:
 
-			#loop past header
-			for row in reader:
-				if '# timestamp' in row:
-					if headerCreated == False:
-						# create header
-						toWrite = ['meterID', 'timestamp']
-						toWrite += row[1:]
-						toWrite.append('condition')
-						writer.writerow(toWrite)
-						headerCreated = True
-					break
-
-			# read acctual data
-			for row in reader:
-
-				toWrite = [CONDITION_METER]
-				toWrite += row
-				toWrite.append(condition)
-				writer.writerow(toWrite)
+					toWrite = [CONDITION_METER]
+					toWrite += row
+					toWrite.append(condition)
+					writer.writerow(toWrite)
 
 # ----------------------------------------------------------------------------------
 print('DONE')

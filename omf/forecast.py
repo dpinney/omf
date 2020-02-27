@@ -572,7 +572,7 @@ def makeUsefulDf(df, noise=2.5, hours_prior=24, structure=None):
 	r_df["temp_n"] = zscore(temp_noise)
 	r_df['temp_n^2'] = zscore([x*x for x in temp_noise])
 
-	return r_df, df['load'] if structure != '3D' else _data_transform_3d(r_df, var='x'), _data_transform_3d(df['load'], var='y')
+	return (r_df, df['load']) if structure != '3D' else (_data_transform_3d(r_df, var='x'), _data_transform_3d(df['load'], var='y'))
 
 def MAPE(predictions, answers):
 	assert len(predictions) == len(answers)
@@ -606,7 +606,7 @@ def train_neural_net(X_train, y_train, epochs, HOURS_AHEAD=24, structure=None):
 	nadam = tf.keras.optimizers.Nadam(learning_rate=0.002, beta_1=0.9, beta_2=0.999)
 	model.compile(optimizer=nadam, loss='mape')
 
-	x, y = np.asarray(X_train.values.tolist()), np.asarray(y_train.tolist()) if structure != '3D' else X_train, y_train
+	x, y = (np.asarray(X_train.values.tolist()), np.asarray(y_train.tolist())) if structure != '3D' else (X_train, y_train)
 	model.fit(x, y, epochs=epochs, verbose=0)
 	
 	return model
@@ -617,8 +617,8 @@ def neural_net_predictions(all_X, all_y, epochs=20, model=None, save_file=None):
 	if model == None:
 		model = train_neural_net(X_train, y_train, epochs)
 	
-	predictions = [float(f) for f in model.predict(np.asarray(all_X[-8760:].values.tolist()))]
-	train = [float(f) for f in model.predict(np.asarray(all_X[:-8760].values.tolist()))]
+	predictions = [float(f) for f in model.predict(np.asarray(all_X[-8760:].values.tolist()), verbose=0)]
+	train = [float(f) for f in model.predict(np.asarray(all_X[:-8760].values.tolist()), verbose=0)]
 	accuracy = {
 		'test': MAPE(predictions, all_y[-8760:]),
 		'train': MAPE(train, all_y[:-8760])
@@ -627,7 +627,7 @@ def neural_net_predictions(all_X, all_y, epochs=20, model=None, save_file=None):
 	if save_file != None:
 		model.save(save_file)
 
-	return [float(f) for f in model.predict(np.asarray(all_X[-8760:].values.tolist()))], accuracy
+	return [float(f) for f in model.predict(np.asarray(all_X[-8760:].values.tolist()), verbose=0)], accuracy
 
 def neural_net_next_day(all_X, all_y, epochs=20, hours_prior=24, save_file=None, model=None, structure=None):
 	all_X_n, all_y_n = all_X[:-hours_prior], all_y[:-hours_prior]
@@ -640,19 +640,19 @@ def neural_net_next_day(all_X, all_y, epochs=20, hours_prior=24, save_file=None,
 		model = train_neural_net(X_train, y_train, epochs, structure=structure)
 
 	if structure != '3D':
-		predictions_test = [float(f) for f in model.predict(np.asarray(X_test.values.tolist()))]
-		train = [float(f) for f in model.predict(np.asarray(X_train.values.tolist()))]	
+		predictions_test = [float(f) for f in model.predict(np.asarray(X_test.values.tolist()), verbose=0)]
+		train = [float(f) for f in model.predict(np.asarray(X_train.values.tolist()), verbose=0)]	
 		accuracy = {
 			'test': MAPE(predictions_test, y_test),
 			'train': MAPE(train, y_train)
 		}
-		predictions = [float(f) for f in model.predict(np.asarray(all_X[-24:].values.tolist()))]
+		predictions = [float(f) for f in model.predict(np.asarray(all_X[-24:].values.tolist()), verbose=0)]
 	else:
 		accuracy = {
 			'test': model.evaluate(X_test, y_test),
 			'train': model.evaluate(X_train, y_train)
 		}
-		predictions = [float(f) for f in model.predict(np.array([all_X[-1]]))[0]]
+		predictions = [float(f) for f in model.predict(np.array([all_X[-1]]), verbose=0)[0]]
 
 	if save_file != None:
 		model.save(save_file)

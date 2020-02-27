@@ -7,9 +7,9 @@ import matplotlib
 
 # Hack: Agg backend doesn't work for interactivity. Switch to something we can use:
 if platform.system() == 'Darwin':
-	matplotlib.use('TkAgg')
+	# matplotlib.use('TkAgg')
 	import matplotlib.pyplot as plt
-	#plt.switch_backend('MacOSX')
+	plt.switch_backend('TkAgg')
 else:
 	from matplotlib import pyplot as plt
 	plt.switch_backend('Agg')

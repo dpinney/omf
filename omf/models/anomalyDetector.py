@@ -458,7 +458,6 @@ def workSAX(modelDir, inputDict):
 
 	return plotData
 
-
 def work(modelDir, inputDict):
 	""" Model processing done here. """
 

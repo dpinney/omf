@@ -475,11 +475,12 @@ def new(modelDir):
 	''' Create a new instance of this model. Returns true on success, false on failure. '''
 	defaultInputs = {
 		"simStartDate": "2019-07-01T00:00:00Z",
-		"simLengthUnits": "seconds",
-		"feederName1": "ieee37fixed",
+		"simLengthUnits": "hours",
+		# "feederName1": "ieee37fixed",
+		"feederName1": "Olin Barre GH EOL Solar AVolts CapReg",
 		"modelType": modelName,
 		"zipCode": "59001",
-		"simLength": "600"
+		"simLength": "72"
 	}
 	creationCode = __neoMetaModel__.new(modelDir, defaultInputs)
 	try:

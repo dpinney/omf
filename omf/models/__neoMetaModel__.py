@@ -125,7 +125,6 @@ def renderTemplate(modelDir, absolutePaths=False, datastoreNames={}):
 		try:
 			#Needed? Should this be handled a different way? Add hashes to the output if they are not yet present
 			if ('pythonHash' not in outJson) or ('htmlHash' not in outJson):
-				print('new model')
 				outJson['htmlHash'] = currentHtmlHash
 				outJson['pythonHash'] = currentPythonHash
 				outJson['oldVersion'] = False
@@ -159,7 +158,7 @@ def renderAndShow(modelDir, datastoreNames={}):
 
 def renderTemplateToFile(modelDir, datastoreNames={}):
 	''' Render and open a template (blank or with output) in a local browser. '''
-	with tempfile.NamedTemporaryFile('w', suffix=".html", delete=False) as baseTemplate:
+	with tempfile.NamedTemporaryFile('w+', suffix=".html", delete=False) as baseTemplate:
 		baseTemplate.write(renderTemplate(modelDir, absolutePaths=False))
 		baseTemplate.flush()
 		baseTemplate.seek(0)
@@ -296,10 +295,15 @@ def csvValidateAndLoad(file_input, modelDir, header=0, nrows=8760, ncols=1, dtyp
 		f.write(file_input)
 	df = pd.read_csv(temp_path, header=header)
 	
-	# confirm nrows & ncols
-	safe_assert( (df.shape[0] == nrows) and (df.shape[1] == ncols), (
-		f'Incorrect CSV size. Required: {ncols} columns, {nrows} rows. Given: {df.shape[1]} columns, {df.shape[0]} rows.'
-	), ignore_errors)
+	if nrows != None:
+		safe_assert( df.shape[0] == nrows, (
+			f'Incorrect CSV size. Required: {nrows} rows. Given: {df.shape[0]} rows.'
+		), ignore_errors)
+
+	if ncols != None:
+		safe_assert( df.shape[1] == ncols, (
+			f'Incorrect CSV size. Required: {ncols} columns. Given: {df.shape[1]} columns.'
+		), ignore_errors)
 	
 	# NaNs
 	if not ignore_nans:

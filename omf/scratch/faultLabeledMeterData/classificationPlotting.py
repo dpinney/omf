@@ -16,12 +16,13 @@ from sklearn.discriminant_analysis import QuadraticDiscriminantAnalysis
 from sklearn.metrics import confusion_matrix
 
 PLOTTING_FEATURE_NUM_1 = 0
-PLOTTING_FEATURE_NUM_2 = 7
+PLOTTING_FEATURE_NUM_2 = 1
+VISUALIZE_DATA_ONLY = False
+TRAIN_FRACTION = 0.9
+INPUT_FILE = 'dataABEC-1mo.csv'
 
-def plot_confusion_matrix(cm, classes,
-                          normalize=False,
-                          title='Confusion matrix',
-                          cmap=plt.cm.Blues):
+def plot_confusion_matrix(cm, classes, normalize=False, title='Confusion matrix', 
+    cmap=plt.cm.Blues):
     """
     This function prints and plots the confusion matrix.
     Normalization can be applied by setting `normalize=True`.
@@ -47,29 +48,12 @@ def plot_confusion_matrix(cm, classes,
     plt.ylabel('True label')
     plt.xlabel('Predicted label')
 
-
-names = ["Nearest Neighbors", "Linear SVM", "RBF SVM", "Gaussian Process",
-         "Decision Tree", "Random Forest", "Neural Net", "AdaBoost",
-         "Naive Bayes", "QDA"]
-
-classifiers = [
-    KNeighborsClassifier(3),
-    SVC(kernel="linear", C=0.025),
-    SVC(gamma=2, C=1),
-    GaussianProcessClassifier(1.0 * RBF(1.0)),
-    DecisionTreeClassifier(max_depth=5),
-    RandomForestClassifier(max_depth=5, n_estimators=10, max_features=1),
-    MLPClassifier(alpha=1, max_iter=1000),
-    AdaBoostClassifier(),
-    GaussianNB(),
-    QuadraticDiscriminantAnalysis()]
-
-# preprocess dataset, split into training and test part
+# load data
 x, y, header, colorList, uniqueLabels = [], [], [], [], []
 colorNum = -1
 lastLabel = ''
 
-with open( 'data.csv','r' ) as dataFile:
+with open( INPUT_FILE,'r' ) as dataFile:
     reader = csv.reader(dataFile, delimiter=',')
     
     for row in reader:
@@ -105,31 +89,72 @@ with open( 'data.csv','r' ) as dataFile:
             count += 1
             lastLabel = label
 
-print('labels for confMats', uniqueLabels)
-
-# plot data
 newX = np.array(x)
+x = np.array(x)
+y = np.array(y)
+ordering = np.argsort(x[:,0])
 
-# raise Exception('STOP')
+x = x[ordering]
+y = y[ordering]
 
-# normalize data and split into train/test
-x = StandardScaler().fit_transform(x)
-xTrain, xTest, yTrain, yTest = \
-    train_test_split(x, y, test_size=.4, random_state=42)
+numPoints = x.shape[0]
+print(numPoints)
+split = int(TRAIN_FRACTION * numPoints)
 
-# iterate over classifiers
-for name, clf in zip(names, classifiers):
+
+if VISUALIZE_DATA_ONLY: 
+    pass;
+
+else: # classify
+
+    names = ["Nearest Neighbors", "Linear SVM", "RBF SVM",
+             "Decision Tree", "Random Forest", "Neural Net", "AdaBoost",
+             "Naive Bayes"]
+
+    classifiers = [
+        KNeighborsClassifier(3),
+        SVC(kernel="linear", C=0.025),
+        SVC(gamma=2, C=1),
+        DecisionTreeClassifier(max_depth=5),
+        RandomForestClassifier(max_depth=5, n_estimators=10, max_features=1),
+        MLPClassifier(alpha=1, max_iter=1000),
+        AdaBoostClassifier(),
+        GaussianNB()
+    ]
+
+    # normalize data and split into train/test
+    x = StandardScaler().fit_transform(x)
     
-    clf.fit(xTrain, yTrain)
-    yPredicted = clf.predict(xTest)
+    # xTrain, xTest, yTrain, yTest = \
+    #     train_test_split(x, y, test_size=0.4, random_state=42)
+    xTrain, xTest, yTrain, yTest = x[:split,:], x[split:,:], y[:split], y[split:]
+    print(xTrain.shape)
+    print(yTrain.shape)
+    print(xTest.shape)
+    print(yTest.shape)
 
-    confMat = confusion_matrix(yTest, yPredicted, labels=uniqueLabels)
-    score = clf.score(xTest, yTest)
+
+    # iterate over classifiers
+    for name, clf in zip(names, classifiers):
+        
+        start = time.time()
+        clf.fit(xTrain, yTrain)
+        endTrain = time.time()
+        yPredicted = clf.predict(xTest)
+        endTest = time.time()
+        totalTrain = endTrain-start
+        totalTest = endTest-endTrain
+        print('Train: {} seconds, Predict: {} seconds'.format(totalTrain, totalTest))        
+        
+        confMat = confusion_matrix(yTest, yPredicted, labels=uniqueLabels)
+        score = clf.score(xTest, yTest)
+        
+        plt.figure()
+        plot_confusion_matrix(confMat, uniqueLabels, normalize=True, title=name)
+        print(name,score)
+        print('')
     
-    plt.figure()
-    plot_confusion_matrix(confMat, uniqueLabels, normalize=True, title=name)
-    print(name,score)
-
+# plot data
 header = ['timepoint'] + header[2:-1]
 plt.figure()
 plt.scatter(newX[:,PLOTTING_FEATURE_NUM_1], newX[:,PLOTTING_FEATURE_NUM_2], c=colorList)
