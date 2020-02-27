@@ -1,5 +1,6 @@
 ''' Functions for manipulting electrical distribution feeder models. '''
 
+
 import datetime, copy, os, re, warnings, json, platform
 from functools import reduce
 import networkx as nx
@@ -7,6 +8,7 @@ import matplotlib
 if platform.system() == 'Darwin':
 	matplotlib.use('TkAgg')
 from matplotlib import pyplot as plt
+
 
 # Wireframe for new feeder objects:
 newFeederWireframe = {
@@ -38,15 +40,18 @@ def load(inPath, attachPaths=[]):
 	else:
 		raise Exception('Unsupported filetype at path ' + inPath)
 
+
 def save(inOmd, outPath):
 	'''Save an in-memory OMD to a file, nicely formatted.'''
 	with open(outPath, 'w') as outFile:
 		json.dump(inOmd, outFile, indent=4)
 
+
 def dump(inTree, outPath):
 	''' Just dump a .glm in a file. '''
 	with open(outPath, 'w') as outFile:
 		outFile.write(write(inTree))
+
 
 def parse(inputStr, filePath=True):
 	''' Parse a GLM into an omf.feeder tree. This is so we can walk the tree, change things in bulk, etc.
@@ -55,12 +60,14 @@ def parse(inputStr, filePath=True):
 	tokens = _tokenizeGlm(inputStr, filePath)
 	return _parseTokenList(tokens)
 
+
 def write(inTree):
 	''' Turn an omf.feeder tree object into a GLM-formatted string. '''
 	output = ''
 	for key in inTree:
 		output += _dictToString(inTree[key]) + '\n'
 	return output
+
 
 def sortedWrite(inTree):
 	''' Write out a GLM from a tree, and order all tree objects by their key. 
@@ -76,6 +83,7 @@ def sortedWrite(inTree):
 		raise Exception
 	return output
 
+
 def glmToOmd(glmPath, omdPath, attachFilePaths=[]):
 	''' Read in a glm file and take a shot at writing an omd. '''
 	tree = parse(glmPath, filePath=True)
@@ -88,6 +96,7 @@ def glmToOmd(glmPath, omdPath, attachFilePaths=[]):
 			omd['attachments'][fname] = f.read()
 	with open(omdPath, 'w') as outFile:
 		json.dump(omd, outFile, indent=4)
+
 
 def omdToGlm(omdPath, outDir):
 	''' Write an .omd to a .glm and associated files. '''
@@ -105,10 +114,12 @@ def omdToGlm(omdPath, outDir):
 	with open(os.path.join(outDir, glmName),'w') as glmFile:
 		glmFile.write(glmString)
 
+
 def chart(inTree, labels=False, neatoLayout=False, showPlot=False):
 	''' Return a matplotlib chart of a feeder.'''
 	nxG = treeToNxGraph(inTree)
 	return latLonNxGraph(nxG, labels=labels, neatoLayout=neatoLayout, showPlot=showPlot)
+
 
 def nameIndex(inTree):
 	''' Return a dictionary mapping object names to keys in the tree.
@@ -116,10 +127,12 @@ def nameIndex(inTree):
 	'''
 	return {inTree[key].get('name',''):key for key in inTree}
 
+
 def getMaxKey(inTree):
 	''' Find the largest key value in the tree. We need this because de-embedding causes noncontiguous keys. '''
 	keys = [int(x) for x in inTree.keys()]
 	return max(keys)
+
 
 def insert(tree, gridlabdObject, index=None):
 	''' Add an object to the tree; if index=None put it on the end.
@@ -133,6 +146,7 @@ def insert(tree, gridlabdObject, index=None):
 		tree[str(index)] = gridlabdObject
 		tree = insert(tree, swap, index + 1)
 
+
 def rekey(tree):
 	''' Update the keys in the tree to be continues integers (cast as strings for web-safety). '''
 	rekeyedTree = {}
@@ -143,6 +157,7 @@ def rekey(tree):
 	for index, key in enumerate(sortedKeys):
 		rekeyedTree[str(index)] = tree[key] 
 	return rekeyedTree
+
 
 def adjustTime(tree, simLength, simLengthUnits, simStartDate):
 	''' Adjust a GLM clock and recorders to start/stop/step specified. '''
@@ -181,6 +196,7 @@ def adjustTime(tree, simLength, simLengthUnits, simStartDate):
 		elif 'argument' in leaf and leaf['argument'].startswith('minimum_timestep'):
 			leaf['argument'] = 'minimum_timestep=' + str(interval)
 
+
 def fullyDeEmbed(glmTree):
 	''' Take any embedded objects in a GLM and make them top-level objects.
 
@@ -196,6 +212,7 @@ def fullyDeEmbed(glmTree):
 		currLen = len(glmTree)
 		_deEmbedOnce(glmTree)
 		lenDiff = len(glmTree) - currLen
+
 
 def _mergeContigLinesOnce(tree):
 	''' helper function for mergeContigLines.'''
@@ -226,6 +243,7 @@ def _mergeContigLinesOnce(tree):
 						except:
 							continue #key weirdness
 
+
 def mergeContigLines(tree):
 	''' merge all lines that are across nodes and have the same config
 	topline --to-> node <-from-- bottomline'''
@@ -235,6 +253,7 @@ def mergeContigLines(tree):
 		_mergeContigLinesOnce(tree)
 		removedKeys = treeKeys - len(tree.keys())
 		# print 'Objects merged: ', 2*removedKeys
+
 
 def attachRecorders(tree, recorderType, keyToJoin, valueToJoin):
 	''' Walk through a tree an and attach Gridlab recorders to the indicated type of node.'''
@@ -277,6 +296,7 @@ def attachRecorders(tree, recorderType, keyToJoin, valueToJoin):
 				tree[biggestKey] = newLeaf
 				biggestKey += 1
 
+
 def groupSwingKids(tree):
 	''' Apply group properties to all links attached to swing nodes.'''
 	staticTree = copy.copy(tree)
@@ -303,6 +323,7 @@ def groupSwingKids(tree):
 		insert['file'] = 'SwingKids_' + obType + '.csv'
 		tree[biggestKey] = insert
 		biggestKey += 1
+
 
 def removeNumberRefs(tree):
 	''' Mutate a tree to remove the number ref names like "node:13".
@@ -340,31 +361,55 @@ def removeNumberRefs(tree):
 					if val == obType and subkey != 'object':
 						tree[key][subkey] = goodName
 
+
 def treeToNxGraph(inTree):
 	''' Convert feeder tree to networkx graph. '''
 	outGraph = nx.Graph()
 	for key in inTree:
 		item = inTree[key]
+		# This check is why configuration objects never get coordinates. Or maybe this is intentional because configuration objects are added later?
 		if 'name' in item.keys():
 			if 'parent' in item.keys():
-				outGraph.add_edge(item['name'],item['parent'], attr_dict={'type':'parentChild','phases':1})
-				outGraph.nodes[item['name']]['type']=item['object']
+				outGraph.add_edge(
+					item['name'],
+					item['parent'],
+					type='parentChild',
+					phases=1
+				)
+				outGraph.nodes[item['name']]['type'] = item['object']
 				# Note that attached houses via gridEdit.html won't have lat/lon values, so this try is a workaround.
-				try: outGraph.nodes[item['name']]['pos']=(float(item.get('latitude',0)),float(item.get('longitude',0)))
-				except: outGraph.nodes[item['name']]['pos']=(0.0,0.0)
+				try:
+					outGraph.nodes[item['name']]['pos'] = (float(item.get('latitude', 0)), float(item.get('longitude', 0)))
+				except:
+					outGraph.nodes[item['name']]['pos'] = (0.0, 0.0)
 			elif 'from' in item.keys():
 				myPhase = _phaseCount(item.get('phases','AN'))
-				outGraph.add_edge(item['from'],item['to'],attr_dict={'name':item.get('name',''),'type':item['object'],'phases':myPhase})
+				outGraph.add_edge(
+					item['from'],
+					item['to'],
+					name=item.get('name',''),
+					type=item['object'],
+					phases=myPhase
+				)
 			elif item['name'] in outGraph:
 				# Edge already led to node's addition, so just set the attributes:
-				outGraph.nodes[item['name']]['type']=item['object']
+				outGraph.nodes[item['name']]['type'] = item['object']
 			else:
-				outGraph.add_node(item['name'],attr_dict={'type':item['object']})
+				outGraph.add_node(
+					item['name'],
+					type=item['object']
+				)
 			if 'latitude' in item.keys() and 'longitude' in item.keys():
-				try: outGraph.nodes.get(item['name'],{})['pos']=(float(item['latitude']),float(item['longitude']))
-				except: outGraph.nodes.get(item['name'],{})['pos']=(0.0,0.0)
+				# Ignore lines that have "latitude" and "longitude" properties
+				if 'from' not in item.keys():
+					try:
+						outGraph.nodes[item['name']]['pos'] = (float(item['latitude']), float(item['longitude'])) 
+					except:
+						outGraph.nodes[item['name']]['pos'] = (0.0, 0.0)
 	return outGraph
 
+
+# TODO: fix the case for nameless objects that aren't lines
 def treeToDiNxGraph(inTree):
 	''' Convert feeder tree to a DIRECTED networkx graph. '''
 	outGraph = nx.DiGraph()
@@ -375,28 +420,53 @@ def treeToDiNxGraph(inTree):
 			if item['object'] == 'switch':
 				if 'OPEN' in item.values(): #super hacky
 					continue
-		if 'name' in item.keys():#sometimes network objects aren't named!
+		if 'name' in item.keys(): # sometimes network objects aren't named!
 			if 'parent' in item.keys():
-				outGraph.add_edge(item['parent'], item['name'], attr_dict={'type':'parentChild','phases':1, 'length': 0})#jfk. swapped from,to
-				outGraph.nodes[item['name']]['type']=item['object']
-				outGraph.nodes[item['name']]['pos']=(float(item.get('latitude',0)),float(item.get('longitude',0)))
+				outGraph.add_edge(
+					item['parent'],
+					item['name'],
+					type='parentChild',
+					phases=1,
+					length=0
+				)
+				outGraph.nodes[item['name']]['type'] = item['object']
+				outGraph.nodes[item['name']]['pos'] = (float(item.get('latitude', 0)), float(item.get('longitude', 0)))
 			elif 'from' in item.keys():
 				myPhase = _phaseCount(item.get('phases','AN'))
-				outGraph.add_edge(item['from'],item['to'],attr_dict={'type':item['object'],'phases':myPhase, 'length': float(item.get('length',0))})
+				outGraph.add_edge(
+					item['from'],
+					item['to'],
+					type=item['object'],
+					phases=myPhase,
+					length=float(item.get('length',0))
+				)
 			elif item['name'] in outGraph:
 				# Edge already led to node's addition, so just set the attributes:
-				outGraph.nodes[item['name']]['type']=item['object']
+				outGraph.nodes[item['name']]['type'] = item['object']
 			else:
-				outGraph.add_node(item['name'],attr_dict={'type':item['object']})
+				outGraph.add_node(item['name'], type=item['object'])
 			if 'latitude' in item.keys() and 'longitude' in item.keys():
-				outGraph.nodes.get(item['name'],{})['pos']=(float(item['latitude']),float(item['longitude']))
-		elif 'object' in item.keys() and item['object'] in network_objects:#when name doesn't exist
+				try:
+					outGraph.nodes[item['name']]['pos'] = (float(item['latitude']), float(item['longitude']))
+				except:
+					outGraph.nodes[item['name']]['pos'] = (0.0, 0.0)
+		elif 'object' in item.keys() and item['object'] in network_objects: # when name doesn't exist
 			if 'from' in item.keys():
 				myPhase = _phaseCount(item.get('phases','AN'))
-				outGraph.add_edge(item['from'],item['to'],attr_dict={'type':item['object'],'phases':myPhase, 'length': float(item.get('length',0))})
+				outGraph.add_edge(
+					item['from'],
+					item['to'],
+					type=item['object'],
+					phases=myPhase,
+					length=float(item.get('length', 0))
+				)
 			if 'latitude' in item.keys() and 'longitude' in item.keys():
+				# Not sure what to do here. The tree item (a dict) doesn't have a "name", so how can we assigned a "pos" attribute via the NodeView if
+				# there is no name key? I'm leaving this line alone (even though it's wrong) for now because this function isn't actually used
+				# anywhere
 				outGraph.nodes.get(item['name'],{})['pos']=(float(item['latitude']),float(item['longitude']))
 	return outGraph
+
 
 def latLonNxGraph(inGraph, labels=False, neatoLayout=False, showPlot=False):
 	''' Draw a networkx graph representing a feeder.'''
@@ -410,59 +480,57 @@ def latLonNxGraph(inGraph, labels=False, neatoLayout=False, showPlot=False):
 	# Layout the graph via GraphViz neato. Handy if there's no lat/lon data.
 	if neatoLayout:
 		# HACK: work on a new graph without attributes because graphViz tries to read attrs.
-
 		cleanG = nx.Graph(inGraph.edges()) # Return a list of edges
-		#cleanG = nx.Graph(inGraph.edges()) # Return a list of edges
-
 		# HACK2: might miss nodes without edges without the following.
 		cleanG.add_nodes_from(inGraph)
 		pos = nx.nx_agraph.graphviz_layout(cleanG, prog='neato')
 	else:
-		pos = {n:inGraph.nodes[n].get('pos',(0,0)) for n in inGraph}
+		pos = {n: inGraph.nodes[n].get('pos', (0, 0)) for n in inGraph}
 	# Draw all the edges.
+	edge_styles = {'parentChild': 'dotted', 'underground_line': 'dashed'}
 	for e in inGraph.edges():
-
-		eType = inGraph.edge[e[0]][e[1]].get('type','underground_line')
-		#eType = inGraph.edges[e[0], e[1]].get('type','underground_line')
-
-		ePhases = inGraph.edge[e[0]][e[1]].get('phases',1)
+		eType = inGraph.edges[e[0], e[1]].get('type', 'underground_line')
+		ePhases = inGraph.edges[e[0], e[1]].get('phases', 1)
 		standArgs = {
-			'edgelist':[e],
-			'edge_color':_obToCol(eType),
-			'width':2,
-			'style':{'parentChild':'dotted','underground_line':'dashed'}.get(eType,'solid')
+			'edgelist': [e],
+			'edge_color': _obToCol(eType),
+			'width': 2,
+			'style': edge_styles.get(eType, 'solid')
 		}
-		if ePhases==3:
-			standArgs.update({'width':5})
-			nx.draw_networkx_edges(inGraph,pos,**standArgs)
-			standArgs.update({'width':3,'edge_color':'white'})
-			nx.draw_networkx_edges(inGraph,pos,**standArgs)
-			standArgs.update({'width':1,'edge_color':_obToCol(eType)})
-			nx.draw_networkx_edges(inGraph,pos,**standArgs)
-		if ePhases==2:
-			standArgs.update({'width':3})
-			nx.draw_networkx_edges(inGraph,pos,**standArgs)
-			standArgs.update({'width':1,'edge_color':'white'})
-			nx.draw_networkx_edges(inGraph,pos,**standArgs)
+		if ePhases == 3:
+			standArgs.update({'width': 5})
+			nx.draw_networkx_edges(inGraph, pos, **standArgs)
+			standArgs.update({'width': 3, 'edge_color': 'white'})
+			nx.draw_networkx_edges(inGraph, pos, **standArgs)
+			standArgs.update({'width': 1, 'edge_color': _obToCol(eType)})
+			nx.draw_networkx_edges(inGraph, pos, **standArgs)
+		if ePhases == 2:
+			standArgs.update({'width': 3})
+			nx.draw_networkx_edges(inGraph, pos, **standArgs)
+			standArgs.update({'width': 1, 'edge_color': 'white'})
+			nx.draw_networkx_edges(inGraph, pos, **standArgs)
 		else:
-			nx.draw_networkx_edges(inGraph,pos,**standArgs)
+			nx.draw_networkx_edges(inGraph, pos, **standArgs)
 	# Draw nodes and optional labels.
 	nx.draw_networkx_nodes(
 		inGraph,
 		pos,
 		nodelist=list(pos.keys()),
-		node_color=[_obToCol(inGraph.nodes[n].get('type','underground_line')) for n in inGraph],
+		node_color=[_obToCol(inGraph.nodes[n].get('type', 'underground_line')) for n in inGraph],
 		linewidths=0,
 	 	node_size=40
 	)
 	if labels:
 		nx.draw_networkx_labels(
-			inGraph,pos,
+			inGraph,
+			pos,
 			font_color='black',
 			font_weight='bold',
 			font_size=0.25
 		)
-	if showPlot: plt.show()
+	if showPlot:
+		plt.show()
+
 
 def _tokenizeGlm(inputStr, filePath=True):
 	''' Turn a GLM file/string into a linked list of tokens.
@@ -491,6 +559,7 @@ def _tokenizeGlm(inputStr, filePath=True):
 	# Get rid of whitespace strings.
 	basicList = [x for x in tokenized if x != '' and x != ' ']
 	return basicList
+
 
 def _parseTokenList(tokenList):
 	''' Given a list of tokens from a GLM, parse those into a tree data structure. '''
@@ -558,6 +627,7 @@ def _parseTokenList(tokenList):
 					currentLeafAdd('omfEmbeddedConfigObject', fullToken[0] + ' ' + listToString(fullToken))
 	return tree
 
+
 def _gatherKeyValues(inDict, keyToAvoid):
 	''' Helper function: put key/value pairs for objects into the format Gridlab needs. '''
 	otherKeyValues = ''
@@ -577,6 +647,7 @@ def _gatherKeyValues(inDict, keyToAvoid):
 			else:
 				otherKeyValues += ('\t' + key + ' ' + str(inDict[key]) + ';\n')
 	return otherKeyValues
+
 
 def _dictToString(inDict):
 	''' Helper function: given a single dict representing a GLM object, concatenate it into a string. '''
@@ -612,6 +683,7 @@ def _dictToString(inDict):
 		return 'class' + ' ' + inDict['class'] + ' {\n' + '     ' + 'double' + ' ' + inDict['double'] + ';' + '\n};\n'
 	# elif 'collector' in inDict and 'group' in inDict and inDict['group'] =='class=ZIPload':
 	# 	return 'object' + ' ' + inDict['object'] + ' {\n' + '	' + 'name' + ' ' + 'collector_ZIPloads' + ';'+'\n' +'group' + ' ' + inDict['group']+';'+'\n'+'property' +' '+inDict['property']+';'+'\n'+'interval'+' '+inDict['interval']+';'+'\n'+'file'+' '+inDict['file']+'\n};\n'
+
 
 def _deEmbedOnce(glmTree):
 	''' Take all objects nested inside top-level objects and move them to the top level.
@@ -666,9 +738,11 @@ def _deEmbedOnce(glmTree):
 				# delete the embedded copy:
 				del glmTree[x][y]
 
+
 def _phaseCount(phaseString):
 	''' Return number of phases not including neutrals. '''
 	return sum([phaseString.lower().count(x) for x in ['a','b','c']])
+
 
 def _obToCol(obStr):
 	''' Graph drawing helper to color by node/edge type. '''
@@ -684,6 +758,7 @@ def _obToCol(obStr):
 		'parentChild':'gray',
 		'underground_line':'black'}
 	return obToColor.get(obStr,'black')
+
 
 def _tests():
 	# Parser Test
