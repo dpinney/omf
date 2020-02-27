@@ -14,14 +14,75 @@ from omf.models.__neoMetaModel__ import *
 # Model metadata:
 modelName, template = __neoMetaModel__.metadata(__file__)
 tooltip = "The cyberInverters model shows the impacts of inverter hacks on a feeder including system voltages, regulator actions, and capacitor responses."
-hidden = True
+hidden = False
 
 def work(modelDir, inputDict):
 	''' Run the model in its directory. WARNING: GRIDLAB CAN TAKE HOURS TO COMPLETE. '''
 	# feederName = inputDict["feederName1"]
 	feederName = [x for x in os.listdir(modelDir) if x.endswith('.omd')][0][:-4]
 	inputDict["feederName1"] = feederName
-	inputDict["climateName"] = omf.weather.zipCodeToClimateName(inputDict["zipCode"])
+	zipCode = "59001" #TODO get zip code from the PV and Load input file
+	#Open load and PV input file
+	with open(pJoin(modelDir,"loadPV.csv"),"w") as loadPVFile:
+		loadPVFile.write(inputDict['loadPV'])
+	try:
+		#TODO do whatever it is we need with load and pv values
+		with open(pJoin(modelDir,"loadPV.csv"), newline='') as inFile:
+			reader = csv.reader(inFile)
+			for row in reader:
+				#Do something!
+				if 3>4: raise Exception
+				pass
+	except:
+		#TODO change to an appropriate warning message
+		errorMessage = "CSV file is incorrect format. Please see valid format definition at <a target='_blank' href='https://github.com/dpinney/omf/wiki/Models-~-demandResponse#walkthrough'>OMF Wiki demandResponse</a>"
+		raise Exception(errorMessage)
+	#Value check for attackVariable
+	if inputDict.get("attackVariable", "None") == "None":
+		attackAgentType = "None"
+	else:
+		attackAgentType = inputDict['attackVariable']
+	#Open defense agent HDF5 file
+	with open(pJoin(modelDir,"defenseVariable.csv"),"w") as defenseVariableFile:
+		defenseVariableFile.write(inputDict['defenseVariable'])
+	try:
+		#TODO do whatever it is we need with defense agent values
+		with open(pJoin(modelDir,"defenseVariable.csv"), newline='') as inFile:
+			reader = csv.reader(inFile)
+			for row in reader:
+				#Do something!
+				if 3>4: raise Exception
+				pass
+	except:
+		#TODO change to an appropriate warning message
+		errorMessage = "CSV file is incorrect format. Please see valid format definition at <a target='_blank' href='https://github.com/dpinney/omf/wiki/Models-~-demandResponse#walkthrough'>OMF Wiki demandResponse</a>"
+		raise Exception(errorMessage)
+	#Value check for train
+	if inputDict.get("trainAgent", "") == "False":
+		trainAgentValue = False
+	else:
+		trainAgentValue = True
+	#None check for simulation length
+	if inputDict.get("simLength", "None") == "None":
+		simLengthValue = None
+	else:
+		simLengthValue = int(inputDict["simLength"])
+	#None check for simulation length
+	if inputDict.get("simLengthUnits", "None") == "None":
+		simLengthUnitsValue = None
+	else:
+		simLengthUnitsValue = inputDict["simLengthUnits"]
+	#None check for simulation start date
+	if inputDict.get("simStartDate", "None") == "None":
+		simStartDateTimeValue = None
+		simStartDateValue = None
+		simStartTimeValue = None
+	else:
+		simStartDateTimeValue = inputDict["simStartDate"]
+		simStartDateValue = simStartDateTimeValue.split('T')[0]
+		simStartTimeValue = simStartDateTimeValue.split('T')[1]
+
+	inputDict["climateName"] = omf.weather.zipCodeToClimateName(zipCode)
 	shutil.copy(pJoin(__neoMetaModel__._omfDir, "data", "Climate", inputDict["climateName"] + ".tmy2"),
 		pJoin(modelDir, "climate.tmy2"))
 	with open(pJoin(modelDir, feederName + '.omd')) as f:
@@ -124,7 +185,7 @@ def work(modelDir, inputDict):
 	# 					'xfrmr_thermal_limit_upper':2,'inverter_v_chng_per_interval_upper_bound':0.050}
 	# tree[omf.feeder.getMaxKey(tree) + 1] = violationRecorder
 	omf.feeder.adjustTime(tree=tree, simLength=float(inputDict["simLength"]),
-		simLengthUnits=inputDict["simLengthUnits"], simStartDate=inputDict["simStartDate"])
+		simLengthUnits=inputDict["simLengthUnits"], simStartDate=simStartDateValue)
 	# RUN GRIDLABD IN FILESYSTEM (EXPENSIVE!)
 	rawOut = omf.solvers.gridlabd.runInFilesystem(tree, attachments=feederJson["attachments"], 
 		keepFiles=True, workDir=pJoin(modelDir))
@@ -413,7 +474,7 @@ def stringToMag(s):
 def new(modelDir):
 	''' Create a new instance of this model. Returns true on success, false on failure. '''
 	defaultInputs = {
-		"simStartDate": "2019-07-01",
+		"simStartDate": "2019-07-01T00:00:00Z",
 		"simLengthUnits": "seconds",
 		"feederName1": "ieee37fixed",
 		"modelType": modelName,
