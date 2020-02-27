@@ -427,6 +427,95 @@
 				}
 			</script>
 		</div>
+		<p class="reportTitle postRun" style="">Inverter Outputs <a target="_self" class="toggle">Hide / Show</a></p>
+		<div id="newInverterReport" class="tightContent postRun">
+			<script type="text/javascript">
+
+				var invNamesArray=[]
+				for (var key in allOutputData)
+				{
+  					if (key.indexOf('Inverter') === 0)
+  					{
+  						invName = "allOutputData.".concat(key);
+  						invNamesArray.push(invName)
+					}
+
+				}
+				if (invNamesArray.length == 0){
+						$("#newInverterReport").html("<p>&#160;&#160;&#160;No Inverters were found on the feeder.</p>")
+					}
+				for (var i in invNamesArray){
+					inv = invNamesArray[i]
+					$("<div/>").appendTo("#newInverterReport")
+						.attr("class", "inverterContainer")
+						.attr("id", inv)
+					$("<div/>").appendTo("#newInverterReport")
+						.attr("id", "inverterSeries_" + inv)
+					// if no inverters are found, display message
+  					
+					
+					var inv1ATSeries = {
+						"pointWidth": 40,
+						"pointInterval": 3 * 3600 * 100,
+						"color":"RoyalBlue",
+						"data":eval(invNamesArray[i].concat(".Inv1A")),
+						"name":"A",
+					}
+
+					var inv1BTSeries = {
+						"pointWidth": 40,
+						"pointInterval": 3 * 3600 * 100,
+						"color":"Red",
+						"data":eval(invNamesArray[i].concat(".Inv1B")),
+						"name":"B",
+					}
+					var inv1CTSeries = {
+						"pointWidth": 40,
+						"pointInterval": 3 * 3600 * 100,
+						"color":"Green",
+						"data":eval(invNamesArray[i].concat(".Inv1C")),
+						"name":"C",
+					}
+				}
+				phaseValue= "ABCN" //eval(inv.concat(".InvPhases"))
+				var localHighChart = JSON.parse(JSON.stringify(highChartsTemplate))
+				localHighChart["chart"]["renderTo"] = "inverterSeries_" + inv
+				localHighChart["chart"]["inverted"] = false
+				localHighChart["chart"]["height"] = 150
+				localHighChart["chart"]["width"] = 1000
+				localHighChart["chart"]["type"] = "line"
+				localHighChart["title"]["text"] = inv.substr(14)
+				localHighChart["series"] = []
+				localHighChart["xAxis"] = { "type":"datetime",
+					"tickColor":"gray",
+					"lineColor":"gray",
+					}
+				localHighChart["yAxis"] = {"min": 0, "max" : 5000000,
+					//"startOnTick": "false",
+					"title":{ "text": "Phase Power",
+						"style":{
+							"color":"gray"
+						}
+					}
+				}
+				localHighChart["plotOptions"] = {
+					//"bar":{"stacking":"normal", "shadow":false},
+				}
+				chart = new Highcharts.Chart(localHighChart);
+				if(phaseValue.indexOf('A') != -1)
+				{
+					chart.addSeries(inv1ATSeries)
+				}
+				if(phaseValue.indexOf('B') != -1)
+				{
+					chart.addSeries(inv1BTSeries)
+				}
+				if(phaseValue.indexOf('C') != -1)
+				{
+					chart.addSeries(inv1CTSeries)
+				}
+			</script>
+		</div>
 		<p class="reportTitle postRun">Cap Bank Activation <a target="_self" class="toggle">Hide / Show</a></p>
 		<div id="newCapbankReport" class="tightContent postRun">
 			<script type="text/javascript">

@@ -43,20 +43,20 @@ def work(modelDir, inputDict):
 	else:
 		attackAgentType = inputDict['attackVariable']
 	#Open defense agent HDF5 file
-	with open(pJoin(modelDir,"defenseVariable.csv"),"w") as defenseVariableFile:
-		defenseVariableFile.write(inputDict['defenseVariable'])
-	try:
-		#TODO do whatever it is we need with defense agent values
-		with open(pJoin(modelDir,"defenseVariable.csv"), newline='') as inFile:
-			reader = csv.reader(inFile)
-			for row in reader:
-				#Do something!
-				if 3>4: raise Exception
-				pass
-	except:
-		#TODO change to an appropriate warning message
-		errorMessage = "CSV file is incorrect format. Please see valid format definition at <a target='_blank' href='https://github.com/dpinney/omf/wiki/Models-~-demandResponse#walkthrough'>OMF Wiki demandResponse</a>"
-		raise Exception(errorMessage)
+	# with open(pJoin(modelDir,"defenseVariable.csv"),"w") as defenseVariableFile:
+	# 	defenseVariableFile.write(inputDict['defenseVariable'])
+	# try:
+	# 	#TODO do whatever it is we need with defense agent values
+	# 	with open(pJoin(modelDir,"defenseVariable.csv"), newline='') as inFile:
+	# 		reader = csv.reader(inFile)
+	# 		for row in reader:
+	# 			#Do something!
+	# 			if 3>4: raise Exception
+	# 			pass
+	# except:
+	# 	#TODO change to an appropriate warning message
+	# 	errorMessage = "CSV file is incorrect format. Please see valid format definition at <a target='_blank' href='https://github.com/dpinney/omf/wiki/Models-~-demandResponse#walkthrough'>OMF Wiki demandResponse</a>"
+	# 	raise Exception(errorMessage)
 	#Value check for train
 	if inputDict.get("trainAgent", "") == "False":
 		trainAgentValue = False
@@ -251,12 +251,23 @@ def work(modelDir, inputDict):
 			else:
 				outData['Consumption']['Power'] = vecSum(oneSwingPower,outData['Consumption']['Power'])
 		elif key.startswith('Inverter_') and key.endswith('.csv'): 	
+			invName=""
+			invName = key
+			newkey=invName.split(".")[0]
+			outData[newkey] ={}
 			realA = rawOut[key]['power_A.real']
 			realB = rawOut[key]['power_B.real']
 			realC = rawOut[key]['power_C.real']
 			imagA = rawOut[key]['power_A.imag']
 			imagB = rawOut[key]['power_B.imag']
 			imagC = rawOut[key]['power_C.imag']
+			outData[newkey]['Inv1A'] = [0] * int(inputDict["simLength"])
+			outData[newkey]['Inv1B'] = [0] * int(inputDict["simLength"])
+			outData[newkey]['Inv1C'] = [0] * int(inputDict["simLength"])
+			outData[newkey]['Inv1A'] = realA
+			outData[newkey]['Inv1B'] = realB
+			outData[newkey]['Inv1C'] = realC
+			# outData[newkey]['InvPhases'] = rawOut[key]['phases'][0]
 			oneDgPower = hdmAgg(vecSum(vecPyth(realA,imagA),vecPyth(realB,imagB),vecPyth(realC,imagC)), avg, level)
 			if 'DG' not in outData['Consumption']:
 				outData['Consumption']['DG'] = oneDgPower
@@ -473,6 +484,10 @@ def stringToMag(s):
 
 def new(modelDir):
 	''' Create a new instance of this model. Returns true on success, false on failure. '''
+	f1Name = "load_solar_data.csv"
+	with open(pJoin(omf.omfDir, "static", "testFiles", "pyCIGAR", f1Name)) as f1:
+		load_PV = f1.read()
+
 	defaultInputs = {
 		"simStartDate": "2019-07-01T00:00:00Z",
 		"simLengthUnits": "hours",
@@ -480,7 +495,8 @@ def new(modelDir):
 		"feederName1": "Olin Barre GH EOL Solar AVolts CapReg",
 		"modelType": modelName,
 		"zipCode": "59001",
-		"simLength": "72"
+		"simLength": "72",
+		"loadPV": load_PV
 	}
 	creationCode = __neoMetaModel__.new(modelDir, defaultInputs)
 	try:
