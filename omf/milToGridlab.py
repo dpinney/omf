@@ -1,8 +1,11 @@
 ''' Convert a Milsoft Windmil feeder model into an OMF-compatible version. '''
-import os, csv, random, math, copy, locale, json, traceback, shutil, time, datetime, warnings, gc
+import os, csv, random, math, copy, locale, json, traceback, shutil, time, datetime, warnings, gc, platform
 from os.path import join as pJoin
 from io import StringIO
 from dateutil.tz import tzlocal
+import matplotlib
+if platform.system() == 'Darwin':
+	matplotlib.use('TkAgg')
 from matplotlib import pyplot as plt
 from pytz import reference
 import numpy as np
