@@ -252,7 +252,8 @@ def new(modelDir):
 	}
 	return __neoMetaModel__.new(modelDir, defaultInputs)
 
-@neoMetaModel_test_setup
+# Disable tests for now b/c they require too much memory for GitHub Actions
+#@neoMetaModel_test_setup
 def _tests():
 	modelLoc = pJoin(__neoMetaModel__._omfDir,'data','Model','admin','Automated Testing of ' + modelName)
 	# Blow away old test results if necessary.
