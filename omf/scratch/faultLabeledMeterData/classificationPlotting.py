@@ -16,8 +16,10 @@ from sklearn.discriminant_analysis import QuadraticDiscriminantAnalysis
 from sklearn.metrics import confusion_matrix
 
 PLOTTING_FEATURE_NUM_1 = 0
-PLOTTING_FEATURE_NUM_2 = 7
+PLOTTING_FEATURE_NUM_2 = 1
 VISUALIZE_DATA_ONLY = False
+TRAIN_FRACTION = 0.9
+INPUT_FILE = 'dataABEC-1mo.csv'
 
 def plot_confusion_matrix(cm, classes, normalize=False, title='Confusion matrix', 
     cmap=plt.cm.Blues):
@@ -51,7 +53,7 @@ x, y, header, colorList, uniqueLabels = [], [], [], [], []
 colorNum = -1
 lastLabel = ''
 
-with open( 'data.csv','r' ) as dataFile:
+with open( INPUT_FILE,'r' ) as dataFile:
     reader = csv.reader(dataFile, delimiter=',')
     
     for row in reader:
@@ -87,9 +89,17 @@ with open( 'data.csv','r' ) as dataFile:
             count += 1
             lastLabel = label
 
-
-# plot data
 newX = np.array(x)
+x = np.array(x)
+y = np.array(y)
+ordering = np.argsort(x[:,0])
+
+x = x[ordering]
+y = y[ordering]
+
+numPoints = x.shape[0]
+print(numPoints)
+split = int(TRAIN_FRACTION * numPoints)
 
 
 if VISUALIZE_DATA_ONLY: 
@@ -114,8 +124,15 @@ else: # classify
 
     # normalize data and split into train/test
     x = StandardScaler().fit_transform(x)
-    xTrain, xTest, yTrain, yTest = \
-        train_test_split(x, y, test_size=0.4, random_state=42)
+    
+    # xTrain, xTest, yTrain, yTest = \
+    #     train_test_split(x, y, test_size=0.4, random_state=42)
+    xTrain, xTest, yTrain, yTest = x[:split,:], x[split:,:], y[:split], y[split:]
+    print(xTrain.shape)
+    print(yTrain.shape)
+    print(xTest.shape)
+    print(yTest.shape)
+
 
     # iterate over classifiers
     for name, clf in zip(names, classifiers):

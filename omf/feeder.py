@@ -1,9 +1,10 @@
 ''' Functions for manipulting electrical distribution feeder models. '''
 
-import datetime, copy, os, re, warnings, networkx as nx, json, matplotlib
+import datetime, copy, os, re, warnings, networkx as nx, json, platform
 from functools import reduce
 import matplotlib
-matplotlib.use('Agg')
+if platform.system() == 'Darwin':
+	matplotlib.use('TkAgg')
 from matplotlib import pyplot as plt
 
 # Wireframe for new feeder objects:
