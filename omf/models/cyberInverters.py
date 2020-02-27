@@ -301,13 +301,11 @@ def work(modelDir, inputDict):
 			imagB = rawOut[key]['sum(power_losses_B.imag)']
 			realC = rawOut[key]['sum(power_losses_C.real)']
 			imagC = rawOut[key]['sum(power_losses_C.imag)']
-			#TODO: fix this
-			outData['Consumption']['Losses'] = 0.0
-			# oneLoss = hdmAgg(vecSum(vecPyth(realA,imagA),vecPyth(realB,imagB),vecPyth(realC,imagC)), avg, level)
-			# if 'Losses' not in outData['Consumption']:
-			# 	outData['Consumption']['Losses'] = oneLoss
-			# else:
-			# 	outData['Consumption']['Losses'] = vecSum(oneLoss,outData['Consumption']['Losses'])
+			oneLoss = hdmAgg(vecSum(vecPyth(realA,imagA),vecPyth(realB,imagB),vecPyth(realC,imagC)), avg, level)
+			if 'Losses' not in outData['Consumption']:
+				outData['Consumption']['Losses'] = oneLoss
+			else:
+				outData['Consumption']['Losses'] = vecSum(oneLoss,outData['Consumption']['Losses'])
 		elif key.startswith('Regulator_') and key.endswith('.csv'):
 			#split function to strip off .csv from filename and user rest of the file name as key. for example- Regulator_VR10.csv -> key would be Regulator_VR10
 			regName=""
