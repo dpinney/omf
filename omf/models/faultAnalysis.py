@@ -1,8 +1,12 @@
 ''' Graph the voltage drop on a feeder. '''
 
-import json, os, shutil, csv, warnings, base64
+import json, os, shutil, csv, warnings, base64, platform
 from os.path import join as pJoin
-#from matplotlib import pyplot as plt
+
+import matplotlib
+if platform.system() == 'Darwin':
+	matplotlib.use('TkAgg')
+from matplotlib import pyplot as plt
 #plt.switch_backend('Agg')
 
 # dateutil imports
@@ -145,7 +149,7 @@ def _testingPlot():
 	# plt.switch_backend('MacOSX')
 	chart = omf.models.voltageDrop.drawPlot(PREFIX + FNAME, neatoLayout=True, edgeCol="Current", nodeCol=None, nodeLabs="Name", edgeLabs=None, faultLoc="node713-704", faultType="TLG", customColormap=False, scaleMin=None, scaleMax=None, rezSqIn=225, simTime='2000-01-01 0:00:00')
 	chart.savefig(PREFIX + "YO_WHATS_GOING_ON.png")
-	# plt.show()
+	#plt.show()
 
 def drawTable(path, workDir=None):
 	#return self.log
@@ -279,4 +283,4 @@ def _tests():
 
 if __name__ == '__main__':
 	_tests()
-	# _testingPlot()
+	#_testingPlot()
