@@ -1,8 +1,7 @@
-import json, datetime, csv, os, shutil, re, warnings, itertools, base64
+import json, datetime, csv, os, shutil, re, warnings, itertools, base64, platform
 from os.path import join as pJoin
 from base64 import b64decode
 from zipfile import ZipFile
-import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 import plotly.graph_objs as go
@@ -11,6 +10,12 @@ import plotly.offline
 from scipy.stats import linregress
 from sklearn import preprocessing
 from sklearn.metrics import confusion_matrix
+
+import matplotlib
+if platform.system() == 'Darwin':
+	matplotlib.use('TkAgg')
+from matplotlib import pyplot as plt
+#plt.switch_backend('Agg')
 
 from omf.models import __neoMetaModel__
 from omf.models.__neoMetaModel__ import *
