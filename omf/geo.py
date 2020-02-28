@@ -1,14 +1,20 @@
-import json, os, shutil, math, tempfile, random, webbrowser
+import json, os, shutil, math, tempfile, random, webbrowser, platform
 from pathlib import Path
 from os.path import join as pJoin
 from pyproj import Proj, transform
 import requests
 import networkx as nx
 import numpy as np
-from matplotlib import pyplot as plt
 from scipy.spatial import ConvexHull
 from sklearn.cluster import KMeans
 from flask import Flask, send_file, render_template
+
+import matplotlib
+if platform.system() == 'Darwin':
+	matplotlib.use('TkAgg')
+from matplotlib import pyplot as plt
+#plt.switch_backend('Agg')
+
 import omf
 from omf import feeder
 
