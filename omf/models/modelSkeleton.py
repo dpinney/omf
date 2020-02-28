@@ -62,4 +62,5 @@ def _tests():
 	__neoMetaModel__.renderAndShow(modelLoc)
 
 if __name__ == '__main__':
-	_tests()
+	#_tests()
+	pass

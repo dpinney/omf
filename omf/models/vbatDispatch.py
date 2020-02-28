@@ -189,7 +189,8 @@ def _tests():
 	__neoMetaModel__.renderAndShow(modelLoc) # Show the output.
 
 if __name__ == '__main__':
-	_tests()
+	#_tests()
+	pass
 
 """
 def vbat24hr(ind, temp):
