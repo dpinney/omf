@@ -14,6 +14,11 @@ else:
 	from matplotlib import pyplot as plt
 	plt.switch_backend('Agg')
 
+import matplotlib
+if platform.system() == 'Darwin':
+	matplotlib.use('TkAgg')
+from matplotlib import pyplot as plt
+
 # OMF imports 
 import omf.feeder
 import omf.solvers.gridlabd
