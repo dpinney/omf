@@ -261,12 +261,18 @@ def work(modelDir, inputDict):
 			imagA = rawOut[key]['power_A.imag']
 			imagB = rawOut[key]['power_B.imag']
 			imagC = rawOut[key]['power_C.imag']
-			outData[newkey]['Inv1A'] = [0] * int(inputDict["simLength"])
-			outData[newkey]['Inv1B'] = [0] * int(inputDict["simLength"])
-			outData[newkey]['Inv1C'] = [0] * int(inputDict["simLength"])
-			outData[newkey]['Inv1A'] = realA
-			outData[newkey]['Inv1B'] = realB
-			outData[newkey]['Inv1C'] = realC
+			outData[newkey]['Inv1AR'] = [0] * int(inputDict["simLength"])
+			outData[newkey]['Inv1BR'] = [0] * int(inputDict["simLength"])
+			outData[newkey]['Inv1CR'] = [0] * int(inputDict["simLength"])
+			outData[newkey]['Inv1AI'] = [0] * int(inputDict["simLength"])
+			outData[newkey]['Inv1BI'] = [0] * int(inputDict["simLength"])
+			outData[newkey]['Inv1CI'] = [0] * int(inputDict["simLength"])
+			outData[newkey]['Inv1AR'] = realA
+			outData[newkey]['Inv1BR'] = realB
+			outData[newkey]['Inv1CR'] = realC
+			outData[newkey]['Inv1AI'] = imagA
+			outData[newkey]['Inv1BI'] = imagB
+			outData[newkey]['Inv1CI'] = imagC
 			# outData[newkey]['InvPhases'] = rawOut[key]['phases'][0]
 			oneDgPower = hdmAgg(vecSum(vecPyth(realA,imagA),vecPyth(realB,imagB),vecPyth(realC,imagC)), avg, level)
 			if 'DG' not in outData['Consumption']:

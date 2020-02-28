@@ -454,37 +454,61 @@
 					// if no inverters are found, display message
   					
 					
-					var inv1ATSeries = {
+					var inv1ARSeries = {
 						"pointWidth": 40,
 						"pointInterval": 3 * 3600 * 100,
 						"color":"RoyalBlue",
-						"data":eval(invNamesArray[i].concat(".Inv1A")),
-						"name":"A",
+						"data":eval(invNamesArray[i].concat(".Inv1AR")),
+						"name":"A Real",
 					}
 
-					var inv1BTSeries = {
+					var inv1BRSeries = {
 						"pointWidth": 40,
 						"pointInterval": 3 * 3600 * 100,
-						"color":"Red",
-						"data":eval(invNamesArray[i].concat(".Inv1B")),
-						"name":"B",
+						"color":"Crimson",
+						"data":eval(invNamesArray[i].concat(".Inv1BR")),
+						"name":"B Real",
 					}
-					var inv1CTSeries = {
+					var inv1CRSeries = {
 						"pointWidth": 40,
 						"pointInterval": 3 * 3600 * 100,
-						"color":"Green",
-						"data":eval(invNamesArray[i].concat(".Inv1C")),
-						"name":"C",
+						"color":"LimeGreen",
+						"data":eval(invNamesArray[i].concat(".Inv1CR")),
+						"name":"C Real",
+					}
+
+					var inv1AISeries = {
+						"pointWidth": 40,
+						"pointInterval": 3 * 3600 * 100,
+						"color":"PowderBlue",
+						"data":eval(invNamesArray[i].concat(".Inv1AI")),
+						"name":"A Imag",
+					}
+
+					var inv1BISeries = {
+						"pointWidth": 40,
+						"pointInterval": 3 * 3600 * 100,
+						"color":"Pink",
+						"data":eval(invNamesArray[i].concat(".Inv1BI")),
+						"name":"B Imag",
+					}
+					var inv1CISeries = {
+						"pointWidth": 40,
+						"pointInterval": 3 * 3600 * 100,
+						"color":"PaleGreen",
+						"data":eval(invNamesArray[i].concat(".Inv1CI")),
+						"name":"C Imag",
 					}
 				}
 				phaseValue= "ABCN" //eval(inv.concat(".InvPhases"))
 				var localHighChart = JSON.parse(JSON.stringify(highChartsTemplate))
 				localHighChart["chart"]["renderTo"] = "inverterSeries_" + inv
 				localHighChart["chart"]["inverted"] = false
-				localHighChart["chart"]["height"] = 150
+				localHighChart["chart"]["height"] = 200
 				localHighChart["chart"]["width"] = 1000
 				localHighChart["chart"]["type"] = "line"
 				localHighChart["title"]["text"] = inv.substr(14)
+				localHighChart["title"]["align"] = "right"
 				localHighChart["series"] = []
 				localHighChart["xAxis"] = { "type":"datetime",
 					"tickColor":"gray",
@@ -504,15 +528,18 @@
 				chart = new Highcharts.Chart(localHighChart);
 				if(phaseValue.indexOf('A') != -1)
 				{
-					chart.addSeries(inv1ATSeries)
+					chart.addSeries(inv1ARSeries)
+					chart.addSeries(inv1AISeries)
 				}
 				if(phaseValue.indexOf('B') != -1)
 				{
-					chart.addSeries(inv1BTSeries)
+					chart.addSeries(inv1BRSeries)
+					chart.addSeries(inv1BISeries)
 				}
 				if(phaseValue.indexOf('C') != -1)
 				{
-					chart.addSeries(inv1CTSeries)
+					chart.addSeries(inv1CRSeries)
+					chart.addSeries(inv1CISeries)
 				}
 			</script>
 		</div>

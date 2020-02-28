@@ -6,34 +6,34 @@
 	<style>
 	/*Styles here*/
 		.tab {
-		    overflow: hidden;
-		    margin-left: auto;
-		    margin-right: auto;
-		    width: 1000px;
+			overflow: hidden;
+			margin-left: auto;
+			margin-right: auto;
+			width: 1000px;
 		}
 
 		.tab button {
 			color: black;
-		    background-color: inherit;
-		    float: left;
-		    border: none;
-		    outline: none;
-		    cursor: pointer;
-		    padding: 14px 16px;
-		    border-radius: 5px 5px 0px 0px;
+			background-color: inherit;
+			float: left;
+			border: none;
+			outline: none;
+			cursor: pointer;
+			padding: 14px 16px;
+			border-radius: 5px 5px 0px 0px;
 		}
 
 		.tab button:hover {
-		    background-color: white;
+			background-color: white;
 		}
 
 		.tab button.active {
-		    background-color: seagreen;
-		    color: white;
+			background-color: seagreen;
+			color: white;
 		}
 
 		.tabcontent {
-		    display: none;
+			display: none;
 		}
 
 		table {
@@ -78,19 +78,19 @@
 			// Get all elements with class="tabContent" for the given table and hide them
 
 			$(".tabContent" + tabSet).hide();
-		    // Get all elements with class="tabLinks" and remove the class "active"
-		    tabLinks = document.getElementsByClassName("tabLinks" + tabSet);
-		    for (i = 0; i < tabLinks.length; i++) {
-		        tabLinks[i].className = tabLinks[i].className.replace(" active", "");
-		    }
-		    // Show the current tab, and add an "active" class to the button that opened the tab
-		    $("." + tabName).show();
-		    //gebi(tabName).style.display = "block";
-		    evt.currentTarget.className += " active";
+			// Get all elements with class="tabLinks" and remove the class "active"
+			tabLinks = document.getElementsByClassName("tabLinks" + tabSet);
+			for (i = 0; i < tabLinks.length; i++) {
+				tabLinks[i].className = tabLinks[i].className.replace(" active", "");
+			}
+			// Show the current tab, and add an "active" class to the button that opened the tab
+			$("." + tabName).show();
+			//gebi(tabName).style.display = "block";
+			evt.currentTarget.className += " active";
 		}
 		$(document).ready(function() {
 			console.log($('#inverterOutputs'));
-    	$('.dt').DataTable({ 'paging': false});
+		$('.dt').DataTable({ 'paging': false});
 		});
 	</script>
 </head>
@@ -332,6 +332,12 @@
 				<img id="maxLoadShapeImg" style="width:1000px;height:auto;" />
 				<script type="text/javascript">gebi("maxLoadShapeImg").src = "data:image/png;base64," + allOutputData.maxLoadShape</script>
 			</div>
+		</div>
+		<p class="reportTitle postRun">Raw Input and Output Files</p>
+		<div id="rawOutput" class="content postRun" style="margin-top:0px">
+			{% for name in allOutputDataDict['fileNames'] %}
+				{% if loop.index > 1 %}&mdash; {% endif %}<a href="/downloadModelData/{{allInputDataDict['user']}}/{{allInputDataDict['modelName']}}/{{name}}">{{name}}</a>
+			{% endfor %}
 		</div>
 		<script>document.getElementById('firstTabButton3').click();//Hack, get first tab to show.</script>
 	</div>
