@@ -7,7 +7,7 @@ if platform.system() == 'Darwin':
 	matplotlib.use('TkAgg')
 from matplotlib import pyplot as plt
 # OMF imports
-import omf.feeder
+from omf import feeder
 from omf.solvers import gridlabd
 
 def omfCalibrate(workDir, feederPath, scadaPath, simStartDate, simLength, simLengthUnits, solver="FBS", calibrateError=(0.05,5), trim=5):
@@ -27,7 +27,7 @@ def omfCalibrate(workDir, feederPath, scadaPath, simStartDate, simLength, simLen
 	# Attach player.
 	classOb = {'omftype':'class player','argument':'{double value;}'}
 	playerOb = {"object":"player", "property":"value", "name":"scadaLoads", "file":"subScada.player", "loop":"0"}
-	maxKey = omf.feeder.getMaxKey(tree)
+	maxKey = feeder.getMaxKey(tree)
 	playerKey = maxKey + 2
 	tree[maxKey+1] = classOb
 	tree[playerKey] = playerOb
@@ -116,7 +116,7 @@ def omfCalibrate(workDir, feederPath, scadaPath, simStartDate, simLength, simLen
 		"interval": "3600"}
 	outputRecorderKey = maxKey + 3
 	tree[outputRecorderKey] = recOb
-	omf.feeder.adjustTime(tree, simLength, simLengthUnits, simStartDate['Date'].strftime("%Y-%m-%d %H:%M:%S"))
+	feeder.adjustTime(tree, simLength, simLengthUnits, simStartDate['Date'].strftime("%Y-%m-%d %H:%M:%S"))
 	# Run Gridlabd, calculate scaling constant.
 	def runPowerflowIter(tree,scadaSubPower):
 		'''Runs powerflow once, then iterates.'''
@@ -242,7 +242,7 @@ def attachVolts(workDir, feederPath, voltVectorA, voltVectorB, voltVectorC, simS
 		voltageObA = {"object":"player", "property":"voltage_A", "file":"phaseAVoltage.player", "loop":"0", "parent":swingName}
 		voltageObB = {"object":"player", "property":"voltage_B", "file":"phaseBVoltage.player", "loop":"0", "parent":swingName}
 		voltageObC = {"object":"player", "property":"voltage_C", "file":"phaseCVoltage.player", "loop":"0", "parent":swingName}
-		maxKey = omf.feeder.getMaxKey(tree)
+		maxKey = feeder.getMaxKey(tree)
 		voltplayerKeyA = maxKey + 2
 		voltplayerKeyB = maxKey + 3
 		voltplayerKeyC = maxKey + 4
@@ -251,7 +251,7 @@ def attachVolts(workDir, feederPath, voltVectorA, voltVectorB, voltVectorC, simS
 		tree[voltplayerKeyB] = voltageObB
 		tree[voltplayerKeyC] = voltageObC
 		# Adjust time and run output.
-		omf.feeder.adjustTime(tree, simLength, simLengthUnits, firstDateTime.strftime("%Y-%m-%d %H:%M:%S"))
+		feeder.adjustTime(tree, simLength, simLengthUnits, firstDateTime.strftime("%Y-%m-%d %H:%M:%S"))
 		output = gridlabd.runInFilesystem(tree, attachments=feederJson.get('attachments', {}), keepFiles=True, workDir=pJoin(workDir,"gridlabD"))
 		# Write the output.
 		with open(pJoin(pJoin(workDir,"gridlabD"),"phaseAVoltage.player")) as f:
