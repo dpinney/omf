@@ -17,7 +17,7 @@ from dateutil.relativedelta import *
 
 # OMF imports
 import omf
-import omf.feeder, omf.geo
+from omf import feeder, geo
 from omf.models import __neoMetaModel__
 from omf.models.__neoMetaModel__ import *
 
@@ -53,7 +53,7 @@ def generateData(pathToOmd, pathToCsv, workDir, useDist, useVolt):
 		print('@@@@@@', workDir)
 
 	# create outageMap to get the distance data for the given feeder system and actual connectivity data
-	outageMap = omf.geo.omdGeoJson(pathToOmd, conversion = False)
+	outageMap = geo.omdGeoJson(pathToOmd, conversion = False)
 
 	# create a dataframe that stores the location data of each of the nodes in the feeder system
 	if useDist == 'True':
@@ -314,7 +314,7 @@ def testingSimple(testPath, pathToCsv, workDir, useDist, useVolt):
 					try: outGraph.node[item['name']]['pos']=(float(item.get('latitude',0)),float(item.get('longitude',0)))
 					except: outGraph.node[item['name']]['pos']=(0.0,0.0)
 				elif 'from' in item.keys():
-					myPhase = omf.feeder._phaseCount(item.get('phases','AN'))
+					myPhase = feeder._phaseCount(item.get('phases','AN'))
 					# outGraph.add_edge(item['from'],item['to'],attr_dict={'name':item.get('name',''),'type':item['object'],'phases':myPhase})
 				elif item['name'] in outGraph:
 					# Edge already led to node's addition, so just set the attributes:
@@ -350,7 +350,7 @@ def testingSimple(testPath, pathToCsv, workDir, useDist, useVolt):
 						outGraph.add_edge(str(volt.loc[row,'node_name']),str(volt.loc[column,'node_name']), attr_dict={'type':'load'})
 				column += 1
 			row += 1
-		#omf.feeder.latLonNxGraph(outGraph, labels=True, neatoLayout=True, showPlot=True)
+		feeder.latLonNxGraph(outGraph, labels=True, neatoLayout=True, showPlot=False)
 		plt.savefig(workDir + graphname)
 
 	# graph the actual, distance, and voltage MSTs
