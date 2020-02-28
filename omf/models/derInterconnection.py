@@ -6,18 +6,11 @@ from networkx.drawing.nx_agraph import graphviz_layout
 import matplotlib
 
 # Hack: Agg backend doesn't work for interactivity. Switch to something we can use:
-if platform.system() == 'Darwin':
-	# matplotlib.use('TkAgg')
-	import matplotlib.pyplot as plt
-	plt.switch_backend('TkAgg')
-else:
-	from matplotlib import pyplot as plt
-	plt.switch_backend('Agg')
-
 import matplotlib
 if platform.system() == 'Darwin':
 	matplotlib.use('TkAgg')
 from matplotlib import pyplot as plt
+#plt.switch_backend('Agg')
 
 # OMF imports 
 import omf.feeder
