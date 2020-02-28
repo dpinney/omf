@@ -25,8 +25,8 @@ import omf.feeder
 import matplotlib
 if platform.system() == 'Darwin':
 	matplotlib.use('TkAgg')
-matplotlib.pyplot.switch_backend("Agg")
 from matplotlib import pyplot as plt
+#matplotlib.pyplot.switch_backend("Agg")
 
 
 m2ft = 1.0 / 0.3048  # Conversion factor for meters to feet

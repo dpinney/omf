@@ -8,8 +8,8 @@ from networkx.drawing.nx_agraph import graphviz_layout
 import matplotlib
 if platform.system() == 'Darwin':
 	matplotlib.use('TkAgg')
-plt.switch_backend('Agg')
 from matplotlib import pyplot as plt
+#plt.switch_backend('Agg')
 
 # dateutil imports
 from dateutil import parser
