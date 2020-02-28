@@ -15,8 +15,8 @@ from dateutil.relativedelta import *
 
 # OMF imports
 import omf
-import omf.feeder
-import omf.models.voltageDrop
+from omf import feeder
+from omf.models import voltageDrop
 from omf.models import __neoMetaModel__
 from omf.models.__neoMetaModel__ import *
 
@@ -83,7 +83,7 @@ def work(modelDir, inputDict):
 	else:
 		faultTypeValue = inputDict["faultType"]
 
-	chart = omf.models.voltageDrop.drawPlot(
+	chart = voltageDrop.drawPlot(
 		pJoin(modelDir,feederName + ".omd"),
 		neatoLayout = neato,
 		edgeCol = edgeColValue,
@@ -147,7 +147,7 @@ def _testingPlot():
 	# FNAME = 'test_smsSingle.glm'
 	# Hack: Agg backend doesn't work for interactivity. Switch to something we can use:
 	# plt.switch_backend('MacOSX')
-	chart = omf.models.voltageDrop.drawPlot(PREFIX + FNAME, neatoLayout=True, edgeCol="Current", nodeCol=None, nodeLabs="Name", edgeLabs=None, faultLoc="node713-704", faultType="TLG", customColormap=False, scaleMin=None, scaleMax=None, rezSqIn=225, simTime='2000-01-01 0:00:00')
+	chart = voltageDrop.drawPlot(PREFIX + FNAME, neatoLayout=True, edgeCol="Current", nodeCol=None, nodeLabs="Name", edgeLabs=None, faultLoc="node713-704", faultType="TLG", customColormap=False, scaleMin=None, scaleMax=None, rezSqIn=225, simTime='2000-01-01 0:00:00')
 	chart.savefig(PREFIX + "YO_WHATS_GOING_ON.png")
 	#plt.show()
 
@@ -156,7 +156,7 @@ def drawTable(path, workDir=None):
 	
 	# warnings.filterwarnings("ignore")
 	if path.endswith('.glm'):
-		tree = omf.feeder.parse(path)
+		tree = feeder.parse(path)
 		attachments = []
 	elif path.endswith('.omd'):
 		with open(path) as f:
