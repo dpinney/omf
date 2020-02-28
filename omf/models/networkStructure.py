@@ -1,11 +1,15 @@
-import json, os, tempfile, shutil, csv, math, re, base64
+import json, os, tempfile, shutil, csv, math, re, base64, platform
 from os.path import join as pJoin
 import pandas as pd
-from matplotlib import pyplot as plt
 import networkx as nx
 from sklearn import svm
 from sklearn import metrics
 from numpy import array
+
+import matplotlib
+if platform.system() == 'Darwin':
+	matplotlib.use('TkAgg')
+from matplotlib import pyplot as plt
 
 # dateutil imports
 from dateutil import parser
@@ -346,7 +350,7 @@ def testingSimple(testPath, pathToCsv, workDir, useDist, useVolt):
 						outGraph.add_edge(str(volt.loc[row,'node_name']),str(volt.loc[column,'node_name']), attr_dict={'type':'load'})
 				column += 1
 			row += 1
-		omf.feeder.latLonNxGraph(outGraph, labels=True, neatoLayout=True, showPlot=True)
+		#omf.feeder.latLonNxGraph(outGraph, labels=True, neatoLayout=True, showPlot=True)
 		plt.savefig(workDir + graphname)
 
 	# graph the actual, distance, and voltage MSTs

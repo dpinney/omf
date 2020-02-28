@@ -1,13 +1,15 @@
 ''' Graph the voltage drop on a feeder. '''
 
-import json, os, tempfile, shutil, csv, math, warnings, base64
+import json, os, tempfile, shutil, csv, math, warnings, base64, platform
 from os.path import join as pJoin
-import matplotlib
-from matplotlib import pyplot as plt
 import networkx as nx
 from networkx.drawing.nx_agraph import graphviz_layout
 
+import matplotlib
+if platform.system() == 'Darwin':
+	matplotlib.use('TkAgg')
 plt.switch_backend('Agg')
+from matplotlib import pyplot as plt
 
 # dateutil imports
 from dateutil import parser
