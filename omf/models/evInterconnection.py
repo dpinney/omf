@@ -1,9 +1,13 @@
 ''' Graph the voltage drop on a feeder. '''
 
-import json, os, shutil, csv, warnings, base64
+import json, os, shutil, csv, warnings, base64, platform
 from os.path import join as pJoin
 from random import randint, uniform
 import numpy as np
+
+import matplotlib
+if platform.system() == 'Darwin':
+	matplotlib.use('TkAgg')
 from matplotlib import pyplot as plt
 #plt.switch_backend('Agg')
 #plt.style.use('seaborn')
