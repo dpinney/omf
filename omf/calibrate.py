@@ -1,8 +1,10 @@
-import csv, datetime as dt, json, tempfile, os, random
+import csv, datetime as dt, json, tempfile, os, random, platform
 from os.path import join as pJoin
 import numpy as np
 # Plotting
 import matplotlib
+if platform.system() == 'Darwin':
+	matplotlib.use('TkAgg')
 from matplotlib import pyplot as plt
 # OMF imports
 import omf.feeder
@@ -327,13 +329,13 @@ def _tests():
 	print("Running gridlabD with voltage players.")
 	voltFeederPath, outcome = attachVolts(workDir, feederPath, voltVectorA, voltVectorB, voltVectorC, simStartDate, simLength, simLengthUnits)
 	print(os.system("gridlabd --version"))
-	# try: 
-	# 	assert None == omfCalibrate(workDir, voltFeederPath, scadaPath, simStartDate, simLength, simLengthUnits, "FBS", error, trim), "feeder calibration failed"
-	# 	print "\n  Success! Ran calibrate with voltage players!"
-	# except: 
-	# 	print "Failed to run calibrate with voltage players. Running only calibrate now."
-	# 	assert None == omfCalibrate(workDir, feederPath, scadaPath, simStartDate, simLength, simLengthUnits, "FBS", error, trim), "feeder calibration failed"
-	# 	print "\n  Success! Ran calibrate!"
+	#try:
+	#	assert None == omfCalibrate(workDir, voltFeederPath, scadaPath, simStartDate, simLength, simLengthUnits, "FBS", error, trim), "feeder calibration failed"
+	#	print("\n  Success! Ran calibrate with voltage players!")
+	#except:
+	#	print("Failed to run calibrate with voltage players. Running only calibrate now.")
+	#	assert None == omfCalibrate(workDir, feederPath, scadaPath, simStartDate, simLength, simLengthUnits, "FBS", error, trim), "feeder calibration failed"
+	#	print("\n  Success! Ran calibrate!")
 
 if __name__ == '__main__':
 	_tests()
