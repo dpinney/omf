@@ -12,8 +12,9 @@ from flask import Flask, send_file, render_template
 import matplotlib
 if platform.system() == 'Darwin':
 	matplotlib.use('TkAgg')
+else:
+	matplotlib.use('Agg')
 from matplotlib import pyplot as plt
-#plt.switch_backend('Agg')
 
 import omf
 from omf import feeder

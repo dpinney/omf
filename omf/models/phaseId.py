@@ -14,8 +14,9 @@ from sklearn.metrics import confusion_matrix
 import matplotlib
 if platform.system() == 'Darwin':
 	matplotlib.use('TkAgg')
+else:
+	matplotlib.use('Agg')
 from matplotlib import pyplot as plt
-#plt.switch_backend('Agg')
 
 from omf.models import __neoMetaModel__
 from omf.models.__neoMetaModel__ import *
@@ -388,5 +389,4 @@ def _tests():
 	__neoMetaModel__.renderAndShow(modelLoc)
 
 if __name__ == "__main__":
-	#_tests()
-	pass
+	_tests()
