@@ -10,7 +10,6 @@ if platform.system() == 'Darwin':
 else:
 	matplotlib.use('Agg')
 from matplotlib import pyplot as plt
-#plt.switch_backend('Agg')
 
 # Wireframe for new feeder objects:
 newFeederWireframe = {
