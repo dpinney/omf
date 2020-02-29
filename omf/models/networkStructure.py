@@ -9,6 +9,8 @@ from numpy import array
 import matplotlib
 if platform.system() == 'Darwin':
 	matplotlib.use('TkAgg')
+else:
+	matplotlib.use('Agg')
 from matplotlib import pyplot as plt
 
 # dateutil imports

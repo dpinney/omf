@@ -7,10 +7,10 @@ import shutil, datetime
 from os.path import join as pJoin
 
 # OMF imports
+from omf import feeder
+from omf.models.voltageDrop import drawPlot
 from omf.models import __neoMetaModel__
 from omf.models.__neoMetaModel__ import *
-import omf.feeder as feeder
-from omf.models.voltageDrop import drawPlot
 
 # Model metadata:
 modelName, template = __neoMetaModel__.metadata(__file__)
@@ -62,5 +62,4 @@ def _tests():
 	__neoMetaModel__.renderAndShow(modelLoc)
 
 if __name__ == '__main__':
-	#_tests()
-	pass
+	_tests()
