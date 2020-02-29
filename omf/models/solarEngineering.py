@@ -9,8 +9,9 @@ import networkx as nx
 import matplotlib
 if platform.system() == 'Darwin':
 	matplotlib.use('TkAgg')
+else:
+	matplotlib.use('Agg')
 from matplotlib import pyplot as plt
-#matplotlib.pyplot.switch_backend('Agg')
 from matplotlib.animation import FuncAnimation
 
 # OMF imports
@@ -607,5 +608,4 @@ def _tests():
 	__neoMetaModel__.renderAndShow(modelLoc)
 
 if __name__ == '__main__':
-	#_tests()
-	pass
+	_tests()

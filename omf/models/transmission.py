@@ -9,6 +9,8 @@ from os.path import join as pJoin
 import matplotlib
 if platform.system() == 'Darwin':
 	matplotlib.use('TkAgg')
+else:
+	matplotlib.use('Agg')
 from matplotlib import pyplot as plt
 import matplotlib.cm as cm
 
@@ -217,5 +219,4 @@ def _tests():
 	__neoMetaModel__.renderAndShow(modelLoc)
 
 if __name__ == '__main__':
-	#_tests()
-	pass
+	_tests()
