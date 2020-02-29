@@ -3,14 +3,14 @@ import json, os, tempfile, shutil, csv, math, warnings, random, copy, base64, pl
 from os.path import join as pJoin
 import networkx as nx
 from networkx.drawing.nx_agraph import graphviz_layout
-import matplotlib
 
 # Hack: Agg backend doesn't work for interactivity. Switch to something we can use:
 import matplotlib
 if platform.system() == 'Darwin':
 	matplotlib.use('TkAgg')
+else:
+	matplotlib.use('Agg')
 from matplotlib import pyplot as plt
-#plt.switch_backend('Agg')
 
 # OMF imports 
 import omf.feeder
@@ -790,6 +790,5 @@ def _tests():
 	__neoMetaModel__.renderAndShow(modelLoc)
 
 if __name__ == '__main__':
-	#_tests()
+	_tests()
 	#_testingPlot()
-	pass

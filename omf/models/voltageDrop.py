@@ -8,8 +8,9 @@ from networkx.drawing.nx_agraph import graphviz_layout
 import matplotlib
 if platform.system() == 'Darwin':
 	matplotlib.use('TkAgg')
+else:
+	matplotlib.use('Agg')
 from matplotlib import pyplot as plt
-#plt.switch_backend('Agg')
 
 # dateutil imports
 from dateutil import parser
@@ -695,6 +696,5 @@ def _tests():
 	__neoMetaModel__.renderAndShow(modelLoc)
 
 if __name__ == '__main__':
-	#_tests()
+	_tests()
 	# _testingPlot()
-	pass
