@@ -8,7 +8,7 @@ import matplotlib
 if platform.system() == 'Darwin':
 	matplotlib.use('TkAgg')
 else:
-	matplotlit.use('Agg')
+	matplotlitb.use('Agg')
 from matplotlib import pyplot as plt
 #plt.switch_backend('Agg')
 
