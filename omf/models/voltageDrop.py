@@ -18,8 +18,8 @@ from dateutil.relativedelta import *
 
 # OMF imports 
 import omf
-import omf.feeder
-import omf.solvers.gridlabd
+from omf import feeder
+from omf.solvers import gridlabd
 from omf.models import __neoMetaModel__
 from omf.models.__neoMetaModel__ import *
 
@@ -98,7 +98,7 @@ def drawPlot(path, workDir=None, neatoLayout=False, edgeLabs=None, nodeLabs=None
 	# Be quiet matplotlib:
 	# warnings.filterwarnings("ignore")
 	if path.endswith('.glm'):
-		tree = omf.feeder.parse(path)
+		tree = feeder.parse(path)
 		attachments = []
 	elif path.endswith('.omd'):
 		with open(path) as f:
@@ -170,12 +170,12 @@ def drawPlot(path, workDir=None, neatoLayout=False, edgeLabs=None, nodeLabs=None
 	tree[str(biggestKey*10 + 5)] = {"object":"voltdump","filename":"voltDump.csv"}
 	tree[str(biggestKey*10 + 6)] = {"object":"currdump","filename":"currDump.csv"}
 	# Line rating dumps
-	tree[omf.feeder.getMaxKey(tree) + 1] = {
+	tree[feeder.getMaxKey(tree) + 1] = {
 		'module': 'tape'
 	}
 	for key in edge_bools.keys():
 		if edge_bools[key]:
-			tree[omf.feeder.getMaxKey(tree) + 1] = {
+			tree[feeder.getMaxKey(tree) + 1] = {
 				'object':'group_recorder', 
 				'group':'"class='+key+'"',
 				'property':'continuous_rating',
@@ -216,14 +216,14 @@ def drawPlot(path, workDir=None, neatoLayout=False, edgeLabs=None, nodeLabs=None
 		if protDevices[key]:
 			for phase in ['A', 'B', 'C']:
 				if key != 'fuse':
-					tree[omf.feeder.getMaxKey(tree) + 1] = {
+					tree[feeder.getMaxKey(tree) + 1] = {
 						'object':'group_recorder', 
 						'group':'"class='+key+'"',
 						'property':'phase_' + phase + '_state',
 						'file':key + '_phase_' + phase + '_state.csv'
 					}
 				else:
-					tree[omf.feeder.getMaxKey(tree) + 1] = {
+					tree[feeder.getMaxKey(tree) + 1] = {
 						'object':'group_recorder', 
 						'group':'"class='+key+'"',
 						'property':'phase_' + phase + '_status',
@@ -235,11 +235,11 @@ def drawPlot(path, workDir=None, neatoLayout=False, edgeLabs=None, nodeLabs=None
 		workDir = tempfile.mkdtemp()
 		print('@@@@@@', workDir)
 	# for i in range(6):
-	# 	gridlabOut = omf.solvers.gridlabd.runInFilesystem(tree, attachments=attachments, workDir=workDir)
+	# 	gridlabOut = gridlabd.runInFilesystem(tree, attachments=attachments, workDir=workDir)
 	# 	#HACK: workaround for shoddy macOS gridlabd build.
 	# 	if 'error when setting parent' not in gridlabOut.get('stderr','OOPS'):
 	# 		break
-	gridlabOut = omf.solvers.gridlabd.runInFilesystem(tree, attachments=attachments, workDir=workDir)
+	gridlabOut = gridlabd.runInFilesystem(tree, attachments=attachments, workDir=workDir)
 
 	#Record final status readout of each fuse/recloser/switch/sectionalizer after running
 	try:
@@ -462,7 +462,7 @@ def drawPlot(path, workDir=None, neatoLayout=False, edgeLabs=None, nodeLabs=None
 	#define which dict will be used for edge label
 	edgeLabels = edgeTupleValsPU
 	# Build the graph.
-	fGraph = omf.feeder.treeToNxGraph(tree)
+	fGraph = feeder.treeToNxGraph(tree)
 	# TODO: consider whether we can set figsize dynamically.
 	wlVal = int(math.sqrt(float(rezSqIn)))
 	voltChart = plt.figure(figsize=(wlVal, wlVal))
@@ -625,7 +625,7 @@ def drawPlot(path, workDir=None, neatoLayout=False, edgeLabs=None, nodeLabs=None
 
 def glmToModel(glmPath, modelDir):
 	''' One shot model creation from glm. '''
-	tree = omf.feeder.parse(glmPath)
+	tree = feeder.parse(glmPath)
 	print("glmPath:    " + glmPath)
 	print("modelDir:   " + modelDir)
 	# Run powerflow. First name the folder for it.
@@ -636,7 +636,7 @@ def glmToModel(glmPath, modelDir):
 	# Create the .omd.
 	os.remove(modelDir + '/Olin Barre Geo.omd')
 	with open(modelDir + '/Olin Barre Geo.omd','w') as omdFile:
-		omd = dict(omf.feeder.newFeederWireframe)
+		omd = dict(feeder.newFeederWireframe)
 		omd['tree'] = tree
 		json.dump(omd, omdFile, indent=4)
 

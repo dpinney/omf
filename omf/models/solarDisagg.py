@@ -7,7 +7,7 @@ from os.path import join as pJoin
 import numpy as np
 
 # OMF imports
-import omf.solvers.CSSS.csss.SolarDisagg as SolarDisagg
+from omf.solvers.CSSS.csss import SolarDisagg
 from omf.models import __neoMetaModel__
 from omf.models.__neoMetaModel__ import *
 
@@ -301,5 +301,4 @@ def _tests():
 	__neoMetaModel__.renderAndShow(modelLoc)
 
 if __name__ == '__main__':
-	#_tests()
-	pass
+	_tests()
