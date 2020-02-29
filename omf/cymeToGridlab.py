@@ -15,18 +15,18 @@ modelDir is the working directory for intermediate file output
 import csv, random, math, copy, subprocess, locale, warnings, os, json, traceback, shutil, platform
 #import tempfile
 from os.path import join as pJoin
-import matplotlib
-from matplotlib import pyplot as plt
 import numpy as np
 from numpy.linalg import inv
-from omf.solvers import gridlabd
-import omf.feeder
 
 import matplotlib
 if platform.system() == 'Darwin':
 	matplotlib.use('TkAgg')
+else:
+	matplotlib.use('Agg')
 from matplotlib import pyplot as plt
-#matplotlib.pyplot.switch_backend("Agg")
+
+from omf import feeder
+from omf.solvers import gridlabd
 
 
 m2ft = 1.0 / 0.3048  # Conversion factor for meters to feet
@@ -3417,7 +3417,7 @@ def _tests(keepFiles=True):
 		try:
 			# Main conversion of CYME model.
 			cyme_base = convertCymeModel(inputDir + db_network, inputDir)
-			glmString = omf.feeder.sortedWrite(cyme_base)
+			glmString = feeder.sortedWrite(cyme_base)
 			testFilename = db_network[:-4]
 			with open(inputDir + testFilename + ".glm", 'w') as f:
 				f.write(glmString)
@@ -3425,7 +3425,7 @@ def _tests(keepFiles=True):
 			outFileStats = os.stat(pJoin(inputDir, testFilename + ".glm"))
 			inFileSize = inFileStats.st_size
 			outFileSize = outFileStats.st_size
-			treeObj = omf.feeder.parse(inputDir + testFilename + ".glm")
+			treeObj = feeder.parse(inputDir + testFilename + ".glm")
 			print("WROTE GLM FOR " + db_network)
 			with open(pJoin(outputDir, "convResults.txt"), "a") as resultsFile:
 				resultsFile.write("WROTE GLM FOR " + testFilename + "\n")
@@ -3463,8 +3463,8 @@ def _tests(keepFiles=True):
 			traceback.print_exc()
 		try:
 			# Draw the GLM.
-			myGraph = omf.feeder.treeToNxGraph(cyme_base)
-			omf.feeder.latLonNxGraph(myGraph, neatoLayout=False)
+			myGraph = feeder.treeToNxGraph(cyme_base)
+			feeder.latLonNxGraph(myGraph, neatoLayout=False)
 			plt.savefig(outputDir + testFilename + ".png")
 			with open(pJoin(outputDir, "convResults.txt"), "a") as resultsFile:
 				resultsFile.write("DREW GLM FOR " + testFilename + "\n")
