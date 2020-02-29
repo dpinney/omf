@@ -3,10 +3,15 @@
 import datetime, copy, os, re, warnings, json, platform
 from functools import reduce
 import networkx as nx
+
 import matplotlib
 if platform.system() == 'Darwin':
 	matplotlib.use('TkAgg')
+else:
+	matplotlit.use('Agg')
 from matplotlib import pyplot as plt
+if platform.sys
+#plt.switch_backend('Agg')
 
 # Wireframe for new feeder objects:
 newFeederWireframe = {
