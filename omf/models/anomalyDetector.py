@@ -498,8 +498,7 @@ def new(modelDir):
 	return __neoMetaModel__.new(modelDir, defaultInputs)
 
 
-@neoMetaModel_test_setup
-def _tests():
+def _debugging():
 	modelLoc = pJoin(
 		__neoMetaModel__._omfDir,
 		"data",
@@ -516,4 +515,4 @@ def _tests():
 
 
 if __name__ == "__main__":
-	_tests()
+	_debugging()
