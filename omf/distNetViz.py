@@ -9,15 +9,17 @@ import omf
 import omf.feeder
 
 
-def main():
+def _tests():
 	''' Handle the command line arguments for distNetViz.'''
 	argCount = len(sys.argv)
 	errorMessage = 'Incorrect inputs. Usage: distNetViz -f <Path_to_feeder.glm or .omd>'
 	if argCount == 1:
 		print('Running tests. Normal usage: distNetViz -f <Path_to_feeder.glm or .omd>')
-		_tests()
+		viz(omf.omfDir + '/static/publicFeeders/Simple Market System.omd', forceLayout=True, open_file=False) # No coordinates
+		viz(omf.omfDir + '/static/publicFeeders/Simple Market System.omd', forceLayout=False, open_file=False) # No coordinates
+		viz(omf.omfDir + '/static/testFiles/IEEE13.glm', forceLayout=True, open_file=False) # Has coordinates
+		viz(omf.omfDir + '/static/testFiles/IEEE13.glm', forceLayout=False, open_file=False) # Has coordinates
 		return
-		#DO_FORCE_LAYOUT = True
 	elif argCount == 2:
 		print('Beginning display of ' + sys.argv[1])
 		DO_FORCE_LAYOUT = False
@@ -179,15 +181,8 @@ def open_browser(tempDir, outputName):
 	webbrowser.open_new("file://" + tempDir + '/' + outputName)
 
 
-def _tests():
-	viz(omf.omfDir + '/static/publicFeeders/Simple Market System.omd', forceLayout=True, open_file=False) # No coordinates
-	viz(omf.omfDir + '/static/publicFeeders/Simple Market System.omd', forceLayout=False, open_file=False) # No coordinates
-	viz(omf.omfDir + '/static/testFiles/IEEE13.glm', forceLayout=True, open_file=False) # Has coordinates
-	viz(omf.omfDir + '/static/testFiles/IEEE13.glm', forceLayout=False, open_file=False) # Has coordinates
-
-
 if __name__ == '__main__':
-	main()
+	_tests()
 	#viz('/Users/tuomastalvitie/OneDrive/NRECA Code/DEC Robinsonville Original.omd', forceLayout=False, outputPath=None)
 	#viz('C:\Users\Tuomas\SkyDrive\NRECA Code\Utility Data\DEC Robinsonville Substation\DEC Robinsonville Original.omd', forceLayout=False, outputPath=None)
 	#viz('/Users/dpinney/Desktop/LATERBASE/NRECA/GridBallast/DM1.3.1 Go-No-Go - Demonstration of GridBallast Performance in Simulation - FINISHED/Utility Data/DEC Robinsonville Substation/DEC Robinsonville Original.omd', forceLayout=False, outputPath=None)

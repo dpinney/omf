@@ -253,8 +253,7 @@ def new(modelDir):
 	return __neoMetaModel__.new(modelDir, defaultInputs)
 
 # Disable tests for now b/c they require too much memory for GitHub Actions
-#@neoMetaModel_test_setup
-def _tests():
+def _debugging():
 	modelLoc = pJoin(__neoMetaModel__._omfDir,'data','Model','admin','Automated Testing of ' + modelName)
 	# Blow away old test results if necessary.
 	if isdir(modelLoc):
@@ -265,4 +264,4 @@ def _tests():
 	__neoMetaModel__.renderAndShow(modelLoc)  # Show the output.
 
 if __name__ == '__main__':
-	_tests()
+	_debugging()

@@ -185,5 +185,4 @@ def _tests():
 	renderAndShow(modelLoc) # Show the output.
 
 if __name__ == '__main__':
-	#_tests()
-	pass
+	_tests()

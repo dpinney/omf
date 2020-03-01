@@ -238,5 +238,5 @@ def _tests():
 	#viz(os.path.join(os.path.dirname(__file__), 'static/SimpleNetwork.json')
 
 if __name__ == '__main__':
-	#viz(os.path.join(os.path.dirname(__file__), "static/SimpleNetwork.json"))
 	_tests()
+	#viz(os.path.join(os.path.dirname(__file__), "static/SimpleNetwork.json"))
