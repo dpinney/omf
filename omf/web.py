@@ -662,12 +662,12 @@ def networkGet(owner, modelName, networkNum):
 		currUser=User.cu(), owner=owner)
 
 
-@app.route("/feeder/<owner>/<modelName>/<feeder_num>/test")
-@app.route("/feeder/<owner>/<modelName>/<feeder_num>")
+@app.route('/feeder/<owner>/<modelName>/<feeder_num>/test')
+@app.route('/feeder/<owner>/<modelName>/<feeder_num>')
 @flask_login.login_required
 @read_permission_function
 def distribution_get(owner, modelName, feeder_num):
-	"""Render the editing interface for distribution networks."""
+	'''Render the editing interface for distribution networks.'''
 	feeder_dict = get_model_metadata(owner, modelName)
 	feeder_name = feeder_dict.get('feederName' + str(feeder_num))
 	feeder_filepath = os.path.join(_omfDir, 'data', 'Model', owner, modelName, feeder_name + '.omd')
@@ -676,34 +676,24 @@ def distribution_get(owner, modelName, feeder_num):
 	feeder = json.dumps(data)
 	component_json = get_components()
 	jasmine = spec = None
-	if request.path.endswith("/test") and User.cu() == "admin":
-		tests = load_test_files(["distNetVizSpec.js"])
-		jasmine = tests["jasmine"]
-		spec = tests["spec"]
+	if request.path.endswith('/test') and User.cu() == 'admin':
+		from omf.static.testFiles.test_distNetVizInterface import helper
+		tests = helper.load_test_files(['spec_distNetVizInterface.js'])
+		jasmine = tests['jasmine']
+		spec = tests['spec']
 	all_data = getDataNames()
-	user_feeders = all_data["feeders"]
+	user_feeders = all_data['feeders']
 	# Must get rid of the 'u' for unicode strings before passing the strings to JavaScript
 	for dictionary in user_feeders:
 		dictionary['model'] = str(dictionary['model'])
 		dictionary['name'] = str(dictionary['name'])
-	public_feeders = all_data["publicFeeders"]
-	show_file_menu = User.cu() == owner or User.cu() == "admin"
+	public_feeders = all_data['publicFeeders']
+	show_file_menu = User.cu() == owner or User.cu() == 'admin'
 	return render_template(
-		"distNetViz.html", thisFeederData=feeder, thisFeederName=feeder_name, thisFeederNum=feeder_num,
+		'distNetViz.html', thisFeederData=feeder, thisFeederName=feeder_name, thisFeederNum=feeder_num,
 		thisModelName=modelName, thisOwner=owner, components=component_json, jasmine=jasmine, spec=spec,
 		publicFeeders=public_feeders, userFeeders=user_feeders, showFileMenu=show_file_menu, currentUser=User.cu()
 	)
-
-
-def load_test_files(file_names):
-	"""Load the JavaScript unit-test files into a string and return the string"""
-	with open(os.path.join(_omfDir, "static", "lib", "jasmine-3.3.0", "scriptTags.html")) as f:
-		jasmine = f.read()
-	spec = ""
-	for name in file_names:
-		with open(os.path.join(_omfDir, "static", "testFiles", name)) as f:
-			spec += f.read()
-	return {"jasmine": jasmine, "spec": spec}
 
 
 @app.route("/getComponents/")

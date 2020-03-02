@@ -56,8 +56,8 @@ class CSSS:
         model['order']     = regressor.shape[1]
 
         ## Define decision variables and cost function style
-        model['source']    = cvp.Variable(self.N,1)
-        model['theta']     = cvp.Variable(model['order'],1)
+        model['source']    = cvp.Variable((self.N, 1))
+        model['theta']     = cvp.Variable((model['order'], 1))
         model['costFunction'] = costFunction
         model['regularizeTheta'] = regularizeTheta
         model['beta'] = beta
@@ -82,13 +82,13 @@ class CSSS:
             ## a scalar or a vector of length N.
             if model['costFunction'].lower() == 'sse':
                 residuals = (model['source'] - model['regressor'] * model['theta'])
-                modelObj =  cvp.sum_squares( cvp.mul_elemwise( model['alpha'] ** .5 , residuals ) )
+                modelObj =  cvp.sum_squares( cvp.multiply( model['alpha'] ** .5 , residuals ) )
             elif model['costFunction'].lower() == 'l1':
                 residuals = (model['source'] - model['regressor'] * model['theta'])
-                modelObj =  cvp.norm( cvp.mul_elemwise( model['alpha'] , residuals ) ,1)
+                modelObj =  cvp.norm( cvp.multiply( model['alpha'] , residuals ) ,1)
             elif model['costFunction'].lower()=='l2':
                 residuals = (model['source'] - model['regressor'] * model['theta'])
-                modelObj =  cvp.norm( cvp.mul_elemwise( model['alpha'] , residuals ) ,2)
+                modelObj =  cvp.norm( cvp.multiply( model['alpha'] , residuals ) ,2)
             else:
                 raise ValueError('{} wrong option, use "sse","l2" or "l1"'.format(costFunction))
             ## Define cost function to regularize theta ****************
@@ -178,7 +178,7 @@ class CSSS:
 
 
         ## Append the constraint that the sum of sources must equal aggergate signal
-        con.append(self.aggregateSignal == sum_sources)
+        con.append(np.vstack(self.aggregateSignal) == sum_sources)
 
         ## Solve problem
         prob = cvp.Problem(cvp.Minimize(obj), con)
@@ -223,8 +223,8 @@ class CSSS:
                         else:
                             ### This is the only source
                             ### we are solving for at each update
-                            theta_update=cvp.Variable(model['order'],1)
-                            source_update=cvp.Variable(self.N,1)
+                            theta_update=cvp.Variable((model['order'], 1))
+                            source_update=cvp.Variable((self.N, 1))
 
                             residuals = (source_update
                             - (model['regressor'] * theta_update))

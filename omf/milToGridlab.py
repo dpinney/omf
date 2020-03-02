@@ -1,15 +1,21 @@
 ''' Convert a Milsoft Windmil feeder model into an OMF-compatible version. '''
-import os, csv, random, math, copy, locale, json, traceback, shutil, time, datetime, warnings, gc
+import os, csv, random, math, copy, locale, json, traceback, shutil, time, datetime, warnings, gc, platform
 from os.path import join as pJoin
 from io import StringIO
 from dateutil.tz import tzlocal
-from matplotlib import pyplot as plt
 from pytz import reference
 import numpy as np
+
+import matplotlib
+if platform.system() == 'Darwin':
+	matplotlib.use('TkAgg')
+else:
+	matplotlib.use('Agg')
+from matplotlib import pyplot as plt
+
 import omf
+from omf import feeder, geo
 from omf.solvers import gridlabd
-import omf.feeder as feeder
-import omf.geo as geo
 
 def _csvToArray(csvString):
 	''' Simple csv data ingester. '''

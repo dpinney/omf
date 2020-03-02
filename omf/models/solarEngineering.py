@@ -1,18 +1,22 @@
 ''' Powerflow results for one Gridlab instance. '''
 
-import json, os, csv, shutil, datetime, math, gc
+import json, os, csv, shutil, datetime, math, gc, platform
+from os.path import join as pJoin
 from functools import reduce
 import numpy as np
 import networkx as nx
+
 import matplotlib
+if platform.system() == 'Darwin':
+	matplotlib.use('TkAgg')
+else:
+	matplotlib.use('Agg')
 from matplotlib import pyplot as plt
 from matplotlib.animation import FuncAnimation
-matplotlib.pyplot.switch_backend('Agg')
-from os.path import join as pJoin
 
 # OMF imports
-import omf.feeder, omf.weather
-import omf.solvers.gridlabd
+from omf import feeder, weather
+from omf.solvers import gridlabd
 from omf.models import __neoMetaModel__
 from omf.models.__neoMetaModel__ import *
 
@@ -26,86 +30,86 @@ def work(modelDir, inputDict):
 	# feederName = inputDict["feederName1"]
 	feederName = [x for x in os.listdir(modelDir) if x.endswith('.omd')][0][:-4]
 	inputDict["feederName1"] = feederName
-	inputDict["climateName"] = omf.weather.zipCodeToClimateName(inputDict["zipCode"])
+	inputDict["climateName"] = weather.zipCodeToClimateName(inputDict["zipCode"])
 	shutil.copy(pJoin(__neoMetaModel__._omfDir, "data", "Climate", inputDict["climateName"] + ".tmy2"),
 		pJoin(modelDir, "climate.tmy2"))
 	with open(pJoin(modelDir, feederName + '.omd')) as f:
 		feederJson = json.load(f)
 	tree = feederJson["tree"]
 	# Set up GLM with correct time and recorders:
-	omf.feeder.attachRecorders(tree, "Regulator", "object", "regulator")
-	omf.feeder.attachRecorders(tree, "Capacitor", "object", "capacitor")
-	omf.feeder.attachRecorders(tree, "Inverter", "object", "inverter")
-	omf.feeder.attachRecorders(tree, "Windmill", "object", "windturb_dg")
-	omf.feeder.attachRecorders(tree, "CollectorVoltage", None, None)
-	omf.feeder.attachRecorders(tree, "Climate", "object", "climate")
-	omf.feeder.attachRecorders(tree, "OverheadLosses", None, None)
-	omf.feeder.attachRecorders(tree, "UndergroundLosses", None, None)
-	omf.feeder.attachRecorders(tree, "TriplexLosses", None, None)
-	omf.feeder.attachRecorders(tree, "TransformerLosses", None, None)
-	omf.feeder.groupSwingKids(tree)
+	feeder.attachRecorders(tree, "Regulator", "object", "regulator")
+	feeder.attachRecorders(tree, "Capacitor", "object", "capacitor")
+	feeder.attachRecorders(tree, "Inverter", "object", "inverter")
+	feeder.attachRecorders(tree, "Windmill", "object", "windturb_dg")
+	feeder.attachRecorders(tree, "CollectorVoltage", None, None)
+	feeder.attachRecorders(tree, "Climate", "object", "climate")
+	feeder.attachRecorders(tree, "OverheadLosses", None, None)
+	feeder.attachRecorders(tree, "UndergroundLosses", None, None)
+	feeder.attachRecorders(tree, "TriplexLosses", None, None)
+	feeder.attachRecorders(tree, "TransformerLosses", None, None)
+	feeder.groupSwingKids(tree)
 	# Attach recorders for system voltage map:
 	stub = {'object':'group_recorder', 'group':'"class=node"', 'interval':3600}
 	for phase in ['A','B','C']:
 		copyStub = dict(stub)
 		copyStub['property'] = 'voltage_' + phase
 		copyStub['file'] = phase.lower() + 'VoltDump.csv'
-		tree[omf.feeder.getMaxKey(tree) + 1] = copyStub
+		tree[feeder.getMaxKey(tree) + 1] = copyStub
 	# Attach recorders for system voltage map, triplex:
 	stub = {'object':'group_recorder', 'group':'"class=triplex_node"', 'interval':3600}
 	for phase in ['1','2']:
 		copyStub = dict(stub)
 		copyStub['property'] = 'voltage_' + phase
 		copyStub['file'] = phase.lower() + 'nVoltDump.csv'
-		tree[omf.feeder.getMaxKey(tree) + 1] = copyStub
+		tree[feeder.getMaxKey(tree) + 1] = copyStub
 	# Attach current recorder for overhead_lines
 	currentStub = {'object':'group_recorder', 'group':'"class=overhead_line"', 'interval':3600}
 	for phase in ['A','B','C']:
 		copyCurrentStub = dict(currentStub)
 		copyCurrentStub['property'] = 'current_out_' + phase
 		copyCurrentStub['file'] = 'OH_line_current_phase' + phase + '.csv'
-		tree[omf.feeder.getMaxKey(tree) + 1] = copyCurrentStub
+		tree[feeder.getMaxKey(tree) + 1] = copyCurrentStub
 	rating_stub = {'object':'group_recorder', 'group':'"class=overhead_line"', 'interval':3600}
 	copyRatingStub = dict(rating_stub)
 	copyRatingStub['property'] = 'continuous_rating'
 	copyRatingStub['file'] = 'OH_line_cont_rating.csv'
-	tree[omf.feeder.getMaxKey(tree) + 1] = copyRatingStub
+	tree[feeder.getMaxKey(tree) + 1] = copyRatingStub
 	flow_stub = {'object':'group_recorder', 'group':'"class=overhead_line"', 'interval':3600}
 	copyFlowStub = dict(flow_stub)
 	copyFlowStub['property'] = 'flow_direction'
 	copyFlowStub['file'] = 'OH_line_flow_direc.csv'
-	tree[omf.feeder.getMaxKey(tree) + 1] = copyFlowStub
+	tree[feeder.getMaxKey(tree) + 1] = copyFlowStub
 	# Attach current recorder for underground_lines
 	currentStubOH = {'object':'group_recorder', 'group':'"class=underground_line"', 'interval':3600}
 	for phase in ['A','B','C']:
 		copyCurrentStubOH = dict(currentStubOH)
 		copyCurrentStubOH['property'] = 'current_out_' + phase
 		copyCurrentStubOH['file'] = 'UG_line_current_phase' + phase + '.csv'
-		tree[omf.feeder.getMaxKey(tree) + 1] = copyCurrentStubOH
+		tree[feeder.getMaxKey(tree) + 1] = copyCurrentStubOH
 	ug_rating_stub = {'object':'group_recorder', 'group':'"class=underground_line"', 'interval':3600}
 	copyUGRatingStub = dict(ug_rating_stub)
 	copyUGRatingStub['property'] = 'continuous_rating'
 	copyUGRatingStub['file'] = 'UG_line_cont_rating.csv'
-	tree[omf.feeder.getMaxKey(tree) + 1] = copyUGRatingStub
+	tree[feeder.getMaxKey(tree) + 1] = copyUGRatingStub
 	ug_flow_stub = {'object':'group_recorder', 'group':'"class=underground_line"', 'interval':3600}
 	ugCopyFlowStub = dict(ug_flow_stub)
 	ugCopyFlowStub['property'] = 'flow_direction'
 	ugCopyFlowStub['file'] = 'UG_line_flow_direc.csv'
-	tree[omf.feeder.getMaxKey(tree) + 1] = ugCopyFlowStub
+	tree[feeder.getMaxKey(tree) + 1] = ugCopyFlowStub
 	# And get meters for system voltage map:
 	stub = {'object':'group_recorder', 'group':'"class=triplex_meter"', 'interval':3600}
 	for phase in ['1','2']:
 		copyStub = dict(stub)
 		copyStub['property'] = 'voltage_' + phase
 		copyStub['file'] = phase.lower() + 'mVoltDump.csv'
-		tree[omf.feeder.getMaxKey(tree) + 1] = copyStub
+		tree[feeder.getMaxKey(tree) + 1] = copyStub
 	for key in tree:
 		if 'bustype' in tree[key].keys():
 			if tree[key]['bustype'] == 'SWING':
 				tree[key]['object'] = 'meter'
 				swingN = tree[key]['name']
 	swingRecord = {'object':'recorder', 'property':'voltage_A,measured_real_power,measured_power','file':'subVoltsA.csv','parent':swingN, 'interval':60}
-	tree[omf.feeder.getMaxKey(tree) + 1] = swingRecord
+	tree[feeder.getMaxKey(tree) + 1] = swingRecord
 	for key in tree:
 		if 'omftype' in tree[key].keys() and tree[key]['argument']=='minimum_timestep=3600':
 			tree[key]['argument'] = 'minimum_timestep=60'
@@ -117,7 +121,7 @@ def work(modelDir, inputDict):
 			downLineNode = tree[key]['voltage_measurements']
 	if downLineNode != 'None':
 		downNodeRecord = {'object':'recorder', 'property':'voltage_A','file':'firstDownlineVoltsA.csv','parent':downLineNode, 'interval':60}
-		tree[omf.feeder.getMaxKey(tree) + 1] = downNodeRecord
+		tree[feeder.getMaxKey(tree) + 1] = downNodeRecord
 	# Violation recorder to display to users 
 	# violationRecorder = {'object':'violation_recorder','node_continuous_voltage_limit_lower':0.95,'file':'Violation_Log.csv',
 	# 					'secondary_dist_voltage_rise_lower_limit':-0.042,'substation_pf_lower_limit':0.85,'substation_breaker_C_limit':300,
@@ -127,11 +131,11 @@ def work(modelDir, inputDict):
 	# 					'node_instantaneous_voltage_limit_lower':0,'line_thermal_limit_upper':1,'echo':'false','node_continuous_voltage_limit_upper':1.05,
 	# 					'interval':30,'line_thermal_limit_lower':0,'summary':'Violation_Summary.csv','inverter_v_chng_interval':60,
 	# 					'xfrmr_thermal_limit_upper':2,'inverter_v_chng_per_interval_upper_bound':0.050}
-	# tree[omf.feeder.getMaxKey(tree) + 1] = violationRecorder
-	omf.feeder.adjustTime(tree=tree, simLength=float(inputDict["simLength"]),
+	# tree[feeder.getMaxKey(tree) + 1] = violationRecorder
+	feeder.adjustTime(tree=tree, simLength=float(inputDict["simLength"]),
 		simLengthUnits=inputDict["simLengthUnits"], simStartDate=inputDict["simStartDate"])
 	# RUN GRIDLABD IN FILESYSTEM (EXPENSIVE!)
-	rawOut = omf.solvers.gridlabd.runInFilesystem(tree, attachments=feederJson["attachments"], 
+	rawOut = gridlabd.runInFilesystem(tree, attachments=feederJson["attachments"], 
 		keepFiles=True, workDir=pJoin(modelDir))
 		# voltDumps have no values when gridlabD fails or the files dont exist
 	if not os.path.isfile(pJoin(modelDir,'aVoltDump.csv')):
@@ -344,7 +348,7 @@ def generateVoltChart(tree, rawOut, modelDir, neatoLayout=True):
 		if type(ob)==dict and ob.get('bustype','')=='SWING':
 			feedVoltage = float(ob.get('nominal_voltage',1))
 	# Make a graph object.
-	fGraph = omf.feeder.treeToNxGraph(tree)
+	fGraph = feeder.treeToNxGraph(tree)
 	if neatoLayout:
 		# HACK: work on a new graph without attributes because graphViz tries to read attrs.
 		cleanG = nx.Graph(fGraph.edges())
@@ -584,6 +588,7 @@ def new(modelDir):
 		return False
 	return creationCode
 
+@neoMetaModel_test_setup
 def _tests():
 	# Location
 	modelLoc = pJoin(__neoMetaModel__._omfDir,"data","Model","admin","Automated Testing of " + modelName)

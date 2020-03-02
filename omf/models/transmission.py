@@ -5,11 +5,16 @@ Tested on Linux and macOS.
 
 import json, os, shutil, subprocess, math, platform, base64
 from os.path import join as pJoin
-import matplotlib
-import matplotlib.cm as cm
-from matplotlib import pyplot as plt
 
-import omf.network
+import matplotlib
+if platform.system() == 'Darwin':
+	matplotlib.use('TkAgg')
+else:
+	matplotlib.use('Agg')
+from matplotlib import pyplot as plt
+import matplotlib.cm as cm
+
+from omf import network
 from omf.models import __neoMetaModel__
 from omf.models.__neoMetaModel__ import *
 
@@ -35,7 +40,7 @@ def work(modelDir, inputDict):
 		networkJson = json.load(f)
 	matName = 'matIn'
 	matFileName = matName + '.m'
-	matStr = omf.network.netToMat(networkJson, matName)
+	matStr = network.netToMat(networkJson, matName)
 	with open(pJoin(modelDir, matFileName),"w") as outMat:
 		for row in matStr: outMat.write(row)		
 	# Build the MATPOWER command.
@@ -194,6 +199,7 @@ def new(modelDir):
 		return False
 	return creationCode
 
+@neoMetaModel_test_setup
 def _tests():
 	# Location
 	modelLoc = pJoin(__neoMetaModel__._omfDir,"data","Model","admin","Automated Testing of " + modelName)

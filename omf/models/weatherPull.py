@@ -2,7 +2,7 @@
 import shutil, csv
 from os.path import isdir, join as pJoin
 
-import omf.weather
+from omf import weather
 from omf.models import __neoMetaModel__
 from omf.models.__neoMetaModel__ import *
 
@@ -17,20 +17,20 @@ def work(modelDir, inputDict):
 	if source =='ASOS':
 		station = inputDict['stationASOS']
 		parameter = inputDict['weatherParameterASOS']
-		data = omf.weather.pullAsos(inputDict['year'], station, parameter)
+		data = weather.pullAsos(inputDict['year'], station, parameter)
 	elif source == 'USCRN':
 		station = inputDict['stationUSCRN']
 		parameter = inputDict['weatherParameterUSCRN']
-		data = omf.weather.pullUscrn(inputDict['year'], station, parameter)
+		data = weather.pullUscrn(inputDict['year'], station, parameter)
 	elif source == 'darkSky':
 		lat = inputDict['darkSkyLat']
 		lon = inputDict['darkSkyLon']
 		parameter = inputDict['weatherParameterdarkSky']
-		data = omf.weather.pullDarksky(inputDict['year'], lat, lon, parameter, units='si')
+		data = weather.pullDarksky(inputDict['year'], lat, lon, parameter, units='si')
 	# station = inputDict['stationASOS'] if source == 'ASOS' else inputDict['stationUSCRN']
 	# parameter = inputDict['weatherParameterASOS'] if source == 'ASOS' else inputDict['weatherParameterUSCRN']
 	# inputs = [inputDict['year'], station, parameter]
-	# data = omf.weather.pullAsos(*inputs) if source == 'ASOS' else omf.weather.pullUscrn(*inputs)
+	# data = weather.pullAsos(*inputs) if source == 'ASOS' else weather.pullUscrn(*inputs)
 	with open(pJoin(modelDir,'weather.csv'), 'w', newline='') as f:
 		csv.writer(f).writerows([[x] for x in data])
 	return {
@@ -54,6 +54,7 @@ def new(modelDir):
 		"modelType": modelName}
 	return __neoMetaModel__.new(modelDir, defaultInputs)
 
+@neoMetaModel_test_setup
 def _tests():
 	modelLoc = pJoin(__neoMetaModel__._omfDir, "data", "Model", "admin", "Automated Testing of " + modelName)
 	if isdir(modelLoc):

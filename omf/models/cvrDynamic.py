@@ -1,13 +1,19 @@
 ''' Calculate CVR impacts using a targetted set of dynamic loadflows. '''
 
-import json, os, shutil, math, calendar
+import json, os, shutil, math, calendar, platform
 from datetime import datetime as dt, timedelta
 from os.path import join as pJoin
+
+import matplotlib
+if platform.system() == 'Darwin':
+	matplotlib.use('TkAgg')
+else:
+	matplotlib.use('Agg')
 from matplotlib import pyplot as plt
 
-# OMF imports
-import omf.feeder
-import omf.solvers.gridlabd
+# OMF feeder
+from omf import feeder
+from omf.solvers import gridlabd
 from omf.models import __neoMetaModel__
 from omf.models.__neoMetaModel__ import *
 
@@ -108,8 +114,8 @@ def work(modelDir,inputDict):
 	#run a reference load flow
 	HOURS = float(inputDict['simLengthHours'])
 	simStartDate = inputDict['simStart']
-	omf.feeder.adjustTime(localTree,HOURS,'hours',simStartDate)
-	output = omf.solvers.gridlabd.runInFilesystem(localTree, attachments, keepFiles=False,workDir=modelDir)
+	feeder.adjustTime(localTree,HOURS,'hours',simStartDate)
+	output = gridlabd.runInFilesystem(localTree, attachments, keepFiles=False,workDir=modelDir)
 	try: os.remove(pJoin(modelDir,'PID.txt'))
 	except: pass
 	p = output['Zregulator.csv']['power_in.real']
@@ -145,8 +151,8 @@ def work(modelDir,inputDict):
 		'voltage_measurements': str(inputDict.get('voltageNodes', 'IVVC1')),
 	}
 	#running powerflow analysis via gridalab after attaching a regulator
-	omf.feeder.adjustTime(localTree,HOURS,'hours',simStartDate)
-	output1 = omf.solvers.gridlabd.runInFilesystem(localTree,attachments,keepFiles=True,workDir=modelDir)
+	feeder.adjustTime(localTree,HOURS,'hours',simStartDate)
+	output1 = gridlabd.runInFilesystem(localTree,attachments,keepFiles=True,workDir=modelDir)
 	os.remove(pJoin(modelDir,'PID.txt'))
 	pnew = output1['NewZregulator.csv']['power_in.real']
 	qnew = output1['NewZregulator.csv']['power_in.imag']
@@ -520,6 +526,7 @@ def returnMag(complexStr):
 				imag = 0.0
 	return (math.sqrt(real**2+imag**2))/60.0
 
+@neoMetaModel_test_setup
 def _tests():
 	# Location
 	modelLoc = pJoin(__neoMetaModel__._omfDir,'data','Model','admin','Automated Testing of ' + modelName)

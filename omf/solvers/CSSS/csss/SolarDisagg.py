@@ -42,12 +42,12 @@ class SolarDisagg_IndvHome(CSSS.CSSS):
             self.addSource(regressor=solarregressors, name = source_name, alpha = 1)
 
             ## Add constraints that solar generation cannot exceed zero or net load.
-            self.addConstraint( self.models[source_name]['source'] <= np.array(self.netloads[source_name]) )
+            self.addConstraint( self.models[source_name]['source'] <= np.vstack(self.netloads[source_name]) )
             self.addConstraint( self.models[source_name]['source'] <= 0 )
 
         ## Add the aggregate load source
         self.addSource(regressor=loadregressors, name = 'AggregateLoad', alpha = 1)
-        self.addConstraint( self.models['AggregateLoad']['source'] > 0 )
+        self.addConstraint( self.models['AggregateLoad']['source'] >= 0 )
 
     def Solar_var_norm(self):
         return(None)

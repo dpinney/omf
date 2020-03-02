@@ -1,45 +1,85 @@
 ''' Walk the /omf/ directory, run _tests() in all modules. '''
 
-import os, sys, subprocess
+import os, sys, subprocess, re
+from pathlib import PurePath, Path
 
-IGNORE_DIRS = ["data", ".git", "static", "templates", "testFiles", "scratch"]
-IGNORE_FILES = ["runAllTests.py"] # to avoid infinite loop.
+
+# These files aren't supposed to have tests
+IGNORE_FILES = ['runAllTests.py', 'install.py', 'setup.py', 'webProd.py', 'web.py', 'omfStats.py', '__init__.py']
+# Only search these directories
+INCLUDE_DIRS = ['omf', 'models']
+# 3/1/20: These 3 files cause GitHub Actions to hang indefinitely when run with this test harness, so they must be run in their own separate processes
+FILES_THAT_HANG = ['networkStructure.py', 'smartSwitching.py', 'forecastTool.py']
+IGNORE_FILES.extend(FILES_THAT_HANG)
+
+
+def _print_header(header):
+	print('\n+------------------------+')
+	print(f'\n{header.upper()}')
+	print('\n+------------------------+')
+
 
 def runAllTests(startingdir):
 	os.chdir(startingdir)
 	nextdirs = []
-	the_errors = 0
 	misfires = {}
-	for item in os.listdir("."):
-		if item not in IGNORE_FILES and item.endswith(".py"):
+	tested = []
+	not_tested = []
+	main_regex = re.compile(r"\s*if\s+__name__\s+==\s+('|\")__main__('|\")\s*:")
+	test_regex = re.compile(r"[^#]*_tests\(")
+	for item in os.listdir('.'):
+		if item not in IGNORE_FILES and item.endswith('.py'):
 			with open(item) as f:
-				file_content = f.read()
-			if 'def _tests():' in file_content:
-				print("********** TESTING", item, "************")
-				p = subprocess.Popen(["python3", item], stderr=subprocess.PIPE)
-				p.wait()
-				if p.returncode:
-					the_errors += 1
-					misfires[os.path.join(os.getcwd(), item)] = p.stderr.read()
-		elif os.path.isdir(item) and item not in IGNORE_DIRS:
+				file_content = f.readlines()
+			has_main = False
+			has_tests = False
+			for line in file_content:
+				if main_regex.match(line):
+					has_main = True
+				if has_main and test_regex.match(line):
+					has_tests = True
+					tested.append(item)
+					print(f'********** TESTING {item} ************')
+					p = subprocess.Popen(['python3', item], stderr=subprocess.PIPE)
+					p.wait()
+					if p.returncode:
+						misfires[os.path.join(os.getcwd(), item)] = p.stderr.read()
+					break
+			if not has_tests:		
+				not_tested.append(item)
+		elif os.path.isdir(item) and item in INCLUDE_DIRS:
 			nextdirs.append(os.path.join(os.getcwd(), item))
 	for d in nextdirs:
-		e, m = runAllTests(d)
-		the_errors += e
-		misfires.update(m)
-	return the_errors, misfires
+		mis, t, nt = runAllTests(d)
+		misfires.update(mis)
+		tested.extend(t)
+		not_tested.extend(nt)
+	return misfires, tested, not_tested
+
 
 def testRunner():
 	os.chdir(sys.argv[1] if len(sys.argv) > 1 else ".") # You can just run tests in a specific dir if you want
-	i, mis = runAllTests(os.getcwd())
-	print("\n\n+------------------------+")
-	print("\n\nTEST RESULTS")
-	print("\n\n+------------------------+")
-	print(i, "tests failed:\n\n")
-	for fname, err in mis.items():
-		print(fname)
-		print(err, "\n\n")
-	if i>0: raise Exception # Fail if there were errors.
+	misfires, tested, not_tested = runAllTests(os.getcwd())
+	_print_header('regular tests report')
+	print(f'Number of modules tested: {len(tested)}')
+	print(tested)
+	print(f'Number of tests failed: {len(misfires)}')
+	print(list(misfires.keys()), '\n')
+	for fname, err in misfires.items():
+		print(PurePath(fname).name)
+		for line in re.split(r'\n+', err.decode('utf-8')):
+			print(line)
+	if len(misfires) > 0:
+		raise Exception # Fail if there were errors.
+	_print_header('untested modules report')
+	print(f'Number of untested modules: {len(not_tested)}')
+	print(not_tested, '\n')
+	if len(FILES_THAT_HANG) > 0:
+		_print_header('special tests report')
+		print(f'Number of special tests: {len(FILES_THAT_HANG)}')
+		print(FILES_THAT_HANG)
+		print(f'See additional output for special tests results')
 
-if __name__ == "__main__":
+
+if __name__ == "__main__"  :
 	testRunner()

@@ -1,16 +1,21 @@
 ''' Run micot-GFM, micot-RDT, and GridLAB-D to determine an optimal distribution resiliency investment. '''
 
-import json, os, shutil, subprocess, datetime, platform, re, random, copy, warnings, base64
+import json, os, shutil, subprocess, datetime, re, random, copy, warnings, base64, platform
 import os.path
 from os.path import join as pJoin
 import numpy as np
-import matplotlib
-from matplotlib import pyplot as plt
 import networkx as nx
+
+import matplotlib
+if platform.system() == 'Darwin':
+	matplotlib.use('TkAgg')
+else:
+	matplotlib.use('Agg')
+from matplotlib import pyplot as plt
 
 # OMF imports
 import omf
-import omf.feeder, omf.weather
+from omf import feeder, weather
 from omf.models import __neoMetaModel__
 from omf.models.__neoMetaModel__ import *
 
@@ -327,7 +332,7 @@ def genDiagram(outputDir, feederJson, damageDict, critLoads, damagedLoads, edgeL
 		if aLat is None and aLon is None and aFrom is None:
 			 tree.pop(key)
 	# Create and save the graphic.
-	inGraph = omf.feeder.treeToNxGraph(tree)
+	inGraph = feeder.treeToNxGraph(tree)
 	labels=True
 	neatoLayout=False 
 	showPlot=False
@@ -493,7 +498,7 @@ def work(modelDir, inputDict):
 		#HACK: force use of Java8 on MacOS.
 		#javaCmd = '/Library/Java/JavaVirtualMachines/jdk1.8.0_181.jdk/Contents/Home/bin/java'
 		#HACK HACK: use my version of Java 8 for now
-		javaCmd = '/Library/Java/JavaVirtualMachines/jdk1.8.0_181.jdk/Contents/Home/bin/java'
+		javaCmd = '/Library/Java/JavaVirtualMachines/jdk1.8.0_202.jdk/Contents/Home/bin/java'
 	else:
 		javaCmd = 'java'
 	proc = subprocess.Popen(
@@ -546,14 +551,14 @@ def work(modelDir, inputDict):
 	#Load a blank glm file and use it to write to it
 	feederPath = pJoin(modelDir, 'feeder.glm')
 	with open(feederPath, 'w') as glmFile:
-		toWrite =  omf.feeder.sortedWrite(omd['tree']) + "object jsondump {\n\tfilename_dump_reliability JSON_dump_line.json;\n\twrite_system_info true;\n\twrite_per_unit true;\n\tsystem_base 100.0 MVA;\n};\n"
+		toWrite =  feeder.sortedWrite(omd['tree']) + "object jsondump {\n\tfilename_dump_reliability JSON_dump_line.json;\n\twrite_system_info true;\n\twrite_per_unit true;\n\tsystem_base 100.0 MVA;\n};\n"
 		glmFile.write(toWrite)		
 	#Write attachments from omd, if no file, one will be created
 	for fileName in omd['attachments']:
 		with open(os.path.join(modelDir, fileName),'w') as file:
 			file.write(omd['attachments'][fileName])
 	#Wire in the file the user specifies via zipcode.
-	climateFileName = omf.weather.zipCodeToClimateName(inputDict["simulationZipCode"])
+	climateFileName = weather.zipCodeToClimateName(inputDict["simulationZipCode"])
 	shutil.copy(pJoin(__neoMetaModel__._omfDir, "data", "Climate", climateFileName + ".tmy2"), pJoin(modelDir, 'climate.tmy2'))
 	# Platform specific binaries for GridLAB-D First Run.
 	if platform.system() == "Linux":
@@ -683,7 +688,7 @@ def work(modelDir, inputDict):
 	# Load a blank glm file and use it to write to it
 	feederPath = pJoin(modelDir, 'feederSecond.glm')
 	with open(feederPath, 'w') as glmFile:
-		toWrite =  "module generators;\n\n" + omf.feeder.sortedWrite(feederCopy['tree']) + "object voltdump {\n\tfilename voltDump2ndRun.csv;\n};\nobject jsondump {\n\tfilename_dump_reliability test_JSON_dump.json;\n\twrite_system_info true;\n\twrite_per_unit true;\n\tsystem_base 100.0 MVA;\n};\n"# + "object jsonreader {\n\tfilename " + insertRealRdtOutputNameHere + ";\n};"
+		toWrite =  "module generators;\n\n" + feeder.sortedWrite(feederCopy['tree']) + "object voltdump {\n\tfilename voltDump2ndRun.csv;\n};\nobject jsondump {\n\tfilename_dump_reliability test_JSON_dump.json;\n\twrite_system_info true;\n\twrite_per_unit true;\n\tsystem_base 100.0 MVA;\n};\n"# + "object jsonreader {\n\tfilename " + insertRealRdtOutputNameHere + ";\n};"
 		glmFile.write(toWrite)
 	# Run GridLAB-D second time.
 	if platform.system() == "Windows":

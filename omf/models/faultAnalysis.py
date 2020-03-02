@@ -1,9 +1,14 @@
 ''' Graph the voltage drop on a feeder. '''
 
-import json, os, shutil, csv, warnings, base64
+import json, os, shutil, csv, warnings, base64, platform
 from os.path import join as pJoin
-#from matplotlib import pyplot as plt
-#plt.switch_backend('Agg')
+
+import matplotlib
+if platform.system() == 'Darwin':
+	matplotlib.use('TkAgg')
+else:
+	matplotlib.use('Agg')
+from matplotlib import pyplot as plt
 
 # dateutil imports
 from dateutil import parser
@@ -11,8 +16,8 @@ from dateutil.relativedelta import *
 
 # OMF imports
 import omf
-import omf.feeder
-import omf.models.voltageDrop
+from omf import feeder
+from omf.models import voltageDrop
 from omf.models import __neoMetaModel__
 from omf.models.__neoMetaModel__ import *
 
@@ -79,7 +84,7 @@ def work(modelDir, inputDict):
 	else:
 		faultTypeValue = inputDict["faultType"]
 
-	chart = omf.models.voltageDrop.drawPlot(
+	chart = voltageDrop.drawPlot(
 		pJoin(modelDir,feederName + ".omd"),
 		neatoLayout = neato,
 		edgeCol = edgeColValue,
@@ -143,16 +148,16 @@ def _testingPlot():
 	# FNAME = 'test_smsSingle.glm'
 	# Hack: Agg backend doesn't work for interactivity. Switch to something we can use:
 	# plt.switch_backend('MacOSX')
-	chart = omf.models.voltageDrop.drawPlot(PREFIX + FNAME, neatoLayout=True, edgeCol="Current", nodeCol=None, nodeLabs="Name", edgeLabs=None, faultLoc="node713-704", faultType="TLG", customColormap=False, scaleMin=None, scaleMax=None, rezSqIn=225, simTime='2000-01-01 0:00:00')
+	chart = voltageDrop.drawPlot(PREFIX + FNAME, neatoLayout=True, edgeCol="Current", nodeCol=None, nodeLabs="Name", edgeLabs=None, faultLoc="node713-704", faultType="TLG", customColormap=False, scaleMin=None, scaleMax=None, rezSqIn=225, simTime='2000-01-01 0:00:00')
 	chart.savefig(PREFIX + "YO_WHATS_GOING_ON.png")
-	# plt.show()
+	#plt.show()
 
 def drawTable(path, workDir=None):
 	#return self.log
 	
 	# warnings.filterwarnings("ignore")
 	if path.endswith('.glm'):
-		tree = omf.feeder.parse(path)
+		tree = feeder.parse(path)
 		attachments = []
 	elif path.endswith('.omd'):
 		with open(path) as f:
@@ -258,6 +263,7 @@ def drawTable(path, workDir=None):
 	html_str += """</tbody></table>"""
 	return html_str
 
+@neoMetaModel_test_setup
 def _tests():
 	# Location
 	modelLoc = pJoin(__neoMetaModel__._omfDir,"data","Model","admin","Automated Testing of " + modelName)
@@ -278,4 +284,4 @@ def _tests():
 
 if __name__ == '__main__':
 	_tests()
-	# _testingPlot()
+	#_testingPlot()

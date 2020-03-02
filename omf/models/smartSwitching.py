@@ -1,13 +1,19 @@
-import json, os, tempfile, shutil, csv, math, itertools, base64, re, datetime
+import json, os, tempfile, shutil, csv, math, itertools, base64, re, datetime, platform
 from os.path import join as pJoin
 import pandas as pd
 import numpy as np
-from matplotlib import pyplot as plt
 import scipy.stats as stats
 import plotly as py
 import plotly.graph_objs as go
 from plotly.tools import make_subplots
 import networkx as nx
+
+import matplotlib
+if platform.system() == 'Darwin':
+	matplotlib.use('TkAgg')
+else:
+	matplotlib.use('Agg')
+from matplotlib import pyplot as plt
 
 # dateutil imports
 from dateutil import parser
@@ -15,8 +21,7 @@ from dateutil.relativedelta import *
 
 # OMF imports
 import omf
-import omf.feeder
-import omf.geo
+from omf import feeder, geo
 from omf.models import __neoMetaModel__
 from omf.models.__neoMetaModel__ import *
 
@@ -119,7 +124,7 @@ def manualOutageStatsSmart(numberOfCustomers, mc_orig, sustainedOutageThreshold,
 
 def setupSystemSmart(seed, pathToGlm, workDir):
 	'helper function to set-up reliability module on a glm given its path'
-	tree = omf.feeder.parse(pathToGlm)
+	tree = feeder.parse(pathToGlm)
 	#add fault object to tree
 	nodeLabs='Name'
 	edgeLabs=None
@@ -192,12 +197,12 @@ def protectionSmart(tree, index, biggestKey, CLOCK_START, CLOCK_END):
 	tree[str(biggestKey*10 + index + 2)] = {'object':'currdump','filename':'currDump.csv'}
 	
 	# Line rating dumps
-	tree[omf.feeder.getMaxKey(tree) + 1] = {
+	tree[feeder.getMaxKey(tree) + 1] = {
 		'module': 'tape'
 	}
 	for key in edge_bools.keys():
 		if edge_bools[key]:
-			tree[omf.feeder.getMaxKey(tree) + 1] = {
+			tree[feeder.getMaxKey(tree) + 1] = {
 				'object':'group_recorder', 
 				'group':'"class='+key+'"',
 				'property':'continuous_rating',
@@ -238,14 +243,14 @@ def protectionSmart(tree, index, biggestKey, CLOCK_START, CLOCK_END):
 		if protDevices[key]:
 			for phase in ['A', 'B', 'C']:
 				if key != 'fuse':
-					tree[omf.feeder.getMaxKey(tree) + 1] = {
+					tree[feeder.getMaxKey(tree) + 1] = {
 						'object':'group_recorder', 
 						'group':'"class='+key+'"',
 						'property':'phase_' + phase + '_state',
 						'file':key + '_phase_' + phase + '_state.csv'
 					}
 				else:
-					tree[omf.feeder.getMaxKey(tree) + 1] = {
+					tree[feeder.getMaxKey(tree) + 1] = {
 						'object':'group_recorder', 
 						'group':'"class='+key+'"',
 						'property':'phase_' + phase + '_status',
@@ -287,14 +292,14 @@ def protectionSmart(tree, index, biggestKey, CLOCK_START, CLOCK_END):
 		if protDevices[key]:
 			for phase in ['A', 'B', 'C']:
 				if key != 'fuse':
-					tree[omf.feeder.getMaxKey(tree) + 1] = {
+					tree[feeder.getMaxKey(tree) + 1] = {
 									'object':'group_recorder', 
 									'group':'"class='+key+'"',
 									'property':'phase_' + phase + '_state',
 									'file':key + '_phase_' + phase + '_state.csv'
 								}
 				else:
-					tree[omf.feeder.getMaxKey(tree) + 1] = {
+					tree[feeder.getMaxKey(tree) + 1] = {
 									'object':'group_recorder', 
 									'group':'"class='+key+'"',
 									'property':'phase_' + phase + '_status',
@@ -435,7 +440,7 @@ def manualOutageObject(pathToOmd, pathToCsv, workDir):
 	# create a DataFrame with the line name and the coordinates of its edges
 	with open(pathToOmd) as inFile:
 		tree = json.load(inFile)['tree']
-	outageMap = omf.geo.omdGeoJson(pathToOmd, conversion = False)
+	outageMap = geo.omdGeoJson(pathToOmd, conversion = False)
 	mc = pd.read_csv(pathToCsv)
 	with open(workDir + '/lines.csv', mode='w', newline='') as lines:
 		fieldnames = ['line_name', 'coords1', 'coords2']
@@ -471,7 +476,7 @@ def manualOutageObject(pathToOmd, pathToCsv, workDir):
 
 def setupSystemOutage(pathToGlm, pathToCsv, workDir, lineNameForRecloser, simTime, faultType):
 	'helper function to set-up reliability module on a glm given its path'
-	tree = omf.feeder.parse(pathToGlm)
+	tree = feeder.parse(pathToGlm)
 	pathToOmd = pathToGlm[:-4] + '.omd'
 	mc = manualOutageObject(pathToOmd, pathToCsv, workDir)
 	
@@ -581,12 +586,12 @@ def setupSystemOutage(pathToGlm, pathToCsv, workDir, lineNameForRecloser, simTim
 	tree[str(biggestKey*10 + index + 2)] = {'object':'currdump','filename':'currDump.csv'}
 	
 	# Line rating dumps
-	tree[omf.feeder.getMaxKey(tree) + 1] = {
+	tree[feeder.getMaxKey(tree) + 1] = {
 		'module': 'tape'
 	}
 	for key in edge_bools.keys():
 		if edge_bools[key]:
-			tree[omf.feeder.getMaxKey(tree) + 1] = {
+			tree[feeder.getMaxKey(tree) + 1] = {
 				'object':'group_recorder', 
 				'group':'"class='+key+'"',
 				'property':'continuous_rating',
@@ -627,14 +632,14 @@ def setupSystemOutage(pathToGlm, pathToCsv, workDir, lineNameForRecloser, simTim
 		if protDevices[key]:
 			for phase in ['A', 'B', 'C']:
 				if key != 'fuse':
-					tree[omf.feeder.getMaxKey(tree) + 1] = {
+					tree[feeder.getMaxKey(tree) + 1] = {
 						'object':'group_recorder', 
 						'group':'"class='+key+'"',
 						'property':'phase_' + phase + '_state',
 						'file':key + '_phase_' + phase + '_state.csv'
 					}
 				else:
-					tree[omf.feeder.getMaxKey(tree) + 1] = {
+					tree[feeder.getMaxKey(tree) + 1] = {
 						'object':'group_recorder', 
 						'group':'"class='+key+'"',
 						'property':'phase_' + phase + '_status',
@@ -681,14 +686,14 @@ def protectionOutage(tree):
 		if protDevices[key]:
 			for phase in ['A', 'B', 'C']:
 				if key != 'fuse':
-					tree[omf.feeder.getMaxKey(tree) + 1] = {
+					tree[feeder.getMaxKey(tree) + 1] = {
 									'object':'group_recorder', 
 									'group':'"class='+key+'"',
 									'property':'phase_' + phase + '_state',
 									'file':key + '_phase_' + phase + '_state.csv'
 								}
 				else:
-					tree[omf.feeder.getMaxKey(tree) + 1] = {
+					tree[feeder.getMaxKey(tree) + 1] = {
 									'object':'group_recorder', 
 									'group':'"class='+key+'"',
 									'property':'phase_' + phase + '_status',
@@ -1014,7 +1019,7 @@ def valueOfAdditionalRecloser(pathToGlm, pathToCsv, workDir, generateRandomFault
 				try: outGraph.node[item['name']]['pos']=(float(item.get('latitude',0)),float(item.get('longitude',0)))
 				except: outGraph.node[item['name']]['pos']=(0.0,0.0)
 			elif 'from' in item.keys():
-				myPhase = omf.feeder._phaseCount(item.get('phases','AN'))
+				myPhase = feeder._phaseCount(item.get('phases','AN'))
 				outGraph.add_edge(item['from'],item['to'],attr_dict={'name':item.get('name',''),'type':item['object'],'phases':myPhase})
 			elif item['name'] in outGraph:
 				# Edge already led to node's addition, so just set the attributes:
@@ -1024,7 +1029,7 @@ def valueOfAdditionalRecloser(pathToGlm, pathToCsv, workDir, generateRandomFault
 			if 'latitude' in item.keys() and 'longitude' in item.keys():
 				try: outGraph.node.get(item['name'],{})['pos']=(float(item['latitude']),float(item['longitude']))
 				except: outGraph.node.get(item['name'],{})['pos']=(0.0,0.0)
-	omf.feeder.latLonNxGraph(outGraph, labels=True, neatoLayout=True, showPlot=True)
+	feeder.latLonNxGraph(outGraph, labels=True, neatoLayout=True, showPlot=False)
 	plt.savefig(workDir + '/feeder_chart')
 	return {'costStatsHtml': costStatsHtml, 'fig1': fig1, 'fig2': fig2, 'fig3': fig3}
 
@@ -1092,7 +1097,7 @@ def work(modelDir, inputDict):
 	# Write the feeder
 	feederName = [x for x in os.listdir(modelDir) if x.endswith('.omd')][0][:-4]
 	inputDict['feederName1'] = feederName
-	omf.feeder.omdToGlm(modelDir + '/' + feederName + '.omd', modelDir)
+	feeder.omdToGlm(modelDir + '/' + feederName + '.omd', modelDir)
 	#test the main functions of the program
 	with open(pJoin(modelDir, inputDict['outageFileName']), 'w') as f:
 		pathToData = f.name
@@ -1174,6 +1179,7 @@ def new(modelDir):
 		return False
 	return __neoMetaModel__.new(modelDir, defaultInputs)
 
+@neoMetaModel_test_setup
 def _tests():
 	# Location
 	modelLoc = pJoin(__neoMetaModel__._omfDir,'data','Model','admin','Automated Testing of ' + modelName)
