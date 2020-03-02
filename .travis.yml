@@ -24,7 +24,7 @@ jobs:
     - os: windows
       language: shell
 before_install:
-  - if [ "$TRAVIS_OS_NAME" = "linux" ]; then sudo apt-get -y install python3; sudo apt-get -y install python3-setuptools; fi
+  - if [ "$TRAVIS_OS_NAME" = "linux" ]; then sudo apt-get -y install python3-pip; sudo apt-get -y install python3-setuptools; fi
   - if [ "$TRAVIS_OS_NAME" = "linux" ]; then sudo pip3 install tensorflow; fi
   - if [ "$TRAVIS_OS_NAME" = "osx" ]; then sudo pip3 install tensorflow; fi
   - if [ "$TRAVIS_OS_NAME" = "windows" ]; then choco install python --version 3.6.8; fi
