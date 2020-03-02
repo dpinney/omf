@@ -7,7 +7,7 @@ from os.path import join as pJoin
 import numpy as np
 
 # OMF imports
-import omf.solvers.CSSS.csss.SolarDisagg as SolarDisagg
+from omf.solvers.CSSS.csss import SolarDisagg
 from omf.models import __neoMetaModel__
 from omf.models.__neoMetaModel__ import *
 
@@ -281,6 +281,7 @@ def pullAsosRevised(start, station, datatype, end=None):
 	data = r.text
 	return data
 
+@neoMetaModel_test_setup
 def _tests():
 	# Location
 	modelLoc = pJoin(__neoMetaModel__._omfDir,"data","Model","admin","Automated Testing of " + modelName)

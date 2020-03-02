@@ -1,9 +1,17 @@
 ''' Functions for manipulating electrical transmission network models. '''
 
-import datetime, copy, os, re, warnings, networkx as nx, json, math, tempfile, shutil, fileinput, webbrowser
+import datetime, copy, os, re, json, tempfile, shutil, fileinput, webbrowser, platform
 from os.path import join as pJoin
+import networkx as nx
+#import math
+#import matpower
+
+import matplotlib
+if platform.system() == 'Darwin':
+	matplotlib.use('TkAgg')
+else:
+	matplotlib.use('Agg')
 from matplotlib import pyplot as plt
-# import matpower
 
 def parse(inputStr, filePath=True):
 	''' Parse a MAT into an omf.network json. This is so we can walk the json, change things in bulk, etc.

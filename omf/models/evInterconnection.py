@@ -1,11 +1,16 @@
 ''' Graph the voltage drop on a feeder. '''
 
-import json, os, shutil, csv, warnings, base64
+import json, os, shutil, csv, warnings, base64, platform
 from os.path import join as pJoin
 from random import randint, uniform
 import numpy as np
+
+import matplotlib
+if platform.system() == 'Darwin':
+	matplotlib.use('TkAgg')
+else:
+	matplotlib.use('Agg')
 from matplotlib import pyplot as plt
-#plt.switch_backend('Agg')
 #plt.style.use('seaborn')
 
 # dateutil imports
@@ -14,7 +19,7 @@ from dateutil.relativedelta import *
 
 # OMF imports
 import omf
-import omf.models.voltageDrop, omf.models.faultAnalysis
+from omf.models import voltageDrop, faultAnalysis
 import omf.solvers.REopt as REopt
 from omf.models import __neoMetaModel__
 from omf.models.__neoMetaModel__ import *
@@ -179,7 +184,7 @@ def work(modelDir, inputDict):
 	outData["fuelCostCalcHtml"] = fuelCostHtml
 
 	#run and display voltage drop image and protective device status table
-	voltPlotChart = omf.models.voltageDrop.drawPlot(
+	voltPlotChart = voltageDrop.drawPlot(
 		pJoin(modelDir,feederName + ".omd"),
 		neatoLayout = neato,
 		edgeCol = "PercentOfRating",
@@ -197,7 +202,7 @@ def work(modelDir, inputDict):
 	voltPlotChart.savefig(pJoin(modelDir, "output.png"))
 	with open(pJoin(modelDir, "output.png"),"rb") as inFile:
 		outData["voltageDrop"] = base64.standard_b64encode(inFile.read()).decode('ascii')
-	protDevTable = omf.models.faultAnalysis.drawTable(
+	protDevTable = faultAnalysis.drawTable(
 		pJoin(modelDir,feederName + ".omd"),
 		workDir = modelDir)
 	with open(pJoin(modelDir, "statusTable.html"), "w") as tabFile:
@@ -245,7 +250,7 @@ def work(modelDir, inputDict):
 					with open(modelDir + '/' + feederName2, "w+") as write_file:
 						json.dump(omd, write_file)
 
-					tempVoltPlotChart = omf.models.voltageDrop.drawPlot(
+					tempVoltPlotChart = voltageDrop.drawPlot(
 						pJoin(modelDir,feederName2),
 						neatoLayout = neato,
 						edgeCol = "PercentOfRating",
@@ -267,7 +272,7 @@ def work(modelDir, inputDict):
 					# outData['loadProtDevTableHtml'] = loadProtDevTable
 					# with open(pJoin(modelDir, "loadVoltPlot.png"),"rb") as inFile:
 					# 	outData["loadVoltageDrop"] = inFile.read().encode("base64")
-					tempProtDevTable = omf.models.faultAnalysis.drawTable(
+					tempProtDevTable = faultAnalysis.drawTable(
 						pJoin(modelDir,feederName2),
 						workDir = modelDir)
 					return tempVoltPlotChart, tempProtDevTable
@@ -654,6 +659,7 @@ def energyCostCalc(max_bau_load_shape = None, sum_bau_load_shape = None, demand_
 		</div>"""
 	return html_str
 
+@neoMetaModel_test_setup
 def _tests():
 	# Location
 	modelLoc = pJoin(__neoMetaModel__._omfDir,"data","Model","admin","Automated Testing of " + modelName)

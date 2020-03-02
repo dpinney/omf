@@ -8,6 +8,14 @@ import numpy as np
 from scipy.spatial import ConvexHull
 from sklearn.cluster import KMeans
 from flask import Flask, send_file, render_template
+
+import matplotlib
+if platform.system() == 'Darwin':
+	matplotlib.use('TkAgg')
+else:
+	matplotlib.use('Agg')
+from matplotlib import pyplot as plt
+
 import omf
 from omf import feeder
 

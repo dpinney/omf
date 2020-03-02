@@ -7,10 +7,10 @@ import shutil, datetime
 from os.path import join as pJoin
 
 # OMF imports
+from omf import feeder
+from omf.models.voltageDrop import drawPlot
 from omf.models import __neoMetaModel__
 from omf.models.__neoMetaModel__ import *
-import omf.feeder as feeder
-from omf.models.voltageDrop import drawPlot
 
 # Model metadata:
 modelName, template = __neoMetaModel__.metadata(__file__)
@@ -42,6 +42,7 @@ def new(modelDir):
 	}
 	return __neoMetaModel__.new(modelDir, defaultInputs)
 
+@neoMetaModel_test_setup
 def _tests():
 	# Location
 	modelLoc = pJoin(__neoMetaModel__._omfDir,"data","Model","admin","Automated Testing of " + modelName)

@@ -9,10 +9,8 @@ from flask import session
 
 # OMF imports
 import omf
-import omf.feeder
-import omf.weather
-import omf.web
-import omf.solvers.gridlabd
+from omf import feeder, weather, web
+from omf.solvers import gridlabd
 from omf.models.__neoMetaModel__ import *
 
 # Model metadata:
@@ -137,7 +135,7 @@ def run(modelDir):
 	with open(pJoin(modelDir, "PPID.txt"),"w+") as pPidFile:
 		pPidFile.write(str(backProc.pid))
 
-def runForeground(modelDir):
+def runForeground(modelDir, test_mode=False):
 	''' Run the model in its directory. WARNING: GRIDLAB CAN TAKE HOURS TO COMPLETE. '''
 	with open(pJoin(modelDir, 'allInputData.json')) as f:
 		inputDict = json.load(f)
@@ -161,7 +159,7 @@ def runForeground(modelDir):
 			os.makedirs(pJoin(modelDir, feederName)) # create subfolders for feeders
 		shutil.copy(pJoin(modelDir, feederName + ".omd"),
 			pJoin(modelDir, feederName, "feeder.omd"))
-		inputDict["climateName"] = omf.weather.zipCodeToClimateName(inputDict["zipCode"])
+		inputDict["climateName"] = weather.zipCodeToClimateName(inputDict["zipCode"])
 		shutil.copy(pJoin(_omfDir, "data", "Climate", inputDict["climateName"] + ".tmy2"),
 			pJoin(modelDir, feederName, "climate.tmy2"))
 		try:
@@ -170,21 +168,21 @@ def runForeground(modelDir):
 				feederJson = json.load(f)
 			tree = feederJson["tree"]
 			# Set up GLM with correct time and recorders:
-			omf.feeder.attachRecorders(tree, "Regulator", "object", "regulator")
-			omf.feeder.attachRecorders(tree, "Capacitor", "object", "capacitor")
-			omf.feeder.attachRecorders(tree, "Inverter", "object", "inverter")
-			omf.feeder.attachRecorders(tree, "Windmill", "object", "windturb_dg")
-			omf.feeder.attachRecorders(tree, "CollectorVoltage", None, None)
-			omf.feeder.attachRecorders(tree, "Climate", "object", "climate")
-			omf.feeder.attachRecorders(tree, "OverheadLosses", None, None)
-			omf.feeder.attachRecorders(tree, "UndergroundLosses", None, None)
-			omf.feeder.attachRecorders(tree, "TriplexLosses", None, None)
-			omf.feeder.attachRecorders(tree, "TransformerLosses", None, None)
-			omf.feeder.groupSwingKids(tree)
-			omf.feeder.adjustTime(tree=tree, simLength=float(inputDict["simLength"]),
+			feeder.attachRecorders(tree, "Regulator", "object", "regulator")
+			feeder.attachRecorders(tree, "Capacitor", "object", "capacitor")
+			feeder.attachRecorders(tree, "Inverter", "object", "inverter")
+			feeder.attachRecorders(tree, "Windmill", "object", "windturb_dg")
+			feeder.attachRecorders(tree, "CollectorVoltage", None, None)
+			feeder.attachRecorders(tree, "Climate", "object", "climate")
+			feeder.attachRecorders(tree, "OverheadLosses", None, None)
+			feeder.attachRecorders(tree, "UndergroundLosses", None, None)
+			feeder.attachRecorders(tree, "TriplexLosses", None, None)
+			feeder.attachRecorders(tree, "TransformerLosses", None, None)
+			feeder.groupSwingKids(tree)
+			feeder.adjustTime(tree=tree, simLength=float(inputDict["simLength"]),
 				simLengthUnits=inputDict["simLengthUnits"], simStartDate=inputDict["simStartDate"])
 			# RUN GRIDLABD IN FILESYSTEM (EXPENSIVE!)
-			rawOut = omf.solvers.gridlabd.runInFilesystem(tree, attachments=feederJson["attachments"],
+			rawOut = gridlabd.runInFilesystem(tree, attachments=feederJson["attachments"],
 				keepFiles=True, workDir=pJoin(modelDir, feederName))
 			cleanOut = {}
 			# Std Err and Std Out
@@ -304,6 +302,8 @@ def runForeground(modelDir):
 			os.remove(pJoin(modelDir, feederName,"PID.txt"))
 			print("DONE RUNNING GRIDLABMULTI", modelDir, feederName)
 		except Exception as e:
+			if test_mode == True:
+				raise e
 			print("MODEL CRASHED GRIDLABMULTI", e, modelDir, feederName)
 			cancel(pJoin(modelDir, feederName))
 			with open(pJoin(modelDir, feederName, "stderr.txt"), "a+") as stderrFile:
@@ -360,7 +360,7 @@ def runForeground(modelDir):
 					user = json.load(f)
 				modelPath, modelName = pSplit(modelDir)
 				message = "The model " + "<i>" + str(modelName) + "</i>" + " has successfully completed running. It ran for a total of " + str(inputDict["runTime"]) + " seconds from " + str(beginTime) + ", to " + str(finishTime) + "."
-				return omf.web.send_link(email, message, user)
+				return web.send_link(email, message, user)
 			except Exception as e:
 				print("ERROR: Failed sending model status email to user: ", email, ", with exception: \n", e)
 	except Exception as e:
@@ -381,7 +381,7 @@ def runForeground(modelDir):
 				user = json.load(f)
 			modelPath, modelName = pSplit(modelDir)
 			message = "The model " + "<i>" + str(modelName) + "</i>" + " has failed to complete running. It ran for a total of " + str(inputDict["runTime"]) + " seconds from " + str(beginTime) + ", to " + str(finishTime) + "."
-			return omf.web.send_link(email, message, user)
+			return web.send_link(email, message, user)
 		except Exception as e:
 			print("Failed sending model status email to user: ", email, ", with exception: \n", e)
 
@@ -501,7 +501,7 @@ def _tests():
 	# No-input template.
 	renderAndShow(modelLoc)
 	# Run the model.
-	runForeground(modelLoc)
+	runForeground(modelLoc, test_mode=True)
 	## Cancel the model.
 	# time.sleep(2)
 	# cancel(modelLoc)

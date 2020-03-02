@@ -4,7 +4,7 @@ import shutil, datetime
 from os.path import join as pJoin
 
 # OMF imports
-import omf.weather
+from omf import weather
 from omf.solvers import nrelsam2013
 from omf.models import __neoMetaModel__
 from omf.models.__neoMetaModel__ import *
@@ -15,7 +15,7 @@ modelName, template = __neoMetaModel__.metadata(__file__)
 
 def work(modelDir, inputDict):
 	# Copy specific climate data into model directory
-	inputDict["climateName"] = omf.weather.zipCodeToClimateName(inputDict["zipCode"])
+	inputDict["climateName"] = weather.zipCodeToClimateName(inputDict["zipCode"])
 	shutil.copy(pJoin(__neoMetaModel__._omfDir, "data", "Climate", inputDict["climateName"] + ".tmy2"), 
 		pJoin(modelDir, "climate.tmy2"))
 	# Set up SAM data structures.
@@ -139,6 +139,7 @@ def new(modelDir):
 	}
 	return __neoMetaModel__.new(modelDir, defaultInputs)
 
+@neoMetaModel_test_setup
 def _tests():
 	# Location
 	modelLoc = pJoin(__neoMetaModel__._omfDir,"data","Model","admin","Automated Testing of " + modelName)

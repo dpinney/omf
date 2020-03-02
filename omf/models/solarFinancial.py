@@ -6,7 +6,7 @@ from numpy import irr, npv
 import xlwt
 
 # OMF imports
-import omf.weather
+from omf import weather
 from omf.solvers import nrelsam2013
 from omf.models import __neoMetaModel__
 from omf.models.__neoMetaModel__ import *
@@ -19,7 +19,7 @@ hidden = False
 def work(modelDir, inputDict):
 	''' Run the model in its directory. '''
 	# Copy spcific climate data into model directory
-	inputDict["climateName"] = omf.weather.zipCodeToClimateName(inputDict["zipCode"])
+	inputDict["climateName"] = weather.zipCodeToClimateName(inputDict["zipCode"])
 	shutil.copy(pJoin(__neoMetaModel__._omfDir, "data", "Climate", inputDict["climateName"] + ".tmy2"), 
 		pJoin(modelDir, "climate.tmy2"))
 	# Set up SAM data structures.
@@ -255,6 +255,7 @@ def new(modelDir):
 	}
 	return __neoMetaModel__.new(modelDir, defaultInputs)
 
+@neoMetaModel_test_setup
 def _tests():
 	# Location
 	modelLoc = pJoin(__neoMetaModel__._omfDir,"data","Model","admin","Automated Testing of " + modelName)
@@ -275,5 +276,3 @@ def _tests():
 
 if __name__ == '__main__':
 	_tests()
-
-	'''		'''

@@ -6,8 +6,8 @@ import numpy as np
 import pandas as pd
 
 # OMF imports 
-import omf.feeder
-import omf.models.voltageDrop
+from omf import feeder
+from omf.models import voltageDrop
 from omf.solvers import SteinmetzController
 from omf.models import __neoMetaModel__
 from omf.models.__neoMetaModel__ import *
@@ -78,17 +78,17 @@ def work(modelDir, ind):
 		tree_base = json.load(f)['tree']
 	
 	with open(pJoin(modelDir, 'input.glm'), 'w') as f:
-		treeString = omf.feeder.sortedWrite(tree_base)
+		treeString = feeder.sortedWrite(tree_base)
 		f.write(treeString)
 
 	base_suffix = "_base"
 	tree_base = _turnOffSolar(tree_base)
 	tree_base = _addCollectors(tree_base, suffix=base_suffix, pvConnection=ind['pvConnection'])
 	with open(pJoin(modelDir, '_base.glm'), 'w') as f:
-		treeString = omf.feeder.sortedWrite(tree_base)
+		treeString = feeder.sortedWrite(tree_base)
 		f.write(treeString)
 	
-	omf.models.voltageDrop.drawPlot(
+	voltageDrop.drawPlot(
 		pJoin(modelDir, "_base.glm"), workDir=modelDir, neatoLayout=neato, 
 		edgeCol=edgeColValue, nodeCol=nodeColValue, nodeLabs=nodeLabsValue, 
 		edgeLabs=edgeLabsValue, customColormap=customColormapValue, rezSqIn=int(ind["rezSqIn"]), 
@@ -112,7 +112,7 @@ def work(modelDir, ind):
 	else:
 		glmPath = pJoin(modelDir, 'input_Final.glm')
 	omdPath = pJoin(modelDir, '_controlled.omd')
-	omf.feeder.glmToOmd(glmPath, omdPath)
+	feeder.glmToOmd(glmPath, omdPath)
 	
 	with open(omdPath) as f:
 		tree_controlled = json.load(f)['tree']
@@ -134,10 +134,10 @@ def work(modelDir, ind):
 	tree_controlled = _addCollectors(tree_controlled, suffix=controlled_suffix, pvConnection=ind['pvConnection'])
 	
 	with open(pJoin(modelDir, '_controlled.glm'), 'w') as f:
-		treeString = omf.feeder.sortedWrite(tree_controlled)
+		treeString = feeder.sortedWrite(tree_controlled)
 		f.write(treeString)
 	
-	omf.models.voltageDrop.drawPlot(
+	voltageDrop.drawPlot(
 		pJoin(modelDir, "_controlled.glm"), workDir=modelDir, neatoLayout=neato, 
 		edgeCol=edgeColValue, nodeCol=nodeColValue, nodeLabs=nodeLabsValue, 
 		edgeLabs=edgeLabsValue, customColormap=customColormapValue, rezSqIn=int(ind["rezSqIn"]), 
@@ -156,7 +156,7 @@ def work(modelDir, ind):
 	else:
 		glmPath = pJoin(modelDir, 'input_Wye_Start.glm')
 	omdPath = pJoin(modelDir, '_solar.omd')
-	omf.feeder.glmToOmd(glmPath, omdPath)
+	feeder.glmToOmd(glmPath, omdPath)
 	
 	with open(omdPath) as f:
 		tree_solar = json.load(f)['tree']
@@ -168,10 +168,10 @@ def work(modelDir, ind):
 	solar_suffix = "_solar"
 	tree_solar = _addCollectors(tree_solar, suffix=solar_suffix, pvConnection=ind['pvConnection'])
 	with open(modelDir + '/_solar.glm', 'w') as f:
-		treeString = omf.feeder.sortedWrite(tree_solar)
+		treeString = feeder.sortedWrite(tree_solar)
 		f.write(treeString)
 	
-	omf.models.voltageDrop.drawPlot(
+	voltageDrop.drawPlot(
 		pJoin(modelDir, "_solar.glm"), workDir=modelDir, neatoLayout=neato, 
 		edgeCol=edgeColValue, nodeCol=nodeColValue, nodeLabs=nodeLabsValue, 
 		edgeLabs=edgeLabsValue, customColormap=customColormapValue, rezSqIn=int(ind["rezSqIn"]), 
@@ -482,8 +482,8 @@ def _readCSV(filename, voltage=True):
 		df = df[df.columns[:-2]]
 	df = df[~df.index.str.startswith('#')]
 	df[0] = [complex(i) if i != '+0+0i' else complex(0) for i in df[0]]
-	df['imag'] = df[0].imag.astype(float)
-	df['real'] = df[0].real.astype(float)
+	df['imag'] = df[0].to_numpy().imag
+	df['real'] = df[0].to_numpy().real
 	df = df.drop([0], axis=1)
 	return df
 
@@ -555,6 +555,7 @@ def new(modelDir):
 		return False
 	return creationCode
 
+@neoMetaModel_test_setup
 def _tests():
 	modelLoc = pJoin(__neoMetaModel__._omfDir,"data","Model","admin","Automated Testing of " + modelName)
 	if os.path.isdir(modelLoc):
