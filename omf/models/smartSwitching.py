@@ -1092,7 +1092,6 @@ def distributiongraph(dist, param_1, param_2, nameOfGraph):
 
 
 def work(modelDir, inputDict):
-	print('************************* smartSwtiching work() started... *************************')
 	# Copy specific climate data into model directory
 	outData = {}
 	# Write the feeder
@@ -1103,7 +1102,6 @@ def work(modelDir, inputDict):
 	with open(pJoin(modelDir, inputDict['outageFileName']), 'w') as f:
 		pathToData = f.name
 		f.write(inputDict['outageData'])
-		print('************************* smartSwtiching about to enter valueOfAdditionalRecloser()... *************************')
 	plotOuts = valueOfAdditionalRecloser(
 		modelDir + '/' + feederName + '.glm', #GLM Path
 		pathToData,
@@ -1135,7 +1133,6 @@ def work(modelDir, inputDict):
 		outData['feeder_chart.png'] = base64.standard_b64encode(inFile.read()).decode()
 	
 	# Plotly outputs.
-		print('************************* smartSwtiching about to enter go.Layout()... *************************')
 	layoutOb = go.Layout()
 	outData['fig1Data'] = json.dumps(plotOuts.get('fig1',{}), cls=py.utils.PlotlyJSONEncoder)
 	outData['fig1Layout'] = json.dumps(layoutOb, cls=py.utils.PlotlyJSONEncoder)
@@ -1202,9 +1199,4 @@ def _tests():
 	__neoMetaModel__.renderAndShow(modelLoc)
 
 if __name__ == '__main__':
-	print('************************* smartSwtiching _tests() started... *************************')
 	_tests()
-	#import resource
-	#print(resource.getrusage(resource.RUSAGE_SELF).ru_maxrss) # 295587840 == 295.587840 MB
-	#_debugging()
-	#print(resource.getrusage(resource.RUSAGE_SELF).ru_maxrss) # 340942848 == 340.942848 MB

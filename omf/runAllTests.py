@@ -4,71 +4,13 @@ import os, sys, subprocess, re
 from pathlib import PurePath, Path
 
 
-#IGNORE_FILES = ['runAllTests.py', 'install.py', 'setup.py', 'webProd.py', 'web.py', 'omfStats.py', '__init__.py']
+# These files aren't supposed to have tests
+IGNORE_FILES = ['runAllTests.py', 'install.py', 'setup.py', 'webProd.py', 'web.py', 'omfStats.py', '__init__.py']
+# Only search these directories
 INCLUDE_DIRS = ['omf', 'models']
-
-IGNORE_FILES = [
-'__init__.py',
-'__neoMetaModel__.py',
-'anomalyDetector.py',
-'circuitRealTime.py',
-'commsBandwidth.py',
-'cvrDynamic.py',
-'cvrStatic.py',
-'cyberInverters.py',
-'demandResponse.py',
-'derInterconnection.py',
-'disaggregation.py',
-'evInterconnection.py',
-'faultAnalysis.py',
-'forecastLoad.py',
-'forecastTool.py',
-'gridlabMulti.py',
-'microgridDesign.py',
-'modelSkeleton.py',
-'networkStructure.py',
-'outageCost.py',
-'phaseBalance.py',
-'phaseId.py',
-'pvWatts.py',
-'resilientDist.py',
-'rfCoverage.py',
-#'smartSwitching.py',
-'solarCashflow.py',
-'solarConsumer.py',
-'solarDisagg.py',
-'solarEngineering.py',
-'solarFinancial.py',
-'solarSunda.py',
-'storageArbitrage.py',
-'storageDeferral.py',
-'storagePeakShave.py',
-'transmission.py',
-'vbatDispatch.py',
-'vbatStacked.py',
-'voltageDrop.py',
-'weatherPull.py',
-'anomalyDetection.py',
-'anonymization.py',
-'calibrate.py',
-'comms.py',
-'cosim.py',
-'cyberAttack.py',
-'cymeToGridlab.py',
-'distNetViz.py',
-'feeder.py',
-'forecast.py',
-'geo.py',
-'loadModeling.py',
-'loadModelingAmi.py',
-'milToGridlab.py',
-'network.py',
-'omfStats.py',
-'runAllTests.py',
-'weather.py',
-'web.py',
-'webProd.py',
-]
+# 3/1/20: These 3 files cause GitHub Actions to hang indefinitely when run with this test harness, so they must be run in their own separate processes
+FILES_THAT_HANG = ['networkStructure.py', 'smartSwitching.py', 'forecastTool.py']
+IGNORE_FILES.extend(FILES_THAT_HANG)
 
 
 def runAllTests(startingdir):
