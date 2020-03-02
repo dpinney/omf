@@ -13,6 +13,12 @@ FILES_THAT_HANG = ['networkStructure.py', 'smartSwitching.py', 'forecastTool.py'
 IGNORE_FILES.extend(FILES_THAT_HANG)
 
 
+def _print_header(header):
+	print('\n+------------------------+')
+	print(f'\n{header.upper()}')
+	print('\n+------------------------+')
+
+
 def runAllTests(startingdir):
 	os.chdir(startingdir)
 	nextdirs = []
@@ -54,9 +60,7 @@ def runAllTests(startingdir):
 def testRunner():
 	os.chdir(sys.argv[1] if len(sys.argv) > 1 else ".") # You can just run tests in a specific dir if you want
 	misfires, tested, not_tested = runAllTests(os.getcwd())
-	print('\n+------------------------+')
-	print('\nTESTED MODULES REPORT')
-	print('\n+------------------------+')
+	_print_header('regular tests report')
 	print(f'Number of modules tested: {len(tested)}')
 	print(tested)
 	print(f'Number of tests failed: {len(misfires)}')
@@ -67,11 +71,14 @@ def testRunner():
 			print(line)
 	if len(misfires) > 0:
 		raise Exception # Fail if there were errors.
-	print('\n+------------------------+')
-	print('\nUNTESTED MODULES REPORT')
-	print('\n+------------------------+')
+	_print_header('untested modules report')
 	print(f'Number of untested modules: {len(not_tested)}')
-	print(not_tested)
+	print(not_tested, '\n')
+	if len(FILES_THAT_HANG) > 0:
+		_print_header('special tests report')
+		print(f'Number of special tests: {len(FILES_THAT_HANG)}')
+		print(FILES_THAT_HANG)
+		print(f'See additional output for special tests results')
 
 
 if __name__ == "__main__"  :
