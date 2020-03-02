@@ -40,7 +40,7 @@ def runAllTests(startingdir):
 			nextdirs.append(os.path.join(os.getcwd(), item))
 	for d in nextdirs:
 		mis, t, nt = runAllTests(d)
-		misfires.update(m)
+		misfires.update(mis)
 		tested.extend(t)
 		not_tested.extend(nt)
 	return misfires, tested, not_tested
