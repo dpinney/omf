@@ -94,9 +94,9 @@ elif platform.system()=="Darwin": # MacOS
 	os.system('sudo installer -package "/Volumes/GridLAB-D 4.0.0/gridlabd.mpkg" -target /')
 	os.system('sudo hdiutil detach "/Volumes/GridLAB-D 4.0.0"')
 	#splat install
-	#os.system("wget https://www.qsl.net/kd2bd/splat-1.4.2-osx.tgz")
-	#os.system("sudo tar -xvzf splat-1.4.2-osx.tgz")
-	#os.system("sudo exec splat-1.4.2/configure")
+	os.system("wget https://www.qsl.net/kd2bd/splat-1.4.2-osx.tgz")
+	os.system("sudo tar -xvzf splat-1.4.2-osx.tgz")
+	os.system("sudo exec splat-1.4.2/configure")
 	os.system("cd omf")
 	os.system('pip3 install pygraphviz --install-option="--include-path=/usr/local/include/graphviz" --install-option="--library-path=/usr/local/lib/graphviz/"')
 	os.system('pip3 install "ecos >= 2.0.7rc2"')
