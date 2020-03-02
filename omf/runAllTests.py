@@ -118,6 +118,7 @@ def testRunner():
 	print(f'Number of modules tested: {len(tested)}')
 	print(tested)
 	print(f'Number of tests failed: {len(misfires)}')
+	print(list(misfires.keys()), '\n')
 	for fname, err in misfires.items():
 		print(PurePath(fname).name)
 		for line in re.split(r'\n+', err.decode('utf-8')):
