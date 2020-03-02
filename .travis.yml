@@ -12,13 +12,13 @@ jobs:
           update: true
       env:
         - DISPLAY=:99.0
+        - TZ=UTC0
       services:
         - xvfb
     - os: osx
       language: generic
       env:
         - DISPLAY=:99.0
-        - TZ=UTC0
       services:
         - xvfb
     - os: windows
