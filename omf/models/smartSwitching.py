@@ -1202,6 +1202,7 @@ def _tests():
 	__neoMetaModel__.renderAndShow(modelLoc)
 
 if __name__ == '__main__':
+	print('************************* smartSwtiching _tests() started... *************************')
 	_tests()
 	#import resource
 	#print(resource.getrusage(resource.RUSAGE_SELF).ru_maxrss) # 295587840 == 295.587840 MB

@@ -9,8 +9,8 @@ INCLUDE_DIRS = ['omf', 'models']
 
 IGNORE_FILES = [
 '__init__.py',
-'__neoMetaModel__.py*',
-'anomalyDetector.py*',
+'__neoMetaModel__.py',
+'anomalyDetector.py',
 'circuitRealTime.py',
 'commsBandwidth.py',
 'cvrDynamic.py',
@@ -30,7 +30,7 @@ IGNORE_FILES = [
 'outageCost.py',
 'phaseBalance.py',
 'phaseId.py',
-'pvWatts.py*',
+'pvWatts.py',
 'resilientDist.py',
 'rfCoverage.py',
 #'smartSwitching.py',
@@ -42,7 +42,7 @@ IGNORE_FILES = [
 'solarSunda.py',
 'storageArbitrage.py',
 'storageDeferral.py',
-'storagePeakShave.py*',
+'storagePeakShave.py',
 'transmission.py',
 'vbatDispatch.py',
 'vbatStacked.py',
