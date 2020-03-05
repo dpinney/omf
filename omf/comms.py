@@ -15,26 +15,26 @@ def treeToNxGraph(inTree):
 		if 'name' in item.keys():
 			if 'parent' in item.keys():
 				outGraph.add_edge(item['name'],item['parent'], attr_dict={'type':'parentChild'})
-				outGraph.node[item['name']]['type']=item['object']
+				outGraph.nodes[item['name']]['type']=item['object']
 				if 'bustype' in item.keys():
-					outGraph.node[item['name']]['substation'] = True
+					outGraph.nodes[item['name']]['substation'] = True
 				# Note that attached houses via gridEdit.html won't have lat/lon values, so this try is a workaround.
-				try: outGraph.node[item['name']]['pos']=(float(item.get('latitude',0)),float(item.get('longitude',0)))
-				except: outGraph.node[item['name']]['pos']=(0.0,0.0)
+				try: outGraph.nodes[item['name']]['pos']=(float(item.get('latitude',0)),float(item.get('longitude',0)))
+				except: outGraph.nodes[item['name']]['pos']=(0.0,0.0)
 			elif 'from' in item.keys():
 				outGraph.add_edge(item['from'],item['to'],attr_dict={'name':item.get('name',''),'type':item['object']})
 			elif item['name'] in outGraph:
 				# Edge already led to node's addition, so just set the attributes:
-				outGraph.node[item['name']]['type']=item['object']
+				outGraph.nodes[item['name']]['type']=item['object']
 				if 'bustype' in item.keys():
-					outGraph.node[item['name']]['substation'] = True
+					outGraph.nodes[item['name']]['substation'] = True
 			else:
 				outGraph.add_node(item['name'],attr_dict={'type':item['object']})
 				if 'bustype' in item.keys():
-					outGraph.node[item['name']]['substation'] = True
+					outGraph.nodes[item['name']]['substation'] = True
 			if 'latitude' in item.keys() and 'longitude' in item.keys():
-				try: outGraph.node.get(item['name'],{})['pos']=(float(item['latitude']),float(item['longitude']))
-				except: outGraph.node.get(item['name'],{})['pos']=(0.0,0.0)
+				try: outGraph.nodes.get(item['name'],{})['pos']=(float(item['latitude']),float(item['longitude']))
+				except: outGraph.nodes.get(item['name'],{})['pos']=(0.0,0.0)
 	return outGraph
 
 def treeToCommsDiNxGraph(inTree):
@@ -50,25 +50,25 @@ def treeToCommsDiNxGraph(inTree):
 		if 'name' in item.keys():#sometimes network objects aren't named!
 			if 'parent' in item.keys():
 				outGraph.add_edge(item['parent'], item['name'], attr_dict={'type':'parentChild', 'length': 0})#jfk. swapped from,to
-				outGraph.node[item['name']]['type']=item['object']
-				outGraph.node[item['name']]['pos']=(float(item.get('latitude',0)),float(item.get('longitude',0)))
+				outGraph.nodes[item['name']]['type']=item['object']
+				outGraph.nodes[item['name']]['pos']=(float(item.get('latitude',0)),float(item.get('longitude',0)))
 				if 'bustype' in item.keys():
 					outGraph.node[item['name']]['substation'] = True
 			elif 'from' in item.keys():
 				outGraph.add_edge(item['from'],item['to'],attr_dict={'type':item['object'], 'length': float(item.get('length',0))})
 				if 'bustype' in item.keys():
-					outGraph.node[item['name']]['substation'] = True
+					outGraph.nodes[item['name']]['substation'] = True
 			elif item['name'] in outGraph:
 				# Edge already led to node's addition, so just set the attributes:
-				outGraph.node[item['name']]['type']=item['object']
+				outGraph.nodes[item['name']]['type']=item['object']
 				if 'bustype' in item.keys():
-					outGraph.node[item['name']]['substation'] = True
+					outGraph.nodes[item['name']]['substation'] = True
 			else:
 				outGraph.add_node(item['name'],attr_dict={'type':item['object']})
 			if 'latitude' in item.keys() and 'longitude' in item.keys():
-				outGraph.node.get(item['name'],{})['pos']=(float(item['latitude']),float(item['longitude']))
+				outGraph.nodes.get(item['name'],{})['pos']=(float(item['latitude']),float(item['longitude']))
 			if 'bustype' in item.keys():
-					outGraph.node[item['name']]['substation'] = True
+					outGraph.nodes[item['name']]['substation'] = True
 		elif 'object' in item.keys() and item['object'] in network_objects:#when name doesn't exist
 			if 'from' in item.keys():
 				outGraph.add_edge(item['from'],item['to'],attr_dict={'type':item['object'], 'length': float(item.get('length',0))})
@@ -89,7 +89,7 @@ def createGraph(pathToOmdFile):
 
 def getSubstation(nxG):
 	'''Get the substation node from a feeder'''
-	return [sub for sub in nx.get_node_attributes(nxG, 'substation') if nxG.node[sub].get('substation',False)][0]
+	return [sub for sub in nx.get_node_attributes(nxG, 'substation') if nxG.nodes[sub].get('substation',False)][0]
 
 def getDistance(nxG, start, end):
 	'''Get the distance between two points in a graph'''
@@ -105,19 +105,19 @@ def setSmartMeters(nxG):
 	'''sets all nodes with type meter or triplex meter to smartMeters''' 
 	#to do add in other areas where needed
 	for meter in nx.get_node_attributes(nxG, 'type'):
-		if nxG.node[meter]['type'] in ['meter', 'triplex_meter']:
-			nxG.node[meter]['smartMeter'] = True
+		if nxG.nodes[meter]['type'] in ['meter', 'triplex_meter']:
+			nxG.nodes[meter]['smartMeter'] = True
 
 def setSmartMeterBandwidth(nxG, packetSize=10):
 	'''sets all smartMeter bandwidth and capacity to the packetSize'''
 	for meter in nx.get_node_attributes(nxG, 'smartMeter'):
-		if nxG.node[meter].get('smartMeter', False):
-			nxG.node[meter]['bandwidthCapacity'] = packetSize
-			nxG.node[meter]['bandwidthUse'] = packetSize
+		if nxG.nodes[meter].get('smartMeter', False):
+			nxG.nodes[meter]['bandwidthCapacity'] = packetSize
+			nxG.nodes[meter]['bandwidthUse'] = packetSize
 
 def setRFCollectors(nxG, edgeType='switch'):
 	'''Set fiber on path between certain edgeType (switch is the defualt for now) and the substation'''
-	node_positions = {nodewithPosition: nxG.node[nodewithPosition]['pos'] for nodewithPosition in nx.get_node_attributes(nxG, 'pos')}
+	node_positions = {nodewithPosition: nxG.nodes[nodewithPosition]['pos'] for nodewithPosition in nx.get_node_attributes(nxG, 'pos')}
 	edge_types = {edge: nxG[edge[0]][edge[1]]['type'] for edge in nx.get_edge_attributes(nxG, 'type')}
 	substation = getSubstation(nxG)
 	#collector position will validate that only one collector is added at each position
@@ -125,20 +125,20 @@ def setRFCollectors(nxG, edgeType='switch'):
 	for node in node_positions:
 		for edge in nxG.out_edges(node):
 			if edge_types.get(edge,'') == edgeType:
-				if nxG.node[node]['pos'] not in collector_positions:
+				if nxG.nodes[node]['pos'] not in collector_positions:
 					collector_positions.append(nxG.node[node]['pos']) 
-					nxG.node[node]['rfCollector'] = True
+					nxG.nodes[node]['rfCollector'] = True
 
 def setRFCollectorCapacity(nxG, rfBandwidthCap=1000):
 	for rfCollector  in nx.get_node_attributes(nxG, 'rfCollector'):
-		if nxG.node[rfCollector].get('rfCollector',False):
-			nxG.node[rfCollector]['bandwidthCapacity'] = rfBandwidthCap
+		if nxG.nodes[rfCollector].get('rfCollector',False):
+			nxG.nodes[rfCollector]['bandwidthCapacity'] = rfBandwidthCap
 
 def setFiber(nxG):
 	'''Set fiber between rfcollectors and substation'''
 	substation = getSubstation(nxG)
 	for rfCollector in nx.get_node_attributes(nxG, 'rfCollector'):
-		if nxG.node[rfCollector].get('rfCollector',False):
+		if nxG.nodes[rfCollector].get('rfCollector',False):
 			shortestPath = nx.bidirectional_shortest_path(nxG, substation, rfCollector)
 			for i in range(len(shortestPath)-1):
 				nxG[shortestPath[i]][shortestPath[i+1]]['fiber'] = True
@@ -149,8 +149,8 @@ def setFiberCapacity(nxG, fiberBandwidthCap=1000000, setSubstationBandwidth=Fals
 	substation = getSubstation(nxG)
 	#fiber capacity for line is stored in the substation bansdwidth capacity
 	if setSubstationBandwidth:
-		nxG.node[substation]['bandwidthCapacity'] = fiberBandwidthCap
-	fiberCapacity = nxG.node[substation].get('bandwidthCapacity',0)
+		nxG.nodes[substation]['bandwidthCapacity'] = fiberBandwidthCap
+	fiberCapacity = nxG.nodes[substation].get('bandwidthCapacity',0)
 	for edge in nx.get_edge_attributes(nxG, 'fiber'):
 		if nxG[edge[0]][edge[1]].get('fiber',False): 
 			nxG[edge[0]][edge[1]]['bandwidthCapacity'] = fiberCapacity
@@ -160,7 +160,7 @@ def setRF(nxG):
 	'''Add rf edges between smartMeters and the nearest rfCollector'''
 	rfCollectors = [rfCollector for rfCollector  in nx.get_node_attributes(nxG, 'rfCollector') if nxG.node[rfCollector].get('rfCollector', False)]
 	for smartMeter in nx.get_node_attributes(nxG, 'smartMeter'):
-		if nxG.node[smartMeter].get('smartMeter',False):
+		if nxG.nodes[smartMeter].get('smartMeter',False):
 			rfCollector = findNearestPoint(nxG, smartMeter, rfCollectors)
 			nxG.add_edge(rfCollector, smartMeter,attr_dict={'rf': True, 'type': 'rf'})
 
@@ -169,7 +169,7 @@ def setRFEdgeCapacity(nxG):
 	rfCollectors = [rfCollector for rfCollector  in nx.get_node_attributes(nxG, 'rfCollector') if nxG.node[rfCollector].get('rfCollector', False)]
 	for rfCollector in rfCollectors:
 		#reset bandwidth calculation to 0
-		nxG.node[rfCollector]['bandwidthUse'] = 0
+		nxG.nodes[rfCollector]['bandwidthUse'] = 0
 		#calculate bandwidth use of each rf connection edge between rfcollectors and smartMeters
 		if len(nxG.successors(rfCollector)) > 0:
 			splitCapacity = nxG.node[rfCollector].get('bandwidthCapacity',0) / len(nxG.successors(rfCollector))
@@ -181,7 +181,7 @@ def calcEdgeLengths(nxG):
 	'''Calculate the lengths of edges based on lat/lon position'''
 	G = Geod(ellps='WGS84')
 	for edge in nx.edges(nxG):
-		nxG[edge[0]][edge[1]]['length'] = G.inv(nxG.node[edge[0]]['pos'][1], nxG.node[edge[0]]['pos'][0], nxG.node[edge[1]]['pos'][1], nxG.node[edge[1]]['pos'][0])[2]
+		nxG[edge[0]][edge[1]]['length'] = G.inv(nxG.node[edge[0]]['pos'][1], nxG.node[edge[0]]['pos'][0], nxG.node[edge[1]]['pos'][1], nxG.nodes[edge[1]]['pos'][0])[2]
 
 def getFiberCost(nxG, fiberCostPerMeter):
 	'''Calculate the cost of fiber'''
@@ -202,7 +202,7 @@ def calcBandwidth(nxG):
 	#go through rfCollectors and smartMeters
 	#adust later to accept different lengh of rfCollectors
 	substation = getSubstation(nxG)
-	nxG.node[substation]['bandwidthUse'] = 0
+	nxG.nodes[substation]['bandwidthUse'] = 0
 	rfCollectors = [rfCollector for rfCollector in nx.get_node_attributes(nxG, 'rfCollector') if nxG.node[rfCollector].get('rfCollector',False)]
 	for rfCollector in rfCollectors:
 		#reset bandwidth calculation to 0
@@ -376,8 +376,8 @@ def graphGeoJson(nxG):
 	"type": "FeatureCollection",
 	"features": []
 	}
-	node_positions = {nodewithPosition: nxG.node[nodewithPosition]['pos'] for nodewithPosition  in nx.get_node_attributes(nxG, 'pos')}
-	node_types = {nodewithType: nxG.node[nodewithType]['type'] for nodewithType in nx.get_node_attributes(nxG, 'type')}
+	node_positions = {nodewithPosition: nxG.nodes[nodewithPosition]['pos'] for nodewithPosition  in nx.get_node_attributes(nxG, 'pos')}
+	node_types = {nodewithType: nxG.nodes[nodewithType]['type'] for nodewithType in nx.get_node_attributes(nxG, 'type')}
 	for node in node_positions:
 		geoJsonDict['features'].append({
 			"type": "Feature", 
@@ -388,11 +388,11 @@ def graphGeoJson(nxG):
 			"properties":{
 				"name": node,
 				"pointType": node_types.get(node,''),
-				"substation": nxG.node[node].get('substation',False),
-				"rfCollector": nxG.node[node].get('rfCollector',False),
-				"smartMeter": nxG.node[node].get('smartMeter',False),
-				"bandwidthUse": nxG.node[node].get('bandwidthUse',''),
-				"bandwidthCapacity": nxG.node[node].get('bandwidthCapacity','')
+				"substation": nxG.nodes[node].get('substation',False),
+				"rfCollector": nxG.nodes[node].get('rfCollector',False),
+				"smartMeter": nxG.nodes[node].get('smartMeter',False),
+				"bandwidthUse": nxG.nodes[node].get('bandwidthUse',''),
+				"bandwidthCapacity": nxG.nodes[node].get('bandwidthCapacity','')
 			}
 		})
 	#Add edges to geoJSON
@@ -469,9 +469,9 @@ def saveOmc(geoJson, outputPath, fileName=None):
 def graphValidator(pathToOmdFile, inGraph):
 	'''If the nodes/edges positions are not in the tree, the spurces and targets in the links key of the omd.json are used. '''
 	try:
-		node_positions = {nodewithPosition: inGraph.node[nodewithPosition]['pos'] for nodewithPosition  in nx.get_node_attributes(inGraph, 'pos')}
+		node_positions = {nodewithPosition: inGraph.nodes[nodewithPosition]['pos'] for nodewithPosition  in nx.get_node_attributes(inGraph, 'pos')}
 		for edge in nx.edges(inGraph):
-			validator = (node_positions[edge[0]] or nxG.node[edge[1]])
+			validator = (node_positions[edge[0]] or nxG.nodes[edge[1]])
 	except KeyError:
 		raise Exception('Network coordinates are not in the .omd tree. Use the anonymize menu in the circuit editor to generate a circuit with valid coordinates.')
 		'''
@@ -481,8 +481,8 @@ def graphValidator(pathToOmdFile, inGraph):
 		except ValueError:
 			#No nodes have positions, so create random ones
 			nxG = inGraph
-			for nodeToChange in nxG.node:
-				nxG.node[nodeToChange]['pos'] = (random.uniform(36.9900, 38.8700), random.uniform(-102.0500,-94.5900))
+			for nodeToChange in nxG.nodes:
+				nxG.nodes[nodeToChange]['pos'] = (random.uniform(36.9900, 38.8700), random.uniform(-102.0500,-94.5900))
 		return nxG'''
 	#should invalid lat/lons be included
 	nxG = latLonValidation(inGraph)
@@ -516,41 +516,41 @@ def convertOmd(pathToOmdFile):
 
 		#nxG.add_edge(key['source']['name'], key['target']['name'])
 		nxG.add_edge(sourceEdge, targetEdge)
-		nxG.node[sourceEdge]['pos'] = (float(key['source']['y']), float(key['source']['x']))
-		nxG.node[targetEdge]['pos'] = (float(key['target']['y']), float(key['target']['x']))
+		nxG.nodes[sourceEdge]['pos'] = (float(key['source']['y']), float(key['source']['x']))
+		nxG.nodes[targetEdge]['pos'] = (float(key['target']['y']), float(key['target']['x']))
 		sourceTreeIndex = str(key['source']['treeIndex'])
 		targetTreeIndex = str(key['target']['treeIndex'])
 		try:
-			nxG.node[sourceEdge]['type'] = tree[sourceTreeIndex]['object']
-			nxG.node[sourceEdge]['name'] = key['source']['name']
+			nxG.nodes[sourceEdge]['type'] = tree[sourceTreeIndex]['object']
+			nxG.nodes[sourceEdge]['name'] = key['source']['name']
 			#Get substation - fix later because this seems a little hacky
 			if tree[sourceTreeIndex]['bustype'] == 'SWING':
-				nxG.node[sourceEdge]['substation'] = True
+				nxG.nodes[sourceEdge]['substation'] = True
 		except KeyError:
-			nxG.node[sourceEdge]['type'] = 'Undefined'
+			nxG.nodes[sourceEdge]['type'] = 'Undefined'
 		try:
-			nxG.node[targetEdge]['type'] = tree[targetTreeIndex]['object']
-			nxG.node[targetEdge]['name'] = key['target']['name']
+			nxG.nodes[targetEdge]['type'] = tree[targetTreeIndex]['object']
+			nxG.nodes[targetEdge]['name'] = key['target']['name']
 		except KeyError:
-			nxG.node[targetEdge]['type'] = 'Undefined'
+			nxG.nodes[targetEdge]['type'] = 'Undefined'
 	for nodeToChange in nx.get_node_attributes(nxG, 'pos'):
-		#nxG.node[nodeToChange]['pos'] = (latitudeCenter + nxG.node[nodeToChange]['pos'][1]/latitude_max, longitudeCenter 
-		#								+ nxG.node[nodeToChange]['pos'][0]/longitude_max)
-		#print(nxG.node[nodeToChange]['pos'][1], nxG.node[nodeToChange]['pos'][0])
-		#print(statePlaneToLatLon(nxG.node[nodeToChange]['pos'][1], nxG.node[nodeToChange]['pos'][0]))
-		nxG.node[nodeToChange]['pos'] = statePlaneToLatLon(nxG.node[nodeToChange]['pos'][1], nxG.node[nodeToChange]['pos'][0])
-	#print(nxG.node)
+		#nxG.nodes[nodeToChange]['pos'] = (latitudeCenter + nxG.nodes[nodeToChange]['pos'][1]/latitude_max, longitudeCenter 
+		#								+ nxG.nodes[nodeToChange]['pos'][0]/longitude_max)
+		#print(nxG.nodes[nodeToChange]['pos'][1], nxG.nodes[nodeToChange]['pos'][0])
+		#print(statePlaneToLatLon(nxG.nodes[nodeToChange]['pos'][1], nxG.nodes[nodeToChange]['pos'][0]))
+		nxG.nodes[nodeToChange]['pos'] = statePlaneToLatLon(nxG.nodes[nodeToChange]['pos'][1], nxG.nodes[nodeToChange]['pos'][0])
+	#print(nxG.nodes)
 	return nxG'''
 
 def latLonValidation(inGraph):
 	'''Checks if an omd has invalid latlons, and if so, converts to stateplane coordinates or generates random values '''
-	latitude_min = min([inGraph.node[nodewithPosition]['pos'][1] for nodewithPosition  in nx.get_node_attributes(inGraph, 'pos')])
-	longitude_min = min([inGraph.node[nodewithPosition]['pos'][0] for nodewithPosition  in nx.get_node_attributes(inGraph, 'pos')])
-	latitude_max = max([inGraph.node[nodewithPosition]['pos'][1] for nodewithPosition  in nx.get_node_attributes(inGraph, 'pos')])
-	longitude_max = max([inGraph.node[nodewithPosition]['pos'][0] for nodewithPosition  in nx.get_node_attributes(inGraph, 'pos')])
+	latitude_min = min([inGraph.nodes[nodewithPosition]['pos'][1] for nodewithPosition  in nx.get_node_attributes(inGraph, 'pos')])
+	longitude_min = min([inGraph.nodes[nodewithPosition]['pos'][0] for nodewithPosition  in nx.get_node_attributes(inGraph, 'pos')])
+	latitude_max = max([inGraph.nodes[nodewithPosition]['pos'][1] for nodewithPosition  in nx.get_node_attributes(inGraph, 'pos')])
+	longitude_max = max([inGraph.nodes[nodewithPosition]['pos'][0] for nodewithPosition  in nx.get_node_attributes(inGraph, 'pos')])
 	if latitude_min < -180 or latitude_max > 180 or longitude_min < -90 or longitude_max > 90:
 		for nodeToChange in nx.get_node_attributes(inGraph, 'pos'):
-			inGraph.node[nodeToChange]['pos'] = statePlaneToLatLon(inGraph.node[nodeToChange]['pos'][1], inGraph.node[nodeToChange]['pos'][0])
+			inGraph.nodes[nodeToChange]['pos'] = statePlaneToLatLon(inGraph.node[nodeToChange]['pos'][1], inGraph.node[nodeToChange]['pos'][0])
 	return inGraph
 
 def statePlaneToLatLon(easting, northing, epsg = None):
