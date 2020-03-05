@@ -53,7 +53,7 @@ def treeToCommsDiNxGraph(inTree):
 				outGraph.nodes[item['name']]['type']=item['object']
 				outGraph.nodes[item['name']]['pos']=(float(item.get('latitude',0)),float(item.get('longitude',0)))
 				if 'bustype' in item.keys():
-					outGraph.node[item['name']]['substation'] = True
+					outGraph.nodes[item['name']]['substation'] = True
 			elif 'from' in item.keys():
 				outGraph.add_edge(item['from'],item['to'],attr_dict={'type':item['object'], 'length': float(item.get('length',0))})
 				if 'bustype' in item.keys():
@@ -75,7 +75,7 @@ def treeToCommsDiNxGraph(inTree):
 			if 'latitude' in item.keys() and 'longitude' in item.keys():
 				outGraph.node.get(item['name'],{})['pos']=(float(item['latitude']),float(item['longitude']))
 			if 'bustype' in item.keys():
-					outGraph.node[item['name']]['substation'] = True
+					outGraph.nodes[item['name']]['substation'] = True
 	return outGraph
 
 def createGraph(pathToOmdFile):
@@ -93,7 +93,7 @@ def getSubstation(nxG):
 
 def getDistance(nxG, start, end):
 	'''Get the distance between two points in a graph'''
-	dist = math.sqrt( (nxG.node[end]['pos'][1] - nxG.node[start]['pos'][1])**2 + (nxG.node[end]['pos'][0] - nxG.node[start]['pos'][0])**2 )
+	dist = math.sqrt( (nxG.nodes[end]['pos'][1] - nxG.nodes[start]['pos'][1])**2 + (nxG.nodes[end]['pos'][0] - nxG.nodes[start]['pos'][0])**2 )
 	return dist
 
 def findNearestPoint(nxG, smartMeter, rfCollectors):
@@ -126,7 +126,7 @@ def setRFCollectors(nxG, edgeType='switch'):
 		for edge in nxG.out_edges(node):
 			if edge_types.get(edge,'') == edgeType:
 				if nxG.nodes[node]['pos'] not in collector_positions:
-					collector_positions.append(nxG.node[node]['pos']) 
+					collector_positions.append(nxG.nodes[node]['pos']) 
 					nxG.nodes[node]['rfCollector'] = True
 
 def setRFCollectorCapacity(nxG, rfBandwidthCap=1000):
@@ -158,7 +158,7 @@ def setFiberCapacity(nxG, fiberBandwidthCap=1000000, setSubstationBandwidth=Fals
 
 def setRF(nxG):
 	'''Add rf edges between smartMeters and the nearest rfCollector'''
-	rfCollectors = [rfCollector for rfCollector  in nx.get_node_attributes(nxG, 'rfCollector') if nxG.node[rfCollector].get('rfCollector', False)]
+	rfCollectors = [rfCollector for rfCollector  in nx.get_node_attributes(nxG, 'rfCollector') if nxG.nodes[rfCollector].get('rfCollector', False)]
 	for smartMeter in nx.get_node_attributes(nxG, 'smartMeter'):
 		if nxG.nodes[smartMeter].get('smartMeter',False):
 			rfCollector = findNearestPoint(nxG, smartMeter, rfCollectors)
@@ -166,13 +166,13 @@ def setRF(nxG):
 
 def setRFEdgeCapacity(nxG):
 	'''Calculate bandwidth use for all rf collectors and '''
-	rfCollectors = [rfCollector for rfCollector  in nx.get_node_attributes(nxG, 'rfCollector') if nxG.node[rfCollector].get('rfCollector', False)]
+	rfCollectors = [rfCollector for rfCollector  in nx.get_node_attributes(nxG, 'rfCollector') if nxG.nodes[rfCollector].get('rfCollector', False)]
 	for rfCollector in rfCollectors:
 		#reset bandwidth calculation to 0
 		nxG.nodes[rfCollector]['bandwidthUse'] = 0
 		#calculate bandwidth use of each rf connection edge between rfcollectors and smartMeters
 		if len(nxG.successors(rfCollector)) > 0:
-			splitCapacity = nxG.node[rfCollector].get('bandwidthCapacity',0) / len(nxG.successors(rfCollector))
+			splitCapacity = nxG.nodes[rfCollector].get('bandwidthCapacity',0) / len(nxG.successors(rfCollector))
 			for smartMeter in nxG.successors(rfCollector):
 				if nxG[rfCollector][smartMeter].get('rf',False):
 					nxG[rfCollector][smartMeter]['bandwidthCapacity'] = splitCapacity
@@ -181,7 +181,7 @@ def calcEdgeLengths(nxG):
 	'''Calculate the lengths of edges based on lat/lon position'''
 	G = Geod(ellps='WGS84')
 	for edge in nx.edges(nxG):
-		nxG[edge[0]][edge[1]]['length'] = G.inv(nxG.node[edge[0]]['pos'][1], nxG.node[edge[0]]['pos'][0], nxG.node[edge[1]]['pos'][1], nxG.nodes[edge[1]]['pos'][0])[2]
+		nxG[edge[0]][edge[1]]['length'] = G.inv(nxG.nodes[edge[0]]['pos'][1], nxG.nodes[edge[0]]['pos'][0], nxG.nodes[edge[1]]['pos'][1], nxG.nodes[edge[1]]['pos'][0])[2]
 
 def getFiberCost(nxG, fiberCostPerMeter):
 	'''Calculate the cost of fiber'''
@@ -190,12 +190,12 @@ def getFiberCost(nxG, fiberCostPerMeter):
 
 def getrfCollectorsCost(nxG, rfCollectorCost):
 	'''Calculate the cost of RF rfCollector equipment'''
-	rfCollector_cost = len([rfCollector for rfCollector  in nx.get_node_attributes(nxG, 'rfCollector') if nxG.node[rfCollector].get('rfCollector',False)])*rfCollectorCost
+	rfCollector_cost = len([rfCollector for rfCollector  in nx.get_node_attributes(nxG, 'rfCollector') if nxG.nodes[rfCollector].get('rfCollector',False)])*rfCollectorCost
 	return rfCollector_cost
 
 def getsmartMetersCost(nxG, smartMeterCost):
 	'''Calculate the cost of RF smartMeter equipment'''
-	smartMeter_cost = len([smartMeter for smartMeter in nx.get_node_attributes(nxG, 'smartMeter') if nxG.node[smartMeter].get('smartMeter',False)])*smartMeterCost
+	smartMeter_cost = len([smartMeter for smartMeter in nx.get_node_attributes(nxG, 'smartMeter') if nxG.nodes[smartMeter].get('smartMeter',False)])*smartMeterCost
 	return smartMeter_cost
 
 def calcBandwidth(nxG):
@@ -203,19 +203,19 @@ def calcBandwidth(nxG):
 	#adust later to accept different lengh of rfCollectors
 	substation = getSubstation(nxG)
 	nxG.nodes[substation]['bandwidthUse'] = 0
-	rfCollectors = [rfCollector for rfCollector in nx.get_node_attributes(nxG, 'rfCollector') if nxG.node[rfCollector].get('rfCollector',False)]
+	rfCollectors = [rfCollector for rfCollector in nx.get_node_attributes(nxG, 'rfCollector') if nxG.nodes[rfCollector].get('rfCollector',False)]
 	for rfCollector in rfCollectors:
 		#reset bandwidth calculation to 0
-		nxG.node[rfCollector]['bandwidthUse'] = 0
+		nxG.nodes[rfCollector]['bandwidthUse'] = 0
 		#calculate bandwidth use of each rf connection edge between rfcollectors and smartMeters
 		for smartMeter in nxG.successors(rfCollector):
 			if nxG[rfCollector][smartMeter].get('rf',False):
-				nxG[rfCollector][smartMeter]['bandwidthUse'] = nxG.node[smartMeter]['bandwidthUse']
-				nxG.node[rfCollector]['bandwidthUse'] += nxG.node[smartMeter]['bandwidthUse']
+				nxG[rfCollector][smartMeter]['bandwidthUse'] = nxG.nodes[smartMeter]['bandwidthUse']
+				nxG.nodes[rfCollector]['bandwidthUse'] += nxG.nodes[smartMeter]['bandwidthUse']
 		shortestPath = nx.bidirectional_shortest_path(nxG, substation, rfCollector)
 		for i in range(len(shortestPath)-1):
-			nxG[shortestPath[i]][shortestPath[i+1]]['bandwidthUse'] += nxG.node[rfCollector]['bandwidthUse']
-		nxG.node[substation]['bandwidthUse'] += nxG.node[rfCollector]['bandwidthUse']
+			nxG[shortestPath[i]][shortestPath[i+1]]['bandwidthUse'] += nxG.nodes[rfCollector]['bandwidthUse']
+		nxG.nodes[substation]['bandwidthUse'] += nxG.nodes[rfCollector]['bandwidthUse']
 
 def clearRFEdges(nxG):
 	'''Delete all rf edges'''
@@ -246,26 +246,26 @@ def clearFiber(nxG):
 def setMeshLevel(nxG):
 	'''Setting mesh level of substation to 0 to start'''
 	substation = getSubstation(nxG)
-	nxG.node[substation]['meshLevel'] = 0
+	nxG.nodes[substation]['meshLevel'] = 0
 
 def addMeshLevel(nxG, hull, radius):
 	rfRange = radius * 2
 	#go through all smart meters
 	for start in hull:
 		for smartMeter in nx.get_node_attributes(nxG, 'smartMeter'):
-			if nxG.node[smartMeter]['smartMeter']:
-				if nxG.node[smartMeter].get('meshLevel', float('inf')) > nxG.node[start]['meshLevel']:
+			if nxG.nodes[smartMeter]['smartMeter']:
+				if nxG.nodes[smartMeter].get('meshLevel', float('inf')) > nxG.nodes[start]['meshLevel']:
 					if getDistance(nxG,start,smartMeter) <= rfRange:
 						addedLevel = True
 						#nxG.add_edge(start, smartMeter, attr_dict={'rf': True, 'type': 'rf'})
-						nxG.node[smartMeter]['meshLevel'] = nxG.node[start]['meshLevel'] + 1
-						nxG.node[smartMeter]['meshOrigin'] = start
+						nxG.nodes[smartMeter]['meshLevel'] = nxG.nodes[start]['meshLevel'] + 1
+						nxG.nodes[smartMeter]['meshOrigin'] = start
 						#add marker that this is connector
-						nxG.node[start]['connector'] = True
+						nxG.nodes[start]['connector'] = True
 
 def convexMesh(nxG, meshLevel, geoJsonDict=dict()):
 	'''marks nodes that make up the edges of the convex hull'''
-	#meshPoints = [nxG.node[node]['pos'] for node in nx.get_node_attributes(nxG, 'meshLevel') if nxG.node[node].get('meshLevel',-1) == meshLevel]
+	#meshPoints = [nxG.nodes[node]['pos'] for node in nx.get_node_attributes(nxG, 'meshLevel') if nxG.nodes[node].get('meshLevel',-1) == meshLevel]
 	#mesh hull is list of points on outer hull
 	meshHull = []
 	#all points in the same mesh level 
@@ -278,7 +278,7 @@ def convexMesh(nxG, meshLevel, geoJsonDict=dict()):
 	for node in nxG.nodes(data=True):
 		if node[1].get('meshLevel',float('inf')) <= meshLevel:
 			if list(node[1]['pos']) in polygon:
-				nxG.node[node[0]]['hullEdge'] = True
+				nxG.nodes[node[0]]['hullEdge'] = True
 				meshHull.append(node[0])
 	for point in concaveHull:
 		point.reverse()
@@ -300,7 +300,7 @@ def convexMesh(nxG, meshLevel, geoJsonDict=dict()):
 
 '''
 def convexHullMesh(nxG, meshLevel, previousMeshHull):
-	#meshPoints = [nxG.node[node]['pos'] for node in nx.get_node_attributes(nxG, 'meshLevel') if nxG.node[node].get('meshLevel',-1) == meshLevel]
+	#meshPoints = [nxG.nodes[node]['pos'] for node in nx.get_node_attributes(nxG, 'meshLevel') if nxG.nodes[node].get('meshLevel',-1) == meshLevel]
 	#mesh hull is list of points on outer hull
 	if len(previousMeshHull) > 1:
 		previousMeshHull.pop()
@@ -550,7 +550,7 @@ def latLonValidation(inGraph):
 	longitude_max = max([inGraph.nodes[nodewithPosition]['pos'][0] for nodewithPosition  in nx.get_node_attributes(inGraph, 'pos')])
 	if latitude_min < -180 or latitude_max > 180 or longitude_min < -90 or longitude_max > 90:
 		for nodeToChange in nx.get_node_attributes(inGraph, 'pos'):
-			inGraph.nodes[nodeToChange]['pos'] = statePlaneToLatLon(inGraph.node[nodeToChange]['pos'][1], inGraph.node[nodeToChange]['pos'][0])
+			inGraph.nodes[nodeToChange]['pos'] = statePlaneToLatLon(inGraph.nodes[nodeToChange]['pos'][1], inGraph.nodes[nodeToChange]['pos'][0])
 	return inGraph
 
 def statePlaneToLatLon(easting, northing, epsg = None):
@@ -666,7 +666,6 @@ def _tests():
 	showOnMap(graphGeoJson(nxG))
 
 	#load an omc, recalculate (as if refresh), redisplay
-	
 	newNxg = omcToNxg('output/commsGeoJson.omc', fromFile=True)
 	clearFiber(newNxg)
 	clearRFEdges(newNxg)
