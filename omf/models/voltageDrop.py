@@ -477,13 +477,13 @@ def drawPlot(path, workDir=None, neatoLayout=False, edgeLabs=None, nodeLabs=None
 		cleanG.add_nodes_from(fGraph)
 		positions = graphviz_layout(cleanG, prog='neato')
 	else:
-		remove_nodes = [n for n in fGraph if fGraph.node[n].get('pos', (0, 0)) == (0, 0)]
+		remove_nodes = [n for n in fGraph if fGraph.nodes[n].get('pos', (0, 0)) == (0, 0)]
 		fGraph.remove_nodes_from(remove_nodes)
-		positions = {n:fGraph.node[n].get('pos',(0,0)) for n in fGraph}
+		positions = {n:fGraph.nodes[n].get('pos',(0,0)) for n in fGraph}
 	# Need to get edge names from pairs of connected node names.
 	edgeNames = []
 	for e in fGraph.edges():
-		edgeNames.append((fGraph.edge[e[0]][e[1]].get('name','BLANK')).replace('"',''))
+		edgeNames.append((fGraph.edges[e].get('name','BLANK')).replace('"',''))
 	#create custom colormap
 	if customColormap:
 		if scaleMin != None and scaleMax != None:
