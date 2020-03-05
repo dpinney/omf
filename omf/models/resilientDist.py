@@ -356,7 +356,7 @@ def genDiagram(outputDir, feederJson, damageDict, critLoads, damagedLoads, edgeL
 	# Draw all the edges
 	selected_labels = {}
 	for e in inGraph.edges():
-		edgeName = inGraph.edge[e].get('name')
+		edgeName = inGraph.edges[e].get('name')
 		if edgeName in edgeLabelsToAdd.keys():
 			selected_labels[e] = edgeLabelsToAdd[edgeName]
 		edgeColor = 'black'
@@ -367,12 +367,14 @@ def genDiagram(outputDir, feederJson, damageDict, critLoads, damagedLoads, edgeL
 				edgeColor = 'orange'
 			if damageDict[edgeName] >= 3:
 				edgeColor = 'red'
-		eType = inGraph.edge[e].get('type','underground_line')
-		ePhases = inGraph.edge[e].get('phases',1)
-		standArgs = {'edgelist':[e],
-					 'edge_color':edgeColor,
-					 'width':2,
-					 'style':{'parentChild':'dotted','underground_line':'dashed'}.get(eType,'solid') }
+		eType = inGraph.edges[e].get('type','underground_line')
+		ePhases = inGraph.edges[e].get('phases',1)
+		standArgs = {
+			'edgelist':[e],
+			'edge_color':edgeColor,
+			'width':2,
+			'style':{'parentChild':'dotted','underground_line':'dashed'}.get(eType,'solid')
+		}
 		if ePhases==3:
 			standArgs.update({'width':5})
 			nx.draw_networkx_edges(inGraph,pos,**standArgs)
