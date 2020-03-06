@@ -387,10 +387,7 @@ def treeToNxGraph(inTree):
 				# Edge already led to node's addition, so just set the attributes:
 				outGraph.nodes[item['name']]['type'] = item['object']
 			else:
-				outGraph.add_node(
-					item['name'],
-					type=item['object']
-				)
+				outGraph.add_node(item['name'], type=item['object'])
 			if 'latitude' in item.keys() and 'longitude' in item.keys():
 				# Ignore lines that have "latitude" and "longitude" properties
 				if 'from' not in item.keys():
