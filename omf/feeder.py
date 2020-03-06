@@ -373,12 +373,7 @@ def treeToNxGraph(inTree):
 		# This check is why configuration objects never get coordinates. Or maybe this is intentional because configuration objects are added later?
 		if 'name' in item.keys():
 			if 'parent' in item.keys():
-				outGraph.add_edge(
-					item['name'],
-					item['parent'],
-					type='parentChild',
-					phases=1
-				)
+				outGraph.add_edge(item['name'], item['parent'], type='parentChild', phases=1)
 				outGraph.nodes[item['name']]['type'] = item['object']
 				# Note that attached houses via gridEdit.html won't have lat/lon values, so this try is a workaround.
 				try:
@@ -387,13 +382,7 @@ def treeToNxGraph(inTree):
 					outGraph.nodes[item['name']]['pos'] = (0.0, 0.0)
 			elif 'from' in item.keys():
 				myPhase = _phaseCount(item.get('phases','AN'))
-				outGraph.add_edge(
-					item['from'],
-					item['to'],
-					name=item.get('name',''),
-					type=item['object'],
-					phases=myPhase
-				)
+				outGraph.add_edge(item['from'], item['to'], name=item.get('name',''), type=item['object'], phases=myPhase)
 			elif item['name'] in outGraph:
 				# Edge already led to node's addition, so just set the attributes:
 				outGraph.nodes[item['name']]['type'] = item['object']
@@ -425,24 +414,12 @@ def treeToDiNxGraph(inTree):
 					continue
 		if 'name' in item.keys(): # sometimes network objects aren't named!
 			if 'parent' in item.keys():
-				outGraph.add_edge(
-					item['parent'],
-					item['name'],
-					type='parentChild',
-					phases=1,
-					length=0
-				)
+				outGraph.add_edge(item['parent'], item['name'], type='parentChild', phases=1, length=0)
 				outGraph.nodes[item['name']]['type'] = item['object']
 				outGraph.nodes[item['name']]['pos'] = (float(item.get('latitude', 0)), float(item.get('longitude', 0)))
 			elif 'from' in item.keys():
 				myPhase = _phaseCount(item.get('phases','AN'))
-				outGraph.add_edge(
-					item['from'],
-					item['to'],
-					type=item['object'],
-					phases=myPhase,
-					length=float(item.get('length',0))
-				)
+				outGraph.add_edge(item['from'], item['to'], type=item['object'], phases=myPhase, length=float(item.get('length',0)))
 			elif item['name'] in outGraph:
 				# Edge already led to node's addition, so just set the attributes:
 				outGraph.nodes[item['name']]['type'] = item['object']
@@ -455,14 +432,8 @@ def treeToDiNxGraph(inTree):
 					outGraph.nodes[item['name']]['pos'] = (0.0, 0.0)
 		elif 'object' in item.keys() and item['object'] in network_objects: # when name doesn't exist
 			if 'from' in item.keys():
-				myPhase = _phaseCount(item.get('phases','AN'))
-				outGraph.add_edge(
-					item['from'],
-					item['to'],
-					type=item['object'],
-					phases=myPhase,
-					length=float(item.get('length', 0))
-				)
+				myPhase = _phaseCount(item.get('phases', 'AN'))
+				outGraph.add_edge(item['from'], item['to'], type=item['object'], phases=myPhase, length=float(item.get('length', 0)))
 			if 'latitude' in item.keys() and 'longitude' in item.keys():
 				# Not sure what to do here. The tree item (a dict) doesn't have a "name", so how can we assigned a "pos" attribute via the NodeView if
 				# there is no name key? I'm leaving this line alone (even though it's wrong) for now because this function isn't actually used
