@@ -837,7 +837,7 @@ function moveBusListener() {
 			//Redraw generators on adjacent buses
 			for(gen in networkData.gen) {
 				busGenID = networkData.gen[String(parseInt(gen))]['bus']
-				if(busGenID == sVGToiLookup[fBusID]) {
+				if(busGenID == fBusID) {
 					document.getElementById("gen_" + String(parseInt(gen))).remove() 
 					addRectangle(x1 - 4/2, y1 - 4/2, 4, 4, "gen_" + String(parseInt(gen)), "gen")
 					if(scaleTracker != 1.0) {
@@ -856,7 +856,7 @@ function moveBusListener() {
 						newRect.setAttribute('y', latitude - (2*scaleTracker))
 					}
 				}
-				if(busGenID == sVGToiLookup[tBusID]) {
+				if(busGenID == tBusID) {
 					document.getElementById("gen_" + String(parseInt(gen))).remove() 
 					addRectangle(x2- 4/2, y2 - 4/2, 4, 4, "gen_" + String(parseInt(gen)), "gen")
 					if(scaleTracker != 1.0) {
