@@ -306,26 +306,26 @@ def testingSimple(testPath, pathToCsv, workDir, useDist, useVolt):
 				reclDevices = dict.fromkeys(['recloser'], False)
 				if (obType in reclDevices.keys() and 'addedRecloser' in item.get('name', '')):
 					# HACK: set the recloser as a swingNode in order to make it hot pink
-					outGraph.add_edge(item['from'],item['to'], attr_dict={'type':'swingNode'})
+					outGraph.add_edge(item['from'],item['to'], type='swingNode')
 				elif (obType in reclDevices.keys() and 'addedRecloser' not in item.get('name','')):
 					outGraph.add_edge(item['from'],item['to'])
 				elif 'parent' in item.keys() and obType not in reclDevices:
-					outGraph.add_edge(item['name'],item['parent'], attr_dict={'type':'parentChild','phases':1})
-					outGraph.node[item['name']]['type']=item['object']
+					outGraph.add_edge(item['name'],item['parent'],type='parentChild',phases=1)
+					outGraph.nodes[item['name']]['type']=item['object']
 					# Note that attached houses via gridEdit.html won't have lat/lon values, so this try is a workaround.
-					try: outGraph.node[item['name']]['pos']=(float(item.get('latitude',0)),float(item.get('longitude',0)))
-					except: outGraph.node[item['name']]['pos']=(0.0,0.0)
+					try: outGraph.nodes[item['name']]['pos']=(float(item.get('latitude',0)),float(item.get('longitude',0)))
+					except: outGraph.nodes[item['name']]['pos']=(0.0,0.0)
 				elif 'from' in item.keys():
 					myPhase = feeder._phaseCount(item.get('phases','AN'))
 					# outGraph.add_edge(item['from'],item['to'],attr_dict={'name':item.get('name',''),'type':item['object'],'phases':myPhase})
 				elif item['name'] in outGraph:
 					# Edge already led to node's addition, so just set the attributes:
-					outGraph.node[item['name']]['type']=item['object']
+					outGraph.nodes[item['name']]['type']=item['object']
 				else:
-					outGraph.add_node(item['name'],attr_dict={'type':item['object']})
+					outGraph.add_node(item['name'],type=item['object'])
 				if 'latitude' in item.keys() and 'longitude' in item.keys():
-					try: outGraph.node.get(item['name'],{})['pos']=(float(item['latitude']),float(item['longitude']))
-					except: outGraph.node.get(item['name'],{})['pos']=(0.0,0.0)
+					try: outGraph.nodes.get(item['name'],{})['pos']=(float(item['latitude']),float(item['longitude']))
+					except: outGraph.nodes.get(item['name'],{})['pos']=(0.0,0.0)
 		 
 		# populate the graph with edges
 		size = len(referenceMST)
