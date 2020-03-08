@@ -356,7 +356,7 @@ def generateVoltChart(tree, rawOut, modelDir, neatoLayout=True):
 		# was formerly : positions = nx.graphviz_layout(cleanG, prog='neato') but this threw an error
 		positions = nx.nx_agraph.graphviz_layout(cleanG, prog='neato')
 	else:
-		rawPositions = {n:fGraph.node[n].get('pos',(0,0)) for n in fGraph}
+		rawPositions = {n:fGraph.nodes[n].get('pos',(0,0)) for n in fGraph}
 		#HACK: the import code reverses the y coords.
 		def yFlip(pair):
 			try: return (pair[0], -1.0*pair[1])
