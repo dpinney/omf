@@ -40,20 +40,30 @@ def n(num):
 def floats(f):
 	return float(f.replace(',', ''))
 
+def parse_complex(x):
+    if 'd' not in x:
+        return complex(x) if x != '+0+0i' else complex(0)
+    else:
+        polar = complex(x.replace('d', 'j'))
+        h = polar.real
+        rad = math.radians(polar.imag)
+        transformed = complex(h*math.cos(rad), h*math.sin(rad))
+        return transformed
+
 def respect_pf(x, constant_pf):
-	m = complex(x)
+	m = parse_complex(x)
 	rating_VA = m.real
 	if constant_pf < 1:
 		# Lagging PF setting on inverters.
 		newWatts = constant_pf * rating_VA
 		newVARs = math.sqrt(rating_VA**2 - newWatts**2)
-		new_complex = complex(newWatts, newVARs)
+		new_complex = parse_complex(newWatts, newVARs)
 		return "{}+{}j".format(new_complex.real, new_complex.imag)
 	elif constant_pf > 1:
 		# Leaing PF setting on inverters.
 		newWatts = (2 - constant_pf) * rating_VA
 		newVARs = math.sqrt(rating_VA**2 - newWatts**2)
-		new_complex = complex(newWatts, newVARs)
+		new_complex = parse_complex(newWatts, newVARs)
 		return "{}{}j".format(new_complex.real, new_complex.imag)
 
 def work(modelDir, ind):
@@ -481,7 +491,7 @@ def _readCSV(filename, voltage=True):
 	if voltage:
 		df = df[df.columns[:-2]]
 	df = df[~df.index.str.startswith('#')]
-	df[0] = [complex(i) if i != '+0+0i' else complex(0) for i in df[0]]
+	df[0] = [parse_complex(i) for i in df[0]]
 	df['imag'] = df[0].to_numpy().imag
 	df['real'] = df[0].to_numpy().real
 	df = df.drop([0], axis=1)
@@ -499,10 +509,10 @@ def _totals(filename, component=None):
 def new(modelDir):
 	''' Create a new instance of this model. Returns true on success, false on failure. '''
 	defaultInputs = {
-		"feederName1": "phase_balance_test",
-		"criticalNode": 'R1-12-47-1_node_17',
-		"pvConnection": 'Delta',
-		"layoutAlgorithm": "geospatial",
+		# "feederName1": "phase_balance_test",
+		# "criticalNode": 'R1-12-47-1_node_17',
+		# "pvConnection": 'Delta',
+		# "layoutAlgorithm": "geospatial",
 		# ---------------------------------------- #
 		# "feederName1": "phase_balance_test_2",
 		# "criticalNode": 'R1-12-47-2_node_28',
@@ -514,10 +524,10 @@ def new(modelDir):
 		# "pvConnection": 'Delta',
 		# "layoutAlgorithm": "geospatial",
 		# ---------------------------------------- #
-		# "feederName1": 'turkey_solar',
-		# "criticalNode": "nodeOH5041-S1689OH15730",
-		# "pvConnection": 'Delta',
-		# "layoutAlgorithm": "geospatial",
+		"feederName1": 'turkey_solar',
+		"criticalNode": "nodeOH5041-S1689OH15730",
+		"pvConnection": 'Delta',
+		"layoutAlgorithm": "geospatial",
 		# ---------------------------------------- #
 		# "feederName1": 'swaec',
 		# "criticalNode": "nodespan_192258span_177328",
