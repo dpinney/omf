@@ -510,8 +510,8 @@ def new(modelDir):
 	''' Create a new instance of this model. Returns true on success, false on failure. '''
 	defaultInputs = {
 		"feederName1": "phase_balance_test",
-		"criticalNode": 'R1-12-47-1_node_17',
-		"pvConnection": 'Delta',
+		"criticalNode": "R1-12-47-1_node_17",
+		"pvConnection": "Delta",
 		"layoutAlgorithm": "geospatial",
 		# ---------------------------------------- #
 		# "feederName1": "phase_balance_test_2",
