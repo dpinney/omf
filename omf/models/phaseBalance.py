@@ -57,13 +57,13 @@ def respect_pf(x, constant_pf):
 		# Lagging PF setting on inverters.
 		newWatts = constant_pf * rating_VA
 		newVARs = math.sqrt(rating_VA**2 - newWatts**2)
-		new_complex = parse_complex(newWatts, newVARs)
+		new_complex = complex(newWatts, newVARs)
 		return "{}+{}j".format(new_complex.real, new_complex.imag)
 	elif constant_pf > 1:
 		# Leaing PF setting on inverters.
 		newWatts = (2 - constant_pf) * rating_VA
 		newVARs = math.sqrt(rating_VA**2 - newWatts**2)
-		new_complex = parse_complex(newWatts, newVARs)
+		new_complex = complex(newWatts, newVARs)
 		return "{}{}j".format(new_complex.real, new_complex.imag)
 
 def work(modelDir, ind):
@@ -534,7 +534,7 @@ def new(modelDir):
 		# "pvConnection": 'Wye',
 		# "layoutAlgorithm": "geospatial",
 		# ---------------------------------------- #
-		"strategy": "decentralized", # constant
+		"strategy": "constant", # constant
 		"constant_pf": "1.10",
 		"modelType": modelName,
 		"runTime": "",
