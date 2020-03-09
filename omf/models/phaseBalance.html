@@ -138,12 +138,12 @@
 				<input type="text" id="pf_threshold" name="pf_threshold" required="required"/>
 			</div>
 			<div class="shortInput">
-				<label class="tooltip">Motor rating<span class="classic">Unbalance threshold over which the motor would be damaged</span></label>
-				<input type="text" id="motor_threshold" name="motor_threshold" required="required"/>
+				<label class="tooltip">Avg motor value ($/MW)<span class="classic"><!-- FILL ME! --></span></label>
+				<input type="text" id="motor_value" name="motor_value" required="required"/>
 			</div>
 			<div class="shortInput">
-				<label class="tooltip">Motor damage cost<span class="classic">How much a damaged motor would cost utility</span></label>
-				<input type="text" id="motor_penalty" name="motor_penalty" required="required"/>
+				<label class="tooltip">Avg motor lifetime (years)<span class="classic">The average motor lifespan in years</span></label>
+				<input type="text" id="motor_lifetime" name="motor_lifetime" required="required"/>
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Discount Rate (%)<span class="classic">Discount rate used in discounted cashflow analysis output.</span></label>
@@ -347,7 +347,7 @@
 					<td>{{allOutputDataDict['service_cost']['motor_derating']['controlled']}}%</td>
 				</tr>
 				<tr>
-					<td>Average Expected Motor Lifetime Reduction (Years)</td>
+					<td>Average Motor Lifetime Reduction (Years)</td>
 					<td>{{allOutputDataDict['service_cost']['lifespan']['base']}}</td>
 					<td>{{allOutputDataDict['service_cost']['lifespan']['solar']}}</td>
 					<td>{{allOutputDataDict['service_cost']['lifespan']['controlled']}}</td>
@@ -384,10 +384,10 @@
 					<td>{{allOutputDataDict['cost_table']['pf_penalty']['controlled']}}</td>
 				</tr>
 				<tr>
-					<td>Motor Damage</td>
-					<td>{{allOutputDataDict['cost_table']['motor_damage']['base']}}</td>
-					<td>{{allOutputDataDict['cost_table']['motor_damage']['solar']}}</td>
-					<td>{{allOutputDataDict['cost_table']['motor_damage']['controlled']}}</td>
+					<td>Motor Inefficiency</td>
+					<td>{{allOutputDataDict['cost_table']['motor_inefficiency']['base']}}</td>
+					<td>{{allOutputDataDict['cost_table']['motor_inefficiency']['solar']}}</td>
+					<td>{{allOutputDataDict['cost_table']['motor_inefficiency']['controlled']}}</td>
 				</tr>
 			</table>
 			{% endif %}
