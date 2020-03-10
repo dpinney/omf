@@ -19,7 +19,7 @@ PLOTTING_FEATURE_NUM_1 = 0
 PLOTTING_FEATURE_NUM_2 = 1
 VISUALIZE_DATA_ONLY = False
 TRAIN_FRACTION = 0.9
-INPUT_FILE = 'dataABEC-1mo.csv'
+INPUT_FILE = 'normalTheftMalfunctionTransformerShortOlin-3month.csv'
 
 def plot_confusion_matrix(cm, classes, normalize=False, title='Confusion matrix', 
     cmap=plt.cm.Blues):
