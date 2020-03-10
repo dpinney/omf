@@ -10,7 +10,8 @@ import numpy as np
 try:
 	from omf.solvers.nilmtk.nilm_metadata.nilm_metadata import save_yaml_to_datastore
 except Exception as e:
-	raise Exception('need to install nilmtk')
+	pass
+	# raise Exception('need to install nilmtk')
 	# installNilm()
 	# from omf.solvers.nilmtk.nilmtk.nilmtk import DataSet, TimeFrame, MeterGroup, HDFDataStore
 	# from omf.solvers.nilmtk.nilmtk.nilmtk.legacy.disaggregate import fhmm_exact
