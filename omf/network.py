@@ -15,7 +15,7 @@ from matplotlib import pyplot as plt
 
 def parse(inputStr, filePath=True):
 	''' Parse a MAT into an omf.network json. This is so we can walk the json, change things in bulk, etc.
-	Input can be a filepath or MAT string.
+	Input can be a filepath or MAT string. Raises ValueError if the MAT file/string does not contain valid data.
 	'''
 	matDict = _dictConversion(inputStr, filePath)
 	return matDict
@@ -44,6 +44,8 @@ def _dictConversion(inputStr, filePath=True):
 	Into a Python dict like this:
 	{"baseMVA":"100.0","mpcVersion":"2.0","bus":[{"1": {"bus_i": 1,"type": 3,"Pd": 0,"Qd": 0,"Gs": 0,"Bs": 0,"area": 1,"Vm": 1,"Va": 0,"baseKV": 135,"zone": 1,"Vmax": 1.05,"Vmin": 0.95}}],"gen":[],
 	"branch":[]}
+
+	Raises ValueError if the MAT file/string does not contain valid data.
 	'''
 	# Wireframe for new network objects:
 	newNetworkWireframe = {"baseMVA":"100.0","mpcVersion":"2.0","bus":{},"gen":{}, "branch":{}}
@@ -54,6 +56,7 @@ def _dictConversion(inputStr, filePath=True):
 		data = inputStr
 	# Parse data.
 	todo = None
+	validData = False
 	for i,line in enumerate(data):
 		if todo!=None:
 			# Parse lines.
@@ -97,12 +100,18 @@ def _dictConversion(inputStr, filePath=True):
 				todo = "version"
 			elif "system mva base" in line.lower():
 				todo = "mva"
+				validData = True
 			elif "mpc.bus = [" in line.lower():
 				todo = "bus"
+				validData = True
 			elif "mpc.gen = [" in line.lower():
 				todo = "gen"
+				validData = True
 			elif "mpc.branch = [" in line.lower():
 				todo = "branch"
+				validData = True
+	if validData == False:
+		raise ValueError('MAT file/string does not contain valid data.')
 	return newNetworkWireframe
 
 def _dictToString(inDict):

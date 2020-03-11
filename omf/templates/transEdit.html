@@ -196,7 +196,7 @@
 	</div>
 	<div id="matpowerModal" class= 'modal'>
 		<div class="modalContent" id='milModal' style='width:350px;'>
-			<form onsubmit='event.preventDefault(); return startConversion("networkNameM", 2);' action="/matpowerImport/{{ owner }}" id='matpower' enctype='multipart/form-data' method='post'>
+			<form onsubmit='startConversion("networkNameM", 2); return false;' action="/matpowerImport/{{ owner }}" id='matpower' enctype='multipart/form-data' method='post'>
 				<input type="hidden" name="_csrf_token" value="{{ csrf_token() }}" />
 				<input type="hidden" id="networkNum" name="networkNum" value="{{ networkNum }}" />
 				<input type="hidden" id="modelName" name="modelName" value="{{ modelName }}" />
@@ -1157,54 +1157,78 @@ function loading() {
 	setTimeout(longLoadingProcess, 100)
 }
 
-function startConversion(elementName, nextAction) {
+async function startConversion(elementName, nextAction) {
 	// Additional check, required for Safari browsers
 	var newName = document.getElementById(elementName).value;
+	let submitForm = false;
+	// Check if the file exists, using the user-provided name
 	if (true) {
-		var modelName = "{{ modelName }}"
-		$.ajax({
-			url: "/uniqObjName/Network/" + "{{ owner }}" + "/" + newName + "/" + modelName
+		var modelName = '{{ modelName }}'
+		await $.ajax({
+			url: '/uniqObjName/Network/' + '{{ owner }}' + '/' + newName + '/' + modelName
 		}).done(function (data) {
 			if (data.exists) {
-				alert("You already have a Network named '" + newName + "', please choose a different name.")
-			}
-			else{
-				if (nextAction == 1){
+				alert('You already have a Network named "' + newName + '", please choose a different name.')
+			} else {
+				// The filename does not already exist. Submit the form with the matpower file
+				if (nextAction == 1)	// 1 for blank network modal
 					newnetwork.submit()
-				}
-				else{
-					gebi('matpower').submit();
-					showProgressDialog('spinner','Converting network','conversion');
-					setTimeout(checkConversion,5000); // Set an initial delay because it takes time to create conversion files.
-				}
+				else					// 2 for matpower modal
+					submitForm = true;
 			}
 		})
 	}
+	if (!submitForm) return;
+
+	// Do the conversion (matpower import)
+	showProgressDialog('spinner', 'Converting network', 'conversion');
+	const form = document.getElementById('matpower');
+    const formData = new FormData(form);
+	const formRequest = $.ajax({
+        type: 'POST',
+        url: form.action,
+        data: formData,
+        processData: false,
+        contentType: false,
+	});
+	// Check for when the conversion is done
+	formRequest.done(function(data) {
+		checkConversion();
+	});
 }
 
 function checkConversion() {
 	// Periodically check to see if any conversion is happening. And if it's done, load the converted model.
 	var conversionStatus = 'converting';
-		// Check every 5 seconds for a feeder & refresh.
-		var setInterval = window.setInterval(function pingAPI(){
-			var modelName = '{{modelName}}'
-			$.ajax({
-				url: "/checkConversion/" + modelName
-			}).done(function (data) {
-				if (data.exists) {
-					conversionStatus = 'converting'
-				}
-				else {
-					conversionStatus = 'done';
-				}
-			})
-			if (conversionStatus == "done"){
-				savePoster("{{ networkName }}", "{{ modelName }}", "{{ owner }}");
-				alert("Conversion complete.")
+	// Check every 5 seconds for a feeder & refresh.
+	var intervalId = window.setInterval(function pingAPI(){
+		var modelName = '{{ modelName }}'
+		$.ajax({
+			url: '/checkConversion/' + modelName + '/' + '{{ owner }}'
+		}).done(function (data) {
+
+			// Set conversion status depending on result of AJAX request
+			if (data.exists == null)
+				conversionStatus = data;
+			else if (data.exists)
+				conversionStatus = 'converting'
+			else if (!data.exists)
+				conversionStatus = 'done';
+
+			// Deal with the conversion status
+			if (conversionStatus == 'done') {
+				window.clearInterval(intervalId);
+				alert('Conversion complete.')
 				window.location.reload();
 			}
-			return pingAPI;
-		}(), 5000);
+			else if (conversionStatus == 'matError') {
+				window.clearInterval(intervalId);
+				alert('The .m file does not contain any valid data.')
+				removeProgressDialog();
+			}
+		})
+		return pingAPI;
+	}, 5000);
 }
 
 function saveNetwork() {
