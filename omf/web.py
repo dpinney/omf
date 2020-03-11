@@ -711,7 +711,6 @@ def get_components():
 
 
 @app.route("/checkConversion/<modelName>/<owner>", methods=["POST","GET"])
-@app.route("/checkConversion/<modelName>", methods=["POST","GET"]) # Don't get rid of this route because transEdit.html uses it
 @flask_login.login_required
 @read_permission_function # Viewers can load a feeder, and all feeders check for ongoing conversions, so this route must have read permissions
 def checkConversion(modelName, owner=None):
