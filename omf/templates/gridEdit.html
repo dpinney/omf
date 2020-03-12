@@ -989,7 +989,7 @@ function showProgress(){
 
 function checkConv(){
 	$.ajax({
-		url: '/checkConversion/{{modelName}}'
+		url: '/checkConversion/{{modelName}}/{{owner}}'
 	}).done(function (data) {
 		if (data.exists == true) {
 			showProgressDialog('spinner', 'Converting Feeder', 'conversion');
@@ -1003,7 +1003,7 @@ function checkConversion() {
 	// Check every 5 seconds for a feeder & refresh.
 	var setInterval = window.setInterval(function pingAPI() {
 		$.ajax({
-			url: '/checkConversion/{{modelName}}'
+			url: '/checkConversion/{{modelName}}/{{owner}}'
 		}).done(function (data) {
 			if (data.exists) {
 				conversionStatus = 'converting'
