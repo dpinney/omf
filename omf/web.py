@@ -713,7 +713,7 @@ def get_components():
 @app.route("/checkConversion/<modelName>/<owner>", methods=["POST","GET"])
 @flask_login.login_required
 @read_permission_function # Viewers can load a feeder, and all feeders check for ongoing conversions, so this route must have read permissions
-def checkConversion(modelName, owner=None):
+def checkConversion(modelName, owner):
 	"""
 	If the path exists, then the conversion is ongoing and the client can't reload their browser yet. If the path does not exist, then either 1) the
 	conversion hasn't started yet or 2) the conversion is finished because the ZPID.txt file is gone. If an error file exists, the the conversion
