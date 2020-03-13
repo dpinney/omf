@@ -227,13 +227,13 @@ def capacityPlot(filePath):
 
 if __name__ == "__main__":
 	# Make core output
-	FPATH = 'test/ieee37_ours.dss'
+	FPATH = 'ieee37_ours.dss'
 	# Just run DSS
 	# runDSS(FPATH)
 	# Generate plots, note output is in FPATH dir.
-	voltagePlot(FPATH)
+	# voltagePlot(FPATH)
 	# currentPlot(FPATH)
-	# networkPlot(FPATH)
+	networkPlot(FPATH)
 	# THD(FPATH)
 	# dynamicPlot(FPATH, 1, 10)
 	# faultPlot(FPATH)

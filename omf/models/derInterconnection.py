@@ -633,7 +633,7 @@ def drawPlot(tree, nodeDict=None, edgeDict=None, edgeLabsDict=None, displayLabs=
 	# Need to get edge names from pairs of connected node names.
 	edgeNames = []
 	for e in fGraph.edges():
-		edgeNames.append((fGraph.edge[e[0]][e[1]].get('name','BLANK')).replace('"',''))
+		edgeNames.append((fGraph.edges[e].get('name','BLANK')).replace('"',''))
 	
 	#set axes step equal
 	if neatoLayout:
@@ -642,7 +642,7 @@ def drawPlot(tree, nodeDict=None, edgeDict=None, edgeLabsDict=None, displayLabs=
 		cleanG.add_nodes_from(fGraph)
 		positions = graphviz_layout(cleanG, prog='neato')
 	else:
-		positions = {n:fGraph.node[n].get('pos',(0,0)) for n in fGraph}
+		positions = {n:fGraph.nodes[n].get('pos',(0,0)) for n in fGraph}
 	
 	#create custom colormap
 	if customColormap:

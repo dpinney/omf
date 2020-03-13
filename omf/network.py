@@ -27,6 +27,11 @@ def write(inNet):
 		output += _dictToString(inNet[key]) + '\n'
 	return output
 
+def save(inNet, outPath):
+	''' Write out an .omt for a inNet. '''
+	with open(outPath, 'w') as outFile:
+		json.dump(inNet, outFile, indent=4)
+
 def layout(inNet):
 	''' Add synthetic lat/lon data to a graph to give it a nice human-readable shape. '''
 	nxG = netToNxGraph(inNet)
@@ -221,7 +226,8 @@ def viz(omt_filepath, output_path=None, output_name="viewer.html", open_file=Tru
 def _tests():
 	# Parse mat to dictionary.
 	networkName = 'case9'
-	networkJson = parse(os.path.join(os.path.dirname(__file__), 'solvers', 'matpower5.1', networkName + '.m'), filePath=True)
+	netPath = os.path.join(os.path.dirname(__file__), 'solvers', 'matpower5.1', networkName + '.m')
+	networkJson = parse(netPath, filePath=True)
 	keyLen = len(networkJson.keys())
 	print('Parsed MAT file with %s buses, %s generators, and %s branches.'%(len(networkJson['bus']),len(networkJson['gen']),len(networkJson['branch'])))
 	# Use python nxgraph to add lat/lon to .omt.json.
@@ -242,6 +248,8 @@ def _tests():
 	#with open(pJoin(os.getcwd(),'scratch','transmission','outData',networkName+'.m'),'w') as outMat:
 		for row in matStr: outMat.write(row)
 	print('Converted .omt back to .m at: %s' % (mat_path))
+	# Draw it.
+	# viz(omt_path)
 	#print('Converted .omt back to .m at: %s'%(pJoin(os.getcwd(),'scratch','transmission','outData',networkName+'.m')))
 	#inputDict = {
 	#	'algorithm' : 'FDBX',
@@ -252,8 +260,6 @@ def _tests():
 	#	}
 	#matpower.runSim(os.path.join(temp_dir, networkName), inputDict, debug=False)
 	#matpower.runSim(pJoin(os.getcwd(),'scratch','transmission','outData',networkName), inputDict, debug=False)
-	#viz(os.path.join(os.path.dirname(__file__), 'static/SimpleNetwork.json')
 
 if __name__ == '__main__':
-	#viz(os.path.join(os.path.dirname(__file__), "static/SimpleNetwork.json"))
 	_tests()

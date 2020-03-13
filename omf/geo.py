@@ -19,6 +19,13 @@ from matplotlib import pyplot as plt
 import omf
 from omf import feeder
 
+import matplotlib
+if platform.system() == 'Darwin':
+	matplotlib.use('TkAgg')
+else:
+	matplotlib.use('Agg')
+from matplotlib import pyplot as plt
+
 # Source: https://github.com/fitnr/stateplane/blob/master/stateplane/dicts.py
 # These are NAD83 EPSG identifiers.
 # If you need others like NAD27, try https://epsg.io
@@ -36,6 +43,7 @@ def statePlaneToLatLon(easting, northing, epsg = None):
 	lon, lat = transform(inProj, outProj, easting, northing)
 	return (lat, lon)
 
+
 def latLonToStatePlane(lat, lon, epsg = None):
 	if not epsg:
 		# Center of the USA default
@@ -45,6 +53,7 @@ def latLonToStatePlane(lat, lon, epsg = None):
 	easting, northing = transform(inProj, outProj, lon, lat)
 	return (easting, northing)
 
+
 def dd2dms(dd):
 	'Decimal degrees to Degrees/Minutes/Seconds'
 	d = int(dd)
@@ -53,6 +62,7 @@ def dd2dms(dd):
 	sd = (md - m) * 60
 	return (d, m, sd)
 
+
 def dms2dd(degrees, minutes, seconds, direction):
 	'Degree/minute/second to decimal degrees'
 	dd = float(degrees) + float(minutes)/60 + float(seconds)/(60*60);
@@ -60,10 +70,12 @@ def dms2dd(degrees, minutes, seconds, direction):
 		dd *= -1
 	return dd
 
+
 def openInGoogleMaps(lat, lon):
 	"Open a browser to the (lat, lon) in Google Maps"
 	loc = 'https://www.google.com/maps/place/{}+{}/'.format(lat,lon)
 	webbrowser.open_new(loc)
+
 
 def hullOfOmd(pathToOmdFile, conversion=False):
 	'''Convex hull of an omd in the form of a geojson dictionary with a single ploygon.'''
@@ -75,7 +87,7 @@ def hullOfOmd(pathToOmdFile, conversion=False):
 	#use conversion for testing other feeders
 	if conversion:
 		nxG = convertOmd(pathToOmdFile)
-	points = np.array([nxG.node[nodewithPosition]['pos'] for nodewithPosition  in nx.get_node_attributes(nxG, 'pos')])
+	points = np.array([nxG.nodes[nodewithPosition]['pos'] for nodewithPosition in nx.get_node_attributes(nxG, 'pos')])
 	hull = ConvexHull(points)
 	polygon = points[hull.vertices].tolist()
 	for point in polygon:
@@ -94,6 +106,7 @@ def hullOfOmd(pathToOmdFile, conversion=False):
 	}
 	return geoJsonDict
 
+
 def omdGeoJson(pathToOmdFile, conversion=False):
 	'''Create a geojson standards compliant file (https://tools.ietf.org/html/rfc7946) from an omd.'''
 	with open(pathToOmdFile) as inFile:
@@ -104,12 +117,12 @@ def omdGeoJson(pathToOmdFile, conversion=False):
 	if conversion:
 		nxG = convertOmd(pathToOmdFile)
 	geoJsonDict = {
-	"type": "FeatureCollection",
-	"features": []
+		"type": "FeatureCollection",
+		"features": []
 	}
 	#Add nodes to geoJSON
-	node_positions = {nodewithPosition: nxG.node[nodewithPosition]['pos'] for nodewithPosition  in nx.get_node_attributes(nxG, 'pos')}
-	node_types = {nodewithType: nxG.node[nodewithType]['type'] for nodewithType in nx.get_node_attributes(nxG, 'type')}
+	node_positions = {nodewithPosition: nxG.nodes[nodewithPosition]['pos'] for nodewithPosition in nx.get_node_attributes(nxG, 'pos')}
+	node_types = {nodewithType: nxG.nodes[nodewithType]['type'] for nodewithType in nx.get_node_attributes(nxG, 'type')}
 	for node in node_positions:
 		geoJsonDict['features'].append({
 			"type": "Feature", 
@@ -129,9 +142,9 @@ def omdGeoJson(pathToOmdFile, conversion=False):
 	for edge in nx.edges(nxG):
 		geoJsonDict['features'].append({
 			"type": "Feature", 
-			"geometry":{
+			"geometry": {
 				"type": "LineString",
-				"coordinates": [[node_positions[edge[0]][1], node_positions[edge[0]][0]],[node_positions[edge[1]][1], node_positions[edge[1]][0]]]
+				"coordinates": [[node_positions[edge[0]][1], node_positions[edge[0]][0]], [node_positions[edge[1]][1], node_positions[edge[1]][0]]]
 			},
 			"properties":{
 				#"phase": edge_phases[edge],
@@ -145,6 +158,7 @@ def omdGeoJson(pathToOmdFile, conversion=False):
 	#shutil.copy('static/geoPolyLeaflet.html', outputPath)
 	#with open(pJoin(outputPath,'geoPointsLines.json'),"w") as outFile:
 	#	json.dump(geoJsonDict, outFile, indent=4)
+
 
 def mapOmd(pathToOmdFile, outputPath, fileFormat, openBrowser=False, conversion=False):
 	'''
@@ -178,10 +192,10 @@ def mapOmd(pathToOmdFile, outputPath, fileFormat, openBrowser=False, conversion=
 		#use conversion for testing other feeders
 		if conversion:
 			nxG = convertOmd(pathToOmdFile)
-		latitude_min = min([nxG.node[nodewithPosition]['pos'][0] for nodewithPosition  in nx.get_node_attributes(nxG, 'pos')])
-		longitude_min = min([nxG.node[nodewithPosition]['pos'][1] for nodewithPosition  in nx.get_node_attributes(nxG, 'pos')])
-		latitude_max = max([nxG.node[nodewithPosition]['pos'][0] for nodewithPosition  in nx.get_node_attributes(nxG, 'pos')])
-		longitude_max = max([nxG.node[nodewithPosition]['pos'][1] for nodewithPosition  in nx.get_node_attributes(nxG, 'pos')])
+		latitude_min = min([nxG.nodes[nodewithPosition]['pos'][0] for nodewithPosition in nx.get_node_attributes(nxG, 'pos')])
+		longitude_min = min([nxG.nodes[nodewithPosition]['pos'][1] for nodewithPosition in nx.get_node_attributes(nxG, 'pos')])
+		latitude_max = max([nxG.nodes[nodewithPosition]['pos'][0] for nodewithPosition in nx.get_node_attributes(nxG, 'pos')])
+		longitude_max = max([nxG.nodes[nodewithPosition]['pos'][1] for nodewithPosition in nx.get_node_attributes(nxG, 'pos')])
 		#Set the plot settings
 		plt.switch_backend('Agg')
 		fig = plt.figure(frameon=False, figsize=[10,10])
@@ -190,9 +204,9 @@ def mapOmd(pathToOmdFile, outputPath, fileFormat, openBrowser=False, conversion=
 		#map latlon to projection
 		epsg3857 = Proj(init='epsg:3857')
 		wgs84 = Proj(init='EPSG:4326')
-		node_positions = {nodewithPosition: nxG.node[nodewithPosition]['pos'] for nodewithPosition  in nx.get_node_attributes(nxG, 'pos')}
+		node_positions = {nodewithPosition: nxG.nodes[nodewithPosition]['pos'] for nodewithPosition in nx.get_node_attributes(nxG, 'pos')}
 		for point in node_positions:
-			node_positions[point] = transform(wgs84,epsg3857,node_positions[point][1], node_positions[point][0])
+			node_positions[point] = transform(wgs84, epsg3857, node_positions[point][1], node_positions[point][0])
 		for zoomLevel in range(18,19):
 			numberofTiles = numTiles(zoomLevel)
 			#Get bounding tiles and their lat/lon edges
@@ -228,6 +242,7 @@ def mapOmd(pathToOmdFile, outputPath, fileFormat, openBrowser=False, conversion=
 			if openBrowser:
 				openInBrowser(pJoin(outputPath,'graphOnMap.png'))
 
+
 def simplifiedOmdShape(pathToOmdFile, conversion=False):
 	'''Use kmeans clustering to create simplified geojson object with convex hull and connected clusters from an omd.'''
 	if not conversion:
@@ -243,7 +258,7 @@ def simplifiedOmdShape(pathToOmdFile, conversion=False):
 	
 	#Kmeans clustering function
 	numpyGraph = np.array([[node,
-		float(nxG.node[node]['pos'][0]), float(nxG.node[node]['pos'][1])]
+		float(nxG.nodes[node]['pos'][0]), float(nxG.nodes[node]['pos'][1])]
 		for node in nx.get_node_attributes(nxG, 'pos')], dtype=object)
 	Kmean = KMeans(n_clusters=20)
 	Kmean.fit(numpyGraph[:,1:3])
@@ -254,45 +269,62 @@ def simplifiedOmdShape(pathToOmdFile, conversion=False):
 	simplifiedGraph = nx.Graph()
 	for centerNode in clusterDict:
 		currentClusterGroup = clusterDict[centerNode]
-		simplifiedGraph.add_node('centroid'+str(centerNode),attr_dict={'type':'centroid',
-			'pos': (centerNodes[centerNode][0], centerNodes[centerNode][1]),
-			'clusterSize': np.ma.size(currentClusterGroup,axis=0), 'lineCount': 0})
+		simplifiedGraph.add_node(
+			'centroid' + str(centerNode),
+			type='centroid',
+			pos=(centerNodes[centerNode][0], centerNodes[centerNode][1]),
+			clusterSize=np.ma.size(currentClusterGroup, axis=0),
+			lineCount=0
+		)
 
 	#Create edges between cluster centers
 	for centerNode in clusterDict:
 		currentClusterGroup = clusterDict[centerNode]
-		nxG.add_node('centroid'+str(centerNode),attr_dict={'type':'centroid', 'pos': (centerNodes[centerNode][0], centerNodes[centerNode][1])})
+		nxG.add_node(
+			'centroid' + str(centerNode),
+			type='centroid',
+			pos=(centerNodes[centerNode][0], centerNodes[centerNode][1])
+		)
 		intraClusterLines = 0
 		for i in currentClusterGroup:
 			currentNode = i[0]
 			neighbors = nx.neighbors(nxG, currentNode)
 			for neighbor in neighbors:
 				#connect centroids
-				if nxG.node[neighbor]['type'] is 'centroid':
-					if ('centroid'+str(centerNode), neighbor) not in nx.edges(simplifiedGraph):
-						simplifiedGraph.add_edge('centroid'+str(centerNode), neighbor, attr_dict={'type': 'centroidConnector', 'lineCount': 1})
+				if nxG.nodes[neighbor]['type'] is 'centroid':
+					if ('centroid' + str(centerNode), neighbor) not in nx.edges(simplifiedGraph):
+						simplifiedGraph.add_edge(
+							'centroid' + str(centerNode),
+							neighbor,
+							type='centroidConnector',
+							lineCount=1
+						)
 					else:
-						simplifiedGraph['centroid'+str(centerNode)][neighbor]['lineCount'] += 1
+						simplifiedGraph['centroid' + str(centerNode)][neighbor]['lineCount'] += 1
 				#connect centroid to nodes in other clusters, which is replaced in subsequent loops
 				elif neighbor not in currentClusterGroup[:,0]:
-					nxG.add_edge('centroid'+str(centerNode), neighbor, attr_dict={'type': 'centroidConnector'})
+					nxG.add_edge(
+						'centroid'+str(centerNode),
+						neighbor,
+						type='centroidConnector'
+					)
 				else:
-					simplifiedGraph.node['centroid'+str(centerNode)]['lineCount'] +=1
+					simplifiedGraph.nodes['centroid' + str(centerNode)]['lineCount'] +=1
 			if currentNode in simplifiedGraph:
 				simplifiedGraph.remove_node(currentNode)
 
 	#Add nodes and edges to dict with convex hull
-	for node in simplifiedGraph.node:
+	for node in simplifiedGraph.nodes:
 		simplifiedGeoDict['features'].append({
 			"type": "Feature", 
 			"geometry":{
 				"type": "Point",
-				"coordinates": [simplifiedGraph.node[node]['pos'][1], simplifiedGraph.node[node]['pos'][0]]
+				"coordinates": [simplifiedGraph.nodes[node]['pos'][1], simplifiedGraph.nodes[node]['pos'][0]]
 			},
 			"properties":{
 				"name": node,
-				"pointType": simplifiedGraph.node[node]['type'],
-				"lineCount": simplifiedGraph.node[node]['lineCount']
+				"pointType": simplifiedGraph.nodes[node]['type'],
+				"lineCount": simplifiedGraph.nodes[node]['lineCount']
 			}
 		})
 	#Add edges to dict
@@ -301,8 +333,8 @@ def simplifiedOmdShape(pathToOmdFile, conversion=False):
 			"type": "Feature", 
 			"geometry":{
 				"type": "LineString",
-				"coordinates": [[simplifiedGraph.node[edge[0]]['pos'][1], simplifiedGraph.node[edge[0]]['pos'][0]],
-				[simplifiedGraph.node[edge[1]]['pos'][1], simplifiedGraph.node[edge[1]]['pos'][0]]]
+				"coordinates": [[simplifiedGraph.nodes[edge[0]]['pos'][1], simplifiedGraph.nodes[edge[0]]['pos'][0]],
+				[simplifiedGraph.nodes[edge[1]]['pos'][1], simplifiedGraph.nodes[edge[1]]['pos'][0]]]
 			},
 			"properties":{
 				"lineCount": simplifiedGraph[edge[0]][edge[1]]['lineCount'],
@@ -318,6 +350,7 @@ def simplifiedOmdShape(pathToOmdFile, conversion=False):
 		json.dump(simplifiedGeoDict, outFile, indent=4)
 	'''
 
+
 def shortestPathOmd(pathToOmdFile, sourceObjectName, targetObjectName):
 	'''Get the shortest path between two points on a feeder'''
 	with open(pathToOmdFile) as inFile:
@@ -327,13 +360,16 @@ def shortestPathOmd(pathToOmdFile, sourceObjectName, targetObjectName):
 	tracePath = nx.bidirectional_shortest_path(nxG, sourceObjectName, targetObjectName)
 	return tracePath
 
+
 def numTiles(z):
 	''' Helper function to get number of tiles at a given zoom '''
 	return(math.pow(2,z))
 
+
 def sec(x):
 	''' Helper fucntion to get secant '''
 	return(1/math.cos(x))
+
 
 def latlon2relativeXY(lat,lon):
 	'''Helper function for latlon2xy'''
@@ -341,16 +377,19 @@ def latlon2relativeXY(lat,lon):
 	y = (1 - math.log(math.tan(math.radians(lat)) + sec(math.radians(lat))) / math.pi) / 2
 	return(x,y)
 
+
 def latlon2xy(lat,lon,z):
 	'''Helper function to convert lat/lon coordinate to x/y coordinates'''
 	n = numTiles(z)
 	x,y = latlon2relativeXY(lat,lon)
 	return(n*x, n*y)
 
+
 def tileXY(lat, lon, z):
 	'''Helper function to get the tile that contains a lat/lon coordinate at a given zoom level'''
 	x,y = latlon2xy(lat,lon,z)
 	return(int(x),int(y))
+
 
 def latEdges(y,z):
 	'''Helper function in tileEdges for latitude'''
@@ -362,6 +401,7 @@ def latEdges(y,z):
 	lat2 = mercatorToLat(math.pi * (1 - 2 * relY2))
 	return(lat1,lat2)
 
+
 def lonEdges(x,z):
 	'''Helper function in tileEdges for longitude'''
 	n = numTiles(z)
@@ -370,15 +410,18 @@ def lonEdges(x,z):
 	lon2 = lon1 + unit
 	return(lon1,lon2)
 
+
 def tileEdges(x,y,z):
 	'''Helper function to get lat/lon of a tile's edges at a given zoom'''
 	lat1,lat2 = latEdges(y,z)
 	lon1,lon2 = lonEdges(x,z)
 	return((lat2, lon1, lat1, lon2)) # S,W,N,E
 
+
 def mercatorToLat(mercatorY):
 	'''Helper function converting mercator to lat'''
 	return(math.degrees(math.atan(math.sinh(mercatorY))))
+
 
 def rasterTilesFromOmd(pathToOmdFile, outputPath, conversion=False):
 	'''Save raster tiles of omd to serve from zoom/x/y directory'''
@@ -392,10 +435,10 @@ def rasterTilesFromOmd(pathToOmdFile, outputPath, conversion=False):
 	if conversion:
 		nxG = convertOmd(pathToOmdFile)
 	#Lat/lon min/max for caluclating tile coverage later
-	latitude_min = min([nxG.node[nodewithPosition]['pos'][0] for nodewithPosition  in nx.get_node_attributes(nxG, 'pos')])
-	longitude_min = min([nxG.node[nodewithPosition]['pos'][1] for nodewithPosition  in nx.get_node_attributes(nxG, 'pos')])
-	latitude_max = max([nxG.node[nodewithPosition]['pos'][0] for nodewithPosition  in nx.get_node_attributes(nxG, 'pos')])
-	longitude_max = max([nxG.node[nodewithPosition]['pos'][1] for nodewithPosition  in nx.get_node_attributes(nxG, 'pos')])
+	latitude_min = min([nxG.nodes[nodewithPosition]['pos'][0] for nodewithPosition in nx.get_node_attributes(nxG, 'pos')])
+	longitude_min = min([nxG.nodes[nodewithPosition]['pos'][1] for nodewithPosition in nx.get_node_attributes(nxG, 'pos')])
+	latitude_max = max([nxG.nodes[nodewithPosition]['pos'][0] for nodewithPosition in nx.get_node_attributes(nxG, 'pos')])
+	longitude_max = max([nxG.nodes[nodewithPosition]['pos'][1] for nodewithPosition in nx.get_node_attributes(nxG, 'pos')])
 	#Set the plot settings
 	plt.switch_backend('Agg')
 	fig = plt.figure(frameon=False, figsize=[2.56,2.56])
@@ -408,7 +451,7 @@ def rasterTilesFromOmd(pathToOmdFile, outputPath, conversion=False):
 	#map latlon to projection
 	epsg3857 = Proj(init='epsg:3857')
 	wgs84 = Proj(init='EPSG:4326')
-	node_positions = {nodewithPosition: nxG.node[nodewithPosition]['pos'] for nodewithPosition  in nx.get_node_attributes(nxG, 'pos')}
+	node_positions = {nodewithPosition: nxG.nodes[nodewithPosition]['pos'] for nodewithPosition in nx.get_node_attributes(nxG, 'pos')}
 	for point in node_positions:
 		node_positions[point] = transform(wgs84,epsg3857,node_positions[point][1], node_positions[point][0])
 	#Go through each zoom level and create tiles for each area covering the feeder
@@ -468,8 +511,8 @@ def serveTiles(pathToTiles):
 			return send_file(default)
 	app.run()
 
+
 def convertOmd(pathToOmdFile):
-	''' Convert sources to networkx graph. Some larger omd files do not have the position information in the tree'''
 	with open(pathToOmdFile) as inFile:
 		tree = json.load(inFile)['links']
 	nxG = nx.Graph()
@@ -492,38 +535,39 @@ def convertOmd(pathToOmdFile):
 
 		#nxG.add_edge(key['source']['name'], key['target']['name'])
 		nxG.add_edge(sourceEdge, targetEdge)
-		nxG.node[sourceEdge]['pos'] = (float(key['source']['y']), float(key['source']['x']))
-		nxG.node[targetEdge]['pos'] = (float(key['target']['y']), float(key['target']['x']))
+		nxG.nodes[sourceEdge]['pos'] = (float(key['source']['y']), float(key['source']['x']))
+		nxG.nodes[targetEdge]['pos'] = (float(key['target']['y']), float(key['target']['x']))
 		try:
-			nxG.node[sourceEdge]['type'] = key['source']['objectType']
+			nxG.nodes[sourceEdge]['type'] = key['source']['objectType']
 		except KeyError:
-			nxG.node[sourceEdge]['type'] = 'Undefined'
+			nxG.nodes[sourceEdge]['type'] = 'Undefined'
 		try:
-			nxG.node[targetEdge]['type'] = key['target']['objectType']
+			nxG.nodes[targetEdge]['type'] = key['target']['objectType']
 		except KeyError:
-			nxG.node[targetEdge]['type'] = 'Undefined'
+			nxG.nodes[targetEdge]['type'] = 'Undefined'
 	for nodeToChange in nx.get_node_attributes(nxG, 'pos'):
 		#nxG.node[nodeToChange]['pos'] = (latitudeCenter + nxG.node[nodeToChange]['pos'][1]/latitude_max, longitudeCenter 
 		#								+ nxG.node[nodeToChange]['pos'][0]/longitude_max)
 		#print(nxG.node[nodeToChange]['pos'][1], nxG.node[nodeToChange]['pos'][0])
 		#print(statePlaneToLatLon(nxG.node[nodeToChange]['pos'][1], nxG.node[nodeToChange]['pos'][0]))
-		nxG.node[nodeToChange]['pos'] = statePlaneToLatLon(nxG.node[nodeToChange]['pos'][1], nxG.node[nodeToChange]['pos'][0])
+		nxG.nodes[nodeToChange]['pos'] = statePlaneToLatLon(nxG.nodes[nodeToChange]['pos'][1], nxG.nodes[nodeToChange]['pos'][0])
 	return nxG
+
 
 def graphValidator(pathToOmdFile, inGraph):
 	'''If the nodes/edges positions are not in the tree, the spurces and targets in the links key of the omd.json are used. '''
 	try:
-		node_positions = {nodewithPosition: inGraph.node[nodewithPosition]['pos'] for nodewithPosition  in nx.get_node_attributes(inGraph, 'pos')}
+		node_positions = {nodewithPosition: inGraph.nodes[nodewithPosition]['pos'] for nodewithPosition  in nx.get_node_attributes(inGraph, 'pos')}
 		for edge in nx.edges(inGraph):
-			validator = (node_positions[edge[0]] or nxG.node[edge[1]])
+			validator = (node_positions[edge[0]] or nxG.nodes[edge[1]])
 	except KeyError:
 		try:
 			nxG = latLonValidation(convertOmd(pathToOmdFile))
 		except ValueError:
 			#No nodes have positions, so create random ones
 			nxG = inGraph
-			for nodeToChange in nxG.node:
-				nxG.node[nodeToChange]['pos'] = (random.uniform(36.9900, 38.8700), random.uniform(-102.0500,-94.5900))
+			for nodeToChange in nxG.nodes:
+				nxG.nodes[nodeToChange]['pos'] = (random.uniform(36.9900, 38.8700), random.uniform(-102.0500,-94.5900))
 		return nxG
 	nxG = latLonValidation(inGraph)
 	return nxG
@@ -531,13 +575,13 @@ def graphValidator(pathToOmdFile, inGraph):
 def latLonValidation(inGraph):
 	'''Checks if an omd has invalid latlons, and if so, converts to stateplane coordinates or generates random values '''
 	#try:
-	latitude_min = min([inGraph.node[nodewithPosition]['pos'][1] for nodewithPosition  in nx.get_node_attributes(inGraph, 'pos')])
-	longitude_min = min([inGraph.node[nodewithPosition]['pos'][0] for nodewithPosition  in nx.get_node_attributes(inGraph, 'pos')])
-	latitude_max = max([inGraph.node[nodewithPosition]['pos'][1] for nodewithPosition  in nx.get_node_attributes(inGraph, 'pos')])
-	longitude_max = max([inGraph.node[nodewithPosition]['pos'][0] for nodewithPosition  in nx.get_node_attributes(inGraph, 'pos')])
+	latitude_min = min([inGraph.nodes[nodewithPosition]['pos'][1] for nodewithPosition in nx.get_node_attributes(inGraph, 'pos')])
+	longitude_min = min([inGraph.nodes[nodewithPosition]['pos'][0] for nodewithPosition in nx.get_node_attributes(inGraph, 'pos')])
+	latitude_max = max([inGraph.nodes[nodewithPosition]['pos'][1] for nodewithPosition in nx.get_node_attributes(inGraph, 'pos')])
+	longitude_max = max([inGraph.nodes[nodewithPosition]['pos'][0] for nodewithPosition in nx.get_node_attributes(inGraph, 'pos')])
 	if latitude_min < -180 or latitude_max > 180 or longitude_min < -90 or longitude_max > 90:
 		for nodeToChange in nx.get_node_attributes(inGraph, 'pos'):
-			inGraph.node[nodeToChange]['pos'] = statePlaneToLatLon(inGraph.node[nodeToChange]['pos'][1], inGraph.node[nodeToChange]['pos'][0])
+			inGraph.nodes[nodeToChange]['pos'] = statePlaneToLatLon(inGraph.nodes[nodeToChange]['pos'][1], inGraph.nodes[nodeToChange]['pos'][0])
 	return inGraph
 
 

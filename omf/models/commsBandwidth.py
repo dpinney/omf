@@ -51,8 +51,8 @@ def work(modelDir, inputDict):
 
 	overloadedCollectors = []
 	for rfCollector in nx.get_node_attributes(feeder, 'rfCollector'):
-		if feeder.node[rfCollector].get('rfCollector',False):
-			if feeder.node[rfCollector]['bandwidthUse'] > feeder.node[rfCollector]['bandwidthCapacity']:
+		if feeder.nodes[rfCollector].get('rfCollector',False):
+			if feeder.nodes[rfCollector]['bandwidthUse'] > feeder.nodes[rfCollector]['bandwidthCapacity']:
 				overloadedCollectors.append(rfCollector)
 
 	outData['overloadedFiber'] = overloadedFiber
