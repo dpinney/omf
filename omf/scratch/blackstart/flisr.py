@@ -148,7 +148,6 @@ def cutoffFault(tree, faultedNode, bestReclosers, workDir, radial):
 				break
 		else:
 			del (buses[0])
-	print(bestReclosers)
 	return tree, bestReclosers
 
 def listPotentiallyViable(tree, tieLines, workDir):
@@ -167,7 +166,7 @@ def listPotentiallyViable(tree, tieLines, workDir):
 	tie_row_count = tieLines.shape[0]
 	entry = 0
 	while entry < tie_row_count:
-		if tieLines.loc[entry, 'to'] in unpowered and tieLines.loc[entry, 'from'] in powered:
+		if (tieLines.loc[entry, 'to'] in unpowered) and (tieLines.loc[entry, 'from'] in powered):
 			potentiallyViable.append({'object':tieLines.loc[entry, 'object'], 'phases':tieLines.loc[entry, 'phases'], 'name':tieLines.loc[entry, 'name'], 'from':tieLines.loc[entry, 'from'], 'to':tieLines.loc[entry, 'to']})
 		if tieLines.loc[entry, 'from'] in unpowered and tieLines.loc[entry, 'to'] in powered:
 			potentiallyViable.append({'object':tieLines.loc[entry, 'object'], 'phases':tieLines.loc[entry, 'phases'], 'name':tieLines.loc[entry, 'name'], 'from':tieLines.loc[entry, 'from'], 'to':tieLines.loc[entry, 'to']})
@@ -183,10 +182,10 @@ def chooseOpenSwitch(potentiallyViable):
 		openSwitch = None
 	return openSwitch
 
-def addTieLines(tree, unpowered, powered, openSwitch, tieLines, bestTies, bestReclosers, workDir, goTo2, goTo3, terminate, radial):
+def addTieLines(tree, faultedNode, potentiallyViable, unpowered, powered, openSwitch, tieLines, bestTies, bestReclosers, workDir, goTo2, goTo3, terminate, index, radial):
 	'Step 4: Close open switches and open closed switches to power unpowered connected components'
 	biggestKey = max([safeInt(x) for x in tree.keys()])
-
+	tree2 = tree.copy()
 	# continue the algorithm until there are no more switches in the subset of potentially viable open switches
 	if openSwitch != None:
 		# find the node of the switch in the unpowered subtree
@@ -194,7 +193,7 @@ def addTieLines(tree, unpowered, powered, openSwitch, tieLines, bestTies, bestRe
 			tieNode = openSwitch.get('to', '')
 		else:
 			tieNode = openSwitch.get('from', '')
-		while goTo2 == False and goTo3 == False:
+		while (goTo2 == False) and (goTo3 == False):
 			# get an adjacency list representation of tree connectivity
 			adjacList, reclosers, vertices = adjacencyList(tree)
 			# check if the faulted node is in the same subtree as the node connected to the unpowered subtree
@@ -226,12 +225,13 @@ def addTieLines(tree, unpowered, powered, openSwitch, tieLines, bestTies, bestRe
 								while entry < tieLines.shape[0]:
 									if openSwitch.get('name', '') == tieLines.loc[entry, 'name']:
 										tieLines.drop(tieLines.index[[entry]], inplace=True)
+									entry += 1
 							break
 						row -= 1
 					break
 				# if there is no such recloser, then the switch is deleted from the subset of potentially viable switches
 				if found == False:
-					goTo3 == True
+					goTo3 = True
 					del (potentiallyViable[0])
 			# if there is no path between the switch and fault, close the switch
 			else:
@@ -243,12 +243,13 @@ def addTieLines(tree, unpowered, powered, openSwitch, tieLines, bestTies, bestRe
 				while entry < tieLines.shape[0]:
 					if openSwitch.get('name', '') == tieLines.loc[entry, 'name']:
 						tieLines.drop(tieLines.index[[entry]], inplace=True)
+					entry += 1
 	# if the subset of potentially viable switches is empty, end the algorithm
 	else:
 		terminate = True
-	return tree, tieLines, bestTies, bestReclosers, goTo2, goTo3, terminate
+	return tree, potentiallyViable, tieLines, bestTies, bestReclosers, goTo2, goTo3, terminate, index
 
-def flisr(pathToOmd, faultedLine, workDir=None, radial=True):
+def flisr(pathToOmd, pathToTieLines, faultedLine, workDir=None, radial=True):
 	'run the FLISR algorithm to isolate the fault and restore power'
 	if not workDir:
 		workDir = tempfile.mkdtemp()
@@ -274,35 +275,37 @@ def flisr(pathToOmd, faultedLine, workDir=None, radial=True):
 	# Step 1
 	tree, bestReclosers = cutoffFault(tree, faultedNode, bestReclosers, workDir, radial)
 
-	# # read in the set of tie lines in the system as a dataframe
-	# tieLines = pd.read_csv(pathToTieLines)
+	# read in the set of tie lines in the system as a dataframe
+	tieLines = pd.read_csv(pathToTieLines)
 
-	# # start the restoration piece of the algorithm
-	# index = 0
-	# terminate = False
-	# goTo4 = False
-	# goTo3 = False
-	# goTo2 = True
-	# while terminate == False:
-	#	# Step 2
-	# 	if goTo2 == True:
-	# 		goTo2 = False
-	# 		goTo3 = True
-	# 		unpowered, powered, potentiallyViable = listPotentiallyViable(tree, tieLines, workDir)
-	#	# Step 3
-	# 	if goTo3 == True:
-	# 		goTo3 = False
-	# 		goTo4 = True
-	# 		openSwitch = chooseOpenSwitch(potentiallyViable)
-	#	# Step 4
-	# 	if goTo4 == True:
-	# 		goTo4 = False
-	# 		tree, tieLines, bestTies, bestReclosers, goTo2, goTo3, terminate, index = addTieLines(tree, unpowered, powered, openSwitch, tieLines, bestTies, bestReclosers, workDir, goTo2, goTo3, terminate, index, radial)
+	# start the restoration piece of the algorithm
+	index = 0
+	terminate = False
+	goTo4 = False
+	goTo3 = False
+	goTo2 = True
+	while terminate == False:
+		# Step 2
+		if goTo2 == True:
+			goTo2 = False
+			goTo3 = True
+			unpowered, powered, potentiallyViable = listPotentiallyViable(tree, tieLines, workDir)
+		# Step 3
+		if goTo3 == True:
+			goTo3 = False
+			goTo4 = True
+			openSwitch = chooseOpenSwitch(potentiallyViable)
+		# Step 4
+		if goTo4 == True:
+			goTo4 = False
+			tree, potentiallyViable, tieLines, bestTies, bestReclosers, goTo2, goTo3, terminate, index = addTieLines(tree, faultedNode, potentiallyViable, unpowered, powered, openSwitch, tieLines, bestTies, bestReclosers, workDir, goTo2, goTo3, terminate, index, radial)
 
+	print(bestReclosers)
+	print(bestTies)
 	# Run powerflow on the optimal solution
-	biggestKey = max([safeInt(x) for x in tree.keys()])
-	tree[str(biggestKey*10 + index)] = {'module':'powerflow','solver_method':'FBS'}
-	attachments = []
-	gridlabOut = omf.solvers.gridlabd.runInFilesystem(tree, attachments=attachments, workDir=workDir)
+	# biggestKey = max([safeInt(x) for x in tree.keys()])
+	# tree[str(biggestKey*10 + index + 1)] = {'module':'powerflow','solver_method':'FBS'}
+	# attachments = []
+	# gridlabOut = omf.solvers.gridlabd.runInFilesystem(tree, attachments=attachments, workDir=workDir)
 
-# flisr('C:/Users/granb/omf/omf/static/publicFeeders/OlinBarre.omd', "14763", None, True)
+# flisr('C:/Users/granb/omf/omf/static/publicFeeders/Olin Barre Fault Test.omd', 'C:/Users/granb/omf/omf/scratch/blackstart/test.csv', "19186", True)
