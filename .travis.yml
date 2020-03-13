@@ -39,6 +39,7 @@ before_script:
 script:
   - python3 ./omf/runAllTests.py omf
   - cd omf/models
+  - python3 phaseBalance.py
   - python3 forecastTool.py
   - python3 smartSwitching.py
   - python3 networkStructure.py

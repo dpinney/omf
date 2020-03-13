@@ -26,8 +26,8 @@ def get_loss_items(tree):
 def motor_efficiency(x):
 	return .0179 + .402*x + .134*x**2 # curve fit from data from NREL analysis
 
-def lifespan(x):
-	return 20-19.8*math.exp(-.679*x) # curve fit from data from NREL analysis
+def lifespan(x, ind):
+	return float(ind['motor_lifetime'])-19.8*math.exp(-.679*x) # curve fit from data from NREL analysis
 
 def pf(real, var):
 	real = floats(real) if type(real) == str else float(real)
@@ -40,8 +40,18 @@ def n(num):
 def floats(f):
 	return float(f.replace(',', ''))
 
+def parse_complex(x):
+    if 'd' not in x:
+        return complex(x) if x != '+0+0i' else complex(0)
+    else:
+        polar = complex(x.replace('d', 'j'))
+        h = polar.real
+        rad = math.radians(polar.imag)
+        transformed = complex(h*math.cos(rad), h*math.sin(rad))
+        return transformed
+
 def respect_pf(x, constant_pf):
-	m = complex(x)
+	m = parse_complex(x)
 	rating_VA = m.real
 	if constant_pf < 1:
 		# Lagging PF setting on inverters.
@@ -238,6 +248,12 @@ def work(modelDir, ind):
 		'lifespan': {}
 	}
 
+	# hack correction
+	if ind['pvConnection'] == 'Delta':
+		o['service_cost']['load']['controlled'] = n(floats(o['service_cost']['load']['controlled']) + floats(o['service_cost']['distributed_gen']['controlled']))
+		o['service_cost']['load']['solar'] = n(floats(o['service_cost']['load']['solar']) + floats(o['service_cost']['distributed_gen']['solar']))
+
+	# power factor
 	sub_df = {
 		'base': _readCSV('substation_power' + base_suffix + '.csv', voltage=False),
 		'solar': _readCSV('substation_power' + solar_suffix + '.csv', voltage=False),
@@ -248,11 +264,6 @@ def work(modelDir, ind):
 		'solar': n(pf(sub_df['solar']['real'].sum(), sub_df['solar']['imag'].sum())),
 		'controlled': n(pf(sub_df['controlled']['real'].sum(), sub_df['controlled']['imag'].sum()))
 	}
-
-	# hack correction
-	if ind['pvConnection'] == 'Delta':
-		o['service_cost']['load']['controlled'] = n(float(o['service_cost']['load']['controlled'].replace(',', '')) + float(o['service_cost']['distributed_gen']['controlled'].replace(',', '')))
-		o['service_cost']['load']['solar'] = n(float(o['service_cost']['load']['solar'].replace(',', '')) + float(o['service_cost']['distributed_gen']['solar'].replace(',', '')))
 	# ----------------------------------------------------------------------- #
 	
 	# -------------------------- INVERTER TABLE ----------------------------- #
@@ -321,13 +332,13 @@ def work(modelDir, ind):
 					n(r2['A_real'] + r2['B_real'] + r2['C_real']),
 					n(r2['A_imag'] + r2['B_imag'] + r2['C_imag']),
 					n(r['voltA']), n(r['voltB']), n(r['voltC']), 
-					n(r['unbalance']), n(motor_efficiency(r['unbalance'])), n(lifespan(r['unbalance'])), "style='background:yellow'") 
+					n(r['unbalance']), n(motor_efficiency(r['unbalance'])), n(lifespan(r['unbalance'], ind)), "style='background:yellow'") 
 				for (i, r), (j, r2) in zip(df_all_motors.iterrows(), df_vs[suffix].iterrows())])
 		
 		all_motor_unbalance[suffix] = [r['unbalance'] for i, r in df_all_motors.iterrows()]
 
 		o['service_cost']['motor_derating'][suffix[1:]] = n(df_all_motors['unbalance'].apply(motor_efficiency).max())
-		o['service_cost']['lifespan'][suffix[1:]] = n(df_all_motors['unbalance'].apply(lifespan).mean())
+		o['service_cost']['lifespan'][suffix[1:]] = n(df_all_motors['unbalance'].apply(lambda x: lifespan(x, ind)).mean())
 
 	# ----------------------------------------------------------------------- #
 
@@ -336,8 +347,7 @@ def work(modelDir, ind):
 	revenue = float(ind['retailCost'])
 	pf_p = float(ind['pf_penalty'])
 	pf_t = float(ind['pf_threshold'])
-	motor_p = float(ind['motor_penalty'])
-	motor_t = float(ind['motor_threshold'])
+	motor_v = float(ind['motor_value'])
 
 	o['cost_table'] = {
 		'energy_cost': {
@@ -355,10 +365,10 @@ def work(modelDir, ind):
 			'solar': '-$' + n(pf_p if floats(o['service_cost']['power_factor']['solar']) <= pf_t else 0),
 			'controlled': '-$' + n(pf_p if floats(o['service_cost']['power_factor']['controlled']) <= pf_t else 0),
 		},
-		'motor_damage': {
-			'base': '-$' + n(motor_p*len([m for m in all_motor_unbalance['_base'] if m > motor_t])),
-			'solar': '-$' + n(motor_p*len([m for m in all_motor_unbalance['_solar'] if m > motor_t])),
-			'controlled': '-$' + n(motor_p*len([m for m in all_motor_unbalance['_controlled'] if m > motor_t])),
+		'motor_inefficiency': {
+			'base': '-$' + n(motor_v*len([m for m in all_motor_unbalance['_base']])),
+			'solar': '-$' + n(motor_v*len([m for m in all_motor_unbalance['_solar']])),
+			'controlled': '-$' + n(motor_v*len([m for m in all_motor_unbalance['_controlled']])),
 		},
 	}
 
@@ -481,7 +491,7 @@ def _readCSV(filename, voltage=True):
 	if voltage:
 		df = df[df.columns[:-2]]
 	df = df[~df.index.str.startswith('#')]
-	df[0] = [complex(i) if i != '+0+0i' else complex(0) for i in df[0]]
+	df[0] = [parse_complex(i) for i in df[0]]
 	df['imag'] = df[0].to_numpy().imag
 	df['real'] = df[0].to_numpy().real
 	df = df.drop([0], axis=1)
@@ -500,13 +510,13 @@ def new(modelDir):
 	''' Create a new instance of this model. Returns true on success, false on failure. '''
 	defaultInputs = {
 		"feederName1": "phase_balance_test",
-		"criticalNode": 'R1-12-47-1_node_17',
-		"pvConnection": 'Wye',
+		"criticalNode": "R1-12-47-1_node_17",
+		"pvConnection": "Delta",
 		"layoutAlgorithm": "geospatial",
 		# ---------------------------------------- #
 		# "feederName1": "phase_balance_test_2",
 		# "criticalNode": 'R1-12-47-2_node_28',
-		# "pvConnection": 'Delta',
+		# "pvConnection": 'Wye',
 		# "layoutAlgorithm": "forceDirected",
 		# ---------------------------------------- #
 		# "feederName1": 'bavarian_solar',
@@ -524,7 +534,7 @@ def new(modelDir):
 		# "pvConnection": 'Wye',
 		# "layoutAlgorithm": "geospatial",
 		# ---------------------------------------- #
-		"strategy": "constant", # decentralized
+		"strategy": "constant", # constant
 		"constant_pf": "1.10",
 		"modelType": modelName,
 		"runTime": "",
@@ -533,11 +543,11 @@ def new(modelDir):
 		"productionCost": "0.03",
 		"pf_penalty": "50000",
 		"pf_threshold": "0.95",
-		"motor_threshold": "2.5",
-		"motor_penalty": "3000000",
+		"motor_value": "30",
+		"motor_lifetime": "20",
 		"discountRate": "7",
 		"edgeCol" : "None",
-		"nodeCol" : "perUnitVoltage",
+		"nodeCol" : "VoltageImbalance", # VoltageImbalance
 		"nodeLabs" : "None",
 		"edgeLabs" : "None",
 		"customColormap" : "False",
@@ -545,7 +555,6 @@ def new(modelDir):
 		"colorMin": "0.92",
 		"colorMax": "1.08",
 		"objectiveFunction": 'VUF', #'I0'
-		"pvConnection": 'Delta',
 		"iterations": "5"
 	}
 	creationCode = __neoMetaModel__.new(modelDir, defaultInputs)

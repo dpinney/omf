@@ -196,7 +196,7 @@
 	</div>
 	<div id="matpowerModal" class= 'modal'>
 		<div class="modalContent" id='milModal' style='width:350px;'>
-			<form onsubmit='event.preventDefault(); return startConversion("networkNameM", 2);' action="/matpowerImport/{{ owner }}" id='matpower' enctype='multipart/form-data' method='post'>
+			<form onsubmit='startConversion("networkNameM", 2); return false;' action="/matpowerImport/{{ owner }}" id='matpower' enctype='multipart/form-data' method='post'>
 				<input type="hidden" name="_csrf_token" value="{{ csrf_token() }}" />
 				<input type="hidden" id="networkNum" name="networkNum" value="{{ networkNum }}" />
 				<input type="hidden" id="modelName" name="modelName" value="{{ modelName }}" />
@@ -274,10 +274,6 @@ var previousTarget = {} // Global to keep track of previous selection target
 var lastElementSelected = {}
 var selection = [] // Global to keep track of multiple alt-selections
 var downX, downY, upX, upY // Globals to keep track of mouse coordinates
-var clickTarget = '';
-var newID = '';
-var newType = '';
-var newBusGenObj = {};
 var scaleTracker = 1
 var maxBusID = -9999999;
 var maxBranchID = -9999999;
@@ -724,14 +720,21 @@ function multiSelectionTable() {
 
 function newNode(typeOfNode) {
 	// Create a new node object.
-	maxBusID = maxBusID + 1
-	newID = maxBusID
-	iToSVGLookup[String(newID)] = String(newID)
-	sVGToiLookup[String(newID)] = String(newID)
-	newBusGenObj = {
+	maxBusID = maxBusID + 1 // This maxBusID is the ID of the new bus.
+	iToSVGLookup[String(maxBusID)] = String(maxBusID)
+	sVGToiLookup[String(maxBusID)] = String(maxBusID)
+	// Add handler to get user's click location for adding.
+	document.getElementById('svgContainer').addEventListener('click', newNodeListener, false)
+	document.body.style.cursor = 'crosshair'
+}
+
+function newNodeListener() {
+	// Helper function that finishes node creation after user clicks on a location.
+	// NB. maxBusID is the ID of the new bus.
+	var newBusGenObj = {
 		longitude: "0",
 		latitude: "0",
-		bus_i: String(newID),
+		bus_i: String(maxBusID),
 		type: "3",
 		Pd: "0",
 		Qd: "0",
@@ -745,42 +748,33 @@ function newNode(typeOfNode) {
 		Vmax: "1.05",
 		Vmin: "0.95"
 	}
-	// Add handler to get user's click location for adding.
-	clickTarget = document.getElementById('svgContainer')
-	clickTarget.addEventListener('click', newNodeListener, false)
-	document.body.style.cursor = 'crosshair'
-}
-
-function newNodeListener() {
-	// Helper function that finishes node creation after user clicks on a location.
 	var xloc = event.pageX
 	var yloc = event.pageY
 	coords = clickLatLon(event)
 	xloc = coords[0]
 	yloc = coords[1]
-	newType = "bus"
+	var newType = "bus"
 	// Save to tree
-	networkData[newType][String(newID)] = newBusGenObj
-	networkData[newType][String(newID)].longitude = xloc
-	networkData[newType][String(newID)].latitude = yloc
+	networkData[newType][String(maxBusID)] = newBusGenObj
+	networkData[newType][String(maxBusID)].longitude = xloc
+	networkData[newType][String(maxBusID)].latitude = yloc
 	// Draw on svg
-	x = networkData[newType][String(newID)].longitude
-	y = networkData[newType][String(newID)].latitude
+	x = networkData[newType][String(maxBusID)].longitude
+	y = networkData[newType][String(maxBusID)].latitude
 	r = 5
-	addCircle(x,y,r,newType+"_"+String(newID),newType)
+	addCircle(x,y,r,newType+"_"+String(maxBusID),newType)
 	if(scaleTracker != 1.0) {
-		newCir = document.getElementById(newType+"_"+String(newID))
+		newCir = document.getElementById(newType+"_"+String(maxBusID))
 		newCir.setAttribute('r', 5*scaleTracker)
 		newCir.setAttribute('stroke-width', 0.5*scaleTracker)
 	}
-	clickTarget.removeEventListener('click', newNodeListener, false)
+	this.removeEventListener('click', newNodeListener, false)
 	document.body.style.cursor = 'auto'
 }
 
 function moveBus() {
 	// Start the bus moving process by adding a listener
-	clickTarget = document.getElementById('svgContainer')
-	clickTarget.addEventListener('click', moveBusListener, false)
+	document.getElementById('svgContainer').addEventListener('click', moveBusListener, false)
 	document.body.style.cursor = 'crosshair'
 }
 
@@ -910,7 +904,7 @@ function moveBusListener() {
 			}
 		}
 	}
-	clickTarget.removeEventListener('click', moveBusListener, false)
+	this.removeEventListener('click', moveBusListener, false)
 	document.body.style.cursor = 'auto'
 }
 
@@ -919,7 +913,7 @@ function newGen() {
 	currSel = selection[0]
 	selectionIDSplit = currSel.id.split("_")
 	if(selection.length === 1 && String(selectionIDSplit[0]) == "bus") {
-		newID = (Object.keys(networkData["gen"]).length)+1
+		var newGenID = (Object.keys(networkData["gen"]).length)+1
 		newGenObj = {}
 		selBusID = parseInt(selectionIDSplit[1])
 		selBus = networkData["bus"][String(selBusID)]
@@ -949,9 +943,9 @@ function newGen() {
 			ramp_q: "0",
 			apf: "0"
 		}
-		addRectangle(selBus.longitude - 4/2, selBus.latitude - 4/2, 4, 4, "gen_" + newID, "gen")
+		addRectangle(selBus.longitude - 4/2, selBus.latitude - 4/2, 4, 4, "gen_" + newGenID, "gen")
 		if(scaleTracker != 1.0) {
-			newRect = document.getElementById("gen_"+newID)
+			newRect = document.getElementById("gen_"+newGenID)
 			xPos = parseFloat(newRect.getAttribute('x'))
 			yPos = parseFloat(newRect.getAttribute('y'))
 			width = parseFloat(newRect.getAttribute('width'))
@@ -965,7 +959,7 @@ function newGen() {
 			newRect.setAttribute('x', longitude - (width*scaleTracker/4))
 			newRect.setAttribute('y', latitude - (height*scaleTracker/4))
 		}
-		networkData["gen"][String(newID)] = newGenObj
+		networkData["gen"][String(newGenID)] = newGenObj
 	}
 }
 
@@ -1139,7 +1133,7 @@ function loading() {
 		var modelName = '{{modelName}}'
 		// Check conversion.
 		$.ajax({
-			url: "/checkConversion/" + modelName
+			url: "/checkConversion/" + modelName + "/" + "{{ owner }}"
 		}).done(function (data) {
 			if (data.exists == true) {
 				showProgressDialog('spinner','Converting network','conversion');
@@ -1157,54 +1151,78 @@ function loading() {
 	setTimeout(longLoadingProcess, 100)
 }
 
-function startConversion(elementName, nextAction) {
+async function startConversion(elementName, nextAction) {
 	// Additional check, required for Safari browsers
 	var newName = document.getElementById(elementName).value;
+	let submitForm = false;
+	// Check if the file exists, using the user-provided name
 	if (true) {
-		var modelName = "{{ modelName }}"
-		$.ajax({
-			url: "/uniqObjName/Network/" + "{{ owner }}" + "/" + newName + "/" + modelName
+		var modelName = '{{ modelName }}'
+		await $.ajax({
+			url: '/uniqObjName/Network/' + '{{ owner }}' + '/' + newName + '/' + modelName
 		}).done(function (data) {
 			if (data.exists) {
-				alert("You already have a Network named '" + newName + "', please choose a different name.")
-			}
-			else{
-				if (nextAction == 1){
+				alert('You already have a Network named "' + newName + '", please choose a different name.')
+			} else {
+				// The filename does not already exist. Submit the form with the matpower file
+				if (nextAction == 1)	// 1 for blank network modal
 					newnetwork.submit()
-				}
-				else{
-					gebi('matpower').submit();
-					showProgressDialog('spinner','Converting network','conversion');
-					setTimeout(checkConversion,5000); // Set an initial delay because it takes time to create conversion files.
-				}
+				else					// 2 for matpower modal
+					submitForm = true;
 			}
 		})
 	}
+	if (!submitForm) return;
+
+	// Do the conversion (matpower import)
+	showProgressDialog('spinner', 'Converting network', 'conversion');
+	const form = document.getElementById('matpower');
+    const formData = new FormData(form);
+	const formRequest = $.ajax({
+        type: 'POST',
+        url: form.action,
+        data: formData,
+        processData: false,
+        contentType: false,
+	});
+	// Check for when the conversion is done
+	formRequest.done(function(data) {
+		checkConversion();
+	});
 }
 
 function checkConversion() {
 	// Periodically check to see if any conversion is happening. And if it's done, load the converted model.
 	var conversionStatus = 'converting';
-		// Check every 5 seconds for a feeder & refresh.
-		var setInterval = window.setInterval(function pingAPI(){
-			var modelName = '{{modelName}}'
-			$.ajax({
-				url: "/checkConversion/" + modelName
-			}).done(function (data) {
-				if (data.exists) {
-					conversionStatus = 'converting'
-				}
-				else {
-					conversionStatus = 'done';
-				}
-			})
-			if (conversionStatus == "done"){
-				savePoster("{{ networkName }}", "{{ modelName }}", "{{ owner }}");
-				alert("Conversion complete.")
+	// Check every 5 seconds for a feeder & refresh.
+	var intervalId = window.setInterval(function pingAPI(){
+		var modelName = '{{ modelName }}'
+		$.ajax({
+			url: '/checkConversion/' + modelName + '/' + '{{ owner }}'
+		}).done(function (data) {
+
+			// Set conversion status depending on result of AJAX request
+			if (data.exists == null)
+				conversionStatus = data;
+			else if (data.exists)
+				conversionStatus = 'converting'
+			else if (!data.exists)
+				conversionStatus = 'done';
+
+			// Deal with the conversion status
+			if (conversionStatus == 'done') {
+				window.clearInterval(intervalId);
+				alert('Conversion complete.')
 				window.location.reload();
 			}
-			return pingAPI;
-		}(), 5000);
+			else if (conversionStatus == 'matError') {
+				window.clearInterval(intervalId);
+				alert('The .m file does not contain any valid data.')
+				removeProgressDialog();
+			}
+		})
+		return pingAPI;
+	}, 5000);
 }
 
 function saveNetwork() {

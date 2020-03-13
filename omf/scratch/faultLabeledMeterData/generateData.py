@@ -3,9 +3,8 @@
 import json, csv, datetime, time, copy
 import numpy as np
 from datetime import datetime, timedelta
-from omf import omfDir, feeder
+from omf import omfDir, feeder, loadModeling
 from omf.solvers import gridlabd
-
 
 # user inputs ----------------------------------------------------------------------
 
@@ -15,7 +14,7 @@ WORKING_DIR = omfDir + '/scratch/faultLabeledMeterData'
 TIMEZONE = 'PST+8PDT'
 TIME_FORMAT = '%Y-%m-%d %H:%M:%S'
 SIM_START_TIME = '2000-01-01 00:00:00 PST'
-SIM_STOP_TIME = '2000-01-01 10:00:00 PST'
+SIM_STOP_TIME = '2000-01-01 01:00:00 PST'
 
 THEFT_LINE_LENGTH = 100
 THEFT_ON_TIME = 12*3600
@@ -40,7 +39,7 @@ CONDITION_TRANSFORMERS = ['CTTF_B_645', '1808-31-003_A', 'T62463072031']
 METER_FILENAMES = ['meterDEC.csv', 'meterABEC.csv', 'meterOlin.csv']
 OUTPUT_FILENAMES = ['dataDEC.csv', 'dataABEC.csv', 'dataOlin.csv']
 
-CONDITION_TYPES = ['None']#, ''transformerShort', theft', 'equipmentMafunction']
+CONDITION_TYPES = ['transformerShort']
 # CONDITION_TYPES = [ 'None', 'theft', 'equipmentMafunction', 'transformerShort'
 # 	'SLG-A', 'SLG-B', 'SLG-C', 'DLG-AB', 'DLG-BC', 'DLG-CA', 'LL-AB',
 # 	'LL-BC', 'LL-CA', 'TLG', 'OC1-A', 'OC1-B', 'OC1-C', 'OC2-AB', 
@@ -306,7 +305,11 @@ for circuitNum in [1]:
 	else: # incorrect file type
 		raise Exception('Invalid input file type. We require a .glm or .omd.')
 
-	# modify circuit to enable data recording ------------------------------------------
+	if 'ABEC Columbia.omd' in CIRCUIT_PATH:
+		loadModeling.addScaledRandomHouses(tree)
+
+
+	# modify circuit to facilitate data recording ------------------------------------------
 
 	# assume circuit doesnt have a clock for keeping time or a tape module for recording
 	clockExists = False

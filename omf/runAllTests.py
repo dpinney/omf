@@ -9,7 +9,9 @@ IGNORE_FILES = ['runAllTests.py', 'install.py', 'setup.py', 'webProd.py', 'web.p
 # Only search these directories
 INCLUDE_DIRS = ['omf', 'models']
 # 3/1/20: These 3 files cause GitHub Actions to hang indefinitely when run with this test harness, so they must be run in their own separate processes
-FILES_THAT_HANG = ['networkStructure.py', 'smartSwitching.py', 'forecastTool.py']
+# 3/9/20: added phaseBalance.py. Ideally, we would not spawn any subprocess. Instead, every file would simply be imported and have its _tests()
+# function called
+FILES_THAT_HANG = ['networkStructure.py', 'smartSwitching.py', 'forecastTool.py', 'phaseBalance.py']
 IGNORE_FILES.extend(FILES_THAT_HANG)
 
 

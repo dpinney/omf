@@ -711,10 +711,9 @@ def get_components():
 
 
 @app.route("/checkConversion/<modelName>/<owner>", methods=["POST","GET"])
-@app.route("/checkConversion/<modelName>", methods=["POST","GET"]) # Don't get rid of this route because transEdit.html uses it
 @flask_login.login_required
 @read_permission_function # Viewers can load a feeder, and all feeders check for ongoing conversions, so this route must have read permissions
-def checkConversion(modelName, owner=None):
+def checkConversion(modelName, owner):
 	"""
 	If the path exists, then the conversion is ongoing and the client can't reload their browser yet. If the path does not exist, then either 1) the
 	conversion hasn't started yet or 2) the conversion is finished because the ZPID.txt file is gone. If an error file exists, the the conversion
@@ -722,7 +721,7 @@ def checkConversion(modelName, owner=None):
 	"""
 	print(modelName)
 	# First check for error files
-	for filename in ['gridError.txt', 'error.txt', 'weatherError.txt']:
+	for filename in ['gridError.txt', 'error.txt', 'weatherError.txt', 'matError.txt']:
 		filepath = os.path.join(_omfDir, 'data', 'Model', owner, modelName, filename)
 		if os.path.isfile(filepath):
 			with locked_open(filepath) as f:
@@ -799,12 +798,13 @@ def milImportBackground(owner, modelName):
 def matpowerImport(owner):
 	''' API for importing a MATPOWER network. '''
 	modelName = request.form.get('modelName', '')
-	model_dir, con_file_path = [os.path.join(_omfDir, 'data', 'Model', owner, modelName, filename) for filename in ('', 'ZPID.txt')]
+	model_dir, con_file_path, error_path = [os.path.join(_omfDir, 'data', 'Model', owner, modelName, filename) for filename in ('', 'ZPID.txt', 'matError.txt')]
 	# Delete existing .m files to not clutter model.
 	for filename in safeListdir(model_dir):
 		if filename.endswith(".m"):
 			os.remove(os.path.join(model_dir, filename))
-	# TODO: Remove error files.
+	if os.path.isfile(error_path):
+		os.remove(error_path)
 	with locked_open(con_file_path, 'w') as conFile:
 		conFile.write("WORKING")
 	importProc = Process(target=matImportBackground, args=[owner, modelName])
@@ -829,6 +829,11 @@ def matImportBackground(owner, modelName):
 		networkNum = request.form.get("networkNum", 1)
 		removeNetwork(owner, modelName, networkNum)
 		writeToInput(model_dir, networkName, 'networkName' + str(networkNum))
+	except ValueError:
+		filepath = os.path.join(_omfDir, 'data', 'Model', owner, modelName, 'matError.txt')
+		with locked_open(filepath, 'w') as errorFile:
+			errorFile.write('matError')
+		os.remove(pid_filepath)
 	except:
 		os.remove(pid_filepath)
 
