@@ -142,7 +142,7 @@
 				<input type="text" id="motor_cost" name="motor_cost" required="required"/>
 			</div> -->
 			<div class="shortInput">
-				<label class="tooltip">Avg motor value ($/MW)<span class="classic"><!-- FILL ME! --></span></label>
+				<label class="tooltip">Avg motor value ($/MW)<span class="classic">Average cost of motors on the system.</span></label>
 				<input type="text" id="motor_value" name="motor_value" required="required"/>
 			</div>
 			<div class="shortInput">
@@ -473,11 +473,11 @@
 		</div>
 	</div>
 	<p class="reportTitle postRun">Raw Input and Output Files</p>
-    <div id="rawOutput" class="content postRun" style="margin-top:0px">
-        {% for name in allOutputDataDict['fileNames'] %}
-            {% if loop.index > 1 %}<br> {% endif %}<a href="/downloadModelData/{{allInputDataDict['user']}}/{{allInputDataDict['modelName']}}/{{name}}">{{name}}</a>
-        {% endfor %}
-    </div>
+	<div id="rawOutput" class="content postRun" style="margin-top:0px">
+		{% for name in allOutputDataDict['fileNames'] %}
+			{% if loop.index > 1 %}&mdash; {% endif %}<a href="/downloadModelData/{{allInputDataDict['user']}}/{{allInputDataDict['modelName']}}/{{name}}">{{name}}</a>
+		{% endfor %}
+	</div>
 </body>
 
 		<!-- <p class="reportTitle postRun">Simulation Location</p>

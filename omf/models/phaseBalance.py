@@ -543,7 +543,7 @@ def new(modelDir):
 		"productionCost": "0.03",
 		"pf_penalty": "50000",
 		"pf_threshold": "0.95",
-		"motor_value": "30",
+		"motor_value": "67000",
 		"motor_lifetime": "20",
 		"discountRate": "7",
 		"edgeCol" : "None",
@@ -570,7 +570,7 @@ def _tests():
 	if os.path.isdir(modelLoc):
 		shutil.rmtree(modelLoc)
 	new(modelLoc)
-	__neoMetaModel__.renderAndShow(modelLoc)
+	# __neoMetaModel__.renderAndShow(modelLoc)
 	__neoMetaModel__.runForeground(modelLoc)
 	__neoMetaModel__.renderAndShow(modelLoc)
 
