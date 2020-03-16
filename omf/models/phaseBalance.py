@@ -333,8 +333,8 @@ def work(modelDir, ind):
 					n(r2['A_imag'] + r2['B_imag'] + r2['C_imag']),
 					n(r['voltA']), n(r['voltB']), n(r['voltC']), 
 					n(r['unbalance']), n(motor_efficiency(r['unbalance'])), n(lifespan(r['unbalance'], ind)), "style='background:yellow'") 
-				for (i, r), (j, r2) in zip(df_all_motors.iterrows(), df_vs[suffix].iterrows())])
-		
+				for (i, r), (j, r2) in zip(df_all_motors.iterrows(), df_vs[suffix].iterrows()) if r2['A_real'] > 0.0])
+		#HACK: we only check for non-zero real power.
 		all_motor_unbalance[suffix] = [r['unbalance'] for i, r in df_all_motors.iterrows()]
 
 		o['service_cost']['motor_derating'][suffix[1:]] = n(df_all_motors['unbalance'].apply(motor_efficiency).max())
@@ -547,7 +547,7 @@ def new(modelDir):
 		"motor_lifetime": "20",
 		"discountRate": "7",
 		"edgeCol" : "None",
-		"nodeCol" : "VoltageImbalance", # VoltageImbalance
+		"nodeCol" : "perUnitVoltage", #"VoltageImbalance"
 		"nodeLabs" : "None",
 		"edgeLabs" : "None",
 		"customColormap" : "False",
