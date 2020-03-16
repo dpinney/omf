@@ -33,6 +33,8 @@ before_install:
   - python3 install.py
   - export BOTO_CONFIG=/dev/null
 install:
+  - if [ "$TRAVIS_OS_NAME" = "osx" ]; then which python; fi
+  - if [ "$TRAVIS_OS_NAME" = "osx" ]; then ls /usr/local/bin/py*; fi
   - python3 setup.py develop || sudo python3 setup.py develop
 before_script:
   - if [ "$TRAVIS_OS_NAME" = "windows" ]; then export "PATH=/c/Python36:/c/Python36/Scripts:/c/Program Files/GridLAB-D/bin:/c/Program files (x86)/Graphviz2.38/bin:$PATH"; fi
