@@ -9,17 +9,17 @@ import numpy as np
 
 try:
 	from omf.solvers.nilmtk.nilm_metadata.nilm_metadata import save_yaml_to_datastore
+	from omf.solvers.nilmtk.nilmtk.nilmtk import DataSet, TimeFrame, MeterGroup, HDFDataStore
+	from omf.solvers.nilmtk.nilmtk.nilmtk.legacy.disaggregate import fhmm_exact
+	from omf.solvers.nilmtk.nilmtk.nilmtk.legacy.disaggregate import CombinatorialOptimisation
+	from omf.solvers.nilmtk.nilmtk.nilmtk.datastore import Key
+	from omf.solvers.nilmtk.nilmtk.nilmtk.measurement import LEVEL_NAMES
+	from omf.solvers.nilmtk.nilmtk.nilmtk.utils import get_datastore
+	from omf.solvers.nilmtk.nilm_metadata.nilm_metadata import save_yaml_to_datastore
 except Exception as e:
 	pass
 	# raise Exception('need to install nilmtk')
 	# installNilm()
-	# from omf.solvers.nilmtk.nilmtk.nilmtk import DataSet, TimeFrame, MeterGroup, HDFDataStore
-	# from omf.solvers.nilmtk.nilmtk.nilmtk.legacy.disaggregate import fhmm_exact
-	# from omf.solvers.nilmtk.nilmtk.nilmtk.legacy.disaggregate import CombinatorialOptimisation
-	# from omf.solvers.nilmtk.nilmtk.nilmtk.datastore import Key
-	# from omf.solvers.nilmtk.nilmtk.nilmtk.measurement import LEVEL_NAMES
-	# from omf.solvers.nilmtk.nilmtk.nilmtk.utils import get_datastore
-	# from omf.solvers.nilmtk.nilm_metadata.nilm_metadata import save_yaml_to_datastore
 
 # warnings.filterwarnings('ignore')
 
