@@ -19,8 +19,6 @@ jobs:
       language: generic
       env:
         - DISPLAY=:99.0
-      services:
-        - xvfb
     - os: windows
       language: shell
 before_install:
@@ -33,7 +31,7 @@ before_install:
   - python3 install.py
   - export BOTO_CONFIG=/dev/null
 install:
-  - if [ "$TRAVIS_OS_NAME" = "osx" ]; then sudo /usr/local/Cellar/python/3.7.7/bin/python3 setup.py develop; fi
+  - if [ "$TRAVIS_OS_NAME" = "osx" ]; then sudo python3 setup.py develop; fi
   - if [ "$TRAVIS_OS_NAME" = "linux" ]; then sudo python3 setup.py develop; fi
   - if [ "$TRAVIS_OS_NAME" = "windows" ]; then python3 setup.py develop; fi
 before_script:
