@@ -32,14 +32,12 @@ before_install:
   - if [ "$TRAVIS_OS_NAME" = "windows" ]; then ln -s /c/Python36/python /usr/bin/python3; ln -s /c/Python36/Scripts/pip /usr/bin/pip3; fi
   - python3 install.py
   - export BOTO_CONFIG=/dev/null
+  - if [ "$TRAVIS_OS_NAME" == "osx" ]; then virtualenv venv -p python3; fi
+  - if [ "$TRAVIS_OS_NAME" == "osx" ]; then source venv/bin/activate; fi
 install:
-  - if [ "$TRAVIS_OS_NAME" = "osx" ]; then which python; fi
-  - if [ "$TRAVIS_OS_NAME" = "osx" ]; then python --version; fi
-  - if [ "$TRAVIS_OS_NAME" = "osx" ]; then ls /usr/local/bin/py*; fi
   - python3 setup.py develop || sudo python3 setup.py develop
 before_script:
   - if [ "$TRAVIS_OS_NAME" = "windows" ]; then export "PATH=/c/Python36:/c/Python36/Scripts:/c/Program Files/GridLAB-D/bin:/c/Program files (x86)/Graphviz2.38/bin:$PATH"; fi
-  - if [ "$TRAVIS_OS_NAME" = "osx" ]; then ln -s /usr/local/bin/python /usr/local/bin/python3; fi
 script:
   - python3 ./omf/runAllTests.py omf
   - cd omf/models
