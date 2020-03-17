@@ -1,0 +1,48 @@
+sudo: required
+dist: xenial
+
+language: generic
+
+addons:
+  apt:
+    sources:
+    - sourceline: 'ppa:octave/stable'   ## without this, it's octave 4.0.0
+    packages:
+    - coinor-libipopt-dev
+    - liboctave-dev
+    - octave        # octave 4.2.2
+    update: true
+
+install:
+# # https://github.com/travis-ci/travis-ci/issues/9080
+# - sudo systemctl disable apt-daily.timer
+# - sudo killall apt.systemd.daily || true
+# 
+# - sudo apt-add-repository -y ppa:octave/stable
+# - sudo apt-get update -qq
+# - sudo apt-get install -qq coinor-libipopt-dev octave liboctave-dev
+- git clone --depth=50 https://github.com/MATPOWER/matpower.git $TRAVIS_BUILD_DIR/matpower
+
+env:
+  global:
+    - IPOPT_VER=3.11.9
+    - MATPOWER_PATH=$TRAVIS_BUILD_DIR/matpower
+
+script:
+# build and install IPOPT MEX file
+- mkdir $TRAVIS_BUILD_DIR/build
+- curl -SL https://www.coin-or.org/download/source/Ipopt/Ipopt-${IPOPT_VER}.tgz | tar -xzC $TRAVIS_BUILD_DIR/build
+- mv $TRAVIS_BUILD_DIR/build/Ipopt-${IPOPT_VER}/Ipopt/contrib/MatlabInterface $TRAVIS_BUILD_DIR/build/ipopt
+- mv $TRAVIS_BUILD_DIR/.travis/Makefile $TRAVIS_BUILD_DIR/build/ipopt/src
+- make -C $TRAVIS_BUILD_DIR/build/ipopt/src
+- mv $TRAVIS_BUILD_DIR/build/ipopt/src/*.mex $TRAVIS_BUILD_DIR/build/ipopt/
+
+- octave-cli --no-gui --eval ver
+- octave-cli --no-gui --eval "addpath('$TRAVIS_BUILD_DIR/build/ipopt'); savepath"
+- octave-cli --no-gui -p $MATPOWER_PATH --eval "install_matpower(1,1,1)"
+- octave-cli --no-gui --eval "addpath('$TRAVIS_BUILD_DIR/lib'); savepath"
+- octave-cli --no-gui --eval "addpath('$TRAVIS_BUILD_DIR/lib/t'); savepath"
+- octave-cli --no-gui --eval mpver
+- octave-cli --no-gui --eval "test_syngrid(1,1)"
+# print IPOPT version number
+# - octave-cli --no-gui --eval "feval('qps_ipopt', [],[1; 1],[1 1],[2],[2],[1; 1],[1; 1],[1; 1],struct('verbose', 2));"
