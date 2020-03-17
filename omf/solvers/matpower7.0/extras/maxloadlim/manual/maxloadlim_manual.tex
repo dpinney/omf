@@ -1,0 +1,343 @@
+\documentclass[12pt,a4]{article}
+
+\usepackage[utf8]{inputenc}
+\usepackage[english]{babel}
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{listings}
+\usepackage{fullpage}
+\usepackage{color} %red, green, blue, yellow, cyan, magenta, black, white
+\definecolor{mygreen}{RGB}{28,172,0} % color values Red, Green, Blue
+\definecolor{mylilas}{RGB}{170,55,241}
+\usepackage{booktabs}
+
+\newcommand*{\field}[1]{\mathbb{#1}}
+\newcommand*{\R}{\field{R}} % real R
+\newcommand*{\codemat}[1]{\texttt{#1}}
+\newcommand*{\matpower}{{\sc Matpower}}
+
+\title{Computation of Maximum loadability limit in \matpower{}}
+\author{Camille Hamon}
+
+\begin{document}
+\lstset{language=Matlab,%
+    breaklines=true,%
+    morekeywords={matlab2tikz},
+    keywordstyle=\color{blue},%
+    morekeywords=[2]{1}, keywordstyle=[2]{\color{black}},
+    identifierstyle=\color{black},%
+    stringstyle=\color{mylilas},
+    commentstyle=\color{mygreen},%
+    showstringspaces=false,%without this there will be a symbol in the places where there is a space
+    numbers=left,%
+    numberstyle={\tiny \color{black}},% size of the numbers
+    numbersep=9pt, % this defines how far the numbers are from the text
+    emph=[1]{for,end,break},emphstyle=[1]\color{red}, %some words to emphasise
+}
+\maketitle
+
+\tableofcontents
+
+\section{Examples}
+\label{sec:examples}
+
+\subsection{IEEE 9 bus system}
+
+\subsubsection{With reactive power limits}
+\label{sec:with-reactive-power}
+
+The following code looks for the maximum loadability point limit in a the direction of load increase defined by \codemat{dir\_mll}.
+
+\lstinputlisting[language=Matlab,firstline=2,lastline=11]{../examples/example_ieee9.m}
+
+The printed results are shown in Figure \ref{fig:res-ieee9}. 
+The first block of information gives information about the stability margin to the maximum loadability limit (MLL) point and the type of bifurcation at the MLL point. 
+In this example, the MLL is a limit-induced bifurcation that occurs when generator 2 reaches its reactive power limit.
+The second block of information gives the participation of all buses in the direction of load increase, the loads and the voltage magnitudes at all buses at the MLL. 
+The third block of information shows the reactive power generation at all generators as compared to their limits, and the voltage magnitude at the generator buses as compared to their set points. 
+A flag \codemat{REF} indicates which generator is the slack. 
+In the case of a limit-induced bifurcation, a flag \codemat{LIB} indicates the generator which generator caused the LIB when reaching its reactive power limit.
+
+\begin{figure}[!h]
+  \centering
+\begin{verbatim}
+=======================================
+      Maximum loadability problem
+=======================================
+The stability margin is 339.53 MW
+The type of bifurcation is limit-induced bifurcation (LIB).
+Generator responsible for LIB: Gen 2 connected at bus 2
+
+--------------------------------------------------
+   Bus nb    Direction     Load at MLL    Voltages 
+   ------    ---------     -----------    --------
+      1          0             0.00         1.000
+      2          0             0.00         1.000
+      3          0             0.00         1.000
+      4          0             0.00         0.867
+      5          0            90.00         0.806
+      6          0             0.00         0.852
+      7          1           439.53         0.663
+      8          0             0.00         0.819
+      9          0           125.00         0.784
+
+=============================================================
+Reactive power production and voltages at the generators
+=============================================================
+   Bus nb      Qgen       Qmin       Qmax        Vm      Vref
+  --------    -------    ------     ------      -----    -----
+      1        305.15    -300.00    9999.00    1.0000   1.0000    REF
+      2        300.00    -300.00     300.00    1.0000   1.0000    LIB
+      3        255.64    -300.00     300.00    1.0000   1.0000
+\end{verbatim}  
+  \caption{Results of the search for the MLL in the IEEE 9 bus system with reactive power limit enforced.}\label{fig:res-ieee9}
+\end{figure}
+
+\subsubsection{Without reactive power limits enforced}
+\label{sec:with-react-power}
+
+In this example, the reactive power limits are not enforced in the search for the MLL point. 
+This is done by setting the flag \codemat{use\_qlim} to 0.
+
+\lstinputlisting[language=Matlab,firstline=13,lastline=15]{../examples/example_ieee9.m}
+
+The results are shown in Figure \ref{fig:res-ieee9-noQ}.
+Since the reactive power limits are not enforced, the maximum loadability limit point is now a saddle-node bifurcation point (SNB).
+It can be seen that the reactive power generation at the generator at bus 2 is 341.64 Mvar which is larger than its limit (300 Mvar).
+
+\begin{figure}[!hb]
+  \centering
+\begin{verbatim}
+=======================================
+      Maximum loadability problem
+=======================================
+The stability margin is 342.37 MW
+The type of bifurcation is saddle-node bifurcation (SNB).
+
+--------------------------------------------------
+   Bus nb    Direction     Load at MLL    Voltages 
+   ------    ---------     -----------    --------
+      1          0             0.00         1.000
+      2          0             0.00         1.000
+      3          0             0.00         1.000
+      4          0             0.00         0.846
+      5          0            90.00         0.776
+      6          0             0.00         0.830
+      7          1           442.37         0.620
+      8          0             0.00         0.793
+      9          0           125.00         0.753
+
+=============================================================
+Reactive power production and voltages at the generators
+=============================================================
+   Bus nb      Qgen       Qmin       Qmax        Vm      Vref
+  --------    -------    ------     ------      -----    -----
+      1        348.43    -300.00    9999.00    1.0000   1.0000    REF
+      2        341.64    -300.00    9999.00    1.0000   1.0000
+      3        293.07    -300.00    9999.00    1.0000   1.0000
+\end{verbatim}  
+  \caption{Results of the search for the MLL in the IEEE 9 bus system without enforcement of the reactive power limits.}\label{fig:res-ieee9-noQ}
+\end{figure}
+
+\subsubsection{Comparison with the \matpower{} CPF function}
+\label{sec:comp-with-matp}
+
+The continuation power flow is implemented in the \matpower{} function \codemat{runcpf}.
+It does not consider reactive power limits.
+The following code runs the continuation power flow in the same direction of load increase as in the previous section (load increase at bus 7).
+
+\lstinputlisting[language=Matlab,firstline=17]{../examples/example_ieee9.m}
+
+The results are shown in Figure \ref{fig:res-ieee9-cpf}.
+Comparing with the results in Figure \ref{fig:res-ieee9-noQ}, it can be seen that both algorithms lead to very similar results; the small differences can be explained by the step length of the CPF algorithm.
+
+\begin{figure}[!h]
+  \centering
+\begin{verbatim}
+================================================================================
+|     Bus Data                                                                 |
+================================================================================
+ Bus      Voltage          Generation             Load        
+  #   Mag(pu) Ang(deg)   P (MW)   Q (MVAr)   P (MW)   Q (MVAr)
+----- ------- --------  --------  --------  --------  --------
+    1  1.000    0.000*   482.24    362.02       -         -   
+    2  1.000  -50.453    163.00    355.52       -         -   
+    3  1.000  -55.236     85.00    305.48       -         -   
+    4  0.839  -19.338       -         -         -         -   
+    5  0.766  -37.631       -         -       90.00     30.00 
+    6  0.822  -58.708       -         -         -         -   
+    7  0.605  -79.871       -         -      442.07    154.72 
+    8  0.784  -57.915       -         -         -         -   
+    9  0.743  -38.424       -         -      125.00     50.00 
+                        --------  --------  --------  --------
+               Total:    730.24   1023.02    657.07    234.72
+\end{verbatim}  
+  \caption{Results of the \matpower{} implementation of continuation power flow.}\label{fig:res-ieee9-cpf}
+\end{figure}
+
+\section{Notations}
+\label{sec:notations}
+
+If not indicated otherwise, the notations are the same as in \matpower{}'s manual.
+
+\section{The maximum loadability limit problem}
+\label{sec:maxim-load-limit}
+
+Finding the maximum loadability limit from base-case loading $P_d^0 \in \R^{n_b}$ in a load increase direction $d \in \R^{n_b}$ can be done by solving the following optimisation problem
+
+\begin{subequations}\label{eq:maxll}
+\begin{align}
+  \max_{z} \quad & \alpha \label{eq:maxll-obj} \\
+  \text{subject to} \quad & P_d = P_d^0 + \alpha d \label{eq:loadinc}\\
+   & Q_d = \text{diag}(\tan \phi^0) P_d \label{eq:loadinc-q}\\
+   & g(z) = 0 \\
+   & z_\text{min} \leq z \leq z_\text{max} \label{eq:zlim}
+\end{align}  
+\end{subequations}
+where
+\begin{align}
+  \label{eq:z}
+  z = [x^T \; \alpha]^T =  \begin{bmatrix}
+    \Theta \\
+    V_m \\
+    P_g \\
+    Q_g \\
+    \alpha
+  \end{bmatrix},
+\end{align}
+where $x$ is defined in Equation (6.5) in \matpower{}'s manual and the function $g$ is defined is Equations (4.2) and (4.3) in \matpower{}'s manual.
+Equation \eqref{eq:loadinc-q} ensures that the power factor of the loads is kept constant to $\cos(\phi_i^0)$, the value defined in the base case.
+Note that $\tan \phi^0 \in \R^{n_b}$.
+The limits \eqref{eq:zlim} are as follows:
+\begin{align}
+  & \theta_i = \theta_i^\text{ref}, && i \in \mathcal{I}_\text{ref} \label{eq:thetaslack} \\
+  & v_m^{i} = v_m^{i,\text{ref}}, && i \in \mathcal{I}_\text{ref} \label{eq:vmslack} \\
+  0 \leq & v_m^{i} \leq v_m^{i,\text{ref}}, && i \in \{1,\ldots,n_g\} \backslash \mathcal{I}_\text{ref} \label{eq:vmpv} \\
+  q_g^{i,\text{min}} \leq & q_g^i \leq q_g^{i,\text{max}}, && i \in \{1,\ldots,n_g\} \backslash \mathcal{I}_\text{ref} \label{eq:qgpv}\\
+  & p_g^i = p_g^{i,0}, && i \in \{1,\ldots,n_g\} \backslash \mathcal{I}_\text{ref} \\
+  & \alpha \in [0,+\infty].
+\end{align}
+where $p_g^{i,0}$ is the active power generation at bus $i$ in the base case.
+Equations \eqref{eq:thetaslack} and \eqref{eq:vmslack} lock the voltage angle and magnitude of the reference buses to their set points.
+Equations \eqref{eq:vmpv} and \eqref{eq:qgpv} limit the terminal voltages and reactive power generation at the PV buses. 
+Note that in theory, complementarity constraints
+\begin{align}
+  \label{eq:comp-constr}
+  (v_m^i-v_m^{i,\text{ref}})\cdot(q_g^i-q_g^{i,\text{max}}), \quad i \in \{1,\ldots,n_g\} \backslash \mathcal{I}_\text{ref}
+\end{align}
+should be included. 
+However, in practice, solvers will set $v_m^i = v_m^{i,\text{ref}}$ if $q_g^i$ is smaller than $q_g^{i,\text{max}}$ and let $v_m^i$ be free if $q_g^i$ has reached its limit, since doing so maximizes loadability.
+
+\section{Implementation in \matpower{}}
+\label{sec:impl-matp}
+
+\subsection{Inputs}
+\label{sec:inputs}
+
+We assume that the following inputs are available:
+\begin{enumerate}
+\item A \matpower{} base case \codemat{mpc}.
+\item A load increase direction $d \in R^{n_b}$, with the assumption that only nonzero loads in \codemat{mpc} can be increased.
+\end{enumerate}
+
+\subsection{Defining dispatchable loads}
+\label{sec:defin-disp-loads}
+
+A new \matpower{} case \codemat{mpc\_vl} is built where all nonzero loads in \codemat{mpc} are transformed to dispatchable loads:
+\begin{lstlisting}[language=Matlab]
+mpc_vl = load2disp(mpc)  
+\end{lstlisting}
+Dispatchable loads are described in Section 6.4.2 of \matpower{}'s package.
+Note that, conceptually, this means that the active parts of the nonzero loads in $P_d$ enter $P_g$ in \eqref{eq:z} and their reactive parts enter $Q_g$.
+
+\subsection{Adjusting the \matpower{} case}
+\label{sec:adjust-matp-case}
+
+\subsubsection{Power constraints of dispatchable loads}
+\label{sec:limits-disp-loads}
+
+In \matpower{}, dispatchable loads are assumed to maintain a constant power factor. 
+This power factor is determined by the values in the columns \codemat{PMIN} and \codemat{QMIN} corresponding to the dispatchable loads in the field \codemat{mpc\_vl.gen}.
+When using the function \codemat{load2disp}, these fields are set to the opposite of the active and reactive power parts of the nonzero loads in the base case \codemat{mpc}.
+When solving the optimisation problem \eqref{eq:maxll} with \matpower{}, the columns \codemat{PMIN} and \codemat{QMIN} also constrain the maximum values of dispatchable loads.
+Since we are looking for maximum loadability limits, upper values on loads must not be binding.
+Therefore, the values \codemat{PMIN} of rows in \codemat{mpc\_vl.gen} corresponding to dispatchable loads is set to a very large negative values and the values \codemat{QMIN} of these dispatchable loads are changed accordingly to keep the constant power factor defined in the base case.
+
+\subsubsection{Power constraints on generators}
+\label{sec:constr-gen}
+
+
+The maximum loadability limit problem differs from a standard AC OPF as defined in Equations (6.1) to (6.4) in \matpower{}'s manual in the following way
+\begin{enumerate}
+\item Active power production at PV buses is locked to the base case values. Therefore, the columns \codemat{PMIN} and \codemat{PMAX} of these generators are set to their active power production in the base case.
+\item Generators at reference buses pick up the loads during the load increase process. The assumption here is that the reference buses correspond to strong generators that do not reach their power limits. Therefore, active and reactive power limits of the generators at reference buses are set to large values.
+\end{enumerate}
+
+\subsubsection{Voltage constraints}
+\label{sec:volt-constr-at}
+Similarly to power constraints discussed above, voltage constraints in the maximum loadability problem differ from a standard AC OPF as follows
+\begin{enumerate}
+\item Voltage magnitudes at the reference buses are locked at their set point values, see Equation \eqref{eq:vmslack}.
+\item Voltage magnitudes at all PV and PQ buses are not constrained from below. The reason for this is that the maximum loadability limit point typically corresponds to an operating point that is outside the normal allowed band on bus voltage magnitude. Therefore, to find this point, lower limits on bus voltage magnitudes of PV and PQ buses must be relaxed.
+\item For the same reason, upper bounds on voltage magnitudes of PQ buses are also relaxed.
+\item Upper bounds on voltage magnitudes of PV buses are set to the voltage set point of the corresponding generators.
+\end{enumerate}
+
+\subsubsection{Branch flows}
+\label{sec:branch-flows}
+
+For the same reason as for bus voltages, the branch flow constraints must be relaxed so that they do not become binding during the optimisation process.
+
+\subsubsection{Decision variable $\alpha$ and additional constraints}
+\label{sec:defin-vari-alpha}
+
+Compared to the standard AC OPF formulation in \matpower{}, the formulation in \eqref{eq:maxll} contains an additional decision variable $\alpha$, see \eqref{eq:z}, and the additional constraints \eqref{eq:loadinc}.
+Note that constraints \eqref{eq:loadinc-q} does not exist in the standard AC OPF formulation either, but \matpower{} assumes a constant power factor model for the dispatchable loads, see also Section \ref{sec:limits-disp-loads}.
+Therefore, there is no need to define the additional constraint \eqref{eq:loadinc-q}.
+The decision variable $\alpha$ and the constraint \eqref{eq:loadinc} are defined using a callback function for the \codemat{formulation} stage.
+
+Following Section 7.2 in \matpower{}'s manual, we create a callback function called \codemat{userfcn\_direction\_mll\_formulation(om,args)} in which we define the new variable and constraints.
+To define the new constraint, recall that when transforming the loads to dispatchable loads, the nonzero loads of the base case enter the set of generators, see Section \ref{sec:defin-disp-loads}.
+\matpower{} has a feature to only define the additional constraints on the relevant components of the decision variable $z$ in \eqref{eq:z}.
+For Equation \eqref{eq:loadinc}, the relevant component of $z$ are $P_g$ (since the dispatchable loads enter $P_g$) and $\alpha$.
+
+\subsubsection{Costs}
+\label{sec:costs}
+
+When solving an OPF with dispatchable loads in \matpower{}, the costs of dispatchable loads is added to that of the generator production costs.
+Since the objective function of the maximum loadability limit is just $\alpha$ (see \eqref{eq:maxll-obj}), we are not interested in keeping track of the cost of dispatchable loads and generators.
+These costs are therefore set to zero.
+
+The cost for $\alpha$ is defined in the callback function introduced in Section \ref{sec:defin-vari-alpha}.
+It is set to -1 since the objective in \eqref{eq:maxll-obj} is to maximize $\alpha$, whereas \matpower{} performs a minimisation.
+
+\subsubsection{Functions}
+\label{sec:functions}
+
+The functions in Table \ref{tab:functions} are used to set up and solving the maximum loadability limit problem with \matpower{}.
+
+\begin{table}[!h]
+  \centering
+  \begin{tabular}{lp{8cm}}
+  \toprule
+  Name  & Description \\
+  \midrule
+  \codemat{maxloadlim} & Main function for solving the maximum loadability limit problem.\\
+  \codemat{postproc\_maxloadlim} & Post-processing function that transforms the dispatchable loads back to normal loads.\\
+  \codemat{prepare\_maxloadlim} & Prepares the \matpower{} case before the AC OPF is run, see Section \ref{sec:adjust-matp-case}.\\
+  \codemat{print\_maxloadlim} & Pretty prints the results from the maximum loadability problem.\\
+  \codemat{userfcn\_direction\_mll\_ext2int} & Converts the vector of generator production changes to internal indexing.\\
+  \codemat{userfcn\_direction\_mll\_formulation} & Callback function to define new variables, constraints and costs, see Section \ref{sec:defin-vari-alpha}. \\
+  \bottomrule
+  \end{tabular}
+  \caption{Functions used for the maximum loadability limit problem}
+  \label{tab:functions}
+\end{table}
+
+
+\end{document}
+
+%%% Local Variables:
+%%% mode: latex
+%%% TeX-master: t
+%%% End:

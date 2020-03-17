@@ -1,0 +1,12 @@
+; DO NOT EDIT (unless you know what you are doing)
+;
+; This subdirectory is a git "subrepo", and this file is maintained by the
+; git-subrepo command. See https://github.com/git-commands/git-subrepo#readme
+;
+[subrepo]
+	remote = git@github.com:MATPOWER/mx-reduction
+	branch = master
+	commit = cbd61ad03308c31faecffa3d8d3259121bdc1aa4
+	parent = 2bd8f026f616ec11ad8ebd70a7b47f67903cd05b
+	cmdver = 0.4.0
+	method = merge
