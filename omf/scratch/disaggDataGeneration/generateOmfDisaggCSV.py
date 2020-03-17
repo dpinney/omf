@@ -46,7 +46,7 @@ with open( OUTPUT_FILENAME_TRAIN, 'w' ) as outputFileTrain:
 		if meterPowerIndex == None:
 			raise Exception('No power values in file: ' + METER_FILENAME)
 
-	# go through each appliance file and write ou training data
+	# go through each appliance file and write out training data
 	numTrainSamples = round(sampleCount * FRACTION_DATA_TRAIN)
 	for filename in applianceFiles:
 		
@@ -78,10 +78,9 @@ with open( OUTPUT_FILENAME_TRAIN, 'w' ) as outputFileTrain:
 						timestamp = applianceRow[0]
 						timestamp = timestamp[:19]
 
-						appliancePower = \
-							float(applianceRow[appliancePowerIndex])*1000
+						appliancePower = float(applianceRow[appliancePowerIndex])
 						if (appliancePower != 0) and (rowNum < numTrainSamples):
-							meterPower = float(meterRow[meterPowerIndex])*1000
+							meterPower = float(meterRow[meterPowerIndex])
 							toWrite =[timestamp,meterPower,appliance]
 							trainWriter.writerow(toWrite)
 						rowNum += 1
@@ -124,7 +123,7 @@ with open( OUTPUT_FILENAME_TEST, 'w' ) as outputFileTest:
 			timestamp = meterRow[0]
 			timestamp = timestamp[:19]
 			if rowNum >= numTrainSamples:
-				meterPower = float(meterRow[meterPowerIndex])*1000
+				meterPower = float(meterRow[meterPowerIndex])
 				toWrite =[timestamp,meterPower]
 				testWriter.writerow(toWrite)
 			rowNum += 1
