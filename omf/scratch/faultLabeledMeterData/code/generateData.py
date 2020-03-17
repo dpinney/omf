@@ -14,7 +14,7 @@ WORKING_DIR = omfDir + '/scratch/faultLabeledMeterData'
 TIMEZONE = 'PST+8PDT'
 TIME_FORMAT = '%Y-%m-%d %H:%M:%S'
 SIM_START_TIME = '2000-01-01 00:00:00 PST'
-SIM_STOP_TIME = '2000-01-01 01:00:00 PST'
+SIM_STOP_TIME = '2000-02-01 00:00:00 PST'
 
 THEFT_LINE_LENGTH = 100
 THEFT_ON_TIME = 12*3600
@@ -27,23 +27,24 @@ SHORTED_TRANSFORMER_PERCENTAGE = 0.9
 
 CIRCUIT_PATHS = ['/static/publicFeeders/DEC Red Base.omd', 
 	'/static/publicFeeders/ABEC Columbia.omd', 
-	'/static/publicFeeders/Olin Barre GH.omd'
-]
+	'/static/publicFeeders/Olin Barre GH.omd', 
+	'/static/publicFeeders/Olin Barre GH.omd', 
+	'/static/publicFeeders/Olin Barre GH.omd']
+CONDITION_METERS = ['tn_B_645', 
+	'nodeS1808-31-0011808-31-003_A', 
+	'node62463133906T62463072031', 
+	'node62463024800T62463023775', 
+	'node62463021692T62463021663']
+CONDITION_TRANSFORMERS = ['CTTF_B_645', 
+	'1808-31-003_A', 
+	'T62463072031', 
+	'T62463023775',
+	'T62463021663'] 
 
-CONDITION_METERS = ['tn_B_645', 'nodeS1808-31-0011808-31-003_A', 
-	'node62463133906T62463072031'
-]
-
-CONDITION_LINES = ['632-645', '825275', '70924']
-CONDITION_TRANSFORMERS = ['CTTF_B_645', '1808-31-003_A', 'T62463072031']
-METER_FILENAMES = ['meterDEC.csv', 'meterABEC.csv', 'meterOlin.csv']
-OUTPUT_FILENAMES = ['dataDEC.csv', 'dataABEC.csv', 'dataOlin.csv']
-
-CONDITION_TYPES = ['transformerShort']
-# CONDITION_TYPES = [ 'None', 'theft', 'equipmentMafunction', 'transformerShort'
-# 	'SLG-A', 'SLG-B', 'SLG-C', 'DLG-AB', 'DLG-BC', 'DLG-CA', 'LL-AB',
-# 	'LL-BC', 'LL-CA', 'TLG', 'OC1-A', 'OC1-B', 'OC1-C', 'OC2-AB', 
-# 	'OC2-BC', 'OC2-CA', 'OC3']
+METER_FILENAMES = ['meterDEC.csv', 'meterABEC.csv', 'meterOlin.csv', 'meterOlin.csv', 'meterOlin.csv']
+OUTPUT_FILENAMES = ['dataDEC.csv', 'dataABEC.csv', 'dataOlin.csv', 'dataOlin-2.csv', 'dataOlin-3.csv']
+CONDITION_TYPES = [ 'None', 'theft', 'equipmentMafunction', 'transformerShort' ]
+# CONDITION_TYPES = [ 'None', 'theft', 'equipmentMafunction', 'transformerShort']
 
 METRICS_OF_INTEREST = 'measured_voltage_1.real, ' + \
 'measured_voltage_2.real, ' + \
@@ -198,21 +199,6 @@ def generateTreeWithCondition(tree, condition):
 			'impedance_fraction_12': 1,
 			'nominal_voltage': voltage,
 			'base_power_12': 'theftLoads.value' }
-
-		# load['name'] = 'theftLoad'
-		# load['base_power'] = THEFT_POWER#'theftLoads.value'
-		# load['parent'] = 'theftLoc'
-		# if load.get('schedule_skew') != None:
-		# 	del load['schedule_skew']
-		# treeCopy[feeder.getMaxKey(treeCopy) + 1] = load
-
-		# treeCopy[feeder.getMaxKey(treeCopy) + 1] = {
-		# 	'object': 'triplex_node',
-		# 	'name': 'theftLoad',
-		# 	'power_12': 'theftLoads.value',
-		# 	'parent': transformerFrom,
-		# 	'phases': phases,
-		# 	'nominal_voltage': voltage }
 			
 		
 	elif condition == 'equipmentMafunction':
@@ -232,61 +218,15 @@ def generateTreeWithCondition(tree, condition):
 			'parent': objectName,
 			'phases': phases,
 			'nominal_voltage': voltage }
-	
-	else:
-
-		# induce fault
-		treeCopy[feeder.getMaxKey(treeCopy) + 1] = {
-			'object': 'fault_check ',
-			'name': 'test_fault',
-			'check_mode': 'ONCHANGE',
-			'eventgen_object': 'ManualEventGen',
-			'output_filename': 'Fault_check_out.txt'
-		}
-
-		treeCopy[feeder.getMaxKey(treeCopy) + 1] = {
-			'object': 'power_metrics',
-			'name': 'PwrMetrics',
-			'base_time_value': '1 h'
-		}
-
-		treeCopy[feeder.getMaxKey(treeCopy) + 1] = {
-			'module': 'reliability',
-			'maximum_event_length': 300,
-			'report_event_log': 'TRUE'
-		}
-
-		treeCopy[feeder.getMaxKey(treeCopy) + 1] = {
-			'object': 'metrics',
-			'name': 'RelMetrics',
-			'report_file': 'Metrics_Output.csv',
-			'module_metrics_object': 'PwrMetrics',
-			'metrics_of_interest': '"SAIFI,SAIDI,CAIDI,ASAI,MAIFI"',
-			'customer_group': '"class=triplex_meter"',
-			'metric_interval': '5 h',
-			'report_interval': '5 h'
-		}
-
-		treeCopy[feeder.getMaxKey(treeCopy) + 1] = {
-			'object': 'eventgen',
-			'name': 'ManualEventGen',
-			'parent': 'RelMetrics',
-			'fault_type': '\"' + condition + '\"',
-			'manual_outages': '\"' + 
-				CONDITION_LINE + ',' + \
-				SIM_START_TIME + ',' + \
-				SIM_STOP_TIME + '\"'
-		}
 
 	return treeCopy
 
 # load circuit ---------------------------------------------------------------------
 
-for circuitNum in [1]:
+for circuitNum in [3]:
 
 	CIRCUIT_PATH = omfDir + CIRCUIT_PATHS[circuitNum]
 	CONDITION_METER = CONDITION_METERS[circuitNum]
-	CONDITION_LINE = CONDITION_LINES[circuitNum]
 	CONDITION_TRANSFORMER = CONDITION_TRANSFORMERS[circuitNum]
 	METER_FILENAME = METER_FILENAMES[circuitNum]
 	OUTPUT_FILENAME = OUTPUT_FILENAMES[circuitNum]

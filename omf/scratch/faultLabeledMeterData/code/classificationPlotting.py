@@ -19,7 +19,7 @@ PLOTTING_FEATURE_NUM_1 = 0
 PLOTTING_FEATURE_NUM_2 = 1
 VISUALIZE_DATA_ONLY = False
 TRAIN_FRACTION = 0.9
-INPUT_FILE = 'normalTheftMalfunctionTransformerShortOlin-3month.csv'
+INPUT_FILE = '../data/dataABEC-1mo.csv'
 
 def plot_confusion_matrix(cm, classes, normalize=False, title='Confusion matrix', 
     cmap=plt.cm.Blues):
@@ -125,8 +125,6 @@ else: # classify
     # normalize data and split into train/test
     x = StandardScaler().fit_transform(x)
     
-    # xTrain, xTest, yTrain, yTest = \
-    #     train_test_split(x, y, test_size=0.4, random_state=42)
     xTrain, xTest, yTrain, yTest = x[:split,:], x[split:,:], y[:split], y[split:]
     print(xTrain.shape)
     print(yTrain.shape)
