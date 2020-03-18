@@ -1,0 +1,3834 @@
+// This is the OpenDSS Master file to solve the test system snapshot power flow. 
+
+// SOURCE: http://wzy.ece.iastate.edu/Testsystem.html
+
+Clear
+new circuit.240_node_test_system        ! Initiate a new circuit called "240_node_test_system"
+
+!--------------------------------------------------------!
+! This file is to define the parameters of the equivalent voltage source. 
+
+Edit "Vsource.source" Bus1= eq_source_bus.1.2.3 Phases=3 Angle=0.00000 Pu=1.00000 BaseKv=69.00000 R1=4.54263687 X1=10.52743053 R0=7.36552668 X0=24.50463867 
+! Voltage source name, bus, number of phases, voltage angle, set voltage in per unit, line-to-line voltage rating, positive-sequence resistance, positive-sequence reactance, zero-sequence resistance, zero-sequence reactance
+
+
+//This file is to define the parameters of load tap changing substation transformer.
+
+//-------------------  substation transformer --------------------//
+New Transformer.Sub_Xfmr Phases=3 Windings=2 XHL=6.26591063                                 ! Transformer name, number of phases, number of windings, percent reactance high-to-low 
+~ wdg=1 bus=eq_source_bus.1.2.3   conn=delta kV=69.000000 kva=10000.00000000 %R=0.62659091  ! Winding number, bus, connection, voltage rating, kVA rating, percent resistance 
+~ wdg=2 bus=bus_Xfmr.1.2.3.0      conn=wye   kV=13.800000 kva=10000.00000000 %R=0.62659091
+
+
+
+//--------------------  3 single-phase tap changers -------------//
+
+New Transformer.sub_regulator_A Phases=1 bank=Reg1 Windings=2 XHL=0.0100000                 ! Tap changer name, number of phases, number of windings, percent reactance high-to-low 
+~ wdg=1 bus=bus_Xfmr.1 conn=wye kV=7.9677 kva=3500 %R=0.00100000
+~ wdg=2 bus=bus1.1     conn=wye kV=7.9677 kva=3500 %R=0.00100000 NumTaps=32 MaxTap=1.1000 MinTap=0.9000  
+! Winding number, bus, connection, voltage rating, kVA rating, percent resistance, total number of taps, max per unit tap, min per unit tap
+
+New Transformer.sub_regulator_B Phases=1 bank=Reg1 Windings=2 XHL=0.0100000
+~ wdg=1 bus=bus_Xfmr.2 conn=wye kV=7.9677 kva=3500 %R=0.00100000
+~ wdg=2 bus=bus1.2     conn=wye kV=7.9677 kva=3500 %R=0.00100000 NumTaps=32 MaxTap=1.1000 MinTap=0.9000
+
+New Transformer.sub_regulator_C Phases=1 bank=Reg1 Windings=2 XHL=0.0100000
+~ wdg=1 bus=bus_Xfmr.3 conn=wye kV=7.9677 kva=3500 %R=0.00100000
+~ wdg=2 bus=bus1.3     conn=wye kV=7.9677 kva=3500 %R=0.00100000 NumTaps=32 MaxTap=1.1000 MinTap=0.9000
+
+
+
+
+
+//This file is to define the parameters of tap changer control for substation transformer.
+
+New RegControl.Reg_contr_A Transformer=sub_regulator_A bus=bus1.1 Winding=2 vReg=123.00000 R=0.00000 X=0.00000 Band=2  PTratio=66.395279 vLimit=129.00000  
+New RegControl.Reg_contr_B Transformer=sub_regulator_B bus=bus1.2 Winding=2 vReg=123.00000 R=0.00000 X=0.00000 Band=2  PTratio=66.395279 vLimit=129.00000   
+New RegControl.Reg_contr_C Transformer=sub_regulator_C bus=bus1.3 Winding=2 vReg=123.00000 R=0.00000 X=0.00000 Band=2  PTratio=66.395279 vLimit=129.00000  
+! Tap changer control name, name of tap changer to be controlled, name of controlled bus, number of windings, voltage setting, R setting on the line drop compensator, X setting on the line drop compensator, voltage bandwdith, PT ratio, voltage limit 
+
+// This file is to define the parameters of secondary distribution transformers, including the three-phase transformers and single-phase center-tapped transformers.
+
+//***************************************************************************************//
+//                                             Feeder A
+//***************************************************************************************//
+//---------------------------------------------------------//  
+//      	     Transformer at bus 1003
+//---------------------------------------------------------//
+
+New Transformer.T_1003 Phases=3 Windings=2 XHL=3.87                        ! Three-phase transformer name, number of phases, number of windings, percent reactance high-to-low
+~ wdg=1 bus=bus1003.1.2.3.0     conn=wye kV=13.8  kva=112.5 %R=1.215       ! Winding number, bus, connection, voltage rating, kVA rating, percent resistance
+~ wdg=2 bus=T_bus1003_L.1.2.3.0 conn=wye kV=0.208 kva=112.5 %R=1.215
+
+//---------------------------------------------------------//
+//      	     Transformer at bus 1004
+//---------------------------------------------------------//
+
+New Transformer.T_1004 Phases=3 Windings=2 XHL=1.91
+~ wdg=1 bus=bus1004.1.2.3.0     conn=wye kV=13.8  kva=75 %R=1.135
+~ wdg=2 bus=T_bus1004_L.1.2.3.0 conn=wye kV=0.208 kva=75 %R=1.135
+
+
+//---------------------------------------------------------//
+//      	     Transformer at bus 1005
+//---------------------------------------------------------//
+
+New Transformer.T_1005 Phases=3 Windings=2 XHL=1.91
+~ wdg=1 bus=bus1005.1.2.3.0     conn=wye kV=13.8  kva=75 %R=1.135
+~ wdg=2 bus=T_bus1005_L.1.2.3.0 conn=wye kV=0.208 kva=75 %R=1.135
+
+
+//---------------------------------------------------------// ---------AB
+//      	     Transformer at bus 1006
+//---------------------------------------------------------//
+! A single-phase transformer, its voltage rating equals the line-to-line nominal voltage.
+New Transformer.T_1006 Phases=2 Windings=2 XHL=3.7
+~ wdg=1 bus=bus1006.1.2     conn=delta kV=13.8  kva=75 %R=1.24
+~ wdg=2 bus=T_bus1006_L.1.2 conn=delta kV=0.208 kva=75 %R=1.24
+
+
+//---------------------------------------------------------// ---------AB
+//      	     Transformer at bus 1007
+//---------------------------------------------------------//
+
+New Transformer.T_1007 Phases=2 Windings=2 XHL=2.3
+~ wdg=1 bus=bus1007.1.2     conn=delta kV=13.8  kva=25 %R=0.7
+~ wdg=2 bus=T_bus1007_L.1.2 conn=delta kV=0.208 kva=25 %R=0.7
+
+
+//---------------------------------------------------------//
+//      	     Transformer at bus 1008
+//---------------------------------------------------------//
+
+New Transformer.T_1008 Phases=3 Windings=2 XHL=1.73
+~ wdg=1 bus=bus1008.1.2.3.0     conn=wye kV=13.8  kva=45 %R=1.26
+~ wdg=2 bus=T_bus1008_L.1.2.3.0 conn=wye kV=0.208 kva=45 %R=1.26
+
+
+//---------------------------------------------------------//
+//      	     Transformer at bus 1009
+//---------------------------------------------------------//
+
+New Transformer.T_1009 Phases=3 Windings=2 XHL=1.91
+~ wdg=1 bus=bus1009.1.2.3.0     conn=wye kV=13.8  kva=75 %R=1.135
+~ wdg=2 bus=T_bus1009_L.1.2.3.0 conn=wye kV=0.208 kva=75 %R=1.135
+
+
+//---------------------------------------------------------//
+//      	     Transformer at bus 1010
+//---------------------------------------------------------//
+
+New Transformer.T_1010 Phases=3 Windings=2 XHL=1.73
+~ wdg=1 bus=bus1010.1.2.3.0     conn=wye kV=13.8  kva=45 %R=1.26
+~ wdg=2 bus=T_bus1010_L.1.2.3.0 conn=wye kV=0.208 kva=45 %R=1.26
+
+
+
+//---------------------------------------------------------//  ------------- A
+//      	     Transformer at bus 1011
+//---------------------------------------------------------//
+
+New Transformer.T_1011 Phases=1 Windings=3 XHL=2.76  XHT=2.76  XLT=1.84  
+! Single-phase center-tapped transformer name, number of phses, number of windings, percent reactance high-to-low, percent reactance high-to-tertiary, percent reactance low-to-tertiary
+~ wdg=1 bus=bus1011.1.0     conn=wye kV=7.9677    kva=25 %R=0.7  ! Winding number, bus, connection, kV rating, kVA rating, percent resistance
+~ wdg=2 bus=T_bus1011_L.1.0 conn=wye kV=0.120     kva=25 %R=1.4
+~ wdg=3 bus=T_bus1011_L.0.2 conn=wye kV=0.120     kva=25 %R=1.4
+
+
+//---------------------------------------------------------//  ------------- B
+//      	     Transformer at bus 1012
+//---------------------------------------------------------//
+
+New Transformer.T_1012 Phases=1 Windings=3 XHL=3.24  XHT=3.24  XLT=2.16 
+~ wdg=1 bus=bus1012.2.0     conn=wye kV=7.9677    kva=37.5 %R=1.8
+~ wdg=2 bus=T_bus1012_L.1.0 conn=wye kV=0.120     kva=37.5 %R=3.6
+~ wdg=3 bus=T_bus1012_L.0.2 conn=wye kV=0.120     kva=37.5 %R=3.6
+
+
+//---------------------------------------------------------//
+//      	     Transformer at bus 1013
+//---------------------------------------------------------//
+
+New Transformer.T_1013 Phases=3 Windings=2 XHL=1.73
+~ wdg=1 bus=bus1013.1.2.3.0     conn=wye kV=13.8  kva=45 %R=1.26
+~ wdg=2 bus=T_bus1013_L.1.2.3.0 conn=wye kV=0.208 kva=45 %R=1.26
+
+
+
+//---------------------------------------------------------//  ------------- B
+//      	     Transformer at bus 1014
+//---------------------------------------------------------//
+
+New Transformer.T_1014 Phases=1 Windings=3 XHL=2.76  XHT=2.76  XLT=1.84 
+~ wdg=1 bus=bus1014.2.0     conn=wye kV=7.9677    kva=25 %R=0.7
+~ wdg=2 bus=T_bus1014_L.1.0 conn=wye kV=0.120     kva=25 %R=1.4
+~ wdg=3 bus=T_bus1014_L.0.2 conn=wye kV=0.120     kva=25 %R=1.4
+
+
+
+//---------------------------------------------------------//  ------------- B
+//      	     Transformer at bus 1015
+//---------------------------------------------------------//
+
+New Transformer.T_1015 Phases=1 Windings=3 XHL=2.76  XHT=2.76  XLT=1.84 
+~ wdg=1 bus=bus1015.2.0     conn=wye kV=7.9677    kva=25 %R=0.7
+~ wdg=2 bus=T_bus1015_L.1.0 conn=wye kV=0.120     kva=25 %R=1.4
+~ wdg=3 bus=T_bus1015_L.0.2 conn=wye kV=0.120     kva=25 %R=1.4
+
+
+
+//---------------------------------------------------------//  -------------C
+//      	     Transformer at bus 1016
+//---------------------------------------------------------//
+
+New Transformer.T_1016 Phases=1 Windings=3 XHL=3.36  XHT=3.36  XLT=2.24
+~ wdg=1 bus=bus1016.3.0     conn=wye kV=7.9677    kva=50 %R=1.55
+~ wdg=2 bus=T_bus1016_L.1.0 conn=wye kV=0.120     kva=50 %R=3.1
+~ wdg=3 bus=T_bus1016_L.0.2 conn=wye kV=0.120     kva=50 %R=3.1
+
+
+
+//---------------------------------------------------------//  ------------- C
+//      	     Transformer at bus 1017
+//---------------------------------------------------------//
+
+New Transformer.T_1017 Phases=1 Windings=3 XHL=3.24  XHT=3.24  XLT=2.16
+~ wdg=1 bus=bus1017.3.0     conn=wye kV=7.9677    kva=37.5 %R=1.8
+~ wdg=2 bus=T_bus1017_L.1.0 conn=wye kV=0.120     kva=37.5 %R=3.6
+~ wdg=3 bus=T_bus1017_L.0.2 conn=wye kV=0.120     kva=37.5 %R=3.6
+
+
+
+
+
+
+//***************************************************************************************//
+//                                             Feeder B
+//***************************************************************************************//
+//---------------------------------------------------------// 
+//      	     Transformer at bus 2002
+//---------------------------------------------------------//
+
+New Transformer.T_2002 Phases=3 Windings=2 XHL=4.5
+~ wdg=1 bus=bus2002.1.2.3     conn=wye   kV=13.8   kva=300 %R=0.9
+~ wdg=2 bus=T_bus2002_L.1.2.3 conn=wye   kV=0.208  kva=300 %R=0.9
+
+
+//---------------------------------------------------------//  
+//      	     Transformer at bus 2003
+//---------------------------------------------------------//
+
+New Transformer.T_2003 Phases=3 Windings=2 XHL=1.91
+~ wdg=1 bus=bus2003.1.2.3.0     conn=wye kV=13.8  kva=75 %R=1.135
+~ wdg=2 bus=T_bus2003_L.1.2.3.0 conn=wye kV=0.208 kva=75 %R=1.135
+
+
+
+//---------------------------------------------------------//  
+//      	     Transformer at bus 2005
+//---------------------------------------------------------//
+
+New Transformer.T_2005 Phases=3 Windings=2 XHL=1.73
+~ wdg=1 bus=bus2005.1.2.3.0     conn=wye kV=13.8  kva=45 %R=1.26
+~ wdg=2 bus=T_bus2005_L.1.2.3.0 conn=wye kV=0.208 kva=45 %R=1.26
+
+
+
+//---------------------------------------------------------//  ------------- A
+//      	     Transformer at bus 2008
+//---------------------------------------------------------//
+
+New Transformer.T_2008 Phases=1 Windings=3 XHL=2.76  XHT=2.76  XLT=1.84
+~ wdg=1 bus=bus2008.1.0     conn=wye kV=7.9677    kva=25 %R=0.7
+~ wdg=2 bus=T_bus2008_L.1.0 conn=wye kV=0.120     kva=25 %R=1.4
+~ wdg=3 bus=T_bus2008_L.0.2 conn=wye kV=0.120     kva=25 %R=1.4
+
+
+
+//---------------------------------------------------------//  ------------- A
+//      	     Transformer at bus 2009
+//---------------------------------------------------------//
+
+New Transformer.T_2009 Phases=1 Windings=3 XHL=2.76  XHT=2.76  XLT=1.84
+~ wdg=1 bus=bus2009.1.0     conn=wye kV=7.9677    kva=25 %R=0.7
+~ wdg=2 bus=T_bus2009_L.1.0 conn=wye kV=0.120     kva=25 %R=1.4
+~ wdg=3 bus=T_bus2009_L.0.2 conn=wye kV=0.120     kva=25 %R=1.4
+
+
+//---------------------------------------------------------//  
+//      	     Transformer at bus 2010
+//---------------------------------------------------------//
+
+New Transformer.T_2010 Phases=3 Windings=2 XHL=1.73
+~ wdg=1 bus=bus2010.1.2.3.0     conn=wye kV=13.8  kva=45 %R=1.26
+~ wdg=2 bus=T_bus2010_L.1.2.3.0 conn=wye kV=0.208 kva=45 %R=1.26
+
+
+//---------------------------------------------------------//  
+//      	     Transformer at bus 2011
+//---------------------------------------------------------//
+
+New Transformer.T_2011 Phases=3 Windings=2 XHL=1.73
+~ wdg=1 bus=bus2011.1.2.3.0     conn=wye kV=13.8  kva=45 %R=1.26
+~ wdg=2 bus=T_bus2011_L.1.2.3.0 conn=wye kV=0.208 kva=45 %R=1.26
+
+
+
+//---------------------------------------------------------//  ------------- B
+//      	     Transformer at bus 2014
+//---------------------------------------------------------//
+
+New Transformer.T_2014 Phases=1 Windings=3 XHL=3.24  XHT=3.24  XLT=2.16
+~ wdg=1 bus=bus2014.2.0     conn=wye kV=7.9677    kva=37.5 %R=1.8
+~ wdg=2 bus=T_bus2014_L.1.0 conn=wye kV=0.120     kva=37.5 %R=3.6
+~ wdg=3 bus=T_bus2014_L.0.2 conn=wye kV=0.120     kva=37.5 %R=3.6
+
+
+
+//---------------------------------------------------------//  ------------- B
+//      	     Transformer at bus 2015
+//---------------------------------------------------------//
+
+New Transformer.T_2015 Phases=1 Windings=3 XHL=2.76  XHT=2.76  XLT=1.84
+~ wdg=1 bus=bus2015.2.0     conn=wye kV=7.9677    kva=25 %R=0.7
+~ wdg=2 bus=T_bus2015_L.1.0 conn=wye kV=0.120     kva=25 %R=1.4
+~ wdg=3 bus=T_bus2015_L.0.2 conn=wye kV=0.120     kva=25 %R=1.4
+
+
+
+//---------------------------------------------------------//  ------------- B
+//      	     Transformer at bus 2016
+//---------------------------------------------------------//
+
+
+New Transformer.T_2016 Phases=1 Windings=3 XHL=2.76  XHT=2.76  XLT=1.84
+~ wdg=1 bus=bus2016.2.0     conn=wye kV=7.9677    kva=25 %R=0.7
+~ wdg=2 bus=T_bus2016_L.1.0 conn=wye kV=0.120     kva=25 %R=1.4
+~ wdg=3 bus=T_bus2016_L.0.2 conn=wye kV=0.120     kva=25 %R=1.4
+
+
+
+//---------------------------------------------------------//  ------------- B
+//      	     Transformer at bus 2017
+//---------------------------------------------------------//
+
+New Transformer.T_2017 Phases=1 Windings=3 XHL=2.76  XHT=2.76  XLT=1.84
+~ wdg=1 bus=bus2017.2.0     conn=wye kV=7.9677    kva=25 %R=0.7
+~ wdg=2 bus=T_bus2017_L.1.0 conn=wye kV=0.120     kva=25 %R=1.4
+~ wdg=3 bus=T_bus2017_L.0.2 conn=wye kV=0.120     kva=25 %R=1.4
+
+
+
+//---------------------------------------------------------//  ------------- B
+//      	     Transformer at bus 2018
+//---------------------------------------------------------//
+
+New Transformer.T_2018 Phases=1 Windings=3 XHL=2.76  XHT=2.76  XLT=1.84
+~ wdg=1 bus=bus2018.2.0     conn=wye kV=7.9677    kva=25 %R=0.7
+~ wdg=2 bus=T_bus2018_L.1.0 conn=wye kV=0.120     kva=25 %R=1.4
+~ wdg=3 bus=T_bus2018_L.0.2 conn=wye kV=0.120     kva=25 %R=1.4
+
+
+
+//---------------------------------------------------------//  ------------- B
+//      	     Transformer at bus 2020
+//---------------------------------------------------------//
+
+New Transformer.T_2020 Phases=1 Windings=3 XHL=2.76  XHT=2.76  XLT=1.84
+~ wdg=1 bus=bus2020.2.0     conn=wye kV=7.9677    kva=25 %R=0.7
+~ wdg=2 bus=T_bus2020_L.1.0 conn=wye kV=0.120     kva=25 %R=1.4
+~ wdg=3 bus=T_bus2020_L.0.2 conn=wye kV=0.120     kva=25 %R=1.4
+
+
+
+//---------------------------------------------------------//  ------------- C
+//      	     Transformer at bus 2022
+//---------------------------------------------------------//
+
+New Transformer.T_2022 Phases=1 Windings=3 XHL=2.76  XHT=2.76  XLT=1.84
+~ wdg=1 bus=bus2022.3.0     conn=wye kV=7.9677    kva=25 %R=0.7
+~ wdg=2 bus=T_bus2022_L.1.0 conn=wye kV=0.120     kva=25 %R=1.4
+~ wdg=3 bus=T_bus2022_L.0.2 conn=wye kV=0.120     kva=25 %R=1.4
+
+
+
+//---------------------------------------------------------//  ------------- C
+//      	     Transformer at bus 2023
+//---------------------------------------------------------//
+
+New Transformer.T_2023 Phases=1 Windings=3 XHL=2.42  XHT=2.42  XLT=1.62
+~ wdg=1 bus=bus2023.3.0     conn=wye kV=7.9677    kva=15 %R=0.8
+~ wdg=2 bus=T_bus2023_L.1.0 conn=wye kV=0.120     kva=15 %R=1.6
+~ wdg=3 bus=T_bus2023_L.0.2 conn=wye kV=0.120     kva=15 %R=1.6
+
+
+
+//---------------------------------------------------------//  ------------- C
+//      	     Transformer at bus 2024
+//---------------------------------------------------------//
+
+New Transformer.T_2024 Phases=1 Windings=3 XHL=2.76  XHT=2.76  XLT=1.84
+~ wdg=1 bus=bus2024.3.0     conn=wye kV=7.9677    kva=25 %R=0.7
+~ wdg=2 bus=T_bus2024_L.1.0 conn=wye kV=0.120     kva=25 %R=1.4
+~ wdg=3 bus=T_bus2024_L.0.2 conn=wye kV=0.120     kva=25 %R=1.4
+
+
+
+//---------------------------------------------------------//  ------------- C
+//      	     Transformer at bus 2025
+//---------------------------------------------------------//
+
+New Transformer.T_2025 Phases=1 Windings=3 XHL=2.76  XHT=2.76  XLT=1.84
+~ wdg=1 bus=bus2025.3.0     conn=wye kV=7.9677    kva=25 %R=0.7
+~ wdg=2 bus=T_bus2025_L.1.0 conn=wye kV=0.120     kva=25 %R=1.4
+~ wdg=3 bus=T_bus2025_L.0.2 conn=wye kV=0.120     kva=25 %R=1.4
+
+
+
+//---------------------------------------------------------//  ------------- A
+//      	     Transformer at bus 2028
+//---------------------------------------------------------//
+
+New Transformer.T_2028 Phases=1 Windings=3 XHL=2.76  XHT=2.76  XLT=1.84
+~ wdg=1 bus=bus2028.1.0     conn=wye kV=7.9677    kva=25 %R=0.7
+~ wdg=2 bus=T_bus2028_L.1.0 conn=wye kV=0.120     kva=25 %R=1.4
+~ wdg=3 bus=T_bus2028_L.0.2 conn=wye kV=0.120     kva=25 %R=1.4
+
+
+
+//---------------------------------------------------------//  
+//      	     Transformer at bus 2029
+//---------------------------------------------------------//
+
+New Transformer.T_2029 Phases=3 Windings=2 XHL=1.91
+~ wdg=1 bus=bus2029.1.2.3.0     conn=wye kV=13.8  kva=75 %R=1.135
+~ wdg=2 bus=T_bus2029_L.1.2.3.0 conn=wye kV=0.208 kva=75 %R=1.135
+
+
+//---------------------------------------------------------//  
+//      	     Transformer at bus 2030
+//---------------------------------------------------------//
+
+New Transformer.T_2030 Phases=3 Windings=2 XHL=1.91
+~ wdg=1 bus=bus2030.1.2.3.0     conn=wye kV=13.8  kva=75 %R=1.135
+~ wdg=2 bus=T_bus2030_L.1.2.3.0 conn=wye kV=0.208 kva=75 %R=1.135
+
+
+
+//---------------------------------------------------------//  ------------- A
+//      	     Transformer at bus 2031
+//---------------------------------------------------------//
+
+New Transformer.T_2031 Phases=1 Windings=3 XHL=2.76  XHT=2.76  XLT=1.84
+~ wdg=1 bus=bus2031.1.0     conn=wye kV=7.9677    kva=25 %R=0.7
+~ wdg=2 bus=T_bus2031_L.1.0 conn=wye kV=0.120     kva=25 %R=1.4
+~ wdg=3 bus=T_bus2031_L.0.2 conn=wye kV=0.120     kva=25 %R=1.4
+
+
+
+//---------------------------------------------------------//  
+//      	     Transformer at bus 2032
+//---------------------------------------------------------//
+
+New Transformer.T_2032 Phases=3 Windings=2 XHL=1.73
+~ wdg=1 bus=bus2032.1.2.3.0     conn=wye kV=13.8  kva=45 %R=1.26
+~ wdg=2 bus=T_bus2032_L.1.2.3.0 conn=wye kV=0.208 kva=45 %R=1.26
+
+
+
+//---------------------------------------------------------//  
+//      	     Transformer at bus 2034
+//---------------------------------------------------------//
+
+New Transformer.T_2034 Phases=3 Windings=2 XHL=1.73
+~ wdg=1 bus=bus2034.1.2.3.0     conn=wye kV=13.8  kva=45 %R=1.26
+~ wdg=2 bus=T_bus2034_L.1.2.3.0 conn=wye kV=0.208 kva=45 %R=1.26
+
+
+
+//---------------------------------------------------------//  
+//      	     Transformer at bus 2035
+//---------------------------------------------------------//
+
+New Transformer.T_2035 Phases=3 Windings=2 XHL=1.91
+~ wdg=1 bus=bus2035.1.2.3.0     conn=wye kV=13.8  kva=75 %R=1.135
+~ wdg=2 bus=T_bus2035_L.1.2.3.0 conn=wye kV=0.208 kva=75 %R=1.135
+
+
+
+//---------------------------------------------------------//  
+//      	     Transformer at bus 2037
+//---------------------------------------------------------//
+
+New Transformer.T_2037 Phases=3 Windings=2 XHL=1.73
+~ wdg=1 bus=bus2037.1.2.3.0     conn=wye kV=13.8  kva=45 %R=1.26
+~ wdg=2 bus=T_bus2037_L.1.2.3.0 conn=wye kV=0.208 kva=45 %R=1.26
+
+
+
+//---------------------------------------------------------//  
+//      	     Transformer at bus 2040
+//---------------------------------------------------------//
+
+New Transformer.T_2040 Phases=3 Windings=2 XHL=4.5
+~ wdg=1 bus=bus2040.1.2.3.0     conn=wye kV=13.8  kva=300 %R=0.9
+~ wdg=2 bus=T_bus2040_L.1.2.3.0 conn=wye kV=0.208 kva=300 %R=0.9
+
+
+
+//---------------------------------------------------------//  
+//      	     Transformer at bus 2041
+//---------------------------------------------------------//
+
+New Transformer.T_2041 Phases=3 Windings=2 XHL=1.73
+~ wdg=1 bus=bus2041.1.2.3.0     conn=wye kV=13.8  kva=45 %R=1.26
+~ wdg=2 bus=T_bus2041_L.1.2.3.0 conn=wye kV=0.208 kva=45 %R=1.26
+
+
+
+//---------------------------------------------------------//  
+//      	     Transformer at bus 2042
+//---------------------------------------------------------//
+
+New Transformer.T_2042 Phases=3 Windings=2 XHL=1.91
+~ wdg=1 bus=bus2042.1.2.3.0     conn=wye kV=13.8  kva=75 %R=1.135
+~ wdg=2 bus=T_bus2042_L.1.2.3.0 conn=wye kV=0.208 kva=75 %R=1.135
+
+
+
+//---------------------------------------------------------//  
+//      	     Transformer at bus 2043
+//---------------------------------------------------------//
+
+New Transformer.T_2043 Phases=3 Windings=2 XHL=1.91
+~ wdg=1 bus=bus2043.1.2.3.0     conn=wye kV=13.8  kva=75 %R=1.135
+~ wdg=2 bus=T_bus2043_L.1.2.3.0 conn=wye kV=0.208 kva=75 %R=1.135
+
+
+
+//---------------------------------------------------------//  ------------- B
+//      	     Transformer at bus 2045
+//---------------------------------------------------------//
+
+New Transformer.T_2045 Phases=1 Windings=3 XHL=2.42  XHT=2.42  XLT=1.62
+~ wdg=1 bus=bus2045.2.0     conn=wye kV=7.9677    kva=15 %R=0.8
+~ wdg=2 bus=T_bus2045_L.1.0 conn=wye kV=0.120     kva=15 %R=1.6
+~ wdg=3 bus=T_bus2045_L.0.2 conn=wye kV=0.120     kva=15 %R=1.6
+
+
+
+//---------------------------------------------------------//  ------------- B
+//      	     Transformer at bus 2046
+//---------------------------------------------------------//
+
+New Transformer.T_2046 Phases=1 Windings=3 XHL=3.36  XHT=3.36  XLT=2.24
+~ wdg=1 bus=bus2046.2.0     conn=wye kV=7.9677    kva=50 %R=1.55
+~ wdg=2 bus=T_bus2046_L.1.0 conn=wye kV=0.120     kva=50 %R=3.1
+~ wdg=3 bus=T_bus2046_L.0.2 conn=wye kV=0.120     kva=50 %R=3.1
+
+
+
+//---------------------------------------------------------//  ------------- B
+//      	     Transformer at bus 2047
+//---------------------------------------------------------//
+
+New Transformer.T_2047 Phases=1 Windings=3 XHL=3.36  XHT=3.36  XLT=2.24
+~ wdg=1 bus=bus2047.2.0     conn=wye kV=7.9677    kva=50 %R=1.55
+~ wdg=2 bus=T_bus2047_L.1.0 conn=wye kV=0.120     kva=50 %R=3.1
+~ wdg=3 bus=T_bus2047_L.0.2 conn=wye kV=0.120     kva=50 %R=3.1
+
+
+
+//---------------------------------------------------------//  ------------- B
+//      	     Transformer at bus 2048
+//---------------------------------------------------------//
+
+New Transformer.T_2048 Phases=1 Windings=3 XHL=3.36  XHT=3.36  XLT=2.24
+~ wdg=1 bus=bus2048.2.0     conn=wye kV=7.9677    kva=50 %R=1.55
+~ wdg=2 bus=T_bus2048_L.1.0 conn=wye kV=0.120     kva=50 %R=3.1
+~ wdg=3 bus=T_bus2048_L.0.2 conn=wye kV=0.120     kva=50 %R=3.1
+
+
+
+
+//---------------------------------------------------------//  ------------- C
+//      	     Transformer at bus 2049
+//---------------------------------------------------------//
+
+New Transformer.T_2049 Phases=1 Windings=3 XHL=3.24  XHT=3.24  XLT=2.16
+~ wdg=1 bus=bus2049.3.0     conn=wye kV=7.9677    kva=37.5 %R=1.8
+~ wdg=2 bus=T_bus2049_L.1.0 conn=wye kV=0.120     kva=37.5 %R=3.6
+~ wdg=3 bus=T_bus2049_L.0.2 conn=wye kV=0.120     kva=37.5 %R=3.6
+
+
+
+//---------------------------------------------------------//  ------------- C
+//      	     Transformer at bus 2050
+//---------------------------------------------------------//
+
+New Transformer.T_2050 Phases=1 Windings=3 XHL=3.24  XHT=3.24  XLT=2.16
+~ wdg=1 bus=bus2050.3.0     conn=wye kV=7.9677    kva=37.5 %R=1.8
+~ wdg=2 bus=T_bus2050_L.1.0 conn=wye kV=0.120     kva=37.5 %R=3.6
+~ wdg=3 bus=T_bus2050_L.0.2 conn=wye kV=0.120     kva=37.5 %R=3.6
+
+
+
+//---------------------------------------------------------//  ------------- C
+//      	     Transformer bus 2051
+//---------------------------------------------------------//
+
+New Transformer.T_2051 Phases=1 Windings=3 XHL=3.24  XHT=3.24  XLT=2.16
+~ wdg=1 bus=bus2051.3.0     conn=wye kV=7.9677    kva=37.5 %R=1.8
+~ wdg=2 bus=T_bus2051_L.1.0 conn=wye kV=0.120     kva=37.5 %R=3.6
+~ wdg=3 bus=T_bus2051_L.0.2 conn=wye kV=0.120     kva=37.5 %R=3.6
+
+
+
+//---------------------------------------------------------//  
+//      	     Transformer at bus 2052
+//---------------------------------------------------------//
+
+New Transformer.T_2052 Phases=3 Windings=2 XHL=5.5
+~ wdg=1 bus=bus2052.1.2.3.0     conn=wye kV=13.8  kva=225 %R=0.575
+~ wdg=2 bus=T_bus2052_L.1.2.3.0 conn=wye kV=0.208 kva=225 %R=0.575
+
+
+
+
+//---------------------------------------------------------//  
+//      	     Transformer at bus 2053
+//---------------------------------------------------------//
+
+New Transformer.T_2053 Phases=3 Windings=2 XHL=5.5
+~ wdg=1 bus=bus2053.1.2.3.0     conn=wye kV=13.8  kva=225 %R=0.575
+~ wdg=2 bus=T_bus2053_L.1.2.3.0 conn=wye kV=0.208 kva=225 %R=0.575
+
+
+
+
+//---------------------------------------------------------//  ------------- A
+//      	     Transformer at bus 2054
+//---------------------------------------------------------//
+
+New Transformer.T_2054 Phases=1 Windings=3 XHL=3.24  XHT=3.24  XLT=2.16
+~ wdg=1 bus=bus2054.1.0     conn=wye kV=7.9677    kva=37.5 %R=1.8
+~ wdg=2 bus=T_bus2054_L.1.0 conn=wye kV=0.120     kva=37.5 %R=3.6
+~ wdg=3 bus=T_bus2054_L.0.2 conn=wye kV=0.120     kva=37.5 %R=3.6
+
+
+
+
+//---------------------------------------------------------//  ------------- A
+//      	     Transformer at bus 2055
+//---------------------------------------------------------//
+
+New Transformer.T_2055 Phases=1 Windings=3 XHL=3.36  XHT=3.36  XLT=2.24
+~ wdg=1 bus=bus2055.1.0     conn=wye kV=7.9677    kva=50 %R=1.55
+~ wdg=2 bus=T_bus2055_L.1.0 conn=wye kV=0.120     kva=50 %R=3.1
+~ wdg=3 bus=T_bus2055_L.0.2 conn=wye kV=0.120     kva=50 %R=3.1
+
+
+
+
+//---------------------------------------------------------//  ------------- A
+//      	     Transformer at bus 2056
+//---------------------------------------------------------//
+
+New Transformer.T_2056 Phases=1 Windings=3 XHL=2.76  XHT=2.76  XLT=1.84
+~ wdg=1 bus=bus2056.1.0     conn=wye kV=7.9677    kva=25 %R=0.7
+~ wdg=2 bus=T_bus2056_L.1.0 conn=wye kV=0.120     kva=25 %R=1.4
+~ wdg=3 bus=T_bus2056_L.0.2 conn=wye kV=0.120     kva=25 %R=1.4
+
+
+
+//---------------------------------------------------------//  
+//      	     Transformer at bus 2058
+//---------------------------------------------------------//
+
+New Transformer.T_2058 Phases=3 Windings=2 XHL=4.5
+~ wdg=1 bus=bus2058.1.2.3.0     conn=wye kV=13.8  kva=300 %R=0.9
+~ wdg=2 bus=T_bus2058_L.1.2.3.0 conn=wye kV=0.208 kva=300 %R=0.9
+
+
+
+//---------------------------------------------------------//  ------------- B
+//      	     Transformer at bus 2059
+//---------------------------------------------------------//
+
+New Transformer.T_2059 Phases=1 Windings=3 XHL=2.76  XHT=2.76  XLT=1.84
+~ wdg=1 bus=bus2059.2.0     conn=wye kV=7.9677    kva=25 %R=0.7
+~ wdg=2 bus=T_bus2059_L.1.0 conn=wye kV=0.120     kva=25 %R=1.4
+~ wdg=3 bus=T_bus2059_L.0.2 conn=wye kV=0.120     kva=25 %R=1.4
+
+
+
+//---------------------------------------------------------//  ------------- B
+//      	     Transformer at bus 2060
+//---------------------------------------------------------//
+
+New Transformer.T_2060 Phases=1 Windings=3 XHL=2.76  XHT=2.76  XLT=1.84
+~ wdg=1 bus=bus2060.2.0     conn=wye kV=7.9677    kva=25 %R=0.7
+~ wdg=2 bus=T_bus2060_L.1.0 conn=wye kV=0.120     kva=25 %R=1.4
+~ wdg=3 bus=T_bus2060_L.0.2 conn=wye kV=0.120     kva=25 %R=1.4
+
+
+
+
+
+
+
+
+//***************************************************************************************//
+//                                             Feeder C
+//***************************************************************************************//
+//---------------------------------------------------------//  
+//      	     Transformer at bus 3002
+//---------------------------------------------------------//
+
+New Transformer.T_3002 Phases=3 Windings=2 XHL=1.73
+~ wdg=1 bus=bus3002.1.2.3.0     conn=wye kV=13.8  kva=45 %R=1.26
+~ wdg=2 bus=T_bus3002_L.1.2.3.0 conn=wye kV=0.208 kva=45 %R=1.26
+
+
+//---------------------------------------------------------//  
+//      	     Transformer at bus 3004
+//---------------------------------------------------------//
+
+New Transformer.T_3004 Phases=3 Windings=2 XHL=1.73
+~ wdg=1 bus=bus3004.1.2.3.0     conn=wye kV=13.8  kva=45 %R=1.26
+~ wdg=2 bus=T_bus3004_L.1.2.3.0 conn=wye kV=0.208 kva=45 %R=1.26
+
+
+//---------------------------------------------------------//  
+//      	     Transformer at bus 3006
+//---------------------------------------------------------//
+
+New Transformer.T_3006 Phases=3 Windings=2 XHL=1.73
+~ wdg=1 bus=bus3006.1.2.3.0     conn=wye kV=13.8  kva=45 %R=1.26
+~ wdg=2 bus=T_bus3006_L.1.2.3.0 conn=wye kV=0.208 kva=45 %R=1.26
+
+
+//---------------------------------------------------------//  
+//      	     Transformer at bus 3007
+//---------------------------------------------------------//
+
+New Transformer.T_3007 Phases=3 Windings=2 XHL=1.91
+~ wdg=1 bus=bus3007.1.2.3.0     conn=wye kV=13.8  kva=75 %R=1.135
+~ wdg=2 bus=T_bus3007_L.1.2.3.0 conn=wye kV=0.208 kva=75 %R=1.135
+
+
+//---------------------------------------------------------//  ------------- A
+//      	     Transformer at bus 3009
+//---------------------------------------------------------//
+
+New Transformer.T_3009 Phases=1 Windings=3 XHL=3.24  XHT=3.24  XLT=2.16
+~ wdg=1 bus=bus3009.1.0     conn=wye kV=7.9677    kva=37.5 %R=1.8
+~ wdg=2 bus=T_bus3009_L.1.0 conn=wye kV=0.120     kva=37.5 %R=3.6
+~ wdg=3 bus=T_bus3009_L.0.2 conn=wye kV=0.120     kva=37.5 %R=3.6
+
+
+
+//---------------------------------------------------------//  ------------- A
+//      	     Transformer at bus 3010
+//---------------------------------------------------------//
+
+New Transformer.T_3010 Phases=1 Windings=3 XHL=3.24  XHT=3.24  XLT=2.16
+~ wdg=1 bus=bus3010.1.0     conn=wye kV=7.9677    kva=37.5 %R=1.8
+~ wdg=2 bus=T_bus3010_L.1.0 conn=wye kV=0.120     kva=37.5 %R=3.6
+~ wdg=3 bus=T_bus3010_L.0.2 conn=wye kV=0.120     kva=37.5 %R=3.6
+
+
+
+//---------------------------------------------------------//  ------------- A
+//      	     Transformer at bus 3011
+//---------------------------------------------------------//
+
+New Transformer.T_3011 Phases=1 Windings=3 XHL=3.24  XHT=3.24  XLT=2.16
+~ wdg=1 bus=bus3011.1.0     conn=wye kV=7.9677    kva=37.5 %R=1.8
+~ wdg=2 bus=T_bus3011_L.1.0 conn=wye kV=0.120     kva=37.5 %R=3.6
+~ wdg=3 bus=T_bus3011_L.0.2 conn=wye kV=0.120     kva=37.5 %R=3.6
+
+
+
+//---------------------------------------------------------//  ------------- A
+//      	     Transformer at bus 3012
+//---------------------------------------------------------//
+
+New Transformer.T_3012 Phases=1 Windings=3 XHL=3.36  XHT=3.36  XLT=2.24
+~ wdg=1 bus=bus3012.1.0     conn=wye kV=7.9677    kva=50 %R=1.55
+~ wdg=2 bus=T_bus3012_L.1.0 conn=wye kV=0.120     kva=50 %R=3.1
+~ wdg=3 bus=T_bus3012_L.0.2 conn=wye kV=0.120     kva=50 %R=3.1
+
+
+
+
+//---------------------------------------------------------//  ------------- B
+//      	     Transformer at bus 3013
+//---------------------------------------------------------//
+
+New Transformer.T_3013 Phases=1 Windings=3 XHL=2.76  XHT=2.76  XLT=1.84
+~ wdg=1 bus=bus3013.2.0     conn=wye kV=7.9677    kva=25 %R=0.7
+~ wdg=2 bus=T_bus3013_L.1.0 conn=wye kV=0.120     kva=25 %R=1.4
+~ wdg=3 bus=T_bus3013_L.0.2 conn=wye kV=0.120     kva=25 %R=1.4
+
+
+
+//---------------------------------------------------------//  ------------- B
+//      	     Transformer at bus 3014
+//---------------------------------------------------------//
+
+New Transformer.T_3014 Phases=1 Windings=3 XHL=3.24  XHT=3.24  XLT=2.16
+~ wdg=1 bus=bus3014.2.0     conn=wye kV=7.9677    kva=37.5 %R=1.8
+~ wdg=2 bus=T_bus3014_L.1.0 conn=wye kV=0.120     kva=37.5 %R=3.6
+~ wdg=3 bus=T_bus3014_L.0.2 conn=wye kV=0.120     kva=37.5 %R=3.6
+
+
+
+//---------------------------------------------------------//  ------------- B
+//      	     Transformer at bus 3016
+//---------------------------------------------------------//
+
+New Transformer.T_3016 Phases=1 Windings=3 XHL=3.24  XHT=3.24  XLT=2.16
+~ wdg=1 bus=bus3016.2.0     conn=wye kV=7.9677    kva=37.5 %R=1.8
+~ wdg=2 bus=T_bus3016_L.1.0 conn=wye kV=0.120     kva=37.5 %R=3.6
+~ wdg=3 bus=T_bus3016_L.0.2 conn=wye kV=0.120     kva=37.5 %R=3.6
+
+
+
+//---------------------------------------------------------//  ------------- B
+//      	     Transformer at bus 3017
+//---------------------------------------------------------//
+
+New Transformer.T_3017 Phases=1 Windings=3 XHL=4.26  XHT=4.26  XLT=2.84
+~ wdg=1 bus=bus3017.2.0     conn=wye kV=7.9677    kva=100 %R=1.06
+~ wdg=2 bus=T_bus3017_L.1.0 conn=wye kV=0.120     kva=100 %R=2.12
+~ wdg=3 bus=T_bus3017_L.0.2 conn=wye kV=0.120     kva=100 %R=2.12
+
+
+
+//---------------------------------------------------------//  ------------- C
+//      	     Transformer at bus 3018
+//---------------------------------------------------------//
+
+New Transformer.T_3018 Phases=1 Windings=3 XHL=3.24  XHT=3.24  XLT=2.16
+~ wdg=1 bus=bus3018.3.0     conn=wye kV=7.9677    kva=37.5 %R=1.8
+~ wdg=2 bus=T_bus3018_L.1.0 conn=wye kV=0.120     kva=37.5 %R=3.6
+~ wdg=3 bus=T_bus3018_L.0.2 conn=wye kV=0.120     kva=37.5 %R=3.6
+
+
+
+//---------------------------------------------------------//  ------------- C
+//      	     Transformer at bus 3019
+//---------------------------------------------------------//
+
+New Transformer.T_3019 Phases=1 Windings=3 XHL=3.24  XHT=3.24  XLT=2.16
+~ wdg=1 bus=bus3019.3.0     conn=wye kV=7.9677    kva=37.5 %R=1.8
+~ wdg=2 bus=T_bus3019_L.1.0 conn=wye kV=0.120     kva=37.5 %R=3.6
+~ wdg=3 bus=T_bus3019_L.0.2 conn=wye kV=0.120     kva=37.5 %R=3.6
+
+
+
+//---------------------------------------------------------//  ------------- C
+//      	     Transformer at bus 3020
+//---------------------------------------------------------//
+
+New Transformer.T_3020 Phases=1 Windings=3 XHL=4.26  XHT=4.26  XLT=2.84
+~ wdg=1 bus=bus3020.3.0     conn=wye kV=7.9677    kva=100 %R=1.06
+~ wdg=2 bus=T_bus3020_L.1.0 conn=wye kV=0.120     kva=100 %R=2.12
+~ wdg=3 bus=T_bus3020_L.0.2 conn=wye kV=0.120     kva=100 %R=2.12
+
+
+
+//---------------------------------------------------------//  ------------- C
+//      	     Transformer at bus 3021
+//---------------------------------------------------------//
+
+New Transformer.T_3021 Phases=1 Windings=3 XHL=3.24  XHT=3.24  XLT=2.16
+~ wdg=1 bus=bus3021.3.0     conn=wye kV=7.9677    kva=37.5 %R=1.8
+~ wdg=2 bus=T_bus3021_L.1.0 conn=wye kV=0.120     kva=37.5 %R=3.6
+~ wdg=3 bus=T_bus3021_L.0.2 conn=wye kV=0.120     kva=37.5 %R=3.6
+
+
+
+//---------------------------------------------------------//  ------------- A
+//      	     Transformer at bus 3023
+//---------------------------------------------------------//
+
+New Transformer.T_3023 Phases=1 Windings=3 XHL=3.36  XHT=3.36  XLT=2.24
+~ wdg=1 bus=bus3023.1.0     conn=wye kV=7.9677    kva=50 %R=1.55
+~ wdg=2 bus=T_bus3023_L.1.0 conn=wye kV=0.120     kva=50 %R=3.1
+~ wdg=3 bus=T_bus3023_L.0.2 conn=wye kV=0.120     kva=50 %R=3.1
+
+
+
+
+//---------------------------------------------------------//  ------------- A
+//      	     Transformer at bus 3024
+//---------------------------------------------------------//
+
+New Transformer.T_3024 Phases=1 Windings=3 XHL=3.24  XHT=3.24  XLT=2.16
+~ wdg=1 bus=bus3024.1.0     conn=wye kV=7.9677    kva=37.5 %R=1.8
+~ wdg=2 bus=T_bus3024_L.1.0 conn=wye kV=0.120     kva=37.5 %R=3.6
+~ wdg=3 bus=T_bus3024_L.0.2 conn=wye kV=0.120     kva=37.5 %R=3.6
+
+
+
+
+//---------------------------------------------------------//  ------------- A
+//      	     Transformer at bus 3025
+//---------------------------------------------------------//
+
+New Transformer.T_3025 Phases=1 Windings=3 XHL=3.36  XHT=3.36  XLT=2.24
+~ wdg=1 bus=bus3025.1.0     conn=wye kV=7.9677    kva=50 %R=1.55
+~ wdg=2 bus=T_bus3025_L.1.0 conn=wye kV=0.120     kva=50 %R=3.1
+~ wdg=3 bus=T_bus3025_L.0.2 conn=wye kV=0.120     kva=50 %R=3.1
+
+
+
+//---------------------------------------------------------//  ------------- A
+//      	     Transformer at bus 3026
+//---------------------------------------------------------//
+
+New Transformer.T_3026 Phases=1 Windings=3 XHL=3.24  XHT=3.24  XLT=2.16
+~ wdg=1 bus=bus3026.1.0     conn=wye kV=7.9677    kva=37.5 %R=1.8
+~ wdg=2 bus=T_bus3026_L.1.0 conn=wye kV=0.120     kva=37.5 %R=3.6
+~ wdg=3 bus=T_bus3026_L.0.2 conn=wye kV=0.120     kva=37.5 %R=3.6
+
+
+
+//---------------------------------------------------------//  ------------- A
+//      	     Transformer at bus 3027
+//---------------------------------------------------------//
+
+New Transformer.T_3027 Phases=1 Windings=3 XHL=4.26 XHT=4.26  XLT=2.84
+~ wdg=1 bus=bus3027.1.0     conn=wye kV=7.9677    kva=100 %R=1.06
+~ wdg=2 bus=T_bus3027_L.1.0 conn=wye kV=0.120     kva=100 %R=2.12
+~ wdg=3 bus=T_bus3027_L.0.2 conn=wye kV=0.120     kva=100 %R=2.12
+
+
+
+//---------------------------------------------------------//  ------------- A
+//      	     Transformer at bus 3028
+//---------------------------------------------------------//
+
+New Transformer.T_3028 Phases=1 Windings=3 XHL=4.26  XHT=4.26  XLT=2.84
+~ wdg=1 bus=bus3028.1.0     conn=wye kV=7.9677    kva=100 %R=1.06
+~ wdg=2 bus=T_bus3028_L.1.0 conn=wye kV=0.120     kva=100 %R=2.12
+~ wdg=3 bus=T_bus3028_L.0.2 conn=wye kV=0.120     kva=100 %R=2.12
+
+
+
+//---------------------------------------------------------//  ------------- A
+//      	     Transformer at bus 3029
+//---------------------------------------------------------//
+
+New Transformer.T_3029 Phases=1 Windings=3 XHL=3.24  XHT=3.24  XLT=2.16
+~ wdg=1 bus=bus3029.1.0     conn=wye kV=7.9677    kva=37.5 %R=1.8
+~ wdg=2 bus=T_bus3029_L.1.0 conn=wye kV=0.120     kva=37.5 %R=3.6
+~ wdg=3 bus=T_bus3029_L.0.2 conn=wye kV=0.120     kva=37.5 %R=3.6
+
+
+//---------------------------------------------------------//  
+//      	     Transformer at bus 3031
+//---------------------------------------------------------//
+
+New Transformer.T_3031 Phases=3 Windings=2 XHL=1.73
+~ wdg=1 bus=bus3031.1.2.3.0     conn=wye kV=13.8  kva=45 %R=1.26
+~ wdg=2 bus=T_bus3031_L.1.2.3.0 conn=wye kV=0.208 kva=45 %R=1.26
+
+
+
+//---------------------------------------------------------//  
+//      	     Transformer at bus 3032
+//---------------------------------------------------------//
+
+New Transformer.T_3032 Phases=3 Windings=2 XHL=1.73
+~ wdg=1 bus=bus3032.1.2.3.0     conn=wye kV=13.8  kva=45 %R=1.26
+~ wdg=2 bus=T_bus3032_L.1.2.3.0 conn=wye kV=0.208 kva=45 %R=1.26
+
+
+
+//---------------------------------------------------------//  
+//      	     Transformer at bus 3033
+//---------------------------------------------------------//
+
+New Transformer.T_3033 Phases=3 Windings=2 XHL=1.73
+~ wdg=1 bus=bus3033.1.2.3.0     conn=wye kV=13.8  kva=45 %R=1.26
+~ wdg=2 bus=T_bus3033_L.1.2.3.0 conn=wye kV=0.208 kva=45 %R=1.26
+
+
+
+//---------------------------------------------------------//  
+//      	     Transformer at bus 3034
+//---------------------------------------------------------//
+
+New Transformer.T_3034 Phases=3 Windings=2 XHL=1.73
+~ wdg=1 bus=bus3034.1.2.3.0     conn=wye kV=13.8  kva=45 %R=1.26
+~ wdg=2 bus=T_bus3034_L.1.2.3.0 conn=wye kV=0.208 kva=45 %R=1.26
+
+
+
+//---------------------------------------------------------//  
+//      	     Transformer at bus 3035
+//---------------------------------------------------------//
+
+New Transformer.T_3035 Phases=3 Windings=2 XHL=1.73
+~ wdg=1 bus=bus3035.1.2.3.0     conn=wye kV=13.8  kva=45 %R=1.26
+~ wdg=2 bus=T_bus3035_L.1.2.3.0 conn=wye kV=0.208 kva=45 %R=1.26
+
+
+
+//---------------------------------------------------------//  
+//      	     Transformer at bus 3036
+//---------------------------------------------------------//
+
+New Transformer.T_3036 Phases=3 Windings=2 XHL=1.73
+~ wdg=1 bus=bus3036.1.2.3.0     conn=wye kV=13.8  kva=45 %R=1.26
+~ wdg=2 bus=T_bus3036_L.1.2.3.0 conn=wye kV=0.208 kva=45 %R=1.26
+
+
+
+//---------------------------------------------------------//  
+//      	     Transformer at bus 3037
+//---------------------------------------------------------//
+
+New Transformer.T_3037 Phases=3 Windings=2 XHL=1.73
+~ wdg=1 bus=bus3037.1.2.3.0     conn=wye kV=13.8  kva=45 %R=1.26
+~ wdg=2 bus=T_bus3037_L.1.2.3.0 conn=wye kV=0.208 kva=45 %R=1.26
+
+
+
+//---------------------------------------------------------//  
+//      	     Transformer at bus 3038
+//---------------------------------------------------------//
+
+New Transformer.T_3038 Phases=3 Windings=2 XHL=1.73
+~ wdg=1 bus=bus3038.1.2.3.0     conn=wye kV=13.8  kva=45 %R=1.26
+~ wdg=2 bus=T_bus3038_L.1.2.3.0 conn=wye kV=0.208 kva=45 %R=1.26
+
+
+
+//---------------------------------------------------------//  
+//      	     Transformer at bus 3039
+//---------------------------------------------------------//
+
+New Transformer.T_3039 Phases=3 Windings=2 XHL=1.73
+~ wdg=1 bus=bus3039.1.2.3.0     conn=wye kV=13.8  kva=45 %R=1.26
+~ wdg=2 bus=T_bus3039_L.1.2.3.0 conn=wye kV=0.208 kva=45 %R=1.26
+
+
+//---------------------------------------------------------//  ------------- C
+//      	     Transformer at bus 3041
+//---------------------------------------------------------//
+
+New Transformer.T_3041 Phases=1 Windings=3 XHL=3.36  XHT=3.36  XLT=2.24
+~ wdg=1 bus=bus3041.3.0     conn=wye kV=7.9677    kva=50 %R=1.55
+~ wdg=2 bus=T_bus3041_L.1.0 conn=wye kV=0.120     kva=50 %R=3.1
+~ wdg=3 bus=T_bus3041_L.0.2 conn=wye kV=0.120     kva=50 %R=3.1
+
+
+//---------------------------------------------------------//  ------------- C
+//      	     Transformer at bus 3042
+//---------------------------------------------------------//
+
+New Transformer.T_3042 Phases=1 Windings=3 XHL=3.24  XHT=3.24  XLT=2.16
+~ wdg=1 bus=bus3042.3.0     conn=wye kV=7.9677    kva=37.5 %R=1.8
+~ wdg=2 bus=T_bus3042_L.1.0 conn=wye kV=0.120     kva=37.5 %R=3.6
+~ wdg=3 bus=T_bus3042_L.0.2 conn=wye kV=0.120     kva=37.5 %R=3.6
+
+
+
+//---------------------------------------------------------//  ------------- C
+//      	     Transformer at bus 3043
+//---------------------------------------------------------//
+
+New Transformer.T_3043 Phases=1 Windings=3 XHL=3.24  XHT=3.24  XLT=2.16
+~ wdg=1 bus=bus3043.3.0     conn=wye kV=7.9677    kva=37.5 %R=1.8
+~ wdg=2 bus=T_bus3043_L.1.0 conn=wye kV=0.120     kva=37.5 %R=3.6
+~ wdg=3 bus=T_bus3043_L.0.2 conn=wye kV=0.120     kva=37.5 %R=3.6
+
+
+//---------------------------------------------------------//  ------------- C
+//      	     Transformer at bus 3044
+//---------------------------------------------------------//
+
+New Transformer.T_3044 Phases=1 Windings=3 XHL=3.24  XHT=3.24  XLT=2.16
+~ wdg=1 bus=bus3044.3.0     conn=wye kV=7.9677    kva=37.5 %R=1.8
+~ wdg=2 bus=T_bus3044_L.1.0 conn=wye kV=0.120     kva=37.5 %R=3.6
+~ wdg=3 bus=T_bus3044_L.0.2 conn=wye kV=0.120     kva=37.5 %R=3.6
+
+
+//---------------------------------------------------------//  ------------- C
+//      	     Transformer at bus 3045
+//---------------------------------------------------------//
+
+New Transformer.T_3045 Phases=1 Windings=3 XHL=3.24  XHT=3.24  XLT=2.16
+~ wdg=1 bus=bus3045.3.0     conn=wye kV=7.9677    kva=37.5 %R=1.8
+~ wdg=2 bus=T_bus3045_L.1.0 conn=wye kV=0.120     kva=37.5 %R=3.6
+~ wdg=3 bus=T_bus3045_L.0.2 conn=wye kV=0.120     kva=37.5 %R=3.6
+
+
+
+//---------------------------------------------------------//  
+//      	     Transformer at bus 3047
+//---------------------------------------------------------//
+
+New Transformer.T_3047 Phases=3 Windings=2 XHL=1.73
+~ wdg=1 bus=bus3047.1.2.3.0     conn=wye kV=13.8  kva=45 %R=1.26
+~ wdg=2 bus=T_bus3047_L.1.2.3.0 conn=wye kV=0.208 kva=45 %R=1.26
+
+
+
+//---------------------------------------------------------//  
+//      	     Transformer at bus 3048
+//---------------------------------------------------------//
+
+New Transformer.T_3048 Phases=3 Windings=2 XHL=1.73
+~ wdg=1 bus=bus3048.1.2.3.0     conn=wye kV=13.8  kva=45 %R=1.26
+~ wdg=2 bus=T_bus3048_L.1.2.3.0 conn=wye kV=0.208 kva=45 %R=1.26
+
+
+
+//---------------------------------------------------------//  
+//      	     Transformer at bus 3049
+//---------------------------------------------------------//
+
+New Transformer.T_3049 Phases=3 Windings=2 XHL=1.73
+~ wdg=1 bus=bus3049.1.2.3.0     conn=wye kV=13.8  kva=45 %R=1.26
+~ wdg=2 bus=T_bus3049_L.1.2.3.0 conn=wye kV=0.208 kva=45 %R=1.26
+
+
+
+//---------------------------------------------------------//  
+//      	     Transformer at bus 3050
+//---------------------------------------------------------//
+
+New Transformer.T_3050 Phases=3 Windings=2 XHL=1.73
+~ wdg=1 bus=bus3050.1.2.3.0     conn=wye kV=13.8  kva=45 %R=1.26
+~ wdg=2 bus=T_bus3050_L.1.2.3.0 conn=wye kV=0.208 kva=45 %R=1.26
+
+
+
+//---------------------------------------------------------//  
+//      	     Transformer at bus 3051
+//---------------------------------------------------------//
+
+New Transformer.T_3051 Phases=3 Windings=2 XHL=1.73
+~ wdg=1 bus=bus3051.1.2.3.0     conn=wye kV=13.8  kva=45 %R=1.26
+~ wdg=2 bus=T_bus3051_L.1.2.3.0 conn=wye kV=0.208 kva=45 %R=1.26
+
+
+//---------------------------------------------------------//  
+//      	     Transformer at bus 3052
+//---------------------------------------------------------//
+
+New Transformer.T_3052 Phases=3 Windings=2 XHL=1.73
+~ wdg=1 bus=bus3052.1.2.3.0     conn=wye kV=13.8  kva=45 %R=1.26
+~ wdg=2 bus=T_bus3052_L.1.2.3.0 conn=wye kV=0.208 kva=45 %R=1.26
+
+
+//---------------------------------------------------------//  
+//      	     Transformer at bus 3054
+//---------------------------------------------------------//
+
+New Transformer.T_3054 Phases=3 Windings=2 XHL=1.73
+~ wdg=1 bus=bus3054.1.2.3.0     conn=wye kV=13.8  kva=45 %R=1.26
+~ wdg=2 bus=T_bus3054_L.1.2.3.0 conn=wye kV=0.208 kva=45 %R=1.26
+
+
+//---------------------------------------------------------//  ------------- B
+//      	     Transformer at bus 3056
+//---------------------------------------------------------//
+
+New Transformer.T_3056 Phases=1 Windings=3 XHL=3.24  XHT=3.24  XLT=2.16
+~ wdg=1 bus=bus3056.2.0     conn=wye kV=7.9677    kva=37.5 %R=1.8
+~ wdg=2 bus=T_bus3056_L.1.0 conn=wye kV=0.120     kva=37.5 %R=3.6
+~ wdg=3 bus=T_bus3056_L.0.2 conn=wye kV=0.120     kva=37.5 %R=3.6
+
+
+
+//---------------------------------------------------------//  ------------- B
+//      	     Transformer at bus 3057
+//---------------------------------------------------------//
+
+New Transformer.T_3057 Phases=1 Windings=3 XHL=3.24  XHT=3.24  XLT=2.16
+~ wdg=1 bus=bus3057.2.0     conn=wye kV=7.9677    kva=37.5 %R=1.8
+~ wdg=2 bus=T_bus3057_L.1.0 conn=wye kV=0.120     kva=37.5 %R=3.6
+~ wdg=3 bus=T_bus3057_L.0.2 conn=wye kV=0.120     kva=37.5 %R=3.6
+
+
+
+//---------------------------------------------------------//  ------------- B
+//      	     Transformer at bus 3058
+//---------------------------------------------------------//
+
+New Transformer.T_3058 Phases=1 Windings=3 XHL=3.24  XHT=3.24  XLT=2.16
+~ wdg=1 bus=bus3058.2.0     conn=wye kV=7.9677    kva=37.5 %R=1.8
+~ wdg=2 bus=T_bus3058_L.1.0 conn=wye kV=0.120     kva=37.5 %R=3.6
+~ wdg=3 bus=T_bus3058_L.0.2 conn=wye kV=0.120     kva=37.5 %R=3.6
+
+
+
+
+//---------------------------------------------------------//  ------------- B
+//      	     Transformer at bus 3059
+//---------------------------------------------------------//
+
+New Transformer.T_3059 Phases=1 Windings=3 XHL=3.24  XHT=3.24  XLT=2.16
+~ wdg=1 bus=bus3059.2.0     conn=wye kV=7.9677    kva=37.5 %R=1.8
+~ wdg=2 bus=T_bus3059_L.1.0 conn=wye kV=0.120     kva=37.5 %R=3.6
+~ wdg=3 bus=T_bus3059_L.0.2 conn=wye kV=0.120     kva=37.5 %R=3.6
+
+
+
+//---------------------------------------------------------//  ------------- B
+//      	     Transformer at bus 3060
+//---------------------------------------------------------//
+
+New Transformer.T_3060 Phases=1 Windings=3 XHL=3.24  XHT=3.24  XLT=2.16
+~ wdg=1 bus=bus3060.2.0     conn=wye kV=7.9677    kva=37.5 %R=1.8
+~ wdg=2 bus=T_bus3060_L.1.0 conn=wye kV=0.120     kva=37.5 %R=3.6
+~ wdg=3 bus=T_bus3060_L.0.2 conn=wye kV=0.120     kva=37.5 %R=3.6
+
+
+
+//---------------------------------------------------------//  ------------- B
+//      	     Transformer at bus 3061
+//---------------------------------------------------------//
+
+New Transformer.T_3061 Phases=1 Windings=3 XHL=3.24  XHT=3.24  XLT=2.16
+~ wdg=1 bus=bus3061.2.0     conn=wye kV=7.9677    kva=37.5 %R=1.8
+~ wdg=2 bus=T_bus3061_L.1.0 conn=wye kV=0.120     kva=37.5 %R=3.6
+~ wdg=3 bus=T_bus3061_L.0.2 conn=wye kV=0.120     kva=37.5 %R=3.6
+
+
+
+//---------------------------------------------------------//  ------------- B
+//      	     Transformer at bus 3062
+//---------------------------------------------------------//
+
+New Transformer.T_3062 Phases=1 Windings=3 XHL=3.24  XHT=3.24  XLT=2.16
+~ wdg=1 bus=bus3062.2.0     conn=wye kV=7.9677    kva=37.5 %R=1.8
+~ wdg=2 bus=T_bus3062_L.1.0 conn=wye kV=0.120     kva=37.5 %R=3.6
+~ wdg=3 bus=T_bus3062_L.0.2 conn=wye kV=0.120     kva=37.5 %R=3.6
+
+
+
+
+//---------------------------------------------------------//  ------------- B
+//      	     Transformer at bus 3063
+//---------------------------------------------------------//
+
+New Transformer.T_3063 Phases=1 Windings=3 XHL=3.24  XHT=3.24  XLT=2.16
+~ wdg=1 bus=bus3063.2.0     conn=wye kV=7.9677    kva=37.5 %R=1.8
+~ wdg=2 bus=T_bus3063_L.1.0 conn=wye kV=0.120     kva=37.5 %R=3.6
+~ wdg=3 bus=T_bus3063_L.0.2 conn=wye kV=0.120     kva=37.5 %R=3.6
+
+
+
+//---------------------------------------------------------//  ------------- B
+//      	     Transformer at bus 3064
+//---------------------------------------------------------//
+
+New Transformer.T_3064 Phases=1 Windings=3 XHL=3.24  XHT=3.24  XLT=2.16
+~ wdg=1 bus=bus3064.2.0     conn=wye kV=7.9677    kva=37.5 %R=1.8
+~ wdg=2 bus=T_bus3064_L.1.0 conn=wye kV=0.120     kva=37.5 %R=3.6
+~ wdg=3 bus=T_bus3064_L.0.2 conn=wye kV=0.120     kva=37.5 %R=3.6
+
+
+
+//---------------------------------------------------------//  ------------- B
+//      	     Transformer at bus 3065
+//---------------------------------------------------------//
+
+New Transformer.T_3065 Phases=1 Windings=3 XHL=3.24  XHT=3.24  XLT=2.16
+~ wdg=1 bus=bus3065.2.0     conn=wye kV=7.9677    kva=37.5 %R=1.8
+~ wdg=2 bus=T_bus3065_L.1.0 conn=wye kV=0.120     kva=37.5 %R=3.6
+~ wdg=3 bus=T_bus3065_L.0.2 conn=wye kV=0.120     kva=37.5 %R=3.6
+
+
+
+//---------------------------------------------------------//  ------------- B
+//      	     Transformer at bus 3066
+//---------------------------------------------------------//
+
+New Transformer.T_3066 Phases=1 Windings=3 XHL=3.24  XHT=3.24  XLT=2.16
+~ wdg=1 bus=bus3066.2.0     conn=wye kV=7.9677    kva=37.5 %R=1.8
+~ wdg=2 bus=T_bus3066_L.1.0 conn=wye kV=0.120     kva=37.5 %R=3.6
+~ wdg=3 bus=T_bus3066_L.0.2 conn=wye kV=0.120     kva=37.5 %R=3.6
+
+
+
+//---------------------------------------------------------//  ------------- B
+//      	     Transformer at bus 3067
+//---------------------------------------------------------//
+
+New Transformer.T_3067 Phases=1 Windings=3 XHL=3.24  XHT=3.24  XLT=2.16
+~ wdg=1 bus=bus3067.2.0     conn=wye kV=7.9677    kva=37.5 %R=1.8
+~ wdg=2 bus=T_bus3067_L.1.0 conn=wye kV=0.120     kva=37.5 %R=3.6
+~ wdg=3 bus=T_bus3067_L.0.2 conn=wye kV=0.120     kva=37.5 %R=3.6
+
+
+
+//---------------------------------------------------------//  
+//      	     Transformer at bus 3070
+//---------------------------------------------------------//
+
+New Transformer.T_3070 Phases=3 Windings=2 XHL=1.73
+~ wdg=1 bus=bus3070.1.2.3.0     conn=wye kV=13.8  kva=45 %R=1.26
+~ wdg=2 bus=T_bus3070_L.1.2.3.0 conn=wye kV=0.208 kva=45 %R=1.26
+
+
+//---------------------------------------------------------//  
+//      	     Transformer at bus 3071
+//---------------------------------------------------------//
+
+New Transformer.T_3071 Phases=3 Windings=2 XHL=1.73
+~ wdg=1 bus=bus3071.1.2.3.0     conn=wye kV=13.8  kva=45 %R=1.26
+~ wdg=2 bus=T_bus3071_L.1.2.3.0 conn=wye kV=0.208 kva=45 %R=1.26
+
+
+
+//---------------------------------------------------------//  
+//      	     Transformer at bus 3072
+//---------------------------------------------------------//
+
+New Transformer.T_3072 Phases=3 Windings=2 XHL=1.73
+~ wdg=1 bus=bus3072.1.2.3.0     conn=wye kV=13.8  kva=45 %R=1.26
+~ wdg=2 bus=T_bus3072_L.1.2.3.0 conn=wye kV=0.208 kva=45 %R=1.26
+
+
+
+//---------------------------------------------------------//  
+//      	     Transformer at bus 3073
+//---------------------------------------------------------//
+
+New Transformer.T_3073 Phases=3 Windings=2 XHL=1.73
+~ wdg=1 bus=bus3073.1.2.3.0     conn=wye kV=13.8  kva=45 %R=1.26
+~ wdg=2 bus=T_bus3073_L.1.2.3.0 conn=wye kV=0.208 kva=45 %R=1.26
+
+
+
+//---------------------------------------------------------//  
+//      	     Transformer at bus 3074
+//---------------------------------------------------------//
+
+New Transformer.T_3074 Phases=3 Windings=2 XHL=1.73
+~ wdg=1 bus=bus3074.1.2.3.0     conn=wye kV=13.8  kva=45 %R=1.26
+~ wdg=2 bus=T_bus3074_L.1.2.3.0 conn=wye kV=0.208 kva=45 %R=1.26
+
+
+
+//---------------------------------------------------------//  
+//      	     Transformer at bus 3077
+//---------------------------------------------------------//
+
+New Transformer.T_3077 Phases=3 Windings=2 XHL=5.9
+~ wdg=1 bus=bus3077.1.2.3.0     conn=wye kV=13.8  kva=500 %R=0.8
+~ wdg=2 bus=T_bus3077_L.1.2.3.0 conn=wye kV=0.208 kva=500 %R=0.8
+
+
+
+//---------------------------------------------------------//  
+//      	     Transformer at bus 3078
+//---------------------------------------------------------//
+
+New Transformer.T_3078 Phases=3 Windings=2 XHL=1.73
+~ wdg=1 bus=bus3078.1.2.3.0     conn=wye kV=13.8  kva=45 %R=1.26
+~ wdg=2 bus=T_bus3078_L.1.2.3.0 conn=wye kV=0.208 kva=45 %R=1.26
+
+
+
+//---------------------------------------------------------//  
+//      	     Transformer at bus 3081
+//---------------------------------------------------------//
+
+New Transformer.T_3081 Phases=3 Windings=2 XHL=1.73
+~ wdg=1 bus=bus3081.1.2.3.0     conn=wye kV=13.8  kva=45 %R=1.26
+~ wdg=2 bus=T_bus3081_L.1.2.3.0 conn=wye kV=0.208 kva=45 %R=1.26
+
+
+
+//---------------------------------------------------------//  ------------- A
+//      	     Transformer at bus 3083
+//---------------------------------------------------------//
+
+New Transformer.T_3083 Phases=1 Windings=3 XHL=3.24  XHT=3.24  XLT=2.16
+~ wdg=1 bus=bus3083.1.0     conn=wye kV=7.9677    kva=37.5 %R=1.8
+~ wdg=2 bus=T_bus3083_L.1.0 conn=wye kV=0.120     kva=37.5 %R=3.6
+~ wdg=3 bus=T_bus3083_L.0.2 conn=wye kV=0.120     kva=37.5 %R=3.6
+
+
+
+//---------------------------------------------------------//  ------------- A
+//      	     Transformer at bus 3084
+//---------------------------------------------------------//
+
+New Transformer.T_3084 Phases=1 Windings=3 XHL=3.24  XHT=3.24  XLT=2.16
+~ wdg=1 bus=bus3084.1.0     conn=wye kV=7.9677    kva=37.5 %R=1.8
+~ wdg=2 bus=T_bus3084_L.1.0 conn=wye kV=0.120     kva=37.5 %R=3.6
+~ wdg=3 bus=T_bus3084_L.0.2 conn=wye kV=0.120     kva=37.5 %R=3.6
+
+
+
+//---------------------------------------------------------//  ------------- A
+//      	     Transformer at bus 3085
+//---------------------------------------------------------//
+
+New Transformer.T_3085 Phases=1 Windings=3 XHL=3.24  XHT=3.24  XLT=2.16
+~ wdg=1 bus=bus3085.1.0     conn=wye kV=7.9677    kva=37.5 %R=1.8
+~ wdg=2 bus=T_bus3085_L.1.0 conn=wye kV=0.120     kva=37.5 %R=3.6
+~ wdg=3 bus=T_bus3085_L.0.2 conn=wye kV=0.120     kva=37.5 %R=3.6
+
+
+
+
+//---------------------------------------------------------//  ------------- A
+//      	     Transformer at bus 3086
+//---------------------------------------------------------//
+
+New Transformer.T_3086 Phases=1 Windings=3 XHL=3.24  XHT=3.24  XLT=2.16
+~ wdg=1 bus=bus3086.1.0     conn=wye kV=7.9677    kva=37.5 %R=1.8
+~ wdg=2 bus=T_bus3086_L.1.0 conn=wye kV=0.120     kva=37.5 %R=3.6
+~ wdg=3 bus=T_bus3086_L.0.2 conn=wye kV=0.120     kva=37.5 %R=3.6
+
+
+
+
+//---------------------------------------------------------//  ------------- A
+//      	     Transformer at bus 3087
+//---------------------------------------------------------//
+
+New Transformer.T_3087 Phases=1 Windings=3 XHL=3.24  XHT=3.24  XLT=2.16
+~ wdg=1 bus=bus3087.1.0     conn=wye kV=7.9677    kva=37.5 %R=1.8
+~ wdg=2 bus=T_bus3087_L.1.0 conn=wye kV=0.120     kva=37.5 %R=3.6
+~ wdg=3 bus=T_bus3087_L.0.2 conn=wye kV=0.120     kva=37.5 %R=3.6
+
+
+
+
+//---------------------------------------------------------//  ------------- A
+//      	     Transformer at bus 3088
+//---------------------------------------------------------//
+
+New Transformer.T_3088 Phases=1 Windings=3 XHL=3.24  XHT=3.24  XLT=2.16
+~ wdg=1 bus=bus3088.1.0     conn=wye kV=7.9677    kva=37.5 %R=1.8
+~ wdg=2 bus=T_bus3088_L.1.0 conn=wye kV=0.120     kva=37.5 %R=3.6
+~ wdg=3 bus=T_bus3088_L.0.2 conn=wye kV=0.120     kva=37.5 %R=3.6
+
+
+
+//---------------------------------------------------------//  ------------- A
+//      	     Transformer at bus 3089
+//---------------------------------------------------------//
+
+New Transformer.T_3089 Phases=1 Windings=3 XHL=3.24  XHT=3.24  XLT=2.16
+~ wdg=1 bus=bus3089.1.0     conn=wye kV=7.9677    kva=37.5 %R=1.8
+~ wdg=2 bus=T_bus3089_L.1.0 conn=wye kV=0.120     kva=37.5 %R=3.6
+~ wdg=3 bus=T_bus3089_L.0.2 conn=wye kV=0.120     kva=37.5 %R=3.6
+
+
+
+//---------------------------------------------------------//  ------------- A
+//      	     Transformer at bus 3090
+//---------------------------------------------------------//
+
+New Transformer.T_3090 Phases=1 Windings=3 XHL=3.24  XHT=3.24  XLT=2.16
+~ wdg=1 bus=bus3090.1.0     conn=wye kV=7.9677    kva=37.5 %R=1.8
+~ wdg=2 bus=T_bus3090_L.1.0 conn=wye kV=0.120     kva=37.5 %R=3.6
+~ wdg=3 bus=T_bus3090_L.0.2 conn=wye kV=0.120     kva=37.5 %R=3.6
+
+
+
+//---------------------------------------------------------//  ------------- A
+//      	     Transformer at bus 3091
+//---------------------------------------------------------//
+
+New Transformer.T_3091 Phases=1 Windings=3 XHL=2.76  XHT=2.76  XLT=1.84
+~ wdg=1 bus=bus3091.1.0     conn=wye kV=7.9677    kva=25 %R=0.7
+~ wdg=2 bus=T_bus3091_L.1.0 conn=wye kV=0.120     kva=25 %R=1.4
+~ wdg=3 bus=T_bus3091_L.0.2 conn=wye kV=0.120     kva=25 %R=1.4
+
+
+
+
+//---------------------------------------------------------//  ------------- A
+//      	     Transformer at bus 3093
+//---------------------------------------------------------//
+
+New Transformer.T_3093 Phases=1 Windings=3 XHL=3.24  XHT=3.24  XLT=2.16
+~ wdg=1 bus=bus3093.1.0     conn=wye kV=7.9677    kva=37.5 %R=1.8
+~ wdg=2 bus=T_bus3093_L.1.0 conn=wye kV=0.120     kva=37.5 %R=3.6
+~ wdg=3 bus=T_bus3093_L.0.2 conn=wye kV=0.120     kva=37.5 %R=3.6
+
+
+
+
+//---------------------------------------------------------//  ------------- A
+//      	     Transformer at bus 3094
+//---------------------------------------------------------//
+
+New Transformer.T_3094 Phases=1 Windings=3 XHL=3.24  XHT=3.24  XLT=2.16
+~ wdg=1 bus=bus3094.1.0     conn=wye kV=7.9677    kva=37.5 %R=1.8
+~ wdg=2 bus=T_bus3094_L.1.0 conn=wye kV=0.120     kva=37.5 %R=3.6
+~ wdg=3 bus=T_bus3094_L.0.2 conn=wye kV=0.120     kva=37.5 %R=3.6
+
+
+
+
+//---------------------------------------------------------//  ------------- A
+//      	     Transformer at bus 3095
+//---------------------------------------------------------//
+
+New Transformer.T_3095 Phases=1 Windings=3 XHL=3.24  XHT=3.24  XLT=2.16
+~ wdg=1 bus=bus3095.1.0     conn=wye kV=7.9677    kva=37.5 %R=1.8
+~ wdg=2 bus=T_bus3095_L.1.0 conn=wye kV=0.120     kva=37.5 %R=3.6
+~ wdg=3 bus=T_bus3095_L.0.2 conn=wye kV=0.120     kva=37.5 %R=3.6
+
+
+
+//---------------------------------------------------------//  ------------- A
+//      	     Transformer at bus 3096
+//---------------------------------------------------------//
+
+New Transformer.T_3096 Phases=1 Windings=3 XHL=3.24  XHT=3.24  XLT=2.16
+~ wdg=1 bus=bus3096.1.0     conn=wye kV=7.9677    kva=37.5 %R=1.8
+~ wdg=2 bus=T_bus3096_L.1.0 conn=wye kV=0.120     kva=37.5 %R=3.6
+~ wdg=3 bus=T_bus3096_L.0.2 conn=wye kV=0.120     kva=37.5 %R=3.6
+
+
+
+//---------------------------------------------------------//  ------------- A
+//      	     Transformer at bus 3097
+//---------------------------------------------------------//
+
+New Transformer.T_3097 Phases=1 Windings=3 XHL=3.24  XHT=3.24  XLT=2.16
+~ wdg=1 bus=bus3097.1.0     conn=wye kV=7.9677    kva=37.5 %R=1.8
+~ wdg=2 bus=T_bus3097_L.1.0 conn=wye kV=0.120     kva=37.5 %R=3.6
+~ wdg=3 bus=T_bus3097_L.0.2 conn=wye kV=0.120     kva=37.5 %R=3.6
+
+
+
+//---------------------------------------------------------//  ------------- B
+//      	     Transformer at bus 3098
+//---------------------------------------------------------//
+
+New Transformer.T_3098 Phases=1 Windings=3 XHL=3.36  XHT=3.36  XLT=2.24
+~ wdg=1 bus=bus3098.2.0     conn=wye kV=7.9677    kva=50 %R=1.55
+~ wdg=2 bus=T_bus3098_L.1.0 conn=wye kV=0.120     kva=50 %R=3.1
+~ wdg=3 bus=T_bus3098_L.0.2 conn=wye kV=0.120     kva=50 %R=3.1
+
+
+
+
+//---------------------------------------------------------//  ------------- B
+//      	     Transformer at bus 3099
+//---------------------------------------------------------//
+
+New Transformer.T_3099 Phases=1 Windings=3 XHL=3.24  XHT=3.24  XLT=2.16
+~ wdg=1 bus=bus3099.2.0     conn=wye kV=7.9677    kva=37.5 %R=1.8
+~ wdg=2 bus=T_bus3099_L.1.0 conn=wye kV=0.120     kva=37.5 %R=3.6
+~ wdg=3 bus=T_bus3099_L.0.2 conn=wye kV=0.120     kva=37.5 %R=3.6
+
+
+
+//---------------------------------------------------------//  ------------- C
+//      	     Transformer at bus 3101
+//---------------------------------------------------------//
+
+New Transformer.T_3101 Phases=1 Windings=3 XHL=3.24  XHT=3.24  XLT=2.16
+~ wdg=1 bus=bus3101.3.0     conn=wye kV=7.9677    kva=37.5 %R=1.8
+~ wdg=2 bus=T_bus3101_L.1.0 conn=wye kV=0.120     kva=37.5 %R=3.6
+~ wdg=3 bus=T_bus3101_L.0.2 conn=wye kV=0.120     kva=37.5 %R=3.6
+
+
+
+//---------------------------------------------------------//  ------------- C
+//      	     Transformer at bus 3102
+//---------------------------------------------------------//
+
+New Transformer.T_3102 Phases=1 Windings=3 XHL=3.24  XHT=3.24  XLT=2.16
+~ wdg=1 bus=bus3102.3.0     conn=wye kV=7.9677    kva=37.5 %R=1.8
+~ wdg=2 bus=T_bus3102_L.1.0 conn=wye kV=0.120     kva=37.5 %R=3.6
+~ wdg=3 bus=T_bus3102_L.0.2 conn=wye kV=0.120     kva=37.5 %R=3.6
+
+
+
+//---------------------------------------------------------//  ------------- C
+//      	     Transformer at bus 3103
+//---------------------------------------------------------//
+
+New Transformer.T_3103 Phases=1 Windings=3 XHL=3.36  XHT=3.36  XLT=2.24
+~ wdg=1 bus=bus3103.3.0     conn=wye kV=7.9677    kva=50 %R=1.55
+~ wdg=2 bus=T_bus3103_L.1.0 conn=wye kV=0.120     kva=50 %R=3.1
+~ wdg=3 bus=T_bus3103_L.0.2 conn=wye kV=0.120     kva=50 %R=3.1
+
+
+
+//---------------------------------------------------------//  ------------- C
+//      	     Transformer at bus 3104
+//---------------------------------------------------------//
+
+New Transformer.T_3104 Phases=1 Windings=3 XHL=4.26  XHT=4.26  XLT=2.84
+~ wdg=1 bus=bus3104.3.0     conn=wye kV=7.9677    kva=100 %R=1.06
+~ wdg=2 bus=T_bus3104_L.1.0 conn=wye kV=0.120     kva=100 %R=2.12
+~ wdg=3 bus=T_bus3104_L.0.2 conn=wye kV=0.120     kva=100 %R=2.12
+
+
+
+//---------------------------------------------------------//  ------------- C
+//      	     Transformer at bus 3105
+//---------------------------------------------------------//
+
+New Transformer.T_3105 Phases=1 Windings=3 XHL=3.24  XHT=3.24  XLT=2.16
+~ wdg=1 bus=bus3105.3.0     conn=wye kV=7.9677    kva=37.5 %R=1.8
+~ wdg=2 bus=T_bus3105_L.1.0 conn=wye kV=0.120     kva=37.5 %R=3.6
+~ wdg=3 bus=T_bus3105_L.0.2 conn=wye kV=0.120     kva=37.5 %R=3.6
+
+
+//---------------------------------------------------------//  ------------- C
+//      	     Transformer at bus 3106
+//---------------------------------------------------------//
+
+New Transformer.T_3106 Phases=1 Windings=3 XHL=4.26  XHT=4.26  XLT=2.84
+~ wdg=1 bus=bus3106.3.0     conn=wye kV=7.9677    kva=100 %R=1.06
+~ wdg=2 bus=T_bus3106_L.1.0 conn=wye kV=0.120     kva=100 %R=2.12
+~ wdg=3 bus=T_bus3106_L.0.2 conn=wye kV=0.120     kva=100 %R=2.12
+
+
+
+
+//---------------------------------------------------------//  ------------- A
+//      	     Transformer at bus 3108
+//---------------------------------------------------------//
+
+New Transformer.T_3108 Phases=1 Windings=3 XHL=3.24  XHT=3.24  XLT=2.16
+~ wdg=1 bus=bus3108.1.0     conn=wye kV=7.9677    kva=37.5 %R=1.8
+~ wdg=2 bus=T_bus3108_L.1.0 conn=wye kV=0.120     kva=37.5 %R=3.6
+~ wdg=3 bus=T_bus3108_L.0.2 conn=wye kV=0.120     kva=37.5 %R=3.6
+
+
+
+//---------------------------------------------------------//  ------------- A
+//      	     Transformer at bus 3109
+//---------------------------------------------------------//
+
+New Transformer.T_3109 Phases=1 Windings=3 XHL=3.24  XHT=3.24  XLT=2.16
+~ wdg=1 bus=bus3109.1.0     conn=wye kV=7.9677    kva=37.5 %R=1.8
+~ wdg=2 bus=T_bus3109_L.1.0 conn=wye kV=0.120     kva=37.5 %R=3.6
+~ wdg=3 bus=T_bus3109_L.0.2 conn=wye kV=0.120     kva=37.5 %R=3.6
+
+
+
+//---------------------------------------------------------//  ------------- A
+//      	     Transformer at bus 3110
+//---------------------------------------------------------//
+
+New Transformer.T_3110 Phases=1 Windings=3 XHL=3.36  XHT=3.36  XLT=2.24
+~ wdg=1 bus=bus3110.1.0     conn=wye kV=7.9677    kva=50 %R=1.55
+~ wdg=2 bus=T_bus3110_L.1.0 conn=wye kV=0.120     kva=50 %R=3.1
+~ wdg=3 bus=T_bus3110_L.0.2 conn=wye kV=0.120     kva=50 %R=3.1
+
+
+
+//---------------------------------------------------------//  ------------- A
+//      	     Transformer at bus 3111
+//---------------------------------------------------------//
+
+New Transformer.T_3111 Phases=1 Windings=3 XHL=3.36  XHT=3.36  XLT=2.24
+~ wdg=1 bus=bus3111.1.0     conn=wye kV=7.9677    kva=50 %R=1.55
+~ wdg=2 bus=T_bus3111_L.1.0 conn=wye kV=0.120     kva=50 %R=3.1
+~ wdg=3 bus=T_bus3111_L.0.2 conn=wye kV=0.120     kva=50 %R=3.1
+
+
+
+
+//---------------------------------------------------------//  ------------- A
+//      	     Transformer at bus 3112
+//---------------------------------------------------------//
+
+New Transformer.T_3112 Phases=1 Windings=3 XHL=3.36  XHT=3.36  XLT=2.24
+~ wdg=1 bus=bus3112.1.0     conn=wye kV=7.9677    kva=50 %R=1.55
+~ wdg=2 bus=T_bus3112_L.1.0 conn=wye kV=0.120     kva=50 %R=3.1
+~ wdg=3 bus=T_bus3112_L.0.2 conn=wye kV=0.120     kva=50 %R=3.1
+
+
+
+//---------------------------------------------------------//  ------------- B
+//      	     Transformer at bus 3114
+//---------------------------------------------------------//
+
+New Transformer.T_3114 Phases=1 Windings=3 XHL=3.24  XHT=3.24  XLT=2.16
+~ wdg=1 bus=bus3114.2.0     conn=wye kV=7.9677    kva=37.5 %R=1.8
+~ wdg=2 bus=T_bus3114_L.1.0 conn=wye kV=0.120     kva=37.5 %R=3.6
+~ wdg=3 bus=T_bus3114_L.0.2 conn=wye kV=0.120     kva=37.5 %R=3.6
+
+
+
+//---------------------------------------------------------//  ------------- B
+//      	     Transformer at bus 3115
+//---------------------------------------------------------//
+
+New Transformer.T_3115 Phases=1 Windings=3 XHL=3.36  XHT=3.36  XLT=2.24
+~ wdg=1 bus=bus3115.2.0     conn=wye kV=7.9677    kva=50 %R=1.55
+~ wdg=2 bus=T_bus3115_L.1.0 conn=wye kV=0.120     kva=50 %R=3.1
+~ wdg=3 bus=T_bus3115_L.0.2 conn=wye kV=0.120     kva=50 %R=3.1
+
+
+
+
+//---------------------------------------------------------//  ------------- B
+//      	     Transformer at bus 3116
+//---------------------------------------------------------//
+
+New Transformer.T_3116 Phases=1 Windings=3 XHL=3.24  XHT=3.24  XLT=2.16
+~ wdg=1 bus=bus3116.2.0     conn=wye kV=7.9677    kva=37.5 %R=1.8
+~ wdg=2 bus=T_bus3116_L.1.0 conn=wye kV=0.120     kva=37.5 %R=3.6
+~ wdg=3 bus=T_bus3116_L.0.2 conn=wye kV=0.120     kva=37.5 %R=3.6
+
+
+
+//---------------------------------------------------------//  ------------- B
+//      	     Transformer at bus 3117
+//---------------------------------------------------------//
+
+New Transformer.T_3117 Phases=1 Windings=3 XHL=3.24  XHT=3.24  XLT=2.16
+~ wdg=1 bus=bus3117.2.0     conn=wye kV=7.9677    kva=37.5 %R=1.8
+~ wdg=2 bus=T_bus3117_L.1.0 conn=wye kV=0.120     kva=37.5 %R=3.6
+~ wdg=3 bus=T_bus3117_L.0.2 conn=wye kV=0.120     kva=37.5 %R=3.6
+
+
+
+//---------------------------------------------------------//  ------------- B
+//      	     Transformer at bus 3120
+//---------------------------------------------------------//
+
+New Transformer.T_3120 Phases=1 Windings=3 XHL=3.24  XHT=3.24  XLT=2.16
+~ wdg=1 bus=bus3120.2.0     conn=wye kV=7.9677    kva=37.5 %R=1.8
+~ wdg=2 bus=T_bus3120_L.1.0 conn=wye kV=0.120     kva=37.5 %R=3.6
+~ wdg=3 bus=T_bus3120_L.0.2 conn=wye kV=0.120     kva=37.5 %R=3.6
+
+
+
+//---------------------------------------------------------//  ------------- B
+//      	     Transformer at bus 3121
+//---------------------------------------------------------//
+
+New Transformer.T_3121 Phases=1 Windings=3 XHL=3.24  XHT=3.24  XLT=2.16
+~ wdg=1 bus=bus3121.2.0     conn=wye kV=7.9677    kva=37.5 %R=1.8
+~ wdg=2 bus=T_bus3121_L.1.0 conn=wye kV=0.120     kva=37.5 %R=3.6
+~ wdg=3 bus=T_bus3121_L.0.2 conn=wye kV=0.120     kva=37.5 %R=3.6
+
+
+//---------------------------------------------------------//  ------------- B
+//      	     Transformer at bus 3122
+//---------------------------------------------------------//
+
+New Transformer.T_3122 Phases=1 Windings=3 XHL=3.24  XHT=3.24  XLT=2.16
+~ wdg=1 bus=bus3122.2.0     conn=wye kV=7.9677    kva=37.5 %R=1.8
+~ wdg=2 bus=T_bus3122_L.1.0 conn=wye kV=0.120     kva=37.5 %R=3.6
+~ wdg=3 bus=T_bus3122_L.0.2 conn=wye kV=0.120     kva=37.5 %R=3.6
+
+
+//---------------------------------------------------------//  ------------- B
+//      	     Transformer at bus 3123
+//---------------------------------------------------------//
+
+New Transformer.T_3123 Phases=1 Windings=3 XHL=3.24  XHT=3.24  XLT=2.16
+~ wdg=1 bus=bus3123.2.0     conn=wye kV=7.9677    kva=37.5 %R=1.8
+~ wdg=2 bus=T_bus3123_L.1.0 conn=wye kV=0.120     kva=37.5 %R=3.6
+~ wdg=3 bus=T_bus3123_L.0.2 conn=wye kV=0.120     kva=37.5 %R=3.6
+
+
+
+//---------------------------------------------------------//  ------------- B
+//      	     Transformer at bus 3124
+//---------------------------------------------------------//
+
+New Transformer.T_3124 Phases=1 Windings=3 XHL=3.24  XHT=3.24  XLT=2.16
+~ wdg=1 bus=bus3124.2.0     conn=wye kV=7.9677    kva=37.5 %R=1.8
+~ wdg=2 bus=T_bus3124_L.1.0 conn=wye kV=0.120     kva=37.5 %R=3.6
+~ wdg=3 bus=T_bus3124_L.0.2 conn=wye kV=0.120     kva=37.5 %R=3.6
+
+
+
+//---------------------------------------------------------//  ------------- B
+//      	     Transformer at bus 3125
+//---------------------------------------------------------//
+
+New Transformer.T_3125 Phases=1 Windings=3 XHL=2.42  XHT=2.42  XLT=1.62
+~ wdg=1 bus=bus3125.2.0     conn=wye kV=7.9677    kva=15 %R=0.8
+~ wdg=2 bus=T_bus3125_L.1.0 conn=wye kV=0.120     kva=15 %R=1.6
+~ wdg=3 bus=T_bus3125_L.0.2 conn=wye kV=0.120     kva=15 %R=1.6
+
+
+
+//---------------------------------------------------------//  ------------- B
+//      	     Transformer at bus 3126
+//---------------------------------------------------------//
+
+New Transformer.T_3126 Phases=1 Windings=3 XHL=3.24  XHT=3.24  XLT=2.16
+~ wdg=1 bus=bus3126.2.0     conn=wye kV=7.9677    kva=37.5 %R=1.8
+~ wdg=2 bus=T_bus3126_L.1.0 conn=wye kV=0.120     kva=37.5 %R=3.6
+~ wdg=3 bus=T_bus3126_L.0.2 conn=wye kV=0.120     kva=37.5 %R=3.6
+
+
+
+//---------------------------------------------------------//  ------------- B
+//      	     Transformer at bus 3127
+//---------------------------------------------------------//
+
+New Transformer.T_3127 Phases=1 Windings=3 XHL=3.24  XHT=3.24  XLT=2.16
+~ wdg=1 bus=bus3127.2.0     conn=wye kV=7.9677    kva=37.5 %R=1.8
+~ wdg=2 bus=T_bus3127_L.1.0 conn=wye kV=0.120     kva=37.5 %R=3.6
+~ wdg=3 bus=T_bus3127_L.0.2 conn=wye kV=0.120     kva=37.5 %R=3.6
+
+
+
+//---------------------------------------------------------//  ------------- B
+//      	     Transformer at bus 3128
+//---------------------------------------------------------//
+
+New Transformer.T_3128 Phases=1 Windings=3 XHL=3.24  XHT=3.24  XLT=2.16
+~ wdg=1 bus=bus3128.2.0     conn=wye kV=7.9677    kva=37.5 %R=1.8
+~ wdg=2 bus=T_bus3128_L.1.0 conn=wye kV=0.120     kva=37.5 %R=3.6
+~ wdg=3 bus=T_bus3128_L.0.2 conn=wye kV=0.120     kva=37.5 %R=3.6
+
+
+
+//---------------------------------------------------------//  ------------- B
+//      	     Transformer at bus 3129
+//---------------------------------------------------------//
+
+New Transformer.T_3129 Phases=1 Windings=3 XHL=3.24  XHT=3.24  XLT=2.16
+~ wdg=1 bus=bus3129.2.0     conn=wye kV=7.9677    kva=37.5 %R=1.8
+~ wdg=2 bus=T_bus3129_L.1.0 conn=wye kV=0.120     kva=37.5 %R=3.6
+~ wdg=3 bus=T_bus3129_L.0.2 conn=wye kV=0.120     kva=37.5 %R=3.6
+
+
+//---------------------------------------------------------//  ------------- B
+//      	     Transformer at bus 3130
+//---------------------------------------------------------//
+
+New Transformer.T_3130 Phases=1 Windings=3 XHL=3.24  XHT=3.24  XLT=2.16
+~ wdg=1 bus=bus3130.2.0     conn=wye kV=7.9677    kva=37.5 %R=1.8
+~ wdg=2 bus=T_bus3130_L.1.0 conn=wye kV=0.120     kva=37.5 %R=3.6
+~ wdg=3 bus=T_bus3130_L.0.2 conn=wye kV=0.120     kva=37.5 %R=3.6
+
+
+//---------------------------------------------------------//  ------------- B
+//      	     Transformer at bus 3131
+//---------------------------------------------------------//
+
+New Transformer.T_3131 Phases=1 Windings=3 XHL=3.24  XHT=3.24  XLT=2.16
+~ wdg=1 bus=bus3131.2.0     conn=wye kV=7.9677    kva=37.5 %R=1.8
+~ wdg=2 bus=T_bus3131_L.1.0 conn=wye kV=0.120     kva=37.5 %R=3.6
+~ wdg=3 bus=T_bus3131_L.0.2 conn=wye kV=0.120     kva=37.5 %R=3.6
+
+
+
+//---------------------------------------------------------//  ------------- A
+//      	     Transformer at bus 3132
+//---------------------------------------------------------//
+
+New Transformer.T_3132 Phases=1 Windings=3 XHL=3.36  XHT=3.36  XLT=2.24
+~ wdg=1 bus=bus3132.1.0     conn=wye kV=7.9677    kva=50 %R=1.55
+~ wdg=2 bus=T_bus3132_L.1.0 conn=wye kV=0.120     kva=50 %R=3.1
+~ wdg=3 bus=T_bus3132_L.0.2 conn=wye kV=0.120     kva=50 %R=3.1
+
+
+
+//---------------------------------------------------------//  ------------- A
+//      	     Transformer at bus 3134
+//---------------------------------------------------------//
+
+New Transformer.T_3134 Phases=1 Windings=3 XHL=3.36  XHT=3.36  XLT=2.24
+~ wdg=1 bus=bus3134.1.0     conn=wye kV=7.9677    kva=50 %R=1.55
+~ wdg=2 bus=T_bus3134_L.1.0 conn=wye kV=0.120     kva=50 %R=3.1
+~ wdg=3 bus=T_bus3134_L.0.2 conn=wye kV=0.120     kva=50 %R=3.1
+
+
+//---------------------------------------------------------//  ------------- A
+//      	     Transformer at bus 3135
+//---------------------------------------------------------//
+
+New Transformer.T_3135 Phases=1 Windings=3 XHL=3.24  XHT=3.24  XLT=2.16
+~ wdg=1 bus=bus3135.1.0     conn=wye kV=7.9677    kva=37.5 %R=1.8
+~ wdg=2 bus=T_bus3135_L.1.0 conn=wye kV=0.120     kva=37.5 %R=3.6
+~ wdg=3 bus=T_bus3135_L.0.2 conn=wye kV=0.120     kva=37.5 %R=3.6
+
+
+
+//---------------------------------------------------------//  ------------- A
+//      	     Transformer at bus 3136
+//---------------------------------------------------------//
+
+New Transformer.T_3136 Phases=1 Windings=3 XHL=3.36  XHT=3.36  XLT=2.24
+~ wdg=1 bus=bus3136.1.0     conn=wye kV=7.9677    kva=50 %R=1.55
+~ wdg=2 bus=T_bus3136_L.1.0 conn=wye kV=0.120     kva=50 %R=3.1
+~ wdg=3 bus=T_bus3136_L.0.2 conn=wye kV=0.120     kva=50 %R=3.1
+
+
+
+//---------------------------------------------------------//  ------------- A
+//      	     Transformer at bus 3137
+//---------------------------------------------------------//
+
+New Transformer.T_3137 Phases=1 Windings=3 XHL=3.36  XHT=3.36  XLT=2.24
+~ wdg=1 bus=bus3137.1.0     conn=wye kV=7.9677    kva=50 %R=1.55
+~ wdg=2 bus=T_bus3137_L.1.0 conn=wye kV=0.120     kva=50 %R=3.1
+~ wdg=3 bus=T_bus3137_L.0.2 conn=wye kV=0.120     kva=50 %R=3.1
+
+
+
+//---------------------------------------------------------//  ------------- A
+//      	     Transformer at bus 3138
+//---------------------------------------------------------//
+
+New Transformer.T_3138 Phases=1 Windings=3 XHL=3.36  XHT=3.36  XLT=2.24
+~ wdg=1 bus=bus3138.1.0     conn=wye kV=7.9677    kva=50 %R=1.55
+~ wdg=2 bus=T_bus3138_L.1.0 conn=wye kV=0.120     kva=50 %R=3.1
+~ wdg=3 bus=T_bus3138_L.0.2 conn=wye kV=0.120     kva=50 %R=3.1
+
+
+
+//---------------------------------------------------------//  ------------- A
+//      	     Transformer at bus 3139
+//---------------------------------------------------------//
+
+New Transformer.T_3139 Phases=1 Windings=3 XHL=3.24  XHT=3.24  XLT=2.16
+~ wdg=1 bus=bus3139.1.0     conn=wye kV=7.9677    kva=37.5 %R=1.8
+~ wdg=2 bus=T_bus3139_L.1.0 conn=wye kV=0.120     kva=37.5 %R=3.6
+~ wdg=3 bus=T_bus3139_L.0.2 conn=wye kV=0.120     kva=37.5 %R=3.6
+
+
+
+
+//---------------------------------------------------------//  ------------- C
+//      	     Transformer at bus 3141
+//---------------------------------------------------------//
+
+New Transformer.T_3141 Phases=1 Windings=3 XHL=3.24  XHT=3.24  XLT=2.16
+~ wdg=1 bus=bus3141.3.0     conn=wye kV=7.9677    kva=37.5 %R=1.8
+~ wdg=2 bus=T_bus3141_L.1.0 conn=wye kV=0.120     kva=37.5 %R=3.6
+~ wdg=3 bus=T_bus3141_L.0.2 conn=wye kV=0.120     kva=37.5 %R=3.6
+
+
+//---------------------------------------------------------//  ------------- C
+//      	     Transformer at bus 3142
+//---------------------------------------------------------//
+
+New Transformer.T_3142 Phases=1 Windings=3 XHL=3.24  XHT=3.24  XLT=2.16
+~ wdg=1 bus=bus3142.3.0     conn=wye kV=7.9677    kva=37.5 %R=1.8
+~ wdg=2 bus=T_bus3142_L.1.0 conn=wye kV=0.120     kva=37.5 %R=3.6
+~ wdg=3 bus=T_bus3142_L.0.2 conn=wye kV=0.120     kva=37.5 %R=3.6
+
+
+//---------------------------------------------------------//  ------------- C
+//      	     Transformer at bus 3143
+//---------------------------------------------------------//
+
+New Transformer.T_3143 Phases=1 Windings=3 XHL=3.24  XHT=3.24  XLT=2.16
+~ wdg=1 bus=bus3143.3.0     conn=wye kV=7.9677    kva=37.5 %R=1.8
+~ wdg=2 bus=T_bus3143_L.1.0 conn=wye kV=0.120     kva=37.5 %R=3.6
+~ wdg=3 bus=T_bus3143_L.0.2 conn=wye kV=0.120     kva=37.5 %R=3.6
+
+
+
+//---------------------------------------------------------//  ------------- C
+//      	     Transformer at bus 3144
+//---------------------------------------------------------//
+
+New Transformer.T_3144 Phases=1 Windings=3 XHL=2.42  XHT=2.42  XLT=1.62
+~ wdg=1 bus=bus3144.3.0     conn=wye kV=7.9677    kva=15 %R=0.8
+~ wdg=2 bus=T_bus3144_L.1.0 conn=wye kV=0.120     kva=15 %R=1.6
+~ wdg=3 bus=T_bus3144_L.0.2 conn=wye kV=0.120     kva=15 %R=1.6
+
+
+
+//---------------------------------------------------------//  ------------- C
+//      	     Transformer at bus 3145
+//---------------------------------------------------------//
+
+New Transformer.T_3145 Phases=1 Windings=3 XHL=3.24  XHT=3.24  XLT=2.16
+~ wdg=1 bus=bus3145.3.0     conn=wye kV=7.9677    kva=37.5 %R=1.8
+~ wdg=2 bus=T_bus3145_L.1.0 conn=wye kV=0.120     kva=37.5 %R=3.6
+~ wdg=3 bus=T_bus3145_L.0.2 conn=wye kV=0.120     kva=37.5 %R=3.6
+
+
+//---------------------------------------------------------//  ------------- C
+//      	     Transformer at bus 3146
+//---------------------------------------------------------//
+
+New Transformer.T_3146 Phases=1 Windings=3 XHL=3.24  XHT=3.24  XLT=2.16
+~ wdg=1 bus=bus3146.3.0     conn=wye kV=7.9677    kva=37.5 %R=1.8
+~ wdg=2 bus=T_bus3146_L.1.0 conn=wye kV=0.120     kva=37.5 %R=3.6
+~ wdg=3 bus=T_bus3146_L.0.2 conn=wye kV=0.120     kva=37.5 %R=3.6
+
+
+//---------------------------------------------------------//  ------------- C
+//      	     Transformer at bus 3147
+//---------------------------------------------------------//
+
+New Transformer.T_3147 Phases=1 Windings=3 XHL=3.24  XHT=3.24  XLT=2.16
+~ wdg=1 bus=bus3147.3.0     conn=wye kV=7.9677    kva=37.5 %R=1.8
+~ wdg=2 bus=T_bus3147_L.1.0 conn=wye kV=0.120     kva=37.5 %R=3.6
+~ wdg=3 bus=T_bus3147_L.0.2 conn=wye kV=0.120     kva=37.5 %R=3.6
+
+
+
+//---------------------------------------------------------//  ------------- C
+//      	     Transformer at bus 3148
+//---------------------------------------------------------//
+
+New Transformer.T_3148 Phases=1 Windings=3 XHL=3.36  XHT=3.36  XLT=2.24
+~ wdg=1 bus=bus3148.3.0     conn=wye kV=7.9677    kva=50 %R=1.55
+~ wdg=2 bus=T_bus3148_L.1.0 conn=wye kV=0.120     kva=50 %R=3.1
+~ wdg=3 bus=T_bus3148_L.0.2 conn=wye kV=0.120     kva=50 %R=3.1
+
+
+//---------------------------------------------------------//  ------------- C
+//      	     Transformer at bus 3149
+//---------------------------------------------------------//
+
+New Transformer.T_3149 Phases=1 Windings=3 XHL=3.24  XHT=3.24  XLT=2.16
+~ wdg=1 bus=bus3149.3.0     conn=wye kV=7.9677    kva=37.5 %R=1.8
+~ wdg=2 bus=T_bus3149_L.1.0 conn=wye kV=0.120     kva=37.5 %R=3.6
+~ wdg=3 bus=T_bus3149_L.0.2 conn=wye kV=0.120     kva=37.5 %R=3.6
+
+
+
+//---------------------------------------------------------//  ------------- C
+//      	     Transformer at bus 3150
+//---------------------------------------------------------//
+
+New Transformer.T_3150 Phases=1 Windings=3 XHL=2.76  XHT=2.76  XLT=1.84
+~ wdg=1 bus=bus3150.3.0     conn=wye kV=7.9677    kva=25 %R=0.7
+~ wdg=2 bus=T_bus3150_L.1.0 conn=wye kV=0.120     kva=25 %R=1.4
+~ wdg=3 bus=T_bus3150_L.0.2 conn=wye kV=0.120     kva=25 %R=1.4
+
+
+
+//---------------------------------------------------------//  ------------- C
+//      	     Transformer at bus 3151
+//---------------------------------------------------------//
+
+New Transformer.T_3151 Phases=1 Windings=3 XHL=2.76  XHT=2.76  XLT=1.84
+~ wdg=1 bus=bus3151.3.0     conn=wye kV=7.9677    kva=25 %R=0.7
+~ wdg=2 bus=T_bus3151_L.1.0 conn=wye kV=0.120     kva=25 %R=1.4
+~ wdg=3 bus=T_bus3151_L.0.2 conn=wye kV=0.120     kva=25 %R=1.4
+
+
+
+//---------------------------------------------------------//  ------------- C
+//      	     Transformer at bus 3152
+//---------------------------------------------------------//
+
+New Transformer.T_3152 Phases=1 Windings=3 XHL=2.76  XHT=2.76  XLT=1.84
+~ wdg=1 bus=bus3152.3.0     conn=wye kV=7.9677    kva=25 %R=0.7
+~ wdg=2 bus=T_bus3152_L.1.0 conn=wye kV=0.120     kva=25 %R=1.4
+~ wdg=3 bus=T_bus3152_L.0.2 conn=wye kV=0.120     kva=25 %R=1.4
+
+
+
+//---------------------------------------------------------//  ------------- C
+//      	     Transformer at bus 3153
+//---------------------------------------------------------//
+
+New Transformer.T_3153 Phases=1 Windings=3 XHL=3.24  XHT=3.24  XLT=2.16
+~ wdg=1 bus=bus3153.3.0     conn=wye kV=7.9677    kva=37.5 %R=1.8
+~ wdg=2 bus=T_bus3153_L.1.0 conn=wye kV=0.120     kva=37.5 %R=3.6
+~ wdg=3 bus=T_bus3153_L.0.2 conn=wye kV=0.120     kva=37.5 %R=3.6
+
+
+
+//---------------------------------------------------------//  ------------- C
+//      	     Transformer at bus 3154
+//---------------------------------------------------------//
+
+New Transformer.T_3154 Phases=1 Windings=3 XHL=2.76  XHT=2.76  XLT=1.84
+~ wdg=1 bus=bus3154.3.0     conn=wye kV=7.9677    kva=25 %R=0.7
+~ wdg=2 bus=T_bus3154_L.1.0 conn=wye kV=0.120     kva=25 %R=1.4
+~ wdg=3 bus=T_bus3154_L.0.2 conn=wye kV=0.120     kva=25 %R=1.4
+
+
+
+//---------------------------------------------------------//  ------------- C
+//      	     Transformer at bus 3155
+//---------------------------------------------------------//
+
+New Transformer.T_3155 Phases=1 Windings=3 XHL=2.76  XHT=2.76  XLT=1.84
+~ wdg=1 bus=bus3155.3.0     conn=wye kV=7.9677    kva=25 %R=0.7
+~ wdg=2 bus=T_bus3155_L.1.0 conn=wye kV=0.120     kva=25 %R=1.4
+~ wdg=3 bus=T_bus3155_L.0.2 conn=wye kV=0.120     kva=25 %R=1.4
+
+
+
+//---------------------------------------------------------//  ------------- C
+//      	     Transformer at bus 3157
+//---------------------------------------------------------//
+
+New Transformer.T_3157 Phases=1 Windings=3 XHL=3.36  XHT=3.36  XLT=2.24
+~ wdg=1 bus=bus3157.3.0     conn=wye kV=7.9677    kva=50 %R=1.55
+~ wdg=2 bus=T_bus3157_L.1.0 conn=wye kV=0.120     kva=50 %R=3.1
+~ wdg=3 bus=T_bus3157_L.0.2 conn=wye kV=0.120     kva=50 %R=3.1
+
+
+
+//---------------------------------------------------------//  ------------- C
+//      	     Transformer at bus 3158
+//---------------------------------------------------------//
+
+New Transformer.T_3158 Phases=1 Windings=3 XHL=3.36  XHT=3.36  XLT=2.24
+~ wdg=1 bus=bus3158.3.0     conn=wye kV=7.9677    kva=50 %R=1.55
+~ wdg=2 bus=T_bus3158_L.1.0 conn=wye kV=0.120     kva=50 %R=3.1
+~ wdg=3 bus=T_bus3158_L.0.2 conn=wye kV=0.120     kva=50 %R=3.1
+
+
+
+//---------------------------------------------------------//  ------------- C
+//      	     Transformer at bus 3159
+//---------------------------------------------------------//
+
+New Transformer.T_3159 Phases=1 Windings=3 XHL=3.36  XHT=3.36  XLT=2.24
+~ wdg=1 bus=bus3159.3.0     conn=wye kV=7.9677    kva=50 %R=1.55
+~ wdg=2 bus=T_bus3159_L.1.0 conn=wye kV=0.120     kva=50 %R=3.1
+~ wdg=3 bus=T_bus3159_L.0.2 conn=wye kV=0.120     kva=50 %R=3.1
+
+
+
+//---------------------------------------------------------//  ------------- C
+//      	     Transformer at bus 3160
+//---------------------------------------------------------//
+
+New Transformer.T_3160 Phases=1 Windings=3 XHL=2.76  XHT=2.76  XLT=1.84
+~ wdg=1 bus=bus3160.3.0     conn=wye kV=7.9677    kva=25 %R=0.7
+~ wdg=2 bus=T_bus3160_L.1.0 conn=wye kV=0.120     kva=25 %R=1.4
+~ wdg=3 bus=T_bus3160_L.0.2 conn=wye kV=0.120     kva=25 %R=1.4
+
+
+
+//---------------------------------------------------------//  ------------- C
+//      	     Transformer at bus 3161
+//---------------------------------------------------------//
+
+New Transformer.T_3161 Phases=1 Windings=3 XHL=2.76  XHT=2.76  XLT=1.84
+~ wdg=1 bus=bus3161.3.0     conn=wye kV=7.9677    kva=25 %R=0.7
+~ wdg=2 bus=T_bus3161_L.1.0 conn=wye kV=0.120     kva=25 %R=1.4
+~ wdg=3 bus=T_bus3161_L.0.2 conn=wye kV=0.120     kva=25 %R=1.4
+
+
+
+//---------------------------------------------------------//  ------------- C
+//      	     Transformer at bus 3162
+//---------------------------------------------------------//
+
+New Transformer.T_3162 Phases=1 Windings=3 XHL=2.76  XHT=2.76  XLT=1.84
+~ wdg=1 bus=bus3162.3.0     conn=wye kV=7.9677    kva=25 %R=0.7
+~ wdg=2 bus=T_bus3162_L.1.0 conn=wye kV=0.120     kva=25 %R=1.4
+~ wdg=3 bus=T_bus3162_L.0.2 conn=wye kV=0.120     kva=25 %R=1.4
+
+
+// This file is to define the line configurations, including the series resistance matrix, series reactance matrix, and shunt nodal capacitance matrix with a variety of phase configurations.
+// For the linecode name, OH denotes overhead, UG denotes underground, 1p denotes 1 phase, 3p denotes 3 phases, "type+number" denotes conductor type.
+
+//--------------------------------------------------------------------------------------//
+//            three-phase overhead line using type 1 overhead conductor
+//--------------------------------------------------------------------------------------//
+New LineCode.OH_3p_type1 nphases= 3 Units= mi    			  ! Configuration name, number of phases, unit
+ ~ Rmatrix= (0.615927 | 0.170927 0.615927 | 0.170927 0.170927 0.615927 )  ! Series resistance matrix
+ ~ Xmatrix= (1.209389 | 0.433188 1.209389 | 0.433188 0.433188 1.209389 )  ! Series reactance matrix
+
+
+//--------------------------------------------------------------------------------------//
+//            two-phase overhead line using type 2 overhead conductor
+//--------------------------------------------------------------------------------------//
+New LineCode.OH_2p_type2 nphases= 2 Units= mi
+ ~ Rmatrix= (0.589255 | 0.169495 0.589255 ) 
+ ~ Xmatrix= (1.074856 | 0.387876 1.074856 )
+
+
+//--------------------------------------------------------------------------------------//
+//            one-phase overhead line using type 2 overhead conductor
+//--------------------------------------------------------------------------------------//
+New LineCode.OH_1p_type2 nphases= 1 Units= mi
+ ~ Rmatrix= (0.592473 ) 
+ ~ Xmatrix= (1.065821 ) 
+
+
+//--------------------------------------------------------------------------------------//
+//           three-phase overhead line using type 5 overhead conductor
+//--------------------------------------------------------------------------------------//
+New LineCode.OH_3p_type5 nphases= 3 Units= mi
+ ~ Rmatrix= (1.191602 | 0.234849 1.191602 | 0.234849 0.234849 1.191602 ) 
+ ~ Xmatrix= (1.209452 | 0.489263 1.209452 | 0.489263 0.489263 1.209452 ) 
+
+
+//--------------------------------------------------------------------------------------//
+//           one-phase overhead line using type 5 overhead conductor
+//--------------------------------------------------------------------------------------//
+New LineCode.OH_1p_type5 nphases= 1 Units= mi
+ ~ Rmatrix= (1.194260 ) 
+ ~ Xmatrix= (1.205420 ) 
+
+
+
+//--------------------------------------------------------------------------------------//
+//           three-phase underground cable using type 1 underground conductor
+//--------------------------------------------------------------------------------------//
+New LineCode.UG_3p_type1 nphases= 3 Units= mi
+ ~ Rmatrix= (1.009423 | 0.409732 1.009423 | 0.409732 0.409732 1.009423 ) 
+ ~ Xmatrix= (0.493164 | 0.100849 0.493164 | 0.100849 0.100849 0.493164 ) 
+ ~ Cmatrix= (286.101593 | 0.000000 286.101593 | 0.000000 0.000000 286.101593 )     ! Shunt nodal capacitance matrix
+
+
+
+//--------------------------------------------------------------------------------------//
+//           three-phase underground cable using type 2 underground conductor
+//--------------------------------------------------------------------------------------//
+New LineCode.UG_3p_type2 nphases= 3 Units= mi
+ ~ Rmatrix= (1.692577 | 0.550087 1.692577 | 0.550087 0.550087 1.692577 ) 
+ ~ Xmatrix= (0.791756 | 0.344931 0.791756 | 0.344931 0.344931 0.791756 ) 
+ ~ Cmatrix= (207.880539 | 0.000000 207.880539 | 0.000000 0.000000 207.880539 )
+
+
+
+//--------------------------------------------------------------------------------------//
+//            one-phase underground cable using type 2 underground conductor
+//--------------------------------------------------------------------------------------//
+New LineCode.UG_1p_type2 nphases= 1 Units= mi
+ ~ Rmatrix= (1.675338 ) 
+ ~ Xmatrix= (1.210007 ) 
+ ~ Cmatrix= (207.880539 )
+
+
+// This file is to define the parameters of line segments, including the overhead lines and underground cables with a variety of phase configurations.
+
+//***************************************************************************************//
+//                                             Feeder A
+//***************************************************************************************//
+//--------------------------------------------------------//
+New Line.L_1001_1002 phases=3 Bus1=bus1001.1.2.3 Bus2=bus1002.1.2.3    ! Line segment name, number of phases, 1st bus, 2nd bus
+ ~ length=2967 units=Ft LineCode=UG_3p_type1		         ! Length, unit, line configuration
+
+//--------------------------------------------------------//
+New Line.L_1002_1003 phases=3 Bus1=bus1002.1.2.3 Bus2=bus1003.1.2.3
+ ~ length=372 units=Ft LineCode=UG_3p_type2
+
+//--------------------------------------------------------//
+New Line.L_1002_1004 phases=3 Bus1=bus1002.1.2.3 Bus2=bus1004.1.2.3
+ ~ length=638 units=Ft LineCode=OH_3p_type1
+
+//--------------------------------------------------------//
+New Line.L_1004_1005 phases=3 Bus1=bus1004.1.2.3 Bus2=bus1005.1.2.3
+ ~ length=394 units=Ft LineCode=OH_3p_type1
+
+//--------------------------------------------------------//
+New Line.L_1005_1006 phases=3 Bus1=bus1005.1.2.3 Bus2=bus1006.1.2.3
+ ~ length=1049 units=Ft LineCode=OH_3p_type1
+
+//--------------------------------------------------------//------------AB
+New Line.L_1006_1007 phases=2 Bus1=bus1006.1.2 Bus2=bus1007.1.2
+ ~ length=2000 units=Ft LineCode=OH_2p_type2
+
+//--------------------------------------------------------//
+New Line.L_1006_1008 phases=3 Bus1=bus1006.1.2.3 Bus2=bus1008.1.2.3
+ ~ length=454 units=Ft LineCode=OH_3p_type1
+
+//--------------------------------------------------------//
+New Line.L_1008_1009 phases=3 Bus1=bus1008.1.2.3 Bus2=bus1009.1.2.3
+ ~ length=1082 units=Ft LineCode=OH_3p_type1
+
+//--------------------------------------------------------//
+New Line.L_1009_1010 phases=3 Bus1=bus1009.1.2.3 Bus2=bus1010.1.2.3
+ ~ length=169 units=Ft LineCode=OH_3p_type1
+
+//--------------------------------------------------------//
+New Line.L_1009_1011 phases=3 Bus1=bus1009.1.2.3 Bus2=bus1011.1.2.3
+ ~ length=60 units=Ft LineCode=UG_3p_type2
+
+//--------------------------------------------------------//
+New Line.L_1011_1012 phases=3 Bus1=bus1011.1.2.3 Bus2=bus1012.1.2.3
+ ~ length=60 units=Ft LineCode=UG_3p_type2
+
+//--------------------------------------------------------//
+New Line.L_1012_1013 phases=3 Bus1=bus1012.1.2.3 Bus2=bus1013.1.2.3
+ ~ length=306 units=Ft LineCode=UG_3p_type2
+
+//--------------------------------------------------------//----------B
+New Line.L_1013_1014 phases=1 Bus1=bus1013.2.0 Bus2=bus1014.2.0
+ ~ length=208 units=Ft LineCode=UG_1p_type2
+
+//--------------------------------------------------------//----------B
+New Line.L_1014_1015 phases=1 Bus1=bus1014.2.0 Bus2=bus1015.2.0
+ ~ length=126 units=Ft LineCode=UG_1p_type2
+
+//--------------------------------------------------------//----------C
+New Line.L_1013_1016 phases=1 Bus1=bus1013.3.0 Bus2=bus1016.3.0
+ ~ length=468 units=Ft LineCode=UG_1p_type2
+
+//--------------------------------------------------------//----------C
+New Line.L_1016_1017 phases=1 Bus1=bus1016.3.0 Bus2=bus1017.3.0
+ ~ length=71 units=Ft LineCode=UG_1p_type2
+
+
+
+
+
+
+//***************************************************************************************//
+//                                             Feeder B
+//***************************************************************************************//
+//--------------------------------------------------------//
+New Line.L_2001_2002 phases=3 Bus1=bus2001.1.2.3 Bus2=bus2002.1.2.3
+ ~ length=1388 units=Ft LineCode=UG_3p_type1
+
+//--------------------------------------------------------//
+New Line.L_2002_2003 phases=3 Bus1=bus2002.1.2.3 Bus2=bus2003.1.2.3
+ ~ length=1281 units=Ft LineCode=OH_3p_type1
+
+//--------------------------------------------------------//
+New Line.L_2003_2004 phases=3 Bus1=bus2003.1.2.3 Bus2=bus2004.1.2.3
+ ~ length=798 units=Ft LineCode=OH_3p_type1
+
+//--------------------------------------------------------//
+New Line.L_2004_2005 phases=3 Bus1=bus2004.1.2.3 Bus2=bus2005.1.2.3
+ ~ length=317 units=Ft LineCode=OH_3p_type1
+
+//--------------------------------------------------------//
+New Line.L_2005_2006 phases=3 Bus1=bus2005.1.2.3 Bus2=bus2006.1.2.3
+ ~ length=145 units=Ft LineCode=OH_3p_type1
+
+//--------------------------------------------------------//--------A
+New Line.L_2006_2007 phases=1 Bus1=bus2006.1 Bus2=bus2007.1
+ ~ length=245 units=Ft LineCode=OH_1p_type5
+
+//--------------------------------------------------------//--------A
+New Line.L_2007_2008 phases=1 Bus1=bus2007.1 Bus2=bus2008.1
+ ~ length=125 units=Ft LineCode=UG_1p_type2
+
+//--------------------------------------------------------//--------A
+New Line.L_2007_2009 phases=1 Bus1=bus2007.1 Bus2=bus2009.1
+ ~ length=161 units=Ft LineCode=OH_1p_type2
+
+//--------------------------------------------------------//
+New Line.L_2006_2010 phases=3 Bus1=bus2006.1.2.3 Bus2=bus2010.1.2.3
+ ~ length=170 units=Ft LineCode=OH_3p_type1
+
+//--------------------------------------------------------//
+New Line.L_2010_2011 phases=3 Bus1=bus2010.1.2.3 Bus2=bus2011.1.2.3
+ ~ length=275 units=Ft LineCode=OH_3p_type1
+
+//--------------------------------------------------------//
+New Line.L_2011_2012 phases=3 Bus1=bus2011.1.2.3 Bus2=bus2012.1.2.3
+ ~ length=503 units=Ft LineCode=OH_3p_type1
+
+//--------------------------------------------------------//
+New Line.L_2013_2014 phases=3 Bus1=bus2013.1.2.3 Bus2=bus2014.1.2.3
+ ~ length=268 units=Ft LineCode=OH_3p_type1
+
+//--------------------------------------------------------//--------B
+New Line.L_2014_2015 phases=1 Bus1=bus2014.2 Bus2=bus2015.2
+ ~ length=120 units=Ft LineCode=UG_1p_type2
+
+//--------------------------------------------------------//
+New Line.L_2014_2016 phases=3 Bus1=bus2014.1.2.3 Bus2=bus2016.1.2.3
+ ~ length=257 units=Ft LineCode=OH_3p_type1
+
+//--------------------------------------------------------//
+New Line.L_2016_2017 phases=3 Bus1=bus2016.1.2.3 Bus2=bus2017.1.2.3
+ ~ length=174 units=Ft LineCode=UG_3p_type2
+
+//--------------------------------------------------------//
+New Line.L_2017_2018 phases=3 Bus1=bus2017.1.2.3 Bus2=bus2018.1.2.3
+ ~ length=447 units=Ft LineCode=UG_3p_type2
+
+//--------------------------------------------------------//
+New Line.L_2013_2019 phases=3 Bus1=bus2013.1.2.3 Bus2=bus2019.1.2.3
+ ~ length=45 units=Ft LineCode=OH_3p_type1
+
+//--------------------------------------------------------//--------B
+New Line.L_2019_2020 phases=1 Bus1=bus2019.2 Bus2=bus2020.2
+ ~ length=642 units=Ft LineCode=UG_1p_type2
+
+//--------------------------------------------------------//
+New Line.L_2019_2021 phases=3 Bus1=bus2019.1.2.3 Bus2=bus2021.1.2.3
+ ~ length=43 units=Ft LineCode=OH_3p_type1
+
+//--------------------------------------------------------//--------C
+New Line.L_2021_2022 phases=1 Bus1=bus2021.3 Bus2=bus2022.3
+ ~ length=205 units=Ft LineCode=UG_1p_type2
+
+//--------------------------------------------------------//--------C
+New Line.L_2022_2023 phases=1 Bus1=bus2022.3 Bus2=bus2023.3
+ ~ length=150 units=Ft LineCode=UG_1p_type2
+
+//--------------------------------------------------------//--------C
+New Line.L_2023_2024 phases=1 Bus1=bus2023.3 Bus2=bus2024.3
+ ~ length=408 units=Ft LineCode=UG_1p_type2
+
+//--------------------------------------------------------//--------C
+New Line.L_2024_2025 phases=1 Bus1=bus2024.3 Bus2=bus2025.3
+ ~ length=331 units=Ft LineCode=UG_1p_type2
+
+//--------------------------------------------------------//
+New Line.L_2026_2027 phases=3 Bus1=bus2026.1.2.3 Bus2=bus2027.1.2.3
+ ~ length=369 units=Ft LineCode=OH_3p_type1
+
+//--------------------------------------------------------//
+New Line.L_2027_2028 phases=3 Bus1=bus2027.1.2.3 Bus2=bus2028.1.2.3
+ ~ length=285 units=Ft LineCode=UG_3p_type2
+
+//--------------------------------------------------------//
+New Line.L_2028_2029 phases=3 Bus1=bus2028.1.2.3 Bus2=bus2029.1.2.3
+ ~ length=131 units=Ft LineCode=UG_3p_type2
+
+//--------------------------------------------------------//
+New Line.L_2029_2030 phases=3 Bus1=bus2029.1.2.3 Bus2=bus2030.1.2.3
+ ~ length=165 units=Ft LineCode=UG_3p_type2
+
+//--------------------------------------------------------//
+New Line.L_2030_2031 phases=3 Bus1=bus2030.1.2.3 Bus2=bus2031.1.2.3
+ ~ length=245 units=Ft LineCode=UG_3p_type2
+
+//--------------------------------------------------------//
+New Line.L_2027_2032 phases=3 Bus1=bus2027.1.2.3 Bus2=bus2032.1.2.3
+ ~ length=149 units=Ft LineCode=OH_3p_type1
+
+//--------------------------------------------------------//
+New Line.L_2032_2033 phases=3 Bus1=bus2032.1.2.3 Bus2=bus2033.1.2.3
+ ~ length=289 units=Ft LineCode=OH_3p_type1
+
+//--------------------------------------------------------//
+New Line.L_2033_2034 phases=3 Bus1=bus2033.1.2.3 Bus2=bus2034.1.2.3
+ ~ length=185 units=Ft LineCode=OH_3p_type5
+
+//--------------------------------------------------------//
+New Line.L_2033_2035 phases=3 Bus1=bus2033.1.2.3 Bus2=bus2035.1.2.3
+ ~ length=160 units=Ft LineCode=OH_3p_type1
+
+//--------------------------------------------------------//
+New Line.L_2035_2036 phases=3 Bus1=bus2035.1.2.3 Bus2=bus2036.1.2.3
+ ~ length=160 units=Ft LineCode=OH_3p_type1
+
+//--------------------------------------------------------//
+New Line.L_2036_2037 phases=3 Bus1=bus2036.1.2.3 Bus2=bus2037.1.2.3
+ ~ length=80 units=Ft LineCode=OH_3p_type1
+
+//--------------------------------------------------------//
+New Line.L_2037_2038 phases=3 Bus1=bus2037.1.2.3 Bus2=bus2038.1.2.3
+ ~ length=192 units=Ft LineCode=OH_3p_type1
+
+//--------------------------------------------------------//
+New Line.L_2038_2039 phases=3 Bus1=bus2038.1.2.3 Bus2=bus2039.1.2.3
+ ~ length=800 units=Ft LineCode=OH_3p_type1
+
+//--------------------------------------------------------//
+New Line.L_2039_2040 phases=3 Bus1=bus2039.1.2.3 Bus2=bus2040.1.2.3
+ ~ length=309 units=Ft LineCode=OH_3p_type1
+
+//--------------------------------------------------------//
+New Line.L_2040_2041 phases=3 Bus1=bus2040.1.2.3 Bus2=bus2041.1.2.3
+ ~ length=383 units=Ft LineCode=OH_3p_type1
+
+//--------------------------------------------------------//
+New Line.L_2039_2042 phases=3 Bus1=bus2039.1.2.3 Bus2=bus2042.1.2.3
+ ~ length=35 units=Ft LineCode=UG_3p_type2
+
+//--------------------------------------------------------//
+New Line.L_2042_2043 phases=3 Bus1=bus2042.1.2.3 Bus2=bus2043.1.2.3
+ ~ length=158 units=Ft LineCode=UG_3p_type2
+
+//--------------------------------------------------------//
+New Line.L_2043_2044 phases=3 Bus1=bus2043.1.2.3 Bus2=bus2044.1.2.3
+ ~ length=342 units=Ft LineCode=UG_3p_type2
+
+//--------------------------------------------------------//----------B
+New Line.L_2044_2045 phases=1 Bus1=bus2044.2 Bus2=bus2045.2
+ ~ length=323 units=Ft LineCode=UG_1p_type2
+
+//--------------------------------------------------------//----------B
+New Line.L_2045_2046 phases=1 Bus1=bus2045.2 Bus2=bus2046.2
+ ~ length=330 units=Ft LineCode=UG_1p_type2
+
+//--------------------------------------------------------//----------B
+New Line.L_2045_2047 phases=1 Bus1=bus2045.2 Bus2=bus2047.2
+ ~ length=189 units=Ft LineCode=UG_1p_type2
+
+//--------------------------------------------------------//----------B
+New Line.L_2047_2048 phases=1 Bus1=bus2047.2 Bus2=bus2048.2
+ ~ length=259 units=Ft LineCode=UG_1p_type2
+
+//--------------------------------------------------------//
+New Line.L_2044_2049 phases=3 Bus1=bus2044.1.2.3 Bus2=bus2049.1.2.3
+ ~ length=130 units=Ft LineCode=UG_3p_type2
+
+//--------------------------------------------------------//
+New Line.L_2049_2050 phases=3 Bus1=bus2049.1.2.3 Bus2=bus2050.1.2.3
+ ~ length=124 units=Ft LineCode=UG_3p_type2
+
+//--------------------------------------------------------//
+New Line.L_2050_2051 phases=3 Bus1=bus2050.1.2.3 Bus2=bus2051.1.2.3
+ ~ length=139 units=Ft LineCode=UG_3p_type2
+
+//--------------------------------------------------------//
+New Line.L_2051_2052 phases=3 Bus1=bus2051.1.2.3 Bus2=bus2052.1.2.3
+ ~ length=134 units=Ft LineCode=UG_3p_type2
+
+//--------------------------------------------------------//
+New Line.L_2044_2053 phases=3 Bus1=bus2044.1.2.3 Bus2=bus2053.1.2.3
+ ~ length=464 units=Ft LineCode=UG_3p_type2
+
+//--------------------------------------------------------//
+New Line.L_2053_2054 phases=3 Bus1=bus2053.1.2.3 Bus2=bus2054.1.2.3
+ ~ length=139 units=Ft LineCode=UG_3p_type2
+
+//--------------------------------------------------------//
+New Line.L_2054_2055 phases=1 Bus1=bus2054.1.2.3 Bus2=bus2055.1.2.3
+ ~ length=156 units=Ft LineCode=UG_3p_type2
+
+//--------------------------------------------------------//
+New Line.L_2055_2056 phases=1 Bus1=bus2055.1.2.3 Bus2=bus2056.1.2.3
+ ~ length=204 units=Ft LineCode=UG_3p_type2
+
+//--------------------------------------------------------//
+New Line.L_2053_2057 phases=3 Bus1=bus2053.1.2.3 Bus2=bus2057.1.2.3
+ ~ length=761 units=Ft LineCode=UG_3p_type2
+
+//--------------------------------------------------------//
+New Line.L_2057_2058 phases=3 Bus1=bus2057.1.2.3 Bus2=bus2058.1.2.3
+ ~ length=407 units=Ft LineCode=UG_3p_type2
+
+//--------------------------------------------------------//
+New Line.L_2057_2059 phases=3 Bus1=bus2057.1.2.3 Bus2=bus2059.1.2.3
+ ~ length=685 units=Ft LineCode=UG_3p_type2
+
+//--------------------------------------------------------//
+New Line.L_2059_2060 phases=3 Bus1=bus2059.1.2.3 Bus2=bus2060.1.2.3
+ ~ length=304 units=Ft LineCode=UG_3p_type2
+
+
+
+
+
+
+
+//***************************************************************************************//
+//                                             Feeder C
+//***************************************************************************************//
+//--------------------------------------------------------//
+New Line.L_3001_3003 phases=3 Bus1=bus3001.1.2.3 Bus2=bus3003.1.2.3
+ ~ length=2307 units=Ft LineCode=UG_3p_type1
+
+//--------------------------------------------------------//
+New Line.L_3003_3002 phases=3 Bus1=bus3003.1.2.3 Bus2=bus3002.1.2.3
+ ~ length=85 units=Ft LineCode=UG_3p_type2
+
+//--------------------------------------------------------//
+New Line.L_3003_3004 phases=3 Bus1=bus3003.1.2.3 Bus2=bus3004.1.2.3
+ ~ length=81 units=Ft LineCode=UG_3p_type2
+
+//--------------------------------------------------------//
+New Line.L_3003_3005 phases=3 Bus1=bus3003.1.2.3 Bus2=bus3005.1.2.3
+ ~ length=1997 units=Ft LineCode=UG_3p_type1
+
+//--------------------------------------------------------//
+New Line.L_3005_3006 phases=3 Bus1=bus3005.1.2.3 Bus2=bus3006.1.2.3
+ ~ length=311 units=Ft LineCode=OH_3p_type1
+
+//--------------------------------------------------------//
+New Line.L_3006_3007 phases=3 Bus1=bus3006.1.2.3 Bus2=bus3007.1.2.3
+ ~ length=370 units=Ft LineCode=OH_3p_type1
+
+//--------------------------------------------------------//
+New Line.L_3005_3008 phases=3 Bus1=bus3005.1.2.3 Bus2=bus3008.1.2.3
+ ~ length=136 units=Ft LineCode=OH_3p_type1
+
+//--------------------------------------------------------//------------A
+New Line.L_3008_3009 phases=1 Bus1=bus3008.1 Bus2=bus3009.1
+ ~ length=161 units=Ft LineCode=OH_1p_type5
+
+//--------------------------------------------------------//------------A
+New Line.L_3009_3010 phases=1 Bus1=bus3009.1 Bus2=bus3010.1
+ ~ length=347 units=Ft LineCode=OH_1p_type5
+
+//--------------------------------------------------------//------------A
+New Line.L_3010_3011 phases=1 Bus1=bus3010.1 Bus2=bus3011.1
+ ~ length=265 units=Ft LineCode=OH_1p_type5
+
+//--------------------------------------------------------//------------A
+New Line.L_3011_3012 phases=1 Bus1=bus3011.1 Bus2=bus3012.1
+ ~ length=312 units=Ft LineCode=OH_1p_type5
+
+//--------------------------------------------------------//------------B
+New Line.L_3008_3013 phases=1 Bus1=bus3008.2 Bus2=bus3013.2
+ ~ length=170 units=Ft LineCode=OH_1p_type5
+
+//--------------------------------------------------------//------------B
+New Line.L_3013_3014 phases=1 Bus1=bus3013.2 Bus2=bus3014.2
+ ~ length=295 units=Ft LineCode=OH_1p_type5
+
+//--------------------------------------------------------//
+New Line.L_3008_3015 phases=3 Bus1=bus3008.1.2.3 Bus2=bus3015.1.2.3
+ ~ length=322 units=Ft LineCode=OH_3p_type1
+
+//--------------------------------------------------------//------------B
+New Line.L_3015_3016 phases=1 Bus1=bus3015.2 Bus2=bus3016.2
+ ~ length=210 units=Ft LineCode=OH_1p_type5
+
+//--------------------------------------------------------//------------B
+New Line.L_3016_3017 phases=1 Bus1=bus3016.2 Bus2=bus3017.2
+ ~ length=259 units=Ft LineCode=OH_1p_type5
+
+//--------------------------------------------------------//------------C
+New Line.L_3015_3018 phases=1 Bus1=bus3015.3 Bus2=bus3018.3
+ ~ length=181 units=Ft LineCode=OH_1p_type5
+
+//--------------------------------------------------------//------------C
+New Line.L_3018_3019 phases=1 Bus1=bus3018.3 Bus2=bus3019.3
+ ~ length=281 units=Ft LineCode=OH_1p_type5
+
+//--------------------------------------------------------//------------C
+New Line.L_3019_3020 phases=1 Bus1=bus3019.3 Bus2=bus3020.3
+ ~ length=307 units=Ft LineCode=OH_1p_type5
+
+//--------------------------------------------------------//------------C
+New Line.L_3020_3021 phases=1 Bus1=bus3020.3 Bus2=bus3021.3
+ ~ length=303 units=Ft LineCode=OH_1p_type5
+
+//--------------------------------------------------------//
+New Line.L_3015_3022 phases=3 Bus1=bus3015.1.2.3 Bus2=bus3022.1.2.3
+ ~ length=289 units=Ft LineCode=OH_3p_type1
+
+//--------------------------------------------------------//------------A
+New Line.L_3022_3023 phases=1 Bus1=bus3022.1 Bus2=bus3023.1
+ ~ length=181 units=Ft LineCode=OH_1p_type5
+
+//--------------------------------------------------------//------------A
+New Line.L_3023_3024 phases=1 Bus1=bus3023.1 Bus2=bus3024.1
+ ~ length=320 units=Ft LineCode=OH_1p_type5
+
+//--------------------------------------------------------//------------A
+New Line.L_3024_3025 phases=1 Bus1=bus3024.1 Bus2=bus3025.1
+ ~ length=331 units=Ft LineCode=OH_1p_type5
+
+//--------------------------------------------------------//------------A
+New Line.L_3022_3026 phases=1 Bus1=bus3022.1 Bus2=bus3026.1
+ ~ length=164 units=Ft LineCode=OH_1p_type5
+
+//--------------------------------------------------------//------------A
+New Line.L_3026_3027 phases=1 Bus1=bus3026.1 Bus2=bus3027.1
+ ~ length=368 units=Ft LineCode=OH_1p_type5
+
+//--------------------------------------------------------//------------A
+New Line.L_3027_3028 phases=1 Bus1=bus3027.1 Bus2=bus3028.1
+ ~ length=241 units=Ft LineCode=OH_1p_type5
+
+//--------------------------------------------------------//------------A
+New Line.L_3028_3029 phases=1 Bus1=bus3028.1 Bus2=bus3029.1
+ ~ length=317 units=Ft LineCode=OH_1p_type5
+
+//--------------------------------------------------------//
+New Line.L_3022_3030 phases=3 Bus1=bus3022.1.2.3 Bus2=bus3030.1.2.3
+ ~ length=304 units=Ft LineCode=OH_3p_type1
+
+//--------------------------------------------------------//
+New Line.L_3030_3035 phases=3 Bus1=bus3030.1.2.3 Bus2=bus3035.1.2.3
+ ~ length=103 units=Ft LineCode=OH_3p_type1
+
+//--------------------------------------------------------//
+New Line.L_3035_3036 phases=3 Bus1=bus3035.1.2.3 Bus2=bus3036.1.2.3
+ ~ length=271 units=Ft LineCode=OH_3p_type1
+
+//--------------------------------------------------------//
+New Line.L_3036_3037 phases=3 Bus1=bus3036.1.2.3 Bus2=bus3037.1.2.3
+ ~ length=136 units=Ft LineCode=OH_3p_type1
+
+//--------------------------------------------------------//
+New Line.L_3037_3038 phases=3 Bus1=bus3037.1.2.3 Bus2=bus3038.1.2.3
+ ~ length=252 units=Ft LineCode=OH_3p_type1
+
+//--------------------------------------------------------//
+New Line.L_3038_3039 phases=3 Bus1=bus3038.1.2.3 Bus2=bus3039.1.2.3
+ ~ length=235 units=Ft LineCode=OH_3p_type1
+
+//--------------------------------------------------------//
+New Line.L_3039_3053 phases=3 Bus1=bus3039.1.2.3 Bus2=bus3053.1.2.3
+ ~ length=263 units=Ft LineCode=OH_3p_type1
+
+//--------------------------------------------------------//
+New Line.L_3053_3054 phases=3 Bus1=bus3053.1.2.3 Bus2=bus3054.1.2.3
+ ~ length=280 units=Ft LineCode=UG_3p_type2
+
+//--------------------------------------------------------//------------B
+New Line.L_3053_3055 phases=1 Bus1=bus3053.2 Bus2=bus3055.2
+ ~ length=1335 units=Ft LineCode=UG_1p_type2
+
+//--------------------------------------------------------//------------B
+New Line.L_3055_3056 phases=1 Bus1=bus3055.2 Bus2=bus3056.2
+ ~ length=128 units=Ft LineCode=UG_1p_type2
+
+//--------------------------------------------------------//------------B
+New Line.L_3056_3057 phases=1 Bus1=bus3056.2 Bus2=bus3057.2
+ ~ length=178 units=Ft LineCode=UG_1p_type2
+
+//--------------------------------------------------------//------------B
+New Line.L_3057_3058 phases=1 Bus1=bus3057.2 Bus2=bus3058.2
+ ~ length=178 units=Ft LineCode=UG_1p_type2
+
+//--------------------------------------------------------//------------B
+New Line.L_3058_3059 phases=1 Bus1=bus3058.2 Bus2=bus3059.2
+ ~ length=274 units=Ft LineCode=UG_1p_type2
+
+//--------------------------------------------------------//------------B
+New Line.L_3059_3060 phases=1 Bus1=bus3059.2 Bus2=bus3060.2
+ ~ length=77 units=Ft LineCode=UG_1p_type2
+
+//--------------------------------------------------------//------------B
+New Line.L_3060_3061 phases=1 Bus1=bus3060.2 Bus2=bus3061.2
+ ~ length=184 units=Ft LineCode=UG_1p_type2
+
+//--------------------------------------------------------//------------B
+New Line.L_3055_3062 phases=1 Bus1=bus3055.2 Bus2=bus3062.2
+ ~ length=443 units=Ft LineCode=UG_1p_type2
+
+//--------------------------------------------------------//------------B
+New Line.L_3062_3063 phases=1 Bus1=bus3062.2 Bus2=bus3063.2
+ ~ length=198 units=Ft LineCode=UG_1p_type2
+
+//--------------------------------------------------------//------------B
+New Line.L_3063_3064 phases=1 Bus1=bus3063.2 Bus2=bus3064.2
+ ~ length=157 units=Ft LineCode=UG_1p_type2
+
+//--------------------------------------------------------//------------B
+New Line.L_3064_3065 phases=1 Bus1=bus3064.2 Bus2=bus3065.2
+ ~ length=205 units=Ft LineCode=UG_1p_type2
+
+//--------------------------------------------------------//------------B
+New Line.L_3065_3066 phases=1 Bus1=bus3065.2 Bus2=bus3066.2
+ ~ length=123 units=Ft LineCode=UG_1p_type2
+
+//--------------------------------------------------------//------------B
+New Line.L_3066_3067 phases=1 Bus1=bus3066.2 Bus2=bus3067.2
+ ~ length=274 units=Ft LineCode=UG_1p_type2
+
+//--------------------------------------------------------//
+New Line.L_3030_3040 phases=3 Bus1=bus3030.1.2.3 Bus2=bus3040.1.2.3
+ ~ length=332 units=Ft LineCode=OH_3p_type1
+
+//--------------------------------------------------------//------------C
+New Line.L_3040_3044 phases=1 Bus1=bus3040.3 Bus2=bus3044.3
+ ~ length=144 units=Ft LineCode=OH_1p_type5
+
+//--------------------------------------------------------//------------C
+New Line.L_3044_3045 phases=1 Bus1=bus3044.3 Bus2=bus3045.3
+ ~ length=393 units=Ft LineCode=OH_1p_type5
+
+//--------------------------------------------------------//------------C
+New Line.L_3040_3041 phases=1 Bus1=bus3040.3 Bus2=bus3041.3
+ ~ length=121 units=Ft LineCode=OH_1p_type5
+
+//--------------------------------------------------------//------------C
+New Line.L_3041_3042 phases=1 Bus1=bus3041.3 Bus2=bus3042.3
+ ~ length=328 units=Ft LineCode=OH_1p_type5
+
+//--------------------------------------------------------//------------C
+New Line.L_3042_3043 phases=1 Bus1=bus3042.3 Bus2=bus3043.3
+ ~ length=418 units=Ft LineCode=OH_1p_type5
+
+//--------------------------------------------------------//
+New Line.L_3040_3046 phases=3 Bus1=bus3040.1.2.3 Bus2=bus3046.1.2.3
+ ~ length=329 units=Ft LineCode=OH_3p_type1
+
+//--------------------------------------------------------//
+New Line.L_3046_3047 phases=3 Bus1=bus3046.1.2.3 Bus2=bus3047.1.2.3
+ ~ length=219 units=Ft LineCode=OH_3p_type1
+
+//--------------------------------------------------------//
+New Line.L_3046_3048 phases=3 Bus1=bus3046.1.2.3 Bus2=bus3048.1.2.3
+ ~ length=130 units=Ft LineCode=OH_3p_type1
+
+//--------------------------------------------------------//
+New Line.L_3048_3049 phases=3 Bus1=bus3048.1.2.3 Bus2=bus3049.1.2.3
+ ~ length=226 units=Ft LineCode=OH_3p_type1
+
+//--------------------------------------------------------//
+New Line.L_3049_3050 phases=3 Bus1=bus3049.1.2.3 Bus2=bus3050.1.2.3
+ ~ length=167 units=Ft LineCode=OH_3p_type1
+
+//--------------------------------------------------------//
+New Line.L_3050_3051 phases=3 Bus1=bus3050.1.2.3 Bus2=bus3051.1.2.3
+ ~ length=360 units=Ft LineCode=OH_3p_type1
+
+//--------------------------------------------------------//
+New Line.L_3051_3052 phases=3 Bus1=bus3051.1.2.3 Bus2=bus3052.1.2.3
+ ~ length=292 units=Ft LineCode=OH_3p_type1
+
+//--------------------------------------------------------//
+New Line.L_3030_3031 phases=3 Bus1=bus3030.1.2.3 Bus2=bus3031.1.2.3
+ ~ length=243 units=Ft LineCode=OH_3p_type1
+
+//--------------------------------------------------------//
+New Line.L_3031_3032 phases=3 Bus1=bus3031.1.2.3 Bus2=bus3032.1.2.3
+ ~ length=251 units=Ft LineCode=OH_3p_type1
+
+//--------------------------------------------------------//
+New Line.L_3032_3033 phases=3 Bus1=bus3032.1.2.3 Bus2=bus3033.1.2.3
+ ~ length=388 units=Ft LineCode=OH_3p_type1
+
+//--------------------------------------------------------//
+New Line.L_3033_3034 phases=3 Bus1=bus3033.1.2.3 Bus2=bus3034.1.2.3
+ ~ length=257 units=Ft LineCode=OH_3p_type1
+
+//--------------------------------------------------------//
+New Line.L_3034_3068 phases=3 Bus1=bus3034.1.2.3 Bus2=bus3068.1.2.3
+ ~ length=164 units=Ft LineCode=OH_3p_type1
+
+//--------------------------------------------------------//
+New Line.L_3068_3069 phases=3 Bus1=bus3068.1.2.3 Bus2=bus3069.1.2.3
+ ~ length=329 units=Ft LineCode=OH_3p_type1
+
+//--------------------------------------------------------//
+New Line.L_3069_3070 phases=3 Bus1=bus3069.1.2.3 Bus2=bus3070.1.2.3
+ ~ length=107 units=Ft LineCode=UG_3p_type2
+
+//--------------------------------------------------------//
+New Line.L_3070_3071 phases=3 Bus1=bus3070.1.2.3 Bus2=bus3071.1.2.3
+ ~ length=141 units=Ft LineCode=UG_3p_type2
+
+//--------------------------------------------------------//
+New Line.L_3071_3072 phases=3 Bus1=bus3071.1.2.3 Bus2=bus3072.1.2.3
+ ~ length=90 units=Ft LineCode=UG_3p_type2
+
+//--------------------------------------------------------//
+New Line.L_3069_3073 phases=3 Bus1=bus3069.1.2.3 Bus2=bus3073.1.2.3
+ ~ length=20 units=Ft LineCode=OH_3p_type1
+
+//--------------------------------------------------------//
+New Line.L_3073_3074 phases=3 Bus1=bus3073.1.2.3 Bus2=bus3074.1.2.3
+ ~ length=340 units=Ft LineCode=OH_3p_type1
+
+//--------------------------------------------------------//
+New Line.L_3068_3075 phases=3 Bus1=bus3068.1.2.3 Bus2=bus3075.1.2.3
+ ~ length=188 units=Ft LineCode=OH_3p_type1
+
+//--------------------------------------------------------//
+New Line.L_3076_3077 phases=3 Bus1=bus3076.1.2.3 Bus2=bus3077.1.2.3
+ ~ length=877 units=Ft LineCode=OH_3p_type1
+
+//--------------------------------------------------------//
+New Line.L_3077_3078 phases=3 Bus1=bus3077.1.2.3 Bus2=bus3078.1.2.3
+ ~ length=80 units=Ft LineCode=OH_3p_type1
+
+//--------------------------------------------------------//
+New Line.L_3076_3079 phases=3 Bus1=bus3076.1.2.3 Bus2=bus3079.1.2.3
+ ~ length=191 units=Ft LineCode=OH_3p_type1
+
+//--------------------------------------------------------//
+New Line.L_3079_3080 phases=3 Bus1=bus3079.1.2.3 Bus2=bus3080.1.2.3
+ ~ length=604 units=Ft LineCode=OH_3p_type1
+
+//--------------------------------------------------------//
+New Line.L_3080_3081 phases=3 Bus1=bus3080.1.2.3 Bus2=bus3081.1.2.3
+ ~ length=195 units=Ft LineCode=OH_3p_type1
+
+//--------------------------------------------------------//
+New Line.L_3080_3082 phases=3 Bus1=bus3080.1.2.3 Bus2=bus3082.1.2.3
+ ~ length=540 units=Ft LineCode=OH_3p_type1
+
+//--------------------------------------------------------//------------A
+New Line.L_3082_3083 phases=1 Bus1=bus3082.1 Bus2=bus3083.1
+ ~ length=125 units=Ft LineCode=UG_1p_type2
+
+//--------------------------------------------------------//------------A
+New Line.L_3083_3084 phases=1 Bus1=bus3083.1 Bus2=bus3084.1
+ ~ length=196 units=Ft LineCode=UG_1p_type2
+
+//--------------------------------------------------------//------------A
+New Line.L_3084_3085 phases=1 Bus1=bus3084.1 Bus2=bus3085.1
+ ~ length=515 units=Ft LineCode=UG_1p_type2
+
+//--------------------------------------------------------//------------A
+New Line.L_3085_3086 phases=1 Bus1=bus3085.1 Bus2=bus3086.1
+ ~ length=338 units=Ft LineCode=UG_1p_type2
+
+//--------------------------------------------------------//------------A
+New Line.L_3086_3087 phases=1 Bus1=bus3086.1 Bus2=bus3087.1
+ ~ length=239 units=Ft LineCode=UG_1p_type2
+
+//--------------------------------------------------------//------------A
+New Line.L_3087_3088 phases=1 Bus1=bus3087.1 Bus2=bus3088.1
+ ~ length=420 units=Ft LineCode=UG_1p_type2
+
+//--------------------------------------------------------//------------A
+New Line.L_3088_3089 phases=1 Bus1=bus3088.1 Bus2=bus3089.1
+ ~ length=112 units=Ft LineCode=UG_1p_type2
+
+//--------------------------------------------------------//------------A
+New Line.L_3089_3090 phases=1 Bus1=bus3089.1 Bus2=bus3090.1
+ ~ length=565 units=Ft LineCode=UG_1p_type2
+
+//--------------------------------------------------------//------------A
+New Line.L_3090_3091 phases=1 Bus1=bus3090.1 Bus2=bus3091.1
+ ~ length=222 units=Ft LineCode=UG_1p_type2
+
+//--------------------------------------------------------//
+New Line.L_3082_3092 phases=3 Bus1=bus3082.1.2.3 Bus2=bus3092.1.2.3
+ ~ length=185 units=Ft LineCode=UG_3p_type2
+
+//--------------------------------------------------------//------------A
+New Line.L_3092_3093 phases=1 Bus1=bus3092.1 Bus2=bus3093.1
+ ~ length=230 units=Ft LineCode=UG_1p_type2
+
+//--------------------------------------------------------//------------A
+New Line.L_3093_3094 phases=1 Bus1=bus3093.1 Bus2=bus3094.1
+ ~ length=125 units=Ft LineCode=UG_1p_type2
+
+//--------------------------------------------------------//------------A
+New Line.L_3094_3095 phases=1 Bus1=bus3094.1 Bus2=bus3095.1
+ ~ length=65 units=Ft LineCode=UG_1p_type2
+
+//--------------------------------------------------------//------------A
+New Line.L_3095_3096 phases=1 Bus1=bus3095.1 Bus2=bus3096.1
+ ~ length=296 units=Ft LineCode=UG_1p_type2
+
+//--------------------------------------------------------//------------A
+New Line.L_3096_3097 phases=1 Bus1=bus3096.1 Bus2=bus3097.1
+ ~ length=117 units=Ft LineCode=UG_1p_type2
+
+//--------------------------------------------------------//------------B
+New Line.L_3092_3098 phases=1 Bus1=bus3092.2 Bus2=bus3098.2
+ ~ length=284 units=Ft LineCode=UG_1p_type2
+
+//--------------------------------------------------------//------------B
+New Line.L_3098_3099 phases=1 Bus1=bus3098.2 Bus2=bus3099.2
+ ~ length=368 units=Ft LineCode=UG_1p_type2
+
+//--------------------------------------------------------//
+New Line.L_3092_3100 phases=3 Bus1=bus3092.1.2.3 Bus2=bus3100.1.2.3
+ ~ length=91 units=Ft LineCode=UG_3p_type2
+
+//--------------------------------------------------------//------------C
+New Line.L_3100_3101 phases=1 Bus1=bus3100.3 Bus2=bus3101.3
+ ~ length=157 units=Ft LineCode=UG_1p_type2
+
+//--------------------------------------------------------//------------C
+New Line.L_3101_3102 phases=1 Bus1=bus3101.3 Bus2=bus3102.3
+ ~ length=225 units=Ft LineCode=UG_1p_type2
+
+//--------------------------------------------------------//------------C
+New Line.L_3102_3103 phases=1 Bus1=bus3102.3 Bus2=bus3103.3
+ ~ length=134 units=Ft LineCode=UG_1p_type2
+
+//--------------------------------------------------------//------------C
+New Line.L_3100_3104 phases=1 Bus1=bus3100.3 Bus2=bus3104.3
+ ~ length=223 units=Ft LineCode=UG_1p_type2
+
+//--------------------------------------------------------//------------C
+New Line.L_3104_3105 phases=1 Bus1=bus3104.3 Bus2=bus3105.3
+ ~ length=120 units=Ft LineCode=UG_1p_type2
+
+//--------------------------------------------------------//------------C
+New Line.L_3105_3106 phases=1 Bus1=bus3105.3 Bus2=bus3106.3
+ ~ length=181 units=Ft LineCode=UG_1p_type2
+
+//--------------------------------------------------------//
+New Line.L_3082_3107 phases=3 Bus1=bus3082.1.2.3 Bus2=bus3107.1.2.3
+ ~ length=1461 units=Ft LineCode=UG_3p_type1
+
+//--------------------------------------------------------//------------A
+New Line.L_3107_3108 phases=1 Bus1=bus3107.1 Bus2=bus3108.1
+ ~ length=466 units=Ft LineCode=UG_1p_type2
+
+//--------------------------------------------------------//------------A
+New Line.L_3108_3109 phases=1 Bus1=bus3108.1 Bus2=bus3109.1
+ ~ length=136 units=Ft LineCode=UG_1p_type2
+
+//--------------------------------------------------------//------------A
+New Line.L_3109_3110 phases=1 Bus1=bus3109.1 Bus2=bus3110.1
+ ~ length=152 units=Ft LineCode=UG_1p_type2
+
+//--------------------------------------------------------//------------A
+New Line.L_3110_3111 phases=1 Bus1=bus3110.1 Bus2=bus3111.1
+ ~ length=276 units=Ft LineCode=UG_1p_type2
+
+//--------------------------------------------------------//------------A
+New Line.L_3111_3112 phases=1 Bus1=bus3111.1 Bus2=bus3112.1
+ ~ length=328 units=Ft LineCode=UG_1p_type2
+
+//--------------------------------------------------------//------------B
+New Line.L_3107_3113 phases=1 Bus1=bus3107.2 Bus2=bus3113.2
+ ~ length=245 units=Ft LineCode=UG_1p_type2
+
+//--------------------------------------------------------//------------B
+New Line.L_3113_3114 phases=1 Bus1=bus3113.2 Bus2=bus3114.2
+ ~ length=149 units=Ft LineCode=UG_1p_type2
+
+//--------------------------------------------------------//------------B
+New Line.L_3114_3115 phases=1 Bus1=bus3114.2 Bus2=bus3115.2
+ ~ length=331 units=Ft LineCode=UG_1p_type2
+
+//--------------------------------------------------------//------------B
+New Line.L_3113_3116 phases=1 Bus1=bus3113.2 Bus2=bus3116.2
+ ~ length=456 units=Ft LineCode=UG_1p_type2
+
+//--------------------------------------------------------//------------B
+New Line.L_3116_3117 phases=1 Bus1=bus3116.2 Bus2=bus3117.2
+ ~ length=112 units=Ft LineCode=UG_1p_type2
+
+//--------------------------------------------------------//
+New Line.L_3107_3118 phases=3 Bus1=bus3107.1.2.3 Bus2=bus3118.1.2.3
+ ~ length=2267 units=Ft LineCode=UG_3p_type1
+
+//--------------------------------------------------------//------------B
+New Line.L_3118_3119 phases=1 Bus1=bus3118.2 Bus2=bus3119.2
+ ~ length=464 units=Ft LineCode=UG_1p_type2
+
+//--------------------------------------------------------//------------B
+New Line.L_3119_3120 phases=1 Bus1=bus3119.2 Bus2=bus3120.2
+ ~ length=350 units=Ft LineCode=UG_1p_type2
+
+//--------------------------------------------------------//------------B
+New Line.L_3120_3121 phases=1 Bus1=bus3120.2 Bus2=bus3121.2
+ ~ length=206 units=Ft LineCode=UG_1p_type2
+
+//--------------------------------------------------------//------------B
+New Line.L_3121_3122 phases=1 Bus1=bus3121.2 Bus2=bus3122.2
+ ~ length=177 units=Ft LineCode=UG_1p_type2
+
+//--------------------------------------------------------//------------B
+New Line.L_3119_3123 phases=1 Bus1=bus3119.2 Bus2=bus3123.2
+ ~ length=91 units=Ft LineCode=UG_1p_type2
+
+//--------------------------------------------------------//------------B
+New Line.L_3123_3124 phases=1 Bus1=bus3123.2 Bus2=bus3124.2
+ ~ length=67 units=Ft LineCode=UG_1p_type2
+
+//--------------------------------------------------------//------------B
+New Line.L_3124_3125 phases=1 Bus1=bus3124.2 Bus2=bus3125.2
+ ~ length=151 units=Ft LineCode=UG_1p_type2
+
+//--------------------------------------------------------//------------B
+New Line.L_3125_3126 phases=1 Bus1=bus3125.2 Bus2=bus3126.2
+ ~ length=343 units=Ft LineCode=UG_1p_type2
+
+//--------------------------------------------------------//------------B
+New Line.L_3126_3127 phases=1 Bus1=bus3126.2 Bus2=bus3127.2
+ ~ length=234 units=Ft LineCode=UG_1p_type2
+
+//--------------------------------------------------------//------------B
+New Line.L_3127_3128 phases=1 Bus1=bus3127.2 Bus2=bus3128.2
+ ~ length=238 units=Ft LineCode=UG_1p_type2
+
+//--------------------------------------------------------//------------B
+New Line.L_3128_3129 phases=1 Bus1=bus3128.2 Bus2=bus3129.2
+ ~ length=243 units=Ft LineCode=UG_1p_type2
+
+//--------------------------------------------------------//------------B
+New Line.L_3129_3130 phases=1 Bus1=bus3129.2 Bus2=bus3130.2
+ ~ length=230 units=Ft LineCode=UG_1p_type2
+
+//--------------------------------------------------------//------------B
+New Line.L_3130_3131 phases=1 Bus1=bus3130.2 Bus2=bus3131.2
+ ~ length=194 units=Ft LineCode=UG_1p_type2
+
+//--------------------------------------------------------//------------A
+New Line.L_3118_3132 phases=1 Bus1=bus3118.1 Bus2=bus3132.1
+ ~ length=501 units=Ft LineCode=UG_1p_type2
+
+//--------------------------------------------------------//------------A
+New Line.L_3132_3133 phases=1 Bus1=bus3132.1 Bus2=bus3133.1
+ ~ length=145 units=Ft LineCode=UG_1p_type2
+
+//--------------------------------------------------------//------------A
+New Line.L_3133_3134 phases=1 Bus1=bus3133.1 Bus2=bus3134.1
+ ~ length=281 units=Ft LineCode=UG_1p_type2
+
+//--------------------------------------------------------//------------A
+New Line.L_3134_3135 phases=1 Bus1=bus3134.1 Bus2=bus3135.1
+ ~ length=240 units=Ft LineCode=UG_1p_type2
+
+//--------------------------------------------------------//------------A
+New Line.L_3135_3136 phases=1 Bus1=bus3135.1 Bus2=bus3136.1
+ ~ length=367 units=Ft LineCode=UG_1p_type2
+
+//--------------------------------------------------------//------------A
+New Line.L_3133_3137 phases=1 Bus1=bus3133.1 Bus2=bus3137.1
+ ~ length=252 units=Ft LineCode=UG_1p_type2
+
+//--------------------------------------------------------//------------A
+New Line.L_3137_3138 phases=1 Bus1=bus3137.1 Bus2=bus3138.1
+ ~ length=351 units=Ft LineCode=UG_1p_type2
+
+//--------------------------------------------------------//------------A
+New Line.L_3138_3139 phases=1 Bus1=bus3138.1 Bus2=bus3139.1
+ ~ length=289 units=Ft LineCode=UG_1p_type2
+
+//--------------------------------------------------------//------------C
+New Line.L_3107_3140 phases=1 Bus1=bus3107.3 Bus2=bus3140.3
+ ~ length=255 units=Ft LineCode=UG_1p_type2
+
+//--------------------------------------------------------//------------C
+New Line.L_3140_3141 phases=1 Bus1=bus3140.3 Bus2=bus3141.3
+ ~ length=134 units=Ft LineCode=UG_1p_type2
+
+//--------------------------------------------------------//------------C
+New Line.L_3141_3142 phases=1 Bus1=bus3141.3 Bus2=bus3142.3
+ ~ length=193 units=Ft LineCode=UG_1p_type2
+
+//--------------------------------------------------------//------------C
+New Line.L_3142_3143 phases=1 Bus1=bus3142.3 Bus2=bus3143.3
+ ~ length=202 units=Ft LineCode=UG_1p_type2
+
+//--------------------------------------------------------//------------C
+New Line.L_3140_3148 phases=1 Bus1=bus3140.3 Bus2=bus3148.3
+ ~ length=147 units=Ft LineCode=UG_1p_type2
+
+//--------------------------------------------------------//------------C
+New Line.L_3148_3149 phases=1 Bus1=bus3148.3 Bus2=bus3149.3
+ ~ length=253 units=Ft LineCode=UG_1p_type2
+
+//--------------------------------------------------------//------------C
+New Line.L_3149_3150 phases=1 Bus1=bus3149.3 Bus2=bus3150.3
+ ~ length=139 units=Ft LineCode=UG_1p_type2
+
+//--------------------------------------------------------//------------C
+New Line.L_3150_3151 phases=1 Bus1=bus3150.3 Bus2=bus3151.3
+ ~ length=156 units=Ft LineCode=UG_1p_type2
+
+//--------------------------------------------------------//------------C
+New Line.L_3151_3152 phases=1 Bus1=bus3151.3 Bus2=bus3152.3
+ ~ length=260 units=Ft LineCode=UG_1p_type2
+
+//--------------------------------------------------------//------------C
+New Line.L_3152_3153 phases=1 Bus1=bus3152.3 Bus2=bus3153.3
+ ~ length=139 units=Ft LineCode=UG_1p_type2
+
+//--------------------------------------------------------//------------C
+New Line.L_3153_3154 phases=1 Bus1=bus3153.3 Bus2=bus3154.3
+ ~ length=119 units=Ft LineCode=UG_1p_type2
+
+//--------------------------------------------------------//------------C
+New Line.L_3154_3155 phases=1 Bus1=bus3154.3 Bus2=bus3155.3
+ ~ length=505 units=Ft LineCode=UG_1p_type2
+
+//--------------------------------------------------------//------------C
+New Line.L_3140_3156 phases=1 Bus1=bus3140.3 Bus2=bus3156.3
+ ~ length=319 units=Ft LineCode=UG_1p_type2
+
+//--------------------------------------------------------//------------C
+New Line.L_3156_3144 phases=1 Bus1=bus3156.3 Bus2=bus3144.3
+ ~ length=122 units=Ft LineCode=UG_1p_type2
+
+//--------------------------------------------------------//------------C
+New Line.L_3144_3145 phases=1 Bus1=bus3144.3 Bus2=bus3145.3
+ ~ length=178 units=Ft LineCode=UG_1p_type2
+
+//--------------------------------------------------------//------------C
+New Line.L_3145_3146 phases=1 Bus1=bus3145.3 Bus2=bus3146.3
+ ~ length=178 units=Ft LineCode=UG_1p_type2
+
+//--------------------------------------------------------//------------C
+New Line.L_3146_3147 phases=1 Bus1=bus3146.3 Bus2=bus3147.3
+ ~ length=178 units=Ft LineCode=UG_1p_type2
+
+//--------------------------------------------------------//------------C
+New Line.L_3156_3157 phases=1 Bus1=bus3156.3 Bus2=bus3157.3
+ ~ length=153 units=Ft LineCode=UG_1p_type2
+
+//--------------------------------------------------------//------------C
+New Line.L_3157_3158 phases=1 Bus1=bus3157.3 Bus2=bus3158.3
+ ~ length=295 units=Ft LineCode=UG_1p_type2
+
+//--------------------------------------------------------//------------C
+New Line.L_3158_3159 phases=1 Bus1=bus3158.3 Bus2=bus3159.3
+ ~ length=257 units=Ft LineCode=UG_1p_type2
+
+//--------------------------------------------------------//------------C
+New Line.L_3159_3160 phases=1 Bus1=bus3159.3 Bus2=bus3160.3
+ ~ length=243 units=Ft LineCode=UG_1p_type2
+
+//--------------------------------------------------------//------------C
+New Line.L_3160_3161 phases=1 Bus1=bus3160.3 Bus2=bus3161.3
+ ~ length=237 units=Ft LineCode=UG_1p_type2
+
+//--------------------------------------------------------//------------C
+New Line.L_3161_3162 phases=1 Bus1=bus3161.3 Bus2=bus3162.3
+ ~ length=176 units=Ft LineCode=UG_1p_type2
+
+
+// This file is to define the parameters of circuit breakers.
+
+
+//---------------------Circuit Breakers of Feeder A----------------------// 
+New Line.CB_101  Phases=3  Bus1=bus1.1.2.3   Bus2=bus1001.1.2.3  Switch=y  r1=1e-4  r0=1e-4  x1=0  x0=0  c1=0  c0=0
+New Line.CB_102  Phases=3  Bus1=bus1010.1.2.3   Bus2=bus1010.4.5.6  Switch=y  r1=1e-4  r0=1e-4  x1=0  x0=0  c1=0  c0=0   ! Bus2 is supposed to connect to bus2057.1.2.3 when reconfiguring, normally open
+! Circuit breaker name, number of phases, 1st bus, 2nd bus, this line is a switch, positive-sequence resistance per uint length, zero-sequence resistance per uint length, positive-sequence reactance per uint length, zero-sequence reactance per uint length, positive-sequence capacitance per uint length, zero-sequence capacitance per uint length. Note that we use Bus2=bus2057.4.5.6 to achieve a normally open circuit breaker, i.e. connecting the energized nodes (bus1010.1.2.3) to non-energized nodes (bus2057.4.5.6).
+
+
+//---------------------Circuit Breakers of Feeder B----------------------// 
+New Line.CB_201  Phases=3  Bus1=bus1.1.2.3      Bus2=bus2001.1.2.3  Switch=y  r1=1e-4  r0=1e-4  x1=0  x0=0  c1=0  c0=0
+New Line.CB_202  Phases=3  Bus1=bus2012.1.2.3   Bus2=bus2013.1.2.3  Switch=y  r1=1e-4  r0=1e-4  x1=0  x0=0  c1=0  c0=0
+New Line.CB_203  Phases=3  Bus1=bus2021.1.2.3   Bus2=bus2026.1.2.3  Switch=y  r1=1e-4  r0=1e-4  x1=0  x0=0  c1=0  c0=0
+New Line.CB_204  Phases=3  Bus1=bus2013.1.2.3   Bus2=bus2013.4.5.6  Switch=y  r1=1e-4  r0=1e-4  x1=0  x0=0  c1=0  c0=0  ! Bus2 is supposed to connect to bus3005.1.2.3 when reconfiguring, normally open
+
+
+//---------------------Circuit Breakers of Feeder C----------------------// 
+New Line.CB_301  Phases=3  Bus1=bus1.1.2.3      Bus2=bus3001.1.2.3  Switch=y  r1=1e-4  r0=1e-4  x1=0  x0=0  c1=0  c0=0
+New Line.CB_302  Phases=3  Bus1=bus3075.1.2.3   Bus2=bus3076.1.2.3  Switch=y  r1=1e-4  r0=1e-4  x1=0  x0=0  c1=0  c0=0
+New Line.CB_303  Phases=3  Bus1=bus3081.1.2.3   Bus2=bus3081.4.5.6  Switch=y  r1=1e-4  r0=1e-4  x1=0  x0=0  c1=0  c0=0   ! Bus2 is supposed to connect to bus2016.1.2.3 when reconfiguring, normally open
+
+// This file is to define loads with a variety of phase configurations.
+
+//***************************************************************************************//
+//                                             Feeder A
+//***************************************************************************************//
+//----------------------------------------------------------------------------------------------------------------------//
+New  Load.Load_1003  phases=3  conn=wye  bus1=T_bus1003_L.1.2.3.0  kV=0.208  kW=15.290000000000001    Kvar=3.832035216364534 
+! Load name, number of phses, connection, bus, kV rating, active power, reactive power
+
+//----------------------------------------------------------------------------------------------------------------------//
+New  Load.Load_1004  phases=3  conn=wye  bus1=T_bus1004_L.1.2.3.0  kV=0.208  kW=6.892000000000000    Kvar=3.337947946542479
+
+//----------------------------------------------------------------------------------------------------------------------//
+New  Load.Load_1005  phases=3  conn=wye  bus1=T_bus1005_L.1.2.3.0  kV=0.208  kW=4.916000000000000    Kvar=1.942927521885772
+
+//----------------------------------------------------------------------------------------------------------------------// 
+New  Load.Load_1006  phases=1  conn=delta  bus1=T_bus1006_L.1.2  kV=0.208  kW=5.040000000000000    Kvar=2.296291839688011
+
+//----------------------------------------------------------------------------------------------------------------------// 
+New  Load.Load_1007  phases=1  conn=delta  bus1=T_bus1007_L.1.2  kV=0.208  kW=4.163000000000000    Kvar=2.016232922439980
+
+//----------------------------------------------------------------------------------------------------------------------//
+New  Load.Load_1008  phases=3  conn=wye  bus1=T_bus1008_L.1.2.3.0  kV=0.208  kW=14.096000000000000    Kvar=6.422327335762342
+
+//----------------------------------------------------------------------------------------------------------------------//
+New  Load.Load_1009  phases=3  conn=wye  bus1=T_bus1009_L.1.2.3.0  kV=0.208  kW=17.081000000000000    Kvar=6.750843165445662
+
+//----------------------------------------------------------------------------------------------------------------------//
+New  Load.Load_1010  phases=3  conn=wye  bus1=T_bus1010_L.1.2.3.0  kV=0.208  kW=7.136000000000000    Kvar=2.820327663990413
+
+//----------------------------------------------------------------------------------------------------------------------// 
+New  Load.Load_1011  phases=2  conn=wye  bus1=T_bus1011_L.1.2  kV=0.208  kW=3.125000000000000    Kvar=1.027137828683947
+
+//----------------------------------------------------------------------------------------------------------------------// 
+New  Load.Load_1012  phases=2  conn=wye  bus1=T_bus1012_L.1.2  kV=0.208  kW=3.083000000000000    Kvar=1.118979580058769 
+
+//----------------------------------------------------------------------------------------------------------------------//
+New  Load.Load_1013  phases=3  conn=wye  bus1=T_bus1013_L.1.2.3.0  kV=0.208  kW=1.537000000000    Kvar=0.448291666666667 
+
+//----------------------------------------------------------------------------------------------------------------------// 
+New  Load.Load_1014  phases=2  conn=wye  bus1=T_bus1014_L.1.2  kV=0.208  kW=0.458000000000000    Kvar=0.195107182990382
+
+//----------------------------------------------------------------------------------------------------------------------// 
+New  Load.Load_1015  phases=2  conn=wye  bus1=T_bus1015_L.1.2  kV=0.208  kW=0.793000000000000   Kvar=0.161025517882765 
+
+//----------------------------------------------------------------------------------------------------------------------// 
+New  Load.Load_1016  phases=2  conn=wye  bus1=T_bus1016_L.1.2  kV=0.208  kW=3.083000000000000    Kvar=1.493165049215099 
+
+//----------------------------------------------------------------------------------------------------------------------// 
+New  Load.Load_1017  phases=2  conn=wye  bus1=T_bus1017_L.1.2  kV=0.208  kW=2.131000000000000    Kvar=0.621541666666667
+
+
+
+
+
+
+//***************************************************************************************//
+//                                             Feeder B
+//***************************************************************************************//
+//----------------------------------------------------------------------------------------------------------------------//
+New  Load.Load_2002  phases=3  conn=wye  bus1=T_bus2002_L.1.2.3.0  kV=0.208  kW=27.940000000000000    Kvar=10.140865866637050 
+
+//----------------------------------------------------------------------------------------------------------------------//
+New  Load.Load_2003  phases=3  conn=wye  bus1=T_bus2003_L.1.2.3.0  kV=0.208  kW=14.286000000000001    Kvar=3.580409097513652 
+
+//----------------------------------------------------------------------------------------------------------------------//
+New  Load.Load_2005  phases=3  conn=wye  bus1=T_bus2005_L.1.2.3.0  kV=0.208  kW=8.947000000000000    Kvar=3.536080662797397 
+
+//----------------------------------------------------------------------------------------------------------------------// 
+New  Load.Load_2008  phases=2  conn=wye  bus1=T_bus2008_L.1.2  kV=0.208  kW=2.067000000000000    Kvar=0.941753022348238
+
+//----------------------------------------------------------------------------------------------------------------------// 
+New  Load.Load_2009  phases=2  conn=wye  bus1=T_bus2009_L.1.2  kV=0.208  kW=1.246000000000000    Kvar=0.492450710388461
+
+//----------------------------------------------------------------------------------------------------------------------//
+New  Load.Load_2010  phases=3  conn=wye  bus1=T_bus2010_L.1.2.3.0  kV=0.208  kW=2.290000000000000    Kvar=0.905065912351184
+
+//----------------------------------------------------------------------------------------------------------------------//
+New  Load.Load_2011  phases=3  conn=wye  bus1=T_bus2011_L.1.2.3.0  kV=0.208  kW=5.367999999999999    Kvar=1.764376276600136 
+
+//----------------------------------------------------------------------------------------------------------------------// 
+New  Load.Load_2014  phases=2  conn=wye  bus1=T_bus2014_L.1.2  kV=0.208  kW=2.816000000000000    Kvar=0.821333333333334
+
+//----------------------------------------------------------------------------------------------------------------------// 
+New  Load.Load_2015  phases=2  conn=wye  bus1=T_bus2015_L.1.2  kV=0.208  kW=1.490000000000000    Kvar=0.634737342042945
+
+//----------------------------------------------------------------------------------------------------------------------//
+New  Load.Load_2016  phases=2  conn=wye  bus1=T_bus2016_L.1.2  kV=0.208  kW=1.640000000000000    Kvar=0.333016203439767
+
+//----------------------------------------------------------------------------------------------------------------------// 
+New  Load.Load_2017  phases=2  conn=wye  bus1=T_bus2017_L.1.2  kV=0.208  kW=5.125000000000000    Kvar=2.482150787293994
+
+//----------------------------------------------------------------------------------------------------------------------// 
+New  Load.Load_2018  phases=2  conn=wye  bus1=T_bus2018_L.1.2  kV=0.208  kW=2.809000000000000    Kvar=0.819291666666667
+
+//----------------------------------------------------------------------------------------------------------------------// 
+New  Load.Load_2020  phases=2  conn=wye  bus1=T_bus2020_L.1.2  kV=0.208  kW=3.086000000000000    Kvar=1.014319148581971
+
+//----------------------------------------------------------------------------------------------------------------------// 
+New  Load.Load_2022  phases=2  conn=wye  bus1=T_bus2022_L.1.2  kV=0.208  kW=2.728000000000000    Kvar=1.242913519577161
+
+//----------------------------------------------------------------------------------------------------------------------// 
+New  Load.Load_2023  phases=2  conn=wye  bus1=T_bus2023_L.1.2  kV=0.208  kW=0.728000000000000    Kvar=0.147826704941555
+
+//----------------------------------------------------------------------------------------------------------------------// 
+New  Load.Load_2024  phases=2  conn=wye  bus1=T_bus2024_L.1.2  kV=0.208  kW=2.549000000000000    Kvar=0.363212828405741
+
+//----------------------------------------------------------------------------------------------------------------------// 
+New  Load.Load_2025  phases=2  conn=wye  bus1=T_bus2025_L.1.2  kV=0.208  kW=2.701000000000000    Kvar=1.067503506227313
+
+//----------------------------------------------------------------------------------------------------------------------// 
+New  Load.Load_2028  phases=2  conn=wye  bus1=T_bus2028_L.1.2  kV=0.208  kW=0.000000000000000    Kvar=0.0000000000000000
+
+//----------------------------------------------------------------------------------------------------------------------//
+New  Load.Load_2029  phases=3  conn=wye  bus1=T_bus2029_L.1.2.3.0  kV=0.208  kW=9.427000000000000    Kvar=1.914233993796757 
+
+//----------------------------------------------------------------------------------------------------------------------//
+New  Load.Load_2030  phases=3  conn=wye  bus1=T_bus2030_L.1.2.3.0  kV=0.208  kW=5.331000000000000    Kvar=2.581921140890592 
+
+//----------------------------------------------------------------------------------------------------------------------// 
+New  Load.Load_2031  phases=2  conn=wye  bus1=T_bus2031_L.1.2  kV=0.208  kW=3.279000000000000    Kvar=1.588092181763319
+
+//----------------------------------------------------------------------------------------------------------------------//
+New  Load.Load_2032  phases=3  conn=wye  bus1=T_bus2032_L.1.2.3.0  kV=0.208  kW=2.217000000000000    Kvar=1.010095041386571 
+
+//----------------------------------------------------------------------------------------------------------------------//
+New  Load.Load_2034  phases=3  conn=wye  bus1=T_bus2034_L.1.2.3.0  kV=0.208  kW=3.621000000000000    Kvar=1.753730341617864 
+
+//----------------------------------------------------------------------------------------------------------------------//
+New  Load.Load_2035  phases=3  conn=wye  bus1=T_bus2035_L.1.2.3.0  kV=0.208  kW=3.931000000000000    Kvar=1.426762481093423 
+
+//----------------------------------------------------------------------------------------------------------------------//
+New  Load.Load_2037  phases=3  conn=wye  bus1=T_bus2037_L.1.2.3.0  kV=0.208  kW=3.941000000000000    Kvar=1.295344058509899 
+
+//----------------------------------------------------------------------------------------------------------------------//
+New  Load.Load_2040  phases=3  conn=wye  bus1=T_bus2040_L.1.2.3.0  kV=0.208  kW=81.759999999999990    Kvar=23.846666666666675 
+
+//----------------------------------------------------------------------------------------------------------------------//
+New  Load.Load_2041  phases=3  conn=wye  bus1=T_bus2041_L.1.2.3.0  kV=0.208  kW=1.919000000000000    Kvar=0.389669569756654 
+
+//----------------------------------------------------------------------------------------------------------------------//
+New  Load.Load_2042  phases=3  conn=wye  bus1=T_bus2042_L.1.2.3.0  kV=0.208  kW=4.223000000000000    Kvar=2.045292248730251 
+
+//----------------------------------------------------------------------------------------------------------------------//
+New  Load.Load_2043  phases=3  conn=wye  bus1=T_bus2043_L.1.2.3.0  kV=0.208  kW=6.509000000000000    Kvar=1.631309170916727 
+
+//----------------------------------------------------------------------------------------------------------------------//
+New  Load.Load_2045  phases=2  conn=wye  bus1=T_bus2045_L.1.2  kV=0.208  kW=2.175000000000000    Kvar=0.545106382968794
+
+//----------------------------------------------------------------------------------------------------------------------// 
+New  Load.Load_2046  phases=2  conn=wye  bus1=T_bus2046_L.1.2  kV=0.208  kW=6.621000000000000    Kvar=2.820534189037812
+
+//----------------------------------------------------------------------------------------------------------------------// 
+New  Load.Load_2047  phases=2  conn=wye  bus1=T_bus2047_L.1.2  kV=0.208  kW=5.512000000000001    Kvar=1.381437417436319
+
+//----------------------------------------------------------------------------------------------------------------------// 
+New  Load.Load_2048  phases=2  conn=wye  bus1=T_bus2048_L.1.2  kV=0.208  kW=3.764000000000000    Kvar=1.714929064401919
+
+//----------------------------------------------------------------------------------------------------------------------// 
+New  Load.Load_2049  phases=2  conn=wye  bus1=T_bus2049_L.1.2  kV=0.208  kW=3.538000000000000    Kvar=1.284122528137505
+
+//----------------------------------------------------------------------------------------------------------------------// 
+New  Load.Load_2050  phases=2  conn=wye  bus1=T_bus2050_L.1.2  kV=0.208  kW=3.747000000000000    Kvar=0.533918582987961
+
+//----------------------------------------------------------------------------------------------------------------------// 
+New  Load.Load_2051  phases=2  conn=wye  bus1=T_bus2051_L.1.2  kV=0.208  kW=5.778000000000001    Kvar=2.461417692834991
+
+//----------------------------------------------------------------------------------------------------------------------//
+New  Load.Load_2052  phases=3  conn=wye  bus1=T_bus2052_L.1.2.3.0  kV=0.208  kW=40.029000000000000    Kvar=17.052282593716143 
+
+//----------------------------------------------------------------------------------------------------------------------//
+New  Load.Load_2053  phases=3  conn=wye  bus1=T_bus2053_L.1.2.3.0  kV=0.208  kW=4.280000000000000    Kvar=1.950025609893787 
+
+//----------------------------------------------------------------------------------------------------------------------// 
+New  Load.Load_2054  phases=2  conn=wye  bus1=T_bus2054_L.1.2  kV=0.208  kW=7.159000000000000    Kvar=3.467261948534187
+
+//----------------------------------------------------------------------------------------------------------------------// 
+New  Load.Load_2055  phases=2  conn=wye  bus1=T_bus2055_L.1.2  kV=0.208  kW=4.260000000000000    Kvar=1.242500000000000
+
+//----------------------------------------------------------------------------------------------------------------------// 
+New  Load.Load_2056  phases=2  conn=wye  bus1=T_bus2056_L.1.2  kV=0.208  kW=4.723000000000001    Kvar=2.011989574811295
+
+//----------------------------------------------------------------------------------------------------------------------//
+New  Load.Load_2058  phases=3  conn=wye  bus1=T_bus2058_L.1.2.3.0  kV=0.208  kW=31.480000000000004    Kvar=11.425714297843033 
+
+//----------------------------------------------------------------------------------------------------------------------// 
+New  Load.Load_2059  phases=2  conn=wye  bus1=T_bus2059_L.1.2  kV=0.208  kW=2.635000000000000    Kvar=1.276188746247742
+
+//----------------------------------------------------------------------------------------------------------------------// 
+New  Load.Load_2060  phases=2  conn=wye  bus1=T_bus2060_L.1.2  kV=0.208  kW=1.946000000000000    Kvar=0.639619268678067
+
+
+
+
+
+//***************************************************************************************//
+//                                             Feeder C
+//***************************************************************************************//
+//-----------------------------------------------------------------------------------------//
+New  Load.Load_3002  phases=3  conn=wye  bus1=T_bus3002_L.1.2.3.0  kV=0.208  kW=19.645    Kvar=7.13018289 
+
+//-----------------------------------------------------------------------------------------//
+New  Load.Load_3004  phases=3  conn=wye  bus1=T_bus3004_L.1.2.3.0  kV=0.208  kW=3.117    Kvar=1.509632001 
+
+//-----------------------------------------------------------------------------------------//
+New  Load.Load_3006  phases=3  conn=wye  bus1=T_bus3006_L.1.2.3.0  kV=0.208  kW=4.033    Kvar=1.837489085 
+
+//-----------------------------------------------------------------------------------------//
+New  Load.Load_3007  phases=3  conn=wye  bus1=T_bus3007_L.1.2.3.0  kV=0.208  kW=9.425    Kvar=4.564735838 
+
+//-----------------------------------------------------------------------------------------// 
+New  Load.Load_3009  phases=2  conn=wye  bus1=T_bus3009_L.1.2  kV=0.208  kW=4.064    Kvar=1.606195575
+
+//-----------------------------------------------------------------------------------------//
+New  Load.Load_3010  phases=2  conn=wye  bus1=T_bus3010_L.1.2  kV=0.208  kW=4.935    Kvar=1.950436802
+
+//-----------------------------------------------------------------------------------------// 
+New  Load.Load_3011  phases=2  conn=wye  bus1=T_bus3011_L.1.2  kV=0.208  kW=7.419    Kvar=2.438507376
+
+//-----------------------------------------------------------------------------------------// 
+New  Load.Load_3012  phases=2  conn=wye  bus1=T_bus3012_L.1.2  kV=0.208  kW=3.763    Kvar=1.365786623
+
+//-----------------------------------------------------------------------------------------// 
+New  Load.Load_3013  phases=2  conn=wye  bus1=T_bus3013_L.1.2  kV=0.208  kW=2.539    Kvar=0.740541667
+
+//-----------------------------------------------------------------------------------------// 
+New  Load.Load_3014  phases=2  conn=wye  bus1=T_bus3014_L.1.2  kV=0.208  kW=3.105    Kvar=1.322724461
+
+//-----------------------------------------------------------------------------------------// 
+New  Load.Load_3016  phases=2  conn=wye  bus1=T_bus3016_L.1.2  kV=0.208  kW=6.246    Kvar=3.025075867
+
+//-----------------------------------------------------------------------------------------// 
+New  Load.Load_3017  phases=2  conn=wye  bus1=T_bus3017_L.1.2  kV=0.208  kW=8.493    Kvar=2.477125
+
+//-----------------------------------------------------------------------------------------// 
+New  Load.Load_3018  phases=2  conn=wye  bus1=T_bus3018_L.1.2  kV=0.208  kW=5.351    Kvar=1.94215366
+
+//-----------------------------------------------------------------------------------------// 
+New  Load.Load_3019  phases=2  conn=wye  bus1=T_bus3019_L.1.2  kV=0.208  kW=5.403    Kvar=1.77588022
+
+//-----------------------------------------------------------------------------------------// 
+New  Load.Load_3020  phases=2  conn=wye  bus1=T_bus3020_L.1.2  kV=0.208  kW=5.984    Kvar=2.726390946
+
+//-----------------------------------------------------------------------------------------// 
+New  Load.Load_3021  phases=2  conn=wye  bus1=T_bus3021_L.1.2  kV=0.208  kW=7.73    Kvar=3.521892048
+
+//-----------------------------------------------------------------------------------------// 
+New  Load.Load_3023  phases=2  conn=wye  bus1=T_bus3023_L.1.2  kV=0.208  kW=4.344    Kvar=0.618986476
+
+//-----------------------------------------------------------------------------------------// 
+New  Load.Load_3024  phases=2  conn=wye  bus1=T_bus3024_L.1.2  kV=0.208  kW=5.02    Kvar=1.984030952
+
+//-----------------------------------------------------------------------------------------// 
+New  Load.Load_3025  phases=2  conn=wye  bus1=T_bus3025_L.1.2  kV=0.208  kW=6.546    Kvar=1.90925
+
+//-----------------------------------------------------------------------------------------// 
+New  Load.Load_3026  phases=2  conn=wye  bus1=T_bus3026_L.1.2  kV=0.208  kW=10.273    Kvar=2.086021621
+
+//-----------------------------------------------------------------------------------------// 
+New  Load.Load_3027  phases=2  conn=wye  bus1=T_bus3027_L.1.2  kV=0.208  kW=7.116    Kvar=1.444965429
+
+//-----------------------------------------------------------------------------------------// 
+New  Load.Load_3028  phases=2  conn=wye  bus1=T_bus3028_L.1.2  kV=0.208  kW=11.008    Kvar=5.33141773
+
+//-----------------------------------------------------------------------------------------// 
+New  Load.Load_3029  phases=2  conn=wye  bus1=T_bus3029_L.1.2  kV=0.208  kW=2.494    Kvar=1.207899329
+
+//-----------------------------------------------------------------------------------------//
+New  Load.Load_3031  phases=3  conn=wye  bus1=T_bus3031_L.1.2.3.0  kV=0.208  kW=4.271    Kvar=0.86726354 
+
+//-----------------------------------------------------------------------------------------//
+New  Load.Load_3032  phases=3  conn=wye  bus1=T_bus3032_L.1.2.3.0  kV=0.208  kW=5.709    Kvar=2.764994897 
+
+//-----------------------------------------------------------------------------------------//
+New  Load.Load_3033  phases=3  conn=wye  bus1=T_bus3033_L.1.2.3.0  kV=0.208  kW=9.779    Kvar=3.549303053
+
+//-----------------------------------------------------------------------------------------//
+New  Load.Load_3034  phases=3  conn=wye  bus1=T_bus3034_L.1.2.3.0  kV=0.208  kW=4.776    Kvar=0.680543142 
+
+//-----------------------------------------------------------------------------------------//
+New  Load.Load_3035  phases=3  conn=wye  bus1=T_bus3035_L.1.2.3.0  kV=0.208  kW=10.893    Kvar=3.580355958 
+
+//-----------------------------------------------------------------------------------------//
+New  Load.Load_3036  phases=3  conn=wye  bus1=T_bus3036_L.1.2.3.0  kV=0.208  kW=4.026    Kvar=1.17425 
+
+//-----------------------------------------------------------------------------------------//
+New  Load.Load_3037  phases=3  conn=wye  bus1=T_bus3037_L.1.2.3.0  kV=0.208  kW=7.303    Kvar=2.886330287 
+
+//-----------------------------------------------------------------------------------------//
+New  Load.Load_3038  phases=3  conn=wye  bus1=T_bus3038_L.1.2.3.0  kV=0.208  kW=6.13    Kvar=1.787916667 
+
+//-----------------------------------------------------------------------------------------//
+New  Load.Load_3039  phases=3  conn=wye  bus1=T_bus3039_L.1.2.3.0  kV=0.208  kW=4.966    Kvar=1.008389309 
+
+//-----------------------------------------------------------------------------------------// 
+New  Load.Load_3041  phases=2  conn=wye  bus1=T_bus3041_L.1.2  kV=0.208  kW=5.252    Kvar=1.316275275
+
+//-----------------------------------------------------------------------------------------// 
+New  Load.Load_3042  phases=2  conn=wye  bus1=T_bus3042_L.1.2  kV=0.208  kW=7.719    Kvar=1.09989793
+
+//-----------------------------------------------------------------------------------------// 
+New  Load.Load_3043  phases=2  conn=wye  bus1=T_bus3043_L.1.2  kV=0.208  kW=6.856    Kvar=1.718275569
+
+//-----------------------------------------------------------------------------------------// 
+New  Load.Load_3044  phases=2  conn=wye  bus1=T_bus3044_L.1.2  kV=0.208  kW=4.119    Kvar=1.754686652
+
+//-----------------------------------------------------------------------------------------// 
+New  Load.Load_3045  phases=2  conn=wye  bus1=T_bus3045_L.1.2  kV=0.208  kW=4.434    Kvar=1.11126515
+
+//-----------------------------------------------------------------------------------------//
+New  Load.Load_3047  phases=3  conn=wye  bus1=T_bus3047_L.1.2.3.0  kV=0.208  kW=10.213    Kvar=3.706824019 
+
+//-----------------------------------------------------------------------------------------//
+New  Load.Load_3048  phases=3  conn=wye  bus1=T_bus3048_L.1.2.3.0  kV=0.208  kW=2.868    Kvar=0.408667867 
+
+//-----------------------------------------------------------------------------------------//
+New  Load.Load_3049  phases=3  conn=wye  bus1=T_bus3049_L.1.2.3.0  kV=0.208  kW=1.671    Kvar=0.711843019 
+
+//-----------------------------------------------------------------------------------------//
+New  Load.Load_3050  phases=3  conn=wye  bus1=T_bus3050_L.1.2.3.0  kV=0.208  kW=2.646    Kvar=1.12719128 
+
+//-----------------------------------------------------------------------------------------//
+New  Load.Load_3051  phases=3  conn=wye  bus1=T_bus3051_L.1.2.3.0  kV=0.208  kW=2.412    Kvar=1.098939666 
+
+//-----------------------------------------------------------------------------------------//
+New  Load.Load_3052  phases=3  conn=wye  bus1=T_bus3052_L.1.2.3.0  kV=0.208  kW=6.101    Kvar=2.954849162 
+
+//-----------------------------------------------------------------------------------------//
+New  Load.Load_3054  phases=3  conn=wye  bus1=T_bus3054_L.1.2.3.0  kV=0.208  kW=2.471    Kvar=1.052641592 
+
+//-----------------------------------------------------------------------------------------// 
+New  Load.Load_3056  phases=2  conn=wye  bus1=T_bus3056_L.1.2  kV=0.208  kW=3.796    Kvar=1.377764024
+
+//-----------------------------------------------------------------------------------------// 
+New  Load.Load_3057  phases=2  conn=wye  bus1=T_bus3057_L.1.2  kV=0.208  kW=3.679    Kvar=1.781821024
+
+//-----------------------------------------------------------------------------------------// 
+New  Load.Load_3058  phases=2  conn=wye  bus1=T_bus3058_L.1.2  kV=0.208  kW=3.475    Kvar=1.142177265
+
+//-----------------------------------------------------------------------------------------// 
+New  Load.Load_3059  phases=2  conn=wye  bus1=T_bus3059_L.1.2  kV=0.208  kW=4.366    Kvar=1.989208367
+
+//-----------------------------------------------------------------------------------------// 
+New  Load.Load_3060  phases=2  conn=wye  bus1=T_bus3060_L.1.2  kV=0.208  kW=3.63    Kvar=1.193123302
+
+//-----------------------------------------------------------------------------------------// 
+New  Load.Load_3061  phases=2  conn=wye  bus1=T_bus3061_L.1.2  kV=0.208  kW=1.283    Kvar=0.374208333
+
+//-----------------------------------------------------------------------------------------// 
+New  Load.Load_3062  phases=2  conn=wye  bus1=T_bus3062_L.1.2  kV=0.208  kW=0.929    Kvar=0.423264905
+
+//-----------------------------------------------------------------------------------------// 
+New  Load.Load_3063  phases=2  conn=wye  bus1=T_bus3063_L.1.2  kV=0.208  kW=6.523    Kvar=2.367532858
+
+//-----------------------------------------------------------------------------------------// 
+New  Load.Load_3064  phases=2  conn=wye  bus1=T_bus3064_L.1.2  kV=0.208  kW=7.792    Kvar=2.272666667
+
+//-----------------------------------------------------------------------------------------// 
+New  Load.Load_3065  phases=2  conn=wye  bus1=T_bus3065_L.1.2  kV=0.208  kW=2.813    Kvar=1.020982666
+
+//-----------------------------------------------------------------------------------------// 
+New  Load.Load_3066  phases=2  conn=wye  bus1=T_bus3066_L.1.2  kV=0.208  kW=3.257    Kvar=1.577437095
+
+//-----------------------------------------------------------------------------------------// 
+New  Load.Load_3067  phases=2  conn=wye  bus1=T_bus3067_L.1.2  kV=0.208  kW=6.204    Kvar=2.039156189
+
+//-----------------------------------------------------------------------------------------//
+New  Load.Load_3070  phases=3  conn=wye  bus1=T_bus3070_L.1.2.3.0  kV=0.208  kW=0.845    Kvar=0.120405979 
+
+//-----------------------------------------------------------------------------------------//
+New  Load.Load_3071  phases=3  conn=wye  bus1=T_bus3071_L.1.2.3.0  kV=0.208  kW=2.163    Kvar=0.71094372 
+
+//-----------------------------------------------------------------------------------------//
+New  Load.Load_3072  phases=3  conn=wye  bus1=T_bus3072_L.1.2.3.0  kV=0.208  kW=1.964    Kvar=0.279854843 
+
+//-----------------------------------------------------------------------------------------//
+New  Load.Load_3073  phases=3  conn=wye  bus1=T_bus3073_L.1.2.3.0  kV=0.208  kW=2.297    Kvar=1.046544118 
+
+//-----------------------------------------------------------------------------------------//
+New  Load.Load_3074  phases=3  conn=wye  bus1=T_bus3074_L.1.2.3.0  kV=0.208  kW=4.791    Kvar=2.182844088 
+
+//-----------------------------------------------------------------------------------------//
+New  Load.Load_3077  phases=3  conn=wye  bus1=T_bus3077_L.1.2.3.0  kV=0.208  kW=41.037    Kvar=16.21886019 
+
+//-----------------------------------------------------------------------------------------//
+New  Load.Load_3078  phases=3  conn=wye  bus1=T_bus3078_L.1.2.3.0  kV=0.208  kW=4.012    Kvar=1.827921203 
+
+//-----------------------------------------------------------------------------------------//
+New  Load.Load_3081  phases=3  conn=wye  bus1=T_bus3081_L.1.2.3.0  kV=0.208  kW=1.581    Kvar=0.39623595 
+
+//-----------------------------------------------------------------------------------------// 
+New  Load.Load_3083  phases=2  conn=wye  bus1=T_bus3083_L.1.2  kV=0.208  kW=3.831    Kvar=0.777917729
+
+//-----------------------------------------------------------------------------------------// 
+New  Load.Load_3084  phases=2  conn=wye  bus1=T_bus3084_L.1.2  kV=0.208  kW=2.25    Kvar=0.65625
+
+//-----------------------------------------------------------------------------------------// 
+New  Load.Load_3085  phases=2  conn=wye  bus1=T_bus3085_L.1.2  kV=0.208  kW=6.765    Kvar=1.695468819
+
+//-----------------------------------------------------------------------------------------// 
+New  Load.Load_3086  phases=2  conn=wye  bus1=T_bus3086_L.1.2  kV=0.208  kW=2.35    Kvar=0.92877943
+
+//-----------------------------------------------------------------------------------------// 
+New  Load.Load_3087  phases=2  conn=wye  bus1=T_bus3087_L.1.2  kV=0.208  kW=4.101    Kvar=1.747018684
+
+//-----------------------------------------------------------------------------------------// 
+New  Load.Load_3088  phases=2  conn=wye  bus1=T_bus3088_L.1.2  kV=0.208  kW=8.41    Kvar=1.707723336
+
+//-----------------------------------------------------------------------------------------// 
+New  Load.Load_3089  phases=2  conn=wye  bus1=T_bus3089_L.1.2  kV=0.208  kW=0.836    Kvar=0.303427483
+
+//-----------------------------------------------------------------------------------------// 
+New  Load.Load_3090  phases=2  conn=wye  bus1=T_bus3090_L.1.2  kV=0.208  kW=3.236    Kvar=0.461105027
+
+//-----------------------------------------------------------------------------------------// 
+New  Load.Load_3091  phases=2  conn=wye  bus1=T_bus3091_L.1.2  kV=0.208  kW=2.536    Kvar=0.739666667
+
+//-----------------------------------------------------------------------------------------// 
+New  Load.Load_3093  phases=2  conn=wye  bus1=T_bus3093_L.1.2  kV=0.208  kW=4.264    Kvar=1.942735795
+
+//-----------------------------------------------------------------------------------------// 
+New  Load.Load_3094  phases=2  conn=wye  bus1=T_bus3094_L.1.2  kV=0.208  kW=3.12    Kvar=0.444575922
+
+//-----------------------------------------------------------------------------------------// 
+New  Load.Load_3095  phases=2  conn=wye  bus1=T_bus3095_L.1.2  kV=0.208  kW=5.901    Kvar=2.141777004
+
+//-----------------------------------------------------------------------------------------// 
+New  Load.Load_3096  phases=2  conn=wye  bus1=T_bus3096_L.1.2  kV=0.208  kW=2.842    Kvar=0.934120227
+
+//-----------------------------------------------------------------------------------------// 
+New  Load.Load_3097  phases=2  conn=wye  bus1=T_bus3097_L.1.2  kV=0.208  kW=11.1    Kvar=4.02876203
+
+//-----------------------------------------------------------------------------------------// 
+New  Load.Load_3098  phases=2  conn=wye  bus1=T_bus3098_L.1.2  kV=0.208  kW=6.461    Kvar=2.752374474
+
+//-----------------------------------------------------------------------------------------// 
+New  Load.Load_3099  phases=2  conn=wye  bus1=T_bus3099_L.1.2  kV=0.208  kW=4.424    Kvar=0.630385858
+
+//-----------------------------------------------------------------------------------------// 
+New  Load.Load_3101  phases=2  conn=wye  bus1=T_bus3101_L.1.2  kV=0.208  kW=2.387    Kvar=1.156076864
+
+//-----------------------------------------------------------------------------------------// 
+New  Load.Load_3102  phases=2  conn=wye  bus1=T_bus3102_L.1.2  kV=0.208  kW=8.2    Kvar=2.391666667
+
+//-----------------------------------------------------------------------------------------// 
+New  Load.Load_3103  phases=2  conn=wye  bus1=T_bus3103_L.1.2  kV=0.208  kW=6.718    Kvar=2.655123493
+
+//-----------------------------------------------------------------------------------------// 
+New  Load.Load_3104  phases=2  conn=wye  bus1=T_bus3104_L.1.2  kV=0.208  kW=8.73    Kvar=2.869412238
+
+//-----------------------------------------------------------------------------------------// 
+New  Load.Load_3105  phases=2  conn=wye  bus1=T_bus3105_L.1.2  kV=0.208  kW=3.052    Kvar=0.619735032
+
+//-----------------------------------------------------------------------------------------// 
+New  Load.Load_3106  phases=2  conn=wye  bus1=T_bus3106_L.1.2  kV=0.208  kW=9.815    Kvar=3.879136214
+
+//-----------------------------------------------------------------------------------------// 
+New  Load.Load_3108  phases=2  conn=wye  bus1=T_bus3108_L.1.2  kV=0.208  kW=2.175    Kvar=0.634375
+
+//-----------------------------------------------------------------------------------------// 
+New  Load.Load_3109  phases=2  conn=wye  bus1=T_bus3109_L.1.2  kV=0.208  kW=13.807    Kvar=6.687035301
+
+//-----------------------------------------------------------------------------------------// 
+New  Load.Load_3110  phases=2  conn=wye  bus1=T_bus3110_L.1.2  kV=0.208  kW=9.577    Kvar=1.364648591
+
+//-----------------------------------------------------------------------------------------// 
+New  Load.Load_3111  phases=2  conn=wye  bus1=T_bus3111_L.1.2  kV=0.208  kW=9.729    Kvar=2.837625
+
+//-----------------------------------------------------------------------------------------// 
+New  Load.Load_3112  phases=2  conn=wye  bus1=T_bus3112_L.1.2  kV=0.208  kW=9.339    Kvar=1.330735427
+
+//-----------------------------------------------------------------------------------------// 
+New  Load.Load_3114  phases=2  conn=wye  bus1=T_bus3114_L.1.2  kV=0.208  kW=5.162    Kvar=2.351876682
+
+//-----------------------------------------------------------------------------------------//
+New  Load.Load_3115  phases=2  conn=wye  bus1=T_bus3115_L.1.2  kV=0.208  kW=7.794    Kvar=1.110584851
+
+//-----------------------------------------------------------------------------------------//
+New  Load.Load_3116  phases=2  conn=wye  bus1=T_bus3116_L.1.2  kV=0.208  kW=7.337    Kvar=2.139958333
+
+//-----------------------------------------------------------------------------------------// 
+New  Load.Load_3117  phases=2  conn=wye  bus1=T_bus3117_L.1.2  kV=0.208  kW=3.688    Kvar=1.786179923
+
+//-----------------------------------------------------------------------------------------// 
+New  Load.Load_3120  phases=2  conn=wye  bus1=T_bus3120_L.1.2  kV=0.208  kW=3.209    Kvar=0.457257735
+
+//-----------------------------------------------------------------------------------------//
+New  Load.Load_3121  phases=2  conn=wye  bus1=T_bus3121_L.1.2  kV=0.208  kW=2.845    Kvar=0.713024211
+
+//-----------------------------------------------------------------------------------------// 
+New  Load.Load_3122  phases=2  conn=wye  bus1=T_bus3122_L.1.2  kV=0.208  kW=4.209    Kvar=1.917677054
+
+//-----------------------------------------------------------------------------------------// 
+New  Load.Load_3123  phases=2  conn=wye  bus1=T_bus3123_L.1.2  kV=0.208  kW=5.077    Kvar=2.458903326
+
+//-----------------------------------------------------------------------------------------// 
+New  Load.Load_3124  phases=2  conn=wye  bus1=T_bus3124_L.1.2  kV=0.208  kW=3.261    Kvar=1.579374384
+
+//-----------------------------------------------------------------------------------------// 
+New  Load.Load_3125  phases=2  conn=wye  bus1=T_bus3125_L.1.2  kV=0.208  kW=0.76    Kvar=0.3680848
+
+//-----------------------------------------------------------------------------------------// 
+New  Load.Load_3126  phases=2  conn=wye  bus1=T_bus3126_L.1.2  kV=0.208  kW=6.249    Kvar=2.662062853
+
+//-----------------------------------------------------------------------------------------// 
+New  Load.Load_3127  phases=2  conn=wye  bus1=T_bus3127_L.1.2  kV=0.208  kW=6.152    Kvar=1.24921688
+
+//-----------------------------------------------------------------------------------------//
+New  Load.Load_3128  phases=2  conn=wye  bus1=T_bus3128_L.1.2  kV=0.208  kW=3.688    Kvar=1.21218698
+
+//-----------------------------------------------------------------------------------------// 
+New  Load.Load_3129  phases=2  conn=wye  bus1=T_bus3129_L.1.2  kV=0.208  kW=1.967    Kvar=0.646521635
+
+//-----------------------------------------------------------------------------------------// 
+New  Load.Load_3130  phases=2  conn=wye  bus1=T_bus3130_L.1.2  kV=0.208  kW=3.657    Kvar=0.742585522
+
+//-----------------------------------------------------------------------------------------// 
+New  Load.Load_3131  phases=2  conn=wye  bus1=T_bus3131_L.1.2  kV=0.208  kW=3.556    Kvar=1.620161465
+
+//-----------------------------------------------------------------------------------------// 
+New  Load.Load_3132  phases=2  conn=wye  bus1=T_bus3132_L.1.2  kV=0.208  kW=11.56    Kvar=4.924539379
+
+//-----------------------------------------------------------------------------------------// 
+New  Load.Load_3134  phases=2  conn=wye  bus1=T_bus3134_L.1.2  kV=0.208  kW=5.953    Kvar=0.848256558
+
+//-----------------------------------------------------------------------------------------// 
+New  Load.Load_3135  phases=2  conn=wye  bus1=T_bus3135_L.1.2  kV=0.208  kW=7.005    Kvar=2.302432157
+
+//-----------------------------------------------------------------------------------------// 
+New  Load.Load_3136  phases=2  conn=wye  bus1=T_bus3136_L.1.2  kV=0.208  kW=9.443    Kvar=4.573453636
+
+//-----------------------------------------------------------------------------------------// 
+New  Load.Load_3137  phases=2  conn=wye  bus1=T_bus3137_L.1.2  kV=0.208  kW=13.759    Kvar=2.793884112
+
+//-----------------------------------------------------------------------------------------// 
+New  Load.Load_3138  phases=2  conn=wye  bus1=T_bus3138_L.1.2  kV=0.208  kW=8.522    Kvar=3.630356798
+
+//-----------------------------------------------------------------------------------------// 
+New  Load.Load_3139  phases=2  conn=wye  bus1=T_bus3139_L.1.2  kV=0.208  kW=0    Kvar=0
+
+//-----------------------------------------------------------------------------------------// 
+New  Load.Load_3141  phases=2  conn=wye  bus1=T_bus3141_L.1.2  kV=0.208  kW=4.915    Kvar=0.998033317
+
+//-----------------------------------------------------------------------------------------// 
+New  Load.Load_3142  phases=2  conn=wye  bus1=T_bus3142_L.1.2  kV=0.208  kW=4.017    Kvar=1.006755099
+
+//-----------------------------------------------------------------------------------------// 
+New  Load.Load_3143  phases=2  conn=wye  bus1=T_bus3143_L.1.2  kV=0.208  kW=7.716    Kvar=2.536126556
+
+//-----------------------------------------------------------------------------------------// 
+New  Load.Load_3144  phases=2  conn=wye  bus1=T_bus3144_L.1.2  kV=0.208  kW=0.482    Kvar=0.219605688
+
+//-----------------------------------------------------------------------------------------// 
+New  Load.Load_3145  phases=2  conn=wye  bus1=T_bus3145_L.1.2  kV=0.208  kW=1.782    Kvar=0.863061991
+
+//-----------------------------------------------------------------------------------------// 
+New  Load.Load_3146  phases=2  conn=wye  bus1=T_bus3146_L.1.2  kV=0.208  kW=1.616    Kvar=0.736271352
+
+//-----------------------------------------------------------------------------------------// 
+New  Load.Load_3147  phases=2  conn=wye  bus1=T_bus3147_L.1.2  kV=0.208  kW=8.324    Kvar=4.031497201
+
+//-----------------------------------------------------------------------------------------// 
+New  Load.Load_3148  phases=2  conn=wye  bus1=T_bus3148_L.1.2  kV=0.208  kW=9.987    Kvar=4.550211628
+
+//-----------------------------------------------------------------------------------------// 
+New  Load.Load_3149  phases=2  conn=wye  bus1=T_bus3149_L.1.2  kV=0.208  kW=2.029    Kvar=0.864350381
+
+//-----------------------------------------------------------------------------------------// 
+New  Load.Load_3150  phases=2  conn=wye  bus1=T_bus3150_L.1.2  kV=0.208  kW=2.602    Kvar=0.652122671
+
+//-----------------------------------------------------------------------------------------// 
+New  Load.Load_3151  phases=2  conn=wye  bus1=T_bus3151_L.1.2  kV=0.208  kW=1.686    Kvar=0.554161401
+
+//-----------------------------------------------------------------------------------------//
+New  Load.Load_3152  phases=2  conn=wye  bus1=T_bus3152_L.1.2  kV=0.208  kW=1.934    Kvar=0.936678951
+
+//-----------------------------------------------------------------------------------------// 
+New  Load.Load_3153  phases=2  conn=wye  bus1=T_bus3153_L.1.2  kV=0.208  kW=5.976    Kvar=2.894308899
+
+//-----------------------------------------------------------------------------------------// 
+New  Load.Load_3154  phases=2  conn=wye  bus1=T_bus3154_L.1.2  kV=0.208  kW=4.836    Kvar=0.689092679
+
+//-----------------------------------------------------------------------------------------// 
+New  Load.Load_3155  phases=2  conn=wye  bus1=T_bus3155_L.1.2  kV=0.208  kW=1.477    Kvar=0.485466423
+
+//-----------------------------------------------------------------------------------------// 
+New  Load.Load_3157  phases=2  conn=wye  bus1=T_bus3157_L.1.2  kV=0.208  kW=9.74    Kvar=4.149222625
+
+//-----------------------------------------------------------------------------------------// 
+New  Load.Load_3158  phases=2  conn=wye  bus1=T_bus3158_L.1.2  kV=0.208  kW=6.517    Kvar=1.63331416
+
+//-----------------------------------------------------------------------------------------// 
+New  Load.Load_3159  phases=2  conn=wye  bus1=T_bus3159_L.1.2  kV=0.208  kW=9.776    Kvar=4.454077187
+
+//-----------------------------------------------------------------------------------------// 
+New  Load.Load_3160  phases=2  conn=wye  bus1=T_bus3160_L.1.2  kV=0.208  kW=4.252    Kvar=1.397564815
+
+//-----------------------------------------------------------------------------------------// 
+New  Load.Load_3161  phases=2  conn=wye  bus1=T_bus3161_L.1.2  kV=0.208  kW=2.744    Kvar=0.390998824
+
+//-----------------------------------------------------------------------------------------// 
+New  Load.Load_3162  phases=2  conn=wye  bus1=T_bus3162_L.1.2  kV=0.208  kW=3.75    Kvar=0.761469977
+
+
+// This file is to define the parameters of shunt capacitor banks.
+
+New Capacitor.CAP_201 phases=3 bus1=bus2038.1.2.3 kV=13.80000 kvar=50.00000000 enabled=Yes            ! Capacitor bank name, number of phases, bus name, kV rating, kVar rating, enabled
+New Capacitor.CAP_301 phases=3 bus1=bus3079.1.2.3 kV=13.80000 kvar=50.00000000 enabled=Yes
+
+
+
+
+
+
+!--------------------------Calculate---------------------!
+Set VoltageBases = "69.0, 13.8, 0.208"	! Set base voltage as 69 kV, 13.8 kV, 0.208 kV
+CalcVoltageBases			! Estimate the voltage base for each bus 
+solve					! Solve the circuit
+
+BusCoords       Buscoords.dss
+
+!-------------Show Snapshot Power Flow Result------------!
+Show Voltage LN Nodes
+!Show currents
+!Show power kva element
+!Show convergence
+!Show isolated
+!Show kvbasemismatch
+!Show losses
+!Show overloads
+!Show topology
+
+
+
+!----------------- Plotting -----------------------!
+
+!Set markCapacitors=yes  CapMarkersize=3
+!Set markRegulators=yes  RegMarkersize=5
+!Interpolate
+!Plot Circuit Power Max=500 dots=n labels=n  C1=Blue  1ph=3   ! $00FF0000
+!Plot Circuit voltage Max=0 dots=n n  C1=Blue C2=$FF00FF  1ph=3
+!plot circuit Losses Max=1 dots=n labels=n subs=y C1=Blue
+
+
+
+
+
+
+
+
+
+
+
+
