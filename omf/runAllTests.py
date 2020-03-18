@@ -45,11 +45,14 @@ def runAllTests(startingdir):
 					# Workaround for Windows hanging with too many pipes.
 					if platform.system()=='Windows':
 						p = subprocess.Popen(['python3', item])
+						p.wait()
+						if p.returncode:
+							misfires[os.path.join(os.getcwd(), item)] = 'WINDOWS_ERROR'
 					else:
 						p = subprocess.Popen(['python3', item], stderr=subprocess.PIPE)
-					p.wait()
-					if p.returncode:
-						misfires[os.path.join(os.getcwd(), item)] = p.stderr.read()
+						p.wait()
+						if p.returncode:
+							misfires[os.path.join(os.getcwd(), item)] = p.stderr.read()
 					break
 			if not has_tests:
 				not_tested.append(item)
