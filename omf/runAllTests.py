@@ -42,10 +42,10 @@ def runAllTests(startingdir):
 					has_tests = True
 					tested.append(item)
 					print(f'********** TESTING {item} ************')
-					p = subprocess.Popen(['python3', item], stderr=subprocess.PIPE)
+					p = subprocess.Popen(['python3', item]) #, stderr=subprocess.PIPE
 					p.wait()
 					if p.returncode:
-						misfires[os.path.join(os.getcwd(), item)] = p.stderr.read()
+						misfires[os.path.join(os.getcwd(), item)] = '' #p.stderr.read()
 					break
 			if not has_tests:		
 				not_tested.append(item)
