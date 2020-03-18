@@ -168,6 +168,7 @@
 						<li><a href='javascript:renameNetwork();'>Rename</a></li>
 						<li><a href='javascript:showModal("blankNetworkModal");'>New Blank Network...</a></li>
 						<li><a href='javascript:showModal("matpowerModal");'>MATPOWER Import...</a></li>
+						<li><a href='javascript:showModal("rawModal");'>RAW Import...</a></li>
 						<li><a href='javascript:downloadTextFile("networkData.omt", JSON.stringify(networkData, null, 2));'>Download .omt File</a></li>
 					</ul>
 					{% endif %}
@@ -195,8 +196,8 @@
 		</div>
 	</div>
 	<div id="matpowerModal" class= 'modal'>
-		<div class="modalContent" id='milModal' style='width:350px;'>
-			<form onsubmit='startConversion("networkNameM", 2); return false;' action="/matpowerImport/{{ owner }}" id='matpower' enctype='multipart/form-data' method='post'>
+		<div class="modalContent" id='matModal' style='width:350px;'>
+			<form onsubmit='startConversion("networkNameM", "matpower", 2); return false;' action="/matpowerImport/{{ owner }}" id='matpower' enctype='multipart/form-data' method='post'>
 				<input type="hidden" name="_csrf_token" value="{{ csrf_token() }}" />
 				<input type="hidden" id="networkNum" name="networkNum" value="{{ networkNum }}" />
 				<input type="hidden" id="modelName" name="modelName" value="{{ modelName }}" />
@@ -212,6 +213,31 @@
 					</tr>
 					<tr>
 						<td><a id='modalCancel' href="#" onclick='closeModal("matpowerModal")' style="text-align:center;font-size:10pt;">Cancel</a></td>
+						<td><input type='submit' value='Import' style='min-width:45px;'/></td>
+					</tr>
+				</table>
+			</form>
+			<iframe class="hide_me" id="take_the_reload" name="take_the_reload" style="width:0px;height:0px;"></iframe>
+		</div>
+	</div>
+	<div id="rawModal" class= 'modal'>
+		<div class="modalContent" id='rawModalContent' style='width:350px;'>
+			<form onsubmit='startConversion("networkNameR", "raw", 2); return false;' action="/rawImport/{{ owner }}" id='raw' enctype='multipart/form-data' method='post'>
+				<input type="hidden" name="_csrf_token" value="{{ csrf_token() }}" />
+				<input type="hidden" id="networkNum" name="networkNum" value="{{ networkNum }}" />
+				<input type="hidden" id="modelName" name="modelName" value="{{ modelName }}" />
+				<table class='importOptions'>
+				<th style="background:transparent;color:black;">RAW Conversion</th>
+					<tr>
+						<td>Name</td>
+						<td><input type='text' id='networkNameR' name='networkNameR' required/></td>
+					</tr>
+					<tr>
+						<td>Data File (.raw)</td>
+						<td><input type='file' name='rawFile' accept = '.raw' required/></td>
+					</tr>
+					<tr>
+						<td><a id='modalCancel' href="#" onclick='closeModal("rawModal")' style="text-align:center;font-size:10pt;">Cancel</a></td>
 						<td><input type='submit' value='Import' style='min-width:45px;'/></td>
 					</tr>
 				</table>
@@ -1151,7 +1177,7 @@ function loading() {
 	setTimeout(longLoadingProcess, 100)
 }
 
-async function startConversion(elementName, nextAction) {
+async function startConversion(elementName, formId, nextAction) {
 	// Additional check, required for Safari browsers
 	var newName = document.getElementById(elementName).value;
 	let submitForm = false;
@@ -1167,16 +1193,16 @@ async function startConversion(elementName, nextAction) {
 				// The filename does not already exist. Submit the form with the matpower file
 				if (nextAction == 1)	// 1 for blank network modal
 					newnetwork.submit()
-				else					// 2 for matpower modal
+				else					// 2 for matpower and raw modal
 					submitForm = true;
 			}
 		})
 	}
 	if (!submitForm) return;
 
-	// Do the conversion (matpower import)
+	// Do the conversion (matpower/raw import)
 	showProgressDialog('spinner', 'Converting network', 'conversion');
-	const form = document.getElementById('matpower');
+	const form = document.getElementById(formId);
     const formData = new FormData(form);
 	const formRequest = $.ajax({
         type: 'POST',
@@ -1218,6 +1244,11 @@ function checkConversion() {
 			else if (conversionStatus == 'matError') {
 				window.clearInterval(intervalId);
 				alert('The .m file does not contain any valid data.')
+				removeProgressDialog();
+			}
+			else if (conversionStatus == 'rawError') {
+				window.clearInterval(intervalId);
+				alert('The .raw file does not contain any valid data.')
 				removeProgressDialog();
 			}
 		})
