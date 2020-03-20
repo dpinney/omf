@@ -64,12 +64,10 @@ elif platform.system()=='Windows':
 	os.system("choco install -y pip")
 	os.system("choco install -y octave.portable")
 	# TODO: find way to install mdbtools.
-	# HACK: timeout and refreshenv should get all the choco binaries on to the path.
-	os.system("refreshenv")
 	# Install GridLAB-D.
 	os.system("wget --no-check-certificate https://sourceforge.net/projects/gridlab-d/files/gridlab-d/Candidate%20release/gridlabd-4.0_RC1.exe")
 	os.system("gridlabd-4.0_RC1.exe/silent")
-	os.system("refreshenv")
+	# os.system("refreshenv")
 	#Install splat
 	#os.system(wget https://www.qsl.net/kd2bd/Splat-1.3.0.zip)
 	#os.system(Splat-1.3.0/Splat-1-3-1-SD-mx64.exe)
