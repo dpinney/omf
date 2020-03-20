@@ -1,6 +1,6 @@
 ''' Functions for manipulating electrical transmission network models. '''
 
-import datetime, copy, os, re, json, tempfile, shutil, fileinput, webbrowser, platform
+import datetime, copy, os, re, json, tempfile, shutil, fileinput, webbrowser, platform, subprocess
 from os.path import join as pJoin
 import networkx as nx
 #import math
@@ -13,11 +13,27 @@ else:
 	matplotlib.use('Agg')
 from matplotlib import pyplot as plt
 
+from omf.models import __neoMetaModel__
+from omf.models.__neoMetaModel__ import *
+
 def parse(inputStr, filePath=True):
 	''' Parse a MAT into an omf.network json. This is so we can walk the json, change things in bulk, etc.
 	Input can be a filepath or MAT string. Raises ValueError if the MAT file/string does not contain valid data.
 	'''
 	matDict = _dictConversion(inputStr, filePath)
+	return matDict
+
+def parseRaw(inputStr, filePath=True):
+	''' Parse a RAW file into an omf.network json via a matpower file. This is so we can walk the json, 
+	change things in bulk, etc. Input can be a filepath or RAW string. Raises ValueError if the RAW 
+	file/string does not contain valid data.
+	'''
+	matfile_name = _rawToMat(inputStr, filePath)
+	matDict = _dictConversion(matfile_name, True)
+
+	if not filePath:
+		os.remove(matfile_name)
+
 	return matDict
 
 def write(inNet):
@@ -26,6 +42,11 @@ def write(inNet):
 	for key in inNet:
 		output += _dictToString(inNet[key]) + '\n'
 	return output
+
+def save(inNet, outPath):
+	''' Write out an .omt for a inNet. '''
+	with open(outPath, 'w') as outFile:
+		json.dump(inNet, outFile, indent=4)
 
 def layout(inNet):
 	''' Add synthetic lat/lon data to a graph to give it a nice human-readable shape. '''
@@ -117,6 +138,58 @@ def _dictConversion(inputStr, filePath=True):
 def _dictToString(inDict):
 	''' Helper function: given a single dict representing a NETWORK, concatenate it into a string. '''
 	return ''
+
+def _rawToMat(inputStr, filePath=True):
+	''' Turn a RAW file/string into a MATPOWER case structure. 
+	See the following for details: https://matpower.org/docs/ref/matpower5.0/psse2mpc.html
+	'''
+	if not filePath: # create a temp file location for the RAW string
+		now = datetime.datetime.now()
+		rawfile_name = pJoin(__neoMetaModel__._omfDir, 'temp' + now + '.raw')
+		matfile_name = pJoin(__neoMetaModel__._omfDir, 'temp' + now + '.m')
+		with open(rawfile_name, 'w') as rawFile:
+			rawFile.write(inputStr)
+	else:
+		rawfile_name = inputStr
+		matfile_name = os.path.splitext(inputStr)[0] + '.m' 
+
+	matDir =  pJoin(__neoMetaModel__._omfDir,'solvers','matpower7.0')
+	if platform.system() == "Windows":
+		pathSep = ";"
+	else:
+		pathSep = ":"
+	matPath = '"' + pathSep.join([matDir, pJoin(matDir,'t'), pJoin(matDir,'extras')]) + '"'
+
+	# TODO: Test code on Windows.
+	if platform.system() == "Windows":
+		# Find the location of octave-cli tool.
+		envVars = os.environ["PATH"].split(';')
+		octavePath = "C:\\Octave\\Octave-4.2.0"
+		for pathVar in envVars:
+			if "octave" in pathVar.lower():
+				octavePath = pathVar
+		# Run Windows-specific Octave command.
+		command = 'psse2mpc(\'' + rawfile_name + '\', \'' + matfile_name + '\')'
+		args = [octavePath + '\\bin\\octave-cli', '-p', matPath, '--eval', command]
+		try:
+			mat = subprocess.check_output(args, shell=True)
+		except subprocess.CalledProcessError as e:
+			raise ValueError('RAW file/string does not contain valid data.')
+		finally:
+			if not filePath:
+				os.remove(rawfile_name)
+	else:
+		# Run UNIX Octave command.
+		command = 'psse2mpc(\'' + rawfile_name + '\', \'' + matfile_name + '\')'
+		args = 'octave -p ' + matPath + ' --no-gui --eval "' + command + '"'
+		proc = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
+		(out, err) = proc.communicate()
+		if not filePath:
+			os.remove(rawfile_name)
+		if len(err) != 0:
+			raise ValueError('RAW file/string does not contain valid data.')
+		
+	return matfile_name
 
 def netToNxGraph(inNet):
 	''' Convert network.omt to networkx graph. '''
@@ -221,7 +294,8 @@ def viz(omt_filepath, output_path=None, output_name="viewer.html", open_file=Tru
 def _tests():
 	# Parse mat to dictionary.
 	networkName = 'case9'
-	networkJson = parse(os.path.join(os.path.dirname(__file__), 'solvers', 'matpower5.1', networkName + '.m'), filePath=True)
+	netPath = os.path.join(os.path.dirname(__file__), 'solvers', 'matpower5.1', networkName + '.m')
+	networkJson = parse(netPath, filePath=True)
 	keyLen = len(networkJson.keys())
 	print('Parsed MAT file with %s buses, %s generators, and %s branches.'%(len(networkJson['bus']),len(networkJson['gen']),len(networkJson['branch'])))
 	# Use python nxgraph to add lat/lon to .omt.json.
@@ -242,6 +316,8 @@ def _tests():
 	#with open(pJoin(os.getcwd(),'scratch','transmission','outData',networkName+'.m'),'w') as outMat:
 		for row in matStr: outMat.write(row)
 	print('Converted .omt back to .m at: %s' % (mat_path))
+	# Draw it.
+	# viz(omt_path)
 	#print('Converted .omt back to .m at: %s'%(pJoin(os.getcwd(),'scratch','transmission','outData',networkName+'.m')))
 	#inputDict = {
 	#	'algorithm' : 'FDBX',
@@ -252,8 +328,6 @@ def _tests():
 	#	}
 	#matpower.runSim(os.path.join(temp_dir, networkName), inputDict, debug=False)
 	#matpower.runSim(pJoin(os.getcwd(),'scratch','transmission','outData',networkName), inputDict, debug=False)
-	#viz(os.path.join(os.path.dirname(__file__), 'static/SimpleNetwork.json')
 
 if __name__ == '__main__':
-	#viz(os.path.join(os.path.dirname(__file__), "static/SimpleNetwork.json"))
 	_tests()

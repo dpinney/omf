@@ -348,7 +348,7 @@ def genDiagram(outputDir, feederJson, damageDict, critLoads, damagedLoads, edgeL
 		cleanG.add_nodes_from(inGraph)
 		pos = nx.nx_agraph.graphviz_layout(cleanG, prog='neato')
 	else:
-		pos = {n:inGraph.node[n].get('pos',(0,0)) for n in inGraph}
+		pos = {n:inGraph.nodes[n].get('pos',(0,0)) for n in inGraph}
 	# Rescale using the magic number.
 	for k in pos:
 		newPos = (pos[k][0]/HACK_SCALING_CONSTANT, pos[k][1]/HACK_SCALING_CONSTANT)
@@ -356,7 +356,7 @@ def genDiagram(outputDir, feederJson, damageDict, critLoads, damagedLoads, edgeL
 	# Draw all the edges
 	selected_labels = {}
 	for e in inGraph.edges():
-		edgeName = inGraph.edge[e[0]][e[1]].get('name')
+		edgeName = inGraph.edges[e].get('name')
 		if edgeName in edgeLabelsToAdd.keys():
 			selected_labels[e] = edgeLabelsToAdd[edgeName]
 		edgeColor = 'black'
@@ -367,12 +367,14 @@ def genDiagram(outputDir, feederJson, damageDict, critLoads, damagedLoads, edgeL
 				edgeColor = 'orange'
 			if damageDict[edgeName] >= 3:
 				edgeColor = 'red'
-		eType = inGraph.edge[e[0]][e[1]].get('type','underground_line')
-		ePhases = inGraph.edge[e[0]][e[1]].get('phases',1)
-		standArgs = {'edgelist':[e],
-					 'edge_color':edgeColor,
-					 'width':2,
-					 'style':{'parentChild':'dotted','underground_line':'dashed'}.get(eType,'solid') }
+		eType = inGraph.edges[e].get('type','underground_line')
+		ePhases = inGraph.edges[e].get('phases',1)
+		standArgs = {
+			'edgelist':[e],
+			'edge_color':edgeColor,
+			'width':2,
+			'style':{'parentChild':'dotted','underground_line':'dashed'}.get(eType,'solid')
+		}
 		if ePhases==3:
 			standArgs.update({'width':5})
 			nx.draw_networkx_edges(inGraph,pos,**standArgs)
@@ -496,9 +498,7 @@ def work(modelDir, inputDict):
 	rdtInputName = 'rdtInput.json'
 	if platform.system() == 'Darwin':
 		#HACK: force use of Java8 on MacOS.
-		#javaCmd = '/Library/Java/JavaVirtualMachines/jdk1.8.0_181.jdk/Contents/Home/bin/java'
-		#HACK HACK: use my version of Java 8 for now
-		javaCmd = '/Library/Java/JavaVirtualMachines/jdk1.8.0_202.jdk/Contents/Home/bin/java'
+		javaCmd = '/Library/Java/JavaVirtualMachines/jdk1.8.0_181.jdk/Contents/Home/bin/java'
 	else:
 		javaCmd = 'java'
 	proc = subprocess.Popen(

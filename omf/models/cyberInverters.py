@@ -406,6 +406,62 @@ def work(modelDir, inputDict):
 		outData['timeStamps'] = aggSeries(stamps, stamps, lambda x:x[0][0:10], 'days')
 	elif level=='months':
 		outData['timeStamps'] = aggSeries(stamps, stamps, lambda x:x[0][0:7], 'months')
+
+	def convertInputs():
+		try:
+			os.mkdir(pJoin(modelDir,"PyCIGAR"))
+		except FileExistsError:
+			print("PyCIGAR folder already exists!")
+			pass
+		except:
+			print("Error occurred creating PyCIGAR folder")
+
+		#create misc_inputs.csv file in folder
+		# f1Name = "misc_inputs.csv"
+		# with open(pJoin(omf.omfDir, "static", "testFiles", "pyCIGAR", f1Name)) as f1:
+		# 	misc_inputs = f1.read()
+		misc_dict = {"Oscillation Penalty":2, 
+		"Action Penalty":0.1, 
+		"Deviation from Optimal Penalty":4, 
+		"load file timestep":1, 
+		"power factor":0.9, 
+		"load scaling factor":1.5, 
+		"solar scaling factor":3, 
+		"measurement filter time constant mean":1.2, 
+		"measurement filter time constant std":0.2, 
+		"output filter time constant mean":0.115, 
+		"output filter time constant std":0.025, 
+		"bp1 default":0.98, 
+		"bp2 default":1.01, 
+		"bp3 default":1.01, 
+		"bp4 default":1.04, 
+		"bp5 default":1.07, 
+		"max tap change default":16, 
+		"forward band default":2, 
+		"tap number default":16, 
+		"tap delay default":2}
+		with open(pJoin(modelDir,"PyCIGAR","misc_inputs.csv"),"w") as miscFile:
+			#Populate misc_inputs.csv
+			# miscFile.write(misc_inputs)
+			for key in misc_dict.keys():
+				miscFile.write("%s,%s\n"%(key,misc_dict[key]))
+
+		#create ieee37.dss file in folder
+		with open(pJoin(modelDir,"PyCIGAR","ieee37.dss"),"w") as dssFile:
+			dssFile.write("TODO: POPULATE IEEE37.DSS")
+
+		#create load_solar_data.csv file in folder
+		with open(pJoin(modelDir,"PyCIGAR","load_solar_data.csv"),"w") as loadPVFile:
+			loadPVFile.write(inputDict['loadPV'])
+
+		#create breakpoints.csv file in folder
+		f1Name = "breakpoints.csv"
+		with open(pJoin(omf.omfDir, "static", "testFiles", "pyCIGAR", f1Name)) as f1:
+			breakpoints_inputs = f1.read()
+		with open(pJoin(modelDir,"PyCIGAR","breakpoints.csv"),"w") as breakpointFile:
+			breakpointFile.write(breakpoints_inputs)
+
+	convertInputs()
 	return outData
 
 def avg(inList):
@@ -485,6 +541,7 @@ def stringToMag(s):
 		return complex(s.replace('d','j')).real
 	elif 'j' in s or 'i' in s:
 		return abs(complex(s.replace('i','j')))
+
 
 def new(modelDir):
 	''' Create a new instance of this model. Returns true on success, false on failure. '''

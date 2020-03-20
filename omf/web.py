@@ -721,7 +721,7 @@ def checkConversion(modelName, owner):
 	"""
 	print(modelName)
 	# First check for error files
-	for filename in ['gridError.txt', 'error.txt', 'weatherError.txt', 'matError.txt']:
+	for filename in ['gridError.txt', 'error.txt', 'weatherError.txt', 'matError.txt', 'rawError.txt']:
 		filepath = os.path.join(_omfDir, 'data', 'Model', owner, modelName, filename)
 		if os.path.isfile(filepath):
 			with locked_open(filepath) as f:
@@ -813,7 +813,7 @@ def matpowerImport(owner):
 
 
 def matImportBackground(owner, modelName):
-	''' Function to run in the background for Milsoft import. '''
+	''' Function to run in the background for Matpower import. '''
 	try:
 		networkName = str(request.form.get('networkNameM', 'network1'))
 		network_filepath, model_dir, pid_filepath = [
@@ -833,6 +833,51 @@ def matImportBackground(owner, modelName):
 		filepath = os.path.join(_omfDir, 'data', 'Model', owner, modelName, 'matError.txt')
 		with locked_open(filepath, 'w') as errorFile:
 			errorFile.write('matError')
+		os.remove(pid_filepath)
+	except:
+		os.remove(pid_filepath)
+
+@app.route("/rawImport/<owner>", methods=["POST"])
+@flask_login.login_required
+@write_permission_function
+def rawImport(owner):
+	''' API for importing a RAW network. '''
+	modelName = request.form.get('modelName', '')
+	model_dir, con_file_path, error_path = [os.path.join(_omfDir, 'data', 'Model', owner, modelName, filename) for filename in ('', 'ZPID.txt', 'rawError.txt')]
+	# Delete existing .raw and .m files to not clutter model.
+	for filename in safeListdir(model_dir):
+		if filename.endswith(".raw") or filename.endswith(".m"):
+			os.remove(os.path.join(model_dir, filename))
+	if os.path.isfile(error_path):
+		os.remove(error_path)
+	with locked_open(con_file_path, 'w') as conFile:
+		conFile.write("WORKING")
+	importProc = Process(target=rawImportBackground, args=[owner, modelName])
+	importProc.start()
+	return 'Success'
+
+
+def rawImportBackground(owner, modelName):
+	''' Function to run in the background for Raw import. '''
+	try:
+		networkName = str(request.form.get('networkNameR', 'network1'))
+		network_filepath, model_dir, pid_filepath = [
+			os.path.join(_omfDir, 'data', 'Model', owner, modelName, filename) for filename in [networkName + '.raw', '', 'ZPID.txt']
+		]
+		request.files['rawFile'].save(network_filepath)
+		newNet = network.parseRaw(network_filepath, filePath=True)
+		network.layout(newNet)
+		with locked_open(network_filepath, 'w') as f:
+			json.dump(newNet, f, indent=4)
+		os.rename(network_filepath, os.path.join(model_dir, networkName + '.omt'))
+		os.remove(pid_filepath)
+		networkNum = request.form.get("networkNum", 1)
+		removeNetwork(owner, modelName, networkNum)
+		writeToInput(model_dir, networkName, 'networkName' + str(networkNum))
+	except ValueError:
+		filepath = os.path.join(_omfDir, 'data', 'Model', owner, modelName, 'rawError.txt')
+		with locked_open(filepath, 'w') as errorFile:
+			errorFile.write('rawError')
 		os.remove(pid_filepath)
 	except:
 		os.remove(pid_filepath)

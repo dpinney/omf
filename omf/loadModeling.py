@@ -196,7 +196,7 @@ def addScaledRandomHouses(inFeed):
 		newHouse['name'] += '_' + str(tripKey)
 		newHouse['parent'] = tMeter['name']
 		newHouse['schedule_skew'] = str(random.gauss(2000,500))
-		newHouse['floor_area'] = str(0.50*tPower)
+		newHouse['floor_area'] = str(500.0 + 0.50*tPower) # Add 500 because very small floor_areas break GLD.
 		newHouse['latitude'] = tMeter.get('latitude','0.0')
 		newHouse['longitude'] = tMeter.get('longitude','0.0')
 		inFeed[maxKey] = newHouse

@@ -63,7 +63,7 @@ elif platform.system()=='Windows':
 	os.system("choco install -y graphviz")
 	os.system("choco install -y pip")
 	os.system("choco install -y octave.portable")
-	#TODO: find way to install mdbtools.
+	# TODO: find way to install mdbtools.
 	# HACK: timeout and refreshenv should get all the choco binaries on to the path.
 	os.system("refreshenv")
 	# Install GridLAB-D.
@@ -82,21 +82,24 @@ elif platform.system()=='Windows':
 	pipInstallInOrder("python3 -m pip")
 	os.system("python3 -m setup.py develop")
 elif platform.system()=="Darwin": # MacOS
-	# Might need to install en_US.UTF-8 locale, like for Ubuntu? That currently is not done in this script. macOS might already come with this locale anyway.
 	# Install homebrew
 	brew_exit_code = os.system("brew --version")
 	if brew_exit_code != 0:
 		os.system('/usr/bin/ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"')
-	os.system("brew install wget python@3 ffmpeg git graphviz octave mdbtools")
-	os.system("brew link --overwrite python")
+	os.system("HOMEBREW_NO_AUTO_UPDATE=1 brew install wget ffmpeg git graphviz octave mdbtools") # Set no-update to keep homebrew from blowing away python3.
 	os.system("wget -O gridlabd.dmg --no-check-certificate https://sourceforge.net/projects/gridlab-d/files/gridlab-d/Candidate%20release/gridlabd_4.0.0.dmg")
 	os.system("sudo hdiutil attach gridlabd.dmg")
 	os.system('sudo installer -package "/Volumes/GridLAB-D 4.0.0/gridlabd.mpkg" -target /')
 	os.system('sudo hdiutil detach "/Volumes/GridLAB-D 4.0.0"')
-	#splat install
+	# splat install
 	os.system("wget https://www.qsl.net/kd2bd/splat-1.4.2-osx.tgz")
 	os.system("sudo tar -xvzf splat-1.4.2-osx.tgz")
-	os.system("sudo exec splat-1.4.2/configure")
+	os.system('''
+		cd splat-1.4.2;
+		sed -i '' 's/ans=""/ans="2"/g' configure;
+		sudo bash configure;
+	''') # sed is to hack the build to work without user input.
+	# pip installs
 	os.system("cd omf")
 	os.system('pip3 install pygraphviz --install-option="--include-path=/usr/local/include/graphviz" --install-option="--library-path=/usr/local/lib/graphviz/"')
 	os.system('pip3 install "ecos >= 2.0.7rc2"')

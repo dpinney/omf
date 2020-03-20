@@ -1,6 +1,6 @@
 ''' Walk the /omf/ directory, run _tests() in all modules. '''
 
-import os, sys, subprocess, re
+import os, sys, subprocess, re, platform
 from pathlib import PurePath, Path
 
 
@@ -11,7 +11,7 @@ INCLUDE_DIRS = ['omf', 'models']
 # 3/1/20: These 3 files cause GitHub Actions to hang indefinitely when run with this test harness, so they must be run in their own separate processes
 # 3/9/20: added phaseBalance.py. Ideally, we would not spawn any subprocess. Instead, every file would simply be imported and have its _tests()
 # function called
-FILES_THAT_HANG = ['networkStructure.py', 'smartSwitching.py', 'forecastTool.py', 'phaseBalance.py']
+FILES_THAT_HANG = ['networkStructure.py', 'smartSwitching.py', 'forecastTool.py', 'phaseBalance.py', 'evInterconnection.py']
 IGNORE_FILES.extend(FILES_THAT_HANG)
 
 
@@ -42,12 +42,19 @@ def runAllTests(startingdir):
 					has_tests = True
 					tested.append(item)
 					print(f'********** TESTING {item} ************')
-					p = subprocess.Popen(['python3', item], stderr=subprocess.PIPE)
-					p.wait()
-					if p.returncode:
-						misfires[os.path.join(os.getcwd(), item)] = p.stderr.read()
+					# Workaround for Windows hanging with too many pipes.
+					if platform.system()=='Windows':
+						p = subprocess.Popen(['python3', item])
+						p.wait()
+						if p.returncode:
+							misfires[os.path.join(os.getcwd(), item)] = 'WINDOWS_ERROR'
+					else:
+						p = subprocess.Popen(['python3', item], stderr=subprocess.PIPE)
+						p.wait()
+						if p.returncode:
+							misfires[os.path.join(os.getcwd(), item)] = p.stderr.read()
 					break
-			if not has_tests:		
+			if not has_tests:
 				not_tested.append(item)
 		elif os.path.isdir(item) and item in INCLUDE_DIRS:
 			nextdirs.append(os.path.join(os.getcwd(), item))
