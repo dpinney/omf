@@ -798,13 +798,15 @@ def milImportBackground(owner, modelName):
 def matpowerImport(owner):
 	''' API for importing a MATPOWER network. '''
 	modelName = request.form.get('modelName', '')
-	model_dir, con_file_path, error_path = [os.path.join(_omfDir, 'data', 'Model', owner, modelName, filename) for filename in ('', 'ZPID.txt', 'matError.txt')]
+	model_dir, con_file_path = [os.path.join(_omfDir, 'data', 'Model', owner, modelName, filename) for filename in ('', 'ZPID.txt')]
+	error_paths = [os.path.join(_omfDir, 'data', 'Model', owner, modelName, filename) for filename in ('matError.txt', 'rawError.txt')]
 	# Delete existing .m files to not clutter model.
 	for filename in safeListdir(model_dir):
 		if filename.endswith(".m"):
 			os.remove(os.path.join(model_dir, filename))
-	if os.path.isfile(error_path):
-		os.remove(error_path)
+	for error_path in error_paths:
+		if os.path.isfile(error_path):
+			os.remove(error_path)
 	with locked_open(con_file_path, 'w') as conFile:
 		conFile.write("WORKING")
 	importProc = Process(target=matImportBackground, args=[owner, modelName])
@@ -843,13 +845,15 @@ def matImportBackground(owner, modelName):
 def rawImport(owner):
 	''' API for importing a RAW network. '''
 	modelName = request.form.get('modelName', '')
-	model_dir, con_file_path, error_path = [os.path.join(_omfDir, 'data', 'Model', owner, modelName, filename) for filename in ('', 'ZPID.txt', 'rawError.txt')]
+	model_dir, con_file_path = [os.path.join(_omfDir, 'data', 'Model', owner, modelName, filename) for filename in ('', 'ZPID.txt')]
+	error_paths = [os.path.join(_omfDir, 'data', 'Model', owner, modelName, filename) for filename in ('matError.txt', 'rawError.txt')]
 	# Delete existing .raw and .m files to not clutter model.
 	for filename in safeListdir(model_dir):
 		if filename.endswith(".raw") or filename.endswith(".m"):
 			os.remove(os.path.join(model_dir, filename))
-	if os.path.isfile(error_path):
-		os.remove(error_path)
+	for error_path in error_paths:
+		if os.path.isfile(error_path):
+			os.remove(error_path)
 	with locked_open(con_file_path, 'w') as conFile:
 		conFile.write("WORKING")
 	importProc = Process(target=rawImportBackground, args=[owner, modelName])
