@@ -16,7 +16,8 @@ __all__ = [dirname if not dirname.endswith('.py') else dirname[:-3]
 			'__pycache__',
 			'gfm',
 			'gridlabdv990',
-			'matpower7.0',
+			'matpower5.1',
+			'matpower7.0'
 			'nilmtk',
 			'rdt',
 			'.DS_Store'

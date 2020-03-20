@@ -44,7 +44,7 @@ def work(modelDir, inputDict):
 	with open(pJoin(modelDir, matFileName),"w") as outMat:
 		for row in matStr: outMat.write(row)		
 	# Build the MATPOWER command.
-	matDir =  pJoin(__neoMetaModel__._omfDir,'solvers','matpower7.0')
+	matDir =  pJoin(__neoMetaModel__._omfDir,'solvers','matpower5.1')
 	if platform.system() == "Windows":
 		pathSep = ";"
 	else:
