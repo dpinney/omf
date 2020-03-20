@@ -225,6 +225,8 @@ def addTieLines(tree, faultedNode, potentiallyViable, unpowered, powered, openSw
 								while entry < tieLines.shape[0]:
 									if openSwitch.get('name', '') == tieLines.loc[entry, 'name']:
 										tieLines.drop(tieLines.index[[entry]], inplace=True)
+										tieLines = tieLines.reset_index(drop=True)
+										break
 									entry += 1
 							break
 						row -= 1
@@ -243,13 +245,15 @@ def addTieLines(tree, faultedNode, potentiallyViable, unpowered, powered, openSw
 				while entry < tieLines.shape[0]:
 					if openSwitch.get('name', '') == tieLines.loc[entry, 'name']:
 						tieLines.drop(tieLines.index[[entry]], inplace=True)
+						tieLines = tieLines.reset_index(drop=True)
+						break
 					entry += 1
 	# if the subset of potentially viable switches is empty, end the algorithm
 	else:
 		terminate = True
 	return tree, potentiallyViable, tieLines, bestTies, bestReclosers, goTo2, goTo3, terminate, index
 
-def flisr(pathToOmd, pathToTieLines, faultedLine, workDir=None, radial=True):
+def flisr(pathToOmd, pathToTieLines, faultedLine, workDir, radial=True):
 	'run the FLISR algorithm to isolate the fault and restore power'
 	if not workDir:
 		workDir = tempfile.mkdtemp()
@@ -299,13 +303,12 @@ def flisr(pathToOmd, pathToTieLines, faultedLine, workDir=None, radial=True):
 		if goTo4 == True:
 			goTo4 = False
 			tree, potentiallyViable, tieLines, bestTies, bestReclosers, goTo2, goTo3, terminate, index = addTieLines(tree, faultedNode, potentiallyViable, unpowered, powered, openSwitch, tieLines, bestTies, bestReclosers, workDir, goTo2, goTo3, terminate, index, radial)
-
 	print(bestReclosers)
 	print(bestTies)
 	# Run powerflow on the optimal solution
-	# biggestKey = max([safeInt(x) for x in tree.keys()])
-	# tree[str(biggestKey*10 + index + 1)] = {'module':'powerflow','solver_method':'FBS'}
-	# attachments = []
-	# gridlabOut = omf.solvers.gridlabd.runInFilesystem(tree, attachments=attachments, workDir=workDir)
+	biggestKey = max([safeInt(x) for x in tree.keys()])
+	tree[str(biggestKey*10 + index + 1)] = {'module':'powerflow','solver_method':'FBS'}
+	attachments = []
+	gridlabOut = omf.solvers.gridlabd.runInFilesystem(tree, attachments=attachments, workDir=workDir)
 
-# flisr('C:/Users/granb/omf/omf/static/publicFeeders/Olin Barre Fault Test.omd', 'C:/Users/granb/omf/omf/scratch/blackstart/test.csv', "19186", True)
+#flisr('C:/Users/granb/omf/omf/static/publicFeeders/Olin Barre Fault Test 2.omd', 'C:/Users/granb/omf/omf/scratch/blackstart/test.csv', "19186", None, True)
