@@ -1,4 +1,4 @@
-import random, re, datetime, json, os, tempfile, shutil, csv, math
+import random, re, datetime, json, os, tempfile, shutil, csv, math, platform, base64
 from os.path import join as pJoin
 import pandas as pd
 import numpy as np
@@ -8,12 +8,25 @@ import scipy.stats as st
 from sklearn.preprocessing import LabelEncoder
 import plotly as py
 import plotly.graph_objs as go
+import matplotlib
+if platform.system() == 'Darwin':
+	matplotlib.use('TkAgg')
+else:
+	matplotlib.use('Agg')
+from matplotlib import pyplot as plt
+import networkx as nx
 # OMF imports
+from omf import feeder, geo
 import omf
 import omf.feeder
 import omf.geo
 from omf.models import __neoMetaModel__
 from omf.models.__neoMetaModel__ import *
+
+# Model metadata:
+tooltip = 'smartSwitching gives the expected reliability improvement from adding reclosers to a circuit.'
+modelName, template = __neoMetaModel__.metadata(__file__)
+hidden = True
 
 def safeInt(x):
 	try: return int(x)
@@ -253,7 +266,7 @@ def addTieLines(tree, faultedNode, potentiallyViable, unpowered, powered, openSw
 		terminate = True
 	return tree, potentiallyViable, tieLines, bestTies, bestReclosers, goTo2, goTo3, terminate, index
 
-def flisr(pathToOmd, pathToTieLines, faultedLine, workDir, radial=True):
+def flisr(pathToOmd, pathToTieLines, faultedLine, workDir, radial):
 	'run the FLISR algorithm to isolate the fault and restore power'
 	if not workDir:
 		workDir = tempfile.mkdtemp()
@@ -311,4 +324,111 @@ def flisr(pathToOmd, pathToTieLines, faultedLine, workDir, radial=True):
 	attachments = []
 	gridlabOut = omf.solvers.gridlabd.runInFilesystem(tree, attachments=attachments, workDir=workDir)
 
+	# feeder chart with recloser
+	plt.close('all')
+	outGraph = nx.Graph()
+	for key in tree:
+		item = tree[key]
+		if 'name' in item.keys():
+			obType = item.get('object')
+			reclDevices = dict.fromkeys(['recloser'], False)
+			if ('tie' in item.get('name', '')):
+				# HACK: set the recloser as a swingNode in order to make it hot pink
+				outGraph.add_edge(item['from'],item['to'],type='swingNode')
+			elif (obType in reclDevices.keys()):
+				outGraph.add_edge(item['from'],item['to'])
+			elif 'parent' in item.keys() and obType not in reclDevices:
+				outGraph.add_edge(item['name'],item['parent'],type='parentChild',phases=1)
+				outGraph.nodes[item['name']]['type']=item['object']
+				# Note that attached houses via gridEdit.html won't have lat/lon values, so this try is a workaround.
+				try: outGraph.nodes[item['name']]['pos']=(float(item.get('latitude',0)),float(item.get('longitude',0)))
+				except: outGraph.nodes[item['name']]['pos']=(0.0,0.0)
+			elif 'from' in item.keys():
+				myPhase = feeder._phaseCount(item.get('phases','AN'))
+				outGraph.add_edge(item['from'],item['to'],name=item.get('name',''),type=item['object'],phases=myPhase)
+			elif item['name'] in outGraph:
+				# Edge already led to node's addition, so just set the attributes:
+				outGraph.nodes[item['name']]['type']=item['object']
+			else:
+				outGraph.add_node(item['name'],type=item['object'])
+			if 'latitude' in item.keys() and 'longitude' in item.keys():
+				try: outGraph.nodes.get(item['name'],{})['pos']=(float(item['latitude']),float(item['longitude']))
+				except: outGraph.nodes.get(item['name'],{})['pos']=(0.0,0.0)
+	feeder.latLonNxGraph(outGraph, labels=True, neatoLayout=True, showPlot=False)
+	plt.savefig(workDir + '/feeder_chart')
+
+	return {'bestReclosers':bestReclosers, 'bestTies':bestTies}
+
 #flisr('C:/Users/granb/omf/omf/static/publicFeeders/Olin Barre Fault Test 2.omd', 'C:/Users/granb/omf/omf/scratch/blackstart/test.csv', "19186", None, True)
+
+def work(modelDir, inputDict):
+	# Copy specific climate data into model directory
+	outData = {}
+	# Write the feeder
+	feederName = [x for x in os.listdir(modelDir) if x.endswith('.omd')][0][:-4]
+	inputDict['feederName1'] = feederName
+	#test the main functions of the program
+	with open(pJoin(modelDir, inputDict['tieFileName']), 'w') as f:
+		pathToData = f.name
+		f.write(inputDict['tieData'])
+	plotOuts = flisr(
+		modelDir + '/' + feederName + '.omd', #OMD Path
+		pathToData, #Tie Line Data Path
+		inputDict['faultedLine'], #'19186'
+		modelDir, #Work directory.
+		inputDict['radial']) #'True') 
+	
+	# # Textual outputs of cost statistic
+	# with open(pJoin(modelDir,'costStatsCalc.html')) as inFile:
+	# 	outData['costStatsHtml'] = inFile.read()
+	
+	# Image outputs.
+	with open(pJoin(modelDir,'feeder_chart.png'),'rb') as inFile:
+		outData['feeder_chart.png'] = base64.standard_b64encode(inFile.read()).decode()
+
+	# Stdout/stderr.
+	outData['stdout'] = 'Success'
+	outData['stderr'] = ''
+	return outData
+
+def new(modelDir):
+	''' Create a new instance of this model. Returns true on success, false on failure. '''
+	with open(pJoin(__neoMetaModel__._omfDir,'scratch','blackstart','testOlinBarreFault.csv')) as f:
+		tie_data = f.read()
+	defaultInputs = {
+		'modelType': modelName,
+		'feederName1': 'Olin Barre Fault Test 2',
+		'faultedLine': '19186',
+		'radial': 'True',
+		'runPowerflow': 'True',
+		'tieFileName': 'testOlinBarreFault.csv',
+		'tieData': tie_data
+	}
+	creationCode = __neoMetaModel__.new(modelDir, defaultInputs)
+	try:
+		shutil.copyfile(pJoin(__neoMetaModel__._omfDir, 'scratch', 'blackstart', defaultInputs['feederName1']+'.omd'), pJoin(modelDir, defaultInputs['feederName1']+'.omd'))
+	except:
+		return False
+	return __neoMetaModel__.new(modelDir, defaultInputs)
+
+@neoMetaModel_test_setup
+def _tests():
+	# Location
+	modelLoc = pJoin(__neoMetaModel__._omfDir,'data','Model','admin','Automated Testing of ' + modelName)
+	# Blow away old test results if necessary.
+	try:
+		shutil.rmtree(modelLoc)
+	except:
+		# No previous test results.
+		pass
+	# Create New.
+	new(modelLoc)
+	# Pre-run.
+	# renderAndShow(modelLoc)
+	# Run the model.
+	__neoMetaModel__.runForeground(modelLoc)
+	# Show the output.
+	__neoMetaModel__.renderAndShow(modelLoc)
+
+if __name__ == '__main__':
+	_tests()
