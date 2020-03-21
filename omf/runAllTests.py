@@ -8,11 +8,6 @@ from pathlib import PurePath, Path
 IGNORE_FILES = ['runAllTests.py', 'install.py', 'setup.py', 'webProd.py', 'web.py', 'omfStats.py', '__init__.py']
 # Only search these directories
 INCLUDE_DIRS = ['omf', 'models']
-# 3/1/20: These 3 files cause GitHub Actions to hang indefinitely when run with this test harness, so they must be run in their own separate processes
-# 3/9/20: added phaseBalance.py. Ideally, we would not spawn any subprocess. Instead, every file would simply be imported and have its _tests()
-# function called
-# FILES_THAT_HANG = ['networkStructure.py', 'smartSwitching.py', 'forecastTool.py', 'phaseBalance.py', 'evInterconnection.py']
-# IGNORE_FILES.extend(FILES_THAT_HANG)
 
 if platform.system()=='Windows':
 	NO_WINDOWS_SUPPORT = ['cymeToGridlab.py', 'rfCoverage.py', 'solarEngineering.py', 'transmission.py']
@@ -69,22 +64,9 @@ def testRunner():
 	print(f'Number of modules tested: {len(tested)}')
 	print(tested)
 	print(f'Number of tests failed: {len(misfires)}')
-	# print(list(misfires.keys()), '\n')
-	# for fname, err in misfires.items():
-	# 	print(PurePath(fname).name)
-	# 	for line in re.split(r'\n+', err.decode('utf-8')):
-	# 		print(line)
-	# if len(misfires) > 0:
-	# 	raise Exception # Fail if there were errors.
 	_print_header('untested modules report')
 	print(f'Number of untested modules: {len(not_tested)}')
 	print(not_tested, '\n')
-	if len(FILES_THAT_HANG) > 0:
-		_print_header('special tests report')
-		print(f'Number of special tests: {len(FILES_THAT_HANG)}')
-		print(FILES_THAT_HANG)
-		print(f'See additional output for special tests results')
-
 
 if __name__ == "__main__"  :
 	testRunner()

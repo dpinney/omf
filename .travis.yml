@@ -40,8 +40,3 @@ before_script:
   - if [ "$TRAVIS_OS_NAME" = "windows" ]; then export "GRIDLABD=C:\Program Files\GridLAB-D"; fi
 script:
   - python3 ./omf/runAllTests.py omf
-  - cd omf/models
-  - python3 phaseBalance.py
-  - python3 forecastTool.py
-  - python3 smartSwitching.py
-  - python3 networkStructure.py
