@@ -14,6 +14,9 @@ INCLUDE_DIRS = ['omf', 'models']
 FILES_THAT_HANG = ['networkStructure.py', 'smartSwitching.py', 'forecastTool.py', 'phaseBalance.py', 'evInterconnection.py']
 IGNORE_FILES.extend(FILES_THAT_HANG)
 
+if platform.system()=='Windows':
+	NO_WINDOWS_SUPPORT = ['cymeToGridlab.py', 'rfCoverage.py', 'solarEngineering.py', 'transmission.py']
+	IGNORE_FILES.extend(NO_WINDOWS_SUPPORT)
 
 def _print_header(header):
 	print('\n+------------------------+')
@@ -49,7 +52,7 @@ def runAllTests(startingdir):
 						if p.returncode:
 							misfires[os.path.join(os.getcwd(), item)] = 'WINDOWS_ERROR'
 					else:
-						p = subprocess.Popen(['python3', item], stderr=subprocess.PIPE)
+						p = subprocess.Popen(['python3', item], stderr=subprocess.STDOUT)
 						p.wait()
 						if p.returncode:
 							misfires[os.path.join(os.getcwd(), item)] = p.stderr.read()

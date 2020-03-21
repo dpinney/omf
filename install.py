@@ -69,8 +69,8 @@ elif platform.system()=='Windows':
 	os.system("gridlabd-4.0_RC1.exe/silent")
 	# os.system("refreshenv")
 	#Install splat
-	#os.system(wget https://www.qsl.net/kd2bd/Splat-1.3.0.zip)
-	#os.system(Splat-1.3.0/Splat-1-3-1-SD-mx64.exe)
+	#os.system(wget http://www.ve3ncq.ca/software/SPLAT-1.3.1.zip)
+	#os.system(unzip SPLAT-1.3.1.zip) #need to rename/copy these files.
 	# Install pygraphviz from wheel because it's finicky
 	graphVizBinPath = "C:\\Program Files (x86)\\Graphviz2.38\\bin"
 	os.system(f'setx path "%path%;{graphVizBinPath}"')
