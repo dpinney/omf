@@ -14,7 +14,7 @@ WORKING_DIR = omfDir + '/scratch/faultLabeledMeterData'
 TIMEZONE = 'PST+8PDT'
 TIME_FORMAT = '%Y-%m-%d %H:%M:%S'
 SIM_START_TIME = '2000-01-01 00:00:00 PST'
-SIM_STOP_TIME = '2000-02-01 00:00:00 PST'
+SIM_STOP_TIME = '2000-07-01 00:00:00 PST'
 
 THEFT_LINE_LENGTH = 100
 THEFT_ON_TIME = 12*3600
@@ -223,7 +223,7 @@ def generateTreeWithCondition(tree, condition):
 
 # load circuit ---------------------------------------------------------------------
 
-for circuitNum in [3]:
+for circuitNum in [3,4]:
 
 	CIRCUIT_PATH = omfDir + CIRCUIT_PATHS[circuitNum]
 	CONDITION_METER = CONDITION_METERS[circuitNum]

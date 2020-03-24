@@ -19,8 +19,8 @@ from sklearn.metrics import confusion_matrix
 
 TRAIN_FRACTION = 0.9
 
-TRAIN_FILE = '../data/dataOlin-1mo-2.csv'
-TEST_FILE = '../data/dataOlin-1mo.csv'
+TRAIN_FILE = '../data/dataOlin-3-6mo.csv'
+TEST_FILE = '../data/dataOlin-1-6mo.csv'
 
 # TRAIN_FILE = '../data/dataABEC-1mo.csv'
 # TEST_FILE = '../data/dataOlin-DEC-1mo.csv'
@@ -40,7 +40,6 @@ def plot_confusion_matrix(cm, classes, normalize=False, title='Confusion matrix'
         cm = cm.astype('float') / cm.sum(axis=1)[:, np.newaxis]
 
     plt.imshow(cm, interpolation='nearest', cmap=cmap)
-    print('here')
     plt.title(title)
     plt.colorbar()
     tick_marks = np.arange(len(classes))
@@ -78,28 +77,30 @@ with open( TRAIN_FILE,'r' ) as trainFile:
             datapoint = []
             label = row[-1]
 
-            # restart counter when we transition to new label and update colorNum
-            if label != lastLabel:
-                count = 0
-                colorNum += 1
-                uniqueLabels.append(label)
-            
-            datapoint.append(count)
-            colorList.append(colorNum)
+            if label != 'theft':
 
-            # populate datapoint
-            for index,data in enumerate(row):
+                # restart counter when we transition to new label and update colorNum
+                if label != lastLabel:
+                    count = 0
+                    colorNum += 1
+                    uniqueLabels.append(label)
+                
+                datapoint.append(count)
+                colorList.append(colorNum)
 
-                # timestamp and meterID and label are not part of the datapoint 
-                # convert everything to float
-                if (index>1) and (index != (len(row)-1)):
-                    datapoint.append(float(data))
-                    
-            trainX.append( datapoint )
-            trainY.append( label )
-            
-            count += 1
-            lastLabel = label
+                # populate datapoint
+                for index,data in enumerate(row):
+
+                    # timestamp and meterID and label are not part of the datapoint 
+                    # convert everything to float
+                    if (index>1) and (index != (len(row)-1)):
+                        datapoint.append(float(data))
+                        
+                trainX.append( datapoint )
+                trainY.append( label )
+                
+                count += 1
+                lastLabel = label
 
 
 # read in test data -----------------------------------------------------------
@@ -121,27 +122,29 @@ with open( TEST_FILE,'r' ) as testFile:
             datapoint = []
             label = row[-1]
 
-            # restart counter when we transition to new label and update colorNum
-            if label != lastLabel:
-                count = 0
-                colorNum += 1
-            
-            datapoint.append(count)
-            colorList.append(colorNum)
+            if label != 'theft':
 
-            # populate datapoint
-            for index,data in enumerate(row):
+                # restart counter when we transition to new label and update colorNum
+                if label != lastLabel:
+                    count = 0
+                    colorNum += 1
+                
+                datapoint.append(count)
+                colorList.append(colorNum)
 
-                # timestamp and meterID and label are not part of the datapoint 
-                # convert everything to float
-                if (index>1) and (index != (len(row)-1)):
-                    datapoint.append(float(data))
-                    
-            testX.append( datapoint )
-            testY.append( label )
-            
-            count += 1
-            lastLabel = label
+                # populate datapoint
+                for index,data in enumerate(row):
+
+                    # timestamp and meterID and label are not part of the datapoint 
+                    # convert everything to float
+                    if (index>1) and (index != (len(row)-1)):
+                        datapoint.append(float(data))
+                        
+                testX.append( datapoint )
+                testY.append( label )
+                
+                count += 1
+                lastLabel = label
 
 # sort data -------------------------------------------------------------------
 
