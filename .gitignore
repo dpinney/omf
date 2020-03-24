@@ -45,4 +45,4 @@ omf/static/model_db_stats.png
 omf/scratch/faultLabeledMeterData/*
 !omf/scratch/faultLabeledMeterData/code/
 omf/scratch/disaggDataGeneration/*
-!omf/scratch/disaggDataGeneration/*.py/
+!omf/scratch/disaggDataGeneration/*.py
