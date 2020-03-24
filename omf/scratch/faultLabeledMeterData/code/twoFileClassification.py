@@ -22,6 +22,8 @@ TRAIN_FRACTION = 0.9
 TRAIN_FILE = '../data/dataOlin-3-6mo.csv'
 TEST_FILE = '../data/dataOlin-1-6mo.csv'
 
+IGNORE_LABELS = ['theft']
+
 # TRAIN_FILE = '../data/dataABEC-1mo.csv'
 # TEST_FILE = '../data/dataOlin-DEC-1mo.csv'
 
@@ -77,7 +79,7 @@ with open( TRAIN_FILE,'r' ) as trainFile:
             datapoint = []
             label = row[-1]
 
-            if label != 'theft':
+            if label not in IGNORE_LABELS:
 
                 # restart counter when we transition to new label and update colorNum
                 if label != lastLabel:
@@ -122,7 +124,7 @@ with open( TEST_FILE,'r' ) as testFile:
             datapoint = []
             label = row[-1]
 
-            if label != 'theft':
+            if label not in IGNORE_LABELS:
 
                 # restart counter when we transition to new label and update colorNum
                 if label != lastLabel:
