@@ -497,7 +497,7 @@ def work(modelDir, inputDict):
 
 		#import and run pycigar
 		import pycigar
-		
+
 		pycigar.main(
 		    modelDir + "/PyCIGAR_inputs/misc_inputs.csv",
 		    modelDir + "/PyCIGAR_inputs/ieee37.dss",
@@ -508,8 +508,18 @@ def work(modelDir, inputDict):
 		    modelDir + "/pycigarOutput/",
 		)
 
+	def convertOutputs():
+		#set outData[] values to those from modelDir/pycigarOutput/pycigar_output_specs_.json
+		#read in the pycigar-outputed json
+		with open(pJoin(modelDir,"pycigarOutput","pycigar_output_specs.json"), 'r') as f:
+			pycigarJson = json.load(f)
+		
+		#convert "allMeterVoltages"
+		outData["allMeterVoltages"] = pycigarJson["allMeterVoltages"]
+
 	convertInputs()
 	runPyCIGAR()
+	convertOutputs()
 	return outData
 
 def avg(inList):
