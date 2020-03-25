@@ -121,6 +121,24 @@
 					<input id="fileName1" name="fileName1" value='' readonly class="uploadFileName">	
 				</div>
 			</div>
+			<div class="shortInput">
+				<label class="tooltip">Breakpoints File Input<span class="classic">Import the .csv file representing the breakpoint data.</span></label>
+				<input id="breakpointsFile" type="file" style="display:none" onchange="handle_files(this.files,'breakpoints','fileName2')">
+				<input id="breakpoints" name="breakpoints" type="hidden">
+				<div>
+					<label for="breakpointsFile" class="fileButton">Choose File</label>
+					<input id="fileName2" name="fileName2" value='' readonly class="uploadFileName">	
+				</div>
+			</div>
+			<div class="shortInput">
+				<label class="tooltip">OpenDSS File Input<span class="classic">Import the .dss file representing the circuit.</span></label>
+				<input id="chooseDssFile" type="file" style="display:none" onchange="handle_files(this.files,'dssFile','fileName3')">
+				<input id="dssFile" name="dssFile" type="hidden">
+				<div>
+					<label for="chooseDssFile" class="fileButton">Choose File</label>
+					<input id="fileName3" name="fileName3" value='' readonly class="uploadFileName">	
+				</div>
+			</div>
 			<div class="wideInput">
 				<p class="inputSectionHeader">Cyber Attack Specifications</p>
 			</div>

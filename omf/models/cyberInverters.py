@@ -22,21 +22,7 @@ def work(modelDir, inputDict):
 	feederName = [x for x in os.listdir(modelDir) if x.endswith('.omd')][0][:-4]
 	inputDict["feederName1"] = feederName
 	zipCode = "59001" #TODO get zip code from the PV and Load input file
-	#Open load and PV input file
-	with open(pJoin(modelDir,"loadPV.csv"),"w") as loadPVFile:
-		loadPVFile.write(inputDict['loadPV'])
-	try:
-		#TODO do whatever it is we need with load and pv values
-		with open(pJoin(modelDir,"loadPV.csv"), newline='') as inFile:
-			reader = csv.reader(inFile)
-			for row in reader:
-				#Do something!
-				if 3>4: raise Exception
-				pass
-	except:
-		#TODO change to an appropriate warning message
-		errorMessage = "CSV file is incorrect format. Please see valid format definition at <a target='_blank' href='https://github.com/dpinney/omf/wiki/Models-~-demandResponse#walkthrough'>OMF Wiki demandResponse</a>"
-		raise Exception(errorMessage)
+	
 	#Value check for attackVariable
 	if inputDict.get("attackVariable", "None") == "None":
 		attackAgentType = "None"
@@ -408,13 +394,14 @@ def work(modelDir, inputDict):
 		outData['timeStamps'] = aggSeries(stamps, stamps, lambda x:x[0][0:7], 'months')
 
 	def convertInputs():
+		#create the PyCIGAR_inputs folder to store the input files to run PyCIGAR
 		try:
-			os.mkdir(pJoin(modelDir,"PyCIGAR"))
+			os.mkdir(pJoin(modelDir,"PyCIGAR_inputs"))
 		except FileExistsError:
-			print("PyCIGAR folder already exists!")
+			print("PyCIGAR_inputs folder already exists!")
 			pass
 		except:
-			print("Error occurred creating PyCIGAR folder")
+			print("Error occurred creating PyCIGAR_inputs folder")
 
 		#create misc_inputs.csv file in folder
 		# f1Name = "misc_inputs.csv"
@@ -440,28 +427,89 @@ def work(modelDir, inputDict):
 		"forward band default":2, 
 		"tap number default":16, 
 		"tap delay default":2}
-		with open(pJoin(modelDir,"PyCIGAR","misc_inputs.csv"),"w") as miscFile:
+		with open(pJoin(modelDir,"PyCIGAR_inputs","misc_inputs.csv"),"w") as miscFile:
 			#Populate misc_inputs.csv
 			# miscFile.write(misc_inputs)
 			for key in misc_dict.keys():
 				miscFile.write("%s,%s\n"%(key,misc_dict[key]))
 
 		#create ieee37.dss file in folder
-		with open(pJoin(modelDir,"PyCIGAR","ieee37.dss"),"w") as dssFile:
-			dssFile.write("TODO: POPULATE IEEE37.DSS")
+		dss_filename = "ieee37.dss"
+		with open(pJoin(modelDir, "PyCIGAR_inputs", dss_filename),"w") as dssFile:
+			dssFile.write(inputDict['dssFile'])
+		try:
+			#TODO do whatever it is we need with load and pv values
+			with open(pJoin(modelDir, "PyCIGAR_inputs", dss_filename), newline='') as inFile:
+				reader = csv.reader(inFile)
+				for row in reader:
+					#Do something!
+					if 3>4: raise Exception
+					pass
+		except:
+			#TODO change to an appropriate warning message
+			errorMessage = "OpenDSS file is incorrect format. Please see valid format definition at <a target='_blank' href='https://github.com/dpinney/omf/wiki/Models-~-demandResponse#walkthrough'>OMF Wiki demandResponse</a>"
+			raise Exception(errorMessage)
 
 		#create load_solar_data.csv file in folder
-		with open(pJoin(modelDir,"PyCIGAR","load_solar_data.csv"),"w") as loadPVFile:
+		with open(pJoin(modelDir,"PyCIGAR_inputs","load_solar_data.csv"),"w") as loadPVFile:
 			loadPVFile.write(inputDict['loadPV'])
+			#Open load and PV input file
+		try:
+			#TODO do whatever it is we need with load and pv values
+			with open(pJoin(modelDir,"PyCIGAR_inputs","load_solar_data.csv"), newline='') as inFile:
+				reader = csv.reader(inFile)
+				for row in reader:
+					#Do something!
+					if 3>4: raise Exception
+					pass
+		except:
+			#TODO change to an appropriate warning message
+			errorMessage = "CSV file is incorrect format. Please see valid format definition at <a target='_blank' href='https://github.com/dpinney/omf/wiki/Models-~-demandResponse#walkthrough'>OMF Wiki demandResponse</a>"
+			raise Exception(errorMessage)
 
 		#create breakpoints.csv file in folder
-		f1Name = "breakpoints.csv"
-		with open(pJoin(omf.omfDir, "static", "testFiles", "pyCIGAR", f1Name)) as f1:
-			breakpoints_inputs = f1.read()
-		with open(pJoin(modelDir,"PyCIGAR","breakpoints.csv"),"w") as breakpointFile:
-			breakpointFile.write(breakpoints_inputs)
+		# f1Name = "breakpoints.csv"
+		# with open(pJoin(omf.omfDir, "static", "testFiles", "pyCIGAR", f1Name)) as f1:
+		# 	breakpoints_inputs = f1.read()
+		with open(pJoin(modelDir,"PyCIGAR_inputs","breakpoints.csv"),"w") as breakpointsFile:
+			breakpointsFile.write(inputDict['breakpoints'])
+		try:
+			#TODO do whatever it is we need with load and pv values
+			with open(pJoin(modelDir, "PyCIGAR_inputs", "breakpoints.csv"), newline='') as inFile:
+				reader = csv.reader(inFile)
+				for row in reader:
+					#Do something!
+					if 3>4: raise Exception
+					pass
+		except:
+			#TODO change to an appropriate warning message
+			errorMessage = "CSV file is incorrect format. Please see valid format definition at <a target='_blank' href='https://github.com/dpinney/omf/wiki/Models-~-demandResponse#walkthrough'>OMF Wiki demandResponse</a>"
+			raise Exception(errorMessage)
+	def runPyCIGAR():
+		#create the pycigarOutput folder to store the output file(s) generated by PyCIGAR
+		try:
+			os.mkdir(pJoin(modelDir,"pycigarOutput"))
+		except FileExistsError:
+			print("pycigarOutput folder already exists!")
+			pass
+		except:
+			print("Error occurred creating pycigarOutput folder")
+
+		#import and run pycigar
+		import pycigar
+		
+		pycigar.main(
+		    modelDir + "/PyCIGAR_inputs/misc_inputs.csv",
+		    modelDir + "/PyCIGAR_inputs/ieee37.dss",
+		    modelDir + "/PyCIGAR_inputs/load_solar_data.csv",
+		    modelDir + "/PyCIGAR_inputs/breakpoints.csv",
+		    2,
+		    None,
+		    modelDir + "/pycigarOutput/",
+		)
 
 	convertInputs()
+	runPyCIGAR()
 	return outData
 
 def avg(inList):
@@ -549,6 +597,14 @@ def new(modelDir):
 	with open(pJoin(omf.omfDir, "static", "testFiles", "pyCIGAR", f1Name)) as f1:
 		load_PV = f1.read()
 
+	f2Name = "breakpoints.csv"
+	with open(pJoin(omf.omfDir, "static", "testFiles", "pyCIGAR", f2Name)) as f2:
+		breakpoints_inputs = f2.read()
+
+	f3Name = "ieee37.dss"
+	with open(pJoin(omf.omfDir, "static", "testFiles", "pyCIGAR", f3Name)) as f3:
+		dssFile = f3.read()
+
 	defaultInputs = {
 		"simStartDate": "2019-07-01T00:00:00Z",
 		"simLengthUnits": "hours",
@@ -557,7 +613,9 @@ def new(modelDir):
 		"modelType": modelName,
 		"zipCode": "59001",
 		"simLength": "72",
-		"loadPV": load_PV
+		"loadPV": load_PV,
+		"breakpoints": breakpoints_inputs,
+		"dssFile": dssFile
 	}
 	creationCode = __neoMetaModel__.new(modelDir, defaultInputs)
 	try:
