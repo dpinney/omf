@@ -44,12 +44,8 @@ def work(modelDir, inputDict):
 	with open(pJoin(modelDir, matFileName),"w") as outMat:
 		for row in matStr: outMat.write(row)		
 	# Build the MATPOWER command.
-	matDir =  pJoin(__neoMetaModel__._omfDir,'solvers','matpower5.1')
-	if platform.system() == "Windows":
-		pathSep = ";"
-	else:
-		pathSep = ":"
-	matPath = '"' + pathSep.join([matDir,pJoin(matDir,'t'),pJoin(matDir,'extras')]) + '"'
+	matDir =  pJoin(__neoMetaModel__._omfDir,'solvers','matpower7.0')
+	matPath = _getMatPath(matDir)
 	algorithm = inputDict.get("algorithm","NR")
 	pfArg = "'pf.alg', '" + algorithm + "'"
 	modelArg = "'model', '" + inputDict.get("model","AC") + "'"
@@ -180,6 +176,17 @@ def work(modelDir, inputDict):
 	outData["stdout"] = "Success"
 	outData["stderr"] = ""
 	return outData
+
+def _getMatPath(matDir):
+	# Get paths required for matpower7.0 in octave
+	if platform.system() == "Windows":
+		pathSep = ";"
+	else:
+		pathSep = ":"
+	relativePaths = ['lib', 'lib/t', 'data', 'mips/lib', 'mips/lib/t', 'most/lib', 'most/lib/t', 'mptest/lib', 'mptest/lib/t', 'extras/maxloadlim', 'extras/maxloadlim/tests', 'extras/maxloadlim/examples', 'extras/misc', 'extras/reduction', 'extras/sdp_pf', 'extras/se', 'extras/smartmarket', 'extras/state_estimator', 'extras/syngrid/lib','extras/syngrid/lib/t']
+	paths = [matDir] + [pJoin(matDir, relativePath) for relativePath in relativePaths]
+	matPath = '"' + pathSep.join(paths) + '"'
+	return matPath
 
 def new(modelDir):
 	''' Create a new instance of this model. Returns true on success, false on failure. '''
