@@ -804,7 +804,7 @@ class xTestSamRun(object):
 class TestTransmissionMatToOmt(object):
 
 	def test_postRequest_returnsJSON(self, client):
-		mat_path = os.path.join(omf.omfDir, "solvers/matpower5.1", "case9.m")
+		mat_path = os.path.join(omf.omfDir, "solvers/matpower7.0", "data, "case9.m")
 		with open(mat_path) as f:
 			b_io = io.BytesIO(f.read())
 		data = {

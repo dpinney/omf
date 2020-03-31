@@ -882,8 +882,11 @@ def rawImportBackground(owner, modelName):
 		filepath = os.path.join(_omfDir, 'data', 'Model', owner, modelName, 'rawError.txt')
 		with locked_open(filepath, 'w') as errorFile:
 			errorFile.write('rawError')
-		os.remove(pid_filepath)
-	except:
+	except Exception:
+		filepath = os.path.join(_omfDir, 'data', 'Model', owner, modelName, 'rawError.txt')
+		with locked_open(filepath, 'w') as errorFile:
+			errorFile.write('octaveError')
+	finally:
 		os.remove(pid_filepath)
 
 

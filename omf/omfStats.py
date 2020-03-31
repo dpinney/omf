@@ -8,6 +8,8 @@ OOO Think about what to do with the error log.
 
 import os, csv, json, time, collections, zipfile
 from datetime import datetime
+import matplotlib
+matplotlib.use('Agg')
 from matplotlib import pyplot as plt
 try:
 	from geolite2 import geolite2
@@ -49,7 +51,7 @@ template = Template(
 def genModelDatabase(outPath):
 	'''Translates all models on serer to .tsv file'''
 	modelDir = os.path.join(omf.omfDir, 'data', 'Model')
-	with open(outPath, 'w', newline='') as statsFile:
+	with open(outPath, 'w') as statsFile:
 		writer = csv.writer(statsFile, delimiter='\t', lineterminator='\n')
 		writer.writerow(['Owner', 'Model Name', 'Type', 'Runtime (H:M:S)', 'Status', 'Created'])
 		for owner in [x for x in os.listdir(modelDir) if not x.startswith('.')]:
@@ -77,7 +79,7 @@ def modelDatabaseStats(dataFilePath, outFilePath):
 	# REPIC(time.strftime("%c"))  #OUTPUT: Mon Nov 26 15:34:39 2018
 	# Import the data.
 	models = []
-	with open(dataFilePath, 'r', newline='') as inFile:
+	with open(dataFilePath, 'r') as inFile:
 		reader = csv.DictReader(inFile, delimiter='\t')
 		for row in reader:
 			models.append(row)
