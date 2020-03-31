@@ -236,7 +236,7 @@ object evcharger_det {
 
 object recorder {
 	interval 60;
-	property heating_demand,cooling_demand,heating_setpoint,air_temperature,outdoor_temperature;
+	property hvac_load,heating_setpoint,air_temperature,outdoor_temperature;
 	line_units NONE;
 	file out_house.csv;
 	parent house0;
