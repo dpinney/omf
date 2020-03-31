@@ -153,12 +153,9 @@ def _rawToMat(inputStr, filePath=True):
 		rawfile_name = inputStr
 		matfile_name = os.path.splitext(inputStr)[0] + '.m' 
 
-	matDir =  pJoin(__neoMetaModel__._omfDir,'solvers','matpower7.0')
-	if platform.system() == "Windows":
-		pathSep = ";"
-	else:
-		pathSep = ":"
-	matPath = '"' + pathSep.join([matDir, pJoin(matDir,'t'), pJoin(matDir,'extras')]) + '"'
+	# Prepare Octave with correct path.
+	matpowerDir =  pJoin(__neoMetaModel__._omfDir,'solvers','matpower7.0')
+	matPath = _getMatPath(matpowerDir)
 
 	# TODO: Test code on Windows.
 	if platform.system() == "Windows":
@@ -187,7 +184,10 @@ def _rawToMat(inputStr, filePath=True):
 		if not filePath:
 			os.remove(rawfile_name)
 		if len(err) != 0:
-			raise ValueError('RAW file/string does not contain valid data.')
+			if '\'psse2mpc\' undefined' in err.decode("utf-8"):
+				raise Exception('Matpower/Octave setup is incorrect.')
+			else: 
+				raise ValueError('RAW file/string does not contain valid data.')
 		
 	return matfile_name
 
@@ -260,6 +260,17 @@ def get_file_contents(filepath):
 def get_abs_path(relative_path):
 	return os.path.join(os.path.dirname(os.path.abspath(__file__)), relative_path)
 
+def _getMatPath(matDir):
+	# Get paths required for matpower7.0 in octave
+	if platform.system() == "Windows":
+		pathSep = ";"
+	else:
+		pathSep = ":"
+	relativePaths = ['lib', 'lib/t', 'data', 'mips/lib', 'mips/lib/t', 'most/lib', 'most/lib/t', 'mptest/lib', 'mptest/lib/t', 'extras/maxloadlim', 'extras/maxloadlim/tests', 'extras/maxloadlim/examples', 'extras/misc', 'extras/reduction', 'extras/sdp_pf', 'extras/se', 'extras/smartmarket', 'extras/state_estimator', 'extras/syngrid/lib','extras/syngrid/lib/t']
+	paths = [matDir] + [pJoin(matDir, relativePath) for relativePath in relativePaths]
+	matPath = '"' + pathSep.join(paths) + '"'
+	return matPath
+
 def viz(omt_filepath, output_path=None, output_name="viewer.html", open_file=True):
 	"""
 	Get a path to an .omt file that was saved on the server after a grip API consumer POSTed their desired .omt file.
@@ -294,10 +305,16 @@ def viz(omt_filepath, output_path=None, output_name="viewer.html", open_file=Tru
 def _tests():
 	# Parse mat to dictionary.
 	networkName = 'case9'
-	netPath = os.path.join(os.path.dirname(__file__), 'solvers', 'matpower5.1', networkName + '.m')
+	netPath = os.path.join(os.path.dirname(__file__), 'solvers', 'matpower7.0', 'data', networkName + '.m')
 	networkJson = parse(netPath, filePath=True)
 	keyLen = len(networkJson.keys())
 	print('Parsed MAT file with %s buses, %s generators, and %s branches.'%(len(networkJson['bus']),len(networkJson['gen']),len(networkJson['branch'])))
+	# Parse raw to dictionary.
+	networkNameRaw = 'GO500v2_perfect_0'
+	netPathRaw = os.path.join(os.path.dirname(__file__), 'solvers', 'matpower7.0', 'data', 'test', networkNameRaw + '.raw')
+	networkJsonRaw = parseRaw(netPathRaw, filePath=True)
+	keyLenRaw = len(networkJsonRaw.keys())
+	print('Parsed RAW file with %s buses, %s generators, and %s branches.'%(len(networkJsonRaw['bus']),len(networkJsonRaw['gen']),len(networkJsonRaw['branch'])))
 	# Use python nxgraph to add lat/lon to .omt.json.
 	nxG = netToNxGraph(networkJson)
 	networkJson = latlonToNet(nxG, networkJson)
