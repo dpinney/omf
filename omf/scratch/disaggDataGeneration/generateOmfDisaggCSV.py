@@ -13,60 +13,48 @@ OUTPUT_FILENAME_TEST = 'disaggTesting.csv'
 OUTPUT_FILENAME_TRUTH = 'disaggTestingTruth.csv'
 METER_FILENAME = './NetZeroEnergyHouseSim/out_meter.csv'
 HOUSE_FILENAME = './NetZeroEnergyHouseSim/out_house.csv'
-HEATING_FILENAME = './NetZeroEnergyHouseSim/out_heating.csv'
-COOLING_FILENAME = './NetZeroEnergyHouseSim/out_cooling.csv'
+HVAC_FILENAME = './NetZeroEnergyHouseSim/out_hvac.csv'
 
 APPLIANCES = ['waterheater', 'lights', 'plugload', 'appliance', 
 	'clotheswasher', 'dishwasher', 'dryer', 'ev_charger', 'freezer', 
 	'microwave', 'range', 'refrigerator', 'responsive', 'unresponsive', 
-	'heating', 'cooling']
+	'hvac']
 
 
-# create heating and cooling files --------------------------------------------
+# create hvac files -----------------------------------------------------------
 
-with open( HEATING_FILENAME, 'w' ) as outputFileHeating:
-	heatingWriter = csv.writer(outputFileHeating, delimiter=',')
+with open( HVAC_FILENAME, 'w' ) as outputFileHvac:
+	hvacWriter = csv.writer(outputFileHvac, delimiter=',')
 
-	with open( COOLING_FILENAME, 'w' ) as outputFileCooling:
-		coolingWriter = csv.writer(outputFileCooling, delimiter=',')
+	# look at file with meter data
+	hvacPowerIndex = None
+	with open( HOUSE_FILENAME ,'r' ) as houseFile:
+		houseReader = csv.reader(houseFile, delimiter=',')
 
-		# look at file with meter data
-		heatingPowerIndex = None
-		coolingPowerIndex = None
-		with open( HOUSE_FILENAME ,'r' ) as houseFile:
-			houseReader = csv.reader(houseFile, delimiter=',')
+		#loop through header and find the power index locations
+		for houseRow in houseReader:
 
-			#loop through header and find the power index locations
-			for houseRow in houseReader:
+			# copy files verbatim till you hit the line with column names
+			if '# timestamp' not in houseRow:
+				hvacWriter.writerow(houseRow)				
 
-				# copy files verbatim till you hit the line with column names
-				if '# timestamp' not in houseRow:
-					heatingWriter.writerow(houseRow)				
-					coolingWriter.writerow(houseRow)					
+			# use col names to determine power indices and data row format
+			else:
 
-				# use col names to determine power indices and data row format
-				else:
+				for index, item in enumerate(houseRow):
+					if 'hvac_load' in item:
+						hvacPowerIndex = index;
+						break
 
-					for index, item in enumerate(houseRow):
-						if 'demand' in item:
-							if 'heating' in item:
-								heatingPowerIndex = index;
-							elif 'cooling' in item:
-								coolingPowerIndex = index;
+				hvacToWrite =[houseRow[0], 'hvac_power']
+				hvacWriter.writerow(hvacToWrite)				
+				break
 
-					heatingToWrite =[houseRow[0], 'heating_power_demand']
-					coolingToWrite =[houseRow[0], 'cooling_power_demand']
-					heatingWriter.writerow(heatingToWrite)				
-					coolingWriter.writerow(coolingToWrite)
-					break
-
-			# loop through rest of  file (actual data) and copy it usinf the 
-			# previously defined data format
-			for houseRow in houseReader:
-				heatingToWrite =[houseRow[0], houseRow[heatingPowerIndex]]
-				coolingToWrite =[houseRow[0], houseRow[coolingPowerIndex]]
-				heatingWriter.writerow(heatingToWrite)				
-				coolingWriter.writerow(coolingToWrite)				
+		# loop through rest of  file (actual data) and copy it usinf the 
+		# previously defined data format
+		for houseRow in houseReader:
+			hvacToWrite =[houseRow[0], houseRow[hvacPowerIndex]]
+			hvacWriter.writerow(hvacToWrite)				
 
 # create train file -----------------------------------------------------------
 
