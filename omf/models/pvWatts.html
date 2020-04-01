@@ -128,37 +128,11 @@
 					<option value="days">Days</option>
 				</select>
 			</div>
-			<div class="wideInput" style="text-align:right">
-				{% if modelStatus != 'running' and (datastoreNames.get('currentUser','') == allInputData.user or datastoreNames.get('currentUser','') == 'admin') %}
-				<button id="deleteButton" type="button" onclick="deleteModel()">Delete</button>
-				<button id="runButton" type="submit">Run Model</button>
-				{% endif %}
-				{% if modelStatus == "finished" %}
-				<button id="shareButton" type="button" onclick="shareModel()">Share</button>
-				<button id="duplicateButton" type="button" onclick="duplicateModel()">Duplicate</button>
-				{% endif %}
-				{% if modelStatus == "running" and (datastoreNames.get('currentUser','') == allInputData.user or datastoreNames.get('currentUser','') == 'admin') %}
-				<button id="cancelButton" type="button" onclick="cancelModel()">Cancel Run</button>
-				{% endif %}
-			</div>
+			{{ omfModelButtons }}
 		</form>
 	</div>
 	<div id="copyrightNotice" style="width:1000px; margin:-25px auto 10px auto; padding-left:5px; color:gray">PVWatts &copy; was developed by the <a href="http://pvwatts.nrel.gov/">National Renewable Energy Lab</a></div>
-	{% if modelStatus == 'running' %}
-	<div id ="runIndicator" class="content">
-		Model running on server. Refresh the page to check for results, or wait for automatic refresh every 5 seconds.
-	</div>
-	{% endif %}
-	{% if modelStatus == 'stopped' %}
-	<div id ="stopIndicator" class="content" style="visibility: hidden">
-		<pre id='errorText' style='overflow-x:scroll'></pre>
-		<script type="text/javascript">
-		if (typeof(allInputData.stderr) !== 'undefined') {	
-			gebi('stopIndicator').style.visibility = 'visible'
-			gebi('errorText').innerHTML = 'MODEL ENCOUNTERED AN ERROR AS FOLLOWS: \n\n' + allInputData.stderr}
-		</script>
-	</div>
-	{% endif %}
+	{{ omfRunDebugBlock }}
 	{% if modelStatus == 'finished' %}
 	<div id="output">
 		<div style="text-align:left" class="tightContent">
@@ -244,12 +218,7 @@
 					"legend":{"verticalAlign":"top","align":"top","borderWidth":0,"x":50,"y":-10,"layout":"horizontal"}})
 			</script>
 		</div>
-		<p class="reportTitle">Raw Input and Output Files</p>
-		<div id="rawOutput" class="content" style="margin-top:0px">
-			{% for name in allOutputDataDict['fileNames'] %}
-				{% if loop.index > 1 %}&mdash; {% endif %}<a href="/downloadModelData/{{allInputDataDict['user']}}/{{allInputDataDict['modelName']}}/{{name}}">{{name}}</a>
-			{% endfor %}
-		</div>
+		{{ rawOutputFiles }}
 	</div>
 	{% endif %}
 </body>

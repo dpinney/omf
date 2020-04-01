@@ -103,9 +103,9 @@ def renderTemplate(modelDir, absolutePaths=False, datastoreNames={}):
 		with web.locked_open(pJoin(modelDir, 'allInputData.json')) as f:
 			inJson = json.load(f)
 		modelPath, modelName = pSplit(modelDir)
-		deepPath, user = pSplit(modelPath)
+		deepPath, modelOwner = pSplit(modelPath)
 		inJson["modelName"] = modelName
-		inJson["user"] = user
+		inJson["user"] = modelOwner
 		modelType = inJson["modelType"]
 		template = getattr(omf.models, modelType).template
 		allInputData = json.dumps(inJson)
@@ -147,9 +147,52 @@ def renderTemplate(modelDir, absolutePaths=False, datastoreNames={}):
 		pathPrefix = _omfDir
 	else:
 		pathPrefix = ""
+	# Generate standard raw output files.
+	rawFilesTemplate = '''
+		<p class="reportTitle">Raw Input and Output Files</p>
+		<div id="rawOutput" class="content" style="margin-top:0px">
+			{% for name in allOutputDataDict['fileNames'] %}
+				{% if loop.index > 1 %}&mdash; {% endif %}<a href="/downloadModelData/{{allInputDataDict['user']}}/{{allInputDataDict['modelName']}}/{{name}}">{{name}}</a>
+			{% endfor %}
+		</div>
+	'''
+	rawOutputFiles = Template(rawFilesTemplate).render(allOutputDataDict=outJson, allInputDataDict=inJson)
+	# Generate standard model buttons.
+	omfModelButtonsTemplate = '''
+		<div class="wideInput" style="text-align:right">
+		{% if modelStatus != 'running' and (loggedInUser == modelOwner or loggedInUser == 'admin') %}
+		<button id="deleteButton" type="button" onclick="deleteModel()">Delete</button>
+		<button id="runButton" type="submit">Run Model</button>
+		{% endif %}
+		{% if modelStatus == "finished" %}
+		<button id="shareButton" type="button" onclick="shareModel()">Share</button>
+		<button id="duplicateButton" type="button" onclick="duplicateModel()">Duplicate</button>
+		{% endif %}
+		{% if modelStatus == "running" and (loggedInUser == modelOwner or loggedInUser == 'admin') %}
+		<button id="cancelButton" type="button" onclick="cancelModel()">Cancel Run</button>
+		{% endif %}
+	</div>
+	'''
+	# Generate standard status content.
+	loggedInUser = datastoreNames.get('currentUser', 'test')
+	modelStatus = getStatus(modelDir)
+	omfModelButtons = Template(omfModelButtonsTemplate).render(modelStatus=modelStatus, loggedInUser=loggedInUser, modelOwner=modelOwner)
+	runDebugTemplate = '''
+		{% if modelStatus == 'running' %}
+		<div id ="runIndicator" class="content">
+			Model running on server. Refresh the page to check for results, or wait for automatic refresh every 5 seconds.
+		</div>
+		{% endif %}
+		{% if modelStatus == 'stopped' and stderr != '' %}
+		<div id ="stopIndicator" class="content">
+			<pre id='errorText' style='overflow-x:scroll'>MODEL ENCOUNTERED AN ERROR AS FOLLOWS:\n\n{{stderr}}</pre>
+		</div>
+		{% endif %}
+		'''
+	omfRunDebugBlock = Template(runDebugTemplate).render(modelStatus=modelStatus, stderr=inJson.get('stderr', ''))
 	# Raw input output include.
-	return template.render(allInputData=allInputData, allOutputData=allOutputData, modelStatus=getStatus(modelDir), pathPrefix=pathPrefix,
-		datastoreNames=datastoreNames, modelName=modelType, allInputDataDict=inJson, allOutputDataDict=outJson)
+	return template.render(allInputData=allInputData, allOutputData=allOutputData, modelStatus=modelStatus, pathPrefix=pathPrefix,
+		datastoreNames=datastoreNames, modelName=modelType, allInputDataDict=inJson, allOutputDataDict=outJson, rawOutputFiles=rawOutputFiles, omfModelButtons=omfModelButtons, omfRunDebugBlock=omfRunDebugBlock)
 
 def renderAndShow(modelDir, datastoreNames={}):
 	''' Render and open a template (blank or with output) in a local browser. '''
