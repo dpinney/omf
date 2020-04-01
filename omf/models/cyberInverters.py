@@ -516,6 +516,31 @@ def work(modelDir, inputDict):
 		
 		#convert "allMeterVoltages"
 		outData["allMeterVoltages"] = pycigarJson["allMeterVoltages"]
+		
+		#convert "Consumption"."Power"
+		outData["Consumption"]["Power"] = pycigarJson["Consumption"]["Power Substation (W)"]
+
+		#convert "Consumption"."Losses"
+		outData["Consumption"]["Losses"] = pycigarJson["Consumption"]["Losses Total (W)"]
+
+		#convert "Consumption"."DG"
+		outData["Consumption"]["DG"] = pycigarJson["Consumption"]["DG Output (W)"]
+
+		#convert "powerFactors"
+		outData["powerFactors"] = pycigarJson["Substation Power Factor (%)"]	
+
+		#convert "swingVoltage"
+		outData["swingVoltage"] = pycigarJson["Substation Top Voltage(V)"]
+
+		#convert "downlineNodeVolts"
+		outData["downlineNodeVolts"] = pycigarJson["Substation Bottom Voltage(V)"]
+
+		#convert "minVoltBand"
+		outData["minVoltBand"] = pycigarJson["Substation Regulator Minimum Voltage(V)"]
+
+		#convert "maxVoltBand"
+		outData["maxVoltBand"] = pycigarJson["Substation Regulator Maximum Voltage(V)"]
+
 
 	convertInputs()
 	runPyCIGAR()
