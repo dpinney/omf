@@ -2,6 +2,8 @@ import os, time
 from os.path import join as pJoin
 import pandas as pd
 import numpy as np
+import matplotlib.pyplot as plt
+
 
 from omf.solvers.nilmtk.nilm_metadata.nilm_metadata import save_yaml_to_datastore
 from omf.solvers.nilmtk.nilmtk.nilmtk import DataSet, TimeFrame, MeterGroup, HDFDataStore
@@ -390,12 +392,12 @@ trueVals.columns=appliances
 
 totalDisagg = predictedVals.sum(1)
 totalDisagdByApp = predictedVals.sum()
-totalDisagdByApp.sort_values(inplace=True, ascending=False)
+#totalDisagdByApp.sort_values(inplace=True, ascending=False)
 percentDisagg = 100.*totalDisagdByApp/totalDisagdByApp.sum()
 
 totalTrue = trueVals.sum(1)
 totalTrueByApp = trueVals.sum()
-totalTrueByApp.sort_values(inplace=True, ascending=False)
+#totalTrueByApp.sort_values(inplace=True, ascending=False)
 percentTrue = 100.*totalTrueByApp/totalTrueByApp.sum()
 
 predictedVals = predictedVals.sort_index(axis=1)
@@ -420,6 +422,21 @@ print(percentDisagg)
 print()
 print('True Overview')
 print(percentTrue)
+
+# plot % use by appliance
+patches, texts = plt.pie(percentDisagg, startangle=180,  counterclock=False)
+labels = ['{0} - {1:1.2f} %'.format(i,j) for i,j in zip(percentDisagg.index, percentDisagg)]
+lgd = plt.legend(patches, labels, loc='center left', bbox_to_anchor=(-0.1, 1))
+plt.savefig(modelDir + '/predictedDisaggPie.png', 
+		bbox_extra_artists=(lgd,), bbox_inches='tight', dpi=600)
+plt.clf()
+
+patches, texts = plt.pie(percentTrue, startangle=180,  counterclock=False)
+labels = ['{0} - {1:1.2f} %'.format(i,j) for i,j in zip(percentTrue.index, percentTrue)]
+lgd = plt.legend(patches, labels, loc='center left', bbox_to_anchor=(-0.1, 1))
+plt.savefig(modelDir + '/trueDisaggPie.png', 
+		bbox_extra_artists=(lgd,), bbox_inches='tight', dpi=600)
+plt.clf()
 
 print('---------------------')
 print('Error mean by appliance')

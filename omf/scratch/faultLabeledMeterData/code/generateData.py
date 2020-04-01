@@ -25,24 +25,48 @@ MALFUNCTION_POWER = 4000
 
 SHORTED_TRANSFORMER_PERCENTAGE = 0.9
 
-CIRCUIT_PATHS = ['/static/publicFeeders/DEC Red Base.omd', 
+CIRCUIT_PATHS = [
+	'/static/publicFeeders/DEC Red Base.omd', 
 	'/static/publicFeeders/ABEC Columbia.omd', 
 	'/static/publicFeeders/Olin Barre GH.omd', 
 	'/static/publicFeeders/Olin Barre GH.omd', 
+	'/static/publicFeeders/Olin Barre GH.omd',
+	'/static/publicFeeders/Olin Barre GH.omd',
 	'/static/publicFeeders/Olin Barre GH.omd']
-CONDITION_METERS = ['tn_B_645', 
+CONDITION_METERS = [
+	'tn_B_645', 
 	'nodeS1808-31-0011808-31-003_A', 
 	'node62463133906T62463072031', 
 	'node62463024800T62463023775', 
-	'node62463021692T62463021663']
-CONDITION_TRANSFORMERS = ['CTTF_B_645', 
+	'node62463021692T62463021663',
+	'node62463027798T62463027880',
+	'node62463020586T62463020670']
+CONDITION_TRANSFORMERS = [
+	'CTTF_B_645', 
 	'1808-31-003_A', 
 	'T62463072031', 
 	'T62463023775',
-	'T62463021663'] 
+	'T62463021663',
+	'T62463027880',
+	'T62463020670'] 
 
-METER_FILENAMES = ['meterDEC.csv', 'meterABEC.csv', 'meterOlin.csv', 'meterOlin.csv', 'meterOlin.csv']
-OUTPUT_FILENAMES = ['dataDEC.csv', 'dataABEC.csv', 'dataOlin.csv', 'dataOlin-2.csv', 'dataOlin-3.csv']
+METER_FILENAMES = [
+	'meterDEC.csv', 
+	'meterABEC.csv', 
+	'meterOlin.csv', 
+	'meterOlin.csv', 
+	'meterOlin.csv',
+	'meterOlin.csv',
+	'meterOlin.csv']
+OUTPUT_FILENAMES = [
+	'dataDEC.csv', 
+	'dataABEC.csv', 
+	'dataOlin-1.csv', 
+	'dataOlin-2.csv', 
+	'dataOlin-3.csv',
+	'dataOlin-1a.csv',
+	'dataOlin-1b.csv']
+
 CONDITION_TYPES = [ 'None', 'theft', 'equipmentMafunction', 'transformerShort' ]
 # CONDITION_TYPES = [ 'None', 'theft', 'equipmentMafunction', 'transformerShort']
 
@@ -223,7 +247,7 @@ def generateTreeWithCondition(tree, condition):
 
 # load circuit ---------------------------------------------------------------------
 
-for circuitNum in [3,4]:
+for circuitNum in [5,6]:
 
 	CIRCUIT_PATH = omfDir + CIRCUIT_PATHS[circuitNum]
 	CONDITION_METER = CONDITION_METERS[circuitNum]
