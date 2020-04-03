@@ -1,0 +1,2045 @@
+clear
+Set DefaultBaseFrequency=60
+
+new circuit.ieee390 basekv=230 pu=1.05 bus1=P1 mvasc3=200000 mvasc1=2000000
+ 
+new LineCode.Switch nphases=3 r1=1e-6 r0=1e-6 x1=1e-6 x0=1e-6 c1=0 c0=0
+ 
+new LineSpacing.101 nconds=3 nphases=3 units=ft x=[0,10,20] h=[50,50,50]
+new LineSpacing.102 nconds=3 nphases=3 units=in x=[0,3,6] h=[-48,-48,-48]
+new LineSpacing.103 nconds=4 nphases=3 units=in x=[-2.1213,0,2.1213,0] h=[50.1213,48,50.1213,52.2426]
+ 
+new WireData.397AA gmr=0.0277 rac=0.0477 diam=0.806 gmrunits=ft radunits=in runits=mi normamps=594
+new CNData.1000AA gmrac=0.04683 rac=0.1214 diam=1.124 gmrunits=ft runits=mi radunits=in normamps=615
+~ diacable=2.08 k=21 gmrstrand=0.00417 rstrand=0.1809 diastrand=0.1285
+~ inslayer=0.25 diains=1.64
+new WireData.UG500Cu gmr=0.026 rac=0.206 diam=0.814 gmrunits=ft radunits=in runits=mi normamps=430
+ 
+new LineGeometry.Trans nconds=3 nphases=3 spacing=101 wires=[397AA 397AA 397AA]
+new LineGeometry.Pri nconds=3 nphases=3 spacing=102 cncables=[1000AA 1000AA 1000AA]
+new LineGeometry.Sec nconds=4 nphases=3 reduce=y spacing=103 wires=[UG500Cu UG500Cu UG500Cu UG500Cu]
+ 
+new Line.1 bus1=P1.1.2.3 bus2=P2.1.2.3 phases=3 length=150 units=ft geometry=Trans
+new Line.2 bus1=P2.1.2.3 bus2=P3.1.2.3 phases=3 length=150 units=ft geometry=Trans
+new Line.3 bus1=P2.1.2.3 bus2=P7.1.2.3 phases=3 length=150 units=ft geometry=Trans
+new Line.4 bus1=P6.1.2.3 bus2=P11.1.2.3 phases=3 length=50 units=ft geometry=Pri
+new Line.5 bus1=P6.1.2.3 bus2=P27.1.2.3 phases=3 length=50 units=ft geometry=Pri
+new Line.6 bus1=P6.1.2.3 bus2=P44.1.2.3 phases=3 length=25 units=ft geometry=Pri
+new Line.7 bus1=P44.1.2.3 bus2=P45.1.2.3 phases=3 length=25 units=ft geometry=Pri
+new Line.8 bus1=P44.1.2.3 bus2=P62.1.2.3 phases=3 length=25 units=ft geometry=Pri
+new Line.9 bus1=P10.1.2.3 bus2=P81.1.2.3 phases=3 length=50 units=ft geometry=Pri
+new Line.10 bus1=P10.1.2.3 bus2=P97.1.2.3 phases=3 length=50 units=ft geometry=Pri
+new Line.11 bus1=P10.1.2.3 bus2=P116.1.2.3 phases=3 length=25 units=ft geometry=Pri
+new Line.12 bus1=P116.1.2.3 bus2=P117.1.2.3 phases=3 length=25 units=ft geometry=Pri
+new Line.13 bus1=P116.1.2.3 bus2=P134.1.2.3 phases=3 length=25 units=ft geometry=Pri
+new Line.14 bus1=P12.1.2.3 bus2=P13.1.2.3 phases=3 length=2500 units=ft geometry=Pri
+new Line.15 bus1=P13.1.2.3 bus2=P14.1.2.3 phases=3 length=100 units=ft geometry=Pri
+new Line.16 bus1=P13.1.2.3 bus2=P15.1.2.3 phases=3 length=100 units=ft geometry=Pri
+new Line.17 bus1=P15.1.2.3 bus2=P16.1.2.3 phases=3 length=100 units=ft geometry=Pri
+new Line.18 bus1=P16.1.2.3 bus2=P17.1.2.3 phases=3 length=100 units=ft geometry=Pri
+new Line.19 bus1=P15.1.2.3 bus2=P18.1.2.3 phases=3 length=100 units=ft geometry=Pri
+new Line.20 bus1=P18.1.2.3 bus2=P19.1.2.3 phases=3 length=100 units=ft geometry=Pri
+new Line.21 bus1=P18.1.2.3 bus2=P20.1.2.3 phases=3 length=100 units=ft geometry=Pri
+new Line.22 bus1=P20.1.2.3 bus2=P21.1.2.3 phases=3 length=100 units=ft geometry=Pri
+new Line.23 bus1=P21.1.2.3 bus2=P22.1.2.3 phases=3 length=100 units=ft geometry=Pri
+new Line.24 bus1=P20.1.2.3 bus2=P23.1.2.3 phases=3 length=100 units=ft geometry=Pri
+new Line.25 bus1=P23.1.2.3 bus2=P24.1.2.3 phases=3 length=100 units=ft geometry=Pri
+new Line.26 bus1=P23.1.2.3 bus2=P25.1.2.3 phases=3 length=100 units=ft geometry=Pri
+new Line.27 bus1=P25.1.2.3 bus2=P26.1.2.3 phases=3 length=100 units=ft geometry=Pri
+new Line.28 bus1=P28.1.2.3 bus2=P29.1.2.3 phases=3 length=2500 units=ft geometry=Pri
+new Line.29 bus1=P29.1.2.3 bus2=P30.1.2.3 phases=3 length=100 units=ft geometry=Pri
+new Line.30 bus1=P29.1.2.3 bus2=P31.1.2.3 phases=3 length=100 units=ft geometry=Pri
+new Line.31 bus1=P31.1.2.3 bus2=P32.1.2.3 phases=3 length=100 units=ft geometry=Pri
+new Line.32 bus1=P31.1.2.3 bus2=P33.1.2.3 phases=3 length=100 units=ft geometry=Pri
+new Line.33 bus1=P33.1.2.3 bus2=P34.1.2.3 phases=3 length=100 units=ft geometry=Pri
+new Line.34 bus1=P33.1.2.3 bus2=P35.1.2.3 phases=3 length=100 units=ft geometry=Pri
+new Line.35 bus1=P35.1.2.3 bus2=P36.1.2.3 phases=3 length=100 units=ft geometry=Pri
+new Line.36 bus1=P35.1.2.3 bus2=P37.1.2.3 phases=3 length=100 units=ft geometry=Pri
+new Line.37 bus1=P37.1.2.3 bus2=P38.1.2.3 phases=3 length=100 units=ft geometry=Pri
+new Line.38 bus1=P37.1.2.3 bus2=P39.1.2.3 phases=3 length=100 units=ft geometry=Pri
+new Line.39 bus1=P39.1.2.3 bus2=P40.1.2.3 phases=3 length=100 units=ft geometry=Pri
+new Line.40 bus1=P40.1.2.3 bus2=P41.1.2.3 phases=3 length=100 units=ft geometry=Pri
+new Line.41 bus1=P39.1.2.3 bus2=P42.1.2.3 phases=3 length=100 units=ft geometry=Pri
+new Line.42 bus1=P42.1.2.3 bus2=P43.1.2.3 phases=3 length=100 units=ft geometry=Pri
+new Line.43 bus1=P46.1.2.3 bus2=P47.1.2.3 phases=3 length=2500 units=ft geometry=Pri
+new Line.44 bus1=P47.1.2.3 bus2=P48.1.2.3 phases=3 length=100 units=ft geometry=Pri
+new Line.45 bus1=P47.1.2.3 bus2=P49.1.2.3 phases=3 length=100 units=ft geometry=Pri
+new Line.46 bus1=P49.1.2.3 bus2=P50.1.2.3 phases=3 length=100 units=ft geometry=Pri
+new Line.47 bus1=P49.1.2.3 bus2=P51.1.2.3 phases=3 length=100 units=ft geometry=Pri
+new Line.48 bus1=P51.1.2.3 bus2=P52.1.2.3 phases=3 length=100 units=ft geometry=Pri
+new Line.49 bus1=P51.1.2.3 bus2=P53.1.2.3 phases=3 length=100 units=ft geometry=Pri
+new Line.50 bus1=P53.1.2.3 bus2=P54.1.2.3 phases=3 length=100 units=ft geometry=Pri
+new Line.51 bus1=P54.1.2.3 bus2=P55.1.2.3 phases=3 length=100 units=ft geometry=Pri
+new Line.52 bus1=P55.1.2.3 bus2=P56.1.2.3 phases=3 length=100 units=ft geometry=Pri
+new Line.53 bus1=P53.1.2.3 bus2=P57.1.2.3 phases=3 length=100 units=ft geometry=Pri
+new Line.54 bus1=P57.1.2.3 bus2=P58.1.2.3 phases=3 length=100 units=ft geometry=Pri
+new Line.55 bus1=P57.1.2.3 bus2=P59.1.2.3 phases=3 length=100 units=ft geometry=Pri
+new Line.56 bus1=P59.1.2.3 bus2=P60.1.2.3 phases=3 length=100 units=ft geometry=Pri
+new Line.57 bus1=P60.1.2.3 bus2=P61.1.2.3 phases=3 length=100 units=ft geometry=Pri
+new Line.58 bus1=P63.1.2.3 bus2=P64.1.2.3 phases=3 length=2500 units=ft geometry=Pri
+new Line.59 bus1=P64.1.2.3 bus2=P65.1.2.3 phases=3 length=100 units=ft geometry=Pri
+new Line.60 bus1=P64.1.2.3 bus2=P66.1.2.3 phases=3 length=100 units=ft geometry=Pri
+new Line.61 bus1=P66.1.2.3 bus2=P67.1.2.3 phases=3 length=100 units=ft geometry=Pri
+new Line.62 bus1=P66.1.2.3 bus2=P68.1.2.3 phases=3 length=100 units=ft geometry=Pri
+new Line.63 bus1=P68.1.2.3 bus2=P69.1.2.3 phases=3 length=100 units=ft geometry=Pri
+new Line.64 bus1=P68.1.2.3 bus2=P70.1.2.3 phases=3 length=100 units=ft geometry=Pri
+new Line.65 bus1=P70.1.2.3 bus2=P71.1.2.3 phases=3 length=100 units=ft geometry=Pri
+new Line.66 bus1=P70.1.2.3 bus2=P72.1.2.3 phases=3 length=100 units=ft geometry=Pri
+new Line.67 bus1=P72.1.2.3 bus2=P73.1.2.3 phases=3 length=100 units=ft geometry=Pri
+new Line.68 bus1=P73.1.2.3 bus2=P74.1.2.3 phases=3 length=100 units=ft geometry=Pri
+new Line.69 bus1=P72.1.2.3 bus2=P75.1.2.3 phases=3 length=100 units=ft geometry=Pri
+new Line.70 bus1=P75.1.2.3 bus2=P76.1.2.3 phases=3 length=100 units=ft geometry=Pri
+new Line.71 bus1=P75.1.2.3 bus2=P77.1.2.3 phases=3 length=100 units=ft geometry=Pri
+new Line.72 bus1=P77.1.2.3 bus2=P78.1.2.3 phases=3 length=100 units=ft geometry=Pri
+new Line.73 bus1=P77.1.2.3 bus2=P79.1.2.3 phases=3 length=100 units=ft geometry=Pri
+new Line.74 bus1=P79.1.2.3 bus2=P80.1.2.3 phases=3 length=100 units=ft geometry=Pri
+new Line.75 bus1=P82.1.2.3 bus2=P83.1.2.3 phases=3 length=2500 units=ft geometry=Pri
+new Line.76 bus1=P83.1.2.3 bus2=P84.1.2.3 phases=3 length=100 units=ft geometry=Pri
+new Line.77 bus1=P83.1.2.3 bus2=P85.1.2.3 phases=3 length=100 units=ft geometry=Pri
+new Line.78 bus1=P85.1.2.3 bus2=P86.1.2.3 phases=3 length=100 units=ft geometry=Pri
+new Line.79 bus1=P86.1.2.3 bus2=P87.1.2.3 phases=3 length=100 units=ft geometry=Pri
+new Line.80 bus1=P85.1.2.3 bus2=P88.1.2.3 phases=3 length=100 units=ft geometry=Pri
+new Line.81 bus1=P88.1.2.3 bus2=P89.1.2.3 phases=3 length=100 units=ft geometry=Pri
+new Line.82 bus1=P88.1.2.3 bus2=P90.1.2.3 phases=3 length=100 units=ft geometry=Pri
+new Line.83 bus1=P90.1.2.3 bus2=P91.1.2.3 phases=3 length=100 units=ft geometry=Pri
+new Line.84 bus1=P91.1.2.3 bus2=P92.1.2.3 phases=3 length=100 units=ft geometry=Pri
+new Line.85 bus1=P90.1.2.3 bus2=P93.1.2.3 phases=3 length=100 units=ft geometry=Pri
+new Line.86 bus1=P93.1.2.3 bus2=P94.1.2.3 phases=3 length=100 units=ft geometry=Pri
+new Line.87 bus1=P93.1.2.3 bus2=P95.1.2.3 phases=3 length=100 units=ft geometry=Pri
+new Line.88 bus1=P95.1.2.3 bus2=P96.1.2.3 phases=3 length=100 units=ft geometry=Pri
+new Line.89 bus1=P98.1.2.3 bus2=P99.1.2.3 phases=3 length=2500 units=ft geometry=Pri
+new Line.90 bus1=P99.1.2.3 bus2=P100.1.2.3 phases=3 length=100 units=ft geometry=Pri
+new Line.91 bus1=P99.1.2.3 bus2=P101.1.2.3 phases=3 length=100 units=ft geometry=Pri
+new Line.92 bus1=P101.1.2.3 bus2=P102.1.2.3 phases=3 length=100 units=ft geometry=Pri
+new Line.93 bus1=P101.1.2.3 bus2=P103.1.2.3 phases=3 length=100 units=ft geometry=Pri
+new Line.94 bus1=P103.1.2.3 bus2=P104.1.2.3 phases=3 length=100 units=ft geometry=Pri
+new Line.95 bus1=P103.1.2.3 bus2=P105.1.2.3 phases=3 length=100 units=ft geometry=Pri
+new Line.96 bus1=P105.1.2.3 bus2=P106.1.2.3 phases=3 length=100 units=ft geometry=Pri
+new Line.97 bus1=P106.1.2.3 bus2=P107.1.2.3 phases=3 length=100 units=ft geometry=Pri
+new Line.98 bus1=P105.1.2.3 bus2=P108.1.2.3 phases=3 length=100 units=ft geometry=Pri
+new Line.99 bus1=P108.1.2.3 bus2=P109.1.2.3 phases=3 length=100 units=ft geometry=Pri
+new Line.100 bus1=P108.1.2.3 bus2=P110.1.2.3 phases=3 length=100 units=ft geometry=Pri
+new Line.101 bus1=P110.1.2.3 bus2=P111.1.2.3 phases=3 length=100 units=ft geometry=Pri
+new Line.102 bus1=P110.1.2.3 bus2=P112.1.2.3 phases=3 length=100 units=ft geometry=Pri
+new Line.103 bus1=P112.1.2.3 bus2=P113.1.2.3 phases=3 length=100 units=ft geometry=Pri
+new Line.104 bus1=P112.1.2.3 bus2=P114.1.2.3 phases=3 length=100 units=ft geometry=Pri
+new Line.105 bus1=P114.1.2.3 bus2=P115.1.2.3 phases=3 length=100 units=ft geometry=Pri
+new Line.106 bus1=P118.1.2.3 bus2=P119.1.2.3 phases=3 length=2500 units=ft geometry=Pri
+new Line.107 bus1=P119.1.2.3 bus2=P120.1.2.3 phases=3 length=100 units=ft geometry=Pri
+new Line.108 bus1=P119.1.2.3 bus2=P121.1.2.3 phases=3 length=100 units=ft geometry=Pri
+new Line.109 bus1=P121.1.2.3 bus2=P122.1.2.3 phases=3 length=100 units=ft geometry=Pri
+new Line.110 bus1=P121.1.2.3 bus2=P123.1.2.3 phases=3 length=100 units=ft geometry=Pri
+new Line.111 bus1=P123.1.2.3 bus2=P124.1.2.3 phases=3 length=100 units=ft geometry=Pri
+new Line.112 bus1=P123.1.2.3 bus2=P125.1.2.3 phases=3 length=100 units=ft geometry=Pri
+new Line.113 bus1=P125.1.2.3 bus2=P126.1.2.3 phases=3 length=100 units=ft geometry=Pri
+new Line.114 bus1=P125.1.2.3 bus2=P127.1.2.3 phases=3 length=100 units=ft geometry=Pri
+new Line.115 bus1=P127.1.2.3 bus2=P128.1.2.3 phases=3 length=100 units=ft geometry=Pri
+new Line.116 bus1=P127.1.2.3 bus2=P129.1.2.3 phases=3 length=100 units=ft geometry=Pri
+new Line.117 bus1=P129.1.2.3 bus2=P130.1.2.3 phases=3 length=100 units=ft geometry=Pri
+new Line.118 bus1=P130.1.2.3 bus2=P131.1.2.3 phases=3 length=100 units=ft geometry=Pri
+new Line.119 bus1=P129.1.2.3 bus2=P132.1.2.3 phases=3 length=100 units=ft geometry=Pri
+new Line.120 bus1=P132.1.2.3 bus2=P133.1.2.3 phases=3 length=100 units=ft geometry=Pri
+new Line.121 bus1=P135.1.2.3 bus2=P136.1.2.3 phases=3 length=2500 units=ft geometry=Pri
+new Line.122 bus1=P136.1.2.3 bus2=P137.1.2.3 phases=3 length=100 units=ft geometry=Pri
+new Line.123 bus1=P136.1.2.3 bus2=P138.1.2.3 phases=3 length=100 units=ft geometry=Pri
+new Line.124 bus1=P138.1.2.3 bus2=P139.1.2.3 phases=3 length=100 units=ft geometry=Pri
+new Line.125 bus1=P139.1.2.3 bus2=P140.1.2.3 phases=3 length=100 units=ft geometry=Pri
+new Line.126 bus1=P138.1.2.3 bus2=P141.1.2.3 phases=3 length=100 units=ft geometry=Pri
+new Line.127 bus1=P141.1.2.3 bus2=P142.1.2.3 phases=3 length=100 units=ft geometry=Pri
+new Line.128 bus1=P141.1.2.3 bus2=P143.1.2.3 phases=3 length=100 units=ft geometry=Pri
+new Line.129 bus1=P143.1.2.3 bus2=P144.1.2.3 phases=3 length=100 units=ft geometry=Pri
+new Line.130 bus1=P144.1.2.3 bus2=P145.1.2.3 phases=3 length=100 units=ft geometry=Pri
+new Line.131 bus1=P145.1.2.3 bus2=P146.1.2.3 phases=3 length=100 units=ft geometry=Pri
+new Line.132 bus1=P143.1.2.3 bus2=P147.1.2.3 phases=3 length=100 units=ft geometry=Pri
+new Line.133 bus1=P147.1.2.3 bus2=P148.1.2.3 phases=3 length=100 units=ft geometry=Pri
+new Line.134 bus1=P147.1.2.3 bus2=P149.1.2.3 phases=3 length=100 units=ft geometry=Pri
+new Line.135 bus1=P149.1.2.3 bus2=P150.1.2.3 phases=3 length=100 units=ft geometry=Pri
+new Line.136 bus1=S194.1.2.3 bus2=S193.1.2.3 phases=3 length=10 units=ft geometry=Sec
+  new Line.136_2 bus1=S194.1.2.3 bus2=S193.1.2.3 phases=3 length=10 units=ft geometry=Sec
+  new Line.136_3 bus1=S194.1.2.3 bus2=S193.1.2.3 phases=3 length=10 units=ft geometry=Sec
+  new Line.136_4 bus1=S194.1.2.3 bus2=S193.1.2.3 phases=3 length=10 units=ft geometry=Sec
+  new Line.136_5 bus1=S194.1.2.3 bus2=S193.1.2.3 phases=3 length=10 units=ft geometry=Sec
+new Line.137 bus1=S195.1.2.3 bus2=S193.1.2.3 phases=3 length=10 units=ft geometry=Sec
+  new Line.137_2 bus1=S195.1.2.3 bus2=S193.1.2.3 phases=3 length=10 units=ft geometry=Sec
+  new Line.137_3 bus1=S195.1.2.3 bus2=S193.1.2.3 phases=3 length=10 units=ft geometry=Sec
+  new Line.137_4 bus1=S195.1.2.3 bus2=S193.1.2.3 phases=3 length=10 units=ft geometry=Sec
+  new Line.137_5 bus1=S195.1.2.3 bus2=S193.1.2.3 phases=3 length=10 units=ft geometry=Sec
+new Line.138 bus1=S199.1.2.3 bus2=S198.1.2.3 phases=3 length=10 units=ft geometry=Sec
+  new Line.138_2 bus1=S199.1.2.3 bus2=S198.1.2.3 phases=3 length=10 units=ft geometry=Sec
+  new Line.138_3 bus1=S199.1.2.3 bus2=S198.1.2.3 phases=3 length=10 units=ft geometry=Sec
+  new Line.138_4 bus1=S199.1.2.3 bus2=S198.1.2.3 phases=3 length=10 units=ft geometry=Sec
+  new Line.138_5 bus1=S199.1.2.3 bus2=S198.1.2.3 phases=3 length=10 units=ft geometry=Sec
+new Line.139 bus1=S200.1.2.3 bus2=S198.1.2.3 phases=3 length=10 units=ft geometry=Sec
+  new Line.139_2 bus1=S200.1.2.3 bus2=S198.1.2.3 phases=3 length=10 units=ft geometry=Sec
+  new Line.139_3 bus1=S200.1.2.3 bus2=S198.1.2.3 phases=3 length=10 units=ft geometry=Sec
+  new Line.139_4 bus1=S200.1.2.3 bus2=S198.1.2.3 phases=3 length=10 units=ft geometry=Sec
+  new Line.139_5 bus1=S200.1.2.3 bus2=S198.1.2.3 phases=3 length=10 units=ft geometry=Sec
+new Line.140 bus1=S204.1.2.3 bus2=S203.1.2.3 phases=3 length=10 units=ft geometry=Sec
+  new Line.140_2 bus1=S204.1.2.3 bus2=S203.1.2.3 phases=3 length=10 units=ft geometry=Sec
+  new Line.140_3 bus1=S204.1.2.3 bus2=S203.1.2.3 phases=3 length=10 units=ft geometry=Sec
+  new Line.140_4 bus1=S204.1.2.3 bus2=S203.1.2.3 phases=3 length=10 units=ft geometry=Sec
+  new Line.140_5 bus1=S204.1.2.3 bus2=S203.1.2.3 phases=3 length=10 units=ft geometry=Sec
+new Line.141 bus1=S205.1.2.3 bus2=S203.1.2.3 phases=3 length=10 units=ft geometry=Sec
+  new Line.141_2 bus1=S205.1.2.3 bus2=S203.1.2.3 phases=3 length=10 units=ft geometry=Sec
+  new Line.141_3 bus1=S205.1.2.3 bus2=S203.1.2.3 phases=3 length=10 units=ft geometry=Sec
+  new Line.141_4 bus1=S205.1.2.3 bus2=S203.1.2.3 phases=3 length=10 units=ft geometry=Sec
+  new Line.141_5 bus1=S205.1.2.3 bus2=S203.1.2.3 phases=3 length=10 units=ft geometry=Sec
+new Line.142 bus1=S206.1.2.3 bus2=S203.1.2.3 phases=3 length=10 units=ft geometry=Sec
+  new Line.142_2 bus1=S206.1.2.3 bus2=S203.1.2.3 phases=3 length=10 units=ft geometry=Sec
+  new Line.142_3 bus1=S206.1.2.3 bus2=S203.1.2.3 phases=3 length=10 units=ft geometry=Sec
+  new Line.142_4 bus1=S206.1.2.3 bus2=S203.1.2.3 phases=3 length=10 units=ft geometry=Sec
+  new Line.142_5 bus1=S206.1.2.3 bus2=S203.1.2.3 phases=3 length=10 units=ft geometry=Sec
+new Line.143 bus1=S211.1.2.3 bus2=S210.1.2.3 phases=3 length=10 units=ft geometry=Sec
+  new Line.143_2 bus1=S211.1.2.3 bus2=S210.1.2.3 phases=3 length=10 units=ft geometry=Sec
+  new Line.143_3 bus1=S211.1.2.3 bus2=S210.1.2.3 phases=3 length=10 units=ft geometry=Sec
+  new Line.143_4 bus1=S211.1.2.3 bus2=S210.1.2.3 phases=3 length=10 units=ft geometry=Sec
+  new Line.143_5 bus1=S211.1.2.3 bus2=S210.1.2.3 phases=3 length=10 units=ft geometry=Sec
+new Line.144 bus1=S212.1.2.3 bus2=S210.1.2.3 phases=3 length=10 units=ft geometry=Sec
+  new Line.144_2 bus1=S212.1.2.3 bus2=S210.1.2.3 phases=3 length=10 units=ft geometry=Sec
+  new Line.144_3 bus1=S212.1.2.3 bus2=S210.1.2.3 phases=3 length=10 units=ft geometry=Sec
+  new Line.144_4 bus1=S212.1.2.3 bus2=S210.1.2.3 phases=3 length=10 units=ft geometry=Sec
+  new Line.144_5 bus1=S212.1.2.3 bus2=S210.1.2.3 phases=3 length=10 units=ft geometry=Sec
+new Line.145 bus1=S213.1.2.3 bus2=S210.1.2.3 phases=3 length=10 units=ft geometry=Sec
+  new Line.145_2 bus1=S213.1.2.3 bus2=S210.1.2.3 phases=3 length=10 units=ft geometry=Sec
+  new Line.145_3 bus1=S213.1.2.3 bus2=S210.1.2.3 phases=3 length=10 units=ft geometry=Sec
+  new Line.145_4 bus1=S213.1.2.3 bus2=S210.1.2.3 phases=3 length=10 units=ft geometry=Sec
+  new Line.145_5 bus1=S213.1.2.3 bus2=S210.1.2.3 phases=3 length=10 units=ft geometry=Sec
+new Line.146 bus1=S218.1.2.3 bus2=S217.1.2.3 phases=3 length=10 units=ft geometry=Sec
+  new Line.146_2 bus1=S218.1.2.3 bus2=S217.1.2.3 phases=3 length=10 units=ft geometry=Sec
+  new Line.146_3 bus1=S218.1.2.3 bus2=S217.1.2.3 phases=3 length=10 units=ft geometry=Sec
+  new Line.146_4 bus1=S218.1.2.3 bus2=S217.1.2.3 phases=3 length=10 units=ft geometry=Sec
+  new Line.146_5 bus1=S218.1.2.3 bus2=S217.1.2.3 phases=3 length=10 units=ft geometry=Sec
+new Line.147 bus1=S219.1.2.3 bus2=S217.1.2.3 phases=3 length=10 units=ft geometry=Sec
+  new Line.147_2 bus1=S219.1.2.3 bus2=S217.1.2.3 phases=3 length=10 units=ft geometry=Sec
+  new Line.147_3 bus1=S219.1.2.3 bus2=S217.1.2.3 phases=3 length=10 units=ft geometry=Sec
+  new Line.147_4 bus1=S219.1.2.3 bus2=S217.1.2.3 phases=3 length=10 units=ft geometry=Sec
+  new Line.147_5 bus1=S219.1.2.3 bus2=S217.1.2.3 phases=3 length=10 units=ft geometry=Sec
+new Line.148 bus1=S220.1.2.3 bus2=S217.1.2.3 phases=3 length=10 units=ft geometry=Sec
+  new Line.148_2 bus1=S220.1.2.3 bus2=S217.1.2.3 phases=3 length=10 units=ft geometry=Sec
+  new Line.148_3 bus1=S220.1.2.3 bus2=S217.1.2.3 phases=3 length=10 units=ft geometry=Sec
+  new Line.148_4 bus1=S220.1.2.3 bus2=S217.1.2.3 phases=3 length=10 units=ft geometry=Sec
+  new Line.148_5 bus1=S220.1.2.3 bus2=S217.1.2.3 phases=3 length=10 units=ft geometry=Sec
+new Line.149 bus1=S225.1.2.3 bus2=S224.1.2.3 phases=3 length=10 units=ft geometry=Sec
+  new Line.149_2 bus1=S225.1.2.3 bus2=S224.1.2.3 phases=3 length=10 units=ft geometry=Sec
+  new Line.149_3 bus1=S225.1.2.3 bus2=S224.1.2.3 phases=3 length=10 units=ft geometry=Sec
+  new Line.149_4 bus1=S225.1.2.3 bus2=S224.1.2.3 phases=3 length=10 units=ft geometry=Sec
+  new Line.149_5 bus1=S225.1.2.3 bus2=S224.1.2.3 phases=3 length=10 units=ft geometry=Sec
+new Line.150 bus1=S226.1.2.3 bus2=S224.1.2.3 phases=3 length=10 units=ft geometry=Sec
+  new Line.150_2 bus1=S226.1.2.3 bus2=S224.1.2.3 phases=3 length=10 units=ft geometry=Sec
+  new Line.150_3 bus1=S226.1.2.3 bus2=S224.1.2.3 phases=3 length=10 units=ft geometry=Sec
+  new Line.150_4 bus1=S226.1.2.3 bus2=S224.1.2.3 phases=3 length=10 units=ft geometry=Sec
+  new Line.150_5 bus1=S226.1.2.3 bus2=S224.1.2.3 phases=3 length=10 units=ft geometry=Sec
+new Line.151 bus1=S227.1.2.3 bus2=S224.1.2.3 phases=3 length=10 units=ft geometry=Sec
+  new Line.151_2 bus1=S227.1.2.3 bus2=S224.1.2.3 phases=3 length=10 units=ft geometry=Sec
+  new Line.151_3 bus1=S227.1.2.3 bus2=S224.1.2.3 phases=3 length=10 units=ft geometry=Sec
+  new Line.151_4 bus1=S227.1.2.3 bus2=S224.1.2.3 phases=3 length=10 units=ft geometry=Sec
+  new Line.151_5 bus1=S227.1.2.3 bus2=S224.1.2.3 phases=3 length=10 units=ft geometry=Sec
+new Line.152 bus1=S232.1.2.3 bus2=S231.1.2.3 phases=3 length=10 units=ft geometry=Sec
+  new Line.152_2 bus1=S232.1.2.3 bus2=S231.1.2.3 phases=3 length=10 units=ft geometry=Sec
+  new Line.152_3 bus1=S232.1.2.3 bus2=S231.1.2.3 phases=3 length=10 units=ft geometry=Sec
+  new Line.152_4 bus1=S232.1.2.3 bus2=S231.1.2.3 phases=3 length=10 units=ft geometry=Sec
+  new Line.152_5 bus1=S232.1.2.3 bus2=S231.1.2.3 phases=3 length=10 units=ft geometry=Sec
+new Line.153 bus1=S233.1.2.3 bus2=S231.1.2.3 phases=3 length=10 units=ft geometry=Sec
+  new Line.153_2 bus1=S233.1.2.3 bus2=S231.1.2.3 phases=3 length=10 units=ft geometry=Sec
+  new Line.153_3 bus1=S233.1.2.3 bus2=S231.1.2.3 phases=3 length=10 units=ft geometry=Sec
+  new Line.153_4 bus1=S233.1.2.3 bus2=S231.1.2.3 phases=3 length=10 units=ft geometry=Sec
+  new Line.153_5 bus1=S233.1.2.3 bus2=S231.1.2.3 phases=3 length=10 units=ft geometry=Sec
+new Line.154 bus1=S237.1.2.3 bus2=S236.1.2.3 phases=3 length=10 units=ft geometry=Sec
+  new Line.154_2 bus1=S237.1.2.3 bus2=S236.1.2.3 phases=3 length=10 units=ft geometry=Sec
+  new Line.154_3 bus1=S237.1.2.3 bus2=S236.1.2.3 phases=3 length=10 units=ft geometry=Sec
+  new Line.154_4 bus1=S237.1.2.3 bus2=S236.1.2.3 phases=3 length=10 units=ft geometry=Sec
+  new Line.154_5 bus1=S237.1.2.3 bus2=S236.1.2.3 phases=3 length=10 units=ft geometry=Sec
+new Line.155 bus1=S239.1.2.3 bus2=S236.1.2.3 phases=3 length=10 units=ft geometry=Sec
+  new Line.155_2 bus1=S239.1.2.3 bus2=S236.1.2.3 phases=3 length=10 units=ft geometry=Sec
+  new Line.155_3 bus1=S239.1.2.3 bus2=S236.1.2.3 phases=3 length=10 units=ft geometry=Sec
+  new Line.155_4 bus1=S239.1.2.3 bus2=S236.1.2.3 phases=3 length=10 units=ft geometry=Sec
+  new Line.155_5 bus1=S239.1.2.3 bus2=S236.1.2.3 phases=3 length=10 units=ft geometry=Sec
+new Line.156 bus1=S1.1.2.3 bus2=S2.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.156_2 bus1=S1.1.2.3 bus2=S2.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.156_3 bus1=S1.1.2.3 bus2=S2.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.156_4 bus1=S1.1.2.3 bus2=S2.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.156_5 bus1=S1.1.2.3 bus2=S2.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.156_6 bus1=S1.1.2.3 bus2=S2.1.2.3 phases=3 length=100 units=ft geometry=Sec
+new Line.157 bus1=S2.1.2.3 bus2=S3.1.2.3 phases=3 length=25 units=ft geometry=Sec
+  new Line.157_2 bus1=S2.1.2.3 bus2=S3.1.2.3 phases=3 length=25 units=ft geometry=Sec
+  new Line.157_3 bus1=S2.1.2.3 bus2=S3.1.2.3 phases=3 length=25 units=ft geometry=Sec
+  new Line.157_4 bus1=S2.1.2.3 bus2=S3.1.2.3 phases=3 length=25 units=ft geometry=Sec
+  new Line.157_5 bus1=S2.1.2.3 bus2=S3.1.2.3 phases=3 length=25 units=ft geometry=Sec
+  new Line.157_6 bus1=S2.1.2.3 bus2=S3.1.2.3 phases=3 length=25 units=ft geometry=Sec
+new Line.158 bus1=S3.1.2.3 bus2=S4.1.2.3 phases=3 length=25 units=ft geometry=Sec
+  new Line.158_2 bus1=S3.1.2.3 bus2=S4.1.2.3 phases=3 length=25 units=ft geometry=Sec
+  new Line.158_3 bus1=S3.1.2.3 bus2=S4.1.2.3 phases=3 length=25 units=ft geometry=Sec
+  new Line.158_4 bus1=S3.1.2.3 bus2=S4.1.2.3 phases=3 length=25 units=ft geometry=Sec
+  new Line.158_5 bus1=S3.1.2.3 bus2=S4.1.2.3 phases=3 length=25 units=ft geometry=Sec
+  new Line.158_6 bus1=S3.1.2.3 bus2=S4.1.2.3 phases=3 length=25 units=ft geometry=Sec
+new Line.159 bus1=S4.1.2.3 bus2=S5.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.159_2 bus1=S4.1.2.3 bus2=S5.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.159_3 bus1=S4.1.2.3 bus2=S5.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.159_4 bus1=S4.1.2.3 bus2=S5.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.159_5 bus1=S4.1.2.3 bus2=S5.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.159_6 bus1=S4.1.2.3 bus2=S5.1.2.3 phases=3 length=100 units=ft geometry=Sec
+new Line.160 bus1=S5.1.2.3 bus2=S6.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.160_2 bus1=S5.1.2.3 bus2=S6.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.160_3 bus1=S5.1.2.3 bus2=S6.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.160_4 bus1=S5.1.2.3 bus2=S6.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.160_5 bus1=S5.1.2.3 bus2=S6.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.160_6 bus1=S5.1.2.3 bus2=S6.1.2.3 phases=3 length=100 units=ft geometry=Sec
+new Line.161 bus1=S6.1.2.3 bus2=S7.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.161_2 bus1=S6.1.2.3 bus2=S7.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.161_3 bus1=S6.1.2.3 bus2=S7.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.161_4 bus1=S6.1.2.3 bus2=S7.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.161_5 bus1=S6.1.2.3 bus2=S7.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.161_6 bus1=S6.1.2.3 bus2=S7.1.2.3 phases=3 length=100 units=ft geometry=Sec
+new Line.162 bus1=S7.1.2.3 bus2=S8.1.2.3 phases=3 length=25 units=ft geometry=Sec
+  new Line.162_2 bus1=S7.1.2.3 bus2=S8.1.2.3 phases=3 length=25 units=ft geometry=Sec
+  new Line.162_3 bus1=S7.1.2.3 bus2=S8.1.2.3 phases=3 length=25 units=ft geometry=Sec
+  new Line.162_4 bus1=S7.1.2.3 bus2=S8.1.2.3 phases=3 length=25 units=ft geometry=Sec
+  new Line.162_5 bus1=S7.1.2.3 bus2=S8.1.2.3 phases=3 length=25 units=ft geometry=Sec
+  new Line.162_6 bus1=S7.1.2.3 bus2=S8.1.2.3 phases=3 length=25 units=ft geometry=Sec
+new Line.163 bus1=S8.1.2.3 bus2=S9.1.2.3 phases=3 length=25 units=ft geometry=Sec
+  new Line.163_2 bus1=S8.1.2.3 bus2=S9.1.2.3 phases=3 length=25 units=ft geometry=Sec
+  new Line.163_3 bus1=S8.1.2.3 bus2=S9.1.2.3 phases=3 length=25 units=ft geometry=Sec
+  new Line.163_4 bus1=S8.1.2.3 bus2=S9.1.2.3 phases=3 length=25 units=ft geometry=Sec
+  new Line.163_5 bus1=S8.1.2.3 bus2=S9.1.2.3 phases=3 length=25 units=ft geometry=Sec
+  new Line.163_6 bus1=S8.1.2.3 bus2=S9.1.2.3 phases=3 length=25 units=ft geometry=Sec
+new Line.164 bus1=S9.1.2.3 bus2=S10.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.164_2 bus1=S9.1.2.3 bus2=S10.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.164_3 bus1=S9.1.2.3 bus2=S10.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.164_4 bus1=S9.1.2.3 bus2=S10.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.164_5 bus1=S9.1.2.3 bus2=S10.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.164_6 bus1=S9.1.2.3 bus2=S10.1.2.3 phases=3 length=100 units=ft geometry=Sec
+new Line.165 bus1=S10.1.2.3 bus2=S11.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.165_2 bus1=S10.1.2.3 bus2=S11.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.165_3 bus1=S10.1.2.3 bus2=S11.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.165_4 bus1=S10.1.2.3 bus2=S11.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.165_5 bus1=S10.1.2.3 bus2=S11.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.165_6 bus1=S10.1.2.3 bus2=S11.1.2.3 phases=3 length=100 units=ft geometry=Sec
+new Line.166 bus1=S11.1.2.3 bus2=S12.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.166_2 bus1=S11.1.2.3 bus2=S12.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.166_3 bus1=S11.1.2.3 bus2=S12.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.166_4 bus1=S11.1.2.3 bus2=S12.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.166_5 bus1=S11.1.2.3 bus2=S12.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.166_6 bus1=S11.1.2.3 bus2=S12.1.2.3 phases=3 length=100 units=ft geometry=Sec
+new Line.167 bus1=S12.1.2.3 bus2=S13.1.2.3 phases=3 length=25 units=ft geometry=Sec
+  new Line.167_2 bus1=S12.1.2.3 bus2=S13.1.2.3 phases=3 length=25 units=ft geometry=Sec
+  new Line.167_3 bus1=S12.1.2.3 bus2=S13.1.2.3 phases=3 length=25 units=ft geometry=Sec
+  new Line.167_4 bus1=S12.1.2.3 bus2=S13.1.2.3 phases=3 length=25 units=ft geometry=Sec
+  new Line.167_5 bus1=S12.1.2.3 bus2=S13.1.2.3 phases=3 length=25 units=ft geometry=Sec
+  new Line.167_6 bus1=S12.1.2.3 bus2=S13.1.2.3 phases=3 length=25 units=ft geometry=Sec
+new Line.168 bus1=S13.1.2.3 bus2=S14.1.2.3 phases=3 length=25 units=ft geometry=Sec
+  new Line.168_2 bus1=S13.1.2.3 bus2=S14.1.2.3 phases=3 length=25 units=ft geometry=Sec
+  new Line.168_3 bus1=S13.1.2.3 bus2=S14.1.2.3 phases=3 length=25 units=ft geometry=Sec
+  new Line.168_4 bus1=S13.1.2.3 bus2=S14.1.2.3 phases=3 length=25 units=ft geometry=Sec
+  new Line.168_5 bus1=S13.1.2.3 bus2=S14.1.2.3 phases=3 length=25 units=ft geometry=Sec
+  new Line.168_6 bus1=S13.1.2.3 bus2=S14.1.2.3 phases=3 length=25 units=ft geometry=Sec
+new Line.169 bus1=S14.1.2.3 bus2=S15.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.169_2 bus1=S14.1.2.3 bus2=S15.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.169_3 bus1=S14.1.2.3 bus2=S15.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.169_4 bus1=S14.1.2.3 bus2=S15.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.169_5 bus1=S14.1.2.3 bus2=S15.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.169_6 bus1=S14.1.2.3 bus2=S15.1.2.3 phases=3 length=100 units=ft geometry=Sec
+new Line.170 bus1=S15.1.2.3 bus2=S16.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.170_2 bus1=S15.1.2.3 bus2=S16.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.170_3 bus1=S15.1.2.3 bus2=S16.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.170_4 bus1=S15.1.2.3 bus2=S16.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.170_5 bus1=S15.1.2.3 bus2=S16.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.170_6 bus1=S15.1.2.3 bus2=S16.1.2.3 phases=3 length=100 units=ft geometry=Sec
+new Line.171 bus1=S16.1.2.3 bus2=S17.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.171_2 bus1=S16.1.2.3 bus2=S17.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.171_3 bus1=S16.1.2.3 bus2=S17.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.171_4 bus1=S16.1.2.3 bus2=S17.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.171_5 bus1=S16.1.2.3 bus2=S17.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.171_6 bus1=S16.1.2.3 bus2=S17.1.2.3 phases=3 length=100 units=ft geometry=Sec
+new Line.172 bus1=S17.1.2.3 bus2=S18.1.2.3 phases=3 length=25 units=ft geometry=Sec
+  new Line.172_2 bus1=S17.1.2.3 bus2=S18.1.2.3 phases=3 length=25 units=ft geometry=Sec
+  new Line.172_3 bus1=S17.1.2.3 bus2=S18.1.2.3 phases=3 length=25 units=ft geometry=Sec
+  new Line.172_4 bus1=S17.1.2.3 bus2=S18.1.2.3 phases=3 length=25 units=ft geometry=Sec
+  new Line.172_5 bus1=S17.1.2.3 bus2=S18.1.2.3 phases=3 length=25 units=ft geometry=Sec
+  new Line.172_6 bus1=S17.1.2.3 bus2=S18.1.2.3 phases=3 length=25 units=ft geometry=Sec
+new Line.173 bus1=S18.1.2.3 bus2=S19.1.2.3 phases=3 length=25 units=ft geometry=Sec
+  new Line.173_2 bus1=S18.1.2.3 bus2=S19.1.2.3 phases=3 length=25 units=ft geometry=Sec
+  new Line.173_3 bus1=S18.1.2.3 bus2=S19.1.2.3 phases=3 length=25 units=ft geometry=Sec
+  new Line.173_4 bus1=S18.1.2.3 bus2=S19.1.2.3 phases=3 length=25 units=ft geometry=Sec
+  new Line.173_5 bus1=S18.1.2.3 bus2=S19.1.2.3 phases=3 length=25 units=ft geometry=Sec
+  new Line.173_6 bus1=S18.1.2.3 bus2=S19.1.2.3 phases=3 length=25 units=ft geometry=Sec
+new Line.174 bus1=S19.1.2.3 bus2=S20.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.174_2 bus1=S19.1.2.3 bus2=S20.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.174_3 bus1=S19.1.2.3 bus2=S20.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.174_4 bus1=S19.1.2.3 bus2=S20.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.174_5 bus1=S19.1.2.3 bus2=S20.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.174_6 bus1=S19.1.2.3 bus2=S20.1.2.3 phases=3 length=100 units=ft geometry=Sec
+new Line.175 bus1=S20.1.2.3 bus2=S21.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.175_2 bus1=S20.1.2.3 bus2=S21.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.175_3 bus1=S20.1.2.3 bus2=S21.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.175_4 bus1=S20.1.2.3 bus2=S21.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.175_5 bus1=S20.1.2.3 bus2=S21.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.175_6 bus1=S20.1.2.3 bus2=S21.1.2.3 phases=3 length=100 units=ft geometry=Sec
+new Line.176 bus1=S42.1.2.3 bus2=S43.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.176_2 bus1=S42.1.2.3 bus2=S43.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.176_3 bus1=S42.1.2.3 bus2=S43.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.176_4 bus1=S42.1.2.3 bus2=S43.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.176_5 bus1=S42.1.2.3 bus2=S43.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.176_6 bus1=S42.1.2.3 bus2=S43.1.2.3 phases=3 length=100 units=ft geometry=Sec
+new Line.177 bus1=S43.1.2.3 bus2=S44.1.2.3 phases=3 length=25 units=ft geometry=Sec
+  new Line.177_2 bus1=S43.1.2.3 bus2=S44.1.2.3 phases=3 length=25 units=ft geometry=Sec
+  new Line.177_3 bus1=S43.1.2.3 bus2=S44.1.2.3 phases=3 length=25 units=ft geometry=Sec
+  new Line.177_4 bus1=S43.1.2.3 bus2=S44.1.2.3 phases=3 length=25 units=ft geometry=Sec
+  new Line.177_5 bus1=S43.1.2.3 bus2=S44.1.2.3 phases=3 length=25 units=ft geometry=Sec
+  new Line.177_6 bus1=S43.1.2.3 bus2=S44.1.2.3 phases=3 length=25 units=ft geometry=Sec
+new Line.178 bus1=S44.1.2.3 bus2=S45.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.178_2 bus1=S44.1.2.3 bus2=S45.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.178_3 bus1=S44.1.2.3 bus2=S45.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.178_4 bus1=S44.1.2.3 bus2=S45.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.178_5 bus1=S44.1.2.3 bus2=S45.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.178_6 bus1=S44.1.2.3 bus2=S45.1.2.3 phases=3 length=100 units=ft geometry=Sec
+new Line.179 bus1=S45.1.2.3 bus2=S46.1.2.3 phases=3 length=25 units=ft geometry=Sec
+  new Line.179_2 bus1=S45.1.2.3 bus2=S46.1.2.3 phases=3 length=25 units=ft geometry=Sec
+  new Line.179_3 bus1=S45.1.2.3 bus2=S46.1.2.3 phases=3 length=25 units=ft geometry=Sec
+  new Line.179_4 bus1=S45.1.2.3 bus2=S46.1.2.3 phases=3 length=25 units=ft geometry=Sec
+  new Line.179_5 bus1=S45.1.2.3 bus2=S46.1.2.3 phases=3 length=25 units=ft geometry=Sec
+  new Line.179_6 bus1=S45.1.2.3 bus2=S46.1.2.3 phases=3 length=25 units=ft geometry=Sec
+new Line.180 bus1=S46.1.2.3 bus2=S47.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.180_2 bus1=S46.1.2.3 bus2=S47.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.180_3 bus1=S46.1.2.3 bus2=S47.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.180_4 bus1=S46.1.2.3 bus2=S47.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.180_5 bus1=S46.1.2.3 bus2=S47.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.180_6 bus1=S46.1.2.3 bus2=S47.1.2.3 phases=3 length=100 units=ft geometry=Sec
+new Line.181 bus1=S47.1.2.3 bus2=S48.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.181_2 bus1=S47.1.2.3 bus2=S48.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.181_3 bus1=S47.1.2.3 bus2=S48.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.181_4 bus1=S47.1.2.3 bus2=S48.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.181_5 bus1=S47.1.2.3 bus2=S48.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.181_6 bus1=S47.1.2.3 bus2=S48.1.2.3 phases=3 length=100 units=ft geometry=Sec
+new Line.182 bus1=S48.1.2.3 bus2=S49.1.2.3 phases=3 length=25 units=ft geometry=Sec
+  new Line.182_2 bus1=S48.1.2.3 bus2=S49.1.2.3 phases=3 length=25 units=ft geometry=Sec
+  new Line.182_3 bus1=S48.1.2.3 bus2=S49.1.2.3 phases=3 length=25 units=ft geometry=Sec
+  new Line.182_4 bus1=S48.1.2.3 bus2=S49.1.2.3 phases=3 length=25 units=ft geometry=Sec
+  new Line.182_5 bus1=S48.1.2.3 bus2=S49.1.2.3 phases=3 length=25 units=ft geometry=Sec
+  new Line.182_6 bus1=S48.1.2.3 bus2=S49.1.2.3 phases=3 length=25 units=ft geometry=Sec
+new Line.183 bus1=S49.1.2.3 bus2=S50.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.183_2 bus1=S49.1.2.3 bus2=S50.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.183_3 bus1=S49.1.2.3 bus2=S50.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.183_4 bus1=S49.1.2.3 bus2=S50.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.183_5 bus1=S49.1.2.3 bus2=S50.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.183_6 bus1=S49.1.2.3 bus2=S50.1.2.3 phases=3 length=100 units=ft geometry=Sec
+new Line.184 bus1=S50.1.2.3 bus2=S51.1.2.3 phases=3 length=25 units=ft geometry=Sec
+  new Line.184_2 bus1=S50.1.2.3 bus2=S51.1.2.3 phases=3 length=25 units=ft geometry=Sec
+  new Line.184_3 bus1=S50.1.2.3 bus2=S51.1.2.3 phases=3 length=25 units=ft geometry=Sec
+  new Line.184_4 bus1=S50.1.2.3 bus2=S51.1.2.3 phases=3 length=25 units=ft geometry=Sec
+  new Line.184_5 bus1=S50.1.2.3 bus2=S51.1.2.3 phases=3 length=25 units=ft geometry=Sec
+  new Line.184_6 bus1=S50.1.2.3 bus2=S51.1.2.3 phases=3 length=25 units=ft geometry=Sec
+new Line.185 bus1=S51.1.2.3 bus2=S52.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.185_2 bus1=S51.1.2.3 bus2=S52.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.185_3 bus1=S51.1.2.3 bus2=S52.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.185_4 bus1=S51.1.2.3 bus2=S52.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.185_5 bus1=S51.1.2.3 bus2=S52.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.185_6 bus1=S51.1.2.3 bus2=S52.1.2.3 phases=3 length=100 units=ft geometry=Sec
+new Line.186 bus1=S52.1.2.3 bus2=S53.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.186_2 bus1=S52.1.2.3 bus2=S53.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.186_3 bus1=S52.1.2.3 bus2=S53.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.186_4 bus1=S52.1.2.3 bus2=S53.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.186_5 bus1=S52.1.2.3 bus2=S53.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.186_6 bus1=S52.1.2.3 bus2=S53.1.2.3 phases=3 length=100 units=ft geometry=Sec
+new Line.187 bus1=S53.1.2.3 bus2=S54.1.2.3 phases=3 length=25 units=ft geometry=Sec
+  new Line.187_2 bus1=S53.1.2.3 bus2=S54.1.2.3 phases=3 length=25 units=ft geometry=Sec
+  new Line.187_3 bus1=S53.1.2.3 bus2=S54.1.2.3 phases=3 length=25 units=ft geometry=Sec
+  new Line.187_4 bus1=S53.1.2.3 bus2=S54.1.2.3 phases=3 length=25 units=ft geometry=Sec
+  new Line.187_5 bus1=S53.1.2.3 bus2=S54.1.2.3 phases=3 length=25 units=ft geometry=Sec
+  new Line.187_6 bus1=S53.1.2.3 bus2=S54.1.2.3 phases=3 length=25 units=ft geometry=Sec
+new Line.188 bus1=S54.1.2.3 bus2=S55.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.188_2 bus1=S54.1.2.3 bus2=S55.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.188_3 bus1=S54.1.2.3 bus2=S55.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.188_4 bus1=S54.1.2.3 bus2=S55.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.188_5 bus1=S54.1.2.3 bus2=S55.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.188_6 bus1=S54.1.2.3 bus2=S55.1.2.3 phases=3 length=100 units=ft geometry=Sec
+new Line.189 bus1=S55.1.2.3 bus2=S56.1.2.3 phases=3 length=25 units=ft geometry=Sec
+  new Line.189_2 bus1=S55.1.2.3 bus2=S56.1.2.3 phases=3 length=25 units=ft geometry=Sec
+  new Line.189_3 bus1=S55.1.2.3 bus2=S56.1.2.3 phases=3 length=25 units=ft geometry=Sec
+  new Line.189_4 bus1=S55.1.2.3 bus2=S56.1.2.3 phases=3 length=25 units=ft geometry=Sec
+  new Line.189_5 bus1=S55.1.2.3 bus2=S56.1.2.3 phases=3 length=25 units=ft geometry=Sec
+  new Line.189_6 bus1=S55.1.2.3 bus2=S56.1.2.3 phases=3 length=25 units=ft geometry=Sec
+new Line.190 bus1=S56.1.2.3 bus2=S57.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.190_2 bus1=S56.1.2.3 bus2=S57.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.190_3 bus1=S56.1.2.3 bus2=S57.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.190_4 bus1=S56.1.2.3 bus2=S57.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.190_5 bus1=S56.1.2.3 bus2=S57.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.190_6 bus1=S56.1.2.3 bus2=S57.1.2.3 phases=3 length=100 units=ft geometry=Sec
+new Line.191 bus1=S57.1.2.3 bus2=S58.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.191_2 bus1=S57.1.2.3 bus2=S58.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.191_3 bus1=S57.1.2.3 bus2=S58.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.191_4 bus1=S57.1.2.3 bus2=S58.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.191_5 bus1=S57.1.2.3 bus2=S58.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.191_6 bus1=S57.1.2.3 bus2=S58.1.2.3 phases=3 length=100 units=ft geometry=Sec
+new Line.192 bus1=S58.1.2.3 bus2=S59.1.2.3 phases=3 length=25 units=ft geometry=Sec
+  new Line.192_2 bus1=S58.1.2.3 bus2=S59.1.2.3 phases=3 length=25 units=ft geometry=Sec
+  new Line.192_3 bus1=S58.1.2.3 bus2=S59.1.2.3 phases=3 length=25 units=ft geometry=Sec
+  new Line.192_4 bus1=S58.1.2.3 bus2=S59.1.2.3 phases=3 length=25 units=ft geometry=Sec
+  new Line.192_5 bus1=S58.1.2.3 bus2=S59.1.2.3 phases=3 length=25 units=ft geometry=Sec
+  new Line.192_6 bus1=S58.1.2.3 bus2=S59.1.2.3 phases=3 length=25 units=ft geometry=Sec
+new Line.193 bus1=S59.1.2.3 bus2=S60.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.193_2 bus1=S59.1.2.3 bus2=S60.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.193_3 bus1=S59.1.2.3 bus2=S60.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.193_4 bus1=S59.1.2.3 bus2=S60.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.193_5 bus1=S59.1.2.3 bus2=S60.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.193_6 bus1=S59.1.2.3 bus2=S60.1.2.3 phases=3 length=100 units=ft geometry=Sec
+new Line.194 bus1=S60.1.2.3 bus2=S61.1.2.3 phases=3 length=25 units=ft geometry=Sec
+  new Line.194_2 bus1=S60.1.2.3 bus2=S61.1.2.3 phases=3 length=25 units=ft geometry=Sec
+  new Line.194_3 bus1=S60.1.2.3 bus2=S61.1.2.3 phases=3 length=25 units=ft geometry=Sec
+  new Line.194_4 bus1=S60.1.2.3 bus2=S61.1.2.3 phases=3 length=25 units=ft geometry=Sec
+  new Line.194_5 bus1=S60.1.2.3 bus2=S61.1.2.3 phases=3 length=25 units=ft geometry=Sec
+  new Line.194_6 bus1=S60.1.2.3 bus2=S61.1.2.3 phases=3 length=25 units=ft geometry=Sec
+new Line.195 bus1=S61.1.2.3 bus2=S62.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.195_2 bus1=S61.1.2.3 bus2=S62.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.195_3 bus1=S61.1.2.3 bus2=S62.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.195_4 bus1=S61.1.2.3 bus2=S62.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.195_5 bus1=S61.1.2.3 bus2=S62.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.195_6 bus1=S61.1.2.3 bus2=S62.1.2.3 phases=3 length=100 units=ft geometry=Sec
+new Line.196 bus1=S83.1.2.3 bus2=S84.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.196_2 bus1=S83.1.2.3 bus2=S84.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.196_3 bus1=S83.1.2.3 bus2=S84.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.196_4 bus1=S83.1.2.3 bus2=S84.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.196_5 bus1=S83.1.2.3 bus2=S84.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.196_6 bus1=S83.1.2.3 bus2=S84.1.2.3 phases=3 length=100 units=ft geometry=Sec
+new Line.197 bus1=S84.1.2.3 bus2=S85.1.2.3 phases=3 length=25 units=ft geometry=Sec
+  new Line.197_2 bus1=S84.1.2.3 bus2=S85.1.2.3 phases=3 length=25 units=ft geometry=Sec
+  new Line.197_3 bus1=S84.1.2.3 bus2=S85.1.2.3 phases=3 length=25 units=ft geometry=Sec
+  new Line.197_4 bus1=S84.1.2.3 bus2=S85.1.2.3 phases=3 length=25 units=ft geometry=Sec
+  new Line.197_5 bus1=S84.1.2.3 bus2=S85.1.2.3 phases=3 length=25 units=ft geometry=Sec
+  new Line.197_6 bus1=S84.1.2.3 bus2=S85.1.2.3 phases=3 length=25 units=ft geometry=Sec
+new Line.198 bus1=S85.1.2.3 bus2=S86.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.198_2 bus1=S85.1.2.3 bus2=S86.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.198_3 bus1=S85.1.2.3 bus2=S86.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.198_4 bus1=S85.1.2.3 bus2=S86.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.198_5 bus1=S85.1.2.3 bus2=S86.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.198_6 bus1=S85.1.2.3 bus2=S86.1.2.3 phases=3 length=100 units=ft geometry=Sec
+new Line.199 bus1=S86.1.2.3 bus2=S87.1.2.3 phases=3 length=25 units=ft geometry=Sec
+  new Line.199_2 bus1=S86.1.2.3 bus2=S87.1.2.3 phases=3 length=25 units=ft geometry=Sec
+  new Line.199_3 bus1=S86.1.2.3 bus2=S87.1.2.3 phases=3 length=25 units=ft geometry=Sec
+  new Line.199_4 bus1=S86.1.2.3 bus2=S87.1.2.3 phases=3 length=25 units=ft geometry=Sec
+  new Line.199_5 bus1=S86.1.2.3 bus2=S87.1.2.3 phases=3 length=25 units=ft geometry=Sec
+  new Line.199_6 bus1=S86.1.2.3 bus2=S87.1.2.3 phases=3 length=25 units=ft geometry=Sec
+new Line.200 bus1=S87.1.2.3 bus2=S88.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.200_2 bus1=S87.1.2.3 bus2=S88.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.200_3 bus1=S87.1.2.3 bus2=S88.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.200_4 bus1=S87.1.2.3 bus2=S88.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.200_5 bus1=S87.1.2.3 bus2=S88.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.200_6 bus1=S87.1.2.3 bus2=S88.1.2.3 phases=3 length=100 units=ft geometry=Sec
+new Line.201 bus1=S88.1.2.3 bus2=S89.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.201_2 bus1=S88.1.2.3 bus2=S89.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.201_3 bus1=S88.1.2.3 bus2=S89.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.201_4 bus1=S88.1.2.3 bus2=S89.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.201_5 bus1=S88.1.2.3 bus2=S89.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.201_6 bus1=S88.1.2.3 bus2=S89.1.2.3 phases=3 length=100 units=ft geometry=Sec
+new Line.202 bus1=S89.1.2.3 bus2=S90.1.2.3 phases=3 length=25 units=ft geometry=Sec
+  new Line.202_2 bus1=S89.1.2.3 bus2=S90.1.2.3 phases=3 length=25 units=ft geometry=Sec
+  new Line.202_3 bus1=S89.1.2.3 bus2=S90.1.2.3 phases=3 length=25 units=ft geometry=Sec
+  new Line.202_4 bus1=S89.1.2.3 bus2=S90.1.2.3 phases=3 length=25 units=ft geometry=Sec
+  new Line.202_5 bus1=S89.1.2.3 bus2=S90.1.2.3 phases=3 length=25 units=ft geometry=Sec
+  new Line.202_6 bus1=S89.1.2.3 bus2=S90.1.2.3 phases=3 length=25 units=ft geometry=Sec
+new Line.203 bus1=S90.1.2.3 bus2=S91.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.203_2 bus1=S90.1.2.3 bus2=S91.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.203_3 bus1=S90.1.2.3 bus2=S91.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.203_4 bus1=S90.1.2.3 bus2=S91.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.203_5 bus1=S90.1.2.3 bus2=S91.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.203_6 bus1=S90.1.2.3 bus2=S91.1.2.3 phases=3 length=100 units=ft geometry=Sec
+new Line.204 bus1=S91.1.2.3 bus2=S92.1.2.3 phases=3 length=25 units=ft geometry=Sec
+  new Line.204_2 bus1=S91.1.2.3 bus2=S92.1.2.3 phases=3 length=25 units=ft geometry=Sec
+  new Line.204_3 bus1=S91.1.2.3 bus2=S92.1.2.3 phases=3 length=25 units=ft geometry=Sec
+  new Line.204_4 bus1=S91.1.2.3 bus2=S92.1.2.3 phases=3 length=25 units=ft geometry=Sec
+  new Line.204_5 bus1=S91.1.2.3 bus2=S92.1.2.3 phases=3 length=25 units=ft geometry=Sec
+  new Line.204_6 bus1=S91.1.2.3 bus2=S92.1.2.3 phases=3 length=25 units=ft geometry=Sec
+new Line.205 bus1=S92.1.2.3 bus2=S93.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.205_2 bus1=S92.1.2.3 bus2=S93.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.205_3 bus1=S92.1.2.3 bus2=S93.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.205_4 bus1=S92.1.2.3 bus2=S93.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.205_5 bus1=S92.1.2.3 bus2=S93.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.205_6 bus1=S92.1.2.3 bus2=S93.1.2.3 phases=3 length=100 units=ft geometry=Sec
+new Line.206 bus1=S93.1.2.3 bus2=S94.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.206_2 bus1=S93.1.2.3 bus2=S94.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.206_3 bus1=S93.1.2.3 bus2=S94.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.206_4 bus1=S93.1.2.3 bus2=S94.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.206_5 bus1=S93.1.2.3 bus2=S94.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.206_6 bus1=S93.1.2.3 bus2=S94.1.2.3 phases=3 length=100 units=ft geometry=Sec
+new Line.207 bus1=S94.1.2.3 bus2=S95.1.2.3 phases=3 length=25 units=ft geometry=Sec
+  new Line.207_2 bus1=S94.1.2.3 bus2=S95.1.2.3 phases=3 length=25 units=ft geometry=Sec
+  new Line.207_3 bus1=S94.1.2.3 bus2=S95.1.2.3 phases=3 length=25 units=ft geometry=Sec
+  new Line.207_4 bus1=S94.1.2.3 bus2=S95.1.2.3 phases=3 length=25 units=ft geometry=Sec
+  new Line.207_5 bus1=S94.1.2.3 bus2=S95.1.2.3 phases=3 length=25 units=ft geometry=Sec
+  new Line.207_6 bus1=S94.1.2.3 bus2=S95.1.2.3 phases=3 length=25 units=ft geometry=Sec
+new Line.208 bus1=S95.1.2.3 bus2=S96.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.208_2 bus1=S95.1.2.3 bus2=S96.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.208_3 bus1=S95.1.2.3 bus2=S96.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.208_4 bus1=S95.1.2.3 bus2=S96.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.208_5 bus1=S95.1.2.3 bus2=S96.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.208_6 bus1=S95.1.2.3 bus2=S96.1.2.3 phases=3 length=100 units=ft geometry=Sec
+new Line.209 bus1=S96.1.2.3 bus2=S97.1.2.3 phases=3 length=25 units=ft geometry=Sec
+  new Line.209_2 bus1=S96.1.2.3 bus2=S97.1.2.3 phases=3 length=25 units=ft geometry=Sec
+  new Line.209_3 bus1=S96.1.2.3 bus2=S97.1.2.3 phases=3 length=25 units=ft geometry=Sec
+  new Line.209_4 bus1=S96.1.2.3 bus2=S97.1.2.3 phases=3 length=25 units=ft geometry=Sec
+  new Line.209_5 bus1=S96.1.2.3 bus2=S97.1.2.3 phases=3 length=25 units=ft geometry=Sec
+  new Line.209_6 bus1=S96.1.2.3 bus2=S97.1.2.3 phases=3 length=25 units=ft geometry=Sec
+new Line.210 bus1=S97.1.2.3 bus2=S98.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.210_2 bus1=S97.1.2.3 bus2=S98.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.210_3 bus1=S97.1.2.3 bus2=S98.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.210_4 bus1=S97.1.2.3 bus2=S98.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.210_5 bus1=S97.1.2.3 bus2=S98.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.210_6 bus1=S97.1.2.3 bus2=S98.1.2.3 phases=3 length=100 units=ft geometry=Sec
+new Line.211 bus1=S98.1.2.3 bus2=S99.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.211_2 bus1=S98.1.2.3 bus2=S99.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.211_3 bus1=S98.1.2.3 bus2=S99.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.211_4 bus1=S98.1.2.3 bus2=S99.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.211_5 bus1=S98.1.2.3 bus2=S99.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.211_6 bus1=S98.1.2.3 bus2=S99.1.2.3 phases=3 length=100 units=ft geometry=Sec
+new Line.212 bus1=S99.1.2.3 bus2=S100.1.2.3 phases=3 length=25 units=ft geometry=Sec
+  new Line.212_2 bus1=S99.1.2.3 bus2=S100.1.2.3 phases=3 length=25 units=ft geometry=Sec
+  new Line.212_3 bus1=S99.1.2.3 bus2=S100.1.2.3 phases=3 length=25 units=ft geometry=Sec
+  new Line.212_4 bus1=S99.1.2.3 bus2=S100.1.2.3 phases=3 length=25 units=ft geometry=Sec
+  new Line.212_5 bus1=S99.1.2.3 bus2=S100.1.2.3 phases=3 length=25 units=ft geometry=Sec
+  new Line.212_6 bus1=S99.1.2.3 bus2=S100.1.2.3 phases=3 length=25 units=ft geometry=Sec
+new Line.213 bus1=S100.1.2.3 bus2=S101.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.213_2 bus1=S100.1.2.3 bus2=S101.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.213_3 bus1=S100.1.2.3 bus2=S101.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.213_4 bus1=S100.1.2.3 bus2=S101.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.213_5 bus1=S100.1.2.3 bus2=S101.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.213_6 bus1=S100.1.2.3 bus2=S101.1.2.3 phases=3 length=100 units=ft geometry=Sec
+new Line.214 bus1=S101.1.2.3 bus2=S102.1.2.3 phases=3 length=25 units=ft geometry=Sec
+  new Line.214_2 bus1=S101.1.2.3 bus2=S102.1.2.3 phases=3 length=25 units=ft geometry=Sec
+  new Line.214_3 bus1=S101.1.2.3 bus2=S102.1.2.3 phases=3 length=25 units=ft geometry=Sec
+  new Line.214_4 bus1=S101.1.2.3 bus2=S102.1.2.3 phases=3 length=25 units=ft geometry=Sec
+  new Line.214_5 bus1=S101.1.2.3 bus2=S102.1.2.3 phases=3 length=25 units=ft geometry=Sec
+  new Line.214_6 bus1=S101.1.2.3 bus2=S102.1.2.3 phases=3 length=25 units=ft geometry=Sec
+new Line.215 bus1=S102.1.2.3 bus2=S103.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.215_2 bus1=S102.1.2.3 bus2=S103.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.215_3 bus1=S102.1.2.3 bus2=S103.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.215_4 bus1=S102.1.2.3 bus2=S103.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.215_5 bus1=S102.1.2.3 bus2=S103.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.215_6 bus1=S102.1.2.3 bus2=S103.1.2.3 phases=3 length=100 units=ft geometry=Sec
+new Line.216 bus1=S124.1.2.3 bus2=S125.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.216_2 bus1=S124.1.2.3 bus2=S125.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.216_3 bus1=S124.1.2.3 bus2=S125.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.216_4 bus1=S124.1.2.3 bus2=S125.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.216_5 bus1=S124.1.2.3 bus2=S125.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.216_6 bus1=S124.1.2.3 bus2=S125.1.2.3 phases=3 length=100 units=ft geometry=Sec
+new Line.217 bus1=S125.1.2.3 bus2=S126.1.2.3 phases=3 length=25 units=ft geometry=Sec
+  new Line.217_2 bus1=S125.1.2.3 bus2=S126.1.2.3 phases=3 length=25 units=ft geometry=Sec
+  new Line.217_3 bus1=S125.1.2.3 bus2=S126.1.2.3 phases=3 length=25 units=ft geometry=Sec
+  new Line.217_4 bus1=S125.1.2.3 bus2=S126.1.2.3 phases=3 length=25 units=ft geometry=Sec
+  new Line.217_5 bus1=S125.1.2.3 bus2=S126.1.2.3 phases=3 length=25 units=ft geometry=Sec
+  new Line.217_6 bus1=S125.1.2.3 bus2=S126.1.2.3 phases=3 length=25 units=ft geometry=Sec
+new Line.218 bus1=S126.1.2.3 bus2=S127.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.218_2 bus1=S126.1.2.3 bus2=S127.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.218_3 bus1=S126.1.2.3 bus2=S127.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.218_4 bus1=S126.1.2.3 bus2=S127.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.218_5 bus1=S126.1.2.3 bus2=S127.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.218_6 bus1=S126.1.2.3 bus2=S127.1.2.3 phases=3 length=100 units=ft geometry=Sec
+new Line.219 bus1=S127.1.2.3 bus2=S128.1.2.3 phases=3 length=25 units=ft geometry=Sec
+  new Line.219_2 bus1=S127.1.2.3 bus2=S128.1.2.3 phases=3 length=25 units=ft geometry=Sec
+  new Line.219_3 bus1=S127.1.2.3 bus2=S128.1.2.3 phases=3 length=25 units=ft geometry=Sec
+  new Line.219_4 bus1=S127.1.2.3 bus2=S128.1.2.3 phases=3 length=25 units=ft geometry=Sec
+  new Line.219_5 bus1=S127.1.2.3 bus2=S128.1.2.3 phases=3 length=25 units=ft geometry=Sec
+  new Line.219_6 bus1=S127.1.2.3 bus2=S128.1.2.3 phases=3 length=25 units=ft geometry=Sec
+new Line.220 bus1=S128.1.2.3 bus2=S129.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.220_2 bus1=S128.1.2.3 bus2=S129.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.220_3 bus1=S128.1.2.3 bus2=S129.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.220_4 bus1=S128.1.2.3 bus2=S129.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.220_5 bus1=S128.1.2.3 bus2=S129.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.220_6 bus1=S128.1.2.3 bus2=S129.1.2.3 phases=3 length=100 units=ft geometry=Sec
+new Line.221 bus1=S129.1.2.3 bus2=S130.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.221_2 bus1=S129.1.2.3 bus2=S130.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.221_3 bus1=S129.1.2.3 bus2=S130.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.221_4 bus1=S129.1.2.3 bus2=S130.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.221_5 bus1=S129.1.2.3 bus2=S130.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.221_6 bus1=S129.1.2.3 bus2=S130.1.2.3 phases=3 length=100 units=ft geometry=Sec
+new Line.222 bus1=S130.1.2.3 bus2=S131.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.222_2 bus1=S130.1.2.3 bus2=S131.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.222_3 bus1=S130.1.2.3 bus2=S131.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.222_4 bus1=S130.1.2.3 bus2=S131.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.222_5 bus1=S130.1.2.3 bus2=S131.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.222_6 bus1=S130.1.2.3 bus2=S131.1.2.3 phases=3 length=100 units=ft geometry=Sec
+new Line.223 bus1=S131.1.2.3 bus2=S132.1.2.3 phases=3 length=25 units=ft geometry=Sec
+  new Line.223_2 bus1=S131.1.2.3 bus2=S132.1.2.3 phases=3 length=25 units=ft geometry=Sec
+  new Line.223_3 bus1=S131.1.2.3 bus2=S132.1.2.3 phases=3 length=25 units=ft geometry=Sec
+  new Line.223_4 bus1=S131.1.2.3 bus2=S132.1.2.3 phases=3 length=25 units=ft geometry=Sec
+  new Line.223_5 bus1=S131.1.2.3 bus2=S132.1.2.3 phases=3 length=25 units=ft geometry=Sec
+  new Line.223_6 bus1=S131.1.2.3 bus2=S132.1.2.3 phases=3 length=25 units=ft geometry=Sec
+new Line.224 bus1=S132.1.2.3 bus2=S133.1.2.3 phases=3 length=25 units=ft geometry=Sec
+  new Line.224_2 bus1=S132.1.2.3 bus2=S133.1.2.3 phases=3 length=25 units=ft geometry=Sec
+  new Line.224_3 bus1=S132.1.2.3 bus2=S133.1.2.3 phases=3 length=25 units=ft geometry=Sec
+  new Line.224_4 bus1=S132.1.2.3 bus2=S133.1.2.3 phases=3 length=25 units=ft geometry=Sec
+  new Line.224_5 bus1=S132.1.2.3 bus2=S133.1.2.3 phases=3 length=25 units=ft geometry=Sec
+  new Line.224_6 bus1=S132.1.2.3 bus2=S133.1.2.3 phases=3 length=25 units=ft geometry=Sec
+new Line.225 bus1=S133.1.2.3 bus2=S134.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.225_2 bus1=S133.1.2.3 bus2=S134.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.225_3 bus1=S133.1.2.3 bus2=S134.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.225_4 bus1=S133.1.2.3 bus2=S134.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.225_5 bus1=S133.1.2.3 bus2=S134.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.225_6 bus1=S133.1.2.3 bus2=S134.1.2.3 phases=3 length=100 units=ft geometry=Sec
+new Line.226 bus1=S134.1.2.3 bus2=S135.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.226_2 bus1=S134.1.2.3 bus2=S135.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.226_3 bus1=S134.1.2.3 bus2=S135.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.226_4 bus1=S134.1.2.3 bus2=S135.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.226_5 bus1=S134.1.2.3 bus2=S135.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.226_6 bus1=S134.1.2.3 bus2=S135.1.2.3 phases=3 length=100 units=ft geometry=Sec
+new Line.227 bus1=S135.1.2.3 bus2=S136.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.227_2 bus1=S135.1.2.3 bus2=S136.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.227_3 bus1=S135.1.2.3 bus2=S136.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.227_4 bus1=S135.1.2.3 bus2=S136.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.227_5 bus1=S135.1.2.3 bus2=S136.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.227_6 bus1=S135.1.2.3 bus2=S136.1.2.3 phases=3 length=100 units=ft geometry=Sec
+new Line.228 bus1=S136.1.2.3 bus2=S137.1.2.3 phases=3 length=25 units=ft geometry=Sec
+  new Line.228_2 bus1=S136.1.2.3 bus2=S137.1.2.3 phases=3 length=25 units=ft geometry=Sec
+  new Line.228_3 bus1=S136.1.2.3 bus2=S137.1.2.3 phases=3 length=25 units=ft geometry=Sec
+  new Line.228_4 bus1=S136.1.2.3 bus2=S137.1.2.3 phases=3 length=25 units=ft geometry=Sec
+  new Line.228_5 bus1=S136.1.2.3 bus2=S137.1.2.3 phases=3 length=25 units=ft geometry=Sec
+  new Line.228_6 bus1=S136.1.2.3 bus2=S137.1.2.3 phases=3 length=25 units=ft geometry=Sec
+new Line.229 bus1=S137.1.2.3 bus2=S138.1.2.3 phases=3 length=25 units=ft geometry=Sec
+  new Line.229_2 bus1=S137.1.2.3 bus2=S138.1.2.3 phases=3 length=25 units=ft geometry=Sec
+  new Line.229_3 bus1=S137.1.2.3 bus2=S138.1.2.3 phases=3 length=25 units=ft geometry=Sec
+  new Line.229_4 bus1=S137.1.2.3 bus2=S138.1.2.3 phases=3 length=25 units=ft geometry=Sec
+  new Line.229_5 bus1=S137.1.2.3 bus2=S138.1.2.3 phases=3 length=25 units=ft geometry=Sec
+  new Line.229_6 bus1=S137.1.2.3 bus2=S138.1.2.3 phases=3 length=25 units=ft geometry=Sec
+new Line.230 bus1=S138.1.2.3 bus2=S139.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.230_2 bus1=S138.1.2.3 bus2=S139.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.230_3 bus1=S138.1.2.3 bus2=S139.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.230_4 bus1=S138.1.2.3 bus2=S139.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.230_5 bus1=S138.1.2.3 bus2=S139.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.230_6 bus1=S138.1.2.3 bus2=S139.1.2.3 phases=3 length=100 units=ft geometry=Sec
+new Line.231 bus1=S139.1.2.3 bus2=S140.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.231_2 bus1=S139.1.2.3 bus2=S140.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.231_3 bus1=S139.1.2.3 bus2=S140.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.231_4 bus1=S139.1.2.3 bus2=S140.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.231_5 bus1=S139.1.2.3 bus2=S140.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.231_6 bus1=S139.1.2.3 bus2=S140.1.2.3 phases=3 length=100 units=ft geometry=Sec
+new Line.232 bus1=S140.1.2.3 bus2=S141.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.232_2 bus1=S140.1.2.3 bus2=S141.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.232_3 bus1=S140.1.2.3 bus2=S141.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.232_4 bus1=S140.1.2.3 bus2=S141.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.232_5 bus1=S140.1.2.3 bus2=S141.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.232_6 bus1=S140.1.2.3 bus2=S141.1.2.3 phases=3 length=100 units=ft geometry=Sec
+new Line.233 bus1=S141.1.2.3 bus2=S142.1.2.3 phases=3 length=25 units=ft geometry=Sec
+  new Line.233_2 bus1=S141.1.2.3 bus2=S142.1.2.3 phases=3 length=25 units=ft geometry=Sec
+  new Line.233_3 bus1=S141.1.2.3 bus2=S142.1.2.3 phases=3 length=25 units=ft geometry=Sec
+  new Line.233_4 bus1=S141.1.2.3 bus2=S142.1.2.3 phases=3 length=25 units=ft geometry=Sec
+  new Line.233_5 bus1=S141.1.2.3 bus2=S142.1.2.3 phases=3 length=25 units=ft geometry=Sec
+  new Line.233_6 bus1=S141.1.2.3 bus2=S142.1.2.3 phases=3 length=25 units=ft geometry=Sec
+new Line.234 bus1=S142.1.2.3 bus2=S143.1.2.3 phases=3 length=25 units=ft geometry=Sec
+  new Line.234_2 bus1=S142.1.2.3 bus2=S143.1.2.3 phases=3 length=25 units=ft geometry=Sec
+  new Line.234_3 bus1=S142.1.2.3 bus2=S143.1.2.3 phases=3 length=25 units=ft geometry=Sec
+  new Line.234_4 bus1=S142.1.2.3 bus2=S143.1.2.3 phases=3 length=25 units=ft geometry=Sec
+  new Line.234_5 bus1=S142.1.2.3 bus2=S143.1.2.3 phases=3 length=25 units=ft geometry=Sec
+  new Line.234_6 bus1=S142.1.2.3 bus2=S143.1.2.3 phases=3 length=25 units=ft geometry=Sec
+new Line.235 bus1=S143.1.2.3 bus2=S144.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.235_2 bus1=S143.1.2.3 bus2=S144.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.235_3 bus1=S143.1.2.3 bus2=S144.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.235_4 bus1=S143.1.2.3 bus2=S144.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.235_5 bus1=S143.1.2.3 bus2=S144.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.235_6 bus1=S143.1.2.3 bus2=S144.1.2.3 phases=3 length=100 units=ft geometry=Sec
+new Line.236 bus1=S1.1.2.3 bus2=S22.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.236_2 bus1=S1.1.2.3 bus2=S22.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.236_3 bus1=S1.1.2.3 bus2=S22.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.236_4 bus1=S1.1.2.3 bus2=S22.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.236_5 bus1=S1.1.2.3 bus2=S22.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.236_6 bus1=S1.1.2.3 bus2=S22.1.2.3 phases=3 length=100 units=ft geometry=Sec
+new Line.237 bus1=S22.1.2.3 bus2=S27.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.237_2 bus1=S22.1.2.3 bus2=S27.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.237_3 bus1=S22.1.2.3 bus2=S27.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.237_4 bus1=S22.1.2.3 bus2=S27.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.237_5 bus1=S22.1.2.3 bus2=S27.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.237_6 bus1=S22.1.2.3 bus2=S27.1.2.3 phases=3 length=100 units=ft geometry=Sec
+new Line.238 bus1=S27.1.2.3 bus2=S32.1.2.3 phases=3 length=25 units=ft geometry=Sec
+  new Line.238_2 bus1=S27.1.2.3 bus2=S32.1.2.3 phases=3 length=25 units=ft geometry=Sec
+  new Line.238_3 bus1=S27.1.2.3 bus2=S32.1.2.3 phases=3 length=25 units=ft geometry=Sec
+  new Line.238_4 bus1=S27.1.2.3 bus2=S32.1.2.3 phases=3 length=25 units=ft geometry=Sec
+  new Line.238_5 bus1=S27.1.2.3 bus2=S32.1.2.3 phases=3 length=25 units=ft geometry=Sec
+  new Line.238_6 bus1=S27.1.2.3 bus2=S32.1.2.3 phases=3 length=25 units=ft geometry=Sec
+new Line.239 bus1=S32.1.2.3 bus2=S37.1.2.3 phases=3 length=25 units=ft geometry=Sec
+  new Line.239_2 bus1=S32.1.2.3 bus2=S37.1.2.3 phases=3 length=25 units=ft geometry=Sec
+  new Line.239_3 bus1=S32.1.2.3 bus2=S37.1.2.3 phases=3 length=25 units=ft geometry=Sec
+  new Line.239_4 bus1=S32.1.2.3 bus2=S37.1.2.3 phases=3 length=25 units=ft geometry=Sec
+  new Line.239_5 bus1=S32.1.2.3 bus2=S37.1.2.3 phases=3 length=25 units=ft geometry=Sec
+  new Line.239_6 bus1=S32.1.2.3 bus2=S37.1.2.3 phases=3 length=25 units=ft geometry=Sec
+new Line.240 bus1=S37.1.2.3 bus2=S42.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.240_2 bus1=S37.1.2.3 bus2=S42.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.240_3 bus1=S37.1.2.3 bus2=S42.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.240_4 bus1=S37.1.2.3 bus2=S42.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.240_5 bus1=S37.1.2.3 bus2=S42.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.240_6 bus1=S37.1.2.3 bus2=S42.1.2.3 phases=3 length=100 units=ft geometry=Sec
+new Line.241 bus1=S42.1.2.3 bus2=S63.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.241_2 bus1=S42.1.2.3 bus2=S63.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.241_3 bus1=S42.1.2.3 bus2=S63.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.241_4 bus1=S42.1.2.3 bus2=S63.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.241_5 bus1=S42.1.2.3 bus2=S63.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.241_6 bus1=S42.1.2.3 bus2=S63.1.2.3 phases=3 length=100 units=ft geometry=Sec
+new Line.242 bus1=S63.1.2.3 bus2=S68.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.242_2 bus1=S63.1.2.3 bus2=S68.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.242_3 bus1=S63.1.2.3 bus2=S68.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.242_4 bus1=S63.1.2.3 bus2=S68.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.242_5 bus1=S63.1.2.3 bus2=S68.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.242_6 bus1=S63.1.2.3 bus2=S68.1.2.3 phases=3 length=100 units=ft geometry=Sec
+new Line.243 bus1=S68.1.2.3 bus2=S73.1.2.3 phases=3 length=25 units=ft geometry=Sec
+  new Line.243_2 bus1=S68.1.2.3 bus2=S73.1.2.3 phases=3 length=25 units=ft geometry=Sec
+  new Line.243_3 bus1=S68.1.2.3 bus2=S73.1.2.3 phases=3 length=25 units=ft geometry=Sec
+  new Line.243_4 bus1=S68.1.2.3 bus2=S73.1.2.3 phases=3 length=25 units=ft geometry=Sec
+  new Line.243_5 bus1=S68.1.2.3 bus2=S73.1.2.3 phases=3 length=25 units=ft geometry=Sec
+  new Line.243_6 bus1=S68.1.2.3 bus2=S73.1.2.3 phases=3 length=25 units=ft geometry=Sec
+new Line.244 bus1=S73.1.2.3 bus2=S78.1.2.3 phases=3 length=25 units=ft geometry=Sec
+  new Line.244_2 bus1=S73.1.2.3 bus2=S78.1.2.3 phases=3 length=25 units=ft geometry=Sec
+  new Line.244_3 bus1=S73.1.2.3 bus2=S78.1.2.3 phases=3 length=25 units=ft geometry=Sec
+  new Line.244_4 bus1=S73.1.2.3 bus2=S78.1.2.3 phases=3 length=25 units=ft geometry=Sec
+  new Line.244_5 bus1=S73.1.2.3 bus2=S78.1.2.3 phases=3 length=25 units=ft geometry=Sec
+  new Line.244_6 bus1=S73.1.2.3 bus2=S78.1.2.3 phases=3 length=25 units=ft geometry=Sec
+new Line.245 bus1=S78.1.2.3 bus2=S83.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.245_2 bus1=S78.1.2.3 bus2=S83.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.245_3 bus1=S78.1.2.3 bus2=S83.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.245_4 bus1=S78.1.2.3 bus2=S83.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.245_5 bus1=S78.1.2.3 bus2=S83.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.245_6 bus1=S78.1.2.3 bus2=S83.1.2.3 phases=3 length=100 units=ft geometry=Sec
+new Line.246 bus1=S83.1.2.3 bus2=S104.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.246_2 bus1=S83.1.2.3 bus2=S104.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.246_3 bus1=S83.1.2.3 bus2=S104.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.246_4 bus1=S83.1.2.3 bus2=S104.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.246_5 bus1=S83.1.2.3 bus2=S104.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.246_6 bus1=S83.1.2.3 bus2=S104.1.2.3 phases=3 length=100 units=ft geometry=Sec
+new Line.247 bus1=S104.1.2.3 bus2=S109.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.247_2 bus1=S104.1.2.3 bus2=S109.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.247_3 bus1=S104.1.2.3 bus2=S109.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.247_4 bus1=S104.1.2.3 bus2=S109.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.247_5 bus1=S104.1.2.3 bus2=S109.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.247_6 bus1=S104.1.2.3 bus2=S109.1.2.3 phases=3 length=100 units=ft geometry=Sec
+new Line.248 bus1=S109.1.2.3 bus2=S114.1.2.3 phases=3 length=25 units=ft geometry=Sec
+  new Line.248_2 bus1=S109.1.2.3 bus2=S114.1.2.3 phases=3 length=25 units=ft geometry=Sec
+  new Line.248_3 bus1=S109.1.2.3 bus2=S114.1.2.3 phases=3 length=25 units=ft geometry=Sec
+  new Line.248_4 bus1=S109.1.2.3 bus2=S114.1.2.3 phases=3 length=25 units=ft geometry=Sec
+  new Line.248_5 bus1=S109.1.2.3 bus2=S114.1.2.3 phases=3 length=25 units=ft geometry=Sec
+  new Line.248_6 bus1=S109.1.2.3 bus2=S114.1.2.3 phases=3 length=25 units=ft geometry=Sec
+new Line.249 bus1=S114.1.2.3 bus2=S119.1.2.3 phases=3 length=25 units=ft geometry=Sec
+  new Line.249_2 bus1=S114.1.2.3 bus2=S119.1.2.3 phases=3 length=25 units=ft geometry=Sec
+  new Line.249_3 bus1=S114.1.2.3 bus2=S119.1.2.3 phases=3 length=25 units=ft geometry=Sec
+  new Line.249_4 bus1=S114.1.2.3 bus2=S119.1.2.3 phases=3 length=25 units=ft geometry=Sec
+  new Line.249_5 bus1=S114.1.2.3 bus2=S119.1.2.3 phases=3 length=25 units=ft geometry=Sec
+  new Line.249_6 bus1=S114.1.2.3 bus2=S119.1.2.3 phases=3 length=25 units=ft geometry=Sec
+new Line.250 bus1=S119.1.2.3 bus2=S124.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.250_2 bus1=S119.1.2.3 bus2=S124.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.250_3 bus1=S119.1.2.3 bus2=S124.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.250_4 bus1=S119.1.2.3 bus2=S124.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.250_5 bus1=S119.1.2.3 bus2=S124.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.250_6 bus1=S119.1.2.3 bus2=S124.1.2.3 phases=3 length=100 units=ft geometry=Sec
+new Line.251 bus1=S6.1.2.3 bus2=S23.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.251_2 bus1=S6.1.2.3 bus2=S23.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.251_3 bus1=S6.1.2.3 bus2=S23.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.251_4 bus1=S6.1.2.3 bus2=S23.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.251_5 bus1=S6.1.2.3 bus2=S23.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.251_6 bus1=S6.1.2.3 bus2=S23.1.2.3 phases=3 length=100 units=ft geometry=Sec
+new Line.252 bus1=S23.1.2.3 bus2=S28.1.2.3 phases=3 length=25 units=ft geometry=Sec
+  new Line.252_2 bus1=S23.1.2.3 bus2=S28.1.2.3 phases=3 length=25 units=ft geometry=Sec
+  new Line.252_3 bus1=S23.1.2.3 bus2=S28.1.2.3 phases=3 length=25 units=ft geometry=Sec
+  new Line.252_4 bus1=S23.1.2.3 bus2=S28.1.2.3 phases=3 length=25 units=ft geometry=Sec
+  new Line.252_5 bus1=S23.1.2.3 bus2=S28.1.2.3 phases=3 length=25 units=ft geometry=Sec
+  new Line.252_6 bus1=S23.1.2.3 bus2=S28.1.2.3 phases=3 length=25 units=ft geometry=Sec
+new Line.253 bus1=S28.1.2.3 bus2=S33.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.253_2 bus1=S28.1.2.3 bus2=S33.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.253_3 bus1=S28.1.2.3 bus2=S33.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.253_4 bus1=S28.1.2.3 bus2=S33.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.253_5 bus1=S28.1.2.3 bus2=S33.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.253_6 bus1=S28.1.2.3 bus2=S33.1.2.3 phases=3 length=100 units=ft geometry=Sec
+new Line.254 bus1=S33.1.2.3 bus2=S38.1.2.3 phases=3 length=25 units=ft geometry=Sec
+  new Line.254_2 bus1=S33.1.2.3 bus2=S38.1.2.3 phases=3 length=25 units=ft geometry=Sec
+  new Line.254_3 bus1=S33.1.2.3 bus2=S38.1.2.3 phases=3 length=25 units=ft geometry=Sec
+  new Line.254_4 bus1=S33.1.2.3 bus2=S38.1.2.3 phases=3 length=25 units=ft geometry=Sec
+  new Line.254_5 bus1=S33.1.2.3 bus2=S38.1.2.3 phases=3 length=25 units=ft geometry=Sec
+  new Line.254_6 bus1=S33.1.2.3 bus2=S38.1.2.3 phases=3 length=25 units=ft geometry=Sec
+new Line.255 bus1=S38.1.2.3 bus2=S47.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.255_2 bus1=S38.1.2.3 bus2=S47.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.255_3 bus1=S38.1.2.3 bus2=S47.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.255_4 bus1=S38.1.2.3 bus2=S47.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.255_5 bus1=S38.1.2.3 bus2=S47.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.255_6 bus1=S38.1.2.3 bus2=S47.1.2.3 phases=3 length=100 units=ft geometry=Sec
+new Line.256 bus1=S47.1.2.3 bus2=S64.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.256_2 bus1=S47.1.2.3 bus2=S64.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.256_3 bus1=S47.1.2.3 bus2=S64.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.256_4 bus1=S47.1.2.3 bus2=S64.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.256_5 bus1=S47.1.2.3 bus2=S64.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.256_6 bus1=S47.1.2.3 bus2=S64.1.2.3 phases=3 length=100 units=ft geometry=Sec
+new Line.257 bus1=S64.1.2.3 bus2=S69.1.2.3 phases=3 length=25 units=ft geometry=Sec
+  new Line.257_2 bus1=S64.1.2.3 bus2=S69.1.2.3 phases=3 length=25 units=ft geometry=Sec
+  new Line.257_3 bus1=S64.1.2.3 bus2=S69.1.2.3 phases=3 length=25 units=ft geometry=Sec
+  new Line.257_4 bus1=S64.1.2.3 bus2=S69.1.2.3 phases=3 length=25 units=ft geometry=Sec
+  new Line.257_5 bus1=S64.1.2.3 bus2=S69.1.2.3 phases=3 length=25 units=ft geometry=Sec
+  new Line.257_6 bus1=S64.1.2.3 bus2=S69.1.2.3 phases=3 length=25 units=ft geometry=Sec
+new Line.258 bus1=S69.1.2.3 bus2=S74.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.258_2 bus1=S69.1.2.3 bus2=S74.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.258_3 bus1=S69.1.2.3 bus2=S74.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.258_4 bus1=S69.1.2.3 bus2=S74.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.258_5 bus1=S69.1.2.3 bus2=S74.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.258_6 bus1=S69.1.2.3 bus2=S74.1.2.3 phases=3 length=100 units=ft geometry=Sec
+new Line.259 bus1=S74.1.2.3 bus2=S79.1.2.3 phases=3 length=25 units=ft geometry=Sec
+  new Line.259_2 bus1=S74.1.2.3 bus2=S79.1.2.3 phases=3 length=25 units=ft geometry=Sec
+  new Line.259_3 bus1=S74.1.2.3 bus2=S79.1.2.3 phases=3 length=25 units=ft geometry=Sec
+  new Line.259_4 bus1=S74.1.2.3 bus2=S79.1.2.3 phases=3 length=25 units=ft geometry=Sec
+  new Line.259_5 bus1=S74.1.2.3 bus2=S79.1.2.3 phases=3 length=25 units=ft geometry=Sec
+  new Line.259_6 bus1=S74.1.2.3 bus2=S79.1.2.3 phases=3 length=25 units=ft geometry=Sec
+new Line.260 bus1=S79.1.2.3 bus2=S88.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.260_2 bus1=S79.1.2.3 bus2=S88.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.260_3 bus1=S79.1.2.3 bus2=S88.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.260_4 bus1=S79.1.2.3 bus2=S88.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.260_5 bus1=S79.1.2.3 bus2=S88.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.260_6 bus1=S79.1.2.3 bus2=S88.1.2.3 phases=3 length=100 units=ft geometry=Sec
+new Line.261 bus1=S88.1.2.3 bus2=S105.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.261_2 bus1=S88.1.2.3 bus2=S105.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.261_3 bus1=S88.1.2.3 bus2=S105.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.261_4 bus1=S88.1.2.3 bus2=S105.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.261_5 bus1=S88.1.2.3 bus2=S105.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.261_6 bus1=S88.1.2.3 bus2=S105.1.2.3 phases=3 length=100 units=ft geometry=Sec
+new Line.262 bus1=S105.1.2.3 bus2=S110.1.2.3 phases=3 length=25 units=ft geometry=Sec
+  new Line.262_2 bus1=S105.1.2.3 bus2=S110.1.2.3 phases=3 length=25 units=ft geometry=Sec
+  new Line.262_3 bus1=S105.1.2.3 bus2=S110.1.2.3 phases=3 length=25 units=ft geometry=Sec
+  new Line.262_4 bus1=S105.1.2.3 bus2=S110.1.2.3 phases=3 length=25 units=ft geometry=Sec
+  new Line.262_5 bus1=S105.1.2.3 bus2=S110.1.2.3 phases=3 length=25 units=ft geometry=Sec
+  new Line.262_6 bus1=S105.1.2.3 bus2=S110.1.2.3 phases=3 length=25 units=ft geometry=Sec
+new Line.263 bus1=S110.1.2.3 bus2=S115.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.263_2 bus1=S110.1.2.3 bus2=S115.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.263_3 bus1=S110.1.2.3 bus2=S115.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.263_4 bus1=S110.1.2.3 bus2=S115.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.263_5 bus1=S110.1.2.3 bus2=S115.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.263_6 bus1=S110.1.2.3 bus2=S115.1.2.3 phases=3 length=100 units=ft geometry=Sec
+new Line.264 bus1=S115.1.2.3 bus2=S120.1.2.3 phases=3 length=25 units=ft geometry=Sec
+  new Line.264_2 bus1=S115.1.2.3 bus2=S120.1.2.3 phases=3 length=25 units=ft geometry=Sec
+  new Line.264_3 bus1=S115.1.2.3 bus2=S120.1.2.3 phases=3 length=25 units=ft geometry=Sec
+  new Line.264_4 bus1=S115.1.2.3 bus2=S120.1.2.3 phases=3 length=25 units=ft geometry=Sec
+  new Line.264_5 bus1=S115.1.2.3 bus2=S120.1.2.3 phases=3 length=25 units=ft geometry=Sec
+  new Line.264_6 bus1=S115.1.2.3 bus2=S120.1.2.3 phases=3 length=25 units=ft geometry=Sec
+new Line.265 bus1=S120.1.2.3 bus2=S129.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.265_2 bus1=S120.1.2.3 bus2=S129.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.265_3 bus1=S120.1.2.3 bus2=S129.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.265_4 bus1=S120.1.2.3 bus2=S129.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.265_5 bus1=S120.1.2.3 bus2=S129.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.265_6 bus1=S120.1.2.3 bus2=S129.1.2.3 phases=3 length=100 units=ft geometry=Sec
+new Line.266 bus1=S11.1.2.3 bus2=S24.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.266_2 bus1=S11.1.2.3 bus2=S24.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.266_3 bus1=S11.1.2.3 bus2=S24.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.266_4 bus1=S11.1.2.3 bus2=S24.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.266_5 bus1=S11.1.2.3 bus2=S24.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.266_6 bus1=S11.1.2.3 bus2=S24.1.2.3 phases=3 length=100 units=ft geometry=Sec
+new Line.267 bus1=S24.1.2.3 bus2=S29.1.2.3 phases=3 length=25 units=ft geometry=Sec
+  new Line.267_2 bus1=S24.1.2.3 bus2=S29.1.2.3 phases=3 length=25 units=ft geometry=Sec
+  new Line.267_3 bus1=S24.1.2.3 bus2=S29.1.2.3 phases=3 length=25 units=ft geometry=Sec
+  new Line.267_4 bus1=S24.1.2.3 bus2=S29.1.2.3 phases=3 length=25 units=ft geometry=Sec
+  new Line.267_5 bus1=S24.1.2.3 bus2=S29.1.2.3 phases=3 length=25 units=ft geometry=Sec
+  new Line.267_6 bus1=S24.1.2.3 bus2=S29.1.2.3 phases=3 length=25 units=ft geometry=Sec
+new Line.268 bus1=S29.1.2.3 bus2=S34.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.268_2 bus1=S29.1.2.3 bus2=S34.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.268_3 bus1=S29.1.2.3 bus2=S34.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.268_4 bus1=S29.1.2.3 bus2=S34.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.268_5 bus1=S29.1.2.3 bus2=S34.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.268_6 bus1=S29.1.2.3 bus2=S34.1.2.3 phases=3 length=100 units=ft geometry=Sec
+new Line.269 bus1=S34.1.2.3 bus2=S39.1.2.3 phases=3 length=25 units=ft geometry=Sec
+  new Line.269_2 bus1=S34.1.2.3 bus2=S39.1.2.3 phases=3 length=25 units=ft geometry=Sec
+  new Line.269_3 bus1=S34.1.2.3 bus2=S39.1.2.3 phases=3 length=25 units=ft geometry=Sec
+  new Line.269_4 bus1=S34.1.2.3 bus2=S39.1.2.3 phases=3 length=25 units=ft geometry=Sec
+  new Line.269_5 bus1=S34.1.2.3 bus2=S39.1.2.3 phases=3 length=25 units=ft geometry=Sec
+  new Line.269_6 bus1=S34.1.2.3 bus2=S39.1.2.3 phases=3 length=25 units=ft geometry=Sec
+new Line.270 bus1=S39.1.2.3 bus2=S52.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.270_2 bus1=S39.1.2.3 bus2=S52.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.270_3 bus1=S39.1.2.3 bus2=S52.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.270_4 bus1=S39.1.2.3 bus2=S52.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.270_5 bus1=S39.1.2.3 bus2=S52.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.270_6 bus1=S39.1.2.3 bus2=S52.1.2.3 phases=3 length=100 units=ft geometry=Sec
+new Line.271 bus1=S52.1.2.3 bus2=S65.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.271_2 bus1=S52.1.2.3 bus2=S65.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.271_3 bus1=S52.1.2.3 bus2=S65.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.271_4 bus1=S52.1.2.3 bus2=S65.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.271_5 bus1=S52.1.2.3 bus2=S65.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.271_6 bus1=S52.1.2.3 bus2=S65.1.2.3 phases=3 length=100 units=ft geometry=Sec
+new Line.272 bus1=S65.1.2.3 bus2=S70.1.2.3 phases=3 length=25 units=ft geometry=Sec
+  new Line.272_2 bus1=S65.1.2.3 bus2=S70.1.2.3 phases=3 length=25 units=ft geometry=Sec
+  new Line.272_3 bus1=S65.1.2.3 bus2=S70.1.2.3 phases=3 length=25 units=ft geometry=Sec
+  new Line.272_4 bus1=S65.1.2.3 bus2=S70.1.2.3 phases=3 length=25 units=ft geometry=Sec
+  new Line.272_5 bus1=S65.1.2.3 bus2=S70.1.2.3 phases=3 length=25 units=ft geometry=Sec
+  new Line.272_6 bus1=S65.1.2.3 bus2=S70.1.2.3 phases=3 length=25 units=ft geometry=Sec
+new Line.273 bus1=S70.1.2.3 bus2=S75.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.273_2 bus1=S70.1.2.3 bus2=S75.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.273_3 bus1=S70.1.2.3 bus2=S75.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.273_4 bus1=S70.1.2.3 bus2=S75.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.273_5 bus1=S70.1.2.3 bus2=S75.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.273_6 bus1=S70.1.2.3 bus2=S75.1.2.3 phases=3 length=100 units=ft geometry=Sec
+new Line.274 bus1=S75.1.2.3 bus2=S80.1.2.3 phases=3 length=25 units=ft geometry=Sec
+  new Line.274_2 bus1=S75.1.2.3 bus2=S80.1.2.3 phases=3 length=25 units=ft geometry=Sec
+  new Line.274_3 bus1=S75.1.2.3 bus2=S80.1.2.3 phases=3 length=25 units=ft geometry=Sec
+  new Line.274_4 bus1=S75.1.2.3 bus2=S80.1.2.3 phases=3 length=25 units=ft geometry=Sec
+  new Line.274_5 bus1=S75.1.2.3 bus2=S80.1.2.3 phases=3 length=25 units=ft geometry=Sec
+  new Line.274_6 bus1=S75.1.2.3 bus2=S80.1.2.3 phases=3 length=25 units=ft geometry=Sec
+new Line.275 bus1=S80.1.2.3 bus2=S93.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.275_2 bus1=S80.1.2.3 bus2=S93.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.275_3 bus1=S80.1.2.3 bus2=S93.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.275_4 bus1=S80.1.2.3 bus2=S93.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.275_5 bus1=S80.1.2.3 bus2=S93.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.275_6 bus1=S80.1.2.3 bus2=S93.1.2.3 phases=3 length=100 units=ft geometry=Sec
+new Line.276 bus1=S93.1.2.3 bus2=S106.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.276_2 bus1=S93.1.2.3 bus2=S106.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.276_3 bus1=S93.1.2.3 bus2=S106.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.276_4 bus1=S93.1.2.3 bus2=S106.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.276_5 bus1=S93.1.2.3 bus2=S106.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.276_6 bus1=S93.1.2.3 bus2=S106.1.2.3 phases=3 length=100 units=ft geometry=Sec
+new Line.277 bus1=S106.1.2.3 bus2=S111.1.2.3 phases=3 length=25 units=ft geometry=Sec
+  new Line.277_2 bus1=S106.1.2.3 bus2=S111.1.2.3 phases=3 length=25 units=ft geometry=Sec
+  new Line.277_3 bus1=S106.1.2.3 bus2=S111.1.2.3 phases=3 length=25 units=ft geometry=Sec
+  new Line.277_4 bus1=S106.1.2.3 bus2=S111.1.2.3 phases=3 length=25 units=ft geometry=Sec
+  new Line.277_5 bus1=S106.1.2.3 bus2=S111.1.2.3 phases=3 length=25 units=ft geometry=Sec
+  new Line.277_6 bus1=S106.1.2.3 bus2=S111.1.2.3 phases=3 length=25 units=ft geometry=Sec
+new Line.278 bus1=S111.1.2.3 bus2=S116.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.278_2 bus1=S111.1.2.3 bus2=S116.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.278_3 bus1=S111.1.2.3 bus2=S116.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.278_4 bus1=S111.1.2.3 bus2=S116.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.278_5 bus1=S111.1.2.3 bus2=S116.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.278_6 bus1=S111.1.2.3 bus2=S116.1.2.3 phases=3 length=100 units=ft geometry=Sec
+new Line.279 bus1=S116.1.2.3 bus2=S121.1.2.3 phases=3 length=25 units=ft geometry=Sec
+  new Line.279_2 bus1=S116.1.2.3 bus2=S121.1.2.3 phases=3 length=25 units=ft geometry=Sec
+  new Line.279_3 bus1=S116.1.2.3 bus2=S121.1.2.3 phases=3 length=25 units=ft geometry=Sec
+  new Line.279_4 bus1=S116.1.2.3 bus2=S121.1.2.3 phases=3 length=25 units=ft geometry=Sec
+  new Line.279_5 bus1=S116.1.2.3 bus2=S121.1.2.3 phases=3 length=25 units=ft geometry=Sec
+  new Line.279_6 bus1=S116.1.2.3 bus2=S121.1.2.3 phases=3 length=25 units=ft geometry=Sec
+new Line.280 bus1=S121.1.2.3 bus2=S134.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.280_2 bus1=S121.1.2.3 bus2=S134.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.280_3 bus1=S121.1.2.3 bus2=S134.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.280_4 bus1=S121.1.2.3 bus2=S134.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.280_5 bus1=S121.1.2.3 bus2=S134.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.280_6 bus1=S121.1.2.3 bus2=S134.1.2.3 phases=3 length=100 units=ft geometry=Sec
+new Line.281 bus1=S16.1.2.3 bus2=S25.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.281_2 bus1=S16.1.2.3 bus2=S25.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.281_3 bus1=S16.1.2.3 bus2=S25.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.281_4 bus1=S16.1.2.3 bus2=S25.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.281_5 bus1=S16.1.2.3 bus2=S25.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.281_6 bus1=S16.1.2.3 bus2=S25.1.2.3 phases=3 length=100 units=ft geometry=Sec
+new Line.282 bus1=S25.1.2.3 bus2=S30.1.2.3 phases=3 length=25 units=ft geometry=Sec
+  new Line.282_2 bus1=S25.1.2.3 bus2=S30.1.2.3 phases=3 length=25 units=ft geometry=Sec
+  new Line.282_3 bus1=S25.1.2.3 bus2=S30.1.2.3 phases=3 length=25 units=ft geometry=Sec
+  new Line.282_4 bus1=S25.1.2.3 bus2=S30.1.2.3 phases=3 length=25 units=ft geometry=Sec
+  new Line.282_5 bus1=S25.1.2.3 bus2=S30.1.2.3 phases=3 length=25 units=ft geometry=Sec
+  new Line.282_6 bus1=S25.1.2.3 bus2=S30.1.2.3 phases=3 length=25 units=ft geometry=Sec
+new Line.283 bus1=S30.1.2.3 bus2=S35.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.283_2 bus1=S30.1.2.3 bus2=S35.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.283_3 bus1=S30.1.2.3 bus2=S35.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.283_4 bus1=S30.1.2.3 bus2=S35.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.283_5 bus1=S30.1.2.3 bus2=S35.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.283_6 bus1=S30.1.2.3 bus2=S35.1.2.3 phases=3 length=100 units=ft geometry=Sec
+new Line.284 bus1=S35.1.2.3 bus2=S40.1.2.3 phases=3 length=25 units=ft geometry=Sec
+  new Line.284_2 bus1=S35.1.2.3 bus2=S40.1.2.3 phases=3 length=25 units=ft geometry=Sec
+  new Line.284_3 bus1=S35.1.2.3 bus2=S40.1.2.3 phases=3 length=25 units=ft geometry=Sec
+  new Line.284_4 bus1=S35.1.2.3 bus2=S40.1.2.3 phases=3 length=25 units=ft geometry=Sec
+  new Line.284_5 bus1=S35.1.2.3 bus2=S40.1.2.3 phases=3 length=25 units=ft geometry=Sec
+  new Line.284_6 bus1=S35.1.2.3 bus2=S40.1.2.3 phases=3 length=25 units=ft geometry=Sec
+new Line.285 bus1=S40.1.2.3 bus2=S57.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.285_2 bus1=S40.1.2.3 bus2=S57.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.285_3 bus1=S40.1.2.3 bus2=S57.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.285_4 bus1=S40.1.2.3 bus2=S57.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.285_5 bus1=S40.1.2.3 bus2=S57.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.285_6 bus1=S40.1.2.3 bus2=S57.1.2.3 phases=3 length=100 units=ft geometry=Sec
+new Line.286 bus1=S57.1.2.3 bus2=S66.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.286_2 bus1=S57.1.2.3 bus2=S66.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.286_3 bus1=S57.1.2.3 bus2=S66.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.286_4 bus1=S57.1.2.3 bus2=S66.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.286_5 bus1=S57.1.2.3 bus2=S66.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.286_6 bus1=S57.1.2.3 bus2=S66.1.2.3 phases=3 length=100 units=ft geometry=Sec
+new Line.287 bus1=S66.1.2.3 bus2=S71.1.2.3 phases=3 length=25 units=ft geometry=Sec
+  new Line.287_2 bus1=S66.1.2.3 bus2=S71.1.2.3 phases=3 length=25 units=ft geometry=Sec
+  new Line.287_3 bus1=S66.1.2.3 bus2=S71.1.2.3 phases=3 length=25 units=ft geometry=Sec
+  new Line.287_4 bus1=S66.1.2.3 bus2=S71.1.2.3 phases=3 length=25 units=ft geometry=Sec
+  new Line.287_5 bus1=S66.1.2.3 bus2=S71.1.2.3 phases=3 length=25 units=ft geometry=Sec
+  new Line.287_6 bus1=S66.1.2.3 bus2=S71.1.2.3 phases=3 length=25 units=ft geometry=Sec
+new Line.288 bus1=S71.1.2.3 bus2=S76.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.288_2 bus1=S71.1.2.3 bus2=S76.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.288_3 bus1=S71.1.2.3 bus2=S76.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.288_4 bus1=S71.1.2.3 bus2=S76.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.288_5 bus1=S71.1.2.3 bus2=S76.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.288_6 bus1=S71.1.2.3 bus2=S76.1.2.3 phases=3 length=100 units=ft geometry=Sec
+new Line.289 bus1=S76.1.2.3 bus2=S81.1.2.3 phases=3 length=25 units=ft geometry=Sec
+  new Line.289_2 bus1=S76.1.2.3 bus2=S81.1.2.3 phases=3 length=25 units=ft geometry=Sec
+  new Line.289_3 bus1=S76.1.2.3 bus2=S81.1.2.3 phases=3 length=25 units=ft geometry=Sec
+  new Line.289_4 bus1=S76.1.2.3 bus2=S81.1.2.3 phases=3 length=25 units=ft geometry=Sec
+  new Line.289_5 bus1=S76.1.2.3 bus2=S81.1.2.3 phases=3 length=25 units=ft geometry=Sec
+  new Line.289_6 bus1=S76.1.2.3 bus2=S81.1.2.3 phases=3 length=25 units=ft geometry=Sec
+new Line.290 bus1=S81.1.2.3 bus2=S98.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.290_2 bus1=S81.1.2.3 bus2=S98.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.290_3 bus1=S81.1.2.3 bus2=S98.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.290_4 bus1=S81.1.2.3 bus2=S98.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.290_5 bus1=S81.1.2.3 bus2=S98.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.290_6 bus1=S81.1.2.3 bus2=S98.1.2.3 phases=3 length=100 units=ft geometry=Sec
+new Line.291 bus1=S98.1.2.3 bus2=S107.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.291_2 bus1=S98.1.2.3 bus2=S107.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.291_3 bus1=S98.1.2.3 bus2=S107.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.291_4 bus1=S98.1.2.3 bus2=S107.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.291_5 bus1=S98.1.2.3 bus2=S107.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.291_6 bus1=S98.1.2.3 bus2=S107.1.2.3 phases=3 length=100 units=ft geometry=Sec
+new Line.292 bus1=S107.1.2.3 bus2=S112.1.2.3 phases=3 length=25 units=ft geometry=Sec
+  new Line.292_2 bus1=S107.1.2.3 bus2=S112.1.2.3 phases=3 length=25 units=ft geometry=Sec
+  new Line.292_3 bus1=S107.1.2.3 bus2=S112.1.2.3 phases=3 length=25 units=ft geometry=Sec
+  new Line.292_4 bus1=S107.1.2.3 bus2=S112.1.2.3 phases=3 length=25 units=ft geometry=Sec
+  new Line.292_5 bus1=S107.1.2.3 bus2=S112.1.2.3 phases=3 length=25 units=ft geometry=Sec
+  new Line.292_6 bus1=S107.1.2.3 bus2=S112.1.2.3 phases=3 length=25 units=ft geometry=Sec
+new Line.293 bus1=S112.1.2.3 bus2=S117.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.293_2 bus1=S112.1.2.3 bus2=S117.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.293_3 bus1=S112.1.2.3 bus2=S117.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.293_4 bus1=S112.1.2.3 bus2=S117.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.293_5 bus1=S112.1.2.3 bus2=S117.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.293_6 bus1=S112.1.2.3 bus2=S117.1.2.3 phases=3 length=100 units=ft geometry=Sec
+new Line.294 bus1=S117.1.2.3 bus2=S122.1.2.3 phases=3 length=25 units=ft geometry=Sec
+  new Line.294_2 bus1=S117.1.2.3 bus2=S122.1.2.3 phases=3 length=25 units=ft geometry=Sec
+  new Line.294_3 bus1=S117.1.2.3 bus2=S122.1.2.3 phases=3 length=25 units=ft geometry=Sec
+  new Line.294_4 bus1=S117.1.2.3 bus2=S122.1.2.3 phases=3 length=25 units=ft geometry=Sec
+  new Line.294_5 bus1=S117.1.2.3 bus2=S122.1.2.3 phases=3 length=25 units=ft geometry=Sec
+  new Line.294_6 bus1=S117.1.2.3 bus2=S122.1.2.3 phases=3 length=25 units=ft geometry=Sec
+new Line.295 bus1=S122.1.2.3 bus2=S139.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.295_2 bus1=S122.1.2.3 bus2=S139.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.295_3 bus1=S122.1.2.3 bus2=S139.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.295_4 bus1=S122.1.2.3 bus2=S139.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.295_5 bus1=S122.1.2.3 bus2=S139.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.295_6 bus1=S122.1.2.3 bus2=S139.1.2.3 phases=3 length=100 units=ft geometry=Sec
+new Line.296 bus1=S21.1.2.3 bus2=S26.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.296_2 bus1=S21.1.2.3 bus2=S26.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.296_3 bus1=S21.1.2.3 bus2=S26.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.296_4 bus1=S21.1.2.3 bus2=S26.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.296_5 bus1=S21.1.2.3 bus2=S26.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.296_6 bus1=S21.1.2.3 bus2=S26.1.2.3 phases=3 length=100 units=ft geometry=Sec
+new Line.297 bus1=S26.1.2.3 bus2=S31.1.2.3 phases=3 length=25 units=ft geometry=Sec
+  new Line.297_2 bus1=S26.1.2.3 bus2=S31.1.2.3 phases=3 length=25 units=ft geometry=Sec
+  new Line.297_3 bus1=S26.1.2.3 bus2=S31.1.2.3 phases=3 length=25 units=ft geometry=Sec
+  new Line.297_4 bus1=S26.1.2.3 bus2=S31.1.2.3 phases=3 length=25 units=ft geometry=Sec
+  new Line.297_5 bus1=S26.1.2.3 bus2=S31.1.2.3 phases=3 length=25 units=ft geometry=Sec
+  new Line.297_6 bus1=S26.1.2.3 bus2=S31.1.2.3 phases=3 length=25 units=ft geometry=Sec
+new Line.298 bus1=S31.1.2.3 bus2=S36.1.2.3 phases=3 length=25 units=ft geometry=Sec
+  new Line.298_2 bus1=S31.1.2.3 bus2=S36.1.2.3 phases=3 length=25 units=ft geometry=Sec
+  new Line.298_3 bus1=S31.1.2.3 bus2=S36.1.2.3 phases=3 length=25 units=ft geometry=Sec
+  new Line.298_4 bus1=S31.1.2.3 bus2=S36.1.2.3 phases=3 length=25 units=ft geometry=Sec
+  new Line.298_5 bus1=S31.1.2.3 bus2=S36.1.2.3 phases=3 length=25 units=ft geometry=Sec
+  new Line.298_6 bus1=S31.1.2.3 bus2=S36.1.2.3 phases=3 length=25 units=ft geometry=Sec
+new Line.299 bus1=S36.1.2.3 bus2=S41.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.299_2 bus1=S36.1.2.3 bus2=S41.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.299_3 bus1=S36.1.2.3 bus2=S41.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.299_4 bus1=S36.1.2.3 bus2=S41.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.299_5 bus1=S36.1.2.3 bus2=S41.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.299_6 bus1=S36.1.2.3 bus2=S41.1.2.3 phases=3 length=100 units=ft geometry=Sec
+new Line.300 bus1=S41.1.2.3 bus2=S62.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.300_2 bus1=S41.1.2.3 bus2=S62.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.300_3 bus1=S41.1.2.3 bus2=S62.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.300_4 bus1=S41.1.2.3 bus2=S62.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.300_5 bus1=S41.1.2.3 bus2=S62.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.300_6 bus1=S41.1.2.3 bus2=S62.1.2.3 phases=3 length=100 units=ft geometry=Sec
+new Line.301 bus1=S62.1.2.3 bus2=S67.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.301_2 bus1=S62.1.2.3 bus2=S67.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.301_3 bus1=S62.1.2.3 bus2=S67.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.301_4 bus1=S62.1.2.3 bus2=S67.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.301_5 bus1=S62.1.2.3 bus2=S67.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.301_6 bus1=S62.1.2.3 bus2=S67.1.2.3 phases=3 length=100 units=ft geometry=Sec
+new Line.302 bus1=S67.1.2.3 bus2=S72.1.2.3 phases=3 length=25 units=ft geometry=Sec
+  new Line.302_2 bus1=S67.1.2.3 bus2=S72.1.2.3 phases=3 length=25 units=ft geometry=Sec
+  new Line.302_3 bus1=S67.1.2.3 bus2=S72.1.2.3 phases=3 length=25 units=ft geometry=Sec
+  new Line.302_4 bus1=S67.1.2.3 bus2=S72.1.2.3 phases=3 length=25 units=ft geometry=Sec
+  new Line.302_5 bus1=S67.1.2.3 bus2=S72.1.2.3 phases=3 length=25 units=ft geometry=Sec
+  new Line.302_6 bus1=S67.1.2.3 bus2=S72.1.2.3 phases=3 length=25 units=ft geometry=Sec
+new Line.303 bus1=S72.1.2.3 bus2=S77.1.2.3 phases=3 length=25 units=ft geometry=Sec
+  new Line.303_2 bus1=S72.1.2.3 bus2=S77.1.2.3 phases=3 length=25 units=ft geometry=Sec
+  new Line.303_3 bus1=S72.1.2.3 bus2=S77.1.2.3 phases=3 length=25 units=ft geometry=Sec
+  new Line.303_4 bus1=S72.1.2.3 bus2=S77.1.2.3 phases=3 length=25 units=ft geometry=Sec
+  new Line.303_5 bus1=S72.1.2.3 bus2=S77.1.2.3 phases=3 length=25 units=ft geometry=Sec
+  new Line.303_6 bus1=S72.1.2.3 bus2=S77.1.2.3 phases=3 length=25 units=ft geometry=Sec
+new Line.304 bus1=S77.1.2.3 bus2=S82.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.304_2 bus1=S77.1.2.3 bus2=S82.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.304_3 bus1=S77.1.2.3 bus2=S82.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.304_4 bus1=S77.1.2.3 bus2=S82.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.304_5 bus1=S77.1.2.3 bus2=S82.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.304_6 bus1=S77.1.2.3 bus2=S82.1.2.3 phases=3 length=100 units=ft geometry=Sec
+new Line.305 bus1=S82.1.2.3 bus2=S103.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.305_2 bus1=S82.1.2.3 bus2=S103.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.305_3 bus1=S82.1.2.3 bus2=S103.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.305_4 bus1=S82.1.2.3 bus2=S103.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.305_5 bus1=S82.1.2.3 bus2=S103.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.305_6 bus1=S82.1.2.3 bus2=S103.1.2.3 phases=3 length=100 units=ft geometry=Sec
+new Line.306 bus1=S103.1.2.3 bus2=S108.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.306_2 bus1=S103.1.2.3 bus2=S108.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.306_3 bus1=S103.1.2.3 bus2=S108.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.306_4 bus1=S103.1.2.3 bus2=S108.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.306_5 bus1=S103.1.2.3 bus2=S108.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.306_6 bus1=S103.1.2.3 bus2=S108.1.2.3 phases=3 length=100 units=ft geometry=Sec
+new Line.307 bus1=S108.1.2.3 bus2=S113.1.2.3 phases=3 length=25 units=ft geometry=Sec
+  new Line.307_2 bus1=S108.1.2.3 bus2=S113.1.2.3 phases=3 length=25 units=ft geometry=Sec
+  new Line.307_3 bus1=S108.1.2.3 bus2=S113.1.2.3 phases=3 length=25 units=ft geometry=Sec
+  new Line.307_4 bus1=S108.1.2.3 bus2=S113.1.2.3 phases=3 length=25 units=ft geometry=Sec
+  new Line.307_5 bus1=S108.1.2.3 bus2=S113.1.2.3 phases=3 length=25 units=ft geometry=Sec
+  new Line.307_6 bus1=S108.1.2.3 bus2=S113.1.2.3 phases=3 length=25 units=ft geometry=Sec
+new Line.308 bus1=S113.1.2.3 bus2=S118.1.2.3 phases=3 length=25 units=ft geometry=Sec
+  new Line.308_2 bus1=S113.1.2.3 bus2=S118.1.2.3 phases=3 length=25 units=ft geometry=Sec
+  new Line.308_3 bus1=S113.1.2.3 bus2=S118.1.2.3 phases=3 length=25 units=ft geometry=Sec
+  new Line.308_4 bus1=S113.1.2.3 bus2=S118.1.2.3 phases=3 length=25 units=ft geometry=Sec
+  new Line.308_5 bus1=S113.1.2.3 bus2=S118.1.2.3 phases=3 length=25 units=ft geometry=Sec
+  new Line.308_6 bus1=S113.1.2.3 bus2=S118.1.2.3 phases=3 length=25 units=ft geometry=Sec
+new Line.309 bus1=S118.1.2.3 bus2=S123.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.309_2 bus1=S118.1.2.3 bus2=S123.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.309_3 bus1=S118.1.2.3 bus2=S123.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.309_4 bus1=S118.1.2.3 bus2=S123.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.309_5 bus1=S118.1.2.3 bus2=S123.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.309_6 bus1=S118.1.2.3 bus2=S123.1.2.3 phases=3 length=100 units=ft geometry=Sec
+new Line.310 bus1=S123.1.2.3 bus2=S144.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.310_2 bus1=S123.1.2.3 bus2=S144.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.310_3 bus1=S123.1.2.3 bus2=S144.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.310_4 bus1=S123.1.2.3 bus2=S144.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.310_5 bus1=S123.1.2.3 bus2=S144.1.2.3 phases=3 length=100 units=ft geometry=Sec
+  new Line.310_6 bus1=S123.1.2.3 bus2=S144.1.2.3 phases=3 length=100 units=ft geometry=Sec
+new Line.1_sw bus1=P3.1.2.3 bus2=P4.1.2.3 phases=3 switch=yes linecode=switch length=1
+  close Line.1_sw 1
+new Line.2_sw bus1=P5.1.2.3 bus2=P6.1.2.3 phases=3 switch=yes linecode=switch length=1
+  close Line.2_sw 1
+new Line.3_sw bus1=P7.1.2.3 bus2=P8.1.2.3 phases=3 switch=yes linecode=switch length=1
+  close Line.3_sw 1
+new Line.4_sw bus1=P9.1.2.3 bus2=P10.1.2.3 phases=3 switch=yes linecode=switch length=1
+  close Line.4_sw 1
+new Line.5_sw bus1=P11.1.2.3 bus2=P12.1.2.3 phases=3 switch=yes linecode=switch length=1
+  close Line.5_sw 1
+new Line.6_sw bus1=P27.1.2.3 bus2=P28.1.2.3 phases=3 switch=yes linecode=switch length=1
+  close Line.6_sw 1
+new Line.7_sw bus1=P45.1.2.3 bus2=P46.1.2.3 phases=3 switch=yes linecode=switch length=1
+  close Line.7_sw 1
+new Line.8_sw bus1=P62.1.2.3 bus2=P63.1.2.3 phases=3 switch=yes linecode=switch length=1
+  close Line.8_sw 1
+new Line.9_sw bus1=P81.1.2.3 bus2=P82.1.2.3 phases=3 switch=yes linecode=switch length=1
+  close Line.9_sw 1
+new Line.10_sw bus1=P97.1.2.3 bus2=P98.1.2.3 phases=3 switch=yes linecode=switch length=1
+  close Line.10_sw 1
+new Line.11_sw bus1=P117.1.2.3 bus2=P118.1.2.3 phases=3 switch=yes linecode=switch length=1
+  close Line.11_sw 1
+new Line.12_sw bus1=P134.1.2.3 bus2=P135.1.2.3 phases=3 switch=yes linecode=switch length=1
+  close Line.12_sw 1
+new Line.13_sw bus1=S148.1.2.3 bus2=S27.1.2.3 phases=3 switch=yes linecode=switch length=1
+  close Line.13_sw 1
+new Line.14_sw bus1=S145.1.2.3 bus2=S4.1.2.3 phases=3 switch=yes linecode=switch length=1
+  close Line.14_sw 1
+new Line.15_sw bus1=S152.1.2.3 bus2=S28.1.2.3 phases=3 switch=yes linecode=switch length=1
+  close Line.15_sw 1
+new Line.16_sw bus1=S149.1.2.3 bus2=S9.1.2.3 phases=3 switch=yes linecode=switch length=1
+  close Line.16_sw 1
+new Line.17_sw bus1=S156.1.2.3 bus2=S29.1.2.3 phases=3 switch=yes linecode=switch length=1
+  close Line.17_sw 1
+new Line.18_sw bus1=S153.1.2.3 bus2=S14.1.2.3 phases=3 switch=yes linecode=switch length=1
+  close Line.18_sw 1
+new Line.19_sw bus1=S160.1.2.3 bus2=S30.1.2.3 phases=3 switch=yes linecode=switch length=1
+  close Line.19_sw 1
+new Line.20_sw bus1=S157.1.2.3 bus2=S19.1.2.3 phases=3 switch=yes linecode=switch length=1
+  close Line.20_sw 1
+new Line.21_sw bus1=S147.1.2.3 bus2=S44.1.2.3 phases=3 switch=yes linecode=switch length=1
+  close Line.21_sw 1
+new Line.22_sw bus1=S146.1.2.3 bus2=S33.1.2.3 phases=3 switch=yes linecode=switch length=1
+  close Line.22_sw 1
+new Line.23_sw bus1=S151.1.2.3 bus2=S49.1.2.3 phases=3 switch=yes linecode=switch length=1
+  close Line.23_sw 1
+new Line.24_sw bus1=S150.1.2.3 bus2=S34.1.2.3 phases=3 switch=yes linecode=switch length=1
+  close Line.24_sw 1
+new Line.25_sw bus1=S155.1.2.3 bus2=S54.1.2.3 phases=3 switch=yes linecode=switch length=1
+  close Line.25_sw 1
+new Line.26_sw bus1=S154.1.2.3 bus2=S35.1.2.3 phases=3 switch=yes linecode=switch length=1
+  close Line.26_sw 1
+new Line.27_sw bus1=S159.1.2.3 bus2=S59.1.2.3 phases=3 switch=yes linecode=switch length=1
+  close Line.27_sw 1
+new Line.28_sw bus1=S158.1.2.3 bus2=S36.1.2.3 phases=3 switch=yes linecode=switch length=1
+  close Line.28_sw 1
+new Line.29_sw bus1=S164.1.2.3 bus2=S68.1.2.3 phases=3 switch=yes linecode=switch length=1
+  close Line.29_sw 1
+new Line.30_sw bus1=S161.1.2.3 bus2=S45.1.2.3 phases=3 switch=yes linecode=switch length=1
+  close Line.30_sw 1
+new Line.31_sw bus1=S168.1.2.3 bus2=S69.1.2.3 phases=3 switch=yes linecode=switch length=1
+  close Line.31_sw 1
+new Line.32_sw bus1=S165.1.2.3 bus2=S50.1.2.3 phases=3 switch=yes linecode=switch length=1
+  close Line.32_sw 1
+new Line.33_sw bus1=S172.1.2.3 bus2=S70.1.2.3 phases=3 switch=yes linecode=switch length=1
+  close Line.33_sw 1
+new Line.34_sw bus1=S169.1.2.3 bus2=S55.1.2.3 phases=3 switch=yes linecode=switch length=1
+  close Line.34_sw 1
+new Line.35_sw bus1=S176.1.2.3 bus2=S71.1.2.3 phases=3 switch=yes linecode=switch length=1
+  close Line.35_sw 1
+new Line.36_sw bus1=S173.1.2.3 bus2=S60.1.2.3 phases=3 switch=yes linecode=switch length=1
+  close Line.36_sw 1
+new Line.37_sw bus1=S163.1.2.3 bus2=S85.1.2.3 phases=3 switch=yes linecode=switch length=1
+  close Line.37_sw 1
+new Line.38_sw bus1=S162.1.2.3 bus2=S74.1.2.3 phases=3 switch=yes linecode=switch length=1
+  close Line.38_sw 1
+new Line.39_sw bus1=S167.1.2.3 bus2=S90.1.2.3 phases=3 switch=yes linecode=switch length=1
+  close Line.39_sw 1
+new Line.40_sw bus1=S166.1.2.3 bus2=S75.1.2.3 phases=3 switch=yes linecode=switch length=1
+  close Line.40_sw 1
+new Line.41_sw bus1=S171.1.2.3 bus2=S95.1.2.3 phases=3 switch=yes linecode=switch length=1
+  close Line.41_sw 1
+new Line.42_sw bus1=S170.1.2.3 bus2=S76.1.2.3 phases=3 switch=yes linecode=switch length=1
+  close Line.42_sw 1
+new Line.43_sw bus1=S175.1.2.3 bus2=S100.1.2.3 phases=3 switch=yes linecode=switch length=1
+  close Line.43_sw 1
+new Line.44_sw bus1=S174.1.2.3 bus2=S77.1.2.3 phases=3 switch=yes linecode=switch length=1
+  close Line.44_sw 1
+new Line.45_sw bus1=S180.1.2.3 bus2=S109.1.2.3 phases=3 switch=yes linecode=switch length=1
+  close Line.45_sw 1
+new Line.46_sw bus1=S177.1.2.3 bus2=S86.1.2.3 phases=3 switch=yes linecode=switch length=1
+  close Line.46_sw 1
+new Line.47_sw bus1=S184.1.2.3 bus2=S110.1.2.3 phases=3 switch=yes linecode=switch length=1
+  close Line.47_sw 1
+new Line.48_sw bus1=S181.1.2.3 bus2=S91.1.2.3 phases=3 switch=yes linecode=switch length=1
+  close Line.48_sw 1
+new Line.49_sw bus1=S188.1.2.3 bus2=S111.1.2.3 phases=3 switch=yes linecode=switch length=1
+  close Line.49_sw 1
+new Line.50_sw bus1=S185.1.2.3 bus2=S96.1.2.3 phases=3 switch=yes linecode=switch length=1
+  close Line.50_sw 1
+new Line.51_sw bus1=S192.1.2.3 bus2=S112.1.2.3 phases=3 switch=yes linecode=switch length=1
+  close Line.51_sw 1
+new Line.52_sw bus1=S189.1.2.3 bus2=S101.1.2.3 phases=3 switch=yes linecode=switch length=1
+  close Line.52_sw 1
+new Line.53_sw bus1=S179.1.2.3 bus2=S126.1.2.3 phases=3 switch=yes linecode=switch length=1
+  close Line.53_sw 1
+new Line.54_sw bus1=S178.1.2.3 bus2=S115.1.2.3 phases=3 switch=yes linecode=switch length=1
+  close Line.54_sw 1
+new Line.55_sw bus1=S183.1.2.3 bus2=S131.1.2.3 phases=3 switch=yes linecode=switch length=1
+  close Line.55_sw 1
+new Line.56_sw bus1=S182.1.2.3 bus2=S116.1.2.3 phases=3 switch=yes linecode=switch length=1
+  close Line.56_sw 1
+new Line.57_sw bus1=S187.1.2.3 bus2=S136.1.2.3 phases=3 switch=yes linecode=switch length=1
+  close Line.57_sw 1
+new Line.58_sw bus1=S186.1.2.3 bus2=S117.1.2.3 phases=3 switch=yes linecode=switch length=1
+  close Line.58_sw 1
+new Line.59_sw bus1=S191.1.2.3 bus2=S141.1.2.3 phases=3 switch=yes linecode=switch length=1
+  close Line.59_sw 1
+new Line.60_sw bus1=S190.1.2.3 bus2=S118.1.2.3 phases=3 switch=yes linecode=switch length=1
+  close Line.60_sw 1
+new Line.61_sw bus1=S196.1.2.3 bus2=S194.1.2.3 phases=3 switch=yes linecode=switch length=1
+  close Line.61_sw 1
+new Line.62_sw bus1=S197.1.2.3 bus2=S195.1.2.3 phases=3 switch=yes linecode=switch length=1
+  close Line.62_sw 1
+new Line.63_sw bus1=S201.1.2.3 bus2=S199.1.2.3 phases=3 switch=yes linecode=switch length=1
+  close Line.63_sw 1
+new Line.64_sw bus1=S202.1.2.3 bus2=S200.1.2.3 phases=3 switch=yes linecode=switch length=1
+  close Line.64_sw 1
+new Line.65_sw bus1=S207.1.2.3 bus2=S204.1.2.3 phases=3 switch=yes linecode=switch length=1
+  close Line.65_sw 1
+new Line.66_sw bus1=S208.1.2.3 bus2=S205.1.2.3 phases=3 switch=yes linecode=switch length=1
+  close Line.66_sw 1
+new Line.67_sw bus1=S209.1.2.3 bus2=S206.1.2.3 phases=3 switch=yes linecode=switch length=1
+  close Line.67_sw 1
+new Line.68_sw bus1=S214.1.2.3 bus2=S211.1.2.3 phases=3 switch=yes linecode=switch length=1
+  close Line.68_sw 1
+new Line.69_sw bus1=S215.1.2.3 bus2=S212.1.2.3 phases=3 switch=yes linecode=switch length=1
+  close Line.69_sw 1
+new Line.70_sw bus1=S216.1.2.3 bus2=S213.1.2.3 phases=3 switch=yes linecode=switch length=1
+  close Line.70_sw 1
+new Line.71_sw bus1=S221.1.2.3 bus2=S218.1.2.3 phases=3 switch=yes linecode=switch length=1
+  close Line.71_sw 1
+new Line.72_sw bus1=S222.1.2.3 bus2=S219.1.2.3 phases=3 switch=yes linecode=switch length=1
+  close Line.72_sw 1
+new Line.73_sw bus1=S223.1.2.3 bus2=S220.1.2.3 phases=3 switch=yes linecode=switch length=1
+  close Line.73_sw 1
+new Line.74_sw bus1=S228.1.2.3 bus2=S225.1.2.3 phases=3 switch=yes linecode=switch length=1
+  close Line.74_sw 1
+new Line.75_sw bus1=S229.1.2.3 bus2=S226.1.2.3 phases=3 switch=yes linecode=switch length=1
+  close Line.75_sw 1
+new Line.76_sw bus1=S230.1.2.3 bus2=S227.1.2.3 phases=3 switch=yes linecode=switch length=1
+  close Line.76_sw 1
+new Line.77_sw bus1=S234.1.2.3 bus2=S232.1.2.3 phases=3 switch=yes linecode=switch length=1
+  close Line.77_sw 1
+new Line.78_sw bus1=S235.1.2.3 bus2=S233.1.2.3 phases=3 switch=yes linecode=switch length=1
+  close Line.78_sw 1
+new Line.79_sw bus1=S238.1.2.3 bus2=S237.1.2.3 phases=3 switch=yes linecode=switch length=1
+  close Line.79_sw 1
+new Line.80_sw bus1=S240.1.2.3 bus2=S239.1.2.3 phases=3 switch=yes linecode=switch length=1
+  close Line.80_sw 1
+ 
+new Load.1 phases=1 bus1=S193.1 conn=w kv=0.277 kw=364.07 pf=0.97
+new Load.2 phases=1 bus1=S193.2 conn=w kv=0.277 kw=413.73 pf=0.94
+new Load.3 phases=1 bus1=S193.3 conn=w kv=0.277 kw=360.05 pf=0.91
+new Load.4 phases=1 bus1=S193.1.2 conn=d kv=0.480 kw=96.80 pf=0.82
+new Load.5 phases=1 bus1=S193.2.3 conn=d kv=0.480 kw=132.06 pf=0.80
+new Load.6 phases=1 bus1=S193.3.1 conn=d kv=0.480 kw=95.21 pf=0.78
+new Load.7 phases=1 bus1=S198.1 conn=w kv=0.277 kw=90.83 pf=0.97
+new Load.8 phases=1 bus1=S198.2 conn=w kv=0.277 kw=97.25 pf=0.98
+new Load.9 phases=1 bus1=S198.3 conn=w kv=0.277 kw=100.79 pf=0.93
+new Load.10 phases=1 bus1=S198.1.2 conn=d kv=0.480 kw=188.32 pf=0.81
+new Load.11 phases=1 bus1=S198.2.3 conn=d kv=0.480 kw=187.95 pf=0.77
+new Load.12 phases=1 bus1=S198.3.1 conn=d kv=0.480 kw=203.01 pf=0.76
+new Load.13 phases=1 bus1=S203.1 conn=w kv=0.277 kw=238.82 pf=0.98
+new Load.14 phases=1 bus1=S203.2 conn=w kv=0.277 kw=232.47 pf=0.92
+new Load.15 phases=1 bus1=S203.3 conn=w kv=0.277 kw=228.58 pf=1.00
+new Load.16 phases=1 bus1=S203.1.2 conn=d kv=0.480 kw=565.80 pf=0.78
+new Load.17 phases=1 bus1=S203.2.3 conn=d kv=0.480 kw=475.55 pf=0.78
+new Load.18 phases=1 bus1=S203.3.1 conn=d kv=0.480 kw=533.69 pf=0.82
+new Load.19 phases=1 bus1=S210.1 conn=w kv=0.277 kw=321.65 pf=0.94
+new Load.20 phases=1 bus1=S210.2 conn=w kv=0.277 kw=303.75 pf=0.97
+new Load.21 phases=1 bus1=S210.3 conn=w kv=0.277 kw=303.87 pf=0.96
+new Load.22 phases=1 bus1=S210.1.2 conn=d kv=0.480 kw=571.83 pf=0.84
+new Load.23 phases=1 bus1=S210.2.3 conn=d kv=0.480 kw=586.56 pf=0.81
+new Load.24 phases=1 bus1=S210.3.1 conn=d kv=0.480 kw=615.94 pf=0.84
+new Load.25 phases=1 bus1=S217.1 conn=w kv=0.277 kw=373.14 pf=0.92
+new Load.26 phases=1 bus1=S217.2 conn=w kv=0.277 kw=320.71 pf=0.92
+new Load.27 phases=1 bus1=S217.3 conn=w kv=0.277 kw=345.84 pf=0.93
+new Load.28 phases=1 bus1=S217.1.2 conn=d kv=0.480 kw=621.67 pf=0.80
+new Load.29 phases=1 bus1=S217.2.3 conn=d kv=0.480 kw=618.18 pf=0.80
+new Load.30 phases=1 bus1=S217.3.1 conn=d kv=0.480 kw=580.83 pf=0.80
+new Load.31 phases=1 bus1=S224.1 conn=w kv=0.277 kw=386.89 pf=0.91
+new Load.32 phases=1 bus1=S224.2 conn=w kv=0.277 kw=317.26 pf=0.95
+new Load.33 phases=1 bus1=S224.3 conn=w kv=0.277 kw=282.42 pf=0.97
+new Load.34 phases=1 bus1=S224.1.2 conn=d kv=0.480 kw=652.02 pf=0.80
+new Load.35 phases=1 bus1=S224.2.3 conn=d kv=0.480 kw=652.91 pf=0.78
+new Load.36 phases=1 bus1=S224.3.1 conn=d kv=0.480 kw=588.22 pf=0.79
+new Load.37 phases=1 bus1=S231.1 conn=w kv=0.277 kw=55.67 pf=0.93
+new Load.38 phases=1 bus1=S231.2 conn=w kv=0.277 kw=39.90 pf=0.92
+new Load.39 phases=1 bus1=S231.3 conn=w kv=0.277 kw=52.71 pf=0.92
+new Load.40 phases=1 bus1=S231.1.2 conn=d kv=0.480 kw=81.26 pf=0.81
+new Load.41 phases=1 bus1=S231.2.3 conn=d kv=0.480 kw=92.16 pf=0.78
+new Load.42 phases=1 bus1=S231.3.1 conn=d kv=0.480 kw=104.45 pf=0.84
+new Load.43 phases=1 bus1=S236.1 conn=w kv=0.277 kw=276.92 pf=0.96
+new Load.44 phases=1 bus1=S236.2 conn=w kv=0.277 kw=310.85 pf=0.99
+new Load.45 phases=1 bus1=S236.3 conn=w kv=0.277 kw=312.34 pf=0.92
+new Load.46 phases=1 bus1=S236.1.2 conn=d kv=0.480 kw=616.16 pf=0.78
+new Load.47 phases=1 bus1=S236.2.3 conn=d kv=0.480 kw=624.23 pf=0.76
+new Load.48 phases=1 bus1=S236.3.1 conn=d kv=0.480 kw=563.51 pf=0.79
+new Load.49 phases=1 bus1=S1.1 conn=w kv=0.120 kw=16.11 pf=0.95
+new Load.50 phases=1 bus1=S1.2 conn=w kv=0.120 kw=11.28 pf=0.94
+new Load.51 phases=1 bus1=S1.3 conn=w kv=0.120 kw=15.30 pf=0.92
+new Load.52 phases=1 bus1=S1.1.2 conn=d kv=0.208 kw=32.44 pf=0.81
+new Load.53 phases=1 bus1=S1.2.3 conn=d kv=0.208 kw=34.69 pf=0.76
+new Load.54 phases=1 bus1=S1.3.1 conn=d kv=0.208 kw=35.71 pf=0.79
+new Load.55 phases=1 bus1=S2.1 conn=w kv=0.120 kw=12.12 pf=0.93
+new Load.56 phases=1 bus1=S2.2 conn=w kv=0.120 kw=12.59 pf=0.93
+new Load.57 phases=1 bus1=S2.3 conn=w kv=0.120 kw=11.45 pf=0.98
+new Load.58 phases=1 bus1=S2.1.2 conn=d kv=0.208 kw=29.83 pf=0.78
+new Load.59 phases=1 bus1=S2.2.3 conn=d kv=0.208 kw=34.51 pf=0.83
+new Load.60 phases=1 bus1=S2.3.1 conn=d kv=0.208 kw=35.70 pf=0.78
+new Load.61 phases=1 bus1=S3.1 conn=w kv=0.120 kw=15.59 pf=0.91
+new Load.62 phases=1 bus1=S3.2 conn=w kv=0.120 kw=12.00 pf=0.97
+new Load.63 phases=1 bus1=S3.3 conn=w kv=0.120 kw=11.90 pf=0.99
+new Load.64 phases=1 bus1=S3.1.2 conn=d kv=0.208 kw=35.18 pf=0.83
+new Load.65 phases=1 bus1=S3.2.3 conn=d kv=0.208 kw=30.71 pf=0.80
+new Load.66 phases=1 bus1=S3.3.1 conn=d kv=0.208 kw=32.33 pf=0.81
+new Load.67 phases=1 bus1=S5.1 conn=w kv=0.120 kw=16.10 pf=0.93
+new Load.68 phases=1 bus1=S5.2 conn=w kv=0.120 kw=15.52 pf=0.95
+new Load.69 phases=1 bus1=S5.3 conn=w kv=0.120 kw=13.30 pf=0.94
+new Load.70 phases=1 bus1=S5.1.2 conn=d kv=0.208 kw=27.99 pf=0.83
+new Load.71 phases=1 bus1=S5.2.3 conn=d kv=0.208 kw=34.21 pf=0.78
+new Load.72 phases=1 bus1=S5.3.1 conn=d kv=0.208 kw=28.45 pf=0.77
+new Load.73 phases=1 bus1=S6.1 conn=w kv=0.120 kw=15.48 pf=0.98
+new Load.74 phases=1 bus1=S6.2 conn=w kv=0.120 kw=12.08 pf=0.96
+new Load.75 phases=1 bus1=S6.3 conn=w kv=0.120 kw=13.38 pf=1.00
+new Load.76 phases=1 bus1=S6.1.2 conn=d kv=0.208 kw=28.93 pf=0.80
+new Load.77 phases=1 bus1=S6.2.3 conn=d kv=0.208 kw=31.92 pf=0.77
+new Load.78 phases=1 bus1=S6.3.1 conn=d kv=0.208 kw=33.13 pf=0.78
+new Load.79 phases=1 bus1=S7.1 conn=w kv=0.120 kw=12.66 pf=0.91
+new Load.80 phases=1 bus1=S7.2 conn=w kv=0.120 kw=13.14 pf=0.95
+new Load.81 phases=1 bus1=S7.3 conn=w kv=0.120 kw=13.76 pf=0.99
+new Load.82 phases=1 bus1=S7.1.2 conn=d kv=0.208 kw=30.27 pf=0.77
+new Load.83 phases=1 bus1=S7.2.3 conn=d kv=0.208 kw=34.89 pf=0.79
+new Load.84 phases=1 bus1=S7.3.1 conn=d kv=0.208 kw=31.74 pf=0.78
+new Load.85 phases=1 bus1=S8.1 conn=w kv=0.120 kw=13.93 pf=0.93
+new Load.86 phases=1 bus1=S8.2 conn=w kv=0.120 kw=13.06 pf=0.99
+new Load.87 phases=1 bus1=S8.3 conn=w kv=0.120 kw=14.97 pf=0.91
+new Load.88 phases=1 bus1=S8.1.2 conn=d kv=0.208 kw=27.75 pf=0.78
+new Load.89 phases=1 bus1=S8.2.3 conn=d kv=0.208 kw=31.78 pf=0.83
+new Load.90 phases=1 bus1=S8.3.1 conn=d kv=0.208 kw=35.14 pf=0.83
+new Load.91 phases=1 bus1=S10.1 conn=w kv=0.120 kw=12.64 pf=0.96
+new Load.92 phases=1 bus1=S10.2 conn=w kv=0.120 kw=13.59 pf=0.96
+new Load.93 phases=1 bus1=S10.3 conn=w kv=0.120 kw=12.04 pf=0.91
+new Load.94 phases=1 bus1=S10.1.2 conn=d kv=0.208 kw=35.54 pf=0.76
+new Load.95 phases=1 bus1=S10.2.3 conn=d kv=0.208 kw=34.64 pf=0.82
+new Load.96 phases=1 bus1=S10.3.1 conn=d kv=0.208 kw=26.30 pf=0.77
+new Load.97 phases=1 bus1=S11.1 conn=w kv=0.120 kw=11.72 pf=0.98
+new Load.98 phases=1 bus1=S11.2 conn=w kv=0.120 kw=14.34 pf=0.91
+new Load.99 phases=1 bus1=S11.3 conn=w kv=0.120 kw=12.57 pf=0.96
+new Load.100 phases=1 bus1=S11.1.2 conn=d kv=0.208 kw=28.59 pf=0.82
+new Load.101 phases=1 bus1=S11.2.3 conn=d kv=0.208 kw=35.81 pf=0.80
+new Load.102 phases=1 bus1=S11.3.1 conn=d kv=0.208 kw=29.03 pf=0.81
+new Load.103 phases=1 bus1=S12.1 conn=w kv=0.120 kw=15.65 pf=0.91
+new Load.104 phases=1 bus1=S12.2 conn=w kv=0.120 kw=14.77 pf=1.00
+new Load.105 phases=1 bus1=S12.3 conn=w kv=0.120 kw=11.73 pf=0.97
+new Load.106 phases=1 bus1=S12.1.2 conn=d kv=0.208 kw=30.47 pf=0.83
+new Load.107 phases=1 bus1=S12.2.3 conn=d kv=0.208 kw=34.06 pf=0.83
+new Load.108 phases=1 bus1=S12.3.1 conn=d kv=0.208 kw=28.34 pf=0.80
+new Load.109 phases=1 bus1=S13.1 conn=w kv=0.120 kw=15.74 pf=0.94
+new Load.110 phases=1 bus1=S13.2 conn=w kv=0.120 kw=13.47 pf=0.95
+new Load.111 phases=1 bus1=S13.3 conn=w kv=0.120 kw=15.21 pf=0.94
+new Load.112 phases=1 bus1=S13.1.2 conn=d kv=0.208 kw=30.60 pf=0.78
+new Load.113 phases=1 bus1=S13.2.3 conn=d kv=0.208 kw=33.97 pf=0.84
+new Load.114 phases=1 bus1=S13.3.1 conn=d kv=0.208 kw=33.37 pf=0.82
+new Load.115 phases=1 bus1=S15.1 conn=w kv=0.120 kw=16.13 pf=0.97
+new Load.116 phases=1 bus1=S15.2 conn=w kv=0.120 kw=12.66 pf=1.00
+new Load.117 phases=1 bus1=S15.3 conn=w kv=0.120 kw=14.31 pf=0.99
+new Load.118 phases=1 bus1=S15.1.2 conn=d kv=0.208 kw=28.37 pf=0.83
+new Load.119 phases=1 bus1=S15.2.3 conn=d kv=0.208 kw=33.63 pf=0.83
+new Load.120 phases=1 bus1=S15.3.1 conn=d kv=0.208 kw=30.78 pf=0.79
+new Load.121 phases=1 bus1=S16.1 conn=w kv=0.120 kw=13.54 pf=0.97
+new Load.122 phases=1 bus1=S16.2 conn=w kv=0.120 kw=13.05 pf=0.95
+new Load.123 phases=1 bus1=S16.3 conn=w kv=0.120 kw=13.72 pf=0.94
+new Load.124 phases=1 bus1=S16.1.2 conn=d kv=0.208 kw=35.73 pf=0.81
+new Load.125 phases=1 bus1=S16.2.3 conn=d kv=0.208 kw=30.73 pf=0.83
+new Load.126 phases=1 bus1=S16.3.1 conn=d kv=0.208 kw=33.05 pf=0.81
+new Load.127 phases=1 bus1=S17.1 conn=w kv=0.120 kw=13.45 pf=0.97
+new Load.128 phases=1 bus1=S17.2 conn=w kv=0.120 kw=11.68 pf=0.97
+new Load.129 phases=1 bus1=S17.3 conn=w kv=0.120 kw=12.86 pf=0.90
+new Load.130 phases=1 bus1=S17.1.2 conn=d kv=0.208 kw=33.05 pf=0.77
+new Load.131 phases=1 bus1=S17.2.3 conn=d kv=0.208 kw=34.36 pf=0.77
+new Load.132 phases=1 bus1=S17.3.1 conn=d kv=0.208 kw=27.45 pf=0.81
+new Load.133 phases=1 bus1=S18.1 conn=w kv=0.120 kw=16.05 pf=0.96
+new Load.134 phases=1 bus1=S18.2 conn=w kv=0.120 kw=14.81 pf=0.97
+new Load.135 phases=1 bus1=S18.3 conn=w kv=0.120 kw=15.43 pf=1.00
+new Load.136 phases=1 bus1=S18.1.2 conn=d kv=0.208 kw=32.33 pf=0.80
+new Load.137 phases=1 bus1=S18.2.3 conn=d kv=0.208 kw=32.97 pf=0.82
+new Load.138 phases=1 bus1=S18.3.1 conn=d kv=0.208 kw=29.70 pf=0.77
+new Load.139 phases=1 bus1=S19.1 conn=w kv=0.120 kw=11.35 pf=0.93
+new Load.140 phases=1 bus1=S19.2 conn=w kv=0.120 kw=14.02 pf=0.97
+new Load.141 phases=1 bus1=S19.3 conn=w kv=0.120 kw=15.38 pf=0.93
+new Load.142 phases=1 bus1=S19.1.2 conn=d kv=0.208 kw=33.61 pf=0.78
+new Load.143 phases=1 bus1=S19.2.3 conn=d kv=0.208 kw=36.04 pf=0.79
+new Load.144 phases=1 bus1=S19.3.1 conn=d kv=0.208 kw=27.90 pf=0.82
+new Load.145 phases=1 bus1=S20.1 conn=w kv=0.120 kw=15.80 pf=0.99
+new Load.146 phases=1 bus1=S20.2 conn=w kv=0.120 kw=13.98 pf=0.91
+new Load.147 phases=1 bus1=S20.3 conn=w kv=0.120 kw=12.90 pf=0.93
+new Load.148 phases=1 bus1=S20.1.2 conn=d kv=0.208 kw=28.11 pf=0.76
+new Load.149 phases=1 bus1=S20.2.3 conn=d kv=0.208 kw=31.40 pf=0.78
+new Load.150 phases=1 bus1=S20.3.1 conn=d kv=0.208 kw=34.79 pf=0.82
+new Load.151 phases=1 bus1=S21.1 conn=w kv=0.120 kw=16.29 pf=0.95
+new Load.152 phases=1 bus1=S21.2 conn=w kv=0.120 kw=13.81 pf=0.91
+new Load.153 phases=1 bus1=S21.3 conn=w kv=0.120 kw=13.05 pf=0.97
+new Load.154 phases=1 bus1=S21.1.2 conn=d kv=0.208 kw=30.12 pf=0.83
+new Load.155 phases=1 bus1=S21.2.3 conn=d kv=0.208 kw=31.94 pf=0.80
+new Load.156 phases=1 bus1=S21.3.1 conn=d kv=0.208 kw=36.38 pf=0.78
+new Load.157 phases=1 bus1=S22.1 conn=w kv=0.120 kw=14.73 pf=0.91
+new Load.158 phases=1 bus1=S22.2 conn=w kv=0.120 kw=12.07 pf=0.93
+new Load.159 phases=1 bus1=S22.3 conn=w kv=0.120 kw=13.30 pf=0.98
+new Load.160 phases=1 bus1=S22.1.2 conn=d kv=0.208 kw=36.12 pf=0.82
+new Load.161 phases=1 bus1=S22.2.3 conn=d kv=0.208 kw=33.91 pf=0.79
+new Load.162 phases=1 bus1=S22.3.1 conn=d kv=0.208 kw=34.94 pf=0.81
+new Load.163 phases=1 bus1=S23.1 conn=w kv=0.120 kw=41.67 pf=0.97
+new Load.164 phases=1 bus1=S23.2 conn=w kv=0.120 kw=44.08 pf=0.93
+new Load.165 phases=1 bus1=S23.3 conn=w kv=0.120 kw=34.47 pf=0.98
+new Load.166 phases=1 bus1=S23.1.2 conn=d kv=0.208 kw=101.57 pf=0.81
+new Load.167 phases=1 bus1=S23.2.3 conn=d kv=0.208 kw=113.38 pf=0.82
+new Load.168 phases=1 bus1=S23.3.1 conn=d kv=0.208 kw=97.23 pf=0.77
+new Load.169 phases=1 bus1=S24.1 conn=w kv=0.120 kw=34.33 pf=0.94
+new Load.170 phases=1 bus1=S24.2 conn=w kv=0.120 kw=42.83 pf=0.95
+new Load.171 phases=1 bus1=S24.3 conn=w kv=0.120 kw=46.08 pf=0.92
+new Load.172 phases=1 bus1=S24.1.2 conn=d kv=0.208 kw=84.09 pf=0.76
+new Load.173 phases=1 bus1=S24.2.3 conn=d kv=0.208 kw=98.49 pf=0.80
+new Load.174 phases=1 bus1=S24.3.1 conn=d kv=0.208 kw=85.75 pf=0.79
+new Load.175 phases=1 bus1=S25.1 conn=w kv=0.120 kw=36.48 pf=0.90
+new Load.176 phases=1 bus1=S25.2 conn=w kv=0.120 kw=47.23 pf=0.98
+new Load.177 phases=1 bus1=S25.3 conn=w kv=0.120 kw=46.74 pf=0.99
+new Load.178 phases=1 bus1=S25.1.2 conn=d kv=0.208 kw=101.51 pf=0.82
+new Load.179 phases=1 bus1=S25.2.3 conn=d kv=0.208 kw=109.37 pf=0.78
+new Load.180 phases=1 bus1=S25.3.1 conn=d kv=0.208 kw=97.87 pf=0.77
+new Load.181 phases=1 bus1=S26.1 conn=w kv=0.120 kw=16.41 pf=0.92
+new Load.182 phases=1 bus1=S26.2 conn=w kv=0.120 kw=12.29 pf=0.92
+new Load.183 phases=1 bus1=S26.3 conn=w kv=0.120 kw=14.77 pf=0.95
+new Load.184 phases=1 bus1=S26.1.2 conn=d kv=0.208 kw=26.87 pf=0.79
+new Load.185 phases=1 bus1=S26.2.3 conn=d kv=0.208 kw=31.65 pf=0.78
+new Load.186 phases=1 bus1=S26.3.1 conn=d kv=0.208 kw=37.40 pf=0.80
+new Load.187 phases=1 bus1=S31.1 conn=w kv=0.120 kw=13.35 pf=0.98
+new Load.188 phases=1 bus1=S31.2 conn=w kv=0.120 kw=14.57 pf=0.92
+new Load.189 phases=1 bus1=S31.3 conn=w kv=0.120 kw=13.73 pf=0.92
+new Load.190 phases=1 bus1=S31.1.2 conn=d kv=0.208 kw=37.07 pf=0.80
+new Load.191 phases=1 bus1=S31.2.3 conn=d kv=0.208 kw=33.43 pf=0.84
+new Load.192 phases=1 bus1=S31.3.1 conn=d kv=0.208 kw=32.15 pf=0.77
+new Load.193 phases=1 bus1=S32.1 conn=w kv=0.120 kw=11.65 pf=0.94
+new Load.194 phases=1 bus1=S32.2 conn=w kv=0.120 kw=12.16 pf=0.92
+new Load.195 phases=1 bus1=S32.3 conn=w kv=0.120 kw=13.06 pf=0.92
+new Load.196 phases=1 bus1=S32.1.2 conn=d kv=0.208 kw=30.79 pf=0.82
+new Load.197 phases=1 bus1=S32.2.3 conn=d kv=0.208 kw=30.40 pf=0.79
+new Load.198 phases=1 bus1=S32.3.1 conn=d kv=0.208 kw=28.33 pf=0.80
+new Load.199 phases=1 bus1=S37.1 conn=w kv=0.120 kw=14.79 pf=0.92
+new Load.200 phases=1 bus1=S37.2 conn=w kv=0.120 kw=12.71 pf=0.97
+new Load.201 phases=1 bus1=S37.3 conn=w kv=0.120 kw=14.39 pf=0.99
+new Load.202 phases=1 bus1=S37.1.2 conn=d kv=0.208 kw=37.32 pf=0.81
+new Load.203 phases=1 bus1=S37.2.3 conn=d kv=0.208 kw=36.93 pf=0.83
+new Load.204 phases=1 bus1=S37.3.1 conn=d kv=0.208 kw=34.43 pf=0.77
+new Load.205 phases=1 bus1=S38.1 conn=w kv=0.120 kw=50.33 pf=0.92
+new Load.206 phases=1 bus1=S38.2 conn=w kv=0.120 kw=55.55 pf=0.93
+new Load.207 phases=1 bus1=S38.3 conn=w kv=0.120 kw=51.74 pf=0.98
+new Load.208 phases=1 bus1=S38.1.2 conn=d kv=0.208 kw=111.43 pf=0.79
+new Load.209 phases=1 bus1=S38.2.3 conn=d kv=0.208 kw=126.13 pf=0.81
+new Load.210 phases=1 bus1=S38.3.1 conn=d kv=0.208 kw=108.74 pf=0.82
+new Load.211 phases=1 bus1=S39.1 conn=w kv=0.120 kw=55.53 pf=0.94
+new Load.212 phases=1 bus1=S39.2 conn=w kv=0.120 kw=41.97 pf=1.00
+new Load.213 phases=1 bus1=S39.3 conn=w kv=0.120 kw=54.85 pf=0.95
+new Load.214 phases=1 bus1=S39.1.2 conn=d kv=0.208 kw=131.70 pf=0.77
+new Load.215 phases=1 bus1=S39.2.3 conn=d kv=0.208 kw=102.86 pf=0.77
+new Load.216 phases=1 bus1=S39.3.1 conn=d kv=0.208 kw=100.92 pf=0.82
+new Load.217 phases=1 bus1=S40.1 conn=w kv=0.120 kw=50.67 pf=0.94
+new Load.218 phases=1 bus1=S40.2 conn=w kv=0.120 kw=51.21 pf=0.97
+new Load.219 phases=1 bus1=S40.3 conn=w kv=0.120 kw=46.99 pf=0.91
+new Load.220 phases=1 bus1=S40.1.2 conn=d kv=0.208 kw=133.47 pf=0.82
+new Load.221 phases=1 bus1=S40.2.3 conn=d kv=0.208 kw=137.92 pf=0.83
+new Load.222 phases=1 bus1=S40.3.1 conn=d kv=0.208 kw=138.71 pf=0.82
+new Load.223 phases=1 bus1=S41.1 conn=w kv=0.120 kw=14.48 pf=0.91
+new Load.224 phases=1 bus1=S41.2 conn=w kv=0.120 kw=15.58 pf=0.93
+new Load.225 phases=1 bus1=S41.3 conn=w kv=0.120 kw=12.83 pf=0.98
+new Load.226 phases=1 bus1=S41.1.2 conn=d kv=0.208 kw=33.87 pf=0.82
+new Load.227 phases=1 bus1=S41.2.3 conn=d kv=0.208 kw=32.61 pf=0.84
+new Load.228 phases=1 bus1=S41.3.1 conn=d kv=0.208 kw=30.70 pf=0.83
+new Load.229 phases=1 bus1=S42.1 conn=w kv=0.120 kw=28.95 pf=0.94
+new Load.230 phases=1 bus1=S42.2 conn=w kv=0.120 kw=23.63 pf=0.97
+new Load.231 phases=1 bus1=S42.3 conn=w kv=0.120 kw=28.13 pf=0.99
+new Load.232 phases=1 bus1=S42.1.2 conn=d kv=0.208 kw=72.32 pf=0.81
+new Load.233 phases=1 bus1=S42.2.3 conn=d kv=0.208 kw=60.67 pf=0.77
+new Load.234 phases=1 bus1=S42.3.1 conn=d kv=0.208 kw=69.80 pf=0.83
+new Load.235 phases=1 bus1=S43.1 conn=w kv=0.120 kw=24.59 pf=0.97
+new Load.236 phases=1 bus1=S43.2 conn=w kv=0.120 kw=25.81 pf=1.00
+new Load.237 phases=1 bus1=S43.3 conn=w kv=0.120 kw=26.97 pf=0.95
+new Load.238 phases=1 bus1=S43.1.2 conn=d kv=0.208 kw=64.92 pf=0.83
+new Load.239 phases=1 bus1=S43.2.3 conn=d kv=0.208 kw=65.39 pf=0.77
+new Load.240 phases=1 bus1=S43.3.1 conn=d kv=0.208 kw=63.61 pf=0.83
+new Load.241 phases=1 bus1=S46.1 conn=w kv=0.120 kw=46.34 pf=0.96
+new Load.242 phases=1 bus1=S46.2 conn=w kv=0.120 kw=47.65 pf=0.96
+new Load.243 phases=1 bus1=S46.3 conn=w kv=0.120 kw=45.08 pf=0.95
+new Load.244 phases=1 bus1=S46.1.2 conn=d kv=0.208 kw=119.88 pf=0.79
+new Load.245 phases=1 bus1=S46.2.3 conn=d kv=0.208 kw=117.60 pf=0.81
+new Load.246 phases=1 bus1=S46.3.1 conn=d kv=0.208 kw=112.17 pf=0.82
+new Load.247 phases=1 bus1=S47.1 conn=w kv=0.120 kw=54.56 pf=0.91
+new Load.248 phases=1 bus1=S47.2 conn=w kv=0.120 kw=48.85 pf=0.98
+new Load.249 phases=1 bus1=S47.3 conn=w kv=0.120 kw=49.34 pf=0.95
+new Load.250 phases=1 bus1=S47.1.2 conn=d kv=0.208 kw=119.48 pf=0.79
+new Load.251 phases=1 bus1=S47.2.3 conn=d kv=0.208 kw=136.41 pf=0.79
+new Load.252 phases=1 bus1=S47.3.1 conn=d kv=0.208 kw=126.02 pf=0.82
+new Load.253 phases=1 bus1=S48.1 conn=w kv=0.120 kw=60.61 pf=0.91
+new Load.254 phases=1 bus1=S48.2 conn=w kv=0.120 kw=51.62 pf=0.97
+new Load.255 phases=1 bus1=S48.3 conn=w kv=0.120 kw=53.05 pf=0.97
+new Load.256 phases=1 bus1=S48.1.2 conn=d kv=0.208 kw=115.73 pf=0.81
+new Load.257 phases=1 bus1=S48.2.3 conn=d kv=0.208 kw=123.57 pf=0.83
+new Load.258 phases=1 bus1=S48.3.1 conn=d kv=0.208 kw=131.51 pf=0.80
+new Load.259 phases=1 bus1=S51.1 conn=w kv=0.120 kw=46.64 pf=0.93
+new Load.260 phases=1 bus1=S51.2 conn=w kv=0.120 kw=44.82 pf=0.93
+new Load.261 phases=1 bus1=S51.3 conn=w kv=0.120 kw=54.85 pf=0.93
+new Load.262 phases=1 bus1=S51.1.2 conn=d kv=0.208 kw=109.39 pf=0.80
+new Load.263 phases=1 bus1=S51.2.3 conn=d kv=0.208 kw=135.19 pf=0.76
+new Load.264 phases=1 bus1=S51.3.1 conn=d kv=0.208 kw=117.66 pf=0.83
+new Load.265 phases=1 bus1=S52.1 conn=w kv=0.120 kw=45.06 pf=0.92
+new Load.266 phases=1 bus1=S52.2 conn=w kv=0.120 kw=44.96 pf=0.95
+new Load.267 phases=1 bus1=S52.3 conn=w kv=0.120 kw=43.75 pf=0.94
+new Load.268 phases=1 bus1=S52.1.2 conn=d kv=0.208 kw=118.95 pf=0.82
+new Load.269 phases=1 bus1=S52.2.3 conn=d kv=0.208 kw=115.35 pf=0.79
+new Load.270 phases=1 bus1=S52.3.1 conn=d kv=0.208 kw=118.19 pf=0.81
+new Load.271 phases=1 bus1=S53.1 conn=w kv=0.120 kw=49.15 pf=0.99
+new Load.272 phases=1 bus1=S53.2 conn=w kv=0.120 kw=51.84 pf=0.92
+new Load.273 phases=1 bus1=S53.3 conn=w kv=0.120 kw=46.56 pf=0.99
+new Load.274 phases=1 bus1=S53.1.2 conn=d kv=0.208 kw=107.23 pf=0.83
+new Load.275 phases=1 bus1=S53.2.3 conn=d kv=0.208 kw=98.13 pf=0.82
+new Load.276 phases=1 bus1=S53.3.1 conn=d kv=0.208 kw=108.48 pf=0.79
+new Load.277 phases=1 bus1=S56.1 conn=w kv=0.120 kw=41.45 pf=0.94
+new Load.278 phases=1 bus1=S56.2 conn=w kv=0.120 kw=52.45 pf=0.92
+new Load.279 phases=1 bus1=S56.3 conn=w kv=0.120 kw=42.66 pf=0.92
+new Load.280 phases=1 bus1=S56.1.2 conn=d kv=0.208 kw=111.58 pf=0.78
+new Load.281 phases=1 bus1=S56.2.3 conn=d kv=0.208 kw=125.95 pf=0.83
+new Load.282 phases=1 bus1=S56.3.1 conn=d kv=0.208 kw=114.43 pf=0.84
+new Load.283 phases=1 bus1=S57.1 conn=w kv=0.120 kw=51.44 pf=0.97
+new Load.284 phases=1 bus1=S57.2 conn=w kv=0.120 kw=51.90 pf=1.00
+new Load.285 phases=1 bus1=S57.3 conn=w kv=0.120 kw=52.65 pf=0.95
+new Load.286 phases=1 bus1=S57.1.2 conn=d kv=0.208 kw=136.78 pf=0.80
+new Load.287 phases=1 bus1=S57.2.3 conn=d kv=0.208 kw=130.06 pf=0.78
+new Load.288 phases=1 bus1=S57.3.1 conn=d kv=0.208 kw=132.48 pf=0.80
+new Load.289 phases=1 bus1=S58.1 conn=w kv=0.120 kw=58.40 pf=0.92
+new Load.290 phases=1 bus1=S58.2 conn=w kv=0.120 kw=45.12 pf=0.97
+new Load.291 phases=1 bus1=S58.3 conn=w kv=0.120 kw=49.06 pf=0.96
+new Load.292 phases=1 bus1=S58.1.2 conn=d kv=0.208 kw=104.87 pf=0.83
+new Load.293 phases=1 bus1=S58.2.3 conn=d kv=0.208 kw=109.53 pf=0.81
+new Load.294 phases=1 bus1=S58.3.1 conn=d kv=0.208 kw=106.22 pf=0.77
+new Load.295 phases=1 bus1=S61.1 conn=w kv=0.120 kw=24.39 pf=0.94
+new Load.296 phases=1 bus1=S61.2 conn=w kv=0.120 kw=22.95 pf=0.96
+new Load.297 phases=1 bus1=S61.3 conn=w kv=0.120 kw=21.86 pf=0.96
+new Load.298 phases=1 bus1=S61.1.2 conn=d kv=0.208 kw=59.21 pf=0.83
+new Load.299 phases=1 bus1=S61.2.3 conn=d kv=0.208 kw=59.66 pf=0.78
+new Load.300 phases=1 bus1=S61.3.1 conn=d kv=0.208 kw=70.38 pf=0.82
+new Load.301 phases=1 bus1=S62.1 conn=w kv=0.120 kw=12.68 pf=0.94
+new Load.302 phases=1 bus1=S62.2 conn=w kv=0.120 kw=13.22 pf=0.94
+new Load.303 phases=1 bus1=S62.3 conn=w kv=0.120 kw=11.86 pf=0.91
+new Load.304 phases=1 bus1=S62.1.2 conn=d kv=0.208 kw=32.28 pf=0.82
+new Load.305 phases=1 bus1=S62.2.3 conn=d kv=0.208 kw=34.95 pf=0.83
+new Load.306 phases=1 bus1=S62.3.1 conn=d kv=0.208 kw=29.75 pf=0.79
+new Load.307 phases=1 bus1=S63.1 conn=w kv=0.120 kw=13.06 pf=0.94
+new Load.308 phases=1 bus1=S63.2 conn=w kv=0.120 kw=11.52 pf=0.92
+new Load.309 phases=1 bus1=S63.3 conn=w kv=0.120 kw=15.28 pf=0.91
+new Load.310 phases=1 bus1=S63.1.2 conn=d kv=0.208 kw=35.06 pf=0.77
+new Load.311 phases=1 bus1=S63.2.3 conn=d kv=0.208 kw=31.53 pf=0.84
+new Load.312 phases=1 bus1=S63.3.1 conn=d kv=0.208 kw=32.36 pf=0.82
+new Load.313 phases=1 bus1=S64.1 conn=w kv=0.120 kw=54.28 pf=0.92
+new Load.314 phases=1 bus1=S64.2 conn=w kv=0.120 kw=48.22 pf=0.98
+new Load.315 phases=1 bus1=S64.3 conn=w kv=0.120 kw=43.59 pf=0.98
+new Load.316 phases=1 bus1=S64.1.2 conn=d kv=0.208 kw=125.89 pf=0.81
+new Load.317 phases=1 bus1=S64.2.3 conn=d kv=0.208 kw=120.31 pf=0.79
+new Load.318 phases=1 bus1=S64.3.1 conn=d kv=0.208 kw=122.47 pf=0.82
+new Load.319 phases=1 bus1=S65.1 conn=w kv=0.120 kw=45.34 pf=0.95
+new Load.320 phases=1 bus1=S65.2 conn=w kv=0.120 kw=48.49 pf=0.99
+new Load.321 phases=1 bus1=S65.3 conn=w kv=0.120 kw=54.02 pf=0.99
+new Load.322 phases=1 bus1=S65.1.2 conn=d kv=0.208 kw=105.36 pf=0.76
+new Load.323 phases=1 bus1=S65.2.3 conn=d kv=0.208 kw=122.00 pf=0.80
+new Load.324 phases=1 bus1=S65.3.1 conn=d kv=0.208 kw=124.94 pf=0.81
+new Load.325 phases=1 bus1=S66.1 conn=w kv=0.120 kw=42.67 pf=0.96
+new Load.326 phases=1 bus1=S66.2 conn=w kv=0.120 kw=44.75 pf=0.98
+new Load.327 phases=1 bus1=S66.3 conn=w kv=0.120 kw=53.42 pf=0.96
+new Load.328 phases=1 bus1=S66.1.2 conn=d kv=0.208 kw=125.46 pf=0.77
+new Load.329 phases=1 bus1=S66.2.3 conn=d kv=0.208 kw=126.26 pf=0.79
+new Load.330 phases=1 bus1=S66.3.1 conn=d kv=0.208 kw=115.65 pf=0.83
+new Load.331 phases=1 bus1=S67.1 conn=w kv=0.120 kw=15.89 pf=0.94
+new Load.332 phases=1 bus1=S67.2 conn=w kv=0.120 kw=12.32 pf=0.92
+new Load.333 phases=1 bus1=S67.3 conn=w kv=0.120 kw=13.71 pf=0.93
+new Load.334 phases=1 bus1=S67.1.2 conn=d kv=0.208 kw=34.86 pf=0.81
+new Load.335 phases=1 bus1=S67.2.3 conn=d kv=0.208 kw=31.69 pf=0.83
+new Load.336 phases=1 bus1=S67.3.1 conn=d kv=0.208 kw=35.29 pf=0.81
+new Load.337 phases=1 bus1=S72.1 conn=w kv=0.120 kw=11.81 pf=0.97
+new Load.338 phases=1 bus1=S72.2 conn=w kv=0.120 kw=13.58 pf=0.91
+new Load.339 phases=1 bus1=S72.3 conn=w kv=0.120 kw=15.46 pf=0.99
+new Load.340 phases=1 bus1=S72.1.2 conn=d kv=0.208 kw=26.98 pf=0.77
+new Load.341 phases=1 bus1=S72.2.3 conn=d kv=0.208 kw=30.49 pf=0.80
+new Load.342 phases=1 bus1=S72.3.1 conn=d kv=0.208 kw=30.71 pf=0.79
+new Load.343 phases=1 bus1=S73.1 conn=w kv=0.120 kw=12.07 pf=0.99
+new Load.344 phases=1 bus1=S73.2 conn=w kv=0.120 kw=12.47 pf=0.95
+new Load.345 phases=1 bus1=S73.3 conn=w kv=0.120 kw=12.48 pf=0.98
+new Load.346 phases=1 bus1=S73.1.2 conn=d kv=0.208 kw=34.72 pf=0.76
+new Load.347 phases=1 bus1=S73.2.3 conn=d kv=0.208 kw=31.96 pf=0.77
+new Load.348 phases=1 bus1=S73.3.1 conn=d kv=0.208 kw=31.40 pf=0.79
+new Load.349 phases=1 bus1=S78.1 conn=w kv=0.120 kw=15.29 pf=0.99
+new Load.350 phases=1 bus1=S78.2 conn=w kv=0.120 kw=14.96 pf=0.91
+new Load.351 phases=1 bus1=S78.3 conn=w kv=0.120 kw=12.60 pf=0.91
+new Load.352 phases=1 bus1=S78.1.2 conn=d kv=0.208 kw=33.50 pf=0.82
+new Load.353 phases=1 bus1=S78.2.3 conn=d kv=0.208 kw=31.46 pf=0.80
+new Load.354 phases=1 bus1=S78.3.1 conn=d kv=0.208 kw=34.09 pf=0.79
+new Load.355 phases=1 bus1=S79.1 conn=w kv=0.120 kw=39.08 pf=0.95
+new Load.356 phases=1 bus1=S79.2 conn=w kv=0.120 kw=35.84 pf=0.93
+new Load.357 phases=1 bus1=S79.3 conn=w kv=0.120 kw=35.53 pf=0.95
+new Load.358 phases=1 bus1=S79.1.2 conn=d kv=0.208 kw=98.60 pf=0.83
+new Load.359 phases=1 bus1=S79.2.3 conn=d kv=0.208 kw=87.85 pf=0.84
+new Load.360 phases=1 bus1=S79.3.1 conn=d kv=0.208 kw=94.07 pf=0.76
+new Load.361 phases=1 bus1=S80.1 conn=w kv=0.120 kw=54.97 pf=0.91
+new Load.362 phases=1 bus1=S80.2 conn=w kv=0.120 kw=45.98 pf=0.91
+new Load.363 phases=1 bus1=S80.3 conn=w kv=0.120 kw=44.05 pf=0.98
+new Load.364 phases=1 bus1=S80.1.2 conn=d kv=0.208 kw=104.06 pf=0.81
+new Load.365 phases=1 bus1=S80.2.3 conn=d kv=0.208 kw=121.40 pf=0.80
+new Load.366 phases=1 bus1=S80.3.1 conn=d kv=0.208 kw=111.20 pf=0.77
+new Load.367 phases=1 bus1=S81.1 conn=w kv=0.120 kw=68.10 pf=0.97
+new Load.368 phases=1 bus1=S81.2 conn=w kv=0.120 kw=64.43 pf=0.96
+new Load.369 phases=1 bus1=S81.3 conn=w kv=0.120 kw=52.55 pf=0.99
+new Load.370 phases=1 bus1=S81.1.2 conn=d kv=0.208 kw=138.66 pf=0.80
+new Load.371 phases=1 bus1=S81.2.3 conn=d kv=0.208 kw=132.13 pf=0.77
+new Load.372 phases=1 bus1=S81.3.1 conn=d kv=0.208 kw=133.97 pf=0.81
+new Load.373 phases=1 bus1=S82.1 conn=w kv=0.120 kw=17.30 pf=0.95
+new Load.374 phases=1 bus1=S82.2 conn=w kv=0.120 kw=14.44 pf=0.92
+new Load.375 phases=1 bus1=S82.3 conn=w kv=0.120 kw=12.52 pf=0.92
+new Load.376 phases=1 bus1=S82.1.2 conn=d kv=0.208 kw=30.27 pf=0.77
+new Load.377 phases=1 bus1=S82.2.3 conn=d kv=0.208 kw=33.29 pf=0.80
+new Load.378 phases=1 bus1=S82.3.1 conn=d kv=0.208 kw=33.37 pf=0.81
+new Load.379 phases=1 bus1=S83.1 conn=w kv=0.120 kw=14.76 pf=0.99
+new Load.380 phases=1 bus1=S83.2 conn=w kv=0.120 kw=13.06 pf=0.96
+new Load.381 phases=1 bus1=S83.3 conn=w kv=0.120 kw=12.02 pf=0.98
+new Load.382 phases=1 bus1=S83.1.2 conn=d kv=0.208 kw=35.75 pf=0.80
+new Load.383 phases=1 bus1=S83.2.3 conn=d kv=0.208 kw=36.62 pf=0.80
+new Load.384 phases=1 bus1=S83.3.1 conn=d kv=0.208 kw=29.58 pf=0.80
+new Load.385 phases=1 bus1=S84.1 conn=w kv=0.120 kw=32.90 pf=0.95
+new Load.386 phases=1 bus1=S84.2 conn=w kv=0.120 kw=46.57 pf=0.96
+new Load.387 phases=1 bus1=S84.3 conn=w kv=0.120 kw=46.65 pf=0.96
+new Load.388 phases=1 bus1=S84.1.2 conn=d kv=0.208 kw=91.64 pf=0.77
+new Load.389 phases=1 bus1=S84.2.3 conn=d kv=0.208 kw=94.90 pf=0.80
+new Load.390 phases=1 bus1=S84.3.1 conn=d kv=0.208 kw=109.53 pf=0.78
+new Load.391 phases=1 bus1=S87.1 conn=w kv=0.120 kw=45.80 pf=0.92
+new Load.392 phases=1 bus1=S87.2 conn=w kv=0.120 kw=35.41 pf=0.96
+new Load.393 phases=1 bus1=S87.3 conn=w kv=0.120 kw=36.86 pf=0.90
+new Load.394 phases=1 bus1=S87.1.2 conn=d kv=0.208 kw=92.24 pf=0.83
+new Load.395 phases=1 bus1=S87.2.3 conn=d kv=0.208 kw=83.06 pf=0.77
+new Load.396 phases=1 bus1=S87.3.1 conn=d kv=0.208 kw=86.45 pf=0.81
+new Load.397 phases=1 bus1=S88.1 conn=w kv=0.120 kw=49.03 pf=0.97
+new Load.398 phases=1 bus1=S88.2 conn=w kv=0.120 kw=48.29 pf=0.93
+new Load.399 phases=1 bus1=S88.3 conn=w kv=0.120 kw=49.64 pf=0.93
+new Load.400 phases=1 bus1=S88.1.2 conn=d kv=0.208 kw=130.13 pf=0.78
+new Load.401 phases=1 bus1=S88.2.3 conn=d kv=0.208 kw=144.17 pf=0.82
+new Load.402 phases=1 bus1=S88.3.1 conn=d kv=0.208 kw=140.75 pf=0.82
+new Load.403 phases=1 bus1=S89.1 conn=w kv=0.120 kw=38.00 pf=0.97
+new Load.404 phases=1 bus1=S89.2 conn=w kv=0.120 kw=49.55 pf=0.99
+new Load.405 phases=1 bus1=S89.3 conn=w kv=0.120 kw=48.75 pf=0.95
+new Load.406 phases=1 bus1=S89.1.2 conn=d kv=0.208 kw=121.25 pf=0.83
+new Load.407 phases=1 bus1=S89.2.3 conn=d kv=0.208 kw=107.77 pf=0.76
+new Load.408 phases=1 bus1=S89.3.1 conn=d kv=0.208 kw=125.35 pf=0.83
+new Load.409 phases=1 bus1=S92.1 conn=w kv=0.120 kw=53.37 pf=0.95
+new Load.410 phases=1 bus1=S92.2 conn=w kv=0.120 kw=49.15 pf=0.97
+new Load.411 phases=1 bus1=S92.3 conn=w kv=0.120 kw=46.06 pf=0.93
+new Load.412 phases=1 bus1=S92.1.2 conn=d kv=0.208 kw=114.19 pf=0.77
+new Load.413 phases=1 bus1=S92.2.3 conn=d kv=0.208 kw=116.18 pf=0.81
+new Load.414 phases=1 bus1=S92.3.1 conn=d kv=0.208 kw=111.20 pf=0.82
+new Load.415 phases=1 bus1=S93.1 conn=w kv=0.120 kw=46.31 pf=0.96
+new Load.416 phases=1 bus1=S93.2 conn=w kv=0.120 kw=54.30 pf=0.99
+new Load.417 phases=1 bus1=S93.3 conn=w kv=0.120 kw=47.13 pf=0.98
+new Load.418 phases=1 bus1=S93.1.2 conn=d kv=0.208 kw=108.93 pf=0.82
+new Load.419 phases=1 bus1=S93.2.3 conn=d kv=0.208 kw=107.46 pf=0.83
+new Load.420 phases=1 bus1=S93.3.1 conn=d kv=0.208 kw=105.16 pf=0.82
+new Load.421 phases=1 bus1=S94.1 conn=w kv=0.120 kw=46.85 pf=0.99
+new Load.422 phases=1 bus1=S94.2 conn=w kv=0.120 kw=47.53 pf=0.96
+new Load.423 phases=1 bus1=S94.3 conn=w kv=0.120 kw=40.73 pf=0.93
+new Load.424 phases=1 bus1=S94.1.2 conn=d kv=0.208 kw=116.00 pf=0.78
+new Load.425 phases=1 bus1=S94.2.3 conn=d kv=0.208 kw=112.35 pf=0.83
+new Load.426 phases=1 bus1=S94.3.1 conn=d kv=0.208 kw=105.06 pf=0.77
+new Load.427 phases=1 bus1=S97.1 conn=w kv=0.120 kw=29.94 pf=0.93
+new Load.428 phases=1 bus1=S97.2 conn=w kv=0.120 kw=34.54 pf=0.98
+new Load.429 phases=1 bus1=S97.3 conn=w kv=0.120 kw=27.65 pf=1.00
+new Load.430 phases=1 bus1=S97.1.2 conn=d kv=0.208 kw=88.65 pf=0.80
+new Load.431 phases=1 bus1=S97.2.3 conn=d kv=0.208 kw=78.56 pf=0.76
+new Load.432 phases=1 bus1=S97.3.1 conn=d kv=0.208 kw=76.20 pf=0.77
+new Load.433 phases=1 bus1=S98.1 conn=w kv=0.120 kw=40.47 pf=0.95
+new Load.434 phases=1 bus1=S98.2 conn=w kv=0.120 kw=36.75 pf=0.95
+new Load.435 phases=1 bus1=S98.3 conn=w kv=0.120 kw=38.09 pf=0.98
+new Load.436 phases=1 bus1=S98.1.2 conn=d kv=0.208 kw=87.21 pf=0.79
+new Load.437 phases=1 bus1=S98.2.3 conn=d kv=0.208 kw=85.78 pf=0.78
+new Load.438 phases=1 bus1=S98.3.1 conn=d kv=0.208 kw=91.10 pf=0.79
+new Load.439 phases=1 bus1=S99.1 conn=w kv=0.120 kw=39.98 pf=0.98
+new Load.440 phases=1 bus1=S99.2 conn=w kv=0.120 kw=35.85 pf=0.97
+new Load.441 phases=1 bus1=S99.3 conn=w kv=0.120 kw=29.33 pf=0.92
+new Load.442 phases=1 bus1=S99.1.2 conn=d kv=0.208 kw=76.51 pf=0.76
+new Load.443 phases=1 bus1=S99.2.3 conn=d kv=0.208 kw=80.54 pf=0.83
+new Load.444 phases=1 bus1=S99.3.1 conn=d kv=0.208 kw=91.37 pf=0.84
+new Load.445 phases=1 bus1=S102.1 conn=w kv=0.120 kw=25.62 pf=0.93
+new Load.446 phases=1 bus1=S102.2 conn=w kv=0.120 kw=30.27 pf=0.92
+new Load.447 phases=1 bus1=S102.3 conn=w kv=0.120 kw=28.27 pf=0.97
+new Load.448 phases=1 bus1=S102.1.2 conn=d kv=0.208 kw=70.13 pf=0.76
+new Load.449 phases=1 bus1=S102.2.3 conn=d kv=0.208 kw=65.97 pf=0.82
+new Load.450 phases=1 bus1=S102.3.1 conn=d kv=0.208 kw=63.65 pf=0.81
+new Load.451 phases=1 bus1=S103.1 conn=w kv=0.120 kw=11.71 pf=0.92
+new Load.452 phases=1 bus1=S103.2 conn=w kv=0.120 kw=13.03 pf=0.93
+new Load.453 phases=1 bus1=S103.3 conn=w kv=0.120 kw=13.55 pf=0.95
+new Load.454 phases=1 bus1=S103.1.2 conn=d kv=0.208 kw=31.97 pf=0.83
+new Load.455 phases=1 bus1=S103.2.3 conn=d kv=0.208 kw=33.81 pf=0.81
+new Load.456 phases=1 bus1=S103.3.1 conn=d kv=0.208 kw=33.08 pf=0.77
+new Load.457 phases=1 bus1=S104.1 conn=w kv=0.120 kw=13.87 pf=0.92
+new Load.458 phases=1 bus1=S104.2 conn=w kv=0.120 kw=12.71 pf=0.97
+new Load.459 phases=1 bus1=S104.3 conn=w kv=0.120 kw=13.16 pf=0.91
+new Load.460 phases=1 bus1=S104.1.2 conn=d kv=0.208 kw=30.44 pf=0.78
+new Load.461 phases=1 bus1=S104.2.3 conn=d kv=0.208 kw=30.33 pf=0.76
+new Load.462 phases=1 bus1=S104.3.1 conn=d kv=0.208 kw=31.12 pf=0.80
+new Load.463 phases=1 bus1=S105.1 conn=w kv=0.120 kw=41.40 pf=0.92
+new Load.464 phases=1 bus1=S105.2 conn=w kv=0.120 kw=43.96 pf=0.92
+new Load.465 phases=1 bus1=S105.3 conn=w kv=0.120 kw=33.70 pf=0.91
+new Load.466 phases=1 bus1=S105.1.2 conn=d kv=0.208 kw=99.23 pf=0.78
+new Load.467 phases=1 bus1=S105.2.3 conn=d kv=0.208 kw=82.35 pf=0.80
+new Load.468 phases=1 bus1=S105.3.1 conn=d kv=0.208 kw=96.23 pf=0.82
+new Load.469 phases=1 bus1=S106.1 conn=w kv=0.120 kw=40.29 pf=0.98
+new Load.470 phases=1 bus1=S106.2 conn=w kv=0.120 kw=54.79 pf=0.98
+new Load.471 phases=1 bus1=S106.3 conn=w kv=0.120 kw=46.93 pf=0.91
+new Load.472 phases=1 bus1=S106.1.2 conn=d kv=0.208 kw=119.14 pf=0.77
+new Load.473 phases=1 bus1=S106.2.3 conn=d kv=0.208 kw=118.63 pf=0.82
+new Load.474 phases=1 bus1=S106.3.1 conn=d kv=0.208 kw=108.70 pf=0.84
+new Load.475 phases=1 bus1=S107.1 conn=w kv=0.120 kw=53.32 pf=0.97
+new Load.476 phases=1 bus1=S107.2 conn=w kv=0.120 kw=45.65 pf=0.92
+new Load.477 phases=1 bus1=S107.3 conn=w kv=0.120 kw=48.96 pf=0.92
+new Load.478 phases=1 bus1=S107.1.2 conn=d kv=0.208 kw=105.77 pf=0.84
+new Load.479 phases=1 bus1=S107.2.3 conn=d kv=0.208 kw=126.81 pf=0.80
+new Load.480 phases=1 bus1=S107.3.1 conn=d kv=0.208 kw=113.86 pf=0.84
+new Load.481 phases=1 bus1=S108.1 conn=w kv=0.120 kw=14.94 pf=0.99
+new Load.482 phases=1 bus1=S108.2 conn=w kv=0.120 kw=12.38 pf=0.95
+new Load.483 phases=1 bus1=S108.3 conn=w kv=0.120 kw=12.12 pf=0.94
+new Load.484 phases=1 bus1=S108.1.2 conn=d kv=0.208 kw=32.70 pf=0.78
+new Load.485 phases=1 bus1=S108.2.3 conn=d kv=0.208 kw=33.05 pf=0.78
+new Load.486 phases=1 bus1=S108.3.1 conn=d kv=0.208 kw=31.33 pf=0.80
+new Load.487 phases=1 bus1=S113.1 conn=w kv=0.120 kw=14.06 pf=0.91
+new Load.488 phases=1 bus1=S113.2 conn=w kv=0.120 kw=12.10 pf=1.00
+new Load.489 phases=1 bus1=S113.3 conn=w kv=0.120 kw=14.02 pf=0.91
+new Load.490 phases=1 bus1=S113.1.2 conn=d kv=0.208 kw=31.51 pf=0.81
+new Load.491 phases=1 bus1=S113.2.3 conn=d kv=0.208 kw=32.22 pf=0.77
+new Load.492 phases=1 bus1=S113.3.1 conn=d kv=0.208 kw=30.09 pf=0.77
+new Load.493 phases=1 bus1=S114.1 conn=w kv=0.120 kw=12.17 pf=0.94
+new Load.494 phases=1 bus1=S114.2 conn=w kv=0.120 kw=15.60 pf=0.98
+new Load.495 phases=1 bus1=S114.3 conn=w kv=0.120 kw=14.22 pf=0.97
+new Load.496 phases=1 bus1=S114.1.2 conn=d kv=0.208 kw=29.89 pf=0.79
+new Load.497 phases=1 bus1=S114.2.3 conn=d kv=0.208 kw=36.29 pf=0.84
+new Load.498 phases=1 bus1=S114.3.1 conn=d kv=0.208 kw=31.53 pf=0.80
+new Load.499 phases=1 bus1=S120.1 conn=w kv=0.120 kw=47.36 pf=0.93
+new Load.500 phases=1 bus1=S120.2 conn=w kv=0.120 kw=36.76 pf=0.91
+new Load.501 phases=1 bus1=S120.3 conn=w kv=0.120 kw=38.02 pf=0.91
+new Load.502 phases=1 bus1=S120.1.2 conn=d kv=0.208 kw=92.72 pf=0.81
+new Load.503 phases=1 bus1=S120.2.3 conn=d kv=0.208 kw=93.46 pf=0.79
+new Load.504 phases=1 bus1=S120.3.1 conn=d kv=0.208 kw=93.33 pf=0.81
+new Load.505 phases=1 bus1=S121.1 conn=w kv=0.120 kw=35.99 pf=0.99
+new Load.506 phases=1 bus1=S121.2 conn=w kv=0.120 kw=33.87 pf=0.92
+new Load.507 phases=1 bus1=S121.3 conn=w kv=0.120 kw=38.45 pf=0.94
+new Load.508 phases=1 bus1=S121.1.2 conn=d kv=0.208 kw=108.00 pf=0.81
+new Load.509 phases=1 bus1=S121.2.3 conn=d kv=0.208 kw=87.53 pf=0.79
+new Load.510 phases=1 bus1=S121.3.1 conn=d kv=0.208 kw=98.29 pf=0.84
+new Load.511 phases=1 bus1=S122.1 conn=w kv=0.120 kw=45.21 pf=0.91
+new Load.512 phases=1 bus1=S122.2 conn=w kv=0.120 kw=44.47 pf=0.98
+new Load.513 phases=1 bus1=S122.3 conn=w kv=0.120 kw=43.61 pf=0.97
+new Load.514 phases=1 bus1=S122.1.2 conn=d kv=0.208 kw=113.68 pf=0.84
+new Load.515 phases=1 bus1=S122.2.3 conn=d kv=0.208 kw=92.63 pf=0.80
+new Load.516 phases=1 bus1=S122.3.1 conn=d kv=0.208 kw=104.75 pf=0.76
+new Load.517 phases=1 bus1=S123.1 conn=w kv=0.120 kw=13.31 pf=0.95
+new Load.518 phases=1 bus1=S123.2 conn=w kv=0.120 kw=13.05 pf=0.93
+new Load.519 phases=1 bus1=S123.3 conn=w kv=0.120 kw=13.71 pf=0.96
+new Load.520 phases=1 bus1=S123.1.2 conn=d kv=0.208 kw=33.85 pf=0.82
+new Load.521 phases=1 bus1=S123.2.3 conn=d kv=0.208 kw=37.88 pf=0.81
+new Load.522 phases=1 bus1=S123.3.1 conn=d kv=0.208 kw=37.59 pf=0.77
+new Load.523 phases=1 bus1=S124.1 conn=w kv=0.120 kw=16.69 pf=0.96
+new Load.524 phases=1 bus1=S124.2 conn=w kv=0.120 kw=12.23 pf=0.99
+new Load.525 phases=1 bus1=S124.3 conn=w kv=0.120 kw=16.19 pf=0.98
+new Load.526 phases=1 bus1=S124.1.2 conn=d kv=0.208 kw=34.55 pf=0.79
+new Load.527 phases=1 bus1=S124.2.3 conn=d kv=0.208 kw=29.38 pf=0.77
+new Load.528 phases=1 bus1=S124.3.1 conn=d kv=0.208 kw=29.05 pf=0.80
+new Load.529 phases=1 bus1=S125.1 conn=w kv=0.120 kw=12.40 pf=0.91
+new Load.530 phases=1 bus1=S125.2 conn=w kv=0.120 kw=12.87 pf=0.91
+new Load.531 phases=1 bus1=S125.3 conn=w kv=0.120 kw=14.35 pf=0.99
+new Load.532 phases=1 bus1=S125.1.2 conn=d kv=0.208 kw=31.18 pf=0.77
+new Load.533 phases=1 bus1=S125.2.3 conn=d kv=0.208 kw=29.22 pf=0.81
+new Load.534 phases=1 bus1=S125.3.1 conn=d kv=0.208 kw=29.42 pf=0.78
+new Load.535 phases=1 bus1=S127.1 conn=w kv=0.120 kw=17.74 pf=0.92
+new Load.536 phases=1 bus1=S127.2 conn=w kv=0.120 kw=12.20 pf=0.92
+new Load.537 phases=1 bus1=S127.3 conn=w kv=0.120 kw=14.88 pf=0.91
+new Load.538 phases=1 bus1=S127.1.2 conn=d kv=0.208 kw=33.06 pf=0.76
+new Load.539 phases=1 bus1=S127.2.3 conn=d kv=0.208 kw=35.59 pf=0.77
+new Load.540 phases=1 bus1=S127.3.1 conn=d kv=0.208 kw=28.84 pf=0.82
+new Load.541 phases=1 bus1=S128.1 conn=w kv=0.120 kw=13.53 pf=0.95
+new Load.542 phases=1 bus1=S128.2 conn=w kv=0.120 kw=13.65 pf=0.96
+new Load.543 phases=1 bus1=S128.3 conn=w kv=0.120 kw=15.18 pf=0.97
+new Load.544 phases=1 bus1=S128.1.2 conn=d kv=0.208 kw=32.54 pf=0.82
+new Load.545 phases=1 bus1=S128.2.3 conn=d kv=0.208 kw=27.98 pf=0.81
+new Load.546 phases=1 bus1=S128.3.1 conn=d kv=0.208 kw=34.21 pf=0.78
+new Load.547 phases=1 bus1=S129.1 conn=w kv=0.120 kw=12.06 pf=0.93
+new Load.548 phases=1 bus1=S129.2 conn=w kv=0.120 kw=14.89 pf=0.99
+new Load.549 phases=1 bus1=S129.3 conn=w kv=0.120 kw=14.96 pf=0.95
+new Load.550 phases=1 bus1=S129.1.2 conn=d kv=0.208 kw=28.74 pf=0.80
+new Load.551 phases=1 bus1=S129.2.3 conn=d kv=0.208 kw=36.80 pf=0.80
+new Load.552 phases=1 bus1=S129.3.1 conn=d kv=0.208 kw=28.39 pf=0.77
+new Load.553 phases=1 bus1=S130.1 conn=w kv=0.120 kw=15.36 pf=0.93
+new Load.554 phases=1 bus1=S130.2 conn=w kv=0.120 kw=14.86 pf=0.99
+new Load.555 phases=1 bus1=S130.3 conn=w kv=0.120 kw=11.96 pf=0.96
+new Load.556 phases=1 bus1=S130.1.2 conn=d kv=0.208 kw=33.06 pf=0.76
+new Load.557 phases=1 bus1=S130.2.3 conn=d kv=0.208 kw=36.16 pf=0.79
+new Load.558 phases=1 bus1=S130.3.1 conn=d kv=0.208 kw=37.31 pf=0.82
+new Load.559 phases=1 bus1=S132.1 conn=w kv=0.120 kw=17.54 pf=0.99
+new Load.560 phases=1 bus1=S132.2 conn=w kv=0.120 kw=11.78 pf=0.98
+new Load.561 phases=1 bus1=S132.3 conn=w kv=0.120 kw=11.77 pf=0.93
+new Load.562 phases=1 bus1=S132.1.2 conn=d kv=0.208 kw=31.17 pf=0.77
+new Load.563 phases=1 bus1=S132.2.3 conn=d kv=0.208 kw=31.46 pf=0.82
+new Load.564 phases=1 bus1=S132.3.1 conn=d kv=0.208 kw=38.32 pf=0.83
+new Load.565 phases=1 bus1=S133.1 conn=w kv=0.120 kw=13.14 pf=0.94
+new Load.566 phases=1 bus1=S133.2 conn=w kv=0.120 kw=13.40 pf=0.96
+new Load.567 phases=1 bus1=S133.3 conn=w kv=0.120 kw=14.45 pf=0.93
+new Load.568 phases=1 bus1=S133.1.2 conn=d kv=0.208 kw=36.68 pf=0.77
+new Load.569 phases=1 bus1=S133.2.3 conn=d kv=0.208 kw=30.05 pf=0.81
+new Load.570 phases=1 bus1=S133.3.1 conn=d kv=0.208 kw=28.29 pf=0.80
+new Load.571 phases=1 bus1=S134.1 conn=w kv=0.120 kw=12.34 pf=0.99
+new Load.572 phases=1 bus1=S134.2 conn=w kv=0.120 kw=15.77 pf=0.95
+new Load.573 phases=1 bus1=S134.3 conn=w kv=0.120 kw=15.82 pf=0.96
+new Load.574 phases=1 bus1=S134.1.2 conn=d kv=0.208 kw=36.87 pf=0.83
+new Load.575 phases=1 bus1=S134.2.3 conn=d kv=0.208 kw=32.50 pf=0.79
+new Load.576 phases=1 bus1=S134.3.1 conn=d kv=0.208 kw=35.79 pf=0.77
+new Load.577 phases=1 bus1=S135.1 conn=w kv=0.120 kw=13.53 pf=0.98
+new Load.578 phases=1 bus1=S135.2 conn=w kv=0.120 kw=14.58 pf=0.97
+new Load.579 phases=1 bus1=S135.3 conn=w kv=0.120 kw=14.48 pf=0.98
+new Load.580 phases=1 bus1=S135.1.2 conn=d kv=0.208 kw=35.71 pf=0.78
+new Load.581 phases=1 bus1=S135.2.3 conn=d kv=0.208 kw=31.50 pf=0.77
+new Load.582 phases=1 bus1=S135.3.1 conn=d kv=0.208 kw=33.86 pf=0.77
+new Load.583 phases=1 bus1=S137.1 conn=w kv=0.120 kw=11.96 pf=0.97
+new Load.584 phases=1 bus1=S137.2 conn=w kv=0.120 kw=11.98 pf=0.99
+new Load.585 phases=1 bus1=S137.3 conn=w kv=0.120 kw=12.32 pf=0.91
+new Load.586 phases=1 bus1=S137.1.2 conn=d kv=0.208 kw=30.18 pf=0.82
+new Load.587 phases=1 bus1=S137.2.3 conn=d kv=0.208 kw=35.65 pf=0.78
+new Load.588 phases=1 bus1=S137.3.1 conn=d kv=0.208 kw=28.47 pf=0.80
+new Load.589 phases=1 bus1=S138.1 conn=w kv=0.120 kw=12.85 pf=1.00
+new Load.590 phases=1 bus1=S138.2 conn=w kv=0.120 kw=14.49 pf=0.91
+new Load.591 phases=1 bus1=S138.3 conn=w kv=0.120 kw=13.28 pf=0.96
+new Load.592 phases=1 bus1=S138.1.2 conn=d kv=0.208 kw=37.01 pf=0.77
+new Load.593 phases=1 bus1=S138.2.3 conn=d kv=0.208 kw=26.95 pf=0.84
+new Load.594 phases=1 bus1=S138.3.1 conn=d kv=0.208 kw=29.64 pf=0.78
+new Load.595 phases=1 bus1=S139.1 conn=w kv=0.120 kw=16.22 pf=0.97
+new Load.596 phases=1 bus1=S139.2 conn=w kv=0.120 kw=14.70 pf=0.97
+new Load.597 phases=1 bus1=S139.3 conn=w kv=0.120 kw=15.30 pf=0.98
+new Load.598 phases=1 bus1=S139.1.2 conn=d kv=0.208 kw=28.15 pf=0.81
+new Load.599 phases=1 bus1=S139.2.3 conn=d kv=0.208 kw=36.35 pf=0.77
+new Load.600 phases=1 bus1=S139.3.1 conn=d kv=0.208 kw=35.47 pf=0.79
+new Load.601 phases=1 bus1=S140.1 conn=w kv=0.120 kw=14.27 pf=0.99
+new Load.602 phases=1 bus1=S140.2 conn=w kv=0.120 kw=12.09 pf=0.92
+new Load.603 phases=1 bus1=S140.3 conn=w kv=0.120 kw=13.66 pf=0.98
+new Load.604 phases=1 bus1=S140.1.2 conn=d kv=0.208 kw=29.39 pf=0.82
+new Load.605 phases=1 bus1=S140.2.3 conn=d kv=0.208 kw=33.66 pf=0.84
+new Load.606 phases=1 bus1=S140.3.1 conn=d kv=0.208 kw=29.88 pf=0.82
+new Load.607 phases=1 bus1=S142.1 conn=w kv=0.120 kw=13.22 pf=0.91
+new Load.608 phases=1 bus1=S142.2 conn=w kv=0.120 kw=12.40 pf=0.92
+new Load.609 phases=1 bus1=S142.3 conn=w kv=0.120 kw=12.26 pf=0.95
+new Load.610 phases=1 bus1=S142.1.2 conn=d kv=0.208 kw=36.88 pf=0.77
+new Load.611 phases=1 bus1=S142.2.3 conn=d kv=0.208 kw=31.62 pf=0.84
+new Load.612 phases=1 bus1=S142.3.1 conn=d kv=0.208 kw=36.31 pf=0.76
+new Load.613 phases=1 bus1=S143.1 conn=w kv=0.120 kw=12.61 pf=0.93
+new Load.614 phases=1 bus1=S143.2 conn=w kv=0.120 kw=15.46 pf=0.97
+new Load.615 phases=1 bus1=S143.3 conn=w kv=0.120 kw=15.22 pf=0.94
+new Load.616 phases=1 bus1=S143.1.2 conn=d kv=0.208 kw=30.62 pf=0.78
+new Load.617 phases=1 bus1=S143.2.3 conn=d kv=0.208 kw=38.28 pf=0.82
+new Load.618 phases=1 bus1=S143.3.1 conn=d kv=0.208 kw=29.34 pf=0.83
+new Load.619 phases=1 bus1=S144.1 conn=w kv=0.120 kw=12.17 pf=0.96
+new Load.620 phases=1 bus1=S144.2 conn=w kv=0.120 kw=15.53 pf=0.93
+new Load.621 phases=1 bus1=S144.3 conn=w kv=0.120 kw=14.78 pf=0.98
+new Load.622 phases=1 bus1=S144.1.2 conn=d kv=0.208 kw=28.76 pf=0.78
+new Load.623 phases=1 bus1=S144.2.3 conn=d kv=0.208 kw=37.85 pf=0.81
+new Load.624 phases=1 bus1=S144.3.1 conn=d kv=0.208 kw=29.31 pf=0.82
+ 
+new Transformer.1 buses=[P4,P5] kvs=[229.999,13.800] kvas=[50000,50000] conns=[d,d] xhl=7.5 %loadloss=0.75
+new Transformer.2 buses=[P8,P9] kvs=[229.999,13.800] kvas=[50000,50000] conns=[d,d] xhl=7.5 %loadloss=0.75
+new Transformer.3 buses=[P41,S196] kvs=[13.800,0.480] kvas=[2000,2000] conns=[d,w] xhl=7 %loadloss=0.7
+new Transformer.4 buses=[P111,S197] kvs=[13.800,0.480] kvas=[2000,2000] conns=[d,w] xhl=7 %loadloss=0.7
+new Transformer.5 buses=[P61,S201] kvs=[13.800,0.480] kvas=[1500,1500] conns=[d,w] xhl=7 %loadloss=0.7
+new Transformer.6 buses=[P131,S202] kvs=[13.800,0.480] kvas=[1500,1500] conns=[d,w] xhl=7 %loadloss=0.7
+new Transformer.7 buses=[P22,S207] kvs=[13.800,0.480] kvas=[2000,2000] conns=[d,w] xhl=7 %loadloss=0.7
+new Transformer.8 buses=[P74,S208] kvs=[13.800,0.480] kvas=[2000,2000] conns=[d,w] xhl=7 %loadloss=0.7
+new Transformer.9 buses=[P144,S209] kvs=[13.800,0.480] kvas=[2000,2000] conns=[d,w] xhl=7 %loadloss=0.7
+new Transformer.10 buses=[P76,S214] kvs=[13.800,0.480] kvas=[2500,2500] conns=[d,w] xhl=7 %loadloss=0.7
+new Transformer.11 buses=[P92,S215] kvs=[13.800,0.480] kvas=[2500,2500] conns=[d,w] xhl=7 %loadloss=0.7
+new Transformer.12 buses=[P146,S216] kvs=[13.800,0.480] kvas=[2500,2500] conns=[d,w] xhl=7 %loadloss=0.7
+new Transformer.13 buses=[P34,S221] kvs=[13.800,0.480] kvas=[2000,2000] conns=[d,w] xhl=7 %loadloss=0.7
+new Transformer.14 buses=[P55,S222] kvs=[13.800,0.480] kvas=[2000,2000] conns=[d,w] xhl=7 %loadloss=0.7
+new Transformer.15 buses=[P107,S223] kvs=[13.800,0.480] kvas=[2000,2000] conns=[d,w] xhl=7 %loadloss=0.7
+new Transformer.16 buses=[P54,S228] kvs=[13.800,0.480] kvas=[2500,2500] conns=[d,w] xhl=7 %loadloss=0.7
+new Transformer.17 buses=[P104,S229] kvs=[13.800,0.480] kvas=[2500,2500] conns=[d,w] xhl=7 %loadloss=0.7
+new Transformer.18 buses=[P124,S230] kvs=[13.800,0.480] kvas=[2500,2500] conns=[d,w] xhl=7 %loadloss=0.7
+new Transformer.19 buses=[P69,S234] kvs=[13.800,0.480] kvas=[2000,2000] conns=[d,w] xhl=7 %loadloss=0.7
+new Transformer.20 buses=[P139,S235] kvs=[13.800,0.480] kvas=[2000,2000] conns=[d,w] xhl=7 %loadloss=0.7
+new Transformer.21 buses=[P16,S238] kvs=[13.800,0.480] kvas=[2500,2500] conns=[d,w] xhl=7 %loadloss=0.7
+new Transformer.22 buses=[P87,S240] kvs=[13.800,0.480] kvas=[2500,2500] conns=[d,w] xhl=7 %loadloss=0.7
+new Transformer.23 buses=[P150,S148] kvs=[13.800,0.208] kvas=[1000,1000] conns=[d,w] xhl=5 %loadloss=0.5
+new Transformer.24 buses=[P133,S145] kvs=[13.800,0.208] kvas=[1000,1000] conns=[d,w] xhl=5 %loadloss=0.5
+new Transformer.25 buses=[P115,S152] kvs=[13.800,0.208] kvas=[1000,1000] conns=[d,w] xhl=5 %loadloss=0.5
+new Transformer.26 buses=[P96,S149] kvs=[13.800,0.208] kvas=[1000,1000] conns=[d,w] xhl=5 %loadloss=0.5
+new Transformer.27 buses=[P80,S156] kvs=[13.800,0.208] kvas=[1000,1000] conns=[d,w] xhl=5 %loadloss=0.5
+new Transformer.28 buses=[P61,S153] kvs=[13.800,0.208] kvas=[1000,1000] conns=[d,w] xhl=5 %loadloss=0.5
+new Transformer.29 buses=[P43,S160] kvs=[13.800,0.208] kvas=[1000,1000] conns=[d,w] xhl=5 %loadloss=0.5
+new Transformer.30 buses=[P26,S157] kvs=[13.800,0.208] kvas=[1000,1000] conns=[d,w] xhl=5 %loadloss=0.5
+new Transformer.31 buses=[P94,S147] kvs=[13.800,0.208] kvas=[1000,1000] conns=[d,w] xhl=5 %loadloss=0.5
+new Transformer.32 buses=[P113,S146] kvs=[13.800,0.208] kvas=[1000,1000] conns=[d,w] xhl=5 %loadloss=0.5
+new Transformer.33 buses=[P148,S151] kvs=[13.800,0.208] kvas=[1000,1000] conns=[d,w] xhl=5 %loadloss=0.5
+new Transformer.34 buses=[P130,S150] kvs=[13.800,0.208] kvas=[1000,1000] conns=[d,w] xhl=5 %loadloss=0.5
+new Transformer.35 buses=[P24,S155] kvs=[13.800,0.208] kvas=[1000,1000] conns=[d,w] xhl=5 %loadloss=0.5
+new Transformer.36 buses=[P40,S154] kvs=[13.800,0.208] kvas=[1000,1000] conns=[d,w] xhl=5 %loadloss=0.5
+new Transformer.37 buses=[P78,S159] kvs=[13.800,0.208] kvas=[1000,1000] conns=[d,w] xhl=5 %loadloss=0.5
+new Transformer.38 buses=[P58,S158] kvs=[13.800,0.208] kvas=[1000,1000] conns=[d,w] xhl=5 %loadloss=0.5
+new Transformer.39 buses=[P109,S164] kvs=[13.800,0.208] kvas=[1000,1000] conns=[d,w] xhl=5 %loadloss=0.5
+new Transformer.40 buses=[P128,S161] kvs=[13.800,0.208] kvas=[1000,1000] conns=[d,w] xhl=5 %loadloss=0.5
+new Transformer.41 buses=[P21,S168] kvs=[13.800,0.208] kvas=[1000,1000] conns=[d,w] xhl=5 %loadloss=0.5
+new Transformer.42 buses=[P73,S165] kvs=[13.800,0.208] kvas=[1000,1000] conns=[d,w] xhl=5 %loadloss=0.5
+new Transformer.43 buses=[P91,S172] kvs=[13.800,0.208] kvas=[1000,1000] conns=[d,w] xhl=5 %loadloss=0.5
+new Transformer.44 buses=[P145,S169] kvs=[13.800,0.208] kvas=[1000,1000] conns=[d,w] xhl=5 %loadloss=0.5
+new Transformer.45 buses=[P89,S176] kvs=[13.800,0.208] kvas=[1000,1000] conns=[d,w] xhl=5 %loadloss=0.5
+new Transformer.46 buses=[P38,S173] kvs=[13.800,0.208] kvas=[1000,1000] conns=[d,w] xhl=5 %loadloss=0.5
+new Transformer.47 buses=[P56,S163] kvs=[13.800,0.208] kvas=[1000,1000] conns=[d,w] xhl=5 %loadloss=0.5
+new Transformer.48 buses=[P126,S162] kvs=[13.800,0.208] kvas=[1000,1000] conns=[d,w] xhl=5 %loadloss=0.5
+new Transformer.49 buses=[P142,S167] kvs=[13.800,0.208] kvas=[1000,1000] conns=[d,w] xhl=5 %loadloss=0.5
+new Transformer.50 buses=[P106,S166] kvs=[13.800,0.208] kvas=[1000,1000] conns=[d,w] xhl=5 %loadloss=0.5
+new Transformer.51 buses=[P19,S171] kvs=[13.800,0.208] kvas=[1000,1000] conns=[d,w] xhl=5 %loadloss=0.5
+new Transformer.52 buses=[P36,S170] kvs=[13.800,0.208] kvas=[1000,1000] conns=[d,w] xhl=5 %loadloss=0.5
+new Transformer.53 buses=[P52,S175] kvs=[13.800,0.208] kvas=[1000,1000] conns=[d,w] xhl=5 %loadloss=0.5
+new Transformer.54 buses=[P71,S174] kvs=[13.800,0.208] kvas=[1000,1000] conns=[d,w] xhl=5 %loadloss=0.5
+new Transformer.55 buses=[P17,S180] kvs=[13.800,0.208] kvas=[1000,1000] conns=[d,w] xhl=5 %loadloss=0.5
+new Transformer.56 buses=[P137,S177] kvs=[13.800,0.208] kvas=[1000,1000] conns=[d,w] xhl=5 %loadloss=0.5
+new Transformer.57 buses=[P122,S184] kvs=[13.800,0.208] kvas=[1000,1000] conns=[d,w] xhl=5 %loadloss=0.5
+new Transformer.58 buses=[P50,S181] kvs=[13.800,0.208] kvas=[1000,1000] conns=[d,w] xhl=5 %loadloss=0.5
+new Transformer.59 buses=[P86,S188] kvs=[13.800,0.208] kvas=[1000,1000] conns=[d,w] xhl=5 %loadloss=0.5
+new Transformer.60 buses=[P102,S185] kvs=[13.800,0.208] kvas=[1000,1000] conns=[d,w] xhl=5 %loadloss=0.5
+new Transformer.61 buses=[P14,S192] kvs=[13.800,0.208] kvas=[1000,1000] conns=[d,w] xhl=5 %loadloss=0.5
+new Transformer.62 buses=[P140,S189] kvs=[13.800,0.208] kvas=[1000,1000] conns=[d,w] xhl=5 %loadloss=0.5
+new Transformer.63 buses=[P65,S179] kvs=[13.800,0.208] kvas=[1000,1000] conns=[d,w] xhl=5 %loadloss=0.5
+new Transformer.64 buses=[P120,S178] kvs=[13.800,0.208] kvas=[1000,1000] conns=[d,w] xhl=5 %loadloss=0.5
+new Transformer.65 buses=[P48,S183] kvs=[13.800,0.208] kvas=[1000,1000] conns=[d,w] xhl=5 %loadloss=0.5
+new Transformer.66 buses=[P100,S182] kvs=[13.800,0.208] kvas=[1000,1000] conns=[d,w] xhl=5 %loadloss=0.5
+new Transformer.67 buses=[P30,S187] kvs=[13.800,0.208] kvas=[1000,1000] conns=[d,w] xhl=5 %loadloss=0.5
+new Transformer.68 buses=[P67,S186] kvs=[13.800,0.208] kvas=[1000,1000] conns=[d,w] xhl=5 %loadloss=0.5
+new Transformer.69 buses=[P32,S191] kvs=[13.800,0.208] kvas=[1000,1000] conns=[d,w] xhl=5 %loadloss=0.5
+new Transformer.70 buses=[P84,S190] kvs=[13.800,0.208] kvas=[1000,1000] conns=[d,w] xhl=5 %loadloss=0.5
+ 
+Set Voltagebases=[230, 13.8, 0.48, 0.208]
+calcv

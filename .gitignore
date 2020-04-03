@@ -42,3 +42,7 @@ omf/static/testFiles/turkey_solar.omd
 omf/scratch/modelDatabase.tsv
 omf/static/ipLoc.html
 omf/static/model_db_stats.png
+omf/scratch/faultLabeledMeterData/*
+!omf/scratch/faultLabeledMeterData/code/
+omf/scratch/disaggDataGeneration/*
+!omf/scratch/disaggDataGeneration/*.py

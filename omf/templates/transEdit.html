@@ -1251,6 +1251,11 @@ function checkConversion() {
 				alert('The .raw file does not contain any valid data.')
 				removeProgressDialog();
 			}
+			else if (conversionStatus == 'octaveError') {
+				window.clearInterval(intervalId);
+				alert('Matpower/Octave setup is incorrect; please contact your system administrator.')
+				removeProgressDialog();
+			}
 		})
 		return pingAPI;
 	}, 5000);

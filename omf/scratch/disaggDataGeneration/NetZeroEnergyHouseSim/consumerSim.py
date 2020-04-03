@@ -7,23 +7,23 @@ plt.style.use('ggplot')
 glmName = 'in_superHouse.glm'
 os.system('gridlabd ' + glmName)
 
-# Get the data
-fileNames = [
-	# 'out_house.csv',
-	'out_responsive.csv',
-	'out_unresponsive.csv',
-	'out_waterheater.csv',
-	'out_ev_charger.csv',
-	# 'out_solar_inv.csv',
-	'out_meter.csv'
-]
-data = {}
-for fname in fileNames:
-	fileOb = open(fname)
-	for x in range(8):
-		# Burn the headers.
-		fileOb.readline()
-	data[fname] = list(csv.DictReader(fileOb))
+# # Get the data
+# fileNames = [
+# 	'out_house.csv',
+# 	'out_responsive.csv',
+# 	'out_unresponsive.csv',
+# 	'out_waterheater.csv',
+# 	'out_ev_charger.csv',
+# 	'out_solar_inv.csv',
+# 	'out_meter.csv'
+# ]
+# data = {}
+# for fname in fileNames:
+# 	fileOb = open(fname)
+# 	for x in range(8):
+# 		# Burn the headers.
+# 		fileOb.readline()
+# 	data[fname] = list(csv.DictReader(fileOb))
 
 # # Plot the demands and generations
 # plt.switch_backend('MacOSX')

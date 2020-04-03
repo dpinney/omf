@@ -21,8 +21,6 @@ except Exception as e:
 	# raise Exception('need to install nilmtk')
 	# installNilm()
 
-# warnings.filterwarnings('ignore')
-
 # Model metadata:
 modelName, template = __neoMetaModel__.metadata(__file__)
 tooltip = "The Disaggregation model performs analysis to appliance level power consumption given a site meter."
@@ -110,6 +108,8 @@ def work(modelDir, inputDict):
 	totalByApp = pred_overall.sum()
 	totalByApp.sort_values(inplace=True, ascending=False)
 	percent = 100.*totalByApp/totalByApp.sum()
+
+	print(train_elec)
 
 	# plot training data using appliance names as labels
 	top_k_train_elec = train_elec.submeters().select_top_k(k=5)
@@ -200,6 +200,7 @@ def convertTestData(modelDir, data, outputFilename):
 	df.columns.set_names(LEVEL_NAMES, inplace=True)
 	df.index = pd.to_datetime(timeStamps, format='%Y-%m-%d %H:%M:%S', exact=False, utc=True)
 	df = df.tz_convert('US/Eastern')
+	df = df.sort_index()
 	key = Key(building=1, meter=1)
 	store.put(str(key), df)
 
@@ -271,7 +272,11 @@ def convertTrainData(modelDir, data, outputFilename):
 
 	# breakdown the data by appliance and set every time point where
 	# the appliance wasnt used to 0
-	for instance, app in enumerate(np.unique(appliances)):
+	
+	uniqueAppliances = list(np.unique(appliances))
+	meterIndex = uniqueAppliances.index('meter')
+
+	for index, app in enumerate(uniqueAppliances):
 		
 		# get the time points where a given appliance is on and 
 		# also where it is off
@@ -295,10 +300,20 @@ def convertTrainData(modelDir, data, outputFilename):
 		df.index = pd.to_datetime(timeAll, format='%Y-%m-%d %H:%M:%S', exact=False, utc=True)
 		df.columns.set_names(LEVEL_NAMES, inplace=True)
 		df = df.tz_convert('US/Eastern')
-		key = Key(building=1, meter=instance+1)
+		df = df.sort_index()
+
+		if index == meterIndex:
+			key = Key(building=1, meter=1)
+		elif index < meterIndex:
+			key = Key(building=1, meter=index+2)
+		else:
+			key = Key(building=1, meter=index+1)			
+		
 		store.put(str(key), df)
 
 	## create the metadata files in accordance with nilmtk guidelines
+	if meterIndex != -1:
+		del(uniqueAppliances[meterIndex])
 
 	# building metatdata
 	if not os.path.exists(pJoin(modelDir,'train')):
@@ -306,19 +321,22 @@ def convertTrainData(modelDir, data, outputFilename):
 	f = open(pJoin(modelDir,'train', 'building1.yaml'), 'w')
 	f.write('instance: 1\n')
 	f.write('elec_meters:\n')
-	for instance, app in enumerate(np.unique(appliances)):
-		if instance == 0:
-			f.write('  ' + '1: &generic\n')
+	f.write('  ' + '1: &mainMeter\n')
+	f.write('    ' + 'site_meter: true\n')
+	f.write('    ' + 'device_model: generic\n')
+	for index, app in enumerate(uniqueAppliances):
+		if index == 0:
+			f.write('  ' + '2: &generic\n')
 			f.write('    ' + 'submeter_of: 0\n')
 			f.write('    ' + 'device_model: generic\n')
 		else:
-			f.write('  ' + str(instance +1) + ': *generic\n')	
+			f.write('  ' + str(index +2) + ': *generic\n')	
 	f.write('\nappliances:')
-	for instance, app in enumerate(np.unique(appliances)):
+	for index, app in enumerate(uniqueAppliances):
 		f.write('\n- ' + 'original_name: ' + app + '\n')
 		f.write('  ' + 'type: unknown\n')
-		f.write('  ' + 'instance: ' + str(instance +1) + '\n')
-		f.write('  ' + 'meters: ['  + str(instance +1) + ']\n')
+		f.write('  ' + 'instance: ' + str(index + 1) + '\n')
+		f.write('  ' + 'meters: ['  + str(index + 2) + ']\n')
 	f.close()
 
 	# dataset metadata

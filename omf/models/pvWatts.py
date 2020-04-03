@@ -127,7 +127,7 @@ def new(modelDir):
 		"simLength": "100",
 		"systemSize":"10",
 		"nonInverterEfficiency":"77",
-		"trackingMode":"0",
+		"trackingMode":"2",
 		"azimuth":"180",
 		"runTime": "",
 		"rotlim":"45.0",

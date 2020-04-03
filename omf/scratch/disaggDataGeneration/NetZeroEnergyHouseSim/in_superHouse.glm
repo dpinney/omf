@@ -234,13 +234,13 @@ object evcharger_det {
 //	stdev_observation_property my_std;
 //};
 
-//object recorder {
-//	interval 60;
-//	property heating_demand[kW],cooling_demand[kW],heating_setpoint[degF],air_temperature[degF],outdoor_temperature[degF];
-//	line_units NONE;
-//	file out_house.csv;
-//	parent house0;
-//};
+object recorder {
+	interval 60;
+	property hvac_load,heating_setpoint,air_temperature,outdoor_temperature;
+	line_units NONE;
+	file out_house.csv;
+	parent house0;
+};
 
 object recorder {
 	interval 60;
