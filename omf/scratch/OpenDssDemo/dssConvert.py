@@ -58,17 +58,20 @@ def dssToTree(pathToDss):
 	contents = [x for x in contents if x != '']
 	# Lex it
 	for i, line in enumerate(contents):
-		#HACK: only support white space separation of attributes.
-		contents[i] = line.split()
-		# HACK: only support = assignment of values.
-		from collections import OrderedDict 
-		ob = OrderedDict() 
-		ob['!CMD'] = contents[i][0]
-		if len(contents[i]) > 1:
-			for j in range(1, len(contents[i])):
-				k,v = contents[i][j].split('=')
-				ob[k] = v
-		contents[i] = ob
+		try:
+			#HACK: only support white space separation of attributes.
+			contents[i] = line.split()
+			# HACK: only support = assignment of values.
+			from collections import OrderedDict 
+			ob = OrderedDict() 
+			ob['!CMD'] = contents[i][0]
+			if len(contents[i]) > 1:
+				for j in range(1, len(contents[i])):
+					k,v = contents[i][j].split('=')
+					ob[k] = v
+			contents[i] = ob
+		except:
+			raise Exception(f'Error encountered on line {i} = {line}')
 	# Print
 	# for line in contents:
 	# 	print line
