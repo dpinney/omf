@@ -6,6 +6,7 @@
 	<script type="text/javascript" src="/static/svg-pan-zoom.js"></script>
 	<script type="text/javascript" src="/static/omf.js"></script>
 	<script type="text/javascript" src="/static/jquery-1.9.1.js"></script>
+	<script type="text/javascript" src="/static/jquery-ui.min.js"></script>
 	<link rel="stylesheet" href="/static/omf.css"/>
 	<link rel="shortcut icon" href="/static/favicon.ico"/>
 	<style>
@@ -146,6 +147,8 @@
 					<button id="editOps" class='pill' onclick='dropPill(this, "Edit");'>Edit ▾</button>
 					<ul class='menu right' style="display:none">
 						<li><a href='javascript:showModal("anonymizeModal");'>Anonymization...</a></li>
+						<li><a href='javascript:showModal("findModal");'>Find...</a></li>
+
 					</ul>
 				</div>
 			</div>
@@ -289,6 +292,27 @@
 			</form>
 		</div>
 	</div>
+	<div id='findModal' class='modal' style="display: none">
+		<div class='modalContent' id='findModalContent' style='width:200px'>
+			<table class='importOptions' style='padding:4px; word-wrap:break-word'>
+				<tr>
+					<td>Term</td>
+					<td><input id='searchTerm' type='text'></td>
+				</tr>
+				<tr>
+					<td><button style='width:75px' onclick='backButton()'>Back</button></td>
+					<td id='searchHitCount' style='font-size:8pt; text-align:center'></td>
+				</tr>
+				<tr>
+					<td><button style='width:75px' onclick='findPrevious()'>Previous</button></td>
+					<td><button style='width:75px' onclick='findNext()'>Next</button></td>
+				</tr>
+				<tr>
+					<td><button style='width:75px' onclick='closeModal("findModal")'>Cancel</button></td>
+				</tr>
+			</table>
+		</div>
+	</div>
 	<div id='tableScroller'></div>
 	</body>
 </html>
@@ -306,6 +330,15 @@ var maxBranchID = -9999999;
 var maxGenID = -9999999;
 var iToSVGLookup = {}; //Necessary global to reduce runtime.  Otherwise whould have loops within loop looking through components for bus ID.
 var sVGToiLookup = {}; //"  "  "  "
+// Public variable to hold the current search state. TODO: put in a closure.
+var searchCursor;
+var currentSearchTerm;
+var previousSearchTerms = [];
+
+function makeModalsDraggable() {
+	$("#findModal .modalContent").draggable()
+}
+makeModalsDraggable();
 
 function saveSvg() {
 	// Redirect to an .svg file that the user can save.
@@ -528,13 +561,18 @@ function hotkeys() {
 }
 
 function tableCreate(inputObject) {
+	// If object doesn't have an element_id, ask user to reupload data set
+	if (inputObject.element_id === undefined) {
+		alert('Please re-upload your data set for additional processing.')
+	}
+	// Get the ID and type of object
+	clickType = inputObject.element_id.split('_')[0]
+	clickID = inputObject.element_id.split('_')[1]
 	// Draw the table for the selected object (i.e. inputObject).
 	tabScroll = document.getElementById('tableScroller')
 	tbl = document.createElement('table')
 	// Show what type of thing you clicked
 	whatClicked = document.createElement('tr')
-	var clickType = event.target.id.split("_")[0]
-	var clickID = event.target.id.split("_")[1]
 	whatClicked.innerHTML = '<th>'+clickType.charAt(0).toUpperCase()+clickType.slice(1);+'</th>'
 	whatClicked.innerHTML += '<th>'+String(clickID)+'</th>'
 	tbl.appendChild(whatClicked)
@@ -551,6 +589,9 @@ function tableCreate(inputObject) {
 	// Put the object attributes in.
 	var notAllowed = ['bus_i', 'bus', 'fbus', 'tbus', 'latitude', 'longitude'] //disabled because doesn't render in real time, and on-change causes lines to sometimes render improperly.
 	for (key in inputObject) {
+		if (key === 'element_id') { // Don't display the element_id in the table; this is for the "find" functionality 
+			continue
+		}
 		if (!(notAllowed.indexOf(key) > -1)) {
 			row = document.createElement('tr')
 			row.innerHTML = '<td><button onclick="tableDel(this)">&#215;</button><input style="width:112px" value=' + key + '></input></td>'
@@ -622,7 +663,7 @@ function deleteOb() {
 		previousTarget.remove()
 		delete networkData[clickType][clickID]
 	}
-	//Delete Squares
+	// Delete Squares
 	if (clickType === 'gen') {
 		previousTarget.remove()
 		delete networkData[clickType][clickID]
@@ -772,7 +813,8 @@ function newNodeListener() {
 		baseKV: "135",
 		zone: "1",
 		Vmax: "1.05",
-		Vmin: "0.95"
+		Vmin: "0.95",
+		element_id: "bus_" + maxBusID
 	}
 	var xloc = event.pageX
 	var yloc = event.pageY
@@ -967,7 +1009,8 @@ function newGen() {
 			ramp_10: "0",
 			ramp_30: "0",
 			ramp_q: "0",
-			apf: "0"
+			apf: "0",
+			element_id: "gen_" + newGenID
 		}
 		addRectangle(selBus.longitude - 4/2, selBus.latitude - 4/2, 4, 4, "gen_" + newGenID, "gen")
 		if(scaleTracker != 1.0) {
@@ -1012,7 +1055,8 @@ function newLink() {
 			angmin: "-360.0",
 			angmax: "360.0",
 			fbus: String(sVGToiLookup[fBusID]),
-			tbus: String(sVGToiLookup[tBusID])
+			tbus: String(sVGToiLookup[tBusID]),
+			element_id: "branch_" + maxBranchID
 		}
 		// Save to tree
 		networkData.branch[String(newCompID)] = newLink
@@ -1361,6 +1405,162 @@ function anonymize() {
 	showProgressDialog('spinner', 'Anonymizing Network')
 	startProcess('/anonymizeTrans/{{owner}}/{{networkName}}')
 	startCheck('/checkAnonymizeTran/{{owner}}/{{modelName}}')
+}
+
+// *********************************************
+// *********** FIND MODAL FUNCTIONS ************
+// *********************************************
+
+/**
+ * Find elements containing data matching the input string. 
+ * Iterate through every element in the network to find all matching elements.
+ * @param  {string} inputString
+ * @return {Object[]} results
+ */
+ function findElementsViaString(inputString) {
+	results = []
+	for (branchIndex in networkData.branch) {
+		branch = networkData.branch[branchIndex]
+		subIndex = JSON.stringify(branch).indexOf(inputString)
+		if (subIndex != -1) {
+			results.push(branch)
+		}
+	}
+	for (busIndex in networkData.bus) {
+		bus = networkData.bus[busIndex]
+		subIndex = JSON.stringify(bus).indexOf(inputString)
+		if (subIndex != -1) {
+			results.push(bus)
+		}
+	}
+	for (genIndex in networkData.gen) {
+		gen = networkData.gen[genIndex]
+		subIndex = JSON.stringify(gen).indexOf(inputString)
+		if (subIndex != -1) {
+			results.push(gen)
+		}
+	}
+	return results
+}
+
+/**
+ * Handler function of the "Back" button in the "Find" modal. 
+ * Find the previous string input.
+ */
+function backButton() {
+	if (previousSearchTerms.length == 0) {
+		console.log("There is no previous search term")
+		return
+	}
+	currentSearchTerm = previousSearchTerms.pop()
+	$("#searchTerm").val(currentSearchTerm)
+	findNext()
+}
+
+/**
+ * Handler function of the "Next" button in the "Find" modal.
+ * If objects are found, zoom to the first object in the list.
+ */
+function findNext() {
+
+	term = gebi('searchTerm').value
+	if (term.length == 0) {
+		return false
+	}
+	if (currentSearchTerm != term) {
+		if (currentSearchTerm != undefined) {
+			previousSearchTerms.push(currentSearchTerm)
+		}
+		currentSearchTerm = term
+		searchCursor = undefined
+	}
+
+	hits = findElementsViaString(term)
+	gebi('searchHitCount').innerHTML = hits.length + ' Hits'
+	try {
+		if (hits.length == 0) {
+			return false
+		}
+		clearAllSelected()
+		tableDestroy()
+		if (searchCursor == undefined) {
+			searchCursor = 0
+		} else {
+			searchCursor++
+			if (searchCursor == hits.length) {
+				searchCursor = 0
+			}
+			if (searchCursor == -1) { // "Previous" hit after 0
+				searchCursor = hits.length - 1
+			}
+		}
+		hit = hits[searchCursor]
+		tableCreate(hit)
+		element = document.getElementById(hit.element_id)
+		element.classList.add('selected')
+		selection.push(element)
+		zoomToSelection()
+	} catch (err) {
+		alert('The following error was encountered:\n' + err.message)
+	}
+}
+
+/**
+ * Handler function of the "Previous" botton in the "Find" modal.
+ * Find the previous object in a matched list.
+ */
+function findPrevious() {
+	if (searchCursor == undefined) {
+		findNext()
+	} else {
+		searchCursor -= 2
+		findNext()
+	}
+}
+
+/**
+ * Zoom to selected element in the center of current window.
+ */
+ function zoomToSelection() {
+	domTargets = document.getElementsByClassName('selected')
+	if (domTargets.length != 1) {
+		return false
+	}
+	element = domTargets[0]
+	if (element.id.includes('bus')) {
+		x = element.cx.baseVal.value
+		y = element.cy.baseVal.value
+	}
+	else if (element.id.includes('gen')) {
+		x = element.x.baseVal.value
+		y = element.y.baseVal.value
+	}
+	else if (element.id.includes('branch')) {
+		x = (element.x1.baseVal.value + element.x2.baseVal.value) / 2
+		y = (element.y1.baseVal.value + element.y2.baseVal.value) / 2
+	}
+	panZoom.pan({x: 0, y: 0})
+	var realZoom = window.panZoom.getSizes().realZoom;
+	var newX = -x * realZoom + window.panZoom.getSizes().width / 2
+	var newY = -y * realZoom + window.panZoom.getSizes().height / 2
+	panZoom.pan({x: newX, y: newY})
+
+	objectCount = Object.keys(networkData.bus).length + Object.keys(networkData.gen).length + Object.keys(networkData.branch).length
+	if (objectCount < 100) {
+		panZoom.zoom(2)
+	} else {
+		panZoom.zoom(objectCount / 50)
+	}
+}
+
+/**
+ * Clear all selected elements.
+ */
+function clearAllSelected() {
+	for (i=0; i<selection.length; i++) {
+			selection[i].classList.remove('selected')
+	}
+	selection = []
 }
 
 function downloadTextFile(fileName, text) {
