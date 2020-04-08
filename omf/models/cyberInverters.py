@@ -559,11 +559,25 @@ def work(modelDir, inputDict):
 			if regPhaseValue.find('C') != -1:
 				outData[reg_name]["RegTapC"] = pycigarJson[reg_name]["creg1c"]
 
-			outData[reg_name]["RegPhases"] = pycigarJson[reg_name]["RegPhases"]
+			outData[reg_name]["RegPhases"] = regPhaseValue
 
 		#convert inverter data
-		# for inv_name in invNameList:
-		# 	outData[inv_name] = pycigarJson[inv_name]
+		inverter_output_dict = {} 
+		for inv_dict in pycigarJson["Inverter Outputs"]:
+			#create a new dictionary to represent the single inverter 
+			new_inv_dict = {}
+			#get values from pycigar output for given single inverter
+			inv_name = inv_dict["Name"]
+			inv_volt = inv_dict["Voltage (V)"]
+			inv_pow_real = inv_dict["Power Output (W)"]
+			inv_pow_imag = inv_dict["Reactive Power Output (VAR)"]
+			#populate single inverter dict with pycigar values
+			new_inv_dict["Voltage"] = inv_volt
+			new_inv_dict["Power_Real"] = inv_pow_real
+			new_inv_dict["Power_Imag"] = inv_pow_imag
+			#add single inverter dict to dict of all the inverters using the inverter name as the key 
+			inverter_output_dict[inv_name] = new_inv_dict
+		outData["Inverter_Outputs"] = inverter_output_dict
 
 		#convert capacitor data - Need one on test circuit first!
 

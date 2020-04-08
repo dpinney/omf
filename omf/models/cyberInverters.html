@@ -450,114 +450,121 @@
 			<script type="text/javascript">
 
 				var invNamesArray=[]
-				for (var key in allOutputData)
-				{
-  					if (key.indexOf('Inverter') === 0)
-  					{
-  						invName = "allOutputData.".concat(key);
-  						invNamesArray.push(invName)
-					}
-
-				}
+				invNamesArray = Object.keys(allOutputData.Inverter_Outputs)
+				// for (var key in allOutputData.Inverter_Outputs)
+				// {
+				// 	invName = "allOutputData.Inverter_Outputs.".concat(key);
+				// 	invNamesArray.push(invName)
+				// }
 				if (invNamesArray.length == 0){
 						$("#newInverterReport").html("<p>&#160;&#160;&#160;No Inverters were found on the feeder.</p>")
 					}
 				for (var i in invNamesArray){
-					inv = invNamesArray[i]
+					var inv = invNamesArray[i]
 					$("<div/>").appendTo("#newInverterReport")
 						.attr("class", "inverterContainer")
 						.attr("id", inv)
 					$("<div/>").appendTo("#newInverterReport")
 						.attr("id", "inverterSeries_" + inv)
 					// if no inverters are found, display message
-  					
+  					var invLongName = "allOutputData.Inverter_Outputs.".concat(inv)
 					
-					var inv1ARSeries = {
+					var invVoltageSeries = {
 						"pointWidth": 40,
 						"pointInterval": 3 * 3600 * 100,
 						"color":"RoyalBlue",
-						"data":eval(invNamesArray[i].concat(".Inv1AR")),
-						"name":"A Real",
+						"data":eval(invLongName.concat(".Voltage")),
+						"name":"Voltage",
 					}
 
-					var inv1BRSeries = {
+					var invPowerRealSeries = {
 						"pointWidth": 40,
 						"pointInterval": 3 * 3600 * 100,
 						"color":"Crimson",
-						"data":eval(invNamesArray[i].concat(".Inv1BR")),
-						"name":"B Real",
+						"data":eval(invLongName.concat(".Power_Real")),
+						"name":"Power Output",
+						"yAxis": 1,
 					}
-					var inv1CRSeries = {
+					var invPowerImagSeries = {
 						"pointWidth": 40,
 						"pointInterval": 3 * 3600 * 100,
 						"color":"LimeGreen",
-						"data":eval(invNamesArray[i].concat(".Inv1CR")),
-						"name":"C Real",
+						"data":eval(invLongName.concat(".Power_Imag")),
+						"name":"Reactive Power Output",
+						"yAxis": 2,
 					}
-
-					var inv1AISeries = {
-						"pointWidth": 40,
-						"pointInterval": 3 * 3600 * 100,
-						"color":"PowderBlue",
-						"data":eval(invNamesArray[i].concat(".Inv1AI")),
-						"name":"A Imag",
-					}
-
-					var inv1BISeries = {
-						"pointWidth": 40,
-						"pointInterval": 3 * 3600 * 100,
-						"color":"Pink",
-						"data":eval(invNamesArray[i].concat(".Inv1BI")),
-						"name":"B Imag",
-					}
-					var inv1CISeries = {
-						"pointWidth": 40,
-						"pointInterval": 3 * 3600 * 100,
-						"color":"PaleGreen",
-						"data":eval(invNamesArray[i].concat(".Inv1CI")),
-						"name":"C Imag",
-					}
-				}
-				phaseValue= "ABCN" //eval(inv.concat(".InvPhases"))
-				var localHighChart = JSON.parse(JSON.stringify(highChartsTemplate))
-				localHighChart["chart"]["renderTo"] = "inverterSeries_" + inv
-				localHighChart["chart"]["inverted"] = false
-				localHighChart["chart"]["height"] = 200
-				localHighChart["chart"]["width"] = 1000
-				localHighChart["chart"]["type"] = "line"
-				localHighChart["title"]["text"] = inv.substr(14)
-				localHighChart["title"]["align"] = "right"
-				localHighChart["series"] = []
-				localHighChart["xAxis"] = { "type":"datetime",
-					"tickColor":"gray",
-					"lineColor":"gray",
-					}
-				localHighChart["yAxis"] = {"min": 0, "max" : 5000000,
-					//"startOnTick": "false",
-					"title":{ "text": "Phase Power",
-						"style":{
-							"color":"gray"
+					var yPowerMin = Math.min(...invPowerRealSeries.data)
+					yPowerMin = Math.floor(yPowerMin/1000)*1000
+					var yPowerMax = Math.max(...invPowerRealSeries.data)
+					yPowerMax = Math.ceil(yPowerMax/1000)*1000
+					var localHighChart = JSON.parse(JSON.stringify(highChartsTemplate))
+					localHighChart["chart"]["renderTo"] = "inverterSeries_" + inv
+					localHighChart["chart"]["zoomType"] = 'xy'
+					localHighChart["chart"]["inverted"] = false
+					localHighChart["chart"]["height"] = 200
+					localHighChart["chart"]["width"] = 1000
+					localHighChart["chart"]["marginRight"] = 150
+					localHighChart["chart"]["type"] = "line"
+					localHighChart["title"]["text"] = inv
+					localHighChart["title"]["align"] = "right"
+					localHighChart["title"]["x"] = -50
+					localHighChart["series"] = []
+					localHighChart["xAxis"] = { "type":"datetime",
+						"tickColor":"gray",
+						"lineColor":"gray",
 						}
+					localHighChart["yAxis"] = [{ //Volts Axis
+						"min": 110, 
+						"max" : 130,
+						//"startOnTick": "false",
+						// 'labels': {
+						// 	'format': '{value} V'
+						// },
+						"title": { 
+							"text": "Voltage (V)",
+							"style": {
+								"color":"gray"
+							}
+						}
+					}, { //Watts Axis
+						"min": yPowerMin, 
+						"max" : yPowerMax,
+						//"startOnTick": "false",
+						// 'labels': {
+						// 	'format': '{value} W'
+						// },
+						"title": { 
+							"text": "Power Output (W)",
+							"style": {
+								"color":"gray"
+							}
+						},
+						"opposite": true
+					}, { //VARs Axis
+						"min": yPowerMin, 
+						"max" : yPowerMax,
+						//"startOnTick": "false",
+						// 'labels': {
+						// 	'format': '{value} VARs'
+						// },
+						"title": { 
+							"text": "Reactive Power Output (VAR)",
+							"style": {
+								"color":"gray"
+							}
+						},
+						"opposite": true
+					}]
+					localHighChart["plotOptions"] = {
+						//"bar":{"stacking":"normal", "shadow":false},
 					}
-				}
-				localHighChart["plotOptions"] = {
-					//"bar":{"stacking":"normal", "shadow":false},
-				}
-				chart = new Highcharts.Chart(localHighChart);
-				if(phaseValue.indexOf('A') != -1)
-				{
-					chart.addSeries(inv1ARSeries)
-					chart.addSeries(inv1AISeries)
-				}
-				if(phaseValue.indexOf('B') != -1)
-				{
-					chart.addSeries(inv1BRSeries)
-					chart.addSeries(inv1BISeries)
-				}
-				if(phaseValue.indexOf('C') != -1)
-				{
-					chart.addSeries(inv1CRSeries)
-					chart.addSeries(inv1CISeries)
+					localHighChart["tooltip"] = {
+						"shared": true
+					}
+					chart = new Highcharts.Chart(localHighChart);
+					chart.addSeries(invVoltageSeries)
+					chart.addSeries(invPowerRealSeries)
+					chart.addSeries(invPowerImagSeries)
 				}
 			</script>
 		</div>
