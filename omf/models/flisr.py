@@ -150,7 +150,7 @@ def cutoffFault(tree, faultedNode, bestReclosers, workDir, radial):
 								tree, bestReclosers, found = removeRecloser(tree, tree2, recloser, bestReclosers, found)
 								break
 					if found == True:
-						if radial == True:
+						if radial == 'True':
 							del (buses[0])
 						break
 					row -= 1
@@ -229,7 +229,7 @@ def addTieLines(tree, faultedNode, potentiallyViable, unpowered, powered, openSw
 									tree, bestReclosers, found = removeRecloser(tree, tree2, recloser, bestReclosers, found)
 									break
 						if found == True:
-							if radial == True:
+							if radial == 'True':
 								goTo2 = True
 								bestTies.append(openSwitch)
 								index += 1
@@ -266,7 +266,24 @@ def addTieLines(tree, faultedNode, potentiallyViable, unpowered, powered, openSw
 		terminate = True
 	return tree, potentiallyViable, tieLines, bestTies, bestReclosers, goTo2, goTo3, terminate, index
 
-def flisr(pathToOmd, pathToTieLines, faultedLine, workDir, radial):
+def coordsFromString(entry):
+	'helper function to take a location string to two integer values'
+	p = re.compile(r'-?\d+\.\d+')  # Compile a pattern to capture float values
+	coord = [float(i) for i in p.findall(str(entry))]  # Convert strings to float
+	coordLat = coord[0]
+	coordLon = coord[1]
+	return coordLat, coordLon, coord
+
+def nodeToCoords(outageMap, nodeName):
+	'get the latitude and longitude of a given node in string format'
+	coords = ''
+	for key in outageMap['features']:
+		if (nodeName in key['properties'].get('name','')):
+			current = key['geometry']['coordinates']
+			coord1, coord2, coords = coordsFromString(current)
+	return coords
+
+def flisr(pathToOmd, pathToTieLines, faultedLine, workDir, radial, drawMap):
 	'run the FLISR algorithm to isolate the fault and restore power'
 	if not workDir:
 		workDir = tempfile.mkdtemp()
@@ -278,9 +295,16 @@ def flisr(pathToOmd, pathToTieLines, faultedLine, workDir, radial):
 
 	# find a node associated with the faulted line
 	faultedNode = ''
+	faultedNode2 = ''
 	for key in tree.keys():
 		if tree[key].get('name','') == faultedLine:
 			faultedNode = tree[key]['from']
+			faultedNode2 = tree[key]['to']
+
+	busNodes = []
+	for key in tree.keys():
+		if tree[key].get('bustype','') == 'SWING':
+			busNodes.append(tree[key]['name'])
 
 	# simplify the system to decrease runtime
 	tree = mergeContigLines(tree, faultedLine)
@@ -324,40 +348,97 @@ def flisr(pathToOmd, pathToTieLines, faultedLine, workDir, radial):
 	attachments = []
 	gridlabOut = omf.solvers.gridlabd.runInFilesystem(tree, attachments=attachments, workDir=workDir)
 
-	# feeder chart with recloser
-	plt.close('all')
-	outGraph = nx.Graph()
-	for key in tree:
-		item = tree[key]
-		if 'name' in item.keys():
-			obType = item.get('object')
-			reclDevices = dict.fromkeys(['recloser'], False)
-			if ('tie' in item.get('name', '')):
-				# HACK: set the recloser as a swingNode in order to make it hot pink
-				outGraph.add_edge(item['from'],item['to'],type='swingNode')
-			elif (obType in reclDevices.keys()):
-				outGraph.add_edge(item['from'],item['to'])
-			elif 'parent' in item.keys() and obType not in reclDevices:
-				outGraph.add_edge(item['name'],item['parent'],type='parentChild',phases=1)
-				outGraph.nodes[item['name']]['type']=item['object']
-				# Note that attached houses via gridEdit.html won't have lat/lon values, so this try is a workaround.
-				try: outGraph.nodes[item['name']]['pos']=(float(item.get('latitude',0)),float(item.get('longitude',0)))
-				except: outGraph.nodes[item['name']]['pos']=(0.0,0.0)
-			elif 'from' in item.keys():
-				myPhase = feeder._phaseCount(item.get('phases','AN'))
-				outGraph.add_edge(item['from'],item['to'],name=item.get('name',''),type=item['object'],phases=myPhase)
-			elif item['name'] in outGraph:
-				# Edge already led to node's addition, so just set the attributes:
-				outGraph.nodes[item['name']]['type']=item['object']
-			else:
-				outGraph.add_node(item['name'],type=item['object'])
-			if 'latitude' in item.keys() and 'longitude' in item.keys():
-				try: outGraph.nodes.get(item['name'],{})['pos']=(float(item['latitude']),float(item['longitude']))
-				except: outGraph.nodes.get(item['name'],{})['pos']=(0.0,0.0)
-	feeder.latLonNxGraph(outGraph, labels=True, neatoLayout=True, showPlot=False)
-	plt.savefig(workDir + '/feeder_chart')
+	# Draw a leaflet graph of the feeder with added tie lines and opened reclosers
+	if drawMap == 'True':
+		outageMap = geo.omdGeoJson(pathToOmd, conversion=False)
 
-	return {'bestReclosers':bestReclosers, 'bestTies':bestTies}
+		row = 0
+		while row < len(busNodes):
+			Dict = {}
+			Dict['geometry'] = {'type': 'Point', 'coordinates': nodeToCoords(outageMap, str(busNodes[row]))}
+			Dict['type'] = 'Feature'
+			Dict['properties'] = {'name': 'swingbus' + str(row+1),
+								  'pointColor': 'orange'}
+			outageMap['features'].append(Dict)
+			row += 1
+
+		Dict = {}
+		Dict['geometry'] = {'type': 'LineString', 'coordinates': [nodeToCoords(outageMap, str(faultedNode)), nodeToCoords(outageMap, str(faultedNode2))]}
+		Dict['type'] = 'Feature'
+		Dict['properties'] = {'name': 'faultedLine',
+							  'edgeColor': 'red'}
+		outageMap['features'].append(Dict)
+
+		row = 0
+		while row < len(bestTies):
+			Dict = {}
+			Dict['geometry'] = {'type': 'LineString', 'coordinates': [nodeToCoords(outageMap, str(bestTies[row]['from'])), nodeToCoords(outageMap, str(bestTies[row]['to']))]}
+			Dict['type'] = 'Feature'
+			Dict['properties'] = {'name': 'tieLine_' + str(row+1),
+								  'edgeColor': 'yellow'}
+			outageMap['features'].append(Dict)
+			row += 1
+
+		row = 0
+		while row < len(bestReclosers):
+			Dict = {}
+			Dict['geometry'] = {'type': 'LineString', 'coordinates': [nodeToCoords(outageMap, str(bestReclosers[row]['from'])), nodeToCoords(outageMap, str(bestReclosers[row]['to']))]}
+			Dict['type'] = 'Feature'
+			Dict['properties'] = {'name': 'recloser_' + str(row+1),
+								  'edgeColor': 'cyan'}
+			outageMap['features'].append(Dict)
+			row += 1
+
+		if not os.path.exists(workDir):
+			os.makedirs(workDir)
+		shutil.copy(omf.omfDir + '/templates/geoJsonMap.html', workDir)
+		with open(pJoin(workDir,'geoJsonFeatures.js'),'w') as outFile:
+			outFile.write('var geojson =')
+			json.dump(outageMap, outFile, indent=4)
+
+		#Save geojson dict to then read into outdata in work function below
+		with open(pJoin(workDir,'geoDict.js'),'w') as outFile:
+			json.dump(outageMap, outFile, indent=4)
+
+	def switchStats(tieLines, bestTies):
+		new_html_str = """
+			<table cellpadding="0" cellspacing="0">
+				<thead>
+					<tr>
+						<th>Name</th>
+						<th>Status</th>
+						<th>From</th>
+						<th>To</th>
+					</tr>
+				</thead>
+				<tbody>"""
+		
+		for openSwitch in bestTies:
+			new_html_str += '<tr><td><b>' + str(openSwitch.get('name', '')) + '</b></td><td>'+'Closed'+'</td><td>'+str(openSwitch.get('from', ''))+'</td><td>'+str(openSwitch.get('to', ''))+'</td></tr>'
+
+		for recloser in bestReclosers:
+			new_html_str += '<tr><td><b>' + str(recloser.get('name', '')) + '</b></td><td>'+'Open'+'</td><td>'+str(recloser.get('from', ''))+'</td><td>'+str(recloser.get('to', ''))+'</td></tr>'
+
+		row = 0
+		while row < len(tieLines):
+			new_html_str += '<tr><td><b>' + str(tieLines.loc[row, 'name']) + '</b></td><td>'+'Open'+'</td><td>'+str(tieLines.loc[row, 'from'])+'</td><td>'+str(tieLines.loc[row, 'to'])+'</td></tr>'
+			row += 1
+
+		for key in tree:
+			if tree[key].get('object','') == 'recloser':
+				new_html_str += '<tr><td><b>' + str(tree[key].get('name', '')) + '</b></td><td>'+'Closed'+'</td><td>'+str(tree[key].get('from', ''))+'</td><td>'+str(tree[key].get('to', ''))+'</td></tr>'
+		new_html_str +="""</tbody></table>"""
+
+		return new_html_str
+
+	# print all intermediate and final costs
+	switchStatsHtml = switchStats(
+		tieLines = tieLines,
+		bestTies = bestTies)
+	with open(pJoin(workDir, 'switchStats.html'), 'w') as switchFile:
+		switchFile.write(switchStatsHtml)
+
+	return {'bestReclosers':bestReclosers, 'bestTies':bestTies, 'switchStatsHtml': switchStatsHtml}
 
 #flisr('C:/Users/granb/omf/omf/static/publicFeeders/Olin Barre Fault Test 2.omd', 'C:/Users/granb/omf/omf/scratch/blackstart/test.csv', "19186", None, True)
 
@@ -376,15 +457,17 @@ def work(modelDir, inputDict):
 		pathToData, #Tie Line Data Path
 		inputDict['faultedLine'], #'19186'
 		modelDir, #Work directory.
-		inputDict['radial']) #'True') 
+		inputDict['radial'], #'True'
+		inputDict['drawMap']) #'True') 
 	
-	# # Textual outputs of cost statistic
-	# with open(pJoin(modelDir,'costStatsCalc.html')) as inFile:
-	# 	outData['costStatsHtml'] = inFile.read()
-	
-	# Image outputs.
-	with open(pJoin(modelDir,'feeder_chart.png'),'rb') as inFile:
-		outData['feeder_chart.png'] = base64.standard_b64encode(inFile.read()).decode()
+	# Textual outputs of cost statistic
+	with open(pJoin(modelDir,'switchStats.html')) as inFile:
+		outData['switchStatsHtml'] = inFile.read()
+
+	#The geojson dictionary to load into the outageCost.py template
+	if inputDict['drawMap'] == 'True':
+		with open(pJoin(modelDir,'geoDict.js'),'rb') as inFile:
+			outData['geoDict'] = inFile.read().decode()
 
 	# Stdout/stderr.
 	outData['stdout'] = 'Success'
@@ -401,6 +484,7 @@ def new(modelDir):
 		'faultedLine': '19186',
 		'radial': 'True',
 		'runPowerflow': 'True',
+		'drawMap': 'True',
 		'tieFileName': 'testOlinBarreFault.csv',
 		'tieData': tie_data
 	}
@@ -432,3 +516,4 @@ def _tests():
 
 if __name__ == '__main__':
 	_tests()
+

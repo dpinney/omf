@@ -150,6 +150,7 @@ def convert(stdString, seqString, rescale=True):
 			generator['Gen_mode'] = 'CONSTANTPQ'
 			generator['Gen_status'] = ('OFFLINE' if genList[26]=='1' else 'ONLINE')
 			generator['phases'] = "ABCN"
+			#TODO: add genList[30] = kWOut, genList[31] = maxKwOut
 			return generator
 
 		def convertMotor(motorList):

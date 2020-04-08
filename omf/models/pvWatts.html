@@ -93,11 +93,11 @@
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Tracking Mode<span class="classic">Type of tracking system the PV array will use if any.</span></label>
-				<select id="trackingMode" name="trackingMode"  value="{{allInputDataDict.trackingMode}}"/>
-					<option value="0">Fixed</option>
-					<option value="1">1 Axis</option>
-					<option value="2">2 Axis</option>
-					<option value="3">Azimuth Axis</option>
+				<select id="trackingMode" name="trackingMode"/>
+					<option value="0" {% if allInputDataDict.trackingMode == '0' %}selected{% endif %}>Fixed</option>
+					<option value="1" {% if allInputDataDict.trackingMode == '1' %}selected{% endif %}>1 Axis</option>
+					<option value="2" {% if allInputDataDict.trackingMode == '2' %}selected{% endif %}>2 Axis</option>
+					<option value="3" {% if allInputDataDict.trackingMode == '3' %}selected{% endif %}>Azimuth Axis</option>
 				</select>
 			</div>
 			<div class="shortInput">
@@ -128,37 +128,11 @@
 					<option value="days">Days</option>
 				</select>
 			</div>
-			<div class="wideInput" style="text-align:right">
-				{% if modelStatus != 'running' and (datastoreNames.get('currentUser','') == allInputData.user or datastoreNames.get('currentUser','') == 'admin') %}
-				<button id="deleteButton" type="button" onclick="deleteModel()">Delete</button>
-				<button id="runButton" type="submit">Run Model</button>
-				{% endif %}
-				{% if modelStatus == "finished" %}
-				<button id="shareButton" type="button" onclick="shareModel()">Share</button>
-				<button id="duplicateButton" type="button" onclick="duplicateModel()">Duplicate</button>
-				{% endif %}
-				{% if modelStatus == "running" and (datastoreNames.get('currentUser','') == allInputData.user or datastoreNames.get('currentUser','') == 'admin') %}
-				<button id="cancelButton" type="button" onclick="cancelModel()">Cancel Run</button>
-				{% endif %}
-			</div>
+			{{ omfModelButtons }}
 		</form>
 	</div>
 	<div id="copyrightNotice" style="width:1000px; margin:-25px auto 10px auto; padding-left:5px; color:gray">PVWatts &copy; was developed by the <a href="http://pvwatts.nrel.gov/">National Renewable Energy Lab</a></div>
-	{% if modelStatus == 'running' %}
-	<div id ="runIndicator" class="content">
-		Model running on server. Refresh the page to check for results, or wait for automatic refresh every 5 seconds.
-	</div>
-	{% endif %}
-	{% if modelStatus == 'stopped' %}
-	<div id ="stopIndicator" class="content" style="visibility: hidden">
-		<pre id='errorText' style='overflow-x:scroll'></pre>
-		<script type="text/javascript">
-		if (typeof(allInputData.stderr) !== 'undefined') {	
-			gebi('stopIndicator').style.visibility = 'visible'
-			gebi('errorText').innerHTML = 'MODEL ENCOUNTERED AN ERROR AS FOLLOWS: \n\n' + allInputData.stderr}
-		</script>
-	</div>
-	{% endif %}
+	{{ omfRunDebugBlock }}
 	{% if modelStatus == 'finished' %}
 	<div id="output">
 		<div style="text-align:left" class="tightContent">
@@ -181,9 +155,13 @@
 			<div id="energyBalance"></div>
 			<script>
 				// Handle special case for inverter sizing:
-				if (allInputData.inverterSize == 0) {chartInverter = allInputData.systemSize}
-				else {chartInverter = allInputData.inverterSize}
-				powerSeries = [{"marker":{"enabled":false},"dataLabels":{"enabled":false}, "color":"red","data":allOutputData.Consumption.Power,"name":"Power Generated"}]
+				if ({{allInputDataDict.inverterSize}} == 0) {
+					chartInverter = {{allInputDataDict.systemSize}}
+				}
+				else {chartInverter = {{allInputDataDict.inverterSize}}}
+				parseFloat({{allInputDataDict.systemSize}})*1000
+				power = {{allOutputDataDict.Consumption['Power']}}
+				powerSeries = [{"marker":{"enabled":false},"dataLabels":{"enabled":false}, "color":"red","data":power,"name":"Power Generated"}]
 				new Highcharts.Chart({ "credits":{"enabled":false},
 					"plotOptions":{ "series":{"pointStart":pointStart,"shadow":false,"pointInterval":pointInterval, "animation": false}, "line":{"marker":{"enabled":false}}},
 					"xAxis":{"maxZoom":108000000,"tickColor":"gray","type":"datetime","lineColor":"gray"},
@@ -196,7 +174,7 @@
 							"dashStyle": "ShortDash",
 							"width": 2,
 							"label":{"text":"Panels Nameplate","align":"right","y":12,"x":0},
-							"value": parseFloat(allInputData.systemSize)*1000,"zIndex": 10},
+							"value": systemSize,"zIndex": 10},
 							{"color": "orange",
 							"dashStyle": "ShortDash",
 							"width": 2,
@@ -244,12 +222,7 @@
 					"legend":{"verticalAlign":"top","align":"top","borderWidth":0,"x":50,"y":-10,"layout":"horizontal"}})
 			</script>
 		</div>
-		<p class="reportTitle">Raw Input and Output Files</p>
-		<div id="rawOutput" class="content" style="margin-top:0px">
-			{% for name in allOutputDataDict['fileNames'] %}
-				{% if loop.index > 1 %}&mdash; {% endif %}<a href="/downloadModelData/{{allInputDataDict['user']}}/{{allInputDataDict['modelName']}}/{{name}}">{{name}}</a>
-			{% endfor %}
-		</div>
+		{{ rawOutputFiles }}
 	</div>
 	{% endif %}
 </body>

@@ -28,11 +28,22 @@
 	<script type="text/javascript" src="{{pathPrefix}}/static/jquery-1.9.1.js"></script>
 	<script src="{{pathPrefix}}/static/highcharts4.src.js"></script>
 	<script src="https://cdn.plot.ly/plotly-1.50.1.min.js"></script>
+	<!-- Leaflet -->
+	<link rel="stylesheet" href="https://unpkg.com/leaflet@1.5.1/dist/leaflet.css"	integrity="sha512-xwE/Az9zrjBIphAcBb3F6JVqxf46+CDLwfLMHloNu6KEQCAWi6HcDUbeOfBIptF7tcCzusKFjFw2yuvEpDL9wQ=="	crossorigin=""/>
+	<script src="https://unpkg.com/leaflet@1.5.1/dist/leaflet.js" integrity="sha512-GffPMF3RvMeYyc1LWMHtK8EbPv0iNZ8/oTtHPx9/cc2ILxQ+u905qIwdpULaqDkyBKgOaB57QTMg7ztg8Jm2Og==" crossorigin=""></script>
 	<!-- Data  Imports -->
 	<script>allInputData={% if allInputDataDict %}{{allInputDataDict | tojson}}{% else %}null{% endif %}</script>
 	<script>allOutputData={% if allOutputDataDict %}{{allOutputDataDict | tojson}}{% else %}null{% endif %}</script>
 	<script>modelStatus="{{modelStatus}}"</script>
 	<script>currentUser="{{datastoreNames.get('currentUser','test')}}"</script>
+	<style>#map{
+		position: relative;
+		width: 100.0%;
+		height: 100.0%;
+		left: 0.0%;
+		top: 0.0%;
+		}
+	</style>
 </head>
 <body onload="init()">
 	<div id="header">
@@ -103,6 +114,13 @@
 				</select>
 			</div>
 			<div class="shortInput">
+				<label class="tooltip">Show Leaflet Map?<span class="classic">If yes, a simplification to the algorithm will be used.</span></label>
+				<select id="drawMap" name="drawMap" />
+					<option value='True'>Yes</option>
+					<option value='False'>No</option>
+				</select>
+			</div>
+			<div class="shortInput">
 				<label class="tooltip">Faulted Line<span class="classic">The line affected by the fault.</span></label>
 				<input type="text" id="faultedLine" name="faultedLine" required="required">
 			</div>
@@ -146,15 +164,219 @@
 		</script>
 	</div>
 	<div id="output">
-		<p class="reportTitle postRun">Feeder Diagram (Added Recloser Shown in Pink, Other Reclosers Shown as Black Dotted Lines)</p>
-		<div id="feederChart" class="content postRun" style="margin-top:0px">
-			<img id="feederChartImage" style="width:980px" />
-			<script>gebi("feederChartImage").src = "data:image/png;base64," + allOutputData["feeder_chart.png"]</script>
-		</div>
-		<p class="reportTitle postRun" style="page-break-before:always">Outage Cost Comparison</p>
+		<p class="reportTitle postRun" style="page-break-before:always">Switch Stats</p>
 		<div id="outageCostCalc" class="tightContent postRun">
-			{{ allOutputDataDict['costStatsHtml'] }}
+			{{ allOutputDataDict['switchStatsHtml'] }}
 		</div>
+		<!-- Leaflet map directly inline with model-->
+		<div id="mapInsert"></div>
+		<script type="text/javascript">
+		//Hack to stop leaflet from loading before geojson data loads 
+		if(modelStatus === "finished"){
+		mapHtml = '<p class="reportTitle">Restored System (Yellow Ties, Cyan Reclosers, Red Fault, Orange Buses)</p><div id="mapHolder" class="tightContent"><div id="map"></div></div>';
+		gebi('mapInsert').innerHTML = mapHtml;
+		//Parse geojson dict (instead of reading from geojson.js - doesn't really matter if you want to load from geojson.js, was just quicker to prototype) 
+		var geojson = JSON.parse(allOutputData['geoDict']);
+		console.log(geojson);
+
+		function filterFunction(feature, layer) {
+			minMeter = feature.properties['meterMinFilter'];
+			maxMeter = feature.properties['meterMaxFilter'];
+			meterCount = feature.properties['meterCount'];
+			minDuration = feature.properties['durationMinFilter'];
+			maxDuration = feature.properties['durationMaxFilter'];
+			dur = feature.properties['duration'];
+			causeFilter = feature.properties['causeFilter'];
+			cause = feature.properties['cause'];
+			time = feature.properties['time'];
+			timeMin = feature.properties['timeMin'];
+			timeMax = feature.properties['timeMax'];
+			faultType = feature.properties['faultType'];
+			componentType = feature.properties['componentType'];
+			faultFilter = feature.properties['faultFilter'];
+			componentFilter = feature.properties['componentFilter'];
+			thisMeter = false;
+			if (minMeter > maxMeter)
+				return false;
+			if (meterCount > maxMeter || meterCount < minMeter)
+				thisMeter = false;
+			else thisMeter = true;
+			if (thisMeter == false)
+				return false;
+			thisDuration = false;
+			if (minDuration > maxDuration)
+				return false;
+			if (dur > maxDuration || dur < minDuration) {
+				thisDuration = false;
+			}
+			else thisDuration = true;
+			if (thisDuration == false) {
+				return false;
+			}
+			thisCause = false;
+			if (causeFilter != '0') {
+				if (causeFilter == cause) {
+					thisCause = true;
+				}
+				else thisCause = false;
+			}
+			else thisCause = true;
+			if (thisCause == false) {
+				return false;
+			}
+			thisComponent = false;
+			if (componentFilter != 'All') {
+				if (componentFilter == componentType) {
+					thisComponent = true;
+				}
+				else thisComponent = false;
+			}
+			else thisComponent = true;
+			if (thisComponent == false) {
+				return false;
+			}
+			thisFault = false;
+			if (faultFilter != 'All') {
+				if (faultFilter == faultType) {
+					thisFault = true;
+				}
+				else thisFault = false;
+			}
+			else thisFault = true;
+			if (thisFault == false) {
+				return false;
+			}
+			thisTime = false;
+			if (timeMin > timeMax)
+				return false;
+			if (time > timeMax || time < timeMin)
+				thisTime = false;
+			else thisTime = true;
+			if (thisTime == false)
+				return false;
+			return true;
+		}
+
+		function onEachFeature(feature, layer) {
+			var popup = '';
+			if (feature.properties['name']){
+				popup += feature.properties['name'];
+				layer.bindPopup(popup);
+			}
+		}
+
+		function pointToLayerNode(feature, latlng) {
+			let fillColorValue = 'gray';
+			let rad = 3
+			if (feature.properties['pointColor']){
+				fillColorValue = feature.properties['pointColor'];
+				rad = 6;
+			}
+			return L.circleMarker(latlng, {
+				radius: rad,
+				fillColor: fillColorValue,
+				color: "#000",
+				weight: 1,
+				opacity: 1,
+				fillOpacity: 0.8
+			});
+		}
+
+		function lineStyle(feature){
+			if (feature.geometry['type'] == 'LineString'){
+				if (feature.properties.edgeColor){
+					return {
+						"color": feature.properties.edgeColor
+					}
+				}
+				else{
+					return {
+						"color": "black"
+					}
+				}
+			}
+			else if (feature.geometry['type'] == 'Polygon'){
+				return {
+					"color": "blue"
+				}
+			}
+		}
+
+		geojsonLayer = L.geoJSON(false, {
+					pointToLayer: pointToLayerNode,
+					onEachFeature: onEachFeature,
+					style: lineStyle,
+					filter: filterFunction
+				});
+
+		geojson.features.forEach(function(feature){
+			if (feature.geometry['type'] == 'Point'){
+				geojsonLayer.addData(feature);
+			}
+			else if (feature.geometry['type'] == 'LineString'){
+				geojsonLayer.addData(feature);
+			}
+			else if (feature.geometry['type'] == 'Polygon'){
+				geojsonLayer.addData(feature);
+			}
+		});
+
+		//function clickFeature(e) {
+		//	if (typeof clickedFeature != 'undefined') {clickedFeature.setRadius(3);}
+
+		//	var layer = e.target;
+		//	e.target.setRadius(5);
+		//	clickedFeature = e.target;
+		//	update(feature.properties.radius);
+		//}
+
+		//var update = function(feature, latlng) {
+		//	return L.circleMarker(latlng)
+		//}
+
+		//function onEachFeature2(feature,layer) {
+		//	layer.on({click: clickFeature,})
+		//}
+
+		// Optional forcing of canvas renderer:
+		// var map = L.map('map', {renderer: L.canvas()}).fitBounds(bounds);
+		var bounds = geojsonLayer.getBounds();
+		var map = L.map('map').fitBounds(bounds);
+
+		//geojson.features.forEach(function(feature1) {
+		//	if (feature1.properties['meters']) {
+		//		var feature1.properties['name'] = new L.geoJSON(false, {
+		//			onEachFeature: onEachFeature2,
+		//			pointToLayer: function(feature, latlng) {
+		//				return L.circleMarker(latlng, {
+		//					radius: 3,
+		//					fillColor: 'gray',
+		//					color: '#000',
+		//					opacity : 1,
+		//					weight: 1.5,
+		//					fillOpacity: 1
+		//				});
+		//			}
+		//		});
+		//		feature1.properties['name'].addData(feature1);
+		//		geojson.features.forEach(function(feature2){
+		//			if (feature1.properties['meters'].includes(feature2.properties['name'])) {
+		//				feature1.properties['name'].addData(feature2);
+		//			}					
+		//		});
+		//	}
+		//});
+		
+		mapLink = '<a href="http://openstreetmap.org">OpenStreetMap</a>';
+		L.tileLayer(
+			'http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+			attribution: '&copy; ' + mapLink + ' Contributors',
+			maxZoom: 18,
+			}).addTo(map);
+		L.control.scale().addTo(map);
+		geojsonLayer.addTo(map);
+	}
+	</script>
 		<!-- TODO: Remove? -->
 		<!-- <script type="text/javascript">
 			// Global Highcharts settings.
