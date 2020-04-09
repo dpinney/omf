@@ -88,9 +88,10 @@
 		}
 	});
 	var bounds = geojsonLayer.getBounds();
-	// Optional forcing of canvas renderer:
-	// var map = L.map('map', {renderer: L.canvas()}).fitBounds(bounds);
-	var map = L.map('map').fitBounds(bounds);
+	// Forcing of canvas renderer:
+	var map = L.map('map', {renderer: L.canvas()}).fitBounds(bounds);
+	// Optional SVG Renderer:
+	// var map = L.map('map').fitBounds(bounds);
 	mapLink = '<a href="http://openstreetmap.org">OpenStreetMap</a>';
 	L.tileLayer(
 		'http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {

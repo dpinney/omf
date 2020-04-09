@@ -58,17 +58,20 @@ def dssToTree(pathToDss):
 	contents = [x for x in contents if x != '']
 	# Lex it
 	for i, line in enumerate(contents):
-		#HACK: only support white space separation of attributes.
-		contents[i] = line.split()
-		# HACK: only support = assignment of values.
-		from collections import OrderedDict 
-		ob = OrderedDict() 
-		ob['!CMD'] = contents[i][0]
-		if len(contents[i]) > 1:
-			for j in range(1, len(contents[i])):
-				k,v = contents[i][j].split('=')
-				ob[k] = v
-		contents[i] = ob
+		try:
+			#HACK: only support white space separation of attributes.
+			contents[i] = line.split()
+			# HACK: only support = assignment of values.
+			from collections import OrderedDict 
+			ob = OrderedDict() 
+			ob['!CMD'] = contents[i][0]
+			if len(contents[i]) > 1:
+				for j in range(1, len(contents[i])):
+					k,v = contents[i][j].split('=')
+					ob[k] = v
+			contents[i] = ob
+		except:
+			raise Exception(f'Error encountered on line {i} = {line}')
 	# Print
 	# for line in contents:
 	# 	print line
@@ -84,11 +87,47 @@ def treeToDss(treeObject, outputPath):
 		outFile.write(line + '\n')
 	outFile.close()
 
-def schemaConvert(treeObject, kind):
-	validKinds = ['DSS-to-GLD', 'GLD-to-DSS']
-	if kind not in validKinds:
-		raise Exception('Kind of conversion must be one of ' + str(validKinds))
-	pass #TODO: maybe implement?
+def evilDssTreeToGldTree(dssTree):
+	''' World's worst and ugliest converter. Hence evil. 
+	We built this to do quick-and-dirty viz of openDSS files. '''
+	gldTree = {}
+	g_id = 1
+	# Grab the SetBusXY commands to make the nodes (=buses, which opendss creates implicitly)
+	for ob in dssTree:
+		if ob['!CMD'] == 'SetBusXY':
+			gldTree[str(g_id)] = {
+				"object": "node",
+				"name": ob['Bus'],
+				"phases": "ABC",
+				"latitude": ob['Y'],
+				"longitude": ob['X']
+			}
+			g_id += 1
+	# Build bad gld representation of each object
+	for ob in dssTree:
+		if ob['!CMD'] == 'New':
+			obtype = ob['object']
+			if obtype.startswith('Line.'):
+				gldTree[str(g_id)] = {
+					"object": "overhead_line",
+					"name": obtype,
+					"phases": "ABC",
+					# strip the weird dot notation stuff via find.
+					"from": ob['bus1'][0:ob['bus1'].find('.')],
+					"to": ob['bus2'][0:ob['bus2'].find('.')]
+				}
+			elif obtype.startswith('Load.'):
+				gldTree[str(g_id)] = {
+					"object": "load", 
+					"name": obtype,
+					"phases": "ABC"
+				}
+			elif obtype.startswith('Transformer'):
+				pass # opendss transformers are bus-type objects, so who knows how to model in gld
+			else:
+				pass # ignore other object types: Circuit, Fuse, Line, Linecode, Load, RegControl, Transformer, etc.
+			g_id += 1
+	return gldTree
 
 if __name__ == '__main__':
 	# tree = dssToTree('ieee37_ours.dss')

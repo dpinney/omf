@@ -229,6 +229,10 @@ def work(modelDir, inputDict):
 	outData['Consumption']['Power'] = [0] * int(inputDict["simLength"])
 	outData['Consumption']['Losses'] = [0] * int(inputDict["simLength"])
 	outData['Consumption']['DG'] = [0] * int(inputDict["simLength"])
+	#create list of regulator key names for reference
+	regNameList = []
+	#create list of inverter key names for reference
+	invNameList = []
 	for key in rawOut:
 		if key.startswith('SwingKids_') and key.endswith('.csv'):
 			oneSwingPower = hdmAgg(vecPyth(rawOut[key]['sum(power_in.real)'],rawOut[key]['sum(power_in.imag)']), avg, level)
@@ -240,6 +244,7 @@ def work(modelDir, inputDict):
 			invName=""
 			invName = key
 			newkey=invName.split(".")[0]
+			invNameList.append(newkey)
 			outData[newkey] ={}
 			realA = rawOut[key]['power_A.real']
 			realB = rawOut[key]['power_B.real']
@@ -303,6 +308,7 @@ def work(modelDir, inputDict):
 			regName=""
 			regName = key
 			newkey=regName.split(".")[0]
+			regNameList.append(newkey)
 			outData[newkey] ={}
 			outData[newkey]['RegTapA'] = [0] * int(inputDict["simLength"])
 			outData[newkey]['RegTapB'] = [0] * int(inputDict["simLength"])
@@ -541,6 +547,39 @@ def work(modelDir, inputDict):
 		#convert "maxVoltBand"
 		outData["maxVoltBand"] = pycigarJson["Substation Regulator Maximum Voltage(V)"]
 
+		#convert regulator data
+		for reg_name in regNameList:
+			regPhaseValue = pycigarJson[reg_name]["RegPhases"]
+			if regPhaseValue.find('A') != -1:
+				outData[reg_name]["RegTapA"] = pycigarJson[reg_name]["creg1a"]
+
+			if regPhaseValue.find('B') != -1:
+				outData[reg_name]["RegTapB"] = pycigarJson[reg_name]["creg1b"]
+
+			if regPhaseValue.find('C') != -1:
+				outData[reg_name]["RegTapC"] = pycigarJson[reg_name]["creg1c"]
+
+			outData[reg_name]["RegPhases"] = regPhaseValue
+
+		#convert inverter data
+		inverter_output_dict = {} 
+		for inv_dict in pycigarJson["Inverter Outputs"]:
+			#create a new dictionary to represent the single inverter 
+			new_inv_dict = {}
+			#get values from pycigar output for given single inverter
+			inv_name = inv_dict["Name"]
+			inv_volt = inv_dict["Voltage (V)"]
+			inv_pow_real = inv_dict["Power Output (W)"]
+			inv_pow_imag = inv_dict["Reactive Power Output (VAR)"]
+			#populate single inverter dict with pycigar values
+			new_inv_dict["Voltage"] = inv_volt
+			new_inv_dict["Power_Real"] = inv_pow_real
+			new_inv_dict["Power_Imag"] = inv_pow_imag
+			#add single inverter dict to dict of all the inverters using the inverter name as the key 
+			inverter_output_dict[inv_name] = new_inv_dict
+		outData["Inverter_Outputs"] = inverter_output_dict
+
+		#convert capacitor data - Need one on test circuit first!
 
 	convertInputs()
 	runPyCIGAR()
