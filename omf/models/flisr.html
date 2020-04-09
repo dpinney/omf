@@ -173,7 +173,7 @@
 		<script type="text/javascript">
 		//Hack to stop leaflet from loading before geojson data loads 
 		if(modelStatus === "finished"){
-		mapHtml = '<p class="reportTitle">Restored System (Yellow Ties, Cyan Reclosers, Red Fault, Orange Buses)</p><div id="mapHolder" class="tightContent"><div id="map"></div></div>';
+		mapHtml = '<p class="reportTitle">Restored System (Yellow Closed Ties, Cyan Open Reclosers, Red Fault, Orange Buses, Purple Unclosed Ties, Blue Closed Reclosers, Silver Powered Subtree)</p><div id="mapHolder" class="tightContent"><div id="map"></div></div>';
 		gebi('mapInsert').innerHTML = mapHtml;
 		//Parse geojson dict (instead of reading from geojson.js - doesn't really matter if you want to load from geojson.js, was just quicker to prototype) 
 		var geojson = JSON.parse(allOutputData['geoDict']);
@@ -270,7 +270,7 @@
 			let rad = 3
 			if (feature.properties['pointColor']){
 				fillColorValue = feature.properties['pointColor'];
-				rad = 6;
+				rad = 4;
 			}
 			return L.circleMarker(latlng, {
 				radius: rad,

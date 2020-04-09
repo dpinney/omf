@@ -16,10 +16,11 @@ else:
 from matplotlib import pyplot as plt
 import networkx as nx
 # OMF imports
-from omf import feeder, geo
+from omf import feeder, geo, distNetViz
 import omf
 import omf.feeder
 import omf.geo
+import omf.distNetViz
 from omf.models import __neoMetaModel__
 from omf.models.__neoMetaModel__ import *
 
@@ -53,39 +54,6 @@ def findPathToFault(graph, start, finish):
 			else:
 				stack.append((next, path + [next]))
 
-def mergeContigLines(tree, faultedLine):
-	'helper function to remove repeated lines'
-	removedKeys = 1
-	while removedKeys != 0:
-		treeKeys = len(tree.keys())
-		obs = list(tree.values())
-		n2k = omf.feeder.nameIndex(tree)
-		for o in obs:
-			if 'to' in o:
-				top = o
-				node = tree[n2k[o['to']]]
-				allBottoms = []
-				for o2 in obs:
-					if o2.get('from', None) == node['name']:
-						allBottoms.append(o2)
-				if len(allBottoms) == 1:
-					bottom = allBottoms[0]
-					if (top.get('object', '') == bottom.get('object', '')) and (top.get('name', '') != faultedLine) and (bottom.get('name', '') != faultedLine) and (top.get('object', '') != 'recloser') and (bottom.get('object', '') != 'recloser'):
-						# delete node and bottom line, make top line length = sum of both lines and connect to bottom to.
-						if ('length' in top) and ('length' in bottom):
-							newLen = float(top['length']) + float(bottom['length'])
-							try:
-								topTree = tree[n2k[o['name']]]
-								topTree['length'] = str(newLen)
-								topTree['to'] = bottom['to']
-								topTree['configuration'] = bottom['configuration']
-								del tree[n2k[node['name']]]
-								del tree[n2k[bottom['name']]]
-							except:
-								continue #key weirdness
-		removedKeys = treeKeys - len(tree.keys())
-	return tree
-
 def adjacencyList(tree):
 	'helper function which creates an adjacency list representation of graph connectivity'
 	adjacList = {}
@@ -93,7 +61,7 @@ def adjacencyList(tree):
 	vertices = set()
 	for key in tree.keys():
 		obtype = tree[key].get('object','')
-		if obtype.startswith('underground_line') or obtype.startswith('overhead_line') or obtype.startswith('triplex_line') or obtype.startswith('switch') or obtype.startswith('recloser') or obtype.startswith('transformer') or obtype.startswith('fuse') or obtype.startswith('regulator'):
+		if obtype.startswith('underground_line') or obtype.startswith('overhead_line') or obtype.startswith('triplex_line') or obtype.startswith('switch') or obtype.startswith('recloser') or obtype.startswith('transformer') or obtype.startswith('fuse') or obtype.startswith('regulator') or obtype.startswith('relay') or obtype.startswith('link') or obtype.startswith('fromTo'):
 			if obtype.startswith('recloser'):
 				reclosers.append(tree[key])
 			if 'from' in tree[key].keys() and 'to' in tree[key].keys():
@@ -306,9 +274,6 @@ def flisr(pathToOmd, pathToTieLines, faultedLine, workDir, radial, drawMap):
 		if tree[key].get('bustype','') == 'SWING':
 			busNodes.append(tree[key]['name'])
 
-	# simplify the system to decrease runtime
-	tree = mergeContigLines(tree, faultedLine)
-
 	# initialize the list of ties closed and reclosers opened
 	bestTies = []
 	bestReclosers = []
@@ -348,58 +313,6 @@ def flisr(pathToOmd, pathToTieLines, faultedLine, workDir, radial, drawMap):
 	attachments = []
 	gridlabOut = omf.solvers.gridlabd.runInFilesystem(tree, attachments=attachments, workDir=workDir)
 
-	# Draw a leaflet graph of the feeder with added tie lines and opened reclosers
-	if drawMap == 'True':
-		outageMap = geo.omdGeoJson(pathToOmd, conversion=False)
-
-		row = 0
-		while row < len(busNodes):
-			Dict = {}
-			Dict['geometry'] = {'type': 'Point', 'coordinates': nodeToCoords(outageMap, str(busNodes[row]))}
-			Dict['type'] = 'Feature'
-			Dict['properties'] = {'name': 'swingbus' + str(row+1),
-								  'pointColor': 'orange'}
-			outageMap['features'].append(Dict)
-			row += 1
-
-		Dict = {}
-		Dict['geometry'] = {'type': 'LineString', 'coordinates': [nodeToCoords(outageMap, str(faultedNode)), nodeToCoords(outageMap, str(faultedNode2))]}
-		Dict['type'] = 'Feature'
-		Dict['properties'] = {'name': 'faultedLine',
-							  'edgeColor': 'red'}
-		outageMap['features'].append(Dict)
-
-		row = 0
-		while row < len(bestTies):
-			Dict = {}
-			Dict['geometry'] = {'type': 'LineString', 'coordinates': [nodeToCoords(outageMap, str(bestTies[row]['from'])), nodeToCoords(outageMap, str(bestTies[row]['to']))]}
-			Dict['type'] = 'Feature'
-			Dict['properties'] = {'name': 'tieLine_' + str(row+1),
-								  'edgeColor': 'yellow'}
-			outageMap['features'].append(Dict)
-			row += 1
-
-		row = 0
-		while row < len(bestReclosers):
-			Dict = {}
-			Dict['geometry'] = {'type': 'LineString', 'coordinates': [nodeToCoords(outageMap, str(bestReclosers[row]['from'])), nodeToCoords(outageMap, str(bestReclosers[row]['to']))]}
-			Dict['type'] = 'Feature'
-			Dict['properties'] = {'name': 'recloser_' + str(row+1),
-								  'edgeColor': 'cyan'}
-			outageMap['features'].append(Dict)
-			row += 1
-
-		if not os.path.exists(workDir):
-			os.makedirs(workDir)
-		shutil.copy(omf.omfDir + '/templates/geoJsonMap.html', workDir)
-		with open(pJoin(workDir,'geoJsonFeatures.js'),'w') as outFile:
-			outFile.write('var geojson =')
-			json.dump(outageMap, outFile, indent=4)
-
-		#Save geojson dict to then read into outdata in work function below
-		with open(pJoin(workDir,'geoDict.js'),'w') as outFile:
-			json.dump(outageMap, outFile, indent=4)
-
 	def switchStats(tieLines, bestTies):
 		new_html_str = """
 			<table cellpadding="0" cellspacing="0">
@@ -437,6 +350,153 @@ def flisr(pathToOmd, pathToTieLines, faultedLine, workDir, radial, drawMap):
 		bestTies = bestTies)
 	with open(pJoin(workDir, 'switchStats.html'), 'w') as switchFile:
 		switchFile.write(switchStatsHtml)
+
+	# Draw a leaflet graph of the feeder with added tie lines and opened reclosers
+	if drawMap == 'True':
+		for key in bestReclosers:
+			print(key)
+			index += 1
+			tree[str(biggestKey*10 + index)] = {'object':key.get('object',''), 'phases':key.get('phases',''), 'name':key.get('name',''), 'from':key.get('from',''), 'to':key.get('to','')}
+		# type: (dict) -> None
+		"""Insert additional latitude and longitude data into the dictionary."""
+		print("Force laying out the graph...")
+		# Use graphviz to lay out the graph.
+		inGraph = omf.feeder.treeToNxGraph(tree)
+		# HACK: work on a new graph without attributes because graphViz tries to read attrs.
+		cleanG = nx.Graph(inGraph.edges())
+		# HACK2: might miss nodes without edges without the following.
+		cleanG.add_nodes_from(inGraph)
+		pos = nx.nx_agraph.graphviz_layout(cleanG, prog='neato')
+		# # Charting the feeder in matplotlib:
+		# feeder.latLonNxGraph(inGraph, labels=False, neatoLayout=True, showPlot=True)
+		# Insert the latlons.
+		for key in tree:
+			obName = tree[key].get('name','')
+			thisPos = pos.get(obName, None)
+			if thisPos != None:
+				# lon, lat = latlon2relativeXY(thisPos[0],thisPos[1])
+				tree[key]['longitude'] = thisPos[0]
+				tree[key]['latitude'] = thisPos[1]
+
+		'''Create a geojson standards compliant file (https://tools.ietf.org/html/rfc7946) from an omd.'''
+		nxG = feeder.treeToNxGraph(tree)
+		#use conversion for testing other feeders
+		nxG = geo.graphValidator(pathToOmd, nxG)
+		# nxG = convertOmd(pathToOmd)
+		geoJsonDict = {
+			"type": "FeatureCollection",
+			"features": []
+		}
+		#Add nodes to geoJSON
+		node_positions = {nodewithPosition: nxG.nodes[nodewithPosition]['pos'] for nodewithPosition in nx.get_node_attributes(nxG, 'pos')}
+		node_types = {nodewithType: nxG.nodes[nodewithType]['type'] for nodewithType in nx.get_node_attributes(nxG, 'type')}
+		for node in node_positions:
+			# geo.latlon2relativeXY(node_positions[node][1], node_positions[node][0])
+			geoJsonDict['features'].append({
+				"type": "Feature", 
+				"geometry":{
+					"type": "Point",
+					"coordinates": [node_positions[node][1], node_positions[node][0]]
+				},
+				"properties":{
+					"name": node,
+					#"pointType": node_types[node],
+					# "pointColor": _obToCol(node_types[node])
+				}
+			})
+		#Add edges to geoJSON
+		edge_types = {edge: nxG[edge[0]][edge[1]]['type'] for edge in nx.get_edge_attributes(nxG, 'type')}
+		edge_phases = {edge: nxG[edge[0]][edge[1]]['phases'] for edge in nx.get_edge_attributes(nxG, 'phases')}
+		for edge in nx.edges(nxG):
+			geoJsonDict['features'].append({
+				"type": "Feature", 
+				"geometry": {
+					"type": "LineString",
+					"coordinates": [[node_positions[edge[0]][1], node_positions[edge[0]][0]], [node_positions[edge[1]][1], node_positions[edge[1]][0]]]
+				},
+				"properties":{
+					#"phase": edge_phases[edge],
+					#"edgeType": edge_types[edge],
+					#"edgeColor":_obToCol(edge_types[edge])
+				}
+			})
+		outageMap = geoJsonDict
+
+		# outageMap = geo.omdGeoJson(pathToOmd, conversion=False)
+
+		Dict = {}
+		Dict['geometry'] = {'type': 'LineString', 'coordinates': [nodeToCoords(outageMap, str(faultedNode)), nodeToCoords(outageMap, str(faultedNode2))]}
+		Dict['type'] = 'Feature'
+		Dict['properties'] = {'name': 'faultedLine',
+							  'edgeColor': 'red'}
+		outageMap['features'].append(Dict)
+
+		row = 0
+		while row < len(bestTies):
+			Dict = {}
+			Dict['geometry'] = {'type': 'LineString', 'coordinates': [nodeToCoords(outageMap, str(bestTies[row]['from'])), nodeToCoords(outageMap, str(bestTies[row]['to']))]}
+			Dict['type'] = 'Feature'
+			Dict['properties'] = {'name': bestTies[row]['name'],
+								  'edgeColor': 'yellow'}
+			outageMap['features'].append(Dict)
+			row += 1
+
+		row = 0
+		while row < len(tieLines):
+			Dict = {}
+			Dict['geometry'] = {'type': 'LineString', 'coordinates': [nodeToCoords(outageMap, str(tieLines.loc[row, 'from'])), nodeToCoords(outageMap, str(tieLines.loc[row, 'to']))]}
+			Dict['type'] = 'Feature'
+			Dict['properties'] = {'name': str(tieLines.loc[row, 'name']),
+								  'edgeColor': 'purple'}
+			outageMap['features'].append(Dict)
+			row += 1
+
+		row = 0
+		while row < len(bestReclosers):
+			Dict = {}
+			Dict['geometry'] = {'type': 'LineString', 'coordinates': [nodeToCoords(outageMap, str(bestReclosers[row]['from'])), nodeToCoords(outageMap, str(bestReclosers[row]['to']))]}
+			Dict['type'] = 'Feature'
+			Dict['properties'] = {'name': bestReclosers[row]['name'],
+								  'edgeColor': 'cyan'}
+			outageMap['features'].append(Dict)
+			row += 1
+
+		for key in tree:
+			if tree[key].get('object','') == 'recloser':
+				Dict = {}
+				Dict['geometry'] = {'type': 'LineString', 'coordinates': [nodeToCoords(outageMap, str(tree[key].get('from', ''))), nodeToCoords(outageMap, str(tree[key].get('from', '')))]}
+				Dict['type'] = 'Feature'
+				Dict['properties'] = {'name': str(tree[key].get('name', '')),
+								  'edgeColor': 'blue'}
+				outageMap['features'].append(Dict)
+			if tree[key].get('name', '') in powered:
+				Dict = {}
+				Dict['geometry'] = {'type': 'Point', 'coordinates': nodeToCoords(outageMap, str(tree[key].get('name', '')))}
+				Dict['type'] = 'Feature'
+				Dict['properties'] = {'name': tree[key].get('name', ''),
+								  'pointColor': 'silver'}
+				outageMap['features'].append(Dict)
+
+		row = 0
+		while row < len(busNodes):
+			Dict = {}
+			Dict['geometry'] = {'type': 'Point', 'coordinates': nodeToCoords(outageMap, str(busNodes[row]))}
+			Dict['type'] = 'Feature'
+			Dict['properties'] = {'name': 'swingbus' + str(row+1),
+								  'pointColor': 'orange'}
+			outageMap['features'].append(Dict)
+			row += 1
+
+		if not os.path.exists(workDir):
+			os.makedirs(workDir)
+		shutil.copy(omf.omfDir + '/templates/geoJsonMap.html', workDir)
+		with open(pJoin(workDir,'geoJsonFeatures.js'),'w') as outFile:
+			outFile.write('var geojson =')
+			json.dump(outageMap, outFile, indent=4)
+
+		#Save geojson dict to then read into outdata in work function below
+		with open(pJoin(workDir,'geoDict.js'),'w') as outFile:
+			json.dump(outageMap, outFile, indent=4)
 
 	return {'bestReclosers':bestReclosers, 'bestTies':bestTies, 'switchStatsHtml': switchStatsHtml}
 
