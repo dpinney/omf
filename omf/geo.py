@@ -1,7 +1,7 @@
 import json, os, shutil, math, tempfile, random, webbrowser, platform
 from pathlib import Path
 from os.path import join as pJoin
-from pyproj import Proj, transform
+from pyproj import Proj, transform, Transformer
 import requests
 import networkx as nx
 import numpy as np
@@ -38,9 +38,10 @@ def statePlaneToLatLon(easting, northing, epsg = None):
 	if not epsg:
 		# Center of the USA default
 		epsg = 26978
-	inProj = Proj(init = 'EPSG:' + str(epsg), preserve_units = True)
-	outProj = Proj(init = 'EPSG:4326')
-	lon, lat = transform(inProj, outProj, easting, northing)
+	inProj = 'EPSG:' + str(epsg)
+	outProj = 'EPSG:4326'
+	transformer = Transformer.from_crs(inProj, outProj)
+	lat, lon = transformer.transform(easting, northing)
 	return (lat, lon)
 
 
@@ -48,9 +49,10 @@ def latLonToStatePlane(lat, lon, epsg = None):
 	if not epsg:
 		# Center of the USA default
 		epsg = 26978
-	inProj = Proj(init = 'EPSG:4326')
-	outProj = Proj(init = 'EPSG:' + str(epsg), preserve_units = True)
-	easting, northing = transform(inProj, outProj, lon, lat)
+	inProj = 'EPSG:4326'
+	outProj = 'EPSG:' + str(epsg)
+	transformer = Transformer.from_crs(inProj, outProj)
+	easting, northing = transformer.transform(lon, lat)
 	return (easting, northing)
 
 
