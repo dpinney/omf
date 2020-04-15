@@ -714,28 +714,6 @@
 					"legend":{"verticalAlign":"top","align":"top","borderWidth":0,"x":50,"y":-10,"layout":"horizontal"}})
 			</script>
 		</div>
-		<p class="reportTitle postRun">Other Climate Variables <a target="_self" class="toggle">Hide / Show</a></p>
-		<div id="climateReport" class="tightContent postRun">
-			<div id="climateChartDiv"></div>
-			<script type="text/javascript">
-				climateSeriesData = [
-					{"name":"Wind Speed (m/s)","marker":{"enabled":false},"color":"darkgray","data":allOutputData.climate["Wind Speed (m/s)"]},
-					{"name":"Temperature (F)","marker":{"enabled":false},"color":"gainsboro","data":allOutputData.climate["Temperature (F)"]},
-					{"name":"Snow Depth (in)","marker":{"enabled":false},"color":"gainsboro","data":allOutputData.climate["Snow Depth (in)"]}]
-				new Highcharts.Chart({
-					"credits":{"enabled":false},
-					"plotOptions":{
-						"series":{"pointStart":pointStart,"shadow":false,"pointInterval":pointInterval},
-						"line":{"marker":{"enabled":false}}},
-					"xAxis":{"maxZoom":1000,"tickColor":"gray","type":"datetime","lineColor":"gray"},
-					"title":{"text":null},
-					"series":climateSeriesData,
-					"yAxis":{"title":{"text":"Climate Units","style":{"color":"gray"}}},
-					"chart":{"marginBottom":35,"zoomType":"x","renderTo":"climateChartDiv","type":"line","marginRight":20, "height":250,"width":1000},
-					"tooltip":{"valueDecimals":1},
-					"legend":{"verticalAlign":"top","align":"top","borderWidth":0,"x":50,"y":-10,"layout":"horizontal"}})
-			</script>
-		</div>
 		<p class="reportTitle postRun">Study Details <a target="_self" class="toggle">Hide / Show</a></p>
 		<div id="studyDetails" class="tightContent postRun detailsContainer" style="position: relative;">
 			<div id="mapHere" style="width:495px; height:340px; display:inline-block"></div>
