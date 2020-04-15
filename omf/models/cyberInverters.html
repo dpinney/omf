@@ -390,14 +390,15 @@
 				{
   					if (key.indexOf('Regulator') === 0)
   					{
-  						regName = "allOutputData.".concat(key);
+  						regName = key;
   						regNamesArray.push(regName)
 					}
 
 				}
-				if (regNamesArray.length == 0){
-						$("#newRegulatorReport").html("<p>&#160;&#160;&#160;No Regulators were found on the feeder.</p>")
-					}
+				if (regNamesArray.length == 0)
+				{
+					$("#newRegulatorReport").html("<p>&#160;&#160;&#160;No Regulators were found on the feeder.</p>")
+				}
 				for (var i in regNamesArray){
 					reg = regNamesArray[i]
 					$("<div/>").appendTo("#newRegulatorReport")
@@ -405,39 +406,37 @@
 						.attr("id", reg)
 					$("<div/>").appendTo("#newRegulatorReport")
 						.attr("id", "regulatorSeries_" + reg)
+					longRegName = "allOutputData.".concat(reg);
 					// if no regulators are found, display message
   					
 					
 					var reg1ATSeries = {
 						"pointWidth": 40,
-						"pointInterval": 3 * 3600 * 100,
 						"color":"RoyalBlue",
-						"data":eval(regNamesArray[i].concat(".RegTapA")),
+						"data":eval(longRegName.concat(".RegTapA")),
 						"name":"A",
 					}
 					var reg1BTSeries = {
 						"pointWidth": 40,
-						"pointInterval": 3 * 3600 * 100,
 						"color":"Red",
-						"data":eval(regNamesArray[i].concat(".RegTapB")),
+						"data":eval(longRegName.concat(".RegTapB")),
 						"name":"B",
 					}
 					var reg1CTSeries = {
 						"pointWidth": 40,
-						"pointInterval": 3 * 3600 * 100,
 						"color":"Green",
-						"data":eval(regNamesArray[i].concat(".RegTapC")),
+						"data":eval(longRegName.concat(".RegTapC")),
 						"name":"C",
 					}
 					
-					phaseValue= eval(reg.concat(".RegPhases"))
+					phaseValue= eval(longRegName.concat(".RegPhases"))
 					var localHighChart = JSON.parse(JSON.stringify(swingHighChartsTemplate))
 					localHighChart["chart"]["renderTo"] = "regulatorSeries_" + reg
 					localHighChart["chart"]["inverted"] = false
 					localHighChart["chart"]["height"] = 150
 					localHighChart["chart"]["width"] = 1000
 					localHighChart["chart"]["type"] = "line"
-					localHighChart["title"]["text"] = reg.substr(14)
+					localHighChart["title"]["text"] = reg
 					localHighChart["series"] = []
 					localHighChart["xAxis"] = { "type":"datetime",
 						"tickColor":"gray",
@@ -469,7 +468,7 @@
 			</script>
 		</div>
 		<p class="reportTitle postRun" style="">Inverter Outputs <a target="_self" class="toggle">Hide / Show</a></p>
-		<div id="newInverterReport" class="tightContent postRun" style="max-height:550px; overflow-y: scroll;">
+		<div id="newInverterReport" class="tightContent postRun" style="max-height:600px; overflow-y: scroll;">
 			<script type="text/javascript">
 				swingPointStart = dateOb(allOutputData.swingTimestamps[0])
 				swingPointInterval = dateOb(allOutputData.swingTimestamps[1]) - pointStart

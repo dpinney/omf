@@ -419,7 +419,7 @@ def work(modelDir, inputDict):
 			if regPhaseValue.find('C') != -1:
 				outData[reg_name]["RegTapC"] = pycigarJson[reg_name]["creg1c"]
 
-			outData[reg_name]["CapPhases"] = regPhaseValue
+			outData[reg_name]["RegPhases"] = regPhaseValue
 
 		#convert inverter data
 		inverter_output_dict = {} 
