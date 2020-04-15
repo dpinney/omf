@@ -191,6 +191,18 @@
 		<div id="powerConsumptionReport" class="tightContent postRun">
 			<div id="powerTimeSeries"></div>
 			<script type="text/javascript">
+				swingPointStart = dateOb(allOutputData.swingTimestamps[0])
+				swingPointInterval = dateOb(allOutputData.swingTimestamps[1]) - pointStart
+				swingHighChartsTemplate = {
+				"chart":{"renderTo":"", "marginRight":20, "marginBottom":35, "zoomType":"x"},
+				"title":{"text":null},
+				"legend":{"layout":"horizontal", "align":"top", "verticalAlign":"top", "x":50, "y":-10, "borderWidth":0},
+				"credits":{"enabled":false},
+				"xAxis":{"type":"datetime","maxZoom":1000, "tickColor":"gray","lineColor":"gray"},
+				"yAxis":{"title":{"text":null, "style":{"color":"gray"}}},
+				"plotOptions":{"line":{"marker":{"enabled":false}}, "series":{"shadow":false, "pointInterval":swingPointInterval, "pointStart":swingPointStart}},
+				"tooltip":{"valueDecimals":1},
+				"series":[]}
 				// power series data
 				var powerSeries = {
 					"marker":{
@@ -218,7 +230,7 @@
 					"name":"DG Power (W)",
 					"visible": false
 				}
-				var localHighChart = JSON.parse(JSON.stringify(highChartsTemplate))
+				var localHighChart = JSON.parse(JSON.stringify(swingHighChartsTemplate))
 				localHighChart["chart"]["renderTo"] = "powerTimeSeries"
 				localHighChart["chart"]["type"] = "line"
 				localHighChart["chart"]["width"] = 1000
@@ -360,6 +372,18 @@
 		<p class="reportTitle postRun" style="">Regulator Tap Changes <a target="_self" class="toggle">Hide / Show</a></p>
 		<div id="newRegulatorReport" class="tightContent postRun">
 			<script type="text/javascript">
+				swingPointStart = dateOb(allOutputData.swingTimestamps[0])
+				swingPointInterval = dateOb(allOutputData.swingTimestamps[1]) - pointStart
+				swingHighChartsTemplate = {
+				"chart":{"renderTo":"", "marginRight":20, "marginBottom":35, "zoomType":"x"},
+				"title":{"text":null},
+				"legend":{"layout":"horizontal", "align":"top", "verticalAlign":"top", "x":50, "y":-10, "borderWidth":0},
+				"credits":{"enabled":false},
+				"xAxis":{"type":"datetime","maxZoom":1000, "tickColor":"gray","lineColor":"gray"},
+				"yAxis":{"title":{"text":null, "style":{"color":"gray"}}},
+				"plotOptions":{"line":{"marker":{"enabled":false}}, "series":{"shadow":false, "pointInterval":swingPointInterval, "pointStart":swingPointStart}},
+				"tooltip":{"valueDecimals":1},
+				"series":[]}
 
 				var regNamesArray=[]
 				for (var key in allOutputData)
@@ -405,50 +429,60 @@
 						"data":eval(regNamesArray[i].concat(".RegTapC")),
 						"name":"C",
 					}
-				}
-				phaseValue= eval(reg.concat(".RegPhases"))
-				var localHighChart = JSON.parse(JSON.stringify(highChartsTemplate))
-				localHighChart["chart"]["renderTo"] = "regulatorSeries_" + reg
-				localHighChart["chart"]["inverted"] = false
-				localHighChart["chart"]["height"] = 150
-				localHighChart["chart"]["width"] = 1000
-				localHighChart["chart"]["type"] = "line"
-				localHighChart["title"]["text"] = reg.substr(14)
-				localHighChart["series"] = []
-				localHighChart["xAxis"] = { "type":"datetime",
-					"tickColor":"gray",
-					"lineColor":"gray",
-				}
-				localHighChart["yAxis"] = {"min": -17, "max" : 17,
-					//"startOnTick": "false",
-					"title":{ "text": "Tap position",
-						"style":{
-							"color":"gray"
+					
+					phaseValue= eval(reg.concat(".RegPhases"))
+					var localHighChart = JSON.parse(JSON.stringify(swingHighChartsTemplate))
+					localHighChart["chart"]["renderTo"] = "regulatorSeries_" + reg
+					localHighChart["chart"]["inverted"] = false
+					localHighChart["chart"]["height"] = 150
+					localHighChart["chart"]["width"] = 1000
+					localHighChart["chart"]["type"] = "line"
+					localHighChart["title"]["text"] = reg.substr(14)
+					localHighChart["series"] = []
+					localHighChart["xAxis"] = { "type":"datetime",
+						"tickColor":"gray",
+						"lineColor":"gray",
+					}
+					localHighChart["yAxis"] = {"min": -17, "max" : 17,
+						//"startOnTick": "false",
+						"title":{ "text": "Tap position",
+							"style":{
+								"color":"gray"
+							}
 						}
 					}
-				}
-				localHighChart["plotOptions"] = {
-					//"bar":{"stacking":"normal", "shadow":false},
-				}
-				chart = new Highcharts.Chart(localHighChart);
-				if(phaseValue.indexOf('A') != -1)
-				{
-					chart.addSeries(reg1ATSeries)
-				}
-				if(phaseValue.indexOf('B') != -1)
-				{
-					chart.addSeries(reg1BTSeries)
-				}
-				if(phaseValue.indexOf('C') != -1)
-				{
-					chart.addSeries(reg1CTSeries)
+
+					chart = new Highcharts.Chart(localHighChart);
+					if(phaseValue.indexOf('A') != -1)
+					{
+						chart.addSeries(reg1ATSeries)
+					}
+					if(phaseValue.indexOf('B') != -1)
+					{
+						chart.addSeries(reg1BTSeries)
+					}
+					if(phaseValue.indexOf('C') != -1)
+					{
+						chart.addSeries(reg1CTSeries)
+					}
 				}
 			</script>
 		</div>
 		<p class="reportTitle postRun" style="">Inverter Outputs <a target="_self" class="toggle">Hide / Show</a></p>
 		<div id="newInverterReport" class="tightContent postRun" style="max-height:550px; overflow-y: scroll;">
 			<script type="text/javascript">
-
+				swingPointStart = dateOb(allOutputData.swingTimestamps[0])
+				swingPointInterval = dateOb(allOutputData.swingTimestamps[1]) - pointStart
+				swingHighChartsTemplate = {
+				"chart":{"renderTo":"", "marginRight":20, "marginBottom":35, "zoomType":"x"},
+				"title":{"text":null},
+				"legend":{"layout":"horizontal", "align":"top", "verticalAlign":"top", "x":50, "y":-10, "borderWidth":0},
+				"credits":{"enabled":false},
+				"xAxis":{"type":"datetime","maxZoom":1000, "tickColor":"gray","lineColor":"gray"},
+				"yAxis":{"title":{"text":null, "style":{"color":"gray"}}},
+				"plotOptions":{"line":{"marker":{"enabled":false}}, "series":{"shadow":false, "pointInterval":swingPointInterval, "pointStart":swingPointStart}},
+				"tooltip":{"valueDecimals":1},
+				"series":[]}
 				var invNamesArray=[]
 				invNamesArray = Object.keys(allOutputData.Inverter_Outputs)
 				// for (var key in allOutputData.Inverter_Outputs)
@@ -471,7 +505,6 @@
 					
 					var invVoltageSeries = {
 						"pointWidth": 40,
-						"pointInterval": 3 * 3600 * 100,
 						"color":"RoyalBlue",
 						"data":eval(invLongName.concat(".Voltage")),
 						"name":"Voltage",
@@ -479,7 +512,6 @@
 
 					var invPowerRealSeries = {
 						"pointWidth": 40,
-						"pointInterval": 3 * 3600 * 100,
 						"color":"Crimson",
 						"data":eval(invLongName.concat(".Power_Real")),
 						"name":"Power Output",
@@ -487,7 +519,6 @@
 					}
 					var invPowerImagSeries = {
 						"pointWidth": 40,
-						"pointInterval": 3 * 3600 * 100,
 						"color":"LimeGreen",
 						"data":eval(invLongName.concat(".Power_Imag")),
 						"name":"Reactive Power Output",
@@ -497,7 +528,7 @@
 					yPowerMin = Math.floor(yPowerMin/1000)*1000
 					var yPowerMax = Math.max(...invPowerRealSeries.data)
 					yPowerMax = Math.ceil(yPowerMax/1000)*1000
-					var localHighChart = JSON.parse(JSON.stringify(highChartsTemplate))
+					var localHighChart = JSON.parse(JSON.stringify(swingHighChartsTemplate))
 					localHighChart["chart"]["renderTo"] = "inverterSeries_" + inv
 					localHighChart["chart"]["zoomType"] = 'xy'
 					localHighChart["chart"]["inverted"] = false
@@ -555,12 +586,8 @@
 						},
 						"opposite": true
 					}]
-					localHighChart["plotOptions"] = {
-						//"bar":{"stacking":"normal", "shadow":false},
-					}
-					localHighChart["tooltip"] = {
-						"shared": true
-					}
+					localHighChart["tooltip"]["shared"] = true
+
 					chart = new Highcharts.Chart(localHighChart);
 					chart.addSeries(invVoltageSeries)
 					chart.addSeries(invPowerRealSeries)
@@ -663,23 +690,35 @@
 		<div id="triplexMeterVoltageReport" class="tightContent postRun">
 			<div id="triplexMeterVoltageChart"></div>
 			<script type="text/javascript">
-					triplexSeriesData = [
-						{"marker": {"enabled":false}, "color":"LightBlue", "data":allOutputData.allMeterVoltages.Min, "name":"Min"},
-						{"marker":{"enabled":false}, "color":"blue", "data":allOutputData.allMeterVoltages.Mean, "name":"Mean"},
-						{"marker":{"enabled":false}, "color":"LightBlue", "data":allOutputData.allMeterVoltages.Max, "name":"Max"}]
-					var localHighChart = JSON.parse(JSON.stringify(highChartsTemplate))
-					localHighChart["chart"]["renderTo"] = "triplexMeterVoltageChart"
-					localHighChart["chart"]["width"] = 1000
-					localHighChart["chart"]["height"] = 200
-					localHighChart["chart"]["type"] = "line"
-					localHighChart["series"] = triplexSeriesData
-					localHighChart["yAxis"] = {
-						"maxRange":20,
-						"plotLines": [
-							{"color": 'gray', "dashStyle": 'ShortDash', "width": 2, "value": 114, "zIndex": 0},
-							{"color": 'gray', "dashStyle": 'ShortDash', "width": 2, "value": 126, "zIndex": 0}],
-						"title":{"text":"Volts (V)", "style":{"color":"gray"}}}
-					new Highcharts.Chart(localHighChart)
+				swingPointStart = dateOb(allOutputData.swingTimestamps[0])
+				swingPointInterval = dateOb(allOutputData.swingTimestamps[1]) - pointStart
+				swingHighChartsTemplate = {
+				"chart":{"renderTo":"", "marginRight":20, "marginBottom":35, "zoomType":"x"},
+				"title":{"text":null},
+				"legend":{"layout":"horizontal", "align":"top", "verticalAlign":"top", "x":50, "y":-10, "borderWidth":0},
+				"credits":{"enabled":false},
+				"xAxis":{"type":"datetime","maxZoom":1000, "tickColor":"gray","lineColor":"gray"},
+				"yAxis":{"title":{"text":null, "style":{"color":"gray"}}},
+				"plotOptions":{"line":{"marker":{"enabled":false}}, "series":{"shadow":false, "pointInterval":swingPointInterval, "pointStart":swingPointStart}},
+				"tooltip":{"valueDecimals":1},
+				"series":[]}
+				triplexSeriesData = [
+					{"marker": {"enabled":false}, "color":"LightBlue", "data":allOutputData.allMeterVoltages.Min, "name":"Min"},
+					{"marker":{"enabled":false}, "color":"blue", "data":allOutputData.allMeterVoltages.Mean, "name":"Mean"},
+					{"marker":{"enabled":false}, "color":"CadetBlue", "data":allOutputData.allMeterVoltages.Max, "name":"Max"}]
+				var localHighChart = JSON.parse(JSON.stringify(swingHighChartsTemplate))
+				localHighChart["chart"]["renderTo"] = "triplexMeterVoltageChart"
+				localHighChart["chart"]["width"] = 1000
+				localHighChart["chart"]["height"] = 200
+				localHighChart["chart"]["type"] = "line"
+				localHighChart["series"] = triplexSeriesData
+				localHighChart["yAxis"] = {
+					"maxRange":20,
+					"plotLines": [
+						{"color": 'gray', "dashStyle": 'ShortDash', "width": 2, "value": 114, "zIndex": 0},
+						{"color": 'gray', "dashStyle": 'ShortDash', "width": 2, "value": 126, "zIndex": 0}],
+					"title":{"text":"Volts (V)", "style":{"color":"gray"}}}
+				new Highcharts.Chart(localHighChart)
 			</script>
 		</div>
 		<!-- <p class="reportTitle postRun" style="page-break-before:always">System Voltage Map <a target="_self" class="toggle">Hide / Show</a></p>
