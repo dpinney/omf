@@ -22,21 +22,16 @@ jobs:
     - os: windows
       language: shell
 before_install:
-  - if [ "$TRAVIS_OS_NAME" = "linux" ]; then sudo apt-get -y install python3-pip; sudo apt-get -y install python3-setuptools; fi
-  - if [ "$TRAVIS_OS_NAME" = "linux" ]; then sudo pip3 install tensorflow; fi
+  - if [ "$TRAVIS_OS_NAME" = "linux" ]; then sudo apt-get -y install python3-pip python3-setuptools tensorflow; fi
   - if [ "$TRAVIS_OS_NAME" = "osx" ]; then sudo pip3 install tensorflow; fi
   - if [ "$TRAVIS_OS_NAME" = "windows" ]; then choco install python --version 3.6.8; fi
-  - if [ "$TRAVIS_OS_NAME" = "windows" ]; then export "PATH=/c/Python36:/c/Python36/Scripts:/c/Program files (x86)/Graphviz2.38/bin:$PATH"; fi
+  - if [ "$TRAVIS_OS_NAME" = "windows" ]; then export "PATH=/c/Python36:/c/Python36/Scripts:/c/Program files (x86)/Graphviz2.38/bin:/c/Python36:/c/Python36/Scripts:/c/Program Files/GridLAB-D/bin:/c/Program Files/GridLAB-D/lib:/c/Program files (x86)/Graphviz2.38/bin:$PATH"; fi
   - if [ "$TRAVIS_OS_NAME" = "windows" ]; then ln -s /c/Python36/python /usr/bin/python3; ln -s /c/Python36/Scripts/pip /usr/bin/pip3; fi
-  - python3 install.py
-  - export BOTO_CONFIG=/dev/null
-install:
-  - if [ "$TRAVIS_OS_NAME" = "osx" ]; then sudo python3 setup.py develop; fi
-  - if [ "$TRAVIS_OS_NAME" = "linux" ]; then sudo python3 setup.py develop; fi
-  - if [ "$TRAVIS_OS_NAME" = "windows" ]; then python3 setup.py develop; fi
-before_script:
-  - if [ "$TRAVIS_OS_NAME" = "windows" ]; then export "PATH=/c/Python36:/c/Python36/Scripts:/c/Program Files/GridLAB-D/bin:/c/Program Files/GridLAB-D/lib:/c/Program files (x86)/Graphviz2.38/bin:$PATH"; fi
   - if [ "$TRAVIS_OS_NAME" = "windows" ]; then export "GLPATH=C:\Program Files\GridLAB-D\bin;C:\Program Files\GridLAB-D\etc;C:\Program Files\GridLAB-D\lib;C:\Program Files\GridLAB-D\samples;C:\Program Files\GridLAB-D\rt;C:\Program Files\GridLAB-D\tmy"; fi
   - if [ "$TRAVIS_OS_NAME" = "windows" ]; then export "GRIDLABD=C:\Program Files\GridLAB-D"; fi
+  - export BOTO_CONFIG=/dev/null
+install:
+  - if [ "$TRAVIS_OS_NAME" = "windows" ]; then python3 setup.py develop; fi
+  - if [ "$TRAVIS_OS_NAME" != "windows" ]; then sudo python3 setup.py develop; fi
 script:
   - python3 ./omf/runAllTests.py omf
