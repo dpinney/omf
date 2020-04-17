@@ -51,7 +51,6 @@ def pre_install():
 		os.system("cd omf")
 		os.system("pip3 install --upgrade pip")
 		pipInstallInOrder("pip3")
-		os.system("python3 setup.py develop")
 	# TODO: Double check CentOS installation to support Python 3.7 or up
 	elif platform.system() == "Linux" and platform.linux_distribution()[0]=="CentOS Linux":
 		# CentOS Docker image appears to come with en_US.UTF-8 locale built-in, but we might need to install that locale in the future. That currently is not done here.
@@ -68,7 +67,6 @@ def pre_install():
 		os.system("cd omf")
 		pipInstallInOrder("pip3")
 		os.system("pip3 install --ignore-installed six")
-		os.system("python3 setup.py develop")
 	elif platform.system()=='Windows':
 		# Choco install.
 		# chocoString = @"%SystemRoot%\System32\WindowsPowerShell\v1.0\powershell.exe" -NoProfile -InputFormat None -ExecutionPolicy Bypass -Command "iex ((New-Object System.Net.WebClient).DownloadString('https://chocolatey.org/install.ps1'))" && SET "PATH=%PATH%;%ALLUSERSPROFILE%\chocolatey\bin"
@@ -129,7 +127,6 @@ def pre_install():
 		os.system('pip3 install pygraphviz --install-option="--include-path=/usr/local/include/graphviz" --install-option="--library-path=/usr/local/lib/graphviz/"')
 		os.system('pip3 install "ecos >= 2.0.7rc2"')
 		pipInstallInOrder("pip3")
-		os.system("python3 setup.py develop")
 	else:
 		print("Your operating system is not currently supported. Platform detected: " + str(platform.system()) + str(platform.linux_distribution()))
 

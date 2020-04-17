@@ -21,7 +21,7 @@ else
 	chown -R root *
 	chgrp -R root *
 	echo "** Re-run install to handle any missing requirements."
-	python3 /omf/install.py
+	python3 /omf/setup.py develop
 	echo "** Restarting the service."
 	systemctl start omf
 fi
