@@ -94,6 +94,9 @@ def work(modelDir, inputDict):
 	outData["stderr"] = ""
 	return outData
 
+def runtimeEstimate(modelDir):
+	return 0.0
+
 def _aggData(key, aggFun, simStartDate, simLength, simLengthUnits, ssc, dat):
 	''' Function to aggregate output if we need something other than hour level. '''
 	u = simStartDate

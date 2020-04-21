@@ -7,15 +7,13 @@ RUN apt-get -y update && apt-get install -y python3 sudo vim python3-pip python3
 RUN mkdir /home/omf
 
 # Do the install and have it cached as an intermediate image.
-COPY install.py /home/omf/
 COPY requirements.txt /home/omf/
 COPY setup.py /home/omf/
-RUN cd /home/omf/; python3 install.py
+RUN cd /home/omf/; python3 setup.py develop
 
 # Run the OMF
 VOLUME ["/home/omf/omf/"]
 WORKDIR /home/omf/omf/
-RUN cd /home/omf/; python3 setup.py develop
 ENTRYPOINT ["python3"]
 CMD ["web.py"]
 
