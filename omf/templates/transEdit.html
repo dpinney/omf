@@ -561,25 +561,27 @@ function hotkeys() {
 }
 
 function tableCreate(inputObject) {
-	// If object doesn't have an element_id, ask user to reupload data set
-	if (inputObject.element_id === undefined) {
-		alert('Please re-upload your data set for additional processing.')
+	// If object contains element_id, get the ID and type of object from the object
+	if (inputObject.element_id) {
+		objType = inputObject.element_id.split('_')[0]
+		objId = inputObject.element_id.split('_')[1]
+	} // Otherwise check what was clicked
+	else {
+		objType = event.target.id.split("_")[0]
+		objId = event.target.id.split("_")[1]
 	}
-	// Get the ID and type of object
-	clickType = inputObject.element_id.split('_')[0]
-	clickID = inputObject.element_id.split('_')[1]
 	// Draw the table for the selected object (i.e. inputObject).
 	tabScroll = document.getElementById('tableScroller')
 	tbl = document.createElement('table')
 	// Show what type of thing you clicked
-	whatClicked = document.createElement('tr')
-	whatClicked.innerHTML = '<th>'+clickType.charAt(0).toUpperCase()+clickType.slice(1);+'</th>'
-	whatClicked.innerHTML += '<th>'+String(clickID)+'</th>'
-	tbl.appendChild(whatClicked)
+	whatSelected = document.createElement('tr')
+	whatSelected.innerHTML = '<th>'+objType.charAt(0).toUpperCase()+objType.slice(1);+'</th>'
+	whatSelected.innerHTML += '<th>'+String(objId)+'</th>'
+	tbl.appendChild(whatSelected)
 	// Put in the header.
 	headRow = document.createElement('tr')
 	headRow.innerHTML = '<th style="text-align: left;padding: 0px 0px 0px 11px;"><button onclick="tablePlus(this)">+</button></th>'
-	if(String(clickType) == "bus") {
+	if(String(objType) == "bus") {
 		headRow.innerHTML += '<th><button id="moveBusButton" onclick="moveBus()">Move</button><button id="deleteButton" onclick="deleteOb()">Delete</button><button id="saveButton" onclick="tableSave(this)">Save</button></th>'
 	}
 	else {
@@ -814,7 +816,6 @@ function newNodeListener() {
 		zone: "1",
 		Vmax: "1.05",
 		Vmin: "0.95",
-		element_id: "bus_" + maxBusID
 	}
 	var xloc = event.pageX
 	var yloc = event.pageY
@@ -1010,7 +1011,6 @@ function newGen() {
 			ramp_30: "0",
 			ramp_q: "0",
 			apf: "0",
-			element_id: "gen_" + newGenID
 		}
 		addRectangle(selBus.longitude - 4/2, selBus.latitude - 4/2, 4, 4, "gen_" + newGenID, "gen")
 		if(scaleTracker != 1.0) {
@@ -1056,7 +1056,6 @@ function newLink() {
 			angmax: "360.0",
 			fbus: String(sVGToiLookup[fBusID]),
 			tbus: String(sVGToiLookup[tBusID]),
-			element_id: "branch_" + maxBranchID
 		}
 		// Save to tree
 		networkData.branch[String(newCompID)] = newLink
@@ -1423,6 +1422,7 @@ function anonymize() {
 		branch = networkData.branch[branchIndex]
 		subIndex = JSON.stringify(branch).indexOf(inputString)
 		if (subIndex != -1) {
+			branch.element_id = 'branch_' + branchIndex
 			results.push(branch)
 		}
 	}
@@ -1430,6 +1430,7 @@ function anonymize() {
 		bus = networkData.bus[busIndex]
 		subIndex = JSON.stringify(bus).indexOf(inputString)
 		if (subIndex != -1) {
+			bus.element_id = 'bus_' + busIndex
 			results.push(bus)
 		}
 	}
@@ -1437,6 +1438,7 @@ function anonymize() {
 		gen = networkData.gen[genIndex]
 		subIndex = JSON.stringify(gen).indexOf(inputString)
 		if (subIndex != -1) {
+			gen.element_id = 'gen_' + genIndex
 			results.push(gen)
 		}
 	}
@@ -1500,6 +1502,7 @@ function findNext() {
 		element.classList.add('selected')
 		selection.push(element)
 		zoomToSelection()
+		removeElementIds(hits)
 	} catch (err) {
 		alert('The following error was encountered:\n' + err.message)
 	}
@@ -1557,10 +1560,19 @@ function findPrevious() {
  * Clear all selected elements.
  */
 function clearAllSelected() {
-	for (i=0; i<selection.length; i++) {
+	for (i = 0; i < selection.length; i++) {
 			selection[i].classList.remove('selected')
 	}
 	selection = []
+}
+
+/**
+ * Remove element_id field from elements in list.
+ */
+function removeElementIds(elements) {
+	for (i = 0; i < elements.length; i++) {
+		delete elements[i].element_id
+	}
 }
 
 function downloadTextFile(fileName, text) {

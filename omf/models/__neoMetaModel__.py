@@ -31,9 +31,17 @@ def heavyProcessing(modelDir, test_mode=False):
 		# Get the inputs.
 		with web.locked_open(pJoin(modelDir, 'allInputData.json')) as f:
 			inputDict = json.load(f)
+		inputDict['runStartTime'] = startTime.isoformat()
 		# Remove old outputs.
-		try: os.remove(pJoin(modelDir,"allOutputData.json"))
-		except Exception as e: pass
+		try:
+			os.remove(pJoin(modelDir,"allOutputData.json"))
+		except Exception as e:
+			pass
+		# Estimate runtime if possible.
+		try:
+			inputDict['runtimeEst_min'] = getattr(omf.models, inputDict['modelType']).runtimeEstimate(modelDir)
+		except: 
+			pass
 		# Get the function and run it.
 		work = getattr(omf.models, inputDict['modelType']).work
 		#This grabs the new outData model
@@ -177,10 +185,19 @@ def renderTemplate(modelDir, absolutePaths=False, datastoreNames={}):
 	loggedInUser = datastoreNames.get('currentUser', 'test')
 	modelStatus = getStatus(modelDir)
 	omfModelButtons = Template(omfModelButtonsTemplate).render(modelStatus=modelStatus, loggedInUser=loggedInUser, modelOwner=modelOwner)
+	now = datetime.datetime.now()
+	try:
+		mod_start = datetime.datetime.fromisoformat(inJson.get('runStartTime'))
+	except:
+		mod_start = now
+	elapsed_dt = now - mod_start
+	elapsed_min = elapsed_dt.total_seconds() / 60.0
+	model_estimate_min = float(inJson.get('runtimeEst_min', '0.0'))
+	remain_min = model_estimate_min - elapsed_min 
 	runDebugTemplate = '''
 		{% if modelStatus == 'running' %}
 		<div id ="runIndicator" class="content">
-			Model running on server. Refresh the page to check for results, or wait for automatic refresh every 5 seconds.
+			Model has run for {{elapsed_min}} minutes. {{remain_min}} minutes estimated until completion. Results updated every 5 seconds.
 		</div>
 		{% endif %}
 		{% if modelStatus == 'stopped' and stderr != '' %}
@@ -189,7 +206,7 @@ def renderTemplate(modelDir, absolutePaths=False, datastoreNames={}):
 		</div>
 		{% endif %}
 		'''
-	omfRunDebugBlock = Template(runDebugTemplate).render(modelStatus=modelStatus, stderr=inJson.get('stderr', ''))
+	omfRunDebugBlock = Template(runDebugTemplate).render(modelStatus=modelStatus, stderr=inJson.get('stderr', ''), elapsed_min=round(elapsed_min,2), remain_min=round(remain_min,2))
 	# Raw input output include.
 	return template.render(allInputData=allInputData, allOutputData=allOutputData, modelStatus=modelStatus, pathPrefix=pathPrefix,
 		datastoreNames=datastoreNames, modelName=modelType, allInputDataDict=inJson, allOutputDataDict=outJson, rawOutputFiles=rawOutputFiles, omfModelButtons=omfModelButtons, omfRunDebugBlock=omfRunDebugBlock)
