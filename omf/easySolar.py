@@ -15,8 +15,12 @@ import pandas as pd
 import numpy as np
 import requests
 import datetime
-from weather import pullUscrn
 from joblib import dump, load
+
+from sklearn.preprocessing import PolynomialFeatures
+
+
+from weather import pullUscrn
 
 
 #Establish directories
@@ -30,11 +34,12 @@ clf_log_poly = load('Log_Polynomial_clf.joblib')
 _key = '31dac4830187f562147a946529516a8d'
 _key2 = os.environ.get('DARKSKY','')
 
-def getUscrnData(year, location='TX_Austin_33_NW', dataType="SOLARAD"):
+def _getUscrnData(year, location='TX_Austin_33_NW', dataType="SOLARAD"):
 	ghiData = pullUscrn(year, location, dataType)
 	return ghiData
+
 #Standard positional arguments are for TX_Austin
-def getDarkSkyCloudCoverForYear(year, lat=30.581736, lon=-98.024098, key=_key, units='si'):
+def _getDarkSkyCloudCoverForYear(year, lat=30.581736, lon=-98.024098, key=_key, units='si'):
 	cloudCoverByHour = {}
 	coords = '%0.2f,%0.2f' % (lat, lon)
 	times = list(pd.date_range('{}-01-01'.format(year), '{}-12-31'.format(year), freq='D'))
@@ -56,9 +61,23 @@ def getDarkSkyCloudCoverForYear(year, lat=30.581736, lon=-98.024098, key=_key, u
 				pass
 	return cloudCoverByHour
 
+def _makeDataNonzero(data):
+	ghiData=list(filter(lambda num: num!=0.0, data))
+	assert(all(x[0]!=0 for x in ghiData))
+	return ghiData
+
+def _logifyData(data):
+	data = np.log(data)
+	return data
+
+def _initPolyModel(X, degrees=5):
+    poly = PolynomialFeatures(degree=degrees)
+    _X_poly = poly.fit_transform(X)
+    return _X_poly
+
 def preparePredictionVectors(year='2018'):
-	cloudCoverData = getDarkSkyCloudCoverForYear(year)
-	ghiData = getUscrnData(year)
+	cloudCoverData = _getDarkSkyCloudCoverForYear(year)
+	ghiData = _getUscrnData(year)
 	#for each 8760 hourly time slots, make a timestamp for each slot, look up cloud cover by that slot
 	#then append cloud cover and GHI reading together
 	start_time = datetime.datetime(int(year),1,1,0)
@@ -71,21 +90,25 @@ def preparePredictionVectors(year='2018'):
 		except KeyError:
 			cloudCover = 0
 		ghi = ghiData[i]
-		training_array.append([ghi, cloudCover])
+		if ghi == 0:
+			continue
+		else:
+			ghi = np.log(ghi)
+		training_array.append((ghi, cloudCover))
+
 	return training_array
 
 
-def _makeDataNonzero(data):
-	ghiData=list(filter(lambda num: num!=0.0, data))
-	return ghiData
-
-def _logifyData(data):
-	data = np.log(data)
-	return data
-
-
 def predictPolynomial(X, model, degrees=5):
-	return
+	X = _initPolyModel(X, degrees=5)
+	predictions = model.predict(X)
+	return predictions
 
-a = preparePredictionVectors('2020')
-print(a)
+# d = _getUscrnData(year='2020')
+# print([x for x in d])
+training_X = preparePredictionVectors(year='2020')
+# print(training_X)
+
+log_prediction = predictPolynomial(training_X, clf_log_poly)
+prediction = np.exp(log_prediction)
+print(prediction)
