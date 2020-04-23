@@ -15,6 +15,8 @@ import pandas as pd
 import numpy as np
 import requests
 import datetime
+import pysolar
+import pytz
 from joblib import dump, load
 
 from sklearn.preprocessing import PolynomialFeatures
@@ -34,7 +36,7 @@ clf_log_poly = load('Log_Polynomial_clf.joblib')
 _key = '31dac4830187f562147a946529516a8d'
 _key2 = os.environ.get('DARKSKY','')
 
-def _getUscrnData(year, location='TX_Austin_33_NW', dataType="SOLARAD"):
+def _getUscrnData(year='2020', location='TX_Austin_33_NW', dataType="SOLARAD"):
 	ghiData = pullUscrn(year, location, dataType)
 	return ghiData
 
@@ -75,40 +77,60 @@ def _initPolyModel(X, degrees=5):
     _X_poly = poly.fit_transform(X)
     return _X_poly
 
-def preparePredictionVectors(year='2018'):
-	cloudCoverData = _getDarkSkyCloudCoverForYear(year)
-	ghiData = _getUscrnData(year)
+def getCosineOfSolarZenith(lat, lon, datetime, timezone='US/Central'):
+	date = pytz.timezone(timezone).localize(datetime)
+	solar_altitude = pysolar.solar.get_altitude(lat,lon,date)
+	solar_zenith = 90 - solar_altitude
+	cosOfSolarZenith = math.cos(math.radians(solar_zenith))
+	return cosOfSolarZenith
+
+def preparePredictionVectors(year='2020', lat=30.581736, lon=-98.024098, station='TX_Austin_33_NW', timezone='US/Central'):
+	cloudCoverData = _getDarkSkyCloudCoverForYear(year, lat, lon)
+	ghiData = _getUscrnData(year, station)
 	#for each 8760 hourly time slots, make a timestamp for each slot, look up cloud cover by that slot
 	#then append cloud cover and GHI reading together
 	start_time = datetime.datetime(int(year),1,1,0)
-	training_array = []
+	input_array = []
 	for i in range(len(ghiData)): #Because ghiData is leneth 8760, one for each hour of a year
 		time = start_time + datetime.timedelta(minutes=60*i)
 		tstamp = int(datetime.datetime.timestamp(time))
+		# cosOfSolarZenith = getCosineOfSolarZenith(lat, lon, time, timezone)
 		try:
 			cloudCover = cloudCoverData[tstamp]
 		except KeyError:
 			cloudCover = 0
 		ghi = ghiData[i]
 		if ghi == 0:
-			continue
-		else:
+			#Not most efficient logic but....
+			#Still need to decide how to handle zero vals. Test this
+			input_array.append((ghi, cloudCover))
+		else:	
 			ghi = np.log(ghi)
-		training_array.append((ghi, cloudCover))
+			input_array.append((ghi, cloudCover))
 
-	return training_array
+	return input_array, ghiData
 
 
 def predictPolynomial(X, model, degrees=5):
 	X = _initPolyModel(X, degrees=5)
-	predictions = model.predict(X)
-	return predictions
+	predictions_dhi = model.predict(X)
+	return predictions_dhi
 
-# d = _getUscrnData(year='2020')
-# print([x for x in d])
-training_X = preparePredictionVectors(year='2020')
-# print(training_X)
+def _tests():
+	#GHI = DHI + cos(theta) * DNI
+	#GHI - DHI = cos(theta) * DNI
+	# a=_getUscrnData()
+	# print(a)
+	# print(len(a))
 
-log_prediction = predictPolynomial(training_X, clf_log_poly)
-prediction = np.exp(log_prediction)
-print(prediction)
+	input_array, ghiData = preparePredictionVectors(year='2020')
+	log_prediction = predictPolynomial(input_array, clf_log_poly)
+	dhiPredictions = np.exp(log_prediction)
+	dhiXCosTheta = ghiData - dhiPredictions #This is cos(theta) * DNI
+	result = list(zip(dhiPredictions, ghiData, dhiXCosTheta))
+	print([i for i in result])
+	print(len(result))
+
+
+if __name__ == '__main__':
+	_tests()
