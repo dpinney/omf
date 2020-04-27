@@ -13,6 +13,7 @@ Params:
 import os
 import pandas as pd
 import numpy as np
+import math
 import requests
 import datetime
 import pysolar
@@ -90,15 +91,17 @@ def preparePredictionVectors(year='2020', lat=30.581736, lon=-98.024098, station
 	#for each 8760 hourly time slots, make a timestamp for each slot, look up cloud cover by that slot
 	#then append cloud cover and GHI reading together
 	start_time = datetime.datetime(int(year),1,1,0)
+	cosArray = []
 	input_array = []
 	for i in range(len(ghiData)): #Because ghiData is leneth 8760, one for each hour of a year
 		time = start_time + datetime.timedelta(minutes=60*i)
 		tstamp = int(datetime.datetime.timestamp(time))
-		# cosOfSolarZenith = getCosineOfSolarZenith(lat, lon, time, timezone)
 		try:
 			cloudCover = cloudCoverData[tstamp]
 		except KeyError:
 			cloudCover = 0
+		#I have my cloud cover, iterate over my ghi and cosine arrays
+		cosOfSolarZenith = getCosineOfSolarZenith(lat, lon, time, timezone)
 		ghi = ghiData[i]
 		if ghi == 0:
 			#Not most efficient logic but....
@@ -107,8 +110,8 @@ def preparePredictionVectors(year='2020', lat=30.581736, lon=-98.024098, station
 		else:	
 			ghi = np.log(ghi)
 			input_array.append((ghi, cloudCover))
-
-	return input_array, ghiData
+		cosArray.append(cosOfSolarZenith)
+	return input_array, ghiData, cosArray
 
 
 def predictPolynomial(X, model, degrees=5):
@@ -117,19 +120,17 @@ def predictPolynomial(X, model, degrees=5):
 	return predictions_dhi
 
 def _tests():
-	#GHI = DHI + cos(theta) * DNI
-	#GHI - DHI = cos(theta) * DNI
-	# a=_getUscrnData()
-	# print(a)
-	# print(len(a))
 
-	input_array, ghiData = preparePredictionVectors(year='2020')
+	input_array, ghiData, cosArray = preparePredictionVectors(year='2020')
+	assert len(input_array) == len(ghiData) == len(cosArray)
 	log_prediction = predictPolynomial(input_array, clf_log_poly)
 	dhiPredictions = np.exp(log_prediction)
 	dhiXCosTheta = ghiData - dhiPredictions #This is cos(theta) * DNI
-	result = list(zip(dhiPredictions, ghiData, dhiXCosTheta))
+	dhi_array = ([dhiXCosTheta[i]/cosArray[i] for i in range(len(dhiXCosTheta))]) 
+	result = list(zip(dhiPredictions, ghiData, dhi_array))
 	print([i for i in result])
 	print(len(result))
+	print(len(input_array))
 
 
 if __name__ == '__main__':
