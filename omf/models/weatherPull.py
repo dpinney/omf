@@ -25,12 +25,10 @@ def work(modelDir, inputDict):
 		parameter = inputDict['weatherParameterUSCRN']
 		data = weather.pullUscrn(inputDict['year'], station, parameter)
 	elif source == 'darkSky':
-		print("DARKSKY found")
 		lat = inputDict['darkSkyLat']
 		lon = inputDict['darkSkyLon']
 		parameter = inputDict['weatherParameterdarkSky']
 		data = weather.pullDarksky(inputDict['year'], lat, lon, parameter, units='si')
-		print(data)
 	elif source == 'easySolar':
 		print("EASYSOLAR FOUND")
 		easySolar.tests()
