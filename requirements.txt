@@ -33,5 +33,6 @@ gunicorn
 Pillow
 maxminddb
 maxminddb-geolite2
+pysolar
 #fbprophet
 #tensorflow
