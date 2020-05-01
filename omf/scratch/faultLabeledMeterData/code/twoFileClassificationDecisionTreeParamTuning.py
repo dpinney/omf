@@ -22,20 +22,16 @@ warnings.filterwarnings("ignore",
 
 # constants -------------------------------------------------------------------
 
-TRAIN_FRACTION = 0.9
+TRAIN_FRACTION = 0.8
+VALIDATION_FRACTION = 0.1
+TEST_FRACTION = 0.1
 TIMEPOINTS_PER_THEFT = 4*24
 
-TRAIN_FILE = '../data/dataOlin-1-1mo.csv'
-TEST_FILE = '../data/dataOlin-1-1mo.csv'
+TRAIN_FILE = '../data/dataOlin-1b-6mo.csv'
+TEST_FILE = '../data/dataOlin-1-6mo.csv'
 SEED = 42
 
 IGNORE_LABELS = ['']
-
-# TRAIN_FILE = '../data/dataABEC-1mo.csv'
-# TEST_FILE = '../data/dataOlin-DEC-1mo.csv'
-
-# TRAIN_FILE = '../data/dataDEC-1mo.csv'
-# TEST_FILE = '../data/dataOlin-ABEC-1mo.csv'
 
 # helper functions ------------------------------------------------------------
 
@@ -172,72 +168,66 @@ testY = testY[ordering]
 
 # classify --------------------------------------------------------------------
 
-names = ["Nearest Neighbors", "Linear SVM", "RBF SVM",
-         "Decision Tree", "Random Forest", "Neural Net", "AdaBoost",
-         "Naive Bayes"]
-
-classifiers = [
-    KNeighborsClassifier(3),
-    SVC(kernel="linear", random_state=SEED),
-    SVC(random_state=SEED),
-    DecisionTreeClassifier(max_depth=5, random_state=SEED),
-    RandomForestClassifier(max_depth=5, n_estimators=10, max_features=1, 
-        random_state=SEED),
-    MLPClassifier(alpha=1, max_iter=1000, random_state=SEED),
-    AdaBoostClassifier(random_state=SEED),
-    GaussianNB()
-]
-
-# normalize data and split into train/test
-trainX = StandardScaler().fit_transform(trainX)
-testX = StandardScaler().fit_transform(testX)
-
 numPoints = trainX.shape[0]
 split = int(TRAIN_FRACTION * numPoints)
 xTrain = trainX[:split,:]
 yTrain = trainY[:split]
 
+numPoints = int(VALIDATION_FRACTION * numPoints)
+xVal = trainX[split:split+numPoints,:]
+yVal = trainY[split:split+numPoints]
+
 numPoints = testX.shape[0]
-split = int(TRAIN_FRACTION * numPoints) 
-xTest = testX[split:,:]
-yTest = testY[split:]
+numPoints = int(TEST_FRACTION * numPoints) 
+xHoldout = testX[-numPoints:,:]
+yHoldout = testY[-numPoints:]
     
-labels = np.unique(yTest)
+labels = np.unique(yTrain)
 labels = np.sort(labels)
 
 # iterate over classifiers
-for name, clf in zip(names, classifiers):
+for condition in ['val','holdout']:
+    print(condition)
+    for depth in range(1,51):
 
-    # classify all conditions    
-    clf.fit(xTrain,yTrain)
-    yPredicted = clf.predict(xTest)
-    confMat = confusion_matrix(yTest, yPredicted)
-    score1 = np.sum(yPredicted==yTest) / float(yTest.shape[0])
+        if condition == 'val':
+            xTest = xVal
+            yTest = yVal
+        elif condition == 'holdout':
+            xTest = xHoldout
+            yTest = yHoldout
 
-    # if a datapoint is predicted as theft, make sure its actually theft by
-    # making sure a majority of the previous TIMEPOINTS_PER_THEFT points were also 
-    # predicted as theft, gets rid of erronous theft predictions that may only occur for
-    # a few timepoints
-    yPredictedNew = np.array(yPredicted)
-    for pNum, prediction in enumerate(yPredicted):
+        # classify all conditions   
+        clf = DecisionTreeClassifier(max_depth=depth, random_state=SEED)
+        clf.fit(xTrain,yTrain)
+        yPredicted = clf.predict(xTest)
+        confMat = confusion_matrix(yTest, yPredicted)
+        score1 = np.sum(yPredicted==yTest) / float(yTest.shape[0])
+
+        # if a datapoint is predicted as theft, make sure its actually theft by
+        # making sure a majority of the previous TIMEPOINTS_PER_THEFT points were also 
+        # predicted as theft, gets rid of erronous theft predictions that may only occur for
+        # a few timepoints
+        yPredictedNew = np.array(yPredicted)
+        for pNum, prediction in enumerate(yPredicted):
+            
+            if prediction == 'theft':
+                trueClass = yTest[pNum]
+                previousPredictionsLocs = yTest==trueClass
+                previousPredictionsLocs[pNum+1:] = False
+                previousPredictions = yPredicted[previousPredictionsLocs] 
+                if len(previousPredictions)>TIMEPOINTS_PER_THEFT:
+                    previousPredictions = previousPredictions[-TIMEPOINTS_PER_THEFT:]
+
+                mode = stats.mode(previousPredictions, axis=None)
+                yPredictedNew[pNum] = mode[0][0]        
+           
+        confMatNew = confusion_matrix(yTest, yPredictedNew)
+        scoreNew = np.sum(yPredictedNew==yTest) / float(yTest.shape[0])
         
-        if prediction == 'theft':
-            trueClass = yTest[pNum]
-            previousPredictionsLocs = yTest==trueClass
-            previousPredictionsLocs[pNum+1:] = False
-            previousPredictions = yPredicted[previousPredictionsLocs] 
-            if len(previousPredictions)>TIMEPOINTS_PER_THEFT:
-                previousPredictions = previousPredictions[-TIMEPOINTS_PER_THEFT:]
-
-            mode = stats.mode(previousPredictions, axis=None)
-            yPredictedNew[pNum] = mode[0][0]        
-       
-    confMatNew = confusion_matrix(yTest, yPredictedNew)
-    scoreNew = np.sum(yPredictedNew==yTest) / float(yTest.shape[0])
-    
-    print(name,round(score1,2),round(scoreNew,2))    
-    # plt.figure()
-    # plot_confusion_matrix(confMat, labels, normalize=True, title=name)  
-    # plt.figure()
-    # plot_confusion_matrix(confMatNew, labels, normalize=True, title=name)
-    # plt.show()
+        print(depth,round(score1,2),round(scoreNew,2))    
+        # plt.figure()
+        # plot_confusion_matrix(confMat, labels, normalize=True, title=name)  
+        # plt.figure()
+        # plot_confusion_matrix(confMatNew, labels, normalize=True, title=name)
+        # plt.show()

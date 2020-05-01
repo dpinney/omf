@@ -14,6 +14,8 @@ from dateutil.parser import parse as parse_dt
 from omf import feeder
 import platform
 
+import pandas as pd
+
 def pullAsos(year, station, datatype):
 	'''This model pulls hourly data for a specified year and ASOS station. 
 	* ASOS is the Automated Surface Observing System, a network of about 900 
@@ -87,6 +89,7 @@ def pullDarksky(year, lat, lon, datatype, units='si', api_key=os.environ.get('DA
 	* path: string, must be a path to a folder if provided.
 		* if a path is provided, the data for all datatypes for the given year and location will be cached there as a csv.'''
 	from pandas import date_range
+	print("DARK SKY IS RUNNING")
 	lat, lon = float(lat), float(lon)
 	int(year) # if year isn't castable... something's up
 	coords = '%0.2f,%0.2f' % (lat, lon) # this gets us 11.1 km unc <https://gis.stackexchange.com/questions/8650/measuring-accuracy-of-latitude-and-longitude>
@@ -108,6 +111,7 @@ def pullDarksky(year, lat, lon, datatype, units='si', api_key=os.environ.get('DA
 	#time.isoformat() has no tzinfo in this case, so darksky parses it as local time
 	urls = ['https://api.darksky.net/forecast/%s/%s,%s?exclude=daily&units=%s' % ( api_key, coords, time.isoformat(), units ) for time in times]
 	data = [requests.get(url).json() for url in urls] # all requests return 400 and "Poorly formatted request" probably because I don't have the API key
+	# print(data)
 	#a fun little annoyance: let's de-unicode those strings
 	#def ascii_me(obj):
 	#	if isinstance(obj, unicode):
@@ -173,8 +177,8 @@ def pullUscrn(year, station, datatype):
 		"SOIL_TEMP_10": 34,
 		"SOIL_TEMP_20": 35,
 		"SOIL_TEMP_50": 36,
-		"SOIL_TEMP_100": 37,
-		"IRRADIENCE_DIFFUSE":13 }
+		"SOIL_TEMP_100": 37
+		}
 	#IF datatype is "irradiance estimate", then run the diffuse/direct_seperator method 
 	assert datatype in datatypeDict, "This datatype isn't listed in options!"
 	datatypeID = datatypeDict[datatype]
@@ -712,6 +716,7 @@ class USCRNDataType(object):
 
 
 def tmy3_pull(usafn_number, out_file=None):
+	print(usafn_number)
 	'''Pull TMY3 data based on usafn. Use nearest_tmy3_station function to get a close by tmy3 station based on latitude/longitude coordinates '''
 	url = 'https://rredc.nrel.gov/solar/old_data/nsrdb/1991-2005/data/tmy3'
 	file_name = '{}TYA.CSV'.format(usafn_number)
@@ -728,7 +733,17 @@ def tmy3_pull(usafn_number, out_file=None):
 					csvwriter = csv.writer(csvfile, delimiter=',')
 					csvwriter.writerow(i)
 	else:
-		return data
+		#Transform data, and resubmit in friendly format for frontend
+		csv_lines = [line.decode() for line in data.iter_lines()]
+		reader = csv.reader(csv_lines, delimiter=',')
+		dataFrame = pd.DataFrame(reader)
+		locID  = (dataFrame.iloc[0][0])
+		locName = (dataFrame.iloc[0][1])
+		locLat = (dataFrame.iloc[0][4])
+		locLon = (dataFrame.iloc[0][5])
+		colNames = dataFrame.iloc[1][:].values
+		dataFrame.rename(columns={key:val for key, val in enumerate(colNames)}, inplace=True)
+		return dataFrame
 
 def nearest_tmy3_station(latitude, longitude):
 	'''Return nearest USAFN stattion based on latlon'''
@@ -817,8 +832,12 @@ def get_nrsdb_data(data_set, longitude, latitude, year, api_key, utc='true', lea
 				csvwriter = csv.writer(csvfile, delimiter=',')
 				csvwriter.writerow(i)
 	else:
+		#Transform data, and resubmit in friendly format for frontend
+		data = pd.DataFrame(reader)
+		colNames = (data.iloc[2][:].values)
+		data.rename(columns={key:val for key, val in enumerate(colNames)}, inplace=True)
 		#Maybe change depending on what's easy/flexible but this gives good display
-		return data.text
+		return data
 
 def getRadiationYears(radiation_type, site, year):
 	'''Pull solard or surfrad data and aggregate into a year'''
@@ -855,77 +874,75 @@ def create_tsv(data, radiation_type, site, year):
 			output.writerow(item)
 
 def get_radiation_data(radiation_type, site, year, out_file=None):
-	'''Get solard or surfrad data. Optional export to csv with out_file option'''
+	'''Get solard or surfrad data. Optional export to csv with out_file option
+		Data is returned in a list w/ ~8760 elements. Each element is a dictionary
+		with ~47 keys value pairs. 
+		 
+	'''
 	allYears = getRadiationYears(radiation_type, site, year)
 	if out_file is not None:
 		create_tsv(allYears, radiation_type, site, year)
 	else:
 		return allYears
 
-def get_diffuse_solar_component(solarTotalTransmission):
-	"""
-	Td = TT [1 -- exp {0.6 (1 --B/TT)/(B -- 0.4)}] 
-	Where Td = Diffuse solar component
-	"""
-	#If no solar detected, return 0
-	if solarTotalTransmission <= 0:
-		return 0
-	#B constant at 0.76 per paper
-	B = 0.76
-	#Multipy solar measurements by 0.0864
-	#Because measurements are in in W/second, equation uses MJ/day
-	solarTotalTransmission = solarTotalTransmission * 0.0864
-	exponent = 0.6 * (1-(B/solarTotalTransmission))/(B-0.4)
-	brackets = 1 - exp(exponent)
-	T_diffuse = solarTotalTransmission * brackets
-	# if T_diffuse < 0:
-		#Problem is when brackets is negative
-		#Brackets becomes negative becayse exp is greater
-		#than 1
-		# print(exponent, brackets)
-	#Convert from  MJ to J
-	T_diffuse = T_diffuse * (10**6)
-	#Convert from J/day to W
-	T_diffuse = T_diffuse * 0.000012
-	return abs(T_diffuse)
-
-
 def _tests():
+	print()
 	print('weather.py tests currently disabled to keep them from sending too many HTTP requests.')
 	from tempfile import mkdtemp
 	tmpdir = mkdtemp()
 	print("Beginning to test weather.py in", tmpdir)
 	# Testing zipCodeToClimateName (Certain cases fail)
-	print(zipCodeToClimateName('75001'))
+	# print(zipCodeToClimateName('75001'))
 	# print(zipCodeToClimateName('07030')) # Doesn't work
-	print(zipCodeToClimateName('64735'))
+	# print(zipCodeToClimateName('64735'))
 	# assert ('MO-KANSAS_CITY', 30) == zipCodeToClimateName('64735') # Assertion Fails
-	print(airportCodeToLatLon("IAD"))
-	# Testing USCRN (Works)
-	print('USCRN (NOAA) data pulled to ' + tmpdir)
-	data = pullUscrn('2017', 'KY_Versailles_3_NNW', "IRRADIENCE_DIFFUSE") # Does not write to a file by itself
+	# print(airportCodeToLatLon("IAD"))
+	# # Testing USCRN (Works)
+	# print('USCRN (NOAA) data pulled to ' + tmpdir)
+	# data = pullUscrn('2017', 'KY_Versailles_3_NNW', "IRRADIENCE_DIFFUSE") # Does not write to a file by itself
+	# data = pullUscrn('2018', 'TX_Austin_33_NW', "SOLARAD") # Does not write to a file by itself
 	# print(data)
 	# import matplotlib.pyplot as plt
 	# plt.plot(data)
 	# plt.show()
-	# Testing ASOS (Works)
-	pullAsos('2017','CHO', 'tmpc') # Does not write to a file by itself
-	print('ASOS (Iowa) data pulled to ' + tmpdir)
+	# # Testing ASOS (Works)
+	# print(pullAsos('2017','CHO', 'tmpc')) # Does not write to a file by itself
+	# print('ASOS (Iowa) data pulled to ' + tmpdir)
 	# pullAsosStations(os.path.join(tmpdir, 'asosStationTable.csv'))
 	# Testing DarkSky (Works as long as you have an API key)
-	# pullDarksky(2018, 36.64, -93.30, 'temperature', path=tmpdir)
+	# print(pullDarksky(2018, 36.64, -93.30, 'temperature', path=tmpdir))
 	# print('Darksky data pulled to ' + tmpdir)
 	# Testing tmy3 (Works)
-	if platform.system() != 'Windows':
-		tmy3_pull(nearest_tmy3_station(41, -78), out_file=os.path.join(tmpdir, 'tmy3_test.csv'))
+	# if platform.system() != 'Windows':
+	# 	data=tmy3_pull(nearest_tmy3_station(41, -78))
+	# 	print(data)
+	# 	print(data.columns)
+	# 	print(data['DNI source'])
+		# plt.plot(data)
+		# plt.show()
+
 	# Testing getRadiationYears (Works, but not used anywhere)
-	# get_radiation_data('surfrad', 'Boulder_CO', 2019, True)
+	# print(get_radiation_data('surfrad', 'Boulder_CO', 2019))
 	# get_radiation_data('solrad', 'bis', 2019)
-	# Testing NSRDB (Works, but not used anywhere)
+	# # Testing NSRDB (Works, but not used anywhere)
 	# nsrdbkey = 'rnvNJxNENljf60SBKGxkGVwkXls4IAKs1M8uZl56'
-	# get_nrsdb_data('psm',-99.49218,43.83452,'2017', nsrdbkey, interval=60, filename=os.path.join(tmpdir, 'psm.csv'))
+	# year='2018'
+	# get_nrsdb_data('psm',-99.49218,43.83452,year, nsrdbkey, interval=60, filename=os.path.join('/Users/tuomastalvitie/Documents/GRIP/Diffuse:Direct/Data_Files')
+# , 'psm_'+year+'.csv'))
+	# Test for charlottesville
+	# get_nrsdb_data('psm',-78.4532,38.0086,year, nsrdbkey, interval=60, filename=os.path.join('/Users/tuomastalvitie/Documents/GRIP/Diffuse:Direct/solarIrradiencePredictor/Raw_Data/Charlottesville/', 'RAW_psm_VA_Charlottesville'+year+'.csv')) 
+	#Test For Austin, TX
+	# d=get_nrsdb_data('psm',-98.024098,30.581736,'2018', nsrdbkey, interval=60)
+	# print(d)
+	# print(type(d))
+	# print(d['GHI'])
+	#Test for Spokane, WA
+	# get_nrsdb_data('psm',-117.52,47.41,year, nsrdbkey, interval=60, filename=os.path.join('/Users/tuomastalvitie/Documents/GRIP/Diffuse:Direct/solarIrradiencePredictor/Raw_Data/Spokane_WA/', 'RAW_psm_WA_Spokane'+year+'.csv'))
+	#Test for Everglades FL
+	# get_nrsdb_data('psm',-81.119239,26.004157,year, nsrdbkey, interval=60, filename=os.path.join('/Users/tuomastalvitie/Documents/GRIP/Diffuse:Direct/solarIrradiencePredictor/Raw_Data/Everglades_FL/', 'RAW_psm_FL_Everglades'+year+'.csv'))
+	# get_nrsdb_data('psm',-99.49218,43.83452,'2016', nsrdbkey, interval=60, filename=os.path.join(tmpdir, 'psm.csv'))
 	# print(get_nrsdb_data('psm',-99.49218,43.83452,'2017', nsrdbkey, interval=60))
-	# get_nrsdb_data('psm_tmy',-99.49218,43.83452,'tdy-2017', nsrdbkey, filename='psm_tmy.csv')
+	# get_nrsdb_data('psm_tmy',-99.49218,43.83452,'tdy-2018', nsrdbkey, filename='psm_tmy.csv')
 	# print(get_nrsdb_data('psm_tmy',-99.49218,43.83452,'tdy-2017', nsrdbkey))
 	# get_nrsdb_data('suny',77.1679,22.1059,'2014', nsrdbkey, filename='suny.csv')
 	# get_nrsdb_data('spectral_tmy',77.08007,20.79720,'tmy', nsrdbkey, filename='spectral_tmy.csv')

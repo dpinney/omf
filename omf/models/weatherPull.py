@@ -3,6 +3,7 @@ import shutil, csv
 from os.path import isdir, join as pJoin
 
 from omf import weather
+from omf import easySolar
 from omf.models import __neoMetaModel__
 from omf.models.__neoMetaModel__ import *
 
@@ -13,6 +14,7 @@ hidden = False
 
 def work(modelDir, inputDict):
 	''' Run the model in its directory.'''
+	print(inputDict)
 	source = inputDict['source']
 	if source =='ASOS':
 		station = inputDict['stationASOS']
@@ -27,6 +29,10 @@ def work(modelDir, inputDict):
 		lon = inputDict['darkSkyLon']
 		parameter = inputDict['weatherParameterdarkSky']
 		data = weather.pullDarksky(inputDict['year'], lat, lon, parameter, units='si')
+	elif source == 'easySolar':
+		print("EASYSOLAR FOUND")
+		easySolar.tests()
+
 	# station = inputDict['stationASOS'] if source == 'ASOS' else inputDict['stationUSCRN']
 	# parameter = inputDict['weatherParameterASOS'] if source == 'ASOS' else inputDict['weatherParameterUSCRN']
 	# inputs = [inputDict['year'], station, parameter]
