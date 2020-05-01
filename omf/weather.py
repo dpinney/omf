@@ -822,6 +822,7 @@ class NSRDB():
 
 def get_nrsdb_data(data_set, longitude, latitude, year, api_key, utc='true', leap_day='false', email='admin@omf.coop', interval=None, filename=None):
 	'''Create nrsdb factory and execute query. Optional output to file or return the response object.'''
+	print("NRSDB found")
 	nrsdb_factory = NSRDB(data_set, longitude, latitude, year, api_key, utc=utc, leap_day=leap_day, email=email, interval=interval)
 	data = nrsdb_factory.execute_query()
 	csv_lines = [line.decode() for line in data.iter_lines()]
@@ -910,7 +911,9 @@ def _tests():
 	# print('ASOS (Iowa) data pulled to ' + tmpdir)
 	# pullAsosStations(os.path.join(tmpdir, 'asosStationTable.csv'))
 	# Testing DarkSky (Works as long as you have an API key)
-	# print(pullDarksky(2018, 36.64, -93.30, 'temperature', path=tmpdir))
+	# d=(pullDarksky(2018, 36.64, -93.30, 'temperature', path=tmpdir))
+	# print(d)
+	# print(type(d))
 	# print('Darksky data pulled to ' + tmpdir)
 	# Testing tmy3 (Works)
 	# if platform.system() != 'Windows':
@@ -933,7 +936,7 @@ def _tests():
 	# get_nrsdb_data('psm',-78.4532,38.0086,year, nsrdbkey, interval=60, filename=os.path.join('/Users/tuomastalvitie/Documents/GRIP/Diffuse:Direct/solarIrradiencePredictor/Raw_Data/Charlottesville/', 'RAW_psm_VA_Charlottesville'+year+'.csv')) 
 	#Test For Austin, TX
 	# d=get_nrsdb_data('psm',-98.024098,30.581736,'2018', nsrdbkey, interval=60)
-	# print(d)
+	# print(d['Temperature'])
 	# print(type(d))
 	# print(d['GHI'])
 	#Test for Spokane, WA

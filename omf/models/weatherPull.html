@@ -65,6 +65,7 @@
 					<option value="USCRN">USCRN</option>
 					<option value="darkSky">darkSky</option>
 					<option value="easySolar">GHI/DHI/DNI Estimation</option>
+					<option value="NRSDB">NRSDB</option>
 				</select>
 			</div>
 			 <div class="shortInput">
@@ -321,6 +322,28 @@
 				<input type="text" id="darkSkyLon" name="darkSkyLon" pattern="[-+]?[0-9]*\.?[0-9]+"/>
 			</div>
 			<div class="shortInput">
+				<label class="tooltip">Weather Parameter - NRSDB<span class="classic">Data that should be pulled</span></label>
+				<select id="weatherParameterNRSDB" name="weatherParameterNRSDB" required="required">
+					<option value="Temperature">Temperature (C) </option>
+					<option value="Clearsky DHI">Clearsky DHI (w/m2)</option>
+					<option value="Clearsky DNI">Clearsky DNI (w/m2)</option>
+					<option value="Clearsky GHI">Clearsky GHI (w/m2)</option>
+					<option value="Cloud Type">Cloud Type</option>
+					<option value="Dew Point">Dew Point (C)</option>
+					<option value="DHI">DHI (w/m2)</option>
+					<option value="DNI">DNI (w/m2)</option>
+					<option value="Fill Flag">Fill Flag</option>
+					<option value="GHI">GHI (w/m2)</option>
+					<option value="Relative Humidity">Relative Humidity (%)</option>
+					<option value="Solar Zenith Angle">Solar Zenith Angle (deg)</option>
+					<option value="Surface Albedo Pressure">Surface Albedo</option>
+					<option value="Precipitable Water">Precipitable Water (cm)</option>
+					<option value="Wind Direction">Wind Direction (Deg)</option>
+					<option value="Pressure">Pressure (mbar)</option>
+					<option value="Wind Speed">Wind Speed (m/s)</option>
+				</select>
+			</div>
+			<!-- <div class="shortInput">
 				<label class="tooltip">Station - GHI/DHI/DNI Estimation<span class="classic">USCRN: Dropdown menu of stations</span></label>
 				<select id="easySolarStation" name="easySolarStation"required="required">
 					<option value="AK_Utqiagvik_formerly_Barrow_4_ENE">AK_Utqiagvik</option>
@@ -480,7 +503,7 @@
 					<option value="WY_Moose_1_NNE">WY_Moose</option>
 					<option value="WY_Sundance_8_NNW">WY_Sundance</option>
 				</select>
-			</div>
+			</div> -->
 
 			<!-- Required Buttons -->
 			<div class="wideInput" style="text-align:right">

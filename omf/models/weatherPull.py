@@ -29,9 +29,22 @@ def work(modelDir, inputDict):
 		lon = inputDict['darkSkyLon']
 		parameter = inputDict['weatherParameterdarkSky']
 		data = weather.pullDarksky(inputDict['year'], lat, lon, parameter, units='si')
+	elif source == 'NRSDB':
+		nsrdbkey = 'rnvNJxNENljf60SBKGxkGVwkXls4IAKs1M8uZl56'
+		latitude = float(inputDict['darkSkyLat'])
+		longitude = float(inputDict['darkSkyLon'])
+		year = inputDict['year']
+		param = inputDict['weatherParameterNRSDB']
+		data = weather.get_nrsdb_data('psm', longitude, latitude, year, nsrdbkey, interval=60)
+		#Data must be a list. Extract correct column from returned pandas df, return this column as array of int
+		data = list(data[param].values[3:].astype(float))
 	elif source == 'easySolar':
 		print("EASYSOLAR FOUND")
 		easySolar.tests()
+	elif source == 'tmy3':
+		pass
+	elif source == 'get_radiation_data':
+		pass
 
 	# station = inputDict['stationASOS'] if source == 'ASOS' else inputDict['stationUSCRN']
 	# parameter = inputDict['weatherParameterASOS'] if source == 'ASOS' else inputDict['weatherParameterUSCRN']
