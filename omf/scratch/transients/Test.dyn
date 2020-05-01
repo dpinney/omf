@@ -1,0 +1,24 @@
+# Test
+
+ID = TEST
+
+#########################
+# Controller Definition #
+#########################
+
+Vref = REF()
+Vt = INPUT(Vt,GEN1)
+N3 = SUM(Vref,-Vt)
+N4 = LDLAG(N3,1,10)
+N5 = LAG(N4,100,0.1)
+Vfd = OUTPUT(N5,GEN1)
+
+##################
+# Initialisation #
+##################
+INIT
+SIGNAL = N5 = MULT(Vfd,1)
+SIGNAL = N4 = MULT(Vfd,0.01)
+SIGNAL = Vref = SUM(Vt,N4)
+STATE = N5 = MULT(Vfd,0.01)
+STATE = N4 = MULT(Vfd,0.01)
