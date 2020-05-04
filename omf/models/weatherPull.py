@@ -42,6 +42,9 @@ def work(modelDir, inputDict):
 		print("EASYSOLAR FOUND")
 		easySolar.tests()
 	elif source == 'tmy3':
+		param = inputDict['weatherParameterTmy3']
+		lat = inputDict['darkSkyLat']
+		lon = inputDict['darkSkyLon']
 		pass
 	elif source == 'get_radiation_data':
 		pass

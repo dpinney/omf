@@ -916,9 +916,9 @@ def _tests():
 	# print(type(d))
 	# print('Darksky data pulled to ' + tmpdir)
 	# Testing tmy3 (Works)
-	# if platform.system() != 'Windows':
-	# 	data=tmy3_pull(nearest_tmy3_station(41, -78))
-	# 	print(data)
+	if platform.system() != 'Windows':
+		data=tmy3_pull(nearest_tmy3_station(41, -78))
+		print(data)
 	# 	print(data.columns)
 	# 	print(data['DNI source'])
 		# plt.plot(data)
