@@ -743,6 +743,8 @@ def tmy3_pull(usafn_number, out_file=None):
 		locLon = (dataFrame.iloc[0][5])
 		colNames = dataFrame.iloc[1][:].values
 		dataFrame.rename(columns={key:val for key, val in enumerate(colNames)}, inplace=True)
+		dataFrame = dataFrame.iloc[2:]
+		dataFrame['year'] = pd.to_datetime(dataFrame['Date (MM/DD/YYYY)'], format='%m/%d/%Y').dt.year
 		return dataFrame
 
 def nearest_tmy3_station(latitude, longitude):
@@ -911,14 +913,16 @@ def _tests():
 	# print('ASOS (Iowa) data pulled to ' + tmpdir)
 	# pullAsosStations(os.path.join(tmpdir, 'asosStationTable.csv'))
 	# Testing DarkSky (Works as long as you have an API key)
-	# d=(pullDarksky(2018, 36.64, -93.30, 'temperature', path=tmpdir))
+	# d=(pullDarksky(2018, 36.64, -93.30, 'temperature', api_key= '31dac4830187f562147a946529516a8d', path=tmpdir))
 	# print(d)
+	# print(len(d))
 	# print(type(d))
 	# print('Darksky data pulled to ' + tmpdir)
 	# Testing tmy3 (Works)
-	if platform.system() != 'Windows':
-		data=tmy3_pull(nearest_tmy3_station(41, -78))
-		print(data)
+	# if platform.system() != 'Windows':
+	# 	data=tmy3_pull(nearest_tmy3_station(41, -78))
+	# 	print(data)
+	# 	print(len(data))
 	# 	print(data.columns)
 	# 	print(data['DNI source'])
 		# plt.plot(data)
@@ -936,7 +940,8 @@ def _tests():
 	# get_nrsdb_data('psm',-78.4532,38.0086,year, nsrdbkey, interval=60, filename=os.path.join('/Users/tuomastalvitie/Documents/GRIP/Diffuse:Direct/solarIrradiencePredictor/Raw_Data/Charlottesville/', 'RAW_psm_VA_Charlottesville'+year+'.csv')) 
 	#Test For Austin, TX
 	# d=get_nrsdb_data('psm',-98.024098,30.581736,'2018', nsrdbkey, interval=60)
-	# print(d['Temperature'])
+	# print(d)
+	# print(len(d))
 	# print(type(d))
 	# print(d['GHI'])
 	#Test for Spokane, WA

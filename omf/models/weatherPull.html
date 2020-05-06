@@ -66,6 +66,7 @@
 					<option value="darkSky">darkSky</option>
 					<option value="easySolar">GHI/DHI/DNI Estimation</option>
 					<option value="NRSDB">NRSDB</option>
+					<option value="tmy3">tmy3</option>
 				</select>
 			</div>
 			 <div class="shortInput">
@@ -314,11 +315,11 @@
 				</select>
 			</div>
 			<div class="shortInput">
-				<label class="tooltip">Dark Sky Lat<span class="classic">Enter in Latitude of location</span></label>
+				<label class="tooltip">Latitude<span class="classic">Enter in Latitude of location</span></label>
 				<input type="text" id="darkSkyLat" name="darkSkyLat" pattern="[-+]?[0-9]*\.?[0-9]+"/>
 			</div>
 			<div class="shortInput">
-				<label class="tooltip">Dark Sky Lon<span class="classic">Enter in Longitude of location</span></label>
+				<label class="tooltip">Longitude<span class="classic">Enter in Longitude of location</span></label>
 				<input type="text" id="darkSkyLon" name="darkSkyLon" pattern="[-+]?[0-9]*\.?[0-9]+"/>
 			</div>
 			<div class="shortInput">
@@ -348,13 +349,13 @@
 				<select id="weatherParameterTmy3" name="weatherParameterTmy3" required="required">
 					<option value="ETR (W/m^2)">Extraterrestrial Radiation on a Horizontal Surface (W/m^2)</option>
 					<option value="ETRN (W/m^2)">Hourly extraterrestrial radiation normal to the sun (W/m^2)</option>
-					<option value="GHI (W/m^2)">Global horizontal irradiance  (Wh/m2)</option>
+					<option value="GHI (W/m^2)">Global Horizontal Irradiance (GHI)  (Wh/m2)</option>
 					<option value="GHI source">Global Horizontal Irradiance Source</option>
 					<option value="GHI uncert (%)">GHI Uncertainty</option>
-					<option value="DNI (W/m^2)">Direct Normal Irradiance (Wh/m^2)</option>
+					<option value="DNI (W/m^2)">Direct Normal Irradiance (DNI) (Wh/m^2)</option>
 					<option value="DNI source">DNI Source</option>
 					<option value="DNI uncert (%)">DNI Uncertainty</option>
-					<option value="DHI (W/m^2)">Diffuse Horizontal Irradience Wh/m^2</option>
+					<option value="DHI (W/m^2)">Diffuse Horizontal Irradience (DHI) Wh/m^2</option>
 					<option value="DHI source">DHI Source</option>
 					<option value="DHI uncert (%)">DHI Uncertainty</option>
 					<option value="GH illum (lx)">Global horizontal Illuminance (Lux)</option>

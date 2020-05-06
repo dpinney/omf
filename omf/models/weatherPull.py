@@ -13,7 +13,9 @@ tooltip = "Download historical weather data for a given location for use in othe
 hidden = False
 
 def work(modelDir, inputDict):
-	''' Run the model in its directory.'''
+	''' Run the model in its directory.
+		Model takes in parameters from inputDict, and returns a list of data points of type float.
+		'''
 	print(inputDict)
 	source = inputDict['source']
 	if source =='ASOS':
@@ -45,7 +47,12 @@ def work(modelDir, inputDict):
 		param = inputDict['weatherParameterTmy3']
 		lat = inputDict['darkSkyLat']
 		lon = inputDict['darkSkyLon']
-		pass
+		year = int(inputDict['year'])
+		data = weather.tmy3_pull(weather.nearest_tmy3_station(lat, lon))
+		#Now get data for the year in question
+		data = data.loc[data['year']==year]
+		#Extract param from data, convert to int, and pass in values not pandas series
+		data = list(data[param].astype(float).values)
 	elif source == 'get_radiation_data':
 		pass
 
