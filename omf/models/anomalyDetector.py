@@ -11,14 +11,35 @@ import plotly.graph_objs as go
 from omf import anomalyDetection
 from omf.models import __neoMetaModel__
 from omf.models.__neoMetaModel__ import *
-
-
 # Model metadata:
 modelName, template = __neoMetaModel__.metadata(__file__)
 tooltip = ('Detect anomalies in meter data.')
 hidden = False
 
 def workProphet(modelDir, inputDict):
+	'''
+	Create models for Prophet monovariate anomaly detector, Peak Forecast T-Test Method, and Elliptic Envelope
+
+	params
+	type modelDir: str, path to the directory in which the model is located
+	type inputDict: dictionary, {
+							'confidence': The required confidence level to classify the data as Gaussian,
+							'norm_confidence': confidence interval using a normal distribution?,
+							'startDate': start date of data to be used for forecasting,
+							'file': csv file of data
+							'demandTempBool': optional dictionary containing parameters for Peak Forecast T-test Method,
+							'ylabel': demand points	throughout the day
+								}
+	rtype out: dictionary, {
+						'y': demand labels for training data,
+						'yhat': predicted demand labels for training data,
+						'yhat_upper': upper bound on predicted training data labels,
+						'yhat_lower': lower bound on predicted training data labels,
+						'prophet_outlier': predicted outlier points from prophet model,
+						'elliptic_outlier': predicted outlier points from prophet model,
+						'katrina_outlier': predicted outlier points from Peak T-test model
+							}
+	'''
 	cached_file_name = "input_data_{}.csv".format(inputDict["confidence"])
 	cached_file_path = pJoin(modelDir, cached_file_name)
 
@@ -104,13 +125,24 @@ def workProphet(modelDir, inputDict):
 	return out
 
 def workLof(modelDir, inputDict):
-	
+	'''
+	Create model for Local Outlier Factor, plot it and return the plot.
+	params:
+	type modelDir: str, path to the directory in which the model is located?
+	type inputDict: dictionary,{
+								'neighbors': number of neighbors used neighborhood of a given point,
+								'contaminationLof': the percent of data expected to be anomalous,
+								'file': csv file of data
+								}
+
+	rtype plotData: list, containinng scatter plot of original input data and predicted anomalous points.
+	'''
 	neighbors = int(inputDict['neighbors'])
 	contamination = float(inputDict['contaminationLof'])
 	if contamination == 0:
 		contamination = 'auto'
 	clf = LocalOutlierFactor(n_neighbors=neighbors, contamination=contamination)
-	
+
 	# load our csv to df
 	f = StringIO(inputDict["file"])
 	df = pd.read_csv(f)
@@ -125,22 +157,35 @@ def workLof(modelDir, inputDict):
 
 	plotData = []
 	x = np.arange(0,datapoints.shape[0])
-	data = go.Scatter( x=x, y=datapoints[:,0], name='data', mode='lines+markers' ) 
+	data = go.Scatter( x=x, y=datapoints[:,0], name='data', mode='lines+markers' )
 	plotData.append(data)
-	outliers = go.Scatter( x=x[labels!=1], y=datapoints[labels!=1, 0], name='outliers', 
-		mode='markers' ) 
+	outliers = go.Scatter( x=x[labels!=1], y=datapoints[labels!=1, 0], name='outliers',
+		mode='markers' )
 	plotData.append(outliers)
 
 	return plotData
 
 def workIso(modelDir, inputDict):
+	'''
+	Create Isolation Forest model, and its respective scatterplot.
 
+	params:
+	type modelDir: str, path to the directory in which the model is located?
+	type inputDict: dictionary,{
+								'samples': the percent of data to sample to create each decision tree.,
+								'estimators': number of decision tress to generate,
+								'contaminationIso': the percent of data expected to be anomalous,
+								'file': csv file of data
+								}
+
+	rtype plotData: list, containinng scatter plot of original input data and predicted anomalous points.
+	'''
 	samples = float(inputDict['samples'])
 	estimators = int(inputDict['estimators'])
 	contamination = float(inputDict['contaminationIso'])
 	if contamination == 0:
 		contamination = 'auto'
-	clf =  IsolationForest(max_samples=samples,	n_estimators=estimators, 
+	clf =  IsolationForest(max_samples=samples,	n_estimators=estimators,
 		contamination=contamination, behaviour='new', random_state=42)
 
 	# load our csv to df
@@ -157,16 +202,27 @@ def workIso(modelDir, inputDict):
 
 	plotData = []
 	x = np.arange(0,datapoints.shape[0])
-	data = go.Scatter( x=x, y=datapoints[:,0], name='data', mode='lines+markers' ) 
+	data = go.Scatter( x=x, y=datapoints[:,0], name='data', mode='lines+markers' )
 	plotData.append(data)
 	outliers = go.Scatter( x=x[labels!=1], y=datapoints[labels!=1, 0], name='outliers',
-		mode='markers' ) 
+		mode='markers' )
 	plotData.append(outliers)
 
 	return plotData
 
 def workSAX(modelDir, inputDict):
-	
+	'''
+	Create SAX model, and its respective scatterplot.
+	params:
+	type modelDir: str, path to the directory in which the model is located?
+	type inputDict: dictionary,{
+								'windowSize': number of data points to consider for the normalization process,
+								'alphabetSize': rhe number of symbols to use in representation,
+								'file': csv file of data
+								}
+
+	rtype plotData: list, containinng scatter plot of original input data and predicted anomalous points.
+	'''
 	def cuts_for_asize(a_size):
 	    """Generate a set of alphabet cuts for its size."""
 
@@ -255,7 +311,7 @@ def workSAX(modelDir, inputDict):
 
 	def znorm(series, znorm_threshold=0.01):
 	    """Znorm implementation."""
-	    
+
 	    sd = np.std(series)
 	    if (sd < znorm_threshold):
 	        return series
@@ -264,7 +320,7 @@ def workSAX(modelDir, inputDict):
 
 	def idx2letter(idx):
 	    """Convert a numerical index to a char."""
-	    
+
 	    if 0 <= idx <= 20:
 	        return chr(96 + idx)
 	    else:
@@ -272,20 +328,20 @@ def workSAX(modelDir, inputDict):
 
 	def ts_to_string(series, cuts):
 	    """A straightforward num-to-string conversion."""
-	    
+
 	    sax = list()
 	    for i in range(0, len(series)):
-	    
+
 	        j = np.searchsorted(cuts,series[i])
 	        sax.append(idx2letter(j))
-	    
+
 	    return ''.join(sax)
 
 	def getSaxString(series, win_size, alphabet_size=3, z_threshold=0.01):
 	    """Simple via window conversion implementation."""
-	    
+
 	    cuts = cuts_for_asize(alphabet_size)
-	    
+
 	    saxString = ''
 	    for i in range(0, len(series) - win_size):
 
@@ -311,15 +367,15 @@ def workSAX(modelDir, inputDict):
 
 	        # make a digram
 	        digram = ' '.join(stringArray[i:i+2])
-	    
+
 	        #print(digram)
 
-	        # if digram not in dict, add to dict 
+	        # if digram not in dict, add to dict
 	        rule = encodingGrammar.get(digram)
 	        if rule is None:
 	            encodingGrammar[digram] = ''
-	        
-	        # else if digram in dict, but no rule 
+
+	        # else if digram in dict, but no rule
 	        elif rule == '':
 
 	            # make rule
@@ -335,17 +391,17 @@ def workSAX(modelDir, inputDict):
 	                else:
 	                    occurances[letter].append( ruleString )
 
-	            # replace all occurances of digram with rule, recursive call 
+	            # replace all occurances of digram with rule, recursive call
 
-	            stringSeq = ' '.join(stringArray)   
+	            stringSeq = ' '.join(stringArray)
 	            stringSeq = stringSeq.replace(digram,ruleString)
 	            stringArray = stringSeq.split(' ')
 	            ruleNum += 1
 
-	            return ( stringArray, encodingGrammar, decodingGrammar, ruleNum, 
+	            return ( stringArray, encodingGrammar, decodingGrammar, ruleNum,
 	                occurances )
 
-	    return ( stringArray, encodingGrammar, decodingGrammar, ruleNum, 
+	    return ( stringArray, encodingGrammar, decodingGrammar, ruleNum,
 	                occurances )
 
 	def sequitur(stringArray, encodingGrammar, decodingGrammar, ruleNum, occurances):
@@ -353,8 +409,8 @@ def workSAX(modelDir, inputDict):
 	    ruleString = str(ruleNum)
 	    while len(stringArray) > 1:
 
-	        ( stringArray, encodingGrammar, decodingGrammar, ruleNum, 
-	        occurances ) = makeReplacement(stringArray, encodingGrammar, 
+	        ( stringArray, encodingGrammar, decodingGrammar, ruleNum,
+	        occurances ) = makeReplacement(stringArray, encodingGrammar,
 	        decodingGrammar, ruleNum, occurances)
 
 	    # when length of seq string is 1
@@ -371,17 +427,17 @@ def workSAX(modelDir, inputDict):
 	                stringToReplace = decodingGrammar[replaceLocation]
 	                decodingGrammar[replaceLocation] = stringToReplace.replace(key,rule)
 	                toDelete.add(key)
-	                
+
 	    for key in toDelete:
 	        del decodingGrammar[key]
-	    
+
 	    return (stringArray, decodingGrammar)
 
 	def findAll( mainString, substring ):
 
 	    locations = []
 	    startPoint = 0
-	    
+
 	    while True:
 
 	        firstLocation = mainString.find(substring, startPoint )
@@ -441,7 +497,7 @@ def workSAX(modelDir, inputDict):
 	windowSize = int(inputDict['windowSize'])
 	alphabetSize = int(inputDict['alphabetSize'])
 
-	saxString = getSaxString(normalizedDatapoints, windowSize, 
+	saxString = getSaxString(normalizedDatapoints, windowSize,
 		alphabet_size=alphabetSize, z_threshold=0.01)
 	saxArray = saxString.split(' ')
 
@@ -451,7 +507,7 @@ def workSAX(modelDir, inputDict):
 
 	plotData = []
 	x = np.arange(0,datapoints[:len(repeats),0].shape[0])
-	data = go.Bar(x=x, y=datapoints[:len(repeats),0], 
+	data = go.Bar(x=x, y=datapoints[:len(repeats),0],
 		marker={'color': repeats[:,0], 'colorbar': {'title': 'repeats'},
 		'colorscale': 'thermal', 'showscale':True})
 	plotData.append(data)
@@ -469,7 +525,7 @@ def work(modelDir, inputDict):
 	outData['plotIso'] = json.dumps(plotData, cls=plotly.utils.PlotlyJSONEncoder)
 	plotData = workSAX(modelDir, inputDict)
 	outData['plotSax'] = json.dumps(plotData, cls=plotly.utils.PlotlyJSONEncoder)
-	
+
 	return outData
 
 
