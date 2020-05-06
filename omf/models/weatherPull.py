@@ -42,7 +42,9 @@ def work(modelDir, inputDict):
 		data = list(data[param].values[3:].astype(float))
 	elif source == 'easySolar':
 		print("EASYSOLAR FOUND")
-		easySolar.tests()
+		station = inputDict['easySolarStation']
+		year = inputDict['year']
+		easySolar.get_synth_dhi_dni(station, year)
 	elif source == 'tmy3':
 		param = inputDict['weatherParameterTmy3']
 		lat = inputDict['darkSkyLat']
