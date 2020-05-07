@@ -1,6 +1,6 @@
-Oscillation Penalty,2
+Oscillation Penalty,40
 Action Penalty,0.1
-Deviation from Optimal Penalty,4
+Deviation from Optimal Penalty,16
 load file timestep,1
 power factor,0.9
 load scaling factor,1.5
@@ -14,7 +14,7 @@ bp2 default,1.01
 bp3 default,1.01
 bp4 default,1.04
 bp5 default,1.07
-max tap change default,16
+max tap change default,0
 forward band default,2
-tap number default,16
+tap number default,0
 tap delay default,2
