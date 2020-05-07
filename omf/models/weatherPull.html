@@ -64,10 +64,11 @@
 					<option value="ASOS">ASOS</option>
 					<option value="USCRN">USCRN</option>
 					<option value="darkSky">darkSky</option>
-					<option value="easySolar">GHI/DHI/DNI Estimation</option>
 					<option value="NRSDB">NRSDB</option>
 					<option value="tmy3">tmy3</option>
-					<option value="easySolar">GHI/DHI/DNI Estimation</option>
+					<option value="easySolarGhi">GHI Estimation</option>
+					<option value="easySolarDhi">DHI Estimation</option>
+					<option value="easySolarDni">DNI Estimation</option>
 				</select>
 			</div>
 			 <div class="shortInput">
@@ -240,6 +241,14 @@
 				<input type="text" id="year" name="year" pattern="[1-2][0-9][0-9][0-9]" required="required"/>
 			</div>	
 			<div class="shortInput">
+				<label class="tooltip">Latitude<span class="classic">Enter in Latitude of location</span></label>
+				<input type="text" id="darkSkyLat" name="darkSkyLat" pattern="[-+]?[0-9]*\.?[0-9]+"/>
+			</div>
+			<div class="shortInput">
+				<label class="tooltip">Longitude<span class="classic">Enter in Longitude of location</span></label>
+				<input type="text" id="darkSkyLon" name="darkSkyLon" pattern="[-+]?[0-9]*\.?[0-9]+"/>
+			</div>
+			<div class="shortInput">
 				<label class="tooltip">Weather Parameter - ASOS<span class="classic">Data that should be pulled</span></label>
 				<select id="weatherParameterASOS" name="weatherParameterASOS" required="required">
 					<option value="tmpc">Temperature (Celsius)</option>
@@ -314,14 +323,6 @@
 					<option value="ozone">Ozone (Dobsons)</option>
 
 				</select>
-			</div>
-			<div class="shortInput">
-				<label class="tooltip">Latitude<span class="classic">Enter in Latitude of location</span></label>
-				<input type="text" id="darkSkyLat" name="darkSkyLat" pattern="[-+]?[0-9]*\.?[0-9]+"/>
-			</div>
-			<div class="shortInput">
-				<label class="tooltip">Longitude<span class="classic">Enter in Longitude of location</span></label>
-				<input type="text" id="darkSkyLon" name="darkSkyLon" pattern="[-+]?[0-9]*\.?[0-9]+"/>
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Weather Parameter - NRSDB<span class="classic">Data that should be pulled</span></label>

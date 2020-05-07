@@ -265,10 +265,11 @@ def preparePredictionVectors(year='2020', lat=30.581736, lon=-98.024098, station
 		#I have my cloud cover, iterate over my ghi and cosine arrays
 		cosOfSolarZenith = getCosineOfSolarZenith(lat, lon, time, timezone)
 		ghi = ghiData[i]
-		if ghi == 0:
+		print(ghi)
+		if ghi <= 0:
 			#Not most efficient logic but....
 			#Still need to decide how to handle zero vals. Test this
-			input_array.append((ghi, cloudCover))
+			input_array.append((0, cloudCover))
 		else:	
 			ghi = np.log(ghi)
 			input_array.append((ghi, cloudCover))
@@ -282,31 +283,36 @@ def predictPolynomial(X, model, degrees=5):
 	return predictions_dhi
 
 def get_synth_dhi_dni(uscrn_station, year):
-	print("********EASY SOLAR TEST STARTED************")
+	print("********EASY SOLAR STARTED************")
 	lat = Station_Dict[uscrn_station][0]
 	lon = Station_Dict[uscrn_station][1]
 	timezone = Station_Dict[uscrn_station][2]
 	input_array, ghiData, cosArray = preparePredictionVectors(year, lat, lon, uscrn_station, timezone)
 	log_prediction = predictPolynomial(input_array, clf_log_poly)
 	dhiPredictions = np.exp(log_prediction)
-	dhiXCosTheta = ghiData - dhiPredictions #This is cos(theta) * DNI
-	dhi_array = ([dhiXCosTheta[i]/cosArray[i] for i in range(len(dhiXCosTheta))]) 
-	result = list(zip(dhiPredictions, ghiData, dhi_array))
+	dniXCosTheta = ghiData - dhiPredictions #This is cos(theta) * DNI
+	dni_array = ([dniXCosTheta[i]/cosArray[i] for i in range(len(dniXCosTheta))]) 
+	result = list(zip(dhiPredictions, ghiData, dni_array))
 	return result
 
-def tests():
+def tests(uscrn_station='TX_Austin_33_NW'):
 	print("********EASY SOLAR TEST STARTED************")
 	print(Station_Dict)
-	input_array, ghiData, cosArray = preparePredictionVectors(year='2020')
+	year='2018'
+	lat = Station_Dict[uscrn_station][0]
+	lon = Station_Dict[uscrn_station][1]
+	timezone = Station_Dict[uscrn_station][2]
+	input_array, ghiData, cosArray = preparePredictionVectors(year, lat, lon, uscrn_station, timezone)
 	assert len(input_array) == len(ghiData) == len(cosArray)
 	log_prediction = predictPolynomial(input_array, clf_log_poly)
 	dhiPredictions = np.exp(log_prediction)
-	dhiXCosTheta = ghiData - dhiPredictions #This is cos(theta) * DNI
-	dhi_array = ([dhiXCosTheta[i]/cosArray[i] for i in range(len(dhiXCosTheta))]) 
-	result = list(zip(dhiPredictions, ghiData, dhi_array))
+	dniXCosTheta = ghiData - dhiPredictions #This is cos(theta) * DNI
+	dni_array = ([dniXCosTheta[i]/cosArray[i] for i in range(len(dniXCosTheta))]) 
+	result = list(zip(dhiPredictions, ghiData, dni_array))
 	print([i for i in result])
 	print(len(result))
 	print(len(input_array))
 
 if __name__ == '__main__':
-	tests()
+	# tests()
+	print(get_synth_dhi_dni("VA_Charlottesville_2_SSE",'2018'))

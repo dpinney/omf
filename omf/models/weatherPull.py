@@ -40,11 +40,18 @@ def work(modelDir, inputDict):
 		data = weather.get_nrsdb_data('psm', longitude, latitude, year, nsrdbkey, interval=60)
 		#Data must be a list. Extract correct column from returned pandas df, return this column as array of int
 		data = list(data[param].values[3:].astype(float))
-	elif source == 'easySolar':
+	elif source in ['easySolarGhi', 'easySolarDhi','easySolarDni'] :
 		print("EASYSOLAR FOUND")
 		station = inputDict['easySolarStation']
 		year = inputDict['year']
-		easySolar.get_synth_dhi_dni(station, year)
+		data = easySolar.get_synth_dhi_dni(station, year)
+		if source == 'easySolarDhi':
+			data = list([i[0] for i in data])
+		elif source == 'easySolarGhi':
+			data = list([i[1] for i in data])
+			print(data)
+		elif source == 'easySolarDni':
+			data = list([i[2] for i in data])
 	elif source == 'tmy3':
 		param = inputDict['weatherParameterTmy3']
 		lat = inputDict['darkSkyLat']
@@ -57,7 +64,6 @@ def work(modelDir, inputDict):
 		data = list(data[param].astype(float).values)
 	elif source == 'get_radiation_data':
 		pass
-
 	# station = inputDict['stationASOS'] if source == 'ASOS' else inputDict['stationUSCRN']
 	# parameter = inputDict['weatherParameterASOS'] if source == 'ASOS' else inputDict['weatherParameterUSCRN']
 	# inputs = [inputDict['year'], station, parameter]
