@@ -13,7 +13,9 @@ tooltip = "Download historical weather data for a given location for use in othe
 hidden = False
 
 def work(modelDir, inputDict):
-	''' Run the model in its directory.'''
+	''' Run the model in its directory.
+		Model takes in parameters from inputDict, and returns a list of data points of type float.
+		'''
 	print(inputDict)
 	source = inputDict['source']
 	if source =='ASOS':
@@ -29,10 +31,39 @@ def work(modelDir, inputDict):
 		lon = inputDict['darkSkyLon']
 		parameter = inputDict['weatherParameterdarkSky']
 		data = weather.pullDarksky(inputDict['year'], lat, lon, parameter, units='si')
-	elif source == 'easySolar':
+	elif source == 'NRSDB':
+		nsrdbkey = 'rnvNJxNENljf60SBKGxkGVwkXls4IAKs1M8uZl56'
+		latitude = float(inputDict['darkSkyLat'])
+		longitude = float(inputDict['darkSkyLon'])
+		year = inputDict['year']
+		param = inputDict['weatherParameterNRSDB']
+		data = weather.get_nrsdb_data('psm', longitude, latitude, year, nsrdbkey, interval=60)
+		#Data must be a list. Extract correct column from returned pandas df, return this column as array of int
+		data = list(data[param].values[3:].astype(float))
+	elif source in ['easySolarGhi', 'easySolarDhi','easySolarDni'] :
 		print("EASYSOLAR FOUND")
-		easySolar.tests()
-
+		station = inputDict['easySolarStation']
+		year = inputDict['year']
+		data = easySolar.get_synth_dhi_dni(station, year)
+		if source == 'easySolarDhi':
+			data = list([i[0] for i in data])
+		elif source == 'easySolarGhi':
+			data = list([i[1] for i in data])
+			print(data)
+		elif source == 'easySolarDni':
+			data = list([i[2] for i in data])
+	elif source == 'tmy3':
+		param = inputDict['weatherParameterTmy3']
+		lat = inputDict['darkSkyLat']
+		lon = inputDict['darkSkyLon']
+		year = int(inputDict['year'])
+		data = weather.tmy3_pull(weather.nearest_tmy3_station(lat, lon))
+		#Now get data for the year in question
+		data = data.loc[data['year']==year]
+		#Extract param from data, convert to int, and pass in values not pandas series
+		data = list(data[param].astype(float).values)
+	elif source == 'get_radiation_data':
+		pass
 	# station = inputDict['stationASOS'] if source == 'ASOS' else inputDict['stationUSCRN']
 	# parameter = inputDict['weatherParameterASOS'] if source == 'ASOS' else inputDict['weatherParameterUSCRN']
 	# inputs = [inputDict['year'], station, parameter]

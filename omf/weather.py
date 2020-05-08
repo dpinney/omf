@@ -743,6 +743,8 @@ def tmy3_pull(usafn_number, out_file=None):
 		locLon = (dataFrame.iloc[0][5])
 		colNames = dataFrame.iloc[1][:].values
 		dataFrame.rename(columns={key:val for key, val in enumerate(colNames)}, inplace=True)
+		dataFrame = dataFrame.iloc[2:]
+		dataFrame['year'] = pd.to_datetime(dataFrame['Date (MM/DD/YYYY)'], format='%m/%d/%Y').dt.year
 		return dataFrame
 
 def nearest_tmy3_station(latitude, longitude):
@@ -822,6 +824,7 @@ class NSRDB():
 
 def get_nrsdb_data(data_set, longitude, latitude, year, api_key, utc='true', leap_day='false', email='admin@omf.coop', interval=None, filename=None):
 	'''Create nrsdb factory and execute query. Optional output to file or return the response object.'''
+	print("NRSDB found")
 	nrsdb_factory = NSRDB(data_set, longitude, latitude, year, api_key, utc=utc, leap_day=leap_day, email=email, interval=interval)
 	data = nrsdb_factory.execute_query()
 	csv_lines = [line.decode() for line in data.iter_lines()]
@@ -910,12 +913,16 @@ def _tests():
 	# print('ASOS (Iowa) data pulled to ' + tmpdir)
 	# pullAsosStations(os.path.join(tmpdir, 'asosStationTable.csv'))
 	# Testing DarkSky (Works as long as you have an API key)
-	# print(pullDarksky(2018, 36.64, -93.30, 'temperature', path=tmpdir))
+	# d=(pullDarksky(2018, 36.64, -93.30, 'temperature', api_key= '31dac4830187f562147a946529516a8d', path=tmpdir))
+	# print(d)
+	# print(len(d))
+	# print(type(d))
 	# print('Darksky data pulled to ' + tmpdir)
 	# Testing tmy3 (Works)
 	# if platform.system() != 'Windows':
 	# 	data=tmy3_pull(nearest_tmy3_station(41, -78))
 	# 	print(data)
+	# 	print(len(data))
 	# 	print(data.columns)
 	# 	print(data['DNI source'])
 		# plt.plot(data)
@@ -934,6 +941,7 @@ def _tests():
 	#Test For Austin, TX
 	# d=get_nrsdb_data('psm',-98.024098,30.581736,'2018', nsrdbkey, interval=60)
 	# print(d)
+	# print(len(d))
 	# print(type(d))
 	# print(d['GHI'])
 	#Test for Spokane, WA

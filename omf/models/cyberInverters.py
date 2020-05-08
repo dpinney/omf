@@ -3,6 +3,8 @@
 import json, os, csv, shutil, math
 from os.path import join as pJoin
 from functools import reduce
+from datetime import timedelta, datetime, tzinfo
+from dateutil import parser as dt_parser
 
 # OMF imports
 from omf import feeder, weather
@@ -28,31 +30,24 @@ def work(modelDir, inputDict):
 		attackAgentType = "None"
 	else:
 		attackAgentType = inputDict['attackVariable']
-	#Open defense agent HDF5 file
-	# with open(pJoin(modelDir,"defenseVariable.csv"),"w") as defenseVariableFile:
-	# 	defenseVariableFile.write(inputDict['defenseVariable'])
-	# try:
-	# 	#TODO do whatever it is we need with defense agent values
-	# 	with open(pJoin(modelDir,"defenseVariable.csv"), newline='') as inFile:
-	# 		reader = csv.reader(inFile)
-	# 		for row in reader:
-	# 			#Do something!
-	# 			if 3>4: raise Exception
-	# 			pass
-	# except:
-	# 	#TODO change to an appropriate warning message
-	# 	errorMessage = "CSV file is incorrect format. Please see valid format definition at <a target='_blank' href='https://github.com/dpinney/omf/wiki/Models-~-demandResponse#walkthrough'>OMF Wiki demandResponse</a>"
-	# 	raise Exception(errorMessage)
-	#Value check for train
+
+	# Value check for train
 	if inputDict.get("trainAgent", "") == "False":
 		trainAgentValue = False
 	else:
 		trainAgentValue = True
+
+	# create simLengthValue to represent number of steps in simulation - will be manipulated by number of rows in load solar data csv file
+	simLengthValue = 0
+
+	#create startStep to represent which step pyCigar should start on - default = 100
+	startStep = 100
+
 	#None check for simulation length
-	if inputDict.get("simLength", "None") == "None":
-		simLengthValue = None
-	else:
-		simLengthValue = int(inputDict["simLength"])
+	# if inputDict.get("simLength", "None") == "None":
+	# 	simLengthValue = None
+	# else:
+	# 	simLengthValue = int(simLengthValue)
 	#None check for simulation length
 	if inputDict.get("simLengthUnits", "None") == "None":
 		simLengthUnitsValue = None
@@ -71,184 +66,7 @@ def work(modelDir, inputDict):
 	inputDict["climateName"] = weather.zipCodeToClimateName(zipCode)
 	shutil.copy(pJoin(__neoMetaModel__._omfDir, "data", "Climate", inputDict["climateName"] + ".tmy2"),
 		pJoin(modelDir, "climate.tmy2"))
-	with open(pJoin(modelDir, feederName + '.omd')) as f:
-		feederJson = json.load(f)
-	tree = feederJson["tree"]
-	# Set up GLM with correct time and recorders:
-	feeder.attachRecorders(tree, "Regulator", "object", "regulator")
-	feeder.attachRecorders(tree, "Capacitor", "object", "capacitor")
-	feeder.attachRecorders(tree, "Inverter", "object", "inverter")
-	feeder.attachRecorders(tree, "Windmill", "object", "windturb_dg")
-	feeder.attachRecorders(tree, "CollectorVoltage", None, None)
-	feeder.attachRecorders(tree, "Climate", "object", "climate")
-	feeder.attachRecorders(tree, "OverheadLosses", None, None)
-	feeder.attachRecorders(tree, "UndergroundLosses", None, None)
-	feeder.attachRecorders(tree, "TriplexLosses", None, None)
-	feeder.attachRecorders(tree, "TransformerLosses", None, None)
-	feeder.groupSwingKids(tree)
-	# Attach recorders for system voltage map:
-	stub = {'object':'group_recorder', 'group':'"class=node"', 'interval':3600}
-	for phase in ['A','B','C']:
-		copyStub = dict(stub)
-		copyStub['property'] = 'voltage_' + phase
-		copyStub['file'] = phase.lower() + 'VoltDump.csv'
-		tree[feeder.getMaxKey(tree) + 1] = copyStub
-	# Attach recorders for system voltage map, triplex:
-	stub = {'object':'group_recorder', 'group':'"class=triplex_node"', 'interval':3600}
-	for phase in ['1','2']:
-		copyStub = dict(stub)
-		copyStub['property'] = 'voltage_' + phase
-		copyStub['file'] = phase.lower() + 'nVoltDump.csv'
-		tree[feeder.getMaxKey(tree) + 1] = copyStub
-	# Attach current recorder for overhead_lines
-	currentStub = {'object':'group_recorder', 'group':'"class=overhead_line"', 'interval':3600}
-	for phase in ['A','B','C']:
-		copyCurrentStub = dict(currentStub)
-		copyCurrentStub['property'] = 'current_out_' + phase
-		copyCurrentStub['file'] = 'OH_line_current_phase' + phase + '.csv'
-		tree[feeder.getMaxKey(tree) + 1] = copyCurrentStub
-	rating_stub = {'object':'group_recorder', 'group':'"class=overhead_line"', 'interval':3600}
-	copyRatingStub = dict(rating_stub)
-	copyRatingStub['property'] = 'continuous_rating'
-	copyRatingStub['file'] = 'OH_line_cont_rating.csv'
-	tree[feeder.getMaxKey(tree) + 1] = copyRatingStub
-	flow_stub = {'object':'group_recorder', 'group':'"class=overhead_line"', 'interval':3600}
-	copyFlowStub = dict(flow_stub)
-	copyFlowStub['property'] = 'flow_direction'
-	copyFlowStub['file'] = 'OH_line_flow_direc.csv'
-	tree[feeder.getMaxKey(tree) + 1] = copyFlowStub
-	# Attach current recorder for underground_lines
-	currentStubOH = {'object':'group_recorder', 'group':'"class=underground_line"', 'interval':3600}
-	for phase in ['A','B','C']:
-		copyCurrentStubOH = dict(currentStubOH)
-		copyCurrentStubOH['property'] = 'current_out_' + phase
-		copyCurrentStubOH['file'] = 'UG_line_current_phase' + phase + '.csv'
-		tree[feeder.getMaxKey(tree) + 1] = copyCurrentStubOH
-	ug_rating_stub = {'object':'group_recorder', 'group':'"class=underground_line"', 'interval':3600}
-	copyUGRatingStub = dict(ug_rating_stub)
-	copyUGRatingStub['property'] = 'continuous_rating'
-	copyUGRatingStub['file'] = 'UG_line_cont_rating.csv'
-	tree[feeder.getMaxKey(tree) + 1] = copyUGRatingStub
-	ug_flow_stub = {'object':'group_recorder', 'group':'"class=underground_line"', 'interval':3600}
-	ugCopyFlowStub = dict(ug_flow_stub)
-	ugCopyFlowStub['property'] = 'flow_direction'
-	ugCopyFlowStub['file'] = 'UG_line_flow_direc.csv'
-	tree[feeder.getMaxKey(tree) + 1] = ugCopyFlowStub
-	# And get meters for system voltage map:
-	stub = {'object':'group_recorder', 'group':'"class=triplex_meter"', 'interval':3600}
-	for phase in ['1','2']:
-		copyStub = dict(stub)
-		copyStub['property'] = 'voltage_' + phase
-		copyStub['file'] = phase.lower() + 'mVoltDump.csv'
-		tree[feeder.getMaxKey(tree) + 1] = copyStub
-	for key in tree:
-		if 'bustype' in tree[key].keys():
-			if tree[key]['bustype'] == 'SWING':
-				tree[key]['object'] = 'meter'
-				swingN = tree[key]['name']
-	swingRecord = {'object':'recorder', 'property':'voltage_A,measured_real_power,measured_power','file':'subVoltsA.csv','parent':swingN, 'interval':60}
-	tree[feeder.getMaxKey(tree) + 1] = swingRecord
-	for key in tree:
-		if 'omftype' in tree[key].keys() and tree[key]['argument']=='minimum_timestep=3600':
-			tree[key]['argument'] = 'minimum_timestep=60'
-	# If there is a varvolt object in the tree, add recorder to swingbus and node from voltage_measurements property
-	# Find var_volt object
-	downLineNode = 'None'
-	for key in tree:
-		if 'object' in tree[key].keys() and tree[key]['object']=='volt_var_control':
-			downLineNode = tree[key]['voltage_measurements']
-	if downLineNode != 'None':
-		downNodeRecord = {'object':'recorder', 'property':'voltage_A','file':'firstDownlineVoltsA.csv','parent':downLineNode, 'interval':60}
-		tree[feeder.getMaxKey(tree) + 1] = downNodeRecord
 	
-	feeder.adjustTime(tree=tree, simLength=float(inputDict["simLength"]),
-		simLengthUnits=inputDict["simLengthUnits"], simStartDate=simStartDateValue)
-	
-	outData = {}
-	# Std Err and Std Out
-	outData['stderr'] = "This should be stderr"  #rawOut['stderr']
-	outData['stdout'] = "This should be stdout"  #rawOut['stdout']
-	# Time Stamps
-	#TODO: Find a way to create a list of timestamps that would have been generated by gridlab-d outputs
-	outData['timeStamps'] = []
-	# For now, hard-coding timestamps for a 25 second simulation with one second intervals
-	outData['timeStamps'] = [
-		"2019-07-01 00:00:00 PDT",
-        "2019-07-01 00:00:01 PDT",
-        "2019-07-01 00:00:02 PDT",
-        "2019-07-01 00:00:03 PDT",
-        "2019-07-01 00:00:04 PDT",
-        "2019-07-01 00:00:05 PDT",
-        "2019-07-01 00:00:06 PDT",
-        "2019-07-01 00:00:07 PDT",
-        "2019-07-01 00:00:08 PDT",
-        "2019-07-01 00:00:09 PDT",
-        "2019-07-01 00:00:10 PDT",
-        "2019-07-01 00:00:11 PDT",
-        "2019-07-01 00:00:12 PDT",
-        "2019-07-01 00:00:13 PDT",
-        "2019-07-01 00:00:14 PDT",
-        "2019-07-01 00:00:15 PDT",
-        "2019-07-01 00:00:16 PDT",
-        "2019-07-01 00:00:17 PDT",
-        "2019-07-01 00:00:18 PDT",
-        "2019-07-01 00:00:19 PDT",
-        "2019-07-01 00:00:20 PDT",
-        "2019-07-01 00:00:21 PDT",
-        "2019-07-01 00:00:22 PDT",
-        "2019-07-01 00:00:23 PDT",
-        "2019-07-01 00:00:24 PDT"
-        ]
-	
-	# Day/Month Aggregation Setup:
-	stamps = outData.get('timeStamps',[])
-	level = inputDict.get('simLengthUnits','seconds')
-	# TODO: Create/populate Climate data without gridlab-d
-	outData['climate'] = {}
-	# for key in rawOut:
-	# 	if key.startswith('Climate_') and key.endswith('.csv'):
-	# 		outData['climate'] = {}
-	# 		outData['climate']['Rain Fall (in/h)'] = hdmAgg(rawOut[key].get('rainfall'), sum, level)
-	# 		outData['climate']['Wind Speed (m/s)'] = hdmAgg(rawOut[key].get('wind_speed'), avg, level)
-	# 		outData['climate']['Temperature (F)'] = hdmAgg(rawOut[key].get('temperature'), max, level)
-	# 		outData['climate']['Snow Depth (in)'] = hdmAgg(rawOut[key].get('snowdepth'), max, level)
-	# 		outData['climate']['Direct Normal (W/sf)'] = hdmAgg(rawOut[key].get('solar_direct'), sum, level)
-	# 		#outData['climate']['Global Horizontal (W/sf)'] = hdmAgg(rawOut[key].get('solar_global'), sum, level)	
-	# 		climateWbySFList= hdmAgg(rawOut[key].get('solar_global'), sum, level)
-	# 		#converting W/sf to W/sm
-	# 		climateWbySMList= [x*10.76392 for x in climateWbySFList]
-	# 		outData['climate']['Global Horizontal (W/sm)']=climateWbySMList			
-	# Voltage Band
-	outData['allMeterVoltages'] = {}
-	outData['allMeterVoltages']['Min'] = [0] * int(inputDict["simLength"])
-	outData['allMeterVoltages']['Mean'] = [0] * int(inputDict["simLength"])
-	outData['allMeterVoltages']['StdDev'] = [0] * int(inputDict["simLength"])
-	outData['allMeterVoltages']['Max'] = [0] * int(inputDict["simLength"])
-	# Power Consumption
-	outData['Consumption'] = {}
-	# Set default value to be 0, avoiding missing value when computing Loads
-	outData['Consumption']['Power'] = [0] * int(inputDict["simLength"])
-	outData['Consumption']['Losses'] = [0] * int(inputDict["simLength"])
-	outData['Consumption']['DG'] = [0] * int(inputDict["simLength"])
-	
-	outData['swingTimestamps'] = []
-	outData['swingTimestamps'] = outData['timeStamps']
-
-	latKeys = [tree[key]['latitude'] for key in tree if 'latitude' in tree[key]]
-	latPerc = 1.0*len(latKeys)/len(tree)
-	if latPerc < 0.25: doNeato = True
-	else: doNeato = False
-	# Generate the frames for the system voltage map time traveling chart.
-	# TODO: fix voltChart in python3
-	# genTime, mapTimestamp = solarEngineering.generateVoltChart(tree, rawOut, modelDir, neatoLayout=doNeato)
-	# outData['genTime'] = genTime
-	# outData['mapTimestamp'] = mapTimestamp
-	# Aggregate up the timestamps:
-	if level=='days':
-		outData['timeStamps'] = aggSeries(stamps, stamps, lambda x:x[0][0:10], 'days')
-	elif level=='months':
-		outData['timeStamps'] = aggSeries(stamps, stamps, lambda x:x[0][0:7], 'months')
-
 	def convertInputs():
 		#create the PyCIGAR_inputs folder to store the input files to run PyCIGAR
 		try:
@@ -283,41 +101,35 @@ def work(modelDir, inputDict):
 		"forward band default":2, 
 		"tap number default":16, 
 		"tap delay default":2}
+
+		#create ieee37.dss file in folder
 		with open(pJoin(modelDir,"PyCIGAR_inputs","misc_inputs.csv"),"w") as miscFile:
 			#Populate misc_inputs.csv
 			# miscFile.write(misc_inputs)
-			for key in misc_dict.keys():
-				miscFile.write("%s,%s\n"%(key,misc_dict[key]))
+			# for key in misc_dict.keys():
+			# 	miscFile.write("%s,%s\n"%(key,misc_dict[key]))
+			miscFile.write(inputDict['miscFile'])
 
 		#create ieee37.dss file in folder
-		dss_filename = "ieee37.dss"
+		dss_filename = "circuit.dss"
 		with open(pJoin(modelDir, "PyCIGAR_inputs", dss_filename),"w") as dssFile:
 			dssFile.write(inputDict['dssFile'])
-		try:
-			#TODO do whatever it is we need with load and pv values
-			with open(pJoin(modelDir, "PyCIGAR_inputs", dss_filename), newline='') as inFile:
-				reader = csv.reader(inFile)
-				for row in reader:
-					#Do something!
-					if 3>4: raise Exception
-					pass
-		except:
-			#TODO change to an appropriate warning message
-			errorMessage = "OpenDSS file is incorrect format. Please see valid format definition at <a target='_blank' href='https://github.com/dpinney/omf/wiki/Models-~-demandResponse#walkthrough'>OMF Wiki demandResponse</a>"
-			raise Exception(errorMessage)
 
 		#create load_solar_data.csv file in folder
+		rowCount = 0
 		with open(pJoin(modelDir,"PyCIGAR_inputs","load_solar_data.csv"),"w") as loadPVFile:
 			loadPVFile.write(inputDict['loadPV'])
 			#Open load and PV input file
 		try:
-			#TODO do whatever it is we need with load and pv values
 			with open(pJoin(modelDir,"PyCIGAR_inputs","load_solar_data.csv"), newline='') as inFile:
 				reader = csv.reader(inFile)
 				for row in reader:
-					#Do something!
-					if 3>4: raise Exception
-					pass
+					rowCount = rowCount+1
+			#Check to see if the simulation length matches the load and solar csv
+			# if (rowCount-1)*misc_dict["load file timestep"] != simLengthValue:
+			# 	errorMessage = "Load and PV Output File does not match simulation length specified by user"
+			# 	raise Exception(errorMessage)
+			simLengthValue = rowCount-1
 		except:
 			#TODO change to an appropriate warning message
 			errorMessage = "CSV file is incorrect format. Please see valid format definition at <a target='_blank' href='https://github.com/dpinney/omf/wiki/Models-~-demandResponse#walkthrough'>OMF Wiki demandResponse</a>"
@@ -329,22 +141,67 @@ def work(modelDir, inputDict):
 		# 	breakpoints_inputs = f1.read()
 		with open(pJoin(modelDir,"PyCIGAR_inputs","breakpoints.csv"),"w") as breakpointsFile:
 			breakpointsFile.write(inputDict['breakpoints'])
-		try:
-			#TODO do whatever it is we need with load and pv values
-			with open(pJoin(modelDir, "PyCIGAR_inputs", "breakpoints.csv"), newline='') as inFile:
-				reader = csv.reader(inFile)
-				for row in reader:
-					#Do something!
-					if 3>4: raise Exception
-					pass
-		except:
-			#TODO change to an appropriate warning message
-			errorMessage = "CSV file is incorrect format. Please see valid format definition at <a target='_blank' href='https://github.com/dpinney/omf/wiki/Models-~-demandResponse#walkthrough'>OMF Wiki demandResponse</a>"
-			raise Exception(errorMessage)
+
+		# Open defense agent HDF5(pb?) file if it was uploaded
+		with open(pJoin(modelDir,"PyCIGAR_inputs","defenseAgent.pb"),"w") as defenseVariableFile:
+			if inputDict['defenseVariable'] == "":
+				defenseVariableFile.write("No Defense Agent Variable File Uploaded")
+			else:
+				defenseVariableFile.write(inputDict['defenseVariable'])
+
+		return simLengthValue
+
+	simLengthValue = convertInputs()
+
+	#simLengthAdjusted accounts for the offset by startStep
+	simLengthAdjusted = simLengthValue - startStep
+
+	outData = {}
+	# Std Err and Std Out
+	outData['stderr'] = "This should be stderr"  #rawOut['stderr']
+	outData['stdout'] = "This should be stdout"  #rawOut['stdout']
+	
+	# Create list of timestamps for simulation steps
+	outData['timeStamps'] = []
+	start_time = dt_parser.isoparse(simStartDateTimeValue)
+	for single_datetime in (start_time + timedelta(seconds=n) for n in range(simLengthAdjusted)):
+		single_datetime_str = single_datetime.strftime("%Y-%m-%d %H:%M:%S%z") 
+		outData['timeStamps'].append(single_datetime_str)
+
+	# Day/Month Aggregation Setup:
+	stamps = outData.get('timeStamps',[])
+	level = inputDict.get('simLengthUnits','seconds')
+	# TODO: Create/populate Climate data without gridlab-d
+	outData['climate'] = {}
+	outData['allMeterVoltages'] = {}
+	outData['allMeterVoltages']['Min'] = [0] * int(simLengthAdjusted)
+	outData['allMeterVoltages']['Mean'] = [0] * int(simLengthAdjusted)
+	outData['allMeterVoltages']['StdDev'] = [0] * int(simLengthAdjusted)
+	outData['allMeterVoltages']['Max'] = [0] * int(simLengthAdjusted)
+	# Power Consumption
+	outData['Consumption'] = {}
+	# Set default value to be 0, avoiding missing value when computing Loads
+	outData['Consumption']['Power'] = [0] * int(simLengthAdjusted)
+	outData['Consumption']['Losses'] = [0] * int(simLengthAdjusted)
+	outData['Consumption']['DG'] = [0] * int(simLengthAdjustede)
+	
+	outData['swingTimestamps'] = []
+	outData['swingTimestamps'] = outData['timeStamps']
+
+	# Aggregate up the timestamps:
+	if level=='days':
+		outData['timeStamps'] = aggSeries(stamps, stamps, lambda x:x[0][0:10], 'days')
+	elif level=='months':
+		outData['timeStamps'] = aggSeries(stamps, stamps, lambda x:x[0][0:7], 'months')
+	
+	print('Ready to run pyCigar')
+
 	def runPyCIGAR():
+		print('just inside runPyCigar')
 		#create the pycigarOutput folder to store the output file(s) generated by PyCIGAR
 		try:
 			os.mkdir(pJoin(modelDir,"pycigarOutput"))
+			print("Made pycigarOutput Folder!!")
 		except FileExistsError:
 			print("pycigarOutput folder already exists!")
 			pass
@@ -354,15 +211,46 @@ def work(modelDir, inputDict):
 		#import and run pycigar
 		import pycigar
 
+		#Set up runType scenarios
+		#runType of 2 implies the base scenario - not training a defense agent, nor is there a defense agent entered
+		runType = 2
+		tempDefenseAgent = None
+		
+		# check to see if we are trying to train a defense agent
+		if trainAgentValue:	
+			#runType of 0 implies the training scenario - runs to train a defense agent and outputs a zip containing defense agent files
+			runType = 0 
+
+		#check to see if user entered a defense agent file
+		if tempDefenseAgent != None:
+			tempDefenseAgent = modelDir + "/PyCIGAR_inputs/defenseAgent.pb"
+			if trainAgentValue:	
+				# TODO: Figure out if it is possible/necessary for a user to train an agent on a circuit that already includes a defense agent
+				runType = 0
+			else:
+				#runType of 0 implies the defense scenario - not training a defense agent, but a defense agent zip was uploaded
+				runType = 1 
+
+		# TODO how to factor attackAgentType into pycigar inputs
+
+		# if there is no training selected and no attack variable, run without a defense agent
 		pycigar.main(
-		    modelDir + "/PyCIGAR_inputs/misc_inputs.csv",
-		    modelDir + "/PyCIGAR_inputs/ieee37.dss",
-		    modelDir + "/PyCIGAR_inputs/load_solar_data.csv",
-		    modelDir + "/PyCIGAR_inputs/breakpoints.csv",
-		    2,
-		    None,
-		    modelDir + "/pycigarOutput/",
+			modelDir + "/PyCIGAR_inputs/misc_inputs.csv",
+			modelDir + "/PyCIGAR_inputs/circuit.dss",
+			modelDir + "/PyCIGAR_inputs/load_solar_data.csv",
+			modelDir + "/PyCIGAR_inputs/breakpoints.csv",
+			runType,
+			tempDefenseAgent,
+			modelDir + "/pycigarOutput/",
+			start=startStep,
+			duration=simLengthAdjusted,
+			hack_start=250,
+			hack_end=None,
+			percentage_hack=0.45
 		)
+
+		print("Got through pyCigar!!!")
+		
 
 	def convertOutputs():
 		#set outData[] values to those from modelDir/pycigarOutput/pycigar_output_specs_.json
@@ -444,20 +332,19 @@ def work(modelDir, inputDict):
 			outData[cap_name] = {}
 			capPhaseValue = pycigarJson[cap_name]["CapPhases"]
 			if capPhaseValue.find('A') != -1:
-				outData[cap_name]['Cap1A'] = [0] * int(inputDict["simLength"])
+				outData[cap_name]['Cap1A'] = [0] * int(simLengthValue)
 				outData[cap_name]['Cap1A'] = pycigarJson[cap_name]['switchA']
 
 			if capPhaseValue.find('B') != -1:
-				outData[cap_name]['Cap1B'] = [0] * int(inputDict["simLength"])
+				outData[cap_name]['Cap1B'] = [0] * int(simLengthValue)
 				outData[cap_name]['Cap1B'] = pycigarJson[cap_name]['switchB']
 
 			if capPhaseValue.find('C') != -1:
-				outData[cap_name]['Cap1C'] = [0] * int(inputDict["simLength"])
+				outData[cap_name]['Cap1C'] = [0] * int(simLengthValue)
 				outData[cap_name]['Cap1C'] = pycigarJson[cap_name]['switchC']
 			
 			outData[cap_name]["CapPhases"] = capPhaseValue
 
-	convertInputs()
 	runPyCIGAR()
 	convertOutputs()
 	return outData

@@ -92,12 +92,12 @@
 				<label>Simulation Start Date (YYYY-MM-DDTHH:mm:SSZ)</label>
 				<input type="text" id="simStartDate" name="simStartDate" required="required" pattern="^\d\d\d\d-\d\d-\d\dT\d\d:\d\d:\d\d(Z|(\+|-)\d\d:\d\d)$"/>
 			</div>
-			<div class="shortInput">
+			<!-- <div class="shortInput">
 				<label class="tooltip">Simulation Length<span class="classic">Number of time steps in the installation. The current range of acceptable values is 3 - 9999.</span></label>
 				<input type="number" id="simLength" name="simLength" required="required" min ="3" max = "9999"/>
-			</div>
+			</div> -->
 			<div class="shortInput">
-				<label>Length Units</label>
+				<label>Simulation Length Units</label>
 				<select id="simLengthUnits" name="simLengthUnits">
 					<option value="hours">Hours</option>
 					<option value="minutes">Minutes</option>
@@ -139,6 +139,15 @@
 					<input id="fileName3" name="fileName3" value='' readonly class="uploadFileName">	
 				</div>
 			</div>
+			<div class="shortInput">
+				<label class="tooltip">Miscellaneous File Input<span class="classic">Import the .csv file representing the miscellaneous inputs data.</span></label>
+				<input id="chooseMiscFile" type="file" style="display:none" onchange="handle_files(this.files,'miscFile','fileName4')">
+				<input id="miscFile" name="miscFile" type="hidden">
+				<div>
+					<label for="chooseMiscFile" class="fileButton">Choose File</label>
+					<input id="fileName4" name="fileName4" value='' readonly class="uploadFileName">	
+				</div>
+			</div>
 			<div class="wideInput">
 				<p class="inputSectionHeader">Cyber Attack Specifications</p>
 			</div>
@@ -152,7 +161,7 @@
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Defense Agent Variable<span class="classic">Import the HDF5 file for defense agent.</span></label>
-				<input id="defenseVariableFile" type="file" style="display:none" onchange="handle_files(this.files,'defenseVariable','fileName2')">
+				<input id="defenseVariableFile" type="file" style="display:none" onchange="handle_files(this.files,'defenseVariable','fileName5')">
 				<input id="defenseVariable" name="defenseVariable" type="hidden">
 				<div>
 					<label for="defenseVariableFile" class="fileButton">Choose File</label>
