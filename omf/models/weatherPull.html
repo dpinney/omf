@@ -1,4 +1,4 @@
-<head>
+\<head>
 	<title>Open Modeling Framework</title>
 	<meta charset="utf-8">
 	<link href="{{pathPrefix}}/static/omf.css" type="text/css" rel="stylesheet"/>
@@ -59,11 +59,127 @@
 			</div>
 			<hr>
 			<div class="shortInput">
+					<!-- Grey out function -->
+				<script type="text/javascript">
+					function loadWeatherParameters(){
+						// var nodes = document.getElementsByTagName('input');
+						const source = document.getElementById('source').value;
+						if (source == 'USCRN'){
+							document.getElementById("stationASOS").disabled = true;
+							document.getElementById("stationUSCRN").disabled = false;
+							document.getElementById("LatInput").disabled = true;
+							document.getElementById("LonInput").disabled = true;
+							document.getElementById("weatherParameterASOS").disabled = true;
+							document.getElementById("weatherParameterUSCRN").disabled = false;
+							document.getElementById("weatherParameterdarkSky").disabled = true;
+							document.getElementById("weatherParameterNRSDB").disabled = true;
+							document.getElementById("weatherParameterTmy3").disabled = true;
+							document.getElementById("easySolarStation").disabled = true;
+						}
+						else if (source == 'ASOS'){
+							document.getElementById("stationASOS").disabled = false;
+							document.getElementById("stationUSCRN").disabled = true;
+							document.getElementById("LatInput").disabled = true;
+							document.getElementById("LonInput").disabled = true;
+							document.getElementById("weatherParameterASOS").disabled = false;
+							document.getElementById("weatherParameterUSCRN").disabled = true;
+							document.getElementById("weatherParameterdarkSky").disabled = true;
+							document.getElementById("weatherParameterNRSDB").disabled = true;
+							document.getElementById("weatherParameterTmy3").disabled = true;
+							document.getElementById("easySolarStation").disabled = true;
+						}
+						else if (source == 'darkSky'){
+							document.getElementById("stationASOS").disabled = true;
+							document.getElementById("stationUSCRN").disabled = true;
+							document.getElementById("LatInput").disabled = false;
+							document.getElementById("LonInput").disabled = false;
+							document.getElementById("weatherParameterASOS").disabled = true;
+							document.getElementById("weatherParameterUSCRN").disabled = true;
+							document.getElementById("weatherParameterdarkSky").disabled = false;
+							document.getElementById("weatherParameterNRSDB").disabled = true;
+							document.getElementById("weatherParameterTmy3").disabled = true;
+							document.getElementById("easySolarStation").disabled = true;
+						}
+						else if (source == 'NRSDB'){
+							document.getElementById("stationASOS").disabled = true;
+							document.getElementById("stationUSCRN").disabled = true;
+							document.getElementById("LatInput").disabled = false;
+							document.getElementById("LonInput").disabled = false;
+							document.getElementById("weatherParameterASOS").disabled = true;
+							document.getElementById("weatherParameterUSCRN").disabled = true;
+							document.getElementById("weatherParameterdarkSky").disabled = true;
+							document.getElementById("weatherParameterNRSDB").disabled = false;
+							document.getElementById("weatherParameterTmy3").disabled = true;
+							document.getElementById("easySolarStation").disabled = true;
+						}
+						else if (source == 'easySolarGhi')
+							{
+							document.getElementById("stationASOS").disabled = true;
+							document.getElementById("stationUSCRN").disabled = true;
+							document.getElementById("LatInput").disabled = true;
+							document.getElementById("LonInput").disabled = true;
+							document.getElementById("weatherParameterASOS").disabled = true;
+							document.getElementById("weatherParameterUSCRN").disabled = true;
+							document.getElementById("weatherParameterdarkSky").disabled = true;
+							document.getElementById("weatherParameterNRSDB").disabled = true;
+							document.getElementById("weatherParameterTmy3").disabled = true;
+							document.getElementById("easySolarStation").disabled = false;
+						}
+						else if (source == 'easySolarDhi'){
+							document.getElementById("stationASOS").disabled = true;
+							document.getElementById("stationUSCRN").disabled = true;
+							document.getElementById("LatInput").disabled = true;
+							document.getElementById("LonInput").disabled = true;
+							document.getElementById("weatherParameterASOS").disabled = true;
+							document.getElementById("weatherParameterUSCRN").disabled = true;
+							document.getElementById("weatherParameterdarkSky").disabled = true;
+							document.getElementById("weatherParameterNRSDB").disabled = true;
+							document.getElementById("weatherParameterTmy3").disabled = true;
+							document.getElementById("easySolarStation").disabled = false;
+						}
+						else if (source == 'easySolarDni'){
+							document.getElementById("stationASOS").disabled = true;
+							document.getElementById("stationUSCRN").disabled = true;
+							document.getElementById("LatInput").disabled = true;
+							document.getElementById("LonInput").disabled = true;
+							document.getElementById("weatherParameterASOS").disabled = true;
+							document.getElementById("weatherParameterUSCRN").disabled = true;
+							document.getElementById("weatherParameterdarkSky").disabled = true;
+							document.getElementById("weatherParameterNRSDB").disabled = true;
+							document.getElementById("weatherParameterTmy3").disabled = true;
+							document.getElementById("easySolarStation").disabled = false;
+						}
+						else if (source == 'tmy3'){
+							document.getElementById("stationASOS").disabled = true;
+							document.getElementById("stationUSCRN").disabled = true;
+							document.getElementById("LatInput").disabled = false;
+							document.getElementById("LonInput").disabled = false;
+							document.getElementById("weatherParameterASOS").disabled = true;
+							document.getElementById("weatherParameterUSCRN").disabled = true;
+							document.getElementById("weatherParameterdarkSky").disabled = true;
+							document.getElementById("weatherParameterNRSDB").disabled = true;
+							document.getElementById("weatherParameterTmy3").disabled = false;
+							document.getElementById("easySolarStation").disabled = true;
+						}
+						else{
+							document.getElementById("stationASOS").disabled = false;
+							document.getElementById("stationUSCRN").disabled = false;
+							document.getElementById("LatInput").disabled = false;
+							document.getElementById("LonInput").disabled = false;
+							document.getElementById("weatherParameterASOS").disabled = false;
+							document.getElementById("weatherParameterUSCRN").disabled = false;
+							document.getElementById("weatherParameterdarkSky").disabled = false;
+							document.getElementById("weatherParameterNRSDB").disabled = false;
+							document.getElementById("weatherParameterTmy3").disabled = false;
+							document.getElementById("easySolarStation").disabled = false;
+						}
+					}
+				</script>
 				<label class="tooltip">Source<span class="classic">Source of data</span></label>
 				<select id="source" name="source" onchange="loadWeatherParameters()" >
 					<option value="ASOS">ASOS</option>
 					<option value="USCRN">USCRN</option>
-					<option value="darkSky">darkSky</option>
+					<option value="darkSky">darkSky</option>    
 					<option value="NRSDB">NRSDB</option>
 					<option value="tmy3">tmy3</option>
 					<option value="easySolarGhi">GHI Estimation</option>
@@ -242,11 +358,11 @@
 			</div>	
 			<div class="shortInput">
 				<label class="tooltip">Latitude<span class="classic">Enter in Latitude of location</span></label>
-				<input type="text" id="darkSkyLat" name="darkSkyLat" pattern="[-+]?[0-9]*\.?[0-9]+"/>
+				<input type="text" id="LatInput" name="LatInput" pattern="[-+]?[0-9]*\.?[0-9]+"/>
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Longitude<span class="classic">Enter in Longitude of location</span></label>
-				<input type="text" id="darkSkyLon" name="darkSkyLon" pattern="[-+]?[0-9]*\.?[0-9]+"/>
+				<input type="text" id="LonInput" name="LonInput" pattern="[-+]?[0-9]*\.?[0-9]+"/>
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Weather Parameter - ASOS<span class="classic">Data that should be pulled</span></label>

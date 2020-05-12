@@ -903,8 +903,8 @@ def _tests():
 	# # Testing USCRN (Works)
 	# print('USCRN (NOAA) data pulled to ' + tmpdir)
 	# data = pullUscrn('2017', 'KY_Versailles_3_NNW', "IRRADIENCE_DIFFUSE") # Does not write to a file by itself
-	# data = pullUscrn('2018', 'TX_Austin_33_NW', "SOLARAD") # Does not write to a file by itself
-	# print(data)
+	data = pullUscrn('2000', 'TX_Austin_33_NW', "SOLARAD") # Does not write to a file by itself
+	print(data)
 	# import matplotlib.pyplot as plt
 	# plt.plot(data)
 	# plt.show()
@@ -932,15 +932,15 @@ def _tests():
 	# print(get_radiation_data('surfrad', 'Boulder_CO', 2019))
 	# get_radiation_data('solrad', 'bis', 2019)
 	# # Testing NSRDB (Works, but not used anywhere)
-	# nsrdbkey = 'rnvNJxNENljf60SBKGxkGVwkXls4IAKs1M8uZl56'
-	# year='2018'
-	# get_nrsdb_data('psm',-99.49218,43.83452,year, nsrdbkey, interval=60, filename=os.path.join('/Users/tuomastalvitie/Documents/GRIP/Diffuse:Direct/Data_Files')
-# , 'psm_'+year+'.csv'))
-	# Test for charlottesville
-	# get_nrsdb_data('psm',-78.4532,38.0086,year, nsrdbkey, interval=60, filename=os.path.join('/Users/tuomastalvitie/Documents/GRIP/Diffuse:Direct/solarIrradiencePredictor/Raw_Data/Charlottesville/', 'RAW_psm_VA_Charlottesville'+year+'.csv')) 
-	#Test For Austin, TX
-	# d=get_nrsdb_data('psm',-98.024098,30.581736,'2018', nsrdbkey, interval=60)
-	# print(d)
+# 	nsrdbkey = 'rnvNJxNENljf60SBKGxkGVwkXls4IAKs1M8uZl56'
+# 	# year='2018'
+# 	# get_nrsdb_data('psm',-99.49218,43.83452,year, nsrdbkey, interval=60, filename=os.path.join('/Users/tuomastalvitie/Documents/GRIP/Diffuse:Direct/Data_Files')
+# # , 'psm_'+year+'.csv'))
+# 	# Test for charlottesville
+# 	# get_nrsdb_data('psm',-78.4532,38.0086,year, nsrdbkey, interval=60, filename=os.path.join('/Users/tuomastalvitie/Documents/GRIP/Diffuse:Direct/solarIrradiencePredictor/Raw_Data/Charlottesville/', 'RAW_psm_VA_Charlottesville'+year+'.csv')) 
+# 	#Test For Austin, TX
+# 	d=get_nrsdb_data('psm',-98.024098,30.581736,'2018', nsrdbkey, interval=60)
+# 	print([i for i in d['GHI'].values])
 	# print(len(d))
 	# print(type(d))
 	# print(d['GHI'])
