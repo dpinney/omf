@@ -532,10 +532,26 @@
 						"name":"Reactive Power Output",
 						"yAxis": 2,
 					}
-					var yPowerMin = Math.min(...invPowerRealSeries.data)
-					yPowerMin = Math.floor(yPowerMin/1000)*1000
-					var yPowerMax = Math.max(...invPowerRealSeries.data)
-					yPowerMax = Math.ceil(yPowerMax/1000)*1000
+					var realPowerMin = Math.min(...invPowerRealSeries.data)
+					var realPowerMax = Math.max(...invPowerRealSeries.data)
+					var imagPowerMin = Math.min(...invPowerImagSeries.data)
+					var imagPowerMax = Math.max(...invPowerImagSeries.data)
+					var yPowerMin = 0
+					var yPowerMax = 0
+					if (realPowerMin <= imagPowerMin){
+						yPowerMin = realPowerMin
+					}
+					else{
+						yPowerMin = imagPowerMin
+					}
+					if (realPowerMax >= imagPowerMax){
+						yPowerMax = realPowerMax
+					}
+					else{
+						yPowerMax = imagPowerMax
+					}
+					yPowerMin = Math.floor(yPowerMin/100)*100
+					yPowerMax = Math.ceil(yPowerMax/100)*100
 					var localHighChart = JSON.parse(JSON.stringify(swingHighChartsTemplate))
 					localHighChart["chart"]["renderTo"] = "inverterSeries_" + inv
 					localHighChart["chart"]["zoomType"] = 'xy'
