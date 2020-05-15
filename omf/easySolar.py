@@ -24,18 +24,12 @@ from sklearn.preprocessing import PolynomialFeatures
 
 from weather import pullUscrn
 
-
-#Establish directories
-_currDir = os.getcwd()
-print(_currDir)
-
 #Import model
 clf_log_poly = load('Log_Polynomial_clf.joblib')
 
 #darksky key
 _key = '31dac4830187f562147a946529516a8d'
 _key2 = os.environ.get('DARKSKY','')
-
 
 #Station_Dict
 
