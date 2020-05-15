@@ -62,8 +62,14 @@ def work(modelDir, inputDict):
 		data = data.loc[data['year']==year]
 		#Extract param from data, convert to int, and pass in values not pandas series
 		data = list(data[param].astype(float).values)
-	elif source == 'get_radiation_data':
-		pass
+	elif source == 'surfrad':
+		year = int(inputDict['year'])
+		param = inputDict['weatherParameterSurfrad']
+		site = inputDict['surfradSite']
+		print(year, param, site)
+		data = weather.get_radiation_data('surfrad', site, year)
+		data = list(data[param].values.astype(float))
+		print(data)
 	# station = inputDict['stationASOS'] if source == 'ASOS' else inputDict['stationUSCRN']
 	# parameter = inputDict['weatherParameterASOS'] if source == 'ASOS' else inputDict['weatherParameterUSCRN']
 	# inputs = [inputDict['year'], station, parameter]

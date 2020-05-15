@@ -75,6 +75,8 @@
 							document.getElementById("weatherParameterNRSDB").disabled = true;
 							document.getElementById("weatherParameterTmy3").disabled = true;
 							document.getElementById("easySolarStation").disabled = true;
+							document.getElementById("weatherParameterSurfrad").disabled = true;
+							document.getElementById("surfradSite").disabled = true;
 						}
 						else if (source == 'ASOS'){
 							document.getElementById("stationASOS").disabled = false;
@@ -87,6 +89,8 @@
 							document.getElementById("weatherParameterNRSDB").disabled = true;
 							document.getElementById("weatherParameterTmy3").disabled = true;
 							document.getElementById("easySolarStation").disabled = true;
+							document.getElementById("weatherParameterSurfrad").disabled = true;
+							document.getElementById("surfradSite").disabled = true;
 						}
 						else if (source == 'darkSky'){
 							document.getElementById("stationASOS").disabled = true;
@@ -99,6 +103,8 @@
 							document.getElementById("weatherParameterNRSDB").disabled = true;
 							document.getElementById("weatherParameterTmy3").disabled = true;
 							document.getElementById("easySolarStation").disabled = true;
+							document.getElementById("weatherParameterSurfrad").disabled = true;
+							document.getElementById("surfradSite").disabled = true;
 						}
 						else if (source == 'NRSDB'){
 							document.getElementById("stationASOS").disabled = true;
@@ -111,6 +117,8 @@
 							document.getElementById("weatherParameterNRSDB").disabled = false;
 							document.getElementById("weatherParameterTmy3").disabled = true;
 							document.getElementById("easySolarStation").disabled = true;
+							document.getElementById("weatherParameterSurfrad").disabled = true;
+							document.getElementById("surfradSite").disabled = true;
 						}
 						else if (source == 'easySolarGhi')
 							{
@@ -124,6 +132,8 @@
 							document.getElementById("weatherParameterNRSDB").disabled = true;
 							document.getElementById("weatherParameterTmy3").disabled = true;
 							document.getElementById("easySolarStation").disabled = false;
+							document.getElementById("weatherParameterSurfrad").disabled = true;
+							document.getElementById("surfradSite").disabled = true;
 						}
 						else if (source == 'easySolarDhi'){
 							document.getElementById("stationASOS").disabled = true;
@@ -136,6 +146,8 @@
 							document.getElementById("weatherParameterNRSDB").disabled = true;
 							document.getElementById("weatherParameterTmy3").disabled = true;
 							document.getElementById("easySolarStation").disabled = false;
+							document.getElementById("weatherParameterSurfrad").disabled = true;
+							document.getElementById("surfradSite").disabled = true;
 						}
 						else if (source == 'easySolarDni'){
 							document.getElementById("stationASOS").disabled = true;
@@ -148,6 +160,8 @@
 							document.getElementById("weatherParameterNRSDB").disabled = true;
 							document.getElementById("weatherParameterTmy3").disabled = true;
 							document.getElementById("easySolarStation").disabled = false;
+							document.getElementById("weatherParameterSurfrad").disabled = true;
+							document.getElementById("surfradSite").disabled = true;
 						}
 						else if (source == 'tmy3'){
 							document.getElementById("stationASOS").disabled = true;
@@ -160,6 +174,23 @@
 							document.getElementById("weatherParameterNRSDB").disabled = true;
 							document.getElementById("weatherParameterTmy3").disabled = false;
 							document.getElementById("easySolarStation").disabled = true;
+							document.getElementById("weatherParameterSurfrad").disabled = true;
+							document.getElementById("surfradSite").disabled = true;
+						}
+						else if (source == 'surfrad'){
+							document.getElementById("stationASOS").disabled = true;
+							document.getElementById("stationUSCRN").disabled = true;
+							document.getElementById("LatInput").disabled = true;
+							document.getElementById("LonInput").disabled = true;
+							document.getElementById("weatherParameterASOS").disabled = true;
+							document.getElementById("weatherParameterUSCRN").disabled = true;
+							document.getElementById("weatherParameterdarkSky").disabled = true;
+							document.getElementById("weatherParameterNRSDB").disabled = true;
+							document.getElementById("weatherParameterTmy3").disabled = true;
+							document.getElementById("easySolarStation").disabled = true;
+							document.getElementById("weatherParameterSurfrad").disabled = false;
+							document.getElementById("surfradSite").disabled = false;
+
 						}
 						else{
 							document.getElementById("stationASOS").disabled = false;
@@ -172,6 +203,8 @@
 							document.getElementById("weatherParameterNRSDB").disabled = false;
 							document.getElementById("weatherParameterTmy3").disabled = false;
 							document.getElementById("easySolarStation").disabled = false;
+							document.getElementById("weatherParameterSurfrad").disabled = false;
+							document.getElementById("surfradSite").disabled = false;
 						}
 					}
 				</script>
@@ -185,6 +218,7 @@
 					<option value="easySolarGhi">GHI Estimation</option>
 					<option value="easySolarDhi">DHI Estimation</option>
 					<option value="easySolarDni">DNI Estimation</option>
+					<option value="surfrad">SURFRAD Data</option>
 				</select>
 			</div>
 			 <div class="shortInput">
@@ -694,6 +728,48 @@
 					<option value="WY_Sundance_8_NNW">WY_Sundance</option>
 				</select>
 			</div>
+			<div class="shortInput">
+				<label class="tooltip">SURFRAD Site<span class="classic"></span></label>
+				<select id="surfradSite" name="surfradSite"required="required">
+					<option value="Boulder_CO">Boulder, CO</option>
+					<option value="Alamosa_CO">Alamosa, CO</option>
+					<option value="Desert_Rock_NV">Desert Rock, NV</option>
+					<option value="Fort_Peck_MT">Fort Peck, MT</option>
+					<option value="Goodwin_Creek_MS">Goodwin, MS</option>
+					<option value="Penn_State_PA">Penn State, PA</option>
+					<option value="Red_Lake_AZ">RedLake, AZ</option>
+					<option value="Rutland_VT">Rutland, VT</option>
+					<option value="Sioux_Falls_SD">Sioux Falls, SD</option>
+					<option value="Wasco_OR">Wasco, OR</option>
+				</select>
+			</div>
+			<div class="shortInput">
+				<label class="tooltip">Weather Parameter - SURFRAD<span class="classic">Data that should be pulled</span></label>
+				<select id="weatherParameterSurfrad" name="weatherParameterSurfrad" required="required">
+					<option value="zen">Solar Zenith Angle</option>
+					<option value="dw_solar">Downwelling global solar (Watts m^-2)</option>
+					<option value="uw_solar">Upwelling global solar (Watts m^-2)</option>
+					<option value="direct_n">Direct-Normal Solar (Watts m^-2)</option>
+					<option value="diffuse">Downwelling Diffuse Solar (Watts m^-2)</option>
+					<option value="dw_ir">Downwelling Thermal Infrared (Watts m^-2)</option>
+					<option value="dw_casetemp">Downwelling IR case temp. (K)</option>
+					<option value="dw_dometemp">Downwelling IR dome temp. (K)</option>
+					<option value="uw_ir">Upwelling Thermal Infrared (Watts m^-2)</option>
+					<option value="uw_casetemp">Upwelling IR case temp. (K)</option>
+					<option value="uw_dometemp">Upwelling IR dome temp. (K)</option>
+					<option value="uvb">Global UVB (milliWatts m^-2)</option>
+					<option value="par">Photosynthetically Active Radiation (Watts m^-2)</option>
+					<option value="netsolar">Net Solar (dw_solar - uw_solar) (Watts m^-2)</option>
+					<option value="netir">net infrared (dw_ir - uw_ir) (Watts m^-2)</option>
+					<option value="totalnet">net radiation (netsolar+netir) (Watts m^-2)</option>
+					<option value="temp">10-meter air temperature (Celsius)</option>
+					<option value="rh">Relative Humidity</option>
+					<option value="windspd">Wind Speed (ms^-1)</option>
+					<option value="winddir">Wind Direction (degrees, clockwise from north)</option>
+					<option value="pressure">Pressure (mb)</option>
+				</select>
+			</div>
+
 
 			<!-- Required Buttons -->
 			<div class="wideInput" style="text-align:right">

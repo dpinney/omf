@@ -842,7 +842,20 @@ def get_nrsdb_data(data_set, longitude, latitude, year, api_key, utc='true', lea
 		#Maybe change depending on what's easy/flexible but this gives good display
 		return data
 
+
+SURFRAD_COLUMNS = [
+    'year', 'jday', 'month', 'day', 'hour', 'minute', 'dt', 'zen',
+    'dw_solar', 'dw_solar_flag', 'uw_solar', 'uw_solar_flag', 'direct_n',
+    'direct_n_flag', 'diffuse', 'diffuse_flag', 'dw_ir', 'dw_ir_flag',
+    'dw_casetemp', 'dw_casetemp_flag', 'dw_dometemp', 'dw_dometemp_flag',
+    'uw_ir', 'uw_ir_flag', 'uw_casetemp', 'uw_casetemp_flag', 'uw_dometemp',
+    'uw_dometemp_flag', 'uvb', 'uvb_flag', 'par', 'par_flag', 'netsolar',
+    'netsolar_flag', 'netir', 'netir_flag', 'totalnet', 'totalnet_flag',
+    'temp', 'temp_flag', 'rh', 'rh_flag', 'windspd', 'windspd_flag',
+    'winddir', 'winddir_flag', 'pressure', 'pressure_flag']
+
 def getRadiationYears(radiation_type, site, year):
+	print("getRadiationRunning~!!!!!!!**********")
 	'''Pull solard or surfrad data and aggregate into a year'''
 	URL = 'ftp://aftp.cmdl.noaa.gov/data/radiation/{}/{}/{}/'.format(radiation_type, site, year)
 	#FILE = 'tbl19001.dat' - example
@@ -877,6 +890,7 @@ def create_tsv(data, radiation_type, site, year):
 			output.writerow(item)
 
 def get_radiation_data(radiation_type, site, year, out_file=None):
+	print("radiation found!")
 	'''Get solard or surfrad data. Optional export to csv with out_file option
 		Data is returned in a list w/ ~8760 elements. Each element is a dictionary
 		with ~47 keys value pairs. 
@@ -886,7 +900,10 @@ def get_radiation_data(radiation_type, site, year, out_file=None):
 	if out_file is not None:
 		create_tsv(allYears, radiation_type, site, year)
 	else:
-		return allYears
+		df= pd.DataFrame(allYears)
+		df.columns = SURFRAD_COLUMNS
+		# return allYears
+		return df
 
 def _tests():
 	print()
@@ -903,8 +920,8 @@ def _tests():
 	# # Testing USCRN (Works)
 	# print('USCRN (NOAA) data pulled to ' + tmpdir)
 	# data = pullUscrn('2017', 'KY_Versailles_3_NNW', "IRRADIENCE_DIFFUSE") # Does not write to a file by itself
-	data = pullUscrn('2000', 'TX_Austin_33_NW', "SOLARAD") # Does not write to a file by itself
-	print(data)
+	# data = pullUscrn('2000', 'TX_Austin_33_NW', "SOLARAD") # Does not write to a file by itself
+	# print(data)
 	# import matplotlib.pyplot as plt
 	# plt.plot(data)
 	# plt.show()
@@ -929,7 +946,7 @@ def _tests():
 		# plt.show()
 
 	# Testing getRadiationYears (Works, but not used anywhere)
-	# print(get_radiation_data('surfrad', 'Boulder_CO', 2019))
+	print(get_radiation_data('surfrad', 'Boulder_CO', 2019))
 	# get_radiation_data('solrad', 'bis', 2019)
 	# # Testing NSRDB (Works, but not used anywhere)
 # 	nsrdbkey = 'rnvNJxNENljf60SBKGxkGVwkXls4IAKs1M8uZl56'
