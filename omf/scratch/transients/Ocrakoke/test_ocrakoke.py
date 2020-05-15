@@ -10,11 +10,11 @@ Classical Stability Test
 
 """
 # Dynamic model classes
+from pydyn.controller import controller
 from pydyn.ext_grid import ext_grid
 from pydyn.sym_order6a import sym_order6a
 from pydyn.sym_order6b import sym_order6b
 from pydyn.sym_order4 import sym_order4
-from pydyn.asym_1cage import asym_1cage
 
 # Simulation modules
 from pydyn.events import events
@@ -38,7 +38,7 @@ if __name__ == '__main__':
     print('----------------------------------------')
 
     # Load PYPOWER case
-    ppc = loadcase('case9.py')
+    ppc = loadcase('ocrakoke.py')
     
     # Program options
     dynopt = {}
@@ -54,31 +54,33 @@ if __name__ == '__main__':
     #dynopt['iopt'] = 'runge_kutta'
     
     # Create dynamic model objects
+    # oCtrl = controller('avr.dyn', dynopt)
     G1 = ext_grid('GEN1', 0, 0.0608, 23.64, dynopt)
     G2 = ext_grid('GEN2', 1, 0.1198, 6.01, dynopt)
-    G3 = ext_grid('GEN3', 2, 0.1813, 3.01, dynopt)
-    B1 = asym_1cage('B1.mach', dynopt)
+    # G3 = ext_grid('GEN3', 2, 0.1813, 3.01, dynopt)
+    # B1 = sym_order6b('B1.mach', dynopt)
     # B2 = sym_order6b('B2.mach', dynopt)
     # B3 = sym_order6b('B3.mach', dynopt)
     # B4 = sym_order6b('B4.mach', dynopt)
     
     # Create dictionary of elements
     elements = {}
+    # elements[oCtrl.id] = oCtrl
     elements[G1.id] = G1
     elements[G2.id] = G2
-    elements[G3.id] = G3
-    elements[B1.id] = B1
+    # elements[G3.id] = G3
+    # elements[B1.id] = B1
     # elements[B2.id] = B2
     # elements[B3.id] = B3
     # elements[B4.id] = B4
 
     # Create event stack
     oEvents = events('events.evnt')
-    event1 = [10.3, 'LOAD', 2, -10, -10]
+    # event1 = [10.3, 'LOAD', 2, -10, -10]
     # event2 = [10.35, 'LOAD', 2, -10, -10]
     # event3 = [1.38, 'LOAD',3, -100, -100]
 
-    oEvents.event_stack.append(event1)
+    # oEvents.event_stack.append(event1)
     # oEvents.event_stack.append(event2)
     # oEvents.event_stack.append(event3)
     # oEvents = mf.addRandomEvents(ppc, oEvents, 5, dynopt['h'], dynopt['t_sim'], 0.05, 0.03)
@@ -122,34 +124,34 @@ if __name__ == '__main__':
     # plt.ylabel('Power of BUS3')
     # plt.show()
 
-    fig, axs = plt.subplots(3, 3)
+    fig, axs = plt.subplots(3, 2)
     axs[0, 0].plot(oRecord.t_axis, np.array(oRecord.results['GEN1:delta']) * 180 / np.pi)
     axs[0, 0].set_title('Rotor Angle (GEN1)')
     axs[0, 0].set(ylabel='radians')
     axs[0, 1].plot(oRecord.t_axis, np.array(oRecord.results['GEN2:delta']) * 180 / np.pi, 'tab:orange')
     axs[0, 1].set_title('Rotor Angle (GEN2)')
     axs[0, 1].set(ylabel='radians')
-    axs[0, 2].plot(oRecord.t_axis, np.array(oRecord.results['GEN3:delta']) * 180 / np.pi, 'tab:green')
-    axs[0, 2].set_title('Rotor Angle (GEN3)')
-    axs[0, 2].set(ylabel='radians')
-    axs[1, 0].plot(oRecord.t_axis, np.array(oRecord.results['BUS7:P']) * 100)
+    # axs[0, 2].plot(oRecord.t_axis, np.array(oRecord.results['GEN3:delta']) * 180 / np.pi, 'tab:green')
+    # axs[0, 2].set_title('Rotor Angle (GEN3)')
+    # axs[0, 2].set(ylabel='radians')
+    axs[1, 0].plot(oRecord.t_axis, np.array(oRecord.results['GEN1:P']) * 100)
     axs[1, 0].set_title('Power (GEN1)')
     axs[1, 0].set(ylabel='MW')
     axs[1, 1].plot(oRecord.t_axis, np.array(oRecord.results['GEN2:P']) * 100, 'tab:orange')
     axs[1, 1].set_title('Power (GEN2)')
     axs[1, 1].set(ylabel='MW')
-    axs[1, 2].plot(oRecord.t_axis, np.array(oRecord.results['GEN3:P']) * 100, 'tab:green')
-    axs[1, 2].set_title('Power (GEN3)')
-    axs[1, 2].set(ylabel='MW')
+    # axs[1, 2].plot(oRecord.t_axis, np.array(oRecord.results['GEN3:P']) * 100, 'tab:green')
+    # axs[1, 2].set_title('Power (GEN3)')
+    # axs[1, 2].set(ylabel='MW')
     axs[2, 0].plot(oRecord.t_axis, np.array(oRecord.results['GEN1:omega']) * 180 / np.pi)
     axs[2, 0].set_title('Frequency (GEN1)')
     axs[2, 0].set(ylabel='Hz')
     axs[2, 1].plot(oRecord.t_axis, np.array(oRecord.results['GEN2:omega']) * 180 / np.pi, 'tab:orange')
     axs[2, 1].set_title('Frequency (GEN2)')
     axs[2, 1].set(ylabel='Hz')
-    axs[2, 2].plot(oRecord.t_axis, np.array(oRecord.results['GEN3:omega']) * 180 / np.pi, 'tab:green')
-    axs[2, 2].set_title('Frequency (GEN3)')
-    axs[2, 2].set(ylabel='Hz')
+    # axs[2, 2].plot(oRecord.t_axis, np.array(oRecord.results['GEN3:omega']) * 180 / np.pi, 'tab:green')
+    # axs[2, 2].set_title('Frequency (GEN3)')
+    # axs[2, 2].set(ylabel='Hz')
     for ax in axs.flat:
         ax.set(xlabel='time (s)')
 
