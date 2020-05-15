@@ -27,14 +27,14 @@ def work(modelDir, inputDict):
 		parameter = inputDict['weatherParameterUSCRN']
 		data = weather.pullUscrn(inputDict['year'], station, parameter)
 	elif source == 'darkSky':
-		lat = inputDict['darkSkyLat']
-		lon = inputDict['darkSkyLon']
+		lat = inputDict['LatInput']
+		lon = inputDict['LonInput']
 		parameter = inputDict['weatherParameterdarkSky']
 		data = weather.pullDarksky(inputDict['year'], lat, lon, parameter, units='si')
 	elif source == 'NRSDB':
 		nsrdbkey = 'rnvNJxNENljf60SBKGxkGVwkXls4IAKs1M8uZl56'
-		latitude = float(inputDict['darkSkyLat'])
-		longitude = float(inputDict['darkSkyLon'])
+		latitude = float(inputDict['LatInput'])
+		longitude = float(inputDict['LonInput'])
 		year = inputDict['year']
 		param = inputDict['weatherParameterNRSDB']
 		data = weather.get_nrsdb_data('psm', longitude, latitude, year, nsrdbkey, interval=60)
@@ -54,16 +54,22 @@ def work(modelDir, inputDict):
 			data = list([i[2] for i in data])
 	elif source == 'tmy3':
 		param = inputDict['weatherParameterTmy3']
-		lat = inputDict['darkSkyLat']
-		lon = inputDict['darkSkyLon']
+		lat = inputDict['LatInput']
+		lon = inputDict['LonInput']
 		year = int(inputDict['year'])
 		data = weather.tmy3_pull(weather.nearest_tmy3_station(lat, lon))
 		#Now get data for the year in question
 		data = data.loc[data['year']==year]
 		#Extract param from data, convert to int, and pass in values not pandas series
 		data = list(data[param].astype(float).values)
-	elif source == 'get_radiation_data':
-		pass
+	elif source == 'surfrad':
+		year = int(inputDict['year'])
+		param = inputDict['weatherParameterSurfrad']
+		site = inputDict['surfradSite']
+		print(year, param, site)
+		data = weather.get_radiation_data('surfrad', site, year)
+		data = list(data[param].values.astype(float))
+		print(data)
 	# station = inputDict['stationASOS'] if source == 'ASOS' else inputDict['stationUSCRN']
 	# parameter = inputDict['weatherParameterASOS'] if source == 'ASOS' else inputDict['weatherParameterUSCRN']
 	# inputs = [inputDict['year'], station, parameter]
