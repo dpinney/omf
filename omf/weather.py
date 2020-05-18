@@ -838,6 +838,7 @@ def get_nrsdb_data(data_set, longitude, latitude, year, api_key, utc='true', lea
 		#Transform data, and resubmit in friendly format for frontend
 		data = pd.DataFrame(reader)
 		colNames = (data.iloc[2][:].values)
+		print(data)
 		data.rename(columns={key:val for key, val in enumerate(colNames)}, inplace=True)
 		#Maybe change depending on what's easy/flexible but this gives good display
 		return data
@@ -911,6 +912,7 @@ def _tests():
 	from tempfile import mkdtemp
 	tmpdir = mkdtemp()
 	print("Beginning to test weather.py in", tmpdir)
+
 	# Testing zipCodeToClimateName (Certain cases fail)
 	# print(zipCodeToClimateName('75001'))
 	# print(zipCodeToClimateName('07030')) # Doesn't work
@@ -937,7 +939,7 @@ def _tests():
 	# print('Darksky data pulled to ' + tmpdir)
 	# Testing tmy3 (Works)
 	# if platform.system() != 'Windows':
-	# 	data=tmy3_pull(nearest_tmy3_station(41, -78))
+	# 	data=tmy3_pull(nearest_tmy3_station(41.00, -78.00))
 	# 	print(data)
 	# 	print(len(data))
 	# 	print(data.columns)
@@ -946,18 +948,21 @@ def _tests():
 		# plt.show()
 
 	# Testing getRadiationYears (Works, but not used anywhere)
-	print(get_radiation_data('surfrad', 'Boulder_CO', 2019))
+	# print(get_radiation_data('surfrad', 'Boulder_CO', 2019))
 	# get_radiation_data('solrad', 'bis', 2019)
 	# # Testing NSRDB (Works, but not used anywhere)
-# 	nsrdbkey = 'rnvNJxNENljf60SBKGxkGVwkXls4IAKs1M8uZl56'
-# 	# year='2018'
-# 	# get_nrsdb_data('psm',-99.49218,43.83452,year, nsrdbkey, interval=60, filename=os.path.join('/Users/tuomastalvitie/Documents/GRIP/Diffuse:Direct/Data_Files')
+	# nsrdbkey = 'rnvNJxNENljf60SBKGxkGVwkXls4IAKs1M8uZl56'
+	# year='2018'
+	# get_nrsdb_data('psm',-99.49218,43.83452,year, nsrdbkey, interval=60, filename=os.path.join('/Users/tuomastalvitie/Documents/GRIP/Diffuse:Direct/Data_Files'))
 # # , 'psm_'+year+'.csv'))
 # 	# Test for charlottesville
 # 	# get_nrsdb_data('psm',-78.4532,38.0086,year, nsrdbkey, interval=60, filename=os.path.join('/Users/tuomastalvitie/Documents/GRIP/Diffuse:Direct/solarIrradiencePredictor/Raw_Data/Charlottesville/', 'RAW_psm_VA_Charlottesville'+year+'.csv')) 
 # 	#Test For Austin, TX
-# 	d=get_nrsdb_data('psm',-98.024098,30.581736,'2018', nsrdbkey, interval=60)
-# 	print([i for i in d['GHI'].values])
+	# d=get_nrsdb_data('psm',90.0,-30.00,'2018', nsrdbkey, interval=60)
+	# print(d)
+	# d=get_nrsdb_data('psm',-98.024098,30.581736,'2018', nsrdbkey, interval=60)
+	# print(d)
+	# print([i for i in d['GHI'].values])
 	# print(len(d))
 	# print(type(d))
 	# print(d['GHI'])
