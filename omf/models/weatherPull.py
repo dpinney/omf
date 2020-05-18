@@ -3,7 +3,6 @@ import shutil, csv
 from os.path import isdir, join as pJoin
 
 from omf import weather
-from omf import easySolar
 from omf.models import __neoMetaModel__
 from omf.models.__neoMetaModel__ import *
 
@@ -38,7 +37,6 @@ def work(modelDir, inputDict):
 		year = inputDict['year']
 		param = inputDict['weatherParameterNRSDB']
 		data = weather.get_nrsdb_data('psm', longitude, latitude, year, nsrdbkey, interval=60)
-		print(data)
 		#Data must be a list. Extract correct column from returned pandas df, return this column as array of int
 		data = list(data[param].values[3:].astype(float))
 		print(data)
@@ -46,7 +44,7 @@ def work(modelDir, inputDict):
 		print("EASYSOLAR FOUND")
 		station = inputDict['easySolarStation']
 		year = inputDict['year']
-		data = easySolar.get_synth_dhi_dni(station, year)
+		data = weather.get_synth_dhi_dni(station, year)
 		if source == 'easySolarDhi':
 			data = list([i[0] for i in data])
 			print(data)

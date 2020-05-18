@@ -259,7 +259,6 @@ def preparePredictionVectors(year='2020', lat=30.581736, lon=-98.024098, station
 		#I have my cloud cover, iterate over my ghi and cosine arrays
 		cosOfSolarZenith = getCosineOfSolarZenith(lat, lon, time, timezone)
 		ghi = ghiData[i]
-		print(ghi)
 		if ghi <= 0:
 			#Not most efficient logic but....
 			#Still need to decide how to handle zero vals. Test this
@@ -289,7 +288,7 @@ def get_synth_dhi_dni(uscrn_station, year):
 	result = list(zip(dhiPredictions, ghiData, dni_array))
 	return result
 
-def tests(uscrn_station='TX_Austin_33_NW'):
+def easy_solar_tests(uscrn_station='TX_Austin_33_NW'):
 	print("********EASY SOLAR TEST STARTED************")
 	print(Station_Dict)
 	year='2018'
@@ -303,10 +302,9 @@ def tests(uscrn_station='TX_Austin_33_NW'):
 	dniXCosTheta = ghiData - dhiPredictions #This is cos(theta) * DNI
 	dni_array = ([dniXCosTheta[i]/cosArray[i] for i in range(len(dniXCosTheta))]) 
 	result = list(zip(dhiPredictions, ghiData, dni_array))
-	print([i for i in result])
-	print(len(result))
-	print(len(input_array))
+	assert 	len(result) == len(input_array)
+	print(result)
 
 if __name__ == '__main__':
-	# tests()
-	print(get_synth_dhi_dni("VA_Charlottesville_2_SSE",'2018'))
+	easy_solar_tests()
+	# print(get_synth_dhi_dni("VA_Charlottesville_2_SSE",'2018'))
