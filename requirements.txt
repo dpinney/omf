@@ -34,5 +34,6 @@ Pillow
 maxminddb
 maxminddb-geolite2
 pysolar
+xmltodict
 #fbprophet
 #tensorflow
