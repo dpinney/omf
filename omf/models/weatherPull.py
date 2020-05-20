@@ -72,6 +72,14 @@ def work(modelDir, inputDict):
 		data = weather.get_radiation_data('surfrad', site, year)
 		data = list(data[param].values.astype(float))
 		print(data)
+	elif source == 'NDFD':
+		#This will just just current date for forecast, as it does not support historical forecasts
+		#and future forcasts are limited
+		lat = inputDict['LatInput']
+		lon = inputDict['LonInput']
+		param = [inputDict['ndfdParam']]
+		data = weather.get_ndfd_data(lat, lon, param)
+		pass
 	# station = inputDict['stationASOS'] if source == 'ASOS' else inputDict['stationUSCRN']
 	# parameter = inputDict['weatherParameterASOS'] if source == 'ASOS' else inputDict['weatherParameterUSCRN']
 	# inputs = [inputDict['year'], station, parameter]
