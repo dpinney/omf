@@ -78,7 +78,7 @@ elif platform.system()=='Windows':
 	os.system("python3.exe -m pip install omf\\static\\pygraphviz-1.5-cp36-cp36m-win_amd64.whl")
 	# Finish up installation with pip.
 	pipInstallInOrder("python3 -m pip")
-	os.system("python3 -m setup.py develop")
+	os.system("python3 setup.py develop")
 elif platform.system()=="Darwin": # MacOS
 	# Install homebrew
 	brew_exit_code = os.system("brew --version")
