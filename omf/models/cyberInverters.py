@@ -431,7 +431,8 @@ def new(modelDir):
 		"dssFile": dssFile,
 		"miscFile": miscFile,
 		"trainAgent": "False",
-		"attackVariable": "None"
+		"attackVariable": "None",
+		"defenseVariable": "None"
 	}
 	creationCode = __neoMetaModel__.new(modelDir, defaultInputs)
 	try:
