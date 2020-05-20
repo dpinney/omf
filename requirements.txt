@@ -1,4 +1,3 @@
-joblib
 Flask>=0.9
 Flask-Login==0.2.11
 Jinja2>=2.7.2
@@ -36,5 +35,6 @@ maxminddb
 maxminddb-geolite2
 pysolar
 xmltodict
+joblib
 #fbprophet
 #tensorflow
