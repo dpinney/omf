@@ -21,7 +21,7 @@ import pytz
 from joblib import dump, load
 from sklearn.preprocessing import PolynomialFeatures
 
-
+omfDir = os.path.dirname(os.path.abspath(__file__))
 
 
 def pullAsos(year, station, datatype):
@@ -239,7 +239,6 @@ def airportCodeToLatLon(airport):
 	''' Airport three letter code -> lat/lon of that location. 
 		Dataset: https://opendata.socrata.com/dataset/Airport-Codes-mapped-
 			to-Latitude-Longitude-in-the-/rxrh-4cxm '''
-	omfDir = os.path.dirname(os.path.abspath(__file__))
 	with open(pJoin(omfDir, 'static/Airports.csv'), newline='') as f:
 		for m in list(csv.reader(f))[1:]:
 			if m[0] == airport:
@@ -258,7 +257,6 @@ def zipCodeToClimateName(zipCode):
 	* Zip code lat/lon/city/state data taken from https://www.gaslampmedia.com
 		/download-zip-code-latitude-longitude-city-state-county-csv/ '''
 	assert isinstance(zipCode, str), "To prevent leading zero errors, input zipcode as string"
-	omfDir = os.path.dirname(os.path.abspath(__file__))
 	zipCsvPath = pJoin(omfDir, "static", "zip_codes_altered.csv")
 	# Find the state, city, lat, lon for given zipcode
 	with open(zipCsvPath, 'r', newline='') as f:
