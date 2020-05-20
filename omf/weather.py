@@ -10,6 +10,7 @@ import numpy as np
 from os.path import join as pJoin
 from datetime import timedelta, datetime
 from urllib.request import Request, urlopen
+from urllib.parse import urlencode, quote
 import requests
 from dateutil.parser import parse as parse_dt
 from omf import feeder
@@ -20,7 +21,8 @@ import pysolar
 import pytz
 from joblib import dump, load
 from sklearn.preprocessing import PolynomialFeatures
-
+import xml.etree.ElementTree as ET
+import xmltodict
 
 
 
@@ -914,7 +916,11 @@ def get_radiation_data(radiation_type, site, year, out_file=None):
 		# return allYears
 		return df
 
-####### Easy Solar Code Below #######
+
+
+
+
+####### GHI/DHI/DNI Estimator Code Below #######
 
 
 #Import model
@@ -1201,14 +1207,80 @@ def easy_solar_tests(uscrn_station='TX_Austin_33_NW'):
 
 
 
+
+########### NDFD API ################
+
+
+"""
+Single Point Unsummarized Data: Returns DWML-encoded NDFD data for a point
+"""
+#Works
+def _singlePointDataQuery(lat1, lon1, product, begin, end, Unit='m', optional_params=['wspd', 'wdir']):
+	params = {
+		'lat':lat1,
+		'lon':lon1,
+		'product':product
+	}
+	params2 = {'begin':begin,
+	'end':end
+	}
+	params3 = {
+		'Unit':Unit,
+	}
+	urlString = urlencode(params)
+	subString = ''
+	for key, value in params2.items():
+		subString += '&'+str(key) + '=' + str(value)
+	urlString+=subString
+	for i in optional_params:
+		params3[i] = i
+	urlString +='&' + urlencode(params3)
+	return urlString
+
+#Main URL path
+def _ndfd_url(path=''):
+    return 'http://www.weather.gov/forecasts/xml/sample_products/browser_interface/ndfdXMLclient.php?' + path
+
+
+#This function acts as a general xml parser
+def _generalParseXml(data):
+	o = xmltodict.parse(data.content)
+	d = json.dumps(o)
+	d = json.loads(d)
+	return d
+
+def _run_ndfd_request(q):
+	print(_ndfd_url(q))
+	resp = requests.get(_ndfd_url(q))
+	if resp.status_code != 200:
+		# This means something went wrong.
+		print(resp.status_code)
+		raise ApiError('GET /tasks/ {}'.format(resp.status_code))
+	return resp
+
+
+#Gets predictions from current moment to 10 weeks in future. Data not avaliable for past dates, not avaliable for too long in future
+def get_ndfd_data(lat1, lon1, optional_params=['wspd'], begin=str(datetime.now().isoformat()), end=print((datetime.now()+timedelta(weeks=+10)).isoformat()), product='time-series', unit='m'):
+	query = _singlePointDataQuery(lat1, lon1, product, begin, end, unit, optional_params)
+	res = _run_ndfd_request(query)
+	data = _generalParseXml(res)
+	return data
+
+
+
 def _tests():
 	print()
 	print('weather.py tests currently disabled to keep them from sending too many HTTP requests.')
 	from tempfile import mkdtemp
 	tmpdir = mkdtemp()
 	print("Beginning to test weather.py in", tmpdir)
+	#NDFD tests
+	d = get_ndfd_data('39.0000', '-77.0000',['wspd'])
+	print(d)
+
+	
 	#Easy Solar Tests
-	easy_solar_tests()
+	# easy_solar_tests()
 
 	# Testing zipCodeToClimateName (Certain cases fail)
 	# print(zipCodeToClimateName('75001'))
