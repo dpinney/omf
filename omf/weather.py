@@ -916,10 +916,6 @@ def get_radiation_data(radiation_type, site, year, out_file=None):
 
 ####### Easy Solar Code Below #######
 
-
-#Import model
-clf_log_poly = load('static/Log_Polynomial_clf.joblib')
-
 #darksky key
 _key = '31dac4830187f562147a946529516a8d' #Personal Key
 _key2 = os.environ.get('DARKSKY','')
@@ -1170,6 +1166,8 @@ def predictPolynomial(X, model, degrees=5):
 
 def get_synth_dhi_dni(uscrn_station, year):
 	print("********EASY SOLAR STARTED************")
+	poly_path = pJoin(omfDir, 'static', 'Log_Polynomial_clf.joblib')
+	clf_log_poly = load(poly_path)
 	lat = Station_Dict[uscrn_station][0]
 	lon = Station_Dict[uscrn_station][1]
 	timezone = Station_Dict[uscrn_station][2]
@@ -1184,6 +1182,8 @@ def get_synth_dhi_dni(uscrn_station, year):
 def easy_solar_tests(uscrn_station='TX_Austin_33_NW'):
 	print("********EASY SOLAR TEST STARTED************")
 	print(Station_Dict)
+	poly_path = pJoin(omfDir, 'static', 'Log_Polynomial_clf.joblib')
+	clf_log_poly = load(poly_path)
 	year='2018'
 	lat = Station_Dict[uscrn_station][0]
 	lon = Station_Dict[uscrn_station][1]
