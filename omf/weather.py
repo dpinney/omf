@@ -16,7 +16,7 @@ from dateutil.parser import parse as parse_dt
 from omf import feeder
 import platform
 import pandas as pd
-
+from tempfile import mkdtemp
 import pysolar
 import pytz
 from joblib import dump, load
@@ -24,9 +24,7 @@ from sklearn.preprocessing import PolynomialFeatures
 import xml.etree.ElementTree as ET
 import xmltodict
 
-
 omfDir = os.path.dirname(os.path.abspath(__file__))
-
 
 def pullAsos(year, station, datatype):
 	'''This model pulls hourly data for a specified year and ASOS station. 
@@ -905,7 +903,6 @@ def get_radiation_data(radiation_type, site, year, out_file=None):
 	'''Get solard or surfrad data. Optional export to csv with out_file option
 		Data is returned in a list w/ ~8760 elements. Each element is a dictionary
 		with ~47 keys value pairs. 
-		 
 	'''
 	allYears = getRadiationYears(radiation_type, site, year)
 	if out_file is not None:
@@ -1269,19 +1266,14 @@ def get_ndfd_data(lat1, lon1, optional_params=['wspd'], begin=str(datetime.now()
 
 
 def _tests():
-	print()
 	print('weather.py tests currently disabled to keep them from sending too many HTTP requests.')
-	from tempfile import mkdtemp
 	tmpdir = mkdtemp()
 	print("Beginning to test weather.py in", tmpdir)
 	#NDFD tests
-	d = get_ndfd_data('39.0000', '-77.0000',['wspd'])
+	# d = get_ndfd_data('39.0000', '-77.0000',['wspd'])
 	print(d)
-
-	
 	#Easy Solar Tests
 	# easy_solar_tests()
-
 	# Testing zipCodeToClimateName (Certain cases fail)
 	# print(zipCodeToClimateName('75001'))
 	# print(zipCodeToClimateName('07030')) # Doesn't work
@@ -1315,7 +1307,6 @@ def _tests():
 	# 	print(data['DNI source'])
 		# plt.plot(data)
 		# plt.show()
-
 	# Testing getRadiationYears (Works, but not used anywhere)
 	# print(get_radiation_data('surfrad', 'Boulder_CO', 2019))
 	# get_radiation_data('solrad', 'bis', 2019)
@@ -1323,10 +1314,10 @@ def _tests():
 	# nsrdbkey = 'rnvNJxNENljf60SBKGxkGVwkXls4IAKs1M8uZl56'
 	# year='2018'
 	# get_nrsdb_data('psm',-99.49218,43.83452,year, nsrdbkey, interval=60, filename=os.path.join('/Users/tuomastalvitie/Documents/GRIP/Diffuse:Direct/Data_Files'))
-# # , 'psm_'+year+'.csv'))
-# 	# Test for charlottesville
-# 	# get_nrsdb_data('psm',-78.4532,38.0086,year, nsrdbkey, interval=60, filename=os.path.join('/Users/tuomastalvitie/Documents/GRIP/Diffuse:Direct/solarIrradiencePredictor/Raw_Data/Charlottesville/', 'RAW_psm_VA_Charlottesville'+year+'.csv')) 
-# 	#Test For Austin, TX
+	# # , 'psm_'+year+'.csv'))
+	# 	# Test for charlottesville
+	# 	# get_nrsdb_data('psm',-78.4532,38.0086,year, nsrdbkey, interval=60, filename=os.path.join('/Users/tuomastalvitie/Documents/GRIP/Diffuse:Direct/solarIrradiencePredictor/Raw_Data/Charlottesville/', 'RAW_psm_VA_Charlottesville'+year+'.csv')) 
+	# 	#Test For Austin, TX
 	# d=get_nrsdb_data('psm',90.0,-30.00,'2018', nsrdbkey, interval=60)
 	# print(d)
 	# d=get_nrsdb_data('psm',-98.024098,30.581736,'2018', nsrdbkey, interval=60)
