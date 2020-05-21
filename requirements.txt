@@ -35,5 +35,6 @@ maxminddb
 maxminddb-geolite2
 pysolar
 xmltodict
+joblib
 #fbprophet
 #tensorflow
