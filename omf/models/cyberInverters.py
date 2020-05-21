@@ -234,7 +234,7 @@ def work(modelDir, inputDict):
 		
 		#convert "Consumption"."Power"
 		# HACK! Units are actually kW. Needs to be fixed in pyCigar.
-		outData["Consumption"]["Power"] = [1000.0 * x for x in pycigarJson["Consumption"]["Power Substation (W)"]]
+		outData["Consumption"]["Power"] = pycigarJson["Consumption"]["Power Substation (W)"]
 
 		#convert "Consumption"."Losses"
 		outData["Consumption"]["Losses"] = pycigarJson["Consumption"]["Losses Total (W)"]
