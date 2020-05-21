@@ -192,19 +192,34 @@
 							document.getElementById("surfradSite").disabled = false;
 
 						}
-						else{
-							document.getElementById("stationASOS").disabled = false;
-							document.getElementById("stationUSCRN").disabled = false;
+						else if (source == 'ndfd'){
+							document.getElementById("stationASOS").disabled = true;
+							document.getElementById("stationUSCRN").disabled = true;
 							document.getElementById("LatInput").disabled = false;
 							document.getElementById("LonInput").disabled = false;
-							document.getElementById("weatherParameterASOS").disabled = false;
-							document.getElementById("weatherParameterUSCRN").disabled = false;
-							document.getElementById("weatherParameterdarkSky").disabled = false;
-							document.getElementById("weatherParameterNRSDB").disabled = false;
-							document.getElementById("weatherParameterTmy3").disabled = false;
-							document.getElementById("easySolarStation").disabled = false;
-							document.getElementById("weatherParameterSurfrad").disabled = false;
-							document.getElementById("surfradSite").disabled = false;
+							document.getElementById("weatherParameterASOS").disabled = true;
+							document.getElementById("weatherParameterUSCRN").disabled = true;
+							document.getElementById("weatherParameterdarkSky").disabled = true;
+							document.getElementById("weatherParameterNRSDB").disabled = true;
+							document.getElementById("weatherParameterTmy3").disabled = true;
+							document.getElementById("easySolarStation").disabled = true;
+							document.getElementById("weatherParameterSurfrad").disabled = true;
+							document.getElementById("surfradSite").disabled = true;
+							document.getElementById("ndfdParam")
+						}
+						else{
+							document.getElementById("stationASOS").disabled = true;
+							document.getElementById("stationUSCRN").disabled = true;
+							document.getElementById("LatInput").disabled = true;
+							document.getElementById("LonInput").disabled = true;
+							document.getElementById("weatherParameterASOS").disabled = true;
+							document.getElementById("weatherParameterUSCRN").disabled = true;
+							document.getElementById("weatherParameterdarkSky").disabled = true;
+							document.getElementById("weatherParameterNRSDB").disabled = true;
+							document.getElementById("weatherParameterTmy3").disabled = true;
+							document.getElementById("easySolarStation").disabled = true;
+							document.getElementById("weatherParameterSurfrad").disabled = true;
+							document.getElementById("surfradSite").disabled = true;
 						}
 					}
 				</script>
@@ -219,6 +234,7 @@
 					<option value="easySolarDhi">DHI Estimation</option>
 					<option value="easySolarDni">DNI Estimation</option>
 					<option value="surfrad">SURFRAD Data</option>
+					<option value="ndfd">NDFD Data</option>
 				</select>
 			</div>
 			 <div class="shortInput">
@@ -767,6 +783,66 @@
 					<option value="windspd">Wind Speed (ms^-1)</option>
 					<option value="winddir">Wind Direction (degrees, clockwise from north)</option>
 					<option value="pressure">Pressure (mb)</option>
+				</select>
+			</div>
+			<div class="shortInput">
+				<label class="tooltip">Weather Parameter - NDFD<span class="classic">Data that should be pulled</span></label>
+				<select id="ndfdParam" name="ndfdParam" required="required">
+					<option value="maxt">Maximum Temperature</option>
+					<option value="mint">Minimum Temperature</option>
+					<option value="temp">3 Hourly Temperature</option>
+					<option value="dew">Dew Point Temperature</option>
+					<option value="appt">Apparent Temperature</option>
+					<option value="pop12">12 Hour Probability of Precipitation</option>
+					<option value="qpf">Liquid Precipitation Amount</option>
+					<option value="snow">Snowfall Amount</option>
+					<option value="sky">Cloud Cover Amount</option>
+					<option value="rh">Relative Humidity</option>
+					<option value="wspd">Wind Speed</option>
+					<option value="wdir">Wind Direction</option>
+					<option value="wx">Weather Zone</option>
+					<option value="icons">Weather Icons</option>
+					<option value="waveh">Wave Height</option>
+					<option value="incw34">Probabilistic Tropical Cyclone Wind Speed >34 Knots (Incremental)</option>
+					<option value="incw50">Probabilistic Tropical Cyclone Wind Speed >50 Knots (Incremental)</option>
+					<option value="incw64">Probabilistic Tropical Cyclone Wind Speed >64 Knots (Incremental)</option>
+					<option value="cumw34">Probabilistic Tropical Cyclone Wind Speed >34 Knots (Cumulative)</option>
+					<option value="cumw50">Probabilistic Tropical Cyclone Wind Speed >50 Knots (Cumulative)</option>	
+					<option value="cumw64">Probabilistic Tropical Cyclone Wind Speed >64 Knots (Cumulative)</option>
+					<option value="wgust">Wind Gust</option>
+					<option value="critfireo">Fire Weather From Wind and Relative Humidity</option>
+					<option value="dryfireo">Fire Weather from Dry Thundrestorms</option>
+					<option value="conhazo">Convective Hazard Outlook</option>
+					<option value="ptornado">Probability of Tornadoes</option>
+					<option value="phail">Probability of Hail</option>
+					<option value="ptstmwinds">Probability of Damaging Thunderstorm Winds</option>
+					<option value="pxtornado">Probability of Extreme Tornadoes</option>
+					<option value="pxhail">Probability of Extreme Hail</option>
+					<option value="pxtstmwinds">Probability of Extreme Thunderstorm Winds</option>
+					<option value="ptotsvrtstm">Probability of Severe Thunderstorms</option>
+					<option value="pxtotsvrtstm">Probability of Extreme Severe Thunderstorms</option>
+					<option value="tmpabv14d">Probability of 8-14 Day Average Temperature Above Normal</option>
+					<option value="tmpblw14d">Probability of 8-14 Day Average Temperature Below Normal</option>
+					<option value="tmpabv30d">Probability of 30 Day Average Temperature Above Normal</option>
+					<option value="tmpblw30d">Probability of 30 Day Average Temperature below Normal</option>
+					<option value="tmpabv90d">Probability of 90 Day Average Temperature Above Normal</option>
+					<option value="tmpblw90d">Probability of 90 Day Average Temperature below Normal</option>
+					<option value="prcpabv14d">Probability of 8-14 day total precipitation above median</option>
+					<option value="prcpblw14d">Probability of 8-14 day total precipitation below median</option>
+					<option value="prcpabv30d">Probability of 30 day precipitation above median</option>
+					<option value="prcpblw30d">Probability of 30 day precipitation below median</option>
+					<option value="prcpabv90d">Probability of 90 day precipitation above median</option>
+					<option value="prcpblw90d">Probability of 90 day precipitation below median</option>
+					<option value="precipa_r">Real-time Mesoscale Analysis Precipitation</option>
+					<option value="sky_r">Real Time Mesoscale Analysis GOES Effective Cloud Amount</option>
+					<option value="td_r">Real-time Mesosscale Analysis Dew Point Temperature</option>
+					<option value="temp_r">Real-time Mesoscale Analysis Temperature</option>
+					<option value="wdir_r">Real-time Mesoscale Analysis Wind Direction</option>
+					<option value="wspd_r">Real-time Mesoscale Analysis Wind Speed</option>
+					<option value="wwa">Watches, Warnings, and Advisories</option>
+					<option value="iceaccum">Ice Accumulation</option>
+					<option value="maxrh">Maximum Relative Humidity</option>
+					<option value="minrh">Minimum Relative Humidity</option>
 				</select>
 			</div>
 

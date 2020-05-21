@@ -5,6 +5,8 @@ from os.path import isdir, join as pJoin
 from omf import weather
 from omf.models import __neoMetaModel__
 from omf.models.__neoMetaModel__ import *
+from datetime import timedelta, datetime
+
 
 # Model metadata:
 modelName, template = __neoMetaModel__.metadata(__file__)
@@ -72,14 +74,60 @@ def work(modelDir, inputDict):
 		data = weather.get_radiation_data('surfrad', site, year)
 		data = list(data[param].values.astype(float))
 		print(data)
-	elif source == 'NDFD':
+	elif source == 'ndfd':
+		print("NDFD fOUND part 1")
 		#This will just just current date for forecast, as it does not support historical forecasts
 		#and future forcasts are limited
 		lat = inputDict['LatInput']
 		lon = inputDict['LonInput']
 		param = [inputDict['ndfdParam']]
-		data = weather.get_ndfd_data(lat, lon, param)
-		pass
+		d = weather.get_ndfd_data(lat, lon, param)
+		#data is now an json-like object. Parse it, and get the data ready for presentation
+		#get timestamps, to unix times
+		timestamps = (d['dwml']['data']['time-layout']['start-valid-time'])
+		timestamps = [datetime.fromisoformat(i).timestamp() for i in timestamps]
+		#get the parameter in question
+		param = list(d['dwml']['data']['parameters'].keys())[-1]
+		#get the values for that parameter
+		values = d['dwml']['data']['parameters'][param]['value']
+		c = zip(timestamps, values)
+		# print(c)
+		#Date dictionary creation
+		start_year=(datetime.today().strftime("%Y"))
+		start_year = datetime(int(start_year),1,1,0)
+		dateAndDataDict = {}
+		for i in range(8761): #Because ghiData is leneth 8760, one for each hour of a year
+				time = start_year + timedelta(minutes=60*i)
+				tstamp = float(datetime.timestamp(time))
+				# time = time.isoformat()
+				dateAndDataDict[tstamp] = 0
+		#Add in exsisting values
+		for i, j in c:
+			dateAndDataDict[i] = int(j)
+		#Now for filler
+		#for 0 values between readings, fill in last read value. 
+		#All other 0 values leave at zero
+
+		#get ordered values
+		data = list(dateAndDataDict.values())
+		#set left and right boundaries at right positions
+		left = 0
+		right = len(data)-1
+		while data[left] == 0 and left < right:
+				left+=1
+		while data[right] ==0 and right>left:
+			right-=1
+
+		#now for filler
+		last = data[left]
+		for i in range(left,right):
+			if data[i] != 0:
+				last = int(data[i])
+			else:
+				data[i] = last
+
+
+
 	# station = inputDict['stationASOS'] if source == 'ASOS' else inputDict['stationUSCRN']
 	# parameter = inputDict['weatherParameterASOS'] if source == 'ASOS' else inputDict['weatherParameterUSCRN']
 	# inputs = [inputDict['year'], station, parameter]
