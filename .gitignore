@@ -46,3 +46,5 @@ omf/scratch/faultLabeledMeterData/*
 !omf/scratch/faultLabeledMeterData/code/
 omf/scratch/disaggDataGeneration/*
 !omf/scratch/disaggDataGeneration/*.py
+__pycache__/
+.vscode/
