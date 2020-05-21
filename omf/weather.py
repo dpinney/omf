@@ -845,6 +845,7 @@ def get_nrsdb_data(data_set, longitude, latitude, year, api_key, utc='true', lea
 	else:
 		#Transform data, and resubmit in friendly format for frontend
 		data = pd.DataFrame(reader)
+		print(data)
 		colNames = (data.iloc[2][:].values)
 		print(data)
 		data.rename(columns={key:val for key, val in enumerate(colNames)}, inplace=True)
@@ -1271,7 +1272,7 @@ def _tests():
 	print("Beginning to test weather.py in", tmpdir)
 	#NDFD tests
 	# d = get_ndfd_data('39.0000', '-77.0000',['wspd'])
-	print(d)
+	# print(d)
 	#Easy Solar Tests
 	# easy_solar_tests()
 	# Testing zipCodeToClimateName (Certain cases fail)
@@ -1312,12 +1313,8 @@ def _tests():
 	# get_radiation_data('solrad', 'bis', 2019)
 	# # Testing NSRDB (Works, but not used anywhere)
 	# nsrdbkey = 'rnvNJxNENljf60SBKGxkGVwkXls4IAKs1M8uZl56'
-	# year='2018'
-	# get_nrsdb_data('psm',-99.49218,43.83452,year, nsrdbkey, interval=60, filename=os.path.join('/Users/tuomastalvitie/Documents/GRIP/Diffuse:Direct/Data_Files'))
-	# # , 'psm_'+year+'.csv'))
-	# 	# Test for charlottesville
-	# 	# get_nrsdb_data('psm',-78.4532,38.0086,year, nsrdbkey, interval=60, filename=os.path.join('/Users/tuomastalvitie/Documents/GRIP/Diffuse:Direct/solarIrradiencePredictor/Raw_Data/Charlottesville/', 'RAW_psm_VA_Charlottesville'+year+'.csv')) 
-	# 	#Test For Austin, TX
+	# Test for charlottesville
+	# Test For Austin, TX
 	# d=get_nrsdb_data('psm',90.0,-30.00,'2018', nsrdbkey, interval=60)
 	# print(d)
 	# d=get_nrsdb_data('psm',-98.024098,30.581736,'2018', nsrdbkey, interval=60)
@@ -1327,9 +1324,7 @@ def _tests():
 	# print(type(d))
 	# print(d['GHI'])
 	#Test for Spokane, WA
-	# get_nrsdb_data('psm',-117.52,47.41,year, nsrdbkey, interval=60, filename=os.path.join('/Users/tuomastalvitie/Documents/GRIP/Diffuse:Direct/solarIrradiencePredictor/Raw_Data/Spokane_WA/', 'RAW_psm_WA_Spokane'+year+'.csv'))
 	#Test for Everglades FL
-	# get_nrsdb_data('psm',-81.119239,26.004157,year, nsrdbkey, interval=60, filename=os.path.join('/Users/tuomastalvitie/Documents/GRIP/Diffuse:Direct/solarIrradiencePredictor/Raw_Data/Everglades_FL/', 'RAW_psm_FL_Everglades'+year+'.csv'))
 	# get_nrsdb_data('psm',-99.49218,43.83452,'2016', nsrdbkey, interval=60, filename=os.path.join(tmpdir, 'psm.csv'))
 	# print(get_nrsdb_data('psm',-99.49218,43.83452,'2017', nsrdbkey, interval=60))
 	# get_nrsdb_data('psm_tmy',-99.49218,43.83452,'tdy-2018', nsrdbkey, filename='psm_tmy.csv')
