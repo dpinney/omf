@@ -42,21 +42,19 @@ elif platform.system() == "Linux" and platform.linux_distribution()[0]=="CentOS 
 	pipInstallInOrder("pip3")
 	os.system("pip3 install --ignore-installed six")
 	os.system("python3 setup.py develop")
-elif platform.system()=="Windows":
+elif platform.system()=='Windows':
 	# Choco install.
 	# chocoString = @"%SystemRoot%\System32\WindowsPowerShell\v1.0\powershell.exe" -NoProfile -InputFormat None -ExecutionPolicy Bypass -Command "iex ((New-Object System.Net.WebClient).DownloadString('https://chocolatey.org/install.ps1'))" && SET "PATH=%PATH%;%ALLUSERSPROFILE%\chocolatey\bin"
 	# os.system(chocoString)
 	# Check for right Python version.
-	major = str(sys.version_info.major)
-	minor = str(sys.version_info.minor)
-	if not(major=='3' and minor=='6'):
-		print('Python v' + major + '.' + minor + ' detected. Requires v3.6.8. We will attempt to continue installing choco.')
+	pybin = os.popen('where python').read()
+	goodbin = 'C:\\Python36\\python.exe'
+	if pybin != goodbin:
+		print('Non-standard python install detected. We will attempt to continue with choco.')
 		os.system("choco install -y python --version 3.6.8")
 	# Hack to create a python3 binary on the path.
-	pypath = sys.executable
-	pydir, pybin = os.path.split(pypath)
-	os.system("copy " + pypath + ' ' + pydir + "\\python3.exe")
-	# Update pip to remove warnings.
+	os.system("copy C:\\Python36\\python.exe C:\\Python36\\python3.exe")
+	# Update pip to remove warnings
 	os.system("python3 -m pip install --upgrade pip")
 	# Install choco packages.
 	os.system("choco install -y wget")
@@ -84,7 +82,8 @@ elif platform.system()=="Windows":
 elif platform.system()=="Darwin": # MacOS
 	# Install homebrew
 	brew_exit_code = os.system("brew --version")
-	os.system('/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install.sh)"')
+	if brew_exit_code != 0:
+		os.system('/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install.sh)"')
 	os.system("HOMEBREW_NO_AUTO_UPDATE=1 brew install wget ffmpeg git graphviz octave mdbtools") # Set no-update to keep homebrew from blowing away python3.
 	os.system("wget -O gridlabd.dmg --no-check-certificate https://sourceforge.net/projects/gridlab-d/files/gridlab-d/Candidate%20release/gridlabd_4.0.0.dmg")
 	os.system("sudo hdiutil attach gridlabd.dmg")
