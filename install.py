@@ -4,7 +4,8 @@ def pipInstallInOrder(pipCommandString):
 	''' This shouldn't be required, but pip doesn't resolve dependencies correctly unless we do this.'''
 	with open("requirements.txt","r") as f:
 		for line in f:
-			os.system(pipCommandString + " install " + line)
+			if not line.startswith('#'):
+				os.system(pipCommandString + " install " + line)
 	# Removes pip log files.
 	os.system("rm \\=*")
 
