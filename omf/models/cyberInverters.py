@@ -37,17 +37,17 @@ def work(modelDir, inputDict):
 	else:
 		trainAgentValue = False
 
-	# create simLengthValue to represent number of steps in simulation - will be manipulated by number of rows in load solar data csv file
-	simLengthValue = 0
+	# create solarPVLengthValue to represent number of steps in simulation - will be manipulated by number of rows in load solar data csv file
+	solarPVLengthValue = 0
 
 	#create startStep to represent which step pyCigar should start on - default = 100
 	startStep = 100
 
 	#None check for simulation length
-	# if inputDict.get("simLength", "None") == "None":
-	# 	simLengthValue = None
-	# else:
-	# 	simLengthValue = int(simLengthValue)
+	if inputDict.get("simLength", "None") == "None":
+		simLengthValue = None
+	else:
+		simLengthValue = int(inputDict['simLength'])
 
 	#None check for simulation length units
 	if inputDict.get("simLengthUnits", "None") == "None":
@@ -105,7 +105,7 @@ def work(modelDir, inputDict):
 			# if (rowCount-1)*misc_dict["load file timestep"] != simLengthValue:
 			# 	errorMessage = "Load and PV Output File does not match simulation length specified by user"
 			# 	raise Exception(errorMessage)
-			simLengthValue = rowCount-1
+			solarPVLengthValue = rowCount-1
 		except:
 			#TODO change to an appropriate warning message
 			errorMessage = "CSV file is incorrect format. Please see valid format definition at <a target='_blank' href='https://github.com/dpinney/omf/wiki/Models-~-demandResponse#walkthrough'>OMF Wiki demandResponse</a>"
@@ -125,14 +125,25 @@ def work(modelDir, inputDict):
 			else:
 				defenseVariableFile.write(inputDict['defenseVariable'])
 
-		return simLengthValue
+		return solarPVLengthValue
 
-	simLengthValue = convertInputs()
+	solarPVLengthValue = convertInputs()
 
-	#simLengthAdjusted accounts for the offset by startStep
-	simLengthAdjusted = simLengthValue - startStep
-	#hard-coding simLengthAdjusted for testing purposes 
-	simLengthAdjusted = 750
+	#create simLengthAdjusted to represent simLength accounting for start step offset
+	simLengthAdjusted = 0
+
+	if simLengthValue != None:
+		if simLengthValue + 100 > solarPVLengthValue:
+			#raise error message that simLengthValue is too large for given Load Solar csv and given timestep (set to 100)
+			simLengthAdjusted = solarPVLengthValue - startStep
+		else:
+			#simLengthValue is equal to the value entered by the user
+			simLengthAdjusted = simLengthValue
+	else: 
+		#simLengthAdjusted accounts for the offset by startStep
+		simLengthAdjusted = solarPVLengthValue - startStep
+	# #hard-coding simLengthAdjusted for testing purposes 
+	# simLengthAdjusted = 750
 
 	outData = {}
 	# Std Err and Std Out
@@ -142,6 +153,7 @@ def work(modelDir, inputDict):
 	# Create list of timestamps for simulation steps
 	outData['timeStamps'] = []
 	start_time = dt_parser.isoparse(simStartDateTimeValue)
+	start_time = start_time + timedelta(seconds=startStep)
 	for single_datetime in (start_time + timedelta(seconds=n) for n in range(simLengthAdjusted)):
 		single_datetime_str = single_datetime.strftime("%Y-%m-%d %H:%M:%S%z") 
 		outData['timeStamps'].append(single_datetime_str)
@@ -422,6 +434,7 @@ def new(modelDir):
 
 	defaultInputs = {
 		"simStartDate": "2019-07-01T00:00:00Z",
+		"simLength": "750",
 		"simLengthUnits": "seconds",
 		# "feederName1": "ieee37fixed",
 		"feederName1": "Olin Barre GH EOL Solar AVolts CapReg",
