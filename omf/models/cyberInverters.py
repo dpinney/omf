@@ -47,7 +47,7 @@ def work(modelDir, inputDict):
 	if inputDict.get("simLength", "None") == "None":
 		simLengthValue = None
 	else:
-		simLengthValue = int(simLengthValue)
+		simLengthValue = int(inputDict['simLength'])
 
 	#None check for simulation length units
 	if inputDict.get("simLengthUnits", "None") == "None":
@@ -434,6 +434,7 @@ def new(modelDir):
 
 	defaultInputs = {
 		"simStartDate": "2019-07-01T00:00:00Z",
+		"simLength": "750",
 		"simLengthUnits": "seconds",
 		# "feederName1": "ieee37fixed",
 		"feederName1": "Olin Barre GH EOL Solar AVolts CapReg",
