@@ -92,10 +92,10 @@
 				<label>Simulation Start Date (YYYY-MM-DDTHH:mm:SSZ)</label>
 				<input type="text" id="simStartDate" name="simStartDate" required="required" pattern="^\d\d\d\d-\d\d-\d\dT\d\d:\d\d:\d\d(Z|(\+|-)\d\d:\d\d)$"/>
 			</div>
-			<div class="shortInput">
-				<label class="tooltip">Simulation Length<span class="classic">Number of time steps in the installation. If left blank, Simulation Length will be set to step through each row in Load and PV Output file. Warning: The simulation needs 100 time steps to warm up, so Simulation Length must be less than or equal to the number of rows in your load and solar data file minus 100</span></label>
-				<input type="number" id="simLength" name="simLength" min ="3" max = "9999"/>
-			</div>
+			<!-- <div class="shortInput">
+				<label class="tooltip">Simulation Length<span class="classic">Number of time steps in the installation. The current range of acceptable values is 3 - 9999.</span></label>
+				<input type="number" id="simLength" name="simLength" required="required" min ="3" max = "9999"/>
+			</div> -->
 			<div class="shortInput">
 				<label>Simulation Length Units</label>
 				<select id="simLengthUnits" name="simLengthUnits">
@@ -113,7 +113,7 @@
 				<input type="text" id="feederName1" name="feederName1">
 			</div>
 			<div class="shortInput">
-				<label class="tooltip">Load and PV Output<span class="classic">Import the .csv file representing the load and PV output.</span></label>
+				<label class="tooltip">Load and Storage<span class="classic">Import the .csv file representing the load and ESS output.</span></label>
 				<input id="loadPVFile" type="file" style="display:none" onchange="handle_files(this.files,'loadPV','fileName1')">
 				<input id="loadPV" name="loadPV" type="hidden">
 				<div>

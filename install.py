@@ -4,7 +4,8 @@ def pipInstallInOrder(pipCommandString):
 	''' This shouldn't be required, but pip doesn't resolve dependencies correctly unless we do this.'''
 	with open("requirements.txt","r") as f:
 		for line in f:
-			os.system(pipCommandString + " install " + line)
+			if not line.startswith('#'):
+				os.system(pipCommandString + " install " + line)
 	# Removes pip log files.
 	os.system("rm \\=*")
 
@@ -78,12 +79,9 @@ elif platform.system()=='Windows':
 	os.system("python3.exe -m pip install omf\\static\\pygraphviz-1.5-cp36-cp36m-win_amd64.whl")
 	# Finish up installation with pip.
 	pipInstallInOrder("python3 -m pip")
-	os.system("python3 -m setup.py develop")
+	os.system("python3 setup.py develop")
 elif platform.system()=="Darwin": # MacOS
 	# Install homebrew
-	brew_exit_code = os.system("brew --version")
-	if brew_exit_code != 0:
-		os.system('/usr/bin/ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"')
 	os.system("HOMEBREW_NO_AUTO_UPDATE=1 brew install wget ffmpeg git graphviz octave mdbtools") # Set no-update to keep homebrew from blowing away python3.
 	os.system("wget -O gridlabd.dmg --no-check-certificate https://sourceforge.net/projects/gridlab-d/files/gridlab-d/Candidate%20release/gridlabd_4.0.0.dmg")
 	os.system("sudo hdiutil attach gridlabd.dmg")

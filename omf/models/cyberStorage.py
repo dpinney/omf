@@ -15,12 +15,11 @@ from omf.models.__neoMetaModel__ import *
 
 # Model metadata:
 modelName, template = __neoMetaModel__.metadata(__file__)
-tooltip = "The cyberInverters model shows the impacts of inverter hacks on a feeder including system voltages, regulator actions, and capacitor responses."
+tooltip = "The cyberStroage model shows the impacts and mitigation options for cyberattacks on energy storage systems."
 hidden = False
 
 def work(modelDir, inputDict):
-	''' Run the model in its directory. WARNING: GRIDLAB CAN TAKE HOURS TO COMPLETE. '''
-	# feederName = inputDict["feederName1"]
+	''' Run the model in its directory.'''
 	feederName = [x for x in os.listdir(modelDir) if x.endswith('.omd')][0][:-4]
 	inputDict["feederName1"] = feederName
 	zipCode = "59001" #TODO get zip code from the PV and Load input file
@@ -37,17 +36,17 @@ def work(modelDir, inputDict):
 	else:
 		trainAgentValue = False
 
-	# create solarPVLengthValue to represent number of steps in simulation - will be manipulated by number of rows in load solar data csv file
-	solarPVLengthValue = 0
+	# create simLengthValue to represent number of steps in simulation - will be manipulated by number of rows in load solar data csv file
+	simLengthValue = 0
 
 	#create startStep to represent which step pyCigar should start on - default = 100
 	startStep = 100
 
 	#None check for simulation length
-	if inputDict.get("simLength", "None") == "None":
-		simLengthValue = None
-	else:
-		simLengthValue = int(simLengthValue)
+	# if inputDict.get("simLength", "None") == "None":
+	# 	simLengthValue = None
+	# else:
+	# 	simLengthValue = int(simLengthValue)
 
 	#None check for simulation length units
 	if inputDict.get("simLengthUnits", "None") == "None":
@@ -105,7 +104,7 @@ def work(modelDir, inputDict):
 			# if (rowCount-1)*misc_dict["load file timestep"] != simLengthValue:
 			# 	errorMessage = "Load and PV Output File does not match simulation length specified by user"
 			# 	raise Exception(errorMessage)
-			solarPVLengthValue = rowCount-1
+			simLengthValue = rowCount-1
 		except:
 			#TODO change to an appropriate warning message
 			errorMessage = "CSV file is incorrect format. Please see valid format definition at <a target='_blank' href='https://github.com/dpinney/omf/wiki/Models-~-demandResponse#walkthrough'>OMF Wiki demandResponse</a>"
@@ -125,25 +124,14 @@ def work(modelDir, inputDict):
 			else:
 				defenseVariableFile.write(inputDict['defenseVariable'])
 
-		return solarPVLengthValue
+		return simLengthValue
 
-	solarPVLengthValue = convertInputs()
+	simLengthValue = convertInputs()
 
-	#create simLengthAdjusted to represent simLength accounting for start step offset
-	simLengthAdjusted = 0
-
-	if simLengthValue != None:
-		if simLengthValue + 100 > solarPVLengthValue:
-			#raise error message that simLengthValue is too large for given Load Solar csv and given timestep (set to 100)
-			simLengthAdjusted = solarPVLengthValue - startStep
-		else:
-			#simLengthValue is equal to the value entered by the user
-			simLengthAdjusted = simLengthValue
-	else: 
-		#simLengthAdjusted accounts for the offset by startStep
-		simLengthAdjusted = solarPVLengthValue - startStep
-	# #hard-coding simLengthAdjusted for testing purposes 
-	# simLengthAdjusted = 750
+	#simLengthAdjusted accounts for the offset by startStep
+	simLengthAdjusted = simLengthValue - startStep
+	#hard-coding simLengthAdjusted for testing purposes 
+	simLengthAdjusted = 750
 
 	outData = {}
 	# Std Err and Std Out
@@ -153,7 +141,6 @@ def work(modelDir, inputDict):
 	# Create list of timestamps for simulation steps
 	outData['timeStamps'] = []
 	start_time = dt_parser.isoparse(simStartDateTimeValue)
-	start_time = start_time + timedelta(seconds=startStep)
 	for single_datetime in (start_time + timedelta(seconds=n) for n in range(simLengthAdjusted)):
 		single_datetime_str = single_datetime.strftime("%Y-%m-%d %H:%M:%S%z") 
 		outData['timeStamps'].append(single_datetime_str)
