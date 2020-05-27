@@ -4,7 +4,7 @@ Source options include NOAA's USCRN, Iowa State University's METAR, and Weather 
 '''
 
 
-import os, csv, re, json
+import os, csv, re, json, sys
 from math import sqrt, exp, cos, radians
 import numpy as np
 from os.path import join as pJoin
@@ -51,7 +51,7 @@ def pullAsos(year, station, datatype):
 			verifiedData[int(deltatime.total_seconds()/3600)] = float(r[2])	
 	return verifiedData
 
-
+#is this used?
 def pullAsosStations(filePath):
 	"""Build a station list for the ASOS data. Put them in filePath with their details. """
 	stations = []
@@ -120,8 +120,12 @@ def pullDarksky(year, lat, lon, datatype, units='si', api_key=os.environ.get('DA
 	times = list(date_range('{}-01-01'.format(year), '{}-12-31'.format(year)))
 	#time.isoformat() has no tzinfo in this case, so darksky parses it as local time
 	urls = ['https://api.darksky.net/forecast/%s/%s,%s?exclude=daily&units=%s' % ( api_key, coords, time.isoformat(), units ) for time in times]
-	data = [requests.get(url).json() for url in urls] # all requests return 400 and "Poorly formatted request" probably because I don't have the API key
-	# print(data)
+	data = [requests.get(url) for url in urls]
+	# if [i.status_code == 400 for i in data]:
+	# 	print(data[0].status_code)
+	# 	raise Exception
+	data = [i.json() for i in data]
+	print(data)
 	#a fun little annoyance: let's de-unicode those strings
 	#def ascii_me(obj):
 	#	if isinstance(obj, unicode):
@@ -724,7 +728,7 @@ class USCRNDataType(object):
 
 
 def tmy3_pull(usafn_number, out_file=None):
-	print(usafn_number)
+	print("usafm mumber is ", usafn_number)
 	'''Pull TMY3 data based on usafn. Use nearest_tmy3_station function to get a close by tmy3 station based on latitude/longitude coordinates '''
 	url = 'https://rredc.nrel.gov/solar/old_data/nsrdb/1991-2005/data/tmy3'
 	file_name = '{}TYA.CSV'.format(usafn_number)
@@ -835,6 +839,10 @@ def get_nrsdb_data(data_set, longitude, latitude, year, api_key, utc='true', lea
 	print("NRSDB found")
 	nrsdb_factory = NSRDB(data_set, longitude, latitude, year, api_key, utc=utc, leap_day=leap_day, email=email, interval=interval)
 	data = nrsdb_factory.execute_query()
+	if data.status_code != 200:
+		# This means something went wrong.
+		print(data.text)
+		raise Exception(data.text)
 	csv_lines = [line.decode() for line in data.iter_lines()]
 	reader = csv.reader(csv_lines, delimiter=',')
 	if filename is not None:
@@ -845,7 +853,6 @@ def get_nrsdb_data(data_set, longitude, latitude, year, api_key, utc='true', lea
 	else:
 		#Transform data, and resubmit in friendly format for frontend
 		data = pd.DataFrame(reader)
-		print(data)
 		colNames = (data.iloc[2][:].values)
 		print(data)
 		data.rename(columns={key:val for key, val in enumerate(colNames)}, inplace=True)
@@ -1099,7 +1106,12 @@ def _getDarkSkyCloudCoverForYear(year='2020', lat=30.581736, lon=-98.024098, key
 		time = times.pop(0)
 		print(time)
 		url = 'https://api.darksky.net/forecast/%s/%s,%s?exclude=daily,alerts,minutely,currently&units=%s' % (key, coords, time.isoformat(), units ) 
-		res = requests.get(url).json()
+		res = requests.get(url)
+		if res.status_code != 200:
+			print(res.status_code)
+			print(res.text)
+			raise Exception
+		res = res.json()
 		try:
 			dayData = res['hourly']['data']
 		except KeyError:
@@ -1270,10 +1282,72 @@ def _tests():
 	print('weather.py tests currently disabled to keep them from sending too many HTTP requests.')
 	tmpdir = mkdtemp()
 	print("Beginning to test weather.py in", tmpdir)
-	#NDFD tests
-	# d = get_ndfd_data('39.0000', '-77.0000',['wspd'])
-	# print(d)
-	#Easy Solar Tests
+	# # # Testing ASOS (Works)
+	# try:
+	# 	# res = pullAsos('2015','LWD', 'presentwx') # Does not write to a file by itself
+	# 	# res = pullAsos('1900','LWD', 'dwpc') # Does not write to a file by itself
+	# 	print(res)
+	# 	if len(res) > 8760:
+	# 		print("ASOS data corrupted")
+	# 		raise Exception
+	# except:
+	# 	e = sys.exc_info()[0]
+	# 	print(e)
+
+	# # # print('ASOS (Iowa) data pulled to ' + tmpdir)
+	# # # pullAsosStations(os.path.join(tmpdir, 'asosStationTable.csv'))
+
+
+	# # Testing USCRN (Works)
+	# # print('USCRN (NOAA) data pulled to ' + tmpdir)
+	# data = pullUscrn('2001', 'TX_Austin_33_NW', "zz") # Does not write to a file by itself
+	# print(data)
+	# try:
+	# 	# data = pullUscrn('2017', 'KY_Versailles_3_NNW', "IRRADIENCE_DIFFUSE") # Does not write to a file by itself
+	# except:
+	# 	e = sys.exc_info()[0]
+	# 	print(e)
+
+#	Testing DarkSky (Works as long as you have an API key)
+	# d=(pullDarksky(2018, 36.64, -93.30, 'temperature', api_key= '31dac4830187f562147a946529516a8d', path=tmpdir))
+	# try:
+	# 	d=(pullDarksky(1900, 36.64, -93.30, 'temperature', api_key= '31dac4830187f562147a946529516a8d', path=tmpdir))
+	# 	print(d)
+	# except:
+	# 	e = sys.exc_info()[0]
+	# 	print(e)
+
+# #	#Testing NSRDB (Works, but not used anywhere)
+	# nsrdbkey = 'rnvNJxNENljf60SBKGxkGVwkXls4IAKs1M8uZl56'
+	# try:
+	# #Test For Austin, TX
+	# 	# d=get_nrsdb_data('psm',90.0,-30.00,'2018', nsrdbkey, interval=60)
+	# 	d=get_nrsdb_data('psm',-98.024098,30.581736,'2009', 'nsrdbkey', interval=60)
+	# 	print(d)
+	# except:
+	# 	e = sys.exc_info()[0]
+	# 	print(e)
+
+#	Testing tmy3 (Works)
+	# if platform.system() != 'Windows':
+	# 	try:
+	# 		data=tmy3_pull(nearest_tmy3_station(31.00, -90.00))
+	# 		print(data)
+	# 		if len(data) == 0:
+	# 			print("too early a year")
+	# 			raise Exception
+	# 	except:
+	# 		e = sys.exc_info()[0]
+	# 		print(e)
+
+#	NDFD tests
+	# try:
+	# 	d = get_ndfd_data('39.0000', '-77000.0000',['wspd'])
+	# 	print(d)
+	# except:
+	# 	e = sys.exc_info()[0]
+	# 	print(e)
+#	Easy Solar Tests
 	# easy_solar_tests()
 	# Testing zipCodeToClimateName (Certain cases fail)
 	# print(zipCodeToClimateName('75001'))
@@ -1281,56 +1355,15 @@ def _tests():
 	# print(zipCodeToClimateName('64735'))
 	# assert ('MO-KANSAS_CITY', 30) == zipCodeToClimateName('64735') # Assertion Fails
 	# print(airportCodeToLatLon("IAD"))
-	# # Testing USCRN (Works)
-	# print('USCRN (NOAA) data pulled to ' + tmpdir)
-	# data = pullUscrn('2017', 'KY_Versailles_3_NNW', "IRRADIENCE_DIFFUSE") # Does not write to a file by itself
-	# data = pullUscrn('2000', 'TX_Austin_33_NW', "SOLARAD") # Does not write to a file by itself
-	# print(data)
-	# import matplotlib.pyplot as plt
-	# plt.plot(data)
-	# plt.show()
-	# # Testing ASOS (Works)
-	# print(pullAsos('2017','CHO', 'tmpc')) # Does not write to a file by itself
-	# print('ASOS (Iowa) data pulled to ' + tmpdir)
-	# pullAsosStations(os.path.join(tmpdir, 'asosStationTable.csv'))
-	# Testing DarkSky (Works as long as you have an API key)
-	# d=(pullDarksky(2018, 36.64, -93.30, 'temperature', api_key= '31dac4830187f562147a946529516a8d', path=tmpdir))
-	# print(d)
-	# print(len(d))
-	# print(type(d))
-	# print('Darksky data pulled to ' + tmpdir)
-	# Testing tmy3 (Works)
-	# if platform.system() != 'Windows':
-	# 	data=tmy3_pull(nearest_tmy3_station(41.00, -78.00))
-	# 	print(data)
-	# 	print(len(data))
-	# 	print(data.columns)
-	# 	print(data['DNI source'])
-		# plt.plot(data)
-		# plt.show()
-	# Testing getRadiationYears (Works, but not used anywhere)
-	# print(get_radiation_data('surfrad', 'Boulder_CO', 2019))
-	# get_radiation_data('solrad', 'bis', 2019)
-	# # Testing NSRDB (Works, but not used anywhere)
-	# nsrdbkey = 'rnvNJxNENljf60SBKGxkGVwkXls4IAKs1M8uZl56'
-	# Test for charlottesville
-	# Test For Austin, TX
-	# d=get_nrsdb_data('psm',90.0,-30.00,'2018', nsrdbkey, interval=60)
-	# print(d)
-	# d=get_nrsdb_data('psm',-98.024098,30.581736,'2018', nsrdbkey, interval=60)
-	# print(d)
-	# print([i for i in d['GHI'].values])
-	# print(len(d))
-	# print(type(d))
-	# print(d['GHI'])
-	#Test for Spokane, WA
-	#Test for Everglades FL
-	# get_nrsdb_data('psm',-99.49218,43.83452,'2016', nsrdbkey, interval=60, filename=os.path.join(tmpdir, 'psm.csv'))
-	# print(get_nrsdb_data('psm',-99.49218,43.83452,'2017', nsrdbkey, interval=60))
-	# get_nrsdb_data('psm_tmy',-99.49218,43.83452,'tdy-2018', nsrdbkey, filename='psm_tmy.csv')
-	# print(get_nrsdb_data('psm_tmy',-99.49218,43.83452,'tdy-2017', nsrdbkey))
-	# get_nrsdb_data('suny',77.1679,22.1059,'2014', nsrdbkey, filename='suny.csv')
-	# get_nrsdb_data('spectral_tmy',77.08007,20.79720,'tmy', nsrdbkey, filename='spectral_tmy.csv')
+
+#	Testing getRadiationYears (Works, but not used anywhere)
+	# try:
+	# 	print(get_radiation_data('surfrad', 'Boulder_CO', 2019))
+	# 	get_radiation_data('solrad', 'bis', 2019)
+	# except:
+	# 	e = sys.exc_info()[0]
+	# 	print(e)
+	
 
 if __name__ == "__main__":
 	_tests()

@@ -64,6 +64,10 @@ def work(modelDir, inputDict):
 		data = weather.tmy3_pull(weather.nearest_tmy3_station(lat, lon))
 		#Now get data for the year in question
 		data = data.loc[data['year']==year]
+		print(data)
+		if len(data) == 0:
+			print("Year needs to be before 2005")
+			raise Exception("Year needs to be before 2005")
 		#Extract param from data, convert to int, and pass in values not pandas series
 		data = list(data[param].astype(float).values)
 	elif source == 'surfrad':
@@ -75,7 +79,6 @@ def work(modelDir, inputDict):
 		data = list(data[param].values.astype(float))
 		print(data)
 	elif source == 'ndfd':
-		print("NDFD fOUND part 1")
 		#This will just just current date for forecast, as it does not support historical forecasts
 		#and future forcasts are limited
 		lat = inputDict['LatInput']
