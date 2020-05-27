@@ -1347,6 +1347,7 @@ def _tests():
 	# except:
 	# 	e = sys.exc_info()[0]
 	# 	print(e)
+	
 #	Easy Solar Tests
 	# easy_solar_tests()
 	# Testing zipCodeToClimateName (Certain cases fail)
