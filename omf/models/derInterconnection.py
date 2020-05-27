@@ -642,7 +642,7 @@ def drawPlot(tree, nodeDict=None, edgeDict=None, edgeLabsDict=None, displayLabs=
 		cleanG.add_nodes_from(fGraph)
 		positions = graphviz_layout(cleanG, prog='neato')
 	else:
-		positions = {n:fGraph.nodes[n].get('pos',(0,0)) for n in fGraph}
+		positions = {n:fGraph.nodes[n].get('pos',(0,0))[::-1] for n in fGraph}
 	
 	#create custom colormap
 	if customColormap:
