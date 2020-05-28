@@ -38869,7 +38869,7 @@
             "longitude": 620.7180398965284, 
             "time_delay": "300.0", 
             "latitude": 470.93253526327317, 
-            "nominal_voltage": "2401.7771", 
+            "nominal_voltage": "7200.00", 
             "voltage_set_low": "2340.0", 
             "switchC": "CLOSED", 
             "control_level": "INDIVIDUAL", 
