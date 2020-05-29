@@ -121,9 +121,8 @@ def pullDarksky(year, lat, lon, datatype, units='si', api_key=os.environ.get('DA
 	#time.isoformat() has no tzinfo in this case, so darksky parses it as local time
 	urls = ['https://api.darksky.net/forecast/%s/%s,%s?exclude=daily&units=%s' % ( api_key, coords, time.isoformat(), units ) for time in times]
 	data = [requests.get(url) for url in urls]
-	# if [i.status_code == 400 for i in data]:
-	# 	print(data[0].status_code)
-	# 	raise Exception
+	if any(i.status_code != 200 for i in data):
+		raise ApiError(data[0].json()['error'], status_code=400)
 	data = [i.json() for i in data]
 	print(data)
 	#a fun little annoyance: let's de-unicode those strings
@@ -734,6 +733,8 @@ def tmy3_pull(usafn_number, out_file=None):
 	file_name = '{}TYA.CSV'.format(usafn_number)
 	file_path = os.path.join(url, file_name)
 	data = requests.get(file_path)
+	if data.status_code != 200:
+		raise ApiError("File not found", data.status_code)
 	if out_file is not None:
 		csv_lines = [line.decode() for line in data.iter_lines()]
 		reader = csv.reader(csv_lines, delimiter=',')
@@ -841,8 +842,7 @@ def get_nrsdb_data(data_set, longitude, latitude, year, api_key, utc='true', lea
 	data = nrsdb_factory.execute_query()
 	if data.status_code != 200:
 		# This means something went wrong.
-		print(data.text)
-		raise Exception(data.text)
+		raise ApiError(data.text, status_code=data.status_code)
 	csv_lines = [line.decode() for line in data.iter_lines()]
 	reader = csv.reader(csv_lines, delimiter=',')
 	if filename is not None:
@@ -1108,9 +1108,7 @@ def _getDarkSkyCloudCoverForYear(year='2020', lat=30.581736, lon=-98.024098, key
 		url = 'https://api.darksky.net/forecast/%s/%s,%s?exclude=daily,alerts,minutely,currently&units=%s' % (key, coords, time.isoformat(), units ) 
 		res = requests.get(url)
 		if res.status_code != 200:
-			print(res.status_code)
-			print(res.text)
-			raise Exception
+			raise ApiError(res.json()['error'], status_code=res.status_code)
 		res = res.json()
 		try:
 			dayData = res['hourly']['data']
@@ -1265,7 +1263,7 @@ def _run_ndfd_request(q):
 	if resp.status_code != 200:
 		# This means something went wrong.
 		print(resp.status_code)
-		raise ApiError('GET /tasks/ {}'.format(resp.status_code))
+		raise ApiError(resp.text, resp.status_code)
 	return resp
 
 
@@ -1275,6 +1273,24 @@ def get_ndfd_data(lat1, lon1, optional_params=['wspd'], begin=str(datetime.now()
 	res = _run_ndfd_request(query)
 	data = _generalParseXml(res)
 	return data
+
+
+class ApiError(Exception):
+
+	def __init__(self, message, status_code=None, payload=None):
+		Exception.__init__(self)
+		self.message = message
+		if status_code is not None:
+			self.status_code = status_code
+		self.payload = payload
+		print(self.message)
+
+	def to_dict(self):
+		rv = dict(self.payload or ())
+		rv['message'] = self.message
+		print(rv['message'])
+		return rv
+
 
 
 
@@ -1299,7 +1315,7 @@ def _tests():
 
 
 	# # Testing USCRN (Works)
-	# # print('USCRN (NOAA) data pulled to ' + tmpdir)
+	# print('USCRN (NOAA) data pulled to ' + tmpdir)
 	# data = pullUscrn('2001', 'TX_Austin_33_NW', "zz") # Does not write to a file by itself
 	# print(data)
 	# try:
@@ -1309,9 +1325,9 @@ def _tests():
 	# 	print(e)
 
 #	Testing DarkSky (Works as long as you have an API key)
-	# d=(pullDarksky(2018, 36.64, -93.30, 'temperature', api_key= '31dac4830187f562147a946529516a8d', path=tmpdir))
+	# d=(pullDarksky(1900, 36.64, -93.30, 'temperature', api_key= '31dac4830187f562147a946529516a8d', path=tmpdir))
 	# try:
-	# 	d=(pullDarksky(1900, 36.64, -93.30, 'temperature', api_key= '31dac4830187f562147a946529516a8d', path=tmpdir))
+	# 	d=(pullDarksky(2000, 36.64, -93.30, 'temperature', api_key= '31dac4830187f562147a946529516a8d', path=tmpdir))
 	# 	print(d)
 	# except:
 	# 	e = sys.exc_info()[0]
@@ -1322,7 +1338,7 @@ def _tests():
 	# try:
 	# #Test For Austin, TX
 	# 	# d=get_nrsdb_data('psm',90.0,-30.00,'2018', nsrdbkey, interval=60)
-	# 	d=get_nrsdb_data('psm',-98.024098,30.581736,'2009', 'nsrdbkey', interval=60)
+	# 	d=get_nrsdb_data('psm',-98.024098,30.581736,'1900', 'nsrdbkey', interval=60)
 	# 	print(d)
 	# except:
 	# 	e = sys.exc_info()[0]
@@ -1350,6 +1366,8 @@ def _tests():
 	
 #	Easy Solar Tests
 	# easy_solar_tests()
+
+
 	# Testing zipCodeToClimateName (Certain cases fail)
 	# print(zipCodeToClimateName('75001'))
 	# print(zipCodeToClimateName('07030')) # Doesn't work
