@@ -288,7 +288,7 @@ def new(modelDir, defaultInputs):
 
 def cancel(modelDir):
 	''' Try to cancel a currently running model. '''
-	# Kill GLD process if already been created
+	# Kill the GridLAB-D process if it has already been created. If GridLAB-D hasn't created a PID.txt file, or GridLAB-D never ran, keep going
 	try:
 		with web.locked_open(pJoin(modelDir,"PID.txt"),"r") as pidFile:
 			pid = int(pidFile.read())
@@ -297,7 +297,7 @@ def cancel(modelDir):
 		print("PID KILLED")
 	except:
 		pass
-	# Kill runForeground process
+	# Kill the runForeground process if it has already been created. If __neoMetaModel__.py hasn't created a PPID.txt file yet, keep going
 	try:
 		with web.locked_open(pJoin(modelDir, "PPID.txt"), "r") as pPidFile:
 			pPid = int(pPidFile.read())
@@ -306,7 +306,7 @@ def cancel(modelDir):
 	except:
 		pass
 	# Remove PID, PPID, and allOutputData file if existed
-	for fName in ["PID.txt","PPID.txt","allOutputData.json"]:
+	for fName in ['PID.txt', 'PPID.txt', 'allOutputData.json']:
 		try: 
 			os.remove(pJoin(modelDir,fName))
 		except:
