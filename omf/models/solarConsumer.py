@@ -81,8 +81,10 @@ def work(modelDir, inputDict):
 def tjCode(inputs, outData):
 	# Make inputs the right types.
 	for k in inputs.keys():
-		if k not in ['quickRunEmail','modelType','meteringType','modelName', 'monthlyDemand','user','created','runTime','climateName']:
+		try:
 			inputs[k] = float(inputs[k])
+		except:
+			pass
 	inputs['years'] = int(inputs['years'])
 	inputs['monthlyDemand'] = [float(x) for x in inputs['monthlyDemand'].split(',')]
 	# Associate solar output with time
