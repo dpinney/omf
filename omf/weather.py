@@ -86,7 +86,7 @@ def pullAsosStations(filePath):
 				csvwriter.writerow(currentSite)
 
 
-def pullDarksky(year, lat, lon, datatype, units='si', api_key=os.environ.get('DARKSKY',''), path = None):
+def pullDarksky(year, lat, lon, datatype, units='si', api_key='31dac4830187f562147a946529516a8d', path = None):
 	'''Returns hourly weather data from the DarkSky API as array.
 
 	* For more on the DarkSky API: https://darksky.net/dev/docs#overview
@@ -122,9 +122,12 @@ def pullDarksky(year, lat, lon, datatype, units='si', api_key=os.environ.get('DA
 	urls = ['https://api.darksky.net/forecast/%s/%s,%s?exclude=daily&units=%s' % ( api_key, coords, time.isoformat(), units ) for time in times]
 	data = [requests.get(url) for url in urls]
 	if any(i.status_code != 200 for i in data):
+		# message = data[0].json()['error']
+		# raise Exception(message)
 		raise ApiError(data[0].json()['error'], status_code=400)
 	data = [i.json() for i in data]
 	print(data)
+	# print(data)
 	#a fun little annoyance: let's de-unicode those strings
 	#def ascii_me(obj):
 	#	if isinstance(obj, unicode):
@@ -147,7 +150,9 @@ def pullDarksky(year, lat, lon, datatype, units='si', api_key=os.environ.get('DA
 			out_csv = [columns]
 	# parse our json-dict
 	for day in data:
+		print(day)
 		for hour in day['hourly']['data']:
+			print(hour)
 			if path:
 				out_csv.append( [hour.get(key) for key in columns] )
 			out.append(hour.get(datatype))
@@ -1284,6 +1289,7 @@ class ApiError(Exception):
 			self.status_code = status_code
 		self.payload = payload
 		print(self.message)
+		raise Exception(self.message + ' ' + str(self.status_code))
 
 	def to_dict(self):
 		rv = dict(self.payload or ())
@@ -1295,6 +1301,7 @@ class ApiError(Exception):
 
 
 def _tests():
+	import traceback
 	print('weather.py tests currently disabled to keep them from sending too many HTTP requests.')
 	tmpdir = mkdtemp()
 	print("Beginning to test weather.py in", tmpdir)
@@ -1307,7 +1314,9 @@ def _tests():
 	# 		print("ASOS data corrupted")
 	# 		raise Exception
 	# except:
+	# 	val = traceback.format_exc()
 	# 	e = sys.exc_info()[0]
+	# 	print(val)
 	# 	print(e)
 
 	# # # print('ASOS (Iowa) data pulled to ' + tmpdir)
@@ -1321,17 +1330,21 @@ def _tests():
 	# try:
 	# 	# data = pullUscrn('2017', 'KY_Versailles_3_NNW', "IRRADIENCE_DIFFUSE") # Does not write to a file by itself
 	# except:
+	# 	val = traceback.format_exc()
 	# 	e = sys.exc_info()[0]
+	# 	print(val)
 	# 	print(e)
 
 #	Testing DarkSky (Works as long as you have an API key)
 	# d=(pullDarksky(1900, 36.64, -93.30, 'temperature', api_key= '31dac4830187f562147a946529516a8d', path=tmpdir))
-	# try:
-	# 	d=(pullDarksky(2000, 36.64, -93.30, 'temperature', api_key= '31dac4830187f562147a946529516a8d', path=tmpdir))
-	# 	print(d)
-	# except:
-	# 	e = sys.exc_info()[0]
-	# 	print(e)
+	try:
+		d=(pullDarksky(1900, 30, -90, 'temperature', api_key= '31dac4830187f562147a946529516a8d'))
+		print(d)
+	except:
+		val = traceback.format_exc()
+		e = sys.exc_info()[0]
+		print(val)
+		print(e)
 
 # #	#Testing NSRDB (Works, but not used anywhere)
 	# nsrdbkey = 'rnvNJxNENljf60SBKGxkGVwkXls4IAKs1M8uZl56'
@@ -1341,7 +1354,9 @@ def _tests():
 	# 	d=get_nrsdb_data('psm',-98.024098,30.581736,'1900', 'nsrdbkey', interval=60)
 	# 	print(d)
 	# except:
+	# 	val = traceback.format_exc()
 	# 	e = sys.exc_info()[0]
+	# 	print(val)
 	# 	print(e)
 
 #	Testing tmy3 (Works)
@@ -1353,7 +1368,9 @@ def _tests():
 	# 			print("too early a year")
 	# 			raise Exception
 	# 	except:
+	# 		val = traceback.format_exc()
 	# 		e = sys.exc_info()[0]
+	# 		print(val)
 	# 		print(e)
 
 #	NDFD tests
@@ -1361,7 +1378,9 @@ def _tests():
 	# 	d = get_ndfd_data('39.0000', '-77000.0000',['wspd'])
 	# 	print(d)
 	# except:
+	# 	val = traceback.format_exc()
 	# 	e = sys.exc_info()[0]
+	# 	print(val)
 	# 	print(e)
 	
 #	Easy Solar Tests

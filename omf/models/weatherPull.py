@@ -65,7 +65,7 @@ def work(modelDir, inputDict):
 		data = data.loc[data['year']==year]
 		print(data)
 		if len(data) == 0:
-			raise Exception("Year needs to be before 2005")
+			raise Exception("No data for the year and location")
 		#Extract param from data, convert to int, and pass in values not pandas series
 		data = list(data[param].astype(float).values)
 	elif source == 'surfrad':
