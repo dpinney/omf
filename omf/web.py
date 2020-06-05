@@ -586,11 +586,15 @@ def get_model_metadata(owner, model_name):
 
 @contextmanager
 def locked_open(filepath, mode='r', timeout=180, **io_open_args):
-	'''Open a file and lock it depending on the file access mode. An IOError will be raised if the lock cannot be acquired within the timeout.'''
+	'''
+	Open a file and lock it depending on the file access mode. An IOError will be raised if the lock cannot be acquired within the timeout. If the
+	filepath does not exist, this function should thrown the exception upwards and not try to handle it
+	'''
+	# __enter__()
 	if 'r' in mode and '+' not in mode:
-		lock_mode = fcntl.LOCK_SH
+		lock_mode = fcntl.LOCK_SH # LOCK_SH == 1
 	else:
-		lock_mode = fcntl.LOCK_EX
+		lock_mode = fcntl.LOCK_EX # LOCK_EX == 2
 	f = open(filepath, mode, **io_open_args)
 	start_time = time.time()
 	while True:
@@ -598,13 +602,14 @@ def locked_open(filepath, mode='r', timeout=180, **io_open_args):
 			fcntl.flock(f, lock_mode | fcntl.LOCK_NB)
 			break
 		except IOError as e:
-			# Catch any IOError regarding the resource being unavailabe, but raise any other IOError
+			# Ignore any IOError regarding the resource being unavailabe, but raise any other IOError
 			if e.errno != errno.EACCES and e.errno != errno.EAGAIN:
 				raise
 		if time.time() >= start_time + timeout:
 			raise IOError("{timeout}-second file lock timeout reached. Either a file-locking operation is taking more than {timeout} seconds "
 				"or there was a programmer error that would have resulted in deadlock.".format(timeout=timeout))
 	yield f
+	# __exit___()
 	fcntl.flock(f, fcntl.LOCK_UN)
 	f.close() 
 
