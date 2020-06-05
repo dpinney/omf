@@ -877,7 +877,7 @@ SURFRAD_COLUMNS = [
     'winddir', 'winddir_flag', 'pressure', 'pressure_flag']
 
 def getRadiationYears(radiation_type, site, year):
-	'''Pull solard or surfrad data and aggregate into a year'''	
+	'''Pull solard or surfrad data and aggregate into a year. '''
 	print("getRadiationRunning~!!!!!!!**********")
 	URL = 'ftp://aftp.cmdl.noaa.gov/data/radiation/{}/{}/{}/'.format(radiation_type, site, year)
 	#FILE = 'tbl19001.dat' - example
@@ -904,7 +904,7 @@ def getRadiationYears(radiation_type, site, year):
 	return accum
 
 def create_tsv(data, radiation_type, site, year):
-	'''Create tsv file from dict '''
+	'''Create tsv file from dict. '''
 	column_count = len(data[0])
 	with open('{}-{}-{}.tsv'.format(radiation_type, site, year), 'w', newline='') as f:
 		output = csv.DictWriter(f, fieldnames=['col{}'.format(x) for x in range(column_count)], delimiter='\t')
@@ -926,17 +926,11 @@ def get_radiation_data(radiation_type, site, year, out_file=None):
 		# return allYears
 		return df
 
-
-
-
-
 ####### GHI/DHI/DNI Estimator Code Below #######
 
 #darksky key
 _key = '31dac4830187f562147a946529516a8d' #Personal Key
 _key2 = os.environ.get('DARKSKY','')
-
-#Station_Dict
 
 Station_Dict = {
 	"AK_Cordova_14_ESE":(60.473, -145.35,'US/Alaska'),
