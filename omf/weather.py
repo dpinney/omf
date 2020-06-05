@@ -877,8 +877,8 @@ SURFRAD_COLUMNS = [
     'winddir', 'winddir_flag', 'pressure', 'pressure_flag']
 
 def getRadiationYears(radiation_type, site, year):
+	'''Pull solard or surfrad data and aggregate into a year'''	
 	print("getRadiationRunning~!!!!!!!**********")
-	'''Pull solard or surfrad data and aggregate into a year'''
 	URL = 'ftp://aftp.cmdl.noaa.gov/data/radiation/{}/{}/{}/'.format(radiation_type, site, year)
 	#FILE = 'tbl19001.dat' - example
 	# Get directory contents.
