@@ -229,7 +229,7 @@ def work(modelDir, inputDict):
 
 			# generate voltage, current and thermal plots
 			filename = 'voltageDer' + der + loadCondition
-			chart = drawPlot(tree,nodeDict=data['nodeVolts'], neatoLayout=neato)
+			chart = drawPlot(tree,nodeDict=data['percentChangeVolts'], neatoLayout=neato, nodeFlagBounds=[114, 126], defaultNodeVal=120)
 			chart.savefig(pJoin(modelDir, filename + 'Chart.png'))
 			with open(pJoin(modelDir,filename + 'Chart.png'),'rb') as inFile:
 				outData[filename] = base64.standard_b64encode(inFile.read()).decode('ascii')
@@ -556,13 +556,15 @@ def runGridlabAndProcessData(tree, attachments, edge_bools, workDir=False):
 		
 	
 	nominalVolts = {}
+	percentChangeVolts = {}
 	for key in nodeVolts.keys():
 		for treeKey in tree:
 			ob = tree[treeKey]
 			obName = ob.get('name','')
 			if obName==key:
 				nominalVolts[key] = float(ob.get('nominal_voltage',1))
-	
+				percentChangeVolts[key] = (nodeVolts[key] / nominalVolts[key]) * 120
+
 	# find edge currents by parsing currdump
 	edgeCurrentSum = {}
 	edgeCurrentMax = {}
@@ -602,11 +604,11 @@ def runGridlabAndProcessData(tree, attachments, edge_bools, workDir=False):
 		tapPositions['tapB'] = readGroupRecorderCSV(pJoin(workDir,'tap_B.csv'))
 		tapPositions['tapC'] = readGroupRecorderCSV(pJoin(workDir,'tap_C.csv'))
 
-	return {'nominalVolts':nominalVolts, 'nodeVolts':nodeVolts, 'edgeCurrentSum':edgeCurrentSum, 
-	'edgePower':edgePower, 'edgeValsPU':edgeValsPU, 'tapPositions':tapPositions }
+	return {'nominalVolts':nominalVolts, 'nodeVolts':nodeVolts, 'percentChangeVolts':percentChangeVolts, 
+	'edgeCurrentSum':edgeCurrentSum, 'edgePower':edgePower, 'edgeValsPU':edgeValsPU, 'tapPositions':tapPositions }
 
 def drawPlot(tree, nodeDict=None, edgeDict=None, edgeLabsDict=None, displayLabs=False, customColormap=False, 
-	perUnitScale=False, rezSqIn=400, neatoLayout=False):
+	perUnitScale=False, rezSqIn=400, neatoLayout=False, nodeFlagBounds=[-float('inf'), float('inf')], defaultNodeVal=1):
 	''' Draw a color-coded map of the voltage drop on a feeder.
 	path is the full path to the GridLAB-D .glm file or OMF .omd file.
 	workDir is where GridLAB-D will run, if it's None then a temp dir is used.
@@ -676,7 +678,7 @@ def drawPlot(tree, nodeDict=None, edgeDict=None, edgeLabsDict=None, displayLabs=
 
 	# draw nodes with or without color
 	if nodeDict != None:
-		nodeList = [nodeDict.get(n,1) for n in fGraph.nodes()]
+		nodeList = [nodeDict.get(n,defaultNodeVal) for n in fGraph.nodes()]
 		drawColorbar = True
 	else:
 		nodeList = [emptyColors.get(n,.6) for n in fGraph.nodes()]
@@ -688,10 +690,17 @@ def drawPlot(tree, nodeDict=None, edgeDict=None, edgeLabsDict=None, displayLabs=
 		vmin = None
 		vmax = None
 
+	edgecolors = ['None'] * len(nodeList)
+	for i in range(len(nodeList)):
+		if nodeList[i] < nodeFlagBounds[0]:
+			edgecolors[i] = '#ffa500'
+		if nodeList[i] > nodeFlagBounds[1]:
+			edgecolors[i] = 'r'
 	nodeIm = nx.draw_networkx_nodes(fGraph,
 		pos = positions,
 		node_color = nodeList,
-		linewidths = 0,
+		edgecolors = edgecolors,
+		linewidths = 2,
 		node_size = 30,
 		vmin = vmin,
 		vmax = vmax,
