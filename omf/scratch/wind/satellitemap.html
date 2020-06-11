@@ -77,6 +77,34 @@
 	map.on(L.Draw.Event.CREATED, function (event) {
 		var layer = event.layer;
 		drawnItems.addLayer(layer);
+
+		// EACH COMMENTED LINE OF CODE BELOW REPRESENTS AN ATTEMPT AT GETTING A GEOJSON REPRESENTATION OF THE DRAW LAYER AND SAVING IT TO A VARIABLE
+
+		// var data = drawnItems.toGeoJSON();
+		// data.bindPopup(popupContent).openPopup();
+		// data.open();
+		// L.geoJSON().addTo(map);
+		// window.MapPlugin.dataElement.value = JSON.stringify(drawnFeatures.toGeoJSON());
+
+
+		// ANOTHER ATTEMPT WHICH HAS SO FAR AMOUNTED TO NOTHING
+		document.getElementById('export').onclick = function (event) {
+            // Extract GeoJson from featureGroup
+            var data = featureGroup.toGeoJSON();
+			// Stringify the GeoJson
+            var convertedData = 'text/json;charset=utf-8,' + encodeURIComponent(JSON.stringify(data));
+            // Create export
+            document.getElementById('export').setAttribute('href', 'data:' + convertedData);
+            document.getElementById('export').setAttribute('download','data.geojson');
+        }
+
+        // PERHAPS THIS IS THE METHOD
+        var drawnItems = new L.FeatureGroup();
+		map.addLayer(drawnItems);
+		// get json
+		var json = drawnItems.toGeoJSON();
+
+		
 	});
 </script>
 </body>
