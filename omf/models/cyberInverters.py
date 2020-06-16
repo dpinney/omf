@@ -64,6 +64,17 @@ def work(modelDir, inputDict):
 		simStartDateValue = simStartDateTimeValue.split('T')[0]
 		simStartTimeValue = simStartDateTimeValue.split('T')[1]
 
+	# None check for defenseVariable
+	if inputDict.get("defenseVariable", "None") == "None":
+		defenseAgentName = None
+	else:
+		defenseAgentName = inputDict['defenseVariable']
+		#Check to make sure that defenseAgent selected by user exists, otherwise return a warning and set defenseAgentName to None
+		if os.path.isdir(pJoin(modelDir, "pycigarOutput", defenseAgentName)) == False:
+			errorMessage = "ERROR: Defense Agent named " + defenseAgentName + " could not be located."
+			defenseAgentName = None
+			raise Exception(errorMessage)
+
 	inputDict["climateName"] = weather.zipCodeToClimateName(zipCode)
 	shutil.copy(pJoin(__neoMetaModel__._omfDir, "data", "Climate", inputDict["climateName"] + ".tmy2"),
 		pJoin(modelDir, "climate.tmy2"))
@@ -108,7 +119,7 @@ def work(modelDir, inputDict):
 			solarPVLengthValue = rowCount-1
 		except:
 			#TODO change to an appropriate warning message
-			errorMessage = "CSV file is incorrect format. Please see valid format definition at <a target='_blank' href='https://github.com/dpinney/omf/wiki/Models-~-demandResponse#walkthrough'>OMF Wiki demandResponse</a>"
+			errorMessage = "CSV file is incorrect format."
 			raise Exception(errorMessage)
 
 		#create breakpoints.csv file in folder
@@ -118,12 +129,26 @@ def work(modelDir, inputDict):
 		with open(pJoin(modelDir,"PyCIGAR_inputs","breakpoints.csv"),"w") as breakpointsFile:
 			breakpointsFile.write(inputDict['breakpoints'])
 
-		# Open defense agent HDF5(pb?) file if it was uploaded
-		with open(pJoin(modelDir,"PyCIGAR_inputs","defenseAgent.pb"),"w") as defenseVariableFile:
-			if inputDict['defenseVariable'] == "":
-				defenseVariableFile.write("No Defense Agent Variable File Uploaded")
-			else:
-				defenseVariableFile.write(inputDict['defenseVariable'])
+		# # create defenseAgent folder for files
+		# try:
+		# 	os.mkdir(pJoin(modelDir,"PyCIGAR_inputs","defenseAgent"))
+		# except FileExistsError:
+		# 	print("PyCIGAR_inputs/defenseAgent folder already exists!")
+		# 	pass
+		# except:
+		# 	print("Error occurred creating PyCIGAR_inputs/defenseAgent folder")	
+
+		# # write files to defenseAgent folder
+		# with open(pJoin(modelDir,"PyCIGAR_inputs","defenseAgent","saved_model.pb"),"w") as defenseVariableFile:
+		# 	if inputDict['defenseVariable'] == "":
+		# 		defenseVariableFile.write("No Defense Agent Variable File Uploaded")
+		# 	else:
+		# 		defenseVariableFile.write(inputDict['defenseVariable'])
+
+		# # Upload zip file representing defense agent
+		# if inputDict['defenseVariable'] != "":
+		# 	with open(pJoin(modelDir,"PyCIGAR_inputs","defense_agent.zip"),"w") as defenseVariableFile:
+		# 		defenseVariableFile.write(inputDict['defenseVariable'])
 
 		return solarPVLengthValue
 
@@ -202,7 +227,7 @@ def work(modelDir, inputDict):
 		#Set up runType scenarios
 		#runType of 2 implies the base scenario - not training a defense agent, nor is there a defense agent entered
 		runType = 2
-		tempDefenseAgent = None #TODO: change tempDefenseAgent to be !None if defense agent file is input
+		defenseAgentPath = None
 
 		# check to see if we are trying to train a defense agent
 		if trainAgentValue:	
@@ -210,8 +235,8 @@ def work(modelDir, inputDict):
 			runType = 0 
 
 		#check to see if user entered a defense agent file
-		elif tempDefenseAgent != None:
-			tempDefenseAgent = modelDir + "/PyCIGAR_inputs/defenseAgent.pb"
+		elif defenseAgentName != None:
+			defenseAgentPath = pJoin(modelDir, "pycigarOutput", defenseAgentName)
 			#runType of 1 implies the defense scenario - not training a defense agent, but a defense agent zip was uploaded
 			runType = 1 
 
@@ -223,7 +248,7 @@ def work(modelDir, inputDict):
 			modelDir + "/PyCIGAR_inputs/load_solar_data.csv",
 			modelDir + "/PyCIGAR_inputs/breakpoints.csv",
 			runType,
-			tempDefenseAgent,
+			defenseAgentPath,
 			modelDir + "/pycigarOutput/",
 			start=startStep,
 			duration=simLengthAdjusted,
@@ -333,6 +358,9 @@ def work(modelDir, inputDict):
 
 	runPyCIGAR()
 	convertOutputs()
+	# Report out the agent paths.
+	defAgentFolders = os.listdir(pJoin(modelDir,"pycigarOutput"))
+	outData['defenseAgents'] = [x for x in defAgentFolders if x.startswith('policy_')]
 	return outData
 
 def avg(inList):
