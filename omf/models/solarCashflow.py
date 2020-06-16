@@ -24,8 +24,8 @@ def work(modelDir, inputDict):
 	dat = ssc.ssc_data_create()
 	# Required user inputs.
 	ssc.ssc_data_set_string(dat, b'file_name', bytes(modelDir + '/climate.tmy2', 'ascii'))
-	# TODO: FIX THIS!!!! IT SHOULD BE AVGSYS*PEN*RESCUSTOMERS
-	ssc.ssc_data_set_number(dat, b'system_size', float(inputDict['systemSize']))
+	systemSize = max(float(inputDict.get('systemSize', 0)), .1)
+	ssc.ssc_data_set_number(dat, b'system_size', systemSize)
 	# SAM options where we take defaults.
 	ssc.ssc_data_set_number(dat, b'derate', 0.97)
 	ssc.ssc_data_set_number(dat, b'track_mode', 0)
