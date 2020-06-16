@@ -1642,18 +1642,49 @@ def checkAnonymizeTran(owner, modelName):
 @flask_login.login_required
 @read_permission_function
 def displayOmdMap(owner, modelName, feederNum):
-	'''Function to render omd on a leaflet map using a new template '''
+	'''API to render omd on a leaflet map using a new template '''
+
 	#handle geoJsonFeatures.js load so it doesn't throw 500 error - this line is there to load geojson variable when not rendering with flask
 	if feederNum == 'geoJsonFeatures.js':
 		return ""
-	else:
-		feederDict = get_model_metadata(owner, modelName)
-		feederName = feederDict.get('feederName' + str(feederNum))
-		modelDir = os.path.join(_omfDir, "data","Model", owner, modelName)
-		feederFile = os.path.join(modelDir, feederName + ".omd")
-		geojson = geo.omdGeoJson(feederFile)
-		return render_template('geoJsonMap.html', geojson=geojson)
 
+	# get tree size first (TODO: use this for a more clever wait message??)
+	feederDict = get_model_metadata(owner, modelName)
+	feederName = feederDict.get('feederName' + str(feederNum))
+	errorPath, conFilePath, modelDir = [os.path.join(_omfDir, "data", 'Model', owner, modelName, fileName) for fileName in ('error.txt', 'ZPID.txt', '')]
+	feederFile = os.path.join(modelDir, feederName + '.omd')
+	with locked_open(feederFile) as inFile:
+		treeSize = len(json.load(inFile)['tree'])
+	
+	# delete existing geojson and error files
+	if os.path.isfile(errorPath):
+		os.remove(errorPath)
+	for filename in safeListdir(modelDir):
+		if filename.endswith(".geojson"):
+			os.remove(os.path.join(modelDir, filename))
+
+	# write process file
+	with locked_open(conFilePath, 'w') as conFile:
+		conFile.write("WORKING")
+
+	# start the background process
+	importProc = Process(target=omdToGeoJson, args=[feederName, modelDir])
+	importProc.start()
+	return render_template('geoJsonMap.html', treeSize=treeSize, modelName=modelName, owner=owner, feederName=feederName)
+
+def omdToGeoJson(feederName, modelDir):
+	''' Function to run in the background for displaying omd on leaflet map, by converting omd to geojson. '''
+	try:
+		geojsonFile, feederFile, conFile = [os.path.join(modelDir, filename) for filename in (feederName + '.geojson', feederName + '.omd', 'ZPID.txt')]
+		geojson = geo.omdGeoJson(feederFile)
+		with locked_open(geojsonFile, 'w') as f:
+			json.dump(geojson, f, indent=4)
+		os.remove(conFile)
+	except Exception as e:
+		filepath = os.path.join(modelDir, 'error.txt')
+		with locked_open(filepath, 'w') as errorFile:
+			errorFile.write(e)
+		os.remove(conFile)
 
 @app.route('/commsMap/<owner>/<modelName>/<feederNum>', methods=["GET"])
 @flask_login.login_required
