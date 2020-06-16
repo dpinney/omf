@@ -163,7 +163,7 @@
 				<label class="tooltip">Defense Agent Variable<span class="classic">Select trained defense agent from the list, or select 'None' and run a training simulation to create one.</span></label>
 				<select id="defenseVariable" name="defenseVariable">
 					<option value="None">None</option>
-					{% for agentFolderName in allOutputData['defenseAgents'] %}
+					{% for agentFolderName in allOutputDataDict["defenseAgents"] %}
 						<option value="{{agentFolderName}}">{{agentFolderName}}</option>
 					{% endfor %}
 				</select>
