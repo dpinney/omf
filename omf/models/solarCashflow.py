@@ -57,7 +57,7 @@ def work(modelDir, inputDict):
 	# Power generation.
 	outData['powerOutputAc'] = ssc.ssc_data_get_array(dat, b'ac')
 	solarFraction = float(inputDict.get("resPenetration", .05))/100
-	fossilFraction = max(1 - solarFraction, 1**-6)
+	fossilFraction = max(1 - solarFraction, 10**-6)
 	# Monthly aggregation outputs.
 	months = {"Jan":0,"Feb":1,"Mar":2,"Apr":3,"May":4,"Jun":5,"Jul":6,"Aug":7,"Sep":8,"Oct":9,"Nov":10,"Dec":11}
 	totMonNum = lambda x:sum([z for (y,z) in zip(outData["timeStamps"], outData["powerOutputAc"]) if y.startswith(startDateTime[0:4] + "-{0:02d}".format(x+1))])
@@ -98,7 +98,7 @@ def work(modelDir, inputDict):
 	# E23 = E11
 	outData["BAU"]["totalKWhPurchased"] = float(inputDict.get("totalKWhPurchased", 1))
 	# E24 = SUM(E19:P19)
-	outData["BAU"]["totalKWhSales"] = sum([x[1] for x in monthlyTotalkWhLoad])
+	outData["BAU"]["totalKWhSales"] = totalkWhLoad
 	# E25 = E23-E24
 	outData["BAU"]["losses"] = float(inputDict.get("totalKWhPurchased", 0)) - totalkWhLoad
 	# E26 = E25/E23
