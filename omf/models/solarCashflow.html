@@ -446,7 +446,7 @@
 						gebi("solarConCashLabel").textContent = "$" + delimitNumbers(allOutputData.Solar.solarResRev.toFixed(0))
 						gebi("nonSolarConEnergyLabel").textContent = delimitNumbers(convertunits(allOutputData.Solar.resNonSolarKWhSold, 3).toFixed(0)) + " MWh"
 						gebi("nonSolarConCashLabel").textContent = "$" + delimitNumbers(allOutputData.Solar.resNonSolarRev.toFixed(0))
-						gebi("commConEnergyLabel").textContent = delimitNumbers(convertunits(allOutputData.BAU.nonResKWhSold, 3).toFixed(0)) + " MWh"
+						gebi("commConEnergyLabel").textContent = delimitNumbers(convertunits(allOutputData.Solar.nonResKWhSold, 3).toFixed(0)) + " MWh"
 						gebi("commConCashLabel").textContent = "$" + delimitNumbers(allOutputData.Solar.nonResRev.toFixed(0))
 						gebi("panelsEnergyLabel").textContent = delimitNumbers(convertunits(allOutputData.Solar.annualSolarGen, 3).toFixed(0)) + " MWh"
 						gebi("panelsCashLabel").textContent = "$" + delimitNumbers(allOutputData.Solar.costSolarGen.toFixed(0))
