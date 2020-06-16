@@ -1,105 +1,218 @@
 <!DOCTYPE html>
 <html>
+
 <head>
 	<title>GeoJSON Map</title>
-<head>
-	<link rel="stylesheet" href="https://unpkg.com/leaflet@1.0.3/dist/leaflet.css" integrity="sha512-07I2e+7D8p6he1SIM+1twR5TIrhUQn9+I6yjqD53JQjFiMf8EtC93ty0/5vJTZGF8aAocvHYNEDJajGdNx1IsQ=="
-		crossorigin="" />
-	<script src="https://unpkg.com/leaflet@1.0.3/dist/leaflet.js" integrity="sha512-A7vV8IFfih/D732iSSKi20u/ooOfj/AGehOKq0f4vLT1Zr2Y+RX7C+w8A1gaSasGtRUZpF/NZgzSAu4/Gc41Lg=="
-		crossorigin=""></script>
-</head>
-	<style>html, body {
-		width: 100%;
-		height: 100%;
-		margin: 0;
-		padding: 0;}
-	</style>
-	<style>#map{
-		position: relative;
-		width: 100.0%;
-		height: 100.0%;
-		left: 0.0%;
-		top: 0.0%;
-		}
-	</style>
-</head>
-<body>
-	<div id="map"></div>
-	<script>var geojson={% if geojson %}{{geojson | tojson}}{% else %}null{% endif %}</script>
-	<script type="text/javascript" src="geoJsonFeatures.js"></script>
-	<script type="text/javascript">
-	function onEachFeature(feature, layer) {
-		var popupContent = '';
-		for (const key in feature.properties) {
-			if (feature.properties.hasOwnProperty(key)) {
-				popupContent += feature.properties[key];
-				layer.bindPopup(popupContent);
-			}
-		}
-	}
-	function pointToLayerNode(feature, latlng) {
-		let fillColorValue = 'gray';
-		if (feature.properties['pointColor']){
-			fillColorValue = feature.properties['pointColor'];
-		}
-		return L.circleMarker(latlng, {
-			radius: 2,
-			fillColor: fillColorValue,
-			color: "#000",
-			weight: 1,
-			opacity: 1,
-			fillOpacity: 0.8
-		});
-	}
 
-	function lineStyle(feature){
-		if (feature.geometry['type'] == 'LineString'){
-			if (feature.properties.edgeColor){
-				return {
-					"color": feature.properties.edgeColor
-				}
-			}
-			else{
-				return {
-					"color": "black"
-				}
-			}
+	<head>
+		<link rel='stylesheet' href='https://unpkg.com/leaflet@1.0.3/dist/leaflet.css' integrity='sha512-07I2e+7D8p6he1SIM+1twR5TIrhUQn9+I6yjqD53JQjFiMf8EtC93ty0/5vJTZGF8aAocvHYNEDJajGdNx1IsQ=='
+		 crossorigin='' />
+		<script src='https://unpkg.com/leaflet@1.0.3/dist/leaflet.js' integrity='sha512-A7vV8IFfih/D732iSSKi20u/ooOfj/AGehOKq0f4vLT1Zr2Y+RX7C+w8A1gaSasGtRUZpF/NZgzSAu4/Gc41Lg=='
+		 crossorigin=''></script>
+		<script type="text/javascript" src="/static/omf.js"></script>
+		<link rel="stylesheet" href="/static/omf.css" />
+		<link rel="shortcut icon" href="/static/favicon.ico" />
+		<script type='text/javascript' src='/static/jquery-1.9.1.js'></script>
+	</head>
+	<style>
+		#map {
+			position: absolute;
+			width: 100.0%;
+			height: 100.0%;
+			left: 0.0%;
+			top: 0.0%;
 		}
-		else if (feature.geometry['type'] == 'Polygon'){
-			return {
-				"color": "blue"
-			}
-		}
-	}
-	geojsonLayer = L.geoJSON(false, {
+	</style>
+</head>
+
+<body>
+	<div id='map'></div>
+	<script type='text/javascript' src='geoJsonFeatures.js'></script>
+	<script type='text/javascript'>
+
+		var geojson;
+
+		showProgressDialog('spinner', 'Generating data for map... \n This might take a few minutes.', 'import');
+
+		// 1. Periodically check (every 5 secs) to see if any conversion (.omd to .geojson) is happening.
+		// If it's done, load the converted model.
+
+		var conversionStatus = 'converting';
+		var intervalId = window.setInterval(function pingAPI() {
+
+			$.ajax({
+				url: '/checkConversion/{{ modelName }}/{{ owner }}',
+				async: false
+			}).done(function (data) {
+
+				// Set conversion status depending on result of AJAX request
+				if (data.exists == null)
+					conversionStatus = data;
+				else if (data.exists)
+					conversionStatus = 'converting'
+				else if (!data.exists)
+					conversionStatus = 'done';
+
+				// Deal with the conversion status (if not 'converting' or 'done', something went wrong)
+				if (conversionStatus == 'converting') { }
+				else if (conversionStatus == 'done') {
+					window.clearInterval(intervalId);
+					alert('Conversion complete.')
+					displayGeojson();
+					removeProgressDialog();
+				}
+				else {
+					window.clearInterval(intervalId);
+					alert(conversionStatus);
+					removeProgressDialog();
+				}
+			})
+			return pingAPI;
+		}, 5000);
+
+		// 2. Function to display the feeder geoJSON in leaflet map when conversion from .omd to .geojson is done. 
+
+		function displayGeojson() {
+
+			$.ajax({
+				url: '/downloadModelData/{{ owner }}/{{ modelName }}/{{ feederName }}.geojson',
+				async: false,
+				dataType: 'json',
+				success: function (json) {
+					geojson = json
+				},
+				error: function (xhr, textStatus, errorThrown) {
+					alert('Request failed: ' + errorThrown);
+				}
+			});
+
+			geojsonLayer = L.geoJSON(false, {
 				pointToLayer: pointToLayerNode,
 				onEachFeature: onEachFeature,
 				style: lineStyle,
 			});
-	geojson.features.forEach(function(feature){
-		if (feature.geometry['type'] == 'Point'){
-			geojsonLayer.addData(feature);
+
+			geojson.features.forEach(function (feature) {
+				if (feature.geometry['type'] == 'Point') {
+					geojsonLayer.addData(feature);
+				}
+				else if (feature.geometry['type'] == 'LineString') {
+					geojsonLayer.addData(feature);
+				}
+				else if (feature.geometry['type'] == 'Polygon') {
+					geojsonLayer.addData(feature);
+				}
+			});
+
+			var bounds = geojsonLayer.getBounds();
+			var map = L.map('map', { renderer: L.canvas() }).fitBounds(bounds);
+			mapLink = '<a href="http://openstreetmap.org">OpenStreetMap</a>';
+			L.tileLayer(
+				'http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+					attribution: '&copy; ' + mapLink + ' Contributors',
+					maxZoom: 18,
+				}).addTo(map);
+			L.control.scale().addTo(map);
+			geojsonLayer.addTo(map);
 		}
-		else if (feature.geometry['type'] == 'LineString'){
-			geojsonLayer.addData(feature);
+
+		// 3. Helper functions for displaying the geoJSON.
+
+		function onEachFeature(feature, layer) {
+			var popupContent = '';
+			for (const key in feature.properties) {
+				if (feature.properties.hasOwnProperty(key)) {
+					popupContent += feature.properties[key];
+					layer.bindPopup(popupContent);
+				}
+			}
 		}
-		else if (feature.geometry['type'] == 'Polygon'){
-			geojsonLayer.addData(feature);
+		function pointToLayerNode(feature, latlng) {
+			let fillColorValue = 'gray';
+			if (feature.properties['pointColor']) {
+				fillColorValue = feature.properties['pointColor'];
+			}
+			return L.circleMarker(latlng, {
+				radius: 2,
+				fillColor: fillColorValue,
+				color: '#000',
+				weight: 1,
+				opacity: 1,
+				fillOpacity: 0.8
+			});
 		}
-	});
-	var bounds = geojsonLayer.getBounds();
-	// Forcing of canvas renderer:
-	var map = L.map('map', {renderer: L.canvas()}).fitBounds(bounds);
-	// Optional SVG Renderer:
-	// var map = L.map('map').fitBounds(bounds);
-	mapLink = '<a href="http://openstreetmap.org">OpenStreetMap</a>';
-	L.tileLayer(
-		'http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-		attribution: '&copy; ' + mapLink + ' Contributors',
-		maxZoom: 18,
-		}).addTo(map);
-	L.control.scale().addTo(map);
-	geojsonLayer.addTo(map);
-</script>
+
+		function lineStyle(feature) {
+			if (feature.geometry['type'] == 'LineString') {
+				if (feature.properties.edgeColor) {
+					return { 'color': feature.properties.edgeColor }
+				}
+				else {
+					return { 'color': 'black' }
+				}
+			}
+			else if (feature.geometry['type'] == 'Polygon') {
+				return { 'color': 'blue' }
+			}
+		}
+
+		// 4. Functions for the progress dialogue box.
+
+		function showProgressDialog(progressType, dialogMessage, cancelType) {
+
+			background = document.createElement('div');
+			background.id = 'progressBackground';
+			background.style.zIndex = '9998';
+			progContent = document.createElement('div');
+			progContent.id = 'progressContent';
+			progContent.style.zIndex = '9999';
+			progressText = document.createElement('h2');
+			progressText.id = 'progressText';
+			progressText.textContent = dialogMessage;
+			document.body.appendChild(background);
+			document.body.appendChild(progContent);
+
+			// If progressType type is spinner create and show the spinner.
+			if (progressType == 'spinner') {
+				spinner = document.createElement('img');
+				spinner.src = '/static/spinner.gif';
+				progContent.appendChild(spinner);
+				progContent.appendChild(progressText);
+				var cancelBtn = document.createElement('BUTTON');
+				var t = document.createTextNode('cancel');
+				cancelBtn.style.marginTop = '5px';
+				cancelBtn.style.background = 'crimson';
+				cancelBtn.appendChild(t);
+				progContent.appendChild(cancelBtn);
+			}
+
+			// If cancelType is not none, add an onclick even to the cancel button to cancel the import.
+			if (cancelType != 'none') {
+				cancelType = (typeof cancelType === 'undefined') ? 'no' : cancelType;
+				cancelBtn.onclick = function () {
+					if (cancelType == 'import') {
+						if (confirm('Are you sure you want to cancel the import?')) {
+							removeProgressDialog();
+						}
+					}
+					else if (cancelType == 'none') {
+						cancelBtn.style.display = 'none';
+					}
+					else {
+						removeProgressDialog();
+					}
+				};
+			}
+		}
+
+		function removeProgressDialog() {
+			if (document.getElementById('progressBackground') != null)
+				document.body.removeChild(document.getElementById('progressBackground'));
+			if (document.getElementById('progressContent') != null)
+				document.body.removeChild(document.getElementById('progressContent'));
+		}
+
+	</script>
 </body>
+
 </html>
