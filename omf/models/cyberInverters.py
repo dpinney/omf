@@ -129,27 +129,6 @@ def work(modelDir, inputDict):
 		with open(pJoin(modelDir,"PyCIGAR_inputs","breakpoints.csv"),"w") as breakpointsFile:
 			breakpointsFile.write(inputDict['breakpoints'])
 
-		# # create defenseAgent folder for files
-		# try:
-		# 	os.mkdir(pJoin(modelDir,"PyCIGAR_inputs","defenseAgent"))
-		# except FileExistsError:
-		# 	print("PyCIGAR_inputs/defenseAgent folder already exists!")
-		# 	pass
-		# except:
-		# 	print("Error occurred creating PyCIGAR_inputs/defenseAgent folder")	
-
-		# # write files to defenseAgent folder
-		# with open(pJoin(modelDir,"PyCIGAR_inputs","defenseAgent","saved_model.pb"),"w") as defenseVariableFile:
-		# 	if inputDict['defenseVariable'] == "":
-		# 		defenseVariableFile.write("No Defense Agent Variable File Uploaded")
-		# 	else:
-		# 		defenseVariableFile.write(inputDict['defenseVariable'])
-
-		# # Upload zip file representing defense agent
-		# if inputDict['defenseVariable'] != "":
-		# 	with open(pJoin(modelDir,"PyCIGAR_inputs","defense_agent.zip"),"w") as defenseVariableFile:
-		# 		defenseVariableFile.write(inputDict['defenseVariable'])
-
 		return solarPVLengthValue
 
 	solarPVLengthValue = convertInputs()
@@ -169,6 +148,17 @@ def work(modelDir, inputDict):
 		simLengthAdjusted = solarPVLengthValue - startStep
 	# #hard-coding simLengthAdjusted for testing purposes 
 	# simLengthAdjusted = 750
+
+	# attackVars = dict of attack types and their corresponding parameter values
+	# to add new attack: attackVars[attackAgentType_name] = {"hackStart": val, "hackEnd": val, "percentHack": val}
+	# MAKE SURE to add attackVars entry when adding another Attack Agent option to the html dropdown list and the name must match the value passed back from the form (inputDict["attackVariable"])!
+	attackVars = {}
+	attackVars["None"] = {"hackStart": 250, "hackEnd": None, "percentHack": 0.0}
+	attackVars["curveSwitch"] = {"hackStart": 250, "hackEnd": None, "percentHack": 0.45}
+
+	#check to make sure attackAgentType is in the attackVars dictionary, otherwise set it to None. This shouldn't ever be a problem since the user selects attackAgentType from a preset HTML dropdown.
+	if attackAgentType not in attackVars:
+		attackAgentType = "None"
 
 	outData = {}
 	# Std Err and Std Out
@@ -228,10 +218,15 @@ def work(modelDir, inputDict):
 		runType = 2
 		defenseAgentPath = None
 
+		#set default values for attack variables
+		hackStartVal = 250
+		hackEndVal = None
+		percentHackVal = 0.0
+		
 		#set pycigar attack variables
-		hackStartVal = 250 #TODO: see if we need to change from a hard-coded value
-		hackEndVal = None #TODO: see if we need to change from a hard-coded value
-		percentHackVal = 0.45 #TODO: see if we need to change from a hard-coded value
+		hackStartVal = attackVars[attackAgentType]["hackStart"] #TODO: see if we need to change from a hard-coded value
+		hackEndVal = attackVars[attackAgentType]["hackEnd"] #TODO: see if we need to change from a hard-coded value
+		percentHackVal = attackVars[attackAgentType]["percentHack"] #TODO: see if we need to change from a hard-coded value
 
 		# check to see if we are trying to train a defense agent
 		if trainAgentValue:	
