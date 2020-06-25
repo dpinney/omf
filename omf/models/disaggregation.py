@@ -132,7 +132,7 @@ def work(modelDir, inputDict):
 
 	# plot the test data as well as the sum of the disag 
 	totalDisagg.plot()
-	test_elec.mains().plot()
+	test_elec.dataframe_of_meters().plot()
 	ax = plt.gca();
 	lgd = plt.legend(bbox_to_anchor=(0,1.02,1,0.2), loc="lower left", 
 		mode="expand", borderaxespad=0, ncol=3)
