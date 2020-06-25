@@ -3,21 +3,24 @@ from os.path import join as pJoin
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
+from datetime import timedelta
 
 
 from omf.solvers.nilmtk.nilm_metadata.nilm_metadata import save_yaml_to_datastore
 from omf.solvers.nilmtk.nilmtk.nilmtk import DataSet, TimeFrame, MeterGroup, HDFDataStore
-from omf.solvers.nilmtk.nilmtk.nilmtk.legacy.disaggregate import fhmm_exact
+from omf.solvers.nilmtk.nilmtk.nilmtk.legacy.disaggregate import FHMM
 from omf.solvers.nilmtk.nilmtk.nilmtk.legacy.disaggregate import CombinatorialOptimisation
+from omf.solvers.nilmtk.nilmtk.nilmtk.legacy.disaggregate import Hart85
+from omf.solvers.nilmtk.nilmtk.nilmtk.legacy.disaggregate import MLE
 from omf.solvers.nilmtk.nilmtk.nilmtk.datastore import Key
 from omf.solvers.nilmtk.nilmtk.nilmtk.measurement import LEVEL_NAMES
 from omf.solvers.nilmtk.nilmtk.nilmtk.utils import get_datastore
 
 # constants -------------------------------------------------------------------
 
-trainFile = 'disaggTraining.csv' 
-truthFile = 'disaggTestingTruth.csv'
-testFile = 'disaggTesting.csv'
+trainFile = '../disaggTraining.csv' 
+truthFile = '../disaggTestingTruth.csv'
+testFile = '../disaggTesting.csv'
 
 trainBuilding =  1
 truthBuilding =  1
@@ -350,78 +353,83 @@ testMetergroup = test.buildings[testBuilding].elec
 samplePeriod = next(iter( train.metadata['meter_devices'].values() ))
 samplePeriod = samplePeriod['sample_period']
 
+print(testMetergroup.meters[0])
+# raise('stop')
+
 # train the appropriate algorithm ---------------------------------------------
 
 clf = ''
-if algorithm == 'fhmm':
-	clf = fhmm_exact.FHMM()
-elif algorithm == 'combOpt':
-	clf = CombinatorialOptimisation()
+if algorithm == 'hart85':
 
-start = time.time()
-clf.train(trainMetergroup, sample_period=samplePeriod)
-end = time.time()
-print('Training runtime =', end-start, 'seconds.')
+	clf = Hart85()
+	clf.train(trainMetergroup,columns=[('power','apparent')])
+	
 
-# make predicitons ------------------------------------------------------------
+	# make predicitons ------------------------------------------------------------
 
-pred = {}
-testChunks = testMetergroup.mains().load(sample_period=samplePeriod)
-for i, chunk in enumerate(testChunks):
-    chunk_drop_na = chunk.dropna()
-    pred[i] = clf.disaggregate_chunk(chunk_drop_na)
-print('---------------------------------')
-print('Testing done')
-print('---------------------------------')
+	disag_filename = 'hart85Disag.h5'
+	output = HDFDataStore(disag_filename, 'w')
+	clf.disaggregate(testMetergroup, output, sample_period=samplePeriod)
+	output.close()
+	disag = DataSet(disag_filename)
+	disag_elec = disag.buildings[1].elec
+	predictedVals = disag_elec.dataframe_of_meters()
 
-# If everything can fit in memory
-predictedVals = pd.concat(pred)
-predictedVals.index = predictedVals.index.droplevel()
 
-# use appliance names as the labels
-appliances = []
-for meter in predictedVals.columns.values:
-    name = meter.appliances[0].metadata['original_name']
-    name = name.replace('_',' ')
-    name = name.capitalize()
-    appliances.append(name)
-predictedVals.columns = appliances
+else:
+
+	if algorithm == 'fhmm':
+		clf = FHMM()
+	elif algorithm == 'combOpt':
+		clf = CombinatorialOptimisation()
+	elif algorithm == 'mle':
+		clf = MLE()
+		clf.sample_period=timedelta(seconds=samplePeriod)
+
+	start = time.time()
+	clf.train(trainMetergroup)
+	end = time.time()
+	print('Training runtime =', end-start, 'seconds.')
+
+	# make predicitons ------------------------------------------------------------
+
+	pred = {}
+	testChunks = testMetergroup.dataframe_of_meters()
+	# for i, chunk in enumerate(testChunks):
+	#     chunk_drop_na = chunk.dropna()
+	pred[0] = clf.disaggregate_chunk(testChunks)
+
+	print('---------------------------------')
+	print('Testing done')
+	print('---------------------------------')
+
+	# If everything can fit in memory
+	predictedVals = pd.concat(pred)
+	predictedVals.index = predictedVals.index.droplevel()
+
+	# use appliance names as the labels
+	appliances = []
+	for meter in predictedVals.columns.values:
+	    name = meter.appliances[0].metadata['original_name']
+	    name = name.replace('_',' ')
+	    name = name.capitalize()
+	    appliances.append(name)
+
+	predictedVals.columns = appliances
 
 trueVals = truthMetergroup.dataframe_of_meters()
 trueVals.columns=appliances
 
 totalDisagg = predictedVals.sum(1)
 totalDisagdByApp = predictedVals.sum()
-#totalDisagdByApp.sort_values(inplace=True, ascending=False)
 percentDisagg = 100.*totalDisagdByApp/totalDisagdByApp.sum()
 
 totalTrue = trueVals.sum(1)
 totalTrueByApp = trueVals.sum()
-#totalTrueByApp.sort_values(inplace=True, ascending=False)
 percentTrue = 100.*totalTrueByApp/totalTrueByApp.sum()
 
 predictedVals = predictedVals.sort_index(axis=1)
 trueVals = trueVals.sort_index(axis=1)
-
-error = predictedVals - trueVals
-errorMeanByApp = error.mean()
-errorStdByApp = error.std() 
-errorMean = error.stack().mean()
-errorStd = error.stack().std()
-
-print('---------------------')
-
-print(predictedVals)
-print()
-print(trueVals)
-
-print('---------------------')
-
-print('Disaggregation Overview')
-print(percentDisagg)
-print()
-print('True Overview')
-print(percentTrue)
 
 # plot % use by appliance
 patches, texts = plt.pie(percentDisagg, startangle=180,  counterclock=False)
@@ -438,16 +446,22 @@ plt.savefig(modelDir + '/trueDisaggPie.png',
 		bbox_extra_artists=(lgd,), bbox_inches='tight', dpi=600)
 plt.clf()
 
-print('---------------------')
-print('Error mean by appliance')
-print(errorMeanByApp)
-print()
-print('Error standard deviation by appliance')
-print(errorStdByApp)
+# error ----------------------------------------------------------------------------
 
-print('---------------------')
-print('Error mean')
+error = predictedVals - trueVals
+errorMeanByApp = error.mean()
+errorStdByApp = error.std() 
+errorMean = error.stack().mean()
+errorStd = error.stack().std()
+
+print('\n\n\n')
+print('classifier: ' + algorithm)
+print('Error mean by appliance------------------------')
+print(errorMeanByApp)
+print('Error standard deviation by appliance----------')
+print(errorStdByApp)
+print('Error mean-------------------------------------')
 print(errorMean)
-print()
-print('Error standard deviation')
+print('Error standard deviation-----------------------')
 print(errorStd)
+print('\n\n\n')

@@ -1,0 +1,185 @@
+clock {
+	timezone EST5;
+	starttime '2012-01-01 00:00:00';
+	stoptime '2013-01-01 00:00:00';
+};
+
+#include "in_superSchedules.glm";
+#set minimum_timestep=60;
+#set profiler=0;
+#set relax_naming_rules=1;
+
+module generators;
+
+module tape;
+
+module climate;
+
+module residential {
+	implicit_enduses NONE;
+};
+
+module powerflow {
+	solver_method FBS;
+	NR_iteration_limit 50;
+};
+
+object climate {
+	name Climate;
+	interpolate QUADRATIC;
+	tmyfile in_climate_vt_burlington.tmy2;
+};
+
+object triplex_meter {
+	voltage_2 -60-103.92j;
+	phases BS;
+	voltage_1 -60-103.92j;
+	name super_meter;
+	meter_power_consumption 2+11j;
+	//power_market Market_1;
+	monthly_fee 10.00;
+	nominal_voltage 120;
+	//bill_mode HOURLY;
+	bill_day 1;
+	voltage_N 0;
+};
+
+object house {
+	name house0;
+	floor_area 2000.0;
+	number_of_stories 1;
+	ceiling_height 8;
+	over_sizing_factor 0.1;
+	Rroof 50.34;
+	Rwall 27.33;
+	Rfloor 35.59;
+	glazing_layers 3;
+	glass_type 2;
+	glazing_treatment 2;
+	window_frame 4;
+	Rdoors 10.51;
+	airchange_per_hour 0.23;
+	cooling_COP 3.8;
+	air_temperature 71.22;
+	mass_temperature 71.22;
+	total_thermal_mass_per_floor_area 3.504;
+	heating_system_type HEAT_PUMP;
+	cooling_system_type ELECTRIC;	
+	breaker_amps 1000;
+	hvac_breaker_rating 1000;
+	
+	heating_setpoint 68;
+	cooling_setpoint 72;
+	schedule_skew -57.2977315002;
+	groupid Residential;
+	parent super_meter;
+};
+
+object ZIPload {
+	parent house0;
+	schedule_skew 261.011840107;
+	name unresponsiveLoad_house0;
+	power_fraction 0.400000;
+	current_fraction 0.400000;
+	base_power unresponsive_loads;
+	current_pf 1.000;
+	power_pf 1.000;
+	heatgain_fraction 0.900;
+	impedance_fraction 0.200000;
+	impedance_pf 1.000;
+};
+
+object ZIPload {
+	parent house0;
+	schedule_skew 324.569774629;
+	name responsiveLoad_house0;
+	power_fraction 0.400000;
+	current_fraction 0.400000;
+	base_power responsive_loads;
+	current_pf 1.000;
+	power_pf 1.000;
+	heatgain_fraction 0.900;
+	impedance_fraction 0.200000;
+	impedance_pf 1.000;
+};
+
+object waterheater {
+	schedule_skew -1057.71751704;
+	tank_volume 50;
+	name waterHeater_house0;
+	parent house0;
+	//height ;
+	heating_element_capacity 4.5 kW;
+	thermostat_deadband 7.8;
+	location INSIDE;
+	tank_diameter 2.5 ft;
+	demand large_6*0.99;
+	tank_setpoint 130;
+	tank_UA 1.3;
+	temperature 130;
+};
+
+object evcharger_det {
+	variation_trip_std_dev 100.0;
+	parent house0;
+	arrival_at_home 1800;
+	duration_at_work 9 h;
+	duration_at_home 14 h;
+	variation_std_dev 100.0;
+	maximum_charge_rate 1700;
+	variation_trip_mean 300.0;
+	charging_efficiency 0.90;
+	work_charging_available false;
+	travel_distance 15.0;
+	mileage_classification 33.0;
+	variation_mean 300.0;
+	arrival_at_work 900;
+	mileage_efficiency 3.846;
+	name ev_house0;
+};
+
+object recorder {
+	interval 60;
+	property power.real,temperature;
+	line_units NONE;
+	file out_waterheater.csv;
+	parent waterHeater_house0;
+};
+
+object recorder {
+	interval 60;
+	property hvac_load,heating_demand,cooling_demand,cooling_setpoint,heating_setpoint,air_temperature,outdoor_temperature;
+	line_units NONE;
+	file out_house.csv;
+	parent house0;
+};
+
+object recorder {
+	interval 60;
+	property power.real;
+	line_units NONE;
+	file out_unresponsive.csv;
+	parent unresponsiveLoad_house0;
+};
+
+object recorder {
+	interval 60;
+	property power.real;
+	line_units NONE;
+	file out_responsive.csv;
+	parent responsiveLoad_house0;
+};
+
+object recorder {
+	interval 60;
+	property measured_real_energy,measured_power.real,measured_reactive_power;
+	line_units NONE;
+	file out_meter.csv;
+	parent super_meter;
+};
+
+object triplex_meter {
+	name zero_meter;
+	phases AS;
+	nominal_voltage 120.0;
+};
