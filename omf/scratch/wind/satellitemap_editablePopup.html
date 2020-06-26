@@ -74,31 +74,16 @@
 			}
 		}
 	}));
-	map.on(L.Draw.Event.CREATED, function (event) {
-		var layer = event.layer;
-		drawnItems.addLayer(layer);
-	});
-	// gets and stringifies GeoJSON representation of the draw layer
-	function button_click() {
-		drawn_geojson = drawnItems.toGeoJSON()
-		alert('We drew: ' + JSON.stringify(drawn_geojson))
-	}
-	// Truncate value based on number of decimals
-	var _round = function(num, len) {
-		return Math.round(num*(Math.pow(10, len)))/(Math.pow(10, len));
-	};
-	// Helper method to format LatLng object (x.xxxxxx, y.yyyyyy)
-	var strLatLng = function(latlng) {
-		return "("+_round(latlng.lat, 6)+", "+_round(latlng.lng, 6)+")";
-	};
-	function saveVeg(vegScore) {
+	// Helper function for saving veg score.
+	function saveVeg() {
 		var newVegScore = document.getElementById('veg_score').value
-		vegScore = newVegScore
+		var shape_id = document.getElementById('popup_leaflet_id').value
+		map._layers[shape_id].feature.properties.vegScore = newVegScore
 	}
 	// Helper function to update veg scores.
 	map.on(L.Draw.Event.CREATED, function(event) {
 		var layer = event.layer;
-		// add veg score
+		// add veg score.
 		feature = layer.feature = layer.feature || {}; // Initialize feature
 		feature.type = feature.type || "Feature"; // Initialize feature.type
 		var props = feature.properties = feature.properties || {}; // Initialize feature.properties
@@ -106,11 +91,16 @@
 		// add click handler that makes popup on each click.
 		layer.on('click', function (e) {
 			vegScore = e.target.feature.properties.vegScore
-			layer.bindPopup("Veg Score: <input type='text' id='veg_score' value=" + vegScore + "><button onclick='saveVeg(vegScore)' type='button'>Save</button>")
+			layer.bindPopup("<input id='popup_leaflet_id' style='display:none' value=" + e.target._leaflet_id + ">Veg Score: <input type='text' id='veg_score' value=" + vegScore + "><button onclick='saveVeg()' type='button'>Save</button>")
 			layer.openPopup()
 		})
 		drawnItems.addLayer(layer);
 	});
+	// gets and stringifies GeoJSON representation of the draw layer
+	function button_click() {
+		drawn_geojson = drawnItems.toGeoJSON()
+		alert('We drew: ' + JSON.stringify(drawn_geojson))
+	}
 </script>
 <button type="button" onclick="button_click()" style="position:fixed; top:0; right: 0; z-index:999">Get GeoJson</button>
 <form>
