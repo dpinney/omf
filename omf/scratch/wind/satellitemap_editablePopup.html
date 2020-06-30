@@ -49,6 +49,63 @@
 		'https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png',
 		{ maxZoom: 18, attribution:'' }
 	);
+	// fireTiles
+	var fireTiles = L.layerGroup().addTo(map);
+			// add a 9 tile grid to symbolize fire risk data (each tile gets its own fire risk score)
+		L.polygon([
+			[-34.8, 150.5],
+			[-34.9, 150.5],
+			[-34.9, 150.6],
+			[-34.8, 150.6]
+			]).bindPopup('Fire Risk = 5').addTo(fireTiles);
+		L.polygon([
+			[-34.7, 150.4],
+			[-34.8, 150.4],
+			[-34.8, 150.5],
+			[-34.7, 150.5]
+			]).bindPopup('FireRisk = 1').addTo(fireTiles);
+		L.polygon([
+			[-34.7, 150.5],
+			[-34.8, 150.5],
+			[-34.8, 150.6],
+			[-34.7, 150.6]
+			]).bindPopup('FireRisk = 2').addTo(fireTiles);
+		L.polygon([
+			[-34.7, 150.6],
+			[-34.8, 150.6],
+			[-34.8, 150.7],
+			[-34.7, 150.7]
+			]).bindPopup('FireRisk = 3').addTo(fireTiles);
+		L.polygon([
+			[-34.8, 150.6],
+			[-34.9, 150.6],
+			[-34.9, 150.7],
+			[-34.8, 150.7]
+			]).bindPopup('FireRisk = 6').addTo(fireTiles);
+		L.polygon([
+			[-34.9, 150.6],
+			[-35, 150.6],
+			[-35, 150.7],
+			[-34.9, 150.7]
+			]).bindPopup('FireRisk = 9').addTo(fireTiles);
+		L.polygon([
+			[-34.9, 150.5],
+			[-35, 150.5],
+			[-35, 150.6],
+			[-34.9, 150.6]
+			]).bindPopup('FireRisk = 8').addTo(fireTiles);
+		L.polygon([
+			[-34.9, 150.4],
+			[-35, 150.4],
+			[-35, 150.5],
+			[-34.9, 150.5]
+			]).bindPopup('FireRisk = 7').addTo(fireTiles);
+		L.polygon([
+			[-34.8, 150.4],
+			[-34.9, 150.4],
+			[-34.9, 150.5],
+			[-34.8, 150.5]
+			]).bindPopup('FireRisk = 4').addTo(fireTiles);
 	// Options to toggle between maps added to layers
 	L.control.layers(
 		{
@@ -56,7 +113,10 @@
 			'landsat': landsat.addTo(map),
 			'topo': topo.addTo(map)
 		},
-		{'drawlayer': drawnItems},
+		{
+			'drawlayer': drawnItems,
+			'fire tiles': fireTiles
+		},
 		{position: 'topleft', collapsed: false}
 	).addTo(map);
 	//Boilerplate to add the layer control.
