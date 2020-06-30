@@ -96,7 +96,7 @@ def work(modelDir, inputDict):
 
 	if dispatchStrategy == 'customDispatch':
 		customDispatch = csvValidateAndLoad(
-			inputDict['demandCurve'], 
+			inputDict['customDispatchStrategy'], 
 			modelDir, header=None, 
 			ignore_nans=False,
 			save_file='dispatchStrategy.csv'
