@@ -50,7 +50,7 @@ elif platform.system()=='Windows':
 	# Check for right Python version.
 	pybin = os.popen('where python').read()
 	goodbin = 'C:\\Python36\\python.exe'
-	if pybin != goodbin:
+	if goodbin not in pybin:
 		print('Non-standard python install detected. We will attempt to continue with choco.')
 		os.system("choco install -y python --version 3.6.8")
 	# Hack to create a python3 binary on the path.
