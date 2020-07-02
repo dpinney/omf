@@ -54,7 +54,7 @@ def dssToTree(pathToDss):
 					contents[j] = contents[j] + contents[i].replace('~', ' ')
 					contents[i] = ''
 					break
-	# Drop blank lines
+	# Drop blank lines.
 	contents = [x for x in contents if x != '']
 	# Lex it
 	for i, line in enumerate(contents):

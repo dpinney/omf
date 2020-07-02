@@ -20,9 +20,7 @@ New object=Transformer.XFM1  Phases=3 Windings=2 Xhl=1.81
 ! import line codes with phase impedance matrices
 ! Redirect        IEEELineCodes.dss
 ! These are for the 37-node test feeder, all underground
-New object=linecode.721 nphases=3 BaseFreq=60
-~ rmatrix=[0.055416667|0.012746212,0.050113636|0.006382576,0.012746212,0.055416667]
-~ xmatrix=[0.037367424|-0.006969697,0.035984848|-0.007897727,-0.006969697,0.037367424]
+New object=linecode.721 nphases=3 BaseFreq=60 rmatrix=[0.055416667|0.012746212,0.050113636|0.006382576,0.012746212,0.055416667] xmatrix=[0.037367424|-0.006969697,0.035984848|-0.007897727,-0.006969697,0.037367424]
 ~ cmatrix=[80.27484728|0,80.27484728|0,0,80.27484728]
 New object=linecode.722 nphases=3 BaseFreq=60
 ~ rmatrix=[0.089981061|0.030852273,0.085|0.023371212,0.030852273,0.089981061]

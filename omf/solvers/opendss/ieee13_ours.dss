@@ -333,7 +333,7 @@ New Load.611 Bus1=611.3      Phases=1 Conn=Wye  Model=5 kV=2.4  kW=170   kvar=80
 New Load.652 Bus1=652.1      Phases=1 Conn=Wye  Model=2 kV=2.4  kW=128   kvar=86 
 New Load.670a Bus1=670.1    Phases=1 Conn=Wye  Model=1 kV=2.4  kW=17    kvar=10 
 New Load.670b Bus1=670.2    Phases=1 Conn=Wye  Model=1 kV=2.4  kW=66    kvar=38 
-New Load.670c Bus1=670.3    Phases=1 Conn=Wye  Model=1 kV=2.4  kW=117  kvar=68 
+New Load.670c Bus1=670.3    Phases=1 Conn=Wye  Model=1 kV=2.4  kW=117  kvar=68
 
 !CAPACITOR DEFINITIONS
 New Capacitor.Cap1 Bus1=675 phases=3 kVAR=600 kV=4.16 
@@ -380,7 +380,7 @@ SetBusXY	Bus=680			X=200	Y=0
 Set Voltagebases=[115, 4.16, .48]
 calcv
 Solve
-BusCoords IEEE13Node_BusXY.csv
+!BusCoords IEEE13Node_BusXY.csv
 
 !---------------------------------------------------------------------------------------------------------------------------------------------------
 !----------------Show some Results -----------------------------------------------------------------------------------------------------------------
