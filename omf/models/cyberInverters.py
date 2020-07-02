@@ -137,7 +137,7 @@ def work(modelDir, inputDict):
 	simLengthAdjusted = 0
 
 	if simLengthValue != None:
-		if simLengthValue + 100 > solarPVLengthValue:
+		if simLengthValue + startStep > solarPVLengthValue:
 			#raise error message that simLengthValue is too large for given Load Solar csv and given timestep (set to 100)
 			simLengthAdjusted = solarPVLengthValue - startStep
 		else:
@@ -149,12 +149,17 @@ def work(modelDir, inputDict):
 	# #hard-coding simLengthAdjusted for testing purposes 
 	# simLengthAdjusted = 750
 
+	# create value to represent the timestep in which the hack starts and adjust it to make sure it is within the bounds or the simulation length
+	defaultHackStart = 250
+	if defaultHackStart > simLengthAdjusted:
+		defaultHackStart = simLengthAdjusted/5
+
 	# attackVars = dict of attack types and their corresponding parameter values
 	# to add new attack: attackVars[attackAgentType_name] = {"hackStart": val, "hackEnd": val, "percentHack": val}
 	# MAKE SURE to add attackVars entry when adding another Attack Agent option to the html dropdown list and the name must match the value passed back from the form (inputDict["attackVariable"])!
 	attackVars = {}
-	attackVars["None"] = {"hackStart": 250, "hackEnd": None, "percentHack": 0.0}
-	attackVars["curveSwitch"] = {"hackStart": 250, "hackEnd": None, "percentHack": 0.45}
+	attackVars["None"] = {"hackStart": defaultHackStart, "hackEnd": None, "percentHack": 0.0}
+	attackVars["curveSwitch"] = {"hackStart": defaultHackStart, "hackEnd": None, "percentHack": 0.45}
 
 	#check to make sure attackAgentType is in the attackVars dictionary, otherwise set it to None. This shouldn't ever be a problem since the user selects attackAgentType from a preset HTML dropdown.
 	if attackAgentType not in attackVars:
@@ -219,12 +224,12 @@ def work(modelDir, inputDict):
 		defenseAgentPath = None
 
 		#set default values for attack variables
-		hackStartVal = 250
+		hackStartVal = defaultHackStart
 		hackEndVal = None
 		percentHackVal = 0.0
 		
 		#set pycigar attack variables
-		hackStartVal = attackVars[attackAgentType]["hackStart"] #TODO: see if we need to change from a hard-coded value
+		hackStartVal = attackVars[attackAgentType]["hackStart"]
 		hackEndVal = attackVars[attackAgentType]["hackEnd"] #TODO: see if we need to change from a hard-coded value
 		percentHackVal = attackVars[attackAgentType]["percentHack"] #TODO: see if we need to change from a hard-coded value
 
