@@ -855,6 +855,7 @@ def get_nrsdb_data(data_set, longitude, latitude, year, api_key, utc='true', lea
 			for i in reader:
 				csvwriter = csv.writer(csvfile, delimiter=',')
 				csvwriter.writerow(i)
+		return data
 	else:
 		#Transform data, and resubmit in friendly format for frontend
 		data = pd.DataFrame(reader)
@@ -1194,7 +1195,6 @@ def get_synth_dhi_dni(uscrn_station, year):
 
 def easy_solar_tests(uscrn_station='TX_Austin_33_NW'):
 	print("********EASY SOLAR TEST STARTED************")
-	print(Station_Dict)
 	poly_path = pJoin(omfDir, 'static', 'Log_Polynomial_clf.joblib')
 	clf_log_poly = load(poly_path)
 	year='2018'
@@ -1331,21 +1331,20 @@ def _tests():
 
 #	Testing DarkSky (Works as long as you have an API key)
 	# d=(pullDarksky(1900, 36.64, -93.30, 'temperature', api_key= '31dac4830187f562147a946529516a8d', path=tmpdir))
-	try:
-		d=(pullDarksky(1900, 30, -90, 'temperature', api_key= '31dac4830187f562147a946529516a8d'))
-		print(d)
-	except:
-		val = traceback.format_exc()
-		e = sys.exc_info()[0]
-		print(val)
-		print(e)
+	# try:
+	# 	d=(pullDarksky(1900, 30, -90, 'temperature', api_key= '31dac4830187f562147a946529516a8d'))
+	# 	print(d)
+	# except:
+	# 	val = traceback.format_exc()
+	# 	e = sys.exc_info()[0]
+	# 	print(val)
+	# 	print(e)
 
-# #	#Testing NSRDB (Works, but not used anywhere)
+#	#Testing NSRDB (Works, but not used anywhere)
 	# nsrdbkey = 'rnvNJxNENljf60SBKGxkGVwkXls4IAKs1M8uZl56'
 	# try:
 	# #Test For Austin, TX
-	# 	# d=get_nrsdb_data('psm',90.0,-30.00,'2018', nsrdbkey, interval=60)
-	# 	d=get_nrsdb_data('psm',-98.024098,30.581736,'1900', 'nsrdbkey', interval=60)
+	# 	d=get_nrsdb_data('psm',-90.0,30.00,'2018', nsrdbkey, interval=60)
 	# 	print(d)
 	# except:
 	# 	val = traceback.format_exc()
