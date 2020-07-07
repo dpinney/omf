@@ -30,7 +30,7 @@
 	<script type='text/javascript'>
 	// basic map definition and zoom control.
 	var map = L.map('map');
-	map.setView([-34.9, 150.644], 10);
+	map.setView([39.8, -121.6], 10);
 	L.control.scale().addTo(map);
 	// drawing layer
 	var drawnItems = L.featureGroup().addTo(map);
@@ -53,59 +53,59 @@
 	var fireTiles = L.layerGroup().addTo(map);
 			// add a 9 tile grid to symbolize fire risk data (each tile gets its own fire risk score)
 		L.polygon([
-			[-34.8, 150.5],
-			[-34.9, 150.5],
-			[-34.9, 150.6],
-			[-34.8, 150.6]
-			]).bindPopup('Fire Risk = 5').addTo(fireTiles);
-		L.polygon([
-			[-34.7, 150.4],
-			[-34.8, 150.4],
-			[-34.8, 150.5],
-			[-34.7, 150.5]
-			]).bindPopup('Fire Risk = 1').addTo(fireTiles);
-		L.polygon([
-			[-34.7, 150.5],
-			[-34.8, 150.5],
-			[-34.8, 150.6],
-			[-34.7, 150.6]
-			]).bindPopup('Fire Risk = 2').addTo(fireTiles);
-		L.polygon([
-			[-34.7, 150.6],
-			[-34.8, 150.6],
-			[-34.8, 150.7],
-			[-34.7, 150.7]
-			]).bindPopup('Fire Risk = 3').addTo(fireTiles);
-		L.polygon([
-			[-34.8, 150.6],
-			[-34.9, 150.6],
-			[-34.9, 150.7],
-			[-34.8, 150.7]
-			]).bindPopup('Fire Risk = 6').addTo(fireTiles);
-		L.polygon([
-			[-34.9, 150.6],
-			[-35, 150.6],
-			[-35, 150.7],
-			[-34.9, 150.7]
-			]).bindPopup('Fire Risk = 9').addTo(fireTiles);
-		L.polygon([
-			[-34.9, 150.5],
-			[-35, 150.5],
-			[-35, 150.6],
-			[-34.9, 150.6]
-			]).bindPopup('Fire Risk = 8').addTo(fireTiles);
-		L.polygon([
-			[-34.9, 150.4],
-			[-35, 150.4],
-			[-35, 150.5],
-			[-34.9, 150.5]
+			[39.7, -121.7],
+			[39.8, -121.7],
+			[39.8, -121.6],
+			[39.7, -121.6]
 			]).bindPopup('Fire Risk = 7').addTo(fireTiles);
 		L.polygon([
-			[-34.8, 150.4],
-			[-34.9, 150.4],
-			[-34.9, 150.5],
-			[-34.8, 150.5]
+			[39.7, -121.6],
+			[39.8, -121.6],
+			[39.8, -121.5],
+			[39.7, -121.5]
+			]).bindPopup('Fire Risk = 8').addTo(fireTiles);
+		L.polygon([
+			[39.7, -121.5],
+			[39.8, -121.5],
+			[39.8, -121.4],
+			[39.7, -121.4]
+			]).bindPopup('Fire Risk = 9').addTo(fireTiles);
+		L.polygon([
+			[39.8, -121.7],
+			[39.9, -121.7],
+			[39.9, -121.6],
+			[39.8, -121.6]
 			]).bindPopup('Fire Risk = 4').addTo(fireTiles);
+		L.polygon([
+			[39.8, -121.6],
+			[39.9, -121.6],
+			[39.9, -121.5],
+			[39.8, -121.5]
+			]).bindPopup('Fire Risk = 5').addTo(fireTiles);
+		L.polygon([
+			[39.8, -121.5],
+			[39.9, -121.5],
+			[39.9, -121.4],
+			[39.8, -121.4]
+			]).bindPopup('Fire Risk = 6').addTo(fireTiles);
+		L.polygon([
+			[39.9, -121.7],
+			[40, -121.7],
+			[40, -121.6],
+			[39.9, -121.6]
+			]).bindPopup('Fire Risk = 1').addTo(fireTiles);
+		L.polygon([
+			[39.9, -121.6],
+			[40, -121.6],
+			[40, -121.5],
+			[39.9, -121.5]
+			]).bindPopup('Fire Risk = 2').addTo(fireTiles);
+		L.polygon([
+			[39.9, -121.5],
+			[40, -121.5],
+			[40, -121.4],
+			[39.9, -121.4]
+			]).bindPopup('Fire Risk = 3').addTo(fireTiles);
 	// Options to toggle between maps added to layers
 	L.control.layers(
 		{
