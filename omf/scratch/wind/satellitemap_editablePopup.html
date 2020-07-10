@@ -577,6 +577,13 @@
 	//   { x: 26.64671527827937, y: 38.65353941234598  }
 	// ];
 
+	// NOTE: LIKELY ARCHITECTURE FOR OBJECT CONVERSION
+	// what_you_have = [[2,4],[2,3],[4,5],[2,3]]
+	// what_you_want = [{x:2,y:4},{...},{...},{...}]
+	// new_list = []
+	// for item in what_you_have:
+	// 	new_list.append({x:item[0], y:item[1]})
+
 	//default test
 	// fig1 = [
 	//   { x: 100, y: 200  },
