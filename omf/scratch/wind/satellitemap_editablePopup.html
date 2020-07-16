@@ -584,6 +584,14 @@
 	// for item in what_you_have:
 	// 	new_list.append({x:item[0], y:item[1]})
 
+	var i;
+	var drawnItems_objects = [];
+	console.log(drawnItems_objects);
+	for (i = 0; i < drawnItems; i++) {
+		drawnItems_objects.push({'x' : drawnItems[i].geometry.coordinates[0], 'y' : drawnItems[i].geometry.coordinates[1]});
+	}
+	console.log(drawnItems_objects);
+
 	//default test
 	// fig1 = [
 	//   { x: 100, y: 200  },
