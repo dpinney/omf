@@ -1244,6 +1244,37 @@ def _singlePointDataQuery(lat1, lon1, product, begin, end, Unit='m', optional_pa
 	urlString +='&' + urlencode(params3)
 	return urlString
 
+"""Subgrid defined by center point and lat/lon horizontal distance"""
+
+def _subGrid(centerPointLat, centerPointLon, distanceLat, distanceLon, resolutionSquare, product, begin, end, Unit='m', optional_params=['wspd', 'wdir']):
+	#Split into 3 dictionaries, each are encoded in a different manner
+	params = {
+		'centerPointLat':centerPointLat,
+		'centerPointLon':centerPointLon,
+		'distanceLat':distanceLat,
+		'distanceLon':distanceLon,
+		'resolutionSquare':resolutionSquare,
+		'product':product
+	}
+	#Begin/end has special encoding
+	params2 = {'begin':begin,
+	'end':end
+	}
+	params3 = {
+		'Unit':Unit,
+	}
+
+	urlString = urlencode(params)
+	subString = ''
+	for key, value in params2.items():
+		subString += '&'+str(key) + '=' + str(value)
+	urlString+=subString
+	for i in optional_params:
+		params3[i] = i
+	urlString +='&' + urlencode(params3)
+
+	return urlString
+
 #Main URL path
 def _ndfd_url(path=''):
     return 'http://www.weather.gov/forecasts/xml/sample_products/browser_interface/ndfdXMLclient.php?' + path
@@ -1274,6 +1305,15 @@ def get_ndfd_data(lat1, lon1, optional_params=['wspd'], begin=str(datetime.now()
 	return data
 
 
+#Wrapper to call _subGrid, return parsed dict
+def getSubGridData(centerLat, centerLon, distanceLat, distanceLon, resolutionSquare, product, begin, end, Unit='m', optional_params=[]):
+	data = _run_ndfd_request(_subGrid(centerLat, centerLon, distanceLat, distanceLon, resolutionSquare, product, begin, end, Unit='m', optional_params=['wspd', 'wdir']))
+	outData = _generalParseXml(data)
+	return outData
+
+
+
+#Custom ApiError class
 class ApiError(Exception):
 
 	def __init__(self, message, status_code=None, payload=None):
@@ -1340,8 +1380,7 @@ def _tests():
 	# 	print(val)
 	# 	print(e)
 
-#	#Testing NSRDB (Works, but not used anywhere)
-	# nsrdbkey = 'rnvNJxNENljf60SBKGxkGVwkXls4IAKs1M8uZl56'
+	#Testing NSRDB (Works)
 	# try:
 	# #Test For Austin, TX
 	# 	d=get_nrsdb_data('psm',-90.0,30.00,'2018', nsrdbkey, interval=60)
