@@ -1306,8 +1306,8 @@ def get_ndfd_data(lat1, lon1, optional_params=['wspd'], begin=str(datetime.now()
 
 
 #Wrapper to call _subGrid, return parsed dict
-def getSubGridData(centerLat, centerLon, distanceLat, distanceLon, resolutionSquare, product, begin, end, Unit='m', optional_params=[]):
-	data = _run_ndfd_request(_subGrid(centerLat, centerLon, distanceLat, distanceLon, resolutionSquare, product, begin, end, Unit='m', optional_params=['wspd', 'wdir']))
+def getSubGridData(centerLat, centerLon, distanceLat, distanceLon, resolutionSquare, product, begin=str(datetime.now().isoformat()), end=print((datetime.now()+timedelta(weeks=+10)).isoformat()), Unit='m', optional_params=['wspd', 'wdir']):
+	data = _run_ndfd_request(_subGrid(centerLat, centerLon, distanceLat, distanceLon, resolutionSquare, product, begin, end, Unit, optional_params))
 	outData = _generalParseXml(data)
 	return outData
 
@@ -1407,7 +1407,9 @@ def _tests():
 
 #	NDFD tests
 	# try:
-	# 	d = get_ndfd_data('39.0000', '-77000.0000',['wspd'])
+	# # 	d = get_ndfd_data('39.0000', '-77000.0000',['wspd'])
+	# # 	print(d)
+	# 	d = getSubGridData('40.758701', '-111.876183', '20', '20', '20', 'time-series')
 	# 	print(d)
 	# except:
 	# 	val = traceback.format_exc()
