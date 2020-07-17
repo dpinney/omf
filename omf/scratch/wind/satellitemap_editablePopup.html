@@ -564,7 +564,6 @@
 	  console.log(JSON.stringify(obj));
 	}
 
-
 	// fig1 = [
 	//   { x:  5.35328472172063, y:  3.3464605876540254 },
 	//   { x: 31.10025450900146, y:  3.3464605876540254 },
@@ -583,14 +582,6 @@
 	// new_list = []
 	// for item in what_you_have:
 	// 	new_list.append({x:item[0], y:item[1]})
-
-	var i;
-	var drawnItems_objects = [];
-	console.log(drawnItems_objects);
-	for (i = 0; i < drawnItems; i++) {
-		drawnItems_objects.push({'x' : drawnItems[i].geometry.coordinates[0], 'y' : drawnItems[i].geometry.coordinates[1]});
-	}
-	console.log(drawnItems_objects);
 
 	//default test
 	// fig1 = [
@@ -725,6 +716,16 @@
 	function button_click() {
 		drawn_geojson = drawnItems.toGeoJSON()
 		alert('We drew: ' + JSON.stringify(drawn_geojson))
+
+		//sets fig1 input (drawn polygons) for js-intersect after they have been drawn (when Get GeoJSON is clicked)
+		var i;
+		var j;
+		var drawnItems_objects = [];
+		for (i = 0; i < drawn_geojson.features.length; i++) {
+			for (j = 0; j < drawn_geojson.features[i].geometry.coordinates[0].length; j++) {
+				drawnItems_objects.push({'x' : drawn_geojson.features[i].geometry.coordinates[0][j][0], 'y' : drawn_geojson.features[i].geometry.coordinates[0][j][1]});
+			}
+		}
 	}
 </script>
 <button type="button" onclick="button_click()" style="position:fixed; top:0; right: 0; z-index:999">Get GeoJson</button>
