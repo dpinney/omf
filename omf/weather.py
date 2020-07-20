@@ -855,6 +855,7 @@ def get_nrsdb_data(data_set, longitude, latitude, year, api_key, utc='true', lea
 			for i in reader:
 				csvwriter = csv.writer(csvfile, delimiter=',')
 				csvwriter.writerow(i)
+		return data
 	else:
 		#Transform data, and resubmit in friendly format for frontend
 		data = pd.DataFrame(reader)
@@ -1194,7 +1195,6 @@ def get_synth_dhi_dni(uscrn_station, year):
 
 def easy_solar_tests(uscrn_station='TX_Austin_33_NW'):
 	print("********EASY SOLAR TEST STARTED************")
-	print(Station_Dict)
 	poly_path = pJoin(omfDir, 'static', 'Log_Polynomial_clf.joblib')
 	clf_log_poly = load(poly_path)
 	year='2018'
@@ -1244,6 +1244,37 @@ def _singlePointDataQuery(lat1, lon1, product, begin, end, Unit='m', optional_pa
 	urlString +='&' + urlencode(params3)
 	return urlString
 
+"""Subgrid defined by center point and lat/lon horizontal distance"""
+
+def _subGrid(centerPointLat, centerPointLon, distanceLat, distanceLon, resolutionSquare, product, begin, end, Unit='m', optional_params=['wspd', 'wdir']):
+	#Split into 3 dictionaries, each are encoded in a different manner
+	params = {
+		'centerPointLat':centerPointLat,
+		'centerPointLon':centerPointLon,
+		'distanceLat':distanceLat,
+		'distanceLon':distanceLon,
+		'resolutionSquare':resolutionSquare,
+		'product':product
+	}
+	#Begin/end has special encoding
+	params2 = {'begin':begin,
+	'end':end
+	}
+	params3 = {
+		'Unit':Unit,
+	}
+
+	urlString = urlencode(params)
+	subString = ''
+	for key, value in params2.items():
+		subString += '&'+str(key) + '=' + str(value)
+	urlString+=subString
+	for i in optional_params:
+		params3[i] = i
+	urlString +='&' + urlencode(params3)
+
+	return urlString
+
 #Main URL path
 def _ndfd_url(path=''):
     return 'http://www.weather.gov/forecasts/xml/sample_products/browser_interface/ndfdXMLclient.php?' + path
@@ -1274,6 +1305,15 @@ def get_ndfd_data(lat1, lon1, optional_params=['wspd'], begin=str(datetime.now()
 	return data
 
 
+#Wrapper to call _subGrid, return parsed dict
+def getSubGridData(centerLat, centerLon, distanceLat, distanceLon, resolutionSquare, product, begin=str(datetime.now().isoformat()), end=print((datetime.now()+timedelta(weeks=+10)).isoformat()), Unit='m', optional_params=['wspd', 'wdir']):
+	data = _run_ndfd_request(_subGrid(centerLat, centerLon, distanceLat, distanceLon, resolutionSquare, product, begin, end, Unit, optional_params))
+	outData = _generalParseXml(data)
+	return outData
+
+
+
+#Custom ApiError class
 class ApiError(Exception):
 
 	def __init__(self, message, status_code=None, payload=None):
@@ -1331,21 +1371,19 @@ def _tests():
 
 #	Testing DarkSky (Works as long as you have an API key)
 	# d=(pullDarksky(1900, 36.64, -93.30, 'temperature', api_key= '31dac4830187f562147a946529516a8d', path=tmpdir))
-	try:
-		d=(pullDarksky(1900, 30, -90, 'temperature', api_key= '31dac4830187f562147a946529516a8d'))
-		print(d)
-	except:
-		val = traceback.format_exc()
-		e = sys.exc_info()[0]
-		print(val)
-		print(e)
+	# try:
+	# 	d=(pullDarksky(1900, 30, -90, 'temperature', api_key= '31dac4830187f562147a946529516a8d'))
+	# 	print(d)
+	# except:
+	# 	val = traceback.format_exc()
+	# 	e = sys.exc_info()[0]
+	# 	print(val)
+	# 	print(e)
 
-# #	#Testing NSRDB (Works, but not used anywhere)
-	# nsrdbkey = 'rnvNJxNENljf60SBKGxkGVwkXls4IAKs1M8uZl56'
+	#Testing NSRDB (Works)
 	# try:
 	# #Test For Austin, TX
-	# 	# d=get_nrsdb_data('psm',90.0,-30.00,'2018', nsrdbkey, interval=60)
-	# 	d=get_nrsdb_data('psm',-98.024098,30.581736,'1900', 'nsrdbkey', interval=60)
+	# 	d=get_nrsdb_data('psm',-90.0,30.00,'2018', nsrdbkey, interval=60)
 	# 	print(d)
 	# except:
 	# 	val = traceback.format_exc()
@@ -1369,7 +1407,9 @@ def _tests():
 
 #	NDFD tests
 	# try:
-	# 	d = get_ndfd_data('39.0000', '-77000.0000',['wspd'])
+	# # 	d = get_ndfd_data('39.0000', '-77000.0000',['wspd'])
+	# # 	print(d)
+	# 	d = getSubGridData('40.758701', '-111.876183', '20', '20', '20', 'time-series')
 	# 	print(d)
 	# except:
 	# 	val = traceback.format_exc()
