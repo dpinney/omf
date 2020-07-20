@@ -1381,6 +1381,7 @@ def _tests():
 	# 	print(e)
 
 	#Testing NSRDB (Works)
+	# nsrdbkey = 'rnvNJxNENljf60SBKGxkGVwkXls4IAKs1M8uZl56'
 	# try:
 	# #Test For Austin, TX
 	# 	d=get_nrsdb_data('psm',-90.0,30.00,'2018', nsrdbkey, interval=60)
