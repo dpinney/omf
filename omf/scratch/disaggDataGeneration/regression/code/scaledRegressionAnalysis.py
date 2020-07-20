@@ -101,13 +101,6 @@ def loadData(filename):
 				xNumCols = len(xRow)
 				yNumCols = len(yRow)
 
-			# # create xRow and yRow 
-			# xRow = data[1:TEST_DATA_COL_START] + [isWeekend, hourOfDay]
-			# yRow = data[TEST_DATA_COL_START:]
-			# if rowNum == 0:
-			# 	xNumCols = len(xRow)
-			# 	yNumCols = len(yRow)
-
 			# convert categorical variables to ints
 			for colNum in CATEGORICAL_FEATURE_INDEXES:
 				xRow[colNum] = \
@@ -201,9 +194,9 @@ def loadData(filename):
 	print('original xTrain shape', xTrain.shape)
 	print('original xTest shape', xTest.shape)
 	
-	# # perform encoding
-	# xTrain = performOneHotEncoding( xTrain )
-	# xTest = performOneHotEncoding( xTest )
+	# perform encoding
+	xTrain = performOneHotEncoding( xTrain )
+	xTest = performOneHotEncoding( xTest )
 	
 	# compute and display progress
 	end = time.time()
@@ -305,11 +298,16 @@ regressor = Ridge(random_state=RAND_SEED, max_iter=2000)
 xTrainOrig, yTrainOrig, xTestOrig, yTestOrig, appliances = \
 	loadData( INPUT_FILE )
 
-# scaler = MaxAbsScaler()
-# xTrainOrig = scaler.fit_transform(xTrainOrig)
-# xTestOrig = scaler.transform(xTestOrig)
+scaler = MaxAbsScaler()
+xTrainOrig = scaler.fit_transform(xTrainOrig)
+xTestOrig = scaler.transform(xTestOrig)
+xTrainOrig = xTrainOrig.tocoo()
+xTestOrig = xTestOrig.tocoo()
 
-TIME_CHUNKS = [0]#,24,2,12,48,24*7]
+
+print(type(xTrainOrig),type(xTestOrig))
+
+TIME_CHUNKS = [0]#[0,24,2,12,48,24*7]
 for iterNum, hour in enumerate(TIME_CHUNKS):
 	timeChunk = hour*3600
 

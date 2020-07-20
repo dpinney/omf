@@ -15,9 +15,8 @@ OUTPUT_FILENAME = DATA_DIR + 'dataSubset.csv'
 DELIMITER = ','
 
 # define file structure params
-NUM_HOUSE_TYPES = 2
-NUM_INSTANCES = 1
-
+NUM_HOUSE_TYPES = 48
+NUM_INSTANCES = 4
 
 # concatenate individual house files into a final output file ---------------
 

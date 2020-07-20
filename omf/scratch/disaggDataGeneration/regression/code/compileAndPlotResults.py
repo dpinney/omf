@@ -17,6 +17,7 @@ pio.renderers.default = "firefox"
 DATE_FORMAT = '%Y-%m-%d'
 START_DATE = '2012-01-01'
 PLOT_DATE = '2012-01-10'
+PLOT_HOUSE_INDEX = 'average' # set to 'average' to see average error across all houses
 
 TIME_SAMPLES_PER_HOUR = 4
 TIME_CHUNK = 24
@@ -32,6 +33,14 @@ DATA_SUBFOLDER = DATA_DIR + str(NUM_HOUSE_TYPES) + 'Types' + \
 IN_FILENAME = DATA_SUBFOLDER+'/results'+str(TIME_CHUNK)+'timeChunk.csv'
 
 DELIMITER = ','
+
+APPLIANCES = ['heating_demand',
+	'cooling_demand',
+	'ev_charger',
+	'hvac',
+	'responsive',
+	'unresponsive',
+	'waterheater']
 
 # functions -------------------------------------------------------------------
 
@@ -133,9 +142,9 @@ with open(IN_FILENAME, 'r') as infile:
 		pred.append(currentPred)
 
 		rowNum+=1
-		if (rowNum % 1000) == 0:
-			end = time.time()
-			print('loaded till line',rowNum, 'in', end-start, 'secs')
+		# if (rowNum % 1000) == 0:
+		# 	end = time.time()
+		# 	print('loaded till line',rowNum, 'in', end-start, 'secs')
 
 # make sure everything is a numpy array of floats
 true = np.array(true,dtype='float64')
@@ -143,20 +152,37 @@ pred = np.array(pred,dtype='float64')
 print('\ntrue shape', true.shape)
 
 # reshape true and predicted to be (time x houses) by appliance
+true = np.reshape(true, (true.shape[0],-1,numAppliances), order='F')
+pred = np.reshape(pred, (true.shape[0],-1,numAppliances), order='F')
+print('true shape', true.shape)
+true = np.transpose(true, (1,0,2))
+pred = np.transpose(pred, (1,0,2))
+print('true shape', true.shape)
 true = np.reshape(true, (-1,numAppliances), order='F')
 pred = np.reshape(pred, (-1,numAppliances), order='F')
-error = pred-true
 print('true shape', true.shape)
+
+# compute error
+error = pred-true
+
+# # plot data
+# hNum = 0
+# hIndex = hNum*NUM_ROWS_PER_FILE
+# print(hIndex)
+# for applianceNum in range(numAppliances):
+# 	plotY = true[:96,applianceNum]
+# 	plotX = np.arange(len(plotY))
+# 	fig = go.Figure(data=go.Scatter(x=plotX, y=plotY))
+# 	fig.update_layout( \
+# 		title='all test houses, all time points for appliance ' + \
+# 		APPLIANCES[applianceNum] )
+# 	fig.show()
+# raise Exception('')
 
 # compute error as a percent of max load
 trueMaxByApp = true.max(axis=0)
-print('trueMax shape', trueMaxByApp.shape)
-print('trueMax', trueMaxByApp)
 trueMaxByApp = np.broadcast_to(trueMaxByApp,error.shape)
-print('trueMax shape', trueMaxByApp.shape)
-error = 100*np.divide(error,trueMaxByApp) 
-print('error shape', error.shape)
-print('error', error)
+# error = 100*np.divide(error,trueMaxByApp) 
 
 # compute metrics
 errorMean = error.mean()
@@ -174,35 +200,68 @@ print( 'results std:', \
 print()
 
 # reshape data into houses x time x app
-true = np.reshape(true, (NUM_HOUSE_TYPES,-1,numAppliances), order='F')
-pred = np.reshape(pred, (NUM_HOUSE_TYPES,-1,numAppliances), order='F')
-error = np.reshape(error, (NUM_HOUSE_TYPES,-1,numAppliances), order='F')
+numHouses = int(NUM_HOUSE_TYPES*NUM_INSTANCES*TEST_FRAC)
+true = np.reshape(true, (-1,numHouses,numAppliances), order='F')
+pred = np.reshape(pred, (-1,numHouses,numAppliances), order='F')
+error = np.reshape(error, (-1,numHouses,numAppliances), order='F')
 print('true shape', true.shape)
 
-# average data across houses
-trueMeanByHouse = true.mean(axis=0)
-predMeanByHouse = pred.mean(axis=0)
-errorMeanByHouse = error.mean(axis=0)
-# get std
-trueStdByHouse = true.std(axis=0)
-predStdByHouse = pred.std(axis=0)
-errorStdByHouse = error.std(axis=0)
-print('true shape', true.shape)
+# # plot data
+# hNum = 2
+# hIndex = hNum*NUM_ROWS_PER_FILE
+# print(hIndex)
+# for applianceNum in range(numAppliances):
+# 	plotY = true[:96,hNum,applianceNum]
+# 	plotX = np.arange(len(plotY))
+# 	fig = go.Figure(data=go.Scatter(x=plotX, y=plotY))
+# 	fig.update_layout( \
+# 		title='all test houses, all time points for appliance ' + \
+# 		APPLIANCES[applianceNum] )
+# 	fig.show()
+# raise Exception('')
+
+
+if PLOT_HOUSE_INDEX =='average':
+
+	# average data across houses
+	trueMeanByHouse = true.mean(axis=1)
+	predMeanByHouse = pred.mean(axis=1)
+	errorMeanByHouse = error.mean(axis=1)
+	# get std
+	trueStdByHouse = true.std(axis=1)
+	predStdByHouse = pred.std(axis=1)
+	errorStdByHouse = error.std(axis=1)
+
+else:
+
+	trueMeanByHouse = np.squeeze(true[:,PLOT_HOUSE_INDEX,:])
+	predMeanByHouse = np.squeeze(pred[:,PLOT_HOUSE_INDEX,:])
+	errorMeanByHouse = np.squeeze(error[:,PLOT_HOUSE_INDEX,:])
+	trueStdByHouse = np.zeros(trueMeanByHouse.shape)
+	predStdByHouse = np.zeros(predMeanByHouse.shape)
+	errorStdByHouse = np.zeros(errorMeanByHouse.shape)
+
+print('why is the true shape', true.shape)
 
 # reshape data into days x time sample x app
 trueMeanByHouse = np.reshape(trueMeanByHouse, \
-	(-1,TIME_SAMPLES_PER_HOUR*24,numAppliances), order='F')
+	(TIME_SAMPLES_PER_HOUR*24,-1,numAppliances), order='F')
+trueMeanByHouse = np.transpose( trueMeanByHouse, (1,0,2) )
 predMeanByHouse = np.reshape(predMeanByHouse, \
-	(-1,TIME_SAMPLES_PER_HOUR*24,numAppliances), order='F')
+	(TIME_SAMPLES_PER_HOUR*24,-1,numAppliances), order='F')
+predMeanByHouse = np.transpose( predMeanByHouse, (1,0,2) )
 errorMeanByHouse = np.reshape(errorMeanByHouse, \
-	(-1,TIME_SAMPLES_PER_HOUR*24,numAppliances), order='F')
+	(TIME_SAMPLES_PER_HOUR*24,-1,numAppliances), order='F')
+errorMeanByHouse = np.transpose( errorMeanByHouse, (1,0,2) )
 trueStdByHouse = np.reshape(trueStdByHouse, \
-	(-1,TIME_SAMPLES_PER_HOUR*24,numAppliances), order='F')
+	(TIME_SAMPLES_PER_HOUR*24,-1,numAppliances), order='F')
+trueStdByHouse = np.transpose( trueStdByHouse, (1,0,2) )
 predStdByHouse = np.reshape(predStdByHouse, \
-	(-1,TIME_SAMPLES_PER_HOUR*24,numAppliances), order='F')
+	(TIME_SAMPLES_PER_HOUR*24,-1,numAppliances), order='F')
+predStdByHouse = np.transpose( predStdByHouse, (1,0,2) )
 errorStdByHouse = np.reshape(errorStdByHouse, \
-	(-1,TIME_SAMPLES_PER_HOUR*24,numAppliances), order='F')
-print('true shape', trueMeanByHouse.shape)
+	(TIME_SAMPLES_PER_HOUR*24,-1,numAppliances), order='F')
+errorStdByHouse = np.transpose( errorStdByHouse, (1,0,2) )
 
 # plot data ---------------------------------------------------------------
 
@@ -226,9 +285,9 @@ for applianceNum in range(numAppliances):
 	errorUpper = errorPlotY + errorStdByHouse[plotDayIndex,:,applianceNum]
 	errorLower = errorPlotY - errorStdByHouse[plotDayIndex,:,applianceNum]
 
-	# print truth vs prediction by appliance
+	# plot truth vs prediction by appliance
 	fig = go.Figure()
-	title = 'truth vs prediction for appliance' + str(applianceNum)
+	title = 'truth vs prediction for appliance ' + APPLIANCES[applianceNum]
 	plotWithBounds(fig, plotX, truePlotY, trueUpper, trueLower, \
 		'rgba(255,0,0,1)', name='truth')
 	plotWithBounds(fig, plotX, predPlotY, predUpper, predLower, \
@@ -236,12 +295,12 @@ for applianceNum in range(numAppliances):
 		xAxisLabel = '15 minute sampleNum', yAxisLabel='watts')
 	fig.show()
 
-	# print error by appliance
+	# plot error by appliance
 	fig2 = go.Figure()
-	title = 'error for appliance' + str(applianceNum)
+	title = 'error for appliance ' + APPLIANCES[applianceNum]
 	plotWithBounds(fig2, plotX, errorPlotY, errorUpper, errorLower, \
 		'rgba(0,0,255,1)', name='error', title=title, \
-		xAxisLabel = '15 minute sampleNum', yAxisLabel='percent max load')
+		xAxisLabel = '15 minute sampleNum', yAxisLabel='watts')
 	fig2.show()
 
 # compute and display progress

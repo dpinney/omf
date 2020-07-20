@@ -8,6 +8,9 @@ signal.signal(signal.SIGINT, signalHandler)
 
 # imports ---------------------------------------------------------------------
 
+from joblib import Parallel, delayed
+import multiprocessing as mp
+from sklearn.linear_model import SGDRegressor
 from sklearn.preprocessing import MaxAbsScaler
 from scipy.sparse import coo_matrix, hstack, lil_matrix
 from sklearn.preprocessing import OneHotEncoder
@@ -31,7 +34,7 @@ pio.renderers.default = "firefox"
 
 # define analysis params
 NUM_HOUSE_TYPES = 48
-NUM_INSTANCES = 2
+NUM_INSTANCES = 4
 DESIRED_TRAIN_FRACTION = 0.5
 RAND_SEED = 42
 START = time.time();
@@ -100,13 +103,6 @@ def loadData(filename):
 			if rowNum == 0:
 				xNumCols = len(xRow)
 				yNumCols = len(yRow)
-
-			# # create xRow and yRow 
-			# xRow = data[1:TEST_DATA_COL_START] + [isWeekend, hourOfDay]
-			# yRow = data[TEST_DATA_COL_START:]
-			# if rowNum == 0:
-			# 	xNumCols = len(xRow)
-			# 	yNumCols = len(yRow)
 
 			# convert categorical variables to ints
 			for colNum in CATEGORICAL_FEATURE_INDEXES:
@@ -201,9 +197,9 @@ def loadData(filename):
 	print('original xTrain shape', xTrain.shape)
 	print('original xTest shape', xTest.shape)
 	
-	# # perform encoding
-	# xTrain = performOneHotEncoding( xTrain )
-	# xTest = performOneHotEncoding( xTest )
+	# perform encoding
+	xTrain = performOneHotEncoding( xTrain )
+	xTest = performOneHotEncoding( xTest )
 	
 	# compute and display progress
 	end = time.time()
@@ -260,6 +256,27 @@ def reshapeByTimeChunk( data, timeChunk ):
 	
 	return data
 
+def predict(regressor, xTrain, yTrain, xTest, yTest, appIndex):
+
+	# get the column we want to train on 
+	trainLabels = yTrain.getcol(appIndex).toarray().reshape(-1)
+
+	# train model and make predictions
+	localStart = time.time()
+	# print('\ntraining model for column ', appIndex)
+	regressor.fit(xTrain,trainLabels)
+	end = time.time()
+	print('completed model training for column ', appIndex, ' in ', end-localStart, 'secs')
+	print('total time elapsed ', end-START, 'secs')
+	
+	localStart = time.time()
+	# print('making predictions')
+	predictions = regressor.predict(xTest)
+	print('completed predictions for column ', appIndex, ' in ', end-localStart, 'secs')
+	print('total time elapsed ', end-START, 'secs')
+
+	return predictions
+	
 # helper functions ------------------------------------------------------------
 
 def trackNonZeros( inputArray, rowNum, rowTrack, colTrack, dataTrack):
@@ -299,41 +316,23 @@ def performOneHotEncoding( x ):
 START = time.time()
 
 # define regression model
-regressor = Ridge(random_state=RAND_SEED, max_iter=2000)
+# regressor = Ridge(random_state=RAND_SEED, max_iter=2000)
+regressor = SGDRegressor(random_state=RAND_SEED, max_iter=2000, tol=1e-3)
 
 # load data
 xTrainOrig, yTrainOrig, xTestOrig, yTestOrig, appliances = \
 	loadData( INPUT_FILE )
 
-# scaler = MaxAbsScaler()
-# xTrainOrig = scaler.fit_transform(xTrainOrig)
-# xTestOrig = scaler.transform(xTestOrig)
+scaler = MaxAbsScaler()
+xTrainOrig = scaler.fit_transform(xTrainOrig)
+xTestOrig = scaler.transform(xTestOrig)
+xTrainOrig = xTrainOrig.tocoo()
+xTestOrig = xTestOrig.tocoo()
 
-TIME_CHUNKS = [0]#,24,2,12,48,24*7]
+TIME_CHUNKS = [24]#[0,24,2,12,48,24*7]
 for iterNum, hour in enumerate(TIME_CHUNKS):
 	timeChunk = hour*3600
 
-	# # plot raw true data
-	# numAppliances = appliances.shape[0]
-	# for applianceNum in range(numAppliances):
-
-	# 	plotY = yTestOrig.getcol(applianceNum).toarray().squeeze()
-	# 	print(plotY.shape)
-
-	# 	plotX = np.arange(len(plotY))
-	# 	fig = go.Figure(data=go.Scatter(x=plotX, y=plotY))
-	# 	fig.update_layout(title='all test houses, all time points for '+\
-	# 		appliances[applianceNum])
-	# 	fig.show()
-		
-	# 	plotY = yTrainOrig.getcol(applianceNum).toarray().squeeze()
-	# 	fig = go.Figure(data=go.Scatter(x=plotX, y=plotY))
-	# 	fig.update_layout(title='all training houses, all time points for '+\
-	# 		appliances[applianceNum])
-	# 	fig.show()
-
-	# raise Exception('training visualization only')
-	
 	# perform regression 
 	localStart = time.time()
 	print('\nperforming regression with',hour,'hour chunks')
@@ -349,38 +348,24 @@ for iterNum, hour in enumerate(TIME_CHUNKS):
 	print('xTest', xTest.shape, 'yTest', yTest.shape) 
 	print('appliances', appliances.shape)
 
-	# # plot raw true data
-	# dayNum = 0
-	
-	# plotY = yTest.getrow(dayNum).toarray().squeeze()
-	# plotX = np.arange(len(plotY))
-	
-	# print(plotY.shape,plotX.shape)
-	# fig = go.Figure(data=go.Scatter(x=plotX, y=plotY))
-	# fig.show()
+	# perform predictions for each appliance in parallel
+	# results = [ pool.apply( predict, \
+	# 	args=(regressor, xTrain, yTrain, xTest, yTest, appIndex) ) \
+	# 	for appIndex in np.arange(yTest.shape[1]) ]
+	predictions = Parallel(n_jobs=2)( delayed(predict) \
+		(regressor, xTrain, yTrain, xTest, yTest, appIndex) \
+		for appIndex in range(yTest.shape[1]) )
 
-	# plotY = yTrain.getrow(dayNum).toarray().squeeze()
-	# fig = go.Figure(data=go.Scatter(x=plotX, y=plotY))
-	# fig.show()
+	# for appIndex in range(yTest.shape[1]):
+	# 	predict(regressor, xTrain, yTrain, xTest, yTest, appIndex)
 
+	# pool.close() 
 
-	# train model and make predictions
-	localStart = time.time()
-	print('\ntraining model')
-	regressor.fit(xTrain,yTrain.toarray())
-	end = time.time()
-	print('completed model training in', end-localStart, 'secs')
-	print('\ntotal time elapsed ', end-START, 'secs')
-	
-	localStart = time.time()
-	print('\nmaking predictions')
-	predictions = regressor.predict(xTest)
-	print('completed predictions in', end-localStart, 'secs')
-	print('\ntotal time elapsed ', end-START, 'secs')
-	
 	# write to file ---------------------------------------------------------
 
-	pred = predictions
+	pred = np.array(predictions).transpose()
+	print(pred.shape)
+
 	true = yTest.toarray()
 
 	resultsFile = DATA_SUBFOLDER+'/results'+str(hour)+'timeChunk.csv'
@@ -394,13 +379,16 @@ for iterNum, hour in enumerate(TIME_CHUNKS):
 			toWrite = list(predRow) + [''] + list(trueRow)
 			writer.writerow(toWrite)
 			
-			if ( (rowNum+1) % NUM_ROWS_PER_FILE) == 0:
-				end = time.time()
-				print('house',int(rowNum/NUM_ROWS_PER_FILE),'/', \
-					NUM_INSTANCES*NUM_HOUSE_TYPES, \
-					'\ntotal time elapsed ', end-START, 'secs')
+			# if ( (rowNum+1) % NUM_ROWS_PER_FILE) == 0:
+			# 	end = time.time()
+			# 	print('house',int(rowNum/NUM_ROWS_PER_FILE),'/', \
+			# 		NUM_INSTANCES*NUM_HOUSE_TYPES, \
+			# 		'\ntotal time elapsed ', end-START, 'secs')
 
 	# compute and display progress
 	end = time.time()
 	print('completed iteration', iterNum, 'in', end-localStart, 'secs')
 	print('\ntotal time elapsed ', end-START, 'secs')
+
+# close multiprocessing pool
+# pool.close()    

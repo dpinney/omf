@@ -1,6 +1,6 @@
 # break out of code on keyboard interrupt -------------------------------------
 
-import os, signal
+import os, signal, sys
 def signalHandler(signal, frame):
     os._exit(1)
 
