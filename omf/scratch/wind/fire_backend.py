@@ -20,6 +20,8 @@ def test():
 @app.route('/firedata/<coords>')
 def firedata(coords):
 	# x = omf.weather.get_ndfd(33,53)
+	print(coords)
+	print(coords[0], coords[1])
 	lat = 40.758701
 	lon = -111.876183
 	dist = 20
@@ -68,3 +70,4 @@ function loadDoc() {
 
 if __name__ == '__main__':
 	app.run(debug=True)
+	
