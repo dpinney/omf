@@ -4,30 +4,32 @@ Backend for fire map work.
 
 import multiprocessing, time
 from flask import Flask
+import json
 from omf.weather import getSubGridData
 
 app = Flask(__name__)
 
 @app.route('/')
 def root():
-	return 'Hello World!'
+	return open('satellitemap_editablePopup.html').read()
 
 @app.route('/test')
 def test():
 	x = 1 + 2
 	return '<b>bold world</b>' + str(x)
 
-@app.route('/firedata/<coords>')
-def firedata(coords):
+@app.route('/firedata/<lat>/<lon>')
+def firedata(lat, lon):
 	# x = omf.weather.get_ndfd(33,53)
-	print(coords)
-	print(coords[0], coords[1])
+	print(lat, lon)
 	lat = 40.758701
 	lon = -111.876183
 	dist = 20
 	resolution = 20
 	x = getSubGridData(str(lat), str(lon), str(dist), str(dist), str(resolution))
-	return x
+	#print(x)
+	print(type(x))
+	return json.dumps(x)
 
 #FRONTEND JAVASCRIPT
 # Sending requests from the frontend: https://www.w3schools.com/xml/ajax_xmlhttprequest_send.asp
