@@ -727,7 +727,12 @@
 			}
 		}
 	}
+	// send an XML Http request to the server for data from getSubGridData() of weather.py
 	function fireButton_click() {
+		var xhttp = new XMLHttpRequest();
+		xhttp.open("POST", "http://127.0.0.1:5000//firedata/<coords>", true);
+		xhttp.send();
+		console.log(xhttp.responseText);
 		alert('Fire Risk is ')
 	}
 </script>
