@@ -19,10 +19,10 @@ import pandas as pd
 from tempfile import mkdtemp
 import pysolar
 import pytz
-from joblib import dump, load
-from sklearn.preprocessing import PolynomialFeatures
 import xml.etree.ElementTree as ET
 import xmltodict
+from tensorflow import keras
+
 
 omfDir = os.path.dirname(os.path.abspath(__file__))
 
@@ -1093,23 +1093,21 @@ Station_Dict = {
 
 
 
-def _getUscrnData(year='2020', location='TX_Austin_33_NW', dataType="SOLARAD"):
+def _getUscrnData(year='2018', location='TX_Austin_33_NW', dataType="SOLARAD"):
 	ghiData = pullUscrn(year, location, dataType)
 	return ghiData
 
 #Standard positional arguments are for TX_Austin
-def _getDarkSkyCloudCoverForYear(year='2020', lat=30.581736, lon=-98.024098, key=_key, units='si'):
+def _getDarkSkyCloudCoverForYear(year='2018', lat=30.581736, lon=-98.024098, key=_key, units='si'):
 	cloudCoverByHour = {}
+	pressureByHour = {}
 	coords = '%0.2f,%0.2f' % (lat, lon)
 	times = list(pd.date_range('{}-01-01'.format(year), '{}-12-31'.format(year), freq='D'))
 	while times:
 		time = times.pop(0)
 		print(time)
 		url = 'https://api.darksky.net/forecast/%s/%s,%s?exclude=daily,alerts,minutely,currently&units=%s' % (key, coords, time.isoformat(), units ) 
-		res = requests.get(url)
-		if res.status_code != 200:
-			raise ApiError(res.json()['error'], status_code=res.status_code)
-		res = res.json()
+		res = requests.get(url).json()
 		try:
 			dayData = res['hourly']['data']
 		except KeyError:
@@ -1118,98 +1116,83 @@ def _getDarkSkyCloudCoverForYear(year='2020', lat=30.581736, lon=-98.024098, key
 		for hour in dayData:
 			try:
 				cloudCoverByHour[hour['time']] = hour['cloudCover']
+				#Darksky result in hpascals, model trained in mbar. 1 - 1 transformation.
+				pressureByHour[hour['time']] = hour['pressure']
 			except KeyError:
 				print("No Cloud Cover Data")
 				pass
-	return cloudCoverByHour
-
-def _makeDataNonzero(data):
-	ghiData=list(filter(lambda num: num!=0.0, data))
-	assert(all(x[0]!=0 for x in ghiData))
-	return ghiData
-
-def _logifyData(data):
-	data = np.log(data)
-	return data
-
-def _initPolyModel(X, degrees=5):
-    poly = PolynomialFeatures(degree=degrees)
-    _X_poly = poly.fit_transform(X)
-    return _X_poly
-
-def getCosineOfSolarZenith(lat, lon, datetime, timezone):
-	date = pytz.timezone(timezone).localize(datetime)
-	solar_altitude = pysolar.solar.get_altitude(lat,lon,date)
-	solar_zenith = 90 - solar_altitude
-	cosOfSolarZenith = cos(radians(solar_zenith))
-	return cosOfSolarZenith
-
-def preparePredictionVectors(year='2020', lat=30.581736, lon=-98.024098, station='TX_Austin_33_NW', timezone='US/Central'):
-	cloudCoverData = _getDarkSkyCloudCoverForYear(year, lat, lon)
-	ghiData = _getUscrnData(year, station, dataType="SOLARAD")
-	#for each 8760 hourly time slots, make a timestamp for each slot, look up cloud cover by that slot
-	#then append cloud cover and GHI reading together
-	start_time = datetime(int(year),1,1,0)
-	cosArray = []
-	input_array = []
-	for i in range(len(ghiData)): #Because ghiData is leneth 8760, one for each hour of a year
-		time = start_time + timedelta(minutes=60*i)
-		tstamp = int(datetime.timestamp(time))
-		try:
-			cloudCover = cloudCoverData[tstamp]
-		except KeyError:
-			cloudCover = 0
-		#I have my cloud cover, iterate over my ghi and cosine arrays
-		cosOfSolarZenith = getCosineOfSolarZenith(lat, lon, time, timezone)
-		ghi = ghiData[i]
-		if ghi <= 0:
-			#Not most efficient logic but....
-			#Still need to decide how to handle zero vals. Test this
-			input_array.append((0, cloudCover))
-		else:	
-			ghi = np.log(ghi)
-			input_array.append((ghi, cloudCover))
-		cosArray.append(cosOfSolarZenith)
-	return input_array, ghiData, cosArray
+	return cloudCoverByHour, pressureByHour
 
 
-def predictPolynomial(X, model, degrees=5):
-	X = _initPolyModel(X, degrees=5)
-	predictions_dhi = model.predict(X)
-	return predictions_dhi
+def getSolarZenith(lat, lon, datetime, timezone):
+    date = pytz.timezone(timezone).localize(datetime)
+    solar_altitude = pysolar.solar.get_altitude(lat,lon,date)
+    solar_zenith = 90 - solar_altitude
+    return solar_zenith
 
-def get_synth_dhi_dni(uscrn_station, year):
-	print("********EASY SOLAR STARTED************")
-	poly_path = pJoin(omfDir, 'static', 'Log_Polynomial_clf.joblib')
-	clf_log_poly = load(poly_path)
-	lat = Station_Dict[uscrn_station][0]
-	lon = Station_Dict[uscrn_station][1]
-	timezone = Station_Dict[uscrn_station][2]
-	input_array, ghiData, cosArray = preparePredictionVectors(year, lat, lon, uscrn_station, timezone)
-	log_prediction = predictPolynomial(input_array, clf_log_poly)
-	dhiPredictions = np.exp(log_prediction)
-	dniXCosTheta = ghiData - dhiPredictions #This is cos(theta) * DNI
-	dni_array = ([dniXCosTheta[i]/cosArray[i] for i in range(len(dniXCosTheta))]) 
-	result = list(zip(dhiPredictions, ghiData, dni_array))
-	return result
+
+def preparePredictionVectors(year='2018', lat=30.581736, lon=-98.024098, station='TX_Austin_33_NW', timezone='US/Central'):
+    cloudCoverData, pressureData = _getDarkSkyCloudCoverForYear(year, lat, lon)
+    ghiData = _getUscrnData(year, station, dataType="SOLARAD")
+    #for each 8760 hourly time slots, make a timestamp for each slot, look up cloud cover by that slot
+    #then append cloud cover and GHI reading together
+    start_time = datetime(int(year),1,1,0)
+    cosArray = []
+    input_array = []
+    for i in range(len(ghiData)): #Because ghiData is leneth 8760, one for each hour of a year
+        time = start_time + timedelta(minutes=60*i)
+        tstamp = int(datetime.timestamp(time))
+        hour = time.hour
+        minute = time.minute
+        try:
+            cloudCover = cloudCoverData[tstamp]
+            pressure = pressureData[tstamp]
+        except KeyError:
+            cloudCover = 0
+            pressure = 0
+        #I have my cloud cover, iterate over my ghi and cosine arrays
+        solar_zenith = getSolarZenith(lat, lon, time, timezone)
+        #Get cosine of solar zenith, this is going to be used later in dni calculation. Make sure its in radians.
+        cosOfSolarZenith = cos(solar_zenith*0.0175)
+        ghi = ghiData[i]
+        input_array.append([ghi, cloudCover, hour, minute, solar_zenith, pressure])
+        cosArray.append(cosOfSolarZenith)
+    return input_array, ghiData, cosArray
+
+def predictNeuralNet(input_array, model_path):
+    model = keras.models.load_model(model_path)
+    #Takes in numpy array of proper shape
+    """
+    Ghi
+    Cloud Cover 
+    Hours
+    Minutes
+    Solar Zenith
+    Pressure
+    DHI"""
+    preds = model.predict(input_array)
+    return preds
+
+def get_synth_dhi_dni(uscrn_station='TX_Austin_33_NW', year='2020'):
+    lat = Station_Dict[uscrn_station][0]
+    lon = Station_Dict[uscrn_station][1]
+    timezone = Station_Dict[uscrn_station][2]
+    input_array, ghi_array, cos_array = preparePredictionVectors(year, lat, lon, uscrn_station, timezone)
+    print("input array created")
+    dhi_preds = list(predictNeuralNet(input_array, 'Neural_Net_National'))
+    dhi_preds = [float(i) for i in dhi_preds]
+    print("preds made")
+    dniXCosTheta = [ghi_array[i] - dhi_preds[i] for i in range(0, len(ghi_array))] #This is cos(theta) * DNI
+    print("cos theta calculation made")
+    dni_array = ([dniXCosTheta[i]/cos_array[i] for i in range(len(dniXCosTheta))])
+    result = list(zip((dhi_preds), (ghi_array), (dni_array)))
+    assert len(result) == len(input_array)
+    return result
+
 
 def easy_solar_tests(uscrn_station='TX_Austin_33_NW'):
 	print("********EASY SOLAR TEST STARTED************")
-	poly_path = pJoin(omfDir, 'static', 'Log_Polynomial_clf.joblib')
-	clf_log_poly = load(poly_path)
-	year='2018'
-	lat = Station_Dict[uscrn_station][0]
-	lon = Station_Dict[uscrn_station][1]
-	timezone = Station_Dict[uscrn_station][2]
-	input_array, ghiData, cosArray = preparePredictionVectors(year, lat, lon, uscrn_station, timezone)
-	assert len(input_array) == len(ghiData) == len(cosArray)
-	log_prediction = predictPolynomial(input_array, clf_log_poly)
-	dhiPredictions = np.exp(log_prediction)
-	dniXCosTheta = ghiData - dhiPredictions #This is cos(theta) * DNI
-	dni_array = ([dniXCosTheta[i]/cosArray[i] for i in range(len(dniXCosTheta))]) 
-	result = list(zip(dhiPredictions, ghiData, dni_array))
-	assert len(result) == len(input_array)
-	print(result)
+	print(get_synth_dhi_dni())
 	print("Easy Solar Test Suceeded.........")
 
 
@@ -1419,7 +1402,7 @@ def _tests():
 	# 	print(e)
 	
 #	Easy Solar Tests
-	# easy_solar_tests()
+	easy_solar_tests()
 
 
 	# Testing zipCodeToClimateName (Certain cases fail)
