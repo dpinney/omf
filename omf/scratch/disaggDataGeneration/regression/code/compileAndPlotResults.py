@@ -11,16 +11,18 @@ import plotly.graph_objs as go
 # a bunch of garbage to the terminal so i use firefox to avoid that
 import plotly.io as pio
 pio.renderers.default = "firefox"
+import matplotlib.pyplot as plt
 
 # constants -------------------------------------------------------------------
 
 DATE_FORMAT = '%Y-%m-%d'
 START_DATE = '2012-01-01'
-PLOT_DATE = '2012-01-10'
-PLOT_HOUSE_INDEX = 'average' # set to 'average' to see average error across all houses
+PLOT_DATE = '2012-01-01'
+PLOT_HOUSE_INDEX = 1 # set to 'average' to see average error across all houses
 
 TIME_SAMPLES_PER_HOUR = 4
 TIME_CHUNK = 24
+PLOT_TIME_WINDOW_IN_HOURS = 24
 
 NUM_ROWS_PER_FILE = 35136
 NUM_HOUSE_TYPES = 48
@@ -30,7 +32,7 @@ TEST_FRAC = 0.5
 DATA_DIR = str( pathlib.Path(__file__).parent.absolute() ) + '/../data/'
 DATA_SUBFOLDER = DATA_DIR + str(NUM_HOUSE_TYPES) + 'Types' + \
 	str(NUM_INSTANCES) + 'HousesPerType'
-IN_FILENAME = DATA_SUBFOLDER+'/results'+str(TIME_CHUNK)+'timeChunk.csv'
+IN_FILENAME = DATA_SUBFOLDER+'/results'+str(TIME_CHUNK)+'timeChunkEasyFeatures.csv'
 
 DELIMITER = ','
 
@@ -149,6 +151,7 @@ with open(IN_FILENAME, 'r') as infile:
 # make sure everything is a numpy array of floats
 true = np.array(true,dtype='float64')
 pred = np.array(pred,dtype='float64')
+pred[pred<0] = 0
 print('\ntrue shape', true.shape)
 
 # reshape true and predicted to be (time x houses) by appliance
@@ -241,34 +244,109 @@ else:
 	predStdByHouse = np.zeros(predMeanByHouse.shape)
 	errorStdByHouse = np.zeros(errorMeanByHouse.shape)
 
-print('why is the true shape', true.shape)
-
 # reshape data into days x time sample x app
+timeWindow = TIME_SAMPLES_PER_HOUR*PLOT_TIME_WINDOW_IN_HOURS
+
 trueMeanByHouse = np.reshape(trueMeanByHouse, \
-	(TIME_SAMPLES_PER_HOUR*24,-1,numAppliances), order='F')
+	(timeWindow,-1,numAppliances), order='F')
 trueMeanByHouse = np.transpose( trueMeanByHouse, (1,0,2) )
+
 predMeanByHouse = np.reshape(predMeanByHouse, \
-	(TIME_SAMPLES_PER_HOUR*24,-1,numAppliances), order='F')
+	(timeWindow,-1,numAppliances), order='F')
 predMeanByHouse = np.transpose( predMeanByHouse, (1,0,2) )
+
 errorMeanByHouse = np.reshape(errorMeanByHouse, \
-	(TIME_SAMPLES_PER_HOUR*24,-1,numAppliances), order='F')
+	(timeWindow,-1,numAppliances), order='F')
 errorMeanByHouse = np.transpose( errorMeanByHouse, (1,0,2) )
+
 trueStdByHouse = np.reshape(trueStdByHouse, \
-	(TIME_SAMPLES_PER_HOUR*24,-1,numAppliances), order='F')
+	(timeWindow,-1,numAppliances), order='F')
 trueStdByHouse = np.transpose( trueStdByHouse, (1,0,2) )
+
 predStdByHouse = np.reshape(predStdByHouse, \
-	(TIME_SAMPLES_PER_HOUR*24,-1,numAppliances), order='F')
+	(timeWindow,-1,numAppliances), order='F')
 predStdByHouse = np.transpose( predStdByHouse, (1,0,2) )
+
 errorStdByHouse = np.reshape(errorStdByHouse, \
-	(TIME_SAMPLES_PER_HOUR*24,-1,numAppliances), order='F')
+	(timeWindow,-1,numAppliances), order='F')
 errorStdByHouse = np.transpose( errorStdByHouse, (1,0,2) )
 
-# plot data ---------------------------------------------------------------
+# plot data as stacked bars ---------------------------------------------------
 
 startDate = datetime.strptime(START_DATE, DATE_FORMAT)
 plotDate = datetime.strptime(PLOT_DATE, DATE_FORMAT)
 plotDayIndex = (plotDate - startDate).days
-print(plotDayIndex)
+print('plot data', plotDate, 'plotting day', plotDayIndex)
+
+if PLOT_HOUSE_INDEX !='average':
+
+	barWidth = 1
+	legendItems, legendLabels = [],[]
+	trueMeansPreviousAppliance = 0
+	trueStdPreviousAppliance = 0
+	predMeansPreviousAppliance = 0
+	predStdPreviousAppliance = 0
+
+	for applianceNum in range(2,numAppliances):
+
+		trueMeansCurrentAppliance = \
+			trueMeanByHouse[plotDayIndex,:,applianceNum]
+		trueMeansCurrentAppliance = np.reshape( trueMeansCurrentAppliance, \
+			(-1,TIME_SAMPLES_PER_HOUR) )
+		trueStdCurrentAppliance = trueMeansCurrentAppliance.std(axis=1)
+		trueMeansCurrentAppliance = trueMeansCurrentAppliance.mean(axis=1)
+		trueInd = np.arange(0,3*len(trueMeansCurrentAppliance),3)
+
+		predMeansCurrentAppliance = \
+			predMeanByHouse[plotDayIndex,:,applianceNum]
+		predMeansCurrentAppliance = np.reshape( predMeansCurrentAppliance, \
+			(-1,TIME_SAMPLES_PER_HOUR) )
+		predStdCurrentAppliance = predMeansCurrentAppliance.std(axis=1)
+		predMeansCurrentAppliance = predMeansCurrentAppliance.mean(axis=1)
+		predInd = np.arange(1,3*len(predMeansCurrentAppliance),3)
+
+		if applianceNum == 2:
+			truePlot = plt.bar(trueInd, trueMeansCurrentAppliance, barWidth, \
+				yerr=trueStdCurrentAppliance, \
+				capsize=5,error_kw={'alpha':0.5})
+			predPlot = plt.bar(predInd, predMeansCurrentAppliance, barWidth, \
+				yerr=predStdCurrentAppliance, \
+				capsize=5,error_kw={'alpha':0.5})
+
+		else:
+			truePlot = plt.bar(trueInd, trueMeansCurrentAppliance, barWidth, \
+				bottom=trueMeansPreviousAppliance, \
+				yerr=trueStdPreviousAppliance, \
+				capsize=5,error_kw={'alpha':0.5})
+			predPlot = plt.bar(predInd, predMeansCurrentAppliance, barWidth, \
+				bottom=predMeansPreviousAppliance, \
+				yerr=predStdPreviousAppliance, \
+				capsize=5,error_kw={'alpha':0.5})
+
+		trueMeansPreviousAppliance = np.add(trueMeansPreviousAppliance, \
+			trueMeansCurrentAppliance)
+		trueStdPreviousAppliance = np.add(trueStdPreviousAppliance, \
+			trueStdCurrentAppliance)
+		predMeansPreviousAppliance = np.add(predMeansPreviousAppliance, \
+			predMeansCurrentAppliance)
+		predStdPreviousAppliance = np.add(predStdPreviousAppliance, \
+			predStdCurrentAppliance)
+
+		legendItems.append(truePlot[0])
+		legendItems.append(predPlot[0])
+		legendLabels.append('true ' + APPLIANCES[applianceNum])
+		legendLabels.append('predicted ' + APPLIANCES[applianceNum])
+
+
+	plt.legend(legendItems,legendLabels, \
+		bbox_to_anchor=(1.05, 1.0), loc='upper left')
+	plt.xticks(np.arange(1,len(trueInd)*3,3), np.arange(len(trueInd)) )
+	plt.xlabel('Hour of Day')
+	plt.ylabel('Watts')
+	plt.tight_layout()
+	plt.show()
+
+# plot data as individual appliances ------------------------------------------
 
 plotX = np.arange(trueMeanByHouse.shape[1])
 for applianceNum in range(numAppliances):

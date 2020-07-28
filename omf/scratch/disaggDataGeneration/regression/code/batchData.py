@@ -16,12 +16,13 @@ from joblib import load, dump
 # constants -------------------------------------------------------------------
 
 # define analysis params
+INPUT_ONLY_CHUNKING = False
 NUM_HOUSE_TYPES = 48
-NUM_INSTANCES_OF_EACH_HOUSE_TYPE = 2
+NUM_INSTANCES_OF_EACH_HOUSE_TYPE = 10
 APPLIANCE_DATA_START_COL = 10
 NUM_ROWS_PER_HOUSE = 35136
 DESIRED_TRAIN_FRAC = 0.5
-TIME_CHUNK_IN_SECS = 0
+TIME_CHUNK_IN_SECS = 24*3600
 FILE_TIMESTEP_IN_SECS = 15*60
 DELIMITER = ','
 
@@ -145,8 +146,6 @@ def reshapeDataByTimeChunkInputsOnly(modelInput, modelOutput):
 	return modelInputChunked, modelOutputChunked
 
 def reshapeDataByTimeChunkNoOverlap(modelInput, modelOutput):
-	''' reshape data such that each output sample is associated
-	with the inputs of all the samples in the previous TIME_CHUNK '''
 				
 	# group train data by house, such that the structure is 
 	# houses by rows by columns
@@ -227,7 +226,10 @@ with open(INPUT_FILE, 'r') as file:
 			# with all inputs of all the samples in the previous 
 			# TIME_CHUNK
 			# timerStartLocal  = time.time()
-			data, labels = reshapeDataByTimeChunkNoOverlap(data, labels)
+			if INPUT_ONLY_CHUNKING:
+				data, labels = reshapeDataByTimeChunkInputsOnly(data, labels)
+			else:
+				data, labels = reshapeDataByTimeChunkNoOverlap(data, labels)
 			# timerEnd = time.time()
 
 			# name batch based on if it training or test
