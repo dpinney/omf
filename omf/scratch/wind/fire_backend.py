@@ -28,9 +28,14 @@ def firedata(lat, lon, dist, resolution):
 	# dist = 20
 	# resolution = 20
 	x = getSubGridData(str(lat), str(lon), str(dist), str(dist), str(resolution))
-	print (json.dumps(x))
-	print(type(json.dumps(x))) # x is a python dictionary, json.dumps is a string
-	return json.dumps(x)
+	# print (json.dumps(x))
+	# print(type(json.dumps(x))) # json.dumps is a string
+	# print (type(x)) # x is a python dictionary 
+	return json.dumps(x) 
+
+	# Following 2 lines allow option to parse here and log xhttp.response in satellitemap_editablePopup 
+	# print (x['dwml']['data']['parameters'][0]['fire-weather']['value'][0])
+	# return x['dwml']['data']['parameters'][0]['fire-weather']['value'][0]
 
 #FRONTEND JAVASCRIPT
 # Sending requests from the frontend: https://www.w3schools.com/xml/ajax_xmlhttprequest_send.asp
