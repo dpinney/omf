@@ -1306,7 +1306,7 @@ def get_ndfd_data(lat1, lon1, optional_params=['wspd'], begin=str(datetime.now()
 
 
 #Wrapper to call _subGrid, return parsed dict
-def getSubGridData(centerLat, centerLon, distanceLat, distanceLon, resolutionSquare, product='time-series', begin=str(datetime.now().isoformat()), end=print((datetime.now()+timedelta(weeks=+10)).isoformat()), Unit='m', optional_params=['wspd', 'wdir']):
+def getSubGridData(centerLat, centerLon, distanceLat, distanceLon, resolutionSquare, product='time-series', begin=str(datetime.now().isoformat()), end=print((datetime.now()+timedelta(weeks=+10)).isoformat()), Unit='m', optional_params=['critfireo']):
 	data = _run_ndfd_request(_subGrid(centerLat, centerLon, distanceLat, distanceLon, resolutionSquare, product, begin, end, Unit, optional_params))
 	outData = _generalParseXml(data)
 	return outData

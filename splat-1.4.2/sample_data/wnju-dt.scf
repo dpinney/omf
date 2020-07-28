@@ -1,0 +1,23 @@
+; SPLAT! Auto-generated Signal Color Definition ("wnju-dt.scf") File
+;
+; Format for the parameters held in this file is as follows:
+;
+;    dBuV/m: red, green, blue
+;
+; ...where "dBuV/m" is the signal strength (in dBuV/m) and
+; "red", "green", and "blue" are the corresponding RGB color
+; definitions ranging from 0 to 255 for the region specified.
+;
+; The following parameters may be edited and/or expanded
+; for future runs of SPLAT!  A total of 32 contour regions
+; may be defined in this file.
+;
+;
+108: 255,   0,   0	; City Grade +60dB
+ 98: 255, 165,   0	; City Grade +50dB
+ 88: 255, 206,   0	; City Grade +40dB
+ 78: 255, 255,   0	; City Grade +30dB
+ 68: 184, 255,   0	; City Grade +20dB
+ 58:   0, 255,   0	; City Grade +10dB
+ 48:   0, 208,   0	; City Grade
+ 41:   0, 196, 196	; Service Threshold

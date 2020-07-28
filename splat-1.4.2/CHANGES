@@ -1,0 +1,483 @@
+Release 1.4.2:
+By John A. Magliacane <kd2bd@amsat.org> (08-Dec-14)
+
+* Modified the "build" script to better accommodate the Mac OSX platform,
+  and fixed a contradiction in the documentation relating to the
+  description of the situational and time variability parameters
+  used in the ITM and ITWOM propagation models.
+  (Thanks John M. Vanderau, AA0DN)
+
+* Modified the man pages for improved rendering.  (Thanks Randy Berry, N3LRX)
+
+* Added a field limit in the citydecoder utility to prevent crashing if
+  the coordinate file being read should contain unexpectantly large fields.
+  (Thanks David Binderman)
+
+
+----------------------------------------------------------------------------
+
+Release 1.4.1:
+By John A. Magliacane <kd2bd@amsat.org> (08-Jan-14):
+
+* The copyright restriction on the ITWOM 3.0 propagation model has
+  been removed.  ITWOM 3.0 code may now be used and modified under
+  the GPLv2 license.
+
+* Commented out unused variables and calculations in itwom3.0.cpp
+  to eliminate gcc warnings about unused but set variables.
+
+* Fixed a bug that caused path loss graphs to be plotted incorrectly.
+
+* Embellished the "citydecoder" utility to handle U.S. Census County
+  Subdivision files, thereby providing an additional source of city
+  names and locations not necessarily contained in previously handled
+  Incorporated Places/Census Designated data files.
+
+* Corrected the image size written to the header of Xastir-compatible
+  .ppm maps.
+
+* Fixed a bug that sometimes prevented the "Mode of propagation" from
+  appearing in Path Analysis reports when running in -oldtim mode.
+
+* Added a -log command line switch that allows SPLAT!'s command line
+  and all associated switches and arguments to be written to a logfile
+  for future reference or re-execution at a later time.
+
+* Modified SPLAT!'s "build" script for better handling of OSX.
+  (Thanks Glen Bizeau, VE9GLN)
+
+* Changed some coding to eliminate compilation warnings produced by
+  recent versions of GCC.
+
+* Brought the documentation up to date.
+
+
+----------------------------------------------------------------------------
+
+Release 1.4.0:
+By John A. Magliacane <kd2bd@amsat.org> (14-Mar-11):
+
+* Supplemented Longley-Rice Irregular Terrain Propagation Model
+  (ITM v7.0) code with an improved Irregular Terrain with Obstructions
+  Model (ITWOM v3.0) by Sid Shumate / Givens & Bell, Inc. that corrects
+  multiple errors present in the original ITM code, and incorporates
+  Radiative Transfer Engine (RTE) computations in the line-of-sight
+  range.  The older ITM model used in previous releases of SPLAT! may
+  be invoked by using the new -olditm command-line switch.
+
+* Introduced a new -sc command line option that provides contour smoothing.
+
+* Added path-loss/signal-strength color keys to GoogleEarth signal contour
+  overlays.
+
+* The "build" and "configure" scripts now attempt to warn the user that
+  configuring SPLAT-HD for 6x6, 7x7, or 8x8 degree operation requires a
+  64-bit environment, and compile SPLAT-HD for the appropriate memory
+  model.
+
+* Fixed a bug that caused misinterpretation of ERP values expressed in
+  .lrp files.
+
+* Fixed bugs in srtm2sdf.c that affected proper handling of .BIL files
+  (Thanks David Pearce), and compiler warnings in splat.cpp and srtm2sdf.c
+  (Thanks Jesse Caulfield and Charles Escobar).
+
+* Brought the documentation up to date.
+
+
+----------------------------------------------------------------------------
+
+Release 1.3.0:
+By John A. Magliacane <kd2bd@amsat.org> (11-Apr-09):
+
+* Introduced one arc-second high-resolution versions of SPLAT!
+  (splat-hd) and the srtm2sdf utility (srtm2sdf-hd) to permit
+  detailed topographic and RF signal analyzes based on SRTM-1
+  digital elevation models.
+
+* Introduced a new configure script that generates the appropriate
+  MAXPAGES parameter prior to compiling SPLAT! based on user
+  interaction at configuration time.
+
+* Added transmitter EIRP, estimated received signal power level
+  (in dBm), estimated received signal power density (in dBW/m^2),
+  and received signal power density to Path Analysis Reports.
+  EIRP can also now be expressed as dBm in place of ERP in
+  Watts in .lrp files.
+
+* Added a new mapping mode that plots contours of received signal
+  power levels in dBm using the new -dbm option.  New .dcf files
+  control the color scheme of the plotted contours.
+
+* The function of the -db option has been expanded to serve as a
+  contour threshold limit for all three mapping modes (path loss,
+  signal strength, and signal power level).
+
+* New -ano and -ani (alphanumeric output and input) options have
+  replaced the -plo and -pli (path loss output and input) options,
+  and can contain either path loss data (as before), field strength
+  data (new), or received signal power level data (new).  Path loss
+  figures in .ano files ignore the effects of transmit antenna
+  pattern, while field strength and received signal power levels
+  take antenna pattern into account.
+
+* Uniform ground clutter height can now be specified using the new
+  -gc switch.
+
+* Several bugs in SPLAT!'s UDT file handling were fixed.
+
+* Bugs affecting the operation of the -f switch were identified
+  and fixed.
+
+* The reported field strength and the corresponding voltage induced
+  across the receive antenna in Path Analysis Reports were found to
+  be 2.14 dB too low.  The cause was identified and fixed.
+
+* Some modifications were made in coding and scripting in response to
+  changes that have occured in the latest versions of gcc and bash.
+
+* The documentation was updated to reflect all the improvements.
+
+
+----------------------------------------------------------------------------
+
+Release 1.2.3:
+By John A. Magliacane <kd2bd@amsat.org> (30-Jul-08):
+
+* Fixed a problem that sometimes caused SPLAT! to hang indefinitely
+  when reading some cartographic boundary files on some platforms.
+
+* Fixed a problem introduced in v1.2.2 that sometimes caused black
+  horizontal and/or vertical dotted lines to appear in path-loss
+  and signal strength contour plots.
+
+* The UDT file switch was described as -udt in the documentation,
+  but recognized as -u in SPLAT!.  SPLAT! was modified to reflect
+  the documentation.
+
+* The -R option can now increase (as well as limit) the .ppm image
+  size when generating topographic maps.
+
+* Dots ('.') are now permitted in the base of filenames passed to SPLAT!
+ 
+* Further improvements in accuracy were made to both SPLAT! and the
+  srtm2sdf utility.  Users are encouraged to re-create their .sdf
+  files using the latest version of srtm2sdf for the best performance. 
+
+* The loading and display of cartographic boundary files now works
+  for any region of the planet.
+
+* A -gpsav command-line switch option was added to instruct SPLAT! to
+  preserve the temporary working files it creates when invoking gnuplot.
+  This permits users to view and edit these files, and even re-run
+  gnuplot outside of SPLAT! (Tnx John McMellen)
+
+----------------------------------------------------------------------------
+
+Release 1.2.2:
+By John A. Magliacane <kd2bd@amsat.org> (10-May-08):
+
+* Cleared up some very small inaccuracies (+/- 1 pixel) through better
+  numerical rounding techniques.
+
+* Transmitter site location names now appear in .ppm maps even if no
+  city location files are loaded into SPLAT!
+
+* Fixed a problem that prevented operation over paths that extended
+  across the Prime Meridian.
+
+* Fixed a problem that produced incorrect TX-to-RX distances in the
+  Site Analysis Report when the -metric switch was used. (Tnx Martin, M0ADY)
+
+* When generating .ppm map contours, SPLAT! is now slightly more liberal
+  when loading SDF files to help ensure the contour doesn't get cut off
+  if it should approach the boundary of an SDF file.
+
+* Added a new utility called "bearing" (under utils) that determines
+  distance and azimuth bearings between two site location (.qth) files.
+
+* The man page installation process was improved.
+
+* Some very minor documentation updates were made.
+
+----------------------------------------------------------------------------
+
+Release 1.2.1:
+By John A. Magliacane <kd2bd@amsat.org> (18-Oct-07):
+
+* SPLAT! now imports transmitter effective radiated power information and
+  predicts received field strength signal levels (dBuV/m) and antenna
+  voltage based on the transmitter's antenna pattern, computed path loss,
+  and ERP.  ERP information is specified on the ninth line of SPLAT! .lrp
+  files. 
+
+* The ability to plot signal strength contour maps has been added.  The
+  color schemes for plotting signal strength and path loss contour maps
+  can now be customized by editing the contents of .scf and .lcf files
+  for each transmitter site.  In addition, both signal strength and path
+  loss contour maps can now be generated for multiple transmitter sites,
+  with the greatest signal strength (or least path loss) illustrated in
+  overlapping regions between sites.
+
+* A new -ngs switch assigns all topography to the color white in .ppm
+  contour maps.  The white background can be made transparent using
+  simple graphics utilities for merging SPLAT! contour maps with other
+  Mercator projection maps and graphics files of equivalent size and
+  resolution.
+
+* Path loss and signal strength contour regions can now be exported to
+  Google Earth as a semi-transparent ground overlay using the -kml switch.
+
+* The default contour map filename now defaults to the basename of the
+  transmitter site .qth file (or first transmitter site within a network)
+  with a .ppm extension (rather than "map.ppm").
+
+* The Fresnel zone clearance percentage, which was fixed at 60% in the
+  past, is now user-definable using the new -fz command-line option.
+ 
+* Information previously contained in SPLAT! Obstruction Reports has now
+  been merged with Longley-Rice path loss information into a single Path
+  Analysis report (with a .txt extension).  (Longley-Rice output (.lro)
+  files are no longer generated.)
+
+* Graph plotting (the -l option) no longer needs to be forced to perform
+  a Longley-Rice path analysis in point-to-point mode.  If a .lrp file is
+  available and contains the information needed, Longley-Rice path loss
+  information will be automatically included in SPLAT!'s Path Analysis
+  Report when performing a point-to-point analysis.
+
+* In addition to information previously contained, SPLAT! Path Loss Output
+  (-plo) files now contain additional information including path loss
+  considering the effects of the transmitting antenna's radiation pattern
+  (if pattern data is available), and field strength values (dBuV/m)
+  based on pattern data and ERP data (if available).  An asterisk at
+  the end of each line indicates the path to the point referenced in
+  the file is obstructed by terrain.
+
+* The srtm2sdf utility now handles 3-arc second SRTM in .BIL (Band
+  Interleaved by Line) format, as well as the usual .HGT format.
+
+* SPLAT!'s associated itm.cpp file was updated to include the latest
+  public domain ITM code released on June 26, 2007.
+
+* References in source code and documentation to "slots" and "MAXSLOTS"
+  have been changed to "pages" and "MAXPAGES", respectively.
+
+* Two bugs affecting the plotting of Fresnel zones were identified and fixed.
+
+* A bug that produced some erroneous elevation angles in SPLAT! Path Loss
+  Output (-plo option) files was identified and fixed.
+
+* Text documentation in Spanish was added (thanks to Charles Escobar).
+
+* The build scripts were modified to permit successful compilation with
+  bzip2-1.0.4 libraries.  (Thanks to Janek, SQ5MJL)
+
+----------------------------------------------------------------------------
+
+Release 1.2.0:
+By John A. Magliacane, <kd2bd@amsat.org> (22-Dec-2006):
+
+* All graph plotting has been enhanced to include distances, azimuths,
+  and in some cases, elevation angles, in numeric form.  Height
+  plots (-h option) now include a contour of the Earth's curvature.
+  A new -H option was added that behaves the same as -h, except its
+  display of heights is normalized to the heights of the endpoints
+  along the plotted path.  Graphs now default to PNG rather than GIF
+  format to reflect gnuplot's current trend away from .gif output.
+  (.gif is still available if your version of gnuplot supports it.)
+  Postscript output is now generated in enhanced color.
+
+* SPLAT! can now determine and plot Fresnel Zone clearances.  A new
+  -f command-line option permits the Fresnel Zone frequency (in MHz)
+  to be specified, otherwise it can be determined from .lrp files when
+  path-loss calculations are performed.  Antenna height requirements
+  for 60% clearance (0.6 F1) and 100% clearance (F1) of the First
+  Fresnel Zone now appear in Obstruction Reports.  These zones are
+  also displayed graphically in height plots (-h or -H options).
+
+* Support for antenna radiation patterns has been added.  SPLAT! now
+  reads normalized azimuth and elevation antenna field pattern data
+  from separate .az and .el files when Longley-Rice studies are performed.
+  One degree azimuth and one tenth degree elevation pattern resolution
+  is supported along with azimuthal pattern rotation and mechanical
+  vertical beam tilt. 
+
+* A bug in the interpretation of the -n and -N command-line options
+  was fixed.
+
+* Negative geographical coordinates in DMS format are now (hopefully)
+  interpreted and displayed better than before.
+
+* SPLAT! data handling can be changed from imperial units (feet/miles)
+  to metric (meters/kilometers) units using the new -metric switch.
+
+* SPLAT! can now generate topographic maps without plotting
+  line-of-sight or path loss coverage.  These maps are centered
+  approximately on the given tx_site, extend out to a radius
+  provided by the -R switch, and can be populated with county
+  boundaries and city names, just like SPLAT!'s traditional
+  line-of-sight and path loss maps. 
+
+* Support for user-defined terrain files (ground clutter) has been
+  added.
+
+* SPLAT! can now generate .geo Geo-reference Information Files
+  when .ppm topography and coverage maps are created, permitting
+  the integration of SPLAT! generated maps with X Amateur Station
+  Tracking and Information Reporting (www.xastir.org) software.
+
+* SPLAT! can now generate .kml Keyhole Markup Language files that
+  when imported into "Google Map", dramatically illustrate the RF
+  path between transmitter and receiver locations when performing
+  point-to-point analyses.
+
+* Support for exporting Longley-Rice path loss contour studies to
+  external data files has been included.  SPLAT! path loss files can
+  be used for performing coverage or interference studies outside of
+  SPLAT!.  They can also be modified externally (with antenna pattern
+  data, for example) through scripts or small utilities, and imported
+  back into SPLAT! to generate coverage maps based on the revised
+  data without having to re-run any time intensive Longley-Rice path
+  loss calculations.
+
+* The documentation was updated to reflect the new features and
+  functionality of the software.
+  
+----------------------------------------------------------------------------
+
+Release 1.1.1:
+By John A. Magliacane, <kd2bd@amsat.org> (01-Apr-2006):
+
+* An srtm2sdf utility was added to permit SPLAT Data Files to be
+  derived from the latest 3-arc second SRTM (STS-99 Space Shuttle
+  Radar Topography Mission) digital elevation model data.  The
+  quality of this data is *significantly* higher than that of older
+  USGS Digital Elevation Models previously used by SPLAT!.  Despite
+  the higher quality, some voids in SRTM data sets still exist.
+  When voids are detected, the srtm2sdf utility replaces them with
+  equivalent elevation data found in existing SDF files (presumably
+  generated from older USGS elevation models).  If older SDF files
+  are not available, voids are handled through pixel averaging or
+  direct replacement.
+
+* Coding changes were made that in concert with the new srtm2sdf utility
+  should allow SPLAT! to function over all regions of the planet for
+  which SRTM-3 elevation data is available.
+
+* SPLAT's SDF search path priority has been changed.  SPLAT! now
+  searches for needed SDF files in the current working directory first.
+  If the needed file isn't found, SPLAT! then searches in the path
+  specified by the -d command-line option, or in the $HOME/.splat_path
+  file.
+
+* The color scheme used by SPLAT! in the generation of Longley-Rice
+  path loss maps was noticeably improved.
+
+* A new command-line option (-db) was added to allow constraints
+  to be placed on the maximum attenuation contours plotted on
+  path loss maps.
+
+* A possible array overflow condition in the ReadPath() function was
+  identified and fixed.
+
+* Some very slight coding modifications were made to permit warning-free
+  compilation under GCC 4.x.x.
+
+* The usgs2sdf utility was modified John Gabrysch (jgabby@gmail.com) to
+  properly handle the latest USGS DEM file format, and to properly scale
+  Alaska tiles.
+
+----------------------------------------------------------------------------
+
+Release 1.1.0:
+By John A. Magliacane, <kd2bd@amsat.org> (29-Jan-2004):
+
+* Extensively modified by J. D. McDonald in January 2004 to include
+  the Longley-Rice propagation model using C++ code from NTIA/ITS.
+  In addition to analyzing line-of-sight propagation paths, SPLAT!
+  now generates multi-color maps illustrating predicted signal
+  strength (path loss), path loss graphs, path loss reports,
+  and terrain height graphs.  The default earth radius, as well
+  as the default line-of-sight and path loss analysis range used
+  by SPLAT! may also be modified using new command-line options.
+
+* splat.c was renamed to splat.cpp to reflect changes necessary
+  to merge with Longley-Rice C++ code.  A C++ compiler (gcc/g++)
+  is now required to compile SPLAT!.
+
+* The documentation was updated to reflect the new features
+  of the program.
+
+----------------------------------------------------------------------------
+
+Release 1.0.3:
+By John A. Magliacane <kd2bd@amsat.org> (10-Jun-2002):
+
+* Coverage areas are now processed four times faster than before.
+  (TNX KC6YSO)
+
+* Determination of antenna height above average terrain (HAAT) based
+  on FCC Part 73.313(d) (Prediction of coverage) has been added.
+
+* Site analysis report generation has been added when coverage mode
+  is invoked.  These reports include ground height above mean sea
+  level, antenna height above mean sea level, antenna height above
+  average terrain, and average terrain calculated at azimuths of 0,
+  45, 90, 135, 180, 225, 270, and 315 degrees.
+
+* Added site location information in degree, minute, second format,
+  as well as antenna height above average terrain to the content of
+  obstruction reports.
+
+* Elevations below sea-level are now safely handled.
+
+* Greyscale of topographic maps generated by SPLAT! is now referenced
+  between the highest and lowest elevations in the survey, instead of
+  between the highest elevation and sea-level.  This change in reference
+  permits regions below sea level to be discernible in the map, and
+  allows subtle terrain variations to be clearly evident over regions
+  having relatively flat terrain.
+
+* The documentation was updated.
+
+* Several other minor coding changes/bug fixes were made.
+
+----------------------------------------------------------------------------
+
+Release 1.0.2:
+By John A. Magliacane <kd2bd@amsat.org> (14-May-2002):
+
+* SPLAT! now buffers data while reading bzip2 compressed SPLAT
+  Data Files (SDFs).  A 100 MHz Pentium now loads compressed SDF
+  files 208% faster than before, and takes only 2 seconds longer
+  than an uncompressed file.
+
+* Configuration, compilation, and installation scripts now invoke
+  bash instead of sh.  The -ffast-math compiler option was removed.
+
+----------------------------------------------------------------------------
+
+Release 1.0.1:
+By John A. Magliacane <kd2bd@amsat.org> (22-Apr-2002):
+
+* The maximum number of transmitter/repeater sites handled
+  per analysis has been increased from two to four.
+
+* Improved the configuration, compilation, and installation scripts.
+  Now ./configure compiles and installs the program, man page, and
+  all associated utilities in one command.
+
+* Some minor coding changes were made, including the addition of an
+  #include <stdlib.h> in each of the utilities to silence a compilation
+  warning issued by gcc version 3.x.x about the use of the exit() function.
+
+* The README and documentation files were updated.
+
+----------------------------------------------------------------------------
+
+Release 1.0.0:
+by John A. Magliacane <kd2bd@amsat.org> (08-Apr-2002):
+
+* First public release of SPLAT!
+

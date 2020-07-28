@@ -1,0 +1,1360 @@
+SPLAT!(1)                       KD2BD Software                       SPLAT!(1)
+
+
+
+NAME
+       splat  es  una  herramienta para el anlisis de Propagacin de Seales RF,
+       Prdidas , y Caractersticas del Terreno (Signal Propagation,  Loss,  And
+       Terrain analysis tool SPLAT!)
+
+SINOPSIS
+       splat
+       [-t  sitio_transmisor.qth]
+       [-r sitio_receptor.qth]
+       [-c  rx altura de la antena para el anlisis de cobertura LOS (pies/met-
+       ros) (flotante)]
+       [-L rx altura de la antena para el anlisis de cobertura ITM  (pies/met-
+       ros) (flotante)]
+       [-p perfil_terreno.ext]
+       [-e perfil_elevacion.ext]
+       [-h perfil_altura.ext]
+       [-H perfil_altura_normalizada.ext]
+       [-l perfil_ITM.ext]
+       [-o nombre_archivo_mapa_topogrfico.ppm]
+       [-b archivo_lmites_cartogrficos.dat]
+       [-s base_datos_sitios/ciudades.dat]
+       [-d ruta_directorio_sdf]
+       [-m radio multiplicador tierra (flotante)]
+       [-f frequencia (MHz) para clculos de la zona de Fresnel (flotante)]
+       [-R mximo radio de cobertura (millas/kilmetros) (flotante)]
+       [-dB Umbral bajo el cual no se presentarn los contornos]
+       [-gc Altura del clutter del terreno (pies/metros) (flotante)]
+       [-fz porcentaje despejado de la zona de Fresnel (default = 60%)]
+       [-ano nombre archivo salida alfanumrica]
+       [-ani nombre archivo entrada alfanumrica]
+       [-udt archivo_terreno_definido_por_el_usuario.dat]
+       [-log logfile.ext]
+       [-n]
+       [-N]
+       [-nf]
+       [-sc]
+       [-dbm]
+       [-ngs]
+       [-geo]
+       [-kml]
+       [-gpsav]
+       [-metric]
+       [-olditm]
+
+DESCRIPCIN
+       SPLAT!  es  una   poderosa  herramienta   para  el anlisis de terreno y
+       propagacin RF que cubre el espectro entre 20 Megahertz y 20  Gigahertz.
+       SPLAT!  es Software Libre y est diseado para operar en escritorios Unix
+       y basados en Linux. La redistribucin y/o modificacin est permitida bajo
+       los  trminos de la licencia pblica general GNU segn lo publicado por la
+       Fundacin de Software Libre, versin 2. La adopcin del  cdigo  fuente  de
+       SPLAT! en aplicaciones propietarias o de fuente-cerrada es una violacin
+       de esta licencia, y est estrictamente prohibida.
+
+       SPLAT! es distribuido con la esperanza de que sea til, pero SIN NINGUNA
+       GARANTA,  an  la  garanta implcita de COMERCIALIZACIN o de la APLICACIN
+       PARA UN PROPSITO PARTICULAR. Vea la licencia GNU para ms detalles.
+
+INTRODUCCIN
+       Las aplicaciones de SPLAT! incluyen la visualizacin, diseo,  y  anlisis
+       de enlaces  de  redes inalmbricas WAN, sistemas de radio comunicaciones
+       comerciales y aficionados  sobre los 20 megahertz, enlaces   microonda,
+       estudios  de interferencia y coordinacin de frecuencias, y determinacin
+       del contorno de cobertura de las regiones de  radio  y  televisin  ter-
+       restres anlogas y digitales.
+
+       SPLAT! provee datos RF de ingeniera del sitio, tales como distancia del
+       arco terrestre y azimut entre sitios, ngulos  de  elevacin  (uptilt)  y
+       depresin  (downtilt)  de la antena, altura de la antena sobre nivel del
+       mar, altura de la antena sobre el promedio del terreno, azimut, distan-
+       cias  y  elevaciones  para  determinar  obstrucciones,  atenuaciones de
+       trayectoria del Modelo Terreno  Irregular,  e  intensidad  de  la  seal
+       recibida. Adicionalmente, la altura mnima de las antenas requerida para
+       superar las obstrucciones del terreno, la primera zona  de  Fresnel,  y
+       cualquier  porcentaje  definido  por el usuario para la primera zona de
+       Fresnel.
+
+       SPLAT! produce reportes, grficos, y  mapas topogrficos de alta  resolu-
+       cin  que presentan trayectorias de lnea-de-vista, prdidas por trayecto-
+       ria regionales y contornos de intensidad de seal a travs de los  cuales
+       se  puede  determinar  el  rea de cobertura esperada de sistemas trans-
+       misores o repetidoras. Cuando se  emplean  mltiples  sitios  de  trans-
+       misores  o  repetidores, al realizar anlisis de lnea de vista y anlisis
+       del Modelo de Terreno Irregular, SPLAT! puede determinar  las  reas  de
+       cobertura individuales y  mutuas  dentro de la red especificada.
+
+
+FICHEROS DE ENTRADA
+       SPLAT!  es  una  aplicacin  manejada por lnea de comandos o terminal de
+       textos (shell), y lee los datos de entrada  a  travs  de  un  nmero  de
+       ficheros  de  datos. Algunos archivos son obligatorios para la ejecucin
+       apropiada del programa, mientras que otros son opcionales. Los archivos
+       obligatorios incluyen los modelos topogrficos de elevacin digital en la
+       forma de archivos de datos de SPLAT (archivos SDF), archivos de  local-
+       izacin del sitio (archivos QTH), y archivos de parmetros para el Modelo
+       de Terreno Irregular (archivos LRP). Los archivos  opcionales  incluyen
+       archivos de localizacin de ciudades/sitios, archivos de lmites cartogr-
+       ficos, archivos de  terreno  definidos  por  el  usuario,  archivos  de
+       entrada de prdidas por trayectoria, archivos de patrones de radiacin de
+       antenas, y archivos de definicin de color.
+
+FICHEROS DE DATOS SPLAT
+       SPLAT! importa los datos topogrficos desde los ficheros de datos  SPLAT
+       (SDFs). Estos archivos se pueden generar desde varias fuentes de infor-
+       macin. En los Estados Unidos, los ficheros de datos   SPLAT  se  pueden
+       generar  a travs de la U.S.  Geological Survey Digital Elevation Models
+       (DEMs) usando la herramienta  postdownload  y  usgs2sdf  incluidas  con
+       SPLAT!. Los modelos de elevacin digital USGS compatibles con esta util-
+       idad pueden ser descargados de:
+
+              http://edcftp.cr.usgs.gov/pub/data/DEM/250/.
+
+       Una resolucin significativamente mejor se puede obtener con el  uso  de
+       los  modelos digitales de  elevacin SRTM versin 2, especialmente cuando
+       son complementados por datos USGS-derivados de SDF.  Estos  modelos  de
+       un-grado por un-grado son el resultado de la misin topogrfica del radar
+       espacial Shuttle STS-99, y estn  disponibles  para  la  mayora  de  las
+       regiones  pobladas de la tierra. Los ficheros de datos SPLAT pueden ser
+       generados desde los archivos de datos SRTM-3 3 arco-segundo  usando  la
+       utilidad  incluida  srtm2sdf.  Los  archivo SRTM-3 versin 2.1 se pueden
+       obtener a travs de FTP annimo desde:
+
+              http://dds.cr.usgs.gov/srtm/version2_1/SRTM3/
+
+       Observe que el nombre de los archivos SRTM se refieren a la  latitud  y
+       longitud  de la esquina suroeste del conjunto de datos topogrficos con-
+       tenidos dentro del archivo. Por lo tanto, la regin de inters debe estar
+       al norte y al este de la latitud y longitud proporcionada por el nombre
+       del archivo SRTM.
+
+       Incluso se puede obtener una mayor resolucin  y  exactitud  usando  los
+       datos  topogrficos SRTM-1 Versin 2.1. Estos datos estn disponibles para
+       los Estados Unidos y sus territorios y posesiones, y pueden ser descar-
+       gados desde:
+
+              http://dds.cr.usgs.gov/srtm/version2_1/SRTM1/
+
+       Los archivos SDF de alta resolucin para ser usados con SPLAT! HD pueden
+       ser generados desde los datos en este  formato  usando  la  herramienta
+       srtm2sdf-hd.
+
+       A  pesar  de  la  exactitud ms alta que los datos SRTM ofrecen, existen
+       algunos vacos en los conjuntos  de  datos.  Cuando  se  detectan  estos
+       vacos,  las herramientas srtm2sdf y srtm2sdf-hd los substituyen por los
+       datos  encontrados en los  archivos SDF  existentes  generados  con  la
+       utilidad   usgs2sdf).   Si   los  datos  SDF,  USGS-derivados  no  estn
+       disponibles, los vacos se reemplazan con el promedio de los pxeles ady-
+       acentes, o reemplazo directo.
+
+       Los  ficheros de datos de SPLAT contienen valores enteros de las eleva-
+       ciones topogrficas en  metros  referenciados  al  nivel  del  mar  para
+       regiones  de  la  tierra  de  1-grado  por 1-grado con una resolucin de
+       3-arco segundos. Los archivos SDF pueden ser ledos por SPLAT! ya sea en
+       el formato estndar (.sdf) as como en los generados directamente por las
+       herramientas usgs2sdf, srtm2sdf, y srtm2sdf-hd, o en  el  formato  com-
+       primido  bzip2  (.sdf.bz2).  Puesto  que  los archivos sin comprimir se
+       pueden procesar ligeramente ms  rpido  que  los  archivos  comprimidos,
+       SPLAT! busca los datos SDF necesarios en formato sin comprimir primero.
+       Si los datos sin comprimir no pueden ser localizados,  SPLAT!  entonces
+       busca  los  datos  en  formato  comprimido  bzip2. Si tampoco se pueden
+       encontrar los archivos SDF comprimidos para la regin solicitada, SPLAT!
+       asume  que  la  regin es el ocano, y asignar una elevacin del nivel del
+       mar a estas reas.
+
+       Esta caracterstica de SPLAT! permite realizar el anlisis  de  trayecto-
+       rias  no solamente sobre la tierra, sino tambin entre las reas costeras
+       no representadas por los datos del Modelo  de  Elevacin  Digital.   Sin
+       embargo,  este comportamiento de SPLAT! resalta la importancia de tener
+       todos los archivos SDF requeridos para la regin a ser  analizada,  para
+       as obtener resultados significativos.
+
+ARCHIVOS DE LOCALIZACIN DEL SITIO (QTH)
+       SPLAT!  SPLAT!  importa  la  informacin de la localizacin de los sitios
+       del transmisor y  del  receptor  analizados  por  el  programa  de  los
+       archivos ASCII que tienen una extensin .qth. Los archivos QTH contienen
+       el nombre del sitio, la  latitud  del  sitio  (positiva  al  norte  del
+       ecuador,  negativa al sur), la longitud del sitio (en grados oeste W de
+       0 a 360 grados), y; La altura de la antena del sitio sobre el nivel del
+       suelo  (AGL),  cada  uno  separado por un caracter de salto-de-lnea. La
+       altura de la antena se asume a ser especificada en pies a menos que sea
+       seguida  por la letra m o de la palabra  meters  en maysculas o minscu-
+       las. La informacin de la latitud y de la longitud se puede expresar  en
+       formato  decimal (74.6889) o en formato grados, minutos, segundos (DMS)
+       (74 41 20.0).
+
+       Por ejemplo, un archivo de localizacin de sitio que describe la estacin
+       de  televisin  WNJT-DT,  Trenton,  NJ (wnjt-dt.qth) se puede  leer como
+       sigue:
+
+
+               WNJT-DT
+               40.2828
+               74.6864
+               990.00
+
+
+       Cada sitio de transmisor y receptor analizado por SPLAT! debe ser  rep-
+       resentado por su propio archivo de la localizacin de sitio (QTH).
+
+ARCHIVOS DE PARMETROS MODELO TERRENO IRREGULAR (LRP)
+       Los  archivos  de  datos  de  parmetros  Modelo  Terreno  Irregular son
+       requeridos por SPLAT! para determinar las prdidas por  trayectoria  RF,
+       intensidad  de campo, o nivel de la potencia de la seal recibida ya sea
+       en el modo punto-a-punto o prediccin de rea.  Los  datos  de  parmetros
+       para  el Modelo Terreno Irregular se leen desde el archivo que tiene el
+       mismo nombre base del archivo QTH del sitio del  transmisor,  pero  con
+       extensin  .lrp.  Los Archivos SPLAT! LRP comparten el siguiente formato
+       (wnjt-dt.lrp):
+
+
+               15.000  ; Earth Dielectric Constant (Relative permittivity)
+               0.005   ; Earth Conductivity (Siemens per meter)
+               301.000 ; Atmospheric Bending Constant (N-units)
+               647.000 ; Frequency in MHz (20 MHz to 20 GHz)
+               5       ; Radio Climate (5 = Continental Temperate)
+               0       ; Polarization (0 = Horizontal, 1 = Vertical)
+               0.50    ; Fraction of situations (50% of locations)
+               0.90    ; Fraction of time (90% of the time)
+               46000.0 ; Potencia Efectiva Radiada (ERP) in Watts (optional)
+
+       Si un archivo LRP correspondiente al archivo QTH del  sitio  de  trans-
+       misin no puede ser encontrado, SPLAT! explorar el directorio de trabajo
+       actual buscando el archivo "splat.lrp". Si este archivo  tampoco  puede
+       ser  encontrado,  entonces  los parmetros por defecto enumerados arriba
+       sern asignados por SPLAT!  y  se  generar  el  archivo  correspondiente
+       "splat.lrp"  que  contendr estos parmetros y por defecto ser escrito en
+       el directorio actual de trabajo. El archivo "splat.lrp" generado  puede
+       ser editado de acuerdo a las necesidades del usuario.
+
+       Las constantes dielctricas tpicas de la tierra y sus valores de conduc-
+       tividad son los siguientes:
+                                  Dielectric Constant  Conductivity
+               Salt water       :        80                5.000
+               Good ground      :        25                0.020
+               Fresh water      :        80                0.010
+               Marshy land      :        12                0.007
+               Farmland, forest :        15                0.005
+               Average ground   :        15                0.005
+               Mountain, sand   :        13                0.002
+               City             :         5                0.001
+               Poor ground      :         4                0.001
+
+       Los cdigos de Clima de Radio usados por SPLAT! son los siguientes:
+
+               1: Equatorial (Congo)
+               2: Continental Subtropical (Sudan)
+               3: Maritime Subtropical (West coast of Africa)
+               4: Desert (Sahara)
+               5: Continental Temperate
+               6: Maritime Temperate, over land (UK and west coasts  of  US  &
+       EU)
+               7: Maritime Temperate, over sea
+
+
+       El  clima templado continental es comn a las grandes masas de la tierra
+       en la zona templada, tal como los  Estados  Unidos.  Para  trayectorias
+       inferiores a 100 kilmetros, es poca la diferencia entre los climas tem-
+       plados continentales y martimos.
+
+       Los parmetros sptimo y octavo en el archivo .lrp corresponden al  anli-
+       sis estadstico proporcionado por el modelo ITM. En este ejemplo, SPLAT!
+       devolver la mxima prdida de trayectoria que ocurre el 50% de las situa-
+       ciones  (fraccin  de  situaciones, o Variabilidad de Locaciones) el 90%
+       del tiempo (fraccin de tiempo, o Variabilidad Tiempo). Esto es a menudo
+       denotado  como  F(50,90)  en  los estudios Longley_Rice. En los Estados
+       Unidos un criterio F(50,90) es tpicamente usado para televisin  digital
+       (8-level  VSB modulation), mientras que F(50,50) es usado para radiodi-
+       fusin analgica (VSB-AM+NTSC).
+
+       Para mayor informacin sobre los parmetros del modelo de propagacin ITM,
+       puede  referirse a: http://www.its.bldrdoc.gov/resources/radio-propaga-
+       tion-software/itm/itm.aspx  y   http://www.softwright.com/faq/engineer-
+       ing/prop_longley_rice.html
+
+       El parmetro final en el archivo .lrp corresponde a la potencia efectiva
+       radiada (ERP), y es opcional. Si esta es incluida en el  archivo  .lrp,
+       entonces  SPLAT!  computar los niveles de intensidad de seal recibida y
+       los contornos de niveles de intensidad de campo cuando se realicen  los
+       estudios  ITM.  Si el parmetro es omitido, se computan  en su lugar las
+       prdidas por trayectoria. El ERP provisto en el archivo .lrp  puede  ser
+       invalidado  usando  la  opcin  SPLAT!   de lnea-de-comando -erp.  Si el
+       archivo .lrp contiene un parmetro ERP y en lugar de  generar  los  con-
+       tornos  de intensidad de campo se desea generar los contornos de prdida
+       por trayectoria, el valor ERP puede ser asignado a cero usando la opcin
+       -erp  sin tener que editar el archivo .lrp para obtener el mismo resul-
+       tado.
+
+ARCHIVOS DE LOCALIZACIN DE CIUDADES
+       Los nombres y las localizaciones de ciudades, sitios  de  la  torre,  u
+       otros puntos de inters se pueden importar y trazar en los mapas topogr-
+       ficos generados por SPLAT!. SPLAT! importa los nombres  de  ciudades  y
+       localizaciones de los archivos ASCII que contienen el nombre, latitud y
+       longitud de la localizacin de inters. Cada campo es  separado  por  una
+       coma.  Cada expediente es separado por un caracter de salto-de-lnea. Al
+       igual que con los archivos .qth, la informacin de la latitud y la  lon-
+       gitud  se  puede  ingresar  en  formato decimal o en formato de grados,
+       minutos, segundos (DMS).
+
+       Por ejemplo (cities.dat):
+
+               Teaneck, 40.891973, 74.014506
+               Tenafly, 40.919212, 73.955892
+               Teterboro, 40.859511, 74.058908
+               Tinton Falls, 40.279966, 74.093924
+               Toms River, 39.977777, 74.183580
+               Totowa, 40.906160, 74.223310
+               Trenton, 40.219922, 74.754665
+
+       Un total de cinco ficheros de datos separados  de  ciudades  se  pueden
+       importar  a  la vez, y no hay lmite al tamao de estos archivos.  SPLAT!
+       lee datos  de  las  ciudades  en  base  a  "primero  ingresada  primero
+       servida",  y  traza  solamente  las localizaciones cuyas anotaciones no
+       estn en conflicto con anotaciones de las localizaciones ledas anterior-
+       mente  en el archivo actual de datos de ciudades, o en archivo previos.
+       Este comportamiento en SPLAT!  reduce al mnimo el desorden  al  generar
+       los mapas topogrficos, pero tambin determina que por mandato las local-
+       izaciones importantes estn puestas al principio del primer  fichero  de
+       datos de ciudades, y las localizaciones de menor importancia sean colo-
+       cadas a continuacin en la lista o  en  los  ficheros  de  datos  subse-
+       cuentes.
+
+       Los  ficheros  de  datos  de las ciudades se pueden generar manualmente
+       usando cualquier editor de textos, importar de otras fuentes, o derivar
+       de  los datos disponibles de la oficina de censo de los Estados Unidos,
+       usando la herramienta citydecoder incluida  con  SPLAT!.   Estos  datos
+       estn   disponibles   gratuitamente   va   Internet  en:  http://web.ar-
+       chive.org/web/20130331172800/http://www.cen-
+       sus.gov/geo/www/cob/bdy_files.html, y deben estar en formato ASCII.
+
+ARCHIVOS DE DATOS DE LIMITES CARTOGRFICOS
+       Los  datos cartogrficos de lmites se pueden tambin importar para trazar
+       los lmites de las ciudades,  condados, o estados en los mapas topogrfi-
+       cos  generados  por  SPLAT!.  Estos  datos deben estar en el formato de
+       metadatos de archivos cartogrficos de lmites  ARC/INFO Ungenerate (for-
+       mato ASCII), y estn disponibles para los E.E.U.U..en la Oficina de Cen-
+       sos          va          Internet          en:           http://web.ar-
+       chive.org/web/20130331144934/http://www.cen-
+       sus.gov/geo/www/cob/co2000.html#ascii         y          http://web.ar-
+       chive.org/web/20130507075658/http://www.cen-
+       sus.gov/geo/www/cob/pl2000.html#ascii.  Un total de cinco archivos car-
+       togrficos  separados de lmites se puede importar a la vez.  No es nece-
+       sario importar lmites de estado si ya  se han importado los lmites  del
+       condado.
+
+OPERACIN DEL PROGRAMA
+       SPLAT!  Debido a que SPLAT! hace un uso intensivo del CPU y la memoria,
+       se invoca va lnea de comandos usando una serie de opciones  y  argumen-
+       tos,  este  tipo  de  interfaz  reduce  al mnimo gastos indirectos y se
+       presta a operaciones  escriptadas (batch). El uso de CPU y prioridad de
+       memoria  por  SPLAT! se pueden modificar con el uso del comando nice de
+       Unix.
+
+       El nmero y el tipo de opciones pasados a SPLAT! determinan su  modo  de
+       operacin  y  el  mtodo de generacin de los datos de  salida. Casi todas
+       las opciones de SPLAT! se pueden llamar en cascada en  cualquier  orden
+       al  invocar  el  programa  desde la lnea de comandos. Simplemente tipee
+       splat en la consola de  comandos,  esto  retornar  un  resumen  de  las
+       opciones de lnea de comando de SPLAT!:
+
+                    --==[ SPLAT! v1.4.2 Available Options... ]==--
+              -t  txsite(s).qth (sitio de transmisin, max 4 con -c, max 30 con
+       -L)
+              -r rxsite.qth (sitio de recepcin)
+              -c grafica rea(s) de cobertura  de  Tx(s)  con  antena  Rx  a  X
+       pies/mts SNT
+              -L grafica mapa de prdida por trayectoria del TX y antena RX a X
+       pies/mts SNT
+              -s nombres  de  archivos(s)  de  ciudades/sitios  para  importar
+       (mximo 5)
+              -b  nombres  de archivos(s) de lmites cartogrficos para importar
+       (mximo 5)
+              -p nombre de archivo para graficar el perfil del terreno
+              -e nombre de archivo para graficar la elevacin del terreno
+              -h nombre de archivo para graficar la altura del terreno
+              -H nombre de archivo para graficar  la  altura  normalizada  del
+       terreno
+              -l nombre de archivo para graficar prdidas por trayectoria
+              -o nombre de archivo para generar el mapa topogrfico (.ppm)
+              -u  nombre  del  archivo  del  terreno definido-por-el-usuario a
+       importar
+              -d ruta al directorio que contiene los archivos sdf (en lugar de
+       ~/.splat_path)
+              -m multiplicador del radio de la tierra
+              -n no grafica las rutas de LDV in mapas .ppm
+              -N  no  produce  reportes  innecesarios  del sitio o reportes de
+       obstruccin
+              -f frecuencia para el clculo de la zona de Fresnel (MHz)
+              -R modifica el rango por defecto para -c o -L (millas/kilmetros)
+              -sc presenta niveles de contornos suavizados en lugar de cuanti-
+       zados
+              -db Umbral bajo el cual los contornos no sern presentados
+              -nf no grafica la zona de Fresnel en los grficos de altura
+              -fz porcentaje de despeje de la zona de Fresnel (default = 60)
+              -gc Altura del clutter del terreno (pies/metros)
+              -ngs  presenta  la  topografa de escala de grises como blanco en
+       archivos .ppm
+              -erp valor ERP en lugar del declarado en el archivo .lrp (Watts)
+              -ano nombre archivo salida alfanumrica
+              -ani nombre archivo entrada alfanumrica
+              -udt nombre del archivo de entrada de  terreno  definido-por-el-
+       usuario
+              -kml  genera  un  archivo  compatible  Google  Earth  .kml (para
+       enlaces punto-punto)
+              -geo genera un archivo Xastir de georeferencia .geo (con  salida
+       .ppm)
+              -dbm  dibuja  contornos de nivel de potencia de seal en lugar de
+       intensidad de campo
+              -log copia las cadenas de salida de la lnea de comandos  a  este
+       archivo de salida
+            -gpsav  preserva  los archivos temporales gnuplot despus de ejecu-
+       tar SPLAT!
+           -metric emplea unidades mtricas para todas las I/O del usuario
+           -olditm invoca el viejo modelo de propagacin ITM en lugar del nuevo
+       ITWOM
+        Las opciones de lnea-de-comando para splat y splat-hd son idnticas.
+
+       La  opcin  de lnea de comandos -log causa que todas las opciones de las
+       lneas de comando llamadas sean direccionadas a un archivo de su eleccin
+       (logfile.txt):
+
+       splat -t tx_site -r rx_site -s nj_cities -o topo_map -log logfile.txt
+
+       SPLAT!  opera  en  dos  modos  distintos: modo punto-a-punto, y modo de
+       prediccin del rea de cobertura, y puede ser  invocado  por  el  usuario
+       usando  el  modo de lnea de vista (LOS) o el  modelo de propagacin Ter-
+       reno Irregular (ITM). El radio de tierra verdadera,  cuatro-tercios,  o
+       cualquier  otro  definido-por-el-usuario  pueden  ser  especificados al
+       realizar los anlisis de lnea-de-vista.
+
+ANLISIS PUNTO-A-PUNTO
+       SPLAT! puede ser utilizado para determinar  si  existe  lnea  de  vista
+       entre  dos localizaciones especificadas realizando para ello el anlisis
+       del perfil del terreno. Por ejemplo:
+
+       splat -t tx_site.qth -r rx_site.qth
+
+       invoca un anlisis del perfil del terreno entre el transmisor  especifi-
+       cado  en  tx_site.qth  y  el  receptor  especificado  en rx_site.qth, y
+       escribe un  Reporte de Obstrucciones SPLAT! al  directorio  de  trabajo
+       actual. El reporte contiene los detalles de los sitios del transmisor y
+       del receptor, e  identifica  la  localizacin  de  cualquier  obstruccin
+       detectada  a  lo  largo  de  la  trayectoria  de  lnea-de-vista. Si una
+       obstruccin puede ser despejada levantando la antena de recepcin  a  una
+       mayor  altura,  SPLAT!  indicar  la altura mnima de la antena requerida
+       para que exista lnea-de-vista entre las localizaciones del transmisor y
+       el receptor especificadas. Observe que las unidades imperiales (millas,
+       pies) se usan por defecto, a menos que se use la opcin  -metric  en  la
+       orden SPLAT! de lnea de comandos.
+
+       splat -t tx_site.qth -r rx_site.qth -metric
+
+       Si la antena se debe levantar una cantidad significativa, esta determi-
+       nacin puede tomar una cierta cantidad de tiempo. Observe que los resul-
+       tados proporcionados son el mnimo necesario para que exista una trayec-
+       toria de la lnea-de-vista, y en el caso de este simple ejemplo, no con-
+       sidera los requisitos de la zona de Fresnel.
+
+       Las  extensiones  qth  son asumidas por SPLAT! para los archivos QTH, y
+       son opcionales cuando se especifican los argumentos -t y -r en la  lnea
+       de  comandos.  SPLAT! lee automticamente todos los ficheros de datos de
+       SPLAT necesarios para el anlisis del terreno entre los sitios especifi-
+       cados.   SPLAT! busca primero los archivos SDF necesarios  en el direc-
+       torio de trabajo actual. Si estos archivos  no  se  encuentran,  SPLAT!
+       entonces busca en la ruta especificada por la opcin -d:
+
+       splat -t tx_site -r rx_site -d /cdrom/sdf/
+
+       Una  ruta  a  un  directorio  externo  se  puede especificar creando el
+       archivo ".splat_path" en el directorio de  trabajo  del  usuario.  Este
+       archivo $HOME/.splat_path debe contener una sola lnea de texto ASCII en
+       la que indique la ruta completa  del directorio que contiene todos  los
+       archivos SDF.
+
+       /opt/splat/sdf/
+
+       Y puede ser generado usando cualquier editor de texto.
+
+       Adicionando  la opcin -p se puede generar un grfico que muestre el per-
+       fil del terreno en funcin de la distancia, partiendo desde el receptor,
+       entre las localizaciones del transmisor y receptor:
+
+       splat -t tx_site -r rx_site -p terrain_profile.png
+
+       Cuando  genera  los  grficos  SPLAT!  invoca  al  programa  gnuplot. La
+       extensin del nombre del archivo especificado a SPLAT! determina el for-
+       mato del grfico a ser producido .png generar un archivo de grfico PNG a
+       color con una resolucin de 640x480,  mientras  que  .ps  o  .postscript
+       generarn archivos de salida postscritp. La salida en formatos como GIF,
+       Adobe Illustrator, AutoCAD dxf, LaTex, y muchos otros estn disponibles.
+       Por  favor consulte gnuplot, y la documentacin de gnuplot para detalles
+       de todos los formatos de salida soportados.
+
+       En el lado del receptor usando la opcin -e se puede generar  un  grfico
+       de  elevaciones  en  funcin de la distancia determinado por el ngulo de
+       inclinacin debido al terreno entre el receptor y el transmisor:
+
+       splat -t tx_site -r rx_site -e elevation_profile.png
+
+       El grfico producido usando esta opcin ilustra los ngulos de elevacin  y
+       depresin   resultado del terreno entre la localizacin del receptor y el
+       sitio del transmisor desde la perspectiva   del  receptor.  Un  segundo
+       trazo  es  dibujado entre el lado izquierdo del grfico (localizacin del
+       receptor) y la localizacin de la antena que  transmite  a  la  derecha.
+       Este  trazo ilustra el ngulo de elevacin requerido para que exista  una
+       trayectoria de lnea-de-vista entre el  receptor  y  transmisor.  Si  la
+       traza  interseca  el  perfil de elevacin en cualquier punto del grfico,
+       entonces esto es una indicacin que bajo las condiciones dadas no existe
+       una trayectoria de lnea-de-vista, y las obstrucciones se pueden identi-
+       ficar claramente en el grfico en los puntos de interseccin.
+
+       Usando la opcin -h  se puede generar un grfico que  ilustre  la  altura
+       del  terreno  referenciado  a  la trayectoria de lnea-de-vista entre el
+       transmisor y el receptor:
+
+       splat -t tx_site -r rx_site -h height_profile.png
+
+       Con la opcin -H se puede obtener La altura del  terreno  normalizada  a
+       las alturas de las antenas del transmisor y receptor:
+
+       splat -t tx_site -r rx_site -H normalized_height_profile.png
+
+       El contorno de curvatura de la Tierra tambin se grafica en este modo.
+
+       La  primera  Zona  de  Fresnel,  y el 60% de la primera Zona de Fresnel
+       pueden ser adicionadas al grfico de perfiles de altura con la opcin -f,
+       especificando la frecuencia (MHz) a la cual la Zona de Fresnel ser mod-
+       elada:
+
+       splat -t tx_site -r rx_site -f 439.250 -H normalized_height_profile.png
+
+       Zonas de despeje de la zona de  Fresnel  distintas  al  60%  se  pueden
+       especificar usando la opcin -fz como sigue:
+
+       splat -t tx_site -r rx_site -f 439.250 -fz 75 -H height_profile2.png
+
+       Un  grfico  que muestre las prdidas de trayectoria ITM se puede dibujar
+       usando la opcin -l:
+
+       splat -t tx_site -r rx_site -l path_loss_profile.png
+
+       Como antes, al adicionar la opcin -metric se forza  al  grfico  a  usar
+       unidades  de  medida  mtrica.   La  opcin -gpsav instruye a SPLAT! para
+       preservar (en lugar de borrar) los archivos temporales de trabajo  gnu-
+       plot  generados  durante la ejecucin de SPLAT!, permitindole al usuario
+       editar esos archivos y re-ejecutar gnuplot si lo desea.
+
+       Al realizar un anlisis punto-a-punto, se genera un reporte  SPLAT!   de
+       anlisis  de  trayectoria   en  la  forma de un archivo de texto con una
+       extensin .txt.  El reporte contiene el azimut y la distancia  entre  el
+       transmisor  y  receptor,  lo mismo para cuando se analizan las perdidas
+       por espacio-libre y trayectoria ITM. El  modo  de  propagacin  para  la
+       trayectoria  est  dado  como Lnea-de-Vista, Horizonte Simple, Horizonte
+       Doble, Difraccin dominante, o Troposcatter  dominante.  Adicionalmente,
+       si  el receptor est localizado en el pico de una obstruccin simple o en
+       el pico de una segunda obstruccin, SPLAT! reportar al RX en el Pico del
+       Terreno  a  lo  Largo  de la Trayectoria cuando opera bajo el modelo de
+       propagacin ITWOM.
+
+       Tambin se proveen datos de distancia y localizaciones para  identificar
+       las obstrucciones a lo largo de la trayectoria entre el transmisor y el
+       receptor. Si se especifica la potencia efectiva radiada del  transmisor
+       en  el  archivo  .lrp  del  transmisor  correspondiente, entonces en el
+       reporte de anlisis de trayectoria tambin  se  provee  la  prediccin  de
+       intensidad de seal y voltaje de antena en la localizacin de recepcin.
+
+       Para  determinar la relacin seal-a-ruido (SNR) en el sitio remoto donde
+       el ruido (trmico) aleatorio de Johnson es el el factor  limitante  pri-
+       mario en la recepcin:
+
+       SNR=T-NJ-L+G-NF
+
+       donde  T  es  la  potencia ERP del transmisor en dBW en la direccin del
+       receptor, NJ es el ruido de Johnson en dBW (-136 dBW para un  canal  de
+       TV de 6 MHz), L son las prdidas por trayectoria provistas por SPLAT! en
+       dB (como un nmero positivo), G es la ganancia de la antena receptora en
+       dB  referenciada a un radiador isotrpico, y NF es la figura de ruido en
+       el receptor en dB.
+
+       T puede ser computado como sigue:
+
+       T=TI+GT
+
+       donde TI es la cantidad actual de potencia RF  entregada  a  la  antena
+       transmisora en dBW, GT  es la ganancia de la antena transmisora (refer-
+       enciada a una isotrpica) en la direccin del receptor (o al horizonte si
+       el receptor est sobre el horizonte).
+
+       Para  calcular  cuanta mas seal est disponible sobre el mnimo necesario
+       para conseguir una relacin seal-a-ruido especfica:
+
+       Signal_Margin=SNR-S
+
+       donde S es la mnima relacin SNR deseada (15.5  dB  para  ATSC  (8-level
+       VSB) DTV, 42 dB para televisin analgica NTSC).
+
+       SPLAT!  puede generar Un mapa topogrfico para visualizar la trayectoria
+       entre el transmisor y el receptor desde  otra  perspectiva.  Los  mapas
+       topogrficos  generados  por  SPLAT!  presentan  las  elevaciones usando
+       escala de grises logartmica, con las elevaciones ms altas representadas
+       a  travs  de capas ms brillantes de gris. El rango dinmico de la imagen
+       es escalada entre las elevaciones ms altas y ms bajas presentes  en  el
+       mapa.  La  nica excepcin de esto es al nivel del mar, el cual se repre-
+       senta usando el color azul.
+
+       La salida topogrfica se puede especificar  usando la opcin -o:
+
+       splat -t tx_site -r rx_site -o topo_map.ppm
+
+       La extensin .ppm del archivo de salida es  asumida  por  SPLAT!,  y  es
+       opcional.
+
+       En este ejemplo, topo_map.ppm ilustrar las localizaciones de los sitios
+       especificados del transmisor y  del  receptor.  Adems,  la  trayectoria
+       entre  los  dos  sitios  ser dibujada sobre las localizaciones para las
+       cuales existe una trayectoria sin obstculo hacia el transmisor con  una
+       altura  de  la  antena  de  recepcin  igual a la del sitio del receptor
+       (especificado en rx_site.qth).
+
+       Puede ser deseable poblar el mapa topogrfico con  nombres  y  localiza-
+       ciones  de ciudades, sitios de torres, o de otras localizaciones impor-
+       tantes.  Para ello se puede pasar  a  SPLAT!  un  archivo  de  ciudades
+       usando la opcin -s:
+
+       splat -t tx_site -r rx_site -s cities.dat -o topo_map
+
+       Hasta cinco archivos separados se pueden pasar a la vez a SPLAT!  luego
+       de la opcin -s.
+
+       Los lmites de estados y ciudades se pueden adicionar al mapa  especifi-
+       cando hasta cinco archivos de lmites cartogrficos de Censo Bureu de los
+       U.S.  usando la opcin -b:
+
+       splat -t tx_site -r rx_site -b co34_d00.dat -o topo_map
+
+       En situaciones donde mltiples sitios de transmisores estn  en  uso,  se
+       puede  pasar  a  SPLAT!  hasta cuatro localizaciones simultneas para su
+       anlisis:
+
+       splat -t tx_site1 tx_site2 tx_site3 tx_site4 -r rx_site -p profile.png
+
+       En este ejemplo, SPLAT! genera cuatro reportes separados de  obstruccin
+       y  de  perfiles  de terreno. Un mapa topogrfico simple se puede especi-
+       ficar al usar la opcin -o, las trayectorias de lnea de vista entre cada
+       transmisor  y  el  sitio  indicado del receptor se graficar en el mapa,
+       cada uno con su propio color. La trayectoria entre el primer transmisor
+       especificado  al  receptor  ser  verde, la trayectoria entre el segundo
+       transmisor y el receptor ser  cyan,  la  trayectoria  entre  el  tercer
+       transmisor  y el receptor ser violeta, y la trayectoria entre el cuarto
+       transmisor y el receptor ser siena.
+
+       Los mapas topogrficos generados por SPLAT! son imgenes TrueColor PixMap
+       Portables  de  24-bit  (PPM) y pueden ser vistos, corregidos, o conver-
+       tidos a otros formatos grficos usando  programas populares  de  imgenes
+       tales  como  xv,  The GIMP, ImageMagick, and XPaint.  El formato PNG es
+       altamente recomendado para el almacenamiento comprimido sin prdidas  de
+       los  archivos topogrficos de salida  generados por SPLAT!.  La utilidad
+       de lnea de comandos  ImageMagick's  convierte  fcilmente  los  archivos
+       grficos SPLAT! PPM al formato PNG:
+
+       convert splat_map.ppm splat_map.png
+
+       Otra  utilidad de de lnea de comandos excelente para convertir archivos
+       PPM     a     PNG     es     wpng,     y     est     disponible     en:
+       http://www.libpng.org/pub/png/book/sources.html.    Como  recurso  adi-
+       cional, los archivos PPM pueden  ser  comprimidos  usando  la  utilidad
+       bzip2, y ser ledos directamente en este formato por The GIMP.
+
+       La opcin -ngs asigna a todo el terreno el color blanco, y se puede usar
+       cuando se quiera generar mapas desprovistos de terreno
+
+       splat -t tx_site -r rx_site -b co34_d00.dat -ngs -o white_map
+
+       El archivo de imagen .ppm resultante puede ser  convertido  al  formato
+       .png  con un fondo transparente usando la utilidad convert de ImageMag-
+       ick's.
+
+       convert -transparent "#FFFFFF" white_map.ppm transparent_map.png
+
+DETERMINANDO LA COBERTURA REGIONAL
+       SPLAT! puede analizar un sitio de  transmisor   repetidora,   redes  de
+       sitios,  y predecir la cobertura regional para cada sitio especificado.
+       En este modo SPLAT! puede generar un  mapa  topogrfico  presentando  la
+       lnea-de-vista geomtrica del rea de cobertura  de los sitios, basados en
+       la localizacin de cada sitio y la altura de la antena receptora que  se
+       desea  comunicar  con  el  sitio  en cuestin.  SPLAT! puede realizar un
+       anlisis regional usando la opcin -c como sigue:
+
+       splat -t tx_site -c 30.0 -s cities.dat -b co34_d00.dat -o tx_coverage
+
+       En este ejemplo, SPLAT! genera un  mapa  topogrfico  llamado  tx_cover-
+       age.ppm que ilustra la prediccin de cobertura regional de lnea-de-vista
+       del tx_site a las estaciones receptoras que tienen  una  antena  de  30
+       pies  de  altura  sobre  el nivel del terreno (AGL). Si se usa la opcin
+       -metric, el argumento que sigue a la opcin -c se interpreta en  metros,
+       en  lugar  de pies. El contenido de cities.dat se dibuja sobre el mapa,
+       como  tambin  los  lmites  cartogrficos  contenidos   en   el   archivo
+       co34_d00.dat.
+
+       Cuando  se  grafica  las  trayectorias  de  lnea-de-vista y las reas de
+       cobertura regional, SPLAT! por defecto no considera los efectos  de  la
+       flexin  atmosfrica.  Sin  embargo esta caracterstica se puede modificar
+       usando el multiplicador de radio de la tierra con la opcin (-m):
+
+       splat -t wnjt-dt -c 30.0 -m 1.333  -s  cities.dat  -b  counties.dat  -o
+       map.ppm
+
+       Un  radio multiplicador de 1.333 instruye a  SPLAT! a usar el modelo de
+       "cuatro-tercios" para el anlisis de propagacin de  lnea  de  vista.  El
+       usuario  puede  seleccionar cualquier multiplicador apropiado del radio
+       de la tierra.
+
+       Cuando realiza un anlisis regional, SPLAT! genera un reporte para  cada
+       estacin  analizada.  Los reportes de sitio SPLAT! contienen detalles de
+       la localizacin geogrfica del sitio, su altura sobre el nivel  del  mar,
+       la  altura  de la antena sobre el promedio del terreno, y la altura del
+       promedio del terreno calculada en las direcciones de los azimut  de  0,
+       45, 90, 135, 180, 225, 270, y 315 grados.
+
+DETERMINANDO MLTIPLES REGIONES DE COBERTURA DE LDV
+       SPLAT!  tambin puede presentar reas de cobertura de lnea-de-vista hasta
+       para  cuatro sitios de transmisores separados sobre un mapa  topogrfico
+       comn.  Por ejemplo:
+
+       splat -t site1 site2 site3 site4 -c 10.0 -metric -o network.ppm
+
+       Graficar  las  coberturas  regionales de lnea de vista del  site1 site2
+       site3 y site4 basado en una antena receptora localizada a  10.0  metros
+       sobre  el nivel del terreno. Entonces se escribe al archivo network.ppm
+       el mapa topogrfico.  El rea de cobertura de  lnea-de-vista  del  trans-
+       misor  es graficada en los colores indicados (junto con sus valores RGB
+       correspondientes en decimal):
+
+           site1: Green (0,255,0)
+           site2: Cyan (0,255,255)
+           site3: Medium Violet (147,112,219)
+           site4: Sienna 1 (255,130,71)
+           site1 + site2: Yellow (255,255,0)
+           site1 + site3: Pink (255,192,203)
+           site1 + site4: Green Yellow (173,255,47)
+           site2 + site3: Orange (255,165,0)
+           site2 + site4: Dark Sea Green 1 (193,255,193)
+           site3 + site4: Dark Turquoise (0,206,209)
+           site1 + site2 + site3: Dark Green (0,100,0)
+           site1 + site2 + site4: Blanched Almond (255,235,205)
+           site1 + site3 + site4: Medium Spring Green (0,250,154)
+           site2 + site3 + site4: Tan (210,180,140)
+           site1 + site2 + site3 + site4: Gold2 (238,201,0)
+
+       Si se generan archivos  .qth  separados,  cada  uno  representando  una
+       localizacin  de  un  sitio comn, pero con diferentes alturas de antena,
+       SPLAT! puede generar un mapa topogrfico sencillo que ilustra la  cober-
+       tura  regional  desde  las  estaciones  (hasta cuatro) separadas por la
+       altura en un nica torre.
+
+ANLISIS DE PRDIDAS POR TRAYECTORIA
+       Si la opcin -c  se reemplaza por la opcin -L, se puede generar un  mapa
+       de prdidas de trayectorias ITM:
+
+       splat -t wnjt -L 30.0 -s cities.dat -b co34_d00.dat -o path_loss_map
+
+       En  este modo, SPLAT! genera un mapa multicolor que ilustra los niveles
+       de seal esperados (prdidas por trayectoria) en las reas  alrededor  del
+       transmisor.  Una  leyenda  en la parte inferior del mapa relaciona cada
+       color con sus respectivas prdidas por trayectoria especficas  en  deci-
+       beles.
+
+       La  opcin  -db  permite  un umbral a ser configurado como lmite bajo el
+       cual los contornos no se graficarn en el  mapa.  Por  ejemplo,  si  las
+       prdidas  por trayectoria por debajo de -140 dB son irrelevantes para el
+       estudio que se est realizando, el grfico  de  prdidas  por  trayectoria
+       puede  ser  limitado a la regin delimitada por el contorno de atenuacin
+       de 140 dB como sigue:
+
+       splat -t wnjt-dt -L 30.0 -s  cities.dat  -b  co34_d00.dat  -db  140  -o
+       plot.ppm
+
+       El  umbral  del contorno de prdidas por trayectoria puede ser expresado
+       como una cantidad positiva o negativa.
+
+       El rango de anlisis de prdidas por trayectoria se puede modificar a una
+       distancia  especificada-por-el-usuario  con  la  opcin -R. El argumento
+       debe ser dado en millas ( kilmetros si se usa la opcin -metric).  Si se
+       especifica  un  rango  mayor  que  el  mapa topogrfico generado, SPLAT!
+       realizar los clculos de perdidas de trayectoria  ITM  entre  todas  las
+       cuatro esquinas del rea del mapa  de prediccin.
+
+       Los  colores usados para ilustrar las regiones de contorno en los mapas
+       SPLAT! de cobertura generados se pueden modificar al crear o  modificar
+       los  archivos de definicin de color SPLAT!'s. Los archivos de definicin
+       de color tienen el mismo nombre base que los  archivos  de  los  trans-
+       misores  .qth,  pero  llevan  extensiones  .lcf, .scf, y .dcf. Si en el
+       directorio de trabajo actual no existen los archivos necesarios, cuando
+       SPLAT!  se  est  ejecutando,  se crea en este directorio un archivo que
+       contiene los parmetros por defecto de  definicin  de  color  que  luego
+       puede ser editado manualmente por el usuario.
+
+       Cuando  se  realiza un anlisis regional  ITM y el ERP del transmisor no
+       se ha especificado  es cero, un archivo de definicin de color de  prdi-
+       das por trayectoria .lcf correspondiente al sitio del transmisor (.qth)
+       es ledo por SPLAT! desde el directorio de trabajo actual. Si el archivo
+       .lcf  correspondiente al sitio del transmisor no se encuentra, entonces
+       SPLAT! generar automticamente un archivo por defecto para edicin manual
+       del usuario.
+
+       Un  archivo  de  definicin de color de prdidas por trayectoria posee la
+       siguiente estructura: (wnjt-dt.lcf):
+        ; SPLAT! Auto-generated  Path-Loss  Color  Definition  ("wnjt-dt.lcf")
+       File
+        ;
+        ; Format for the parameters held in this file is as follows:
+        ;
+        ;    dB: red, green, blue
+        ;
+        ; ...where "dB" is the path loss (in dB) and
+        ; "red", "green", and "blue" are the corresponding RGB color
+        ; definitions ranging from 0 to 255 for the region specified.
+        ;
+        ; The following parameters may be edited and/or expanded
+        ; for future runs of SPLAT!  A total of 32 contour regions
+        ; may be defined in this file.
+        ;
+        ;
+         80: 255,   0,   0
+         90: 255, 128,   0
+        100: 255, 165,   0
+        110: 255, 206,   0
+        120: 255, 255,   0
+        130: 184, 255,   0
+        140:   0, 255,   0
+        150:   0, 208,   0
+        160:   0, 196, 196
+        170:   0, 148, 255
+        180:  80,  80, 255
+        190:   0,  38, 255
+        200: 142,  63, 255
+        210: 196,  54, 255
+        220: 255,   0, 255
+        230: 255, 194, 204
+
+       Si  la  prdida  por trayectoria es menor que 80 dB, el color Rojo (RGB=
+       255, 0, 0) se asigna a la regin. Si la prdida por trayectoria es  mayor
+       o igual a 80 dB, pero menor que 90 dB, entonces el color Naranja Oscuro
+       (255, 128, 0) se asigna a la regin. El color Naranja (255, 165,  0)  se
+       asigna a regiones que tienen una prdida por trayectoria mayor o igual a
+       90 dB, pero menor que 100 dB, y as en adelante. El terreno en escala de
+       grises  se  presenta por debajo del contorno de prdidas por trayectoria
+       de 230 dB.  Si se usa la opcin -sc se suavizar las  transiciones  entre
+       los niveles de contornos cuantizados.
+
+ANLISIS DE INTENSIDAD DE CAMPO
+       Si  se  especifica la potencia efectiva radiada (ERP) del transmisor en
+       el archivo del transmisor .lrp, o se expresa en  la  lnea  de  comandos
+       usando  la  opcin  -erp,  en  lugar  de las prdidas por trayectoria, se
+       graficarn los contornos de intensidad de campo  referenciados  a  deci-
+       beles sobre un microvoltio por metro (dBuV/m):
+
+       splat -t wnjt-dt -L 30.0 -erp 46000 -db 30 -o plot.ppm
+
+       La  opcin  -db  puede ser usada como antes en este modo para limitar la
+       medicin a la cual el  contorno  de  intensidad  de  campo  se  dibujar.
+       cuando  se  dibuja  el contorno de intensidad de campo, sin embargo, el
+       argumento dado es interpretado a ser expresado en dBuV/m.
+
+       El archivo SPLAT! de definicin de color de intensidad de campo comparte
+       una  estructura muy similar a los archivos .lcf usados para graficar la
+       prdidas por trayectoria.
+
+        ; SPLAT! Auto-generated Signal Color Definition ("wnjt-dt.scf") File
+        ;
+        ; Format for the parameters held in this file is as follows:
+        ;
+        ;    dBuV/m: red, green, blue
+        ;
+        ; ...where "dBuV/m" is the signal strength (in dBuV/m) and
+        ; "red", "green", and "blue" are the corresponding RGB color
+        ; definitions ranging from 0 to 255 for the region specified.
+        ;
+        ; The following parameters may be edited and/or expanded
+        ; for future runs of SPLAT!  A total of 32 contour regions
+        ; may be defined in this file.
+        ;
+        ;
+        128: 255,   0,   0
+        118: 255, 165,   0
+        108: 255, 206,   0
+         98: 255, 255,   0
+         88: 184, 255,   0
+         78:   0, 255,   0
+         68:   0, 208,   0
+         58:   0, 196, 196
+         48:   0, 148, 255
+         38:  80,  80, 255
+         28:   0,  38, 255
+         18: 142,  63, 255
+          8: 140,   0, 128
+
+       Si la intensidad de seal es mayor o igual a 128 dB sobre 1  microvoltio
+       por  metro  (dBuV/m),  se  presenta  el  color Rojo (255, 0, 0) para la
+       regin.  Si la intensidad de seal es mayor o igual a  118  dBuV/m,  pero
+       menor  que 128 dBuV/m, entonces se presenta el color naranja (255, 165,
+       0) y as  en adelante. El terreno en escala de grises es presentado para
+       regiones con intensidad de seal menores que 8 dBuV/m.
+
+       Los  contornos de intensidad de seal para algunos servicios de radiodi-
+       fusin comunes en VHF y UHF en los Estados Unidos son los siguientes:
+
+
+              Analog Television Broadcasting
+              ------------------------------
+              Channels 2-6:       City Grade: >= 74 dBuV/m
+                                     Grade A: >= 68 dBuV/m
+                                     Grade B: >= 47 dBuV/m
+              --------------------------------------------
+              Channels 7-13:      City Grade: >= 77 dBuV/m
+                                     Grade A: >= 71 dBuV/m
+                                     Grade B: >= 56 dBuV/m
+              --------------------------------------------
+              Channels 14-69:   Indoor Grade: >= 94 dBuV/m
+                                  City Grade: >= 80 dBuV/m
+                                     Grade A: >= 74 dBuV/m
+                                     Grade B: >= 64 dBuV/m
+              Digital Television Broadcasting
+              -------------------------------
+              Channels 2-6:       City Grade: >= 35 dBuV/m
+                           Service Threshold: >= 28 dBuV/m
+              --------------------------------------------
+              Channels 7-13:      City Grade: >= 43 dBuV/m
+                           Service Threshold: >= 36 dBuV/m
+              --------------------------------------------
+              Channels 14-69:     City Grade: >= 48 dBuV/m
+                           Service Threshold: >= 41 dBuV/m
+              NOAA Weather Radio (162.400 - 162.550 MHz)
+              ------------------------------------------
+                         Reliable: >= 18 dBuV/m
+                     Not reliable: <  18 dBuV/m
+              Unlikely to receive: <  0 dBuV/m
+              FM Radio Broadcasting (88.1 - 107.9 MHz)
+              ----------------------------------------
+              Analog Service Contour:  60 dBuV/m
+              Digital Service Contour: 65 dBuV/m
+
+
+ANALISIS DEL NIVEL DE POTENCIA RECIBIDO
+       Si en el archivo .lrp se especifica la potencia efectiva radiada (ERP),
+       o se la expresa con la opcin -erp a travs de la lnea de comandos, junto
+       con la opcin -dbm, los contornos de nivel de potencia recibida se  ref-
+       erencia a decibeles sobre un milivatio (dBm):
+
+       splat -t wnjt-dt -L 30.0 -erp 46000 -dbm -db -100 -o plot.ppm
+
+       Para  limitar  la medicin a la cual se grafican los contornos del nivel
+       de potencia recibida, se puede usar la opcin -db.  Cuando  se  grafican
+       contornos de nivel de potencia, el argumento dado es interpretado a ser
+       expresado en dbm.
+
+       Los archivos SPLAT!  de  definicin  de  color  del  nivel  de  potencia
+       recibidos  comparten  una estructura muy similar a la estructura de los
+       archivos de definicin de color descritos previamente, excepto  que  los
+       niveles  de  potencia  en  dbm pueden ser positivos o negativos, y estn
+       limitados a un rango entre +40 dBm y -200 dBm:
+
+        ; SPLAT! Auto-generated DBM  Signal  Level  Color  Definition  ("wnjt-
+       dt.dcf") File
+        ;
+        ; Format for the parameters held in this file is as follows:
+        ;
+        ;    dBm: red, green, blue
+        ;
+        ; ...where "dBm" is the received signal power level between +40 dBm
+        ; and -200 dBm, and "red", "green", and "blue" are the corresponding
+        ;  RGB  color  definitions ranging from 0 to 255 for the region speci-
+       fied.
+        ;
+        ; The following parameters may be edited and/or expanded
+        ; for future runs of SPLAT!  A total of 32 contour regions
+        ; may be defined in this file.
+        ;
+        ;
+          +0: 255,   0,   0
+         -10: 255, 128,   0
+         -20: 255, 165,   0
+         -30: 255, 206,   0
+         -40: 255, 255,   0
+         -50: 184, 255,   0
+         -60:   0, 255,   0
+         -70:   0, 208,   0
+         -80:   0, 196, 196
+         -90:   0, 148, 255
+        -100:  80,  80, 255
+        -110:   0,  38, 255
+        -120: 142,  63, 255
+        -130: 196,  54, 255
+        -140: 255,   0, 255
+        -150: 255, 194, 204
+
+PARMETROS PARA PATRONES DE RADIACIN DE ANTENAS
+       Los patrones de voltaje de campo normalizado para planos  verticales  y
+       horizontales  de antenas transmisoras se pueden importar automticamente
+       dentro de SPLAT! cuando se realizan los anlisis de prdidas por  trayec-
+       toria,  intensidad  de  campo,  intensidad de campo o nivel de potencia
+       recibida.
+
+       Los datos de los patrones de antena se leen de un par de  archivos  que
+       tienen  el mismo nombre base que el transmisor y los archivos LRP, pero
+       con extensiones .az y .el, para  los  patrones  de  azimut  y  elevacin
+       respectivamente.  Las  especificaciones  acerca de la rotacin del patrn
+       (si existe) e inclinacin  mecnica  y  direccin  de  la  inclinacin  (si
+       existe)  tambin  se  definen  dentro  de  los  archivos  de patrones de
+       radiacin de las antenas.
+
+       Por ejemplo las primeras pocas lneas de un archivo de patrn  de  azimut
+       SPLAT! podran aparecer como sigue (kvea.az):
+
+               183.0
+               0       0.8950590
+               1       0.8966406
+               2       0.8981447
+               3       0.8995795
+               4       0.9009535
+               5       0.9022749
+               6       0.9035517
+               7       0.9047923
+               8       0.9060051
+
+       La primera lnea de el archivo .az especifica la cantidad de rotacin del
+       patrn de azimut (medido en grados desde el norte verdadero  en  sentido
+       horario) a ser aplicado por SPLAT! a los datos contenidos en el archivo
+       .az. Esto es seguido por el correspondiente azimut (0 a 360  grados)  y
+       su  asociado patrn de campo normalizado (0.000 a 1.000) separado por un
+       espacio en blanco.
+
+       La estructura del archivo del patrn de elevacin SPLAT!  es  ligeramente
+       diferente.  La  primera  lnea del archivo .el especifica la cantidad de
+       elevacin mecnica aplicada a la antena.  Note  que  una  elevacin  hacia
+       abajo (bajo el horizonte) es expresada como un ngulo positivo, mientras
+       que hacia arriba (sobre el horizonte) es expresada como un ngulo  nega-
+       tivo.  Estos  datos  son seguidos por la direccin del azimut de la ele-
+       vacin, separado por un espacio en blanco.
+
+       El remanente del archivo consiste en los valores de los ngulos de  ele-
+       vacin  y  su  correspondiente  patrn de radiacin de voltaje normalizado
+       (0.000 a 1.000) separados por un espacio en blanco. Los ngulos de  ele-
+       vacin deben ser especificados sobre un rango de -10 a +90 grados. Igual
+       que la notacin en la elevacin mecnica, ngulos de elevacin negativa  son
+       usados  para  representar elevaciones sobre el horizonte,  mientras que
+       los ngulos positivos representan elevaciones bajo el horizonte.
+
+       Por ejemplo las primeras pocas lneas de un archivo  patrn  de  elevacin
+       SPLAT! podra aparecer como sigue (kvea.el):
+
+               1.1    130.0
+              -10.0   0.172
+              -9.5    0.109
+              -9.0    0.115
+              -8.5    0.155
+              -8.0    0.157
+              -7.5    0.104
+              -7.0    0.029
+              -6.5    0.109
+              -6.0    0.185
+
+       En  este  ejemplo,  la antena es mecnicamente inclinada hacia abajo 1.1
+       grados hacia un azimut de 130 grados.
+
+       Para mejores resultados, la resolucin  de  los  datos  de  patrones  de
+       radiacin  debera  ser  especificados lo mas cerca posibles a los grados
+       azimut, y la resolucin de datos  del  patrn  de  elevacin  deberan  ser
+       especificados  lo  mas  cerca  posible  a 0.01 grados. Si los datos del
+       patrn especificado no alcanzan este nivel de resolucin, SPLAT! interpo-
+       lar  los  valores  provistos  para determinar los datos en la resolucin
+       requerida, aunque esto puede resultar en una prdida en exactitud.
+
+EXPORTANDO E IMPORTANDO DATOS DE CONTORNO REGIONAL
+       Realizar un anlisis de cobertura  regional  basado  en  un  anlisis  de
+       trayectoria  ITM  puede  ser un proceso que consuma mucho tiempo, espe-
+       cialmente si los anlisis son  repetidos  varias  veces  para  descubrir
+       cuales  son  los  efectos que los cambios a los patrones de radiacin de
+       las antenas hacen a la prediccin del rea de cobertura.
+
+       Este proceso puede ser apresurado al exportar los  datos  del  contorno
+       producidos  por  SPLAT!  a un archivo de salida alfanumrico (.ano). Los
+       datos contenidos en este archivo se pueden modificar externamente  para
+       incorporar  efectos  de  patrones  de  antena,  y entonces se los puede
+       importar nuevamente dentro de SPLAT! para rpidamente producir  un  mapa
+       de contorno revisado. Dependiendo de la forma en la cual SPLAT! es lla-
+       mado, los archivos de salida alfanumrica pueden  describir  prdidas  de
+       trayectoria  regional,  intensidad  de  campo, o niveles de potencia de
+       seal recibida.
+
+       Por ejemplo un archivo de salida alfanumrico que contenga informacin de
+       prdidas  por  trayectoria  se puede generar por SPLAT! para un sitio de
+       recepcin a 30 pies sobre el nivel del terreno, con un radio de 50  mil-
+       las  alrededor  del  sitio  de transmisin para  prdidas por trayectoria
+       mximas de 140 dB (asumiendo que en el archivo del transmisor .lrp no se
+       ha especificado la ERP) usando la siguiente sintaxis:
+
+       splat -t kvea -L 30.0 -R 50.0 -db 140 -ano pathloss.dat
+
+       Si  la  ERP se especifica en el archivo .lrp o a travs de la opcin -erp
+       de la lnea de comandos, el archivo de salida alfanumrica  en  su  lugar
+       contendr  los  valores  de prediccin de campo en  dBuV/m.  Si se usa la
+       opcin de lnea de comando -dBm, entonces el archivo de  salida  alfanum-
+       rica contendr niveles de potencia de seal recibida en dBm.
+
+       Los archivos de salida alfanumrico SPLAT! pueden exceder muchos cientos
+       de megabytes de tamao. Contienen la informacin referentes a los  lmites
+       de  la regin que describen seguido por latitudes (grados norte), longi-
+       tudes (grados oeste), azimut (referenciados al norte verdadero), eleva-
+       ciones(a  la  primera  obstruccin),  seguidos  ya  sea  por prdidas por
+       trayectoria(en dB), intensidad de campo recibida (en dBuV/m),  o  nivel
+       de  potencia  de  seal  recibida  (en  dBm)  sin considerar el patrn de
+       radiacin de la antena.
+
+       Las primeras pocas lneas de un archivo  de  salida  alfanumrica  SPLAT!
+       podra tener la siguiente apariencia (pathloss.dat):
+
+               119, 117    ; max_west, min_west
+               35, 34      ; max_north, min_north
+               34.2265424, 118.0631096, 48.199, -32.747, 67.70
+               34.2270358, 118.0624421, 48.199, -19.161, 73.72
+               34.2275292, 118.0617747, 48.199, -13.714, 77.24
+               34.2280226, 118.0611072, 48.199, -10.508, 79.74
+               34.2290094, 118.0597723, 48.199, -11.806, 83.26 *
+               34.2295028, 118.0591048, 48.199, -11.806, 135.47 *
+               34.2299962, 118.0584373, 48.199, -15.358, 137.06 *
+               34.2304896, 118.0577698, 48.199, -15.358, 149.87 *
+               34.2314763, 118.0564348, 48.199, -15.358, 154.16 *
+               34.2319697, 118.0557673, 48.199, -11.806, 153.42 *
+               34.2324631, 118.0550997, 48.199, -11.806, 137.63 *
+               34.2329564, 118.0544322, 48.199, -11.806, 139.23 *
+               34.2339432, 118.0530971, 48.199, -11.806, 139.75 *
+               34.2344365, 118.0524295, 48.199, -11.806, 151.01 *
+               34.2349299, 118.0517620, 48.199, -11.806, 147.71 *
+               34.2354232, 118.0510944, 48.199, -15.358, 159.49 *
+               34.2364099, 118.0497592, 48.199, -15.358, 151.67 *
+
+       En  este  archivo  se  pueden  poner comentarios precedidos por punto y
+       coma, el editor de texto vim ha probado ser capaz de editar archivos de
+       este tamao.
+
+       Note  que  al  igual que el caso de los archivos de patrones de antena,
+       ngulos de elevacin negativos se refieren a inclinaciones  hacia  arriba
+       (sobre  el  horizonte),  mientras  que  ngulos  positivos se refieren a
+       inclinaciones hacia abajo (bajo el horizonte). Esos ngulos se  refieren
+       a  la elevacin para la antena receptora en la altura sobre el nivel del
+       terreno especificada usando la opcin -L  si  la  trayectoria  entre  el
+       transmisor  y  el  receptor  no  tiene obstrucciones. Si la trayectoria
+       entre el transmisor y el receptor est obstruida, se coloca un asterisco
+       (*)  al  final  de la lnea, y el ngulo de elevacin retornado por SPLAT!
+       se refiere al ngulo de elevacin a la primera obstruccin en lugar de  la
+       localizacin  geogrfica  especificada  en  la  lnea.  Esto  se hace con-
+       siderando que el modelo ITM considera la energa que  alcanza  un  punto
+       distante  sobre una trayectoria obstruida como un derivado de la energa
+       dispersada de la punta de la  primera  obstruccin  a  lo  largo  de  la
+       trayectoria.  Puesto  que  la  energa no puede alcanzar directamente la
+       localizacin obstruida, el actual ngulo  de  elevacin  a  ese  punto  es
+       irrelevante.
+
+       Cuando se modifican los archivos SPLAT! de prdidas por trayectoria para
+       reflejar datos de patrones de antena, solo  la  ltima  columna  numrica
+       debera ser enmendada para reflejar la ganancia de antena normalizada en
+       los ngulos de elevacin y azimut especificados en el archivo.  Programas
+       y  scripts  capaces  de  realizar  esta  operacin  quedan como tarea al
+       usuario.
+
+       Los archivos de salida alfanumricos modificados pueden  ser  importados
+       nuevamente  a  SPLAT!  para  generar  mapas de cobertura revisados con-
+       siderando la ERP y -dBm de la misma manera que  cuando  el  archivo  de
+       salida alfanumrico fue generado originalmente.
+
+       splat -t kvea -ani pathloss.dat -s city.dat -b county.dat -o map.ppm
+
+       Observe  que  los  archivos de salida alfanumricos generados a travs de
+       splat no pueden ser usados con  splat-hd,  o  vice-versa  debido  a  la
+       incompatibilidad  de resoluciones entre las dos versiones del programa.
+       Tambin cada uno de los tres formatos de salida de los archivos alfanum-
+       ricos  son  incompatibles  entre ellos, tal que un archivo que contenga
+       datos de prdidas por trayectoria, no  puede  ser  importado  dentro  de
+       SPLAT!   para  producir  contornos  de nivel de intensidad de seal o de
+       niveles de potencia recibida, etc.
+
+ARCHIVOS DE ENTRADA DE TERRENO DEFINIDOS POR EL USUARIO
+       Un archivo de terreno definido por el usuario es un  archivo  de  texto
+       generado-por-el-usuario  que  contiene latitudes, longitudes, y alturas
+       sobre el nivel de la tierra de caractersticas de terreno especfica  que
+       se  cree  son  de  importancia para el anlisis que SPLAT! est desarrol-
+       lando, pero perceptiblemente ausentes de  los  archivos  SDF  que  estn
+       siendo usados.  Un archivo de terreno definido-por-el-usuario es impor-
+       tado dentro de un anlisis de SPLAT! usando la opcin -udt:
+
+        splat -t tx_site -r rx_site -udt udt_file.txt -o map.ppm
+
+       Un archivo de terreno definido-por-el-usuario tiene la siguiente apari-
+       encia y estructura:
+
+              40.32180556, 74.1325, 100.0 meters
+              40.321805, 74.1315, 300.0
+              40.3218055, 74.1305, 100.0 meters
+
+       La  altura del terreno es interpretada en pies sobre el nivel del suelo
+       a menos que sea seguido por la palabra meters, y es  adicionado  en  la
+       parte  superior  de  el  terreno  especificado en los datos SDF para la
+       localizacin especificada. Debe saber que las  caractersticas  especifi-
+       cadas  en  los  archivos  de  terreno especificados-por-el-usuario sern
+       interpretados en SPLAT!, como 3-arco segundos en latitud y  longitud  y
+       como como 1-arco segundos en latitud y longitud en splat-hd. Las carac-
+       tersticas descritas en el archivo  de  terreno  definido-por-el-usuario
+       que  traslapen  las  caractersticas previamente definidas en el archivo
+       son ignoradas por SPLAT! para evitar ambigedades.
+
+CLUTTER DEL TERRENO
+       **Wikipedia:Ruido provocado por los ecos o  reflexiones,  en  elementos
+       ajenos al sistema (montaas, superficie del mar, etc.)
+
+       La  altura  del  clutter  de la tierra puede ser especificado usando la
+       opcin -gc:
+
+             splat -t wnjt-dt -r kd2bd -gc 30.0 -H wnjt-dt_path.png
+
+       La opcin -gc tiene el efecto de aumentar el nivel general  del  terreno
+       en  la cantidad de pies especificada (o metros si se usa la opcin -met-
+       ric), excepto sobre reas al nivel del mar y en  las  localizaciones  de
+       las antenas transmisora y receptora.
+
+GENERACIN DE MAPAS TOPOGRFICOS SIMPLES
+       En  ciertas  ocasiones puede ser deseable generar un mapa topogrfico de
+       una regin sin graficar reas  de  cobertura,  trayectorias  de  lnea-de-
+       vista,  o  generar reportes de obstrucciones. Existen varias maneras de
+       hacer esto.  Si se desea  generar  un  mapa  topogrfico  ilustrando  la
+       localizacin de un sitio del transmisor  y receptor con un breve reporte
+       de texto describiendo las localizaciones y distancias entre los sitios,
+       entonces, entonces se debe invocar la opcin -n como sigue:
+
+       splat -t tx_site -r rx_site -n -o topo_map.ppm
+
+       Si no se desea un reporte de texto, entonces debe usar la opcin -N:
+
+       splat -t tx_site -r rx_site -N -o topo_map.ppm
+
+       Si se desea un mapa topogrfico centrado cerca de un sitio para un radio
+       mnimo especificado, se puede utilizar un comando similar al siguiente:
+
+       splat -t tx_site -R 50.0 -s NJ_Cities -b NJ_Counties -o topo_map.ppm
+
+       donde -R especifica el mnimo radio de el mapa en millas ( kilmetros  si
+       se  usa  la opcin -metric). Note que el nombre del sitio_tx y la local-
+       izacin no son presentadas en este ejemplo. Si se desea  presentar  esta
+       informacin,  simplemente  cree  un  archivo  de ciudades SPLAT!  con la
+       opcin (-s) y adicinele a las opciones de la lnea-de-comandos ilustradas
+       arriba.
+
+       Si  la opcin -o y el archivo de salida son omitidos en esa operacin, la
+       salida  topogrfica  es  escrita  a  un  archivo  por  defecto   llamado
+       tx_site.ppm en el directorio de trabajo actual.
+
+GENERACIN DE ARCHIVOS DE GEOREFERENCIA
+       Los  mapas  topogrficos,  de cobertura (-c), y contornos de prdidas por
+       trayectoria (-L) generados por SPLAT! se  pueden  importar  dentro  del
+       programa  Xastir  (X  Amateur  Station Tracking and Information Report-
+       ing), al generar un archivo de georeferencia  usando  la  opcin  SPLAT!
+       -geo:
+
+       splat -t kd2bd -R 50.0 -s NJ_Cities -b NJ_Counties -geo -o map.ppm
+
+       El  archivo  de  georeferencia creado tendr el mismo nombre base que el
+       archivo -o especificado, pero con extensin  .geo, y permite la  apropi-
+       ada  interpretacin  y presentacin de los grficos .ppm SPLAT! en el pro-
+       grama Xastir.
+
+GENERACION DE ARCHIVOS KML GOOGLE MAP
+       Cuando se realizan anlisis punto-a-punto,  al  invocar  la  opcin  -kml
+       SPLAT!  puede  generar archivos Keyhole Markup Language compatibles con
+       Google Earth:
+
+       splat -t wnjt-dt -r kd2bd -kml
+
+       El archivo KML generado tendr la misma estructura  que  el  nombre  del
+       Reporte  de  Obstrucciones  para  los  sitios del transmisor y receptor
+       dados, excepto que tendr una extensin  .kml.
+
+       Una vez cargado dentro del Google Earth (Archivo --> Abrir), el archivo
+       KLM  exhibir  las localizaciones de los sitios de transmisin y recepcin
+       en el mapa. Los puntos de vista de la imagen sern desde la posicin  del
+       sitio  de  transmisin  mirando  hacia  la  localizacin del receptor. La
+       trayectoria punto-a-punto entre los sitios ser presentada como una lnea
+       blanca,  mientras que la trayectoria de lnea-de-vista RF ser presentada
+       en verde.  Las herramientas de navegacin de Google Earth le permiten al
+       usuario  "volar"  alrededor  de  la  trayectoria, identificando seales,
+       caminos, y otras caractersticas contenidas.
+
+       Cuando se realiza el anlisis de cobertura regional, el archivo intensi-
+       dad  de seal o de prdidas por trayectoria sobre mapas Google Earth como
+       capas con su color correspondiente relacionado en la  esquina  superior
+       izquierda.
+
+       El archivo .kml generado tendr el mismo nombre base como el del archivo
+       .ppm normalmente generado.
+
+DETERMINACIN DE LA ALTURA DE LA ANTENA SOBRE EL PROMEDIO DEL TERRENO
+       SPLAT! determina la altura de la antena sobre el promedio  del  terreno
+       (HAAT)  de  acuerdo al procedimiento definido por la Comisin Federal de
+       Comunicaciones. Parte 73.313(d). De acuerdo a esta definicin,  la  ele-
+       vacin  del terreno a lo largo de ocho radiales entre 2 y 16 millas (3 y
+       16 Kilmetros) desde el sitio que est siendo analizado es  muestreado  y
+       promediado para los azimut  cada 45 grados comenzando con el norte ver-
+       dadero. Si uno o mas radiales caen enteramente sobre el mar o sobre  el
+       continente fuera de los Estados Unidos (reas para las cuales no existen
+       disponibles datos topogrficos USGS), entonces esos radiales son  omiti-
+       dos  de  los clculos del promedio del terreno. Si parte de los radiales
+       se extienden sobre el mar o fuera de los Estados Unidos, entonces  solo
+       la  parte  de  esos  radiales  que  caen sobre la tierra de los Estados
+       Unidos son usados en la determinacin del promedio del terreno.
+
+       Note que los datos de elevaciones SRTM-3, a diferencia de los  antiguos
+       datos USGS, se extienden ms all de las fronteras de los Estados Unidos.
+       Por esta razn, los resultados  HAAT, no estarn en fiel cumplimiento con
+       la FCC parte 73.313(d) en reas a lo largo de la frontera de los Estados
+       Unidos si los archivos SDF usados por SPLAT! son derivados-SRTM.
+
+       Cuando se realiza anlisis punto-a-punto del terreno, SPLAT!   determina
+       la  altura de la antena sobre el promedio del  terreno solo si han sido
+       cargados por el programa suficientes datos topogrficos para realizar el
+       anlisis punto-a-punto. En la mayora de los casos, esto ser verdadero, a
+       menos que el sitio en cuestin no est dentro de 10 millas de la frontera
+       de los datos topogrficos cargados en memoria.
+
+       Cuando  se realiza el anlisis de prediccin de rea, normalmente son car-
+       gados por SPLAT! suficientes datos topogrficos para realizar los  clcu-
+       los  del promedio del terreno. Bajo esas condiciones, SPLAT! proveer la
+       altura de la antena sobre el  promedio  del  terreno,  como  tambin  el
+       promedio  del  terreno sobre el nivel del mar para los azimut de 0, 45,
+       90, 135, 180, 225, 270, y 315 grados, e incluir dicha informacin en  el
+       reporte  de sitio generado. Si uno o ms de los ocho radiales caen sobre
+       el  mar  o  sobre  regiones  para  las  cuales  no  existen  datos  SDF
+       disponibles, SPLAT! reportar sin terreno la trayectoria de los radiales
+       afectados.
+
+INFORMACIN ADICIONAL
+       Las ltimas noticias e  informacin  respecto  al  programa  SPLAT!   est
+       disponible   a   travs   de   la   pgina  web  oficial  localizada  en:
+       http://www.qsl.net/kd2bd/splat.html.
+
+AUTORES
+       John A. Magliacane, KD2BD <kd2bd@amsat.org>
+              Creator, Lead Developer
+
+       Doug McDonald <mcdonald@scs.uiuc.edu>
+              Original Longley-Rice ITM Model integration
+
+       Ron Bentley <ronbentley@earthlink.net>
+              Fresnel Zone plotting and clearance determination
+
+
+
+
+KD2BD Software                25 de julio de 2014                    SPLAT!(1)

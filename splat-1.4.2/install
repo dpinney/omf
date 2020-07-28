@@ -1,0 +1,84 @@
+#!/bin/bash
+#
+# Simple shell script for installing SPLAT! and associated utilities.
+# Written by John A. Magliacane, KD2BD April 2002.
+# Last update: March 1, 2008.
+#
+
+install_splat()
+{
+	if [ -x splat ]; then
+		cp splat /usr/local/bin
+		echo "SPLAT! installed!"
+	fi
+
+	if [ -x splat-hd ]; then
+		cp splat-hd /usr/local/bin
+		echo "SPLAT!-HD installed!"
+	fi
+}
+
+install_utils()
+{
+	cd utils
+	./install all
+	cd ..
+	echo "utils installed!"
+}
+
+install_man()
+{
+	if [ -d /usr/local/man/man1 ]; then
+		cp docs/english/man/splat.1 /usr/local/man/man1/splat.1
+		echo "man page installed!"
+	else
+		if [ -d /usr/man/man1 ]; then
+			cp docs/english/man/splat.1 /usr/man/man1/splat.1
+			echo "man page installed!"
+		fi
+	fi
+
+	if [ -d /usr/local/man/es/man1 ]; then
+		cp docs/spanish/man/splat.1 /usr/local/man/es/man1/splat.1
+		echo "spanish man page installed!"
+	else
+		if [ -d /usr/man/es/man1 ]; then
+			cp docs/spanish/man/splat.1 /usr/man/es/man1/splat.1
+			echo "spanish man page installed!"
+		fi
+	fi
+}
+
+whoami=`whoami`
+
+if [ "$#" = "0" ]; then
+	echo "Usage: ./install { splat, utils, man, all }"
+else
+	if [ "$whoami" = "root" ]; then
+
+		if [ "$1" = "splat" ] && [ -x splat ]; then
+			install_splat
+		fi
+
+		if [ "$1" = "utils" ]; then
+			install_utils
+		fi
+
+		if [ "$1" = "man" ]; then
+			install_man
+		fi
+
+		if [ "$1" = "all" ] && [ -x splat ]; then
+			install_splat
+			install_utils
+			install_man
+		fi
+	else
+		echo "Sorry, $whoami.  You need to be 'root' to install this software.  :-("
+	fi
+
+	if [ "$1" != "splat" ] && [ "$1" != "utils" ] && [ "$1" != "man" ] && [ "$1" != "all" ]; then
+		echo "Usage: ./install { splat, utils, man, all }"
+	fi
+fi
+

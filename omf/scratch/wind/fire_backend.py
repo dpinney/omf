@@ -18,17 +18,18 @@ def test():
 	x = 1 + 2
 	return '<b>bold world</b>' + str(x)
 
-@app.route('/firedata/<lat>/<lon>')
-def firedata(lat, lon):
+@app.route('/firedata/<lat>/<lon>/<dist>/<resolution>')
+def firedata(lat, lon, dist, resolution):
 	# x = omf.weather.get_ndfd(33,53)
-	print(lat, lon)
-	lat = 40.758701
-	lon = -111.876183
-	dist = 20
-	resolution = 20
+	print(lat, lon, dist, resolution)
+	# note: these inputs take precedence over url in js GET request
+	# lat = 40.758701
+	# lon = -111.876183
+	# dist = 20
+	# resolution = 20
 	x = getSubGridData(str(lat), str(lon), str(dist), str(dist), str(resolution))
-	#print(x)
-	print(type(x))
+	print (json.dumps(x))
+	print(type(json.dumps(x))) # x is a python dictionary, json.dumps is a string
 	return json.dumps(x)
 
 #FRONTEND JAVASCRIPT

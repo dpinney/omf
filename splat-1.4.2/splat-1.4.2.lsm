@@ -1,0 +1,40 @@
+Begin4
+Title:		SPLAT!
+Version:	1.4.2
+Entered-date:	2014-08-12
+Description:	SPLAT! is a terrestrial RF propagation analysis tool for
+		the spectrum between 20 MHz and 20 GHz.  SPLAT! provides
+		site engineering data such as the great circle distances
+		and bearings between sites, antenna elevation angles
+		(uptilt), depression angles (downtilt), antenna height
+		above mean sea level, antenna height above average
+		terrain, bearings and distances to known obstructions,
+		path loss, received power level, received power density,
+		and signal strength based on the ITM and ITWOM Irregular
+		Terrain With Obstructions Models, and minimum antenna
+		height requirements needed to establish first Fresnel zone
+		clearance and line-of-sight RF paths absent of obstructions
+		due to terrain.  SPLAT! produces reports, graphs, and highly
+		detailed and carefully annotated topographic maps
+		depicting line-of-sight paths, path loss, and expected
+		coverage areas of transmitters and repeater systems.
+		Applications of SPLAT! include site engineering, wireless
+		network design, amateur radio communications, frequency
+		coordination, communication system design, and terrestrial
+		radio and HDTV television broadcasting.  SPLAT! requires
+		gnuplot version 3.7, libbzip-1.0.1 or later, and zlib, as
+		well as an application capable of displaying PPM graphic
+		files (xv, ImageMagick, xpaint, The GIMP, etc.).
+Keywords:	Terrain analysis, site engineering, Longley-Rice path
+		loss, signal strength contours, received power level,
+		TV/FM radio broadcasting, TV/FM radio reception, LPFM,
+		HDTV, amateur radio, wireless WAN analysis and design
+Author:		kd2bd@amsat.org (John A. Magliacane) (Creator, Lead Developer)
+		mcdonald@scs.uiuc.edu (Doug McDonald) (L-R Model Integration)
+		ronbentley@embarqmail.com (Ron Bentley) (Fresnel Zone Plotting)
+Maintained-by:	kd2bd@amsat.org (John A. Magliacane)
+Primary-site:	ftp.ibiblio.org /pub/Linux/apps/ham/splat-1.4.2.tar.bz2
+Original-site:	http://www.qsl.net/kd2bd/splat.html
+Platforms:	Linux/Unix
+Copying-policy:	GPL
+End

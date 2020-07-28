@@ -1,0 +1,81 @@
+#!/bin/bash
+#
+# Simple shell script for installing SPLAT! and associated utilities.
+# Written by John A. Magliacane, KD2BD April 2002.  Updated March 2009.
+#
+
+install_citydecoder()
+{
+	cp citydecoder /usr/local/bin
+	echo "citydecoder installed!"
+}
+
+install_usgs2sdf()
+{
+	cp usgs2sdf /usr/local/bin
+	echo "usgs2sdf installed!"
+}
+
+install_srtm2sdf()
+{
+	cp srtm2sdf /usr/local/bin
+	rm -f /usr/local/bin/srtm2sdf-hd
+	ln -s /usr/local/bin/srtm2sdf /usr/local/bin/srtm2sdf-hd
+	echo "srtm2sdf and srtm2sdf-hd installed!"
+}
+
+install_fontdata()
+{
+	cp fontdata /usr/local/bin
+	echo "fontdata installed!"
+}
+
+whoami=`whoami`
+
+if [ "$whoami" != "root" ]; then
+	echo "Sorry, $whoami.  You need to be 'root' to install this software.  :-("
+fi
+
+if [ "$#" = "0" ]; then
+	echo "Usage: ./install  { citydecoder, srtm2sdf, usgs2sdf, fontdata, all }"
+else 
+
+	if [ "$1" = "citydecoder" ] && [ "$whoami" = "root" ] && [ -x citydecoder ]; then
+		install_citydecoder
+	fi
+
+	if [ "$1" = "srtm2sdf" ] && [ "$whoami" = "root" ] && [ -x srtm2sdf ]; then
+		install_srtm2sdf
+	fi
+
+	if [ "$1" = "usgs2sdf" ] && [ "$whoami" = "root" ] && [ -x usgs2sdf ]; then
+		install_usgs2sdf
+	fi
+
+	if [ "$1" = "fontdata" ] && [ "$whoami" = "root" ] && [ -x fontdata ]; then
+		install_fontdata
+	fi
+
+	if [ "$1" = "all" ]  && [ "$whoami" = "root" ]; then
+		if [ -x citydecoder ]; then
+			install_citydecoder
+		fi
+
+		if [ -x srtm2sdf ]; then
+			install_srtm2sdf
+		fi
+
+		if [ -x usgs2sdf ]; then
+			install_usgs2sdf
+		fi
+
+		if [ -x fontdata ]; then
+			install_fontdata
+		fi
+	fi
+
+	if [ "$1" != "citydecoder" ] && [ "$1" != "srtm2sdf" ] && [ "$1" != "usgs2sdf" ] && [ "$1" != "fontdata" ] && [ "$1" != "all" ]; then
+		echo "Usage: install { citydecoder, srtm2sdf, usgs2sdf, fontdata, all }"
+	fi
+fi
+

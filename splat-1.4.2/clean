@@ -1,0 +1,10 @@
+#!/bin/bash
+# Simple script to create a clean distribution
+#
+rm -f splat splat-hd splat.h std-parms.h hd-parms.h utils/fontdata utils/citydecoder utils/usgs2sdf utils/srtm2sdf utils/srtm2sdf-hd utils/bearing
+cd docs/english/man
+./docmaker
+cd ../../spanish/man
+./docmaker 2> /dev/null
+cd ../../../
+

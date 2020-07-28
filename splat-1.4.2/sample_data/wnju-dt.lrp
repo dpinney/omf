@@ -1,0 +1,11 @@
+15.000	; Earth Dielectric Constant (Relative permittivity)
+0.005	; Earth Conductivity (Siemens per meter)
+301.000	; Atmospheric Bending Constant (N-Units)
+605.000	; Frequency in MHz (20 MHz to 20 GHz)
+5	; Radio Climate
+0	; Polarization (0 = Horizontal, 1 = Vertical)
+0.50	; Fraction of situations
+0.90	; Fraction of time
+650000  ; ERP in watts
+
+Please consult SPLAT! documentation for the meaning and use of this data.

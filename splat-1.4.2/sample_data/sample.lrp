@@ -1,0 +1,72 @@
+15.000  ; Earth Dielectric Constant (Relative permittivity)
+0.005   ; Earth Conductivity (Siemens per meter)
+301.000 ; Atmospheric Bending Constant (N-units)
+646.000	; Frequency in MHz (20 MHz to 20 GHz)
+5       ; Radio Climate (5 = Continental Temperate)
+0       ; Polarization (0 = Horizontal, 1 = Vertical)
+0.5     ; Fraction of situations (50% of locations)
+0.5     ; Fraction of time (50% of the time)
+46000.0 ; Effective Radiated Power in Watts (optional)
+
+This file contains Longley-Rice path loss parameters used
+by SPLAT!  Anything after the 9th line is ignored by the
+program.  Comments are allowed following each element of
+numeric data.  No blank lines are allowed at the top.
+
+Earth dielectric constants and conductivity values are as follows:
+
+	 		  Dielectric Constant   Conductivity
+	Salt water       :        80		    5.000
+	Good ground      :        25		    0.020
+	Fresh water      :        80		    0.010
+	Marshy land      :        12		    0.007
+	Farmland, forest :        15		    0.005
+	Average ground   :        15		    0.005
+	Mountain, sand   :        13		    0.002
+	City             :         5		    0.001
+	Poor ground      :         4		    0.001
+
+Radio climate codes are defined as follows:
+
+	1: Equatorial (Congo)
+	2: Continental Subtropical (Sudan)
+	3: Maritime Subtropical (West coast of Africa)
+	4: Desert (Sahara)
+	5: Continental Temperate
+	6: Maritime Temperate, over land (UK and west coasts of US & EU)
+	7: Maritime Temperate, over sea
+
+The Continental Temperate climate (5) is common to large land masses in
+the temperate zone, such as the United States.  For paths shorter than
+100 km, there is little difference between Continental and Martitime
+Temperate climates.
+
+The 7th and 8th parameters in the .lrp file correspond to the statistical
+analysis provided by the Longley-Rice model.  In this example, SPLAT!
+will return the maximum path loss occurring 50% of the time (fraction
+of time) in 50% of situations (fraction of situations).  Use a fraction
+of time of 0.90 for digital television, 0.50 for analog.
+
+Edit these parameters as required and save the result ("Save As")
+to a filename with an extension of ".lrp" in the directory normally
+used for .qth files (current working directory is assumed).  The
+base of the filename MUST match the base of the corresponding
+SPLAT! transmitter site QTH filename for proper correlation
+between data sets.  In other words:
+
+	wnjt-dt.qth  <--- TX site data for WNJT-DT
+	wnjt-dt.lrp  <--- Corresponding Longly-Rice parameters for WNJT-DT
+
+If an LRP file corresponding to the tx_site QTH file cannot be
+found, SPLAT! scans the current working directory for "splat.lrp".
+If this file cannot be found, then default parameters similar to
+those listed above are assigned by SPLAT!, and a "splat.lrp" file
+containing those parameters is written to the current working directory.
+
+For further information on Longley-Rice model parameters, see:
+
+	http://elbert.its.bldrdoc.gov/itm.html
+	http://www.softwright.com/faq/engineering/prop_longley_rice.html
+
+Also consult SPLAT!'s documentation for more information.
+
