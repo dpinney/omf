@@ -16,7 +16,7 @@ def root():
 @app.route('/test')
 def test():
 	x = 1 + 2
-	return '<b>bold world</b>' + str(x)
+	return '<b>bold world</b> ' + str(x)
 
 @app.route('/firedata/<lat>/<lon>/<dist>/<resolution>')
 def firedata(lat, lon, dist, resolution):
@@ -73,4 +73,3 @@ function loadDoc() {
 
 if __name__ == '__main__':
 	app.run(debug=True)
-	

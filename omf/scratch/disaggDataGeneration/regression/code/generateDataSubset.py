@@ -6,7 +6,7 @@ import pathlib, csv
 
 # define input file params
 DATA_DIR = str( pathlib.Path(__file__).parent.absolute() ) + \
-	'/../data/48Types10HousesPerType'
+	'/../data/48Types2HousesPerType'
 INPUT_FILENAME_START = DATA_DIR + '/dataTest'
 FILE_EXT = '.csv'
 
@@ -15,8 +15,8 @@ OUTPUT_FILENAME = DATA_DIR + 'dataSubset.csv'
 DELIMITER = ','
 
 # define file structure params
-NUM_HOUSE_TYPES = 48
-NUM_INSTANCES = 4
+NUM_HOUSE_TYPES = 2
+NUM_INSTANCES = 2
 
 # concatenate individual house files into a final output file ---------------
 

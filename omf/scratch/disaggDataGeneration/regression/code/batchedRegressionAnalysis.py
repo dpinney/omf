@@ -20,7 +20,7 @@ from glob import glob
 
 # define analysis params
 NUM_HOUSE_TYPES = 48
-NUM_INSTANCES_OF_EACH_HOUSE_TYPE = 2
+NUM_INSTANCES_OF_EACH_HOUSE_TYPE = 10
 TIME_CHUNK_IN_SECS = 0
 NUM_EPOCHS = 1000
 PCA_VAR = 0.95
@@ -28,21 +28,19 @@ DELIMITER = ','
 
 # input file params; path defined relative to the code file location
 DATA_DIR = str( pathlib.Path(__file__).parent.absolute() ) + '/../data/'
-DATA_SUBFOLDER = DATA_DIR + str(NUM_HOUSE_TYPES) + 'house' + \
-	str(NUM_INSTANCES_OF_EACH_HOUSE_TYPE) + 'typesInputChunking'
+DATA_SUBFOLDER = DATA_DIR + str(NUM_HOUSE_TYPES) + 'Types' + \
+	str(NUM_INSTANCES_OF_EACH_HOUSE_TYPE) + 'HousesPerType'
 
 # joblib sometimes writes data out to share among processors
-JOBLIB_DIR = str( pathlib.Path(__file__).parent.absolute() ) + 
+JOBLIB_DIR = str( pathlib.Path(__file__).parent.absolute() ) + \
 	'/../workingDir/'
 
 # functions -------------------------------------------------------------------
 
 def train(regressor, data, labels, appIndex):
 
-	# if isinstance(data, np.memmap):
-	# 	data = np.asarray(data)
-	# if isinstance(labels, np.memmap):
-	# 	labels = np.asarray(labels)
+	data = np.asarray(data)
+	labels = np.asarray(labels)
 
 	timerStart = time.time()
 	labelsSingleApp = labels[:,appIndex]
@@ -56,10 +54,8 @@ def train(regressor, data, labels, appIndex):
 
 def test(regressor, data, labels, appIndex):
 
-	# if isinstance(data, np.memmap):
-	# 	data = np.asarray(data)
-	# if isinstance(labels, np.memmap):
-	# 	labels = np.asarray(labels)
+	data = np.asarray(data)
+	labels = np.asarray(labels)
 
 	timerStart = time.time()
 	labelsSingleApp = labels[:,appIndex]
@@ -80,8 +76,8 @@ scaler = StandardScaler()
 pca = IncrementalPCA()
 
 # define regression model
-regressor = SGDRegressor(random_state=42, max_iter=1, tol=None)
-regressors = None
+regressor = SGDRegressor(random_state=42, max_iter=1, tol=1e-3)
+regressors, predictions = None, None
 
 # load training data one batch at a time
 trainFiles = glob(DATA_SUBFOLDER+'/trainBatch*')
@@ -91,11 +87,13 @@ for fileNum, file in enumerate(trainFiles):
 	# load batch
 	timerStartLocal2  = time.time()
 	data,labels = load(file)
-	timerEnd = time.time()
 
 	#init scaler and pca
 	scaler.partial_fit(data)
 	# pca.partial_fit(data)
+
+	timerEnd = time.time()
+	print('loading data', fileNum, '/', len(trainFiles), timerEnd-timerStartLocal2)
 
 # determine how many pca components to retain based on provided variance
 # numComponentsToRetain = \
@@ -107,12 +105,12 @@ for fileNum, file in enumerate(trainFiles):
 
 # train -----------------------------------------------------------------------
 
-with Parallel(n_jobs=2, temp_folder=CACHE_DIR) as parallel:
+with Parallel(n_jobs=2) as parallel:
 
 	# load training data one batch at a time
 	trainFiles = glob(DATA_SUBFOLDER+'/trainBatch*')
-	timerStartLocal  = time.time()
 	for epochNum in range(NUM_EPOCHS):
+		timerStartLocal  = time.time()
 		for fileNum, file in enumerate(trainFiles):
 			
 			# load batch
@@ -129,17 +127,34 @@ with Parallel(n_jobs=2, temp_folder=CACHE_DIR) as parallel:
 			if regressors == None:
 				regressors = [regressor]*labels.shape[1]
 
-			# train models for each app in parallel
-			regressors = parallel( delayed(train) ( \
+			# prallel training ---------------------------------------
+			# filename = JOBLIB_DIR+'data.mmap'
+			# dump(data, filename)
+			# dataMemmap = load(filename, mmap_mode='r+')
+
+			# filename = JOBLIB_DIR+'labels.mmap'
+			# dump(labels, filename)
+			# labelsMemmap = load(filename, mmap_mode='r+')
+
+			# # train models for each app in parallel
+			# regressors = parallel( delayed(train) ( \
+			# 		regressor=regressors[appIndex], \
+			# 		data=dataMemmap, \
+			# 		labels=labelsMemmap, \
+			# 		appIndex = appIndex
+			# 	) for appIndex in range(labels.shape[1])
+			# )
+
+			# non-prallel training ---------------------------------------
+			for appIndex in range(labels.shape[1]):
+				regressors[appIndex] = train( \
 					regressor=regressors[appIndex], \
 					data=data, \
 					labels=labels, \
-					appIndex = appIndex
-				) for appIndex in range(labels.shape[1])
-			)
+					appIndex = appIndex )
 
-			# timerEnd = time.time()
-			# print(fileNum, timerEnd-timerStartLocal2)	
+			timerEnd = time.time()
+			print(fileNum, timerEnd-timerStartLocal2)	
 
 		timerEnd = time.time()
 		print('epoch', epochNum, timerEnd-timerStartLocal)	
@@ -148,7 +163,7 @@ with Parallel(n_jobs=2, temp_folder=CACHE_DIR) as parallel:
 
 hour = int(TIME_CHUNK_IN_SECS/3600)
 resultsFile = DATA_SUBFOLDER+'/results'+str(hour)+'timeChunk.csv'
-with Parallel(n_jobs=2, temp_folder=CACHE_DIR) as parallel:
+with Parallel(n_jobs=2) as parallel:
 
 	# load training data one batch at a time
 	testFiles = glob(DATA_SUBFOLDER+'/testBatch*')
@@ -167,14 +182,37 @@ with Parallel(n_jobs=2, temp_folder=CACHE_DIR) as parallel:
 		data = scaler.transform(data)
 		# data = pca.transform(data)[:,numComponentsToRetain]
 
-		# make predictions for each app in parallel
-		predictions = parallel( delayed(test) ( \
+		# prallel prediction ---------------------------------------
+		# filename = JOBLIB_DIR+'data.mmap'
+		# dump(data, filename)
+		# dataMemmap = load(filename, mmap_mode='r+')
+
+		# filename = JOBLIB_DIR+'labels.mmap'
+		# dump(labels, filename)
+		# labelsMemmap = load(filename, mmap_mode='r+')
+
+		# # make predictions for each app in parallel
+		# predictions = parallel( delayed(test) ( \
+		# 		regressor=regressors[appIndex], \
+		# 		data=dataMemmap, \S
+		# 		labels=labelsMemmap, \
+		# 		appIndex = appIndex
+		# 	) for appIndex in range(labels.shape[1])
+		# )
+
+
+		# non-prallel prediction ---------------------------------------
+		
+		# init predictions
+		if predictions == None:
+			predictions = []*labels.shape[1]
+
+		for appIndex in range(labels.shape[1]):
+			predictions[appIndex] = test( \
 				regressor=regressors[appIndex], \
 				data=data, \
 				labels=labels, \
-				appIndex = appIndex
-			) for appIndex in range(labels.shape[1])
-		)
+				appIndex = appIndex )
 		
 
 	# write to file -----------------------------------------------------------
