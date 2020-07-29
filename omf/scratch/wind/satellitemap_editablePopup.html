@@ -729,9 +729,10 @@
 	}
 	// send an XML Http request to the server for data from getSubGridData() of weather.py
 	function fireButton_click() {
+		drawn_geojson = drawnItems.toGeoJSON()
 		xhttp = new XMLHttpRequest();
-		xhttp.open("GET", "http://127.0.0.1:5000/firedata/39.810278/-121.437222/0/0", true);
-		//xhttp.open("GET", "http://127.0.0.1:5000/firedata/" + 39.810278 + "/" + -121.437222 + "/" + 0 + "/0", true); 
+		xhttp.open("GET", "http://127.0.0.1:5000/firedata/39.810278/-121.437222/10/10/10", true);
+		// xhttp.open("GET", "http://127.0.0.1:5000/firedata/" + "39.810278" + "/" + "-121.437222" + "/" + "10" + "/10" + "/10", true); 
 		xhttp.send();
 		// alert() and console.log() work too quickly for the server to return the subGrid function data 
 		setTimeout(function(){
