@@ -781,7 +781,7 @@ def _tests():
 	x = latLonNxGraph(nxG)
 	# Contig line merging test
 	mergeContigLines(tree)
-
+	dump(tree, '/Users/dpinney/Desktop/reduced.glm')
 
 if __name__ == '__main__':
 	_tests()

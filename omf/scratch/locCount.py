@@ -4,8 +4,7 @@
 Count the number of lines of code in this project. Ignores the data stores and libraries, etc.
 2.5 kLOC as of 2012-10-24.
 9.6 kLOC as of 2013-06-10.
-99. kLOC as of 2015-09-10.
-200 kLOC as of 2019-02-14.
+98 kLOC as of 2020-07-24.
 '''
 
 import os, pathlib
