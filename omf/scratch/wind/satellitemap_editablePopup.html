@@ -717,7 +717,7 @@
 		drawn_geojson = drawnItems.toGeoJSON()
 		alert('We drew: ' + JSON.stringify(drawn_geojson))
 
-		//sets fig1 input (drawn polygons) for js-intersect after they have been drawn (when Get GeoJSON is clicked)
+		//reformats and sets fig1 input (drawn polygons) for js-intersect after they have been drawn (when Get GeoJSON is clicked)
 		var i;
 		var j;
 		var drawnItems_objects = [];
@@ -730,24 +730,33 @@
 	// send an XML Http request to the server for data from getSubGridData() of weather.py
 	function fireButton_click() {
 		drawn_geojson = drawnItems.toGeoJSON()
-		centerLon = (drawn_geojson.features[0].geometry.coordinates[0][0][0] + drawn_geojson.features[0].geometry.coordinates[0][2][0]) / 2
-		centerLat = (drawn_geojson.features[0].geometry.coordinates[0][0][1] + drawn_geojson.features[0].geometry.coordinates[0][1][1]) / 2
-		distLat = drawn_geojson.features[0].geometry.coordinates[0][1][1] - centerLat
-		distLon = drawn_geojson.features[0].geometry.coordinates[0][0][0] - centerLon
-		xhttp = new XMLHttpRequest();
-		// xhttp.open("GET", "http://127.0.0.1:5000/firedata/39.810278/-121.437222/10/10/10", true);
-		xhttp.open("GET", "http://127.0.0.1:5000/firedata/" + centerLat + "/" + centerLon + "/" + distLat + "/" + distLon + "/10", true); 
-		xhttp.send();
-		// alert() and console.log() work too quickly for the server to return the subGrid function data 
+		var eachShape = [];
+		// A call to subGrid for each drawn shape
+		for (i = 0; i < drawn_geojson.features.length; i++) {
+			xhttp = new XMLHttpRequest();
+			centerLon = (drawn_geojson.features[i].geometry.coordinates[0][0][0] + drawn_geojson.features[i].geometry.coordinates[0][2][0]) / 2
+			centerLat = (drawn_geojson.features[i].geometry.coordinates[0][0][1] + drawn_geojson.features[i].geometry.coordinates[0][1][1]) / 2
+			distLat = drawn_geojson.features[i].geometry.coordinates[0][1][1] - centerLat
+			distLon = drawn_geojson.features[i].geometry.coordinates[0][0][0] - centerLon
+			// xhttp.open("GET", "http://127.0.0.1:5000/firedata/39.810278/-121.437222/10/10/10", true); <-- centerpoint of map test (Camp Fire)
+			xhttp.open("GET", "http://127.0.0.1:5000/firedata/" + centerLat + "/" + centerLon + "/" + distLat + "/" + distLon + "/10", true); 
+			xhttp.send();
+			setTimeout(function(){
+				var xhttpData = JSON.parse(xhttp.responseText).dwml.data;
+				// Logs each risk reading for each point of the subgrid into an array 
+				var eachRisk = [];
+				for (j = 0; j < xhttpData.location.length; j++) {
+					eachRisk.push(xhttpData.parameters[j]["fire-weather"].value[0]);
+				}
+				// logs each array of risk readings into an array
+				eachShape.push(eachRisk);
+			}, 7000);
+		}
+		// the function will skip to the alert and console without an additional time delay
 		setTimeout(function(){
-			// Following 2 lines can be uncommented for the option to parse in fire_backend.py instead of here
-			// console.log(xhttp.response); 
-			// alert('Fire Risk is ' + xhttp.response);
-
-			// Parses HERE rather than in fire_backend.py
-			alert('Fire Risk is ' + JSON.parse(xhttp.responseText).dwml.data.parameters[0]["fire-weather"].value[0]); 
-			console.log(JSON.parse(xhttp.response).dwml.data.parameters[0]["fire-weather"].value[0]); 
-		}, 7000);
+			alert('Fire Risk is ' + eachShape);
+			console.log(eachShape);
+		}, 8000);
 	}
 </script>
 <button type="button" onclick="button_click()" style="position:fixed; top:0; right: 0; z-index:999">Get GeoJson</button>
