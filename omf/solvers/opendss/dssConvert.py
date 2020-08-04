@@ -71,7 +71,7 @@ def dssToTree(pathToDss):
 					ob[k] = v
 			contents[i] = ob
 		except:
-			raise Exception(f'Error encountered on line {i} = {line}')
+			raise Exception(f'Error encountered on line {i + 1} = {line}')
 	# Print
 	# for line in contents:
 	# 	print line
