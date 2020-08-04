@@ -107,6 +107,7 @@
 	// send an XML Http request to the server for data from getSubGridData() of weather.py
 	function fireButton_click() {
 		var eachShape = [];
+		// loop through map._layers or other data structure that actually represents the vector data
 		// A call to subGrid for each drawn shape
 		for (i = 0; i < drawnItems.features.length; i++) {
 			xhttp = new XMLHttpRequest();
