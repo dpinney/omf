@@ -106,15 +106,15 @@
 	}
 	// send an XML Http request to the server for data from getSubGridData() of weather.py
 	function fireButton_click() {
-		drawn_geojson = drawnItems.toGeoJSON()
+		drawnItems = drawnItems.toGeoJSON()
 		var eachShape = [];
 		// A call to subGrid for each drawn shape
-		for (i = 0; i < drawn_geojson.features.length; i++) {
+		for (i = 0; i < drawnItems.features.length; i++) {
 			xhttp = new XMLHttpRequest();
-			centerLon = (drawn_geojson.features[i].geometry.coordinates[0][0][0] + drawn_geojson.features[i].geometry.coordinates[0][2][0]) / 2
-			centerLat = (drawn_geojson.features[i].geometry.coordinates[0][0][1] + drawn_geojson.features[i].geometry.coordinates[0][1][1]) / 2
-			distLat = drawn_geojson.features[i].geometry.coordinates[0][1][1] - centerLat
-			distLon = drawn_geojson.features[i].geometry.coordinates[0][0][0] - centerLon
+			centerLon = (drawnItems.features[i].geometry.coordinates[0][0][0] + drawnItems.features[i].geometry.coordinates[0][2][0]) / 2
+			centerLat = (drawnItems.features[i].geometry.coordinates[0][0][1] + drawnItems.features[i].geometry.coordinates[0][1][1]) / 2
+			distLat = drawnItems.features[i].geometry.coordinates[0][1][1] - centerLat
+			distLon = drawnItems.features[i].geometry.coordinates[0][0][0] - centerLon
 			// xhttp.open("GET", "http://127.0.0.1:5000/firedata/39.810278/-121.437222/10/10/10", true); <-- centerpoint of map test (Camp Fire)
 			xhttp.open("GET", "http://127.0.0.1:5000/firedata/" + centerLat + "/" + centerLon + "/" + distLat + "/" + distLon + "/10", true); 
 			xhttp.send();
@@ -136,18 +136,19 @@
 						eachRisk.push(10);
 						sum += 10;
 					}
+					// drawnItems.features[i].properties.risk = eachRisk[j]; 
 				}
 				// logs the average of each array's quantitative risk readings into an array
 				average = sum / eachRisk.length;
 				eachShape.push(average);
-			}, 11000);
+			}, 8000);
 		}
 		// the function will skip to the alert and console without an additional time delay
 		setTimeout(function(){
 			// alert('Fire Risk is ' + eachShape);
 			console.log(eachShape);
 			return eachShape;
-		}, 12000);
+		}, 10000);
 	}
 </script>
 <button type="button" onclick="button_click()" style="position:fixed; top:0; right: 0; z-index:999">Get GeoJson</button>
