@@ -106,7 +106,6 @@
 	}
 	// send an XML Http request to the server for data from getSubGridData() of weather.py
 	function fireButton_click() {
-		drawnItems = drawnItems.toGeoJSON()
 		var eachShape = [];
 		// A call to subGrid for each drawn shape
 		for (i = 0; i < drawnItems.features.length; i++) {
@@ -116,32 +115,32 @@
 			distLat = drawnItems.features[i].geometry.coordinates[0][1][1] - centerLat
 			distLon = drawnItems.features[i].geometry.coordinates[0][0][0] - centerLon
 			// xhttp.open("GET", "http://127.0.0.1:5000/firedata/39.810278/-121.437222/10/10/10", true); <-- centerpoint of map test (Camp Fire)
-			xhttp.open("GET", "http://127.0.0.1:5000/firedata/" + centerLat + "/" + centerLon + "/" + distLat + "/" + distLon + "/10", true); 
+			xhttp.open("GET", "http://127.0.0.1:5000/firedata/" + centerLat + "/" + centerLon + "/" + distLat + "/" + distLon + "/10", false); 
 			xhttp.send();
-			setTimeout(function(){
-				var xhttpData = JSON.parse(xhttp.responseText).dwml.data;
-				// Logs each risk reading for each point of the subgrid into an array 
-				var eachRisk = [];
-				var sum = 0;
-				var average = 0;
-				for (j = 0; j < xhttpData.location.length; j++) {
-					if (xhttpData.parameters[j]["fire-weather"].value[0] = "No Areas") {
-						eachRisk.push(0);
-					}
-					else if (xhttpData.parameters[j]["fire-weather"].value[0] = "Elevated") {
-						eachRisk.push(5);
-						sum += 5;
-					}
-					else {
-						eachRisk.push(10);
-						sum += 10;
-					}
-					// drawnItems.features[i].properties.risk = eachRisk[j]; 
+			// setTimeout(function(){}, 8000);
+			var xhttpData = JSON.parse(xhttp.responseText).dwml.data;
+			// Logs each risk reading for each point of the subgrid into an array 
+			var eachRisk = [];
+			var sum = 0;
+			var average = 0;
+			for (j = 0; j < xhttpData.location.length; j++) {
+				if (xhttpData.parameters[j]["fire-weather"].value[0] = "No Areas") {
+					eachRisk.push(0);
 				}
-				// logs the average of each array's quantitative risk readings into an array
-				average = sum / eachRisk.length;
-				eachShape.push(average);
-			}, 8000);
+				else if (xhttpData.parameters[j]["fire-weather"].value[0] = "Elevated") {
+					eachRisk.push(5);
+					sum += 5;
+				}
+				else {
+					eachRisk.push(10);
+					sum += 10;
+				}
+				// drawnItems.features[i].properties.risk = eachRisk[j]; 
+			}
+			// logs the average of each array's quantitative risk readings into an array
+			average = sum / eachRisk.length;
+			drawnItems.features[i].properties['fire-risk'] = average
+			eachShape.push(average);
 		}
 		// the function will skip to the alert and console without an additional time delay
 		setTimeout(function(){
