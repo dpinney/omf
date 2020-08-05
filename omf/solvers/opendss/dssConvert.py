@@ -54,10 +54,10 @@ def dssToTree(pathToDss):
 					contents[j] = contents[j] + contents[i].replace('~', ' ')
 					contents[i] = ''
 					break
-	# Drop blank lines.
-	contents = [x for x in contents if x != '']
+	# Capture original line numbers and drop blanks
+	contents = dict([(c,x) for (c, x) in enumerate(contents) if x != ''])
 	# Lex it
-	for i, line in enumerate(contents):
+	for i, line in contents.items():
 		jpos = 0
 		try:
 			#HACK: only support white space separation of attributes.
@@ -73,10 +73,11 @@ def dssToTree(pathToDss):
 					ob[k] = v
 			contents[i] = ob
 		except:
-			raise Exception(f'Error encountered in group (space delimited) #{jpos} of object #{i + 1}: "{line}"')
+			raise Exception(f'Error encountered in group (space delimited) #{jpos+1} of line {i + 1}: {line}')
 	# Print
 	# for line in contents:
 	# 	print line
+	contents = contents.values()
 	return contents
 
 def treeToDss(treeObject, outputPath):
