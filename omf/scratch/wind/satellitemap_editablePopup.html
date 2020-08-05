@@ -94,7 +94,7 @@
 		// add click handler that makes popup on each click.
 		layer.on('click', function (e) {
 			vegScore = e.target.feature.properties.vegScore
-			layer.bindPopup("<input id='popup_leaflet_id' style='display:none' value=" + e.target._leaflet_id + ">Veg Score: <input type='text' id='veg_score' value=" + vegScore + "><button onclick='saveVeg()' type='button'>Save</button>"+">Fire Risk: "+props['fire-risk'])
+			layer.bindPopup("<input id='popup_leaflet_id' style='display:none' value=" + e.target._leaflet_id + ">Veg Score: <input type='text' id='veg_score' value=" + vegScore + "><button onclick='saveVeg()' type='button'>Save</button>"+"<br />"+"Fire Risk: "+props['fire-risk'])
 			layer.openPopup()
 		})
 		drawnItems.addLayer(layer);
