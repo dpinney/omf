@@ -131,7 +131,7 @@ def evilDssTreeToGldTree(dssTree):
 			g_id += 1
 	return gldTree
 
-if __name__ == '__main__':
+#if __name__ == '__main__':
 	# tree = dssToTree('ieee37_ours.dss')
 	# treeToDss(tree, 'ieee37p.dss')
 	# dssToMem('ieee37.dss')
