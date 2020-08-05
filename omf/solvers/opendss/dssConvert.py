@@ -58,6 +58,7 @@ def dssToTree(pathToDss):
 	contents = [x for x in contents if x != '']
 	# Lex it
 	for i, line in enumerate(contents):
+		jpos = 0
 		try:
 			#HACK: only support white space separation of attributes.
 			contents[i] = line.split()
@@ -67,11 +68,12 @@ def dssToTree(pathToDss):
 			ob['!CMD'] = contents[i][0]
 			if len(contents[i]) > 1:
 				for j in range(1, len(contents[i])):
+					jpos = j
 					k,v = contents[i][j].split('=')
 					ob[k] = v
 			contents[i] = ob
 		except:
-			raise Exception(f'Error encountered on line {i + 1} = {line}')
+			raise Exception(f'Error encountered in group (space delimited) #{jpos} of object #{i + 1}: "{line}"')
 	# Print
 	# for line in contents:
 	# 	print line
@@ -134,4 +136,4 @@ if __name__ == '__main__':
 	# treeToDss(tree, 'ieee37p.dss')
 	# dssToMem('ieee37.dss')
 	# dssToGridLab('ieee37.dss', 'Model.glm') # this kind of works
-	gridLabToDSS('ieee37_fixed.glm', 'ieee37_conv.dss') # this fails miserably
+	#gridLabToDSS('ieee37_fixed.glm', 'ieee37_conv.dss') # this fails miserably
