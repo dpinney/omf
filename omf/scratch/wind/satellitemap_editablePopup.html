@@ -92,11 +92,11 @@
 			}
 		},
 		draw: {
-			polygon: {
-				allowIntersection: false,
-				showArea: true
-			}
-		}
+			polygon: false,
+			polyline: false,
+			circle: false,
+			marker: false,
+			circlemarker: false		}
 	}));
 	// Helper function for saving veg score.
 	function saveVeg() {
@@ -115,7 +115,7 @@
 		// add click handler that makes popup on each click.
 		layer.on('click', function (e) {
 			vegScore = e.target.feature.properties.vegScore
-			layer.bindPopup("<input id='popup_leaflet_id' style='display:none' value=" + e.target._leaflet_id + ">Veg Score: <input type='text' id='veg_score' value=" + vegScore + "><button onclick='saveVeg()' type='button'>Save</button>"+"<br />"+"Fire Risk: "+props['fire-risk'])
+			layer.bindPopup("<input id='popup_leaflet_id' style='display:none' value=" + e.target._leaflet_id + ">Veg Score: <input type='text' id='veg_score' value=" + vegScore + "><button onclick='saveVeg()' type='button'>Save</button>"+"<br />"+"Fire Risk: "+props['fire-risk']+"<br />"+"<a href='https://www.spc.noaa.gov/products/fire_wx/fwdy1.html' target='_blank'>Click for more information</a>")
 			layer.openPopup()
 		})
 		drawnItems.addLayer(layer);
@@ -129,6 +129,9 @@
 	// send an XML Http request to the server for data from getSubGridData() of weather.py
 	function fireButton_click() {
 		drawn_geojson = drawnItems.toGeoJSON()
+		if (drawn_geojson.features.length == 0) {
+			alert('Please use the drawing pallete to the left to create boxes')
+		}
 		// this array is linked to console.log() statement for verifying the array contents
 		var eachShape = [];
 		// A call to subGrid for each drawn shape
@@ -163,6 +166,7 @@
 					eachRisk.push(10);
 					sum += 10;
 				}
+				console.log(sum)
 			}
 			// logs the average of each array's quantitative risk readings into an array
 			average = sum / eachRisk.length;
