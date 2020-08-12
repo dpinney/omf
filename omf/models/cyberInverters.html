@@ -40,6 +40,11 @@
 			studyUser = allInputData.user
 			window.open("/feeder/" + studyUser + "/" + modelName + "/" + feederNum,  "_blank")
 		}
+		function editDSS(modelName, fileNum) {
+			console.log("modelName:",modelName)
+			studyUser = allInputData.user
+			window.open("/rawTextEdit/" + studyUser + "/" + modelName + "/" + fileNum,  "_blank")
+		}
 		// Code to make the toggles work:
 		$(document).ready(function(){
 			$(".toggle").click(function(){
@@ -108,9 +113,17 @@
 				<label>Feeder</label>
 				<button id="feederButton" type="button" onclick="javascript:editFeeder(allInputData.modelName,1);" style="display:block;width:125px;">Open Editor</button>
 			</div>
+			<div class="shortInput">
+				<label>OpenDSS Editor</label>
+				<button id="OpenDSSButton" type="button" onclick="javascript:editDSS(allInputData.modelName,1);" style="display:block;width:125px;">Open Editor</button>
+			</div>
 			<div class="shortInput" style="display:none"><!--HACK:pass feeder name back and forth to backend.-->
 				<label>feederName1</label>
 				<input type="text" id="feederName1" name="feederName1">
+			</div>
+			<div class="shortInput" style="display:none"><!--HACK:pass dss name back and forth to backend.-->
+				<label>dssName1</label>
+				<input type="text" id="dssName1" name="dssName1">
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Load and PV Output<span class="classic">Import the .csv file representing the load and PV output.</span></label>

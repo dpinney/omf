@@ -23,6 +23,8 @@ def work(modelDir, inputDict):
 	# feederName = inputDict["feederName1"]
 	feederName = [x for x in os.listdir(modelDir) if x.endswith('.omd')][0][:-4]
 	inputDict["feederName1"] = feederName
+	dssName = [x for x in os.listdir(pJoin(modelDir, "PyCIGAR_inputs")) if x.endswith('.dss')][0][:-4]
+	inputDict["dssName1"] = dssName
 	zipCode = "59001" #TODO get zip code from the PV and Load input file
 	
 	#Value check for attackVariable
@@ -483,6 +485,7 @@ def new(modelDir):
 		"simLengthUnits": "seconds",
 		# "feederName1": "ieee37fixed",
 		"feederName1": "Olin Barre GH EOL Solar AVolts CapReg",
+		"dssName1": "ieee37",
 		"modelType": modelName,
 		"zipCode": "59001",
 		"loadPV": load_PV,
@@ -496,6 +499,12 @@ def new(modelDir):
 	creationCode = __neoMetaModel__.new(modelDir, defaultInputs)
 	try:
 		shutil.copyfile(pJoin(__neoMetaModel__._omfDir, "static", "publicFeeders", defaultInputs["feederName1"]+'.omd'), pJoin(modelDir, defaultInputs["feederName1"]+'.omd'))
+	except:
+		return False
+	try:
+		shutil.copyfile(pJoin(__neoMetaModel__._omfDir, "static", "testFiles", "pyCIGAR", defaultInputs["dssName1"]+'.dss'), pJoin(modelDir, "PyCIGAR_inputs", defaultInputs["dssName1"]+'.dss'))
+		# TODO: Change to better location where default dss files can be held... maybe solvers/opendss?
+		# shutil.copyfile(pJoin(__neoMetaModel__._omfDir, "solvers", "opendss", defaultInputs["dssName1"]+'.dss'), pJoin(modelDir, "PyCIGAR_inputs", defaultInputs["dssName1"]+'.dss'))
 	except:
 		return False
 	return creationCode

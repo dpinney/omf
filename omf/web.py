@@ -44,10 +44,14 @@ def getDataNames():
 		currUser = "public"
 	climates = [x[:-5] for x in safeListdir("./data/Climate/")]
 	feeders = []
+	circuitFiles = []
 	for (dirpath, dirnames, filenames) in os.walk(os.path.join(_omfDir, "data","Model", currUser)):
 		for fname in filenames:
 			if fname.endswith('.omd') and fname != 'feeder.omd':
 				feeders.append({'name': fname[:-4], 'model': dirpath.split('/')[-1]})
+			# TODO: possibly expand circuit file editor to include more than just openDSS files
+			elif fname.endswith('.dss') and fname != 'feeder.dss':
+				circuitFiles.append({'name': fname[:-4], 'model': dirpath.split('/')[-1]})
 	networks = []
 	for (dirpath, dirnames, filenames) in os.walk(os.path.join(_omfDir, "scratch","transmission", "outData")):
 		for fname in filenames:
@@ -59,7 +63,13 @@ def getDataNames():
 		for fname in filenames:
 			if fname.endswith('.omd') and fname != 'feeder.omd':
 				publicFeeders.append({'name': fname[:-4], 'model': dirpath.split('/')[-1]})
-	return {"climates":sorted(climates), "feeders":feeders, "networks":networks, "publicFeeders":publicFeeders, "currentUser":currUser}
+	# Public circuit files too.
+	publicCircuitFiles = []
+	for (dirpath, dirnames, filenames) in os.walk(os.path.join(_omfDir, "solvers","opendss")):
+		for fname in filenames:
+			if fname.endswith('.dss') and fname != 'feeder.dss':
+				publicCircuitFiles.append({'name': fname[:-4], 'model': dirpath.split('/')[-1]})
+	return {"climates":sorted(climates), "feeders":feeders, "circuitFiles":circuitFiles, "networks":networks, "publicFeeders":publicFeeders, "publicCircuitFiles":publicCircuitFiles, "currentUser":currUser}
 
 # @app.before_request
 # def csrf_protect():
@@ -647,7 +657,6 @@ def feederGet(owner, modelName, feederNum):
 		public=owner=="public", currUser=User.cu(), owner=owner
 	)
 
-
 @app.route("/network/<owner>/<modelName>/<networkNum>")
 @flask_login.login_required
 @read_permission_function
@@ -698,6 +707,41 @@ def distribution_get(owner, modelName, feeder_num):
 		'distNetViz.html', thisFeederData=feeder, thisFeederName=feeder_name, thisFeederNum=feeder_num,
 		thisModelName=modelName, thisOwner=owner, components=component_json, jasmine=jasmine, spec=spec,
 		publicFeeders=public_feeders, userFeeders=user_feeders, showFileMenu=show_file_menu, currentUser=User.cu()
+	)
+
+@app.route('/rawTextEdit/<owner>/<modelName>/<file_num>/test')
+@app.route('/rawTextEdit/<owner>/<modelName>/<file_num>')
+@flask_login.login_required
+@read_permission_function
+def distribution_text_get(owner, modelName, file_num):
+	'''Render the raw text editing interface for distribution networks.'''
+	file_dict = get_model_metadata(owner, modelName)
+	# file_name = file_dict.get('feederName' + str(file_num))
+	file_name = file_dict.get('dssName' + str(file_num))
+	# file_filepath = os.path.join(_omfDir, 'data', 'Model', owner, modelName, file_name + '.omd')
+	file_filepath = os.path.join(_omfDir, 'data', 'Model', owner, modelName, 'PyCIGAR_inputs', file_name + '.dss')
+	with locked_open(file_filepath) as f:
+		data = f.read()
+	file = data
+	# component_json = get_components()
+	jasmine = spec = None
+	if request.path.endswith('/test') and User.cu() == 'admin':
+		from omf.static.testFiles.test_distNetVizInterface import helper
+		tests = helper.load_test_files(['spec_distNetVizInterface.js'])
+		jasmine = tests['jasmine']
+		spec = tests['spec']
+	all_data = getDataNames()
+	user_files = all_data['circuitFiles']
+	# Must get rid of the 'u' for unicode strings before passing the strings to JavaScript
+	for dictionary in user_files:
+		dictionary['model'] = str(dictionary['model'])
+		dictionary['name'] = str(dictionary['name'])
+	public_files = all_data['publicCircuitFiles']
+	show_file_menu = User.cu() == owner or User.cu() == 'admin'
+	return render_template(
+		'distText.html', thisFileData=file, thisFileName=file_name, thisFileNum=file_num,
+		thisModelName=modelName, thisOwner=owner, jasmine=jasmine, spec=spec,
+		publicFiles=public_files, userFiles=user_files, showFileMenu=show_file_menu, currentUser=User.cu()
 	)
 
 
@@ -1145,6 +1189,30 @@ def newBlankFeeder(owner):
 		return redirect(url_for("distribution_get", owner=owner, modelName=modelName, feeder_num=feederNum))
 	return redirect(url_for('feederGet', owner=owner, modelName=modelName, feederNum=feederNum))
 
+# @app.route("/newBlankFile/<owner>", methods=["POST"])
+# @flask_login.login_required
+# @write_permission_function
+# def newBlankFile(owner):
+# 	'''This function is used for creating a new blank feeder.'''
+# 	modelName = request.form.get("modelName","")
+# 	fileName = str(request.form.get("fileNameNew"))
+# 	fileNum = request.form.get("fileNum",1)
+# 	if fileName == '': fileName = 'feeder'
+# 	modelDir = os.path.join(_omfDir, "data","Model", owner, modelName)
+# 	try:
+# 		os.remove("data/Model/"+owner+"/"+modelName+'/' + "ZPID.txt")
+# 		print("removed, ", ("data/Model/"+owner+"/"+modelName+'/' + "ZPID.txt"))
+# 	except: pass
+# 	removeFeeder(owner, modelName, feederNum)
+# 	removeFile(owner, modelName, fileNum)
+# 	newSimpleFeeder(owner, modelName, feederNum, False, feederName)
+# 	newSimpleFile(owner, modelName, fileNum, False, fileName)
+# 	writeToInput(modelDir, feederName, 'feederName'+str(feederNum))
+# 	writeToInput(modelDir, fileName, 'feederName'+str(fileNum))
+# 	if request.form.get("referrer") == "distribution":
+# 		return redirect(url_for("distribution_text_get", owner=owner, modelName=modelName, file_num=fileNum))
+# 	return redirect(url_for('fileGet', owner=owner, modelName=modelName, feederNum=feederNum))
+
 
 @app.route("/newBlankNetwork/<owner>", methods=["POST"])
 @flask_login.login_required
@@ -1237,6 +1305,57 @@ def saveFeeder(owner, modelName, feederName, feederNum):
 		# The feeder_file should always exist, but just in case there was an error, we allow the recreation of the file
 		with locked_open(feeder_file, 'w') as f:
 			json.dump(payload, f, indent=4)
+	return 'Success'
+
+@app.route("/saveFile/<owner>/<modelName>/<fileName>/<int:fileNum>", methods=["POST"])
+@flask_login.login_required
+@write_permission_function
+def saveFile(owner, modelName, fileName, fileNum):
+	"""Save file data. Also used for cancelling a file import, file conversion, or file-load overwrite."""
+	print("Saving file for:%s, with model: %s, and file: %s"%(owner, modelName, fileName))
+	model_dir = os.path.join(_omfDir, "data/Model", owner, modelName)
+	for filename in ["gridError.txt", "error.txt", "weatherError.txt"]:
+		error_file = os.path.join(model_dir, filename)
+		if os.path.isfile(error_file):
+			try:
+				os.remove(error_file)
+			except FileNotFoundError as e:
+				if e.errno ==2:
+					# Tried to remove a nonexistant file
+					pass
+	# Do NOT cancel any PPID.txt or PID.txt processes.
+	for filename in ["ZPID.txt", "APID.txt", "NPID.txt", "CPID.txt", "WPID.txt"]:
+		pid_filepath = os.path.join(model_dir, filename)
+		if os.path.isfile(pid_filepath):
+			try:
+				with locked_open(pid_filepath) as f:
+					pid = f.read()
+				os.remove(pid_filepath)
+				os.kill(int(pid), signal.SIGTERM)
+			except FileNotFoundError as e:
+				if e.errno == 2:
+					# Tried to open a nonexistent file. Presumably, some other process opened the used the pid file and deleted it before this process
+					# could use it
+					pass
+				else:
+					raise
+			except ProcessLookupError as e:
+				if e.errno == 3:
+					# Tried to kill a process with a pid that doesn't map to an existing process.
+					pass
+				else:
+					raise
+	writeToInput(model_dir, fileName, 'dssName' + str(fileNum)) # TODO: Incorporate other files, not just dss
+	payload = request.form.get('fileContents', '')
+	file_file = os.path.join(model_dir, fileName + ".dss") # TODO: Incorporate other files, not just dss
+	if os.path.isfile(file_file):
+		with locked_open(file_file, 'r+') as f:
+			f.truncate(0)
+			f.write(payload)
+	else:
+		# The file_file should always exist, but just in case there was an error, we allow the recreation of the file
+		with locked_open(file_file, 'w') as f:
+			f.write(payload)
 	return 'Success'
 
 
@@ -1332,6 +1451,31 @@ def loadFeeder(frfeederName, frmodelName, modelName, feederNum, frUser, owner):
 	if request.form.get("referrer") == "distribution":
 		return redirect(url_for("distribution_get", owner=owner, modelName=modelName, feeder_num=feederNum))
 	return redirect(url_for('feederGet', owner=owner, modelName=modelName, feederNum=feederNum))
+
+@app.route("/loadFile/<frfileName>/<frmodelName>/<modelName>/<fileNum>/<frUser>/<owner>", methods=["GET", "POST"])
+@flask_login.login_required
+@write_permission_function
+def loadFile(frfileName, frmodelName, modelName, fileNum, frUser, owner):
+	'''Load a file from one model to another.'''
+	if frUser != "public":
+		frUser = User.cu()
+		frmodelDir = os.path.join(_omfDir, 'data/Model', frUser, frmodelName)
+	elif frUser == "public":
+		frmodelDir = os.path.join(_omfDir, 'solvers/opendss')
+	print("Entered loadFile with info: frfileName %s, frmodelName: %s, modelName: %s, fileNum: %s"%(frfileName, frmodelName, str(modelName), str(fileNum)))
+	# I can't use shutil.copyfile() becasue I need locks on the source and destination file
+	#shutil.copyfile(os.path.join(frmodelDir, frfileName + '.omd'), os.path.join(modelDir, fileName + '.omd'))
+	with locked_open(os.path.join(frmodelDir, frfileName + '.dss')) as inFile:
+		file_string = inFile.read()
+	modelDir = os.path.join(_omfDir, 'data/Model', owner, modelName)
+	fileName = get_model_metadata(owner, modelName).get('fileName' + str(fileNum))
+	with locked_open(os.path.join(modelDir, fileName + '.dss'), 'r+') as outFile:
+		outFile.truncate(0)
+		outFile.write(file_string)
+	if request.form.get("referrer") == "distribution":
+		return redirect(url_for("distribution_text_get", owner=owner, modelName=modelName, file_num=fileNum))
+	return redirect(url_for("distribution_text_get", owner=owner, modelName=modelName, file_num=fileNum)) # TODO: Figure out where this should actually redirect
+	# return redirect(url_for('fileGet', owner=owner, modelName=modelName, fileNum=fileNum))
 
 
 @app.route("/cleanUpFeeders/<owner>/<modelName>", methods=["GET", "POST"])
@@ -1852,6 +1996,13 @@ def uniqObjName(objtype, owner, name, modelName=False):
 		path = os.path.join(path_prefix, modelName, name + '.omt')
 		if name == 'feeder':
 			return jsonify(exists=True)
+	elif objtype == 'circuitFile':
+		if name == 'feeder':
+			return jsonify(exists=True)
+		if owner != 'public':
+			path = os.path.join(path_prefix, modelName, name + '.dss')
+		else:
+			path = os.path.join(_omfDir, 'solvers', 'opendss', name + '.dss')
 	return jsonify(exists=os.path.exists(path))
 
 
