@@ -2,14 +2,12 @@
 <html>
 <head>
 	<title>GeoJSON Map</title>
-<head>
 	<link rel='stylesheet' href='https://unpkg.com/leaflet@1.0.3/dist/leaflet.css' integrity='sha512-07I2e+7D8p6he1SIM+1twR5TIrhUQn9+I6yjqD53JQjFiMf8EtC93ty0/5vJTZGF8aAocvHYNEDJajGdNx1IsQ=='
 		crossorigin='' />
 	<script src='https://unpkg.com/leaflet@1.0.3/dist/leaflet.js' integrity='sha512-A7vV8IFfih/D732iSSKi20u/ooOfj/AGehOKq0f4vLT1Zr2Y+RX7C+w8A1gaSasGtRUZpF/NZgzSAu4/Gc41Lg=='
 		crossorigin=''></script>
 	<link rel='stylesheet' href='https://unpkg.com/leaflet-draw@1.0.0/dist/leaflet.draw.css' />
 	<script src='https://unpkg.com/leaflet-draw@1.0.0/dist/leaflet.draw.js'></script>
-</head>
 	<style>html, body {
 		width: 100%;
 		height: 100%;
@@ -24,9 +22,32 @@
 		top: 0.0%;
 		}
 	</style>
+	<!-- CSS Loader-->	
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<style>
+	.loader {
+	  border: 16px solid #f3f3f3;
+	  border-radius: 50%;
+	  border-top: 16px solid #3498db;
+	  width: 120px;
+	  height: 120px;
+	  -webkit-animation: spin 2s linear infinite; /* Safari */
+	  animation: spin 2s linear infinite;
+	}
+	/* Safari */
+	@-webkit-keyframes spin {
+	  0% { -webkit-transform: rotate(0deg); }
+	  100% { -webkit-transform: rotate(360deg); }
+	}
+	@keyframes spin {
+	  0% { transform: rotate(0deg); }
+	  100% { transform: rotate(360deg); }
+	}
+	</style>
 </head>
 <body>
 	<div id='map'></div>
+	<div class="loader"></div>
 	<script type='text/javascript'>
 	// basic map definition and zoom control.
 	var map = L.map('map');
@@ -71,11 +92,11 @@
 			}
 		},
 		draw: {
-			polygon: {
-				allowIntersection: false,
-				showArea: true
-			}
-		}
+			polygon: false,
+			polyline: false,
+			circle: false,
+			marker: false,
+			circlemarker: false		}
 	}));
 	// Helper function for saving veg score.
 	function saveVeg() {
@@ -94,7 +115,7 @@
 		// add click handler that makes popup on each click.
 		layer.on('click', function (e) {
 			vegScore = e.target.feature.properties.vegScore
-			layer.bindPopup("<input id='popup_leaflet_id' style='display:none' value=" + e.target._leaflet_id + ">Veg Score: <input type='text' id='veg_score' value=" + vegScore + "><button onclick='saveVeg()' type='button'>Save</button>"+"<br />"+"Fire Risk: "+props['fire-risk'])
+			layer.bindPopup("<input id='popup_leaflet_id' style='display:none' value=" + e.target._leaflet_id + ">Veg Score: <input type='text' id='veg_score' value=" + vegScore + "><button onclick='saveVeg()' type='button'>Save</button>"+"<br />"+"Fire Risk: "+props['fire-risk']+"<br />"+"<a href='https://www.spc.noaa.gov/products/fire_wx/fwdy1.html' target='_blank'>Click for more information</a>")
 			layer.openPopup()
 		})
 		drawnItems.addLayer(layer);
@@ -108,6 +129,9 @@
 	// send an XML Http request to the server for data from getSubGridData() of weather.py
 	function fireButton_click() {
 		drawn_geojson = drawnItems.toGeoJSON()
+		if (drawn_geojson.features.length == 0) {
+			alert('Please use the drawing pallete to the left to create boxes')
+		}
 		// this array is linked to console.log() statement for verifying the array contents
 		var eachShape = [];
 		// A call to subGrid for each drawn shape
@@ -120,23 +144,29 @@
 			// xhttp.open("GET", "http://127.0.0.1:5000/firedata/39.810278/-121.437222/10/10/10", true); <-- centerpoint of map test (Camp Fire)
 			xhttp.open("GET", "http://127.0.0.1:5000/firedata/" + centerLat + "/" + centerLon + "/" + distLat + "/" + distLon + "/10", false); 
 			xhttp.send();
+			if (xhttp.readyState == 3) {
+				document.getElementById('loader').show;
+			}
 			var xhttpData = JSON.parse(xhttp.responseText).dwml.data;
 			// Logs each risk reading for each point of the subgrid into an array 
 			var eachRisk = [];
 			var sum = 0;
 			var average = 0;
 			for (j = 0; j < xhttpData.location.length; j++) {
-				if (xhttpData.parameters[j]["fire-weather"].value[0] = "No Areas") {
+				console.log(xhttpData.parameters[j]['fire-weather'].value[0])
+				if (xhttpData.parameters[j]["fire-weather"].value[0] == "No Areas") {
 					eachRisk.push(0);
 				}
-				else if (xhttpData.parameters[j]["fire-weather"].value[0] = "Elevated") {
+				else if (xhttpData.parameters[j]["fire-weather"].value[0] == "Elevated Areas") {
 					eachRisk.push(5);
 					sum += 5;
 				}
-				else {
+				else { // the final parameter is "Critical Areas"
+					console.log(xhttpData.parameters[j]["fire-weather"].value[0] == "Critical Areas")
 					eachRisk.push(10);
 					sum += 10;
 				}
+				console.log(sum)
 			}
 			// logs the average of each array's quantitative risk readings into an array
 			average = sum / eachRisk.length;
