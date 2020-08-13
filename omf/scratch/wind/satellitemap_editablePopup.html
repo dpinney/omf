@@ -140,9 +140,9 @@
 	}
 	// next two functions will open and close the loading icon when the fire risk button is clicked
 	function openModal() {
-        document.getElementById('modal').style.display = 'block';
-	    document.getElementById('fade').style.display = 'block';
-	    fireButton_click();
+        document.getElementById('modal').style.display = 'initial';
+	    document.getElementById('fade').style.display = 'initial';
+	    setTimeout(fireButton_click, 5); // HACK: slight timeout to get screen to refresh.
 	}
 
 	function closeModal() {
