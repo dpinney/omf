@@ -22,32 +22,44 @@
 		top: 0.0%;
 		}
 	</style>
-	<!-- CSS Loader-->	
-	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<style>
-	.loader {
-	  border: 16px solid #f3f3f3;
-	  border-radius: 50%;
-	  border-top: 16px solid #3498db;
-	  width: 120px;
-	  height: 120px;
-	  -webkit-animation: spin 2s linear infinite; /* Safari */
-	  animation: spin 2s linear infinite;
-	}
-	/* Safari */
-	@-webkit-keyframes spin {
-	  0% { -webkit-transform: rotate(0deg); }
-	  100% { -webkit-transform: rotate(360deg); }
-	}
-	@keyframes spin {
-	  0% { transform: rotate(0deg); }
-	  100% { transform: rotate(360deg); }
-	}
-	</style>
+		#fade {
+		    display: none;
+		    position: absolute;
+		    top: 0%;
+		    left: 0%;
+		    width: 100%;
+		    height: 100%;
+		    background-color: #ababab;
+		    z-index: 1001;
+		    -moz-opacity: 0.8;
+		    opacity: .70;
+		    filter: alpha(opacity=80);
+		}
+
+		#modal {
+		    display: none;
+		    position: absolute;
+		    top: 35%;
+		    left: 45%;
+		    width: 100px;
+		    height: 100px;
+		    padding:15px 15px 15px;
+		    border: 3px solid #ababab;
+		    box-shadow: 1px 1px 10px #ababab;
+		    border-radius: 20px;
+		    background-color: white;
+		    z-index: 1002;
+		    text-align: center;
+		    overflow: auto;
+    </style>
 </head>
 <body>
 	<div id='map'></div>
-	<div class="loader"></div>
+	<div id="modal">
+		<img id="loader" src="https://i.gifer.com/KSYA.gif" />
+	</div>
+	<div id="fade"></div>
 	<script type='text/javascript'>
 	// basic map definition and zoom control.
 	var map = L.map('map');
@@ -126,57 +138,69 @@
 		alert('We drew: ' + JSON.stringify(drawn_geojson))
 		return drawn_geojson
 	}
+	// next two functions will open and close the loading icon when the fire risk button is clicked
+	function openModal() {
+        document.getElementById('modal').style.display = 'block';
+	    document.getElementById('fade').style.display = 'block';
+	    fireButton_click();
+	}
+
+	function closeModal() {
+		document.getElementById('modal').style.display = 'none';
+	   	document.getElementById('fade').style.display = 'none';
+	}
 	// send an XML Http request to the server for data from getSubGridData() of weather.py
 	function fireButton_click() {
 		drawn_geojson = drawnItems.toGeoJSON()
 		if (drawn_geojson.features.length == 0) {
-			alert('Please use the drawing pallete to the left to create boxes')
+			alert('Please use the drawing pallete to the left to create boxes');
+			closeModal();
 		}
-		// this array is linked to console.log() statement for verifying the array contents
-		var eachShape = [];
-		// A call to subGrid for each drawn shape
-		for (i = 0; i < drawn_geojson.features.length; i++) {
-			xhttp = new XMLHttpRequest();
-			centerLon = (drawn_geojson.features[i].geometry.coordinates[0][0][0] + drawn_geojson.features[i].geometry.coordinates[0][2][0]) / 2
-			centerLat = (drawn_geojson.features[i].geometry.coordinates[0][0][1] + drawn_geojson.features[i].geometry.coordinates[0][1][1]) / 2
-			distLat = drawn_geojson.features[i].geometry.coordinates[0][1][1] - centerLat
-			distLon = drawn_geojson.features[i].geometry.coordinates[0][0][0] - centerLon
-			// xhttp.open("GET", "http://127.0.0.1:5000/firedata/39.810278/-121.437222/10/10/10", true); <-- centerpoint of map test (Camp Fire)
-			xhttp.open("GET", "http://127.0.0.1:5000/firedata/" + centerLat + "/" + centerLon + "/" + distLat + "/" + distLon + "/10", false); 
-			xhttp.send();
-			if (xhttp.readyState == 3) {
-				document.getElementById('loader').show;
+		else {
+			// this array is linked to console.log() statement for verifying the array contents
+			var eachShape = [];
+			// A call to subGrid for each drawn shape
+			for (i = 0; i < drawn_geojson.features.length; i++) {
+				xhttp = new XMLHttpRequest();
+				centerLon = (drawn_geojson.features[i].geometry.coordinates[0][0][0] + drawn_geojson.features[i].geometry.coordinates[0][2][0]) / 2
+				centerLat = (drawn_geojson.features[i].geometry.coordinates[0][0][1] + drawn_geojson.features[i].geometry.coordinates[0][1][1]) / 2
+				distLat = drawn_geojson.features[i].geometry.coordinates[0][1][1] - centerLat
+				distLon = drawn_geojson.features[i].geometry.coordinates[0][0][0] - centerLon
+				// xhttp.open("GET", "http://127.0.0.1:5000/firedata/39.810278/-121.437222/10/10/10", true); <-- centerpoint of map test (Camp Fire)
+				xhttp.open("GET", "http://127.0.0.1:5000/firedata/" + centerLat + "/" + centerLon + "/" + distLat + "/" + distLon + "/10", false); 
+				xhttp.send();
+				var xhttpData = JSON.parse(xhttp.responseText).dwml.data;
+				// Logs each risk reading for each point of the subgrid into an array 
+				var eachRisk = [];
+				var sum = 0;
+				var average = 0;
+				for (j = 0; j < xhttpData.location.length; j++) {
+					console.log(xhttpData.parameters[j]['fire-weather'].value[0])
+					if (xhttpData.parameters[j]["fire-weather"].value[0] == "No Areas") {
+						eachRisk.push(0);
+					}
+					else if (xhttpData.parameters[j]["fire-weather"].value[0] == "Elevated Areas") {
+						eachRisk.push(5);
+						sum += 5;
+					}
+					else { // the final parameter is "Critical Areas"
+						console.log(xhttpData.parameters[j]["fire-weather"].value[0] == "Critical Areas")
+						eachRisk.push(10);
+						sum += 10;
+					}
+					console.log(sum)
+				}
+				// logs the average of each array's quantitative risk readings into an array
+				average = sum / eachRisk.length;
+				drawn_geojson.features[i].properties['fire-risk'] = average
+				eachShape.push(average);
 			}
-			var xhttpData = JSON.parse(xhttp.responseText).dwml.data;
-			// Logs each risk reading for each point of the subgrid into an array 
-			var eachRisk = [];
-			var sum = 0;
-			var average = 0;
-			for (j = 0; j < xhttpData.location.length; j++) {
-				console.log(xhttpData.parameters[j]['fire-weather'].value[0])
-				if (xhttpData.parameters[j]["fire-weather"].value[0] == "No Areas") {
-					eachRisk.push(0);
-				}
-				else if (xhttpData.parameters[j]["fire-weather"].value[0] == "Elevated Areas") {
-					eachRisk.push(5);
-					sum += 5;
-				}
-				else { // the final parameter is "Critical Areas"
-					console.log(xhttpData.parameters[j]["fire-weather"].value[0] == "Critical Areas")
-					eachRisk.push(10);
-					sum += 10;
-				}
-				console.log(sum)
-			}
-			// logs the average of each array's quantitative risk readings into an array
-			average = sum / eachRisk.length;
-			drawn_geojson.features[i].properties['fire-risk'] = average
-			eachShape.push(average);
 		}
 		console.log(eachShape);
+		closeModal();
 	}
 </script>
 <button type="button" onclick="button_click()" style="position:fixed; top:0; right: 0; z-index:999">Get GeoJson</button>
-<button type="button" onclick="fireButton_click()" style="position:absolute; top: 20px; right: 0; z-index:999">Get Fire Risk</button>
+<button type="button" onclick="openModal()" style="position:absolute; top: 20px; right: 0; z-index:999">Get Fire Risk</button>
 </body>
 </html>
