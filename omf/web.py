@@ -720,8 +720,12 @@ def distribution_text_get(owner, modelName, file_num):
 	file_name = file_dict.get('dssName' + str(file_num))
 	# file_filepath = os.path.join(_omfDir, 'data', 'Model', owner, modelName, file_name + '.omd')
 	file_filepath = os.path.join(_omfDir, 'data', 'Model', owner, modelName, 'PyCIGAR_inputs', file_name + '.dss')
-	with locked_open(file_filepath) as f:
-		data = f.read()
+	try:
+		with locked_open(file_filepath) as f:
+			data = f.read()
+	except FileNotFoundError:
+		with locked_open(os.path.join(_omfDir, 'solvers', 'opendss', file_name + '.dss')) as f:
+			data = f.read()
 	file = data
 	# component_json = get_components()
 	jasmine = spec = None
