@@ -128,16 +128,16 @@
 		layer.on('click', function (e) {
 			vegScore = e.target.feature.properties.vegScore
 			layer.bindPopup("<input id='popup_leaflet_id' style='display:none' value=" + e.target._leaflet_id + ">Veg Score: <input type='text' id='veg_score' value=" + vegScore + "><button onclick='saveVeg()' type='button'>Save</button>"+"<br />"+"Fire Risk: "+props['fire-risk']+"<br />"+"<a href='https://www.spc.noaa.gov/products/fire_wx/fwdy1.html' target='_blank'>Click for more information</a>")
-			if (0 <= props['fire-risk'] < 1) {window.polygon.setStyle({fillColor: '#005CE5'})}
-			if (1 <= props['fire-risk'] < 2) {window.polygon.setStyle({fillColor: '#1551D2'})}
-			if (2 <= props['fire-risk'] < 3) {window.polygon.setStyle({fillColor: '#2A47BF'})}
-			if (3 <= props['fire-risk'] < 4) {window.polygon.setStyle({fillColor: '#3F3DAC'})}
-			if (4 <= props['fire-risk'] < 5) {window.polygon.setStyle({fillColor: '#543399'})}
-			if (5 <= props['fire-risk'] < 6) {window.polygon.setStyle({fillColor: '#6A2886'})}
-			if (6 <= props['fire-risk'] < 7) {window.polygon.setStyle({fillColor: '#7F1E73'})}
-			if (7 <= props['fire-risk'] < 8) {window.polygon.setStyle({fillColor: '#941460'})}
-			if (8 <= props['fire-risk'] < 9) {window.polygon.setStyle({fillColor: '#A90A4D'})}
-			if (9 <= props['fire-risk'] <= 10) {window.polygon.setStyle({fillColor: '#BF003A'})}
+			if (0 <= props['fire-risk'] < 1) {window.rectangle.setStyle({fillColor: '#005CE5'})}
+			if (1 <= props['fire-risk'] < 2) {window.rectangle.setStyle({fillColor: '#1551D2'})}
+			if (2 <= props['fire-risk'] < 3) {window.rectangle.setStyle({fillColor: '#2A47BF'})}
+			if (3 <= props['fire-risk'] < 4) {window.rectangle.setStyle({fillColor: '#3F3DAC'})}
+			if (4 <= props['fire-risk'] < 5) {window.rectangle.setStyle({fillColor: '#543399'})}
+			if (5 <= props['fire-risk'] < 6) {window.rectangle.setStyle({fillColor: '#6A2886'})}
+			if (6 <= props['fire-risk'] < 7) {window.rectangle.setStyle({fillColor: '#7F1E73'})}
+			if (7 <= props['fire-risk'] < 8) {window.rectangle.setStyle({fillColor: '#941460'})}
+			if (8 <= props['fire-risk'] < 9) {window.rectangle.setStyle({fillColor: '#A90A4D'})}
+			if (9 <= props['fire-risk'] <= 10) {window.rectangle.setStyle({fillColor: '#BF003A'})}
 			layer.openPopup()
 		})
 		drawnItems.addLayer(layer);
