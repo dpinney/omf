@@ -8,6 +8,10 @@
 		crossorigin=''></script>
 	<link rel='stylesheet' href='https://unpkg.com/leaflet-draw@1.0.0/dist/leaflet.draw.css' />
 	<script src='https://unpkg.com/leaflet-draw@1.0.0/dist/leaflet.draw.js'></script>
+	<!-- Load Esri Leaflet from CDN -->
+	<script src="https://unpkg.com/esri-leaflet@2.5.0/dist/esri-leaflet.js"
+	    integrity="sha512-ucw7Grpc+iEQZa711gcjgMBnmd9qju1CICsRaryvX7HJklK0pGl/prxKvtHwpgm5ZHdvAil7YPxI1oWPOWK3UQ=="
+	    crossorigin=""></script>
 	<style>html, body {
 		width: 100%;
 		height: 100%;
@@ -68,10 +72,7 @@
 	// drawing layer
 	var drawnItems = L.featureGroup().addTo(map);
 	// base map
-	var base = L.tileLayer(
-		'https://{s}.basemaps.cartocdn.com/light_only_labels/{z}/{x}/{y}{r}.png',
-		{maxZoom: 18, attribution:''}
-	);
+	var base = L.esri.basemapLayer('Streets').addTo(map);
 	// satelite
 	var landsat = L.tileLayer(
 		'https://{s}.tiles.mapbox.com/v4/mapbox.landsat-live/{z}/{x}/{y}.jpg?access_token=pk.eyJ1IjoiZWp0YWxib3QiLCJhIjoiY2ptMHBlOGdjMmZlaTNwb2dwMHE2Mm54NCJ9.xzceVNmAZy49SyFDb3UMaw',
