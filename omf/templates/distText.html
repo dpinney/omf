@@ -1,0 +1,2745 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<style>
+            /* Define global css variables */
+            /* I have to subtract 4px or so from the svgContainer to prevent the scrollbar from appearing. Making the header height less does not appear to change anything. */
+            :root {
+                --header-height: 35px;
+                --header-padding-top: 8px;
+                --header-padding-bottom: 8px;
+            }
+			* { 
+                font-family: Helvetica, Arial, Sans-Serif;
+            }
+			div.divButton {
+				-webkit-touch-callout: none;
+				-webkit-user-select: none;
+				-khtml-user-select: none;
+				-moz-user-select: none;
+				-ms-user-select: none;
+				user-select: none;
+				cursor: pointer;
+				cursor: hand;
+				position:fixed;
+				width:30px;
+				height:30px;
+				text-align:center;
+				font-size:30px;
+				line-height:30px;
+				color:white;
+                background-color: dimgrey;
+                left: 5px;
+			}
+            #scaleButton {
+                top: 175px;
+            }
+			body {
+                /*width: 100%;
+                height: 100%;*/
+                margin:0px;
+            }
+			a {
+				text-decoration: none;
+                color: mediumseagreen;
+                /*color: black;*/
+			}
+            /*a:visited {
+                color: seagreen;
+            }*/
+
+            /* rawText */
+
+            #interfaceContainer {
+                position: relative;
+            }
+
+            /* This is the element that acts as a hook for svg-pan-zoom.js to attach a viewport, which it creates itself */
+            /* overflow: hidden is set by svg-pan-zoom.js itself. No need to change that here. */
+			#rawTextContainer {
+                /* width must be 100%, meaning 100% of the document */
+				margin: 20px;
+                width: calc(100% - 46px); 
+                /* height must be manually set to a hard value */
+				/*height: calc(100vh - var(--header-height) - var(--header-padding-bottom) - var(--header-padding-top));*/
+				height: calc(100vh - var(--header-height) - var(--header-padding-bottom) - var(--header-padding-top) - 50px);
+			}
+			#saveButton {
+				float:right;
+			}
+
+            div#loadingMessage {
+                width: 100%;
+                height: 100%;
+				/*background-color: rgba(0,0,0,0.4); */
+                background-color: white;
+                position: fixed;
+                top: 0px;
+            }
+
+            /**************************************************
+            // Header and menu links
+            **************************************************/
+
+			#header {
+				width:100%;
+				height: var(--header-height);
+				padding-top: var(--header-padding-top);
+				padding-bottom: var(--header-padding-bottom);
+				background:black;
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+			}
+            #menuLeft h4 {
+                margin: 0px 0px 4px 20px;
+            }
+            #menuLeft p {
+                margin: 0px 0px 0px 20px;
+            }
+            #menuRight { 
+              display:flex;
+                      align-items: center;
+            }
+            .white {
+                color: #F8F8F8;
+            }
+            .menuHeading {
+                margin: 0px;
+                padding: 5px;
+                border-radius: 5px 5px 0px 0px;
+            }
+            .expandedHeading {
+                color: black;
+                background: #F8F8F8;
+            }
+            .headerGroup {
+                position: relative; /* set to relative in order to correctly align the ul.menu */
+                margin-right: 15px;
+                cursor: pointer;
+            }
+            ul.menu {
+                list-style: none; /* remove bullet points from menu */
+                margin: 0px;
+                padding: 0px;
+                position: absolute; /* remove the menu from the document flow */
+                background-color: #F8F8F8;
+                right: 0px; /* align the menu to the left */
+                box-shadow: 0 11px 10px rgba(0, 0, 0, 0.2); /* add shadow to the menu */
+                border-radius: 5px 0 0 0; /* round the top left corner of the menu */
+                max-height: 550px; /* Limit the length of the component list */
+                overflow: auto;
+                white-space: nowrap;
+            }
+            ul.menu li { 
+                padding: 4px; 
+            }
+            ul.menu li:hover {
+                background:green; color:white; 
+            }
+
+            /**************************************************
+            // Modal Dialogs
+            **************************************************/
+
+            #componentTable {
+                max-height: 65vh;
+                overflow: auto;
+                min-width: 450px;
+            }
+            #progressModalCancel {
+                background-color: crimson;
+            }
+            #progressModal {
+                z-index: 1;
+            }
+            #massAddModal .modalContent {
+                width: 400px;
+            }
+            #climateModal label {
+                white-space: nowrap;
+            }
+            #anonymizeModal {
+                white-space: nowrap;
+            }
+			.modal {
+                position: fixed;
+                top: 0px;
+                width: 100%;
+                height: 100%;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+				background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
+			}
+	 		.modalContent {
+                padding: 20px;
+                border-radius: 10px;
+				background-color: #fefefe;
+                /*max-height: 80vh;*/
+                /*overflow: auto;*/
+                overflow: hidden;
+                max-width: 80vw;
+
+			}
+            .progressModalMessages {
+                padding: 20px;
+            }
+            .modalContentButtons {
+                padding: 50px 0px 0px 0px;
+                text-align: center;
+            }
+            #fileListFlex {
+                display: flex;
+                min-width: 50vw;
+            }
+            #fileListFlex h3 {
+                text-align: center;
+            }
+            #fileListFlex div {
+                width: 50%;
+            }
+            .right {
+                float: right;
+            }
+            .centered {
+                text-align: center;
+            }
+            .modalHeading {
+                text-align: center;
+            }
+            .modalInput {
+                font-size: medium;
+                border: 0px;
+                background-color: gainsboro;
+                width: 100%;
+            }
+            .modalInputLine {
+                font-size: medium;
+                border: 0px;
+                background-color: gainsboro;
+            }
+            .vertFlex {
+                display: flex;
+                flex-direction: column;
+            }
+            .legendFlex {
+                display: flex;
+                height: 40vh;
+            }
+            .legendGradiant {
+                height: 100%;
+                width: 5vw;
+            }
+            .legendAxis {
+                height: 100%;
+                margin: 0px 0px 0px 20px;
+                justify-content: space-between;
+            }
+            .legendAxis p {
+                margin: 0px;
+            }
+            .modalTableHeader {
+                margin: 20px 0px 0px 0px;
+            }
+            .modalButton {
+                font-size: medium;
+                background-color: seagreen;
+                -webkit-border-radius: 5px;
+                -moz-border-radius: 5px;
+                border-radius: 5px;
+                border: none;
+                color: white;
+                cursor: pointer;
+                padding: 4px 6px 4px;
+            }
+            .leftText {
+                text-align: left;
+            }
+            .modalTableRow {
+                width: 50%;
+            }
+            .scrollableList {
+                overflow: auto;
+                max-height: 70vh;
+                list-style-type: none;
+                margin: 0px;
+                padding: 0px 20px 0px 20px;
+                cursor: pointer;
+            }
+            .fileItem {
+                padding: 5px 0px 5px 0px;
+                margin: 10px 0px 10px 0px;
+            }
+            .fileItem:hover {
+                color: white;
+                background-color: green;
+            }
+            .buttonRow button {
+                margin-right: 5px;
+            }
+            .tableInput {
+                font-size: small;
+                background-color: gainsboro;
+                padding: 3px;
+                border: 0px;
+            }
+            .deleteButton {
+                background-color: #CC0000;
+                /*padding: 1px 7px 1px 7px;*/
+            }
+            /* TODO: might need to delete this rule */
+            .editButton {
+                font-size: small;
+                /*width: 100%;*/
+            }
+
+			/* dataTable */
+
+            .floatingTables {
+                position: absolute;
+                top: 0px;
+                height: 0px;
+            }
+
+            #descriptionTables { }
+
+            #selectionTable { }
+
+            .formContainer {
+				/*position: fixed;*/
+				/*top: 55px;*/
+                height:0px;
+				/*right: 5px;*/
+            }
+
+            /* Don't set overflow-y to hidden */
+			.dataTable {
+                position: fixed;
+				top: 55px;
+				border:1px solid black;
+				border-collapse: collapse;
+                display: inline-block;
+                overflow-x: hidden;
+				max-height: 90vh;
+                right: 10px;
+			}
+            .dataTable tr {
+                border-bottom: 1px solid black;
+            }
+            .dataTable tr:last-child {
+                border: 0px;
+            }
+            .tableTitle {
+                background-color: black;
+                color: white;
+            }
+			tbody {
+                border-collapse: collapse;
+			}
+			td {
+				background:white;
+				border-collapse: collapse;
+			}
+            .verticalPadded {
+				padding: 5px 0px 5px 0px;
+            }
+            .fullPadded {
+				padding: 5px;
+            }
+            #componentList {
+                min-width:250px;
+            } /* Hack to prevent horizontal scrolling. */
+
+            /* SVG Styling */
+
+            line { stroke: rgb(0,0,0); } /* black */
+            line.parentChild { stroke: rgb(211,211,211); } /* LightGray */
+            circle {
+                stroke: rgb(255,255,255); /* white */
+                fill: rgb(128,128,128); /* gray */
+            }
+            .house { fill: rgb(0,0,255); } /* blue */
+            .triplex_meter { fill:rgb(255,165,0); } /* orange */
+            .underground_line { stroke: rgb(128,128,128);} 
+            .transformer { stroke:rgb(255,165,0); }
+            .regulator { stroke: rgb(255,0,0) ;} /* red */
+            .undefined,.regulator_configuration,.transformer_configuration,.triplex_line_configuration,.line_configuration,.volt_var_control,.line_spacing,.climate,.overhead_line_conductor,.underground_line_conductor,.triplex_line_conductor,.player,.schedule { fill: rgb(191,191,191); } /* 75% lightness gray */
+        </style>
+        <link rel="stylesheet" href="/static/jquery-ui.min.css">
+        <script type="text/javascript" src="/static/jquery.js"></script>
+        <script type="text/javascript" src="/static/jquery-ui.min.js"></script>
+        <script type="text/javascript" src="/static/svg-pan-zoom.js"></script>
+        <script type="text/javascript" src="/static/chroma.min.js"></script>
+        <script type="text/javascript" src="/static/papaparse.min.js"></script>
+        <link rel="shortcut icon" href="/static/favicon.ico"/>
+		{% if jasmine %}{{ jasmine | safe }}{% endif %}
+		<!-- <script id='fileLoadScript' type='text/javascript' src='./Data for Testing/testFeeder.js'></script> -->
+		<!-- <script id='fileLoadScript' type='text/javascript' src='./Data for Testing/testFeeder Largest.js'></script> -->
+		<!-- <script id='fileLoadScript' type='text/javascript' src='./Data for Testing/testFeeder Norfork.js'></script> -->
+	</head>
+    <body>
+        <div id="interfaceContainer">
+            <div id="loadingMessage" style="display: none">
+                <p style="font-size:60pt; text-align:center; width:100%;">File Loading...</p>
+            </div>
+            <div id="descriptionTables" class="floatingTables"></div>
+            <div id="selectionTable" class="floatingTables"></div>
+            <div id="header">
+                <div id="menuLeft" class="white">
+                    <h4>{{thisFileName}}</h4>
+                    <p>from "{{thisModelName}}"</p>
+                </div>
+                <div id="menuRight">
+                    <h4 style="padding: 5px; margin-right: 15px;"><a id="helpButton" class="white" href="https://github.com/dpinney/omf/wiki/Tools-~-gridEdit" target="_blank">Help</a></h4>
+                    <div class="headerGroup">
+                        <h4 class="menuHeading white">File &#x25BE</h4>
+                        <ul id="fileMenu" class="menu" style="display: none">
+                            {% if showFileMenu %}
+                            <li data-web="save">Save</li>
+                            <!-- <li data-web="rename">Rename</li> -->
+                            <li data-web="load">Load from file...</li>
+                            <!-- <li data-web="new">New blank circuit file...</li> -->
+                            {% endif %}
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <!-- rawText container -->
+            <div id="rawTextContainerWrapper" style="height: auto;">
+                <textarea id="rawTextContainer" name="rawText">{{thisFileData}}</textarea>
+            </div>
+            <!-- Modals -->
+            {% if showFileMenu %}
+            <div id="loadModal" class="modal" style="display: none">
+                <div class="modalContent">
+                    <div id="fileListFlex">
+                        <div>
+                            <h3>Public Circuit Files</h3>
+                            <ul id="publicFileList" class="scrollableList"></ul>
+                        </div>
+                        <div>
+                            <h3>My Circuit Files</h3>
+                            <ul id="userFileList" class="scrollableList"></ul>
+                        </div>
+                    </div>
+                    <div id="fileUpload"></div>
+                    <div class="modalContentButtons">
+                        <button data-buttonfunction="toggle">Close</button>
+                    </div>
+                </div>
+            </div>
+            <!-- <div id="blankFileModal" class="modal" style="display: none">
+                <div class="modalContent"> -->
+                    <!--{{thisOwner}} is correct because this form is supposed to replace THIS file with a new blank one-->
+                   <!--  <form onsubmit="submitForm({formId:'blankFileForm'}); return false;" action="/newBlankFile/{{thisOwner}}" id="blankFileForm">
+                        <input type="hidden" name="_csrf_token" value="{{csrf_token()}}"/>
+                        <input type="hidden" id="fileNum" name="fileNum" value="{{thisFeederNum}}"/>
+                        <input type="hidden" id="modelName" name="modelName" value="{{thisModelName}}"/>
+                        <input type="hidden" name="referrer" value="distribution"/>
+                        <table>
+                            <tbody>
+                                <tr><th colspan="2">New Blank File</th></tr>
+                                <tr>
+                                    <td><label for="blankFileInput">Name</label></td>
+                                    <td> -->
+                                        <!-- TODO: add better validation than just the "required" attribute-->
+                                       <!--  <input type="text" required id="blankFileInput" name="fileNameNew" class="modalInput"/>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                        <div class="modalContentButtons">
+                            <button type="button" data-buttonfunction="toggle">Close</button>
+                            <button type="submit">Create</button>
+                        </div>
+                    </form>
+                </div>
+            </div> -->
+            {% endif %}
+            <!--Modals-->
+        </div>
+	</body>
+</html>
+<script id="fileInsert">let gReadFile = {% if thisFileData %}{{ thisFileData | safe }}{% else %}null{% endif %}; 
+</script>
+<style id="jqueryCssInsert">
+</style>
+<script id="jqueryInsert">
+</script>
+<script id="jqueryUiInsert">
+</script>
+<script id="panZoomInsert">
+</script>
+<script id="chromaInsert">
+</script>
+<script id="papaParseInsert">
+</script>
+<script type="text/javascript">
+    /**
+     * Need to do browser detection in a separate script because IE won't do anything inside of a <script><\/script> if there are syntax errors. If
+     * the user agent contains "Trident" or "MSIE", it is very likely that the browser is Internet Explorer. Warn the user to switch browsers if they
+     * are using internet explorer.
+     */
+    function couldBeInternetExplorer() {
+        var keys = ["trident", "msie"],
+            idx = keys.length - 1,
+            userAgent = navigator.userAgent.toLowerCase();
+        for (idx; idx > -1 && userAgent.indexOf(keys[idx]) === -1; idx--);
+        return idx === -1 ? false : true;
+    }
+    if (couldBeInternetExplorer()) {
+        alert("This interface is not supported in any version of Internet Explorer. Please switch to a supported browser, such as an updated version of Firefox or Chrome.")
+    }
+</script>
+<script type="text/javascript">
+//**************************************************
+// global variables
+//**************************************************
+
+"use strict";
+let gThisFileName = "{% if thisFileName %}{{ thisFileName | safe }}{% else %}null{% endif %}";
+const gThisFileNum = {% if thisFileNum %}{{ thisFileNum | safe }}{% else %}null{% endif %}; 
+let gThisModelName = "{% if thisModelName %}{{ thisModelName | safe }}{% else %}null{% endif %}"; 
+const gThisOwner = "{% if thisOwner %}{{ thisOwner | safe }}{% else %}null{% endif %}"; 
+const gCurrentUser = "{% if currentUser %}{{ currentUser | safe }}{% else %}null{% endif %}"
+const gPublicFiles = {% if publicFiles %}{{ publicFiles | safe }}{% else %}null{% endif %};
+const gUserFiles = {% if userFiles %}{{ userFiles | safe }}{% else %}null{% endif %}; 
+const gWriteFile = deepCopy(gReadFile);
+let gTree; // A wrapper around the gWriteFile.tree data structure. Has methods for accessing and modifying the data.
+let gComponentManager; // A wrapper around all component.json objects.
+let gSelection;
+let gViewport; 
+let gOpacityManager;
+let gAddManager;
+let gMinLon; // The minimum longitude found among all the gWriteFile.tree objects. Used to transform and flip how the graph is drawn.
+let gMaxLat; // The maximum latitude found among all the gWriteFile.tree objects. Used to transform and flip how the graph is drawn.
+let gDrawScaleFactor; // A number that scales all graph data to fit within a 1000 x 1000 viewport size so the graph draws nicely.
+let gDownX;
+let gDownY;
+const gViridisColors = ["#440154FF", "#481567FF", "#482677FF", "#453781FF", "#404788FF", "#39568CFF", "#33638DFF", "#2D708EFF", "#287D8EFF", "#238A8DFF", "#1F968BFF", "#20A387FF", "#29AF7FFF", "#3CBB75FF", "#55C667FF", "#73D055FF", "#95D840FF", "#B8DE29FF", "#DCE319FF", "#FDE725FF"];
+let gScaleLevel = 1.0; // Scale that all SVG objects are drawn at
+
+//**************************************************
+// Selection Interface
+//**************************************************
+
+const selectionPrototype = {
+
+    /* Public methods */
+
+    hasId(id) {
+        if (this.selectedElements.find(e => e.id === id) != null) return true;
+        return false;
+    },
+    remove(element) {
+        const elements = this.selectedElements.filter(e => e.id === element.id);
+        if (elements.length === 0) throw new Error(`Remove operation failed. The element "${element.tagName}" does not exist in this selection.`);
+        elements.forEach(e => {
+            e.classList.remove("selected");
+            Array.from(e.children).forEach(child => {
+                e.removeChild(child);
+            })
+            this.selectedElements.splice(this.selectedElements.indexOf(e), 1);
+        });
+    },
+    add(element) {
+        if (this.selectedElements.includes(element)) {
+            throw new Error("Add operation failed. The element argument already exists in this selection.");
+        } else if (element.classList.contains("selected")) {
+            throw new Error("Add operation failed. The element argument already has the 'selected' class.");
+        }
+        element.classList.add("selected");
+        this.addAnimation(element);
+        this.selectedElements.push(element);
+    },
+    empty() {
+        this.selectedElements.forEach(e => {
+            e.classList.remove("selected");
+            Array.from(e.children).forEach(child => {
+                e.removeChild(child);
+            });
+        });
+        this.selectedElements = [];
+    },
+    getKeys() {
+        return this.selectedElements.map(element => {
+            return element.id;
+        });
+    },
+
+    /* Private methods */
+
+    /** 
+     * An <animate> element points to exactly one other element. If there is no 'href' attribute, then the element is the direct parent of the <animate> element. I cannot apply a single <animate> element to multiple elements.
+     * @param {HTMLElement} e
+     */
+    addAnimation(e) {
+        e.innerHTML = `<animate id="anim1${e.id}" attributeName="stroke" values="#FFFFFF;#00FF00;#FFFFFF" dur="0.6s" repeatCount="indefinite"/>`;
+    },
+}
+
+function createSelection() {
+    const obj = Object.create(selectionPrototype);
+    obj.selectedElements = [];
+    return obj;
+}
+
+function saveSvg() {
+	// Create an SVG that can be saved.
+	alert("We are redirecting you to a static version of the SVG that you can save as a .svg file.")
+	var svg = document.getElementById("svgContainer").outerHTML
+	var win = window.open()
+	win.document.write(svg)
+}
+
+function downloadTextFile() {
+	// WARNING! Performance is very bad because the JSON is enormous! This can hang your browser!
+	alert("We are opening a window with JSON in it that you can save as a .json file.")
+	var modJson = JSON.stringify(gWriteFile);
+	var win = window.open();
+	win.document.write(modJson);
+}
+
+/**
+ * TODO: add unit tests
+ * Get dimensions with: panZoom.getSizes()
+ * scale of .0000004 displays real lat/lon fairly well
+ */
+function createViewport(tree, svgContainer) {
+    const keys = Object.keys(tree);
+    const firstKey = keys.find(key => tree[key].longitude != null && tree[key].latitude != null);
+    if (firstKey == null) {
+        // There were no coordinates, so insert some!
+        const objects = Object.values(tree);
+        insertCoordinates(objects, 0, 0, 50);
+        scaleGraphForVisualAppearance(keys.length)
+    }
+    const minMax = getMinMax({objectContainer: tree, properties: ["longitude", "latitude"]});
+    let {latitude: {min: minLat}} = minMax;
+    let {latitude: {max: maxLat}} = minMax;
+    let {longitude: {min: minLon}} = minMax;
+    let {longitude: {max: maxLon}} = minMax;
+    /* Longitude is not reversed, so I want the minimum longitude to use as the offset. Latitude IS reversed, so I want the maximum latitude to use as the offset. */
+    const longitudeRange = maxLon - minLon;
+    const latitudeRange = maxLat - minLat;
+    gMinLon = minLon;
+    gMaxLat = maxLat;
+    /* Multiply by the gDrawScaleFactor when drawing. Divide by the gDrawScaleFactor when storing. 
+    We use the larger of the range values to set the gDrawScaleFactor to make the graph fit in the viewport initially.
+    */
+    if (longitudeRange > latitudeRange) {
+        gDrawScaleFactor = 1000/longitudeRange;
+    } else {
+        gDrawScaleFactor = 1000/latitudeRange;
+    }
+    /*
+    Special case: minimum and maximum longitude and latitude are all the same (e.g. 0)! gDrawScale factor won't space things further apart, it just
+    makes various scales fit in the viewport
+    */
+    if (gDrawScaleFactor === Infinity) {
+        gDrawScaleFactor = 1;
+    }
+    svgContainer.setAttribute("viewBox",`0 0 ${1000} ${1000}`);
+    /* Uncomment below to make gScaleFactor go away */
+    //gDrawScaleFactor = 1;
+    //svgContainer.setAttribute("viewBox",`0 0 ${longitudeRange} ${latitudeRange}`);
+    /* Uncomment above to make gScaleFactor go away */
+	window.panZoom = svgPanZoom("#svgContainer", {
+        /* Override the default values set by "optionsDefaults" in svg-pan-zoom.js */
+        dblClickZoomEnabled: false,
+        zoomScaleSensitivity: 0.2,
+        minZoom: 0.01,
+		maxZoom: 800
+    });
+}
+
+//**************************************************
+// Click event functions
+//**************************************************
+
+/**
+ * TODO: add unit tests, this should only handle selection objects. creating tables is a special listener attached to svgContainer,
+ * not svgContainerWrapper
+ * Listener on the SVG object that handles user clicks.
+ */
+function handleSelection(event) {
+    if (detectDrag(event)) return;
+    const element = event.target;
+    if (event.altKey && (element.tagName === "circle" || element.tagName === "line") && !element.classList.contains("parentChild")) {
+        if (gSelection.hasId(element.id)) {
+            gSelection.remove(element);
+            //Copied from rowPrototype.delete(). Refactor needed
+            const table = document.getElementById(`descriptionTable_${element.id}`);
+            if (table != null) {
+                document.getElementById("descriptionTables").removeChild(table);
+            }
+        } else {
+            gSelection.add(element);
+        }
+        rebuildSelectionTable();
+    } else if (!event.altKey) {
+        gSelection.empty();
+        destroyTables(["descriptionTables", "selectionTable"]);
+        //destroyTables(["selectionTable"]);
+        if ((element.tagName === "circle" || element.tagName === "line") && !element.classList.contains("parentChild")) {
+            gSelection.add(element);
+            const table = createDescriptionTable(element.id);
+            table.id = `descriptionTable_${element.id}`;
+            document.getElementById("descriptionTables").appendChild(table);
+        } 
+    }
+}
+
+
+//**************************************************
+// Header menu functions
+//**************************************************
+
+
+
+
+//**************************************************
+// Handler functions
+//**************************************************
+
+function attachHandlers() {
+    addMouseHandlers();
+    addKeyHandlers(); // PosiblyDelete
+    Array.from(document.querySelectorAll("div.headerGroup")).forEach(h => {
+        h.addEventListener("click", toggleHeader);
+    });
+    const isStatic = interfaceIsStatic();
+    addModelViewerHandlers(isStatic);
+    {% if showFileMenu %}
+    addModelOwnerHandlers(isStatic);
+    {% endif %}
+    makeModalsDraggable();
+}
+
+
+function toggleHeader() {
+    const heading = this.querySelector(".menuHeading");
+    if (heading.classList.contains("expandedHeading")) {
+        // Close this header if it was open
+        closeHeader.call(this);
+    } else {
+        // Open this header and close all other headers
+        expandHeader.call(this);
+        const that = this;
+        Array.from(document.querySelectorAll("div.headerGroup")).forEach(div => {
+            if (div !== that) {
+                closeHeader.call(div);
+            }
+        });
+    }
+}
+
+function expandHeader() {
+    const heading = this.querySelector(".menuHeading");
+    const headingName = heading.textContent.split(" ")[0];
+    if (!heading.classList.contains("expandedHeading")) {
+        heading.classList.add("expandedHeading");
+        heading.innerHTML = headingName + " &#x25B4;";
+        this.querySelector("ul").removeAttribute("style");
+    }
+}
+
+function closeHeader() {
+    const heading = this.querySelector(".menuHeading");
+    const headingName = heading.textContent.split(" ")[0];
+    if (heading.classList.contains("expandedHeading")) {
+        heading.classList.remove("expandedHeading");
+        heading.innerHTML = headingName + " &#x25BE;";
+        this.querySelector("ul").style.display = "none";
+    }
+}
+
+/** 
+ * Fill a list with files that the user can load into this file
+ * @param {Element} ul - An html element where the list will be attached.
+ * @param {Array} files - An array of objects, where each object has properties "model" and "name", or null. 
+ * @param {string} owner - Either "public" or the current user.
+ */
+function fillFileList(ul, files, owner, thisModelName, thisFileName) {
+    if (files == null) return; // sometimes the user has no files
+    if (ul == null) return; // there is no ul if we don't show the file menu
+    const sortedNames = [...new Set(files.map(file => file.name.toLowerCase()))].sort();
+    sortedNames.forEach(name => {
+        const file_ary = files.filter(f => f.name.toLowerCase() === name);
+        file_ary.forEach(f => {
+            if (f.model !== thisModelName || f.name !== thisFileName) {
+                const li = document.createElement("li");
+                li.classList.add("fileItem");
+                li.innerHTML = `<strong>${f.name}</strong> from <br>"${f.model}"`;
+                li.addEventListener("click", function() {
+                    // What is the file.model for a public file? It's "publicFiles". Do files not have their own owner property? No they
+                    // don't. That's why I have a separate owner variable 
+                    loadFeeder(f.name, f.model, owner);
+                });
+                ul.append(li);
+            }
+        });
+    });
+}
+
+/**
+ * These features should be enabled for every user who views this model, whether they are an owner or not.
+ * @param {boolean} interfaceIsStatic - true if this interface was rendered outside of a web server context.
+ */
+function addModelViewerHandlers(interfaceIsStatic=true) {
+    const fileMenu = document.getElementById("fileMenu");
+    const fileMenuNodes = Array.from(fileMenu.querySelectorAll("li"));
+}
+
+{% if showFileMenu %}
+/**
+ * These features should only be enabled for the owner of a model.
+ * @param {boolean} interfaceIsStatic - true if this interface was rendered outside of a web server context.
+ */
+function addModelOwnerHandlers(interfaceIsStatic=true) {
+    const fileMenu = document.getElementById("fileMenu");
+    if (!interfaceIsStatic) {
+        // Add handlers to file menu
+        fileMenu.querySelector("li[data-web='save']").addEventListener("click", () => saveFile(gWriteFile));
+        // fileMenu.querySelector("li[data-web='rename']").addEventListener("click", getNewFeederName);
+        fileMenu.querySelector("li[data-web='load']").addEventListener("click", () => toggleDisplay(document.getElementById("loadModal")));
+        // fileMenu.querySelector("li[data-web='new']").addEventListener("click", () => toggleDisplay(document.getElementById("blankFileModal")));
+        // Fill file lists
+        // fillFileList(document.getElementById("publicFileList"), gPublicFiles, "public", gThisModelName, gThisFileName);
+        // fillFileList(document.getElementById("userFileList"), gUserFiles, gCurrentUser, gThisModelName, gThisFileName);
+    }
+}
+{% endif %}
+
+function addMouseHandlers() {
+    const rawTextContainerWrapper = document.getElementById("rawTextContainerWrapper");
+    rawTextContainerWrapper.addEventListener("click", function() {
+        Array.from(document.querySelectorAll("div.headerGroup")).forEach(div => {
+            closeHeader.call(div);
+        });
+    });
+}
+
+function addKeyHandlers() {
+    // document.body.addEventListener("keydown", function(event) {
+    //     if (event.target.tagName.toLowerCase() !== "input") {
+    //         switch (event.key) {
+    //             case "m":
+    //                 destroyTables(["descriptionTables"]);
+    //                 attachMoveListener(gSelection.getKeys());
+    //                 break;
+    //             case "-":
+    //                 panZoom.zoomOut();
+    //                 break;
+    //             case "=":
+    //                 panZoom.zoomIn();
+    //                 break;
+    //             case "Escape":
+    //                 const svgContainer = document.getElementById("svgContainer");
+    //                 if (svgContainer.onclick != null) {
+    //                     alert("Operation cancelled");
+    //                     detachListener();
+    //                 }
+    //                 break;
+    //         }
+    //     }
+    // });
+}
+
+/** 
+ * TODO: add unit tests If an element isn't displayed, set it's inline display value to the default browser value. If the element is displayed, then
+ * hide it.
+ * @param {HTMLElement} element
+ */
+function toggleDisplay(element) {
+    if (element.style.display === "none") {
+        element.removeAttribute("style");
+    } else {
+        element.style.display = "none";
+        if (element.id === "findModal") return;
+        // When we hide a modal (except the findModal), set any of the text fields to empty.
+        Array.from(element.querySelectorAll("input[type='text']")).forEach(input => input.value = "");
+    }
+}
+
+function makeModalsDraggable() {
+    $("#loadModal .modalContent").draggable();
+    // $("#blankFileModal .modalContent").draggable();
+    // Position the description table depending on whether or not it is draggable
+    //document.getElementById("descriptionTable").removeAttribute("style");
+    //document.getElementById("descriptionTable").style.left = "70vw";
+}
+
+function detachListener() {
+    const element = document.getElementById("svgContainer");
+    element.setAttribute("style", "cursor: default");
+    element.onclick = null;
+}
+
+// Ignore drags, those should be handled by svg-panzoom.
+function detectDrag(event) {
+    return (gDownX !== event.clientX || gDownY !== event.clientY) ? true : false;
+}
+
+{% if showFileMenu %}
+
+//**************************************************
+// File menu interface
+//**************************************************
+
+/** 
+ * Used to save the new changes or undo an operation by resaving the old changes.
+ */
+function saveFile(file) {
+    const formData = new FormData();
+    formData.set("fileContents", file);
+    const postRequest = $.ajax({
+        type: "POST",
+        url: `/saveFile/${gThisOwner}/${gThisModelName}/${gThisFileName}/${gThisFileNum}`,
+        data: formData,
+        processData: false,
+        contentType: false,
+    });
+    const modal = createProgressModal();
+    if (file === gReadFile) {
+        modal.clearAndAddMessage('Re-saving the data from your most recent save...');
+        postRequest.done(function() {
+            modal.clearAndAddMessage('Success. Your data was restored to the most recent save.');
+            modal.finish();
+        }).fail(function() {
+            modal.clearAndAddMessage('The server raised an internal exception during the save operation.');
+            modal.finish();
+        });
+    } else if (file === gWriteFile) {
+        modal.clearAndAddMessage('Saving changes to your file...');
+        postRequest.done(function() {
+            modal.hide();
+            gReadFile = deepCopy(gWriteFile);
+        }).fail(function() {
+            modal.clearAndAddMessage('The server raised an internal exception during the save operation.');
+            modal.finish();
+        });
+    }
+}
+
+/**
+ * serverFileName: The name of the file I want to load, e.g. "ABEC Columbia"
+ * serverModelName: Either "publicFiles" or something like "Simple Market System Indy Solar"
+ * 
+ * @param {string} owner - either "public" or the current user.
+ */
+async function loadFeeder(serverFileName, serverModelName, owner) {
+    let cancelled = false;
+    const modal = createProgressModal(() => {
+        cancelled = true;
+        saveFile(gReadFile);
+    });
+    if (fileNeedsSave()) {
+        modal.clearAndAddMessage('You have unsaved changes. Please save this file before loading a new file.');
+        modal.hideCancelButton();
+        modal.finish();
+        return;
+    }
+    let submitForm = false;
+    await $.ajax({ // I need to check if a user's file still exists.
+        url: `/uniqObjName/circuitFile/${owner}/${serverFileName}/${serverModelName}`// good
+    }).done(function(data) {
+        if (data.exists) { 
+            submitForm = true;
+        } else {
+            modal.clearAndAddMessage('This file no longer exists. Please refresh the page, or select another file.');
+            modal.hideCancelButton();
+            modal.finish();
+        }
+    }).fail(function() {
+        modal.clearAndAddMessage('The AJAX request failed to get a successful response from the server.');
+        modal.hideCancelButton();
+        modal.finish();
+    });
+    if (submitForm === false) return;
+    modal.clearAndAddMessage('Loading file from the server...');
+    let formData = new FormData();
+    formData.set('referrer', 'distribution');
+    $.ajax({
+        type: "POST",
+        // {owner} is correct. {owner} is either "public" to load from public files or <current user> to load from the users files. {gThisOwner}
+        // is correct because I am overwriting THIS file file, which is either publicly owned or owned by the current user. {gThisOwner} cannot be
+        // {gCurrentUser} because then I can't overwrite public files as the admin.
+        url: `/loadFeeder/${serverFileName}/${serverModelName}/${gThisModelName}/${gThisFileNum}/${owner}/${gThisOwner}`,
+        data: formData,
+        processData: false,
+        contentType: false,
+    }).done(function() {
+        if (!cancelled) { // This is to prevent this modal from overwriting the active save modal
+            modal.clearAndAddMessage('Success. This file has been overwritten with the selected file.');
+            modal.cancelButton.textContent = 'Undo';
+            modal.finishButton.onclick = () => {
+                modal.hide();
+                reloadWrapper();
+            }
+            modal.finish();
+        }
+    }).fail(function() {
+        if (!cancelled) {
+            modal.clearAndAddMessage('The server raised an internal exception while loading the file.');
+            modal.hideCancelButton();
+            modal.finish();
+        }
+    });
+}
+
+/** 
+ * Submit a from to do one of the following:
+ * 1) Import a Milsoft, GridLAB-D, or CYME file into this .omd file.
+ * 2) Load a new blank file into this .omd file
+ * 3) Modify this .omd file with SCADA calibration
+ * 4) Modify this .omd file with AMI 
+ * 5) Modify this .omd file with climate
+ * 6) Modify this .omd file with anonymization
+ */
+async function submitForm({formId, pollUrl, inputId}) {
+    let cancelled = false;
+    const modal = createProgressModal(() => {
+        cancelled = true;
+        // In cases where the initial operation changed the name of the .omd file on the server, we must rename the .omd file to its previous name
+        // in order to completely undo the operation. These operations don't change the .omd name: climate, anonymize, scada, ami
+        // if (['blankFileForm', 'milsoftForm', 'gridlabdForm', 'cymeForm'].includes(formId)) {
+        //     let oldServerName;
+        //     if (formId === 'blankFileForm') {
+        //         oldServerName = document.getElementById('blankFileInput').value;
+        //     } else if (formId === 'milsoftForm') {
+        //         oldServerName = document.getElementById('milsoftInput').value;
+        //     } else if (formId === 'gridlabdForm') {
+        //         oldServerName = document.getElementById('gridlabdInput').value;
+        //     } else if (formId === 'cymeForm') {
+        //         oldServerName = document.getElementById('cymeInput').value;
+        //     }
+        //     renameFeeder(oldServerName, gThisFileName, false);
+        // }
+        saveFile(gReadFile);
+    });
+    if (fileNeedsSave()) {
+        modal.clearAndAddMessage('You have unsaved changes. Please save your file before modifying it.');
+        modal.hideCancelButton();
+        modal.finish();
+        return;
+    }
+    let submitForm = true;
+    if (inputId !== undefined) { // inputId was defined, therefore we need to check the file name on the server before submitting the form
+        submitForm = false;
+        const fileName = document.getElementById(inputId).value;
+        await $.ajax({ // Check if the file exists, using the user-provided fileName
+            url: `/uniqObjName/circuitFile/${gThisOwner}/${fileName}/${gThisModelName}` // good
+        }).done(function(data) {
+            if (data.exists === true) {
+                modal.clearAndAddMessage(`You already have a file named "${fileName}". Please choose a different name.`);
+                modal.hideCancelButton();
+                modal.finish();
+            } else {
+                submitForm = true; // The file does not exist. Submit the form.
+            }
+        }).fail(function() {
+            modal.clearAndAddMessage('The AJAX request failed to get a successful response from the server');
+            modal.hideCancelButton();
+            modal.finish();
+        });
+    }
+    if (submitForm === false) return;
+    modal.clearAndAddMessage('Submitting your file...');
+    const form = document.getElementById(formId);
+    const formData = new FormData(form);
+    if (formId === 'milsoftForm') {
+        const stdFileSize = formData.get('stdFile').size;
+        let conversionTime = Math.round(0.8860308267 * Math.E ** (0.000000460300437 * stdFileSize));
+        if (conversionTime === 0) {
+            modal.addMessage('Estimated conversion duration: < 1 minute');
+        } else if (conversionTime === 1) {
+            modal.addMessage('Estimated conversion duration: 1 minute');
+        } else {
+            modal.addMessage(`Estimated conversion duration: ${conversionTime} minutes`);
+        }
+    }
+    const formRequest = $.ajax({
+        type: "POST",
+        url: form.action,
+        data: formData,
+        processData: false,
+        contentType: false,
+    });
+    if (pollUrl === undefined) { // We don't want to poll the server. Just reload the page.
+        formRequest.done(function() {
+            if (!cancelled) {
+                modal.clearAndAddMessage('Success. Your file was loaded into this file.');
+                modal.cancelButton.textContent = 'Undo';
+                modal.finishButton.onclick = () => {
+                    modal.hide();
+                    reloadWrapper();
+                }
+                modal.finish();
+            }
+        }).fail(function() {
+            if (!cancelled) {
+                modal.clearAndAddMessage('The server raised an internal exception during form submission.')
+                modal.hideCancelButton();
+                modal.finish();
+            }
+        });
+    } else {
+        formRequest.done(function(data) {
+            const intervalId = setInterval(function() {
+                $.ajax({
+                    url: pollUrl
+                }).done(function(data) { // Try not to modify this section. The only way this section can be improved is if the server code is improved first
+                    if (cancelled) {
+                        clearInterval(intervalId); // If operation was canceled, stop polling. The cancelFunc() will do the rest.
+                    } else { // data can be a string, or it can be json with an "exists" property
+                        if (data.exists === false) { // processing completed successfully
+                            clearInterval(intervalId);
+                            if (formId == 'anonymizeForm') {
+                                modal.clearAndAddMessage('Success. Your file was anonymized.');
+                            } else if (formId === 'climateForm') {
+                                modal.clearAndAddMessage('Success. Climate data was added.');
+                            } else if (formId === 'scadaForm') {
+                                modal.clearAndAddMessage('Success. SCADA data was added.');
+                            } else if (formId === 'amiForm') {
+                                modal.clearAndAddMessage('Success. AMI data was added.');
+                            } else {
+                                modal.clearAndAddMessage('Success. Your file was loaded into this file.');
+                            }
+                            modal.cancelButton.textContent = 'Undo';
+                            modal.finishButton.onclick = () => {
+                                modal.hide();
+                                reloadWrapper();
+                            }
+                            modal.finish();
+                        } else if (data.exists == null) { // processing ended in error
+                            clearInterval(intervalId);
+                            if (data === 'milError') {
+                                modal.clearAndAddMessage('The .std and .seq files used were incorrectly formatted.');
+                            } else if (data === 'glmError') {
+                                modal.clearAndAddMessage('The .glm file used was incorrectly formatted.');
+                            } else if (data === 'amiError') {
+                                modal.clearAndAddMessage('The AMI file used was incorrectly formatted.');
+                            } else {
+                                if (!data.endsWith('.')) data += '.';
+                                modal.clearAndAddMessage(data);
+                            }
+                            modal.cancelButton.textContent = 'Undo';
+                            modal.hideCancelButton();
+                            modal.finish();
+                        }
+                    }
+                }).fail(function() {
+                    clearInterval(intervalId);
+                    if (!cancelled) {
+                        modal.clearAndAddMessage('The server raised an internal exception during the file operation.')
+                        modal.hideCancelButton();
+                        modal.finish();
+                    }
+                });
+            }, 5000);
+        });
+    }
+}
+
+// async function getNewFeederName() {
+//     const modal = createProgressModal();
+//     if (fileNeedsSave()) {
+//         modal.clearAndAddMessage('You have unsaved changes. Please save the file before renaming.');
+//         modal.finish();
+//         return;
+//     }
+//     let newName = prompt('Rename the file to', `${gThisFileName}`);
+//     while (/\W/.test(newName)) {
+//         newName = prompt('Only letters, digits and underscore are allowed.\nPlease enter a different name', `${gThisFileName}`);
+//     }
+//     if (newName != null) {
+//         await $.ajax({
+//             url: `/uniqObjName/circuitFile/${gThisOwner}/${newName}/${gThisModelName}` // good because of course I am renaming THIS file file
+//         }).done(function(data) {
+//             if (data.exists) {
+//                 modal.clearAndAddMessage(`You already have a file named "${newName}". Please choose a different name.`);
+//                 modal.finish();
+//                 return;
+//             } else {
+//                 renameFeeder(gThisFileName, newName);
+//             }
+//         });
+//     } else {
+//         modal.hide();
+//     }
+// }
+
+/**
+ * The modal shouldn't be shown when the rename operation is being used to undo a newBlankFeeder operation
+ */
+// async function renameFeeder(oldServerName, newName, showModal=true) {
+//     let modal;
+//     if (showModal === true) {
+//         if (newName === gThisFileName) { // We are undoing a previous rename operation
+//             modal = createProgressModal();
+//             modal.clearAndAddMessage('Undoing the previous rename...');
+//         } else { // We are using a new name
+//             modal = createProgressModal(() => {
+//                 renameFeeder(newName, oldServerName);
+//             });
+//             modal.clearAndAddMessage('Renaming this file file...');
+//             modal.finishButton.onclick = () => { // good
+//                 gThisFileName = newName;
+//                 document.getElementById('menuLeft').querySelector('h4').textContent = newName;
+//                 modal.hide();
+//             }
+//         }
+//     }
+//     await $.ajax({
+//         url: `/renameFeeder/${gThisOwner}/${gThisModelName}/${oldServerName}/${newName}/${gThisFileNum}`
+//     }).done(function(data) {
+//         if (showModal === true) {
+//             if (data === 'Failure') {
+//                 modal.clearAndAddMessage('Rename operation failed.');
+//                 modal.hideCancelButton();
+//             } else {
+//                 modal.clearAndAddMessage('Success. This file file was renamed.');
+//             }
+//             modal.finish();
+//         }
+//     }).fail(function() {
+//         modal.clearAndAddMessage('The server raised an internal exception during the rename operation.')
+//         modal.hideCancelButton();
+//         modal.finish();
+//     });
+// }
+
+{% endif %}
+
+function reloadWrapper() {
+    // Force the client to always request new files from the server without using the browser cache. 
+    window.location.reload(true);
+}
+
+const progressModalPrototype = {
+    /**
+     * This function is called to remove the spinner and show the "OK" button
+     * @param {Function} func - An additional function to execute when the "OK" button is clicked
+     */
+    finish(func) {
+        if (func != null) func(); // This line makes it possible to execute ANOTHER function during "modal.finish()", although it isn't used anywhere
+        this.spinner.style.display = 'none';
+        this.finishButton.removeAttribute('style');
+    },
+
+    hide() {
+        this.self.style.display = 'none';
+    },
+
+    _clearMessages() {
+        Array.from(this.messageDiv.children).forEach(element => element.remove());
+    },
+
+    clearAndAddMessage(message) {
+        this._clearMessages();
+        this.addMessage(message);
+    },
+
+    addMessage(message) {
+        const h2 = document.createElement('h2');
+        h2.textContent = message;
+        this.messageDiv.append(h2);
+    },
+
+    hideCancelButton() {
+        this.cancelButton.style.display = 'none';
+    }
+}
+
+/**
+ * @param {Function} cancelFunc - (optional) if provided, this function will execute when the "Cancel" button is clicked on the modal. If not
+ *     provided, the "Cancel" button is never shown to the user
+ */
+function createProgressModal(cancelFunc=null) {
+    const obj = Object.create(progressModalPrototype);
+    obj.self = document.getElementById('progressModal');
+    obj.messageDiv = obj.self.querySelector('div.progressModalMessages');
+    obj._clearMessages();
+    obj.cancelButton = obj.self.querySelector("button[data-buttonfunction='cancel']");
+    obj.cancelButton.textContent = 'Cancel'; // reset the "Cancel" button just in case it was changed
+    obj.finishButton = obj.self.querySelector("button[data-buttonfunction='submit']");
+    obj.finishButton.textContent = 'OK'; // reset the "OK" button just in case it was changed
+    obj.finishButton.style.display = 'none'; // Always hide the "OK" button initially
+    obj.finishButton.onclick = () => { obj.hide(); }
+    if (cancelFunc == null) {
+        obj.cancelButton.style.display = 'none';
+        obj.cancelButton.onclick = null;
+    } else {
+        obj.cancelFunc = cancelFunc;
+        obj.cancelButton.onclick = obj.cancelFunc;
+        obj.cancelButton.removeAttribute('style');
+    }
+    obj.spinner = obj.self.querySelector('img');
+    obj.spinner.removeAttribute('style');
+    obj.self.removeAttribute('style');
+    return obj;
+}
+
+//**************************************************
+// Public utility functions
+//**************************************************
+
+/**
+ * There are 4 relationships of objects: lines, child nodes, independent nodes, and configuration nodes.
+ * The line between a parent and child doesn't exist in the data itself, it's merely shown in the svg
+ * to demonstrate the relationship between two nodes.
+ */
+
+/**
+ * Return true if the string is a valid number, otherwise return false. Thanks stackoverflow.
+ * @param {string}
+ * @return {boolean}
+ */
+function isNumberString(str) {
+    if (typeof str !== "string" || /\s/.test(str)) {
+        //console.error(`Expected "${str}" to be a string without whitespace, but it was not.`);
+        return false;
+    } 
+    if (isNaN(str) || isNaN(parseFloat(str))) {
+        //console.error(`Expected "${str}" to be a string that could be parsed to a number, but it was not.`);
+        return false;
+    }
+    return true;
+}
+
+/** 
+ * Return an object that is a copy of the argument object. JSON.stringify() has many limitations so be careful!.
+ * 
+ * @param {Object} oldObject - the object to copy.
+ * @return {Object} - a copy of the oldObject.
+ */
+ function deepCopy(oldObject) {
+    if (Object.getPrototypeOf(oldObject) !== Object.prototype) {
+        throw new Error("This function cannot be used to copy objects that are not plain JavaScript objects.");
+    }
+    const properties = Object.getOwnPropertyNames(oldObject);
+    const keys = Object.keys(oldObject);
+    for (let key of keys) {
+        if (typeof(oldObject[key]) === "function") {
+            throw new Error("This function cannot be used to copy objects with methods.");
+        } else if (oldObject[key] === undefined) {
+            // JSON.stringify will not copy a property of an object with an undefined value.
+            throw new Error("JSON.stringify silently ignores properties with undefined values, so this function cannot handle undefined values.");
+        }
+    }
+    return JSON.parse(JSON.stringify(oldObject));
+}
+
+/**
+ * Doesn't need unit tests.
+ */
+function enableDrag(element) {
+    if (window.jQuery != null) {
+        element.style.left = "50vw";
+        $(element).draggable();
+    }
+}
+
+/**
+ * @param {Function} - the function to call on each element of the array of strings.
+ *
+ * This function is like <Array>.forEach(), but 1) it assumes the <Array> contains only strings 2) it iterates over the array in caseless sorted order
+ * 3) it must be used with bind()
+ */
+ function alphabeticalForEach(func) {
+    const sorted = this.map(casedWord => casedWord.toLowerCase()).sort().map(lowercaseWord => {
+        return this.find(casedWord => casedWord.toLowerCase() === lowercaseWord);
+    });
+    sorted.forEach((casedWord, idx, ary) => {
+        func(casedWord, idx, ary);
+    });
+}
+
+/**
+ * Return the minimum and maximum values inside of an object or an object of objects.
+ * 
+ * @param {Object} object - the object within which to find the minimum and maximum values.
+ * @param {Object} objectContainer - an object which has other objects as properties.
+ * @param {Array} properties - the properties to scan for min and max values across all objects in the objectContainer.
+ * @return {Object}
+ */
+function getMinMax({object=null, objectContainer=null, properties=null}) {
+    if (object != null) {
+        let min, max;
+        const values = Object.values(object);
+        values.forEach(val => {
+            val = parseFloat(val);
+            if (!isNaN(val)) {
+                if (min == null) {
+                    min = val;
+                    max = val;
+                } else {
+                    if (val < min) min = val;
+                    if (val > max) max = val;
+                }
+            }
+        });
+        return {
+            min: min,
+            max: max
+        }
+    }
+    if (objectContainer != null && properties != null) {
+        const minMax = {};
+        const objects = Object.values(objectContainer);
+        properties.forEach(prop => minMax[prop] = {});
+        objects.forEach(obj => {
+            properties.forEach(prop => {
+                const propVal = parseFloat(obj[prop]);
+                if (!isNaN(propVal)) {
+                    if (minMax[prop].min == null) {
+                        minMax[prop].min = propVal;
+                        minMax[prop].max = propVal;
+                    } else {
+                        if (propVal < minMax[prop].min) minMax[prop].min = propVal;
+                        if (propVal > minMax[prop].max) minMax[prop].max = propVal;
+                    }
+                }
+            });
+        });
+        return minMax;
+    }
+}
+
+/**
+ * Doesn't need unit tests.
+ * @param {HTMLElement} e
+ */
+ function getStyleAttribute(e) {
+    const tagName = e.tagName.toLowerCase();
+    return tagName === "circle" ? "fill" : "stroke";
+}
+
+/**
+ * TODO: add unit tests
+ * @param {string} rgba
+ * @return {string|undefined}
+ */
+function getAlpha(rgba) {
+    if (/rgba\(/.test(rgba)) {
+        return rgba.match(/\d[^,]*\d(?=\))/)[0];
+    }
+}
+
+/**
+ * Doesn't need unit tests
+ * @param {string} className
+ * @return {string}
+ */
+function getDefaultFill(className) {
+    const cssRule = getCSSRule(className);
+    return cssRule.style.fill;
+}
+
+/**
+ * Doesn't need unit tests.
+ * @param {string} className
+ * @return {string}
+ */ 
+function getDefaultStroke(className) {
+    const cssRule = getCSSRule(className);
+    return cssRule.style.stroke;
+}
+
+/**
+ * @param {string} rgb
+ * @param {number} alpha
+ * @return {string}
+ */
+function insertAlpha(rgb, alpha) {
+    if (!/rgb\(/.test(rgb)) throw new Error("rgb argument must be an 'rgb' string, not an 'rgba' string");
+    return rgb.replace(")", `, ${alpha})`).replace("b", "ba");
+}
+
+/**
+ * Doesn't need unit tests. Tested via color().
+ * @param {HTMLElement} e - the HTMLElement to color.
+ * @param {string|Object} rgb - either an "rgb()" string or an instance of custom class from chroma.js
+ */
+function preserveAlphaWithNewColor(e, rgb) {
+    if (typeof rgb === "string") {
+        if (!/rgb\(/.test(rgb)) throw new Error("rgb argument must be an 'rgb' string, not an 'rgba' string");
+    } else {
+        rgb = rgb.css().replace(/,/g, ", ");
+    }
+    const firstThreeNumbers = /(\d+[^\d]+){2}\d+/;
+    const styleAttribute = getStyleAttribute(e);
+    const oldColor = e.style[styleAttribute];
+    const alpha = getAlpha(oldColor);
+    const defaultColorValues = (styleAttribute === "fill" ? getDefaultFill(e.classList[0]) : getDefaultStroke(e.classList[0])).match(firstThreeNumbers)[0];
+    if (alpha != null) {
+        e.style[styleAttribute] = insertAlpha(rgb, alpha);
+        //e.style[styleAttribute] = rgb.replace(")", `, ${alpha})`).replace("b", "ba");
+        return;
+    }
+    if (rgb.match(firstThreeNumbers)[0] === defaultColorValues) {
+        e.removeAttribute("style");
+        return;
+    }
+    e.style[styleAttribute] = rgb;
+    return;
+}
+
+/**
+ * Doesn't need unit tests. Tested via setAlpha().
+ * Set the style of the HTMLElement to either its exisitng inline color with a new alpha value, or the default CSS coloring with the alpha value.
+ * @param {HTMLElement} e
+ * @param {number} alpha
+ */
+function preserveColorWithNewAlpha(e, alpha) {
+    if (typeof alpha !== "number") throw new Error("New alpha value must be a number");
+    if (alpha > 1 || alpha < 0) throw new Error("New alpha value must be between 0 and 1, inclusive.");
+    const firstThreeNumbers = /(\d+[^\d]+){2}\d+/;
+    const styleAttribute = getStyleAttribute(e);
+    let inlineColorValues = e.style[styleAttribute].match(firstThreeNumbers);
+    if (inlineColorValues == null) {
+        if (alpha === 1) {
+            e.removeAttribute("style");
+            return;
+        } else {
+            let rgba = styleAttribute === "fill" ? getDefaultFill(e.classList[0]) : getDefaultStroke(e.classList[0]);
+            rgba = insertAlpha(rgba, alpha);
+            //rgba = rgba.replace(")", `, ${alpha})`).replace("b", "ba");
+            e.style[styleAttribute] = rgba;
+            return;
+        }
+    } 
+    inlineColorValues = inlineColorValues[0];
+    const defaultColorValues = (styleAttribute === "fill" ? getDefaultFill(e.classList[0]) : getDefaultStroke(e.classList[0])).match(firstThreeNumbers)[0];
+    if (inlineColorValues === defaultColorValues && alpha === 1) {
+        e.removeAttribute("style");
+        return;
+    } else {
+        e.style[styleAttribute] = `rgba(${inlineColorValues}, ${alpha})`;
+        return;
+    }
+}
+
+/**
+ * Determine whether or not this interface was loaded as a static file or as part of a web server request.
+ */
+function interfaceIsStatic() {
+    return document.getElementById("panZoomInsert").textContent.trim() !== ""
+}
+
+/**
+ * Determine whether or not to force the user to save their file. This might not always be sufficient, due to the many limitations of using JSON.stringify().
+ */
+function fileNeedsSave() {
+    return JSON.stringify(gReadFile) !== JSON.stringify(gWriteFile);
+}
+
+//**************************************************
+// Private utility functions
+//**************************************************
+
+/**
+ * TODO: add unit tests!
+ * Return the document CSSStyleRule that applies to the class name.
+ * @param {string} className
+ * @return {CSSStyleRule}
+ */
+function getCSSRule(className) {
+    const cssRules = document.styleSheets[0].cssRules;
+    const keys = Object.keys(cssRules);
+    let key = keys.find(key => {
+        const selectorString = cssRules[key].selectorText;
+        if (selectorString == null) return false;
+        const ary = selectorString.split(",").map(string => string.trim());
+        return ary.includes(`.${className}`);
+    });
+    if (key == null) {
+        let relationship;
+        try {
+            // Need try-catch because player objects have an "object" property but don't exist in components
+            relationship = getRelationship(gComponentManager.getFirst(className));
+        } catch (e) {
+            relationship = "not a line";
+        }
+        if (relationship === "line") {
+            key = keys.find(key => cssRules[key].selectorText === "line");
+        } else {
+            key = keys.find(key => cssRules[key].selectorText === "circle");
+        }
+    }
+    return cssRules[key];
+}
+
+//**************************************************
+// OpacityManager class
+//**************************************************
+
+const opacityManagerPrototype = {
+
+    /* Public methods */
+
+    /**
+     * Doesn't need unit tests.
+     * Fill the document opacity modal HTMLElement with content.
+     */
+    buildOpacityModal() {
+        const modal = document.getElementById("opacityModal");
+        const tableDiv = modal.querySelector("[data-tableinsert]");
+        Array.from(tableDiv.children).forEach(child => {
+            child.parentElement.removeChild(child);
+        });
+        const table = document.createElement("table");
+        const titleRow = document.createElement("tr");
+        ["", "Object", "Opacity"].forEach(str => {
+            const td = document.createElement("td");
+            td.classList.add("centered");
+            td.classList.add("fullPadded");
+            const h = document.createElement("h3");
+            h.textContent = str;
+            td.append(h);
+            titleRow.append(td);
+        });
+        table.append(titleRow);
+        const that = this;
+        alphabeticalForEach.bind(Object.keys(that.types))(type => {
+            const tr = document.createElement("tr");
+            let td = document.createElement("td");
+            td.classList.add("fullPadded");
+            const btn = getTableButton("Highlight", () => this.highlight(type));
+            td.append(btn);
+            tr.append(td);
+            td = document.createElement("td");
+            td.classList.add("fullPadded");
+            td.textContent = type;
+            tr.append(td);
+            td = document.createElement("td");
+            td.classList.add("fullPadded");
+            const input = document.createElement("input");
+            input.classList.add("modalInput");
+            input.dataset.objecttype = type;
+            input.addEventListener("change", function() {
+                that.setAlpha({className: type, input: this});
+            });
+            input.value = this.types[type];
+            td.append(input);
+            tr.append(td);
+            table.append(tr);
+        });
+        tableDiv.append(table);
+        modal.removeAttribute("style");
+        if (window.jQuery != null) {
+            $("#opacityModal .modalContent").draggable();
+        }
+    },
+
+    /**
+     * Set the alpha value on all HTMLElements with the specified class name.
+     * @param {string} className
+     * @param {HTMLInputElement} input
+     * @param {string} value
+     */
+    setAlpha({className, input, value=null}) {
+        let alpha;
+        if (input != null) {
+            alpha = input.value;
+        } else if (value != null) {
+            alpha = value;
+        }
+        if (isNumberString(alpha)) {
+            alpha = parseFloat(alpha);
+            if (alpha < 0 || alpha > 1) {
+                alert("The opacity value must be between 0 and 1, inclusive.");
+                input.value = this.types[className];
+                return;
+            }
+        } else {
+            alert("Please enter a valid number between 0 and 1, inclusive.");
+            input.value = this.types[className];
+            return;
+        }
+        this.types[className] = alpha; //record the alpha in the gOpacityManager for the case of adding new elements.
+        const elements = Array.from(document.getElementsByClassName(className));
+        elements.forEach(e => {
+            preserveColorWithNewAlpha(e, alpha);
+        });
+    },
+
+    /**
+     * Doesn't need unit tests.
+     * Update the OpacityManager to always display existing object types.
+     */
+    update() {
+        const existingObjectTypes = [];
+        Object.values(getRelationshipsWithTypes()).forEach(ary => {
+            ary.forEach(type => existingObjectTypes.push(type));
+        });
+        existingObjectTypes.forEach(type => {
+            if (this.types[type] == null) {
+                // User added a new objectType, so add it
+                this.types[type] = 1.0;
+            }
+        });
+        Object.keys(this.types).forEach(type => {
+            if (!existingObjectTypes.includes(type)) {
+                // User deleted all of a previously existing objectType, so delete it
+                delete this.types[type];
+            }
+        });
+    },
+
+    /* Private methods */
+
+    /**
+     * Set the alpha of every other object type to 0.1.
+     * @param {string} className
+     */
+    highlight(className) {
+        Object.keys(this.types).forEach(key => {
+            if (key !== className) {
+                this.types[key] = 0.1;
+                this.setAlpha({className: key, value: "0.1"});
+            } else {
+                this.types[key] = 1;
+                this.setAlpha({className: key, value: "1"});
+            }
+        });
+        const opacityModal = document.getElementById("opacityModal");
+        const classInput = opacityModal.querySelector(`input[data-objecttype='${className}']`);
+        Array.from(opacityModal.querySelectorAll("input[data-objecttype]")).forEach(input => {
+            if (input !== classInput) {
+                input.value = 0.1;
+            } else {
+                input.value = 1;
+            }
+        }); 
+    },
+
+    /**
+     * Set the alpha of every object type to 1.
+     */
+    reset() {
+        Object.keys(this.types).forEach(key => {
+            this.types[key] = 1.0;
+            this.setAlpha({className: key, value: "1.0"});
+        });
+        Array.from(document.getElementById("opacityModal").querySelectorAll("input[data-objecttype]")).forEach(input => {
+            input.value = 1.0;
+        });
+    },
+};
+
+/**
+ * An OpacityManager is really setting alpha values on HTMLElements, but the term "opacity" is more straightforward.
+ */
+function createOpacityManager() {
+    const om = Object.create(opacityManagerPrototype);
+    om.types = {};
+    Object.values(getRelationshipsWithTypes()).forEach(ary => {
+        ary.forEach(type => {
+            om.types[type] = 1.0;
+        });
+    });
+    return om;
+}
+
+//**************************************************
+// Coloring classes
+//**************************************************
+
+const colorMapPrototype = {
+
+    /* Public methods */
+
+    /**
+     * Apply a color to each HTMLElement that maps to an object that exists in this ColorMap. If any element had an alpha value, preserve it.
+     */ 
+    color() {
+        const invalidNames = [];
+        Object.keys(this.colorMap).forEach(name => {
+            try {
+                const key = gTree.treeMap.getKey(name);
+                const e = document.getElementById(key);
+                preserveAlphaWithNewColor(e, this.colorMap[name]);
+            } catch (e) {
+                invalidNames.push(name);
+            }
+        });
+        if (invalidNames.length > 0) {
+            alert(`Unable to color the following objects because they weren't found in this graph: "${invalidNames.join(", ")}".`);
+        } else {
+            alert(`Successfully colored all objects according to the specified column "${this.title}" in the specified csv file "${this.parentTitle}".`);
+        }
+    },
+
+    /**
+     * TODO: break up into smaller methods?
+     * Doesn't need unit tests.
+     * Create a legend for the color map and append it to the "colorLegends" div.
+     */
+    appendLegend() {
+        const masterDiv = document.createElement("div");
+        masterDiv.classList.add("modalContent");
+        masterDiv.classList.add("centered");
+        masterDiv.style.border = "1px solid black";
+        masterDiv.style.alignContent = "center";
+        masterDiv.setAttribute("data-colorfile", this.parentTitle);
+        masterDiv.setAttribute("data-colormap", this.title);
+        let h = document.createElement("h2");
+        h.textContent = this.parentTitle;
+        masterDiv.append(h);
+        h = document.createElement("h3");
+        h.textContent = this.title;
+        masterDiv.append(h);
+        const flexbox = document.createElement("div");
+        flexbox.classList.add("legendFlex");
+        let div = document.createElement("div");
+        div.classList.add("legendGradiant");
+        div.style.background = `linear-gradient(0deg,${gViridisColors.join(",")})`;
+        flexbox.append(div);
+        div = document.createElement("div");
+        div.classList.add("vertFlex");
+        div.classList.add("legendAxis");
+        div.classList.add("leftText");
+        const increment = (this.max - this.min) / 7;
+        for (let i = 0; i < 8; i++) {
+            let p = document.createElement("p");
+            let val;
+            if (i === 0) {
+                val = this.min;
+            } else if (i === 7) {
+                val = this.max;
+            } else {
+                val = this.min + i * increment;
+            }
+            val = val.toString();
+            let decimalIdx = val.indexOf(".");
+            if (decimalIdx !== -1) {
+                val = val.slice(0, decimalIdx + 5);
+            }
+            p.textContent = val;
+            div.prepend(p);
+        }
+        flexbox.append(div);
+        masterDiv.append(flexbox);
+        div = document.createElement("div");
+        div.style.margin = "20px 0px 0px 0px";
+        const button = getTableButton("Close", () => {
+            const legendDiv = document.getElementById("colorLegends");
+            const legend = legendDiv.querySelector(`div[data-colorfile='${this.parentTitle}'],[data-colormap='${this.title}']`);
+            legend.parentElement.removeChild(legend);
+        });
+        div.append(button);
+        masterDiv.append(div);
+        document.getElementById("colorLegends").append(masterDiv);
+        enableDrag(masterDiv);
+    },
+
+    /* private methods */
+
+    /**
+     * Create a color map by mapping the 'viridis' color scale to the data inside of this.colorMap.
+     */
+    buildColorScale() {
+        const {min, max} = getMinMax({object: this.colorMap});
+        this.min = min;
+        this.max = max;
+        const f = chroma.scale(gViridisColors).domain([min, max]);
+        Object.keys(this.colorMap).forEach(key => {
+            this.colorMap[key] = f(this.colorMap[key]);
+        });
+        this.colorScale = f;
+    }
+}
+
+/**
+ * Doesn't need unit tests.
+ * A ColorMap is a wrapper around an object that maps tree object names to colors.
+ * @param {string} title - the header of the column in the csv that this color map is representing.
+ * @param {ColorFile} parent - the ColorFile that contains this ColorMap. 
+ * @return {ColorMap}
+ */
+function createColorMap(title, parentTitle) {
+    const obj = Object.create(colorMapPrototype);
+    obj.title = title;
+    obj.parentTitle = parentTitle;
+    obj.colorMap = {};
+    return obj;
+}
+
+const colorFilePrototype = {
+    
+    /* Public methods */
+
+    /* Doesn't need unit tests */
+    getTable() {
+        const table = document.createElement("table");
+        let tr = document.createElement("tr");
+        let td = document.createElement("td");
+        let h = document.createElement("h4");
+        h.classList.add("modalTableHeader");
+        h.textContent = this.title;
+        td.append(h);
+        tr.append(td);
+        table.append(tr);
+        tr = document.createElement("tr");
+        td = document.createElement("td");
+        td.classList.add("fullPadded");
+        const select = document.createElement("select");
+        select.setAttribute("data-colorfile", this.title);
+        td.append(select);
+        tr.append(td);
+        table.append(tr);
+        this.colorMaps.forEach(cm => {
+            select.innerHTML += `<option value=${cm.title}>${cm.title}</option>`
+        });
+        tr = document.createElement("tr");
+        td = document.createElement("td");
+        td.classList.add("fullPadded");
+        const button = getTableButton("Color", () => {
+            const colorMapName = document.getElementById("colorModal").querySelector(`select[data-colorfile='${this.title}']`).value;//need quotes around the dataset value because of the '.' in the file name.
+            const colorMap = this.colorMaps.find(cm => cm.title === colorMapName);
+            //If the graph hasn't been desaturated, then it needs to be. If is has been desaturated, then do nothing
+            if (this.parent.graphIsDesaturated === false) {
+                this.parent.desaturateGraph();
+            }
+            colorMap.color();
+            colorMap.appendLegend();
+        });
+        td.append(button);
+        tr.append(td);
+        table.append(tr);
+        return table;
+    },
+
+    /* Private methods */
+
+    /**
+     * TODO: add unit tests
+     * Build an array of ColorMaps by parsing the csv file and return the array.
+     * @param {File} file
+     * @return {Promise}
+     */
+    buildColorMaps(file) {
+        const that = this;
+        return new Promise(function(resolve, reject) {
+            Papa.parse(file, {
+                dynamicTyping: true,
+                complete: function(results, file) {
+                    const colorMaps = [];
+                    try {
+                        const headerRow = results.data[0];
+                        for (let i = 1; i < headerRow.length; i++) {
+                            colorMaps.push(createColorMap(headerRow[i], that.title));
+                        }
+                        for (let i = 1; i < results.data.length; i++) {
+                            let row = results.data[i];
+                            for (let j = 1; j < row.length; j++) {
+                                colorMaps[j - 1].colorMap[row[0]] = row[j];
+                            }
+                        }
+                        colorMaps.forEach(cm => cm.buildColorScale());
+                        resolve(colorMaps);
+                    } catch (e) {
+                        reject();
+                    }
+                }
+            });
+        });
+    }
+}
+
+/**
+ * A ColorFile is a grouping of associated ColorMap objects.
+ * @param {File} file - a csv file that maps the name of an object in this tree data to other data.
+ * @return {ColorFile}
+ */
+async function createColorFile(file, parent) {
+    const obj = Object.create(colorFilePrototype);
+    obj.title = file.name;
+    obj.parent = parent;
+    obj.colorMaps = await obj.buildColorMaps(file);
+    return obj;
+}
+
+const colorManagerPrototype = {
+
+    /* Public methods */
+
+    /**
+     * Doesn't need unit tests.
+     * Load the CSV files into ColorFile objects and fill the color modal HTML with content.
+     * 
+     * @param {FileList} files - the CSV files to be used to color the graph.
+     */
+    async buildHTML(files) {
+        this.colorFiles = await this.buildColorFiles(Array.from(files));
+        const tableDiv = document.getElementById("colorModal").querySelector("div[data-tableinsert]");
+        while (tableDiv.firstChild) {
+            tableDiv.removeChild(tableDiv.firstChild);
+        }
+        this.colorFiles.forEach(cf => {
+            tableDiv.append(cf.getTable());
+        });
+    },
+
+    /**
+     * Remove all colors that were applied by all ColorMaps from all HTMLElements. If any element had an inline alpha value, preserve it.
+     */
+    removeColors() {
+        Object.keys(gTree.tree).forEach(key => {
+            const e = document.getElementById(key);
+            // Need to watch out for objects that weren't drawn, like lines with non-existent node ends
+            if (e != null) {
+                const color = e.tagName.toLowerCase() === "circle" ? getDefaultFill(e.classList[0]) : getDefaultStroke(e.classList[0]);
+                preserveAlphaWithNewColor(e, color);
+            }
+        });
+        this.graphIsDesaturated = false;
+    },
+
+    /**
+     * Prepare the graph to handle multiple overlapping ColorMap colorings by removing all special default colors from nodes and lines. For example, houses will go from blue to gray and transformers will go from yellow to gray.
+     */
+    desaturateGraph() {
+        const cssRules = document.styleSheets[0].cssRules;
+        const keys = Object.keys(cssRules);
+        const circleFill = cssRules[keys.find(key => cssRules[key].selectorText === "circle")].style.fill;
+        const lineStroke = cssRules[keys.find(key => cssRules[key].selectorText === "line")].style.stroke;
+        Object.keys(gTree.tree).forEach(key => {
+            const e = document.getElementById(key);
+            // Need to watch out for data objects that weren't drawn, like lines with non-existent nodes
+            if (e != null) {
+                const color = e.tagName.toLowerCase() === "circle" ? circleFill : lineStroke;
+                preserveAlphaWithNewColor(e, color)
+            }
+        });
+        this.graphIsDesaturated = true;
+    },
+
+    /* Private methods */
+
+    /**
+     * Doesn't need unit tests.
+     * Asynchronously create an array of ColorFiles and return it inside of a Promise.
+     * @param {Array} files
+     * @return {Promise}
+     */
+    buildColorFiles(files) {
+        const that = this;
+        return new Promise(async function(resolve, reject) {
+            const colorFiles = [];
+            for (let file of files) {
+                try {
+                    const cf = await createColorFile(file, that);
+                    colorFiles.push(cf);
+                } catch (e) {
+                    alert(`We could not parse the CSV file "${file.name}" that you provided.`);
+                }
+            }
+            resolve(colorFiles);
+        });
+    }
+}
+
+/**
+ * Doesn't need unit tests.
+ * A ColorManager object contains ColorFile objects.
+ * @return {ColorManager}
+ */
+function createColorManager() {
+    const obj = Object.create(colorManagerPrototype);
+    obj.graphIsDesaturated = false;
+    //obj.colorFiles = await obj.buildColorFiles(Array.from(files));
+    return obj;
+}
+
+
+//**************************************************
+// Modal functions 
+//**************************************************
+
+/**
+ * @param {HTMLElement} modal
+ */
+function formatModal(modal) {
+    Array.from(modal.querySelectorAll("td")).forEach(td => td.classList.add("fullPadded"));
+    Array.from(modal.querySelectorAll("th")).forEach(th => th.classList.add("fullPadded"));
+    Array.from(modal.querySelectorAll("button")).forEach(btn => btn.classList.add("modalButton"));
+    Array.from(modal.querySelectorAll("button[data-buttonfunction='toggle']")).forEach(btn => {
+        if (btn.textContent.toLowerCase() !== "select" && btn.textContent.toLowerCase() !== "save") {
+            btn.classList.add("deleteButton")
+        }
+    });
+    Array.from(modal.querySelectorAll("button[data-buttonfunction='cancel']")).forEach(btn => btn.classList.add("deleteButton"));
+}
+
+/**
+ * @param {HTMLElement} modal
+ */
+function addModalHandlers(modal) {
+    Array.from(modal.querySelectorAll("button[data-buttonfunction='toggle']")).forEach(btn => {
+        btn.addEventListener("click", () => toggleDisplay(modal));
+    });
+}
+
+(function setupModals() {
+    Array.from(document.querySelectorAll("div.modal")).forEach(div => {
+        formatModal(div);
+        addModalHandlers(div);
+    });
+})();
+
+//**************************************************
+// Table classes 
+//**************************************************
+
+/**
+ * These are names of properties in most objects in gWriteFile.tree that should not be deleted from objects because doing so might make that object
+ * hard to identify with reference to the rest of the data.
+ */
+const nonDeletableProperties = ["name", "object", "from", "to", "parent", "latitude", "longitude", "configuration"];
+/* If these properties were to be modified for a given gWriteFile.tree object, it would require significantly modifying the 
+other objects.  These properties ARE technically modifiable, but allowing the user to change them would require more work 
+than I think is worth it. It is easier just to create a new node.
+*/
+const nonModifiableProperties = ["name", "object"];
+const titleProperties = ["object"];
+/* This array is used to determine if an object is a configuration node, based on the "object" property of that node. If a node
+lacks the "object" property entirely, then I know its a configuration node.
+Player is a configuration object. Recorder can have a parent, so it is NOT a configuration object.
+*/
+const configurationTypes = ["regulator_configuration", "transformer_configuration", "triplex_line_configuration", "line_configuration",
+"volt_var_control", "line_spacing", "climate", "overhead_line_conductor", "underground_line_conductor", "triplex_line_conductor",
+"player", "schedule"];
+
+
+function formatTable(table) {
+    Array.from(table.querySelectorAll("td")).forEach(td => {
+        td.classList.add("fullPadded");
+    });
+    //table.style.textalign = "left";
+}
+
+// delete this eventually
+function rebuildSelectionTable() {
+    destroyTables(["selectionTable"]);
+    const ids = gSelection.getKeys();
+    if (ids.length > 0) {
+        const table = createSelectionTable(ids, gTree);
+        document.getElementById("selectionTable").appendChild(table);
+    } 
+}
+/**
+ * TODO: add unit tests, $().draggable make the text unfocusable
+ * If an object has no name, just get the first property in the object.
+ */
+function createSelectionTable(ids, tree) {
+    const table = document.createElement("table");
+    const tHead = document.createElement("thead");
+    const tBody = document.createElement("tbody"); 
+    const titleRow = createRow({key: "Selected Elements"});
+    Array.from(titleRow.self.children).forEach(td => { 
+        td.classList.add("tableTitle");
+        td.classList.add("fullPadded");
+    });
+    titleRow.self.children[1].setAttribute("colspan", "2");
+    titleRow.self.children[2].remove();
+    tHead.append(titleRow.self);
+    table.append(tHead);
+    table.append(tBody);
+    table.classList.add("dataTable");
+    // duplicate
+    const buttonRow = document.createElement("tr");
+    buttonRow.classList.add("buttonRow");
+    const buttonCell = document.createElement("td");
+    buttonCell.setAttribute("colspan", "3");
+    buttonCell.classList.add("fullPadded");
+    buttonCell.append(getTableButton("move", function() {
+        destroyTables(["descriptionTables"]);
+        attachMoveListener(gSelection.getKeys());
+    }));
+    buttonRow.append(buttonCell);
+    tBody.append(buttonRow);
+    // duplicate
+    ids.forEach(id => {
+        let obj = tree.getObject(id);
+        let name = obj.name != null ? obj.name : obj.object != null ? obj.object : Object.keys(obj)[0];
+        const button = getTableButton("view", getDisplayTableFunction(id));
+        let row = createRow({key: name, value: button, deletable: true}, document.getElementById(id));
+        Array.from(row.self.children).forEach(td => {
+            td.classList.add("fullPadded");
+        });
+        tBody.append(row.self);
+    });
+    enableDrag(table);
+    return table;
+}
+
+/* Helper functions */
+
+function getDisplayTableFunction(id) {
+    let displayTable = function() {
+        let table = document.getElementById(`descriptionTable_${id}`);
+        if (table == null) {
+            const table = createDescriptionTable(id);
+            table.id = `descriptionTable_${id}`;
+            document.getElementById("descriptionTables").append(table);
+        }           
+    }
+    return displayTable;
+}
+
+function getTableButton(text, func) {
+    const button = document.createElement("button");
+    button.textContent = text;
+    button.classList.add("modalButton");
+    button.addEventListener("click", func);
+    return button;
+}
+
+
+/**
+ * TODO: add unit tests, don't allow longitude and latitude to be editted for lines!,
+ * turn all key inputs into plain text upon clicking save (would look nice), 
+ * 
+ * Bugs: $().draggable() makes text unfocusable via double click. Unfortunately,
+ * this is set behavior of the library because the demo on the jQuery wesbsite behaves the same way. Users must right click
+ * text in a table to select it.
+ * 
+ * The form element is only used to take advantage of the "required" form validation functionality that is native to the
+ * browser.
+ */
+function createDescriptionTable(id) {
+    const form = document.createElement("form");
+    form.classList.add("formContainer");
+    const table = document.createElement("table");
+    table.classList.add("dataTable");
+    const tHead = document.createElement("thead");
+    const tBody = document.createElement("tbody");
+    // duplicate
+    const buttonRow = document.createElement("tr");
+    buttonRow.classList.add("buttonRow");
+    const buttonCell = document.createElement("td");
+    buttonCell.classList.add("fullPadded");
+    buttonCell.setAttribute("colspan", "3");
+    buttonRow.append(buttonCell);
+    // duplicate
+    form.append(table);
+    table.append(tHead);
+    table.append(tBody);
+    tBody.append(buttonRow);
+    const tObject = createTreeObject(id, gTree);
+    if (getRelationship(tObject.data) !== "line") {
+        buttonCell.append(createButton({action: "move", tObject: tObject, tableBody: tBody}).self);
+    }
+    buttonCell.append(createButton({action: "delete", tObject: tObject, tableBody: tBody}).self);
+    buttonCell.append(createButton({action: "add", tObject: tObject, tableBody: tBody}).self);
+    buttonCell.append(createButton({action: "save"}).self);
+    form.addEventListener("submit", function(event) {
+        event.preventDefault();
+        // Delete the object entirely just in case parent was changed, in order to delete the old parent-child line
+        const svg = createSvgData([tObject.key]);
+        svg.remove(gViewport);
+        gTree.insert(tObject);// re-insert the updated object. It is remapped in the process.
+        svg.draw(gViewport);
+        // alert("Object saved");
+    });
+    Object.keys(tObject.data).forEach(key => {
+        let row;
+        if (titleProperties.includes(key)) {
+            row = createRow({key: key, tObject: tObject});
+            Array.from(row.self.children).forEach(td => {
+                td.classList.add("tableTitle");
+                td.classList.add("fullPadded");
+            });
+            tHead.append(row.self);
+        } else {
+            row = createRow({key: key, deletable: true, tObject: tObject});
+            Array.from(row.self.children).forEach(td => {
+                td.classList.add("fullPadded");
+            });
+            tBody.appendChild(row.self);
+        }
+    });
+    //Display key
+    //row = createRow({key: "key", value: `${tObject.key}`});
+    //Array.from(row.self.children).forEach(td => {
+    //    td.classList.add("tableTitle");
+    //});
+    //tHead.append(row.self);
+    //Display key
+    enableDrag(table);
+    return form;
+}
+
+/**
+ * TODO: add unit tests
+ */
+ function destroyTables(ids) {
+    ids.forEach(id => {
+        const tableDiv = document.getElementById(id);
+        Array.from(tableDiv.children).forEach(t => {
+            tableDiv.removeChild(t);
+        });
+    });
+}
+
+const buttonPrototype = {
+
+    /* Private helper methods */
+
+    /**
+     * TODO: update unit tests
+     * Delete the TreeObject of this button from the TreeWrapper of this button
+     */
+    deleteObject() {
+        const key = this.tObject.key;
+        if (gTree.isRemovable(key)) {
+            createSvgData([key]).remove(gViewport);
+            rebuildSelectionTable();
+        } else {
+            let msg = `If you click "ok", you will delete this object and all of its connected children and/or lines. `;
+            const children = gTree.treeMap.getChildKeys(key);
+            if (children != null) {
+                msg += `Do you want to delete "${gTree.getObject(key).name}" and its children: "${children.join(", ")}"? `;
+            }
+            const lines = gTree.treeMap.getLineKeys(key);
+            if (lines != null) {
+                msg += `Do you want to delete "${gTree.getObject(key).name}" and its lines: "${lines.join(", ")}"?`;
+            }
+            if (confirm(msg)) {
+                const keys = gTree.getSubtreeToRemove(key);
+                keys.push(key);
+                createSvgData(keys).remove(gViewport);
+                //console.log(document.getElementById("svgContainer").onclick);
+                rebuildSelectionTable();
+            }
+        }
+    },
+
+    /**
+     * TODO: add unit tests
+     */
+    validateArguments(args) {
+        if (args.action === "move") {
+            //if (args.tObject == null || args.tWrapper == null || args.tableBody == null) {
+            //    throw new Error(`A button with a "${args.action}" action must have non-null tObject, tWrapper, and tableBody arguments`);
+            //}
+        } else if (args.action === "delete") {
+            if (args.tObject == null || args.tableBody == null) {
+                throw new Error(`A button with a "delete" action must have non-null tObject and tableBody arguments`);
+            }
+        } else if (args.action === "add") {
+            if (args.tObject == null || args.tableBody == null) {
+                throw new Error(`A button with an "add" action must have non-null tObject and tableBody arguments`);
+            }
+        } else if (args.action !== "save") {
+            throw new Error(`The action argument must match an existing action`);
+        }
+    }
+}
+
+/**
+ * TODO: add unit tests, DON'T remove tObject argument, remove tWrapper argument
+ */
+function createButton({action, tableBody=null, tObject=null}) {
+    const button = Object.create(buttonPrototype);
+    button.validateArguments(arguments[0]);
+    button.self = document.createElement("button");
+    button.self.textContent = action;
+    button.self.classList.add("modalButton");
+    button.tObject = tObject;
+    button.tableBody = tableBody;
+    button.self.type = "button";
+    switch (action) {
+        case "move":
+            button.self.addEventListener("click", function() {
+                attachMoveListener([tObject.key], tableBody, tObject);
+            });
+            break;
+        case "delete":
+            button.self.classList.add("deleteButton");
+            button.self.addEventListener("click", function() {
+                button.deleteObject();                
+                document.getElementById("descriptionTables").removeChild(tableBody.parentElement.parentElement);
+            });
+            break;
+        case "add":
+            button.self.addEventListener("click", function() {
+                const row = createRow({key: "", deletable: true, tObject: tObject});
+                Array.from(row.self.children).forEach(td => {
+                    td.classList.add("fullPadded");
+                });
+                tableBody.append(row.self);
+            });
+            break;
+        case "save":
+            button.self.type = "submit";
+            break;
+        default:
+            throw new Error("The action argument must be a string that matches an existing action for this button.");
+    }
+    return button;
+}
+
+const rowPrototype = {
+
+    /* Private helper methods */
+
+    /**
+     * Throw an error if arguments passed to createRow() were invalid.
+     * @param {Object} args - an object containing the arguments that were passed to createRow().
+     */
+    validateArguments(args) {
+        if (args.key != null && args.value != null && args.tObject != null) {
+            throw new Error(`If there are key and tObject arguments, then the value of the row is determined by map[key] and passing a value
+            argument is invalid`);
+        } else if (args.tObject != null && args.tObject.data[args.key] === undefined && args.key !== "") {
+            throw new Error("If a tObject argument is passed, the key argument should exist in that tObject.data.");
+        } else if (args.key === "" && args.tObject == null) {
+            throw new Error("If the key is an empty string, a tObject argument should be passed to the function");
+        }
+    },
+
+    /**
+     * Return false if the key already exists in the map or, otherwise return true.
+     * @param {string} key - the incoming key that the user wants to write into the map belonging to this Row.
+     * @return {boolean}
+     */
+    validateNewKey(key) {
+        // These keys cannot be added becasue they would turn the object into a different type. If a user wants such an object, they should add a new one and edit its attributes.
+        const invalidKeys = [undefined, "", "to", "from", "parent"];
+        if (invalidKeys.includes(key)) return false;
+        if (this.tObject.data[key] !== undefined) return false;
+        return true;
+    },
+
+    /** 
+     * Return false if the current key is an empty string, otherwise return true.
+     * @return {boolean}
+     */
+    validateCurrentKey() {
+        return this.key === "" ? false : true;
+    },
+
+    /**
+     * Update a key in the map that belongs to this Row.
+     * @param {HTMLInputElement} input - contains the new key that should be written to the map, if it is valid.
+     */
+    updateMapKey(input) {
+        const newKey = input.value.trim();;
+        if (this.validateNewKey(newKey)) {
+            this.tObject.data[newKey] = this.tObject.data[this.key] != null ? this.tObject.data[this.key] : "";
+            delete this.tObject.data[this.key];
+            this.key = newKey;
+        } else {
+            alert(`A new attribute must not match an existing attribute. Additionally, the attributes "", "parent", "to", and "from" cannot be added.`);
+            input.value = this.key;
+        } 
+    },
+    /**
+     * Return an HTMLTableCellElement.
+     * @return {HTMLTableCellElement}
+     */
+    getKeyElement() {
+        const td = document.createElement("td");
+        if (this.key === "") {
+            const input = document.createElement("input");
+            input.classList.add("modalInput");
+            td.appendChild(input);
+            input.required = true;
+            input.pattern = "[\\s]*[\\S]+.*";
+            const that = this;
+            input.addEventListener("change", function() {
+                that.updateMapKey(this);
+            });
+        } else {
+            td.textContent = this.key;
+        } 
+        return td;
+    },
+
+    /** 
+     * Return true if the value is valid for the Row (based on the key of that Row), otherwise return false.
+     * @param {string} value - a value for a corresponding key that should be validated based on the key.
+     * @return {boolean}
+     */
+    validateNewValue(value) {
+        if (this.key === "longitude" || this.key === "latitude") return isNumberString(value);
+        if (this.key === "parent") {
+            if (isValidParentName(value, this.tObject.object)) return true;
+            return false;
+        }
+        if (this.key === "to" || this.key === "from") {
+            if (!isValidToOrFromNode(value)) return false;
+            if (this.key === "to" && this.tObject.data.from === value) return false;
+            if (this.key === "from" && this.tObject.data.to === value) return false;
+        }
+        return true;
+    },
+
+    /** 
+     * Update a value in the map that belongs to this Row.
+     * @param {HTMLInputElement} input - contains the new value that should be written to the map, if the value is valid.
+     */
+    updateMapValue(input) {
+        if (!this.validateCurrentKey()) {
+            alert("Please enter a valid key for this row before entering a value.");
+            input.value = "";
+            return;
+        }
+        let newValue = input.value.trim();
+        if (this.validateNewValue(newValue)) {
+            if (this.key === "longitude" || this.key === "latitude") newValue = parseFloat(newValue);
+            this.tObject.data[this.key] = newValue;
+        } else {
+            alert(`The value "${newValue}" is invalid for for the key "${this.key}" in the table.`);
+            input.value = this.tObject.data[this.key];
+        }
+    },
+    /** 
+     * Return an HTMLTableRowElement.
+     * @param {Array} nonModifiableProperties - a hard-coded array of properties that the user shouldn't be able to modify.
+     * @return {HTMLTableRowElement}
+     */
+    getValueElement(nonModifiableProperties) {
+        const td = document.createElement("td");
+        if (typeof(this.value) === "string") {
+            // Display a string with no regard to any TreeObject
+            td.textContent = this.value;
+            return td;
+        } else if (this.value instanceof HTMLElement) {
+            // Display another HTMLElement instead of a string
+            td.append(this.value);
+            return td;
+        } else if (this.value == null) {
+            if (this.tObject == null) {
+                // Don't display any value
+                return td;
+            } else {
+                // Display value within TreeObject.data
+                const value = this.key === "" ? "" : this.tObject.data[this.key];
+                if (this.key === 'object') {
+                    td.textContent = value;
+                    return td;
+                }
+                const input = document.createElement("input");
+                input.classList.add("modalInput");
+                input.value = value;
+                td.appendChild(input);
+                if (nonModifiableProperties.includes(this.key)) {
+                    input.readOnly = true;
+                } else {
+                    if (this.key === "longitude") {
+                        input.dataset.coordinate = "longitude";
+                    } else if (this.key === "latitude") {
+                        input.dataset.coordinate = "latitude";
+                    }
+                    const that = this;
+                    input.addEventListener("change", function() {
+                        that.updateMapValue(this);
+                    });
+                }
+                return td;
+            }
+        }
+        throw new Error("Invalid value was provided for this row");
+    },
+
+    /** 
+     * TODO: add unit tests
+     * Return an HTMLTableRowElement.
+     * @param {boolean} deletable - whether or not the returned <td> should have a delete button element child.
+     * @param {Array} nonDeletableProperties - a hard-coded array of properties that the user should not be able
+     * to delete from a TreeObject.
+     * @return {HTMLTableRowElement}
+     */
+    getDeleteElement(deletable, nonDeletableProperties) {
+        const td = document.createElement("td");
+        if (deletable === true && !nonDeletableProperties.includes(this.key)) {
+            const btn = document.createElement("button");
+            btn.innerHTML = "&#9587;"
+            btn.setAttribute("class", "modalButton deleteButton"); 
+            td.appendChild(btn);
+            btn.addEventListener("click", () => { this.remove() });
+        } 
+        return td;
+    },
+
+    /**
+     * TODO: update unit tests
+     * Delete the row from the table. Delete the key from the map, if there was a map.
+     */
+    remove() {
+        this.self.parentElement.removeChild(this.self);
+        if (this.tObject != null) {
+            delete this.tObject.data[this.key];
+        } 
+        // This is only used with the selection table rows (very confusing btw)
+        if (this.element != null) {
+            gSelection.remove(this.element);
+            const table = document.getElementById(`descriptionTable_${this.element.id}`);
+            if (table != null) {
+                document.getElementById("descriptionTables").removeChild(table);
+            }
+            if (gSelection.getKeys().length === 0) {
+                destroyTables(["selectionTable"]);
+            }
+        }
+    },
+}
+
+/** 
+ * Return a Row that can be appended to a table.
+ * 
+ * @param {string} key - the key of the row, which must be a property of the tObject.data argument if the tObject argument is not null.
+ * @param {string|HTMLElement} - an optional value of the row.
+ * @param {Object} map - an optional object that contains the data being manipulated by all of the rows. 
+ * @param {?} value - either a string or an HTMLElement to be displayed outright, with no relationship to the tObject (which should be null if this argument is passed).
+ * @param {boolean} deletable - whether or not the row should have a delete button.
+ * @return {Row} - A wrapper object around the HTMLTableRowElement.
+ */ 
+function createRow({key, value=null, tObject=null, deletable=false}) {
+    const obj = Object.create(rowPrototype);
+    obj.validateArguments(arguments[0]);
+    obj.key = key;
+    obj.value = value;
+    obj.tObject = tObject;
+    //obj.map = map;
+    obj.self = document.createElement("tr");
+    obj.self.append(obj.getDeleteElement(deletable, nonDeletableProperties));
+    obj.self.append(obj.getKeyElement());
+    obj.self.append(obj.getValueElement(nonModifiableProperties));
+    if (arguments[1] != null) {
+        obj.element = arguments[1];
+    }
+    return obj;
+}
+
+//**************************************************
+// Initialization
+//**************************************************
+
+/**
+ * Initialize the interface. The order of the initialization functions matters. This is a function declaration instead of an automatically invoked
+ * function expression because the testing code needs to call this function.
+ */
+async function initializeInterface() {
+    if (!interfaceIsStatic()) {
+        try {
+            await checkServerConversion();
+        } catch (e) {
+        }
+    }
+    createInterface();
+    {% if showFileMenu %}
+    if (!interfaceIsStatic() && fileNeedsSave()) {
+        // Save to account for objects that were given artifical grid coordinates. This will make the interface less annoying
+        saveFile(gWriteFile);
+    }
+    {% endif %}
+    attachHandlers();
+    document.getElementById("loadingMessage").style.display = "none"
+}
+initializeInterface();
+
+function createSingletons() {
+    gOpacityManager = createOpacityManager();
+    gAddManager = createAddManager();
+    gSelection = createSelection();
+}
+
+function createInterface() {
+    createViewport(gWriteFile.tree, document.getElementById("svgContainer"));
+    gTree = createTree(gWriteFile.tree);
+    const objects = Object.values(gTree.tree);
+    insertCoordinates(objects, gMinLon, gMaxLat, (1000/gDrawScaleFactor) * .005);
+    gViewport = document.getElementsByClassName("svg-pan-zoom_viewport")[0];
+    createSingletons();
+    createSvgData(Object.keys(gTree.tree)).quickDraw(gViewport);
+}
+
+function checkServerConversion() {
+    return new Promise(function(resolve, reject) {
+        let cancelled = false;
+        let reload = false;
+        const modal = createProgressModal(() => {
+            if (confirm('Are you sure you want to cancel the in-progress server file conversion?')) {
+                cancelled = true;
+                saveFile(gReadFile);
+                resolve();
+            }
+        });
+        modal.clearAndAddMessage('Checking for an in-progress server file conversion...')
+        const intervalId = setInterval(function pollServer() {
+            $.ajax({
+                type: "POST",
+                url: "/checkConversion/{{thisModelName}}/{{thisOwner}}",
+            }).done((data) => {
+                if (!cancelled) {
+                    if (data.exists === true) {
+                        reload = true
+                        modal.clearAndAddMessage('Waiting for an in-progress server file conversion to complete...');
+                    } else if (data.exists === false) {
+                        clearInterval(intervalId);
+                        if (reload) {
+                            reloadWrapper();
+                        } else { // There was never an in-progress file conversion, so don't bother to reload the page
+                            modal.hide();
+                            resolve();
+                        }
+                    } else {
+                        // There was an error? Notify the user, proceed as normal.
+                        clearInterval(intervalId);
+                        modal.clearAndAddMessage('An error occurred on the server during the file conversion process. You may save your file to prevent this message from appearing.')
+                        modal.hideCancelButton();
+                        modal.finish();
+                        reject();
+                    }
+                } else {
+                    clearInterval(intervalId);
+                }
+            }).fail(function() {
+                if (!cancelled) {
+                    clearInterval(intervalId);
+                    modal.clearAndAddMessage('The server raised an internal exception while checking for an ongoing file operation.');
+                    modal.hideCancelButton();
+                    modal.finish();
+                    reject();
+                }
+            });
+            return pollServer;
+        }(), 5000) // Execute pollServer immediately once, then return it to setInterval so that it continues to execute every 5 seconds
+    });
+}
+
+    //buildFeeder();
+    //const t0 = performance.now();
+
+    /* 
+    const t1 = performance.now();
+    const time = t1 - t0;
+    console.log(`Tree rendering time was ${time} ms`);
+    */
+    
+    /*
+    setTimeout(function() {
+        const deleteSvgData = createDeletableSvgData(gTree.tree);
+        deleteSvgData.deleteFrom(viewport);
+    }, 2000);
+    */
+
+{% if showFileMenu %}
+    /* Browsers don't show custom 'beforeunload' messages anymore due to spamming users, so don't bother setting it. Only set this listener if the
+    user has unsaved changes */
+    window.onbeforeunload = function(event) {
+        if (fileNeedsSave()) {
+            return "";
+        }
+    }
+{% endif %}
+</script>
+{% if spec %}{{ spec | safe }}{% endif %}

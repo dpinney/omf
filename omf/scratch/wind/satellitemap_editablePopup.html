@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>GeoJSON Map</title>
+	<link rel='stylesheet' href='https://unpkg.com/leaflet@1.0.3/dist/leaflet.css' integrity='sha512-07I2e+7D8p6he1SIM+1twR5TIrhUQn9+I6yjqD53JQjFiMf8EtC93ty0/5vJTZGF8aAocvHYNEDJajGdNx1IsQ=='
+		crossorigin='' />
+	<script src='https://unpkg.com/leaflet@1.0.3/dist/leaflet.js' integrity='sha512-A7vV8IFfih/D732iSSKi20u/ooOfj/AGehOKq0f4vLT1Zr2Y+RX7C+w8A1gaSasGtRUZpF/NZgzSAu4/Gc41Lg=='
+		crossorigin=''></script>
+	<link rel='stylesheet' href='https://unpkg.com/leaflet-draw@1.0.0/dist/leaflet.draw.css' />
+	<script src='https://unpkg.com/leaflet-draw@1.0.0/dist/leaflet.draw.js'></script>
+	<!-- Load Esri Leaflet from CDN -->
+	<script src="https://unpkg.com/esri-leaflet@2.5.0/dist/esri-leaflet.js"
+	    integrity="sha512-ucw7Grpc+iEQZa711gcjgMBnmd9qju1CICsRaryvX7HJklK0pGl/prxKvtHwpgm5ZHdvAil7YPxI1oWPOWK3UQ=="
+	    crossorigin=""></script>
+	<style>html, body {
+		width: 100%;
+		height: 100%;
+		margin: 0;
+		padding: 0;}
+	</style>
+	<style>#map{
+		position: relative;
+		width: 100.0%;
+		height: 100.0%;
+		left: 0.0%;
+		top: 0.0%;
+		}
+	</style>
+	<style>
+		#fade {
+		    display: none;
+		    position: absolute;
+		    top: 0%;
+		    left: 0%;
+		    width: 100%;
+		    height: 100%;
+		    background-color: #ababab;
+		    z-index: 1001;
+		    -moz-opacity: 0.8;
+		    opacity: .70;
+		    filter: alpha(opacity=80);
+		}
+
+		#modal {
+		    display: none;
+		    position: absolute;
+		    top: 35%;
+		    left: 45%;
+		    width: 100px;
+		    height: 100px;
+		    padding:15px 15px 15px;
+		    border: 3px solid #ababab;
+		    box-shadow: 1px 1px 10px #ababab;
+		    border-radius: 20px;
+		    background-color: white;
+		    z-index: 1002;
+		    text-align: center;
+		    overflow: auto;
+    </style>
+</head>
+<body>
+	<div id='map'></div>
+	<div id="modal">
+		<img id="loader" src="https://i.gifer.com/KSYA.gif" />
+	</div>
+	<div id="fade"></div>
+	<script type='text/javascript'>
+	// basic map definition and zoom control.
+	var map = L.map('map');
+	map.setView([39.8, -121.6], 10);
+	L.control.scale().addTo(map);
+	// drawing layer
+	var drawnItems = L.featureGroup().addTo(map);
+	// esri_images map
+	var esri_images = L.esri.basemapLayer('Imagery').addTo(map);
+	// satelite
+	var landsat = L.tileLayer(
+		'https://{s}.tiles.mapbox.com/v4/mapbox.landsat-live/{z}/{x}/{y}.jpg?access_token=pk.eyJ1IjoiZWp0YWxib3QiLCJhIjoiY2ptMHBlOGdjMmZlaTNwb2dwMHE2Mm54NCJ9.xzceVNmAZy49SyFDb3UMaw',
+		{ maxZoom: 18, attribution:'' }
+	);
+	// Topo
+	var streets = L.esri.basemapLayer('Streets').addTo(map);
+	// var streets = L.tileLayer(
+	// 	'https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png',
+	// 	{ maxZoom: 18, attribution:'' }
+	// );
+
+	// Options to toggle between maps added to layers
+	L.control.layers(
+		{
+			'landsat': landsat.addTo(map),
+			'streets': streets.addTo(map),
+			'esri_images': esri_images.addTo(map)
+		},
+		{
+			'drawlayer': drawnItems,
+		},
+		{position: 'topleft', collapsed: false}
+	).addTo(map);
+	//Boilerplate to add the layer control.
+	map.addControl(new L.Control.Draw({
+		edit: {
+			featureGroup: drawnItems,
+			poly: {
+				allowIntersection: false
+			}
+		},
+		draw: {
+			polygon: false,
+			polyline: false,
+			circle: false,
+			marker: false,
+			circlemarker: false		}
+	}));
+	// Helper function for saving veg score.
+	function saveVeg() {
+		var newVegScore = document.getElementById('veg_score').value
+		var shape_id = document.getElementById('popup_leaflet_id').value
+		map._layers[shape_id].feature.properties.vegScore = newVegScore
+	}
+	// Helper function to update veg scores.
+	map.on(L.Draw.Event.CREATED, function(event) {
+		var layer = event.layer;
+		// add veg score.
+		feature = layer.feature = layer.feature || {}; // Initialize feature
+		feature.type = feature.type || "Feature"; // Initialize feature.type
+		var props = feature.properties = feature.properties || {}; // Initialize feature.properties
+		props.vegScore = '10';
+		// add click handler that makes popup on each click.
+		layer.on('click', function (e) {
+			vegScore = e.target.feature.properties.vegScore
+			layer.bindPopup("<input id='popup_leaflet_id' style='display:none' value=" + e.target._leaflet_id + ">Veg Score: <input type='text' id='veg_score' value=" + vegScore + "><button onclick='saveVeg()' type='button'>Save</button>"+"<br />"+"Fire Risk: "+props['fire-risk']+"<br />"+"<a href='https://www.spc.noaa.gov/products/fire_wx/fwdy1.html' target='_blank'>Click for more information</a>")
+			console.log(props['fire-risk'])
+			if (0 <= props['fire-risk'] && props['fire-risk'] < 1) {layer.setStyle({fillColor: '#005CE5'})}
+			if (1 <= props['fire-risk'] && props['fire-risk'] < 2) {layer.setStyle({fillColor: '#1551D2'})}
+			if (2 <= props['fire-risk'] && props['fire-risk'] < 3) {layer.setStyle({fillColor: '#2A47BF'})}
+			if (3 <= props['fire-risk'] && props['fire-risk'] < 4) {layer.setStyle({fillColor: '#3F3DAC'})}
+			if (4 <= props['fire-risk'] && props['fire-risk'] < 5) {layer.setStyle({fillColor: '#543399'})}
+			if (5 <= props['fire-risk'] && props['fire-risk'] < 6) {layer.setStyle({fillColor: '#6A2886'})}
+			if (6 <= props['fire-risk'] && props['fire-risk'] < 7) {layer.setStyle({fillColor: '#7F1E73'})}
+			if (7 <= props['fire-risk'] && props['fire-risk'] < 8) {layer.setStyle({fillColor: '#941460'})}
+			if (8 <= props['fire-risk'] && props['fire-risk'] < 9) {layer.setStyle({fillColor: '#A90A4D'})}
+			if (9 <= props['fire-risk'] && props['fire-risk'] <= 10) {layer.setStyle({fillColor: '#BF003A'})}
+			layer.openPopup()
+		})
+		drawnItems.addLayer(layer);
+	});
+	// gets and stringifies GeoJSON representation of the draw layer
+	function button_click() {
+		drawn_geojson = drawnItems.toGeoJSON()
+		alert('We drew: ' + JSON.stringify(drawn_geojson))
+		return drawn_geojson
+	}
+	// next two functions will open and close the loading icon when the fire risk button is clicked
+	function openModal() {
+        document.getElementById('modal').style.display = 'initial';
+	    document.getElementById('fade').style.display = 'initial';
+	    setTimeout(fireButton_click, 5); // HACK: slight timeout to get screen to refresh.
+	}
+
+	function closeModal() {
+		document.getElementById('modal').style.display = 'none';
+	   	document.getElementById('fade').style.display = 'none';
+	}
+	// send an XML Http request to the server for data from getSubGridData() of weather.py
+	function fireButton_click() {
+		drawn_geojson = drawnItems.toGeoJSON()
+		if (drawn_geojson.features.length == 0) {
+			alert('Please use the drawing pallete to the left to create boxes');
+			closeModal();
+		}
+		else {
+			// this array is linked to console.log() statement for verifying the array contents
+			var eachShape = [];
+			// A call to subGrid for each drawn shape
+			for (i = 0; i < drawn_geojson.features.length; i++) {
+				xhttp = new XMLHttpRequest();
+				centerLon = (drawn_geojson.features[i].geometry.coordinates[0][0][0] + drawn_geojson.features[i].geometry.coordinates[0][2][0]) / 2
+				centerLat = (drawn_geojson.features[i].geometry.coordinates[0][0][1] + drawn_geojson.features[i].geometry.coordinates[0][1][1]) / 2
+				distLat = drawn_geojson.features[i].geometry.coordinates[0][1][1] - centerLat
+				distLon = drawn_geojson.features[i].geometry.coordinates[0][0][0] - centerLon
+				// xhttp.open("GET", "http://127.0.0.1:5000/firedata/39.810278/-121.437222/10/10/10", true); <-- centerpoint of map test (Camp Fire)
+				xhttp.open("GET", "http://127.0.0.1:5000/firedata/" + centerLat + "/" + centerLon + "/" + distLat + "/" + distLon + "/10", false); 
+				xhttp.send();
+				var xhttpData = JSON.parse(xhttp.responseText).dwml.data;
+				// Logs each risk reading for each point of the subgrid into an array 
+				var eachRisk = [];
+				var sum = 0;
+				var average = 0;
+				for (j = 0; j < xhttpData.location.length; j++) {
+					console.log(xhttpData.parameters[j]['fire-weather'].value[0])
+					if (xhttpData.parameters[j]["fire-weather"].value[0] == "No Areas") {
+						eachRisk.push(0);
+					}
+					else if (xhttpData.parameters[j]["fire-weather"].value[0] == "Elevated Areas") {
+						eachRisk.push(5);
+						sum += 5;
+					}
+					else { // the final parameter is "Critical Areas"
+						console.log(xhttpData.parameters[j]["fire-weather"].value[0] == "Critical Areas")
+						eachRisk.push(10);
+						sum += 10;
+					}
+					console.log(sum)
+				}
+				// logs the average of each array's quantitative risk readings into an array
+				average = sum / eachRisk.length;
+				drawn_geojson.features[i].properties['fire-risk'] = average
+				eachShape.push(average);
+			}
+		}
+		console.log(eachShape);
+		closeModal();
+	}
+</script>
+<button type="button" onclick="button_click()" style="position:fixed; top:0; right: 0; z-index:999">Get GeoJson</button>
+<button type="button" onclick="openModal()" style="position:absolute; top: 20px; right: 0; z-index:999">Get Fire Risk</button>
+</body>
+</html>

@@ -99,14 +99,6 @@
 				<label class="tooltip">Customer Service Charge ($)<span class="classic">Monthly service charge for residential customers if any.</span></label>
 				<input type="text" id="customServiceCharge" name="customServiceCharge" pattern="^\d+\.?\d*$" value="15" required="required"/>
 			</div>
-			<div class="shortInput">
-				<label class="tooltip">Form 7.R.13.TOTAL Other Electric Revenue.<span class="classic">Additional revenue from Form 7 Table R.</span></label>
-				<input type="text" id="otherElecRevenue" name="otherElecRevenue" pattern="^\d+\.?\d*$" required="required"/>
-			</div>
-			<div class="shortInput">
-				<label class="tooltip">Form 7.L.5.c TOTAL kWh Purchased<span class="classic">Total energy purchased from Form 7 Table R.</span></label>
-				<input type="text" id="totalKWhPurchased" name="totalKWhPurchased" pattern="^\d+\.?\d*$" required="required"/>
-			</div>
 			<div class="wideInput">
 				<p class="inputSectionHeader">Form 7 Financial Variables</p>
 			</div>
@@ -301,6 +293,14 @@
 					</tr>
 				</table>
 			</div>
+			<div class="shortInput">
+				<label class="tooltip">Form 7.R.13.TOTAL Other Electric Revenue.<span class="classic">Additional revenue from Form 7 Table R.</span></label>
+				<input type="text" id="otherElecRevenue" name="otherElecRevenue" pattern="^\d+\.?\d*$" required="required"/>
+			</div>
+			<div class="shortInput">
+				<label class="tooltip">Form 7.L.5.c TOTAL kWh Purchased<span class="classic">Total energy purchased from Form 7 Table R.</span></label>
+				<input type="text" id="totalKWhPurchased" name="totalKWhPurchased" pattern="^\d+\.?\d*$" required="required"/>
+			</div>
 			<div class="wideInput" style="text-align:right">
 				<button id="deleteButton" type="button" class="stoppedInline postRunInline" onclick="deleteModel()">Delete</button>
 				<button id="shareButton" type="button" class="postRunInline" onclick="shareModel()">Share</button>
@@ -369,7 +369,7 @@
 					"plotOptions":{"column":{"stacking":'normal'},"series":{"animation":false,"shadow":false},"line":{"marker":{"enabled":false}}},
 					"xAxis":{"type":"category","tickColor":"gray","lineColor":"gray"},
 					"title":{"text":null},
-					"series":[{"name":"From Solar", "color":"orange", "data":allOutputData.totalGeneration, "dataLabels":{"enabled":false}},{"name":"From G&T", "color":"green", "data":allOutputData.totalsolarmonthly, "dataLabels":{"enabled":false}}],
+					"series":[{"name":"From Solar", "color":"orange", "data":allOutputData.monthlySolarkWhGenerated, "dataLabels":{"enabled":false}},{"name":"From G&T", "color":"green", "data":allOutputData.totalsolarmonthly, "dataLabels":{"enabled":false}}],
 					"yAxis":[{"title":{"text":"Energy (Wh)","style":{"color":"gray"}}}],
 					"chart":{"marginBottom":40,"zoomType":"disabled","renderTo":"monthlyPerformanceDiv","type":"column","marginRight":20,"height":250,"width":1000},
 					"tooltip":{"valueDecimals":1},
@@ -393,7 +393,7 @@
 					<g id="vendorNode" class="node"><circle cx="250" cy="450" r="45"></circle><text x="250" y="450" text-anchor="middle">Non-Power Costs</text></g>
 					<g id="patronageNode" class="node"><circle cx="500" cy="50" r="45"></circle><text x="500" y="50" text-anchor="middle">Patronage Capital</text></g>
 					<g id="distributionNode" class="node"><rect x="400" y="150" width="200" height="200"></rect><text x="500" y="250" text-anchor="middle">Distribution Utility</text></g>
-					<g id="panelsNode" class="node"><circle cx="850" cy="40" r="30"></circle><text x="850" y="40" text-anchor="middle">Panels</text></g>
+					<g id="panelsNode" class="node"><circle cx="850" cy="40" r="30"></circle><text x="850" y="40" text-anchor="middle">Solar</text></g>
 					<g id="solarConNode" class="node"><rect x="750" y="120" width="200" height="90"></rect><text x="850" y="165" text-anchor="middle">Solar Res. Consumers</text></g>
 					<g id="nonSolarConNode" class="node"><rect x="750" y="240" width="200" height="90"></rect><text x="850" y="285" text-anchor="middle">Non-Solar Res. Consumers</text></g>
 					<g id="commConNode" class="node"><rect x="750" y="350" width="200" height="90"></rect><text x="850" y="395" text-anchor="middle">C&amp;I Consumers</text></g>
@@ -446,7 +446,7 @@
 						gebi("solarConCashLabel").textContent = "$" + delimitNumbers(allOutputData.Solar.solarResRev.toFixed(0))
 						gebi("nonSolarConEnergyLabel").textContent = delimitNumbers(convertunits(allOutputData.Solar.resNonSolarKWhSold, 3).toFixed(0)) + " MWh"
 						gebi("nonSolarConCashLabel").textContent = "$" + delimitNumbers(allOutputData.Solar.resNonSolarRev.toFixed(0))
-						gebi("commConEnergyLabel").textContent = delimitNumbers(convertunits(allOutputData.BAU.nonResKWhSold, 3).toFixed(0)) + " MWh"
+						gebi("commConEnergyLabel").textContent = delimitNumbers(convertunits(allOutputData.Solar.nonResKWhSold, 3).toFixed(0)) + " MWh"
 						gebi("commConCashLabel").textContent = "$" + delimitNumbers(allOutputData.Solar.nonResRev.toFixed(0))
 						gebi("panelsEnergyLabel").textContent = delimitNumbers(convertunits(allOutputData.Solar.annualSolarGen, 3).toFixed(0)) + " MWh"
 						gebi("panelsCashLabel").textContent = "$" + delimitNumbers(allOutputData.Solar.costSolarGen.toFixed(0))
@@ -489,7 +489,7 @@
 				<tr><td>7.A.25.b</td><td>Generation and Transmission Capital Credits</td><td id="bau_genTransCapCredits" class="inVal"></td><td id="sol_genTransCapCredits"></td></tr>
 				<tr><td>7.A.26.b</td><td>Other Capital Credits and Patronage Dividends</td><td id="bau_otherCapCreditsPatroDivident" class="inVal"></td><td id="sol_otherCapCreditsPatroDivident"></td></tr>
 				<tr><td>7.A.27.b</td><td>Extraordinary Items</td><td id="bau_extraItems" class="inVal"></td><td id="sol_extraItems"></td></tr>
-				<tr><td>7.A.28.b</td><td>Patronage Capital or Margins (20 thru 27)</td><td id="bau_patCapital"></td><td id="sol_patCapital"></td></tr>
+				<tr><td>7.A.28.b</td><td>Patronage Capital or Margins (20 thru 27)</td><td id="bau_patCapital"></td><td id="sol_patCapital"></td><td id="delta_patCapital"></td></tr>
 			</table>
 			<script>
 				// Set all the values in the above table by mapping ID<->allOutput.
@@ -498,7 +498,7 @@
 				for (i=1; i<rows.length; i++) {
 					tds = rows[i].children
 					tds[2].innerHTML = delimitNumbers(allOutputData.BAU[tds[2].id.substring(4)].toFixed(0))
-					tds[3].innerHTML = delimitNumbers(allOutputData.Solar[tds[3].id.substring(4)].toFixed(0)) }
+					tds[3].innerHTML = delimitNumbers(allOutputData.Solar[tds[3].id.substring(4)].toFixed(0))}
 			</script>
 		</div>
 		<!-- TODO: Split into two separate sheet -->
@@ -515,13 +515,13 @@
 					cell = newRow.insertCell()
 					cell.innerHTML = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"][i]
 				}
-				insertMetric("monthlySummaryTable","No. Consumer Served", allOutputData.monthlyNoConsumerServedSales.map(function(x){return x[1]}))
+				insertMetric("monthlySummaryTable","No. Consumer Served", allOutputData.monthlyConsumers.map(function(x){return x[1]}))
 				insertMetric("monthlySummaryTable","Single Residential PV System Generation(kWh)", allOutputData.monthlyGeneration.map(function(x){return x[1]/1000}))
-				insertMetric("monthlySummaryTable","Total Residential PV Generation(kWh)", allOutputData.totalGeneration.map(function(x){return x[1]}))
-				insertMetric("monthlySummaryTable","KWh Sold", allOutputData.monthlyKWhSold.map(function(x){return x[1]}))
-				insertMetric("monthlySummaryTable","Revenue", allOutputData.monthlyRevenue.map(function(x){return x[1]}))
-				insertMetric("monthlySummaryTable","Total KWh Sold", allOutputData.totalKWhSold.map(function(x){return x[1]}))
-				insertMetric("monthlySummaryTable","Total Revenue from Sales of Electric Energy", allOutputData.totalRevenue.map(function(x){return x[1]}))
+				insertMetric("monthlySummaryTable","Total Residential PV Generation(kWh)", allOutputData.monthlySolarkWhGenerated.map(function(x){return x[1]}))
+				insertMetric("monthlySummaryTable","KWh Sold", allOutputData.monthlyResidentialkWhLoad.map(function(x){return x[1]}))
+				insertMetric("monthlySummaryTable","Revenue", allOutputData.monthlyResidentialRevenue.map(function(x){return x[1]}))
+				insertMetric("monthlySummaryTable","Total KWh Sold", allOutputData.monthlyTotalkWhLoad.map(function(x){return x[1]}))
+				insertMetric("monthlySummaryTable","Total Revenue from Sales of Electric Energy", allOutputData.monthlyTotalRevenue.map(function(x){return x[1]}))
 			</script>
 		</div>
 		<p class="reportTitle postRun">Irradiance</p>

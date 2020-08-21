@@ -1,7 +1,6 @@
 ''' Get power and energy limits from PNNL VirtualBatteries (VBAT) load model.'''
 import shutil, csv
 from os.path import isdir, join as pJoin
-
 from omf import weather
 from omf.models import __neoMetaModel__
 from omf.models.__neoMetaModel__ import *
@@ -66,8 +65,7 @@ def work(modelDir, inputDict):
 		data = data.loc[data['year']==year]
 		print(data)
 		if len(data) == 0:
-			print("Year needs to be before 2005")
-			raise Exception("Year needs to be before 2005")
+			raise Exception("No data for the year and location")
 		#Extract param from data, convert to int, and pass in values not pandas series
 		data = list(data[param].astype(float).values)
 	elif source == 'surfrad':

@@ -19,10 +19,10 @@ import pandas as pd
 from tempfile import mkdtemp
 import pysolar
 import pytz
-from joblib import dump, load
-from sklearn.preprocessing import PolynomialFeatures
 import xml.etree.ElementTree as ET
 import xmltodict
+from tensorflow import keras
+
 
 omfDir = os.path.dirname(os.path.abspath(__file__))
 
@@ -86,7 +86,7 @@ def pullAsosStations(filePath):
 				csvwriter.writerow(currentSite)
 
 
-def pullDarksky(year, lat, lon, datatype, units='si', api_key=os.environ.get('DARKSKY',''), path = None):
+def pullDarksky(year, lat, lon, datatype, units='si', api_key='31dac4830187f562147a946529516a8d', path = None):
 	'''Returns hourly weather data from the DarkSky API as array.
 
 	* For more on the DarkSky API: https://darksky.net/dev/docs#overview
@@ -122,9 +122,12 @@ def pullDarksky(year, lat, lon, datatype, units='si', api_key=os.environ.get('DA
 	urls = ['https://api.darksky.net/forecast/%s/%s,%s?exclude=daily&units=%s' % ( api_key, coords, time.isoformat(), units ) for time in times]
 	data = [requests.get(url) for url in urls]
 	if any(i.status_code != 200 for i in data):
+		# message = data[0].json()['error']
+		# raise Exception(message)
 		raise ApiError(data[0].json()['error'], status_code=400)
 	data = [i.json() for i in data]
 	print(data)
+	# print(data)
 	#a fun little annoyance: let's de-unicode those strings
 	#def ascii_me(obj):
 	#	if isinstance(obj, unicode):
@@ -147,7 +150,9 @@ def pullDarksky(year, lat, lon, datatype, units='si', api_key=os.environ.get('DA
 			out_csv = [columns]
 	# parse our json-dict
 	for day in data:
+		print(day)
 		for hour in day['hourly']['data']:
+			print(hour)
 			if path:
 				out_csv.append( [hour.get(key) for key in columns] )
 			out.append(hour.get(datatype))
@@ -850,6 +855,7 @@ def get_nrsdb_data(data_set, longitude, latitude, year, api_key, utc='true', lea
 			for i in reader:
 				csvwriter = csv.writer(csvfile, delimiter=',')
 				csvwriter.writerow(i)
+		return data
 	else:
 		#Transform data, and resubmit in friendly format for frontend
 		data = pd.DataFrame(reader)
@@ -872,8 +878,8 @@ SURFRAD_COLUMNS = [
     'winddir', 'winddir_flag', 'pressure', 'pressure_flag']
 
 def getRadiationYears(radiation_type, site, year):
+	'''Pull solard or surfrad data and aggregate into a year. '''
 	print("getRadiationRunning~!!!!!!!**********")
-	'''Pull solard or surfrad data and aggregate into a year'''
 	URL = 'ftp://aftp.cmdl.noaa.gov/data/radiation/{}/{}/{}/'.format(radiation_type, site, year)
 	#FILE = 'tbl19001.dat' - example
 	# Get directory contents.
@@ -899,7 +905,7 @@ def getRadiationYears(radiation_type, site, year):
 	return accum
 
 def create_tsv(data, radiation_type, site, year):
-	'''Create tsv file from dict '''
+	'''Create tsv file from dict. '''
 	column_count = len(data[0])
 	with open('{}-{}-{}.tsv'.format(radiation_type, site, year), 'w', newline='') as f:
 		output = csv.DictWriter(f, fieldnames=['col{}'.format(x) for x in range(column_count)], delimiter='\t')
@@ -921,17 +927,11 @@ def get_radiation_data(radiation_type, site, year, out_file=None):
 		# return allYears
 		return df
 
-
-
-
-
 ####### GHI/DHI/DNI Estimator Code Below #######
 
 #darksky key
 _key = '31dac4830187f562147a946529516a8d' #Personal Key
 _key2 = os.environ.get('DARKSKY','')
-
-#Station_Dict
 
 Station_Dict = {
 	"AK_Cordova_14_ESE":(60.473, -145.35,'US/Alaska'),
@@ -1093,23 +1093,21 @@ Station_Dict = {
 
 
 
-def _getUscrnData(year='2020', location='TX_Austin_33_NW', dataType="SOLARAD"):
+def _getUscrnData(year='2018', location='TX_Austin_33_NW', dataType="SOLARAD"):
 	ghiData = pullUscrn(year, location, dataType)
 	return ghiData
 
 #Standard positional arguments are for TX_Austin
-def _getDarkSkyCloudCoverForYear(year='2020', lat=30.581736, lon=-98.024098, key=_key, units='si'):
+def _getDarkSkyCloudCoverForYear(year='2018', lat=30.581736, lon=-98.024098, key=_key, units='si'):
 	cloudCoverByHour = {}
+	pressureByHour = {}
 	coords = '%0.2f,%0.2f' % (lat, lon)
 	times = list(pd.date_range('{}-01-01'.format(year), '{}-12-31'.format(year), freq='D'))
 	while times:
 		time = times.pop(0)
 		print(time)
 		url = 'https://api.darksky.net/forecast/%s/%s,%s?exclude=daily,alerts,minutely,currently&units=%s' % (key, coords, time.isoformat(), units ) 
-		res = requests.get(url)
-		if res.status_code != 200:
-			raise ApiError(res.json()['error'], status_code=res.status_code)
-		res = res.json()
+		res = requests.get(url).json()
 		try:
 			dayData = res['hourly']['data']
 		except KeyError:
@@ -1118,99 +1116,83 @@ def _getDarkSkyCloudCoverForYear(year='2020', lat=30.581736, lon=-98.024098, key
 		for hour in dayData:
 			try:
 				cloudCoverByHour[hour['time']] = hour['cloudCover']
+				#Darksky result in hpascals, model trained in mbar. 1 - 1 transformation.
+				pressureByHour[hour['time']] = hour['pressure']
 			except KeyError:
 				print("No Cloud Cover Data")
 				pass
-	return cloudCoverByHour
-
-def _makeDataNonzero(data):
-	ghiData=list(filter(lambda num: num!=0.0, data))
-	assert(all(x[0]!=0 for x in ghiData))
-	return ghiData
-
-def _logifyData(data):
-	data = np.log(data)
-	return data
-
-def _initPolyModel(X, degrees=5):
-    poly = PolynomialFeatures(degree=degrees)
-    _X_poly = poly.fit_transform(X)
-    return _X_poly
-
-def getCosineOfSolarZenith(lat, lon, datetime, timezone):
-	date = pytz.timezone(timezone).localize(datetime)
-	solar_altitude = pysolar.solar.get_altitude(lat,lon,date)
-	solar_zenith = 90 - solar_altitude
-	cosOfSolarZenith = cos(radians(solar_zenith))
-	return cosOfSolarZenith
-
-def preparePredictionVectors(year='2020', lat=30.581736, lon=-98.024098, station='TX_Austin_33_NW', timezone='US/Central'):
-	cloudCoverData = _getDarkSkyCloudCoverForYear(year, lat, lon)
-	ghiData = _getUscrnData(year, station, dataType="SOLARAD")
-	#for each 8760 hourly time slots, make a timestamp for each slot, look up cloud cover by that slot
-	#then append cloud cover and GHI reading together
-	start_time = datetime(int(year),1,1,0)
-	cosArray = []
-	input_array = []
-	for i in range(len(ghiData)): #Because ghiData is leneth 8760, one for each hour of a year
-		time = start_time + timedelta(minutes=60*i)
-		tstamp = int(datetime.timestamp(time))
-		try:
-			cloudCover = cloudCoverData[tstamp]
-		except KeyError:
-			cloudCover = 0
-		#I have my cloud cover, iterate over my ghi and cosine arrays
-		cosOfSolarZenith = getCosineOfSolarZenith(lat, lon, time, timezone)
-		ghi = ghiData[i]
-		if ghi <= 0:
-			#Not most efficient logic but....
-			#Still need to decide how to handle zero vals. Test this
-			input_array.append((0, cloudCover))
-		else:	
-			ghi = np.log(ghi)
-			input_array.append((ghi, cloudCover))
-		cosArray.append(cosOfSolarZenith)
-	return input_array, ghiData, cosArray
+	return cloudCoverByHour, pressureByHour
 
 
-def predictPolynomial(X, model, degrees=5):
-	X = _initPolyModel(X, degrees=5)
-	predictions_dhi = model.predict(X)
-	return predictions_dhi
+def getSolarZenith(lat, lon, datetime, timezone):
+    date = pytz.timezone(timezone).localize(datetime)
+    solar_altitude = pysolar.solar.get_altitude(lat,lon,date)
+    solar_zenith = 90 - solar_altitude
+    return solar_zenith
 
-def get_synth_dhi_dni(uscrn_station, year):
-	print("********EASY SOLAR STARTED************")
-	poly_path = pJoin(omfDir, 'static', 'Log_Polynomial_clf.joblib')
-	clf_log_poly = load(poly_path)
-	lat = Station_Dict[uscrn_station][0]
-	lon = Station_Dict[uscrn_station][1]
-	timezone = Station_Dict[uscrn_station][2]
-	input_array, ghiData, cosArray = preparePredictionVectors(year, lat, lon, uscrn_station, timezone)
-	log_prediction = predictPolynomial(input_array, clf_log_poly)
-	dhiPredictions = np.exp(log_prediction)
-	dniXCosTheta = ghiData - dhiPredictions #This is cos(theta) * DNI
-	dni_array = ([dniXCosTheta[i]/cosArray[i] for i in range(len(dniXCosTheta))]) 
-	result = list(zip(dhiPredictions, ghiData, dni_array))
-	return result
+
+def preparePredictionVectors(year='2018', lat=30.581736, lon=-98.024098, station='TX_Austin_33_NW', timezone='US/Central'):
+    cloudCoverData, pressureData = _getDarkSkyCloudCoverForYear(year, lat, lon)
+    ghiData = _getUscrnData(year, station, dataType="SOLARAD")
+    #for each 8760 hourly time slots, make a timestamp for each slot, look up cloud cover by that slot
+    #then append cloud cover and GHI reading together
+    start_time = datetime(int(year),1,1,0)
+    cosArray = []
+    input_array = []
+    for i in range(len(ghiData)): #Because ghiData is leneth 8760, one for each hour of a year
+        time = start_time + timedelta(minutes=60*i)
+        tstamp = int(datetime.timestamp(time))
+        hour = time.hour
+        minute = time.minute
+        try:
+            cloudCover = cloudCoverData[tstamp]
+            pressure = pressureData[tstamp]
+        except KeyError:
+            cloudCover = 0
+            pressure = 0
+        #I have my cloud cover, iterate over my ghi and cosine arrays
+        solar_zenith = getSolarZenith(lat, lon, time, timezone)
+        #Get cosine of solar zenith, this is going to be used later in dni calculation. Make sure its in radians.
+        cosOfSolarZenith = cos(solar_zenith*0.0175)
+        ghi = ghiData[i]
+        input_array.append([ghi, cloudCover, hour, minute, solar_zenith, pressure])
+        cosArray.append(cosOfSolarZenith)
+    return input_array, ghiData, cosArray
+
+def predictNeuralNet(input_array, model_path):
+    model = keras.models.load_model(model_path)
+    #Takes in numpy array of proper shape
+    """
+    Ghi
+    Cloud Cover 
+    Hours
+    Minutes
+    Solar Zenith
+    Pressure
+    DHI"""
+    preds = model.predict(input_array)
+    return preds
+
+def get_synth_dhi_dni(uscrn_station='TX_Austin_33_NW', year='2020'):
+    lat = Station_Dict[uscrn_station][0]
+    lon = Station_Dict[uscrn_station][1]
+    timezone = Station_Dict[uscrn_station][2]
+    input_array, ghi_array, cos_array = preparePredictionVectors(year, lat, lon, uscrn_station, timezone)
+    print("input array created")
+    dhi_preds = list(predictNeuralNet(input_array, 'Neural_Net_National'))
+    dhi_preds = [float(i) for i in dhi_preds]
+    print("preds made")
+    dniXCosTheta = [ghi_array[i] - dhi_preds[i] for i in range(0, len(ghi_array))] #This is cos(theta) * DNI
+    print("cos theta calculation made")
+    dni_array = ([dniXCosTheta[i]/cos_array[i] for i in range(len(dniXCosTheta))])
+    result = list(zip((dhi_preds), (ghi_array), (dni_array)))
+    assert len(result) == len(input_array)
+    return result
+
 
 def easy_solar_tests(uscrn_station='TX_Austin_33_NW'):
 	print("********EASY SOLAR TEST STARTED************")
-	print(Station_Dict)
-	poly_path = pJoin(omfDir, 'static', 'Log_Polynomial_clf.joblib')
-	clf_log_poly = load(poly_path)
-	year='2018'
-	lat = Station_Dict[uscrn_station][0]
-	lon = Station_Dict[uscrn_station][1]
-	timezone = Station_Dict[uscrn_station][2]
-	input_array, ghiData, cosArray = preparePredictionVectors(year, lat, lon, uscrn_station, timezone)
-	assert len(input_array) == len(ghiData) == len(cosArray)
-	log_prediction = predictPolynomial(input_array, clf_log_poly)
-	dhiPredictions = np.exp(log_prediction)
-	dniXCosTheta = ghiData - dhiPredictions #This is cos(theta) * DNI
-	dni_array = ([dniXCosTheta[i]/cosArray[i] for i in range(len(dniXCosTheta))]) 
-	result = list(zip(dhiPredictions, ghiData, dni_array))
-	assert len(result) == len(input_array)
-	print(result)
+	print(get_synth_dhi_dni())
 	print("Easy Solar Test Suceeded.........")
 
 
@@ -1245,6 +1227,37 @@ def _singlePointDataQuery(lat1, lon1, product, begin, end, Unit='m', optional_pa
 	urlString +='&' + urlencode(params3)
 	return urlString
 
+"""Subgrid defined by center point and lat/lon horizontal distance"""
+
+def _subGrid(centerPointLat, centerPointLon, distanceLat, distanceLon, resolutionSquare, product, begin, end, Unit='m', optional_params=['wspd', 'wdir']):
+	#Split into 3 dictionaries, each are encoded in a different manner
+	params = {
+		'centerPointLat':centerPointLat,
+		'centerPointLon':centerPointLon,
+		'distanceLat':distanceLat,
+		'distanceLon':distanceLon,
+		'resolutionSquare':resolutionSquare,
+		'product':product
+	}
+	#Begin/end has special encoding
+	params2 = {'begin':begin,
+	'end':end
+	}
+	params3 = {
+		'Unit':Unit,
+	}
+
+	urlString = urlencode(params)
+	subString = ''
+	for key, value in params2.items():
+		subString += '&'+str(key) + '=' + str(value)
+	urlString+=subString
+	for i in optional_params:
+		params3[i] = i
+	urlString +='&' + urlencode(params3)
+
+	return urlString
+
 #Main URL path
 def _ndfd_url(path=''):
     return 'http://www.weather.gov/forecasts/xml/sample_products/browser_interface/ndfdXMLclient.php?' + path
@@ -1275,6 +1288,15 @@ def get_ndfd_data(lat1, lon1, optional_params=['wspd'], begin=str(datetime.now()
 	return data
 
 
+#Wrapper to call _subGrid, return parsed dict
+def getSubGridData(centerLat, centerLon, distanceLat, distanceLon, resolutionSquare, product='time-series', begin=str(datetime.now().isoformat()), end=print((datetime.now()+timedelta(weeks=+10)).isoformat()), Unit='m', optional_params=['critfireo']):
+	data = _run_ndfd_request(_subGrid(centerLat, centerLon, distanceLat, distanceLon, resolutionSquare, product, begin, end, Unit, optional_params))
+	outData = _generalParseXml(data)
+	return outData
+
+
+
+#Custom ApiError class
 class ApiError(Exception):
 
 	def __init__(self, message, status_code=None, payload=None):
@@ -1284,6 +1306,7 @@ class ApiError(Exception):
 			self.status_code = status_code
 		self.payload = payload
 		print(self.message)
+		raise Exception(self.message + ' ' + str(self.status_code))
 
 	def to_dict(self):
 		rv = dict(self.payload or ())
@@ -1295,6 +1318,7 @@ class ApiError(Exception):
 
 
 def _tests():
+	import traceback
 	print('weather.py tests currently disabled to keep them from sending too many HTTP requests.')
 	tmpdir = mkdtemp()
 	print("Beginning to test weather.py in", tmpdir)
@@ -1307,7 +1331,9 @@ def _tests():
 	# 		print("ASOS data corrupted")
 	# 		raise Exception
 	# except:
+	# 	val = traceback.format_exc()
 	# 	e = sys.exc_info()[0]
+	# 	print(val)
 	# 	print(e)
 
 	# # # print('ASOS (Iowa) data pulled to ' + tmpdir)
@@ -1321,27 +1347,32 @@ def _tests():
 	# try:
 	# 	# data = pullUscrn('2017', 'KY_Versailles_3_NNW', "IRRADIENCE_DIFFUSE") # Does not write to a file by itself
 	# except:
+	# 	val = traceback.format_exc()
 	# 	e = sys.exc_info()[0]
+	# 	print(val)
 	# 	print(e)
 
 #	Testing DarkSky (Works as long as you have an API key)
 	# d=(pullDarksky(1900, 36.64, -93.30, 'temperature', api_key= '31dac4830187f562147a946529516a8d', path=tmpdir))
 	# try:
-	# 	d=(pullDarksky(2000, 36.64, -93.30, 'temperature', api_key= '31dac4830187f562147a946529516a8d', path=tmpdir))
+	# 	d=(pullDarksky(1900, 30, -90, 'temperature', api_key= '31dac4830187f562147a946529516a8d'))
 	# 	print(d)
 	# except:
+	# 	val = traceback.format_exc()
 	# 	e = sys.exc_info()[0]
+	# 	print(val)
 	# 	print(e)
 
-# #	#Testing NSRDB (Works, but not used anywhere)
+	#Testing NSRDB (Works)
 	# nsrdbkey = 'rnvNJxNENljf60SBKGxkGVwkXls4IAKs1M8uZl56'
 	# try:
 	# #Test For Austin, TX
-	# 	# d=get_nrsdb_data('psm',90.0,-30.00,'2018', nsrdbkey, interval=60)
-	# 	d=get_nrsdb_data('psm',-98.024098,30.581736,'1900', 'nsrdbkey', interval=60)
+	# 	d=get_nrsdb_data('psm',-90.0,30.00,'2018', nsrdbkey, interval=60)
 	# 	print(d)
 	# except:
+	# 	val = traceback.format_exc()
 	# 	e = sys.exc_info()[0]
+	# 	print(val)
 	# 	print(e)
 
 #	Testing tmy3 (Works)
@@ -1353,15 +1384,21 @@ def _tests():
 	# 			print("too early a year")
 	# 			raise Exception
 	# 	except:
+	# 		val = traceback.format_exc()
 	# 		e = sys.exc_info()[0]
+	# 		print(val)
 	# 		print(e)
 
 #	NDFD tests
 	# try:
-	# 	d = get_ndfd_data('39.0000', '-77000.0000',['wspd'])
+	# # 	d = get_ndfd_data('39.0000', '-77000.0000',['wspd'])
+	# # 	print(d)
+	# 	d = getSubGridData('40.758701', '-111.876183', '20', '20', '20', 'time-series')
 	# 	print(d)
 	# except:
+	# 	val = traceback.format_exc()
 	# 	e = sys.exc_info()[0]
+	# 	print(val)
 	# 	print(e)
 	
 #	Easy Solar Tests

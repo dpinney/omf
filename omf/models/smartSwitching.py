@@ -1153,7 +1153,7 @@ def new(modelDir):
 	defaultInputs = {
 		'modelType': modelName,
 		'feederName1': 'ieee37nodeFaultTester',
-		'generateRandomFaults': 'False',
+		'generateRandomFaults': 'True',
 		'lineTypeForFaults': 'underground_line',
 		'recloserLocation': 'node709-708',
 		'failureDistribution': 'EXPONENTIAL',
