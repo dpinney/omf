@@ -230,7 +230,7 @@ def forgotpwd(email):
 			user = json.load(f)
 		message = "Click the link below to reset your password for the OMF.  This link will expire in 24 hours.\n\nreg_link"
 		code = send_link(email, message, user)
-		if code is "Success":
+		if code == "Success":
 			return "We have sent a password reset link to " + email
 		else:
 			raise Exception
