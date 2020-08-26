@@ -110,7 +110,6 @@ def evilDssTreeToGldTree(dssTree):
 			}
 		elif ob['!CMD'] == 'new':
 			obtype, name = ob['object'].split('.')
-			#TODO: set "object" keys correctly by finding the '.' or splitting.
 			if 'bus1' in ob and 'bus2' in ob:
 				# line-like object.
 				gldTree[str(g_id)] = {
@@ -120,7 +119,6 @@ def evilDssTreeToGldTree(dssTree):
 					"from": ob['bus1'][0:ob['bus1'].find('.')],
 					"to": ob['bus2'][0:ob['bus2'].find('.')]
 				}
-				#TODO: exclude some of the keys.
 				other_keys = {k: ob[k] for k in ob if k not in ['object','bus1','bus2','!CMD']}
 				gldTree[str(g_id)].update(other_keys)
 			elif 'buses' in ob:
@@ -163,6 +161,11 @@ def evilDssTreeToGldTree(dssTree):
 			warnings.warn(f'Ignored {ob}')
 		g_id += 1
 	return gldTree
+
+def evilGldTreeToDssTree():
+	''' Inverse frontend to DSS converter. Still evil. '''
+	#TODO: implement
+	pass
 
 if __name__ == '__main__':
 	tree = dssToTree('ieee37_ours.dss')
