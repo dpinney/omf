@@ -98,7 +98,8 @@ def evilDssTreeToGldTree(dssTree):
 	We built this to do quick-and-dirty viz of openDSS files. '''
 	gldTree = {}
 	g_id = 1
-	# Grab the SetBusXY commands to make the nodes (=buses, which opendss creates implicitly)
+	# TODO: find all buses without coords. Ick.
+	# Build bad gld representation of each object
 	for ob in dssTree:
 		if ob['!CMD'] == 'setbusxy':
 			gldTree[str(g_id)] = {
@@ -107,40 +108,60 @@ def evilDssTreeToGldTree(dssTree):
 				"latitude": ob['y'],
 				"longitude": ob['x']
 			}
-			g_id += 1
-	# TODO: find all buses without coords. Ick.
-	# Build bad gld representation of each object
-	for ob in dssTree:
-		if ob['!CMD'] == 'new':
-			obtype = ob['object']
-			if obtype.startswith('line.'):
+		elif ob['!CMD'] == 'new':
+			obtype, name = ob['object'].split('.')
+			#TODO: set "object" keys correctly by finding the '.' or splitting.
+			if 'bus1' in ob and 'bus2' in ob:
+				# line-like object.
 				gldTree[str(g_id)] = {
-					"object": "line",
-					"name": obtype,
-					"phases": "ABC",
+					"object": obtype,
+					"name": name,
 					# strip the weird dot notation stuff via find.
 					"from": ob['bus1'][0:ob['bus1'].find('.')],
 					"to": ob['bus2'][0:ob['bus2'].find('.')]
 				}
-			elif obtype.startswith('load.'):
-				gldTree[str(g_id)] = {
-					"object": "load", 
-					"name": obtype,
-					"phases": "ABC"
-				}
-			elif obtype.startswith('transformer.') and 'buses' in ob:
+				#TODO: exclude some of the keys.
+				other_keys = {k: ob[k] for k in ob if k not in ['object','bus1','bus2','!CMD']}
+				gldTree[str(g_id)].update(other_keys)
+			elif 'buses' in ob:
+				#transformer-like object.
 				fro, to = ob['buses'].replace('(','').replace(')','').split(',')
 				gldTree[str(g_id)] = {
-					"object": "transformer",
-					"name": obtype,
-					"phases": "ABC",
+					"object": obtype,
+					"name": name,
 					"from": fro,
 					"to": to
 				}
+				other_keys = {k: ob[k] for k in ob if k not in ['object','buses','!CMD']}
+				gldTree[str(g_id)].update(other_keys)
+			elif 'bus' in ob:
+				#load-like object.
+				gldTree[str(g_id)] = {
+					"object": obtype,
+					"name": name,
+					"parent": ob['bus']
+				}
+				other_keys = {k: ob[k] for k in ob if k not in ['object','bus','!CMD']}
+				gldTree[str(g_id)].update(other_keys)
 			else:
-				warnings.warn(f'Ignored {ob}')
-				pass # ignore other object types: Circuit, Fuse, Line, Linecode, Load, RegControl, Transformer, etc.
-			g_id += 1
+				#config-like object.
+				gldTree[str(g_id)] = {
+					"object": obtype,
+					"name": name
+				}
+				other_keys = {k: ob[k] for k in ob if k not in ['object','!CMD']}
+				gldTree[str(g_id)].update(other_keys)
+		elif ob['!CMD'] not in ['new', 'setbusxy']:
+			#command-like objects.
+			gldTree[str(g_id)] = {
+				"object": "!CMD",
+				"name": ob['!CMD']
+			}
+			other_keys = {k: ob[k] for k in ob if k not in ['!CMD']}
+			gldTree[str(g_id)].update(other_keys)
+		else:
+			warnings.warn(f'Ignored {ob}')
+		g_id += 1
 	return gldTree
 
 if __name__ == '__main__':
@@ -152,5 +173,5 @@ if __name__ == '__main__':
 	evil_glm = evilDssTreeToGldTree(tree)
 	from omf import feeder, distNetViz
 	feeder.dump(evil_glm, './evil.glm')
-	distNetViz.viz('./evil.glm', forceLayout=True, open_file=True)
+	distNetViz.viz('./evil.glm', open_file=True) #forceLayout=True, 
 	#TODO: make parser accept keyless items with new !keyless_n key?
