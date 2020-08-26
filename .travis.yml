@@ -29,6 +29,7 @@ before_install:
   - if [ "$TRAVIS_OS_NAME" = "windows" ]; then choco install python --version 3.6.8; fi
   - if [ "$TRAVIS_OS_NAME" = "windows" ]; then export "PATH=/c/Python36:/c/Python36/Scripts:/c/Program files (x86)/Graphviz2.38/bin:$PATH"; fi
   - if [ "$TRAVIS_OS_NAME" = "windows" ]; then ln -s /c/Python36/python /usr/bin/python3; ln -s /c/Python36/Scripts/pip /usr/bin/pip3; fi
+  - if [ "$TRAVIS_OS_NAME" = "windows" ]; then pip3 install pystan; fi
   - python3 install.py
   - export BOTO_CONFIG=/dev/null
 install:
