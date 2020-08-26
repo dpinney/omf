@@ -39,5 +39,5 @@ setup(
 	license = 'GPLv2',
 	platforms = 'any',
 	zip_safe = False, 
-	install_requires = open("requirements.txt").readlines(),
+	install_requires = [x for x in open("requirements.txt").readlines() if not x.startswith('#')],
 )

@@ -38,6 +38,6 @@ pysolar
 xmltodict
 joblib
 pystan
-fbprophet
+#fbprophet
 tensorflow
 xmltodict>=0.12.0
