@@ -7,6 +7,7 @@ from ditto.writers.opendss.write import Writer as dWriter
 from ditto.readers.gridlabd.read import Reader as gReader
 from ditto.writers.gridlabd.write import Writer as gWriter
 from collections import OrderedDict
+import warnings
 
 def gridLabToDSS(inFilePath, outFilePath):
 	''' Convert gridlab file to dss. ''' 
@@ -38,6 +39,8 @@ def dssToTree(pathToDss):
 	# Ingest file.
 	with open(pathToDss, 'r') as dssFile:
 		contents = dssFile.readlines()
+	# Lowercase everything. OpenDSS is case insensitive.
+	contents = [x.lower() for x in contents]
 	# Clean up the file.
 	for i, line in enumerate(contents):
 		# Remove whitespace.
@@ -97,44 +100,57 @@ def evilDssTreeToGldTree(dssTree):
 	g_id = 1
 	# Grab the SetBusXY commands to make the nodes (=buses, which opendss creates implicitly)
 	for ob in dssTree:
-		if ob['!CMD'] == 'SetBusXY':
+		if ob['!CMD'] == 'setbusxy':
 			gldTree[str(g_id)] = {
 				"object": "node",
-				"name": ob['Bus'],
-				"phases": "ABC",
-				"latitude": ob['Y'],
-				"longitude": ob['X']
+				"name": ob['bus'],
+				"latitude": ob['y'],
+				"longitude": ob['x']
 			}
 			g_id += 1
+	# TODO: find all buses without coords. Ick.
 	# Build bad gld representation of each object
 	for ob in dssTree:
-		if ob['!CMD'] == 'New':
+		if ob['!CMD'] == 'new':
 			obtype = ob['object']
-			if obtype.startswith('Line.'):
+			if obtype.startswith('line.'):
 				gldTree[str(g_id)] = {
-					"object": "overhead_line",
+					"object": "line",
 					"name": obtype,
 					"phases": "ABC",
 					# strip the weird dot notation stuff via find.
 					"from": ob['bus1'][0:ob['bus1'].find('.')],
 					"to": ob['bus2'][0:ob['bus2'].find('.')]
 				}
-			elif obtype.startswith('Load.'):
+			elif obtype.startswith('load.'):
 				gldTree[str(g_id)] = {
 					"object": "load", 
 					"name": obtype,
 					"phases": "ABC"
 				}
-			elif obtype.startswith('Transformer'):
-				pass # opendss transformers are bus-type objects, so who knows how to model in gld
+			elif obtype.startswith('transformer.') and 'buses' in ob:
+				fro, to = ob['buses'].replace('(','').replace(')','').split(',')
+				gldTree[str(g_id)] = {
+					"object": "transformer",
+					"name": obtype,
+					"phases": "ABC",
+					"from": fro,
+					"to": to
+				}
 			else:
+				warnings.warn(f'Ignored {ob}')
 				pass # ignore other object types: Circuit, Fuse, Line, Linecode, Load, RegControl, Transformer, etc.
 			g_id += 1
 	return gldTree
 
-#if __name__ == '__main__':
-	# tree = dssToTree('ieee37_ours.dss')
+if __name__ == '__main__':
+	tree = dssToTree('ieee37_ours.dss')
 	# treeToDss(tree, 'ieee37p.dss')
 	# dssToMem('ieee37.dss')
 	# dssToGridLab('ieee37.dss', 'Model.glm') # this kind of works
-	#gridLabToDSS('ieee37_fixed.glm', 'ieee37_conv.dss') # this fails miserably
+	# gridLabToDSS('ieee37_fixed.glm', 'ieee37_conv.dss') # this fails miserably
+	evil_glm = evilDssTreeToGldTree(tree)
+	from omf import feeder, distNetViz
+	feeder.dump(evil_glm, './evil.glm')
+	distNetViz.viz('./evil.glm', forceLayout=True, open_file=True)
+	#TODO: make parser accept keyless items with new !keyless_n key?
