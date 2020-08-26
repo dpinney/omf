@@ -395,6 +395,10 @@ def work(modelDir, inputDict):
 
 	return outData
 
+def runtimeEstimate(modelDir):
+	''' Estimated runtime of model in minutes. '''
+	return 2.0
+
 def new(modelDir):
 	''' Create a new instance of this model. Returns true on success, false on failure. '''
 	fName = "input - 2 col, 200 Employee Office, Springfield Illinois, 2001.csv"
@@ -447,9 +451,9 @@ def _debugging():
 	# Pre-run.
 	renderAndShow(modelLoc)
 	# Run the model.
-	# __neoMetaModel__.runForeground(modelLoc)
+	__neoMetaModel__.runForeground(modelLoc)
 	# Show the output.
-	# __neoMetaModel__.renderAndShow(modelLoc)
+	__neoMetaModel__.renderAndShow(modelLoc)
 
 if __name__ == '__main__':
 	_debugging()
