@@ -178,3 +178,4 @@ if __name__ == '__main__':
 	feeder.dump(evil_glm, './evil.glm')
 	distNetViz.viz('./evil.glm', open_file=True) #forceLayout=True, 
 	#TODO: make parser accept keyless items with new !keyless_n key?
+	#TODO: define .dsc format and write syntax guide.
