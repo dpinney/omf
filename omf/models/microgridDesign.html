@@ -18,26 +18,6 @@
 
 	<script type="text/javascript">
 
-		function checkboxDisplayInput(checkboxName) {
-			
-			if ( $('#' + checkboxName ).prop('checked') == true ){
-				$('.' + checkboxName + 'DisplayInput').show();
-			} else { $('.' + checkboxName + 'DisplayInput').hide() }
-			
-			if (allOutputData != null) {
-				checkboxDisplay(checkboxName);
-			}
-
-			
-		}
-
-		function checkboxDisplay(checkboxName) {
-			if ( $('#' + checkboxName ).prop('checked') == true ){
-				$('.' + checkboxName + 'Display').show();
-			} else { $('.' + checkboxName + 'Display').hide() }
-		
-		}
-
 		function populateTables() {
 			var list = document.getElementsByTagName("td");
 			for (var i = 0; i < list.length; i++) {
@@ -226,43 +206,7 @@
 		}
 
 		$(window).on('pageshow',function(){
-
-		    // use input data to set checkboxes unless output data exists
-		    // sometimes there will be no wind output even tho wind was selected in the input
-		    // so allways use output data for most relevant info
-		    dict = allInputData;
-		    if (allOutputData != null) { dict = allOutputData; }
-
-
-		    console.log(dict)
-
-
-
-		    // set checkboxes appropriately
-			if (dict['solar'] == 'off') { $('#solar').prop('checked',false); } 
-			else { $('#solar').prop('checked',true); }
-			if (dict['wind'] == 'off') { $('#wind').prop('checked',false); } 
-			else { $('#wind').prop('checked',true); }
-			if (dict['battery'] == 'off') { $('#battery').prop('checked',false); } 
-			else { $('#battery').prop('checked',true); }
-
-			// toggle the displays of the appropriate outputs only once 
-			// the ouputs have been generated
-			if (allOutputData != null) {
-				checkboxDisplay('solar');
-				checkboxDisplay('wind');
-				checkboxDisplay('battery');
-			}
-
-			// otherwise only set the input displays
-			else {
-				checkboxDisplayInput('solar');
-				checkboxDisplayInput('wind');
-				checkboxDisplayInput('battery');
-			}
-
 			loadContent();
-
 		});
 
 	</script>
@@ -315,7 +259,6 @@
 </head>
 
 <body onload="init()">
-	
 	<div id="header">
 		<div id="headInnerBlock">
 			<div id="menuLeft">
@@ -324,12 +267,10 @@
 			</div>
 		</div>
 	</div>
-
 	<div id="triangle-parent">
 		<div id="triangle-message">New Version<span class="classic-triangle">A new version of the model has been added to the OMF. To get the new outputs, please fill in any missing inputs and hit "Run Model". You can also just look at the old inputs/outputs.</span></div>
 		<div id="triangle-topright"></div>
 	</div>
-	
 	<p class="reportTitle">Model Input</p>
 	<div id="input" class="content">
 		<form name="inputForm" action="/runModel/" onsubmit="event.preventDefault(); return isFormValid();" method="post">
@@ -357,7 +298,7 @@
 
 			
 			<div class="wideInput">
-				<p class="inputSectionHeader">Microgrid Design Parameters</p>
+				<p class="inputSectionHeader">Grid Parameters</p>
 			</div>
 			<hr>
 			<div class="shortInput">
@@ -391,30 +332,36 @@
 			</div>
 			
 			<div class="wideInput">
-				<p class="inputSectionHeader">Select your Technologies</p>
+				<p class="inputSectionHeader">Generation Technologies</p>
 			</div>
 			<hr>
 			<div class="shortInput">
-				<input type="checkbox" name="solar" id="solar" onchange="checkboxDisplayInput('solar')">
-				<label class="tooltip">Solar <span class="classic">Check the box if you want to include Solar generation in your microgrid.</span>
-				</label>
+				<label class="tooltip">Solar<span class="classic">Include solar in the microgrid design?</span></label>
+				<select id="solar" name="solar"/>
+					<option value="on">Yes</option>
+					<option value="off">No</option>
+				</select>
 			</div>
 			<div class="shortInput">
-				<input type="checkbox" name="wind" id="wind" onchange="checkboxDisplayInput('wind')">
-				<label class="tooltip">Wind <span class="classic">Check the box if you want to include wind generation in your microgrid.</span>
-				</label>
+				<label class="tooltip">Wind<span class="classic">Include wind in the microgrid design?</span></label>
+				<select id="wind" name="wind"/>
+					<option value="on">Yes</option>
+					<option value="off">No</option>
+				</select>
 			</div>
 			<div class="shortInput">
-				<input type="checkbox" name="battery" id="battery" onchange="checkboxDisplayInput('battery')">
-				<label class="tooltip">Battery <span class="classic">Check the box if you want to include battery storage in your microgrid.</span>
-				</label>
+				<label class="tooltip">Battery<span class="classic">Include batteries in the microgrid design?</span></label>
+				<select id="battery" name="battery"/>
+					<option value="on">Yes</option>
+					<option value="off">No</option>
+				</select>
 			</div>
 			<div class="shortInput solarDisplayInput">
 				<label class="tooltip">Solar Cost ($/kW)<span class="classic">Specify the cost in $/kW.</span></label>
 				<input type="text" id="solarCost" name="solarCost" pattern="^\d+\.?\d*?$" required="required"/>
 			</div>
 			<div class="shortInput solarDisplayInput">
-				<label class="tooltip">Minimum Solar Generation (kW)<span class="classic">Specify the minimum desired generation in kW.</span></label>
+				<label class="tooltip">Solar Minimum Power (kW)<span class="classic">Specify the minimum desired generation in kW.</span></label>
 				<input type="text" id="solarMin" name="solarMin" required="required"/>
 			</div>
 			<div class="shortInput windDisplayInput">
@@ -422,23 +369,23 @@
 				<input type="text" id="windCost" name="windCost" pattern="^\d+\.?\d*?$" required="required"/>
 			</div>
 			<div class="shortInput windDisplayInput">
-				<label class="tooltip">Minimum Wind Generation (kW)<span class="classic">Specify the minimum desired generation in kW.</span></label>
+				<label class="tooltip">Wind Minimum Power (kW)<span class="classic">Specify the minimum desired generation in kW.</span></label>
 				<input type="text" id="windMin" name="windMin" required="required"/>
 			</div>
 			<div class="shortInput batteryDisplayInput">
-				<label class="tooltip">Energy capacity cost ($/kWh)<span class="classic">Specify the cost in $/kWh.</span></label>
+				<label class="tooltip">Battery Energy Cost ($/kWh)<span class="classic">Specify the cost in $/kWh.</span></label>
 				<input type="text" id="batteryEnergyCost" name="batteryEnergyCost" pattern="^\d+\.?\d*?$" required="required"/>
 			</div>
 			<div class="shortInput batteryDisplayInput">
-				<label class="tooltip">Power capacity cost ($/kW)<span class="classic">Specify the cost in $/kW.</span></label>
+				<label class="tooltip">Battery Power Cost ($/kW)<span class="classic">Specify the cost in $/kW.</span></label>
 				<input type="text" id="batteryPowerCost" name="batteryPowerCost" pattern="^\d+\.?\d*?$" required="required"/>
 			</div>
 			<div class="shortInput BatteryDisplayInput">
-				<label class="tooltip">Minimum Power Cpacity (kW)<span class="classic">Specify the minimum desired battery capacity in kW.</span></label>
+				<label class="tooltip">Battery Minimum Power (kW)<span class="classic">Specify the minimum desired battery capacity in kW.</span></label>
 				<input type="text" id="batteryPowerMin" name="batteryPowerMin" required="required"/>
 			</div>
 			<div class="shortInput BatteryDisplayInput">
-				<label class="tooltip">Minimum Energy Cpacity (kWh)<span class="classic">Specify the minimum desired battery capacity in kWh.</span></label>
+				<label class="tooltip">Battery Minimum Energy (kWh)<span class="classic">Specify the minimum desired battery capacity in kWh.</span></label>
 				<input type="text" id="batteryEnergyMin" name="batteryEnergyMin" required="required"/>
 			</div>
 
@@ -462,38 +409,16 @@
 				<label class="tooltip">Minimum Generator Loading<span class="classic">The percent of load that must be met by the generator during a grid outage.</span></label>
 				<input type="number" id="minGenLoading" name="minGenLoading" min="0" max="100" required="required"/>
 			</div>
-			
-
-			<div class="wideInput" style="text-align:right">
-				<button id="deleteButton" type="button" class="stoppedInline postRunInline" onclick="deleteModel()">Delete</button>
-				<button id="shareButton" type="button" class="postRunInline" onclick="shareModel()">Share</button>
-				<button id="duplicateButton" type="button" class="postRunInline" onclick="duplicateModel()">Duplicate</button>
-				<button id="cancelButton" class="runningInline" type="button" onclick="cancelModel()">Cancel Run</button>
-				<button id="runButton" class="stoppedInline postRunInline" type="submit">Run Model</button>
-			</div>
+			{{ omfModelButtons }}
 		</form>
 	</div>
-
-	<div id ="runIndicator" class="content running">
-		Model running on server. Refresh the page to check for results, or wait for automatic refresh every 5 seconds.
-	</div>
-	<div id ="stopIndicator" class="content stopped" style="visibility: hidden">
-		<pre id='errorText' style='overflow-x:scroll'></pre>
-		<script type="text/javascript">
-		if (typeof(allInputData.stderr) !== 'undefined') {
-			gebi('stopIndicator').style.visibility = 'visible'
-			gebi('errorText').innerHTML = 'MODEL ENCOUNTERED AN ERROR AS FOLLOWS: \n\n' + allInputData.stderr}
-		</script>
-	</div>
+	{{ omfRunDebugBlock }}
 	<div id="output" class="postRun">
 		<table>
 			<tr><th></th></tr>
 		</table>
 	</div>
-	<p class="reportTitle postRun">Raw Input and Output Files</p>
-	<div id="rawOutput" class="content postRun" style="margin-top:0px">
-		{% for name in allOutputDataDict['fileNames'] %}
-			{% if loop.index > 1 %}&mdash; {% endif %}<a href="/downloadModelData/{{allInputDataDict['user']}}/{{allInputDataDict['modelName']}}/{{name}}">{{name}}</a>
-		{% endfor %}
+	<div id="raw_out" class="postRun">
+		{{ rawOutputFiles }}
 	</div>
 </body>

@@ -95,7 +95,8 @@ def work(modelDir, inputDict):
 	return outData
 
 def runtimeEstimate(modelDir):
-	return 0.0
+	''' Estimated runtime of model in minutes. '''
+	return 0.5
 
 def _aggData(key, aggFun, simStartDate, simLength, simLengthUnits, ssc, dat):
 	''' Function to aggregate output if we need something other than hour level. '''

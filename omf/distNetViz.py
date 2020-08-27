@@ -85,6 +85,11 @@ def get_components():
 					components[name[0:-5]] = json.load(f) # Load the file as a regular object into the dictionary
 	return json.dumps(components) # Turn the dictionary of objects into a string
 
+def viz_mem(feederTreeObj, forceLayout=False, outputPath=None, outputName='viewer.html', open_file=True):
+	''' Visualize a distribution system that's already in memory. '''
+	tempdir = tempfile.mkdtemp()
+	omf.feeder.dump(feederTreeObj, tempdir + 'temp.glm')
+	viz(tempdir + 'temp.glm', forceLayout=forceLayout, outputPath=outputPath, outputName=outputName, open_file=open_file)
 
 def viz(pathToOmdOrGlm, forceLayout=False, outputPath=None, outputName='viewer.html', open_file=True):
 	''' Vizualize a distribution system.'''

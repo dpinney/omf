@@ -1,3 +1,4 @@
+wheel
 Flask>=0.9
 Flask-Login==0.2.11
 Jinja2>=2.7.2
@@ -21,11 +22,11 @@ requests>=2.20
 pandas>=0.24.2
 pulp>=1.6.8
 tqdm>=4.19.6
-scipy>=1.1.0,<1.3
+scipy>=1.4.1
 flask_compress>=1.4.0
 plotly>=4.0.0
 cvxpy>=1.0.28
-scikit-learn>=0.19.0,<0.21.0
+scikit-learn>=0.23.0
 gevent
 iso3166
 pyproj
@@ -36,6 +37,7 @@ maxminddb-geolite2
 pysolar
 xmltodict
 joblib
+pystan
 #fbprophet
-#tensorflow
+tensorflow
 xmltodict>=0.12.0

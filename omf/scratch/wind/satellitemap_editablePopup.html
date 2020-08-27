@@ -8,6 +8,10 @@
 		crossorigin=''></script>
 	<link rel='stylesheet' href='https://unpkg.com/leaflet-draw@1.0.0/dist/leaflet.draw.css' />
 	<script src='https://unpkg.com/leaflet-draw@1.0.0/dist/leaflet.draw.js'></script>
+	<!-- Load Esri Leaflet from CDN -->
+	<script src="https://unpkg.com/esri-leaflet@2.5.0/dist/esri-leaflet.js"
+	    integrity="sha512-ucw7Grpc+iEQZa711gcjgMBnmd9qju1CICsRaryvX7HJklK0pGl/prxKvtHwpgm5ZHdvAil7YPxI1oWPOWK3UQ=="
+	    crossorigin=""></script>
 	<style>html, body {
 		width: 100%;
 		height: 100%;
@@ -67,28 +71,26 @@
 	L.control.scale().addTo(map);
 	// drawing layer
 	var drawnItems = L.featureGroup().addTo(map);
-	// base map
-	var base = L.tileLayer(
-		'https://{s}.basemaps.cartocdn.com/light_only_labels/{z}/{x}/{y}{r}.png',
-		{maxZoom: 18, attribution:''}
-	);
+	// esri_images map
+	var esri_images = L.esri.basemapLayer('Imagery').addTo(map);
 	// satelite
 	var landsat = L.tileLayer(
 		'https://{s}.tiles.mapbox.com/v4/mapbox.landsat-live/{z}/{x}/{y}.jpg?access_token=pk.eyJ1IjoiZWp0YWxib3QiLCJhIjoiY2ptMHBlOGdjMmZlaTNwb2dwMHE2Mm54NCJ9.xzceVNmAZy49SyFDb3UMaw',
 		{ maxZoom: 18, attribution:'' }
 	);
 	// Topo
-	var topo = L.tileLayer(
-		'https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png',
-		{ maxZoom: 18, attribution:'' }
-	);
+	var streets = L.esri.basemapLayer('Streets').addTo(map);
+	// var streets = L.tileLayer(
+	// 	'https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png',
+	// 	{ maxZoom: 18, attribution:'' }
+	// );
 
 	// Options to toggle between maps added to layers
 	L.control.layers(
 		{
-			'base': base.addTo(map),
 			'landsat': landsat.addTo(map),
-			'topo': topo.addTo(map)
+			'streets': streets.addTo(map),
+			'esri_images': esri_images.addTo(map)
 		},
 		{
 			'drawlayer': drawnItems,
@@ -128,16 +130,17 @@
 		layer.on('click', function (e) {
 			vegScore = e.target.feature.properties.vegScore
 			layer.bindPopup("<input id='popup_leaflet_id' style='display:none' value=" + e.target._leaflet_id + ">Veg Score: <input type='text' id='veg_score' value=" + vegScore + "><button onclick='saveVeg()' type='button'>Save</button>"+"<br />"+"Fire Risk: "+props['fire-risk']+"<br />"+"<a href='https://www.spc.noaa.gov/products/fire_wx/fwdy1.html' target='_blank'>Click for more information</a>")
-			if (0 <= props['fire-risk'] < 1) {window.rectangle.setStyle({fillColor: '#005CE5'})}
-			if (1 <= props['fire-risk'] < 2) {window.rectangle.setStyle({fillColor: '#1551D2'})}
-			if (2 <= props['fire-risk'] < 3) {window.rectangle.setStyle({fillColor: '#2A47BF'})}
-			if (3 <= props['fire-risk'] < 4) {window.rectangle.setStyle({fillColor: '#3F3DAC'})}
-			if (4 <= props['fire-risk'] < 5) {window.rectangle.setStyle({fillColor: '#543399'})}
-			if (5 <= props['fire-risk'] < 6) {window.rectangle.setStyle({fillColor: '#6A2886'})}
-			if (6 <= props['fire-risk'] < 7) {window.rectangle.setStyle({fillColor: '#7F1E73'})}
-			if (7 <= props['fire-risk'] < 8) {window.rectangle.setStyle({fillColor: '#941460'})}
-			if (8 <= props['fire-risk'] < 9) {window.rectangle.setStyle({fillColor: '#A90A4D'})}
-			if (9 <= props['fire-risk'] <= 10) {window.rectangle.setStyle({fillColor: '#BF003A'})}
+			console.log(props['fire-risk'])
+			if (0 <= props['fire-risk'] && props['fire-risk'] < 1) {layer.setStyle({fillColor: '#E1E500'})}
+			if (1 <= props['fire-risk'] && props['fire-risk'] < 2) {layer.setStyle({fillColor: '#DDCF00'})}
+			if (2 <= props['fire-risk'] && props['fire-risk'] < 3) {layer.setStyle({fillColor: '#DAB900'})}
+			if (3 <= props['fire-risk'] && props['fire-risk'] < 4) {layer.setStyle({fillColor: '#D6A400'})}
+			if (4 <= props['fire-risk'] && props['fire-risk'] < 5) {layer.setStyle({fillColor: '#D38E00'})}
+			if (5 <= props['fire-risk'] && props['fire-risk'] < 6) {layer.setStyle({fillColor: '#D07900'})}
+			if (6 <= props['fire-risk'] && props['fire-risk'] < 7) {layer.setStyle({fillColor: '#CC6300'})}
+			if (7 <= props['fire-risk'] && props['fire-risk'] < 8) {layer.setStyle({fillColor: '#C94D00'})}
+			if (8 <= props['fire-risk'] && props['fire-risk'] < 9) {layer.setStyle({fillColor: '#C22200'})}
+			if (9 <= props['fire-risk'] && props['fire-risk'] <= 10) {layer.setStyle({fillColor: '#BF0D00'})}
 			layer.openPopup()
 		})
 		drawnItems.addLayer(layer);
@@ -185,18 +188,29 @@
 				var sum = 0;
 				var average = 0;
 				for (j = 0; j < xhttpData.location.length; j++) {
-					console.log(xhttpData.parameters[j]['fire-weather'].value[0])
-					if (xhttpData.parameters[j]["fire-weather"].value[0] == "No Areas") {
+					console.log(xhttpData.parameters[j]['fire-weather'][0].value[0])
+					console.log(xhttpData.parameters[j]['fire-weather'][1].value[0])
+					if (xhttpData.parameters[j]["fire-weather"][0].value[0] == "No Areas") {
 						eachRisk.push(0);
 					}
-					else if (xhttpData.parameters[j]["fire-weather"].value[0] == "Elevated Areas") {
+					if (xhttpData.parameters[j]["fire-weather"][1].value[0] == "No Areas") {
+						eachRisk.push(0);
+					}
+					if (xhttpData.parameters[j]["fire-weather"][0].value[0] == "Elevated Areas") {
 						eachRisk.push(5);
 						sum += 5;
 					}
-					else { // the final parameter is "Critical Areas"
-						console.log(xhttpData.parameters[j]["fire-weather"].value[0] == "Critical Areas")
+					if (xhttpData.parameters[j]["fire-weather"][1].value[0] == "Isolated") {
+						eachRisk.push(5);
+						sum += 5;
+					}
+					if (xhttpData.parameters[j]["fire-weather"][0].value[0] == "Critical Areas") { 
 						eachRisk.push(10);
 						sum += 10;
+					}
+					if (xhttpData.parameters[j]["fire-weather"][1].value[0] == "Scattered") { 
+						eachRisk.push(8);
+						sum += 8;
 					}
 					console.log(sum)
 				}
