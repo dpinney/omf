@@ -4,18 +4,13 @@ clear
 ! node voltages in opendss are normally line-ground and may give strange-looking results
 ! be careful if you put line-neutral connected loads or other devices on this circuit.
 
-new object=circuit.ieee37
-~ basekv=230 pu=1.00 mvasc3=200000 mvasc1=210000
+new object=circuit.ieee37 basekv=230 pu=1.00 mvasc3=200000 mvasc1=210000
 
 ! substation transformer
-new object=transformer.subxf phases=3 windings=2 xhl=8
-~ wdg=1 bus=sourcebus conn=delta kv=230   kva=2500   %r=1
-~ wdg=2 bus=799       conn=delta kv=4.8   kva=2500   %r=1
+new object=transformer.subxf phases=3 windings=2 xhl=8 buses=(sourcebus,799) conns="delta,delta" kvs="230,4.8" kvas="2500,2500" %r=1
 
 ! load transformer
-new object=transformer.xfm1  phases=3 windings=2 xhl=1.81
-~ wdg=1 bus=709       conn=delta kv=4.80  kva=500    %r=0.045
-~ wdg=2 bus=775       conn=delta kv=0.48  kva=500    %r=0.045
+new object=transformer.xfm1  phases=3 windings=2 xhl=1.81 buses=(709,775) conns="delta,delta" kvs="4.80,0.48" kvas="500,500" %r=0.045
 
 ! import line codes with phase impedance matrices
 ! redirect        ieeelinecodes.dss

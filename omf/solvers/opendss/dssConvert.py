@@ -99,8 +99,9 @@ def evilDssTreeToGldTree(dssTree):
 	We built this to do quick-and-dirty viz of openDSS files. '''
 	gldTree = {}
 	g_id = 1
-	# TODO: find all buses without coords. Ick.
 	# Build bad gld representation of each object
+	bus_names = []
+	bus_with_coords = []
 	for ob in dssTree:
 		if ob['!CMD'] == 'setbusxy':
 			gldTree[str(g_id)] = {
@@ -109,37 +110,46 @@ def evilDssTreeToGldTree(dssTree):
 				"latitude": ob['y'],
 				"longitude": ob['x']
 			}
+			bus_with_coords.append(ob['bus'])
 		elif ob['!CMD'] == 'new':
 			obtype, name = ob['object'].split('.')
 			if 'bus1' in ob and 'bus2' in ob:
 				# line-like object.
-				gldTree[str(g_id)] = {
-					"object": obtype,
-					"name": name,
-					# strip the weird dot notation stuff via find.
-					"from": ob['bus1'][0:ob['bus1'].find('.')],
-					"to": ob['bus2'][0:ob['bus2'].find('.')]
-				}
-				other_keys = {k: ob[k] for k in ob if k not in ['object','bus1','bus2','!CMD']}
-				gldTree[str(g_id)].update(other_keys)
-			elif 'buses' in ob:
-				#transformer-like object.
-				fro, to = ob['buses'].replace('(','').replace(')','').split(',')
+				# strip the weird dot notation stuff via find.
+				fro = ob['bus1'].split('.')[0]
+				to = ob['bus2'].split('.')[0]
 				gldTree[str(g_id)] = {
 					"object": obtype,
 					"name": name,
 					"from": fro,
 					"to": to
 				}
+				bus_names.extend([fro, to])
+				other_keys = {k: ob[k] for k in ob if k not in ['object','bus1','bus2','!CMD']}
+				gldTree[str(g_id)].update(other_keys)
+			elif 'buses' in ob:
+				#transformer-like object.
+				b1, b2 = ob['buses'].replace('(','').replace(')','').split(',')
+				fro = b1.split('.')[0]
+				to = b2.split('.')[0]
+				gldTree[str(g_id)] = {
+					"object": obtype,
+					"name": name,
+					"from": fro,
+					"to": to
+				}
+				bus_names.extend([fro, to])
 				other_keys = {k: ob[k] for k in ob if k not in ['object','buses','!CMD']}
 				gldTree[str(g_id)].update(other_keys)
 			elif 'bus' in ob:
 				#load-like object.
+				bus_root = ob['bus'].split('.')[0]
 				gldTree[str(g_id)] = {
 					"object": obtype,
 					"name": name,
-					"parent": ob['bus']
+					"parent": ob['bus'].split('.')[0]
 				}
+				bus_names.append(bus_root)
 				other_keys = {k: ob[k] for k in ob if k not in ['object','bus','!CMD']}
 				gldTree[str(g_id)].update(other_keys)
 			else:
@@ -161,6 +171,10 @@ def evilDssTreeToGldTree(dssTree):
 		else:
 			warnings.warn(f'Ignored {ob}')
 		g_id += 1
+	# Warn on buses with no coords.
+	no_coord_buses = set(bus_names) - set(bus_with_coords)
+	if len(no_coord_buses) != 0:
+		warnings.warn(f'Buses without coordintates:', no_coord_buses)
 	return gldTree
 
 def evilGldTreeToDssTree():
@@ -178,3 +192,4 @@ if __name__ == '__main__':
 	distNetViz.viz_mem(evil_glm, open_file=True) #forceLayout=True)
 	#TODO: make parser accept keyless items with new !keyless_n key?
 	#TODO: define .dsc format and write syntax guide.
+	#TODO: what to do about transformers with invalid bus setting with the duplicate keys?
