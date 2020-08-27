@@ -23,7 +23,7 @@ def work(modelDir, inputDict):
 	# feederName = inputDict["feederName1"]
 	feederName = [x for x in os.listdir(modelDir) if x.endswith('.omd')][0][:-4]
 	inputDict["feederName1"] = feederName
-	dssName = [x for x in os.listdir(pJoin(modelDir, "PyCIGAR_inputs")) if x.endswith('.dss')][0][:-4]
+	dssName = [x for x in os.listdir(modelDir) if x.endswith('.dss')][0][:-4]
 	inputDict["dssName1"] = dssName
 	zipCode = "59001" #TODO get zip code from the PV and Load input file
 	
@@ -99,7 +99,7 @@ def work(modelDir, inputDict):
 			# 	miscFile.write("%s,%s\n"%(key,misc_dict[key]))
 			miscFile.write(inputDict['miscFile'])
 
-		#create ieee37.dss file in folder
+		#create dss file in folder
 		dss_filename = "circuit.dss"
 		with open(pJoin(modelDir, "PyCIGAR_inputs", dss_filename),"w") as dssFile:
 			dssFile.write(inputDict['dssFile'])
@@ -471,8 +471,9 @@ def new(modelDir):
 	with open(pJoin(omf.omfDir, "static", "testFiles", "pyCIGAR", f2Name)) as f2:
 		breakpoints_inputs = f2.read()
 
-	f3Name = "ieee37.dss"
-	with open(pJoin(omf.omfDir, "static", "testFiles", "pyCIGAR", f3Name)) as f3:
+	dssDefault = "ieee37_ours"
+	f3Name = dssDefault + ".dss"
+	with open(pJoin(omf.omfDir, "solvers", "opendss", f3Name)) as f3:
 		dssFile = f3.read()
 
 	f4Name = "misc_inputs.csv"
@@ -485,7 +486,7 @@ def new(modelDir):
 		"simLengthUnits": "seconds",
 		# "feederName1": "ieee37fixed",
 		"feederName1": "Olin Barre GH EOL Solar AVolts CapReg",
-		"dssName1": "ieee37",
+		"dssName1": dssDefault,
 		"modelType": modelName,
 		"zipCode": "59001",
 		"loadPV": load_PV,
@@ -502,9 +503,8 @@ def new(modelDir):
 	except:
 		return False
 	try:
-		shutil.copyfile(pJoin(__neoMetaModel__._omfDir, "static", "testFiles", "pyCIGAR", defaultInputs["dssName1"]+'.dss'), pJoin(modelDir, "PyCIGAR_inputs", defaultInputs["dssName1"]+'.dss'))
-		# TODO: Change to better location where default dss files can be held... maybe solvers/opendss?
 		# shutil.copyfile(pJoin(__neoMetaModel__._omfDir, "solvers", "opendss", defaultInputs["dssName1"]+'.dss'), pJoin(modelDir, "PyCIGAR_inputs", defaultInputs["dssName1"]+'.dss'))
+		shutil.copyfile(pJoin(__neoMetaModel__._omfDir, "solvers", "opendss", defaultInputs["dssName1"]+'.dss'), pJoin(modelDir, defaultInputs["dssName1"]+'.dss'))
 	except:
 		return False
 	return creationCode

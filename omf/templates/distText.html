@@ -411,6 +411,15 @@
                 <textarea id="rawTextContainer" name="rawText">{{thisFileData}}</textarea>
             </div>
             <!-- Modals -->
+            <div id="progressModal" class="modal" style="display: none">
+                <div class="modalContent centered">
+                    <img src="/static/spinner.gif">
+                    <div class='progressModalMessages'></div>
+                    <button class="deleteButton" data-buttonfunction="cancel" style="margin-right:300px;">Cancel</button>
+                    <button data-buttonfunction="submit">OK</button>
+                    </div>
+                </div>
+            </div>
             {% if showFileMenu %}
             <div id="loadModal" class="modal" style="display: none">
                 <div class="modalContent">
@@ -462,7 +471,8 @@
         </div>
 	</body>
 </html>
-<script id="fileInsert">let gReadFile = {% if thisFileData %}{{ thisFileData | safe }}{% else %}null{% endif %}; 
+<script id="fileInsert">
+    let gReadFile = `{% if thisFileData %}{{ thisFileData | safe }}{% else %}null{% endif %}`; 
 </script>
 <style id="jqueryCssInsert">
 </style>
@@ -525,172 +535,172 @@ let gScaleLevel = 1.0; // Scale that all SVG objects are drawn at
 // Selection Interface
 //**************************************************
 
-const selectionPrototype = {
+// const selectionPrototype = {
 
-    /* Public methods */
+//     /* Public methods */
 
-    hasId(id) {
-        if (this.selectedElements.find(e => e.id === id) != null) return true;
-        return false;
-    },
-    remove(element) {
-        const elements = this.selectedElements.filter(e => e.id === element.id);
-        if (elements.length === 0) throw new Error(`Remove operation failed. The element "${element.tagName}" does not exist in this selection.`);
-        elements.forEach(e => {
-            e.classList.remove("selected");
-            Array.from(e.children).forEach(child => {
-                e.removeChild(child);
-            })
-            this.selectedElements.splice(this.selectedElements.indexOf(e), 1);
-        });
-    },
-    add(element) {
-        if (this.selectedElements.includes(element)) {
-            throw new Error("Add operation failed. The element argument already exists in this selection.");
-        } else if (element.classList.contains("selected")) {
-            throw new Error("Add operation failed. The element argument already has the 'selected' class.");
-        }
-        element.classList.add("selected");
-        this.addAnimation(element);
-        this.selectedElements.push(element);
-    },
-    empty() {
-        this.selectedElements.forEach(e => {
-            e.classList.remove("selected");
-            Array.from(e.children).forEach(child => {
-                e.removeChild(child);
-            });
-        });
-        this.selectedElements = [];
-    },
-    getKeys() {
-        return this.selectedElements.map(element => {
-            return element.id;
-        });
-    },
+//     hasId(id) {
+//         if (this.selectedElements.find(e => e.id === id) != null) return true;
+//         return false;
+//     },
+//     remove(element) {
+//         const elements = this.selectedElements.filter(e => e.id === element.id);
+//         if (elements.length === 0) throw new Error(`Remove operation failed. The element "${element.tagName}" does not exist in this selection.`);
+//         elements.forEach(e => {
+//             e.classList.remove("selected");
+//             Array.from(e.children).forEach(child => {
+//                 e.removeChild(child);
+//             })
+//             this.selectedElements.splice(this.selectedElements.indexOf(e), 1);
+//         });
+//     },
+//     add(element) {
+//         if (this.selectedElements.includes(element)) {
+//             throw new Error("Add operation failed. The element argument already exists in this selection.");
+//         } else if (element.classList.contains("selected")) {
+//             throw new Error("Add operation failed. The element argument already has the 'selected' class.");
+//         }
+//         element.classList.add("selected");
+//         this.addAnimation(element);
+//         this.selectedElements.push(element);
+//     },
+//     empty() {
+//         this.selectedElements.forEach(e => {
+//             e.classList.remove("selected");
+//             Array.from(e.children).forEach(child => {
+//                 e.removeChild(child);
+//             });
+//         });
+//         this.selectedElements = [];
+//     },
+//     getKeys() {
+//         return this.selectedElements.map(element => {
+//             return element.id;
+//         });
+//     },
 
-    /* Private methods */
+//     /* Private methods */
 
-    /** 
-     * An <animate> element points to exactly one other element. If there is no 'href' attribute, then the element is the direct parent of the <animate> element. I cannot apply a single <animate> element to multiple elements.
-     * @param {HTMLElement} e
-     */
-    addAnimation(e) {
-        e.innerHTML = `<animate id="anim1${e.id}" attributeName="stroke" values="#FFFFFF;#00FF00;#FFFFFF" dur="0.6s" repeatCount="indefinite"/>`;
-    },
-}
+//     /** 
+//      * An <animate> element points to exactly one other element. If there is no 'href' attribute, then the element is the direct parent of the <animate> element. I cannot apply a single <animate> element to multiple elements.
+//      * @param {HTMLElement} e
+//      */
+//     addAnimation(e) {
+//         e.innerHTML = `<animate id="anim1${e.id}" attributeName="stroke" values="#FFFFFF;#00FF00;#FFFFFF" dur="0.6s" repeatCount="indefinite"/>`;
+//     },
+// }
 
-function createSelection() {
-    const obj = Object.create(selectionPrototype);
-    obj.selectedElements = [];
-    return obj;
-}
+// function createSelection() {
+//     const obj = Object.create(selectionPrototype);
+//     obj.selectedElements = [];
+//     return obj;
+// }
 
-function saveSvg() {
-	// Create an SVG that can be saved.
-	alert("We are redirecting you to a static version of the SVG that you can save as a .svg file.")
-	var svg = document.getElementById("svgContainer").outerHTML
-	var win = window.open()
-	win.document.write(svg)
-}
+// function saveSvg() {
+// 	// Create an SVG that can be saved.
+// 	alert("We are redirecting you to a static version of the SVG that you can save as a .svg file.")
+// 	var svg = document.getElementById("svgContainer").outerHTML
+// 	var win = window.open()
+// 	win.document.write(svg)
+// }
 
-function downloadTextFile() {
-	// WARNING! Performance is very bad because the JSON is enormous! This can hang your browser!
-	alert("We are opening a window with JSON in it that you can save as a .json file.")
-	var modJson = JSON.stringify(gWriteFile);
-	var win = window.open();
-	win.document.write(modJson);
-}
+// function downloadTextFile() {
+// 	// WARNING! Performance is very bad because the JSON is enormous! This can hang your browser!
+// 	alert("We are opening a window with JSON in it that you can save as a .json file.")
+// 	var modJson = JSON.stringify(gWriteFile);
+// 	var win = window.open();
+// 	win.document.write(modJson);
+// }
 
-/**
- * TODO: add unit tests
- * Get dimensions with: panZoom.getSizes()
- * scale of .0000004 displays real lat/lon fairly well
- */
-function createViewport(tree, svgContainer) {
-    const keys = Object.keys(tree);
-    const firstKey = keys.find(key => tree[key].longitude != null && tree[key].latitude != null);
-    if (firstKey == null) {
-        // There were no coordinates, so insert some!
-        const objects = Object.values(tree);
-        insertCoordinates(objects, 0, 0, 50);
-        scaleGraphForVisualAppearance(keys.length)
-    }
-    const minMax = getMinMax({objectContainer: tree, properties: ["longitude", "latitude"]});
-    let {latitude: {min: minLat}} = minMax;
-    let {latitude: {max: maxLat}} = minMax;
-    let {longitude: {min: minLon}} = minMax;
-    let {longitude: {max: maxLon}} = minMax;
-    /* Longitude is not reversed, so I want the minimum longitude to use as the offset. Latitude IS reversed, so I want the maximum latitude to use as the offset. */
-    const longitudeRange = maxLon - minLon;
-    const latitudeRange = maxLat - minLat;
-    gMinLon = minLon;
-    gMaxLat = maxLat;
-    /* Multiply by the gDrawScaleFactor when drawing. Divide by the gDrawScaleFactor when storing. 
-    We use the larger of the range values to set the gDrawScaleFactor to make the graph fit in the viewport initially.
-    */
-    if (longitudeRange > latitudeRange) {
-        gDrawScaleFactor = 1000/longitudeRange;
-    } else {
-        gDrawScaleFactor = 1000/latitudeRange;
-    }
-    /*
-    Special case: minimum and maximum longitude and latitude are all the same (e.g. 0)! gDrawScale factor won't space things further apart, it just
-    makes various scales fit in the viewport
-    */
-    if (gDrawScaleFactor === Infinity) {
-        gDrawScaleFactor = 1;
-    }
-    svgContainer.setAttribute("viewBox",`0 0 ${1000} ${1000}`);
-    /* Uncomment below to make gScaleFactor go away */
-    //gDrawScaleFactor = 1;
-    //svgContainer.setAttribute("viewBox",`0 0 ${longitudeRange} ${latitudeRange}`);
-    /* Uncomment above to make gScaleFactor go away */
-	window.panZoom = svgPanZoom("#svgContainer", {
-        /* Override the default values set by "optionsDefaults" in svg-pan-zoom.js */
-        dblClickZoomEnabled: false,
-        zoomScaleSensitivity: 0.2,
-        minZoom: 0.01,
-		maxZoom: 800
-    });
-}
+// /**
+//  * TODO: add unit tests
+//  * Get dimensions with: panZoom.getSizes()
+//  * scale of .0000004 displays real lat/lon fairly well
+//  */
+// function createViewport(tree, svgContainer) {
+//     const keys = Object.keys(tree);
+//     const firstKey = keys.find(key => tree[key].longitude != null && tree[key].latitude != null);
+//     if (firstKey == null) {
+//         // There were no coordinates, so insert some!
+//         const objects = Object.values(tree);
+//         insertCoordinates(objects, 0, 0, 50);
+//         scaleGraphForVisualAppearance(keys.length)
+//     }
+//     const minMax = getMinMax({objectContainer: tree, properties: ["longitude", "latitude"]});
+//     let {latitude: {min: minLat}} = minMax;
+//     let {latitude: {max: maxLat}} = minMax;
+//     let {longitude: {min: minLon}} = minMax;
+//     let {longitude: {max: maxLon}} = minMax;
+//     /* Longitude is not reversed, so I want the minimum longitude to use as the offset. Latitude IS reversed, so I want the maximum latitude to use as the offset. */
+//     const longitudeRange = maxLon - minLon;
+//     const latitudeRange = maxLat - minLat;
+//     gMinLon = minLon;
+//     gMaxLat = maxLat;
+//     /* Multiply by the gDrawScaleFactor when drawing. Divide by the gDrawScaleFactor when storing. 
+//     We use the larger of the range values to set the gDrawScaleFactor to make the graph fit in the viewport initially.
+//     */
+//     if (longitudeRange > latitudeRange) {
+//         gDrawScaleFactor = 1000/longitudeRange;
+//     } else {
+//         gDrawScaleFactor = 1000/latitudeRange;
+//     }
+//     /*
+//     Special case: minimum and maximum longitude and latitude are all the same (e.g. 0)! gDrawScale factor won't space things further apart, it just
+//     makes various scales fit in the viewport
+//     */
+//     if (gDrawScaleFactor === Infinity) {
+//         gDrawScaleFactor = 1;
+//     }
+//     svgContainer.setAttribute("viewBox",`0 0 ${1000} ${1000}`);
+//     /* Uncomment below to make gScaleFactor go away */
+//     //gDrawScaleFactor = 1;
+//     //svgContainer.setAttribute("viewBox",`0 0 ${longitudeRange} ${latitudeRange}`);
+//     /* Uncomment above to make gScaleFactor go away */
+// 	window.panZoom = svgPanZoom("#svgContainer", {
+//         /* Override the default values set by "optionsDefaults" in svg-pan-zoom.js */
+//         dblClickZoomEnabled: false,
+//         zoomScaleSensitivity: 0.2,
+//         minZoom: 0.01,
+// 		maxZoom: 800
+//     });
+// }
 
-//**************************************************
-// Click event functions
-//**************************************************
+// //**************************************************
+// // Click event functions
+// //**************************************************
 
-/**
- * TODO: add unit tests, this should only handle selection objects. creating tables is a special listener attached to svgContainer,
- * not svgContainerWrapper
- * Listener on the SVG object that handles user clicks.
- */
-function handleSelection(event) {
-    if (detectDrag(event)) return;
-    const element = event.target;
-    if (event.altKey && (element.tagName === "circle" || element.tagName === "line") && !element.classList.contains("parentChild")) {
-        if (gSelection.hasId(element.id)) {
-            gSelection.remove(element);
-            //Copied from rowPrototype.delete(). Refactor needed
-            const table = document.getElementById(`descriptionTable_${element.id}`);
-            if (table != null) {
-                document.getElementById("descriptionTables").removeChild(table);
-            }
-        } else {
-            gSelection.add(element);
-        }
-        rebuildSelectionTable();
-    } else if (!event.altKey) {
-        gSelection.empty();
-        destroyTables(["descriptionTables", "selectionTable"]);
-        //destroyTables(["selectionTable"]);
-        if ((element.tagName === "circle" || element.tagName === "line") && !element.classList.contains("parentChild")) {
-            gSelection.add(element);
-            const table = createDescriptionTable(element.id);
-            table.id = `descriptionTable_${element.id}`;
-            document.getElementById("descriptionTables").appendChild(table);
-        } 
-    }
-}
+// /**
+//  * TODO: add unit tests, this should only handle selection objects. creating tables is a special listener attached to svgContainer,
+//  * not svgContainerWrapper
+//  * Listener on the SVG object that handles user clicks.
+//  */
+// function handleSelection(event) {
+//     if (detectDrag(event)) return;
+//     const element = event.target;
+//     if (event.altKey && (element.tagName === "circle" || element.tagName === "line") && !element.classList.contains("parentChild")) {
+//         if (gSelection.hasId(element.id)) {
+//             gSelection.remove(element);
+//             //Copied from rowPrototype.delete(). Refactor needed
+//             const table = document.getElementById(`descriptionTable_${element.id}`);
+//             if (table != null) {
+//                 document.getElementById("descriptionTables").removeChild(table);
+//             }
+//         } else {
+//             gSelection.add(element);
+//         }
+//         rebuildSelectionTable();
+//     } else if (!event.altKey) {
+//         gSelection.empty();
+//         destroyTables(["descriptionTables", "selectionTable"]);
+//         //destroyTables(["selectionTable"]);
+//         if ((element.tagName === "circle" || element.tagName === "line") && !element.classList.contains("parentChild")) {
+//             gSelection.add(element);
+//             const table = createDescriptionTable(element.id);
+//             table.id = `descriptionTable_${element.id}`;
+//             document.getElementById("descriptionTables").appendChild(table);
+//         } 
+//     }
+// }
 
 
 //**************************************************
@@ -706,7 +716,7 @@ function handleSelection(event) {
 
 function attachHandlers() {
     addMouseHandlers();
-    addKeyHandlers(); // PosiblyDelete
+    addKeyHandlers(); // PossiblyDelete
     Array.from(document.querySelectorAll("div.headerGroup")).forEach(h => {
         h.addEventListener("click", toggleHeader);
     });
@@ -776,7 +786,7 @@ function fillFileList(ul, files, owner, thisModelName, thisFileName) {
                 li.addEventListener("click", function() {
                     // What is the file.model for a public file? It's "publicFiles". Do files not have their own owner property? No they
                     // don't. That's why I have a separate owner variable 
-                    loadFeeder(f.name, f.model, owner);
+                    loadFile(f.name, f.model, owner);
                 });
                 ul.append(li);
             }
@@ -930,7 +940,7 @@ function saveFile(file) {
  * 
  * @param {string} owner - either "public" or the current user.
  */
-async function loadFeeder(serverFileName, serverModelName, owner) {
+async function loadFile(serverFileName, serverModelName, owner) {
     let cancelled = false;
     const modal = createProgressModal(() => {
         cancelled = true;
@@ -967,7 +977,7 @@ async function loadFeeder(serverFileName, serverModelName, owner) {
         // {owner} is correct. {owner} is either "public" to load from public files or <current user> to load from the users files. {gThisOwner}
         // is correct because I am overwriting THIS file file, which is either publicly owned or owned by the current user. {gThisOwner} cannot be
         // {gCurrentUser} because then I can't overwrite public files as the admin.
-        url: `/loadFeeder/${serverFileName}/${serverModelName}/${gThisModelName}/${gThisFileNum}/${owner}/${gThisOwner}`,
+        url: `/loadFile/${serverFileName}/${serverModelName}/${gThisModelName}/${gThisFileNum}/${owner}/${gThisOwner}`,
         data: formData,
         processData: false,
         contentType: false,
@@ -1316,21 +1326,25 @@ function isNumberString(str) {
  * @param {Object} oldObject - the object to copy.
  * @return {Object} - a copy of the oldObject.
  */
- function deepCopy(oldObject) {
-    if (Object.getPrototypeOf(oldObject) !== Object.prototype) {
-        throw new Error("This function cannot be used to copy objects that are not plain JavaScript objects.");
-    }
-    const properties = Object.getOwnPropertyNames(oldObject);
-    const keys = Object.keys(oldObject);
-    for (let key of keys) {
-        if (typeof(oldObject[key]) === "function") {
-            throw new Error("This function cannot be used to copy objects with methods.");
-        } else if (oldObject[key] === undefined) {
-            // JSON.stringify will not copy a property of an object with an undefined value.
-            throw new Error("JSON.stringify silently ignores properties with undefined values, so this function cannot handle undefined values.");
-        }
-    }
-    return JSON.parse(JSON.stringify(oldObject));
+// function deepCopy(oldObject) {
+//     if (Object.getPrototypeOf(oldObject) !== Object.prototype) {
+//         throw new Error("This function cannot be used to copy objects that are not plain JavaScript objects.");
+//     }
+//     const properties = Object.getOwnPropertyNames(oldObject);
+//     const keys = Object.keys(oldObject);
+//     for (let key of keys) {
+//         if (typeof(oldObject[key]) === "function") {
+//             throw new Error("This function cannot be used to copy objects with methods.");
+//         } else if (oldObject[key] === undefined) {
+//             // JSON.stringify will not copy a property of an object with an undefined value.
+//             throw new Error("JSON.stringify silently ignores properties with undefined values, so this function cannot handle undefined values.");
+//         }
+//     }
+//     return JSON.parse(JSON.stringify(oldObject));
+// }
+
+function deepCopy(oldObject) {
+    return oldObject;
 }
 
 /**
@@ -1533,8 +1547,11 @@ function interfaceIsStatic() {
 /**
  * Determine whether or not to force the user to save their file. This might not always be sufficient, due to the many limitations of using JSON.stringify().
  */
+// function fileNeedsSave() {
+//     return JSON.stringify(gReadFile) !== JSON.stringify(gWriteFile);
+// }
 function fileNeedsSave() {
-    return JSON.stringify(gReadFile) !== JSON.stringify(gWriteFile);
+    return gReadFile !== gWriteFile;
 }
 
 //**************************************************
@@ -2634,7 +2651,7 @@ async function initializeInterface() {
         } catch (e) {
         }
     }
-    createInterface();
+    // createInterface();
     {% if showFileMenu %}
     if (!interfaceIsStatic() && fileNeedsSave()) {
         // Save to account for objects that were given artifical grid coordinates. This will make the interface less annoying
