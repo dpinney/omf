@@ -6,9 +6,8 @@ Set DefaultBaseFrequency=60
 ! Tyler Patton, Jon Wood, and David Woods, April 2009
 !
 
-new circuit.IEEE13Nodeckt 
-~ basekv=115 pu=1.0001 phases=3 bus1=SourceBus  
-~ Angle=30                                                         ! advance angle 30 deg so result agree with published angle
+new circuit.IEEE13Nodeckt basekv=115 pu=1.0001 phases=3 bus1=SourceBus  
+~ Angle=30                     ! advance angle 30 deg so result agree with published angle
 ~ MVAsc3=20000 MVASC1=21000    ! stiffen the source to approximate inf source
 
 

@@ -7,6 +7,8 @@ from ditto.writers.opendss.write import Writer as dWriter
 from ditto.readers.gridlabd.read import Reader as gReader
 from ditto.writers.gridlabd.write import Writer as gWriter
 from collections import OrderedDict
+import warnings
+from omf import feeder, distNetViz
 
 def gridLabToDSS(inFilePath, outFilePath):
 	''' Convert gridlab file to dss. ''' 
@@ -38,6 +40,8 @@ def dssToTree(pathToDss):
 	# Ingest file.
 	with open(pathToDss, 'r') as dssFile:
 		contents = dssFile.readlines()
+	# Lowercase everything. OpenDSS is case insensitive.
+	contents = [x.lower() for x in contents]
 	# Clean up the file.
 	for i, line in enumerate(contents):
 		# Remove whitespace.
@@ -95,46 +99,97 @@ def evilDssTreeToGldTree(dssTree):
 	We built this to do quick-and-dirty viz of openDSS files. '''
 	gldTree = {}
 	g_id = 1
-	# Grab the SetBusXY commands to make the nodes (=buses, which opendss creates implicitly)
+	# Build bad gld representation of each object
+	bus_names = []
+	bus_with_coords = []
 	for ob in dssTree:
-		if ob['!CMD'] == 'SetBusXY':
+		if ob['!CMD'] == 'setbusxy':
 			gldTree[str(g_id)] = {
 				"object": "node",
-				"name": ob['Bus'],
-				"phases": "ABC",
-				"latitude": ob['Y'],
-				"longitude": ob['X']
+				"name": ob['bus'],
+				"latitude": ob['y'],
+				"longitude": ob['x']
 			}
-			g_id += 1
-	# Build bad gld representation of each object
-	for ob in dssTree:
-		if ob['!CMD'] == 'New':
-			obtype = ob['object']
-			if obtype.startswith('Line.'):
+			bus_with_coords.append(ob['bus'])
+		elif ob['!CMD'] == 'new':
+			obtype, name = ob['object'].split('.')
+			if 'bus1' in ob and 'bus2' in ob:
+				# line-like object.
+				# strip the weird dot notation stuff via find.
+				fro = ob['bus1'].split('.')[0]
+				to = ob['bus2'].split('.')[0]
 				gldTree[str(g_id)] = {
-					"object": "overhead_line",
-					"name": obtype,
-					"phases": "ABC",
-					# strip the weird dot notation stuff via find.
-					"from": ob['bus1'][0:ob['bus1'].find('.')],
-					"to": ob['bus2'][0:ob['bus2'].find('.')]
+					"object": obtype,
+					"name": name,
+					"from": fro,
+					"to": to
 				}
-			elif obtype.startswith('Load.'):
+				bus_names.extend([fro, to])
+				other_keys = {k: ob[k] for k in ob if k not in ['object','bus1','bus2','!CMD']}
+				gldTree[str(g_id)].update(other_keys)
+			elif 'buses' in ob:
+				#transformer-like object.
+				b1, b2 = ob['buses'].replace('(','').replace(')','').split(',')
+				fro = b1.split('.')[0]
+				to = b2.split('.')[0]
 				gldTree[str(g_id)] = {
-					"object": "load", 
-					"name": obtype,
-					"phases": "ABC"
+					"object": obtype,
+					"name": name,
+					"from": fro,
+					"to": to
 				}
-			elif obtype.startswith('Transformer'):
-				pass # opendss transformers are bus-type objects, so who knows how to model in gld
+				bus_names.extend([fro, to])
+				other_keys = {k: ob[k] for k in ob if k not in ['object','buses','!CMD']}
+				gldTree[str(g_id)].update(other_keys)
+			elif 'bus' in ob:
+				#load-like object.
+				bus_root = ob['bus'].split('.')[0]
+				gldTree[str(g_id)] = {
+					"object": obtype,
+					"name": name,
+					"parent": ob['bus'].split('.')[0]
+				}
+				bus_names.append(bus_root)
+				other_keys = {k: ob[k] for k in ob if k not in ['object','bus','!CMD']}
+				gldTree[str(g_id)].update(other_keys)
 			else:
-				pass # ignore other object types: Circuit, Fuse, Line, Linecode, Load, RegControl, Transformer, etc.
-			g_id += 1
+				#config-like object.
+				gldTree[str(g_id)] = {
+					"object": obtype,
+					"name": name
+				}
+				other_keys = {k: ob[k] for k in ob if k not in ['object','!CMD']}
+				gldTree[str(g_id)].update(other_keys)
+		elif ob['!CMD'] not in ['new', 'setbusxy']:
+			#command-like objects.
+			gldTree[str(g_id)] = {
+				"object": "!CMD",
+				"name": ob['!CMD']
+			}
+			other_keys = {k: ob[k] for k in ob if k not in ['!CMD']}
+			gldTree[str(g_id)].update(other_keys)
+		else:
+			warnings.warn(f'Ignored {ob}')
+		g_id += 1
+	# Warn on buses with no coords.
+	no_coord_buses = set(bus_names) - set(bus_with_coords)
+	if len(no_coord_buses) != 0:
+		warnings.warn(f'Buses without coordintates:', no_coord_buses)
 	return gldTree
 
-#if __name__ == '__main__':
-	# tree = dssToTree('ieee37_ours.dss')
+def evilGldTreeToDssTree():
+	''' Inverse frontend to DSS converter. Still evil. '''
+	#TODO: implement
+	pass
+
+if __name__ == '__main__':
+	tree = dssToTree('ieee37_ours.dss')
 	# treeToDss(tree, 'ieee37p.dss')
 	# dssToMem('ieee37.dss')
 	# dssToGridLab('ieee37.dss', 'Model.glm') # this kind of works
-	#gridLabToDSS('ieee37_fixed.glm', 'ieee37_conv.dss') # this fails miserably
+	# gridLabToDSS('ieee37_fixed.glm', 'ieee37_conv.dss') # this fails miserably
+	evil_glm = evilDssTreeToGldTree(tree)
+	distNetViz.viz_mem(evil_glm, open_file=True) #forceLayout=True)
+	#TODO: make parser accept keyless items with new !keyless_n key?
+	#TODO: define .dsc format and write syntax guide.
+	#TODO: what to do about transformers with invalid bus setting with the duplicate keys?

@@ -17,25 +17,13 @@ hidden = False
 
 def work(modelDir, inputDict):
 	''' Run the model in its directory. '''
-
 	outData = {}
-
-	if inputDict.get("solar", "None") == "None":
-		solar = 'off'
-	else: 
-		solar = 'on'
-	if inputDict.get("wind", "None") == "None":
-		wind = 'off'
-	else: 
-		wind = 'on'
-	if inputDict.get("battery", "None") == "None":
-		battery = 'off'
-	else: 
-		battery = 'on'
-
-	outData['solar'] = solar
-	outData['wind'] = wind
-	outData['battery'] = battery
+	solar = inputDict['solar'] 
+	wind = inputDict['wind']
+	battery = inputDict['battery']
+	outData['solar'] = inputDict['solar']
+	outData['wind'] = inputDict['wind']
+	outData['battery'] = inputDict['battery']
 
 	# Setting up the loadShape file.
 	with open(pJoin(modelDir,"loadShape.csv"),"w") as loadShapeFile:
@@ -407,6 +395,10 @@ def work(modelDir, inputDict):
 
 	return outData
 
+def runtimeEstimate(modelDir):
+	''' Estimated runtime of model in minutes. '''
+	return 2.0
+
 def new(modelDir):
 	''' Create a new instance of this model. Returns true on success, false on failure. '''
 	fName = "input - 2 col, 200 Employee Office, Springfield Illinois, 2001.csv"
@@ -457,7 +449,7 @@ def _debugging():
 	# Create New.
 	new(modelLoc)
 	# Pre-run.
-	# renderAndShow(modelLoc)
+	renderAndShow(modelLoc)
 	# Run the model.
 	__neoMetaModel__.runForeground(modelLoc)
 	# Show the output.

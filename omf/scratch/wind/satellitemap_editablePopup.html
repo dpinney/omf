@@ -131,16 +131,16 @@
 			vegScore = e.target.feature.properties.vegScore
 			layer.bindPopup("<input id='popup_leaflet_id' style='display:none' value=" + e.target._leaflet_id + ">Veg Score: <input type='text' id='veg_score' value=" + vegScore + "><button onclick='saveVeg()' type='button'>Save</button>"+"<br />"+"Fire Risk: "+props['fire-risk']+"<br />"+"<a href='https://www.spc.noaa.gov/products/fire_wx/fwdy1.html' target='_blank'>Click for more information</a>")
 			console.log(props['fire-risk'])
-			if (0 <= props['fire-risk'] && props['fire-risk'] < 1) {layer.setStyle({fillColor: '#005CE5'})}
-			if (1 <= props['fire-risk'] && props['fire-risk'] < 2) {layer.setStyle({fillColor: '#1551D2'})}
-			if (2 <= props['fire-risk'] && props['fire-risk'] < 3) {layer.setStyle({fillColor: '#2A47BF'})}
-			if (3 <= props['fire-risk'] && props['fire-risk'] < 4) {layer.setStyle({fillColor: '#3F3DAC'})}
-			if (4 <= props['fire-risk'] && props['fire-risk'] < 5) {layer.setStyle({fillColor: '#543399'})}
-			if (5 <= props['fire-risk'] && props['fire-risk'] < 6) {layer.setStyle({fillColor: '#6A2886'})}
-			if (6 <= props['fire-risk'] && props['fire-risk'] < 7) {layer.setStyle({fillColor: '#7F1E73'})}
-			if (7 <= props['fire-risk'] && props['fire-risk'] < 8) {layer.setStyle({fillColor: '#941460'})}
-			if (8 <= props['fire-risk'] && props['fire-risk'] < 9) {layer.setStyle({fillColor: '#A90A4D'})}
-			if (9 <= props['fire-risk'] && props['fire-risk'] <= 10) {layer.setStyle({fillColor: '#BF003A'})}
+			if (0 <= props['fire-risk'] && props['fire-risk'] < 1) {layer.setStyle({fillColor: '#E1E500'})}
+			if (1 <= props['fire-risk'] && props['fire-risk'] < 2) {layer.setStyle({fillColor: '#DDCF00'})}
+			if (2 <= props['fire-risk'] && props['fire-risk'] < 3) {layer.setStyle({fillColor: '#DAB900'})}
+			if (3 <= props['fire-risk'] && props['fire-risk'] < 4) {layer.setStyle({fillColor: '#D6A400'})}
+			if (4 <= props['fire-risk'] && props['fire-risk'] < 5) {layer.setStyle({fillColor: '#D38E00'})}
+			if (5 <= props['fire-risk'] && props['fire-risk'] < 6) {layer.setStyle({fillColor: '#D07900'})}
+			if (6 <= props['fire-risk'] && props['fire-risk'] < 7) {layer.setStyle({fillColor: '#CC6300'})}
+			if (7 <= props['fire-risk'] && props['fire-risk'] < 8) {layer.setStyle({fillColor: '#C94D00'})}
+			if (8 <= props['fire-risk'] && props['fire-risk'] < 9) {layer.setStyle({fillColor: '#C22200'})}
+			if (9 <= props['fire-risk'] && props['fire-risk'] <= 10) {layer.setStyle({fillColor: '#BF0D00'})}
 			layer.openPopup()
 		})
 		drawnItems.addLayer(layer);
@@ -188,18 +188,29 @@
 				var sum = 0;
 				var average = 0;
 				for (j = 0; j < xhttpData.location.length; j++) {
-					console.log(xhttpData.parameters[j]['fire-weather'].value[0])
-					if (xhttpData.parameters[j]["fire-weather"].value[0] == "No Areas") {
+					console.log(xhttpData.parameters[j]['fire-weather'][0].value[0])
+					console.log(xhttpData.parameters[j]['fire-weather'][1].value[0])
+					if (xhttpData.parameters[j]["fire-weather"][0].value[0] == "No Areas") {
 						eachRisk.push(0);
 					}
-					else if (xhttpData.parameters[j]["fire-weather"].value[0] == "Elevated Areas") {
+					if (xhttpData.parameters[j]["fire-weather"][1].value[0] == "No Areas") {
+						eachRisk.push(0);
+					}
+					if (xhttpData.parameters[j]["fire-weather"][0].value[0] == "Elevated Areas") {
 						eachRisk.push(5);
 						sum += 5;
 					}
-					else { // the final parameter is "Critical Areas"
-						console.log(xhttpData.parameters[j]["fire-weather"].value[0] == "Critical Areas")
+					if (xhttpData.parameters[j]["fire-weather"][1].value[0] == "Isolated") {
+						eachRisk.push(5);
+						sum += 5;
+					}
+					if (xhttpData.parameters[j]["fire-weather"][0].value[0] == "Critical Areas") { 
 						eachRisk.push(10);
 						sum += 10;
+					}
+					if (xhttpData.parameters[j]["fire-weather"][1].value[0] == "Scattered") { 
+						eachRisk.push(8);
+						sum += 8;
 					}
 					console.log(sum)
 				}

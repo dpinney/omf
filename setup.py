@@ -11,6 +11,10 @@ Full documentation is available on our OMF wiki: http://github.com/dpinney/omf/w
 
 from distutils.core import setup
 from setuptools import find_packages
+import os
+
+#HACK: keep matplotlib from breaking out of sandboxes on Windows.
+os.environ["MPLCONFIGDIR"] = "."
 
 setup(
 	name = 'omf',
@@ -35,5 +39,5 @@ setup(
 	license = 'GPLv2',
 	platforms = 'any',
 	zip_safe = False, 
-	install_requires = open("requirements.txt").readlines(),
+	install_requires = [x for x in open("requirements.txt").readlines() if not x.startswith('#')],
 )

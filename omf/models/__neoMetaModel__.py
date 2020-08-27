@@ -31,7 +31,10 @@ def heavyProcessing(modelDir, test_mode=False):
 		# Get the inputs.
 		with web.locked_open(pJoin(modelDir, 'allInputData.json')) as f:
 			inputDict = json.load(f)
+		# Place run start time.
 		inputDict['runStartTime'] = startTime.isoformat()
+		with open(pJoin(modelDir, 'allInputData.json'), 'w') as f:
+			json.dump(inputDict, f, indent=4)
 		# Remove old outputs.
 		try:
 			os.remove(pJoin(modelDir,"allOutputData.json"))
@@ -192,7 +195,7 @@ def renderTemplate(modelDir, absolutePaths=False, datastoreNames={}):
 		mod_start = now
 	elapsed_dt = now - mod_start
 	elapsed_min = elapsed_dt.total_seconds() / 60.0
-	model_estimate_min = float(inJson.get('runtimeEst_min', '0.0'))
+	model_estimate_min = float(inJson.get('runtimeEst_min', '2.0'))
 	remain_min = model_estimate_min - elapsed_min 
 	runDebugTemplate = '''
 		{% if modelStatus == 'running' %}
