@@ -8,6 +8,7 @@ from ditto.readers.gridlabd.read import Reader as gReader
 from ditto.writers.gridlabd.write import Writer as gWriter
 from collections import OrderedDict
 import warnings
+from omf import feeder, distNetViz
 
 def gridLabToDSS(inFilePath, outFilePath):
 	''' Convert gridlab file to dss. ''' 
@@ -174,8 +175,6 @@ if __name__ == '__main__':
 	# dssToGridLab('ieee37.dss', 'Model.glm') # this kind of works
 	# gridLabToDSS('ieee37_fixed.glm', 'ieee37_conv.dss') # this fails miserably
 	evil_glm = evilDssTreeToGldTree(tree)
-	from omf import feeder, distNetViz
-	feeder.dump(evil_glm, './evil.glm')
-	distNetViz.viz('./evil.glm', open_file=True) #forceLayout=True, 
+	distNetViz.viz_mem(evil_glm, open_file=True) #forceLayout=True)
 	#TODO: make parser accept keyless items with new !keyless_n key?
 	#TODO: define .dsc format and write syntax guide.
