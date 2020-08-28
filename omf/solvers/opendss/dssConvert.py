@@ -152,6 +152,17 @@ def evilDssTreeToGldTree(dssTree):
 				bus_names.append(bus_root)
 				other_keys = {k: ob[k] for k in ob if k not in ['object','bus','!CMD']}
 				gldTree[str(g_id)].update(other_keys)
+			elif 'bus1' in ob and 'bus2' not in ob:
+				#load-like object, alternate syntax
+				bus_root = ob['bus1'].split('.')[0]
+				gldTree[str(g_id)] = {
+					"object": obtype,
+					"name": name,
+					"parent": bus_root
+				}
+				bus_names.append(bus_root)
+				other_keys = {k: ob[k] for k in ob if k not in ['object','bus1','!CMD']}
+				gldTree[str(g_id)].update(other_keys)
 			else:
 				#config-like object.
 				gldTree[str(g_id)] = {
@@ -189,7 +200,8 @@ if __name__ == '__main__':
 	# dssToGridLab('ieee37.dss', 'Model.glm') # this kind of works
 	# gridLabToDSS('ieee37_fixed.glm', 'ieee37_conv.dss') # this fails miserably
 	evil_glm = evilDssTreeToGldTree(tree)
-	distNetViz.viz_mem(evil_glm, open_file=True) #forceLayout=True)
+	distNetViz.viz_mem(evil_glm, open_file=True, forceLayout=True)
 	#TODO: make parser accept keyless items with new !keyless_n key?
 	#TODO: define .dsc format and write syntax guide.
 	#TODO: what to do about transformers with invalid bus setting with the duplicate keys?
+	#TODO: where to save the x.1.2.3 bus connectivity info?
