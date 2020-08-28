@@ -207,36 +207,35 @@ def evilGldTreeToDssTree(evil_gld_tree):
 		elif ob.get('object') == 'line':
 			new_ob = {
 				'!CMD': 'new',
-				'object': 'line',
+				'object': 'line.' + ob['name'],
 				'bus1': ob['from'],
 				'bus2': ob['to'],
 			}
-			_extend_with_exc(ob, new_ob, ['!CMD','from','to','object'])
+			_extend_with_exc(ob, new_ob, ['!CMD','from','to','name','object'])
 			dssTree.append(new_ob)
 		elif ob.get('object') == 'transformer':
 			new_ob = {
 				'!CMD': 'new',
-				'object': 'transformer',
+				'object': 'transformer.' + ob['name'],
 				'buses': f'({ob["from"]},{ob["to"]})'
 			}
-			_extend_with_exc(ob, new_ob, ['!CMD','from','to'])
+			_extend_with_exc(ob, new_ob, ['!CMD','from','to','name','object'])
 			dssTree.append(new_ob)
 		elif 'parent' in ob:
 			new_ob = {
 				'!CMD': 'new',
-				'object': ob['object'],
+				'object': ob['object'] + '.' + ob['name'],
 				'bus': ob['parent'] 
 			}
-			_extend_with_exc(ob, new_ob, ['parent'])
+			_extend_with_exc(ob, new_ob, ['parent','name','object'])
 			dssTree.append(new_ob)
 		elif 'bus' not in ob and 'bus1' not in ob and 'bus2' not in ob and 'buses' not in ob and ob.get('object') != '!CMD':
 			# floating config type object.
 			new_ob = {
 				'!CMD': 'new',
-				'object': ob['object'],
-				'name': ob['name'] 
+				'object': ob['object'] + '.' + ob['name'],
 			}
-			_extend_with_exc(ob, new_ob, new_ob.keys())
+			_extend_with_exc(ob, new_ob, ['!CMD','name','object'])
 			dssTree.append(new_ob)
 		elif ob.get('object') == '!CMD':
 			new_ob = {
@@ -259,7 +258,8 @@ if __name__ == '__main__':
 	# pp(evil_glm)
 	# distNetViz.viz_mem(evil_glm, open_file=True, forceLayout=True)
 	evil_dss = evilGldTreeToDssTree(evil_glm)
-	pp(evil_dss)
+	# pp(evil_dss)
+	treeToDss(evil_dss, 'HACKZ.dss')
 	#TODO: make parser accept keyless items with new !keyless_n key?
 	#TODO: define .dsc format and write syntax guide.
 	#TODO: what to do about transformers with invalid bus setting with the duplicate keys?
