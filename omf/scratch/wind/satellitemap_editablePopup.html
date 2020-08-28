@@ -2,16 +2,19 @@
 <html>
 <head>
 	<title>GeoJSON Map</title>
-	<link rel='stylesheet' href='https://unpkg.com/leaflet@1.0.3/dist/leaflet.css' integrity='sha512-07I2e+7D8p6he1SIM+1twR5TIrhUQn9+I6yjqD53JQjFiMf8EtC93ty0/5vJTZGF8aAocvHYNEDJajGdNx1IsQ=='
-		crossorigin='' />
-	<script src='https://unpkg.com/leaflet@1.0.3/dist/leaflet.js' integrity='sha512-A7vV8IFfih/D732iSSKi20u/ooOfj/AGehOKq0f4vLT1Zr2Y+RX7C+w8A1gaSasGtRUZpF/NZgzSAu4/Gc41Lg=='
-		crossorigin=''></script>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.6.0/dist/leaflet.css"
+    integrity="sha512-xwE/Az9zrjBIphAcBb3F6JVqxf46+CDLwfLMHloNu6KEQCAWi6HcDUbeOfBIptF7tcCzusKFjFw2yuvEpDL9wQ=="
+    crossorigin=""/>
+  <script src="https://unpkg.com/leaflet@1.6.0/dist/leaflet.js"
+    integrity="sha512-gZwIG9x3wUXg2hdXF6+rVkLF/0Vi9U8D2Ntg4Ga5I5BZpVkVxlJWbSQtXPSiUTtC0TjtGOmxa1AJPuV0CPthew=="
+    crossorigin=""></script>
 	<link rel='stylesheet' href='https://unpkg.com/leaflet-draw@1.0.0/dist/leaflet.draw.css' />
 	<script src='https://unpkg.com/leaflet-draw@1.0.0/dist/leaflet.draw.js'></script>
 	<!-- Load Esri Leaflet from CDN -->
 	<script src="https://unpkg.com/esri-leaflet@2.5.0/dist/esri-leaflet.js"
-	    integrity="sha512-ucw7Grpc+iEQZa711gcjgMBnmd9qju1CICsRaryvX7HJklK0pGl/prxKvtHwpgm5ZHdvAil7YPxI1oWPOWK3UQ=="
-	    crossorigin=""></script>
+		integrity="sha512-ucw7Grpc+iEQZa711gcjgMBnmd9qju1CICsRaryvX7HJklK0pGl/prxKvtHwpgm5ZHdvAil7YPxI1oWPOWK3UQ=="
+		crossorigin="">
+	</script>
 	<style>html, body {
 		width: 100%;
 		height: 100%;
@@ -28,35 +31,35 @@
 	</style>
 	<style>
 		#fade {
-		    display: none;
-		    position: absolute;
-		    top: 0%;
-		    left: 0%;
-		    width: 100%;
-		    height: 100%;
-		    background-color: #ababab;
-		    z-index: 1001;
-		    -moz-opacity: 0.8;
-		    opacity: .70;
-		    filter: alpha(opacity=80);
+			display: none;
+			position: absolute;
+			top: 0%;
+			left: 0%;
+			width: 100%;
+			height: 100%;
+			background-color: #ababab;
+			z-index: 1001;
+			-moz-opacity: 0.8;
+			opacity: .70;
+			filter: alpha(opacity=80);
 		}
 
 		#modal {
-		    display: none;
-		    position: absolute;
-		    top: 35%;
-		    left: 45%;
-		    width: 100px;
-		    height: 100px;
-		    padding:15px 15px 15px;
-		    border: 3px solid #ababab;
-		    box-shadow: 1px 1px 10px #ababab;
-		    border-radius: 20px;
-		    background-color: white;
-		    z-index: 1002;
-		    text-align: center;
-		    overflow: auto;
-    </style>
+			display: none;
+			position: absolute;
+			top: 35%;
+			left: 45%;
+			width: 100px;
+			height: 100px;
+			padding:15px 15px 15px;
+			border: 3px solid #ababab;
+			box-shadow: 1px 1px 10px #ababab;
+			border-radius: 20px;
+			background-color: white;
+			z-index: 1002;
+			text-align: center;
+			overflow: auto;
+	</style>
 </head>
 <body>
 	<div id='map'></div>
@@ -70,7 +73,7 @@
 	map.setView([39.8, -121.6], 10);
 	L.control.scale().addTo(map);
 	// drawing layer
-	var drawnItems = L.featureGroup().addTo(map);
+	var drawnItems = L.featureGroup();
 	// esri_images map
 	var esri_images = L.esri.basemapLayer('Imagery').addTo(map);
 	// satelite
@@ -78,19 +81,32 @@
 		'https://{s}.tiles.mapbox.com/v4/mapbox.landsat-live/{z}/{x}/{y}.jpg?access_token=pk.eyJ1IjoiZWp0YWxib3QiLCJhIjoiY2ptMHBlOGdjMmZlaTNwb2dwMHE2Mm54NCJ9.xzceVNmAZy49SyFDb3UMaw',
 		{ maxZoom: 18, attribution:'' }
 	);
+	// Streets.
+	var streets = L.esri.basemapLayer('Streets');
 	// Topo
-	var streets = L.esri.basemapLayer('Streets').addTo(map);
 	// var streets = L.tileLayer(
 	// 	'https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png',
 	// 	{ maxZoom: 18, attribution:'' }
 	// );
 
+	var esri_landsat = L.esri.imageMapLayer({
+		url: 'https://landsat2.arcgis.com/arcgis/rest/services/Landsat/MS/ImageServer',
+		attribution: 'United States Geological Survey (USGS), National Aeronautics and Space Administration (NASA)'
+	})
+
+	var esri_sentinel = L.esri.imageMapLayer({
+		url: 'https://sentinel.arcgis.com/arcgis/rest/services/Sentinel2/ImageServer',
+		attribution: 'United States Geological Survey (USGS), National Aeronautics and Space Administration (NASA)'
+	})
+
 	// Options to toggle between maps added to layers
 	L.control.layers(
 		{
-			'landsat': landsat.addTo(map),
-			'streets': streets.addTo(map),
-			'esri_images': esri_images.addTo(map)
+			'landsat': landsat,
+			'streets': streets,
+			'esri_landsat': esri_landsat,
+			'esri_sentinel': esri_sentinel,
+			'esri_images': esri_images
 		},
 		{
 			'drawlayer': drawnItems,
@@ -153,14 +169,14 @@
 	}
 	// next two functions will open and close the loading icon when the fire risk button is clicked
 	function openModal() {
-        document.getElementById('modal').style.display = 'initial';
-	    document.getElementById('fade').style.display = 'initial';
-	    setTimeout(fireButton_click, 5); // HACK: slight timeout to get screen to refresh.
+		document.getElementById('modal').style.display = 'initial';
+		document.getElementById('fade').style.display = 'initial';
+		setTimeout(fireButton_click, 5); // HACK: slight timeout to get screen to refresh.
 	}
 
 	function closeModal() {
 		document.getElementById('modal').style.display = 'none';
-	   	document.getElementById('fade').style.display = 'none';
+		document.getElementById('fade').style.display = 'none';
 	}
 	// send an XML Http request to the server for data from getSubGridData() of weather.py
 	function fireButton_click() {
