@@ -76,11 +76,11 @@
 	var drawnItems = L.featureGroup();
 	// esri_images map
 	var esri_images = L.esri.basemapLayer('Imagery').addTo(map);
-	// satelite
-	var landsat = L.tileLayer(
-		'https://{s}.tiles.mapbox.com/v4/mapbox.landsat-live/{z}/{x}/{y}.jpg?access_token=pk.eyJ1IjoiZWp0YWxib3QiLCJhIjoiY2ptMHBlOGdjMmZlaTNwb2dwMHE2Mm54NCJ9.xzceVNmAZy49SyFDb3UMaw',
-		{ maxZoom: 18, attribution:'' }
-	);
+	// Mapbox Satellite
+	// var landsat = L.tileLayer(
+	// 	'https://a.tiles.mapbox.com/v4/mapbox.landsat-live/{z}/{x}/{y}@2x.jpg?access_token=pk.eyJ1IjoiZWp0YWxib3QiLCJhIjoiY2ptMHBlOGdjMmZlaTNwb2dwMHE2Mm54NCJ9.xzceVNmAZy49SyFDb3UMaw',
+	// 	{ maxZoom: 18, attribution:'' }
+	// );
 	// Streets.
 	var streets = L.esri.basemapLayer('Streets');
 	// Topo
@@ -88,24 +88,35 @@
 	// 	'https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png',
 	// 	{ maxZoom: 18, attribution:'' }
 	// );
-
+	// Token request.
+	try {
+		cred_req = L.esri.post('https://www.arcgis.com/sharing/rest/generateToken', {  
+			username: 'TBD',  
+			password: 'TBD',  
+			f: 'json',  
+			expiration: 60,  
+			client: 'referer',  
+			referer: window.location.origin  
+		}, function (error, response) {});
+		token = JSON.parse(cred_req.response).token
+	} catch (err) {}
+	// Landsat Imagery
 	var esri_landsat = L.esri.imageMapLayer({
 		url: 'https://landsat2.arcgis.com/arcgis/rest/services/Landsat/MS/ImageServer',
 		attribution: 'United States Geological Survey (USGS), National Aeronautics and Space Administration (NASA)'
 	})
-
+	// Sentinel 2 Imagery
 	var esri_sentinel = L.esri.imageMapLayer({
 		url: 'https://sentinel.arcgis.com/arcgis/rest/services/Sentinel2/ImageServer',
-		attribution: 'United States Geological Survey (USGS), National Aeronautics and Space Administration (NASA)'
+		attribution: 'United States Geological Survey (USGS), National Aeronautics and Space Administration (NASA)',
+		token: ''
 	})
-
 	// Options to toggle between maps added to layers
 	L.control.layers(
 		{
-			'landsat': landsat,
 			'streets': streets,
-			'esri_landsat': esri_landsat,
 			'esri_sentinel': esri_sentinel,
+			'esri_landsat': esri_landsat,
 			'esri_images': esri_images
 		},
 		{
