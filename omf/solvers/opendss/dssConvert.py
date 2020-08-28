@@ -94,6 +94,11 @@ def treeToDss(treeObject, outputPath):
 		outFile.write(line + '\n')
 	outFile.close()
 
+def _extend_with_exc(from_d, to_d, exclude_list):
+	''' Add all items in from_d to to_d that aren't in exclude_list. '''
+	good_items = {k: from_d[k] for k in from_d if k not in exclude_list}
+	to_d.update(good_items)
+
 def evilDssTreeToGldTree(dssTree):
 	''' World's worst and ugliest converter. Hence evil. 
 	We built this to do quick-and-dirty viz of openDSS files. '''
@@ -102,6 +107,7 @@ def evilDssTreeToGldTree(dssTree):
 	# Build bad gld representation of each object
 	bus_names = []
 	bus_with_coords = []
+	# Handle all the components.
 	for ob in dssTree:
 		if ob['!CMD'] == 'setbusxy':
 			gldTree[str(g_id)] = {
@@ -125,8 +131,7 @@ def evilDssTreeToGldTree(dssTree):
 					"to": to
 				}
 				bus_names.extend([fro, to])
-				other_keys = {k: ob[k] for k in ob if k not in ['object','bus1','bus2','!CMD']}
-				gldTree[str(g_id)].update(other_keys)
+				_extend_with_exc(ob, gldTree[str(g_id)], ['object','bus1','bus2','!CMD'])
 			elif 'buses' in ob:
 				#transformer-like object.
 				b1, b2 = ob['buses'].replace('(','').replace(')','').split(',')
@@ -139,8 +144,7 @@ def evilDssTreeToGldTree(dssTree):
 					"to": to
 				}
 				bus_names.extend([fro, to])
-				other_keys = {k: ob[k] for k in ob if k not in ['object','buses','!CMD']}
-				gldTree[str(g_id)].update(other_keys)
+				_extend_with_exc(ob, gldTree[str(g_id)], ['object','buses','!CMD'])
 			elif 'bus' in ob:
 				#load-like object.
 				bus_root = ob['bus'].split('.')[0]
@@ -150,8 +154,7 @@ def evilDssTreeToGldTree(dssTree):
 					"parent": ob['bus'].split('.')[0]
 				}
 				bus_names.append(bus_root)
-				other_keys = {k: ob[k] for k in ob if k not in ['object','bus','!CMD']}
-				gldTree[str(g_id)].update(other_keys)
+				_extend_with_exc(ob, gldTree[str(g_id)], ['object','bus','!CMD'])
 			elif 'bus1' in ob and 'bus2' not in ob:
 				#load-like object, alternate syntax
 				bus_root = ob['bus1'].split('.')[0]
@@ -161,37 +164,89 @@ def evilDssTreeToGldTree(dssTree):
 					"parent": bus_root
 				}
 				bus_names.append(bus_root)
-				other_keys = {k: ob[k] for k in ob if k not in ['object','bus1','!CMD']}
-				gldTree[str(g_id)].update(other_keys)
+				_extend_with_exc(ob, gldTree[str(g_id)], ['object','bus1','!CMD'])
 			else:
 				#config-like object.
 				gldTree[str(g_id)] = {
 					"object": obtype,
 					"name": name
 				}
-				other_keys = {k: ob[k] for k in ob if k not in ['object','!CMD']}
-				gldTree[str(g_id)].update(other_keys)
+				_extend_with_exc(ob, gldTree[str(g_id)], ['object','!CMD'])
 		elif ob['!CMD'] not in ['new', 'setbusxy']:
 			#command-like objects.
 			gldTree[str(g_id)] = {
 				"object": "!CMD",
 				"name": ob['!CMD']
 			}
-			other_keys = {k: ob[k] for k in ob if k not in ['!CMD']}
-			gldTree[str(g_id)].update(other_keys)
+			_extend_with_exc(ob, gldTree[str(g_id)], ['!CMD'])
 		else:
 			warnings.warn(f'Ignored {ob}')
 		g_id += 1
 	# Warn on buses with no coords.
 	no_coord_buses = set(bus_names) - set(bus_with_coords)
 	if len(no_coord_buses) != 0:
-		warnings.warn(f'Buses without coordintates:', no_coord_buses)
+		warnings.warn(f'Buses without coordintates:{no_coord_buses}')
 	return gldTree
 
-def evilGldTreeToDssTree():
+def evilGldTreeToDssTree(evil_gld_tree):
 	''' Inverse frontend to DSS converter. Still evil. '''
-	#TODO: implement
-	pass
+	dssTree = []
+	# Put objects in order.
+	all_objs = evil_gld_tree.items()
+	objs_in_order = [y[1] for y in sorted(all_objs, key=lambda x:int(x[0]))]
+	# Process each object.
+	for ob in objs_in_order:
+		if ob.get('object') == 'node':
+			new_ob = {
+				'!CMD':'setbusxy',
+				'bus':ob['name'],
+				'x': ob['longitude'],
+				'y': ob['latitude']
+			}
+			dssTree.append(new_ob)
+		elif ob.get('object') == 'line':
+			new_ob = {
+				'!CMD': 'new',
+				'object': 'line',
+				'bus1': ob['from'],
+				'bus2': ob['to'],
+			}
+			_extend_with_exc(ob, new_ob, ['!CMD','from','to','object'])
+			dssTree.append(new_ob)
+		elif ob.get('object') == 'transformer':
+			new_ob = {
+				'!CMD': 'new',
+				'object': 'transformer',
+				'buses': f'({ob["from"]},{ob["to"]})'
+			}
+			_extend_with_exc(ob, new_ob, ['!CMD','from','to'])
+			dssTree.append(new_ob)
+		elif 'parent' in ob:
+			new_ob = {
+				'!CMD': 'new',
+				'object': ob['object'],
+				'bus': ob['parent'] 
+			}
+			_extend_with_exc(ob, new_ob, ['parent'])
+			dssTree.append(new_ob)
+		elif 'bus' not in ob and 'bus1' not in ob and 'bus2' not in ob and 'buses' not in ob and ob.get('object') != '!CMD':
+			# floating config type object.
+			new_ob = {
+				'!CMD': 'new',
+				'object': ob['object'],
+				'name': ob['name'] 
+			}
+			_extend_with_exc(ob, new_ob, new_ob.keys())
+			dssTree.append(new_ob)
+		elif ob.get('object') == '!CMD':
+			new_ob = {
+				'!CMD': ob['name'],
+			}
+			_extend_with_exc(ob, new_ob, ['!CMD', 'name', 'object'])
+			dssTree.append(new_ob)
+		else:
+			warnings.warn(f'Unprocessed object: {ob}')
+	return dssTree
 
 if __name__ == '__main__':
 	tree = dssToTree('ieee37_ours.dss')
@@ -199,8 +254,12 @@ if __name__ == '__main__':
 	# dssToMem('ieee37.dss')
 	# dssToGridLab('ieee37.dss', 'Model.glm') # this kind of works
 	# gridLabToDSS('ieee37_fixed.glm', 'ieee37_conv.dss') # this fails miserably
+	from pprint import pprint as pp
 	evil_glm = evilDssTreeToGldTree(tree)
-	distNetViz.viz_mem(evil_glm, open_file=True, forceLayout=True)
+	# pp(evil_glm)
+	# distNetViz.viz_mem(evil_glm, open_file=True, forceLayout=True)
+	evil_dss = evilGldTreeToDssTree(evil_glm)
+	pp(evil_dss)
 	#TODO: make parser accept keyless items with new !keyless_n key?
 	#TODO: define .dsc format and write syntax guide.
 	#TODO: what to do about transformers with invalid bus setting with the duplicate keys?
