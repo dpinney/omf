@@ -156,7 +156,7 @@
 		// add click handler that makes popup on each click.
 		layer.on('click', function (e) {
 			vegScore = e.target.feature.properties.vegScore
-			layer.bindPopup("<input id='popup_leaflet_id' style='display:none' value=" + e.target._leaflet_id + ">Veg Score: <input type='text' id='veg_score' value=" + vegScore + "><button onclick='saveVeg()' type='button'>Save</button>"+"<br />"+"Fire Risk: "+props['fire-risk']+"<br />"+"<a href='https://www.spc.noaa.gov/products/fire_wx/fwdy1.html' target='_blank'>Click for more information</a>")
+			layer.bindPopup("<input id='popup_leaflet_id' style='display:none' value=" + e.target._leaflet_id + ">Veg Score: <input type='text' id='veg_score' value=" + vegScore + "><button onclick='saveVeg()' type='button'>Save</button>"+"<br />"+"Fire Risk valid for 24 hours starting at "+props['start-time']+": "+"<strong>"+props['fire-risk']+"</strong>"+"<br />"+"<a href='https://www.spc.noaa.gov/products/fire_wx/fwdy1.html' target='_blank'>Click for more information</a>")
 			console.log(props['fire-risk'])
 			if (0 <= props['fire-risk'] && props['fire-risk'] < 1) {layer.setStyle({fillColor: '#E1E500'})}
 			if (1 <= props['fire-risk'] && props['fire-risk'] < 2) {layer.setStyle({fillColor: '#DDCF00'})}
@@ -199,6 +199,8 @@
 		else {
 			// this array is linked to console.log() statement for verifying the array contents
 			var eachShape = [];
+			dayForecast = document.getElementById("fireRisk").value;
+			console.log(dayForecast);
 			// A call to subGrid for each drawn shape
 			for (i = 0; i < drawn_geojson.features.length; i++) {
 				xhttp = new XMLHttpRequest();
@@ -217,25 +219,25 @@
 				for (j = 0; j < xhttpData.location.length; j++) {
 					console.log(xhttpData.parameters[j]['fire-weather'][0].value[0])
 					console.log(xhttpData.parameters[j]['fire-weather'][1].value[0])
-					if (xhttpData.parameters[j]["fire-weather"][0].value[0] == "No Areas") {
+					if (xhttpData.parameters[j]["fire-weather"][0].value[dayForecast] == "No Areas") {
 						eachRisk.push(0);
 					}
-					if (xhttpData.parameters[j]["fire-weather"][1].value[0] == "No Areas") {
+					if (xhttpData.parameters[j]["fire-weather"][1].value[dayForecast] == "No Areas") {
 						eachRisk.push(0);
 					}
-					if (xhttpData.parameters[j]["fire-weather"][0].value[0] == "Elevated Areas") {
+					if (xhttpData.parameters[j]["fire-weather"][0].value[dayForecast] == "Elevated Areas") {
 						eachRisk.push(5);
 						sum += 5;
 					}
-					if (xhttpData.parameters[j]["fire-weather"][1].value[0] == "Isolated") {
+					if (xhttpData.parameters[j]["fire-weather"][1].value[dayForecast] == "Isolated") {
 						eachRisk.push(5);
 						sum += 5;
 					}
-					if (xhttpData.parameters[j]["fire-weather"][0].value[0] == "Critical Areas") { 
+					if (xhttpData.parameters[j]["fire-weather"][0].value[dayForecast] == "Critical Areas") { 
 						eachRisk.push(10);
 						sum += 10;
 					}
-					if (xhttpData.parameters[j]["fire-weather"][1].value[0] == "Scattered") { 
+					if (xhttpData.parameters[j]["fire-weather"][1].value[dayForecast] == "Scattered") { 
 						eachRisk.push(8);
 						sum += 8;
 					}
@@ -244,6 +246,7 @@
 				// logs the average of each array's quantitative risk readings into an array
 				average = sum / eachRisk.length;
 				drawn_geojson.features[i].properties['fire-risk'] = average
+				drawn_geojson.features[i].properties['start-time'] = xhttpData["time-layout"]["start-valid-time"][dayForecast]
 				eachShape.push(average);
 			}
 		}
@@ -252,6 +255,18 @@
 	}
 </script>
 <button type="button" onclick="button_click()" style="position:fixed; top:0; right: 0; z-index:999">Get GeoJson</button>
+<form style="position:absolute; top: 40px; right: 0; z-index:999">
+	<label for="fireRisk"> </label>
+	<select name="fireRisk" id="fireRisk">
+		<option value="0">Day 1 Forecast</option>
+		<option value="1">Day 2 Forecast</option>
+		<option value="2">Day 3 Forecast</option>
+		<option value="3">Day 4 Forecast</option>
+		<option value="4">Day 5 Forecast</option>
+		<option value="5">Day 6 Forecast</option>
+		<option value="6">Day 7 Forecast</option>
+	</select>
+</form>
 <button type="button" onclick="openModal()" style="position:absolute; top: 20px; right: 0; z-index:999">Get Fire Risk</button>
 </body>
 </html>
