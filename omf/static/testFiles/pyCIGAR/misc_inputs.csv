@@ -19,3 +19,4 @@ max tap change default,0
 forward band default,2
 tap number default,0
 tap delay default,2
+delay default, 2
