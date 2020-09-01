@@ -19,46 +19,57 @@
 		width: 100%;
 		height: 100%;
 		margin: 0;
-		padding: 0;}
-	</style>
-	<style>#map{
+		padding: 0;
+	}
+	#map{
 		position: relative;
 		width: 100.0%;
 		height: 100.0%;
 		left: 0.0%;
 		top: 0.0%;
-		}
-	</style>
-	<style>
-		#fade {
-			display: none;
-			position: absolute;
-			top: 0%;
-			left: 0%;
-			width: 100%;
-			height: 100%;
-			background-color: #ababab;
-			z-index: 1001;
-			-moz-opacity: 0.8;
-			opacity: .70;
-			filter: alpha(opacity=80);
-		}
-
-		#modal {
-			display: none;
-			position: absolute;
-			top: 35%;
-			left: 45%;
-			width: 100px;
-			height: 100px;
-			padding:15px 15px 15px;
-			border: 3px solid #ababab;
-			box-shadow: 1px 1px 10px #ababab;
-			border-radius: 20px;
-			background-color: white;
-			z-index: 1002;
-			text-align: center;
-			overflow: auto;
+	}
+	#fade {
+		display: none;
+		position: absolute;
+		top: 0%;
+		left: 0%;
+		width: 100%;
+		height: 100%;
+		background-color: #ababab;
+		z-index: 1001;
+		-moz-opacity: 0.8;
+		opacity: .70;
+		filter: alpha(opacity=80);
+	}
+	#modal {
+		display: none;
+		position: absolute;
+		top: 35%;
+		left: 45%;
+		width: 100px;
+		height: 100px;
+		padding:15px 15px 15px;
+		border: 3px solid #ababab;
+		box-shadow: 1px 1px 10px #ababab;
+		border-radius: 20px;
+		background-color: white;
+		z-index: 1002;
+		text-align: center;
+		overflow: auto;
+	}
+	#export {
+        position: absolute;
+        top: 59px;
+        right: 0px;
+        z-index: 999;
+        background: white;
+        color: black;
+        cursor: pointer;
+        text-decoration: none;
+        font-family: 'Arial';
+        font-size: 13px;
+        padding: 4px;
+    }
 	</style>
 </head>
 <body>
@@ -67,6 +78,7 @@
 		<img id="loader" src="https://i.gifer.com/KSYA.gif" />
 	</div>
 	<div id="fade"></div>
+	<a href='#' id='export'>Export Features</a>
 	<script type='text/javascript'>
 	// basic map definition and zoom control.
 	var map = L.map('map');
@@ -253,9 +265,18 @@
 		console.log(eachShape);
 		closeModal();
 	}
+	document.getElementById('export').onclick = function(e) {
+        // Extract GeoJson from featureGroup
+        var data = drawnItems.toGeoJSON();
+        // Stringify the GeoJson
+        var convertedData = 'text/json;charset=utf-8,' + encodeURIComponent(JSON.stringify(data));
+        // Create export
+        document.getElementById('export').setAttribute('href', 'data:' + convertedData);
+        document.getElementById('export').setAttribute('download','data.geojson');
+    }
 </script>
-<button type="button" onclick="button_click()" style="position:fixed; top:0; right: 0; z-index:999">Get GeoJson</button>
-<form style="position:absolute; top: 40px; right: 0; z-index:999">
+<button type="button" onclick="button_click()" style="position: fixed; top: 0px; right: 0px; z-index:999; cursor: pointer" >Get GeoJson</button>
+<form style="position: absolute; top: 40px; right: 0px; z-index:999; cursor: pointer">
 	<label for="fireRisk"> </label>
 	<select name="fireRisk" id="fireRisk">
 		<option value="0">Day 1 Forecast</option>
@@ -267,6 +288,6 @@
 		<option value="6">Day 7 Forecast</option>
 	</select>
 </form>
-<button type="button" onclick="openModal()" style="position:absolute; top: 20px; right: 0; z-index:999">Get Fire Risk</button>
+<button type="button" onclick="openModal()" style="position:absolute; top: 20px; right: 0px; z-index:999; cursor: pointer">Get Fire Risk</button>
 </body>
 </html>
