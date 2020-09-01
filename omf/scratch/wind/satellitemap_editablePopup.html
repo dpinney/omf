@@ -73,7 +73,7 @@
 	map.setView([39.8, -121.6], 10);
 	L.control.scale().addTo(map);
 	// drawing layer
-	var drawnItems = L.featureGroup();
+	var drawnItems = L.featureGroup().addTo(map);
 	// esri_images map
 	var esri_images = L.esri.basemapLayer('Imagery').addTo(map);
 	// Mapbox Satellite
