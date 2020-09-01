@@ -216,35 +216,34 @@ def fullyDeEmbed(glmTree):
 		_deEmbedOnce(glmTree)
 		lenDiff = len(glmTree) - currLen
 
-
 def _mergeContigLinesOnce(tree):
-	''' helper function for mergeContigLines.'''
-	obs = list(tree.values())
 	n2k = nameIndex(tree)
-	for o in obs:
+	treecopy = tree.copy()
+	#removedNames = [] # DEBUG
+	while treecopy:
+		o = treecopy.popitem() # destructively iterate through tree copy
+		o = o[1]
 		if 'to' in o:
 			top = o
 			node = tree[n2k[o['to']]]
 			allBottoms = []
-			for o2 in obs:
+			for o2 in tree.values():
 				if o2.get('from', None) == node['name']:
 					allBottoms.append(o2)
-			# print 'TOPLINE', o['name'], 'NODE', node['name'], len(allBottoms)
 			if len(allBottoms) == 1:
 				bottom = allBottoms[0]
 				if top.get('configuration','NTC') == bottom.get('configuration','NBC'):
-					# print 'MATCH!', top['name'], top['length'], bottom['name'], bottom['length'], 'TOTAL', float(top['length']) + float(bottom['length'])
-					# delete node and bottom line, make top line length = sum of both lines and connect to bottom to.
+					# delete node and bottom line. Make top line length = sum of both lines. Connect the new bottom.
 					if ('length' in top) and ('length' in bottom):
 						newLen = float(top['length']) + float(bottom['length'])
-						try:
-							topTree = tree[n2k[o['name']]]
-							topTree['length'] = str(newLen)
-							topTree['to'] = bottom['to']
-							del tree[n2k[node['name']]]
-							del tree[n2k[bottom['name']]]
-						except:
-							continue #key weirdness
+						#removedNames.append(o['name']) # DEBUG
+						topTree = tree[n2k[o['name']]]
+						topTree['length'] = str(newLen)
+						topTree['to'] = bottom['to']
+						del tree[n2k[node['name']]]
+						del tree[n2k[bottom['name']]]
+	#for x in removedNames: # DEBUG
+	#	print(x)  # DEBUG
 
 
 def mergeContigLines(tree):
@@ -255,8 +254,6 @@ def mergeContigLines(tree):
 		treeKeys = len(tree.keys())
 		_mergeContigLinesOnce(tree)
 		removedKeys = treeKeys - len(tree.keys())
-		# print 'Objects merged: ', 2*removedKeys
-
 
 def attachRecorders(tree, recorderType, keyToJoin, valueToJoin):
 	''' Walk through a tree an and attach Gridlab recorders to the indicated type of node.'''
@@ -784,4 +781,8 @@ def _tests():
 	dump(tree, '/Users/dpinney/Desktop/reduced.glm')
 
 if __name__ == '__main__':
-	_tests()
+	FPATH = 'solvers/opendss/ieee37_ours.glm'
+	gldTree = parse(os.path.join(os.path.dirname(__file__), FPATH), filePath=True)
+	mergeContigLines(gldTree)
+	dump(gldTree, 'solvers/opendss/ieee37_ours_reduced_LMS.glm')
+	#_tests()
