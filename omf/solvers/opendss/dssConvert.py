@@ -264,7 +264,8 @@ if __name__ == '__main__':
 	from pprint import pprint as pp
 	evil_glm = evilDssTreeToGldTree(tree)
 	# pp(evil_glm)
-	distNetViz.viz_mem(evil_glm, open_file=True, forceLayout=False)
+	distNetViz.viz_mem(evil_glm, open_file=True, forceLayout=True)
+	distNetViz.insert_coordinates(evil_glm)
 	evilToOmd(evil_glm, 'ieee37.dss.omd')
 	# evil_dss = evilGldTreeToDssTree(evil_glm)
 	# pp(evil_dss)
