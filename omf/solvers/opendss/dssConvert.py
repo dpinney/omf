@@ -1,13 +1,14 @@
 # Prereq: `pip install 'git+https://github.com/NREL/ditto.git@master#egg=ditto[all]'`
 import os
 import sys
+import json
+import warnings
 from ditto.store import Store
 from ditto.readers.opendss.read import Reader as dReader
 from ditto.writers.opendss.write import Writer as dWriter
 from ditto.readers.gridlabd.read import Reader as gReader
 from ditto.writers.gridlabd.write import Writer as gWriter
 from collections import OrderedDict
-import warnings
 from omf import feeder, distNetViz
 
 def gridLabToDSS(inFilePath, outFilePath):
@@ -247,6 +248,13 @@ def evilGldTreeToDssTree(evil_gld_tree):
 			warnings.warn(f'Unprocessed object: {ob}')
 	return dssTree
 
+def evilToOmd(evilTree, outPath):
+	omdStruct = dict(feeder.newFeederWireframe)
+	omdStruct['syntax'] = 'DSS'
+	omdStruct['tree'] = evilTree
+	with open(outPath, 'w') as outFile:
+		json.dump(omdStruct, outFile, indent=4)
+
 if __name__ == '__main__':
 	tree = dssToTree('ieee37_ours.dss')
 	# treeToDss(tree, 'ieee37p.dss')
@@ -256,11 +264,14 @@ if __name__ == '__main__':
 	from pprint import pprint as pp
 	evil_glm = evilDssTreeToGldTree(tree)
 	# pp(evil_glm)
-	# distNetViz.viz_mem(evil_glm, open_file=True, forceLayout=True)
-	evil_dss = evilGldTreeToDssTree(evil_glm)
+	distNetViz.viz_mem(evil_glm, open_file=True, forceLayout=False)
+	evilToOmd(evil_glm, 'ieee37.dss.omd')
+	# evil_dss = evilGldTreeToDssTree(evil_glm)
 	# pp(evil_dss)
-	treeToDss(evil_dss, 'HACKZ.dss')
-	#TODO: make parser accept keyless items with new !keyless_n key?
+	# treeToDss(evil_dss, 'HACKZ.dss')
+	#TODO: make parser accept keyless items with new !keyless_n key? Or is this just horrible syntax?
 	#TODO: define .dsc format and write syntax guide.
-	#TODO: what to do about transformers with invalid bus setting with the duplicate keys?
+	#TODO: what to do about transformers with invalid bus setting with the duplicate keys? Probably ignore.
 	#TODO: where to save the x.1.2.3 bus connectivity info?
+	#TODO: refactor in to well-defined bijections between object types?
+	#TODO: a little help on the frontend to hide invalid commands.

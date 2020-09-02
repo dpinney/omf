@@ -66,6 +66,9 @@ def nodeToCoords(feederMap, nodeName):
 			current = key['geometry']['coordinates']
 			coordLis = coordsFromString(current)
 			coordStr = str(coordLis[0]) + ' ' + str(coordLis[1])
+		else:
+			coordLis = []
+			coordStr = ''
 	return coordLis, coordStr
 
 def lineToCoords(tree, feederMap, lineName):
@@ -173,15 +176,16 @@ def graphMicrogrid(pathToOmd, workDir, maxTime, stepSize, faultedLine, networked
 	faultedNodeCoordLis2, faultedNodeCoordStr2 = nodeToCoords(feederMap, str(faultedNode2))
 	Dict['geometry'] = {'type': 'LineString', 'coordinates': [faultedNodeCoordLis1, faultedNodeCoordLis2]}
 	Dict['type'] = 'Feature'
-	Dict['properties'] = {'name': faultedLine,
-						  'edgeColor': 'red',
-						  'popupContent': '<br><br>Location: <b>' + str(faultedNodeCoordStr1) + ', ' + str(faultedNodeCoordStr2) + '</b><br>Faulted Line: <b>' + str(faultedLine)}
+	Dict['properties'] = {
+		'name': faultedLine,
+		'edgeColor': 'red',
+		'popupContent': '<br><br>Location: <b>' + str(faultedNodeCoordStr1) + ', ' + str(faultedNodeCoordStr2) + '</b><br>Faulted Line: <b>' + str(faultedLine)
+	}
 	feederMap['features'].append(Dict)
 	row = 0
 	row_count_timeline = outputTimeline.shape[0]
 	while row < row_count_timeline:
 		device, coordLis, coordStr, time, action, loadBefore, loadAfter = pullDataForGraph(tree, feederMap, outputTimeline, row)
-
 		Dict = {}
 		if len(coordLis) == 2:
 			Dict['geometry'] = {'type': 'Point', 'coordinates': [coordLis[0], coordLis[1]]}
@@ -194,14 +198,19 @@ def graphMicrogrid(pathToOmd, workDir, maxTime, stepSize, faultedLine, networked
 								  'pointColor': '#' + str(colormap(time)), 
 								  'popupContent': '<br><br>Location: <b>' + str(coordStr) + '</b><br>Device: <b>' + str(device) + '</b><br>Time: <b>' + str(time) + '</b><br>Action: <b>' + str(action) + '</b><br>Load Before: <b>' + str(loadBefore) + '</b><br>Load After: <b>' + str(loadAfter) + '</b>.'}
 			feederMap['features'].append(Dict)
-		else:
+		elif len(coordLis) == 4:
 			print(colormap(time))
+			print(coordLis)
 			Dict['geometry'] = {'type': 'LineString', 'coordinates': [[coordLis[0], coordLis[1]], [coordLis[2], coordLis[3]]]}
 			Dict['type'] = 'Feature'
-			Dict['properties'] = {'name': str(tree[key].get('name', '')),
-								  'edgeColor': '#' + str(colormap(time)),
-								  'popupContent': '<br><br>Location: <b>' + str(coordStr) + '</b><br>Device: <b>' + str(device) + '</b><br>Time: <b>' + str(time) + '</b><br>Action: <b>' + str(action) + '</b><br>Load Before: <b>' + str(loadBefore) + '</b><br>Load After: <b>' + str(loadAfter) + '</b>.'}
+			Dict['properties'] = {
+				'name': str(tree[key].get('name', '')),
+				'edgeColor': '#' + str(colormap(time)),
+				'popupContent': '<br><br>Location: <b>' + str(coordStr) + '</b><br>Device: <b>' + str(device) + '</b><br>Time: <b>' + str(time) + '</b><br>Action: <b>' + str(action) + '</b><br>Load Before: <b>' + str(loadBefore) + '</b><br>Load After: <b>' + str(loadAfter) + '</b>.'
+			}
 			feederMap['features'].append(Dict)
+		else:
+			pass #TODO: figure out what's going on with coord-less items.
 		row += 1
 
 	if not os.path.exists(workDir):
@@ -287,7 +296,8 @@ def new(modelDir):
 	''' Create a new instance of this model. Returns true on success, false on failure. '''
 	defaultInputs = {
 		'modelType': modelName,
-		'feederName1': 'ieee37nodeFaultTester',
+		# 'feederName1': 'ieee37nodeFaultTester',
+		'feederName1': 'ieee37.dss',
 		'maxTime': '20',
 		'stepSize': '1',
 		'faultedLine': 'node738-711',

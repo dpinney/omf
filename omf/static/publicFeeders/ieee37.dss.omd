@@ -1,0 +1,1038 @@
+{
+    "links": [],
+    "hiddenLinks": [],
+    "nodes": [],
+    "hiddenNodes": [],
+    "layoutVars": {
+        "theta": "0.8",
+        "gravity": "0.01",
+        "friction": "0.9",
+        "linkStrength": "5",
+        "linkDistance": "5",
+        "charge": "-5"
+    },
+    "tree": {
+        "1": {
+            "object": "!CMD",
+            "name": "clear"
+        },
+        "2": {
+            "object": "circuit",
+            "name": "ieee37",
+            "basekv": "230",
+            "pu": "1.00",
+            "mvasc3": "200000",
+            "mvasc1": "210000"
+        },
+        "3": {
+            "object": "transformer",
+            "name": "subxf",
+            "from": "sourcebus",
+            "to": "799",
+            "phases": "3",
+            "windings": "2",
+            "xhl": "8",
+            "conns": "\"delta,delta\"",
+            "kvs": "\"230,4.8\"",
+            "kvas": "\"2500,2500\"",
+            "%r": "1"
+        },
+        "4": {
+            "object": "transformer",
+            "name": "xfm1",
+            "from": "709",
+            "to": "775",
+            "phases": "3",
+            "windings": "2",
+            "xhl": "1.81",
+            "conns": "\"delta,delta\"",
+            "kvs": "\"4.80,0.48\"",
+            "kvas": "\"500,500\"",
+            "%r": "0.045"
+        },
+        "5": {
+            "object": "linecode",
+            "name": "721",
+            "nphases": "3",
+            "basefreq": "60",
+            "rmatrix": "[0.055416667|0.012746212,0.050113636|0.006382576,0.012746212,0.055416667]",
+            "xmatrix": "[0.037367424|-0.006969697,0.035984848|-0.007897727,-0.006969697,0.037367424]",
+            "cmatrix": "[80.27484728|0,80.27484728|0,0,80.27484728]"
+        },
+        "6": {
+            "object": "linecode",
+            "name": "722",
+            "nphases": "3",
+            "basefreq": "60",
+            "rmatrix": "[0.089981061|0.030852273,0.085|0.023371212,0.030852273,0.089981061]",
+            "xmatrix": "[0.056306818|-0.006174242,0.050719697|-0.011496212,-0.006174242,0.056306818]",
+            "cmatrix": "[64.2184109|0,64.2184109|0,0,64.2184109]"
+        },
+        "7": {
+            "object": "linecode",
+            "name": "723",
+            "nphases": "3",
+            "basefreq": "60",
+            "rmatrix": "[0.245|0.092253788,0.246628788|0.086837121,0.092253788,0.245]",
+            "xmatrix": "[0.127140152|0.039981061,0.119810606|0.028806818,0.039981061,0.127140152]",
+            "cmatrix": "[37.5977112|0,37.5977112|0,0,37.5977112]"
+        },
+        "8": {
+            "object": "linecode",
+            "name": "724",
+            "nphases": "3",
+            "basefreq": "60",
+            "rmatrix": "[0.396818182|0.098560606,0.399015152|0.093295455,0.098560606,0.396818182]",
+            "xmatrix": "[0.146931818|0.051856061,0.140113636|0.040208333,0.051856061,0.146931818]",
+            "cmatrix": "[30.26701029|0,30.26701029|0,0,30.26701029]"
+        },
+        "9": {
+            "object": "line",
+            "name": "l1",
+            "from": "701",
+            "to": "702",
+            "phases": "3",
+            "linecode": "722",
+            "length": "0.96"
+        },
+        "10": {
+            "object": "line",
+            "name": "l2",
+            "from": "702",
+            "to": "705",
+            "phases": "3",
+            "linecode": "724",
+            "length": "0.4"
+        },
+        "11": {
+            "object": "line",
+            "name": "l3",
+            "from": "702",
+            "to": "713",
+            "phases": "3",
+            "linecode": "723",
+            "length": "0.36"
+        },
+        "12": {
+            "object": "line",
+            "name": "l4",
+            "from": "702",
+            "to": "703",
+            "phases": "3",
+            "linecode": "722",
+            "length": "1.32"
+        },
+        "13": {
+            "object": "line",
+            "name": "l5",
+            "from": "703",
+            "to": "727",
+            "phases": "3",
+            "linecode": "724",
+            "length": "0.24"
+        },
+        "14": {
+            "object": "line",
+            "name": "l6",
+            "from": "703",
+            "to": "730",
+            "phases": "3",
+            "linecode": "723",
+            "length": "0.6"
+        },
+        "15": {
+            "object": "line",
+            "name": "l7",
+            "from": "704",
+            "to": "714",
+            "phases": "3",
+            "linecode": "724",
+            "length": "0.08"
+        },
+        "16": {
+            "object": "line",
+            "name": "l8",
+            "from": "704",
+            "to": "720",
+            "phases": "3",
+            "linecode": "723",
+            "length": "0.8"
+        },
+        "17": {
+            "object": "line",
+            "name": "l9",
+            "from": "705",
+            "to": "742",
+            "phases": "3",
+            "linecode": "724",
+            "length": "0.32"
+        },
+        "18": {
+            "object": "line",
+            "name": "l10",
+            "from": "705",
+            "to": "712",
+            "phases": "3",
+            "linecode": "724",
+            "length": "0.24"
+        },
+        "19": {
+            "object": "line",
+            "name": "l11",
+            "from": "706",
+            "to": "725",
+            "phases": "3",
+            "linecode": "724",
+            "length": "0.28"
+        },
+        "20": {
+            "object": "line",
+            "name": "l12",
+            "from": "707",
+            "to": "724",
+            "phases": "3",
+            "linecode": "724",
+            "length": "0.76"
+        },
+        "21": {
+            "object": "line",
+            "name": "l13",
+            "from": "707",
+            "to": "722",
+            "phases": "3",
+            "linecode": "724",
+            "length": "0.12"
+        },
+        "22": {
+            "object": "line",
+            "name": "l14",
+            "from": "708",
+            "to": "733",
+            "phases": "3",
+            "linecode": "723",
+            "length": "0.32"
+        },
+        "23": {
+            "object": "line",
+            "name": "l15",
+            "from": "708",
+            "to": "732",
+            "phases": "3",
+            "linecode": "724",
+            "length": "0.32"
+        },
+        "24": {
+            "object": "line",
+            "name": "l16",
+            "from": "709",
+            "to": "731",
+            "phases": "3",
+            "linecode": "723",
+            "length": "0.6"
+        },
+        "25": {
+            "object": "line",
+            "name": "l17",
+            "from": "709",
+            "to": "708",
+            "phases": "3",
+            "linecode": "723",
+            "length": "0.32"
+        },
+        "26": {
+            "object": "line",
+            "name": "l18",
+            "from": "710",
+            "to": "735",
+            "phases": "3",
+            "linecode": "724",
+            "length": "0.2"
+        },
+        "27": {
+            "object": "line",
+            "name": "l19",
+            "from": "710",
+            "to": "736",
+            "phases": "3",
+            "linecode": "724",
+            "length": "1.28"
+        },
+        "28": {
+            "object": "line",
+            "name": "l20",
+            "from": "711",
+            "to": "741",
+            "phases": "3",
+            "linecode": "723",
+            "length": "0.4"
+        },
+        "29": {
+            "object": "line",
+            "name": "l21",
+            "from": "711",
+            "to": "740",
+            "phases": "3",
+            "linecode": "724",
+            "length": "0.2"
+        },
+        "30": {
+            "object": "line",
+            "name": "l22",
+            "from": "713",
+            "to": "704",
+            "phases": "3",
+            "linecode": "723",
+            "length": "0.52"
+        },
+        "31": {
+            "object": "line",
+            "name": "l23",
+            "from": "714",
+            "to": "718",
+            "phases": "3",
+            "linecode": "724",
+            "length": "0.52"
+        },
+        "32": {
+            "object": "line",
+            "name": "l24",
+            "from": "720",
+            "to": "707",
+            "phases": "3",
+            "linecode": "724",
+            "length": "0.92"
+        },
+        "33": {
+            "object": "line",
+            "name": "l25",
+            "from": "720",
+            "to": "706",
+            "phases": "3",
+            "linecode": "723",
+            "length": "0.6"
+        },
+        "34": {
+            "object": "line",
+            "name": "l26",
+            "from": "727",
+            "to": "744",
+            "phases": "3",
+            "linecode": "723",
+            "length": "0.28"
+        },
+        "35": {
+            "object": "line",
+            "name": "l27",
+            "from": "730",
+            "to": "709",
+            "phases": "3",
+            "linecode": "723",
+            "length": "0.2"
+        },
+        "36": {
+            "object": "line",
+            "name": "l28",
+            "from": "733",
+            "to": "734",
+            "phases": "3",
+            "linecode": "723",
+            "length": "0.56"
+        },
+        "37": {
+            "object": "line",
+            "name": "l29",
+            "from": "734",
+            "to": "737",
+            "phases": "3",
+            "linecode": "723",
+            "length": "0.64"
+        },
+        "38": {
+            "object": "line",
+            "name": "l30",
+            "from": "734",
+            "to": "710",
+            "phases": "3",
+            "linecode": "724",
+            "length": "0.52"
+        },
+        "39": {
+            "object": "line",
+            "name": "l31",
+            "from": "737",
+            "to": "738",
+            "phases": "3",
+            "linecode": "723",
+            "length": "0.4"
+        },
+        "40": {
+            "object": "line",
+            "name": "l32",
+            "from": "738",
+            "to": "711",
+            "phases": "3",
+            "linecode": "723",
+            "length": "0.4"
+        },
+        "41": {
+            "object": "line",
+            "name": "l33",
+            "from": "744",
+            "to": "728",
+            "phases": "3",
+            "linecode": "724",
+            "length": "0.2"
+        },
+        "42": {
+            "object": "line",
+            "name": "l34",
+            "from": "744",
+            "to": "729",
+            "phases": "3",
+            "linecode": "724",
+            "length": "0.28"
+        },
+        "43": {
+            "object": "line",
+            "name": "l35",
+            "from": "799r",
+            "to": "701",
+            "phases": "3",
+            "linecode": "721",
+            "length": "1.85"
+        },
+        "44": {
+            "object": "transformer",
+            "name": "reg1a",
+            "from": "799",
+            "to": "799r",
+            "phases": "1",
+            "windings": "2",
+            "bank": "reg1",
+            "conns": "'delta,delta'",
+            "kvs": "\"4.8,4.8\"",
+            "kvas": "\"2000,2000\"",
+            "xhl": "1"
+        },
+        "45": {
+            "object": "regcontrol",
+            "name": "creg1a",
+            "transformer": "reg1a",
+            "winding": "2",
+            "vreg": "122",
+            "band": "2",
+            "ptratio": "40",
+            "ctprim": "350",
+            "r": "-0.201",
+            "x": "3.348"
+        },
+        "46": {
+            "object": "transformer",
+            "name": "reg1c",
+            "from": "799",
+            "to": "799r",
+            "like": "reg1a",
+            "bank": "reg1"
+        },
+        "47": {
+            "object": "regcontrol",
+            "name": "creg1c",
+            "like": "creg1a",
+            "transformer": "reg1c",
+            "r": "2.799",
+            "x": "1.848"
+        },
+        "48": {
+            "object": "line",
+            "name": "jumper",
+            "from": "799",
+            "to": "799r",
+            "phases": "1",
+            "r0": "1e-3",
+            "r1": "1e-3",
+            "x0": "0",
+            "x1": "0",
+            "c0": "0",
+            "c1": "0"
+        },
+        "49": {
+            "object": "load",
+            "name": "s701a",
+            "parent": "701",
+            "phases": "1",
+            "conn": "delta",
+            "model": "1",
+            "kv": "4.800",
+            "kw": "140.0",
+            "kvar": "70.0"
+        },
+        "50": {
+            "object": "load",
+            "name": "s701b",
+            "parent": "701",
+            "phases": "1",
+            "conn": "delta",
+            "model": "1",
+            "kv": "4.800",
+            "kw": "140.0",
+            "kvar": "70.0"
+        },
+        "51": {
+            "object": "load",
+            "name": "s701c",
+            "parent": "701",
+            "phases": "1",
+            "conn": "delta",
+            "model": "1",
+            "kv": "4.800",
+            "kw": "350.0",
+            "kvar": "175.0"
+        },
+        "52": {
+            "object": "load",
+            "name": "s712c",
+            "parent": "712",
+            "phases": "1",
+            "conn": "delta",
+            "model": "1",
+            "kv": "4.800",
+            "kw": "85.0",
+            "kvar": "40.0"
+        },
+        "53": {
+            "object": "load",
+            "name": "s713c",
+            "parent": "713",
+            "phases": "1",
+            "conn": "delta",
+            "model": "1",
+            "kv": "4.800",
+            "kw": "85.0",
+            "kvar": "40.0"
+        },
+        "54": {
+            "object": "load",
+            "name": "s714a",
+            "parent": "714",
+            "phases": "1",
+            "conn": "delta",
+            "model": "4",
+            "kv": "4.800",
+            "kw": "17.0",
+            "kvar": "8.0"
+        },
+        "55": {
+            "object": "load",
+            "name": "s714b",
+            "parent": "714",
+            "phases": "1",
+            "conn": "delta",
+            "model": "4",
+            "kv": "4.800",
+            "kw": "21.0",
+            "kvar": "10.0"
+        },
+        "56": {
+            "object": "load",
+            "name": "s718a",
+            "parent": "718",
+            "phases": "1",
+            "conn": "delta",
+            "model": "2",
+            "kv": "4.800",
+            "kw": "85.0",
+            "kvar": "40.0"
+        },
+        "57": {
+            "object": "load",
+            "name": "s720c",
+            "parent": "720",
+            "phases": "1",
+            "conn": "delta",
+            "model": "1",
+            "kv": "4.800",
+            "kw": "85.0",
+            "kvar": "40.0"
+        },
+        "58": {
+            "object": "load",
+            "name": "s722b",
+            "parent": "722",
+            "phases": "1",
+            "conn": "delta",
+            "model": "4",
+            "kv": "4.800",
+            "kw": "140.0",
+            "kvar": "70.0"
+        },
+        "59": {
+            "object": "load",
+            "name": "s722c",
+            "parent": "722",
+            "phases": "1",
+            "conn": "delta",
+            "model": "4",
+            "kv": "4.800",
+            "kw": "21.0",
+            "kvar": "10.0"
+        },
+        "60": {
+            "object": "load",
+            "name": "s724b",
+            "parent": "724",
+            "phases": "1",
+            "conn": "delta",
+            "model": "2",
+            "kv": "4.800",
+            "kw": "42.0",
+            "kvar": "21.0"
+        },
+        "61": {
+            "object": "load",
+            "name": "s725b",
+            "parent": "725",
+            "phases": "1",
+            "conn": "delta",
+            "model": "1",
+            "kv": "4.800",
+            "kw": "42.0",
+            "kvar": "21.0"
+        },
+        "62": {
+            "object": "load",
+            "name": "s727c",
+            "parent": "727",
+            "phases": "1",
+            "conn": "delta",
+            "model": "1",
+            "kv": "4.800",
+            "kw": "42.0",
+            "kvar": "21.0"
+        },
+        "63": {
+            "object": "load",
+            "name": "s728",
+            "parent": "728",
+            "phases": "3",
+            "conn": "delta",
+            "model": "1",
+            "kv": "4.800",
+            "kw": "126.0",
+            "kvar": "63.0"
+        },
+        "64": {
+            "object": "load",
+            "name": "s729a",
+            "parent": "729",
+            "phases": "1",
+            "conn": "delta",
+            "model": "4",
+            "kv": "4.800",
+            "kw": "42.0",
+            "kvar": "21.0"
+        },
+        "65": {
+            "object": "load",
+            "name": "s730c",
+            "parent": "730",
+            "phases": "1",
+            "conn": "delta",
+            "model": "2",
+            "kv": "4.800",
+            "kw": "85.0",
+            "kvar": "40.0"
+        },
+        "66": {
+            "object": "load",
+            "name": "s731b",
+            "parent": "731",
+            "phases": "1",
+            "conn": "delta",
+            "model": "2",
+            "kv": "4.800",
+            "kw": "85.0",
+            "kvar": "40.0"
+        },
+        "67": {
+            "object": "load",
+            "name": "s732c",
+            "parent": "732",
+            "phases": "1",
+            "conn": "delta",
+            "model": "1",
+            "kv": "4.800",
+            "kw": "42.0",
+            "kvar": "21.0"
+        },
+        "68": {
+            "object": "load",
+            "name": "s733a",
+            "parent": "733",
+            "phases": "1",
+            "conn": "delta",
+            "model": "4",
+            "kv": "4.800",
+            "kw": "85.0",
+            "kvar": "40.0"
+        },
+        "69": {
+            "object": "load",
+            "name": "s734c",
+            "parent": "734",
+            "phases": "1",
+            "conn": "delta",
+            "model": "1",
+            "kv": "4.800",
+            "kw": "42.0",
+            "kvar": "21.0"
+        },
+        "70": {
+            "object": "load",
+            "name": "s735c",
+            "parent": "735",
+            "phases": "1",
+            "conn": "delta",
+            "model": "1",
+            "kv": "4.800",
+            "kw": "85.0",
+            "kvar": "40.0"
+        },
+        "71": {
+            "object": "load",
+            "name": "s736b",
+            "parent": "736",
+            "phases": "1",
+            "conn": "delta",
+            "model": "2",
+            "kv": "4.800",
+            "kw": "42.0",
+            "kvar": "21.0"
+        },
+        "72": {
+            "object": "load",
+            "name": "s737a",
+            "parent": "737",
+            "phases": "1",
+            "conn": "delta",
+            "model": "4",
+            "kv": "4.800",
+            "kw": "140.0",
+            "kvar": "70.0"
+        },
+        "73": {
+            "object": "load",
+            "name": "s738a",
+            "parent": "738",
+            "phases": "1",
+            "conn": "delta",
+            "model": "1",
+            "kv": "4.800",
+            "kw": "126.0",
+            "kvar": "62.0"
+        },
+        "74": {
+            "object": "load",
+            "name": "s740c",
+            "parent": "740",
+            "phases": "1",
+            "conn": "delta",
+            "model": "1",
+            "kv": "4.800",
+            "kw": "85.0",
+            "kvar": "40.0"
+        },
+        "75": {
+            "object": "load",
+            "name": "s741c",
+            "parent": "741",
+            "phases": "1",
+            "conn": "delta",
+            "model": "4",
+            "kv": "4.800",
+            "kw": "42.0",
+            "kvar": "21.0"
+        },
+        "76": {
+            "object": "load",
+            "name": "s742a",
+            "parent": "742",
+            "phases": "1",
+            "conn": "delta",
+            "model": "2",
+            "kv": "4.800",
+            "kw": "8.0",
+            "kvar": "4.0"
+        },
+        "77": {
+            "object": "load",
+            "name": "s742b",
+            "parent": "742",
+            "phases": "1",
+            "conn": "delta",
+            "model": "2",
+            "kv": "4.800",
+            "kw": "85.0",
+            "kvar": "40.0"
+        },
+        "78": {
+            "object": "load",
+            "name": "s744a",
+            "parent": "744",
+            "phases": "1",
+            "conn": "delta",
+            "model": "1",
+            "kv": "4.800",
+            "kw": "42.0",
+            "kvar": "21.0"
+        },
+        "79": {
+            "object": "!CMD",
+            "name": "makebuslist"
+        },
+        "80": {
+            "object": "node",
+            "name": "sourcebus",
+            "latitude": "0.02",
+            "longitude": "0.00"
+        },
+        "81": {
+            "object": "node",
+            "name": "799r",
+            "latitude": "0.00",
+            "longitude": "0.00"
+        },
+        "82": {
+            "object": "node",
+            "name": "799",
+            "latitude": "0.01",
+            "longitude": "0.00"
+        },
+        "83": {
+            "object": "node",
+            "name": "701",
+            "latitude": "-1.85",
+            "longitude": "0.00"
+        },
+        "84": {
+            "object": "node",
+            "name": "702",
+            "latitude": "-2.81",
+            "longitude": "0.00"
+        },
+        "85": {
+            "object": "node",
+            "name": "703",
+            "latitude": "-4.13",
+            "longitude": "0.00"
+        },
+        "86": {
+            "object": "node",
+            "name": "704",
+            "latitude": "-2.81",
+            "longitude": "0.88"
+        },
+        "87": {
+            "object": "node",
+            "name": "705",
+            "latitude": "-2.81",
+            "longitude": "-0.40"
+        },
+        "88": {
+            "object": "node",
+            "name": "706",
+            "latitude": "-3.41",
+            "longitude": "1.68"
+        },
+        "89": {
+            "object": "node",
+            "name": "707",
+            "latitude": "-1.89",
+            "longitude": "1.68"
+        },
+        "90": {
+            "object": "node",
+            "name": "708",
+            "latitude": "-4.93",
+            "longitude": "-0.32"
+        },
+        "91": {
+            "object": "node",
+            "name": "709",
+            "latitude": "-4.93",
+            "longitude": "0.00"
+        },
+        "92": {
+            "object": "node",
+            "name": "710",
+            "latitude": "-5.81",
+            "longitude": "-0.84"
+        },
+        "93": {
+            "object": "node",
+            "name": "711",
+            "latitude": "-6.45",
+            "longitude": "0.48"
+        },
+        "94": {
+            "object": "node",
+            "name": "712",
+            "latitude": "-2.57",
+            "longitude": "-0.40"
+        },
+        "95": {
+            "object": "node",
+            "name": "713",
+            "latitude": "-2.81",
+            "longitude": "0.36"
+        },
+        "96": {
+            "object": "node",
+            "name": "714",
+            "latitude": "-2.89",
+            "longitude": "0.88"
+        },
+        "97": {
+            "object": "node",
+            "name": "718",
+            "latitude": "-3.41",
+            "longitude": "0.88"
+        },
+        "98": {
+            "object": "node",
+            "name": "720",
+            "latitude": "-2.81",
+            "longitude": "1.68"
+        },
+        "99": {
+            "object": "node",
+            "name": "722",
+            "latitude": "-1.89",
+            "longitude": "1.56"
+        },
+        "100": {
+            "object": "node",
+            "name": "724",
+            "latitude": "-1.13",
+            "longitude": "1.68"
+        },
+        "101": {
+            "object": "node",
+            "name": "725",
+            "latitude": "-3.69",
+            "longitude": "1.68"
+        },
+        "102": {
+            "object": "node",
+            "name": "727",
+            "latitude": "-4.13",
+            "longitude": "-0.24"
+        },
+        "103": {
+            "object": "node",
+            "name": "728",
+            "latitude": "-4.33",
+            "longitude": "-0.52"
+        },
+        "104": {
+            "object": "node",
+            "name": "729",
+            "latitude": "-4.13",
+            "longitude": "-0.80"
+        },
+        "105": {
+            "object": "node",
+            "name": "730",
+            "latitude": "-4.73",
+            "longitude": "0.00"
+        },
+        "106": {
+            "object": "node",
+            "name": "731",
+            "latitude": "-4.93",
+            "longitude": "0.60"
+        },
+        "107": {
+            "object": "node",
+            "name": "732",
+            "latitude": "-4.93",
+            "longitude": "-0.64"
+        },
+        "108": {
+            "object": "node",
+            "name": "733",
+            "latitude": "-5.25",
+            "longitude": "-0.32"
+        },
+        "109": {
+            "object": "node",
+            "name": "734",
+            "latitude": "-5.81",
+            "longitude": "-0.32"
+        },
+        "110": {
+            "object": "node",
+            "name": "735",
+            "latitude": "-6.01",
+            "longitude": "-0.84"
+        },
+        "111": {
+            "object": "node",
+            "name": "736",
+            "latitude": "-4.53",
+            "longitude": "-0.84"
+        },
+        "112": {
+            "object": "node",
+            "name": "737",
+            "latitude": "-6.45",
+            "longitude": "-0.32"
+        },
+        "113": {
+            "object": "node",
+            "name": "738",
+            "latitude": "-6.45",
+            "longitude": "0.08"
+        },
+        "114": {
+            "object": "node",
+            "name": "740",
+            "latitude": "-6.25",
+            "longitude": "0.48"
+        },
+        "115": {
+            "object": "node",
+            "name": "741",
+            "latitude": "-6.45",
+            "longitude": "0.88"
+        },
+        "116": {
+            "object": "node",
+            "name": "742",
+            "latitude": "-2.81",
+            "longitude": "-0.72"
+        },
+        "117": {
+            "object": "node",
+            "name": "744",
+            "latitude": "-4.13",
+            "longitude": "-0.52"
+        },
+        "118": {
+            "object": "node",
+            "name": "775",
+            "latitude": "-4.94",
+            "longitude": "0.00"
+        },
+        "119": {
+            "object": "!CMD",
+            "name": "set",
+            "voltagebases": "\"230,4.8,0.48\""
+        },
+        "120": {
+            "object": "!CMD",
+            "name": "calcvoltagebases"
+        }
+    },
+    "attachments": {},
+    "syntax": "DSS"
+}
