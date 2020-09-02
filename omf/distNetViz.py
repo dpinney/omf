@@ -98,7 +98,8 @@ def viz(pathToOmdOrGlm, forceLayout=False, outputPath=None, outputName='viewer.h
 	# Load in the feeder.
 	with open(pathToOmdOrGlm,'r') as feedFile:
 		if pathToOmdOrGlm.endswith('.omd'):
-			thisFeed = {'tree':json.load(feedFile)['tree']} # TODO: later bring back attachments.
+			omd = json.load(feedFile)
+			thisFeed = {'tree':omd['tree']} # TODO: later bring back attachments.
 		elif pathToOmdOrGlm.endswith('.glm'):
 			thisFeed = {'tree':omf.feeder.parse(pathToOmdOrGlm, filePath=True)}
 		tree = thisFeed['tree']
@@ -137,9 +138,10 @@ def viz(pathToOmdOrGlm, forceLayout=False, outputPath=None, outputName='viewer.h
 	def id():
 		return ""
 	component_json = get_components()
+	dss_schema = True if omd.get('syntax','') == 'DSS' else False
 	rend = template.render(thisFeederData=json.dumps(thisFeed), thisFeederName=pathToOmdOrGlm, thisFeederNum=1,
 		thisModelName="Local Filesystem", thisOwner="NONE", components=component_json, jasmine=None, spec=None,
-		publicFeeders=[], userFeeders=[], csrf_token=id, showFileMenu=False, currentUser=None
+		publicFeeders=[], userFeeders=[], csrf_token=id, showFileMenu=False, currentUser=None, dssSchema=dss_schema
 	)
 	with open(tempDir + '/' + outputName, 'w') as outFile:
 		outFile.write(rend)

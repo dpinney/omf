@@ -266,7 +266,7 @@ if __name__ == '__main__':
 	# pp(evil_glm)
 	distNetViz.viz_mem(evil_glm, open_file=True, forceLayout=True)
 	distNetViz.insert_coordinates(evil_glm)
-	evilToOmd(evil_glm, 'ieee37.dss.omd')
+	# evilToOmd(evil_glm, 'ieee37.dss.omd')
 	# evil_dss = evilGldTreeToDssTree(evil_glm)
 	# pp(evil_dss)
 	# treeToDss(evil_dss, 'HACKZ.dss')
