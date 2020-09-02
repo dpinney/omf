@@ -14,6 +14,7 @@ import omf
 from omf import geo
 from omf.models import __neoMetaModel__
 from omf.models.__neoMetaModel__ import *
+from omf.solvers.opendss import dssConvert
 
 # Model metadata:
 tooltip = 'outageCost calculates reliability metrics and creates a leaflet graph based on data from an input csv file.'
@@ -264,6 +265,13 @@ def work(modelDir, inputDict):
 	# Write in the feeder
 	feederName = [x for x in os.listdir(modelDir) if x.endswith('.omd')][0][:-4]
 	inputDict['feederName1'] = feederName
+
+	# Output a .dss file, which will be needed for ONM.
+	with open(f'{modelDir}/{feederName}.omd', 'r') as omdFile:
+		omd = json.load(omdFile)
+	tree = omd['tree']
+	niceDss = dssConvert.evilGldTreeToDssTree(tree)
+	dssConvert.treeToDss(niceDss, f'{modelDir}/circuit.dss')
 
 	# Run the main functions of the program
 	# with open(pJoin(modelDir, inputDict['csvFileName']), 'w') as f:

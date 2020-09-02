@@ -91,7 +91,7 @@ def treeToDss(treeObject, outputPath):
 		line = ob['!CMD']
 		for key in ob:
 			if key not in ['!CMD']:
-				line = line + ' ' + key + '=' + ob[key]
+				line = f'{line} {key}={ob[key]}'
 		outFile.write(line + '\n')
 	outFile.close()
 
@@ -212,7 +212,7 @@ def evilGldTreeToDssTree(evil_gld_tree):
 				'bus1': ob['from'],
 				'bus2': ob['to'],
 			}
-			_extend_with_exc(ob, new_ob, ['!CMD','from','to','name','object'])
+			_extend_with_exc(ob, new_ob, ['!CMD','from','to','name','object','latitude','longitude'])
 			dssTree.append(new_ob)
 		elif ob.get('object') == 'transformer':
 			new_ob = {
@@ -220,7 +220,7 @@ def evilGldTreeToDssTree(evil_gld_tree):
 				'object': 'transformer.' + ob['name'],
 				'buses': f'({ob["from"]},{ob["to"]})'
 			}
-			_extend_with_exc(ob, new_ob, ['!CMD','from','to','name','object'])
+			_extend_with_exc(ob, new_ob, ['!CMD','from','to','name','object','latitude','longitude'])
 			dssTree.append(new_ob)
 		elif 'parent' in ob:
 			new_ob = {
@@ -228,7 +228,7 @@ def evilGldTreeToDssTree(evil_gld_tree):
 				'object': ob['object'] + '.' + ob['name'],
 				'bus': ob['parent'] 
 			}
-			_extend_with_exc(ob, new_ob, ['parent','name','object'])
+			_extend_with_exc(ob, new_ob, ['parent','name','object','latitude','longitude'])
 			dssTree.append(new_ob)
 		elif 'bus' not in ob and 'bus1' not in ob and 'bus2' not in ob and 'buses' not in ob and ob.get('object') != '!CMD':
 			# floating config type object.
@@ -236,13 +236,13 @@ def evilGldTreeToDssTree(evil_gld_tree):
 				'!CMD': 'new',
 				'object': ob['object'] + '.' + ob['name'],
 			}
-			_extend_with_exc(ob, new_ob, ['!CMD','name','object'])
+			_extend_with_exc(ob, new_ob, ['!CMD','name','object','latitude','longitude'])
 			dssTree.append(new_ob)
 		elif ob.get('object') == '!CMD':
 			new_ob = {
 				'!CMD': ob['name'],
 			}
-			_extend_with_exc(ob, new_ob, ['!CMD', 'name', 'object'])
+			_extend_with_exc(ob, new_ob, ['!CMD', 'name', 'object','latitude','longitude'])
 			dssTree.append(new_ob)
 		else:
 			warnings.warn(f'Unprocessed object: {ob}')
