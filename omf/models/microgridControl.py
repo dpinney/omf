@@ -67,9 +67,6 @@ def nodeToCoords(feederMap, nodeName):
 			current = key['geometry']['coordinates']
 			coordLis = coordsFromString(current)
 			coordStr = str(coordLis[0]) + ' ' + str(coordLis[1])
-		else:
-			coordLis = []
-			coordStr = ''
 	return coordLis, coordStr
 
 def lineToCoords(tree, feederMap, lineName):
@@ -81,8 +78,11 @@ def lineToCoords(tree, feederMap, lineName):
 	for key in tree.keys():
 		if tree[key].get('name','') == lineName:
 			lineNode = tree[key]['from']
+			print(lineNode)
 			lineNode2 = tree[key]['to']
+			print(lineNode2)
 			coordLis1, coordStr1 = nodeToCoords(feederMap, lineNode)
+			print(coordLis1)
 			coordLis2, coordStr2 = nodeToCoords(feederMap, lineNode2)
 			coordLis = []
 			coordLis.append(coordLis1[0])
@@ -91,34 +91,6 @@ def lineToCoords(tree, feederMap, lineName):
 			coordLis.append(coordLis2[1])
 			coordStr = str(coordLis[0]) + ' ' + str(coordLis[1]) + ' ' + str(coordLis[2]) + ' ' + str(coordLis[3])
 	return coordLis, coordStr
-
-def adjacencyList(tree):
-	'helper function which creates an adjacency list representation of graph connectivity (not including reclosers, which are assumed to be points of coupling)'
-	adjacList = {}
-	vertices = set()
-	for key in tree.keys():
-		obtype = tree[key].get('object','')
-		if obtype.startswith('underground_line') or obtype.startswith('overhead_line') or obtype.startswith('triplex_line') or obtype.startswith('transformer') or obtype.startswith('fuse') or obtype.startswith('regulator') or obtype.startswith('relay') or obtype.startswith('link') or obtype.startswith('fromTo'):
-			if 'from' in tree[key].keys() and 'to' in tree[key].keys():
-				if not tree[key]['from'] in adjacList.keys():
-					adjacList[tree[key]['from']] = set()
-					vertices.add(tree[key].get('from', ''))
-				if not tree[key]['to'] in adjacList.keys():
-					adjacList[tree[key]['to']] = set()
-					vertices.add(tree[key].get('to', ''))
-				adjacList[tree[key]['from']].add(tree[key]['to'])
-				adjacList[tree[key]['to']].add(tree[key]['from'])
-	return adjacList, vertices
-
-def getMaxSubtree(graph, start):
-	'helper function that returns all the nodes connected to a starting node in a graph'
-	visited, stack = set(), [start]
-	while stack:
-		vertex = stack.pop()
-		if vertex not in visited:
-			visited.add(vertex)
-			stack.extend(graph[vertex] - visited)
-	return visited
 
 def pullDataForGraph(tree, feederMap, outputTimeline, row):
 		device = outputTimeline.loc[row, 'device']
@@ -134,7 +106,7 @@ def pullDataForGraph(tree, feederMap, outputTimeline, row):
 
 def createTimeline():
 	data = {'time': ['1', '3', '7', '10', '15'],
-			'device': ['node707-724', 'load745', 'load742', 'node775', 'node703'],
+			'device': ['l2', 's701a', 's713c', '799r', '705'],
 			'action': ['Switching', 'Load Shed', 'Load Pickup', 'Battery Control', 'Generator Control'],
 			'loadBefore': ['50', '20', '10', '50', '50'],
 			'loadAfter': ['0', '10', '20', '60', '40']
@@ -146,13 +118,53 @@ def colormap(time):
 	color = 8438271 - 10*int(time)
 	return '{:x}'.format(int(color))
 
-def graphMicrogrid(pathToOmd, workDir, maxTime, stepSize, faultedLine, networked):
+def microgridTimeline(outputTimeline, workDir):
+	# check to see if work directory is specified; otherwise, create a temporary directory
+	if not workDir:
+		workDir = tempfile.mkdtemp()
+		print('@@@@@@', workDir)
+	
+	# TODO: update table after calculating outage stats
+	def timelineStats(outputTimeline):
+		new_html_str = """
+			<table cellpadding="0" cellspacing="0">
+				<thead>
+					<tr>
+						<th>Device</th>
+						<th>Time</th>
+						<th>Action</th>
+						<th>Load Before</th>
+						<th>Load After</th>
+					</tr>
+				</thead>
+				<tbody>"""
+		
+		row = 0
+		while row < len(outputTimeline):
+			new_html_str += '<tr><td>' + str(outputTimeline.loc[row, 'device']) + '</td><td>' + str(outputTimeline.loc[row, 'time']) + '</td><td>' + str(outputTimeline.loc[row, 'action']) + '</td><td>' + str(outputTimeline.loc[row, 'loadBefore']) + '</td><td>' + str(outputTimeline.loc[row, 'loadAfter']) + '</td></tr>'
+			row += 1
+
+		new_html_str +="""</tbody></table>"""
+
+		return new_html_str
+
+	# print all intermediate and final costs
+	timelineStatsHtml = timelineStats(
+		outputTimeline = outputTimeline)
+	with open(pJoin(workDir, 'timelineStats.html'), 'w') as timelineFile:
+		timelineFile.write(timelineStatsHtml)
+
+	return timelineStatsHtml
+
+def graphMicrogrid(pathToOmd, pathToMicro, workDir, maxTime, stepSize, faultedLine):
 	# read in the OMD file as a tree and create a geojson map of the system
 	if not workDir:
 		workDir = tempfile.mkdtemp()
 		print('@@@@@@', workDir)
 
 	outputTimeline = createTimeline()
+
+	timelineStatsHtml = microgridTimeline(outputTimeline, workDir)
 
 	with open(pathToOmd) as inFile:
 		tree = json.load(inFile)['tree']
@@ -177,16 +189,15 @@ def graphMicrogrid(pathToOmd, workDir, maxTime, stepSize, faultedLine, networked
 	faultedNodeCoordLis2, faultedNodeCoordStr2 = nodeToCoords(feederMap, str(faultedNode2))
 	Dict['geometry'] = {'type': 'LineString', 'coordinates': [faultedNodeCoordLis1, faultedNodeCoordLis2]}
 	Dict['type'] = 'Feature'
-	Dict['properties'] = {
-		'name': faultedLine,
-		'edgeColor': 'red',
-		'popupContent': '<br><br>Location: <b>' + str(faultedNodeCoordStr1) + ', ' + str(faultedNodeCoordStr2) + '</b><br>Faulted Line: <b>' + str(faultedLine)
-	}
+	Dict['properties'] = {'name': faultedLine,
+						  'edgeColor': 'red',
+						  'popupContent': 'Location: <b>' + str(faultedNodeCoordStr1) + ', ' + str(faultedNodeCoordStr2) + '</b><br>Faulted Line: <b>' + str(faultedLine)}
 	feederMap['features'].append(Dict)
 	row = 0
 	row_count_timeline = outputTimeline.shape[0]
 	while row < row_count_timeline:
 		device, coordLis, coordStr, time, action, loadBefore, loadAfter = pullDataForGraph(tree, feederMap, outputTimeline, row)
+
 		Dict = {}
 		if len(coordLis) == 2:
 			Dict['geometry'] = {'type': 'Point', 'coordinates': [coordLis[0], coordLis[1]]}
@@ -197,21 +208,15 @@ def graphMicrogrid(pathToOmd, workDir, maxTime, stepSize, faultedLine, networked
 								  'loadBefore': loadBefore,
 								  'loadAfter': loadAfter,
 								  'pointColor': '#' + str(colormap(time)), 
-								  'popupContent': '<br><br>Location: <b>' + str(coordStr) + '</b><br>Device: <b>' + str(device) + '</b><br>Time: <b>' + str(time) + '</b><br>Action: <b>' + str(action) + '</b><br>Load Before: <b>' + str(loadBefore) + '</b><br>Load After: <b>' + str(loadAfter) + '</b>.'}
-			feederMap['features'].append(Dict)
-		elif len(coordLis) == 4:
-			print(colormap(time))
-			print(coordLis)
-			Dict['geometry'] = {'type': 'LineString', 'coordinates': [[coordLis[0], coordLis[1]], [coordLis[2], coordLis[3]]]}
-			Dict['type'] = 'Feature'
-			Dict['properties'] = {
-				'name': str(tree[key].get('name', '')),
-				'edgeColor': '#' + str(colormap(time)),
-				'popupContent': '<br><br>Location: <b>' + str(coordStr) + '</b><br>Device: <b>' + str(device) + '</b><br>Time: <b>' + str(time) + '</b><br>Action: <b>' + str(action) + '</b><br>Load Before: <b>' + str(loadBefore) + '</b><br>Load After: <b>' + str(loadAfter) + '</b>.'
-			}
+								  'popupContent': 'Location: <b>' + str(coordStr) + '</b><br>Device: <b>' + str(device) + '</b><br>Time: <b>' + str(time) + '</b><br>Action: <b>' + str(action) + '</b><br>Load Before: <b>' + str(loadBefore) + '</b><br>Load After: <b>' + str(loadAfter) + '</b>.'}
 			feederMap['features'].append(Dict)
 		else:
-			pass #TODO: figure out what's going on with coord-less items.
+			Dict['geometry'] = {'type': 'LineString', 'coordinates': [[coordLis[0], coordLis[1]], [coordLis[2], coordLis[3]]]}
+			Dict['type'] = 'Feature'
+			Dict['properties'] = {'name': str(tree[key].get('name', '')),
+								  'edgeColor': '#' + str(colormap(time)),
+								  'popupContent': 'Location: <b>' + str(coordStr) + '</b><br>Device: <b>' + str(device) + '</b><br>Time: <b>' + str(time) + '</b><br>Action: <b>' + str(action) + '</b><br>Load Before: <b>' + str(loadBefore) + '</b><br>Load After: <b>' + str(loadAfter) + '</b>.'}
+			feederMap['features'].append(Dict)
 		row += 1
 
 	if not os.path.exists(workDir):
@@ -225,38 +230,7 @@ def graphMicrogrid(pathToOmd, workDir, maxTime, stepSize, faultedLine, networked
 	with open(pJoin(workDir,'geoDict.js'),'w') as outFile:
 		json.dump(feederMap, outFile, indent=4)
 
-def microgridControl(pathToOmd, outputTimeline, workDir, maxTime):
-	# check to see if work directory is specified; otherwise, create a temporary directory
-	if not workDir:
-		workDir = tempfile.mkdtemp()
-		print('@@@@@@', workDir)
-	
-	# TODO: update table after calculating outage stats
-	def costStatsCalc(initCustCost=None, finCustCost=None, initRestCost=None, finRestCost=None, initHardCost=None, finHardCost=None, initOutCost=None, finOutCost=None):
-		new_html_str = """
-			<table cellpadding="0" cellspacing="0">
-				<thead>
-					<tr>
-						<th></th>
-						<th>No-Recloser</th>
-						<th>Recloser</th>
-					</tr>
-				</thead>
-				<tbody>"""
-		new_html_str += '<tr><td><b>Lost kWh Sales</b></td><td>'+str(initCustCost)+'</td><td>'+str(finCustCost)+'</td></tr>'
-		new_html_str += '<tr><td><b>Restoration Labor Cost</b></td><td>'+str(initRestCost)+'</td><td>'+str(finRestCost)+'</td></tr>'
-		new_html_str += '<tr><td><b>Restoration Hardware Cost</b></td><td>'+str(initHardCost)+'</td><td>'+str(finHardCost)+'</td></tr>'
-		new_html_str += '<tr><td><b>Outage Cost</b></td><td>'+str(initOutCost)+'</td><td>'+str(finOutCost)+'</td></tr>'
-		new_html_str +="""</tbody></table>"""
-
-		return new_html_str
-
-	def stats(outputTimeline):
-		# TODO: calculate outage statistics
-		outageStats = ''
-		return outageStats
-
-
+	return {'timelineStatsHtml': timelineStatsHtml}
 
 def work(modelDir, inputDict):
 	# Copy specific climate data into model directory
@@ -274,22 +248,21 @@ def work(modelDir, inputDict):
 	dssConvert.treeToDss(niceDss, f'{modelDir}/circuit.dss')
 
 	# Run the main functions of the program
-	# with open(pJoin(modelDir, inputDict['csvFileName']), 'w') as f:
-	# 	pathToData = f.name
-	# 	f.write(inputDict['csvData'])
+	with open(pJoin(modelDir, inputDict['microFileName']), 'w') as f:
+		pathToData = f.name
+		f.write(inputDict['microData'])
 
 	plotOuts = graphMicrogrid(
 		modelDir + '/' + feederName + '.omd', #OMD Path
+		pathToData,
 		modelDir, #Work directory.
 		inputDict['maxTime'], #computational time limit
 		inputDict['stepSize'], #time step size
-		inputDict['faultedLine'], #line faulted
-		inputDict['networked'] # are microgrids networked?
-		)
+		inputDict['faultedLine']) #line faulted
 	
-	# # Textual outputs of cost statistic
-	# with open(pJoin(modelDir,'statsCalc.html'),'rb') as inFile:
-	# 	outData['statsHtml'] = inFile.read().decode()
+	# Textual outputs of cost statistic
+	with open(pJoin(modelDir,'timelineStats.html')) as inFile:
+		outData['timelineStatsHtml'] = inFile.read()
 
 	#The geojson dictionary to load into the outageCost.py template
 	with open(pJoin(modelDir,'geoDict.js'),'rb') as inFile:
@@ -302,14 +275,17 @@ def work(modelDir, inputDict):
 
 def new(modelDir):
 	''' Create a new instance of this model. Returns true on success, false on failure. '''
+	with open(pJoin(__neoMetaModel__._omfDir,'scratch','RONM','microComponents.txt')) as f:
+		micro_data = f.read()
 	defaultInputs = {
 		'modelType': modelName,
 		# 'feederName1': 'ieee37nodeFaultTester',
 		'feederName1': 'ieee37.dss',
 		'maxTime': '20',
 		'stepSize': '1',
-		'faultedLine': 'node738-711',
-		'networked': 'False'
+		'faultedLine': 'l33',
+		'microFileName': 'microComponents.txt',
+		'microData': micro_data
 	}
 	creationCode = __neoMetaModel__.new(modelDir, defaultInputs)
 	try:
