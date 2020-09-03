@@ -57,7 +57,7 @@
 		text-align: center;
 		overflow: auto;
 	}
-	#export {
+	#export, #import, #submit {
         position: absolute;
         top: 59px;
         right: 0px;
@@ -70,6 +70,9 @@
         font-size: 13px;
         padding: 4px;
     }
+    #import, #submit {
+    	top: 83px;
+    }
 	</style>
 </head>
 <body>
@@ -78,7 +81,11 @@
 		<img id="loader" src="https://i.gifer.com/KSYA.gif" />
 	</div>
 	<div id="fade"></div>
-	<a href='#' id='export'>Export Features</a>
+	<a href='#' id='export'>Save Features</a>
+	<form action="/action_page.php">
+		<input type="file" id="import" name="filename">
+		<input type="submit" id="submit">
+	</form>
 	<script type='text/javascript'>
 	// basic map definition and zoom control.
 	var map = L.map('map');
@@ -265,6 +272,7 @@
 		console.log(eachShape);
 		closeModal();
 	}
+	// download drawn features button
 	document.getElementById('export').onclick = function(e) {
         // Extract GeoJson from featureGroup
         var data = drawnItems.toGeoJSON();
@@ -273,6 +281,24 @@
         // Create export
         document.getElementById('export').setAttribute('href', 'data:' + convertedData);
         document.getElementById('export').setAttribute('download','data.geojson');
+    }
+    // upload saved geoJSON file of drawn features button
+    document.getElementById('import').onsubmit = function(e) {
+    	var uploaded = document.getElementById('import').values[0]
+    	var geojson = new L.GeoJSON.AJAX("data.geojson", {local:true});
+    	geojson.on('data:loaded', function() {
+    		geojson.addTo(map);
+    	});
+    	// // Get file with name "data.geojson"
+    	// var xhr = new XMLHttpRequest();
+    	// xhr.open('GET', 'http://127.0.0.1:5000/data.geojson');
+    	// xhr.setRequestHeader('Content-Type', 'application/json');
+    	// xhr.responseType = 'json';
+    	// xhr.onload = function() {
+    	//     if (xhr.status !== 200) return
+    	//     L.geoJSON(xhr.response).addTo(map);
+    	// };
+    	// xhr.send();
     }
 </script>
 <button type="button" onclick="button_click()" style="position: fixed; top: 0px; right: 0px; z-index:999; cursor: pointer" >Get GeoJson</button>
