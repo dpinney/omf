@@ -111,8 +111,8 @@ def work(modelDir, inputDict):
 			miscFile.write(inputDict['miscFile'])
 
 		#create dss file in folder
-		# copyfile(f'{modelDir}/circuit.dss', f'{modelDir}/PyCIGAR_inputs/circuit.dss')
-		copyfile(f'{__neoMetaModel__._omfDir}/solvers/opendss/ieee37_ours.dss', f'{modelDir}/PyCIGAR_inputs/circuit.dss')
+		copyfile(f'{modelDir}/circuit.dss', f'{modelDir}/PyCIGAR_inputs/circuit.dss')
+		# copyfile(f'{__neoMetaModel__._omfDir}/solvers/opendss/ieee37_ours.dss', f'{modelDir}/PyCIGAR_inputs/circuit.dss')
 
 		#create load_solar_data.csv file in folder
 		rowCount = 0

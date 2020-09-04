@@ -130,8 +130,8 @@ def evilDssTreeToGldTree(dssTree):
 					"name": name,
 					"from": fro,
 					"to": to,
-					"!FROCODE": froCode,
-					"!TOCODE": toCode
+					"!FROCODE": '.' + froCode,
+					"!TOCODE": '.' + toCode
 				}
 				bus_names.extend([fro, to])
 				_extend_with_exc(ob, gldTree[str(g_id)], ['object','bus1','bus2','!CMD'])
@@ -281,9 +281,9 @@ if __name__ == '__main__':
 	distNetViz.viz_mem(evil_glm, open_file=True, forceLayout=True)
 	distNetViz.insert_coordinates(evil_glm)
 	evilToOmd(evil_glm, 'ieee37.dss.omd')
-	# evil_dss = evilGldTreeToDssTree(evil_glm)
+	evil_dss = evilGldTreeToDssTree(evil_glm)
 	# pp(evil_dss)
-	# treeToDss(evil_dss, 'HACKZ.dss')
+	treeToDss(evil_dss, 'HACKZ.dss')
 	#TODO: make parser accept keyless items with new !keyless_n key? Or is this just horrible syntax?
 	#TODO: define .dsc format and write syntax guide.
 	#TODO: what to do about transformers with invalid bus setting with the duplicate keys? Probably ignore.
