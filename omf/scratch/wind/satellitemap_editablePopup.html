@@ -82,11 +82,9 @@
 	</div>
 	<div id="fade"></div>
 	<a href='#' id='export'>Save Features</a>
-	<form action="/action_page.php">
-		<input type="file" id="import" name="filename">
-		<input type="submit" id="submit">
-	</form>
-	<script type='text/javascript'>
+	<button type="button" id="upload_button" onclick="handle_upload()" style="position:absolute; top:100px; right: 0px; z-index:9999; cursor: pointer">Upload</button>
+	<input type="file" id="import" name="filename">
+<script type='text/javascript'>
 	// basic map definition and zoom control.
 	var map = L.map('map');
 	map.setView([39.8, -121.6], 10);
@@ -283,12 +281,17 @@
         document.getElementById('export').setAttribute('download','data.geojson');
     }
     // upload saved geoJSON file of drawn features button
-    document.getElementById('import').onsubmit = function(e) {
-    	var uploaded = document.getElementById('import').values[0]
-    	var geojson = new L.GeoJSON.AJAX("data.geojson", {local:true});
-    	geojson.on('data:loaded', function() {
-    		geojson.addTo(map);
-    	});
+    function handle_upload(e) {
+    	var upload_file = document.getElementById("import").files[0];
+    	var reader = new FileReader();
+    	reader.readAsText(upload_file, "UTF-8");
+    	var contents = reader.result
+    	console.log(contents)
+    	// var uploaded = document.getElementById('import').values[0]
+    	// var geojson = new L.GeoJSON.AJAX("data.geojson", {local:true});
+    	// geojson.on('data:loaded', function() {
+    	// 	geojson.addTo(map);
+    	// });
     	// // Get file with name "data.geojson"
     	// var xhr = new XMLHttpRequest();
     	// xhr.open('GET', 'http://127.0.0.1:5000/data.geojson');
