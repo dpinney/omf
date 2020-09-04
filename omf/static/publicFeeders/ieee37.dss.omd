@@ -103,6 +103,8 @@
             "name": "l1",
             "from": "701",
             "to": "702",
+            "!FROCODE": "1.2.3",
+            "!TOCODE": "1.2.3",
             "phases": "3",
             "linecode": "722",
             "length": "0.96"
@@ -112,6 +114,8 @@
             "name": "l2",
             "from": "702",
             "to": "705",
+            "!FROCODE": "1.2.3",
+            "!TOCODE": "1.2.3",
             "phases": "3",
             "linecode": "724",
             "length": "0.4"
@@ -121,6 +125,8 @@
             "name": "l3",
             "from": "702",
             "to": "713",
+            "!FROCODE": "1.2.3",
+            "!TOCODE": "1.2.3",
             "phases": "3",
             "linecode": "723",
             "length": "0.36"
@@ -130,6 +136,8 @@
             "name": "l4",
             "from": "702",
             "to": "703",
+            "!FROCODE": "1.2.3",
+            "!TOCODE": "1.2.3",
             "phases": "3",
             "linecode": "722",
             "length": "1.32"
@@ -139,6 +147,8 @@
             "name": "l5",
             "from": "703",
             "to": "727",
+            "!FROCODE": "1.2.3",
+            "!TOCODE": "1.2.3",
             "phases": "3",
             "linecode": "724",
             "length": "0.24"
@@ -148,6 +158,8 @@
             "name": "l6",
             "from": "703",
             "to": "730",
+            "!FROCODE": "1.2.3",
+            "!TOCODE": "1.2.3",
             "phases": "3",
             "linecode": "723",
             "length": "0.6"
@@ -157,6 +169,8 @@
             "name": "l7",
             "from": "704",
             "to": "714",
+            "!FROCODE": "1.2.3",
+            "!TOCODE": "1.2.3",
             "phases": "3",
             "linecode": "724",
             "length": "0.08"
@@ -166,6 +180,8 @@
             "name": "l8",
             "from": "704",
             "to": "720",
+            "!FROCODE": "1.2.3",
+            "!TOCODE": "1.2.3",
             "phases": "3",
             "linecode": "723",
             "length": "0.8"
@@ -175,6 +191,8 @@
             "name": "l9",
             "from": "705",
             "to": "742",
+            "!FROCODE": "1.2.3",
+            "!TOCODE": "1.2.3",
             "phases": "3",
             "linecode": "724",
             "length": "0.32"
@@ -184,6 +202,8 @@
             "name": "l10",
             "from": "705",
             "to": "712",
+            "!FROCODE": "1.2.3",
+            "!TOCODE": "1.2.3",
             "phases": "3",
             "linecode": "724",
             "length": "0.24"
@@ -193,6 +213,8 @@
             "name": "l11",
             "from": "706",
             "to": "725",
+            "!FROCODE": "1.2.3",
+            "!TOCODE": "1.2.3",
             "phases": "3",
             "linecode": "724",
             "length": "0.28"
@@ -202,6 +224,8 @@
             "name": "l12",
             "from": "707",
             "to": "724",
+            "!FROCODE": "1.2.3",
+            "!TOCODE": "1.2.3",
             "phases": "3",
             "linecode": "724",
             "length": "0.76"
@@ -211,6 +235,8 @@
             "name": "l13",
             "from": "707",
             "to": "722",
+            "!FROCODE": "1.2.3",
+            "!TOCODE": "1.2.3",
             "phases": "3",
             "linecode": "724",
             "length": "0.12"
@@ -220,6 +246,8 @@
             "name": "l14",
             "from": "708",
             "to": "733",
+            "!FROCODE": "1.2.3",
+            "!TOCODE": "1.2.3",
             "phases": "3",
             "linecode": "723",
             "length": "0.32"
@@ -229,6 +257,8 @@
             "name": "l15",
             "from": "708",
             "to": "732",
+            "!FROCODE": "1.2.3",
+            "!TOCODE": "1.2.3",
             "phases": "3",
             "linecode": "724",
             "length": "0.32"
@@ -238,6 +268,8 @@
             "name": "l16",
             "from": "709",
             "to": "731",
+            "!FROCODE": "1.2.3",
+            "!TOCODE": "1.2.3",
             "phases": "3",
             "linecode": "723",
             "length": "0.6"
@@ -247,6 +279,8 @@
             "name": "l17",
             "from": "709",
             "to": "708",
+            "!FROCODE": "1.2.3",
+            "!TOCODE": "1.2.3",
             "phases": "3",
             "linecode": "723",
             "length": "0.32"
@@ -256,6 +290,8 @@
             "name": "l18",
             "from": "710",
             "to": "735",
+            "!FROCODE": "1.2.3",
+            "!TOCODE": "1.2.3",
             "phases": "3",
             "linecode": "724",
             "length": "0.2"
@@ -265,6 +301,8 @@
             "name": "l19",
             "from": "710",
             "to": "736",
+            "!FROCODE": "1.2.3",
+            "!TOCODE": "1.2.3",
             "phases": "3",
             "linecode": "724",
             "length": "1.28"
@@ -274,6 +312,8 @@
             "name": "l20",
             "from": "711",
             "to": "741",
+            "!FROCODE": "1.2.3",
+            "!TOCODE": "1.2.3",
             "phases": "3",
             "linecode": "723",
             "length": "0.4"
@@ -283,6 +323,8 @@
             "name": "l21",
             "from": "711",
             "to": "740",
+            "!FROCODE": "1.2.3",
+            "!TOCODE": "1.2.3",
             "phases": "3",
             "linecode": "724",
             "length": "0.2"
@@ -292,6 +334,8 @@
             "name": "l22",
             "from": "713",
             "to": "704",
+            "!FROCODE": "1.2.3",
+            "!TOCODE": "1.2.3",
             "phases": "3",
             "linecode": "723",
             "length": "0.52"
@@ -301,6 +345,8 @@
             "name": "l23",
             "from": "714",
             "to": "718",
+            "!FROCODE": "1.2.3",
+            "!TOCODE": "1.2.3",
             "phases": "3",
             "linecode": "724",
             "length": "0.52"
@@ -310,6 +356,8 @@
             "name": "l24",
             "from": "720",
             "to": "707",
+            "!FROCODE": "1.2.3",
+            "!TOCODE": "1.2.3",
             "phases": "3",
             "linecode": "724",
             "length": "0.92"
@@ -319,6 +367,8 @@
             "name": "l25",
             "from": "720",
             "to": "706",
+            "!FROCODE": "1.2.3",
+            "!TOCODE": "1.2.3",
             "phases": "3",
             "linecode": "723",
             "length": "0.6"
@@ -328,6 +378,8 @@
             "name": "l26",
             "from": "727",
             "to": "744",
+            "!FROCODE": "1.2.3",
+            "!TOCODE": "1.2.3",
             "phases": "3",
             "linecode": "723",
             "length": "0.28"
@@ -337,6 +389,8 @@
             "name": "l27",
             "from": "730",
             "to": "709",
+            "!FROCODE": "1.2.3",
+            "!TOCODE": "1.2.3",
             "phases": "3",
             "linecode": "723",
             "length": "0.2"
@@ -346,6 +400,8 @@
             "name": "l28",
             "from": "733",
             "to": "734",
+            "!FROCODE": "1.2.3",
+            "!TOCODE": "1.2.3",
             "phases": "3",
             "linecode": "723",
             "length": "0.56"
@@ -355,6 +411,8 @@
             "name": "l29",
             "from": "734",
             "to": "737",
+            "!FROCODE": "1.2.3",
+            "!TOCODE": "1.2.3",
             "phases": "3",
             "linecode": "723",
             "length": "0.64"
@@ -364,6 +422,8 @@
             "name": "l30",
             "from": "734",
             "to": "710",
+            "!FROCODE": "1.2.3",
+            "!TOCODE": "1.2.3",
             "phases": "3",
             "linecode": "724",
             "length": "0.52"
@@ -373,6 +433,8 @@
             "name": "l31",
             "from": "737",
             "to": "738",
+            "!FROCODE": "1.2.3",
+            "!TOCODE": "1.2.3",
             "phases": "3",
             "linecode": "723",
             "length": "0.4"
@@ -382,6 +444,8 @@
             "name": "l32",
             "from": "738",
             "to": "711",
+            "!FROCODE": "1.2.3",
+            "!TOCODE": "1.2.3",
             "phases": "3",
             "linecode": "723",
             "length": "0.4"
@@ -391,6 +455,8 @@
             "name": "l33",
             "from": "744",
             "to": "728",
+            "!FROCODE": "1.2.3",
+            "!TOCODE": "1.2.3",
             "phases": "3",
             "linecode": "724",
             "length": "0.2"
@@ -400,6 +466,8 @@
             "name": "l34",
             "from": "744",
             "to": "729",
+            "!FROCODE": "1.2.3",
+            "!TOCODE": "1.2.3",
             "phases": "3",
             "linecode": "724",
             "length": "0.28"
@@ -409,6 +477,8 @@
             "name": "l35",
             "from": "799r",
             "to": "701",
+            "!FROCODE": "1.2.3",
+            "!TOCODE": "1.2.3",
             "phases": "3",
             "linecode": "721",
             "length": "1.85"
@@ -424,7 +494,9 @@
             "conns": "'delta,delta'",
             "kvs": "\"4.8,4.8\"",
             "kvas": "\"2000,2000\"",
-            "xhl": "1"
+            "xhl": "1",
+            "!FROCODE": ".1.2",
+            "!TOCODE": ".1.2"
         },
         "45": {
             "object": "regcontrol",
@@ -446,7 +518,9 @@
             "from": "799",
             "to": "799r",
             "like": "reg1a",
-            "bank": "reg1"
+            "bank": "reg1",
+            "!FROCODE": ".3.2",
+            "!TOCODE": ".3.2"
         },
         "47": {
             "object": "regcontrol",
@@ -463,6 +537,8 @@
             "name": "jumper",
             "from": "799",
             "to": "799r",
+            "!FROCODE": "2",
+            "!TOCODE": "2",
             "phases": "1",
             "r0": "1e-3",
             "r1": "1e-3",
@@ -481,6 +557,7 @@
             "kv": "4.800",
             "kw": "140.0",
             "kvar": "70.0",
+            "!CONNCODE": ".1.2",
             "longitude": 863.12,
             "latitude": 291.24
         },
@@ -494,6 +571,7 @@
             "kv": "4.800",
             "kw": "140.0",
             "kvar": "70.0",
+            "!CONNCODE": ".2.3",
             "longitude": 845.68,
             "latitude": 238.37
         },
@@ -507,6 +585,7 @@
             "kv": "4.800",
             "kw": "350.0",
             "kvar": "175.0",
+            "!CONNCODE": ".3.1",
             "longitude": 751.46,
             "latitude": 264.22
         },
@@ -520,6 +599,7 @@
             "kv": "4.800",
             "kw": "85.0",
             "kvar": "40.0",
+            "!CONNCODE": ".3.1",
             "longitude": 715.58,
             "latitude": 120.31
         },
@@ -533,6 +613,7 @@
             "kv": "4.800",
             "kw": "85.0",
             "kvar": "40.0",
+            "!CONNCODE": ".3.1",
             "longitude": 900.71,
             "latitude": 437.39
         },
@@ -546,6 +627,7 @@
             "kv": "4.800",
             "kw": "17.0",
             "kvar": "8.0",
+            "!CONNCODE": ".1.2",
             "longitude": 1038.6,
             "latitude": 525.19
         },
@@ -559,6 +641,7 @@
             "kv": "4.800",
             "kw": "21.0",
             "kvar": "10.0",
+            "!CONNCODE": ".2.3",
             "longitude": 1105.5,
             "latitude": 452.67
         },
@@ -572,6 +655,7 @@
             "kv": "4.800",
             "kw": "85.0",
             "kvar": "40.0",
+            "!CONNCODE": ".1.2",
             "longitude": 1159.3,
             "latitude": 575.64
         },
@@ -585,6 +669,7 @@
             "kv": "4.800",
             "kw": "85.0",
             "kvar": "40.0",
+            "!CONNCODE": ".3.1",
             "longitude": 1042.3,
             "latitude": 252.84
         },
@@ -598,6 +683,7 @@
             "kv": "4.800",
             "kw": "140.0",
             "kvar": "70.0",
+            "!CONNCODE": ".2.3",
             "longitude": 1224.6,
             "latitude": 129.4
         },
@@ -611,6 +697,7 @@
             "kv": "4.800",
             "kw": "21.0",
             "kvar": "10.0",
+            "!CONNCODE": ".3.1",
             "longitude": 1266.2,
             "latitude": 205.91
         },
@@ -624,6 +711,7 @@
             "kv": "4.800",
             "kw": "42.0",
             "kvar": "21.0",
+            "!CONNCODE": ".2.3",
             "longitude": 1122.5,
             "latitude": 62.006
         },
@@ -637,6 +725,7 @@
             "kv": "4.800",
             "kw": "42.0",
             "kvar": "21.0",
+            "!CONNCODE": ".2.3",
             "longitude": 1294.6,
             "latitude": 392.68
         },
@@ -650,6 +739,7 @@
             "kv": "4.800",
             "kw": "42.0",
             "kvar": "21.0",
+            "!CONNCODE": ".3.1",
             "longitude": 805.73,
             "latitude": 564.58
         },
@@ -676,6 +766,7 @@
             "kv": "4.800",
             "kw": "42.0",
             "kvar": "21.0",
+            "!CONNCODE": ".1.2",
             "longitude": 898.67,
             "latitude": 765.39
         },
@@ -689,6 +780,7 @@
             "kv": "4.800",
             "kw": "85.0",
             "kvar": "40.0",
+            "!CONNCODE": ".3.1",
             "longitude": 617.82,
             "latitude": 429.05
         },
@@ -702,6 +794,7 @@
             "kv": "4.800",
             "kw": "85.0",
             "kvar": "40.0",
+            "!CONNCODE": ".2.3",
             "longitude": 453.61,
             "latitude": 341.92
         },
@@ -715,6 +808,7 @@
             "kv": "4.800",
             "kw": "42.0",
             "kvar": "21.0",
+            "!CONNCODE": ".3.1",
             "longitude": 497.22,
             "latitude": 708.78
         },
@@ -728,6 +822,7 @@
             "kv": "4.800",
             "kw": "85.0",
             "kvar": "40.0",
+            "!CONNCODE": ".1.2",
             "longitude": 354.08,
             "latitude": 478.63
         },
@@ -741,6 +836,7 @@
             "kv": "4.800",
             "kw": "42.0",
             "kvar": "21.0",
+            "!CONNCODE": ".3.1",
             "longitude": 311.69,
             "latitude": 623.23
         },
@@ -754,6 +850,7 @@
             "kv": "4.800",
             "kw": "85.0",
             "kvar": "40.0",
+            "!CONNCODE": ".3.1",
             "longitude": 127.98,
             "latitude": 361.11
         },
@@ -767,6 +864,7 @@
             "kv": "4.800",
             "kw": "42.0",
             "kvar": "21.0",
+            "!CONNCODE": ".2.3",
             "longitude": 69.477,
             "latitude": 460.48
         },
@@ -780,6 +878,7 @@
             "kv": "4.800",
             "kw": "140.0",
             "kvar": "70.0",
+            "!CONNCODE": ".1.2",
             "longitude": 178.18,
             "latitude": 626.42
         },
@@ -793,6 +892,7 @@
             "kv": "4.800",
             "kw": "126.0",
             "kvar": "62.0",
+            "!CONNCODE": ".1.2",
             "longitude": 133.59,
             "latitude": 717.03
         },
@@ -806,6 +906,7 @@
             "kv": "4.800",
             "kw": "85.0",
             "kvar": "40.0",
+            "!CONNCODE": ".3.1",
             "longitude": 186.07,
             "latitude": 967.13
         },
@@ -819,6 +920,7 @@
             "kv": "4.800",
             "kw": "42.0",
             "kvar": "21.0",
+            "!CONNCODE": ".3.1",
             "longitude": 30.739,
             "latitude": 860.47
         },
@@ -832,6 +934,7 @@
             "kv": "4.800",
             "kw": "8.0",
             "kvar": "4.0",
+            "!CONNCODE": ".1.2",
             "longitude": 646.49,
             "latitude": 140.05
         },
@@ -845,6 +948,7 @@
             "kv": "4.800",
             "kw": "85.0",
             "kvar": "40.0",
+            "!CONNCODE": ".2.3",
             "longitude": 598.88,
             "latitude": 180.48
         },
@@ -858,6 +962,7 @@
             "kv": "4.800",
             "kw": "42.0",
             "kvar": "21.0",
+            "!CONNCODE": ".1.2",
             "longitude": 803.01,
             "latitude": 691.82
         },

@@ -12,6 +12,8 @@ from omf.solvers import gridlabd
 from omf.models import solarEngineering
 from omf.models import __neoMetaModel__
 from omf.models.__neoMetaModel__ import *
+from omf.solvers.opendss import dssConvert
+from shutil import copyfile
 
 # Model metadata:
 modelName, template = __neoMetaModel__.metadata(__file__)
@@ -23,10 +25,19 @@ def work(modelDir, inputDict):
 	# feederName = inputDict["feederName1"]
 	feederName = [x for x in os.listdir(modelDir) if x.endswith('.omd')][0][:-4]
 	inputDict["feederName1"] = feederName
+	zipCode = "59001" #TODO get zip code from the PV and Load input file
+
+	# Output a .dss file, which will be needed for ONM.
+	with open(f'{modelDir}/{feederName}.omd', 'r') as omdFile:
+		omd = json.load(omdFile)
+	tree = omd['tree']
+	niceDss = dssConvert.evilGldTreeToDssTree(tree)
+	dssConvert.treeToDss(niceDss, f'{modelDir}/circuit.dss')
+
+	# Confirm dss file name.
 	dssName = [x for x in os.listdir(modelDir) if x.endswith('.dss')][0][:-4]
 	inputDict["dssName1"] = dssName
-	zipCode = "59001" #TODO get zip code from the PV and Load input file
-	
+
 	#Value check for attackVariable
 	if inputDict.get("attackVariable", "None") == "None":
 		attackAgentType = "None"
@@ -100,9 +111,8 @@ def work(modelDir, inputDict):
 			miscFile.write(inputDict['miscFile'])
 
 		#create dss file in folder
-		dss_filename = "circuit.dss"
-		with open(pJoin(modelDir, "PyCIGAR_inputs", dss_filename),"w") as dssFile:
-			dssFile.write(inputDict['dssFile'])
+		# copyfile(f'{modelDir}/circuit.dss', f'{modelDir}/PyCIGAR_inputs/circuit.dss')
+		copyfile(f'{__neoMetaModel__._omfDir}/solvers/opendss/ieee37_ours.dss', f'{modelDir}/PyCIGAR_inputs/circuit.dss')
 
 		#create load_solar_data.csv file in folder
 		rowCount = 0
@@ -471,11 +481,6 @@ def new(modelDir):
 	with open(pJoin(omf.omfDir, "static", "testFiles", "pyCIGAR", f2Name)) as f2:
 		breakpoints_inputs = f2.read()
 
-	dssDefault = "ieee37_ours"
-	f3Name = dssDefault + ".dss"
-	with open(pJoin(omf.omfDir, "solvers", "opendss", f3Name)) as f3:
-		dssFile = f3.read()
-
 	f4Name = "misc_inputs.csv"
 	with open(pJoin(omf.omfDir, "static", "testFiles", "pyCIGAR", f4Name)) as f4:
 		miscFile = f4.read()
@@ -484,14 +489,12 @@ def new(modelDir):
 		"simStartDate": "2019-07-01T00:00:00Z",
 		"simLength": "750",
 		"simLengthUnits": "seconds",
-		# "feederName1": "ieee37fixed",
-		"feederName1": "Olin Barre GH EOL Solar AVolts CapReg",
-		"dssName1": dssDefault,
+		"feederName1": "ieee37.dss",
+		# "feederName1": "Olin Barre GH EOL Solar AVolts CapReg",
 		"modelType": modelName,
 		"zipCode": "59001",
 		"loadPV": load_PV,
 		"breakpoints": breakpoints_inputs,
-		"dssFile": dssFile,
 		"miscFile": miscFile,
 		"trainAgent": "False",
 		"attackVariable": "None",
@@ -502,11 +505,11 @@ def new(modelDir):
 		shutil.copyfile(pJoin(__neoMetaModel__._omfDir, "static", "publicFeeders", defaultInputs["feederName1"]+'.omd'), pJoin(modelDir, defaultInputs["feederName1"]+'.omd'))
 	except:
 		return False
-	try:
-		# shutil.copyfile(pJoin(__neoMetaModel__._omfDir, "solvers", "opendss", defaultInputs["dssName1"]+'.dss'), pJoin(modelDir, "PyCIGAR_inputs", defaultInputs["dssName1"]+'.dss'))
-		shutil.copyfile(pJoin(__neoMetaModel__._omfDir, "solvers", "opendss", defaultInputs["dssName1"]+'.dss'), pJoin(modelDir, defaultInputs["dssName1"]+'.dss'))
-	except:
-		return False
+	# try:
+	# 	# shutil.copyfile(pJoin(__neoMetaModel__._omfDir, "solvers", "opendss", defaultInputs["dssName1"]+'.dss'), pJoin(modelDir, "PyCIGAR_inputs", defaultInputs["dssName1"]+'.dss'))
+	# 	shutil.copyfile(pJoin(__neoMetaModel__._omfDir, "solvers", "opendss", defaultInputs["dssName1"]+'.dss'), pJoin(modelDir, defaultInputs["dssName1"]+'.dss'))
+	# except:
+	# 	return False
 	return creationCode
 
 @neoMetaModel_test_setup

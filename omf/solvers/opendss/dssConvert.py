@@ -123,21 +123,29 @@ def evilDssTreeToGldTree(dssTree):
 			if 'bus1' in ob and 'bus2' in ob:
 				# line-like object.
 				# strip the weird dot notation stuff via find.
-				fro = ob['bus1'].split('.')[0]
-				to = ob['bus2'].split('.')[0]
+				fro, froCode = ob['bus1'].split('.', maxsplit=1)
+				to, toCode = ob['bus2'].split('.', maxsplit=1)
 				gldTree[str(g_id)] = {
 					"object": obtype,
 					"name": name,
 					"from": fro,
-					"to": to
+					"to": to,
+					"!FROCODE": froCode,
+					"!TOCODE": toCode
 				}
 				bus_names.extend([fro, to])
 				_extend_with_exc(ob, gldTree[str(g_id)], ['object','bus1','bus2','!CMD'])
 			elif 'buses' in ob:
 				#transformer-like object.
 				b1, b2 = ob['buses'].replace('(','').replace(')','').split(',')
-				fro = b1.split('.')[0]
-				to = b2.split('.')[0]
+				try: 
+					fro, froCode = b1.split('.', maxsplit=1)
+					to, toCode = b2.split('.', maxsplit=1)
+					ob["!FROCODE"] = '.' + froCode
+					ob["!TOCODE"] = '.' + toCode
+				except:
+					fro = b1
+					to = b2
 				gldTree[str(g_id)] = {
 					"object": obtype,
 					"name": name,
@@ -148,21 +156,26 @@ def evilDssTreeToGldTree(dssTree):
 				_extend_with_exc(ob, gldTree[str(g_id)], ['object','buses','!CMD'])
 			elif 'bus' in ob:
 				#load-like object.
-				bus_root = ob['bus'].split('.')[0]
+				bus_root, connCode = ob['bus'].split('.', maxsplit=1)
 				gldTree[str(g_id)] = {
 					"object": obtype,
 					"name": name,
-					"parent": ob['bus'].split('.')[0]
+					"parent": bus_root,
+					"!CONNCODE": '.' + connCode
 				}
 				bus_names.append(bus_root)
 				_extend_with_exc(ob, gldTree[str(g_id)], ['object','bus','!CMD'])
 			elif 'bus1' in ob and 'bus2' not in ob:
 				#load-like object, alternate syntax
-				bus_root = ob['bus1'].split('.')[0]
+				try:
+					bus_root, connCode = ob['bus1'].split('.', maxsplit=1)
+					ob['!CONNCODE'] = '.' + connCode
+				except:
+					bus_root = ob['bus1']
 				gldTree[str(g_id)] = {
 					"object": obtype,
 					"name": name,
-					"parent": bus_root
+					"parent": bus_root,
 				}
 				bus_names.append(bus_root)
 				_extend_with_exc(ob, gldTree[str(g_id)], ['object','bus1','!CMD'])
@@ -209,26 +222,26 @@ def evilGldTreeToDssTree(evil_gld_tree):
 			new_ob = {
 				'!CMD': 'new',
 				'object': 'line.' + ob['name'],
-				'bus1': ob['from'],
-				'bus2': ob['to'],
+				'bus1': ob['from'] + ob.get('!FROCODE',''),
+				'bus2': ob['to']+ ob.get('!TOCODE',''),
 			}
-			_extend_with_exc(ob, new_ob, ['!CMD','from','to','name','object','latitude','longitude'])
+			_extend_with_exc(ob, new_ob, ['!CMD','from','to','name','object','latitude','longitude','!FROCODE', '!TOCODE'])
 			dssTree.append(new_ob)
 		elif ob.get('object') == 'transformer':
 			new_ob = {
 				'!CMD': 'new',
 				'object': 'transformer.' + ob['name'],
-				'buses': f'({ob["from"]},{ob["to"]})'
+				'buses': f'({ob["from"]}{ob.get("!FROCODE","")},{ob["to"]}{ob.get("!TOCODE","")})'
 			}
-			_extend_with_exc(ob, new_ob, ['!CMD','from','to','name','object','latitude','longitude'])
+			_extend_with_exc(ob, new_ob, ['!CMD','from','to','name','object','latitude','longitude','!FROCODE', '!TOCODE'])
 			dssTree.append(new_ob)
 		elif 'parent' in ob:
 			new_ob = {
 				'!CMD': 'new',
-				'object': ob['object'] + '.' + ob['name'],
-				'bus': ob['parent'] 
+				'object': 'load.' + ob.get('name',''),
+				'bus1': ob['parent'] + ob.get('!CONNCODE', '')
 			}
-			_extend_with_exc(ob, new_ob, ['parent','name','object','latitude','longitude'])
+			_extend_with_exc(ob, new_ob, ['parent','name','object','latitude','longitude','!CONNCODE'])
 			dssTree.append(new_ob)
 		elif 'bus' not in ob and 'bus1' not in ob and 'bus2' not in ob and 'buses' not in ob and ob.get('object') != '!CMD':
 			# floating config type object.
@@ -263,10 +276,11 @@ if __name__ == '__main__':
 	# gridLabToDSS('ieee37_fixed.glm', 'ieee37_conv.dss') # this fails miserably
 	from pprint import pprint as pp
 	evil_glm = evilDssTreeToGldTree(tree)
-	# pp(evil_glm)
+	pp(evil_glm)
+	# print(evil_glm)
 	distNetViz.viz_mem(evil_glm, open_file=True, forceLayout=True)
 	distNetViz.insert_coordinates(evil_glm)
-	# evilToOmd(evil_glm, 'ieee37.dss.omd')
+	evilToOmd(evil_glm, 'ieee37.dss.omd')
 	# evil_dss = evilGldTreeToDssTree(evil_glm)
 	# pp(evil_dss)
 	# treeToDss(evil_dss, 'HACKZ.dss')
