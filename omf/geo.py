@@ -293,7 +293,7 @@ def simplifiedOmdShape(pathToOmdFile, conversion=False):
 			neighbors = nx.neighbors(nxG, currentNode)
 			for neighbor in neighbors:
 				#connect centroids
-				if nxG.nodes[neighbor]['type'] is 'centroid':
+				if nxG.nodes[neighbor]['type'] == 'centroid':
 					if ('centroid' + str(centerNode), neighbor) not in nx.edges(simplifiedGraph):
 						simplifiedGraph.add_edge(
 							'centroid' + str(centerNode),
@@ -612,8 +612,12 @@ def _tests():
 	# mapOmd(prefix / 'static/publicFeeders/Olin Barre LatLon.omd', 'testOutput', 'html', openBrowser=True, conversion=False)
 	# showOnMap(hullOfOmd(prefix / 'static/publicFeeders/Olin Barre LatLon.omd', conversion=False))
 	# showOnMap(simplifiedOmdShape(prefix / 'static/publicFeeders/Olin Barre LatLon.omd', conversion=False))
+	# x = omdGeoJson(prefix / 'static/publicFeeders/Olin Barre LatLon.omd', conversion=False)
+	# import json
+	# with open ('scratch/wind/circuit.geojson', 'w') as outFile:
+	# 	json.dump(x, outFile, indent=4)
 	# showOnMap(omdGeoJson(prefix / 'static/publicFeeders/Olin Barre LatLon.omd', conversion=False))
-	print(shortestPathOmd(prefix / 'static/publicFeeders/Olin Barre LatLon.omd', 'node62474203981T62474203987_B', 'node1667616792'))
+	# print(shortestPathOmd(prefix / 'static/publicFeeders/Olin Barre LatLon.omd', 'node62474203981T62474203987_B', 'node1667616792'))
 	# Server tests.
 	# rasterTilesFromOmd(prefix / 'static/publicFeeders/Olin Barre LatLon.omd', prefix / 'scratch/omdTests/tiles', conversion=False)
 	# serveTiles(prefix / 'scratch/omdTests/tiles') # Need to launch in correct directory
