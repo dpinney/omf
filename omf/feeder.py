@@ -787,18 +787,17 @@ def _tests():
 		tree = json.load(inFile)['tree']
 	nxG = treeToNxGraph(tree)
 	x = latLonNxGraph(nxG)
-	# Contig line merging test
-	mergeContigLines(tree)
-	dump(tree, '/Users/dpinney/Desktop/reduced.glm')
-
+	# # Contig line merging test
+	# mergeContigLines(tree)
+	# dump(tree, '/Users/dpinney/Desktop/reduced.glm')
+	# Additional reduction testing.
+	# FPATH = 'solvers/opendss/ieee37_ours.glm'
+	#FPATH = 'solvers/opendss/ieee37_ours_reduced_LMS.glm'
+	# gldTree = parse(os.path.join(os.path.dirname(__file__), FPATH), filePath=True)
+	# mergeContigLines(gldTree)
+	# dump(gldTree, 'solvers/opendss/ieee37_ours_reduced_LMS.glm')
+	# from omf import distNetViz
+	# distNetViz.viz_mem(gldTree, open_file=True, forceLayout=True)
 
 if __name__ == '__main__':
-	FPATH = 'solvers/opendss/ieee37_ours.glm'
-	#FPATH = 'solvers/opendss/ieee37_ours_reduced_LMS.glm'
-	gldTree = parse(os.path.join(os.path.dirname(__file__), FPATH), filePath=True)
-	mergeContigLines(gldTree)
-	dump(gldTree, 'solvers/opendss/ieee37_ours_reduced_LMS.glm')
-	from omf import distNetViz
-	distNetViz.viz_mem(gldTree, open_file=True, forceLayout=True)
-
-	#_tests()
+	_tests()
