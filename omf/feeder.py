@@ -222,15 +222,28 @@ def _mergeContigLinesOnce(tree):
 	while treecopy:
 		o = treecopy.popitem() # destructively iterate through tree copy
 		o = o[1]
-		if  not 'to' in o:
+		#if not 'to' in o: # couldn't this still allow a switch, regulator, or transformer through?
+		if (not 'line' in o.get('object', None)):
+			continue
+		if (not 'to' in o): # rules out line configs
 			continue
 		top = o
-		node = tree[n2k[o['to']]]
-		allBottoms = [x for x in tree.values() if x.get('from', None) == node['name'] ]
+		node = tree[n2k[o['to']]] # get downstream node
+		# Check that no other objects are attached to this node
+		# *** What is connected to a node? 'parent':[loads, capacitors] 'to'/'from':[switches, regulators, transformers, lines]...anything else?
+		# ***...?? from docs, expecting: fuse, line (overhead_line, triplex_line, underground_line), regulator, relay, series_reactor, switch_object (recloser, sectionalizer), transformer
+		allBottoms = [x for x in tree.values() if (
+			x.get('from', None) == node['name'] 
+			or x.get('parent', None) == node['name']
+			or x.get('to', None) == node['name']
+			) and x != o]
 		if len(allBottoms) != 1:
 			continue
+		# Check that only line objects are connected to this node (Does this matter?)
 		bottom = allBottoms[0]
-		if ( top.get('configuration','NTC') == bottom.get('configuration','NBC') ) and ('length' in top) and ('length' in bottom):
+		if not 'line' in bottom.get('object', None):
+			continue
+		if (top.get('configuration','NTC') == bottom.get('configuration','NBC')) and ('length' in top) and ('length' in bottom):
 			# delete node and bottom line. Make top line length = sum of both lines. Connect the new bottom.
 			newLen = float(top['length']) + float(bottom['length'])
 			#removedNames.append(bottom['name']) # DEBUG
@@ -240,7 +253,7 @@ def _mergeContigLinesOnce(tree):
 			del tree[n2k[node['name']]]
 			del tree[n2k[bottom['name']]]
 	#for x in removedNames: # DEBUG
-	#	print(x)  # DEBUG
+		#print(x)  # DEBUG
 
 
 def mergeContigLines(tree):
@@ -784,8 +797,8 @@ if __name__ == '__main__':
 	#FPATH = 'solvers/opendss/ieee37_ours_reduced_LMS.glm'
 	gldTree = parse(os.path.join(os.path.dirname(__file__), FPATH), filePath=True)
 	mergeContigLines(gldTree)
-	#dump(gldTree, 'solvers/opendss/ieee37_ours_reduced_LMS.glm')
-	#from omf import distNetViz
-	#distNetViz.viz_mem(gldTree, open_file=True, forceLayout=True)
+	dump(gldTree, 'solvers/opendss/ieee37_ours_reduced_LMS.glm')
+	from omf import distNetViz
+	distNetViz.viz_mem(gldTree, open_file=True, forceLayout=True)
 
 	#_tests()
