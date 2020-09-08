@@ -112,7 +112,7 @@ def evilDssTreeToGldTree(dssTree):
 	for ob in dssTree:
 		if ob['!CMD'] == 'setbusxy':
 			gldTree[str(g_id)] = {
-				"object": "node",
+				"object": "bus",
 				"name": ob['bus'],
 				"latitude": ob['y'],
 				"longitude": ob['x']
@@ -210,7 +210,7 @@ def evilGldTreeToDssTree(evil_gld_tree):
 	objs_in_order = [y[1] for y in sorted(all_objs, key=lambda x:int(x[0]))]
 	# Process each object.
 	for ob in objs_in_order:
-		if ob.get('object') == 'node':
+		if ob.get('object') == 'bus':
 			new_ob = {
 				'!CMD':'setbusxy',
 				'bus':ob['name'],
@@ -269,7 +269,8 @@ def evilToOmd(evilTree, outPath):
 		json.dump(omdStruct, outFile, indent=4)
 
 if __name__ == '__main__':
-	tree = dssToTree('ieee37_ours.dss')
+	tree = dssToTree('ieee37.clean.dss')
+	# tree = dssToTree('ieee240_ours.dss')
 	# treeToDss(tree, 'ieee37p.dss')
 	# dssToMem('ieee37.dss')
 	# dssToGridLab('ieee37.dss', 'Model.glm') # this kind of works
@@ -280,7 +281,7 @@ if __name__ == '__main__':
 	# print(evil_glm)
 	distNetViz.viz_mem(evil_glm, open_file=True, forceLayout=True)
 	distNetViz.insert_coordinates(evil_glm)
-	evilToOmd(evil_glm, 'ieee37.dss.omd')
+	# evilToOmd(evil_glm, 'ieee37.dss.omd')
 	evil_dss = evilGldTreeToDssTree(evil_glm)
 	# pp(evil_dss)
 	treeToDss(evil_dss, 'HACKZ.dss')
