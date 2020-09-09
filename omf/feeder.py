@@ -218,42 +218,40 @@ def fullyDeEmbed(glmTree):
 def _mergeContigLinesOnce(tree):
 	n2k = nameIndex(tree)
 	treecopy = tree.copy()
-	#removedNames = [] # DEBUG
+	removedNames = []
 	while treecopy:
-		o = treecopy.popitem() # destructively iterate through tree copy
+		o = treecopy.popitem() # destructively iterate through treecopy
 		o = o[1]
-		#if not 'to' in o: # couldn't this still allow a switch, regulator, or transformer through?
-		if (not 'line' in o.get('object', None)):
+		if o.get('name') in removedNames:
 			continue
-		if (not 'to' in o): # rules out line configs
+		if (not 'to' in o):
 			continue
 		top = o
 		node = tree[n2k[o['to']]] # get downstream node
 		# Check that no other objects are attached to this node
-		# *** What is connected to a node? 'parent':[loads, capacitors] 'to'/'from':[switches, regulators, transformers, lines]...anything else?
-		# ***...?? from docs, expecting: fuse, line (overhead_line, triplex_line, underground_line), regulator, relay, series_reactor, switch_object (recloser, sectionalizer), transformer
 		allBottoms = [x for x in tree.values() if (
 			x.get('from', None) == node['name'] 
 			or x.get('parent', None) == node['name']
 			or x.get('to', None) == node['name']
-			) and x != o]
+			) and not x == o]
 		if len(allBottoms) != 1:
+			# TODO: check for a switch. 
+			#for x in allBottoms:
+			#	if x.get('object', None):
+			#		pass
 			continue
-		# Check that only line objects are connected to this node (Does this matter?)
 		bottom = allBottoms[0]
-		if not 'line' in bottom.get('object', None):
-			continue
 		if (top.get('configuration','NTC') == bottom.get('configuration','NBC')) and ('length' in top) and ('length' in bottom):
 			# delete node and bottom line. Make top line length = sum of both lines. Connect the new bottom.
-			newLen = float(top['length']) + float(bottom['length'])
-			#removedNames.append(bottom['name']) # DEBUG
+			newLen = float(top['length']) + float(bottom['length']) # get the new length
+			removedNames.append(bottom['name'])
 			topTree = tree[n2k[o['name']]]
 			topTree['length'] = str(newLen)
 			topTree['to'] = bottom['to']
 			del tree[n2k[node['name']]]
 			del tree[n2k[bottom['name']]]
 	#for x in removedNames: # DEBUG
-		#print(x)  # DEBUG
+	#	print(x)  # DEBUG
 
 
 def mergeContigLines(tree):
@@ -264,7 +262,7 @@ def mergeContigLines(tree):
 		treeKeys = len(tree.keys())
 		_mergeContigLinesOnce(tree)
 		removedKeys = treeKeys - len(tree.keys())
-
+	
 
 def attachRecorders(tree, recorderType, keyToJoin, valueToJoin):
 	''' Walk through a tree an and attach Gridlab recorders to the indicated type of node.'''
@@ -787,17 +785,13 @@ def _tests():
 		tree = json.load(inFile)['tree']
 	nxG = treeToNxGraph(tree)
 	x = latLonNxGraph(nxG)
-	# # Contig line merging test
-	# mergeContigLines(tree)
-	# dump(tree, '/Users/dpinney/Desktop/reduced.glm')
-	# Additional reduction testing.
-	# FPATH = 'solvers/opendss/ieee37_ours.glm'
-	#FPATH = 'solvers/opendss/ieee37_ours_reduced_LMS.glm'
-	# gldTree = parse(os.path.join(os.path.dirname(__file__), FPATH), filePath=True)
-	# mergeContigLines(gldTree)
-	# dump(gldTree, 'solvers/opendss/ieee37_ours_reduced_LMS.glm')
-	# from omf import distNetViz
-	# distNetViz.viz_mem(gldTree, open_file=True, forceLayout=True)
+
+	# Contig line merging test
+	oldsz = len(tree)
+	mergeContigLines(tree)
+	newsz = len(tree)
+	print ('Objects removed: %s (of %s). Percent reduction: %s.'%(oldsz, oldsz-newsz, (oldsz-newsz)*100/oldsz))
+	
 
 if __name__ == '__main__':
 	_tests()
