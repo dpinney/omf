@@ -1,5 +1,6 @@
 """
-This script converts a CYME feeder model database to an OMF feeder tree dictionary object. The out put is similar to that produced by milToGridlab.py
+This script converts a CYME feeder model database to an OMF feeder tree
+dictionary object. The output is similar to that produced by milToGridlab.py
 
 An example of how to call the script is shown below:
 	from omf.cymeToGridlab import convertCymeModel
