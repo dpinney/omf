@@ -216,6 +216,7 @@ def fullyDeEmbed(glmTree):
 
 
 def _mergeContigLinesOnce(tree):
+	# TODO: Check for switches that prevent valid reduction opportunities
 	n2k = nameIndex(tree)
 	treecopy = tree.copy()
 	removedNames = []
@@ -235,10 +236,6 @@ def _mergeContigLinesOnce(tree):
 			or x.get('to', None) == node['name']
 			) and not x == o]
 		if len(allBottoms) != 1:
-			# TODO: check for a switch. 
-			#for x in allBottoms:
-			#	if x.get('object', None):
-			#		pass
 			continue
 		bottom = allBottoms[0]
 		if (top.get('configuration','NTC') == bottom.get('configuration','NBC')) and ('length' in top) and ('length' in bottom):
@@ -788,7 +785,10 @@ def _tests():
 
 	# Contig line merging test
 	oldsz = len(tree)
+	#from omf import distNetViz
+	#distNetViz.viz_mem(tree, open_file=True, forceLayout=True)
 	mergeContigLines(tree)
+	#dump(tree, 'solvers/opendss/test_reduced.glm')
 	newsz = len(tree)
 	print ('Objects removed: %s (of %s). Percent reduction: %s.'%(oldsz, oldsz-newsz, (oldsz-newsz)*100/oldsz))
 	
