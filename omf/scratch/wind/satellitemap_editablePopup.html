@@ -331,18 +331,19 @@
     	// xhr.send();
     }
     // Grab a kml file
-   	fetch('/get-kml/')
-       	.then(res => res.text())
-       	.then(kmltext => {
-           	// Create new kml overlay
-           	const parser = new DOMParser();
-           	const kml = parser.parseFromString(kmltext, 'text/xml');
-           	const track = new L.KML(kml);
-           	map.addLayer(track);
+    	fetch('/get-kml/')
+        	.then(res => res.text())
+        	.then(kmltext => {
+            	// Create new kml overlay
+            	const parser = new DOMParser();
+            	const kml = parser.parseFromString(kmltext, 'text/xml');
+            	const track = new L.KML(kml);
+            	map.addLayer(track);
 
-           	// Adjust map to show the kml
-           	const bounds = track.getBounds();
-       		map.fitBounds(bounds);
+            	// Adjust map to show the kml
+            	const bounds = track.getBounds();
+        		map.fitBounds(bounds);
+        	});
 </script>
 <button type="button" onclick="button_click()" style="position: fixed; top: 0px; right: 0px; z-index:999; cursor: pointer" >Get GeoJson</button>
 <form style="position: absolute; top: 40px; right: 0px; z-index:999; cursor: pointer">
