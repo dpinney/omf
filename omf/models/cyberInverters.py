@@ -32,7 +32,8 @@ def work(modelDir, inputDict):
 		omd = json.load(omdFile)
 	tree = omd['tree']
 	niceDss = dssConvert.evilGldTreeToDssTree(tree)
-	dssConvert.treeToDss(niceDss, f'{modelDir}/circuit.dss')
+	dssConvert.treeToDss(niceDss, f'{modelDir}/{inputDict["dssName1"]}.dss')
+	# dssConvert.treeToDss(niceDss, f'{modelDir}/circuit.dss')
 
 	# Confirm dss file name.
 	dssName = [x for x in os.listdir(modelDir) if x.endswith('.dss')][0][:-4]
@@ -111,7 +112,8 @@ def work(modelDir, inputDict):
 			miscFile.write(inputDict['miscFile'])
 
 		#create dss file in folder
-		copyfile(f'{modelDir}/circuit.dss', f'{modelDir}/PyCIGAR_inputs/circuit.dss')
+		# copyfile(f'{modelDir}/circuit.dss', f'{modelDir}/PyCIGAR_inputs/circuit.dss')
+		copyfile(f'{modelDir}/{dssName}.dss', f'{modelDir}/PyCIGAR_inputs/circuit.dss')
 		# copyfile(f'{__neoMetaModel__._omfDir}/solvers/opendss/ieee37_ours.dss', f'{modelDir}/PyCIGAR_inputs/circuit.dss')
 
 		#create load_solar_data.csv file in folder
@@ -490,6 +492,7 @@ def new(modelDir):
 		"simLength": "750",
 		"simLengthUnits": "seconds",
 		"feederName1": "ieee37.dss",
+		"dssName1": "ieee37",
 		# "feederName1": "Olin Barre GH EOL Solar AVolts CapReg",
 		"modelType": modelName,
 		"zipCode": "59001",
@@ -505,6 +508,13 @@ def new(modelDir):
 		shutil.copyfile(pJoin(__neoMetaModel__._omfDir, "static", "publicFeeders", defaultInputs["feederName1"]+'.omd'), pJoin(modelDir, defaultInputs["feederName1"]+'.omd'))
 	except:
 		return False
+	
+	with open(f'{modelDir}/{defaultInputs["feederName1"]}.omd', 'r') as omdFile:
+		omd = json.load(omdFile)
+	tree = omd['tree']
+	niceDss = dssConvert.evilGldTreeToDssTree(tree)
+	dssConvert.treeToDss(niceDss, f'{modelDir}/{defaultInputs["dssName1"]}.dss')
+
 	# try:
 	# 	# shutil.copyfile(pJoin(__neoMetaModel__._omfDir, "solvers", "opendss", defaultInputs["dssName1"]+'.dss'), pJoin(modelDir, "PyCIGAR_inputs", defaultInputs["dssName1"]+'.dss'))
 	# 	shutil.copyfile(pJoin(__neoMetaModel__._omfDir, "solvers", "opendss", defaultInputs["dssName1"]+'.dss'), pJoin(modelDir, defaultInputs["dssName1"]+'.dss'))
