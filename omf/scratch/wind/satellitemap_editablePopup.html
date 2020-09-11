@@ -26,6 +26,8 @@
    	<!-- Leaflet Draw -->
 	<link rel='stylesheet' href='https://unpkg.com/leaflet-draw@1.0.0/dist/leaflet.draw.css' />
 	<script src='https://unpkg.com/leaflet-draw@1.0.0/dist/leaflet.draw.js'></script>
+	<!-- leaflet-kml from windycom to read KML file -->
+	<script src="./L.KML.js"></script>
 	<!-- Load Esri Leaflet from CDN -->
 	<script src="https://unpkg.com/esri-leaflet@2.5.0/dist/esri-leaflet.js"
 		integrity="sha512-ucw7Grpc+iEQZa711gcjgMBnmd9qju1CICsRaryvX7HJklK0pGl/prxKvtHwpgm5ZHdvAil7YPxI1oWPOWK3UQ=="
@@ -328,20 +330,19 @@
     	// };
     	// xhr.send();
     }
-    // to grab a kml file
-    // fetch('www.spc.noaa.gov/products/outlook/SPC_outlooks.kml')
-    //                 .then(res => res.text())
-    //                 .then(kmltext => {
-    //                     // Create new kml overlay
-    //                     const parser = new DOMParser();
-    //                     const kml = parser.parseFromString(kmltext, 'text/xml');
-    //                     const track = new L.KML(kml);
-    //                     map.addLayer(track);
+    // Grab a kml file
+   	fetch('/get-kml/')
+       	.then(res => res.text())
+       	.then(kmltext => {
+           	// Create new kml overlay
+           	const parser = new DOMParser();
+           	const kml = parser.parseFromString(kmltext, 'text/xml');
+           	const track = new L.KML(kml);
+           	map.addLayer(track);
 
-    //                     // Adjust map to show the kml
-    //                     const bounds = track.getBounds();
-    //                     map.fitBounds(bounds);
-    //                 });
+           	// Adjust map to show the kml
+           	const bounds = track.getBounds();
+       		map.fitBounds(bounds);
 </script>
 <button type="button" onclick="button_click()" style="position: fixed; top: 0px; right: 0px; z-index:999; cursor: pointer" >Get GeoJson</button>
 <form style="position: absolute; top: 40px; right: 0px; z-index:999; cursor: pointer">

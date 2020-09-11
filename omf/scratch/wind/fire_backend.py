@@ -3,7 +3,7 @@ Backend for fire map work.
 '''
 
 import multiprocessing, time
-from flask import Flask
+from flask import Flask, redirect
 import json
 from omf.weather import getSubGridData
 
@@ -26,6 +26,10 @@ def firedata(lat, lon, distLat, distLon, resolution):
 	# print(type(json.dumps(x))) # json.dumps is a string
 	# print (type(x)) # x is a python dictionary 
 	return json.dumps(x) 
+
+@app.route('/get-kml/')
+def shapes():
+	return redirect('www.spc.noaa.gov/products/outlook/SPC_outlooks.kml')
 
 if __name__ == '__main__':
 	app.run(debug=True)
