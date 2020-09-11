@@ -116,7 +116,9 @@
 			referer: window.location.origin  
 		}, function (error, response) {});
 		token = JSON.parse(cred_req.response).token
-	} catch (err) {}
+	} catch (err) {
+		token = null
+	}
 	// Landsat Imagery
 	var esri_landsat = L.esri.imageMapLayer({
 		url: 'https://landsat2.arcgis.com/arcgis/rest/services/Landsat/MS/ImageServer',
@@ -126,7 +128,7 @@
 	var esri_sentinel = L.esri.imageMapLayer({
 		url: 'https://sentinel.arcgis.com/arcgis/rest/services/Sentinel2/ImageServer',
 		attribution: 'United States Geological Survey (USGS), National Aeronautics and Space Administration (NASA)',
-		token: ''
+		token: token
 	})
 	// Options to toggle between maps added to layers
 	L.control.layers(
