@@ -3,11 +3,14 @@ import os
 import sys
 import json
 import warnings
-from ditto.store import Store
-from ditto.readers.opendss.read import Reader as dReader
-from ditto.writers.opendss.write import Writer as dWriter
-from ditto.readers.gridlabd.read import Reader as gReader
-from ditto.writers.gridlabd.write import Writer as gWriter
+try:
+	from ditto.store import Store
+	from ditto.readers.opendss.read import Reader as dReader
+	from ditto.writers.opendss.write import Writer as dWriter
+	from ditto.readers.gridlabd.read import Reader as gReader
+	from ditto.writers.gridlabd.write import Writer as gWriter
+except:
+	warnings.warn('nrel ditto not installed. opendss conversion disabled.')
 from collections import OrderedDict
 from omf import feeder, distNetViz
 

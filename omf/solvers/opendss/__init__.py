@@ -1,11 +1,15 @@
 ''' Run OpenDSS and plot the results for arbitrary circuits. '''
 
-import opendssdirect as dss
 import pandas as pd
 import matplotlib.pyplot as plt
 import networkx as nx
 import math
 import os
+import warnings
+try:
+	import opendssdirect as dss
+except:
+	warnings.warn('opendssdirect not installed; opendss functionality disabled.')
 
 def runDSS(dssFilePath):
 	''' Run DSS file and set export path. '''
