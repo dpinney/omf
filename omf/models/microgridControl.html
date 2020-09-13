@@ -153,6 +153,27 @@
 		</script>
 	</div>
 	<div id="output">
+		<p class="reportTitle postRun">Generator Profiles</p>
+		<div id="fig1" class="tightContent postRun">
+			<div id="fig1Chart" style="width:1000px"></div>
+			<script type="text/javascript">
+				Plotly.newPlot("fig1Chart", JSON.parse(allOutputData["fig1Data"]), JSON.parse(allOutputData["fig1Layout"]) || {})
+			</script>
+		</div>
+		<p class="reportTitle postRun">Voltages</p>
+		<div id="fig2" class="tightContent postRun">
+			<div id="fig2Chart" style="width:1000px"></div>
+			<script type="text/javascript">
+				Plotly.newPlot("fig2Chart", JSON.parse(allOutputData["fig2Data"]), JSON.parse(allOutputData["fig2Layout"]) || {})
+			</script>
+		</div>
+		<p class="reportTitle postRun">Loads Served</p>
+		<div id="fig3" class="tightContent postRun">
+			<div id="fig3Chart" style="width:1000px"></div>
+			<script type="text/javascript">
+				Plotly.newPlot("fig3Chart", JSON.parse(allOutputData["fig3Data"]), JSON.parse(allOutputData["fig3Layout"]) || {})
+			</script>
+		</div>
 		<p class="reportTitle postRun" style="page-break-before:always">Timeline</p>
 		<div id="outageCostCalc" class="tightContent postRun">
 			{{ allOutputDataDict['timelineStatsHtml'] }}

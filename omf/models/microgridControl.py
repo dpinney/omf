@@ -1,5 +1,6 @@
 import random, re, datetime, json, os, tempfile, shutil, csv, math
 from os.path import join as pJoin
+import subprocess
 import pandas as pd
 import numpy as np
 import scipy
@@ -8,6 +9,7 @@ import scipy.stats as st
 from sklearn.preprocessing import LabelEncoder
 import plotly as py
 import plotly.graph_objs as go
+from plotly.tools import make_subplots
 
 # OMF imports
 import omf
@@ -162,7 +164,67 @@ def graphMicrogrid(pathToOmd, pathToMicro, workDir, maxTime, stepSize, faultedLi
 		workDir = tempfile.mkdtemp()
 		print('@@@@@@', workDir)
 
+	# command = 'cmd /c ' + '"julia --project=' + '"C:/Users/granb/PowerModelsONM.jl-master/" ' + 'C:/Users/granb/PowerModelsONM.jl-master/src/cli/entrypoint.jl' + ' -n ' + '"' + str(workDir) + '/circuit.dss' + '"' + ' -o ' + '"C:/Users/granb/PowerModelsONM.jl-master/output.json"'
+	# os.system(command)
+
+	with open(pJoin(__neoMetaModel__._omfDir,'scratch','RONM','output.json')) as inFile:
+	# with open("C:/Users/granb/PowerModelsONM.jl-master/output.json") as inFile:
+		data = json.load(inFile) 
+		genProfiles = data['Generator profiles']
+		simTimeSteps = []
+		for i in data['Simulation time steps']:
+			simTimeSteps.append(float(i))
+		voltages = data['Voltages']
+		loadServed = data['Load served']
+		storageSOC = data['Storage SOC (%)']
+	
 	outputTimeline = createTimeline()
+
+	# Create traces
+	gens = go.Figure()
+	gens.add_trace(go.Scatter(x=simTimeSteps, y=genProfiles['Diesel DG (kW)'],
+							mode='lines',
+							name='Diesel DG'))
+	gens.add_trace(go.Scatter(x=simTimeSteps, y=genProfiles['Energy storage (kW)'],
+							mode='lines',
+							name='Energy Storage'))
+	gens.add_trace(go.Scatter(x=simTimeSteps, y=genProfiles['Solar DG (kW)'],
+							mode='lines',
+							name='Solar DG'))
+	gens.add_trace(go.Scatter(x=simTimeSteps, y=genProfiles['Grid mix (kW)'],
+							mode='lines',
+							name='Grid Mix'))
+	# Edit the layout
+	gens.update_layout(xaxis_title='Hours',
+						yaxis_title='Power (kW)')
+
+	volts = go.Figure()
+	volts.add_trace(go.Scatter(x=simTimeSteps, y=voltages['Min voltage (p.u.)'],
+							mode='lines',
+							name='Minimum Voltage'))
+	volts.add_trace(go.Scatter(x=simTimeSteps, y=voltages['Max voltage (p.u.)'],
+							mode='lines',
+							name='Maximum Voltage'))
+	volts.add_trace(go.Scatter(x=simTimeSteps, y=voltages['Mean voltage (p.u.)'],
+							mode='lines',
+							name='Mean Voltage'))
+	# Edit the layout
+	volts.update_layout(xaxis_title='Hours',
+						yaxis_title='Power (p.u.)')
+
+	loads = go.Figure()
+	loads.add_trace(go.Scatter(x=simTimeSteps, y=loadServed['Feeder load (%)'],
+							mode='lines',
+							name='Feeder Load'))
+	loads.add_trace(go.Scatter(x=simTimeSteps, y=loadServed['Microgrid load (%)'],
+							mode='lines',
+							name='Microgrid Load'))
+	loads.add_trace(go.Scatter(x=simTimeSteps, y=loadServed['Bonus load via microgrid (%)'],
+							mode='lines',
+							name='Bonus Load via Microgrid'))
+	# Edit the layout
+	loads.update_layout(xaxis_title='Hours',
+						yaxis_title='Load (%)')
 
 	timelineStatsHtml = microgridTimeline(outputTimeline, workDir)
 
@@ -230,7 +292,7 @@ def graphMicrogrid(pathToOmd, pathToMicro, workDir, maxTime, stepSize, faultedLi
 	with open(pJoin(workDir,'geoDict.js'),'w') as outFile:
 		json.dump(feederMap, outFile, indent=4)
 
-	return {'timelineStatsHtml': timelineStatsHtml}
+	return {'timelineStatsHtml': timelineStatsHtml, 'gens': gens, 'loads': loads, 'volts': volts}
 
 def work(modelDir, inputDict):
 	# Copy specific climate data into model directory
@@ -267,6 +329,15 @@ def work(modelDir, inputDict):
 	#The geojson dictionary to load into the outageCost.py template
 	with open(pJoin(modelDir,'geoDict.js'),'rb') as inFile:
 		outData['geoDict'] = inFile.read().decode()
+
+	# Plotly outputs.
+	layoutOb = go.Layout()
+	outData['fig1Data'] = json.dumps(plotOuts.get('gens',{}), cls=py.utils.PlotlyJSONEncoder)
+	outData['fig1Layout'] = json.dumps(layoutOb, cls=py.utils.PlotlyJSONEncoder)
+	outData['fig2Data'] = json.dumps(plotOuts.get('volts',{}), cls=py.utils.PlotlyJSONEncoder)
+	outData['fig2Layout'] = json.dumps(layoutOb, cls=py.utils.PlotlyJSONEncoder)
+	outData['fig3Data'] = json.dumps(plotOuts.get('loads',{}), cls=py.utils.PlotlyJSONEncoder)
+	outData['fig3Layout'] = json.dumps(layoutOb, cls=py.utils.PlotlyJSONEncoder)
 
 	# Stdout/stderr.
 	outData['stdout'] = 'Success'
