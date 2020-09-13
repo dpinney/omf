@@ -3,7 +3,7 @@ Backend for fire map work.
 '''
 
 import multiprocessing, time
-from flask import Flask
+from flask import Flask, redirect
 import json
 from omf.weather import getSubGridData
 
@@ -26,6 +26,14 @@ def firedata(lat, lon, distLat, distLon, resolution):
 	# print(type(json.dumps(x))) # json.dumps is a string
 	# print (type(x)) # x is a python dictionary 
 	return json.dumps(x) 
+
+@app.route('/circuit.geojson')
+def geojson():
+	return open('circuit.geojson').read()
+
+@app.route('/L.KML.js')
+def kml_lib():
+	return open('L.KML.js').read()
 
 if __name__ == '__main__':
 	app.run(debug=True)

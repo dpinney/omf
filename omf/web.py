@@ -719,7 +719,8 @@ def distribution_text_get(owner, modelName, file_num):
 	# file_name = file_dict.get('feederName' + str(file_num))
 	file_name = file_dict.get('dssName' + str(file_num))
 	# file_filepath = os.path.join(_omfDir, 'data', 'Model', owner, modelName, file_name + '.omd')
-	file_filepath = os.path.join(_omfDir, 'data', 'Model', owner, modelName, 'PyCIGAR_inputs', file_name + '.dss')
+	# file_filepath = os.path.join(_omfDir, 'data', 'Model', owner, modelName, 'PyCIGAR_inputs', file_name + '.dss')
+	file_filepath = os.path.join(_omfDir, 'data', 'Model', owner, modelName, file_name + '.dss')
 	try:
 		with locked_open(file_filepath) as f:
 			data = f.read()

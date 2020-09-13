@@ -26,6 +26,9 @@ from tensorflow import keras
 
 omfDir = os.path.dirname(os.path.abspath(__file__))
 
+#darksky key
+_key_darksky = os.environ.get('DARKSKY','')
+
 def pullAsos(year, station, datatype):
 	'''This model pulls hourly data for a specified year and ASOS station. 
 	* ASOS is the Automated Surface Observing System, a network of about 900 
@@ -86,7 +89,7 @@ def pullAsosStations(filePath):
 				csvwriter.writerow(currentSite)
 
 
-def pullDarksky(year, lat, lon, datatype, units='si', api_key='31dac4830187f562147a946529516a8d', path = None):
+def pullDarksky(year, lat, lon, datatype, units='si', api_key=_key_darksky, path = None):
 	'''Returns hourly weather data from the DarkSky API as array.
 
 	* For more on the DarkSky API: https://darksky.net/dev/docs#overview
@@ -928,10 +931,17 @@ def get_radiation_data(radiation_type, site, year, out_file=None):
 		return df
 
 ####### GHI/DHI/DNI Estimator Code Below #######
+"""
+GHI/DHI/DNI Estimator Code by:
+Tuomas Talvitie 2020
+tpt5cu@virginia.edu
 
-#darksky key
-_key = '31dac4830187f562147a946529516a8d' #Personal Key
-_key2 = os.environ.get('DARKSKY','')
+Original Code at 
+
+https://github.com/tpt5cu/solarIrradiancePredictor
+
+"""
+
 
 Station_Dict = {
 	"AK_Cordova_14_ESE":(60.473, -145.35,'US/Alaska'),
@@ -1098,7 +1108,7 @@ def _getUscrnData(year='2018', location='TX_Austin_33_NW', dataType="SOLARAD"):
 	return ghiData
 
 #Standard positional arguments are for TX_Austin
-def _getDarkSkyCloudCoverForYear(year='2018', lat=30.581736, lon=-98.024098, key=_key, units='si'):
+def _getDarkSkyCloudCoverForYear(year='2018', lat=30.581736, lon=-98.024098, key=_key_darksky, units='si'):
 	cloudCoverByHour = {}
 	pressureByHour = {}
 	coords = '%0.2f,%0.2f' % (lat, lon)
@@ -1200,6 +1210,13 @@ def easy_solar_tests(uscrn_station='TX_Austin_33_NW'):
 
 ########### NDFD API ################
 
+"""
+NDFD code written by Tuomas Talvitie, 2020
+tpt5cu@viriginia.edu
+
+Based on code from:
+https://github.com/tpt5cu/pyNDFD-fetcher
+"""
 
 """
 Single Point Unsummarized Data: Returns DWML-encoded NDFD data for a point
@@ -1314,14 +1331,11 @@ class ApiError(Exception):
 		print(rv['message'])
 		return rv
 
-
-
-
 def _tests():
-	import traceback
-	print('weather.py tests currently disabled to keep them from sending too many HTTP requests.')
-	tmpdir = mkdtemp()
-	print("Beginning to test weather.py in", tmpdir)
+	# import traceback
+	# print('weather.py tests currently disabled to keep them from sending too many HTTP requests.')
+	# tmpdir = mkdtemp()
+	# print("Beginning to test weather.py in", tmpdir)
 	# # # Testing ASOS (Works)
 	# try:
 	# 	# res = pullAsos('2015','LWD', 'presentwx') # Does not write to a file by itself
@@ -1353,9 +1367,9 @@ def _tests():
 	# 	print(e)
 
 #	Testing DarkSky (Works as long as you have an API key)
-	# d=(pullDarksky(1900, 36.64, -93.30, 'temperature', api_key= '31dac4830187f562147a946529516a8d', path=tmpdir))
+	# d=(pullDarksky(1900, 36.64, -93.30, 'temperature', api_key= _key_darksky, path=tmpdir))
 	# try:
-	# 	d=(pullDarksky(1900, 30, -90, 'temperature', api_key= '31dac4830187f562147a946529516a8d'))
+	# 	d=(pullDarksky(1900, 30, -90, 'temperature', api_key= _key_darksky))
 	# 	print(d)
 	# except:
 	# 	val = traceback.format_exc()
@@ -1419,6 +1433,7 @@ def _tests():
 	# except:
 	# 	e = sys.exc_info()[0]
 	# 	print(e)
+	print("testing finished")
 	
 
 if __name__ == "__main__":

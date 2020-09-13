@@ -1,6 +1,5 @@
 ''' Functions for manipulting electrical distribution feeder models. '''
 
-
 import datetime, copy, os, re, warnings, json, platform
 from functools import reduce
 import networkx as nx
@@ -11,7 +10,6 @@ if platform.system() == 'Darwin':
 else:
 	matplotlib.use('Agg')
 from matplotlib import pyplot as plt
-
 
 # Wireframe for new feeder objects:
 newFeederWireframe = {
@@ -216,32 +214,39 @@ def fullyDeEmbed(glmTree):
 		_deEmbedOnce(glmTree)
 		lenDiff = len(glmTree) - currLen
 
+
 def _mergeContigLinesOnce(tree):
+	# TODO: Check for switches that prevent valid reduction opportunities
 	n2k = nameIndex(tree)
 	treecopy = tree.copy()
-	#removedNames = [] # DEBUG
+	removedNames = []
 	while treecopy:
-		o = treecopy.popitem() # destructively iterate through tree copy
+		o = treecopy.popitem() # destructively iterate through treecopy
 		o = o[1]
-		if 'to' in o:
-			top = o
-			node = tree[n2k[o['to']]]
-			allBottoms = []
-			for o2 in tree.values():
-				if o2.get('from', None) == node['name']:
-					allBottoms.append(o2)
-			if len(allBottoms) == 1:
-				bottom = allBottoms[0]
-				if top.get('configuration','NTC') == bottom.get('configuration','NBC'):
-					# delete node and bottom line. Make top line length = sum of both lines. Connect the new bottom.
-					if ('length' in top) and ('length' in bottom):
-						newLen = float(top['length']) + float(bottom['length'])
-						#removedNames.append(o['name']) # DEBUG
-						topTree = tree[n2k[o['name']]]
-						topTree['length'] = str(newLen)
-						topTree['to'] = bottom['to']
-						del tree[n2k[node['name']]]
-						del tree[n2k[bottom['name']]]
+		if o.get('name') in removedNames:
+			continue
+		if (not 'to' in o):
+			continue
+		top = o
+		node = tree[n2k[o['to']]] # get downstream node
+		# Check that no other objects are attached to this node
+		allBottoms = [x for x in tree.values() if (
+			x.get('from', None) == node['name'] 
+			or x.get('parent', None) == node['name']
+			or x.get('to', None) == node['name']
+			) and not x == o]
+		if len(allBottoms) != 1:
+			continue
+		bottom = allBottoms[0]
+		if (top.get('configuration','NTC') == bottom.get('configuration','NBC')) and ('length' in top) and ('length' in bottom):
+			# delete node and bottom line. Make top line length = sum of both lines. Connect the new bottom.
+			newLen = float(top['length']) + float(bottom['length']) # get the new length
+			removedNames.append(bottom['name'])
+			topTree = tree[n2k[o['name']]]
+			topTree['length'] = str(newLen)
+			topTree['to'] = bottom['to']
+			del tree[n2k[node['name']]]
+			del tree[n2k[bottom['name']]]
 	#for x in removedNames: # DEBUG
 	#	print(x)  # DEBUG
 
@@ -254,6 +259,7 @@ def mergeContigLines(tree):
 		treeKeys = len(tree.keys())
 		_mergeContigLinesOnce(tree)
 		removedKeys = treeKeys - len(tree.keys())
+	
 
 def attachRecorders(tree, recorderType, keyToJoin, valueToJoin):
 	''' Walk through a tree an and attach Gridlab recorders to the indicated type of node.'''
@@ -776,13 +782,16 @@ def _tests():
 		tree = json.load(inFile)['tree']
 	nxG = treeToNxGraph(tree)
 	x = latLonNxGraph(nxG)
+
 	# Contig line merging test
+	oldsz = len(tree)
+	#from omf import distNetViz
+	#distNetViz.viz_mem(tree, open_file=True, forceLayout=True)
 	mergeContigLines(tree)
-	dump(tree, '/Users/dpinney/Desktop/reduced.glm')
+	#dump(tree, 'solvers/opendss/test_reduced.glm')
+	newsz = len(tree)
+	print ('Objects removed: %s (of %s). Percent reduction: %s.'%(oldsz, oldsz-newsz, (oldsz-newsz)*100/oldsz))
+	
 
 if __name__ == '__main__':
-	FPATH = 'solvers/opendss/ieee37_ours.glm'
-	gldTree = parse(os.path.join(os.path.dirname(__file__), FPATH), filePath=True)
-	mergeContigLines(gldTree)
-	dump(gldTree, 'solvers/opendss/ieee37_ours_reduced_LMS.glm')
-	#_tests()
+	_tests()

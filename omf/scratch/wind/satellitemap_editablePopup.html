@@ -2,19 +2,9 @@
 <html>
 <head>
 	<title>GeoJSON Map</title>
-  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.6.0/dist/leaflet.css"
-    integrity="sha512-xwE/Az9zrjBIphAcBb3F6JVqxf46+CDLwfLMHloNu6KEQCAWi6HcDUbeOfBIptF7tcCzusKFjFw2yuvEpDL9wQ=="
-    crossorigin=""/>
-  <script src="https://unpkg.com/leaflet@1.6.0/dist/leaflet.js"
-    integrity="sha512-gZwIG9x3wUXg2hdXF6+rVkLF/0Vi9U8D2Ntg4Ga5I5BZpVkVxlJWbSQtXPSiUTtC0TjtGOmxa1AJPuV0CPthew=="
-    crossorigin=""></script>
-	<link rel='stylesheet' href='https://unpkg.com/leaflet-draw@1.0.0/dist/leaflet.draw.css' />
-	<script src='https://unpkg.com/leaflet-draw@1.0.0/dist/leaflet.draw.js'></script>
-	<!-- Load Esri Leaflet from CDN -->
-	<script src="https://unpkg.com/esri-leaflet@2.5.0/dist/esri-leaflet.js"
-		integrity="sha512-ucw7Grpc+iEQZa711gcjgMBnmd9qju1CICsRaryvX7HJklK0pGl/prxKvtHwpgm5ZHdvAil7YPxI1oWPOWK3UQ=="
-		crossorigin="">
-	</script>
+	<link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css"
+	integrity="sha512-xodZBNTC5n17Xt2atTPuE1HxjVMSvLVW9ocqUKLsCC5CXdbqCmblAshOMAS6/keqq/sMZMZ19scR4PsZChSR7A=="
+	crossorigin=""/>
 	<style>html, body {
 		width: 100%;
 		height: 100%;
@@ -28,6 +18,21 @@
 		left: 0.0%;
 		top: 0.0%;
 	}
+	</style>
+	<!-- Make sure you put this AFTER Leaflet's CSS -->
+	<script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"
+	integrity="sha512-XQoYMqMTK8LvdxXYG3nZ448hOEQiglfqkJs1NOQV44cWnUrBc8PkAOcXy20w0vlaXaVUearIOBhiXZ5V3ynxwA=="
+	crossorigin=""></script>
+	<!-- Leaflet Draw -->
+	<link rel='stylesheet' href='https://unpkg.com/leaflet-draw@1.0.0/dist/leaflet.draw.css' />
+	<script src='https://unpkg.com/leaflet-draw@1.0.0/dist/leaflet.draw.js'></script>
+	<!-- leaflet-kml from windycom to read KML file -->
+	<script src="./L.KML.js"></script>
+	<!-- Load Esri Leaflet from CDN -->
+	<script src="https://unpkg.com/esri-leaflet@2.5.0/dist/esri-leaflet.js"
+		integrity="sha512-ucw7Grpc+iEQZa711gcjgMBnmd9qju1CICsRaryvX7HJklK0pGl/prxKvtHwpgm5ZHdvAil7YPxI1oWPOWK3UQ=="
+		crossorigin=""></script>
+	<style>
 	#fade {
 		display: none;
 		position: absolute;
@@ -57,19 +62,22 @@
 		text-align: center;
 		overflow: auto;
 	}
-	#export {
-        position: absolute;
-        top: 59px;
-        right: 0px;
-        z-index: 999;
-        background: white;
-        color: black;
-        cursor: pointer;
-        text-decoration: none;
-        font-family: 'Arial';
-        font-size: 13px;
-        padding: 4px;
-    }
+	#export, #import, #submit {
+		position: absolute;
+		top: 59px;
+		right: 0px;
+		z-index: 999;
+		background: white;
+		color: black;
+		cursor: pointer;
+		text-decoration: none;
+		font-family: 'Arial';
+		font-size: 13px;
+		padding: 4px;
+	}
+	#import, #submit {
+		top: 83px;
+	}
 	</style>
 </head>
 <body>
@@ -78,10 +86,12 @@
 		<img id="loader" src="https://i.gifer.com/KSYA.gif" />
 	</div>
 	<div id="fade"></div>
-	<a href='#' id='export'>Export Features</a>
-	<script type='text/javascript'>
+	<a href='#' id='export'>Save Features</a>
+	<button type="button" id="upload_button" onclick="handle_upload()" style="position:absolute; top:100px; right: 0px; z-index:9999; cursor: pointer">Upload</button>
+	<input type="file" id="import" name="filename">
+<script type='text/javascript'>
 	// basic map definition and zoom control.
-	var map = L.map('map');
+	var map = L.map('map', {renderer: L.canvas()});
 	map.setView([39.8, -121.6], 10);
 	L.control.scale().addTo(map);
 	// drawing layer
@@ -111,7 +121,9 @@
 			referer: window.location.origin  
 		}, function (error, response) {});
 		token = JSON.parse(cred_req.response).token
-	} catch (err) {}
+	} catch (err) {
+		token = null
+	}
 	// Landsat Imagery
 	var esri_landsat = L.esri.imageMapLayer({
 		url: 'https://landsat2.arcgis.com/arcgis/rest/services/Landsat/MS/ImageServer',
@@ -121,8 +133,32 @@
 	var esri_sentinel = L.esri.imageMapLayer({
 		url: 'https://sentinel.arcgis.com/arcgis/rest/services/Sentinel2/ImageServer',
 		attribution: 'United States Geological Survey (USGS), National Aeronautics and Space Administration (NASA)',
-		token: ''
+		token: token
 	})
+	// Grab a kml for fire risk.
+	var risk_layer = L.tileLayer('')
+	var kml_req = new XMLHttpRequest();
+	kml_req.open("GET", 'https://www.spc.noaa.gov/products/fire_wx/day1fireotlk.kmz'); 
+	// kml_req.setRequestHeader('Content-Type', 'text/xml')
+	kml_req.onload = function() {
+		if (kml_req.status !== 200) return
+		track = new L.KML(kml_req.response);
+		map.addLayer(track);
+		// const bounds = track.getBounds();
+		// map.fitBounds(bounds);
+	};
+	kml_req.send();
+	// Load in a circuit
+	var circuit_layer = L.tileLayer('')
+	var circuit = new XMLHttpRequest();
+	circuit.open("GET", 'circuit.geojson'); 
+	circuit.setRequestHeader('Content-Type', 'application/geojson')
+	circuit.responseType = 'json';
+	circuit.onload = function() {
+		if (circuit.status !== 200) return
+		circuit_layer = L.geoJSON(circuit.response).addTo(map);
+	};
+	circuit.send();
 	// Options to toggle between maps added to layers
 	L.control.layers(
 		{
@@ -132,9 +168,14 @@
 			'esri_images': esri_images
 		},
 		{
+			// 'circuit': circuit_layer,
 			'drawlayer': drawnItems,
+			// 'fire_risk':track
 		},
-		{position: 'topleft', collapsed: false}
+		{
+			position: 'topleft',
+			collapsed: false
+		}
 	).addTo(map);
 	//Boilerplate to add the layer control.
 	map.addControl(new L.Control.Draw({
@@ -170,16 +211,6 @@
 			vegScore = e.target.feature.properties.vegScore
 			layer.bindPopup("<input id='popup_leaflet_id' style='display:none' value=" + e.target._leaflet_id + ">Veg Score: <input type='text' id='veg_score' value=" + vegScore + "><button onclick='saveVeg()' type='button'>Save</button>"+"<br />"+"Fire Risk valid for 24 hours starting at "+props['start-time']+": "+"<strong>"+props['fire-risk']+"</strong>"+"<br />"+"<a href='https://www.spc.noaa.gov/products/fire_wx/fwdy1.html' target='_blank'>Click for more information</a>")
 			console.log(props['fire-risk'])
-			if (0 <= props['fire-risk'] && props['fire-risk'] < 1) {layer.setStyle({fillColor: '#E1E500'})}
-			if (1 <= props['fire-risk'] && props['fire-risk'] < 2) {layer.setStyle({fillColor: '#DDCF00'})}
-			if (2 <= props['fire-risk'] && props['fire-risk'] < 3) {layer.setStyle({fillColor: '#DAB900'})}
-			if (3 <= props['fire-risk'] && props['fire-risk'] < 4) {layer.setStyle({fillColor: '#D6A400'})}
-			if (4 <= props['fire-risk'] && props['fire-risk'] < 5) {layer.setStyle({fillColor: '#D38E00'})}
-			if (5 <= props['fire-risk'] && props['fire-risk'] < 6) {layer.setStyle({fillColor: '#D07900'})}
-			if (6 <= props['fire-risk'] && props['fire-risk'] < 7) {layer.setStyle({fillColor: '#CC6300'})}
-			if (7 <= props['fire-risk'] && props['fire-risk'] < 8) {layer.setStyle({fillColor: '#C94D00'})}
-			if (8 <= props['fire-risk'] && props['fire-risk'] < 9) {layer.setStyle({fillColor: '#C22200'})}
-			if (9 <= props['fire-risk'] && props['fire-risk'] <= 10) {layer.setStyle({fillColor: '#BF0D00'})}
 			layer.openPopup()
 		})
 		drawnItems.addLayer(layer);
@@ -260,20 +291,55 @@
 				drawn_geojson.features[i].properties['fire-risk'] = average
 				drawn_geojson.features[i].properties['start-time'] = xhttpData["time-layout"]["start-valid-time"][dayForecast]
 				eachShape.push(average);
+
+				if (0 <= drawn_geojson.features[i].properties['fire-risk'] && drawn_geojson.features[i].properties['fire-risk'] < 1) {drawnItems._layers[Object.keys(drawnItems._layers)[i]].setStyle({fillColor: '#E1E500'})}
+				if (1 <= drawn_geojson.features[i].properties['fire-risk'] && drawn_geojson.features[i].properties['fire-risk'] < 2) {drawnItems._layers[Object.keys(drawnItems._layers)[i]].setStyle({fillColor: '#DDCF00'})}
+				if (2 <= drawn_geojson.features[i].properties['fire-risk'] && drawn_geojson.features[i].properties['fire-risk'] < 3) {drawnItems._layers[Object.keys(drawnItems._layers)[i]].setStyle({fillColor: '#DAB900'})}
+				if (3 <= drawn_geojson.features[i].properties['fire-risk'] && drawn_geojson.features[i].properties['fire-risk'] < 4) {drawnItems._layers[Object.keys(drawnItems._layers)[i]].setStyle({fillColor: '#D6A400'})}
+				if (4 <= drawn_geojson.features[i].properties['fire-risk'] && drawn_geojson.features[i].properties['fire-risk'] < 5) {drawnItems._layers[Object.keys(drawnItems._layers)[i]].setStyle({fillColor: '#D38E00'})}
+				if (5 <= drawn_geojson.features[i].properties['fire-risk'] && drawn_geojson.features[i].properties['fire-risk'] < 6) {drawnItems._layers[Object.keys(drawnItems._layers)[i]].setStyle({fillColor: '#D07900'})}
+				if (6 <= drawn_geojson.features[i].properties['fire-risk'] && drawn_geojson.features[i].properties['fire-risk'] < 7) {drawnItems._layers[Object.keys(drawnItems._layers)[i]].setStyle({fillColor: '#CC6300'})}
+				if (7 <= drawn_geojson.features[i].properties['fire-risk'] && drawn_geojson.features[i].properties['fire-risk'] < 8) {drawnItems._layers[Object.keys(drawnItems._layers)[i]].setStyle({fillColor: '#C94D00'})}
+				if (8 <= drawn_geojson.features[i].properties['fire-risk'] && drawn_geojson.features[i].properties['fire-risk'] < 9) {drawnItems._layers[Object.keys(drawnItems._layers)[i]].setStyle({fillColor: '#C22200'})}
+				if (9 <= drawn_geojson.features[i].properties['fire-risk'] && drawn_geojson.features[i].properties['fire-risk'] <= 10) {drawnItems._layers[Object.keys(drawnItems._layers)[i]].setStyle({fillColor: '#BF0D00'})}
 			}
 		}
 		console.log(eachShape);
 		closeModal();
 	}
+	// download drawn features button
 	document.getElementById('export').onclick = function(e) {
-        // Extract GeoJson from featureGroup
-        var data = drawnItems.toGeoJSON();
-        // Stringify the GeoJson
-        var convertedData = 'text/json;charset=utf-8,' + encodeURIComponent(JSON.stringify(data));
-        // Create export
-        document.getElementById('export').setAttribute('href', 'data:' + convertedData);
-        document.getElementById('export').setAttribute('download','data.geojson');
-    }
+		// Extract GeoJson from featureGroup
+		var data = drawnItems.toGeoJSON();
+		// Stringify the GeoJson
+		var convertedData = 'text/json;charset=utf-8,' + encodeURIComponent(JSON.stringify(data));
+		// Create export
+		document.getElementById('export').setAttribute('href', 'data:' + convertedData);
+		document.getElementById('export').setAttribute('download','data.geojson');
+	}
+	// upload saved geoJSON file of drawn features button
+	function handle_upload(e) {
+		var upload_file = document.getElementById("import").files[0];
+		var reader = new FileReader();
+		reader.readAsText(upload_file, "UTF-8");
+		var contents = reader.result
+		console.log(contents)
+		// var uploaded = document.getElementById('import').values[0]
+		// var geojson = new L.GeoJSON.AJAX("data.geojson", {local:true});
+		// geojson.on('data:loaded', function() {
+		// 	geojson.addTo(map);
+		// });
+		// // Get file with name "data.geojson"
+		// var xhr = new XMLHttpRequest();
+		// xhr.open('GET', 'http://127.0.0.1:5000/data.geojson');
+		// xhr.setRequestHeader('Content-Type', 'application/json');
+		// xhr.responseType = 'json';
+		// xhr.onload = function() {
+		//     if (xhr.status !== 200) return
+		//     L.geoJSON(xhr.response).addTo(map);
+		// };
+		// xhr.send();
+	}
 </script>
 <button type="button" onclick="button_click()" style="position: fixed; top: 0px; right: 0px; z-index:999; cursor: pointer" >Get GeoJson</button>
 <form style="position: absolute; top: 40px; right: 0px; z-index:999; cursor: pointer">

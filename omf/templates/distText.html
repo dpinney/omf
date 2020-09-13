@@ -903,6 +903,7 @@ function detectDrag(event) {
  * Used to save the new changes or undo an operation by resaving the old changes.
  */
 function saveFile(file) {
+    file = document.getElementById("rawTextContainer").value
     const formData = new FormData();
     formData.set("fileContents", file);
     const postRequest = $.ajax({
@@ -913,7 +914,8 @@ function saveFile(file) {
         contentType: false,
     });
     const modal = createProgressModal();
-    if (file === gReadFile) {
+    // if (file === gReadFile) {
+    if (!fileNeedsSave()) {
         modal.clearAndAddMessage('Re-saving the data from your most recent save...');
         postRequest.done(function() {
             modal.clearAndAddMessage('Success. Your data was restored to the most recent save.');
@@ -922,11 +924,12 @@ function saveFile(file) {
             modal.clearAndAddMessage('The server raised an internal exception during the save operation.');
             modal.finish();
         });
-    } else if (file === gWriteFile) {
+    // } else if (file === gWriteFile) {
+    } else if (fileNeedsSave()) {
         modal.clearAndAddMessage('Saving changes to your file...');
         postRequest.done(function() {
             modal.hide();
-            gReadFile = deepCopy(gWriteFile);
+            gReadFile = deepCopy(file);
         }).fail(function() {
             modal.clearAndAddMessage('The server raised an internal exception during the save operation.');
             modal.finish();
@@ -1551,7 +1554,8 @@ function interfaceIsStatic() {
 //     return JSON.stringify(gReadFile) !== JSON.stringify(gWriteFile);
 // }
 function fileNeedsSave() {
-    return gReadFile !== gWriteFile;
+    return gReadFile !== document.getElementById("rawTextContainer").value;
+    // return gReadFile !== gWriteFile;
 }
 
 //**************************************************

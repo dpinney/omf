@@ -100,8 +100,12 @@ def viz(pathToOmdOrGlm, forceLayout=False, outputPath=None, outputName='viewer.h
 		if pathToOmdOrGlm.endswith('.omd'):
 			omd = json.load(feedFile)
 			thisFeed = {'tree':omd['tree']} # TODO: later bring back attachments.
+			dss_schema = True if omd.get('syntax','') == 'DSS' else False
 		elif pathToOmdOrGlm.endswith('.glm'):
 			thisFeed = {'tree':omf.feeder.parse(pathToOmdOrGlm, filePath=True)}
+			dss_schema = False
+		else:
+			dss_schema = True #TODO: don't assume this.
 		tree = thisFeed['tree']
 	## Force layout of feeders with no lat/lon information so we can actually see what's there.
 	if forceLayout:
@@ -138,7 +142,6 @@ def viz(pathToOmdOrGlm, forceLayout=False, outputPath=None, outputName='viewer.h
 	def id():
 		return ""
 	component_json = get_components()
-	dss_schema = True if omd.get('syntax','') == 'DSS' else False
 	rend = template.render(thisFeederData=json.dumps(thisFeed), thisFeederName=pathToOmdOrGlm, thisFeederNum=1,
 		thisModelName="Local Filesystem", thisOwner="NONE", components=component_json, jasmine=None, spec=None,
 		publicFeeders=[], userFeeders=[], csrf_token=id, showFileMenu=False, currentUser=None, dssSchema=dss_schema

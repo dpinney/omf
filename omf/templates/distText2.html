@@ -1,0 +1,463 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<style>
+            /* Define global css variables */
+            /* I have to subtract 4px or so from the svgContainer to prevent the scrollbar from appearing. Making the header height less does not appear to change anything. */
+            :root {
+                --header-height: 35px;
+                --header-padding-top: 8px;
+                --header-padding-bottom: 8px;
+            }
+			* { 
+                font-family: Helvetica, Arial, Sans-Serif;
+            }
+			div.divButton {
+				-webkit-touch-callout: none;
+				-webkit-user-select: none;
+				-khtml-user-select: none;
+				-moz-user-select: none;
+				-ms-user-select: none;
+				user-select: none;
+				cursor: pointer;
+				cursor: hand;
+				position:fixed;
+				width:30px;
+				height:30px;
+				text-align:center;
+				font-size:30px;
+				line-height:30px;
+				color:white;
+                background-color: dimgrey;
+                left: 5px;
+			}
+            #scaleButton {
+                top: 175px;
+            }
+			body {
+                /*width: 100%;
+                height: 100%;*/
+                margin:0px;
+            }
+			a {
+				text-decoration: none;
+                color: mediumseagreen;
+                /*color: black;*/
+			}
+            /*a:visited {
+                color: seagreen;
+            }*/
+
+            /* SVG */
+
+            #interfaceContainer {
+                position: relative;
+            }
+
+            /* This is the element that acts as a hook for svg-pan-zoom.js to attach a viewport, which it creates itself */
+            /* overflow: hidden is set by svg-pan-zoom.js itself. No need to change that here. */
+			#svgContainer {
+                /* width must be 100%, meaning 100% of the document */
+				width: 100%; 
+                /* height must be manually set to a hard value */
+				/*height: calc(100vh - var(--header-height) - var(--header-padding-bottom) - var(--header-padding-top));*/
+				height: calc(100vh - var(--header-height) - var(--header-padding-bottom) - var(--header-padding-top) - 4px);
+			}
+			#saveButton {
+				float:right;
+			}
+
+            div#loadingMessage {
+                width: 100%;
+                height: 100%;
+				/*background-color: rgba(0,0,0,0.4); */
+                background-color: white;
+                position: fixed;
+                top: 0px;
+            }
+
+            /**************************************************
+            // Header and menu links
+            **************************************************/
+
+			#header {
+				width:100%;
+				height: var(--header-height);
+				padding-top: var(--header-padding-top);
+				padding-bottom: var(--header-padding-bottom);
+				background:black;
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+			}
+            #menuLeft h4 {
+                margin: 0px 0px 4px 20px;
+            }
+            #menuLeft p {
+                margin: 0px 0px 0px 20px;
+            }
+            #menuRight { 
+              display:flex;
+                      align-items: center;
+            }
+            .white {
+                color: #F8F8F8;
+            }
+            .menuHeading {
+                margin: 0px;
+                padding: 5px;
+                border-radius: 5px 5px 0px 0px;
+            }
+            .expandedHeading {
+                color: black;
+                background: #F8F8F8;
+            }
+            .headerGroup {
+                position: relative; /* set to relative in order to correctly align the ul.menu */
+                margin-right: 15px;
+                cursor: pointer;
+            }
+            ul.menu {
+                list-style: none; /* remove bullet points from menu */
+                margin: 0px;
+                padding: 0px;
+                position: absolute; /* remove the menu from the document flow */
+                background-color: #F8F8F8;
+                right: 0px; /* align the menu to the left */
+                box-shadow: 0 11px 10px rgba(0, 0, 0, 0.2); /* add shadow to the menu */
+                border-radius: 5px 0 0 0; /* round the top left corner of the menu */
+                max-height: 550px; /* Limit the length of the component list */
+                overflow: auto;
+                white-space: nowrap;
+            }
+            ul.menu li { 
+                padding: 4px; 
+            }
+            ul.menu li:hover {
+                background:green; color:white; 
+            }
+
+            /**************************************************
+            // Modal Dialogs
+            **************************************************/
+
+            #componentTable {
+                max-height: 65vh;
+                overflow: auto;
+                min-width: 450px;
+            }
+            #progressModalCancel {
+                background-color: crimson;
+            }
+            #progressModal {
+                z-index: 1;
+            }
+            #massAddModal .modalContent {
+                width: 400px;
+            }
+            #climateModal label {
+                white-space: nowrap;
+            }
+            #anonymizeModal {
+                white-space: nowrap;
+            }
+			.modal {
+                position: fixed;
+                top: 0px;
+                width: 100%;
+                height: 100%;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+				background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
+			}
+	 		.modalContent {
+                padding: 20px;
+                border-radius: 10px;
+				background-color: #fefefe;
+                /*max-height: 80vh;*/
+                /*overflow: auto;*/
+                overflow: hidden;
+                max-width: 80vw;
+
+			}
+            .progressModalMessages {
+                padding: 20px;
+            }
+            .modalContentButtons {
+                padding: 50px 0px 0px 0px;
+                text-align: center;
+            }
+            #feederListFlex {
+                display: flex;
+                min-width: 50vw;
+            }
+            #feederListFlex h3 {
+                text-align: center;
+            }
+            #feederListFlex div {
+                width: 50%;
+            }
+            .right {
+                float: right;
+            }
+            .centered {
+                text-align: center;
+            }
+            .modalHeading {
+                text-align: center;
+            }
+            .modalInput {
+                font-size: medium;
+                border: 0px;
+                background-color: gainsboro;
+                width: 100%;
+            }
+            .modalInputLine {
+                font-size: medium;
+                border: 0px;
+                background-color: gainsboro;
+            }
+            .vertFlex {
+                display: flex;
+                flex-direction: column;
+            }
+            .legendFlex {
+                display: flex;
+                height: 40vh;
+            }
+            .legendGradiant {
+                height: 100%;
+                width: 5vw;
+            }
+            .legendAxis {
+                height: 100%;
+                margin: 0px 0px 0px 20px;
+                justify-content: space-between;
+            }
+            .legendAxis p {
+                margin: 0px;
+            }
+            .modalTableHeader {
+                margin: 20px 0px 0px 0px;
+            }
+            .modalButton {
+                font-size: medium;
+                background-color: seagreen;
+                -webkit-border-radius: 5px;
+                -moz-border-radius: 5px;
+                border-radius: 5px;
+                border: none;
+                color: white;
+                cursor: pointer;
+                padding: 4px 6px 4px;
+            }
+            .leftText {
+                text-align: left;
+            }
+            .modalTableRow {
+                width: 50%;
+            }
+            .scrollableList {
+                overflow: auto;
+                max-height: 70vh;
+                list-style-type: none;
+                margin: 0px;
+                padding: 0px 20px 0px 20px;
+                cursor: pointer;
+            }
+            .feederItem {
+                padding: 5px 0px 5px 0px;
+                margin: 10px 0px 10px 0px;
+            }
+            .feederItem:hover {
+                color: white;
+                background-color: green;
+            }
+            .buttonRow button {
+                margin-right: 5px;
+            }
+            .tableInput {
+                font-size: small;
+                background-color: gainsboro;
+                padding: 3px;
+                border: 0px;
+            }
+            .deleteButton {
+                background-color: #CC0000;
+                /*padding: 1px 7px 1px 7px;*/
+            }
+            /* TODO: might need to delete this rule */
+            .editButton {
+                font-size: small;
+                /*width: 100%;*/
+            }
+
+			/* dataTable */
+
+            .floatingTables {
+                position: absolute;
+                top: 0px;
+                height: 0px;
+            }
+
+            #descriptionTables { }
+
+            #selectionTable { }
+
+            .formContainer {
+				/*position: fixed;*/
+				/*top: 55px;*/
+                height:0px;
+				/*right: 5px;*/
+            }
+
+            /* Don't set overflow-y to hidden */
+			.dataTable {
+                position: fixed;
+				top: 55px;
+				border:1px solid black;
+				border-collapse: collapse;
+                display: inline-block;
+                overflow-x: hidden;
+				max-height: 90vh;
+                right: 10px;
+			}
+            .dataTable tr {
+                border-bottom: 1px solid black;
+            }
+            .dataTable tr:last-child {
+                border: 0px;
+            }
+            .tableTitle {
+                background-color: black;
+                color: white;
+            }
+			tbody {
+                border-collapse: collapse;
+			}
+			td {
+				background:white;
+				border-collapse: collapse;
+			}
+            .verticalPadded {
+				padding: 5px 0px 5px 0px;
+            }
+            .fullPadded {
+				padding: 5px;
+            }
+            #componentList {
+                min-width:250px;
+            } /* Hack to prevent horizontal scrolling. */
+
+            /* SVG Styling */
+
+            line { stroke: rgb(0,0,0); } /* black */
+            line.parentChild { stroke: rgb(211,211,211); } /* LightGray */
+            circle {
+                stroke: rgb(255,255,255); /* white */
+                fill: rgb(128,128,128); /* gray */
+            }
+            .house { fill: rgb(0,0,255); } /* blue */
+            .triplex_meter { fill:rgb(255,165,0); } /* orange */
+            .underground_line { stroke: rgb(128,128,128);} 
+            .transformer { stroke:rgb(255,165,0); }
+            .regulator { stroke: rgb(255,0,0) ;} /* red */
+            .undefined,.regulator_configuration,.transformer_configuration,.triplex_line_configuration,.line_configuration,.volt_var_control,.line_spacing,.climate,.overhead_line_conductor,.underground_line_conductor,.triplex_line_conductor,.player,.schedule { fill: rgb(191,191,191); } /* 75% lightness gray */
+        </style>
+        <link rel="stylesheet" href="/static/jquery-ui.min.css">
+        <script type="text/javascript" src="/static/jquery.js"></script>
+        <script type="text/javascript" src="/static/jquery-ui.min.js"></script>
+        <script type="text/javascript" src="/static/svg-pan-zoom.js"></script>
+        <script type="text/javascript" src="/static/chroma.min.js"></script>
+        <script type="text/javascript" src="/static/papaparse.min.js"></script>
+        <link rel="shortcut icon" href="/static/favicon.ico"/>
+		{% if jasmine %}{{ jasmine | safe }}{% endif %}
+		<!-- <script id='feederLoadScript' type='text/javascript' src='./Data for Testing/testFeeder.js'></script> -->
+		<!-- <script id='feederLoadScript' type='text/javascript' src='./Data for Testing/testFeeder Largest.js'></script> -->
+		<!-- <script id='feederLoadScript' type='text/javascript' src='./Data for Testing/testFeeder Norfork.js'></script> -->
+	</head>
+	<body>
+		<div id="interfaceContainer">
+            <div id="loadingMessage">
+                <p style="font-size:60pt; text-align:center; width:100%;">File Loading...</p>
+            </div>
+            <div id="descriptionTables" class="floatingTables"></div>
+            <div id="selectionTable" class="floatingTables"></div>
+            <div id="header">
+                <div id="menuLeft" class="white">
+                    <h4>{{thisFileName}}</h4>
+                    <p>from "{{thisModelName}}"</p>
+                </div>
+                <div id="menuRight">
+                    <h4 style="padding: 5px; margin-right: 15px;"><a id="helpButton" class="white" href="https://github.com/dpinney/omf/wiki/Tools-~-gridEdit" target="_blank">Help</a></h4>
+                    <div class="headerGroup">
+                        <h4 class="menuHeading white">File &#x25BE</h4>
+                        <ul id="fileMenu" class="menu" style="display: none">
+                            {% if showFileMenu %}
+                            <li data-web="save">Save</li>
+                            <li data-web="rename">Rename</li>
+                            <li data-web="load">Load from file...</li>
+                            <li data-web="new">New blank circuit file...</li>
+                            {% endif %}
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <!-- Svg container -->
+            <div id="rawTextContainerWrapper" style="height: auto;">
+                <textarea name="rawText">{{thisFileData}}</textarea>
+            </div>
+            <!-- Modals -->
+            {% if showFileMenu %}
+            <div id="loadModal" class="modal" style="display: none">
+                <div class="modalContent">
+                    <div id="feederListFlex">
+                        <div>
+                            <h3>Public Circuit Files</h3>
+                            <ul id="publicFeederList" class="scrollableList"></ul>
+                        </div>
+                        <div>
+                            <h3>My Circuit Files</h3>
+                            <ul id="userFeederList" class="scrollableList"></ul>
+                        </div>
+                    </div>
+                    <div id="fileUpload"></div>
+                    <div class="modalContentButtons">
+                        <button data-buttonfunction="toggle">Close</button>
+                    </div>
+                </div>
+            </div>
+            <div id="blankFeederModal" class="modal" style="display: none">
+                <div class="modalContent">
+                    <!--{{thisOwner}} is correct because this form is supposed to replace THIS feeder with a new blank one-->
+                    <form onsubmit="submitForm({formId:'blankFeederForm'}); return false;" action="/newBlankFeeder/{{thisOwner}}" id="blankFeederForm">
+                        <input type="hidden" name="_csrf_token" value="{{csrf_token()}}"/>
+                        <input type="hidden" id="feederNum" name="feederNum" value="{{thisFeederNum}}"/>
+                        <input type="hidden" id="modelName" name="modelName" value="{{thisModelName}}"/>
+                        <input type="hidden" name="referrer" value="distribution"/>
+                        <table>
+                            <tbody>
+                                <tr><th colspan="2">New Blank Feeder</th></tr>
+                                <tr>
+                                    <td><label for="blankFeederInput">Name</label></td>
+                                    <td>
+                                        <!-- TODO: add better validation than just the "required" attribute-->
+                                        <input type="text" required id="blankFeederInput" name="feederNameNew" class="modalInput"/>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                        <div class="modalContentButtons">
+                            <button type="button" data-buttonfunction="toggle">Close</button>
+                            <button type="submit">Create</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            {% endif %}
+			<!--Modals-->
+		</div>
+	</body>
+</html>

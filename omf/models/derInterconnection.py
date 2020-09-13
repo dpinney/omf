@@ -1,5 +1,5 @@
 ''' perform analysis pertaining to the addition of a DER interconnection on a feeder. '''
-import json, os, tempfile, shutil, csv, math, warnings, random, copy, base64, platform
+import glob, json, os, tempfile, shutil, csv, math, warnings, random, copy, base64, platform
 from os.path import join as pJoin
 import networkx as nx
 from networkx.drawing.nx_agraph import graphviz_layout
@@ -11,6 +11,10 @@ if platform.system() == 'Darwin':
 else:
 	matplotlib.use('Agg')
 from matplotlib import pyplot as plt
+
+# dateutil imports
+from dateutil import parser
+from dateutil.relativedelta import *
 
 # OMF imports 
 from omf import feeder
@@ -91,7 +95,7 @@ def work(modelDir, inputDict):
 			tree[feeder.getMaxKey(tree) + 1] = {
 				'object':'group_recorder', 
 				'group':'"class='+key+'"',
-				'limit':1,
+				'limit':1000,
 				'property':'continuous_rating',
 				'file':key+'_cont_rating.csv'
 			}
@@ -133,7 +137,13 @@ def work(modelDir, inputDict):
 		if starttime!='' and stoptime!='':
 			startTime = tree[key]['starttime']
 			stopTime = tree[key]['stoptime']
-			break			
+			break	
+
+	# gridlabd complains if sim and fault start at the same time so
+	# add 1 sec to the fault start
+	faultStartTime = parser.parse(starttime)
+	faultStartTime = faultStartTime + relativedelta(seconds=+1)
+	faultStartTime = str(faultStartTime)		
 
 	# Map to speed up name lookups.
 	nameToIndex = {tree[key].get('name',''):key for key in tree.keys()}
@@ -175,6 +185,7 @@ def work(modelDir, inputDict):
 	faultVoltsThreshold = float(inputDict['faultVoltsThreshold'])
 
 	# run analysis for both load conditions
+	count = 0
 	for loadCondition in ['Peak', 'Min']:
 
 		# if a peak load file is provided, use it to set peak loads in the tree
@@ -223,9 +234,11 @@ def work(modelDir, inputDict):
 				tree[addedDerInverterKey]['generator_status'] = 'ONLINE'
 
 			# run gridlab solver
+			count += 1
+			print('run num', count, 'der', der, 'load', loadCondition)
 			data = runGridlabAndProcessData(tree, attachments, edge_bools, workDir=modelDir)
-			print(tree[addedDerKey]);
-			print(tree[addedDerInverterKey]);
+			# print(tree[addedDerKey]);
+			# print(tree[addedDerInverterKey]);
 
 			# generate voltage, current and thermal plots
 			filename = 'voltageDer' + der + loadCondition
@@ -246,6 +259,7 @@ def work(modelDir, inputDict):
 			with open(pJoin(modelDir,filename + 'Chart.png'),'rb') as inFile:
 				outData[filename] = base64.standard_b64encode(inFile.read()).decode('ascii')
 
+
 			# calculate max and min voltage and track badwidth violations
 			[maxVoltsLocation, maxVoltsVal] = ['',0]
 			[minVoltsLocation, minVoltsVal] = ['',float('inf')]
@@ -262,7 +276,7 @@ def work(modelDir, inputDict):
 					minVoltsLocation = key
 
 				change = 100*((voltVal-nominalVoltVal)/nominalVoltVal)
-				if voltVal > 600:
+				if nominalVoltVal > 600:
 					violation = (voltVal >= (upperVoltThresh*nominalVoltVal)) or \
 						(voltVal <= (lowerVoltThresh600*nominalVoltVal))
 				else:
@@ -316,7 +330,10 @@ def work(modelDir, inputDict):
 						faultIndex = faultNum + len(faults)
 
 					treeCopy =  createTreeWithFault( tree, \
-						faultType, faultLocation, startTime, stopTime )
+						faultType, faultLocation, faultStartTime, stopTime )
+					count += 1
+					print('run num', count, 'der', der, 'load', loadCondition, \
+						'fault Location', faultLocation, 'type', faultType, )
 					faultData = runGridlabAndProcessData(treeCopy, attachments, \
 						edge_bools, workDir=modelDir)
 					faultVolts = faultData['nodeVolts']
@@ -417,11 +434,18 @@ def work(modelDir, inputDict):
 	outData['faultCurrentViolations'] = faultCurrentViolations
 	outData['faultPOIVolts'] = faultPOIVolts
 	
+	plt.close('all')
 	return outData
 
 def createTreeWithFault( tree, faultType, faultLocation, startTime, stopTime ):
 	
 	treeCopy = copy.deepcopy(tree)
+
+	treeCopy[feeder.getMaxKey(treeCopy) + 1] = {
+		'module': 'reliability ',
+		'maximum_event_length': '300 s',
+		'report_event_log': 'TRUE'
+	}
 
 	faultType = '"'+faultType+'"'
 	outageParams = '"'+faultLocation+','+startTime.replace('\'','') + \
@@ -448,11 +472,11 @@ def createTreeWithFault( tree, faultType, faultLocation, startTime, stopTime ):
 		'report_file': 'Metrics_Output.csv',
 		'module_metrics_object': 'PwrMetrics',
 		'metrics_of_interest': '"SAIFI,SAIDI,CAIDI,ASAI,MAIFI"',
-		'customer_group': '"groupid=METERTEST"',
+		'customer_group': '"class=meter"',
 		'metric_interval': '5 h',
 		'report_interval': '5 h'
 	}
-
+	
 	treeCopy[feeder.getMaxKey(treeCopy) + 1] = {
 		'object': 'power_metrics',
 		'name': 'PwrMetrics',
@@ -485,8 +509,20 @@ def runGridlabAndProcessData(tree, attachments, edge_bools, workDir=False):
 	# Run Gridlab.
 	if not workDir:
 		workDir = tempfile.mkdtemp()
-		# print '@@@@@@', workDir
+	else:
+		# print(workDir)
+		folderContents = glob.glob(workDir+'/*')
+		for item in folderContents:
+			if (item[-3:] != 'omd') and (item[-4:] != 'json'):
+				# os.remove(item)
+				pass
+
 	gridlabOut = gridlabd.runInFilesystem(tree, attachments=attachments, workDir=workDir)
+
+	if os.stat(workDir+'/stderr.txt').st_size > 40:
+		print('failed with stderr.txt size', os.stat(workDir+'/stderr.txt').st_size)
+	else:
+		print('passed with stderr.txt size', os.stat(workDir+'/stderr.txt').st_size)
 
 	# read voltDump values into a dictionary.
 	try:
