@@ -1,0 +1,26 @@
+{
+	"mg1": {
+		"load745": {
+			"object": "load",
+			"properties": "none"
+		},
+		"node775": {
+			"object": "node",
+			"properties": "none"
+		}
+	},
+	"mg2": {
+		"node707-724": {
+			"object": "underground_line",
+			"properties": "none"
+		},
+		"node707": {
+			"object": "node",
+			"properties": "none"
+		},
+		"load724": {
+			"object": "load",
+			"properties": "none"
+		}
+	}
+}

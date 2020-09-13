@@ -346,7 +346,7 @@ def work(modelDir, inputDict):
 
 def new(modelDir):
 	''' Create a new instance of this model. Returns true on success, false on failure. '''
-	with open(pJoin(__neoMetaModel__._omfDir,'scratch','RONM','microComponents.txt')) as f:
+	with open(pJoin(__neoMetaModel__._omfDir,'scratch','RONM','microComponents.json')) as f:
 		micro_data = f.read()
 	defaultInputs = {
 		'modelType': modelName,
@@ -355,7 +355,7 @@ def new(modelDir):
 		'maxTime': '20',
 		'stepSize': '1',
 		'faultedLine': 'l33',
-		'microFileName': 'microComponents.txt',
+		'microFileName': 'microComponents.json',
 		'microData': micro_data
 	}
 	creationCode = __neoMetaModel__.new(modelDir, defaultInputs)
