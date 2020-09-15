@@ -294,6 +294,98 @@ def compareVoltsTrees(origTree, modTree):
 	resultErr.to_csv('volts_comparison_results.csv', header=False, index=True, mode='a')
 	return maxErr
 
+
+
+def _stripPhases(dssObjId): # (Is this even worth encapsulating?) YES.
+	# expected input is a string of format <uniqueName> (or perhaps <dssObjectType>.<uniqueName> )
+	dssObjId = dssObjId.split('.')
+	if len(dssObjId) == 1:
+		return dssObjId
+	elif len(dssObjId) >= 2:
+		return dssObjId[0]
+	else:
+		assert True, 'An unknown error occurred.' # this should never happen
+		return dssObjId
+
+def _mergeContigLinesOnce(tree): # TODO finish debugging this code block - LMS
+	#Input: a list of dictionaries (TODO double-check that this is correct)
+	# Create a lookup table of indices to object names for quick retrieval
+	id2key = {tree[i].get('object', None):i for i,v in enumerate(tree)} # note that these are in the form <type>.<name> (no phase info)
+	id2key.update({tree[i].get('bus', None):i for i,v in enumerate(tree) if tree[i].get('!CMD', None) == 'setbusxy'}) # form: <name>
+	id2key.update({'t_' + tree[i].get('bus', None) + '_l':i for i,v in enumerate(tree) if tree[i].get('!CMD', None) == 'setbusxy'}) # form: <name>
+	treecopy = tree.copy()
+	removedids = []
+	while treecopy:
+		o = treecopy.pop() # destructively iterate through tree copy
+		top = o
+		# Get the top id and check that this is a line
+		tid =  top.get('object', '')
+		# Get bottom node (could be indicated by 'bus', 'bus1', 'bus2', or the first member of 'buses'. Must assume it will be appended with phase information)
+		bid = ''
+		for k in top.keys():
+			if k == 'bus' or k == 'bus1': # not line-like #(remove?)
+				continue
+			if k == 'bus2': # is line-like, get value (i.e. the 'to' bus. Note there could be a 'bus3', but these types of object are not eligible for reduction anyway)
+				bid = top['bus2']
+			if k == 'buses': # is line-like, get 2nd member of tuple (i.e. the 'to' bus)  #(remove?)
+				bid = top['buses'][1] #(remove?)
+			else:
+				continue
+		if bid == '': # not a line (or line-like?)
+			continue 
+		# Strip phase info and apply lookup table to get corresponding bus object (will NOT be of form <object>.<name>)
+		bid = _stripPhases(bid) # need to look at circuit to figure out how things are connected. a line is connected to busn.1.2.3 and busn.4.5.6 - is this a switch?
+		bus = tree[id2key[bid]] # TODO properly deal with key error when bid=='t_bus3162_l' (HACK: see line 246, 'id2key.update...)
+		# Get bottoms' ids, strip off phase info, then apply lookup table to obtain corresponding objects
+		bottoms = [] # objects connected to bus
+		# loop through tree and grab any objects that have a connection equal to the bus id
+		for obj in tree:
+			#Loop through dictionary items and get all the connections
+			if obj.get('object', None) == top.get('object', None): # The 'top' object is already accounted for
+				continue
+			#(Could also check for bid equivalency here..?)
+			allbottoms = [] # list of ids for connected objects
+			for k, v in obj.items():
+				if 'bus' in k: # it's a connection attribute (are there any other keys that need to be checked for?)
+					if k == 'buses': # it's a tuple, so serialize it for easier processing
+						allbottoms.append(obj[k][0])
+						allbottoms.append(obj[k][1])
+					else: # we'll take it just the way it is
+						allbottoms.append(obj[k])
+			#if any connection ids equal the node id, then obj is connected to our node of interest
+			allbottoms = [_stripPhases(x) for x in allbottoms]
+			if ( len([x for x in allbottoms if x == bid]) > 0 ):
+				bottoms.append(obj) # and since we already have the object right here, we will just append it instead of using id2key
+		# 'bottoms' successfully constructed. now what?
+		#Check for a one-line-in, one-line-out scenario
+		if len(bottoms) != 1:
+			continue
+		bottom = bottoms[0]
+		# ['r1','r0','x1','x0',c1','c0']
+		#if (top.get('geometry','NTC') == bottom.get('geometry','NBC')) and ('length' in top) and ('length' in bottom): # (could configs be defined under any other attribute names?)
+		if ('length' in top) and ('length' in bottom): # (could configs be defined under any other attribute names?)
+			# delete node and bottom line. Make top line length = sum of both lines. Connect the new bottom.
+			newLen = float(top['length']) + float(bottom['length']) # get the new length
+			removedids.append(bottom['object'])
+			toptree = tree[id2key[top['object']]]
+			toptree['length'] = str(newLen)
+			toptree['to'] = bottom['to']
+			del tree[id2key[bus['name']]]
+			del tree[id2key[bottom['name']]]
+	#for x in removedids: # DEBUG
+	#	print(x)  # DEBUG
+
+
+def mergeContigLines(tree):
+	''' merge all lines that are across nodes and have the same config
+	topline --to-> node <-from-- bottomline'''
+	removedKeys = 1
+	while removedKeys != 0:
+		treeKeys = len(tree)
+		_mergeContigLinesOnce(tree)
+		removedKeys = treeKeys - len(tree)
+
+
 def _tests():
 	# compareVoltsFiles test
 	fpath1 = 'ieee240_ours_EXP_VOLTAGES.csv'
@@ -306,6 +398,23 @@ def _tests():
 	fpath2 = 'ieee240.clean.dss'
 	errlim = 0.0
 	assert compareVoltsTrees(fpath1, fpath2) <= errlim, 'The error between the compared trees exceeds the allowable limit of %s%%.'%(errlim*100)
+
+	# Contig line merging test
+	#FPATH = 'ieee240.clean.dss'
+	#import dssConvert
+	#tree = dssConvert.dssToTree(FPATH)
+	#networkPlot(FPATH) # DEBUG (not working. Line 114 of this file complains about 'BUS2' not having coords)
+	#gldtree = dssConvert.evilDssTreeToGldTree(tree) # DEBUG
+	#dssConvert.distNetViz.viz_mem(gldtree, open_file=True, forceLayout=True) # DEBUG
+	#oldsz = len(tree)
+	#mergeContigLines(tree)
+	#newsz = len(tree)
+	##dssConvert.treeToDss(tree, FPATH[:-4] + '-reduced.dss')
+	##networkPlot(FPATH[:-4] +'-reduced.dss') # DEBUG (not working. Line 114 of this file complains about 'BUS2' not having coords)
+	##gldtree = dssConvert.evilDssTreeToGldTree(tree) # DEBUG
+	##dssConvert.distNetViz.viz_mem(gldtree, open_file=True, forceLayout=True) # DEBUG
+	#print('Objects removed: %s (of %s). Percent reduction: %s%%.'%(oldsz, oldsz-newsz, (oldsz-newsz)*100/oldsz))
+
 
 if __name__ == "__main__":
 	_tests()
