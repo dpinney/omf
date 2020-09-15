@@ -164,7 +164,14 @@ def evilDssTreeToGldTree(dssTree):
 				_extend_with_exc(ob, gldTree[str(g_id)], ['object','bus1','bus2','!CMD'])
 			elif 'buses' in ob:
 				#transformer-like object.
-				b1, b2 = ob['buses'].replace('(','').replace(')','').split(',')
+				# TODO: add proper handling for 3-winding transformers.
+				bb = [x for x in ob['buses']]
+				b1 = bb[0]
+				b2 = bb[1]
+				#if bb[2]:
+				#	b3 = bb[2] # how is 3rd winding dealt with in gld? 
+
+				#b1,b2 = str(ob['buses']).replace('(','').replace(')','').split(',')
 				try: 
 					fro, froCode = b1.split('.', maxsplit=1)
 					to, toCode = b2.split('.', maxsplit=1)
@@ -305,7 +312,8 @@ def _tests():
 if __name__ == '__main__':
 	#_tests()
 		
-	# tree = dssToTree('ieee240_ours.dss')
+	tree = dssToTree('ieee240_ours.dss')
+	# treeToDss(tree, 'ieee240_ours_xfrmrTest.dss')
 	# treeToDss(tree, 'ieee37p.dss')
 	# dssToMem('ieee37.dss')
 	# dssToGridLab('ieee37.dss', 'Model.glm') # this kind of works
