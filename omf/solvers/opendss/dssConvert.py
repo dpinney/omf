@@ -41,6 +41,8 @@ def dssToGridLab(inFilePath, outFilePath, busCoords=None):
 def dssToTree(pathToDss):
 	''' Convert a .dss file to an in-memory, OMF-compatible "tree" object.
 	Note that we only support a VERY specifically-formatted DSS file.'''
+	# Supports multi-line definition of transformer windings
+	# TODO: does this need a test? 
 	# Ingest file.
 	with open(pathToDss, 'r') as dssFile:
 		contents = dssFile.readlines()
@@ -65,6 +67,7 @@ def dssToTree(pathToDss):
 	# Capture original line numbers and drop blanks
 	contents = dict([(c,x) for (c, x) in enumerate(contents) if x != ''])
 	# Lex it
+	convTbl = {'bus':'buses', 'conn':'conns', 'kv':'kvs', 'kva':'kvas', '%r':'%r'}
 	for i, line in contents.items():
 		jpos = 0
 		try:
@@ -78,15 +81,36 @@ def dssToTree(pathToDss):
 				for j in range(1, len(contents[i])):
 					jpos = j
 					k,v = contents[i][j].split('=')
-					ob[k] = v
-			contents[i] = ob
+					if k == 'wdg':
+						continue
+					if (k in ob.keys()) or (convTbl.get(k,k) in ob.keys()): # if the single key already exists in the object, then this is the second pass. If pluralized key exists, then this is the 2+nth pass
+						# pluralize the key if needed, get the existing values, add the incoming value, place into ob, remove singular key
+						plurlk = convTbl.get(k, None) # use conversion table to pluralize the key or keep same key
+						incmngVal = v
+						xistngVals = []
+						if k in ob: # indicates 2nd winding, existing value is a string (in the case of %r, this indicates 3rd winding as well!)
+							if type(ob[k]) != tuple: # needed to rule out %r weirdness
+								xistngVals.append(ob[k])
+								del ob[k]
+						if plurlk in ob: # indicates 3rd+ winding; existing values are tuples
+								for item in ob[plurlk]:
+									xistngVals.append(item)
+						xistngVals.append(incmngVal) # concatenate incoming value with the existing values
+						ob[plurlk] =  tuple(xistngVals) # convert all to tuple
+					else: # if single key has not already been added, add it
+						ob[k] = v
 		except:
 			raise Exception(f'Error encountered in group (space delimited) #{jpos+1} of line {i + 1}: {line}')
-	# Print
-	# for line in contents:
-	# 	print line
-	contents = contents.values()
-	return contents
+		contents[i] = ob
+	# Print to file
+	#with open("dssTreeRepresentation.csv", 'w') as outFile:
+	#	ii = 1
+	#	for item in contents:
+	#		outFile.write(str(item) + "\n")
+	#		ii = ii + 1
+	#		for k2,v2 in item.items():
+	#			outFile.write("," + str(k2) + "," + str(v2) + "\n")
+	return list(contents.values())
 
 def treeToDss(treeObject, outputPath):
 	outFile = open(outputPath, 'w')
@@ -271,8 +295,16 @@ def evilToOmd(evilTree, outPath):
 	with open(outPath, 'w') as outFile:
 		json.dump(omdStruct, outFile, indent=4)
 
+def _tests():
+	# dssToTree test
+	FPATH = 'ieee240_ours.dss' # this circuit has 3-winding transformer definitions, with a winding per line
+	tree = dssToTree(FPATH)
+
+	# other tests...
+
 if __name__ == '__main__':
-	tree = dssToTree('ieee37.clean.dss')
+	#_tests()
+		
 	# tree = dssToTree('ieee240_ours.dss')
 	# treeToDss(tree, 'ieee37p.dss')
 	# dssToMem('ieee37.dss')
