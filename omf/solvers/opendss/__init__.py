@@ -146,7 +146,6 @@ def THD(filePath):
 	plt.savefig(dssFileLoc + '/THD.png')
 	plt.clf()
 
-
 def dynamicPlot(filePath, time_step, iterations):
 	''' Do a dynamic, long-term study of the powerflow. time_step is in seconds. '''
 	dssFileLoc = os.path.dirname(os.path.abspath(filePath))	
@@ -186,7 +185,6 @@ def dynamicPlot(filePath, time_step, iterations):
 	plt.title('Dynamic Simulation Power Plot')
 	plt.savefig(dssFileLoc + '/DynamicPowerPlot.png')
 	os.system('rm ' + dssFileLoc + '/dynamicvolt* ' + dssFileLoc + '/dynamiccurrent*')
-
 
 def faultPlot(filePath):
 	''' Plot fault study. ''' 
@@ -229,16 +227,61 @@ def capacityPlot(filePath):
 	plt.savefig(dssFileLoc + '/Capacity Profile.png')
 	plt.clf()
 
+
+def compareVoltsFiles(origFile, modFile):
+	# Compares two of the files output by the 'Export voltages" opendss command. returns the maximum error encountered.
+	if not ('.csv' in origFile and '.csv' in modFile):
+		assert True, 'Input files must be .csv files of voltages output by OpenDss'
+	ovolts = pd.read_csv(origFile, header=0)
+	ovolts.index = ovolts['Bus']
+	ovolts.drop(labels='Bus', axis=1, inplace=True)
+	ovolts = ovolts.astype(float, copy=True)
+	mvolts = pd.read_csv(modFile, header=0)
+	mvolts.index = mvolts['Bus']
+	mvolts.drop(labels='Bus', axis=1, inplace=True)
+	mvolts = mvolts.astype(float, copy=True)
+	cols = mvolts.columns
+	resultErr = pd.DataFrame(index=mvolts.index, columns=cols)
+	assert ovolts.size == mvolts.size, 'The matrices represented by the input files must have identical dimensions.'
+	resultErr =  abs(ovolts - mvolts)/ovolts
+	resultSumm = pd.DataFrame(index=['Max', 'Avg', 'Min'], columns=cols)
+	for c in cols:
+		resultSumm.loc['Max',c] = max(resultErr.loc[:,c])
+		resultSumm.loc['Avg',c] = sum(resultErr.loc[:,c])/len(resultErr.loc[:,c])
+		resultSumm.loc['Min',c] = min(resultErr.loc[:,c])
+	maxErr = max(resultSumm.loc['Max',:])
+	resultSumm.to_csv('volts_comparison_results.csv', header=True, index=True, mode='w')
+	resultSumm = pd.DataFrame(index=[''],columns=cols)
+	resultSumm.to_csv('volts_comparison_results.csv', header=False, index=True, mode='a')
+	resultErr.to_csv('volts_comparison_results.csv', header=False, index=True, mode='a')
+	return maxErr
+
+
+def _tests():
+	# compareVoltsFiles test
+	fpath1 = 'ieee240_ours_EXP_VOLTAGES.csv'
+	fpath2 = 'ieee240_ours_EXP_VOLTAGES.csv'
+	errlim = 0.0
+	assert compareVoltsFiles(fpath1, fpath2) <= errlim, 'The error between the compared files exceeds the allowable limit of %s%%.'%(errlim*100)
+
 if __name__ == "__main__":
+	_tests()
+
 	# Make core output
-	FPATH = 'ieee37_ours.dss'
+	#FPATH = 'ieee240.clean.dss'
+	#FPATH = 'ieeeLVTestCaseNorthAmerican.dss'
+	#FPATH = 'ieee37.clean.reduced.dss'
+	#dssConvert.evilGldTreeToDssTree(tree)
+	#dssConvert.treeToDss(tree, 'ieeeLVTestCaseNorthAmerican_reduced.dss')
+	
+
 	# Just run DSS
-	# runDSS(FPATH)
+	#runDSS(FPATH)
 	# Generate plots, note output is in FPATH dir.
-	# voltagePlot(FPATH)
-	# currentPlot(FPATH)
-	networkPlot(FPATH)
-	# THD(FPATH)
-	# dynamicPlot(FPATH, 1, 10)
-	# faultPlot(FPATH)
-	# capacityPlot(FPATH)
+	#voltagePlot(FPATH) # 
+	#currentPlot(FPATH)
+	#networkPlot(FPATH)
+	#THD(FPATH)
+	#dynamicPlot(FPATH, 1, 10)
+	#faultPlot(FPATH)
+	#capacityPlot(FPATH)
