@@ -89,7 +89,8 @@ def dssToTree(pathToDss):
 						incmngVal = v
 						xistngVals = []
 						if k in ob: # indicates 2nd winding, existing value is a string (in the case of %r, this indicates 3rd winding as well!)
-							if type(ob[k]) != tuple: # needed to rule out %r weirdness
+							if (type(ob[k]) != tuple) or (type(ob[k]) != list): # pluralized values can be defined as either
+							#if iter(type(ob[k])):
 								xistngVals.append(ob[k])
 								del ob[k]
 						if plurlk in ob: # indicates 3rd+ winding; existing values are tuples
@@ -311,23 +312,23 @@ def _tests():
 
 if __name__ == '__main__':
 	#_tests()
-		
-	tree = dssToTree('ieee240_ours.dss')
+	pass
+	#tree = dssToTree('ieee240_ours.dss')
 	# treeToDss(tree, 'ieee240_ours_xfrmrTest.dss')
 	# treeToDss(tree, 'ieee37p.dss')
 	# dssToMem('ieee37.dss')
 	# dssToGridLab('ieee37.dss', 'Model.glm') # this kind of works
 	# gridLabToDSS('ieee37_fixed.glm', 'ieee37_conv.dss') # this fails miserably
-	from pprint import pprint as pp
-	evil_glm = evilDssTreeToGldTree(tree)
-	pp(evil_glm)
+	#from pprint import pprint as pp
+	#evil_glm = evilDssTreeToGldTree(tree)
+	#pp(evil_glm)
 	# print(evil_glm)
-	distNetViz.viz_mem(evil_glm, open_file=True, forceLayout=True)
-	distNetViz.insert_coordinates(evil_glm)
+	#distNetViz.viz_mem(evil_glm, open_file=True, forceLayout=True)
+	#distNetViz.insert_coordinates(evil_glm)
 	# evilToOmd(evil_glm, 'ieee37.dss.omd')
-	evil_dss = evilGldTreeToDssTree(evil_glm)
+	#evil_dss = evilGldTreeToDssTree(evil_glm)
 	# pp(evil_dss)
-	treeToDss(evil_dss, 'HACKZ.dss')
+	#treeToDss(evil_dss, 'HACKZ.dss')
 	#TODO: make parser accept keyless items with new !keyless_n key? Or is this just horrible syntax?
 	#TODO: define .dsc format and write syntax guide.
 	#TODO: what to do about transformers with invalid bus setting with the duplicate keys? Probably ignore.
