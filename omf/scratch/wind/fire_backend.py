@@ -28,12 +28,20 @@ def firedata(lat, lon, distLat, distLon, resolution):
 	return json.dumps(x) 
 
 @app.route('/circuit.geojson')
-def geojson():
+def circuit():
 	return open('circuit.geojson').read()
 
 @app.route('/L.KML.js')
 def kml_lib():
 	return open('L.KML.js').read()
+
+@app.route('/https://www.spc.noaa.gov/products/fire_wx/day1fireotlk.kmz')
+def kmz_address():
+	return redirect('https://www.spc.noaa.gov/products/fire_wx/day1fireotlk.kmz')
+
+@app.route('/data.geojson')
+def data():
+	return open('data.geojson').read()
 
 if __name__ == '__main__':
 	app.run(debug=True)
