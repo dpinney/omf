@@ -24,10 +24,12 @@
 	integrity="sha512-XQoYMqMTK8LvdxXYG3nZ448hOEQiglfqkJs1NOQV44cWnUrBc8PkAOcXy20w0vlaXaVUearIOBhiXZ5V3ynxwA=="
 	crossorigin=""></script>
 	<!-- Leaflet Draw -->
-	<link rel='stylesheet' href='https://unpkg.com/leaflet-draw@1.0.0/dist/leaflet.draw.css' />
+	<link rel='stylesheet' href='https://unpkg.com/leaflet-draw@1.0.0/dist/leaflet.draw.css'/>
 	<script src='https://unpkg.com/leaflet-draw@1.0.0/dist/leaflet.draw.js'></script>
 	<!-- leaflet-kml from windycom to read KML file -->
-	<script src="./L.KML.js"></script>
+	<script src="./L.KML.js"></script> 
+	<!-- leaflet-kmz from Raruto to read KMZ file -->
+	<script src="https://unpkg.com/leaflet-kmz@latest/dist/leaflet-kmz.js"></script>
 	<!-- Load Esri Leaflet from CDN -->
 	<script src="https://unpkg.com/esri-leaflet@2.5.0/dist/esri-leaflet.js"
 		integrity="sha512-ucw7Grpc+iEQZa711gcjgMBnmd9qju1CICsRaryvX7HJklK0pGl/prxKvtHwpgm5ZHdvAil7YPxI1oWPOWK3UQ=="
@@ -62,7 +64,7 @@
 		text-align: center;
 		overflow: auto;
 	}
-	#export, #import, #submit {
+	#export, #import {
 		position: absolute;
 		top: 59px;
 		right: 0px;
@@ -75,7 +77,7 @@
 		font-size: 13px;
 		padding: 4px;
 	}
-	#import, #submit {
+	#import  {
 		top: 83px;
 	}
 	</style>
@@ -83,12 +85,14 @@
 <body>
 	<div id='map'></div>
 	<div id="modal">
-		<img id="loader" src="https://i.gifer.com/KSYA.gif" />
+		<img id="loader" src="https://i.gifer.com/KSYA.gif"/>
 	</div>
 	<div id="fade"></div>
-	<a href='#' id='export'>Save Features</a>
-	<button type="button" id="upload_button" onclick="handle_upload()" style="position:absolute; top:100px; right: 0px; z-index:9999; cursor: pointer">Upload</button>
-	<input type="file" id="import" name="filename">
+	<div class="buttons">
+		<a href='#' id='export'>Save Features</a>
+		<button type="button" id="upload_button" onclick="handle_upload()" style="position:absolute; top:86.5px; right: 5px; z-index:9999; cursor: pointer">Upload</button>
+		<input type="file" id="import" name="filename">
+	</div>
 <script type='text/javascript'>
 	// basic map definition and zoom control.
 	var map = L.map('map', {renderer: L.canvas()});
@@ -136,20 +140,44 @@
 		token: token
 	})
 	// Grab a kml for fire risk.
+	// var risk_layer = L.tileLayer('')
+	// var kml_req = new XMLHttpRequest();
+	// kml_req.open("GET", 'https://www.spc.noaa.gov/products/fire_wx/day1fireotlk.kmz'); 
+	// // kml_req.setRequestHeader('Content-Type', 'text/xml')
+	// kml_req.onload = function() {
+	// 	if (kml_req.status !== 200) return
+	// 	track = new L.KML(kml_req.response);
+	// 	map.addLayer(track);
+	// 	// const bounds = track.getBounds();
+	// 	// map.fitBounds(bounds);
+	// };
+	// kml_req.send();
+
+	// Grab a kml for fire risk.
 	var risk_layer = L.tileLayer('')
-	var kml_req = new XMLHttpRequest();
-	kml_req.open("GET", 'https://www.spc.noaa.gov/products/fire_wx/day1fireotlk.kmz'); 
+	var kmz_req = new XMLHttpRequest();
+	kmz_req.open("GET", 'https://www.spc.noaa.gov/products/fire_wx/day1fireotlk.kmz'); 
 	// kml_req.setRequestHeader('Content-Type', 'text/xml')
-	kml_req.onload = function() {
-		if (kml_req.status !== 200) return
-		track = new L.KML(kml_req.response);
+	kmz_req.onload = function() {
+		if (kmz_req.status !== 200) return
+		track = new L.kmzLayer(kmz_req.response);
 		map.addLayer(track);
 		// const bounds = track.getBounds();
 		// map.fitBounds(bounds);
 	};
-	kml_req.send();
+	kmz_req.send();
+
+	// Grab a kmz for fire risk.
+	// var kmz = L.kmzLayer().addTo(map);
+	// kmz.on('load', function(e) {
+	// 	control.addOverlay(e.layer, e.name);
+	// 	// e.layer.addTo(map);
+	// });
+	// // Add remote KMZ files as layers (NB if they are 3rd-party servers, they MUST have CORS enabled)
+	// kmz.load('https://www.spc.noaa.gov/products/fire_wx/day1fireotlk.kmz');
+
 	// Load in a circuit
-	var circuit_layer = L.tileLayer('')
+	var circuit_layer = L.featureGroup()
 	var circuit = new XMLHttpRequest();
 	circuit.open("GET", 'circuit.geojson'); 
 	circuit.setRequestHeader('Content-Type', 'application/geojson')
@@ -159,6 +187,19 @@
 		circuit_layer = L.geoJSON(circuit.response).addTo(map);
 	};
 	circuit.send();
+
+	// Load in data.geojson (saved geojson drawnItems)
+	var prevShapesLayer = L.featureGroup()
+	var oldShapes = new XMLHttpRequest();
+	oldShapes.open("GET", 'data.geojson'); 
+	oldShapes.setRequestHeader('Content-Type', 'application/geojson')
+	oldShapes.responseType = 'json';
+	oldShapes.onload = function() {
+		if (oldShapes.status !== 200) return
+		prevShapesLayer = L.geoJSON(oldShapes.response).addTo(map);
+	};
+	oldShapes.send();
+
 	// Options to toggle between maps added to layers
 	L.control.layers(
 		{
@@ -168,8 +209,9 @@
 			'esri_images': esri_images
 		},
 		{
-			// 'circuit': circuit_layer,
+			'circuit': circuit_layer,
 			'drawlayer': drawnItems,
+			'uploaded' : prevShapesLayer
 			// 'fire_risk':track
 		},
 		{
