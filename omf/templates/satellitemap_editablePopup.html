@@ -19,6 +19,8 @@
 		top: 0.0%;
 	}
 	</style>
+	<!-- loads Jquery -->
+	<script type="text/javascript" src="/static/jquery.js"></script>
 	<!-- Make sure you put this AFTER Leaflet's CSS -->
 	<script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"
 	integrity="sha512-XQoYMqMTK8LvdxXYG3nZ448hOEQiglfqkJs1NOQV44cWnUrBc8PkAOcXy20w0vlaXaVUearIOBhiXZ5V3ynxwA=="
@@ -154,27 +156,27 @@
 	// kml_req.send();
 
 	// Grab a kml for fire risk.
-	var risk_layer = L.tileLayer('')
-	var kmz_req = new XMLHttpRequest();
-	kmz_req.open("GET", 'https://www.spc.noaa.gov/products/fire_wx/day1fireotlk.kmz'); 
-	// kml_req.setRequestHeader('Content-Type', 'text/xml')
-	kmz_req.onload = function() {
-		if (kmz_req.status !== 200) return
-		track = new L.kmzLayer(kmz_req.response);
-		map.addLayer(track);
-		// const bounds = track.getBounds();
-		// map.fitBounds(bounds);
-	};
-	kmz_req.send();
+	// var risk_layer = L.tileLayer('')
+	// var kmz_req = new XMLHttpRequest();
+	// kmz_req.open("GET", 'https://www.spc.noaa.gov/products/fire_wx/day1fireotlk.kmz'); 
+	// // kml_req.setRequestHeader('Content-Type', 'text/xml')
+	// kmz_req.onload = function() {
+	// 	if (kmz_req.status !== 200) return
+	// 	track = new L.kmzLayer(kmz_req.response);
+	// 	map.addLayer(track);
+	// 	// const bounds = track.getBounds();
+	// 	// map.fitBounds(bounds);
+	// };
+	// kmz_req.send();
 
 	// Grab a kmz for fire risk.
-	// var kmz = L.kmzLayer().addTo(map);
-	// kmz.on('load', function(e) {
-	// 	control.addOverlay(e.layer, e.name);
-	// 	// e.layer.addTo(map);
-	// });
-	// // Add remote KMZ files as layers (NB if they are 3rd-party servers, they MUST have CORS enabled)
-	// kmz.load('https://www.spc.noaa.gov/products/fire_wx/day1fireotlk.kmz');
+	var kmz = L.kmzLayer().addTo(map);
+	kmz.on('load', function(e) {
+		control.addOverlay(e.layer, e.name);
+		// e.layer.addTo(map);
+	});
+	// Add remote KMZ files as layers (NB if they are 3rd-party servers, they MUST have CORS enabled)
+	kmz.load('https://www.spc.noaa.gov/products/fire_wx/day1fireotlk.kmz');
 
 	// Load in a circuit
 	var circuit_layer = L.featureGroup()
@@ -294,7 +296,7 @@
 				distLat = drawn_geojson.features[i].geometry.coordinates[0][1][1] - centerLat
 				distLon = drawn_geojson.features[i].geometry.coordinates[0][0][0] - centerLon
 				// xhttp.open("GET", "http://127.0.0.1:5000/firedata/39.810278/-121.437222/10/10/10", true); <-- centerpoint of map test (Camp Fire)
-				xhttp.open("GET", "http://127.0.0.1:5000/firedata/" + centerLat + "/" + centerLon + "/" + distLat + "/" + distLon + "/10", false); 
+				xhttp.open("GET", "http://127.0.0.1:5000/firedata/" + centerLat + "/" + centerLon + "/" + distLat + "/" + distLon + "/10", false); // HACK
 				xhttp.send();
 				var xhttpData = JSON.parse(xhttp.responseText).dwml.data;
 				// Logs each risk reading for each point of the subgrid into an array 
