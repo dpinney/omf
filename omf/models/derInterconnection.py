@@ -176,7 +176,7 @@ def work(modelDir, inputDict):
 	tapViolations = []
 	tapThreshold = float(inputDict['tapThreshold'])
 	faults = ['SLG-A','SLG-B','SLG-C','TLG']
-	faultLocs = [inputDict['newGenerationBreaker'], inputDict['newGenerationStepUp']]
+	faultLocs = [inputDict['newGenerationBreaker']]
 	faultBreaker = [[] for i in range(2*len(faults))] # the 2 is for the 2 load conditions
 	faultStepUp = [[] for i in range(2*len(faults))]
 	faultCurrentViolations = []
@@ -339,21 +339,38 @@ def work(modelDir, inputDict):
 					faultVolts = faultData['nodeVolts']
 					faultCurrents = faultData['edgeCurrentSum']
 
-					# get fault current values at the breaker when 
 					# the fault is at the breaker
 					if faultLocation == inputDict['newGenerationBreaker']:
+
 						if der == 'On':
+						
+							# get fault current values at the breaker
 							faultBreaker[faultIndex] = [loadCondition, faultType]
 							faultBreaker[faultIndex].append(\
-								float(faultCurrents[\
-									inputDict['newGenerationBreaker']]))
+								float(faultCurrents[inputDict['newGenerationBreaker']]))
+						
+							# get fault current values at the transformer
+							faultStepUp[faultIndex] = [loadCondition, faultType]
+							faultStepUp[faultIndex].append(\
+								float(faultCurrents[inputDict['newGenerationStepUp']]))
+						
 						else: #der off
+
+							# get fault current values at the breaker
 							faultBreaker[faultIndex].append(\
 								float(faultCurrents[inputDict['newGenerationBreaker']]))
 							faultBreaker[faultIndex].append(\
 								faultBreaker[faultIndex][2] - \
 								faultBreaker[faultIndex][3])
 
+							# get fault current values at the transformer
+							faultStepUp[faultIndex].append(\
+								float(faultCurrents[inputDict[\
+									'newGenerationStepUp']]))
+							faultStepUp[faultIndex].append(\
+								faultStepUp[faultIndex][2] - \
+								faultStepUp[faultIndex][3])
+						
 						# get fault voltage values at POI
 						preFaultval = data['nodeVolts'][poi]
 						postFaultVal = faultVolts[poi]
@@ -362,22 +379,6 @@ def work(modelDir, inputDict):
 							loadCondition + ' Load', poi, faultType, preFaultval,\
 								postFaultVal, percentChange, \
 								(percentChange>=faultVoltsThreshold)])
-
-					# get fault current values at the transformer when 
-					# the fault is at the transformer
-					else: #faultLocation == newGenerationStepUp
-						if der == 'On':
-							faultStepUp[faultIndex] = [loadCondition, faultType]
-							faultStepUp[faultIndex].append(\
-								float(faultCurrents[\
-									inputDict['newGenerationStepUp']]))
-						else: #der off
-							faultStepUp[faultIndex].append(\
-								float(faultCurrents[inputDict[\
-									'newGenerationStepUp']]))
-							faultStepUp[faultIndex].append(\
-								faultStepUp[faultIndex][2] - \
-								faultStepUp[faultIndex][3])
 
 					# get fault violations when der is on
 					if der == 'On':
