@@ -13,45 +13,45 @@ app = Flask(__name__)
 
 @app.route('/getkmz')
 def kmz():
-    return render_template('satelliteMap_v2.html')
+    return render_template('satellitemap_editablePopup.html')
 
 @app.route('/debug')
 def debug():
     return "hello"
 
-# @app.route('/')
-# def root():
-# 	return open('satellitemap_editablePopup.html').read()
+@app.route('/')
+def root():
+	return open('satellitemap_editablePopup.html').read()
 
-# @app.route('/test')
-# def test():
-# 	x = 1 + 2
-# 	return '<b>bold world</b> ' + str(x)
+@app.route('/test')
+def test():
+	x = 1 + 2
+	return '<b>bold world</b> ' + str(x)
 
-# @app.route('/firedata/<lat>/<lon>/<distLat>/<distLon>/<resolution>')
-# def firedata(lat, lon, distLat, distLon, resolution):
-# 	print(lat, lon, distLat, distLon, resolution)
-# 	x = getSubGridData(str(lat), str(lon), str(distLat), str(distLon), str(resolution))
-# 	# print (json.dumps(x))
-# 	# print(type(json.dumps(x))) # json.dumps is a string
-# 	# print (type(x)) # x is a python dictionary 
-# 	return json.dumps(x) 
+@app.route('/firedata/<lat>/<lon>/<distLat>/<distLon>/<resolution>')
+def firedata(lat, lon, distLat, distLon, resolution):
+	print(lat, lon, distLat, distLon, resolution)
+	x = getSubGridData(str(lat), str(lon), str(distLat), str(distLon), str(resolution))
+	# print (json.dumps(x))
+	# print(type(json.dumps(x))) # json.dumps is a string
+	# print (type(x)) # x is a python dictionary 
+	return json.dumps(x) 
 
-# @app.route('/circuit.geojson')
-# def circuit():
-# 	return open('circuit.geojson').read()
+@app.route('/circuit.geojson')
+def circuit():
+	return open('circuit.geojson').read()
 
-# @app.route('/L.KML.js')
-# def kml_lib():
-# 	return open('L.KML.js').read()
+@app.route('/L.KML.js')
+def kml_lib():
+	return open('L.KML.js').read()
 
-# @app.route('/https://www.spc.noaa.gov/products/fire_wx/day1fireotlk.kmz')
-# def kmz_address():
-# 	return render_template('https://www.spc.noaa.gov/products/fire_wx/day1fireotlk.kmz')
+@app.route('/https://www.spc.noaa.gov/products/fire_wx/day1fireotlk.kmz')
+def kmz_address():
+	return render_template('https://www.spc.noaa.gov/products/fire_wx/day1fireotlk.kmz')
 
-# @app.route('/data.geojson')
-# def data():
-# 	return open('data.geojson').read()
+@app.route('/data.geojson')
+def data():
+	return open('data.geojson').read()
 
-# if __name__ == '__main__':
-# 	app.run(debug=True)
+if __name__ == '__main__':
+	app.run(debug=True)

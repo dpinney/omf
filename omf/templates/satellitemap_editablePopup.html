@@ -29,8 +29,8 @@
 	<link rel='stylesheet' href='https://unpkg.com/leaflet-draw@1.0.0/dist/leaflet.draw.css'/>
 	<script src='https://unpkg.com/leaflet-draw@1.0.0/dist/leaflet.draw.js'></script>
 	<!-- leaflet-kml from windycom to read KML file -->
-	<script src="./L.KML.js"></script> 
-	<!-- leaflet-kmz from Raruto to read KMZ file -->
+<!-- 	<script src="./L.KML.js"></script> 
+ -->	<!-- leaflet-kmz from Raruto to read KMZ file -->
 	<script src="https://unpkg.com/leaflet-kmz@latest/dist/leaflet-kmz.js"></script>
 	<!-- Load Esri Leaflet from CDN -->
 	<script src="https://unpkg.com/esri-leaflet@2.5.0/dist/esri-leaflet.js"
@@ -155,20 +155,6 @@
 	// };
 	// kml_req.send();
 
-	// Grab a kml for fire risk.
-	// var risk_layer = L.tileLayer('')
-	// var kmz_req = new XMLHttpRequest();
-	// kmz_req.open("GET", 'https://www.spc.noaa.gov/products/fire_wx/day1fireotlk.kmz'); 
-	// // kml_req.setRequestHeader('Content-Type', 'text/xml')
-	// kmz_req.onload = function() {
-	// 	if (kmz_req.status !== 200) return
-	// 	track = new L.kmzLayer(kmz_req.response);
-	// 	map.addLayer(track);
-	// 	// const bounds = track.getBounds();
-	// 	// map.fitBounds(bounds);
-	// };
-	// kmz_req.send();
-
 	// Grab a kmz for fire risk.
 	var kmz = L.kmzLayer().addTo(map);
 	kmz.on('load', function(e) {
@@ -177,6 +163,7 @@
 	});
 	// Add remote KMZ files as layers (NB if they are 3rd-party servers, they MUST have CORS enabled)
 	kmz.load('https://www.spc.noaa.gov/products/fire_wx/day1fireotlk.kmz');
+	var control = L.control.layers(null, null, { collapsed:false }).addTo(map);
 
 	// Load in a circuit
 	var circuit_layer = L.featureGroup()
