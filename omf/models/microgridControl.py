@@ -165,10 +165,15 @@ def graphMicrogrid(pathToOmd, pathToMicro, workDir, maxTime, stepSize, faultedLi
 		print('@@@@@@', workDir)
 
 	# command = 'cmd /c ' + '"julia --project=' + '"C:/Users/granb/PowerModelsONM.jl-master/" ' + 'C:/Users/granb/PowerModelsONM.jl-master/src/cli/entrypoint.jl' + ' -n ' + '"' + str(workDir) + '/circuit.dss' + '"' + ' -o ' + '"C:/Users/granb/PowerModelsONM.jl-master/output.json"'
-	# os.system(command)
+	
+	setup_command = f'julia --project="{__neoMetaModel__._omfDir}/solvers/PowerModelsONM.jl" -e "using Pkg; Pkg.update()"'
+	os.system(setup_command)
+
+	command = f'julia --project="{__neoMetaModel__._omfDir}/solvers/PowerModelsONM.jl" "{__neoMetaModel__._omfDir}/solvers/PowerModelsONM.jl/src/cli/entrypoint.jl" -n "{workDir}/circuit.dss" -o "{workDir}/onm_output.json"'
+	os.system(command)
 
 	with open(pJoin(__neoMetaModel__._omfDir,'scratch','RONM','output.json')) as inFile:
-	# with open("C:/Users/granb/PowerModelsONM.jl-master/output.json") as inFile:
+	# with open(f'{workDir}/onm_output.json') as inFile:
 		data = json.load(inFile) 
 		genProfiles = data['Generator profiles']
 		simTimeSteps = []
@@ -352,6 +357,7 @@ def new(modelDir):
 		'modelType': modelName,
 		# 'feederName1': 'ieee37nodeFaultTester',
 		'feederName1': 'ieee37.dss',
+		# 'feederName1': 'ieee240.dss',
 		'maxTime': '20',
 		'stepSize': '1',
 		'faultedLine': 'l33',
