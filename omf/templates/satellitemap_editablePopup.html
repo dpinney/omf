@@ -93,7 +93,7 @@
 		position:fixed;
 		right:0px;
 		top:0px;
-		z-index:999
+		z-index:400;
 	}
 	</style>
 </head>
@@ -123,11 +123,11 @@
 	</div>
 <script type='text/javascript'>
 	// basic map definition and zoom control.
-	var map = L.map('map', {renderer: L.canvas(), attributionControl: true});
+	var map = L.map('map', {renderer: L.canvas()});
 	map.setView([39.8, -121.6], 10);
 	L.control.scale().addTo(map);
 	// drawing layer
-	var drawnItems = L.featureGroup();
+	var drawnItems = L.featureGroup().addTo(map);
 	// esri_images map
 	var esri_images = L.esri.basemapLayer('Imagery').addTo(map);
 	// Mapbox Satellite
@@ -182,13 +182,13 @@
 	// kml_req.send();
 
 	// Grab a kmz for fire risk.
-	var kmz = L.kmzLayer().addTo(map);
-	kmz.on('load', function(e) {
-		control.addOverlay(e.layer, e.name);
-		// e.layer.addTo(map);
-	});
-	// Add remote KMZ files as layers (NB if they are 3rd-party servers, they MUST have CORS enabled)
-	kmz.load('https://www.spc.noaa.gov/products/fire_wx/day1fireotlk.kmz');
+	// var kmz = L.kmzLayer().addTo(map);
+	// kmz.on('load', function(e) {
+	// 	control.addOverlay(e.layer, e.name);
+	// 	// e.layer.addTo(map);
+	// });
+	// // Add remote KMZ files as layers (NB if they are 3rd-party servers, they MUST have CORS enabled)
+	// kmz.load('https://www.spc.noaa.gov/products/fire_wx/day1fireotlk.kmz');
 
 	// Load in a circuit
 	var circuit_layer = L.geoJSON()
