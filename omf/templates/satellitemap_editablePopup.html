@@ -31,7 +31,7 @@
 	<!-- leaflet-kml from windycom to read KML file -->
 <!-- 	<script src="./L.KML.js"></script> 
  -->	<!-- leaflet-kmz from Raruto to read KMZ file -->
-	<script src="https://unpkg.com/leaflet-kmz@latest/dist/leaflet-kmz.js"></script>
+	<script src="/leaflet-kmz"></script>
 	<!-- Load Esri Leaflet from CDN -->
 	<script src="https://unpkg.com/esri-leaflet@2.5.0/dist/esri-leaflet.js"
 		integrity="sha512-ucw7Grpc+iEQZa711gcjgMBnmd9qju1CICsRaryvX7HJklK0pGl/prxKvtHwpgm5ZHdvAil7YPxI1oWPOWK3UQ=="
@@ -66,7 +66,7 @@
 		text-align: center;
 		overflow: auto;
 	}
-	#export, #import {
+/*	#export, #import {
 		position: absolute;
 		top: 59px;
 		right: 0px;
@@ -82,6 +82,19 @@
 	#import  {
 		top: 83px;
 	}
+	#upload_button {
+		position: absolute; 
+		top:86.5px; 
+		right: 5px; 
+		z-index:9999; 
+		cursor: pointer
+	}*/
+	.buttons {
+		position:fixed;
+		right:0px;
+		top:0px;
+		z-index:999
+	}
 	</style>
 </head>
 <body>
@@ -91,17 +104,30 @@
 	</div>
 	<div id="fade"></div>
 	<div class="buttons">
-		<a href='#' id='export'>Save Features</a>
-		<button type="button" id="upload_button" onclick="handle_upload()" style="position:absolute; top:86.5px; right: 5px; z-index:9999; cursor: pointer">Upload</button>
+		<button type="button" id='export'>Save Features</button>
+		<button type="button" onclick="button_click()">Get GeoJSON</button>
+		<button type="button" onclick="openModal()">Get Fire Risk</button>
+		<form>
+			<label for="fireRisk"> </label>
+			<select name="fireRisk" id="fireRisk">
+				<option value="0">Day 1 Forecast</option>
+				<option value="1">Day 2 Forecast</option>
+				<option value="2">Day 3 Forecast</option>
+				<option value="3">Day 4 Forecast</option>
+				<option value="4">Day 5 Forecast</option>
+				<option value="5">Day 6 Forecast</option>
+				<option value="6">Day 7 Forecast</option>
+			</select>
+		</form>
 		<input type="file" id="import" name="filename">
 	</div>
 <script type='text/javascript'>
 	// basic map definition and zoom control.
-	var map = L.map('map', {renderer: L.canvas()});
+	var map = L.map('map', {renderer: L.canvas(), attributionControl: true});
 	map.setView([39.8, -121.6], 10);
 	L.control.scale().addTo(map);
 	// drawing layer
-	var drawnItems = L.featureGroup().addTo(map);
+	var drawnItems = L.featureGroup();
 	// esri_images map
 	var esri_images = L.esri.basemapLayer('Imagery').addTo(map);
 	// Mapbox Satellite
@@ -163,10 +189,9 @@
 	});
 	// Add remote KMZ files as layers (NB if they are 3rd-party servers, they MUST have CORS enabled)
 	kmz.load('https://www.spc.noaa.gov/products/fire_wx/day1fireotlk.kmz');
-	var control = L.control.layers(null, null, { collapsed:false }).addTo(map);
 
 	// Load in a circuit
-	var circuit_layer = L.featureGroup()
+	var circuit_layer = L.geoJSON()
 	var circuit = new XMLHttpRequest();
 	circuit.open("GET", 'circuit.geojson'); 
 	circuit.setRequestHeader('Content-Type', 'application/geojson')
@@ -178,7 +203,7 @@
 	circuit.send();
 
 	// Load in data.geojson (saved geojson drawnItems)
-	var prevShapesLayer = L.featureGroup()
+	var prevShapesLayer = L.geoJSON()
 	var oldShapes = new XMLHttpRequest();
 	oldShapes.open("GET", 'data.geojson'); 
 	oldShapes.setRequestHeader('Content-Type', 'application/geojson')
@@ -205,15 +230,17 @@
 		},
 		{
 			position: 'topleft',
-			collapsed: false
+			collapsed: false		
 		}
 	).addTo(map);
 	//Boilerplate to add the layer control.
 	map.addControl(new L.Control.Draw({
 		edit: {
 			featureGroup: drawnItems,
+			featureGroup: circuit_layer,
+			featureGroup: prevShapesLayer,
 			poly: {
-				allowIntersection: false
+				allowIntersection: false,
 			}
 		},
 		draw: {
@@ -221,7 +248,8 @@
 			polyline: false,
 			circle: false,
 			marker: false,
-			circlemarker: false		}
+			circlemarker: false
+		}
 	}));
 	// Helper function for saving veg score.
 	function saveVeg() {
@@ -348,43 +376,6 @@
 		document.getElementById('export').setAttribute('href', 'data:' + convertedData);
 		document.getElementById('export').setAttribute('download','data.geojson');
 	}
-	// upload saved geoJSON file of drawn features button
-	function handle_upload(e) {
-		var upload_file = document.getElementById("import").files[0];
-		var reader = new FileReader();
-		reader.readAsText(upload_file, "UTF-8");
-		var contents = reader.result
-		console.log(contents)
-		// var uploaded = document.getElementById('import').values[0]
-		// var geojson = new L.GeoJSON.AJAX("data.geojson", {local:true});
-		// geojson.on('data:loaded', function() {
-		// 	geojson.addTo(map);
-		// });
-		// // Get file with name "data.geojson"
-		// var xhr = new XMLHttpRequest();
-		// xhr.open('GET', 'http://127.0.0.1:5000/data.geojson');
-		// xhr.setRequestHeader('Content-Type', 'application/json');
-		// xhr.responseType = 'json';
-		// xhr.onload = function() {
-		//     if (xhr.status !== 200) return
-		//     L.geoJSON(xhr.response).addTo(map);
-		// };
-		// xhr.send();
-	}
 </script>
-<button type="button" onclick="button_click()" style="position: fixed; top: 0px; right: 0px; z-index:999; cursor: pointer" >Get GeoJson</button>
-<form style="position: absolute; top: 40px; right: 0px; z-index:999; cursor: pointer">
-	<label for="fireRisk"> </label>
-	<select name="fireRisk" id="fireRisk">
-		<option value="0">Day 1 Forecast</option>
-		<option value="1">Day 2 Forecast</option>
-		<option value="2">Day 3 Forecast</option>
-		<option value="3">Day 4 Forecast</option>
-		<option value="4">Day 5 Forecast</option>
-		<option value="5">Day 6 Forecast</option>
-		<option value="6">Day 7 Forecast</option>
-	</select>
-</form>
-<button type="button" onclick="openModal()" style="position:absolute; top: 20px; right: 0px; z-index:999; cursor: pointer">Get Fire Risk</button>
 </body>
 </html>

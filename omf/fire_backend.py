@@ -4,24 +4,20 @@ Backend for fire map work.
 
 import multiprocessing, time
 from flask import Flask, redirect, render_template
-# from flask_cors import CORS
+from flask_cors import CORS
 import json
 from omf.weather import getSubGridData
 
 app = Flask(__name__)
-# CORS(app)
+CORS(app)
+
+@app.route('/')
+def root():
+	return render_template('satellitemap_editablePopup.html')
 
 @app.route('/getkmz')
 def kmz():
     return render_template('satellitemap_editablePopup.html')
-
-@app.route('/debug')
-def debug():
-    return "hello"
-
-@app.route('/')
-def root():
-	return open('satellitemap_editablePopup.html').read()
 
 @app.route('/test')
 def test():
@@ -41,9 +37,9 @@ def firedata(lat, lon, distLat, distLon, resolution):
 def circuit():
 	return open('circuit.geojson').read()
 
-@app.route('/L.KML.js')
-def kml_lib():
-	return open('L.KML.js').read()
+# @app.route('/L.KML.js')
+# def kml_lib():
+# 	return open('L.KML.js').read()
 
 @app.route('/https://www.spc.noaa.gov/products/fire_wx/day1fireotlk.kmz')
 def kmz_address():
