@@ -3,13 +3,13 @@ Backend for fire map work.
 '''
 
 import multiprocessing, time
-from flask import Flask, redirect, render_template
-from flask_cors import CORS
+from flask import Flask, redirect, render_template, send_file
 import json
 from omf.weather import getSubGridData
+import io
+import requests
 
 app = Flask(__name__)
-CORS(app)
 
 @app.route('/')
 def root():
@@ -40,6 +40,15 @@ def circuit():
 # @app.route('/L.KML.js')
 # def kml_lib():
 # 	return open('L.KML.js').read()
+
+@app.route('/my_kmz')
+def my_kmz():
+	# return open('day1fireotlk.kmz').read()
+	url = 'https://www.spc.noaa.gov/products/fire_wx/day1fireotlk.kmz'
+	# url = 'https://www.spc.noaa.gov/products/fire_wx/day2fireotlk.kmz'
+	# url = 'https://www.spc.noaa.gov/products/fire_wx/day38fireotlk.kmz'
+	r = requests.get(url, allow_redirects=True)
+	return send_file(r.content)
 
 @app.route('/https://www.spc.noaa.gov/products/fire_wx/day1fireotlk.kmz')
 def kmz_address():

@@ -23,19 +23,17 @@
 	<script type="text/javascript" src="/static/jquery.js"></script>
 	<!-- Make sure you put this AFTER Leaflet's CSS -->
 	<script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"
-	integrity="sha512-XQoYMqMTK8LvdxXYG3nZ448hOEQiglfqkJs1NOQV44cWnUrBc8PkAOcXy20w0vlaXaVUearIOBhiXZ5V3ynxwA=="
-	crossorigin=""></script>
+		integrity="sha512-XQoYMqMTK8LvdxXYG3nZ448hOEQiglfqkJs1NOQV44cWnUrBc8PkAOcXy20w0vlaXaVUearIOBhiXZ5V3ynxwA=="
+		crossorigin="">
+	</script>
 	<!-- Leaflet Draw -->
 	<link rel='stylesheet' href='https://unpkg.com/leaflet-draw@1.0.0/dist/leaflet.draw.css'/>
 	<script src='https://unpkg.com/leaflet-draw@1.0.0/dist/leaflet.draw.js'></script>
-	<!-- leaflet-kml from windycom to read KML file -->
-<!-- 	<script src="./L.KML.js"></script> 
- -->	<!-- leaflet-kmz from Raruto to read KMZ file -->
-	<script src="/leaflet-kmz"></script>
-	<!-- Load Esri Leaflet from CDN -->
+	<script src="https://unpkg.com/leaflet-kmz@latest/dist/leaflet-kmz.js"></script>
 	<script src="https://unpkg.com/esri-leaflet@2.5.0/dist/esri-leaflet.js"
 		integrity="sha512-ucw7Grpc+iEQZa711gcjgMBnmd9qju1CICsRaryvX7HJklK0pGl/prxKvtHwpgm5ZHdvAil7YPxI1oWPOWK3UQ=="
-		crossorigin=""></script>
+		crossorigin="">
+	</script>
 	<style>
 	#fade {
 		display: none;
@@ -167,29 +165,6 @@
 		attribution: 'United States Geological Survey (USGS), National Aeronautics and Space Administration (NASA)',
 		token: token
 	})
-	// Grab a kml for fire risk.
-	// var risk_layer = L.tileLayer('')
-	// var kml_req = new XMLHttpRequest();
-	// kml_req.open("GET", 'https://www.spc.noaa.gov/products/fire_wx/day1fireotlk.kmz'); 
-	// // kml_req.setRequestHeader('Content-Type', 'text/xml')
-	// kml_req.onload = function() {
-	// 	if (kml_req.status !== 200) return
-	// 	track = new L.KML(kml_req.response);
-	// 	map.addLayer(track);
-	// 	// const bounds = track.getBounds();
-	// 	// map.fitBounds(bounds);
-	// };
-	// kml_req.send();
-
-	// Grab a kmz for fire risk.
-	// var kmz = L.kmzLayer().addTo(map);
-	// kmz.on('load', function(e) {
-	// 	control.addOverlay(e.layer, e.name);
-	// 	// e.layer.addTo(map);
-	// });
-	// // Add remote KMZ files as layers (NB if they are 3rd-party servers, they MUST have CORS enabled)
-	// kmz.load('https://www.spc.noaa.gov/products/fire_wx/day1fireotlk.kmz');
-
 	// Load in a circuit
 	var circuit_layer = L.geoJSON()
 	var circuit = new XMLHttpRequest();
@@ -201,7 +176,6 @@
 		circuit_layer = L.geoJSON(circuit.response).addTo(map);
 	};
 	circuit.send();
-
 	// Load in data.geojson (saved geojson drawnItems)
 	var prevShapesLayer = L.geoJSON()
 	var oldShapes = new XMLHttpRequest();
@@ -213,8 +187,14 @@
 		prevShapesLayer = L.geoJSON(oldShapes.response).addTo(map);
 	};
 	oldShapes.send();
-
-	// Options to toggle between maps added to layers
+	// Instantiate KMZ layer (async)
+	var kmz = L.kmzLayer().addTo(map);
+	kmz.on('load', function(e) {
+		// control.addOverlay(e.layer, e.name);
+		e.layer.addTo(map);
+	});
+	kmz.load('/my_kmz'); // Add remote KMZ files as layers (NB if they are 3rd-party servers, they MUST have CORS enabled)
+	// Add the layer control.
 	L.control.layers(
 		{
 			'streets': streets,
@@ -225,20 +205,18 @@
 		{
 			'circuit': circuit_layer,
 			'drawlayer': drawnItems,
-			'uploaded' : prevShapesLayer
-			// 'fire_risk':track
+			'uploaded' : prevShapesLayer,
+			'fire_risk': kmz
 		},
 		{
 			position: 'topleft',
 			collapsed: false		
 		}
 	).addTo(map);
-	//Boilerplate to add the layer control.
-	map.addControl(new L.Control.Draw({
+	// Add the drawing control.
+	control = map.addControl(new L.Control.Draw({
 		edit: {
 			featureGroup: drawnItems,
-			featureGroup: circuit_layer,
-			featureGroup: prevShapesLayer,
 			poly: {
 				allowIntersection: false,
 			}
