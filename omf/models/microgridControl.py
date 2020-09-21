@@ -65,7 +65,7 @@ def nodeToCoords(feederMap, nodeName):
 	'get the latitude and longitude of a given entry in string format'
 	coordStr = ''
 	for key in feederMap['features']:
-		if (nodeName in key['properties'].get('name','')):
+		if (nodeName == key['properties'].get('name','')):
 			current = key['geometry']['coordinates']
 			coordLis = coordsFromString(current)
 			coordStr = str(coordLis[0]) + ' ' + str(coordLis[1])
@@ -254,7 +254,7 @@ def graphMicrogrid(pathToOmd, pathToMicro, workDir, maxTime, stepSize, faultedLi
 	Dict = {}
 	faultedNodeCoordLis1, faultedNodeCoordStr1 = nodeToCoords(feederMap, str(faultedNode))
 	faultedNodeCoordLis2, faultedNodeCoordStr2 = nodeToCoords(feederMap, str(faultedNode2))
-	Dict['geometry'] = {'type': 'LineString', 'coordinates': [faultedNodeCoordLis1, faultedNodeCoordLis2]}
+	Dict['geometry'] = {'type': 'LineString', 'coordinates': [faultedNodeCoordLis2, faultedNodeCoordLis1]}
 	Dict['type'] = 'Feature'
 	Dict['properties'] = {'name': faultedLine,
 						  'edgeColor': 'red',
@@ -360,7 +360,7 @@ def new(modelDir):
 		# 'feederName1': 'ieee240.dss',
 		'maxTime': '20',
 		'stepSize': '1',
-		'faultedLine': 'l33',
+		'faultedLine': 'l32',
 		'microFileName': 'microComponents.json',
 		'microData': micro_data
 	}

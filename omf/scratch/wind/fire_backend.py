@@ -13,7 +13,7 @@ app = Flask(__name__)
 
 @app.route('/')
 def root():
-	return render_template('satellitemap_editablePopup.html')
+	return open('satellitemap_editablePopup.html').read()
 
 @app.route('/getkmz')
 def kmz():
