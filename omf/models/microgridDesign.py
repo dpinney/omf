@@ -401,7 +401,7 @@ def runtimeEstimate(modelDir):
 
 def new(modelDir):
 	''' Create a new instance of this model. Returns true on success, false on failure. '''
-	fName = "input - 2 col, 200 Employee Office, Springfield Illinois, 2001.csv"
+	fName = "input - col 1 micro commercial, col 2 residential, each 30 kWh per day.csv"
 	with open(pJoin(omf.omfDir, "static", "testFiles", fName)) as f:
 		load_shape = f.read()
 	defaultInputs = {
