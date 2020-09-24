@@ -20,8 +20,9 @@
 	}
 	</style>
 	<!-- loads Jquery -->
-	<script type="text/javascript" src="../../static/jquery.js"></script>
-	<!-- Make sure you put this AFTER Leaflet's CSS -->
+	<script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+<!-- 	<script type="text/javascript" src="../../static/jquery.js"></script>
+ -->	<!-- Make sure you put this AFTER Leaflet's CSS -->
 	<script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"
 		integrity="sha512-XQoYMqMTK8LvdxXYG3nZ448hOEQiglfqkJs1NOQV44cWnUrBc8PkAOcXy20w0vlaXaVUearIOBhiXZ5V3ynxwA=="
 		crossorigin="">
@@ -70,6 +71,18 @@
 		top:0px;
 		z-index:400;
 	}
+	#export {
+	    color:black;
+        font:13.5px Arial;
+  		text-decoration: none;
+		background-color: #EEEEEE;
+		padding: 1.5px 5.5px 1.5px 5.5px;
+		border-top: 1px solid #CCCCCC;
+		border-right: 1px solid #333333;
+		border-bottom: 1px solid #333333;
+		border-left: 1px solid #CCCCCC;
+		border-radius: 3px;
+	}
 	</style>
 </head>
 <body>
@@ -79,7 +92,7 @@
 	</div>
 	<div id="fade"></div>
 	<div class="buttons">
-		<button type="button" id='export'>Save Features</button>
+		<a href='#' id='export'>Save Features</a>
 		<button type="button" onclick="button_click()">Get GeoJSON</button>
 		<button type="button" onclick="openModal()">Get Fire Risk</button>
 		<form>
@@ -94,7 +107,8 @@
 				<option value="6">Day 7 Forecast</option>
 			</select>
 		</form>
-		<input type="file" id="import" name="filename">
+		<input type="file" id="choosefile" name="filename">
+		<input type="submit" id="import">
 	</div>
 <script type='text/javascript'>
 	// basic map definition and zoom control.
@@ -142,17 +156,27 @@
 		attribution: 'United States Geological Survey (USGS), National Aeronautics and Space Administration (NASA)',
 		token: token
 	})
-	// Load in a circuit
-	var circuit_layer = L.geoJSON()
-	var circuit = new XMLHttpRequest();
-	circuit.open("GET", 'circuit.geojson'); 
-	circuit.setRequestHeader('Content-Type', 'application/geojson')
-	circuit.responseType = 'json';
-	circuit.onload = function() {
-		if (circuit.status !== 200) return
-		circuit_layer = L.geoJSON(circuit.response).addTo(map);
-	};
-	circuit.send();
+	// Create a circle symbol to use with a GeoJSON layer instead of the default blue marker
+	function createCircleMarker( feature, latlng ){
+	// Change the values of these options to change the symbol's appearance
+		let options = {
+			radius: 8,
+			fillColor: "lightgreen",
+			color: "black",
+			weight: 1,
+			opacity: 1,
+			fillOpacity: 0.8
+		}
+		return L.circleMarker( latlng, options );
+	}
+	// Use jQuery's getJSON method to fetch the data from a URL
+	var circuit_layer = L.geoJSON();
+	jQuery.getJSON( "circuit.geojson", function( json ) {
+		// Use Leaflet's geoJSON method to turn the data into a feature layer
+		circuit_layer = L.geoJSON( json, {
+			pointToLayer: createCircleMarker // Call the function createCircleMarker to create the symbol for this layer
+		}).addTo(map);
+	})
 	// Load in data.geojson (saved geojson drawnItems)
 	var prevShapesLayer = L.geoJSON()
 	var oldShapes = new XMLHttpRequest();
@@ -333,4 +357,4 @@
 	}
 </script>
 </body>
-</html>
+</html>  			

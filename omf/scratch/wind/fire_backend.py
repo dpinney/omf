@@ -48,7 +48,10 @@ def my_kmz():
 	# url = 'https://www.spc.noaa.gov/products/fire_wx/day2fireotlk.kmz'
 	# url = 'https://www.spc.noaa.gov/products/fire_wx/day38fireotlk.kmz'
 	r = requests.get(url, allow_redirects=True)
-	return send_file(r.content)
+	return send_file(r.content,
+		# as_attachment = True,
+		mimetype="application/vnd",
+		)
 
 @app.route('/https://www.spc.noaa.gov/products/fire_wx/day1fireotlk.kmz')
 def kmz_address():
