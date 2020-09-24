@@ -70,7 +70,6 @@
 		right:0px;
 		top:0px;
 		z-index:400;
-		cursor: pointer;
 	}
 	#export {
 	    color:black;
@@ -108,7 +107,8 @@
 				<option value="6">Day 7 Forecast</option>
 			</select>
 		</form>
-		<input type="file" id="import" name="filename">
+		<input type="file" id="choosefile" name="filename">
+		<input type="submit" id="import">
 	</div>
 <script type='text/javascript'>
 	// basic map definition and zoom control.
@@ -156,18 +156,6 @@
 		attribution: 'United States Geological Survey (USGS), National Aeronautics and Space Administration (NASA)',
 		token: token
 	})
-	// Load in a circuit
-	// var circuit_layer = L.geoJSON()
-	// var circuit = new XMLHttpRequest();
-	// circuit.open("GET", 'circuit.geojson'); 
-	// circuit.setRequestHeader('Content-Type', 'application/geojson')
-	// circuit.responseType = 'json';
-	// circuit.onload = function() {
-	// 	if (circuit.status !== 200) return
-	// 	circuit_layer = L.geoJSON(circuit.response).addTo(map);
-	// };
-	// circuit.send();
-
 	// Create a circle symbol to use with a GeoJSON layer instead of the default blue marker
 	function createCircleMarker( feature, latlng ){
 	// Change the values of these options to change the symbol's appearance
@@ -189,7 +177,6 @@
 			pointToLayer: createCircleMarker // Call the function createCircleMarker to create the symbol for this layer
 		}).addTo(map);
 	})
-
 	// Load in data.geojson (saved geojson drawnItems)
 	var prevShapesLayer = L.geoJSON()
 	var oldShapes = new XMLHttpRequest();
