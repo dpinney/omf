@@ -159,7 +159,6 @@
 	})
 	// Create a circle symbol to use with a GeoJSON layer instead of the default blue marker
 	function createCircleMarker( feature, latlng ){
-	// Change the values of these options to change the symbol's appearance
 		let options = {
 			radius: 8,
 			fillColor: "lightgreen",
@@ -170,9 +169,9 @@
 		}
 		return L.circleMarker( latlng, options );
 	}
-	circuit_layer = new L.GeoJSON.AJAX(["circuit.geojson"], {pointToLayer: createCircleMarker}).addTo(map);
+	// circuit_layer = new L.GeoJSON.AJAX(["circuit.geojson"], {pointToLayer: createCircleMarker});
 	// Load in data.geojson (saved geojson drawnItems)
-	prevShapesLayer = new L.GeoJSON.AJAX("data.geojson").addTo(map);
+	// prevShapesLayer = new L.GeoJSON.AJAX("data.geojson");
 	// Instantiate KMZ layer (async)
 	var kmz = L.kmzLayer().addTo(map);
 	kmz.on('load', function(e) {
@@ -189,9 +188,9 @@
 			'esri_images': esri_images
 		},
 		{
-			'circuit': circuit_layer,
 			'drawlayer': drawnItems,
-			'uploaded' : prevShapesLayer,
+			// 'uploaded' : prevShapesLayer,
+			// 'circuit': circuit_layer,
 			'fire_risk': kmz
 		},
 		{
@@ -258,7 +257,7 @@
 	// send an XML Http request to the server for data from getSubGridData() of weather.py
 	function fireButton_click() {
 		drawn_geojson = drawnItems.toGeoJSON()
-		if (drawn_geojson.features.length == 0) {
+		if (drawn_geojson.features.length == 0 && addedItems.length == 0) {
 			alert('Please use the drawing pallete to the left to create boxes');
 			closeModal();
 		}
@@ -267,6 +266,10 @@
 			var eachShape = [];
 			dayForecast = document.getElementById("fireRisk").value;
 			console.log(dayForecast);
+			addedItems.push(drawn_geojson);
+			for (h = 0; h < addedItems.length; h++) {
+
+			}
 			// A call to subGrid for each drawn shape
 			for (i = 0; i < drawn_geojson.features.length; i++) {
 				xhttp = new XMLHttpRequest();
@@ -341,13 +344,20 @@
 		document.getElementById('export').setAttribute('download','data.geojson');
 	}
 	// upload any geojson file and add to the map 
+	var addedItems = [];
 	var loadFile = function() {
-		var upload = document.getElementById('import').files[0];
-		console.log(upload)
-		uploadLayer = new L.GeoJSON.AJAX(upload)
-		console.log(uploadLayer)
-		uploadLayer.addTo(map);
-		layerControl.addOverlay(uploadLayer, 'uploaded');
+		var data = document.getElementById('import');
+		var reader = new FileReader();
+		reader.onload = onReaderLoad;
+		reader.readAsText(data.files[0]);
+		function onReaderLoad(event) {
+			var upload = JSON.parse(event.target.result);
+			console.log(upload);
+			uploadLayer = new L.geoJSON([upload], {pointToLayer: createCircleMarker})
+			uploadLayer.addTo(map);
+			layerControl.addOverlay(uploadLayer, 'uploaded');
+			addedItems.push(upload); 
+		}
 	};
 </script>
 </body>
