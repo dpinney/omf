@@ -35,6 +35,7 @@
 		integrity="sha512-ucw7Grpc+iEQZa711gcjgMBnmd9qju1CICsRaryvX7HJklK0pGl/prxKvtHwpgm5ZHdvAil7YPxI1oWPOWK3UQ=="
 		crossorigin="">
 	</script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet-ajax/2.1.0/leaflet.ajax.min.js"></script>
 	<style>
 	#fade {
 		display: none;
@@ -107,8 +108,8 @@
 				<option value="6">Day 7 Forecast</option>
 			</select>
 		</form>
-		<input type="file" id="choosefile" name="filename">
-		<input type="submit" id="import">
+		<input type="file" id="import" accept=".geojson" name="filename">
+		<button onclick="loadFile()">Load</button>
 	</div>
 <script type='text/javascript'>
 	// basic map definition and zoom control.
@@ -169,25 +170,9 @@
 		}
 		return L.circleMarker( latlng, options );
 	}
-	// Use jQuery's getJSON method to fetch the data from a URL
-	var circuit_layer = L.geoJSON();
-	jQuery.getJSON( "circuit.geojson", function( json ) {
-		// Use Leaflet's geoJSON method to turn the data into a feature layer
-		circuit_layer = L.geoJSON( json, {
-			pointToLayer: createCircleMarker // Call the function createCircleMarker to create the symbol for this layer
-		}).addTo(map);
-	})
+	circuit_layer = new L.GeoJSON.AJAX(["circuit.geojson"], {pointToLayer: createCircleMarker}).addTo(map);
 	// Load in data.geojson (saved geojson drawnItems)
-	var prevShapesLayer = L.geoJSON()
-	var oldShapes = new XMLHttpRequest();
-	oldShapes.open("GET", 'data.geojson'); 
-	oldShapes.setRequestHeader('Content-Type', 'application/geojson')
-	oldShapes.responseType = 'json';
-	oldShapes.onload = function() {
-		if (oldShapes.status !== 200) return
-		prevShapesLayer = L.geoJSON(oldShapes.response).addTo(map);
-	};
-	oldShapes.send();
+	prevShapesLayer = new L.GeoJSON.AJAX("data.geojson").addTo(map);
 	// Instantiate KMZ layer (async)
 	var kmz = L.kmzLayer().addTo(map);
 	kmz.on('load', function(e) {
@@ -196,7 +181,7 @@
 	});
 	kmz.load('/my_kmz'); // Add remote KMZ files as layers (NB if they are 3rd-party servers, they MUST have CORS enabled)
 	// Add the layer control.
-	L.control.layers(
+	var layerControl = L.control.layers(
 		{
 			'streets': streets,
 			'esri_sentinel': esri_sentinel,
@@ -355,6 +340,15 @@
 		document.getElementById('export').setAttribute('href', 'data:' + convertedData);
 		document.getElementById('export').setAttribute('download','data.geojson');
 	}
+	// upload any geojson file and add to the map 
+	var loadFile = function() {
+		var upload = document.getElementById('import').files[0];
+		console.log(upload)
+		uploadLayer = new L.GeoJSON.AJAX(upload)
+		console.log(uploadLayer)
+		uploadLayer.addTo(map);
+		layerControl.addOverlay(uploadLayer, 'uploaded');
+	};
 </script>
 </body>
 </html>  			
