@@ -20,7 +20,7 @@
 	<!-- Global Functions -->
 	<script type="text/javascript">
 		// Global setting of Highcharts
-		Highcharts.setOptions({global: {useUTC: false}})
+		Highcharts.setOptions({global: {useUTC: true}})
 		// Clean up the non-ISO date strings we get.
 		function dateOb(inStr) {return Date.parse(inStr.replace(/-/g,"/"))}
 		pointStart = dateOb(allOutputData.timeStamps[0])
@@ -330,7 +330,7 @@
 				localHighChart["chart"]["width"] = 1000
 				localHighChart["chart"]["height"] = 150
 				localHighChart["series"] = [swingPF]
-				localHighChart["yAxis"]= [{"title":{"text":"Per Unit (PU)","style":{"color":"black"}},"min":0,"max":1}]
+				localHighChart["yAxis"]= [{"title":{"text":"Per Unit (PU)","style":{"color":"black"}},"min":-1,"max":1}]
 				new Highcharts.Chart(localHighChart);
 			</script>
 		</div>
