@@ -20,7 +20,7 @@
 	<!-- Global Functions -->
 	<script type="text/javascript">
 		// Global setting of Highcharts
-		Highcharts.setOptions({global: {useUTC: false}})
+		Highcharts.setOptions({global: {useUTC: true}})
 		// Clean up the non-ISO date strings we get.
 		function dateOb(inStr) {return Date.parse(inStr.replace(/-/g,"/"))}
 		pointStart = dateOb(allOutputData.timeStamps[0])
@@ -122,8 +122,8 @@
 				<input type="text" id="feederName1" name="feederName1">
 			</div>
 			<div class="shortInput" style="display:none"><!--HACK:pass dss name back and forth to backend.-->
-				<label>dssName1</label>
-				<input type="text" id="dssName1" name="dssName1">
+				<label>circuitFileName1</label>
+				<input type="text" id="circuitFileName1" name="circuitFileName1">
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Load and PV Output<span class="classic">Import the .csv file representing the load and PV output.</span></label>
@@ -330,7 +330,7 @@
 				localHighChart["chart"]["width"] = 1000
 				localHighChart["chart"]["height"] = 150
 				localHighChart["series"] = [swingPF]
-				localHighChart["yAxis"]= [{"title":{"text":"Per Unit (PU)","style":{"color":"black"}},"min":0,"max":1}]
+				localHighChart["yAxis"]= [{"title":{"text":"Per Unit (PU)","style":{"color":"black"}},"min":-1,"max":1}]
 				new Highcharts.Chart(localHighChart);
 			</script>
 		</div>
@@ -782,7 +782,7 @@
 					"legend":{"verticalAlign":"top","align":"top","borderWidth":0,"x":50,"y":-10,"layout":"horizontal"}})
 			</script> -->
 		</div>
-		<p class="reportTitle postRun">Study Details <a target="_self" class="toggle">Hide / Show</a></p>
+		<!-- <p class="reportTitle postRun">Study Details <a target="_self" class="toggle">Hide / Show</a></p>
 		<div id="studyDetails" class="tightContent postRun detailsContainer" style="position: relative;">
 			<div id="mapHere" style="width:495px; height:340px; display:inline-block"></div>
 			<script type="text/javascript">
@@ -819,6 +819,13 @@
 					circle.append("svg:title").text(climate)})
 			</script>
 			<div id="runtimeStatsReport" style="width:495px; height:340px; margin:5 0 0 0; overflow-y:scroll; overflow-x:hidden; display:inline-block; vertical-align:top">
+				<pre id="stdout" style="font-size:13px; text-align:left"></pre>
+			</div>
+			<script>gebi("stdout").innerHTML = allOutputData.stdout</script>
+		</div> -->
+		<p class="reportTitle postRun">Study Details and Standard Output<a target="_self" class="toggle">Hide / Show</a></p>
+		<div id="studyDetails" class="tightContent postRun detailsContainer" style="position: relative;">
+			<div id="runtimeStatsReport" style="width:100%; height:340px; margin:5 0 0 0; overflow-y:scroll; overflow-x:hidden; display:inline-block; vertical-align:top">
 				<pre id="stdout" style="font-size:13px; text-align:left"></pre>
 			</div>
 			<script>gebi("stdout").innerHTML = allOutputData.stdout</script>

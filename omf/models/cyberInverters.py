@@ -32,12 +32,12 @@ def work(modelDir, inputDict):
 		omd = json.load(omdFile)
 	tree = omd['tree']
 	niceDss = dssConvert.evilGldTreeToDssTree(tree)
-	dssConvert.treeToDss(niceDss, f'{modelDir}/{inputDict["dssName1"]}.dss')
+	dssConvert.treeToDss(niceDss, f'{modelDir}/{inputDict["circuitFileName1"]}')
 	# dssConvert.treeToDss(niceDss, f'{modelDir}/circuit.dss')
 
 	# Confirm dss file name.
-	dssName = [x for x in os.listdir(modelDir) if x.endswith('.dss')][0][:-4]
-	inputDict["dssName1"] = dssName
+	dssName = [x for x in os.listdir(modelDir) if x.endswith('.dss')][0]
+	inputDict["circuitFileName1"] = dssName
 
 	#Value check for attackVariable
 	if inputDict.get("attackVariable", "None") == "None":
@@ -113,7 +113,7 @@ def work(modelDir, inputDict):
 
 		#create dss file in folder
 		# copyfile(f'{modelDir}/circuit.dss', f'{modelDir}/PyCIGAR_inputs/circuit.dss')
-		copyfile(f'{modelDir}/{dssName}.dss', f'{modelDir}/PyCIGAR_inputs/circuit.dss')
+		copyfile(f'{modelDir}/{dssName}', f'{modelDir}/PyCIGAR_inputs/circuit.dss')
 		# copyfile(f'{__neoMetaModel__._omfDir}/solvers/opendss/ieee37_ours.dss', f'{modelDir}/PyCIGAR_inputs/circuit.dss')
 
 		#create load_solar_data.csv file in folder
@@ -492,7 +492,7 @@ def new(modelDir):
 		"simLength": "750",
 		"simLengthUnits": "seconds",
 		"feederName1": "ieee37.dss",
-		"dssName1": "ieee37",
+		"circuitFileName1": "ieee37.dss",
 		# "feederName1": "Olin Barre GH EOL Solar AVolts CapReg",
 		"modelType": modelName,
 		"zipCode": "59001",
@@ -513,7 +513,7 @@ def new(modelDir):
 		omd = json.load(omdFile)
 	tree = omd['tree']
 	niceDss = dssConvert.evilGldTreeToDssTree(tree)
-	dssConvert.treeToDss(niceDss, f'{modelDir}/{defaultInputs["dssName1"]}.dss')
+	dssConvert.treeToDss(niceDss, f'{modelDir}/{defaultInputs["circuitFileName1"]}')
 
 	# try:
 	# 	# shutil.copyfile(pJoin(__neoMetaModel__._omfDir, "solvers", "opendss", defaultInputs["dssName1"]+'.dss'), pJoin(modelDir, "PyCIGAR_inputs", defaultInputs["dssName1"]+'.dss'))

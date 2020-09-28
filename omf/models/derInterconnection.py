@@ -128,6 +128,15 @@ def work(modelDir, inputDict):
 			'interval':0
 		}
 
+		tree[feeder.getMaxKey(tree) + 1] = {
+			'object':'group_recorder', 
+			'group':'"class=regulator"',
+			'limit':1000,
+			'property':'flow_direction',
+			'file':'regulatorFlowDirection.csv',
+			'interval':0
+		}
+
 	# get start and stop time for the simulation
 	[startTime,stopTime] = ['','']
 	for key in tree.keys():
@@ -298,14 +307,14 @@ def work(modelDir, inputDict):
 
 			if edge_bools['regulator']:
 				# check for reverse regulator powerflow
-				for key in tree.keys():
-					obtype = tree[key].get("object","")	
-					obname = tree[key].get("name","")
-					if obtype == 'regulator':
-						powerVal = float(data['edgePower'][obname])
-						content = [obname, powerVal,\
-							loadCondition+' Load, DER '+der,(powerVal<0)]
-						reversePowerFlow.append(content)
+				for key in data['regulatorFlowDirection']:
+					directions = data['regulatorFlowDirection'][key].split('|')
+					reverseFlow = ('AR' in directions) or \
+						('BR' in directions) or ('CR' in directions)
+					powerVal = float(data['edgePower'][key])
+					content = [key, powerVal,\
+						loadCondition+' Load, DER '+der,reverseFlow]
+					reversePowerFlow.append(content)
 
 				# check for tap_position values and violations
 				if der == 'On':
@@ -442,6 +451,16 @@ def createTreeWithFault( tree, faultType, faultLocation, startTime, stopTime ):
 	
 	treeCopy = copy.deepcopy(tree)
 
+	# HACK: set groupid for all meters so outage stats are collected.
+	noMeters = True
+	for key in treeCopy:
+		if treeCopy[key].get('object','') in ['meter', 'triplex_meter']:
+			treeCopy[key]['groupid'] = "METERTEST"
+			noMeters = False
+	if noMeters:
+		raise Exception("No meters detected on the circuit. \
+			Please add at least one meter to allow for collection of outage statistics.")
+
 	treeCopy[feeder.getMaxKey(treeCopy) + 1] = {
 		'module': 'reliability ',
 		'maximum_event_length': '300 s',
@@ -473,7 +492,7 @@ def createTreeWithFault( tree, faultType, faultLocation, startTime, stopTime ):
 		'report_file': 'Metrics_Output.csv',
 		'module_metrics_object': 'PwrMetrics',
 		'metrics_of_interest': '"SAIFI,SAIDI,CAIDI,ASAI,MAIFI"',
-		'customer_group': '"class=meter"',
+		'customer_group': '"groupid=METERTEST"',
 		'metric_interval': '5 h',
 		'report_interval': '5 h'
 	}
@@ -522,6 +541,10 @@ def runGridlabAndProcessData(tree, attachments, edge_bools, workDir=False):
 
 	if os.stat(workDir+'/stderr.txt').st_size > 40:
 		print('failed with stderr.txt size', os.stat(workDir+'/stderr.txt').st_size)
+		print('--------------------------------------')
+		print(gridlabOut['stderr'])
+		print('--------------------------------------')
+		
 	else:
 		print('passed with stderr.txt size', os.stat(workDir+'/stderr.txt').st_size)
 
@@ -576,6 +599,8 @@ def runGridlabAndProcessData(tree, attachments, edge_bools, workDir=False):
 		return math.ceil(math.log10(x+1))
 	def avg(l):
 		''' Average of a list of ints or floats. '''
+		if len(l) == 0:
+			return 0
 		return sum(l)/len(l)
 	
 	# Tot it all up.
@@ -634,15 +659,22 @@ def runGridlabAndProcessData(tree, attachments, edge_bools, workDir=False):
 				edgeValsPU[edge] = edgePerUnitVal
 				edgePower[edge] = ((currVal * voltVal)/1000)
 
-	# read regulator tap position values values into a single dictionary
 	tapPositions = {}
+	regulatorFlowDirection = {}
 	if edge_bools['regulator']:
+		
+		# read regulator tap position values values into a single dictionary
 		tapPositions['tapA'] = readGroupRecorderCSV(pJoin(workDir,'tap_A.csv'))
 		tapPositions['tapB'] = readGroupRecorderCSV(pJoin(workDir,'tap_B.csv'))
 		tapPositions['tapC'] = readGroupRecorderCSV(pJoin(workDir,'tap_C.csv'))
+		
+		# read regulator flow direction values into a single dictionary
+		regulatorFlowDirection = readGroupRecorderCSV(pJoin(workDir,'regulatorFlowDirection.csv'))
+
 
 	return {'nominalVolts':nominalVolts, 'nodeVolts':nodeVolts, 'percentChangeVolts':percentChangeVolts, 
-	'edgeCurrentSum':edgeCurrentSum, 'edgePower':edgePower, 'edgeValsPU':edgeValsPU, 'tapPositions':tapPositions }
+	'edgeCurrentSum':edgeCurrentSum, 'edgePower':edgePower, 'edgeValsPU':edgeValsPU, 'tapPositions':tapPositions,
+	'regulatorFlowDirection': regulatorFlowDirection }
 
 def drawPlot(tree, nodeDict=None, edgeDict=None, edgeLabsDict=None, displayLabs=False, customColormap=False, 
 	perUnitScale=False, rezSqIn=400, neatoLayout=False, nodeFlagBounds=[-float('inf'), float('inf')], defaultNodeVal=1):

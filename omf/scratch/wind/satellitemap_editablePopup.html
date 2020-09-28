@@ -2,9 +2,7 @@
 <html>
 <head>
 	<title>GeoJSON Map</title>
-	<link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css"
-	integrity="sha512-xodZBNTC5n17Xt2atTPuE1HxjVMSvLVW9ocqUKLsCC5CXdbqCmblAshOMAS6/keqq/sMZMZ19scR4PsZChSR7A=="
-	crossorigin=""/>
+	<link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" integrity="sha512-xodZBNTC5n17Xt2atTPuE1HxjVMSvLVW9ocqUKLsCC5CXdbqCmblAshOMAS6/keqq/sMZMZ19scR4PsZChSR7A==" crossorigin=""/>
 	<style>html, body {
 		width: 100%;
 		height: 100%;
@@ -18,23 +16,6 @@
 		left: 0.0%;
 		top: 0.0%;
 	}
-	</style>
-	<!-- loads Jquery -->
-	<script type="text/javascript" src="../../static/jquery.js"></script>
-	<!-- Make sure you put this AFTER Leaflet's CSS -->
-	<script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"
-		integrity="sha512-XQoYMqMTK8LvdxXYG3nZ448hOEQiglfqkJs1NOQV44cWnUrBc8PkAOcXy20w0vlaXaVUearIOBhiXZ5V3ynxwA=="
-		crossorigin="">
-	</script>
-	<!-- Leaflet Draw -->
-	<link rel='stylesheet' href='https://unpkg.com/leaflet-draw@1.0.0/dist/leaflet.draw.css'/>
-	<script src='https://unpkg.com/leaflet-draw@1.0.0/dist/leaflet.draw.js'></script>
-	<script src="https://unpkg.com/leaflet-kmz@latest/dist/leaflet-kmz.js"></script>
-	<script src="https://unpkg.com/esri-leaflet@2.5.0/dist/esri-leaflet.js"
-		integrity="sha512-ucw7Grpc+iEQZa711gcjgMBnmd9qju1CICsRaryvX7HJklK0pGl/prxKvtHwpgm5ZHdvAil7YPxI1oWPOWK3UQ=="
-		crossorigin="">
-	</script>
-	<style>
 	#fade {
 		display: none;
 		position: absolute;
@@ -69,8 +50,36 @@
 		right:0px;
 		top:0px;
 		z-index:400;
+		background: white;
+		border: 2px solid rgba(0,0,0,0.2);
+		background-clip: padding-box;
+		margin-right: 10px;
+		margin-top: 10px;
+		padding: 6px 10px 6px 6px;
+		border-radius: 5px;
+	}
+	#export {
+	    color:black;
+        font:13.5px Arial;
+  		text-decoration: none;
+		background-color: #EEEEEE;
+		padding: 1.5px 5.5px 1.5px 5.5px;
+		border-top: 1px solid #CCCCCC;
+		border-right: 1px solid #333333;
+		border-bottom: 1px solid #333333;
+		border-left: 1px solid #CCCCCC;
+		border-radius: 3px;
 	}
 	</style>
+	<!-- loads Jquery -->
+	<script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+	<!-- Make sure you put this AFTER Leaflet's CSS -->
+	<script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js" integrity="sha512-XQoYMqMTK8LvdxXYG3nZ448hOEQiglfqkJs1NOQV44cWnUrBc8PkAOcXy20w0vlaXaVUearIOBhiXZ5V3ynxwA==" crossorigin=""></script>
+	<!-- Leaflet Draw -->
+	<link rel='stylesheet' href='https://unpkg.com/leaflet-draw@1.0.0/dist/leaflet.draw.css'/>
+	<script src='https://unpkg.com/leaflet-draw@1.0.0/dist/leaflet.draw.js'></script>
+	<script src="https://unpkg.com/leaflet-kmz@1.0.6/dist/leaflet-kmz.js"></script>
+	<script src="https://unpkg.com/esri-leaflet@2.5.0/dist/esri-leaflet.js" integrity="sha512-ucw7Grpc+iEQZa711gcjgMBnmd9qju1CICsRaryvX7HJklK0pGl/prxKvtHwpgm5ZHdvAil7YPxI1oWPOWK3UQ==" crossorigin=""></script>
 </head>
 <body>
 	<div id='map'></div>
@@ -79,22 +88,21 @@
 	</div>
 	<div id="fade"></div>
 	<div class="buttons">
-		<button type="button" id='export'>Save Features</button>
-		<button type="button" onclick="button_click()">Get GeoJSON</button>
 		<button type="button" onclick="openModal()">Get Fire Risk</button>
-		<form>
-			<label for="fireRisk"> </label>
-			<select name="fireRisk" id="fireRisk">
-				<option value="0">Day 1 Forecast</option>
-				<option value="1">Day 2 Forecast</option>
-				<option value="2">Day 3 Forecast</option>
-				<option value="3">Day 4 Forecast</option>
-				<option value="4">Day 5 Forecast</option>
-				<option value="5">Day 6 Forecast</option>
-				<option value="6">Day 7 Forecast</option>
-			</select>
-		</form>
-		<input type="file" id="import" name="filename">
+		<label for="fireRisk"> </label>
+		<select name="fireRisk" id="fireRisk">
+			<option value="0">Day 1 Forecast</option>
+			<option value="1">Day 2 Forecast</option>
+			<option value="2">Day 3 Forecast</option>
+			<option value="3">Day 4 Forecast</option>
+			<option value="4">Day 5 Forecast</option>
+			<option value="5">Day 6 Forecast</option>
+			<option value="6">Day 7 Forecast</option>
+		</select>
+		<a href='#' id='export'>Save Features</a>
+		<button type="button" onclick="button_click()">Get GeoJSON</button>
+		<input type="file" id="import" accept=".geojson" name="filename">
+		<button onclick="loadFile()">Load</button>
 	</div>
 <script type='text/javascript'>
 	// basic map definition and zoom control.
@@ -142,28 +150,21 @@
 		attribution: 'United States Geological Survey (USGS), National Aeronautics and Space Administration (NASA)',
 		token: token
 	})
-	// Load in a circuit
-	var circuit_layer = L.geoJSON()
-	var circuit = new XMLHttpRequest();
-	circuit.open("GET", 'circuit.geojson'); 
-	circuit.setRequestHeader('Content-Type', 'application/geojson')
-	circuit.responseType = 'json';
-	circuit.onload = function() {
-		if (circuit.status !== 200) return
-		circuit_layer = L.geoJSON(circuit.response).addTo(map);
-	};
-	circuit.send();
+	// Create a circle symbol to use with a GeoJSON layer instead of the default blue marker
+	function createCircleMarker( feature, latlng ){
+		let options = {
+			radius: 8,
+			fillColor: "lightgreen",
+			color: "black",
+			weight: 1,
+			opacity: 1,
+			fillOpacity: 0.8
+		}
+		return L.circleMarker( latlng, options );
+	}
+	// circuit_layer = new L.GeoJSON.AJAX(["circuit.geojson"], {pointToLayer: createCircleMarker});
 	// Load in data.geojson (saved geojson drawnItems)
-	var prevShapesLayer = L.geoJSON()
-	var oldShapes = new XMLHttpRequest();
-	oldShapes.open("GET", 'data.geojson'); 
-	oldShapes.setRequestHeader('Content-Type', 'application/geojson')
-	oldShapes.responseType = 'json';
-	oldShapes.onload = function() {
-		if (oldShapes.status !== 200) return
-		prevShapesLayer = L.geoJSON(oldShapes.response).addTo(map);
-	};
-	oldShapes.send();
+	// prevShapesLayer = new L.GeoJSON.AJAX("data.geojson");
 	// Instantiate KMZ layer (async)
 	var kmz = L.kmzLayer().addTo(map);
 	kmz.on('load', function(e) {
@@ -172,7 +173,7 @@
 	});
 	kmz.load('/my_kmz'); // Add remote KMZ files as layers (NB if they are 3rd-party servers, they MUST have CORS enabled)
 	// Add the layer control.
-	L.control.layers(
+	var layerControl = L.control.layers(
 		{
 			'streets': streets,
 			'esri_sentinel': esri_sentinel,
@@ -180,9 +181,9 @@
 			'esri_images': esri_images
 		},
 		{
-			'circuit': circuit_layer,
 			'drawlayer': drawnItems,
-			'uploaded' : prevShapesLayer,
+			// 'uploaded' : prevShapesLayer,
+			// 'circuit': circuit_layer,
 			'fire_risk': kmz
 		},
 		{
@@ -249,7 +250,7 @@
 	// send an XML Http request to the server for data from getSubGridData() of weather.py
 	function fireButton_click() {
 		drawn_geojson = drawnItems.toGeoJSON()
-		if (drawn_geojson.features.length == 0) {
+		if (drawn_geojson.features.length == 0 && addedItems.length == 0) {
 			alert('Please use the drawing pallete to the left to create boxes');
 			closeModal();
 		}
@@ -258,6 +259,10 @@
 			var eachShape = [];
 			dayForecast = document.getElementById("fireRisk").value;
 			console.log(dayForecast);
+			addedItems.push(drawn_geojson);
+			for (h = 0; h < addedItems.length; h++) {
+
+			}
 			// A call to subGrid for each drawn shape
 			for (i = 0; i < drawn_geojson.features.length; i++) {
 				xhttp = new XMLHttpRequest();
@@ -331,6 +336,22 @@
 		document.getElementById('export').setAttribute('href', 'data:' + convertedData);
 		document.getElementById('export').setAttribute('download','data.geojson');
 	}
+	// upload any geojson file and add to the map 
+	var addedItems = [];
+	var loadFile = function() {
+		var data = document.getElementById('import');
+		var reader = new FileReader();
+		reader.onload = onReaderLoad;
+		reader.readAsText(data.files[0]);
+		function onReaderLoad(event) {
+			var upload = JSON.parse(event.target.result);
+			console.log(upload);
+			uploadLayer = new L.geoJSON([upload], {pointToLayer: createCircleMarker})
+			uploadLayer.addTo(map);
+			layerControl.addOverlay(uploadLayer, 'uploaded');
+			addedItems.push(upload); 
+		}
+	};
 </script>
 </body>
-</html>
+</html>  			
