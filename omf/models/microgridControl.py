@@ -172,7 +172,7 @@ def graphMicrogrid(pathToOmd, pathToMicro, workDir, maxTime, stepSize, faultedLi
 	command = f'julia --project="{__neoMetaModel__._omfDir}/solvers/PowerModelsONM.jl" "{__neoMetaModel__._omfDir}/solvers/PowerModelsONM.jl/src/cli/entrypoint.jl" -n "{workDir}/circuit.dss" -o "{workDir}/onm_output.json"'
 	os.system(command)
 
-	with open(pJoin(__neoMetaModel__._omfDir,'scratch','RONM','output.json')) as inFile:
+	with open(pJoin(__neoMetaModel__._omfDir,'static','testFiles','output.json')) as inFile:
 	# with open(f'{workDir}/onm_output.json') as inFile:
 		data = json.load(inFile) 
 		genProfiles = data['Generator profiles']
@@ -351,7 +351,7 @@ def work(modelDir, inputDict):
 
 def new(modelDir):
 	''' Create a new instance of this model. Returns true on success, false on failure. '''
-	with open(pJoin(__neoMetaModel__._omfDir,'scratch','RONM','microComponents.json')) as f:
+	with open(pJoin(__neoMetaModel__._omfDir,'static','testFiles','microComponents.json')) as f:
 		micro_data = f.read()
 	defaultInputs = {
 		'modelType': modelName,
