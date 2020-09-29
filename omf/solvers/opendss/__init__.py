@@ -227,7 +227,6 @@ def capacityPlot(filePath):
 	plt.savefig(dssFileLoc + '/Capacity Profile.png')
 	plt.clf()
 
-
 def compareVoltsFiles(origFile, modFile):
 	# Compares two of the files output by the 'Export voltages" opendss command. returns the maximum error encountered.
 	if not ('.csv' in origFile and '.csv' in modFile):
@@ -255,46 +254,6 @@ def compareVoltsFiles(origFile, modFile):
 	resultSumm.to_csv('volts_comparison_results.csv', header=False, index=True, mode='a')
 	resultErr.to_csv('volts_comparison_results.csv', header=False, index=True, mode='a')
 	return maxErr
-
-
-def compareVoltsTrees(origTree, modTree):
-	# Obtains and compares OpenDss voltage output for two .dss circuit files.
-	# Inputs: relative path to two dss circuit definition files
-	# Outputs: Maximum error encountered
-	# TODO: Needs some path manipulation to be ready for production (i.e. pull needed files from omf\static)
-	if not ('.dss' in origTree and '.dss' in modTree):
-		assert True, 'Input files must be .dss circuit definition files.'
-	voltagePlot(origTree) # outputs volts.csv
-	os.rename('volts.csv','origVolts.csv')
-	voltagePlot(modTree)
-	os.rename('volts.csv','modVolts.csv')
-	ovolts = pd.read_csv('origVolts.csv', header=0)
-	os.remove('origVolts.csv')
-	ovolts.index = ovolts['Bus']
-	ovolts.drop(labels='Bus', axis=1, inplace=True)
-	ovolts = ovolts.astype(float, copy=True)
-	mvolts = pd.read_csv('modVolts.csv', header=0)
-	os.remove('modVolts.csv')
-	mvolts.index = mvolts['Bus']
-	mvolts.drop(labels='Bus', axis=1, inplace=True)
-	mvolts = mvolts.astype(float, copy=True)
-	cols = mvolts.columns
-	resultErr = pd.DataFrame(index=mvolts.index, columns=cols)
-	assert ovolts.size == mvolts.size, 'The matrices represented by the input files must have identical dimensions.'
-	resultErr =  abs(ovolts - mvolts)/ovolts
-	resultSumm = pd.DataFrame(index=['Max', 'Avg', 'Min'], columns=cols)
-	for c in cols:
-		resultSumm.loc['Max',c] = max(resultErr.loc[:,c])
-		resultSumm.loc['Avg',c] = sum(resultErr.loc[:,c])/len(resultErr.loc[:,c])
-		resultSumm.loc['Min',c] = min(resultErr.loc[:,c])
-	maxErr = max(resultSumm.loc['Max',:])
-	resultSumm.to_csv('volts_comparison_results.csv', header=True, index=True, mode='w')
-	resultSumm = pd.DataFrame(index=[''],columns=cols)
-	resultSumm.to_csv('volts_comparison_results.csv', header=False, index=True, mode='a')
-	resultErr.to_csv('volts_comparison_results.csv', header=False, index=True, mode='a')
-	return maxErr
-
-
 
 def _stripPhases(dssObjId): # (Is this even worth encapsulating?) YES.
 	# expected input is a string of format <uniqueName> (or perhaps <dssObjectType>.<uniqueName> )
