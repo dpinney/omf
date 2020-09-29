@@ -125,10 +125,13 @@ def work(modelDir, inputDict):
 			}
 		}
 
+		# solar and battery have default 'max_kw' == 1000000000; Wind has default 'max_kw' == 0 and thus must be set explicitly; Check https://developer.nrel.gov/docs/energy-optimization/reopt-v1 for updates
 		if solar == 'off':
 			scenario['Scenario']['Site']['PV']['max_kw'] = 0;
 		if wind == 'off':
-			scenario['Scenario']['Site']['Wind']['max_kw'] = 0;
+			scenario['Scenario']['Site']['Wind']['max_kw'] = 0
+		elif wind == 'on':
+			scenario['Scenario']['Site']['Wind']['max_kw'] = 1000000000;
 		if battery == 'off':
 			scenario['Scenario']['Site']['Storage']['max_kw'] = 0;
 	
@@ -200,6 +203,8 @@ def work(modelDir, inputDict):
 		outData['survivalProbY' + indexString] = resultsResilience['probs_of_surviving']
 		outData['runID' + indexString] = runID
 		outData['apiKey' + indexString] = 'WhEzm6QQQrks1hcsdN0Vrd56ZJmUyXJxTJFg6pn9'
+
+
 
 		#Set plotly layout ---------------------------------------------------------------
 		plotlyLayout = go.Layout(
@@ -393,6 +398,8 @@ def work(modelDir, inputDict):
 		outData["resilienceProbData" + indexString] = json.dumps(plotData, cls=plotly.utils.PlotlyJSONEncoder)
 		outData["resilienceProbLayout"  + indexString] = json.dumps(plotlyLayout, cls=plotly.utils.PlotlyJSONEncoder)
 
+	#print("Wind kw from resultsSubset:", resultsSubset['Wind']['size_kw'])
+
 	return outData
 
 def runtimeEstimate(modelDir):
@@ -401,7 +408,7 @@ def runtimeEstimate(modelDir):
 
 def new(modelDir):
 	''' Create a new instance of this model. Returns true on success, false on failure. '''
-	fName = "input - 2 col, 200 Employee Office, Springfield Illinois, 2001.csv"
+	fName = "input - col 1 commercial 120 kW per day, col 2 residential  30 kWh per day.csv"
 	with open(pJoin(omf.omfDir, "static", "testFiles", fName)) as f:
 		load_shape = f.read()
 	defaultInputs = {
@@ -417,10 +424,10 @@ def new(modelDir):
 		"year" : '2001',
 		"energyCost" : "0.08",
 		"demandCost" : '20',
-		"solarCost" : "2000",
+		"solarCost" : "1600",
 		"windCost" : "4989",
-		"batteryEnergyCost" : "500",
-		"batteryPowerCost" : "1000",
+		"batteryEnergyCost" : "420",
+		"batteryPowerCost" : "840",
 		"solarMin": 0,
 		"windMin": 0,
 		"batteryPowerMin": 0,

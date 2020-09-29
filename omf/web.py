@@ -51,7 +51,8 @@ def getDataNames():
 				feeders.append({'name': fname[:-4], 'model': dirpath.split('/')[-1]})
 			# TODO: possibly expand circuit file editor to include more than just openDSS files
 			elif fname.endswith('.dss') and fname != 'feeder.dss':
-				circuitFiles.append({'name': fname[:-4], 'model': dirpath.split('/')[-1]})
+				# circuitFiles.append({'name': fname[:-4], 'model': dirpath.split('/')[-1]})
+				circuitFiles.append({'name': fname, 'model': dirpath.split('/')[-1]})
 	networks = []
 	for (dirpath, dirnames, filenames) in os.walk(os.path.join(_omfDir, "scratch","transmission", "outData")):
 		for fname in filenames:
@@ -68,7 +69,8 @@ def getDataNames():
 	for (dirpath, dirnames, filenames) in os.walk(os.path.join(_omfDir, "solvers","opendss")):
 		for fname in filenames:
 			if fname.endswith('.dss') and fname != 'feeder.dss':
-				publicCircuitFiles.append({'name': fname[:-4], 'model': dirpath.split('/')[-1]})
+				# publicCircuitFiles.append({'name': fname[:-4], 'model': dirpath.split('/')[-1]})
+				publicCircuitFiles.append({'name': fname, 'model': dirpath.split('/')[-1]})
 	return {"climates":sorted(climates), "feeders":feeders, "circuitFiles":circuitFiles, "networks":networks, "publicFeeders":publicFeeders, "publicCircuitFiles":publicCircuitFiles, "currentUser":currUser}
 
 # @app.before_request
@@ -717,15 +719,17 @@ def distribution_text_get(owner, modelName, file_num):
 	'''Render the raw text editing interface for distribution networks.'''
 	file_dict = get_model_metadata(owner, modelName)
 	# file_name = file_dict.get('feederName' + str(file_num))
-	file_name = file_dict.get('dssName' + str(file_num))
+	file_name = file_dict.get('circuitFileName' + str(file_num))
 	# file_filepath = os.path.join(_omfDir, 'data', 'Model', owner, modelName, file_name + '.omd')
 	# file_filepath = os.path.join(_omfDir, 'data', 'Model', owner, modelName, 'PyCIGAR_inputs', file_name + '.dss')
-	file_filepath = os.path.join(_omfDir, 'data', 'Model', owner, modelName, file_name + '.dss')
+	file_filepath = os.path.join(_omfDir, 'data', 'Model', owner, modelName, file_name)
+	# file_filepath = os.path.join(_omfDir, 'data', 'Model', owner, modelName, file_name + '.dss')
 	try:
 		with locked_open(file_filepath) as f:
 			data = f.read()
 	except FileNotFoundError:
-		with locked_open(os.path.join(_omfDir, 'solvers', 'opendss', file_name + '.dss')) as f:
+		with locked_open(os.path.join(_omfDir, 'solvers', 'opendss', file_name)) as f:
+		# with locked_open(os.path.join(_omfDir, 'solvers', 'opendss', file_name + '.dss')) as f:
 			data = f.read()
 	file = data
 	# component_json = get_components()
@@ -1350,9 +1354,10 @@ def saveFile(owner, modelName, fileName, fileNum):
 					pass
 				else:
 					raise
-	writeToInput(model_dir, fileName, 'dssName' + str(fileNum)) # TODO: Incorporate other files, not just dss
+	writeToInput(model_dir, fileName, 'circuitFileName' + str(fileNum)) # TODO: Incorporate other files, not just dss
 	payload = request.form.get('fileContents', '')
-	file_file = os.path.join(model_dir, fileName + ".dss") # TODO: Incorporate other files, not just dss
+	# file_file = os.path.join(model_dir, fileName + ".dss") # TODO: Incorporate other files, not just dss
+	file_file = os.path.join(model_dir, fileName)
 	if os.path.isfile(file_file):
 		with locked_open(file_file, 'r+') as f:
 			f.truncate(0)
@@ -1470,11 +1475,13 @@ def loadFile(frfileName, frmodelName, modelName, fileNum, frUser, owner):
 	print("Entered loadFile with info: frfileName %s, frmodelName: %s, modelName: %s, fileNum: %s"%(frfileName, frmodelName, str(modelName), str(fileNum)))
 	# I can't use shutil.copyfile() becasue I need locks on the source and destination file
 	#shutil.copyfile(os.path.join(frmodelDir, frfileName + '.omd'), os.path.join(modelDir, fileName + '.omd'))
-	with locked_open(os.path.join(frmodelDir, frfileName + '.dss')) as inFile:
+	# with locked_open(os.path.join(frmodelDir, frfileName + '.dss')) as inFile:
+	with locked_open(os.path.join(frmodelDir, frfileName)) as inFile:
 		file_string = inFile.read()
 	modelDir = os.path.join(_omfDir, 'data/Model', owner, modelName)
 	fileName = get_model_metadata(owner, modelName).get('fileName' + str(fileNum))
-	with locked_open(os.path.join(modelDir, fileName + '.dss'), 'r+') as outFile:
+	# with locked_open(os.path.join(modelDir, fileName + '.dss'), 'r+') as outFile:
+	with locked_open(os.path.join(modelDir, fileName), 'r+') as outFile:
 		outFile.truncate(0)
 		outFile.write(file_string)
 	if request.form.get("referrer") == "distribution":
@@ -2005,9 +2012,11 @@ def uniqObjName(objtype, owner, name, modelName=False):
 		if name == 'feeder':
 			return jsonify(exists=True)
 		if owner != 'public':
-			path = os.path.join(path_prefix, modelName, name + '.dss')
+			# path = os.path.join(path_prefix, modelName, name + '.dss')
+			path = os.path.join(path_prefix, modelName, name)
 		else:
-			path = os.path.join(_omfDir, 'solvers', 'opendss', name + '.dss')
+			# path = os.path.join(_omfDir, 'solvers', 'opendss', name + '.dss')
+			path = os.path.join(_omfDir, 'solvers', 'opendss', name)
 	return jsonify(exists=os.path.exists(path))
 
 
