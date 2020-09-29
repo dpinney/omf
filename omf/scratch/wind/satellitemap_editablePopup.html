@@ -338,6 +338,7 @@
 	}
 	// upload any geojson file and add to the map 
 	var addedItems = [];
+	var uploadCount = 0;
 	var loadFile = function() {
 		var data = document.getElementById('import');
 		var reader = new FileReader();
@@ -348,7 +349,9 @@
 			console.log(upload);
 			uploadLayer = new L.geoJSON([upload], {pointToLayer: createCircleMarker})
 			uploadLayer.addTo(map);
-			layerControl.addOverlay(uploadLayer, 'uploaded');
+			uploadCount = uploadCount + 1;
+			newLayerName = "uploaded (" + uploadCount + ")";
+			layerControl.addOverlay(uploadLayer, newLayerName);
 			addedItems.push(upload); 
 		}
 	};
