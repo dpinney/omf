@@ -195,6 +195,91 @@ def dssFilePrep(fpath):
 		contents = re.sub(', \)', ',)', contents)
 		outFile.write(contents)
 
+def _dfToListOfDicts(dfin, objtype):
+	'''Converts the contents of a data frame into a list of dictionaries, where each
+		dictionary represents a single row, with keys corresponding to the column names.'''
+		#TODO: mapping for attribute renaming dss<->tree (use objtype for this)
+	#print(dfin.head(1))
+	dictlst = []
+	dfin.rename(columns={'Name':'Object'}, inplace=True)
+	#TODO add any other attribute name conversions
+	#TODO: change any lists to tuples?
+	for name, obj in dfin.iterrows(): #TODO refactor for performance (very slow to iterate over rows. vectorize?)
+		obj['Object'] = objtype + '.' + str(name)
+		obj_dict = dict(zip(obj.index,obj))
+		dictlst.append(obj_dict)
+	return dictlst
+
+def _dssToTree_dssdirect(fpath):
+	'''Do not use this function other than to evaluate the accuracy of opendssdirect.py. 
+	After reviewing the file output at the end of this function, it is apparent that 
+	opendssdirect does not handle the three-winding/repeating key object property 
+	definition syntax. Because of this, it was decided that we should pursue a custom 
+	parser after all, roundtripping the user-input circuit definition file through OpenDSS 
+	to standardize it before parsing.'''
+	# import circuit via opendssdirect
+	import opendssdirect as dss
+	dss.run_command('Redirect ' + fpath)
+	dss.run_command('Solve')
+	tree = [] # list of dictionaries
+	tree.extend(_dfToListOfDicts(dss.utils.capacitors_to_dataframe(),'Capacitor'))
+	tree.extend(_dfToListOfDicts(dss.utils.fuses_to_dataframe(), 'Fuse'))
+	tree.extend(_dfToListOfDicts(dss.utils.generators_to_dataframe(), 'Generator'))
+	tree.extend(_dfToListOfDicts(dss.utils.isource_to_dataframe(), 'ISource'))
+	tree.extend(_dfToListOfDicts(dss.utils.lines_to_dataframe(), 'Line'))
+	tree.extend(_dfToListOfDicts(dss.utils.loads_to_dataframe(), 'Load'))
+	tree.extend(_dfToListOfDicts(dss.utils.loadshape_to_dataframe(), 'LoadShape'))
+	tree.extend(_dfToListOfDicts(dss.utils.meters_to_dataframe(), 'Meter'))
+	tree.extend(_dfToListOfDicts(dss.utils.monitors_to_dataframe(), 'Monitor'))
+	tree.extend(_dfToListOfDicts(dss.utils.pvsystems_to_dataframe(), 'PvSystem'))
+	tree.extend(_dfToListOfDicts(dss.utils.reclosers_to_dataframe(), 'Recloser'))
+	tree.extend(_dfToListOfDicts(dss.utils.regcontrols_to_dataframe(), 'RegControl'))
+	tree.extend(_dfToListOfDicts(dss.utils.relays_to_dataframe(), 'Relay'))
+	tree.extend(_dfToListOfDicts(dss.utils.sensors_to_dataframe(), 'Sensor'))
+	tree.extend(_dfToListOfDicts(dss.utils.transformers_to_dataframe(), 'Transformer'))
+	tree.extend(_dfToListOfDicts(dss.utils.vsources_to_dataframe(), 'VSource'))
+	tree.extend(_dfToListOfDicts(dss.utils.xycurves_to_dataframe(), 'XyCurve'))
+	
+	## One way of getting all the circuit elements....
+	# Add the connections (there is not a way I can see to get this info the pandas way...can we ask someone? Do it the other way)
+	with open("dssTreeRepresentation_direct.csv", 'w') as outFile:
+		for i,objd in enumerate(tree):
+			dss.Circuit.SetActiveElement(objd['Object'])
+			objd['Cnxns'] = dss.CktElement.BusNames()
+			outFile.write(str(i) + "\n")
+			for k,v in objd.items():
+					outFile.write("," + str(k) + "," + str(v) + "\n")
+	
+	## A second way of getting all the circuit elements....
+		## Add the connections (there is not a way I can see to get this info the pandas way...can we ask someone? Do it the other way)
+		#allelms = dss.Circuit.AllElementNames()
+		#for elm in allelms:
+			#dss.Circuit.SetActiveElement(elm)
+			## Get variable keys and values (not sure if these matter...)
+			#nms = dss.CktElement.AllVariableNames()
+			#vls = dss.CktElement.AllVariableValues()
+			#elm_dict = dict(zip(nms,vls))
+			#elm_dict_vrbls = dict(zip(nms,vls))
+			## Get property keys
+			#prp_keys = dss.CktElement.AllPropertyNames()
+			## Loop to get property values
+			#for item in dss.utils.Iterator(prp_keys):
+				#prp_keys.#how to read the property of the active element?
+			#elm_dict = elm_dict_vrbls.update(prps)
+			## Add busnames
+			#elm_dict['cnxns'] = dss.CktElement.BusNames()
+			#tree.append(elm_dict)
+		#allNodes = dss.Circuit.AllNodeNames()
+		#allbuses = dss.Circuit.AllBusNames()
+		#tree.append(allNodes)
+		## Get the buses
+		#for node in allNodes:
+			#pass
+		#for bus in allBuses:
+			#dss.Circuit.SetActiveBus(node)
+			#cnxns = dss.Bus.LineList().append(dss.Bus.LoadList())
+	return tree
+
 def _extend_with_exc(from_d, to_d, exclude_list):
 	''' Add all items in from_d to to_d that aren't in exclude_list. '''
 	good_items = {k: from_d[k] for k in from_d if k not in exclude_list}
