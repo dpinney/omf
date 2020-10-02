@@ -106,10 +106,10 @@ def dssToTree(pathToDss):
 	# Print to file
 	#with open("dssTreeRepresentation.csv", 'w') as outFile:
 	#	ii = 1
-	#	for item in contents:
-	#		outFile.write(str(item) + "\n")
+	#	for k,v in contents.items():
+	#		outFile.write(str(k) + "\n")
 	#		ii = ii + 1
-	#		for k2,v2 in item.items():
+	#		for k2,v2 in v.items():
 	#			outFile.write("," + str(k2) + "," + str(v2) + "\n")
 	return list(contents.values())
 
