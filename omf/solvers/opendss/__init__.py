@@ -228,7 +228,9 @@ def capacityPlot(filePath):
 	plt.clf()
 
 def compareVoltsFiles(origFile, modFile):
-	# Compares two of the files output by the 'Export voltages" opendss command. returns the maximum error encountered.
+	'''Compares two instances of the files created by the 'Export voltages' opendss command and 
+	outputs a file that describes the maximum, average, and minimum error encountered for each column.'''
+	# TODO: would inter-quartile ranges be more descriptive?
 	if not ('.csv' in origFile and '.csv' in modFile):
 		assert True, 'Input files must be .csv files of voltages output by OpenDss'
 	ovolts = pd.read_csv(origFile, header=0)
@@ -347,16 +349,16 @@ def mergeContigLines(tree):
 
 def _tests():
 	# compareVoltsFiles test
-	fpath1 = 'ieee240_ours_EXP_VOLTAGES.csv'
-	fpath2 = 'ieee240_ours_EXP_VOLTAGES.csv'
+	fpath1 = 'ieee240_EXP_VOLTAGES.csv'
+	fpath2 = 'ieee240_EXP_VOLTAGES.csv'
 	errlim = 0.0
 	assert compareVoltsFiles(fpath1, fpath2) <= errlim, 'The error between the compared files exceeds the allowable limit of %s%%.'%(errlim*100)
 
 	# compareVoltsTrees test
-	fpath1 = 'ieee240.clean.dss'
-	fpath2 = 'ieee240.clean.dss'
-	errlim = 0.0
-	assert compareVoltsTrees(fpath1, fpath2) <= errlim, 'The error between the compared trees exceeds the allowable limit of %s%%.'%(errlim*100)
+	#fpath1 = 'ieee240.clean.dss'
+	#fpath2 = 'ieee240.clean.dss'
+	#errlim = 0.0
+	#assert compareVoltsTrees(fpath1, fpath2) <= errlim, 'The error between the compared trees exceeds the allowable limit of %s%%.'%(errlim*100)
 
 	# Contig line merging test
 	#FPATH = 'ieee240.clean.dss'
