@@ -123,6 +123,78 @@ def treeToDss(treeObject, outputPath):
 		outFile.write(line + '\n')
 	outFile.close()
 
+def dssFilePrep(fpath):
+	'''**Under construction as of 01OCT2020** Prepares an OpenDSS circuit definition file (.dss) for consumption by the 
+	OMF. The expected input is the path to a .dss master file that redirects to or
+	compiles from other .dss files within the same directory. The path can also 
+	indicate a single .dss file that does not contain redirect or compile commands.'''
+	
+	import opendssdirect as dss
+	import pandas as pd
+	import tempfile as tf
+	import re
+
+	dssFilePath = os.path.realpath(fpath)
+	dssDirPath = os.path.dirname(dssFilePath)
+	# Before doing anything else, ensure the file at fpath can be found
+	try:
+		with open(dssFilePath):
+			pass
+	except Exception as ex:
+		print('While accessing the file located at %s, the following exception occured: %s'%(dssDirPath, ex))
+	# TODO could wrap this in a try/catch block to ensure tmpdir is cleaned up. (seems like it actually isn't cleaned on premature exit)
+	tfdir = tf.TemporaryDirectory()
+	with tfdir as tempDir:
+		exptDirPath = tempDir + '/' + 'OmfCktExport'
+		dss.run_command('Clear')
+		x = dss.run_command('Redirect ' + dssFilePath)
+		x = dss.run_command('Solve')
+		dss.run_command('Save Circuit ' + 'purposelessFileName.dss ' + exptDirPath)
+		# Manipulate buscoords file to create generate bus list commands
+		dss.run_command('Export BusCoords ' + exptDirPath + '/BusCoords.dss')
+		coords = pd.read_csv(exptDirPath + '/BusCoords.dss', header=None)
+		coords.columns = ['Element', 'X', 'Y']
+		coordscmds = []
+		for i,x in coords.iterrows():
+			elmt = x['Element']
+			xcoord = x['X']
+			ycoord = x['Y']
+			coordscmds.append('SetBusXY bus=' + elmt + ' X=' + str(xcoord) + ' Y=' + str(ycoord) + '\n') # save commands for later usage
+		  
+		# Get Master.DSS from exported files and insert content from other files
+		outfilepath = dssDirPath + '/' + fpath[:-3] + 'clean.tst.dss'
+		#with open(exptDirPath + '/Master.DSS', 'r') as ogMaster, open(dssDirPath + '/' + fpath[:-3] + '.clean.dss') as catMaster:
+		with open(exptDirPath + '/Master.DSS', 'r') as ogMaster, open(outfilepath, 'a') as catMaster:
+			catMaster.truncate(0)
+			for line in ogMaster:
+				# wherever there is a redirect or a compile, get the code from that file and insert into catMaster
+				if line.lower().startswith('redirect') or line.lower().startswith('compile'):
+					catMaster.write('! ' + line)
+					addnFilename = line.split(' ')[1] # get path of file to insert (accounts for inline comments following the command)
+					addnFilename = re.sub('\s','', addnFilename)
+					with open(exptDirPath + '/' + addnFilename, 'r') as addn: # will error if file is not located in same directory as Master.dss
+						addn = addn.read()
+						catMaster.write(addn)
+				elif line.lower().startswith('buscoords'):
+					catMaster.write('! ' + line)
+					catMaster.writelines(coordscmds)
+				else:
+					catMaster.write(line)
+	# tfdir.cleanup() # not necessary because tmpdir gets cleaned up once context manager closes (on windows, there was a question of whether the file gets cleaned up or not)
+	with open(fpath, 'r') as inFile, open(fpath[:-4]+'.clean.dss', 'w') as outFile:
+		# apply all dat regex
+		contents = inFile.read()
+		contents = re.sub('New (?!object=)', 'New object=', contents) # Doesn't look like the ^ (begins with) regex syntax works here...
+		contents = re.sub('Edit (?!object=)', 'Edit object=', contents)
+		contents = re.sub('(?<=\d)(\s)+(?=\d)', ',', contents)
+		contents = re.sub('(\s)+\|(\s)+', '|', contents)
+		contents = re.sub('\[(\s)*', '[', contents)
+		contents = re.sub('(\s)*\]', ']', contents)
+		contents = re.sub('"', '', contents)
+		contents = re.sub('(?<=(\d|\w))(\s)*,(\s)+(?=(\d|\w))', ',', contents)
+		contents = re.sub(', \)', ',)', contents)
+		outFile.write(contents)
+
 def _extend_with_exc(from_d, to_d, exclude_list):
 	''' Add all items in from_d to to_d that aren't in exclude_list. '''
 	good_items = {k: from_d[k] for k in from_d if k not in exclude_list}
