@@ -228,9 +228,7 @@ def capacityPlot(filePath):
 	plt.clf()
 
 def compareVoltsFiles(origFile, modFile):
-	'''Compares two instances of the files created by the 'Export voltages' opendss command and 
-	outputs a file that describes the maximum, average, and minimum error encountered for each column.'''
-	# TODO: would inter-quartile ranges be more descriptive?
+	# Compares two of the files output by the 'Export voltages" opendss command. returns the maximum error encountered.
 	if not ('.csv' in origFile and '.csv' in modFile):
 		assert True, 'Input files must be .csv files of voltages output by OpenDss'
 	ovolts = pd.read_csv(origFile, header=0)
@@ -256,20 +254,6 @@ def compareVoltsFiles(origFile, modFile):
 	resultSumm.to_csv('volts_comparison_results.csv', header=False, index=True, mode='a')
 	resultErr.to_csv('volts_comparison_results.csv', header=False, index=True, mode='a')
 	return maxErr
-
-def getVoltages(tree):
-	'''Obtains the OpenDss voltage output for a dss circuit tree.'''
-	voltagePlot(tree) # outputs volts.csv
-	os.rename('volts.csv','origVolts.csv')
-	voltagePlot(tree)
-	os.rename('volts.csv','modVolts.csv')
-	ovolts = pd.read_csv('origVolts.csv', header=0)
-	os.remove('origVolts.csv')
-	ovolts.index = ovolts['Bus']
-	ovolts.drop(labels='Bus', axis=1, inplace=True)
-	ovolts = ovolts.astype(float, copy=True)
-	mvolts = pd.read_csv('modVolts.csv', header=0)
-	os.remove('modVolts.csv')
 
 def _stripPhases(dssObjId): # (Is this even worth encapsulating?) YES.
 	# expected input is a string of format <uniqueName> (or perhaps <dssObjectType>.<uniqueName> )
