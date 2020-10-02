@@ -377,14 +377,37 @@ def evilToOmd(evilTree, outPath):
 
 def _tests():
 	# dssToTree test
-	FPATH = 'ieee240_ours.dss' # this circuit has 3-winding transformer definitions, with a winding per line
+	FPATH = 'ieee240.clean.dss' # this circuit has 3-winding transformer definitions, with a winding per line
 	tree = dssToTree(FPATH)
 
-	# other tests...
+	## dssFilePrep test
+	#FPATH = 'iowa240.raw.dss'
+	#FPATH = 'ieee37.clean.dss'
+	#FPATH = 'ieee8500-unbal_ours.dss'
+	#FPATH = 'ieee123_solarRamp.dss'
+	#FPATH = 'iowa240_ours.dss'
+	#FPATH = 'ieee240.clean.dss'
+	#dssFilePrep(FPATH)
+
+	#try:
+	#	dssFilePrep(FPATH)
+	#except:
+	#	print('A general error was generated while preparing the file for the OMF.')
+	
+	
+	# *************BEGIN BLOCK: Junk code***************
+	## dssToTree_direct test
+	#FPATH = 'ieee240.clean.dss' # this circuit has 3-winding transformer definitions, with a winding per line
+	#import opendssdirect as dss
+	#dss.run_command('Redirect ' + FPATH)
+	#numelems = dss.Circuit.NumCktElements()
+	#tree = dssToTree_direct(FPATH)
+	#mssng = numelems - len(tree) + 1 # why is there an extra element in the tree?
+	#assert mssng==0, 'There are %s circuit elements unaccounted for by the function\'s output.'%(mssng)
+	# *************END BLOCK: Junk code*****************
 
 if __name__ == '__main__':
-	#_tests()
-	pass
+	_tests()
 	#tree = dssToTree('ieee240_ours.dss')
 	# treeToDss(tree, 'ieee240_ours_xfrmrTest.dss')
 	# treeToDss(tree, 'ieee37p.dss')
