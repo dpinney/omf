@@ -374,17 +374,12 @@ def _tests():
 	##dssConvert.distNetViz.viz_mem(gldtree, open_file=True, forceLayout=True) # DEBUG
 	#print('Objects removed: %s (of %s). Percent reduction: %s%%.'%(oldsz, oldsz-newsz, (oldsz-newsz)*100/oldsz))
 
-
-if __name__ == "__main__":
-	_tests()
-
 	# Make core output
 	#FPATH = 'ieee240.clean.dss'
 	#FPATH = 'ieeeLVTestCaseNorthAmerican.dss'
 	#FPATH = 'ieee37.clean.reduced.dss'
 	#dssConvert.evilGldTreeToDssTree(tree)
 	#dssConvert.treeToDss(tree, 'ieeeLVTestCaseNorthAmerican_reduced.dss')
-	
 
 	# Just run DSS
 	#runDSS(FPATH)
@@ -396,3 +391,6 @@ if __name__ == "__main__":
 	#dynamicPlot(FPATH, 1, 10)
 	#faultPlot(FPATH)
 	#capacityPlot(FPATH)
+
+if __name__ == "__main__":
+	_tests()

@@ -13,6 +13,7 @@ except:
 	warnings.warn('nrel ditto not installed. opendss conversion disabled.')
 from collections import OrderedDict
 from omf import feeder, distNetViz
+from pprint import pprint as pp
 
 def gridLabToDSS(inFilePath, outFilePath):
 	''' Convert gridlab file to dss. ''' 
@@ -304,34 +305,28 @@ def evilToOmd(evilTree, outPath):
 		json.dump(omdStruct, outFile, indent=4)
 
 def _tests():
-	# dssToTree test
-	FPATH = 'ieee240_ours.dss' # this circuit has 3-winding transformer definitions, with a winding per line
-	tree = dssToTree(FPATH)
-
-	# other tests...
-
-if __name__ == '__main__':
-	#_tests()
-	pass
-	#tree = dssToTree('ieee240_ours.dss')
-	# treeToDss(tree, 'ieee240_ours_xfrmrTest.dss')
-	# treeToDss(tree, 'ieee37p.dss')
-	# dssToMem('ieee37.dss')
+	FNAMES = ['ieee240.clean.dss']
+	# FNAMES =  ['ieee240.clean.dss', 'ieee37.clean.dss', 'ieee8500.clean.dss', 'ieeeLVWhateverItsCalled.clean.dss']
+	for fname in FNAMES:
+		tree = dssToTree(fname)
+		# pp([dict(x) for x in tree])
+		# treeToDss(tree, 'TEST.dss')
+		# TODO: Add compare voltage test here!
+		evil_glm = evilDssTreeToGldTree(tree)
+		pp(evil_glm)
+		# distNetViz.viz_mem(evil_glm, open_file=True, forceLayout=False)
+		# evil_dss = evilGldTreeToDssTree(evil_glm)
+		# treeToDss(tree, 'TEST2.dss')
+	# Deprecated tests section
 	# dssToGridLab('ieee37.dss', 'Model.glm') # this kind of works
 	# gridLabToDSS('ieee37_fixed.glm', 'ieee37_conv.dss') # this fails miserably
-	#from pprint import pprint as pp
-	#evil_glm = evilDssTreeToGldTree(tree)
-	#pp(evil_glm)
-	# print(evil_glm)
-	#distNetViz.viz_mem(evil_glm, open_file=True, forceLayout=True)
-	#distNetViz.insert_coordinates(evil_glm)
-	# evilToOmd(evil_glm, 'ieee37.dss.omd')
-	#evil_dss = evilGldTreeToDssTree(evil_glm)
-	# pp(evil_dss)
-	#treeToDss(evil_dss, 'HACKZ.dss')
+	# distNetViz.insert_coordinates(evil_glm)
 	#TODO: make parser accept keyless items with new !keyless_n key? Or is this just horrible syntax?
 	#TODO: define .dsc format and write syntax guide.
 	#TODO: what to do about transformers with invalid bus setting with the duplicate keys? Probably ignore.
 	#TODO: where to save the x.1.2.3 bus connectivity info?
 	#TODO: refactor in to well-defined bijections between object types?
 	#TODO: a little help on the frontend to hide invalid commands.
+
+if __name__ == '__main__':
+	_tests()
