@@ -227,38 +227,70 @@ def capacityPlot(filePath):
 	plt.savefig(dssFileLoc + '/Capacity Profile.png')
 	plt.clf()
 
-def compareVoltsFiles(origFile, modFile):
-	'''Compares two instances of the files created by the 'Export voltages' opendss command and 
-	outputs a file that describes the maximum, average, and minimum error encountered for each column.'''
+def voltageCompare(in1, in2, keep_output=False, output_filename='voltageCompare_results.csv'):
+	'''Compares two instances of the information provided by the 'Export voltages' opendss command and outputs 
+	the maximum error encountered for any value compared. If the 'keep_output' flag is set to 'True', also 
+	outputs a file that describes the maximum, average, and minimum error encountered for each column. Use the 
+	'output_filename' parameter to set the output file name. Inputs can be formatted as a .csv file of voltages
+	output by OpenDSS, or as a dataframe of voltages obtained using the OMF's getVoltages(). Buses contained in 
+	input files must match in name and order.'''
 	# TODO: would inter-quartile ranges be more descriptive?
-	if not ('.csv' in origFile and '.csv' in modFile):
-		assert True, 'Input files must be .csv files of voltages output by OpenDss'
-	ovolts = pd.read_csv(origFile, header=0)
-	ovolts.index = ovolts['Bus']
-	ovolts.drop(labels='Bus', axis=1, inplace=True)
-	ovolts = ovolts.astype(float, copy=True)
-	mvolts = pd.read_csv(modFile, header=0)
-	mvolts.index = mvolts['Bus']
-	mvolts.drop(labels='Bus', axis=1, inplace=True)
-	mvolts = mvolts.astype(float, copy=True)
-	cols = mvolts.columns
-	resultErr = pd.DataFrame(index=mvolts.index, columns=cols)
-	assert ovolts.size == mvolts.size, 'The matrices represented by the input files must have identical dimensions.'
-	resultErr =  abs(ovolts - mvolts)/ovolts
+	# TODO: add 'set_theoretical={1|2}' flag to mark which input should be considered the base case in comparison
+	ins = [in1, in2]
+	csvins = [x for x in ins if type(x)==str and '.csv' in x.lower()]
+	dfins = [x for x in ins if type(x)==pd.DataFrame]
+	assert (len(csvins)+len(dfins))==2, 'Inputs must either be a .csv file of voltages as output by the OpenDss \'Export Voltages\' command, or a dataframe of voltages output by the omf method \'getVoltages()\'.'
+	for pth in csvins:
+		try:
+			df = pd.read_csv(pth, header=0)
+			df.index = df['Bus']
+		except:
+			print('Please ensure that the input file exists and is formatted like the file output by the OpenDss \'Export Voltages\' command.')
+		df.drop(labels='Bus', axis=1, inplace=True)
+		df = df.astype(float, copy=True)
+		dfins.append(df)
+	# now everything is in a dataframe. unpack this, because the remainder of this code block is not vectorized. (how to
+	# provide difference between multiple values, i.e. [v1,v2,v3,...,vn]? permuting would be ridiculous. not worth it.)
+	avolts = dfins[0]
+	bvolts = dfins[1]
+	assert avolts.size == bvolts.size, 'The matrices represented by the input files must have identical dimensions.'
+	cols = bvolts.columns
+	resultErr = pd.DataFrame(index=bvolts.index, columns=cols)
+ 	# TODO: add handling for 'set_theoretical={1|2}' flag to mark which input should be considered the base case in comparison
+	resultErr =  abs(avolts - bvolts)/avolts
 	resultSumm = pd.DataFrame(index=['Max', 'Avg', 'Min'], columns=cols)
 	for c in cols:
 		resultSumm.loc['Max',c] = max(resultErr.loc[:,c])
 		resultSumm.loc['Avg',c] = sum(resultErr.loc[:,c])/len(resultErr.loc[:,c])
 		resultSumm.loc['Min',c] = min(resultErr.loc[:,c])
 	maxErr = max(resultSumm.loc['Max',:])
-	resultSumm.to_csv('volts_comparison_results.csv', header=True, index=True, mode='w')
-	resultSumm = pd.DataFrame(index=[''],columns=cols)
-	resultSumm.to_csv('volts_comparison_results.csv', header=False, index=True, mode='a')
-	resultErr.to_csv('volts_comparison_results.csv', header=False, index=True, mode='a')
+	if keep_output:
+		resultSumm.to_csv(output_filename, header=True, index=True, mode='w')
+		resultSumm = pd.DataFrame(index=[''],columns=cols)
+		resultSumm.to_csv(output_filename, header=False, index=True, mode='a')
+		resultErr.to_csv(output_filename, header=True, index=True, mode='a')
 	return maxErr
 
+def getVoltages(dssFilePath, keep_output=False, output_filename='voltages.csv'):
+	'''Obtains the OpenDss voltage output for a OpenDSS circuit definition file (*.dss). Set the 
+	'keep_output' flag to 'True' to save output to the input file's directory as 'voltages.csv',
+	or specify a filename for the output through the 'output_filename' parameter (i.e. '*.csv').'''
+	# TODO: (nice to have) vectorize it?
+	dssFileLoc = os.path.dirname(os.path.abspath(dssFilePath))
+	#coords = runDSS(dssFileLoc + '/' + dssFilePath, keep_output=False)
+	coords = runDSS(dssFileLoc + '/' + dssFilePath)
+	dss.run_command('Export voltages ' + dssFileLoc + '/' + output_filename)
+	volts = pd.read_csv(dssFileLoc + '/' + output_filename, header=0)
+	volts.index = volts['Bus']
+	volts.drop(labels='Bus', axis=1, inplace=True)
+	volts = volts.astype(float, copy=True)
+	if not keep_output:
+		os.remove(output_filename)
+	return volts
+
 def _stripPhases(dssObjId): # (Is this even worth encapsulating?) YES.
-	# expected input is a string of format <uniqueName> (or perhaps <dssObjectType>.<uniqueName> )
+	'''**JUNK** Do not use.'''
+	# Expected input is a string of format <uniqueName> (or perhaps <dssObjectType>.<uniqueName> )
 	dssObjId = dssObjId.split('.')
 	if len(dssObjId) == 1:
 		return dssObjId
@@ -348,30 +380,27 @@ def mergeContigLines(tree):
 
 
 def _tests():
-	# compareVoltsFiles test
-	fpath1 = 'ieee240_EXP_VOLTAGES.csv'
-	fpath2 = 'ieee240_EXP_VOLTAGES.csv'
+	# Tests for compareVoltsFiles and getVoltages
+	fpath = 'voltages.csv'
+	voltsdf = getVoltages('ieee240.clean.dss', keep_output=True, output_filename=fpath)
 	errlim = 0.0
-	assert compareVoltsFiles(fpath1, fpath2) <= errlim, 'The error between the compared files exceeds the allowable limit of %s%%.'%(errlim*100)
-
-	# compareVoltsTrees test
-	#fpath1 = 'ieee240.clean.dss'
-	#fpath2 = 'ieee240.clean.dss'
-	#errlim = 0.0
-	#assert compareVoltsTrees(fpath1, fpath2) <= errlim, 'The error between the compared trees exceeds the allowable limit of %s%%.'%(errlim*100)
+	assert voltageCompare(fpath, fpath, keep_output=True) <= errlim, 'The error between the compared files exceeds the allowable limit of %s%%.'%(errlim*100)
+	assert voltageCompare(voltsdf, voltsdf, keep_output=True) <= errlim, 'The error between the compared files exceeds the allowable limit of %s%%.'%(errlim*100)
+	assert voltageCompare(fpath, voltsdf, keep_output=True) <= errlim, 'The error between the compared files exceeds the allowable limit of %s%%.'%(errlim*100)
+	os.remove(fpath)
 
 	# Contig line merging test
-	#FPATH = 'ieee240.clean.dss'
+	#fpath = 'ieee240.clean.dss'
 	#import dssConvert
-	#tree = dssConvert.dssToTree(FPATH)
-	#networkPlot(FPATH) # DEBUG (not working. Line 114 of this file complains about 'BUS2' not having coords)
+	#tree = dssConvert.dssToTree(fpath)
+	#networkPlot(fpath) # DEBUG (not working. Line 114 of this file complains about 'BUS2' not having coords)
 	#gldtree = dssConvert.evilDssTreeToGldTree(tree) # DEBUG
 	#dssConvert.distNetViz.viz_mem(gldtree, open_file=True, forceLayout=True) # DEBUG
 	#oldsz = len(tree)
 	#mergeContigLines(tree)
 	#newsz = len(tree)
-	##dssConvert.treeToDss(tree, FPATH[:-4] + '-reduced.dss')
-	##networkPlot(FPATH[:-4] +'-reduced.dss') # DEBUG (not working. Line 114 of this file complains about 'BUS2' not having coords)
+	##dssConvert.treeToDss(tree, fpath[:-4] + '-reduced.dss')
+	##networkPlot(fpath[:-4] +'-reduced.dss') # DEBUG (not working. Line 114 of this file complains about 'BUS2' not having coords)
 	##gldtree = dssConvert.evilDssTreeToGldTree(tree) # DEBUG
 	##dssConvert.distNetViz.viz_mem(gldtree, open_file=True, forceLayout=True) # DEBUG
 	#print('Objects removed: %s (of %s). Percent reduction: %s%%.'%(oldsz, oldsz-newsz, (oldsz-newsz)*100/oldsz))
