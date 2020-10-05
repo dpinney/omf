@@ -407,14 +407,16 @@ def mergeContigLines(tree):
 
 
 def _tests():
-	# Tests for compareVoltsFiles and getVoltages
-	fpath = 'voltages.csv'
-	voltsdf = getVoltages('ieee240.clean.dss', keep_output=True, output_filename=fpath)
+	# Tests for voltageCompare and getVoltages
+	voltpath = 'voltages.csv'
+	outpath = 'voltageCompare_results.csv'
+	voltsdf = getVoltages('ieee240.clean.dss', keep_output=True, output_filename=voltpath)
 	errlim = 0.0
-	assert voltageCompare(fpath, fpath, keep_output=True) <= errlim, 'The error between the compared files exceeds the allowable limit of %s%%.'%(errlim*100)
-	assert voltageCompare(voltsdf, voltsdf, keep_output=True) <= errlim, 'The error between the compared files exceeds the allowable limit of %s%%.'%(errlim*100)
-	assert voltageCompare(fpath, voltsdf, keep_output=True) <= errlim, 'The error between the compared files exceeds the allowable limit of %s%%.'%(errlim*100)
-	os.remove(fpath)
+	assert voltageCompare(voltpath, voltpath, keep_output=True, output_filename=outpath) <= errlim, 'The error between the compared files exceeds the allowable limit of %s%%.'%(errlim*100)
+	assert voltageCompare(voltsdf, voltsdf, keep_output=True, output_filename=outpath) <= errlim, 'The error between the compared files exceeds the allowable limit of %s%%.'%(errlim*100)
+	assert voltageCompare(voltpath, voltsdf, keep_output=True, output_filename=outpath) <= errlim, 'The error between the compared files exceeds the allowable limit of %s%%.'%(errlim*100)
+	os.remove(voltpath)
+	os.remove(outpath)
 
 	# Contig line merging test
 	#fpath = 'ieee240.clean.dss'
