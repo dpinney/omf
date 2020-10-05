@@ -173,7 +173,8 @@ def work(modelDir, inputDict):
 	# MAKE SURE to add attackVars entry when adding another Attack Agent option to the html dropdown list and the name must match the value passed back from the form (inputDict["attackVariable"])!
 	attackVars = {}
 	attackVars["None"] = {"hackStart": defaultHackStart, "hackEnd": None, "percentHack": 0.0}
-	attackVars["curveSwitch"] = {"hackStart": defaultHackStart, "hackEnd": None, "percentHack": 0.45}
+	attackVars["VOLTAGE_OSCILLATION"] = {"hackStart": defaultHackStart, "hackEnd": None, "percentHack": 0.45} #TODO: Change to VOLTAGE_OSCILLATION
+	attackVars["VOLTAGE_IMBALANCE"] = {"hackStart": defaultHackStart, "hackEnd": None, "percentHack": 0.30} #percentHack cannot be above .4 for VOLTAGE_IMBALANCE
 
 	#check to make sure attackAgentType is in the attackVars dictionary, otherwise set it to None. This shouldn't ever be a problem since the user selects attackAgentType from a preset HTML dropdown.
 	if attackAgentType not in attackVars:
@@ -234,7 +235,7 @@ def work(modelDir, inputDict):
 
 		#Set up runType scenarios
 		#runType of 2 implies the base scenario - not training a defense agent, nor is there a defense agent entered
-		runType = 2
+		runType = "NO_DEFENSE"
 		defenseAgentPath = None
 
 		#set default values for attack variables
@@ -243,9 +244,12 @@ def work(modelDir, inputDict):
 		percentHackVal = 0.0
 		
 		#set pycigar attack variables
+		attackType = attackAgentType
 		hackStartVal = attackVars[attackAgentType]["hackStart"]
 		hackEndVal = attackVars[attackAgentType]["hackEnd"] #TODO: see if we need to change from a hard-coded value
 		percentHackVal = attackVars[attackAgentType]["percentHack"] #TODO: see if we need to change from a hard-coded value
+		if attackAgentType == "None":
+			attackType = "VOLTAGE_OSCILLATION" #TODO: See if changes can be made to pycigar to implement a "None" attack type - for now, we set it to a voltage oscillation attack with percent hack = 0.0
 
 		# check to see if we are trying to train a defense agent
 		if trainAgentValue:	
@@ -256,7 +260,8 @@ def work(modelDir, inputDict):
 				modelDir + "/PyCIGAR_inputs/circuit.dss",
 				modelDir + "/PyCIGAR_inputs/load_solar_data.csv",
 				modelDir + "/PyCIGAR_inputs/breakpoints.csv",
-				0,
+				'TRAIN',
+				attackType,
 				defenseAgentPath,
 				modelDir + "/pycigarOutput/",
 				start=startStep,
@@ -270,7 +275,7 @@ def work(modelDir, inputDict):
 		elif defenseAgentName != None:
 			defenseAgentPath = pJoin(modelDir, "pycigarOutput", defenseAgentName)
 			#runType of 1 implies the defense scenario - not training a defense agent, but a defense agent zip was uploaded
-			runType = 1 
+			runType = "DEFENSE" 
 
 		# TODO how to factor attackAgentType into pycigar inputs
 		# if there is no training selected and no attack variable, run without a defense agent
@@ -280,6 +285,7 @@ def work(modelDir, inputDict):
 			modelDir + "/PyCIGAR_inputs/load_solar_data.csv",
 			modelDir + "/PyCIGAR_inputs/breakpoints.csv",
 			runType,
+			attackType,
 			defenseAgentPath,
 			modelDir + "/pycigarOutput/",
 			start=startStep,
