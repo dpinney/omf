@@ -11,8 +11,9 @@ try:
 except:
 	warnings.warn('opendssdirect not installed; opendss functionality disabled.')
 
-def runDSS(dssFilePath):
-	''' Run DSS circuit definition file and set export path. Generates file named coords.csv in directory of input file.'''
+def runDSS(dssFilePath, keep_output=True):
+	''' Run DSS circuit definition file and set export path. Generates file named coords.csv in directory of input file.
+	To avoid generating this file, set the 'keep_output' parameter to False.'''
 	# Check for valid .dss file
 	assert '.dss' in dssFilePath.lower(), 'The input file must be an OpenDSS circuit definition file.'
 	# TODO: try/except on opening the file?
@@ -25,6 +26,9 @@ def runDSS(dssFilePath):
 	# also generate coordinates.
 	x = dss.run_command('Export BusCoords ' + dssFileLoc + '/coords.csv')
 	coords = pd.read_csv(dssFileLoc + '/coords.csv', header=None)
+	# TODO: reverse keep_output logic - Should default to cleanliness. Requires addition of 'keep_output=True' to all function calls.
+	if not keep_output:
+		os.remove(x)
 	coords.columns = ['Element', 'X', 'Y']
 	hyp = []
 	for index, row in coords.iterrows():
@@ -280,8 +284,7 @@ def getVoltages(dssFilePath, keep_output=False, output_filename='voltages.csv'):
 	or specify a filename for the output through the 'output_filename' parameter (i.e. '*.csv').'''
 	# TODO: (nice to have) vectorize it?
 	dssFileLoc = os.path.dirname(os.path.abspath(dssFilePath))
-	#coords = runDSS(dssFileLoc + '/' + dssFilePath, keep_output=False)
-	coords = runDSS(dssFileLoc + '/' + dssFilePath)
+	coords = runDSS(dssFileLoc + '/' + dssFilePath, keep_output=False)
 	dss.run_command('Export voltages ' + dssFileLoc + '/' + output_filename)
 	volts = pd.read_csv(dssFileLoc + '/' + output_filename, header=0)
 	volts.index = volts['Bus']
