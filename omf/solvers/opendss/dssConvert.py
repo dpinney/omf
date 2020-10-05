@@ -13,6 +13,7 @@ except:
 	warnings.warn('nrel ditto not installed. opendss conversion disabled.')
 from collections import OrderedDict
 from omf import feeder, distNetViz
+from pprint import pprint as pp
 
 def gridLabToDSS(inFilePath, outFilePath):
 	''' Convert gridlab file to dss. ''' 
@@ -461,57 +462,28 @@ def evilToOmd(evilTree, outPath):
 		json.dump(omdStruct, outFile, indent=4)
 
 def _tests():
-	# dssToTree test
-	FPATH = 'ieee240.clean.dss' # this circuit has 3-winding transformer definitions, with a winding per line
-	tree = dssToTree(FPATH)
-
-	## dssFilePrep test
-	#FPATH = 'iowa240.raw.dss'
-	#FPATH = 'ieee37.clean.dss'
-	#FPATH = 'ieee8500-unbal_ours.dss'
-	#FPATH = 'ieee123_solarRamp.dss'
-	#FPATH = 'iowa240_ours.dss'
-	#FPATH = 'ieee240.clean.dss'
-	#dssFilePrep(FPATH)
-
-	#try:
-	#	dssFilePrep(FPATH)
-	#except:
-	#	print('A general error was generated while preparing the file for the OMF.')
-	
-	
-	# *************BEGIN BLOCK: Junk code***************
-	## dssToTree_direct test
-	#FPATH = 'ieee240.clean.dss' # this circuit has 3-winding transformer definitions, with a winding per line
-	#import opendssdirect as dss
-	#dss.run_command('Redirect ' + FPATH)
-	#numelems = dss.Circuit.NumCktElements()
-	#tree = dssToTree_direct(FPATH)
-	#mssng = numelems - len(tree) + 1 # why is there an extra element in the tree?
-	#assert mssng==0, 'There are %s circuit elements unaccounted for by the function\'s output.'%(mssng)
-	# *************END BLOCK: Junk code*****************
-
-if __name__ == '__main__':
-	_tests()
-	#tree = dssToTree('ieee240_ours.dss')
-	# treeToDss(tree, 'ieee240_ours_xfrmrTest.dss')
-	# treeToDss(tree, 'ieee37p.dss')
-	# dssToMem('ieee37.dss')
+	FNAMES = ['ieee240.clean.dss']
+	# FNAMES =  ['ieee240.clean.dss', 'ieee37.clean.dss', 'ieee8500.clean.dss', 'ieeeLVWhateverItsCalled.clean.dss']
+	for fname in FNAMES:
+		tree = dssToTree(fname)
+		# pp([dict(x) for x in tree])
+		# treeToDss(tree, 'TEST.dss')
+		# TODO: Add compare voltage test here!
+		evil_glm = evilDssTreeToGldTree(tree)
+		pp(evil_glm)
+		# distNetViz.viz_mem(evil_glm, open_file=True, forceLayout=False)
+		# evil_dss = evilGldTreeToDssTree(evil_glm)
+		# treeToDss(tree, 'TEST2.dss')
+	# Deprecated tests section
 	# dssToGridLab('ieee37.dss', 'Model.glm') # this kind of works
 	# gridLabToDSS('ieee37_fixed.glm', 'ieee37_conv.dss') # this fails miserably
-	#from pprint import pprint as pp
-	#evil_glm = evilDssTreeToGldTree(tree)
-	#pp(evil_glm)
-	# print(evil_glm)
-	#distNetViz.viz_mem(evil_glm, open_file=True, forceLayout=True)
-	#distNetViz.insert_coordinates(evil_glm)
-	# evilToOmd(evil_glm, 'ieee37.dss.omd')
-	#evil_dss = evilGldTreeToDssTree(evil_glm)
-	# pp(evil_dss)
-	#treeToDss(evil_dss, 'HACKZ.dss')
+	# distNetViz.insert_coordinates(evil_glm)
 	#TODO: make parser accept keyless items with new !keyless_n key? Or is this just horrible syntax?
 	#TODO: define .dsc format and write syntax guide.
 	#TODO: what to do about transformers with invalid bus setting with the duplicate keys? Probably ignore.
 	#TODO: where to save the x.1.2.3 bus connectivity info?
 	#TODO: refactor in to well-defined bijections between object types?
 	#TODO: a little help on the frontend to hide invalid commands.
+
+if __name__ == '__main__':
+	_tests()
