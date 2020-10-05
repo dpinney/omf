@@ -24,12 +24,30 @@ def runDSS(dssFilePath, keep_output=True):
 	dss.run_command('Redirect ' + fullPath)
 	dss.run_command('Solve')
 	# also generate coordinates.
+	# TODO: Get the coords as a separate function (i.e. getCoords() below) and instead return dssFileLoc.
 	x = dss.run_command('Export BusCoords ' + dssFileLoc + '/coords.csv')
 	coords = pd.read_csv(dssFileLoc + '/coords.csv', header=None)
 	# TODO: reverse keep_output logic - Should default to cleanliness. Requires addition of 'keep_output=True' to all function calls.
 	if not keep_output:
 		os.remove(x)
 	coords.columns = ['Element', 'X', 'Y']
+	hyp = []
+	for index, row in coords.iterrows():
+		hyp.append(math.sqrt(row['X']**2 + row['Y']**2))
+	coords['radius'] = hyp
+	return coords
+
+def getCoords(dssFilePath, keep_output=True):
+	'''Takes in an OpenDSS circuit definition file and outputs the bus coordinates as a dataframe. If 
+	'keep_output' is set to True, a file named coords.csv is generated in the directory of input file.'''
+	# TODO: clean up and test the below copy-pasta'd logic
+	#dssFileLoc = runDSS(dssFilePath, keep_output=True)
+	dssFileLoc = runDSS(dssFilePath)
+	x = dss.run_command('Export BusCoords ' + dssFileLoc + '/coords.csv')
+	coords = pd.read_csv(dssFileLoc + '/coords.csv', header=None)
+	if not keep_output:
+		os.remove(x)
+	coords.columns = ['Element', 'X', 'Y', 'radius'] # most everything renames 'Element' to 'Bus'. currentPlot() and capacityPlot() change it to 'Index' for their own reasons.
 	hyp = []
 	for index, row in coords.iterrows():
 		hyp.append(math.sqrt(row['X']**2 + row['Y']**2))
