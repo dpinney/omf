@@ -55,13 +55,16 @@ def getCoords(dssFilePath, keep_output=True):
 	return coords
 
 def voltagePlot(filePath, PU=True):
-	''' Voltage plotting routine.'''
+	''' Voltage plotting routine. Creates 'voltages.csv' and 'Voltage [PU|V].png' in directory of input file.'''
+	# TODO: use getVoltages() here
 	dssFileLoc = os.path.dirname(os.path.abspath(filePath))
+	# TODO: use getCoords() here, if we write it.
+	#volt_coord = runDSS(filePath, keep_output=False)
 	volt_coord = runDSS(filePath)
 	dss.run_command('Export voltages ' + dssFileLoc + '/volts.csv')
-	# Generate voltage plots.
 	voltage = pd.read_csv(dssFileLoc + '/volts.csv')
-	volt_coord.columns = ['Bus', 'X', 'Y', 'radius']
+	# Generate voltage plots.
+	volt_coord.columns = ['Bus', 'X', 'Y', 'radius'] # radius would be obtained by getCoords().
 	voltageDF = pd.merge(volt_coord, voltage, on='Bus') # Merge on the bus axis so that all data is in one frame.
 	plt.title('Voltage Profile')
 	plt.xlabel('Distance from source[miles]')
