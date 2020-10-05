@@ -12,7 +12,10 @@ except:
 	warnings.warn('opendssdirect not installed; opendss functionality disabled.')
 
 def runDSS(dssFilePath):
-	''' Run DSS file and set export path. '''
+	''' Run DSS circuit definition file and set export path. Generates file named coords.csv in directory of input file.'''
+	# Check for valid .dss file
+	assert '.dss' in dssFilePath.lower(), 'The input file must be an OpenDSS circuit definition file.'
+	# TODO: try/except on opening the file?
 	# Get paths because openDss doesn't like relative paths.
 	fullPath = os.path.abspath(dssFilePath)
 	dssFileLoc = os.path.dirname(fullPath)
