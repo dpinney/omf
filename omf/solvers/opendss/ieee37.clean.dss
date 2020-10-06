@@ -70,8 +70,8 @@ new object=line.l35    phases=3 bus1=799r.1.2.3 bus2=701.1.2.3  linecode=721  le
 ! regulator - open delta with c leading, a lagging, base ldc setting is 1.5 + j3
 new object=transformer.reg1a phases=1 windings=2 bank=reg1 buses=(799.1.2,799r.1.2) conns='delta,delta' kvs="4.8,4.8" kvas="2000,2000" xhl=1
 new object=regcontrol.creg1a transformer=reg1a winding=2 vreg=122 band=2 ptratio=40 ctprim=350 r=-0.201 x=3.348
-new object=transformer.reg1c like=reg1a bank=reg1 buses=(799.3.2,799r.3.2)
-new object=regcontrol.creg1c like=creg1a transformer=reg1c r=2.799 x=1.848
+new object=transformer.reg1c phases=1 windings=2 bank=reg1  buses=(799.3.2,799r.3.2) conns='delta,delta' kvs="4.8,4.8" kvas="2000,2000" xhl=1 
+new object=regcontrol.creg1c transformer=reg1c winding=2 vreg=122 band=2 ptratio=40 ctprim=350 r=2.799 x=1.848
 new object=line.jumper phases=1 bus1=799.2 bus2=799r.2 r0=1e-3 r1=1e-3 x0=0 x1=0 c0=0 c1=0
 
 ! spot loads
