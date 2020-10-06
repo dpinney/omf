@@ -120,6 +120,38 @@
 				<label class="tooltip">Faulted Line<span class="classic">The line on which there is an outage at the beginning of the simulation.</span></label>
 				<input type="text" id="faultedLine" name="faultedLine">
 			</div>
+			<div class="wideInput">
+				<p class="inputSectionHeader">Customer Outage Cost Parameters</p>
+			</div>
+			<hr>
+			<div class="shortInput">
+				<label class="tooltip">Duration of Outage<span class="classic">The amount of time the customer has no power.</span></label>
+				<input type="text" id="duration" name="duration">
+			</div>
+			<div class="shortInput">
+				<label class="tooltip">Season<span class="classic">Specifies the season in which the outage occurs.</span></label>
+				<select id="season" name="season" />
+					<option value='summer'>Summer</option>
+					<option value='winter'>Winter</option>
+				</select>
+			</div>				
+			<div class="shortInput">
+				<label class="tooltip">Annual kWh Usage<span class="classic">Specifies the average amount of energy used each year by the customer.</span></label>
+				<input type="text" id="annualkWh" name="annualkWh">
+			</div>
+			<div class="shortInput">
+				<label class="tooltip">Business Type<span class="classic">Specifies the type of business under consideration.</span></label>
+				<select id="businessType" name="businessType" />
+					<option value='manufacturing'>Manufacturing</option>
+					<option value='construction'>Construction</option>
+					<option value='finance'>Finance</option>
+					<option value='retail'>Retail</option>
+					<option value='services'>Services</option>
+					<option value='utilities'>Utilities/Transportation</option>
+					<option value='public'>Public</option>
+					<option value='residential'>Residential</option>
+				</select>
+			</div>	
 			<div class="wideInput" style="text-align:right">
 				<button id="deleteButton" type="button" class="stoppedInline postRunInline" onclick="deleteModel()">Delete</button>
 				<button id="shareButton" type="button" class="postRunInline" onclick="shareModel()">Share</button>
@@ -173,6 +205,11 @@
 			<script type="text/javascript">
 				Plotly.newPlot("fig3Chart", JSON.parse(allOutputData["fig3Data"]), JSON.parse(allOutputData["fig3Layout"]) || {})
 			</script>
+		</div>
+		<p class="reportTitle postRun">Customer Outage Cost (wrt time)</p>
+		<div id="customerCostFig" class="content postRun" style="margin-top:0px">
+			<img id="customerCostFigImage" style="width:980px" />
+			<script>gebi("customerCostFigImage").src = "data:image/png;base64," + allOutputData["customerCostFig.png"]</script>
 		</div>
 		<p class="reportTitle postRun" style="page-break-before:always">Timeline</p>
 		<div id="outageCostCalc" class="tightContent postRun">

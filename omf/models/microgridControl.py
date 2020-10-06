@@ -1,4 +1,4 @@
-import random, re, datetime, json, os, tempfile, shutil, csv, math
+import random, re, datetime, json, os, tempfile, shutil, csv, math, base64
 from os.path import join as pJoin
 import subprocess
 import pandas as pd
@@ -7,6 +7,7 @@ import scipy
 from scipy import spatial
 import scipy.stats as st
 from sklearn.preprocessing import LabelEncoder
+import matplotlib.pyplot as plt
 import plotly as py
 import plotly.graph_objs as go
 from plotly.tools import make_subplots
@@ -158,7 +159,111 @@ def microgridTimeline(outputTimeline, workDir):
 
 	return timelineStatsHtml
 
-def graphMicrogrid(pathToOmd, pathToMicro, workDir, maxTime, stepSize, faultedLine):
+def customerCost(workDir, duration, season, annualkWh, businessType):
+
+	duration = int(duration)
+	annualkWh = int(annualkWh)
+
+	kWhTemplate = {}
+	kWhTemplate[5000000000] = np.array([5000000000,5000000000,5000000000,5000000000,5000000000,5000000000,5000000000,5000000000,5000000000,5000000000,5000000000,5000000000,5000000000])
+	kWhTemplate[1000000000] = np.array([1000000000,1000000000,1000000000,1000000000,1000000000,1000000000,1000000000,1000000000,1000000000,1000000000,1000000000,1000000000,1000000000])
+	kWhTemplate[175000000] = np.array([260000, 325000, 380000, 420000, 430000, 410000, 370000, 310000, 240000, 175000, 120000, 75000, 50000])
+	kWhTemplate[17500000] = np.array([5000, 7000, 14000, 21000, 28000, 35000, 42000, 47000, 49000, 47000, 45000, 35000, 28000])
+	kWhTemplate[1750000] = np.array([5000, 7000, 13000, 20000, 26000, 34000, 40000, 46000, 48000, 46000, 44000, 34000, 27000])
+	kWhTemplate[1182930] = np.array([5000, 7000, 10500, 13750, 17000, 20500, 23500, 26000, 27000, 27000, 26500, 24000, 21000])
+	kWhTemplate[118293] = np.array([1000, 1600, 2100, 2450, 2700, 3200, 3500, 4500, 4700, 4600, 4500, 3300, 2900])
+	kWhTemplate[11829] = np.array([1000, 1500, 2000, 2250, 2500, 2700, 3000, 3200, 3300, 3200, 3100, 2800, 2600])
+	kWhTemplate[0] = np.array([0,0,0,0,0,0,0,0,0,0,0,0,0])
+
+	def kWhApprox(kWhDict, annualkWh, iterate):
+		step = 0
+		while step < iterate:
+			keys = list(kWhDict.keys())
+			keys.sort()
+
+			key = 0
+			while key < len(keys):
+				if annualkWh > keys[key]:
+					key+=1
+				else:
+					newEntry = (keys[key] + keys[key+1])/2
+					averageCost = (kWhDict[keys[key]] + kWhDict[keys[key+1]])/2
+					kWhDict[newEntry] = averageCost
+					break
+			step+=1
+			if step == iterate:
+				return(kWhDict[newEntry])
+
+	kWhEstimate = kWhApprox(kWhTemplate, annualkWh, 10)
+	print(kWhEstimate)
+
+	if annualkWh > 1000000:
+		winter = np.array([13000, 20000, 32000, 45000, 63000, 79000, 95000, 105000, 108000, 104000, 95000, 80000, 64000])
+		summer = np.array([7000, 10000, 14000, 19000, 26000, 34000, 39000, 42000, 43000, 42000, 39000, 34000, 26000])
+		manufacturing = np.array([9000, 12000, 19000, 26000, 38000, 48000, 59000, 67000, 69000, 68000, 65000, 56000, 46000])
+		construction = np.array([10000, 18000, 27000, 40000, 56000, 72000, 86000, 98000, 102000, 101000, 96000, 82000, 68000])
+		finance = np.array([8000, 10000, 17000, 22000, 31000, 40000, 48000, 55000, 58000, 57000, 54000, 45000, 38000])
+		public = np.array([6000, 9000, 15000, 17000, 22000, 29000, 35000, 39000, 41000, 41000, 38000, 32000, 27000])
+		retail = np.array([6000, 9000, 15000, 17000, 22000, 29000, 35000, 39000, 41000, 41000, 38000, 32000, 27000])
+		utilities = np.array([6000, 9000, 14000, 16000, 19000, 23000, 29000, 33000, 35000, 34000, 32000, 26000, 22000])
+		services = np.array([5000, 7000, 8000, 10000, 16000, 19000, 22000, 25000, 26000, 25000, 23000, 21000, 18000])
+
+	elif businessType != 'residential':
+		winter = np.array([1200, 1800, 2500, 3200, 4100, 4900, 5600, 6200, 6400, 6400, 6200, 5700, 5000])
+		summer = np.array([900, 1300, 1700, 2200, 2800, 3300, 3800, 4200, 4400, 4400, 4200, 3900, 3400])
+		manufacturing = np.array([1200, 1900, 2600, 3500, 4600, 5700, 6600, 7400, 7800, 7900, 7700, 7100, 6200])
+		construction = np.array([900, 1300, 1800, 2500, 3250, 4000, 4600, 5200, 5500, 5600, 5400, 5000, 4400])
+		finance = np.array([600, 750, 1150, 1500, 2000, 2400, 2800, 3200, 3350, 3400, 3300, 3100, 2650])
+		retail = np.array([600, 700, 1000, 1400, 1700, 2200, 2600, 2850, 3050, 3100, 3000, 2750, 2400])
+		services = np.array([500, 600, 800, 1150, 1400, 1750, 2100, 2350, 2400, 2450, 2350, 2200, 1950])
+		utilities = np.array([500, 550, 750, 1000, 1300, 1600, 1800, 2050, 2150, 2150, 2100, 1950, 1750])
+		public = np.array([350, 500, 600, 800, 1050, 1250, 1500, 1600, 1750, 1750, 1700, 1600, 1400])
+	else:
+		winter = np.array([3, 3, 4, 5, 6, 7, 8, 9, 10, 10, 11, 11, 12])
+		summer = np.array([2, 3, 4, 4, 5, 6, 7, 8, 9, 9, 10, 10, 10])
+
+	averageSeason = np.sum((winter + summer)/2)/13
+	averageSummer = np.sum(summer)/13
+	averageWinter = np.sum(winter)/13
+	if season == 'summer':
+		seasonMultiplier = averageSummer/averageSeason
+	else:
+		seasonMultiplier = averageWinter/averageSeason
+	kWhEstimate = kWhEstimate * seasonMultiplier
+	print(kWhEstimate)
+
+	if businessType != 'residential':
+		averageBusiness = np.sum((manufacturing + construction + finance + retail + services + utilities + public)/7)/13
+		if businessType == 'manufacturing':
+			averageManufacturing = np.sum(manufacturing)/13
+			businessMultiplier = averageManufacturing/averageBusiness
+		elif businessType == 'construction':
+			averageConstruction = np.sum(construction)/13
+			businessMultiplier = averageConstruction/averageBusiness
+		elif businessType == 'finance':
+			averageFinance = np.sum(finance)/13
+			businessMultiplier = averageFinance/averageBusiness
+		elif businessType == 'retail':
+			averageRetail = np.sum(retail)/13
+			businessMultiplier = averageRetail/averageBusiness
+		elif businessType == 'services':
+			averageServices = np.sum(services)/13
+			businessMultiplier = averageServices/averageBusiness
+		elif businessType == 'utilities':
+			averageUtilities = np.sum(utilities)/13
+			businessMultiplier = averageUtilities/averageBusiness
+		else:
+			averagePublic = np.sum(public)/13
+			businessMultiplier = averagePublic/averageBusiness
+		kWhEstimate = kWhEstimate * businessMultiplier
+	times = np.array([0,1,2,3,4,5,6,7,8,9,10,11,12])
+	print(kWhEstimate)
+	outageCost = kWhEstimate[duration]
+	plt.plot(times, kWhEstimate)
+	plt.savefig(workDir + '/customerCostFig')
+	return {'customerOutageCost': outageCost}
+
+def graphMicrogrid(pathToOmd, pathToMicro, workDir, maxTime, stepSize, faultedLine, duration, season, annualkWh, businessType):
 	# read in the OMD file as a tree and create a geojson map of the system
 	if not workDir:
 		workDir = tempfile.mkdtemp()
@@ -297,7 +402,9 @@ def graphMicrogrid(pathToOmd, pathToMicro, workDir, maxTime, stepSize, faultedLi
 	with open(pJoin(workDir,'geoDict.js'),'w') as outFile:
 		json.dump(feederMap, outFile, indent=4)
 
-	return {'timelineStatsHtml': timelineStatsHtml, 'gens': gens, 'loads': loads, 'volts': volts}
+	customerOutageCost = customerCost(workDir, duration, season, annualkWh, businessType)
+
+	return {'timelineStatsHtml': timelineStatsHtml, 'gens': gens, 'loads': loads, 'volts': volts, 'customerOutageCost': customerOutageCost}
 
 def work(modelDir, inputDict):
 	# Copy specific climate data into model directory
@@ -325,7 +432,11 @@ def work(modelDir, inputDict):
 		modelDir, #Work directory.
 		inputDict['maxTime'], #computational time limit
 		inputDict['stepSize'], #time step size
-		inputDict['faultedLine']) #line faulted
+		inputDict['faultedLine'],#line faulted
+		inputDict['duration'], 
+		inputDict['season'],
+		inputDict['annualkWh'], 
+		inputDict['businessType']) 
 	
 	# Textual outputs of cost statistic
 	with open(pJoin(modelDir,'timelineStats.html')) as inFile:
@@ -334,6 +445,10 @@ def work(modelDir, inputDict):
 	#The geojson dictionary to load into the outageCost.py template
 	with open(pJoin(modelDir,'geoDict.js'),'rb') as inFile:
 		outData['geoDict'] = inFile.read().decode()
+
+	# Image outputs.
+	with open(pJoin(modelDir,'customerCostFig.png'),'rb') as inFile:
+		outData['customerCostFig.png'] = base64.standard_b64encode(inFile.read()).decode()
 
 	# Plotly outputs.
 	layoutOb = go.Layout()
@@ -361,6 +476,10 @@ def new(modelDir):
 		'maxTime': '20',
 		'stepSize': '1',
 		'faultedLine': 'l32',
+		'duration': '5', 
+		'season': 'winter', 
+		'annualkWh': '17550000', 
+		'businessType': 'manufacturing',
 		'microFileName': 'microComponents.json',
 		'microData': micro_data
 	}
