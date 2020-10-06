@@ -13,6 +13,7 @@ except:
 	warnings.warn('nrel ditto not installed. opendss conversion disabled.')
 from collections import OrderedDict
 from omf import feeder, distNetViz
+from pprint import pprint as pp
 
 def gridLabToDSS(inFilePath, outFilePath):
 	''' Convert gridlab file to dss. ''' 
@@ -106,10 +107,10 @@ def dssToTree(pathToDss):
 	# Print to file
 	#with open("dssTreeRepresentation.csv", 'w') as outFile:
 	#	ii = 1
-	#	for item in contents:
-	#		outFile.write(str(item) + "\n")
+	#	for k,v in contents.items():
+	#		outFile.write(str(k) + "\n")
 	#		ii = ii + 1
-	#		for k2,v2 in item.items():
+	#		for k2,v2 in v.items():
 	#			outFile.write("," + str(k2) + "," + str(v2) + "\n")
 	return list(contents.values())
 
@@ -122,6 +123,163 @@ def treeToDss(treeObject, outputPath):
 				line = f'{line} {key}={ob[key]}'
 		outFile.write(line + '\n')
 	outFile.close()
+
+def dssFilePrep(fpath):
+	'''**Under construction as of 01OCT2020** Prepares an OpenDSS circuit definition file (.dss) for consumption by the 
+	OMF. The expected input is the path to a .dss master file that redirects to or
+	compiles from other .dss files within the same directory. The path can also 
+	indicate a single .dss file that does not contain redirect or compile commands.'''
+	
+	import opendssdirect as dss
+	import pandas as pd
+	import tempfile as tf
+	import re
+
+	dssFilePath = os.path.realpath(fpath)
+	dssDirPath = os.path.dirname(dssFilePath)
+	# Before doing anything else, ensure the file at fpath can be found
+	try:
+		with open(dssFilePath):
+			pass
+	except Exception as ex:
+		print('While accessing the file located at %s, the following exception occured: %s'%(dssDirPath, ex))
+	# TODO could wrap this in a try/catch block to ensure tmpdir is cleaned up. (seems like it actually isn't cleaned on premature exit)
+	tfdir = tf.TemporaryDirectory()
+	with tfdir as tempDir:
+		exptDirPath = tempDir + '/' + 'OmfCktExport'
+		dss.run_command('Clear')
+		x = dss.run_command('Redirect ' + dssFilePath)
+		x = dss.run_command('Solve')
+		dss.run_command('Save Circuit ' + 'purposelessFileName.dss ' + exptDirPath)
+		# Manipulate buscoords file to create generate bus list commands
+		dss.run_command('Export BusCoords ' + exptDirPath + '/BusCoords.dss')
+		coords = pd.read_csv(exptDirPath + '/BusCoords.dss', header=None)
+		coords.columns = ['Element', 'X', 'Y']
+		coordscmds = []
+		for i,x in coords.iterrows():
+			elmt = x['Element']
+			xcoord = x['X']
+			ycoord = x['Y']
+			coordscmds.append('SetBusXY bus=' + elmt + ' X=' + str(xcoord) + ' Y=' + str(ycoord) + '\n') # save commands for later usage
+		  
+		# Get Master.DSS from exported files and insert content from other files
+		outfilepath = dssDirPath + '/' + fpath[:-3] + 'clean.tst.dss'
+		#with open(exptDirPath + '/Master.DSS', 'r') as ogMaster, open(dssDirPath + '/' + fpath[:-3] + '.clean.dss') as catMaster:
+		with open(exptDirPath + '/Master.DSS', 'r') as ogMaster, open(outfilepath, 'a') as catMaster:
+			catMaster.truncate(0)
+			for line in ogMaster:
+				# wherever there is a redirect or a compile, get the code from that file and insert into catMaster
+				if line.lower().startswith('redirect') or line.lower().startswith('compile'):
+					catMaster.write('! ' + line)
+					addnFilename = line.split(' ')[1] # get path of file to insert (accounts for inline comments following the command)
+					addnFilename = re.sub('\s','', addnFilename)
+					with open(exptDirPath + '/' + addnFilename, 'r') as addn: # will error if file is not located in same directory as Master.dss
+						addn = addn.read()
+						catMaster.write(addn)
+				elif line.lower().startswith('buscoords'):
+					catMaster.write('! ' + line)
+					catMaster.writelines(coordscmds)
+				else:
+					catMaster.write(line)
+	# tfdir.cleanup() # not necessary because tmpdir gets cleaned up once context manager closes (on windows, there was a question of whether the file gets cleaned up or not)
+	with open(fpath, 'r') as inFile, open(fpath[:-4]+'.clean.dss', 'w') as outFile:
+		# apply all dat regex
+		contents = inFile.read()
+		contents = re.sub('New (?!object=)', 'New object=', contents) # Doesn't look like the ^ (begins with) regex syntax works here...
+		contents = re.sub('Edit (?!object=)', 'Edit object=', contents)
+		contents = re.sub('(?<=\d)(\s)+(?=\d)', ',', contents)
+		contents = re.sub('(\s)+\|(\s)+', '|', contents)
+		contents = re.sub('\[(\s)*', '[', contents)
+		contents = re.sub('(\s)*\]', ']', contents)
+		contents = re.sub('"', '', contents)
+		contents = re.sub('(?<=(\d|\w))(\s)*,(\s)+(?=(\d|\w))', ',', contents)
+		contents = re.sub(', \)', ',)', contents)
+		outFile.write(contents)
+
+def _dfToListOfDicts(dfin, objtype):
+	'''Converts the contents of a data frame into a list of dictionaries, where each
+		dictionary represents a single row, with keys corresponding to the column names.'''
+		#TODO: mapping for attribute renaming dss<->tree (use objtype for this)
+	#print(dfin.head(1))
+	dictlst = []
+	dfin.rename(columns={'Name':'Object'}, inplace=True)
+	#TODO add any other attribute name conversions
+	#TODO: change any lists to tuples?
+	for name, obj in dfin.iterrows(): #TODO refactor for performance (very slow to iterate over rows. vectorize?)
+		obj['Object'] = objtype + '.' + str(name)
+		obj_dict = dict(zip(obj.index,obj))
+		dictlst.append(obj_dict)
+	return dictlst
+
+def _dssToTree_dssdirect(fpath):
+	'''Do not use this function other than to evaluate the accuracy of opendssdirect.py. 
+	After reviewing the file output at the end of this function, it is apparent that 
+	opendssdirect does not handle the three-winding/repeating key object property 
+	definition syntax. Because of this, it was decided that we should pursue a custom 
+	parser after all, roundtripping the user-input circuit definition file through OpenDSS 
+	to standardize it before parsing.'''
+	# import circuit via opendssdirect
+	import opendssdirect as dss
+	dss.run_command('Redirect ' + fpath)
+	dss.run_command('Solve')
+	tree = [] # list of dictionaries
+	tree.extend(_dfToListOfDicts(dss.utils.capacitors_to_dataframe(),'Capacitor'))
+	tree.extend(_dfToListOfDicts(dss.utils.fuses_to_dataframe(), 'Fuse'))
+	tree.extend(_dfToListOfDicts(dss.utils.generators_to_dataframe(), 'Generator'))
+	tree.extend(_dfToListOfDicts(dss.utils.isource_to_dataframe(), 'ISource'))
+	tree.extend(_dfToListOfDicts(dss.utils.lines_to_dataframe(), 'Line'))
+	tree.extend(_dfToListOfDicts(dss.utils.loads_to_dataframe(), 'Load'))
+	tree.extend(_dfToListOfDicts(dss.utils.loadshape_to_dataframe(), 'LoadShape'))
+	tree.extend(_dfToListOfDicts(dss.utils.meters_to_dataframe(), 'Meter'))
+	tree.extend(_dfToListOfDicts(dss.utils.monitors_to_dataframe(), 'Monitor'))
+	tree.extend(_dfToListOfDicts(dss.utils.pvsystems_to_dataframe(), 'PvSystem'))
+	tree.extend(_dfToListOfDicts(dss.utils.reclosers_to_dataframe(), 'Recloser'))
+	tree.extend(_dfToListOfDicts(dss.utils.regcontrols_to_dataframe(), 'RegControl'))
+	tree.extend(_dfToListOfDicts(dss.utils.relays_to_dataframe(), 'Relay'))
+	tree.extend(_dfToListOfDicts(dss.utils.sensors_to_dataframe(), 'Sensor'))
+	tree.extend(_dfToListOfDicts(dss.utils.transformers_to_dataframe(), 'Transformer'))
+	tree.extend(_dfToListOfDicts(dss.utils.vsources_to_dataframe(), 'VSource'))
+	tree.extend(_dfToListOfDicts(dss.utils.xycurves_to_dataframe(), 'XyCurve'))
+	
+	## One way of getting all the circuit elements....
+	# Add the connections (there is not a way I can see to get this info the pandas way...can we ask someone? Do it the other way)
+	with open("dssTreeRepresentation_direct.csv", 'w') as outFile:
+		for i,objd in enumerate(tree):
+			dss.Circuit.SetActiveElement(objd['Object'])
+			objd['Cnxns'] = dss.CktElement.BusNames()
+			outFile.write(str(i) + "\n")
+			for k,v in objd.items():
+					outFile.write("," + str(k) + "," + str(v) + "\n")
+	
+	## A second way of getting all the circuit elements....
+		## Add the connections (there is not a way I can see to get this info the pandas way...can we ask someone? Do it the other way)
+		#allelms = dss.Circuit.AllElementNames()
+		#for elm in allelms:
+			#dss.Circuit.SetActiveElement(elm)
+			## Get variable keys and values (not sure if these matter...)
+			#nms = dss.CktElement.AllVariableNames()
+			#vls = dss.CktElement.AllVariableValues()
+			#elm_dict = dict(zip(nms,vls))
+			#elm_dict_vrbls = dict(zip(nms,vls))
+			## Get property keys
+			#prp_keys = dss.CktElement.AllPropertyNames()
+			## Loop to get property values
+			#for item in dss.utils.Iterator(prp_keys):
+				#prp_keys.#how to read the property of the active element?
+			#elm_dict = elm_dict_vrbls.update(prps)
+			## Add busnames
+			#elm_dict['cnxns'] = dss.CktElement.BusNames()
+			#tree.append(elm_dict)
+		#allNodes = dss.Circuit.AllNodeNames()
+		#allbuses = dss.Circuit.AllBusNames()
+		#tree.append(allNodes)
+		## Get the buses
+		#for node in allNodes:
+			#pass
+		#for bus in allBuses:
+			#dss.Circuit.SetActiveBus(node)
+			#cnxns = dss.Bus.LineList().append(dss.Bus.LoadList())
+	return tree
 
 def _extend_with_exc(from_d, to_d, exclude_list):
 	''' Add all items in from_d to to_d that aren't in exclude_list. '''
@@ -304,34 +462,28 @@ def evilToOmd(evilTree, outPath):
 		json.dump(omdStruct, outFile, indent=4)
 
 def _tests():
-	# dssToTree test
-	FPATH = 'ieee240_ours.dss' # this circuit has 3-winding transformer definitions, with a winding per line
-	tree = dssToTree(FPATH)
-
-	# other tests...
-
-if __name__ == '__main__':
-	#_tests()
-	pass
-	#tree = dssToTree('ieee240_ours.dss')
-	# treeToDss(tree, 'ieee240_ours_xfrmrTest.dss')
-	# treeToDss(tree, 'ieee37p.dss')
-	# dssToMem('ieee37.dss')
+	FNAMES = ['ieee240.clean.dss']
+	# FNAMES =  ['ieee240.clean.dss', 'ieee37.clean.dss', 'ieee8500.clean.dss', 'ieeeLVWhateverItsCalled.clean.dss']
+	for fname in FNAMES:
+		tree = dssToTree(fname)
+		# pp([dict(x) for x in tree])
+		# treeToDss(tree, 'TEST.dss')
+		# TODO: Add compare voltage test here!
+		evil_glm = evilDssTreeToGldTree(tree)
+		pp(evil_glm)
+		# distNetViz.viz_mem(evil_glm, open_file=True, forceLayout=False)
+		# evil_dss = evilGldTreeToDssTree(evil_glm)
+		# treeToDss(tree, 'TEST2.dss')
+	# Deprecated tests section
 	# dssToGridLab('ieee37.dss', 'Model.glm') # this kind of works
 	# gridLabToDSS('ieee37_fixed.glm', 'ieee37_conv.dss') # this fails miserably
-	#from pprint import pprint as pp
-	#evil_glm = evilDssTreeToGldTree(tree)
-	#pp(evil_glm)
-	# print(evil_glm)
-	#distNetViz.viz_mem(evil_glm, open_file=True, forceLayout=True)
-	#distNetViz.insert_coordinates(evil_glm)
-	# evilToOmd(evil_glm, 'ieee37.dss.omd')
-	#evil_dss = evilGldTreeToDssTree(evil_glm)
-	# pp(evil_dss)
-	#treeToDss(evil_dss, 'HACKZ.dss')
+	# distNetViz.insert_coordinates(evil_glm)
 	#TODO: make parser accept keyless items with new !keyless_n key? Or is this just horrible syntax?
 	#TODO: define .dsc format and write syntax guide.
 	#TODO: what to do about transformers with invalid bus setting with the duplicate keys? Probably ignore.
 	#TODO: where to save the x.1.2.3 bus connectivity info?
 	#TODO: refactor in to well-defined bijections between object types?
 	#TODO: a little help on the frontend to hide invalid commands.
+
+if __name__ == '__main__':
+	_tests()

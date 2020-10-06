@@ -11,8 +11,12 @@ try:
 except:
 	warnings.warn('opendssdirect not installed; opendss functionality disabled.')
 
-def runDSS(dssFilePath):
-	''' Run DSS file and set export path. '''
+def runDSS(dssFilePath, keep_output=True):
+	''' Run DSS circuit definition file and set export path. Generates file named coords.csv in directory of input file.
+	To avoid generating this file, set the 'keep_output' parameter to False.'''
+	# Check for valid .dss file
+	assert '.dss' in dssFilePath.lower(), 'The input file must be an OpenDSS circuit definition file.'
+	# TODO: try/except on opening the file?
 	# Get paths because openDss doesn't like relative paths.
 	fullPath = os.path.abspath(dssFilePath)
 	dssFileLoc = os.path.dirname(fullPath)
@@ -20,8 +24,12 @@ def runDSS(dssFilePath):
 	dss.run_command('Redirect ' + fullPath)
 	dss.run_command('Solve')
 	# also generate coordinates.
+	# TODO: Get the coords as a separate function (i.e. getCoords() below) and instead return dssFileLoc.
 	x = dss.run_command('Export BusCoords ' + dssFileLoc + '/coords.csv')
 	coords = pd.read_csv(dssFileLoc + '/coords.csv', header=None)
+	# TODO: reverse keep_output logic - Should default to cleanliness. Requires addition of 'keep_output=True' to all function calls.
+	if not keep_output:
+		os.remove(x)
 	coords.columns = ['Element', 'X', 'Y']
 	hyp = []
 	for index, row in coords.iterrows():
@@ -29,14 +37,34 @@ def runDSS(dssFilePath):
 	coords['radius'] = hyp
 	return coords
 
+def getCoords(dssFilePath, keep_output=True):
+	'''Takes in an OpenDSS circuit definition file and outputs the bus coordinates as a dataframe. If 
+	'keep_output' is set to True, a file named coords.csv is generated in the directory of input file.'''
+	# TODO: clean up and test the below copy-pasta'd logic
+	#dssFileLoc = runDSS(dssFilePath, keep_output=True)
+	dssFileLoc = runDSS(dssFilePath)
+	x = dss.run_command('Export BusCoords ' + dssFileLoc + '/coords.csv')
+	coords = pd.read_csv(dssFileLoc + '/coords.csv', header=None)
+	if not keep_output:
+		os.remove(x)
+	coords.columns = ['Element', 'X', 'Y', 'radius'] # most everything renames 'Element' to 'Bus'. currentPlot() and capacityPlot() change it to 'Index' for their own reasons.
+	hyp = []
+	for index, row in coords.iterrows():
+		hyp.append(math.sqrt(row['X']**2 + row['Y']**2))
+	coords['radius'] = hyp
+	return coords
+
 def voltagePlot(filePath, PU=True):
-	''' Voltage plotting routine.'''
+	''' Voltage plotting routine. Creates 'voltages.csv' and 'Voltage [PU|V].png' in directory of input file.'''
+	# TODO: use getVoltages() here
 	dssFileLoc = os.path.dirname(os.path.abspath(filePath))
+	# TODO: use getCoords() here, if we write it.
+	#volt_coord = runDSS(filePath, keep_output=False)
 	volt_coord = runDSS(filePath)
 	dss.run_command('Export voltages ' + dssFileLoc + '/volts.csv')
-	# Generate voltage plots.
 	voltage = pd.read_csv(dssFileLoc + '/volts.csv')
-	volt_coord.columns = ['Bus', 'X', 'Y', 'radius']
+	# Generate voltage plots.
+	volt_coord.columns = ['Bus', 'X', 'Y', 'radius'] # radius would be obtained by getCoords().
 	voltageDF = pd.merge(volt_coord, voltage, on='Bus') # Merge on the bus axis so that all data is in one frame.
 	plt.title('Voltage Profile')
 	plt.xlabel('Distance from source[miles]')
@@ -227,36 +255,69 @@ def capacityPlot(filePath):
 	plt.savefig(dssFileLoc + '/Capacity Profile.png')
 	plt.clf()
 
-def compareVoltsFiles(origFile, modFile):
-	# Compares two of the files output by the 'Export voltages" opendss command. returns the maximum error encountered.
-	if not ('.csv' in origFile and '.csv' in modFile):
-		assert True, 'Input files must be .csv files of voltages output by OpenDss'
-	ovolts = pd.read_csv(origFile, header=0)
-	ovolts.index = ovolts['Bus']
-	ovolts.drop(labels='Bus', axis=1, inplace=True)
-	ovolts = ovolts.astype(float, copy=True)
-	mvolts = pd.read_csv(modFile, header=0)
-	mvolts.index = mvolts['Bus']
-	mvolts.drop(labels='Bus', axis=1, inplace=True)
-	mvolts = mvolts.astype(float, copy=True)
-	cols = mvolts.columns
-	resultErr = pd.DataFrame(index=mvolts.index, columns=cols)
-	assert ovolts.size == mvolts.size, 'The matrices represented by the input files must have identical dimensions.'
-	resultErr =  abs(ovolts - mvolts)/ovolts
+def voltageCompare(in1, in2, keep_output=False, output_filename='voltageCompare_results.csv'):
+	'''Compares two instances of the information provided by the 'Export voltages' opendss command and outputs 
+	the maximum error encountered for any value compared. If the 'keep_output' flag is set to 'True', also 
+	outputs a file that describes the maximum, average, and minimum error encountered for each column. Use the 
+	'output_filename' parameter to set the output file name. Inputs can be formatted as a .csv file of voltages
+	output by OpenDSS, or as a dataframe of voltages obtained using the OMF's getVoltages(). Buses contained in 
+	input files must match in name and order.'''
+	# TODO: would inter-quartile ranges be more descriptive?
+	# TODO: add 'set_theoretical={1|2}' flag to mark which input should be considered the base case in comparison
+	ins = [in1, in2]
+	csvins = [x for x in ins if type(x)==str and '.csv' in x.lower()]
+	dfins = [x for x in ins if type(x)==pd.DataFrame]
+	assert (len(csvins)+len(dfins))==2, 'Inputs must either be a .csv file of voltages as output by the OpenDss \'Export Voltages\' command, or a dataframe of voltages output by the omf method \'getVoltages()\'.'
+	for pth in csvins:
+		try:
+			df = pd.read_csv(pth, header=0)
+			df.index = df['Bus']
+		except:
+			print('Please ensure that the input file exists and is formatted like the file output by the OpenDss \'Export Voltages\' command.')
+		df.drop(labels='Bus', axis=1, inplace=True)
+		df = df.astype(float, copy=True)
+		dfins.append(df)
+	# now everything is in a dataframe. unpack this, because the remainder of this code block is not vectorized. (how to
+	# provide difference between multiple values, i.e. [v1,v2,v3,...,vn]? permuting would be ridiculous. not worth it.)
+	avolts = dfins[0]
+	bvolts = dfins[1]
+	assert avolts.size == bvolts.size, 'The matrices represented by the input files must have identical dimensions.'
+	cols = bvolts.columns
+	resultErr = pd.DataFrame(index=bvolts.index, columns=cols)
+ 	# TODO: add handling for 'set_theoretical={1|2}' flag to mark which input should be considered the base case in comparison
+	resultErr =  abs(avolts - bvolts)/avolts
 	resultSumm = pd.DataFrame(index=['Max', 'Avg', 'Min'], columns=cols)
 	for c in cols:
 		resultSumm.loc['Max',c] = max(resultErr.loc[:,c])
 		resultSumm.loc['Avg',c] = sum(resultErr.loc[:,c])/len(resultErr.loc[:,c])
 		resultSumm.loc['Min',c] = min(resultErr.loc[:,c])
 	maxErr = max(resultSumm.loc['Max',:])
-	resultSumm.to_csv('volts_comparison_results.csv', header=True, index=True, mode='w')
-	resultSumm = pd.DataFrame(index=[''],columns=cols)
-	resultSumm.to_csv('volts_comparison_results.csv', header=False, index=True, mode='a')
-	resultErr.to_csv('volts_comparison_results.csv', header=False, index=True, mode='a')
+	if keep_output:
+		resultSumm.to_csv(output_filename, header=True, index=True, mode='w')
+		resultSumm = pd.DataFrame(index=[''],columns=cols)
+		resultSumm.to_csv(output_filename, header=False, index=True, mode='a')
+		resultErr.to_csv(output_filename, header=True, index=True, mode='a')
 	return maxErr
 
+def getVoltages(dssFilePath, keep_output=False, output_filename='voltages.csv'):
+	'''Obtains the OpenDss voltage output for a OpenDSS circuit definition file (*.dss). Set the 
+	'keep_output' flag to 'True' to save output to the input file's directory as 'voltages.csv',
+	or specify a filename for the output through the 'output_filename' parameter (i.e. '*.csv').'''
+	# TODO: (nice to have) vectorize it?
+	dssFileLoc = os.path.dirname(os.path.abspath(dssFilePath))
+	coords = runDSS(dssFileLoc + '/' + dssFilePath, keep_output=False)
+	dss.run_command('Export voltages ' + dssFileLoc + '/' + output_filename)
+	volts = pd.read_csv(dssFileLoc + '/' + output_filename, header=0)
+	volts.index = volts['Bus']
+	volts.drop(labels='Bus', axis=1, inplace=True)
+	volts = volts.astype(float, copy=True)
+	if not keep_output:
+		os.remove(output_filename)
+	return volts
+
 def _stripPhases(dssObjId): # (Is this even worth encapsulating?) YES.
-	# expected input is a string of format <uniqueName> (or perhaps <dssObjectType>.<uniqueName> )
+	'''**JUNK** Do not use.'''
+	# Expected input is a string of format <uniqueName> (or perhaps <dssObjectType>.<uniqueName> )
 	dssObjId = dssObjId.split('.')
 	if len(dssObjId) == 1:
 		return dssObjId
@@ -346,37 +407,32 @@ def mergeContigLines(tree):
 
 
 def _tests():
-	# compareVoltsFiles test
-	fpath1 = 'ieee240_ours_EXP_VOLTAGES.csv'
-	fpath2 = 'ieee240_ours_EXP_VOLTAGES.csv'
+	# Tests for voltageCompare and getVoltages
+	voltpath = 'voltages.csv'
+	outpath = 'voltageCompare_results.csv'
+	voltsdf = getVoltages('ieee240.clean.dss', keep_output=True, output_filename=voltpath)
 	errlim = 0.0
-	assert compareVoltsFiles(fpath1, fpath2) <= errlim, 'The error between the compared files exceeds the allowable limit of %s%%.'%(errlim*100)
-
-	# compareVoltsTrees test
-	fpath1 = 'ieee240.clean.dss'
-	fpath2 = 'ieee240.clean.dss'
-	errlim = 0.0
-	assert compareVoltsTrees(fpath1, fpath2) <= errlim, 'The error between the compared trees exceeds the allowable limit of %s%%.'%(errlim*100)
+	assert voltageCompare(voltpath, voltpath, keep_output=True, output_filename=outpath) <= errlim, 'The error between the compared files exceeds the allowable limit of %s%%.'%(errlim*100)
+	assert voltageCompare(voltsdf, voltsdf, keep_output=True, output_filename=outpath) <= errlim, 'The error between the compared files exceeds the allowable limit of %s%%.'%(errlim*100)
+	assert voltageCompare(voltpath, voltsdf, keep_output=True, output_filename=outpath) <= errlim, 'The error between the compared files exceeds the allowable limit of %s%%.'%(errlim*100)
+	os.remove(voltpath)
+	os.remove(outpath)
 
 	# Contig line merging test
-	#FPATH = 'ieee240.clean.dss'
+	#fpath = 'ieee240.clean.dss'
 	#import dssConvert
-	#tree = dssConvert.dssToTree(FPATH)
-	#networkPlot(FPATH) # DEBUG (not working. Line 114 of this file complains about 'BUS2' not having coords)
+	#tree = dssConvert.dssToTree(fpath)
+	#networkPlot(fpath) # DEBUG (not working. Line 114 of this file complains about 'BUS2' not having coords)
 	#gldtree = dssConvert.evilDssTreeToGldTree(tree) # DEBUG
 	#dssConvert.distNetViz.viz_mem(gldtree, open_file=True, forceLayout=True) # DEBUG
 	#oldsz = len(tree)
 	#mergeContigLines(tree)
 	#newsz = len(tree)
-	##dssConvert.treeToDss(tree, FPATH[:-4] + '-reduced.dss')
-	##networkPlot(FPATH[:-4] +'-reduced.dss') # DEBUG (not working. Line 114 of this file complains about 'BUS2' not having coords)
+	##dssConvert.treeToDss(tree, fpath[:-4] + '-reduced.dss')
+	##networkPlot(fpath[:-4] +'-reduced.dss') # DEBUG (not working. Line 114 of this file complains about 'BUS2' not having coords)
 	##gldtree = dssConvert.evilDssTreeToGldTree(tree) # DEBUG
 	##dssConvert.distNetViz.viz_mem(gldtree, open_file=True, forceLayout=True) # DEBUG
 	#print('Objects removed: %s (of %s). Percent reduction: %s%%.'%(oldsz, oldsz-newsz, (oldsz-newsz)*100/oldsz))
-
-
-if __name__ == "__main__":
-	_tests()
 
 	# Make core output
 	#FPATH = 'ieee240.clean.dss'
@@ -384,7 +440,6 @@ if __name__ == "__main__":
 	#FPATH = 'ieee37.clean.reduced.dss'
 	#dssConvert.evilGldTreeToDssTree(tree)
 	#dssConvert.treeToDss(tree, 'ieeeLVTestCaseNorthAmerican_reduced.dss')
-	
 
 	# Just run DSS
 	#runDSS(FPATH)
@@ -396,3 +451,6 @@ if __name__ == "__main__":
 	#dynamicPlot(FPATH, 1, 10)
 	#faultPlot(FPATH)
 	#capacityPlot(FPATH)
+
+if __name__ == "__main__":
+	_tests()

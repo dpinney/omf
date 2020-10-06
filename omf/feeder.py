@@ -784,11 +784,13 @@ def _tests():
 	x = latLonNxGraph(nxG)
 
 	# Contig line merging test
+	#with open(os.path.join(os.path.dirname(__file__), 'static/publicFeeders/Olin Barre Geo.omd')) as inFile:
+	#	tree = json.load(inFile)['tree']	
 	oldsz = len(tree)
 	#from omf import distNetViz
 	#distNetViz.viz_mem(tree, open_file=True, forceLayout=True)
 	mergeContigLines(tree)
-	#dump(tree, 'solvers/opendss/test_reduced.glm')
+	#dump(tree, 'Olin Barre Geo reduced.glm')
 	newsz = len(tree)
 	print ('Objects removed: %s (of %s). Percent reduction: %s.'%(oldsz, oldsz-newsz, (oldsz-newsz)*100/oldsz))
 	

@@ -151,8 +151,8 @@ setbusxy bus=775		x=0.00	y=-4.94
 ! calculations
 set voltagebases="230,4.8,0.48"
 calcvoltagebases
-!export buscoords coords.csv
-!calcincmatrix_o
-!export incmatrix     ! exports the incidence branch to node matrix (only the non-zero elements and their coordinates)
-!export incmatrixrow links.csv  ! exports the name of the rows (link branches)
-!export incmatrixcols ! exports the name of the cols (buses)
+! export buscoords coords.csv
+! calcincmatrix_o
+! export incmatrix     ! exports the incidence branch to node matrix (only the non-zero elements and their coordinates)
+! export incmatrixrow links.csv  ! exports the name of the rows (link branches)
+! export incmatrixcols ! exports the name of the cols (buses)
