@@ -252,26 +252,30 @@
 			closeModal();
 		}
 		else {
-			// this array is linked to console.log() statement for verifying the array contents
-			var eachShape = [];
+			var pushes = 0;
 			dayForecast = document.getElementById("fireRisk").value;
 			// A call to subGrid for each drawn shape
-			for (i = 0; i < drawn_geojson.length; i++) {
-				xhttp = new XMLHttpRequest();
-				centerLon = (drawn_geojson[i].geometry.coordinates[0][0][0] + drawn_geojson[i].geometry.coordinates[0][2][0]) / 2
-				centerLat = (drawn_geojson[i].geometry.coordinates[0][0][1] + drawn_geojson[i].geometry.coordinates[0][1][1]) / 2
-				distLat = drawn_geojson[i].geometry.coordinates[0][1][1] - centerLat
-				distLon = drawn_geojson[i].geometry.coordinates[0][0][0] - centerLon
-				// xhttp.open("GET", "http://127.0.0.1:5000/firedata/39.810278/-121.437222/10/10/10", true); <-- centerpoint of map test (Camp Fire)
-				xhttp.open("GET", "http://127.0.0.1:5000/firedata/" + centerLat + "/" + centerLon + "/" + distLat + "/" + distLon + "/10", false); // HACK
-				xhttp.send();
+			function stateChange(xhttp) {
+				xhttp.onreadystatechange = function() {
+					if (xhttp.readyState === 4 && xhttp.status == 200) { // Request Complete and Successful Request 
+						console.log("Request successful:", xhttp.readyState, xhttp.status, xhttp.statusText);
+						parsingFunction(xhttp);
+					}
+					else { // Failed Request
+						console.log("Request failed:", xhttp.readyState, xhttp.status, xhttp.statusText);
+					}
+					closeModal();
+				}
+			}
+			function parsingFunction(xhttp) {
+				console.log(xhttp.responseText);
 				var xhttpData = JSON.parse(xhttp.responseText).dwml.data;
 				// Logs each risk reading for each point of the subgrid into an array 
 				var eachRisk = [];
 				var sum = 0;
 				var average = 0;
 				for (j = 0; j < xhttpData.location.length; j++) {
-					console.log(xhttpData.parameters[j]['fire-weather'][0].value[0])
+					console.log(xhttpData.parameters[j]['fire-weather'][0].value[0]);
 					console.log(xhttpData.parameters[j]['fire-weather'][1].value[0])
 					if (xhttpData.parameters[j]["fire-weather"][0].value[dayForecast] == "No Areas") {
 						eachRisk.push(0);
@@ -295,28 +299,44 @@
 						eachRisk.push(8);
 						sum += 8;
 					}
-					console.log(sum)
+					console.log(sum);
 				}
-				// logs the average of each array's quantitative risk readings into an array
 				average = sum / eachRisk.length;
-				drawn_geojson[i].properties['fire-risk'] = average
-				drawn_geojson[i].properties['start-time'] = xhttpData["time-layout"]["start-valid-time"][dayForecast]
-				eachShape.push(average);
-
-				if (0 <= drawn_geojson[i].properties['fire-risk'] && drawn_geojson[i].properties['fire-risk'] < 1) {drawnItems._layers[Object.keys(drawnItems._layers)[i]].setStyle({fillColor: '#E1E500'})}
-				if (1 <= drawn_geojson[i].properties['fire-risk'] && drawn_geojson[i].properties['fire-risk'] < 2) {drawnItems._layers[Object.keys(drawnItems._layers)[i]].setStyle({fillColor: '#DDCF00'})}
-				if (2 <= drawn_geojson[i].properties['fire-risk'] && drawn_geojson[i].properties['fire-risk'] < 3) {drawnItems._layers[Object.keys(drawnItems._layers)[i]].setStyle({fillColor: '#DAB900'})}
-				if (3 <= drawn_geojson[i].properties['fire-risk'] && drawn_geojson[i].properties['fire-risk'] < 4) {drawnItems._layers[Object.keys(drawnItems._layers)[i]].setStyle({fillColor: '#D6A400'})}
-				if (4 <= drawn_geojson[i].properties['fire-risk'] && drawn_geojson[i].properties['fire-risk'] < 5) {drawnItems._layers[Object.keys(drawnItems._layers)[i]].setStyle({fillColor: '#D38E00'})}
-				if (5 <= drawn_geojson[i].properties['fire-risk'] && drawn_geojson[i].properties['fire-risk'] < 6) {drawnItems._layers[Object.keys(drawnItems._layers)[i]].setStyle({fillColor: '#D07900'})}
-				if (6 <= drawn_geojson[i].properties['fire-risk'] && drawn_geojson[i].properties['fire-risk'] < 7) {drawnItems._layers[Object.keys(drawnItems._layers)[i]].setStyle({fillColor: '#CC6300'})}
-				if (7 <= drawn_geojson[i].properties['fire-risk'] && drawn_geojson[i].properties['fire-risk'] < 8) {drawnItems._layers[Object.keys(drawnItems._layers)[i]].setStyle({fillColor: '#C94D00'})}
-				if (8 <= drawn_geojson[i].properties['fire-risk'] && drawn_geojson[i].properties['fire-risk'] < 9) {drawnItems._layers[Object.keys(drawnItems._layers)[i]].setStyle({fillColor: '#C22200'})}
-				if (9 <= drawn_geojson[i].properties['fire-risk'] && drawn_geojson[i].properties['fire-risk'] <= 10) {drawnItems._layers[Object.keys(drawnItems._layers)[i]].setStyle({fillColor: '#BF0D00'})}
+				var timeReading = xhttpData["time-layout"]["start-valid-time"][dayForecast];
+				pushingFunction(average, timeReading);
+			}
+			function pushingFunction(average, timeReading) {
+				// logs each shape's average fire risk and time frame into its geoJSON representation
+				drawn_geojson[pushes].properties['fire-risk'] = average;
+				drawn_geojson[pushes].properties['start-time'] = timeReading;
+				// changes shape color according to fire risk
+				if (0 <= drawn_geojson[pushes].properties['fire-risk'] && drawn_geojson[pushes].properties['fire-risk'] < 1) {drawnItems._layers[Object.keys(drawnItems._layers)[pushes]].setStyle({fillColor: '#E1E500'})}
+				if (1 <= drawn_geojson[pushes].properties['fire-risk'] && drawn_geojson[pushes].properties['fire-risk'] < 2) {drawnItems._layers[Object.keys(drawnItems._layers)[pushes]].setStyle({fillColor: '#DDCF00'})}
+				if (2 <= drawn_geojson[pushes].properties['fire-risk'] && drawn_geojson[pushes].properties['fire-risk'] < 3) {drawnItems._layers[Object.keys(drawnItems._layers)[pushes]].setStyle({fillColor: '#DAB900'})}
+				if (3 <= drawn_geojson[pushes].properties['fire-risk'] && drawn_geojson[pushes].properties['fire-risk'] < 4) {drawnItems._layers[Object.keys(drawnItems._layers)[pushes]].setStyle({fillColor: '#D6A400'})}
+				if (4 <= drawn_geojson[pushes].properties['fire-risk'] && drawn_geojson[pushes].properties['fire-risk'] < 5) {drawnItems._layers[Object.keys(drawnItems._layers)[pushes]].setStyle({fillColor: '#D38E00'})}
+				if (5 <= drawn_geojson[pushes].properties['fire-risk'] && drawn_geojson[pushes].properties['fire-risk'] < 6) {drawnItems._layers[Object.keys(drawnItems._layers)[pushes]].setStyle({fillColor: '#D07900'})}
+				if (6 <= drawn_geojson[pushes].properties['fire-risk'] && drawn_geojson[pushes].properties['fire-risk'] < 7) {drawnItems._layers[Object.keys(drawnItems._layers)[pushes]].setStyle({fillColor: '#CC6300'})}
+				if (7 <= drawn_geojson[pushes].properties['fire-risk'] && drawn_geojson[pushes].properties['fire-risk'] < 8) {drawnItems._layers[Object.keys(drawnItems._layers)[pushes]].setStyle({fillColor: '#C94D00'})}
+				if (8 <= drawn_geojson[pushes].properties['fire-risk'] && drawn_geojson[pushes].properties['fire-risk'] < 9) {drawnItems._layers[Object.keys(drawnItems._layers)[pushes]].setStyle({fillColor: '#C22200'})}
+				if (9 <= drawn_geojson[pushes].properties['fire-risk'] && drawn_geojson[pushes].properties['fire-risk'] <= 10) {drawnItems._layers[Object.keys(drawnItems._layers)[pushes]].setStyle({fillColor: '#BF0D00'})}
+				pushes++;
+			}
+			// new GET request for each shape in drawnItems (and thereby drawn_geojson)
+			for (i = 0; i < drawn_geojson.length; i++) {
+				centerLon = (drawn_geojson[i].geometry.coordinates[0][0][0] + drawn_geojson[i].geometry.coordinates[0][2][0]) / 2;
+				centerLat = (drawn_geojson[i].geometry.coordinates[0][0][1] + drawn_geojson[i].geometry.coordinates[0][1][1]) / 2;
+				distLat = drawn_geojson[i].geometry.coordinates[0][1][1] - centerLat;
+				distLon = drawn_geojson[i].geometry.coordinates[0][0][0] - centerLon;
+				// xhttp.open("GET", "http://127.0.0.1:5000/firedata/39.810278/-121.437222/10/10/10", true); <-- centerpoint of map test (Camp Fire)
+				xhttp = new XMLHttpRequest();
+				xhttp.timeout = 10000;
+				xhttp.open("GET", "http://127.0.0.1:5000/firedata/" + centerLat + "/" + centerLon + "/" + distLat + "/" + distLon + "/10"); 
+				console.log('Starting Request');
+				xhttp.send();
+				stateChange(xhttp);
 			}
 		}
-		console.log(eachShape);
-		closeModal();
 	}
 	// download drawn features button
 	document.getElementById('export').onclick = function(e) {
@@ -347,14 +367,19 @@
 				}
 			}
 			function popup(event) {
+				console.log("Popup for upload function fires"); // this first segment fires once on each click. see layer.on('click') comment below for more information
 				var layer = event.layer;
+				console.log(layer); // i {options: {…}, _bounds: R, _latlngs: Array(1), _initHooksCalled: true, _events: {…}, …}
 				// add veg score.
 				feature = layer.feature = layer.feature || {}; // Initialize feature
+				console.log(feature); // {type: "Feature", properties: {…}, geometry: {…}}
 				feature.type = feature.type || "Feature"; // Initialize feature.type
+				console.log(feature.type); // Feature
 				var props = feature.properties = feature.properties || {}; // Initialize feature.properties
+				console.log(props); // {vegScore: "10", fire-risk: 0, start-time: "2020-09-04T05:00:00-07:00"}
 				props.vegScore = '10';
 				// add click handler that makes popup on each click.
-				layer.on('click', function (e) {
+				layer.on('click', function (e) { // first click: 0 fires. second click: 1 fire. third click: 2 fires. fourth click: 3 fires. etc. 
 					vegScore = e.target.feature.properties.vegScore
 					layer.bindPopup("<input id='popup_leaflet_id' style='display:none' value=" + e.target._leaflet_id + ">Veg Score: <input type='text' id='veg_score' value=" + vegScore + "><button onclick='saveVeg()' type='button'>Save</button>"+"<br />"+"Fire Risk valid for 24 hours starting at "+props['start-time']+": "+"<strong>"+props['fire-risk']+"</strong>"+"<br />"+"<a href='https://www.spc.noaa.gov/products/fire_wx/fwdy1.html' target='_blank'>Click for more information</a>")
 					console.log(props['fire-risk'])
@@ -362,7 +387,7 @@
 				})
 				drawnItems.addLayer(layer);
 			}
-			drawnItems.on('click', popup)
+			drawnItems.on('click', popup);
 		}
 	};
 </script>
