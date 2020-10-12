@@ -1,0 +1,885 @@
+Clear
+New object=Circuit.240_node_test_system
+
+
+! Redirect Vsource.dss
+Edit object=Vsource.source bus1=eq_source_bus.1.2.3 phases=3 angle=0.00000 pu=1.00000 basekv=69.00000 R1=4.5426 X1=10.527 R0=7.3655 X0=24.505
+! Redirect LineCode.DSS
+New object=LineCode.oh_3p_type1 nphases=3 units=mi rmatrix=[0.61592700,0.17092700,0.17092700|0.17092700,0.61592700,0.17092700|0.17092700,0.17092700,0.61592700] xmatrix=[1.20938900,0.43318800,0.43318800|0.43318800,1.20938900,0.43318800|0.43318800,0.43318800,1.20938900]
+New object=LineCode.oh_2p_type2 nphases=2 units=mi rmatrix=[0.58925500,0.16949500|0.16949500,0.58925500] xmatrix=[1.07485600,0.38787600|0.38787600,1.07485600]
+New object=LineCode.oh_1p_type2 nphases=1 units=mi rmatrix=[0.59247300] xmatrix=[1.06582100]
+New object=LineCode.oh_3p_type5 nphases=3 units=mi rmatrix=[1.19160200,0.23484900,0.23484900|0.23484900,1.19160200,0.23484900|0.23484900,0.23484900,1.19160200] xmatrix=[1.20945200,0.48926300,0.48926300|0.48926300,1.20945200,0.48926300|0.48926300,0.48926300,1.20945200]
+New object=LineCode.oh_1p_type5 nphases=1 units=mi rmatrix=[1.19426000] xmatrix=[1.20542000]
+New object=LineCode.ug_3p_type1 nphases=3 units=mi rmatrix=[1.00942300,0.40973200,0.40973200|0.40973200,1.00942300,0.40973200|0.40973200,0.40973200,1.00942300] xmatrix=[0.49316400,0.10084900,0.10084900|0.10084900,0.49316400,0.10084900|0.10084900,0.10084900,0.49316400] cmatrix=[286.10159300,0.00000000,0.00000000|0.00000000,286.10159300,0.00000000|0.00000000,0.00000000,286.10159300]
+New object=LineCode.ug_3p_type2 nphases=3 units=mi rmatrix=[1.69257700,0.55008700,0.55008700|0.55008700,1.69257700,0.55008700|0.55008700,0.55008700,1.69257700] xmatrix=[0.79175600,0.34493100,0.34493100|0.34493100,0.79175600,0.34493100|0.34493100,0.34493100,0.79175600] cmatrix=[207.88053900,0.00000000,0.00000000|0.00000000,207.88053900,0.00000000|0.00000000,0.00000000,207.88053900]
+New object=LineCode.ug_1p_type2 nphases=1 units=mi rmatrix=[1.67533800] xmatrix=[1.21000700] cmatrix=[207.88053900]
+! Redirect LoadShape.DSS
+New object=LoadShape.default npts=24 npts=24 interval=1 mult=[0.677,0.6256,0.6087,0.5833,0.58028,0.6025,0.657,0.7477,0.832,0.88,0.94,0.989,0.985,0.98,0.9898,0.999,1,0.958,0.936,0.913,0.876,0.876,0.828,0.756]
+! Redirect GrowthShape.DSS
+New object=GrowthShape.default npts=2 year=(1,20) mult=(1.025,1.025)
+! Redirect TCC_Curve.DSS
+New object=TCC_Curve.a npts=5 C_array=[1,2.5,4.5,8,14] T_array=[0.15,0.07,0.05,0.045,0.045]
+New object=TCC_Curve.d npts=5 C_array=[1,2.5,4.5,8,14] T_array=[6,0.7,0.2,0.06,0.02]
+New object=TCC_Curve.tlink npts=7 C_array=[2,2.1,3,4,6,22,50] T_array=[300,100,10.1,4,1.4,0.1,0.02]
+New object=TCC_Curve.klink npts=6 C_array=[2,2.2,3,4,6,30] T_array=[300,20,4,1.3,0.41,0.02]
+New object=TCC_Curve.uv1547 npts=2 C_array=[0.5,0.9] T_array=[0.166,2]
+New object=TCC_Curve.ov1547 npts=2 C_array=[1.1,1.2] T_array=[2,0.166]
+New object=TCC_Curve.mod_inv npts=15 C_array=[1.1,1.3,1.5,2,3,4,5,6,7,8,9,10,20,50,100] T_array=[27.1053,9.9029,6.439,3.8032,2.4322,1.9458,1.6883,1.5255,1.4117,1.3267,1.2604,1.2068,0.9481,0.7468,0.6478]
+New object=TCC_Curve.very_inv npts=15 C_array=[1.1,1.3,1.5,2,3,4,5,6,7,8,9,10,20,50,100] T_array=[93.872,28.9113,16.179,7.0277,2.9423,1.7983,1.3081,1.0513,0.8995,0.8023,0.7361,0.6891,0.5401,0.4988,0.493]
+New object=TCC_Curve.ext_inv npts=15 C_array=[1.1,1.3,1.5,2,3,4,5,6,7,8,9,10,20,50,100] T_array=[134.407,40.9913,22.6817,9.5217,3.6467,2.0017,1.2967,0.9274,0.7092,0.5693,0.4742,0.4065,0.1924,0.133,0.1245]
+New object=TCC_Curve.definite npts=3 C_array=[1,1.001,100] T_array=[300,1,1]
+! Redirect Spectrum.DSS
+New object=Spectrum.default NumHarm=7 harmonic=(1,3,5,7,9,11,13) %mag=(100,33,20,14,11,9,7) angle=(0,0,0,0,0,0,0)
+New object=Spectrum.defaultload NumHarm=7 harmonic=(1,3,5,7,9,11,13) %mag=(100,1.5,20,14,1,9,7) angle=(0,180,180,180,180,180,180)
+New object=Spectrum.defaultgen NumHarm=7 harmonic=(1,3,5,7,9,11,13) %mag=(100,5,3,1.5,1,0.7,0.5) angle=(0,0,0,0,0,0,0)
+New object=Spectrum.defaultvsource NumHarm=1 harmonic=(1) %mag=(100) angle=(0)
+New object=Spectrum.linear NumHarm=1 harmonic=(1) %mag=(100) angle=(0)
+New object=Spectrum.pwm6 NumHarm=13 harmonic=(1,3,5,7,9,11,13,15,17,19,21,23,25) %mag=(100,4.4,76.5,62.7,2.9,24.8,12.7,0.5,7.1,8.4,0.9,4.4,3.3) angle=(-103,-5,28,-180,-33,-59,79,36,-253,-124,3,-30,86)
+New object=Spectrum.dc6 NumHarm=10 harmonic=(1,3,5,7,9,11,13,15,17,19) %mag=(100,1.2,33.6,1.6,0.4,8.7,1.2,0.3,4.5,1.3) angle=(-75,28,156,29,-91,49,54,148,-57,-46)
+! Redirect Line.DSS
+New object=Line.l_1001_1002 phases=3 bus1=bus1001.1.2.3 bus2=bus1002.1.2.3 length=2967 units=ft linecode=UG_3p_type1 Seasons=1 Ratings=[400] normamps=400 emergamps=600
+New object=Line.l_1002_1003 phases=3 bus1=bus1002.1.2.3 bus2=bus1003.1.2.3 length=372 units=ft linecode=UG_3p_type2 Seasons=1 Ratings=[400] normamps=400 emergamps=600
+New object=Line.l_1002_1004 phases=3 bus1=bus1002.1.2.3 bus2=bus1004.1.2.3 length=638 units=ft linecode=OH_3p_type1 Seasons=1 Ratings=[400] normamps=400 emergamps=600
+New object=Line.l_1004_1005 phases=3 bus1=bus1004.1.2.3 bus2=bus1005.1.2.3 length=394 units=ft linecode=OH_3p_type1 Seasons=1 Ratings=[400] normamps=400 emergamps=600
+New object=Line.l_1005_1006 phases=3 bus1=bus1005.1.2.3 bus2=bus1006.1.2.3 length=1049 units=ft linecode=OH_3p_type1 Seasons=1 Ratings=[400] normamps=400 emergamps=600
+New object=Line.l_1006_1007 phases=2 bus1=bus1006.1.2 bus2=bus1007.1.2 length=2000 units=ft linecode=OH_2p_type2 Seasons=1 Ratings=[400] normamps=400 emergamps=600
+New object=Line.l_1006_1008 phases=3 bus1=bus1006.1.2.3 bus2=bus1008.1.2.3 length=454 units=ft linecode=OH_3p_type1 Seasons=1 Ratings=[400] normamps=400 emergamps=600
+New object=Line.l_1008_1009 phases=3 bus1=bus1008.1.2.3 bus2=bus1009.1.2.3 length=1082 units=ft linecode=OH_3p_type1 Seasons=1 Ratings=[400] normamps=400 emergamps=600
+New object=Line.l_1009_1010 phases=3 bus1=bus1009.1.2.3 bus2=bus1010.1.2.3 length=169 units=ft linecode=OH_3p_type1 Seasons=1 Ratings=[400] normamps=400 emergamps=600
+New object=Line.l_1009_1011 phases=3 bus1=bus1009.1.2.3 bus2=bus1011.1.2.3 length=60 units=ft linecode=UG_3p_type2 Seasons=1 Ratings=[400] normamps=400 emergamps=600
+New object=Line.l_1011_1012 phases=3 bus1=bus1011.1.2.3 bus2=bus1012.1.2.3 length=60 units=ft linecode=UG_3p_type2 Seasons=1 Ratings=[400] normamps=400 emergamps=600
+New object=Line.l_1012_1013 phases=3 bus1=bus1012.1.2.3 bus2=bus1013.1.2.3 length=306 units=ft linecode=UG_3p_type2 Seasons=1 Ratings=[400] normamps=400 emergamps=600
+New object=Line.l_1013_1014 phases=1 bus1=bus1013.2.0 bus2=bus1014.2.0 length=208 units=ft linecode=UG_1p_type2 Seasons=1 Ratings=[400] normamps=400 emergamps=600
+New object=Line.l_1014_1015 phases=1 bus1=bus1014.2.0 bus2=bus1015.2.0 length=126 units=ft linecode=UG_1p_type2 Seasons=1 Ratings=[400] normamps=400 emergamps=600
+New object=Line.l_1013_1016 phases=1 bus1=bus1013.3.0 bus2=bus1016.3.0 length=468 units=ft linecode=UG_1p_type2 Seasons=1 Ratings=[400] normamps=400 emergamps=600
+New object=Line.l_1016_1017 phases=1 bus1=bus1016.3.0 bus2=bus1017.3.0 length=71 units=ft linecode=UG_1p_type2 Seasons=1 Ratings=[400] normamps=400 emergamps=600
+New object=Line.l_2001_2002 phases=3 bus1=bus2001.1.2.3 bus2=bus2002.1.2.3 length=1388 units=ft linecode=UG_3p_type1 Seasons=1 Ratings=[400] normamps=400 emergamps=600
+New object=Line.l_2002_2003 phases=3 bus1=bus2002.1.2.3 bus2=bus2003.1.2.3 length=1281 units=ft linecode=OH_3p_type1 Seasons=1 Ratings=[400] normamps=400 emergamps=600
+New object=Line.l_2003_2004 phases=3 bus1=bus2003.1.2.3 bus2=bus2004.1.2.3 length=798 units=ft linecode=OH_3p_type1 Seasons=1 Ratings=[400] normamps=400 emergamps=600
+New object=Line.l_2004_2005 phases=3 bus1=bus2004.1.2.3 bus2=bus2005.1.2.3 length=317 units=ft linecode=OH_3p_type1 Seasons=1 Ratings=[400] normamps=400 emergamps=600
+New object=Line.l_2005_2006 phases=3 bus1=bus2005.1.2.3 bus2=bus2006.1.2.3 length=145 units=ft linecode=OH_3p_type1 Seasons=1 Ratings=[400] normamps=400 emergamps=600
+New object=Line.l_2006_2007 phases=1 bus1=bus2006.1 bus2=bus2007.1 length=245 units=ft linecode=OH_1p_type5 Seasons=1 Ratings=[400] normamps=400 emergamps=600
+New object=Line.l_2007_2008 phases=1 bus1=bus2007.1 bus2=bus2008.1 length=125 units=ft linecode=UG_1p_type2 Seasons=1 Ratings=[400] normamps=400 emergamps=600
+New object=Line.l_2007_2009 phases=1 bus1=bus2007.1 bus2=bus2009.1 length=161 units=ft linecode=OH_1p_type2 Seasons=1 Ratings=[400] normamps=400 emergamps=600
+New object=Line.l_2006_2010 phases=3 bus1=bus2006.1.2.3 bus2=bus2010.1.2.3 length=170 units=ft linecode=OH_3p_type1 Seasons=1 Ratings=[400] normamps=400 emergamps=600
+New object=Line.l_2010_2011 phases=3 bus1=bus2010.1.2.3 bus2=bus2011.1.2.3 length=275 units=ft linecode=OH_3p_type1 Seasons=1 Ratings=[400] normamps=400 emergamps=600
+New object=Line.l_2011_2012 phases=3 bus1=bus2011.1.2.3 bus2=bus2012.1.2.3 length=503 units=ft linecode=OH_3p_type1 Seasons=1 Ratings=[400] normamps=400 emergamps=600
+New object=Line.l_2013_2014 phases=3 bus1=bus2013.1.2.3 bus2=bus2014.1.2.3 length=268 units=ft linecode=OH_3p_type1 Seasons=1 Ratings=[400] normamps=400 emergamps=600
+New object=Line.l_2014_2015 phases=1 bus1=bus2014.2 bus2=bus2015.2 length=120 units=ft linecode=UG_1p_type2 Seasons=1 Ratings=[400] normamps=400 emergamps=600
+New object=Line.l_2014_2016 phases=3 bus1=bus2014.1.2.3 bus2=bus2016.1.2.3 length=257 units=ft linecode=OH_3p_type1 Seasons=1 Ratings=[400] normamps=400 emergamps=600
+New object=Line.l_2016_2017 phases=3 bus1=bus2016.1.2.3 bus2=bus2017.1.2.3 length=174 units=ft linecode=UG_3p_type2 Seasons=1 Ratings=[400] normamps=400 emergamps=600
+New object=Line.l_2017_2018 phases=3 bus1=bus2017.1.2.3 bus2=bus2018.1.2.3 length=447 units=ft linecode=UG_3p_type2 Seasons=1 Ratings=[400] normamps=400 emergamps=600
+New object=Line.l_2013_2019 phases=3 bus1=bus2013.1.2.3 bus2=bus2019.1.2.3 length=45 units=ft linecode=OH_3p_type1 Seasons=1 Ratings=[400] normamps=400 emergamps=600
+New object=Line.l_2019_2020 phases=1 bus1=bus2019.2 bus2=bus2020.2 length=642 units=ft linecode=UG_1p_type2 Seasons=1 Ratings=[400] normamps=400 emergamps=600
+New object=Line.l_2019_2021 phases=3 bus1=bus2019.1.2.3 bus2=bus2021.1.2.3 length=43 units=ft linecode=OH_3p_type1 Seasons=1 Ratings=[400] normamps=400 emergamps=600
+New object=Line.l_2021_2022 phases=1 bus1=bus2021.3 bus2=bus2022.3 length=205 units=ft linecode=UG_1p_type2 Seasons=1 Ratings=[400] normamps=400 emergamps=600
+New object=Line.l_2022_2023 phases=1 bus1=bus2022.3 bus2=bus2023.3 length=150 units=ft linecode=UG_1p_type2 Seasons=1 Ratings=[400] normamps=400 emergamps=600
+New object=Line.l_2023_2024 phases=1 bus1=bus2023.3 bus2=bus2024.3 length=408 units=ft linecode=UG_1p_type2 Seasons=1 Ratings=[400] normamps=400 emergamps=600
+New object=Line.l_2024_2025 phases=1 bus1=bus2024.3 bus2=bus2025.3 length=331 units=ft linecode=UG_1p_type2 Seasons=1 Ratings=[400] normamps=400 emergamps=600
+New object=Line.l_2026_2027 phases=3 bus1=bus2026.1.2.3 bus2=bus2027.1.2.3 length=369 units=ft linecode=OH_3p_type1 Seasons=1 Ratings=[400] normamps=400 emergamps=600
+New object=Line.l_2027_2028 phases=3 bus1=bus2027.1.2.3 bus2=bus2028.1.2.3 length=285 units=ft linecode=UG_3p_type2 Seasons=1 Ratings=[400] normamps=400 emergamps=600
+New object=Line.l_2028_2029 phases=3 bus1=bus2028.1.2.3 bus2=bus2029.1.2.3 length=131 units=ft linecode=UG_3p_type2 Seasons=1 Ratings=[400] normamps=400 emergamps=600
+New object=Line.l_2029_2030 phases=3 bus1=bus2029.1.2.3 bus2=bus2030.1.2.3 length=165 units=ft linecode=UG_3p_type2 Seasons=1 Ratings=[400] normamps=400 emergamps=600
+New object=Line.l_2030_2031 phases=3 bus1=bus2030.1.2.3 bus2=bus2031.1.2.3 length=245 units=ft linecode=UG_3p_type2 Seasons=1 Ratings=[400] normamps=400 emergamps=600
+New object=Line.l_2027_2032 phases=3 bus1=bus2027.1.2.3 bus2=bus2032.1.2.3 length=149 units=ft linecode=OH_3p_type1 Seasons=1 Ratings=[400] normamps=400 emergamps=600
+New object=Line.l_2032_2033 phases=3 bus1=bus2032.1.2.3 bus2=bus2033.1.2.3 length=289 units=ft linecode=OH_3p_type1 Seasons=1 Ratings=[400] normamps=400 emergamps=600
+New object=Line.l_2033_2034 phases=3 bus1=bus2033.1.2.3 bus2=bus2034.1.2.3 length=185 units=ft linecode=OH_3p_type5 Seasons=1 Ratings=[400] normamps=400 emergamps=600
+New object=Line.l_2033_2035 phases=3 bus1=bus2033.1.2.3 bus2=bus2035.1.2.3 length=160 units=ft linecode=OH_3p_type1 Seasons=1 Ratings=[400] normamps=400 emergamps=600
+New object=Line.l_2035_2036 phases=3 bus1=bus2035.1.2.3 bus2=bus2036.1.2.3 length=160 units=ft linecode=OH_3p_type1 Seasons=1 Ratings=[400] normamps=400 emergamps=600
+New object=Line.l_2036_2037 phases=3 bus1=bus2036.1.2.3 bus2=bus2037.1.2.3 length=80 units=ft linecode=OH_3p_type1 Seasons=1 Ratings=[400] normamps=400 emergamps=600
+New object=Line.l_2037_2038 phases=3 bus1=bus2037.1.2.3 bus2=bus2038.1.2.3 length=192 units=ft linecode=OH_3p_type1 Seasons=1 Ratings=[400] normamps=400 emergamps=600
+New object=Line.l_2038_2039 phases=3 bus1=bus2038.1.2.3 bus2=bus2039.1.2.3 length=800 units=ft linecode=OH_3p_type1 Seasons=1 Ratings=[400] normamps=400 emergamps=600
+New object=Line.l_2039_2040 phases=3 bus1=bus2039.1.2.3 bus2=bus2040.1.2.3 length=309 units=ft linecode=OH_3p_type1 Seasons=1 Ratings=[400] normamps=400 emergamps=600
+New object=Line.l_2040_2041 phases=3 bus1=bus2040.1.2.3 bus2=bus2041.1.2.3 length=383 units=ft linecode=OH_3p_type1 Seasons=1 Ratings=[400] normamps=400 emergamps=600
+New object=Line.l_2039_2042 phases=3 bus1=bus2039.1.2.3 bus2=bus2042.1.2.3 length=35 units=ft linecode=UG_3p_type2 Seasons=1 Ratings=[400] normamps=400 emergamps=600
+New object=Line.l_2042_2043 phases=3 bus1=bus2042.1.2.3 bus2=bus2043.1.2.3 length=158 units=ft linecode=UG_3p_type2 Seasons=1 Ratings=[400] normamps=400 emergamps=600
+New object=Line.l_2043_2044 phases=3 bus1=bus2043.1.2.3 bus2=bus2044.1.2.3 length=342 units=ft linecode=UG_3p_type2 Seasons=1 Ratings=[400] normamps=400 emergamps=600
+New object=Line.l_2044_2045 phases=1 bus1=bus2044.2 bus2=bus2045.2 length=323 units=ft linecode=UG_1p_type2 Seasons=1 Ratings=[400] normamps=400 emergamps=600
+New object=Line.l_2045_2046 phases=1 bus1=bus2045.2 bus2=bus2046.2 length=330 units=ft linecode=UG_1p_type2 Seasons=1 Ratings=[400] normamps=400 emergamps=600
+New object=Line.l_2045_2047 phases=1 bus1=bus2045.2 bus2=bus2047.2 length=189 units=ft linecode=UG_1p_type2 Seasons=1 Ratings=[400] normamps=400 emergamps=600
+New object=Line.l_2047_2048 phases=1 bus1=bus2047.2 bus2=bus2048.2 length=259 units=ft linecode=UG_1p_type2 Seasons=1 Ratings=[400] normamps=400 emergamps=600
+New object=Line.l_2044_2049 phases=3 bus1=bus2044.1.2.3 bus2=bus2049.1.2.3 length=130 units=ft linecode=UG_3p_type2 Seasons=1 Ratings=[400] normamps=400 emergamps=600
+New object=Line.l_2049_2050 phases=3 bus1=bus2049.1.2.3 bus2=bus2050.1.2.3 length=124 units=ft linecode=UG_3p_type2 Seasons=1 Ratings=[400] normamps=400 emergamps=600
+New object=Line.l_2050_2051 phases=3 bus1=bus2050.1.2.3 bus2=bus2051.1.2.3 length=139 units=ft linecode=UG_3p_type2 Seasons=1 Ratings=[400] normamps=400 emergamps=600
+New object=Line.l_2051_2052 phases=3 bus1=bus2051.1.2.3 bus2=bus2052.1.2.3 length=134 units=ft linecode=UG_3p_type2 Seasons=1 Ratings=[400] normamps=400 emergamps=600
+New object=Line.l_2044_2053 phases=3 bus1=bus2044.1.2.3 bus2=bus2053.1.2.3 length=464 units=ft linecode=UG_3p_type2 Seasons=1 Ratings=[400] normamps=400 emergamps=600
+New object=Line.l_2053_2054 phases=3 bus1=bus2053.1.2.3 bus2=bus2054.1.2.3 length=139 units=ft linecode=UG_3p_type2 Seasons=1 Ratings=[400] normamps=400 emergamps=600
+New object=Line.l_2054_2055 phases=3 bus1=bus2054.1.2.3 bus2=bus2055.1.2.3 length=156 units=ft linecode=UG_3p_type2 Seasons=1 Ratings=[400] normamps=400 emergamps=600
+New object=Line.l_2055_2056 phases=3 bus1=bus2055.1.2.3 bus2=bus2056.1.2.3 length=204 units=ft linecode=UG_3p_type2 Seasons=1 Ratings=[400] normamps=400 emergamps=600
+New object=Line.l_2053_2057 phases=3 bus1=bus2053.1.2.3 bus2=bus2057.1.2.3 length=761 units=ft linecode=UG_3p_type2 Seasons=1 Ratings=[400] normamps=400 emergamps=600
+New object=Line.l_2057_2058 phases=3 bus1=bus2057.1.2.3 bus2=bus2058.1.2.3 length=407 units=ft linecode=UG_3p_type2 Seasons=1 Ratings=[400] normamps=400 emergamps=600
+New object=Line.l_2057_2059 phases=3 bus1=bus2057.1.2.3 bus2=bus2059.1.2.3 length=685 units=ft linecode=UG_3p_type2 Seasons=1 Ratings=[400] normamps=400 emergamps=600
+New object=Line.l_2059_2060 phases=3 bus1=bus2059.1.2.3 bus2=bus2060.1.2.3 length=304 units=ft linecode=UG_3p_type2 Seasons=1 Ratings=[400] normamps=400 emergamps=600
+New object=Line.l_3001_3003 phases=3 bus1=bus3001.1.2.3 bus2=bus3003.1.2.3 length=2307 units=ft linecode=UG_3p_type1 Seasons=1 Ratings=[400] normamps=400 emergamps=600
+New object=Line.l_3003_3002 phases=3 bus1=bus3003.1.2.3 bus2=bus3002.1.2.3 length=85 units=ft linecode=UG_3p_type2 Seasons=1 Ratings=[400] normamps=400 emergamps=600
+New object=Line.l_3003_3004 phases=3 bus1=bus3003.1.2.3 bus2=bus3004.1.2.3 length=81 units=ft linecode=UG_3p_type2 Seasons=1 Ratings=[400] normamps=400 emergamps=600
+New object=Line.l_3003_3005 phases=3 bus1=bus3003.1.2.3 bus2=bus3005.1.2.3 length=1997 units=ft linecode=UG_3p_type1 Seasons=1 Ratings=[400] normamps=400 emergamps=600
+New object=Line.l_3005_3006 phases=3 bus1=bus3005.1.2.3 bus2=bus3006.1.2.3 length=311 units=ft linecode=OH_3p_type1 Seasons=1 Ratings=[400] normamps=400 emergamps=600
+New object=Line.l_3006_3007 phases=3 bus1=bus3006.1.2.3 bus2=bus3007.1.2.3 length=370 units=ft linecode=OH_3p_type1 Seasons=1 Ratings=[400] normamps=400 emergamps=600
+New object=Line.l_3005_3008 phases=3 bus1=bus3005.1.2.3 bus2=bus3008.1.2.3 length=136 units=ft linecode=OH_3p_type1 Seasons=1 Ratings=[400] normamps=400 emergamps=600
+New object=Line.l_3008_3009 phases=1 bus1=bus3008.1 bus2=bus3009.1 length=161 units=ft linecode=OH_1p_type5 Seasons=1 Ratings=[400] normamps=400 emergamps=600
+New object=Line.l_3009_3010 phases=1 bus1=bus3009.1 bus2=bus3010.1 length=347 units=ft linecode=OH_1p_type5 Seasons=1 Ratings=[400] normamps=400 emergamps=600
+New object=Line.l_3010_3011 phases=1 bus1=bus3010.1 bus2=bus3011.1 length=265 units=ft linecode=OH_1p_type5 Seasons=1 Ratings=[400] normamps=400 emergamps=600
+New object=Line.l_3011_3012 phases=1 bus1=bus3011.1 bus2=bus3012.1 length=312 units=ft linecode=OH_1p_type5 Seasons=1 Ratings=[400] normamps=400 emergamps=600
+New object=Line.l_3008_3013 phases=1 bus1=bus3008.2 bus2=bus3013.2 length=170 units=ft linecode=OH_1p_type5 Seasons=1 Ratings=[400] normamps=400 emergamps=600
+New object=Line.l_3013_3014 phases=1 bus1=bus3013.2 bus2=bus3014.2 length=295 units=ft linecode=OH_1p_type5 Seasons=1 Ratings=[400] normamps=400 emergamps=600
+New object=Line.l_3008_3015 phases=3 bus1=bus3008.1.2.3 bus2=bus3015.1.2.3 length=322 units=ft linecode=OH_3p_type1 Seasons=1 Ratings=[400] normamps=400 emergamps=600
+New object=Line.l_3015_3016 phases=1 bus1=bus3015.2 bus2=bus3016.2 length=210 units=ft linecode=OH_1p_type5 Seasons=1 Ratings=[400] normamps=400 emergamps=600
+New object=Line.l_3016_3017 phases=1 bus1=bus3016.2 bus2=bus3017.2 length=259 units=ft linecode=OH_1p_type5 Seasons=1 Ratings=[400] normamps=400 emergamps=600
+New object=Line.l_3015_3018 phases=1 bus1=bus3015.3 bus2=bus3018.3 length=181 units=ft linecode=OH_1p_type5 Seasons=1 Ratings=[400] normamps=400 emergamps=600
+New object=Line.l_3018_3019 phases=1 bus1=bus3018.3 bus2=bus3019.3 length=281 units=ft linecode=OH_1p_type5 Seasons=1 Ratings=[400] normamps=400 emergamps=600
+New object=Line.l_3019_3020 phases=1 bus1=bus3019.3 bus2=bus3020.3 length=307 units=ft linecode=OH_1p_type5 Seasons=1 Ratings=[400] normamps=400 emergamps=600
+New object=Line.l_3020_3021 phases=1 bus1=bus3020.3 bus2=bus3021.3 length=303 units=ft linecode=OH_1p_type5 Seasons=1 Ratings=[400] normamps=400 emergamps=600
+New object=Line.l_3015_3022 phases=3 bus1=bus3015.1.2.3 bus2=bus3022.1.2.3 length=289 units=ft linecode=OH_3p_type1 Seasons=1 Ratings=[400] normamps=400 emergamps=600
+New object=Line.l_3022_3023 phases=1 bus1=bus3022.1 bus2=bus3023.1 length=181 units=ft linecode=OH_1p_type5 Seasons=1 Ratings=[400] normamps=400 emergamps=600
+New object=Line.l_3023_3024 phases=1 bus1=bus3023.1 bus2=bus3024.1 length=320 units=ft linecode=OH_1p_type5 Seasons=1 Ratings=[400] normamps=400 emergamps=600
+New object=Line.l_3024_3025 phases=1 bus1=bus3024.1 bus2=bus3025.1 length=331 units=ft linecode=OH_1p_type5 Seasons=1 Ratings=[400] normamps=400 emergamps=600
+New object=Line.l_3022_3026 phases=1 bus1=bus3022.1 bus2=bus3026.1 length=164 units=ft linecode=OH_1p_type5 Seasons=1 Ratings=[400] normamps=400 emergamps=600
+New object=Line.l_3026_3027 phases=1 bus1=bus3026.1 bus2=bus3027.1 length=368 units=ft linecode=OH_1p_type5 Seasons=1 Ratings=[400] normamps=400 emergamps=600
+New object=Line.l_3027_3028 phases=1 bus1=bus3027.1 bus2=bus3028.1 length=241 units=ft linecode=OH_1p_type5 Seasons=1 Ratings=[400] normamps=400 emergamps=600
+New object=Line.l_3028_3029 phases=1 bus1=bus3028.1 bus2=bus3029.1 length=317 units=ft linecode=OH_1p_type5 Seasons=1 Ratings=[400] normamps=400 emergamps=600
+New object=Line.l_3022_3030 phases=3 bus1=bus3022.1.2.3 bus2=bus3030.1.2.3 length=304 units=ft linecode=OH_3p_type1 Seasons=1 Ratings=[400] normamps=400 emergamps=600
+New object=Line.l_3030_3035 phases=3 bus1=bus3030.1.2.3 bus2=bus3035.1.2.3 length=103 units=ft linecode=OH_3p_type1 Seasons=1 Ratings=[400] normamps=400 emergamps=600
+New object=Line.l_3035_3036 phases=3 bus1=bus3035.1.2.3 bus2=bus3036.1.2.3 length=271 units=ft linecode=OH_3p_type1 Seasons=1 Ratings=[400] normamps=400 emergamps=600
+New object=Line.l_3036_3037 phases=3 bus1=bus3036.1.2.3 bus2=bus3037.1.2.3 length=136 units=ft linecode=OH_3p_type1 Seasons=1 Ratings=[400] normamps=400 emergamps=600
+New object=Line.l_3037_3038 phases=3 bus1=bus3037.1.2.3 bus2=bus3038.1.2.3 length=252 units=ft linecode=OH_3p_type1 Seasons=1 Ratings=[400] normamps=400 emergamps=600
+New object=Line.l_3038_3039 phases=3 bus1=bus3038.1.2.3 bus2=bus3039.1.2.3 length=235 units=ft linecode=OH_3p_type1 Seasons=1 Ratings=[400] normamps=400 emergamps=600
+New object=Line.l_3039_3053 phases=3 bus1=bus3039.1.2.3 bus2=bus3053.1.2.3 length=263 units=ft linecode=OH_3p_type1 Seasons=1 Ratings=[400] normamps=400 emergamps=600
+New object=Line.l_3053_3054 phases=3 bus1=bus3053.1.2.3 bus2=bus3054.1.2.3 length=280 units=ft linecode=UG_3p_type2 Seasons=1 Ratings=[400] normamps=400 emergamps=600
+New object=Line.l_3053_3055 phases=1 bus1=bus3053.2 bus2=bus3055.2 length=1335 units=ft linecode=UG_1p_type2 Seasons=1 Ratings=[400] normamps=400 emergamps=600
+New object=Line.l_3055_3056 phases=1 bus1=bus3055.2 bus2=bus3056.2 length=128 units=ft linecode=UG_1p_type2 Seasons=1 Ratings=[400] normamps=400 emergamps=600
+New object=Line.l_3056_3057 phases=1 bus1=bus3056.2 bus2=bus3057.2 length=178 units=ft linecode=UG_1p_type2 Seasons=1 Ratings=[400] normamps=400 emergamps=600
+New object=Line.l_3057_3058 phases=1 bus1=bus3057.2 bus2=bus3058.2 length=178 units=ft linecode=UG_1p_type2 Seasons=1 Ratings=[400] normamps=400 emergamps=600
+New object=Line.l_3058_3059 phases=1 bus1=bus3058.2 bus2=bus3059.2 length=274 units=ft linecode=UG_1p_type2 Seasons=1 Ratings=[400] normamps=400 emergamps=600
+New object=Line.l_3059_3060 phases=1 bus1=bus3059.2 bus2=bus3060.2 length=77 units=ft linecode=UG_1p_type2 Seasons=1 Ratings=[400] normamps=400 emergamps=600
+New object=Line.l_3060_3061 phases=1 bus1=bus3060.2 bus2=bus3061.2 length=184 units=ft linecode=UG_1p_type2 Seasons=1 Ratings=[400] normamps=400 emergamps=600
+New object=Line.l_3055_3062 phases=1 bus1=bus3055.2 bus2=bus3062.2 length=443 units=ft linecode=UG_1p_type2 Seasons=1 Ratings=[400] normamps=400 emergamps=600
+New object=Line.l_3062_3063 phases=1 bus1=bus3062.2 bus2=bus3063.2 length=198 units=ft linecode=UG_1p_type2 Seasons=1 Ratings=[400] normamps=400 emergamps=600
+New object=Line.l_3063_3064 phases=1 bus1=bus3063.2 bus2=bus3064.2 length=157 units=ft linecode=UG_1p_type2 Seasons=1 Ratings=[400] normamps=400 emergamps=600
+New object=Line.l_3064_3065 phases=1 bus1=bus3064.2 bus2=bus3065.2 length=205 units=ft linecode=UG_1p_type2 Seasons=1 Ratings=[400] normamps=400 emergamps=600
+New object=Line.l_3065_3066 phases=1 bus1=bus3065.2 bus2=bus3066.2 length=123 units=ft linecode=UG_1p_type2 Seasons=1 Ratings=[400] normamps=400 emergamps=600
+New object=Line.l_3066_3067 phases=1 bus1=bus3066.2 bus2=bus3067.2 length=274 units=ft linecode=UG_1p_type2 Seasons=1 Ratings=[400] normamps=400 emergamps=600
+New object=Line.l_3030_3040 phases=3 bus1=bus3030.1.2.3 bus2=bus3040.1.2.3 length=332 units=ft linecode=OH_3p_type1 Seasons=1 Ratings=[400] normamps=400 emergamps=600
+New object=Line.l_3040_3044 phases=1 bus1=bus3040.3 bus2=bus3044.3 length=144 units=ft linecode=OH_1p_type5 Seasons=1 Ratings=[400] normamps=400 emergamps=600
+New object=Line.l_3044_3045 phases=1 bus1=bus3044.3 bus2=bus3045.3 length=393 units=ft linecode=OH_1p_type5 Seasons=1 Ratings=[400] normamps=400 emergamps=600
+New object=Line.l_3040_3041 phases=1 bus1=bus3040.3 bus2=bus3041.3 length=121 units=ft linecode=OH_1p_type5 Seasons=1 Ratings=[400] normamps=400 emergamps=600
+New object=Line.l_3041_3042 phases=1 bus1=bus3041.3 bus2=bus3042.3 length=328 units=ft linecode=OH_1p_type5 Seasons=1 Ratings=[400] normamps=400 emergamps=600
+New object=Line.l_3042_3043 phases=1 bus1=bus3042.3 bus2=bus3043.3 length=418 units=ft linecode=OH_1p_type5 Seasons=1 Ratings=[400] normamps=400 emergamps=600
+New object=Line.l_3040_3046 phases=3 bus1=bus3040.1.2.3 bus2=bus3046.1.2.3 length=329 units=ft linecode=OH_3p_type1 Seasons=1 Ratings=[400] normamps=400 emergamps=600
+New object=Line.l_3046_3047 phases=3 bus1=bus3046.1.2.3 bus2=bus3047.1.2.3 length=219 units=ft linecode=OH_3p_type1 Seasons=1 Ratings=[400] normamps=400 emergamps=600
+New object=Line.l_3046_3048 phases=3 bus1=bus3046.1.2.3 bus2=bus3048.1.2.3 length=130 units=ft linecode=OH_3p_type1 Seasons=1 Ratings=[400] normamps=400 emergamps=600
+New object=Line.l_3048_3049 phases=3 bus1=bus3048.1.2.3 bus2=bus3049.1.2.3 length=226 units=ft linecode=OH_3p_type1 Seasons=1 Ratings=[400] normamps=400 emergamps=600
+New object=Line.l_3049_3050 phases=3 bus1=bus3049.1.2.3 bus2=bus3050.1.2.3 length=167 units=ft linecode=OH_3p_type1 Seasons=1 Ratings=[400] normamps=400 emergamps=600
+New object=Line.l_3050_3051 phases=3 bus1=bus3050.1.2.3 bus2=bus3051.1.2.3 length=360 units=ft linecode=OH_3p_type1 Seasons=1 Ratings=[400] normamps=400 emergamps=600
+New object=Line.l_3051_3052 phases=3 bus1=bus3051.1.2.3 bus2=bus3052.1.2.3 length=292 units=ft linecode=OH_3p_type1 Seasons=1 Ratings=[400] normamps=400 emergamps=600
+New object=Line.l_3030_3031 phases=3 bus1=bus3030.1.2.3 bus2=bus3031.1.2.3 length=243 units=ft linecode=OH_3p_type1 Seasons=1 Ratings=[400] normamps=400 emergamps=600
+New object=Line.l_3031_3032 phases=3 bus1=bus3031.1.2.3 bus2=bus3032.1.2.3 length=251 units=ft linecode=OH_3p_type1 Seasons=1 Ratings=[400] normamps=400 emergamps=600
+New object=Line.l_3032_3033 phases=3 bus1=bus3032.1.2.3 bus2=bus3033.1.2.3 length=388 units=ft linecode=OH_3p_type1 Seasons=1 Ratings=[400] normamps=400 emergamps=600
+New object=Line.l_3033_3034 phases=3 bus1=bus3033.1.2.3 bus2=bus3034.1.2.3 length=257 units=ft linecode=OH_3p_type1 Seasons=1 Ratings=[400] normamps=400 emergamps=600
+New object=Line.l_3034_3068 phases=3 bus1=bus3034.1.2.3 bus2=bus3068.1.2.3 length=164 units=ft linecode=OH_3p_type1 Seasons=1 Ratings=[400] normamps=400 emergamps=600
+New object=Line.l_3068_3069 phases=3 bus1=bus3068.1.2.3 bus2=bus3069.1.2.3 length=329 units=ft linecode=OH_3p_type1 Seasons=1 Ratings=[400] normamps=400 emergamps=600
+New object=Line.l_3069_3070 phases=3 bus1=bus3069.1.2.3 bus2=bus3070.1.2.3 length=107 units=ft linecode=UG_3p_type2 Seasons=1 Ratings=[400] normamps=400 emergamps=600
+New object=Line.l_3070_3071 phases=3 bus1=bus3070.1.2.3 bus2=bus3071.1.2.3 length=141 units=ft linecode=UG_3p_type2 Seasons=1 Ratings=[400] normamps=400 emergamps=600
+New object=Line.l_3071_3072 phases=3 bus1=bus3071.1.2.3 bus2=bus3072.1.2.3 length=90 units=ft linecode=UG_3p_type2 Seasons=1 Ratings=[400] normamps=400 emergamps=600
+New object=Line.l_3069_3073 phases=3 bus1=bus3069.1.2.3 bus2=bus3073.1.2.3 length=20 units=ft linecode=OH_3p_type1 Seasons=1 Ratings=[400] normamps=400 emergamps=600
+New object=Line.l_3073_3074 phases=3 bus1=bus3073.1.2.3 bus2=bus3074.1.2.3 length=340 units=ft linecode=OH_3p_type1 Seasons=1 Ratings=[400] normamps=400 emergamps=600
+New object=Line.l_3068_3075 phases=3 bus1=bus3068.1.2.3 bus2=bus3075.1.2.3 length=188 units=ft linecode=OH_3p_type1 Seasons=1 Ratings=[400] normamps=400 emergamps=600
+New object=Line.l_3076_3077 phases=3 bus1=bus3076.1.2.3 bus2=bus3077.1.2.3 length=877 units=ft linecode=OH_3p_type1 Seasons=1 Ratings=[400] normamps=400 emergamps=600
+New object=Line.l_3077_3078 phases=3 bus1=bus3077.1.2.3 bus2=bus3078.1.2.3 length=80 units=ft linecode=OH_3p_type1 Seasons=1 Ratings=[400] normamps=400 emergamps=600
+New object=Line.l_3076_3079 phases=3 bus1=bus3076.1.2.3 bus2=bus3079.1.2.3 length=191 units=ft linecode=OH_3p_type1 Seasons=1 Ratings=[400] normamps=400 emergamps=600
+New object=Line.l_3079_3080 phases=3 bus1=bus3079.1.2.3 bus2=bus3080.1.2.3 length=604 units=ft linecode=OH_3p_type1 Seasons=1 Ratings=[400] normamps=400 emergamps=600
+New object=Line.l_3080_3081 phases=3 bus1=bus3080.1.2.3 bus2=bus3081.1.2.3 length=195 units=ft linecode=OH_3p_type1 Seasons=1 Ratings=[400] normamps=400 emergamps=600
+New object=Line.l_3080_3082 phases=3 bus1=bus3080.1.2.3 bus2=bus3082.1.2.3 length=540 units=ft linecode=OH_3p_type1 Seasons=1 Ratings=[400] normamps=400 emergamps=600
+New object=Line.l_3082_3083 phases=1 bus1=bus3082.1 bus2=bus3083.1 length=125 units=ft linecode=UG_1p_type2 Seasons=1 Ratings=[400] normamps=400 emergamps=600
+New object=Line.l_3083_3084 phases=1 bus1=bus3083.1 bus2=bus3084.1 length=196 units=ft linecode=UG_1p_type2 Seasons=1 Ratings=[400] normamps=400 emergamps=600
+New object=Line.l_3084_3085 phases=1 bus1=bus3084.1 bus2=bus3085.1 length=515 units=ft linecode=UG_1p_type2 Seasons=1 Ratings=[400] normamps=400 emergamps=600
+New object=Line.l_3085_3086 phases=1 bus1=bus3085.1 bus2=bus3086.1 length=338 units=ft linecode=UG_1p_type2 Seasons=1 Ratings=[400] normamps=400 emergamps=600
+New object=Line.l_3086_3087 phases=1 bus1=bus3086.1 bus2=bus3087.1 length=239 units=ft linecode=UG_1p_type2 Seasons=1 Ratings=[400] normamps=400 emergamps=600
+New object=Line.l_3087_3088 phases=1 bus1=bus3087.1 bus2=bus3088.1 length=420 units=ft linecode=UG_1p_type2 Seasons=1 Ratings=[400] normamps=400 emergamps=600
+New object=Line.l_3088_3089 phases=1 bus1=bus3088.1 bus2=bus3089.1 length=112 units=ft linecode=UG_1p_type2 Seasons=1 Ratings=[400] normamps=400 emergamps=600
+New object=Line.l_3089_3090 phases=1 bus1=bus3089.1 bus2=bus3090.1 length=565 units=ft linecode=UG_1p_type2 Seasons=1 Ratings=[400] normamps=400 emergamps=600
+New object=Line.l_3090_3091 phases=1 bus1=bus3090.1 bus2=bus3091.1 length=222 units=ft linecode=UG_1p_type2 Seasons=1 Ratings=[400] normamps=400 emergamps=600
+New object=Line.l_3082_3092 phases=3 bus1=bus3082.1.2.3 bus2=bus3092.1.2.3 length=185 units=ft linecode=UG_3p_type2 Seasons=1 Ratings=[400] normamps=400 emergamps=600
+New object=Line.l_3092_3093 phases=1 bus1=bus3092.1 bus2=bus3093.1 length=230 units=ft linecode=UG_1p_type2 Seasons=1 Ratings=[400] normamps=400 emergamps=600
+New object=Line.l_3093_3094 phases=1 bus1=bus3093.1 bus2=bus3094.1 length=125 units=ft linecode=UG_1p_type2 Seasons=1 Ratings=[400] normamps=400 emergamps=600
+New object=Line.l_3094_3095 phases=1 bus1=bus3094.1 bus2=bus3095.1 length=65 units=ft linecode=UG_1p_type2 Seasons=1 Ratings=[400] normamps=400 emergamps=600
+New object=Line.l_3095_3096 phases=1 bus1=bus3095.1 bus2=bus3096.1 length=296 units=ft linecode=UG_1p_type2 Seasons=1 Ratings=[400] normamps=400 emergamps=600
+New object=Line.l_3096_3097 phases=1 bus1=bus3096.1 bus2=bus3097.1 length=117 units=ft linecode=UG_1p_type2 Seasons=1 Ratings=[400] normamps=400 emergamps=600
+New object=Line.l_3092_3098 phases=1 bus1=bus3092.2 bus2=bus3098.2 length=284 units=ft linecode=UG_1p_type2 Seasons=1 Ratings=[400] normamps=400 emergamps=600
+New object=Line.l_3098_3099 phases=1 bus1=bus3098.2 bus2=bus3099.2 length=368 units=ft linecode=UG_1p_type2 Seasons=1 Ratings=[400] normamps=400 emergamps=600
+New object=Line.l_3092_3100 phases=3 bus1=bus3092.1.2.3 bus2=bus3100.1.2.3 length=91 units=ft linecode=UG_3p_type2 Seasons=1 Ratings=[400] normamps=400 emergamps=600
+New object=Line.l_3100_3101 phases=1 bus1=bus3100.3 bus2=bus3101.3 length=157 units=ft linecode=UG_1p_type2 Seasons=1 Ratings=[400] normamps=400 emergamps=600
+New object=Line.l_3101_3102 phases=1 bus1=bus3101.3 bus2=bus3102.3 length=225 units=ft linecode=UG_1p_type2 Seasons=1 Ratings=[400] normamps=400 emergamps=600
+New object=Line.l_3102_3103 phases=1 bus1=bus3102.3 bus2=bus3103.3 length=134 units=ft linecode=UG_1p_type2 Seasons=1 Ratings=[400] normamps=400 emergamps=600
+New object=Line.l_3100_3104 phases=1 bus1=bus3100.3 bus2=bus3104.3 length=223 units=ft linecode=UG_1p_type2 Seasons=1 Ratings=[400] normamps=400 emergamps=600
+New object=Line.l_3104_3105 phases=1 bus1=bus3104.3 bus2=bus3105.3 length=120 units=ft linecode=UG_1p_type2 Seasons=1 Ratings=[400] normamps=400 emergamps=600
+New object=Line.l_3105_3106 phases=1 bus1=bus3105.3 bus2=bus3106.3 length=181 units=ft linecode=UG_1p_type2 Seasons=1 Ratings=[400] normamps=400 emergamps=600
+New object=Line.l_3082_3107 phases=3 bus1=bus3082.1.2.3 bus2=bus3107.1.2.3 length=1461 units=ft linecode=UG_3p_type1 Seasons=1 Ratings=[400] normamps=400 emergamps=600
+New object=Line.l_3107_3108 phases=1 bus1=bus3107.1 bus2=bus3108.1 length=466 units=ft linecode=UG_1p_type2 Seasons=1 Ratings=[400] normamps=400 emergamps=600
+New object=Line.l_3108_3109 phases=1 bus1=bus3108.1 bus2=bus3109.1 length=136 units=ft linecode=UG_1p_type2 Seasons=1 Ratings=[400] normamps=400 emergamps=600
+New object=Line.l_3109_3110 phases=1 bus1=bus3109.1 bus2=bus3110.1 length=152 units=ft linecode=UG_1p_type2 Seasons=1 Ratings=[400] normamps=400 emergamps=600
+New object=Line.l_3110_3111 phases=1 bus1=bus3110.1 bus2=bus3111.1 length=276 units=ft linecode=UG_1p_type2 Seasons=1 Ratings=[400] normamps=400 emergamps=600
+New object=Line.l_3111_3112 phases=1 bus1=bus3111.1 bus2=bus3112.1 length=328 units=ft linecode=UG_1p_type2 Seasons=1 Ratings=[400] normamps=400 emergamps=600
+New object=Line.l_3107_3113 phases=1 bus1=bus3107.2 bus2=bus3113.2 length=245 units=ft linecode=UG_1p_type2 Seasons=1 Ratings=[400] normamps=400 emergamps=600
+New object=Line.l_3113_3114 phases=1 bus1=bus3113.2 bus2=bus3114.2 length=149 units=ft linecode=UG_1p_type2 Seasons=1 Ratings=[400] normamps=400 emergamps=600
+New object=Line.l_3114_3115 phases=1 bus1=bus3114.2 bus2=bus3115.2 length=331 units=ft linecode=UG_1p_type2 Seasons=1 Ratings=[400] normamps=400 emergamps=600
+New object=Line.l_3113_3116 phases=1 bus1=bus3113.2 bus2=bus3116.2 length=456 units=ft linecode=UG_1p_type2 Seasons=1 Ratings=[400] normamps=400 emergamps=600
+New object=Line.l_3116_3117 phases=1 bus1=bus3116.2 bus2=bus3117.2 length=112 units=ft linecode=UG_1p_type2 Seasons=1 Ratings=[400] normamps=400 emergamps=600
+New object=Line.l_3107_3118 phases=3 bus1=bus3107.1.2.3 bus2=bus3118.1.2.3 length=2267 units=ft linecode=UG_3p_type1 Seasons=1 Ratings=[400] normamps=400 emergamps=600
+New object=Line.l_3118_3119 phases=1 bus1=bus3118.2 bus2=bus3119.2 length=464 units=ft linecode=UG_1p_type2 Seasons=1 Ratings=[400] normamps=400 emergamps=600
+New object=Line.l_3119_3120 phases=1 bus1=bus3119.2 bus2=bus3120.2 length=350 units=ft linecode=UG_1p_type2 Seasons=1 Ratings=[400] normamps=400 emergamps=600
+New object=Line.l_3120_3121 phases=1 bus1=bus3120.2 bus2=bus3121.2 length=206 units=ft linecode=UG_1p_type2 Seasons=1 Ratings=[400] normamps=400 emergamps=600
+New object=Line.l_3121_3122 phases=1 bus1=bus3121.2 bus2=bus3122.2 length=177 units=ft linecode=UG_1p_type2 Seasons=1 Ratings=[400] normamps=400 emergamps=600
+New object=Line.l_3119_3123 phases=1 bus1=bus3119.2 bus2=bus3123.2 length=91 units=ft linecode=UG_1p_type2 Seasons=1 Ratings=[400] normamps=400 emergamps=600
+New object=Line.l_3123_3124 phases=1 bus1=bus3123.2 bus2=bus3124.2 length=67 units=ft linecode=UG_1p_type2 Seasons=1 Ratings=[400] normamps=400 emergamps=600
+New object=Line.l_3124_3125 phases=1 bus1=bus3124.2 bus2=bus3125.2 length=151 units=ft linecode=UG_1p_type2 Seasons=1 Ratings=[400] normamps=400 emergamps=600
+New object=Line.l_3125_3126 phases=1 bus1=bus3125.2 bus2=bus3126.2 length=343 units=ft linecode=UG_1p_type2 Seasons=1 Ratings=[400] normamps=400 emergamps=600
+New object=Line.l_3126_3127 phases=1 bus1=bus3126.2 bus2=bus3127.2 length=234 units=ft linecode=UG_1p_type2 Seasons=1 Ratings=[400] normamps=400 emergamps=600
+New object=Line.l_3127_3128 phases=1 bus1=bus3127.2 bus2=bus3128.2 length=238 units=ft linecode=UG_1p_type2 Seasons=1 Ratings=[400] normamps=400 emergamps=600
+New object=Line.l_3128_3129 phases=1 bus1=bus3128.2 bus2=bus3129.2 length=243 units=ft linecode=UG_1p_type2 Seasons=1 Ratings=[400] normamps=400 emergamps=600
+New object=Line.l_3129_3130 phases=1 bus1=bus3129.2 bus2=bus3130.2 length=230 units=ft linecode=UG_1p_type2 Seasons=1 Ratings=[400] normamps=400 emergamps=600
+New object=Line.l_3130_3131 phases=1 bus1=bus3130.2 bus2=bus3131.2 length=194 units=ft linecode=UG_1p_type2 Seasons=1 Ratings=[400] normamps=400 emergamps=600
+New object=Line.l_3118_3132 phases=1 bus1=bus3118.1 bus2=bus3132.1 length=501 units=ft linecode=UG_1p_type2 Seasons=1 Ratings=[400] normamps=400 emergamps=600
+New object=Line.l_3132_3133 phases=1 bus1=bus3132.1 bus2=bus3133.1 length=145 units=ft linecode=UG_1p_type2 Seasons=1 Ratings=[400] normamps=400 emergamps=600
+New object=Line.l_3133_3134 phases=1 bus1=bus3133.1 bus2=bus3134.1 length=281 units=ft linecode=UG_1p_type2 Seasons=1 Ratings=[400] normamps=400 emergamps=600
+New object=Line.l_3134_3135 phases=1 bus1=bus3134.1 bus2=bus3135.1 length=240 units=ft linecode=UG_1p_type2 Seasons=1 Ratings=[400] normamps=400 emergamps=600
+New object=Line.l_3135_3136 phases=1 bus1=bus3135.1 bus2=bus3136.1 length=367 units=ft linecode=UG_1p_type2 Seasons=1 Ratings=[400] normamps=400 emergamps=600
+New object=Line.l_3133_3137 phases=1 bus1=bus3133.1 bus2=bus3137.1 length=252 units=ft linecode=UG_1p_type2 Seasons=1 Ratings=[400] normamps=400 emergamps=600
+New object=Line.l_3137_3138 phases=1 bus1=bus3137.1 bus2=bus3138.1 length=351 units=ft linecode=UG_1p_type2 Seasons=1 Ratings=[400] normamps=400 emergamps=600
+New object=Line.l_3138_3139 phases=1 bus1=bus3138.1 bus2=bus3139.1 length=289 units=ft linecode=UG_1p_type2 Seasons=1 Ratings=[400] normamps=400 emergamps=600
+New object=Line.l_3107_3140 phases=1 bus1=bus3107.3 bus2=bus3140.3 length=255 units=ft linecode=UG_1p_type2 Seasons=1 Ratings=[400] normamps=400 emergamps=600
+New object=Line.l_3140_3141 phases=1 bus1=bus3140.3 bus2=bus3141.3 length=134 units=ft linecode=UG_1p_type2 Seasons=1 Ratings=[400] normamps=400 emergamps=600
+New object=Line.l_3141_3142 phases=1 bus1=bus3141.3 bus2=bus3142.3 length=193 units=ft linecode=UG_1p_type2 Seasons=1 Ratings=[400] normamps=400 emergamps=600
+New object=Line.l_3142_3143 phases=1 bus1=bus3142.3 bus2=bus3143.3 length=202 units=ft linecode=UG_1p_type2 Seasons=1 Ratings=[400] normamps=400 emergamps=600
+New object=Line.l_3140_3148 phases=1 bus1=bus3140.3 bus2=bus3148.3 length=147 units=ft linecode=UG_1p_type2 Seasons=1 Ratings=[400] normamps=400 emergamps=600
+New object=Line.l_3148_3149 phases=1 bus1=bus3148.3 bus2=bus3149.3 length=253 units=ft linecode=UG_1p_type2 Seasons=1 Ratings=[400] normamps=400 emergamps=600
+New object=Line.l_3149_3150 phases=1 bus1=bus3149.3 bus2=bus3150.3 length=139 units=ft linecode=UG_1p_type2 Seasons=1 Ratings=[400] normamps=400 emergamps=600
+New object=Line.l_3150_3151 phases=1 bus1=bus3150.3 bus2=bus3151.3 length=156 units=ft linecode=UG_1p_type2 Seasons=1 Ratings=[400] normamps=400 emergamps=600
+New object=Line.l_3151_3152 phases=1 bus1=bus3151.3 bus2=bus3152.3 length=260 units=ft linecode=UG_1p_type2 Seasons=1 Ratings=[400] normamps=400 emergamps=600
+New object=Line.l_3152_3153 phases=1 bus1=bus3152.3 bus2=bus3153.3 length=139 units=ft linecode=UG_1p_type2 Seasons=1 Ratings=[400] normamps=400 emergamps=600
+New object=Line.l_3153_3154 phases=1 bus1=bus3153.3 bus2=bus3154.3 length=119 units=ft linecode=UG_1p_type2 Seasons=1 Ratings=[400] normamps=400 emergamps=600
+New object=Line.l_3154_3155 phases=1 bus1=bus3154.3 bus2=bus3155.3 length=505 units=ft linecode=UG_1p_type2 Seasons=1 Ratings=[400] normamps=400 emergamps=600
+New object=Line.l_3140_3156 phases=1 bus1=bus3140.3 bus2=bus3156.3 length=319 units=ft linecode=UG_1p_type2 Seasons=1 Ratings=[400] normamps=400 emergamps=600
+New object=Line.l_3156_3144 phases=1 bus1=bus3156.3 bus2=bus3144.3 length=122 units=ft linecode=UG_1p_type2 Seasons=1 Ratings=[400] normamps=400 emergamps=600
+New object=Line.l_3144_3145 phases=1 bus1=bus3144.3 bus2=bus3145.3 length=178 units=ft linecode=UG_1p_type2 Seasons=1 Ratings=[400] normamps=400 emergamps=600
+New object=Line.l_3145_3146 phases=1 bus1=bus3145.3 bus2=bus3146.3 length=178 units=ft linecode=UG_1p_type2 Seasons=1 Ratings=[400] normamps=400 emergamps=600
+New object=Line.l_3146_3147 phases=1 bus1=bus3146.3 bus2=bus3147.3 length=178 units=ft linecode=UG_1p_type2 Seasons=1 Ratings=[400] normamps=400 emergamps=600
+New object=Line.l_3156_3157 phases=1 bus1=bus3156.3 bus2=bus3157.3 length=153 units=ft linecode=UG_1p_type2 Seasons=1 Ratings=[400] normamps=400 emergamps=600
+New object=Line.l_3157_3158 phases=1 bus1=bus3157.3 bus2=bus3158.3 length=295 units=ft linecode=UG_1p_type2 Seasons=1 Ratings=[400] normamps=400 emergamps=600
+New object=Line.l_3158_3159 phases=1 bus1=bus3158.3 bus2=bus3159.3 length=257 units=ft linecode=UG_1p_type2 Seasons=1 Ratings=[400] normamps=400 emergamps=600
+New object=Line.l_3159_3160 phases=1 bus1=bus3159.3 bus2=bus3160.3 length=243 units=ft linecode=UG_1p_type2 Seasons=1 Ratings=[400] normamps=400 emergamps=600
+New object=Line.l_3160_3161 phases=1 bus1=bus3160.3 bus2=bus3161.3 length=237 units=ft linecode=UG_1p_type2 Seasons=1 Ratings=[400] normamps=400 emergamps=600
+New object=Line.l_3161_3162 phases=1 bus1=bus3161.3 bus2=bus3162.3 length=176 units=ft linecode=UG_1p_type2 Seasons=1 Ratings=[400] normamps=400 emergamps=600
+New object=Line.cb_101 phases=3 bus1=bus1.1.2.3 bus2=bus1001.1.2.3 Switch=True r1=0.0001 r0=0.0001 x1=0 x0=0 C1=0 C0=0
+New object=Line.cb_102 phases=3 bus1=bus1010.1.2.3 bus2=bus1010.4.5.6 Switch=True r1=0.0001 r0=0.0001 x1=0 x0=0 C1=0 C0=0
+New object=Line.cb_201 phases=3 bus1=bus1.1.2.3 bus2=bus2001.1.2.3 Switch=True r1=0.0001 r0=0.0001 x1=0 x0=0 C1=0 C0=0
+New object=Line.cb_202 phases=3 bus1=bus2012.1.2.3 bus2=bus2013.1.2.3 Switch=True r1=0.0001 r0=0.0001 x1=0 x0=0 C1=0 C0=0
+New object=Line.cb_203 phases=3 bus1=bus2021.1.2.3 bus2=bus2026.1.2.3 Switch=True r1=0.0001 r0=0.0001 x1=0 x0=0 C1=0 C0=0
+New object=Line.cb_204 phases=3 bus1=bus2013.1.2.3 bus2=bus2013.4.5.6 Switch=True r1=0.0001 r0=0.0001 x1=0 x0=0 C1=0 C0=0
+New object=Line.cb_301 phases=3 bus1=bus1.1.2.3 bus2=bus3001.1.2.3 Switch=True r1=0.0001 r0=0.0001 x1=0 x0=0 C1=0 C0=0
+New object=Line.cb_302 phases=3 bus1=bus3075.1.2.3 bus2=bus3076.1.2.3 Switch=True r1=0.0001 r0=0.0001 x1=0 x0=0 C1=0 C0=0
+New object=Line.cb_303 phases=3 bus1=bus3081.1.2.3 bus2=bus3081.4.5.6 Switch=True r1=0.0001 r0=0.0001 x1=0 x0=0 C1=0 C0=0
+! Redirect Load.DSS
+New object=Load.load_1003 phases=3 conn=wye bus1=t_bus1003_l.1.2.3.0 kV=0.208 kW=15.29 kvar=3.83203521636453
+New object=Load.load_1004 phases=3 conn=wye bus1=t_bus1004_l.1.2.3.0 kV=0.208 kW=6.892 kvar=3.33794794654248
+New object=Load.load_1005 phases=3 conn=wye bus1=t_bus1005_l.1.2.3.0 kV=0.208 kW=4.916 kvar=1.94292752188577
+New object=Load.load_1006 phases=1 conn=delta bus1=t_bus1006_l.1.2 kV=0.208 kW=5.04 kvar=2.29629183968801
+New object=Load.load_1007 phases=1 conn=delta bus1=t_bus1007_l.1.2 kV=0.208 kW=4.163 kvar=2.01623292243998
+New object=Load.load_1008 phases=3 conn=wye bus1=t_bus1008_l.1.2.3.0 kV=0.208 kW=14.096 kvar=6.42232733576234
+New object=Load.load_1009 phases=3 conn=wye bus1=t_bus1009_l.1.2.3.0 kV=0.208 kW=17.081 kvar=6.75084316544566
+New object=Load.load_1010 phases=3 conn=wye bus1=t_bus1010_l.1.2.3.0 kV=0.208 kW=7.136 kvar=2.82032766399041
+New object=Load.load_1011 phases=2 conn=wye bus1=t_bus1011_l.1.2 kV=0.208 kW=3.125 kvar=1.02713782868395
+New object=Load.load_1012 phases=2 conn=wye bus1=t_bus1012_l.1.2 kV=0.208 kW=3.083 kvar=1.11897958005877
+New object=Load.load_1013 phases=3 conn=wye bus1=t_bus1013_l.1.2.3.0 kV=0.208 kW=1.537 kvar=0.448291666666667
+New object=Load.load_1014 phases=2 conn=wye bus1=t_bus1014_l.1.2 kV=0.208 kW=0.458 kvar=0.195107182990382
+New object=Load.load_1015 phases=2 conn=wye bus1=t_bus1015_l.1.2 kV=0.208 kW=0.793 kvar=0.161025517882765
+New object=Load.load_1016 phases=2 conn=wye bus1=t_bus1016_l.1.2 kV=0.208 kW=3.083 kvar=1.4931650492151
+New object=Load.load_1017 phases=2 conn=wye bus1=t_bus1017_l.1.2 kV=0.208 kW=2.131 kvar=0.621541666666667
+New object=Load.load_2002 phases=3 conn=wye bus1=t_bus2002_l.1.2.3.0 kV=0.208 kW=27.94 kvar=10.1408658666371
+New object=Load.load_2003 phases=3 conn=wye bus1=t_bus2003_l.1.2.3.0 kV=0.208 kW=14.286 kvar=3.58040909751365
+New object=Load.load_2005 phases=3 conn=wye bus1=t_bus2005_l.1.2.3.0 kV=0.208 kW=8.947 kvar=3.5360806627974
+New object=Load.load_2008 phases=2 conn=wye bus1=t_bus2008_l.1.2 kV=0.208 kW=2.067 kvar=0.941753022348238
+New object=Load.load_2009 phases=2 conn=wye bus1=t_bus2009_l.1.2 kV=0.208 kW=1.246 kvar=0.492450710388461
+New object=Load.load_2010 phases=3 conn=wye bus1=t_bus2010_l.1.2.3.0 kV=0.208 kW=2.29 kvar=0.905065912351184
+New object=Load.load_2011 phases=3 conn=wye bus1=t_bus2011_l.1.2.3.0 kV=0.208 kW=5.368 kvar=1.76437627660014
+New object=Load.load_2014 phases=2 conn=wye bus1=t_bus2014_l.1.2 kV=0.208 kW=2.816 kvar=0.821333333333334
+New object=Load.load_2015 phases=2 conn=wye bus1=t_bus2015_l.1.2 kV=0.208 kW=1.49 kvar=0.634737342042945
+New object=Load.load_2016 phases=2 conn=wye bus1=t_bus2016_l.1.2 kV=0.208 kW=1.64 kvar=0.333016203439767
+New object=Load.load_2017 phases=2 conn=wye bus1=t_bus2017_l.1.2 kV=0.208 kW=5.125 kvar=2.48215078729399
+New object=Load.load_2018 phases=2 conn=wye bus1=t_bus2018_l.1.2 kV=0.208 kW=2.809 kvar=0.819291666666667
+New object=Load.load_2020 phases=2 conn=wye bus1=t_bus2020_l.1.2 kV=0.208 kW=3.086 kvar=1.01431914858197
+New object=Load.load_2022 phases=2 conn=wye bus1=t_bus2022_l.1.2 kV=0.208 kW=2.728 kvar=1.24291351957716
+New object=Load.load_2023 phases=2 conn=wye bus1=t_bus2023_l.1.2 kV=0.208 kW=0.728 kvar=0.147826704941555
+New object=Load.load_2024 phases=2 conn=wye bus1=t_bus2024_l.1.2 kV=0.208 kW=2.549 kvar=0.363212828405741
+New object=Load.load_2025 phases=2 conn=wye bus1=t_bus2025_l.1.2 kV=0.208 kW=2.701 kvar=1.06750350622731
+New object=Load.load_2028 phases=2 conn=wye bus1=t_bus2028_l.1.2 kV=0.208 kW=0 kvar=0
+New object=Load.load_2029 phases=3 conn=wye bus1=t_bus2029_l.1.2.3.0 kV=0.208 kW=9.427 kvar=1.91423399379676
+New object=Load.load_2030 phases=3 conn=wye bus1=t_bus2030_l.1.2.3.0 kV=0.208 kW=5.331 kvar=2.58192114089059
+New object=Load.load_2031 phases=2 conn=wye bus1=t_bus2031_l.1.2 kV=0.208 kW=3.279 kvar=1.58809218176332
+New object=Load.load_2032 phases=3 conn=wye bus1=t_bus2032_l.1.2.3.0 kV=0.208 kW=2.217 kvar=1.01009504138657
+New object=Load.load_2034 phases=3 conn=wye bus1=t_bus2034_l.1.2.3.0 kV=0.208 kW=3.621 kvar=1.75373034161786
+New object=Load.load_2035 phases=3 conn=wye bus1=t_bus2035_l.1.2.3.0 kV=0.208 kW=3.931 kvar=1.42676248109342
+New object=Load.load_2037 phases=3 conn=wye bus1=t_bus2037_l.1.2.3.0 kV=0.208 kW=3.941 kvar=1.2953440585099
+New object=Load.load_2040 phases=3 conn=wye bus1=t_bus2040_l.1.2.3.0 kV=0.208 kW=81.76 kvar=23.8466666666667
+New object=Load.load_2041 phases=3 conn=wye bus1=t_bus2041_l.1.2.3.0 kV=0.208 kW=1.919 kvar=0.389669569756654
+New object=Load.load_2042 phases=3 conn=wye bus1=t_bus2042_l.1.2.3.0 kV=0.208 kW=4.223 kvar=2.04529224873025
+New object=Load.load_2043 phases=3 conn=wye bus1=t_bus2043_l.1.2.3.0 kV=0.208 kW=6.509 kvar=1.63130917091673
+New object=Load.load_2045 phases=2 conn=wye bus1=t_bus2045_l.1.2 kV=0.208 kW=2.175 kvar=0.545106382968794
+New object=Load.load_2046 phases=2 conn=wye bus1=t_bus2046_l.1.2 kV=0.208 kW=6.621 kvar=2.82053418903781
+New object=Load.load_2047 phases=2 conn=wye bus1=t_bus2047_l.1.2 kV=0.208 kW=5.512 kvar=1.38143741743632
+New object=Load.load_2048 phases=2 conn=wye bus1=t_bus2048_l.1.2 kV=0.208 kW=3.764 kvar=1.71492906440192
+New object=Load.load_2049 phases=2 conn=wye bus1=t_bus2049_l.1.2 kV=0.208 kW=3.538 kvar=1.28412252813751
+New object=Load.load_2050 phases=2 conn=wye bus1=t_bus2050_l.1.2 kV=0.208 kW=3.747 kvar=0.533918582987961
+New object=Load.load_2051 phases=2 conn=wye bus1=t_bus2051_l.1.2 kV=0.208 kW=5.778 kvar=2.46141769283499
+New object=Load.load_2052 phases=3 conn=wye bus1=t_bus2052_l.1.2.3.0 kV=0.208 kW=40.029 kvar=17.0522825937161
+New object=Load.load_2053 phases=3 conn=wye bus1=t_bus2053_l.1.2.3.0 kV=0.208 kW=4.28 kvar=1.95002560989379
+New object=Load.load_2054 phases=2 conn=wye bus1=t_bus2054_l.1.2 kV=0.208 kW=7.159 kvar=3.46726194853419
+New object=Load.load_2055 phases=2 conn=wye bus1=t_bus2055_l.1.2 kV=0.208 kW=4.26 kvar=1.2425
+New object=Load.load_2056 phases=2 conn=wye bus1=t_bus2056_l.1.2 kV=0.208 kW=4.723 kvar=2.01198957481129
+New object=Load.load_2058 phases=3 conn=wye bus1=t_bus2058_l.1.2.3.0 kV=0.208 kW=31.48 kvar=11.425714297843
+New object=Load.load_2059 phases=2 conn=wye bus1=t_bus2059_l.1.2 kV=0.208 kW=2.635 kvar=1.27618874624774
+New object=Load.load_2060 phases=2 conn=wye bus1=t_bus2060_l.1.2 kV=0.208 kW=1.946 kvar=0.639619268678067
+New object=Load.load_3002 phases=3 conn=wye bus1=t_bus3002_l.1.2.3.0 kV=0.208 kW=19.645 kvar=7.13018289
+New object=Load.load_3004 phases=3 conn=wye bus1=t_bus3004_l.1.2.3.0 kV=0.208 kW=3.117 kvar=1.509632001
+New object=Load.load_3006 phases=3 conn=wye bus1=t_bus3006_l.1.2.3.0 kV=0.208 kW=4.033 kvar=1.837489085
+New object=Load.load_3007 phases=3 conn=wye bus1=t_bus3007_l.1.2.3.0 kV=0.208 kW=9.425 kvar=4.564735838
+New object=Load.load_3009 phases=2 conn=wye bus1=t_bus3009_l.1.2 kV=0.208 kW=4.064 kvar=1.606195575
+New object=Load.load_3010 phases=2 conn=wye bus1=t_bus3010_l.1.2 kV=0.208 kW=4.935 kvar=1.950436802
+New object=Load.load_3011 phases=2 conn=wye bus1=t_bus3011_l.1.2 kV=0.208 kW=7.419 kvar=2.438507376
+New object=Load.load_3012 phases=2 conn=wye bus1=t_bus3012_l.1.2 kV=0.208 kW=3.763 kvar=1.365786623
+New object=Load.load_3013 phases=2 conn=wye bus1=t_bus3013_l.1.2 kV=0.208 kW=2.539 kvar=0.740541667
+New object=Load.load_3014 phases=2 conn=wye bus1=t_bus3014_l.1.2 kV=0.208 kW=3.105 kvar=1.322724461
+New object=Load.load_3016 phases=2 conn=wye bus1=t_bus3016_l.1.2 kV=0.208 kW=6.246 kvar=3.025075867
+New object=Load.load_3017 phases=2 conn=wye bus1=t_bus3017_l.1.2 kV=0.208 kW=8.493 kvar=2.477125
+New object=Load.load_3018 phases=2 conn=wye bus1=t_bus3018_l.1.2 kV=0.208 kW=5.351 kvar=1.94215366
+New object=Load.load_3019 phases=2 conn=wye bus1=t_bus3019_l.1.2 kV=0.208 kW=5.403 kvar=1.77588022
+New object=Load.load_3020 phases=2 conn=wye bus1=t_bus3020_l.1.2 kV=0.208 kW=5.984 kvar=2.726390946
+New object=Load.load_3021 phases=2 conn=wye bus1=t_bus3021_l.1.2 kV=0.208 kW=7.73 kvar=3.521892048
+New object=Load.load_3023 phases=2 conn=wye bus1=t_bus3023_l.1.2 kV=0.208 kW=4.344 kvar=0.618986476
+New object=Load.load_3024 phases=2 conn=wye bus1=t_bus3024_l.1.2 kV=0.208 kW=5.02 kvar=1.984030952
+New object=Load.load_3025 phases=2 conn=wye bus1=t_bus3025_l.1.2 kV=0.208 kW=6.546 kvar=1.90925
+New object=Load.load_3026 phases=2 conn=wye bus1=t_bus3026_l.1.2 kV=0.208 kW=10.273 kvar=2.086021621
+New object=Load.load_3027 phases=2 conn=wye bus1=t_bus3027_l.1.2 kV=0.208 kW=7.116 kvar=1.444965429
+New object=Load.load_3028 phases=2 conn=wye bus1=t_bus3028_l.1.2 kV=0.208 kW=11.008 kvar=5.33141773
+New object=Load.load_3029 phases=2 conn=wye bus1=t_bus3029_l.1.2 kV=0.208 kW=2.494 kvar=1.207899329
+New object=Load.load_3031 phases=3 conn=wye bus1=t_bus3031_l.1.2.3.0 kV=0.208 kW=4.271 kvar=0.86726354
+New object=Load.load_3032 phases=3 conn=wye bus1=t_bus3032_l.1.2.3.0 kV=0.208 kW=5.709 kvar=2.764994897
+New object=Load.load_3033 phases=3 conn=wye bus1=t_bus3033_l.1.2.3.0 kV=0.208 kW=9.779 kvar=3.549303053
+New object=Load.load_3034 phases=3 conn=wye bus1=t_bus3034_l.1.2.3.0 kV=0.208 kW=4.776 kvar=0.680543142
+New object=Load.load_3035 phases=3 conn=wye bus1=t_bus3035_l.1.2.3.0 kV=0.208 kW=10.893 kvar=3.580355958
+New object=Load.load_3036 phases=3 conn=wye bus1=t_bus3036_l.1.2.3.0 kV=0.208 kW=4.026 kvar=1.17425
+New object=Load.load_3037 phases=3 conn=wye bus1=t_bus3037_l.1.2.3.0 kV=0.208 kW=7.303 kvar=2.886330287
+New object=Load.load_3038 phases=3 conn=wye bus1=t_bus3038_l.1.2.3.0 kV=0.208 kW=6.13 kvar=1.787916667
+New object=Load.load_3039 phases=3 conn=wye bus1=t_bus3039_l.1.2.3.0 kV=0.208 kW=4.966 kvar=1.008389309
+New object=Load.load_3041 phases=2 conn=wye bus1=t_bus3041_l.1.2 kV=0.208 kW=5.252 kvar=1.316275275
+New object=Load.load_3042 phases=2 conn=wye bus1=t_bus3042_l.1.2 kV=0.208 kW=7.719 kvar=1.09989793
+New object=Load.load_3043 phases=2 conn=wye bus1=t_bus3043_l.1.2 kV=0.208 kW=6.856 kvar=1.718275569
+New object=Load.load_3044 phases=2 conn=wye bus1=t_bus3044_l.1.2 kV=0.208 kW=4.119 kvar=1.754686652
+New object=Load.load_3045 phases=2 conn=wye bus1=t_bus3045_l.1.2 kV=0.208 kW=4.434 kvar=1.11126515
+New object=Load.load_3047 phases=3 conn=wye bus1=t_bus3047_l.1.2.3.0 kV=0.208 kW=10.213 kvar=3.706824019
+New object=Load.load_3048 phases=3 conn=wye bus1=t_bus3048_l.1.2.3.0 kV=0.208 kW=2.868 kvar=0.408667867
+New object=Load.load_3049 phases=3 conn=wye bus1=t_bus3049_l.1.2.3.0 kV=0.208 kW=1.671 kvar=0.711843019
+New object=Load.load_3050 phases=3 conn=wye bus1=t_bus3050_l.1.2.3.0 kV=0.208 kW=2.646 kvar=1.12719128
+New object=Load.load_3051 phases=3 conn=wye bus1=t_bus3051_l.1.2.3.0 kV=0.208 kW=2.412 kvar=1.098939666
+New object=Load.load_3052 phases=3 conn=wye bus1=t_bus3052_l.1.2.3.0 kV=0.208 kW=6.101 kvar=2.954849162
+New object=Load.load_3054 phases=3 conn=wye bus1=t_bus3054_l.1.2.3.0 kV=0.208 kW=2.471 kvar=1.052641592
+New object=Load.load_3056 phases=2 conn=wye bus1=t_bus3056_l.1.2 kV=0.208 kW=3.796 kvar=1.377764024
+New object=Load.load_3057 phases=2 conn=wye bus1=t_bus3057_l.1.2 kV=0.208 kW=3.679 kvar=1.781821024
+New object=Load.load_3058 phases=2 conn=wye bus1=t_bus3058_l.1.2 kV=0.208 kW=3.475 kvar=1.142177265
+New object=Load.load_3059 phases=2 conn=wye bus1=t_bus3059_l.1.2 kV=0.208 kW=4.366 kvar=1.989208367
+New object=Load.load_3060 phases=2 conn=wye bus1=t_bus3060_l.1.2 kV=0.208 kW=3.63 kvar=1.193123302
+New object=Load.load_3061 phases=2 conn=wye bus1=t_bus3061_l.1.2 kV=0.208 kW=1.283 kvar=0.374208333
+New object=Load.load_3062 phases=2 conn=wye bus1=t_bus3062_l.1.2 kV=0.208 kW=0.929 kvar=0.423264905
+New object=Load.load_3063 phases=2 conn=wye bus1=t_bus3063_l.1.2 kV=0.208 kW=6.523 kvar=2.367532858
+New object=Load.load_3064 phases=2 conn=wye bus1=t_bus3064_l.1.2 kV=0.208 kW=7.792 kvar=2.272666667
+New object=Load.load_3065 phases=2 conn=wye bus1=t_bus3065_l.1.2 kV=0.208 kW=2.813 kvar=1.020982666
+New object=Load.load_3066 phases=2 conn=wye bus1=t_bus3066_l.1.2 kV=0.208 kW=3.257 kvar=1.577437095
+New object=Load.load_3067 phases=2 conn=wye bus1=t_bus3067_l.1.2 kV=0.208 kW=6.204 kvar=2.039156189
+New object=Load.load_3070 phases=3 conn=wye bus1=t_bus3070_l.1.2.3.0 kV=0.208 kW=0.845 kvar=0.120405979
+New object=Load.load_3071 phases=3 conn=wye bus1=t_bus3071_l.1.2.3.0 kV=0.208 kW=2.163 kvar=0.71094372
+New object=Load.load_3072 phases=3 conn=wye bus1=t_bus3072_l.1.2.3.0 kV=0.208 kW=1.964 kvar=0.279854843
+New object=Load.load_3073 phases=3 conn=wye bus1=t_bus3073_l.1.2.3.0 kV=0.208 kW=2.297 kvar=1.046544118
+New object=Load.load_3074 phases=3 conn=wye bus1=t_bus3074_l.1.2.3.0 kV=0.208 kW=4.791 kvar=2.182844088
+New object=Load.load_3077 phases=3 conn=wye bus1=t_bus3077_l.1.2.3.0 kV=0.208 kW=41.037 kvar=16.21886019
+New object=Load.load_3078 phases=3 conn=wye bus1=t_bus3078_l.1.2.3.0 kV=0.208 kW=4.012 kvar=1.827921203
+New object=Load.load_3081 phases=3 conn=wye bus1=t_bus3081_l.1.2.3.0 kV=0.208 kW=1.581 kvar=0.39623595
+New object=Load.load_3083 phases=2 conn=wye bus1=t_bus3083_l.1.2 kV=0.208 kW=3.831 kvar=0.777917729
+New object=Load.load_3084 phases=2 conn=wye bus1=t_bus3084_l.1.2 kV=0.208 kW=2.25 kvar=0.65625
+New object=Load.load_3085 phases=2 conn=wye bus1=t_bus3085_l.1.2 kV=0.208 kW=6.765 kvar=1.695468819
+New object=Load.load_3086 phases=2 conn=wye bus1=t_bus3086_l.1.2 kV=0.208 kW=2.35 kvar=0.92877943
+New object=Load.load_3087 phases=2 conn=wye bus1=t_bus3087_l.1.2 kV=0.208 kW=4.101 kvar=1.747018684
+New object=Load.load_3088 phases=2 conn=wye bus1=t_bus3088_l.1.2 kV=0.208 kW=8.41 kvar=1.707723336
+New object=Load.load_3089 phases=2 conn=wye bus1=t_bus3089_l.1.2 kV=0.208 kW=0.836 kvar=0.303427483
+New object=Load.load_3090 phases=2 conn=wye bus1=t_bus3090_l.1.2 kV=0.208 kW=3.236 kvar=0.461105027
+New object=Load.load_3091 phases=2 conn=wye bus1=t_bus3091_l.1.2 kV=0.208 kW=2.536 kvar=0.739666667
+New object=Load.load_3093 phases=2 conn=wye bus1=t_bus3093_l.1.2 kV=0.208 kW=4.264 kvar=1.942735795
+New object=Load.load_3094 phases=2 conn=wye bus1=t_bus3094_l.1.2 kV=0.208 kW=3.12 kvar=0.444575922
+New object=Load.load_3095 phases=2 conn=wye bus1=t_bus3095_l.1.2 kV=0.208 kW=5.901 kvar=2.141777004
+New object=Load.load_3096 phases=2 conn=wye bus1=t_bus3096_l.1.2 kV=0.208 kW=2.842 kvar=0.934120227
+New object=Load.load_3097 phases=2 conn=wye bus1=t_bus3097_l.1.2 kV=0.208 kW=11.1 kvar=4.02876203
+New object=Load.load_3098 phases=2 conn=wye bus1=t_bus3098_l.1.2 kV=0.208 kW=6.461 kvar=2.752374474
+New object=Load.load_3099 phases=2 conn=wye bus1=t_bus3099_l.1.2 kV=0.208 kW=4.424 kvar=0.630385858
+New object=Load.load_3101 phases=2 conn=wye bus1=t_bus3101_l.1.2 kV=0.208 kW=2.387 kvar=1.156076864
+New object=Load.load_3102 phases=2 conn=wye bus1=t_bus3102_l.1.2 kV=0.208 kW=8.2 kvar=2.391666667
+New object=Load.load_3103 phases=2 conn=wye bus1=t_bus3103_l.1.2 kV=0.208 kW=6.718 kvar=2.655123493
+New object=Load.load_3104 phases=2 conn=wye bus1=t_bus3104_l.1.2 kV=0.208 kW=8.73 kvar=2.869412238
+New object=Load.load_3105 phases=2 conn=wye bus1=t_bus3105_l.1.2 kV=0.208 kW=3.052 kvar=0.619735032
+New object=Load.load_3106 phases=2 conn=wye bus1=t_bus3106_l.1.2 kV=0.208 kW=9.815 kvar=3.879136214
+New object=Load.load_3108 phases=2 conn=wye bus1=t_bus3108_l.1.2 kV=0.208 kW=2.175 kvar=0.634375
+New object=Load.load_3109 phases=2 conn=wye bus1=t_bus3109_l.1.2 kV=0.208 kW=13.807 kvar=6.687035301
+New object=Load.load_3110 phases=2 conn=wye bus1=t_bus3110_l.1.2 kV=0.208 kW=9.577 kvar=1.364648591
+New object=Load.load_3111 phases=2 conn=wye bus1=t_bus3111_l.1.2 kV=0.208 kW=9.729 kvar=2.837625
+New object=Load.load_3112 phases=2 conn=wye bus1=t_bus3112_l.1.2 kV=0.208 kW=9.339 kvar=1.330735427
+New object=Load.load_3114 phases=2 conn=wye bus1=t_bus3114_l.1.2 kV=0.208 kW=5.162 kvar=2.351876682
+New object=Load.load_3115 phases=2 conn=wye bus1=t_bus3115_l.1.2 kV=0.208 kW=7.794 kvar=1.110584851
+New object=Load.load_3116 phases=2 conn=wye bus1=t_bus3116_l.1.2 kV=0.208 kW=7.337 kvar=2.139958333
+New object=Load.load_3117 phases=2 conn=wye bus1=t_bus3117_l.1.2 kV=0.208 kW=3.688 kvar=1.786179923
+New object=Load.load_3120 phases=2 conn=wye bus1=t_bus3120_l.1.2 kV=0.208 kW=3.209 kvar=0.457257735
+New object=Load.load_3121 phases=2 conn=wye bus1=t_bus3121_l.1.2 kV=0.208 kW=2.845 kvar=0.713024211
+New object=Load.load_3122 phases=2 conn=wye bus1=t_bus3122_l.1.2 kV=0.208 kW=4.209 kvar=1.917677054
+New object=Load.load_3123 phases=2 conn=wye bus1=t_bus3123_l.1.2 kV=0.208 kW=5.077 kvar=2.458903326
+New object=Load.load_3124 phases=2 conn=wye bus1=t_bus3124_l.1.2 kV=0.208 kW=3.261 kvar=1.579374384
+New object=Load.load_3125 phases=2 conn=wye bus1=t_bus3125_l.1.2 kV=0.208 kW=0.76 kvar=0.3680848
+New object=Load.load_3126 phases=2 conn=wye bus1=t_bus3126_l.1.2 kV=0.208 kW=6.249 kvar=2.662062853
+New object=Load.load_3127 phases=2 conn=wye bus1=t_bus3127_l.1.2 kV=0.208 kW=6.152 kvar=1.24921688
+New object=Load.load_3128 phases=2 conn=wye bus1=t_bus3128_l.1.2 kV=0.208 kW=3.688 kvar=1.21218698
+New object=Load.load_3129 phases=2 conn=wye bus1=t_bus3129_l.1.2 kV=0.208 kW=1.967 kvar=0.646521635
+New object=Load.load_3130 phases=2 conn=wye bus1=t_bus3130_l.1.2 kV=0.208 kW=3.657 kvar=0.742585522
+New object=Load.load_3131 phases=2 conn=wye bus1=t_bus3131_l.1.2 kV=0.208 kW=3.556 kvar=1.620161465
+New object=Load.load_3132 phases=2 conn=wye bus1=t_bus3132_l.1.2 kV=0.208 kW=11.56 kvar=4.924539379
+New object=Load.load_3134 phases=2 conn=wye bus1=t_bus3134_l.1.2 kV=0.208 kW=5.953 kvar=0.848256558
+New object=Load.load_3135 phases=2 conn=wye bus1=t_bus3135_l.1.2 kV=0.208 kW=7.005 kvar=2.302432157
+New object=Load.load_3136 phases=2 conn=wye bus1=t_bus3136_l.1.2 kV=0.208 kW=9.443 kvar=4.573453636
+New object=Load.load_3137 phases=2 conn=wye bus1=t_bus3137_l.1.2 kV=0.208 kW=13.759 kvar=2.793884112
+New object=Load.load_3138 phases=2 conn=wye bus1=t_bus3138_l.1.2 kV=0.208 kW=8.522 kvar=3.630356798
+New object=Load.load_3139 phases=2 conn=wye bus1=t_bus3139_l.1.2 kV=0.208 kW=0 kvar=0
+New object=Load.load_3141 phases=2 conn=wye bus1=t_bus3141_l.1.2 kV=0.208 kW=4.915 kvar=0.998033317
+New object=Load.load_3142 phases=2 conn=wye bus1=t_bus3142_l.1.2 kV=0.208 kW=4.017 kvar=1.006755099
+New object=Load.load_3143 phases=2 conn=wye bus1=t_bus3143_l.1.2 kV=0.208 kW=7.716 kvar=2.536126556
+New object=Load.load_3144 phases=2 conn=wye bus1=t_bus3144_l.1.2 kV=0.208 kW=0.482 kvar=0.219605688
+New object=Load.load_3145 phases=2 conn=wye bus1=t_bus3145_l.1.2 kV=0.208 kW=1.782 kvar=0.863061991
+New object=Load.load_3146 phases=2 conn=wye bus1=t_bus3146_l.1.2 kV=0.208 kW=1.616 kvar=0.736271352
+New object=Load.load_3147 phases=2 conn=wye bus1=t_bus3147_l.1.2 kV=0.208 kW=8.324 kvar=4.031497201
+New object=Load.load_3148 phases=2 conn=wye bus1=t_bus3148_l.1.2 kV=0.208 kW=9.987 kvar=4.550211628
+New object=Load.load_3149 phases=2 conn=wye bus1=t_bus3149_l.1.2 kV=0.208 kW=2.029 kvar=0.864350381
+New object=Load.load_3150 phases=2 conn=wye bus1=t_bus3150_l.1.2 kV=0.208 kW=2.602 kvar=0.652122671
+New object=Load.load_3151 phases=2 conn=wye bus1=t_bus3151_l.1.2 kV=0.208 kW=1.686 kvar=0.554161401
+New object=Load.load_3152 phases=2 conn=wye bus1=t_bus3152_l.1.2 kV=0.208 kW=1.934 kvar=0.936678951
+New object=Load.load_3153 phases=2 conn=wye bus1=t_bus3153_l.1.2 kV=0.208 kW=5.976 kvar=2.894308899
+New object=Load.load_3154 phases=2 conn=wye bus1=t_bus3154_l.1.2 kV=0.208 kW=4.836 kvar=0.689092679
+New object=Load.load_3155 phases=2 conn=wye bus1=t_bus3155_l.1.2 kV=0.208 kW=1.477 kvar=0.485466423
+New object=Load.load_3157 phases=2 conn=wye bus1=t_bus3157_l.1.2 kV=0.208 kW=9.74 kvar=4.149222625
+New object=Load.load_3158 phases=2 conn=wye bus1=t_bus3158_l.1.2 kV=0.208 kW=6.517 kvar=1.63331416
+New object=Load.load_3159 phases=2 conn=wye bus1=t_bus3159_l.1.2 kV=0.208 kW=9.776 kvar=4.454077187
+New object=Load.load_3160 phases=2 conn=wye bus1=t_bus3160_l.1.2 kV=0.208 kW=4.252 kvar=1.397564815
+New object=Load.load_3161 phases=2 conn=wye bus1=t_bus3161_l.1.2 kV=0.208 kW=2.744 kvar=0.390998824
+New object=Load.load_3162 phases=2 conn=wye bus1=t_bus3162_l.1.2 kV=0.208 kW=3.75 kvar=0.761469977
+! Redirect Transformer.DSS
+New object=Transformer.sub_xfmr phases=3 windings=2 XHL=6.265911 buses=[eq_source_bus.1.2.3,bus_xfmr.1.2.3.0] conns=[delta,wye] kVs=[69,13.8] kVAs=[10000,10000] taps=[1,1] wdg=1 %R=0.6265909 RdcOhms=2.535719 wdg=2 %R=0.6265909 RdcOhms=0.03380959
+New object=Transformer.sub_regulator_a phases=1 bank=Reg1 windings=2 XHL=0.01 buses=[bus_xfmr.1,bus1.1] conns=[wye,wye] kVs=[7.9677,7.9677] kVAs=[3500,3500] taps=[1,1.025] wdg=1 %R=0.001 RdcOhms=0.000154176 wdg=2 %R=0.001 RdcOhms=0.000154176 NumTaps=32 MaxTap=1.1 MinTap=0.9
+New object=Transformer.sub_regulator_b phases=1 bank=Reg1 windings=2 XHL=0.01 buses=[bus_xfmr.2,bus1.2] conns=[wye,wye] kVs=[7.9677,7.9677] kVAs=[3500,3500] taps=[1,1.025] wdg=1 %R=0.001 RdcOhms=0.000154176 wdg=2 %R=0.001 RdcOhms=0.000154176 NumTaps=32 MaxTap=1.1 MinTap=0.9
+New object=Transformer.sub_regulator_c phases=1 bank=Reg1 windings=2 XHL=0.01 buses=[bus_xfmr.3,bus1.3] conns=[wye,wye] kVs=[7.9677,7.9677] kVAs=[3500,3500] taps=[1,1.025] wdg=1 %R=0.001 RdcOhms=0.000154176 wdg=2 %R=0.001 RdcOhms=0.000154176 NumTaps=32 MaxTap=1.1 MinTap=0.9
+New object=Transformer.t_1003 phases=3 windings=2 XHL=3.87 buses=[bus1003.1.2.3.0,t_bus1003_l.1.2.3.0] conns=[wye,wye] kVs=[13.8,0.208] kVAs=[112.5,112.5] taps=[1,1] wdg=1 %R=1.215 RdcOhms=5.827464 wdg=2 %R=1.215 RdcOhms=0.001323878
+New object=Transformer.t_1004 phases=3 windings=2 XHL=1.91 buses=[bus1004.1.2.3.0,t_bus1004_l.1.2.3.0] conns=[wye,wye] kVs=[13.8,0.208] kVAs=[75,75] taps=[1,1] wdg=1 %R=1.135 RdcOhms=8.165644 wdg=2 %R=1.135 RdcOhms=0.001855064
+New object=Transformer.t_1005 phases=3 windings=2 XHL=1.91 buses=[bus1005.1.2.3.0,t_bus1005_l.1.2.3.0] conns=[wye,wye] kVs=[13.8,0.208] kVAs=[75,75] taps=[1,1] wdg=1 %R=1.135 RdcOhms=8.165644 wdg=2 %R=1.135 RdcOhms=0.001855064
+New object=Transformer.t_1006 phases=2 windings=2 XHL=3.7 buses=[bus1006.1.2,t_bus1006_l.1.2] conns=[delta,delta] kVs=[13.8,0.208] kVAs=[75,75] taps=[1,1] wdg=1 %R=1.24 RdcOhms=26.76317 wdg=2 %R=1.24 RdcOhms=0.006080034
+New object=Transformer.t_1007 phases=2 windings=2 XHL=2.3 buses=[bus1007.1.2,t_bus1007_l.1.2] conns=[delta,delta] kVs=[13.8,0.208] kVAs=[25,25] taps=[1,1] wdg=1 %R=0.7 RdcOhms=45.32472 wdg=2 %R=0.7 RdcOhms=0.01029683
+New object=Transformer.t_1008 phases=3 windings=2 XHL=1.73 buses=[bus1008.1.2.3.0,t_bus1008_l.1.2.3.0] conns=[wye,wye] kVs=[13.8,0.208] kVAs=[45,45] taps=[1,1] wdg=1 %R=1.26 RdcOhms=15.10824 wdg=2 %R=1.26 RdcOhms=0.003432277
+New object=Transformer.t_1009 phases=3 windings=2 XHL=1.91 buses=[bus1009.1.2.3.0,t_bus1009_l.1.2.3.0] conns=[wye,wye] kVs=[13.8,0.208] kVAs=[75,75] taps=[1,1] wdg=1 %R=1.135 RdcOhms=8.165644 wdg=2 %R=1.135 RdcOhms=0.001855064
+New object=Transformer.t_1010 phases=3 windings=2 XHL=1.73 buses=[bus1010.1.2.3.0,t_bus1010_l.1.2.3.0] conns=[wye,wye] kVs=[13.8,0.208] kVAs=[45,45] taps=[1,1] wdg=1 %R=1.26 RdcOhms=15.10824 wdg=2 %R=1.26 RdcOhms=0.003432277
+New object=Transformer.t_1011 phases=1 windings=3 XHL=2.76 XHT=2.76 XLT=1.84 buses=[bus1011.1.0,t_bus1011_l.1.0,t_bus1011_l.0.2] conns=[wye,wye,wye] kVs=[7.9677,0.12,0.12] kVAs=[25,25,25] taps=[1,1,1] wdg=1 %R=0.7 RdcOhms=15.10925 wdg=2 %R=1.4 RdcOhms=0.0068544 wdg=3 %R=1.4 RdcOhms=0.0068544
+New object=Transformer.t_1012 phases=1 windings=3 XHL=3.24 XHT=3.24 XLT=2.16 buses=[bus1012.2.0,t_bus1012_l.1.0,t_bus1012_l.0.2] conns=[wye,wye,wye] kVs=[7.9677,0.12,0.12] kVAs=[37.5,37.5,37.5] taps=[1,1,1] wdg=1 %R=1.8 RdcOhms=25.90157 wdg=2 %R=3.6 RdcOhms=0.0117504 wdg=3 %R=3.6 RdcOhms=0.0117504
+New object=Transformer.t_1013 phases=3 windings=2 XHL=1.73 buses=[bus1013.1.2.3.0,t_bus1013_l.1.2.3.0] conns=[wye,wye] kVs=[13.8,0.208] kVAs=[45,45] taps=[1,1] wdg=1 %R=1.26 RdcOhms=15.10824 wdg=2 %R=1.26 RdcOhms=0.003432277
+New object=Transformer.t_1014 phases=1 windings=3 XHL=2.76 XHT=2.76 XLT=1.84 buses=[bus1014.2.0,t_bus1014_l.1.0,t_bus1014_l.0.2] conns=[wye,wye,wye] kVs=[7.9677,0.12,0.12] kVAs=[25,25,25] taps=[1,1,1] wdg=1 %R=0.7 RdcOhms=15.10925 wdg=2 %R=1.4 RdcOhms=0.0068544 wdg=3 %R=1.4 RdcOhms=0.0068544
+New object=Transformer.t_1015 phases=1 windings=3 XHL=2.76 XHT=2.76 XLT=1.84 buses=[bus1015.2.0,t_bus1015_l.1.0,t_bus1015_l.0.2] conns=[wye,wye,wye] kVs=[7.9677,0.12,0.12] kVAs=[25,25,25] taps=[1,1,1] wdg=1 %R=0.7 RdcOhms=15.10925 wdg=2 %R=1.4 RdcOhms=0.0068544 wdg=3 %R=1.4 RdcOhms=0.0068544
+New object=Transformer.t_1016 phases=1 windings=3 XHL=3.36 XHT=3.36 XLT=2.24 buses=[bus1016.3.0,t_bus1016_l.1.0,t_bus1016_l.0.2] conns=[wye,wye,wye] kVs=[7.9677,0.12,0.12] kVAs=[50,50,50] taps=[1,1,1] wdg=1 %R=1.55 RdcOhms=16.7281 wdg=2 %R=3.1 RdcOhms=0.0075888 wdg=3 %R=3.1 RdcOhms=0.0075888
+New object=Transformer.t_1017 phases=1 windings=3 XHL=3.24 XHT=3.24 XLT=2.16 buses=[bus1017.3.0,t_bus1017_l.1.0,t_bus1017_l.0.2] conns=[wye,wye,wye] kVs=[7.9677,0.12,0.12] kVAs=[37.5,37.5,37.5] taps=[1,1,1] wdg=1 %R=1.8 RdcOhms=25.90157 wdg=2 %R=3.6 RdcOhms=0.0117504 wdg=3 %R=3.6 RdcOhms=0.0117504
+New object=Transformer.t_2002 phases=3 windings=2 XHL=4.5 buses=[bus2002.1.2.3,t_bus2002_l.1.2.3] conns=[wye,wye] kVs=[13.8,0.208] kVAs=[300,300] taps=[1,1] wdg=1 %R=0.9 RdcOhms=1.61874 wdg=2 %R=0.9 RdcOhms=0.000367744
+New object=Transformer.t_2003 phases=3 windings=2 XHL=1.91 buses=[bus2003.1.2.3.0,t_bus2003_l.1.2.3.0] conns=[wye,wye] kVs=[13.8,0.208] kVAs=[75,75] taps=[1,1] wdg=1 %R=1.135 RdcOhms=8.165644 wdg=2 %R=1.135 RdcOhms=0.001855064
+New object=Transformer.t_2005 phases=3 windings=2 XHL=1.73 buses=[bus2005.1.2.3.0,t_bus2005_l.1.2.3.0] conns=[wye,wye] kVs=[13.8,0.208] kVAs=[45,45] taps=[1,1] wdg=1 %R=1.26 RdcOhms=15.10824 wdg=2 %R=1.26 RdcOhms=0.003432277
+New object=Transformer.t_2008 phases=1 windings=3 XHL=2.76 XHT=2.76 XLT=1.84 buses=[bus2008.1.0,t_bus2008_l.1.0,t_bus2008_l.0.2] conns=[wye,wye,wye] kVs=[7.9677,0.12,0.12] kVAs=[25,25,25] taps=[1,1,1] wdg=1 %R=0.7 RdcOhms=15.10925 wdg=2 %R=1.4 RdcOhms=0.0068544 wdg=3 %R=1.4 RdcOhms=0.0068544
+New object=Transformer.t_2009 phases=1 windings=3 XHL=2.76 XHT=2.76 XLT=1.84 buses=[bus2009.1.0,t_bus2009_l.1.0,t_bus2009_l.0.2] conns=[wye,wye,wye] kVs=[7.9677,0.12,0.12] kVAs=[25,25,25] taps=[1,1,1] wdg=1 %R=0.7 RdcOhms=15.10925 wdg=2 %R=1.4 RdcOhms=0.0068544 wdg=3 %R=1.4 RdcOhms=0.0068544
+New object=Transformer.t_2010 phases=3 windings=2 XHL=1.73 buses=[bus2010.1.2.3.0,t_bus2010_l.1.2.3.0] conns=[wye,wye] kVs=[13.8,0.208] kVAs=[45,45] taps=[1,1] wdg=1 %R=1.26 RdcOhms=15.10824 wdg=2 %R=1.26 RdcOhms=0.003432277
+New object=Transformer.t_2011 phases=3 windings=2 XHL=1.73 buses=[bus2011.1.2.3.0,t_bus2011_l.1.2.3.0] conns=[wye,wye] kVs=[13.8,0.208] kVAs=[45,45] taps=[1,1] wdg=1 %R=1.26 RdcOhms=15.10824 wdg=2 %R=1.26 RdcOhms=0.003432277
+New object=Transformer.t_2014 phases=1 windings=3 XHL=3.24 XHT=3.24 XLT=2.16 buses=[bus2014.2.0,t_bus2014_l.1.0,t_bus2014_l.0.2] conns=[wye,wye,wye] kVs=[7.9677,0.12,0.12] kVAs=[37.5,37.5,37.5] taps=[1,1,1] wdg=1 %R=1.8 RdcOhms=25.90157 wdg=2 %R=3.6 RdcOhms=0.0117504 wdg=3 %R=3.6 RdcOhms=0.0117504
+New object=Transformer.t_2015 phases=1 windings=3 XHL=2.76 XHT=2.76 XLT=1.84 buses=[bus2015.2.0,t_bus2015_l.1.0,t_bus2015_l.0.2] conns=[wye,wye,wye] kVs=[7.9677,0.12,0.12] kVAs=[25,25,25] taps=[1,1,1] wdg=1 %R=0.7 RdcOhms=15.10925 wdg=2 %R=1.4 RdcOhms=0.0068544 wdg=3 %R=1.4 RdcOhms=0.0068544
+New object=Transformer.t_2016 phases=1 windings=3 XHL=2.76 XHT=2.76 XLT=1.84 buses=[bus2016.2.0,t_bus2016_l.1.0,t_bus2016_l.0.2] conns=[wye,wye,wye] kVs=[7.9677,0.12,0.12] kVAs=[25,25,25] taps=[1,1,1] wdg=1 %R=0.7 RdcOhms=15.10925 wdg=2 %R=1.4 RdcOhms=0.0068544 wdg=3 %R=1.4 RdcOhms=0.0068544
+New object=Transformer.t_2017 phases=1 windings=3 XHL=2.76 XHT=2.76 XLT=1.84 buses=[bus2017.2.0,t_bus2017_l.1.0,t_bus2017_l.0.2] conns=[wye,wye,wye] kVs=[7.9677,0.12,0.12] kVAs=[25,25,25] taps=[1,1,1] wdg=1 %R=0.7 RdcOhms=15.10925 wdg=2 %R=1.4 RdcOhms=0.0068544 wdg=3 %R=1.4 RdcOhms=0.0068544
+New object=Transformer.t_2018 phases=1 windings=3 XHL=2.76 XHT=2.76 XLT=1.84 buses=[bus2018.2.0,t_bus2018_l.1.0,t_bus2018_l.0.2] conns=[wye,wye,wye] kVs=[7.9677,0.12,0.12] kVAs=[25,25,25] taps=[1,1,1] wdg=1 %R=0.7 RdcOhms=15.10925 wdg=2 %R=1.4 RdcOhms=0.0068544 wdg=3 %R=1.4 RdcOhms=0.0068544
+New object=Transformer.t_2020 phases=1 windings=3 XHL=2.76 XHT=2.76 XLT=1.84 buses=[bus2020.2.0,t_bus2020_l.1.0,t_bus2020_l.0.2] conns=[wye,wye,wye] kVs=[7.9677,0.12,0.12] kVAs=[25,25,25] taps=[1,1,1] wdg=1 %R=0.7 RdcOhms=15.10925 wdg=2 %R=1.4 RdcOhms=0.0068544 wdg=3 %R=1.4 RdcOhms=0.0068544
+New object=Transformer.t_2022 phases=1 windings=3 XHL=2.76 XHT=2.76 XLT=1.84 buses=[bus2022.3.0,t_bus2022_l.1.0,t_bus2022_l.0.2] conns=[wye,wye,wye] kVs=[7.9677,0.12,0.12] kVAs=[25,25,25] taps=[1,1,1] wdg=1 %R=0.7 RdcOhms=15.10925 wdg=2 %R=1.4 RdcOhms=0.0068544 wdg=3 %R=1.4 RdcOhms=0.0068544
+New object=Transformer.t_2023 phases=1 windings=3 XHL=2.42 XHT=2.42 XLT=1.62 buses=[bus2023.3.0,t_bus2023_l.1.0,t_bus2023_l.0.2] conns=[wye,wye,wye] kVs=[7.9677,0.12,0.12] kVAs=[15,15,15] taps=[1,1,1] wdg=1 %R=0.8 RdcOhms=28.77952 wdg=2 %R=1.6 RdcOhms=0.013056 wdg=3 %R=1.6 RdcOhms=0.013056
+New object=Transformer.t_2024 phases=1 windings=3 XHL=2.76 XHT=2.76 XLT=1.84 buses=[bus2024.3.0,t_bus2024_l.1.0,t_bus2024_l.0.2] conns=[wye,wye,wye] kVs=[7.9677,0.12,0.12] kVAs=[25,25,25] taps=[1,1,1] wdg=1 %R=0.7 RdcOhms=15.10925 wdg=2 %R=1.4 RdcOhms=0.0068544 wdg=3 %R=1.4 RdcOhms=0.0068544
+New object=Transformer.t_2025 phases=1 windings=3 XHL=2.76 XHT=2.76 XLT=1.84 buses=[bus2025.3.0,t_bus2025_l.1.0,t_bus2025_l.0.2] conns=[wye,wye,wye] kVs=[7.9677,0.12,0.12] kVAs=[25,25,25] taps=[1,1,1] wdg=1 %R=0.7 RdcOhms=15.10925 wdg=2 %R=1.4 RdcOhms=0.0068544 wdg=3 %R=1.4 RdcOhms=0.0068544
+New object=Transformer.t_2028 phases=1 windings=3 XHL=2.76 XHT=2.76 XLT=1.84 buses=[bus2028.1.0,t_bus2028_l.1.0,t_bus2028_l.0.2] conns=[wye,wye,wye] kVs=[7.9677,0.12,0.12] kVAs=[25,25,25] taps=[1,1,1] wdg=1 %R=0.7 RdcOhms=15.10925 wdg=2 %R=1.4 RdcOhms=0.0068544 wdg=3 %R=1.4 RdcOhms=0.0068544
+New object=Transformer.t_2029 phases=3 windings=2 XHL=1.91 buses=[bus2029.1.2.3.0,t_bus2029_l.1.2.3.0] conns=[wye,wye] kVs=[13.8,0.208] kVAs=[75,75] taps=[1,1] wdg=1 %R=1.135 RdcOhms=8.165644 wdg=2 %R=1.135 RdcOhms=0.001855064
+New object=Transformer.t_2030 phases=3 windings=2 XHL=1.91 buses=[bus2030.1.2.3.0,t_bus2030_l.1.2.3.0] conns=[wye,wye] kVs=[13.8,0.208] kVAs=[75,75] taps=[1,1] wdg=1 %R=1.135 RdcOhms=8.165644 wdg=2 %R=1.135 RdcOhms=0.001855064
+New object=Transformer.t_2031 phases=1 windings=3 XHL=2.76 XHT=2.76 XLT=1.84 buses=[bus2031.1.0,t_bus2031_l.1.0,t_bus2031_l.0.2] conns=[wye,wye,wye] kVs=[7.9677,0.12,0.12] kVAs=[25,25,25] taps=[1,1,1] wdg=1 %R=0.7 RdcOhms=15.10925 wdg=2 %R=1.4 RdcOhms=0.0068544 wdg=3 %R=1.4 RdcOhms=0.0068544
+New object=Transformer.t_2032 phases=3 windings=2 XHL=1.73 buses=[bus2032.1.2.3.0,t_bus2032_l.1.2.3.0] conns=[wye,wye] kVs=[13.8,0.208] kVAs=[45,45] taps=[1,1] wdg=1 %R=1.26 RdcOhms=15.10824 wdg=2 %R=1.26 RdcOhms=0.003432277
+New object=Transformer.t_2034 phases=3 windings=2 XHL=1.73 buses=[bus2034.1.2.3.0,t_bus2034_l.1.2.3.0] conns=[wye,wye] kVs=[13.8,0.208] kVAs=[45,45] taps=[1,1] wdg=1 %R=1.26 RdcOhms=15.10824 wdg=2 %R=1.26 RdcOhms=0.003432277
+New object=Transformer.t_2035 phases=3 windings=2 XHL=1.91 buses=[bus2035.1.2.3.0,t_bus2035_l.1.2.3.0] conns=[wye,wye] kVs=[13.8,0.208] kVAs=[75,75] taps=[1,1] wdg=1 %R=1.135 RdcOhms=8.165644 wdg=2 %R=1.135 RdcOhms=0.001855064
+New object=Transformer.t_2037 phases=3 windings=2 XHL=1.73 buses=[bus2037.1.2.3.0,t_bus2037_l.1.2.3.0] conns=[wye,wye] kVs=[13.8,0.208] kVAs=[45,45] taps=[1,1] wdg=1 %R=1.26 RdcOhms=15.10824 wdg=2 %R=1.26 RdcOhms=0.003432277
+New object=Transformer.t_2040 phases=3 windings=2 XHL=4.5 buses=[bus2040.1.2.3.0,t_bus2040_l.1.2.3.0] conns=[wye,wye] kVs=[13.8,0.208] kVAs=[300,300] taps=[1,1] wdg=1 %R=0.9 RdcOhms=1.61874 wdg=2 %R=0.9 RdcOhms=0.000367744
+New object=Transformer.t_2041 phases=3 windings=2 XHL=1.73 buses=[bus2041.1.2.3.0,t_bus2041_l.1.2.3.0] conns=[wye,wye] kVs=[13.8,0.208] kVAs=[45,45] taps=[1,1] wdg=1 %R=1.26 RdcOhms=15.10824 wdg=2 %R=1.26 RdcOhms=0.003432277
+New object=Transformer.t_2042 phases=3 windings=2 XHL=1.91 buses=[bus2042.1.2.3.0,t_bus2042_l.1.2.3.0] conns=[wye,wye] kVs=[13.8,0.208] kVAs=[75,75] taps=[1,1] wdg=1 %R=1.135 RdcOhms=8.165644 wdg=2 %R=1.135 RdcOhms=0.001855064
+New object=Transformer.t_2043 phases=3 windings=2 XHL=1.91 buses=[bus2043.1.2.3.0,t_bus2043_l.1.2.3.0] conns=[wye,wye] kVs=[13.8,0.208] kVAs=[75,75] taps=[1,1] wdg=1 %R=1.135 RdcOhms=8.165644 wdg=2 %R=1.135 RdcOhms=0.001855064
+New object=Transformer.t_2045 phases=1 windings=3 XHL=2.42 XHT=2.42 XLT=1.62 buses=[bus2045.2.0,t_bus2045_l.1.0,t_bus2045_l.0.2] conns=[wye,wye,wye] kVs=[7.9677,0.12,0.12] kVAs=[15,15,15] taps=[1,1,1] wdg=1 %R=0.8 RdcOhms=28.77952 wdg=2 %R=1.6 RdcOhms=0.013056 wdg=3 %R=1.6 RdcOhms=0.013056
+New object=Transformer.t_2046 phases=1 windings=3 XHL=3.36 XHT=3.36 XLT=2.24 buses=[bus2046.2.0,t_bus2046_l.1.0,t_bus2046_l.0.2] conns=[wye,wye,wye] kVs=[7.9677,0.12,0.12] kVAs=[50,50,50] taps=[1,1,1] wdg=1 %R=1.55 RdcOhms=16.7281 wdg=2 %R=3.1 RdcOhms=0.0075888 wdg=3 %R=3.1 RdcOhms=0.0075888
+New object=Transformer.t_2047 phases=1 windings=3 XHL=3.36 XHT=3.36 XLT=2.24 buses=[bus2047.2.0,t_bus2047_l.1.0,t_bus2047_l.0.2] conns=[wye,wye,wye] kVs=[7.9677,0.12,0.12] kVAs=[50,50,50] taps=[1,1,1] wdg=1 %R=1.55 RdcOhms=16.7281 wdg=2 %R=3.1 RdcOhms=0.0075888 wdg=3 %R=3.1 RdcOhms=0.0075888
+New object=Transformer.t_2048 phases=1 windings=3 XHL=3.36 XHT=3.36 XLT=2.24 buses=[bus2048.2.0,t_bus2048_l.1.0,t_bus2048_l.0.2] conns=[wye,wye,wye] kVs=[7.9677,0.12,0.12] kVAs=[50,50,50] taps=[1,1,1] wdg=1 %R=1.55 RdcOhms=16.7281 wdg=2 %R=3.1 RdcOhms=0.0075888 wdg=3 %R=3.1 RdcOhms=0.0075888
+New object=Transformer.t_2049 phases=1 windings=3 XHL=3.24 XHT=3.24 XLT=2.16 buses=[bus2049.3.0,t_bus2049_l.1.0,t_bus2049_l.0.2] conns=[wye,wye,wye] kVs=[7.9677,0.12,0.12] kVAs=[37.5,37.5,37.5] taps=[1,1,1] wdg=1 %R=1.8 RdcOhms=25.90157 wdg=2 %R=3.6 RdcOhms=0.0117504 wdg=3 %R=3.6 RdcOhms=0.0117504
+New object=Transformer.t_2050 phases=1 windings=3 XHL=3.24 XHT=3.24 XLT=2.16 buses=[bus2050.3.0,t_bus2050_l.1.0,t_bus2050_l.0.2] conns=[wye,wye,wye] kVs=[7.9677,0.12,0.12] kVAs=[37.5,37.5,37.5] taps=[1,1,1] wdg=1 %R=1.8 RdcOhms=25.90157 wdg=2 %R=3.6 RdcOhms=0.0117504 wdg=3 %R=3.6 RdcOhms=0.0117504
+New object=Transformer.t_2051 phases=1 windings=3 XHL=3.24 XHT=3.24 XLT=2.16 buses=[bus2051.3.0,t_bus2051_l.1.0,t_bus2051_l.0.2] conns=[wye,wye,wye] kVs=[7.9677,0.12,0.12] kVAs=[37.5,37.5,37.5] taps=[1,1,1] wdg=1 %R=1.8 RdcOhms=25.90157 wdg=2 %R=3.6 RdcOhms=0.0117504 wdg=3 %R=3.6 RdcOhms=0.0117504
+New object=Transformer.t_2052 phases=3 windings=2 XHL=5.5 buses=[bus2052.1.2.3.0,t_bus2052_l.1.2.3.0] conns=[wye,wye] kVs=[13.8,0.208] kVAs=[225,225] taps=[1,1] wdg=1 %R=0.575 RdcOhms=1.378927 wdg=2 %R=0.575 RdcOhms=0.0003132634
+New object=Transformer.t_2053 phases=3 windings=2 XHL=5.5 buses=[bus2053.1.2.3.0,t_bus2053_l.1.2.3.0] conns=[wye,wye] kVs=[13.8,0.208] kVAs=[225,225] taps=[1,1] wdg=1 %R=0.575 RdcOhms=1.378927 wdg=2 %R=0.575 RdcOhms=0.0003132634
+New object=Transformer.t_2054 phases=1 windings=3 XHL=3.24 XHT=3.24 XLT=2.16 buses=[bus2054.1.0,t_bus2054_l.1.0,t_bus2054_l.0.2] conns=[wye,wye,wye] kVs=[7.9677,0.12,0.12] kVAs=[37.5,37.5,37.5] taps=[1,1,1] wdg=1 %R=1.8 RdcOhms=25.90157 wdg=2 %R=3.6 RdcOhms=0.0117504 wdg=3 %R=3.6 RdcOhms=0.0117504
+New object=Transformer.t_2055 phases=1 windings=3 XHL=3.36 XHT=3.36 XLT=2.24 buses=[bus2055.1.0,t_bus2055_l.1.0,t_bus2055_l.0.2] conns=[wye,wye,wye] kVs=[7.9677,0.12,0.12] kVAs=[50,50,50] taps=[1,1,1] wdg=1 %R=1.55 RdcOhms=16.7281 wdg=2 %R=3.1 RdcOhms=0.0075888 wdg=3 %R=3.1 RdcOhms=0.0075888
+New object=Transformer.t_2056 phases=1 windings=3 XHL=2.76 XHT=2.76 XLT=1.84 buses=[bus2056.1.0,t_bus2056_l.1.0,t_bus2056_l.0.2] conns=[wye,wye,wye] kVs=[7.9677,0.12,0.12] kVAs=[25,25,25] taps=[1,1,1] wdg=1 %R=0.7 RdcOhms=15.10925 wdg=2 %R=1.4 RdcOhms=0.0068544 wdg=3 %R=1.4 RdcOhms=0.0068544
+New object=Transformer.t_2058 phases=3 windings=2 XHL=4.5 buses=[bus2058.1.2.3.0,t_bus2058_l.1.2.3.0] conns=[wye,wye] kVs=[13.8,0.208] kVAs=[300,300] taps=[1,1] wdg=1 %R=0.9 RdcOhms=1.61874 wdg=2 %R=0.9 RdcOhms=0.000367744
+New object=Transformer.t_2059 phases=1 windings=3 XHL=2.76 XHT=2.76 XLT=1.84 buses=[bus2059.2.0,t_bus2059_l.1.0,t_bus2059_l.0.2] conns=[wye,wye,wye] kVs=[7.9677,0.12,0.12] kVAs=[25,25,25] taps=[1,1,1] wdg=1 %R=0.7 RdcOhms=15.10925 wdg=2 %R=1.4 RdcOhms=0.0068544 wdg=3 %R=1.4 RdcOhms=0.0068544
+New object=Transformer.t_2060 phases=1 windings=3 XHL=2.76 XHT=2.76 XLT=1.84 buses=[bus2060.2.0,t_bus2060_l.1.0,t_bus2060_l.0.2] conns=[wye,wye,wye] kVs=[7.9677,0.12,0.12] kVAs=[25,25,25] taps=[1,1,1] wdg=1 %R=0.7 RdcOhms=15.10925 wdg=2 %R=1.4 RdcOhms=0.0068544 wdg=3 %R=1.4 RdcOhms=0.0068544
+New object=Transformer.t_3002 phases=3 windings=2 XHL=1.73 buses=[bus3002.1.2.3.0,t_bus3002_l.1.2.3.0] conns=[wye,wye] kVs=[13.8,0.208] kVAs=[45,45] taps=[1,1] wdg=1 %R=1.26 RdcOhms=15.10824 wdg=2 %R=1.26 RdcOhms=0.003432277
+New object=Transformer.t_3004 phases=3 windings=2 XHL=1.73 buses=[bus3004.1.2.3.0,t_bus3004_l.1.2.3.0] conns=[wye,wye] kVs=[13.8,0.208] kVAs=[45,45] taps=[1,1] wdg=1 %R=1.26 RdcOhms=15.10824 wdg=2 %R=1.26 RdcOhms=0.003432277
+New object=Transformer.t_3006 phases=3 windings=2 XHL=1.73 buses=[bus3006.1.2.3.0,t_bus3006_l.1.2.3.0] conns=[wye,wye] kVs=[13.8,0.208] kVAs=[45,45] taps=[1,1] wdg=1 %R=1.26 RdcOhms=15.10824 wdg=2 %R=1.26 RdcOhms=0.003432277
+New object=Transformer.t_3007 phases=3 windings=2 XHL=1.91 buses=[bus3007.1.2.3.0,t_bus3007_l.1.2.3.0] conns=[wye,wye] kVs=[13.8,0.208] kVAs=[75,75] taps=[1,1] wdg=1 %R=1.135 RdcOhms=8.165644 wdg=2 %R=1.135 RdcOhms=0.001855064
+New object=Transformer.t_3009 phases=1 windings=3 XHL=3.24 XHT=3.24 XLT=2.16 buses=[bus3009.1.0,t_bus3009_l.1.0,t_bus3009_l.0.2] conns=[wye,wye,wye] kVs=[7.9677,0.12,0.12] kVAs=[37.5,37.5,37.5] taps=[1,1,1] wdg=1 %R=1.8 RdcOhms=25.90157 wdg=2 %R=3.6 RdcOhms=0.0117504 wdg=3 %R=3.6 RdcOhms=0.0117504
+New object=Transformer.t_3010 phases=1 windings=3 XHL=3.24 XHT=3.24 XLT=2.16 buses=[bus3010.1.0,t_bus3010_l.1.0,t_bus3010_l.0.2] conns=[wye,wye,wye] kVs=[7.9677,0.12,0.12] kVAs=[37.5,37.5,37.5] taps=[1,1,1] wdg=1 %R=1.8 RdcOhms=25.90157 wdg=2 %R=3.6 RdcOhms=0.0117504 wdg=3 %R=3.6 RdcOhms=0.0117504
+New object=Transformer.t_3011 phases=1 windings=3 XHL=3.24 XHT=3.24 XLT=2.16 buses=[bus3011.1.0,t_bus3011_l.1.0,t_bus3011_l.0.2] conns=[wye,wye,wye] kVs=[7.9677,0.12,0.12] kVAs=[37.5,37.5,37.5] taps=[1,1,1] wdg=1 %R=1.8 RdcOhms=25.90157 wdg=2 %R=3.6 RdcOhms=0.0117504 wdg=3 %R=3.6 RdcOhms=0.0117504
+New object=Transformer.t_3012 phases=1 windings=3 XHL=3.36 XHT=3.36 XLT=2.24 buses=[bus3012.1.0,t_bus3012_l.1.0,t_bus3012_l.0.2] conns=[wye,wye,wye] kVs=[7.9677,0.12,0.12] kVAs=[50,50,50] taps=[1,1,1] wdg=1 %R=1.55 RdcOhms=16.7281 wdg=2 %R=3.1 RdcOhms=0.0075888 wdg=3 %R=3.1 RdcOhms=0.0075888
+New object=Transformer.t_3013 phases=1 windings=3 XHL=2.76 XHT=2.76 XLT=1.84 buses=[bus3013.2.0,t_bus3013_l.1.0,t_bus3013_l.0.2] conns=[wye,wye,wye] kVs=[7.9677,0.12,0.12] kVAs=[25,25,25] taps=[1,1,1] wdg=1 %R=0.7 RdcOhms=15.10925 wdg=2 %R=1.4 RdcOhms=0.0068544 wdg=3 %R=1.4 RdcOhms=0.0068544
+New object=Transformer.t_3014 phases=1 windings=3 XHL=3.24 XHT=3.24 XLT=2.16 buses=[bus3014.2.0,t_bus3014_l.1.0,t_bus3014_l.0.2] conns=[wye,wye,wye] kVs=[7.9677,0.12,0.12] kVAs=[37.5,37.5,37.5] taps=[1,1,1] wdg=1 %R=1.8 RdcOhms=25.90157 wdg=2 %R=3.6 RdcOhms=0.0117504 wdg=3 %R=3.6 RdcOhms=0.0117504
+New object=Transformer.t_3016 phases=1 windings=3 XHL=3.24 XHT=3.24 XLT=2.16 buses=[bus3016.2.0,t_bus3016_l.1.0,t_bus3016_l.0.2] conns=[wye,wye,wye] kVs=[7.9677,0.12,0.12] kVAs=[37.5,37.5,37.5] taps=[1,1,1] wdg=1 %R=1.8 RdcOhms=25.90157 wdg=2 %R=3.6 RdcOhms=0.0117504 wdg=3 %R=3.6 RdcOhms=0.0117504
+New object=Transformer.t_3017 phases=1 windings=3 XHL=4.26 XHT=4.26 XLT=2.84 buses=[bus3017.2.0,t_bus3017_l.1.0,t_bus3017_l.0.2] conns=[wye,wye,wye] kVs=[7.9677,0.12,0.12] kVAs=[100,100,100] taps=[1,1,1] wdg=1 %R=1.06 RdcOhms=5.71993 wdg=2 %R=2.12 RdcOhms=0.00259488 wdg=3 %R=2.12 RdcOhms=0.00259488
+New object=Transformer.t_3018 phases=1 windings=3 XHL=3.24 XHT=3.24 XLT=2.16 buses=[bus3018.3.0,t_bus3018_l.1.0,t_bus3018_l.0.2] conns=[wye,wye,wye] kVs=[7.9677,0.12,0.12] kVAs=[37.5,37.5,37.5] taps=[1,1,1] wdg=1 %R=1.8 RdcOhms=25.90157 wdg=2 %R=3.6 RdcOhms=0.0117504 wdg=3 %R=3.6 RdcOhms=0.0117504
+New object=Transformer.t_3019 phases=1 windings=3 XHL=3.24 XHT=3.24 XLT=2.16 buses=[bus3019.3.0,t_bus3019_l.1.0,t_bus3019_l.0.2] conns=[wye,wye,wye] kVs=[7.9677,0.12,0.12] kVAs=[37.5,37.5,37.5] taps=[1,1,1] wdg=1 %R=1.8 RdcOhms=25.90157 wdg=2 %R=3.6 RdcOhms=0.0117504 wdg=3 %R=3.6 RdcOhms=0.0117504
+New object=Transformer.t_3020 phases=1 windings=3 XHL=4.26 XHT=4.26 XLT=2.84 buses=[bus3020.3.0,t_bus3020_l.1.0,t_bus3020_l.0.2] conns=[wye,wye,wye] kVs=[7.9677,0.12,0.12] kVAs=[100,100,100] taps=[1,1,1] wdg=1 %R=1.06 RdcOhms=5.71993 wdg=2 %R=2.12 RdcOhms=0.00259488 wdg=3 %R=2.12 RdcOhms=0.00259488
+New object=Transformer.t_3021 phases=1 windings=3 XHL=3.24 XHT=3.24 XLT=2.16 buses=[bus3021.3.0,t_bus3021_l.1.0,t_bus3021_l.0.2] conns=[wye,wye,wye] kVs=[7.9677,0.12,0.12] kVAs=[37.5,37.5,37.5] taps=[1,1,1] wdg=1 %R=1.8 RdcOhms=25.90157 wdg=2 %R=3.6 RdcOhms=0.0117504 wdg=3 %R=3.6 RdcOhms=0.0117504
+New object=Transformer.t_3023 phases=1 windings=3 XHL=3.36 XHT=3.36 XLT=2.24 buses=[bus3023.1.0,t_bus3023_l.1.0,t_bus3023_l.0.2] conns=[wye,wye,wye] kVs=[7.9677,0.12,0.12] kVAs=[50,50,50] taps=[1,1,1] wdg=1 %R=1.55 RdcOhms=16.7281 wdg=2 %R=3.1 RdcOhms=0.0075888 wdg=3 %R=3.1 RdcOhms=0.0075888
+New object=Transformer.t_3024 phases=1 windings=3 XHL=3.24 XHT=3.24 XLT=2.16 buses=[bus3024.1.0,t_bus3024_l.1.0,t_bus3024_l.0.2] conns=[wye,wye,wye] kVs=[7.9677,0.12,0.12] kVAs=[37.5,37.5,37.5] taps=[1,1,1] wdg=1 %R=1.8 RdcOhms=25.90157 wdg=2 %R=3.6 RdcOhms=0.0117504 wdg=3 %R=3.6 RdcOhms=0.0117504
+New object=Transformer.t_3025 phases=1 windings=3 XHL=3.36 XHT=3.36 XLT=2.24 buses=[bus3025.1.0,t_bus3025_l.1.0,t_bus3025_l.0.2] conns=[wye,wye,wye] kVs=[7.9677,0.12,0.12] kVAs=[50,50,50] taps=[1,1,1] wdg=1 %R=1.55 RdcOhms=16.7281 wdg=2 %R=3.1 RdcOhms=0.0075888 wdg=3 %R=3.1 RdcOhms=0.0075888
+New object=Transformer.t_3026 phases=1 windings=3 XHL=3.24 XHT=3.24 XLT=2.16 buses=[bus3026.1.0,t_bus3026_l.1.0,t_bus3026_l.0.2] conns=[wye,wye,wye] kVs=[7.9677,0.12,0.12] kVAs=[37.5,37.5,37.5] taps=[1,1,1] wdg=1 %R=1.8 RdcOhms=25.90157 wdg=2 %R=3.6 RdcOhms=0.0117504 wdg=3 %R=3.6 RdcOhms=0.0117504
+New object=Transformer.t_3027 phases=1 windings=3 XHL=4.26 XHT=4.26 XLT=2.84 buses=[bus3027.1.0,t_bus3027_l.1.0,t_bus3027_l.0.2] conns=[wye,wye,wye] kVs=[7.9677,0.12,0.12] kVAs=[100,100,100] taps=[1,1,1] wdg=1 %R=1.06 RdcOhms=5.71993 wdg=2 %R=2.12 RdcOhms=0.00259488 wdg=3 %R=2.12 RdcOhms=0.00259488
+New object=Transformer.t_3028 phases=1 windings=3 XHL=4.26 XHT=4.26 XLT=2.84 buses=[bus3028.1.0,t_bus3028_l.1.0,t_bus3028_l.0.2] conns=[wye,wye,wye] kVs=[7.9677,0.12,0.12] kVAs=[100,100,100] taps=[1,1,1] wdg=1 %R=1.06 RdcOhms=5.71993 wdg=2 %R=2.12 RdcOhms=0.00259488 wdg=3 %R=2.12 RdcOhms=0.00259488
+New object=Transformer.t_3029 phases=1 windings=3 XHL=3.24 XHT=3.24 XLT=2.16 buses=[bus3029.1.0,t_bus3029_l.1.0,t_bus3029_l.0.2] conns=[wye,wye,wye] kVs=[7.9677,0.12,0.12] kVAs=[37.5,37.5,37.5] taps=[1,1,1] wdg=1 %R=1.8 RdcOhms=25.90157 wdg=2 %R=3.6 RdcOhms=0.0117504 wdg=3 %R=3.6 RdcOhms=0.0117504
+New object=Transformer.t_3031 phases=3 windings=2 XHL=1.73 buses=[bus3031.1.2.3.0,t_bus3031_l.1.2.3.0] conns=[wye,wye] kVs=[13.8,0.208] kVAs=[45,45] taps=[1,1] wdg=1 %R=1.26 RdcOhms=15.10824 wdg=2 %R=1.26 RdcOhms=0.003432277
+New object=Transformer.t_3032 phases=3 windings=2 XHL=1.73 buses=[bus3032.1.2.3.0,t_bus3032_l.1.2.3.0] conns=[wye,wye] kVs=[13.8,0.208] kVAs=[45,45] taps=[1,1] wdg=1 %R=1.26 RdcOhms=15.10824 wdg=2 %R=1.26 RdcOhms=0.003432277
+New object=Transformer.t_3033 phases=3 windings=2 XHL=1.73 buses=[bus3033.1.2.3.0,t_bus3033_l.1.2.3.0] conns=[wye,wye] kVs=[13.8,0.208] kVAs=[45,45] taps=[1,1] wdg=1 %R=1.26 RdcOhms=15.10824 wdg=2 %R=1.26 RdcOhms=0.003432277
+New object=Transformer.t_3034 phases=3 windings=2 XHL=1.73 buses=[bus3034.1.2.3.0,t_bus3034_l.1.2.3.0] conns=[wye,wye] kVs=[13.8,0.208] kVAs=[45,45] taps=[1,1] wdg=1 %R=1.26 RdcOhms=15.10824 wdg=2 %R=1.26 RdcOhms=0.003432277
+New object=Transformer.t_3035 phases=3 windings=2 XHL=1.73 buses=[bus3035.1.2.3.0,t_bus3035_l.1.2.3.0] conns=[wye,wye] kVs=[13.8,0.208] kVAs=[45,45] taps=[1,1] wdg=1 %R=1.26 RdcOhms=15.10824 wdg=2 %R=1.26 RdcOhms=0.003432277
+New object=Transformer.t_3036 phases=3 windings=2 XHL=1.73 buses=[bus3036.1.2.3.0,t_bus3036_l.1.2.3.0] conns=[wye,wye] kVs=[13.8,0.208] kVAs=[45,45] taps=[1,1] wdg=1 %R=1.26 RdcOhms=15.10824 wdg=2 %R=1.26 RdcOhms=0.003432277
+New object=Transformer.t_3037 phases=3 windings=2 XHL=1.73 buses=[bus3037.1.2.3.0,t_bus3037_l.1.2.3.0] conns=[wye,wye] kVs=[13.8,0.208] kVAs=[45,45] taps=[1,1] wdg=1 %R=1.26 RdcOhms=15.10824 wdg=2 %R=1.26 RdcOhms=0.003432277
+New object=Transformer.t_3038 phases=3 windings=2 XHL=1.73 buses=[bus3038.1.2.3.0,t_bus3038_l.1.2.3.0] conns=[wye,wye] kVs=[13.8,0.208] kVAs=[45,45] taps=[1,1] wdg=1 %R=1.26 RdcOhms=15.10824 wdg=2 %R=1.26 RdcOhms=0.003432277
+New object=Transformer.t_3039 phases=3 windings=2 XHL=1.73 buses=[bus3039.1.2.3.0,t_bus3039_l.1.2.3.0] conns=[wye,wye] kVs=[13.8,0.208] kVAs=[45,45] taps=[1,1] wdg=1 %R=1.26 RdcOhms=15.10824 wdg=2 %R=1.26 RdcOhms=0.003432277
+New object=Transformer.t_3041 phases=1 windings=3 XHL=3.36 XHT=3.36 XLT=2.24 buses=[bus3041.3.0,t_bus3041_l.1.0,t_bus3041_l.0.2] conns=[wye,wye,wye] kVs=[7.9677,0.12,0.12] kVAs=[50,50,50] taps=[1,1,1] wdg=1 %R=1.55 RdcOhms=16.7281 wdg=2 %R=3.1 RdcOhms=0.0075888 wdg=3 %R=3.1 RdcOhms=0.0075888
+New object=Transformer.t_3042 phases=1 windings=3 XHL=3.24 XHT=3.24 XLT=2.16 buses=[bus3042.3.0,t_bus3042_l.1.0,t_bus3042_l.0.2] conns=[wye,wye,wye] kVs=[7.9677,0.12,0.12] kVAs=[37.5,37.5,37.5] taps=[1,1,1] wdg=1 %R=1.8 RdcOhms=25.90157 wdg=2 %R=3.6 RdcOhms=0.0117504 wdg=3 %R=3.6 RdcOhms=0.0117504
+New object=Transformer.t_3043 phases=1 windings=3 XHL=3.24 XHT=3.24 XLT=2.16 buses=[bus3043.3.0,t_bus3043_l.1.0,t_bus3043_l.0.2] conns=[wye,wye,wye] kVs=[7.9677,0.12,0.12] kVAs=[37.5,37.5,37.5] taps=[1,1,1] wdg=1 %R=1.8 RdcOhms=25.90157 wdg=2 %R=3.6 RdcOhms=0.0117504 wdg=3 %R=3.6 RdcOhms=0.0117504
+New object=Transformer.t_3044 phases=1 windings=3 XHL=3.24 XHT=3.24 XLT=2.16 buses=[bus3044.3.0,t_bus3044_l.1.0,t_bus3044_l.0.2] conns=[wye,wye,wye] kVs=[7.9677,0.12,0.12] kVAs=[37.5,37.5,37.5] taps=[1,1,1] wdg=1 %R=1.8 RdcOhms=25.90157 wdg=2 %R=3.6 RdcOhms=0.0117504 wdg=3 %R=3.6 RdcOhms=0.0117504
+New object=Transformer.t_3045 phases=1 windings=3 XHL=3.24 XHT=3.24 XLT=2.16 buses=[bus3045.3.0,t_bus3045_l.1.0,t_bus3045_l.0.2] conns=[wye,wye,wye] kVs=[7.9677,0.12,0.12] kVAs=[37.5,37.5,37.5] taps=[1,1,1] wdg=1 %R=1.8 RdcOhms=25.90157 wdg=2 %R=3.6 RdcOhms=0.0117504 wdg=3 %R=3.6 RdcOhms=0.0117504
+New object=Transformer.t_3047 phases=3 windings=2 XHL=1.73 buses=[bus3047.1.2.3.0,t_bus3047_l.1.2.3.0] conns=[wye,wye] kVs=[13.8,0.208] kVAs=[45,45] taps=[1,1] wdg=1 %R=1.26 RdcOhms=15.10824 wdg=2 %R=1.26 RdcOhms=0.003432277
+New object=Transformer.t_3048 phases=3 windings=2 XHL=1.73 buses=[bus3048.1.2.3.0,t_bus3048_l.1.2.3.0] conns=[wye,wye] kVs=[13.8,0.208] kVAs=[45,45] taps=[1,1] wdg=1 %R=1.26 RdcOhms=15.10824 wdg=2 %R=1.26 RdcOhms=0.003432277
+New object=Transformer.t_3049 phases=3 windings=2 XHL=1.73 buses=[bus3049.1.2.3.0,t_bus3049_l.1.2.3.0] conns=[wye,wye] kVs=[13.8,0.208] kVAs=[45,45] taps=[1,1] wdg=1 %R=1.26 RdcOhms=15.10824 wdg=2 %R=1.26 RdcOhms=0.003432277
+New object=Transformer.t_3050 phases=3 windings=2 XHL=1.73 buses=[bus3050.1.2.3.0,t_bus3050_l.1.2.3.0] conns=[wye,wye] kVs=[13.8,0.208] kVAs=[45,45] taps=[1,1] wdg=1 %R=1.26 RdcOhms=15.10824 wdg=2 %R=1.26 RdcOhms=0.003432277
+New object=Transformer.t_3051 phases=3 windings=2 XHL=1.73 buses=[bus3051.1.2.3.0,t_bus3051_l.1.2.3.0] conns=[wye,wye] kVs=[13.8,0.208] kVAs=[45,45] taps=[1,1] wdg=1 %R=1.26 RdcOhms=15.10824 wdg=2 %R=1.26 RdcOhms=0.003432277
+New object=Transformer.t_3052 phases=3 windings=2 XHL=1.73 buses=[bus3052.1.2.3.0,t_bus3052_l.1.2.3.0] conns=[wye,wye] kVs=[13.8,0.208] kVAs=[45,45] taps=[1,1] wdg=1 %R=1.26 RdcOhms=15.10824 wdg=2 %R=1.26 RdcOhms=0.003432277
+New object=Transformer.t_3054 phases=3 windings=2 XHL=1.73 buses=[bus3054.1.2.3.0,t_bus3054_l.1.2.3.0] conns=[wye,wye] kVs=[13.8,0.208] kVAs=[45,45] taps=[1,1] wdg=1 %R=1.26 RdcOhms=15.10824 wdg=2 %R=1.26 RdcOhms=0.003432277
+New object=Transformer.t_3056 phases=1 windings=3 XHL=3.24 XHT=3.24 XLT=2.16 buses=[bus3056.2.0,t_bus3056_l.1.0,t_bus3056_l.0.2] conns=[wye,wye,wye] kVs=[7.9677,0.12,0.12] kVAs=[37.5,37.5,37.5] taps=[1,1,1] wdg=1 %R=1.8 RdcOhms=25.90157 wdg=2 %R=3.6 RdcOhms=0.0117504 wdg=3 %R=3.6 RdcOhms=0.0117504
+New object=Transformer.t_3057 phases=1 windings=3 XHL=3.24 XHT=3.24 XLT=2.16 buses=[bus3057.2.0,t_bus3057_l.1.0,t_bus3057_l.0.2] conns=[wye,wye,wye] kVs=[7.9677,0.12,0.12] kVAs=[37.5,37.5,37.5] taps=[1,1,1] wdg=1 %R=1.8 RdcOhms=25.90157 wdg=2 %R=3.6 RdcOhms=0.0117504 wdg=3 %R=3.6 RdcOhms=0.0117504
+New object=Transformer.t_3058 phases=1 windings=3 XHL=3.24 XHT=3.24 XLT=2.16 buses=[bus3058.2.0,t_bus3058_l.1.0,t_bus3058_l.0.2] conns=[wye,wye,wye] kVs=[7.9677,0.12,0.12] kVAs=[37.5,37.5,37.5] taps=[1,1,1] wdg=1 %R=1.8 RdcOhms=25.90157 wdg=2 %R=3.6 RdcOhms=0.0117504 wdg=3 %R=3.6 RdcOhms=0.0117504
+New object=Transformer.t_3059 phases=1 windings=3 XHL=3.24 XHT=3.24 XLT=2.16 buses=[bus3059.2.0,t_bus3059_l.1.0,t_bus3059_l.0.2] conns=[wye,wye,wye] kVs=[7.9677,0.12,0.12] kVAs=[37.5,37.5,37.5] taps=[1,1,1] wdg=1 %R=1.8 RdcOhms=25.90157 wdg=2 %R=3.6 RdcOhms=0.0117504 wdg=3 %R=3.6 RdcOhms=0.0117504
+New object=Transformer.t_3060 phases=1 windings=3 XHL=3.24 XHT=3.24 XLT=2.16 buses=[bus3060.2.0,t_bus3060_l.1.0,t_bus3060_l.0.2] conns=[wye,wye,wye] kVs=[7.9677,0.12,0.12] kVAs=[37.5,37.5,37.5] taps=[1,1,1] wdg=1 %R=1.8 RdcOhms=25.90157 wdg=2 %R=3.6 RdcOhms=0.0117504 wdg=3 %R=3.6 RdcOhms=0.0117504
+New object=Transformer.t_3061 phases=1 windings=3 XHL=3.24 XHT=3.24 XLT=2.16 buses=[bus3061.2.0,t_bus3061_l.1.0,t_bus3061_l.0.2] conns=[wye,wye,wye] kVs=[7.9677,0.12,0.12] kVAs=[37.5,37.5,37.5] taps=[1,1,1] wdg=1 %R=1.8 RdcOhms=25.90157 wdg=2 %R=3.6 RdcOhms=0.0117504 wdg=3 %R=3.6 RdcOhms=0.0117504
+New object=Transformer.t_3062 phases=1 windings=3 XHL=3.24 XHT=3.24 XLT=2.16 buses=[bus3062.2.0,t_bus3062_l.1.0,t_bus3062_l.0.2] conns=[wye,wye,wye] kVs=[7.9677,0.12,0.12] kVAs=[37.5,37.5,37.5] taps=[1,1,1] wdg=1 %R=1.8 RdcOhms=25.90157 wdg=2 %R=3.6 RdcOhms=0.0117504 wdg=3 %R=3.6 RdcOhms=0.0117504
+New object=Transformer.t_3063 phases=1 windings=3 XHL=3.24 XHT=3.24 XLT=2.16 buses=[bus3063.2.0,t_bus3063_l.1.0,t_bus3063_l.0.2] conns=[wye,wye,wye] kVs=[7.9677,0.12,0.12] kVAs=[37.5,37.5,37.5] taps=[1,1,1] wdg=1 %R=1.8 RdcOhms=25.90157 wdg=2 %R=3.6 RdcOhms=0.0117504 wdg=3 %R=3.6 RdcOhms=0.0117504
+New object=Transformer.t_3064 phases=1 windings=3 XHL=3.24 XHT=3.24 XLT=2.16 buses=[bus3064.2.0,t_bus3064_l.1.0,t_bus3064_l.0.2] conns=[wye,wye,wye] kVs=[7.9677,0.12,0.12] kVAs=[37.5,37.5,37.5] taps=[1,1,1] wdg=1 %R=1.8 RdcOhms=25.90157 wdg=2 %R=3.6 RdcOhms=0.0117504 wdg=3 %R=3.6 RdcOhms=0.0117504
+New object=Transformer.t_3065 phases=1 windings=3 XHL=3.24 XHT=3.24 XLT=2.16 buses=[bus3065.2.0,t_bus3065_l.1.0,t_bus3065_l.0.2] conns=[wye,wye,wye] kVs=[7.9677,0.12,0.12] kVAs=[37.5,37.5,37.5] taps=[1,1,1] wdg=1 %R=1.8 RdcOhms=25.90157 wdg=2 %R=3.6 RdcOhms=0.0117504 wdg=3 %R=3.6 RdcOhms=0.0117504
+New object=Transformer.t_3066 phases=1 windings=3 XHL=3.24 XHT=3.24 XLT=2.16 buses=[bus3066.2.0,t_bus3066_l.1.0,t_bus3066_l.0.2] conns=[wye,wye,wye] kVs=[7.9677,0.12,0.12] kVAs=[37.5,37.5,37.5] taps=[1,1,1] wdg=1 %R=1.8 RdcOhms=25.90157 wdg=2 %R=3.6 RdcOhms=0.0117504 wdg=3 %R=3.6 RdcOhms=0.0117504
+New object=Transformer.t_3067 phases=1 windings=3 XHL=3.24 XHT=3.24 XLT=2.16 buses=[bus3067.2.0,t_bus3067_l.1.0,t_bus3067_l.0.2] conns=[wye,wye,wye] kVs=[7.9677,0.12,0.12] kVAs=[37.5,37.5,37.5] taps=[1,1,1] wdg=1 %R=1.8 RdcOhms=25.90157 wdg=2 %R=3.6 RdcOhms=0.0117504 wdg=3 %R=3.6 RdcOhms=0.0117504
+New object=Transformer.t_3070 phases=3 windings=2 XHL=1.73 buses=[bus3070.1.2.3.0,t_bus3070_l.1.2.3.0] conns=[wye,wye] kVs=[13.8,0.208] kVAs=[45,45] taps=[1,1] wdg=1 %R=1.26 RdcOhms=15.10824 wdg=2 %R=1.26 RdcOhms=0.003432277
+New object=Transformer.t_3071 phases=3 windings=2 XHL=1.73 buses=[bus3071.1.2.3.0,t_bus3071_l.1.2.3.0] conns=[wye,wye] kVs=[13.8,0.208] kVAs=[45,45] taps=[1,1] wdg=1 %R=1.26 RdcOhms=15.10824 wdg=2 %R=1.26 RdcOhms=0.003432277
+New object=Transformer.t_3072 phases=3 windings=2 XHL=1.73 buses=[bus3072.1.2.3.0,t_bus3072_l.1.2.3.0] conns=[wye,wye] kVs=[13.8,0.208] kVAs=[45,45] taps=[1,1] wdg=1 %R=1.26 RdcOhms=15.10824 wdg=2 %R=1.26 RdcOhms=0.003432277
+New object=Transformer.t_3073 phases=3 windings=2 XHL=1.73 buses=[bus3073.1.2.3.0,t_bus3073_l.1.2.3.0] conns=[wye,wye] kVs=[13.8,0.208] kVAs=[45,45] taps=[1,1] wdg=1 %R=1.26 RdcOhms=15.10824 wdg=2 %R=1.26 RdcOhms=0.003432277
+New object=Transformer.t_3074 phases=3 windings=2 XHL=1.73 buses=[bus3074.1.2.3.0,t_bus3074_l.1.2.3.0] conns=[wye,wye] kVs=[13.8,0.208] kVAs=[45,45] taps=[1,1] wdg=1 %R=1.26 RdcOhms=15.10824 wdg=2 %R=1.26 RdcOhms=0.003432277
+New object=Transformer.t_3077 phases=3 windings=2 XHL=5.9 buses=[bus3077.1.2.3.0,t_bus3077_l.1.2.3.0] conns=[wye,wye] kVs=[13.8,0.208] kVAs=[500,500] taps=[1,1] wdg=1 %R=0.8 RdcOhms=0.863328 wdg=2 %R=0.8 RdcOhms=0.0001961301
+New object=Transformer.t_3078 phases=3 windings=2 XHL=1.73 buses=[bus3078.1.2.3.0,t_bus3078_l.1.2.3.0] conns=[wye,wye] kVs=[13.8,0.208] kVAs=[45,45] taps=[1,1] wdg=1 %R=1.26 RdcOhms=15.10824 wdg=2 %R=1.26 RdcOhms=0.003432277
+New object=Transformer.t_3081 phases=3 windings=2 XHL=1.73 buses=[bus3081.1.2.3.0,t_bus3081_l.1.2.3.0] conns=[wye,wye] kVs=[13.8,0.208] kVAs=[45,45] taps=[1,1] wdg=1 %R=1.26 RdcOhms=15.10824 wdg=2 %R=1.26 RdcOhms=0.003432277
+New object=Transformer.t_3083 phases=1 windings=3 XHL=3.24 XHT=3.24 XLT=2.16 buses=[bus3083.1.0,t_bus3083_l.1.0,t_bus3083_l.0.2] conns=[wye,wye,wye] kVs=[7.9677,0.12,0.12] kVAs=[37.5,37.5,37.5] taps=[1,1,1] wdg=1 %R=1.8 RdcOhms=25.90157 wdg=2 %R=3.6 RdcOhms=0.0117504 wdg=3 %R=3.6 RdcOhms=0.0117504
+New object=Transformer.t_3084 phases=1 windings=3 XHL=3.24 XHT=3.24 XLT=2.16 buses=[bus3084.1.0,t_bus3084_l.1.0,t_bus3084_l.0.2] conns=[wye,wye,wye] kVs=[7.9677,0.12,0.12] kVAs=[37.5,37.5,37.5] taps=[1,1,1] wdg=1 %R=1.8 RdcOhms=25.90157 wdg=2 %R=3.6 RdcOhms=0.0117504 wdg=3 %R=3.6 RdcOhms=0.0117504
+New object=Transformer.t_3085 phases=1 windings=3 XHL=3.24 XHT=3.24 XLT=2.16 buses=[bus3085.1.0,t_bus3085_l.1.0,t_bus3085_l.0.2] conns=[wye,wye,wye] kVs=[7.9677,0.12,0.12] kVAs=[37.5,37.5,37.5] taps=[1,1,1] wdg=1 %R=1.8 RdcOhms=25.90157 wdg=2 %R=3.6 RdcOhms=0.0117504 wdg=3 %R=3.6 RdcOhms=0.0117504
+New object=Transformer.t_3086 phases=1 windings=3 XHL=3.24 XHT=3.24 XLT=2.16 buses=[bus3086.1.0,t_bus3086_l.1.0,t_bus3086_l.0.2] conns=[wye,wye,wye] kVs=[7.9677,0.12,0.12] kVAs=[37.5,37.5,37.5] taps=[1,1,1] wdg=1 %R=1.8 RdcOhms=25.90157 wdg=2 %R=3.6 RdcOhms=0.0117504 wdg=3 %R=3.6 RdcOhms=0.0117504
+New object=Transformer.t_3087 phases=1 windings=3 XHL=3.24 XHT=3.24 XLT=2.16 buses=[bus3087.1.0,t_bus3087_l.1.0,t_bus3087_l.0.2] conns=[wye,wye,wye] kVs=[7.9677,0.12,0.12] kVAs=[37.5,37.5,37.5] taps=[1,1,1] wdg=1 %R=1.8 RdcOhms=25.90157 wdg=2 %R=3.6 RdcOhms=0.0117504 wdg=3 %R=3.6 RdcOhms=0.0117504
+New object=Transformer.t_3088 phases=1 windings=3 XHL=3.24 XHT=3.24 XLT=2.16 buses=[bus3088.1.0,t_bus3088_l.1.0,t_bus3088_l.0.2] conns=[wye,wye,wye] kVs=[7.9677,0.12,0.12] kVAs=[37.5,37.5,37.5] taps=[1,1,1] wdg=1 %R=1.8 RdcOhms=25.90157 wdg=2 %R=3.6 RdcOhms=0.0117504 wdg=3 %R=3.6 RdcOhms=0.0117504
+New object=Transformer.t_3089 phases=1 windings=3 XHL=3.24 XHT=3.24 XLT=2.16 buses=[bus3089.1.0,t_bus3089_l.1.0,t_bus3089_l.0.2] conns=[wye,wye,wye] kVs=[7.9677,0.12,0.12] kVAs=[37.5,37.5,37.5] taps=[1,1,1] wdg=1 %R=1.8 RdcOhms=25.90157 wdg=2 %R=3.6 RdcOhms=0.0117504 wdg=3 %R=3.6 RdcOhms=0.0117504
+New object=Transformer.t_3090 phases=1 windings=3 XHL=3.24 XHT=3.24 XLT=2.16 buses=[bus3090.1.0,t_bus3090_l.1.0,t_bus3090_l.0.2] conns=[wye,wye,wye] kVs=[7.9677,0.12,0.12] kVAs=[37.5,37.5,37.5] taps=[1,1,1] wdg=1 %R=1.8 RdcOhms=25.90157 wdg=2 %R=3.6 RdcOhms=0.0117504 wdg=3 %R=3.6 RdcOhms=0.0117504
+New object=Transformer.t_3091 phases=1 windings=3 XHL=2.76 XHT=2.76 XLT=1.84 buses=[bus3091.1.0,t_bus3091_l.1.0,t_bus3091_l.0.2] conns=[wye,wye,wye] kVs=[7.9677,0.12,0.12] kVAs=[25,25,25] taps=[1,1,1] wdg=1 %R=0.7 RdcOhms=15.10925 wdg=2 %R=1.4 RdcOhms=0.0068544 wdg=3 %R=1.4 RdcOhms=0.0068544
+New object=Transformer.t_3093 phases=1 windings=3 XHL=3.24 XHT=3.24 XLT=2.16 buses=[bus3093.1.0,t_bus3093_l.1.0,t_bus3093_l.0.2] conns=[wye,wye,wye] kVs=[7.9677,0.12,0.12] kVAs=[37.5,37.5,37.5] taps=[1,1,1] wdg=1 %R=1.8 RdcOhms=25.90157 wdg=2 %R=3.6 RdcOhms=0.0117504 wdg=3 %R=3.6 RdcOhms=0.0117504
+New object=Transformer.t_3094 phases=1 windings=3 XHL=3.24 XHT=3.24 XLT=2.16 buses=[bus3094.1.0,t_bus3094_l.1.0,t_bus3094_l.0.2] conns=[wye,wye,wye] kVs=[7.9677,0.12,0.12] kVAs=[37.5,37.5,37.5] taps=[1,1,1] wdg=1 %R=1.8 RdcOhms=25.90157 wdg=2 %R=3.6 RdcOhms=0.0117504 wdg=3 %R=3.6 RdcOhms=0.0117504
+New object=Transformer.t_3095 phases=1 windings=3 XHL=3.24 XHT=3.24 XLT=2.16 buses=[bus3095.1.0,t_bus3095_l.1.0,t_bus3095_l.0.2] conns=[wye,wye,wye] kVs=[7.9677,0.12,0.12] kVAs=[37.5,37.5,37.5] taps=[1,1,1] wdg=1 %R=1.8 RdcOhms=25.90157 wdg=2 %R=3.6 RdcOhms=0.0117504 wdg=3 %R=3.6 RdcOhms=0.0117504
+New object=Transformer.t_3096 phases=1 windings=3 XHL=3.24 XHT=3.24 XLT=2.16 buses=[bus3096.1.0,t_bus3096_l.1.0,t_bus3096_l.0.2] conns=[wye,wye,wye] kVs=[7.9677,0.12,0.12] kVAs=[37.5,37.5,37.5] taps=[1,1,1] wdg=1 %R=1.8 RdcOhms=25.90157 wdg=2 %R=3.6 RdcOhms=0.0117504 wdg=3 %R=3.6 RdcOhms=0.0117504
+New object=Transformer.t_3097 phases=1 windings=3 XHL=3.24 XHT=3.24 XLT=2.16 buses=[bus3097.1.0,t_bus3097_l.1.0,t_bus3097_l.0.2] conns=[wye,wye,wye] kVs=[7.9677,0.12,0.12] kVAs=[37.5,37.5,37.5] taps=[1,1,1] wdg=1 %R=1.8 RdcOhms=25.90157 wdg=2 %R=3.6 RdcOhms=0.0117504 wdg=3 %R=3.6 RdcOhms=0.0117504
+New object=Transformer.t_3098 phases=1 windings=3 XHL=3.36 XHT=3.36 XLT=2.24 buses=[bus3098.2.0,t_bus3098_l.1.0,t_bus3098_l.0.2] conns=[wye,wye,wye] kVs=[7.9677,0.12,0.12] kVAs=[50,50,50] taps=[1,1,1] wdg=1 %R=1.55 RdcOhms=16.7281 wdg=2 %R=3.1 RdcOhms=0.0075888 wdg=3 %R=3.1 RdcOhms=0.0075888
+New object=Transformer.t_3099 phases=1 windings=3 XHL=3.24 XHT=3.24 XLT=2.16 buses=[bus3099.2.0,t_bus3099_l.1.0,t_bus3099_l.0.2] conns=[wye,wye,wye] kVs=[7.9677,0.12,0.12] kVAs=[37.5,37.5,37.5] taps=[1,1,1] wdg=1 %R=1.8 RdcOhms=25.90157 wdg=2 %R=3.6 RdcOhms=0.0117504 wdg=3 %R=3.6 RdcOhms=0.0117504
+New object=Transformer.t_3101 phases=1 windings=3 XHL=3.24 XHT=3.24 XLT=2.16 buses=[bus3101.3.0,t_bus3101_l.1.0,t_bus3101_l.0.2] conns=[wye,wye,wye] kVs=[7.9677,0.12,0.12] kVAs=[37.5,37.5,37.5] taps=[1,1,1] wdg=1 %R=1.8 RdcOhms=25.90157 wdg=2 %R=3.6 RdcOhms=0.0117504 wdg=3 %R=3.6 RdcOhms=0.0117504
+New object=Transformer.t_3102 phases=1 windings=3 XHL=3.24 XHT=3.24 XLT=2.16 buses=[bus3102.3.0,t_bus3102_l.1.0,t_bus3102_l.0.2] conns=[wye,wye,wye] kVs=[7.9677,0.12,0.12] kVAs=[37.5,37.5,37.5] taps=[1,1,1] wdg=1 %R=1.8 RdcOhms=25.90157 wdg=2 %R=3.6 RdcOhms=0.0117504 wdg=3 %R=3.6 RdcOhms=0.0117504
+New object=Transformer.t_3103 phases=1 windings=3 XHL=3.36 XHT=3.36 XLT=2.24 buses=[bus3103.3.0,t_bus3103_l.1.0,t_bus3103_l.0.2] conns=[wye,wye,wye] kVs=[7.9677,0.12,0.12] kVAs=[50,50,50] taps=[1,1,1] wdg=1 %R=1.55 RdcOhms=16.7281 wdg=2 %R=3.1 RdcOhms=0.0075888 wdg=3 %R=3.1 RdcOhms=0.0075888
+New object=Transformer.t_3104 phases=1 windings=3 XHL=4.26 XHT=4.26 XLT=2.84 buses=[bus3104.3.0,t_bus3104_l.1.0,t_bus3104_l.0.2] conns=[wye,wye,wye] kVs=[7.9677,0.12,0.12] kVAs=[100,100,100] taps=[1,1,1] wdg=1 %R=1.06 RdcOhms=5.71993 wdg=2 %R=2.12 RdcOhms=0.00259488 wdg=3 %R=2.12 RdcOhms=0.00259488
+New object=Transformer.t_3105 phases=1 windings=3 XHL=3.24 XHT=3.24 XLT=2.16 buses=[bus3105.3.0,t_bus3105_l.1.0,t_bus3105_l.0.2] conns=[wye,wye,wye] kVs=[7.9677,0.12,0.12] kVAs=[37.5,37.5,37.5] taps=[1,1,1] wdg=1 %R=1.8 RdcOhms=25.90157 wdg=2 %R=3.6 RdcOhms=0.0117504 wdg=3 %R=3.6 RdcOhms=0.0117504
+New object=Transformer.t_3106 phases=1 windings=3 XHL=4.26 XHT=4.26 XLT=2.84 buses=[bus3106.3.0,t_bus3106_l.1.0,t_bus3106_l.0.2] conns=[wye,wye,wye] kVs=[7.9677,0.12,0.12] kVAs=[100,100,100] taps=[1,1,1] wdg=1 %R=1.06 RdcOhms=5.71993 wdg=2 %R=2.12 RdcOhms=0.00259488 wdg=3 %R=2.12 RdcOhms=0.00259488
+New object=Transformer.t_3108 phases=1 windings=3 XHL=3.24 XHT=3.24 XLT=2.16 buses=[bus3108.1.0,t_bus3108_l.1.0,t_bus3108_l.0.2] conns=[wye,wye,wye] kVs=[7.9677,0.12,0.12] kVAs=[37.5,37.5,37.5] taps=[1,1,1] wdg=1 %R=1.8 RdcOhms=25.90157 wdg=2 %R=3.6 RdcOhms=0.0117504 wdg=3 %R=3.6 RdcOhms=0.0117504
+New object=Transformer.t_3109 phases=1 windings=3 XHL=3.24 XHT=3.24 XLT=2.16 buses=[bus3109.1.0,t_bus3109_l.1.0,t_bus3109_l.0.2] conns=[wye,wye,wye] kVs=[7.9677,0.12,0.12] kVAs=[37.5,37.5,37.5] taps=[1,1,1] wdg=1 %R=1.8 RdcOhms=25.90157 wdg=2 %R=3.6 RdcOhms=0.0117504 wdg=3 %R=3.6 RdcOhms=0.0117504
+New object=Transformer.t_3110 phases=1 windings=3 XHL=3.36 XHT=3.36 XLT=2.24 buses=[bus3110.1.0,t_bus3110_l.1.0,t_bus3110_l.0.2] conns=[wye,wye,wye] kVs=[7.9677,0.12,0.12] kVAs=[50,50,50] taps=[1,1,1] wdg=1 %R=1.55 RdcOhms=16.7281 wdg=2 %R=3.1 RdcOhms=0.0075888 wdg=3 %R=3.1 RdcOhms=0.0075888
+New object=Transformer.t_3111 phases=1 windings=3 XHL=3.36 XHT=3.36 XLT=2.24 buses=[bus3111.1.0,t_bus3111_l.1.0,t_bus3111_l.0.2] conns=[wye,wye,wye] kVs=[7.9677,0.12,0.12] kVAs=[50,50,50] taps=[1,1,1] wdg=1 %R=1.55 RdcOhms=16.7281 wdg=2 %R=3.1 RdcOhms=0.0075888 wdg=3 %R=3.1 RdcOhms=0.0075888
+New object=Transformer.t_3112 phases=1 windings=3 XHL=3.36 XHT=3.36 XLT=2.24 buses=[bus3112.1.0,t_bus3112_l.1.0,t_bus3112_l.0.2] conns=[wye,wye,wye] kVs=[7.9677,0.12,0.12] kVAs=[50,50,50] taps=[1,1,1] wdg=1 %R=1.55 RdcOhms=16.7281 wdg=2 %R=3.1 RdcOhms=0.0075888 wdg=3 %R=3.1 RdcOhms=0.0075888
+New object=Transformer.t_3114 phases=1 windings=3 XHL=3.24 XHT=3.24 XLT=2.16 buses=[bus3114.2.0,t_bus3114_l.1.0,t_bus3114_l.0.2] conns=[wye,wye,wye] kVs=[7.9677,0.12,0.12] kVAs=[37.5,37.5,37.5] taps=[1,1,1] wdg=1 %R=1.8 RdcOhms=25.90157 wdg=2 %R=3.6 RdcOhms=0.0117504 wdg=3 %R=3.6 RdcOhms=0.0117504
+New object=Transformer.t_3115 phases=1 windings=3 XHL=3.36 XHT=3.36 XLT=2.24 buses=[bus3115.2.0,t_bus3115_l.1.0,t_bus3115_l.0.2] conns=[wye,wye,wye] kVs=[7.9677,0.12,0.12] kVAs=[50,50,50] taps=[1,1,1] wdg=1 %R=1.55 RdcOhms=16.7281 wdg=2 %R=3.1 RdcOhms=0.0075888 wdg=3 %R=3.1 RdcOhms=0.0075888
+New object=Transformer.t_3116 phases=1 windings=3 XHL=3.24 XHT=3.24 XLT=2.16 buses=[bus3116.2.0,t_bus3116_l.1.0,t_bus3116_l.0.2] conns=[wye,wye,wye] kVs=[7.9677,0.12,0.12] kVAs=[37.5,37.5,37.5] taps=[1,1,1] wdg=1 %R=1.8 RdcOhms=25.90157 wdg=2 %R=3.6 RdcOhms=0.0117504 wdg=3 %R=3.6 RdcOhms=0.0117504
+New object=Transformer.t_3117 phases=1 windings=3 XHL=3.24 XHT=3.24 XLT=2.16 buses=[bus3117.2.0,t_bus3117_l.1.0,t_bus3117_l.0.2] conns=[wye,wye,wye] kVs=[7.9677,0.12,0.12] kVAs=[37.5,37.5,37.5] taps=[1,1,1] wdg=1 %R=1.8 RdcOhms=25.90157 wdg=2 %R=3.6 RdcOhms=0.0117504 wdg=3 %R=3.6 RdcOhms=0.0117504
+New object=Transformer.t_3120 phases=1 windings=3 XHL=3.24 XHT=3.24 XLT=2.16 buses=[bus3120.2.0,t_bus3120_l.1.0,t_bus3120_l.0.2] conns=[wye,wye,wye] kVs=[7.9677,0.12,0.12] kVAs=[37.5,37.5,37.5] taps=[1,1,1] wdg=1 %R=1.8 RdcOhms=25.90157 wdg=2 %R=3.6 RdcOhms=0.0117504 wdg=3 %R=3.6 RdcOhms=0.0117504
+New object=Transformer.t_3121 phases=1 windings=3 XHL=3.24 XHT=3.24 XLT=2.16 buses=[bus3121.2.0,t_bus3121_l.1.0,t_bus3121_l.0.2] conns=[wye,wye,wye] kVs=[7.9677,0.12,0.12] kVAs=[37.5,37.5,37.5] taps=[1,1,1] wdg=1 %R=1.8 RdcOhms=25.90157 wdg=2 %R=3.6 RdcOhms=0.0117504 wdg=3 %R=3.6 RdcOhms=0.0117504
+New object=Transformer.t_3122 phases=1 windings=3 XHL=3.24 XHT=3.24 XLT=2.16 buses=[bus3122.2.0,t_bus3122_l.1.0,t_bus3122_l.0.2] conns=[wye,wye,wye] kVs=[7.9677,0.12,0.12] kVAs=[37.5,37.5,37.5] taps=[1,1,1] wdg=1 %R=1.8 RdcOhms=25.90157 wdg=2 %R=3.6 RdcOhms=0.0117504 wdg=3 %R=3.6 RdcOhms=0.0117504
+New object=Transformer.t_3123 phases=1 windings=3 XHL=3.24 XHT=3.24 XLT=2.16 buses=[bus3123.2.0,t_bus3123_l.1.0,t_bus3123_l.0.2] conns=[wye,wye,wye] kVs=[7.9677,0.12,0.12] kVAs=[37.5,37.5,37.5] taps=[1,1,1] wdg=1 %R=1.8 RdcOhms=25.90157 wdg=2 %R=3.6 RdcOhms=0.0117504 wdg=3 %R=3.6 RdcOhms=0.0117504
+New object=Transformer.t_3124 phases=1 windings=3 XHL=3.24 XHT=3.24 XLT=2.16 buses=[bus3124.2.0,t_bus3124_l.1.0,t_bus3124_l.0.2] conns=[wye,wye,wye] kVs=[7.9677,0.12,0.12] kVAs=[37.5,37.5,37.5] taps=[1,1,1] wdg=1 %R=1.8 RdcOhms=25.90157 wdg=2 %R=3.6 RdcOhms=0.0117504 wdg=3 %R=3.6 RdcOhms=0.0117504
+New object=Transformer.t_3125 phases=1 windings=3 XHL=2.42 XHT=2.42 XLT=1.62 buses=[bus3125.2.0,t_bus3125_l.1.0,t_bus3125_l.0.2] conns=[wye,wye,wye] kVs=[7.9677,0.12,0.12] kVAs=[15,15,15] taps=[1,1,1] wdg=1 %R=0.8 RdcOhms=28.77952 wdg=2 %R=1.6 RdcOhms=0.013056 wdg=3 %R=1.6 RdcOhms=0.013056
+New object=Transformer.t_3126 phases=1 windings=3 XHL=3.24 XHT=3.24 XLT=2.16 buses=[bus3126.2.0,t_bus3126_l.1.0,t_bus3126_l.0.2] conns=[wye,wye,wye] kVs=[7.9677,0.12,0.12] kVAs=[37.5,37.5,37.5] taps=[1,1,1] wdg=1 %R=1.8 RdcOhms=25.90157 wdg=2 %R=3.6 RdcOhms=0.0117504 wdg=3 %R=3.6 RdcOhms=0.0117504
+New object=Transformer.t_3127 phases=1 windings=3 XHL=3.24 XHT=3.24 XLT=2.16 buses=[bus3127.2.0,t_bus3127_l.1.0,t_bus3127_l.0.2] conns=[wye,wye,wye] kVs=[7.9677,0.12,0.12] kVAs=[37.5,37.5,37.5] taps=[1,1,1] wdg=1 %R=1.8 RdcOhms=25.90157 wdg=2 %R=3.6 RdcOhms=0.0117504 wdg=3 %R=3.6 RdcOhms=0.0117504
+New object=Transformer.t_3128 phases=1 windings=3 XHL=3.24 XHT=3.24 XLT=2.16 buses=[bus3128.2.0,t_bus3128_l.1.0,t_bus3128_l.0.2] conns=[wye,wye,wye] kVs=[7.9677,0.12,0.12] kVAs=[37.5,37.5,37.5] taps=[1,1,1] wdg=1 %R=1.8 RdcOhms=25.90157 wdg=2 %R=3.6 RdcOhms=0.0117504 wdg=3 %R=3.6 RdcOhms=0.0117504
+New object=Transformer.t_3129 phases=1 windings=3 XHL=3.24 XHT=3.24 XLT=2.16 buses=[bus3129.2.0,t_bus3129_l.1.0,t_bus3129_l.0.2] conns=[wye,wye,wye] kVs=[7.9677,0.12,0.12] kVAs=[37.5,37.5,37.5] taps=[1,1,1] wdg=1 %R=1.8 RdcOhms=25.90157 wdg=2 %R=3.6 RdcOhms=0.0117504 wdg=3 %R=3.6 RdcOhms=0.0117504
+New object=Transformer.t_3130 phases=1 windings=3 XHL=3.24 XHT=3.24 XLT=2.16 buses=[bus3130.2.0,t_bus3130_l.1.0,t_bus3130_l.0.2] conns=[wye,wye,wye] kVs=[7.9677,0.12,0.12] kVAs=[37.5,37.5,37.5] taps=[1,1,1] wdg=1 %R=1.8 RdcOhms=25.90157 wdg=2 %R=3.6 RdcOhms=0.0117504 wdg=3 %R=3.6 RdcOhms=0.0117504
+New object=Transformer.t_3131 phases=1 windings=3 XHL=3.24 XHT=3.24 XLT=2.16 buses=[bus3131.2.0,t_bus3131_l.1.0,t_bus3131_l.0.2] conns=[wye,wye,wye] kVs=[7.9677,0.12,0.12] kVAs=[37.5,37.5,37.5] taps=[1,1,1] wdg=1 %R=1.8 RdcOhms=25.90157 wdg=2 %R=3.6 RdcOhms=0.0117504 wdg=3 %R=3.6 RdcOhms=0.0117504
+New object=Transformer.t_3132 phases=1 windings=3 XHL=3.36 XHT=3.36 XLT=2.24 buses=[bus3132.1.0,t_bus3132_l.1.0,t_bus3132_l.0.2] conns=[wye,wye,wye] kVs=[7.9677,0.12,0.12] kVAs=[50,50,50] taps=[1,1,1] wdg=1 %R=1.55 RdcOhms=16.7281 wdg=2 %R=3.1 RdcOhms=0.0075888 wdg=3 %R=3.1 RdcOhms=0.0075888
+New object=Transformer.t_3134 phases=1 windings=3 XHL=3.36 XHT=3.36 XLT=2.24 buses=[bus3134.1.0,t_bus3134_l.1.0,t_bus3134_l.0.2] conns=[wye,wye,wye] kVs=[7.9677,0.12,0.12] kVAs=[50,50,50] taps=[1,1,1] wdg=1 %R=1.55 RdcOhms=16.7281 wdg=2 %R=3.1 RdcOhms=0.0075888 wdg=3 %R=3.1 RdcOhms=0.0075888
+New object=Transformer.t_3135 phases=1 windings=3 XHL=3.24 XHT=3.24 XLT=2.16 buses=[bus3135.1.0,t_bus3135_l.1.0,t_bus3135_l.0.2] conns=[wye,wye,wye] kVs=[7.9677,0.12,0.12] kVAs=[37.5,37.5,37.5] taps=[1,1,1] wdg=1 %R=1.8 RdcOhms=25.90157 wdg=2 %R=3.6 RdcOhms=0.0117504 wdg=3 %R=3.6 RdcOhms=0.0117504
+New object=Transformer.t_3136 phases=1 windings=3 XHL=3.36 XHT=3.36 XLT=2.24 buses=[bus3136.1.0,t_bus3136_l.1.0,t_bus3136_l.0.2] conns=[wye,wye,wye] kVs=[7.9677,0.12,0.12] kVAs=[50,50,50] taps=[1,1,1] wdg=1 %R=1.55 RdcOhms=16.7281 wdg=2 %R=3.1 RdcOhms=0.0075888 wdg=3 %R=3.1 RdcOhms=0.0075888
+New object=Transformer.t_3137 phases=1 windings=3 XHL=3.36 XHT=3.36 XLT=2.24 buses=[bus3137.1.0,t_bus3137_l.1.0,t_bus3137_l.0.2] conns=[wye,wye,wye] kVs=[7.9677,0.12,0.12] kVAs=[50,50,50] taps=[1,1,1] wdg=1 %R=1.55 RdcOhms=16.7281 wdg=2 %R=3.1 RdcOhms=0.0075888 wdg=3 %R=3.1 RdcOhms=0.0075888
+New object=Transformer.t_3138 phases=1 windings=3 XHL=3.36 XHT=3.36 XLT=2.24 buses=[bus3138.1.0,t_bus3138_l.1.0,t_bus3138_l.0.2] conns=[wye,wye,wye] kVs=[7.9677,0.12,0.12] kVAs=[50,50,50] taps=[1,1,1] wdg=1 %R=1.55 RdcOhms=16.7281 wdg=2 %R=3.1 RdcOhms=0.0075888 wdg=3 %R=3.1 RdcOhms=0.0075888
+New object=Transformer.t_3139 phases=1 windings=3 XHL=3.24 XHT=3.24 XLT=2.16 buses=[bus3139.1.0,t_bus3139_l.1.0,t_bus3139_l.0.2] conns=[wye,wye,wye] kVs=[7.9677,0.12,0.12] kVAs=[37.5,37.5,37.5] taps=[1,1,1] wdg=1 %R=1.8 RdcOhms=25.90157 wdg=2 %R=3.6 RdcOhms=0.0117504 wdg=3 %R=3.6 RdcOhms=0.0117504
+New object=Transformer.t_3141 phases=1 windings=3 XHL=3.24 XHT=3.24 XLT=2.16 buses=[bus3141.3.0,t_bus3141_l.1.0,t_bus3141_l.0.2] conns=[wye,wye,wye] kVs=[7.9677,0.12,0.12] kVAs=[37.5,37.5,37.5] taps=[1,1,1] wdg=1 %R=1.8 RdcOhms=25.90157 wdg=2 %R=3.6 RdcOhms=0.0117504 wdg=3 %R=3.6 RdcOhms=0.0117504
+New object=Transformer.t_3142 phases=1 windings=3 XHL=3.24 XHT=3.24 XLT=2.16 buses=[bus3142.3.0,t_bus3142_l.1.0,t_bus3142_l.0.2] conns=[wye,wye,wye] kVs=[7.9677,0.12,0.12] kVAs=[37.5,37.5,37.5] taps=[1,1,1] wdg=1 %R=1.8 RdcOhms=25.90157 wdg=2 %R=3.6 RdcOhms=0.0117504 wdg=3 %R=3.6 RdcOhms=0.0117504
+New object=Transformer.t_3143 phases=1 windings=3 XHL=3.24 XHT=3.24 XLT=2.16 buses=[bus3143.3.0,t_bus3143_l.1.0,t_bus3143_l.0.2] conns=[wye,wye,wye] kVs=[7.9677,0.12,0.12] kVAs=[37.5,37.5,37.5] taps=[1,1,1] wdg=1 %R=1.8 RdcOhms=25.90157 wdg=2 %R=3.6 RdcOhms=0.0117504 wdg=3 %R=3.6 RdcOhms=0.0117504
+New object=Transformer.t_3144 phases=1 windings=3 XHL=2.42 XHT=2.42 XLT=1.62 buses=[bus3144.3.0,t_bus3144_l.1.0,t_bus3144_l.0.2] conns=[wye,wye,wye] kVs=[7.9677,0.12,0.12] kVAs=[15,15,15] taps=[1,1,1] wdg=1 %R=0.8 RdcOhms=28.77952 wdg=2 %R=1.6 RdcOhms=0.013056 wdg=3 %R=1.6 RdcOhms=0.013056
+New object=Transformer.t_3145 phases=1 windings=3 XHL=3.24 XHT=3.24 XLT=2.16 buses=[bus3145.3.0,t_bus3145_l.1.0,t_bus3145_l.0.2] conns=[wye,wye,wye] kVs=[7.9677,0.12,0.12] kVAs=[37.5,37.5,37.5] taps=[1,1,1] wdg=1 %R=1.8 RdcOhms=25.90157 wdg=2 %R=3.6 RdcOhms=0.0117504 wdg=3 %R=3.6 RdcOhms=0.0117504
+New object=Transformer.t_3146 phases=1 windings=3 XHL=3.24 XHT=3.24 XLT=2.16 buses=[bus3146.3.0,t_bus3146_l.1.0,t_bus3146_l.0.2] conns=[wye,wye,wye] kVs=[7.9677,0.12,0.12] kVAs=[37.5,37.5,37.5] taps=[1,1,1] wdg=1 %R=1.8 RdcOhms=25.90157 wdg=2 %R=3.6 RdcOhms=0.0117504 wdg=3 %R=3.6 RdcOhms=0.0117504
+New object=Transformer.t_3147 phases=1 windings=3 XHL=3.24 XHT=3.24 XLT=2.16 buses=[bus3147.3.0,t_bus3147_l.1.0,t_bus3147_l.0.2] conns=[wye,wye,wye] kVs=[7.9677,0.12,0.12] kVAs=[37.5,37.5,37.5] taps=[1,1,1] wdg=1 %R=1.8 RdcOhms=25.90157 wdg=2 %R=3.6 RdcOhms=0.0117504 wdg=3 %R=3.6 RdcOhms=0.0117504
+New object=Transformer.t_3148 phases=1 windings=3 XHL=3.36 XHT=3.36 XLT=2.24 buses=[bus3148.3.0,t_bus3148_l.1.0,t_bus3148_l.0.2] conns=[wye,wye,wye] kVs=[7.9677,0.12,0.12] kVAs=[50,50,50] taps=[1,1,1] wdg=1 %R=1.55 RdcOhms=16.7281 wdg=2 %R=3.1 RdcOhms=0.0075888 wdg=3 %R=3.1 RdcOhms=0.0075888
+New object=Transformer.t_3149 phases=1 windings=3 XHL=3.24 XHT=3.24 XLT=2.16 buses=[bus3149.3.0,t_bus3149_l.1.0,t_bus3149_l.0.2] conns=[wye,wye,wye] kVs=[7.9677,0.12,0.12] kVAs=[37.5,37.5,37.5] taps=[1,1,1] wdg=1 %R=1.8 RdcOhms=25.90157 wdg=2 %R=3.6 RdcOhms=0.0117504 wdg=3 %R=3.6 RdcOhms=0.0117504
+New object=Transformer.t_3150 phases=1 windings=3 XHL=2.76 XHT=2.76 XLT=1.84 buses=[bus3150.3.0,t_bus3150_l.1.0,t_bus3150_l.0.2] conns=[wye,wye,wye] kVs=[7.9677,0.12,0.12] kVAs=[25,25,25] taps=[1,1,1] wdg=1 %R=0.7 RdcOhms=15.10925 wdg=2 %R=1.4 RdcOhms=0.0068544 wdg=3 %R=1.4 RdcOhms=0.0068544
+New object=Transformer.t_3151 phases=1 windings=3 XHL=2.76 XHT=2.76 XLT=1.84 buses=[bus3151.3.0,t_bus3151_l.1.0,t_bus3151_l.0.2] conns=[wye,wye,wye] kVs=[7.9677,0.12,0.12] kVAs=[25,25,25] taps=[1,1,1] wdg=1 %R=0.7 RdcOhms=15.10925 wdg=2 %R=1.4 RdcOhms=0.0068544 wdg=3 %R=1.4 RdcOhms=0.0068544
+New object=Transformer.t_3152 phases=1 windings=3 XHL=2.76 XHT=2.76 XLT=1.84 buses=[bus3152.3.0,t_bus3152_l.1.0,t_bus3152_l.0.2] conns=[wye,wye,wye] kVs=[7.9677,0.12,0.12] kVAs=[25,25,25] taps=[1,1,1] wdg=1 %R=0.7 RdcOhms=15.10925 wdg=2 %R=1.4 RdcOhms=0.0068544 wdg=3 %R=1.4 RdcOhms=0.0068544
+New object=Transformer.t_3153 phases=1 windings=3 XHL=3.24 XHT=3.24 XLT=2.16 buses=[bus3153.3.0,t_bus3153_l.1.0,t_bus3153_l.0.2] conns=[wye,wye,wye] kVs=[7.9677,0.12,0.12] kVAs=[37.5,37.5,37.5] taps=[1,1,1] wdg=1 %R=1.8 RdcOhms=25.90157 wdg=2 %R=3.6 RdcOhms=0.0117504 wdg=3 %R=3.6 RdcOhms=0.0117504
+New object=Transformer.t_3154 phases=1 windings=3 XHL=2.76 XHT=2.76 XLT=1.84 buses=[bus3154.3.0,t_bus3154_l.1.0,t_bus3154_l.0.2] conns=[wye,wye,wye] kVs=[7.9677,0.12,0.12] kVAs=[25,25,25] taps=[1,1,1] wdg=1 %R=0.7 RdcOhms=15.10925 wdg=2 %R=1.4 RdcOhms=0.0068544 wdg=3 %R=1.4 RdcOhms=0.0068544
+New object=Transformer.t_3155 phases=1 windings=3 XHL=2.76 XHT=2.76 XLT=1.84 buses=[bus3155.3.0,t_bus3155_l.1.0,t_bus3155_l.0.2] conns=[wye,wye,wye] kVs=[7.9677,0.12,0.12] kVAs=[25,25,25] taps=[1,1,1] wdg=1 %R=0.7 RdcOhms=15.10925 wdg=2 %R=1.4 RdcOhms=0.0068544 wdg=3 %R=1.4 RdcOhms=0.0068544
+New object=Transformer.t_3157 phases=1 windings=3 XHL=3.36 XHT=3.36 XLT=2.24 buses=[bus3157.3.0,t_bus3157_l.1.0,t_bus3157_l.0.2] conns=[wye,wye,wye] kVs=[7.9677,0.12,0.12] kVAs=[50,50,50] taps=[1,1,1] wdg=1 %R=1.55 RdcOhms=16.7281 wdg=2 %R=3.1 RdcOhms=0.0075888 wdg=3 %R=3.1 RdcOhms=0.0075888
+New object=Transformer.t_3158 phases=1 windings=3 XHL=3.36 XHT=3.36 XLT=2.24 buses=[bus3158.3.0,t_bus3158_l.1.0,t_bus3158_l.0.2] conns=[wye,wye,wye] kVs=[7.9677,0.12,0.12] kVAs=[50,50,50] taps=[1,1,1] wdg=1 %R=1.55 RdcOhms=16.7281 wdg=2 %R=3.1 RdcOhms=0.0075888 wdg=3 %R=3.1 RdcOhms=0.0075888
+New object=Transformer.t_3159 phases=1 windings=3 XHL=3.36 XHT=3.36 XLT=2.24 buses=[bus3159.3.0,t_bus3159_l.1.0,t_bus3159_l.0.2] conns=[wye,wye,wye] kVs=[7.9677,0.12,0.12] kVAs=[50,50,50] taps=[1,1,1] wdg=1 %R=1.55 RdcOhms=16.7281 wdg=2 %R=3.1 RdcOhms=0.0075888 wdg=3 %R=3.1 RdcOhms=0.0075888
+New object=Transformer.t_3160 phases=1 windings=3 XHL=2.76 XHT=2.76 XLT=1.84 buses=[bus3160.3.0,t_bus3160_l.1.0,t_bus3160_l.0.2] conns=[wye,wye,wye] kVs=[7.9677,0.12,0.12] kVAs=[25,25,25] taps=[1,1,1] wdg=1 %R=0.7 RdcOhms=15.10925 wdg=2 %R=1.4 RdcOhms=0.0068544 wdg=3 %R=1.4 RdcOhms=0.0068544
+New object=Transformer.t_3161 phases=1 windings=3 XHL=2.76 XHT=2.76 XLT=1.84 buses=[bus3161.3.0,t_bus3161_l.1.0,t_bus3161_l.0.2] conns=[wye,wye,wye] kVs=[7.9677,0.12,0.12] kVAs=[25,25,25] taps=[1,1,1] wdg=1 %R=0.7 RdcOhms=15.10925 wdg=2 %R=1.4 RdcOhms=0.0068544 wdg=3 %R=1.4 RdcOhms=0.0068544
+New object=Transformer.t_3162 phases=1 windings=3 XHL=2.76 XHT=2.76 XLT=1.84 buses=[bus3162.3.0,t_bus3162_l.1.0,t_bus3162_l.0.2] conns=[wye,wye,wye] kVs=[7.9677,0.12,0.12] kVAs=[25,25,25] taps=[1,1,1] wdg=1 %R=0.7 RdcOhms=15.10925 wdg=2 %R=1.4 RdcOhms=0.0068544 wdg=3 %R=1.4 RdcOhms=0.0068544
+! Redirect RegControl.DSS
+New object=RegControl.reg_contr_a transformer=sub_regulator_A bus=bus1.1 winding=2 tapwinding=2 vreg=123.00000 R=0.00000 X=0.00000 band=2 ptratio=66.395279 vlimit=129.00000
+New object=RegControl.reg_contr_b transformer=sub_regulator_B bus=bus1.2 winding=2 tapwinding=2 vreg=123.00000 R=0.00000 X=0.00000 band=2 ptratio=66.395279 vlimit=129.00000
+New object=RegControl.reg_contr_c transformer=sub_regulator_C bus=bus1.3 winding=2 tapwinding=2 vreg=123.00000 R=0.00000 X=0.00000 band=2 ptratio=66.395279 vlimit=129.00000
+! Redirect Capacitor.DSS
+New object=Capacitor.cap_201 phases=3 bus1=bus2038.1.2.3 kv=13.80000 kvar=[50] enabled=true
+New object=Capacitor.cap_301 phases=3 bus1=bus3079.1.2.3 kv=13.80000 kvar=[50] enabled=true
+MakeBusList
+! Redirect BusVoltageBases.dss  ! set voltage bases
+Set Voltagebases=(69,13.8,0.208)
+! Buscoords buscoords.dss
+SetBusXY bus=bus1 X=10.52 Y=13.6
+SetBusXY bus=bus1003 X=8.9 Y=13.36
+SetBusXY bus=bus1004 X=7.77 Y=14.11
+SetBusXY bus=bus1005 X=6.4 Y=14.11
+SetBusXY bus=bus1006 X=5.15 Y=14.11
+SetBusXY bus=bus1007 X=5.15 Y=12.98
+SetBusXY bus=bus1008 X=3.71 Y=14.11
+SetBusXY bus=bus1009 X=2.4 Y=14.11
+SetBusXY bus=bus1010 X=1.4 Y=14.11
+SetBusXY bus=bus1011 X=2.4 Y=12.98
+SetBusXY bus=bus1012 X=2.4 Y=12.11
+SetBusXY bus=bus1013 X=2.4 Y=11.23
+SetBusXY bus=bus1014 X=3.85 Y=11.23
+SetBusXY bus=bus1015 X=4.85 Y=11.23
+SetBusXY bus=bus1016 X=2.4 Y=10.48
+SetBusXY bus=bus1017 X=2.4 Y=9.73
+SetBusXY bus=bus2002 X=9.56 Y=7.58
+SetBusXY bus=bus2003 X=8.3 Y=7.58
+SetBusXY bus=bus2005 X=5.77 Y=7.58
+SetBusXY bus=bus2008 X=3.66 Y=8.25
+SetBusXY bus=bus2009 X=4.55 Y=8.93
+SetBusXY bus=bus2010 X=3.68 Y=7.58
+SetBusXY bus=bus2011 X=2.71 Y=7.58
+SetBusXY bus=bus2014 X=2.31 Y=5.68
+SetBusXY bus=bus2015 X=1.41 Y=5.68
+SetBusXY bus=bus2016 X=2.31 Y=4.97
+SetBusXY bus=bus2017 X=2.31 Y=4.24
+SetBusXY bus=bus2018 X=2.31 Y=3.51
+SetBusXY bus=bus2020 X=3.23 Y=5.85
+SetBusXY bus=bus2022 X=4.04 Y=5.72
+SetBusXY bus=bus2023 X=4.04 Y=4.99
+SetBusXY bus=bus2024 X=4.04 Y=4.26
+SetBusXY bus=bus2025 X=4.04 Y=3.53
+SetBusXY bus=bus2028 X=5.59 Y=5.88
+SetBusXY bus=bus2029 X=5.58 Y=5.31
+SetBusXY bus=bus2030 X=5.58 Y=4.73
+SetBusXY bus=bus2031 X=5.58 Y=4.16
+SetBusXY bus=bus2032 X=6.61 Y=6.45
+SetBusXY bus=bus2034 X=7.6 Y=5.79
+SetBusXY bus=bus2035 X=8.46 Y=6.44
+SetBusXY bus=bus2037 X=10.21 Y=6.45
+SetBusXY bus=bus2040 X=11.07 Y=4.98
+SetBusXY bus=bus2041 X=11.88 Y=4.98
+SetBusXY bus=bus2042 X=10.21 Y=4.39
+SetBusXY bus=bus2043 X=10.21 Y=3.63
+SetBusXY bus=bus2045 X=8.76 Y=4.29
+SetBusXY bus=bus2046 X=8.76 Y=5.0
+SetBusXY bus=bus2047 X=7.84 Y=4.29
+SetBusXY bus=bus2048 X=6.92 Y=4.29
+SetBusXY bus=bus2049 X=7.87 Y=3.63
+SetBusXY bus=bus2050 X=7.01 Y=3.63
+SetBusXY bus=bus2051 X=6.16 Y=3.62
+SetBusXY bus=bus2052 X=6.16 Y=2.81
+SetBusXY bus=bus2053 X=8.76 Y=2.1
+SetBusXY bus=bus2054 X=7.78 Y=2.1
+SetBusXY bus=bus2055 X=6.84 Y=2.1
+SetBusXY bus=bus2056 X=5.86 Y=2.1
+SetBusXY bus=bus2058 X=9.9 Y=1.4
+SetBusXY bus=bus2059 X=7.72 Y=1.4
+SetBusXY bus=bus2060 X=6.76 Y=1.4
+SetBusXY bus=bus3002 X=12.5 Y=12.16
+SetBusXY bus=bus3004 X=12.5 Y=13.43
+SetBusXY bus=bus3006 X=13.36 Y=13.91
+SetBusXY bus=bus3007 X=13.36 Y=14.71
+SetBusXY bus=bus3009 X=14.61 Y=12.04
+SetBusXY bus=bus3010 X=14.62 Y=12.7
+SetBusXY bus=bus3011 X=14.61 Y=13.36
+SetBusXY bus=bus3012 X=14.62 Y=14.02
+SetBusXY bus=bus3013 X=14.61 Y=10.77
+SetBusXY bus=bus3014 X=14.62 Y=10.06
+SetBusXY bus=bus3016 X=15.8 Y=10.75
+SetBusXY bus=bus3017 X=15.8 Y=10.1
+SetBusXY bus=bus3018 X=15.8 Y=12.07
+SetBusXY bus=bus3019 X=15.8 Y=12.72
+SetBusXY bus=bus3020 X=15.8 Y=13.38
+SetBusXY bus=bus3021 X=15.8 Y=14.03
+SetBusXY bus=bus3023 X=16.99 Y=10.76
+SetBusXY bus=bus3024 X=16.99 Y=10.12
+SetBusXY bus=bus3025 X=16.99 Y=9.47
+SetBusXY bus=bus3026 X=16.99 Y=12.06
+SetBusXY bus=bus3027 X=16.99 Y=12.72
+SetBusXY bus=bus3028 X=16.99 Y=13.38
+SetBusXY bus=bus3029 X=16.99 Y=14.03
+SetBusXY bus=bus3031 X=18.26 Y=10.91
+SetBusXY bus=bus3032 X=18.26 Y=10.4
+SetBusXY bus=bus3033 X=18.26 Y=9.9
+SetBusXY bus=bus3034 X=18.26 Y=9.39
+SetBusXY bus=bus3035 X=18.25 Y=12.05
+SetBusXY bus=bus3036 X=18.27 Y=12.68
+SetBusXY bus=bus3037 X=18.25 Y=13.32
+SetBusXY bus=bus3038 X=18.25 Y=13.95
+SetBusXY bus=bus3039 X=18.26 Y=14.59
+SetBusXY bus=bus3041 X=19.51 Y=10.87
+SetBusXY bus=bus3042 X=19.51 Y=10.33
+SetBusXY bus=bus3043 X=19.51 Y=9.79
+SetBusXY bus=bus3044 X=19.51 Y=12.03
+SetBusXY bus=bus3045 X=19.51 Y=12.63
+SetBusXY bus=bus3047 X=20.88 Y=12.16
+SetBusXY bus=bus3048 X=21.17 Y=10.92
+SetBusXY bus=bus3049 X=22.0 Y=10.92
+SetBusXY bus=bus3050 X=22.82 Y=10.92
+SetBusXY bus=bus3051 X=23.64 Y=10.92
+SetBusXY bus=bus3052 X=24.46 Y=10.91
+SetBusXY bus=bus3054 X=19.51 Y=14.19
+SetBusXY bus=bus3056 X=21.5 Y=15.2
+SetBusXY bus=bus3057 X=22.22 Y=15.2
+SetBusXY bus=bus3058 X=22.93 Y=15.2
+SetBusXY bus=bus3059 X=23.65 Y=15.2
+SetBusXY bus=bus3060 X=24.37 Y=15.2
+SetBusXY bus=bus3061 X=25.09 Y=15.2
+SetBusXY bus=bus3062 X=21.53 Y=14.13
+SetBusXY bus=bus3063 X=22.24 Y=14.13
+SetBusXY bus=bus3064 X=22.95 Y=14.14
+SetBusXY bus=bus3065 X=23.66 Y=14.13
+SetBusXY bus=bus3066 X=24.38 Y=14.13
+SetBusXY bus=bus3067 X=25.09 Y=14.13
+SetBusXY bus=bus3070 X=16.65 Y=8.27
+SetBusXY bus=bus3071 X=16.65 Y=7.71
+SetBusXY bus=bus3072 X=16.65 Y=7.16
+SetBusXY bus=bus3073 X=15.76 Y=8.82
+SetBusXY bus=bus3074 X=14.98 Y=8.82
+SetBusXY bus=bus3077 X=20.73 Y=8.82
+SetBusXY bus=bus3078 X=21.49 Y=8.82
+SetBusXY bus=bus3081 X=19.21 Y=7.42
+SetBusXY bus=bus3083 X=19.1 Y=6.79
+SetBusXY bus=bus3084 X=18.23 Y=6.79
+SetBusXY bus=bus3085 X=17.36 Y=6.79
+SetBusXY bus=bus3086 X=16.49 Y=6.79
+SetBusXY bus=bus3087 X=15.62 Y=6.79
+SetBusXY bus=bus3088 X=14.75 Y=6.79
+SetBusXY bus=bus3089 X=13.88 Y=6.79
+SetBusXY bus=bus3090 X=13.01 Y=6.79
+SetBusXY bus=bus3091 X=12.14 Y=6.79
+SetBusXY bus=bus3093 X=22.07 Y=7.3
+SetBusXY bus=bus3094 X=22.04 Y=7.81
+SetBusXY bus=bus3095 X=22.05 Y=8.32
+SetBusXY bus=bus3096 X=22.05 Y=8.83
+SetBusXY bus=bus3097 X=22.05 Y=9.34
+SetBusXY bus=bus3098 X=22.05 Y=6.13
+SetBusXY bus=bus3099 X=22.05 Y=5.56
+SetBusXY bus=bus3101 X=23.86 Y=6.8
+SetBusXY bus=bus3102 X=24.53 Y=6.8
+SetBusXY bus=bus3103 X=25.12 Y=6.8
+SetBusXY bus=bus3104 X=23.09 Y=7.52
+SetBusXY bus=bus3105 X=23.08 Y=8.08
+SetBusXY bus=bus3106 X=23.09 Y=8.67
+SetBusXY bus=bus3108 X=18.97 Y=5.54
+SetBusXY bus=bus3109 X=18.07 Y=5.54
+SetBusXY bus=bus3110 X=16.97 Y=5.54
+SetBusXY bus=bus3111 X=15.97 Y=5.54
+SetBusXY bus=bus3112 X=15.07 Y=5.54
+SetBusXY bus=bus3114 X=18.63 Y=4.15
+SetBusXY bus=bus3115 X=18.63 Y=3.53
+SetBusXY bus=bus3116 X=17.55 Y=4.75
+SetBusXY bus=bus3117 X=16.55 Y=4.76
+SetBusXY bus=bus3120 X=22.77 Y=4.69
+SetBusXY bus=bus3121 X=22.78 Y=5.34
+SetBusXY bus=bus3122 X=22.78 Y=5.96
+SetBusXY bus=bus3123 X=23.64 Y=4.04
+SetBusXY bus=bus3124 X=24.42 Y=4.04
+SetBusXY bus=bus3125 X=25.17 Y=4.04
+SetBusXY bus=bus3126 X=25.97 Y=4.04
+SetBusXY bus=bus3127 X=25.97 Y=4.58
+SetBusXY bus=bus3128 X=25.97 Y=5.12
+SetBusXY bus=bus3129 X=25.97 Y=5.66
+SetBusXY bus=bus3130 X=25.97 Y=6.2
+SetBusXY bus=bus3131 X=25.97 Y=6.75
+SetBusXY bus=bus3132 X=21.35 Y=3.22
+SetBusXY bus=bus3134 X=22.53 Y=2.41
+SetBusXY bus=bus3135 X=23.57 Y=2.41
+SetBusXY bus=bus3136 X=24.53 Y=2.41
+SetBusXY bus=bus3137 X=21.37 Y=1.79
+SetBusXY bus=bus3138 X=21.37 Y=1.16
+SetBusXY bus=bus3139 X=21.36 Y=0.53
+SetBusXY bus=bus3141 X=18.42 Y=2.48
+SetBusXY bus=bus3142 X=19.23 Y=2.48
+SetBusXY bus=bus3143 X=20.03 Y=2.49
+SetBusXY bus=bus3144 X=18.31 Y=1.11
+SetBusXY bus=bus3145 X=18.99 Y=1.11
+SetBusXY bus=bus3146 X=19.67 Y=1.11
+SetBusXY bus=bus3147 X=20.35 Y=1.11
+SetBusXY bus=bus3148 X=16.87 Y=2.48
+SetBusXY bus=bus3149 X=16.13 Y=2.48
+SetBusXY bus=bus3150 X=15.4 Y=2.48
+SetBusXY bus=bus3151 X=14.66 Y=2.48
+SetBusXY bus=bus3152 X=13.92 Y=2.48
+SetBusXY bus=bus3153 X=13.18 Y=2.48
+SetBusXY bus=bus3154 X=12.44 Y=2.49
+SetBusXY bus=bus3155 X=11.7 Y=2.49
+SetBusXY bus=bus3157 X=16.9 Y=1.11
+SetBusXY bus=bus3158 X=16.17 Y=1.11
+SetBusXY bus=bus3159 X=15.43 Y=1.11
+SetBusXY bus=bus3160 X=14.7 Y=1.11
+SetBusXY bus=bus3161 X=13.97 Y=1.11
+SetBusXY bus=bus3162 X=13.23 Y=1.11
+SetBusXY bus=bus1001 X=10.19 Y=13.04
+SetBusXY bus=bus1002 X=8.9 Y=14.11
+SetBusXY bus=bus2001 X=10.52 Y=12.23
+SetBusXY bus=bus2004 X=7.07 Y=7.58
