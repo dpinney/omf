@@ -705,10 +705,11 @@ def distribution_get(owner, modelName, feeder_num):
 		dictionary['name'] = str(dictionary['name'])
 	public_feeders = all_data['publicFeeders']
 	show_file_menu = User.cu() == owner or User.cu() == 'admin'
+	dssSchema = True if data.get('syntax','') == 'DSS' else False
 	return render_template(
 		'distNetViz.html', thisFeederData=feeder, thisFeederName=feeder_name, thisFeederNum=feeder_num,
 		thisModelName=modelName, thisOwner=owner, components=component_json, jasmine=jasmine, spec=spec,
-		publicFeeders=public_feeders, userFeeders=user_feeders, showFileMenu=show_file_menu, currentUser=User.cu()
+		publicFeeders=public_feeders, userFeeders=user_feeders, showFileMenu=show_file_menu, currentUser=User.cu(), dssSchema=dssSchema
 	)
 
 @app.route('/rawTextEdit/<owner>/<modelName>/<file_num>/test')
