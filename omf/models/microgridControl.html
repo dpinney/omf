@@ -120,11 +120,39 @@
 				<label class="tooltip">Faulted Line<span class="classic">The line on which there is an outage at the beginning of the simulation.</span></label>
 				<input type="text" id="faultedLine" name="faultedLine">
 			</div>
+			<div class="shortInput">
+				<label class="tooltip">Minimum Time Filter<span class="classic">Filter the fault data shown by leaflet map based on a lower bound on the time the faults can occur.</span></label>
+				<input type="text" id="timeMinFilter" name="timeMinFilter">
+			</div>
+			<div class="shortInput">
+				<label class="tooltip">Maximum Time Filter<span class="classic">Filter the fault data shown by leaflet map based on an upper bound on the time the faults can occur.</span></label>
+				<input type="text" id="timeMaxFilter" name="timeMaxFilter">
+			</div>
+			<div class="shortInput">
+				<label class="tooltip">Action Filter<span class="classic">Filter the timeline data shown by leaflet map based on a specific action. Entering "All" will yield all actions being shown on the map.</span></label>
+				<select id="actionFilter" name="actionFilter" />
+					<option value="All">All Actions</option>
+					<option value="Switching">Switching</option>
+					<option value="Load Shed">Load Shed</option>
+					<option value="Battery Control">Battery Control</option>
+					<option value="Load Pickup">Load Pickup</option>
+					<option value="Generator Control">Generator Control</option>
+				</select>
+			</div>
 			<div class="wideInput">
 				<p class="inputSectionHeader">Customer Outage Cost Parameters</p>
 			</div>
 			<hr>
 			<div class="shortInput">
+				<label class="tooltip">Customer Information (.csv file)<span class="classic">Please see the documentation at the help link for the required format</span></label>
+				<input id="customerFile" type="file" style="display:none" onchange="handle_files(this.files,'customerData','customerFileName')">
+				<input id="customerData" name="customerData" type="hidden">
+				<div>
+					<label for="customerFile" class="fileButton">Choose File</label>
+					<input id="customerFileName" name="customerFileName" value='' readonly class="uploadFileName">
+				</div>
+			</div>
+<!-- 			<div class="shortInput">
 				<label class="tooltip">Duration of Outage<span class="classic">The amount of time the customer has no power.</span></label>
 				<input type="text" id="duration" name="duration">
 			</div>
@@ -151,7 +179,7 @@
 					<option value='public'>Public</option>
 					<option value='residential'>Residential</option>
 				</select>
-			</div>	
+			</div>	 -->
 			<div class="wideInput" style="text-align:right">
 				<button id="deleteButton" type="button" class="stoppedInline postRunInline" onclick="deleteModel()">Delete</button>
 				<button id="shareButton" type="button" class="postRunInline" onclick="shareModel()">Share</button>
@@ -206,7 +234,7 @@
 				Plotly.newPlot("fig3Chart", JSON.parse(allOutputData["fig3Data"]), JSON.parse(allOutputData["fig3Layout"]) || {})
 			</script>
 		</div>
-		<p class="reportTitle postRun">Customer Outage Cost (wrt time)</p>
+		<p class="reportTitle postRun">Customer Outage Plots (wrt time)</p>
 		<div id="customerCostFig" class="content postRun" style="margin-top:0px">
 			<img id="customerCostFigImage" style="width:980px" />
 			<script>gebi("customerCostFigImage").src = "data:image/png;base64," + allOutputData["customerCostFig.png"]</script>
@@ -214,6 +242,10 @@
 		<p class="reportTitle postRun" style="page-break-before:always">Timeline</p>
 		<div id="outageCostCalc" class="tightContent postRun">
 			{{ allOutputDataDict['timelineStatsHtml'] }}
+		</div>
+		<p class="reportTitle postRun" style="page-break-before:always">Customer Outage Cost</p>
+		<div id="customerOutageCostCalc" class="tightContent postRun">
+			{{ allOutputDataDict['customerOutageHtml'] }}
 		</div>
 		<!-- Leaflet map directly inline with model-->
 		<div id="mapInsert"></div>
@@ -225,6 +257,35 @@
 		//Parse geojson dict (instead of reading from geojson.js - doesn't really matter if you want to load from geojson.js, was just quicker to prototype) 
 		var geojson = JSON.parse(allOutputData['geoDict']);
 		console.log(geojson);
+
+		function filterFunction(feature, layer) {
+			time = feature.properties['time'];
+			timeMin = feature.properties['timeMin'];
+			timeMax = feature.properties['timeMax'];
+			action = feature.properties['action'];
+			actionFilter = feature.properties['actionFilter'];
+			
+			thisAction = false;
+			if (actionFilter != 'All') {
+				if (actionFilter == action) {
+					thisAction = true;
+				}
+				else thisAction = false;
+			}
+			else thisAction = true;
+			if (thisAction == false) {
+				return false;
+			}
+			thisTime = false;
+			if (timeMin > timeMax)
+				return false;
+			if (time > timeMax || time < timeMin)
+				thisTime = false;
+			else thisTime = true;
+			if (thisTime == false)
+				return false;
+			return true;
+		}
 
 		function onEachFeature(feature, layer) {
 			var popup = '';
@@ -276,6 +337,7 @@
 					pointToLayer: pointToLayerNode,
 					onEachFeature: onEachFeature,
 					style: lineStyle,
+					filter: filterFunction
 				});
 
 		geojson.features.forEach(function(feature){

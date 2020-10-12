@@ -159,12 +159,56 @@ def microgridTimeline(outputTimeline, workDir):
 
 	return timelineStatsHtml
 
-def customerCost(workDir, duration, season, annualkWh, businessType):
+def customerOutageTable(customerOutageData, outageCost, workDir):
+	# check to see if work directory is specified; otherwise, create a temporary directory
+	if not workDir:
+		workDir = tempfile.mkdtemp()
+		print('@@@@@@', workDir)
+	
+	# TODO: update table after calculating outage stats
+	def customerOutageStats(customerOutageData):
+		new_html_str = """
+			<table cellpadding="0" cellspacing="0">
+				<thead>
+					<tr>
+						<th>Customer Name</th>
+						<th>Duration</th>
+						<th>Season</th>
+						<th>Annual kWh</th>
+						<th>Business Type</th>
+						<th>Outage Cost</th>
+					</tr>
+				</thead>
+				<tbody>"""
+		
+		row = 0
+		while row < len(customerOutageData):
+			new_html_str += '<tr><td>' + str(customerOutageData.loc[row, 'Customer Name']) + '</td><td>' + str(customerOutageData.loc[row, 'Duration']) + '</td><td>' + str(customerOutageData.loc[row, 'Season']) + '</td><td>' + str(customerOutageData.loc[row, 'Annual kWh']) + '</td><td>' + str(customerOutageData.loc[row, 'Business Type']) + '</td><td>' + str(outageCost[row])+ '</td></tr>'
+			row += 1
 
+		new_html_str +="""</tbody></table>"""
+
+		return new_html_str
+
+	# print business information and estimated customer outage costs
+	customerOutageHtml = customerOutageStats(
+		customerOutageData = customerOutageData)
+	with open(pJoin(workDir, 'customerOutageTable.html'), 'w') as customerOutageFile:
+		customerOutageFile.write(customerOutageHtml)
+
+	return customerOutageHtml
+
+
+def customerCost(workDir, customerName, duration, season, annualkWh, businessType):
+	'function to determine customer outage cost based on season, annual kWh usage, and business type'
 	duration = int(duration)
 	annualkWh = int(annualkWh)
 
+	# load the customer outage cost data (compared with annual kWh usage) from the 2002 Lawton survey
 	kWhTemplate = {}
+
+	# NOTE: We set a maximum kWh value constant so the model doesn't crash for very large annualkWh inputs. However, the
+	# model would still likely be very inaccurate for any value above 175000000
 	kWhTemplate[5000000000] = np.array([5000000000,5000000000,5000000000,5000000000,5000000000,5000000000,5000000000,5000000000,5000000000,5000000000,5000000000,5000000000,5000000000])
 	kWhTemplate[1000000000] = np.array([1000000000,1000000000,1000000000,1000000000,1000000000,1000000000,1000000000,1000000000,1000000000,1000000000,1000000000,1000000000,1000000000])
 	kWhTemplate[175000000] = np.array([260000, 325000, 380000, 420000, 430000, 410000, 370000, 310000, 240000, 175000, 120000, 75000, 50000])
@@ -173,14 +217,23 @@ def customerCost(workDir, duration, season, annualkWh, businessType):
 	kWhTemplate[1182930] = np.array([5000, 7000, 10500, 13750, 17000, 20500, 23500, 26000, 27000, 27000, 26500, 24000, 21000])
 	kWhTemplate[118293] = np.array([1000, 1600, 2100, 2450, 2700, 3200, 3500, 4500, 4700, 4600, 4500, 3300, 2900])
 	kWhTemplate[11829] = np.array([1000, 1500, 2000, 2250, 2500, 2700, 3000, 3200, 3300, 3200, 3100, 2800, 2600])
+	
+	# NOTE: We set a minimum kWh value so the model doesn't crash for low values.
 	kWhTemplate[0] = np.array([0,0,0,0,0,0,0,0,0,0,0,0,0])
 
 	def kWhApprox(kWhDict, annualkWh, iterate):
+		'helper function for approximating customer outage cost based on annualkWh by iteratively "averaging" the curves'
 		step = 0
+
+		# iterate the process a set number of times
 		while step < iterate:
+
+			#sort the current kWh values for which we have customer outage costs
 			keys = list(kWhDict.keys())
 			keys.sort()
 
+			# find the current kWh values estimated that are closest to the annualkWh input...
+			# ...then, estimate the outage costs for the kWh value directly between these
 			key = 0
 			while key < len(keys):
 				if annualkWh > keys[key]:
@@ -194,9 +247,11 @@ def customerCost(workDir, duration, season, annualkWh, businessType):
 			if step == iterate:
 				return(kWhDict[newEntry])
 
-	kWhEstimate = kWhApprox(kWhTemplate, annualkWh, 10)
-	print(kWhEstimate)
+	# estimate customer outage cost based on annualkWh
+	kWhEstimate = kWhApprox(kWhTemplate, annualkWh, 20)
 
+	# based on the annualkWh usage, import the average relationship between season/business type and outage cost
+	# NOTE: This data is also taken from the Lawton survey
 	if annualkWh > 1000000:
 		winter = np.array([13000, 20000, 32000, 45000, 63000, 79000, 95000, 105000, 108000, 104000, 95000, 80000, 64000])
 		summer = np.array([7000, 10000, 14000, 19000, 26000, 34000, 39000, 42000, 43000, 42000, 39000, 34000, 26000])
@@ -218,10 +273,13 @@ def customerCost(workDir, duration, season, annualkWh, businessType):
 		services = np.array([500, 600, 800, 1150, 1400, 1750, 2100, 2350, 2400, 2450, 2350, 2200, 1950])
 		utilities = np.array([500, 550, 750, 1000, 1300, 1600, 1800, 2050, 2150, 2150, 2100, 1950, 1750])
 		public = np.array([350, 500, 600, 800, 1050, 1250, 1500, 1600, 1750, 1750, 1700, 1600, 1400])
+	
+	# NOTE: if the customer is residential, there is no business type relationship
 	else:
 		winter = np.array([3, 3, 4, 5, 6, 7, 8, 9, 10, 10, 11, 11, 12])
 		summer = np.array([2, 3, 4, 4, 5, 6, 7, 8, 9, 9, 10, 10, 10])
 
+	# adjust the estimated customer outage cost by the difference between the average outage cost and the average seasonal cost
 	averageSeason = np.sum((winter + summer)/2)/13
 	averageSummer = np.sum(summer)/13
 	averageWinter = np.sum(winter)/13
@@ -230,8 +288,8 @@ def customerCost(workDir, duration, season, annualkWh, businessType):
 	else:
 		seasonMultiplier = averageWinter/averageSeason
 	kWhEstimate = kWhEstimate * seasonMultiplier
-	print(kWhEstimate)
 
+	# adjust the estimated customer outage cost by the difference between the average outage cost and the average business type cost
 	if businessType != 'residential':
 		averageBusiness = np.sum((manufacturing + construction + finance + retail + services + utilities + public)/7)/13
 		if businessType == 'manufacturing':
@@ -256,14 +314,27 @@ def customerCost(workDir, duration, season, annualkWh, businessType):
 			averagePublic = np.sum(public)/13
 			businessMultiplier = averagePublic/averageBusiness
 		kWhEstimate = kWhEstimate * businessMultiplier
-	times = np.array([0,1,2,3,4,5,6,7,8,9,10,11,12])
-	print(kWhEstimate)
-	outageCost = kWhEstimate[duration]
-	plt.plot(times, kWhEstimate)
-	plt.savefig(workDir + '/customerCostFig')
-	return {'customerOutageCost': outageCost}
 
-def graphMicrogrid(pathToOmd, pathToMicro, workDir, maxTime, stepSize, faultedLine, duration, season, annualkWh, businessType):
+	# adjust for inflation from 2002 to 2020 using the CPI
+	kWhEstimate = 1.445 * kWhEstimate
+
+	# find the estimated customer outage cost for the customer in question, given the duration of the outage
+	times = np.array([0,1,2,3,4,5,6,7,8,9,10,11,12])
+	outageCost = kWhEstimate[duration]
+	localMax = 0
+	row = 0
+	while row < 13:
+		if kWhEstimate[row] > localMax:
+			localMax = kWhEstimate[row]
+		row+=1
+	
+	# plot the expected customer outage cost over the duration of the outage
+	# plt.plot(times, kWhEstimate)
+	# plt.savefig(workDir + '/customerCostFig')
+	# return {'customerOutageCost': outageCost}
+	return outageCost, kWhEstimate, times, localMax
+
+def graphMicrogrid(pathToOmd, pathToMicro, pathToCsv, workDir, maxTime, stepSize, faultedLine, timeMinFilter, timeMaxFilter, actionFilter, duration, season, annualkWh, businessType):
 	# read in the OMD file as a tree and create a geojson map of the system
 	if not workDir:
 		workDir = tempfile.mkdtemp()
@@ -365,6 +436,10 @@ def graphMicrogrid(pathToOmd, pathToMicro, workDir, maxTime, stepSize, faultedLi
 						  'edgeColor': 'red',
 						  'popupContent': 'Location: <b>' + str(faultedNodeCoordStr1) + ', ' + str(faultedNodeCoordStr2) + '</b><br>Faulted Line: <b>' + str(faultedLine)}
 	feederMap['features'].append(Dict)
+
+	timeMin = int(timeMinFilter)
+	timeMax = int(timeMaxFilter)
+
 	row = 0
 	row_count_timeline = outputTimeline.shape[0]
 	while row < row_count_timeline:
@@ -379,6 +454,9 @@ def graphMicrogrid(pathToOmd, pathToMicro, workDir, maxTime, stepSize, faultedLi
 								  'action': action,
 								  'loadBefore': loadBefore,
 								  'loadAfter': loadAfter,
+								  'timeMin': timeMin, 
+								  'timeMax': timeMax,
+								  'actionFilter': actionFilter,
 								  'pointColor': '#' + str(colormap(time)), 
 								  'popupContent': 'Location: <b>' + str(coordStr) + '</b><br>Device: <b>' + str(device) + '</b><br>Time: <b>' + str(time) + '</b><br>Action: <b>' + str(action) + '</b><br>Load Before: <b>' + str(loadBefore) + '</b><br>Load After: <b>' + str(loadAfter) + '</b>.'}
 			feederMap['features'].append(Dict)
@@ -402,9 +480,46 @@ def graphMicrogrid(pathToOmd, pathToMicro, workDir, maxTime, stepSize, faultedLi
 	with open(pJoin(workDir,'geoDict.js'),'w') as outFile:
 		json.dump(feederMap, outFile, indent=4)
 
-	customerOutageCost = customerCost(workDir, duration, season, annualkWh, businessType)
+	customerOutageData = pd.read_csv(pathToCsv)
+	numberRows = math.ceil(customerOutageData.shape[0]/2)
+	fig, axs = plt.subplots(numberRows, 2)
+	row = 0
+	outageCost = []
+	globalMax = 0
+	while row < customerOutageData.shape[0]:
+		customerName = str(customerOutageData.loc[row, 'Customer Name'])
+		duration = str(customerOutageData.loc[row, 'Duration'])
+		season = str(customerOutageData.loc[row, 'Season'])
+		annualkWh = str(customerOutageData.loc[row, 'Annual kWh'])
+		businessType = str(customerOutageData.loc[row, 'Business Type'])
 
-	return {'timelineStatsHtml': timelineStatsHtml, 'gens': gens, 'loads': loads, 'volts': volts, 'customerOutageCost': customerOutageCost}
+		customerOutageCost, kWhEstimate, times, localMax = customerCost(workDir, customerName, duration, season, annualkWh, businessType)
+		outageCost.append(customerOutageCost)
+		if localMax > globalMax:
+			globalMax = localMax
+		print(customerName)
+		print(customerOutageCost)
+		print(numberRows)
+		print(math.floor(row/2))
+		print(row%2)
+		if numberRows > 1:
+			axs[math.floor(row/2), row%2].plot(times, kWhEstimate)
+			axs[math.floor(row/2), row%2].set_title(str(customerName))
+		else:
+			axs[row%2].plot(times, kWhEstimate)
+			axs[row%2].set_title(str(customerName))
+		row+=1
+	for ax in axs.flat:
+		ax.set(xlabel='Duration (hrs)', ylabel='Customer Outage Cost')
+		ax.set_xlim([0, 12])
+		ax.set_ylim([0, globalMax + .05*globalMax])
+	for ax in axs.flat:
+		ax.label_outer()
+	plt.savefig(workDir + '/customerCostFig')
+
+	customerOutageHtml = customerOutageTable(customerOutageData, outageCost, workDir)
+
+	return {'customerOutageHtml': customerOutageHtml, 'timelineStatsHtml': timelineStatsHtml, 'gens': gens, 'loads': loads, 'volts': volts, 'customerOutageCost': customerOutageCost}
 
 def work(modelDir, inputDict):
 	# Copy specific climate data into model directory
@@ -425,22 +540,33 @@ def work(modelDir, inputDict):
 	with open(pJoin(modelDir, inputDict['microFileName']), 'w') as f:
 		pathToData = f.name
 		f.write(inputDict['microData'])
+	with open(pJoin(modelDir, inputDict['customerFileName']), 'w') as f1:
+		pathToData1 = f1.name
+		f1.write(inputDict['customerData'])
 
 	plotOuts = graphMicrogrid(
 		modelDir + '/' + feederName + '.omd', #OMD Path
 		pathToData,
+		pathToData1,
 		modelDir, #Work directory.
 		inputDict['maxTime'], #computational time limit
 		inputDict['stepSize'], #time step size
 		inputDict['faultedLine'],#line faulted
+		inputDict['timeMinFilter'],
+		inputDict['timeMaxFilter'],
+		inputDict['actionFilter'],
 		inputDict['duration'], 
 		inputDict['season'],
 		inputDict['annualkWh'], 
 		inputDict['businessType']) 
 	
-	# Textual outputs of cost statistic
+	# Textual outputs of outage timeline
 	with open(pJoin(modelDir,'timelineStats.html')) as inFile:
 		outData['timelineStatsHtml'] = inFile.read()
+
+	# Textual outputs of customer cost statistic
+	with open(pJoin(modelDir,'customerOutageTable.html')) as inFile:
+		outData['customerOutageHtml'] = inFile.read()
 
 	#The geojson dictionary to load into the outageCost.py template
 	with open(pJoin(modelDir,'geoDict.js'),'rb') as inFile:
@@ -468,6 +594,8 @@ def new(modelDir):
 	''' Create a new instance of this model. Returns true on success, false on failure. '''
 	with open(pJoin(__neoMetaModel__._omfDir,'static','testFiles','microComponents.json')) as f:
 		micro_data = f.read()
+	with open(pJoin(__neoMetaModel__._omfDir,'static','testFiles','customerInfo.csv')) as f1:
+		customer_data = f1.read()
 	defaultInputs = {
 		'modelType': modelName,
 		# 'feederName1': 'ieee37nodeFaultTester',
@@ -476,12 +604,17 @@ def new(modelDir):
 		'maxTime': '20',
 		'stepSize': '1',
 		'faultedLine': 'l32',
+		'timeMinFilter': '1',
+		'timeMaxFilter': '20',
+		'actionFilter': 'All',
 		'duration': '5', 
-		'season': 'winter', 
+		'season': 'winter',
 		'annualkWh': '17550000', 
 		'businessType': 'manufacturing',
 		'microFileName': 'microComponents.json',
-		'microData': micro_data
+		'microData': micro_data,
+		'customerData': customer_data,
+		'customerFileName': 'customerInfo.csv'
 	}
 	creationCode = __neoMetaModel__.new(modelDir, defaultInputs)
 	try:
