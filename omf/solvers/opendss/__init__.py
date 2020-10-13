@@ -16,15 +16,19 @@ def runDSS(dssFilePath, keep_output=True):
 	To avoid generating this file, set the 'keep_output' parameter to False.'''
 	# Check for valid .dss file
 	assert '.dss' in dssFilePath.lower(), 'The input file must be an OpenDSS circuit definition file.'
-	# TODO: try/except on opening the file?
 	# Get paths because openDss doesn't like relative paths.
 	fullPath = os.path.abspath(dssFilePath)
 	dssFileLoc = os.path.dirname(fullPath)
+	try:
+		with open(fullPath):
+			pass
+	except Exception as ex:
+		print('While accessing the file located at %s, the following exception occured: %s'%(dssFileLoc, ex))
 	dss.run_command('Clear')
 	dss.run_command('Redirect ' + fullPath)
 	dss.run_command('Solve')
 	# also generate coordinates.
-	# TODO: Get the coords as a separate function (i.e. getCoords() below) and instead return dssFileLoc.
+	# TODO?: Get the coords as a separate function (i.e. getCoords() below) and instead return dssFileLoc.
 	x = dss.run_command('Export BusCoords ' + dssFileLoc + '/coords.csv')
 	coords = pd.read_csv(dssFileLoc + '/coords.csv', header=None)
 	# TODO: reverse keep_output logic - Should default to cleanliness. Requires addition of 'keep_output=True' to all function calls.
@@ -282,17 +286,23 @@ def voltageCompare(in1, in2, keep_output=False, output_filename='voltageCompare_
 	# provide difference between multiple values, i.e. [v1,v2,v3,...,vn]? permuting would be ridiculous. not worth it.)
 	avolts = dfins[0]
 	bvolts = dfins[1]
-	assert avolts.size == bvolts.size, 'The matrices represented by the input files must have identical dimensions.'
+	assert avolts.size == bvolts.size, 'The matrices must have identical dimensions.'
+	#assert avolts.columns == bvolts.columns, 'The matrices must have identical column names.' # doesn't work, moving on.
 	cols = bvolts.columns
 	resultErr = pd.DataFrame(index=bvolts.index, columns=cols)
- 	# TODO: add handling for 'set_theoretical={1|2}' flag to mark which input should be considered the base case in comparison
-	resultErr =  abs(avolts - bvolts)/avolts
-	resultSumm = pd.DataFrame(index=['Max', 'Avg', 'Min'], columns=cols)
+	for col in cols:
+		for row in bvolts.index:
+			in1 = avolts.loc[row,col]
+			in2 = bvolts.loc[row,col]
+			denom = in1 if in1!=0 else in2
+			resultErr.loc[row,col] = abs(100*(in1 - in2)/denom) if denom!=0 else 0
+
+	resultSumm = pd.DataFrame(index=['Max %Err', 'Avg %Err', 'Min %Err'], columns=cols)
 	for c in cols:
-		resultSumm.loc['Max',c] = max(resultErr.loc[:,c])
-		resultSumm.loc['Avg',c] = sum(resultErr.loc[:,c])/len(resultErr.loc[:,c])
-		resultSumm.loc['Min',c] = min(resultErr.loc[:,c])
-	maxErr = max(resultSumm.loc['Max',:])
+		resultSumm.loc['Max %Err',c] = max(resultErr.loc[:,c])
+		resultSumm.loc['Avg %Err',c] = sum(resultErr.loc[:,c])/len(resultErr.loc[:,c])
+		resultSumm.loc['Min %Err',c] = min(resultErr.loc[:,c])
+	maxErr = max(resultSumm.loc['Max %Err',:])
 	if keep_output:
 		resultSumm.to_csv(output_filename, header=True, index=True, mode='w')
 		resultSumm = pd.DataFrame(index=[''],columns=cols)
@@ -301,12 +311,13 @@ def voltageCompare(in1, in2, keep_output=False, output_filename='voltageCompare_
 	return maxErr
 
 def getVoltages(dssFilePath, keep_output=False, output_filename='voltages.csv'):
-	'''Obtains the OpenDss voltage output for a OpenDSS circuit definition file (*.dss). Set the 
-	'keep_output' flag to 'True' to save output to the input file's directory as 'voltages.csv',
-	or specify a filename for the output through the 'output_filename' parameter (i.e. '*.csv').'''
+	'''Obtains the OpenDss voltage output for a OpenDSS circuit definition file (*.dss). Input path 
+	can be fully qualified or not. Set the 'keep_output' flag to 'True' to save output to the input 
+	file's directory as 'voltages.csv',	or specify a filename for the output through the 
+	'output_filename' parameter (i.e. '*.csv').'''
 	# TODO: (nice to have) vectorize it?
 	dssFileLoc = os.path.dirname(os.path.abspath(dssFilePath))
-	coords = runDSS(dssFileLoc + '/' + dssFilePath, keep_output=False)
+	coords = runDSS(os.path.abspath(dssFilePath), keep_output=False)
 	dss.run_command('Export voltages ' + dssFileLoc + '/' + output_filename)
 	volts = pd.read_csv(dssFileLoc + '/' + output_filename, header=0)
 	volts.index = volts['Bus']
