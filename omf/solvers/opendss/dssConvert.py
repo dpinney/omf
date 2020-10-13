@@ -124,8 +124,13 @@ def treeToDss(treeObject, outputPath):
 		outFile.write(line + '\n')
 	outFile.close()
 
-def dssFilePrep(fpath):
-	'''**Under construction as of 01OCT2020** Prepares an OpenDSS circuit definition file (.dss) for consumption by the 
+def _dssFilePrep(fpath):
+	'''***DO NOT USE*** 
+	**There are no future plans to widen dss parsing rules beyond the specifically-formatted
+	.dss files that are expected by omf (described in OMF docs). This function is only left here in 
+	case an OMF developer wants to generate some new test files from something that is badly 
+	formatted to begin with.**
+	Prepares an OpenDSS circuit definition file (.dss) for consumption by the 
 	OMF. The expected input is the path to a .dss master file that redirects to or
 	compiles from other .dss files within the same directory. The path can also 
 	indicate a single .dss file that does not contain redirect or compile commands.'''
@@ -133,26 +138,25 @@ def dssFilePrep(fpath):
 	import opendssdirect as dss
 	import pandas as pd
 	import tempfile as tf
-	import re
 
-	dssFilePath = os.path.realpath(fpath)
-	dssDirPath = os.path.dirname(dssFilePath)
-	# Before doing anything else, ensure the file at fpath can be found
-	try:
-		with open(dssFilePath):
-			pass
-	except Exception as ex:
-		print('While accessing the file located at %s, the following exception occured: %s'%(dssDirPath, ex))
-	# TODO could wrap this in a try/catch block to ensure tmpdir is cleaned up. (seems like it actually isn't cleaned on premature exit)
-	tfdir = tf.TemporaryDirectory()
-	with tfdir as tempDir:
-		exptDirPath = tempDir + '/' + 'OmfCktExport'
+	# Note that tmpdir is not automatically cleaned up on premature exit; This is expected to be addressed by user action. 
+	with tf.TemporaryDirectory() as tempDir:
+		dssFilePath = os.path.realpath(fpath)
+		dssDirPath = os.path.dirname(dssFilePath)
+		try:
+			with open(dssFilePath):
+				pass
+		except Exception as ex:
+			print('While accessing the file located at %s, the following exception occured: %s'%(dssDirPath, ex))
 		dss.run_command('Clear')
 		x = dss.run_command('Redirect ' + dssFilePath)
 		x = dss.run_command('Solve')
+		# TODO: If runDSS() is changed to return dssFileLoc, replace the above lines of code with this:
+		#  dssDirPath = self.runDSS(fpath, keep_output=False) # will require moving the function or changing the definition to reference 'self'.
+	
+		exptDirPath = tempDir + '/' + 'OmfCktExport'
 		dss.run_command('Save Circuit ' + 'purposelessFileName.dss ' + exptDirPath)
-		# Manipulate buscoords file to create generate bus list commands
-		dss.run_command('Export BusCoords ' + exptDirPath + '/BusCoords.dss')
+		# Manipulate buscoords file to create commands that generate bus list
 		coords = pd.read_csv(exptDirPath + '/BusCoords.dss', header=None)
 		coords.columns = ['Element', 'X', 'Y']
 		coordscmds = []
@@ -161,40 +165,58 @@ def dssFilePrep(fpath):
 			xcoord = x['X']
 			ycoord = x['Y']
 			coordscmds.append('SetBusXY bus=' + elmt + ' X=' + str(xcoord) + ' Y=' + str(ycoord) + '\n') # save commands for later usage
-		  
 		# Get Master.DSS from exported files and insert content from other files
-		outfilepath = dssDirPath + '/' + fpath[:-3] + 'clean.tst.dss'
-		#with open(exptDirPath + '/Master.DSS', 'r') as ogMaster, open(dssDirPath + '/' + fpath[:-3] + '.clean.dss') as catMaster:
+		outfilepath = dssDirPath + '/' + fpath[:-4] + '_expd.dss'
 		with open(exptDirPath + '/Master.DSS', 'r') as ogMaster, open(outfilepath, 'a') as catMaster:
 			catMaster.truncate(0)
 			for line in ogMaster:
 				# wherever there is a redirect or a compile, get the code from that file and insert into catMaster
-				if line.lower().startswith('redirect') or line.lower().startswith('compile'):
-					catMaster.write('! ' + line)
-					addnFilename = line.split(' ')[1] # get path of file to insert (accounts for inline comments following the command)
-					addnFilename = re.sub('\s','', addnFilename)
-					with open(exptDirPath + '/' + addnFilename, 'r') as addn: # will error if file is not located in same directory as Master.dss
-						addn = addn.read()
-						catMaster.write(addn)
-				elif line.lower().startswith('buscoords'):
-					catMaster.write('! ' + line)
-					catMaster.writelines(coordscmds)
-				else:
-					catMaster.write(line)
-	# tfdir.cleanup() # not necessary because tmpdir gets cleaned up once context manager closes (on windows, there was a question of whether the file gets cleaned up or not)
-	with open(fpath, 'r') as inFile, open(fpath[:-4]+'.clean.dss', 'w') as outFile:
-		# apply all dat regex
+				try:
+					if line.lower().startswith('redirect') or line.lower().startswith('compile'):
+						catMaster.write('! ' + line)
+						addnFilename = line.split(' ')[1] # get path of file to insert (accounts for inline comments following the command)
+						addnFilename = ' '.join(addnFilename.splitlines()) # removes newline characters
+						with open(exptDirPath + '/' + addnFilename, 'r') as addn: # will error if file is not located in same directory as Master.dss
+							addn = addn.read()
+							z = catMaster.write(addn)
+					elif line.lower().startswith('buscoords'):
+						catMaster.write('! ' + line)
+						catMaster.writelines(coordscmds)
+					else:
+						catMaster.write(line)
+				except Exception as ex:
+					print(ex)
+			catMaster.flush() # really shouldn't have to do this, but addresses an apparent delay (due to buffering) if this file is read immediately after this fnxn returns
+			respath = _applyRegex(catMaster.name)
+		os.remove(outfilepath)
+		return os.path.abspath(respath)
+
+def _applyRegex(fpath):
+	'''***DO NOT USE***
+	**There are no future plans to widen dss parsing rules beyond the specifically-formatted
+	.dss files that are expected by omf (described in OMF docs). This function is only left here in 
+	case an OMF developer wants to generate some new test files from something that is badly 
+	formatted to begin with. Meant to be called on files that end with '_expd.dss' **'''
+
+	import re
+	with open(fpath, 'r') as inFile, open(fpath[:-9]+'_clean.dss', 'w') as outFile:
+		# apply all dat ugly regex
+		# The ^ (begins with) regex syntax does not work here.
 		contents = inFile.read()
-		contents = re.sub('New (?!object=)', 'New object=', contents) # Doesn't look like the ^ (begins with) regex syntax works here...
+		contents = re.sub('New (?!object=)', 'New object=', contents)
 		contents = re.sub('Edit (?!object=)', 'Edit object=', contents)
 		contents = re.sub('(?<=\d)(\s)+(?=\d)', ',', contents)
+		contents = re.sub('(?<=\d)(\s)+(?=-\d)', ',', contents)
 		contents = re.sub('(\s)+\|(\s)+', '|', contents)
 		contents = re.sub('\[(\s)*', '[', contents)
 		contents = re.sub('(\s)*\]', ']', contents)
 		contents = re.sub('"', '', contents)
 		contents = re.sub('(?<=(\d|\w))(\s)*,(\s)+(?=(\d|\w))', ',', contents)
-		contents = re.sub(', \)', ',)', contents)
+		contents = re.sub('(?<=(\d|\w))(\s)*,(\s)+(?=-(\d|\w))', ',', contents)
+		contents = re.sub(',\s*\)', ')', contents)
+		contents = re.sub(',\s*\]', ']', contents)
 		outFile.write(contents)
+		return outFile.name
 
 def _dfToListOfDicts(dfin, objtype):
 	'''Converts the contents of a data frame into a list of dictionaries, where each
@@ -462,22 +484,28 @@ def evilToOmd(evilTree, outPath):
 		json.dump(omdStruct, outFile, indent=4)
 
 def _tests():
-	FNAMES = ['ieee240.clean.dss']
-	# FNAMES =  ['ieee240.clean.dss', 'ieee37.clean.dss', 'ieee8500.clean.dss', 'ieeeLVWhateverItsCalled.clean.dss']
+	FNAMES =  ['iowa240.clean.dss', 'ieee37.clean.dss']
+	#FNAMES =  ['iowa240.clean.dss', 'ieee37.clean.dss', 'ieee123_solarRamp.clean.dss','ieee8500-unbal.clean.dss']
 	for fname in FNAMES:
 		tree = dssToTree(fname)
 		# pp([dict(x) for x in tree])
 		# treeToDss(tree, 'TEST.dss')
 		# TODO: Add compare voltage test here!
 		evil_glm = evilDssTreeToGldTree(tree)
-		pp(evil_glm)
+		#pp(evil_glm)
 		# distNetViz.viz_mem(evil_glm, open_file=True, forceLayout=False)
 		# evil_dss = evilGldTreeToDssTree(evil_glm)
 		# treeToDss(tree, 'TEST2.dss')
+	
 	# Deprecated tests section
-	# dssToGridLab('ieee37.dss', 'Model.glm') # this kind of works
-	# gridLabToDSS('ieee37_fixed.glm', 'ieee37_conv.dss') # this fails miserably
-	# distNetViz.insert_coordinates(evil_glm)
+	#dssToGridLab('ieee37.dss', 'Model.glm') # this kind of works
+	#gridLabToDSS('ieee37_fixed.glm', 'ieee37_conv.dss') # this fails miserably
+	#distNetViz.insert_coordinates(evil_glm)
+
+	#results = _createAndCompareTestFile('ieee37_ours.dss','ieee37_LMS.clean.dss')
+	#results = _createAndCompareTestFile('ieee123_solarRamp_ours.dss', 'ieee123_solarRamp_LMS.clean.dss')
+	#results = _createAndCompareTestFile('iowa240_ours.dss', 'iowa240_LMS.clean.dss')
+	#results = _createAndCompareTestFile('ieee8500-unbal_ours.dss', 'ieee8500-unbal_LMS.clean.dss')
 	#TODO: make parser accept keyless items with new !keyless_n key? Or is this just horrible syntax?
 	#TODO: define .dsc format and write syntax guide.
 	#TODO: what to do about transformers with invalid bus setting with the duplicate keys? Probably ignore.
