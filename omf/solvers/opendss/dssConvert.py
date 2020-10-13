@@ -483,6 +483,24 @@ def evilToOmd(evilTree, outPath):
 	with open(outPath, 'w') as outFile:
 		json.dump(omdStruct, outFile, indent=4)
 
+def _createAndCompareTestFile(inFile, userOutFile=''):
+	'''Input: the name of the file to be prepared for OMF consumption and perform subsequent checks (import to memory
+	and voltage comparison). Provide a second filename via userOutFile to bypass file manipulation and perform only the 
+	subsequent checks'''
+
+	outFile = userOutFile if userOutFile!='' else _dssFilePrep(inFile)
+	try:
+		tree1 = dssToTree(outFile) # check that it can be parsed into a dssTree. If error, 
+	except Exception as ex:
+		print('The output file provided/created was not accepted by the OMF. Please perform manual checks as needed and retry.\nFilename: ' + outFile + '\nError: ' + ex)
+	from omf.solvers.opendss import getVoltages, voltageCompare
+	involts = getVoltages(inFile, keep_output=False)
+	outvolts = getVoltages(outFile, keep_output=False)
+	resFile = 'voltsCompare__' + os.path.split(inFile)[1][:-4] + '___' + os.path.split(outFile)[1][:-4] + '.csv'
+	maxerr = voltageCompare(involts, outvolts, keep_output=True, output_filename=resFile)
+	return maxerr, inFile, outFile, resFile
+
+
 def _tests():
 	FNAMES =  ['iowa240.clean.dss', 'ieee37.clean.dss']
 	#FNAMES =  ['iowa240.clean.dss', 'ieee37.clean.dss', 'ieee123_solarRamp.clean.dss','ieee8500-unbal.clean.dss']
