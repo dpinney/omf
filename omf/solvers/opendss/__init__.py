@@ -254,7 +254,8 @@ def capacityPlot(filePath):
 	fig.legend()
 	plt.savefig(dssFileLoc + '/Capacity Profile.png')
 	plt.clf()
-
+	
+	
 def voltageCompare(in1, in2, keep_output=False, output_filename='voltageCompare_results.csv'):
 	'''Compares two instances of the information provided by the 'Export voltages' opendss command and outputs 
 	the maximum error encountered for any value compared. If the 'keep_output' flag is set to 'True', also 
@@ -328,7 +329,6 @@ def _stripPhases(dssObjId): # (Is this even worth encapsulating?) YES.
 		return dssObjId
 
 def _mergeContigLinesOnce(tree): # TODO finish debugging this code block - LMS
-	#Input: a list of dictionaries (TODO double-check that this is correct)
 	# Create a lookup table of indices to object names for quick retrieval
 	id2key = {tree[i].get('object', None):i for i,v in enumerate(tree)} # note that these are in the form <type>.<name> (no phase info)
 	id2key.update({tree[i].get('bus', None):i for i,v in enumerate(tree) if tree[i].get('!CMD', None) == 'setbusxy'}) # form: <name>
@@ -395,7 +395,6 @@ def _mergeContigLinesOnce(tree): # TODO finish debugging this code block - LMS
 	#for x in removedids: # DEBUG
 	#	print(x)  # DEBUG
 
-
 def mergeContigLines(tree):
 	''' merge all lines that are across nodes and have the same config
 	topline --to-> node <-from-- bottomline'''
@@ -407,10 +406,10 @@ def mergeContigLines(tree):
 
 
 def _tests():
-	# Tests for voltageCompare and getVoltages
+	# Tests for voltageCompare, getVoltages, and runDSS
 	voltpath = 'voltages.csv'
 	outpath = 'voltageCompare_results.csv'
-	voltsdf = getVoltages('ieee240.clean.dss', keep_output=True, output_filename=voltpath)
+	voltsdf = getVoltages('iowa240.clean.dss', keep_output=True, output_filename=voltpath)
 	errlim = 0.0
 	assert voltageCompare(voltpath, voltpath, keep_output=True, output_filename=outpath) <= errlim, 'The error between the compared files exceeds the allowable limit of %s%%.'%(errlim*100)
 	assert voltageCompare(voltsdf, voltsdf, keep_output=True, output_filename=outpath) <= errlim, 'The error between the compared files exceeds the allowable limit of %s%%.'%(errlim*100)
@@ -419,7 +418,7 @@ def _tests():
 	os.remove(outpath)
 
 	# Contig line merging test
-	#fpath = 'ieee240.clean.dss'
+	#fpath = 'iowa240.clean.dss'
 	#import dssConvert
 	#tree = dssConvert.dssToTree(fpath)
 	#networkPlot(fpath) # DEBUG (not working. Line 114 of this file complains about 'BUS2' not having coords)
@@ -435,7 +434,7 @@ def _tests():
 	#print('Objects removed: %s (of %s). Percent reduction: %s%%.'%(oldsz, oldsz-newsz, (oldsz-newsz)*100/oldsz))
 
 	# Make core output
-	#FPATH = 'ieee240.clean.dss'
+	#FPATH = 'iowa240.clean.dss'
 	#FPATH = 'ieeeLVTestCaseNorthAmerican.dss'
 	#FPATH = 'ieee37.clean.reduced.dss'
 	#dssConvert.evilGldTreeToDssTree(tree)

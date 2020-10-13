@@ -42,8 +42,7 @@ def dssToGridLab(inFilePath, outFilePath, busCoords=None):
 def dssToTree(pathToDss):
 	''' Convert a .dss file to an in-memory, OMF-compatible "tree" object.
 	Note that we only support a VERY specifically-formatted DSS file.'''
-	# Supports multi-line definition of transformer windings
-	# TODO: does this need a test? 
+	# Supports 'wdg=' syntax for transformer winding definitions
 	# Ingest file.
 	with open(pathToDss, 'r') as dssFile:
 		contents = dssFile.readlines()
@@ -82,6 +81,7 @@ def dssToTree(pathToDss):
 				for j in range(1, len(contents[i])):
 					jpos = j
 					k,v = contents[i][j].split('=')
+					# Should we pull the multiwinding transformer handling out of here and put it into dssFilePrep()?
 					if k == 'wdg':
 						continue
 					if (k in ob.keys()) or (convTbl.get(k,k) in ob.keys()): # if the single key already exists in the object, then this is the second pass. If pluralized key exists, then this is the 2+nth pass
@@ -331,6 +331,7 @@ def evilDssTreeToGldTree(dssTree):
 			if 'bus1' in ob and 'bus2' in ob:
 				# line-like object.
 				# strip the weird dot notation stuff via find.
+				# TODO: add handling for cnxns that are defined with no phase/node information attached, i.e. 'busX' vs. 'busX.1.2.3'
 				fro, froCode = ob['bus1'].split('.', maxsplit=1)
 				to, toCode = ob['bus2'].split('.', maxsplit=1)
 				gldTree[str(g_id)] = {
@@ -414,7 +415,7 @@ def evilDssTreeToGldTree(dssTree):
 	# Warn on buses with no coords.
 	no_coord_buses = set(bus_names) - set(bus_with_coords)
 	if len(no_coord_buses) != 0:
-		warnings.warn(f'Buses without coordintates:{no_coord_buses}')
+		warnings.warn(f'Buses without coordinates:{no_coord_buses}')
 	return gldTree
 
 def evilGldTreeToDssTree(evil_gld_tree):
