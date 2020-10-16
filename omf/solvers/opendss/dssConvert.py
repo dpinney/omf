@@ -437,7 +437,7 @@ def evilGldTreeToDssTree(evil_gld_tree):
 		elif ob.get('object') == 'line':
 			new_ob = {
 				'!CMD': 'new',
-				'object': 'line.' + ob['name'],
+				'object': ob['object'] + '.' + ob['name'],
 				'bus1': ob['from'] + ob.get('!FROCODE',''),
 				'bus2': ob['to']+ ob.get('!TOCODE',''),
 			}
@@ -446,7 +446,7 @@ def evilGldTreeToDssTree(evil_gld_tree):
 		elif ob.get('object') == 'transformer':
 			new_ob = {
 				'!CMD': 'new',
-				'object': 'transformer.' + ob['name'],
+				'object': ob['object'] + '.' + ob['name'],
 				'buses': f'({ob["from"]}{ob.get("!FROCODE","")},{ob["to"]}{ob.get("!TOCODE","")})'
 			}
 			_extend_with_exc(ob, new_ob, ['!CMD','from','to','name','object','latitude','longitude','!FROCODE', '!TOCODE'])
@@ -454,7 +454,7 @@ def evilGldTreeToDssTree(evil_gld_tree):
 		elif 'parent' in ob:
 			new_ob = {
 				'!CMD': 'new',
-				'object': 'load.' + ob.get('name',''),
+				'object': ob['object'] + '.' + ob.get('name',''),
 				'bus1': ob['parent'] + ob.get('!CONNCODE', '')
 			}
 			_extend_with_exc(ob, new_ob, ['parent','name','object','latitude','longitude','!CONNCODE'])
@@ -503,7 +503,7 @@ def _createAndCompareTestFile(inFile, userOutFile=''):
 
 
 def _tests():
-	FNAMES =  ['iowa240.clean.dss', 'ieee37.clean.dss']
+	FNAMES =  ['ieee240.clean.dss']#, 'ieee37.clean.dss']
 	#FNAMES =  ['iowa240.clean.dss', 'ieee37.clean.dss', 'ieee123_solarRamp.clean.dss','ieee8500-unbal.clean.dss']
 	for fname in FNAMES:
 		tree = dssToTree(fname)
@@ -512,7 +512,7 @@ def _tests():
 		# TODO: Add compare voltage test here!
 		evil_glm = evilDssTreeToGldTree(tree)
 		#pp(evil_glm)
-		# distNetViz.viz_mem(evil_glm, open_file=True, forceLayout=False)
+		distNetViz.viz_mem(evil_glm, open_file=True, forceLayout=False)
 		# evil_dss = evilGldTreeToDssTree(evil_glm)
 		# treeToDss(tree, 'TEST2.dss')
 	
