@@ -1,0 +1,15 @@
+{
+    "object": "generator",
+    "name": "NULL",
+    "parent": "NULL",
+    "phases": "3",
+    "kv": "0.48",
+    "pf": "1",
+    "conn": "wye",
+    "kw": "750",
+    "kvar": "0",
+    "xdp": "0.15",
+    "h": "1.5",
+    "d": "1.0",
+    "!CONNCODE": ".1.2.3"
+}

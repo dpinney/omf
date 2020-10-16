@@ -1,0 +1,11 @@
+{
+    "object": "load",
+    "name": "NULL",
+    "parent": "NULL",
+    "phases": "3",
+    "conn": "wye",
+    "kv": "13.8",
+    "kw": "15.290000000000001",
+    "kvar": "3.832035216364534",
+    "!CONNCODE": ".1.2.3.0"
+}

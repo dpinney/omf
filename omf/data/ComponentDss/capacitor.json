@@ -1,0 +1,10 @@
+{
+    "object": "capacitor",
+    "name": "NULL",
+    "parent": "NULL",
+    "phases": "3",
+    "kv": "13.80000",
+    "kvar": "50.00000000",
+    "enabled": "yes",
+    "!CONNCODE": ".1.2.3"
+}

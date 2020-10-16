@@ -690,7 +690,6 @@ def distribution_get(owner, modelName, feeder_num):
 	with locked_open(feeder_filepath) as f:
 		data = json.load(f)
 	feeder = json.dumps(data)
-	component_json = get_components()
 	jasmine = spec = None
 	if request.path.endswith('/test') and User.cu() == 'admin':
 		from omf.static.testFiles.test_distNetVizInterface import helper
@@ -706,6 +705,10 @@ def distribution_get(owner, modelName, feeder_num):
 	public_feeders = all_data['publicFeeders']
 	show_file_menu = User.cu() == owner or User.cu() == 'admin'
 	dssSchema = True if data.get('syntax','') == 'DSS' else False
+	if dssSchema:
+		component_json = get_components(schema='dss')
+	else:
+		component_json = get_components()
 	return render_template(
 		'distNetViz.html', thisFeederData=feeder, thisFeederName=feeder_name, thisFeederNum=feeder_num,
 		thisModelName=modelName, thisOwner=owner, components=component_json, jasmine=jasmine, spec=spec,
@@ -733,7 +736,6 @@ def distribution_text_get(owner, modelName, file_num):
 		# with locked_open(os.path.join(_omfDir, 'solvers', 'opendss', file_name + '.dss')) as f:
 			data = f.read()
 	file = data
-	# component_json = get_components()
 	jasmine = spec = None
 	if request.path.endswith('/test') and User.cu() == 'admin':
 		from omf.static.testFiles.test_distNetVizInterface import helper
@@ -756,9 +758,13 @@ def distribution_text_get(owner, modelName, file_num):
 
 
 @app.route("/getComponents/")
+@app.route("/getComponents/<schema>")
 @flask_login.login_required
-def get_components():
-	directory = os.path.join(_omfDir, 'data', 'Component')
+def get_components(schema='gld'):
+	if schema == 'dss':
+		directory = os.path.join(_omfDir, 'data', 'ComponentDss')
+	else: #schema == 'gld'
+		directory = os.path.join(_omfDir, 'data', 'Component')
 	components = {}
 	for dirpath, dirnames, file_names in os.walk(directory):
 		for name in file_names:
