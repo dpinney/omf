@@ -451,6 +451,14 @@ def evilGldTreeToDssTree(evil_gld_tree):
 			}
 			_extend_with_exc(ob, new_ob, ['!CMD','from','to','name','object','latitude','longitude','!FROCODE', '!TOCODE'])
 			dssTree.append(new_ob)
+		elif ob.get('object') == 'regcontrol':
+			new_ob = {
+				'!CMD': 'new',
+				'object': ob['object'] + '.' + ob.get('name',''),
+				'bus': ob['parent'] + ob.get('!CONNCODE', '')
+			}
+			_extend_with_exc(ob, new_ob, ['parent','name','object','latitude','longitude','!CONNCODE'])
+			dssTree.append(new_ob)
 		elif 'parent' in ob:
 			new_ob = {
 				'!CMD': 'new',
