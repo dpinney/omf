@@ -403,16 +403,16 @@
                         <h4 class="menuHeading white">Edit &#x25BE</h4>
                         <ul id="editMenu" class="menu" style="display: none;">
                         {% if showFileMenu %}
-                            <li data-web="ami">Add AMI Profiles...</li>
-                            <li data-web="anonymize">Anonymization...</li>
+                            <li data-web="ami" class="not4dss">Add AMI Profiles...</li>
+                            <li data-web="anonymize" class="not4dss">Anonymization...</li>
                             <li>Attachments...</li>
-                            <li data-web="climate">Climate...</li>
+                            <li data-web="climate" class="not4dss">Climate...</li>
                             <li>Find...</li>
                             <li>Mass add...</li>
                             <li>Mass edit...</li>
-                            <li data-web="scada">Scada Loadshapes...</li>
-                            <li>Static loads to houses</li>
-                            <li data-web="zillowHouse">Static loads to Zillow houses</li>
+                            <li data-web="scada" class="not4dss">Scada Loadshapes...</li>
+                            <li class="not4dss">Static loads to houses</li>
+                            <li data-web="zillowHouse" class="not4dss">Static loads to Zillow houses</li>
                             <li>Change opacity...</li>
                             <li>Color circuit...</li>
                         {% else %}
@@ -420,7 +420,7 @@
                             <li>Find...</li>
                             <li>Mass add...</li>
                             <li>Mass edit...</li>
-                            <li>Static loads to houses</li>
+                            <li class="not4dss">Static loads to houses</li>
                             <li>Change opacity...</li>
                             <li>Color circuit...</li>
                         {% endif %}
@@ -437,11 +437,11 @@
                             <li data-web="save">Save</li>
                             <li>View raw data</li>
                             <li data-web="rename">Rename</li>
-                            <li data-web="load">Load from model...</li>
-                            <li data-web="new">New blank feeder...</li>
-                            <li data-web="windmil">Windmil conversion...</li>
-                            <li data-web="gridlabd">GridLAB-D conversion...</li>
-                            <li data-web="cyme">CYMDIST conversion...</li>
+                            <li data-web="load" class="not4dss">Load from model...</li>
+                            <li data-web="new" class="not4dss">New blank feeder...</li>
+                            <li data-web="windmil" class="not4dss">Windmil conversion...</li>
+                            <li data-web="gridlabd" class="not4dss">GridLAB-D conversion...</li>
+                            <li data-web="cyme" class="not4dss">CYMDIST conversion...</li>
                             <li data-web="map">View on map</li>
                             {% else %}
                             <li>View raw data</li>
@@ -1017,6 +1017,13 @@ let gDownX;
 let gDownY;
 const gViridisColors = ["#440154FF", "#481567FF", "#482677FF", "#453781FF", "#404788FF", "#39568CFF", "#33638DFF", "#2D708EFF", "#287D8EFF", "#238A8DFF", "#1F968BFF", "#20A387FF", "#29AF7FFF", "#3CBB75FF", "#55C667FF", "#73D055FF", "#95D840FF", "#B8DE29FF", "#DCE319FF", "#FDE725FF"];
 let gScaleLevel = 1.0; // Scale that all SVG objects are drawn at
+
+// HACK: Hide anything that doesn't work with openDSS
+{% if dssSchema %}
+document.querySelectorAll('.not4dss').forEach(function(el) {
+   el.style.display = 'none';
+});
+{% endif %}
 
 //**************************************************
 // Tree class
