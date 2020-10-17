@@ -4061,7 +4061,7 @@ New object=Transformer.t21469911a XfmrCode=CT25 buses=[l2955047.1,x2955047a.1.0,
 New object=Transformer.t5328365b XfmrCode=CT37 buses=[l3179646.2,x3179646b.1.0,x3179646b.0.2]
 New object=Transformer.t21380325b XfmrCode=CT25 buses=[l2674027.2,x2674027b.1.0,x2674027b.0.2]
 New object=Transformer.t5328364c XfmrCode=CT25 buses=[l2692633.3,x2692633c.1.0,x2692633c.0.2]
-New object=Transformer.vreg3_c phases=1 windings=2 bank=VREG3 buses=[regxfmr_190-8581.3,190-8581.3] conns=[wye,wye] kVs=[7.2,7.2] kVAs=[10000,10000] XHL=0.1 %loadloss=0.01 buses=[regxfmr_190-8581.3,190-8581.3] conns=[wye,wye] kVs=[7.2,7.2] kVAs=[10000,10000] taps=[1,1.00625] wdg=1 %R=0.005 RdcOhms=0.00022032 wdg=2 %R=0.005 RdcOhms=0.00022032 MaxTap=1.1 MinTap=0.9 ppm_antifloat=0
+New object=Transformer.vreg3_c phases=1 windings=2 bank=VREG3 buses=[regxfmr_190-8581.3,190-8581.3] conns=[wye,wye] kVs=[7.2,7.2] kVAs=[10000,10000] XHL=0.1 %loadloss=0.01 buses=[regxfmr_190-8581.3,190-8581.3] conns=[wye,wye] kVs=[7.2,7.2] kVAs=[10000,10000] taps=[1,1.00625] wdg=1 %R=0.005 wdg=2 %R=0.005 MaxTap=1.1 MinTap=0.9 ppm_antifloat=0
 New object=RegControl.vreg3_c transformer=VREG3_C winding=2 tapwinding=2 vreg=125 ptratio=60 band=2
 New object=Transformer.t5356797c XfmrCode=CT25 buses=[l2955006.3,x2955006c.1.0,x2955006c.0.2]
 New object=Transformer.t5356798c XfmrCode=CT25 buses=[l2692600.3,x2692600c.1.0,x2692600c.0.2]
@@ -4153,7 +4153,7 @@ New object=Transformer.t5338988a XfmrCode=CT10 buses=[l3254231.1,x3254231a.1.0,x
 New object=Transformer.t5338976b XfmrCode=CT15 buses=[l2691967.2,x2691967b.1.0,x2691967b.0.2]
 New object=Transformer.t21382992a XfmrCode=CT25 buses=[l3197654.1,x3197654a.1.0,x3197654a.0.2]
 New object=Transformer.t5338972b XfmrCode=CT25 buses=[l2841632.2,x2841632b.1.0,x2841632b.0.2]
-New object=Transformer.vreg2_c phases=1 windings=2 bank=VREG2 buses=[regxfmr_190-8593.3,190-8593.3] conns=[wye,wye] kVs=[7.2,7.2] kVAs=[10000,10000] XHL=0.1 %loadloss=0.01 buses=[regxfmr_190-8593.3,190-8593.3] conns=[wye,wye] kVs=[7.2,7.2] kVAs=[10000,10000] taps=[1,1.00625] wdg=1 %R=0.005 RdcOhms=0.00022032 wdg=2 %R=0.005 RdcOhms=0.00022032 MaxTap=1.1 MinTap=0.9 ppm_antifloat=0
+New object=Transformer.vreg2_c phases=1 windings=2 bank=VREG2 buses=[regxfmr_190-8593.3,190-8593.3] conns=[wye,wye] kVs=[7.2,7.2] kVAs=[10000,10000] XHL=0.1 %loadloss=0.01 buses=[regxfmr_190-8593.3,190-8593.3] conns=[wye,wye] kVs=[7.2,7.2] kVAs=[10000,10000] taps=[1,1.00625] wdg=1 %R=0.005 wdg=2 %R=0.005 MaxTap=1.1 MinTap=0.9 ppm_antifloat=0
 New object=RegControl.vreg2_c transformer=VREG2_C winding=2 tapwinding=2 vreg=125 ptratio=60 band=2
 New object=Transformer.t5338968c XfmrCode=CT37 buses=[l3178979.3,x3178979c.1.0,x3178979c.0.2]
 New object=Transformer.t5338966c XfmrCode=CT25 buses=[l3029505.3,x3029505c.1.0,x3029505c.0.2]
@@ -4698,9 +4698,9 @@ New object=Transformer.t2224386889a XfmrCode=CT25 buses=[l3727712.1,x3727712a.1.
 New object=Transformer.t28127253a XfmrCode=CT37 buses=[l3085401.1,x3085401a.1.0,x3085401a.0.2]
 New object=Transformer.t5338969a XfmrCode=CT37 buses=[l3104129.1,x3104129a.1.0,x3104129a.0.2]
 New object=Transformer.t5338970a XfmrCode=CT25 buses=[l3141401.1,x3141401a.1.0,x3141401a.0.2]
-New object=Transformer.vreg2_b phases=1 windings=2 bank=VREG2 buses=[regxfmr_190-8593.2,190-8593.2] conns=[wye,wye] kVs=[7.2,7.2] kVAs=[10000,10000] XHL=0.1 %loadloss=0.01 buses=[regxfmr_190-8593.2,190-8593.2] conns=[wye,wye] kVs=[7.2,7.2] kVAs=[10000,10000] taps=[1,1.0375] wdg=1 %R=0.005 RdcOhms=0.00022032 wdg=2 %R=0.005 RdcOhms=0.00022032 MaxTap=1.1 MinTap=0.9 ppm_antifloat=0
+New object=Transformer.vreg2_b phases=1 windings=2 bank=VREG2 buses=[regxfmr_190-8593.2,190-8593.2] conns=[wye,wye] kVs=[7.2,7.2] kVAs=[10000,10000] XHL=0.1 %loadloss=0.01 buses=[regxfmr_190-8593.2,190-8593.2] conns=[wye,wye] kVs=[7.2,7.2] kVAs=[10000,10000] taps=[1,1.0375] wdg=1 %R=0.005 wdg=2 %R=0.005 MaxTap=1.1 MinTap=0.9 ppm_antifloat=0
 New object=RegControl.vreg2_b transformer=VREG2_B winding=2 tapwinding=2 vreg=125 ptratio=60 band=2
-New object=Transformer.vreg2_a phases=1 windings=2 bank=VREG2 buses=[regxfmr_190-8593.1,190-8593.1] conns=[wye,wye] kVs=[7.2,7.2] kVAs=[10000,10000] XHL=0.1 %loadloss=0.01 buses=[regxfmr_190-8593.1,190-8593.1] conns=[wye,wye] kVs=[7.2,7.2] kVAs=[10000,10000] taps=[1,1.05625] wdg=1 %R=0.005 RdcOhms=0.00022032 wdg=2 %R=0.005 RdcOhms=0.00022032 MaxTap=1.1 MinTap=0.9 ppm_antifloat=0
+New object=Transformer.vreg2_a phases=1 windings=2 bank=VREG2 buses=[regxfmr_190-8593.1,190-8593.1] conns=[wye,wye] kVs=[7.2,7.2] kVAs=[10000,10000] XHL=0.1 %loadloss=0.01 buses=[regxfmr_190-8593.1,190-8593.1] conns=[wye,wye] kVs=[7.2,7.2] kVAs=[10000,10000] taps=[1,1.05625] wdg=1 %R=0.005 wdg=2 %R=0.005 MaxTap=1.1 MinTap=0.9 ppm_antifloat=0
 New object=RegControl.vreg2_a transformer=VREG2_A winding=2 tapwinding=2 vreg=125 ptratio=60 band=2
 New object=Transformer.t226193078a XfmrCode=CT25 buses=[l2764403.1,x2764403a.1.0,x2764403a.0.2]
 New object=Transformer.t5338975a XfmrCode=CT15 buses=[l2785537.1,x2785537a.1.0,x2785537a.0.2]
@@ -4708,9 +4708,9 @@ New object=Transformer.t5338973a XfmrCode=CT37 buses=[l2748157.1,x2748157a.1.0,x
 New object=Transformer.t226194093a XfmrCode=CT15 buses=[l3157718.1,x3157718a.1.0,x3157718a.0.2]
 New object=Transformer.t5328363b XfmrCode=CT37 buses=[l2936213.2,x2936213b.1.0,x2936213b.0.2]
 New object=Transformer.t5339042b XfmrCode=CT25 buses=[l3141394.2,x3141394b.1.0,x3141394b.0.2]
-New object=Transformer.vreg3_b phases=1 windings=2 bank=VREG3 buses=[regxfmr_190-8581.2,190-8581.2] conns=[wye,wye] kVs=[7.2,7.2] kVAs=[10000,10000] XHL=0.1 %loadloss=0.01 buses=[regxfmr_190-8581.2,190-8581.2] conns=[wye,wye] kVs=[7.2,7.2] kVAs=[10000,10000] taps=[1,1.0625] wdg=1 %R=0.005 RdcOhms=0.00022032 wdg=2 %R=0.005 RdcOhms=0.00022032 MaxTap=1.1 MinTap=0.9 ppm_antifloat=0
+New object=Transformer.vreg3_b phases=1 windings=2 bank=VREG3 buses=[regxfmr_190-8581.2,190-8581.2] conns=[wye,wye] kVs=[7.2,7.2] kVAs=[10000,10000] XHL=0.1 %loadloss=0.01 buses=[regxfmr_190-8581.2,190-8581.2] conns=[wye,wye] kVs=[7.2,7.2] kVAs=[10000,10000] taps=[1,1.0625] wdg=1 %R=0.005 wdg=2 %R=0.005 MaxTap=1.1 MinTap=0.9 ppm_antifloat=0
 New object=RegControl.vreg3_b transformer=VREG3_B winding=2 tapwinding=2 vreg=125 ptratio=60 band=2
-New object=Transformer.vreg3_a phases=1 windings=2 bank=VREG3 buses=[regxfmr_190-8581.1,190-8581.1] conns=[wye,wye] kVs=[7.2,7.2] kVAs=[10000,10000] XHL=0.1 %loadloss=0.01 buses=[regxfmr_190-8581.1,190-8581.1] conns=[wye,wye] kVs=[7.2,7.2] kVAs=[10000,10000] taps=[1,1.1] wdg=1 %R=0.005 RdcOhms=0.00022032 wdg=2 %R=0.005 RdcOhms=0.00022032 MaxTap=1.1 MinTap=0.9 ppm_antifloat=0
+New object=Transformer.vreg3_a phases=1 windings=2 bank=VREG3 buses=[regxfmr_190-8581.1,190-8581.1] conns=[wye,wye] kVs=[7.2,7.2] kVAs=[10000,10000] XHL=0.1 %loadloss=0.01 buses=[regxfmr_190-8581.1,190-8581.1] conns=[wye,wye] kVs=[7.2,7.2] kVAs=[10000,10000] taps=[1,1.1] wdg=1 %R=0.005 wdg=2 %R=0.005 MaxTap=1.1 MinTap=0.9 ppm_antifloat=0
 New object=RegControl.vreg3_a transformer=VREG3_A winding=2 tapwinding=2 vreg=125 ptratio=60 band=2
 New object=Transformer.t5356809a XfmrCode=CT25 buses=[l2936214.1,x2936214a.1.0,x2936214a.0.2]
 New object=Transformer.t5356811a XfmrCode=CT25 buses=[l2804956.1,x2804956a.1.0,x2804956a.0.2]
@@ -4801,9 +4801,9 @@ New object=Transformer.t21384099a XfmrCode=CT37 buses=[l3215385.1,x3215385a.1.0,
 New object=Transformer.t5138265a XfmrCode=CT25 buses=[l3160107.1,x3160107a.1.0,x3160107a.0.2]
 New object=Transformer.t5138264b XfmrCode=CT25 buses=[l3104125.2,x3104125b.1.0,x3104125b.0.2]
 New object=Transformer.t5138262a XfmrCode=CT50 buses=[l3029502.1,x3029502a.1.0,x3029502a.0.2]
-New object=Transformer.vreg4_c phases=1 windings=2 bank=VREG4 buses=[regxfmr_190-7361.3,190-7361.3] conns=[wye,wye] kVs=[7.2,7.2] kVAs=[10000,10000] XHL=0.1 %loadloss=0.01 buses=[regxfmr_190-7361.3,190-7361.3] conns=[wye,wye] kVs=[7.2,7.2] kVAs=[10000,10000] taps=[1,1.025] wdg=1 %R=0.005 RdcOhms=0.00022032 wdg=2 %R=0.005 RdcOhms=0.00022032 MaxTap=1.1 MinTap=0.9 ppm_antifloat=0
+New object=Transformer.vreg4_c phases=1 windings=2 bank=VREG4 buses=[regxfmr_190-7361.3,190-7361.3] conns=[wye,wye] kVs=[7.2,7.2] kVAs=[10000,10000] XHL=0.1 %loadloss=0.01 buses=[regxfmr_190-7361.3,190-7361.3] conns=[wye,wye] kVs=[7.2,7.2] kVAs=[10000,10000] taps=[1,1.025] wdg=1 %R=0.005 wdg=2 %R=0.005 MaxTap=1.1 MinTap=0.9 ppm_antifloat=0
 New object=RegControl.vreg4_c transformer=VREG4_C winding=2 tapwinding=2 vreg=125 ptratio=60 band=2
-New object=Transformer.g_m1125934 XHL=5.75 conns=[wye,delta] buses=[190-7361.1.2.3.4,g_190-7361] conns=[wye,delta] kVs=[12.47,0.48] kVAs=[1000,1000] taps=[1,1] wdg=1 %R=0.2 RdcOhms=0.08811718 wdg=2 %R=0.2 RdcOhms=0.00039168
+New object=Transformer.g_m1125934 XHL=5.75 conns=[wye,delta] buses=[190-7361.1.2.3.4,g_190-7361] conns=[wye,delta] kVs=[12.47,0.48] kVAs=[1000,1000] taps=[1,1] wdg=1 %R=0.2 wdg=2 %R=0.2
 New object=Transformer.t5138259c XfmrCode=CT15 buses=[l2973158.3,x2973158c.1.0,x2973158c.0.2]
 New object=Transformer.t5138581a XfmrCode=CT25 buses=[l2879064.1,x2879064a.1.0,x2879064a.0.2]
 New object=Transformer.t5138574a XfmrCode=CT25 buses=[l2991907.1,x2991907a.1.0,x2991907a.0.2]
@@ -5030,9 +5030,9 @@ New object=Transformer.t21393454b XfmrCode=CT37 buses=[l3179699.2,x3179699b.1.0,
 New object=Transformer.t5275248b XfmrCode=CT10 buses=[l2805036.2,x2805036b.1.0,x2805036b.0.2]
 New object=Transformer.t21393412b XfmrCode=CT25 buses=[l2729405.2,x2729405b.1.0,x2729405b.0.2]
 New object=Transformer.t28147974b XfmrCode=CT15 buses=[l2691946.2,x2691946b.1.0,x2691946b.0.2]
-New object=Transformer.vreg4_b phases=1 windings=2 bank=VREG4 buses=[regxfmr_190-7361.2,190-7361.2] conns=[wye,wye] kVs=[7.2,7.2] kVAs=[10000,10000] XHL=0.1 %loadloss=0.01 buses=[regxfmr_190-7361.2,190-7361.2] conns=[wye,wye] kVs=[7.2,7.2] kVAs=[10000,10000] taps=[1,1.05] wdg=1 %R=0.005 RdcOhms=0.00022032 wdg=2 %R=0.005 RdcOhms=0.00022032 MaxTap=1.1 MinTap=0.9 ppm_antifloat=0
+New object=Transformer.vreg4_b phases=1 windings=2 bank=VREG4 buses=[regxfmr_190-7361.2,190-7361.2] conns=[wye,wye] kVs=[7.2,7.2] kVAs=[10000,10000] XHL=0.1 %loadloss=0.01 buses=[regxfmr_190-7361.2,190-7361.2] conns=[wye,wye] kVs=[7.2,7.2] kVAs=[10000,10000] taps=[1,1.05] wdg=1 %R=0.005 wdg=2 %R=0.005 MaxTap=1.1 MinTap=0.9 ppm_antifloat=0
 New object=RegControl.vreg4_b transformer=VREG4_B winding=2 tapwinding=2 vreg=125 ptratio=60 band=2
-New object=Transformer.vreg4_a phases=1 windings=2 bank=VREG4 buses=[regxfmr_190-7361.1,190-7361.1] conns=[wye,wye] kVs=[7.2,7.2] kVAs=[10000,10000] XHL=0.1 %loadloss=0.01 buses=[regxfmr_190-7361.1,190-7361.1] conns=[wye,wye] kVs=[7.2,7.2] kVAs=[10000,10000] taps=[1,1.04375] wdg=1 %R=0.005 RdcOhms=0.00022032 wdg=2 %R=0.005 RdcOhms=0.00022032 MaxTap=1.1 MinTap=0.9 ppm_antifloat=0
+New object=Transformer.vreg4_a phases=1 windings=2 bank=VREG4 buses=[regxfmr_190-7361.1,190-7361.1] conns=[wye,wye] kVs=[7.2,7.2] kVAs=[10000,10000] XHL=0.1 %loadloss=0.01 buses=[regxfmr_190-7361.1,190-7361.1] conns=[wye,wye] kVs=[7.2,7.2] kVAs=[10000,10000] taps=[1,1.04375] wdg=1 %R=0.005 wdg=2 %R=0.005 MaxTap=1.1 MinTap=0.9 ppm_antifloat=0
 New object=RegControl.vreg4_a transformer=VREG4_A winding=2 tapwinding=2 vreg=125 ptratio=60 band=2
 New object=Transformer.t28120855a XfmrCode=CT10 buses=[l2673316.1,x2673316a.1.0,x2673316a.0.2]
 New object=Transformer.t28120786a XfmrCode=CT25 buses=[l2841628.1,x2841628a.1.0,x2841628a.0.2]
@@ -7500,10 +7500,10 @@ New object=Line.hvmv_sub_connector bus1=_hvmv_sub_lsb bus2=hvmv_sub_48332 length
 New object=Line.a8735_48332_sw bus1=d5710794-3_int bus2=e192860 Switch=True r1=1 x1=1 r0=1 x0=1 length=0.001
 New object=Line.ln5710794-3 bus1=hvmv_sub_48332 bus2=d5710794-3_int length=0.01943604 units=km linecode=3PH_H-397_ACSR397_ACSR397_ACSR397_ACSR Seasons=1 Ratings=[400] normamps=400 emergamps=600
 ! Redirect Transformer.DSS
-New object=Transformer.hvmv_sub phases=3 windings=2 buses=[hvmv_sub_hsb,regxfmr_hvmv_sub_lsb.1.2.3.0] conns=[delta,wye] kVs=[115,12.47] kVAs=[27500,27500] XHL=15.51 sub=y subname=HVMV_Sub buses=[hvmv_sub_hsb,regxfmr_hvmv_sub_lsb.1.2.3.0] conns=[delta,wye] kVs=[115,12.47] kVAs=[27500,27500] taps=[1,1] wdg=1 %R=0.67202 RdcOhms=2.747034 wdg=2 %R=0.67202 RdcOhms=0.01076664
-New object=Transformer.feeder_rega phases=1 windings=2 bank=FEEDER_REG buses=[regxfmr_hvmv_sub_lsb.1,_hvmv_sub_lsb.1] conns=[wye,wye] kVs=[7.2,7.2] kVAs=[27500,27500] XHL=0.1 %loadloss=0.001 buses=[regxfmr_hvmv_sub_lsb.1,_hvmv_sub_lsb.1] conns=[wye,wye] kVs=[7.2,7.2] kVAs=[27500,27500] taps=[1,1.0125] wdg=1 %R=0.0005 RdcOhms=8.011636E-6 wdg=2 %R=0.0005 RdcOhms=8.011636E-6 MaxTap=1.1 MinTap=0.9 ppm_antifloat=0
-New object=Transformer.feeder_regb phases=1 windings=2 bank=FEEDER_REG buses=[regxfmr_hvmv_sub_lsb.2,_hvmv_sub_lsb.2] conns=[wye,wye] kVs=[7.2,7.2] kVAs=[27500,27500] XHL=0.1 %loadloss=0.001 buses=[regxfmr_hvmv_sub_lsb.2,_hvmv_sub_lsb.2] conns=[wye,wye] kVs=[7.2,7.2] kVAs=[27500,27500] taps=[1,1.0125] wdg=1 %R=0.0005 RdcOhms=8.011636E-6 wdg=2 %R=0.0005 RdcOhms=8.011636E-6 MaxTap=1.1 MinTap=0.9 ppm_antifloat=0
-New object=Transformer.feeder_regc phases=1 windings=2 bank=FEEDER_REG buses=[regxfmr_hvmv_sub_lsb.3,_hvmv_sub_lsb.3] conns=[wye,wye] kVs=[7.2,7.2] kVAs=[27500,27500] XHL=0.1 %loadloss=0.001 buses=[regxfmr_hvmv_sub_lsb.3,_hvmv_sub_lsb.3] conns=[wye,wye] kVs=[7.2,7.2] kVAs=[27500,27500] taps=[1,1.00625] wdg=1 %R=0.0005 RdcOhms=8.011636E-6 wdg=2 %R=0.0005 RdcOhms=8.011636E-6 MaxTap=1.1 MinTap=0.9 ppm_antifloat=0
+New object=Transformer.hvmv_sub phases=3 windings=2 buses=[hvmv_sub_hsb,regxfmr_hvmv_sub_lsb.1.2.3.0] conns=[delta,wye] kVs=[115,12.47] kVAs=[27500,27500] XHL=15.51 sub=y subname=HVMV_Sub buses=[hvmv_sub_hsb,regxfmr_hvmv_sub_lsb.1.2.3.0] conns=[delta,wye] kVs=[115,12.47] kVAs=[27500,27500] taps=[1,1] wdg=1 %R=0.67202 wdg=2 %R=0.67202
+New object=Transformer.feeder_rega phases=1 windings=2 bank=FEEDER_REG buses=[regxfmr_hvmv_sub_lsb.1,_hvmv_sub_lsb.1] conns=[wye,wye] kVs=[7.2,7.2] kVAs=[27500,27500] XHL=0.1 %loadloss=0.001 buses=[regxfmr_hvmv_sub_lsb.1,_hvmv_sub_lsb.1] conns=[wye,wye] kVs=[7.2,7.2] kVAs=[27500,27500] taps=[1,1.0125] wdg=1 %R=0.0005-6 wdg=2 %R=0.0005-6 MaxTap=1.1 MinTap=0.9 ppm_antifloat=0
+New object=Transformer.feeder_regb phases=1 windings=2 bank=FEEDER_REG buses=[regxfmr_hvmv_sub_lsb.2,_hvmv_sub_lsb.2] conns=[wye,wye] kVs=[7.2,7.2] kVAs=[27500,27500] XHL=0.1 %loadloss=0.001 buses=[regxfmr_hvmv_sub_lsb.2,_hvmv_sub_lsb.2] conns=[wye,wye] kVs=[7.2,7.2] kVAs=[27500,27500] taps=[1,1.0125] wdg=1 %R=0.0005-6 wdg=2 %R=0.0005-6 MaxTap=1.1 MinTap=0.9 ppm_antifloat=0
+New object=Transformer.feeder_regc phases=1 windings=2 bank=FEEDER_REG buses=[regxfmr_hvmv_sub_lsb.3,_hvmv_sub_lsb.3] conns=[wye,wye] kVs=[7.2,7.2] kVAs=[27500,27500] XHL=0.1 %loadloss=0.001 buses=[regxfmr_hvmv_sub_lsb.3,_hvmv_sub_lsb.3] conns=[wye,wye] kVs=[7.2,7.2] kVAs=[27500,27500] taps=[1,1.00625] wdg=1 %R=0.0005-6 wdg=2 %R=0.0005-6 MaxTap=1.1 MinTap=0.9 ppm_antifloat=0
 ! Redirect RegControl.DSS
 New object=RegControl.feeder_rega transformer=FEEDER_REGA winding=2 tapwinding=2 vreg=126.5 ptratio=60 band=2
 New object=RegControl.feeder_regb transformer=FEEDER_REGB winding=2 tapwinding=2 vreg=126.5 ptratio=60 band=2
