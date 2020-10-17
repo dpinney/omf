@@ -68,6 +68,8 @@ def dssToTree(pathToDss):
 	contents = dict([(c,x) for (c, x) in enumerate(contents) if x != ''])
 	# Lex it
 	convTbl = {'bus':'buses', 'conn':'conns', 'kv':'kvs', 'kva':'kvas', '%r':'%r'}
+	# convTbl = {'bus':'buses', 'conn':'conns', 'kv':'kvs', 'kva':'kvas', '%r':'%rs'} # TODO at some point this will need to happen; need to check what is affected i.e. viz, etc
+
 	for i, line in contents.items():
 		jpos = 0
 		try:
@@ -220,9 +222,10 @@ def _applyRegex(fpath):
 		contents = re.sub(',(\s)*(?=\])', '', contents)
 		# The following are best applied by hand because busnames are so varied
 		#contents = re.sub('(?<=buses=\[\w*),', '.1.2.3,', contents)
-		#contents = re.sub('(?<=buses=\[\w*(\.\d)*,\w*)\]', '.1.2.3],', contents)
+		#contents = re.sub('(?<=buses=\[\w*(\.\d)*,\w*)\]', '.1.2.3]', contents)
 		#contents = re.sub('(?<=buses=\[\w*(\.\d)*,\w*),', '.1.2.3,', contents)
-		#contents = re.sub('(?<=bus(\w?)=\w*) ', '.1.2.3', contents) #'bus(\w?)' captures bus, bus1, bus2
+		#contents = re.sub('(?<=bus(\w?)=\w*) ', '.1.2.3 ', contents) #'bus(\w?)' captures bus, bus1, bus2
+		#contents = re.sub('(?<=bus(\w?)=\w*-\w*) ', '.1.2.3 ', contents) #'bus(\w?)' captures bus, bus1, bus2 with hyphen within
 		outFile.write(contents)
 		return outFile.name
 
@@ -516,7 +519,7 @@ def _createAndCompareTestFile(inFile, userOutFile=''):
 
 
 def _tests():
-	FNAMES =  ['ieee37.clean.dss', 'ieee123_solarRamp.clean.dss', 'iowa240.clean.dss', 'ieee8500_unbal.clean.dss']
+	FNAMES =  ['ieee37.clean.dss', 'ieee123_solarRamp.clean.dss', 'iowa240.clean.dss', 'ieee8500-unbal.clean.dss']
 	for fname in FNAMES:
 		tree = dssToTree(fname)
 		# pp([dict(x) for x in tree])
