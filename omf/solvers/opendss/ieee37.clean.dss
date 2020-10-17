@@ -3,14 +3,14 @@ New object=Circuit.ieee37
 
 
 ! Redirect Vsource.dss
-Edit object=Vsource.source bus1=sourcebus basekv=230 pu=1.00 MVAsc3=2E5 MVAsc1=2.1E5
+Edit object=Vsource.source bus1=sourcebus.1.2.3 basekv=230 pu=1.00 MVAsc3=2E5 MVAsc1=2.1E5
 ! Redirect LineCode.DSS
 New object=LineCode.721 nphases=3 baseFreq=60 rmatrix=[0.05541667,0.01274621,0.00638258|0.01274621,0.05011364,0.01274621|0.00638258,0.01274621,0.05541667] xmatrix=[0.03736742,-0.00696970,-0.00789773|-0.00696970,0.03598485,-0.00696970|-0.00789773,-0.00696970,0.03736742] cmatrix=[80.27484728,0.00000000,0.00000000|0.00000000,80.27484728,0.00000000|0.00000000,0.00000000,80.27484728]
 New object=LineCode.722 nphases=3 baseFreq=60 rmatrix=[0.08998106,0.03085227,0.02337121|0.03085227,0.08500000,0.03085227|0.02337121,0.03085227,0.08998106] xmatrix=[0.05630682,-0.00617424,-0.01149621|-0.00617424,0.05071970,-0.00617424|-0.01149621,-0.00617424,0.05630682] cmatrix=[64.21841090,0.00000000,0.00000000|0.00000000,64.21841090,0.00000000|0.00000000,0.00000000,64.21841090]
 New object=LineCode.723 nphases=3 baseFreq=60 rmatrix=[0.24500000,0.09225379,0.08683712|0.09225379,0.24662879,0.09225379|0.08683712,0.09225379,0.24500000] xmatrix=[0.12714015,0.03998106,0.02880682|0.03998106,0.11981061,0.03998106|0.02880682,0.03998106,0.12714015] cmatrix=[37.59771120,0.00000000,0.00000000|0.00000000,37.59771120,0.00000000|0.00000000,0.00000000,37.59771120]
 New object=LineCode.724 nphases=3 baseFreq=60 rmatrix=[0.39681818,0.09856061,0.09329546|0.09856061,0.39901515,0.09856061|0.09329546,0.09856061,0.39681818] xmatrix=[0.14693182,0.05185606,0.04020833|0.05185606,0.14011364,0.05185606|0.04020833,0.05185606,0.14693182] cmatrix=[30.26701029,0.00000000,0.00000000|0.00000000,30.26701029,0.00000000|0.00000000,0.00000000,30.26701029]
 ! Redirect LoadShape.DSS
-New object=LoadShape.default npts=24 npts=24 interval=1 mult=[0.677,0.6256,0.6087,0.5833,0.58028,0.6025,0.657,0.7477,0.832,0.88,0.94,0.989,0.985,0.98,0.9898,0.999,1,0.958,0.936,0.913,0.876,0.876,0.828,0.756]
+New object=LoadShape.default npts=24 interval=1 mult=[0.677,0.6256,0.6087,0.5833,0.58028,0.6025,0.657,0.7477,0.832,0.88,0.94,0.989,0.985,0.98,0.9898,0.999,1,0.958,0.936,0.913,0.876,0.876,0.828,0.756]
 ! Redirect GrowthShape.DSS
 New object=GrowthShape.default npts=2 year=[1,20] mult=[1.025,1.025]
 ! Redirect TCC_Curve.DSS
@@ -84,7 +84,7 @@ New object=Load.s722c bus1=722.3.1 phases=1 conn=delta model=4 kV=4.8 kW=21 kvar
 New object=Load.s724b bus1=724.2.3 phases=1 conn=delta model=2 kV=4.8 kW=42 kvar=21
 New object=Load.s725b bus1=725.2.3 phases=1 conn=delta model=1 kV=4.8 kW=42 kvar=21
 New object=Load.s727c bus1=727.3.1 phases=1 conn=delta model=1 kV=4.8 kW=42 kvar=21
-New object=Load.s728 bus1=728 phases=3 conn=delta model=1 kV=4.8 kW=126 kvar=63
+New object=Load.s728 bus1=728.1.2.3 phases=3 conn=delta model=1 kV=4.8 kW=126 kvar=63
 New object=Load.s729a bus1=729.1.2 phases=1 conn=delta model=4 kV=4.8 kW=42 kvar=21
 New object=Load.s730c bus1=730.3.1 phases=1 conn=delta model=2 kV=4.8 kW=85 kvar=40
 New object=Load.s731b bus1=731.2.3 phases=1 conn=delta model=2 kV=4.8 kW=85 kvar=40
@@ -101,8 +101,8 @@ New object=Load.s742a bus1=742.1.2 phases=1 conn=delta model=2 kV=4.8 kW=8 kvar=
 New object=Load.s742b bus1=742.2.3 phases=1 conn=delta model=2 kV=4.8 kW=85 kvar=40
 New object=Load.s744a bus1=744.1.2 phases=1 conn=delta model=1 kV=4.8 kW=42 kvar=21
 ! Redirect Transformer.DSS
-New object=Transformer.subxf phases=3 windings=2 XHL=8 buses=[sourcebus,799] conns=[delta,delta] kVs=[230,4.8] kVAs=[2500,2500]
-New object=Transformer.xfm1 phases=3 windings=2 XHL=1.81 buses=[709,775] conns=[delta,delta] kVs=[4.8,0.48] kVAs=[500,500]
+New object=Transformer.subxf phases=3 windings=2 XHL=8 buses=[sourcebus.1.2.3,799.1.2.3] conns=[delta,delta] kVs=[230,4.8] kVAs=[2500,2500]
+New object=Transformer.xfm1 phases=3 windings=2 XHL=1.81 buses=[709.1.2.3,775.1.2.3] conns=[delta,delta] kVs=[4.8,0.48] kVAs=[500,500]
 New object=Transformer.reg1a phases=1 windings=2 bank=reg1 buses=[799.1.2,799r.1.2] conns=[delta,delta] kVs=[4.8,4.8] kVAs=[2000,2000] XHL=1
 New object=Transformer.reg1c phases=1 windings=2 bank=reg1 buses=[799.3.2,799r.3.2] conns=[delta,delta] kVs=[4.8,4.8] kVAs=[2000,2000] XHL=1
 ! Redirect RegControl.DSS
