@@ -142,7 +142,7 @@ def _dssFilePrep(fpath):
 	# Note that tmpdir is not automatically cleaned up on premature exit; This is expected to be addressed by user action. 
 	with tf.TemporaryDirectory() as tempDir:
 		dssFilePath = os.path.realpath(fpath)
-		dssDirPath = os.path.dirname(dssFilePath)
+		dssDirPath, dssFileName = os.path.split(dssFilePath)
 		try:
 			with open(dssFilePath):
 				pass
@@ -166,7 +166,7 @@ def _dssFilePrep(fpath):
 			ycoord = x['Y']
 			coordscmds.append('SetBusXY bus=' + elmt + ' X=' + str(xcoord) + ' Y=' + str(ycoord) + '\n') # save commands for later usage
 		# Get Master.DSS from exported files and insert content from other files
-		outfilepath = dssDirPath + '/' + fpath[:-4] + '_expd.dss'
+		outfilepath = dssDirPath + '/' + dssFileName[:-4] + '_expd.dss'
 		with open(exptDirPath + '/Master.DSS', 'r') as ogMaster, open(outfilepath, 'a') as catMaster:
 			catMaster.truncate(0)
 			for line in ogMaster:
@@ -189,7 +189,7 @@ def _dssFilePrep(fpath):
 			catMaster.flush() # really shouldn't have to do this, but addresses an apparent delay (due to buffering) if this file is read immediately after this fnxn returns
 			respath = _applyRegex(catMaster.name)
 		os.remove(outfilepath)
-		return os.path.abspath(respath)
+		return os.path.abspath(respath) # still might not be clean. Round trip through treetoDss(dssToTree(respath), respath) to fix problems with transformer winding definitions
 
 def _applyRegex(fpath):
 	'''***DO NOT USE***
@@ -205,16 +205,19 @@ def _applyRegex(fpath):
 		contents = inFile.read()
 		contents = re.sub('New (?!object=)', 'New object=', contents)
 		contents = re.sub('Edit (?!object=)', 'Edit object=', contents)
+		contents = re.sub('\)', ']', contents)
+		contents = re.sub('\(', '[', contents)
 		contents = re.sub('(?<=\d)(\s)+(?=\d)', ',', contents)
 		contents = re.sub('(?<=\d)(\s)+(?=-\d)', ',', contents)
 		contents = re.sub('(\s)+\|(\s)+', '|', contents)
 		contents = re.sub('\[(\s)*', '[', contents)
 		contents = re.sub('(\s)*\]', ']', contents)
 		contents = re.sub('"', '', contents)
-		contents = re.sub('(?<=(\d|\w))(\s)*,(\s)+(?=(\d|\w))', ',', contents)
-		contents = re.sub('(?<=(\d|\w))(\s)*,(\s)+(?=-(\d|\w))', ',', contents)
-		contents = re.sub(',\s*\)', ')', contents)
-		contents = re.sub(',\s*\]', ']', contents)
+		contents = re.sub('(?<=\w)(\s)*,(\s)+(?=\w)', ',', contents)
+		contents = re.sub('(?<=\w)(\s)*,(\s)+(?=-\w)', ',', contents)
+		contents = re.sub('(?<=\w)(\s)+,(\s)*(?=\w)', ',', contents)
+		contents = re.sub('(?<=\w)(\s)+,(\s)*(?=-\w)', ',', contents)
+		contents = re.sub(',(\s)*(?=\])', '', contents)
 		outFile.write(contents)
 		return outFile.name
 
@@ -495,13 +498,10 @@ def evilToOmd(evilTree, outPath):
 def _createAndCompareTestFile(inFile, userOutFile=''):
 	'''Input: the name of the file to be prepared for OMF consumption and perform subsequent checks (import to memory
 	and voltage comparison). Provide a second filename via userOutFile to bypass file manipulation and perform only the 
-	subsequent checks'''
+	subsequent checks.'''
 
 	outFile = userOutFile if userOutFile!='' else _dssFilePrep(inFile)
-	try:
-		tree1 = dssToTree(outFile) # check that it can be parsed into a dssTree. If error, 
-	except Exception as ex:
-		print('The output file provided/created was not accepted by the OMF. Please perform manual checks as needed and retry.\nFilename: ' + outFile + '\nError: ' + ex)
+	tree1 = dssToTree(outFile) # check that it can be parsed into a dssTree.
 	from omf.solvers.opendss import getVoltages, voltageCompare
 	involts = getVoltages(inFile, keep_output=False)
 	outvolts = getVoltages(outFile, keep_output=False)
