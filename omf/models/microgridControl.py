@@ -399,7 +399,7 @@ def graphMicrogrid(pathToOmd, pathToMicro, pathToCsv, workDir, maxTime, stepSize
 			voltages = data['Voltages']
 			loadServed = data['Load served']
 			storageSOC = data['Storage SOC (%)']
-			print('notCached')
+			cached = 'no'
 	else:
 		with open(f'{workDir}/output.json') as inFile:
 			data = json.load(inFile)
@@ -410,7 +410,7 @@ def graphMicrogrid(pathToOmd, pathToMicro, pathToCsv, workDir, maxTime, stepSize
 			voltages = data['Voltages']
 			loadServed = data['Load served']
 			storageSOC = data['Storage SOC (%)']
-			print('cached')
+			cached = 'yes'
 	
 	outputTimeline = createTimeline()
 
@@ -418,7 +418,7 @@ def graphMicrogrid(pathToOmd, pathToMicro, pathToCsv, workDir, maxTime, stepSize
 	gens = go.Figure()
 	gens.add_trace(go.Scatter(x=simTimeSteps, y=genProfiles['Diesel DG (kW)'],
 							mode='lines',
-							name='Diesel DG'))
+							name=cached))
 	gens.add_trace(go.Scatter(x=simTimeSteps, y=genProfiles['Energy storage (kW)'],
 							mode='lines',
 							name='Energy Storage'))
