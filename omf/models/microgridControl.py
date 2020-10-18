@@ -592,8 +592,8 @@ def work(modelDir, inputDict):
 	with open(f'{modelDir}/{feederName}.omd', 'r') as omdFile:
 		omd = json.load(omdFile)
 	tree = omd['tree']
-	niceDss = dssConvert.evilGldTreeToDssTree(tree)
-	dssConvert.treeToDss(niceDss, f'{modelDir}/circuit.dss')
+	# niceDss = dssConvert.evilGldTreeToDssTree(tree)
+	# dssConvert.treeToDss(niceDss, f'{modelDir}/circuit.dss')
 
 	# Run the main functions of the program
 	with open(pJoin(modelDir, inputDict['microFileName']), 'w') as f:
