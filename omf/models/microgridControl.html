@@ -140,7 +140,7 @@
 				</select>
 			</div>
 			<div class="wideInput">
-				<p class="inputSectionHeader">Customer Outage Cost Parameters</p>
+				<p class="inputSectionHeader">Outage Cost Parameters</p>
 			</div>
 			<hr>
 			<div class="shortInput">
@@ -152,11 +152,19 @@
 					<input id="customerFileName" name="customerFileName" value='' readonly class="uploadFileName">
 				</div>
 			</div>
-<!-- 			<div class="shortInput">
-				<label class="tooltip">Duration of Outage<span class="classic">The amount of time the customer has no power.</span></label>
-				<input type="text" id="duration" name="duration">
+			<div class="shortInput">
+				<label class="tooltip">Duration of Outage<span class="classic">The amount of time the outage lasts.</span></label>
+				<input type="text" id="outageDuration" name="outageDuration">
 			</div>
 			<div class="shortInput">
+				<label class="tooltip">Restoration Cost ($/hr)<span class="classic">Restoration cost parameter for calculating outage costs.</span></label>
+				<input type="text" id="restoration_cost" name="restoration_cost" pattern="^\d+\.?\d*$" required="required">
+			</div>
+			<div class="shortInput">
+				<label class="tooltip">Hardware Cost<span class="classic">Hardware cost parameter for calculating outage costs.</span></label>
+				<input type="text" id="hardware_cost" name="hardware_cost" pattern="^\d+\.?\d*$" required="required">
+			</div>
+			<!-- <div class="shortInput">
 				<label class="tooltip">Season<span class="classic">Specifies the season in which the outage occurs.</span></label>
 				<select id="season" name="season" />
 					<option value='summer'>Summer</option>
@@ -239,13 +247,17 @@
 			<img id="customerCostFigImage" style="width:980px" />
 			<script>gebi("customerCostFigImage").src = "data:image/png;base64," + allOutputData["customerCostFig.png"]</script>
 		</div>
-		<p class="reportTitle postRun" style="page-break-before:always">Timeline</p>
-		<div id="outageCostCalc" class="tightContent postRun">
-			{{ allOutputDataDict['timelineStatsHtml'] }}
-		</div>
 		<p class="reportTitle postRun" style="page-break-before:always">Customer Outage Cost</p>
 		<div id="customerOutageCostCalc" class="tightContent postRun">
 			{{ allOutputDataDict['customerOutageHtml'] }}
+		</div>
+		<p class="reportTitle postRun" style="page-break-before:always">Utility Outage Cost</p>
+		<div id="utilityOutageCostCalc" class="tightContent postRun">
+			{{ allOutputDataDict['utilityOutageHtml'] }}
+		</div>
+		<p class="reportTitle postRun" style="page-break-before:always">Timeline</p>
+		<div id="outageCostCalc" class="tightContent postRun">
+			{{ allOutputDataDict['timelineStatsHtml'] }}
 		</div>
 		<!-- Leaflet map directly inline with model-->
 		<div id="mapInsert"></div>
