@@ -1,0 +1,12 @@
+{
+    "object": "line",
+    "name": "NULL",
+    "from": "NULL",
+    "to": "NULL",
+    "!FROCODE": ".1.2.3",
+    "!TOCODE": ".1.2.3",
+    "phases": "3",
+    "length": "2967",
+    "units": "ft",
+    "linecode": "ug_3p_type1"
+}

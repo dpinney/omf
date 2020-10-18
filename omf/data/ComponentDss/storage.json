@@ -1,0 +1,19 @@
+{
+    "object": "storage",
+    "name": "NULL",
+    "parent": "NULL",
+    "phases": "3",
+    "kv": "13.8",
+    "kwhstored": "200",
+    "kwhrated": "200",
+    "kva": "100",
+    "kvar": "100",
+    "%charge": "100",
+    "%discharge": "100",
+    "%effcharge": "100",
+    "%effdischarge": "100",
+    "%idlingkw": "1",
+    "%r": "0",
+    "%x": "50",
+    "!CONNCODE": ".1.2.3"
+}

@@ -1,0 +1,17 @@
+{
+    "object": "transformer",
+    "name": "NULL",
+    "from": "NULL",
+    "to": "NULL",
+    "phases": "1",
+    "bank": "reg1",
+    "windings": "2",
+    "xhl": "0.0100000",
+    "conns": "[wye,wye]",
+    "kvs": "[7.9677,7.9677]",
+    "kvas": "[3500,3500]",
+    "%rs": "[0.00100000,0.00100000",
+    "numtaps": "32",
+    "maxtap": "1.1000",
+    "mintap": "0.9000]"
+}

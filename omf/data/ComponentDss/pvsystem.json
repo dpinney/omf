@@ -1,0 +1,16 @@
+{
+    "object": "pvsystem",
+    "name": "NULL",
+    "parent": "NULL",
+    "phases": "3",
+    "kv": "13.8",
+    "conn": "wye",
+    "pmpp": "110",
+    "kva": "100",
+    "pf": "1",
+    "balanced": "true",
+    "limitcurrent": "true",
+    "vminpu": "0.9090909",
+    "daily": "pvscaling1",
+    "!CONNCODE": ".1.2.3"
+}

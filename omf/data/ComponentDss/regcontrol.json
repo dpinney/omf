@@ -1,0 +1,14 @@
+{
+    "object": "regcontrol",
+    "name": "NULL",
+    "parent": "NULL",
+    "!CONNCODE": ".1",
+    "transformer": "sub_regulator_a",
+    "winding": "2",
+    "vreg": "123.00000",
+    "r": "0.00000",
+    "x": "0.00000",
+    "band": "2",
+    "ptratio": "66.395279",
+    "vlimit": "129.00000"
+}
