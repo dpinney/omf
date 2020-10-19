@@ -371,7 +371,7 @@ def customerCost(workDir, customerName, duration, season, annualkWh, businessTyp
 	# return {'customerOutageCost': outageCost}
 	return outageCost, kWhEstimate, times, localMax
 
-def graphMicrogrid(pathToOmd, pathToMicro, pathToCsv, workDir, maxTime, stepSize, faultedLine, timeMinFilter, timeMaxFilter, actionFilter, outageDuration, restoration_cost, hardware_cost):
+def graphMicrogrid(pathToOmd, pathToMicro, pathToCsv, workDir, maxTime, stepSize, faultedLine, timeMinFilter, timeMaxFilter, actionFilter, outageDuration, restoration_cost, hardware_cost, nameSame):
 	# read in the OMD file as a tree and create a geojson map of the system
 	if not workDir:
 		workDir = tempfile.mkdtemp()
@@ -379,8 +379,19 @@ def graphMicrogrid(pathToOmd, pathToMicro, pathToCsv, workDir, maxTime, stepSize
 
 	# command = 'cmd /c ' + '"julia --project=' + '"C:/Users/granb/PowerModelsONM.jl-master/" ' + 'C:/Users/granb/PowerModelsONM.jl-master/src/cli/entrypoint.jl' + ' -n ' + '"' + str(workDir) + '/circuit.dss' + '"' + ' -o ' + '"C:/Users/granb/PowerModelsONM.jl-master/output.json"'
 	
-	if not os.path.exists(f'{workDir}/output.json'):
+	if os.path.exists(f'{workDir}/output.json') and nameSame:
+		with open(f'{workDir}/output.json') as inFile:
+			data = json.load(inFile)
+			genProfiles = data['Generator profiles']
+			simTimeSteps = []
+			for i in data['Simulation time steps']:
+				simTimeSteps.append(float(i))
+			voltages = data['Voltages']
+			loadServed = data['Load served']
+			storageSOC = data['Storage SOC (%)']
+			cached = 'yes'
 
+	else:
 		setup_command = f'julia --project="{__neoMetaModel__._omfDir}/solvers/PowerModelsONM.jl" -e "using Pkg; Pkg.update()"'
 		os.system(setup_command)
 
@@ -400,17 +411,6 @@ def graphMicrogrid(pathToOmd, pathToMicro, pathToCsv, workDir, maxTime, stepSize
 			loadServed = data['Load served']
 			storageSOC = data['Storage SOC (%)']
 			cached = 'no'
-	else:
-		with open(f'{workDir}/output.json') as inFile:
-			data = json.load(inFile)
-			genProfiles = data['Generator profiles']
-			simTimeSteps = []
-			for i in data['Simulation time steps']:
-				simTimeSteps.append(float(i))
-			voltages = data['Voltages']
-			loadServed = data['Load served']
-			storageSOC = data['Storage SOC (%)']
-			cached = 'yes'
 	
 	outputTimeline = createTimeline()
 
@@ -587,10 +587,24 @@ def work(modelDir, inputDict):
 	# Write in the feeder
 	feederName = [x for x in os.listdir(modelDir) if x.endswith('.omd')][0][:-4]
 	inputDict['feederName1'] = feederName
+	nameSame = False
 
-	# Output a .dss file, which will be needed for ONM.
-	with open(f'{modelDir}/{feederName}.omd', 'r') as omdFile:
-		omd = json.load(omdFile)
+	if os.path.exists(f'{modelDir}/feeder.json'):
+		with open(f'{modelDir}/feeder.json') as inFile:
+			name = json.load(inFile)
+			if name == feederName:
+				nameSame = True
+		with open(f'{modelDir}/{feederName}.omd', 'r') as omdFile:
+			omd = json.load(omdFile)
+
+	if not nameSame:
+		# Output a .dss file, which will be needed for ONM.
+		with open(f'{modelDir}/{feederName}.omd', 'r') as omdFile:
+			omd = json.load(omdFile)
+			with open(f'{modelDir}/feeder.json', 'wt') as feederFile:
+				json.dump(feederName, feederFile)
+
+
 	tree = omd['tree']
 	# niceDss = dssConvert.evilGldTreeToDssTree(tree)
 	# dssConvert.treeToDss(niceDss, f'{modelDir}/circuit.dss')
@@ -616,7 +630,8 @@ def work(modelDir, inputDict):
 		inputDict['actionFilter'],
 		inputDict['outageDuration'],
 		inputDict['restoration_cost'],
-		inputDict['hardware_cost'])
+		inputDict['hardware_cost'],
+		nameSame)
 	
 	# Textual outputs of outage timeline
 	with open(pJoin(modelDir,'timelineStats.html')) as inFile:
