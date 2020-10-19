@@ -42,7 +42,7 @@ def dssToGridLab(inFilePath, outFilePath, busCoords=None):
 def dssToTree(pathToDss):
 	''' Convert a .dss file to an in-memory, OMF-compatible "tree" object.
 	Note that we only support a VERY specifically-formatted DSS file.'''
-	# Supports 'wdg=' syntax for transformer winding definitions
+	# TODO: Consider removing the handling for 'wdg=' syntax within this block, as we will not support it in an input file. 
 	# Ingest file.
 	with open(pathToDss, 'r') as dssFile:
 		contents = dssFile.readlines()

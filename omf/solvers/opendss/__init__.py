@@ -41,8 +41,8 @@ def runDSS(dssFilePath, keep_output=True):
 	coords['radius'] = hyp
 	return coords
 
-def getCoords(dssFilePath, keep_output=True):
-	'''Takes in an OpenDSS circuit definition file and outputs the bus coordinates as a dataframe. If 
+def _getCoords(dssFilePath, keep_output=True):
+	'''*Not approved for usage*. Takes in an OpenDSS circuit definition file and outputs the bus coordinates as a dataframe. If 
 	'keep_output' is set to True, a file named coords.csv is generated in the directory of input file.'''
 	# TODO: clean up and test the below copy-pasta'd logic
 	#dssFileLoc = runDSS(dssFilePath, keep_output=True)
@@ -259,7 +259,6 @@ def capacityPlot(filePath):
 	plt.savefig(dssFileLoc + '/Capacity Profile.png')
 	plt.clf()
 	
-	
 def voltageCompare(in1, in2, keep_output=False, output_filename='voltageCompare_results.csv'):
 	'''Compares two instances of the information provided by the 'Export voltages' opendss command and outputs 
 	the maximum error encountered for any value compared. If the 'keep_output' flag is set to 'True', also 
@@ -310,7 +309,7 @@ def voltageCompare(in1, in2, keep_output=False, output_filename='voltageCompare_
 		resultErr.to_csv(output_filename, header=True, index=True, mode='a')
 	return maxErr
 
-def getVoltages(dssFilePath, keep_output=False, output_filename='voltages.csv'):
+def getVoltages(dssFilePath, keep_output=False, output_filename='voltages.csv'): # TODO: remane to voltageGet for consistency with other functions?
 	'''Obtains the OpenDss voltage output for a OpenDSS circuit definition file (*.dss). Input path 
 	can be fully qualified or not. Set the 'keep_output' flag to 'True' to save output to the input 
 	file's directory as 'voltages.csv',	or specify a filename for the output through the 
@@ -339,7 +338,7 @@ def _stripPhases(dssObjId): # (Is this even worth encapsulating?) YES.
 		assert True, 'An unknown error occurred.' # this should never happen
 		return dssObjId
 
-def _mergeContigLinesOnce(tree): # TODO finish debugging this code block - LMS
+def _mergeContigLinesOnce(tree):
 	# Create a lookup table of indices to object names for quick retrieval
 	id2key = {tree[i].get('object', None):i for i,v in enumerate(tree)} # note that these are in the form <type>.<name> (no phase info)
 	id2key.update({tree[i].get('bus', None):i for i,v in enumerate(tree) if tree[i].get('!CMD', None) == 'setbusxy'}) # form: <name>
@@ -351,23 +350,24 @@ def _mergeContigLinesOnce(tree): # TODO finish debugging this code block - LMS
 		top = o
 		# Get the top id and check that this is a line
 		tid =  top.get('object', '')
-		# Get bottom node (could be indicated by 'bus', 'bus1', 'bus2', or the first member of 'buses'. Must assume it will be appended with phase information)
+		# Get bottom node(s) (could be indicated by 'bus', 'bus1', or the first member of 'buses'. Can assume it will be appended with phase information)
 		bid = ''
-		for k in top.keys():
+		for k in top.keys(): # Loop through the keys to find all the object's cnxns
 			if k == 'bus' or k == 'bus1': # not line-like #(remove?)
 				continue
 			if k == 'bus2': # is line-like, get value (i.e. the 'to' bus. Note there could be a 'bus3', but these types of object are not eligible for reduction anyway)
 				bid = top['bus2']
-			if k == 'buses': # is line-like, get 2nd member of tuple (i.e. the 'to' bus)  #(remove?)
-				bid = top['buses'][1] #(remove?)
+			if k == 'buses': # is line-like, get 2nd member of list (i.e. the 'to' bus)
+				bid = top['buses'].split(',')
+				if len(bid)>2:
+					continue # this has more than 2 cnxns and thus is ineligible for reduction
+				bid = bid[1][:-1] # gets rid of trailing ']'
 			else:
 				continue
 		if bid == '': # not a line (or line-like?)
 			continue 
-		# Strip phase info and apply lookup table to get corresponding bus object (will NOT be of form <object>.<name>)
-		bid = _stripPhases(bid) # need to look at circuit to figure out how things are connected. a line is connected to busn.1.2.3 and busn.4.5.6 - is this a switch?
-		bus = tree[id2key[bid]] # TODO properly deal with key error when bid=='t_bus3162_l' (HACK: see line 246, 'id2key.update...)
-		# Get bottoms' ids, strip off phase info, then apply lookup table to obtain corresponding objects
+		bus = tree[id2key[bid]] # TODO build proper buslist
+		# Get bottoms' ids then apply lookup table to obtain corresponding objects
 		bottoms = [] # objects connected to bus
 		# loop through tree and grab any objects that have a connection equal to the bus id
 		for obj in tree:
@@ -414,7 +414,6 @@ def mergeContigLines(tree):
 		treeKeys = len(tree)
 		_mergeContigLinesOnce(tree)
 		removedKeys = treeKeys - len(tree)
-
 
 def _tests():
 	# Tests for voltageCompare, getVoltages, and runDSS
@@ -463,4 +462,21 @@ def _tests():
 	#capacityPlot(FPATH)
 
 if __name__ == "__main__":
+		
+	# Contig line merging test
+	#from dssConvert import dssToTree, distNetViz, evilDssTreeToGldTree, treeToDss
+	#fpath = ['ieee37.clean.dss','ieee123_solarRamp.clean.dss','iowa240.clean.dss','ieee8500-unbal.clean.dss']
+	#for ckt in fpath:
+	#	tree = dssToTree(ckt)
+	#	#gldtree = evilDssTreeToGldTree(tree) # DEBUG
+	#	#distNetViz.viz_mem(gldtree, open_file=True, forceLayout=True) # DEBUG
+	#	oldsz = len(tree)
+	#	mergeContigLines(tree)
+	#	newsz = len(tree)
+	#	#gldtree = evilDssTreeToGldTree(tree) # DEBUG
+	#	#distNetViz.viz_mem(gldtree, open_file=True, forceLayout=True) # DEBUG
+	#	outckt = fpath[:-4] + '_mergeContigLines.dss'
+	#	treeToDss(tree, outckt)
+	#	maxerr = voltageCompare(getVoltages(ckt), getVoltages(outckt), keep_output=False)
+	#	print('Objects removed: %s (of %s).\nPercent reduction: %s%%.\nMaximum voltage error: %s.'%(oldsz, oldsz-newsz, (oldsz-newsz)*100/oldsz, maxerr))
 	_tests()
