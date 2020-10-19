@@ -70,13 +70,13 @@ def dssToTree(pathToDss):
 	convTbl = {'bus':'buses', 'conn':'conns', 'kv':'kvs', 'kva':'kvas', '%r':'%r'}
 	# convTbl = {'bus':'buses', 'conn':'conns', 'kv':'kvs', 'kva':'kvas', '%r':'%rs'} # TODO at some point this will need to happen; need to check what is affected i.e. viz, etc
 
+	from collections import OrderedDict 
 	for i, line in contents.items():
 		jpos = 0
 		try:
 			#HACK: only support white space separation of attributes.
 			contents[i] = line.split()
 			# HACK: only support = assignment of values.
-			from collections import OrderedDict 
 			ob = OrderedDict() 
 			ob['!CMD'] = contents[i][0]
 			if len(contents[i]) > 1:
