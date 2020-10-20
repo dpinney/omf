@@ -326,85 +326,118 @@ def getVoltages(dssFilePath, keep_output=False, output_filename='voltages.csv'):
 		os.remove(output_filename)
 	return volts
 
-def _stripPhases(dssObjId): # (Is this even worth encapsulating?) YES.
-	'''**JUNK** Do not use.'''
-	# Expected input is a string of format <uniqueName> (or perhaps <dssObjectType>.<uniqueName> )
-	dssObjId = dssObjId.split('.')
-	if len(dssObjId) == 1:
-		return dssObjId
-	elif len(dssObjId) >= 2:
-		return dssObjId[0]
-	else:
-		assert True, 'An unknown error occurred.' # this should never happen
-		return dssObjId
-
 def _mergeContigLinesOnce(tree):
 	# Create a lookup table of indices to object names for quick retrieval
-	id2key = {tree[i].get('object', None):i for i,v in enumerate(tree)} # note that these are in the form <type>.<name> (no phase info)
-	id2key.update({tree[i].get('bus', None):i for i,v in enumerate(tree) if tree[i].get('!CMD', None) == 'setbusxy'}) # form: <name>
-	id2key.update({'t_' + tree[i].get('bus', None) + '_l':i for i,v in enumerate(tree) if tree[i].get('!CMD', None) == 'setbusxy'}) # form: <name>
+	from collections import OrderedDict 
+	key2id = OrderedDict({tree[i].get('object', None):i for i,v in enumerate(tree)}) # note that these are in the form <type>.<name>
+	key2id.update({tree[i].get('bus', None):i for i,v in enumerate(tree) if tree[i].get('!CMD', None) == 'setbusxy'}) # form: <name>
+	
+	 # Destructively iterate through treecopy and perform any modifications on tree.
 	treecopy = tree.copy()
 	removedids = []
 	while treecopy:
-		o = treecopy.pop() # destructively iterate through tree copy
-		top = o
-		# Get the top id and check that this is a line
-		tid =  top.get('object', '')
-		# Get bottom node(s) (could be indicated by 'bus', 'bus1', or the first member of 'buses'. Can assume it will be appended with phase information)
-		bid = ''
-		for k in top.keys(): # Loop through the keys to find all the object's cnxns
-			if k == 'bus' or k == 'bus1': # not line-like #(remove?)
-				continue
-			if k == 'bus2': # is line-like, get value (i.e. the 'to' bus. Note there could be a 'bus3', but these types of object are not eligible for reduction anyway)
-				bid = top['bus2']
-			if k == 'buses': # is line-like, get 2nd member of list (i.e. the 'to' bus)
-				bid = top['buses'].split(',')
-				if len(bid)>2:
-					continue # this has more than 2 cnxns and thus is ineligible for reduction
-				bid = bid[1][:-1] # gets rid of trailing ']'
-			else:
-				continue
-		if bid == '': # not a line (or line-like?)
+		top = treecopy.pop()
+		topid =  top.get('object', '')
+		
+		# is this a line object? If not, move to next object in treecopy
+		if not top.get('object','None').startswith('line.'):
+			continue
+
+		# if it is a line, is it a switch? Let's skip these for now. 
+		# TODO: handling for switches when merging them with adjacent line segments is feasible
+		if top.get('switch','None')=='yes' or top.get('switch','None')=='true':
+			continue
+
+		# Get 'to' buses (Could be indicated by 'bus2', or the second, third members of 'buses'. Can assume it will be appended with phase information.)
+		busid = ''
+		topcnxnid = '' # capture name of the property that holds the 'to' connection
+		for k in top.keys():
+			if 'bus' in k:
+				if k == 'bus' or k == 'bus1':
+					continue
+				if k == 'buses': # is line-like, get all members of list beyond the first (i.e. 'to' buses)
+					buslist = top['buses']
+					buslist = buslist.replace(']','')
+					buslist = buslist.replace('[','')
+					buslist = buslist.split(',')
+					if len(buslist)>2:
+						busid = ''
+						continue # this has more than 2 cnxns and thus is ineligible for reduction
+					busid = buslist[1]
+				else: # is line-like, get value (i.e. a 'to' bus)
+					busid = top[k]
+		if busid == '': # not line-like
 			continue 
-		bus = tree[id2key[bid]] # TODO build proper buslist
-		# Get bottoms' ids then apply lookup table to obtain corresponding objects
-		bottoms = [] # objects connected to bus
-		# loop through tree and grab any objects that have a connection equal to the bus id
+		bus = tree[key2id[busid.split('.')[0]]]
+
+		# Get ids of objects connected to bus (aka the bottoms)
+		bottoms = []
 		for obj in tree:
-			#Loop through dictionary items and get all the connections
-			if obj.get('object', None) == top.get('object', None): # The 'top' object is already accounted for
+			if obj.get('object', None) == top.get('object', None): # The top cannot also be a bottom
 				continue
-			#(Could also check for bid equivalency here..?)
-			allbottoms = [] # list of ids for connected objects
+			if obj.get('!CMD','None')=='setbusxy': # The bus cannot connect to itself
+				continue
+			allbottoms = []
 			for k, v in obj.items():
-				if 'bus' in k: # it's a connection attribute (are there any other keys that need to be checked for?)
-					if k == 'buses': # it's a tuple, so serialize it for easier processing
+				if 'bus' in k: # property indicates a cnxn
+					if k == 'buses': # it's a list
 						allbottoms.append(obj[k][0])
 						allbottoms.append(obj[k][1])
-					else: # we'll take it just the way it is
+					else: # it's a single value
 						allbottoms.append(obj[k])
-			#if any connection ids equal the node id, then obj is connected to our node of interest
-			allbottoms = [_stripPhases(x) for x in allbottoms]
-			if ( len([x for x in allbottoms if x == bid]) > 0 ):
-				bottoms.append(obj) # and since we already have the object right here, we will just append it instead of using id2key
-		# 'bottoms' successfully constructed. now what?
-		#Check for a one-line-in, one-line-out scenario
+			# TODO: Decide whether to leave phase info appended to botid or not. May ensure that connected phases of bottoms are equivalent
+			allbottoms = [x.split('.')[0] for x in allbottoms]
+			if ( len([x for x in allbottoms if x == busid.split('.')[0]]) > 0 ): #if any of the bottoms ids equal the node id, then obj is connected to our node of interest
+				bottoms.append(obj)
+		
+		# Check for a one-line-in, one-line-out scenario
 		if len(bottoms) != 1:
 			continue
 		bottom = bottoms[0]
-		# ['r1','r0','x1','x0',c1','c0']
-		#if (top.get('geometry','NTC') == bottom.get('geometry','NBC')) and ('length' in top) and ('length' in bottom): # (could configs be defined under any other attribute names?)
-		if ('length' in top) and ('length' in bottom): # (could configs be defined under any other attribute names?)
-			# delete node and bottom line. Make top line length = sum of both lines. Connect the new bottom.
+
+		# is the bottom a line?
+		if not bottom.get('object','None').startswith('line.'):
+			continue
+
+		#bottom = ''
+		#for obj in tree:
+		#	if obj.get('object','None').startswith('line.'):
+		#		if obj['bus1']==busid: # the bottom will be attached to the bus via its 'from' bus, indicated by bus1 for a line.
+		#			bottom = obj
+
+		if ('length' in top) and ('length' in bottom):
+			# check that the configurations are equal - top/bottom both need to be lines for this to work correctly (i.e. check the intersection between the two sets of properties).
+			diffprops = ['!CMD','object','bus1','bus2','length',] # we don't care if these values differ between the top and the bottom
+			for k,vt in top.items():
+				if not k in diffprops:
+					vb = bottom.get(k,'None')
+					if vt!=vb:
+						break # the two configurations are unequal (or k isn't defined for the bottom).
+			
+			# If we get here, we know the configs are the same...
+			
+			# final check - ensure phase connectivity is compatible between merged cnxn
+			#tphsinf = top['bus2'].split('.',1)
+			#bphsinf = bottom['bus2'].split('.',1)
+			#if tphsinf[1]!=bphsinf[1]:
+			#	continue
+
+			# Delete bus and bottom; Set top line length = sum of both lines; Connect top to the new bottom.
+			toptree = tree[key2id[top['object']]] # modify the tree object directly (this creates a pointer for in-place mods)
+			removedids.append(bus['bus']) # DEBUG
+			removedids.append(bottom['object']) # DEBUG
 			newLen = float(top['length']) + float(bottom['length']) # get the new length
-			removedids.append(bottom['object'])
-			toptree = tree[id2key[top['object']]]
 			toptree['length'] = str(newLen)
-			toptree['to'] = bottom['to']
-			del tree[id2key[bus['name']]]
-			del tree[id2key[bottom['name']]]
-	#for x in removedids: # DEBUG
-	#	print(x)  # DEBUG
+			toptree['bus2'] = bottom['bus2'] # we know these props exist because we know the top and bottom are lines
+			# the following operations must occur in this order to maintain accuracy of key2id
+			del tree[key2id[bus['bus']]]
+			# correct all ids in key2id greater than key2id[bus['bus']]
+			del tree[key2id[bottom['object']]]
+			del key2id[bottom['object']]
+
+
+	for x in removedids: # DEBUG
+		print(x)  # DEBUG
 
 def mergeContigLines(tree):
 	''' merge all lines that are across nodes and have the same config
@@ -465,18 +498,19 @@ if __name__ == "__main__":
 		
 	# Contig line merging test
 	#from dssConvert import dssToTree, distNetViz, evilDssTreeToGldTree, treeToDss
+	#fpath = ['iowa240.clean.dss','ieee8500-unbal.clean.dss']
 	#fpath = ['ieee37.clean.dss','ieee123_solarRamp.clean.dss','iowa240.clean.dss','ieee8500-unbal.clean.dss']
 	#for ckt in fpath:
 	#	tree = dssToTree(ckt)
-	#	#gldtree = evilDssTreeToGldTree(tree) # DEBUG
-	#	#distNetViz.viz_mem(gldtree, open_file=True, forceLayout=True) # DEBUG
+		#gldtree = evilDssTreeToGldTree(tree) # DEBUG
+		#distNetViz.viz_mem(gldtree, open_file=True, forceLayout=True) # DEBUG
 	#	oldsz = len(tree)
 	#	mergeContigLines(tree)
 	#	newsz = len(tree)
-	#	#gldtree = evilDssTreeToGldTree(tree) # DEBUG
-	#	#distNetViz.viz_mem(gldtree, open_file=True, forceLayout=True) # DEBUG
-	#	outckt = fpath[:-4] + '_mergeContigLines.dss'
+		#gldtree = evilDssTreeToGldTree(tree) # DEBUG
+		#distNetViz.viz_mem(gldtree, open_file=True, forceLayout=True) # DEBUG
+	#	outckt = ckt[:-4] + '_mergeContigLines.dss'
 	#	treeToDss(tree, outckt)
 	#	maxerr = voltageCompare(getVoltages(ckt), getVoltages(outckt), keep_output=False)
-	#	print('Objects removed: %s (of %s).\nPercent reduction: %s%%.\nMaximum voltage error: %s.'%(oldsz, oldsz-newsz, (oldsz-newsz)*100/oldsz, maxerr))
+	#	print('Objects removed: %s (of %s).\nPercent reduction: %s%%.\nMaximum voltage error: %s.'%(oldsz-newsz, oldsz, (oldsz-newsz)*100/oldsz, maxerr))
 	_tests()
