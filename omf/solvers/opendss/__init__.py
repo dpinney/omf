@@ -327,20 +327,24 @@ def getVoltages(dssFilePath, keep_output=False, output_filename='voltages.csv'):
 	return volts
 
 def _mergeContigLinesOnce(tree):
-	# Create a lookup table of indices to object names for quick retrieval
-	from collections import OrderedDict 
-	key2id = OrderedDict({tree[i].get('object', None):i for i,v in enumerate(tree)}) # note that these are in the form <type>.<name>
-	key2id.update({tree[i].get('bus', None):i for i,v in enumerate(tree) if tree[i].get('!CMD', None) == 'setbusxy'}) # form: <name>
+	# Create a lookup table that maps an object's name to its key in the tree (or we could just map the name to the tree key...?)
+	treeids = range(0,len(tree),1)
+	tree = dict(zip(treeids,tree))
+	name2key = {tree[i].get('object', None):i for i,v in enumerate(tree)} # note that these are in the form <type>.<name>
+	name2key.update({tree[i].get('bus', None):i for i,v in enumerate(tree) if tree[i].get('!CMD', None) == 'setbusxy'}) # form: <name>
 	
 	 # Destructively iterate through treecopy and perform any modifications on tree.
 	treecopy = tree.copy()
 	removedids = []
+	i_0 = 0
 	while treecopy:
-		top = treecopy.pop()
-		topid =  top.get('object', '')
-		
+		top = treecopy.pop(i_0)
+		i_0 = i_0 + 1
 		# is this a line object? If not, move to next object in treecopy
 		if not top.get('object','None').startswith('line.'):
+			continue
+
+		if top.get('object','None') in removedids:
 			continue
 
 		# if it is a line, is it a switch? Let's skip these for now. 
@@ -350,7 +354,6 @@ def _mergeContigLinesOnce(tree):
 
 		# Get 'to' buses (Could be indicated by 'bus2', or the second, third members of 'buses'. Can assume it will be appended with phase information.)
 		busid = ''
-		topcnxnid = '' # capture name of the property that holds the 'to' connection
 		for k in top.keys():
 			if 'bus' in k:
 				if k == 'bus' or k == 'bus1':
@@ -362,17 +365,17 @@ def _mergeContigLinesOnce(tree):
 					buslist = buslist.split(',')
 					if len(buslist)>2:
 						busid = ''
-						continue # this has more than 2 cnxns and thus is ineligible for reduction
+						continue # more than 2 cnxns = ineligible for reduction
 					busid = buslist[1]
 				else: # is line-like, get value (i.e. a 'to' bus)
 					busid = top[k]
 		if busid == '': # not line-like
 			continue 
-		bus = tree[key2id[busid.split('.')[0]]]
+		bus = tree[name2key[busid.split('.')[0]]]
 
 		# Get ids of objects connected to bus (aka the bottoms)
 		bottoms = []
-		for obj in tree:
+		for k,obj in tree.items():
 			if obj.get('object', None) == top.get('object', None): # The top cannot also be a bottom
 				continue
 			if obj.get('!CMD','None')=='setbusxy': # The bus cannot connect to itself
@@ -399,12 +402,6 @@ def _mergeContigLinesOnce(tree):
 		if not bottom.get('object','None').startswith('line.'):
 			continue
 
-		#bottom = ''
-		#for obj in tree:
-		#	if obj.get('object','None').startswith('line.'):
-		#		if obj['bus1']==busid: # the bottom will be attached to the bus via its 'from' bus, indicated by bus1 for a line.
-		#			bottom = obj
-
 		if ('length' in top) and ('length' in bottom):
 			# check that the configurations are equal - top/bottom both need to be lines for this to work correctly (i.e. check the intersection between the two sets of properties).
 			diffprops = ['!CMD','object','bus1','bus2','length',] # we don't care if these values differ between the top and the bottom
@@ -412,32 +409,22 @@ def _mergeContigLinesOnce(tree):
 				if not k in diffprops:
 					vb = bottom.get(k,'None')
 					if vt!=vb:
-						break # the two configurations are unequal (or k isn't defined for the bottom).
+						break
 			
-			# If we get here, we know the configs are the same...
-			
-			# final check - ensure phase connectivity is compatible between merged cnxn
-			#tphsinf = top['bus2'].split('.',1)
-			#bphsinf = bottom['bus2'].split('.',1)
-			#if tphsinf[1]!=bphsinf[1]:
-			#	continue
-
 			# Delete bus and bottom; Set top line length = sum of both lines; Connect top to the new bottom.
-			toptree = tree[key2id[top['object']]] # modify the tree object directly (this creates a pointer for in-place mods)
-			removedids.append(bus['bus']) # DEBUG
-			removedids.append(bottom['object']) # DEBUG
+			toptree = tree[name2key[top['object']]] # modify the tree object directly (this creates a pointer for in-place mods)
+			removedids.append(bus['bus'])
+			removedids.append(bottom['object'])
 			newLen = float(top['length']) + float(bottom['length']) # get the new length
 			toptree['length'] = str(newLen)
 			toptree['bus2'] = bottom['bus2'] # we know these props exist because we know the top and bottom are lines
-			# the following operations must occur in this order to maintain accuracy of key2id
-			del tree[key2id[bus['bus']]]
-			# correct all ids in key2id greater than key2id[bus['bus']]
-			del tree[key2id[bottom['object']]]
-			del key2id[bottom['object']]
-
-
+			del tree[name2key[bus['bus']]]
+			del tree[name2key[bottom['object']]]
+	
 	for x in removedids: # DEBUG
 		print(x)  # DEBUG
+	return [v for k,v in tree.items()] # back to a list of dicts
+
 
 def mergeContigLines(tree):
 	''' merge all lines that are across nodes and have the same config
@@ -445,8 +432,9 @@ def mergeContigLines(tree):
 	removedKeys = 1
 	while removedKeys != 0:
 		treeKeys = len(tree)
-		_mergeContigLinesOnce(tree)
+		tree = _mergeContigLinesOnce(tree)
 		removedKeys = treeKeys - len(tree)
+	return tree
 
 def _tests():
 	# Tests for voltageCompare, getVoltages, and runDSS
@@ -462,18 +450,16 @@ def _tests():
 
 	# Contig line merging test
 	#fpath = 'iowa240.clean.dss'
-	#import dssConvert
-	#tree = dssConvert.dssToTree(fpath)
-	#networkPlot(fpath) # DEBUG (not working. Line 114 of this file complains about 'BUS2' not having coords)
-	#gldtree = dssConvert.evilDssTreeToGldTree(tree) # DEBUG
-	#dssConvert.distNetViz.viz_mem(gldtree, open_file=True, forceLayout=True) # DEBUG
+	#from dssConvert import dssToTree,evilDssTreeToGldTree,distNetViz
+	#tree = dssToTree(fpath)
+	#gldtree = evilDssTreeToGldTree(tree) # DEBUG
+	#distNetViz.viz_mem(gldtree, open_file=True, forceLayout=True) # DEBUG
 	#oldsz = len(tree)
 	#mergeContigLines(tree)
 	#newsz = len(tree)
 	##dssConvert.treeToDss(tree, fpath[:-4] + '-reduced.dss')
-	##networkPlot(fpath[:-4] +'-reduced.dss') # DEBUG (not working. Line 114 of this file complains about 'BUS2' not having coords)
-	##gldtree = dssConvert.evilDssTreeToGldTree(tree) # DEBUG
-	##dssConvert.distNetViz.viz_mem(gldtree, open_file=True, forceLayout=True) # DEBUG
+	#gldtree = evilDssTreeToGldTree(tree) # DEBUG
+	#distNetViz.viz_mem(gldtree, open_file=True, forceLayout=True) # DEBUG
 	#print('Objects removed: %s (of %s). Percent reduction: %s%%.'%(oldsz, oldsz-newsz, (oldsz-newsz)*100/oldsz))
 
 	# Make core output
@@ -495,22 +481,23 @@ def _tests():
 	#capacityPlot(FPATH)
 
 if __name__ == "__main__":
-		
+	_tests()
+	
 	# Contig line merging test
 	#from dssConvert import dssToTree, distNetViz, evilDssTreeToGldTree, treeToDss
 	#fpath = ['iowa240.clean.dss','ieee8500-unbal.clean.dss']
-	#fpath = ['ieee37.clean.dss','ieee123_solarRamp.clean.dss','iowa240.clean.dss','ieee8500-unbal.clean.dss']
+	##fpath = ['ieee37.clean.dss','ieee123_solarRamp.clean.dss','iowa240.clean.dss','ieee8500-unbal.clean.dss']
 	#for ckt in fpath:
 	#	tree = dssToTree(ckt)
-		#gldtree = evilDssTreeToGldTree(tree) # DEBUG
-		#distNetViz.viz_mem(gldtree, open_file=True, forceLayout=True) # DEBUG
+	#	#gldtree = evilDssTreeToGldTree(tree) # DEBUG
+	#	#distNetViz.viz_mem(gldtree, open_file=True, forceLayout=True) # DEBUG
 	#	oldsz = len(tree)
-	#	mergeContigLines(tree)
+	#	tree = mergeContigLines(tree)
 	#	newsz = len(tree)
-		#gldtree = evilDssTreeToGldTree(tree) # DEBUG
-		#distNetViz.viz_mem(gldtree, open_file=True, forceLayout=True) # DEBUG
+	#	#gldtree = evilDssTreeToGldTree(tree) # DEBUG
+	#	#distNetViz.viz_mem(gldtree, open_file=True, forceLayout=True) # DEBUG
 	#	outckt = ckt[:-4] + '_mergeContigLines.dss'
 	#	treeToDss(tree, outckt)
 	#	maxerr = voltageCompare(getVoltages(ckt), getVoltages(outckt), keep_output=False)
 	#	print('Objects removed: %s (of %s).\nPercent reduction: %s%%.\nMaximum voltage error: %s.'%(oldsz-newsz, oldsz, (oldsz-newsz)*100/oldsz, maxerr))
-	_tests()
+	
