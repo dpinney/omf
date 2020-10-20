@@ -272,6 +272,7 @@ def voltageCompare(in1, in2, keep_output=False, output_filename='voltageCompare_
 	csvins = [x for x in ins if type(x)==str and '.csv' in x.lower()]
 	dfins = [x for x in ins if type(x)==pd.DataFrame]
 	assert (len(csvins)+len(dfins))==2, 'Inputs must either be a .csv file of voltages as output by the OpenDss \'Export Voltages\' command, or a dataframe of voltages output by the omf method \'getVoltages()\'.'
+	# Convert .csvs to dataframes and add to the list
 	for pth in csvins:
 		try:
 			df = pd.read_csv(pth, header=0)
@@ -281,22 +282,29 @@ def voltageCompare(in1, in2, keep_output=False, output_filename='voltageCompare_
 		df.drop(labels='Bus', axis=1, inplace=True)
 		df = df.astype(float, copy=True)
 		dfins.append(df)
-	# now everything is in a dataframe. unpack this, because the remainder of this code block is not vectorized. (how to
-	# provide difference between multiple values, i.e. [v1,v2,v3,...,vn]? permuting would be ridiculous. not worth it.)
-	avolts = dfins[0]
-	bvolts = dfins[1]
-	assert avolts.size == bvolts.size, 'The matrices must have identical dimensions.'
-	#assert avolts.columns == bvolts.columns, 'The matrices must have identical column names.' # doesn't work, moving on.
-	cols = bvolts.columns
-	resultErr = pd.DataFrame(index=bvolts.index, columns=cols)
+
+	# Which has more rows? We'll define the larger one to be 'avolts' 
+	foob = 0 if len(dfins[0].index) > len(dfins[1].index) else 1
+	avolts = dfins[foob]
+	foob = 1-foob # returns 0 if foob==1 ; returns 1 if foob==0
+	bvolts = dfins[foob]
+	
+	# Match columns to rows, perform needed math, and save into resultErr.
+	# TODO: Check that columns match (will currently error if not)
+	cols = avolts.columns
+	resultErr = pd.DataFrame(index=avolts.index, columns=cols)
 	for col in cols:
-		for row in bvolts.index:
+		for row in avolts.index:
+			if not row in bvolts.index:
+				continue
 			in1 = avolts.loc[row,col]
 			in2 = bvolts.loc[row,col]
-			denom = in1 if in1!=0 else in2
+			denom = in1 if in1!=0 else in2 # TODO: is this okay? Feels sacrilegious. Neither input is theoretical so <shrug?>
 			resultErr.loc[row,col] = abs(100*(in1 - in2)/denom) if denom!=0 else 0
-
+	
+	# Construct results, ignoring the 'pu' columns
 	resultSumm = pd.DataFrame(index=['Max %Err', 'Avg %Err', 'Min %Err'], columns=cols)
+	cols = [c for c in cols if (not c.startswith(' pu')) and (not c.startswith(' Node'))]
 	for c in cols:
 		resultSumm.loc['Max %Err',c] = max(resultErr.loc[:,c])
 		resultSumm.loc['Avg %Err',c] = sum(resultErr.loc[:,c])/len(resultErr.loc[:,c])
@@ -421,8 +429,8 @@ def _mergeContigLinesOnce(tree):
 			del tree[name2key[bus['bus']]]
 			del tree[name2key[bottom['object']]]
 	
-	for x in removedids: # DEBUG
-		print(x)  # DEBUG
+	#for x in removedids: # DEBUG
+	#	print(x)  # DEBUG
 	return [v for k,v in tree.items()] # back to a list of dicts
 
 
@@ -449,18 +457,25 @@ def _tests():
 	os.remove(outpath)
 
 	# Contig line merging test
-	#fpath = 'iowa240.clean.dss'
-	#from dssConvert import dssToTree,evilDssTreeToGldTree,distNetViz
-	#tree = dssToTree(fpath)
-	#gldtree = evilDssTreeToGldTree(tree) # DEBUG
-	#distNetViz.viz_mem(gldtree, open_file=True, forceLayout=True) # DEBUG
-	#oldsz = len(tree)
-	#mergeContigLines(tree)
-	#newsz = len(tree)
-	##dssConvert.treeToDss(tree, fpath[:-4] + '-reduced.dss')
-	#gldtree = evilDssTreeToGldTree(tree) # DEBUG
-	#distNetViz.viz_mem(gldtree, open_file=True, forceLayout=True) # DEBUG
-	#print('Objects removed: %s (of %s). Percent reduction: %s%%.'%(oldsz, oldsz-newsz, (oldsz-newsz)*100/oldsz))
+	#from dssConvert import dssToTree, distNetViz, evilDssTreeToGldTree, treeToDss
+	#fpath = ['iowa240.clean.dss','ieee8500-unbal.clean.dss']
+	#fpath = ['ieee37.clean.dss','ieee123_solarRamp.clean.dss','iowa240.clean.dss','ieee8500-unbal.clean.dss']
+	#for ckt in fpath:
+	#	tree = dssToTree(ckt)
+		#gldtree = evilDssTreeToGldTree(tree) # DEBUG
+		#distNetViz.viz_mem(gldtree, open_file=True, forceLayout=True) # DEBUG
+		#oldsz = len(tree)
+		#tree = mergeContigLines(tree)
+		#newsz = len(tree)
+		#gldtree = evilDssTreeToGldTree(tree) # DEBUG
+		#distNetViz.viz_mem(gldtree, open_file=True, forceLayout=True) # DEBUG
+	#	outckt = ckt[:-4] + '_mergeContigLines.dss'
+	#	treeToDss(tree, outckt)
+	#	involts = getVoltages(ckt, keep_output=True, output_filename=ckt[:-4] + '_volts.dss')
+	#	outvolts = getVoltages(outckt, keep_output=True, output_filename=outckt[:-4] + '_volts.dss')
+	#	maxerr = voltageCompare(involts, outvolts, keep_output=True)
+	#	print('Objects removed: %s (of %s).\nPercent reduction: %s%%.\nMaximum voltage error (magnitude or angle): %s.'%(oldsz-newsz, oldsz, (oldsz-newsz)*100/oldsz, maxerr))
+	
 
 	# Make core output
 	#FPATH = 'iowa240.clean.dss'
@@ -482,22 +497,3 @@ def _tests():
 
 if __name__ == "__main__":
 	_tests()
-	
-	# Contig line merging test
-	#from dssConvert import dssToTree, distNetViz, evilDssTreeToGldTree, treeToDss
-	#fpath = ['iowa240.clean.dss','ieee8500-unbal.clean.dss']
-	##fpath = ['ieee37.clean.dss','ieee123_solarRamp.clean.dss','iowa240.clean.dss','ieee8500-unbal.clean.dss']
-	#for ckt in fpath:
-	#	tree = dssToTree(ckt)
-	#	#gldtree = evilDssTreeToGldTree(tree) # DEBUG
-	#	#distNetViz.viz_mem(gldtree, open_file=True, forceLayout=True) # DEBUG
-	#	oldsz = len(tree)
-	#	tree = mergeContigLines(tree)
-	#	newsz = len(tree)
-	#	#gldtree = evilDssTreeToGldTree(tree) # DEBUG
-	#	#distNetViz.viz_mem(gldtree, open_file=True, forceLayout=True) # DEBUG
-	#	outckt = ckt[:-4] + '_mergeContigLines.dss'
-	#	treeToDss(tree, outckt)
-	#	maxerr = voltageCompare(getVoltages(ckt), getVoltages(outckt), keep_output=False)
-	#	print('Objects removed: %s (of %s).\nPercent reduction: %s%%.\nMaximum voltage error: %s.'%(oldsz-newsz, oldsz, (oldsz-newsz)*100/oldsz, maxerr))
-	
