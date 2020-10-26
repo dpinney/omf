@@ -371,7 +371,7 @@ def customerCost(workDir, customerName, duration, season, annualkWh, businessTyp
 	# return {'customerOutageCost': outageCost}
 	return outageCost, kWhEstimate, times, localMax
 
-def graphMicrogrid(pathToOmd, pathToMicro, pathToCsv, workDir, maxTime, stepSize, faultedLine, timeMinFilter, timeMaxFilter, actionFilter, outageDuration, restoration_cost, hardware_cost, nameSame):
+def graphMicrogrid(pathToOmd, pathToMicro, pathToCsv, workDir, maxTime, stepSize, faultedLine, timeMinFilter, timeMaxFilter, actionFilter, outageDuration, restoration_cost, hardware_cost, sameFeeder):
 	# read in the OMD file as a tree and create a geojson map of the system
 	if not workDir:
 		workDir = tempfile.mkdtemp()
@@ -379,7 +379,7 @@ def graphMicrogrid(pathToOmd, pathToMicro, pathToCsv, workDir, maxTime, stepSize
 
 	# command = 'cmd /c ' + '"julia --project=' + '"C:/Users/granb/PowerModelsONM.jl-master/" ' + 'C:/Users/granb/PowerModelsONM.jl-master/src/cli/entrypoint.jl' + ' -n ' + '"' + str(workDir) + '/circuit.dss' + '"' + ' -o ' + '"C:/Users/granb/PowerModelsONM.jl-master/output.json"'
 	
-	if os.path.exists(f'{workDir}/output.json') and nameSame:
+	if os.path.exists(f'{workDir}/output.json') and sameFeeder:
 		with open(f'{workDir}/output.json') as inFile:
 			data = json.load(inFile)
 			genProfiles = data['Generator profiles']
@@ -516,7 +516,14 @@ def graphMicrogrid(pathToOmd, pathToMicro, pathToCsv, workDir, maxTime, stepSize
 		else:
 			Dict['geometry'] = {'type': 'LineString', 'coordinates': [[coordLis[0], coordLis[1]], [coordLis[2], coordLis[3]]]}
 			Dict['type'] = 'Feature'
-			Dict['properties'] = {'name': str(tree[key].get('name', '')),
+			Dict['properties'] = {'device': device, 
+								  'time': time,
+								  'action': action,
+								  'loadBefore': loadBefore,
+								  'loadAfter': loadAfter,
+								  'timeMin': timeMin, 
+								  'timeMax': timeMax,
+								  'actionFilter': actionFilter,
 								  'edgeColor': '#' + str(colormap(time)),
 								  'popupContent': 'Location: <b>' + str(coordStr) + '</b><br>Device: <b>' + str(device) + '</b><br>Time: <b>' + str(time) + '</b><br>Action: <b>' + str(action) + '</b><br>Load Before: <b>' + str(loadBefore) + '</b><br>Load After: <b>' + str(loadAfter) + '</b>.'}
 			feederMap['features'].append(Dict)
@@ -587,25 +594,22 @@ def work(modelDir, inputDict):
 	# Write in the feeder
 	feederName = [x for x in os.listdir(modelDir) if x.endswith('.omd')][0][:-4]
 	inputDict['feederName1'] = feederName
-	nameSame = False
+	with open(f'{modelDir}/{feederName}.omd', 'r') as omdFile:
+		omd = json.load(omdFile)
+	sameFeeder = False
 
+	
 	if os.path.exists(f'{modelDir}/feeder.json'):
-		with open(f'{modelDir}/feeder.json') as inFile:
-			name = json.load(inFile)
-			if name == feederName:
-				nameSame = True
-		with open(f'{modelDir}/{feederName}.omd', 'r') as omdFile:
-			omd = json.load(omdFile)
+		sameFeeder = open(f'{modelDir}/feeder.json').read() == omd		
 
-	if not nameSame:
-		# Output a .dss file, which will be needed for ONM.
-		with open(f'{modelDir}/{feederName}.omd', 'r') as omdFile:
-			omd = json.load(omdFile)
-			with open(f'{modelDir}/feeder.json', 'wt') as feederFile:
-				json.dump(feederName, feederFile)
+	if not sameFeeder:
+		with open(f'{modelDir}/feeder.json', 'wt') as feederFile:
+			with open(f'{modelDir}/{feederName}.omd', 'r') as omdFile:
+				json.dump(json.load(omdFile), feederFile)
 
 
 	tree = omd['tree']
+	# Output a .dss file, which will be needed for ONM.
 	# niceDss = dssConvert.evilGldTreeToDssTree(tree)
 	# dssConvert.treeToDss(niceDss, f'{modelDir}/circuit.dss')
 
@@ -631,7 +635,7 @@ def work(modelDir, inputDict):
 		inputDict['outageDuration'],
 		inputDict['restoration_cost'],
 		inputDict['hardware_cost'],
-		nameSame)
+		sameFeeder)
 	
 	# Textual outputs of outage timeline
 	with open(pJoin(modelDir,'timelineStats.html')) as inFile:
@@ -681,7 +685,7 @@ def new(modelDir):
 		'maxTime': '20',
 		'stepSize': '1',
 		'faultedLine': 'l32',
-		'timeMinFilter': '1',
+		'timeMinFilter': '10',
 		'timeMaxFilter': '20',
 		'actionFilter': 'All',
 		'outageDuration': '5', 
@@ -693,6 +697,7 @@ def new(modelDir):
 		'customerFileName': 'customerInfo.csv'
 	}
 	creationCode = __neoMetaModel__.new(modelDir, defaultInputs)
+	print(creationCode)
 	try:
 		shutil.copyfile(pJoin(__neoMetaModel__._omfDir, 'static', 'publicFeeders', defaultInputs['feederName1']+'.omd'), pJoin(modelDir, defaultInputs['feederName1']+'.omd'))
 	except:
@@ -711,6 +716,8 @@ def _debugging():
 		pass
 	# Create New.
 	new(modelLoc)
+	with open(f'{modelLoc}/allInputData.json') as file:
+		print(json.load(file))
 	# Pre-run.
 	# renderAndShow(modelLoc)
 	# Run the model.

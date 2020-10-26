@@ -348,8 +348,8 @@
 		geojsonLayer = L.geoJSON(false, {
 					pointToLayer: pointToLayerNode,
 					onEachFeature: onEachFeature,
-					style: lineStyle,
-					filter: filterFunction
+					filter: filterFunction,
+					style: lineStyle
 				});
 
 		geojson.features.forEach(function(feature){
