@@ -17,6 +17,7 @@ from pprint import pprint as pp
 
 def gridLabToDSS(inFilePath, outFilePath):
 	''' Convert gridlab file to dss. ''' 
+	#TODO: delete because obsolete?
 	model = Store()
 	# HACK: the gridlab reader can't handle brace syntax that ditto itself writes...
 	# command = 'sed -i -E "s/{/ {/" ' + inFilePath
@@ -30,6 +31,7 @@ def gridLabToDSS(inFilePath, outFilePath):
 
 def dssToGridLab(inFilePath, outFilePath, busCoords=None):
 	''' Convert dss file to gridlab. '''
+	#TODO: delete because obsolete?
 	model = Store()
 	#TODO: do something about busCoords: 
 	dss_reader = dReader(master_file = inFilePath)
@@ -342,7 +344,7 @@ def evilDssTreeToGldTree(dssTree):
 			if 'bus1' in ob and 'bus2' in ob:
 				# line-like object.
 				# strip the weird dot notation stuff via find.
-				# TODO: add handling for cnxns that are defined with no phase/node information attached, i.e. 'busX' vs. 'busX.1.2.3'
+				# TODOn't: add handling for cnxns that are defined with no phase/node information attached, i.e. 'busX' vs. 'busX.1.2.3' (not a problem anymore since .dss files are required to have phase info)
 				fro, froCode = ob['bus1'].split('.', maxsplit=1)
 				to, toCode = ob['bus2'].split('.', maxsplit=1)
 				gldTree[str(g_id)] = {
@@ -357,8 +359,11 @@ def evilDssTreeToGldTree(dssTree):
 				_extend_with_exc(ob, gldTree[str(g_id)], ['object','bus1','bus2','!CMD'])
 			elif 'buses' in ob:
 				#transformer-like object.
-				# TODO: add proper handling for 3-winding transformers.
-				bb = [x for x in ob['buses']]
+				# TODO: add proper handling for 3-winding transformers. We won't be supporting 3-winding xfrmrs for viz - are we not supporting it at all?
+				bb = ob['buses'] # TODO 'buses' is not a list yet, need to make it into one.
+				bb = bb.replace(']','')
+				bb = bb.replace('[','')
+				bb = bb.split(',')
 				b1 = bb[0]
 				b2 = bb[1]
 				#if bb[2]:
