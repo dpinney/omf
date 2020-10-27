@@ -344,7 +344,12 @@ def getVoltages(dssFilePath, keep_output=False, output_filename='voltages.csv'):
 	return volts
 
 def _mergeContigLinesOnce(tree):
-	# Create a lookup table that maps an object's name to its key in the tree (or we could just map the name to the tree key...?)
+	#TODO refactor this code for performance and readability. O(n^2)=gross.
+	
+	# Capture the connections to any elements that don't connect to a bus (i.e.monitors, capacitors, meters, generators, etc.)
+	busless_objs = [x.get('element','None') for x in tree if 'element' in x]
+	
+	# Create a lookup table that maps an object's name to its key in the tree (could we just map the name to the tree key...?)
 	treeids = range(0,len(tree),1)
 	tree = dict(zip(treeids,tree))
 	name2key = {tree[i].get('object', None):i for i,v in enumerate(tree)} # note that these are in the form <type>.<name>
@@ -357,35 +362,30 @@ def _mergeContigLinesOnce(tree):
 	while treecopy:
 		top = treecopy.pop(i_0)
 		i_0 = i_0 + 1
+
 		# is this a line object? If not, move to next object in treecopy
 		if not top.get('object','None').startswith('line.'):
 			continue
-
+		
+		# has this item already been removed?
 		if top.get('object','None') in removedids:
-			continue
-
-		# if it is a line, is it a switch? Let's skip these for now. 
-		# TODO: handling for switches when merging them with adjacent line segments is feasible
-		if top.get('switch','None')=='yes' or top.get('switch','None')=='true':
 			continue
 
 		# Get 'to' buses (Could be indicated by 'bus2', or the second, third members of 'buses'. Can assume it will be appended with phase information.)
 		busid = ''
+		buslist = []
 		for k in top.keys():
-			if 'bus' in k:
-				if k == 'bus' or k == 'bus1':
-					continue
-				if k == 'buses': # is line-like, get all members of list beyond the first (i.e. 'to' buses)
-					buslist = top['buses']
-					buslist = buslist.replace(']','')
-					buslist = buslist.replace('[','')
-					buslist = buslist.split(',')
-					if len(buslist)>2:
-						busid = ''
-						continue # more than 2 cnxns = ineligible for reduction
-					busid = buslist[1]
-				else: # is line-like, get value (i.e. a 'to' bus)
-					busid = top[k]
+			if k=='buses':
+				buslist = top[k]
+				buslist = buslist.replace(']','')
+				buslist = buslist.replace('[','')
+				buslist = buslist.split(',')
+				if len(buslist)>2:
+					busid = ''
+					continue # more than 2 cnxns = ineligible for reduction
+				busid = buslist[1]
+			elif k=='bus2':
+				busid = top[k]
 		if busid == '': # not line-like
 			continue 
 		bus = tree[name2key[busid.split('.')[0]]]
@@ -393,21 +393,24 @@ def _mergeContigLinesOnce(tree):
 		# Get ids of objects connected to bus (aka the bottoms)
 		bottoms = []
 		for k,obj in tree.items():
+			objid = obj.get('object','None')
 			if obj.get('object', None) == top.get('object', None): # The top cannot also be a bottom
 				continue
 			if obj.get('!CMD','None')=='setbusxy': # The bus cannot connect to itself
 				continue
 			allbottoms = []
-			for k, v in obj.items():
-				if 'bus' in k: # property indicates a cnxn
-					if k == 'buses': # it's a list
-						allbottoms.append(obj[k][0])
-						allbottoms.append(obj[k][1])
-					else: # it's a single value
-						allbottoms.append(obj[k])
-			# TODO: Decide whether to leave phase info appended to botid or not. May ensure that connected phases of bottoms are equivalent
+			for k, v in obj.items(): # See if this object is attached to our bus of interest. If so, capture it.
+				if k == 'buses':
+					buslist = obj[k]
+					buslist = buslist.replace(']','')
+					buslist = buslist.replace('[','')
+					buslist = buslist.split(',')
+					for b in buslist:
+						allbottoms.append(b)
+				elif k in ['bus','bus1','bus2','element']: # it's a single value
+					allbottoms.append(v)
 			allbottoms = [x.split('.')[0] for x in allbottoms]
-			if ( len([x for x in allbottoms if x == busid.split('.')[0]]) > 0 ): #if any of the bottoms ids equal the node id, then obj is connected to our node of interest
+			if ( len([x for x in allbottoms if x == busid.split('.')[0]]) > 0 ): #if any of the bottoms' ids equal the bus id, then obj is connected to our node of interest
 				bottoms.append(obj)
 		
 		# Check for a one-line-in, one-line-out scenario
@@ -415,8 +418,17 @@ def _mergeContigLinesOnce(tree):
 			continue
 		bottom = bottoms[0]
 
-		# is the bottom a line?
+		# Is the bottom a line?
 		if not bottom.get('object','None').startswith('line.'):
+			continue
+
+		# Is the bottom a switch? Let's skip these for now. 
+		# TODO: handling for switches when merging them with adjacent line segments is feasible
+		if bottom.get('switch','None')=='yes' or bottom.get('switch','None')=='true':
+			continue
+
+		# Does the bottom have any monitors, capacitors, energy meters, etc. attached? If so, don't remove it.
+		if bottom.get('object','None') in busless_objs:
 			continue
 
 		if ('length' in top) and ('length' in bottom):
@@ -438,10 +450,10 @@ def _mergeContigLinesOnce(tree):
 			del tree[name2key[bus['bus']]]
 			del tree[name2key[bottom['object']]]
 	
-	#for x in removedids: # DEBUG
-	#	print(x)  # DEBUG
+	#with open('removed_ids.txt', 'a') as remfile:
+	#	for remid in removedids:
+	#		remfile.write(remid + '\n')
 	return [v for k,v in tree.items()] # back to a list of dicts
-
 
 def mergeContigLines(tree):
 	''' merge all lines that are across nodes and have the same config
