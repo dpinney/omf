@@ -551,7 +551,7 @@ def work(modelDir, inputDict):
 	#Load a blank glm file and use it to write to it
 	feederPath = pJoin(modelDir, 'feeder.glm')
 	with open(feederPath, 'w') as glmFile:
-		toWrite =  feeder.sortedWrite(omd['tree']) + "object jsondump {\n\tfilename_dump_reliability JSON_dump_line.json;\n\twrite_system_info true;\n\twrite_per_unit true;\n\tsystem_base 100.0 MVA;\n};\n"
+		toWrite = feeder.sortedWrite(omd['tree']) + "object jsondump {\n\tfilename_dump_reliability JSON_dump_line.json;\n\twrite_system_info true;\n\twrite_per_unit true;\n\tsystem_base 100.0 MVA;\n};\n"
 		glmFile.write(toWrite)		
 	#Write attachments from omd, if no file, one will be created
 	for fileName in omd['attachments']:
@@ -573,7 +573,8 @@ def work(modelDir, inputDict):
 		myEnv['GLPATH'] = omf.omfDir + '/solvers/gridlabdv990/MacRC4p1_std8/'
 		commandString = '"' + omf.omfDir + '/solvers/gridlabdv990/MacRC4p1_std8/gld.sh" feeder.glm'
 	# Run GridLAB-D First Time.
-	proc = subprocess.Popen(commandString, stdout=subprocess.PIPE, shell=True, cwd=modelDir, env=myEnv)
+	proc = subprocess.Popen(['gridlabd', '-w', 'feeder.glm'], stdout=subprocess.PIPE, shell=True, cwd=modelDir, env=myEnv)
+	# proc = subprocess.Popen(commandString, stdout=subprocess.PIPE, shell=True, cwd=modelDir, env=myEnv)
 	(out, err) = proc.communicate()
 	with open(pJoin(modelDir, "gldConsoleOut.txt"), "w") as gldConsoleOut:
 		gldConsoleOut.write(out.decode())

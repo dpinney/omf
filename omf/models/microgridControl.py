@@ -697,7 +697,6 @@ def new(modelDir):
 		'customerFileName': 'customerInfo.csv'
 	}
 	creationCode = __neoMetaModel__.new(modelDir, defaultInputs)
-	print(creationCode)
 	try:
 		shutil.copyfile(pJoin(__neoMetaModel__._omfDir, 'static', 'publicFeeders', defaultInputs['feederName1']+'.omd'), pJoin(modelDir, defaultInputs['feederName1']+'.omd'))
 	except:

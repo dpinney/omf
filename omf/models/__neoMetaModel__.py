@@ -281,6 +281,9 @@ def new(modelDir, defaultInputs):
 		if not alreadyThere:
 			os.makedirs(modelDir)
 		else:
+			defaultInputs["created"] = str(datetime.datetime.now())
+			with web.locked_open(pJoin(modelDir, "allInputData.json"),"w") as inputFile:
+				json.dump(defaultInputs, inputFile, indent = 4)
 			return False
 		defaultInputs["created"] = str(datetime.datetime.now())
 		with web.locked_open(pJoin(modelDir, "allInputData.json"),"w") as inputFile:
