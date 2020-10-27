@@ -261,19 +261,18 @@ def capacityPlot(filePath):
 	
 def voltageCompare(in1, in2, keep_output=False, output_filename='voltageCompare_results.csv'):
 	'''Compares two instances of the information provided by the 'Export voltages' opendss command and outputs 
-	the maximum error encountered for any value compared. If the 'keep_output' flag is set to 'True', also 
+	the maximum error (% and absolute difference) encountered for any value compared. If the 'keep_output' flag is set to 'True', also 
 	outputs a file that describes the maximum, average, and minimum error encountered for each column. Use the 
-	'output_filename' parameter to set the output file name. Inputs can be formatted as a .csv file of voltages
-	output by OpenDSS, or as a dataframe of voltages obtained using the OMF's getVoltages(). Buses contained in 
-	input files must match in name and order.'''
-	# TODO: would inter-quartile ranges be more descriptive?
-	# TODO: add 'set_theoretical={1|2}' flag to mark which input should be considered the base case in comparison
+	'output_filename' parameter to set the output file name. Inputs can be formatted as a .dss file of voltages
+	output by OpenDSS, or as a dataframe of voltages obtained using the OMF's getVoltages().'''
+	#TODO: rewrite description
 	ins = [in1, in2]
-	csvins = [x for x in ins if type(x)==str and '.csv' in x.lower()]
-	dfins = [x for x in ins if type(x)==pd.DataFrame]
-	assert (len(csvins)+len(dfins))==2, 'Inputs must either be a .csv file of voltages as output by the OpenDss \'Export Voltages\' command, or a dataframe of voltages output by the omf method \'getVoltages()\'.'
+	txtins = [x for x in ins if type(x)==str and 'dss'==x.lower().split('.')[-1]]
+	memins = [x for x in ins if type(x)==pd.DataFrame]
+	assert (len(txtins)+len(memins))==2, 'Inputs must either be a .dss file of voltages as output by the OpenDss \'Export Voltages\' command, or a dataframe of voltages output by the omf method \'getVoltages()\'.'
 	# Convert .csvs to dataframes and add to the list
-	for pth in csvins:
+	for pth in txtins:
+		df = pd.DataFrame()
 		try:
 			df = pd.read_csv(pth, header=0)
 			df.index = df['Bus']
@@ -281,43 +280,53 @@ def voltageCompare(in1, in2, keep_output=False, output_filename='voltageCompare_
 			print('Please ensure that the input file exists and is formatted like the file output by the OpenDss \'Export Voltages\' command.')
 		df.drop(labels='Bus', axis=1, inplace=True)
 		df = df.astype(float, copy=True)
-		dfins.append(df)
+		memins.append(df)
 
-	# Which has more rows? We'll define the larger one to be 'avolts' 
-	foob = 0 if len(dfins[0].index) > len(dfins[1].index) else 1
-	avolts = dfins[foob]
+	# Which has more rows? We'll define the larger one to be 'avolts'. This is also considered the 'theoretical' set.
+	foob = 0 if len(memins[0].index) > len(memins[1].index) else 1
+	avolts = memins[foob]
 	foob = 1-foob # returns 0 if foob==1 ; returns 1 if foob==0
-	bvolts = dfins[foob]
+	bvolts = memins[foob]
 	
 	# Match columns to rows, perform needed math, and save into resultErr.
-	# TODO: Check that columns match (will currently error if not)
 	cols = avolts.columns
-	resultErr = pd.DataFrame(index=avolts.index, columns=cols)
+	cols = [c for c in cols if (not c.startswith(' pu')) and (not c.startswith(' Node'))]
+	resultErrD = pd.DataFrame(index=avolts.index, columns=cols)
+	resultErrP = resultErrD.copy()
 	for col in cols:
 		for row in avolts.index:
 			if not row in bvolts.index:
 				continue
 			in1 = avolts.loc[row,col]
 			in2 = bvolts.loc[row,col]
-			denom = in1 if in1!=0 else in2 # TODO: is this okay? Feels sacrilegious. Neither input is theoretical so <shrug?>
-			resultErr.loc[row,col] = abs(100*(in1 - in2)/denom) if denom!=0 else 0
+			resultErrP.loc[row,col] = 100*(in1 - in2)/in1 if in1!=0 else 0
+			resultErrD.loc[row,col] = in1 - in2
 	
-	# Construct results, ignoring the 'pu' columns
-	resultSumm = pd.DataFrame(index=['Max %Err', 'Avg %Err', 'Min %Err'], columns=cols)
-	cols = [c for c in cols if (not c.startswith(' pu')) and (not c.startswith(' Node'))]
+	# Construct results
+	resultSummP = pd.DataFrame(index=['Max %Err', 'Avg %Err', 'Min %Err'], columns=cols)
+	resultSummD = pd.DataFrame(index=['Max Diff', 'Avg Diff', 'Min Diff'], columns=cols)
 	for c in cols:
-		resultSumm.loc['Max %Err',c] = max(resultErr.loc[:,c])
-		resultSumm.loc['Avg %Err',c] = sum(resultErr.loc[:,c])/len(resultErr.loc[:,c])
-		resultSumm.loc['Min %Err',c] = min(resultErr.loc[:,c])
-	maxErr = max(resultSumm.loc['Max %Err',:])
+		resultSummP.loc['Max %Err',c] = max(resultErrP.loc[:,c])
+		resultSummP.loc['Avg %Err',c] = sum(resultErrP.loc[:,c])/len(resultErrP.loc[:,c])
+		resultSummP.loc['Min %Err',c] = min(resultErrP.loc[:,c])
+		resultSummD.loc['Max Diff',c] = max(resultErrD.loc[:,c])
+		resultSummD.loc['Avg Diff',c] = sum(resultErrD.loc[:,c])/len(resultErrD.loc[:,c])
+		resultSummD.loc['Min Diff',c] = min(resultErrD.loc[:,c])	
+	maxErrPerc = max(resultSummP.loc['Max %Err',:])
+	maxErrDiff = max(resultSummD.loc['Max Diff',:])
+	outroot = output_filename[:-4]
 	if keep_output:
-		resultSumm.to_csv(output_filename, header=True, index=True, mode='w')
-		resultSumm = pd.DataFrame(index=[''],columns=cols)
-		resultSumm.to_csv(output_filename, header=False, index=True, mode='a')
-		resultErr.to_csv(output_filename, header=True, index=True, mode='a')
-	return maxErr
+		resultSummP.to_csv(outroot + '_Perc.csv', header=True, index=True, mode='w')
+		resultSummP = pd.DataFrame(index=[''],columns=cols)
+		resultSummP.to_csv(outroot + '_Perc.csv', header=False, index=True, mode='a')
+		resultErrP.to_csv(outroot + '_Perc.csv', header=True, index=True, mode='a')
+		resultSummD.to_csv(outroot + '_Diff.csv', header=True, index=True, mode='w')
+		resultSummD = pd.DataFrame(index=[''],columns=cols)
+		resultSummD.to_csv(outroot + '_Diff.csv', header=False, index=True, mode='a')
+		resultErrD.to_csv(outroot + '_Diff.csv', header=True, index=True, mode='a')
+	return maxErrPerc, maxErrDiff
 
-def getVoltages(dssFilePath, keep_output=False, output_filename='voltages.csv'): # TODO: remane to voltageGet for consistency with other functions?
+def getVoltages(dssFilePath, keep_output=False, output_filename='voltages.csv'): # TODO: rename to voltageGet for consistency with other functions?
 	'''Obtains the OpenDss voltage output for a OpenDSS circuit definition file (*.dss). Input path 
 	can be fully qualified or not. Set the 'keep_output' flag to 'True' to save output to the input 
 	file's directory as 'voltages.csv',	or specify a filename for the output through the 
