@@ -38,12 +38,16 @@ class HazardField(object):
 		''' Parse input .asc file. '''
 		with open(inPath, "r") as hazardFile: # Parse the file, strip away whitespaces.
 			content = hazardFile.readlines()
+			print(content)
 		content = [x.strip() for x in content]
+		print(content)
 		hazardObj = {}
 		field = []
 		for i in range(len(content)): 
 			if i <= 5: # First, get the the parameters for the export function below. Each gets their own entry in our object.
-				line = re.split(r"\s+",content[i])
+				# line = re.split(r"\s+",content[i])
+				line = content[i].split()
+				print(line)
 				hazardObj[line[0]] = float(line[1])
 			if i > 5: # Then, get the numerical data, mapping each number to its appropriate parameter.
 				field.insert((i-6), list(map(float,content[i].split(" "))))
