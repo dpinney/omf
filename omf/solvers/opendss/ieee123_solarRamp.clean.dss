@@ -177,14 +177,14 @@ New object=Line.l113 phases=1 bus1=113.1 bus2=114.1 linecode=9 Seasons=1 Ratings
 New object=Line.l114 phases=3 bus1=135.1.2.3 bus2=35.1.2.3 linecode=4 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.375 units=kft
 New object=Line.l116 phases=3 bus1=152.1.2.3 bus2=52.1.2.3 linecode=1 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.4 units=kft
 New object=Line.l117 phases=3 bus1=160r.1.2.3 bus2=67.1.2.3 linecode=6 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.35 units=kft
-New object=Line.sw1 phases=3 bus1=150r.1.2.3 bus2=149.1.2.3 r1=0.001 r0=0.001 x1=0 x0=0 C1=0 C0=0 length=0.001
-New object=Line.sw2 phases=3 bus1=13.1.2.3 bus2=152.1.2.3 r1=0.001 r0=0.001 x1=0 x0=0 C1=0 C0=0 length=0.001
-New object=Line.sw3 phases=3 bus1=18.1.2.3 bus2=135.1.2.3 r1=0.001 r0=0.001 x1=0 x0=0 C1=0 C0=0 length=0.001
-New object=Line.sw4 phases=3 bus1=60.1.2.3 bus2=160.1.2.3 r1=0.001 r0=0.001 x1=0 x0=0 C1=0 C0=0 length=0.001
-New object=Line.sw5 phases=3 bus1=97.1.2.3 bus2=197.1.2.3 r1=0.001 r0=0.001 x1=0 x0=0 C1=0 C0=0 length=0.001
-New object=Line.sw6 phases=3 bus1=61.1.2.3 bus2=61s.1.2.3 r1=0.001 r0=0.001 x1=0 x0=0 C1=0 C0=0 length=0.001
-New object=Line.sw7 phases=3 bus1=151.1.2.3 bus2=300_open.1.2.3 r1=0.001 r0=0.001 x1=0 x0=0 C1=0 C0=0 length=0.001
-New object=Line.sw8 phases=1 bus1=54.1 bus2=94_open.1 r1=0.001 r0=0.001 x1=0 x0=0 C1=0 C0=0 length=0.001
+New object=Line.sw1 phases=3 bus1=150r.1.2.3 bus2=149.1.2.3 r1=0.001 r0=0.001 x1=0 x0=0 C1=0 C0=0 length=0.001 switch=True
+New object=Line.sw2 phases=3 bus1=13.1.2.3 bus2=152.1.2.3 r1=0.001 r0=0.001 x1=0 x0=0 C1=0 C0=0 length=0.001 switch=True
+New object=Line.sw3 phases=3 bus1=18.1.2.3 bus2=135.1.2.3 r1=0.001 r0=0.001 x1=0 x0=0 C1=0 C0=0 length=0.001 switch=True
+New object=Line.sw4 phases=3 bus1=60.1.2.3 bus2=160.1.2.3 r1=0.001 r0=0.001 x1=0 x0=0 C1=0 C0=0 length=0.001 switch=True
+New object=Line.sw5 phases=3 bus1=97.1.2.3 bus2=197.1.2.3 r1=0.001 r0=0.001 x1=0 x0=0 C1=0 C0=0 length=0.001 switch=True
+New object=Line.sw6 phases=3 bus1=61.1.2.3 bus2=61s.1.2.3 r1=0.001 r0=0.001 x1=0 x0=0 C1=0 C0=0 length=0.001 switch=True
+New object=Line.sw7 phases=3 bus1=151.1.2.3 bus2=300_open.1.2.3 r1=0.001 r0=0.001 x1=0 x0=0 C1=0 C0=0 length=0.001 switch=True
+New object=Line.sw8 phases=1 bus1=54.1 bus2=94_open.1 r1=0.001 r0=0.001 x1=0 x0=0 C1=0 C0=0 length=0.001 switch=True
 ! Redirect Load.DSS
 New object=Load.s1a bus1=1.1 phases=1 conn=Wye model=1 kV=2.4 kW=40 kvar=20
 New object=Load.s2b bus1=2.2 phases=1 conn=Wye model=1 kV=2.4 kW=20 kvar=10
