@@ -161,14 +161,13 @@ def _dssFilePrep(fpath):
 		exptDirPath = tempDir + '/' + 'OmfCktExport'
 		dss.run_command('Save Circuit ' + 'purposelessFileName.dss ' + exptDirPath)
 		# Manipulate buscoords file to create commands that generate bus list
-		coords = pd.read_csv(exptDirPath + '/BusCoords.dss', header=None)
-		coords.columns = ['Element', 'X', 'Y']
+		coords = pd.read_csv(exptDirPath + '/BusCoords.dss', header=None, dtype=str, names=['Element', 'X', 'Y'])
 		coordscmds = []
 		for i,x in coords.iterrows():
 			elmt = x['Element']
 			xcoord = x['X']
 			ycoord = x['Y']
-			coordscmds.append('SetBusXY bus=' + elmt + ' X=' + str(xcoord) + ' Y=' + str(ycoord) + '\n') # save commands for later usage
+			coordscmds.append('SetBusXY bus=' + str(elmt) + ' X=' + str(xcoord) + ' Y=' + str(ycoord) + '\n') # save commands for later usage
 		# Get Master.DSS from exported files and insert content from other files
 		outfilepath = dssDirPath + '/' + dssFileName[:-4] + '_expd.dss'
 		with open(exptDirPath + '/Master.DSS', 'r') as ogMaster, open(outfilepath, 'a') as catMaster:
