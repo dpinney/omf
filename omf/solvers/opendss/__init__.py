@@ -272,11 +272,8 @@ def voltageCompare(in1, in2, keep_output=False, output_filename='voltageCompare_
 	# Convert .csvs to dataframes and add to the list
 	for pth in txtins:
 		df = pd.DataFrame()
-		try:
-			df = pd.read_csv(pth, header=0)
-			df.index = df['Bus']
-		except:
-			print('Please ensure that the input file exists and is formatted like the file output by the OpenDss \'Export Voltages\' command.')
+		df = pd.read_csv(pth, header=0)
+		df.index = df['Bus']
 		df.drop(labels='Bus', axis=1, inplace=True)
 		df = df.astype(float, copy=True)
 		memins.append(df)
@@ -303,27 +300,77 @@ def voltageCompare(in1, in2, keep_output=False, output_filename='voltageCompare_
 	
 	# Construct results
 	resultSummP = pd.DataFrame(index=['Max %Err', 'Avg %Err', 'Min %Err'], columns=cols)
-	resultSummD = pd.DataFrame(index=['Max Diff', 'Avg Diff', 'Min Diff'], columns=cols)
+	resultSummD = pd.DataFrame(index=['Max Diff', 'Avg Diff', 'Min Diff', 'RMSE'], columns=cols)
 	for c in cols:
-		resultSummP.loc['Max %Err',c] = max(resultErrP.loc[:,c])
-		resultSummP.loc['Avg %Err',c] = sum(resultErrP.loc[:,c])/len(resultErrP.loc[:,c])
-		resultSummP.loc['Min %Err',c] = min(resultErrP.loc[:,c])
-		resultSummD.loc['Max Diff',c] = max(resultErrD.loc[:,c])
-		resultSummD.loc['Avg Diff',c] = sum(resultErrD.loc[:,c])/len(resultErrD.loc[:,c])
-		resultSummD.loc['Min Diff',c] = min(resultErrD.loc[:,c])	
-	maxErrPerc = max(resultSummP.loc['Max %Err',:])
-	maxErrDiff = max(resultSummD.loc['Max Diff',:])
+		resultSummP.loc['Max %Err',c] = resultErrP.loc[:,c].max(skipna=True)
+		resultSummP.loc['Avg %Err',c] = resultErrP.loc[:,c].mean(skipna=True)
+		resultSummP.loc['Min %Err',c] = resultErrP.loc[:,c].min(skipna=True)
+		resultSummD.loc['Max Diff',c] = resultErrD.loc[:,c].max(skipna=True)
+		resultSummD.loc['Avg Diff',c] = resultErrD.loc[:,c].mean(skipna=True)
+		resultSummD.loc['Min Diff',c] = resultErrD.loc[:,c].min(skipna=True)
+		resultSummD.loc['RMSE',c] = math.sqrt((resultErrD.loc[:,c]**2).mean())
 	outroot = output_filename[:-4]
+	
 	if keep_output:
 		resultSummP.to_csv(outroot + '_Perc.csv', header=True, index=True, mode='w')
-		resultSummP = pd.DataFrame(index=[''],columns=cols)
-		resultSummP.to_csv(outroot + '_Perc.csv', header=False, index=True, mode='a')
+		emptyline = pd.DataFrame(index=[''],columns=cols)
+		emptyline.to_csv(outroot + '_Perc.csv', header=False, index=True, mode='a')
 		resultErrP.to_csv(outroot + '_Perc.csv', header=True, index=True, mode='a')
 		resultSummD.to_csv(outroot + '_Diff.csv', header=True, index=True, mode='w')
-		resultSummD = pd.DataFrame(index=[''],columns=cols)
-		resultSummD.to_csv(outroot + '_Diff.csv', header=False, index=True, mode='a')
+		emptyline.to_csv(outroot + '_Diff.csv', header=False, index=True, mode='a')
 		resultErrD.to_csv(outroot + '_Diff.csv', header=True, index=True, mode='a')
-	return maxErrPerc, maxErrDiff
+
+		# Produce boxplots to visually analyze the residuals
+		from matplotlib.pyplot import boxplot
+		magcols = [c for c in cols if c.lower().startswith(' magnitude')]
+		bxpltMdf = pd.DataFrame(index=bvolts.index,data=resultErrD,columns=magcols)
+		bxpltM = []
+		for item in magcols:
+			bxpltM.append(bxpltMdf[item])
+		figM, axM = plt.subplots()
+		axM.set_title('Boxplot of Residuals: Voltage Magnitude')
+		plt.xticks(rotation=45)
+		axM.set_xticklabels(magcols)
+		axM.boxplot(bxpltM)
+		figM.savefig('ieeeXX.clean_boxplot_Magnitude.png', bbox_inches='tight')
+
+		angcols = [c for c in cols if c.lower().startswith(' angle')]
+		bxpltAdf = pd.DataFrame(data=resultErrD[angcols],columns=angcols)
+		bxpltA = []
+		for item in angcols:
+			bxpltA.append(bxpltAdf[item])
+		figA, axA = plt.subplots()
+		axA.set_title('Boxplot of Residuals: Voltage Angle')
+		plt.xticks(rotation=45)
+		axA.set_xticklabels(angcols)
+		axA.boxplot(bxpltA)
+		figA.savefig('ieeeXX.clean_boxplot_Angle.png', bbox_inches='tight')
+
+		for c in cols:
+			# Produce plot of residuals
+			figR, axR = plt.subplots()
+			residuals = resultErrD[c].copy().sort_values()
+			axR.plot(resultErrD[c], 'k.', alpha=0.1)
+			axR.set_title('Plot of Residuals: ' + c)
+			plt.xticks(rotation=45)
+			axR.set_xlabel('Bus Name')
+			axR.set_ylabel('Value of Residual')
+			figR.savefig('ieeeXX.clean_residualplot_' + c +'_.png', bbox_inches='tight')
+
+			# Produce scatter plots
+			in2 = pd.Series(bvolts[c], index=bvolts.index) # this is the input with fewer buses
+			in2 = in2.sort_values(na_position='first')
+			in1 = pd.Series(index=bvolts.index)
+			for idx in in2.index:
+				in1[idx] = avolts.loc[idx,c]
+			figS, axS = plt.subplots()
+			axS.set_title('Scatter Plot: ' + c)
+			axS.plot(in2, in1, 'k.', alpha=0.1)
+			axS.set_xlabel('Circuit with the least buses')
+			axS.set_ylabel('Circuit with the most buses')
+			figS.savefig('ieeeXX.clean_scatterplot_' + c +'_.png', bbox_inches='tight')
+	plt.close('all')
+	return resultSummP, resultSummD
 
 def getVoltages(dssFilePath, keep_output=False, output_filename='voltages.csv'): # TODO: rename to voltageGet for consistency with other functions?
 	'''Obtains the OpenDss voltage output for a OpenDSS circuit definition file (*.dss). Input path 
@@ -449,9 +496,9 @@ def _mergeContigLinesOnce(tree):
 			del tree[name2key[bus['bus']]]
 			del tree[name2key[bottom['object']]]
 	
-	#with open('removed_ids.txt', 'a') as remfile:
-	#	for remid in removedids:
-	#		remfile.write(remid + '\n')
+	with open('removed_ids.txt', 'a') as remfile:
+		for remid in removedids:
+			remfile.write(remid + '\n')
 	return [v for k,v in tree.items()] # back to a list of dicts
 
 def mergeContigLines(tree):
@@ -465,41 +512,55 @@ def mergeContigLines(tree):
 	return tree
 
 def _tests():
-	# Tests for voltageCompare, getVoltages, and runDSS
-	voltpath = 'voltages.csv'
-	outpath = 'voltageCompare_results.csv'
-	voltsdf = getVoltages('iowa240.clean.dss', keep_output=True, output_filename=voltpath)
-	errlim = 0.0
-	assert voltageCompare(voltpath, voltpath, keep_output=True, output_filename=outpath) <= errlim, 'The error between the compared files exceeds the allowable limit of %s%%.'%(errlim*100)
-	assert voltageCompare(voltsdf, voltsdf, keep_output=True, output_filename=outpath) <= errlim, 'The error between the compared files exceeds the allowable limit of %s%%.'%(errlim*100)
-	assert voltageCompare(voltpath, voltsdf, keep_output=True, output_filename=outpath) <= errlim, 'The error between the compared files exceeds the allowable limit of %s%%.'%(errlim*100)
-	os.remove(voltpath)
-	os.remove(outpath)
+	#froots = ['ieee37.clean.dss','ieee123_solarRamp.clean.dss','iowa240.clean.dss','ieeeLVTestCase.clean.dss','ieee8500-unbal.clean.dss']
+	#for froot in froots:
+	#	froot = froot[:-4]
+	#	involts = froot + '_volts.dss'
+	#	outvolts = froot + '_mergecontiglines_volts.dss'
+	#	rsumm_P, rsumm_D = voltageCompare(involts, outvolts, keep_output=True)
 
-	# Contig line merging test
-	#from dssConvert import dssToTree, distNetViz, evilDssTreeToGldTree, treeToDss
-	#fpath = ['iowa240.clean.dss','ieee8500-unbal.clean.dss']
-	#fpath = ['ieee37.clean.dss','ieee123_solarRamp.clean.dss','iowa240.clean.dss','ieee8500-unbal.clean.dss']
-	#for ckt in fpath:
-	#	tree = dssToTree(ckt)
+	from dssConvert import dssToTree, distNetViz, evilDssTreeToGldTree, treeToDss
+	fpath = ['ieee37.clean.dss','ieee123_solarRamp.clean.dss','iowa240.clean.dss','ieeeLVTestCase.clean.dss','ieee8500-unbal.clean.dss']
+
+	for ckt in fpath:
+		tree = dssToTree(ckt)
+		
+		# Tests for mergeContigLines, voltageCompare, getVoltages, and runDSS
+		#errlim = 0.0
+		#assert voltageCompare(voltpath, voltpath, keep_output=True, output_filename=outpath) <= errlim, 'The error between the compared files exceeds the allowable limit of %s%%.'%(errlim*100)
+		#assert voltageCompare(voltsdf, voltsdf, keep_output=True, output_filename=outpath) <= errlim, 'The error between the compared files exceeds the allowable limit of %s%%.'%(errlim*100)
+		#assert voltageCompare(voltpath, voltsdf, keep_output=True, output_filename=outpath) <= errlim, 'The error between the compared files exceeds the allowable limit of %s%%.'%(errlim*100)
 		#gldtree = evilDssTreeToGldTree(tree) # DEBUG
 		#distNetViz.viz_mem(gldtree, open_file=True, forceLayout=True) # DEBUG
-		#oldsz = len(tree)
-		#tree = mergeContigLines(tree)
-		#newsz = len(tree)
+		oldsz = len(tree)
+		tree = mergeContigLines(tree)
+		newsz = len(tree)
 		#gldtree = evilDssTreeToGldTree(tree) # DEBUG
 		#distNetViz.viz_mem(gldtree, open_file=True, forceLayout=True) # DEBUG
-	#	outckt = ckt[:-4] + '_mergeContigLines.dss'
-	#	treeToDss(tree, outckt)
-	#	involts = getVoltages(ckt, keep_output=True, output_filename=ckt[:-4] + '_volts.dss')
-	#	outvolts = getVoltages(outckt, keep_output=True, output_filename=outckt[:-4] + '_volts.dss')
-	#	maxerr = voltageCompare(involts, outvolts, keep_output=True)
-	#	print('Objects removed: %s (of %s).\nPercent reduction: %s%%.\nMaximum voltage error (magnitude or angle): %s.'%(oldsz-newsz, oldsz, (oldsz-newsz)*100/oldsz, maxerr))
-	
+		outckt_loc = ckt[:-4] + '_mergeContigLines.dss'
+		treeToDss(tree, outckt_loc)
+		involts_loc = ckt[:-4] + '_volts.dss'
+		involts = getVoltages(ckt, keep_output=True, output_filename=involts_loc)
+		outvolts_loc = outckt_loc[:-4] + '_volts.dss'
+		outvolts = getVoltages(outckt_loc, keep_output=True, output_filename=outvolts_loc)
+		rsumm_P, rsumm_D = voltageCompare(involts, outvolts, keep_output=False, output_filename=ckt[:-4] + '_voltageCompare.csv')		
+		avgerrM = [rsumm_P.loc['Avg %Err',c] for c in rsumm_P.columns if c.lower().startswith(' magnitude')]
+		avgerrM = pd.Series(avgerrM).mean()
+		avgerrA = [rsumm_P.loc['Avg %Err',c] for c in rsumm_P.columns if c.lower().startswith(' angle')]
+		avgerrA = pd.Series(avgerrA).mean()
+		maxrmseM = [rsumm_D.loc['RMSE',c] for c in rsumm_P.columns if c.lower().startswith(' angle')]
+		maxrmseM = pd.Series(maxrmseM).max()
+		maxrmseA = [rsumm_D.loc['RMSE',c] for c in rsumm_P.columns if c.lower().startswith(' magnitude')]
+		maxrmseA = pd.Series(maxrmseA).max()
+		os.remove(involts_loc)
+		os.remove(outvolts_loc)
+		os.remove(outckt_loc)
+		print('Objects removed: %s (of %s).\nPercent reduction: %s%%\nAverage percent error in voltage magnitude: %s%%\nAverage percent error in voltage angle: %s%%\nMax RMSE for voltage magnitude: %s\nMax RMSE for voltage angle: %s'%(oldsz-newsz, oldsz, (oldsz-newsz)*100/oldsz, avgerrM, avgerrA, maxrmseM, maxrmseA))
+		
 
 	# Make core output
 	#FPATH = 'iowa240.clean.dss'
-	#FPATH = 'ieeeLVTestCaseNorthAmerican.dss'
+	#FPATH = 'ieeeLVTestCase.dss'
 	#FPATH = 'ieee37.clean.reduced.dss'
 	#dssConvert.evilGldTreeToDssTree(tree)
 	#dssConvert.treeToDss(tree, 'ieeeLVTestCaseNorthAmerican_reduced.dss')
