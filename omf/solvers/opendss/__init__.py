@@ -30,14 +30,13 @@ def runDSS(dssFilePath, keep_output=True):
 	# also generate coordinates.
 	# TODO?: Get the coords as a separate function (i.e. getCoords() below) and instead return dssFileLoc.
 	x = dss.run_command('Export BusCoords ' + dssFileLoc + '/coords.csv')
-	coords = pd.read_csv(dssFileLoc + '/coords.csv', header=None)
+	coords = pd.read_csv(dssFileLoc + '/coords.csv', dtype=str, header=None, names=['Element', 'X', 'Y'])
 	# TODO: reverse keep_output logic - Should default to cleanliness. Requires addition of 'keep_output=True' to all function calls.
 	if not keep_output:
 		os.remove(x)
-	coords.columns = ['Element', 'X', 'Y']
 	hyp = []
 	for index, row in coords.iterrows():
-		hyp.append(math.sqrt(row['X']**2 + row['Y']**2))
+		hyp.append(math.sqrt(float(row['X'])**2 + float(row['Y'])**2))
 	coords['radius'] = hyp
 	return coords
 
