@@ -46,6 +46,7 @@ class HazardField(object):
 				# line = re.split(r"\s+",content[i])
 				line = content[i].split()
 				print(line)
+				if len(line) < 2:
 					continue
 				hazardObj[line[0]] = float(line[1])
 			if i > 5: # Then, get the numerical data, mapping each number to its appropriate parameter.
