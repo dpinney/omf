@@ -51,7 +51,8 @@ class HazardField(object):
 				hazardObj[line[0]] = float(line[1])
 			if i > 8: # Then, get the numerical data, mapping each number to its appropriate parameter.
 				content[i] = content[i].replace(" ", ",")
-				field.insert((i-6), list(map(float,content[i].split(","))))
+				if content[i].split(",") != " ":
+					field.insert((i-6), list(map(float,content[i].split(","))))
 		field = np.array(field)
 		hazardObj["field"] = field
 		return hazardObj
