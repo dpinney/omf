@@ -38,18 +38,18 @@ class HazardField(object):
 		''' Parse input .asc file. '''
 		with open(inPath, "r") as hazardFile: # Parse the file, strip away whitespaces.
 			content = hazardFile.readlines()
-		content = [x.strip() for x in content]
+		content = [x.strip(' ') for x in content]
 		hazardObj = {}
 		field = []
 		for i in range(len(content)):
-			if i <= 7: # First, get the the parameters for the export function below. Each gets their own entry in our object.
+			if i <= 8: # First, get the the parameters for the export function below. Each gets their own entry in our object.
 				# line = re.split(r"\s+",content[i])
 				line = content[i].split()
 				print(line)
 				if len(line) < 2:
 					continue
 				hazardObj[line[0]] = float(line[1])
-			if i > 7: # Then, get the numerical data, mapping each number to its appropriate parameter.
+			if i > 8: # Then, get the numerical data, mapping each number to its appropriate parameter.
 				field.insert((i-6), list(map(float,content[i].split(" "))))
 		field = np.array(field)
 		hazardObj["field"] = field
