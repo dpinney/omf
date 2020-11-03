@@ -38,17 +38,14 @@ class HazardField(object):
 		''' Parse input .asc file. '''
 		with open(inPath, "r") as hazardFile: # Parse the file, strip away whitespaces.
 			content = hazardFile.readlines()
-			print(content)
 		content = [x.strip() for x in content]
-		print(content)
 		hazardObj = {}
 		field = []
 		for i in range(len(content)): 
 			if i <= 5: # First, get the the parameters for the export function below. Each gets their own entry in our object.
 				# line = re.split(r"\s+",content[i])
 				line = content[i].split()
-				print(line)
-				hazardObj[line[0]] = float(line[1])
+				hazardObj[line[0][0]] = float(line[0][1])
 			if i > 5: # Then, get the numerical data, mapping each number to its appropriate parameter.
 				field.insert((i-6), list(map(float,content[i].split(" "))))
 		field = np.array(field)
@@ -521,6 +518,7 @@ def work(modelDir, inputDict):
 	with open(rdtInputFilePath, 'r') as rdtInputFile:
 		# HACK: we use rdtInput as a string in the frontend.
 		rdtJsonAsString = rdtInputFile.read()
+		print(rdtJsonAsString)
 		rdtJson = json.loads(rdtJsonAsString)
 	rdtJson["power_flow"] = inputDict["power_flow"]
 	rdtJson["solver_iteration_timeout"] = 300.0
@@ -571,14 +569,14 @@ def work(modelDir, inputDict):
 		commandString = omf.omfDir + '/solvers/gridlabdv990/gridlabd.bin feeder.glm'  
 	elif platform.system() == "Windows":
 		myEnv = os.environ.copy()
-		commandString =  '"' + pJoin(omf.omfDir, "solvers", "gridlabdv990", "gridlabd.exe") + '"' + " feeder.glm"
+		commandString = 'gridlabd' + ' -w ' + 'feeder.glm'
+		# commandString =  '"' + pJoin(omf.omfDir, "solvers", "gridlabdv990", "gridlabd.exe") + '"' + " feeder.glm"
 	elif platform.system() == "Darwin":
 		myEnv = os.environ.copy()
 		myEnv['GLPATH'] = omf.omfDir + '/solvers/gridlabdv990/MacRC4p1_std8/'
 		commandString = '"' + omf.omfDir + '/solvers/gridlabdv990/MacRC4p1_std8/gld.sh" feeder.glm'
 	# Run GridLAB-D First Time.
-	proc = subprocess.Popen(['gridlabd', '-w', 'feeder.glm'], stdout=subprocess.PIPE, shell=True, cwd=modelDir, env=myEnv)
-	# proc = subprocess.Popen(commandString, stdout=subprocess.PIPE, shell=True, cwd=modelDir, env=myEnv)
+	proc = subprocess.Popen(commandString, stdout=subprocess.PIPE, shell=True, cwd=modelDir, env=myEnv)
 	(out, err) = proc.communicate()
 	with open(pJoin(modelDir, "gldConsoleOut.txt"), "w") as gldConsoleOut:
 		gldConsoleOut.write(out.decode())
@@ -723,7 +721,7 @@ def new(modelDir):
 		weather_impacts = f.read()
 
 	defaultInputs = {
-		"feederName1": "trip37", # "trip37" "UCS Winter 2017 Fixed" "SVECNoIslands"
+		"feederName1": 'trip37', #"ieee123", # "trip37" "UCS Winter 2017 Fixed" "SVECNoIslands"
 		"modelType": modelName,
 		"layoutAlgorithm": "geospatial",
 		"modelName": modelDir,
@@ -739,6 +737,11 @@ def new(modelDir):
 		"generatorCandidates": "A_node706,A_node707,A_node708,B_node704,B_node705,B_node703",
 		"switchCandidates" : "A_node705-742,A_node705-712",
 		"criticalLoads": "C_load722",
+		# "hardeningCandidates": "line068069",
+		# "newLineCandidates": "line072073",
+		# "generatorCandidates": "node072",
+		# "switchCandidates": "line106107",
+		# "criticalLoads": "node050",
 		"criticalLoadMet": "0.98",
 		"nonCriticalLoadMet": "0.5",
 		"chanceConstraint": "1.0",
