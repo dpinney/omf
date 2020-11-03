@@ -45,7 +45,10 @@ class HazardField(object):
 			if i <= 5: # First, get the the parameters for the export function below. Each gets their own entry in our object.
 				# line = re.split(r"\s+",content[i])
 				line = content[i].split()
-				hazardObj[line[0][0]] = float(line[0][1])
+				if len(line) < 2:
+					i+=1
+					continue
+				hazardObj[line[0]] = float(line[1])
 			if i > 5: # Then, get the numerical data, mapping each number to its appropriate parameter.
 				field.insert((i-6), list(map(float,content[i].split(" "))))
 		field = np.array(field)
