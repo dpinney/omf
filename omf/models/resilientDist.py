@@ -45,8 +45,7 @@ class HazardField(object):
 			if i <= 5: # First, get the the parameters for the export function below. Each gets their own entry in our object.
 				# line = re.split(r"\s+",content[i])
 				line = content[i].split()
-				if len(line) < 2:
-					i+=1
+				print(line)
 					continue
 				hazardObj[line[0]] = float(line[1])
 			if i > 5: # Then, get the numerical data, mapping each number to its appropriate parameter.
@@ -521,7 +520,6 @@ def work(modelDir, inputDict):
 	with open(rdtInputFilePath, 'r') as rdtInputFile:
 		# HACK: we use rdtInput as a string in the frontend.
 		rdtJsonAsString = rdtInputFile.read()
-		print(rdtJsonAsString)
 		rdtJson = json.loads(rdtJsonAsString)
 	rdtJson["power_flow"] = inputDict["power_flow"]
 	rdtJson["solver_iteration_timeout"] = 300.0
