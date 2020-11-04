@@ -46,7 +46,7 @@ def _getCoords(dssFilePath, keep_output=True):
 	# TODO: clean up and test the below copy-pasta'd logic
 	#dssFileLoc = runDSS(dssFilePath, keep_output=True)
 	dssFileLoc = runDSS(dssFilePath)
-	x = dss.run_command('Export BusCoords ' + dssFileLoc + '/coords.csv')
+	x = dss.run_command('Export BusCoords "' + dssFileLoc + '/coords.csv"')
 	coords = pd.read_csv(dssFileLoc + '/coords.csv', header=None)
 	if not keep_output:
 		os.remove(x)
@@ -64,7 +64,7 @@ def voltagePlot(filePath, PU=True):
 	# TODO: use getCoords() here, if we write it.
 	#volt_coord = runDSS(filePath, keep_output=False)
 	volt_coord = runDSS(filePath)
-	dss.run_command('Export voltages ' + dssFileLoc + '/volts.csv')
+	dss.run_command('Export voltages "' + dssFileLoc + '/volts.csv"')
 	voltage = pd.read_csv(dssFileLoc + '/volts.csv')
 	# Generate voltage plots.
 	volt_coord.columns = ['Bus', 'X', 'Y', 'radius'] # radius would be obtained by getCoords().
@@ -92,7 +92,7 @@ def currentPlot(filePath):
 	''' Current plotting function.'''
 	dssFileLoc = os.path.dirname(os.path.abspath(filePath))
 	curr_coord = runDSS(filePath)
-	dss.run_command('Export currents ' + dssFileLoc + '/currents.csv')
+	dss.run_command('Export currents "' + dssFileLoc + '/currents.csv"')
 	current = pd.read_csv(dssFileLoc + '/currents.csv')
 	curr_coord.columns = ['Index', 'X', 'Y', 'radius'] # DSS buses don't have current, but are connected to it. 
 	curr_hyp = []
@@ -112,7 +112,7 @@ def networkPlot(filePath):
 	''' Plot the physical topology of the circuit. '''
 	dssFileLoc = os.path.dirname(os.path.abspath(filePath))
 	coords = runDSS(filePath)
-	dss.run_command('Export voltages ' + dssFileLoc + '/volts.csv')
+	dss.run_command('Export voltages "' + dssFileLoc + '/volts.csv"')
 	volts = pd.read_csv(dssFileLoc + '/volts.csv')
 	coords.columns = ['Bus', 'X', 'Y', 'radius']
 	G = nx.Graph()
@@ -156,7 +156,7 @@ def THD(filePath):
 	dssFileLoc = os.path.dirname(os.path.abspath(filePath))
 	bus_coords = runDSS(filePath)
 	dss.run_command('Solve mode=harmonics')
-	dss.run_command('Export voltages ' + dssFileLoc + '/voltharmonics.csv')
+	dss.run_command('Export voltages "' + dssFileLoc + '/voltharmonics.csv"')
 	# Clean up temp file.
 	try:
 		base = os.path.basename(filePath)
@@ -185,8 +185,8 @@ def dynamicPlot(filePath, time_step, iterations):
 	dynamicCommand = 'Solve mode=dynamics stepsize=%d number=%d' % (time_step, iterations)
 	dss.run_command(dynamicCommand)
 	for i in range(iterations):
-		voltString = 'Export voltages ' + dssFileLoc + '/dynamicVolt%d.csv' % i
-		currentString = 'Export currents ' + dssFileLoc + '/dynamicCurrent%d.csv' % i
+		voltString = 'Export voltages "' + dssFileLoc + '/dynamicVolt%d.csv"' % i
+		currentString = 'Export currents "' + dssFileLoc + '/dynamicCurrent%d.csv"' % i
 		dss.run_command(voltString)
 		dss.run_command(currentString)
 	powerData = []
@@ -222,7 +222,7 @@ def faultPlot(filePath):
 	dssFileLoc = os.path.dirname(os.path.abspath(filePath))
 	bus_coord = runDSS(filePath)
 	dss.run_command('Solve Mode=FaultStudy')
-	dss.run_command('Export fault ' + dssFileLoc + '/faults.csv')
+	dss.run_command('Export fault "' + dssFileLoc + '/faults.csv"')
 	faultData = pd.read_csv(dssFileLoc + '/faults.csv')
 	bus_coord.columns = ['Bus', 'X', 'Y', 'radius']
 	faultDF = pd.concat([bus_coord, faultData], axis=1)
@@ -242,7 +242,7 @@ def capacityPlot(filePath):
 	''' Plot power vs. distance '''
 	dssFileLoc = os.path.dirname(os.path.abspath(filePath))
 	coords = runDSS(filePath)
-	dss.run_command('Export Capacity ' + dssFileLoc + '/capacity.csv')
+	dss.run_command('Export Capacity "' + dssFileLoc + '/capacity.csv"')
 	capacityData = pd.read_csv(dssFileLoc + '/capacity.csv')
 	coords.columns = ['Index', 'X', 'Y', 'radius']
 	capacityDF = pd.concat([coords, capacityData], axis=1)
@@ -380,7 +380,7 @@ def getVoltages(dssFilePath, keep_output=False, output_filename='voltages.csv'):
 	# TODO: (nice to have) vectorize it?
 	dssFileLoc = os.path.dirname(os.path.abspath(dssFilePath))
 	coords = runDSS(os.path.abspath(dssFilePath), keep_output=False)
-	dss.run_command('Export voltages ' + dssFileLoc + '/' + output_filename)
+	dss.run_command('Export voltages "' + dssFileLoc + '/' + output_filename + '"')
 	volts = pd.read_csv(dssFileLoc + '/' + output_filename, header=0)
 	volts.index = volts['Bus']
 	volts.drop(labels='Bus', axis=1, inplace=True)
