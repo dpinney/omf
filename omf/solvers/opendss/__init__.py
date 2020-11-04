@@ -25,11 +25,11 @@ def runDSS(dssFilePath, keep_output=True):
 	except Exception as ex:
 		print('While accessing the file located at %s, the following exception occured: %s'%(dssFileLoc, ex))
 	dss.run_command('Clear')
-	dss.run_command('Redirect ' + fullPath)
+	dss.run_command('Redirect "' + fullPath + '"')
 	dss.run_command('Solve')
 	# also generate coordinates.
 	# TODO?: Get the coords as a separate function (i.e. getCoords() below) and instead return dssFileLoc.
-	x = dss.run_command('Export BusCoords ' + dssFileLoc + '/coords.csv')
+	x = dss.run_command('Export BusCoords "' + dssFileLoc + '/coords.csv"')
 	coords = pd.read_csv(dssFileLoc + '/coords.csv', dtype=str, header=None, names=['Element', 'X', 'Y'])
 	# TODO: reverse keep_output logic - Should default to cleanliness. Requires addition of 'keep_output=True' to all function calls.
 	if not keep_output:
