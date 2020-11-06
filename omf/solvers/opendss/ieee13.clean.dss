@@ -3,7 +3,7 @@ set defaultbasefrequency=60
 
 new object=circuit.ieee13nodeckt basekv=115 pu=1.0001 phases=3 bus1=sourcebus angle=30 mvasc3=20000 mvasc1=21000 
 
-!sub transformer definition 
+! sub transformer definition 
 new object=transformer.sub phases=3 windings=2 xhl=0.008 windings=2 buses=[sourcebus,650] conns=[delta,wye] kvs=[115,4.16] kvas=[5000,5000] %rs=[0.0005,0.0005]
 
 ! feeder 1-phase voltage regulators
@@ -18,10 +18,10 @@ new object=regcontrol.reg2 transformer=reg2 winding=2 vreg=122 band=2 ptratio=20
 new object=transformer.reg3 phases=1 bank=reg1 xhl=0.01 kvas=[1666,1666] buses=[650.3,rg60.3] kvs=[2.4,2.4] %loadloss=0.01
 new object=regcontrol.reg3 transformer=reg3 winding=2 vreg=122 band=2 ptratio=20 ctprim=700 r=3 x=9 
 
-!transformer definition 
+! transformer definition 
 new object=transformer.xfm1 phases=3 windings=2 xhl=2 buses=[633,634] conns=[wye,wye] kvs=[4.16,0.480] kvas=[500,500] %rs=[0.55,0.55] xht=1 xlt=1
 
-// these are local matrix line codes
+! these are local matrix line codes
 new object=linecode.mtx601 nphases=3 basefreq=60 rmatrix=[0.3465|0.1560,0.3375|0.1580,0.1535,0.3414] xmatrix=[1.0179|0.5017,1.0478|0.4236,0.3849,1.0348] units=mi 
 new object=linecode.mtx602 nphases=3 basefreq=60 rmatrix=[0.7526|0.1580,0.7475|0.1560,0.1535,0.7436] xmatrix=[1.1814|0.4236,1.1983|0.5017,0.3849,1.2112] units=mi 
 new object=linecode.mtx603 nphases=2 basefreq=60 rmatrix=[1.3238|0.2066,1.3294] xmatrix=[1.3569|0.4591,1.3471] units=mi 
