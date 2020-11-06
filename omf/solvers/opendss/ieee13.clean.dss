@@ -1,0 +1,90 @@
+clear 
+set defaultbasefrequency=60
+
+new object=circuit.ieee13nodeckt basekv=115 pu=1.0001 phases=3 bus1=sourcebus angle=30 mvasc3=20000 mvasc1=21000 
+
+!sub transformer definition 
+new object=transformer.sub phases=3 windings=2 xhl=0.008 windings=2 buses=[sourcebus,650] conns=[delta,wye] kvs=[115,4.16] kvas=[5000,5000] %rs=[0.0005,0.0005]
+
+! feeder 1-phase voltage regulators
+! define low-impedance 2-wdg transformer
+
+new object=transformer.reg1 phases=1 bank=reg1 xhl=0.01 kvas=[1666,1666] buses=[650.1,rg60.1] kvs=[2.4,2.4] %loadloss=0.01
+new object=regcontrol.reg1 transformer=reg1 winding=2 vreg=122 band=2 ptratio=20 ctprim=700 r=3 x=9 
+
+new object=transformer.reg2 phases=1 bank=reg1 xhl=0.01 kvas=[1666,1666] buses=[650.2,rg60.2] kvs=[2.4,2.4] %loadloss=0.01
+new object=regcontrol.reg2 transformer=reg2 winding=2 vreg=122 band=2 ptratio=20 ctprim=700 r=3 x=9 
+
+new object=transformer.reg3 phases=1 bank=reg1 xhl=0.01 kvas=[1666,1666] buses=[650.3,rg60.3] kvs=[2.4,2.4] %loadloss=0.01
+new object=regcontrol.reg3 transformer=reg3 winding=2 vreg=122 band=2 ptratio=20 ctprim=700 r=3 x=9 
+
+!transformer definition 
+new object=transformer.xfm1 phases=3 windings=2 xhl=2 buses=[633,634] conns=[wye,wye] kvs=[4.16,0.480] kvas=[500,500] %rs=[0.55,0.55] xht=1 xlt=1
+
+// these are local matrix line codes
+new object=linecode.mtx601 nphases=3 basefreq=60 rmatrix=[0.3465|0.1560,0.3375|0.1580,0.1535,0.3414] xmatrix=[1.0179|0.5017,1.0478|0.4236,0.3849,1.0348] units=mi 
+new object=linecode.mtx602 nphases=3 basefreq=60 rmatrix=[0.7526|0.1580,0.7475|0.1560,0.1535,0.7436] xmatrix=[1.1814|0.4236,1.1983|0.5017,0.3849,1.2112] units=mi 
+new object=linecode.mtx603 nphases=2 basefreq=60 rmatrix=[1.3238|0.2066,1.3294] xmatrix=[1.3569|0.4591,1.3471] units=mi 
+new object=linecode.mtx604 nphases=2 basefreq=60 rmatrix=[1.3238|0.2066,1.3294] xmatrix=[1.3569|0.4591,1.3471] units=mi 
+new object=linecode.mtx605 nphases=1 basefreq=60 rmatrix=[1.3292] xmatrix=[1.3475] units=mi 
+new object=linecode.mtx606 nphases=3 units=mi rmatrix=[0.791721|0.318476,0.781649|0.28345,0.318476,0.791721] xmatrix=[0.438352|0.0276838,0.396697|-0.0184204,0.0276838,0.438352] cmatrix=[383.948|0,383.948|0,0,383.948]
+new object=linecode.mtx607 nphases=1 basefreq=60 rmatrix=[1.3425] xmatrix=[0.5124] cmatrix=[236] units=mi 
+
+!load definitions 
+new object=load.671 bus1=671.1.2.3 phases=3 conn=delta model=1 kv=4.16 kw=1155 kvar=660 
+new object=load.634a bus1=634.1 phases=1 conn=wye model=1 kv=0.277 kw=160 kvar=110 
+new object=load.634b bus1=634.2 phases=1 conn=wye model=1 kv=0.277 kw=120 kvar=90 
+new object=load.634c bus1=634.3 phases=1 conn=wye model=1 kv=0.277 kw=120 kvar=90 
+new object=load.645 bus1=645.2 phases=1 conn=wye model=1 kv=2.4 kw=170 kvar=125 
+new object=load.646 bus1=646.2.3 phases=1 conn=delta model=2 kv=4.16 kw=230 kvar=132 
+new object=load.692 bus1=692.3.1 phases=1 conn=delta model=5 kv=4.16 kw=170 kvar=151 
+new object=load.675a bus1=675.1 phases=1 conn=wye model=1 kv=2.4 kw=485 kvar=190 
+new object=load.675b bus1=675.2 phases=1 conn=wye model=1 kv=2.4 kw=68 kvar=60 
+new object=load.675c bus1=675.3 phases=1 conn=wye model=1 kv=2.4 kw=290 kvar=212 
+new object=load.611 bus1=611.3 phases=1 conn=wye model=5 kv=2.4 kw=170 kvar=80 
+new object=load.652 bus1=652.1 phases=1 conn=wye model=2 kv=2.4 kw=128 kvar=86 
+new object=load.670a bus1=670.1 phases=1 conn=wye model=1 kv=2.4 kw=17 kvar=10 
+new object=load.670b bus1=670.2 phases=1 conn=wye model=1 kv=2.4 kw=66 kvar=38 
+new object=load.670c bus1=670.3 phases=1 conn=wye model=1 kv=2.4 kw=117 kvar=68
+
+!capacitor definitions
+new object=capacitor.cap1 bus1=675 phases=3 kvar=600 kv=4.16 
+new object=capacitor.cap2 bus1=611.3 phases=1 kvar=100 kv=2.4 
+
+!line definitions 
+new object=line.650632 phases=3 bus1=rg60.1.2.3 bus2=632.1.2.3 linecode=mtx601 length=2000 units=ft 
+new object=line.632670 phases=3 bus1=632.1.2.3 bus2=670.1.2.3 linecode=mtx601 length=667 units=ft 
+new object=line.670671 phases=3 bus1=670.1.2.3 bus2=671.1.2.3 linecode=mtx601 length=1333 units=ft 
+new object=line.671680 phases=3 bus1=671.1.2.3 bus2=680.1.2.3 linecode=mtx601 length=1000 units=ft 
+new object=line.632633 phases=3 bus1=632.1.2.3 bus2=633.1.2.3 linecode=mtx602 length=500 units=ft 
+new object=line.632645 phases=2 bus1=632.3.2 bus2=645.3.2 linecode=mtx603 length=500 units=ft 
+new object=line.645646 phases=2 bus1=645.3.2 bus2=646.3.2 linecode=mtx603 length=300 units=ft 
+new object=line.692675 phases=3 bus1=692.1.2.3 bus2=675.1.2.3 linecode=mtx606 length=500 units=ft 
+new object=line.671684 phases=2 bus1=671.1.3 bus2=684.1.3 linecode=mtx604 length=300 units=ft 
+new object=line.684611 phases=1 bus1=684.3 bus2=611.3 linecode=mtx605 length=300 units=ft 
+new object=line.684652 phases=1 bus1=684.1 bus2=652.1 linecode=mtx607 length=800 units=ft 
+
+!switch definitions 
+new object=line.671692 phases=3 bus1=671 bus2=692 switch=y r1=1e-4 r0=1e-4 x1=0.000 x0=0.000 c1=0.000 c0=0.000
+
+! bus coords
+makebuslist
+setbusxy bus=sourcebus x=200 y=400
+setbusxy bus=650 x=200 y=350
+setbusxy bus=rg60 x=200 y=300
+setbusxy bus=646 x=0 y=250
+setbusxy bus=645 x=100 y=250
+setbusxy bus=632 x=200 y=250
+setbusxy bus=633 x=350 y=250
+setbusxy bus=634 x=400 y=250
+setbusxy bus=670 x=200 y=200
+setbusxy bus=611 x=0 y=100
+setbusxy bus=684 x=100 y=100
+setbusxy bus=671 x=200 y=100
+setbusxy bus=692 x=250 y=100
+setbusxy bus=675 x=400 y=100
+setbusxy bus=652 x=100 y=0
+setbusxy bus=680 x=200 y=0
+
+! set voltages
+set voltagebases=[115,4.16,0.48]
