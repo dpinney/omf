@@ -522,8 +522,8 @@ def _createAndCompareTestFile(inFile, userOutFile=''):
 	involts = getVoltages(inFile, keep_output=False)
 	outvolts = getVoltages(outFile, keep_output=False)
 	resFile = 'voltsCompare__' + os.path.split(inFile)[1][:-4] + '___' + os.path.split(outFile)[1][:-4] + '.csv'
-	maxerr = voltageCompare(involts, outvolts, keep_output=True, output_filename=resFile)
-	return maxerr, inFile, outFile, resFile
+	percSumm, diffSumm = voltageCompare(involts, outvolts, keep_output=True)
+	return 
 
 
 def _tests():

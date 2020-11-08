@@ -298,14 +298,19 @@ def voltageCompare(in1, in2, keep_output=False, output_filename='voltageCompare_
 			in2 = bvolts.loc[row,col]
 			resultErrP.loc[row,col] = 100*(in1 - in2)/in1 if in1!=0 else 0
 			resultErrD.loc[row,col] = in1 - in2
-	
+			# TODO: should absolute value be used here? (RMSPE/RMSE takes care of it)
+			#resultErrP.loc[row,col] = 100*abs(in1 - in2)/in1 if in1!=0 else 0
+			#resultErrD.loc[row,col] = abs(in1 - in2)
+
 	# Construct results
-	resultSummP = pd.DataFrame(index=['Max %Err', 'Avg %Err', 'Min %Err'], columns=cols)
+	resultSummP = pd.DataFrame(index=['Max %Err', 'Avg %Err', 'Min %Err', 'RMSPE'], columns=cols)
 	resultSummD = pd.DataFrame(index=['Max Diff', 'Avg Diff', 'Min Diff', 'RMSE'], columns=cols)
 	for c in cols:
 		resultSummP.loc['Max %Err',c] = resultErrP.loc[:,c].max(skipna=True)
 		resultSummP.loc['Avg %Err',c] = resultErrP.loc[:,c].mean(skipna=True)
 		resultSummP.loc['Min %Err',c] = resultErrP.loc[:,c].min(skipna=True)
+		resultSummP.loc['RMSPE',c] = math.sqrt((resultErrP.loc[:,c]**2).mean())
+
 		resultSummD.loc['Max Diff',c] = resultErrD.loc[:,c].max(skipna=True)
 		resultSummD.loc['Avg Diff',c] = resultErrD.loc[:,c].mean(skipna=True)
 		resultSummD.loc['Min Diff',c] = resultErrD.loc[:,c].min(skipna=True)
@@ -351,7 +356,7 @@ def voltageCompare(in1, in2, keep_output=False, output_filename='voltageCompare_
 			# Produce plot of residuals
 			figR, axR = plt.subplots()
 			residuals = resultErrD[c].copy().sort_values()
-			axR.plot(resultErrD[c], 'k.', alpha=0.1)
+			axR.plot(residuals, 'k.', alpha=0.1)
 			axR.set_title('Plot of Residuals: ' + c)
 			plt.xticks(rotation=45)
 			axR.set_xlabel('Bus Name')
@@ -367,8 +372,8 @@ def voltageCompare(in1, in2, keep_output=False, output_filename='voltageCompare_
 			figS, axS = plt.subplots()
 			axS.set_title('Scatter Plot: ' + c)
 			axS.plot(in2, in1, 'k.', alpha=0.1)
-			axS.set_xlabel('Circuit with the least buses')
-			axS.set_ylabel('Circuit with the most buses')
+			axS.set_xlabel('Bus voltages of circuit with the least buses')
+			axS.set_ylabel('Bus voltages of circuit with the most buses')
 			figS.savefig('ieeeXX.clean_scatterplot_' + c +'_.png', bbox_inches='tight')
 	plt.close('all')
 	return resultSummP, resultSummD
@@ -547,18 +552,18 @@ def _tests():
 
 		outvolts = getVoltages(outckt_loc, keep_output=True, output_filename=outvolts_loc)
 		rsumm_P, rsumm_D = voltageCompare(involts, outvolts, keep_output=False, output_filename=ckt[:-4] + '_voltageCompare.csv')		
-		avgerrM = [rsumm_P.loc['Avg %Err',c] for c in rsumm_P.columns if c.lower().startswith(' magnitude')]
-		avgerrM = pd.Series(avgerrM).mean()
-		avgerrA = [rsumm_P.loc['Avg %Err',c] for c in rsumm_P.columns if c.lower().startswith(' angle')]
-		avgerrA = pd.Series(avgerrA).mean()
-		maxrmseA = [rsumm_D.loc['RMSE',c] for c in rsumm_D.columns if c.lower().startswith(' angle')]
-		maxrmseA = pd.Series(maxrmseA).max()
-		maxrmseM = [rsumm_D.loc['RMSE',c] for c in rsumm_D.columns if c.lower().startswith(' magnitude')]
-		maxrmseM = pd.Series(maxrmseM).max()
+		maxPerrM = [rsumm_P.loc['RMSPE',c] for c in rsumm_P.columns if c.lower().startswith(' magnitude')]
+		maxPerrM = pd.Series(maxPerrM).max()
+		maxPerrA = [rsumm_P.loc['RMSPE',c] for c in rsumm_P.columns if c.lower().startswith(' angle')]
+		maxPerrA = pd.Series(maxPerrA).max()
+		maxDerrA = [rsumm_D.loc['RMSE',c] for c in rsumm_D.columns if c.lower().startswith(' angle')]
+		maxDerrA = pd.Series(maxDerrA).max()
+		maxDerrM = [rsumm_D.loc['RMSE',c] for c in rsumm_D.columns if c.lower().startswith(' magnitude')]
+		maxDerrM = pd.Series(maxDerrM).max()
 		os.remove(involts_loc)
 		os.remove(outvolts_loc)
 		os.remove(outckt_loc)
-		print('Objects removed: %s (of %s).\nPercent reduction: %s%%\nAverage percent error in voltage magnitude: %s%%\nAverage percent error in voltage angle: %s%%\nMax RMSE for voltage magnitude: %s\nMax RMSE for voltage angle: %s'%(oldsz-newsz, oldsz, (oldsz-newsz)*100/oldsz, avgerrM, avgerrA, maxrmseM, maxrmseA))
+		print('Objects removed: %s (of %s).\nPercent reduction: %s%%\nMax RMSPE for voltage magnitude: %s%%\nMax RMSPE for voltage angle: %s%%\nMax RMSE for voltage magnitude: %s\nMax RMSE for voltage angle: %s\n'%(oldsz-newsz, oldsz, (oldsz-newsz)*100/oldsz, maxPerrM, maxPerrA, maxDerrM, maxDerrA))
 		
 
 	# Make core output
