@@ -551,10 +551,10 @@ def _tests():
 		avgerrM = pd.Series(avgerrM).mean()
 		avgerrA = [rsumm_P.loc['Avg %Err',c] for c in rsumm_P.columns if c.lower().startswith(' angle')]
 		avgerrA = pd.Series(avgerrA).mean()
-		maxrmseM = [rsumm_D.loc['RMSE',c] for c in rsumm_P.columns if c.lower().startswith(' angle')]
-		maxrmseM = pd.Series(maxrmseM).max()
-		maxrmseA = [rsumm_D.loc['RMSE',c] for c in rsumm_P.columns if c.lower().startswith(' magnitude')]
+		maxrmseA = [rsumm_D.loc['RMSE',c] for c in rsumm_D.columns if c.lower().startswith(' angle')]
 		maxrmseA = pd.Series(maxrmseA).max()
+		maxrmseM = [rsumm_D.loc['RMSE',c] for c in rsumm_D.columns if c.lower().startswith(' magnitude')]
+		maxrmseM = pd.Series(maxrmseM).max()
 		os.remove(involts_loc)
 		os.remove(outvolts_loc)
 		os.remove(outckt_loc)
