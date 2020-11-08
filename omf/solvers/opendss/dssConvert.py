@@ -153,13 +153,13 @@ def _dssFilePrep(fpath):
 		except Exception as ex:
 			print('While accessing the file located at %s, the following exception occured: %s'%(dssDirPath, ex))
 		dss.run_command('Clear')
-		x = dss.run_command('Redirect ' + dssFilePath)
+		x = dss.run_command('Redirect "' + dssFilePath + '"')
 		x = dss.run_command('Solve')
 		# TODO: If runDSS() is changed to return dssFileLoc, replace the above lines of code with this:
 		#  dssDirPath = self.runDSS(fpath, keep_output=False) # will require moving the function or changing the definition to reference 'self'.
 	
 		exptDirPath = tempDir + '/' + 'OmfCktExport'
-		dss.run_command('Save Circuit ' + 'purposelessFileName.dss ' + exptDirPath)
+		dss.run_command('Save Circuit ' + 'purposelessFileName.dss "' + exptDirPath + '"')
 		# Manipulate buscoords file to create commands that generate bus list
 		coords = pd.read_csv(exptDirPath + '/BusCoords.dss', header=None, dtype=str, names=['Element', 'X', 'Y'])
 		coordscmds = []
@@ -227,6 +227,10 @@ def _applyRegex(fpath):
 		#contents = re.sub('(?<=buses=\[\w*(\.\d)*,\w*),', '.1.2.3,', contents)
 		#contents = re.sub('(?<=bus(\w?)=\w*) ', '.1.2.3 ', contents) #'bus(\w?)' captures bus, bus1, bus2
 		#contents = re.sub('(?<=bus(\w?)=\w*-\w*) ', '.1.2.3 ', contents) #'bus(\w?)' captures bus, bus1, bus2 with hyphen within
+		#contents = re.sub('rdcohms=.* ','',contents) # removes rdcohms=stuff
+		#contents = re.sub('wdg=.* ','',contents) # removes wdg=stuff
+		#contents = re.sub('%r=.* ','',contents) # removes %R=stuff
+		#contents = re.sub('(?<=taps=\[\d,\d,\d\] ).*(?=taps=)','',contents) # handles repeated stuff between 'taps' and 'taps'
 		outFile.write(contents)
 		return outFile.name
 
@@ -545,9 +549,6 @@ def _tests():
 	#results = _createAndCompareTestFile('ieee8500-unbal_ours.dss', 'ieee8500-unbal_LMS.clean.dss')
 	#results = _createAndCompareTestFile('iowa240_ours.dss', 'iowa240.clean.dss')
 	#TODO: make parser accept keyless items with new !keyless_n key? Or is this just horrible syntax?
-	#TODO: define .dsc format and write syntax guide.
-	#TODO: what to do about transformers with invalid bus setting with the duplicate keys? Probably ignore.
-	#TODO: where to save the x.1.2.3 bus connectivity info?
 	#TODO: refactor in to well-defined bijections between object types?
 	#TODO: a little help on the frontend to hide invalid commands.
 

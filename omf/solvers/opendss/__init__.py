@@ -246,6 +246,7 @@ def capacityPlot(filePath):
 	capacityData = pd.read_csv(dssFileLoc + '/capacity.csv')
 	coords.columns = ['Index', 'X', 'Y', 'radius']
 	capacityDF = pd.concat([coords, capacityData], axis=1)
+	#TODO set any missing buscoords to (0,0) or remove NaN rows using dataframe.dropna(). Currently fails iowa240 without this fix.
 	fig, ax1 = plt.subplots()
 	ax1.set_xlabel('Distance From Source [Miles]')
 	ax1.set_ylabel('Power [kW]')
@@ -386,7 +387,7 @@ def getVoltages(dssFilePath, keep_output=False, output_filename='voltages.csv'):
 	volts.drop(labels='Bus', axis=1, inplace=True)
 	volts = volts.astype(float, copy=True)
 	if not keep_output:
-		os.remove(output_filename)
+		os.remove(dssFileLoc + '/' + output_filename)
 	return volts
 
 def _mergeContigLinesOnce(tree):
