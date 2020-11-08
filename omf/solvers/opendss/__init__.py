@@ -513,7 +513,7 @@ def mergeContigLines(tree):
 	return tree
 
 def _tests():
-	#froots = ['ieee37.clean.dss','ieee123_solarRamp.clean.dss','iowa240.clean.dss','ieeeLVTestCase.clean.dss','ieee8500-unbal.clean.dss']
+	#froots = ['ieee37.clean.dss','ieee123_solarRamp.clean.dss','iowa240.clean.dss','ieeeLVTestCase.clean.dss','ieee8500-unbal_no_fuses.clean.dss']
 	#for froot in froots:
 	#	froot = froot[:-4]
 	#	involts = froot + '_volts.dss'
@@ -521,16 +521,12 @@ def _tests():
 	#	rsumm_P, rsumm_D = voltageCompare(involts, outvolts, keep_output=True)
 
 	from dssConvert import dssToTree, distNetViz, evilDssTreeToGldTree, treeToDss
-	fpath = ['ieee37.clean.dss','ieee123_solarRamp.clean.dss','iowa240.clean.dss','ieeeLVTestCase.clean.dss','ieee8500-unbal.clean.dss']
+	fpath = ['ieee37.clean.dss','ieee123_solarRamp.clean.dss','iowa240.clean.dss','ieeeLVTestCase.clean.dss','ieee8500-unbal_no_fuses.clean.dss']
 
 	for ckt in fpath:
 		tree = dssToTree(ckt)
 		
 		# Tests for mergeContigLines, voltageCompare, getVoltages, and runDSS
-		#errlim = 0.0
-		#assert voltageCompare(voltpath, voltpath, keep_output=True, output_filename=outpath) <= errlim, 'The error between the compared files exceeds the allowable limit of %s%%.'%(errlim*100)
-		#assert voltageCompare(voltsdf, voltsdf, keep_output=True, output_filename=outpath) <= errlim, 'The error between the compared files exceeds the allowable limit of %s%%.'%(errlim*100)
-		#assert voltageCompare(voltpath, voltsdf, keep_output=True, output_filename=outpath) <= errlim, 'The error between the compared files exceeds the allowable limit of %s%%.'%(errlim*100)
 		#gldtree = evilDssTreeToGldTree(tree) # DEBUG
 		#distNetViz.viz_mem(gldtree, open_file=True, forceLayout=True) # DEBUG
 		oldsz = len(tree)
@@ -543,6 +539,12 @@ def _tests():
 		involts_loc = ckt[:-4] + '_volts.dss'
 		involts = getVoltages(ckt, keep_output=True, output_filename=involts_loc)
 		outvolts_loc = outckt_loc[:-4] + '_volts.dss'
+
+		#errlim = 0.0
+		#assert voltageCompare(voltpath, voltpath, keep_output=True, output_filename=outpath) <= errlim, 'The error between the compared files exceeds the allowable limit of %s%%.'%(errlim*100)
+		#assert voltageCompare(voltsdf, voltsdf, keep_output=True, output_filename=outpath) <= errlim, 'The error between the compared files exceeds the allowable limit of %s%%.'%(errlim*100)
+		#assert voltageCompare(voltpath, voltsdf, keep_output=True, output_filename=outpath) <= errlim, 'The error between the compared files exceeds the allowable limit of %s%%.'%(errlim*100)
+
 		outvolts = getVoltages(outckt_loc, keep_output=True, output_filename=outvolts_loc)
 		rsumm_P, rsumm_D = voltageCompare(involts, outvolts, keep_output=False, output_filename=ckt[:-4] + '_voltageCompare.csv')		
 		avgerrM = [rsumm_P.loc['Avg %Err',c] for c in rsumm_P.columns if c.lower().startswith(' magnitude')]
