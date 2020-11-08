@@ -474,7 +474,8 @@ def evilGldTreeToDssTree(evil_gld_tree):
 			new_ob = {
 				'!CMD': 'new',
 				'object': ob['object'] + '.' + ob.get('name',''),
-				'bus': ob['parent'] + ob.get('!CONNCODE', '')
+				# This fails because regcontrol objects connect to a transformer by way of the 'transformer' property   
+				'bus': ob['parent'] + ob.get('!CONNCODE', '') 
 			}
 			_extend_with_exc(ob, new_ob, ['parent','name','object','latitude','longitude','!CONNCODE'])
 			dssTree.append(new_ob)
@@ -527,27 +528,32 @@ def _createAndCompareTestFile(inFile, userOutFile=''):
 
 
 def _tests():
-	FNAMES =  ['ieee37.clean.dss', 'ieee123_solarRamp.clean.dss', 'iowa240.clean.dss', 'ieee8500-unbal.clean.dss']
+	from omf.solvers.opendss import getVoltages, voltageCompare
+	import pandas as pd
+	FNAMES =  ['ieee37.clean.dss', 'ieee123_solarRamp.clean.dss', 'iowa240.clean.dss', 'ieee8500-unbal_no_fuses.clean.dss']	
 	for fname in FNAMES:
-		tree = dssToTree(fname)
-		# pp([dict(x) for x in tree])
-		# treeToDss(tree, 'TEST.dss')
-		# TODO: Add compare voltage test here!
-		evil_glm = evilDssTreeToGldTree(tree)
-		#pp(evil_glm)
-		distNetViz.viz_mem(evil_glm, open_file=True, forceLayout=False)
-		# evil_dss = evilGldTreeToDssTree(evil_glm)
-		# treeToDss(tree, 'TEST2.dss')
+		# Roundtrip conversion test
+		errorLimit = 0.03
+		startvolts = getVoltages(fname, keep_output=False)
+		dsstreein = dssToTree(fname)
+		# pp([dict(x) for x in dsstreein]) # DEBUG
+		# treeToDss(dsstreein, 'TEST.dss') # DEBUG
+		glmtree = evilDssTreeToGldTree(dsstreein)
+		#pp(glmtree)
+		distNetViz.viz_mem(glmtree, open_file=True, forceLayout=False)
+		#dsstreeout = evilGldTreeToDssTree(glmtree) # This fails on RegControl objects
+		#outpath = fname[:-4] + '_roundtrip_test.dss'
+		#treeToDss(dsstreeout, outpath)
+		#endvolts = getVoltages(outpath, keep_output=False)
+		#percSumm, diffSumm = voltageCompare(startvolts, endvolts, keep_output=False)
+		#maxPerrM = [percSumm.loc['RMSPE',c] for c in percSumm.columns if c.lower().startswith(' magnitude')]
+		#maxPerrM = pd.Series(maxPerrM).max()
+		#assert abs(maxPerrM) < errorLimit*100, 'The average percent error exceeeds the threshold of %s%%.'%(errorLimit*100)
 	
 	# Deprecated tests section
 	#dssToGridLab('ieee37.dss', 'Model.glm') # this kind of works
 	#gridLabToDSS('ieee37_fixed.glm', 'ieee37_conv.dss') # this fails miserably
 	#distNetViz.insert_coordinates(evil_glm)
-
-	#results = _createAndCompareTestFile('ieee37_ours.dss','ieee37.clean.dss')
-	#results = _createAndCompareTestFile('ieee123_solarRamp_ours.dss', 'ieee123_solarRamp.clean.dss')
-	#results = _createAndCompareTestFile('ieee8500-unbal_ours.dss', 'ieee8500-unbal_LMS.clean.dss')
-	#results = _createAndCompareTestFile('iowa240_ours.dss', 'iowa240.clean.dss')
 	#TODO: make parser accept keyless items with new !keyless_n key? Or is this just horrible syntax?
 	#TODO: refactor in to well-defined bijections between object types?
 	#TODO: a little help on the frontend to hide invalid commands.
