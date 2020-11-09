@@ -7413,9 +7413,10 @@ New object=RegControl.feeder_regc transformer=FEEDER_REGC winding=2 tapwinding=2
 New object=Reactor.hvmv_sub_hsb bus1=SourceBus.1.2.3 bus2=HVMV_Sub_HSB.1.2.3 R=0 X=14.798307 normamps=400 emergamps=400
 ! Redirect EnergyMeter.DSS
 New object=EnergyMeter.m1 element=Line.ln5815900-1 terminal=1
-MakeBusList
 ! Redirect BusVoltageBases.dss  ! set voltage bases
 Set Voltagebases=[115,12.47,0.48,0.208]
+! Calcvoltagebases
+MakeBusList
 ! Buscoords buscoords.dss
 SetBusXY bus=M1047751 X=1670806.28884553 Y=12288000.0004359
 SetBusXY bus=M1027011 X=1664903.58829604 Y=12291968.2830636
