@@ -563,8 +563,9 @@ def _tests():
 		maxDerrA = pd.Series(maxDerrA).max()
 		maxDerrM = [rsumm_D.loc['RMSE',c] for c in rsumm_D.columns if c.lower().startswith(' magnitude')]
 		maxDerrM = pd.Series(maxDerrM).max()
+		from shutil import rmtree
 		os.remove(outckt_loc)
-		os.remove(outdir)
+		rmtree(outdir)
 		print('Objects removed: %s (of %s).\nPercent reduction: %s%%\nMax RMSPE for voltage magnitude: %s%%\nMax RMSPE for voltage angle: %s%%\nMax RMSE for voltage magnitude: %s\nMax RMSE for voltage angle: %s\n'%(oldsz-newsz, oldsz, (oldsz-newsz)*100/oldsz, maxPerrM, maxPerrA, maxDerrM, maxDerrA))
 		
 
