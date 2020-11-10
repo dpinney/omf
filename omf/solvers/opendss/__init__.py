@@ -525,6 +525,100 @@ def mergeContigLines(tree):
 		removedKeys = treeKeys - len(tree)
 	return tree
 
+def rollUpLoads(tree):
+	
+	# Capture the connections to any elements that don't connect to a bus (i.e.monitors, capacitors, meters, generators, etc.)
+	#busless_objs = [x.get('element','None') for x in tree if 'element' in x]
+	
+	# Create a lookup table that maps an object's name to its key in the tree (could we just map the name to the tree key...?)
+	treeids = range(0,len(tree),1)
+	tree = dict(zip(treeids,tree))
+	name2key = {tree[i].get('object', None):i for i,v in enumerate(tree)} # note that these are in the form <type>.<name>
+	name2key.update({tree[i].get('bus', None):i for i,v in enumerate(tree) if tree[i].get('!CMD', None) == 'setbusxy'}) # form: <name>
+	
+	 # Destructively iterate through treecopy and perform any modifications on tree.
+	treecopy = tree.copy()
+	removedids = []
+	i_0 = 0
+	while treecopy:
+		obj = treecopy.pop(i_0)
+		i_0 = i_0 + 1
+
+		# Is this a load object? If not, move to next object in treecopy
+		if not obj.get('object','None').startswith('load.'):
+			continue
+		
+		# Has this item already been removed?
+		if obj.get('object','None') in removedids:
+			continue
+
+		# Get the load's parent bus
+		loadparent = obj.get('bus1','None')
+
+		# Get everything else that might be attached to the parent bus
+		siblings = []
+		for k1,o in tree.items():
+			if o.get('object', None) == obj.get('object', None): # Ignore the load's own connection
+				continue
+			if o.get('!CMD','None')=='setbusxy': # Ignore the bus itself
+				continue
+			busesofint = []
+			for k2,v in o.items(): # See if this object is attached to our bus of interest. If so, capture it.
+				if k2 == 'buses':
+					buslist = o[k2]
+					buslist = buslist.replace(']','')
+					buslist = buslist.replace('[','')
+					buslist = buslist.split(',')
+					for b in buslist:
+						busesofint.append(b)
+				elif k2 in ['bus','bus1','bus2','element']: # it's a single value
+					busesofint.append(v)
+			busesofint = [x.split('.')[0] for x in busesofint]
+			if ( len([x for x in busesofint if x == loadparent.split('.')[0]]) > 0 ): #if any of the bottoms' ids equal the bus id, then obj is connected to our node of interest
+				siblings.append(o)
+
+		# Do the siblings include a transformer? 
+		xfmrs = [x for x in siblings if 'transformer' in x.get('object','None')]
+		if len(xfmrs)!=1:
+			continue
+		xfmr = xfmrs[0]
+		xfmrbuses = xfmr.get('buses','None') # Note: It is expected that the high side of the transformer is defined first in the 'buses' array
+		# TODO: check that the xfrmr connects to a line (fringe case?)
+
+		# Grab sibling loads and ensure there aren't any other element types
+		loads = [x for x in siblings if 'load' in x.get('object','None')]
+		if len(loads) != len(siblings)-1:
+			continue		
+		
+		# Add current load to siblings. Now the family is complete. (To complete the analogy, this species reproduces asexually and the transformer begot the bus)
+		siblings.append(obj)
+
+		# Capture load kws and associate with appropiate %r in a dataframe 
+		# (this is an issue right now - how to work with connectivity?)
+		# (also, not all situations are arranged bus>xfrmr>bus>loads)
+		ldparams = pd.DataFrame(colums=['node','kw','perc_r'])
+		for ld in loads:
+			kw = ld.get('kw','DNE')
+			node = ''
+			pass
+		kws = [x.get('kw') for x in loads if x.get('kw','DNE')!='DNE']
+		
+		# Note: We assume that info for the high side (aka the line side) of the xfrmr is in position 0 of the config arrays
+		r_arr = xfmr.get('%rs','None')
+
+		# Calculate what the equivalent load should be
+		secLoad = 0
+		for idx,row in ldparams.iterrows():
+			secLoad = secLoad + row['kw']*(1+row['perc_r'])
+		#load_eq = (1 + r_prim)*secLoad
+
+		#remove all but one of the loads
+		#attach that load to the xfrmr's parent bus
+		#remove the loads'parent bus
+		#remove xfrmr
+		# add to removed id's list
+	return
+
 
 def _tests():
 	from dssConvert import dssToTree, distNetViz, evilDssTreeToGldTree, treeToDss
@@ -538,6 +632,7 @@ def _tests():
 		#distNetViz.viz_mem(gldtree, open_file=True, forceLayout=True) # DEBUG
 		oldsz = len(tree)
 		tree = mergeContigLines(tree)
+		#tree = rollUpLoads(tree)
 		newsz = len(tree)
 		#gldtree = evilDssTreeToGldTree(tree) # DEBUG
 		#distNetViz.viz_mem(gldtree, open_file=True, forceLayout=True) # DEBUG
