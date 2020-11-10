@@ -381,6 +381,9 @@ def evilDssTreeToGldTree(dssTree):
 				except:
 					fro = b1
 					to = b2
+					#TODO: fix this hack!
+					ob["!FROCODE"] = '.1.2.3'
+					ob["!TOCODE"] = '.1.2.3'
 				gldTree[str(g_id)] = {
 					"object": obtype,
 					"name": name,
@@ -463,19 +466,20 @@ def evilGldTreeToDssTree(evil_gld_tree):
 			_extend_with_exc(ob, new_ob, ['!CMD','from','to','name','object','latitude','longitude','!FROCODE', '!TOCODE'])
 			dssTree.append(new_ob)
 		elif ob.get('object') == 'transformer':
-			new_ob = {
-				'!CMD': 'new',
-				'object': ob['object'] + '.' + ob['name'],
-				'buses': f'({ob["from"]}{ob.get("!FROCODE","")},{ob["to"]}{ob.get("!TOCODE","")})'
-			}
-			_extend_with_exc(ob, new_ob, ['!CMD','from','to','name','object','latitude','longitude','!FROCODE', '!TOCODE'])
-			dssTree.append(new_ob)
+			try:
+				new_ob = {
+					'!CMD': 'new',
+					'object': ob['object'] + '.' + ob['name'],
+					'buses': f'({ob["from"]}{ob.get("!FROCODE","")},{ob["to"]}{ob.get("!TOCODE","")})'
+				}
+				_extend_with_exc(ob, new_ob, ['!CMD','from','to','name','object','latitude','longitude','!FROCODE', '!TOCODE'])
+				dssTree.append(new_ob)
+			except:
+				warnings.warn(f'Could not write valid DSS object for {ob}')
 		elif ob.get('object') == 'regcontrol':
 			new_ob = {
 				'!CMD': 'new',
 				'object': ob['object'] + '.' + ob.get('name',''),
-				# This fails because regcontrol objects connect to a transformer by way of the 'transformer' property   
-				'bus': ob['parent'] + ob.get('!CONNCODE', '') 
 			}
 			_extend_with_exc(ob, new_ob, ['parent','name','object','latitude','longitude','!CONNCODE'])
 			dssTree.append(new_ob)
@@ -530,8 +534,9 @@ def _createAndCompareTestFile(inFile, userOutFile=''):
 def _tests():
 	from omf.solvers.opendss import getVoltages, voltageCompare
 	import pandas as pd
-	FNAMES =  ['ieee37.clean.dss', 'ieee123_solarRamp.clean.dss', 'iowa240.clean.dss', 'ieee8500-unbal_no_fuses.clean.dss']	
+	FNAMES =  ['ieee37.clean.dss', 'ieee123_solarRamp.clean.dss', 'iowa240.clean.dss', 'ieee8500-unbal_no_fuses.clean.dss']
 	for fname in FNAMES:
+		print('!!!!!!!!!!!!!! ',fname,' !!!!!!!!!!!!!!')
 		# Roundtrip conversion test
 		errorLimit = 0.03
 		startvolts = getVoltages(fname, keep_output=False)
@@ -540,8 +545,8 @@ def _tests():
 		# treeToDss(dsstreein, 'TEST.dss') # DEBUG
 		glmtree = evilDssTreeToGldTree(dsstreein)
 		#pp(glmtree)
-		distNetViz.viz_mem(glmtree, open_file=True, forceLayout=False)
-		#dsstreeout = evilGldTreeToDssTree(glmtree) # This fails on RegControl objects
+		# distNetViz.viz_mem(glmtree, open_file=True, forceLayout=False)
+		dsstreeout = evilGldTreeToDssTree(glmtree)
 		#outpath = fname[:-4] + '_roundtrip_test.dss'
 		#treeToDss(dsstreeout, outpath)
 		#endvolts = getVoltages(outpath, keep_output=False)
