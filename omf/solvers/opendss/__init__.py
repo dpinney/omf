@@ -66,9 +66,16 @@ def qstsPlot(filePath, stepSizeInMinutes, numberOfSteps):
 	dss.run_command('Set mode=daily')
 	dss.run_command('Set number=1')
 	dss.run_command(f'Set stepsize={stepSizeInMinutes}m')
+	big_df = pd.DataFrame()
 	for step in range(1, numberOfSteps+1):
 		dss.run_command('Solve')
-		dss.run_command(f'Export voltages "{dssFileLoc}/volt_prof_hour_{step:04d}.csv"')
+		csv_path = f'{dssFileLoc}/volt_prof_hour_{step:04d}.csv'
+		dss.run_command(f'Export voltages "{csv_path}"')
+		new_data = pd.read_csv(csv_path)
+		new_data['Step'] = step
+		big_df = pd.concat([big_df, new_data], ignore_index=True)
+		os.remove(csv_path)
+	big_df.to_csv(f'{dssFileLoc}/voltage_timeseries.csv', index=False)
 	#Todo: generate plots.
 
 def voltagePlot(filePath, PU=True):
