@@ -27,6 +27,9 @@ def runDSS(dssFilePath, keep_output=True):
 	dss.run_command('Clear')
 	dss.run_command('Redirect "' + fullPath + '"')
 	dss.run_command('Solve')
+	latest_error = dss.Error.Description()
+	if latest_error != '':
+		print('OpenDSS Error:',latest_error)
 	# also generate coordinates.
 	# TODO?: Get the coords as a separate function (i.e. getCoords() below) and instead return dssFileLoc.
 	x = dss.run_command('Export BusCoords "' + dssFileLoc + '/coords.csv"')
