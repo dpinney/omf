@@ -54,7 +54,7 @@ class HazardField(object):
 				line = content[i].split()
 				print(line)
 				if len(line) < 2:
-					j -= 1
+					i += 1
 					continue
 				hazardObj[line[0]] = float(line[1])
 			if j > 5: # Then, get the numerical data, mapping each number to its appropriate parameter.
@@ -62,6 +62,7 @@ class HazardField(object):
 				try:
 					field.insert((i-6), list(map(float,content[i].split(","))))
 				except:
+					i += 1
 					continue
 			i += 1
 			j += 1
