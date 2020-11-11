@@ -41,15 +41,17 @@ class HazardField(object):
 		content = [x.strip() for x in content]
 		hazardObj = {}
 		field = []
+		newContent = []
 		for i in range(len(content)):
-			if i <= 8: # First, get the the parameters for the export function below. Each gets their own entry in our object.
+			line = content[i].split()
+			if len(line) > 1:
+				newContent.append(line)
+		for i in range(len(newContent)):
+			if i <= 5: # First, get the the parameters for the export function below. Each gets their own entry in our object.
 				# line = re.split(r"\s+",content[i])
 				line = content[i].split()
-				print(line)
-				if len(line) < 2:
-					continue
 				hazardObj[line[0]] = float(line[1])
-			if i > 8: # Then, get the numerical data, mapping each number to its appropriate parameter.
+			if i > 5: # Then, get the numerical data, mapping each number to its appropriate parameter.
 				content[i] = content[i].replace(" ", ",")
 				try:
 					field.insert((i-6), list(map(float,content[i].split(","))))
