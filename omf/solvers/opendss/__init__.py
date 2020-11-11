@@ -60,6 +60,17 @@ def _getCoords(dssFilePath, keep_output=True):
 	coords['radius'] = hyp
 	return coords
 
+def qstsPlot(filePath, stepSizeInMinutes, numberOfSteps):
+	dssFileLoc = os.path.dirname(os.path.abspath(filePath))
+	volt_coord = runDSS(filePath)
+	dss.run_command('Set mode=daily')
+	dss.run_command('Set number=1')
+	dss.run_command(f'Set stepsize={stepSizeInMinutes}m')
+	for step in range(1, numberOfSteps+1):
+		dss.run_command('Solve')
+		dss.run_command(f'Export voltages "{dssFileLoc}/volt_prof_hour_{step:04d}.csv"')
+	#Todo: generate plots.
+
 def voltagePlot(filePath, PU=True):
 	''' Voltage plotting routine. Creates 'voltages.csv' and 'Voltage [PU|V].png' in directory of input file.'''
 	# TODO: use getVoltages() here
