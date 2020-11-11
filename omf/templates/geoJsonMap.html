@@ -9,6 +9,7 @@
 		 crossorigin='' />
 		<script src='https://unpkg.com/leaflet@1.0.3/dist/leaflet.js' integrity='sha512-A7vV8IFfih/D732iSSKi20u/ooOfj/AGehOKq0f4vLT1Zr2Y+RX7C+w8A1gaSasGtRUZpF/NZgzSAu4/Gc41Lg=='
 		 crossorigin=''></script>
+		<script src="https://unpkg.com/esri-leaflet@2.5.0/dist/esri-leaflet.js" integrity="sha512-ucw7Grpc+iEQZa711gcjgMBnmd9qju1CICsRaryvX7HJklK0pGl/prxKvtHwpgm5ZHdvAil7YPxI1oWPOWK3UQ==" crossorigin=""></script>
 		<script type="text/javascript" src="/static/omf.js"></script>
 		<link rel="stylesheet" href="/static/omf.css" />
 		<link rel="shortcut icon" href="/static/favicon.ico" />
@@ -106,12 +107,20 @@
 
 			var bounds = geojsonLayer.getBounds();
 			var map = L.map('map', { renderer: L.canvas() }).fitBounds(bounds);
+			var esri_images = L.esri.basemapLayer('Imagery').addTo(map);
+			var streets = L.esri.basemapLayer('Streets');
+			var layerControl = L.control.layers(
+				{
+					'Satellite': esri_images,
+					'Streets': streets
+				},
+				{},
+				{
+					position: 'topleft',
+					collapsed: false		
+				}
+			).addTo(map);	
 			mapLink = '<a href="http://openstreetmap.org">OpenStreetMap</a>';
-			L.tileLayer(
-				'http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-					attribution: '&copy; ' + mapLink + ' Contributors',
-					maxZoom: 18,
-				}).addTo(map);
 			L.control.scale().addTo(map);
 			geojsonLayer.addTo(map);
 		}

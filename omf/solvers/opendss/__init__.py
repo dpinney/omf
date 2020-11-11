@@ -25,11 +25,14 @@ def runDSS(dssFilePath, keep_output=True):
 	except Exception as ex:
 		print('While accessing the file located at %s, the following exception occured: %s'%(dssFileLoc, ex))
 	dss.run_command('Clear')
-	dss.run_command('Redirect ' + fullPath)
+	dss.run_command('Redirect "' + fullPath + '"')
 	dss.run_command('Solve')
+	latest_error = dss.Error.Description()
+	if latest_error != '':
+		print('OpenDSS Error:',latest_error)
 	# also generate coordinates.
 	# TODO?: Get the coords as a separate function (i.e. getCoords() below) and instead return dssFileLoc.
-	x = dss.run_command('Export BusCoords ' + dssFileLoc + '/coords.csv')
+	x = dss.run_command('Export BusCoords "' + dssFileLoc + '/coords.csv"')
 	coords = pd.read_csv(dssFileLoc + '/coords.csv', dtype=str, header=None, names=['Element', 'X', 'Y'])
 	# TODO: reverse keep_output logic - Should default to cleanliness. Requires addition of 'keep_output=True' to all function calls.
 	if not keep_output:
@@ -46,7 +49,7 @@ def _getCoords(dssFilePath, keep_output=True):
 	# TODO: clean up and test the below copy-pasta'd logic
 	#dssFileLoc = runDSS(dssFilePath, keep_output=True)
 	dssFileLoc = runDSS(dssFilePath)
-	x = dss.run_command('Export BusCoords ' + dssFileLoc + '/coords.csv')
+	x = dss.run_command('Export BusCoords "' + dssFileLoc + '/coords.csv"')
 	coords = pd.read_csv(dssFileLoc + '/coords.csv', header=None)
 	if not keep_output:
 		os.remove(x)
@@ -64,7 +67,7 @@ def voltagePlot(filePath, PU=True):
 	# TODO: use getCoords() here, if we write it.
 	#volt_coord = runDSS(filePath, keep_output=False)
 	volt_coord = runDSS(filePath)
-	dss.run_command('Export voltages ' + dssFileLoc + '/volts.csv')
+	dss.run_command('Export voltages "' + dssFileLoc + '/volts.csv"')
 	voltage = pd.read_csv(dssFileLoc + '/volts.csv')
 	# Generate voltage plots.
 	volt_coord.columns = ['Bus', 'X', 'Y', 'radius'] # radius would be obtained by getCoords().
@@ -92,7 +95,7 @@ def currentPlot(filePath):
 	''' Current plotting function.'''
 	dssFileLoc = os.path.dirname(os.path.abspath(filePath))
 	curr_coord = runDSS(filePath)
-	dss.run_command('Export currents ' + dssFileLoc + '/currents.csv')
+	dss.run_command('Export currents "' + dssFileLoc + '/currents.csv"')
 	current = pd.read_csv(dssFileLoc + '/currents.csv')
 	curr_coord.columns = ['Index', 'X', 'Y', 'radius'] # DSS buses don't have current, but are connected to it. 
 	curr_hyp = []
@@ -112,7 +115,7 @@ def networkPlot(filePath):
 	''' Plot the physical topology of the circuit. '''
 	dssFileLoc = os.path.dirname(os.path.abspath(filePath))
 	coords = runDSS(filePath)
-	dss.run_command('Export voltages ' + dssFileLoc + '/volts.csv')
+	dss.run_command('Export voltages "' + dssFileLoc + '/volts.csv"')
 	volts = pd.read_csv(dssFileLoc + '/volts.csv')
 	coords.columns = ['Bus', 'X', 'Y', 'radius']
 	G = nx.Graph()
@@ -156,7 +159,7 @@ def THD(filePath):
 	dssFileLoc = os.path.dirname(os.path.abspath(filePath))
 	bus_coords = runDSS(filePath)
 	dss.run_command('Solve mode=harmonics')
-	dss.run_command('Export voltages ' + dssFileLoc + '/voltharmonics.csv')
+	dss.run_command('Export voltages "' + dssFileLoc + '/voltharmonics.csv"')
 	# Clean up temp file.
 	try:
 		base = os.path.basename(filePath)
@@ -185,8 +188,8 @@ def dynamicPlot(filePath, time_step, iterations):
 	dynamicCommand = 'Solve mode=dynamics stepsize=%d number=%d' % (time_step, iterations)
 	dss.run_command(dynamicCommand)
 	for i in range(iterations):
-		voltString = 'Export voltages ' + dssFileLoc + '/dynamicVolt%d.csv' % i
-		currentString = 'Export currents ' + dssFileLoc + '/dynamicCurrent%d.csv' % i
+		voltString = 'Export voltages "' + dssFileLoc + '/dynamicVolt%d.csv"' % i
+		currentString = 'Export currents "' + dssFileLoc + '/dynamicCurrent%d.csv"' % i
 		dss.run_command(voltString)
 		dss.run_command(currentString)
 	powerData = []
@@ -222,7 +225,7 @@ def faultPlot(filePath):
 	dssFileLoc = os.path.dirname(os.path.abspath(filePath))
 	bus_coord = runDSS(filePath)
 	dss.run_command('Solve Mode=FaultStudy')
-	dss.run_command('Export fault ' + dssFileLoc + '/faults.csv')
+	dss.run_command('Export fault "' + dssFileLoc + '/faults.csv"')
 	faultData = pd.read_csv(dssFileLoc + '/faults.csv')
 	bus_coord.columns = ['Bus', 'X', 'Y', 'radius']
 	faultDF = pd.concat([bus_coord, faultData], axis=1)
@@ -242,10 +245,11 @@ def capacityPlot(filePath):
 	''' Plot power vs. distance '''
 	dssFileLoc = os.path.dirname(os.path.abspath(filePath))
 	coords = runDSS(filePath)
-	dss.run_command('Export Capacity ' + dssFileLoc + '/capacity.csv')
+	dss.run_command('Export Capacity "' + dssFileLoc + '/capacity.csv"')
 	capacityData = pd.read_csv(dssFileLoc + '/capacity.csv')
 	coords.columns = ['Index', 'X', 'Y', 'radius']
 	capacityDF = pd.concat([coords, capacityData], axis=1)
+	#TODO set any missing buscoords to (0,0) or remove NaN rows using dataframe.dropna(). Currently fails iowa240 without this fix.
 	fig, ax1 = plt.subplots()
 	ax1.set_xlabel('Distance From Source [Miles]')
 	ax1.set_ylabel('Power [kW]')
@@ -258,13 +262,14 @@ def capacityPlot(filePath):
 	plt.savefig(dssFileLoc + '/Capacity Profile.png')
 	plt.clf()
 	
-def voltageCompare(in1, in2, keep_output=False, output_filename='voltageCompare_results.csv'):
+def voltageCompare(in1, in2, keep_output=False, outdir='', outfilebase='voltageCompare'):
 	'''Compares two instances of the information provided by the 'Export voltages' opendss command and outputs 
 	the maximum error (% and absolute difference) encountered for any value compared. If the 'keep_output' flag is set to 'True', also 
 	outputs a file that describes the maximum, average, and minimum error encountered for each column. Use the 
 	'output_filename' parameter to set the output file name. Inputs can be formatted as a .dss file of voltages
 	output by OpenDSS, or as a dataframe of voltages obtained using the OMF's getVoltages().'''
 	#TODO: rewrite description
+	#TODO: set in1 as predicted/modded/final and handle it as such; in1 is the truth/original/initial
 	ins = [in1, in2]
 	txtins = [x for x in ins if type(x)==str and 'dss'==x.lower().split('.')[-1]]
 	memins = [x for x in ins if type(x)==pd.DataFrame]
@@ -297,25 +302,29 @@ def voltageCompare(in1, in2, keep_output=False, output_filename='voltageCompare_
 			in2 = bvolts.loc[row,col]
 			resultErrP.loc[row,col] = 100*(in1 - in2)/in1 if in1!=0 else 0
 			resultErrD.loc[row,col] = in1 - in2
-	
+
 	# Construct results
-	resultSummP = pd.DataFrame(index=['Max %Err', 'Avg %Err', 'Min %Err'], columns=cols)
+	resultSummP = pd.DataFrame(index=['Max %Err', 'Avg %Err', 'Min %Err', 'RMSPE'], columns=cols)
 	resultSummD = pd.DataFrame(index=['Max Diff', 'Avg Diff', 'Min Diff', 'RMSE'], columns=cols)
 	for c in cols:
 		resultSummP.loc['Max %Err',c] = resultErrP.loc[:,c].max(skipna=True)
 		resultSummP.loc['Avg %Err',c] = resultErrP.loc[:,c].mean(skipna=True)
 		resultSummP.loc['Min %Err',c] = resultErrP.loc[:,c].min(skipna=True)
+		resultSummP.loc['RMSPE',c] = math.sqrt((resultErrP.loc[:,c]**2).mean())
+
 		resultSummD.loc['Max Diff',c] = resultErrD.loc[:,c].max(skipna=True)
 		resultSummD.loc['Avg Diff',c] = resultErrD.loc[:,c].mean(skipna=True)
 		resultSummD.loc['Min Diff',c] = resultErrD.loc[:,c].min(skipna=True)
 		resultSummD.loc['RMSE',c] = math.sqrt((resultErrD.loc[:,c]**2).mean())
-	outroot = output_filename[:-4]
 	
 	if keep_output:
+		outroot = outdir + '/' + outfilebase
+		resultErrP.dropna(inplace=True)
 		resultSummP.to_csv(outroot + '_Perc.csv', header=True, index=True, mode='w')
 		emptyline = pd.DataFrame(index=[''],columns=cols)
 		emptyline.to_csv(outroot + '_Perc.csv', header=False, index=True, mode='a')
 		resultErrP.to_csv(outroot + '_Perc.csv', header=True, index=True, mode='a')
+		resultErrD.dropna(inplace=True)
 		resultSummD.to_csv(outroot + '_Diff.csv', header=True, index=True, mode='w')
 		emptyline.to_csv(outroot + '_Diff.csv', header=False, index=True, mode='a')
 		resultErrD.to_csv(outroot + '_Diff.csv', header=True, index=True, mode='a')
@@ -332,8 +341,9 @@ def voltageCompare(in1, in2, keep_output=False, output_filename='voltageCompare_
 		plt.xticks(rotation=45)
 		axM.set_xticklabels(magcols)
 		axM.boxplot(bxpltM)
-		figM.savefig('ieeeXX.clean_boxplot_Magnitude.png', bbox_inches='tight')
-
+		figM.savefig(outroot + '_boxplot_Mag.png', bbox_inches='tight')
+		plt.close()
+		
 		angcols = [c for c in cols if c.lower().startswith(' angle')]
 		bxpltAdf = pd.DataFrame(data=resultErrD[angcols],columns=angcols)
 		bxpltA = []
@@ -344,49 +354,56 @@ def voltageCompare(in1, in2, keep_output=False, output_filename='voltageCompare_
 		plt.xticks(rotation=45)
 		axA.set_xticklabels(angcols)
 		axA.boxplot(bxpltA)
-		figA.savefig('ieeeXX.clean_boxplot_Angle.png', bbox_inches='tight')
+		figA.savefig(outroot + '_boxplot_Ang.png', bbox_inches='tight')
+		plt.close()
 
 		for c in cols:
+			# construct a dataframe of busname, input, output, and residual
+			dat = pd.concat([avolts[c],bvolts[c],resultErrP[c],resultErrD[c]], axis=1,join='inner')
+			dat.columns = ['buses+','buses-','residuals_P','residuals_D'] # buses+ denotes the circuit with more buses; buses- denotes the one with fewer
+			dat = dat.sort_values(by=['buses-','buses+'], ascending=True, na_position='first')
+			
 			# Produce plot of residuals
+			#pltlenR = math.ceil(len(dat['residuals_P'])/2)
+			#figR, axR = plt.subplots(figsize=(pltlenR,12))
+			#axR.plot(dat['buses-'], 'k.', alpha=0.15)
 			figR, axR = plt.subplots()
-			residuals = resultErrD[c].copy().sort_values()
-			axR.plot(resultErrD[c], 'k.', alpha=0.1)
+			axR.plot(dat['buses-'], dat['residuals_P'], 'k.', alpha=0.15)
+			
 			axR.set_title('Plot of Residuals: ' + c)
-			plt.xticks(rotation=45)
-			axR.set_xlabel('Bus Name')
+			#plt.xticks(rotation=45)
+			axR.set_xlabel('Value of ' + c + ' for circuit with fewer buses')
 			axR.set_ylabel('Value of Residual')
-			figR.savefig('ieeeXX.clean_residualplot_' + c +'_.png', bbox_inches='tight')
+			figR.savefig(outroot + '_residualplot_' + c +'_.png', bbox_inches='tight')
+			plt.close()
 
 			# Produce scatter plots
-			in2 = pd.Series(bvolts[c], index=bvolts.index) # this is the input with fewer buses
-			in2 = in2.sort_values(na_position='first')
-			in1 = pd.Series(index=bvolts.index)
-			for idx in in2.index:
-				in1[idx] = avolts.loc[idx,c]
 			figS, axS = plt.subplots()
 			axS.set_title('Scatter Plot: ' + c)
-			axS.plot(in2, in1, 'k.', alpha=0.1)
-			axS.set_xlabel('Circuit with the least buses')
-			axS.set_ylabel('Circuit with the most buses')
-			figS.savefig('ieeeXX.clean_scatterplot_' + c +'_.png', bbox_inches='tight')
-	plt.close('all')
+			axS.plot(dat['buses-'], dat['buses+'], 'k.', alpha=0.15)
+			axS.set_xlabel('Value of ' + c + ' for circuit with fewer buses')
+			axS.set_ylabel('Value of ' + c + ' for circuit with more buses')
+			figS.savefig(outroot + '_scatterplot_' + c +'_.png', bbox_inches='tight')
+			plt.close()
 	return resultSummP, resultSummD
 
-def getVoltages(dssFilePath, keep_output=False, output_filename='voltages.csv'): # TODO: rename to voltageGet for consistency with other functions?
+def getVoltages(dssFilePath, keep_output=False, outdir='', output_filename='voltages.csv'): # TODO: rename to voltageGet for consistency with other functions?
 	'''Obtains the OpenDss voltage output for a OpenDSS circuit definition file (*.dss). Input path 
 	can be fully qualified or not. Set the 'keep_output' flag to 'True' to save output to the input 
 	file's directory as 'voltages.csv',	or specify a filename for the output through the 
 	'output_filename' parameter (i.e. '*.csv').'''
-	# TODO: (nice to have) vectorize it?
 	dssFileLoc = os.path.dirname(os.path.abspath(dssFilePath))
 	coords = runDSS(os.path.abspath(dssFilePath), keep_output=False)
-	dss.run_command('Export voltages ' + dssFileLoc + '/' + output_filename)
-	volts = pd.read_csv(dssFileLoc + '/' + output_filename, header=0)
+	if outdir!='':
+		outdir = outdir + '/'
+	voltfile = dssFileLoc + '/' + outdir + output_filename
+	dss.run_command('Export voltages "' + voltfile + '"')
+	volts = pd.read_csv(voltfile, header=0)
 	volts.index = volts['Bus']
 	volts.drop(labels='Bus', axis=1, inplace=True)
 	volts = volts.astype(float, copy=True)
 	if not keep_output:
-		os.remove(output_filename)
+		os.remove(voltfile)
 	return volts
 
 def _mergeContigLinesOnce(tree):
@@ -511,51 +528,143 @@ def mergeContigLines(tree):
 		removedKeys = treeKeys - len(tree)
 	return tree
 
-def _tests():
-	#froots = ['ieee37.clean.dss','ieee123_solarRamp.clean.dss','iowa240.clean.dss','ieeeLVTestCase.clean.dss','ieee8500-unbal.clean.dss']
-	#for froot in froots:
-	#	froot = froot[:-4]
-	#	involts = froot + '_volts.dss'
-	#	outvolts = froot + '_mergecontiglines_volts.dss'
-	#	rsumm_P, rsumm_D = voltageCompare(involts, outvolts, keep_output=True)
+def rollUpLoads(tree):
+	
+	# Capture the connections to any elements that don't connect to a bus (i.e.monitors, capacitors, meters, generators, etc.)
+	#busless_objs = [x.get('element','None') for x in tree if 'element' in x]
+	
+	# Create a lookup table that maps an object's name to its key in the tree (could we just map the name to the tree key...?)
+	treeids = range(0,len(tree),1)
+	tree = dict(zip(treeids,tree))
+	name2key = {tree[i].get('object', None):i for i,v in enumerate(tree)} # note that these are in the form <type>.<name>
+	name2key.update({tree[i].get('bus', None):i for i,v in enumerate(tree) if tree[i].get('!CMD', None) == 'setbusxy'}) # form: <name>
+	
+	 # Destructively iterate through treecopy and perform any modifications on tree.
+	treecopy = tree.copy()
+	removedids = []
+	i_0 = 0
+	while treecopy:
+		obj = treecopy.pop(i_0)
+		i_0 = i_0 + 1
 
+		# Is this a load object? If not, move to next object in treecopy
+		if not obj.get('object','None').startswith('load.'):
+			continue
+		
+		# Has this item already been removed?
+		if obj.get('object','None') in removedids:
+			continue
+
+		# Get the load's parent bus
+		loadparent = obj.get('bus1','None')
+
+		# Get everything else that might be attached to the parent bus
+		siblings = []
+		for k1,o in tree.items():
+			if o.get('object', None) == obj.get('object', None): # Ignore the load's own connection
+				continue
+			if o.get('!CMD','None')=='setbusxy': # Ignore the bus itself
+				continue
+			busesofint = []
+			for k2,v in o.items(): # See if this object is attached to our bus of interest. If so, capture it.
+				if k2 == 'buses':
+					buslist = o[k2]
+					buslist = buslist.replace(']','')
+					buslist = buslist.replace('[','')
+					buslist = buslist.split(',')
+					for b in buslist:
+						busesofint.append(b)
+				elif k2 in ['bus','bus1','bus2','element']: # it's a single value
+					busesofint.append(v)
+			busesofint = [x.split('.')[0] for x in busesofint]
+			if ( len([x for x in busesofint if x == loadparent.split('.')[0]]) > 0 ): #if any of the bottoms' ids equal the bus id, then obj is connected to our node of interest
+				siblings.append(o)
+
+		# Do the siblings include a transformer? 
+		xfmrs = [x for x in siblings if 'transformer' in x.get('object','None')]
+		if len(xfmrs)!=1:
+			continue
+		xfmr = xfmrs[0]
+		xfmrbuses = xfmr.get('buses','None') # Note: It is expected that the high side of the transformer is defined first in the 'buses' array
+		# TODO: check that the xfrmr connects to a line (fringe case?)
+
+		# Grab sibling loads and ensure there aren't any other element types
+		loads = [x for x in siblings if 'load' in x.get('object','None')]
+		if len(loads) != len(siblings)-1:
+			continue		
+		
+		# Add current load to siblings. Now the family is complete. (To complete the analogy, this species reproduces asexually and the transformer begot the bus)
+		siblings.append(obj)
+
+		# Capture load kws and associate with appropiate %r in a dataframe 
+		# (this is an issue right now - how to work with connectivity?)
+		# (also, not all situations are arranged bus>xfrmr>bus>loads)
+		ldparams = pd.DataFrame(colums=['node','kw','perc_r'])
+		for ld in loads:
+			kw = ld.get('kw','DNE')
+			node = ''
+			pass
+		kws = [x.get('kw') for x in loads if x.get('kw','DNE')!='DNE']
+		
+		# Note: We assume that info for the high side (aka the line side) of the xfrmr is in position 0 of the config arrays
+		r_arr = xfmr.get('%rs','None')
+
+		# Calculate what the equivalent load should be
+		secLoad = 0
+		for idx,row in ldparams.iterrows():
+			secLoad = secLoad + row['kw']*(1+row['perc_r'])
+		#load_eq = (1 + r_prim)*secLoad
+
+		#remove all but one of the loads
+		#attach that load to the xfrmr's parent bus
+		#remove the loads'parent bus
+		#remove xfrmr
+		# add to removed id's list
+	return
+
+
+def _tests():
 	from dssConvert import dssToTree, distNetViz, evilDssTreeToGldTree, treeToDss
-	fpath = ['ieee37.clean.dss','ieee123_solarRamp.clean.dss','iowa240.clean.dss','ieeeLVTestCase.clean.dss','ieee8500-unbal.clean.dss']
+	fpath = ['ieee37.clean.dss','ieee123_solarRamp.clean.dss','iowa240.clean.dss','ieeeLVTestCase.clean.dss','ieee8500-unbal_no_fuses.clean.dss']
 
 	for ckt in fpath:
-		tree = dssToTree(ckt)
 		
 		# Tests for mergeContigLines, voltageCompare, getVoltages, and runDSS
-		#errlim = 0.0
-		#assert voltageCompare(voltpath, voltpath, keep_output=True, output_filename=outpath) <= errlim, 'The error between the compared files exceeds the allowable limit of %s%%.'%(errlim*100)
-		#assert voltageCompare(voltsdf, voltsdf, keep_output=True, output_filename=outpath) <= errlim, 'The error between the compared files exceeds the allowable limit of %s%%.'%(errlim*100)
-		#assert voltageCompare(voltpath, voltsdf, keep_output=True, output_filename=outpath) <= errlim, 'The error between the compared files exceeds the allowable limit of %s%%.'%(errlim*100)
+		tree = dssToTree(ckt)
 		#gldtree = evilDssTreeToGldTree(tree) # DEBUG
 		#distNetViz.viz_mem(gldtree, open_file=True, forceLayout=True) # DEBUG
 		oldsz = len(tree)
 		tree = mergeContigLines(tree)
+		#tree = rollUpLoads(tree)
 		newsz = len(tree)
 		#gldtree = evilDssTreeToGldTree(tree) # DEBUG
 		#distNetViz.viz_mem(gldtree, open_file=True, forceLayout=True) # DEBUG
 		outckt_loc = ckt[:-4] + '_mergeContigLines.dss'
 		treeToDss(tree, outckt_loc)
+
+		outdir = 'voltageCompare_' + ckt[:-4]
+		if not os.path.exists(outdir):
+			os.mkdir(outdir)
 		involts_loc = ckt[:-4] + '_volts.dss'
-		involts = getVoltages(ckt, keep_output=True, output_filename=involts_loc)
+		involts = getVoltages(ckt, keep_output=True, outdir=outdir, output_filename=involts_loc)
 		outvolts_loc = outckt_loc[:-4] + '_volts.dss'
-		outvolts = getVoltages(outckt_loc, keep_output=True, output_filename=outvolts_loc)
-		rsumm_P, rsumm_D = voltageCompare(involts, outvolts, keep_output=False, output_filename=ckt[:-4] + '_voltageCompare.csv')		
-		avgerrM = [rsumm_P.loc['Avg %Err',c] for c in rsumm_P.columns if c.lower().startswith(' magnitude')]
-		avgerrM = pd.Series(avgerrM).mean()
-		avgerrA = [rsumm_P.loc['Avg %Err',c] for c in rsumm_P.columns if c.lower().startswith(' angle')]
-		avgerrA = pd.Series(avgerrA).mean()
-		maxrmseM = [rsumm_D.loc['RMSE',c] for c in rsumm_P.columns if c.lower().startswith(' angle')]
-		maxrmseM = pd.Series(maxrmseM).max()
-		maxrmseA = [rsumm_D.loc['RMSE',c] for c in rsumm_P.columns if c.lower().startswith(' magnitude')]
-		maxrmseA = pd.Series(maxrmseA).max()
-		os.remove(involts_loc)
-		os.remove(outvolts_loc)
+		outvolts = getVoltages(outckt_loc, keep_output=True, outdir=outdir, output_filename=outvolts_loc)
+		#assert voltageCompare(voltpath, voltpath, keep_output=True, output_filename=outpath) <= errorLimit, 'The error between the compared files exceeds the allowable limit of %s%%.'%(errlim*100)
+		#assert voltageCompare(voltsdf, voltsdf, keep_output=True, output_filename=outpath) <= errorLimit, 'The error between the compared files exceeds the allowable limit of %s%%.'%(errlim*100)
+		#assert voltageCompare(voltpath, voltsdf, keep_output=True, output_filename=outpath) <= errorLimit, 'The error between the compared files exceeds the allowable limit of %s%%.'%(errlim*100)
+		rsumm_P, rsumm_D = voltageCompare(involts, outvolts, keep_output=True, outdir=outdir, outfilebase=ckt[:-4])		
+		maxPerrM = [rsumm_P.loc['RMSPE',c] for c in rsumm_P.columns if c.lower().startswith(' magnitude')]
+		maxPerrM = pd.Series(maxPerrM).max()
+		maxPerrA = [rsumm_P.loc['RMSPE',c] for c in rsumm_P.columns if c.lower().startswith(' angle')]
+		maxPerrA = pd.Series(maxPerrA).max()
+		maxDerrA = [rsumm_D.loc['RMSE',c] for c in rsumm_D.columns if c.lower().startswith(' angle')]
+		maxDerrA = pd.Series(maxDerrA).max()
+		maxDerrM = [rsumm_D.loc['RMSE',c] for c in rsumm_D.columns if c.lower().startswith(' magnitude')]
+		maxDerrM = pd.Series(maxDerrM).max()
+		from shutil import rmtree
 		os.remove(outckt_loc)
-		print('Objects removed: %s (of %s).\nPercent reduction: %s%%\nAverage percent error in voltage magnitude: %s%%\nAverage percent error in voltage angle: %s%%\nMax RMSE for voltage magnitude: %s\nMax RMSE for voltage angle: %s'%(oldsz-newsz, oldsz, (oldsz-newsz)*100/oldsz, avgerrM, avgerrA, maxrmseM, maxrmseA))
+		rmtree(outdir)
+		print('Objects removed: %s (of %s).\nPercent reduction: %s%%\nMax RMSPE for voltage magnitude: %s%%\nMax RMSPE for voltage angle: %s%%\nMax RMSE for voltage magnitude: %s\nMax RMSE for voltage angle: %s\n'%(oldsz-newsz, oldsz, (oldsz-newsz)*100/oldsz, maxPerrM, maxPerrA, maxDerrM, maxDerrA))
 		
 
 	# Make core output
@@ -575,6 +684,13 @@ def _tests():
 	#dynamicPlot(FPATH, 1, 10)
 	#faultPlot(FPATH)
 	#capacityPlot(FPATH)
+
+	#froots = ['ieee37.clean.dss','ieee123_solarRamp.clean.dss','iowa240.clean.dss','ieeeLVTestCase.clean.dss','ieee8500-unbal_no_fuses.clean.dss']
+	#for froot in froots:
+	#	froot = froot[:-4]
+	#	involts = froot + '_volts.dss'
+	#	outvolts = froot + '_mergecontiglines_volts.dss'
+	#	rsumm_P, rsumm_D = voltageCompare(involts, outvolts, keep_output=True)
 
 if __name__ == "__main__":
 	_tests()

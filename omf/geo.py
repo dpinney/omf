@@ -162,7 +162,7 @@ def omdGeoJson(pathToOmdFile, conversion=False):
 	#	json.dump(geoJsonDict, outFile, indent=4)
 
 
-def mapOmd(pathToOmdFile, outputPath, fileFormat, openBrowser=False, conversion=False):
+def mapOmd(pathToOmdFile, outputPath, fileFormat, openBrowser=False, conversion=False, offline=False):
 	'''
 	Draw an omd on a map.
 	
@@ -179,7 +179,10 @@ def mapOmd(pathToOmdFile, outputPath, fileFormat, openBrowser=False, conversion=
 			geoJsonDict = omdGeoJson(pathToOmdFile, conversion=True)
 		if not os.path.exists(outputPath):
 			os.makedirs(outputPath)
-		shutil.copy(omf.omfDir + '/templates/geoJsonMap.html', outputPath)
+		if offline == False:
+			shutil.copy(omf.omfDir + '/templates/geoJsonMap.html', outputPath)
+		else:
+			shutil.copy(omf.omfDir + '/templates/geoJsonMap_offline.html', outputPath)
 		with open(pJoin(outputPath,'geoJsonFeatures.js'),"w") as outFile:
 			outFile.write("var geojson =")
 			json.dump(geoJsonDict, outFile, indent=4)

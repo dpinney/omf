@@ -153,13 +153,13 @@ def _dssFilePrep(fpath):
 		except Exception as ex:
 			print('While accessing the file located at %s, the following exception occured: %s'%(dssDirPath, ex))
 		dss.run_command('Clear')
-		x = dss.run_command('Redirect ' + dssFilePath)
+		x = dss.run_command('Redirect "' + dssFilePath + '"')
 		x = dss.run_command('Solve')
 		# TODO: If runDSS() is changed to return dssFileLoc, replace the above lines of code with this:
 		#  dssDirPath = self.runDSS(fpath, keep_output=False) # will require moving the function or changing the definition to reference 'self'.
 	
 		exptDirPath = tempDir + '/' + 'OmfCktExport'
-		dss.run_command('Save Circuit ' + 'purposelessFileName.dss ' + exptDirPath)
+		dss.run_command('Save Circuit ' + 'purposelessFileName.dss "' + exptDirPath + '"')
 		# Manipulate buscoords file to create commands that generate bus list
 		coords = pd.read_csv(exptDirPath + '/BusCoords.dss', header=None, dtype=str, names=['Element', 'X', 'Y'])
 		coordscmds = []
@@ -227,6 +227,10 @@ def _applyRegex(fpath):
 		#contents = re.sub('(?<=buses=\[\w*(\.\d)*,\w*),', '.1.2.3,', contents)
 		#contents = re.sub('(?<=bus(\w?)=\w*) ', '.1.2.3 ', contents) #'bus(\w?)' captures bus, bus1, bus2
 		#contents = re.sub('(?<=bus(\w?)=\w*-\w*) ', '.1.2.3 ', contents) #'bus(\w?)' captures bus, bus1, bus2 with hyphen within
+		#contents = re.sub('rdcohms=.* ','',contents) # removes rdcohms=stuff
+		#contents = re.sub('wdg=.* ','',contents) # removes wdg=stuff
+		#contents = re.sub('%r=.* ','',contents) # removes %R=stuff
+		#contents = re.sub('(?<=taps=\[\d,\d,\d\] ).*(?=taps=)','',contents) # handles repeated stuff between 'taps' and 'taps'
 		outFile.write(contents)
 		return outFile.name
 
@@ -377,6 +381,9 @@ def evilDssTreeToGldTree(dssTree):
 				except:
 					fro = b1
 					to = b2
+					#TODO: fix this hack!
+					ob["!FROCODE"] = '.1.2.3'
+					ob["!TOCODE"] = '.1.2.3'
 				gldTree[str(g_id)] = {
 					"object": obtype,
 					"name": name,
@@ -459,18 +466,20 @@ def evilGldTreeToDssTree(evil_gld_tree):
 			_extend_with_exc(ob, new_ob, ['!CMD','from','to','name','object','latitude','longitude','!FROCODE', '!TOCODE'])
 			dssTree.append(new_ob)
 		elif ob.get('object') == 'transformer':
-			new_ob = {
-				'!CMD': 'new',
-				'object': ob['object'] + '.' + ob['name'],
-				'buses': f'({ob["from"]}{ob.get("!FROCODE","")},{ob["to"]}{ob.get("!TOCODE","")})'
-			}
-			_extend_with_exc(ob, new_ob, ['!CMD','from','to','name','object','latitude','longitude','!FROCODE', '!TOCODE'])
-			dssTree.append(new_ob)
+			try:
+				new_ob = {
+					'!CMD': 'new',
+					'object': ob['object'] + '.' + ob['name'],
+					'buses': f'({ob["from"]}{ob.get("!FROCODE","")},{ob["to"]}{ob.get("!TOCODE","")})'
+				}
+				_extend_with_exc(ob, new_ob, ['!CMD','from','to','name','object','latitude','longitude','!FROCODE', '!TOCODE'])
+				dssTree.append(new_ob)
+			except:
+				warnings.warn(f'Could not write valid DSS object for {ob}')
 		elif ob.get('object') == 'regcontrol':
 			new_ob = {
 				'!CMD': 'new',
 				'object': ob['object'] + '.' + ob.get('name',''),
-				'bus': ob['parent'] + ob.get('!CONNCODE', '')
 			}
 			_extend_with_exc(ob, new_ob, ['parent','name','object','latitude','longitude','!CONNCODE'])
 			dssTree.append(new_ob)
@@ -518,36 +527,39 @@ def _createAndCompareTestFile(inFile, userOutFile=''):
 	involts = getVoltages(inFile, keep_output=False)
 	outvolts = getVoltages(outFile, keep_output=False)
 	resFile = 'voltsCompare__' + os.path.split(inFile)[1][:-4] + '___' + os.path.split(outFile)[1][:-4] + '.csv'
-	maxerr = voltageCompare(involts, outvolts, keep_output=True, output_filename=resFile)
-	return maxerr, inFile, outFile, resFile
+	percSumm, diffSumm = voltageCompare(involts, outvolts, keep_output=True)
+	return 
 
 
 def _tests():
-	FNAMES =  ['ieee37.clean.dss', 'ieee123_solarRamp.clean.dss', 'iowa240.clean.dss', 'ieee8500-unbal.clean.dss']
+	from omf.solvers.opendss import getVoltages, voltageCompare
+	import pandas as pd
+	FNAMES =  ['ieee37.clean.dss', 'ieee123_solarRamp.clean.dss', 'iowa240.clean.dss', 'ieee8500-unbal_no_fuses.clean.dss']
 	for fname in FNAMES:
-		tree = dssToTree(fname)
-		# pp([dict(x) for x in tree])
-		# treeToDss(tree, 'TEST.dss')
-		# TODO: Add compare voltage test here!
-		evil_glm = evilDssTreeToGldTree(tree)
-		#pp(evil_glm)
-		distNetViz.viz_mem(evil_glm, open_file=True, forceLayout=False)
-		# evil_dss = evilGldTreeToDssTree(evil_glm)
-		# treeToDss(tree, 'TEST2.dss')
+		print('!!!!!!!!!!!!!! ',fname,' !!!!!!!!!!!!!!')
+		# Roundtrip conversion test
+		errorLimit = 0.03
+		startvolts = getVoltages(fname, keep_output=False)
+		dsstreein = dssToTree(fname)
+		# pp([dict(x) for x in dsstreein]) # DEBUG
+		# treeToDss(dsstreein, 'TEST.dss') # DEBUG
+		glmtree = evilDssTreeToGldTree(dsstreein)
+		#pp(glmtree)
+		# distNetViz.viz_mem(glmtree, open_file=True, forceLayout=False)
+		dsstreeout = evilGldTreeToDssTree(glmtree)
+		#outpath = fname[:-4] + '_roundtrip_test.dss'
+		#treeToDss(dsstreeout, outpath)
+		#endvolts = getVoltages(outpath, keep_output=False)
+		#percSumm, diffSumm = voltageCompare(startvolts, endvolts, keep_output=False)
+		#maxPerrM = [percSumm.loc['RMSPE',c] for c in percSumm.columns if c.lower().startswith(' magnitude')]
+		#maxPerrM = pd.Series(maxPerrM).max()
+		#assert abs(maxPerrM) < errorLimit*100, 'The average percent error exceeeds the threshold of %s%%.'%(errorLimit*100)
 	
 	# Deprecated tests section
 	#dssToGridLab('ieee37.dss', 'Model.glm') # this kind of works
 	#gridLabToDSS('ieee37_fixed.glm', 'ieee37_conv.dss') # this fails miserably
 	#distNetViz.insert_coordinates(evil_glm)
-
-	#results = _createAndCompareTestFile('ieee37_ours.dss','ieee37.clean.dss')
-	#results = _createAndCompareTestFile('ieee123_solarRamp_ours.dss', 'ieee123_solarRamp.clean.dss')
-	#results = _createAndCompareTestFile('ieee8500-unbal_ours.dss', 'ieee8500-unbal_LMS.clean.dss')
-	#results = _createAndCompareTestFile('iowa240_ours.dss', 'iowa240.clean.dss')
 	#TODO: make parser accept keyless items with new !keyless_n key? Or is this just horrible syntax?
-	#TODO: define .dsc format and write syntax guide.
-	#TODO: what to do about transformers with invalid bus setting with the duplicate keys? Probably ignore.
-	#TODO: where to save the x.1.2.3 bus connectivity info?
 	#TODO: refactor in to well-defined bijections between object types?
 	#TODO: a little help on the frontend to hide invalid commands.
 
