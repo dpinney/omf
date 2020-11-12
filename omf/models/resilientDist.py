@@ -15,7 +15,7 @@ from matplotlib import pyplot as plt
 
 # OMF imports
 import omf
-from omf import feeder, weather
+from omf import feeder, weather, distNetViz
 from omf.models import __neoMetaModel__
 from omf.models.__neoMetaModel__ import *
 
@@ -190,6 +190,7 @@ def convertToGFM(gfmInputTemplate, feederModel):
 	}
 	# Get necessary data from .omd.
 	jsonTree = feederModel.get('tree',{})
+	distNetViz.insert_coordinates(jsonTree)
 	jsonNodes = feederModel.get('nodes',[])
 	#Line Creation
 	critLoads = gfmInputTemplate["criticalLoads"].strip().replace(' ', '').split(',')
@@ -739,7 +740,7 @@ def new(modelDir):
 		weather_impacts = f.read()
 
 	defaultInputs = {
-		"feederName1": 'trip37', #"ieee123", # "trip37" "UCS Winter 2017 Fixed" "SVECNoIslands"
+		"feederName1": "ieee123", # "trip37" "UCS Winter 2017 Fixed" "SVECNoIslands"
 		"modelType": modelName,
 		"layoutAlgorithm": "geospatial",
 		"modelName": modelDir,
@@ -750,16 +751,16 @@ def new(modelDir):
 		"dgUnitCost": "1000000.0",
 		"hardeningUnitCost": "10.0",
 		"maxDGPerGenerator": "1.0",
-		"hardeningCandidates": "A_node701-702",
-		"newLineCandidates": "TIE_A_to_C,TIE_C_to_B,TIE_B_to_A",
-		"generatorCandidates": "A_node706,A_node707,A_node708,B_node704,B_node705,B_node703",
-		"switchCandidates" : "A_node705-742,A_node705-712",
-		"criticalLoads": "C_load722",
-		# "hardeningCandidates": "line068069",
-		# "newLineCandidates": "line072073",
-		# "generatorCandidates": "node072",
-		# "switchCandidates": "line106107",
-		# "criticalLoads": "node050",
+		# "hardeningCandidates": "A_node701-702",
+		# "newLineCandidates": "TIE_A_to_C,TIE_C_to_B,TIE_B_to_A",
+		# "generatorCandidates": "A_node706,A_node707,A_node708,B_node704,B_node705,B_node703",
+		# "switchCandidates" : "A_node705-742,A_node705-712",
+		# "criticalLoads": "C_load722",
+		"hardeningCandidates": "line068069",
+		"newLineCandidates": "line072073",
+		"generatorCandidates": "node072",
+		"switchCandidates": "line106107",
+		"criticalLoads": "node050",
 		"criticalLoadMet": "0.98",
 		"nonCriticalLoadMet": "0.5",
 		"chanceConstraint": "1.0",
