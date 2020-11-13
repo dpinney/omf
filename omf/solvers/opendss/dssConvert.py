@@ -152,14 +152,14 @@ def _dssFilePrep(fpath):
 				pass
 		except Exception as ex:
 			print('While accessing the file located at %s, the following exception occured: %s'%(dssDirPath, ex))
-		dss.run_command('Clear')
-		x = dss.run_command('Redirect "' + dssFilePath + '"')
-		x = dss.run_command('Solve')
+		runDssCommand('Clear')
+		x = runDssCommand('Redirect "' + dssFilePath + '"')
+		x = runDssCommand('Solve')
 		# TODO: If runDSS() is changed to return dssFileLoc, replace the above lines of code with this:
 		#  dssDirPath = self.runDSS(fpath, keep_output=False) # will require moving the function or changing the definition to reference 'self'.
 	
 		exptDirPath = tempDir + '/' + 'OmfCktExport'
-		dss.run_command('Save Circuit ' + 'purposelessFileName.dss "' + exptDirPath + '"')
+		runDssCommand('Save Circuit ' + 'purposelessFileName.dss "' + exptDirPath + '"')
 		# Manipulate buscoords file to create commands that generate bus list
 		coords = pd.read_csv(exptDirPath + '/BusCoords.dss', header=None, dtype=str, names=['Element', 'X', 'Y'])
 		coordscmds = []
@@ -258,8 +258,8 @@ def _dssToTree_dssdirect(fpath):
 	to standardize it before parsing.'''
 	# import circuit via opendssdirect
 	import opendssdirect as dss
-	dss.run_command('Redirect ' + fpath)
-	dss.run_command('Solve')
+	runDssCommand('Redirect ' + fpath)
+	runDssCommand('Solve')
 	tree = [] # list of dictionaries
 	tree.extend(_dfToListOfDicts(dss.utils.capacitors_to_dataframe(),'Capacitor'))
 	tree.extend(_dfToListOfDicts(dss.utils.fuses_to_dataframe(), 'Fuse'))
@@ -544,7 +544,7 @@ def _tests():
 		# pp([dict(x) for x in dsstreein]) # DEBUG
 		# treeToDss(dsstreein, 'TEST.dss') # DEBUG
 		glmtree = evilDssTreeToGldTree(dsstreein)
-		#pp(glmtree)
+		#pp(glmtree) #DEBUG
 		# distNetViz.viz_mem(glmtree, open_file=True, forceLayout=False)
 		dsstreeout = evilGldTreeToDssTree(glmtree)
 		#outpath = fname[:-4] + '_roundtrip_test.dss'
