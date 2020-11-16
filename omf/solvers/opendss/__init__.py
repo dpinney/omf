@@ -61,6 +61,7 @@ def _getCoords(dssFilePath, keep_output=True):
 	return coords
 
 def qstsPlot(filePath, stepSizeInMinutes, numberOfSteps):
+	''' Generate voltage values for a timeseries powerflow. '''
 	dssFileLoc = os.path.dirname(os.path.abspath(filePath))
 	volt_coord = runDSS(filePath)
 	dss.run_command('Set mode=daily')
