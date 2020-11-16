@@ -305,8 +305,6 @@ def flisr(pathToOmd, pathToTieLines, faultedLine, workDir, radial, drawMap):
 		if goTo4 == True:
 			goTo4 = False
 			tree, potentiallyViable, tieLines, bestTies, bestReclosers, goTo2, goTo3, terminate, index = addTieLines(tree, faultedNode, potentiallyViable, unpowered, powered, openSwitch, tieLines, bestTies, bestReclosers, workDir, goTo2, goTo3, terminate, index, radial)
-	print(bestReclosers)
-	print(bestTies)
 	# Run powerflow on the optimal solution
 	biggestKey = max([safeInt(x) for x in tree.keys()])
 	tree[str(biggestKey*10 + index + 1)] = {'module':'powerflow','solver_method':'FBS'}
@@ -498,7 +496,7 @@ def flisr(pathToOmd, pathToTieLines, faultedLine, workDir, radial, drawMap):
 		with open(pJoin(workDir,'geoDict.js'),'w') as outFile:
 			json.dump(outageMap, outFile, indent=4)
 
-	return {'bestReclosers':bestReclosers, 'bestTies':bestTies, 'switchStatsHtml': switchStatsHtml}
+	return {'bestReclosers':bestReclosers, 'bestTies':bestTies, 'switchStatsHtml': switchStatsHtml, 'powered': powered}
 
 #flisr('C:/Users/granb/omf/omf/static/publicFeeders/Olin Barre Fault Test 2.omd', 'C:/Users/granb/omf/omf/scratch/blackstart/test.csv', "19186", None, True)
 

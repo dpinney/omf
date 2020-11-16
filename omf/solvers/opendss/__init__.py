@@ -11,6 +11,14 @@ try:
 except:
 	warnings.warn('opendssdirect not installed; opendss functionality disabled.')
 
+def runDssCommand(dsscmd):
+	from opendssdirect import run_command, Error
+	x = run_command(dsscmd)
+	latest_error = Error.Description()
+	if latest_error != '':
+		print('OpenDSS Error:', latest_error)
+	return x
+
 def runDSS(dssFilePath, keep_output=True):
 	''' Run DSS circuit definition file and set export path. Generates file named coords.csv in directory of input file.
 	To avoid generating this file, set the 'keep_output' parameter to False.'''
@@ -24,15 +32,12 @@ def runDSS(dssFilePath, keep_output=True):
 			pass
 	except Exception as ex:
 		print('While accessing the file located at %s, the following exception occured: %s'%(dssFileLoc, ex))
-	dss.run_command('Clear')
-	dss.run_command('Redirect "' + fullPath + '"')
-	dss.run_command('Solve')
-	latest_error = dss.Error.Description()
-	if latest_error != '':
-		print('OpenDSS Error:',latest_error)
+	runDssCommand('Clear')
+	runDssCommand('Redirect "' + fullPath + '"')
+	runDssCommand('Solve')
 	# also generate coordinates.
 	# TODO?: Get the coords as a separate function (i.e. getCoords() below) and instead return dssFileLoc.
-	x = dss.run_command('Export BusCoords "' + dssFileLoc + '/coords.csv"')
+	x = runDssCommand('Export BusCoords "' + dssFileLoc + '/coords.csv"')
 	coords = pd.read_csv(dssFileLoc + '/coords.csv', dtype=str, header=None, names=['Element', 'X', 'Y'])
 	# TODO: reverse keep_output logic - Should default to cleanliness. Requires addition of 'keep_output=True' to all function calls.
 	if not keep_output:
@@ -49,7 +54,7 @@ def _getCoords(dssFilePath, keep_output=True):
 	# TODO: clean up and test the below copy-pasta'd logic
 	#dssFileLoc = runDSS(dssFilePath, keep_output=True)
 	dssFileLoc = runDSS(dssFilePath)
-	x = dss.run_command('Export BusCoords "' + dssFileLoc + '/coords.csv"')
+	x = runDssCommand('Export BusCoords "' + dssFileLoc + '/coords.csv"')
 	coords = pd.read_csv(dssFileLoc + '/coords.csv', header=None)
 	if not keep_output:
 		os.remove(x)
@@ -64,20 +69,20 @@ def qstsPlot(filePath, stepSizeInMinutes, numberOfSteps):
 	''' Generate voltage values for a timeseries powerflow. '''
 	dssFileLoc = os.path.dirname(os.path.abspath(filePath))
 	volt_coord = runDSS(filePath)
-	dss.run_command('Set mode=daily')
-	dss.run_command('Set number=1')
-	dss.run_command(f'Set stepsize={stepSizeInMinutes}m')
+	runDssCommand('Set mode=daily')
+	runDssCommand('Set number=1')
+	runDssCommand(f'Set stepsize={stepSizeInMinutes}m')
 	big_df = pd.DataFrame()
 	for step in range(1, numberOfSteps+1):
-		dss.run_command('Solve')
+		runDssCommand('Solve')
 		csv_path = f'{dssFileLoc}/volt_prof_hour_{step:04d}.csv'
-		dss.run_command(f'Export voltages "{csv_path}"')
+		runDssCommand(f'Export voltages "{csv_path}"')
 		new_data = pd.read_csv(csv_path)
 		new_data['Step'] = step
 		big_df = pd.concat([big_df, new_data], ignore_index=True)
 		os.remove(csv_path)
 	big_df.to_csv(f'{dssFileLoc}/voltage_timeseries.csv', index=False)
-	#Todo: generate plots.
+	# TODO: generate plots.
 
 def voltagePlot(filePath, PU=True):
 	''' Voltage plotting routine. Creates 'voltages.csv' and 'Voltage [PU|V].png' in directory of input file.'''
@@ -86,7 +91,7 @@ def voltagePlot(filePath, PU=True):
 	# TODO: use getCoords() here, if we write it.
 	#volt_coord = runDSS(filePath, keep_output=False)
 	volt_coord = runDSS(filePath)
-	dss.run_command('Export voltages "' + dssFileLoc + '/volts.csv"')
+	runDssCommand('Export voltages "' + dssFileLoc + '/volts.csv"')
 	voltage = pd.read_csv(dssFileLoc + '/volts.csv')
 	# Generate voltage plots.
 	volt_coord.columns = ['Bus', 'X', 'Y', 'radius'] # radius would be obtained by getCoords().
@@ -114,7 +119,7 @@ def currentPlot(filePath):
 	''' Current plotting function.'''
 	dssFileLoc = os.path.dirname(os.path.abspath(filePath))
 	curr_coord = runDSS(filePath)
-	dss.run_command('Export currents "' + dssFileLoc + '/currents.csv"')
+	runDssCommand('Export currents "' + dssFileLoc + '/currents.csv"')
 	current = pd.read_csv(dssFileLoc + '/currents.csv')
 	curr_coord.columns = ['Index', 'X', 'Y', 'radius'] # DSS buses don't have current, but are connected to it. 
 	curr_hyp = []
@@ -134,7 +139,7 @@ def networkPlot(filePath):
 	''' Plot the physical topology of the circuit. '''
 	dssFileLoc = os.path.dirname(os.path.abspath(filePath))
 	coords = runDSS(filePath)
-	dss.run_command('Export voltages "' + dssFileLoc + '/volts.csv"')
+	runDssCommand('Export voltages "' + dssFileLoc + '/volts.csv"')
 	volts = pd.read_csv(dssFileLoc + '/volts.csv')
 	coords.columns = ['Bus', 'X', 'Y', 'radius']
 	G = nx.Graph()
@@ -177,8 +182,8 @@ def THD(filePath):
 	''' Calculate and plot total harmonic distortion. '''
 	dssFileLoc = os.path.dirname(os.path.abspath(filePath))
 	bus_coords = runDSS(filePath)
-	dss.run_command('Solve mode=harmonics')
-	dss.run_command('Export voltages "' + dssFileLoc + '/voltharmonics.csv"')
+	runDssCommand('Solve mode=harmonics')
+	runDssCommand('Export voltages "' + dssFileLoc + '/voltharmonics.csv"')
 	# Clean up temp file.
 	try:
 		base = os.path.basename(filePath)
@@ -203,14 +208,14 @@ def dynamicPlot(filePath, time_step, iterations):
 	''' Do a dynamic, long-term study of the powerflow. time_step is in seconds. '''
 	dssFileLoc = os.path.dirname(os.path.abspath(filePath))	
 	runDSS(filePath)
-	dss.run_command('Solve')
+	runDssCommand('Solve')
 	dynamicCommand = 'Solve mode=dynamics stepsize=%d number=%d' % (time_step, iterations)
-	dss.run_command(dynamicCommand)
+	runDssCommand(dynamicCommand)
 	for i in range(iterations):
 		voltString = 'Export voltages "' + dssFileLoc + '/dynamicVolt%d.csv"' % i
 		currentString = 'Export currents "' + dssFileLoc + '/dynamicCurrent%d.csv"' % i
-		dss.run_command(voltString)
-		dss.run_command(currentString)
+		runDssCommand(voltString)
+		runDssCommand(currentString)
 	powerData = []
 	for j in range(iterations):
 		curVolt = 'dynamicvolt%d.csv' % j
@@ -243,8 +248,8 @@ def faultPlot(filePath):
 	''' Plot fault study. ''' 
 	dssFileLoc = os.path.dirname(os.path.abspath(filePath))
 	bus_coord = runDSS(filePath)
-	dss.run_command('Solve Mode=FaultStudy')
-	dss.run_command('Export fault "' + dssFileLoc + '/faults.csv"')
+	runDssCommand('Solve Mode=FaultStudy')
+	runDssCommand('Export fault "' + dssFileLoc + '/faults.csv"')
 	faultData = pd.read_csv(dssFileLoc + '/faults.csv')
 	bus_coord.columns = ['Bus', 'X', 'Y', 'radius']
 	faultDF = pd.concat([bus_coord, faultData], axis=1)
@@ -264,7 +269,7 @@ def capacityPlot(filePath):
 	''' Plot power vs. distance '''
 	dssFileLoc = os.path.dirname(os.path.abspath(filePath))
 	coords = runDSS(filePath)
-	dss.run_command('Export Capacity "' + dssFileLoc + '/capacity.csv"')
+	runDssCommand('Export Capacity "' + dssFileLoc + '/capacity.csv"')
 	capacityData = pd.read_csv(dssFileLoc + '/capacity.csv')
 	coords.columns = ['Index', 'X', 'Y', 'radius']
 	capacityDF = pd.concat([coords, capacityData], axis=1)
@@ -416,7 +421,7 @@ def getVoltages(dssFilePath, keep_output=False, outdir='', output_filename='volt
 	if outdir!='':
 		outdir = outdir + '/'
 	voltfile = dssFileLoc + '/' + outdir + output_filename
-	dss.run_command('Export voltages "' + voltfile + '"')
+	runDssCommand('Export voltages "' + voltfile + '"')
 	volts = pd.read_csv(voltfile, header=0)
 	volts.index = volts['Bus']
 	volts.drop(labels='Bus', axis=1, inplace=True)
@@ -618,7 +623,7 @@ def rollUpLoads(tree):
 		# Capture load kws and associate with appropiate %r in a dataframe 
 		# (this is an issue right now - how to work with connectivity?)
 		# (also, not all situations are arranged bus>xfrmr>bus>loads)
-		ldparams = pd.DataFrame(colums=['node','kw','perc_r'])
+		ldparams = pd.DataFrame(columns=['node','kw','perc_r'])
 		for ld in loads:
 			kw = ld.get('kw','DNE')
 			node = ''

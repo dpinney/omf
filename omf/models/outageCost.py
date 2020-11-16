@@ -12,6 +12,7 @@ import plotly.graph_objs as go
 # OMF imports
 import omf
 from omf import geo
+from omf.models import flisr
 from omf.models import __neoMetaModel__
 from omf.models.__neoMetaModel__ import *
 
@@ -754,7 +755,7 @@ def randomFaultsRefined(pathToCsv, pathToOmd, workDir, gridLines, faultsGenerate
 	faults = pd.DataFrame(data)
 	return faults
 
-def outageCostAnalysis(pathToOmd, pathToCsv, workDir, generateRandom, graphData, numberOfCustomers, sustainedOutageThreshold, causeFilter, componentTypeFilter, faultTypeFilter, timeMinFilter, timeMaxFilter, meterMinFilter, meterMaxFilter, durationMinFilter, durationMaxFilter, gridLinesStr, faultsGeneratedStr, test, depDist):
+def outageCostAnalysis(pathToOmd, pathToCsv, workDir, generateRandom, graphData, numberOfCustomers, sustainedOutageThreshold, causeFilter, componentTypeFilter, faultTypeFilter, timeMinFilter, timeMaxFilter, meterMinFilter, meterMaxFilter, durationMinFilter, durationMaxFilter, gridLinesStr, faultsGeneratedStr, test, depDist, pathToTieLines):
 	' calculates outage metrics, plots a leaflet map of faults, and plots an outage timeline'
 	# check to see if work directory is specified; otherwise, create a temporary directory
 	if not workDir:
@@ -775,34 +776,28 @@ def outageCostAnalysis(pathToOmd, pathToCsv, workDir, generateRandom, graphData,
 		customerInterruptionDurations = 0.0
 		row = 0
 		row_count_mc = mc.shape[0]
-		while row < row_count_mc:
-			if (datetime_to_float(datetime.datetime.strptime(mc.loc[row, 'Finish'], '%Y-%m-%d %H:%M:%S')) - datetime_to_float(datetime.datetime.strptime(mc.loc[row, 'Start'], '%Y-%m-%d %H:%M:%S'))) > int(sustainedOutageThreshold):
-				entry = str(mc.loc[row, 'Meters Affected'])
-				meters = entry.split()
-				customerInterruptionDurations += (datetime_to_float(datetime.datetime.strptime(mc.loc[row, 'Finish'], '%Y-%m-%d %H:%M:%S')) - datetime_to_float(datetime.datetime.strptime(mc.loc[row, 'Start'], '%Y-%m-%d %H:%M:%S'))) * len(meters) / 3600
-			row += 1
-
-		SAIDI = customerInterruptionDurations / int(numberOfCustomers)
-
-		# calculate SAIFI
-		row = 0
 		totalInterruptions = 0.0
 		customersAffected = 0
 		while row < row_count_mc:
 			if (datetime_to_float(datetime.datetime.strptime(mc.loc[row, 'Finish'], '%Y-%m-%d %H:%M:%S')) - datetime_to_float(datetime.datetime.strptime(mc.loc[row, 'Start'], '%Y-%m-%d %H:%M:%S'))) > int(sustainedOutageThreshold):
 				entry = str(mc.loc[row, 'Meters Affected'])
 				meters = entry.split()
+				customerInterruptionDurations += (datetime_to_float(datetime.datetime.strptime(mc.loc[row, 'Finish'], '%Y-%m-%d %H:%M:%S')) - datetime_to_float(datetime.datetime.strptime(mc.loc[row, 'Start'], '%Y-%m-%d %H:%M:%S'))) * len(meters) / 3600
 				customersAffected += len(meters)
 			row += 1
-		SAIFI = float(customersAffected) / int(numberOfCustomers)
+
+		SAIDI = round(customerInterruptionDurations / int(numberOfCustomers), 5)
+
+		# calculate SAIFI
+		SAIFI = round(float(customersAffected) / int(numberOfCustomers), 5)
 
 		# calculate CAIDI
 		if (SAIDI != 0):
-			CAIDI = SAIDI / SAIFI
+			CAIDI = round(SAIDI / SAIFI)
 		else: CAIDI = 'Error: Check sustained outage threshold'
 	
 		# calculate ASAI
-		ASAI = (int(numberOfCustomers) * 8760 - customerInterruptionDurations) / (int(numberOfCustomers) * 8760)
+		ASAI = round((int(numberOfCustomers) * 8760 - customerInterruptionDurations) / (int(numberOfCustomers) * 8760), 5)
 
 		# calculate MAIFI
 		sumCustomersAffected = 0.0
@@ -814,14 +809,58 @@ def outageCostAnalysis(pathToOmd, pathToCsv, workDir, generateRandom, graphData,
 				sumCustomersAffected += len(meters)
 			row += 1
 
-		MAIFI = sumCustomersAffected / int(numberOfCustomers)
+		MAIFI = round(sumCustomersAffected / int(numberOfCustomers), 5)
 
+		return SAIDI, SAIFI, CAIDI, ASAI, MAIFI
+
+	def flisrStats(mc, pathToOmd, pathToTieLines):
+		# calculate SAIDI
+		customerInterruptionDurations = 0.0
+		row = 0
+		row_count_mc = mc.shape[0]
+		sumCustomersAffected = 0.0
+		totalInterruptions = 0.0
+		customersAffected = 0
+		while row < row_count_mc:
+			flisrDict = flisr.flisr(pathToOmd, pathToTieLines, mc.loc[row, 'Object Name'], workDir, True, False)
+			if (datetime_to_float(datetime.datetime.strptime(mc.loc[row, 'Finish'], '%Y-%m-%d %H:%M:%S')) - datetime_to_float(datetime.datetime.strptime(mc.loc[row, 'Start'], '%Y-%m-%d %H:%M:%S'))) > int(sustainedOutageThreshold):
+				powered = flisrDict['powered']
+				entry = str(mc.loc[row, 'Meters Affected'])
+				meters = entry.split()
+				meters = [item for item in meters if item not in powered]
+				customerInterruptionDurations += (datetime_to_float(datetime.datetime.strptime(mc.loc[row, 'Finish'], '%Y-%m-%d %H:%M:%S')) - datetime_to_float(datetime.datetime.strptime(mc.loc[row, 'Start'], '%Y-%m-%d %H:%M:%S'))) * len(meters) / 3600
+				customersAffected += len(meters)
+			if (datetime_to_float(datetime.datetime.strptime(mc.loc[row, 'Finish'], '%Y-%m-%d %H:%M:%S')) - datetime_to_float(datetime.datetime.strptime(mc.loc[row, 'Start'], '%Y-%m-%d %H:%M:%S'))) <= int(sustainedOutageThreshold):
+				powered = flisrDict['powered']
+				entry = str(mc.loc[row, 'Meters Affected'])
+				meters = entry.split()
+				meters = [item for item in meters if item not in powered]
+				sumCustomersAffected += len(meters)
+			row += 1
+
+		SAIDI = round(customerInterruptionDurations / int(numberOfCustomers), 5)
+
+		# calculate SAIFI
+		SAIFI = round(float(customersAffected) / int(numberOfCustomers), 5)
+
+		# calculate MAIFI
+		MAIFI = round(sumCustomersAffected / int(numberOfCustomers), 5)
+
+		# calculate CAIDI
+		if (SAIDI != 0):
+			CAIDI = round(SAIDI / SAIFI)
+		else: CAIDI = 'Error: Check sustained outage threshold'
+	
+		# calculate ASAI
+		ASAI = round((int(numberOfCustomers) * 8760 - customerInterruptionDurations) / (int(numberOfCustomers) * 8760), 5)
+		
 		return SAIDI, SAIFI, CAIDI, ASAI, MAIFI
 
 	mc = pd.read_csv(pathToCsv)
 
 	if 'Start' in mc.columns:
 		SAIDI, SAIFI, CAIDI, ASAI, MAIFI = stats(mc)
+		flisrSAIDI, flisrSAIFI, flisrCAIDI, flisrASAI, flisrMAIFI = flisrStats(mc, pathToOmd, pathToTieLines)
 
 		# make the format nice and save as .html
 		metrics = statsCalc(
@@ -830,8 +869,17 @@ def outageCostAnalysis(pathToOmd, pathToCsv, workDir, generateRandom, graphData,
 			caidi = CAIDI,
 			asai = ASAI,
 			maifi = MAIFI)
+
+		flisrMetrics = statsCalc(
+			saidi = flisrSAIDI,
+			saifi = flisrSAIFI,
+			caidi = flisrCAIDI,
+			asai = flisrASAI,
+			maifi = flisrMAIFI)
 		with open(pJoin(workDir, 'statsCalc.html'), 'w') as statsFile:
 			statsFile.write(metrics)
+		with open(pJoin(workDir, 'flisrStatsCalc.html'), 'w') as statsFile:
+			statsFile.write(flisrMetrics)
 	else:
 		with open(pJoin(workDir, 'statsCalc.html'), 'w') as statsFile:
 			statsFile.write('No outage stats are available given the input data provided by the user.')
@@ -1063,6 +1111,9 @@ def work(modelDir, inputDict):
 	with open(pJoin(modelDir, inputDict['outageFileName']), 'w') as f:
 		pathToData = f.name
 		f.write(inputDict['outageData'])
+	with open(pJoin(modelDir, inputDict['tieFileName']), 'w') as f:
+		pathToData1 = f.name
+		f.write(inputDict['tieData'])
 	plotOuts = outageCostAnalysis(
 		modelDir + '/' + feederName + '.omd', #OMD Path
 		pathToData,
@@ -1083,11 +1134,14 @@ def work(modelDir, inputDict):
 		inputDict['gridLinesStr'],
 		inputDict['faultsGeneratedStr'],
 		inputDict['test'],
-		inputDict['depDist'])
+		inputDict['depDist'],
+		pathToData1)
 	
 	# Textual outputs of cost statistic
 	with open(pJoin(modelDir,'statsCalc.html'),'rb') as inFile:
 		outData['statsHtml'] = inFile.read().decode()
+	with open(pJoin(modelDir,'flisrStatsCalc.html'),'rb') as inFile:
+		outData['flisrStatsHtml'] = inFile.read().decode()
 
 	#The geojson dictionary to load into the outageCost.py template
 	with open(pJoin(modelDir,'geoDict.js'),'rb') as inFile:
@@ -1109,9 +1163,11 @@ def new(modelDir):
 	''' Create a new instance of this model. Returns true on success, false on failure. '''
 	with open(pJoin(__neoMetaModel__._omfDir,'scratch','smartSwitching','outagesNew3.csv')) as f:
 		outage_data = f.read()
+	with open(pJoin(__neoMetaModel__._omfDir,'scratch','blackstart','testOlinBarreFault.csv')) as f:
+		tie_data = f.read()
 	defaultInputs = {
 		'modelType': modelName,
-		'feederName1': 'Olin Barre Geo',
+		'feederName1': 'Olin Barre Fault Test 2',
 		'generateRandom': '0',
 		'graphData': '1',
 		'numberOfCustomers': '192',
@@ -1130,7 +1186,9 @@ def new(modelDir):
 		'faultsGeneratedStr': '1000',
 		'test': 'dependent',
 		'depDist': '0',
-		'outageData': outage_data
+		'outageData': outage_data,
+		'tieFileName': 'testOlinBarreFault.csv',
+		'tieData': tie_data
 	}
 	creationCode = __neoMetaModel__.new(modelDir, defaultInputs)
 	try:
