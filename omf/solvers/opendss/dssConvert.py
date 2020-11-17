@@ -547,13 +547,13 @@ def _tests():
 		#pp(glmtree) #DEBUG
 		# distNetViz.viz_mem(glmtree, open_file=True, forceLayout=False)
 		dsstreeout = evilGldTreeToDssTree(glmtree)
-		#outpath = fname[:-4] + '_roundtrip_test.dss'
-		#treeToDss(dsstreeout, outpath)
-		#endvolts = getVoltages(outpath, keep_output=False)
-		#percSumm, diffSumm = voltageCompare(startvolts, endvolts, keep_output=False)
-		#maxPerrM = [percSumm.loc['RMSPE',c] for c in percSumm.columns if c.lower().startswith(' magnitude')]
-		#maxPerrM = pd.Series(maxPerrM).max()
-		#assert abs(maxPerrM) < errorLimit*100, 'The average percent error exceeeds the threshold of %s%%.'%(errorLimit*100)
+		outpath = fname[:-4] + '_roundtrip_test.dss'
+		treeToDss(dsstreeout, outpath)
+		endvolts = getVoltages(outpath, keep_output=False)
+		percSumm, diffSumm = voltageCompare(startvolts, endvolts, keep_output=False)
+		maxPerrM = [percSumm.loc['RMSPE',c] for c in percSumm.columns if c.lower().startswith(' magnitude')]
+		maxPerrM = pd.Series(maxPerrM).max()
+		#assert abs(maxPerrM) < errorLimit*100, 'The average percent error in voltage magnitude exceeeds the threshold of %s%%.'%(errorLimit*100)
 	
 	# Deprecated tests section
 	#dssToGridLab('ieee37.dss', 'Model.glm') # this kind of works
