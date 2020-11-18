@@ -76,15 +76,24 @@ def dssToTree(pathToDss):
 	for i, line in contents.items():
 		jpos = 0
 		try:
-			#HACK: only support white space separation of attributes.
 			contents[i] = line.split()
-			# HACK: only support = assignment of values.
 			ob = OrderedDict() 
 			ob['!CMD'] = contents[i][0]
 			if len(contents[i]) > 1:
 				for j in range(1, len(contents[i])):
 					jpos = j
-					k,v = contents[i][j].split('=')
+					splitlen = len(contents[i][j].split('='))
+					k,v=('','',)
+					if splitlen==3:
+						print('OMF does not support OpenDSS\'s \'file=\' syntax for defining property values.')
+						k,v,f = contents[i][j].split('=')
+						# replaceFileSyntax() # DEBUG
+						## replaceFileSyntax  should do the following:
+						  # parse the filename (contained in v)
+						  # read in the file and parse as array
+						  # v = file content array, cast as a string
+					else:
+						k,v = contents[i][j].split('=')
 					# Should we pull the multiwinding transformer handling out of here and put it into dssFilePrep()?
 					if k == 'wdg':
 						continue
