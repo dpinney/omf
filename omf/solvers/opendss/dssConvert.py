@@ -491,6 +491,13 @@ def evilGldTreeToDssTree(evil_gld_tree):
 			}
 			_extend_with_exc(ob, new_ob, ['parent','name','object','latitude','longitude','!CONNCODE'])
 			dssTree.append(new_ob)
+		elif ob.get('object').split('.')[0]=='vsource':
+			new_ob = {
+				'!CMD': 'edit',
+				'object': ob['object'],
+			}
+			_extend_with_exc(ob, new_ob, ['!CMD','name','object','latitude','longitude'])
+			dssTree.append(new_ob)
 		elif 'bus' not in ob and 'bus1' not in ob and 'bus2' not in ob and 'buses' not in ob and ob.get('object') != '!CMD':
 			# floating config type object.
 			new_ob = {
