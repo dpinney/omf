@@ -25,6 +25,7 @@ def work(modelDir, inputDict):
 	# feederName = inputDict["feederName1"]
 	feederName = [x for x in os.listdir(modelDir) if x.endswith('.omd')][0][:-4]
 	inputDict["feederName1"] = feederName
+	inputDict["circuitFileName1"] = feederName
 	zipCode = "59001" #TODO get zip code from the PV and Load input file
 
 	# Output a .dss file, which will be needed for ONM.
@@ -344,14 +345,18 @@ def work(modelDir, inputDict):
 		for reg_name in regNameList:
 			outData[reg_name] = {}
 			regPhaseValue = pycigarJson[reg_name]["RegPhases"]
+			short_reg_name = reg_name[10:] #cut out "Regulator_" for naming purposes
 			if regPhaseValue.find('A') != -1:
-				outData[reg_name]["RegTapA"] = pycigarJson[reg_name]["creg1a"]
+				#outData[reg_name]["RegTapA"] = pycigarJson[reg_name]["creg1a"]
+				outData[reg_name]["RegTapA"] = pycigarJson[reg_name][short_reg_name + "a"]
 
 			if regPhaseValue.find('B') != -1:
-				outData[reg_name]["RegTapB"] = pycigarJson[reg_name]["creg1b"]
+				#outData[reg_name]["RegTapB"] = pycigarJson[reg_name]["creg1b"]
+				outData[reg_name]["RegTapA"] = pycigarJson[reg_name][short_reg_name + "b"]
 
 			if regPhaseValue.find('C') != -1:
-				outData[reg_name]["RegTapC"] = pycigarJson[reg_name]["creg1c"]
+				#outData[reg_name]["RegTapC"] = pycigarJson[reg_name]["creg1c"]
+				outData[reg_name]["RegTapA"] = pycigarJson[reg_name][short_reg_name + "c"]
 
 			outData[reg_name]["RegPhases"] = regPhaseValue
 
