@@ -9,8 +9,6 @@ jobs:
     timeout-minutes: 120
     steps:
       - uses: actions/checkout@v2 # Checkout whichever ref that triggered this workflow
-        with:
-          ref: new-testing
       - name: Install Dependencies
         run: |
           sudo apt-get -y update
@@ -26,8 +24,6 @@ jobs:
     runs-on: macos-latest # macOS Catalina 10.15
     steps:
       - uses: actions/checkout@v2
-        with:
-          ref: new-testing
       - name: Install dependencies
         run: |
           /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install.sh)"
@@ -44,8 +40,6 @@ jobs:
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v2
-        with:
-          ref: new-testing
       - name: Install dependencies
         run: |
           choco install python --version 3.6.8
