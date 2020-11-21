@@ -1,0 +1,57 @@
+name: OMF Integration Tests
+
+on: push # Run test on any push to any branch to dpinney/omf
+        
+jobs:
+  Ubuntu:
+    name: Test OMF on Ubuntu
+    runs-on: ubuntu-18.04
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@v2 # Checkout whichever ref that triggered this workflow
+        with:
+          ref: new-testing
+      - name: Install Dependencies
+        run: |
+          sudo apt-get -y update
+          sudo apt-get -y upgrade
+          sudo apt-get -y install python3-pip
+          sudo python3 install.py
+          sudo pip3 install -r requirements.txt
+      - name: Run Tests
+        run: sudo python3 omf/runAllTests.py
+  # macOS tests are currently allowed to fail (| syntax)
+  macOS:
+    name: Test OMF on macOS
+    runs-on: macos-latest # macOS Catalina 10.15
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          ref: new-testing
+      - name: Install dependencies
+        run: |
+          /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install.sh)"
+          brew install python
+          python3 install.py
+          pip3 install -r requirements.txt
+      - name: Run tests
+        continue-on-error: true # let tests fail for now
+        run: |
+          python3 omf/runAllTests.py
+  # Windows tests are currently allowed to fail (| syntax)
+  Windows:
+    name: Test OMF on Windows
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          ref: new-testing
+      - name: Install dependencies
+        run: |
+          choco install python --version 3.6.8
+          python install.py
+          pip install -r requirements.txt
+      - name: Run tests
+        continue-on-error: true # let tests fail for now
+        run: |
+          python omf/runAllTests.py
