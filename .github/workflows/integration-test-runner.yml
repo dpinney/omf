@@ -18,23 +18,20 @@ jobs:
           sudo pip3 install -r requirements.txt
       - name: Run Tests
         run: sudo python3 omf/runAllTests.py
-  # macOS tests are currently allowed to fail (| syntax)
   macOS:
     name: Test OMF on macOS
     runs-on: macos-latest
     steps:
       - uses: actions/checkout@v2
       - name: Install dependencies
-        continue-on-error: true
         run: |
           brew link python@3.8 #already installed but python3.9 is default
           python3 install.py
           pip3 install -r requirements.txt
       - name: Run tests
-        continue-on-error: true
         run: |
           python3 omf/runAllTests.py
-  # Windows tests are currently allowed to fail (| syntax)
+  # Windows tests are currently allowed to fail
   Windows:
     name: Test OMF on Windows
     runs-on: windows-latest
