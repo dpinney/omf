@@ -1,6 +1,6 @@
 name: OMF Integration Tests
 
-on: push # Run test on any push to any branch to dpinney/omf
+on: push
         
 jobs:
   Ubuntu:
@@ -21,17 +21,17 @@ jobs:
   # macOS tests are currently allowed to fail (| syntax)
   macOS:
     name: Test OMF on macOS
-    runs-on: macos-latest # macOS Catalina 10.15
+    runs-on: macos-latest
     steps:
       - uses: actions/checkout@v2
       - name: Install dependencies
+        continue-on-error: true
         run: |
-          /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install.sh)"
-          brew install python
+          brew install python3
           python3 install.py
           pip3 install -r requirements.txt
       - name: Run tests
-        continue-on-error: true # let tests fail for now
+        continue-on-error: true
         run: |
           python3 omf/runAllTests.py
   # Windows tests are currently allowed to fail (| syntax)
@@ -41,11 +41,12 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - name: Install dependencies
+        continue-on-error: true
         run: |
           choco install python --version 3.6.8
           python install.py
           pip install -r requirements.txt
       - name: Run tests
-        continue-on-error: true # let tests fail for now
+        continue-on-error: true
         run: |
           python omf/runAllTests.py
