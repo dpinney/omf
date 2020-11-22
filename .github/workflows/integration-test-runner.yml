@@ -47,7 +47,7 @@ jobs:
           python install.py
           pip install -r requirements.txt
           # path fixes for windoze
-          echo "C:\\Program files (x86)\\Graphviz2.38\\bin;C:\\Program Files\\GridLAB-D\\bin;C:\\Program Files\\GridLAB-D\\lib;C:\\Program files (x86)\\Graphviz2.38\\bin" >> $GITHUB_PATH
+          echo "C:\\Program Files\\GridLAB-D\\bin;C:\\Program Files\\GridLAB-D\\lib;C:\\Program Files (x86)\\Graphviz2.38\\bin" >> $GITHUB_PATH
           # workaround for busted pygraphviz on windoze
           wget -nv --no-check-certificate "https://github.com/CristiFati/Prebuilt-Binaries/raw/master/PyGraphviz/v1.5/Graphviz-2.42.2/pygraphviz-1.5-cp37-cp37m-win_amd64.whl"
           python -m pip install pygraphviz-1.5-cp37-cp37m-win_amd64.whl
