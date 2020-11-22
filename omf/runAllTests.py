@@ -68,6 +68,7 @@ def testRunner():
 	print(tested)
 	print(f'Number of tests failed: {len(misfires)}')
 	_print_header('untested modules report')
+	print(misfires)
 	print(f'Number of untested modules: {len(not_tested)}')
 	print(not_tested, '\n')
 
