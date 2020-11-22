@@ -57,7 +57,6 @@ elif platform.system()=='Windows':
 	# Install GridLAB-D.
 	os.system("wget --no-check-certificate https://sourceforge.net/projects/gridlab-d/files/gridlab-d/Candidate%20release/gridlabd-4.0_RC1.exe")
 	os.system("gridlabd-4.0_RC1.exe/silent")
-	# os.system("refreshenv")
 	#Install splat
 	#os.system(wget http://www.ve3ncq.ca/software/SPLAT-1.3.1.zip)
 	#os.system(unzip SPLAT-1.3.1.zip) #need to rename/copy these files.
@@ -69,6 +68,7 @@ elif platform.system()=='Windows':
 	# Finish up installation with pip.
 	pipInstallInOrder("python -m pip")
 	os.system("python setup.py develop")
+	# os.system("refreshenv") # Refresh local environment variables via choco tool.
 elif platform.system()=="Darwin": # MacOS
 	# Install homebrew
 	os.system("HOMEBREW_NO_AUTO_UPDATE=1 brew install wget ffmpeg git graphviz octave mdbtools") # Set no-update to keep homebrew from blowing away python3.
