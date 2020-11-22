@@ -44,18 +44,15 @@ elif platform.system() == "Linux" and platform.linux_distribution()[0]=="CentOS 
 	os.system("pip3 install --ignore-installed six")
 	os.system("python3 setup.py develop")
 elif platform.system()=='Windows':
-	# Choco install.
-	# chocoString = @"%SystemRoot%\System32\WindowsPowerShell\v1.0\powershell.exe" -NoProfile -InputFormat None -ExecutionPolicy Bypass -Command "iex ((New-Object System.Net.WebClient).DownloadString('https://chocolatey.org/install.ps1'))" && SET "PATH=%PATH%;%ALLUSERSPROFILE%\chocolatey\bin"
-	# os.system(chocoString)
 	# Update pip to remove warnings
 	os.system("python -m pip install --upgrade pip")
 	# Install choco packages.
-	os.system("choco install -y wget")
-	os.system("choco install -y vcredist-all")
-	os.system("choco install -y ffmpeg")
-	os.system("choco install -y graphviz")
-	os.system("choco install -y pip")
-	os.system("choco install -y octave.portable")
+	os.system("choco install -y --no-progress wget")
+	os.system("choco install -y --no-progress vcredist-all")
+	os.system("choco install -y --no-progress ffmpeg")
+	os.system("choco install -y --no-progress graphviz")
+	os.system("choco install -y --no-progress pip")
+	os.system("choco install -y --no-progress octave.portable")
 	# TODO: find way to install mdbtools.
 	# Install GridLAB-D.
 	os.system("wget --no-check-certificate https://sourceforge.net/projects/gridlab-d/files/gridlab-d/Candidate%20release/gridlabd-4.0_RC1.exe")
@@ -70,7 +67,7 @@ elif platform.system()=='Windows':
 	os.system(f"set PATH=%PATH%;{graphVizBinPath}")
 	os.system("python -m pip install omf\\static\\pygraphviz-1.5-cp36-cp36m-win_amd64.whl")
 	# Finish up installation with pip.
-	pipInstallInOrder("python3 -m pip")
+	pipInstallInOrder("python -m pip")
 	os.system("python setup.py develop")
 elif platform.system()=="Darwin": # MacOS
 	# Install homebrew
