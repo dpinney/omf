@@ -38,6 +38,7 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - name: Install dependencies
+        continue-on-error: true
         run: |
           choco install python --version 3.6.8
           python install.py
