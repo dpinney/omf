@@ -31,10 +31,12 @@ jobs:
       - name: Run tests
         run: |
           python3 omf/runAllTests.py
-  # Windows tests are currently allowed to fail
   Windows:
     name: Test OMF on Windows
     runs-on: windows-latest
+    env:
+        GLPATH: "C:\\Program Files\\GridLAB-D\\bin;C:\\Program Files\\GridLAB-D\\etc;C:\\Program Files\\GridLAB-D\\lib;C:\\Program Files\\GridLAB-D\\samples;C:\\Program Files\\GridLAB-D\\rt;C:\\Program Files\\GridLAB-D\\tmy"
+        GRIDLABD: "C:\\Program Files\\GridLAB-D"
     steps:
       - uses: actions/checkout@v2
       - name: Install dependencies
@@ -43,6 +45,8 @@ jobs:
           choco install python --version 3.6.8
           python install.py
           pip install -r requirements.txt
+          # path fixes for windoze
+          echo "C:Program files (x86)\\Graphviz2.38\\bin:C:Program Files\\GridLAB-D\\bin:C:Program Files\\GridLAB-D\\lib:C:Program files (x86)\\Graphviz2.38\\bin" >> $GITHUB_PATH
       - name: Run tests
         run: |
           python omf/runAllTests.py
