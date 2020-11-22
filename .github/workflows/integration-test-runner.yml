@@ -46,7 +46,7 @@ jobs:
           python install.py
           pip install -r requirements.txt
           # path fixes for windoze
-          echo "C:Program files (x86)\\Graphviz2.38\\bin:C:Program Files\\GridLAB-D\\bin:C:Program Files\\GridLAB-D\\lib:C:Program files (x86)\\Graphviz2.38\\bin" >> $GITHUB_PATH
+          echo "C:\\Program files (x86)\\Graphviz2.38\\bin;C:\\Program Files\\GridLAB-D\\bin;C:\\Program Files\\GridLAB-D\\lib;C:\\Program files (x86)\\Graphviz2.38\\bin" >> $GITHUB_PATH
       - name: Run tests
         run: |
           python omf/runAllTests.py
