@@ -38,12 +38,10 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - name: Install dependencies
-        continue-on-error: true
         run: |
           choco install python --version 3.6.8
           python install.py
           pip install -r requirements.txt
       - name: Run tests
-        continue-on-error: true
         run: |
           python omf/runAllTests.py
