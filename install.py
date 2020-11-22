@@ -44,26 +44,15 @@ elif platform.system() == "Linux" and platform.linux_distribution()[0]=="CentOS 
 	os.system("pip3 install --ignore-installed six")
 	os.system("python3 setup.py develop")
 elif platform.system()=='Windows':
-	# Choco install.
-	# chocoString = @"%SystemRoot%\System32\WindowsPowerShell\v1.0\powershell.exe" -NoProfile -InputFormat None -ExecutionPolicy Bypass -Command "iex ((New-Object System.Net.WebClient).DownloadString('https://chocolatey.org/install.ps1'))" && SET "PATH=%PATH%;%ALLUSERSPROFILE%\chocolatey\bin"
-	# os.system(chocoString)
-	# Check for right Python version.
-	pybin = os.popen('where python').read()
-	goodbin = 'C:\\Python36\\python.exe'
-	if goodbin not in pybin:
-		print('Non-standard python install detected. We will attempt to continue with choco.')
-		os.system("choco install -y python --version 3.6.8")
-	# Hack to create a python3 binary on the path.
-	os.system("copy C:\\Python36\\python.exe C:\\Python36\\python3.exe")
 	# Update pip to remove warnings
-	os.system("python3 -m pip install --upgrade pip")
+	os.system("python -m pip install --upgrade pip")
 	# Install choco packages.
-	os.system("choco install -y wget")
-	os.system("choco install -y vcredist-all")
-	os.system("choco install -y ffmpeg")
-	os.system("choco install -y graphviz")
-	os.system("choco install -y pip")
-	os.system("choco install -y octave.portable")
+	os.system("choco install -y --no-progress wget")
+	os.system("choco install -y --no-progress vcredist-all")
+	os.system("choco install -y --no-progress ffmpeg")
+	os.system("choco install -y --no-progress graphviz")
+	os.system("choco install -y --no-progress pip")
+	os.system("choco install -y --no-progress octave.portable")
 	# TODO: find way to install mdbtools.
 	# Install GridLAB-D.
 	os.system("wget --no-check-certificate https://sourceforge.net/projects/gridlab-d/files/gridlab-d/Candidate%20release/gridlabd-4.0_RC1.exe")
@@ -76,10 +65,10 @@ elif platform.system()=='Windows':
 	graphVizBinPath = "C:\\Program Files (x86)\\Graphviz2.38\\bin"
 	os.system(f'setx path "%path%;{graphVizBinPath}"')
 	os.system(f"set PATH=%PATH%;{graphVizBinPath}")
-	os.system("python3.exe -m pip install omf\\static\\pygraphviz-1.5-cp36-cp36m-win_amd64.whl")
+	os.system("python -m pip install omf\\static\\pygraphviz-1.5-cp36-cp36m-win_amd64.whl")
 	# Finish up installation with pip.
-	pipInstallInOrder("python3 -m pip")
-	os.system("python3 setup.py develop")
+	pipInstallInOrder("python -m pip")
+	os.system("python setup.py develop")
 elif platform.system()=="Darwin": # MacOS
 	# Install homebrew
 	os.system("HOMEBREW_NO_AUTO_UPDATE=1 brew install wget ffmpeg git graphviz octave mdbtools") # Set no-update to keep homebrew from blowing away python3.
