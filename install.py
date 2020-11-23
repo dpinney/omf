@@ -50,7 +50,7 @@ elif platform.system()=='Windows':
 	os.system("choco install -y --no-progress wget")
 	os.system("choco install -y --no-progress vcredist-all")
 	os.system("choco install -y --no-progress ffmpeg")
-	os.system("choco install -y --no-progress graphviz")
+	os.system("choco install graphviz --version=2.38.0.20171119")
 	os.system("choco install -y --no-progress pip")
 	os.system("choco install -y --no-progress octave.portable")
 	# TODO: find way to install mdbtools.
@@ -61,10 +61,10 @@ elif platform.system()=='Windows':
 	#os.system(wget http://www.ve3ncq.ca/software/SPLAT-1.3.1.zip)
 	#os.system(unzip SPLAT-1.3.1.zip) #need to rename/copy these files.
 	# Install pygraphviz from wheel because it's finicky
-	graphVizBinPath = "C:\\Program Files (x86)\\Graphviz2.38\\bin"
+	graphVizBinPath = 'C:\\Program Files (x86)\\Graphviz2.38\\bin'
 	os.system(f'setx path "%path%;{graphVizBinPath}"')
 	os.system(f"set PATH=%PATH%;{graphVizBinPath}")
-	os.system("python -m pip install omf\\static\\pygraphviz-1.5-cp36-cp36m-win_amd64.whl")
+	os.system('python -m pip install omf\\static\\pygraphviz-1.5-cp36-cp36m-win_amd64.whl')
 	# Finish up installation with pip.
 	pipInstallInOrder("python -m pip")
 	os.system("python setup.py develop")
