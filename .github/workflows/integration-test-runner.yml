@@ -34,11 +34,16 @@ jobs:
   Windows:
     name: Test OMF on Windows
     runs-on: windows-latest
-    env:
-        GLPATH: "C:\\Program Files\\GridLAB-D\\bin;C:\\Program Files\\GridLAB-D\\etc;C:\\Program Files\\GridLAB-D\\lib;C:\\Program Files\\GridLAB-D\\samples;C:\\Program Files\\GridLAB-D\\rt;C:\\Program Files\\GridLAB-D\\tmy"
-        GRIDLABD: "C:\\Program Files\\GridLAB-D"
     steps:
       - uses: actions/checkout@v2
+      - name: Fix Pathing
+        continue-on-error: true
+        shell: bash
+        run: |
+          # https://docs.github.com/en/free-pro-team@latest/actions/reference/workflow-commands-for-github-actions#setting-an-environment-variable
+          echo "GLPATH=C:\\Program Files\\GridLAB-D\\bin;C:\\Program Files\\GridLAB-D\\etc;C:\\Program Files\\GridLAB-D\\lib;C:\\Program Files\\GridLAB-D\\samples;C:\\Program Files\\GridLAB-D\\rt;C:\\Program Files\\GridLAB-D\\tmy" >> $GITHUB_ENV
+          echo "GRIDLABD=C:\\Program Files\\GridLAB-D" >> $GITHUB_ENV
+          echo "C:\\Program Files\\GridLAB-D\\bin;C:\\Program Files\\GridLAB-D\\lib;C:\\Program Files (x86)\\Graphviz2.38\\bin" >> $GITHUB_PATH
       - name: Install dependencies
         continue-on-error: true
         run: |
@@ -46,8 +51,6 @@ jobs:
           choco install wget
           python install.py
           pip install -r requirements.txt
-          # path fixes for windoze
-          echo "C:\\Program Files\\GridLAB-D\\bin;C:\\Program Files\\GridLAB-D\\lib;C:\\Program Files (x86)\\Graphviz2.38\\bin" >> $GITHUB_PATH
           # workaround for busted pygraphviz on windoze
           wget -nv --no-check-certificate "https://github.com/CristiFati/Prebuilt-Binaries/raw/master/PyGraphviz/v1.5/Graphviz-2.42.2/pygraphviz-1.5-cp37-cp37m-win_amd64.whl"
           python -m pip install pygraphviz-1.5-cp37-cp37m-win_amd64.whl
