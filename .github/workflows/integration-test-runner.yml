@@ -47,8 +47,8 @@ jobs:
       - name: Install dependencies
         continue-on-error: true
         run: |
-          choco install python --version 3.6.8
-          choco install wget
+          choco install python --no-progress --version 3.6.8
+          choco install wget --no-progress
           python install.py
           pip install -r requirements.txt
           # workaround for busted pygraphviz on windoze

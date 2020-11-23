@@ -50,7 +50,7 @@ elif platform.system()=='Windows':
 	os.system("choco install -y --no-progress wget")
 	os.system("choco install -y --no-progress vcredist-all")
 	os.system("choco install -y --no-progress ffmpeg")
-	os.system("choco install graphviz --version=2.38.0.20171119")
+	os.system("choco install graphviz --no-progress --version=2.38.0.20171119")
 	os.system("choco install -y --no-progress pip")
 	os.system("choco install -y --no-progress octave.portable")
 	# TODO: find way to install mdbtools.

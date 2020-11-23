@@ -21,7 +21,6 @@ def _print_header(header):
 	print(f'\n{header.upper()}')
 	print('\n+------------------------+')
 
-
 def runAllTests(startingdir):
 	os.chdir(startingdir)
 	nextdirs = []
@@ -66,9 +65,10 @@ def testRunner():
 	_print_header('regular tests report')
 	print(f'Number of modules tested: {len(tested)}')
 	print(tested)
+	_print_header('failed tests report')
 	print(f'Number of tests failed: {len(misfires)}')
-	_print_header('untested modules report')
 	print(misfires)
+	_print_header('untested modules report')
 	print(f'Number of untested modules: {len(not_tested)}')
 	print(not_tested, '\n')
 
