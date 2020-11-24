@@ -1,5 +1,5 @@
 Clear
-New object=Circuit.ieee8500u_fused
+New object=Circuit.ieee8500u_fuseless
 
 ! Redirect Vsource.dss
 Edit object=Vsource.source bus1=sourcebus.1.2.3 pu=1.05 R1=0 X1=0.001 R0=0 X0=0.001
@@ -289,7 +289,6 @@ New object=Line.ln6351523-3 bus1=m1108315.3 bus2=n1230121.3 length=0.009108856 u
 New object=Line.ln6351523-2 bus1=n1230121.3 bus2=m1108316.3 length=0.01506764 units=km linecode=1PH-xx4_ACSR4_ACSR Seasons=1 Ratings=[400] normamps=400 emergamps=600
 New object=Line.ln5686489-1 bus1=m1108316.3 bus2=196-35541.3 length=0.008384198 units=km linecode=1PH-xx4_ACSR4_ACSR Seasons=1 Ratings=[400] normamps=400 emergamps=600
 New object=Line.ln6141147-1 bus1=196-35541.3 bus2=m1108317.3 length=0.07492938 units=km linecode=1PH-xx4_ACSR4_ACSR Seasons=1 Ratings=[400] normamps=400 emergamps=600
-New object=Fuse.ln6141147-1 MonitoredObj=LINE.LN6141147-1 MonitoredTerm=1 FuseCurve=tlink RatedCurrent=10
 New object=Line.ln5591814-1 bus1=m1108317.3 bus2=l2820590.3 length=0.06677156 units=km linecode=1PH-xx4_WPAL4_WPAL Seasons=1 Ratings=[400] normamps=400 emergamps=600
 New object=Line.ln5531334-1 bus1=l2820590.3 bus2=m1108328.3 length=0.05542785 units=km linecode=1PH-xx4_ACSR4_ACSR Seasons=1 Ratings=[400] normamps=400 emergamps=600
 New object=Line.ln5803287-1 bus1=m1108328.3 bus2=l2875754.3 length=0.02126716 units=km linecode=1PH-xx2_ACSR2_ACSR Seasons=1 Ratings=[400] normamps=400 emergamps=600
@@ -344,7 +343,6 @@ New object=Line.ln6320328-1 bus1=m1089170.3 bus2=l2879062.3 length=0.1700257 uni
 New object=Line.tpx21385192c0 bus1=x2879062c.1.2 bus2=sx2879062c.1.2 linecode=4/0Triplex Seasons=1 Ratings=[400] normamps=156 emergamps=195 length=50 units=ft faultrate=0
 New object=Line.ln5956460-1 bus1=l2879062.3 bus2=m1089173.3 length=0.09017534 units=km linecode=1PH-xx4_ACSR4_WPAL Seasons=1 Ratings=[400] normamps=400 emergamps=600
 New object=Line.ln5532741-1 bus1=m1089173.3 bus2=l2935551.3 length=0.06085765 units=km linecode=1PH-xx4_WPAL4_WPAL Seasons=1 Ratings=[400] normamps=400 emergamps=600
-New object=Fuse.ln5532741-1 MonitoredObj=LINE.LN5532741-1 MonitoredTerm=1 FuseCurve=tlink RatedCurrent=10
 New object=Line.tpx21387929c0 bus1=x2935551c.1.2 bus2=sx2935551c.1.2 linecode=4/0Triplex Seasons=1 Ratings=[400] normamps=156 emergamps=195 length=50 units=ft faultrate=0
 New object=Line.ln5746546-1 bus1=l2935551.3 bus2=d5746546-1_int.3 length=0.03204032 units=km linecode=1PH-xx4_WPAL4_WPAL Seasons=1 Ratings=[400] normamps=400 emergamps=600
 New object=Line.a333_48332_sw bus1=d5746546-1_int.3 bus2=e182723.3 Switch=True r1=1 x1=1 r0=1 x0=1 length=0.001 phases=1
@@ -376,7 +374,6 @@ New object=Line.tpx337642c0 bus1=x3104154c.1.2 bus2=sx3104154c.1.2 linecode=4/0T
 New object=Line.ln5859993-1 bus1=l3104154.3 bus2=l3104155.3 length=0.04042317 units=km linecode=1PH-xx4_ACSR4_ACSR Seasons=1 Ratings=[400] normamps=400 emergamps=600
 New object=Line.tpx21474587c0 bus1=x3104155c.1.2 bus2=sx3104155c.1.2 linecode=4/0Triplex Seasons=1 Ratings=[400] normamps=156 emergamps=195 length=50 units=ft faultrate=0
 New object=Line.ln5562961-1 bus1=l3104155.3 bus2=m1069456.3 length=0.06373798 units=km linecode=1PH-xx4_ACSR4_ACSR Seasons=1 Ratings=[400] normamps=400 emergamps=600
-New object=Fuse.ln5562961-1 MonitoredObj=LINE.LN5562961-1 MonitoredTerm=1 FuseCurve=tlink RatedCurrent=10
 New object=Line.ln6138635-1 bus1=m1069456.3 bus2=l2897806.3 length=0.06307009 units=km linecode=1PH-xx4_ACSR4_ACSR Seasons=1 Ratings=[400] normamps=400 emergamps=600
 New object=Line.tpx337643c0 bus1=x2897806c.1.2 bus2=sx2897806c.1.2 linecode=4/0Triplex Seasons=1 Ratings=[400] normamps=156 emergamps=195 length=50 units=ft faultrate=0
 New object=Line.ln5837361-7 bus1=m1069456.3 bus2=n1147867.3 length=0.02267017 units=km linecode=1PH-xx4_ACSR4_ACSR Seasons=1 Ratings=[400] normamps=400 emergamps=600
@@ -486,9 +483,7 @@ New object=Line.ln5472360-1 bus1=m1089120.1.2.3 bus2=m1089119.1.2.3 length=0.057
 New object=Line.ln5625547-1 bus1=m1089119.2 bus2=p827521.2 length=0.006811498 units=km linecode=1PH-x4_ACSRx4_ACSR Seasons=1 Ratings=[400] normamps=400 emergamps=600
 New object=Line.ln5955074-3 bus1=p827521.2 bus2=n1139546.2 length=0.009140775 units=km linecode=1PH-x4_ACSRx4_ACSR Seasons=1 Ratings=[400] normamps=400 emergamps=600
 New object=Line.ln5955074-2 bus1=n1139546.2 bus2=l2970842.2 length=0.08556852 units=km linecode=1PH-x4_ACSRx4_ACSR Seasons=1 Ratings=[400] normamps=400 emergamps=600
-New object=Fuse.ln5955074-2 MonitoredObj=LINE.LN5955074-2 MonitoredTerm=1 FuseCurve=tlink RatedCurrent=10
 New object=Line.ln6409873-1 bus1=l2970842.2 bus2=m1089113.2 length=0.07187752 units=km linecode=1PH-x4_ACSRx4_ACSR Seasons=1 Ratings=[400] normamps=400 emergamps=600
-New object=Fuse.ln6409873-1 MonitoredObj=LINE.LN6409873-1 MonitoredTerm=1 FuseCurve=tlink RatedCurrent=10
 New object=Line.ln5835141-1 bus1=m1089113.2 bus2=l2691946.2 length=0.07601351 units=km linecode=1PH-x2_ACSRx2_ACSR Seasons=1 Ratings=[400] normamps=400 emergamps=600
 New object=Line.tpx28147974b0 bus1=x2691946b.1.2 bus2=sx2691946b.1.2 linecode=4/0Triplex Seasons=1 Ratings=[400] normamps=156 emergamps=195 length=50 units=ft faultrate=0
 New object=Line.ln6046042-1 bus1=m1089113.2 bus2=m1089103.2 length=0.441135 units=km linecode=1PH-x4_ACSRx4_ACSR Seasons=1 Ratings=[400] normamps=400 emergamps=600
@@ -540,7 +535,6 @@ New object=Line.ln6199521-1 bus1=m1089115.3 bus2=l2991911.3 length=0.07181828 un
 New object=Line.tpx138258c0 bus1=x2991911c.1.2 bus2=sx2991911c.1.2 linecode=4/0Triplex Seasons=1 Ratings=[400] normamps=156 emergamps=195 length=50 units=ft faultrate=0
 New object=Line.ln5593234-1 bus1=m1089115.1.2.3 bus2=m1089112.1.2.3 length=0.09150361 units=km linecode=3PH_H-4_ACSR4_ACSR4_ACSR4_WPAL Seasons=1 Ratings=[400] normamps=400 emergamps=600
 New object=Line.ln6138609-1 bus1=m1089112.3 bus2=l2691951.3 length=0.06504075 units=km linecode=1PH-xx4_WPAL4_WPAL Seasons=1 Ratings=[400] normamps=400 emergamps=600
-New object=Fuse.ln6138609-1 MonitoredObj=LINE.LN6138609-1 MonitoredTerm=1 FuseCurve=tlink RatedCurrent=10
 New object=Line.tpx138379c0 bus1=x2691951c.1.2 bus2=sx2691951c.1.2 linecode=4/0Triplex Seasons=1 Ratings=[400] normamps=156 emergamps=195 length=50 units=ft faultrate=0
 New object=Line.ln6292465-2 bus1=l2691951.3 bus2=n1139542.3 length=0.02311777 units=km linecode=1PH-xx4_WPAL4_WPAL Seasons=1 Ratings=[400] normamps=400 emergamps=600
 New object=Line.ln6292465-3 bus1=n1139542.3 bus2=p827523.3 length=0.02159534 units=km linecode=1PH-xx4_WPAL4_WPAL Seasons=1 Ratings=[400] normamps=400 emergamps=600
@@ -633,7 +627,6 @@ New object=Line.tpx138346c0 bus1=x2916609c.1.2 bus2=sx2916609c.1.2 linecode=4/0T
 New object=Line.ln5776667-1 bus1=m1089112.3 bus2=p827520.3 length=0.004631519 units=km linecode=1PH-xx4_ACSR4_ACSR Seasons=1 Ratings=[400] normamps=400 emergamps=600
 New object=Line.ln5712477-2 bus1=p827520.3 bus2=n1139545.3 length=0.006405147 units=km linecode=1PH-xx4_ACSR4_ACSR Seasons=1 Ratings=[400] normamps=400 emergamps=600
 New object=Line.ln5712477-3 bus1=n1139545.3 bus2=m1069174.3 length=0.1031125 units=km linecode=1PH-xx4_ACSR4_ACSR Seasons=1 Ratings=[400] normamps=400 emergamps=600
-New object=Fuse.ln5712477-3 MonitoredObj=LINE.LN5712477-3 MonitoredTerm=1 FuseCurve=tlink RatedCurrent=10
 New object=Line.ln5742813-1 bus1=m1069174.3 bus2=l2841629.3 length=0.05826065 units=km linecode=1PH-xx4_ACSR4_ACSR Seasons=1 Ratings=[400] normamps=400 emergamps=600
 New object=Line.tpx138405c0 bus1=x2841629c.1.2 bus2=sx2841629c.1.2 linecode=4/0Triplex Seasons=1 Ratings=[400] normamps=156 emergamps=195 length=50 units=ft faultrate=0
 New object=Line.ln5833622-1 bus1=m1069174.3 bus2=l3216347.3 length=0.07367517 units=km linecode=1PH-xx4_ACSR4_WPAL Seasons=1 Ratings=[400] normamps=400 emergamps=600
@@ -1016,7 +1009,6 @@ New object=Line.tpx138751b0 bus1=x3066818b.1.2 bus2=sx3066818b.1.2 linecode=4/0T
 New object=Line.ln5653469-1 bus1=l3066818.2 bus2=l3178981.2 length=0.05976987 units=km linecode=1PH-x4_ACSRx4_ACSR Seasons=1 Ratings=[400] normamps=400 emergamps=600
 New object=Line.tpx21396331b0 bus1=x3178981b.1.2 bus2=sx3178981b.1.2 linecode=4/0Triplex Seasons=1 Ratings=[400] normamps=156 emergamps=195 length=50 units=ft faultrate=0
 New object=Line.ln5683833-1 bus1=l3178981.2 bus2=m1047368.2 length=0.2167976 units=km linecode=1PH-x4_ACSRx4_ACSR Seasons=1 Ratings=[400] normamps=400 emergamps=600
-New object=Fuse.ln5683833-1 MonitoredObj=LINE.LN5683833-1 MonitoredTerm=1 FuseCurve=tlink RatedCurrent=10
 New object=Line.ln6350548-1 bus1=m1047368.2 bus2=l2748130.2 length=0.06363001 units=km linecode=1PH-x4_ACSRx4_ACSR Seasons=1 Ratings=[400] normamps=400 emergamps=600
 New object=Line.tpx138753b0 bus1=x2748130b.1.2 bus2=sx2748130b.1.2 linecode=4/0Triplex Seasons=1 Ratings=[400] normamps=156 emergamps=195 length=50 units=ft faultrate=0
 New object=Line.ln5895773-1 bus1=l2748130.2 bus2=l3254212.2 length=0.07216984 units=km linecode=1PH-x4_ACSRx4_ACSR Seasons=1 Ratings=[400] normamps=400 emergamps=600
@@ -1534,7 +1526,6 @@ New object=Line.tpx338950b0 bus1=x2822872b.1.2 bus2=sx2822872b.1.2 linecode=4/0T
 New object=Line.ln6169261-1 bus1=l2822872.1.2.3 bus2=m1047490.1.2.3 length=0.09282392 units=km linecode=3PH_H-2/0_ACSR2/0_ACSR2/0_ACSR2_ACSR Seasons=1 Ratings=[400] normamps=400 emergamps=600
 New object=Line.ln6987572-4 bus1=m1047490.1 bus2=p1164481.1 length=0.03641342 units=km linecode=1PH-2_ACSRxx2_ACSR Seasons=1 Ratings=[400] normamps=400 emergamps=600
 New object=Line.ln6991377-9 bus1=p1164481.1 bus2=l3729297.1 length=0.05307068 units=km linecode=1PH-2_ACSRxx2_ACSR Seasons=1 Ratings=[400] normamps=400 emergamps=600
-New object=Fuse.ln6991377-9 MonitoredObj=LINE.LN6991377-9 MonitoredTerm=1 FuseCurve=tlink RatedCurrent=10
 New object=Line.tpx2224386592a0 bus1=x3729297a.1.2 bus2=sx3729297a.1.2 linecode=4/0Triplex Seasons=1 Ratings=[400] normamps=156 emergamps=195 length=50 units=ft faultrate=0
 New object=Line.ln6991377-11 bus1=l3729297.1 bus2=l3729298.1 length=0.062589 units=km linecode=1PH-2_ACSRxx2_ACSR Seasons=1 Ratings=[400] normamps=400 emergamps=600
 New object=Line.tpx2224386617a0 bus1=x3729298a.1.2 bus2=sx3729298a.1.2 linecode=4/0Triplex Seasons=1 Ratings=[400] normamps=156 emergamps=195 length=50 units=ft faultrate=0
@@ -1588,7 +1579,6 @@ New object=Line.ln6259987-1 bus1=m1047483.1.2.3 bus2=m1047480.1.2.3 length=0.079
 New object=Line.ln6077774-1 bus1=m1047480.1.2.3 bus2=m1069483.1.2.3 length=0.1139823 units=km linecode=3PH_H-2/0_ACSR2/0_ACSR2/0_ACSR2_ACSR Seasons=1 Ratings=[400] normamps=400 emergamps=600
 New object=Line.ln5898056-1 bus1=m1069483.3 bus2=p827503.3 length=0.008322578 units=km linecode=1PH-xx4_WPAL4_ACSR Seasons=1 Ratings=[400] normamps=400 emergamps=600
 New object=Line.ln5928544-2 bus1=p827503.3 bus2=n1137994.3 length=0.03087062 units=km linecode=1PH-xx4_WPAL4_ACSR Seasons=1 Ratings=[400] normamps=400 emergamps=600
-New object=Fuse.ln5928544-2 MonitoredObj=LINE.LN5928544-2 MonitoredTerm=1 FuseCurve=tlink RatedCurrent=10
 New object=Line.ln5928544-3 bus1=n1137994.3 bus2=m1069484.3 length=0.05637094 units=km linecode=1PH-xx4_WPAL4_ACSR Seasons=1 Ratings=[400] normamps=400 emergamps=600
 New object=Line.ln5593221-1 bus1=m1069484.3 bus2=l2785517.3 length=0.1245392 units=km linecode=1PH-xx4_WPAL4_ACSR Seasons=1 Ratings=[400] normamps=400 emergamps=600
 New object=Line.tpx338957c0 bus1=x2785517c.1.2 bus2=sx2785517c.1.2 linecode=4/0Triplex Seasons=1 Ratings=[400] normamps=156 emergamps=195 length=50 units=ft faultrate=0
@@ -1710,7 +1700,6 @@ New object=Line.ln6229829-3 bus1=n1138598.1.2.3 bus2=m1069376.1.2.3 length=0.014
 New object=Line.ln5867449-1 bus1=m1069376.2 bus2=p827563.2 length=0.009627028 units=km linecode=1PH-x4_ACSRx4_ACSR Seasons=1 Ratings=[400] normamps=400 emergamps=600
 New object=Line.ln6505944-2 bus1=p827563.2 bus2=n1138595.2 length=0.006716682 units=km linecode=1PH-x4_ACSRx4_ACSR Seasons=1 Ratings=[400] normamps=400 emergamps=600
 New object=Line.ln6505944-3 bus1=n1138595.2 bus2=m3036167.2 length=0.1179087 units=km linecode=1PH-x4_ACSRx4_ACSR Seasons=1 Ratings=[400] normamps=400 emergamps=600
-New object=Fuse.ln6505944-3 MonitoredObj=LINE.LN6505944-3 MonitoredTerm=1 FuseCurve=tlink RatedCurrent=10
 New object=Line.ln6505946-1 bus1=m3036167.2 bus2=l3085391.2 length=0.07333502 units=km linecode=1PH-x2_ACSRx2_ACSR Seasons=1 Ratings=[400] normamps=400 emergamps=600
 New object=Line.tpx21236413b0 bus1=x3085391b.1.2 bus2=sx3085391b.1.2 linecode=4/0Triplex Seasons=1 Ratings=[400] normamps=156 emergamps=195 length=50 units=ft faultrate=0
 New object=Line.ln6505945-1 bus1=m3036167.2 bus2=l2973156.2 length=0.003119941 units=km linecode=1PH-x4_ACSRx4_ACSR Seasons=1 Ratings=[400] normamps=400 emergamps=600
@@ -1821,7 +1810,6 @@ New object=Line.ln5517002-2 bus1=l3143999.1.2.3 bus2=m1069350.1.2.3 length=0.002
 New object=Line.ln5965099-10 bus1=m1069350.1.2.3 bus2=n1144668.1.2.3 length=0.02674808 units=km linecode=3PH_H-2/0_ACSR2/0_ACSR2/0_ACSR2_ACSR Seasons=1 Ratings=[400] normamps=400 emergamps=600
 New object=Line.ln5965099-11 bus1=n1144668.1.2.3 bus2=m4113347.1.2.3 length=0.02961052 units=km linecode=3PH_H-2/0_ACSR2/0_ACSR2/0_ACSR2_ACSR Seasons=1 Ratings=[400] normamps=400 emergamps=600
 New object=Line.ln7061777-3 bus1=m4113347.3 bus2=n1138606.3 length=0.01502653 units=km linecode=1PH-xx2_ACSR2_ACSR Seasons=1 Ratings=[400] normamps=400 emergamps=600
-New object=Fuse.ln7061777-3 MonitoredObj=LINE.LN7061777-3 MonitoredTerm=1 FuseCurve=tlink RatedCurrent=10
 New object=Line.ln7061777-4 bus1=n1138606.3 bus2=m1069335.3 length=0.03225708 units=km linecode=1PH-xx2_ACSR2_ACSR Seasons=1 Ratings=[400] normamps=400 emergamps=600
 New object=Line.ln6231997-1 bus1=m1069335.3 bus2=p827564.3 length=0.0118117 units=km linecode=1PH-xx2_ACSR2_ACSR Seasons=1 Ratings=[400] normamps=400 emergamps=600
 New object=Line.ln6049823-1 bus1=p827564.3 bus2=m1069348.3 length=0.06148002 units=km linecode=1PH-xx2_ACSR2_ACSR Seasons=1 Ratings=[400] normamps=400 emergamps=600
@@ -1836,7 +1824,6 @@ New object=Line.ln5965099-9 bus1=n1138607.1.2.3 bus2=l3159448.1.2.3 length=0.064
 New object=Line.tpx337684a0 bus1=x3159448a.1.2 bus2=sx3159448a.1.2 linecode=4/0Triplex Seasons=1 Ratings=[400] normamps=156 emergamps=195 length=50 units=ft faultrate=0
 New object=Line.ln5965099-2 bus1=l3159448.1.2.3 bus2=m1069311.1.2.3 length=0.002488518 units=km linecode=3PH_H-2/0_ACSR2/0_ACSR2/0_ACSR2_ACSR Seasons=1 Ratings=[400] normamps=400 emergamps=600
 New object=Line.ln5970852-1 bus1=m1069311.3 bus2=m1069312.3 length=0.02647091 units=km linecode=1PH-xx2_ACSR2_ACSR Seasons=1 Ratings=[400] normamps=400 emergamps=600
-New object=Fuse.ln5970852-1 MonitoredObj=LINE.LN5970852-1 MonitoredTerm=1 FuseCurve=tlink RatedCurrent=10
 New object=Line.ln81018875-1 bus1=m1069312.3 bus2=p873800.3 length=0.007335412 units=km linecode=1P_1/0_AXNJ_DB Seasons=1 Ratings=[400] normamps=220 emergamps=220
 New object=Line.ln81018877-2 bus1=p873800.3 bus2=221-306686.3 length=0.004789778 units=km linecode=1P_1/0_AXNJ_DB Seasons=1 Ratings=[400] normamps=220 emergamps=220
 New object=Line.ln81018877-1 bus1=221-306686.3 bus2=l2970258.3 length=0.03441255 units=km linecode=1P_1/0_AXNJ_DB Seasons=1 Ratings=[400] normamps=220 emergamps=220
@@ -1863,7 +1850,6 @@ New object=Line.ln8979343-3 bus1=m4113348.3 bus2=p850400.3 length=0.008298294 un
 New object=Line.ln8979344-1 bus1=p850400.3 bus2=221-311595.3 length=0.007008599 units=km linecode=1P_1/0_AXNJ_DB Seasons=1 Ratings=[400] normamps=220 emergamps=220
 New object=Line.ln8979344-3 bus1=221-311595.3 bus2=n1139251.3 length=0.003862832 units=km linecode=1P_1/0_AXNJ_DB Seasons=1 Ratings=[400] normamps=220 emergamps=220
 New object=Line.ln8979344-4 bus1=n1139251.3 bus2=m1069249.3 length=0.1745601 units=km linecode=1P_1/0_AXNJ_DB Seasons=1 Ratings=[400] normamps=220 emergamps=220
-New object=Fuse.ln8979344-4 MonitoredObj=LINE.LN8979344-4 MonitoredTerm=1 FuseCurve=tlink RatedCurrent=10
 New object=Line.ln8979358-1 bus1=m1069249.3 bus2=l2803194.3 length=0.05941932 units=km linecode=1P_1/0_AXNJ_DB Seasons=1 Ratings=[400] normamps=220 emergamps=220
 New object=Line.tpx227917130c0 bus1=x2803194c.1.2 bus2=sx2803194c.1.2 linecode=4/0Triplex Seasons=1 Ratings=[400] normamps=156 emergamps=195 length=50 units=ft faultrate=0
 New object=Line.ln8979358-2 bus1=l2803194.3 bus2=l3047073.3 length=0.08833488 units=km linecode=1P_1/0_AXNJ_DB Seasons=1 Ratings=[400] normamps=220 emergamps=220
@@ -1877,7 +1863,6 @@ New object=Line.ln8979345-1 bus1=m1069284.1 bus2=p850401.1 length=0.009197184 un
 New object=Line.ln8979346-1 bus1=p850401.1 bus2=221-311583.1 length=0.00417941 units=km linecode=1P_1/0_AXNJ_DB Seasons=1 Ratings=[400] normamps=220 emergamps=220
 New object=Line.ln8979346-4 bus1=221-311583.1 bus2=n1139250.1 length=0.00400896 units=km linecode=1P_1/0_AXNJ_DB Seasons=1 Ratings=[400] normamps=220 emergamps=220
 New object=Line.ln8979346-5 bus1=n1139250.1 bus2=l2821770.1 length=0.1316516 units=km linecode=1P_1/0_AXNJ_DB Seasons=1 Ratings=[400] normamps=220 emergamps=220
-New object=Fuse.ln8979346-5 MonitoredObj=LINE.LN8979346-5 MonitoredTerm=1 FuseCurve=tlink RatedCurrent=10
 New object=Line.tpx227917119a0 bus1=x2821770a.1.2 bus2=sx2821770a.1.2 linecode=4/0Triplex Seasons=1 Ratings=[400] normamps=156 emergamps=195 length=50 units=ft faultrate=0
 New object=Line.ln8979346-3 bus1=l2821770.1 bus2=m1069247.1 length=0.07512795 units=km linecode=1P_1/0_AXNJ_DB Seasons=1 Ratings=[400] normamps=220 emergamps=220
 New object=Line.ln8979367-1 bus1=m1069247.1 bus2=m1069248.1 length=0.122795 units=km linecode=1P_1/0_AXNJ_DB Seasons=1 Ratings=[400] normamps=220 emergamps=220
@@ -2126,7 +2111,6 @@ New object=Line.ln6196270-2 bus1=l3226771.1 bus2=l3189190.1 length=0.1618778 uni
 New object=Line.tpx227100753a0 bus1=x3189190a.1.2 bus2=sx3189190a.1.2 linecode=4/0Triplex Seasons=1 Ratings=[400] normamps=156 emergamps=195 length=50 units=ft faultrate=0
 New object=Line.ln5774470-3 bus1=m1026695.1 bus2=n1138594.1 length=0.01892608 units=km linecode=1PH-4_ACSRxx4_ACSR Seasons=1 Ratings=[400] normamps=400 emergamps=600
 New object=Line.ln5774470-2 bus1=n1138594.1 bus2=m1026679.1 length=0.1403141 units=km linecode=1PH-4_ACSRxx4_ACSR Seasons=1 Ratings=[400] normamps=400 emergamps=600
-New object=Fuse.ln5774470-2 MonitoredObj=LINE.LN5774470-2 MonitoredTerm=1 FuseCurve=tlink RatedCurrent=10
 New object=Line.ln5958703-1 bus1=m1026679.1 bus2=p827537.1 length=0.008889353 units=km linecode=1PH-4_ACSRxx4_ACSR Seasons=1 Ratings=[400] normamps=400 emergamps=600
 New object=Line.ln6079950-1 bus1=p827537.1 bus2=l3122827.1 length=0.06972797 units=km linecode=1PH-4_ACSRxx4_ACSR Seasons=1 Ratings=[400] normamps=400 emergamps=600
 New object=Line.tpx293673a0 bus1=x3122827a.1.2 bus2=sx3122827a.1.2 linecode=4/0Triplex Seasons=1 Ratings=[400] normamps=156 emergamps=195 length=50 units=ft faultrate=0
@@ -2349,7 +2333,6 @@ New object=Line.tpx338893a0 bus1=x3197633a.1.2 bus2=sx3197633a.1.2 linecode=4/0T
 New object=Line.ln5776665-1 bus1=m1047763.2 bus2=p827509.2 length=0.004641168 units=km linecode=1PH-x4_ACSRx4_ACSR Seasons=1 Ratings=[400] normamps=400 emergamps=600
 New object=Line.ln5898058-3 bus1=p827509.2 bus2=n1136029.2 length=0.006614675 units=km linecode=1PH-x4_ACSRx4_ACSR Seasons=1 Ratings=[400] normamps=400 emergamps=600
 New object=Line.ln5898058-2 bus1=n1136029.2 bus2=m1047767.2 length=0.1093075 units=km linecode=1PH-x4_ACSRx4_ACSR Seasons=1 Ratings=[400] normamps=400 emergamps=600
-New object=Fuse.ln5898058-2 MonitoredObj=LINE.LN5898058-2 MonitoredTerm=1 FuseCurve=tlink RatedCurrent=10
 New object=Line.ln5623395-1 bus1=m1047767.2 bus2=l2879068.2 length=0.1083623 units=km linecode=1PH-x4_ACSRx4_ACSR Seasons=1 Ratings=[400] normamps=400 emergamps=600
 New object=Line.tpx323254b0 bus1=x2879068b.1.2 bus2=sx2879068b.1.2 linecode=4/0Triplex Seasons=1 Ratings=[400] normamps=156 emergamps=195 length=50 units=ft faultrate=0
 New object=Line.ln5895774-1 bus1=l2879068.2 bus2=m1047773.2 length=0.0967991 units=km linecode=1PH-x4_ACSRx4_ACSR Seasons=1 Ratings=[400] normamps=400 emergamps=600
@@ -2376,7 +2359,6 @@ New object=Line.ln5865229-1 bus1=m1026987.2 bus2=m1026990.2 length=0.057054 unit
 New object=Line.ln5956456-1 bus1=m1026990.2 bus2=m1027001.2 length=0.2548622 units=km linecode=1PH-x4_ACSRx4_ACSR Seasons=1 Ratings=[400] normamps=400 emergamps=600
 New object=Line.ln5835127-1 bus1=m1027001.2 bus2=m1027004.2 length=0.09186476 units=km linecode=1PH-x4_ACSRx4_ACSR Seasons=1 Ratings=[400] normamps=400 emergamps=600
 New object=Line.ln5986923-1 bus1=m1027004.2 bus2=l2897765.2 length=0.1459034 units=km linecode=1PH-x4_ACSRx4_ACSR Seasons=1 Ratings=[400] normamps=400 emergamps=600
-New object=Fuse.ln5986923-1 MonitoredObj=LINE.LN5986923-1 MonitoredTerm=1 FuseCurve=tlink RatedCurrent=10
 New object=Line.tpx323243b0 bus1=x2897765b.1.2 bus2=sx2897765b.1.2 linecode=4/0Triplex Seasons=1 Ratings=[400] normamps=156 emergamps=195 length=50 units=ft faultrate=0
 New object=Line.ln5835129-1 bus1=l2897765.2 bus2=m1047819.2 length=0.114221 units=km linecode=1PH-x4_ACSRx4_ACSR Seasons=1 Ratings=[400] normamps=400 emergamps=600
 New object=Line.ln6350530-1 bus1=m1047819.2 bus2=m1047821.2 length=0.06780512 units=km linecode=1PH-x4_ACSRx4_WPAL Seasons=1 Ratings=[400] normamps=400 emergamps=600
@@ -2434,7 +2416,6 @@ New object=Line.ln6017290-1 bus1=m1047767.2 bus2=l2860484.2 length=0.1091966 uni
 New object=Line.tpx323255b0 bus1=x2860484b.1.2 bus2=sx2860484b.1.2 linecode=4/0Triplex Seasons=1 Ratings=[400] normamps=156 emergamps=195 length=50 units=ft faultrate=0
 New object=Line.ln5804798-2 bus1=m1047763.2 bus2=n1136030.2 length=0.0175254 units=km linecode=1PH-x4_ACSRx4_ACSR Seasons=1 Ratings=[400] normamps=400 emergamps=600
 New object=Line.ln5804798-3 bus1=n1136030.2 bus2=m1047766.2 length=0.03079934 units=km linecode=1PH-x4_ACSRx4_ACSR Seasons=1 Ratings=[400] normamps=400 emergamps=600
-New object=Fuse.ln5804798-3 MonitoredObj=LINE.LN5804798-3 MonitoredTerm=1 FuseCurve=tlink RatedCurrent=10
 New object=Line.ln5683817-1 bus1=m1047766.2 bus2=l3216344.2 length=0.05513351 units=km linecode=1PH-x4_ACSRx4_ACSR Seasons=1 Ratings=[400] normamps=400 emergamps=600
 New object=Line.tpx323264b0 bus1=x3216344b.1.2 bus2=sx3216344b.1.2 linecode=4/0Triplex Seasons=1 Ratings=[400] normamps=156 emergamps=195 length=50 units=ft faultrate=0
 New object=Line.ln5593247-1 bus1=l3216344.2 bus2=l2860501.2 length=0.03108266 units=km linecode=1PH-x2_ACSRx2_ACSR Seasons=1 Ratings=[400] normamps=400 emergamps=600
@@ -2811,7 +2792,6 @@ New object=Line.ln6167754-3 bus1=n1147859.2 bus2=p827573.2 length=0.006772215 un
 New object=Line.ln6383061-1 bus1=p827573.2 bus2=l2710542.2 length=0.02105849 units=km linecode=1PH-x4_ACSRx4_ACSR Seasons=1 Ratings=[400] normamps=400 emergamps=600
 New object=Line.tpx355584b0 bus1=x2710542b.1.2 bus2=sx2710542b.1.2 linecode=4/0Triplex Seasons=1 Ratings=[400] normamps=156 emergamps=195 length=50 units=ft faultrate=0
 New object=Line.ln6229831-1 bus1=l2710542.2 bus2=l2729430.2 length=0.03536971 units=km linecode=1PH-x4_ACSRx4_ACSR Seasons=1 Ratings=[400] normamps=400 emergamps=600
-New object=Fuse.ln6229831-1 MonitoredObj=LINE.LN6229831-1 MonitoredTerm=1 FuseCurve=tlink RatedCurrent=10
 New object=Line.tpx21248901b0 bus1=x2729430b.1.2 bus2=sx2729430b.1.2 linecode=4/0Triplex Seasons=1 Ratings=[400] normamps=156 emergamps=195 length=50 units=ft faultrate=0
 New object=Line.ln6017316-1 bus1=l2729430.2 bus2=l2766742.2 length=0.1086412 units=km linecode=1PH-x4_ACSRx4_ACSR Seasons=1 Ratings=[400] normamps=400 emergamps=600
 New object=Line.tpx355585b0 bus1=x2766742b.1.2 bus2=sx2766742b.1.2 linecode=4/0Triplex Seasons=1 Ratings=[400] normamps=156 emergamps=195 length=50 units=ft faultrate=0
@@ -2837,7 +2817,6 @@ New object=Line.ln5623390-1 bus1=m1009827.2 bus2=m1009832.2 length=0.08714176 un
 New object=Line.ln6199505-1 bus1=m1009832.2 bus2=l2860479.2 length=0.03604679 units=km linecode=1PH-x4_ACSRx4_ACSR Seasons=1 Ratings=[400] normamps=400 emergamps=600
 New object=Line.tpx355595b0 bus1=x2860479b.1.2 bus2=sx2860479b.1.2 linecode=4/0Triplex Seasons=1 Ratings=[400] normamps=156 emergamps=195 length=50 units=ft faultrate=0
 New object=Line.ln5744326-1 bus1=m1009832.2 bus2=m1009838.2 length=0.09538007 units=km linecode=1PH-x4_ACSRx4_ACSR Seasons=1 Ratings=[400] normamps=400 emergamps=600
-New object=Fuse.ln5744326-1 MonitoredObj=LINE.LN5744326-1 MonitoredTerm=1 FuseCurve=tlink RatedCurrent=10
 New object=Line.ln5472343-1 bus1=m1009838.2 bus2=l2801896.2 length=0.04727077 units=km linecode=1PH-x4_ACSRx4_ACSR Seasons=1 Ratings=[400] normamps=400 emergamps=600
 New object=Line.tpx226191995b0 bus1=x2801896b.1.2 bus2=sx2801896b.1.2 linecode=4/0Triplex Seasons=1 Ratings=[400] normamps=156 emergamps=195 length=50 units=ft faultrate=0
 New object=Line.ln5532734-1 bus1=l2801896.2 bus2=m1009839.2 length=0.07570307 units=km linecode=1PH-x4_ACSRx4_ACSR Seasons=1 Ratings=[400] normamps=400 emergamps=600
@@ -2990,7 +2969,6 @@ New object=Line.ln6350538-1 bus1=m1026950.1.2.3 bus2=m1026954.1.2.3 length=0.105
 New object=Line.ln5655682-1 bus1=m1026954.2 bus2=d5655682-1_int.2 length=0.004573626 units=km linecode=1PH-x4_ACSRx4_ACSR Seasons=1 Ratings=[400] normamps=400 emergamps=600
 New object=Line.l5491_48332_sw bus1=d5655682-1_int.2 bus2=e182725.2 phases=1 Switch=True r1=1 x1=1 r0=1 x0=1 length=0.001
 New object=Line.ln6292464-1 bus1=e182725.2 bus2=m1026948.2 length=0.1244018 units=km linecode=1PH-x4_ACSRx4_ACSR Seasons=1 Ratings=[400] normamps=400 emergamps=600
-New object=Fuse.ln6292464-1 MonitoredObj=LINE.LN6292464-1 MonitoredTerm=1 FuseCurve=tlink RatedCurrent=10
 New object=Line.ln5593227-1 bus1=m1026948.2 bus2=m1026949.2 length=0.009027042 units=km linecode=1PH-x2_ACSRx2_ACSR Seasons=1 Ratings=[400] normamps=400 emergamps=600
 New object=Line.ln6259991-1 bus1=m1026949.2 bus2=m1026951.2 length=0.08717277 units=km linecode=1PH-x2_ACSRx2_ACSR Seasons=1 Ratings=[400] normamps=400 emergamps=600
 New object=Line.ln6047564-1 bus1=m1026951.2 bus2=l2954347.2 length=0.06658085 units=km linecode=1PH-x2_ACSRx2_ACSR Seasons=1 Ratings=[400] normamps=400 emergamps=600
@@ -3099,7 +3077,6 @@ New object=Line.ln5956466-1 bus1=m1027043.1.2.3 bus2=m1027055.1.2.3 length=0.044
 New object=Line.ln6228328-1 bus1=m1027055.1 bus2=m1027056.1 length=0.006711971 units=km linecode=1PH-4_ACSRxx4_ACSR Seasons=1 Ratings=[400] normamps=400 emergamps=600
 New object=Line.ln5712587-3 bus1=m1027056.1 bus2=n1144667.1 length=0.03175549 units=km linecode=1PH-4_ACSRxx4_ACSR Seasons=1 Ratings=[400] normamps=400 emergamps=600
 New object=Line.ln5712587-2 bus1=n1144667.1 bus2=l3083019.1 length=0.09404118 units=km linecode=1PH-4_ACSRxx4_ACSR Seasons=1 Ratings=[400] normamps=400 emergamps=600
-New object=Fuse.ln5712587-2 MonitoredObj=LINE.LN5712587-2 MonitoredTerm=1 FuseCurve=tlink RatedCurrent=10
 New object=Line.ln6106658-1 bus1=l3083019.1 bus2=m1027080.1 length=0.02872206 units=km linecode=1PH-4_ACSRxx4_ACSR Seasons=1 Ratings=[400] normamps=400 emergamps=600
 New object=Line.ln6137084-3 bus1=m1027080.1 bus2=n1134471.1 length=0.0223048 units=km linecode=1PH-4_ACSRxx4_ACSR Seasons=1 Ratings=[400] normamps=400 emergamps=600
 New object=Line.ln6137084-2 bus1=n1134471.1 bus2=l2839331.1 length=0.07426648 units=km linecode=1PH-4_ACSRxx4_ACSR Seasons=1 Ratings=[400] normamps=400 emergamps=600
@@ -3141,7 +3118,6 @@ New object=Line.ln6076266-1 bus1=m1027123.1 bus2=l3008248.1 length=0.02490304 un
 New object=Line.tpx321159a0 bus1=x3008248a.1.2 bus2=sx3008248a.1.2 linecode=4/0Triplex Seasons=1 Ratings=[400] normamps=156 emergamps=195 length=50 units=ft faultrate=0
 New object=Line.ln6106583-4 bus1=m1027121.1 bus2=n1134469.1 length=0.00874622 units=km linecode=1PH-2_ACSRxx2_ACSR Seasons=1 Ratings=[400] normamps=400 emergamps=600
 New object=Line.ln6106583-5 bus1=n1134469.1 bus2=m1010017.1 length=0.3206256 units=km linecode=1PH-2_ACSRxx2_ACSR Seasons=1 Ratings=[400] normamps=400 emergamps=600
-New object=Fuse.ln6106583-5 MonitoredObj=LINE.LN6106583-5 MonitoredTerm=1 FuseCurve=tlink RatedCurrent=10
 New object=Line.ln6106583-2 bus1=m1010017.1 bus2=l2858175.1 length=0.08541764 units=km linecode=1PH-2_ACSRxx2_ACSR Seasons=1 Ratings=[400] normamps=400 emergamps=600
 New object=Line.tpx225668688a0 bus1=x2858175a.1.2 bus2=sx2858175a.1.2 linecode=4/0Triplex Seasons=1 Ratings=[400] normamps=156 emergamps=195 length=50 units=ft faultrate=0
 New object=Line.ln6106583-3 bus1=l2858175.1 bus2=m1027110.1 length=0.004622844 units=km linecode=1PH-2_ACSRxx2_ACSR Seasons=1 Ratings=[400] normamps=400 emergamps=600
@@ -3228,7 +3204,6 @@ New object=Line.ln5776669-2 bus1=p827548.1 bus2=n1136368.1 length=0.007678207 un
 New object=Line.ln5776669-3 bus1=n1136368.1 bus2=l2897792.1 length=0.007062513 units=km linecode=1PH-4_WPALxx4_WPAL Seasons=1 Ratings=[400] normamps=400 emergamps=600
 New object=Line.tpx338985a0 bus1=x2897792a.1.2 bus2=sx2897792a.1.2 linecode=4/0Triplex Seasons=1 Ratings=[400] normamps=156 emergamps=195 length=50 units=ft faultrate=0
 New object=Line.ln6260017-1 bus1=l2897792.1 bus2=l2785538.1 length=0.09431161 units=km linecode=1PH-4_WPALxx4_WPAL Seasons=1 Ratings=[400] normamps=400 emergamps=600
-New object=Fuse.ln6260017-1 MonitoredObj=LINE.LN6260017-1 MonitoredTerm=1 FuseCurve=tlink RatedCurrent=10
 New object=Line.tpx338986a0 bus1=x2785538a.1.2 bus2=sx2785538a.1.2 linecode=4/0Triplex Seasons=1 Ratings=[400] normamps=156 emergamps=195 length=50 units=ft faultrate=0
 New object=Line.ln6047596-1 bus1=l2785538.1 bus2=l2897793.1 length=0.06543463 units=km linecode=1PH-4_WPALxx4_WPAL Seasons=1 Ratings=[400] normamps=400 emergamps=600
 New object=Line.tpx338987a0 bus1=x2897793a.1.2 bus2=sx2897793a.1.2 linecode=4/0Triplex Seasons=1 Ratings=[400] normamps=156 emergamps=195 length=50 units=ft faultrate=0
@@ -3310,7 +3285,6 @@ New object=Line.tpx441854c0 bus1=x2935566c.1.2 bus2=sx2935566c.1.2 linecode=4/0T
 New object=Line.ln5898408-1 bus1=m1069533.2 bus2=196-29521.2 length=0.01860634 units=km linecode=1PH-x4_WPALx4_WPAL Seasons=1 Ratings=[400] normamps=400 emergamps=600
 New object=Line.ln5985355-4 bus1=196-29521.2 bus2=n1136355.2 length=0.01024864 units=km linecode=1PH-x4_WPALx4_WPAL Seasons=1 Ratings=[400] normamps=400 emergamps=600
 New object=Line.ln5985355-3 bus1=n1136355.2 bus2=l2783231.2 length=0.0724548 units=km linecode=1PH-x4_WPALx4_WPAL Seasons=1 Ratings=[400] normamps=400 emergamps=600
-New object=Fuse.ln5985355-3 MonitoredObj=LINE.LN5985355-3 MonitoredTerm=1 FuseCurve=tlink RatedCurrent=10
 New object=Line.tpx226193886b0 bus1=x2783231b.1.2 bus2=sx2783231b.1.2 linecode=4/0Triplex Seasons=1 Ratings=[400] normamps=156 emergamps=195 length=50 units=ft faultrate=0
 New object=Line.ln5985355-1 bus1=l2783231.2 bus2=l3254227.2 length=0.1519396 units=km linecode=1PH-x4_WPALx4_WPAL Seasons=1 Ratings=[400] normamps=400 emergamps=600
 New object=Line.tpx338995b0 bus1=x3254227b.1.2 bus2=sx3254227b.1.2 linecode=4/0Triplex Seasons=1 Ratings=[400] normamps=156 emergamps=195 length=50 units=ft faultrate=0
@@ -3348,7 +3322,6 @@ New object=Line.ln5773046-2 bus1=m1069551.2 bus2=m1069560.2 length=0.1218179 uni
 New object=Line.ln5773046-1 bus1=m1069560.2 bus2=m1069567.2 length=0.08142822 units=km linecode=1PH-x4_ACSRx4_ACSR Seasons=1 Ratings=[400] normamps=400 emergamps=600
 New object=Line.ln5774480-1 bus1=m1069567.2 bus2=m1069582.2 length=0.1529554 units=km linecode=1PH-x4_ACSRx4_ACSR Seasons=1 Ratings=[400] normamps=400 emergamps=600
 New object=Line.ln5895802-1 bus1=m1069582.2 bus2=l2973171.2 length=0.02622546 units=km linecode=1PH-x2_ACSRx2_ACSR Seasons=1 Ratings=[400] normamps=400 emergamps=600
-New object=Fuse.ln5895802-1 MonitoredObj=LINE.LN5895802-1 MonitoredTerm=1 FuseCurve=tlink RatedCurrent=10
 New object=Line.tpx339012b0 bus1=x2973171b.1.2 bus2=sx2973171b.1.2 linecode=4/0Triplex Seasons=1 Ratings=[400] normamps=156 emergamps=195 length=50 units=ft faultrate=0
 New object=Line.ln6231996-1 bus1=m1069582.2 bus2=d6231996-1_int.2 length=0.02468106 units=km linecode=1PH-x4_ACSRx4_ACSR Seasons=1 Ratings=[400] normamps=400 emergamps=600
 New object=Line.l5659_48332_sw bus1=d6231996-1_int.2 bus2=e206614.2 phases=1 Switch=True r1=1 x1=1 r0=1 x0=1 length=0.001
@@ -3535,7 +3508,6 @@ New object=Line.ln81048088-1 bus1=m1108378.1 bus2=p904451.1 length=0.007003397 u
 New object=Line.ln81048102-5 bus1=p904451.1 bus2=221-282819.1 length=0.005501021 units=km linecode=1P_1/0_AXNJ_DB Seasons=1 Ratings=[400] normamps=220 emergamps=220
 New object=Line.ln81048102-6 bus1=221-282819.1 bus2=n1230122.1 length=0.005611066 units=km linecode=1P_1/0_AXNJ_DB Seasons=1 Ratings=[400] normamps=220 emergamps=220
 New object=Line.ln81048102-4 bus1=n1230122.1 bus2=l3233412.1 length=0.1269857 units=km linecode=1P_1/0_AXNJ_DB Seasons=1 Ratings=[400] normamps=220 emergamps=220
-New object=Fuse.ln81048102-4 MonitoredObj=LINE.LN81048102-4 MonitoredTerm=1 FuseCurve=tlink RatedCurrent=10
 New object=Line.tpx226308717a0 bus1=x3233412a.1.2 bus2=sx3233412a.1.2 linecode=4/0Triplex Seasons=1 Ratings=[400] normamps=156 emergamps=195 length=50 units=ft faultrate=0
 New object=Line.ln81048102-2 bus1=l3233412.1 bus2=m1108413.1 length=0.01726216 units=km linecode=1P_1/0_AXNJ_DB Seasons=1 Ratings=[400] normamps=220 emergamps=220
 New object=Line.ln81048089-1 bus1=m1108413.1 bus2=m1108460.1 length=0.1460952 units=km linecode=1P_1/0_AXNJ_DB Seasons=1 Ratings=[400] normamps=220 emergamps=220
@@ -3558,7 +3530,6 @@ New object=Line.ln6411005-1 bus1=m1108379.1.2.3 bus2=m1108380.1.2.3 length=0.040
 New object=Line.ln81048087-1 bus1=m1108380.2 bus2=p904452.2 length=0.00654156 units=km linecode=1P_1/0_AXNJ_DB Seasons=1 Ratings=[400] normamps=220 emergamps=220
 New object=Line.ln81048100-6 bus1=p904452.2 bus2=221-282818.2 length=0.006347379 units=km linecode=1P_1/0_AXNJ_DB Seasons=1 Ratings=[400] normamps=220 emergamps=220
 New object=Line.ln81048100-7 bus1=221-282818.2 bus2=n1230123.2 length=0.006488617 units=km linecode=1P_1/0_AXNJ_DB Seasons=1 Ratings=[400] normamps=220 emergamps=220
-New object=Fuse.ln81048100-7 MonitoredObj=LINE.LN81048100-7 MonitoredTerm=1 FuseCurve=tlink RatedCurrent=10
 New object=Line.ln81048100-5 bus1=n1230123.2 bus2=l2708744.2 length=0.05580327 units=km linecode=1P_1/0_AXNJ_DB Seasons=1 Ratings=[400] normamps=220 emergamps=220
 New object=Line.tpx226308710b0 bus1=x2708744b.1.2 bus2=sx2708744b.1.2 linecode=4/0Triplex Seasons=1 Ratings=[400] normamps=156 emergamps=195 length=50 units=ft faultrate=0
 New object=Line.ln81048100-2 bus1=l2708744.2 bus2=l2690187.2 length=0.09530558 units=km linecode=1P_1/0_AXNJ_DB Seasons=1 Ratings=[400] normamps=220 emergamps=220
@@ -3746,7 +3717,6 @@ New object=Line.ln5958865-1 bus1=m1209800.3 bus2=p829957.3 length=0.01008982 uni
 New object=Line.ln5746703-1 bus1=p829957.3 bus2=l3160863.3 length=0.1649481 units=km linecode=1PH-xx4_ACSR4_ACSR Seasons=1 Ratings=[400] normamps=400 emergamps=600
 New object=Line.tpx223660c0 bus1=x3160863c.1.2 bus2=sx3160863c.1.2 linecode=4/0Triplex Seasons=1 Ratings=[400] normamps=156 emergamps=195 length=50 units=ft faultrate=0
 New object=Line.ln6201670-1 bus1=l3160863.3 bus2=l2730108.3 length=0.3107603 units=km linecode=1PH-xx4_ACSR4_ACSR Seasons=1 Ratings=[400] normamps=400 emergamps=600
-New object=Fuse.ln6201670-1 MonitoredObj=LINE.LN6201670-1 MonitoredTerm=1 FuseCurve=tlink RatedCurrent=10
 New object=Line.tpx223661c0 bus1=x2730108c.1.2 bus2=sx2730108c.1.2 linecode=4/0Triplex Seasons=1 Ratings=[400] normamps=156 emergamps=195 length=50 units=ft faultrate=0
 New object=Line.ln5896731-1 bus1=l2730108.3 bus2=l2786204.3 length=0.08435868 units=km linecode=1PH-xx4_ACSR4_ACSR Seasons=1 Ratings=[400] normamps=400 emergamps=600
 New object=Line.tpx223662c0 bus1=x2786204c.1.2 bus2=sx2786204c.1.2 linecode=4/0Triplex Seasons=1 Ratings=[400] normamps=156 emergamps=195 length=50 units=ft faultrate=0
@@ -7415,7 +7385,7 @@ New object=Reactor.hvmv_sub_hsb bus1=SourceBus.1.2.3 bus2=HVMV_Sub_HSB.1.2.3 R=0
 New object=EnergyMeter.m1 element=Line.ln5815900-1 terminal=1
 ! Redirect BusVoltageBases.dss  ! set voltage bases
 Set Voltagebases=[115,12.47,0.48,0.208]
-! Calcvoltagebases
+Calcvoltagebases
 MakeBusList
 ! Buscoords buscoords.dss
 SetBusXY bus=M1047751 X=1670806.28884553 Y=12288000.0004359
@@ -9255,6 +9225,7 @@ SetBusXY bus=L2973155 X=1670269.04929303 Y=12287698.2808836
 SetBusXY bus=N1139550 X=1667501.82855446 Y=12275299.094952
 SetBusXY bus=N1139250 X=1674436.68014491 Y=12272578.8512375
 SetBusXY bus=E183493 X=1682204.12975215 Y=12272442.7493494
+SetBusXY bus=293471 X=1669819.14900452 Y=12262614.7088921
 SetBusXY bus=L3141395 X=1673109.80961568 Y=12277712.0239783
 SetBusXY bus=L2973152 X=1669197.74049204 Y=12289153.2087569
 SetBusXY bus=L3085397 X=1668881.32858774 Y=12290075.4600218

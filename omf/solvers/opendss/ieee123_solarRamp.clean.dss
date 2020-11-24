@@ -278,8 +278,8 @@ new object=load.s112a bus1=112.1 phases=1 conn=wye model=5 kv=2.4 kw=20 kvar=10
 new object=load.s113a bus1=113.1 phases=1 conn=wye model=2 kv=2.4 kw=40 kvar=20
 new object=load.s114a bus1=114.1 phases=1 conn=wye model=1 kv=2.4 kw=20 kvar=10
 ! redirect transformer.dss
-new object=transformer.reg1a phases=3 windings=2 buses=[150,150r] conns=[wye,wye] kvs=[4.16,4.16] kvas=[5000,5000] xhl=0.001 %loadloss=0.00001 ppm_antifloat=0
-new object=transformer.xfm1 phases=3 windings=2 xhl=2.72 buses=[61s,610] conns=[delta,delta] kvs=[4.16,0.48] kvas=[150,150] taps=[1,1] %rs=[0.635,0.635]
+new object=transformer.reg1a phases=3 windings=2 buses=[150.1.2.3,150r.1.2.3] conns=[wye,wye] kvs=[4.16,4.16] kvas=[5000,5000] xhl=0.001 %loadloss=0.00001 ppm_antifloat=0
+new object=transformer.xfm1 phases=3 windings=2 xhl=2.72 buses=[61s.1.2.3,610.1.2.3] conns=[delta,delta] kvs=[4.16,0.48] kvas=[150,150] taps=[1,1] %rs=[0.635,0.635]
 new object=transformer.reg2a phases=1 windings=2 bank=reg2 buses=[9.1,9r.1] conns=[wye,wye] kvs=[2.402,2.402] kvas=[2000,2000] xhl=0.01 %loadloss=0.00001 ppm_antifloat=0
 new object=transformer.reg3a phases=1 windings=2 bank=reg3 buses=[25.1,25r.1] conns=[wye,wye] kvs=[2.402,2.402] kvas=[2000,2000] xhl=0.01 %loadloss=0.00001 ppm_antifloat=0
 new object=transformer.reg4a phases=1 windings=2 bank=reg4 buses=[160.1,160r.1] conns=[wye,wye] kvs=[2.402,2.402] kvas=[2000,2000] xhl=0.01 %loadloss=0.00001 ppm_antifloat=0
@@ -439,3 +439,5 @@ setbusxy bus=300_open x=0 y=0
 setbusxy bus=61s x=3175 y=1300
 setbusxy bus=94_open x=0 y=0
 setbusxy bus=9r x=1200 y=1725
+
+Set maxcontroliter=30
