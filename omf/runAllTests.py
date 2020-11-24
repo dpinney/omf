@@ -9,15 +9,17 @@ IGNORE_FILES = ['runAllTests.py', 'install.py', 'setup.py', 'webProd.py', 'web.p
 # Only search these directories
 INCLUDE_DIRS = ['omf', 'models']
 
+PY_BIN_NAME = 'python3'
+
 if platform.system()=='Windows':
 	NO_WINDOWS_SUPPORT = ['cymeToGridlab.py', 'rfCoverage.py', 'solarEngineering.py', 'transmission.py']
+	PY_BIN_NAME = 'python'
 	IGNORE_FILES.extend(NO_WINDOWS_SUPPORT)
 
 def _print_header(header):
 	print('\n+------------------------+')
 	print(f'\n{header.upper()}')
 	print('\n+------------------------+')
-
 
 def runAllTests(startingdir):
 	os.chdir(startingdir)
@@ -40,7 +42,7 @@ def runAllTests(startingdir):
 					has_tests = True
 					tested.append(item)
 					print(f'********** TESTING {item} ************')
-					p = subprocess.Popen(['python3', item], stderr=subprocess.STDOUT)
+					p = subprocess.Popen([PY_BIN_NAME, item], stderr=subprocess.STDOUT)
 					p.wait()
 					if p.returncode:
 						misfires[os.path.join(os.getcwd(), item)] = 'ERR'
@@ -63,7 +65,9 @@ def testRunner():
 	_print_header('regular tests report')
 	print(f'Number of modules tested: {len(tested)}')
 	print(tested)
+	_print_header('failed tests report')
 	print(f'Number of tests failed: {len(misfires)}')
+	print(misfires)
 	_print_header('untested modules report')
 	print(f'Number of untested modules: {len(not_tested)}')
 	print(not_tested, '\n')
