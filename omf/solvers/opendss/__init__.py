@@ -79,10 +79,13 @@ def newQstsPlot(filePath, stepSizeInMinutes, numberOfSteps, keepAllFiles=False):
 		mon_name = f'mon{obType}-{name}'
 		if obData.startswith('circuit.'):
 			circ_name = name
-		if obData.startswith('generator.'):
+		elif obData.startswith('vsource.'):
 			runDssCommand(f'new object=monitor.{mon_name} element={obType}.{name} terminal=1 mode=1 ppolar=no')
 			mon_names.append(mon_name)
-		if ob.get('object','').startswith('load.'):
+		elif obData.startswith('generator.'):
+			runDssCommand(f'new object=monitor.{mon_name} element={obType}.{name} terminal=1 mode=1 ppolar=no')
+			mon_names.append(mon_name)
+		elif ob.get('object','').startswith('load.'):
 			runDssCommand(f'new object=monitor.{mon_name} element={obType}.{name} terminal=1 mode=0')
 			mon_names.append(mon_name)
 	# Run DSS
@@ -94,6 +97,7 @@ def newQstsPlot(filePath, stepSizeInMinutes, numberOfSteps, keepAllFiles=False):
 	# Aggregate monitors
 	all_gen_df = pd.DataFrame()
 	all_load_df = pd.DataFrame()
+	all_source_df = pd.DataFrame()
 	for name in mon_names:
 		csv_path = f'{dssFileLoc}/{circ_name}_Mon_{name}.csv'
 		df = pd.read_csv(f'{circ_name}_Mon_{name}.csv')
@@ -103,12 +107,20 @@ def newQstsPlot(filePath, stepSizeInMinutes, numberOfSteps, keepAllFiles=False):
 		elif name.startswith('mongenerator-'):
 			df['Name'] = name
 			all_gen_df = pd.concat([all_gen_df, df], ignore_index=True, sort=False)
+		elif name.startswith('monvsource-'):
+			df['Name'] = name
+			all_source_df = pd.concat([all_source_df, df], ignore_index=True, sort=False)
 		if not keepAllFiles:
 			os.remove(csv_path)
 	# Write final aggregates
 	all_gen_df.sort_values(['Name','hour'], inplace=True)
+	all_gen_df.columns = all_gen_df.columns.str.replace(r'[ "]','')
 	all_gen_df.to_csv(f'{dssFileLoc}/timeseries_gen.csv', index=False)
+	all_source_df.sort_values(['Name','hour'], inplace=True)
+	all_source_df.columns = all_source_df.columns.str.replace(r'[ "]','')
+	all_source_df.to_csv(f'{dssFileLoc}/timeseries_source.csv', index=False)
 	all_load_df.sort_values(['Name','hour'], inplace=True)
+	all_load_df.columns = all_load_df.columns.str.replace(r'[ "]','')
 	all_load_df.to_csv(f'{dssFileLoc}/timeseries_load.csv', index=False)
 
 def qstsPlot(filePath, stepSizeInMinutes, numberOfSteps, getVolts=True, getLoads=False, getGens=False):
