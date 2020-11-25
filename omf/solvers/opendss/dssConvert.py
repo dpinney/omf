@@ -94,7 +94,7 @@ def dssToTree(pathToDss):
 						  # v = file content array, cast as a string
 					else:
 						k,v = contents[i][j].split('=')
-					# Should we pull the multiwinding transformer handling out of here and put it into dssFilePrep()?
+					# TODO: Should we pull the multiwinding transformer handling out of here and put it into dssFilePrep()?
 					if k == 'wdg':
 						continue
 					if (k in ob.keys()) or (convTbl.get(k,k) in ob.keys()): # if the single key already exists in the object, then this is the second pass. If pluralized key exists, then this is the 2+nth pass
@@ -430,7 +430,7 @@ def evilDssTreeToGldTree(dssTree):
 				}
 				_extend_with_exc(ob, gldTree[str(g_id)], ['object','element','!CMD'])
 			else:
-				#config-like object.S
+				#config-like object
 				gldTree[str(g_id)] = {
 					'object': obtype,
 					'name': name
@@ -492,7 +492,7 @@ def evilGldTreeToDssTree(evil_gld_tree):
 			dssTree.append(new_ob)
 		elif ob.get('object') == 'transformer':
 			buses = f"[{ob['from']}{ob.get('!FROCODE','')},{ob['to']}{ob.get('!TOCODE','')}]" # for 2-winding xfrmrs
-			exclist = ['!CMD','from','to','to2','name','object','latitude','longitude','!FROCODE','!TOCODE']
+			exclist = ['!CMD','from','to','to2','name','object','latitude','longitude','!FROCODE','!TOCODE','windings']
 			if ob.get('to2'): # for 3-winding xfrmrs
 				exclist.extend(['to2','!TO2CODE'])
 				buses = f"[{ob['from']}{ob.get('!FROCODE','')},{ob['to']}{ob.get('!TOCODE','')},{ob['to2']}{ob.get('!TO2CODE','')}]"
@@ -502,8 +502,10 @@ def evilGldTreeToDssTree(evil_gld_tree):
 			new_ob = {
 				'!CMD': 'new',
 				'object': ob['object'] + '.' + ob['name'],
-				'buses': buses
 			}
+			if ob.get('windings','NWP')!='NWP':
+				new_ob['windings'] = ob['windings'] # This is required to ensure correct order (because the 'windings' property triggers memory allocation and resets everything to default values)
+			new_ob['buses'] = buses # 'buses' must come after 'windings', if existing.
 			_extend_with_exc(ob, new_ob, exclist)
 			dssTree.append(new_ob)
 		elif ob.get('object') == 'reactor':
@@ -521,6 +523,10 @@ def evilGldTreeToDssTree(evil_gld_tree):
 				'!CMD': 'new',
 				'object': ob['object'] + '.' + ob.get('name',''),
 			}
+			if ob.get('parent','NP')!='NP':
+				if ob.get('!CONNCODE','NCC')=='NCC':
+					new_ob['!CONNCODE'] = '.1' # If no node info is specified, then it defaults to one-phase.
+				new_ob['bus'] = ob['parent'] + ob['!CONNCODE']
 			_extend_with_exc(ob, new_ob, ['parent','name','object','latitude','longitude','!CONNCODE'])
 			dssTree.append(new_ob)
 		elif ob.get('object') == 'capcontrol':
@@ -532,6 +538,15 @@ def evilGldTreeToDssTree(evil_gld_tree):
 			_extend_with_exc(ob, new_ob, ['parent','name','object','latitude','longitude','!CONNCODE'])
 			dssTree.append(new_ob)
 		elif ob.get('object') == 'energymeter':
+			#TODO this block of code is the same as 'capcontrol' above. Consider combining.
+			new_ob = {
+				'!CMD': 'new',
+				'object': ob['object'] + '.' + ob.get('name',''),
+				'element': ob['parent'] + ob.get('!CONNCODE', '')
+			}
+			_extend_with_exc(ob, new_ob, ['parent','name','object','latitude','longitude','!CONNCODE'])
+			dssTree.append(new_ob)
+		elif ob.get('object') == 'monitor':
 			#TODO this block of code is the same as 'capcontrol' above. Consider combining.
 			new_ob = {
 				'!CMD': 'new',
@@ -587,13 +602,10 @@ def _createAndCompareTestFile(inFile, userOutFile=''):
 	percSumm, diffSumm = voltageCompare(involts, outvolts, keep_output=True)
 	return 
 
-
 def _tests():
 	from omf.solvers.opendss import getVoltages, voltageCompare
 	import pandas as pd
-	#FNAMES =  ['ieee37.clean.dss', 'ieee123_solarRamp.clean.dss', 'iowa240.clean.dss', 'ieeeLVTestCase.clean.dss', 'ieee8500-unbal_no_fuses.clean.dss']
-	#FNAMES = ['ieee8500-unbal_with_fuses.clean.dss']
-	FNAMES =  ['ieee37.clean.dss']
+	FNAMES =  ['ieee37.clean.dss', 'ieee123_solarRamp.clean.dss', 'iowa240.clean.dss', 'ieeeLVTestCase.clean.dss', 'ieee8500-unbal_no_fuses.clean.dss', 'ieee8500-unbal_with_fuses.clean.dss']
 	
 	for fname in FNAMES:
 		print('!!!!!!!!!!!!!! ',fname,' !!!!!!!!!!!!!!')
@@ -616,7 +628,7 @@ def _tests():
 		dsstreeout2 = evilGldTreeToDssTree(glmtree2)
 		treeToDss(dsstreeout2, outpath)
 		endvolts = getVoltages(outpath, keep_output=False)
-		#os.remove(outpath)
+		os.remove(outpath)
 		percSumm, diffSumm = voltageCompare(startvolts, endvolts, keep_output=False)
 		maxPerrM = [percSumm.loc['RMSPE',c] for c in percSumm.columns if c.lower().startswith(' magnitude')]
 		maxPerrM = pd.Series(maxPerrM).max()

@@ -305,7 +305,7 @@ new object=generator.2mwgen bus1=450.1.2.3 kv=4.16 kw=2000 pf=1 duty=solarramp
 new object=monitor.mon1 element=line.l99 terminal=1
 makebuslist
 ! redirect busvoltagebases.dss  ! set voltage bases
-set voltagebases=(4.16,0.48)
+set voltagebases=[4.16,0.48]
 ! buscoords buscoords.dss
 setbusxy bus=1 x=700 y=1500
 setbusxy bus=2 x=700 y=1675
