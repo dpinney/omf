@@ -1066,6 +1066,7 @@ MakeBusList
 ! Redirect BusVoltageBases.dss  ! set voltage bases
 Set Voltagebases=[11,0.416]
 ! Buscoords buscoords.dss
+SetBusXY bus=sourcebus X=0 Y=0
 SetBusXY bus=1 X=390872.663 Y=392887.379
 SetBusXY bus=2 X=390871.596 Y=392887.638
 SetBusXY bus=3 X=390871.481 Y=392887.643
