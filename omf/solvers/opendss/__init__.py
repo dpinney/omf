@@ -67,6 +67,7 @@ def _getCoords(dssFilePath, keep_output=True):
 	return coords
 
 def newQstsPlot(filePath, stepSizeInMinutes, numberOfSteps, keepAllFiles=False):
+	''' Use monitor objects to generate voltage values for a timeseries powerflow. '''
 	dssFileLoc = os.path.dirname(os.path.abspath(filePath))
 	volt_coord = runDSS(filePath)
 	# Attach Monitors
@@ -80,13 +81,20 @@ def newQstsPlot(filePath, stepSizeInMinutes, numberOfSteps, keepAllFiles=False):
 		if obData.startswith('circuit.'):
 			circ_name = name
 		elif obData.startswith('vsource.'):
-			runDssCommand(f'new object=monitor.{mon_name} element={obType}.{name} terminal=1 mode=1 ppolar=no')
+			runDssCommand(f'new object=monitor.{mon_name} element={obType}.{name} terminal=1 mode=0')
 			mon_names.append(mon_name)
 		elif obData.startswith('generator.'):
 			runDssCommand(f'new object=monitor.{mon_name} element={obType}.{name} terminal=1 mode=1 ppolar=no')
 			mon_names.append(mon_name)
 		elif ob.get('object','').startswith('load.'):
 			runDssCommand(f'new object=monitor.{mon_name} element={obType}.{name} terminal=1 mode=0')
+			mon_names.append(mon_name)
+		elif ob.get('object','').startswith('capacitor.'):
+			runDssCommand(f'new object=monitor.{mon_name} element={obType}.{name} terminal=1 mode=6')
+			mon_names.append(mon_name)
+		elif ob.get('object','').startswith('transformer.'):
+			#TODO: only capture transformers with regulators on them by looking through the regcontrol objects.
+			runDssCommand(f'new object=monitor.{mon_name} element={obType}.{name} terminal=1 mode=2')
 			mon_names.append(mon_name)
 	# Run DSS
 	runDssCommand(f'set mode=yearly stepsize={stepSizeInMinutes}m number={numberOfSteps}')
@@ -98,6 +106,7 @@ def newQstsPlot(filePath, stepSizeInMinutes, numberOfSteps, keepAllFiles=False):
 	all_gen_df = pd.DataFrame()
 	all_load_df = pd.DataFrame()
 	all_source_df = pd.DataFrame()
+	all_control_df = pd.DataFrame()
 	for name in mon_names:
 		csv_path = f'{dssFileLoc}/{circ_name}_Mon_{name}.csv'
 		df = pd.read_csv(f'{circ_name}_Mon_{name}.csv')
@@ -110,14 +119,29 @@ def newQstsPlot(filePath, stepSizeInMinutes, numberOfSteps, keepAllFiles=False):
 		elif name.startswith('monvsource-'):
 			df['Name'] = name
 			all_source_df = pd.concat([all_source_df, df], ignore_index=True, sort=False)
+		elif name.startswith('moncapacitor-'):
+			df['Type'] = 'Capacitor'
+			df['Name'] = name
+			df.rename({'Step_1': 'Tap(pu)'}, inplace=True) #TODO: fix this renaming.
+			all_control_df = pd.concat([all_control_df, df], ignore_index=True, sort=False)
+		elif name.startswith('montransformer-'):
+			df['Type'] = 'Transformer'
+			df['Name'] = name
+			all_control_df = pd.concat([all_control_df, df], ignore_index=True, sort=False)
 		if not keepAllFiles:
 			os.remove(csv_path)
 	# Write final aggregates
 	all_gen_df.sort_values(['Name','hour'], inplace=True)
 	all_gen_df.columns = all_gen_df.columns.str.replace(r'[ "]','')
 	all_gen_df.to_csv(f'{dssFileLoc}/timeseries_gen.csv', index=False)
+	all_control_df.sort_values(['Name','hour'], inplace=True)
+	all_control_df.columns = all_control_df.columns.str.replace(r'[ "]','')
+	all_control_df.to_csv(f'{dssFileLoc}/timeseries_control.csv', index=False)
 	all_source_df.sort_values(['Name','hour'], inplace=True)
 	all_source_df.columns = all_source_df.columns.str.replace(r'[ "]','')
+	all_source_df["P1(kW)"] = all_source_df["V1"] * all_source_df["I1"] / 1000.0
+	all_source_df["P2(kW)"] = all_source_df["V2"] * all_source_df["I2"] / 1000.0
+	all_source_df["P3(kW)"] = all_source_df["V3"] * all_source_df["I3"] / 1000.0
 	all_source_df.to_csv(f'{dssFileLoc}/timeseries_source.csv', index=False)
 	all_load_df.sort_values(['Name','hour'], inplace=True)
 	all_load_df.columns = all_load_df.columns.str.replace(r'[ "]','')
