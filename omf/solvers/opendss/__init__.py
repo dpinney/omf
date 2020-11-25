@@ -69,9 +69,9 @@ def qstsPlot(filePath, stepSizeInMinutes, numberOfSteps):
 	''' Generate voltage values for a timeseries powerflow. '''
 	dssFileLoc = os.path.dirname(os.path.abspath(filePath))
 	volt_coord = runDSS(filePath)
-	runDssCommand('Set mode=daily')
-	runDssCommand('Set number=1')
-	runDssCommand(f'Set stepsize={stepSizeInMinutes}m')
+	runDssCommand('Set mode=yearly')
+	runDssCommand(f'Set number=1')
+	runDssCommand(f'Set stepsize={stepSizeInMinutes:.1f}m')
 	big_df = pd.DataFrame()
 	for step in range(1, numberOfSteps+1):
 		runDssCommand('Solve')
@@ -81,6 +81,7 @@ def qstsPlot(filePath, stepSizeInMinutes, numberOfSteps):
 		new_data['Step'] = step
 		big_df = pd.concat([big_df, new_data], ignore_index=True)
 		os.remove(csv_path)
+	big_df.sort_values(['Bus','Step'], inplace=True)
 	big_df.to_csv(f'{dssFileLoc}/voltage_timeseries.csv', index=False)
 	# TODO: generate plots.
 
