@@ -66,7 +66,7 @@ def _getCoords(dssFilePath, keep_output=True):
 	coords['radius'] = hyp
 	return coords
 
-def newQstsPlot(filePath, stepSizeInMinutes, numberOfSteps):
+def newQstsPlot(filePath, stepSizeInMinutes, numberOfSteps, keepAllFiles=False):
 	dssFileLoc = os.path.dirname(os.path.abspath(filePath))
 	volt_coord = runDSS(filePath)
 	# Attach Monitors
@@ -103,7 +103,8 @@ def newQstsPlot(filePath, stepSizeInMinutes, numberOfSteps):
 		elif name.startswith('mongenerator-'):
 			df['Name'] = name
 			all_gen_df = pd.concat([all_gen_df, df], ignore_index=True, sort=False)
-		os.remove(csv_path)
+		if not keepAllFiles:
+			os.remove(csv_path)
 	# Write final aggregates
 	all_gen_df.sort_values(['Name','hour'], inplace=True)
 	all_gen_df.to_csv(f'{dssFileLoc}/timeseries_gen.csv', index=False)
