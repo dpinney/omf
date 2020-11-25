@@ -100,12 +100,16 @@ def qstsPlot(filePath, stepSizeInMinutes, numberOfSteps, getVolts=True, getLoads
 			os.remove(csv_path)
 	if getVolts:
 		big_df_volts.sort_values(['Bus','Step'], inplace=True)
+		big_df_volts.columns = big_df_volts.columns.str.replace(r'[ "]','') # All these calls to replace are to remove garbage characters.
 		big_df_volts.to_csv(f'{dssFileLoc}/timeseries_voltage.csv', index=False)
 	if getLoads:
 		big_df_loads.sort_values(['Load','Step'], inplace=True)
+		big_df_loads.columns = big_df_loads.columns.str.replace(r'[ "]','')
 		big_df_loads.to_csv(f'{dssFileLoc}/timeseries_load.csv', index=False)
 	if getGens:
-		big_df_gens.sort_values([' Generator','Step'], inplace=True) #NOTE: space in col name because that's how dss rolls.
+		big_df_gens.columns = big_df_gens.columns.str.replace(r'[ "]','')
+		big_df_gens.sort_values(['Generator','Step'], inplace=True) #NOTE: space in col name because that's how dss rolls.
+		big_df_gens['Generator'] = big_df_gens['Generator'].str.replace(r'[ "]', '')
 		big_df_gens.to_csv(f'{dssFileLoc}/timeseries_gen.csv', index=False)
 	# TODO: generate plots.
 
