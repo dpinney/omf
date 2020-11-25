@@ -65,24 +65,48 @@ def _getCoords(dssFilePath, keep_output=True):
 	coords['radius'] = hyp
 	return coords
 
-def qstsPlot(filePath, stepSizeInMinutes, numberOfSteps):
+def qstsPlot(filePath, stepSizeInMinutes, numberOfSteps, getVolts=True, getLoads=False, getGens=False):
 	''' Generate voltage values for a timeseries powerflow. '''
 	dssFileLoc = os.path.dirname(os.path.abspath(filePath))
 	volt_coord = runDSS(filePath)
 	runDssCommand('Set mode=yearly')
 	runDssCommand(f'Set number=1')
 	runDssCommand(f'Set stepsize={stepSizeInMinutes:.1f}m')
-	big_df = pd.DataFrame()
+	big_df_volts = pd.DataFrame()
+	big_df_loads = pd.DataFrame()
+	big_df_gens = pd.DataFrame()
 	for step in range(1, numberOfSteps+1):
 		runDssCommand('Solve')
-		csv_path = f'{dssFileLoc}/volt_prof_hour_{step:04d}.csv'
-		runDssCommand(f'Export voltages "{csv_path}"')
-		new_data = pd.read_csv(csv_path)
-		new_data['Step'] = step
-		big_df = pd.concat([big_df, new_data], ignore_index=True)
-		os.remove(csv_path)
-	big_df.sort_values(['Bus','Step'], inplace=True)
-	big_df.to_csv(f'{dssFileLoc}/voltage_timeseries.csv', index=False)
+		if getVolts:
+			csv_path = f'{dssFileLoc}/volt_prof_hour_{step:04d}.csv'
+			runDssCommand(f'Export voltages "{csv_path}"')
+			new_data = pd.read_csv(csv_path)
+			new_data['Step'] = step
+			big_df_volts = pd.concat([big_df_volts, new_data], ignore_index=True)
+			os.remove(csv_path)
+		if getLoads:
+			csv_path = f'{dssFileLoc}/load_prof_hour_{step:04d}.csv'
+			runDssCommand(f'Export loads "{csv_path}"')
+			new_data = pd.read_csv(csv_path)
+			new_data['Step'] = step
+			big_df_loads = pd.concat([big_df_loads, new_data], ignore_index=True)
+			os.remove(csv_path)
+		if getGens:
+			csv_path = f'{dssFileLoc}/gen_prof_hour_{step:04d}.csv'
+			runDssCommand(f'Export generators "{csv_path}"')
+			new_data = pd.read_csv(csv_path)
+			new_data['Step'] = step
+			big_df_gens = pd.concat([big_df_gens, new_data], ignore_index=True)
+			os.remove(csv_path)
+	if getVolts:
+		big_df_volts.sort_values(['Bus','Step'], inplace=True)
+		big_df_volts.to_csv(f'{dssFileLoc}/timeseries_voltage.csv', index=False)
+	if getLoads:
+		big_df_loads.sort_values(['Load','Step'], inplace=True)
+		big_df_loads.to_csv(f'{dssFileLoc}/timeseries_load.csv', index=False)
+	if getGens:
+		big_df_gens.sort_values([' Generator','Step'], inplace=True) #NOTE: space in col name because that's how dss rolls.
+		big_df_gens.to_csv(f'{dssFileLoc}/timeseries_gen.csv', index=False)
 	# TODO: generate plots.
 
 def voltagePlot(filePath, PU=True):
