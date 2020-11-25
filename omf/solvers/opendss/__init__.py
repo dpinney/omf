@@ -10,6 +10,7 @@ try:
 	import opendssdirect as dss
 except:
 	warnings.warn('opendssdirect not installed; opendss functionality disabled.')
+from omf.solvers.opendss import dssConvert
 
 def runDssCommand(dsscmd):
 	from opendssdirect import run_command, Error
@@ -65,13 +66,57 @@ def _getCoords(dssFilePath, keep_output=True):
 	coords['radius'] = hyp
 	return coords
 
+def newQstsPlot(filePath, stepSizeInMinutes, numberOfSteps):
+	dssFileLoc = os.path.dirname(os.path.abspath(filePath))
+	volt_coord = runDSS(filePath)
+	# Attach Monitors
+	tree = dssConvert.dssToTree(filePath)
+	mon_names = []
+	cic_name = 'NONE'
+	for ob in tree:
+		obData = ob.get('object','NONE.NONE')
+		obType, name = obData.split('.')
+		mon_name = f'mon{obType}-{name}'
+		if obData.startswith('circuit.'):
+			circ_name = name
+		if obData.startswith('generator.'):
+			runDssCommand(f'new object=monitor.{mon_name} element={obType}.{name} terminal=1 mode=1 ppolar=no')
+			mon_names.append(mon_name)
+		if ob.get('object','').startswith('load.'):
+			runDssCommand(f'new object=monitor.{mon_name} element={obType}.{name} terminal=1 mode=0')
+			mon_names.append(mon_name)
+	# Run DSS
+	runDssCommand(f'set mode=yearly stepsize={stepSizeInMinutes}m number={numberOfSteps}')
+	runDssCommand('solve')
+	# Export all monitors
+	for name in mon_names:
+		runDssCommand(f'export monitors monitorname={name}')
+	# Aggregate monitors
+	all_gen_df = pd.DataFrame()
+	all_load_df = pd.DataFrame()
+	for name in mon_names:
+		csv_path = f'{dssFileLoc}/{circ_name}_Mon_{name}.csv'
+		df = pd.read_csv(f'{circ_name}_Mon_{name}.csv')
+		if name.startswith('monload-'):
+			df['Name'] = name
+			all_load_df = pd.concat([all_load_df, df], ignore_index=True, sort=False)
+		elif name.startswith('mongenerator-'):
+			df['Name'] = name
+			all_gen_df = pd.concat([all_gen_df, df], ignore_index=True, sort=False)
+		os.remove(csv_path)
+	# Write final aggregates
+	all_gen_df.sort_values(['Name','hour'], inplace=True)
+	all_gen_df.to_csv(f'{dssFileLoc}/timeseries_gen.csv', index=False)
+	all_load_df.sort_values(['Name','hour'], inplace=True)
+	all_load_df.to_csv(f'{dssFileLoc}/timeseries_load.csv', index=False)
+
 def qstsPlot(filePath, stepSizeInMinutes, numberOfSteps, getVolts=True, getLoads=False, getGens=False):
 	''' Generate voltage values for a timeseries powerflow. '''
 	dssFileLoc = os.path.dirname(os.path.abspath(filePath))
 	volt_coord = runDSS(filePath)
 	runDssCommand('Set mode=yearly')
 	runDssCommand(f'Set number=1')
-	runDssCommand(f'Set stepsize={stepSizeInMinutes:.1f}m')
+	runDssCommand(f'Set stepsize=360')
 	big_df_volts = pd.DataFrame()
 	big_df_loads = pd.DataFrame()
 	big_df_gens = pd.DataFrame()
