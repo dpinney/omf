@@ -71,6 +71,8 @@ def testRunner():
 	_print_header('untested modules report')
 	print(f'Number of untested modules: {len(not_tested)}')
 	print(not_tested, '\n')
+	if len(misfires) > 0:
+		sys.exit(1) # trigger build failure.
 
 if __name__ == "__main__"  :
 	testRunner()
