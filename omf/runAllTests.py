@@ -8,7 +8,7 @@ from pathlib import PurePath, Path
 IGNORE_FILES = ['runAllTests.py', 'install.py', 'setup.py', 'webProd.py', 'web.py', 'omfStats.py', '__init__.py']
 # Only search these directories
 INCLUDE_DIRS = ['omf', 'models']
-
+# Different platforms like to name the python binary differently
 PY_BIN_NAME = 'python3'
 
 if platform.system()=='Windows':
