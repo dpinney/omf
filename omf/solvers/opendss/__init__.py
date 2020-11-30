@@ -66,7 +66,7 @@ def _getCoords(dssFilePath, keep_output=True):
 	coords['radius'] = hyp
 	return coords
 
-def newQstsPlot(filePath, stepSizeInMinutes, numberOfSteps, keepAllFiles=False):
+def newQstsPlot(filePath, stepSizeInMinutes, numberOfSteps, keepAllFiles=False, actions={}):
 	''' Use monitor objects to generate voltage values for a timeseries powerflow. '''
 	dssFileLoc = os.path.dirname(os.path.abspath(filePath))
 	volt_coord = runDSS(filePath)
@@ -97,8 +97,20 @@ def newQstsPlot(filePath, stepSizeInMinutes, numberOfSteps, keepAllFiles=False):
 			runDssCommand(f'new object=monitor.{mon_name} element={obType}.{name} terminal=1 mode=2')
 			mon_names.append(mon_name)
 	# Run DSS
-	runDssCommand(f'set mode=yearly stepsize={stepSizeInMinutes}m number={numberOfSteps}')
-	runDssCommand('solve')
+	runDssCommand(f'set mode=yearly stepsize={stepSizeInMinutes}m')
+	if actions == {}:
+		# Run all steps directly.
+		runDssCommand(f'set number={numberOfSteps}')
+		runDssCommand('solve')
+	else:
+		# Actions defined, run them at the appropriate timestep.
+		runDssCommand(f'set number=1')
+		for step in range(1, numberOfSteps+1):
+			action = actions.get(step)
+			if action != None:
+				print(f'Step {step} executing:', action)
+				runDssCommand(action)
+			runDssCommand('solve')
 	# Export all monitors
 	for name in mon_names:
 		runDssCommand(f'export monitors monitorname={name}')
@@ -146,54 +158,6 @@ def newQstsPlot(filePath, stepSizeInMinutes, numberOfSteps, keepAllFiles=False):
 	all_load_df.sort_values(['Name','hour'], inplace=True)
 	all_load_df.columns = all_load_df.columns.str.replace(r'[ "]','')
 	all_load_df.to_csv(f'{dssFileLoc}/timeseries_load.csv', index=False)
-
-def qstsPlot(filePath, stepSizeInMinutes, numberOfSteps, getVolts=True, getLoads=False, getGens=False):
-	''' Generate voltage values for a timeseries powerflow. '''
-	dssFileLoc = os.path.dirname(os.path.abspath(filePath))
-	volt_coord = runDSS(filePath)
-	runDssCommand('Set mode=yearly')
-	runDssCommand(f'Set number=1')
-	runDssCommand(f'Set stepsize=360')
-	big_df_volts = pd.DataFrame()
-	big_df_loads = pd.DataFrame()
-	big_df_gens = pd.DataFrame()
-	for step in range(1, numberOfSteps+1):
-		runDssCommand('Solve')
-		if getVolts:
-			csv_path = f'{dssFileLoc}/volt_prof_hour_{step:04d}.csv'
-			runDssCommand(f'Export voltages "{csv_path}"')
-			new_data = pd.read_csv(csv_path)
-			new_data['Step'] = step
-			big_df_volts = pd.concat([big_df_volts, new_data], ignore_index=True)
-			os.remove(csv_path)
-		if getLoads:
-			csv_path = f'{dssFileLoc}/load_prof_hour_{step:04d}.csv'
-			runDssCommand(f'Export loads "{csv_path}"')
-			new_data = pd.read_csv(csv_path)
-			new_data['Step'] = step
-			big_df_loads = pd.concat([big_df_loads, new_data], ignore_index=True)
-			os.remove(csv_path)
-		if getGens:
-			csv_path = f'{dssFileLoc}/gen_prof_hour_{step:04d}.csv'
-			runDssCommand(f'Export generators "{csv_path}"')
-			new_data = pd.read_csv(csv_path)
-			new_data['Step'] = step
-			big_df_gens = pd.concat([big_df_gens, new_data], ignore_index=True)
-			os.remove(csv_path)
-	if getVolts:
-		big_df_volts.sort_values(['Bus','Step'], inplace=True)
-		big_df_volts.columns = big_df_volts.columns.str.replace(r'[ "]','') # All these calls to replace are to remove garbage characters.
-		big_df_volts.to_csv(f'{dssFileLoc}/timeseries_voltage.csv', index=False)
-	if getLoads:
-		big_df_loads.sort_values(['Load','Step'], inplace=True)
-		big_df_loads.columns = big_df_loads.columns.str.replace(r'[ "]','')
-		big_df_loads.to_csv(f'{dssFileLoc}/timeseries_load.csv', index=False)
-	if getGens:
-		big_df_gens.columns = big_df_gens.columns.str.replace(r'[ "]','')
-		big_df_gens.sort_values(['Generator','Step'], inplace=True) #NOTE: space in col name because that's how dss rolls.
-		big_df_gens['Generator'] = big_df_gens['Generator'].str.replace(r'[ "]', '')
-		big_df_gens.to_csv(f'{dssFileLoc}/timeseries_gen.csv', index=False)
-	# TODO: generate plots.
 
 def voltagePlot(filePath, PU=True):
 	''' Voltage plotting routine. Creates 'voltages.csv' and 'Voltage [PU|V].png' in directory of input file.'''
