@@ -73,7 +73,7 @@ def newQstsPlot(filePath, stepSizeInMinutes, numberOfSteps, keepAllFiles=False, 
 	# Attach Monitors
 	tree = dssConvert.dssToTree(filePath)
 	mon_names = []
-	cic_name = 'NONE'
+	circ_name = 'NONE'
 	for ob in tree:
 		obData = ob.get('object','NONE.NONE')
 		obType, name = obData.split('.')
