@@ -926,7 +926,6 @@ def rawImport(owner):
 	importProc.start()
 	return 'Success'
 
-
 def rawImportBackground(owner, modelName):
 	''' Function to run in the background for Raw import. '''
 	try:
@@ -969,9 +968,43 @@ def gridlabdImport(owner):
 			os.remove(os.path.join(modelDir, filename))
 	if os.path.isfile(error_path):
 		os.remove(error_path)
-	importProc = Process(target=gridlabImportBackground, args=[owner, modelName])
+	# Handle request objects
+	feederName = str(request.form.get("feederNameG",""))
+	glm_path = os.path.join(_omfDir, 'data', 'Model', owner, modelName, feederName + '.glm')
+	request.files['glmFile'].save(glm_path)
+	feederNum = request.form.get("feederNum", 1)
+	importProc = Process(target=gridlabImportBackground, args=[owner, modelName, feederName, feederNum])
 	importProc.start()
 	return 'Success'
+
+
+def gridlabImportBackground(owner, modelName, feederName, feederNum):
+	''' Function to run in the background for Gridlabd import. '''
+	try:
+		feeder_path, glm_path, modelDir, pid_filepath = [
+			os.path.join(_omfDir, 'data', 'Model', owner, modelName, filename) for filename in [feederName + '.omd', feederName + '.glm', '', 'ZPID.txt']
+		]
+		with locked_open(pid_filepath, 'w') as pid_file:
+			pid_file.write(str(os.getpid()))
+		# Save .glm file to model folder
+		with locked_open(glm_path) as glmFile:
+			glmString = glmFile.read()
+		newFeeder = dict(**feeder.newFeederWireframe)
+		newFeeder["tree"] = feeder.parse(glmString, False)
+		if not distNetViz.contains_valid_coordinates(newFeeder["tree"]):
+			distNetViz.insert_coordinates(newFeeder["tree"])
+		with locked_open(os.path.join(_omfDir, 'static', 'schedules.glm')) as schedFile:
+			newFeeder["attachments"] = {"schedules.glm":schedFile.read()}
+		with locked_open(feeder_path, 'w') as f: # Use 'w' mode because we're creating a new .omd file according to feederName
+			json.dump(newFeeder, f, indent=4)
+		os.remove(pid_filepath)
+		removeFeeder(owner, modelName, feederNum)
+		writeToInput(modelDir, feederName, 'feederName' + str(feederNum))
+	except Exception: 
+		filepath = os.path.join(_omfDir, 'data', 'Model', owner, modelName, 'gridError.txt')
+		with locked_open(filepath, 'w') as errorFile:
+			errorFile.write('glmError')
+
 
 @app.route("/opendssImport/<owner>", methods=["POST"])
 @flask_login.login_required
@@ -993,6 +1026,7 @@ def dssImport(owner):
 	importProc = Process(target=dssImportBackground, args=[owner, modelName, feederName, feederNum])
 	importProc.start()
 	return 'Success'
+
 
 def dssImportBackground(owner, modelName, feederName, feederNum):
 	''' Function to run in the background for OpenDSS import. '''
@@ -1020,37 +1054,6 @@ def dssImportBackground(owner, modelName, feederName, feederNum):
 		with locked_open(os.path.join(modelDir, 'allInputData.json'), 'r+') as f:
 			f.truncate(0)
 			json.dump(allInput, f, indent=4)
-		writeToInput(modelDir, feederName, 'feederName' + str(feederNum))
-	except Exception: 
-		filepath = os.path.join(_omfDir, 'data', 'Model', owner, modelName, 'gridError.txt')
-		with locked_open(filepath, 'w') as errorFile:
-			errorFile.write('glmError')
-
-
-def gridlabImportBackground(owner, modelName):
-	''' Function to run in the background for Gridlabd import. '''
-	try:
-		feederName = str(request.form.get("feederNameG",""))
-		feeder_path, glm_path, modelDir, pid_filepath = [
-			os.path.join(_omfDir, 'data', 'Model', owner, modelName, filename) for filename in [feederName + '.omd', feederName + '.glm', '', 'ZPID.txt']
-		]
-		with locked_open(pid_filepath, 'w') as pid_file:
-			pid_file.write(str(os.getpid()))
-		# Save .glm file to model folder
-		request.files['glmFile'].save(glm_path)
-		with locked_open(glm_path) as glmFile:
-			glmString = glmFile.read()
-		newFeeder = dict(**feeder.newFeederWireframe)
-		newFeeder["tree"] = feeder.parse(glmString, False)
-		if not distNetViz.contains_valid_coordinates(newFeeder["tree"]):
-			distNetViz.insert_coordinates(newFeeder["tree"])
-		with locked_open(os.path.join(_omfDir, 'static', 'schedules.glm')) as schedFile:
-			newFeeder["attachments"] = {"schedules.glm":schedFile.read()}
-		with locked_open(feeder_path, 'w') as f: # Use 'w' mode because we're creating a new .omd file according to feederName
-			json.dump(newFeeder, f, indent=4)
-		os.remove(pid_filepath)
-		feederNum = request.form.get("feederNum", 1)
-		removeFeeder(owner, modelName, feederNum)
 		writeToInput(modelDir, feederName, 'feederName' + str(feederNum))
 	except Exception: 
 		filepath = os.path.join(_omfDir, 'data', 'Model', owner, modelName, 'gridError.txt')
@@ -1474,11 +1477,6 @@ def renameNetwork(owner, modelName, oldName, networkName, networkNum):
 	writeToInput(model_dir, networkName, 'networkName' + str(networkNum))
 	return 'Success'
 
-
-@app.route("/removeFeeder/<owner>/<modelName>/<feederNum>", methods=["GET", "POST"])
-@app.route("/removeFeeder/<owner>/<modelName>/<feederNum>/<feederName>", methods=["GET", "POST"])
-@flask_login.login_required
-@write_permission_function
 def removeFeeder(owner, modelName, feederNum, feederName=None):
 	'''Remove a feeder from input data.'''
 	try:
@@ -1497,6 +1495,13 @@ def removeFeeder(owner, modelName, feederNum, feederName=None):
 	except:
 		return 'Failed'
 
+@app.route("/removeFeeder/<owner>/<modelName>/<feederNum>", methods=["GET", "POST"])
+@app.route("/removeFeeder/<owner>/<modelName>/<feederNum>/<feederName>", methods=["GET", "POST"])
+@flask_login.login_required
+@write_permission_function
+def removeFeederRequest(owner, modelName, feederNum, feederName=None):
+	''' Remove feeder from web.'''
+	removeFeeder(owner, modelName, feederNum, feederName=None)
 
 @app.route("/loadFeeder/<frfeederName>/<frmodelName>/<modelName>/<feederNum>/<frUser>/<owner>", methods=["GET", "POST"])
 @flask_login.login_required
