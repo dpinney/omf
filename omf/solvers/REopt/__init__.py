@@ -50,7 +50,19 @@ def runResilience(runID, outputPath):
 		logger.log.info("Saved results to {}".format(outputPath))
 
 def _test():
-	run('Scenario_test_POST.json', 'results.json')
+	run('Scenario_POST13.json', 'results_S13.json')
+
+	with open('results_S13.json') as jsonFile:
+		results = json.load(jsonFile)
+		
+	test_ID = results['outputs']['Scenario']['run_uuid']
+	print("PV size_kw:", results['outputs']['Scenario']['Site']['PV']['size_kw'])
+	print("Storage size_kw:", results['outputs']['Scenario']['Site']['Storage']['size_kw'])
+	print("Storage size_kwh:", results['outputs']['Scenario']['Site']['Storage']['size_kwh'])
+	print("Wind size_kw:", results['outputs']['Scenario']['Site']['Wind']['size_kw'])
+	print("Generator fuel_used_gal:", results['outputs']['Scenario']['Site']['Generator']['fuel_used_gal'])
+	print("Generator size_kw:", results['outputs']['Scenario']['Site']['Generator']['size_kw'])
+	runResilience(test_ID, 'resultsResilience_S13.json')
 
 if __name__ == '__main__':
 	_test()
