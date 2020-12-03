@@ -996,35 +996,35 @@ def dssImport(owner):
 
 def dssImportBackground(owner, modelName, feederName, feederNum):
 	''' Function to run in the background for OpenDSS import. '''
-	# try:
-	feeder_path, dss_path, modelDir, pid_filepath = [
-		os.path.join(_omfDir, 'data', 'Model', owner, modelName, filename) for filename in [feederName + '.omd', feederName + '.dss', '', 'ZPID.txt']
-	]
-	with locked_open(pid_filepath, 'w') as pid_file:
-		pid_file.write(str(os.getpid()))
-	newFeeder = dict(**feeder.newFeederWireframe)
-	newFeeder['syntax'] = 'DSS'
-	dss_tree = dssConvert.dssToTree(dss_path)
-	glm_tree = dssConvert.evilDssTreeToGldTree(dss_tree)
-	newFeeder["tree"] = glm_tree
-	if not distNetViz.contains_valid_coordinates(newFeeder["tree"]):
-		distNetViz.insert_coordinates(newFeeder["tree"])
-	with locked_open(feeder_path, 'w') as f: # Use 'w' mode because we're creating a new .omd file according to feederName
-		json.dump(newFeeder, f, indent=4)
-	os.remove(pid_filepath)
-	# Remove a feeder from input data.
-	allInput = get_model_metadata(owner, modelName)
-	oldFeederName = str(allInput.get('feederName'+str(feederNum)))
-	os.remove(os.path.join(modelDir, oldFeederName +'.omd'))
-	allInput.pop("feederName" + str(feederNum))
-	with locked_open(os.path.join(modelDir, 'allInputData.json'), 'r+') as f:
-		f.truncate(0)
-		json.dump(allInput, f, indent=4)
-	writeToInput(modelDir, feederName, 'feederName' + str(feederNum))
-	# except Exception: 
-	# 	filepath = os.path.join(_omfDir, 'data', 'Model', owner, modelName, 'gridError.txt')
-	# 	with locked_open(filepath, 'w') as errorFile:
-	# 		errorFile.write('glmError')
+	try:
+		feeder_path, dss_path, modelDir, pid_filepath = [
+			os.path.join(_omfDir, 'data', 'Model', owner, modelName, filename) for filename in [feederName + '.omd', feederName + '.dss', '', 'ZPID.txt']
+		]
+		with locked_open(pid_filepath, 'w') as pid_file:
+			pid_file.write(str(os.getpid()))
+		newFeeder = dict(**feeder.newFeederWireframe)
+		newFeeder['syntax'] = 'DSS'
+		dss_tree = dssConvert.dssToTree(dss_path)
+		glm_tree = dssConvert.evilDssTreeToGldTree(dss_tree)
+		newFeeder["tree"] = glm_tree
+		if not distNetViz.contains_valid_coordinates(newFeeder["tree"]):
+			distNetViz.insert_coordinates(newFeeder["tree"])
+		with locked_open(feeder_path, 'w') as f: # Use 'w' mode because we're creating a new .omd file according to feederName
+			json.dump(newFeeder, f, indent=4)
+		os.remove(pid_filepath)
+		# Remove a feeder from input data.
+		allInput = get_model_metadata(owner, modelName)
+		oldFeederName = str(allInput.get('feederName'+str(feederNum)))
+		os.remove(os.path.join(modelDir, oldFeederName +'.omd'))
+		allInput.pop("feederName" + str(feederNum))
+		with locked_open(os.path.join(modelDir, 'allInputData.json'), 'r+') as f:
+			f.truncate(0)
+			json.dump(allInput, f, indent=4)
+		writeToInput(modelDir, feederName, 'feederName' + str(feederNum))
+	except Exception: 
+		filepath = os.path.join(_omfDir, 'data', 'Model', owner, modelName, 'gridError.txt')
+		with locked_open(filepath, 'w') as errorFile:
+			errorFile.write('glmError')
 
 
 def gridlabImportBackground(owner, modelName):
