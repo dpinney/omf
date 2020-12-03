@@ -21,6 +21,7 @@ except:
 import omf
 from omf import (models, feeder, network, milToGridlab, cymeToGridlab, weather, anonymization, distNetViz, calibrate, omfStats, loadModeling,
 	loadModelingAmi, geo, comms)
+from omf.solvers.opendss import dssConvert
 
 app = Flask("web")
 Compress(app)
@@ -972,10 +973,62 @@ def gridlabdImport(owner):
 	importProc.start()
 	return 'Success'
 
+@app.route("/opendssImport/<owner>", methods=["POST"])
+@flask_login.login_required
+@write_permission_function
+def dssImport(owner):
+	'''This function is used for opendss importing in distnetviz'''
+	modelName = request.form.get("modelName","")
+	error_path, modelDir = [os.path.join(_omfDir, 'data', 'Model', owner, modelName, filename) for filename in ('gridError.txt', '')]
+	# Delete exisitng .std and .seq, .glm files to not clutter model file
+	for filename in safeListdir(modelDir):
+		if filename.endswith(".dss"):
+			os.remove(os.path.join(modelDir, filename))
+	if os.path.isfile(error_path):
+		os.remove(error_path)
+	feederName = str(request.form.get("feederNameOpendss",""))
+	feederNum = request.form.get("feederNum", 1)
+	dss_path = os.path.join(_omfDir, 'data', 'Model', owner, modelName, feederName + '.dss')
+	request.files['dssFile'].save(dss_path)
+	importProc = Process(target=dssImportBackground, args=[owner, modelName, feederName, feederNum])
+	importProc.start()
+	return 'Success'
+
+def dssImportBackground(owner, modelName, feederName, feederNum):
+	''' Function to run in the background for OpenDSS import. '''
+	# try:
+	feeder_path, dss_path, modelDir, pid_filepath = [
+		os.path.join(_omfDir, 'data', 'Model', owner, modelName, filename) for filename in [feederName + '.omd', feederName + '.dss', '', 'ZPID.txt']
+	]
+	with locked_open(pid_filepath, 'w') as pid_file:
+		pid_file.write(str(os.getpid()))
+	newFeeder = dict(**feeder.newFeederWireframe)
+	newFeeder['syntax'] = 'DSS'
+	dss_tree = dssConvert.dssToTree(dss_path)
+	glm_tree = dssConvert.evilDssTreeToGldTree(dss_tree)
+	newFeeder["tree"] = glm_tree
+	if not distNetViz.contains_valid_coordinates(newFeeder["tree"]):
+		distNetViz.insert_coordinates(newFeeder["tree"])
+	with locked_open(feeder_path, 'w') as f: # Use 'w' mode because we're creating a new .omd file according to feederName
+		json.dump(newFeeder, f, indent=4)
+	os.remove(pid_filepath)
+	# Remove a feeder from input data.
+	allInput = get_model_metadata(owner, modelName)
+	oldFeederName = str(allInput.get('feederName'+str(feederNum)))
+	os.remove(os.path.join(modelDir, oldFeederName +'.omd'))
+	allInput.pop("feederName" + str(feederNum))
+	with locked_open(os.path.join(modelDir, 'allInputData.json'), 'r+') as f:
+		f.truncate(0)
+		json.dump(allInput, f, indent=4)
+	writeToInput(modelDir, feederName, 'feederName' + str(feederNum))
+	# except Exception: 
+	# 	filepath = os.path.join(_omfDir, 'data', 'Model', owner, modelName, 'gridError.txt')
+	# 	with locked_open(filepath, 'w') as errorFile:
+	# 		errorFile.write('glmError')
+
 
 def gridlabImportBackground(owner, modelName):
-#def gridlabImportBackground(owner, modelName, feederName, feederNum, glmString):
-	''' Function to run in the background for Milsoft import. '''
+	''' Function to run in the background for Gridlabd import. '''
 	try:
 		feederName = str(request.form.get("feederNameG",""))
 		feeder_path, glm_path, modelDir, pid_filepath = [
