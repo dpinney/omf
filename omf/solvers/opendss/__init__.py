@@ -134,11 +134,12 @@ def newQstsPlot(filePath, stepSizeInMinutes, numberOfSteps, keepAllFiles=False, 
 		elif name.startswith('moncapacitor-'):
 			df['Type'] = 'Capacitor'
 			df['Name'] = name
-			df.rename({'Step_1': 'Tap(pu)'}, inplace=True) #TODO: fix this renaming.
+			df = df.rename({' Step_1 ': 'Tap(pu)'}, axis='columns') #HACK: rename to match regulator tap name
 			all_control_df = pd.concat([all_control_df, df], ignore_index=True, sort=False)
 		elif name.startswith('montransformer-'):
 			df['Type'] = 'Transformer'
 			df['Name'] = name
+			df = df.rename({' Tap (pu)': 'Tap(pu)'}, axis='columns') #HACK: rename to match cap tap name
 			all_control_df = pd.concat([all_control_df, df], ignore_index=True, sort=False)
 		if not keepAllFiles:
 			os.remove(csv_path)
