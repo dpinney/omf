@@ -506,6 +506,61 @@ def getVoltages(dssFilePath, keep_output=False, outdir='', output_filename='volt
 		os.remove(voltfile)
 	return volts
 
+def applyCnxns(tree):
+	'''Gathers and applies connection information to dss lines and buses.'''
+	relevantObjs = ['capacitor','line','transformer','load','reactor','monitor','energymeter','generator','pvsystem','vsource','relay','fuse']
+	# make a mapping between an object's name and its index in tree
+	name2key = {v.get('bus', None):i for i,v in enumerate(tree) if v.get('!CMD','NC')=='setbusxy'}
+	name2key.update({v.get('object', None):i for i,v in enumerate(tree) if v.get('!CMD','NC')=='new'})
+	for obj in tree:
+		objid = obj.get('object','None')
+		if objid.split('.')[0] not in relevantObjs:
+			continue
+		cnxns = []
+		for k,v in obj.items():
+			if k == 'buses':
+				bb = v
+				bb = bb.replace(']','')
+				bb = bb.replace('[','')
+				bb = bb.split(',')
+				for b in bb:
+					cnxns.append(b.split('.')[0])
+			elif k in ['bus','bus1','bus2']:
+				cnxns.append(v.split('.')[0])
+			elif k in ['element','monitoredobj']:
+				cnxns.append(v)
+		for cnxn in cnxns:
+			if cnxn in name2key:
+				# get existing connections, append, and reassign to tree
+				treebusobj = tree[name2key[cnxn]]
+				if '!CNXNS' in treebusobj:
+					bb = treebusobj['!CNXNS']
+					treebusobj['!CNXNS'] = bb.replace(']', ',' + objid + ']')
+				else:
+					treebusobj['!CNXNS'] = '[' + objid + ']'
+			elif len(cnxn.split('.'))==1:
+				# make a new entry in the tree and update name2key
+				from collections import OrderedDict 
+				newobj = OrderedDict([
+					('!CMD','new'),
+					('object',cnxn),
+					('x','0'),
+					('y','0'),
+					('!CNXNS','[' + objid + ']')
+					])
+				tree.append(newobj)
+				newdict = {cnxn:len(tree)-1}
+				name2key.update(newdict)
+			else:
+				print('opendss.applyCnxns() reports an unprocessed item: %s\n'%(cnxn))
+	return tree
+
+def removeCnxns(tree):
+	for i,obj in enumerate(tree.copy()):
+		if obj.get('!CNXNS','NCX')!='NCX':
+			del tree[i]['!CNXNS']
+	return tree
+
 def _mergeContigLinesOnce(tree):
 	#TODO refactor this code for performance and readability. O(n^2)=gross.
 	
