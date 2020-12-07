@@ -132,7 +132,7 @@ def treeToDss(treeObject, outputPath):
 	for ob in treeObject:
 		line = ob['!CMD']
 		for key in ob:
-			if key not in ['!CMD']:
+			if not key.startswith('!'):
 				line = f"{line} {key}={ob[key]}"
 		outFile.write(line + '\n')
 	outFile.close()
@@ -610,7 +610,7 @@ def _tests():
 	for fname in FNAMES:
 		print('!!!!!!!!!!!!!! ',fname,' !!!!!!!!!!!!!!')
 		# Roundtrip conversion test
-		errorLimit = 0.03
+		errorLimit = 0.001
 		startvolts = getVoltages(fname, keep_output=False)
 		dsstreein = dssToTree(fname)
 		# pp([dict(x) for x in dsstreein]) # DEBUG
@@ -632,7 +632,7 @@ def _tests():
 		percSumm, diffSumm = voltageCompare(startvolts, endvolts, saveascsv=False, with_plots=False)
 		maxPerrM = [percSumm.loc['RMSPE',c] for c in percSumm.columns if c.lower().startswith(' magnitude')]
 		maxPerrM = pd.Series(maxPerrM).max()
-		print(maxPerrM) # DEBUG
+		#print(maxPerrM) # DEBUG
 		assert abs(maxPerrM) < errorLimit*100, 'The average percent error in voltage magnitude is %s, which exceeeds the threshold of %s%%.'%(maxPerrM,errorLimit*100)
 
 	# Deprecated tests section
