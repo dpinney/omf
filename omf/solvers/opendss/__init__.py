@@ -362,7 +362,7 @@ def capacityPlot(filePath):
 	plt.savefig(dssFileLoc + '/Capacity Profile.png')
 	plt.clf()
 	
-def voltageCompare(in1, in2, keep_output=False, outdir='', outfilebase='voltageCompare'):
+def voltageCompare(in1, in2, saveascsv=False, with_plots=False, outdir='', outfilebase='voltageCompare'):
 	'''Compares two instances of the information provided by the 'Export voltages' opendss command and outputs 
 	the maximum error (% and absolute difference) encountered for any value compared. If the 'keep_output' flag is set to 'True', also 
 	outputs a file that describes the maximum, average, and minimum error encountered for each column. Use the 
@@ -382,18 +382,17 @@ def voltageCompare(in1, in2, keep_output=False, outdir='', outfilebase='voltageC
 		df.drop(labels='Bus', axis=1, inplace=True)
 		df = df.astype(float, copy=True)
 		memins.append(df)
-
 	# Which has more rows? We'll define the larger one to be 'avolts'. This is also considered the 'theoretical' set.
 	foob = 0 if len(memins[0].index) > len(memins[1].index) else 1
 	avolts = memins[foob]
 	foob = 1-foob # returns 0 if foob==1 ; returns 1 if foob==0
 	bvolts = memins[foob]
-	
 	# Match columns to rows, perform needed math, and save into resultErr.
 	cols = avolts.columns
 	cols = [c for c in cols if (not c.startswith(' pu')) and (not c.startswith(' Node'))]
 	resultErrD = pd.DataFrame(index=avolts.index, columns=cols)
 	resultErrP = resultErrD.copy()
+	# TODO can this code block be sped up?
 	for col in cols:
 		for row in avolts.index:
 			if not row in bvolts.index:
@@ -402,7 +401,6 @@ def voltageCompare(in1, in2, keep_output=False, outdir='', outfilebase='voltageC
 			in2 = bvolts.loc[row,col]
 			resultErrP.loc[row,col] = 100*(in1 - in2)/in1 if in1!=0 else 0
 			resultErrD.loc[row,col] = in1 - in2
-
 	# Construct results
 	resultSummP = pd.DataFrame(index=['Max %Err', 'Avg %Err', 'Min %Err', 'RMSPE'], columns=cols)
 	resultSummD = pd.DataFrame(index=['Max Diff', 'Avg Diff', 'Min Diff', 'RMSE'], columns=cols)
@@ -411,13 +409,11 @@ def voltageCompare(in1, in2, keep_output=False, outdir='', outfilebase='voltageC
 		resultSummP.loc['Avg %Err',c] = resultErrP.loc[:,c].mean(skipna=True)
 		resultSummP.loc['Min %Err',c] = resultErrP.loc[:,c].min(skipna=True)
 		resultSummP.loc['RMSPE',c] = math.sqrt((resultErrP.loc[:,c]**2).mean())
-
 		resultSummD.loc['Max Diff',c] = resultErrD.loc[:,c].max(skipna=True)
 		resultSummD.loc['Avg Diff',c] = resultErrD.loc[:,c].mean(skipna=True)
 		resultSummD.loc['Min Diff',c] = resultErrD.loc[:,c].min(skipna=True)
 		resultSummD.loc['RMSE',c] = math.sqrt((resultErrD.loc[:,c]**2).mean())
-	
-	if keep_output:
+	if saveascsv:
 		outroot = outdir + '/' + outfilebase
 		resultErrP.dropna(inplace=True)
 		resultSummP.to_csv(outroot + '_Perc.csv', header=True, index=True, mode='w')
@@ -428,7 +424,7 @@ def voltageCompare(in1, in2, keep_output=False, outdir='', outfilebase='voltageC
 		resultSummD.to_csv(outroot + '_Diff.csv', header=True, index=True, mode='w')
 		emptyline.to_csv(outroot + '_Diff.csv', header=False, index=True, mode='a')
 		resultErrD.to_csv(outroot + '_Diff.csv', header=True, index=True, mode='a')
-
+	if with_plots:
 		# Produce boxplots to visually analyze the residuals
 		from matplotlib.pyplot import boxplot
 		magcols = [c for c in cols if c.lower().startswith(' magnitude')]
@@ -443,7 +439,6 @@ def voltageCompare(in1, in2, keep_output=False, outdir='', outfilebase='voltageC
 		axM.boxplot(bxpltM)
 		figM.savefig(outroot + '_boxplot_Mag.png', bbox_inches='tight')
 		plt.close()
-		
 		angcols = [c for c in cols if c.lower().startswith(' angle')]
 		bxpltAdf = pd.DataFrame(data=resultErrD[angcols],columns=angcols)
 		bxpltA = []
@@ -456,27 +451,23 @@ def voltageCompare(in1, in2, keep_output=False, outdir='', outfilebase='voltageC
 		axA.boxplot(bxpltA)
 		figA.savefig(outroot + '_boxplot_Ang.png', bbox_inches='tight')
 		plt.close()
-
 		for c in cols:
 			# construct a dataframe of busname, input, output, and residual
 			dat = pd.concat([avolts[c],bvolts[c],resultErrP[c],resultErrD[c]], axis=1,join='inner')
 			dat.columns = ['buses+','buses-','residuals_P','residuals_D'] # buses+ denotes the circuit with more buses; buses- denotes the one with fewer
 			dat = dat.sort_values(by=['buses-','buses+'], ascending=True, na_position='first')
-			
 			# Produce plot of residuals
 			#pltlenR = math.ceil(len(dat['residuals_P'])/2)
 			#figR, axR = plt.subplots(figsize=(pltlenR,12))
 			#axR.plot(dat['buses-'], 'k.', alpha=0.15)
 			figR, axR = plt.subplots()
 			axR.plot(dat['buses-'], dat['residuals_P'], 'k.', alpha=0.15)
-			
 			axR.set_title('Plot of Residuals: ' + c)
 			#plt.xticks(rotation=45)
 			axR.set_xlabel('Value of ' + c + ' for circuit with fewer buses')
 			axR.set_ylabel('Value of Residual')
 			figR.savefig(outroot + '_residualplot_' + c +'_.png', bbox_inches='tight')
 			plt.close()
-
 			# Produce scatter plots
 			figS, axS = plt.subplots()
 			axS.set_title('Scatter Plot: ' + c)
@@ -804,10 +795,7 @@ def _tests():
 		involts = getVoltages(ckt, keep_output=True, outdir=outdir, output_filename=involts_loc)
 		outvolts_loc = outckt_loc[:-4] + '_volts.dss'
 		outvolts = getVoltages(outckt_loc, keep_output=True, outdir=outdir, output_filename=outvolts_loc)
-		#assert voltageCompare(voltpath, voltpath, keep_output=True, output_filename=outpath) <= errorLimit, 'The error between the compared files exceeds the allowable limit of %s%%.'%(errlim*100)
-		#assert voltageCompare(voltsdf, voltsdf, keep_output=True, output_filename=outpath) <= errorLimit, 'The error between the compared files exceeds the allowable limit of %s%%.'%(errlim*100)
-		#assert voltageCompare(voltpath, voltsdf, keep_output=True, output_filename=outpath) <= errorLimit, 'The error between the compared files exceeds the allowable limit of %s%%.'%(errlim*100)
-		rsumm_P, rsumm_D = voltageCompare(involts, outvolts, keep_output=True, outdir=outdir, outfilebase=ckt[:-4])		
+		rsumm_P, rsumm_D = voltageCompare(involts, outvolts, saveascsv=True, with_plots=False, outdir=outdir, outfilebase=ckt[:-4])		
 		maxPerrM = [rsumm_P.loc['RMSPE',c] for c in rsumm_P.columns if c.lower().startswith(' magnitude')]
 		maxPerrM = pd.Series(maxPerrM).max()
 		maxPerrA = [rsumm_P.loc['RMSPE',c] for c in rsumm_P.columns if c.lower().startswith(' angle')]

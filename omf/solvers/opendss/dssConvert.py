@@ -629,7 +629,7 @@ def _tests():
 		treeToDss(dsstreeout2, outpath)
 		endvolts = getVoltages(outpath, keep_output=False)
 		os.remove(outpath)
-		percSumm, diffSumm = voltageCompare(startvolts, endvolts, keep_output=False)
+		percSumm, diffSumm = voltageCompare(startvolts, endvolts, saveascsv=False, with_plots=False)
 		maxPerrM = [percSumm.loc['RMSPE',c] for c in percSumm.columns if c.lower().startswith(' magnitude')]
 		maxPerrM = pd.Series(maxPerrM).max()
 		print(maxPerrM) # DEBUG
