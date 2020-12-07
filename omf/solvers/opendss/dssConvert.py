@@ -605,7 +605,7 @@ def _createAndCompareTestFile(inFile, userOutFile=''):
 def _tests():
 	from omf.solvers.opendss import getVoltages, voltageCompare
 	import pandas as pd
-	FNAMES =  ['ieee37.clean.dss', 'ieee123_solarRamp.clean.dss', 'iowa240.clean.dss', 'ieeeLVTestCase.clean.dss', 'ieee8500-unbal_no_fuses.clean.dss', 'ieee8500-unbal_with_fuses.clean.dss']
+	FNAMES =  ['ieee37.clean.dss', 'ieee123_solarRamp.clean.dss', 'iowa240.clean.dss', 'ieeeLVTestCase.clean.dss', 'ieee8500-unbal_no_fuses.clean.dss']
 	
 	for fname in FNAMES:
 		print('!!!!!!!!!!!!!! ',fname,' !!!!!!!!!!!!!!')

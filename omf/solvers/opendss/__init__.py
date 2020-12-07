@@ -768,23 +768,23 @@ def rollUpLoads(tree):
 		# add to removed id's list
 	return
 
-
 def _tests():
-	from dssConvert import dssToTree, distNetViz, evilDssTreeToGldTree, treeToDss
+	from dssConvert import dssToTree, distNetViz, evilDssTreeToGldTree, treeToDss, evilGldTreeToDssTree
 	fpath = ['ieee37.clean.dss','ieee123_solarRamp.clean.dss','iowa240.clean.dss','ieeeLVTestCase.clean.dss','ieee8500-unbal_no_fuses.clean.dss']
 
 	for ckt in fpath:
-		
-		# Tests for mergeContigLines, voltageCompare, getVoltages, and runDSS
+		print('!!!!!!!!!!!!!! ',ckt,' !!!!!!!!!!!!!!')
+		# Test for mergeContigLines, voltageCompare, getVoltages, and runDSS.
 		tree = dssToTree(ckt)
 		#gldtree = evilDssTreeToGldTree(tree) # DEBUG
 		#distNetViz.viz_mem(gldtree, open_file=True, forceLayout=True) # DEBUG
 		oldsz = len(tree)
 		tree = mergeContigLines(tree)
-		#tree = rollUpLoads(tree)
+		#tree = rollUpLoads(tree) # This currently fails
 		newsz = len(tree)
 		#gldtree = evilDssTreeToGldTree(tree) # DEBUG
 		#distNetViz.viz_mem(gldtree, open_file=True, forceLayout=True) # DEBUG
+		#tree = evilGldTreeToDssTree(gldtree) # DEBUG
 		outckt_loc = ckt[:-4] + '_mergeContigLines.dss'
 		treeToDss(tree, outckt_loc)
 
