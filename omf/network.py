@@ -310,11 +310,11 @@ def _tests():
 	keyLen = len(networkJson.keys())
 	print('Parsed MAT file with %s buses, %s generators, and %s branches.'%(len(networkJson['bus']),len(networkJson['gen']),len(networkJson['branch'])))
 	# Parse raw to dictionary.
-	networkNameRaw = 'GO500v2_perfect_0'
-	netPathRaw = os.path.join(os.path.dirname(__file__), 'solvers', 'matpower7.0', 'data', 'test', networkNameRaw + '.raw')
-	networkJsonRaw = parseRaw(netPathRaw, filePath=True)
-	keyLenRaw = len(networkJsonRaw.keys())
-	print('Parsed RAW file with %s buses, %s generators, and %s branches.'%(len(networkJsonRaw['bus']),len(networkJsonRaw['gen']),len(networkJsonRaw['branch'])))
+	# networkNameRaw = 'GO500v2_perfect_0'
+	# netPathRaw = os.path.join(os.path.dirname(__file__), 'solvers', 'matpower7.0', 'data', 'test', networkNameRaw + '.raw')
+	# networkJsonRaw = parseRaw(netPathRaw, filePath=True)
+	# keyLenRaw = len(networkJsonRaw.keys())
+	# print('Parsed RAW file with %s buses, %s generators, and %s branches.'%(len(networkJsonRaw['bus']),len(networkJsonRaw['gen']),len(networkJsonRaw['branch'])))
 	# Use python nxgraph to add lat/lon to .omt.json.
 	nxG = netToNxGraph(networkJson)
 	networkJson = latlonToNet(nxG, networkJson)

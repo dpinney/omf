@@ -360,6 +360,8 @@
                 fill: rgb(128,128,128); /* gray */
             }
             .house { fill: rgb(0,0,255); } /* blue */
+            .load { fill: rgb(0,0,255); } /* blue */
+            .generator {  fill: rgb(255,0,0); } /* red */
             .triplex_meter { fill:rgb(255,165,0); } /* orange */
             .underground_line { stroke: rgb(128,128,128);} 
             .transformer { stroke:rgb(255,165,0); }
@@ -442,6 +444,7 @@
                             <li data-web="windmil" class="not4dss">Windmil conversion...</li>
                             <li data-web="gridlabd" class="not4dss">GridLAB-D conversion...</li>
                             <li data-web="cyme" class="not4dss">CYMDIST conversion...</li>
+                            <li data-web="opendss" class="not4gridlabd">OpenDSS conversion...</li>
                             <li data-web="map">View on map</li>
                             {% else %}
                             <li>View raw data</li>
@@ -570,6 +573,37 @@
                         </div>
                     </form>
                 </div> 
+            </div>
+            <div id="opendssModal" class="modal" style="display: none">
+                <div class="modalContent">
+                    <!--I assume this is supposed to replace THIS feeder with the gridlabd upload. Therefore, uniqObjName with {{thisOwner}} is correct.-->
+                    <form onsubmit="submitForm({formId:'opendssForm', pollUrl:'/checkConversion/{{thisModelName}}/{{thisOwner}}', inputId:'feederNameOpendss'}); return false;"
+                    action="/opendssImport/{{thisOwner}}" id="opendssForm">
+                        <input type="hidden" name="_csrf_token" value="{{csrf_token()}}"/>
+                        <input type="hidden" id="feederNum" name="feederNum" value="{{thisFeederNum}}"/>
+                        <input type="hidden" id="modelName" name="modelName" value="{{thisModelName}}"/>
+                        <table>
+                            <tbody>
+                                <tr><th colspan="2">OpenDSS Conversion</th></tr>
+                                <tr>
+                                    <td><label for="feederNameOpendss">Circuit Name</label></td>
+                                    <td>
+                                        <!-- TODO: add better validation than just the "required" attribute-->
+                                        <input type="text" required id="feederNameOpendss" name="feederNameOpendss" class="modalInput"/>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>Data File (.dss)</td>
+                                    <td><input type="file" required id="dssFile" name="dssFile" accept=".dss" class="modalInput"/></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                        <div class="modalContentButtons">
+                            <button type="button" data-buttonfunction="toggle">Close</button>
+                            <button type="submit">Import</button>
+                        </div>
+                    </form>
+                </div>
             </div>
             <div id="gridlabdModal" class="modal" style="display: none">
                 <div class="modalContent">
@@ -2494,6 +2528,7 @@ function addModelOwnerHandlers(interfaceIsStatic=true) {
         fileMenu.querySelector("li[data-web='new']").addEventListener("click", () => toggleDisplay(document.getElementById("blankFeederModal")));
         fileMenu.querySelector("li[data-web='windmil']").addEventListener("click", () => toggleDisplay(document.getElementById("milsoftModal")));
         fileMenu.querySelector("li[data-web='gridlabd']").addEventListener("click", () => toggleDisplay(document.getElementById("gridlabdModal")));
+        fileMenu.querySelector("li[data-web='opendss']").addEventListener("click", () => toggleDisplay(document.getElementById("opendssModal")));
         fileMenu.querySelector("li[data-web='cyme']").addEventListener("click", () => toggleDisplay(document.getElementById("cymeModal")));
         // Fill feeder lists
         fillFeederList(document.getElementById("publicFeederList"), gPublicFeeders, "public", gThisModelName, gThisFeederName);

@@ -1,0 +1,1977 @@
+! To be used with the files located in the 'Daily_1min_100profiles' folder of the ieeeLVTestCase sourcefiles,
+! retrievable from https://sourceforge.net/p/electricdss/code/HEAD/tree/trunk/Version8/Distrib/IEEETestCases/LVTestCase/
+! The entire 'Daily_1min_100profiles' folder should be placed into the same directory as this file.
+
+Clear
+New object=Circuit.lvtest
+
+
+! Redirect Vsource.dss
+Edit object=Vsource.source bus1=sourcebus.1.2.3 basekv=11 pu=1.05 Isc3=3000 Isc1=5
+! Redirect LineCode.DSS
+New object=LineCode.2c_007 nphases=3 r1=3.97 x1=0.099 r0=3.97 x0=0.099 C1=0 C0=0 units=km
+New object=LineCode.2c_0225 nphases=3 r1=1.257 x1=0.085 r0=1.257 x0=0.085 C1=0 C0=0 units=km
+New object=LineCode.2c_16 nphases=3 r1=1.15 x1=0.088 r0=1.2 x0=0.088 C1=0 C0=0 units=km
+New object=LineCode.35_sac_xsc nphases=3 r1=0.868 x1=0.092 r0=0.76 x0=0.092 C1=0 C0=0 units=km
+New object=LineCode.4c_06 nphases=3 r1=0.469 x1=0.075 r0=1.581 x0=0.091 C1=0 C0=0 units=km
+New object=LineCode.4c_1 nphases=3 r1=0.274 x1=0.073 r0=0.959 x0=0.079 C1=0 C0=0 units=km
+New object=LineCode.4c_35 nphases=3 r1=0.089 x1=0.0675 r0=0.319 x0=0.076 C1=0 C0=0 units=km
+New object=LineCode.4c_185 nphases=3 r1=0.166 x1=0.068 r0=0.58 x0=0.078 C1=0 C0=0 units=km
+New object=LineCode.4c_70 nphases=3 r1=0.446 x1=0.071 r0=1.505 x0=0.083 C1=0 C0=0 units=km
+New object=LineCode.4c_95_sac_xc nphases=3 r1=0.322 x1=0.074 r0=0.804 x0=0.093 C1=0 C0=0 units=km
+! Redirect Loadshape.DSS
+New object=Loadshape.Shape_1 npts=1440 minterval=1 mult=(file=Daily_1min_100profiles\Load_profile_1.txt) useactual=true
+New object=Loadshape.Shape_2 npts=1440 minterval=1 mult=(file=Daily_1min_100profiles\Load_profile_2.txt) useactual=true
+New object=Loadshape.Shape_3 npts=1440 minterval=1 mult=(file=Daily_1min_100profiles\Load_profile_3.txt) useactual=true
+New object=Loadshape.Shape_4 npts=1440 minterval=1 mult=(file=Daily_1min_100profiles\Load_profile_4.txt) useactual=true
+New object=Loadshape.Shape_5 npts=1440 minterval=1 mult=(file=Daily_1min_100profiles\Load_profile_5.txt) useactual=true
+New object=Loadshape.Shape_6 npts=1440 minterval=1 mult=(file=Daily_1min_100profiles\Load_profile_6.txt) useactual=true
+New object=Loadshape.Shape_7 npts=1440 minterval=1 mult=(file=Daily_1min_100profiles\Load_profile_7.txt) useactual=true
+New object=Loadshape.Shape_8 npts=1440 minterval=1 mult=(file=Daily_1min_100profiles\Load_profile_8.txt) useactual=true
+New object=Loadshape.Shape_9 npts=1440 minterval=1 mult=(file=Daily_1min_100profiles\Load_profile_9.txt) useactual=true
+New object=Loadshape.Shape_10 npts=1440 minterval=1 mult=(file=Daily_1min_100profiles\Load_profile_10.txt) useactual=true
+New object=Loadshape.Shape_11 npts=1440 minterval=1 mult=(file=Daily_1min_100profiles\Load_profile_11.txt) useactual=true
+New object=Loadshape.Shape_12 npts=1440 minterval=1 mult=(file=Daily_1min_100profiles\Load_profile_12.txt) useactual=true
+New object=Loadshape.Shape_13 npts=1440 minterval=1 mult=(file=Daily_1min_100profiles\Load_profile_13.txt) useactual=true
+New object=Loadshape.Shape_14 npts=1440 minterval=1 mult=(file=Daily_1min_100profiles\Load_profile_14.txt) useactual=true
+New object=Loadshape.Shape_15 npts=1440 minterval=1 mult=(file=Daily_1min_100profiles\Load_profile_15.txt) useactual=true
+New object=Loadshape.Shape_16 npts=1440 minterval=1 mult=(file=Daily_1min_100profiles\Load_profile_16.txt) useactual=true
+New object=Loadshape.Shape_17 npts=1440 minterval=1 mult=(file=Daily_1min_100profiles\Load_profile_17.txt) useactual=true
+New object=Loadshape.Shape_18 npts=1440 minterval=1 mult=(file=Daily_1min_100profiles\Load_profile_18.txt) useactual=true
+New object=Loadshape.Shape_19 npts=1440 minterval=1 mult=(file=Daily_1min_100profiles\Load_profile_19.txt) useactual=true
+New object=Loadshape.Shape_20 npts=1440 minterval=1 mult=(file=Daily_1min_100profiles\Load_profile_20.txt) useactual=true
+New object=Loadshape.Shape_21 npts=1440 minterval=1 mult=(file=Daily_1min_100profiles\Load_profile_21.txt) useactual=true
+New object=Loadshape.Shape_22 npts=1440 minterval=1 mult=(file=Daily_1min_100profiles\Load_profile_22.txt) useactual=true
+New object=Loadshape.Shape_23 npts=1440 minterval=1 mult=(file=Daily_1min_100profiles\Load_profile_23.txt) useactual=true
+New object=Loadshape.Shape_24 npts=1440 minterval=1 mult=(file=Daily_1min_100profiles\Load_profile_24.txt) useactual=true
+New object=Loadshape.Shape_25 npts=1440 minterval=1 mult=(file=Daily_1min_100profiles\Load_profile_25.txt) useactual=true
+New object=Loadshape.Shape_26 npts=1440 minterval=1 mult=(file=Daily_1min_100profiles\Load_profile_26.txt) useactual=true
+New object=Loadshape.Shape_27 npts=1440 minterval=1 mult=(file=Daily_1min_100profiles\Load_profile_27.txt) useactual=true
+New object=Loadshape.Shape_28 npts=1440 minterval=1 mult=(file=Daily_1min_100profiles\Load_profile_28.txt) useactual=true
+New object=Loadshape.Shape_29 npts=1440 minterval=1 mult=(file=Daily_1min_100profiles\Load_profile_29.txt) useactual=true
+New object=Loadshape.Shape_30 npts=1440 minterval=1 mult=(file=Daily_1min_100profiles\Load_profile_30.txt) useactual=true
+New object=Loadshape.Shape_31 npts=1440 minterval=1 mult=(file=Daily_1min_100profiles\Load_profile_31.txt) useactual=true
+New object=Loadshape.Shape_32 npts=1440 minterval=1 mult=(file=Daily_1min_100profiles\Load_profile_32.txt) useactual=true
+New object=Loadshape.Shape_33 npts=1440 minterval=1 mult=(file=Daily_1min_100profiles\Load_profile_33.txt) useactual=true
+New object=Loadshape.Shape_34 npts=1440 minterval=1 mult=(file=Daily_1min_100profiles\Load_profile_34.txt) useactual=true
+New object=Loadshape.Shape_35 npts=1440 minterval=1 mult=(file=Daily_1min_100profiles\Load_profile_35.txt) useactual=true
+New object=Loadshape.Shape_36 npts=1440 minterval=1 mult=(file=Daily_1min_100profiles\Load_profile_36.txt) useactual=true
+New object=Loadshape.Shape_37 npts=1440 minterval=1 mult=(file=Daily_1min_100profiles\Load_profile_37.txt) useactual=true
+New object=Loadshape.Shape_38 npts=1440 minterval=1 mult=(file=Daily_1min_100profiles\Load_profile_38.txt) useactual=true
+New object=Loadshape.Shape_39 npts=1440 minterval=1 mult=(file=Daily_1min_100profiles\Load_profile_39.txt) useactual=true
+New object=Loadshape.Shape_40 npts=1440 minterval=1 mult=(file=Daily_1min_100profiles\Load_profile_40.txt) useactual=true
+New object=Loadshape.Shape_41 npts=1440 minterval=1 mult=(file=Daily_1min_100profiles\Load_profile_41.txt) useactual=true
+New object=Loadshape.Shape_42 npts=1440 minterval=1 mult=(file=Daily_1min_100profiles\Load_profile_42.txt) useactual=true
+New object=Loadshape.Shape_43 npts=1440 minterval=1 mult=(file=Daily_1min_100profiles\Load_profile_43.txt) useactual=true
+New object=Loadshape.Shape_44 npts=1440 minterval=1 mult=(file=Daily_1min_100profiles\Load_profile_44.txt) useactual=true
+New object=Loadshape.Shape_45 npts=1440 minterval=1 mult=(file=Daily_1min_100profiles\Load_profile_45.txt) useactual=true
+New object=Loadshape.Shape_46 npts=1440 minterval=1 mult=(file=Daily_1min_100profiles\Load_profile_46.txt) useactual=true
+New object=Loadshape.Shape_47 npts=1440 minterval=1 mult=(file=Daily_1min_100profiles\Load_profile_47.txt) useactual=true
+New object=Loadshape.Shape_48 npts=1440 minterval=1 mult=(file=Daily_1min_100profiles\Load_profile_48.txt) useactual=true
+New object=Loadshape.Shape_49 npts=1440 minterval=1 mult=(file=Daily_1min_100profiles\Load_profile_49.txt) useactual=true
+New object=Loadshape.Shape_50 npts=1440 minterval=1 mult=(file=Daily_1min_100profiles\Load_profile_50.txt) useactual=true
+New object=Loadshape.Shape_51 npts=1440 minterval=1 mult=(file=Daily_1min_100profiles\Load_profile_51.txt) useactual=true
+New object=Loadshape.Shape_52 npts=1440 minterval=1 mult=(file=Daily_1min_100profiles\Load_profile_52.txt) useactual=true
+New object=Loadshape.Shape_53 npts=1440 minterval=1 mult=(file=Daily_1min_100profiles\Load_profile_53.txt) useactual=true
+New object=Loadshape.Shape_54 npts=1440 minterval=1 mult=(file=Daily_1min_100profiles\Load_profile_54.txt) useactual=true
+New object=object=Loadshape.Shape_55 npts=1440 minterval=1 mult=(file=Daily_1min_100profiles\Load_profile_55.txt) useactual=true
+! Redirect GrowthShape.DSS
+New object=GrowthShape.default npts=2 year=[1,20] mult=[1.025,1.025]
+! Redirect TCC_Curve.DSS
+New object=TCC_Curve.a npts=5 C_array=[1,2.5,4.5,8,14] T_array=[0.15,0.07,0.05,0.045,0.045]
+New object=TCC_Curve.d npts=5 C_array=[1,2.5,4.5,8,14] T_array=[6,0.7,0.2,0.06,0.02]
+New object=TCC_Curve.tlink npts=7 C_array=[2,2.1,3,4,6,22,50] T_array=[300,100,10.1,4,1.4,0.1,0.02]
+New object=TCC_Curve.klink npts=6 C_array=[2,2.2,3,4,6,30] T_array=[300,20,4,1.3,0.41,0.02]
+New object=TCC_Curve.uv1547 npts=2 C_array=[0.5,0.9] T_array=[0.166,2]
+New object=TCC_Curve.ov1547 npts=2 C_array=[1.1,1.2] T_array=[2,0.166]
+New object=TCC_Curve.mod_inv npts=15 C_array=[1.1,1.3,1.5,2,3,4,5,6,7,8,9,10,20,50,100] T_array=[27.1053,9.9029,6.439,3.8032,2.4322,1.9458,1.6883,1.5255,1.4117,1.3267,1.2604,1.2068,0.9481,0.7468,0.6478]
+New object=TCC_Curve.very_inv npts=15 C_array=[1.1,1.3,1.5,2,3,4,5,6,7,8,9,10,20,50,100] T_array=[93.872,28.9113,16.179,7.0277,2.9423,1.7983,1.3081,1.0513,0.8995,0.8023,0.7361,0.6891,0.5401,0.4988,0.493]
+New object=TCC_Curve.ext_inv npts=15 C_array=[1.1,1.3,1.5,2,3,4,5,6,7,8,9,10,20,50,100] T_array=[134.407,40.9913,22.6817,9.5217,3.6467,2.0017,1.2967,0.9274,0.7092,0.5693,0.4742,0.4065,0.1924,0.133,0.1245]
+New object=TCC_Curve.definite npts=3 C_array=[1,1.001,100] T_array=[300,1,1]
+! Redirect Spectrum.DSS
+New object=Spectrum.default NumHarm=7 harmonic=[1,3,5,7,9,11,13] %mag=[100,33,20,14,11,9,7] angle=[0,0,0,0,0,0,0]
+New object=Spectrum.defaultload NumHarm=7 harmonic=[1,3,5,7,9,11,13] %mag=[100,1.5,20,14,1,9,7] angle=[0,180,180,180,180,180,180]
+New object=Spectrum.defaultgen NumHarm=7 harmonic=[1,3,5,7,9,11,13] %mag=[100,5,3,1.5,1,0.7,0.5] angle=[0,0,0,0,0,0,0]
+New object=Spectrum.defaultvsource NumHarm=1 harmonic=[1] %mag=[100] angle=[0]
+New object=Spectrum.linear NumHarm=1 harmonic=[1] %mag=[100] angle=[0]
+New object=Spectrum.pwm6 NumHarm=13 harmonic=[1,3,5,7,9,11,13,15,17,19,21,23,25] %mag=[100,4.4,76.5,62.7,2.9,24.8,12.7,0.5,7.1,8.4,0.9,4.4,3.3] angle=[-103,-5,28,-180,-33,-59,79,36,-253,-124,3,-30,86]
+New object=Spectrum.dc6 NumHarm=10 harmonic=[1,3,5,7,9,11,13,15,17,19] %mag=[100,1.2,33.6,1.6,0.4,8.7,1.2,0.3,4.5,1.3] angle=[-75,28,156,29,-91,49,54,148,-57,-46]
+! Redirect m1\Branches.dss
+New object=Line.line1 bus1=1.1.2.3 bus2=2.1.2.3 phases=3 linecode=4c_70 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=1.098 units=m
+New object=Line.line2 bus1=2.1.2.3 bus2=3.1.2.3 phases=3 linecode=4c_70 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.11511 units=m
+New object=Line.line3 bus1=3.1.2.3 bus2=4.1.2.3 phases=3 linecode=4c_70 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.10784 units=m
+New object=Line.line4 bus1=4.1.2.3 bus2=5.1.2.3 phases=3 linecode=4c_70 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.094021 units=m
+New object=Line.line5 bus1=5.1.2.3 bus2=6.1.2.3 phases=3 linecode=4c_70 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.14812 units=m
+New object=Line.line6 bus1=6.1.2.3 bus2=7.1.2.3 phases=3 linecode=4c_70 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=10.0863 units=m
+New object=Line.line7 bus1=7.1.2.3 bus2=8.1.2.3 phases=3 linecode=4c_70 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.45175 units=m
+New object=Line.line8 bus1=8.1.2.3 bus2=9.1.2.3 phases=3 linecode=4c_70 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.376 units=m
+New object=Line.line9 bus1=9.1.2.3 bus2=10.1.2.3 phases=3 linecode=4c_70 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.32997 units=m
+New object=Line.line10 bus1=10.1.2.3 bus2=11.1.2.3 phases=3 linecode=4c_70 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.24622 units=m
+New object=Line.line11 bus1=11.1.2.3 bus2=12.1.2.3 phases=3 linecode=4c_70 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.23114 units=m
+New object=Line.line12 bus1=12.1.2.3 bus2=13.1.2.3 phases=3 linecode=4c_70 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.14213 units=m
+New object=Line.line13 bus1=13.1.2.3 bus2=14.1.2.3 phases=3 linecode=4c_70 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.35384 units=m
+New object=Line.line14 bus1=14.1.2.3 bus2=15.1.2.3 phases=3 linecode=4c_70 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=2.8664 units=m
+New object=Line.line15 bus1=15.1.2.3 bus2=16.1.2.3 phases=3 linecode=2c_007 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.09654 units=m
+New object=Line.line17 bus1=16.1.2.3 bus2=18.1.2.3 phases=3 linecode=2c_007 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.044045 units=m
+New object=Line.line19 bus1=18.1.2.3 bus2=20.1.2.3 phases=3 linecode=2c_007 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.046174 units=m
+New object=Line.line21 bus1=20.1.2.3 bus2=22.1.2.3 phases=3 linecode=2c_007 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.041976 units=m
+New object=Line.line23 bus1=22.1.2.3 bus2=24.1.2.3 phases=3 linecode=2c_007 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.051245 units=m
+New object=Line.line25 bus1=24.1.2.3 bus2=26.1.2.3 phases=3 linecode=2c_007 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.055902 units=m
+New object=Line.line28 bus1=26.1.2.3 bus2=29.1.2.3 phases=3 linecode=2c_007 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.054562 units=m
+New object=Line.line32 bus1=29.1.2.3 bus2=33.1.2.3 phases=3 linecode=2c_007 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.14629 units=m
+New object=Line.line37 bus1=33.1.2.3 bus2=38.1.2.3 phases=3 linecode=2c_007 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.13648 units=m
+New object=Line.line43 bus1=38.1.2.3 bus2=44.1.2.3 phases=3 linecode=2c_007 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.033838 units=m
+New object=Line.line49 bus1=44.1.2.3 bus2=50.1.2.3 phases=3 linecode=2c_007 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.048104 units=m
+New object=Line.line55 bus1=50.1.2.3 bus2=56.1.2.3 phases=3 linecode=2c_007 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.087664 units=m
+New object=Line.line61 bus1=56.1.2.3 bus2=62.1.2.3 phases=3 linecode=2c_007 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.078 units=m
+New object=Line.line68 bus1=62.1.2.3 bus2=69.1.2.3 phases=3 linecode=2c_007 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.083241 units=m
+New object=Line.line76 bus1=69.1.2.3 bus2=77.1.2.3 phases=3 linecode=2c_007 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.38907 units=m
+New object=Line.line81 bus1=77.1.2.3 bus2=82.1.2.3 phases=3 linecode=2c_007 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.51088 units=m
+New object=Line.line86 bus1=82.1.2.3 bus2=87.1.2.3 phases=3 linecode=2c_007 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.31045 units=m
+New object=Line.line90 bus1=87.1.2.3 bus2=91.1.2.3 phases=3 linecode=2c_007 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.11206 units=m
+New object=Line.line93 bus1=91.1.2.3 bus2=94.1.2.3 phases=3 linecode=2c_007 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.034785 units=m
+New object=Line.line96 bus1=94.1.2.3 bus2=97.1.2.3 phases=3 linecode=2c_007 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.03677 units=m
+New object=Line.line99 bus1=97.1.2.3 bus2=100.1.2.3 phases=3 linecode=2c_007 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.089588 units=m
+New object=Line.line102 bus1=100.1.2.3 bus2=103.1.2.3 phases=3 linecode=2c_007 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.28583 units=m
+New object=Line.line16 bus1=15.1.2.3 bus2=17.1.2.3 phases=3 linecode=4c_70 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=3.476 units=m
+New object=Line.line18 bus1=17.1.2.3 bus2=19.1.2.3 phases=3 linecode=4c_70 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.23917 units=m
+New object=Line.line20 bus1=19.1.2.3 bus2=21.1.2.3 phases=3 linecode=4c_70 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.26856 units=m
+New object=Line.line22 bus1=21.1.2.3 bus2=23.1.2.3 phases=3 linecode=4c_70 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.43727 units=m
+New object=Line.line24 bus1=23.1.2.3 bus2=25.1.2.3 phases=3 linecode=4c_70 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.7955 units=m
+New object=Line.line26 bus1=25.1.2.3 bus2=27.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=5.9049 units=m
+New object=Line.line29 bus1=27.1.2.3 bus2=30.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=1.6265 units=m
+New object=Line.line33 bus1=30.1.2.3 bus2=34.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=3.7248 units=m
+New object=Line.line30 bus1=27.1.2.3 bus2=31.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=1.5847 units=m
+New object=Line.line34 bus1=31.1.2.3 bus2=35.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.053666 units=m
+New object=Line.line38 bus1=35.1.2.3 bus2=39.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.077162 units=m
+New object=Line.line44 bus1=39.1.2.3 bus2=45.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.098955 units=m
+New object=Line.line50 bus1=45.1.2.3 bus2=51.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.241 units=m
+New object=Line.line56 bus1=51.1.2.3 bus2=57.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.20634 units=m
+New object=Line.line62 bus1=57.1.2.3 bus2=63.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.98912 units=m
+New object=Line.line69 bus1=63.1.2.3 bus2=70.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=3.4962 units=m
+New object=Line.line27 bus1=25.1.2.3 bus2=28.1.2.3 phases=3 linecode=4c_70 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=9.9686 units=m
+New object=Line.line31 bus1=28.1.2.3 bus2=32.1.2.3 phases=3 linecode=4c_70 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=2.6538 units=m
+New object=Line.line35 bus1=32.1.2.3 bus2=36.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=5.7265 units=m
+New object=Line.line39 bus1=36.1.2.3 bus2=40.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.40004 units=m
+New object=Line.line45 bus1=40.1.2.3 bus2=46.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.18031 units=m
+New object=Line.line51 bus1=46.1.2.3 bus2=52.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.19109 units=m
+New object=Line.line57 bus1=52.1.2.3 bus2=58.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.182 units=m
+New object=Line.line63 bus1=58.1.2.3 bus2=64.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.109 units=m
+New object=Line.line70 bus1=64.1.2.3 bus2=71.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.21385 units=m
+New object=Line.line77 bus1=71.1.2.3 bus2=78.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=1.0838 units=m
+New object=Line.line82 bus1=78.1.2.3 bus2=83.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=4.084 units=m
+New object=Line.line40 bus1=36.1.2.3 bus2=41.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=1.8063 units=m
+New object=Line.line46 bus1=41.1.2.3 bus2=47.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=4.3463 units=m
+New object=Line.line36 bus1=32.1.2.3 bus2=37.1.2.3 phases=3 linecode=4c_70 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=8.0244 units=m
+New object=Line.line41 bus1=37.1.2.3 bus2=42.1.2.3 phases=3 linecode=4c_70 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=5.5684 units=m
+New object=Line.line47 bus1=42.1.2.3 bus2=48.1.2.3 phases=3 linecode=4c_70 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=4.2078 units=m
+New object=Line.line52 bus1=48.1.2.3 bus2=53.1.2.3 phases=3 linecode=4c_70 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.60668 units=m
+New object=Line.line58 bus1=53.1.2.3 bus2=59.1.2.3 phases=3 linecode=4c_70 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=2.7481 units=m
+New object=Line.line64 bus1=59.1.2.3 bus2=65.1.2.3 phases=3 linecode=4c_70 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.55868 units=m
+New object=Line.line71 bus1=65.1.2.3 bus2=72.1.2.3 phases=3 linecode=4c_70 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=6.6006 units=m
+New object=Line.line78 bus1=72.1.2.3 bus2=79.1.2.3 phases=3 linecode=4c_70 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=2.3008 units=m
+New object=Line.line83 bus1=79.1.2.3 bus2=84.1.2.3 phases=3 linecode=4c_70 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.50211 units=m
+New object=Line.line87 bus1=84.1.2.3 bus2=88.1.2.3 phases=3 linecode=4c_70 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=1.0182 units=m
+New object=Line.line91 bus1=88.1.2.3 bus2=92.1.2.3 phases=3 linecode=4c_70 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.96021 units=m
+New object=Line.line94 bus1=92.1.2.3 bus2=95.1.2.3 phases=3 linecode=4c_70 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.55811 units=m
+New object=Line.line97 bus1=95.1.2.3 bus2=98.1.2.3 phases=3 linecode=4c_70 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.36859 units=m
+New object=Line.line100 bus1=98.1.2.3 bus2=101.1.2.3 phases=3 linecode=4c_70 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.50892 units=m
+New object=Line.line103 bus1=101.1.2.3 bus2=104.1.2.3 phases=3 linecode=4c_35 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.28838 units=m
+New object=Line.line106 bus1=104.1.2.3 bus2=107.1.2.3 phases=3 linecode=4c_35 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.3489 units=m
+New object=Line.line109 bus1=107.1.2.3 bus2=110.1.2.3 phases=3 linecode=4c_35 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.4044 units=m
+New object=Line.line112 bus1=110.1.2.3 bus2=113.1.2.3 phases=3 linecode=4c_35 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.61659 units=m
+New object=Line.line115 bus1=113.1.2.3 bus2=116.1.2.3 phases=3 linecode=4c_35 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.79271 units=m
+New object=Line.line119 bus1=116.1.2.3 bus2=120.1.2.3 phases=3 linecode=4c_35 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.56909 units=m
+New object=Line.line124 bus1=120.1.2.3 bus2=125.1.2.3 phases=3 linecode=4c_35 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.80412 units=m
+New object=Line.line129 bus1=125.1.2.3 bus2=130.1.2.3 phases=3 linecode=4c_35 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.87 units=m
+New object=Line.line135 bus1=130.1.2.3 bus2=136.1.2.3 phases=3 linecode=4c_35 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.82048 units=m
+New object=Line.line141 bus1=136.1.2.3 bus2=142.1.2.3 phases=3 linecode=4c_35 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=1.349 units=m
+New object=Line.line147 bus1=142.1.2.3 bus2=148.1.2.3 phases=3 linecode=4c_35 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=6.4142 units=m
+New object=Line.line154 bus1=148.1.2.3 bus2=155.1.2.3 phases=3 linecode=4c_35 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=1.3973 units=m
+New object=Line.line161 bus1=155.1.2.3 bus2=162.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=11.7422 units=m
+New object=Line.line169 bus1=162.1.2.3 bus2=170.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=2.2183 units=m
+New object=Line.line177 bus1=170.1.2.3 bus2=178.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=4.5768 units=m
+New object=Line.line162 bus1=155.1.2.3 bus2=163.1.2.3 phases=3 linecode=4c_35 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=5.2844 units=m
+New object=Line.line170 bus1=163.1.2.3 bus2=171.1.2.3 phases=3 linecode=4c_35 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=7.0156 units=m
+New object=Line.line178 bus1=171.1.2.3 bus2=179.1.2.3 phases=3 linecode=4c_35 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=1.1818 units=m
+New object=Line.line186 bus1=179.1.2.3 bus2=187.1.2.3 phases=3 linecode=4c_35 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=4.6507 units=m
+New object=Line.line195 bus1=187.1.2.3 bus2=196.1.2.3 phases=3 linecode=4c_35 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=8.3036 units=m
+New object=Line.line205 bus1=196.1.2.3 bus2=206.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=3.2475 units=m
+New object=Line.line215 bus1=206.1.2.3 bus2=216.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=10.6295 units=m
+New object=Line.line224 bus1=216.1.2.3 bus2=225.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=4.5822 units=m
+New object=Line.line206 bus1=196.1.2.3 bus2=207.1.2.3 phases=3 linecode=4c_35 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=2.1371 units=m
+New object=Line.line216 bus1=207.1.2.3 bus2=217.1.2.3 phases=3 linecode=4c_35 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=3.8571 units=m
+New object=Line.line225 bus1=217.1.2.3 bus2=226.1.2.3 phases=3 linecode=4c_35 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=1.3772 units=m
+New object=Line.line232 bus1=226.1.2.3 bus2=233.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=11.8949 units=m
+New object=Line.line240 bus1=233.1.2.3 bus2=241.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=1.7274 units=m
+New object=Line.line247 bus1=241.1.2.3 bus2=248.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=5.3022 units=m
+New object=Line.line248 bus1=241.1.2.3 bus2=249.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=5.3022 units=m
+New object=Line.line233 bus1=226.1.2.3 bus2=234.1.2.3 phases=3 linecode=4c_35 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=1.1273 units=m
+New object=Line.line179 bus1=171.1.2.3 bus2=180.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=2.4224 units=m
+New object=Line.line187 bus1=180.1.2.3 bus2=188.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=10.0258 units=m
+New object=Line.line196 bus1=188.1.2.3 bus2=197.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=1.9595 units=m
+New object=Line.line207 bus1=197.1.2.3 bus2=208.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=4.9541 units=m
+New object=Line.line197 bus1=188.1.2.3 bus2=198.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=1.1325 units=m
+New object=Line.line208 bus1=198.1.2.3 bus2=209.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.16008 units=m
+New object=Line.line217 bus1=209.1.2.3 bus2=218.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.1291 units=m
+New object=Line.line226 bus1=218.1.2.3 bus2=227.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.10317 units=m
+New object=Line.line234 bus1=227.1.2.3 bus2=235.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.15749 units=m
+New object=Line.line241 bus1=235.1.2.3 bus2=242.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.18461 units=m
+New object=Line.line249 bus1=242.1.2.3 bus2=250.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.28355 units=m
+New object=Line.line256 bus1=250.1.2.3 bus2=257.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=1.0376 units=m
+New object=Line.line263 bus1=257.1.2.3 bus2=264.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=5.05 units=m
+New object=Line.line104 bus1=101.1.2.3 bus2=105.1.2.3 phases=3 linecode=4c_70 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.33602 units=m
+New object=Line.line107 bus1=105.1.2.3 bus2=108.1.2.3 phases=3 linecode=4c_70 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.19054 units=m
+New object=Line.line110 bus1=108.1.2.3 bus2=111.1.2.3 phases=3 linecode=4c_70 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=7.5182 units=m
+New object=Line.line113 bus1=111.1.2.3 bus2=114.1.2.3 phases=3 linecode=4c_70 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.75316 units=m
+New object=Line.line116 bus1=114.1.2.3 bus2=117.1.2.3 phases=3 linecode=4c_35 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=1.1056 units=m
+New object=Line.line120 bus1=117.1.2.3 bus2=121.1.2.3 phases=3 linecode=2c_007 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.19481 units=m
+New object=Line.line125 bus1=121.1.2.3 bus2=126.1.2.3 phases=3 linecode=2c_007 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.16869 units=m
+New object=Line.line130 bus1=126.1.2.3 bus2=131.1.2.3 phases=3 linecode=2c_007 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.11915 units=m
+New object=Line.line136 bus1=131.1.2.3 bus2=137.1.2.3 phases=3 linecode=2c_007 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.18436 units=m
+New object=Line.line142 bus1=137.1.2.3 bus2=143.1.2.3 phases=3 linecode=2c_007 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.21781 units=m
+New object=Line.line148 bus1=143.1.2.3 bus2=149.1.2.3 phases=3 linecode=2c_007 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.19401 units=m
+New object=Line.line155 bus1=149.1.2.3 bus2=156.1.2.3 phases=3 linecode=2c_007 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.2191 units=m
+New object=Line.line163 bus1=156.1.2.3 bus2=164.1.2.3 phases=3 linecode=2c_007 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.20342 units=m
+New object=Line.line171 bus1=164.1.2.3 bus2=172.1.2.3 phases=3 linecode=2c_007 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.1727 units=m
+New object=Line.line180 bus1=172.1.2.3 bus2=181.1.2.3 phases=3 linecode=2c_007 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.17961 units=m
+New object=Line.line188 bus1=181.1.2.3 bus2=189.1.2.3 phases=3 linecode=2c_007 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.15412 units=m
+New object=Line.line198 bus1=189.1.2.3 bus2=199.1.2.3 phases=3 linecode=2c_007 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.19148 units=m
+New object=Line.line209 bus1=199.1.2.3 bus2=210.1.2.3 phases=3 linecode=2c_007 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.44838 units=m
+New object=Line.line218 bus1=210.1.2.3 bus2=219.1.2.3 phases=3 linecode=2c_007 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.67215 units=m
+New object=Line.line121 bus1=117.1.2.3 bus2=122.1.2.3 phases=3 linecode=4c_35 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.53831 units=m
+New object=Line.line126 bus1=122.1.2.3 bus2=127.1.2.3 phases=3 linecode=4c_35 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=2.5288 units=m
+New object=Line.line131 bus1=127.1.2.3 bus2=132.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=3.8212 units=m
+New object=Line.line137 bus1=132.1.2.3 bus2=138.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.32908 units=m
+New object=Line.line143 bus1=138.1.2.3 bus2=144.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.32289 units=m
+New object=Line.line149 bus1=144.1.2.3 bus2=150.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.26072 units=m
+New object=Line.line156 bus1=150.1.2.3 bus2=157.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.39132 units=m
+New object=Line.line164 bus1=157.1.2.3 bus2=165.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.47178 units=m
+New object=Line.line172 bus1=165.1.2.3 bus2=173.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.35642 units=m
+New object=Line.line181 bus1=173.1.2.3 bus2=182.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.41244 units=m
+New object=Line.line189 bus1=182.1.2.3 bus2=190.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.3878 units=m
+New object=Line.line199 bus1=190.1.2.3 bus2=200.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.41725 units=m
+New object=Line.line210 bus1=200.1.2.3 bus2=211.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.63785 units=m
+New object=Line.line219 bus1=211.1.2.3 bus2=220.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=1.7419 units=m
+New object=Line.line227 bus1=220.1.2.3 bus2=228.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.14852 units=m
+New object=Line.line235 bus1=228.1.2.3 bus2=236.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.0686 units=m
+New object=Line.line242 bus1=236.1.2.3 bus2=243.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.073376 units=m
+New object=Line.line250 bus1=243.1.2.3 bus2=251.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.070114 units=m
+New object=Line.line257 bus1=251.1.2.3 bus2=258.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.07811 units=m
+New object=Line.line264 bus1=258.1.2.3 bus2=265.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.16123 units=m
+New object=Line.line272 bus1=265.1.2.3 bus2=273.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.16792 units=m
+New object=Line.line280 bus1=273.1.2.3 bus2=281.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.63854 units=m
+New object=Line.line288 bus1=281.1.2.3 bus2=289.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=3.3901 units=m
+New object=Line.line132 bus1=127.1.2.3 bus2=133.1.2.3 phases=3 linecode=4c_35 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=7.1782 units=m
+New object=Line.line138 bus1=133.1.2.3 bus2=139.1.2.3 phases=3 linecode=4c_35 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=5.3402 units=m
+New object=Line.line144 bus1=139.1.2.3 bus2=145.1.2.3 phases=3 linecode=4c_35 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=3.5762 units=m
+New object=Line.line150 bus1=145.1.2.3 bus2=151.1.2.3 phases=3 linecode=4c_35 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=3.5713 units=m
+New object=Line.line157 bus1=151.1.2.3 bus2=158.1.2.3 phases=3 linecode=4c_35 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=9.4713 units=m
+New object=Line.line165 bus1=158.1.2.3 bus2=166.1.2.3 phases=3 linecode=4c_35 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=3.2899 units=m
+New object=Line.line173 bus1=166.1.2.3 bus2=174.1.2.3 phases=3 linecode=4c_35 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=3.9183 units=m
+New object=Line.line182 bus1=174.1.2.3 bus2=183.1.2.3 phases=3 linecode=4c_35 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.58763 units=m
+New object=Line.line190 bus1=183.1.2.3 bus2=191.1.2.3 phases=3 linecode=4c_35 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=2.3151 units=m
+New object=Line.line200 bus1=191.1.2.3 bus2=201.1.2.3 phases=3 linecode=4c_35 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.9314 units=m
+New object=Line.line191 bus1=183.1.2.3 bus2=192.1.2.3 phases=3 linecode=4c_35 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.27791 units=m
+New object=Line.line201 bus1=192.1.2.3 bus2=202.1.2.3 phases=3 linecode=4c_35 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.16447 units=m
+New object=Line.line211 bus1=202.1.2.3 bus2=212.1.2.3 phases=3 linecode=4c_35 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.15526 units=m
+New object=Line.line220 bus1=212.1.2.3 bus2=221.1.2.3 phases=3 linecode=4c_35 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.17006 units=m
+New object=Line.line228 bus1=221.1.2.3 bus2=229.1.2.3 phases=3 linecode=4c_35 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.23273 units=m
+New object=Line.line236 bus1=229.1.2.3 bus2=237.1.2.3 phases=3 linecode=4c_35 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.20742 units=m
+New object=Line.line243 bus1=237.1.2.3 bus2=244.1.2.3 phases=3 linecode=4c_35 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.16881 units=m
+New object=Line.line251 bus1=244.1.2.3 bus2=252.1.2.3 phases=3 linecode=4c_35 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.13297 units=m
+New object=Line.line258 bus1=252.1.2.3 bus2=259.1.2.3 phases=3 linecode=4c_35 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.17323 units=m
+New object=Line.line265 bus1=259.1.2.3 bus2=266.1.2.3 phases=3 linecode=4c_35 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.19436 units=m
+New object=Line.line273 bus1=266.1.2.3 bus2=274.1.2.3 phases=3 linecode=4c_35 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.17888 units=m
+New object=Line.line281 bus1=274.1.2.3 bus2=282.1.2.3 phases=3 linecode=4c_35 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.60542 units=m
+New object=Line.line289 bus1=282.1.2.3 bus2=290.1.2.3 phases=3 linecode=4c_35 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.81044 units=m
+New object=Line.line174 bus1=166.1.2.3 bus2=175.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=4.2045 units=m
+New object=Line.line183 bus1=175.1.2.3 bus2=184.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.45409 units=m
+New object=Line.line192 bus1=184.1.2.3 bus2=193.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.43923 units=m
+New object=Line.line202 bus1=193.1.2.3 bus2=203.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.35134 units=m
+New object=Line.line212 bus1=203.1.2.3 bus2=213.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.27987 units=m
+New object=Line.line221 bus1=213.1.2.3 bus2=222.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.59169 units=m
+New object=Line.line229 bus1=222.1.2.3 bus2=230.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.46597 units=m
+New object=Line.line237 bus1=230.1.2.3 bus2=238.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.32322 units=m
+New object=Line.line244 bus1=238.1.2.3 bus2=245.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.32245 units=m
+New object=Line.line252 bus1=245.1.2.3 bus2=253.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.47173 units=m
+New object=Line.line259 bus1=253.1.2.3 bus2=260.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=1.7742 units=m
+New object=Line.line266 bus1=260.1.2.3 bus2=267.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.4141 units=m
+New object=Line.line274 bus1=267.1.2.3 bus2=275.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.18971 units=m
+New object=Line.line282 bus1=275.1.2.3 bus2=283.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.12472 units=m
+New object=Line.line290 bus1=283.1.2.3 bus2=291.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.87618 units=m
+New object=Line.line297 bus1=291.1.2.3 bus2=298.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.40248 units=m
+New object=Line.line304 bus1=298.1.2.3 bus2=305.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.68119 units=m
+New object=Line.line311 bus1=305.1.2.3 bus2=312.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=1.3075 units=m
+New object=Line.line319 bus1=312.1.2.3 bus2=320.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=3.8495 units=m
+New object=Line.line291 bus1=283.1.2.3 bus2=292.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.10807 units=m
+New object=Line.line298 bus1=292.1.2.3 bus2=299.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.076485 units=m
+New object=Line.line305 bus1=299.1.2.3 bus2=306.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.089006 units=m
+New object=Line.line312 bus1=306.1.2.3 bus2=313.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.17024 units=m
+New object=Line.line320 bus1=313.1.2.3 bus2=321.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.6529 units=m
+New object=Line.line326 bus1=321.1.2.3 bus2=327.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=2.2281 units=m
+New object=Line.line151 bus1=145.1.2.3 bus2=152.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=5.1314 units=m
+New object=Line.line158 bus1=152.1.2.3 bus2=159.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.31233 units=m
+New object=Line.line166 bus1=159.1.2.3 bus2=167.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.28533 units=m
+New object=Line.line175 bus1=167.1.2.3 bus2=176.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.11853 units=m
+New object=Line.line184 bus1=176.1.2.3 bus2=185.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.25549 units=m
+New object=Line.line193 bus1=185.1.2.3 bus2=194.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.65073 units=m
+New object=Line.line203 bus1=194.1.2.3 bus2=204.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.38178 units=m
+New object=Line.line213 bus1=204.1.2.3 bus2=214.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.2674 units=m
+New object=Line.line222 bus1=214.1.2.3 bus2=223.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.51437 units=m
+New object=Line.line230 bus1=223.1.2.3 bus2=231.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.25602 units=m
+New object=Line.line238 bus1=231.1.2.3 bus2=239.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.18179 units=m
+New object=Line.line245 bus1=239.1.2.3 bus2=246.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=2.0796 units=m
+New object=Line.line253 bus1=246.1.2.3 bus2=254.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.61324 units=m
+New object=Line.line260 bus1=254.1.2.3 bus2=261.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.1372 units=m
+New object=Line.line267 bus1=261.1.2.3 bus2=268.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=3.4578 units=m
+New object=Line.line275 bus1=268.1.2.3 bus2=276.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=3.4268 units=m
+New object=Line.line268 bus1=261.1.2.3 bus2=269.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.11871 units=m
+New object=Line.line276 bus1=269.1.2.3 bus2=277.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.13918 units=m
+New object=Line.line283 bus1=277.1.2.3 bus2=284.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.12578 units=m
+New object=Line.line292 bus1=284.1.2.3 bus2=293.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.12739 units=m
+New object=Line.line299 bus1=293.1.2.3 bus2=300.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.13697 units=m
+New object=Line.line306 bus1=300.1.2.3 bus2=307.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.79435 units=m
+New object=Line.line313 bus1=307.1.2.3 bus2=314.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=3.3598 units=m
+New object=Line.line117 bus1=114.1.2.3 bus2=118.1.2.3 phases=3 linecode=4c_1 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=3.6556 units=m
+New object=Line.line122 bus1=118.1.2.3 bus2=123.1.2.3 phases=3 linecode=4c_1 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=6.5924 units=m
+New object=Line.line127 bus1=123.1.2.3 bus2=128.1.2.3 phases=3 linecode=4c_1 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=2.9646 units=m
+New object=Line.line133 bus1=128.1.2.3 bus2=134.1.2.3 phases=3 linecode=4c_1 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.88205 units=m
+New object=Line.line139 bus1=134.1.2.3 bus2=140.1.2.3 phases=3 linecode=4c_1 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.99566 units=m
+New object=Line.line145 bus1=140.1.2.3 bus2=146.1.2.3 phases=3 linecode=4c_1 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.9364 units=m
+New object=Line.line152 bus1=146.1.2.3 bus2=153.1.2.3 phases=3 linecode=4c_1 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=1.0926 units=m
+New object=Line.line159 bus1=153.1.2.3 bus2=160.1.2.3 phases=3 linecode=4c_1 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.31439 units=m
+New object=Line.line167 bus1=160.1.2.3 bus2=168.1.2.3 phases=3 linecode=4c_1 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=1.7861 units=m
+New object=Line.line176 bus1=168.1.2.3 bus2=177.1.2.3 phases=3 linecode=4c_1 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=1.0088 units=m
+New object=Line.line185 bus1=177.1.2.3 bus2=186.1.2.3 phases=3 linecode=4c_1 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.74886 units=m
+New object=Line.line194 bus1=186.1.2.3 bus2=195.1.2.3 phases=3 linecode=4c_1 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.67326 units=m
+New object=Line.line204 bus1=195.1.2.3 bus2=205.1.2.3 phases=3 linecode=4c_1 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.83638 units=m
+New object=Line.line214 bus1=205.1.2.3 bus2=215.1.2.3 phases=3 linecode=4c_1 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=1.5434 units=m
+New object=Line.line223 bus1=215.1.2.3 bus2=224.1.2.3 phases=3 linecode=4c_1 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=1.3456 units=m
+New object=Line.line231 bus1=224.1.2.3 bus2=232.1.2.3 phases=3 linecode=4c_1 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.91534 units=m
+New object=Line.line239 bus1=232.1.2.3 bus2=240.1.2.3 phases=3 linecode=4c_1 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.6013 units=m
+New object=Line.line246 bus1=240.1.2.3 bus2=247.1.2.3 phases=3 linecode=4c_1 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=1.2941 units=m
+New object=Line.line254 bus1=247.1.2.3 bus2=255.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=4.5618 units=m
+New object=Line.line261 bus1=255.1.2.3 bus2=262.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.6306 units=m
+New object=Line.line269 bus1=262.1.2.3 bus2=270.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.28991 units=m
+New object=Line.line277 bus1=270.1.2.3 bus2=278.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.34433 units=m
+New object=Line.line284 bus1=278.1.2.3 bus2=285.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.53126 units=m
+New object=Line.line293 bus1=285.1.2.3 bus2=294.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.47339 units=m
+New object=Line.line300 bus1=294.1.2.3 bus2=301.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.36805 units=m
+New object=Line.line307 bus1=301.1.2.3 bus2=308.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.45813 units=m
+New object=Line.line314 bus1=308.1.2.3 bus2=315.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.47384 units=m
+New object=Line.line321 bus1=315.1.2.3 bus2=322.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.55892 units=m
+New object=Line.line327 bus1=322.1.2.3 bus2=328.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.31851 units=m
+New object=Line.line333 bus1=328.1.2.3 bus2=334.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=1.4389 units=m
+New object=Line.line340 bus1=334.1.2.3 bus2=341.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.55999 units=m
+New object=Line.line347 bus1=341.1.2.3 bus2=348.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.19454 units=m
+New object=Line.line353 bus1=348.1.2.3 bus2=354.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.14656 units=m
+New object=Line.line358 bus1=354.1.2.3 bus2=359.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.10723 units=m
+New object=Line.line363 bus1=359.1.2.3 bus2=364.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.054452 units=m
+New object=Line.line368 bus1=364.1.2.3 bus2=369.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.080056 units=m
+New object=Line.line373 bus1=369.1.2.3 bus2=374.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.1342 units=m
+New object=Line.line379 bus1=374.1.2.3 bus2=380.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.59859 units=m
+New object=Line.line386 bus1=380.1.2.3 bus2=387.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=2.2004 units=m
+New object=Line.line255 bus1=247.1.2.3 bus2=256.1.2.3 phases=3 linecode=4c_1 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.85678 units=m
+New object=Line.line262 bus1=256.1.2.3 bus2=263.1.2.3 phases=3 linecode=4c_1 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=3.2128 units=m
+New object=Line.line270 bus1=263.1.2.3 bus2=271.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=4.2547 units=m
+New object=Line.line278 bus1=271.1.2.3 bus2=279.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.30927 units=m
+New object=Line.line285 bus1=279.1.2.3 bus2=286.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.25491 units=m
+New object=Line.line294 bus1=286.1.2.3 bus2=295.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.36208 units=m
+New object=Line.line301 bus1=295.1.2.3 bus2=302.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=1.6263 units=m
+New object=Line.line308 bus1=302.1.2.3 bus2=309.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.31308 units=m
+New object=Line.line315 bus1=309.1.2.3 bus2=316.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.23181 units=m
+New object=Line.line322 bus1=316.1.2.3 bus2=323.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.26702 units=m
+New object=Line.line328 bus1=323.1.2.3 bus2=329.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.26488 units=m
+New object=Line.line334 bus1=329.1.2.3 bus2=335.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=2.327 units=m
+New object=Line.line341 bus1=335.1.2.3 bus2=342.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=4.7567 units=m
+New object=Line.line271 bus1=263.1.2.3 bus2=272.1.2.3 phases=3 linecode=4c_1 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=1.0792 units=m
+New object=Line.line279 bus1=272.1.2.3 bus2=280.1.2.3 phases=3 linecode=4c_1 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=3.9121 units=m
+New object=Line.line286 bus1=280.1.2.3 bus2=287.1.2.3 phases=3 linecode=4c_06 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=1.7542 units=m
+New object=Line.line295 bus1=287.1.2.3 bus2=296.1.2.3 phases=3 linecode=4c_06 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.80742 units=m
+New object=Line.line302 bus1=296.1.2.3 bus2=303.1.2.3 phases=3 linecode=4c_06 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=5.2746 units=m
+New object=Line.line309 bus1=303.1.2.3 bus2=310.1.2.3 phases=3 linecode=4c_06 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.39397 units=m
+New object=Line.line316 bus1=310.1.2.3 bus2=317.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.64903 units=m
+New object=Line.line323 bus1=317.1.2.3 bus2=324.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=3.3427 units=m
+New object=Line.line329 bus1=324.1.2.3 bus2=330.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=1.167 units=m
+New object=Line.line335 bus1=330.1.2.3 bus2=336.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=2.5399 units=m
+New object=Line.line342 bus1=336.1.2.3 bus2=343.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=2.082 units=m
+New object=Line.line348 bus1=343.1.2.3 bus2=349.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=3.1153 units=m
+New object=Line.line343 bus1=336.1.2.3 bus2=344.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.9796 units=m
+New object=Line.line349 bus1=344.1.2.3 bus2=350.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.1364 units=m
+New object=Line.line354 bus1=350.1.2.3 bus2=355.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.14814 units=m
+New object=Line.line359 bus1=355.1.2.3 bus2=360.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.12976 units=m
+New object=Line.line364 bus1=360.1.2.3 bus2=365.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.13787 units=m
+New object=Line.line369 bus1=365.1.2.3 bus2=370.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.19677 units=m
+New object=Line.line374 bus1=370.1.2.3 bus2=375.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.23921 units=m
+New object=Line.line380 bus1=375.1.2.3 bus2=381.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=1.4827 units=m
+New object=Line.line387 bus1=381.1.2.3 bus2=388.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=5.0734 units=m
+New object=Line.line317 bus1=310.1.2.3 bus2=318.1.2.3 phases=3 linecode=4c_06 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=7.2163 units=m
+New object=Line.line324 bus1=318.1.2.3 bus2=325.1.2.3 phases=3 linecode=4c_06 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=3.4631 units=m
+New object=Line.line330 bus1=325.1.2.3 bus2=331.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=9.1332 units=m
+New object=Line.line336 bus1=331.1.2.3 bus2=337.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=3.6172 units=m
+New object=Line.line331 bus1=325.1.2.3 bus2=332.1.2.3 phases=3 linecode=4c_06 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=6.6729 units=m
+New object=Line.line337 bus1=332.1.2.3 bus2=338.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=6.8067 units=m
+New object=Line.line344 bus1=338.1.2.3 bus2=345.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=3.4221 units=m
+New object=Line.line350 bus1=345.1.2.3 bus2=351.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.31846 units=m
+New object=Line.line355 bus1=351.1.2.3 bus2=356.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.13152 units=m
+New object=Line.line360 bus1=356.1.2.3 bus2=361.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.092801 units=m
+New object=Line.line365 bus1=361.1.2.3 bus2=366.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.094921 units=m
+New object=Line.line370 bus1=366.1.2.3 bus2=371.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.112 units=m
+New object=Line.line375 bus1=371.1.2.3 bus2=376.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.14128 units=m
+New object=Line.line381 bus1=376.1.2.3 bus2=382.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.12653 units=m
+New object=Line.line388 bus1=382.1.2.3 bus2=389.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.10012 units=m
+New object=Line.line393 bus1=389.1.2.3 bus2=394.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.17183 units=m
+New object=Line.line399 bus1=394.1.2.3 bus2=400.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.59984 units=m
+New object=Line.line405 bus1=400.1.2.3 bus2=406.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=3.6672 units=m
+New object=Line.line338 bus1=332.1.2.3 bus2=339.1.2.3 phases=3 linecode=4c_06 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=1.2129 units=m
+New object=Line.line345 bus1=339.1.2.3 bus2=346.1.2.3 phases=3 linecode=4c_06 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=1.0391 units=m
+New object=Line.line351 bus1=346.1.2.3 bus2=352.1.2.3 phases=3 linecode=4c_06 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.73091 units=m
+New object=Line.line356 bus1=352.1.2.3 bus2=357.1.2.3 phases=3 linecode=4c_06 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.92352 units=m
+New object=Line.line361 bus1=357.1.2.3 bus2=362.1.2.3 phases=3 linecode=4c_06 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.57867 units=m
+New object=Line.line366 bus1=362.1.2.3 bus2=367.1.2.3 phases=3 linecode=4c_06 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.88861 units=m
+New object=Line.line371 bus1=367.1.2.3 bus2=372.1.2.3 phases=3 linecode=4c_06 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.88584 units=m
+New object=Line.line376 bus1=372.1.2.3 bus2=377.1.2.3 phases=3 linecode=4c_06 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.99394 units=m
+New object=Line.line382 bus1=377.1.2.3 bus2=383.1.2.3 phases=3 linecode=4c_06 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.71925 units=m
+New object=Line.line389 bus1=383.1.2.3 bus2=390.1.2.3 phases=3 linecode=4c_06 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.85728 units=m
+New object=Line.line394 bus1=390.1.2.3 bus2=395.1.2.3 phases=3 linecode=4c_06 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=1.2439 units=m
+New object=Line.line400 bus1=395.1.2.3 bus2=401.1.2.3 phases=3 linecode=4c_06 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.9222 units=m
+New object=Line.line406 bus1=401.1.2.3 bus2=407.1.2.3 phases=3 linecode=4c_06 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.88961 units=m
+New object=Line.line412 bus1=407.1.2.3 bus2=413.1.2.3 phases=3 linecode=4c_06 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.87066 units=m
+New object=Line.line418 bus1=413.1.2.3 bus2=419.1.2.3 phases=3 linecode=4c_06 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=1.0471 units=m
+New object=Line.line424 bus1=419.1.2.3 bus2=425.1.2.3 phases=3 linecode=4c_06 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=1.7537 units=m
+New object=Line.line431 bus1=425.1.2.3 bus2=432.1.2.3 phases=3 linecode=4c_06 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=5.9151 units=m
+New object=Line.line438 bus1=432.1.2.3 bus2=439.1.2.3 phases=3 linecode=4c_06 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=8.3663 units=m
+New object=Line.line445 bus1=439.1.2.3 bus2=446.1.2.3 phases=3 linecode=4c_06 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=6.0033 units=m
+New object=Line.line452 bus1=446.1.2.3 bus2=453.1.2.3 phases=3 linecode=4c_06 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=1.8214 units=m
+New object=Line.line459 bus1=453.1.2.3 bus2=460.1.2.3 phases=3 linecode=4c_06 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=5.3905 units=m
+New object=Line.line466 bus1=460.1.2.3 bus2=467.1.2.3 phases=3 linecode=4c_06 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=5.9891 units=m
+New object=Line.line474 bus1=467.1.2.3 bus2=475.1.2.3 phases=3 linecode=4c_06 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=2.1947 units=m
+New object=Line.line481 bus1=475.1.2.3 bus2=482.1.2.3 phases=3 linecode=4c_06 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=4.6432 units=m
+New object=Line.line489 bus1=482.1.2.3 bus2=490.1.2.3 phases=3 linecode=4c_06 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=6.6548 units=m
+New object=Line.line498 bus1=490.1.2.3 bus2=499.1.2.3 phases=3 linecode=4c_06 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=4.0612 units=m
+New object=Line.line507 bus1=499.1.2.3 bus2=508.1.2.3 phases=3 linecode=4c_06 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.69938 units=m
+New object=Line.line515 bus1=508.1.2.3 bus2=516.1.2.3 phases=3 linecode=4c_06 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=1.8857 units=m
+New object=Line.line524 bus1=516.1.2.3 bus2=525.1.2.3 phases=3 linecode=4c_06 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=1.3881 units=m
+New object=Line.line532 bus1=525.1.2.3 bus2=533.1.2.3 phases=3 linecode=4c_06 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=1.8899 units=m
+New object=Line.line541 bus1=533.1.2.3 bus2=542.1.2.3 phases=3 linecode=4c_06 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=1.3374 units=m
+New object=Line.line549 bus1=542.1.2.3 bus2=550.1.2.3 phases=3 linecode=4c_06 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=3.7401 units=m
+New object=Line.line558 bus1=550.1.2.3 bus2=559.1.2.3 phases=3 linecode=4c_06 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=2.7082 units=m
+New object=Line.line566 bus1=559.1.2.3 bus2=567.1.2.3 phases=3 linecode=4c_06 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.60068 units=m
+New object=Line.line572 bus1=567.1.2.3 bus2=573.1.2.3 phases=3 linecode=4c_06 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.14223 units=m
+New object=Line.line578 bus1=573.1.2.3 bus2=579.1.2.3 phases=3 linecode=4c_06 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=3.8558 units=m
+New object=Line.line586 bus1=579.1.2.3 bus2=587.1.2.3 phases=3 linecode=4c_06 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=2.7022 units=m
+New object=Line.line594 bus1=587.1.2.3 bus2=595.1.2.3 phases=3 linecode=4c_06 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=5.4142 units=m
+New object=Line.line603 bus1=595.1.2.3 bus2=604.1.2.3 phases=3 linecode=4c_06 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=4.8283 units=m
+New object=Line.line615 bus1=604.1.2.3 bus2=616.1.2.3 phases=3 linecode=2c_0225 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=3.9301 units=m
+New object=Line.line625 bus1=616.1.2.3 bus2=626.1.2.3 phases=3 linecode=2c_0225 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=5.3537 units=m
+New object=Line.line632 bus1=626.1.2.3 bus2=633.1.2.3 phases=3 linecode=2c_0225 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=1.5703 units=m
+New object=Line.line638 bus1=633.1.2.3 bus2=639.1.2.3 phases=3 linecode=2c_0225 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=5.1974 units=m
+New object=Line.line616 bus1=604.1.2.3 bus2=617.1.2.3 phases=3 linecode=4c_06 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=3.1088 units=m
+New object=Line.line617 bus1=604.1.2.3 bus2=618.1.2.3 phases=3 linecode=4c_06 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=3.1088 units=m
+New object=Line.line604 bus1=595.1.2.3 bus2=605.1.2.3 phases=3 linecode=4c_06 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=4.8283 units=m
+New object=Line.line605 bus1=595.1.2.3 bus2=606.1.2.3 phases=3 linecode=4c_06 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=4.7719 units=m
+New object=Line.line595 bus1=587.1.2.3 bus2=596.1.2.3 phases=3 linecode=4c_06 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.64238 units=m
+New object=Line.line606 bus1=596.1.2.3 bus2=607.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=11.6642 units=m
+New object=Line.line618 bus1=607.1.2.3 bus2=619.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=2.7454 units=m
+New object=Line.line607 bus1=596.1.2.3 bus2=608.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=11.6642 units=m
+New object=Line.line587 bus1=579.1.2.3 bus2=588.1.2.3 phases=3 linecode=4c_06 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=2.7022 units=m
+New object=Line.line579 bus1=573.1.2.3 bus2=580.1.2.3 phases=3 linecode=4c_06 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=3.8558 units=m
+New object=Line.line580 bus1=573.1.2.3 bus2=581.1.2.3 phases=3 linecode=4c_06 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.31979 units=m
+New object=Line.line588 bus1=581.1.2.3 bus2=589.1.2.3 phases=3 linecode=4c_06 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.11628 units=m
+New object=Line.line596 bus1=589.1.2.3 bus2=597.1.2.3 phases=3 linecode=4c_06 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.089275 units=m
+New object=Line.line608 bus1=597.1.2.3 bus2=609.1.2.3 phases=3 linecode=4c_06 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.11037 units=m
+New object=Line.line619 bus1=609.1.2.3 bus2=620.1.2.3 phases=3 linecode=4c_06 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.06364 units=m
+New object=Line.line626 bus1=620.1.2.3 bus2=627.1.2.3 phases=3 linecode=4c_06 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.077897 units=m
+New object=Line.line633 bus1=627.1.2.3 bus2=634.1.2.3 phases=3 linecode=4c_06 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.065299 units=m
+New object=Line.line639 bus1=634.1.2.3 bus2=640.1.2.3 phases=3 linecode=4c_06 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.069123 units=m
+New object=Line.line644 bus1=640.1.2.3 bus2=645.1.2.3 phases=3 linecode=4c_06 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.068593 units=m
+New object=Line.line649 bus1=645.1.2.3 bus2=650.1.2.3 phases=3 linecode=4c_06 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.093984 units=m
+New object=Line.line654 bus1=650.1.2.3 bus2=655.1.2.3 phases=3 linecode=4c_06 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.12394 units=m
+New object=Line.line660 bus1=655.1.2.3 bus2=661.1.2.3 phases=3 linecode=4c_06 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.36466 units=m
+New object=Line.line666 bus1=661.1.2.3 bus2=667.1.2.3 phases=3 linecode=4c_06 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.26019 units=m
+New object=Line.line673 bus1=667.1.2.3 bus2=674.1.2.3 phases=3 linecode=4c_06 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.20184 units=m
+New object=Line.line680 bus1=674.1.2.3 bus2=681.1.2.3 phases=3 linecode=4c_06 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.40252 units=m
+New object=Line.line573 bus1=567.1.2.3 bus2=574.1.2.3 phases=3 linecode=4c_06 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.14223 units=m
+New object=Line.line567 bus1=559.1.2.3 bus2=568.1.2.3 phases=3 linecode=4c_06 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.60068 units=m
+New object=Line.line568 bus1=559.1.2.3 bus2=569.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=3.8482 units=m
+New object=Line.line574 bus1=569.1.2.3 bus2=575.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.48648 units=m
+New object=Line.line581 bus1=575.1.2.3 bus2=582.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.35899 units=m
+New object=Line.line589 bus1=582.1.2.3 bus2=590.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.3493 units=m
+New object=Line.line597 bus1=590.1.2.3 bus2=598.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=3.2812 units=m
+New object=Line.line609 bus1=598.1.2.3 bus2=610.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=1.5271 units=m
+New object=Line.line620 bus1=610.1.2.3 bus2=621.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.71673 units=m
+New object=Line.line627 bus1=621.1.2.3 bus2=628.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.47807 units=m
+New object=Line.line634 bus1=628.1.2.3 bus2=635.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.73088 units=m
+New object=Line.line640 bus1=635.1.2.3 bus2=641.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=1.4274 units=m
+New object=Line.line645 bus1=641.1.2.3 bus2=646.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.39457 units=m
+New object=Line.line650 bus1=646.1.2.3 bus2=651.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.11455 units=m
+New object=Line.line655 bus1=651.1.2.3 bus2=656.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.099368 units=m
+New object=Line.line661 bus1=656.1.2.3 bus2=662.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.093 units=m
+New object=Line.line667 bus1=662.1.2.3 bus2=668.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.095802 units=m
+New object=Line.line674 bus1=668.1.2.3 bus2=675.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.69267 units=m
+New object=Line.line681 bus1=675.1.2.3 bus2=682.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=5.0441 units=m
+New object=Line.line656 bus1=651.1.2.3 bus2=657.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.52781 units=m
+New object=Line.line662 bus1=657.1.2.3 bus2=663.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.69648 units=m
+New object=Line.line668 bus1=663.1.2.3 bus2=669.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=2.8935 units=m
+New object=Line.line675 bus1=669.1.2.3 bus2=676.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=1.2288 units=m
+New object=Line.line559 bus1=550.1.2.3 bus2=560.1.2.3 phases=3 linecode=4c_06 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=2.7082 units=m
+New object=Line.line550 bus1=542.1.2.3 bus2=551.1.2.3 phases=3 linecode=4c_06 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=3.7401 units=m
+New object=Line.line542 bus1=533.1.2.3 bus2=543.1.2.3 phases=3 linecode=4c_06 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=1.3374 units=m
+New object=Line.line533 bus1=525.1.2.3 bus2=534.1.2.3 phases=3 linecode=4c_06 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=1.8899 units=m
+New object=Line.line525 bus1=516.1.2.3 bus2=526.1.2.3 phases=3 linecode=4c_06 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=1.3881 units=m
+New object=Line.line516 bus1=508.1.2.3 bus2=517.1.2.3 phases=3 linecode=4c_06 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=1.8857 units=m
+New object=Line.line517 bus1=508.1.2.3 bus2=518.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=4.7316 units=m
+New object=Line.line526 bus1=518.1.2.3 bus2=527.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=2.796 units=m
+New object=Line.line534 bus1=527.1.2.3 bus2=535.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=2.2154 units=m
+New object=Line.line543 bus1=535.1.2.3 bus2=544.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.91542 units=m
+New object=Line.line551 bus1=544.1.2.3 bus2=552.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.28804 units=m
+New object=Line.line560 bus1=552.1.2.3 bus2=561.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.10599 units=m
+New object=Line.line569 bus1=561.1.2.3 bus2=570.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.15788 units=m
+New object=Line.line575 bus1=570.1.2.3 bus2=576.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.095 units=m
+New object=Line.line582 bus1=576.1.2.3 bus2=583.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.11463 units=m
+New object=Line.line590 bus1=583.1.2.3 bus2=591.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.10065 units=m
+New object=Line.line598 bus1=591.1.2.3 bus2=599.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.65862 units=m
+New object=Line.line610 bus1=599.1.2.3 bus2=611.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=4.8562 units=m
+New object=Line.line552 bus1=544.1.2.3 bus2=553.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=3.789 units=m
+New object=Line.line561 bus1=553.1.2.3 bus2=562.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=2.8664 units=m
+New object=Line.line508 bus1=499.1.2.3 bus2=509.1.2.3 phases=3 linecode=4c_06 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.69938 units=m
+New object=Line.line499 bus1=490.1.2.3 bus2=500.1.2.3 phases=3 linecode=4c_06 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=4.0612 units=m
+New object=Line.line490 bus1=482.1.2.3 bus2=491.1.2.3 phases=3 linecode=4c_06 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=6.6548 units=m
+New object=Line.line482 bus1=475.1.2.3 bus2=483.1.2.3 phases=3 linecode=4c_06 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=4.6432 units=m
+New object=Line.line483 bus1=475.1.2.3 bus2=484.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=10.2769 units=m
+New object=Line.line491 bus1=484.1.2.3 bus2=492.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.57796 units=m
+New object=Line.line500 bus1=492.1.2.3 bus2=501.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.24429 units=m
+New object=Line.line509 bus1=501.1.2.3 bus2=510.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.14354 units=m
+New object=Line.line518 bus1=510.1.2.3 bus2=519.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.1321 units=m
+New object=Line.line527 bus1=519.1.2.3 bus2=528.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.11769 units=m
+New object=Line.line535 bus1=528.1.2.3 bus2=536.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.12209 units=m
+New object=Line.line544 bus1=536.1.2.3 bus2=545.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.36857 units=m
+New object=Line.line553 bus1=545.1.2.3 bus2=554.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.37143 units=m
+New object=Line.line562 bus1=554.1.2.3 bus2=563.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=3.4705 units=m
+New object=Line.line492 bus1=484.1.2.3 bus2=493.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=4.0726 units=m
+New object=Line.line501 bus1=493.1.2.3 bus2=502.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=2.606 units=m
+New object=Line.line475 bus1=467.1.2.3 bus2=476.1.2.3 phases=3 linecode=4c_06 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=2.1947 units=m
+New object=Line.line467 bus1=460.1.2.3 bus2=468.1.2.3 phases=3 linecode=4c_06 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=5.9891 units=m
+New object=Line.line468 bus1=460.1.2.3 bus2=469.1.2.3 phases=3 linecode=4c_06 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.88292 units=m
+New object=Line.line460 bus1=453.1.2.3 bus2=461.1.2.3 phases=3 linecode=4c_06 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=5.3905 units=m
+New object=Line.line461 bus1=453.1.2.3 bus2=462.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=3.6859 units=m
+New object=Line.line469 bus1=462.1.2.3 bus2=470.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.53828 units=m
+New object=Line.line476 bus1=470.1.2.3 bus2=477.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.29351 units=m
+New object=Line.line484 bus1=477.1.2.3 bus2=485.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.19883 units=m
+New object=Line.line493 bus1=485.1.2.3 bus2=494.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.30201 units=m
+New object=Line.line502 bus1=494.1.2.3 bus2=503.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.45833 units=m
+New object=Line.line510 bus1=503.1.2.3 bus2=511.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.32517 units=m
+New object=Line.line519 bus1=511.1.2.3 bus2=520.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.22216 units=m
+New object=Line.line528 bus1=520.1.2.3 bus2=529.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.17555 units=m
+New object=Line.line536 bus1=529.1.2.3 bus2=537.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.56286 units=m
+New object=Line.line545 bus1=537.1.2.3 bus2=546.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=4.5527 units=m
+New object=Line.line554 bus1=546.1.2.3 bus2=555.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.22672 units=m
+New object=Line.line563 bus1=555.1.2.3 bus2=564.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.17889 units=m
+New object=Line.line570 bus1=564.1.2.3 bus2=571.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.20224 units=m
+New object=Line.line576 bus1=571.1.2.3 bus2=577.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.18 units=m
+New object=Line.line583 bus1=577.1.2.3 bus2=584.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.20718 units=m
+New object=Line.line591 bus1=584.1.2.3 bus2=592.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.21243 units=m
+New object=Line.line599 bus1=592.1.2.3 bus2=600.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.25534 units=m
+New object=Line.line611 bus1=600.1.2.3 bus2=612.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.16008 units=m
+New object=Line.line621 bus1=612.1.2.3 bus2=622.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.68797 units=m
+New object=Line.line628 bus1=622.1.2.3 bus2=629.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=2.9004 units=m
+New object=Line.line453 bus1=446.1.2.3 bus2=454.1.2.3 phases=3 linecode=4c_06 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=1.8214 units=m
+New object=Line.line446 bus1=439.1.2.3 bus2=447.1.2.3 phases=3 linecode=4c_06 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=6.0033 units=m
+New object=Line.line439 bus1=432.1.2.3 bus2=440.1.2.3 phases=3 linecode=4c_06 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=8.3663 units=m
+New object=Line.line432 bus1=425.1.2.3 bus2=433.1.2.3 phases=3 linecode=4c_06 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=5.9151 units=m
+New object=Line.line425 bus1=419.1.2.3 bus2=426.1.2.3 phases=3 linecode=4c_06 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=1.7537 units=m
+New object=Line.line287 bus1=280.1.2.3 bus2=288.1.2.3 phases=3 linecode=4c_1 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.91306 units=m
+New object=Line.line296 bus1=288.1.2.3 bus2=297.1.2.3 phases=3 linecode=4c_1 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=3.8266 units=m
+New object=Line.line303 bus1=297.1.2.3 bus2=304.1.2.3 phases=3 linecode=4c_1 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.84468 units=m
+New object=Line.line310 bus1=304.1.2.3 bus2=311.1.2.3 phases=3 linecode=4c_1 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.28067 units=m
+New object=Line.line318 bus1=311.1.2.3 bus2=319.1.2.3 phases=3 linecode=4c_1 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.14649 units=m
+New object=Line.line325 bus1=319.1.2.3 bus2=326.1.2.3 phases=3 linecode=4c_1 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.1254 units=m
+New object=Line.line332 bus1=326.1.2.3 bus2=333.1.2.3 phases=3 linecode=4c_1 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.14262 units=m
+New object=Line.line339 bus1=333.1.2.3 bus2=340.1.2.3 phases=3 linecode=4c_1 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.11236 units=m
+New object=Line.line346 bus1=340.1.2.3 bus2=347.1.2.3 phases=3 linecode=4c_1 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.094202 units=m
+New object=Line.line352 bus1=347.1.2.3 bus2=353.1.2.3 phases=3 linecode=4c_1 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.085 units=m
+New object=Line.line357 bus1=353.1.2.3 bus2=358.1.2.3 phases=3 linecode=4c_1 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.070349 units=m
+New object=Line.line362 bus1=358.1.2.3 bus2=363.1.2.3 phases=3 linecode=4c_1 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.081609 units=m
+New object=Line.line367 bus1=363.1.2.3 bus2=368.1.2.3 phases=3 linecode=4c_1 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.089694 units=m
+New object=Line.line372 bus1=368.1.2.3 bus2=373.1.2.3 phases=3 linecode=4c_1 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.48898 units=m
+New object=Line.line377 bus1=373.1.2.3 bus2=378.1.2.3 phases=3 linecode=4c_1 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=3.6848 units=m
+New object=Line.line383 bus1=378.1.2.3 bus2=384.1.2.3 phases=3 linecode=4c_1 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=3.5292 units=m
+New object=Line.line390 bus1=384.1.2.3 bus2=391.1.2.3 phases=3 linecode=4c_1 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.15711 units=m
+New object=Line.line395 bus1=391.1.2.3 bus2=396.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=4.0601 units=m
+New object=Line.line401 bus1=396.1.2.3 bus2=402.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.37201 units=m
+New object=Line.line407 bus1=402.1.2.3 bus2=408.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.21148 units=m
+New object=Line.line413 bus1=408.1.2.3 bus2=414.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.1436 units=m
+New object=Line.line419 bus1=414.1.2.3 bus2=420.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.23403 units=m
+New object=Line.line426 bus1=420.1.2.3 bus2=427.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.77793 units=m
+New object=Line.line433 bus1=427.1.2.3 bus2=434.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.86608 units=m
+New object=Line.line440 bus1=434.1.2.3 bus2=441.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.48708 units=m
+New object=Line.line447 bus1=441.1.2.3 bus2=448.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.45756 units=m
+New object=Line.line454 bus1=448.1.2.3 bus2=455.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.43655 units=m
+New object=Line.line462 bus1=455.1.2.3 bus2=463.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.71675 units=m
+New object=Line.line470 bus1=463.1.2.3 bus2=471.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.49923 units=m
+New object=Line.line477 bus1=471.1.2.3 bus2=478.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.35077 units=m
+New object=Line.line485 bus1=478.1.2.3 bus2=486.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.1676 units=m
+New object=Line.line494 bus1=486.1.2.3 bus2=495.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.10617 units=m
+New object=Line.line503 bus1=495.1.2.3 bus2=504.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.071784 units=m
+New object=Line.line511 bus1=504.1.2.3 bus2=512.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.10013 units=m
+New object=Line.line520 bus1=512.1.2.3 bus2=521.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.07642 units=m
+New object=Line.line529 bus1=521.1.2.3 bus2=530.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.54535 units=m
+New object=Line.line537 bus1=530.1.2.3 bus2=538.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=1.9227 units=m
+New object=Line.line546 bus1=538.1.2.3 bus2=547.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=2.1231 units=m
+New object=Line.line555 bus1=547.1.2.3 bus2=556.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=5.7548 units=m
+New object=Line.line538 bus1=530.1.2.3 bus2=539.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=5.5837 units=m
+New object=Line.line396 bus1=391.1.2.3 bus2=397.1.2.3 phases=3 linecode=4c_1 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=2.8793 units=m
+New object=Line.line402 bus1=397.1.2.3 bus2=403.1.2.3 phases=3 linecode=4c_1 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=1.3891 units=m
+New object=Line.line408 bus1=403.1.2.3 bus2=409.1.2.3 phases=3 linecode=4c_1 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=4.1907 units=m
+New object=Line.line414 bus1=409.1.2.3 bus2=415.1.2.3 phases=3 linecode=4c_1 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=5.9686 units=m
+New object=Line.line420 bus1=415.1.2.3 bus2=421.1.2.3 phases=3 linecode=4c_1 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=1.249 units=m
+New object=Line.line427 bus1=421.1.2.3 bus2=428.1.2.3 phases=3 linecode=4c_1 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.31923 units=m
+New object=Line.line434 bus1=428.1.2.3 bus2=435.1.2.3 phases=3 linecode=4c_1 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.16724 units=m
+New object=Line.line441 bus1=435.1.2.3 bus2=442.1.2.3 phases=3 linecode=4c_1 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.13864 units=m
+New object=Line.line448 bus1=442.1.2.3 bus2=449.1.2.3 phases=3 linecode=4c_1 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.11236 units=m
+New object=Line.line455 bus1=449.1.2.3 bus2=456.1.2.3 phases=3 linecode=4c_1 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.17175 units=m
+New object=Line.line463 bus1=456.1.2.3 bus2=464.1.2.3 phases=3 linecode=4c_1 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.15483 units=m
+New object=Line.line471 bus1=464.1.2.3 bus2=472.1.2.3 phases=3 linecode=4c_1 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.14736 units=m
+New object=Line.line478 bus1=472.1.2.3 bus2=479.1.2.3 phases=3 linecode=4c_1 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.16601 units=m
+New object=Line.line486 bus1=479.1.2.3 bus2=487.1.2.3 phases=3 linecode=4c_1 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.17536 units=m
+New object=Line.line495 bus1=487.1.2.3 bus2=496.1.2.3 phases=3 linecode=4c_1 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.38342 units=m
+New object=Line.line504 bus1=496.1.2.3 bus2=505.1.2.3 phases=3 linecode=4c_1 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=8.6961 units=m
+New object=Line.line512 bus1=505.1.2.3 bus2=513.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=5.5648 units=m
+New object=Line.line521 bus1=513.1.2.3 bus2=522.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=4.9074 units=m
+New object=Line.line513 bus1=505.1.2.3 bus2=514.1.2.3 phases=3 linecode=4c_1 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=1.3369 units=m
+New object=Line.line522 bus1=514.1.2.3 bus2=523.1.2.3 phases=3 linecode=4c_1 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.72122 units=m
+New object=Line.line530 bus1=523.1.2.3 bus2=531.1.2.3 phases=3 linecode=4c_1 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.10771 units=m
+New object=Line.line539 bus1=531.1.2.3 bus2=540.1.2.3 phases=3 linecode=4c_1 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.082219 units=m
+New object=Line.line547 bus1=540.1.2.3 bus2=548.1.2.3 phases=3 linecode=4c_1 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.076896 units=m
+New object=Line.line556 bus1=548.1.2.3 bus2=557.1.2.3 phases=3 linecode=4c_1 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.082 units=m
+New object=Line.line564 bus1=557.1.2.3 bus2=565.1.2.3 phases=3 linecode=4c_1 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.07256 units=m
+New object=Line.line571 bus1=565.1.2.3 bus2=572.1.2.3 phases=3 linecode=4c_1 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.074216 units=m
+New object=Line.line577 bus1=572.1.2.3 bus2=578.1.2.3 phases=3 linecode=4c_1 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.38305 units=m
+New object=Line.line584 bus1=578.1.2.3 bus2=585.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=4.7318 units=m
+New object=Line.line592 bus1=585.1.2.3 bus2=593.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.27268 units=m
+New object=Line.line600 bus1=593.1.2.3 bus2=601.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.13695 units=m
+New object=Line.line612 bus1=601.1.2.3 bus2=613.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.11484 units=m
+New object=Line.line622 bus1=613.1.2.3 bus2=623.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.093648 units=m
+New object=Line.line629 bus1=623.1.2.3 bus2=630.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.147 units=m
+New object=Line.line635 bus1=630.1.2.3 bus2=636.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.35053 units=m
+New object=Line.line641 bus1=636.1.2.3 bus2=642.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.24251 units=m
+New object=Line.line646 bus1=642.1.2.3 bus2=647.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.30835 units=m
+New object=Line.line651 bus1=647.1.2.3 bus2=652.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.18732 units=m
+New object=Line.line657 bus1=652.1.2.3 bus2=658.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.16911 units=m
+New object=Line.line663 bus1=658.1.2.3 bus2=664.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.28521 units=m
+New object=Line.line669 bus1=664.1.2.3 bus2=670.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.2804 units=m
+New object=Line.line676 bus1=670.1.2.3 bus2=677.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.13267 units=m
+New object=Line.line682 bus1=677.1.2.3 bus2=683.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.14572 units=m
+New object=Line.line686 bus1=683.1.2.3 bus2=687.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.13986 units=m
+New object=Line.line691 bus1=687.1.2.3 bus2=692.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.16867 units=m
+New object=Line.line697 bus1=692.1.2.3 bus2=698.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.26905 units=m
+New object=Line.line703 bus1=698.1.2.3 bus2=704.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.73636 units=m
+New object=Line.line708 bus1=704.1.2.3 bus2=709.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.97996 units=m
+New object=Line.line714 bus1=709.1.2.3 bus2=715.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.093338 units=m
+New object=Line.line720 bus1=715.1.2.3 bus2=721.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.073817 units=m
+New object=Line.line727 bus1=721.1.2.3 bus2=728.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.071694 units=m
+New object=Line.line734 bus1=728.1.2.3 bus2=735.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.076792 units=m
+New object=Line.line741 bus1=735.1.2.3 bus2=742.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.071 units=m
+New object=Line.line749 bus1=742.1.2.3 bus2=750.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.06691 units=m
+New object=Line.line758 bus1=750.1.2.3 bus2=759.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.093059 units=m
+New object=Line.line766 bus1=759.1.2.3 bus2=767.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.11404 units=m
+New object=Line.line775 bus1=767.1.2.3 bus2=776.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.54052 units=m
+New object=Line.line784 bus1=776.1.2.3 bus2=785.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=4.6216 units=m
+New object=Line.line585 bus1=578.1.2.3 bus2=586.1.2.3 phases=3 linecode=4c_1 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.82623 units=m
+New object=Line.line593 bus1=586.1.2.3 bus2=594.1.2.3 phases=3 linecode=4c_1 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=3.9483 units=m
+New object=Line.line601 bus1=594.1.2.3 bus2=602.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=9.1669 units=m
+New object=Line.line613 bus1=602.1.2.3 bus2=614.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=4.8374 units=m
+New object=Line.line602 bus1=594.1.2.3 bus2=603.1.2.3 phases=3 linecode=4c_1 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=4.6424 units=m
+New object=Line.line614 bus1=603.1.2.3 bus2=615.1.2.3 phases=3 linecode=4c_1 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=4.4466 units=m
+New object=Line.line623 bus1=615.1.2.3 bus2=624.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=1.6322 units=m
+New object=Line.line630 bus1=624.1.2.3 bus2=631.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.40022 units=m
+New object=Line.line636 bus1=631.1.2.3 bus2=637.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.27482 units=m
+New object=Line.line642 bus1=637.1.2.3 bus2=643.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.38096 units=m
+New object=Line.line647 bus1=643.1.2.3 bus2=648.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.90337 units=m
+New object=Line.line652 bus1=648.1.2.3 bus2=653.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.68671 units=m
+New object=Line.line658 bus1=653.1.2.3 bus2=659.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.48206 units=m
+New object=Line.line664 bus1=659.1.2.3 bus2=665.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.505 units=m
+New object=Line.line670 bus1=665.1.2.3 bus2=671.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.41461 units=m
+New object=Line.line677 bus1=671.1.2.3 bus2=678.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.68648 units=m
+New object=Line.line683 bus1=678.1.2.3 bus2=684.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=2.2185 units=m
+New object=Line.line687 bus1=684.1.2.3 bus2=688.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=5.1838 units=m
+New object=Line.line624 bus1=615.1.2.3 bus2=625.1.2.3 phases=3 linecode=4c_1 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=1.2511 units=m
+New object=Line.line631 bus1=625.1.2.3 bus2=632.1.2.3 phases=3 linecode=4c_1 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.28784 units=m
+New object=Line.line637 bus1=632.1.2.3 bus2=638.1.2.3 phases=3 linecode=4c_1 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.14284 units=m
+New object=Line.line643 bus1=638.1.2.3 bus2=644.1.2.3 phases=3 linecode=4c_1 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.15697 units=m
+New object=Line.line648 bus1=644.1.2.3 bus2=649.1.2.3 phases=3 linecode=4c_1 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.18112 units=m
+New object=Line.line653 bus1=649.1.2.3 bus2=654.1.2.3 phases=3 linecode=4c_1 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.1831 units=m
+New object=Line.line659 bus1=654.1.2.3 bus2=660.1.2.3 phases=3 linecode=4c_1 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.20299 units=m
+New object=Line.line665 bus1=660.1.2.3 bus2=666.1.2.3 phases=3 linecode=4c_1 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.29519 units=m
+New object=Line.line671 bus1=666.1.2.3 bus2=672.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.4801 units=m
+New object=Line.line678 bus1=672.1.2.3 bus2=679.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.2883 units=m
+New object=Line.line684 bus1=679.1.2.3 bus2=685.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.26744 units=m
+New object=Line.line688 bus1=685.1.2.3 bus2=689.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.26095 units=m
+New object=Line.line692 bus1=689.1.2.3 bus2=693.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.19573 units=m
+New object=Line.line698 bus1=693.1.2.3 bus2=699.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.31093 units=m
+New object=Line.line704 bus1=699.1.2.3 bus2=705.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.52424 units=m
+New object=Line.line709 bus1=705.1.2.3 bus2=710.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=3.9281 units=m
+New object=Line.line715 bus1=710.1.2.3 bus2=716.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=3.2225 units=m
+New object=Line.line721 bus1=716.1.2.3 bus2=722.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=1.021 units=m
+New object=Line.line728 bus1=722.1.2.3 bus2=729.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.92949 units=m
+New object=Line.line735 bus1=729.1.2.3 bus2=736.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.50625 units=m
+New object=Line.line742 bus1=736.1.2.3 bus2=743.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.40432 units=m
+New object=Line.line750 bus1=743.1.2.3 bus2=751.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.34477 units=m
+New object=Line.line759 bus1=751.1.2.3 bus2=760.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.40459 units=m
+New object=Line.line767 bus1=760.1.2.3 bus2=768.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.36969 units=m
+New object=Line.line776 bus1=768.1.2.3 bus2=777.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.57353 units=m
+New object=Line.line785 bus1=777.1.2.3 bus2=786.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=1.1579 units=m
+New object=Line.line791 bus1=786.1.2.3 bus2=792.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.34588 units=m
+New object=Line.line798 bus1=792.1.2.3 bus2=799.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.30164 units=m
+New object=Line.line806 bus1=799.1.2.3 bus2=807.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.24947 units=m
+New object=Line.line815 bus1=807.1.2.3 bus2=816.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.194 units=m
+New object=Line.line823 bus1=816.1.2.3 bus2=824.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.19731 units=m
+New object=Line.line830 bus1=824.1.2.3 bus2=831.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.17123 units=m
+New object=Line.line836 bus1=831.1.2.3 bus2=837.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.12298 units=m
+New object=Line.line841 bus1=837.1.2.3 bus2=842.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.14278 units=m
+New object=Line.line847 bus1=842.1.2.3 bus2=848.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.2151 units=m
+New object=Line.line853 bus1=848.1.2.3 bus2=854.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.35143 units=m
+New object=Line.line859 bus1=854.1.2.3 bus2=860.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=2.82 units=m
+New object=Line.line860 bus1=854.1.2.3 bus2=861.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=7.5091 units=m
+New object=Line.line792 bus1=786.1.2.3 bus2=793.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=2.062 units=m
+New object=Line.line799 bus1=793.1.2.3 bus2=800.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=3.2995 units=m
+New object=Line.line807 bus1=800.1.2.3 bus2=808.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=2.8191 units=m
+New object=Line.line816 bus1=808.1.2.3 bus2=817.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=1.5955 units=m
+New object=Line.line672 bus1=666.1.2.3 bus2=673.1.2.3 phases=3 linecode=4c_1 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.81161 units=m
+New object=Line.line679 bus1=673.1.2.3 bus2=680.1.2.3 phases=3 linecode=4c_1 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=5.1393 units=m
+New object=Line.line685 bus1=680.1.2.3 bus2=686.1.2.3 phases=3 linecode=4c_1 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=3.6787 units=m
+New object=Line.line689 bus1=686.1.2.3 bus2=690.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=8.1445 units=m
+New object=Line.line693 bus1=690.1.2.3 bus2=694.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.76157 units=m
+New object=Line.line699 bus1=694.1.2.3 bus2=700.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.2383 units=m
+New object=Line.line705 bus1=700.1.2.3 bus2=706.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.15322 units=m
+New object=Line.line710 bus1=706.1.2.3 bus2=711.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.092418 units=m
+New object=Line.line716 bus1=711.1.2.3 bus2=717.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.093408 units=m
+New object=Line.line722 bus1=717.1.2.3 bus2=723.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.083433 units=m
+New object=Line.line729 bus1=723.1.2.3 bus2=730.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.094 units=m
+New object=Line.line736 bus1=730.1.2.3 bus2=737.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.075313 units=m
+New object=Line.line743 bus1=737.1.2.3 bus2=744.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.090338 units=m
+New object=Line.line751 bus1=744.1.2.3 bus2=752.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.09735 units=m
+New object=Line.line760 bus1=752.1.2.3 bus2=761.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.17761 units=m
+New object=Line.line768 bus1=761.1.2.3 bus2=769.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=1.3288 units=m
+New object=Line.line777 bus1=769.1.2.3 bus2=778.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=4.0721 units=m
+New object=Line.line694 bus1=690.1.2.3 bus2=695.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=2.1261 units=m
+New object=Line.line700 bus1=695.1.2.3 bus2=701.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=4.3312 units=m
+New object=Line.line690 bus1=686.1.2.3 bus2=691.1.2.3 phases=3 linecode=4c_1 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=10.5254 units=m
+New object=Line.line695 bus1=691.1.2.3 bus2=696.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=9.4817 units=m
+New object=Line.line701 bus1=696.1.2.3 bus2=702.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=5.493 units=m
+New object=Line.line696 bus1=691.1.2.3 bus2=697.1.2.3 phases=3 linecode=4c_1 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=2.1907 units=m
+New object=Line.line702 bus1=697.1.2.3 bus2=703.1.2.3 phases=3 linecode=4c_06 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=2.4 units=m
+New object=Line.line706 bus1=703.1.2.3 bus2=707.1.2.3 phases=3 linecode=4c_06 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=6.3308 units=m
+New object=Line.line711 bus1=707.1.2.3 bus2=712.1.2.3 phases=3 linecode=4c_06 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=7.5025 units=m
+New object=Line.line717 bus1=712.1.2.3 bus2=718.1.2.3 phases=3 linecode=4c_06 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=7.7434 units=m
+New object=Line.line723 bus1=718.1.2.3 bus2=724.1.2.3 phases=3 linecode=4c_06 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=3.2535 units=m
+New object=Line.line730 bus1=724.1.2.3 bus2=731.1.2.3 phases=3 linecode=4c_06 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=4.421 units=m
+New object=Line.line737 bus1=731.1.2.3 bus2=738.1.2.3 phases=3 linecode=4c_06 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=5.1761 units=m
+New object=Line.line744 bus1=738.1.2.3 bus2=745.1.2.3 phases=3 linecode=4c_06 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=4.1562 units=m
+New object=Line.line752 bus1=745.1.2.3 bus2=753.1.2.3 phases=3 linecode=4c_06 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=1.5434 units=m
+New object=Line.line761 bus1=753.1.2.3 bus2=762.1.2.3 phases=3 linecode=4c_06 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=2.1279 units=m
+New object=Line.line769 bus1=762.1.2.3 bus2=770.1.2.3 phases=3 linecode=4c_06 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=5.2347 units=m
+New object=Line.line778 bus1=770.1.2.3 bus2=779.1.2.3 phases=3 linecode=4c_06 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=4.2428 units=m
+New object=Line.line786 bus1=779.1.2.3 bus2=787.1.2.3 phases=3 linecode=4c_06 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=3.3152 units=m
+New object=Line.line793 bus1=787.1.2.3 bus2=794.1.2.3 phases=3 linecode=4c_06 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=2.9963 units=m
+New object=Line.line800 bus1=794.1.2.3 bus2=801.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.20555 units=m
+New object=Line.line808 bus1=801.1.2.3 bus2=809.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.20609 units=m
+New object=Line.line817 bus1=809.1.2.3 bus2=818.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.20649 units=m
+New object=Line.line824 bus1=818.1.2.3 bus2=825.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.20524 units=m
+New object=Line.line831 bus1=825.1.2.3 bus2=832.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.20602 units=m
+New object=Line.line837 bus1=832.1.2.3 bus2=838.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.20588 units=m
+New object=Line.line842 bus1=838.1.2.3 bus2=843.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.20601 units=m
+New object=Line.line848 bus1=843.1.2.3 bus2=849.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.10056 units=m
+New object=Line.line854 bus1=849.1.2.3 bus2=855.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=2.2601 units=m
+New object=Line.line861 bus1=855.1.2.3 bus2=862.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=1.4697 units=m
+New object=Line.line866 bus1=862.1.2.3 bus2=867.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=1.2854 units=m
+New object=Line.line871 bus1=867.1.2.3 bus2=872.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=1.3483 units=m
+New object=Line.line877 bus1=872.1.2.3 bus2=878.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=2.3022 units=m
+New object=Line.line883 bus1=878.1.2.3 bus2=884.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.56468 units=m
+New object=Line.line887 bus1=884.1.2.3 bus2=888.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.62293 units=m
+New object=Line.line891 bus1=888.1.2.3 bus2=892.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=1.0228 units=m
+New object=Line.line896 bus1=892.1.2.3 bus2=897.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.20223 units=m
+New object=Line.line900 bus1=897.1.2.3 bus2=901.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.17088 units=m
+New object=Line.line901 bus1=901.1.2.3 bus2=902.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.144 units=m
+New object=Line.line902 bus1=902.1.2.3 bus2=903.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.18732 units=m
+New object=Line.line903 bus1=903.1.2.3 bus2=904.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.33902 units=m
+New object=Line.line904 bus1=904.1.2.3 bus2=905.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.5878 units=m
+New object=Line.line905 bus1=905.1.2.3 bus2=906.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=4.8147 units=m
+New object=Line.line888 bus1=884.1.2.3 bus2=889.1.2.3 phases=3 linecode=35_SAC_XSC Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=3.1574 units=m
+New object=Line.line892 bus1=889.1.2.3 bus2=893.1.2.3 phases=3 linecode=35_SAC_XSC Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=2.6779 units=m
+New object=Line.line897 bus1=893.1.2.3 bus2=898.1.2.3 phases=3 linecode=35_SAC_XSC Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=4.501 units=m
+New object=Line.line801 bus1=794.1.2.3 bus2=802.1.2.3 phases=3 linecode=4c_95_SAC_XC Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=2.8031 units=m
+New object=Line.line809 bus1=802.1.2.3 bus2=810.1.2.3 phases=3 linecode=4c_06 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=3.0749 units=m
+New object=Line.line818 bus1=810.1.2.3 bus2=819.1.2.3 phases=3 linecode=4c_06 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=2.5782 units=m
+New object=Line.line825 bus1=819.1.2.3 bus2=826.1.2.3 phases=3 linecode=4c_06 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=2.7715 units=m
+New object=Line.line832 bus1=826.1.2.3 bus2=833.1.2.3 phases=3 linecode=4c_06 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=2.2755 units=m
+New object=Line.line838 bus1=833.1.2.3 bus2=839.1.2.3 phases=3 linecode=4c_06 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=2.443 units=m
+New object=Line.line843 bus1=839.1.2.3 bus2=844.1.2.3 phases=3 linecode=2c_0225 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=4.8092 units=m
+New object=Line.line849 bus1=844.1.2.3 bus2=850.1.2.3 phases=3 linecode=2c_0225 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.7036 units=m
+New object=Line.line855 bus1=850.1.2.3 bus2=856.1.2.3 phases=3 linecode=2c_0225 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=1.9822 units=m
+New object=Line.line862 bus1=856.1.2.3 bus2=863.1.2.3 phases=3 linecode=2c_0225 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=2.3276 units=m
+New object=Line.line867 bus1=863.1.2.3 bus2=868.1.2.3 phases=3 linecode=2c_0225 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.30194 units=m
+New object=Line.line872 bus1=868.1.2.3 bus2=873.1.2.3 phases=3 linecode=2c_0225 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.37952 units=m
+New object=Line.line878 bus1=873.1.2.3 bus2=879.1.2.3 phases=3 linecode=2c_0225 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.35118 units=m
+New object=Line.line884 bus1=879.1.2.3 bus2=885.1.2.3 phases=3 linecode=2c_0225 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.534 units=m
+New object=Line.line889 bus1=885.1.2.3 bus2=890.1.2.3 phases=3 linecode=2c_0225 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.67483 units=m
+New object=Line.line893 bus1=890.1.2.3 bus2=894.1.2.3 phases=3 linecode=2c_0225 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=2.6271 units=m
+New object=Line.line898 bus1=894.1.2.3 bus2=899.1.2.3 phases=3 linecode=2c_0225 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=4.7723 units=m
+New object=Line.line873 bus1=868.1.2.3 bus2=874.1.2.3 phases=3 linecode=2c_0225 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.84439 units=m
+New object=Line.line879 bus1=874.1.2.3 bus2=880.1.2.3 phases=3 linecode=2c_0225 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=1.9761 units=m
+New object=Line.line885 bus1=880.1.2.3 bus2=886.1.2.3 phases=3 linecode=2c_0225 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=4.6879 units=m
+New object=Line.line844 bus1=839.1.2.3 bus2=845.1.2.3 phases=3 linecode=4c_06 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=3.6212 units=m
+New object=Line.line850 bus1=845.1.2.3 bus2=851.1.2.3 phases=3 linecode=4c_06 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=4.364 units=m
+New object=Line.line856 bus1=851.1.2.3 bus2=857.1.2.3 phases=3 linecode=4c_06 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=6.8621 units=m
+New object=Line.line863 bus1=857.1.2.3 bus2=864.1.2.3 phases=3 linecode=4c_06 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=2.7888 units=m
+New object=Line.line868 bus1=864.1.2.3 bus2=869.1.2.3 phases=3 linecode=4c_06 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=1.7373 units=m
+New object=Line.line874 bus1=869.1.2.3 bus2=875.1.2.3 phases=3 linecode=4c_06 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=1.2 units=m
+New object=Line.line880 bus1=875.1.2.3 bus2=881.1.2.3 phases=3 linecode=4c_06 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=1.0112 units=m
+New object=Line.line881 bus1=875.1.2.3 bus2=882.1.2.3 phases=3 linecode=4c_06 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=1.0112 units=m
+New object=Line.line875 bus1=869.1.2.3 bus2=876.1.2.3 phases=3 linecode=4c_06 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=1.2 units=m
+New object=Line.line869 bus1=864.1.2.3 bus2=870.1.2.3 phases=3 linecode=4c_06 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=1.7373 units=m
+New object=Line.line864 bus1=857.1.2.3 bus2=865.1.2.3 phases=3 linecode=4c_06 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=2.7888 units=m
+New object=Line.line857 bus1=851.1.2.3 bus2=858.1.2.3 phases=3 linecode=4c_06 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=6.8621 units=m
+New object=Line.line851 bus1=845.1.2.3 bus2=852.1.2.3 phases=3 linecode=4c_06 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=4.364 units=m
+New object=Line.line845 bus1=839.1.2.3 bus2=846.1.2.3 phases=3 linecode=4c_06 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=3.6212 units=m
+New object=Line.line839 bus1=833.1.2.3 bus2=840.1.2.3 phases=3 linecode=4c_06 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=2.443 units=m
+New object=Line.line833 bus1=826.1.2.3 bus2=834.1.2.3 phases=3 linecode=4c_06 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=2.2755 units=m
+New object=Line.line826 bus1=819.1.2.3 bus2=827.1.2.3 phases=3 linecode=4c_06 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=2.7715 units=m
+New object=Line.line819 bus1=810.1.2.3 bus2=820.1.2.3 phases=3 linecode=4c_06 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=2.5782 units=m
+New object=Line.line810 bus1=802.1.2.3 bus2=811.1.2.3 phases=3 linecode=4c_06 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=3.0749 units=m
+New object=Line.line753 bus1=745.1.2.3 bus2=754.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=5.9227 units=m
+New object=Line.line762 bus1=754.1.2.3 bus2=763.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=4.9506 units=m
+New object=Line.line770 bus1=763.1.2.3 bus2=771.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=3.6007 units=m
+New object=Line.line779 bus1=771.1.2.3 bus2=780.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=3.5283 units=m
+New object=Line.line771 bus1=763.1.2.3 bus2=772.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.13038 units=m
+New object=Line.line780 bus1=772.1.2.3 bus2=781.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.12466 units=m
+New object=Line.line787 bus1=781.1.2.3 bus2=788.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.13439 units=m
+New object=Line.line794 bus1=788.1.2.3 bus2=795.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.12 units=m
+New object=Line.line802 bus1=795.1.2.3 bus2=803.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.13252 units=m
+New object=Line.line811 bus1=803.1.2.3 bus2=812.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.08544 units=m
+New object=Line.line820 bus1=812.1.2.3 bus2=821.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.13123 units=m
+New object=Line.line827 bus1=821.1.2.3 bus2=828.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=1.0794 units=m
+New object=Line.line834 bus1=828.1.2.3 bus2=835.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=3.7201 units=m
+New object=Line.line724 bus1=718.1.2.3 bus2=725.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=9.3475 units=m
+New object=Line.line731 bus1=725.1.2.3 bus2=732.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=1.2539 units=m
+New object=Line.line738 bus1=732.1.2.3 bus2=739.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.65877 units=m
+New object=Line.line745 bus1=739.1.2.3 bus2=746.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=3.7387 units=m
+New object=Line.line754 bus1=746.1.2.3 bus2=755.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=3.0391 units=m
+New object=Line.line746 bus1=739.1.2.3 bus2=747.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.12202 units=m
+New object=Line.line755 bus1=747.1.2.3 bus2=756.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.088238 units=m
+New object=Line.line763 bus1=756.1.2.3 bus2=764.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.074465 units=m
+New object=Line.line772 bus1=764.1.2.3 bus2=773.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.12578 units=m
+New object=Line.line781 bus1=773.1.2.3 bus2=782.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.17614 units=m
+New object=Line.line788 bus1=782.1.2.3 bus2=789.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.1307 units=m
+New object=Line.line795 bus1=789.1.2.3 bus2=796.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.21651 units=m
+New object=Line.line803 bus1=796.1.2.3 bus2=804.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=1.5028 units=m
+New object=Line.line812 bus1=804.1.2.3 bus2=813.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=3.3195 units=m
+New object=Line.line712 bus1=707.1.2.3 bus2=713.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=3.9448 units=m
+New object=Line.line718 bus1=713.1.2.3 bus2=719.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.4223 units=m
+New object=Line.line725 bus1=719.1.2.3 bus2=726.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.16124 units=m
+New object=Line.line732 bus1=726.1.2.3 bus2=733.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.17056 units=m
+New object=Line.line739 bus1=733.1.2.3 bus2=740.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.14155 units=m
+New object=Line.line747 bus1=740.1.2.3 bus2=748.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.16763 units=m
+New object=Line.line756 bus1=748.1.2.3 bus2=757.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.16348 units=m
+New object=Line.line764 bus1=757.1.2.3 bus2=765.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.22475 units=m
+New object=Line.line773 bus1=765.1.2.3 bus2=774.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.30918 units=m
+New object=Line.line782 bus1=774.1.2.3 bus2=783.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.3272 units=m
+New object=Line.line789 bus1=783.1.2.3 bus2=790.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.21735 units=m
+New object=Line.line796 bus1=790.1.2.3 bus2=797.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.22121 units=m
+New object=Line.line804 bus1=797.1.2.3 bus2=805.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.10577 units=m
+New object=Line.line813 bus1=805.1.2.3 bus2=814.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.16824 units=m
+New object=Line.line821 bus1=814.1.2.3 bus2=822.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.15794 units=m
+New object=Line.line828 bus1=822.1.2.3 bus2=829.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.22567 units=m
+New object=Line.line835 bus1=829.1.2.3 bus2=836.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=2.3821 units=m
+New object=Line.line840 bus1=836.1.2.3 bus2=841.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.95278 units=m
+New object=Line.line846 bus1=841.1.2.3 bus2=847.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.48382 units=m
+New object=Line.line852 bus1=847.1.2.3 bus2=853.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.10706 units=m
+New object=Line.line858 bus1=853.1.2.3 bus2=859.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.084315 units=m
+New object=Line.line865 bus1=859.1.2.3 bus2=866.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.090338 units=m
+New object=Line.line870 bus1=866.1.2.3 bus2=871.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.072277 units=m
+New object=Line.line876 bus1=871.1.2.3 bus2=877.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.070178 units=m
+New object=Line.line882 bus1=877.1.2.3 bus2=883.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.07 units=m
+New object=Line.line886 bus1=883.1.2.3 bus2=887.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.069181 units=m
+New object=Line.line890 bus1=887.1.2.3 bus2=891.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=1.2371 units=m
+New object=Line.line894 bus1=891.1.2.3 bus2=895.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=5.8249 units=m
+New object=Line.line899 bus1=895.1.2.3 bus2=900.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=3.8684 units=m
+New object=Line.line895 bus1=891.1.2.3 bus2=896.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=3.2587 units=m
+New object=Line.line707 bus1=703.1.2.3 bus2=708.1.2.3 phases=3 linecode=4c_06 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.11132 units=m
+New object=Line.line713 bus1=708.1.2.3 bus2=714.1.2.3 phases=3 linecode=4c_06 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.10474 units=m
+New object=Line.line719 bus1=714.1.2.3 bus2=720.1.2.3 phases=3 linecode=4c_06 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.097 units=m
+New object=Line.line726 bus1=720.1.2.3 bus2=727.1.2.3 phases=3 linecode=4c_06 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.10977 units=m
+New object=Line.line733 bus1=727.1.2.3 bus2=734.1.2.3 phases=3 linecode=4c_06 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.089889 units=m
+New object=Line.line740 bus1=734.1.2.3 bus2=741.1.2.3 phases=3 linecode=4c_06 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.13761 units=m
+New object=Line.line748 bus1=741.1.2.3 bus2=749.1.2.3 phases=3 linecode=4c_06 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.16427 units=m
+New object=Line.line757 bus1=749.1.2.3 bus2=758.1.2.3 phases=3 linecode=4c_06 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.12454 units=m
+New object=Line.line765 bus1=758.1.2.3 bus2=766.1.2.3 phases=3 linecode=4c_06 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.12167 units=m
+New object=Line.line774 bus1=766.1.2.3 bus2=775.1.2.3 phases=3 linecode=4c_06 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.07931 units=m
+New object=Line.line783 bus1=775.1.2.3 bus2=784.1.2.3 phases=3 linecode=4c_06 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.097 units=m
+New object=Line.line790 bus1=784.1.2.3 bus2=791.1.2.3 phases=3 linecode=4c_06 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.091984 units=m
+New object=Line.line797 bus1=791.1.2.3 bus2=798.1.2.3 phases=3 linecode=4c_06 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.091706 units=m
+New object=Line.line805 bus1=798.1.2.3 bus2=806.1.2.3 phases=3 linecode=4c_06 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.12311 units=m
+New object=Line.line814 bus1=806.1.2.3 bus2=815.1.2.3 phases=3 linecode=4c_06 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.42086 units=m
+New object=Line.line822 bus1=815.1.2.3 bus2=823.1.2.3 phases=3 linecode=4c_06 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.48651 units=m
+New object=Line.line829 bus1=823.1.2.3 bus2=830.1.2.3 phases=3 linecode=4c_06 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.49659 units=m
+New object=Line.line409 bus1=403.1.2.3 bus2=410.1.2.3 phases=3 linecode=4c_1 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.3791 units=m
+New object=Line.line415 bus1=410.1.2.3 bus2=416.1.2.3 phases=3 linecode=4c_1 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.094921 units=m
+New object=Line.line421 bus1=416.1.2.3 bus2=422.1.2.3 phases=3 linecode=4c_1 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.066573 units=m
+New object=Line.line428 bus1=422.1.2.3 bus2=429.1.2.3 phases=3 linecode=4c_1 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.082873 units=m
+New object=Line.line435 bus1=429.1.2.3 bus2=436.1.2.3 phases=3 linecode=4c_1 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.071344 units=m
+New object=Line.line442 bus1=436.1.2.3 bus2=443.1.2.3 phases=3 linecode=4c_1 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.078 units=m
+New object=Line.line449 bus1=443.1.2.3 bus2=450.1.2.3 phases=3 linecode=4c_1 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.079246 units=m
+New object=Line.line456 bus1=450.1.2.3 bus2=457.1.2.3 phases=3 linecode=4c_1 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.054231 units=m
+New object=Line.line464 bus1=457.1.2.3 bus2=465.1.2.3 phases=3 linecode=4c_1 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.040311 units=m
+New object=Line.line472 bus1=465.1.2.3 bus2=473.1.2.3 phases=3 linecode=4c_1 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.049497 units=m
+New object=Line.line479 bus1=473.1.2.3 bus2=480.1.2.3 phases=3 linecode=4c_1 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.063953 units=m
+New object=Line.line487 bus1=480.1.2.3 bus2=488.1.2.3 phases=3 linecode=4c_1 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.11163 units=m
+New object=Line.line496 bus1=488.1.2.3 bus2=497.1.2.3 phases=3 linecode=4c_1 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.13972 units=m
+New object=Line.line505 bus1=497.1.2.3 bus2=506.1.2.3 phases=3 linecode=4c_1 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.096167 units=m
+New object=Line.line514 bus1=506.1.2.3 bus2=515.1.2.3 phases=3 linecode=4c_1 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.085492 units=m
+New object=Line.line523 bus1=515.1.2.3 bus2=524.1.2.3 phases=3 linecode=4c_1 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.066573 units=m
+New object=Line.line531 bus1=524.1.2.3 bus2=532.1.2.3 phases=3 linecode=4c_1 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.060803 units=m
+New object=Line.line540 bus1=532.1.2.3 bus2=541.1.2.3 phases=3 linecode=4c_1 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.065513 units=m
+New object=Line.line548 bus1=541.1.2.3 bus2=549.1.2.3 phases=3 linecode=4c_1 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.086145 units=m
+New object=Line.line557 bus1=549.1.2.3 bus2=558.1.2.3 phases=3 linecode=4c_1 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.061612 units=m
+New object=Line.line565 bus1=558.1.2.3 bus2=566.1.2.3 phases=3 linecode=4c_1 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.12021 units=m
+New object=Line.line378 bus1=373.1.2.3 bus2=379.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=1.4115 units=m
+New object=Line.line384 bus1=379.1.2.3 bus2=385.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=8.6668 units=m
+New object=Line.line391 bus1=385.1.2.3 bus2=392.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=3.1675 units=m
+New object=Line.line397 bus1=392.1.2.3 bus2=398.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.32241 units=m
+New object=Line.line403 bus1=398.1.2.3 bus2=404.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.225 units=m
+New object=Line.line410 bus1=404.1.2.3 bus2=411.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.23308 units=m
+New object=Line.line416 bus1=411.1.2.3 bus2=417.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.9788 units=m
+New object=Line.line422 bus1=417.1.2.3 bus2=423.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.239 units=m
+New object=Line.line429 bus1=423.1.2.3 bus2=430.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.22798 units=m
+New object=Line.line436 bus1=430.1.2.3 bus2=437.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.22674 units=m
+New object=Line.line443 bus1=437.1.2.3 bus2=444.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.2601 units=m
+New object=Line.line450 bus1=444.1.2.3 bus2=451.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.89824 units=m
+New object=Line.line457 bus1=451.1.2.3 bus2=458.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=4.3773 units=m
+New object=Line.line385 bus1=379.1.2.3 bus2=386.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=1.4561 units=m
+New object=Line.line392 bus1=386.1.2.3 bus2=393.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=7.8335 units=m
+New object=Line.line398 bus1=393.1.2.3 bus2=399.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.5688 units=m
+New object=Line.line404 bus1=399.1.2.3 bus2=405.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.24807 units=m
+New object=Line.line411 bus1=405.1.2.3 bus2=412.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.16706 units=m
+New object=Line.line417 bus1=412.1.2.3 bus2=418.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.27954 units=m
+New object=Line.line423 bus1=418.1.2.3 bus2=424.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=3.1944 units=m
+New object=Line.line430 bus1=424.1.2.3 bus2=431.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=1.1331 units=m
+New object=Line.line437 bus1=431.1.2.3 bus2=438.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.384 units=m
+New object=Line.line444 bus1=438.1.2.3 bus2=445.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.67858 units=m
+New object=Line.line451 bus1=445.1.2.3 bus2=452.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.59366 units=m
+New object=Line.line458 bus1=452.1.2.3 bus2=459.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.67064 units=m
+New object=Line.line465 bus1=459.1.2.3 bus2=466.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.63421 units=m
+New object=Line.line473 bus1=466.1.2.3 bus2=474.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=3.201 units=m
+New object=Line.line480 bus1=474.1.2.3 bus2=481.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.18984 units=m
+New object=Line.line488 bus1=481.1.2.3 bus2=489.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.1713 units=m
+New object=Line.line497 bus1=489.1.2.3 bus2=498.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.23283 units=m
+New object=Line.line506 bus1=498.1.2.3 bus2=507.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.30564 units=m
+New object=Line.line65 bus1=59.1.2.3 bus2=66.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=8.2583 units=m
+New object=Line.line72 bus1=66.1.2.3 bus2=73.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=4.0366 units=m
+New object=Line.line73 bus1=66.1.2.3 bus2=74.1.2.3 phases=3 linecode=2c_16 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=4.0366 units=m
+New object=Line.line53 bus1=48.1.2.3 bus2=54.1.2.3 phases=3 linecode=4c_70 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.63949 units=m
+New object=Line.line59 bus1=54.1.2.3 bus2=60.1.2.3 phases=3 linecode=4c_70 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.065368 units=m
+New object=Line.line66 bus1=60.1.2.3 bus2=67.1.2.3 phases=3 linecode=4c_70 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.074 units=m
+New object=Line.line74 bus1=67.1.2.3 bus2=75.1.2.3 phases=3 linecode=4c_70 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.17951 units=m
+New object=Line.line79 bus1=75.1.2.3 bus2=80.1.2.3 phases=3 linecode=4c_70 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.10362 units=m
+New object=Line.line84 bus1=80.1.2.3 bus2=85.1.2.3 phases=3 linecode=4c_70 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.11122 units=m
+New object=Line.line88 bus1=85.1.2.3 bus2=89.1.2.3 phases=3 linecode=4c_70 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.1048 units=m
+New object=Line.line42 bus1=37.1.2.3 bus2=43.1.2.3 phases=3 linecode=4c_185 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.21675 units=m
+New object=Line.line48 bus1=43.1.2.3 bus2=49.1.2.3 phases=3 linecode=4c_185 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.10436 units=m
+New object=Line.line54 bus1=49.1.2.3 bus2=55.1.2.3 phases=3 linecode=4c_185 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.11625 units=m
+New object=Line.line60 bus1=55.1.2.3 bus2=61.1.2.3 phases=3 linecode=4c_185 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.10028 units=m
+New object=Line.line67 bus1=61.1.2.3 bus2=68.1.2.3 phases=3 linecode=4c_185 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.096042 units=m
+New object=Line.line75 bus1=68.1.2.3 bus2=76.1.2.3 phases=3 linecode=4c_185 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.23551 units=m
+New object=Line.line80 bus1=76.1.2.3 bus2=81.1.2.3 phases=3 linecode=4c_185 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.7469 units=m
+New object=Line.line85 bus1=81.1.2.3 bus2=86.1.2.3 phases=3 linecode=4c_185 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=1.4388 units=m
+New object=Line.line89 bus1=86.1.2.3 bus2=90.1.2.3 phases=3 linecode=4c_185 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.34251 units=m
+New object=Line.line92 bus1=90.1.2.3 bus2=93.1.2.3 phases=3 linecode=4c_185 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.065307 units=m
+New object=Line.line95 bus1=93.1.2.3 bus2=96.1.2.3 phases=3 linecode=4c_185 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.086052 units=m
+New object=Line.line98 bus1=96.1.2.3 bus2=99.1.2.3 phases=3 linecode=4c_185 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.037216 units=m
+New object=Line.line101 bus1=99.1.2.3 bus2=102.1.2.3 phases=3 linecode=4c_185 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=5.0819 units=m
+New object=Line.line105 bus1=102.1.2.3 bus2=106.1.2.3 phases=3 linecode=4c_185 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.22108 units=m
+New object=Line.line108 bus1=106.1.2.3 bus2=109.1.2.3 phases=3 linecode=4c_185 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.45085 units=m
+New object=Line.line111 bus1=109.1.2.3 bus2=112.1.2.3 phases=3 linecode=4c_185 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=11.9766 units=m
+New object=Line.line114 bus1=112.1.2.3 bus2=115.1.2.3 phases=3 linecode=4c_185 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=10.6613 units=m
+New object=Line.line118 bus1=115.1.2.3 bus2=119.1.2.3 phases=3 linecode=4c_185 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.99464 units=m
+New object=Line.line123 bus1=119.1.2.3 bus2=124.1.2.3 phases=3 linecode=4c_185 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.7248 units=m
+New object=Line.line128 bus1=124.1.2.3 bus2=129.1.2.3 phases=3 linecode=4c_185 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.62512 units=m
+New object=Line.line134 bus1=129.1.2.3 bus2=135.1.2.3 phases=3 linecode=4c_185 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=1.9203 units=m
+New object=Line.line140 bus1=135.1.2.3 bus2=141.1.2.3 phases=3 linecode=4c_185 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=1.4127 units=m
+New object=Line.line146 bus1=141.1.2.3 bus2=147.1.2.3 phases=3 linecode=4c_185 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.24053 units=m
+New object=Line.line153 bus1=147.1.2.3 bus2=154.1.2.3 phases=3 linecode=4c_185 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.083096 units=m
+New object=Line.line160 bus1=154.1.2.3 bus2=161.1.2.3 phases=3 linecode=4c_185 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.12256 units=m
+New object=Line.line168 bus1=161.1.2.3 bus2=169.1.2.3 phases=3 linecode=4c_185 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.24958 units=m
+! Redirect m1\Loads.dss
+New object=Load.load1 phases=1 bus1=34.1 kV=0.23 kW=1 pf=0.95 yearly=Shape_1
+New object=Load.load3 phases=1 bus1=70.1 kV=0.23 kW=1 pf=0.95 yearly=Shape_3
+New object=Load.load6 phases=1 bus1=83.2 kV=0.23 kW=1 pf=0.95 yearly=Shape_6
+New object=Load.load2 phases=1 bus1=47.2 kV=0.23 kW=1 pf=0.95 yearly=Shape_2
+New object=Load.load7 phases=1 bus1=178.2 kV=0.23 kW=1 pf=0.95 yearly=Shape_7
+New object=Load.load9 phases=1 bus1=225.1 kV=0.23 kW=1 pf=0.95 yearly=Shape_9
+New object=Load.load10 phases=1 bus1=248.2 kV=0.23 kW=1 pf=0.95 yearly=Shape_10
+New object=Load.load11 phases=1 bus1=249.2 kV=0.23 kW=1 pf=0.95 yearly=Shape_11
+New object=Load.load8 phases=1 bus1=208.3 kV=0.23 kW=1 pf=0.95 yearly=Shape_8
+New object=Load.load12 phases=1 bus1=264.3 kV=0.23 kW=1 pf=0.95 yearly=Shape_12
+New object=Load.load14 phases=1 bus1=289.1 kV=0.23 kW=1 pf=0.95 yearly=Shape_14
+New object=Load.load16 phases=1 bus1=320.3 kV=0.23 kW=1 pf=0.95 yearly=Shape_16
+New object=Load.load17 phases=1 bus1=327.3 kV=0.23 kW=1 pf=0.95 yearly=Shape_17
+New object=Load.load13 phases=1 bus1=276.2 kV=0.23 kW=1 pf=0.95 yearly=Shape_13
+New object=Load.load15 phases=1 bus1=314.2 kV=0.23 kW=1 pf=0.95 yearly=Shape_15
+New object=Load.load21 phases=1 bus1=387.1 kV=0.23 kW=1 pf=0.95 yearly=Shape_21
+New object=Load.load19 phases=1 bus1=342.3 kV=0.23 kW=1 pf=0.95 yearly=Shape_19
+New object=Load.load20 phases=1 bus1=349.1 kV=0.23 kW=1 pf=0.95 yearly=Shape_20
+New object=Load.load22 phases=1 bus1=388.1 kV=0.23 kW=1 pf=0.95 yearly=Shape_22
+New object=Load.load18 phases=1 bus1=337.3 kV=0.23 kW=1 pf=0.95 yearly=Shape_18
+New object=Load.load23 phases=1 bus1=406.2 kV=0.23 kW=1 pf=0.95 yearly=Shape_23
+New object=Load.load35 phases=1 bus1=639.2 kV=0.23 kW=1 pf=0.95 yearly=Shape_35
+New object=Load.load33 phases=1 bus1=619.3 kV=0.23 kW=1 pf=0.95 yearly=Shape_33
+New object=Load.load37 phases=1 bus1=682.2 kV=0.23 kW=1 pf=0.95 yearly=Shape_37
+New object=Load.load36 phases=1 bus1=676.2 kV=0.23 kW=1 pf=0.95 yearly=Shape_36
+New object=Load.load31 phases=1 bus1=611.1 kV=0.23 kW=1 pf=0.95 yearly=Shape_31
+New object=Load.load29 phases=1 bus1=562.1 kV=0.23 kW=1 pf=0.95 yearly=Shape_29
+New object=Load.load30 phases=1 bus1=563.1 kV=0.23 kW=1 pf=0.95 yearly=Shape_30
+New object=Load.load25 phases=1 bus1=502.1 kV=0.23 kW=1 pf=0.95 yearly=Shape_25
+New object=Load.load34 phases=1 bus1=629.1 kV=0.23 kW=1 pf=0.95 yearly=Shape_34
+New object=Load.load28 phases=1 bus1=556.3 kV=0.23 kW=1 pf=0.95 yearly=Shape_28
+New object=Load.load27 phases=1 bus1=539.3 kV=0.23 kW=1 pf=0.95 yearly=Shape_27
+New object=Load.load26 phases=1 bus1=522.2 kV=0.23 kW=1 pf=0.95 yearly=Shape_26
+New object=Load.load44 phases=1 bus1=785.2 kV=0.23 kW=1 pf=0.95 yearly=Shape_44
+New object=Load.load32 phases=1 bus1=614.3 kV=0.23 kW=1 pf=0.95 yearly=Shape_32
+New object=Load.load38 phases=1 bus1=688.2 kV=0.23 kW=1 pf=0.95 yearly=Shape_38
+New object=Load.load48 phases=1 bus1=860.1 kV=0.23 kW=1 pf=0.95 yearly=Shape_48
+New object=Load.load49 phases=1 bus1=861.1 kV=0.23 kW=1 pf=0.95 yearly=Shape_49
+New object=Load.load46 phases=1 bus1=817.1 kV=0.23 kW=1 pf=0.95 yearly=Shape_46
+New object=Load.load42 phases=1 bus1=778.3 kV=0.23 kW=1 pf=0.95 yearly=Shape_42
+New object=Load.load39 phases=1 bus1=701.3 kV=0.23 kW=1 pf=0.95 yearly=Shape_39
+New object=Load.load40 phases=1 bus1=702.2 kV=0.23 kW=1 pf=0.95 yearly=Shape_40
+New object=Load.load55 phases=1 bus1=906.1 kV=0.23 kW=1 pf=0.95 yearly=Shape_55
+New object=Load.load52 phases=1 bus1=898.1 kV=0.23 kW=1 pf=0.95 yearly=Shape_52
+New object=Load.load53 phases=1 bus1=899.2 kV=0.23 kW=1 pf=0.95 yearly=Shape_53
+New object=Load.load50 phases=1 bus1=886.2 kV=0.23 kW=1 pf=0.95 yearly=Shape_50
+New object=Load.load43 phases=1 bus1=780.3 kV=0.23 kW=1 pf=0.95 yearly=Shape_43
+New object=Load.load47 phases=1 bus1=835.3 kV=0.23 kW=1 pf=0.95 yearly=Shape_47
+New object=Load.load41 phases=1 bus1=755.2 kV=0.23 kW=1 pf=0.95 yearly=Shape_41
+New object=Load.load45 phases=1 bus1=813.2 kV=0.23 kW=1 pf=0.95 yearly=Shape_45
+New object=Load.load54 phases=1 bus1=900.1 kV=0.23 kW=1 pf=0.95 yearly=Shape_54
+New object=Load.load51 phases=1 bus1=896.1 kV=0.23 kW=1 pf=0.95 yearly=Shape_51
+New object=Load.load24 phases=1 bus1=458.3 kV=0.23 kW=1 pf=0.95 yearly=Shape_24
+New object=Load.load4 phases=1 bus1=73.1 kV=0.23 kW=1 pf=0.95 yearly=Shape_4
+New object=Load.load5 phases=1 bus1=74.1 kV=0.23 kW=1 pf=0.95 yearly=Shape_5
+! Redirect Transformer.DSS
+New object=Transformer.tr1 buses=[sourcebus.1.2.3,1.1.2.3] conns=[delta,wye] kVs=[11,0.416] kVAs=[800,800] XHL=4 sub=y
+! Redirect Monitor.DSS
+New object=Monitor.line558_vi_vs_time element=line.line558 terminal=2 mode=0
+New object=Monitor.line825_vi_vs_time element=line.line825 terminal=2 mode=0
+! Redirect EnergyMeter.DSS
+New object=EnergyMeter.m1 element=LINE.LINE1 terminal=1
+MakeBusList
+! Redirect BusVoltageBases.dss  ! set voltage bases
+Set Voltagebases=[11,0.416]
+! Buscoords buscoords.dss
+SetBusXY bus=1 X=390872.663 Y=392887.379
+SetBusXY bus=2 X=390871.596 Y=392887.638
+SetBusXY bus=3 X=390871.481 Y=392887.643
+SetBusXY bus=4 X=390871.379 Y=392887.608
+SetBusXY bus=5 X=390871.305 Y=392887.55
+SetBusXY bus=6 X=390871.234 Y=392887.42
+SetBusXY bus=7 X=390868.779 Y=392877.637
+SetBusXY bus=8 X=390868.753 Y=392877.186
+SetBusXY bus=9 X=390868.753 Y=392876.81
+SetBusXY bus=10 X=390868.804 Y=392876.484
+SetBusXY bus=11 X=390868.904 Y=392876.259
+SetBusXY bus=12 X=390869.079 Y=392876.108
+SetBusXY bus=13 X=390869.18 Y=392876.008
+SetBusXY bus=14 X=390869.5 Y=392875.857
+SetBusXY bus=15 X=390872.292 Y=392875.208
+SetBusXY bus=17 X=390875.678 Y=392874.422
+SetBusXY bus=19 X=390875.907 Y=392874.353
+SetBusXY bus=21 X=390876.142 Y=392874.223
+SetBusXY bus=23 X=390876.44 Y=392873.903
+SetBusXY bus=25 X=390877.003 Y=392873.341
+SetBusXY bus=28 X=390884.19 Y=392866.433
+SetBusXY bus=32 X=390886.111 Y=392864.602
+SetBusXY bus=37 X=390891.919 Y=392859.065
+SetBusXY bus=43 X=390891.775 Y=392858.903
+SetBusXY bus=49 X=390891.742 Y=392858.804
+SetBusXY bus=55 X=390891.759 Y=392858.689
+SetBusXY bus=61 X=390891.775 Y=392858.59
+SetBusXY bus=68 X=390891.825 Y=392858.508
+SetBusXY bus=76 X=390891.972 Y=392858.324
+SetBusXY bus=81 X=390892.512 Y=392857.808
+SetBusXY bus=86 X=390893.558 Y=392856.82
+SetBusXY bus=90 X=390893.775 Y=392856.555
+SetBusXY bus=93 X=390893.803 Y=392856.496
+SetBusXY bus=96 X=390893.8 Y=392856.41
+SetBusXY bus=99 X=390893.781 Y=392856.378
+SetBusXY bus=102 X=390890.706 Y=392852.332
+SetBusXY bus=106 X=390890.64 Y=392852.121
+SetBusXY bus=109 X=390890.511 Y=392851.689
+SetBusXY bus=112 X=390883.277 Y=392842.144
+SetBusXY bus=115 X=390876.523 Y=392833.895
+SetBusXY bus=119 X=390875.778 Y=392833.236
+SetBusXY bus=124 X=390875.199 Y=392832.8
+SetBusXY bus=129 X=390874.662 Y=392832.48
+SetBusXY bus=135 X=390872.865 Y=392831.803
+SetBusXY bus=141 X=390871.466 Y=392831.607
+SetBusXY bus=147 X=390871.226 Y=392831.623
+SetBusXY bus=154 X=390871.173 Y=392831.687
+SetBusXY bus=161 X=390871.128 Y=392831.801
+SetBusXY bus=169 X=390871.1 Y=392832.049
+SetBusXY bus=42 X=390895.963 Y=392855.237
+SetBusXY bus=48 X=390899.026 Y=392852.352
+SetBusXY bus=54 X=390899.491 Y=392852.791
+SetBusXY bus=60 X=390899.548 Y=392852.823
+SetBusXY bus=67 X=390899.618 Y=392852.847
+SetBusXY bus=75 X=390899.793 Y=392852.887
+SetBusXY bus=80 X=390899.889 Y=392852.926
+SetBusXY bus=85 X=390899.982 Y=392852.987
+SetBusXY bus=89 X=390900.06 Y=392853.057
+SetBusXY bus=53 X=390899.475 Y=392851.944
+SetBusXY bus=59 X=390901.469 Y=392850.053
+SetBusXY bus=66 X=390907.23 Y=392855.97
+SetBusXY bus=74 X=390907 Y=392860
+SetBusXY bus=73 X=390907 Y=392860
+SetBusXY bus=65 X=390901.87 Y=392849.664
+SetBusXY bus=72 X=390906.932 Y=392845.428
+SetBusXY bus=79 X=390908.613 Y=392843.857
+SetBusXY bus=84 X=390909.025 Y=392843.57
+SetBusXY bus=88 X=390909.878 Y=392843.014
+SetBusXY bus=92 X=390910.741 Y=392842.593
+SetBusXY bus=95 X=390911.23 Y=392842.324
+SetBusXY bus=98 X=390911.556 Y=392842.152
+SetBusXY bus=101 X=390911.997 Y=392841.898
+SetBusXY bus=105 X=390912.282 Y=392841.72
+SetBusXY bus=108 X=390912.43 Y=392841.6
+SetBusXY bus=111 X=390917.463 Y=392836.015
+SetBusXY bus=114 X=390918.004 Y=392835.491
+SetBusXY bus=118 X=390915.488 Y=392832.839
+SetBusXY bus=123 X=390910.895 Y=392828.11
+SetBusXY bus=128 X=390908.834 Y=392825.979
+SetBusXY bus=134 X=390908.271 Y=392825.3
+SetBusXY bus=140 X=390907.615 Y=392824.551
+SetBusXY bus=146 X=390907.053 Y=392823.802
+SetBusXY bus=153 X=390906.491 Y=392822.865
+SetBusXY bus=160 X=390906.35 Y=392822.584
+SetBusXY bus=168 X=390905.502 Y=392821.012
+SetBusXY bus=177 X=390905.189 Y=392820.053
+SetBusXY bus=186 X=390905.022 Y=392819.323
+SetBusXY bus=195 X=390904.938 Y=392818.655
+SetBusXY bus=205 X=390905.001 Y=392817.821
+SetBusXY bus=215 X=390905.251 Y=392816.298
+SetBusXY bus=224 X=390905.69 Y=392815.026
+SetBusXY bus=232 X=390906.065 Y=392814.191
+SetBusXY bus=240 X=390906.399 Y=392813.691
+SetBusXY bus=247 X=390907.213 Y=392812.685
+SetBusXY bus=256 X=390907.752 Y=392812.019
+SetBusXY bus=263 X=390909.871 Y=392809.604
+SetBusXY bus=272 X=390910.583 Y=392808.793
+SetBusXY bus=280 X=390913.173 Y=392805.861
+SetBusXY bus=288 X=390912.467 Y=392805.282
+SetBusXY bus=297 X=390909.292 Y=392803.146
+SetBusXY bus=304 X=390908.726 Y=392802.519
+SetBusXY bus=311 X=390908.548 Y=392802.302
+SetBusXY bus=319 X=390908.47 Y=392802.178
+SetBusXY bus=326 X=390908.408 Y=392802.069
+SetBusXY bus=333 X=390908.354 Y=392801.937
+SetBusXY bus=340 X=390908.323 Y=392801.829
+SetBusXY bus=347 X=390908.308 Y=392801.736
+SetBusXY bus=353 X=390908.308 Y=392801.651
+SetBusXY bus=358 X=390908.315 Y=392801.581
+SetBusXY bus=363 X=390908.339 Y=392801.503
+SetBusXY bus=368 X=390908.385 Y=392801.426
+SetBusXY bus=373 X=390908.689 Y=392801.043
+SetBusXY bus=379 X=390907.282 Y=392801.155
+SetBusXY bus=386 X=390906.36 Y=392802.282
+SetBusXY bus=393 X=390901.454 Y=392808.389
+SetBusXY bus=399 X=390901.096 Y=392808.831
+SetBusXY bus=405 X=390900.933 Y=392809.018
+SetBusXY bus=412 X=390900.791 Y=392809.106
+SetBusXY bus=418 X=390900.539 Y=392809.227
+SetBusXY bus=424 X=390897.659 Y=392810.609
+SetBusXY bus=431 X=390896.587 Y=392810.976
+SetBusXY bus=438 X=390896.22 Y=392811.089
+SetBusXY bus=445 X=390895.542 Y=392811.117
+SetBusXY bus=452 X=390894.949 Y=392811.145
+SetBusXY bus=459 X=390894.3 Y=392810.976
+SetBusXY bus=466 X=390893.764 Y=392810.637
+SetBusXY bus=474 X=390891.2225 Y=392808.691
+SetBusXY bus=481 X=390891.138 Y=392808.521
+SetBusXY bus=489 X=390891.11 Y=392808.352
+SetBusXY bus=498 X=390891.166 Y=392808.126
+SetBusXY bus=507 X=390891.336 Y=392807.872
+SetBusXY bus=385 X=390898.776 Y=392802.817
+SetBusXY bus=392 X=390895.655 Y=392803.358
+SetBusXY bus=398 X=390895.344 Y=392803.443
+SetBusXY bus=404 X=390895.119 Y=392803.443
+SetBusXY bus=411 X=390894.893 Y=392803.386
+SetBusXY bus=417 X=390894.074 Y=392802.85
+SetBusXY bus=423 X=390893.905 Y=392802.681
+SetBusXY bus=430 X=390893.792 Y=392802.483
+SetBusXY bus=437 X=390893.764 Y=392802.258
+SetBusXY bus=444 X=390893.82 Y=392802.004
+SetBusXY bus=451 X=390894.441 Y=392801.355
+SetBusXY bus=458 X=390894 Y=392797
+SetBusXY bus=378 X=390910.98 Y=392798.157
+SetBusXY bus=384 X=390913.208 Y=392795.42
+SetBusXY bus=391 X=390913.3067 Y=392795.2978
+SetBusXY bus=397 X=390915.116 Y=392793.058
+SetBusXY bus=403 X=390916.015 Y=392791.999
+SetBusXY bus=410 X=390915.753 Y=392791.725
+SetBusXY bus=416 X=390915.69 Y=392791.654
+SetBusXY bus=422 X=390915.654 Y=392791.598
+SetBusXY bus=429 X=390915.626 Y=392791.52
+SetBusXY bus=436 X=390915.619 Y=392791.449
+SetBusXY bus=443 X=390915.619 Y=392791.371
+SetBusXY bus=450 X=390915.633 Y=392791.293
+SetBusXY bus=457 X=390915.654 Y=392791.243
+SetBusXY bus=465 X=390915.683 Y=392791.215
+SetBusXY bus=473 X=390915.718 Y=392791.18
+SetBusXY bus=480 X=390915.775 Y=392791.151
+SetBusXY bus=488 X=390915.881 Y=392791.116
+SetBusXY bus=497 X=390916.016 Y=392791.08
+SetBusXY bus=506 X=390916.108 Y=392791.052
+SetBusXY bus=515 X=390916.186 Y=392791.017
+SetBusXY bus=524 X=390916.242 Y=392790.981
+SetBusXY bus=532 X=390916.278 Y=392790.932
+SetBusXY bus=541 X=390916.292 Y=392790.868
+SetBusXY bus=549 X=390916.278 Y=392790.783
+SetBusXY bus=558 X=390916.242 Y=392790.733
+SetBusXY bus=566 X=390916.157 Y=392790.648
+SetBusXY bus=409 X=390918.607 Y=392788.706
+SetBusXY bus=415 X=390922.398 Y=392784.096
+SetBusXY bus=421 X=390923.197 Y=392783.136
+SetBusXY bus=428 X=390923.398 Y=392782.888
+SetBusXY bus=435 X=390923.491 Y=392782.749
+SetBusXY bus=442 X=390923.553 Y=392782.625
+SetBusXY bus=449 X=390923.584 Y=392782.517
+SetBusXY bus=456 X=390923.6 Y=392782.346
+SetBusXY bus=464 X=390923.584 Y=392782.192
+SetBusXY bus=472 X=390923.538 Y=392782.052
+SetBusXY bus=479 X=390923.476 Y=392781.898
+SetBusXY bus=487 X=390923.352 Y=392781.774
+SetBusXY bus=496 X=390923.073 Y=392781.511
+SetBusXY bus=505 X=390916.237 Y=392776.136
+SetBusXY bus=514 X=390915.185 Y=392775.311
+SetBusXY bus=523 X=390914.619 Y=392774.864
+SetBusXY bus=531 X=390914.548 Y=392774.783
+SetBusXY bus=540 X=390914.494 Y=392774.721
+SetBusXY bus=548 X=390914.467 Y=392774.649
+SetBusXY bus=557 X=390914.449 Y=392774.569
+SetBusXY bus=565 X=390914.458 Y=392774.497
+SetBusXY bus=572 X=390914.476 Y=392774.425
+SetBusXY bus=578 X=390914.701 Y=392774.115
+SetBusXY bus=586 X=390915.202 Y=392773.458
+SetBusXY bus=594 X=390917.646 Y=392770.357
+SetBusXY bus=603 X=390920.545 Y=392766.731
+SetBusXY bus=615 X=390923.419 Y=392763.338
+SetBusXY bus=625 X=390924.232 Y=392762.387
+SetBusXY bus=632 X=390924.414 Y=392762.164
+SetBusXY bus=638 X=390924.515 Y=392762.063
+SetBusXY bus=644 X=390924.636 Y=392761.963
+SetBusXY bus=649 X=390924.798 Y=392761.882
+SetBusXY bus=654 X=390924.98 Y=392761.862
+SetBusXY bus=660 X=390925.182 Y=392761.882
+SetBusXY bus=666 X=390925.444 Y=392762.018
+SetBusXY bus=673 X=390926.091 Y=392762.508
+SetBusXY bus=680 X=390929.951 Y=392765.901
+SetBusXY bus=686 X=390932.739 Y=392768.301
+SetBusXY bus=691 X=390940.702 Y=392775.184
+SetBusXY bus=697 X=390942.352 Y=392776.625
+SetBusXY bus=703 X=390944.148 Y=392778.217
+SetBusXY bus=708 X=390944.182 Y=392778.111
+SetBusXY bus=714 X=390944.201 Y=392778.008
+SetBusXY bus=720 X=390944.201 Y=392777.911
+SetBusXY bus=727 X=390944.188 Y=392777.802
+SetBusXY bus=734 X=390944.156 Y=392777.718
+SetBusXY bus=741 X=390944.072 Y=392777.609
+SetBusXY bus=749 X=390943.95 Y=392777.499
+SetBusXY bus=758 X=390943.847 Y=392777.429
+SetBusXY bus=766 X=390943.737 Y=392777.377
+SetBusXY bus=775 X=390943.66 Y=392777.358
+SetBusXY bus=784 X=390943.563 Y=392777.358
+SetBusXY bus=791 X=390943.473 Y=392777.377
+SetBusXY bus=798 X=390943.39 Y=392777.416
+SetBusXY bus=806 X=390943.306 Y=392777.506
+SetBusXY bus=815 X=390943.035 Y=392777.828
+SetBusXY bus=823 X=390942.694 Y=392778.175
+SetBusXY bus=830 X=390942.333 Y=392778.516
+SetBusXY bus=707 X=390948.941 Y=392782.353
+SetBusXY bus=713 X=390951.513 Y=392779.362
+SetBusXY bus=719 X=390951.779 Y=392779.034
+SetBusXY bus=726 X=390951.873 Y=392778.903
+SetBusXY bus=733 X=390951.956 Y=392778.754
+SetBusXY bus=740 X=390952.012 Y=392778.624
+SetBusXY bus=748 X=390952.068 Y=392778.466
+SetBusXY bus=757 X=390952.106 Y=392778.307
+SetBusXY bus=765 X=390952.134 Y=392778.084
+SetBusXY bus=774 X=390952.161 Y=392777.776
+SetBusXY bus=783 X=390952.189 Y=392777.45
+SetBusXY bus=790 X=390952.227 Y=392777.236
+SetBusXY bus=797 X=390952.283 Y=392777.022
+SetBusXY bus=805 X=390952.311 Y=392776.92
+SetBusXY bus=814 X=390952.366 Y=392776.761
+SetBusXY bus=822 X=390952.441 Y=392776.622
+SetBusXY bus=829 X=390952.581 Y=392776.445
+SetBusXY bus=836 X=390954.1 Y=392774.61
+SetBusXY bus=841 X=390954.732 Y=392773.897
+SetBusXY bus=847 X=390955.053 Y=392773.535
+SetBusXY bus=853 X=390955.134 Y=392773.465
+SetBusXY bus=859 X=390955.204 Y=392773.418
+SetBusXY bus=866 X=390955.285 Y=392773.378
+SetBusXY bus=871 X=390955.355 Y=392773.36
+SetBusXY bus=877 X=390955.425 Y=392773.355
+SetBusXY bus=883 X=390955.495 Y=392773.355
+SetBusXY bus=887 X=390955.564 Y=392773.36
+SetBusXY bus=891 X=390956.756 Y=392773.691
+SetBusXY bus=896 X=390960 Y=392774
+SetBusXY bus=895 X=390952.377 Y=392769.85
+SetBusXY bus=900 X=390952 Y=392766
+SetBusXY bus=712 X=390954.592 Y=392787.288
+SetBusXY bus=718 X=390960.503 Y=392792.29
+SetBusXY bus=725 X=390966.597 Y=392785.202
+SetBusXY bus=732 X=390967.383 Y=392784.225
+SetBusXY bus=739 X=390967.79 Y=392783.707
+SetBusXY bus=747 X=390967.869 Y=392783.614
+SetBusXY bus=756 X=390967.938 Y=392783.559
+SetBusXY bus=764 X=390968.007 Y=392783.531
+SetBusXY bus=773 X=390968.132 Y=392783.517
+SetBusXY bus=782 X=390968.299 Y=392783.573
+SetBusXY bus=789 X=390968.41 Y=392783.642
+SetBusXY bus=796 X=390968.576 Y=392783.781
+SetBusXY bus=804 X=390969.687 Y=392784.793
+SetBusXY bus=813 X=390973 Y=392785
+SetBusXY bus=746 X=390965.176 Y=392781.034
+SetBusXY bus=755 X=390965 Y=392778
+SetBusXY bus=724 X=390962.999 Y=392794.377
+SetBusXY bus=731 X=390966.383 Y=392797.222
+SetBusXY bus=738 X=390970.344 Y=392800.554
+SetBusXY bus=745 X=390973.519 Y=392803.236
+SetBusXY bus=754 X=390977.441 Y=392798.798
+SetBusXY bus=763 X=390980.72 Y=392795.089
+SetBusXY bus=772 X=390980.83 Y=392795.019
+SetBusXY bus=781 X=390980.951 Y=392794.989
+SetBusXY bus=788 X=390981.082 Y=392794.959
+SetBusXY bus=795 X=390981.202 Y=392794.959
+SetBusXY bus=803 X=390981.333 Y=392794.979
+SetBusXY bus=812 X=390981.413 Y=392795.009
+SetBusXY bus=821 X=390981.524 Y=392795.079
+SetBusXY bus=828 X=390982.359 Y=392795.763
+SetBusXY bus=835 X=390986 Y=392795
+SetBusXY bus=771 X=390978.194 Y=392792.523
+SetBusXY bus=780 X=390978 Y=392789
+SetBusXY bus=753 X=390974.708 Y=392804.22
+SetBusXY bus=762 X=390976.271 Y=392805.664
+SetBusXY bus=770 X=390980.319 Y=392808.983
+SetBusXY bus=779 X=390983.29 Y=392812.012
+SetBusXY bus=787 X=390985.762 Y=392814.221
+SetBusXY bus=794 X=390988.243 Y=392815.901
+SetBusXY bus=802 X=390990.626 Y=392817.377
+SetBusXY bus=811 X=390993.25 Y=392818.98
+SetBusXY bus=810 X=390993.25 Y=392818.98
+SetBusXY bus=820 X=390995.557 Y=392820.131
+SetBusXY bus=819 X=390995.557 Y=392820.131
+SetBusXY bus=827 X=390997.983 Y=392821.471
+SetBusXY bus=826 X=390997.983 Y=392821.471
+SetBusXY bus=834 X=390999.996 Y=392822.532
+SetBusXY bus=833 X=390999.996 Y=392822.532
+SetBusXY bus=840 X=391002.28 Y=392823.399
+SetBusXY bus=839 X=391002.28 Y=392823.399
+SetBusXY bus=846 X=391005.615 Y=392824.81
+SetBusXY bus=845 X=391005.615 Y=392824.81
+SetBusXY bus=852 X=391009.67 Y=392826.423
+SetBusXY bus=851 X=391009.67 Y=392826.423
+SetBusXY bus=858 X=391016.001 Y=392829.07
+SetBusXY bus=857 X=391016.001 Y=392829.07
+SetBusXY bus=865 X=391018.607 Y=392830.063
+SetBusXY bus=864 X=391018.607 Y=392830.063
+SetBusXY bus=870 X=391020.304 Y=392830.435
+SetBusXY bus=869 X=391020.304 Y=392830.435
+SetBusXY bus=876 X=391021.504 Y=392830.435
+SetBusXY bus=875 X=391021.504 Y=392830.435
+SetBusXY bus=882 X=391022.496 Y=392830.239
+SetBusXY bus=881 X=391022.496 Y=392830.239
+SetBusXY bus=844 X=391004.255 Y=392819.014
+SetBusXY bus=850 X=391004.582 Y=392818.391
+SetBusXY bus=856 X=391005.27 Y=392816.532
+SetBusXY bus=863 X=391006.257 Y=392814.424
+SetBusXY bus=868 X=391006.471 Y=392814.211
+SetBusXY bus=874 X=391005.777 Y=392813.73
+SetBusXY bus=880 X=391004.149 Y=392812.61
+SetBusXY bus=886 X=391005 Y=392808
+SetBusXY bus=873 X=391006.765 Y=392813.971
+SetBusXY bus=879 X=391007.112 Y=392813.917
+SetBusXY bus=885 X=391007.646 Y=392813.917
+SetBusXY bus=890 X=391008.286 Y=392814.131
+SetBusXY bus=894 X=391010.609 Y=392815.358
+SetBusXY bus=899 X=391014 Y=392812
+SetBusXY bus=801 X=390988.444 Y=392815.944
+SetBusXY bus=809 X=390988.65 Y=392815.95
+SetBusXY bus=818 X=390988.854 Y=392815.918
+SetBusXY bus=825 X=390989.048 Y=392815.851
+SetBusXY bus=832 X=390989.227 Y=392815.749
+SetBusXY bus=838 X=390989.385 Y=392815.617
+SetBusXY bus=843 X=390989.516 Y=392815.458
+SetBusXY bus=849 X=390989.5735 Y=392815.3755
+SetBusXY bus=855 X=390990.602 Y=392813.363
+SetBusXY bus=862 X=390991.411 Y=392812.136
+SetBusXY bus=867 X=390991.997 Y=392810.992
+SetBusXY bus=872 X=390992.556 Y=392809.765
+SetBusXY bus=878 X=390993.762 Y=392807.804
+SetBusXY bus=884 X=390994.075 Y=392807.334
+SetBusXY bus=889 X=390992.316 Y=392804.712
+SetBusXY bus=893 X=390990.811 Y=392802.497
+SetBusXY bus=898 X=390991 Y=392798
+SetBusXY bus=888 X=390994.421 Y=392806.816
+SetBusXY bus=892 X=390994.97 Y=392805.953
+SetBusXY bus=897 X=390995.113 Y=392805.81
+SetBusXY bus=901 X=390995.257 Y=392805.718
+SetBusXY bus=902 X=390995.401 Y=392805.718
+SetBusXY bus=903 X=390995.584 Y=392805.758
+SetBusXY bus=904 X=390995.885 Y=392805.914
+SetBusXY bus=905 X=390996.355 Y=392806.267
+SetBusXY bus=906 X=391001 Y=392805
+SetBusXY bus=696 X=390947.039 Y=392768.131
+SetBusXY bus=702 X=390949 Y=392763
+SetBusXY bus=690 X=390938.131 Y=392762.197
+SetBusXY bus=695 X=390939.539 Y=392760.604
+SetBusXY bus=701 X=390943 Y=392758
+SetBusXY bus=694 X=390937.548 Y=392761.707
+SetBusXY bus=700 X=390937.379 Y=392761.539
+SetBusXY bus=706 X=390937.285 Y=392761.418
+SetBusXY bus=711 X=390937.231 Y=392761.343
+SetBusXY bus=717 X=390937.197 Y=392761.256
+SetBusXY bus=723 X=390937.177 Y=392761.175
+SetBusXY bus=730 X=390937.177 Y=392761.081
+SetBusXY bus=737 X=390937.191 Y=392761.007
+SetBusXY bus=744 X=390937.231 Y=392760.926
+SetBusXY bus=752 X=390937.285 Y=392760.845
+SetBusXY bus=761 X=390937.393 Y=392760.704
+SetBusXY bus=769 X=390938.215 Y=392759.66
+SetBusXY bus=778 X=390940 Y=392756
+SetBusXY bus=672 X=390925.74 Y=392761.64
+SetBusXY bus=679 X=390925.919 Y=392761.414
+SetBusXY bus=685 X=390926.062 Y=392761.188
+SetBusXY bus=689 X=390926.169 Y=392760.95
+SetBusXY bus=693 X=390926.216 Y=392760.76
+SetBusXY bus=699 X=390926.24 Y=392760.45
+SetBusXY bus=705 X=390926.204 Y=392759.927
+SetBusXY bus=710 X=390925.585 Y=392756.048
+SetBusXY bus=716 X=390925.095 Y=392752.863
+SetBusXY bus=722 X=390924.96 Y=392751.851
+SetBusXY bus=729 X=390924.892 Y=392750.924
+SetBusXY bus=736 X=390924.876 Y=392750.418
+SetBusXY bus=743 X=390924.892 Y=392750.014
+SetBusXY bus=751 X=390924.96 Y=392749.676
+SetBusXY bus=760 X=390925.078 Y=392749.289
+SetBusXY bus=768 X=390925.23 Y=392748.952
+SetBusXY bus=777 X=390925.5 Y=392748.446
+SetBusXY bus=786 X=390926.112 Y=392747.463
+SetBusXY bus=793 X=390924.179 Y=392748.181
+SetBusXY bus=800 X=390921.1 Y=392749.367
+SetBusXY bus=808 X=390918.462 Y=392750.361
+SetBusXY bus=817 X=390917 Y=392751
+SetBusXY bus=792 X=390926.444 Y=392747.366
+SetBusXY bus=799 X=390926.734 Y=392747.283
+SetBusXY bus=807 X=390926.982 Y=392747.256
+SetBusXY bus=816 X=390927.176 Y=392747.256
+SetBusXY bus=824 X=390927.369 Y=392747.297
+SetBusXY bus=831 X=390927.535 Y=392747.339
+SetBusXY bus=837 X=390927.645 Y=392747.394
+SetBusXY bus=842 X=390927.77 Y=392747.463
+SetBusXY bus=848 X=390927.935 Y=392747.601
+SetBusXY bus=854 X=390928.184 Y=392747.849
+SetBusXY bus=861 X=390935 Y=392751
+SetBusXY bus=860 X=390931 Y=392748
+SetBusXY bus=624 X=390922.171 Y=392762.286
+SetBusXY bus=631 X=390921.888 Y=392762.003
+SetBusXY bus=637 X=390921.726 Y=392761.781
+SetBusXY bus=643 X=390921.524 Y=392761.458
+SetBusXY bus=648 X=390921.12 Y=392760.65
+SetBusXY bus=653 X=390920.797 Y=392760.044
+SetBusXY bus=659 X=390920.534 Y=392759.64
+SetBusXY bus=665 X=390920.231 Y=392759.236
+SetBusXY bus=671 X=390919.948 Y=392758.933
+SetBusXY bus=678 X=390919.443 Y=392758.468
+SetBusXY bus=684 X=390917.785 Y=392756.994
+SetBusXY bus=688 X=390913 Y=392755
+SetBusXY bus=602 X=390910.518 Y=392764.593
+SetBusXY bus=614 X=390909 Y=392760
+SetBusXY bus=585 X=390910.991 Y=392771.178
+SetBusXY bus=593 X=390910.777 Y=392771.009
+SetBusXY bus=601 X=390910.657 Y=392770.943
+SetBusXY bus=613 X=390910.547 Y=392770.91
+SetBusXY bus=623 X=390910.454 Y=392770.899
+SetBusXY bus=630 X=390910.307 Y=392770.899
+SetBusXY bus=636 X=390909.959 Y=392770.941
+SetBusXY bus=642 X=390909.718 Y=392770.968
+SetBusXY bus=647 X=390909.412 Y=392771.006
+SetBusXY bus=652 X=390909.225 Y=392771.017
+SetBusXY bus=658 X=390909.056 Y=392771.023
+SetBusXY bus=664 X=390908.771 Y=392771.012
+SetBusXY bus=670 X=390908.492 Y=392770.984
+SetBusXY bus=677 X=390908.361 Y=392770.963
+SetBusXY bus=683 X=390908.218 Y=392770.935
+SetBusXY bus=687 X=390908.087 Y=392770.886
+SetBusXY bus=692 X=390907.934 Y=392770.815
+SetBusXY bus=698 X=390907.699 Y=392770.684
+SetBusXY bus=704 X=390907.124 Y=392770.224
+SetBusXY bus=709 X=390906.396 Y=392769.568
+SetBusXY bus=715 X=390906.33 Y=392769.502
+SetBusXY bus=721 X=390906.287 Y=392769.442
+SetBusXY bus=728 X=390906.259 Y=392769.376
+SetBusXY bus=735 X=390906.248 Y=392769.3
+SetBusXY bus=742 X=390906.248 Y=392769.229
+SetBusXY bus=750 X=390906.259 Y=392769.163
+SetBusXY bus=759 X=390906.303 Y=392769.081
+SetBusXY bus=767 X=390906.369 Y=392768.988
+SetBusXY bus=776 X=390906.708 Y=392768.567
+SetBusXY bus=785 X=390906 Y=392764
+SetBusXY bus=513 X=390912.695 Y=392780.428
+SetBusXY bus=522 X=390908 Y=392779
+SetBusXY bus=396 X=390910.051 Y=392792.872
+SetBusXY bus=402 X=390909.746 Y=392792.659
+SetBusXY bus=408 X=390909.563 Y=392792.553
+SetBusXY bus=414 X=390909.433 Y=392792.492
+SetBusXY bus=420 X=390909.212 Y=392792.415
+SetBusXY bus=427 X=390908.473 Y=392792.172
+SetBusXY bus=434 X=390907.642 Y=392791.928
+SetBusXY bus=441 X=390907.177 Y=392791.783
+SetBusXY bus=448 X=390906.751 Y=392791.616
+SetBusXY bus=455 X=390906.364 Y=392791.414
+SetBusXY bus=463 X=390905.762 Y=392791.025
+SetBusXY bus=471 X=390905.366 Y=392790.721
+SetBusXY bus=478 X=390905.122 Y=392790.469
+SetBusXY bus=486 X=390905.015 Y=392790.34
+SetBusXY bus=495 X=390904.962 Y=392790.248
+SetBusXY bus=504 X=390904.939 Y=392790.18
+SetBusXY bus=512 X=390904.924 Y=392790.081
+SetBusXY bus=521 X=390904.932 Y=392790.005
+SetBusXY bus=530 X=390905.076 Y=392789.479
+SetBusXY bus=539 X=390904 Y=392784
+SetBusXY bus=538 X=390903.887 Y=392790.99
+SetBusXY bus=547 X=390902.523 Y=392792.617
+SetBusXY bus=556 X=390897 Y=392791
+SetBusXY bus=287 X=390914.334 Y=392804.546
+SetBusXY bus=296 X=390914.839 Y=392803.916
+SetBusXY bus=303 X=390918.269 Y=392799.909
+SetBusXY bus=310 X=390918.529 Y=392799.613
+SetBusXY bus=318 X=390923.291 Y=392794.191
+SetBusXY bus=325 X=390925.511 Y=392791.533
+SetBusXY bus=332 X=390929.7419 Y=392786.3729
+SetBusXY bus=339 X=390930.511 Y=392785.435
+SetBusXY bus=346 X=390931.168 Y=392784.63
+SetBusXY bus=352 X=390931.703 Y=392784.132
+SetBusXY bus=357 X=390932.46 Y=392783.603
+SetBusXY bus=362 X=390932.953 Y=392783.3
+SetBusXY bus=367 X=390933.748 Y=392782.903
+SetBusXY bus=372 X=390934.599 Y=392782.657
+SetBusXY bus=377 X=390935.584 Y=392782.524
+SetBusXY bus=383 X=390936.303 Y=392782.505
+SetBusXY bus=390 X=390937.155 Y=392782.6
+SetBusXY bus=395 X=390938.366 Y=392782.884
+SetBusXY bus=401 X=390939.237 Y=392783.187
+SetBusXY bus=407 X=390940.013 Y=392783.622
+SetBusXY bus=413 X=390940.732 Y=392784.113
+SetBusXY bus=419 X=390941.549 Y=392784.768
+SetBusXY bus=426 X=390942.91 Y=392785.874
+SetBusXY bus=425 X=390942.91 Y=392785.874
+SetBusXY bus=433 X=390947.433 Y=392789.686
+SetBusXY bus=432 X=390947.433 Y=392789.686
+SetBusXY bus=440 X=390953.846 Y=392795.059
+SetBusXY bus=439 X=390953.846 Y=392795.059
+SetBusXY bus=447 X=390958.463 Y=392798.896
+SetBusXY bus=446 X=390958.463 Y=392798.896
+SetBusXY bus=454 X=390959.827 Y=392800.103
+SetBusXY bus=453 X=390959.827 Y=392800.103
+SetBusXY bus=462 X=390957.305 Y=392802.791
+SetBusXY bus=470 X=390956.915 Y=392803.162
+SetBusXY bus=477 X=390956.693 Y=392803.354
+SetBusXY bus=485 X=390956.52 Y=392803.452
+SetBusXY bus=494 X=390956.242 Y=392803.57
+SetBusXY bus=503 X=390955.804 Y=392803.705
+SetBusXY bus=511 X=390955.501 Y=392803.823
+SetBusXY bus=520 X=390955.316 Y=392803.946
+SetBusXY bus=529 X=390955.18 Y=392804.057
+SetBusXY bus=537 X=390954.784 Y=392804.457
+SetBusXY bus=546 X=390951.688 Y=392807.795
+SetBusXY bus=555 X=390951.538 Y=392807.965
+SetBusXY bus=564 X=390951.458 Y=392808.125
+SetBusXY bus=571 X=390951.428 Y=392808.325
+SetBusXY bus=577 X=390951.428 Y=392808.505
+SetBusXY bus=584 X=390951.458 Y=392808.71
+SetBusXY bus=592 X=390951.553 Y=392808.9
+SetBusXY bus=600 X=390951.713 Y=392809.099
+SetBusXY bus=612 X=390951.838 Y=392809.199
+SetBusXY bus=622 X=390952.418 Y=392809.569
+SetBusXY bus=629 X=390954 Y=392812
+SetBusXY bus=461 X=390963.865 Y=392803.674
+SetBusXY bus=460 X=390963.865 Y=392803.674
+SetBusXY bus=469 X=390964.469 Y=392803.03
+SetBusXY bus=468 X=390968.351 Y=392807.642
+SetBusXY bus=467 X=390968.351 Y=392807.642
+SetBusXY bus=476 X=390970.015 Y=392809.073
+SetBusXY bus=475 X=390970.015 Y=392809.073
+SetBusXY bus=484 X=390963.033 Y=392816.614
+SetBusXY bus=493 X=390965.49 Y=392819.862
+SetBusXY bus=502 X=390964 Y=392822
+SetBusXY bus=492 X=390962.663 Y=392817.058
+SetBusXY bus=501 X=390962.507 Y=392817.246
+SetBusXY bus=510 X=390962.384 Y=392817.32
+SetBusXY bus=519 X=390962.253 Y=392817.337
+SetBusXY bus=528 X=390962.138 Y=392817.312
+SetBusXY bus=536 X=390962.023 Y=392817.271
+SetBusXY bus=545 X=390961.735 Y=392817.041
+SetBusXY bus=554 X=390961.464 Y=392816.787
+SetBusXY bus=563 X=390958 Y=392817
+SetBusXY bus=483 X=390973.535 Y=392812.101
+SetBusXY bus=482 X=390973.535 Y=392812.101
+SetBusXY bus=491 X=390978.625 Y=392816.388
+SetBusXY bus=490 X=390978.625 Y=392816.388
+SetBusXY bus=500 X=390981.879 Y=392818.818
+SetBusXY bus=499 X=390981.879 Y=392818.818
+SetBusXY bus=509 X=390982.421 Y=392819.26
+SetBusXY bus=508 X=390982.421 Y=392819.26
+SetBusXY bus=518 X=390979.167 Y=392822.695
+SetBusXY bus=527 X=390977.209 Y=392824.691
+SetBusXY bus=535 X=390975.743 Y=392826.352
+SetBusXY bus=544 X=390975.138 Y=392827.039
+SetBusXY bus=553 X=390977.781 Y=392829.754
+SetBusXY bus=562 X=390976 Y=392832
+SetBusXY bus=552 X=390974.926 Y=392827.234
+SetBusXY bus=561 X=390974.831 Y=392827.281
+SetBusXY bus=570 X=390974.676 Y=392827.311
+SetBusXY bus=576 X=390974.581 Y=392827.311
+SetBusXY bus=583 X=390974.467 Y=392827.299
+SetBusXY bus=591 X=390974.378 Y=392827.252
+SetBusXY bus=599 X=390973.854 Y=392826.853
+SetBusXY bus=611 X=390969 Y=392827
+SetBusXY bus=517 X=390983.883 Y=392820.451
+SetBusXY bus=516 X=390983.883 Y=392820.451
+SetBusXY bus=526 X=390985.003 Y=392821.271
+SetBusXY bus=525 X=390985.003 Y=392821.271
+SetBusXY bus=534 X=390986.567 Y=392822.332
+SetBusXY bus=533 X=390986.567 Y=392822.332
+SetBusXY bus=543 X=390987.709 Y=392823.028
+SetBusXY bus=542 X=390987.709 Y=392823.028
+SetBusXY bus=551 X=390991 Y=392824.805
+SetBusXY bus=550 X=390991 Y=392824.805
+SetBusXY bus=560 X=390993.403 Y=392826.054
+SetBusXY bus=559 X=390993.403 Y=392826.054
+SetBusXY bus=569 X=390991.104 Y=392829.14
+SetBusXY bus=575 X=390990.836 Y=392829.546
+SetBusXY bus=582 X=390990.662 Y=392829.86
+SetBusXY bus=590 X=390990.534 Y=392830.185
+SetBusXY bus=598 X=390989.572 Y=392833.322
+SetBusXY bus=610 X=390989.096 Y=392834.773
+SetBusXY bus=621 X=390988.794 Y=392835.423
+SetBusXY bus=628 X=390988.562 Y=392835.841
+SetBusXY bus=635 X=390988.132 Y=392836.432
+SetBusXY bus=641 X=390987.226 Y=392837.535
+SetBusXY bus=646 X=390986.947 Y=392837.814
+SetBusXY bus=651 X=390986.866 Y=392837.895
+SetBusXY bus=657 X=390987.307 Y=392838.185
+SetBusXY bus=663 X=390987.923 Y=392838.51
+SetBusXY bus=669 X=390990.478 Y=392839.868
+SetBusXY bus=676 X=390990 Y=392841
+SetBusXY bus=656 X=390986.773 Y=392837.93
+SetBusXY bus=662 X=390986.68 Y=392837.93
+SetBusXY bus=668 X=390986.587 Y=392837.907
+SetBusXY bus=675 X=390986.018 Y=392837.512
+SetBusXY bus=682 X=390981 Y=392837
+SetBusXY bus=568 X=390993.936 Y=392826.331
+SetBusXY bus=567 X=390993.936 Y=392826.331
+SetBusXY bus=574 X=390994.064 Y=392826.393
+SetBusXY bus=573 X=390994.064 Y=392826.393
+SetBusXY bus=581 X=390993.888 Y=392826.66
+SetBusXY bus=589 X=390993.812 Y=392826.748
+SetBusXY bus=597 X=390993.745 Y=392826.807
+SetBusXY bus=609 X=390993.64 Y=392826.841
+SetBusXY bus=620 X=390993.577 Y=392826.832
+SetBusXY bus=627 X=390993.509 Y=392826.794
+SetBusXY bus=634 X=390993.467 Y=392826.744
+SetBusXY bus=640 X=390993.45 Y=392826.677
+SetBusXY bus=645 X=390993.459 Y=392826.609
+SetBusXY bus=650 X=390993.492 Y=392826.521
+SetBusXY bus=655 X=390993.551 Y=392826.412
+SetBusXY bus=661 X=390993.787 Y=392826.134
+SetBusXY bus=667 X=390993.989 Y=392825.97
+SetBusXY bus=674 X=390994.166 Y=392825.873
+SetBusXY bus=681 X=390994.528 Y=392825.697
+SetBusXY bus=580 X=390997.536 Y=392828.07
+SetBusXY bus=579 X=390997.536 Y=392828.07
+SetBusXY bus=588 X=390999.985 Y=392829.212
+SetBusXY bus=587 X=390999.985 Y=392829.212
+SetBusXY bus=596 X=391000.5776 Y=392829.4599
+SetBusXY bus=608 X=390996.172 Y=392840.26
+SetBusXY bus=607 X=390996.172 Y=392840.26
+SetBusXY bus=619 X=390996 Y=392843
+SetBusXY bus=595 X=391004.98 Y=392831.301
+SetBusXY bus=606 X=391000.5776 Y=392829.4599
+SetBusXY bus=605 X=391009.465 Y=392833.089
+SetBusXY bus=604 X=391009.465 Y=392833.089
+SetBusXY bus=618 X=391012.375 Y=392834.183
+SetBusXY bus=617 X=391012.375 Y=392834.183
+SetBusXY bus=616 X=391008.023 Y=392836.745
+SetBusXY bus=626 X=391006.125 Y=392841.751
+SetBusXY bus=633 X=391005.565 Y=392843.218
+SetBusXY bus=639 X=391002 Y=392847
+SetBusXY bus=338 X=390934.963 Y=392790.74
+SetBusXY bus=345 X=390937.605 Y=392792.915
+SetBusXY bus=351 X=390937.856 Y=392793.111
+SetBusXY bus=356 X=390937.949 Y=392793.204
+SetBusXY bus=361 X=390938.005 Y=392793.278
+SetBusXY bus=366 X=390938.024 Y=392793.371
+SetBusXY bus=371 X=390938.024 Y=392793.483
+SetBusXY bus=376 X=390938.005 Y=392793.623
+SetBusXY bus=382 X=390937.968 Y=392793.744
+SetBusXY bus=389 X=390937.912 Y=392793.827
+SetBusXY bus=394 X=390937.791 Y=392793.949
+SetBusXY bus=400 X=390937.344 Y=392794.349
+SetBusXY bus=406 X=390937 Y=392798
+SetBusXY bus=331 X=390932.594 Y=392797.299
+SetBusXY bus=337 X=390935 Y=392800
+SetBusXY bus=317 X=390919.05 Y=392800
+SetBusXY bus=324 X=390921.636 Y=392802.118
+SetBusXY bus=330 X=390922.556 Y=392802.836
+SetBusXY bus=336 X=390924.531 Y=392804.433
+SetBusXY bus=344 X=390923.88 Y=392805.165
+SetBusXY bus=350 X=390923.819 Y=392805.287
+SetBusXY bus=355 X=390923.758 Y=392805.422
+SetBusXY bus=360 X=390923.744 Y=392805.551
+SetBusXY bus=365 X=390923.772 Y=392805.686
+SetBusXY bus=370 X=390923.86 Y=392805.862
+SetBusXY bus=375 X=390924.022 Y=392806.038
+SetBusXY bus=381 X=390925.152 Y=392806.998
+SetBusXY bus=388 X=390926 Y=392812
+SetBusXY bus=343 X=390926.15 Y=392805.742
+SetBusXY bus=349 X=390929 Y=392807
+SetBusXY bus=271 X=390913.165 Y=392812.297
+SetBusXY bus=279 X=390913.42 Y=392812.472
+SetBusXY bus=286 X=390913.648 Y=392812.586
+SetBusXY bus=295 X=390913.996 Y=392812.686
+SetBusXY bus=302 X=390915.584 Y=392813.037
+SetBusXY bus=309 X=390915.882 Y=392813.133
+SetBusXY bus=316 X=390916.093 Y=392813.229
+SetBusXY bus=323 X=390916.33 Y=392813.352
+SetBusXY bus=329 X=390916.549 Y=392813.501
+SetBusXY bus=335 X=390918.357 Y=392814.966
+SetBusXY bus=342 X=390923 Y=392816
+SetBusXY bus=255 X=390910.805 Y=392815.497
+SetBusXY bus=262 X=390911.309 Y=392815.876
+SetBusXY bus=270 X=390911.514 Y=392816.081
+SetBusXY bus=278 X=390911.683 Y=392816.381
+SetBusXY bus=285 X=390911.851 Y=392816.885
+SetBusXY bus=294 X=390912.001 Y=392817.334
+SetBusXY bus=301 X=390912.188 Y=392817.651
+SetBusXY bus=308 X=390912.454 Y=392818.024
+SetBusXY bus=315 X=390912.783 Y=392818.365
+SetBusXY bus=322 X=390913.191 Y=392818.747
+SetBusXY bus=328 X=390913.426 Y=392818.962
+SetBusXY bus=334 X=390914.512 Y=392819.906
+SetBusXY bus=341 X=390914.975 Y=392820.221
+SetBusXY bus=348 X=390915.149 Y=392820.308
+SetBusXY bus=354 X=390915.29 Y=392820.348
+SetBusXY bus=359 X=390915.397 Y=392820.355
+SetBusXY bus=364 X=390915.451 Y=392820.348
+SetBusXY bus=369 X=390915.511 Y=392820.295
+SetBusXY bus=374 X=390915.592 Y=392820.188
+SetBusXY bus=380 X=390915.907 Y=392819.679
+SetBusXY bus=387 X=390918 Y=392819
+SetBusXY bus=117 X=390918.765 Y=392836.293
+SetBusXY bus=122 X=390919.135 Y=392836.684
+SetBusXY bus=127 X=390920.876 Y=392838.518
+SetBusXY bus=133 X=390925.817 Y=392843.725
+SetBusXY bus=139 X=390929.524 Y=392847.569
+SetBusXY bus=145 X=390932.015 Y=392850.135
+SetBusXY bus=152 X=390935.584 Y=392846.448
+SetBusXY bus=159 X=390935.817 Y=392846.24
+SetBusXY bus=167 X=390935.995 Y=392846.017
+SetBusXY bus=176 X=390936.05 Y=392845.912
+SetBusXY bus=185 X=390936.119 Y=392845.666
+SetBusXY bus=194 X=390936.242 Y=392845.027
+SetBusXY bus=204 X=390936.288 Y=392844.648
+SetBusXY bus=214 X=390936.388 Y=392844.4
+SetBusXY bus=223 X=390936.61 Y=392843.936
+SetBusXY bus=231 X=390936.749 Y=392843.721
+SetBusXY bus=239 X=390936.874 Y=392843.589
+SetBusXY bus=246 X=390938.352 Y=392842.126
+SetBusXY bus=254 X=390938.796 Y=392841.703
+SetBusXY bus=261 X=390938.914 Y=392841.633
+SetBusXY bus=269 X=390939.032 Y=392841.62
+SetBusXY bus=277 X=390939.171 Y=392841.613
+SetBusXY bus=284 X=390939.296 Y=392841.627
+SetBusXY bus=293 X=390939.414 Y=392841.675
+SetBusXY bus=300 X=390939.539 Y=392841.731
+SetBusXY bus=307 X=390940.115 Y=392842.278
+SetBusXY bus=314 X=390943 Y=392844
+SetBusXY bus=268 X=390936.706 Y=392838.972
+SetBusXY bus=276 X=390935 Y=392836
+SetBusXY bus=151 X=390934.503 Y=392852.697
+SetBusXY bus=158 X=390941.046 Y=392859.545
+SetBusXY bus=166 X=390943.336 Y=392861.907
+SetBusXY bus=175 X=390946.317 Y=392858.942
+SetBusXY bus=184 X=390946.618 Y=392858.602
+SetBusXY bus=193 X=390946.84 Y=392858.223
+SetBusXY bus=203 X=390946.971 Y=392857.897
+SetBusXY bus=213 X=390947.023 Y=392857.622
+SetBusXY bus=222 X=390947.089 Y=392857.034
+SetBusXY bus=230 X=390947.18 Y=392856.577
+SetBusXY bus=238 X=390947.287 Y=392856.272
+SetBusXY bus=245 X=390947.457 Y=392855.998
+SetBusXY bus=253 X=390947.784 Y=392855.658
+SetBusXY bus=260 X=390949.052 Y=392854.417
+SetBusXY bus=267 X=390949.358 Y=392854.138
+SetBusXY bus=275 X=390949.516 Y=392854.033
+SetBusXY bus=283 X=390949.636 Y=392853.999
+SetBusXY bus=292 X=390949.744 Y=392853.995
+SetBusXY bus=299 X=390949.819 Y=392854.01
+SetBusXY bus=306 X=390949.898 Y=392854.051
+SetBusXY bus=313 X=390950.032 Y=392854.156
+SetBusXY bus=321 X=390950.481 Y=392854.63
+SetBusXY bus=327 X=390952 Y=392853
+SetBusXY bus=291 X=390949.096 Y=392853.309
+SetBusXY bus=298 X=390948.848 Y=392852.992
+SetBusXY bus=305 X=390948.3925 Y=392852.4855
+SetBusXY bus=312 X=390947.472 Y=392851.557
+SetBusXY bus=320 X=390946 Y=392848
+SetBusXY bus=174 X=390946.01 Y=392864.771
+SetBusXY bus=183 X=390946.422 Y=392865.19
+SetBusXY bus=192 X=390946.652 Y=392865.034
+SetBusXY bus=202 X=390946.807 Y=392864.979
+SetBusXY bus=212 X=390946.962 Y=392864.97
+SetBusXY bus=221 X=390947.126 Y=392865.015
+SetBusXY bus=229 X=390947.326 Y=392865.134
+SetBusXY bus=237 X=390947.49 Y=392865.261
+SetBusXY bus=244 X=390947.59 Y=392865.397
+SetBusXY bus=252 X=390947.626 Y=392865.525
+SetBusXY bus=259 X=390947.635 Y=392865.698
+SetBusXY bus=266 X=390947.599 Y=392865.889
+SetBusXY bus=274 X=390947.508 Y=392866.043
+SetBusXY bus=282 X=390947.071 Y=392866.462
+SetBusXY bus=290 X=390946.507 Y=392867.044
+SetBusXY bus=191 X=390948.046 Y=392866.84
+SetBusXY bus=201 X=390948.693 Y=392867.51
+SetBusXY bus=132 X=390923.576 Y=392835.814
+SetBusXY bus=138 X=390923.799 Y=392835.572
+SetBusXY bus=144 X=390923.973 Y=392835.3
+SetBusXY bus=150 X=390924.07 Y=392835.058
+SetBusXY bus=157 X=390924.128 Y=392834.671
+SetBusXY bus=165 X=390924.169 Y=392834.201
+SetBusXY bus=173 X=390924.246 Y=392833.853
+SetBusXY bus=182 X=390924.411 Y=392833.475
+SetBusXY bus=190 X=390924.644 Y=392833.165
+SetBusXY bus=200 X=390924.934 Y=392832.865
+SetBusXY bus=211 X=390925.39 Y=392832.419
+SetBusXY bus=220 X=390926.643 Y=392831.209
+SetBusXY bus=228 X=390926.75 Y=392831.106
+SetBusXY bus=236 X=390926.805 Y=392831.065
+SetBusXY bus=243 X=390926.875 Y=392831.043
+SetBusXY bus=251 X=390926.945 Y=392831.047
+SetBusXY bus=258 X=390927.019 Y=392831.072
+SetBusXY bus=265 X=390927.156 Y=392831.157
+SetBusXY bus=273 X=390927.282 Y=392831.268
+SetBusXY bus=281 X=390927.695 Y=392831.755
+SetBusXY bus=289 X=390931 Y=392831
+SetBusXY bus=121 X=390918.949 Y=392836.229
+SetBusXY bus=126 X=390919.115 Y=392836.199
+SetBusXY bus=131 X=390919.234 Y=392836.205
+SetBusXY bus=137 X=390919.412 Y=392836.253
+SetBusXY bus=143 X=390919.608 Y=392836.348
+SetBusXY bus=149 X=390919.762 Y=392836.466
+SetBusXY bus=156 X=390919.905 Y=392836.632
+SetBusXY bus=164 X=390920.012 Y=392836.805
+SetBusXY bus=172 X=390920.077 Y=392836.965
+SetBusXY bus=181 X=390920.101 Y=392837.143
+SetBusXY bus=189 X=390920.095 Y=392837.297
+SetBusXY bus=199 X=390920.042 Y=392837.481
+SetBusXY bus=210 X=390919.804 Y=392837.861
+SetBusXY bus=219 X=390919.412 Y=392838.407
+SetBusXY bus=104 X=390912.282 Y=392841.942
+SetBusXY bus=107 X=390912.63 Y=392841.967
+SetBusXY bus=110 X=390913.032 Y=392842.011
+SetBusXY bus=113 X=390913.637 Y=392842.13
+SetBusXY bus=116 X=390914.4 Y=392842.345
+SetBusXY bus=120 X=390914.924 Y=392842.567
+SetBusXY bus=125 X=390915.64 Y=392842.933
+SetBusXY bus=130 X=390916.403 Y=392843.351
+SetBusXY bus=136 X=390917.072 Y=392843.826
+SetBusXY bus=142 X=390918.076 Y=392844.727
+SetBusXY bus=148 X=390922.542 Y=392849.331
+SetBusXY bus=155 X=390923.521 Y=392850.328
+SetBusXY bus=163 X=390927.222 Y=392854.1
+SetBusXY bus=171 X=390931.986 Y=392859.25
+SetBusXY bus=180 X=390930.205 Y=392860.892
+SetBusXY bus=188 X=390923.046 Y=392867.911
+SetBusXY bus=198 X=390923.824 Y=392868.734
+SetBusXY bus=209 X=390923.916 Y=392868.865
+SetBusXY bus=218 X=390923.961 Y=392868.986
+SetBusXY bus=227 X=390923.967 Y=392869.089
+SetBusXY bus=235 X=390923.916 Y=392869.238
+SetBusXY bus=242 X=390923.807 Y=392869.387
+SetBusXY bus=250 X=390923.606 Y=392869.587
+SetBusXY bus=257 X=390922.855 Y=392870.303
+SetBusXY bus=264 X=390921 Y=392875
+SetBusXY bus=197 X=390921.647 Y=392869.283
+SetBusXY bus=208 X=390917 Y=392871
+SetBusXY bus=179 X=390932.788 Y=392860.118
+SetBusXY bus=187 X=390935.932 Y=392863.545
+SetBusXY bus=196 X=390941.568 Y=392869.643
+SetBusXY bus=207 X=390943.019 Y=392871.212
+SetBusXY bus=217 X=390945.597 Y=392874.081
+SetBusXY bus=226 X=390946.519 Y=392875.104
+SetBusXY bus=234 X=390947.273 Y=392875.942
+SetBusXY bus=233 X=390937.556 Y=392882.924
+SetBusXY bus=241 X=390936.301 Y=392884.111
+SetBusXY bus=249 X=390931 Y=392884
+SetBusXY bus=248 X=390931 Y=392884
+SetBusXY bus=206 X=390939.128 Y=392871.786
+SetBusXY bus=216 X=390931.512 Y=392879.201
+SetBusXY bus=225 X=390927 Y=392880
+SetBusXY bus=162 X=390915.061 Y=392858.471
+SetBusXY bus=170 X=390913.478 Y=392860.025
+SetBusXY bus=178 X=390910 Y=392863
+SetBusXY bus=36 X=390890.1695 Y=392868.642
+SetBusXY bus=41 X=390891.41 Y=392869.955
+SetBusXY bus=47 X=390893 Y=392874
+SetBusXY bus=40 X=390890.444 Y=392868.351
+SetBusXY bus=46 X=390890.571 Y=392868.223
+SetBusXY bus=52 X=390890.754 Y=392868.168
+SetBusXY bus=58 X=390890.936 Y=392868.168
+SetBusXY bus=64 X=390891.045 Y=392868.168
+SetBusXY bus=71 X=390891.246 Y=392868.241
+SetBusXY bus=78 X=390892.048 Y=392868.97
+SetBusXY bus=83 X=390896 Y=392870
+SetBusXY bus=27 X=390880.364 Y=392878.196
+SetBusXY bus=31 X=390879.232 Y=392879.305
+SetBusXY bus=35 X=390879.208 Y=392879.353
+SetBusXY bus=39 X=390879.183 Y=392879.426
+SetBusXY bus=45 X=390879.159 Y=392879.522
+SetBusXY bus=51 X=390879.159 Y=392879.763
+SetBusXY bus=57 X=390879.232 Y=392879.956
+SetBusXY bus=63 X=390879.907 Y=392880.679
+SetBusXY bus=70 X=390881 Y=392884
+SetBusXY bus=30 X=390881.306 Y=392879.522
+SetBusXY bus=34 X=390885 Y=392880
+SetBusXY bus=16 X=390872.314 Y=392875.302
+SetBusXY bus=18 X=390872.316 Y=392875.346
+SetBusXY bus=20 X=390872.312 Y=392875.392
+SetBusXY bus=22 X=390872.303 Y=392875.433
+SetBusXY bus=24 X=390872.288 Y=392875.482
+SetBusXY bus=26 X=390872.263 Y=392875.532
+SetBusXY bus=29 X=390872.239 Y=392875.581
+SetBusXY bus=33 X=390872.17 Y=392875.71
+SetBusXY bus=38 X=390872.092 Y=392875.822
+SetBusXY bus=44 X=390872.073 Y=392875.85
+SetBusXY bus=50 X=390872.038 Y=392875.883
+SetBusXY bus=56 X=390871.964 Y=392875.93
+SetBusXY bus=62 X=390871.892 Y=392875.96
+SetBusXY bus=69 X=390871.812 Y=392875.983
+SetBusXY bus=77 X=390871.436 Y=392876.083
+SetBusXY bus=82 X=390870.935 Y=392876.183
+SetBusXY bus=87 X=390870.634 Y=392876.259
+SetBusXY bus=91 X=390870.525 Y=392876.285
+SetBusXY bus=94 X=390870.492 Y=392876.296
+SetBusXY bus=97 X=390870.458 Y=392876.31
+SetBusXY bus=100 X=390870.383 Y=392876.359
+SetBusXY bus=103 X=390870.157 Y=392876.534

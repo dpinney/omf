@@ -25,7 +25,7 @@ def gridLabToDSS(inFilePath, outFilePath):
 	gld_reader = gReader(input_file = inFilePath)
 	gld_reader.parse(model)
 	model.set_names()
-	dss_writer = dWriter(output_path=".")
+	dss_writer = dWriter(output_path='.')
 	# TODO: no way to specify output filename, so move and rename.
 	dss_writer.write(model)
 
@@ -37,12 +37,12 @@ def dssToGridLab(inFilePath, outFilePath, busCoords=None):
 	dss_reader = dReader(master_file = inFilePath)
 	dss_reader.parse(model)
 	model.set_names()
-	glm_writer = gWriter(output_path=".")
+	glm_writer = gWriter(output_path='.')
 	# TODO: no way to specify output filename, so move and rename.
 	glm_writer.write(model)
 
 def dssToTree(pathToDss):
-	''' Convert a .dss file to an in-memory, OMF-compatible "tree" object.
+	''' Convert a .dss file to an in-memory, OMF-compatible 'tree' object.
 	Note that we only support a VERY specifically-formatted DSS file.'''
 	# TODO: Consider removing the handling for 'wdg=' syntax within this block, as we will not support it in an input file. 
 	# Ingest file.
@@ -76,16 +76,25 @@ def dssToTree(pathToDss):
 	for i, line in contents.items():
 		jpos = 0
 		try:
-			#HACK: only support white space separation of attributes.
 			contents[i] = line.split()
-			# HACK: only support = assignment of values.
 			ob = OrderedDict() 
 			ob['!CMD'] = contents[i][0]
 			if len(contents[i]) > 1:
 				for j in range(1, len(contents[i])):
 					jpos = j
-					k,v = contents[i][j].split('=')
-					# Should we pull the multiwinding transformer handling out of here and put it into dssFilePrep()?
+					splitlen = len(contents[i][j].split('='))
+					k,v=('','',)
+					if splitlen==3:
+						print('OMF does not support OpenDSS\'s \'file=\' syntax for defining property values.')
+						k,v,f = contents[i][j].split('=')
+						# replaceFileSyntax() # DEBUG
+						## replaceFileSyntax  should do the following:
+						  # parse the filename (contained in v)
+						  # read in the file and parse as array
+						  # v = file content array, cast as a string
+					else:
+						k,v = contents[i][j].split('=')
+					# TODO: Should we pull the multiwinding transformer handling out of here and put it into dssFilePrep()?
 					if k == 'wdg':
 						continue
 					if (k in ob.keys()) or (convTbl.get(k,k) in ob.keys()): # if the single key already exists in the object, then this is the second pass. If pluralized key exists, then this is the 2+nth pass
@@ -106,16 +115,16 @@ def dssToTree(pathToDss):
 					else: # if single key has not already been added, add it
 						ob[k] = v
 		except:
-			raise Exception(f'Error encountered in group (space delimited) #{jpos+1} of line {i + 1}: {line}')
+			raise Exception(f"Error encountered in group (space delimited) #{jpos+1} of line {i + 1}: {line}")
 		contents[i] = ob
 	# Print to file
-	#with open("dssTreeRepresentation.csv", 'w') as outFile:
+	#with open('dssTreeRepresentation.csv', 'w') as outFile:
 	#	ii = 1
 	#	for k,v in contents.items():
-	#		outFile.write(str(k) + "\n")
+	#		outFile.write(str(k) + '\n')
 	#		ii = ii + 1
 	#		for k2,v2 in v.items():
-	#			outFile.write("," + str(k2) + "," + str(v2) + "\n")
+	#			outFile.write(',' + str(k2) + ',' + str(v2) + '\n')
 	return list(contents.values())
 
 def treeToDss(treeObject, outputPath):
@@ -123,8 +132,8 @@ def treeToDss(treeObject, outputPath):
 	for ob in treeObject:
 		line = ob['!CMD']
 		for key in ob:
-			if key not in ['!CMD']:
-				line = f'{line} {key}={ob[key]}'
+			if not key.startswith('!'):
+				line = f"{line} {key}={ob[key]}"
 		outFile.write(line + '\n')
 	outFile.close()
 
@@ -142,6 +151,7 @@ def _dssFilePrep(fpath):
 	import opendssdirect as dss
 	import pandas as pd
 	import tempfile as tf
+	from omf.solvers.opendss import runDssCommand
 
 	# Note that tmpdir is not automatically cleaned up on premature exit; This is expected to be addressed by user action. 
 	with tf.TemporaryDirectory() as tempDir:
@@ -152,14 +162,14 @@ def _dssFilePrep(fpath):
 				pass
 		except Exception as ex:
 			print('While accessing the file located at %s, the following exception occured: %s'%(dssDirPath, ex))
-		dss.run_command('Clear')
-		x = dss.run_command('Redirect "' + dssFilePath + '"')
-		x = dss.run_command('Solve')
+		runDssCommand('Clear')
+		x = runDssCommand('Redirect "' + dssFilePath + '"')
+		x = runDssCommand('Solve')
 		# TODO: If runDSS() is changed to return dssFileLoc, replace the above lines of code with this:
-		#  dssDirPath = self.runDSS(fpath, keep_output=False) # will require moving the function or changing the definition to reference 'self'.
+		#  dssDirPath = self.runDSS(fpath, keep_output=False) # will require moving the function or changing the definition to reference 'self".
 	
 		exptDirPath = tempDir + '/' + 'OmfCktExport'
-		dss.run_command('Save Circuit ' + 'purposelessFileName.dss "' + exptDirPath + '"')
+		runDssCommand('Save Circuit ' + 'purposelessFileName.dss "' + exptDirPath + '"')
 		# Manipulate buscoords file to create commands that generate bus list
 		coords = pd.read_csv(exptDirPath + '/BusCoords.dss', header=None, dtype=str, names=['Element', 'X', 'Y'])
 		coordscmds = []
@@ -258,8 +268,8 @@ def _dssToTree_dssdirect(fpath):
 	to standardize it before parsing.'''
 	# import circuit via opendssdirect
 	import opendssdirect as dss
-	dss.run_command('Redirect ' + fpath)
-	dss.run_command('Solve')
+	runDssCommand('Redirect ' + fpath)
+	runDssCommand('Solve')
 	tree = [] # list of dictionaries
 	tree.extend(_dfToListOfDicts(dss.utils.capacitors_to_dataframe(),'Capacitor'))
 	tree.extend(_dfToListOfDicts(dss.utils.fuses_to_dataframe(), 'Fuse'))
@@ -281,13 +291,13 @@ def _dssToTree_dssdirect(fpath):
 	
 	## One way of getting all the circuit elements....
 	# Add the connections (there is not a way I can see to get this info the pandas way...can we ask someone? Do it the other way)
-	with open("dssTreeRepresentation_direct.csv", 'w') as outFile:
+	with open('dssTreeRepresentation_direct.csv', 'w') as outFile:
 		for i,objd in enumerate(tree):
 			dss.Circuit.SetActiveElement(objd['Object'])
 			objd['Cnxns'] = dss.CktElement.BusNames()
-			outFile.write(str(i) + "\n")
+			outFile.write(str(i) + '\n')
 			for k,v in objd.items():
-					outFile.write("," + str(k) + "," + str(v) + "\n")
+					outFile.write(',' + str(k) + ',' + str(v) + '\n')
 	
 	## A second way of getting all the circuit elements....
 		## Add the connections (there is not a way I can see to get this info the pandas way...can we ask someone? Do it the other way)
@@ -336,70 +346,62 @@ def evilDssTreeToGldTree(dssTree):
 	for ob in dssTree:
 		if ob['!CMD'] == 'setbusxy':
 			gldTree[str(g_id)] = {
-				"object": "bus",
-				"name": ob['bus'],
-				"latitude": ob['y'],
-				"longitude": ob['x']
+				'object': 'bus',
+				'name': ob['bus'],
+				'latitude': ob['y'],
+				'longitude': ob['x']
 			}
 			bus_with_coords.append(ob['bus'])
 		elif ob['!CMD'] == 'new':
 			obtype, name = ob['object'].split('.')
 			if 'bus1' in ob and 'bus2' in ob:
-				# line-like object.
-				# strip the weird dot notation stuff via find.
-				# TODOn't: add handling for cnxns that are defined with no phase/node information attached, i.e. 'busX' vs. 'busX.1.2.3' (not a problem anymore since .dss files are required to have phase info)
+				# line-like object. includes reactors.
 				fro, froCode = ob['bus1'].split('.', maxsplit=1)
 				to, toCode = ob['bus2'].split('.', maxsplit=1)
 				gldTree[str(g_id)] = {
-					"object": obtype,
-					"name": name,
-					"from": fro,
-					"to": to,
-					"!FROCODE": '.' + froCode,
-					"!TOCODE": '.' + toCode
+					'object': obtype,
+					'name': name,
+					'from': fro,
+					'to': to,
+					'!FROCODE': '.' + froCode,
+					'!TOCODE': '.' + toCode
 				}
 				bus_names.extend([fro, to])
-				_extend_with_exc(ob, gldTree[str(g_id)], ['object','bus1','bus2','!CMD'])
+				stuff = gldTree[str(g_id)]
+				_extend_with_exc(ob, stuff, ['object','bus1','bus2','!CMD'])
 			elif 'buses' in ob:
 				#transformer-like object.
-				# TODO: add proper handling for 3-winding transformers. We won't be supporting 3-winding xfrmrs for viz - are we not supporting it at all?
-				bb = ob['buses'] # TODO 'buses' is not a list yet, need to make it into one.
-				bb = bb.replace(']','')
-				bb = bb.replace('[','')
-				bb = bb.split(',')
+				bb = ob['buses']
+				bb = bb.replace(']','').replace('[','').split(',')
 				b1 = bb[0]
+				fro, froCode = b1.split('.', maxsplit=1)
+				ob['!FROCODE'] = '.' + froCode
 				b2 = bb[1]
-				#if bb[2]:
-				#	b3 = bb[2] # how is 3rd winding dealt with in gld? 
-
-				#b1,b2 = str(ob['buses']).replace('(','').replace(')','').split(',')
-				try: 
-					fro, froCode = b1.split('.', maxsplit=1)
-					to, toCode = b2.split('.', maxsplit=1)
-					ob["!FROCODE"] = '.' + froCode
-					ob["!TOCODE"] = '.' + toCode
-				except:
-					fro = b1
-					to = b2
-					#TODO: fix this hack!
-					ob["!FROCODE"] = '.1.2.3'
-					ob["!TOCODE"] = '.1.2.3'
-				gldTree[str(g_id)] = {
-					"object": obtype,
-					"name": name,
-					"from": fro,
-					"to": to
+				to, toCode = b2.split('.', maxsplit=1)
+				ob['!TOCODE'] = '.' + toCode
+				gldobj = {
+					'object': obtype,
+					'name': name,
+					'from': fro,
+					'to': to
 				}
 				bus_names.extend([fro, to])
+				if len(bb)==3:
+					b3 = bb[2]
+					to2, to2Code = b3.split('.', maxsplit=1)
+					ob['!TO2CODE'] = '.' + to2Code
+					gldobj['to2'] = to2
+					bus_names.append(to2)
+				gldTree[str(g_id)] = gldobj
 				_extend_with_exc(ob, gldTree[str(g_id)], ['object','buses','!CMD'])
 			elif 'bus' in ob:
 				#load-like object.
 				bus_root, connCode = ob['bus'].split('.', maxsplit=1)
 				gldTree[str(g_id)] = {
-					"object": obtype,
-					"name": name,
-					"parent": bus_root,
-					"!CONNCODE": '.' + connCode
+					'object': obtype,
+					'name': name,
+					'parent': bus_root,
+					'!CONNCODE': '.' + connCode
 				}
 				bus_names.append(bus_root)
 				_extend_with_exc(ob, gldTree[str(g_id)], ['object','bus','!CMD'])
@@ -409,35 +411,58 @@ def evilDssTreeToGldTree(dssTree):
 					bus_root, connCode = ob['bus1'].split('.', maxsplit=1)
 					ob['!CONNCODE'] = '.' + connCode
 				except:
-					bus_root = ob['bus1']
+					bus_root = ob['bus1'] # this shoudln't happen if the .clean syntax guide is followed.
 				gldTree[str(g_id)] = {
-					"object": obtype,
-					"name": name,
-					"parent": bus_root,
+					'object': obtype,
+					'name': name,
+					'parent': bus_root,
 				}
 				bus_names.append(bus_root)
 				_extend_with_exc(ob, gldTree[str(g_id)], ['object','bus1','!CMD'])
-			else:
-				#config-like object.
+			elif 'element' in ob:
+				#control object (connected to another object instead of a bus)
+				#cobtype, cobname, connCode = ob['element'].split('.', maxsplit=2)
+				cobtype, cobname = ob['element'].split('.', maxsplit=1)
 				gldTree[str(g_id)] = {
-					"object": obtype,
-					"name": name
+					'object': obtype,
+					'name': name,
+					'parent': cobtype + '.' + cobname,
+				}
+				_extend_with_exc(ob, gldTree[str(g_id)], ['object','element','!CMD'])
+			else:
+				#config-like object
+				gldTree[str(g_id)] = {
+					'object': obtype,
+					'name': name
 				}
 				_extend_with_exc(ob, gldTree[str(g_id)], ['object','!CMD'])
-		elif ob['!CMD'] not in ['new', 'setbusxy']:
+		elif ob.get('object','').split('.')[0]=='vsource':
+			obtype, name = ob['object'].split('.')
+			conn, connCode = ob.get('bus1').split('.', maxsplit=1)
+			gldTree[str(g_id)] = {
+				'object': obtype,
+				'name': name,
+				'parent': conn,
+				'!CONNCODE': '.' + connCode
+			}
+			_extend_with_exc(ob, gldTree[str(g_id)], ['object','bus1'])
+		elif ob['!CMD']=='edit':
+			#TODO: handle edited objects? maybe just extend the 'new' block (excluding vsource) because the functionality is basically the same.
+			warnings.warn(f"Ignored 'edit' command: {ob}")
+		elif ob['!CMD'] not in ['new', 'setbusxy', 'edit']: # what about 'set', 
 			#command-like objects.
 			gldTree[str(g_id)] = {
-				"object": "!CMD",
-				"name": ob['!CMD']
+				'object': '!CMD',
+				'name': ob['!CMD']
 			}
 			_extend_with_exc(ob, gldTree[str(g_id)], ['!CMD'])
 		else:
-			warnings.warn(f'Ignored {ob}')
+			warnings.warn(f"Ignored {ob}")
 		g_id += 1
 	# Warn on buses with no coords.
-	no_coord_buses = set(bus_names) - set(bus_with_coords)
-	if len(no_coord_buses) != 0:
-		warnings.warn(f'Buses without coordinates:{no_coord_buses}')
+	#no_coord_buses = set(bus_names) - set(bus_with_coords)
+	#if len(no_coord_buses) != 0:
+		#warnings.warn(f"Buses without coordinates:{no_coord_buses}")
 	return gldTree
 
 def evilGldTreeToDssTree(evil_gld_tree):
@@ -466,20 +491,67 @@ def evilGldTreeToDssTree(evil_gld_tree):
 			_extend_with_exc(ob, new_ob, ['!CMD','from','to','name','object','latitude','longitude','!FROCODE', '!TOCODE'])
 			dssTree.append(new_ob)
 		elif ob.get('object') == 'transformer':
-			try:
-				new_ob = {
-					'!CMD': 'new',
-					'object': ob['object'] + '.' + ob['name'],
-					'buses': f'({ob["from"]}{ob.get("!FROCODE","")},{ob["to"]}{ob.get("!TOCODE","")})'
-				}
-				_extend_with_exc(ob, new_ob, ['!CMD','from','to','name','object','latitude','longitude','!FROCODE', '!TOCODE'])
-				dssTree.append(new_ob)
-			except:
-				warnings.warn(f'Could not write valid DSS object for {ob}')
+			buses = f"[{ob['from']}{ob.get('!FROCODE','')},{ob['to']}{ob.get('!TOCODE','')}]" # for 2-winding xfrmrs
+			exclist = ['!CMD','from','to','to2','name','object','latitude','longitude','!FROCODE','!TOCODE','windings']
+			if ob.get('to2'): # for 3-winding xfrmrs
+				exclist.extend(['to2','!TO2CODE'])
+				buses = f"[{ob['from']}{ob.get('!FROCODE','')},{ob['to']}{ob.get('!TOCODE','')},{ob['to2']}{ob.get('!TO2CODE','')}]"
+			#if ob.get('to3'): # for 4-winding xfrmrs (rare)
+			#	exclist.extend(['to3','!TO3CODE'])
+			#	buses = f"[{ob['from']}{ob.get('!FROCODE','')},{ob['to']}{ob.get('!TOCODE','')},{ob['to2']}{ob.get('!TO2CODE','')},{ob['to3']}{ob.get('!TO3CODE','')}]"
+			new_ob = {
+				'!CMD': 'new',
+				'object': ob['object'] + '.' + ob['name'],
+			}
+			if ob.get('windings','NWP')!='NWP':
+				new_ob['windings'] = ob['windings'] # This is required to ensure correct order (because the 'windings' property triggers memory allocation and resets everything to default values)
+			new_ob['buses'] = buses # 'buses' must come after 'windings', if existing.
+			_extend_with_exc(ob, new_ob, exclist)
+			dssTree.append(new_ob)
+		elif ob.get('object') == 'reactor':
+			#TODO: this block of code is same as for 'line' above. Consider combining.
+			new_ob = {
+				'!CMD': 'new',
+				'object': ob['object'] + '.' + ob['name'],
+				'bus1': ob['from'] + ob.get('!FROCODE',''),
+				'bus2': ob['to']+ ob.get('!TOCODE',''),
+			}
+			_extend_with_exc(ob, new_ob, ['!CMD','from','to','name','object','latitude','longitude','!FROCODE', '!TOCODE'])
+			dssTree.append(new_ob)
 		elif ob.get('object') == 'regcontrol':
 			new_ob = {
 				'!CMD': 'new',
 				'object': ob['object'] + '.' + ob.get('name',''),
+			}
+			if ob.get('parent','NP')!='NP':
+				if ob.get('!CONNCODE','NCC')=='NCC':
+					new_ob['!CONNCODE'] = '.1' # If no node info is specified, then it defaults to one-phase.
+				new_ob['bus'] = ob['parent'] + ob['!CONNCODE']
+			_extend_with_exc(ob, new_ob, ['parent','name','object','latitude','longitude','!CONNCODE'])
+			dssTree.append(new_ob)
+		elif ob.get('object') == 'capcontrol':
+			new_ob = {
+				'!CMD': 'new',
+				'object': ob['object'] + '.' + ob.get('name',''),
+				'element': ob['parent'] + ob.get('!CONNCODE', '')
+			}
+			_extend_with_exc(ob, new_ob, ['parent','name','object','latitude','longitude','!CONNCODE'])
+			dssTree.append(new_ob)
+		elif ob.get('object') == 'energymeter':
+			#TODO this block of code is the same as 'capcontrol' above. Consider combining.
+			new_ob = {
+				'!CMD': 'new',
+				'object': ob['object'] + '.' + ob.get('name',''),
+				'element': ob['parent'] + ob.get('!CONNCODE', '')
+			}
+			_extend_with_exc(ob, new_ob, ['parent','name','object','latitude','longitude','!CONNCODE'])
+			dssTree.append(new_ob)
+		elif ob.get('object') == 'monitor':
+			#TODO this block of code is the same as 'capcontrol' above. Consider combining.
+			new_ob = {
+				'!CMD': 'new',
+				'object': ob['object'] + '.' + ob.get('name',''),
+				'element': ob['parent'] + ob.get('!CONNCODE', '')
 			}
 			_extend_with_exc(ob, new_ob, ['parent','name','object','latitude','longitude','!CONNCODE'])
 			dssTree.append(new_ob)
@@ -506,7 +578,7 @@ def evilGldTreeToDssTree(evil_gld_tree):
 			_extend_with_exc(ob, new_ob, ['!CMD', 'name', 'object','latitude','longitude'])
 			dssTree.append(new_ob)
 		else:
-			warnings.warn(f'Unprocessed object: {ob}')
+			warnings.warn(f"Unprocessed object: {ob}")
 	return dssTree
 
 def evilToOmd(evilTree, outPath):
@@ -530,31 +602,39 @@ def _createAndCompareTestFile(inFile, userOutFile=''):
 	percSumm, diffSumm = voltageCompare(involts, outvolts, keep_output=True)
 	return 
 
-
 def _tests():
 	from omf.solvers.opendss import getVoltages, voltageCompare
 	import pandas as pd
-	FNAMES =  ['ieee37.clean.dss', 'ieee123_solarRamp.clean.dss', 'iowa240.clean.dss', 'ieee8500-unbal_no_fuses.clean.dss']
+	FNAMES =  ['ieee37.clean.dss', 'ieee123_solarRamp.clean.dss', 'iowa240.clean.dss', 'ieeeLVTestCase.clean.dss', 'ieee8500-unbal_no_fuses.clean.dss']
+	
 	for fname in FNAMES:
 		print('!!!!!!!!!!!!!! ',fname,' !!!!!!!!!!!!!!')
 		# Roundtrip conversion test
-		errorLimit = 0.03
+		errorLimit = 0.001
 		startvolts = getVoltages(fname, keep_output=False)
 		dsstreein = dssToTree(fname)
 		# pp([dict(x) for x in dsstreein]) # DEBUG
 		# treeToDss(dsstreein, 'TEST.dss') # DEBUG
 		glmtree = evilDssTreeToGldTree(dsstreein)
-		#pp(glmtree)
-		# distNetViz.viz_mem(glmtree, open_file=True, forceLayout=False)
+		#pp(glmtree) #DEBUG
+		#distNetViz.viz_mem(glmtree, open_file=True, forceLayout=False)
 		dsstreeout = evilGldTreeToDssTree(glmtree)
-		#outpath = fname[:-4] + '_roundtrip_test.dss'
-		#treeToDss(dsstreeout, outpath)
-		#endvolts = getVoltages(outpath, keep_output=False)
-		#percSumm, diffSumm = voltageCompare(startvolts, endvolts, keep_output=False)
-		#maxPerrM = [percSumm.loc['RMSPE',c] for c in percSumm.columns if c.lower().startswith(' magnitude')]
-		#maxPerrM = pd.Series(maxPerrM).max()
-		#assert abs(maxPerrM) < errorLimit*100, 'The average percent error exceeeds the threshold of %s%%.'%(errorLimit*100)
-	
+		outpath = fname[:-4] + '_roundtrip_test.dss'
+		treeToDss(dsstreeout, outpath)
+		#...roundtrip a second time to check the output dss syntax
+		dsstreein2 = dssToTree(outpath)
+		glmtree2 = evilDssTreeToGldTree(dsstreein2)
+		distNetViz.viz_mem(glmtree2, open_file=True, forceLayout=False)
+		dsstreeout2 = evilGldTreeToDssTree(glmtree2)
+		treeToDss(dsstreeout2, outpath)
+		endvolts = getVoltages(outpath, keep_output=False)
+		os.remove(outpath)
+		percSumm, diffSumm = voltageCompare(startvolts, endvolts, saveascsv=False, with_plots=False)
+		maxPerrM = [percSumm.loc['RMSPE',c] for c in percSumm.columns if c.lower().startswith(' magnitude')]
+		maxPerrM = pd.Series(maxPerrM).max()
+		#print(maxPerrM) # DEBUG
+		assert abs(maxPerrM) < errorLimit*100, 'The average percent error in voltage magnitude is %s, which exceeeds the threshold of %s%%.'%(maxPerrM,errorLimit*100)
+
 	# Deprecated tests section
 	#dssToGridLab('ieee37.dss', 'Model.glm') # this kind of works
 	#gridLabToDSS('ieee37_fixed.glm', 'ieee37_conv.dss') # this fails miserably

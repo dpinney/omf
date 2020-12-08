@@ -4,10 +4,6 @@ import shutil, base64
 from datetime import datetime as dt, timedelta
 from os.path import isdir, join as pJoin
 import pandas as pd
-try:
-	import tensorflow as tf
-except:
-	pass
 import numpy as np
 from scipy.stats import norm
 from omf import forecast as lf
@@ -33,6 +29,7 @@ def highest_peak_this_month(df, predicted_day):
 
 def work(modelDir, ind):
 	''' Model processing done here. '''
+	import tensorflow as tf
 	epochs = int(ind['epochs'])
 	o = {}  # See bottom of file for out's structure
 

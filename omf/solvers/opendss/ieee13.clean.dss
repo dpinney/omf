@@ -1,10 +1,10 @@
 clear 
 set defaultbasefrequency=60
 
-new object=circuit.ieee13nodeckt basekv=115 pu=1.0001 phases=3 bus1=sourcebus angle=30 mvasc3=20000 mvasc1=21000 
+new object=circuit.ieee13nodeckt basekv=115 pu=1.0001 phases=3 bus1=sourcebus.1.2.3 angle=30 mvasc3=20000 mvasc1=21000 
 
 ! sub transformer definition 
-new object=transformer.sub phases=3 windings=2 xhl=0.008 windings=2 buses=[sourcebus,650] conns=[delta,wye] kvs=[115,4.16] kvas=[5000,5000] %rs=[0.0005,0.0005]
+new object=transformer.sub phases=3 windings=2 xhl=0.008 windings=2 buses=[sourcebus.1.2.3,650.1.2.3] conns=[delta,wye] kvs=[115,4.16] kvas=[5000,5000] %rs=[0.0005,0.0005]
 
 ! feeder 1-phase voltage regulators
 ! define low-impedance 2-wdg transformer
@@ -19,16 +19,25 @@ new object=transformer.reg3 phases=1 bank=reg1 xhl=0.01 kvas=[1666,1666] buses=[
 new object=regcontrol.reg3 transformer=reg3 winding=2 vreg=122 band=2 ptratio=20 ctprim=700 r=3 x=9 
 
 ! transformer definition 
-new object=transformer.xfm1 phases=3 windings=2 xhl=2 buses=[633,634] conns=[wye,wye] kvs=[4.16,0.480] kvas=[500,500] %rs=[0.55,0.55] xht=1 xlt=1
+new object=transformer.xfm1 phases=3 windings=2 xhl=2 buses=[633.1.2.3,634.1.2.3] conns=[wye,wye] kvs=[4.16,0.480] kvas=[500,500] %rs=[0.55,0.55] xht=1 xlt=1
 
-! these are local matrix line codes
-new object=linecode.mtx601 nphases=3 basefreq=60 rmatrix=[0.3465|0.1560,0.3375|0.1580,0.1535,0.3414] xmatrix=[1.0179|0.5017,1.0478|0.4236,0.3849,1.0348] units=mi 
-new object=linecode.mtx602 nphases=3 basefreq=60 rmatrix=[0.7526|0.1580,0.7475|0.1560,0.1535,0.7436] xmatrix=[1.1814|0.4236,1.1983|0.5017,0.3849,1.2112] units=mi 
-new object=linecode.mtx603 nphases=2 basefreq=60 rmatrix=[1.3238|0.2066,1.3294] xmatrix=[1.3569|0.4591,1.3471] units=mi 
-new object=linecode.mtx604 nphases=2 basefreq=60 rmatrix=[1.3238|0.2066,1.3294] xmatrix=[1.3569|0.4591,1.3471] units=mi 
+! Lincodes with expanded matrix definitions
+new object=linecode.mtx601 nphases=3 basefreq=60 rmatrix=[0.3465,0.1560,0.1580|0.1560,0.3375,0.1535|0.1580,0.1535,0.3414] xmatrix=[1.0179,0.5017,0.4236|0.5017,1.0478,0.3849|0.4236,0.3849,1.0348] units=mi 
+new object=linecode.mtx602 nphases=3 basefreq=60 rmatrix=[0.7526,0.1580,0.1560|0.1580,0.7475,0.1535|0.1560,0.1535,0.7436] xmatrix=[1.1814,0.4236,0.5017|0.4236,1.1983,0.3849|0.5017,0.3849,1.2112] units=mi 
+new object=linecode.mtx603 nphases=2 basefreq=60 rmatrix=[1.3238,0.2066|0.2066,1.3294] xmatrix=[1.3569,0.4591|0.4591,1.3471] units=mi 
+new object=linecode.mtx604 nphases=2 basefreq=60 rmatrix=[1.3238,0.2066|0.2066,1.3294] xmatrix=[1.3569,0.4591|0.4591,1.3471] units=mi 
 new object=linecode.mtx605 nphases=1 basefreq=60 rmatrix=[1.3292] xmatrix=[1.3475] units=mi 
-new object=linecode.mtx606 nphases=3 units=mi rmatrix=[0.791721|0.318476,0.781649|0.28345,0.318476,0.791721] xmatrix=[0.438352|0.0276838,0.396697|-0.0184204,0.0276838,0.438352] cmatrix=[383.948|0,383.948|0,0,383.948]
+new object=linecode.mtx606 nphases=3 units=mi rmatrix=[0.791721,0.318476,0.28345|0.318476,0.781649,0.318476|0.28345,0.318476,0.791721] xmatrix=[0.438352,0.0276838,-0.0184204|0.0276838,0.396697,0.0276838|-0.0184204,0.0276838,0.438352] cmatrix=[383.948,0,0|0,383.948,0|0,0,383.948]
 new object=linecode.mtx607 nphases=1 basefreq=60 rmatrix=[1.3425] xmatrix=[0.5124] cmatrix=[236] units=mi 
+
+! Original linecodes, with lower triangular matrix definitions
+! new object=linecode.mtx601 nphases=3 basefreq=60 rmatrix=[0.3465|0.1560,0.3375|0.1580,0.1535,0.3414] xmatrix=[1.0179|0.5017,1.0478|0.4236,0.3849,1.0348] units=mi 
+! new object=linecode.mtx602 nphases=3 basefreq=60 rmatrix=[0.7526|0.1580,0.7475|0.1560,0.1535,0.7436] xmatrix=[1.1814|0.4236,1.1983|0.5017,0.3849,1.2112] units=mi 
+! new object=linecode.mtx603 nphases=2 basefreq=60 rmatrix=[1.3238|0.2066,1.3294] xmatrix=[1.3569|0.4591,1.3471] units=mi 
+! new object=linecode.mtx604 nphases=2 basefreq=60 rmatrix=[1.3238|0.2066,1.3294] xmatrix=[1.3569|0.4591,1.3471] units=mi 
+! new object=linecode.mtx605 nphases=1 basefreq=60 rmatrix=[1.3292] xmatrix=[1.3475] units=mi 
+! new object=linecode.mtx606 nphases=3 units=mi rmatrix=[0.791721|0.318476,0.781649|0.28345,0.318476,0.791721] xmatrix=[0.438352|0.0276838,0.396697|-0.0184204,0.0276838,0.438352] cmatrix=[383.948|0,383.948|0,0,383.948]
+! new object=linecode.mtx607 nphases=1 basefreq=60 rmatrix=[1.3425] xmatrix=[0.5124] cmatrix=[236] units=mi 
 
 !load definitions 
 new object=load.671 bus1=671.1.2.3 phases=3 conn=delta model=1 kv=4.16 kw=1155 kvar=660 
