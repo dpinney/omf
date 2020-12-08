@@ -553,112 +553,89 @@ def removeCnxns(tree):
 	return tree
 
 def _mergeContigLinesOnce(tree):
-	#TODO refactor this code for performance and readability. O(n^2)=gross.
-	
-	# Capture the connections to any elements that don't connect to a bus (i.e.monitors, capacitors, meters, generators, etc.)
-	busless_objs = [x.get('element','None') for x in tree if 'element' in x]
-	
-	# Create a lookup table that maps an object's name to its key in the tree (could we just map the name to the tree key...?)
+	'''Reduces circuit complexity by combining adjacent line segments having identical configurations.'''
+	# Applicable circuit model: [top bus]-[top line]-[middle bus]-[bottom line]-[bottom bus]
+	from copy import deepcopy
 	treeids = range(0,len(tree),1)
 	tree = dict(zip(treeids,tree))
-	name2key = {tree[i].get('object', None):i for i,v in enumerate(tree)} # note that these are in the form <type>.<name>
-	name2key.update({tree[i].get('bus', None):i for i,v in enumerate(tree) if tree[i].get('!CMD', None) == 'setbusxy'}) # form: <name>
-	
-	 # Destructively iterate through treecopy and perform any modifications on tree.
-	treecopy = tree.copy()
+	name2key = {v.get('object', None):k for k,v in tree.items()}
+	name2key.update({v.get('bus', None):k for k,v in tree.items() if v.get('!CMD', None) == 'setbusxy'})
+	# Iterate through treecopy and perform any modifications directly on tree. Note that name2key can be used om either tree or treecopy.
+	treecopy = deepcopy(tree)
 	removedids = []
-	i_0 = 0
-	while treecopy:
-		top = treecopy.pop(i_0)
-		i_0 = i_0 + 1
-
-		# is this a line object? If not, move to next object in treecopy
-		if not top.get('object','None').startswith('line.'):
+	for topobj in treecopy.values():
+		top = topobj.copy()
+		topid = top.get('object','None')
+		# is this a line object?
+		if not topid.startswith('line.'):
 			continue
-		
-		# has this item already been removed?
-		if top.get('object','None') in removedids:
+		# has this line already been removed?
+		if topid in removedids:
 			continue
-
-		# Get 'to' buses (Could be indicated by 'bus2', or the second, third members of 'buses'. Can assume it will be appended with phase information.)
-		busid = ''
-		buslist = []
-		for k in top.keys():
-			if k=='buses':
-				buslist = top[k]
-				buslist = buslist.replace(']','')
-				buslist = buslist.replace('[','')
-				buslist = buslist.split(',')
-				if len(buslist)>2:
-					busid = ''
-					continue # more than 2 cnxns = ineligible for reduction
-				busid = buslist[1]
-			elif k=='bus2':
-				busid = top[k]
-		if busid == '': # not line-like
+		# Is the top a switch? Let's skip these for now. TODO: handling for switches when merging them with adjacent line segments is feasible
+		if top.get('switch','None') in ['true','yes']:
+			continue
+		# Get the 'to' bus
+		midbusid = top.get('bus2','NA')
+		if midbusid=='NA':
 			continue 
-		bus = tree[name2key[busid.split('.')[0]]]
-
-		# Get ids of objects connected to bus (aka the bottoms)
-		bottoms = []
-		for k,obj in tree.items():
-			objid = obj.get('object','None')
-			if obj.get('object', None) == top.get('object', None): # The top cannot also be a bottom
-				continue
-			if obj.get('!CMD','None')=='setbusxy': # The bus cannot connect to itself
-				continue
-			allbottoms = []
-			for k, v in obj.items(): # See if this object is attached to our bus of interest. If so, capture it.
-				if k == 'buses':
-					buslist = obj[k]
-					buslist = buslist.replace(']','')
-					buslist = buslist.replace('[','')
-					buslist = buslist.split(',')
-					for b in buslist:
-						allbottoms.append(b)
-				elif k in ['bus','bus1','bus2','element']: # it's a single value
-					allbottoms.append(v)
-			allbottoms = [x.split('.')[0] for x in allbottoms]
-			if ( len([x for x in allbottoms if x == busid.split('.')[0]]) > 0 ): #if any of the bottoms' ids equal the bus id, then obj is connected to our node of interest
-				bottoms.append(obj)
-		
+		midbus = treecopy[name2key[midbusid.split('.')[0]]]
+		# Get ids of the relevant objects (other than the top) connected to the parent bus (aka the bottoms)
+		bottoms = midbus.get('!CNXNS','None')
+		bottoms = bottoms.replace('[','').replace(']','')
+		bottoms = bottoms.split(',')
+		bottoms.remove(topid)
 		# Check for a one-line-in, one-line-out scenario
 		if len(bottoms) != 1:
 			continue
-		bottom = bottoms[0]
-
-		# Is the bottom a line?
+		botid = bottoms[0]
+		bottom = treecopy[name2key[botid]]
 		if not bottom.get('object','None').startswith('line.'):
 			continue
-
-		# Is the bottom a switch? Let's skip these for now. 
-		# TODO: handling for switches when merging them with adjacent line segments is feasible
-		if bottom.get('switch','None')=='yes' or bottom.get('switch','None')=='true':
+		# Is the bottom a switch? Let's skip these for now. TODO: handling for switches when merging them with adjacent line segments is feasible
+		if bottom.get('switch','None') in ['true','yes']:
 			continue
-
-		# Does the bottom have any monitors, capacitors, energy meters, etc. attached? If so, don't remove it.
-		if bottom.get('object','None') in busless_objs:
+		# Does the bottom have any other objects 'attached' to it? If so, we must not remove it. 
+		if bottom.get('!CNXNS','NCX')!='NCX':
 			continue
-
+		# All checks have passed. Let's combine the top and bottom lines.
 		if ('length' in top) and ('length' in bottom):
-			# check that the configurations are equal - top/bottom both need to be lines for this to work correctly (i.e. check the intersection between the two sets of properties).
-			diffprops = ['!CMD','object','bus1','bus2','length',] # we don't care if these values differ between the top and the bottom
+			# check that the configurations are equal
+			diffprops = ['!CMD','object','bus1','bus2','length','!CNXNS'] # we don't care if these values differ between the top and the bottom
+			diffPropValFlag = False
 			for k,vt in top.items():
 				if not k in diffprops:
 					vb = bottom.get(k,'None')
 					if vt!=vb:
+						diffPropValFlag = True
 						break
-			
-			# Delete bus and bottom; Set top line length = sum of both lines; Connect top to the new bottom.
-			toptree = tree[name2key[top['object']]] # modify the tree object directly (this creates a pointer for in-place mods)
-			removedids.append(bus['bus'])
-			removedids.append(bottom['object'])
+			if diffPropValFlag:
+				continue
+			# Set top line length = sum of both lines
 			newLen = float(top['length']) + float(bottom['length']) # get the new length
-			toptree['length'] = str(newLen)
-			toptree['bus2'] = bottom['bus2'] # we know these props exist because we know the top and bottom are lines
-			del tree[name2key[bus['bus']]]
+			top['length'] = str(newLen)
+			# Connect top line to the bottom bus
+			top['bus2'] = bottom['bus2']
+			tree[name2key[topid]] = top
+			# Connect bottom bus to the top line 
+			botbus = treecopy[name2key[bottom['bus2'].split('.')[0]]].copy()
+			botbcons = botbus.get('!CNXNS','None')
+			botbcons = botbcons.replace('[','').replace(']','')
+			botbcons = botbcons.split(',')
+			if bottom['object'] in botbcons:
+				iji = botbcons.index(bottom['object'])
+				botbcons[iji] = top['object']
+			tstr = '['
+			for item in botbcons:
+				tstr = tstr + item + ','
+			tstr = tstr[:-1] + ']'
+			botbus['!CNXNS'] = tstr
+			tree[name2key[botbus['bus']]] = botbus
+			# Delete the bottom line element and the middle bus			
+			removedids.append(bottom['object'])
 			del tree[name2key[bottom['object']]]
-	
+			removedids.append(midbus['bus'])
+			del tree[name2key[midbus['bus']]]
 	with open('removed_ids.txt', 'a') as remfile:
 		for remid in removedids:
 			remfile.write(remid + '\n')
@@ -667,11 +644,15 @@ def _mergeContigLinesOnce(tree):
 def mergeContigLines(tree):
 	''' merge all lines that are across nodes and have the same config
 	topline --to-> node <-from-- bottomline'''
+	tree = applyCnxns(tree)
 	removedKeys = 1
+	if os.path.exists('removed_ids.txt'):
+		os.remove('removed_ids.txt')
 	while removedKeys != 0:
 		treeKeys = len(tree)
 		tree = _mergeContigLinesOnce(tree)
 		removedKeys = treeKeys - len(tree)
+	tree = removeCnxns(tree)
 	return tree
 
 def rollUpLoads(tree):
@@ -807,7 +788,9 @@ def _tests():
 		from shutil import rmtree
 		os.remove(outckt_loc)
 		rmtree(outdir)
-		print('Objects removed: %s (of %s).\nPercent reduction: %s%%\nMax RMSPE for voltage magnitude: %s%%\nMax RMSPE for voltage angle: %s%%\nMax RMSE for voltage magnitude: %s\nMax RMSE for voltage angle: %s\n'%(oldsz-newsz, oldsz, (oldsz-newsz)*100/oldsz, maxPerrM, maxPerrA, maxDerrM, maxDerrA))
+		errlim = 0.03 # threshold of 30% error between reduced files. 
+		assert maxPerrM <= errlim, 'The voltage magnitude error between the compared files exceeds the allowable limit of %s%%.'%(errlim*100)
+		#print('Objects removed: %s (of %s).\nPercent reduction: %s%%\nMax RMSPE for voltage magnitude: %s%%\nMax RMSPE for voltage angle: %s%%\nMax RMSE for voltage magnitude: %s\nMax RMSE for voltage angle: %s\n'%(oldsz-newsz, oldsz, (oldsz-newsz)*100/oldsz, maxPerrM, maxPerrA, maxDerrM, maxDerrA)) # DEBUG
 		
 
 	# Make core output
