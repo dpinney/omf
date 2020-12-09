@@ -603,6 +603,7 @@ def _createAndCompareTestFile(inFile, userOutFile=''):
 	return 
 
 def _conversionTests():
+	pass
 	# Deprecated tests section
 	#dssToGridLab('ieee37.dss', 'Model.glm') # this kind of works
 	#gridLabToDSS('ieee37_fixed.glm', 'ieee37_conv.dss') # this fails miserably
