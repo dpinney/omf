@@ -13,7 +13,7 @@ from omf.models import solarEngineering
 from omf.models import __neoMetaModel__
 from omf.models.__neoMetaModel__ import *
 from omf.solvers.opendss import dssConvert
-from shutil import copyfile
+from shutil import copyfile, copytree
 
 # Model metadata:
 modelName, template = __neoMetaModel__.metadata(__file__)
@@ -51,6 +51,12 @@ def work(modelDir, inputDict):
 		trainAgentValue = True
 	else:
 		trainAgentValue = False
+
+	# Value check for hackPercent and conversion to percentHackVal
+	if inputDict.get("hackPercent", "None") == "None":
+		hackPercentValue = None
+	else:
+		hackPercentValue = float(inputDict['hackPercent'])
 
 	# create solarPVLengthValue to represent number of steps in simulation - will be manipulated by number of rows in load solar data csv file
 	solarPVLengthValue = 0
@@ -251,6 +257,10 @@ def work(modelDir, inputDict):
 		percentHackVal = attackVars[attackAgentType]["percentHack"] #TODO: see if we need to change from a hard-coded value
 		if attackAgentType == "None":
 			attackType = "VOLTAGE_OSCILLATION" #TODO: See if changes can be made to pycigar to implement a "None" attack type - for now, we set it to a voltage oscillation attack with percent hack = 0.0
+
+		#change percentHackVal to user input
+		elif hackPercentValue != None:
+			percentHackVal = hackPercentValue / 100.0
 
 		# check to see if we are trying to train a defense agent
 		if trainAgentValue:	
@@ -518,6 +528,40 @@ def new(modelDir):
 	try:
 		shutil.copyfile(pJoin(__neoMetaModel__._omfDir, "static", "publicFeeders", defaultInputs["feederName1"]+'.omd'), pJoin(modelDir, defaultInputs["feederName1"]+'.omd'))
 	except:
+		return False
+
+	#default values put into new instance of model
+	# create PyCIGAR_inputs folder
+	try:
+		os.mkdir(pJoin(modelDir,"PyCIGAR_inputs"))
+	except FileExistsError:
+		print("PyCIGAR_inputs folder already exists!")
+		pass
+	except:
+		print("Error occurred creating PyCIGAR_inputs folder")
+		return False
+
+	# create pycigarOutput folder
+	try:
+		os.mkdir(pJoin(modelDir,"pycigarOutput"))
+	except FileExistsError:
+		print("pycigarOutput folder already exists!")
+		pass
+	except:
+		print("Error occurred creating pycigarOutput folder")
+		return False
+
+	# put sample policies in pycigarOutput folder
+	try:
+		shutil.copytree(pJoin(__neoMetaModel__._omfDir, "static", "testFiles", "pyCIGAR", "policy_ieee37_oscillation_sample"), pJoin(modelDir, "pycigarOutput", "policy_ieee37_oscillation_sample"))
+	except:
+		print("Error occurred copying policy_ieee37_oscillation_sample to pycigarOutput folder")
+		return False
+
+	try:
+		shutil.copytree(pJoin(__neoMetaModel__._omfDir, "static", "testFiles", "pyCIGAR", "policy_ieee37_unbalance_sample"), pJoin(modelDir, "pycigarOutput", "policy_ieee37_unbalance_sample"))
+	except:
+		print("Error occurred copying policy_ieee37_unbalance_sample to pycigarOutput folder")
 		return False
 	
 	with open(f'{modelDir}/{defaultInputs["feederName1"]}.omd', 'r') as omdFile:
