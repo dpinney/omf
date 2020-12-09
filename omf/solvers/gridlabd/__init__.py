@@ -210,7 +210,7 @@ def _strClean(x):
 
 def runToCompletionForMacOS(feederTree, attachments=[], keepFiles=False, workDir=None, glmName=None, gldBinary=None):
 	#TODO: port repeated running code from Kevin in here.
-	MAX_ERROR_RUN = 6
+	MAX_ERROR_RUN = 12
 	for i in range(MAX_ERROR_RUN):
 		gridlabOut = runInFilesystem(
 			feederTree, attachments=attachments, keepFiles=keepFiles, workDir=workDir, 

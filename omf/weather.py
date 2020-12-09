@@ -21,8 +21,6 @@ import pysolar
 import pytz
 import xml.etree.ElementTree as ET
 import xmltodict
-from tensorflow import keras
-
 
 omfDir = os.path.dirname(os.path.abspath(__file__))
 
@@ -1170,6 +1168,7 @@ def preparePredictionVectors(year='2018', lat=30.581736, lon=-98.024098, station
     return input_array, ghiData, cosArray
 
 def predictNeuralNet(input_array, model_path):
+    from tensorflow import keras
     model = keras.models.load_model(model_path)
     #Takes in numpy array of proper shape
     """

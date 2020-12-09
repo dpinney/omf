@@ -10,6 +10,7 @@ try:
 	import opendssdirect as dss
 except:
 	warnings.warn('opendssdirect not installed; opendss functionality disabled.')
+from omf.solvers.opendss import dssConvert
 
 def runDssCommand(dsscmd):
 	from opendssdirect import run_command, Error
@@ -65,24 +66,99 @@ def _getCoords(dssFilePath, keep_output=True):
 	coords['radius'] = hyp
 	return coords
 
-def qstsPlot(filePath, stepSizeInMinutes, numberOfSteps):
-	''' Generate voltage values for a timeseries powerflow. '''
+def newQstsPlot(filePath, stepSizeInMinutes, numberOfSteps, keepAllFiles=False, actions={}):
+	''' Use monitor objects to generate voltage values for a timeseries powerflow. '''
 	dssFileLoc = os.path.dirname(os.path.abspath(filePath))
 	volt_coord = runDSS(filePath)
-	runDssCommand('Set mode=daily')
-	runDssCommand('Set number=1')
-	runDssCommand(f'Set stepsize={stepSizeInMinutes}m')
-	big_df = pd.DataFrame()
-	for step in range(1, numberOfSteps+1):
-		runDssCommand('Solve')
-		csv_path = f'{dssFileLoc}/volt_prof_hour_{step:04d}.csv'
-		runDssCommand(f'Export voltages "{csv_path}"')
-		new_data = pd.read_csv(csv_path)
-		new_data['Step'] = step
-		big_df = pd.concat([big_df, new_data], ignore_index=True)
-		os.remove(csv_path)
-	big_df.to_csv(f'{dssFileLoc}/voltage_timeseries.csv', index=False)
-	# TODO: generate plots.
+	# Attach Monitors
+	tree = dssConvert.dssToTree(filePath)
+	mon_names = []
+	circ_name = 'NONE'
+	for ob in tree:
+		obData = ob.get('object','NONE.NONE')
+		obType, name = obData.split('.')
+		mon_name = f'mon{obType}-{name}'
+		if obData.startswith('circuit.'):
+			circ_name = name
+		elif obData.startswith('vsource.'):
+			runDssCommand(f'new object=monitor.{mon_name} element={obType}.{name} terminal=1 mode=0')
+			mon_names.append(mon_name)
+		elif obData.startswith('generator.'):
+			runDssCommand(f'new object=monitor.{mon_name} element={obType}.{name} terminal=1 mode=1 ppolar=no')
+			mon_names.append(mon_name)
+		elif ob.get('object','').startswith('load.'):
+			runDssCommand(f'new object=monitor.{mon_name} element={obType}.{name} terminal=1 mode=0')
+			mon_names.append(mon_name)
+		elif ob.get('object','').startswith('capacitor.'):
+			runDssCommand(f'new object=monitor.{mon_name} element={obType}.{name} terminal=1 mode=6')
+			mon_names.append(mon_name)
+		elif ob.get('object','').startswith('transformer.'):
+			#TODO: only capture transformers with regulators on them by looking through the regcontrol objects.
+			runDssCommand(f'new object=monitor.{mon_name} element={obType}.{name} terminal=1 mode=2')
+			mon_names.append(mon_name)
+	# Run DSS
+	runDssCommand(f'set mode=yearly stepsize={stepSizeInMinutes}m')
+	if actions == {}:
+		# Run all steps directly.
+		runDssCommand(f'set number={numberOfSteps}')
+		runDssCommand('solve')
+	else:
+		# Actions defined, run them at the appropriate timestep.
+		runDssCommand(f'set number=1')
+		for step in range(1, numberOfSteps+1):
+			action = actions.get(step)
+			if action != None:
+				print(f'Step {step} executing:', action)
+				runDssCommand(action)
+			runDssCommand('solve')
+	# Export all monitors
+	for name in mon_names:
+		runDssCommand(f'export monitors monitorname={name}')
+	# Aggregate monitors
+	all_gen_df = pd.DataFrame()
+	all_load_df = pd.DataFrame()
+	all_source_df = pd.DataFrame()
+	all_control_df = pd.DataFrame()
+	for name in mon_names:
+		csv_path = f'{dssFileLoc}/{circ_name}_Mon_{name}.csv'
+		df = pd.read_csv(f'{circ_name}_Mon_{name}.csv')
+		if name.startswith('monload-'):
+			df['Name'] = name
+			all_load_df = pd.concat([all_load_df, df], ignore_index=True, sort=False)
+		elif name.startswith('mongenerator-'):
+			df['Name'] = name
+			all_gen_df = pd.concat([all_gen_df, df], ignore_index=True, sort=False)
+		elif name.startswith('monvsource-'):
+			df['Name'] = name
+			all_source_df = pd.concat([all_source_df, df], ignore_index=True, sort=False)
+		elif name.startswith('moncapacitor-'):
+			df['Type'] = 'Capacitor'
+			df['Name'] = name
+			df = df.rename({' Step_1 ': 'Tap(pu)'}, axis='columns') #HACK: rename to match regulator tap name
+			all_control_df = pd.concat([all_control_df, df], ignore_index=True, sort=False)
+		elif name.startswith('montransformer-'):
+			df['Type'] = 'Transformer'
+			df['Name'] = name
+			df = df.rename({' Tap (pu)': 'Tap(pu)'}, axis='columns') #HACK: rename to match cap tap name
+			all_control_df = pd.concat([all_control_df, df], ignore_index=True, sort=False)
+		if not keepAllFiles:
+			os.remove(csv_path)
+	# Write final aggregates
+	all_gen_df.sort_values(['Name','hour'], inplace=True)
+	all_gen_df.columns = all_gen_df.columns.str.replace(r'[ "]','')
+	all_gen_df.to_csv(f'{dssFileLoc}/timeseries_gen.csv', index=False)
+	all_control_df.sort_values(['Name','hour'], inplace=True)
+	all_control_df.columns = all_control_df.columns.str.replace(r'[ "]','')
+	all_control_df.to_csv(f'{dssFileLoc}/timeseries_control.csv', index=False)
+	all_source_df.sort_values(['Name','hour'], inplace=True)
+	all_source_df.columns = all_source_df.columns.str.replace(r'[ "]','')
+	all_source_df["P1(kW)"] = all_source_df["V1"] * all_source_df["I1"] / 1000.0
+	all_source_df["P2(kW)"] = all_source_df["V2"] * all_source_df["I2"] / 1000.0
+	all_source_df["P3(kW)"] = all_source_df["V3"] * all_source_df["I3"] / 1000.0
+	all_source_df.to_csv(f'{dssFileLoc}/timeseries_source.csv', index=False)
+	all_load_df.sort_values(['Name','hour'], inplace=True)
+	all_load_df.columns = all_load_df.columns.str.replace(r'[ "]','')
+	all_load_df.to_csv(f'{dssFileLoc}/timeseries_load.csv', index=False)
 
 def voltagePlot(filePath, PU=True):
 	''' Voltage plotting routine. Creates 'voltages.csv' and 'Voltage [PU|V].png' in directory of input file.'''
@@ -286,7 +362,7 @@ def capacityPlot(filePath):
 	plt.savefig(dssFileLoc + '/Capacity Profile.png')
 	plt.clf()
 	
-def voltageCompare(in1, in2, keep_output=False, outdir='', outfilebase='voltageCompare'):
+def voltageCompare(in1, in2, saveascsv=False, with_plots=False, outdir='', outfilebase='voltageCompare'):
 	'''Compares two instances of the information provided by the 'Export voltages' opendss command and outputs 
 	the maximum error (% and absolute difference) encountered for any value compared. If the 'keep_output' flag is set to 'True', also 
 	outputs a file that describes the maximum, average, and minimum error encountered for each column. Use the 
@@ -306,18 +382,17 @@ def voltageCompare(in1, in2, keep_output=False, outdir='', outfilebase='voltageC
 		df.drop(labels='Bus', axis=1, inplace=True)
 		df = df.astype(float, copy=True)
 		memins.append(df)
-
 	# Which has more rows? We'll define the larger one to be 'avolts'. This is also considered the 'theoretical' set.
 	foob = 0 if len(memins[0].index) > len(memins[1].index) else 1
 	avolts = memins[foob]
 	foob = 1-foob # returns 0 if foob==1 ; returns 1 if foob==0
 	bvolts = memins[foob]
-	
 	# Match columns to rows, perform needed math, and save into resultErr.
 	cols = avolts.columns
 	cols = [c for c in cols if (not c.startswith(' pu')) and (not c.startswith(' Node'))]
 	resultErrD = pd.DataFrame(index=avolts.index, columns=cols)
 	resultErrP = resultErrD.copy()
+	# TODO can this code block be sped up?
 	for col in cols:
 		for row in avolts.index:
 			if not row in bvolts.index:
@@ -326,7 +401,6 @@ def voltageCompare(in1, in2, keep_output=False, outdir='', outfilebase='voltageC
 			in2 = bvolts.loc[row,col]
 			resultErrP.loc[row,col] = 100*(in1 - in2)/in1 if in1!=0 else 0
 			resultErrD.loc[row,col] = in1 - in2
-
 	# Construct results
 	resultSummP = pd.DataFrame(index=['Max %Err', 'Avg %Err', 'Min %Err', 'RMSPE'], columns=cols)
 	resultSummD = pd.DataFrame(index=['Max Diff', 'Avg Diff', 'Min Diff', 'RMSE'], columns=cols)
@@ -335,13 +409,11 @@ def voltageCompare(in1, in2, keep_output=False, outdir='', outfilebase='voltageC
 		resultSummP.loc['Avg %Err',c] = resultErrP.loc[:,c].mean(skipna=True)
 		resultSummP.loc['Min %Err',c] = resultErrP.loc[:,c].min(skipna=True)
 		resultSummP.loc['RMSPE',c] = math.sqrt((resultErrP.loc[:,c]**2).mean())
-
 		resultSummD.loc['Max Diff',c] = resultErrD.loc[:,c].max(skipna=True)
 		resultSummD.loc['Avg Diff',c] = resultErrD.loc[:,c].mean(skipna=True)
 		resultSummD.loc['Min Diff',c] = resultErrD.loc[:,c].min(skipna=True)
 		resultSummD.loc['RMSE',c] = math.sqrt((resultErrD.loc[:,c]**2).mean())
-	
-	if keep_output:
+	if saveascsv:
 		outroot = outdir + '/' + outfilebase
 		resultErrP.dropna(inplace=True)
 		resultSummP.to_csv(outroot + '_Perc.csv', header=True, index=True, mode='w')
@@ -352,7 +424,7 @@ def voltageCompare(in1, in2, keep_output=False, outdir='', outfilebase='voltageC
 		resultSummD.to_csv(outroot + '_Diff.csv', header=True, index=True, mode='w')
 		emptyline.to_csv(outroot + '_Diff.csv', header=False, index=True, mode='a')
 		resultErrD.to_csv(outroot + '_Diff.csv', header=True, index=True, mode='a')
-
+	if with_plots:
 		# Produce boxplots to visually analyze the residuals
 		from matplotlib.pyplot import boxplot
 		magcols = [c for c in cols if c.lower().startswith(' magnitude')]
@@ -367,7 +439,6 @@ def voltageCompare(in1, in2, keep_output=False, outdir='', outfilebase='voltageC
 		axM.boxplot(bxpltM)
 		figM.savefig(outroot + '_boxplot_Mag.png', bbox_inches='tight')
 		plt.close()
-		
 		angcols = [c for c in cols if c.lower().startswith(' angle')]
 		bxpltAdf = pd.DataFrame(data=resultErrD[angcols],columns=angcols)
 		bxpltA = []
@@ -380,27 +451,23 @@ def voltageCompare(in1, in2, keep_output=False, outdir='', outfilebase='voltageC
 		axA.boxplot(bxpltA)
 		figA.savefig(outroot + '_boxplot_Ang.png', bbox_inches='tight')
 		plt.close()
-
 		for c in cols:
 			# construct a dataframe of busname, input, output, and residual
 			dat = pd.concat([avolts[c],bvolts[c],resultErrP[c],resultErrD[c]], axis=1,join='inner')
 			dat.columns = ['buses+','buses-','residuals_P','residuals_D'] # buses+ denotes the circuit with more buses; buses- denotes the one with fewer
 			dat = dat.sort_values(by=['buses-','buses+'], ascending=True, na_position='first')
-			
 			# Produce plot of residuals
 			#pltlenR = math.ceil(len(dat['residuals_P'])/2)
 			#figR, axR = plt.subplots(figsize=(pltlenR,12))
 			#axR.plot(dat['buses-'], 'k.', alpha=0.15)
 			figR, axR = plt.subplots()
 			axR.plot(dat['buses-'], dat['residuals_P'], 'k.', alpha=0.15)
-			
 			axR.set_title('Plot of Residuals: ' + c)
 			#plt.xticks(rotation=45)
 			axR.set_xlabel('Value of ' + c + ' for circuit with fewer buses')
 			axR.set_ylabel('Value of Residual')
 			figR.savefig(outroot + '_residualplot_' + c +'_.png', bbox_inches='tight')
 			plt.close()
-
 			# Produce scatter plots
 			figS, axS = plt.subplots()
 			axS.set_title('Scatter Plot: ' + c)
@@ -430,113 +497,145 @@ def getVoltages(dssFilePath, keep_output=False, outdir='', output_filename='volt
 		os.remove(voltfile)
 	return volts
 
+def applyCnxns(tree):
+	'''Gathers and applies connection information to dss lines and buses.'''
+	relevantObjs = ['capacitor','line','transformer','load','reactor','monitor','energymeter','generator','pvsystem','vsource','relay','fuse']
+	# make a mapping between an object's name and its index in tree
+	name2key = {v.get('bus', None):i for i,v in enumerate(tree) if v.get('!CMD','NC')=='setbusxy'}
+	name2key.update({v.get('object', None):i for i,v in enumerate(tree) if v.get('!CMD','NC')=='new'})
+	for obj in tree:
+		objid = obj.get('object','None')
+		if objid.split('.')[0] not in relevantObjs:
+			continue
+		cnxns = []
+		for k,v in obj.items():
+			if k == 'buses':
+				bb = v
+				bb = bb.replace(']','')
+				bb = bb.replace('[','')
+				bb = bb.split(',')
+				for b in bb:
+					cnxns.append(b.split('.')[0])
+			elif k in ['bus','bus1','bus2']:
+				cnxns.append(v.split('.')[0])
+			elif k in ['element','monitoredobj']:
+				cnxns.append(v)
+		for cnxn in cnxns:
+			if cnxn in name2key:
+				# get existing connections, append, and reassign to tree
+				treebusobj = tree[name2key[cnxn]]
+				if '!CNXNS' in treebusobj:
+					bb = treebusobj['!CNXNS']
+					treebusobj['!CNXNS'] = bb.replace(']', ',' + objid + ']')
+				else:
+					treebusobj['!CNXNS'] = '[' + objid + ']'
+			elif len(cnxn.split('.'))==1:
+				# make a new entry in the tree and update name2key
+				from collections import OrderedDict 
+				newobj = OrderedDict([
+					('!CMD','new'),
+					('object',cnxn),
+					('x','0'),
+					('y','0'),
+					('!CNXNS','[' + objid + ']')
+					])
+				tree.append(newobj)
+				newdict = {cnxn:len(tree)-1}
+				name2key.update(newdict)
+			else:
+				print('opendss.applyCnxns() reports an unprocessed item: %s\n'%(cnxn))
+	return tree
+
+def removeCnxns(tree):
+	for i,obj in enumerate(tree.copy()):
+		if obj.get('!CNXNS','NCX')!='NCX':
+			del tree[i]['!CNXNS']
+	return tree
+
 def _mergeContigLinesOnce(tree):
-	#TODO refactor this code for performance and readability. O(n^2)=gross.
-	
-	# Capture the connections to any elements that don't connect to a bus (i.e.monitors, capacitors, meters, generators, etc.)
-	busless_objs = [x.get('element','None') for x in tree if 'element' in x]
-	
-	# Create a lookup table that maps an object's name to its key in the tree (could we just map the name to the tree key...?)
+	'''Reduces circuit complexity by combining adjacent line segments having identical configurations.'''
+	# Applicable circuit model: [top bus]-[top line]-[middle bus]-[bottom line]-[bottom bus]
+	from copy import deepcopy
 	treeids = range(0,len(tree),1)
 	tree = dict(zip(treeids,tree))
-	name2key = {tree[i].get('object', None):i for i,v in enumerate(tree)} # note that these are in the form <type>.<name>
-	name2key.update({tree[i].get('bus', None):i for i,v in enumerate(tree) if tree[i].get('!CMD', None) == 'setbusxy'}) # form: <name>
-	
-	 # Destructively iterate through treecopy and perform any modifications on tree.
-	treecopy = tree.copy()
+	name2key = {v.get('object', None):k for k,v in tree.items()}
+	name2key.update({v.get('bus', None):k for k,v in tree.items() if v.get('!CMD', None) == 'setbusxy'})
+	# Iterate through treecopy and perform any modifications directly on tree. Note that name2key can be used om either tree or treecopy.
+	treecopy = deepcopy(tree)
 	removedids = []
-	i_0 = 0
-	while treecopy:
-		top = treecopy.pop(i_0)
-		i_0 = i_0 + 1
-
-		# is this a line object? If not, move to next object in treecopy
-		if not top.get('object','None').startswith('line.'):
+	for topobj in treecopy.values():
+		top = topobj.copy()
+		topid = top.get('object','None')
+		# is this a line object?
+		if not topid.startswith('line.'):
 			continue
-		
-		# has this item already been removed?
-		if top.get('object','None') in removedids:
+		# has this line already been removed?
+		if topid in removedids:
 			continue
-
-		# Get 'to' buses (Could be indicated by 'bus2', or the second, third members of 'buses'. Can assume it will be appended with phase information.)
-		busid = ''
-		buslist = []
-		for k in top.keys():
-			if k=='buses':
-				buslist = top[k]
-				buslist = buslist.replace(']','')
-				buslist = buslist.replace('[','')
-				buslist = buslist.split(',')
-				if len(buslist)>2:
-					busid = ''
-					continue # more than 2 cnxns = ineligible for reduction
-				busid = buslist[1]
-			elif k=='bus2':
-				busid = top[k]
-		if busid == '': # not line-like
+		# Is the top a switch? Let's skip these for now. TODO: handling for switches when merging them with adjacent line segments is feasible
+		if top.get('switch','None') in ['true','yes']:
+			continue
+		# Get the 'to' bus
+		midbusid = top.get('bus2','NA')
+		if midbusid=='NA':
 			continue 
-		bus = tree[name2key[busid.split('.')[0]]]
-
-		# Get ids of objects connected to bus (aka the bottoms)
-		bottoms = []
-		for k,obj in tree.items():
-			objid = obj.get('object','None')
-			if obj.get('object', None) == top.get('object', None): # The top cannot also be a bottom
-				continue
-			if obj.get('!CMD','None')=='setbusxy': # The bus cannot connect to itself
-				continue
-			allbottoms = []
-			for k, v in obj.items(): # See if this object is attached to our bus of interest. If so, capture it.
-				if k == 'buses':
-					buslist = obj[k]
-					buslist = buslist.replace(']','')
-					buslist = buslist.replace('[','')
-					buslist = buslist.split(',')
-					for b in buslist:
-						allbottoms.append(b)
-				elif k in ['bus','bus1','bus2','element']: # it's a single value
-					allbottoms.append(v)
-			allbottoms = [x.split('.')[0] for x in allbottoms]
-			if ( len([x for x in allbottoms if x == busid.split('.')[0]]) > 0 ): #if any of the bottoms' ids equal the bus id, then obj is connected to our node of interest
-				bottoms.append(obj)
-		
+		midbus = treecopy[name2key[midbusid.split('.')[0]]]
+		# Get ids of the relevant objects (other than the top) connected to the parent bus (aka the bottoms)
+		bottoms = midbus.get('!CNXNS','None')
+		bottoms = bottoms.replace('[','').replace(']','')
+		bottoms = bottoms.split(',')
+		bottoms.remove(topid)
 		# Check for a one-line-in, one-line-out scenario
 		if len(bottoms) != 1:
 			continue
-		bottom = bottoms[0]
-
-		# Is the bottom a line?
+		botid = bottoms[0]
+		bottom = treecopy[name2key[botid]]
 		if not bottom.get('object','None').startswith('line.'):
 			continue
-
-		# Is the bottom a switch? Let's skip these for now. 
-		# TODO: handling for switches when merging them with adjacent line segments is feasible
-		if bottom.get('switch','None')=='yes' or bottom.get('switch','None')=='true':
+		# Is the bottom a switch? Let's skip these for now. TODO: handling for switches when merging them with adjacent line segments is feasible
+		if bottom.get('switch','None') in ['true','yes']:
 			continue
-
-		# Does the bottom have any monitors, capacitors, energy meters, etc. attached? If so, don't remove it.
-		if bottom.get('object','None') in busless_objs:
+		# Does the bottom have any other objects 'attached' to it? If so, we must not remove it. 
+		if bottom.get('!CNXNS','NCX')!='NCX':
 			continue
-
+		# All checks have passed. Let's combine the top and bottom lines.
 		if ('length' in top) and ('length' in bottom):
-			# check that the configurations are equal - top/bottom both need to be lines for this to work correctly (i.e. check the intersection between the two sets of properties).
-			diffprops = ['!CMD','object','bus1','bus2','length',] # we don't care if these values differ between the top and the bottom
+			# check that the configurations are equal
+			diffprops = ['!CMD','object','bus1','bus2','length','!CNXNS'] # we don't care if these values differ between the top and the bottom
+			diffPropValFlag = False
 			for k,vt in top.items():
 				if not k in diffprops:
 					vb = bottom.get(k,'None')
 					if vt!=vb:
+						diffPropValFlag = True
 						break
-			
-			# Delete bus and bottom; Set top line length = sum of both lines; Connect top to the new bottom.
-			toptree = tree[name2key[top['object']]] # modify the tree object directly (this creates a pointer for in-place mods)
-			removedids.append(bus['bus'])
-			removedids.append(bottom['object'])
+			if diffPropValFlag:
+				continue
+			# Set top line length = sum of both lines
 			newLen = float(top['length']) + float(bottom['length']) # get the new length
-			toptree['length'] = str(newLen)
-			toptree['bus2'] = bottom['bus2'] # we know these props exist because we know the top and bottom are lines
-			del tree[name2key[bus['bus']]]
+			top['length'] = str(newLen)
+			# Connect top line to the bottom bus
+			top['bus2'] = bottom['bus2']
+			tree[name2key[topid]] = top
+			# Connect bottom bus to the top line 
+			botbus = treecopy[name2key[bottom['bus2'].split('.')[0]]].copy()
+			botbcons = botbus.get('!CNXNS','None')
+			botbcons = botbcons.replace('[','').replace(']','')
+			botbcons = botbcons.split(',')
+			if bottom['object'] in botbcons:
+				iji = botbcons.index(bottom['object'])
+				botbcons[iji] = top['object']
+			tstr = '['
+			for item in botbcons:
+				tstr = tstr + item + ','
+			tstr = tstr[:-1] + ']'
+			botbus['!CNXNS'] = tstr
+			tree[name2key[botbus['bus']]] = botbus
+			# Delete the bottom line element and the middle bus			
+			removedids.append(bottom['object'])
 			del tree[name2key[bottom['object']]]
-	
+			removedids.append(midbus['bus'])
+			del tree[name2key[midbus['bus']]]
 	with open('removed_ids.txt', 'a') as remfile:
 		for remid in removedids:
 			remfile.write(remid + '\n')
@@ -545,11 +644,15 @@ def _mergeContigLinesOnce(tree):
 def mergeContigLines(tree):
 	''' merge all lines that are across nodes and have the same config
 	topline --to-> node <-from-- bottomline'''
+	tree = applyCnxns(tree)
 	removedKeys = 1
+	if os.path.exists('removed_ids.txt'):
+		os.remove('removed_ids.txt')
 	while removedKeys != 0:
 		treeKeys = len(tree)
 		tree = _mergeContigLinesOnce(tree)
 		removedKeys = treeKeys - len(tree)
+	tree = removeCnxns(tree)
 	return tree
 
 def rollUpLoads(tree):
@@ -646,23 +749,23 @@ def rollUpLoads(tree):
 		# add to removed id's list
 	return
 
-
 def _tests():
-	from dssConvert import dssToTree, distNetViz, evilDssTreeToGldTree, treeToDss
+	from dssConvert import dssToTree, distNetViz, evilDssTreeToGldTree, treeToDss, evilGldTreeToDssTree
 	fpath = ['ieee37.clean.dss','ieee123_solarRamp.clean.dss','iowa240.clean.dss','ieeeLVTestCase.clean.dss','ieee8500-unbal_no_fuses.clean.dss']
 
 	for ckt in fpath:
-		
-		# Tests for mergeContigLines, voltageCompare, getVoltages, and runDSS
+		print('!!!!!!!!!!!!!! ',ckt,' !!!!!!!!!!!!!!')
+		# Test for mergeContigLines, voltageCompare, getVoltages, and runDSS.
 		tree = dssToTree(ckt)
 		#gldtree = evilDssTreeToGldTree(tree) # DEBUG
 		#distNetViz.viz_mem(gldtree, open_file=True, forceLayout=True) # DEBUG
 		oldsz = len(tree)
 		tree = mergeContigLines(tree)
-		#tree = rollUpLoads(tree)
+		#tree = rollUpLoads(tree) # This currently fails
 		newsz = len(tree)
 		#gldtree = evilDssTreeToGldTree(tree) # DEBUG
 		#distNetViz.viz_mem(gldtree, open_file=True, forceLayout=True) # DEBUG
+		#tree = evilGldTreeToDssTree(gldtree) # DEBUG
 		outckt_loc = ckt[:-4] + '_mergeContigLines.dss'
 		treeToDss(tree, outckt_loc)
 
@@ -673,10 +776,7 @@ def _tests():
 		involts = getVoltages(ckt, keep_output=True, outdir=outdir, output_filename=involts_loc)
 		outvolts_loc = outckt_loc[:-4] + '_volts.dss'
 		outvolts = getVoltages(outckt_loc, keep_output=True, outdir=outdir, output_filename=outvolts_loc)
-		#assert voltageCompare(voltpath, voltpath, keep_output=True, output_filename=outpath) <= errorLimit, 'The error between the compared files exceeds the allowable limit of %s%%.'%(errlim*100)
-		#assert voltageCompare(voltsdf, voltsdf, keep_output=True, output_filename=outpath) <= errorLimit, 'The error between the compared files exceeds the allowable limit of %s%%.'%(errlim*100)
-		#assert voltageCompare(voltpath, voltsdf, keep_output=True, output_filename=outpath) <= errorLimit, 'The error between the compared files exceeds the allowable limit of %s%%.'%(errlim*100)
-		rsumm_P, rsumm_D = voltageCompare(involts, outvolts, keep_output=True, outdir=outdir, outfilebase=ckt[:-4])		
+		rsumm_P, rsumm_D = voltageCompare(involts, outvolts, saveascsv=True, with_plots=False, outdir=outdir, outfilebase=ckt[:-4])		
 		maxPerrM = [rsumm_P.loc['RMSPE',c] for c in rsumm_P.columns if c.lower().startswith(' magnitude')]
 		maxPerrM = pd.Series(maxPerrM).max()
 		maxPerrA = [rsumm_P.loc['RMSPE',c] for c in rsumm_P.columns if c.lower().startswith(' angle')]
@@ -688,7 +788,9 @@ def _tests():
 		from shutil import rmtree
 		os.remove(outckt_loc)
 		rmtree(outdir)
-		print('Objects removed: %s (of %s).\nPercent reduction: %s%%\nMax RMSPE for voltage magnitude: %s%%\nMax RMSPE for voltage angle: %s%%\nMax RMSE for voltage magnitude: %s\nMax RMSE for voltage angle: %s\n'%(oldsz-newsz, oldsz, (oldsz-newsz)*100/oldsz, maxPerrM, maxPerrA, maxDerrM, maxDerrA))
+		errlim = 0.03 # threshold of 30% error between reduced files. 
+		assert maxPerrM <= errlim, 'The voltage magnitude error between the compared files exceeds the allowable limit of %s%%.'%(errlim*100)
+		#print('Objects removed: %s (of %s).\nPercent reduction: %s%%\nMax RMSPE for voltage magnitude: %s%%\nMax RMSPE for voltage angle: %s%%\nMax RMSE for voltage magnitude: %s\nMax RMSE for voltage angle: %s\n'%(oldsz-newsz, oldsz, (oldsz-newsz)*100/oldsz, maxPerrM, maxPerrA, maxDerrM, maxDerrA)) # DEBUG
 		
 
 	# Make core output

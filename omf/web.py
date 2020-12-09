@@ -21,6 +21,7 @@ except:
 import omf
 from omf import (models, feeder, network, milToGridlab, cymeToGridlab, weather, anonymization, distNetViz, calibrate, omfStats, loadModeling,
 	loadModelingAmi, geo, comms)
+from omf.solvers.opendss import dssConvert
 
 app = Flask("web")
 Compress(app)
@@ -813,15 +814,19 @@ def milsoftImport(owner):
 			os.remove(os.path.join(model_dir, filename))
 	if os.path.isfile(error_filepath):
 		os.remove(error_filepath)
-	importProc = Process(target=milImportBackground, args=[owner, modelName])
+	feederName = str(request.form.get('feederNameM', 'feeder'))
+	feederNum = request.form.get("feederNum",1)
+	std_filepath, seq_filepath = [os.path.join(_omfDir, 'data', 'Model', owner, modelName, filename) for filename in (feederName + '.std', feederName + '.std')]
+	request.files.get('stdFile').save(std_filepath)
+	request.files.get('seqFile').save(seq_filepath)
+	importProc = Process(target=milImportBackground, args=[owner, modelName, feederName, feederNum])
 	importProc.start()
 	return 'Success'
 
 
-def milImportBackground(owner, modelName):
+def milImportBackground(owner, modelName, feederName, feederNum):
 	''' Function to run in the background for Milsoft import. '''
 	try:
-		feederName = str(request.form.get('feederNameM', 'feeder'))
 		std_filepath, seq_filepath, pid_filepath, feeder_filepath, model_dir, error_filepath = [
 			os.path.join(_omfDir, 'data', 'Model', owner, modelName, filename) for filename in
 				[feederName + '.std',
@@ -830,8 +835,6 @@ def milImportBackground(owner, modelName):
 				feederName + '.omd',
 				'', 'gridError.txt']
 		]
-		request.files.get('stdFile').save(std_filepath)
-		request.files.get('seqFile').save(seq_filepath)
 		with open(std_filepath) as f:
 			stdString = f.read()
 		with open(seq_filepath) as f:
@@ -849,7 +852,6 @@ def milImportBackground(owner, modelName):
 			with locked_open(error_filepath, 'w') as errorFile:
 				errorFile.write('milError')
 		os.remove(pid_filepath)
-		feederNum = request.form.get("feederNum",1)
 		removeFeeder(owner, modelName, feederNum)
 		writeToInput(model_dir, feederName, 'feederName' + str(feederNum))
 	except Exception: 
@@ -874,26 +876,27 @@ def matpowerImport(owner):
 			os.remove(error_path)
 	with locked_open(con_file_path, 'w') as conFile:
 		conFile.write("WORKING")
-	importProc = Process(target=matImportBackground, args=[owner, modelName])
+	networkName = str(request.form.get('networkNameM', 'network1'))
+	networkNum = request.form.get("networkNum", 1)
+	network_filepath = os.path.join(_omfDir, 'data', 'Model', owner, modelName, networkName + '.m')
+	request.files['matFile'].save(network_filepath)
+	importProc = Process(target=matImportBackground, args=[owner, modelName, networkName, networkNum])
 	importProc.start()
 	return 'Success'
 
 
-def matImportBackground(owner, modelName):
+def matImportBackground(owner, modelName, networkName, networkNum):
 	''' Function to run in the background for Matpower import. '''
 	try:
-		networkName = str(request.form.get('networkNameM', 'network1'))
 		network_filepath, model_dir, pid_filepath = [
 			os.path.join(_omfDir, 'data', 'Model', owner, modelName, filename) for filename in [networkName + '.m', '', 'ZPID.txt']
 		]
-		request.files['matFile'].save(network_filepath)
 		newNet = network.parse(network_filepath, filePath=True)
 		network.layout(newNet)
 		with locked_open(network_filepath, 'w') as f:
 			json.dump(newNet, f, indent=4)
 		os.rename(network_filepath, os.path.join(model_dir, networkName + '.omt'))
 		os.remove(pid_filepath)
-		networkNum = request.form.get("networkNum", 1)
 		removeNetwork(owner, modelName, networkNum)
 		writeToInput(model_dir, networkName, 'networkName' + str(networkNum))
 	except ValueError:
@@ -921,26 +924,26 @@ def rawImport(owner):
 			os.remove(error_path)
 	with locked_open(con_file_path, 'w') as conFile:
 		conFile.write("WORKING")
-	importProc = Process(target=rawImportBackground, args=[owner, modelName])
+	networkName = str(request.form.get('networkNameR', 'network1'))
+	networkNum = request.form.get("networkNum", 1)
+	network_filepath = os.path.join(_omfDir, 'data', 'Model', owner, modelName, networkName + '.raw')
+	request.files['rawFile'].save(network_filepath)
+	importProc = Process(target=rawImportBackground, args=[owner, modelName, networkName, networkNum])
 	importProc.start()
 	return 'Success'
 
-
-def rawImportBackground(owner, modelName):
+def rawImportBackground(owner, modelName, networkName, networkNum):
 	''' Function to run in the background for Raw import. '''
 	try:
-		networkName = str(request.form.get('networkNameR', 'network1'))
 		network_filepath, model_dir, pid_filepath = [
 			os.path.join(_omfDir, 'data', 'Model', owner, modelName, filename) for filename in [networkName + '.raw', '', 'ZPID.txt']
 		]
-		request.files['rawFile'].save(network_filepath)
 		newNet = network.parseRaw(network_filepath, filePath=True)
 		network.layout(newNet)
 		with locked_open(network_filepath, 'w') as f:
 			json.dump(newNet, f, indent=4)
 		os.rename(network_filepath, os.path.join(model_dir, networkName + '.omt'))
 		os.remove(pid_filepath)
-		networkNum = request.form.get("networkNum", 1)
 		removeNetwork(owner, modelName, networkNum)
 		writeToInput(model_dir, networkName, 'networkName' + str(networkNum))
 	except ValueError:
@@ -968,23 +971,25 @@ def gridlabdImport(owner):
 			os.remove(os.path.join(modelDir, filename))
 	if os.path.isfile(error_path):
 		os.remove(error_path)
-	importProc = Process(target=gridlabImportBackground, args=[owner, modelName])
+	# Handle request objects
+	feederName = str(request.form.get("feederNameG",""))
+	glm_path = os.path.join(_omfDir, 'data', 'Model', owner, modelName, feederName + '.glm')
+	request.files['glmFile'].save(glm_path)
+	feederNum = request.form.get("feederNum", 1)
+	importProc = Process(target=gridlabImportBackground, args=[owner, modelName, feederName, feederNum])
 	importProc.start()
 	return 'Success'
 
 
-def gridlabImportBackground(owner, modelName):
-#def gridlabImportBackground(owner, modelName, feederName, feederNum, glmString):
-	''' Function to run in the background for Milsoft import. '''
+def gridlabImportBackground(owner, modelName, feederName, feederNum):
+	''' Function to run in the background for Gridlabd import. '''
 	try:
-		feederName = str(request.form.get("feederNameG",""))
 		feeder_path, glm_path, modelDir, pid_filepath = [
 			os.path.join(_omfDir, 'data', 'Model', owner, modelName, filename) for filename in [feederName + '.omd', feederName + '.glm', '', 'ZPID.txt']
 		]
 		with locked_open(pid_filepath, 'w') as pid_file:
 			pid_file.write(str(os.getpid()))
 		# Save .glm file to model folder
-		request.files['glmFile'].save(glm_path)
 		with locked_open(glm_path) as glmFile:
 			glmString = glmFile.read()
 		newFeeder = dict(**feeder.newFeederWireframe)
@@ -996,8 +1001,62 @@ def gridlabImportBackground(owner, modelName):
 		with locked_open(feeder_path, 'w') as f: # Use 'w' mode because we're creating a new .omd file according to feederName
 			json.dump(newFeeder, f, indent=4)
 		os.remove(pid_filepath)
-		feederNum = request.form.get("feederNum", 1)
 		removeFeeder(owner, modelName, feederNum)
+		writeToInput(modelDir, feederName, 'feederName' + str(feederNum))
+	except Exception: 
+		filepath = os.path.join(_omfDir, 'data', 'Model', owner, modelName, 'gridError.txt')
+		with locked_open(filepath, 'w') as errorFile:
+			errorFile.write('glmError')
+
+
+@app.route("/opendssImport/<owner>", methods=["POST"])
+@flask_login.login_required
+@write_permission_function
+def dssImport(owner):
+	'''This function is used for opendss importing in distnetviz'''
+	modelName = request.form.get("modelName","")
+	error_path, modelDir = [os.path.join(_omfDir, 'data', 'Model', owner, modelName, filename) for filename in ('gridError.txt', '')]
+	# Delete exisitng .std and .seq, .glm files to not clutter model file
+	for filename in safeListdir(modelDir):
+		if filename.endswith(".dss"):
+			os.remove(os.path.join(modelDir, filename))
+	if os.path.isfile(error_path):
+		os.remove(error_path)
+	feederName = str(request.form.get("feederNameOpendss",""))
+	feederNum = request.form.get("feederNum", 1)
+	dss_path = os.path.join(_omfDir, 'data', 'Model', owner, modelName, feederName + '.dss')
+	request.files['dssFile'].save(dss_path)
+	importProc = Process(target=dssImportBackground, args=[owner, modelName, feederName, feederNum])
+	importProc.start()
+	return 'Success'
+
+
+def dssImportBackground(owner, modelName, feederName, feederNum):
+	''' Function to run in the background for OpenDSS import. '''
+	try:
+		feeder_path, dss_path, modelDir, pid_filepath = [
+			os.path.join(_omfDir, 'data', 'Model', owner, modelName, filename) for filename in [feederName + '.omd', feederName + '.dss', '', 'ZPID.txt']
+		]
+		with locked_open(pid_filepath, 'w') as pid_file:
+			pid_file.write(str(os.getpid()))
+		newFeeder = dict(**feeder.newFeederWireframe)
+		newFeeder['syntax'] = 'DSS'
+		dss_tree = dssConvert.dssToTree(dss_path)
+		glm_tree = dssConvert.evilDssTreeToGldTree(dss_tree)
+		newFeeder["tree"] = glm_tree
+		if not distNetViz.contains_valid_coordinates(newFeeder["tree"]):
+			distNetViz.insert_coordinates(newFeeder["tree"])
+		with locked_open(feeder_path, 'w') as f: # Use 'w' mode because we're creating a new .omd file according to feederName
+			json.dump(newFeeder, f, indent=4)
+		os.remove(pid_filepath)
+		# Remove a feeder from input data.
+		allInput = get_model_metadata(owner, modelName)
+		oldFeederName = str(allInput.get('feederName'+str(feederNum)))
+		os.remove(os.path.join(modelDir, oldFeederName +'.omd'))
+		allInput.pop("feederName" + str(feederNum))
+		with locked_open(os.path.join(modelDir, 'allInputData.json'), 'r+') as f:
+			f.truncate(0)
+			json.dump(allInput, f, indent=4)
 		writeToInput(modelDir, feederName, 'feederName' + str(feederNum))
 	except Exception: 
 		filepath = os.path.join(_omfDir, 'data', 'Model', owner, modelName, 'gridError.txt')
@@ -1083,6 +1142,8 @@ def loadModelingAmi(owner, feederName):
 	for fp in filepaths:
 		if os.path.isfile(fp):
 			os.remove(fp)
+	ami_filepath = os.path.join(_omfDir, 'data', 'Model', owner, modelName, loadName + '.csv')
+	request.files['amiFile'].save(ami_filepath)
 	importProc = Process(target=backgroundLoadModelingAmi, args=[owner, modelName, feederName, loadName])
 	importProc.start()
 	return 'Success'
@@ -1093,7 +1154,6 @@ def backgroundLoadModelingAmi(owner, modelName, feederName, loadName):
 		pid_filepath, ami_filepath, omdPath, outDir, error_filepath = [os.path.join(_omfDir, 'data', 'Model', owner, modelName, filename) for filename in 
 			['APID.txt', loadName + '.csv', feederName + '.omd', 'amiOutput', 'error.txt']
 		]
-		request.files['amiFile'].save(ami_filepath)
 		with locked_open(pid_filepath, 'w') as pid_file:
 			pid_file.write(str(os.getpid()))
 		loadModelingAmi.writeNewGlmAndPlayers(omdPath, ami_filepath, outDir)
@@ -1113,21 +1173,22 @@ def cymeImport(owner):
 	error_filepath = os.path.join(_omfDir, 'data', 'Model', owner, modelName, 'gridError.txt')
 	if os.path.isfile(error_filepath):
 		os.remove(error_filepath)
-	importProc = Process(target=cymeImportBackground, args=[owner, modelName])
+	feederNum = request.form.get("feederNum",1)
+	feederName = str(request.form.get("feederNameC",""))
+	mdbFileObject = request.files["mdbNetFile"]
+	mdbFileObject.save(mdb_filepath)
+	print(mdbFileObject.filename)
+	importProc = Process(target=cymeImportBackground, args=[owner, modelName, feederNum, feederName])
 	importProc.start()
 	return 'Success'
 
 
-def cymeImportBackground(owner, modelName):
+def cymeImportBackground(owner, modelName, feederNum, feederName):
 	''' Function to run in the background for Milsoft import. '''
 	try:
-		mdbFileObject = request.files["mdbNetFile"]
-		feederName = str(request.form.get("feederNameC",""))
 		pid_filepath, error_filepath, mdb_filepath, feeder_filepath, modelDir = [os.path.join(_omfDir, 'data', 'Model', owner, modelName, filename) for filename in 
 			['ZPID.txt', 'gridError.txt', mdbFileObject.filename, feederName + '.omd', '']
 		]
-		mdbFileObject.save(mdb_filepath)
-		print(mdbFileObject.filename)
 		with locked_open(pid_filepath, 'w') as pid_file:
 			pid_file.write(str(os.getpid()))
 		newFeeder = dict(**feeder.newFeederWireframe)
@@ -1138,7 +1199,6 @@ def cymeImportBackground(owner, modelName):
 		with locked_open(feeder_filepath, 'w') as f: 
 			json.dump(newFeeder, f, indent=4)
 		os.remove(pid_filepath)
-		feederNum = request.form.get("feederNum",1)
 		removeFeeder(owner, modelName, feederNum) # remove the old feeder file that had the same feeder number
 		writeToInput(modelDir, feederName, 'feederName' + str(feederNum))
 	except Exception:
@@ -1421,11 +1481,6 @@ def renameNetwork(owner, modelName, oldName, networkName, networkNum):
 	writeToInput(model_dir, networkName, 'networkName' + str(networkNum))
 	return 'Success'
 
-
-@app.route("/removeFeeder/<owner>/<modelName>/<feederNum>", methods=["GET", "POST"])
-@app.route("/removeFeeder/<owner>/<modelName>/<feederNum>/<feederName>", methods=["GET", "POST"])
-@flask_login.login_required
-@write_permission_function
 def removeFeeder(owner, modelName, feederNum, feederName=None):
 	'''Remove a feeder from input data.'''
 	try:
@@ -1444,6 +1499,13 @@ def removeFeeder(owner, modelName, feederNum, feederName=None):
 	except:
 		return 'Failed'
 
+@app.route("/removeFeeder/<owner>/<modelName>/<feederNum>", methods=["GET", "POST"])
+@app.route("/removeFeeder/<owner>/<modelName>/<feederNum>/<feederName>", methods=["GET", "POST"])
+@flask_login.login_required
+@write_permission_function
+def removeFeederRequest(owner, modelName, feederNum, feederName=None):
+	''' Remove feeder from web.'''
+	removeFeeder(owner, modelName, feederNum, feederName=None)
 
 @app.route("/loadFeeder/<frfeederName>/<frmodelName>/<modelName>/<feederNum>/<frUser>/<owner>", methods=["GET", "POST"])
 @flask_login.login_required
@@ -1558,27 +1620,29 @@ def climateChange(owner, feederName):
 		if os.path.isfile(fp):
 			os.remove(fp)
 	# Don't bother writing WPID.txt here because /checkConversion doesn't distinguish between non-started processes and non-existant processes
-	importProc = Process(target=backgroundClimateChange, args=[owner, model_name, feederName])
+	importOption = request.form.get('climateImportOption')
+	zipCode = request.form.get('zipCode')
+	station = request.form.get("uscrnStation")
+	year_str = request.form.get("uscrnYear")
+	importProc = Process(target=backgroundClimateChange, args=[owner, model_name, feederName, importOption, zipCode, station, year_str])
 	importProc.start()
 	return "Success"
 
 
-def backgroundClimateChange(owner, modelName, feederName):
+def backgroundClimateChange(owner, modelName, feederName, importOption, zipCode, station, year_str):
 	try:
 		omdPath, pid_filepath, error_filepath = [
 			os.path.join(_omfDir, 'data', 'Model', owner, modelName, filename) for filename in [feederName + '.omd', 'WPID.txt', 'error.txt']
 		]
 		with locked_open(pid_filepath, 'w') as pid_file:
 			pid_file.write(str(os.getpid()))
-		importOption = request.form.get('climateImportOption')
 		if importOption is None:
 			raise Exception("Invalid weather import option selected.")
 		if importOption == "USCRNImport":
 			try:
-				year = int(request.form.get("uscrnYear"))
+				year = int(year_str)
 			except:
 				raise Exception("Invalid year was submitted.")
-			station = request.form.get("uscrnStation")
 			if station is None or len(station) == 0:
 				raise Exception("Invalid station was submitted.")
 			weather.attachHistoricalWeather(omdPath, year, station)
@@ -1593,7 +1657,6 @@ def backgroundClimateChange(owner, modelName, feederName):
 				if (key.endswith('.tmy2')) or (key == 'weatherAirport.csv'):
 					del feederJson['attachments'][key]
 			# Old tmy2 weather operation
-			zipCode = request.form.get('zipCode')
 			climateName = weather.zipCodeToClimateName(zipCode)
 			tmyFilePath = 'data/Climate/' + climateName + '.tmy2'
 			feederJson['tree'][feeder.getMaxKey(feederJson['tree'])+1] = {'object':'climate','name':'Climate','interpolate':'QUADRATIC', 'tmyfile':'climate.tmy2'}
@@ -1619,12 +1682,25 @@ def anonymize(owner, feederName):
 	modelName = request.form.get('modelName')
 	modelDir = 'data/Model/' + owner + '/' + modelName
 	omdPath = modelDir + '/' + feederName + '.omd'
-	importProc = Process(target=backgroundAnonymize, args=[modelDir, omdPath, owner, modelName])
+	# form variables
+	nameOption = request.form.get('anonymizeNameOption')
+	locOption = request.form.get('anonymizeLocationOption')
+	translationRight = request.form.get('translateRight')
+	translationUp = request.form.get('translateUp')
+	rotation = request.form.get('rotate')
+	shufPerc = request.form.get('shufflePerc')
+	noisePerc = request.form.get('noisePerc')
+	modifyLengthSize = request.form.get('modifyLengthSize')
+	smoothLoadGen = request.form.get('smoothLoadGen')
+	shuffleLoadGen = request.form.get('shuffleLoadGen')
+	addNoise = request.form.get('addNoise')
+	# start background process
+	importProc = Process(target=backgroundAnonymize, args=[modelDir, omdPath, owner, modelName, nameOption, locOption, translationRight, translationUp, rotation, shufPerc, noisePerc, modifyLengthSize, smoothLoadGen, shuffleLoadGen, addNoise])
 	importProc.start()
 	return 'Success'
 
 
-def backgroundAnonymize(modelDir, omdPath, owner, modelName):
+def backgroundAnonymize(modelDir, omdPath, owner, modelName, nameOption, locOption, translationRight, translationUp, rotation, shufPerc, noisePerc, modifyLengthSize, smoothLoadGen, shuffleLoadGen, addNoise):
 	try:
 		pid_filepath = os.path.join(_omfDir, "data/Model", owner, modelName, "NPID.txt")
 		with locked_open(pid_filepath, 'w') as pid_file:
@@ -1632,34 +1708,27 @@ def backgroundAnonymize(modelDir, omdPath, owner, modelName):
 		with locked_open(omdPath, 'r') as inFile:
 			inFeeder = json.load(inFile)
 		# Name Option
-		nameOption = request.form.get('anonymizeNameOption')
 		newNameKey = None
 		if nameOption == 'pseudonymize':
 			newNameKey = anonymization.distPseudomizeNames(inFeeder)
 		elif nameOption == 'randomize':
 			anonymization.distRandomizeNames(inFeeder)
 		# Location Option
-		locOption = request.form.get('anonymizeLocationOption')
 		if locOption == 'translation':
-			translationRight = request.form.get('translateRight')
-			translationUp = request.form.get('translateUp')
-			rotation = request.form.get('rotate')
 			anonymization.distTranslateLocations(inFeeder, translationRight, translationUp, rotation)
 		elif locOption == 'randomize':
 			anonymization.distRandomizeLocations(inFeeder)
 		elif locOption == 'forceLayout':
 			distNetViz.insert_coordinates(inFeeder["tree"])
 		# Electrical Properties
-		if request.form.get('modifyLengthSize'):
+		if modifyLengthSize:
 			anonymization.distModifyTriplexLengths(inFeeder)
 			anonymization.distModifyConductorLengths(inFeeder)
-		if request.form.get('smoothLoadGen'):
+		if smoothLoadGen:
 			anonymization.distSmoothLoads(inFeeder)
-		if request.form.get('shuffleLoadGen'):
-			shufPerc = request.form.get('shufflePerc')
+		if shuffleLoadGen:
 			anonymization.distShuffleLoads(inFeeder, shufPerc)
-		if request.form.get('addNoise'):
-			noisePerc = request.form.get('noisePerc')
+		if addNoise:
 			anonymization.distAddNoise(inFeeder, noisePerc)
 		with locked_open(omdPath, 'r+') as f:
 			f.truncate(0)
@@ -1689,17 +1758,17 @@ def zillow_houses():
 	zpid_filepath = os.path.join(model_dir, "ZPID.txt")
 	with locked_open(zpid_filepath, 'w'):
 		pass
-	importProc = Process(target=background_zillow_houses, args=[model_dir])
+	triplex_objects = json.loads(request.form.get("triplexObjects"))
+	importProc = Process(target=background_zillow_houses, args=[model_dir, triplex_objects])
 	importProc.start()
 	return ""
 
 
-def background_zillow_houses(model_dir):
+def background_zillow_houses(model_dir, triplex_objects):
 	try:
 		pid_filepath = os.path.join(model_dir, "ZPID.txt")
 		with locked_open(pid_filepath, 'w') as pid_file:
 			pid_file.write(str(os.getpid()))
-		triplex_objects = json.loads(request.form.get("triplexObjects"))
 		zillow_houses = {}
 		for obj in triplex_objects:
 			house = loadModeling.get_zillow_configured_new_house(obj['latitude'], obj['longitude'])
@@ -1750,7 +1819,16 @@ def anonymizeTran(owner, networkName):
 	modelName = request.form.get('modelName')
 	modelDir = 'data/Model/' + owner + '/' + modelName
 	omtPath = modelDir + '/' + networkName + '.omt'
-	importProc = Process(target=backgroundAnonymizeTran, args =[modelDir, omtPath])
+	nameOption = request.form.get('anonymizeNameOption')
+	locOption = request.form.get('anonymizeLocationOption')
+	translationRight = request.form.get('translateRight')
+	translationUp = request.form.get('translateUp')
+	rotation = request.form.get('rotate')
+	shufPerc = request.form.get('shufflePerc')
+	noisePerc = request.form.get('noisePerc')
+	shuffleLoadGen = request.form.get('shuffleLoadGen')
+	addNoise = request.form.get('addNoise')
+	importProc = Process(target=backgroundAnonymizeTran, args = [modelDir, omtPath, nameOption, locOption, translationRight, translationUp, rotation, shufPerc, noisePerc, shuffleLoadGen, addNoise])
 	importProc.start()
 	pid = str(importProc.pid)
 	with locked_open(modelDir + '/TPPID.txt', 'w') as outFile:
@@ -1758,30 +1836,23 @@ def anonymizeTran(owner, networkName):
 	return 'Success'
 
 
-def backgroundAnonymizeTran(modelDir, omtPath):
+def backgroundAnonymizeTran(modelDir, omtPath, nameOption, locOption, translationRight, translationUp, rotation, shufPerc, noisePerc, shuffleLoadGen, addNoise):
 	with locked_open(omtPath, 'r') as inFile:
 		inNetwork = json.load(inFile)
 	# Name Options
-	nameOption = request.form.get('anonymizeNameOption')
 	if nameOption == 'pseudonymize':
 		newBusKey = anonymization.tranPseudomizeNames(inNetwork)
 	elif nameOption == 'randomize':
 		anonymization.tranRandomizeNames(inNetwork)
 	# Location Options
-	locOption = request.form.get('anonymizeLocationOption')
 	if locOption == 'translation':
-		translationRight = request.form.get('translateRight')
-		translationUp = request.form.get('translateUp')
-		rotation = request.form.get('rotate')
 		anonymization.tranTranslateLocations(inNetwork, translationRight, translationUp, rotation)
 	elif locOption == 'randomize':
 		anonymization.tranRandomizeLocations(inNetwork)
 	# Electrical Properties
-	if request.form.get('shuffleLoadGen'):
-		shufPerc = request.form.get('shufflePerc')
+	if shuffleLoadGen:
 		anonymization.tranShuffleLoadsAndGens(inNetwork, shufPerc)
-	if request.form.get('addNoise'):
-		noisePerc = request.form.get('noisePerc')
+	if addNoise:
 		anonymization.tranAddNoise(inNetwork, noisePerc)
 	with locked_open(omtPath, 'w') as outFile:
 		# I don't know if the outFile already exists or not, which is why I haven't switched to r+ and truncate()
