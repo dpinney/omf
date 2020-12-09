@@ -602,6 +602,13 @@ def _createAndCompareTestFile(inFile, userOutFile=''):
 	percSumm, diffSumm = voltageCompare(involts, outvolts, keep_output=True)
 	return 
 
+def _conversionTests():
+	# Deprecated tests section
+	#dssToGridLab('ieee37.dss', 'Model.glm') # this kind of works
+	#gridLabToDSS('ieee37_fixed.glm', 'ieee37_conv.dss') # this fails miserably
+	#cymeToDss(...) # first need to define function.
+	#distNetViz.insert_coordinates(evil_glm)
+
 def _tests():
 	from omf.solvers.opendss import getVoltages, voltageCompare
 	import pandas as pd
@@ -635,10 +642,6 @@ def _tests():
 		print(maxPerrM) # DEBUG
 		assert abs(maxPerrM) < errorLimit*100, 'The average percent error in voltage magnitude is %s, which exceeeds the threshold of %s%%.'%(maxPerrM,errorLimit*100)
 
-	# Deprecated tests section
-	#dssToGridLab('ieee37.dss', 'Model.glm') # this kind of works
-	#gridLabToDSS('ieee37_fixed.glm', 'ieee37_conv.dss') # this fails miserably
-	#distNetViz.insert_coordinates(evil_glm)
 	#TODO: make parser accept keyless items with new !keyless_n key? Or is this just horrible syntax?
 	#TODO: refactor in to well-defined bijections between object types?
 	#TODO: a little help on the frontend to hide invalid commands.
