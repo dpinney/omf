@@ -236,29 +236,39 @@ def utilityOutageTable(customerCost, restoration_cost, hardware_cost, outageDura
 
 	return utilityOutageHtml
 
-def customerCost(workDir, customerName, duration, season, annualkWh, businessType):
+def customerCost1(workDir, customerName, duration, season, averagekW, businessType):
 	'function to determine customer outage cost based on season, annual kWh usage, and business type'
 	duration = int(duration)
-	annualkWh = int(annualkWh)
+	averagekW = int(averagekW)
 
-	times = np.array([0,1,2,3,4,5,6,7,8,9,10,11,12])
+	times = np.array([0,1,2,3,4,5,6,7,8])
 	# load the customer outage cost data (compared with annual kWh usage) from the 2002 Lawton survey
-	kWhTemplate = {}
+	kWTemplate = {}
 
 	# NOTE: We set a maximum kWh value constant so the model doesn't crash for very large annualkWh inputs. However, the
 	# model would still likely be very inaccurate for any value above 175000000
-	kWhTemplate[5000000000] = np.array([5000000000,5000000000,5000000000,5000000000,5000000000,5000000000,5000000000,5000000000,5000000000,5000000000,5000000000,5000000000,5000000000])
-	kWhTemplate[1000000000] = np.array([1000000000,1000000000,1000000000,1000000000,1000000000,1000000000,1000000000,1000000000,1000000000,1000000000,1000000000,1000000000,1000000000])
-	kWhTemplate[175000000] = np.array([260000, 325000, 380000, 420000, 430000, 410000, 370000, 310000, 240000, 175000, 120000, 75000, 50000])
-	kWhTemplate[17500000] = np.array([5000, 7000, 14000, 21000, 28000, 35000, 42000, 47000, 49000, 47000, 45000, 35000, 28000])
-	kWhTemplate[1750000] = np.array([5000, 7000, 13000, 20000, 26000, 34000, 40000, 46000, 48000, 46000, 44000, 34000, 27000])
-	kWhTemplate[1182930] = np.array([5000, 7000, 10500, 13750, 17000, 20500, 23500, 26000, 27000, 27000, 26500, 24000, 21000])
-	kWhTemplate[118293] = np.array([1000, 1600, 2100, 2450, 2700, 3200, 3500, 4500, 4700, 4600, 4500, 3300, 2900])
-	kWhTemplate[11829] = np.array([1000, 1500, 2000, 2250, 2500, 2700, 3000, 3200, 3300, 3200, 3100, 2800, 2600])
+	
+	if businessType != 'residential':
+		kWTemplate[5000.0] = np.array([50000, 70000, 120000, 16000, 200000, 260000, 300000, 320000, 350000])
+		kWTemplate[2500.0] = np.array([20000, 35000, 58000, 75000, 95000, 117000, 133000, 142000, 145000])
+		kWTemplate[500.0] = np.array([10000, 18000, 23000, 38000, 48000, 60000, 68000, 77000, 78000])
+		kWTemplate[100.0] = np.array([4000, 7000, 13000, 19000, 23000, 31000, 37000, 40000, 41000])
+		kWTemplate[20.0] = np.array([1500, 4000, 6000, 10000, 14000, 18000, 19500, 20500, 21000])
+		kWTemplate[5.0] = np.array([500, 900, 1400, 2050, 2800, 3600, 4200, 4850, 5300])
+		kWTemplate[3.0] = np.array([500, 900, 1400, 2050, 2700, 3500, 3900, 4600, 5000])
+		kWTemplate[1.0] = np.array([400, 750, 1200, 1900, 2600, 3200, 3600, 4000, 4100])
+		kWTemplate[0.25] = np.array([350, 700, 1100, 1700, 2400, 3000, 3300, 3500, 3300])
+	
+	else:
+		kWTemplate[8.0] = np.array([4, 6, 7, 9, 12, 14, 14, 15, 16])
+		kWTemplate[4.0] = np.array([3, 5, 6, 8, 9, 11, 12, 13, 13])
+		kWTemplate[2.5] = np.array([3, 4, 6, 7, 8, 10, 11, 12, 12])
+		kWTemplate[1.0] = np.array([3, 4, 5, 6, 7, 8, 9, 10, 10])
+		kWTemplate[0.25] = np.array([2, 3, 4, 5, 5, 6, 7, 7, 8])
 	# NOTE: We set a minimum kWh value so the model doesn't crash for low values.
-	kWhTemplate[0] = np.array([0,0,0,0,0,0,0,0,0,0,0,0,0])
+	kWTemplate[0] = np.array([0,0,0,0,0,0,0,0,0])
 
-	def kWhApprox(kWhDict, annualkWh, iterate):
+	def kWhApprox(kWDict, averagekW, iterate):
 		'helper function for approximating customer outage cost based on annualkWh by iteratively "averaging" the curves'
 		step = 0
 
@@ -266,60 +276,64 @@ def customerCost(workDir, customerName, duration, season, annualkWh, businessTyp
 		while step < iterate:
 
 			#sort the current kWh values for which we have customer outage costs
-			keys = list(kWhDict.keys())
+			keys = list(kWDict.keys())
 			keys.sort()
 
 			# find the current kWh values estimated that are closest to the annualkWh input...
 			# ...then, estimate the outage costs for the kWh value directly between these
 			key = 0
 			while key < len(keys):
-				if annualkWh > keys[key]:			
+				if averagekW > keys[key]:			
 					key+=1
 				else:
 					newEntry = (keys[key] + keys[key+1])/2
-					averageCost = (kWhDict[keys[key]] + kWhDict[keys[key+1]])/2
-					kWhDict[newEntry] = averageCost
+					averageCost = (kWDict[keys[key]] + kWDict[keys[key+1]])/2
+					kWDict[newEntry] = averageCost
 					break
 			step+=1
 			if step == iterate:
-				return(kWhDict[newEntry])
+				return(kWDict[newEntry])
 
 	# estimate customer outage cost based on annualkWh
-	kWhEstimate = kWhApprox(kWhTemplate, annualkWh, 20)
+	kWhEstimate = kWhApprox(kWTemplate, averagekW, 20)
 
 	# based on the annualkWh usage, import the average relationship between season/business type and outage cost
 	# NOTE: This data is also taken from the Lawton survey
-	if annualkWh > 1000000:
-		winter = np.array([13000, 20000, 32000, 45000, 63000, 79000, 95000, 105000, 108000, 104000, 95000, 80000, 64000])
-		summer = np.array([7000, 10000, 14000, 19000, 26000, 34000, 39000, 42000, 43000, 42000, 39000, 34000, 26000])
-		manufacturing = np.array([9000, 12000, 19000, 26000, 38000, 48000, 59000, 67000, 69000, 68000, 65000, 56000, 46000])
-		construction = np.array([10000, 18000, 27000, 40000, 56000, 72000, 86000, 98000, 102000, 101000, 96000, 82000, 68000])
-		finance = np.array([8000, 10000, 17000, 22000, 31000, 40000, 48000, 55000, 58000, 57000, 54000, 45000, 38000])
-		public = np.array([6000, 9000, 15000, 17000, 22000, 29000, 35000, 39000, 41000, 41000, 38000, 32000, 27000])
-		retail = np.array([6000, 9000, 15000, 17000, 22000, 29000, 35000, 39000, 41000, 41000, 38000, 32000, 27000])
-		utilities = np.array([6000, 9000, 14000, 16000, 19000, 23000, 29000, 33000, 35000, 34000, 32000, 26000, 22000])
-		services = np.array([5000, 7000, 8000, 10000, 16000, 19000, 22000, 25000, 26000, 25000, 23000, 21000, 18000])
+	if averagekW > 10:
+		winter = np.array([10000, 19000, 27000, 41000, 59000, 72000, 83000, 91000, 93000])
+		summer = np.array([11000, 20000, 31000, 43000, 60000, 73000, 84000, 92000, 94500])
+		manufacturing = np.array([25000, 35000, 54000, 77000, 106000, 127000, 147000, 161000, 165000])
+		construction = np.array([27000, 49000, 73000, 102000, 135000, 167000, 190000, 215000, 225000])
+		finance = np.array([24000, 32000, 49000, 70000, 90000, 115000, 130000, 144000, 148000])
+		public = np.array([7000, 17000, 26000, 40000, 50000, 65000, 75000, 77000, 80000])
+		retail = np.array([6000, 14000, 23000, 35000, 40000, 47000, 52000, 55000, 57000])
+		utilities = np.array([10000, 20000, 30000, 45000, 65000, 76000, 85000, 93000, 96000])
+		mining = np.array([6000, 15000, 24000, 38000, 47000, 54000, 65000, 70000, 72000])
+		services = np.array([6000, 15000, 24000, 38000, 47000, 54000, 65000, 70000, 72000])
+		agriculture = np.array([5000, 10000, 17000, 22000, 26000, 30000, 37000, 40000, 42000])
 
 	elif businessType != 'residential':
-		winter = np.array([1200, 1800, 2500, 3200, 4100, 4900, 5600, 6200, 6400, 6400, 6200, 5700, 5000])
-		summer = np.array([900, 1300, 1700, 2200, 2800, 3300, 3800, 4200, 4400, 4400, 4200, 3900, 3400])
-		manufacturing = np.array([1200, 1900, 2600, 3500, 4600, 5700, 6600, 7400, 7800, 7900, 7700, 7100, 6200])
-		construction = np.array([900, 1300, 1800, 2500, 3250, 4000, 4600, 5200, 5500, 5600, 5400, 5000, 4400])
-		finance = np.array([600, 750, 1150, 1500, 2000, 2400, 2800, 3200, 3350, 3400, 3300, 3100, 2650])
-		retail = np.array([600, 700, 1000, 1400, 1700, 2200, 2600, 2850, 3050, 3100, 3000, 2750, 2400])
-		services = np.array([500, 600, 800, 1150, 1400, 1750, 2100, 2350, 2400, 2450, 2350, 2200, 1950])
-		utilities = np.array([500, 550, 750, 1000, 1300, 1600, 1800, 2050, 2150, 2150, 2100, 1950, 1750])
-		public = np.array([350, 500, 600, 800, 1050, 1250, 1500, 1600, 1750, 1750, 1700, 1600, 1400])
+		winter = np.array([600, 1100, 2000, 3000, 4150, 5400, 6500, 7300, 7800])
+		summer = np.array([550, 900, 1350, 2000, 2800, 3450, 4000, 4550, 4800])
+		manufacturing = np.array([850, 1100, 1900, 2600, 3600, 4500, 5400, 6000, 6300])
+		mining = np.array([1000, 1800, 2750, 4000, 5600, 6800, 8000, 8900, 9300])
+		construction = np.array([1100, 1900, 3000, 4300, 5900, 7400, 8600, 9500, 10100])
+		agriculture = np.array([500, 650, 1300, 1800, 2400, 3300, 4000, 4600, 4800])
+		finance = np.array([850, 1100, 1900, 2600, 3600, 4500, 5400, 6000, 6300])
+		retail = np.array([500, 650, 1300, 1800, 2300, 3000, 3500, 3900, 4100])
+		services = np.array([500, 600, 900, 1500, 2100, 2600, 3000, 3500, 3700])
+		utilities = np.array([850, 1100, 1900, 2600, 3600, 4500, 5400, 6000, 6300])
+		public = np.array([400, 500, 800, 1200, 1800, 2200, 2600, 3100, 3300])
 	
 	# NOTE: if the customer is residential, there is no business type relationship
 	else:
-		winter = np.array([3, 3, 4, 5, 6, 7, 8, 9, 10, 10, 11, 11, 12])
-		summer = np.array([2, 3, 4, 4, 5, 6, 7, 8, 9, 9, 10, 10, 10])
+		summer = np.array([4, 5, 7, 8, 10, 11, 12, 13, 14])
+		winter = np.array([3, 4, 5, 6, 8, 9, 10, 11, 11])
 
 	# adjust the estimated customer outage cost by the difference between the average outage cost and the average seasonal cost
-	averageSeason = np.sum((winter + summer)/2)/13
-	averageSummer = np.sum(summer)/13
-	averageWinter = np.sum(winter)/13
+	averageSeason = np.sum((winter + summer)/2)/9
+	averageSummer = np.sum(summer)/9
+	averageWinter = np.sum(winter)/9
 	if season == 'summer':
 		seasonMultiplier = averageSummer/averageSeason
 	else:
@@ -328,39 +342,45 @@ def customerCost(workDir, customerName, duration, season, annualkWh, businessTyp
 
 	# adjust the estimated customer outage cost by the difference between the average outage cost and the average business type cost
 	if businessType != 'residential':
-		averageBusiness = np.sum((manufacturing + construction + finance + retail + services + utilities + public)/7)/13
+		averageBusiness = np.sum((manufacturing + construction + finance + retail + services + utilities + public + mining + agriculture)/9)/9
 		if businessType == 'manufacturing':
-			averageManufacturing = np.sum(manufacturing)/13
+			averageManufacturing = np.sum(manufacturing)/9
 			businessMultiplier = averageManufacturing/averageBusiness
 		elif businessType == 'construction':
-			averageConstruction = np.sum(construction)/13
+			averageConstruction = np.sum(construction)/9
 			businessMultiplier = averageConstruction/averageBusiness
 		elif businessType == 'finance':
-			averageFinance = np.sum(finance)/13
+			averageFinance = np.sum(finance)/9
 			businessMultiplier = averageFinance/averageBusiness
 		elif businessType == 'retail':
-			averageRetail = np.sum(retail)/13
+			averageRetail = np.sum(retail)/9
 			businessMultiplier = averageRetail/averageBusiness
 		elif businessType == 'services':
-			averageServices = np.sum(services)/13
+			averageServices = np.sum(services)/9
 			businessMultiplier = averageServices/averageBusiness
 		elif businessType == 'utilities':
-			averageUtilities = np.sum(utilities)/13
+			averageUtilities = np.sum(utilities)/9
 			businessMultiplier = averageUtilities/averageBusiness
+		elif businessType == 'agriculture':
+			averageAgriculture = np.sum(agriculture)/9
+			businessMultiplier = averageAgriculture/averageBusiness
+		elif businessType == 'mining':
+			averageMining = np.sum(mining)/9
+			businessMultiplier = averageMining/averageBusiness
 		else:
-			averagePublic = np.sum(public)/13
+			averagePublic = np.sum(public)/9
 			businessMultiplier = averagePublic/averageBusiness
 		kWhEstimate = kWhEstimate * businessMultiplier
 
-	# adjust for inflation from 2002 to 2020 using the CPI
-	kWhEstimate = 1.445 * kWhEstimate
+	# adjust for inflation from 2008 to 2020 using the CPI
+	kWhEstimate = 1.21 * kWhEstimate
 
 	# find the estimated customer outage cost for the customer in question, given the duration of the outage
-	times = np.array([0,1,2,3,4,5,6,7,8,9,10,11,12])
+	times = np.array([0,1,2,3,4,5,6,7,8])
 	outageCost = kWhEstimate[duration]
 	localMax = 0
 	row = 0
-	while row < 13:
+	while row < 9:
 		if kWhEstimate[row] > localMax:
 			localMax = kWhEstimate[row]
 		row+=1
@@ -371,6 +391,143 @@ def customerCost(workDir, customerName, duration, season, annualkWh, businessTyp
 	# return {'customerOutageCost': outageCost}
 	return outageCost, kWhEstimate, times, localMax
 
+
+# OLD 2003 estimates
+# def customerCost(workDir, customerName, duration, season, annualkWh, businessType):
+# 	'function to determine customer outage cost based on season, annual kWh usage, and business type'
+# 	duration = int(duration)
+# 	annualkWh = int(annualkWh)
+
+# 	times = np.array([0,1,2,3,4,5,6,7,8,9,10,11,12])
+# 	# load the customer outage cost data (compared with annual kWh usage) from the 2002 Lawton survey
+# 	kWhTemplate = {}
+
+# 	# NOTE: We set a maximum kWh value constant so the model doesn't crash for very large annualkWh inputs. However, the
+# 	# model would still likely be very inaccurate for any value above 175000000
+# 	kWhTemplate[5000000000] = np.array([5000000000,5000000000,5000000000,5000000000,5000000000,5000000000,5000000000,5000000000,5000000000,5000000000,5000000000,5000000000,5000000000])
+# 	kWhTemplate[1000000000] = np.array([1000000000,1000000000,1000000000,1000000000,1000000000,1000000000,1000000000,1000000000,1000000000,1000000000,1000000000,1000000000,1000000000])
+# 	kWhTemplate[175000000] = np.array([260000, 325000, 380000, 420000, 430000, 410000, 370000, 310000, 240000, 175000, 120000, 75000, 50000])
+# 	kWhTemplate[17500000] = np.array([5000, 7000, 14000, 21000, 28000, 35000, 42000, 47000, 49000, 47000, 45000, 35000, 28000])
+# 	kWhTemplate[1750000] = np.array([5000, 7000, 13000, 20000, 26000, 34000, 40000, 46000, 48000, 46000, 44000, 34000, 27000])
+# 	kWhTemplate[1182930] = np.array([5000, 7000, 10500, 13750, 17000, 20500, 23500, 26000, 27000, 27000, 26500, 24000, 21000])
+# 	kWhTemplate[118293] = np.array([1000, 1600, 2100, 2450, 2700, 3200, 3500, 4500, 4700, 4600, 4500, 3300, 2900])
+# 	kWhTemplate[11829] = np.array([1000, 1500, 2000, 2250, 2500, 2700, 3000, 3200, 3300, 3200, 3100, 2800, 2600])
+# 	# NOTE: We set a minimum kWh value so the model doesn't crash for low values.
+# 	kWhTemplate[0] = np.array([0,0,0,0,0,0,0,0,0,0,0,0,0])
+
+# 	def kWhApprox(kWhDict, annualkWh, iterate):
+# 		'helper function for approximating customer outage cost based on annualkWh by iteratively "averaging" the curves'
+# 		step = 0
+
+# 		# iterate the process a set number of times
+# 		while step < iterate:
+
+# 			#sort the current kWh values for which we have customer outage costs
+# 			keys = list(kWhDict.keys())
+# 			keys.sort()
+
+# 			# find the current kWh values estimated that are closest to the annualkWh input...
+# 			# ...then, estimate the outage costs for the kWh value directly between these
+# 			key = 0
+# 			while key < len(keys):
+# 				if annualkWh > keys[key]:			
+# 					key+=1
+# 				else:
+# 					newEntry = (keys[key] + keys[key+1])/2
+# 					averageCost = (kWhDict[keys[key]] + kWhDict[keys[key+1]])/2
+# 					kWhDict[newEntry] = averageCost
+# 					break
+# 			step+=1
+# 			if step == iterate:
+# 				return(kWhDict[newEntry])
+
+# 	# estimate customer outage cost based on annualkWh
+# 	kWhEstimate = kWhApprox(kWhTemplate, annualkWh, 20)
+
+# 	# based on the annualkWh usage, import the average relationship between season/business type and outage cost
+# 	# NOTE: This data is also taken from the Lawton survey
+# 	if annualkWh > 1000000:
+# 		winter = np.array([13000, 20000, 32000, 45000, 63000, 79000, 95000, 105000, 108000, 104000, 95000, 80000, 64000])
+# 		summer = np.array([7000, 10000, 14000, 19000, 26000, 34000, 39000, 42000, 43000, 42000, 39000, 34000, 26000])
+# 		manufacturing = np.array([9000, 12000, 19000, 26000, 38000, 48000, 59000, 67000, 69000, 68000, 65000, 56000, 46000])
+# 		construction = np.array([10000, 18000, 27000, 40000, 56000, 72000, 86000, 98000, 102000, 101000, 96000, 82000, 68000])
+# 		finance = np.array([8000, 10000, 17000, 22000, 31000, 40000, 48000, 55000, 58000, 57000, 54000, 45000, 38000])
+# 		public = np.array([6000, 9000, 15000, 17000, 22000, 29000, 35000, 39000, 41000, 41000, 38000, 32000, 27000])
+# 		retail = np.array([6000, 9000, 15000, 17000, 22000, 29000, 35000, 39000, 41000, 41000, 38000, 32000, 27000])
+# 		utilities = np.array([6000, 9000, 14000, 16000, 19000, 23000, 29000, 33000, 35000, 34000, 32000, 26000, 22000])
+# 		services = np.array([5000, 7000, 8000, 10000, 16000, 19000, 22000, 25000, 26000, 25000, 23000, 21000, 18000])
+
+# 	elif businessType != 'residential':
+# 		winter = np.array([1200, 1800, 2500, 3200, 4100, 4900, 5600, 6200, 6400, 6400, 6200, 5700, 5000])
+# 		summer = np.array([900, 1300, 1700, 2200, 2800, 3300, 3800, 4200, 4400, 4400, 4200, 3900, 3400])
+# 		manufacturing = np.array([1200, 1900, 2600, 3500, 4600, 5700, 6600, 7400, 7800, 7900, 7700, 7100, 6200])
+# 		construction = np.array([900, 1300, 1800, 2500, 3250, 4000, 4600, 5200, 5500, 5600, 5400, 5000, 4400])
+# 		finance = np.array([600, 750, 1150, 1500, 2000, 2400, 2800, 3200, 3350, 3400, 3300, 3100, 2650])
+# 		retail = np.array([600, 700, 1000, 1400, 1700, 2200, 2600, 2850, 3050, 3100, 3000, 2750, 2400])
+# 		services = np.array([500, 600, 800, 1150, 1400, 1750, 2100, 2350, 2400, 2450, 2350, 2200, 1950])
+# 		utilities = np.array([500, 550, 750, 1000, 1300, 1600, 1800, 2050, 2150, 2150, 2100, 1950, 1750])
+# 		public = np.array([350, 500, 600, 800, 1050, 1250, 1500, 1600, 1750, 1750, 1700, 1600, 1400])
+	
+# 	# NOTE: if the customer is residential, there is no business type relationship
+# 	else:
+# 		winter = np.array([3, 3, 4, 5, 6, 7, 8, 9, 10, 10, 11, 11, 12])
+# 		summer = np.array([2, 3, 4, 4, 5, 6, 7, 8, 9, 9, 10, 10, 10])
+
+# 	# adjust the estimated customer outage cost by the difference between the average outage cost and the average seasonal cost
+# 	averageSeason = np.sum((winter + summer)/2)/13
+# 	averageSummer = np.sum(summer)/13
+# 	averageWinter = np.sum(winter)/13
+# 	if season == 'summer':
+# 		seasonMultiplier = averageSummer/averageSeason
+# 	else:
+# 		seasonMultiplier = averageWinter/averageSeason
+# 	kWhEstimate = kWhEstimate * seasonMultiplier
+
+# 	# adjust the estimated customer outage cost by the difference between the average outage cost and the average business type cost
+# 	if businessType != 'residential':
+# 		averageBusiness = np.sum((manufacturing + construction + finance + retail + services + utilities + public)/7)/13
+# 		if businessType == 'manufacturing':
+# 			averageManufacturing = np.sum(manufacturing)/13
+# 			businessMultiplier = averageManufacturing/averageBusiness
+# 		elif businessType == 'construction':
+# 			averageConstruction = np.sum(construction)/13
+# 			businessMultiplier = averageConstruction/averageBusiness
+# 		elif businessType == 'finance':
+# 			averageFinance = np.sum(finance)/13
+# 			businessMultiplier = averageFinance/averageBusiness
+# 		elif businessType == 'retail':
+# 			averageRetail = np.sum(retail)/13
+# 			businessMultiplier = averageRetail/averageBusiness
+# 		elif businessType == 'services':
+# 			averageServices = np.sum(services)/13
+# 			businessMultiplier = averageServices/averageBusiness
+# 		elif businessType == 'utilities':
+# 			averageUtilities = np.sum(utilities)/13
+# 			businessMultiplier = averageUtilities/averageBusiness
+# 		else:
+# 			averagePublic = np.sum(public)/13
+# 			businessMultiplier = averagePublic/averageBusiness
+# 		kWhEstimate = kWhEstimate * businessMultiplier
+
+# 	# adjust for inflation from 2002 to 2020 using the CPI
+# 	kWhEstimate = 1.445 * kWhEstimate
+
+# 	# find the estimated customer outage cost for the customer in question, given the duration of the outage
+# 	times = np.array([0,1,2,3,4,5,6,7,8,9,10,11,12])
+# 	outageCost = kWhEstimate[duration]
+# 	localMax = 0
+# 	row = 0
+# 	while row < 13:
+# 		if kWhEstimate[row] > localMax:
+# 			localMax = kWhEstimate[row]
+# 		row+=1
+	
+# 	# plot the expected customer outage cost over the duration of the outage
+# 	# plt.plot(times, kWhEstimate)
+# 	# plt.savefig(workDir + '/customerCostFig')
+# 	# return {'customerOutageCost': outageCost}
+# 	return outageCost, kWhEstimate, times, localMax
+
 def graphMicrogrid(pathToOmd, pathToMicro, pathToCsv, workDir, maxTime, stepSize, faultedLine, timeMinFilter, timeMaxFilter, actionFilter, outageDuration, restoration_cost, hardware_cost, sameFeeder):
 	# read in the OMD file as a tree and create a geojson map of the system
 	if not workDir:
@@ -379,8 +536,8 @@ def graphMicrogrid(pathToOmd, pathToMicro, pathToCsv, workDir, maxTime, stepSize
 
 	# command = 'cmd /c ' + '"julia --project=' + '"C:/Users/granb/PowerModelsONM.jl-master/" ' + 'C:/Users/granb/PowerModelsONM.jl-master/src/cli/entrypoint.jl' + ' -n ' + '"' + str(workDir) + '/circuit.dss' + '"' + ' -o ' + '"C:/Users/granb/PowerModelsONM.jl-master/output.json"'
 	
-	if os.path.exists(f'{workDir}/output.json') and sameFeeder:
-		with open(f'{workDir}/output.json') as inFile:
+	if os.path.exists(f'{workDir}/outputLehigh.json') and sameFeeder:
+		with open(f'{workDir}/outputLehigh.json') as inFile:
 			data = json.load(inFile)
 			genProfiles = data['Generator profiles']
 			simTimeSteps = []
@@ -398,10 +555,10 @@ def graphMicrogrid(pathToOmd, pathToMicro, pathToCsv, workDir, maxTime, stepSize
 		command = f'julia --project="{__neoMetaModel__._omfDir}/solvers/PowerModelsONM.jl" "{__neoMetaModel__._omfDir}/solvers/PowerModelsONM.jl/src/cli/entrypoint.jl" -n "{workDir}/circuit.dss" -o "{workDir}/onm_output.json"'
 		os.system(command)
 
-		with open(pJoin(__neoMetaModel__._omfDir,'static','testFiles','output.json')) as inFile:
+		with open(pJoin(__neoMetaModel__._omfDir,'static','testFiles','outputLehigh.json')) as inFile:
 		# with open(f'{workDir}/onm_output.json') as inFile:
 			data = json.load(inFile)
-			with open(f'{workDir}/output.json', 'w') as outfile:
+			with open(f'{workDir}/outputLehigh.json', 'w') as outfile:
 				json.dump(data, outfile)
 			genProfiles = data['Generator profiles']
 			simTimeSteps = []
@@ -418,7 +575,7 @@ def graphMicrogrid(pathToOmd, pathToMicro, pathToCsv, workDir, maxTime, stepSize
 	gens = go.Figure()
 	gens.add_trace(go.Scatter(x=simTimeSteps, y=genProfiles['Diesel DG (kW)'],
 							mode='lines',
-							name=cached))
+							name='Diesel DG'))
 	gens.add_trace(go.Scatter(x=simTimeSteps, y=genProfiles['Energy storage (kW)'],
 							mode='lines',
 							name='Energy Storage'))
@@ -553,7 +710,7 @@ def graphMicrogrid(pathToOmd, pathToMicro, pathToCsv, workDir, maxTime, stepSize
 		annualkWh = str(customerOutageData.loc[row, 'Annual kWh'])
 		businessType = str(customerOutageData.loc[row, 'Business Type'])
 
-		customerOutageCost, kWhEstimate, times, localMax = customerCost(workDir, customerName, duration, season, annualkWh, businessType)
+		customerOutageCost, kWhEstimate, times, localMax = customerCost1(workDir, customerName, duration, season, annualkWh, businessType)
 		outageCost.append(customerOutageCost)
 		if localMax > globalMax:
 			globalMax = localMax
@@ -571,7 +728,7 @@ def graphMicrogrid(pathToOmd, pathToMicro, pathToCsv, workDir, maxTime, stepSize
 		row+=1
 	for ax in axs.flat:
 		ax.set(xlabel='Duration (hrs)', ylabel='Customer Outage Cost')
-		ax.set_xlim([0, 12])
+		ax.set_xlim([0, 8])
 		ax.set_ylim([0, globalMax + .05*globalMax])
 	for ax in axs.flat:
 		ax.label_outer()
@@ -685,7 +842,7 @@ def new(modelDir):
 		'maxTime': '20',
 		'stepSize': '1',
 		'faultedLine': 'l32',
-		'timeMinFilter': '10',
+		'timeMinFilter': '0',
 		'timeMaxFilter': '20',
 		'actionFilter': 'All',
 		'outageDuration': '5', 

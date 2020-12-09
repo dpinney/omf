@@ -132,7 +132,7 @@ def treeToDss(treeObject, outputPath):
 	for ob in treeObject:
 		line = ob['!CMD']
 		for key in ob:
-			if key not in ['!CMD']:
+			if not key.startswith('!'):
 				line = f"{line} {key}={ob[key]}"
 		outFile.write(line + '\n')
 	outFile.close()
@@ -612,12 +612,12 @@ def _conversionTests():
 def _tests():
 	from omf.solvers.opendss import getVoltages, voltageCompare
 	import pandas as pd
-	FNAMES =  ['ieee37.clean.dss', 'ieee123_solarRamp.clean.dss', 'iowa240.clean.dss', 'ieeeLVTestCase.clean.dss', 'ieee8500-unbal_no_fuses.clean.dss', 'ieee8500-unbal_with_fuses.clean.dss']
+	FNAMES =  ['ieee37.clean.dss', 'ieee123_solarRamp.clean.dss', 'iowa240.clean.dss', 'ieeeLVTestCase.clean.dss', 'ieee8500-unbal_no_fuses.clean.dss']
 	
 	for fname in FNAMES:
 		print('!!!!!!!!!!!!!! ',fname,' !!!!!!!!!!!!!!')
 		# Roundtrip conversion test
-		errorLimit = 0.03
+		errorLimit = 0.001
 		startvolts = getVoltages(fname, keep_output=False)
 		dsstreein = dssToTree(fname)
 		# pp([dict(x) for x in dsstreein]) # DEBUG
@@ -636,10 +636,10 @@ def _tests():
 		treeToDss(dsstreeout2, outpath)
 		endvolts = getVoltages(outpath, keep_output=False)
 		os.remove(outpath)
-		percSumm, diffSumm = voltageCompare(startvolts, endvolts, keep_output=False)
+		percSumm, diffSumm = voltageCompare(startvolts, endvolts, saveascsv=False, with_plots=False)
 		maxPerrM = [percSumm.loc['RMSPE',c] for c in percSumm.columns if c.lower().startswith(' magnitude')]
 		maxPerrM = pd.Series(maxPerrM).max()
-		print(maxPerrM) # DEBUG
+		#print(maxPerrM) # DEBUG
 		assert abs(maxPerrM) < errorLimit*100, 'The average percent error in voltage magnitude is %s, which exceeeds the threshold of %s%%.'%(maxPerrM,errorLimit*100)
 
 	#TODO: make parser accept keyless items with new !keyless_n key? Or is this just horrible syntax?
