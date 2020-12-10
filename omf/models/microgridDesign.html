@@ -395,7 +395,7 @@
 			<hr>
 			<div class="shortInput">
 				<label class="tooltip">Critical Load Factor<span class="classic">The percent of typical load that must be met during a grid outage.</span></label>
-				<input type="number" id="criticalLoadFactor" name="criticalLoadFactor" min="0" max="100" required="required"/>
+				<input type="number" id="criticalLoadFactor" name="criticalLoadFactor" step="0.01" min="0.0" max="1.0" required="required"/>
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Pre-existing Generator Size (kW)<span class="classic">Specify the total capacity of any pre-existing generators in kWh.</span></label>
@@ -407,8 +407,18 @@
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Minimum Generator Loading<span class="classic">The percent of load that must be met by the generator during a grid outage.</span></label>
-				<input type="number" id="minGenLoading" name="minGenLoading" min="0" max="100" required="required"/>
+				<input type="number" id="minGenLoading" name="minGenLoading" step="0.01" min="0.0" max="1.0"  required="required"/>
 			</div>
+			<div class="shortInput">
+				<label class="tooltip">Outage Start Hour<span class="classic">A major outage is added starting at this hour.</span></label>
+				<input type="number" id="outage_start_hour" name="outage_start_hour" min="0" max="8760" required="required"/>
+			</div>
+			<div class="shortInput">
+				<label class="tooltip">Minimum Generator Loading<span class="classic">The added major outage is given this duration.</span></label>
+				<input type="number" id="outageDuration" name="outageDuration" min="0" max="8760" required="required"/>
+			</div>
+
+
 			{{ omfModelButtons }}
 		</form>
 	</div>
