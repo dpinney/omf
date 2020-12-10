@@ -554,7 +554,7 @@ def removeCnxns(tree):
 
 def _mergeContigLinesOnce(tree):
 	'''Reduces circuit complexity by combining adjacent line segments having identical configurations.'''
-	# Applicable circuit model: [top bus]-[top line]-[middle bus]-[bottom line]-[bottom bus]
+	# Applicable circuit model: [top bus]-[top line]-[middle bus]-[bottom line]-[bottom bus]-...
 	from copy import deepcopy
 	treeids = range(0,len(tree),1)
 	tree = dict(zip(treeids,tree))
@@ -602,14 +602,15 @@ def _mergeContigLinesOnce(tree):
 		if ('length' in top) and ('length' in bottom):
 			# check that the configurations are equal
 			diffprops = ['!CMD','object','bus1','bus2','length','!CNXNS'] # we don't care if these values differ between the top and the bottom
-			diffPropValFlag = False
+			continueFlag = False
 			for k,vt in top.items():
 				if not k in diffprops:
 					vb = bottom.get(k,'None')
 					if vt!=vb:
-						diffPropValFlag = True
+						continueFlag = True
 						break
-			if diffPropValFlag:
+			if continueFlag:
+				continueFlag = False
 				continue
 			# Set top line length = sum of both lines
 			newLen = float(top['length']) + float(bottom['length']) # get the new length
