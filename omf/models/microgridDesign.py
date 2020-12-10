@@ -21,9 +21,11 @@ def work(modelDir, inputDict):
 	solar = inputDict['solar'] 
 	wind = inputDict['wind']
 	battery = inputDict['battery']
+	#generator = inputDict['generator'] #specifying generator might not be needed in the inputDict, as it is turned on automatically when an outage is specified
 	outData['solar'] = inputDict['solar']
 	outData['wind'] = inputDict['wind']
 	outData['battery'] = inputDict['battery']
+	#outData['generator'] = inputDict['generator']
 
 	# Setting up the loadShape file.
 	with open(pJoin(modelDir,"loadShape.csv"),"w") as loadShapeFile:
@@ -45,7 +47,9 @@ def work(modelDir, inputDict):
 	energyCost = float(inputDict['energyCost'])
 	demandCost = float(inputDict['demandCost'])
 	year = int(inputDict['year'])
-	criticalLoadFactor = float(inputDict['criticalLoadFactor'])/100
+	#criticalLoadFactor is not calculating correctly as a 0-1 fraction in allOutputData.json; Need to fix the default
+	#criticalLoadFactor = float(inputDict['criticalLoadFactor'])/100
+	criticalLoadFactor = float(inputDict['criticalLoadFactor'])
 	solarCost = float(inputDict['solarCost'])
 	windCost = float(inputDict['windCost'])
 	batteryPowerCost = float(inputDict['batteryPowerCost'])
@@ -56,7 +60,13 @@ def work(modelDir, inputDict):
 	batteryEnergyMin = float(inputDict['batteryEnergyMin'])
 	fuelAvailable = float(inputDict['fuelAvailable'])
 	genSize = float(inputDict['genSize'])
+	#minGenLoading is not calculating correctly as a 0-1 fraction in allOutputData.json; Need to fix the default
+	#minGenLoading = float(inputDict['minGenLoading'])/100
 	minGenLoading = float(inputDict['minGenLoading'])
+	outage_start_hour = float(inputDict['outage_start_hour'])
+	outage_end_hour = outage_start_hour + float(inputDict['outageDuration'])
+
+
 	#outageStart = int(inputDict['outageStart'])
 	#outageEnd = outageStart + indexStringnt(inputDict['outageDuration'])
 	#if outageEnd > 8759:
@@ -98,7 +108,9 @@ def work(modelDir, inputDict):
 					"LoadProfile": {
 						"loads_kw": jsonifiableLoad,
 						"year": year,
-						"critical_load_pct": criticalLoadFactor
+						"critical_load_pct": criticalLoadFactor,
+						"outage_start_hour": outage_start_hour,
+						"outage_end_hour": outage_end_hour
 					},
 					"PV": {
 						"installed_cost_us_dollars_per_kw": solarCost,
@@ -131,10 +143,13 @@ def work(modelDir, inputDict):
 		if wind == 'off':
 			scenario['Scenario']['Site']['Wind']['max_kw'] = 0
 		elif wind == 'on':
-			scenario['Scenario']['Site']['Wind']['max_kw'] = 1000000000;
+			scenario['Scenario']['Site']['Wind']['max_kw'] = 1000000;
 		if battery == 'off':
 			scenario['Scenario']['Site']['Storage']['max_kw'] = 0;
-	
+		if outage_start_hour:
+			scenario['Scenario']['Site']['LoadProfile']['outage_is_major_event'] = True
+		
+
 		with open(pJoin(modelDir, "Scenario_test_POST.json"), "w") as jsonFile:
 			json.dump(scenario, jsonFile)
 
@@ -152,7 +167,7 @@ def work(modelDir, inputDict):
 		outData['demandCostBAU' + indexString] = resultsSubset['ElectricTariff']['total_demand_cost_bau_us_dollars']
 		if outData['demandCostBAU' + indexString] is None:
 			errMsg = results['messages'].get('error','API currently unavailable please try again later')
-			raise Exception('The reOpt data analysis API by NREL had the following error: ' + errMsg) 
+			raise Exception('The REopt data analysis API by NREL had the following error: ' + errMsg) 
 	
 		outData['demandCost' + indexString] = resultsSubset['ElectricTariff']['total_demand_cost_us_dollars']
 		outData['demandCostDiff' + indexString] = outData['demandCostBAU' + indexString] - outData['demandCost' + indexString]
@@ -194,6 +209,15 @@ def work(modelDir, inputDict):
 			outData['powerWindToLoad' + indexString] = resultsSubset['Wind']['year_one_to_load_series_kw']
 		else:
 			outData['sizeWind' + indexString] = 0
+
+		# diesel generator does not follow convention above, as it is not turned on by user, but rather is automatically turned on when an outage is specified
+		# if generator == 'on':
+		outData['sizeDiesel' + indexString] = resultsSubset['Generator']['size_kw']
+		#print(outData['sizeDiesel' + indexString])
+		outData['powerDiesel' + indexString] = resultsSubset['Generator']['year_one_power_production_series_kw']
+		#print(resultsSubset['Generator']['year_one_power_production_series_kw'])
+		# else:
+		# 	outData['sizeGen' + indexString] = 0
 		
 		outData['resilience' + indexString] = resultsResilience['resilience_by_timestep']
 		outData['minOutage' + indexString] = resultsResilience['resilience_hours_min']
@@ -408,7 +432,8 @@ def runtimeEstimate(modelDir):
 
 def new(modelDir):
 	''' Create a new instance of this model. Returns true on success, false on failure. '''
-	fName = "input - col 1 commercial 120 kW per day, col 2 residential  30 kWh per day.csv"
+	#fName = "input - col 1 commercial 120 kW per day, col 2 residential  30 kWh per day.csv"
+	fName = "input - 200 Employee Office, Springfield Illinois, 2001.csv"
 	with open(pJoin(omf.omfDir, "static", "testFiles", fName)) as f:
 		load_shape = f.read()
 	defaultInputs = {
@@ -432,10 +457,12 @@ def new(modelDir):
 		"windMin": 0,
 		"batteryPowerMin": 0,
 		"batteryEnergyMin": 0,
-		"criticalLoadFactor" : "50",
-		"fuelAvailable": "0",
+		"criticalLoadFactor": "0.7",
+		"outage_start_hour": "1000",
+		"outageDuration": "24",
+		"fuelAvailable": "1000",
 		"genSize": "0",
-		"minGenLoading": "0"
+		"minGenLoading": "0.3"
 	}
 	creationCode = __neoMetaModel__.new(modelDir, defaultInputs)
 	try:

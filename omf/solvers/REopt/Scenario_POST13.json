@@ -1,6 +1,6 @@
 {"Scenario": {
             "time_steps_per_hour": 1,
-            "description": "Generator with high utilty rates analysis and DOE ref LoadProfile; Works with generator on or off",
+            "description": "Mocking up inputs for specifying outage in microgridDesign",
             "Site": {
                 "latitude": 39.7392,
                 "longitude": -104.99,
@@ -8786,22 +8786,19 @@
                 },
 
                 "Storage": {
-                    "max_kw": "0",
-                    "max_kwh": "0"
+                    "max_kw": "100",
+                    "max_kwh": "500"
                 },
 
                 "Wind": {
-                    "max_kw": "0"
+                    "max_kw": "500",
+                    "installed_cost_us_dollars_per_kw": "100"
                 },
 
                 "Generator": {
+                    "min_turn_down_pct": 0.3,
                     "fuel_avail_gal": 1000,
-                    "existing_kw": 0,
-                    "installed_cost_us_dollars_per_kw": 500,
-                    "min_kw": 0,
-                    "max_kw": 500,
-                    "generator_only_runs_during_grid_outage": false,
-                    "generator_sells_energy_back_to_grid": false
+                    "existing_kw": 20
                 }
             }
         }

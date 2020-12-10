@@ -62,7 +62,10 @@ def _test():
 	print("Wind size_kw:", results['outputs']['Scenario']['Site']['Wind']['size_kw'])
 	print("Generator fuel_used_gal:", results['outputs']['Scenario']['Site']['Generator']['fuel_used_gal'])
 	print("Generator size_kw:", results['outputs']['Scenario']['Site']['Generator']['size_kw'])
+	print("npv_us_dollars:", results['outputs']['Scenario']['Site']['Financial']['npv_us_dollars'])
 	runResilience(test_ID, 'resultsResilience_S13.json')
+
+
 
 if __name__ == '__main__':
 	_test()
