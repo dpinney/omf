@@ -798,6 +798,31 @@ def rollUpOnePhaseLoads(tree):
 			remfile.write(remid + '\n')
 	return tree
 
+def rollUpSplitPhaseLoads(tree):
+	'''Just a wrapper for future endeavors.'''
+	tree = applyCnxns(tree)
+	from copy import deepcopy
+	treeids = range(0,len(tree),1)
+	tree = dict(zip(treeids,tree))
+	name2key = {v.get('object', None):k for k,v in tree.items()}
+	name2key.update({v.get('bus', None):k for k,v in tree.items() if v.get('!CMD', None) == 'setbusxy'})
+	# Iterate through treecopy and perform any modifications directly on tree. Note that name2key can be used on either tree or treecopy.
+	treecopy = deepcopy(tree)
+	removedids = []
+	for obj in treecopy.values():
+
+		pass # Code goes here
+	
+	tree = [v for k,v in tree.items()] # back to a list of dicts
+	tree = removeCnxns(tree)
+	if os.path.exists('removed_ids.txt'):
+		os.remove('removed_ids.txt')
+	with open('removed_ids.txt', 'a') as remfile:
+		for remid in removedids:
+			remfile.write(remid + '\n')
+	tree = removeCnxns(tree)
+	return tree
+
 
 def _tests():
 	from dssConvert import dssToTree, distNetViz, evilDssTreeToGldTree, treeToDss, evilGldTreeToDssTree
