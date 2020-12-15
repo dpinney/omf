@@ -698,8 +698,7 @@ def rollUpOnePhaseLoads(tree):
 		newkw = 0
 		newkvar = 0
 		continueFlag = False
-		lastvals = ''
-		diffprops = ['!CMD','object','bus1','!CNXNS','numcust','kw','kvar'] # we don't care if these values differ between the loads
+		diffprops = ['!CMD','object','bus1','!CNXNS','!CONNCODE','numcust','kw','kvar'] # we don't care if these values differ between the loads
 		for i, load in enumerate(loads): # TODO: check for equivalent connection config (i.e. wye or delta)?
 			# check that relevant load configurations are equal
 			# TODO: Consider unequal voltages?
@@ -738,7 +737,6 @@ def rollUpOnePhaseLoads(tree):
 		newbusid = newload['bus1'].split('.')[0]
 		newload['bus1'] = newbusid + '.1.2.3'
 		newload['phases'] = '3'
-
 		# Remove the deleted loads from the bus !CNXNS 
 		newbus = tree[name2key[newbusid]]
 		newbcons = newbus.get('!CNXNS','None')
@@ -754,6 +752,7 @@ def rollUpOnePhaseLoads(tree):
 		tstr = tstr[:-1] + ']'
 		newbus['!CNXNS'] = tstr
 		tree[name2key[newbusid]] = newbus
+		# delete removed loads from tree
 		for loadid in loadids:
 			removedids.append(loadid)
 			del tree[name2key[loadid]]
@@ -771,7 +770,6 @@ def rollUpOnePhaseLoads(tree):
 		#	continue
 		#xfmr = xfmrs[0]
 		#xfmrbuses = xfmr.get('buses','None') # Note: It is expected that the primary winding of the transformer is defined first in the 'buses' array
-		## TODO: check that the xfrmr connects to a line (fringe case?)
 
 		# Capture load kws and associate with appropiate %r in a dataframe 
 		#ldparams = pd.DataFrame(columns=['node','kw','perc_r'])
