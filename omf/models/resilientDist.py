@@ -740,7 +740,7 @@ def new(modelDir):
 		weather_impacts = f.read()
 
 	defaultInputs = {
-		"feederName1": "ieee123", # "trip37" "UCS Winter 2017 Fixed" "SVECNoIslands"
+		"feederName1": "ieee13", # "trip37" "UCS Winter 2017 Fixed" "SVECNoIslands"
 		"modelType": modelName,
 		"layoutAlgorithm": "geospatial",
 		"modelName": modelDir,
@@ -756,11 +756,16 @@ def new(modelDir):
 		# "generatorCandidates": "A_node706,A_node707,A_node708,B_node704,B_node705,B_node703",
 		# "switchCandidates" : "A_node705-742,A_node705-712",
 		# "criticalLoads": "C_load722",
-		"hardeningCandidates": "line068069",
-		"newLineCandidates": "line072073",
-		"generatorCandidates": "node072",
-		"switchCandidates": "line106107",
-		"criticalLoads": "node050",
+		# "hardeningCandidates": "line068069",
+		# "newLineCandidates": "line072073",
+		# "generatorCandidates": "node072",
+		# "switchCandidates": "line106107",
+		# "criticalLoads": "node050",
+		"hardeningCandidates": "L692_675",
+		"newLineCandidates": "L632_671",
+		"generatorCandidates": "nx645",
+		"switchCandidates": "L650_632",
+		"criticalLoads": "ntpmLOAD634C",
 		"criticalLoadMet": "0.98",
 		"nonCriticalLoadMet": "0.5",
 		"chanceConstraint": "1.0",
