@@ -1,0 +1,792 @@
+{
+    "links": [],
+    "hiddenLinks": [],
+    "nodes": [],
+    "hiddenNodes": [],
+    "layoutVars": {
+        "theta": "0.8",
+        "gravity": "0.01",
+        "friction": "0.9",
+        "linkStrength": "5",
+        "linkDistance": "5",
+        "charge": "-5"
+    },
+    "tree": {
+        "0": {
+            "clock": "clock",
+            "timezone": "PST+8PDT",
+            "starttime": "'2000-01-01 00:00:00'",
+            "stoptime": "'2000-01-01 01:00:00'"
+        },
+        "1": {
+            "omftype": "#set",
+            "argument": "minimum_timestep=60"
+        },
+        "2": {
+            "omftype": "#set",
+            "argument": "profiler=1"
+        },
+        "3": {
+            "omftype": "#set",
+            "argument": "relax_naming_rules=1"
+        },
+        "4": {
+            "omftype": "module",
+            "argument": "generators"
+        },
+        "5": {
+            "omftype": "module",
+            "argument": "tape"
+        },
+        "6": {
+            "module": "residential",
+            "implicit_enduses": "NONE"
+        },
+        "7": {
+            "module": "powerflow",
+            "solver_method": "NR",
+            "NR_iteration_limit": "50"
+        },
+        "8": {
+            "object": "overhead_line_conductor",
+            "resistance": "0.000000",
+            "name": "NONE",
+            "geometric_mean_radius": "0.000000"
+        },
+        "9": {
+            "object": "overhead_line_conductor",
+            "resistance": "0.205999",
+            "name": "x500_500",
+            "geometric_mean_radius": "0.026000"
+        },
+        "10": {
+            "object": "overhead_line_conductor",
+            "resistance": "0.105000",
+            "name": "x1000000CM_AA",
+            "geometric_mean_radius": "0.036800"
+        },
+        "11": {
+            "object": "overhead_line_conductor",
+            "resistance": "1.120000",
+            "name": "x1_0",
+            "geometric_mean_radius": "0.004460"
+        },
+        "12": {
+            "object": "overhead_line_conductor",
+            "resistance": "0.306001",
+            "name": "x336_400",
+            "geometric_mean_radius": "0.024400"
+        },
+        "13": {
+            "object": "overhead_line_conductor",
+            "resistance": "0.410000",
+            "name": "x250_000",
+            "geometric_mean_radius": "0.017100"
+        },
+        "14": {
+            "object": "overhead_line_conductor",
+            "resistance": "0.186000",
+            "name": "x556_500",
+            "geometric_mean_radius": "0.031100"
+        },
+        "15": {
+            "object": "overhead_line_conductor",
+            "resistance": "0.196018",
+            "name": "DEFAULT",
+            "geometric_mean_radius": "0.028999"
+        },
+        "16": {
+            "object": "overhead_line_conductor",
+            "resistance": "0.592000",
+            "name": "x4_0",
+            "geometric_mean_radius": "0.008140"
+        },
+        "17": {
+            "object": "overhead_line_conductor",
+            "resistance": "14.871999",
+            "name": "x14",
+            "geometric_mean_radius": "0.002080"
+        },
+        "18": {
+            "object": "line_spacing",
+            "distance_AN": "44.752208",
+            "name": "DEFAULTohsps",
+            "distance_CN": "112.464517",
+            "distance_BC": "36.616657",
+            "distance_AB": "36.616657",
+            "distance_BN": "81.030768",
+            "distance_AC": "70.538058"
+        },
+        "19": {
+            "object": "line_spacing",
+            "distance_AN": "5.656854",
+            "name": "x500",
+            "distance_CN": "5.000000",
+            "distance_BC": "4.500000",
+            "distance_AB": "2.500000",
+            "distance_BN": "4.272002",
+            "distance_AC": "7.000000"
+        },
+        "20": {
+            "object": "line_spacing",
+            "distance_AN": "5.656854",
+            "name": "x505",
+            "distance_CN": "24.331050",
+            "distance_BC": "28.861739",
+            "distance_AB": "7.000000",
+            "distance_BN": "5.000000",
+            "distance_AC": "28.000000"
+        },
+        "21": {
+            "object": "line_spacing",
+            "distance_AN": "5.024938",
+            "name": "x510",
+            "distance_CN": "24.005208",
+            "distance_BC": "0.000000",
+            "distance_AB": "29.000000",
+            "distance_BN": "24.005208",
+            "distance_AC": "29.000000"
+        },
+        "22": {
+            "object": "line_configuration",
+            "z23": "0.000000+0.0j",
+            "name": "LINE607",
+            "z32": "0.000000+0.0j",
+            "z21": "0.000000+0.0j",
+            "z12": "0.000000+0.0j",
+            "z13": "0.000000+0.0j",
+            "z11": "1.342500+0.512399j",
+            "z33": "0.000000+0.0j",
+            "z31": "0.000000+0.0j",
+            "z22": "0.000000+0.0j"
+        },
+        "23": {
+            "object": "line_configuration",
+            "z23": "0.307800+0.0170993j",
+            "name": "LINE606",
+            "z32": "0.307800+0.0170993j",
+            "z21": "0.307800+0.0170993j",
+            "z12": "0.307800+0.0170993j",
+            "z13": "0.307800+0.0170993j",
+            "z11": "0.798199+0.4463j",
+            "z33": "0.798199+0.4463j",
+            "z31": "0.307800+0.0170993j",
+            "z22": "0.789100+0.4041j"
+        },
+        "24": {
+            "object": "line_configuration",
+            "name": "olc4",
+            "spacing": "x505",
+            "conductor_N": "x1_0",
+            "conductor_A": "x1_0",
+            "conductor_C": "x1_0",
+            "conductor_B": "x556_500"
+        },
+        "25": {
+            "object": "line_configuration",
+            "name": "olc5",
+            "spacing": "x510",
+            "conductor_N": "x1_0",
+            "conductor_A": "x1_0",
+            "conductor_C": "x1_0",
+            "conductor_B": "x556_500"
+        },
+        "26": {
+            "object": "line_configuration",
+            "name": "olc0",
+            "spacing": "x500",
+            "conductor_N": "x4_0",
+            "conductor_A": "x4_0",
+            "conductor_C": "x4_0",
+            "conductor_B": "x4_0"
+        },
+        "27": {
+            "object": "line_configuration",
+            "name": "olc1",
+            "spacing": "x505",
+            "conductor_N": "x1_0",
+            "conductor_A": "x4_0",
+            "conductor_C": "x1_0",
+            "conductor_B": "x1_0"
+        },
+        "28": {
+            "object": "line_configuration",
+            "name": "olc2",
+            "spacing": "x500",
+            "conductor_N": "x4_0",
+            "conductor_A": "x556_500",
+            "conductor_C": "x556_500",
+            "conductor_B": "x556_500"
+        },
+        "29": {
+            "object": "line_configuration",
+            "name": "olc3",
+            "spacing": "x505",
+            "conductor_N": "x1_0",
+            "conductor_A": "x556_500",
+            "conductor_C": "x1_0",
+            "conductor_B": "x1_0"
+        },
+        "55": {
+            "object": "regulator_configuration",
+            "Control": "OUTPUT_VOLTAGE",
+            "dwell_time": "5",
+            "raise_taps": "16",
+            "name": "REG650_632_x650REG",
+            "band_center": "2521.869",
+            "tap_pos_A": "1.0000000000000000e+01",
+            "tap_pos_B": "8.0000000000000000e+00",
+            "connect_type": "WYE_WYE",
+            "time_delay": "30.0",
+            "regulation": "0.1",
+            "lower_taps": "16",
+            "control_level": "INDIVIDUAL",
+            "tap_pos_C": "1.1000000000000000e+01",
+            "band_width": "4807.12264033"
+        },
+        "56": {
+            "object": "node",
+            "phases": "ABCN",
+            "name": "nx650",
+            "longitude": "0.0",
+            "nominal_voltage": "2401.77711983",
+            "latitude": "0.0"
+        },
+        "57": {
+            "object": "node",
+            "phases": "ABCN",
+            "name": "nRG60",
+            "longitude": "800.478805158",
+            "nominal_voltage": "2401.77711983",
+            "latitude": "-1.58331495464"
+        },
+        "58": {
+            "object": "node",
+            "phases": "ABCN",
+            "name": "nx675",
+            "longitude": "1306.55615536",
+            "nominal_voltage": "2401.77711983",
+            "latitude": "1687.01611293"
+        },
+        "59": {
+            "object": "node",
+            "phases": "ABCN",
+            "name": "nx634",
+            "longitude": "746.385389388",
+            "nominal_voltage": "2401.77711983",
+            "latitude": "2404.18219804"
+        },
+        "60": {
+            "object": "node",
+            "phases": "ABCN",
+            "name": "nx633",
+            "longitude": "746.385389388",
+            "nominal_voltage": "2401.77711983",
+            "latitude": "1200.0"
+        },
+        "61": {
+            "object": "node",
+            "phases": "ABCN",
+            "name": "nx680",
+            "longitude": "1541.15645654",
+            "nominal_voltage": "2401.77711983",
+            "latitude": "-2.07799489538"
+        },
+        "62": {
+            "object": "node",
+            "phases": "ABCN",
+            "name": "nx632",
+            "longitude": "746.385389388",
+            "nominal_voltage": "2401.77711983",
+            "latitude": "-4.18220407409"
+        },
+        "63": {
+            "object": "node",
+            "phases": "ABCN",
+            "name": "nx671",
+            "longitude": "1305.69694018",
+            "nominal_voltage": "2401.77711983",
+            "latitude": "-4.18220407409"
+        },
+        "64": {
+            "object": "node",
+            "phases": "ABCN",
+            "name": "nx611",
+            "longitude": "1307.18098387",
+            "nominal_voltage": "2401.77711983",
+            "latitude": "-2387.63554808"
+        },
+        "65": {
+            "object": "node",
+            "phases": "ABCN",
+            "name": "nx645",
+            "longitude": "746.385389388",
+            "nominal_voltage": "2401.77711983",
+            "latitude": "-1217.41840764"
+        },
+        "66": {
+            "object": "node",
+            "phases": "ACN",
+            "name": "nx684",
+            "longitude": "1305.64731818",
+            "nominal_voltage": "2401.77711983",
+            "latitude": "-1229.23397085"
+        },
+        "67": {
+            "object": "node",
+            "phases": "ABCN",
+            "name": "nx646",
+            "longitude": "746.385389388",
+            "nominal_voltage": "2401.77711983",
+            "latitude": "-2421.60060568"
+        },
+        "68": {
+            "object": "node",
+            "phases": "ABCN",
+            "name": "nx652",
+            "longitude": "1547.23975503",
+            "nominal_voltage": "2401.77711983",
+            "latitude": "-1228.36506149"
+        },
+        "69": {
+            "object": "node",
+            "phases": "ABCN",
+            "name": "nx7",
+            "longitude": "216.928069741",
+            "nominal_voltage": "2401.77711983",
+            "latitude": "-1.61989667324"
+        },
+        "70": {
+            "object": "node",
+            "phases": "ABCN",
+            "name": "nx692",
+            "longitude": "1305.66418285",
+            "nominal_voltage": "2401.77711983",
+            "latitude": "1190.92361819"
+        },
+        "71": {
+            "object": "load",
+            "phases": "CN",
+            "parent": "nx634",
+            "name": "ntpmLOAD634C",
+            "longitude": "749.110701673",
+            "nominal_voltage": "120",
+            "latitude": "2403.97093165"
+        },
+        "72": {
+            "object": "load",
+            "phases": "BN",
+            "parent": "nx634",
+            "name": "ntpmLOAD634B",
+            "longitude": "742.809304461",
+            "nominal_voltage": "120",
+            "latitude": "2404.47860866"
+        },
+        "73": {
+            "object": "load",
+            "phases": "AN",
+            "parent": "nx634",
+            "name": "ntpmLOAD634A",
+            "longitude": "750.398678547",
+            "nominal_voltage": "120",
+            "latitude": "2403.87986065"
+        },
+        "74": {
+            "object": "load",
+            "phases": "AN",
+            "parent": "nx611",
+            "name": "ntpmLOAD611A",
+            "longitude": "1304.86462612",
+            "nominal_voltage": "120",
+            "latitude": "-2386.37999706"
+        },
+        "75": {
+            "object": "load",
+            "phases": "CN",
+            "parent": "nx611",
+            "name": "ntpmLOAD611C",
+            "longitude": "1303.43319166",
+            "nominal_voltage": "120",
+            "latitude": "-2391.3480166"
+        },
+        "76": {
+            "object": "load",
+            "phases": "BN",
+            "parent": "nx646",
+            "name": "ntpmLOAD646B",
+            "longitude": "743.839537054",
+            "nominal_voltage": "120",
+            "latitude": "-2424.50910571"
+        },
+        "77": {
+            "object": "load",
+            "phases": "CN",
+            "parent": "nx646",
+            "name": "ntpmLOAD646C",
+            "longitude": "745.25650224",
+            "nominal_voltage": "120",
+            "latitude": "-2419.68619679"
+        },
+        "78": {
+            "object": "load",
+            "phases": "AN",
+            "parent": "nx646",
+            "name": "ntpmLOAD646A",
+            "longitude": "746.023112894",
+            "nominal_voltage": "120",
+            "latitude": "-2424.30187856"
+        },
+        "79": {
+            "object": "load",
+            "phases": "CN",
+            "parent": "nx692",
+            "name": "ntpmLOAD692C",
+            "longitude": "1306.65228318",
+            "nominal_voltage": "120",
+            "latitude": "1190.97356299"
+        },
+        "80": {
+            "object": "load",
+            "phases": "BN",
+            "parent": "nx692",
+            "name": "ntpmLOAD692B",
+            "longitude": "1309.23535117",
+            "nominal_voltage": "120",
+            "latitude": "1189.66591382"
+        },
+        "81": {
+            "object": "load",
+            "phases": "AN",
+            "parent": "nx692",
+            "name": "ntpmLOAD692A",
+            "longitude": "1301.67261673",
+            "nominal_voltage": "120",
+            "latitude": "1193.00909401"
+        },
+        "82": {
+            "object": "load",
+            "phases": "AN",
+            "parent": "nx675",
+            "name": "ntpmLOAD675A",
+            "longitude": "1311.55180055",
+            "nominal_voltage": "120",
+            "latitude": "1690.96486678"
+        },
+        "83": {
+            "object": "load",
+            "phases": "BN",
+            "parent": "nx675",
+            "name": "ntpmLOAD675B",
+            "longitude": "1310.5586933",
+            "nominal_voltage": "120",
+            "latitude": "1685.54137231"
+        },
+        "84": {
+            "object": "load",
+            "phases": "CN",
+            "parent": "nx675",
+            "name": "ntpmLOAD675C",
+            "longitude": "1307.899672",
+            "nominal_voltage": "120",
+            "latitude": "1688.54380659"
+        },
+        "85": {
+            "object": "load",
+            "phases": "AN",
+            "parent": "nx671",
+            "name": "ntpmLOAD671A",
+            "longitude": "1305.36275005",
+            "nominal_voltage": "120",
+            "latitude": "-6.28609796358"
+        },
+        "86": {
+            "object": "load",
+            "phases": "BN",
+            "parent": "nx671",
+            "name": "ntpmLOAD671B",
+            "longitude": "1310.35837325",
+            "nominal_voltage": "120",
+            "latitude": "-6.11895521756"
+        },
+        "87": {
+            "object": "load",
+            "phases": "CN",
+            "parent": "nx671",
+            "name": "ntpmLOAD671C",
+            "longitude": "1307.62012889",
+            "nominal_voltage": "120",
+            "latitude": "-0.304798185342"
+        },
+        "88": {
+            "object": "load",
+            "phases": "BN",
+            "parent": "nx611",
+            "name": "ntpmLOAD611B",
+            "longitude": "1303.17046517",
+            "nominal_voltage": "120",
+            "latitude": "-2382.94021117"
+        },
+        "89": {
+            "object": "load",
+            "phases": "CN",
+            "parent": "nx645",
+            "name": "ntpmLOAD645C",
+            "longitude": "750.731540536",
+            "nominal_voltage": "120",
+            "latitude": "-1219.3637725"
+        },
+        "90": {
+            "object": "load",
+            "phases": "BN",
+            "parent": "nx645",
+            "name": "ntpmLOAD645B",
+            "longitude": "750.325600198",
+            "nominal_voltage": "120",
+            "latitude": "-1216.42385847"
+        },
+        "91": {
+            "object": "load",
+            "phases": "AN",
+            "parent": "nx645",
+            "name": "ntpmLOAD645A",
+            "longitude": "747.040948887",
+            "nominal_voltage": "120",
+            "latitude": "-1213.62911865"
+        },
+        "92": {
+            "object": "load",
+            "phases": "CN",
+            "parent": "nx652",
+            "name": "ntpmLOAD652C",
+            "longitude": "1549.19199554",
+            "nominal_voltage": "120",
+            "latitude": "-1223.78439282"
+        },
+        "93": {
+            "object": "load",
+            "phases": "BN",
+            "parent": "nx652",
+            "name": "ntpmLOAD652B",
+            "longitude": "1550.33412465",
+            "nominal_voltage": "120",
+            "latitude": "-1228.15733946"
+        },
+        "94": {
+            "object": "load",
+            "phases": "AN",
+            "parent": "nx652",
+            "name": "ntpmLOAD652A",
+            "longitude": "1544.23183479",
+            "nominal_voltage": "120",
+            "latitude": "-1224.49570854"
+        },
+        "119": {
+            "object": "overhead_line",
+            "phases": "A",
+            "from": "nx684",
+            "name": "L684_652",
+            "to": "nx652",
+            "length": "800.000000",
+            "configuration": "LINE607"
+        },
+        "120": {
+            "object": "overhead_line",
+            "phases": "ACN",
+            "from": "nx671",
+            "name": "L671_684",
+            "to": "nx684",
+            "length": "300.000000",
+            "configuration": "olc4"
+        },
+        "121": {
+            "object": "overhead_line",
+            "phases": "ABCN",
+            "from": "nx671",
+            "name": "L671_680",
+            "to": "nx680",
+            "length": "1000.000000",
+            "configuration": "olc2"
+        },
+        "122": {
+            "object": "overhead_line",
+            "phases": "ABCN",
+            "from": "nx632",
+            "name": "L632_645",
+            "to": "nx645",
+            "length": "500.000000",
+            "configuration": "olc1"
+        },
+        "123": {
+            "object": "overhead_line",
+            "phases": "ABC",
+            "from": "nx692",
+            "name": "L692_675",
+            "to": "nx675",
+            "length": "500.000000",
+            "configuration": "LINE606"
+        },
+        "124": {
+            "object": "overhead_line",
+            "phases": "ABCN",
+            "from": "nx632",
+            "name": "L632_671",
+            "to": "nx671",
+            "length": "2000.000656",
+            "configuration": "olc2"
+        },
+        "125": {
+            "object": "overhead_line",
+            "phases": "ABCN",
+            "from": "nx632",
+            "name": "L632_633",
+            "to": "nx633",
+            "length": "500.000000",
+            "configuration": "olc0"
+        },
+        "126": {
+            "object": "overhead_line",
+            "phases": "ABCN",
+            "from": "nx645",
+            "name": "L645_646",
+            "to": "nx646",
+            "length": "300.000000",
+            "configuration": "olc3"
+        },
+        "127": {
+            "object": "overhead_line",
+            "phases": "CN",
+            "from": "nx684",
+            "name": "L684_611",
+            "to": "nx611",
+            "length": "300.000007",
+            "configuration": "olc5"
+        },
+        "128": {
+            "object": "overhead_line",
+            "phases": "ABCN",
+            "from": "nRG60",
+            "name": "L650_632",
+            "to": "nx632",
+            "length": "2000.000656",
+            "configuration": "olc2"
+        },
+        "129": {
+            "object": "transformer_configuration",
+            "powerC_rating": "166.667007",
+            "name": "XFM1_XFO",
+            "primary_voltage": "4160.000000",
+            "secondary_voltage": "480.000000",
+            "connect_type": "WYE_WYE",
+            "impedance": "0.011000+0.019999j",
+            "powerB_rating": "166.667007",
+            "powerA_rating": "166.667007",
+            "power_rating": "500"
+        },
+        "130": {
+            "object": "transformer",
+            "phases": "ABC",
+            "from": "nx633",
+            "name": "L633_634_XFM_1",
+            "to": "nx634",
+            "configuration": "XFM1_XFO"
+        },
+
+        "154": {
+            "object": "regulator",
+            "phases": "ABC",
+            "from": "nx7",
+            "name": "x650REG",
+            "to": "nRG60",
+            "configuration": "REG650_632_x650REG"
+        },
+        "155": {
+            "object": "switch",
+            "phase_B_state": "CLOSED",
+            "phases": "ABC",
+            "from": "nx671",
+            "name": "L671_692_SW_1",
+            "phase_C_state": "CLOSED",
+            "to": "nx692",
+            "phase_A_state": "CLOSED",
+            "operating_mode": "BANKED"
+        },
+        "156": {
+            "object": "switch",
+            "phase_B_state": "CLOSED",
+            "phases": "ABC",
+            "from": "nx650",
+            "name": "x296",
+            "phase_C_state": "CLOSED",
+            "to": "nx7",
+            "phase_A_state": "CLOSED",
+            "operating_mode": "BANKED"
+        },
+        "157": {
+            "object": "capacitor",
+            "control": "MANUAL",
+            "dwell_time": "3",
+            "capacitor_A": "200000.0",
+            "name": "L675CAP",
+            "parent": "nx675",
+            "capacitor_B": "200000.0",
+            "capacitor_C": "200000.0",
+            "phases": "ABC",
+            "longitude": "1308.25979069",
+            "time_delay": "2",
+            "latitude": "1689.40784544",
+            "nominal_voltage": "2401.78",
+            "switchC": "CLOSED",
+            "switchB": "CLOSED",
+            "switchA": "CLOSED",
+            "phases_connected": "ABCN"
+        },
+        "158": {
+            "object": "capacitor",
+            "control": "MANUAL",
+            "dwell_time": "3",
+            "name": "L611CAP",
+            "parent": "nx611",
+            "capacitor_C": "100000.0",
+            "phases": "C",
+            "longitude": "1307.23561391",
+            "time_delay": "2",
+            "latitude": "-2387.46587697",
+            "nominal_voltage": "2401.78",
+            "switchC": "CLOSED",
+            "phases_connected": "CN"
+        },
+        "159": {
+            "object": "node",
+            "phases": "ABC",
+            "nominal_voltage": "2401.77711983",
+            "name": "sourcenode",
+            "bustype": "SWING"
+        },
+        "160": {
+            "object": "regulator",
+            "phases": "ABC",
+            "from": "sourcenode",
+            "name": "sourceregulator",
+            "to": "nx650",
+            "configuration": "ss_regconfiguration"
+        },
+        "161": {
+            "object": "regulator_configuration",
+            "dwell_time": "5",
+            "band_center": "2401.77711983",
+            "connect_type": "WYE_WYE",
+            "control_level": "INDIVIDUAL",
+            "lower_taps": "50",
+            "Control": "OUTPUT_VOLTAGE",
+            "raise_taps": "50",
+            "name": "ss_regconfiguration",
+            "tap_pos_A": "0",
+            "tap_pos_B": "0",
+            "tap_pos_C": "0",
+            "time_delay": "30.0",
+            "regulation": "0.1",
+            "band_width": "2.0"
+        }
+    },
+    "attachments": {}
+}
