@@ -5,7 +5,6 @@ import pandas as pd
 import omf
 from omf.forecast import suppress_stdout_stderr
 
-
 def train_prophet(df, modelDir, confidence=0.99):
 	# train and cache into modelDir
 	from fbprophet import Prophet
