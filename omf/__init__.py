@@ -3,7 +3,8 @@
 __version__ = 0.2
 
 import os as _os
-import time
+import importlib.util
+
 
 # Our OMF location
 omfDir = _os.path.dirname(__file__)
@@ -15,9 +16,10 @@ good_mods = set([x[0:-3] for x in mod_files if x not in ['__init__.py', 'web.py'
 # Import modules
 for mod in good_mods:
 	# start = time.process_time()
-	__import__(mod)
+	spec = importlib.util.spec_from_file_location(mod, f"{omfDir}/{mod}.py")
+	mod_ob = importlib.util.module_from_spec(spec)
+	spec.loader.exec_module(mod_ob)
+	# __import__(mod)
 	# print('{:f}'.format(time.process_time() - start), mod)
 
-# Import sub-packages.
-import solvers
-# import models
+# Import sub-packages
