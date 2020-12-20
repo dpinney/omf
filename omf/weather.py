@@ -1297,19 +1297,17 @@ def _run_ndfd_request(q):
 
 
 #Gets predictions from current moment to 10 weeks in future. Data not avaliable for past dates, not avaliable for too long in future
-def get_ndfd_data(lat1, lon1, optional_params=['wspd'], begin=str(datetime.now().isoformat()), end=print((datetime.now()+timedelta(weeks=+10)).isoformat()), product='time-series', unit='m'):
+def get_ndfd_data(lat1, lon1, optional_params=['wspd'], begin=str(datetime.now().isoformat()), end=(datetime.now()+timedelta(weeks=+10)).isoformat(), product='time-series', unit='m'):
 	query = _singlePointDataQuery(lat1, lon1, product, begin, end, unit, optional_params)
 	res = _run_ndfd_request(query)
 	data = _generalParseXml(res)
 	return data
 
-
 #Wrapper to call _subGrid, return parsed dict
-def getSubGridData(centerLat, centerLon, distanceLat, distanceLon, resolutionSquare, product='time-series', begin=str(datetime.now().isoformat()), end=print((datetime.now()+timedelta(weeks=+10)).isoformat()), Unit='m', optional_params=['critfireo', 'dryfireo']):
+def getSubGridData(centerLat, centerLon, distanceLat, distanceLon, resolutionSquare, product='time-series', begin=str(datetime.now().isoformat()), end=(datetime.now()+timedelta(weeks=+10)).isoformat(), Unit='m', optional_params=['critfireo', 'dryfireo']):
 	data = _run_ndfd_request(_subGrid(centerLat, centerLon, distanceLat, distanceLon, resolutionSquare, product, begin, end, Unit, optional_params))
 	outData = _generalParseXml(data)
 	return outData
-
 
 
 #Custom ApiError class
