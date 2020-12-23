@@ -3,18 +3,7 @@
 import datetime, copy, os, re, json, tempfile, shutil, fileinput, webbrowser, platform, subprocess
 from os.path import join as pJoin
 import networkx as nx
-#import math
-#import matpower
-
-import matplotlib
-if platform.system() == 'Darwin':
-	matplotlib.use('TkAgg')
-else:
-	matplotlib.use('Agg')
-from matplotlib import pyplot as plt
-
-from omf.models import __neoMetaModel__
-from omf.models.__neoMetaModel__ import *
+import omf
 
 def parse(inputStr, filePath=True):
 	''' Parse a MAT into an omf.network json. This is so we can walk the json, change things in bulk, etc.
@@ -145,8 +134,8 @@ def _rawToMat(inputStr, filePath=True):
 	'''
 	if not filePath: # create a temp file location for the RAW string
 		now = datetime.datetime.now()
-		rawfile_name = pJoin(__neoMetaModel__._omfDir, 'temp' + now + '.raw')
-		matfile_name = pJoin(__neoMetaModel__._omfDir, 'temp' + now + '.m')
+		rawfile_name = pJoin(omf.omfDir, 'temp' + now + '.raw')
+		matfile_name = pJoin(omf.omfDir, 'temp' + now + '.m')
 		with open(rawfile_name, 'w') as rawFile:
 			rawFile.write(inputStr)
 	else:
@@ -154,7 +143,7 @@ def _rawToMat(inputStr, filePath=True):
 		matfile_name = os.path.splitext(inputStr)[0] + '.m' 
 
 	# Prepare Octave with correct path.
-	matpowerDir =  pJoin(__neoMetaModel__._omfDir,'solvers','matpower7.0')
+	matpowerDir =  pJoin(omf.omfDir,'solvers','matpower7.0')
 	matPath = _getMatPath(matpowerDir)
 
 	# TODO: Test code on Windows.

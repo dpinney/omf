@@ -5,12 +5,6 @@ from io import StringIO
 from dateutil.tz import tzlocal
 from pytz import reference
 import numpy as np
-
-import matplotlib
-if platform.system() == 'Darwin':
-	matplotlib.use('TkAgg')
-else:
-	matplotlib.use('Agg')
 from matplotlib import pyplot as plt
 
 import omf
