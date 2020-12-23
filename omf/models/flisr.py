@@ -61,9 +61,12 @@ def adjacencyList(tree):
 	vertices = set()
 	for key in tree.keys():
 		obtype = tree[key].get('object','')
-		if obtype.startswith('underground_line') or obtype.startswith('overhead_line') or obtype.startswith('triplex_line') or obtype.startswith('switch') or obtype.startswith('recloser') or obtype.startswith('transformer') or obtype.startswith('fuse') or obtype.startswith('regulator') or obtype.startswith('relay') or obtype.startswith('link') or obtype.startswith('fromTo'):
+		if obtype.startswith('underground_line') or obtype.startswith('overhead_line') or obtype.startswith('triplex_line') or obtype.startswith('switch') or obtype.startswith('recloser') or obtype.startswith('transformer') or obtype.startswith('fuse') or obtype.startswith('regulator') or obtype.startswith('relay') or obtype.startswith('link') or obtype.startswith('fromTo') or obtype.startswith('line'):
 			if obtype.startswith('recloser'):
 				reclosers.append(tree[key])
+			if 'switch' in tree[key]:
+				if tree[key].get('switch','').startswith('y'):
+					reclosers.append(tree[key])
 			if 'from' in tree[key].keys() and 'to' in tree[key].keys():
 				if not tree[key]['from'] in adjacList.keys():
 					adjacList[tree[key]['from']] = set()
@@ -85,15 +88,18 @@ def removeRecloser(tree, treeCopy, recloser, bestReclosers, found):
 	
 	return tree, bestReclosers, found
 
-def cutoffFault(tree, faultedNode, bestReclosers, workDir, radial):	
+def cutoffFault(tree, faultedNode, bestReclosers, workDir, radial, buses):	
 	'Step 1: isolate the fault from all power sources'
-	buses = []
-	# create a list of all power sources
 	tree2 = tree.copy()
-	for key in tree2.keys():
-		if bool(tree2[key].get('bustype','')) is True:
-			buses.append(tree[key]['name'])
+	if not buses:
+		buses = []
+		# create a list of all power sources
+		for key in tree2.keys():
+			if bool(tree2[key].get('bustype','')) is True:
+				buses.append(tree[key]['name'])
 	# for each power source
+	# create a list to hold all the buses that cannot be isolated from the fault
+	badBuses = []
 	while len(buses) > 0:
 		# create an adjacency list representation of tree connectivity
 		adjacList, reclosers, vertices = adjacencyList(tree)
@@ -126,10 +132,11 @@ def cutoffFault(tree, faultedNode, bestReclosers, workDir, radial):
 			# if there is no way to isolate the fault, notify the user!
 			if found == False:
 				print('This system is unsolvable with respect to FLISR!')
-				break
+				badBuses.append(buses[0])
+				del (buses[0])
 		else:
 			del (buses[0])
-	return tree, bestReclosers
+	return tree, bestReclosers, badBuses
 
 def listPotentiallyViable(tree, tieLines, workDir):
 	'Step 2: find the powered and unpowered subtrees and the subset of potentially viable open switches'
@@ -279,7 +286,7 @@ def flisr(pathToOmd, pathToTieLines, faultedLine, workDir, radial, drawMap):
 	bestReclosers = []
 
 	# Step 1
-	tree, bestReclosers = cutoffFault(tree, faultedNode, bestReclosers, workDir, radial)
+	tree, bestReclosers, badBuses = cutoffFault(tree, faultedNode, bestReclosers, workDir, radial, None)
 
 	# read in the set of tie lines in the system as a dataframe
 	tieLines = pd.read_csv(pathToTieLines)
