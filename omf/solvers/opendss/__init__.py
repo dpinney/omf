@@ -656,8 +656,327 @@ def mergeContigLines(tree):
 	tree = removeCnxns(tree)
 	return tree
 
+def rollUpOnePhaseLoads(tree):
+	'''For now, only handles cases of 3 single-phase loads connected to a 3-phase line.
+	Combines multiple loads and their transformer (if existing) into a single electrically-representative load using reasonable estimates for any
+	losses. Applies to instances where one or more single-phase loads are connected to a single bus, and that bus is connected to a transformer (but
+	not connected to any lines). Does not apply to split-phase configurations.'''
+	# Applicable circuit model: [one or more loads]-[bus]-[zero or more lines]-[transformer (optional)]-...
+	tree = applyCnxns(tree)
+	from copy import deepcopy
+	treeids = range(0,len(tree),1)
+	tree = dict(zip(treeids,tree))
+	name2key = {v.get('object', None):k for k,v in tree.items()}
+	name2key.update({v.get('bus', None):k for k,v in tree.items() if v.get('!CMD', None) == 'setbusxy'})
+	# Iterate through treecopy and perform any modifications directly on tree. Note that name2key can be used on either tree or treecopy.
+	treecopy = deepcopy(tree)
+	removedids = []
+	for obj in treecopy.values():
+		objid = obj.get('object','None')
+		# Is this a load object? If not, move to next object in treecopy
+		if not objid.startswith('load.'):
+			continue
+		# Has this load already been removed?
+		if objid in removedids:
+			continue
+		# Get the load's parent bus
+		loadbusid = obj.get('bus1','None').split('.')[0]
+		loadbus = treecopy[name2key[loadbusid]]
+		# Get everything that is attached to the parent bus
+		siblings = loadbus.get('!CNXNS','None')
+		siblings = siblings.replace('[','').replace(']','')
+		siblings = siblings.split(',')
+		# Check that there is more than one load
+		loadids = [x for x in siblings if x.startswith('load')]
+		loads = [treecopy[name2key[x]] for x in loadids]
+		if len(loads) == 1:
+			continue
+		# For now, only handle cases of 3 single-phase loads connected to a 3-phase line 
+		# TODO: Consider 2 single-phase loads connected directly to two-phases of a line
+		if len(loads) != 3:
+			continue
+		# Loop through loads to perform some checks and get some values
+		newkw = 0
+		newkvar = 0
+		continueFlag = False
+		diffprops = ['!CMD','object','bus1','!CNXNS','!CONNCODE','numcust','kw','kvar','conn'] # we don't care if these values differ between the loads
+		for i, load in enumerate(loads): # TODO: check for equivalent connection config (i.e. wye or delta)?
+			# check that relevant load configurations are equal
+			# TODO: Consider unequal voltages?
+			if i==0:
+				lastload = load
+				continue
+			for k,v in load.items():
+				if not k in diffprops:
+					if lastload.get(k,'None') != v:
+						continueFlag = True # we don't care about combining this group of loads, so move on to next load in tree
+						break	
+			if continueFlag:
+				break # leave continueFlag set to True to break out of outer 'for' loop
+			# Check for single-phase
+			numnodes = len(load['bus1'].split('.'))-1
+			if numnodes!=1:
+				# TODO: Consider one-phase connections defined as .x.0 or .0.x. 
+				continueFlag = True
+				break
+			# Capture kw and kvar
+			newkw = newkw + float(load.get('kw','0'))
+			newkvar = newkvar + float(load.get('kvar','0'))
+			# prepare for the next loop
+			lastload = load
+		if continueFlag:
+			continueFlag = False
+			continue
+		# combine into one n-phase load
+		# TODO: consider wye vs delta connections for total kw and kvar calculations
+		# wye-delta and delta-wye configs impose a 30 degree phase shift (lead or lag, depends on if delta is grounded and how)
+
+		# TODO: detect and preserve connection order other than .1.2.3 or .1.2 or .0.1 or .0.2? see ieee37 for examples of .3.1
+		newload = tree[name2key[objid]]
+		newload['kw'] = str(newkw) # TODO: Does this calculation require sqrt(3) somewhere?
+		newload['kvar'] = str(newkvar)
+		newbusid = newload['bus1'].split('.')[0]
+		newload['bus1'] = newbusid + '.1.2.3'
+		newload['phases'] = '3'
+		# Remove the deleted loads from the bus !CNXNS 
+		newbus = tree[name2key[newbusid]]
+		newbcons = newbus.get('!CNXNS','None')
+		newbcons = newbcons.replace('[','').replace(']','')
+		newbcons = newbcons.split(',')
+		loadids.remove(objid) # now only contains the removed load ids
+		for loadid in loadids:
+			if loadid in newbcons:
+				newbcons.remove(loadid)
+		tstr = '['
+		for item in newbcons:
+			tstr = tstr + item + ','
+		tstr = tstr[:-1] + ']'
+		newbus['!CNXNS'] = tstr
+		tree[name2key[newbusid]] = newbus
+		# delete removed loads from tree
+		for loadid in loadids:
+			removedids.append(loadid)
+			del tree[name2key[loadid]]
+			if name2key[loadid] in tree:
+				hfop = 'irfbowrf'
+		## interesting cases:
+		# ieee37
+		# 	-bus 712. one line and one load. is there a transformer upstream of the line? If not, there would be two lines wouldn't there? NO. Not in the case of loads connected between two phases, which happens frequently.
+
+
+
+		## Do the siblings include a transformer?
+		#xfmrs = [x for x in siblings if x.get('object','None').startswith('transformer')]
+		#if len(xfmrs)!=1:
+		#	continue
+		#xfmr = xfmrs[0]
+		#xfmrbuses = xfmr.get('buses','None') # Note: It is expected that the primary winding of the transformer is defined first in the 'buses' array
+
+		# Capture load kws and associate with appropiate %r in a dataframe 
+		#ldparams = pd.DataFrame(columns=['node','kw','perc_r'])
+		#for ld in loads:
+		#	kw = ld.get('kw','DNE')
+		#	node = ''
+		#	pass
+		#kws = [x.get('kw') for x in loads if x.get('kw','DNE')!='DNE']
+		
+		## Note: We assume that info for the high side (aka the line side) of the xfrmr is in position 0 of the config arrays
+		#r_arr = xfmr.get('%rs','None')
+
+		## Calculate what the equivalent load should be
+		#secLoad = 0
+		#for idx,row in ldparams.iterrows():
+		#	secLoad = secLoad + row['kw']*(1+row['perc_r'])
+		##load_eq = (1 + r_prim)*secLoad
+	tree = [v for k,v in tree.items()] # back to a list of dicts
+	tree = removeCnxns(tree)
+	if os.path.exists('removed_ids.txt'):
+		os.remove('removed_ids.txt')
+	with open('removed_ids.txt', 'a') as remfile:
+		for remid in removedids:
+			remfile.write(remid + '\n')
+	return tree
+
 def rollUpLoads_approx(tree):
-	'''Combines multiple loads and their transformer (if existing) into a single electrically-representative load using engineering estimates for any losses. Applies to instances where 
+	'''Combines multiple loads and their transformer (if existing) into a single electrically-representative load using engineering estimates for
+	any losses. Applies to instances where one or more loads are connected to a single bus, and that bus is connected to a transformer
+	(but not connected to any lines).'''
+	tree = applyCnxns(tree)
+	from copy import deepcopy
+	from math import sqrt
+	treeids = range(0,len(tree),1)
+	tree = dict(zip(treeids,tree))
+	name2key = {v.get('object', None):k for k,v in tree.items()}
+	name2key.update({v.get('bus', None):k for k,v in tree.items() if v.get('!CMD', None) == 'setbusxy'})
+	# Iterate through treecopy and perform any modifications directly on tree. Note that name2key can be used on either tree or treecopy.
+	treecopy = deepcopy(tree)
+	removedids = []
+	for obj in treecopy.values():
+		objid = obj.get('object','None')
+		#if len(removedids)>=1: # DEBUG
+		#	break # DEBUG
+		# Is this a load object? If not, move to next object in treecopy
+		if not objid.startswith('load.'):
+			continue
+		# Has this load already been removed?
+		if objid in removedids:
+			continue
+		# Get the load's parent bus
+		loadbusid = obj.get('bus1','None').split('.')[0]
+		loadbus = treecopy[name2key[loadbusid]]
+		# Get everything that is attached to the parent bus
+		siblings = loadbus.get('!CNXNS','None')
+		siblings = siblings.replace('[','').replace(']','')
+		siblings = siblings.split(',')
+		# Grab load objects
+		loadids = [x for x in siblings if x.startswith('load')]
+		loads = [treecopy[name2key[x]] for x in loadids]
+		# Loop through loads to perform some checks and get some values
+		newkw = 0
+		newkvar = 0
+		conncodes = []
+		continueFlag = False
+		#diffprops = ['!CMD','object','bus1','!CONNCODE','!CNXNS','numcust','kw','kvar','phases','conn']
+		diffprops = ['!CMD','object','bus1','!CONNCODE','!CNXNS','numcust','kw','kvar','phases']
+		for i, load in enumerate(loads):
+			# check that relevant load configurations are equal
+			conncodes.append(load.get('!CONNCODE','NC'))
+			# Capture kw and kvar
+			newkw = newkw + float(load.get('kw','0'))
+			newkvar = newkvar + float(load.get('kvar','0'))
+			#newkw = newkw + float(load.get('kw','0'))/sqrt(3)
+			#newkvar = newkvar + float(load.get('kvar','0'))/sqrt(3)
+			# prepare for the next loop
+			lastload = load
+			if i==0:
+				continue
+			for k,v in load.items():
+				if not k in diffprops:
+					if lastload.get(k,'None') != v:
+						continueFlag = True # we don't care about combining this group of loads, so move on to next load in tree
+						break	
+			if continueFlag:
+				break # leave continueFlag set to True to break out of outer 'for' loop
+		if continueFlag:
+			continueFlag = False
+			continue
+		# Does the bus connect to a transformer?
+		xfrmrid = 'NT'
+		xfrmrids = [x for x in siblings if x.startswith('transformer.')] # only checks for immediately adjacent transformer
+		xfrmrids = list(set(xfrmrids)) # removable 3-winding xfrmrs often define two connections to the same bus (different phases)
+		if len(xfrmrids)==1:
+			xfrmrid = xfrmrids[0]
+		# get new bus connection and new voltage base for the representative load
+		newbusid = ''
+		newconncode = ''
+		newkv = ''
+		if xfrmrid != 'NT':
+			# Check that this xfrmr does not serve a feeder in addition to the load
+			lineids = [x for x in siblings if x.startswith('line.')]
+			if len(lineids)!=0:
+				continue
+			xfrmr = treecopy[name2key[xfrmrid]]
+			# correct for additional losses due to winding resistance (engineering estimate of 1% loss per winding)
+			numwdgs = float(xfrmr['windings'])
+			newkw = newkw * (1 + 0.01 * numwdgs)
+			#newkvar = 1.xx * newkvar # do we need a correction factor here?  don't think so. xfrmrs don't add relevant phase shift.
+			# use the xfrmr's parent bus and primary winding conncode
+			xfrmrconns = xfrmr.get('buses')
+			xfrmrconns = xfrmrconns.replace('[','')
+			xfrmrconns = xfrmrconns.replace(']','')
+			xfrmrconns = xfrmrconns.split(',')
+			newbusid, newconncode = xfrmrconns[0].split('.', maxsplit=1) # by convention, the 'from' bus is listed first
+			# use the kv value from the transformer's primary winding
+			xfrmrconns = xfrmr.get('kvs')
+			xfrmrconns = xfrmrconns.replace('[','')
+			xfrmrconns = xfrmrconns.replace(']','')
+			xfrmrconns = xfrmrconns.split(',')
+			newkv = xfrmrconns[0] # by convention, the primary bus is listed first
+		else:
+			# Ensure there are 2+ loads to reduce
+			if len(loadids)<=1:
+				continue
+			# we either have to construct the new conncode from the loads' codes, or we use the connection code from the line(s)
+			lines = [x for x in siblings if x.startswith('line.')]
+			for line in lines: # TODO: This gets the specific 'from' bus. can we just use the conncode from any of the buses on any of the lines?
+				tmpb = treecopy[name2key[line]].get('bus2')
+				if tmpb.startswith(loadbusid + '.'):
+					newbusid, newconncode = tmpb.split('.',maxsplit=1)
+			# use the existing kv value
+			newkv = loads[0]['kv'] # any of the loads will do because they have been confirmed to all be the same.
+		# else: # there is not a transformer and we have to construct the conncode
+			#  construct the new conn code and apply it.
+			#conns = []
+			#grndConnFlag = False # needed to deal with leading or trailing ground connections in the conncode
+			#for conn in conncodes:
+			#	nodes = conn.split('.')
+			#	if nodes[-1] == '0': # indicates a relevant ground (i.e. trailing) that needs to be preserved
+			#		grndConnFlag = True
+			#	for c in nodes:
+			#		conns.append(c)
+			#conns.sort()
+			#newconncode = ''
+			#newphases = len(conns)
+			#if grndConnFlag:
+			#	conns.remove('0')
+			#	conns.append('0') # put the ground back at the end
+			#	newphases = newphases - 1 # the ground does not count as a phase
+			#for c in conns:
+			#	newconncode = newconncode + '.' + c
+		# Get the new number of phases associated with this load
+		newphases = newconncode.split('.')
+		newphases.sort()
+		if newphases[0] == '0': # grounds don't count
+			newphases.remove('0')
+		newphases = len(newphases)
+		# Get pointers to the new load and bus in tree
+		newload = tree[name2key[objid]]
+		newbus = tree[name2key[newbusid]]
+		# Modify the existing load to represent the combined loads and transformer (if existing).
+		newload['kw'] = str(newkw) # TODO: when combining multiple loads into one electrically equivalent load, do we need to consider wye/delta config and throw in a factor of sqrt(3)?
+		if 'kvar' in newload:
+			newload['kvar'] = str(newkvar)
+		newload['kv'] = str(newkv)
+		newload['bus1'] = newbusid + '.' + newconncode
+		newload['phases'] = newphases
+		
+		# Update !CNXNS for the new bus 
+		newbus = tree[name2key[newbusid]]
+		newbcons = newbus.get('!CNXNS','None')
+		newbcons = newbcons.replace('[','').replace(']','')
+		newbcons = newbcons.split(',')
+		loadids.remove(objid) # now only contains the removed load ids
+		for loadid in loadids:
+			if loadid in newbcons:
+				newbcons.remove(loadid)
+		tstr = '['
+		for item in newbcons:
+			tstr = tstr + item + ','
+		tstr = tstr[:-1] + ']'
+		newbus['!CNXNS'] = tstr
+
+		# delete removed loads from tree
+		for loadid in loadids:
+			removedids.append(loadid)
+			del tree[name2key[loadid]]
+		# delete transformer, loadbus from tree
+		if xfrmrid != 'NT':
+			removedids.append(xfrmrid)
+			removedids.append(loadbusid)
+			del tree[name2key[xfrmrid]]
+			del tree[name2key[loadbusid]]
+	tree = [v for k,v in tree.items()] # back to a list of dicts
+	tree = removeCnxns(tree)
+	if os.path.exists('removed_ids.txt'):
+		os.remove('removed_ids.txt')
+	with open('removed_ids.txt', 'a') as remfile:
+		for remid in removedids:
+			remfile.write(remid + '\n')
+	tree = removeCnxns(tree)
+	return tree
+
+def rollUpLoads_exact(tree):
+	'''Combines multiple loads and their transformer (if existing) into a single electrically-representative load. Applies to instances where 
 	one or more single-phase loads are connected to a single bus, and that bus is connected to a transformer (but not connected to any lines)'''
 	tree = applyCnxns(tree)
 	from copy import deepcopy
@@ -750,25 +1069,6 @@ def rollUpLoads_approx(tree):
 				tmpb = treecopy[name2key[line]].get('bus2')
 				if tmpb.startswith(loadbusid + '.'):
 					newbusid, newconncode = tmpb.split('.',maxsplit=1)
-		# else: # there is not a transformer and we have to construct the conncode
-			#  construct the new conn code and apply it.
-			#conns = []
-			#grndConnFlag = False # needed to deal with leading or trailing ground connections in the conncode
-			#for conn in conncodes:
-			#	nodes = conn.split('.')
-			#	if nodes[-1] == '0': # indicates a relevant ground (i.e. trailing) that needs to be preserved
-			#		grndConnFlag = True
-			#	for c in nodes:
-			#		conns.append(c)
-			#conns.sort()
-			#newconncode = ''
-			#newphases = len(conns)
-			#if grndConnFlag:
-			#	conns.remove('0')
-			#	conns.append('0') # put the ground back at the end
-			#	newphases = newphases - 1 # the ground does not count as a phase
-			#for c in conns:
-			#	newconncode = newconncode + '.' + c
 		# Get the new number of phases associated with this load
 		newphases = newconncode.split('.')
 		newphases.sort()
@@ -817,146 +1117,6 @@ def rollUpLoads_approx(tree):
 		for remid in removedids:
 			remfile.write(remid + '\n')
 	tree = removeCnxns(tree)
-	return tree
-
-def rollUpOnePhaseLoads(tree):
-	'''Combines complex load distribution circuits into a single electrically-representative load. Applies to instances where one or more 
-	single-phase loads are connected to a single bus. If that bus is also connected to a transformer via one or more line segments, 
-	these are also consolidated. Does not apply to split-phase configurations.'''
-	# Applicable circuit model: [one or more loads]-[bus]-[zero or more lines]-[bus]-[transformer (optional)]-...
-	tree = applyCnxns(tree)
-	from copy import deepcopy
-	treeids = range(0,len(tree),1)
-	tree = dict(zip(treeids,tree))
-	name2key = {v.get('object', None):k for k,v in tree.items()}
-	name2key.update({v.get('bus', None):k for k,v in tree.items() if v.get('!CMD', None) == 'setbusxy'})
-	# Iterate through treecopy and perform any modifications directly on tree. Note that name2key can be used on either tree or treecopy.
-	treecopy = deepcopy(tree)
-	removedids = []
-	for obj in treecopy.values():
-		objid = obj.get('object','None')
-		# Is this a load object? If not, move to next object in treecopy
-		if not objid.startswith('load.'):
-			continue
-		# Has this load already been removed?
-		if objid in removedids:
-			continue
-		# Get the load's parent bus
-		loadbusid = obj.get('bus1','None').split('.')[0]
-		loadbus = treecopy[name2key[loadbusid]]
-		# Get everything that is attached to the parent bus
-		siblings = loadbus.get('!CNXNS','None')
-		siblings = siblings.replace('[','').replace(']','')
-		siblings = siblings.split(',')
-		# Grab load objects and check that there is more than one
-		loadids = [x for x in siblings if x.startswith('load')]
-		loads = [treecopy[name2key[x]] for x in loadids]
-		if len(loads) == 1:
-			continue
-		# For now, only handle cases of 3 single-phase loads connected to a 3-phase line 
-		# TODO: Consider 2 single-phase loads connected directly to two-phases of a line
-		if len(loads) != 3:
-			continue
-		# Loop through loads to perform some checks and get some values
-		newkw = 0
-		newkvar = 0
-		continueFlag = False
-		diffprops = ['!CMD','object','bus1','!CNXNS','!CONNCODE','numcust','kw','kvar'] # we don't care if these values differ between the loads
-		for i, load in enumerate(loads): # TODO: check for equivalent connection config (i.e. wye or delta)?
-			# check that relevant load configurations are equal
-			# TODO: Consider unequal voltages?
-			if i==0:
-				lastload = load
-				continue
-			for k,v in load.items():
-				if not k in diffprops:
-					if lastload.get(k,'None') != v:
-						continueFlag = True # we don't care about combining this group of loads, so move on to next load in tree
-						break	
-			if continueFlag:
-				break # leave continueFlag set to True to break out of outer 'for' loop
-			# Check for single-phase
-			numnodes = len(load['bus1'].split('.'))-1
-			if numnodes!=1:
-				# TODO: Consider one-phase connections defined as .x.0 or .0.x. 
-				continueFlag = True
-				break
-			# Capture kw and kvar
-			newkw = newkw + float(load.get('kw','0'))
-			newkvar = newkvar + float(load.get('kvar','0'))
-			# prepare for the next loop
-			lastload = load
-		if continueFlag:
-			continueFlag = False
-			continue
-		# combine into one n-phase load
-		# TODO: consider wye vs delta connections for total kw and kvar calculations
-		# 	wye:	loads connect line-to-neutral.
-		# 	delta:	loads connect line-to-line. 
-		# TODO: detect and preserve connection order other than .1.2.3 or .1.2 or .0.1 or .0.2. see ieee37 for examples of .3.1
-		newload = tree[name2key[objid]]
-		newload['kw'] = str(newkw) # Does this calculation require sqrt(3) somewhere?
-		newload['kvar'] = str(newkvar)
-		newbusid = newload['bus1'].split('.')[0]
-		newload['bus1'] = newbusid + '.1.2.3'
-		newload['phases'] = '3'
-		# Remove the deleted loads from the bus !CNXNS 
-		newbus = tree[name2key[newbusid]]
-		newbcons = newbus.get('!CNXNS','None')
-		newbcons = newbcons.replace('[','').replace(']','')
-		newbcons = newbcons.split(',')
-		loadids.remove(objid) # now only contains the removed load ids
-		for loadid in loadids:
-			if loadid in newbcons:
-				newbcons.remove(loadid)
-		tstr = '['
-		for item in newbcons:
-			tstr = tstr + item + ','
-		tstr = tstr[:-1] + ']'
-		newbus['!CNXNS'] = tstr
-		tree[name2key[newbusid]] = newbus
-		# delete removed loads from tree
-		for loadid in loadids:
-			removedids.append(loadid)
-			del tree[name2key[loadid]]
-			if name2key[loadid] in tree:
-				hfop = 'irfbowrf'
-		## interesting cases:
-		# ieee37
-		# 	-bus 712. one line and one load. is there a transformer upstream of the line? If not, there would be two lines wouldn't there? NO. Not in the case of loads connected between two phases, which happens frequently.
-
-
-
-		## Do the siblings include a transformer?
-		#xfmrs = [x for x in siblings if x.get('object','None').startswith('transformer')]
-		#if len(xfmrs)!=1:
-		#	continue
-		#xfmr = xfmrs[0]
-		#xfmrbuses = xfmr.get('buses','None') # Note: It is expected that the primary winding of the transformer is defined first in the 'buses' array
-
-		# Capture load kws and associate with appropiate %r in a dataframe 
-		#ldparams = pd.DataFrame(columns=['node','kw','perc_r'])
-		#for ld in loads:
-		#	kw = ld.get('kw','DNE')
-		#	node = ''
-		#	pass
-		#kws = [x.get('kw') for x in loads if x.get('kw','DNE')!='DNE']
-		
-		## Note: We assume that info for the high side (aka the line side) of the xfrmr is in position 0 of the config arrays
-		#r_arr = xfmr.get('%rs','None')
-
-		## Calculate what the equivalent load should be
-		#secLoad = 0
-		#for idx,row in ldparams.iterrows():
-		#	secLoad = secLoad + row['kw']*(1+row['perc_r'])
-		##load_eq = (1 + r_prim)*secLoad
-	tree = [v for k,v in tree.items()] # back to a list of dicts
-	tree = removeCnxns(tree)
-	if os.path.exists('removed_ids.txt'):
-		os.remove('removed_ids.txt')
-	with open('removed_ids.txt', 'a') as remfile:
-		for remid in removedids:
-			remfile.write(remid + '\n')
 	return tree
 
 def rollUpSplitPhaseLoads(tree):
@@ -984,172 +1144,6 @@ def rollUpSplitPhaseLoads(tree):
 	tree = removeCnxns(tree)
 	return tree
 
-def rollUpLoads_exact(tree):
-	'''Combines multiple loads and their transformer (if existing) into a single electrically-representative load. Applies to instances where 
-	one or more single-phase loads are connected to a single bus, and that bus is connected to a transformer (but not connected to any lines)'''
-	tree = applyCnxns(tree)
-	from copy import deepcopy
-	treeids = range(0,len(tree),1)
-	tree = dict(zip(treeids,tree))
-	name2key = {v.get('object', None):k for k,v in tree.items()}
-	name2key.update({v.get('bus', None):k for k,v in tree.items() if v.get('!CMD', None) == 'setbusxy'})
-	# Iterate through treecopy and perform any modifications directly on tree. Note that name2key can be used on either tree or treecopy.
-	treecopy = deepcopy(tree)
-	removedids = []
-	for obj in treecopy.values():
-		objid = obj.get('object','None')
-		# Is this a load object? If not, move to next object in treecopy
-		if not objid.startswith('load.'):
-			continue
-		# Has this load already been removed?
-		if objid in removedids:
-			continue
-		# Get the load's parent bus
-		loadbusid = obj.get('bus1','None').split('.')[0]
-		loadbus = treecopy[name2key[loadbusid]]
-		# Get everything that is attached to the parent bus
-		siblings = loadbus.get('!CNXNS','None')
-		siblings = siblings.replace('[','').replace(']','')
-		siblings = siblings.split(',')
-		# Grab load objects
-		loadids = [x for x in siblings if x.startswith('load')]
-		loads = [treecopy[name2key[x]] for x in loadids]
-		# Loop through loads to perform some checks and get some values
-		newkw = 0
-		newkvar = 0
-		conncodes = []
-		continueFlag = False
-		#diffprops = ['!CMD','object','bus1','!CONNCODE','!CNXNS','numcust','kw','kvar','phases','conn']
-		diffprops = ['!CMD','object','bus1','!CONNCODE','!CNXNS','numcust','kw','kvar']
-		for i, load in enumerate(loads):
-			# check that relevant load configurations are equal
-			# TODO: Consider unequal voltages?
-			conncodes.append(load.get('!CONNCODE','NC'))
-			# Capture kw and kvar
-			newkw = newkw + float(load.get('kw','0'))
-			newkvar = newkvar + float(load.get('kvar','0'))
-			# prepare for the next loop
-			lastload = load
-			if i==0:
-				continue
-			for k,v in load.items():
-				if not k in diffprops:
-					if lastload.get(k,'None') != v:
-						continueFlag = True # we don't care about combining this group of loads, so move on to next load in tree
-						break	
-			if continueFlag:
-				break # leave continueFlag set to True to break out of outer 'for' loop
-		if continueFlag:
-			continueFlag = False
-			continue
-		# Does the bus connect to a transformer? TODO: ensure this works correctly for the xfrmr case.
-		#TODO: ensure monitors, etc are not being removed
-		xfrmrid = 'NT'
-		xfrmrids = [x for x in siblings if x.startswith('transformer.')]
-		xfrmrids = list(set(xfrmrids)) # removable 3-winding xfrmrs often define two connections to the same bus (different phases)
-		if len(xfrmrids)==1:
-			xfrmrid = xfrmrids[0]
-		# get new bus connection for the representative load
-		newbusid = ''
-		newconncode = ''
-		if xfrmrid != 'NT':
-			# Check that this xfrmr does not serve a feeder in addition to the load
-			lineids = [x for x in siblings if x.startswith('line.')]
-			if len(lineids)!=0:
-				continue
-			# correct for additional losses due to winding resistance (engineering estimate of 3% loss)
-			newkw = 1.018 * newkw
-			#newkvar = 1.xx * newkvar # do we need a correction factor here?  don't think so. xfrmrs don't add relevant phase shift.
-			# use the xfrmr's parent bus and primary winding conncode
-			xfrmr = treecopy[name2key[xfrmrid]]
-			xfrmrconns = xfrmr.get('buses')
-			xfrmrconns = xfrmrconns.replace('[','')
-			xfrmrconns = xfrmrconns.replace(']','')
-			xfrmrconns = xfrmrconns.split(',')
-			newbusid, newconncode = xfrmrconns[0].split('.', maxsplit=1) # by convention, the 'from' bus is listed first
-		else: # there is not a transformer
-			# Check for 2+ loads
-			if len(loadids)<=1:
-				continue
-			#... so we either have to construct the new conncode from the loads' codes, or we use the connection code from the line(s)
-			lines = [x for x in siblings if x.startswith('line.')]
-			for line in lines: # TODO: This gets the specific 'from' bus. can we just use the conncode from any of the buses on any of the lines?
-				tmpb = treecopy[name2key[line]].get('bus2')
-				if tmpb.startswith(loadbusid + '.'):
-					newbusid, newconncode = tmpb.split('.',maxsplit=1)
-		# else: # there is not a transformer and we have to construct the conncode
-			#  construct the new conn code and apply it.
-			#conns = []
-			#grndConnFlag = False # needed to deal with leading or trailing ground connections in the conncode
-			#for conn in conncodes:
-			#	nodes = conn.split('.')
-			#	if nodes[-1] == '0': # indicates a relevant ground (i.e. trailing) that needs to be preserved
-			#		grndConnFlag = True
-			#	for c in nodes:
-			#		conns.append(c)
-			#conns.sort()
-			#newconncode = ''
-			#newphases = len(conns)
-			#if grndConnFlag:
-			#	conns.remove('0')
-			#	conns.append('0') # put the ground back at the end
-			#	newphases = newphases - 1 # the ground does not count as a phase
-			#for c in conns:
-			#	newconncode = newconncode + '.' + c
-		# Get the new number of phases associated with this load
-		newphases = newconncode.split('.')
-		newphases.sort()
-		if newphases[0] == '0': # grounds don't count
-			newphases.remove('0')
-		newphases = len(newphases)
-		# Get pointers to the new load and bus in tree
-		newload = tree[name2key[objid]]
-		newbus = tree[name2key[newbusid]]
-		# Modify the existing load to represent the combined loads and transformer (if existing).
-		newload['kw'] = str(newkw) # TODO: when combining multiple loads into one electrically equivalent load, do we need to consider wye/delta config and throw in a factor of sqrt(3)?
-		newload['kvar'] = str(newkvar)
-		newload['bus1'] = newbusid + '.' + newconncode
-		newload['phases'] = newphases
-		
-		# Update !CNXNS for the new bus 
-		newbus = tree[name2key[newbusid]]
-		newbcons = newbus.get('!CNXNS','None')
-		newbcons = newbcons.replace('[','').replace(']','')
-		newbcons = newbcons.split(',')
-		loadids.remove(objid) # now only contains the removed load ids
-		for loadid in loadids:
-			if loadid in newbcons:
-				newbcons.remove(loadid)
-		tstr = '['
-		for item in newbcons:
-			tstr = tstr + item + ','
-		tstr = tstr[:-1] + ']'
-		newbus['!CNXNS'] = tstr
-
-		# delete removed loads from tree
-		for loadid in loadids:
-			removedids.append(loadid)
-			del tree[name2key[loadid]]
-			#if name2key[loadid] in tree: # DEBUG
-			#	debugjsdhnkj = 'irfbowrf' # DEBUG
-		# delete transformer, loadbus from tree
-		if xfrmrid != 'NT':
-			removedids.append(xfrmrid)
-			removedids.append(loadbusid)
-			del tree[name2key[xfrmrid]]
-			del tree[name2key[loadbusid]]
-			#if name2key[xfrmrid] in tree or name2key[loadbusid] in tree: # DEBUG
-			#	debugjsdhnkj = 'irfbowrf' # DEBUG
-	tree = [v for k,v in tree.items()] # back to a list of dicts
-	tree = removeCnxns(tree)
-	if os.path.exists('removed_ids.txt'):
-		os.remove('removed_ids.txt')
-	with open('removed_ids.txt', 'a') as remfile:
-		for remid in removedids:
-			remfile.write(remid + '\n')
-	tree = removeCnxns(tree)
-	return tree
-
 def _tests():
 	from dssConvert import dssToTree, distNetViz, evilDssTreeToGldTree, treeToDss, evilGldTreeToDssTree
 	fpath = ['ieee37.clean.dss','ieee123_solarRamp.clean.dss','iowa240.clean.dss','ieeeLVTestCase.clean.dss','ieee8500-unbal_no_fuses.clean.dss']
@@ -1158,6 +1152,7 @@ def _tests():
 		print('!!!!!!!!!!!!!! ',ckt,' !!!!!!!!!!!!!!')
 		# Test for mergeContigLines, voltageCompare, getVoltages, and runDSS.
 		tree = dssToTree(ckt)
+		#voltagePlot(ckt,PU=False)
 		#gldtree = evilDssTreeToGldTree(tree) # DEBUG
 		#distNetViz.viz_mem(gldtree, open_file=True, forceLayout=True) # DEBUG
 		oldsz = len(tree)
@@ -1170,6 +1165,7 @@ def _tests():
 		#tree = evilGldTreeToDssTree(gldtree) # DEBUG
 		outckt_loc = ckt[:-4] + '_reduced.dss'
 		treeToDss(tree, outckt_loc)
+		#voltagePlot(outckt_loc,PU=False)
 
 		outdir = 'voltageCompare_' + ckt[:-4]
 		if not os.path.exists(outdir):
