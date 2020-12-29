@@ -84,7 +84,9 @@ def work(modelDir, inputDict):
 	for i in range(0,1+numCols):
 		indexString = str(i+1)
 
-		if i == numCols:
+		if numCols == 1:
+			load = loadShape[:,0]
+		elif i == numCols:
 			load = totalLoad
 		else:
 			load = loadShape[:,i]
@@ -424,6 +426,8 @@ def work(modelDir, inputDict):
 		outData["resilienceProbData" + indexString] = json.dumps(plotData, cls=plotly.utils.PlotlyJSONEncoder)
 		outData["resilienceProbLayout"  + indexString] = json.dumps(plotlyLayout, cls=plotly.utils.PlotlyJSONEncoder)
 
+		if numCols == 1:
+			break
 	#print("Wind kw from resultsSubset:", resultsSubset['Wind']['size_kw'])
 
 	return outData
