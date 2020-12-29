@@ -183,6 +183,8 @@ def work(modelDir, inputDict):
 		outData['totalCost' + indexString] = resultsSubset['Financial']['lcc_us_dollars']
 		outData['totalCostDiff' + indexString] = outData['totalCostBAU' + indexString] - outData['totalCost' + indexString]
 		outData['savings' + indexString] = resultsSubset['Financial']['npv_us_dollars']
+		outData['initial_capital_costs' + indexString] = resultsSubset['Financial']['initial_capital_costs']
+		outData['initial_capital_costs_after_incentives' + indexString] = resultsSubset['Financial']['initial_capital_costs_after_incentives']
 		outData['load' + indexString] = resultsSubset['LoadProfile']['year_one_electric_load_series_kw']
 		
 		if solar == 'on':	
@@ -457,7 +459,7 @@ def new(modelDir):
 		"windMin": 0,
 		"batteryPowerMin": 0,
 		"batteryEnergyMin": 0,
-		"criticalLoadFactor": "0.7",
+		"criticalLoadFactor": ".99",
 		"outage_start_hour": "1000",
 		"outageDuration": "24",
 		"fuelAvailable": "1000",
