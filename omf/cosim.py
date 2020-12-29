@@ -4,7 +4,6 @@ try:
 except ImportError:
     from urllib2 import urlopen
 from datetime import datetime, timedelta
-#import webbrowser, os
 from http.client import BadStatusLine
 import omf
 import omf.feeder

@@ -9,7 +9,6 @@ OOO Think about what to do with the error log.
 import os, csv, json, time, collections, zipfile
 from datetime import datetime
 import matplotlib
-matplotlib.use('Agg')
 from matplotlib import pyplot as plt
 try:
 	from geolite2 import geolite2
@@ -20,8 +19,6 @@ from dateutil.parser import parse as parseDt
 from jinja2 import Template
 import omf
 # from REPIC import REPIC
-
-plt.style.use('ggplot')
 
 # Template for map:
 template = Template(
@@ -117,6 +114,8 @@ def modelDatabaseStats(dataFilePath, outFilePath):
 	yearUsers = collections.OrderedDict(sorted(yearUsers.items()))
 	# REPIC(yearUsers)  #OUTPUT: OrderedDict([('2014', 1), ('2017', 1), ('2018', 1)])
 	# Plot users over time
+	matplotlib.use('Agg')
+	plt.style.use('ggplot')
 	plt.figure(figsize=(15, 8))
 	plt.subplot(2, 1, 1)
 	xRanges2 = list(range(len(yearUsers.values())))
@@ -221,6 +220,8 @@ def trafficLogStats(logsPath, outFilePath):
 	with open(os.path.join(os.path.dirname(__file__), 'static/ipLoc.html'), 'w') as f2:
 		f2.write(template.render(markers=markers))
 	# Set up plotting:
+	matplotlib.use('Agg')
+	plt.style.use('ggplot')
 	plt.figure(figsize=(15, 15))
 	ggColors = [x['color'] for x in plt.rcParams['axes.prop_cycle']]
 	# Session counts by month:
