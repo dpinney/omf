@@ -92,12 +92,13 @@ def newQstsPlot(filePath, stepSizeInMinutes, numberOfSteps, keepAllFiles=False, 
 		elif ob.get('object','').startswith('capacitor.'):
 			runDssCommand(f'new object=monitor.{mon_name} element={obType}.{name} terminal=1 mode=6')
 			mon_names.append(mon_name)
-		elif ob.get('object','').startswith('transformer.'):
-			#TODO: only capture transformers with regulators on them by looking through the regcontrol objects.
-			runDssCommand(f'new object=monitor.{mon_name} element={obType}.{name} terminal=1 mode=2')
+		elif ob.get('object','').startswith('regcontrol.'):
+			tformer = ob.get('transformer','NONE')
+			winding = ob.get('winding',1)
+			runDssCommand(f'new object=monitor.{mon_name} element=transformer.{tformer} terminal={winding} mode=2')
 			mon_names.append(mon_name)
 	# Run DSS
-	runDssCommand(f'set mode=yearly stepsize={stepSizeInMinutes}m')
+	runDssCommand(f'set mode=yearly stepsize={stepSizeInMinutes}m ')
 	if actions == {}:
 		# Run all steps directly.
 		runDssCommand(f'set number={numberOfSteps}')
@@ -136,7 +137,7 @@ def newQstsPlot(filePath, stepSizeInMinutes, numberOfSteps, keepAllFiles=False, 
 			df['Name'] = name
 			df = df.rename({' Step_1 ': 'Tap(pu)'}, axis='columns') #HACK: rename to match regulator tap name
 			all_control_df = pd.concat([all_control_df, df], ignore_index=True, sort=False)
-		elif name.startswith('montransformer-'):
+		elif name.startswith('monregcontrol-'):
 			df['Type'] = 'Transformer'
 			df['Name'] = name
 			df = df.rename({' Tap (pu)': 'Tap(pu)'}, axis='columns') #HACK: rename to match cap tap name
