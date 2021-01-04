@@ -427,7 +427,7 @@ def work(modelDir, inputDict):
 		outData["resilienceProbLayout"  + indexString] = json.dumps(plotlyLayout, cls=plotly.utils.PlotlyJSONEncoder)
 
 		if numCols == 1:
-			break
+			break # if we only have a single load, don't run an additional combined load shape run.
 	#print("Wind kw from resultsSubset:", resultsSubset['Wind']['size_kw'])
 
 	return outData

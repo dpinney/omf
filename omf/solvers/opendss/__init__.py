@@ -74,6 +74,7 @@ def newQstsPlot(filePath, stepSizeInMinutes, numberOfSteps, keepAllFiles=False, 
 	tree = dssConvert.dssToTree(filePath)
 	mon_names = []
 	circ_name = 'NONE'
+	base_kvs = pd.DataFrame()
 	for ob in tree:
 		obData = ob.get('object','NONE.NONE')
 		obType, name = obData.split('.')
@@ -89,6 +90,8 @@ def newQstsPlot(filePath, stepSizeInMinutes, numberOfSteps, keepAllFiles=False, 
 		elif ob.get('object','').startswith('load.'):
 			runDssCommand(f'new object=monitor.{mon_name} element={obType}.{name} terminal=1 mode=0')
 			mon_names.append(mon_name)
+			new_kv = pd.DataFrame({'kv':[float(ob.get('kv',1.0))],'Name':['monload-' + name]})
+			base_kvs = base_kvs.append(new_kv)
 		elif ob.get('object','').startswith('capacitor.'):
 			runDssCommand(f'new object=monitor.{mon_name} element={obType}.{name} terminal=1 mode=6')
 			mon_names.append(mon_name)
@@ -159,6 +162,10 @@ def newQstsPlot(filePath, stepSizeInMinutes, numberOfSteps, keepAllFiles=False, 
 	all_source_df.to_csv(f'{dssFileLoc}/timeseries_source.csv', index=False)
 	all_load_df.sort_values(['Name','hour'], inplace=True)
 	all_load_df.columns = all_load_df.columns.str.replace(r'[ "]','')
+	all_load_df = all_load_df.join(base_kvs.set_index('Name'), on='Name')
+	all_load_df['V1(PU)'] = all_load_df['V1'] / (all_load_df['kv'] * 1000.0)
+	all_load_df['V2(PU)'] = all_load_df['V2'] / (all_load_df['kv'] * 1000.0)
+	all_load_df['V3(PU)'] = all_load_df['V3'] / (all_load_df['kv'] * 1000.0)
 	all_load_df.to_csv(f'{dssFileLoc}/timeseries_load.csv', index=False)
 
 def voltagePlot(filePath, PU=True):
