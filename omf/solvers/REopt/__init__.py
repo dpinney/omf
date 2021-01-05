@@ -50,9 +50,9 @@ def runResilience(runID, outputPath):
 		logger.log.info("Saved results to {}".format(outputPath))
 
 def _test():
-	run('Scenario_POST13.json', 'results_S13.json')
+	run('Scenario_POST14.json', 'results_S14.json')
 
-	with open('results_S13.json') as jsonFile:
+	with open('results_S14.json') as jsonFile:
 		results = json.load(jsonFile)
 		
 	test_ID = results['outputs']['Scenario']['run_uuid']
@@ -63,7 +63,7 @@ def _test():
 	print("Generator fuel_used_gal:", results['outputs']['Scenario']['Site']['Generator']['fuel_used_gal'])
 	print("Generator size_kw:", results['outputs']['Scenario']['Site']['Generator']['size_kw'])
 	print("npv_us_dollars:", results['outputs']['Scenario']['Site']['Financial']['npv_us_dollars'])
-	runResilience(test_ID, 'resultsResilience_S13.json')
+	runResilience(test_ID, 'resultsResilience_S14.json')
 
 
 

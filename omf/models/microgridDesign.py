@@ -84,9 +84,7 @@ def work(modelDir, inputDict):
 	for i in range(0,1+numCols):
 		indexString = str(i+1)
 
-		if numCols == 1:
-			load = loadShape[:,0]
-		elif i == numCols:
+		if i == numCols:
 			load = totalLoad
 		else:
 			load = loadShape[:,i]
@@ -109,10 +107,7 @@ def work(modelDir, inputDict):
 					},
 					"LoadProfile": {
 						"loads_kw": jsonifiableLoad,
-						"year": year,
-						"critical_load_pct": criticalLoadFactor,
-						"outage_start_hour": outage_start_hour,
-						"outage_end_hour": outage_end_hour
+						"year": year
 					},
 					"PV": {
 						"installed_cost_us_dollars_per_kw": solarCost,
@@ -131,9 +126,9 @@ def work(modelDir, inputDict):
 
 					},
 					"Generator": {
-						"fuel_avail_gal": fuelAvailable,
-						"min_turn_down_pct": minGenLoading,
-						"existing_kw": genSize
+					# 	"fuel_avail_gal": fuelAvailable,
+					# 	"min_turn_down_pct": minGenLoading,
+					# 	"existing_kw": genSize
 					}
 				}
 			}
@@ -148,9 +143,14 @@ def work(modelDir, inputDict):
 			scenario['Scenario']['Site']['Wind']['max_kw'] = 1000000;
 		if battery == 'off':
 			scenario['Scenario']['Site']['Storage']['max_kw'] = 0;
-		if outage_start_hour:
+		if outage_start_hour != 0:
 			scenario['Scenario']['Site']['LoadProfile']['outage_is_major_event'] = True
-		
+			scenario['Scenario']['Site']['LoadProfile']['critical_load_pct'] = criticalLoadFactor
+			scenario['Scenario']['Site']['LoadProfile']['outage_start_time_step'] = outage_start_hour
+			scenario['Scenario']['Site']['LoadProfile']['outage_end_time_step'] = outage_end_hour
+			scenario['Scenario']['Site']['Generator']['fuel_avail_gal'] = fuelAvailable
+			scenario['Scenario']['Site']['Generator']['min_turn_down_pct'] = minGenLoading
+			scenario['Scenario']['Site']['Generator']['existing_kw'] = genSize
 
 		with open(pJoin(modelDir, "Scenario_test_POST.json"), "w") as jsonFile:
 			json.dump(scenario, jsonFile)
@@ -438,8 +438,8 @@ def runtimeEstimate(modelDir):
 
 def new(modelDir):
 	''' Create a new instance of this model. Returns true on success, false on failure. '''
-	#fName = "input - col 1 commercial 120 kW per day, col 2 residential  30 kWh per day.csv"
-	fName = "input - 200 Employee Office, Springfield Illinois, 2001.csv"
+	fName = "input - col 1 commercial 120 kW per day, col 2 residential  30 kWh per day.csv"
+	#fName = "input - 200 Employee Office, Springfield Illinois, 2001.csv"
 	with open(pJoin(omf.omfDir, "static", "testFiles", fName)) as f:
 		load_shape = f.read()
 	defaultInputs = {
@@ -464,7 +464,7 @@ def new(modelDir):
 		"batteryPowerMin": 0,
 		"batteryEnergyMin": 0,
 		"criticalLoadFactor": ".99",
-		"outage_start_hour": "1000",
+		"outage_start_hour": "0",
 		"outageDuration": "24",
 		"fuelAvailable": "1000",
 		"genSize": "0",
