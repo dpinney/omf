@@ -163,9 +163,9 @@ def newQstsPlot(filePath, stepSizeInMinutes, numberOfSteps, keepAllFiles=False, 
 	all_load_df.sort_values(['Name','hour'], inplace=True)
 	all_load_df.columns = all_load_df.columns.str.replace(r'[ "]','')
 	all_load_df = all_load_df.join(base_kvs.set_index('Name'), on='Name')
-	all_load_df['V1(PU)'] = all_load_df['V1'] / (all_load_df['kv'] * 1000.0)
-	all_load_df['V2(PU)'] = all_load_df['V2'] / (all_load_df['kv'] * 1000.0)
-	all_load_df['V3(PU)'] = all_load_df['V3'] / (all_load_df['kv'] * 1000.0)
+	all_load_df['V1(PU)'] = all_load_df['V1'].astype(float) / (all_load_df['kv'].astype(float) * 1000.0)
+	all_load_df['V2(PU)'] = all_load_df['V2'].astype(float) / (all_load_df['kv'].astype(float) * 1000.0)
+	all_load_df['V3(PU)'] = all_load_df['V3'].astype(float) / (all_load_df['kv'].astype(float) * 1000.0)
 	all_load_df.to_csv(f'{dssFileLoc}/timeseries_load.csv', index=False)
 
 def voltagePlot(filePath, PU=True):
