@@ -70,7 +70,7 @@ elif platform.system()=='Windows':
 	os.system(f'setx path "%path%;{graphVizBinPath}"')
 	os.system(f"set PATH=%PATH%;{graphVizBinPath}")
 	os.system("wget --no-check-certificate https://github.com/CristiFati/Prebuilt-Binaries/raw/master/PyGraphviz/v1.6/pygraphviz-1.6-cp37-cp37m-win_amd64.whl")
-	os.system('python -m pip install omf\\static\\pygraphviz-1.6-cp37-cp37m-win_amd64.whl')
+	os.system('python -m pip install pygraphviz-1.6-cp37-cp37m-win_amd64.whl')
 	# os.system('python -m pip install omf\\static\\pygraphviz-1.5-cp36-cp36m-win_amd64.whl')
 	# Finish up installation with pip.
 	pipInstallInOrder("python -m pip")
