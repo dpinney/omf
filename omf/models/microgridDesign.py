@@ -107,10 +107,7 @@ def work(modelDir, inputDict):
 					},
 					"LoadProfile": {
 						"loads_kw": jsonifiableLoad,
-						"year": year,
-						"critical_load_pct": criticalLoadFactor,
-						"outage_start_hour": outage_start_hour,
-						"outage_end_hour": outage_end_hour
+						"year": year
 					},
 					"PV": {
 						"installed_cost_us_dollars_per_kw": solarCost,
@@ -129,9 +126,9 @@ def work(modelDir, inputDict):
 
 					},
 					"Generator": {
-						"fuel_avail_gal": fuelAvailable,
-						"min_turn_down_pct": minGenLoading,
-						"existing_kw": genSize
+					# 	"fuel_avail_gal": fuelAvailable,
+					# 	"min_turn_down_pct": minGenLoading,
+					# 	"existing_kw": genSize
 					}
 				}
 			}
@@ -146,9 +143,14 @@ def work(modelDir, inputDict):
 			scenario['Scenario']['Site']['Wind']['max_kw'] = 1000000;
 		if battery == 'off':
 			scenario['Scenario']['Site']['Storage']['max_kw'] = 0;
-		if outage_start_hour:
+		if outage_start_hour != 0:
 			scenario['Scenario']['Site']['LoadProfile']['outage_is_major_event'] = True
-		
+			scenario['Scenario']['Site']['LoadProfile']['critical_load_pct'] = criticalLoadFactor
+			scenario['Scenario']['Site']['LoadProfile']['outage_start_time_step'] = outage_start_hour
+			scenario['Scenario']['Site']['LoadProfile']['outage_end_time_step'] = outage_end_hour
+			scenario['Scenario']['Site']['Generator']['fuel_avail_gal'] = fuelAvailable
+			scenario['Scenario']['Site']['Generator']['min_turn_down_pct'] = minGenLoading
+			scenario['Scenario']['Site']['Generator']['existing_kw'] = genSize
 
 		with open(pJoin(modelDir, "Scenario_test_POST.json"), "w") as jsonFile:
 			json.dump(scenario, jsonFile)
@@ -183,6 +185,8 @@ def work(modelDir, inputDict):
 		outData['totalCost' + indexString] = resultsSubset['Financial']['lcc_us_dollars']
 		outData['totalCostDiff' + indexString] = outData['totalCostBAU' + indexString] - outData['totalCost' + indexString]
 		outData['savings' + indexString] = resultsSubset['Financial']['npv_us_dollars']
+		outData['initial_capital_costs' + indexString] = resultsSubset['Financial']['initial_capital_costs']
+		outData['initial_capital_costs_after_incentives' + indexString] = resultsSubset['Financial']['initial_capital_costs_after_incentives']
 		outData['load' + indexString] = resultsSubset['LoadProfile']['year_one_electric_load_series_kw']
 		
 		if solar == 'on':	
@@ -422,6 +426,8 @@ def work(modelDir, inputDict):
 		outData["resilienceProbData" + indexString] = json.dumps(plotData, cls=plotly.utils.PlotlyJSONEncoder)
 		outData["resilienceProbLayout"  + indexString] = json.dumps(plotlyLayout, cls=plotly.utils.PlotlyJSONEncoder)
 
+		if numCols == 1:
+			break # if we only have a single load, don't run an additional combined load shape run.
 	#print("Wind kw from resultsSubset:", resultsSubset['Wind']['size_kw'])
 
 	return outData
@@ -432,8 +438,8 @@ def runtimeEstimate(modelDir):
 
 def new(modelDir):
 	''' Create a new instance of this model. Returns true on success, false on failure. '''
-	#fName = "input - col 1 commercial 120 kW per day, col 2 residential  30 kWh per day.csv"
-	fName = "input - 200 Employee Office, Springfield Illinois, 2001.csv"
+	fName = "input - col 1 commercial 120 kW per day, col 2 residential  30 kWh per day.csv"
+	#fName = "input - 200 Employee Office, Springfield Illinois, 2001.csv"
 	with open(pJoin(omf.omfDir, "static", "testFiles", fName)) as f:
 		load_shape = f.read()
 	defaultInputs = {
@@ -457,8 +463,8 @@ def new(modelDir):
 		"windMin": 0,
 		"batteryPowerMin": 0,
 		"batteryEnergyMin": 0,
-		"criticalLoadFactor": "0.7",
-		"outage_start_hour": "1000",
+		"criticalLoadFactor": ".99",
+		"outage_start_hour": "0",
 		"outageDuration": "24",
 		"fuelAvailable": "1000",
 		"genSize": "0",
