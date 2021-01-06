@@ -52,25 +52,43 @@ def play(pathToOmd, pathToDss, workDir, microgrids, faultedLine, radial):
 		buses.append(microgrids[key].get('gen_bus', ''))
 
 	tree, bestReclosers, badBuses = flisr.cutoffFault(tree, faultedNode, bestReclosers, workDir, radial, buses)
-
+	print(bestReclosers)
 	# 2) get list of loads associated with each microgrid component
 	# and create a loadshape containing all said loads
 	buses = []
-	for key in microgrids.keys():
-		buses.append(microgrids[key].get('gen_bus', ''))
+	sortvals = {}
+	for key in microgrids:
+		sortvals[key] = microgrids[key].get('max_potential','')
+	sortvals = sorted(sortvals.items(), key=lambda x: x[1], reverse=True)
+
+	for key in sortvals:
+		buses.append(microgrids[key[0]].get('gen_bus', ''))
 	buses = [x for x in buses if x not in badBuses]
 
+	subtrees = {}
 	busShapes = {}
 	shape_insert_list = {}
+	gen_insert_list = {}
 	i = 0
+	j = 0
 	# for each power source
 	while len(buses) > 0:
 		# create an adjacency list representation of tree connectivity
 		adjacList, reclosers, vertices = flisr.adjacencyList(tree)
 		bus = buses[0]
+		print(buses[0])
 		loadShapes = {}
 		# check to see if there is a path between the power source and the fault 
 		subtree = flisr.getMaxSubtree(adjacList, bus)
+		for key in subtrees:
+			if key == subtree:
+				## TODO: NEED MORE SUBTLETY... write a function HERE so that if a smaller generator is networked with a bigger,
+				## we have the bigger already giving max and the smaller just picks up leftover load.
+				del(buses[0])
+				continue
+		if 'sourcebus' in subtree:
+			del(buses[0])
+			continue
 		for node in subtree:
 			for key in tree.keys():
 				obtype = tree[key].get('object','')
@@ -108,27 +126,80 @@ def play(pathToOmd, pathToDss, workDir, microgrids, faultedLine, radial):
 								dieselShapes['.2'] = [a - b for a, b in zip(loadShapes.get('.2',''), solarshape)]
 							if '.3' in loadShapes:
 								dieselShapes['.3'] = [a - b for a, b in zip(loadShapes.get('.3',''), solarshape)]
-							print('hi')
 		busShapes[buses[0]] = [dieselShapes.get('.1',''), dieselShapes.get('.2',''), dieselShapes.get('.3','')]
 	# 4) add diesel generation to the opendss formatted system and solve
-		shape_name = 'NewDiesel_' + str(buses[0]) + '_shape'
-		shape_data = dieselShapes.get('.1','')
-		shape_insert_list[i] = {
-				'!CMD': 'new',
-				'object': f'loadshape.{shape_name}',
-				'npts': f'{len(shape_data)}',
-				'interval': '1',
-				'useactual': 'no',
-				'mult': f'{list(shape_data)}'
-			}
-		i+=1
+		phase=1
+		while phase < 4:
+			shape_name = 'NewDiesel_' + str(buses[0]) + '_' + str(phase) + '_shape'
+			shape_data = dieselShapes.get('.' + str(phase),'')
+			shape_insert_list[i] = {
+					'!CMD': 'new',
+					'object': f'loadshape.{shape_name}',
+					'npts': f'{len(shape_data)}',
+					'interval': '1',
+					'useactual': 'no',
+					'mult': f'{list(shape_data)}'
+				}
+			i+=1
+			gen_name = 'Isource.isource_newDiesel' + str(buses[0]) + '_' + str(phase) + '_shape'
+			if phase == 1:
+				angle = '240.000000'
+				amps = '219.969000'
+			elif phase == 2:
+				angle = '120.000000'
+				amps = '65.000000'
+			else:
+				angle = '0.000000'
+				amps = '169.120000'
+			gen_insert_list[j] = {
+					'!CMD': 'new',
+					'!TEST': f'"{gen_name}"',
+					'bus1': str(buses[0]) + '.' + str(phase),
+					'phases': '1',
+					'angle': str(angle),
+					'amps': str(amps),
+					'daily': 'NewDiesel_' + str(buses[0]) + '_' + str(phase) + '_shape'
+				}
+			j+=1
+			gen_name = 'Isource.isource_solar' + str(buses[0]) + '_' + str(phase) + '_shape'
+			gen_insert_list[j] = {
+					'!CMD': 'new',
+					'!TEST': f'"{gen_name}"',
+					'bus1': str(buses[0]) + '.' + str(phase),
+					'phases': '1',
+					'angle': str(angle),
+					'amps': str(amps),
+					'daily': 'solar_' + str(buses[0]) + '_shape'
+				}
+			j+=1
+			phase += 1
 		del (buses[0])
 
-	# insert new diesel loadshapes
+	# insert new diesel loadshapes and isource generators
 	treeDSS = dssConvert.dssToTree(pathToDss)
 	for key in shape_insert_list:
 		min_pos = min(shape_insert_list.keys())
 		treeDSS.insert(min_pos, shape_insert_list[key])
+	for key in gen_insert_list:
+		max_pos = 100000000
+		treeDSS.insert(max_pos, gen_insert_list[key])
+		max_pos+=1
+
+	key = 0
+	while key < len(bestReclosers):
+		recloserName = bestReclosers[key].get('name','')
+		open_line = {
+					'!CMD': 'Open',
+					'!TEST': 'line.' + f'{recloserName}',
+					'term': '2'
+				}
+		max_pos = 1000000000
+		treeDSS.insert(max_pos, open_line)
+		max_pos+=1
+		key+=1
+
+	treeDSS.insert(max_pos, {'!CMD': 'solve'})
+
 
 	# Write new DSS file.
 	FULL_NAME = 'lehigh_full_newDiesel.dss'
@@ -143,22 +214,26 @@ microgrids = {
 	'm1': {
 		'loads': ['634a_supermarket','634b_supermarket','634c_supermarket'],
 		'switch': '632633',
-		'gen_bus': '634'
+		'gen_bus': '634',
+		'max_potential': '0.7'
 	},
 	'm2': {
 		'loads': ['675a_residential1','675b_residential1','675c_residential1'],
 		'switch': '671692',
-		'gen_bus': '675'
+		'gen_bus': '675',
+		'max_potential': '0.65'
 	},
 	'm3': {
 		'loads': ['671_hospital','652_med_apartment'],
 		'switch': '671684',
-		'gen_bus': '684'
+		'gen_bus': '684',
+		'max_potential': '0.9'
 	},
 	'm4': {
 		'loads': ['645_warehouse1','646_med_office'],
 		'switch': '632645',
-		'gen_bus': '646'
+		'gen_bus': '646',
+		'max_potential': '0.8'
 	}
 }
 

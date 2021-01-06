@@ -134,6 +134,8 @@ def treeToDss(treeObject, outputPath):
 		for key in ob:
 			if not key.startswith('!'):
 				line = f"{line} {key}={ob[key]}"
+			if key.startswith('!TEST'):
+				line = f"{line} {ob['!TEST']}"
 		outFile.write(line + '\n')
 	outFile.close()
 
