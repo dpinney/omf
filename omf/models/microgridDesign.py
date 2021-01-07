@@ -172,10 +172,10 @@ def work(modelDir, inputDict):
 			raise Exception('The REopt data analysis API by NREL had the following error: ' + errMsg) 
 	
 		outData['demandCost' + indexString] = resultsSubset['ElectricTariff']['total_demand_cost_us_dollars']
-		outData['demandCostDiff' + indexString] = outData['demandCostBAU' + indexString] - outData['demandCost' + indexString]
+		outData['demandCostDiff' + indexString] = round(outData['demandCostBAU' + indexString] - outData['demandCost' + indexString],2)
 		outData['energyCostBAU' + indexString] = resultsSubset['ElectricTariff']['total_energy_cost_bau_us_dollars']
 		outData['energyCost' + indexString] = resultsSubset['ElectricTariff']['total_energy_cost_us_dollars']
-		outData['energyCostDiff' + indexString] = outData['energyCostBAU' + indexString] - outData['energyCost' + indexString]
+		outData['energyCostDiff' + indexString] = round(outData['energyCostBAU' + indexString] - outData['energyCost' + indexString],2)
 		outData['fixedCostBAU' + indexString] = resultsSubset['ElectricTariff']['total_fixed_cost_bau_us_dollars']
 		outData['fixedCost' + indexString] = resultsSubset['ElectricTariff']['total_fixed_cost_us_dollars']
 		outData['fixedCostDiff' + indexString] = outData['fixedCostBAU' + indexString] - outData['fixedCost' + indexString]
@@ -183,12 +183,13 @@ def work(modelDir, inputDict):
 		outData['powerGridToLoad' + indexString] = resultsSubset['ElectricTariff']['year_one_to_load_series_kw']
 		outData['totalCostBAU' + indexString] = resultsSubset['Financial']['lcc_bau_us_dollars']
 		outData['totalCost' + indexString] = resultsSubset['Financial']['lcc_us_dollars']
-		outData['totalCostDiff' + indexString] = outData['totalCostBAU' + indexString] - outData['totalCost' + indexString]
+		outData['totalCostDiff' + indexString] = round(outData['totalCostBAU' + indexString] - outData['totalCost' + indexString],2)
 		outData['savings' + indexString] = resultsSubset['Financial']['npv_us_dollars']
 		outData['initial_capital_costs' + indexString] = resultsSubset['Financial']['initial_capital_costs']
 		outData['initial_capital_costs_after_incentives' + indexString] = resultsSubset['Financial']['initial_capital_costs_after_incentives']
 		outData['load' + indexString] = resultsSubset['LoadProfile']['year_one_electric_load_series_kw']
-		
+		outData['avgLoad' + indexString] = round(sum(resultsSubset['LoadProfile']['year_one_electric_load_series_kw'])/len(resultsSubset['LoadProfile']['year_one_electric_load_series_kw']),1)
+
 		if solar == 'on':	
 			outData['sizePV' + indexString] = resultsSubset['PV']['size_kw']
 			outData['powerPV' + indexString] = resultsSubset['PV']['year_one_power_production_series_kw']
@@ -469,10 +470,10 @@ def new(modelDir):
 		"batteryPowerMin": 0,
 		"batteryEnergyMin": 0,
 		"criticalLoadFactor": ".99",
-		"outage_start_hour": "10",
-		"outageDuration": "24",
+		"outage_start_hour": "100",
+		"outageDuration": "72",
 		"fuelAvailable": "1000",
-		"genSize": "0",
+		"genSize": "20",
 		"minGenLoading": "0.3"
 	}
 	creationCode = __neoMetaModel__.new(modelDir, defaultInputs)
