@@ -1,5 +1,7 @@
 # Prereq: `pip install 'git+https://github.com/NREL/ditto.git@master#egg=ditto[all]'`
 import os
+from os.path import join as pJoin
+import subprocess
 import sys
 import json
 import warnings
@@ -27,6 +29,11 @@ def gridLabToDSS(inFilePath, outFilePath):
 	model.set_names()
 	dss_writer = dWriter(output_path='.')
 	# TODO: no way to specify output filename, so move and rename.
+	# use tempfile.temp_dir()
+	# spawn the write function working in that directory via subprocess.
+	# subprocess.Popen("ls", cwd="/")
+	# gather up the stuff in output dir, place it at outFilePath
+	# What do we do if the ouput from ditto is multiple files or a dir? Ideally wanna merge, but making sure outFilePath is at least a dir is a good start
 	dss_writer.write(model)
 
 def dssToGridLab(inFilePath, outFilePath, busCoords=None):
@@ -116,6 +123,7 @@ def dssToTree(pathToDss):
 						ob[k] = v
 		except:
 			raise Exception(f"Error encountered in group (space delimited) #{jpos+1} of line {i + 1}: {line}")
+			# raise Exception("Temp fix but error in loop at line 76")
 		contents[i] = ob
 	# Print to file
 	#with open('dssTreeRepresentation.csv', 'w') as outFile:
@@ -604,9 +612,72 @@ def _createAndCompareTestFile(inFile, userOutFile=''):
 
 def _conversionTests():
 	pass
+	glmList = set()
+	mdbList = set()
+	cleanGlmList = set()
+	cleanMdbList = set()
+	brokenGlmList = set()
+	brokenMdbList = set()
+
+	def fillFileLists():
+		for root, dirs, files in os.walk("/Users/ryanmahoney/omf/omf"):
+			for f in files:
+				if f.endswith(".glm"):
+					glmList.add(os.path.join(root, f))
+				if f.endswith(".mdb"):
+					mdbList.add(os.path.join(root, f))
+		#print("***********glmList = " + ", ".join(glmList))
+		#print("***********mdbList = " + ", ".join(mdbList))
+
+	def testAllGlm():
+		for f in glmList:
+			#run gridlabd
+			try:
+				result = subprocess.run(["gridlabd", f], shell=True, check=True)
+				cleanGlmList.add(f)
+			except:
+				brokenGlmList.add(f)
+		print("***********cleanGlmList = " + ", ".join(cleanGlmList))
+		# print("***********brokenGlmList = " + ", ".join(brokenGlmList))
+
+	def testAllCyme():
+		for f in mdbList:
+			#run gridlabd
+			try:
+				result = subprocess.run(["", f], shell=True, check=True)
+				cleanMdbList.add(f)
+			except:
+				brokenMdbList.add(f)
+		# print("***********cleanMdbList = " + ", ".join(cleanMdbList))
+		# print("***********brokenMdbList = " + ", ".join(brokenMdbList))
+	# all_glm_files = os.system('find ../.. -name *.glm')
+	# inputs = get urls for the input files. OMF_GITHUB_URL + extension.
+	fillFileLists()
+	testAllGlm()
+
+	brokenDittoList = {}
+	# working_dir = './TEMP_CONV/'
+	try:
+		os.mkdir(pJoin("/Users/ryanmahoney/omf/omf/scratch","dittoTestOutput"))
+	except FileExistsError:
+		print("dittoTestOutput folder already exists!")
+		pass
+	except:
+		print("Error occurred creating dittoTestOutput folder")
+
+	for fname in cleanGlmList:
+		try:
+			gridLabToDSS(fname, pJoin("/Users/ryanmahoney/omf/omf/scratch/dittoTestOutput", fname + '_conv.dss'))
+		except:
+			brokenDittoList[fname] = "This is where stderr goes"
+			pass
+
+			# save exception to txt
+	print(brokenDittoList.keys())
+	# zip up all inputs, outputs, exceptions + send to nrel
 	# Deprecated tests section
 	#dssToGridLab('ieee37.dss', 'Model.glm') # this kind of works
-	#gridLabToDSS('ieee37_fixed.glm', 'ieee37_conv.dss') # this fails miserably
+	# gridLabToDSS('ieee13.glm', 'ieee13_conv.dss') # this fails miserably
 	#cymeToDss(...) # first need to define function.
 	#distNetViz.insert_coordinates(evil_glm)
 
@@ -648,4 +719,4 @@ def _tests():
 	#TODO: a little help on the frontend to hide invalid commands.
 
 if __name__ == '__main__':
-	_tests()
+	_conversionTests()
