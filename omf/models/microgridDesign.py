@@ -215,13 +215,8 @@ def work(modelDir, inputDict):
 			outData['sizeWind' + indexString] = 0
 
 		# diesel generator does not follow convention above, as it is not turned on by user, but rather is automatically turned on when an outage is specified
-		# if generator == 'on':
 		outData['sizeDiesel' + indexString] = resultsSubset['Generator']['size_kw']
-		#print(outData['sizeDiesel' + indexString])
-		outData['powerDiesel' + indexString] = resultsSubset['Generator']['year_one_power_production_series_kw']
-		#print(resultsSubset['Generator']['year_one_power_production_series_kw'])
-		# else:
-		# 	outData['sizeGen' + indexString] = 0
+		outData['powerDieselToLoad' + indexString] = resultsSubset['Generator']['year_one_power_production_series_kw']
 		
 		outData['resilience' + indexString] = resultsResilience['resilience_by_timestep']
 		outData['minOutage' + indexString] = resultsResilience['resilience_hours_min']
@@ -286,6 +281,16 @@ def work(modelDir, inputDict):
 				stackgroup='one',
 				mode='none')
 			plotData.append(powerWindToLoad)
+
+		if resultsSubset['Generator']['size_kw'] > 0:
+			powerDieselToLoad = go.Scatter(
+				x=x,
+				y=outData['powerDieselToLoad' + indexString],
+				line=dict( color=('brown') ),
+				name="Load met by Diesel",
+				stackgroup='one',
+				mode='none')
+			plotData.append(powerDieselToLoad)			
 
 		plotlyLayout['yaxis'].update(title='Power (kW)')
 		plotlyLayout['xaxis'].update(title='Hour')
@@ -438,8 +443,8 @@ def runtimeEstimate(modelDir):
 
 def new(modelDir):
 	''' Create a new instance of this model. Returns true on success, false on failure. '''
-	fName = "input - col 1 commercial 120 kW per day, col 2 residential  30 kWh per day.csv"
-	#fName = "input - 200 Employee Office, Springfield Illinois, 2001.csv"
+	#fName = "input - col 1 commercial 120 kW per day, col 2 residential  30 kWh per day.csv"
+	fName = "input - 200 Employee Office, Springfield Illinois, 2001.csv"
 	with open(pJoin(omf.omfDir, "static", "testFiles", fName)) as f:
 		load_shape = f.read()
 	defaultInputs = {
@@ -464,7 +469,7 @@ def new(modelDir):
 		"batteryPowerMin": 0,
 		"batteryEnergyMin": 0,
 		"criticalLoadFactor": ".99",
-		"outage_start_hour": "0",
+		"outage_start_hour": "10",
 		"outageDuration": "24",
 		"fuelAvailable": "1000",
 		"genSize": "0",
