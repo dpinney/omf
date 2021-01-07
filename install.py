@@ -52,7 +52,7 @@ elif platform.system()=='Windows':
 	os.system("python -m pip install --upgrade pip")
 	# Install choco packages.
 	os.system("choco install -y --no-progress wget")
-	os.system("choco install -y --no-progress vcredist-all")
+	# os.system("choco install -y --no-progress vcredist-all")
 	os.system("choco install -y --no-progress ffmpeg")
 	os.system("choco install graphviz --no-progress --version=2.38.0.20171119")
 	os.system("choco install -y --no-progress pip")
@@ -69,7 +69,9 @@ elif platform.system()=='Windows':
 	graphVizBinPath = 'C:\\Program Files (x86)\\Graphviz2.38\\bin'
 	os.system(f'setx path "%path%;{graphVizBinPath}"')
 	os.system(f"set PATH=%PATH%;{graphVizBinPath}")
-	os.system('python -m pip install omf\\static\\pygraphviz-1.5-cp36-cp36m-win_amd64.whl')
+	os.system("wget --no-check-certificate https://github.com/CristiFati/Prebuilt-Binaries/raw/master/PyGraphviz/v1.6/pygraphviz-1.6-cp37-cp37m-win_amd64.whl")
+	os.system('python -m pip install pygraphviz-1.6-cp37-cp37m-win_amd64.whl')
+	# os.system('python -m pip install omf\\static\\pygraphviz-1.5-cp36-cp36m-win_amd64.whl')
 	# Finish up installation with pip.
 	pipInstallInOrder("python -m pip")
 	os.system("python setup.py develop")

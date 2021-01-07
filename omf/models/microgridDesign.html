@@ -302,7 +302,7 @@
 			</div>
 			<hr>
 			<div class="shortInput">
-				<label class="tooltip">Hourly Load Shape (.csv file)<span class="classic">Please enter the name of a .csv file representing the hourly load shape</span></label>
+				<label class="tooltip">Hourly Load Shape (.csv file)<span class="classic">Please enter the name of a .csv file representing the hourly load shape.</span></label>
 				<input id="loadShapeFile" type="file" style="display:none" onchange="handle_files(this.files,'loadShape','fileName')">
 				<input id="loadShape" name="loadShape" type="hidden">
 				<div>
@@ -390,11 +390,19 @@
 			</div>
 
 			<div class="wideInput">
-				<p class="inputSectionHeader">Resilence</p>
+				<p class="inputSectionHeader">Resilience - To optimize for resilience, specify an Outage Start Hour greater than 0</p>
 			</div>
 			<hr>
 			<div class="shortInput">
-				<label class="tooltip">Critical Load Factor<span class="classic">The percent of typical load that must be met during a grid outage.</span></label>
+				<label class="tooltip">Outage Start Hour<span class="classic">A major outage is added starting at this hour. Specify an hour greater than 0 but less than 8760 to trigger optimization for resilience and include diesel generation. If 0 is entered, the model will run an economic optimization without diesel.</span></label>
+				<input type="number" id="outage_start_hour" name="outage_start_hour" min="0" max="8760" required="required"/>
+			</div>
+			<div class="shortInput">
+				<label class="tooltip">Outage Duration (hours)<span class="classic">The added major outage is given this duration.</span></label>
+				<input type="number" id="outageDuration" name="outageDuration" min="1" max="8760" required="required"/>
+			</div>
+			<div class="shortInput">
+				<label class="tooltip">Critical Load Factor<span class="classic">Please enter a number 0-1 for the fraction of total typical load that must be met during a grid outage.</span></label>
 				<input type="number" id="criticalLoadFactor" name="criticalLoadFactor" step="0.01" min="0.0" max="1.0" required="required"/>
 			</div>
 			<div class="shortInput">
@@ -406,16 +414,8 @@
 				<input type="text" id="fuelAvailable" name="fuelAvailable" required="required"/>
 			</div>
 			<div class="shortInput">
-				<label class="tooltip">Minimum Generator Loading<span class="classic">The percent of load that must be met by the generator during a grid outage.</span></label>
+				<label class="tooltip">Minimum Generator Loading<span class="classic">Please enter a number 0-1 for the the minimum fraction of rated total kVA load that must be maintained by the generator. 0.3 rcommended for extended operation.</span></label>
 				<input type="number" id="minGenLoading" name="minGenLoading" step="0.01" min="0.0" max="1.0"  required="required"/>
-			</div>
-			<div class="shortInput">
-				<label class="tooltip">Outage Start Hour<span class="classic">A major outage is added starting at this hour.</span></label>
-				<input type="number" id="outage_start_hour" name="outage_start_hour" min="0" max="8760" required="required"/>
-			</div>
-			<div class="shortInput">
-				<label class="tooltip">Outage Duration (hours)<span class="classic">The added major outage is given this duration.</span></label>
-				<input type="number" id="outageDuration" name="outageDuration" min="0" max="8760" required="required"/>
 			</div>
 
 
