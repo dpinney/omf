@@ -143,6 +143,7 @@ def work(modelDir, inputDict):
 			scenario['Scenario']['Site']['Wind']['max_kw'] = 1000000;
 		if battery == 'off':
 			scenario['Scenario']['Site']['Storage']['max_kw'] = 0;
+		# if outage_start_hour is > 0, a resiliency optimization that includes diesel is triggered
 		if outage_start_hour != 0:
 			scenario['Scenario']['Site']['LoadProfile']['outage_is_major_event'] = True
 			scenario['Scenario']['Site']['LoadProfile']['critical_load_pct'] = criticalLoadFactor
@@ -470,10 +471,10 @@ def new(modelDir):
 		"batteryPowerMin": 0,
 		"batteryEnergyMin": 0,
 		"criticalLoadFactor": ".99",
-		"outage_start_hour": "100",
-		"outageDuration": "72",
+		"outage_start_hour": "170",
+		"outageDuration": "24",
 		"fuelAvailable": "1000",
-		"genSize": "20",
+		"genSize": "0",
 		"minGenLoading": "0.3"
 	}
 	creationCode = __neoMetaModel__.new(modelDir, defaultInputs)
