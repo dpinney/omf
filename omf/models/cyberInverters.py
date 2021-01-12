@@ -501,7 +501,8 @@ def stringToMag(s):
 
 def new(modelDir):
 	''' Create a new instance of this model. Returns true on success, false on failure. '''
-	f1Name = "load_solar_data.csv"
+	# f1Name = "load_solar_data.csv"
+	f1Name = "load_solar_data_850.csv"
 	with open(pJoin(omf.omfDir, "static", "testFiles", "pyCIGAR", f1Name)) as f1:
 		load_PV = f1.read()
 	f2Name = "breakpoints.csv"

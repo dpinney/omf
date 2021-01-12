@@ -2064,7 +2064,6 @@ def downloadModelData(owner, modelName, fullPath):
 	pathPieces = fullPath.split('/')
 	dirPath = "data/Model/"+owner+"/"+modelName+"/"+"/".join(pathPieces[0:-1])
 	fileName = pathPieces[-1]
-	print('!!!!!!!!!!!!!!', pathPieces,dirPath,fileName,fullPath)
 	if os.path.isdir(f'{dirPath}/{fileName}'):
 		shutil.make_archive(f'{dirPath}/{fileName}', 'zip', f'{dirPath}/{fileName}')
 		fileName =  pathPieces[-1] + '.zip'
