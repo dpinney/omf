@@ -4,6 +4,7 @@ import subprocess
 import pandas as pd
 import numpy as np
 import scipy
+import collections
 from scipy import spatial
 import scipy.stats as st
 from sklearn.preprocessing import LabelEncoder
@@ -15,6 +16,7 @@ from plotly.tools import make_subplots
 # OMF imports
 import omf
 from omf import geo
+from omf import distNetViz
 from omf.models import __neoMetaModel__
 from omf.models.__neoMetaModel__ import *
 from omf.models import flisr
@@ -180,47 +182,163 @@ def play(pathToOmd, pathToDss, workDir, microgrids, faultedLine, radial):
 	# insert new diesel loadshapes and isource generators
 	treeDSS = dssConvert.dssToTree(pathToDss)
 	tree2 = treeDSS.copy()
-	print(tree2)
+	# print(tree2)
 	for thing in tree2:
 		if (thing.get('object','').startswith('generator')) or (thing.get('object','').startswith('storage')):
 			treeDSS.remove(thing)
 	for key in shape_insert_list:
+		convertedKey = collections.OrderedDict(shape_insert_list[key])
 		min_pos = min(shape_insert_list.keys())
-		treeDSS.insert(min_pos, shape_insert_list[key])
+		treeDSS.insert(min_pos, convertedKey)
+	max_pos = 100000000
 	for key in gen_insert_list:
-		max_pos = 100000000
-		treeDSS.insert(max_pos, gen_insert_list[key])
+		convertedKey = collections.OrderedDict(gen_insert_list[key])
+		treeDSS.insert(max_pos, convertedKey)
 		max_pos+=1
 
-	key = 0
-	while key < len(bestReclosers):
-		recloserName = bestReclosers[key].get('name','')
-		open_line = {
-					'!CMD': 'Open',
-					'!TEST': 'line.' + f'{recloserName}',
-					'term': '2'
-				}
-		max_pos = 1000000000
-		treeDSS.insert(max_pos, open_line)
-		max_pos+=1
-		key+=1
+	# key = 0
+	# while key < len(bestReclosers):
+	# 	recloserName = bestReclosers[key].get('name','')
+	# 	open_line = {
+	# 				'!CMD': 'Open',
+	# 				'!TEST': 'line.' + f'{recloserName}',
+	# 				'term': '2'
+	# 			}
+	# 	max_pos = 1000000000
+	# 	convertedLine = collections.OrderedDict(open_line)
+	# 	treeDSS.insert(max_pos, convertedLine)
+	# 	max_pos+=1
+	# 	key+=1
 
-	treeDSS.insert(max_pos, {'!CMD': 'solve'})
+	# treeDSS.insert(max_pos, {'!CMD': 'solve'})
 
 	# Write new DSS file.
 	FULL_NAME = 'lehigh_full_newDiesel.dss'
 	dssConvert.treeToDss(treeDSS, FULL_NAME)
+	print(treeDSS)
 
-	# Powerflow outputs.
-	# opendss.newQstsPlot(FULL_NAME,
-	# 	stepSizeInMinutes=60, 
-	# 	numberOfSteps=24*20,
-	# 	keepAllFiles=False,
-	# 	actions={
-	# 		24*5:'open object=line.671692 term=1',
-	# 		24*8:'new object=fault.f1 bus1=670.1.2.3 phases=3 r=0 ontime=0.0'
-	# 	}
-	# )
+	actions = {}
+	key = 0
+	max_pos = 1000000000
+	while key < len(bestReclosers):
+		recloserName = bestReclosers[key].get('name','')
+		open_line = 'open object=line.' + f'{recloserName}' + ' term=1'
+		actions[max_pos] = open_line
+		max_pos+=1
+		key+=1
+
+	opendss.newQstsPlot(FULL_NAME,
+		stepSizeInMinutes=60, 
+		numberOfSteps=24*20,
+		keepAllFiles=False,
+		actions=actions
+	)
+
+	# stepSizeInMinutes= 60 
+	# numberOfSteps= 24*20
+	# keepAllFiles= False
+	# actions = {}
+	# filePath = FULL_NAME
+
+	# dssFileLoc = os.path.dirname(os.path.abspath(filePath))
+	# volt_coord = opendss.runDSS(filePath)
+
+	# mon_names = []
+	# circ_name = 'NONE'
+	# base_kvs = pd.DataFrame()
+	# for ob in treeDSS:
+	# 	obData = ob.get('object','NONE.NONE')
+	# 	obType, name = obData.split('.')
+	# 	mon_name = f'mon{obType}-{name}'
+	# 	if obData.startswith('circuit.'):
+	# 		circ_name = name
+	# 	elif obData.startswith('vsource.'):
+	# 		opendss.runDssCommand(f'new object=monitor.{mon_name} element={obType}.{name} terminal=1 mode=0')
+	# 		mon_names.append(mon_name)
+	# 	elif obData.startswith('generator.'):
+	# 		opendss.runDssCommand(f'new object=monitor.{mon_name} element={obType}.{name} terminal=1 mode=1 ppolar=no')
+	# 		mon_names.append(mon_name)
+	# 	elif ob.get('object','').startswith('load.'):
+	# 		opendss.runDssCommand(f'new object=monitor.{mon_name} element={obType}.{name} terminal=1 mode=0')
+	# 		mon_names.append(mon_name)
+	# 		new_kv = pd.DataFrame({'kv':[float(ob.get('kv',1.0))],'Name':['monload-' + name]})
+	# 		base_kvs = base_kvs.append(new_kv)
+	# 	elif ob.get('object','').startswith('capacitor.'):
+	# 		opendss.runDssCommand(f'new object=monitor.{mon_name} element={obType}.{name} terminal=1 mode=6')
+	# 		mon_names.append(mon_name)
+	# 	elif ob.get('object','').startswith('regcontrol.'):
+	# 		tformer = ob.get('transformer','NONE')
+	# 		winding = ob.get('winding',1)
+	# 		opendss.runDssCommand(f'new object=monitor.{mon_name} element=transformer.{tformer} terminal={winding} mode=2')
+	# 		mon_names.append(mon_name)
+	# # Run DSS
+	# opendss.runDssCommand(f'set mode=yearly stepsize={stepSizeInMinutes}m ')
+	# if actions == {}:
+	# 	# Run all steps directly.
+	# 	opendss.runDssCommand(f'set number={numberOfSteps}')
+	# 	opendss.runDssCommand('solve')
+	# else:
+	# 	# Actions defined, run them at the appropriate timestep.
+	# 	opendss.runDssCommand(f'set number=1')
+	# 	for step in range(1, numberOfSteps+1):
+	# 		action = actions.get(step)
+	# 		if action != None:
+	# 			print(f'Step {step} executing:', action)
+	# 			opendss.runDssCommand(action)
+	# 		opendss.runDssCommand('solve')
+	# # Export all monitors
+	# for name in mon_names:
+	# 	opendss.runDssCommand(f'export monitors monitorname={name}')
+	# # Aggregate monitors
+	# all_gen_df = pd.DataFrame()
+	# all_load_df = pd.DataFrame()
+	# all_source_df = pd.DataFrame()
+	# all_control_df = pd.DataFrame()
+	# for name in mon_names:
+	# 	csv_path = f'{dssFileLoc}/{circ_name}_Mon_{name}.csv'
+	# 	df = pd.read_csv(f'{circ_name}_Mon_{name}.csv')
+	# 	if name.startswith('monload-'):
+	# 		df['Name'] = name
+	# 		all_load_df = pd.concat([all_load_df, df], ignore_index=True, sort=False)
+	# 	elif name.startswith('mongenerator-'):
+	# 		df['Name'] = name
+	# 		all_gen_df = pd.concat([all_gen_df, df], ignore_index=True, sort=False)
+	# 	elif name.startswith('monvsource-'):
+	# 		df['Name'] = name
+	# 		all_source_df = pd.concat([all_source_df, df], ignore_index=True, sort=False)
+	# 	elif name.startswith('moncapacitor-'):
+	# 		df['Type'] = 'Capacitor'
+	# 		df['Name'] = name
+	# 		df = df.rename({' Step_1 ': 'Tap(pu)'}, axis='columns') #HACK: rename to match regulator tap name
+	# 		all_control_df = pd.concat([all_control_df, df], ignore_index=True, sort=False)
+	# 	elif name.startswith('monregcontrol-'):
+	# 		df['Type'] = 'Transformer'
+	# 		df['Name'] = name
+	# 		df = df.rename({' Tap (pu)': 'Tap(pu)'}, axis='columns') #HACK: rename to match cap tap name
+	# 		all_control_df = pd.concat([all_control_df, df], ignore_index=True, sort=False)
+	# 	# if not keepAllFiles:
+	# 	# 	os.remove(csv_path)
+	# print(all_gen_df)
+	# # Write final aggregates
+	# all_gen_df.sort_values(['Name','hour'], inplace=True)
+	# all_gen_df.columns = all_gen_df.columns.str.replace(r'[ "]','')
+	# all_gen_df.to_csv(f'{dssFileLoc}/timeseries_gen.csv', index=False)
+	# all_control_df.sort_values(['Name','hour'], inplace=True)
+	# all_control_df.columns = all_control_df.columns.str.replace(r'[ "]','')
+	# all_control_df.to_csv(f'{dssFileLoc}/timeseries_control.csv', index=False)
+	# all_source_df.sort_values(['Name','hour'], inplace=True)
+	# all_source_df.columns = all_source_df.columns.str.replace(r'[ "]','')
+	# all_source_df["P1(kW)"] = all_source_df["V1"].astype(float) * all_source_df["I1"].astype(float) / 1000.0
+	# all_source_df["P2(kW)"] = all_source_df["V2"].astype(float) * all_source_df["I2"].astype(float) / 1000.0
+	# all_source_df["P3(kW)"] = all_source_df["V3"].astype(float) * all_source_df["I3"].astype(float) / 1000.0
+	# all_source_df.to_csv(f'{dssFileLoc}/timeseries_source.csv', index=False)
+	# all_load_df.sort_values(['Name','hour'], inplace=True)
+	# all_load_df.columns = all_load_df.columns.str.replace(r'[ "]','')
+	# all_load_df = all_load_df.join(base_kvs.set_index('Name'), on='Name')
+	# all_load_df['V1(PU)'] = all_load_df['V1'].astype(float) / (all_load_df['kv'].astype(float) * 1000.0)
+	# all_load_df['V2(PU)'] = all_load_df['V2'].astype(float) / (all_load_df['kv'].astype(float) * 1000.0)
+	# all_load_df['V3(PU)'] = all_load_df['V3'].astype(float) / (all_load_df['kv'].astype(float) * 1000.0)
+	# all_load_df.to_csv(f'{dssFileLoc}/timeseries_load.csv', index=False)
 		
 # 5) open switches to isolate the fault in opendss version of system
 
