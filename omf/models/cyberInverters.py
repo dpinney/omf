@@ -281,6 +281,13 @@ def work(modelDir, inputDict):
 				hack_end=hackEndVal,
 				percentage_hack=percentHackVal
 			)
+			# Report out the agent paths.
+			# TODO: test, this might break with allInputData file locking.
+			defAgentFolders = os.listdir(pJoin(modelDir,"pycigarOutput"))
+			inputDict['defenseAgentNames'] = ','.join([x for x in defAgentFolders if x.startswith('policy_')])
+			print(inputDict['defenseAgentNames'])
+			with open(pJoin(modelDir, "allInputData.json")) as inFileOb:
+				json.dump(inputDict, inFileOb, indent=4)
 
 		#check to see if user entered a defense agent file
 		elif defenseAgentName != None:
@@ -409,9 +416,7 @@ def work(modelDir, inputDict):
 		outData["stdout"] = pycigarJson["stdout"]
 
 	runPyCIGAR()
-	# Report out the agent paths.
-	defAgentFolders = os.listdir(pJoin(modelDir,"pycigarOutput"))
-	outData['defenseAgents'] = [x for x in defAgentFolders if x.startswith('policy_')]
+	# Write outputs.
 	convertOutputs()
 	return outData
 
@@ -499,15 +504,12 @@ def new(modelDir):
 	f1Name = "load_solar_data.csv"
 	with open(pJoin(omf.omfDir, "static", "testFiles", "pyCIGAR", f1Name)) as f1:
 		load_PV = f1.read()
-
 	f2Name = "breakpoints.csv"
 	with open(pJoin(omf.omfDir, "static", "testFiles", "pyCIGAR", f2Name)) as f2:
 		breakpoints_inputs = f2.read()
-
 	f4Name = "misc_inputs.csv"
 	with open(pJoin(omf.omfDir, "static", "testFiles", "pyCIGAR", f4Name)) as f4:
 		miscFile = f4.read()
-
 	defaultInputs = {
 		"simStartDate": "2019-07-01T00:00:00Z",
 		"simLength": "750",
@@ -515,66 +517,39 @@ def new(modelDir):
 		"feederName1": "ieee37.dss",
 		"circuitFileName1": "ieee37.dss",
 		# "feederName1": "Olin Barre GH EOL Solar AVolts CapReg",
+		"fileName1":f1Name,
+		"loadPV": load_PV,
+		"fileName2":f2Name,
+		"breakpoints": breakpoints_inputs,
+		"fileName4":f4Name,
+		"miscFile": miscFile,
 		"modelType": modelName,
 		"zipCode": "59001",
-		"loadPV": load_PV,
-		"breakpoints": breakpoints_inputs,
-		"miscFile": miscFile,
 		"trainAgent": "False",
 		"attackVariable": "None",
-		"defenseVariable": "None"
+		"defenseVariable": "None",
+		"hackPercent": "50",
+		"defenseAgentNames": "policy_ieee37_oscillation_sample,policy_ieee37_unbalance_sample"
 	}
 	creationCode = __neoMetaModel__.new(modelDir, defaultInputs)
 	try:
 		shutil.copyfile(pJoin(__neoMetaModel__._omfDir, "static", "publicFeeders", defaultInputs["feederName1"]+'.omd'), pJoin(modelDir, defaultInputs["feederName1"]+'.omd'))
-	except:
-		return False
-
-	#default values put into new instance of model
-	# create PyCIGAR_inputs folder
-	try:
+		# Move in default files and empty results folders.
 		os.mkdir(pJoin(modelDir,"PyCIGAR_inputs"))
-	except FileExistsError:
-		print("PyCIGAR_inputs folder already exists!")
-		pass
-	except:
-		print("Error occurred creating PyCIGAR_inputs folder")
-		return False
-
-	# create pycigarOutput folder
-	try:
 		os.mkdir(pJoin(modelDir,"pycigarOutput"))
-	except FileExistsError:
-		print("pycigarOutput folder already exists!")
-		pass
+		for name in defaultInputs['defenseAgentNames'].split(','):
+			shutil.copytree(
+				pJoin(__neoMetaModel__._omfDir, "static", "testFiles", "pyCIGAR", name),
+				pJoin(modelDir, "pycigarOutput", name)
+			)
+		# Generate .dss file so we can open editor right out of the gate.
+		with open(f'{modelDir}/{defaultInputs["feederName1"]}.omd', 'r') as omdFile:
+			omd = json.load(omdFile)
+		tree = omd['tree']
+		niceDss = dssConvert.evilGldTreeToDssTree(tree)
+		dssConvert.treeToDss(niceDss, f'{modelDir}/{defaultInputs["circuitFileName1"]}')
 	except:
-		print("Error occurred creating pycigarOutput folder")
 		return False
-
-	# put sample policies in pycigarOutput folder
-	try:
-		shutil.copytree(pJoin(__neoMetaModel__._omfDir, "static", "testFiles", "pyCIGAR", "policy_ieee37_oscillation_sample"), pJoin(modelDir, "pycigarOutput", "policy_ieee37_oscillation_sample"))
-	except:
-		print("Error occurred copying policy_ieee37_oscillation_sample to pycigarOutput folder")
-		return False
-
-	try:
-		shutil.copytree(pJoin(__neoMetaModel__._omfDir, "static", "testFiles", "pyCIGAR", "policy_ieee37_unbalance_sample"), pJoin(modelDir, "pycigarOutput", "policy_ieee37_unbalance_sample"))
-	except:
-		print("Error occurred copying policy_ieee37_unbalance_sample to pycigarOutput folder")
-		return False
-	
-	with open(f'{modelDir}/{defaultInputs["feederName1"]}.omd', 'r') as omdFile:
-		omd = json.load(omdFile)
-	tree = omd['tree']
-	niceDss = dssConvert.evilGldTreeToDssTree(tree)
-	dssConvert.treeToDss(niceDss, f'{modelDir}/{defaultInputs["circuitFileName1"]}')
-
-	# try:
-	# 	# shutil.copyfile(pJoin(__neoMetaModel__._omfDir, "solvers", "opendss", defaultInputs["dssName1"]+'.dss'), pJoin(modelDir, "PyCIGAR_inputs", defaultInputs["dssName1"]+'.dss'))
-	# 	shutil.copyfile(pJoin(__neoMetaModel__._omfDir, "solvers", "opendss", defaultInputs["dssName1"]+'.dss'), pJoin(modelDir, defaultInputs["dssName1"]+'.dss'))
-	# except:
-	# 	return False
 	return creationCode
 
 @neoMetaModel_test_setup

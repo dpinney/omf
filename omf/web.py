@@ -2062,8 +2062,13 @@ def delete(objectType, objectName, owner):
 @read_permission_function
 def downloadModelData(owner, modelName, fullPath):
 	pathPieces = fullPath.split('/')
-	return send_from_directory("data/Model/"+owner+"/"+modelName+"/"+"/".join(pathPieces[0:-1]), pathPieces[-1])
-
+	dirPath = "data/Model/"+owner+"/"+modelName+"/"+"/".join(pathPieces[0:-1])
+	fileName = pathPieces[-1]
+	print('!!!!!!!!!!!!!!', pathPieces,dirPath,fileName,fullPath)
+	if os.path.isdir(f'{dirPath}/{fileName}'):
+		shutil.make_archive(f'{dirPath}/{fileName}', 'zip', f'{dirPath}/{fileName}')
+		fileName =  pathPieces[-1] + '.zip'
+	return send_from_directory(dirPath, fileName)
 
 @app.route("/uniqObjName/<objtype>/<owner>/<name>")
 @app.route("/uniqObjName/<objtype>/<owner>/<name>/<modelName>")
