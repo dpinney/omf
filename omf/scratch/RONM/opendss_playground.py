@@ -19,6 +19,7 @@ from omf.models import __neoMetaModel__
 from omf.models.__neoMetaModel__ import *
 from omf.models import flisr
 from omf.solvers.opendss import dssConvert
+from omf.solvers import opendss
 
 # Model metadata:
 # tooltip = 'outageCost calculates reliability metrics and creates a leaflet graph based on data from an input csv file.'
@@ -52,8 +53,8 @@ def play(pathToOmd, pathToDss, workDir, microgrids, faultedLine, radial):
 		buses.append(microgrids[key].get('gen_bus', ''))
 
 	tree, bestReclosers, badBuses = flisr.cutoffFault(tree, faultedNode, bestReclosers, workDir, radial, buses)
-	print(bestReclosers)
-	# 2) get list of loads associated with each microgrid component
+	# print(bestReclosers)
+	# 2) get a list of loads associated with each microgrid component
 	# and create a loadshape containing all said loads
 	buses = []
 	sortvals = {}
@@ -76,16 +77,16 @@ def play(pathToOmd, pathToDss, workDir, microgrids, faultedLine, radial):
 		# create an adjacency list representation of tree connectivity
 		adjacList, reclosers, vertices = flisr.adjacencyList(tree)
 		bus = buses[0]
-		print(buses[0])
+		# print(buses[0])
 		loadShapes = {}
+		alreadySeen = False
 		# check to see if there is a path between the power source and the fault 
 		subtree = flisr.getMaxSubtree(adjacList, bus)
 		for key in subtrees:
 			if key == subtree:
 				## TODO: NEED MORE SUBTLETY... write a function HERE so that if a smaller generator is networked with a bigger,
 				## we have the bigger already giving max and the smaller just picks up leftover load.
-				del(buses[0])
-				continue
+				alreadySeen = True
 		if 'sourcebus' in subtree:
 			del(buses[0])
 			continue
@@ -130,18 +131,6 @@ def play(pathToOmd, pathToDss, workDir, microgrids, faultedLine, radial):
 	# 4) add diesel generation to the opendss formatted system and solve
 		phase=1
 		while phase < 4:
-			shape_name = 'NewDiesel_' + str(buses[0]) + '_' + str(phase) + '_shape'
-			shape_data = dieselShapes.get('.' + str(phase),'')
-			shape_insert_list[i] = {
-					'!CMD': 'new',
-					'object': f'loadshape.{shape_name}',
-					'npts': f'{len(shape_data)}',
-					'interval': '1',
-					'useactual': 'no',
-					'mult': f'{list(shape_data)}'
-				}
-			i+=1
-			gen_name = 'Isource.isource_newDiesel' + str(buses[0]) + '_' + str(phase) + '_shape'
 			if phase == 1:
 				angle = '240.000000'
 				amps = '219.969000'
@@ -151,16 +140,29 @@ def play(pathToOmd, pathToDss, workDir, microgrids, faultedLine, radial):
 			else:
 				angle = '0.000000'
 				amps = '169.120000'
-			gen_insert_list[j] = {
-					'!CMD': 'new',
-					'!TEST': f'"{gen_name}"',
-					'bus1': str(buses[0]) + '.' + str(phase),
-					'phases': '1',
-					'angle': str(angle),
-					'amps': str(amps),
-					'daily': 'NewDiesel_' + str(buses[0]) + '_' + str(phase) + '_shape'
-				}
-			j+=1
+			if alreadySeen == False:
+				shape_name = 'NewDiesel_' + str(buses[0]) + '_' + str(phase) + '_shape'
+				shape_data = dieselShapes.get('.' + str(phase),'')
+				shape_insert_list[i] = {
+						'!CMD': 'new',
+						'object': f'loadshape.{shape_name}',
+						'npts': f'{len(shape_data)}',
+						'interval': '1',
+						'useactual': 'no',
+						'mult': f'{list(shape_data)}'
+					}
+				i+=1
+				gen_name = 'Isource.isource_newDiesel' + str(buses[0]) + '_' + str(phase) + '_shape'
+				gen_insert_list[j] = {
+						'!CMD': 'new',
+						'!TEST': f'"{gen_name}"',
+						'bus1': str(buses[0]) + '.' + str(phase),
+						'phases': '1',
+						'angle': str(angle),
+						'amps': str(amps),
+						'daily': 'NewDiesel_' + str(buses[0]) + '_' + str(phase) + '_shape'
+					}
+				j+=1
 			gen_name = 'Isource.isource_solar' + str(buses[0]) + '_' + str(phase) + '_shape'
 			gen_insert_list[j] = {
 					'!CMD': 'new',
@@ -177,6 +179,11 @@ def play(pathToOmd, pathToDss, workDir, microgrids, faultedLine, radial):
 
 	# insert new diesel loadshapes and isource generators
 	treeDSS = dssConvert.dssToTree(pathToDss)
+	tree2 = treeDSS.copy()
+	print(tree2)
+	for thing in tree2:
+		if (thing.get('object','').startswith('generator')) or (thing.get('object','').startswith('storage')):
+			treeDSS.remove(thing)
 	for key in shape_insert_list:
 		min_pos = min(shape_insert_list.keys())
 		treeDSS.insert(min_pos, shape_insert_list[key])
@@ -200,10 +207,20 @@ def play(pathToOmd, pathToDss, workDir, microgrids, faultedLine, radial):
 
 	treeDSS.insert(max_pos, {'!CMD': 'solve'})
 
-
 	# Write new DSS file.
 	FULL_NAME = 'lehigh_full_newDiesel.dss'
 	dssConvert.treeToDss(treeDSS, FULL_NAME)
+
+	# Powerflow outputs.
+	# opendss.newQstsPlot(FULL_NAME,
+	# 	stepSizeInMinutes=60, 
+	# 	numberOfSteps=24*20,
+	# 	keepAllFiles=False,
+	# 	actions={
+	# 		24*5:'open object=line.671692 term=1',
+	# 		24*8:'new object=fault.f1 bus1=670.1.2.3 phases=3 r=0 ontime=0.0'
+	# 	}
+	# )
 		
 # 5) open switches to isolate the fault in opendss version of system
 
