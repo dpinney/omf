@@ -152,6 +152,15 @@
 					<input id="fileName4" name="fileName4" value='' readonly class="uploadFileName">	
 				</div>
 			</div>
+			<div class="shortInput">
+				<label class="tooltip">Storage File Input<span class="classic">Import the .csv file representing the energy storage inputs data.</span></label>
+				<input id="chooseStorageFile" type="file" style="display:none" onchange="handle_files(this.files,'storageFile','storageFileName')">
+				<input id="storageFile" name="storageFile" type="hidden">
+				<div>
+					<label for="chooseStorageFile" class="fileButton">Choose File</label>
+					<input id="storageFileName" name="storageFileName" value='' readonly class="uploadFileName">	
+				</div>
+			</div>
 			<div class="wideInput">
 				<p class="inputSectionHeader">Cyber Attack Specifications</p>
 			</div>
@@ -170,9 +179,10 @@
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Defense Agent Variable<span class="classic">Select trained defense agent from the list, or select 'None' and run a training simulation to create one.</span></label>
+				<input id="defenseAgentNames" name="defenseAgentNames" type="hidden"/>
 				<select id="defenseVariable" name="defenseVariable">
 					<option value="None">None</option>
-					{% for agentFolderName in allOutputDataDict["defenseAgents"] %}
+					{% for agentFolderName in allInputDataDict["defenseAgentNames"].split(",") %}
 						<option value="{{agentFolderName}}">{{agentFolderName}}</option>
 					{% endfor %}
 				</select>
@@ -184,26 +194,10 @@
 					<option value="False">No</option>
 				</select>
 			</div>
-			<div class="wideInput" style="text-align:right">
-				<button id="deleteButton" type="button" class="stoppedInline postRunInline" onclick="deleteModel()">Delete</button>
-				<button id="shareButton" type="button" class="postRunInline" onclick="shareModel()">Share</button>
-				<button id="duplicateButton" type="button" class="postRunInline" onclick="duplicateModel()">Duplicate</button>
-				<button id="cancelButton" class="runningInline" type="button" onclick="cancelModel()">Cancel Run</button>
-				<button id="runButton" class="postRunInline stoppedInline" type="submit">Run Model</button>
-			</div>
+			{{ omfModelButtons }}
 		</form>
 	</div>
-	<div id ="runIndicator" class="content running">
-		Model running on server. Refresh the page to check for results, or wait for automatic refresh every 5 seconds.
-	</div>
-	<div id ="stopIndicator" class="content stopped" style="visibility: hidden">
-		<pre style='overflow-x: scroll;' id='errorText'></pre>
-		<script type="text/javascript">
-		if (typeof(allInputData.stderr) !== 'undefined') {	
-			gebi('stopIndicator').style.visibility = 'visible'
-			gebi('errorText').innerHTML = 'MODEL ENCOUNTERED AN ERROR AS FOLLOWS: \n\n' + allInputData.stderr}
-		</script>
-	</div>
+	{{ omfRunDebugBlock }}
 	<div id="output">
 		<p class="reportTitle postRun">Power Consumption From Transmission System <a target="_self" class="toggle">Hide / Show</a></p>
 		<div id="powerConsumptionReport" class="tightContent postRun">
@@ -828,14 +822,14 @@
 			</div>
 			<script>gebi("stdout").innerHTML = allOutputData.stdout</script>
 		</div> -->
-		<p class="reportTitle postRun">Study Details and Standard Output<a target="_self" class="toggle">Hide / Show</a></p>
+<!-- 		<p class="reportTitle postRun">Study Details and Standard Output<a target="_self" class="toggle">Hide / Show</a></p>
 		<div id="studyDetails" class="tightContent postRun detailsContainer" style="position: relative;">
 			<div id="runtimeStatsReport" style="width:100%; height:340px; margin:5 0 0 0; overflow-y:scroll; overflow-x:hidden; display:inline-block; vertical-align:top">
 				<pre id="stdout" style="font-size:13px; text-align:left"></pre>
 			</div>
 			<script>gebi("stdout").innerHTML = allOutputData.stdout</script>
 		</div>
-		<p class="reportTitle postRun">Raw Input and Output Files</p>
+ -->		<p class="reportTitle postRun">Raw Input and Output Files</p>
 		<div id="rawOutput" class="content postRun" style="margin-top:0px">
 			{% for name in allOutputDataDict['fileNames'] %}
 				{% if loop.index > 1 %}&mdash; {% endif %}<a href="/downloadModelData/{{allInputDataDict['user']}}/{{allInputDataDict['modelName']}}/{{name}}">{{name}}</a>

@@ -51,18 +51,19 @@
 
 			var numCols = parseInt(allOutputData['numScenarios'], 10);
 			if (numCols == 2) { numCols = 1;}
-			var content = '<p class="reportTitle" style="page-break-before:always">Microgrid Overview</p>'+
+			var content = '<p class="reportTitle" style="page-break-before:always">Recommended Microgrid Design Overview</p>'+
 				'<div id="" class="tightContent">'+
 					'<table>'+
 						'<tr>'+
 							'<th></th>'+
 							'<th>Total Savings (20 years)</th>'+
-							'<th class="solarDisplay">Recommended Solar (kW)</th>'+
-							'<th class="windDisplay">Recommended Wind (kW)</th>'+
-							'<th class="batteryDisplay">Recommended Battery Power (kW)</th>'+
-							'<th class="batteryDisplay">Recommended Battery Capacity (kWh)</th>'+
+							'<th>Average Load (kWh)</th>'+
+							'<th class="solarDisplay">Solar (kW)</th>'+
+							'<th class="windDisplay">Wind (kW)</th>'+
+							'<th class="batteryDisplay">Battery Power (kW)</th>'+
+							'<th class="batteryDisplay">Battery Capacity (kWh)</th>'+
+							'<th>Total Diesel Generation (kW)</th>'+
 							'<th>Average length of survived Outage (hours)</th>'+
-							'<th>Minimum length of survived Outage (hours)</th>'+
 							'<th>Maximum length of survived Outage (hours)</th>'+
 						'</tr>';
 
@@ -78,12 +79,13 @@
 				}
 					
 				row += '<td id="savings' + indexString + '"></td>'+
+					'<td id="avgLoad' + indexString + '"></td>'+
 					'<td id="sizePV' + indexString + '"></td>'+
 					'<td id="sizeWind' + indexString + '"></td>'+
 					'<td id="powerBattery' + indexString + '"></td>'+
 					'<td id="capacityBattery' + indexString + '"></td>'+
+					'<td id="sizeDiesel' + indexString + '"></td>'+
 					'<td id="avgOutage' + indexString + '"></td>'+
-					'<td id="minOutage' + indexString + '"></td>'+
 					'<td id="maxOutage' + indexString + '"></td>'+
 					'</tr>';
 
@@ -394,7 +396,7 @@
 			</div>
 			<hr>
 			<div class="shortInput">
-				<label class="tooltip">Outage Start Hour<span class="classic">A major outage is added starting at this hour. Specify an hour greater than 0 but less than 8760 to trigger optimization for resilience and include diesel generation. If 0 is entered, the model will run an economic optimization without diesel.</span></label>
+				<label class="tooltip">Outage Start Hour<span class="classic">A major outage is added starting at this hour. Specify an hour greater than 0 but less than 8760 to trigger optimization for resilience and include diesel generation. If 0 is entered, the model will run an economic optimization without diesel generation.</span></label>
 				<input type="number" id="outage_start_hour" name="outage_start_hour" min="0" max="8760" required="required"/>
 			</div>
 			<div class="shortInput">
@@ -414,7 +416,7 @@
 				<input type="text" id="fuelAvailable" name="fuelAvailable" required="required"/>
 			</div>
 			<div class="shortInput">
-				<label class="tooltip">Minimum Generator Loading<span class="classic">Please enter a number 0-1 for the the minimum fraction of rated total kVA load that must be maintained by the generator. 0.3 rcommended for extended operation.</span></label>
+				<label class="tooltip">Minimum Generator Loading<span class="classic">Please enter a number 0-1 for the the minimum fraction of rated total kVA load that must be maintained by the generator. >/= 0.3 recommended for extended operation.</span></label>
 				<input type="number" id="minGenLoading" name="minGenLoading" step="0.01" min="0.0" max="1.0"  required="required"/>
 			</div>
 
