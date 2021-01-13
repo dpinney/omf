@@ -635,7 +635,7 @@ def _conversionTests():
 		for f in glmList:
 			#run gridlabd
 			try:
-				result = subprocess.run(["gridlabd", f], shell=True, check=True)
+				result = subprocess.run(["gridlabd", f], shell=True, check=True) #cwd=path.get_folder(f)
 				cleanGlmList.add(f)
 			except:
 				brokenGlmList.add(f)
