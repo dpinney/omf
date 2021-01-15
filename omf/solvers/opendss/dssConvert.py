@@ -3,8 +3,10 @@ import os
 from os.path import join as pJoin
 import subprocess
 import sys
+import csv
 import json
 import warnings
+import traceback
 try:
 	from ditto.store import Store
 	from ditto.readers.opendss.read import Reader as dReader
@@ -16,6 +18,7 @@ except:
 from collections import OrderedDict
 from omf import feeder, distNetViz
 from pprint import pprint as pp
+from omf.solvers import gridlabd
 
 def gridLabToDSS(inFilePath, outFilePath):
 	''' Convert gridlab file to dss. ''' 
@@ -613,13 +616,13 @@ def _createAndCompareTestFile(inFile, userOutFile=''):
 	return 
 
 def _conversionTests():
-	pass
+	# pass
 	glmList = set()
 	mdbList = set()
 	cleanGlmList = set()
 	cleanMdbList = set()
-	brokenGlmList = set()
-	brokenMdbList = set()
+	brokenGlmList = {}
+	brokenMdbList = {}
 
 	def fillFileLists():
 		for root, dirs, files in os.walk("/Users/ryanmahoney/omf/omf"):
@@ -636,10 +639,13 @@ def _conversionTests():
 			#run gridlabd
 			try:
 				result = subprocess.run(["gridlabd", f], shell=True, check=True)
+				# result = subprocess.run(["gridlabd", f], shell=True, check=True) #cwd=path.get_folder(f)
 				cleanGlmList.add(f)
-			except:
-				brokenGlmList.add(f)
-		print("***********cleanGlmList = " + ", ".join(cleanGlmList))
+			except subprocess.CalledProcessError as e:
+				print("Error with ", f, ": ", e.output)
+				brokenGlmList[f] = e.output
+
+		# print("***********cleanGlmList = " + ", ".join(cleanGlmList))
 		# print("***********brokenGlmList = " + ", ".join(brokenGlmList))
 
 	def testAllCyme():
@@ -648,14 +654,14 @@ def _conversionTests():
 			try:
 				result = subprocess.run(["", f], shell=True, check=True)
 				cleanMdbList.add(f)
-			except:
-				brokenMdbList.add(f)
+			except subprocess.CalledProcessError as e:
+				brokenMdbList[f] = e.output
 		# print("***********cleanMdbList = " + ", ".join(cleanMdbList))
 		# print("***********brokenMdbList = " + ", ".join(brokenMdbList))
 	# all_glm_files = os.system('find ../.. -name *.glm')
 	# inputs = get urls for the input files. OMF_GITHUB_URL + extension.
 	fillFileLists()
-	testAllGlm()
+	# testAllGlm()
 
 	brokenDittoList = {}
 	# working_dir = './TEMP_CONV/'
@@ -667,15 +673,27 @@ def _conversionTests():
 	except:
 		print("Error occurred creating dittoTestOutput folder")
 
-	for fname in cleanGlmList:
+	# for fname in cleanGlmList:
+	for fname in glmList:
 		try:
 			gridLabToDSS(fname, pJoin("/Users/ryanmahoney/omf/omf/scratch/dittoTestOutput", fname + '_conv.dss'))
 		except:
-			brokenDittoList[fname] = "This is where stderr goes"
+			errorMsg = "" + traceback.format_exc()
+			brokenDittoList[fname] = errorMsg
+			# brokenDittoList[fname] = sys.exc_info()[0]
 			pass
-
 			# save exception to txt
-	print(brokenDittoList.keys())
+
+	# for key in brokenDittoList.keys():
+	# 	print(key + ": " + brokenDittoList[key])
+
+	#create a new file to save the broken ditto runs to
+	with open(pJoin("/Users/ryanmahoney/omf/omf/scratch", "dittoTestOutput", "brokenDittoList.csv"),"w") as brokenDittoFile:
+		writer = csv.writer(brokenDittoFile)
+		writer.writerows(brokenDittoList.items())
+
+
+	# print(brokenDittoList.keys())
 	# zip up all inputs, outputs, exceptions + send to nrel
 	# Deprecated tests section
 	#dssToGridLab('ieee37.dss', 'Model.glm') # this kind of works
