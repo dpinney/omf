@@ -4,7 +4,7 @@ source_dir = os.path.dirname(__file__)
 
 def pipInstallInOrder(pipCommandString):
 	''' This shouldn't be required, but pip doesn't resolve dependencies correctly unless we do this.'''
-	with open(f"{source_dir}/requirements.txt","r") as f:
+	with open("requirements.txt","r") as f:
 		for line in f:
 			if not line.startswith('#'):
 				os.system(pipCommandString + " install " + line)
@@ -25,9 +25,10 @@ if platform.system() == "Linux" and platform.linux_distribution()[0] in ["Ubuntu
 	os.system("sudo alien -i gridlabd-4.0.0-1.el6.x86_64.rpm")
 	os.system("sudo apt-get install -f")
 	os.system(f'octave-cli --no-gui -p "{source_dir}/omf/solvers/matpower7.0" --eval "install_matpower(1,1,1)"')
+	os.system("cd omf")
 	os.system("pip3 install --upgrade pip")
 	pipInstallInOrder("pip3")
-	os.system(f"python3 {source_dir}/setup.py develop")
+	os.system("python3 setup.py develop")
 # TODO: Double check CentOS installation to support Python 3.7 or up
 elif platform.system() == "Linux" and platform.linux_distribution()[0]=="CentOS Linux":
 	# CentOS Docker image appears to come with en_US.UTF-8 locale built-in, but we might need to install that locale in the future. That currently is not done here.
@@ -42,9 +43,10 @@ elif platform.system() == "Linux" and platform.linux_distribution()[0]=="CentOS 
 	os.system("wget --no-check-certificate https://sourceforge.net/projects/gridlab-d/files/gridlab-d/Candidate%20release/gridlabd-4.0.0-1.el6.x86_64.rpm")
 	os.system("rpm -Uvh gridlabd-4.0.0-1.el6.x86_64.rpm")
 	os.system(f'octave-cli --no-gui -p "{source_dir}/omf/solvers/matpower7.0" --eval "install_matpower(1,1,1)"')
+	os.system("cd omf")
 	pipInstallInOrder("pip3")
 	os.system("pip3 install --ignore-installed six")
-	os.system(f"python3 {source_dir}/setup.py develop")
+	os.system("python3 setup.py develop")
 elif platform.system()=='Windows':
 	# Update pip to remove warnings
 	os.system("python -m pip install --upgrade pip")
@@ -72,7 +74,7 @@ elif platform.system()=='Windows':
 	# os.system('python -m pip install omf\\static\\pygraphviz-1.5-cp36-cp36m-win_amd64.whl')
 	# Finish up installation with pip.
 	pipInstallInOrder("python -m pip")
-	os.system(f"python {source_dir}/setup.py develop")
+	os.system("python setup.py develop")
 	# os.system("refreshenv") # Refresh local environment variables via choco tool.
 elif platform.system()=="Darwin": # MacOS
 	# Install homebrew
@@ -91,9 +93,10 @@ elif platform.system()=="Darwin": # MacOS
 	''') # sed is to hack the build to work without user input.
 	os.system(f'octave-cli --no-gui -p "{source_dir}/omf/solvers/matpower7.0" --eval "install_matpower(1,1,1)"')
 	# pip installs
+	os.system("cd omf")
 	os.system('pip3 install pygraphviz --install-option="--include-path=/usr/local/include/graphviz" --install-option="--library-path=/usr/local/lib/graphviz/"')
 	os.system('pip3 install "ecos >= 2.0.7rc2"')
 	pipInstallInOrder("pip3")
-	os.system(f"python3 {source_dir}/setup.py develop")
+	os.system("python3 setup.py develop")
 else:
 	print("Your operating system is not currently supported. Platform detected: " + str(platform.system()) + str(platform.linux_distribution()))
