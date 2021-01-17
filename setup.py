@@ -16,6 +16,8 @@ import os
 #HACK: keep matplotlib from breaking out of sandboxes on Windows.
 os.environ["MPLCONFIGDIR"] = "."
 
+source_dir = os.path.dirname(__file__)
+
 setup(
 	name = 'omf',
 	version = '1.0.0',
@@ -39,5 +41,5 @@ setup(
 	license = 'GPLv2',
 	platforms = 'any',
 	zip_safe = False, 
-	install_requires = [x for x in open("requirements.txt").readlines() if not x.startswith('#')],
+	install_requires = [x for x in open(f"{source_dir}/requirements.txt").readlines() if not x.startswith('#')],
 )
