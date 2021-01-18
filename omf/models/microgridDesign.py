@@ -47,8 +47,6 @@ def work(modelDir, inputDict):
 	energyCost = float(inputDict['energyCost'])
 	demandCost = float(inputDict['demandCost'])
 	year = int(inputDict['year'])
-	#criticalLoadFactor is not calculating correctly as a 0-1 fraction in allOutputData.json; Need to fix the default
-	#criticalLoadFactor = float(inputDict['criticalLoadFactor'])/100
 	criticalLoadFactor = float(inputDict['criticalLoadFactor'])
 	solarCost = float(inputDict['solarCost'])
 	windCost = float(inputDict['windCost'])
@@ -58,10 +56,10 @@ def work(modelDir, inputDict):
 	windMin = float(inputDict['windMin'])
 	batteryPowerMin = float(inputDict['batteryPowerMin'])
 	batteryEnergyMin = float(inputDict['batteryEnergyMin'])
+	solarMax = float(inputDict['solarMax'])
+	windMax = float(inputDict['windMax'])
 	fuelAvailable = float(inputDict['fuelAvailable'])
 	genSize = float(inputDict['genSize'])
-	#minGenLoading is not calculating correctly as a 0-1 fraction in allOutputData.json; Need to fix the default
-	#minGenLoading = float(inputDict['minGenLoading'])/100
 	minGenLoading = float(inputDict['minGenLoading'])
 	outage_start_hour = float(inputDict['outage_start_hour'])
 	outage_end_hour = outage_start_hour + float(inputDict['outageDuration'])
@@ -136,11 +134,13 @@ def work(modelDir, inputDict):
 
 		# solar and battery have default 'max_kw' == 1000000000; Wind has default 'max_kw' == 0 and thus must be set explicitly; Check https://developer.nrel.gov/docs/energy-optimization/reopt-v1 for updates
 		if solar == 'off':
-			scenario['Scenario']['Site']['PV']['max_kw'] = 0;
+			scenario['Scenario']['Site']['PV']['max_kw'] = 0
+		elif solar == 'on':
+			scenario['Scenario']['Site']['PV']['max_kw'] = solarMax;
 		if wind == 'off':
 			scenario['Scenario']['Site']['Wind']['max_kw'] = 0
 		elif wind == 'on':
-			scenario['Scenario']['Site']['Wind']['max_kw'] = 1000000;
+			scenario['Scenario']['Site']['Wind']['max_kw'] = windMax;
 		if battery == 'off':
 			scenario['Scenario']['Site']['Storage']['max_kw'] = 0;
 		# if outage_start_hour is > 0, a resiliency optimization that includes diesel is triggered
@@ -470,8 +470,10 @@ def new(modelDir):
 		"windMin": 0,
 		"batteryPowerMin": 0,
 		"batteryEnergyMin": 0,
+		"solarMax": '1000000000',
+		"windMax": '1000000000',
 		"criticalLoadFactor": ".99",
-		"outage_start_hour": "170",
+		"outage_start_hour": "1000",
 		"outageDuration": "24",
 		"fuelAvailable": "1000",
 		"genSize": "0",
