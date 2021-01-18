@@ -125,10 +125,26 @@ def play(pathToOmd, pathToDss, workDir, microgrids, faultedLine, radial):
 							solarshape = eval(tree[key1].get('mult',''))
 							if '.1' in loadShapes:
 								dieselShapes['.1'] = [a - b for a, b in zip(loadShapes.get('.1',''), solarshape)]
+								k = []
+								for i in dieselShapes['.1']:
+									str(i).replace(' ','')
+									k.append(i)
+								dieselShapes['.1'] = k
 							if '.2' in loadShapes:
 								dieselShapes['.2'] = [a - b for a, b in zip(loadShapes.get('.2',''), solarshape)]
+								k = []
+								for i in dieselShapes['.2']:
+									str(i).replace(' ','')
+									k.append(i)
+								dieselShapes['.2'] = k
 							if '.3' in loadShapes:
 								dieselShapes['.3'] = [a - b for a, b in zip(loadShapes.get('.3',''), solarshape)]
+								k = []
+								# for i in dieselShapes['.3']:
+								# 	str(i).replace(' ','')
+								# 	k.append(i)
+								# dieselShapes['.3'] = k
+								# print(x.strip(' ') for x in dieselShapes['.3'])
 		busShapes[buses[0]] = [dieselShapes.get('.1',''), dieselShapes.get('.2',''), dieselShapes.get('.3','')]
 	# 4) add diesel generation to the opendss formatted system and solve
 		phase=1
@@ -143,7 +159,7 @@ def play(pathToOmd, pathToDss, workDir, microgrids, faultedLine, radial):
 				angle = '0.000000'
 				amps = '169.120000'
 			if alreadySeen == False:
-				shape_name = 'NewDiesel_' + str(buses[0]) + '_' + str(phase) + '_shape'
+				shape_name = 'newdiesel_' + str(buses[0]) + '_' + str(phase) + '_shape'
 				shape_data = dieselShapes.get('.' + str(phase),'')
 				shape_insert_list[i] = {
 						'!CMD': 'new',
@@ -151,24 +167,24 @@ def play(pathToOmd, pathToDss, workDir, microgrids, faultedLine, radial):
 						'npts': f'{len(shape_data)}',
 						'interval': '1',
 						'useactual': 'no',
-						'mult': f'{list(shape_data)}'
+						'mult': str(list(shape_data)).replace(' ','')
 					}
 				i+=1
-				gen_name = 'Isource.isource_newDiesel' + str(buses[0]) + '_' + str(phase) + '_shape'
+				gen_name = 'isource.isource_newdiesel' + str(buses[0]) + '_' + str(phase) + '_shape'
 				gen_insert_list[j] = {
 						'!CMD': 'new',
-						'!TEST': f'"{gen_name}"',
+						'object': f'"{gen_name}"',
 						'bus1': str(buses[0]) + '.' + str(phase),
 						'phases': '1',
 						'angle': str(angle),
 						'amps': str(amps),
-						'daily': 'NewDiesel_' + str(buses[0]) + '_' + str(phase) + '_shape'
+						'daily': 'newdiesel_' + str(buses[0]) + '_' + str(phase) + '_shape'
 					}
 				j+=1
-			gen_name = 'Isource.isource_solar' + str(buses[0]) + '_' + str(phase) + '_shape'
+			gen_name = 'isource.isource_solar' + str(buses[0]) + '_' + str(phase) + '_shape'
 			gen_insert_list[j] = {
 					'!CMD': 'new',
-					'!TEST': f'"{gen_name}"',
+					'object': f'"{gen_name}"',
 					'bus1': str(buses[0]) + '.' + str(phase),
 					'phases': '1',
 					'angle': str(angle),
@@ -197,6 +213,7 @@ def play(pathToOmd, pathToDss, workDir, microgrids, faultedLine, radial):
 		max_pos+=1
 
 	# key = 0
+	# max_pos = 1000000000
 	# while key < len(bestReclosers):
 	# 	recloserName = bestReclosers[key].get('name','')
 	# 	open_line = {
@@ -204,18 +221,18 @@ def play(pathToOmd, pathToDss, workDir, microgrids, faultedLine, radial):
 	# 				'!TEST': 'line.' + f'{recloserName}',
 	# 				'term': '2'
 	# 			}
-	# 	max_pos = 1000000000
-	# 	convertedLine = collections.OrderedDict(open_line)
-	# 	treeDSS.insert(max_pos, convertedLine)
+	# 	# convertedLine = collections.OrderedDict(open_line)
+	# 	treeDSS.insert(max_pos, open_line)
 	# 	max_pos+=1
 	# 	key+=1
 
-	# treeDSS.insert(max_pos, {'!CMD': 'solve'})
+	treeDSS.insert(max_pos, {'!CMD': 'solve'})
+	print(treeDSS)
 
 	# Write new DSS file.
 	FULL_NAME = 'lehigh_full_newDiesel.dss'
 	dssConvert.treeToDss(treeDSS, FULL_NAME)
-	print(treeDSS)
+	# print(treeDSS)
 
 	actions = {}
 	key = 0
@@ -226,6 +243,7 @@ def play(pathToOmd, pathToDss, workDir, microgrids, faultedLine, radial):
 		actions[max_pos] = open_line
 		max_pos+=1
 		key+=1
+	# print(treeDSS)
 
 	opendss.newQstsPlot(FULL_NAME,
 		stepSizeInMinutes=60, 
@@ -237,7 +255,7 @@ def play(pathToOmd, pathToDss, workDir, microgrids, faultedLine, radial):
 	# stepSizeInMinutes= 60 
 	# numberOfSteps= 24*20
 	# keepAllFiles= False
-	# actions = {}
+	# actions = actions
 	# filePath = FULL_NAME
 
 	# dssFileLoc = os.path.dirname(os.path.abspath(filePath))
@@ -318,7 +336,6 @@ def play(pathToOmd, pathToDss, workDir, microgrids, faultedLine, radial):
 	# 		all_control_df = pd.concat([all_control_df, df], ignore_index=True, sort=False)
 	# 	# if not keepAllFiles:
 	# 	# 	os.remove(csv_path)
-	# print(all_gen_df)
 	# # Write final aggregates
 	# all_gen_df.sort_values(['Name','hour'], inplace=True)
 	# all_gen_df.columns = all_gen_df.columns.str.replace(r'[ "]','')
