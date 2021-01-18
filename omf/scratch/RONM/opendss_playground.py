@@ -252,115 +252,30 @@ def play(pathToOmd, pathToDss, workDir, microgrids, faultedLine, radial):
 		actions=actions
 	)
 
-	# stepSizeInMinutes= 60 
-	# numberOfSteps= 24*20
-	# keepAllFiles= False
-	# actions = actions
-	# filePath = FULL_NAME
-
-	# dssFileLoc = os.path.dirname(os.path.abspath(filePath))
-	# volt_coord = opendss.runDSS(filePath)
-
-	# mon_names = []
-	# circ_name = 'NONE'
-	# base_kvs = pd.DataFrame()
-	# for ob in treeDSS:
-	# 	obData = ob.get('object','NONE.NONE')
-	# 	obType, name = obData.split('.')
-	# 	mon_name = f'mon{obType}-{name}'
-	# 	if obData.startswith('circuit.'):
-	# 		circ_name = name
-	# 	elif obData.startswith('vsource.'):
-	# 		opendss.runDssCommand(f'new object=monitor.{mon_name} element={obType}.{name} terminal=1 mode=0')
-	# 		mon_names.append(mon_name)
-	# 	elif obData.startswith('generator.'):
-	# 		opendss.runDssCommand(f'new object=monitor.{mon_name} element={obType}.{name} terminal=1 mode=1 ppolar=no')
-	# 		mon_names.append(mon_name)
-	# 	elif ob.get('object','').startswith('load.'):
-	# 		opendss.runDssCommand(f'new object=monitor.{mon_name} element={obType}.{name} terminal=1 mode=0')
-	# 		mon_names.append(mon_name)
-	# 		new_kv = pd.DataFrame({'kv':[float(ob.get('kv',1.0))],'Name':['monload-' + name]})
-	# 		base_kvs = base_kvs.append(new_kv)
-	# 	elif ob.get('object','').startswith('capacitor.'):
-	# 		opendss.runDssCommand(f'new object=monitor.{mon_name} element={obType}.{name} terminal=1 mode=6')
-	# 		mon_names.append(mon_name)
-	# 	elif ob.get('object','').startswith('regcontrol.'):
-	# 		tformer = ob.get('transformer','NONE')
-	# 		winding = ob.get('winding',1)
-	# 		opendss.runDssCommand(f'new object=monitor.{mon_name} element=transformer.{tformer} terminal={winding} mode=2')
-	# 		mon_names.append(mon_name)
-	# # Run DSS
-	# opendss.runDssCommand(f'set mode=yearly stepsize={stepSizeInMinutes}m ')
-	# if actions == {}:
-	# 	# Run all steps directly.
-	# 	opendss.runDssCommand(f'set number={numberOfSteps}')
-	# 	opendss.runDssCommand('solve')
-	# else:
-	# 	# Actions defined, run them at the appropriate timestep.
-	# 	opendss.runDssCommand(f'set number=1')
-	# 	for step in range(1, numberOfSteps+1):
-	# 		action = actions.get(step)
-	# 		if action != None:
-	# 			print(f'Step {step} executing:', action)
-	# 			opendss.runDssCommand(action)
-	# 		opendss.runDssCommand('solve')
-	# # Export all monitors
-	# for name in mon_names:
-	# 	opendss.runDssCommand(f'export monitors monitorname={name}')
-	# # Aggregate monitors
-	# all_gen_df = pd.DataFrame()
-	# all_load_df = pd.DataFrame()
-	# all_source_df = pd.DataFrame()
-	# all_control_df = pd.DataFrame()
-	# for name in mon_names:
-	# 	csv_path = f'{dssFileLoc}/{circ_name}_Mon_{name}.csv'
-	# 	df = pd.read_csv(f'{circ_name}_Mon_{name}.csv')
-	# 	if name.startswith('monload-'):
-	# 		df['Name'] = name
-	# 		all_load_df = pd.concat([all_load_df, df], ignore_index=True, sort=False)
-	# 	elif name.startswith('mongenerator-'):
-	# 		df['Name'] = name
-	# 		all_gen_df = pd.concat([all_gen_df, df], ignore_index=True, sort=False)
-	# 	elif name.startswith('monvsource-'):
-	# 		df['Name'] = name
-	# 		all_source_df = pd.concat([all_source_df, df], ignore_index=True, sort=False)
-	# 	elif name.startswith('moncapacitor-'):
-	# 		df['Type'] = 'Capacitor'
-	# 		df['Name'] = name
-	# 		df = df.rename({' Step_1 ': 'Tap(pu)'}, axis='columns') #HACK: rename to match regulator tap name
-	# 		all_control_df = pd.concat([all_control_df, df], ignore_index=True, sort=False)
-	# 	elif name.startswith('monregcontrol-'):
-	# 		df['Type'] = 'Transformer'
-	# 		df['Name'] = name
-	# 		df = df.rename({' Tap (pu)': 'Tap(pu)'}, axis='columns') #HACK: rename to match cap tap name
-	# 		all_control_df = pd.concat([all_control_df, df], ignore_index=True, sort=False)
-	# 	# if not keepAllFiles:
-	# 	# 	os.remove(csv_path)
-	# # Write final aggregates
-	# all_gen_df.sort_values(['Name','hour'], inplace=True)
-	# all_gen_df.columns = all_gen_df.columns.str.replace(r'[ "]','')
-	# all_gen_df.to_csv(f'{dssFileLoc}/timeseries_gen.csv', index=False)
-	# all_control_df.sort_values(['Name','hour'], inplace=True)
-	# all_control_df.columns = all_control_df.columns.str.replace(r'[ "]','')
-	# all_control_df.to_csv(f'{dssFileLoc}/timeseries_control.csv', index=False)
-	# all_source_df.sort_values(['Name','hour'], inplace=True)
-	# all_source_df.columns = all_source_df.columns.str.replace(r'[ "]','')
-	# all_source_df["P1(kW)"] = all_source_df["V1"].astype(float) * all_source_df["I1"].astype(float) / 1000.0
-	# all_source_df["P2(kW)"] = all_source_df["V2"].astype(float) * all_source_df["I2"].astype(float) / 1000.0
-	# all_source_df["P3(kW)"] = all_source_df["V3"].astype(float) * all_source_df["I3"].astype(float) / 1000.0
-	# all_source_df.to_csv(f'{dssFileLoc}/timeseries_source.csv', index=False)
-	# all_load_df.sort_values(['Name','hour'], inplace=True)
-	# all_load_df.columns = all_load_df.columns.str.replace(r'[ "]','')
-	# all_load_df = all_load_df.join(base_kvs.set_index('Name'), on='Name')
-	# all_load_df['V1(PU)'] = all_load_df['V1'].astype(float) / (all_load_df['kv'].astype(float) * 1000.0)
-	# all_load_df['V2(PU)'] = all_load_df['V2'].astype(float) / (all_load_df['kv'].astype(float) * 1000.0)
-	# all_load_df['V3(PU)'] = all_load_df['V3'].astype(float) / (all_load_df['kv'].astype(float) * 1000.0)
-	# all_load_df.to_csv(f'{dssFileLoc}/timeseries_load.csv', index=False)
-		
-# 5) open switches to isolate the fault in opendss version of system
-
-#### for each switch that is flipped in flisr model:
-	# repeat steps 2-5), trying to slowly make microgrids network with each other
+	def make_chart(csvName, category_name, x, y_list):
+		gen_data = pd.read_csv(csvName)
+		data = []
+		for ob_name in set(gen_data[category_name]):
+			for y_name in y_list:
+				this_series = gen_data[gen_data[category_name] == ob_name]
+				trace = py.graph_objs.Scatter(
+					x = this_series[x],
+					y = this_series[y_name],
+					name = ob_name + '_' + y_name
+				)
+				data.append(trace)
+		layout = py.graph_objs.Layout(
+			title = f'{csvName} Output',
+			xaxis = dict(title = x),
+			yaxis = dict(title = str(y_list))
+		)
+		fig = py.graph_objs.Figure(data, layout)
+		py.offline.plot(fig, filename=f'{csvName}.plot.html')
+	
+	# make_chart('timeseries_gen.csv', 'Name', 'hour', ['P1(kW)','P2(kW)','P3(kW)'])
+	make_chart('timeseries_load.csv', 'Name', 'hour', ['V1','V2','V3'])
+	make_chart('timeseries_source.csv', 'Name', 'hour', ['P1(kW)','P2(kW)','P3(kW)'])
+	make_chart('timeseries_control.csv', 'Name', 'hour', ['Tap(pu)'])
 
 microgrids = {
 	'm1': {
