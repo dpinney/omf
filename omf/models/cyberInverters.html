@@ -780,7 +780,7 @@
 						"pointWidth": 40,
 						"marker": {"enabled":false}, 
 						"color": "gray", 
-						"data":allOutputData.voltageImbalances[busName], 
+						"data":allOutputData.voltageImbalances[busName].map(x => 100 * x), 
 						"name":busName,
 						"visible":true,
 					}
