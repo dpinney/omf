@@ -150,22 +150,22 @@ def newQstsPlot(filePath, stepSizeInMinutes, numberOfSteps, keepAllFiles=False, 
 	# Write final aggregates
 	if not all_gen_df.empty:
 		all_gen_df.sort_values(['Name','hour'], inplace=True)
-		all_gen_df.columns = all_gen_df.columns.str.replace(r'[ "]','')
+		all_gen_df.columns = all_gen_df.columns.str.replace(r'[ "]','',regex=True)
 		all_gen_df.to_csv(f'{dssFileLoc}/timeseries_gen.csv', index=False)
 	if not all_control_df.empty:
 		all_control_df.sort_values(['Name','hour'], inplace=True)
-		all_control_df.columns = all_control_df.columns.str.replace(r'[ "]','')
+		all_control_df.columns = all_control_df.columns.str.replace(r'[ "]','',regex=True)
 		all_control_df.to_csv(f'{dssFileLoc}/timeseries_control.csv', index=False)
 	if not all_source_df.empty:
 		all_source_df.sort_values(['Name','hour'], inplace=True)
-		all_source_df.columns = all_source_df.columns.str.replace(r'[ "]','')
+		all_source_df.columns = all_source_df.columns.str.replace(r'[ "]','',regex=True)
 		all_source_df["P1(kW)"] = all_source_df["V1"].astype(float) * all_source_df["I1"].astype(float) / 1000.0
 		all_source_df["P2(kW)"] = all_source_df["V2"].astype(float) * all_source_df["I2"].astype(float) / 1000.0
 		all_source_df["P3(kW)"] = all_source_df["V3"].astype(float) * all_source_df["I3"].astype(float) / 1000.0
 		all_source_df.to_csv(f'{dssFileLoc}/timeseries_source.csv', index=False)
 	if not all_load_df.empty:
 		all_load_df.sort_values(['Name','hour'], inplace=True)
-		all_load_df.columns = all_load_df.columns.str.replace(r'[ "]','')
+		all_load_df.columns = all_load_df.columns.str.replace(r'[ "]','',regex=True)
 		all_load_df = all_load_df.join(base_kvs.set_index('Name'), on='Name')
 		all_load_df['V1(PU)'] = all_load_df['V1'].astype(float) / (all_load_df['kv'].astype(float) * 1000.0)
 		all_load_df['V2(PU)'] = all_load_df['V2'].astype(float) / (all_load_df['kv'].astype(float) * 1000.0)
