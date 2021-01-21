@@ -769,13 +769,8 @@
 				if (busNamesArray.length == 0){
 					$("#voltageImbalancesReport").html("<p>&#160;&#160;&#160;No Voltage Imbalance values were returned.</p>")
 				}
-				// else {
-				// 	$("#voltageImbalancesReport").html("<p>&#160;&#160;&#160;".concat(busNamesArray.join()).concat("</p>"))
-				// }
 				voltImbalSeriesData = []
 				for (var busName of busNamesArray){
-					// randomize color
-					var seriesColor = "blue"
 					var busSeriesData = {
 						"pointWidth": 40,
 						"marker": {"enabled":false}, 
