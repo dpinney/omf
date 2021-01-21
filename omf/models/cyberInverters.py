@@ -413,6 +413,12 @@ def work(modelDir, inputDict):
 			
 			outData[cap_name]["CapPhases"] = capPhaseValue
 
+		# convert voltage imbalance data
+		outData["voltageImbalances"] = {}
+		for bus_name in pycigarJson["Voltage Imbalances"].keys():
+			outData["voltageImbalances"][bus_name] = []
+			outData["voltageImbalances"][bus_name] = pycigarJson["Voltage Imbalances"][bus_name]
+
 		outData["stdout"] = pycigarJson["stdout"]
 
 	runPyCIGAR()
