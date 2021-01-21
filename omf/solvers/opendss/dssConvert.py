@@ -709,6 +709,15 @@ def _conversionTests():
 			brokenDittoList[fname]["errMsg"] = errorMsg.replace("\n","\t*\t")
 			pass
 
+	# TECHNIQUES FOR HANDLING GLM INCLUDES
+	# glm_str = open('glm_path.glm').read()
+	# if '#include' in glm_str:
+	# 	if quick_and_easy_flag:
+	# 		pass #skip test, until we can work out includes.
+	# 	else:
+	# 		include_file = open('path to the include')
+	# 		glm_str.replace('#include name.glm', include_file)
+
 	# for key in brokenDittoList.keys():
 	# 	print(key + ": " + brokenDittoList[key])
 
