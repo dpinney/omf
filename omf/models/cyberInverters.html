@@ -771,6 +771,10 @@
 				}
 				voltImbalSeriesData = []
 				for (var busName of busNamesArray){
+<<<<<<< HEAD
+=======
+					// randomize color
+>>>>>>> fb5a66cf4709d267bc32fec509e5bd287f9fce42
 					var busSeriesData = {
 						"pointWidth": 40,
 						"marker": {"enabled":false}, 
@@ -781,7 +785,6 @@
 					}
 					voltImbalSeriesData.push(busSeriesData)
 				}
-
 				var localHighChart = JSON.parse(JSON.stringify(swingHighChartsTemplate))
 				localHighChart["chart"]["renderTo"] = "voltageImbalancesChart"
 				localHighChart["chart"]["width"] = 1000
