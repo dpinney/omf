@@ -773,15 +773,15 @@
 				// 	$("#voltageImbalancesReport").html("<p>&#160;&#160;&#160;".concat(busNamesArray.join()).concat("</p>"))
 				// }
 				voltImbalSeriesData = []
-				for (var busName in busNamesArray){
+				for (var busName of busNamesArray){
 					// randomize color
 					var seriesColor = "blue"
 					var busSeriesData = {
 						"pointWidth": 40,
 						"marker": {"enabled":false}, 
-						"color": "blue", 
-						"data":eval("allOutputData.voltageImbalances.".concat(busName)), 
-						"name":"busName",
+						"color": "gray", 
+						"data":allOutputData.voltageImbalances[busName], 
+						"name":busName,
 						"visible":true,
 					}
 					voltImbalSeriesData.push(busSeriesData)
@@ -793,7 +793,7 @@
 				localHighChart["chart"]["height"] = 200
 				localHighChart["chart"]["type"] = "line"
 				localHighChart["series"] = voltImbalSeriesData
-				localHighChart["yAxis"] = [{"title":{"text":"Imbalance %","style":{"color":"black"}},"min":0,"max":1}]
+				localHighChart["yAxis"] = [{"title":{"text":"Imbalance %","style":{"color":"black"}}}]
 				new Highcharts.Chart(localHighChart)
 			</script>
 		</div>
