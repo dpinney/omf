@@ -383,20 +383,28 @@
 				<input type="text" id="windMax" name="windMax" required="required"/>
 			</div>
 			<div class="shortInput batteryDisplayInput">
-				<label class="tooltip">Battery Energy Cost ($/kWh)<span class="classic">Specify the cost in $/kWh.</span></label>
-				<input type="text" id="batteryEnergyCost" name="batteryEnergyCost" pattern="^\d+\.?\d*?$" required="required"/>
-			</div>
-			<div class="shortInput batteryDisplayInput">
 				<label class="tooltip">Battery Power Cost ($/kW)<span class="classic">Specify the cost in $/kW.</span></label>
 				<input type="text" id="batteryPowerCost" name="batteryPowerCost" pattern="^\d+\.?\d*?$" required="required"/>
 			</div>
 			<div class="shortInput BatteryDisplayInput">
-				<label class="tooltip">Battery Minimum Power (kW)<span class="classic">Specify the minimum desired battery capacity in kW.</span></label>
+				<label class="tooltip">Battery Minimum Power (kW)<span class="classic">Specify the minimum desired battery power in kW.</span></label>
 				<input type="text" id="batteryPowerMin" name="batteryPowerMin" required="required"/>
 			</div>
 			<div class="shortInput BatteryDisplayInput">
-				<label class="tooltip">Battery Minimum Energy (kWh)<span class="classic">Specify the minimum desired battery capacity in kWh.</span></label>
-				<input type="text" id="batteryEnergyMin" name="batteryEnergyMin" required="required"/>
+				<label class="tooltip">Battery Maximum Power (kW)<span class="classic">Specify the maximum desired battery power in kW.</span></label>
+				<input type="text" id="batteryPowerMax" name="batteryPowerMax" required="required"/>
+			</div>
+			<div class="shortInput batteryDisplayInput">
+				<label class="tooltip">Battery Capacity Cost ($/kWh)<span class="classic">Specify the cost in $/kWh.</span></label>
+				<input type="text" id="batteryCapacityCost" name="batteryCapacityCost" pattern="^\d+\.?\d*?$" required="required"/>
+			</div>
+			<div class="shortInput BatteryDisplayInput">
+				<label class="tooltip">Battery Minimum Capacity (kWh)<span class="classic">Specify the minimum desired battery capacity in kWh.</span></label>
+				<input type="text" id="batteryCapacityMin" name="batteryCapacityMin" required="required"/>
+			</div>
+			<div class="shortInput BatteryDisplayInput">
+				<label class="tooltip">Battery Maximum Capacity (kWh)<span class="classic">Specify the maximum desired battery capacity in kWh.</span></label>
+				<input type="text" id="batteryCapacityMax" name="batteryCapacityMax" required="required"/>
 			</div>
 
 			<div class="wideInput">

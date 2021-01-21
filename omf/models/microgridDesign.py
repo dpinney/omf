@@ -51,13 +51,15 @@ def work(modelDir, inputDict):
 	solarCost = float(inputDict['solarCost'])
 	windCost = float(inputDict['windCost'])
 	batteryPowerCost = float(inputDict['batteryPowerCost'])
-	batteryEnergyCost = float(inputDict['batteryEnergyCost'])
+	batteryCapacityCost = float(inputDict['batteryCapacityCost'])
 	solarMin = float(inputDict['solarMin'])
 	windMin = float(inputDict['windMin'])
 	batteryPowerMin = float(inputDict['batteryPowerMin'])
-	batteryEnergyMin = float(inputDict['batteryEnergyMin'])
+	batteryCapacityMin = float(inputDict['batteryCapacityMin'])
 	solarMax = float(inputDict['solarMax'])
 	windMax = float(inputDict['windMax'])
+	batteryPowerMax = float(inputDict['batteryPowerMax'])
+	batteryCapacityMax = float(inputDict['batteryCapacityMax'])
 	fuelAvailable = float(inputDict['fuelAvailable'])
 	genSize = float(inputDict['genSize'])
 	minGenLoading = float(inputDict['minGenLoading'])
@@ -113,20 +115,15 @@ def work(modelDir, inputDict):
 					},
 					"Storage": {
 						"installed_cost_us_dollars_per_kw": batteryPowerCost,
-						"installed_cost_us_dollars_per_kwh": batteryEnergyCost,
+						"installed_cost_us_dollars_per_kwh": batteryCapacityCost,
 						"min_kw": batteryPowerMin,
-						"min_kwh": batteryEnergyMin
-
+						"min_kwh": batteryCapacityMin
 					},
 					"Wind": {
 						"installed_cost_us_dollars_per_kw": windCost,
 						"min_kw": windMin
-
 					},
 					"Generator": {
-					# 	"fuel_avail_gal": fuelAvailable,
-					# 	"min_turn_down_pct": minGenLoading,
-					# 	"existing_kw": genSize
 					}
 				}
 			}
@@ -142,7 +139,11 @@ def work(modelDir, inputDict):
 		elif wind == 'on':
 			scenario['Scenario']['Site']['Wind']['max_kw'] = windMax;
 		if battery == 'off':
-			scenario['Scenario']['Site']['Storage']['max_kw'] = 0;
+			scenario['Scenario']['Site']['Storage']['max_kw'] = 0
+			scenario['Scenario']['Site']['Storage']['max_kwh'] = 0 #May not be a needed constraint, even though it is stated as such in the NREL docs
+		elif battery == 'on':
+			scenario['Scenario']['Site']['Storage']['max_kw'] = batteryPowerMax
+			scenario['Scenario']['Site']['Storage']['max_kwh'] = batteryCapacityMax;
 		# if outage_start_hour is > 0, a resiliency optimization that includes diesel is triggered
 		if outage_start_hour != 0:
 			scenario['Scenario']['Site']['LoadProfile']['outage_is_major_event'] = True
@@ -460,22 +461,24 @@ def new(modelDir):
 		"latitude" : '39.7817',
 		"longitude" : '-89.6501',
 		"year" : '2001',
-		"energyCost" : "0.08",
+		"energyCost" : "0.1",
 		"demandCost" : '20',
 		"solarCost" : "1600",
 		"windCost" : "4989",
-		"batteryEnergyCost" : "420",
 		"batteryPowerCost" : "840",
+		"batteryCapacityCost" : "420",
 		"solarMin": 0,
 		"windMin": 0,
 		"batteryPowerMin": 0,
-		"batteryEnergyMin": 0,
-		"solarMax": '1000000000',
-		"windMax": '1000000000',
+		"batteryCapacityMin": 0,
+		"solarMax": "1000000000",
+		"windMax": "1000000000",
+		"batteryPowerMax": "1000000",
+		"batteryCapacityMax": "1000000",
 		"criticalLoadFactor": ".99",
 		"outage_start_hour": "1000",
 		"outageDuration": "24",
-		"fuelAvailable": "1000",
+		"fuelAvailable": "1024",
 		"genSize": "0",
 		"minGenLoading": "0.3"
 	}
