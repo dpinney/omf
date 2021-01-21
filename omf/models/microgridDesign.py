@@ -60,8 +60,9 @@ def work(modelDir, inputDict):
 	windMax = float(inputDict['windMax'])
 	batteryPowerMax = float(inputDict['batteryPowerMax'])
 	batteryCapacityMax = float(inputDict['batteryCapacityMax'])
+	solarExisting = float(inputDict['solarExisting'])
 	fuelAvailable = float(inputDict['fuelAvailable'])
-	genSize = float(inputDict['genSize'])
+	genExisting = float(inputDict['genExisting'])
 	minGenLoading = float(inputDict['minGenLoading'])
 	outage_start_hour = float(inputDict['outage_start_hour'])
 	outage_end_hour = outage_start_hour + float(inputDict['outageDuration'])
@@ -133,7 +134,8 @@ def work(modelDir, inputDict):
 		if solar == 'off':
 			scenario['Scenario']['Site']['PV']['max_kw'] = 0
 		elif solar == 'on':
-			scenario['Scenario']['Site']['PV']['max_kw'] = solarMax;
+			scenario['Scenario']['Site']['PV']['max_kw'] = solarMax
+			scenario['Scenario']['Site']['PV']['existing_kw'] = solarExisting;
 		if wind == 'off':
 			scenario['Scenario']['Site']['Wind']['max_kw'] = 0
 		elif wind == 'on':
@@ -152,7 +154,7 @@ def work(modelDir, inputDict):
 			scenario['Scenario']['Site']['LoadProfile']['outage_end_time_step'] = outage_end_hour
 			scenario['Scenario']['Site']['Generator']['fuel_avail_gal'] = fuelAvailable
 			scenario['Scenario']['Site']['Generator']['min_turn_down_pct'] = minGenLoading
-			scenario['Scenario']['Site']['Generator']['existing_kw'] = genSize
+			scenario['Scenario']['Site']['Generator']['existing_kw'] = genExisting
 
 		with open(pJoin(modelDir, "Scenario_test_POST.json"), "w") as jsonFile:
 			json.dump(scenario, jsonFile)
@@ -475,11 +477,12 @@ def new(modelDir):
 		"windMax": "1000000000",
 		"batteryPowerMax": "1000000",
 		"batteryCapacityMax": "1000000",
+		"solarExisting": 0,
 		"criticalLoadFactor": ".99",
 		"outage_start_hour": "1000",
 		"outageDuration": "24",
 		"fuelAvailable": "1024",
-		"genSize": "0",
+		"genExisting": 0,
 		"minGenLoading": "0.3"
 	}
 	creationCode = __neoMetaModel__.new(modelDir, defaultInputs)
