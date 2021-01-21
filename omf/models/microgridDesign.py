@@ -456,12 +456,12 @@ def new(modelDir):
 		"loadShape" : load_shape,
 		"solar" : "on",
 		"wind" : "off",
-		"battery" : "off",
+		"battery" : "on",
 		"fileName" : fName,
 		"latitude" : '39.7817',
 		"longitude" : '-89.6501',
 		"year" : '2001',
-		"energyCost" : "0.08",
+		"energyCost" : "0.1",
 		"demandCost" : '20',
 		"solarCost" : "1600",
 		"windCost" : "4989",
@@ -478,7 +478,7 @@ def new(modelDir):
 		"criticalLoadFactor": ".99",
 		"outage_start_hour": "1000",
 		"outageDuration": "24",
-		"fuelAvailable": "1000",
+		"fuelAvailable": "1024",
 		"genSize": "0",
 		"minGenLoading": "0.3"
 	}
