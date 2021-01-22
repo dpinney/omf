@@ -135,7 +135,8 @@ def work(modelDir, inputDict):
 			scenario['Scenario']['Site']['PV']['max_kw'] = 0
 		elif solar == 'on':
 			scenario['Scenario']['Site']['PV']['max_kw'] = solarMax
-			scenario['Scenario']['Site']['PV']['existing_kw'] = solarExisting;
+			scenario['Scenario']['Site']['PV']['existing_kw'] = solarExisting
+			scenario['Scenario']['Site']['LoadProfile']['loads_kw_is_net'] = False;
 		if wind == 'off':
 			scenario['Scenario']['Site']['Wind']['max_kw'] = 0
 		elif wind == 'on':
