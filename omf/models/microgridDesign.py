@@ -222,6 +222,7 @@ def work(modelDir, inputDict):
 
 		# diesel generator does not follow convention above, as it is not turned on by user, but rather is automatically turned on when an outage is specified
 		outData['sizeDiesel' + indexString] = resultsSubset['Generator']['size_kw']
+		outData['fuelUsedDiesel' + indexString] = resultsSubset['Generator']['fuel_used_gal']
 		outData['powerDieselToLoad' + indexString] = resultsSubset['Generator']['year_one_power_production_series_kw']
 		
 		outData['resilience' + indexString] = resultsResilience['resilience_by_timestep']
