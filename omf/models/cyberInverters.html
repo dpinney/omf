@@ -748,6 +748,53 @@
 				new Highcharts.Chart(localHighChart)
 			</script>
 		</div>
+		<p class="reportTitle postRun" style="">Voltage Imbalances <a target="_self" class="toggle">Hide / Show</a></p>
+		<div id="voltageImbalancesReport" class="tightContent postRun">
+			<div id="voltageImbalancesChart"></div>
+			<script type="text/javascript">
+				swingPointStart = dateOb(allOutputData.swingTimestamps[0])
+				swingPointInterval = dateOb(allOutputData.swingTimestamps[1]) - pointStart
+				swingHighChartsTemplate = {
+				"chart":{"renderTo":"", "marginRight":20, "marginBottom":35, "zoomType":"x"},
+				"title":{"text":null},
+				"legend":{"layout":"horizontal", "align":"top", "verticalAlign":"top", "x":50, "y":-10, "borderWidth":0},
+				"credits":{"enabled":false},
+				"xAxis":{"type":"datetime","maxZoom":1000, "tickColor":"gray","lineColor":"gray"},
+				"yAxis":{"title":{"text":null, "style":{"color":"gray"}}},
+				"plotOptions":{"line":{"marker":{"enabled":false}}, "series":{"shadow":false, "pointInterval":swingPointInterval, "pointStart":swingPointStart}},
+				"tooltip":{"valueDecimals":1},
+				"series":[]}
+				var busNamesArray = []
+				busNamesArray = Object.keys(allOutputData.voltageImbalances)
+				if (busNamesArray.length == 0){
+					$("#voltageImbalancesReport").html("<p>&#160;&#160;&#160;No Voltage Imbalance values were returned.</p>")
+				}
+				voltImbalSeriesData = []
+				for (var busName of busNamesArray){
+<<<<<<< HEAD
+=======
+					// randomize color
+>>>>>>> fb5a66cf4709d267bc32fec509e5bd287f9fce42
+					var busSeriesData = {
+						"pointWidth": 40,
+						"marker": {"enabled":false}, 
+						"color": "gray", 
+						"data":allOutputData.voltageImbalances[busName].map(x => 100 * x), 
+						"name":busName,
+						"visible":true,
+					}
+					voltImbalSeriesData.push(busSeriesData)
+				}
+				var localHighChart = JSON.parse(JSON.stringify(swingHighChartsTemplate))
+				localHighChart["chart"]["renderTo"] = "voltageImbalancesChart"
+				localHighChart["chart"]["width"] = 1000
+				localHighChart["chart"]["height"] = 200
+				localHighChart["chart"]["type"] = "line"
+				localHighChart["series"] = voltImbalSeriesData
+				localHighChart["yAxis"] = [{"title":{"text":"Imbalance %","style":{"color":"black"}}}]
+				new Highcharts.Chart(localHighChart)
+			</script>
+		</div>
 		<!-- <p class="reportTitle postRun" style="page-break-before:always">System Voltage Map <a target="_self" class="toggle">Hide / Show</a></p>
 		<div id="systemVoltageMap" class="tightContent postRun" style="height:1030px; display: none;">
 			<video width="1000" height="1000" controls preload="auto">

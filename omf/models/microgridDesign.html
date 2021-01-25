@@ -58,7 +58,7 @@
 							'<th></th>'+
 							'<th>Total Savings (20 years)</th>'+
 							'<th>Average Load (kWh)</th>'+
-							'<th class="solarDisplay">Solar (kW)</th>'+
+							'<th class="solarDisplay">Total Solar (kW)</th>'+
 							'<th class="windDisplay">Wind (kW)</th>'+
 							'<th class="batteryDisplay">Battery Power (kW)</th>'+
 							'<th class="batteryDisplay">Battery Capacity (kWh)</th>'+
@@ -383,20 +383,32 @@
 				<input type="text" id="windMax" name="windMax" required="required"/>
 			</div>
 			<div class="shortInput batteryDisplayInput">
-				<label class="tooltip">Battery Energy Cost ($/kWh)<span class="classic">Specify the cost in $/kWh.</span></label>
-				<input type="text" id="batteryEnergyCost" name="batteryEnergyCost" pattern="^\d+\.?\d*?$" required="required"/>
-			</div>
-			<div class="shortInput batteryDisplayInput">
 				<label class="tooltip">Battery Power Cost ($/kW)<span class="classic">Specify the cost in $/kW.</span></label>
 				<input type="text" id="batteryPowerCost" name="batteryPowerCost" pattern="^\d+\.?\d*?$" required="required"/>
 			</div>
 			<div class="shortInput BatteryDisplayInput">
-				<label class="tooltip">Battery Minimum Power (kW)<span class="classic">Specify the minimum desired battery capacity in kW.</span></label>
+				<label class="tooltip">Battery Minimum Power (kW)<span class="classic">Specify the minimum desired battery power in kW.</span></label>
 				<input type="text" id="batteryPowerMin" name="batteryPowerMin" required="required"/>
 			</div>
 			<div class="shortInput BatteryDisplayInput">
-				<label class="tooltip">Battery Minimum Energy (kWh)<span class="classic">Specify the minimum desired battery capacity in kWh.</span></label>
-				<input type="text" id="batteryEnergyMin" name="batteryEnergyMin" required="required"/>
+				<label class="tooltip">Battery Maximum Power (kW)<span class="classic">Specify the maximum desired battery power in kW.</span></label>
+				<input type="text" id="batteryPowerMax" name="batteryPowerMax" required="required"/>
+			</div>
+			<div class="shortInput batteryDisplayInput">
+				<label class="tooltip">Battery Capacity Cost ($/kWh)<span class="classic">Specify the cost in $/kWh.</span></label>
+				<input type="text" id="batteryCapacityCost" name="batteryCapacityCost" pattern="^\d+\.?\d*?$" required="required"/>
+			</div>
+			<div class="shortInput BatteryDisplayInput">
+				<label class="tooltip">Battery Minimum Capacity (kWh)<span class="classic">Specify the minimum desired battery capacity in kWh.</span></label>
+				<input type="text" id="batteryCapacityMin" name="batteryCapacityMin" required="required"/>
+			</div>
+			<div class="shortInput BatteryDisplayInput">
+				<label class="tooltip">Battery Maximum Capacity (kWh)<span class="classic">Specify the maximum desired battery capacity in kWh.</span></label>
+				<input type="text" id="batteryCapacityMax" name="batteryCapacityMax" required="required"/>
+			</div>
+			<div class="shortInput solarDisplayInput">
+				<label class="tooltip">Pre-existing Solar Size (kW)<span class="classic">Specify the total capacity of any pre-existing solar arrays in kW.</span></label>
+				<input type="text" id="solarExisting" name="solarExisting" required="required"/>
 			</div>
 
 			<div class="wideInput">
@@ -416,8 +428,8 @@
 				<input type="number" id="criticalLoadFactor" name="criticalLoadFactor" step="0.01" min="0.0" max="1.0" required="required"/>
 			</div>
 			<div class="shortInput">
-				<label class="tooltip">Pre-existing Generator Size (kW)<span class="classic">Specify the total capacity of any pre-existing generators in kWh.</span></label>
-				<input type="text" id="genSize" name="genSize" required="required"/>
+				<label class="tooltip">Pre-existing Generator Size (kW)<span class="classic">Specify the total capacity of any pre-existing generators in kW.</span></label>
+				<input type="text" id="genExisting" name="genExisting" required="required"/>
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Available Generator Fuel (gallons)<span class="classic">Specify the amount of fuel available for any pre-existing generators in gallons.</span></label>
