@@ -104,7 +104,6 @@ def playOneStep(tree, bestReclosers, badBuses, pathToDss):
 	shape_insert_list = {}
 	gen_insert_list = {}
 	leftOverLoad = {}
-
 	i = 0
 	j = 0
 	# for each power source
@@ -112,15 +111,64 @@ def playOneStep(tree, bestReclosers, badBuses, pathToDss):
 		# create an adjacency list representation of tree connectivity
 		adjacList, reclosers, vertices = flisr.adjacencyList(tree)
 		bus = buses[0]
-		# print(buses[0])
 		loadShapes = {}
 		alreadySeen = False
 		# check to see if there is a path between the power source and the fault 
 		subtree = flisr.getMaxSubtree(adjacList, bus)
 		for key in subtrees:
-			if key == subtree:
-				## TODO: NEED MORE SUBTLETY... write a function HERE so that if a smaller generator is networked with a bigger,
-				## we have the bigger already giving max and the smaller just picks up leftover load.
+			if set(subtrees[key]) == set(subtree):
+				# if a larger generator is already supplying power, have a smaller generator only pick up the remaining load
+				dieselShapes = {}
+				leftOverShapes = {}
+				dieselShapesNew = {}
+				leftOverHere = {}
+				maximum = 1.0
+				for entry in microgrids:
+					if bus == microgrids[entry].get('gen_bus', ''):
+						maximum = microgrids[entry].get('max_potential', '')
+						k = 0
+						while k < 3:
+							val = 0
+							while val < len(leftOverLoad[key][k]):
+								if k == 0:
+									if not '.1' in dieselShapes.keys():
+										dieselShapes['.1'] = []
+									if leftOverLoad[key][k][val] == True:
+										dieselShapes['.1'].append(leftOverBusShapes[key][k][val])
+									else:
+										dieselShapes['.1'].append(0.0)
+								if k == 1:
+									if not '.2' in dieselShapes.keys():
+										dieselShapes['.2'] = []
+									if leftOverLoad[key][k][val] == True:
+										dieselShapes['.2'].append(leftOverBusShapes[key][k][val])
+									else:
+										dieselShapes['.2'].append(0.0)
+								if k == 2:
+									if not '.3' in dieselShapes.keys():
+										dieselShapes['.3'] = []
+									if leftOverLoad[key][k][val] == True:
+										dieselShapes['.3'].append(leftOverBusShapes[key][k][val])
+									else:
+										dieselShapes['.3'].append(0.0)
+								val += 1
+							k += 1
+						for shape in dieselShapes:
+							if not shape in dieselShapesNew.keys():
+								dieselShapesNew[shape] = []
+							if not shape in leftOverShapes.keys():
+								leftOverShapes[shape] = []
+							if not shape in leftOverHere.keys():
+								leftOverHere[shape] = []
+							for entry in dieselShapes[shape]:
+								if (float(maximum) - float(entry)) >= 0:
+									dieselShapesNew[shape].append(float(entry))
+									leftOverShapes[shape].append(0.0)
+									leftOverHere[shape].append(False)
+								else:
+									dieselShapesNew[shape].append(float(maximum))
+									leftOverShapes[shape].append(float(entry)-float(maximum))
+									leftOverHere[shape].append(True)
 				alreadySeen = True
 		if 'sourcebus' in subtree:
 			del(buses[0])
@@ -150,6 +198,8 @@ def playOneStep(tree, bestReclosers, badBuses, pathToDss):
 # 3) obtain the diesel loadshape by subtracting off solar from load
 		dieselShapes = {}
 		leftOverShapes = {}
+		dieselShapesNew = {}
+		leftOverHere = {}
 		maximum = 1.0
 		for key in tree.keys():
 			if tree[key].get('object','').startswith('generator'):
@@ -168,27 +218,26 @@ def playOneStep(tree, bestReclosers, badBuses, pathToDss):
 											dieselShapes['.2'] = [a - b for a, b in zip(loadShapes.get('.2',''), solarshape)]
 										if '.3' in loadShapes:
 											dieselShapes['.3'] = [a - b for a, b in zip(loadShapes.get('.3',''), solarshape)]
-		dieselShapesNew = {}
-		leftOverHere = {}
-		for shape in dieselShapes:
-			if not shape in dieselShapesNew.keys():
-				dieselShapesNew[shape] = []
-			if not shape in leftOverShapes.keys():
-				leftOverShapes[shape] = []
-			if not shape in leftOverHere.keys():
-				leftOverHere[shape] = []
-			for entry in dieselShapes[shape]:
-				if (float(maximum) - float(entry)) >= 0:
-					dieselShapesNew[shape].append(float(entry))
-					leftOverShapes[shape].append(0.0)
-					leftOverHere[shape].append(False)
-				else:
-					dieselShapesNew[shape].append(float(maximum))
-					leftOverShapes[shape].append(float(entry)-float(maximum))
-					leftOverHere[shape].append(True)
+								for shape in dieselShapes:
+									if not shape in dieselShapesNew.keys():
+										dieselShapesNew[shape] = []
+									if not shape in leftOverShapes.keys():
+										leftOverShapes[shape] = []
+									if not shape in leftOverHere.keys():
+										leftOverHere[shape] = []
+									for entry in dieselShapes[shape]:
+										if (float(maximum) - float(entry)) >= 0:
+											dieselShapesNew[shape].append(float(entry))
+											leftOverShapes[shape].append(0.0)
+											leftOverHere[shape].append(False)
+										else:
+											dieselShapesNew[shape].append(float(maximum))
+											leftOverShapes[shape].append(float(entry)-float(maximum))
+											leftOverHere[shape].append(True)
 		busShapes[buses[0]] = [dieselShapesNew.get('.1',''), dieselShapesNew.get('.2',''), dieselShapesNew.get('.3','')]
 		leftOverBusShapes[buses[0]] = [leftOverShapes.get('.1',''), leftOverShapes.get('.2',''), leftOverShapes.get('.3','')]
 		leftOverLoad[buses[0]] = [leftOverHere.get('.1',''), leftOverHere.get('.2',''), leftOverHere.get('.3','')]
+		subtrees[bus] = subtree
 	# 4) add diesel generation to the opendss formatted system and solve
 		phase=1
 		while phase < 4:
@@ -243,7 +292,7 @@ def playOneStep(tree, bestReclosers, badBuses, pathToDss):
 	tree2 = treeDSS.copy()
 	# print(tree2)
 	for thing in tree2:
-		if (thing.get('object','').startswith('generator')) or (thing.get('object','').startswith('storage')):
+		if (thing.get('object','').startswith('generator')):
 			treeDSS.remove(thing)
 	for key in shape_insert_list:
 		convertedKey = collections.OrderedDict(shape_insert_list[key])
@@ -256,7 +305,7 @@ def playOneStep(tree, bestReclosers, badBuses, pathToDss):
 		max_pos+=1
 
 	treeDSS.insert(max_pos, {'!CMD': 'solve'})
-	print(treeDSS)
+	# print(treeDSS)
 
 	# Write new DSS file.
 	FULL_NAME = 'lehigh_full_newDiesel.dss'
