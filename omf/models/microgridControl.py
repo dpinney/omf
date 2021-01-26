@@ -549,10 +549,7 @@ def graphMicrogrid(pathToOmd, pathToMicro, pathToCsv, workDir, maxTime, stepSize
 			cached = 'yes'
 
 	else:
-		setup_command = f'julia --project="{__neoMetaModel__._omfDir}/solvers/PowerModelsONM.jl" -e "using Pkg; Pkg.update()"'
-		os.system(setup_command)
-
-		command = f'julia --project="{__neoMetaModel__._omfDir}/solvers/PowerModelsONM.jl" "{__neoMetaModel__._omfDir}/solvers/PowerModelsONM.jl/src/cli/entrypoint.jl" -n "{workDir}/circuit.dss" -o "{workDir}/onm_output.json"'
+		command = f'{__neoMetaModel__._omfDir}/solvers/PowerModelsONM/onm -n "{workDir}/circuit.dss" -o "{workDir}/onm_output.json"'
 		os.system(command)
 
 		with open(pJoin(__neoMetaModel__._omfDir,'static','testFiles','outputLehigh.json')) as inFile:
