@@ -91,11 +91,12 @@ elif platform.system()=="Darwin": # MacOS
 		sed -i '' 's/ans=""/ans="2"/g' configure;
 		sudo bash configure;
 	''') # sed is to hack the build to work without user input.
+	print(f"{source_dir}/omf/solvers/matpower7.0")
 	os.system(f'octave-cli --no-gui -p "{source_dir}/omf/solvers/matpower7.0" --eval "install_matpower(1,1,1)"')
 	# pip installs
 	os.system("cd omf")
+	os.system('pip3 install ecos')
 	os.system('pip3 install pygraphviz --install-option="--include-path=/usr/local/include/graphviz" --install-option="--library-path=/usr/local/lib/graphviz/"')
-	os.system('pip3 install "ecos >= 2.0.7rc2"')
 	pipInstallInOrder("pip3")
 	os.system("python3 setup.py develop")
 else:
