@@ -66,7 +66,7 @@ def _getCoords(dssFilePath, keep_output=True):
 	coords['radius'] = hyp
 	return coords
 
-def newQstsPlot(filePath, stepSizeInMinutes, numberOfSteps, keepAllFiles=False, actions={}):
+def newQstsPlot(filePath, stepSizeInMinutes, numberOfSteps, keepAllFiles=False, actions={}, filePrefix='timeseries'):
 	''' Use monitor objects to generate voltage values for a timeseries powerflow. '''
 	dssFileLoc = os.path.dirname(os.path.abspath(filePath))
 	volt_coord = runDSS(filePath)
@@ -151,18 +151,18 @@ def newQstsPlot(filePath, stepSizeInMinutes, numberOfSteps, keepAllFiles=False, 
 	if not all_gen_df.empty:
 		all_gen_df.sort_values(['Name','hour'], inplace=True)
 		all_gen_df.columns = all_gen_df.columns.str.replace(r'[ "]','',regex=True)
-		all_gen_df.to_csv(f'{dssFileLoc}/timeseries_gen.csv', index=False)
+		all_gen_df.to_csv(f'{dssFileLoc}/{filePrefix}_gen.csv', index=False)
 	if not all_control_df.empty:
 		all_control_df.sort_values(['Name','hour'], inplace=True)
 		all_control_df.columns = all_control_df.columns.str.replace(r'[ "]','',regex=True)
-		all_control_df.to_csv(f'{dssFileLoc}/timeseries_control.csv', index=False)
+		all_control_df.to_csv(f'{dssFileLoc}/{filePrefix}_control.csv', index=False)
 	if not all_source_df.empty:
 		all_source_df.sort_values(['Name','hour'], inplace=True)
 		all_source_df.columns = all_source_df.columns.str.replace(r'[ "]','',regex=True)
 		all_source_df["P1(kW)"] = all_source_df["V1"].astype(float) * all_source_df["I1"].astype(float) / 1000.0
 		all_source_df["P2(kW)"] = all_source_df["V2"].astype(float) * all_source_df["I2"].astype(float) / 1000.0
 		all_source_df["P3(kW)"] = all_source_df["V3"].astype(float) * all_source_df["I3"].astype(float) / 1000.0
-		all_source_df.to_csv(f'{dssFileLoc}/timeseries_source.csv', index=False)
+		all_source_df.to_csv(f'{dssFileLoc}/{filePrefix}_source.csv', index=False)
 	if not all_load_df.empty:
 		all_load_df.sort_values(['Name','hour'], inplace=True)
 		all_load_df.columns = all_load_df.columns.str.replace(r'[ "]','',regex=True)
@@ -170,7 +170,7 @@ def newQstsPlot(filePath, stepSizeInMinutes, numberOfSteps, keepAllFiles=False, 
 		all_load_df['V1(PU)'] = all_load_df['V1'].astype(float) / (all_load_df['kv'].astype(float) * 1000.0)
 		all_load_df['V2(PU)'] = all_load_df['V2'].astype(float) / (all_load_df['kv'].astype(float) * 1000.0)
 		all_load_df['V3(PU)'] = all_load_df['V3'].astype(float) / (all_load_df['kv'].astype(float) * 1000.0)
-		all_load_df.to_csv(f'{dssFileLoc}/timeseries_load.csv', index=False)
+		all_load_df.to_csv(f'{dssFileLoc}/{filePrefix}_load.csv', index=False)
 
 def voltagePlot(filePath, PU=True):
 	''' Voltage plotting routine. Creates 'voltages.csv' and 'Voltage [PU|V].png' in directory of input file.'''
