@@ -562,7 +562,7 @@ def graphMicrogrid(pathToOmd, pathToMicro, pathToCsv, workDir, maxTime, stepSize
 			else:
 				raise Exception('Unsupported ONM platform.')
 			URL = 'https://github.com/lanl-ansi/PowerModelsONM.jl/releases/download/v0.0.9/' + FNAME
-			os.system(f'wget -nv {URL} -P ./omf/solvers/PowerModelsONM/')
+			os.system(f'wget -nv {URL} -P {DIR}')
 			os.system(f'unzip {DIR}{FNAME} -d {DIR}')
 			os.system(f'rm {DIR}{FNAME}')
 			if platform.system() == "Darwin":
