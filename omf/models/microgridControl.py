@@ -11,6 +11,7 @@ import matplotlib.pyplot as plt
 import plotly as py
 import plotly.graph_objs as go
 from plotly.tools import make_subplots
+import platform
 
 # OMF imports
 import omf
@@ -549,7 +550,26 @@ def graphMicrogrid(pathToOmd, pathToMicro, pathToCsv, workDir, maxTime, stepSize
 			cached = 'yes'
 
 	else:
-		command = f'{__neoMetaModel__._omfDir}/solvers/PowerModelsONM/onm -n "{workDir}/circuit.dss" -o "{workDir}/onm_output.json"'
+		# Install if necessary.
+		DIR = f'{__neoMetaModel__._omfDir}/solvers/PowerModelsONM/'
+		if not os.path.isdir(f'{DIR}build'):
+			if platform.system() == "Linux":
+				FNAME = 'PowerModelsONM_ubuntu-latest_x64.zip'
+			elif platform.system() == "Windows":
+				FNAME = 'PowerModelsONM_windows-latest_x64.zip'
+			elif platform.system() == "Darwin":
+				FNAME = 'PowerModelsONM_macOS-latest_x64.zip'
+			else:
+				raise Exception('Unsupported ONM platform.')
+			URL = 'https://github.com/lanl-ansi/PowerModelsONM.jl/releases/download/v0.0.9/' + FNAME
+			os.system(f'wget -nv {URL} -P ./omf/solvers/PowerModelsONM/')
+			os.system(f'unzip {DIR}{FNAME} -d {DIR}')
+			os.system(f'rm {DIR}{FNAME}')
+			if platform.system() == "Darwin":
+				# Disable quarantine.
+				os.system(f'xattr -dr com.apple.quarantine {DIR}')
+		# Run command
+		command = f'{DIR}/build/bin/PowerModelsONM -n "{workDir}/circuit.dss" -o "{workDir}/onm_output.json"'
 		os.system(command)
 
 		with open(pJoin(__neoMetaModel__._omfDir,'static','testFiles','outputLehigh.json')) as inFile:
