@@ -200,6 +200,7 @@ def work(modelDir, inputDict):
 			outData['powerPV' + indexString] = resultsSubset['PV']['year_one_power_production_series_kw']
 			outData['powerPVToBattery' + indexString] = resultsSubset['PV']['year_one_to_battery_series_kw']
 			outData['powerPVToLoad' + indexString] = resultsSubset['PV']['year_one_to_load_series_kw']
+			outData['sizePVExisting' + indexString] = results['inputs']['Scenario']['Site']['PV']['existing_kw']
 		else:
 			outData['sizePV' + indexString] = 0
 		
@@ -224,7 +225,8 @@ def work(modelDir, inputDict):
 		outData['sizeDiesel' + indexString] = resultsSubset['Generator']['size_kw']
 		outData['fuelUsedDiesel' + indexString] = resultsSubset['Generator']['fuel_used_gal']
 		outData['powerDieselToLoad' + indexString] = resultsSubset['Generator']['year_one_power_production_series_kw']
-		
+		outData['sizeDieselExisting' + indexString] = results['inputs']['Scenario']['Site']['Generator']['existing_kw'] 
+
 		outData['resilience' + indexString] = resultsResilience['resilience_by_timestep']
 		outData['minOutage' + indexString] = resultsResilience['resilience_hours_min']
 		outData['maxOutage' + indexString] = resultsResilience['resilience_hours_max']
@@ -479,12 +481,12 @@ def new(modelDir):
 		"windMax": "100000000",
 		"batteryPowerMax": "1000000",
 		"batteryCapacityMax": "1000000",
-		"solarExisting": 0,
+		"solarExisting": 20,
 		"criticalLoadFactor": "1",
-		"outage_start_hour": "0",
+		"outage_start_hour": "1000",
 		"outageDuration": "24",
 		"fuelAvailable": "40000",
-		"genExisting": 0,
+		"genExisting": 10,
 		"minGenLoading": "0.3"
 	}
 	creationCode = __neoMetaModel__.new(modelDir, defaultInputs)
