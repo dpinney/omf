@@ -224,8 +224,10 @@ def work(modelDir, inputDict):
 		# diesel generator does not follow convention above, as it is not turned on by user, but rather is automatically turned on when an outage is specified
 		outData['sizeDiesel' + indexString] = resultsSubset['Generator']['size_kw']
 		outData['fuelUsedDiesel' + indexString] = resultsSubset['Generator']['fuel_used_gal']
-		outData['powerDieselToLoad' + indexString] = resultsSubset['Generator']['year_one_power_production_series_kw']
-		outData['sizeDieselExisting' + indexString] = results['inputs']['Scenario']['Site']['Generator']['existing_kw'] 
+		outData['sizeDieselExisting' + indexString] = results['inputs']['Scenario']['Site']['Generator']['existing_kw']
+		outData['powerDiesel' + indexString] = resultsSubset['Generator']['year_one_power_production_series_kw']
+		outData['powerDieselToBattery' + indexString] = resultsSubset['Generator']['year_one_to_battery_series_kw']
+		outData['powerDieselToLoad' + indexString] = resultsSubset['Generator']['year_one_to_load_series_kw']
 
 		outData['resilience' + indexString] = resultsResilience['resilience_by_timestep']
 		outData['minOutage' + indexString] = resultsResilience['resilience_hours_min']
@@ -470,23 +472,23 @@ def new(modelDir):
 		"energyCost" : "0.1",
 		"demandCost" : '20',
 		"solarCost" : "1600",
-		"windCost" : "4989",
+		"windCost" : "4898",
 		"batteryPowerCost" : "840",
 		"batteryCapacityCost" : "420",
 		"solarMin": 0,
 		"windMin": 0,
 		"batteryPowerMin": 0,
 		"batteryCapacityMin": 0,
-		"solarMax": "100000000",
-		"windMax": "100000000",
+		"solarMax": "10000000",
+		"windMax": "10000000",
 		"batteryPowerMax": "1000000",
 		"batteryCapacityMax": "1000000",
-		"solarExisting": 20,
+		"solarExisting": 0,
 		"criticalLoadFactor": "1",
 		"outage_start_hour": "1000",
 		"outageDuration": "24",
 		"fuelAvailable": "40000",
-		"genExisting": 10,
+		"genExisting": 0,
 		"minGenLoading": "0.3"
 	}
 	creationCode = __neoMetaModel__.new(modelDir, defaultInputs)
