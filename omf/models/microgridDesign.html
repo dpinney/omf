@@ -56,7 +56,7 @@
 					'<table>'+
 						'<tr>'+
 							'<th></th>'+
-							'<th>Total Savings (20 years)</th>'+
+							'<th>Total Savings ($ over 20 years)</th>'+
 							'<th>Average Load (kWh)</th>'+
 							'<th class="solarDisplay">Total Solar (kW)</th>'+
 							'<th class="windDisplay">Wind (kW)</th>'+
@@ -80,11 +80,11 @@
 					
 				row += '<td id="savings' + indexString + '"></td>'+
 					'<td id="avgLoad' + indexString + '"></td>'+
-					'<td id="sizePV' + indexString + '"></td>'+
-					'<td id="sizeWind' + indexString + '"></td>'+
-					'<td id="powerBattery' + indexString + '"></td>'+
-					'<td id="capacityBattery' + indexString + '"></td>'+
-					'<td id="sizeDiesel' + indexString + '"></td>'+
+					'<td id="sizePVRounded' + indexString + '"></td>'+
+					'<td id="sizeWindRounded' + indexString + '"></td>'+
+					'<td id="powerBatteryRounded' + indexString + '"></td>'+
+					'<td id="capacityBatteryRounded' + indexString + '"></td>'+
+					'<td id="sizeDieselRounded' + indexString + '"></td>'+
 					'<td id="avgOutage' + indexString + '"></td>'+
 					'<td id="fuelUsedDiesel' + indexString + '"></td>'+
 					'</tr>';
@@ -167,6 +167,9 @@
 					'<p class="windDisplay reportTitle" style="page-break-before:always">Wind Generation</p>'+
 					'<div id="windPlotly' + indexString + '" class="windDisplay tightContent"></div>'+
 					
+					'<p class="reportTitle" style="page-break-before:always">Diesel Generation</p>'+
+					'<div id="dieselPlotly' + indexString + '" class="tightContent"></div>'+
+
 					'<p class="batteryDisplay reportTitle" style="page-break-before:always">Battery Charge Source</p>'+
 					'<div id="batteryPlotly' + indexString + '" class="batteryDisplay tightContent"></div>'+
 					
