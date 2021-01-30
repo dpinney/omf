@@ -1188,7 +1188,7 @@ def get_synth_dhi_dni(uscrn_station='TX_Austin_33_NW', year='2020'):
     timezone = Station_Dict[uscrn_station][2]
     input_array, ghi_array, cos_array = preparePredictionVectors(year, lat, lon, uscrn_station, timezone)
     print("input array created")
-    dhi_preds = list(predictNeuralNet(input_array, 'Neural_Net_National'))
+    dhi_preds = list(predictNeuralNet(input_array, f'{omf.omfDir}/static/Neural_Net_National'))
     dhi_preds = [float(i) for i in dhi_preds]
     print("preds made")
     dniXCosTheta = [ghi_array[i] - dhi_preds[i] for i in range(0, len(ghi_array))] #This is cos(theta) * DNI
