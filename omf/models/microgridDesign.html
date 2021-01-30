@@ -56,7 +56,7 @@
 					'<table>'+
 						'<tr>'+
 							'<th></th>'+
-							'<th>Total Savings (20 years)</th>'+
+							'<th>Total Savings ($ over 20 years)</th>'+
 							'<th>Average Load (kWh)</th>'+
 							'<th class="solarDisplay">Total Solar (kW)</th>'+
 							'<th class="windDisplay">Wind (kW)</th>'+
@@ -64,7 +64,7 @@
 							'<th class="batteryDisplay">Battery Capacity (kWh)</th>'+
 							'<th>Total Diesel Generation (kW)</th>'+
 							'<th>Average length of survived Outage (hours)</th>'+
-							'<th>Maximum length of survived Outage (hours)</th>'+
+							'<th>Diesel consumed during specified Outage Duration (gallons)</th>'+
 						'</tr>';
 
 			for (var i = 0; i < numCols ; i++) {
@@ -80,13 +80,13 @@
 					
 				row += '<td id="savings' + indexString + '"></td>'+
 					'<td id="avgLoad' + indexString + '"></td>'+
-					'<td id="sizePV' + indexString + '"></td>'+
-					'<td id="sizeWind' + indexString + '"></td>'+
-					'<td id="powerBattery' + indexString + '"></td>'+
-					'<td id="capacityBattery' + indexString + '"></td>'+
-					'<td id="sizeDiesel' + indexString + '"></td>'+
+					'<td id="sizePVRounded' + indexString + '"></td>'+
+					'<td id="sizeWindRounded' + indexString + '"></td>'+
+					'<td id="powerBatteryRounded' + indexString + '"></td>'+
+					'<td id="capacityBatteryRounded' + indexString + '"></td>'+
+					'<td id="sizeDieselRounded' + indexString + '"></td>'+
 					'<td id="avgOutage' + indexString + '"></td>'+
-					'<td id="maxOutage' + indexString + '"></td>'+
+					'<td id="fuelUsedDiesel' + indexString + '"></td>'+
 					'</tr>';
 
 				content += row;
@@ -167,6 +167,9 @@
 					'<p class="windDisplay reportTitle" style="page-break-before:always">Wind Generation</p>'+
 					'<div id="windPlotly' + indexString + '" class="windDisplay tightContent"></div>'+
 					
+					'<p class="reportTitle" style="page-break-before:always">Diesel Generation</p>'+
+					'<div id="dieselPlotly' + indexString + '" class="tightContent"></div>'+
+
 					'<p class="batteryDisplay reportTitle" style="page-break-before:always">Battery Charge Source</p>'+
 					'<div id="batteryPlotly' + indexString + '" class="batteryDisplay tightContent"></div>'+
 					
@@ -367,7 +370,7 @@
 				<input type="text" id="solarMin" name="solarMin" required="required"/>
 			</div>
 			<div class="shortInput solarDisplayInput">
-				<label class="tooltip">Solar Maximum Power (kW)<span class="classic">Specify the maximum desired generation in kW.</span></label>
+				<label class="tooltip">Solar Maximum Power (kW)<span class="classic">Specify the maximum desired generation in kW. Leave at default for full optimization on solar power.</span></label>
 				<input type="text" id="solarMax" name="solarMax" required="required"/>
 			</div>
 			<div class="shortInput windDisplayInput">
@@ -379,7 +382,7 @@
 				<input type="text" id="windMin" name="windMin" required="required"/>
 			</div>
 			<div class="shortInput windDisplayInput">
-				<label class="tooltip">Wind Maximum Power (kW)<span class="classic">Specify the maximum desired generation in kW.</span></label>
+				<label class="tooltip">Wind Maximum Power (kW)<span class="classic">Specify the maximum desired generation in kW. Leave at default for full optimization on wind power.</span></label>
 				<input type="text" id="windMax" name="windMax" required="required"/>
 			</div>
 			<div class="shortInput batteryDisplayInput">
@@ -407,7 +410,7 @@
 				<input type="text" id="batteryCapacityMax" name="batteryCapacityMax" required="required"/>
 			</div>
 			<div class="shortInput solarDisplayInput">
-				<label class="tooltip">Pre-existing Solar Size (kW)<span class="classic">Specify the total capacity of any pre-existing solar arrays in kW.</span></label>
+				<label class="tooltip">Pre-existing Solar Size (kW)<span class="classic">Specify the total capacity of any pre-existing solar arrays in kW. The outputted "Total Solar" will be inclusive of existing solar.</span></label>
 				<input type="text" id="solarExisting" name="solarExisting" required="required"/>
 			</div>
 
@@ -428,7 +431,7 @@
 				<input type="number" id="criticalLoadFactor" name="criticalLoadFactor" step="0.01" min="0.0" max="1.0" required="required"/>
 			</div>
 			<div class="shortInput">
-				<label class="tooltip">Pre-existing Generator Size (kW)<span class="classic">Specify the total capacity of any pre-existing generators in kW.</span></label>
+				<label class="tooltip">Pre-existing Generator Size (kW)<span class="classic">Specify the total capacity of any pre-existing generators in kW. The outputted "Total Diesel Gen" will be inclusive of existing diesel gen.</span></label>
 				<input type="text" id="genExisting" name="genExisting" required="required"/>
 			</div>
 			<div class="shortInput">

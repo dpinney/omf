@@ -26,6 +26,7 @@ jobs:
       - name: Install dependencies
         run: |
           brew link --overwrite python@3.8 #already installed but python3.9 is default
+          pip3 install ecos
           python3 install.py
           pip3 install -r requirements.txt
       - name: Run tests

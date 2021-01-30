@@ -197,34 +197,49 @@ def work(modelDir, inputDict):
 
 		if solar == 'on':	
 			outData['sizePV' + indexString] = resultsSubset['PV']['size_kw']
+			outData['sizePVRounded' + indexString] = round(resultsSubset['PV']['size_kw'],1)
 			outData['powerPV' + indexString] = resultsSubset['PV']['year_one_power_production_series_kw']
 			outData['powerPVToBattery' + indexString] = resultsSubset['PV']['year_one_to_battery_series_kw']
 			outData['powerPVToLoad' + indexString] = resultsSubset['PV']['year_one_to_load_series_kw']
+			outData['sizePVExisting' + indexString] = results['inputs']['Scenario']['Site']['PV']['existing_kw']
 		else:
 			outData['sizePV' + indexString] = 0
+			outData['sizePVRounded' + indexString] = 0
 		
 		if battery == 'on':
 			outData['powerBattery' + indexString] = resultsSubset['Storage']['size_kw']
+			outData['powerBatteryRounded' + indexString] = round(resultsSubset['Storage']['size_kw'],1)
 			outData['capacityBattery' + indexString] = resultsSubset['Storage']['size_kwh']
+			outData['capacityBatteryRounded' + indexString] = round(resultsSubset['Storage']['size_kwh'],1)
 			outData['chargeLevelBattery' + indexString] = resultsSubset['Storage']['year_one_soc_series_pct']
 			outData['powerBatteryToLoad' + indexString] = resultsSubset['Storage']['year_one_to_load_series_kw']
 		else:
 			outData['powerBattery' + indexString] = 0
 			outData['capacityBattery' + indexString] = 0
+			outData['powerBatteryRounded' + indexString] = 0
+			outData['capacityBatteryRounded' + indexString] = 0
 		
 		if wind == 'on':
 			outData['sizeWind' + indexString] = resultsSubset['Wind']['size_kw']
+			outData['sizeWindRounded' + indexString] = round(resultsSubset['Wind']['size_kw'],1)
 			outData['powerWind' + indexString] = resultsSubset['Wind']['year_one_power_production_series_kw']
 			outData['powerWindToBattery' + indexString] = resultsSubset['Wind']['year_one_to_battery_series_kw']
 			outData['powerWindToLoad' + indexString] = resultsSubset['Wind']['year_one_to_load_series_kw']
 		else:
 			outData['sizeWind' + indexString] = 0
+			outData['sizeWindRounded' + indexString] = 0
 
 		# diesel generator does not follow convention above, as it is not turned on by user, but rather is automatically turned on when an outage is specified
 		outData['sizeDiesel' + indexString] = resultsSubset['Generator']['size_kw']
+		outData['sizeDieselRounded' + indexString] = round(resultsSubset['Generator']['size_kw'],1)
+		if resultsSubset['Generator']['size_kw'] == 0:
+			outData['sizeDieselRounded' + indexString] = 0
 		outData['fuelUsedDiesel' + indexString] = resultsSubset['Generator']['fuel_used_gal']
-		outData['powerDieselToLoad' + indexString] = resultsSubset['Generator']['year_one_power_production_series_kw']
-		
+		outData['sizeDieselExisting' + indexString] = results['inputs']['Scenario']['Site']['Generator']['existing_kw']
+		outData['powerDiesel' + indexString] = resultsSubset['Generator']['year_one_power_production_series_kw']
+		outData['powerDieselToBattery' + indexString] = resultsSubset['Generator']['year_one_to_battery_series_kw']
+		outData['powerDieselToLoad' + indexString] = resultsSubset['Generator']['year_one_to_load_series_kw']
+
 		outData['resilience' + indexString] = resultsResilience['resilience_by_timestep']
 		outData['minOutage' + indexString] = resultsResilience['resilience_hours_min']
 		outData['maxOutage' + indexString] = resultsResilience['resilience_hours_max']
@@ -367,13 +382,43 @@ def work(modelDir, inputDict):
 
 		outData["windData"  + indexString] = json.dumps(plotData, cls=plotly.utils.PlotlyJSONEncoder)
 
+		plotData = []
+		if resultsSubset['Generator']['size_kw'] > 0:
+			
+			powerDieselToLoad = go.Scatter(
+				x=x,
+				y=outData['powerDieselToLoad' + indexString],
+				line=dict( color=('brown') ),
+				name="Diesel used to meet Load",
+				stackgroup='one',
+				mode='none')
+			plotData.append(powerDieselToLoad)
+
+			if battery == 'on':
+				powerDieselToBattery = go.Scatter(
+					x=x,
+					y=outData['powerDieselToBattery' + indexString],
+					line=dict( color=('yellow') ),
+					name="Diesel used to charge Battery",
+					stackgroup='one',
+					mode='none')
+				plotData.append(powerDieselToBattery)
+
+			# powerDiesel = go.Scatter(
+			# 	x=x,
+			# 	y=outData['powerDiesel' + indexString],
+			# 	line=dict( color=('red') ),
+			# 	name="Diesel Generation")
+			# plotData.append(powerDiesel)
+
+		outData["dieselData"  + indexString] = json.dumps(plotData, cls=plotly.utils.PlotlyJSONEncoder)
 
 		plotData = []
 		if battery == 'on':
 			powerGridToBattery = go.Scatter(
 				x=x,
 				y=outData['powerGridToBattery' + indexString],
-				line=dict( color=('red') ),
+				line=dict( color=('blue') ),
 				name="Grid",
 				stackgroup='one',
 				mode='none')
@@ -398,6 +443,17 @@ def work(modelDir, inputDict):
 					stackgroup='one',
 					mode='none')
 				plotData.append(powerWindToBattery)
+
+			if resultsSubset['Generator']['size_kw'] > 0:
+				powerDieselToBattery = go.Scatter(
+					x=x,
+					y=outData['powerDieselToBattery' + indexString],
+					line=dict( color=('brown') ),
+					name="Diesel",
+					stackgroup='one',
+					mode='none')
+				plotData.append(powerDieselToBattery)
+
 
 		outData["batteryData" + indexString] = json.dumps(plotData, cls=plotly.utils.PlotlyJSONEncoder)
 			
@@ -468,22 +524,22 @@ def new(modelDir):
 		"energyCost" : "0.1",
 		"demandCost" : '20',
 		"solarCost" : "1600",
-		"windCost" : "4989",
+		"windCost" : "4898",
 		"batteryPowerCost" : "840",
 		"batteryCapacityCost" : "420",
 		"solarMin": 0,
 		"windMin": 0,
 		"batteryPowerMin": 0,
 		"batteryCapacityMin": 0,
-		"solarMax": "1000000000",
-		"windMax": "1000000000",
+		"solarMax": "10000000",
+		"windMax": "10000000",
 		"batteryPowerMax": "1000000",
 		"batteryCapacityMax": "1000000",
 		"solarExisting": 0,
-		"criticalLoadFactor": ".99",
+		"criticalLoadFactor": "1",
 		"outage_start_hour": "1000",
 		"outageDuration": "24",
-		"fuelAvailable": "1024",
+		"fuelAvailable": "40000",
 		"genExisting": 0,
 		"minGenLoading": "0.3"
 	}
