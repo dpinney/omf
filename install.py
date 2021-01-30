@@ -12,12 +12,9 @@ def pipInstallInOrder(pipCommandString):
 	os.system("rm \\=*")
 
 if platform.system() == "Linux" and platform.linux_distribution()[0] in ["Ubuntu"]:
+	os.system("sudo ACCEPT_EULA=Y apt-get -yq install mssql-tools msodbcsql mdbtools") # workaround for the package EULA, which otherwise breaks upgrade!!
 	os.system("sudo apt-get -y update && sudo apt-get -y upgrade") # Make sure apt-get is updated to prevent any weird package installation issues
 	os.system("sudo apt-get -y install language-pack-en") # Install English locale 
-	try:
-		os.system("sudo ACCEPT_EULA=Y apt-get -yq install mssql-tools msodbcsql mdbtools") # workaround for the package EULA.
-	except:
-		pass
 	os.system("sudo DEBIAN_FRONTEND=noninteractive apt-get -y install git python3-pip python3-dev python3-numpy python3-pygraphviz graphviz \
 		unixodbc-dev libfreetype6-dev pkg-config alien libgraphviz-dev python3-pydot python3-tk octave libblas-dev liblapack-dev \
 		libatlas-base-dev gfortran wget splat")
