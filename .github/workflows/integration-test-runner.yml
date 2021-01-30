@@ -9,11 +9,8 @@ jobs:
     timeout-minutes: 120
     steps:
       - uses: actions/checkout@v2 # Checkout whichever ref that triggered this workflow
-      - name: Install Dependencies
+      - name: Install Dependencies # sudo apt-get -y update; sudo apt-get -y upgrade; sudo apt-get -y install python3-pip
         run: |
-          sudo apt-get -y update
-          sudo apt-get -y upgrade
-          sudo apt-get -y install python3-pip
           sudo python3 install.py
           sudo pip3 install -r requirements.txt
       - name: Run Tests
