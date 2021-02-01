@@ -1,5 +1,5 @@
 Customer Name,Duration,Season,Annual kWh,Business Type
-Midas Mulligan's Bank,5,summer,1500000,finance
-Rearden Metal,3,winter,2000000,manufacturing
-Taggart Transcontinental,8,summer,500000,utilities
-John Galt's House,2,winter,10000,residential
+Midas Mulligan's Bank,5,summer,1500,finance
+Rearden Metal,3,winter,2000,manufacturing
+Taggart Transcontinental,7,summer,50,utilities
+John Galt's House,2,winter,2,residential
