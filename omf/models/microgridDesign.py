@@ -21,11 +21,9 @@ def work(modelDir, inputDict):
 	solar = inputDict['solar'] 
 	wind = inputDict['wind']
 	battery = inputDict['battery']
-	#generator = inputDict['generator'] #specifying generator might not be needed in the inputDict, as it is turned on automatically when an outage is specified
 	outData['solar'] = inputDict['solar']
 	outData['wind'] = inputDict['wind']
 	outData['battery'] = inputDict['battery']
-	#outData['generator'] = inputDict['generator']
 
 	# Setting up the loadShape file.
 	with open(pJoin(modelDir,"loadShape.csv"),"w") as loadShapeFile:
@@ -213,6 +211,10 @@ def work(modelDir, inputDict):
 			outData['capacityBatteryRounded' + indexString] = round(resultsSubset['Storage']['size_kwh'],1)
 			outData['chargeLevelBattery' + indexString] = resultsSubset['Storage']['year_one_soc_series_pct']
 			outData['powerBatteryToLoad' + indexString] = resultsSubset['Storage']['year_one_to_load_series_kw']
+			# batteryKwExisting and batteryKwhExisting are pass through variables used in microgridUp project
+			outData['batteryKwExisting' + indexString] = float(inputDict['batteryKwExisting'])
+			outData['batteryKwhExisting' + indexString] = float(inputDict['batteryKwhExisting'])
+
 		else:
 			outData['powerBattery' + indexString] = 0
 			outData['capacityBattery' + indexString] = 0
@@ -520,7 +522,7 @@ def new(modelDir):
 		"fileName" : fName,
 		"latitude" : '39.7817',
 		"longitude" : '-89.6501',
-		"year" : '2001',
+		"year" : '2017',
 		"energyCost" : "0.1",
 		"demandCost" : '20',
 		"solarCost" : "1600",
@@ -537,11 +539,13 @@ def new(modelDir):
 		"batteryCapacityMax": "1000000",
 		"solarExisting": 0,
 		"criticalLoadFactor": "1",
-		"outage_start_hour": "1000",
+		"outage_start_hour": "500",
 		"outageDuration": "24",
 		"fuelAvailable": "40000",
 		"genExisting": 0,
-		"minGenLoading": "0.3"
+		"minGenLoading": "0.3",
+		"batteryKwExisting": 0,
+		"batteryKwhExisting": 0
 	}
 	creationCode = __neoMetaModel__.new(modelDir, defaultInputs)
 	try:
