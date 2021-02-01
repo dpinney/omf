@@ -19,6 +19,7 @@ from collections import OrderedDict
 from omf import feeder, distNetViz
 from pprint import pprint as pp
 from omf.solvers import gridlabd
+from time import time
 
 def gridLabToDSS(inFilePath, outFilePath):
 	''' Convert gridlab file to dss. ''' 
@@ -625,9 +626,12 @@ def _conversionTests():
 	brokenMdbList = {}
 
 	#set to True if you want to test all the glm files, otherwise it will just read the file paths from the previously saved workingGlmList.csv
-	shouldTestGlm = True
+	shouldTestGlm = False
 
-	omfDir = "/Users/ryanmahoney/omf/omf" #change to be dynamic location of omf
+	curDir = os.getcwd()
+	os.chdir('../..')
+	omfDir = os.getcwd()
+
 	def fillFileLists():
 		for root, dirs, files in os.walk(omfDir):
 			for f in files:
@@ -653,10 +657,17 @@ def _conversionTests():
 			except subprocess.CalledProcessError as e:
 				# print("Error with ", fPathShort, ": ", e.output)
 				brokenGlmList[fPathShort] = e.output
+		#save list of working glms to csv file
 		with open(pJoin(omfDir, "scratch", "dittoTestOutput", "workingGlmList.csv"),"w") as workingGlmListFile:
 			csv_writer = csv.writer(workingGlmListFile)
 			for x in cleanGlmList:
 				csv_writer.writerow([x])
+		#save list of broken glms to csv file
+		with open(pJoin(omfDir, "scratch", "dittoTestOutput", "brokenGlmList.csv"),"w") as brokenGlmListFile:
+			csv_writer2 = csv.writer(brokenGlmListFile)
+			for x in brokenGlmList.keys():
+				errorMsg = brokenGlmList[x].replace("\n","\t*\t")
+				csv_writer2.writerow([x, errorMsg])
 		# print("***********cleanGlmList = " + ", ".join(cleanGlmList))
 		# print("***********brokenGlmList = " + ", ".join(brokenGlmList))
 
@@ -682,9 +693,18 @@ def _conversionTests():
 			#read the names of the working files into cleanGlmList
 			csv_reader = csv.reader(workingGlmListFile)
 			for row in csv_reader:
-				cleanGlmList.add(row)
+				print(row[0])
+				cleanGlmList.add(row[0])
+		with open(pJoin(omfDir, "scratch", "dittoTestOutput", "brokenGlmList.csv"),"r") as brokenGlmListFile:
+			#read the names of the working files into cleanGlmList
+			csv_reader2 = csv.reader(brokenGlmListFile)
+			for row in csv_reader2:
+				filePath = row[0]
+				errMsg = row[1]
+				brokenGlmList[filePath] = errMsg
 
 	brokenDittoList = {}
+	cleanDittoList = {}
 	# working_dir = './TEMP_CONV/'
 	try:
 		os.mkdir(pJoin(omfDir, "scratch", "dittoTestOutput"))
@@ -701,7 +721,13 @@ def _conversionTests():
 		if '/' in fname:
 			fShort = fname.rsplit('/',1)[1]
 		try:
-			gridLabToDSS(fLong, pJoin(omfDir, "scratch", "dittoTestOutput", fShort + '_conv.dss'))
+			convFilePath = pJoin(omfDir, "scratch", "dittoTestOutput", fShort + '_conv.dss')
+			t0 = time()
+			gridLabToDSS(fLong, convFilePath)
+			t1 = time()
+			cleanDittoList[fname] = {}
+			cleanDittoList[fname]["convPath"] = convFilePath
+			cleanDittoList[fname]["convTime"] = t1-t0
 		except:
 			errorMsg = traceback.format_exc()
 			brokenDittoList[fname] = {}
@@ -728,7 +754,25 @@ def _conversionTests():
 		for fname in brokenDittoList.keys():
 			writer.writerow((fname, brokenDittoList[fname]["fullPath"], brokenDittoList[fname]["errMsg"]))
 
+	def createFullReport():
+		with open(pJoin(omfDir, "scratch", "dittoTestOutput", "fullDittoReport.csv"),"w") as fullReportFile:
+			fieldnames = ['filePath', 'gridlabdResult', 'dittoResult', 'conversionTime', 'originalFileSize', 'convertedFileSize', 'sizeDifference', 'powerflowResutls']
+			writer = csv.DictWriter(fullReportFile, fieldnames=fieldnames)
 
+			#write the column headers
+			writer.writeheader()
+			# add information from broken gridlab-d files
+			for x in brokenGlmList.keys():
+				writer.writerow({'filePath': x, 'gridlabdResult': brokenGlmList[x], 'dittoResult': 'N/A', 'conversionTime': 'N/A', 'originalFileSize': 'N/A', 'convertedFileSize': 'N/A', 'sizeDifference': 'N/A', 'powerflowResutls': 'N/A'})
+			# add information from working gridlab-d files that break in ditto
+			for x in brokenDittoList.keys():
+				writer.writerow({'filePath': x, 'gridlabdResult': 'SUCCESS', 'dittoResult': brokenDittoList[x]["errMsg"], 'conversionTime': 'N/A', 'originalFileSize': 'N/A', 'convertedFileSize': 'N/A', 'sizeDifference': 'N/A', 'powerflowResutls': 'N/A'})
+			# add information from working gridlab-d files that ditto converts
+			for x in cleanDittoList.keys():
+				# TODO: fill out 'originalFileSize', 'convertedFileSize', 'sizeDifference', 'powerflowResutls'
+				writer.writerow({'filePath': x, 'gridlabdResult': 'SUCCESS', 'dittoResult': cleanDittoList[x]["convPath"], 'conversionTime': cleanDittoList[x]["convTime"], 'originalFileSize': 'N/A', 'convertedFileSize': 'N/A', 'sizeDifference': 'N/A', 'powerflowResutls': 'N/A'})
+
+	createFullReport()
 	# print(brokenDittoList.keys())
 	# zip up all inputs, outputs, exceptions + send to nrel
 	# Deprecated tests section
@@ -738,7 +782,9 @@ def _conversionTests():
 	#distNetViz.insert_coordinates(evil_glm)
 
 def _randomTest():
-	omfDir = "/Users/ryanmahoney/omf/omf"
+	curDir = os.getcwd()
+	os.chdir('../..')
+	omfDir = os.getcwd()
 	s1 = "/this is a string"
 	s2 = "something/file.ext"
 	s3 = "/Users/ryanmahoney/omf/omf/someLocation/anotherLocation/file.ext"
