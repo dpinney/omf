@@ -148,6 +148,13 @@ def newQstsPlot(filePath, stepSizeInMinutes, numberOfSteps, keepAllFiles=False, 
 			all_control_df = pd.concat([all_control_df, df], ignore_index=True, sort=False)
 		if not keepAllFiles:
 			os.remove(csv_path)
+	# Collect switching actions
+	for key, ob in actions.items():
+		if ob.startswith('open'):
+			switch_ob = ob.split()
+			ob_name = switch_ob[1][7:]
+			new_row = {'hour':key, 't(sec)':0.0,'Tap(pu)':1,'Type':'Switch','Name':ob_name}
+			all_control_df = all_control_df.append(new_row, ignore_index=True)
 	# Write final aggregates
 	if not all_gen_df.empty:
 		all_gen_df.sort_values(['Name','hour'], inplace=True)
