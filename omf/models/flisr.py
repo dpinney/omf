@@ -37,7 +37,7 @@ def getMaxSubtree(graph, start):
 	'helper function that returns all the nodes connected to a starting node in a graph'
 	visited, stack = set(), [start]
 	while stack:
-		vertex = stack.pop()
+		vertex = str(stack.pop())
 		if vertex not in visited:
 			visited.add(vertex)
 			stack.extend(graph[vertex] - visited)
@@ -145,18 +145,21 @@ def listPotentiallyViable(tree, tieLines, workDir):
 	# create the powered and unpowered subtrees
 	powered = set()
 	for key in tree.keys():
-		if bool(tree[key].get('bustype','')) is True:
+		if (bool(tree[key].get('bustype','')) is True or tree[key].get('name','') == 'sourcebus'):
 			powered |= getMaxSubtree(adjacList, tree[key]['name'])
+	print(powered)
 	unpowered = vertices - powered
+	print(unpowered)
 	
 	# create a list of dict objects that represents the subset of potentially viable open switches
 	potentiallyViable = []
 	tie_row_count = tieLines.shape[0]
+	print(tie_row_count)
 	entry = 0
 	while entry < tie_row_count:
-		if (tieLines.loc[entry, 'to'] in unpowered) and (tieLines.loc[entry, 'from'] in powered):
+		if (str(tieLines.loc[entry, 'to']) in unpowered) and (str(tieLines.loc[entry, 'from']) in powered):
 			potentiallyViable.append({'object':tieLines.loc[entry, 'object'], 'phases':tieLines.loc[entry, 'phases'], 'name':tieLines.loc[entry, 'name'], 'from':tieLines.loc[entry, 'from'], 'to':tieLines.loc[entry, 'to']})
-		if tieLines.loc[entry, 'from'] in unpowered and tieLines.loc[entry, 'to'] in powered:
+		if (str(tieLines.loc[entry, 'from']) in unpowered and str(tieLines.loc[entry, 'to']) in powered):
 			potentiallyViable.append({'object':tieLines.loc[entry, 'object'], 'phases':tieLines.loc[entry, 'phases'], 'name':tieLines.loc[entry, 'name'], 'from':tieLines.loc[entry, 'from'], 'to':tieLines.loc[entry, 'to']})
 		entry += 1
 
