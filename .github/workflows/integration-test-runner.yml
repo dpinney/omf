@@ -22,7 +22,7 @@ jobs:
       - name: Install dependencies
         run: |
           brew link --overwrite python@3.8 #already installed but python3.9 is default
-          pip3 install ecos
+          pip3 install ecos #because it's having trouble not going first
           python3 install.py
       - name: Run tests
         run: |
