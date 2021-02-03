@@ -13,9 +13,9 @@ from omf.solvers.opendss import dssConvert
 def _tests():
 	''' Handle the command line arguments for distNetViz.'''
 	argCount = len(sys.argv)
-	errorMessage = 'Incorrect inputs. Usage: distNetViz [-f (force layout)] <Path_to_feeder.glm or .omd>'
+	errorMessage = 'Incorrect inputs. Usage: distNetViz [-f (force layout)] <Path_to_feeder.glm/.omd/.dss>'
 	if argCount == 1:
-		print('Running tests. Normal usage: distNetViz [-f (force layout)] <Path_to_feeder.glm or .omd>')
+		print('Running tests. Normal usage: distNetViz [-f (force layout)] <Path_to_feeder.glm/.omd/.dss>')
 		viz(omf.omfDir + '/static/publicFeeders/Simple Market System.omd', forceLayout=True, open_file=False) # No coordinates
 		viz(omf.omfDir + '/static/publicFeeders/Simple Market System.omd', forceLayout=False, open_file=False) # No coordinates
 		viz(omf.omfDir + '/static/testFiles/IEEE13.glm', forceLayout=True, open_file=False) # Has coordinates
