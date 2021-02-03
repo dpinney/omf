@@ -7,14 +7,15 @@ import networkx as nx
 from jinja2 import Template
 import omf
 import omf.feeder
-
+from omf.solvers import opendss
+from omf.solvers.opendss import dssConvert
 
 def _tests():
 	''' Handle the command line arguments for distNetViz.'''
 	argCount = len(sys.argv)
-	errorMessage = 'Incorrect inputs. Usage: distNetViz -f <Path_to_feeder.glm or .omd>'
+	errorMessage = 'Incorrect inputs. Usage: distNetViz [-f (force layout)] <Path_to_feeder.glm or .omd>'
 	if argCount == 1:
-		print('Running tests. Normal usage: distNetViz -f <Path_to_feeder.glm or .omd>')
+		print('Running tests. Normal usage: distNetViz [-f (force layout)] <Path_to_feeder.glm or .omd>')
 		viz(omf.omfDir + '/static/publicFeeders/Simple Market System.omd', forceLayout=True, open_file=False) # No coordinates
 		viz(omf.omfDir + '/static/publicFeeders/Simple Market System.omd', forceLayout=False, open_file=False) # No coordinates
 		viz(omf.omfDir + '/static/testFiles/IEEE13.glm', forceLayout=True, open_file=False) # Has coordinates
@@ -104,8 +105,10 @@ def viz(pathToOmdOrGlm, forceLayout=False, outputPath=None, outputName='viewer.h
 		elif pathToOmdOrGlm.endswith('.glm'):
 			thisFeed = {'tree':omf.feeder.parse(pathToOmdOrGlm, filePath=True)}
 			dss_schema = False
-		else:
-			dss_schema = True #TODO: don't assume this.
+		elif pathToOmdOrGlm.endswith('.dss'):
+			thisTree = dssConvert.dssToTree(pathToOmdOrGlm)
+			thisFeed = {'tree':dssConvert.evilDssTreeToGldTree(thisTree)}
+			dss_schema = True
 		tree = thisFeed['tree']
 	## Force layout of feeders with no lat/lon information so we can actually see what's there.
 	if forceLayout:
