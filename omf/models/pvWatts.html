@@ -11,11 +11,6 @@
 	<script type="text/javascript" src="{{pathPrefix}}/static/omf.js"></script>
 	<script type="text/javascript" src="{{pathPrefix}}/static/jquery-1.9.1.js"></script>
 	<script src="{{pathPrefix}}/static/highcharts4.src.js"></script>
-	<!-- Data  Imports -->
-	<script>allInputData={% if allInputDataDict %}{{allInputDataDict | tojson}}{% else %}null{% endif %}</script>
-	<script>allOutputData={% if allOutputDataDict %}{{allOutputDataDict | tojson}}{% else %}null{% endif %}</script>
-	<script>modelStatus="{{modelStatus}}"</script>
-	<script>currentUser="{{datastoreNames.get('currentUser','test')}}"</script>
 </head>
 <body>
 	<div id="header">
@@ -188,10 +183,14 @@
 		<div id="irradianceReport" class="tightContent">
 			<div id="irradianceChartDiv"></div>
 			<script>
+				poai = {{allOutputDataDict["climate"]["Plane of Array Irradiance (W/m^2)"]}}
+				bni = {{allOutputDataDict["climate"]["Beam Normal Irradiance (W/m^2)"]}}
+				di = {{allOutputDataDict["climate"]["Diffuse Irradiance (W/m^2)"]}}
 				irradianceSeriesData = [
-					{"name":"Plane of Array Irradiance (W/m^2)","marker":{"enabled":false},"color":"yellow","data":allOutputData.climate["Plane of Array Irradiance (W/m^2)"]},
-					{"name":"Beam Normal Irradiance (W/m^2)","marker":{"enabled":false},"color":"gold","data":allOutputData.climate["Beam Normal Irradiance (W/m^2)"]},
-					{"name":"Diffuse Irradiance (W/m^2)","marker":{"enabled":false},"color":"lemonchiffon","data":allOutputData.climate["Diffuse Irradiance (W/m^2)"]} ]
+					{"name":"Plane of Array Irradiance (W/m^2)","marker":{"enabled":false},"color":"yellow","data":poai},
+					{"name":"Beam Normal Irradiance (W/m^2)","marker":{"enabled":false},"color":"gold","data":bni},
+					{"name":"Diffuse Irradiance (W/m^2)","marker":{"enabled":false},"color":"lemonchiffon","data":di}
+				]
 				new Highcharts.Chart({"credits":{"enabled":false},
 					"plotOptions":{"series":{"animation": false, "pointStart":pointStart,"shadow":false,"pointInterval":pointInterval},"line":{"marker":{"enabled":false}}},
 					"xAxis":{"maxZoom":108000000,"tickColor":"gray","type":"datetime","lineColor":"gray"},
@@ -207,11 +206,16 @@
 		<div id="climateReport" class="tightContent">
 			<div id="climateChartDiv"></div>
 			<script>
+				amt = {{allOutputDataDict["climate"]["Ambient Temperature (F)"]}}
+				ct = {{allOutputDataDict["climate"]["Cell Temperature (F)"]}}
+				ws = {{allOutputDataDict["climate"]["Wind Speed (m/s)"]}}
 				climateSeriesData = [
-					{"name":"Ambient Temperature (F)","marker":{"enabled":false},"color":"dimgray","data":allOutputData.climate["Ambient Temperature (F)"]},
-					{"name":"Cell Temperature (F)","marker":{"enabled":false},"color":"gainsboro","data":allOutputData.climate["Cell Temperature (F)"]},
-					{"name":"Wind Speed (m/s)","marker":{"enabled":false},"color":"darkgray","data":allOutputData.climate["Wind Speed (m/s)"]} ]
-				new Highcharts.Chart({"credits":{"enabled":false},
+					{"name":"Ambient Temperature (F)","marker":{"enabled":false},"color":"dimgray","data":amt},
+					{"name":"Cell Temperature (F)","marker":{"enabled":false},"color":"gainsboro","data":ct},
+					{"name":"Wind Speed (m/s)","marker":{"enabled":false},"color":"darkgray","data":ws}
+				]
+				new Highcharts.Chart(
+					{"credits":{"enabled":false},
 					"plotOptions":{"series":{"animation": false, "pointStart":pointStart,"shadow":false,"pointInterval":pointInterval},"line":{"marker":{"enabled":false}}},
 					"xAxis":{"maxZoom":108000000,"tickColor":"gray","type":"datetime","lineColor":"gray"},
 					"title":{"text":null},
@@ -219,7 +223,8 @@
 					"yAxis":{"title":{"text":"Climate Units","style":{"color":"gray"}}},
 					"chart":{"marginBottom":35,"zoomType":"x","renderTo":"climateChartDiv","type":"line","marginRight":20, "height":250,"width":1000},
 					"tooltip":false,
-					"legend":{"verticalAlign":"top","align":"top","borderWidth":0,"x":50,"y":-10,"layout":"horizontal"}})
+					"legend":{"verticalAlign":"top","align":"top","borderWidth":0,"x":50,"y":-10,"layout":"horizontal"}}
+				)
 			</script>
 		</div>
 		{{ rawOutputFiles }}
