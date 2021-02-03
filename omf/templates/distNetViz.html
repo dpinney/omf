@@ -363,10 +363,10 @@
             .load { fill: rgb(0,0,255); } /* blue */
             .generator {  fill: rgb(255,0,0); } /* red */
             .triplex_meter { fill:rgb(255,165,0); } /* orange */
+            .storage { fill: rgb(255,0,0); } /* red */
+            .capacitor { fill: rgb(128,0,128);}  /* purple */
             .underground_line { stroke: rgb(128,128,128);}
-            .capacitor { stroke: rgb(128,0,128);}  /* purple */
             .transformer { stroke:rgb(255,165,0); } /* orange */
-            .storage { stroke: rgb(255,0,0); } /* red */
             .regulator { stroke: rgb(255,0,0) ;} /* red */
             .undefined,.regulator_configuration,.transformer_configuration,.triplex_line_configuration,.line_configuration,.volt_var_control,.line_spacing,.climate,.overhead_line_conductor,.underground_line_conductor,.triplex_line_conductor,.player,.schedule { fill: rgb(191,191,191); } /* 75% lightness gray */
         </style>
@@ -1897,11 +1897,11 @@ function downloadTextFile() {
 
 function scaleGraphForVisualAppearance(objectCount) {
     if (objectCount < 100) {
-        gScaleLevel = 4;
+        gScaleLevel = 3;
     } else if (objectCount < 1000) {
-        gScaleLevel = .2;
+        gScaleLevel = .4;
     } else {
-        gScaleLevel = .05;
+        gScaleLevel = .1;
     }
 }
 
@@ -1917,8 +1917,8 @@ function createViewport(tree, svgContainer) {
         // There were no coordinates, so insert some!
         const objects = Object.values(tree);
         insertCoordinates(objects, 0, 0, 50);
-        scaleGraphForVisualAppearance(keys.length)
     }
+    scaleGraphForVisualAppearance(keys.length)
     const minMax = getMinMax({objectContainer: tree, properties: ["longitude", "latitude"]});
     let {latitude: {min: minLat}} = minMax;
     let {latitude: {max: maxLat}} = minMax;
