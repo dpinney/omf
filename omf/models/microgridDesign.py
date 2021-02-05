@@ -64,6 +64,7 @@ def work(modelDir, inputDict):
 	minGenLoading = float(inputDict['minGenLoading'])
 	outage_start_hour = float(inputDict['outage_start_hour'])
 	outage_end_hour = outage_start_hour + float(inputDict['outageDuration'])
+	value_of_lost_load = float(inputDict['value_of_lost_load'])
 
 
 	#outageStart = int(inputDict['outageStart'])
@@ -107,6 +108,9 @@ def work(modelDir, inputDict):
 					"LoadProfile": {
 						"loads_kw": jsonifiableLoad,
 						"year": year
+					},
+					"Financial": {
+						"value_of_lost_load_us_dollars_per_kwh": value_of_lost_load
 					},
 					"PV": {
 						"installed_cost_us_dollars_per_kw": solarCost,
@@ -173,6 +177,8 @@ def work(modelDir, inputDict):
 		if outData['demandCostBAU' + indexString] is None:
 			errMsg = results['messages'].get('error','API currently unavailable please try again later')
 			raise Exception('The REopt data analysis API by NREL had the following error: ' + errMsg) 
+
+		# calculate wind and battery existing costs here for microgridUp
 	
 		outData['demandCost' + indexString] = resultsSubset['ElectricTariff']['total_demand_cost_us_dollars']
 		outData['demandCostDiff' + indexString] = round(outData['demandCostBAU' + indexString] - outData['demandCost' + indexString],2)
@@ -227,6 +233,9 @@ def work(modelDir, inputDict):
 			outData['powerWind' + indexString] = resultsSubset['Wind']['year_one_power_production_series_kw']
 			outData['powerWindToBattery' + indexString] = resultsSubset['Wind']['year_one_to_battery_series_kw']
 			outData['powerWindToLoad' + indexString] = resultsSubset['Wind']['year_one_to_load_series_kw']
+			# batteryKwExisting and batteryKwhExisting are pass through variables used in microgridUp project
+			outData['windExisting' + indexString] = float(inputDict['windExisting'])
+			outData['windExisting' + indexString] = float(inputDict['windExisting'])
 		else:
 			outData['sizeWind' + indexString] = 0
 			outData['sizeWindRounded' + indexString] = 0
@@ -248,6 +257,8 @@ def work(modelDir, inputDict):
 		outData['avgOutage' + indexString] = resultsResilience['resilience_hours_avg']
 		outData['survivalProbX' + indexString] = resultsResilience['outage_durations']
 		outData['survivalProbY' + indexString] = resultsResilience['probs_of_surviving']
+		outData['avoidedOutageCosts' + indexString] = resultsResilience['avoided_outage_costs_us_dollars']
+
 		outData['runID' + indexString] = runID
 		outData['apiKey' + indexString] = 'WhEzm6QQQrks1hcsdN0Vrd56ZJmUyXJxTJFg6pn9'
 
@@ -544,8 +555,10 @@ def new(modelDir):
 		"fuelAvailable": "40000",
 		"genExisting": 0,
 		"minGenLoading": "0.3",
+		"windExisting": 0,
 		"batteryKwExisting": 0,
-		"batteryKwhExisting": 0
+		"batteryKwhExisting": 0,
+		"value_of_lost_load": "100"
 	}
 	creationCode = __neoMetaModel__.new(modelDir, defaultInputs)
 	try:
