@@ -233,8 +233,7 @@ def work(modelDir, inputDict):
 			outData['powerWind' + indexString] = resultsSubset['Wind']['year_one_power_production_series_kw']
 			outData['powerWindToBattery' + indexString] = resultsSubset['Wind']['year_one_to_battery_series_kw']
 			outData['powerWindToLoad' + indexString] = resultsSubset['Wind']['year_one_to_load_series_kw']
-			# batteryKwExisting and batteryKwhExisting are pass through variables used in microgridUp project
-			outData['windExisting' + indexString] = float(inputDict['windExisting'])
+			# windExisting are pass through variables used in microgridUp project
 			outData['windExisting' + indexString] = float(inputDict['windExisting'])
 		else:
 			outData['sizeWind' + indexString] = 0
