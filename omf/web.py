@@ -9,6 +9,7 @@ from flask import (Flask, send_from_directory, request, redirect, render_templat
 import flask_login, boto3
 from flask_compress import Compress
 from jinja2 import Template
+import dateutil
 try:
 	import fcntl
 except:
@@ -271,7 +272,7 @@ def register(email, reg_key):
 	if not (user and
 			reg_key == user.get("reg_key") and
 			user.get("timestamp") and
-			dt.timedelta(1) > dt.datetime.now() - dt.datetime.strptime(user.get("timestamp"), "%c")):
+			dt.timedelta(1) > dt.datetime.now() - dateutil.parser.parse(user.get("timestamp"))):
 		return "This page either expired, or you are not supposed to access it. It might not even exist"
 	if request.method == "GET":
 		return render_template("register.html", email=email)
@@ -320,7 +321,7 @@ def adminControls():
 		tStamp = userDict.get("timestamp","")
 		if userDict.get("password_digest"):
 			user["status"] = "Registered"
-		elif dt.timedelta(1) > dt.datetime.now() - dt.datetime.strptime(tStamp, "%c"):
+		elif dt.timedelta(1) > dt.datetime.now() - dateutil.parser.parse(tStamp):
 			user["status"] = "emailSent"
 		else:
 			user["status"] = "emailExpired"
