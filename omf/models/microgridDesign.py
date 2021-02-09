@@ -206,6 +206,7 @@ def work(modelDir, inputDict):
 			outData['powerPVToBattery' + indexString] = resultsSubset['PV']['year_one_to_battery_series_kw']
 			outData['powerPVToLoad' + indexString] = resultsSubset['PV']['year_one_to_load_series_kw']
 			outData['sizePVExisting' + indexString] = results['inputs']['Scenario']['Site']['PV']['existing_kw']
+			outData['solarCost' + indexString] = float(inputDict['solarCost'])
 		else:
 			outData['sizePV' + indexString] = 0
 			outData['sizePVRounded' + indexString] = 0
@@ -217,6 +218,8 @@ def work(modelDir, inputDict):
 			outData['capacityBatteryRounded' + indexString] = round(resultsSubset['Storage']['size_kwh'],1)
 			outData['chargeLevelBattery' + indexString] = resultsSubset['Storage']['year_one_soc_series_pct']
 			outData['powerBatteryToLoad' + indexString] = resultsSubset['Storage']['year_one_to_load_series_kw']
+			outData['batteryPowerCost' + indexString] = float(inputDict['batteryPowerCost'])
+			outData['batteryCapacityCost' + indexString] = float(inputDict['batteryCapacityCost'])
 			# batteryKwExisting and batteryKwhExisting are pass through variables used in microgridUp project
 			outData['batteryKwExisting' + indexString] = float(inputDict['batteryKwExisting'])
 			outData['batteryKwhExisting' + indexString] = float(inputDict['batteryKwhExisting'])
@@ -233,7 +236,8 @@ def work(modelDir, inputDict):
 			outData['powerWind' + indexString] = resultsSubset['Wind']['year_one_power_production_series_kw']
 			outData['powerWindToBattery' + indexString] = resultsSubset['Wind']['year_one_to_battery_series_kw']
 			outData['powerWindToLoad' + indexString] = resultsSubset['Wind']['year_one_to_load_series_kw']
-			# windExisting are pass through variables used in microgridUp project
+			outData['windCost' + indexString] = float(inputDict['windCost'])
+			# windExisting is a pass through variables used in microgridUp project
 			outData['windExisting' + indexString] = float(inputDict['windExisting'])
 		else:
 			outData['sizeWind' + indexString] = 0
