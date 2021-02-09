@@ -84,6 +84,9 @@ def newQstsPlot(filePath, stepSizeInMinutes, numberOfSteps, keepAllFiles=False, 
 		elif obData.startswith('vsource.'):
 			runDssCommand(f'new object=monitor.{mon_name} element={obType}.{name} terminal=1 mode=0')
 			mon_names.append(mon_name)
+		elif obData.startswith('isource.'):
+			runDssCommand(f'new object=monitor.{mon_name} element={obType}.{name} terminal=1 mode=0')
+			mon_names.append(mon_name)
 		elif obData.startswith('generator.') or obData.startswith('isource.') or obData.startswith('storage.'):
 			mon_name = f'mongenerator-{name}'
 			runDssCommand(f'new object=monitor.{mon_name} element={obType}.{name} terminal=1 mode=1 ppolar=no')
@@ -134,6 +137,9 @@ def newQstsPlot(filePath, stepSizeInMinutes, numberOfSteps, keepAllFiles=False, 
 			df['Name'] = name
 			all_gen_df = pd.concat([all_gen_df, df], ignore_index=True, sort=False)
 		elif name.startswith('monvsource-'):
+			df['Name'] = name
+			all_source_df = pd.concat([all_source_df, df], ignore_index=True, sort=False)
+		elif name.startswith('monisource-'):
 			df['Name'] = name
 			all_source_df = pd.concat([all_source_df, df], ignore_index=True, sort=False)
 		elif name.startswith('moncapacitor-'):
