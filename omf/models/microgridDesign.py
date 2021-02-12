@@ -67,6 +67,8 @@ def work(modelDir, inputDict):
 	outage_start_hour = float(inputDict['outage_start_hour'])
 	outage_end_hour = outage_start_hour + float(inputDict['outageDuration'])
 	value_of_lost_load = float(inputDict['value_of_lost_load'])
+	solarCanExport = inputDict['solarCanExport']
+	solarCanCurtail = inputDict['solarCanCurtail']
 
 
 	#outageStart = int(inputDict['outageStart'])
@@ -116,7 +118,9 @@ def work(modelDir, inputDict):
 					},
 					"PV": {
 						"installed_cost_us_dollars_per_kw": solarCost,
-						"min_kw": solarMin
+						"min_kw": solarMin,
+						"can_export_beyond_site_load": solarCanExport,
+						"can_curtail": solarCanCurtail
 					},
 					"Storage": {
 						"installed_cost_us_dollars_per_kw": batteryPowerCost,
@@ -346,17 +350,35 @@ def work(modelDir, inputDict):
 			powerPVToLoad = go.Scatter(
 				x=x,
 				y=outData['powerPVToLoad' + indexString],
-				line=dict( color=('green') ),
+				line=dict( color=('blue') ),
 				name="Solar used to meet Load",
 				stackgroup='one',
 				mode='none')
 			plotData.append(powerPVToLoad)
 
+			powerPVToGrid = go.Scatter(
+				x=x,
+				y=outData['powerPVToGrid' + indexString],
+				line=dict( color=('yellow') ),
+				name="Solar exported to Grid",
+				stackgroup='one',
+				mode='none')
+			plotData.append(powerPVToGrid)
+
+			powerPVCurtailed = go.Scatter(
+				x=x,
+				y=outData['powerPVCurtailed' + indexString],
+				line=dict( color=('green') ),
+				name="Solar power curtailed",
+				stackgroup='one',
+				mode='none')
+			plotData.append(powerPVCurtailed)
+
 			if battery == 'on':
 				powerPVToBattery = go.Scatter(
 					x=x,
 					y=outData['powerPVToBattery' + indexString],
-					line=dict( color=('yellow') ),
+					line=dict( color=('red') ),
 					name="Solar used to charge Battery",
 					stackgroup='one',
 					mode='none')
@@ -567,7 +589,9 @@ def new(modelDir):
 		"windExisting": 0,
 		"batteryKwExisting": 0,
 		"batteryKwhExisting": 0,
-		"value_of_lost_load": "100"
+		"value_of_lost_load": "100",
+		"solarCanCurtail": False,
+		"solarCanExport": True
 	}
 	creationCode = __neoMetaModel__.new(modelDir, defaultInputs)
 	try:
