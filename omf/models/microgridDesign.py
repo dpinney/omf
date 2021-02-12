@@ -24,6 +24,7 @@ def work(modelDir, inputDict):
 	outData['solar'] = inputDict['solar']
 	outData['wind'] = inputDict['wind']
 	outData['battery'] = inputDict['battery']
+	outData['year'] = inputDict['year']
 
 	# Setting up the loadShape file.
 	with open(pJoin(modelDir,"loadShape.csv"),"w") as loadShapeFile:
@@ -50,6 +51,7 @@ def work(modelDir, inputDict):
 	windCost = float(inputDict['windCost'])
 	batteryPowerCost = float(inputDict['batteryPowerCost'])
 	batteryCapacityCost = float(inputDict['batteryCapacityCost'])
+	dieselGenCost = float(inputDict['dieselGenCost'])
 	solarMin = float(inputDict['solarMin'])
 	windMin = float(inputDict['windMin'])
 	batteryPowerMin = float(inputDict['batteryPowerMin'])
@@ -127,6 +129,7 @@ def work(modelDir, inputDict):
 						"min_kw": windMin
 					},
 					"Generator": {
+						"installed_cost_us_dollars_per_kw": dieselGenCost
 					}
 				}
 			}
@@ -205,6 +208,8 @@ def work(modelDir, inputDict):
 			outData['powerPV' + indexString] = resultsSubset['PV']['year_one_power_production_series_kw']
 			outData['powerPVToBattery' + indexString] = resultsSubset['PV']['year_one_to_battery_series_kw']
 			outData['powerPVToLoad' + indexString] = resultsSubset['PV']['year_one_to_load_series_kw']
+			outData['powerPVCurtailed' + indexString] = resultsSubset['PV']['year_one_curtailed_production_series_kw']
+			outData['powerPVToGrid' + indexString] = resultsSubset['PV']['year_one_to_grid_series_kw']
 			outData['sizePVExisting' + indexString] = results['inputs']['Scenario']['Site']['PV']['existing_kw']
 			outData['solarCost' + indexString] = float(inputDict['solarCost'])
 		else:
@@ -543,6 +548,7 @@ def new(modelDir):
 		"windCost" : "4898",
 		"batteryPowerCost" : "840",
 		"batteryCapacityCost" : "420",
+		"dieselGenCost": "500",
 		"solarMin": 0,
 		"windMin": 0,
 		"batteryPowerMin": 0,
