@@ -49,6 +49,7 @@ def heavyProcessing(modelDir, test_mode=False):
 		work = getattr(omf.models, inputDict['modelType']).work
 		#This grabs the new outData model
 		outData = work(modelDir, inputDict)
+		#print("!!!!!!! thing !!!!!!!!") # DEBUG
 	except Exception as e:
 		# cancel(modelDir)
 		if test_mode == True:

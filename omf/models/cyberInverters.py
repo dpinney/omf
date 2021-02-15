@@ -111,7 +111,7 @@ def work(modelDir, inputDict):
 			print("Error occurred creating PyCIGAR_inputs folder")
 
 		#create misc_inputs.csv file in folder
-		with open(pJoin(modelDir,"PyCIGAR_inputs","misc_inputs.csv"),"w") as miscFile:
+		with open(pJoin(modelDir,"PyCIGAR_inputs","misc_inputs.csv"),"w", newline='') as miscFile:
 			#Populate misc_inputs.csv
 			# miscFile.write(misc_inputs)
 			# for key in misc_dict.keys():
@@ -125,7 +125,7 @@ def work(modelDir, inputDict):
 
 		#create load_solar_data.csv file in folder
 		rowCount = 0
-		with open(pJoin(modelDir,"PyCIGAR_inputs","load_solar_data.csv"),"w") as loadPVFile:
+		with open(pJoin(modelDir,"PyCIGAR_inputs","load_solar_data.csv"),"w", newline='') as loadPVFile:
 			loadPVFile.write(inputDict['loadPV'])
 			#Open load and PV input file
 		try:
@@ -147,8 +147,13 @@ def work(modelDir, inputDict):
 		# f1Name = "breakpoints.csv"
 		# with open(pJoin(omf.omfDir, "static", "testFiles", "pyCIGAR", f1Name)) as f1:
 		# 	breakpoints_inputs = f1.read()
-		with open(pJoin(modelDir,"PyCIGAR_inputs","breakpoints.csv"),"w") as breakpointsFile:
+		with open(pJoin(modelDir,"PyCIGAR_inputs","breakpoints.csv"),"w", newline='') as breakpointsFile:
 			breakpointsFile.write(inputDict['breakpoints'])
+
+		#create storage_inputs.txt file in folder
+		print(inputDict['storageFile']) # DEBUG
+		with open(pJoin(modelDir,"PyCIGAR_inputs","storage_inputs.txt"),"w", newline='') as storageIns:
+			storageIns.writelines(inputDict['storageFile'])
 
 		return solarPVLengthValue
 
@@ -182,6 +187,7 @@ def work(modelDir, inputDict):
 	attackVars["None"] = {"hackStart": defaultHackStart, "hackEnd": None, "percentHack": 0.0}
 	attackVars["VOLTAGE_OSCILLATION"] = {"hackStart": defaultHackStart, "hackEnd": None, "percentHack": 0.45} #TODO: Change to VOLTAGE_OSCILLATION
 	attackVars["VOLTAGE_IMBALANCE"] = {"hackStart": defaultHackStart, "hackEnd": None, "percentHack": 0.30} #percentHack cannot be above .4 for VOLTAGE_IMBALANCE
+	attackVars["PEAK_SHAVING"] = {"hackStart": defaultHackStart, "hackEnd": None, "percentHack": 0.45}
 
 	#check to make sure attackAgentType is in the attackVars dictionary, otherwise set it to None. This shouldn't ever be a problem since the user selects attackAgentType from a preset HTML dropdown.
 	if attackAgentType not in attackVars:
@@ -279,7 +285,8 @@ def work(modelDir, inputDict):
 				duration=simLengthAdjusted,
 				hack_start=hackStartVal,
 				hack_end=hackEndVal,
-				percentage_hack=percentHackVal
+				percentage_hack=percentHackVal,
+				battery_path=modelDir + "/PyCIGAR_inputs/storage_inputs.txt"
 			)
 			# Report out the agent paths.
 			# TODO: test, this might break with allInputData file locking.
@@ -310,10 +317,11 @@ def work(modelDir, inputDict):
 			duration=simLengthAdjusted,
 			hack_start=hackStartVal,
 			hack_end=hackEndVal,
-			percentage_hack=percentHackVal
+			percentage_hack=percentHackVal,
+			battery_path=modelDir + "/PyCIGAR_inputs/storage_inputs.txt"
 		)
 
-		#print("Got through pyCigar!!!")
+		#print("!!!!!!!!!!! Got through pyCigar !!!!!!!!!!!!")
 
 	def convertOutputs():
 		#set outData[] values to those from modelDir/pycigarOutput/pycigar_output_specs_.json
@@ -412,6 +420,24 @@ def work(modelDir, inputDict):
 				outData[cap_name]['Cap1C'] = pycigarJson[cap_name]['switchC']
 			
 			outData[cap_name]["CapPhases"] = capPhaseValue
+		
+		#convert battery data
+		battery_output_dict = {} 
+		for bname,batt_dict in pycigarJson["Battery Outputs"].items():
+			#create a new dictionary to represent the single battery 
+			new_batt_dict = {}
+			#get values from pycigar output for given single battery
+			batt_name = batt_dict["Name"]
+			batt_soc = batt_dict["SOC"]
+			batt_power = batt_dict["Power Output (W)"]
+			batt_status = batt_dict["control_setting"]
+			#populate single battery dict with pycigar values
+			new_batt_dict["SOC"] = batt_soc
+			new_batt_dict["Power"] = batt_power
+			new_batt_dict["Charge_Status"] = batt_status
+			#add single battery dict to dict of all the batteries using the battery name as the key 
+			battery_output_dict[batt_name] = new_batt_dict
+		outData["Battery_Outputs"] = battery_output_dict
 
 		# convert voltage imbalance data
 		outData["voltageImbalances"] = {}
@@ -504,25 +530,28 @@ def stringToMag(s):
 	elif 'j' in s or 'i' in s:
 		return abs(complex(s.replace('i','j')))
 
-
 def new(modelDir):
 	''' Create a new instance of this model. Returns true on success, false on failure. '''
-	# f1Name = "load_solar_data.csv"
+	circuit_dir = "ieee3busdata_battery"
 	f1Name = "load_solar_data_850.csv"
-	with open(pJoin(omf.omfDir, "static", "testFiles", "pyCIGAR", f1Name)) as f1:
+	with open(pJoin(omf.omfDir, "static", "testFiles", "pyCIGAR", circuit_dir, f1Name)) as f1:
 		load_PV = f1.read()
 	f2Name = "breakpoints.csv"
-	with open(pJoin(omf.omfDir, "static", "testFiles", "pyCIGAR", f2Name)) as f2:
+	with open(pJoin(omf.omfDir, "static", "testFiles", "pyCIGAR", circuit_dir, f2Name)) as f2:
 		breakpoints_inputs = f2.read()
 	f4Name = "misc_inputs.csv"
-	with open(pJoin(omf.omfDir, "static", "testFiles", "pyCIGAR", f4Name)) as f4:
+	with open(pJoin(omf.omfDir, "static", "testFiles", "pyCIGAR", circuit_dir, f4Name)) as f4:
 		miscFile = f4.read()
+	sfName = "battery_inputs_cent.txt"
+	with open(pJoin(omf.omfDir, "static", "testFiles", "pyCIGAR", circuit_dir, sfName)) as sf:
+		storageFile = sf.read()
+
 	defaultInputs = {
 		"simStartDate": "2019-07-01T00:00:00Z",
 		"simLength": "750",
 		"simLengthUnits": "seconds",
-		"feederName1": "ieee37.dss",
-		"circuitFileName1": "ieee37.dss",
+		"feederName1": "ieee3",
+		"circuitFileName1": "ieee3.dss",
 		# "feederName1": "Olin Barre GH EOL Solar AVolts CapReg",
 		"fileName1":f1Name,
 		"loadPV": load_PV,
@@ -536,7 +565,9 @@ def new(modelDir):
 		"attackVariable": "None",
 		"defenseVariable": "None",
 		"hackPercent": "50",
-		"defenseAgentNames": "policy_ieee37_oscillation_sample,policy_ieee37_unbalance_sample"
+		"defenseAgentNames": "policy_ieee37_oscillation_sample,policy_ieee37_unbalance_sample",
+		"storageFileName": sfName,
+		"storageFile": storageFile
 	}
 	creationCode = __neoMetaModel__.new(modelDir, defaultInputs)
 	try:
@@ -549,7 +580,7 @@ def new(modelDir):
 				pJoin(__neoMetaModel__._omfDir, "static", "testFiles", "pyCIGAR", name),
 				pJoin(modelDir, "pycigarOutput", name)
 			)
-		# Generate .dss file so we can open editor right out of the gate.
+		# Generate .dss file from .omd so we can open text editor right out of the gate.
 		with open(f'{modelDir}/{defaultInputs["feederName1"]}.omd', 'r') as omdFile:
 			omd = json.load(omdFile)
 		tree = omd['tree']
