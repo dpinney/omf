@@ -171,6 +171,7 @@
 					<option value="None">None</option>
 					<option value="VOLTAGE_OSCILLATION">Voltage Oscillation</option>
 					<option value="VOLTAGE_IMBALANCE">Voltage Imbalance</option>
+					<option value="PEAK_SHAVING">Peak Shaving</option>
 				</select>
 			</div>
 			<div class="shortInput">
@@ -513,7 +514,6 @@
 						.attr("id", "inverterSeries_" + inv)
 					// if no inverters are found, display message
   					var invLongName = "allOutputData.Inverter_Outputs.".concat(inv)
-					
 					var invVoltageSeries = {
 						"pointWidth": 40,
 						"color":"RoyalBlue",
@@ -872,8 +872,81 @@
 				<pre id="stdout" style="font-size:13px; text-align:left"></pre>
 			</div>
 			<script>gebi("stdout").innerHTML = allOutputData.stdout</script>
+		</div> -->
+		<p class="reportTitle postRun">Battery Power Output (W) <a target="_self" class="toggle">Hide / Show</a></p>
+		<div id="newBatteryReport" class="tightContent postRun" style="max-height:600px; overflow-y: scroll;">
+			<script type="text/javascript">
+				swingPointStart = dateOb(allOutputData.swingTimestamps[0])
+				swingPointInterval = dateOb(allOutputData.swingTimestamps[1]) - pointStart
+				swingHighChartsTemplate = {
+				"chart":{"renderTo":"", "marginRight":20, "marginBottom":35, "zoomType":"x"},
+				"title":{"text":null},
+				"legend":{"layout":"horizontal", "align":"top", "verticalAlign":"top", "x":50, "y":-10, "borderWidth":0},
+				"credits":{"enabled":false},
+				"xAxis":{"type":"datetime","maxZoom":1000, "tickColor":"gray","lineColor":"gray"},
+				"yAxis":{"title":{"text":null, "style":{"color":"gray"}}},
+				"plotOptions":{"line":{"marker":{"enabled":false}}, "series":{"shadow":false, "pointInterval":swingPointInterval, "pointStart":swingPointStart}},
+				"tooltip":{"valueDecimals":1},
+				"series":[]}
+				var battNamesArray=[]
+				battNamesArray = Object.keys(allOutputData.Battery_Outputs)
+				if (battNamesArray.length == 0){
+						$("#newBatteryReport").html("<p>&#160;&#160;&#160;No battery storage units were found on the feeder.</p>")
+					}
+				for (var i in battNamesArray){
+					var batt = battNamesArray[i]
+					$("<div/>").appendTo("#newBatteryReport")
+						.attr("class", "batteryContainer")
+						.attr("id", batt)
+					$("<div/>").appendTo("#newBatteryReport")
+						.attr("id", "batterySeries_" + batt)
+					var battLongName = "allOutputData.Battery_Outputs.".concat(batt)
+					var battPowerRealSeries = {
+						"pointWidth": 40,
+						"color":"RoyalBlue",
+						"data":eval(battLongName.concat(".Power")),
+						"name":"Power",
+					}
+					var realPowerMin = Math.min(...battPowerRealSeries.data)
+					var realPowerMax = Math.max(...battPowerRealSeries.data)
+					var localHighChart = JSON.parse(JSON.stringify(swingHighChartsTemplate))
+					localHighChart["chart"]["renderTo"] = "batterySeries_" + batt
+					localHighChart["chart"]["zoomType"] = 'xy'
+					localHighChart["chart"]["inverted"] = false
+					localHighChart["chart"]["height"] = 200
+					localHighChart["chart"]["width"] = 1000
+					localHighChart["chart"]["marginRight"] = 150
+					localHighChart["chart"]["type"] = "line"
+					localHighChart["title"]["text"] = batt
+					localHighChart["title"]["align"] = "right"
+					localHighChart["title"]["x"] = -50
+					localHighChart["series"] = []
+					localHighChart["xAxis"] = { 
+						"type":"datetime",
+						"tickColor":"gray",
+						"lineColor":"gray",
+						}
+					localHighChart["yAxis"] = [{ //Watts Axis
+						"min": realPowerMin, 
+						"max" : realPowerMax,
+						"title": { 
+							"text": "Power Output (W)",
+							"style": {
+								"color":"gray"
+							}
+						}
+					}]
+					localHighChart["tooltip"]["shared"] = true
+					chart = new Highcharts.Chart(localHighChart);
+					chart.addSeries(battPowerRealSeries)
+				}
+			</script>
 		</div>
- -->		<p class="reportTitle postRun">Raw Input and Output Files</p>
+		<p class="reportTitle postRun">Battery Charging Status <a target="_self" class="toggle">Hide / Show</a></p>
+		<!--stack of single-line plots w/ three state (charge, discharge, standby) y-axis, a la inverter stack-->
+		<p class="reportTitle postRun">Battery State of Charge <a target="_self" class="toggle">Hide / Show</a></p>
+		<!--stack of single-line plots w/ y-axis fixed @ 100% height, a la inverter stack-->
+		<p class="reportTitle postRun">Raw Input and Output Files</p>
 		<div id="rawOutput" class="content postRun" style="margin-top:0px">
 			{% for name in allOutputDataDict['fileNames'] %}
 				{% if loop.index > 1 %}&mdash; {% endif %}<a href="/downloadModelData/{{allInputDataDict['user']}}/{{allInputDataDict['modelName']}}/{{name}}">{{name}}</a>
