@@ -9,9 +9,6 @@ jobs:
     timeout-minutes: 120
     steps:
       - uses: actions/checkout@v2 # Checkout whichever ref that triggered this workflow
-      - name: Avoid Azure Repos That Have Problems
-        run: |
-          sed -e 's/azure.archive.ubuntu.com/us.archive.ubuntu.com/g' -e t -e d /etc/apt/sources.list | sudo tee /etc/apt/sources.list.d/nonazure.list
       - name: Install Dependencies
         run: |
           sudo python3 install.py
