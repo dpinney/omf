@@ -13,7 +13,7 @@ def pipInstallInOrder(pipCommandString):
 
 if platform.system() == "Linux" and platform.linux_distribution()[0] in ["Ubuntu"]:
 	os.system("sudo ACCEPT_EULA=Y apt-get -yq install mssql-tools msodbcsql mdbtools") # workaround for the package EULA, which otherwise breaks upgrade!!
-	os.system("sudo apt-get -y update && sudo apt-get -y upgrade") # Make sure apt-get is updated to prevent any weird package installation issues
+	os.system("sudo apt-get -y update")# && sudo apt-get -y upgrade") # Make sure apt-get is updated to prevent any weird package installation issues
 	os.system("sudo apt-get -y install language-pack-en") # Install English locale 
 	# os.system("sudo apt-get dist-upgrade")
 	# os.system("sudo apt --fix-broken install")
