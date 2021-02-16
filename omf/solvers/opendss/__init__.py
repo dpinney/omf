@@ -66,6 +66,11 @@ def _getCoords(dssFilePath, keep_output=True):
 	coords['radius'] = hyp
 	return coords
 
+def _getByName(tree, name):
+	''' Return first object with name in tree. '''
+	matches = [x for x in tree if x.get('name','') == name]
+	return matches[0]
+
 def newQstsPlot(filePath, stepSizeInMinutes, numberOfSteps, keepAllFiles=False, actions={}, filePrefix='timeseries'):
 	''' Use monitor objects to generate voltage values for a timeseries powerflow. '''
 	dssFileLoc = os.path.dirname(os.path.abspath(filePath))
@@ -131,6 +136,15 @@ def newQstsPlot(filePath, stepSizeInMinutes, numberOfSteps, keepAllFiles=False, 
 		csv_path = f'{dssFileLoc}/{circ_name}_Mon_{name}.csv'
 		df = pd.read_csv(f'{circ_name}_Mon_{name}.csv')
 		if name.startswith('monload-'):
+			#TODO: debug.
+			# ob_name = name.split('-')[1]
+			# the_object = _getByName(tree, ob_name)
+			# phase_ids = the_object.get('bus1','').split('.')[1:]
+			# if len(phase_ids) == 1:
+			# 	df.rename({'V1': f'V{phase_ids[0]}'}, axis='columns')
+			# elif len(phase_ids) == 2:
+			# 	df.rename({'V1': f'V{phase_ids[0]}'}, axis='columns')
+			# 	df.rename({'V2': f'V{phase_ids[1]}'}, axis='columns')
 			df['Name'] = name
 			all_load_df = pd.concat([all_load_df, df], ignore_index=True, sort=False)
 		elif name.startswith('mongenerator-'):
