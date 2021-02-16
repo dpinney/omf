@@ -17,7 +17,7 @@ if platform.system() == "Linux" and platform.linux_distribution()[0] in ["Ubuntu
 	os.system("sudo apt-get -y install language-pack-en") # Install English locale 
 	os.system("sudo apt-get dist-upgrade")
 	os.system("sudo apt --fix-broken install")
-	os.system("sudo DEBIAN_FRONTEND=noninteractive apt-get -y install git python3-pip python3-dev python3-numpy python3-pygraphviz graphviz \
+	os.system("sudo DEBIAN_FRONTEND=noninteractive apt-get -y install git python3-pip python3-dev python3-numpy graphviz \
 		unixodbc-dev libfreetype6-dev pkg-config alien libgraphviz-dev python3-pydot python3-tk octave libblas-dev liblapack-dev \
 		libatlas-base-dev gfortran wget splat")
 	os.system("sudo apt-get -y install ffmpeg python3-cairocffi") # Separate to better support debian.
