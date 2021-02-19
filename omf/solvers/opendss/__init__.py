@@ -140,17 +140,21 @@ def newQstsPlot(filePath, stepSizeInMinutes, numberOfSteps, keepAllFiles=False, 
 		csv_path = f'{dssFileLoc}/{circ_name}_Mon_{name}.csv'
 		df = pd.read_csv(f'{circ_name}_Mon_{name}.csv')
 		if name.startswith('monload-'):
-			#TODO: debug.
-			ob_name = name.split('-')[1]
-			the_object = _getByName(tree, ob_name)
-			phase_ids = the_object.get('bus1','').split('.')[1:]
-			if len(phase_ids) == 1:
-				df.rename({'V1': f'V{phase_ids[0]}'}, axis='columns')
-			elif len(phase_ids) == 2:
-				df.rename({'V1': f'V{phase_ids[0]}'}, axis='columns')
-				df.rename({'V2': f'V{phase_ids[1]}'}, axis='columns')
+			#TODO: debug such that load data moves to the correct column for that phase instead of reassigning column headings. Concatenation step resets column headings.
+			#TODO: current logic here does not change column headings in df.head()
+			# ob_name = name.split('-')[1]
+			# the_object = _getByName(tree, ob_name)
+			# phase_ids = the_object.get('bus1','').split('.')[1:]
+			# if len(phase_ids) == 1:
+			# 	df.rename({'V1': f'V{phase_ids[0]}'}, axis='columns')
+			# 	#print(df.head(10))
+			# elif len(phase_ids) == 2:
+			# 	df.rename({'V1': f'V{phase_ids[0]}'}, axis='columns')
+			# 	df.rename({'V2': f'V{phase_ids[1]}'}, axis='columns')
 			df['Name'] = name
 			all_load_df = pd.concat([all_load_df, df], ignore_index=True, sort=False)
+			#pd.set_option('display.max_columns', None)
+			#print("all_load_df:", df.head(50))
 		elif name.startswith('mongenerator-'):
 			df['Name'] = name
 			all_gen_df = pd.concat([all_gen_df, df], ignore_index=True, sort=False)
@@ -200,8 +204,9 @@ def newQstsPlot(filePath, stepSizeInMinutes, numberOfSteps, keepAllFiles=False, 
 		all_load_df.columns = all_load_df.columns.str.replace(r'[ "]','',regex=True)
 		all_load_df = all_load_df.join(base_kvs.set_index('Name'), on='Name')
 		# TODO: insert ANSI bands here based on base_kv?  How to not display two bands per load with the appended CSV format?
-		# TODO: insert logic here to say if phase is black or fully 0, do not calculate it?  Or do we lose some 0V information?
 		all_load_df['V1(PU)'] = all_load_df['V1'].astype(float) / (all_load_df['kv'].astype(float) * 1000.0)
+		# HACK: reassigning 0V to "NaN" as below does not removes 0V phases but could impact 2 phase systems
+		#all_load_df['V2'][(all_load_df['VAngle2']==0) & (all_load_df['V2']==0)] = "NaN"
 		all_load_df['V2(PU)'] = all_load_df['V2'].astype(float) / (all_load_df['kv'].astype(float) * 1000.0)
 		all_load_df['V3(PU)'] = all_load_df['V3'].astype(float) / (all_load_df['kv'].astype(float) * 1000.0)
 		all_load_df.to_csv(f'{dssFileLoc}/{filePrefix}_load.csv', index=False)
