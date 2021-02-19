@@ -1896,9 +1896,11 @@ function downloadTextFile() {
 }
 
 function scaleGraphForVisualAppearance(objectCount) {
-    if (objectCount < 100) {
-        gScaleLevel = 3;
-    } else if (objectCount < 1000) {
+    if (objectCount < 300) {
+        gScaleLevel = 5;
+    } else if (objectCount < 2000) {
+        gScaleLevel = 2;
+    } else if (objectCount < 4000) {
         gScaleLevel = .4;
     } else {
         gScaleLevel = .1;
