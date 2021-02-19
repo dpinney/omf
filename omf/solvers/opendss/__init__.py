@@ -67,9 +67,13 @@ def _getCoords(dssFilePath, keep_output=True):
 	return coords
 
 def _getByName(tree, name):
-	''' Return first object with name in tree. '''
-	matches = [x for x in tree if x.get('name','') == name]
-	return matches[0]
+    ''' Return first object with name in tree as an OrderedDict. '''
+    matches =[]
+    for x in tree:
+        if x.get('object',''):
+            if x.get('object','').split('.')[1] == name:
+                matches.append(x)
+    return matches[0]
 
 def newQstsPlot(filePath, stepSizeInMinutes, numberOfSteps, keepAllFiles=False, actions={}, filePrefix='timeseries'):
 	''' Use monitor objects to generate voltage values for a timeseries powerflow. '''
@@ -137,14 +141,14 @@ def newQstsPlot(filePath, stepSizeInMinutes, numberOfSteps, keepAllFiles=False, 
 		df = pd.read_csv(f'{circ_name}_Mon_{name}.csv')
 		if name.startswith('monload-'):
 			#TODO: debug.
-			# ob_name = name.split('-')[1]
-			# the_object = _getByName(tree, ob_name)
-			# phase_ids = the_object.get('bus1','').split('.')[1:]
-			# if len(phase_ids) == 1:
-			# 	df.rename({'V1': f'V{phase_ids[0]}'}, axis='columns')
-			# elif len(phase_ids) == 2:
-			# 	df.rename({'V1': f'V{phase_ids[0]}'}, axis='columns')
-			# 	df.rename({'V2': f'V{phase_ids[1]}'}, axis='columns')
+			ob_name = name.split('-')[1]
+			the_object = _getByName(tree, ob_name)
+			phase_ids = the_object.get('bus1','').split('.')[1:]
+			if len(phase_ids) == 1:
+				df.rename({'V1': f'V{phase_ids[0]}'}, axis='columns')
+			elif len(phase_ids) == 2:
+				df.rename({'V1': f'V{phase_ids[0]}'}, axis='columns')
+				df.rename({'V2': f'V{phase_ids[1]}'}, axis='columns')
 			df['Name'] = name
 			all_load_df = pd.concat([all_load_df, df], ignore_index=True, sort=False)
 		elif name.startswith('mongenerator-'):
@@ -195,6 +199,8 @@ def newQstsPlot(filePath, stepSizeInMinutes, numberOfSteps, keepAllFiles=False, 
 		all_load_df.sort_values(['Name','hour'], inplace=True)
 		all_load_df.columns = all_load_df.columns.str.replace(r'[ "]','',regex=True)
 		all_load_df = all_load_df.join(base_kvs.set_index('Name'), on='Name')
+		# TODO: insert ANSI bands here based on base_kv?  How to not display two bands per load with the appended CSV format?
+		# TODO: insert logic here to say if phase is black or fully 0, do not calculate it?  Or do we lose some 0V information?
 		all_load_df['V1(PU)'] = all_load_df['V1'].astype(float) / (all_load_df['kv'].astype(float) * 1000.0)
 		all_load_df['V2(PU)'] = all_load_df['V2'].astype(float) / (all_load_df['kv'].astype(float) * 1000.0)
 		all_load_df['V3(PU)'] = all_load_df['V3'].astype(float) / (all_load_df['kv'].astype(float) * 1000.0)
