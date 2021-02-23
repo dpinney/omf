@@ -1,6 +1,7 @@
 import warnings, csv, json
 from os.path import join as pJoin
 import numpy as np
+import pandas as pd
 import plotly
 import plotly.graph_objs as go
 import omf
@@ -292,10 +293,11 @@ def work(modelDir, inputDict):
 
 		plotData = []
 		powerGridToLoad = go.Scatter(
-			x=x,
+			x=pd.to_datetime(x, unit = 'h', origin = pd.Timestamp(f'{year}-01-01')),
 			y=outData['powerGridToLoad' + indexString],
 			line=dict( color=('red') ),
 			name="Load met by Grid",
+			hoverlabel = dict(namelength = -1),
 			showlegend=True,
 			stackgroup='one',
 			mode='none')
@@ -303,37 +305,40 @@ def work(modelDir, inputDict):
 
 		if solar == 'on':
 			powerPVToLoad = go.Scatter(
-				x=x,
+				x=pd.to_datetime(x, unit = 'h', origin = pd.Timestamp(f'{year}-01-01')),
 				y=outData['powerPVToLoad' + indexString],
 				line=dict( color=('green') ),
 				name="Load met by Solar",
+				hoverlabel = dict(namelength = -1),
 				stackgroup='one',
 				mode='none')
 			plotData.append(powerPVToLoad)
 
 		if battery == 'on':
 			powerBatteryToLoad = go.Scatter(
-				x=x,
+				x=pd.to_datetime(x, unit = 'h', origin = pd.Timestamp(f'{year}-01-01')),
 				y=outData['powerBatteryToLoad' + indexString],
 				line=dict( color=('blue') ),
 				name="Load met by Battery",
+				hoverlabel = dict(namelength = -1),
 				stackgroup='one',
 				mode='none')
 			plotData.append(powerBatteryToLoad)
 
 		if wind == 'on':
 			powerWindToLoad = go.Scatter(
-				x=x,
+				x=pd.to_datetime(x, unit = 'h', origin = pd.Timestamp(f'{year}-01-01')),
 				y=outData['powerWindToLoad' + indexString],
 				line=dict( color=('yellow') ),
 				name="Load met by Wind",
+				hoverlabel = dict(namelength = -1),
 				stackgroup='one',
 				mode='none')
 			plotData.append(powerWindToLoad)
 
 		if resultsSubset['Generator']['size_kw'] > 0:
 			powerDieselToLoad = go.Scatter(
-				x=x,
+				x=pd.to_datetime(x, unit = 'h', origin = pd.Timestamp(f'{year}-01-01')),
 				y=outData['powerDieselToLoad' + indexString],
 				line=dict( color=('brown') ),
 				name="Load met by Diesel",
@@ -342,7 +347,7 @@ def work(modelDir, inputDict):
 			plotData.append(powerDieselToLoad)			
 
 		plotlyLayout['yaxis'].update(title='Power (kW)')
-		plotlyLayout['xaxis'].update(title='Hour')
+		plotlyLayout['xaxis'].update(title='Time')
 		outData["powerGenerationData" + indexString ] = json.dumps(plotData, cls=plotly.utils.PlotlyJSONEncoder)
 		outData["plotlyLayout"] = json.dumps(plotlyLayout, cls=plotly.utils.PlotlyJSONEncoder)
 
@@ -350,44 +355,48 @@ def work(modelDir, inputDict):
 		if solar == 'on':
 			
 			powerPVToLoad = go.Scatter(
-				x=x,
+				x=pd.to_datetime(x, unit = 'h', origin = pd.Timestamp(f'{year}-01-01')),
 				y=outData['powerPVToLoad' + indexString],
 				line=dict( color=('blue') ),
 				name="Solar used to meet Load",
+				hoverlabel = dict(namelength = -1),
 				stackgroup='one',
 				mode='none')
 			plotData.append(powerPVToLoad)
 
 			powerPVToGrid = go.Scatter(
-				x=x,
+				x=pd.to_datetime(x, unit = 'h', origin = pd.Timestamp(f'{year}-01-01')),
 				y=outData['powerPVToGrid' + indexString],
 				line=dict( color=('yellow') ),
 				name="Solar exported to Grid",
+				hoverlabel = dict(namelength = -1),
 				stackgroup='one',
 				mode='none')
 			plotData.append(powerPVToGrid)
 
 			powerPVCurtailed = go.Scatter(
-				x=x,
+				x=pd.to_datetime(x, unit = 'h', origin = pd.Timestamp(f'{year}-01-01')),
 				y=outData['powerPVCurtailed' + indexString],
 				line=dict( color=('green') ),
 				name="Solar power curtailed",
+				hoverlabel = dict(namelength = -1),
 				stackgroup='one',
 				mode='none')
 			plotData.append(powerPVCurtailed)
 
 			if battery == 'on':
 				powerPVToBattery = go.Scatter(
-					x=x,
+					x=pd.to_datetime(x, unit = 'h', origin = pd.Timestamp(f'{year}-01-01')),
 					y=outData['powerPVToBattery' + indexString],
 					line=dict( color=('red') ),
 					name="Solar used to charge Battery",
+					hoverlabel = dict(namelength = -1),
 					stackgroup='one',
 					mode='none')
 				plotData.append(powerPVToBattery)
 
 			# powerPV = go.Scatter(
-			# 	x=x,
+			# 	x=pd.to_datetime(x, unit = 'h', origin = pd.Timestamp(f'{year}-01-01')),
 			# 	y=outData['powerPV' + indexString],
 			# 	line=dict( color=('red') ),
 			# 	name="Solar Generation")
@@ -400,26 +409,28 @@ def work(modelDir, inputDict):
 		if wind == 'on':
 			
 			powerWindToLoad = go.Scatter(
-				x=x,
+				x=pd.to_datetime(x, unit = 'h', origin = pd.Timestamp(f'{year}-01-01')),
 				y=outData['powerWindToLoad' + indexString],
 				line=dict( color=('green') ),
 				name="Wind used to meet Load",
+				hoverlabel = dict(namelength = -1),
 				stackgroup='one',
 				mode='none')
 			plotData.append(powerWindToLoad)
 
 			if battery == 'on':
 				powerWindToBattery = go.Scatter(
-					x=x,
+					x=pd.to_datetime(x, unit = 'h', origin = pd.Timestamp(f'{year}-01-01')),
 					y=outData['powerWindToBattery' + indexString],
 					line=dict( color=('yellow') ),
 					name="Wind used to charge Battery",
+					hoverlabel = dict(namelength = -1),
 					stackgroup='one',
 					mode='none')
 				plotData.append(powerWindToBattery)
 
 			# powerWind = go.Scatter(
-			# 	x=x,
+			# 	x=pd.to_datetime(x, unit = 'h', origin = pd.Timestamp(f'{year}-01-01')),
 			# 	y=outData['powerWind' + indexString],
 			# 	line=dict( color=('red') ),
 			# 	name="Wind Generation")
@@ -431,26 +442,28 @@ def work(modelDir, inputDict):
 		if resultsSubset['Generator']['size_kw'] > 0:
 			
 			powerDieselToLoad = go.Scatter(
-				x=x,
+				x=pd.to_datetime(x, unit = 'h', origin = pd.Timestamp(f'{year}-01-01')),
 				y=outData['powerDieselToLoad' + indexString],
 				line=dict( color=('brown') ),
 				name="Diesel used to meet Load",
+				hoverlabel = dict(namelength = -1),
 				stackgroup='one',
 				mode='none')
 			plotData.append(powerDieselToLoad)
 
 			if battery == 'on':
 				powerDieselToBattery = go.Scatter(
-					x=x,
+					x=pd.to_datetime(x, unit = 'h', origin = pd.Timestamp(f'{year}-01-01')),
 					y=outData['powerDieselToBattery' + indexString],
 					line=dict( color=('yellow') ),
 					name="Diesel used to charge Battery",
+					hoverlabel = dict(namelength = -1),
 					stackgroup='one',
 					mode='none')
 				plotData.append(powerDieselToBattery)
 
 			# powerDiesel = go.Scatter(
-			# 	x=x,
+			# 	x=pd.to_datetime(x, unit = 'h', origin = pd.Timestamp(f'{year}-01-01')),
 			# 	y=outData['powerDiesel' + indexString],
 			# 	line=dict( color=('red') ),
 			# 	name="Diesel Generation")
@@ -461,7 +474,7 @@ def work(modelDir, inputDict):
 		plotData = []
 		if battery == 'on':
 			powerGridToBattery = go.Scatter(
-				x=x,
+				x=pd.to_datetime(x, unit = 'h', origin = pd.Timestamp(f'{year}-01-01')),
 				y=outData['powerGridToBattery' + indexString],
 				line=dict( color=('blue') ),
 				name="Grid",
@@ -471,7 +484,7 @@ def work(modelDir, inputDict):
 
 			if solar == 'on':
 				powerPVToBattery = go.Scatter(
-					x=x,
+					x=pd.to_datetime(x, unit = 'h', origin = pd.Timestamp(f'{year}-01-01')),
 					y=outData['powerPVToBattery' + indexString],
 					line=dict( color=('green') ),
 					name="Solar",
@@ -481,7 +494,7 @@ def work(modelDir, inputDict):
 
 			if wind == 'on':
 				powerWindToBattery = go.Scatter(
-					x=x,
+					x=pd.to_datetime(x, unit = 'h', origin = pd.Timestamp(f'{year}-01-01')),
 					y=outData['powerWindToBattery' + indexString],
 					line=dict( color=('yellow') ),
 					name="Wind",
@@ -491,7 +504,7 @@ def work(modelDir, inputDict):
 
 			if resultsSubset['Generator']['size_kw'] > 0:
 				powerDieselToBattery = go.Scatter(
-					x=x,
+					x=pd.to_datetime(x, unit = 'h', origin = pd.Timestamp(f'{year}-01-01')),
 					y=outData['powerDieselToBattery' + indexString],
 					line=dict( color=('brown') ),
 					name="Diesel",
@@ -505,13 +518,13 @@ def work(modelDir, inputDict):
 		plotData = []
 		if battery == 'on':
 			chargeLevelBattery = go.Scatter(
-				x=x,
+				x=pd.to_datetime(x, unit = 'h', origin = pd.Timestamp(f'{year}-01-01')),
 				y=outData['chargeLevelBattery' + indexString],
 				line=dict( color=('red') )
 			)
 			plotData.append(chargeLevelBattery)
 			plotlyLayout['yaxis'].update(title='Charge (%)')
-			plotlyLayout['xaxis'].update(title='Hour')
+			plotlyLayout['xaxis'].update(title='Time')
 			outData["batteryChargeData" + indexString] = json.dumps(plotData, cls=plotly.utils.PlotlyJSONEncoder)
 			outData["batteryChargeLayout" + indexString] = json.dumps(plotlyLayout, cls=plotly.utils.PlotlyJSONEncoder)
 		
@@ -551,7 +564,7 @@ def runtimeEstimate(modelDir):
 
 def new(modelDir):
 	''' Create a new instance of this model. Returns true on success, false on failure. '''
-	#fName = "input - col 1 commercial 120 kW per day, col 2 residential  30 kWh per day.csv"
+	# fName = "input - col 1 commercial 120 kW per day, col 2 residential  30 kWh per day.csv"
 	fName = "input - 200 Employee Office, Springfield Illinois, 2001.csv"
 	with open(pJoin(omf.omfDir, "static", "testFiles", fName)) as f:
 		load_shape = f.read()
@@ -581,6 +594,7 @@ def new(modelDir):
 		"windMax": "10000000",
 		"batteryPowerMax": "1000000",
 		"batteryCapacityMax": "1000000",
+		"dieselMax": "1000000",
 		"solarExisting": 0,
 		"criticalLoadFactor": "1",
 		"outage_start_hour": "500",
@@ -593,8 +607,7 @@ def new(modelDir):
 		"batteryKwhExisting": 0,
 		"value_of_lost_load": "100",
 		"solarCanCurtail": True,
-		"solarCanExport": True,
-		"dieselMax": "5"
+		"solarCanExport": True
 	}
 	creationCode = __neoMetaModel__.new(modelDir, defaultInputs)
 	try:
