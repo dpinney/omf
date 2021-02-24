@@ -19,8 +19,16 @@ from collections import OrderedDict
 from omf import feeder, distNetViz
 from pprint import pprint as pp
 from omf.solvers import gridlabd
-from __init__ import runDssCommand
 from time import time
+
+def runDssCommand(dsscmd):
+	''' todo: dedup with __init__ version. '''
+	from opendssdirect import run_command, Error
+	x = run_command(dsscmd)
+	latest_error = Error.Description()
+	if latest_error != '':
+		print('OpenDSS Error:', latest_error)
+	return x
 
 def gridLabToDSS(inFilePath, outFilePath):
 	''' Convert gridlab file to dss. ''' 
