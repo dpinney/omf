@@ -428,7 +428,7 @@ def work(modelDir, inputDict):
 			new_batt_dict = {}
 			#get values from pycigar output for given single battery
 			batt_name = batt_dict["Name"]
-			batt_soc = batt_dict["SOC"]
+			batt_soc = [x*100 for x in batt_dict["SOC"]]
 			batt_power = batt_dict["Power Output (W)"]
 			batt_status = batt_dict["control_setting"]
 			#populate single battery dict with pycigar values
@@ -532,7 +532,8 @@ def stringToMag(s):
 
 def new(modelDir):
 	''' Create a new instance of this model. Returns true on success, false on failure. '''
-	circuit_dir = "ieee3busdata_battery"
+	#circuit_dir = "ieee3busdata_battery"
+	circuit_dir = "ieee37busdata"
 	f1Name = "load_solar_data_850.csv"
 	with open(pJoin(omf.omfDir, "static", "testFiles", "pyCIGAR", circuit_dir, f1Name)) as f1:
 		load_PV = f1.read()
@@ -542,7 +543,8 @@ def new(modelDir):
 	f4Name = "misc_inputs.csv"
 	with open(pJoin(omf.omfDir, "static", "testFiles", "pyCIGAR", circuit_dir, f4Name)) as f4:
 		miscFile = f4.read()
-	sfName = "battery_inputs_cent.txt"
+	#sfName = "battery_inputs_cent.txt"
+	sfName = "battery_inputs_dummy_file.txt"
 	with open(pJoin(omf.omfDir, "static", "testFiles", "pyCIGAR", circuit_dir, sfName)) as sf:
 		storageFile = sf.read()
 
@@ -550,9 +552,10 @@ def new(modelDir):
 		"simStartDate": "2019-07-01T00:00:00Z",
 		"simLength": "750",
 		"simLengthUnits": "seconds",
-		"feederName1": "ieee3",
-		"circuitFileName1": "ieee3.dss",
-		# "feederName1": "Olin Barre GH EOL Solar AVolts CapReg",
+		#"feederName1": "ieee3",
+		"feederName1": "ieee37",
+		#"circuitFileName1": "ieee3.dss",
+		"circuitFileName1": "ieee37.dss",
 		"fileName1":f1Name,
 		"loadPV": load_PV,
 		"fileName2":f2Name,
