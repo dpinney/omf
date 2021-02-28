@@ -88,7 +88,7 @@ def dss_to_clean_dss(dss_path, clean_out_path, exec_code = ''):
 					if key.lower() == 'wdgcurrents':
 						val = '[' + val.replace('(','').replace(')','').replace(' ','') + ']'
 					# ignore deprecated opendss props and bad values
-					bad_props = ['ratings', 'seasons', 'linetype', 'rneut', 'xneut', '%fuel', '%reserve', 'fuelkwh', 'refuel', '%cutin', '%cutout', 'varfollowinverter', 'kvarmax', 'kvarmaxabs', 'wattpriority', 'pfpriority', '%pminnovars', '%pminkvarmax', '%kwrated', '%cutin', '%cutout', 'varfollowinverter', 'kvarmax', 'kvarmaxabs', 'wattpriority', 'pfpriority', '%pminnovars', '%pminkvarmax', '%kwrated', '%cutin', '%cutout', 'varfollowinverter', 'kvarmax', 'kvarmaxabs', 'wattpriority', 'pfpriority', '%pminnovars', '%pminkvarmax', '%kwrated', '%pmpp', '%pmpp', '%pmpp', '%pmpp', '%pmpp', 'z1', 'z0', 'z2', 'puz1', 'puz0', 'puz2']
+					bad_props = ['ratings', 'seasons', 'linetype', 'rneut', 'xneut', '%fuel', '%reserve', 'fuelkwh', 'refuel', '%cutin', '%cutout', 'varfollowinverter', 'kvarmax', 'kvarmaxabs', 'wattpriority', 'pfpriority', '%pminnovars', '%pminkvarmax', '%kwrated', '%cutin', '%cutout', 'varfollowinverter', 'kvarmax', 'kvarmaxabs', 'wattpriority', 'pfpriority', '%pminnovars', '%pminkvarmax', '%kwrated', '%cutin', '%cutout', 'varfollowinverter', 'kvarmax', 'kvarmaxabs', 'wattpriority', 'pfpriority', '%pminnovars', '%pminkvarmax', '%kwrated', '%pmpp', '%pmpp', '%pmpp', '%pmpp', '%pmpp']
 					bad_vals = ['', '----']
 					if val not in bad_vals and key.lower() not in bad_props:
 						out_dss += f'{key}={val} '.lower()
