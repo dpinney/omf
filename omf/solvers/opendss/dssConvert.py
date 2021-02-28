@@ -61,46 +61,50 @@ def dssToGridLab(inFilePath, outFilePath, busCoords=None):
 	# TODO: no way to specify output filename, so move and rename.
 	glm_writer.write(model)
 
-def dssToCleanDss(dss_path, clean_out_path, exec_code = ''):
-    runDssCommand('clear')
-    dss_response_to_redir = runDssCommand(f'Redirect "{dss_path}"')
-    all_classes = dss.Basic.Classes()
-    out_dss = f'new object=circuit.{dss.Circuit.Name()}'
-    # todo: get actual circuit props.
-    # get all circuit elements.
-    for c in all_classes:
-        d = dss.utils.class_to_dataframe(c, dss=None, transform_string=None, clean_data=None).T.to_dict()
-        if d != {}:
-            out_dss += f'\n! {c}s\n'
-            for name in d:
-                out_dss += f'new object={name} '.lower()
-                for key in d[name]:
-                    val = d[name][key]
-                    # clean up matrix format.
-                    if type(val) is tuple:
-                        val = str(val).replace("'","").replace(' ','')
-                    if type(val) is list and len(val) != 0:
-                        val = '[' + val[0].replace("'","").replace(' |', '|').replace(' ',',') + ']'
-                    # hack for malformed wdgcurrents
-                    if key.lower() == 'wdgcurrents':
-                        val = '[' + val.replace('(','').replace(')','').replace(' ','') + ']'
-                    # ignore deprecated opendss props and bad values
-                    bad_props = ['ratings', 'seasons', 'linetype', 'rneut', 'xneut', '%fuel', '%reserve', 'fuelkwh', 'refuel', '%cutin', '%cutout', 'varfollowinverter', 'kvarmax', 'kvarmaxabs', 'wattpriority', 'pfpriority', '%pminnovars', '%pminkvarmax', '%kwrated', '%cutin', '%cutout', 'varfollowinverter', 'kvarmax', 'kvarmaxabs', 'wattpriority', 'pfpriority', '%pminnovars', '%pminkvarmax', '%kwrated', '%cutin', '%cutout', 'varfollowinverter', 'kvarmax', 'kvarmaxabs', 'wattpriority', 'pfpriority', '%pminnovars', '%pminkvarmax', '%kwrated', '%pmpp', '%pmpp', '%pmpp', '%pmpp', '%pmpp']
-                    bad_vals = ['', '----']
-                    if val not in bad_vals and key.lower() not in bad_props:
-                        out_dss += f'{key}={val} '.lower()
-                out_dss += '\n'
-    # get buses.
-    all_bus_names = dss.Circuit.AllBusNames()
-    out_dss += f'\n! Buses\nmakebuslist\n'
-    for bus_name in all_bus_names:
-        dss.Circuit.SetActiveBus(bus_name)
-        out_dss += f'setbusxy bus={bus_name} y={dss.Bus.Y()} x={dss.Bus.X()}\n'
-    # todo: all the settings? which are under dss.Solution and dss.Settings. or don't support them.
-    out_dss += exec_code
-    # print(out_dss)
-    with open(clean_out_path,'w') as out_dss_file:
-        out_dss_file.write(out_dss)
+def dss_to_clean_dss(dss_path, clean_out_path, exec_code = ''):
+	runDssCommand('clear')
+	dss_response_to_redir = runDssCommand(f'Redirect "{dss_path}"')
+	all_classes = dss.Basic.Classes()
+	out_dss = f'new object=circuit.{dss.Circuit.Name()}'
+	# todo: get actual circuit props.
+	# get all circuit elements.
+	for c in all_classes:
+		d = dss.utils.class_to_dataframe(c, dss=None, transform_string=None, clean_data=None).T.to_dict()
+		if d != {}:
+			out_dss += f'\n! {c}s\n'
+			for name in d:
+				if c == 'Vsource' and name == 'Vsource.source':
+					out_dss += f'edit object={name} '.lower()
+				else:
+					out_dss += f'new object={name} '.lower()
+				for key in d[name]:
+					val = d[name][key]
+					# clean up matrix format.
+					if type(val) is tuple:
+						val = str(val).replace("'","").replace(' ','')
+					if type(val) is list and len(val) != 0:
+						val = '[' + val[0].replace("'","").replace(' |', '|').replace(' ',',') + ']'
+					# hack for malformed wdgcurrents
+					if key.lower() == 'wdgcurrents':
+						val = '[' + val.replace('(','').replace(')','').replace(' ','') + ']'
+					# ignore deprecated opendss props and bad values
+					bad_props = ['ratings', 'seasons', 'linetype', 'rneut', 'xneut', '%fuel', '%reserve', 'fuelkwh', 'refuel', '%cutin', '%cutout', 'varfollowinverter', 'kvarmax', 'kvarmaxabs', 'wattpriority', 'pfpriority', '%pminnovars', '%pminkvarmax', '%kwrated', '%cutin', '%cutout', 'varfollowinverter', 'kvarmax', 'kvarmaxabs', 'wattpriority', 'pfpriority', '%pminnovars', '%pminkvarmax', '%kwrated', '%cutin', '%cutout', 'varfollowinverter', 'kvarmax', 'kvarmaxabs', 'wattpriority', 'pfpriority', '%pminnovars', '%pminkvarmax', '%kwrated', '%pmpp', '%pmpp', '%pmpp', '%pmpp', '%pmpp', 'z1', 'z0', 'z2', 'puz1', 'puz0', 'puz2']
+					bad_vals = ['', '----']
+					if val not in bad_vals and key.lower() not in bad_props:
+						out_dss += f'{key}={val} '.lower()
+				out_dss += '\n'
+	# get buses.
+	all_bus_names = dss.Circuit.AllBusNames()
+	out_dss += f'\n! Buses\nmakebuslist\n'
+	for bus_name in all_bus_names:
+		dss.Circuit.SetActiveBus(bus_name)
+		out_dss += f'setbusxy bus={bus_name} y={dss.Bus.Y()} x={dss.Bus.X()}\n'
+	# todo: all the settings? which are under dss.Solution and dss.Settings. or don't support them.
+	out_dss += exec_code
+	# print(out_dss)
+	with open(clean_out_path,'w') as out_dss_file:
+		out_dss_file.write(out_dss)
+
 
 def dssToTree(pathToDss):
 	''' Convert a .dss file to an in-memory, OMF-compatible 'tree' object.
