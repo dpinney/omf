@@ -153,7 +153,7 @@
 				</div>
 			</div>
 			<div class="shortInput">
-				<label class="tooltip">Storage File Input<span class="classic">Import the .csv file representing the energy storage inputs data.</span></label>
+				<label class="tooltip">Battery File Input<span class="classic">Import the .csv file representing the energy storage inputs data.</span></label>
 				<input id="chooseStorageFile" type="file" style="display:none" onchange="handle_files(this.files,'storageFile','storageFileName')">
 				<input id="storageFile" name="storageFile" type="hidden">
 				<div>
@@ -397,19 +397,17 @@
 				"plotOptions":{"line":{"marker":{"enabled":false}}, "series":{"shadow":false, "pointInterval":swingPointInterval, "pointStart":swingPointStart}},
 				"tooltip":{"valueDecimals":1},
 				"series":[]}
-
+				
+				// Original code:			
 				var regNamesArray=[]
-				for (var key in allOutputData)
-				{
-  					if (key.indexOf('Regulator') === 0)
-  					{
+				for (var key in allOutputData){
+					console.info("regulator_reg index is" + key.indexOf('Regulator_reg')) //DEBUG
+  					if (key.indexOf('Regulator_reg') === 0){
   						regName = key;
   						regNamesArray.push(regName)
 					}
-
 				}
-				if (regNamesArray.length == 0)
-				{
+				if (regNamesArray.length == 0){
 					$("#newRegulatorReport").html("<p>&#160;&#160;&#160;No Regulators were found on the feeder.</p>")
 				}
 				for (var i in regNamesArray){
@@ -419,10 +417,7 @@
 						.attr("id", reg)
 					$("<div/>").appendTo("#newRegulatorReport")
 						.attr("id", "regulatorSeries_" + reg)
-					longRegName = "allOutputData.".concat(reg);
-					// if no regulators are found, display message
-  					
-					
+					longRegName = "allOutputData.".concat(reg); 					
 					var reg1ATSeries = {
 						"pointWidth": 40,
 						"color":"RoyalBlue",
@@ -441,6 +436,51 @@
 						"data":eval(longRegName.concat(".RegTapC")),
 						"name":"C",
 					}
+				
+				// Lisa's mods:
+				/*var regNamesArray=[]
+				var regwrpr = {}
+				for (var key in allOutputData){
+  					if (key.indexOf("Regulator") === 0){
+						console.info("1-" + key)  //DEBUG
+  						regwrpr = allOutputData[key]
+						console.info("2-" + regwrpr)  //DEBUG
+					}
+				}
+				var phases = 0
+				for (var key in regwrpr){
+					console.info("3-" + key) //DEBUG
+					console.info("4-" + key.indexOf("Phase")) //DEBUG
+					if (key.indexOf("Phase") > 0){
+						phases = regwrpr[key]
+					}
+					else{
+						regNamesArray.push(key)
+					}
+				}
+				if (regNamesArray.length == 0){
+					$("#newRegulatorReport").html("<p>&#160;&#160;&#160;No Regulators were found on the feeder.</p>")
+				}
+				for (var i in regNamesArray){
+					reg = regNamesArray[i]
+					$("<div/>").appendTo("#newRegulatorReport")
+						.attr("class", "regContainer")
+						.attr("id", reg)
+					$("<div/>").appendTo("#newRegulatorReport")
+						.attr("id", "regulatorSeries_" + reg)
+					longRegName = "allOutputData.".concat(reg); 	
+					var regSeries = []
+					var colorTheme = ["RoyalBlue", "Red", "Green"]	
+					var phaseMap = ["A","B","C"]	
+					for (let i = 0; i < phases; i++){
+						phaseId = reg + phaseMap[i] 
+						regSeries.push({
+							"pointWidth": 40,
+							"color":eval(colorTheme[i]),
+							"data":eval(longRegName.concat(phaseSeries)),
+							"name":eval(phaseMap[i])})
+					}*/
+
 					
 					phaseValue= eval(longRegName.concat(".RegPhases"))
 					var localHighChart = JSON.parse(JSON.stringify(swingHighChartsTemplate))
@@ -463,7 +503,6 @@
 							}
 						}
 					}
-
 					chart = new Highcharts.Chart(localHighChart);
 					if(phaseValue.indexOf('A') != -1)
 					{
@@ -874,7 +913,7 @@
 			<script>gebi("stdout").innerHTML = allOutputData.stdout</script>
 		</div> -->
 		<p class="reportTitle postRun">Battery Power Output (W) <a target="_self" class="toggle">Hide / Show</a></p>
-		<div id="newBatteryReport" class="tightContent postRun" style="max-height:600px; overflow-y: scroll;">
+		<div id="batteryPowerReport" class="tightContent postRun" style="max-height:600px; overflow-y: scroll;">
 			<script type="text/javascript">
 				swingPointStart = dateOb(allOutputData.swingTimestamps[0])
 				swingPointInterval = dateOb(allOutputData.swingTimestamps[1]) - pointStart
@@ -891,14 +930,14 @@
 				var battNamesArray=[]
 				battNamesArray = Object.keys(allOutputData.Battery_Outputs)
 				if (battNamesArray.length == 0){
-						$("#newBatteryReport").html("<p>&#160;&#160;&#160;No battery storage units were found on the feeder.</p>")
+						$("#batteryPowerReport").html("<p>&#160;&#160;&#160;No battery storage units were found on the feeder.</p>")
 					}
 				for (var i in battNamesArray){
 					var batt = battNamesArray[i]
-					$("<div/>").appendTo("#newBatteryReport")
+					$("<div/>").appendTo("#batteryPowerReport")
 						.attr("class", "batteryContainer")
 						.attr("id", batt)
-					$("<div/>").appendTo("#newBatteryReport")
+					$("<div/>").appendTo("#batteryPowerReport")
 						.attr("id", "batterySeries_" + batt)
 					var battLongName = "allOutputData.Battery_Outputs.".concat(batt)
 					var battPowerRealSeries = {
@@ -942,10 +981,102 @@
 				}
 			</script>
 		</div>
-		<p class="reportTitle postRun">Battery Charging Status <a target="_self" class="toggle">Hide / Show</a></p>
-		<!--stack of single-line plots w/ three state (charge, discharge, standby) y-axis, a la inverter stack-->
-		<p class="reportTitle postRun">Battery State of Charge <a target="_self" class="toggle">Hide / Show</a></p>
-		<!--stack of single-line plots w/ y-axis fixed @ 100% height, a la inverter stack-->
+		<p class="reportTitle postRun">Battery State of Charge (%) <a target="_self" class="toggle">Hide / Show</a></p>
+		<div id="batterySOCReport" class="tightContent postRun" style="max-height:600px; overflow-y: scroll;">
+			<script type="text/javascript">
+				//var dodFactor = 100 - parseFloat(allInputData.dodFactor) //There is not an input for this in the interface
+				var dodFactor = 100 // hardcode 100% allowable discharge
+				swingPointStart = dateOb(allOutputData.swingTimestamps[0])
+				swingPointInterval = dateOb(allOutputData.swingTimestamps[1]) - pointStart
+				swingHighChartsTemplate = {
+					"chart":{"renderTo":"", "marginRight":20, "marginBottom":35, "zoomType":"x"},
+					"title":{"text":null},
+					"legend":{"layout":"horizontal", "align":"top", "verticalAlign":"top", "x":50, "y":-10, "borderWidth":0},
+					"credits":{"enabled":false},
+					"xAxis":{"type":"datetime","maxZoom":1000, "tickColor":"gray","lineColor":"gray"},
+					"yAxis":{"title":{"text":null, "style":{"color":"gray"}}},
+					"plotOptions":{
+						"line":{"marker":{"enabled":false}}, 
+						"series":{"shadow":false,"pointInterval":swingPointInterval,"pointStart":swingPointStart}},
+					"tooltip":{"valueDecimals":1},
+					"series":[],
+				}
+				var battNamesArray=[]
+				battNamesArray = Object.keys(allOutputData.Battery_Outputs)
+				if (battNamesArray.length == 0){
+						$("#batterySOCReport").html("<p>&#160;&#160;&#160;No battery storage units were found on the feeder.</p>")
+					}
+				for (var i in battNamesArray){
+					var batt = battNamesArray[i]
+					$("<div/>").appendTo("#batterySOCReport")
+						.attr("class", "batteryContainer")
+						.attr("id", batt)
+					$("<div/>").appendTo("#batterySOCReport")
+						.attr("id", "batterySOCSeries_" + batt)
+					var battLongName = "allOutputData.Battery_Outputs.".concat(batt)
+					var battSOCSeries = {
+						"pointWidth": 40,
+						"color":"RoyalBlue",
+						"data":eval(battLongName.concat(".SOC")),
+						"name":"Battery State of Charge",
+						"marker":{"enabled":false}
+					}
+					var localHighChart = JSON.parse(JSON.stringify(swingHighChartsTemplate))
+					localHighChart["chart"]["renderTo"] = "batterySOCSeries_" + batt
+					localHighChart["chart"]["zoomType"] = 'xy'
+					localHighChart["chart"]["inverted"] = false
+					localHighChart["chart"]["height"] = 200
+					localHighChart["chart"]["width"] = 1000
+					localHighChart["chart"]["marginRight"] = 150
+					localHighChart["chart"]["type"] = "line"
+					localHighChart["title"]["text"] = batt
+					localHighChart["title"]["align"] = "right"
+					localHighChart["title"]["x"] = -50
+					// From storagePeakShave Battery SOC output plot:
+					//localHighChart["title"] = {
+					//	//"text":"Cycle Equivalents:" + delimitNumbers(allOutputData.cycleEquivalents.toFixed(1))+ "  Battery Life:" + delimitNumbers(allOutputData.batteryLife.toFixed(1)) + " yrs", 
+					//	"text":"Cycle Equivalents:" + " xx" + "  Battery Life: xx yrs", 
+					//	"verticalAlign":"bottom", 
+					//	"align":"right", 
+					//	"y":-28-dodFactor*2, 
+					//	"x":-10, 
+					//	"style":{"color":"#333333", "fontSize":"12px"}
+					//},
+					localHighChart["series"] = []
+					localHighChart["xAxis"] = {
+						"type":"datetime",
+						"lineColor":"gray",
+						"tickColor":"gray"
+					}
+					localHighChart["yAxis"] = [{
+						"title":{
+							"text":"Battery SoC (%)",
+							"style":{"color":"gray"}}, 
+						"min":0, 
+						"max":100,
+						"minorTickColor":"gray", 
+						"minorTickInterval":5,
+						//"plotLines":[{
+						//	"color": "gray",
+						//	"dashStyle": "ShortDash",
+						//	"width": 2,
+							//"label":{
+							//	"text":"Max specified DOD:" + dodFactor + "%",
+							//	"align":"right",
+							//	"y":-5,
+							//	"x":-630, 
+							//	"style":{"color":"gray", "fontsize":"12px"}
+							//	},
+						//	"value": 100-dodFactor,
+						//	"zIndex": 10
+						//}]
+					}]
+					localHighChart["tooltip"]["shared"] = true
+					chart = new Highcharts.Chart(localHighChart);
+					chart.addSeries(battSOCSeries)
+				}					
+			</script>
+		</div>
 		<p class="reportTitle postRun">Raw Input and Output Files</p>
 		<div id="rawOutput" class="content postRun" style="margin-top:0px">
 			{% for name in allOutputDataDict['fileNames'] %}
