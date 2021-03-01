@@ -68,8 +68,8 @@ def work(modelDir, inputDict):
 	outage_start_hour = float(inputDict['outage_start_hour'])
 	outage_end_hour = outage_start_hour + float(inputDict['outageDuration'])
 	value_of_lost_load = float(inputDict['value_of_lost_load'])
-	solarCanExport = inputDict['solarCanExport']
-	solarCanCurtail = inputDict['solarCanCurtail']
+	solarCanExport = bool(inputDict['solarCanExport'])
+	solarCanCurtail = bool(inputDict['solarCanCurtail'])
 	dieselMax = float(inputDict['dieselMax'])
 
 
@@ -209,7 +209,7 @@ def work(modelDir, inputDict):
 		outData['load' + indexString] = resultsSubset['LoadProfile']['year_one_electric_load_series_kw']
 		outData['avgLoad' + indexString] = round(sum(resultsSubset['LoadProfile']['year_one_electric_load_series_kw'])/len(resultsSubset['LoadProfile']['year_one_electric_load_series_kw']),1)
 
-		if solar == 'on':	
+		if solar == 'on':
 			outData['sizePV' + indexString] = resultsSubset['PV']['size_kw']
 			outData['sizePVRounded' + indexString] = round(resultsSubset['PV']['size_kw'],1)
 			outData['powerPV' + indexString] = resultsSubset['PV']['year_one_power_production_series_kw']
@@ -233,8 +233,10 @@ def work(modelDir, inputDict):
 			outData['batteryPowerCost' + indexString] = float(inputDict['batteryPowerCost'])
 			outData['batteryCapacityCost' + indexString] = float(inputDict['batteryCapacityCost'])
 			# batteryKwExisting and batteryKwhExisting are pass through variables used in microgridUp project
-			outData['batteryKwExisting' + indexString] = float(inputDict['batteryKwExisting'])
-			outData['batteryKwhExisting' + indexString] = float(inputDict['batteryKwhExisting'])
+			if 'batteryKwExisting' in inputDict.keys():
+				outData['batteryKwExisting' + indexString] = float(inputDict['batteryKwExisting'])
+			if 'batteryKwhExisting' in inputDict.keys():
+				outData['batteryKwhExisting' + indexString] = float(inputDict['batteryKwhExisting'])
 
 		else:
 			outData['powerBattery' + indexString] = 0
@@ -250,12 +252,13 @@ def work(modelDir, inputDict):
 			outData['powerWindToLoad' + indexString] = resultsSubset['Wind']['year_one_to_load_series_kw']
 			outData['windCost' + indexString] = float(inputDict['windCost'])
 			# windExisting is a pass through variables used in microgridUp project
-			outData['windExisting' + indexString] = float(inputDict['windExisting'])
+			if 'windExisting' in inputDict.keys():
+				outData['windExisting' + indexString] = float(inputDict['windExisting'])
 		else:
 			outData['sizeWind' + indexString] = 0
 			outData['sizeWindRounded' + indexString] = 0
 
-		# diesel generator does not follow convention above, as it is not turned on by user, but rather is automatically turned on when an outage is specified
+		# diesel generator does not follow on/off convention, as it is not turned on by user, but rather is automatically turned on when an outage is specified
 		outData['sizeDiesel' + indexString] = resultsSubset['Generator']['size_kw']
 		outData['sizeDieselRounded' + indexString] = round(resultsSubset['Generator']['size_kw'],1)
 		if resultsSubset['Generator']['size_kw'] == 0:
@@ -342,6 +345,7 @@ def work(modelDir, inputDict):
 				y=outData['powerDieselToLoad' + indexString],
 				line=dict( color=('brown') ),
 				name="Load met by Diesel",
+				hoverlabel = dict(namelength = -1),
 				stackgroup='one',
 				mode='none')
 			plotData.append(powerDieselToLoad)			
@@ -602,9 +606,9 @@ def new(modelDir):
 		"fuelAvailable": "40000",
 		"genExisting": 0,
 		"minGenLoading": "0.3",
-		"windExisting": 0,
-		"batteryKwExisting": 0,
-		"batteryKwhExisting": 0,
+		#"windExisting": 0,
+		#"batteryKwExisting": 0,
+		#"batteryKwhExisting": 0,
 		"value_of_lost_load": "100",
 		"solarCanCurtail": True,
 		"solarCanExport": True
