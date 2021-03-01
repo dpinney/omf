@@ -20,7 +20,10 @@ from omf import feeder, distNetViz
 from pprint import pprint as pp
 from omf.solvers import gridlabd
 from time import time
-import opendssdirect as dss
+try:
+	import opendssdirect as dss
+except:
+	warnings.warn('opendssdirect not installed; opendss functionality disabled.')
 
 def runDssCommand(dsscmd):
 	''' todo: dedup with __init__ version. '''
