@@ -151,7 +151,6 @@ def work(modelDir, inputDict):
 			breakpointsFile.write(inputDict['breakpoints'])
 
 		#create storage_inputs.txt file in folder
-		print(inputDict['storageFile']) # DEBUG
 		with open(pJoin(modelDir,"PyCIGAR_inputs","storage_inputs.txt"),"w", newline='') as storageIns:
 			storageIns.writelines(inputDict['storageFile'])
 
@@ -185,9 +184,9 @@ def work(modelDir, inputDict):
 	# MAKE SURE to add attackVars entry when adding another Attack Agent option to the html dropdown list and the name must match the value passed back from the form (inputDict["attackVariable"])!
 	attackVars = {}
 	attackVars["None"] = {"hackStart": defaultHackStart, "hackEnd": None, "percentHack": 0.0}
-	attackVars["VOLTAGE_OSCILLATION"] = {"hackStart": defaultHackStart, "hackEnd": None, "percentHack": 0.45} #TODO: Change to VOLTAGE_OSCILLATION
-	attackVars["VOLTAGE_IMBALANCE"] = {"hackStart": defaultHackStart, "hackEnd": None, "percentHack": 0.30} #percentHack cannot be above .4 for VOLTAGE_IMBALANCE
-	attackVars["PEAK_SHAVING"] = {"hackStart": defaultHackStart, "hackEnd": None, "percentHack": 0.45}
+	attackVars["VOLTAGE_OSCILLATION"] = {"hackStart": defaultHackStart, "hackEnd": None, "percentHack": 0.15}
+	attackVars["VOLTAGE_IMBALANCE"] = {"hackStart": defaultHackStart, "hackEnd": None, "percentHack": 0.15} #percentHack must be between 0.1 and 0.4 for pre-trained VOLTAGE_IMBALANCE defense
+	attackVars["PEAK_SHAVING"] = {"hackStart": defaultHackStart, "hackEnd": None, "percentHack": 0.15}
 
 	#check to make sure attackAgentType is in the attackVars dictionary, otherwise set it to None. This shouldn't ever be a problem since the user selects attackAgentType from a preset HTML dropdown.
 	if attackAgentType not in attackVars:
@@ -263,7 +262,6 @@ def work(modelDir, inputDict):
 		percentHackVal = attackVars[attackAgentType]["percentHack"] #TODO: see if we need to change from a hard-coded value
 		if attackAgentType == "None":
 			attackType = "VOLTAGE_OSCILLATION" #TODO: See if changes can be made to pycigar to implement a "None" attack type - for now, we set it to a voltage oscillation attack with percent hack = 0.0
-
 		#change percentHackVal to user input
 		elif hackPercentValue != None:
 			percentHackVal = hackPercentValue / 100.0
@@ -532,7 +530,7 @@ def stringToMag(s):
 
 def new(modelDir):
 	''' Create a new instance of this model. Returns true on success, false on failure. '''
-	#circuit_dir = "ieee3busdata_battery"
+	#circuit_dir = "ieee3busdata_battery" # DEBUG
 	circuit_dir = "ieee37busdata"
 	f1Name = "load_solar_data_850.csv"
 	with open(pJoin(omf.omfDir, "static", "testFiles", "pyCIGAR", circuit_dir, f1Name)) as f1:
@@ -543,18 +541,20 @@ def new(modelDir):
 	f4Name = "misc_inputs.csv"
 	with open(pJoin(omf.omfDir, "static", "testFiles", "pyCIGAR", circuit_dir, f4Name)) as f4:
 		miscFile = f4.read()
-	#sfName = "battery_inputs_cent.txt"
-	sfName = "battery_inputs_dummy_file.txt"
-	with open(pJoin(omf.omfDir, "static", "testFiles", "pyCIGAR", circuit_dir, sfName)) as sf:
-		storageFile = sf.read()
+	#sfName = "battery_inputs_cent.txt" TODO?: add a drop-down to include the battery - yes or no)
+	#with open(pJoin(omf.omfDir, "static", "testFiles", "pyCIGAR", circuit_dir, sfName)) as sf:
+	#	storageFile = sf.read()
+	sfName = "" # DEBUG
+	storageFile = "" # DEBUG
+
 
 	defaultInputs = {
 		"simStartDate": "2019-07-01T00:00:00Z",
 		"simLength": "750",
 		"simLengthUnits": "seconds",
-		#"feederName1": "ieee3",
+		#"feederName1": "ieee3", # DEBUG
 		"feederName1": "ieee37",
-		#"circuitFileName1": "ieee3.dss",
+		#"circuitFileName1": "ieee3.dss", # DEBUG
 		"circuitFileName1": "ieee37.dss",
 		"fileName1":f1Name,
 		"loadPV": load_PV,
@@ -567,10 +567,11 @@ def new(modelDir):
 		"trainAgent": "False",
 		"attackVariable": "None",
 		"defenseVariable": "None",
-		"hackPercent": "50",
+		"hackPercent": "30",
 		"defenseAgentNames": "policy_ieee37_oscillation_sample,policy_ieee37_unbalance_sample",
 		"storageFileName": sfName,
 		"storageFile": storageFile
+		
 	}
 	creationCode = __neoMetaModel__.new(modelDir, defaultInputs)
 	try:
