@@ -20,6 +20,7 @@ from omf import feeder, distNetViz
 from pprint import pprint as pp
 from omf.solvers import gridlabd
 from time import time
+import opendssdirect as dss
 
 def runDssCommand(dsscmd):
 	''' todo: dedup with __init__ version. '''
