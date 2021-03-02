@@ -671,11 +671,11 @@ def _name_to_key(glm):
 			mapping[val['name']] = key
 	return mapping
 
-def dssToOmd(dssFilePath, omdFilePath):
+def dssToOmd(dssFilePath, omdFilePath, RADIUS=0.0002):
 	''' Generate an OMD.
 	SIDE-EFFECTS: creates the OMD'''
 	# Injecting additional coordinates.
-	RADIUS = 0.0002 #TODO: derive sensible RADIUS from lat/lon numbers.
+	#TODO: derive sensible RADIUS from lat/lon numbers.
 	tree = dssToTree(dssFilePath)
 	evil_glm = evilDssTreeToGldTree(tree)
 	name_map = _name_to_key(evil_glm)
