@@ -183,6 +183,12 @@ def newQstsPlot(filePath, stepSizeInMinutes, numberOfSteps, keepAllFiles=False, 
 			ob_name = switch_ob[1][7:]
 			new_row = {'hour':key, 't(sec)':0.0,'Tap(pu)':1,'Type':'Switch','Name':ob_name}
 			all_control_df = all_control_df.append(new_row, ignore_index=True)
+	for key, ob in actions.items():
+		if ob.startswith('close'):
+			switch_ob = ob.split()
+			ob_name = switch_ob[1][7:]
+			new_row = {'hour':key, 't(sec)':0.0,'Tap(pu)':1,'Type':'Switch','Name':ob_name}
+			all_control_df = all_control_df.append(new_row, ignore_index=True)
 	# Write final aggregates
 	if not all_gen_df.empty:
 		all_gen_df.sort_values(['Name','hour'], inplace=True)
