@@ -1,0 +1,196 @@
+{
+    "links": [],
+    "hiddenLinks": [],
+    "nodes": [],
+    "hiddenNodes": [],
+    "layoutVars": {
+        "theta": "0.8",
+        "gravity": "0.01",
+        "friction": "0.9",
+        "linkStrength": "5",
+        "linkDistance": "5",
+        "charge": "-5"
+    },
+    "tree": {
+        "1": {
+            "object": "!CMD",
+            "name": "clear"
+        },
+        "2": {
+            "object": "circuit",
+            "name": "ieee3",
+            "basekv": "230",
+            "angle": "0",
+            "pu": "1.00",
+            "mvasc3": "200000",
+            "mvasc1": "210000"
+        },
+        "3": {
+            "object": "transformer",
+            "name": "subxf",
+            "from": "sourcebus",
+            "to": "799",
+            "phases": "1",
+            "windings": "2",
+            "xhl": "8",
+            "conns": "[wye,wye]",
+            "kvs": "[230,4.8]",
+            "kvas": "[2500,2500]",
+            "%rs": "[1,1]",
+            "!FROCODE": ".1",
+            "!TOCODE": ".1"
+        },
+        "4": {
+            "object": "transformer",
+            "name": "reg1",
+            "from": "799",
+            "to": "799r",
+            "phases": "1",
+            "windings": "2",
+            "bank": "reg1",
+            "xhl": "0.01",
+            "kvas": "[2500,2500]",
+            "kvs": "[2.77128129,2.77128129]",
+            "%loadloss": "0.01",
+            "!FROCODE": ".1",
+            "!TOCODE": ".1"
+        },
+        "5": {
+            "object": "regcontrol",
+            "name": "reg1",
+            "parent": "799r",
+            "!CONNCODE": ".1",
+            "transformer": "reg1",
+            "winding": "2",
+            "vreg": "138",
+            "band": "2",
+            "ptratio": "20"
+        },
+        "6": {
+            "object": "linecode",
+            "name": "721bal",
+            "nphases": "1",
+            "basefreq": "60",
+            "rmatrix": "[0.1,0.0,0.0|0.0,0.0,0.0|0.0,0.0,0.0]",
+            "xmatrix": "[0.2,0.0,0.0|-0.0,0.0,0.0|-0.0,-0.0,0.0]"
+        },
+        "7": {
+            "object": "linecode",
+            "name": "722bal",
+            "nphases": "1",
+            "basefreq": "60",
+            "rmatrix": "[0.1,0.0,0.0|0.0,0.0,0.0|0.0,0.0,0.0]",
+            "xmatrix": "[0.2,0.0,0.0|-0.0,0.0,0.0|-0.0,-0.0,0.0]"
+        },
+        "8": {
+            "object": "line",
+            "name": "line_799r_701",
+            "from": "799r",
+            "to": "701",
+            "!FROCODE": ".1",
+            "!TOCODE": ".1",
+            "phases": "1",
+            "linecode": "721bal",
+            "length": "1.00"
+        },
+        "9": {
+            "object": "line",
+            "name": "line_701_702",
+            "from": "701",
+            "to": "702",
+            "!FROCODE": ".1",
+            "!TOCODE": ".1",
+            "phases": "1",
+            "linecode": "722bal",
+            "length": "1.00"
+        },
+        "10": {
+            "object": "line",
+            "name": "line_702_703",
+            "from": "702",
+            "to": "703",
+            "!FROCODE": ".1",
+            "!TOCODE": ".1",
+            "phases": "1",
+            "linecode": "722bal",
+            "length": "1.00"
+        },
+        "11": {
+            "object": "load",
+            "name": "s701a",
+            "parent": "701",
+            "phases": "1",
+            "conn": "wye",
+            "model": "1",
+            "kv": "2.7712812921102037",
+            "kw": "200.0",
+            "kvar": "50.0",
+            "!CONNCODE": ".1"
+        },
+        "12": {
+            "object": "load",
+            "name": "s702a",
+            "parent": "702",
+            "phases": "1",
+            "conn": "wye",
+            "model": "1",
+            "kv": "2.7712812921102037",
+            "kw": "400.0",
+            "kvar": "100.0",
+            "!CONNCODE": ".1"
+        },
+        "13": {
+            "object": "load",
+            "name": "s703a",
+            "parent": "703",
+            "phases": "1",
+            "conn": "wye",
+            "model": "1",
+            "kv": "2.7712812921102037",
+            "kw": "100.0",
+            "kvar": "50.0",
+            "!CONNCODE": ".1"
+        },
+        "14": {
+            "object": "!CMD",
+            "name": "makebuslist"
+        },
+        "15": {
+            "object": "!CMD",
+            "name": "set",
+            "voltagebases": "[230,4.8]"
+        },
+        "16": {
+            "object": "bus",
+            "name": "799",
+            "latitude": "0",
+            "longitude": "0"
+        },
+        "17": {
+            "object": "bus",
+            "name": "799r",
+            "latitude": "0",
+            "longitude": "0"
+        },
+        "18": {
+            "object": "bus",
+            "name": "701",
+            "latitude": "0",
+            "longitude": "0"
+        },
+        "19": {
+            "object": "bus",
+            "name": "702",
+            "latitude": "0",
+            "longitude": "0"
+        },
+        "20": {
+            "object": "bus",
+            "name": "703",
+            "latitude": "0",
+            "longitude": "0"
+        }
+    },
+    "attachments": {},
+    "syntax": "DSS"
+}
