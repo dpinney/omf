@@ -69,8 +69,8 @@ def work(modelDir, inputDict):
 	outage_start_hour = float(inputDict['outage_start_hour'])
 	outage_end_hour = outage_start_hour + float(inputDict['outageDuration'])
 	value_of_lost_load = float(inputDict['value_of_lost_load'])
-	# solarCanExport = bool(inputDict['solarCanExport'])
-	# solarCanCurtail = bool(inputDict['solarCanCurtail'])
+	solarCanExport = bool(inputDict['solarCanExport'])
+	solarCanCurtail = bool(inputDict['solarCanCurtail'])
 	# explicitly convert string inputs from microgridDesign.html into usable boolean for REopt Scenario
 	if inputDict['solarCanExport'] == "true":
 		solarCanExport = True
