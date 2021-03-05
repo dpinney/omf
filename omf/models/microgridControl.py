@@ -66,6 +66,7 @@ def locationToName(location, lines):
 def nodeToCoords(feederMap, nodeName):
 	'get the latitude and longitude of a given entry in string format'
 	coordStr = ''
+	coordLis = []
 	for key in feederMap['features']:
 		if (nodeName == key['properties'].get('name','')):
 			current = key['geometry']['coordinates']
@@ -110,7 +111,9 @@ def pullDataForGraph(tree, feederMap, outputTimeline, row):
 
 def createTimeline():
 	data = {'time': ['1', '3', '7', '10', '15'],
-			'device': ['l2', 's701a', 's713c', '799r', '705'],
+			'device': ['l_1006_1007', 'load_1003', 'load_1016', 'bus1014', 'bus2053'],
+			# devices on ieee37
+			#'device': ['l2', 's701a', 's713c', '799r', '705'],
 			'action': ['Switching', 'Load Shed', 'Load Pickup', 'Battery Control', 'Generator Control'],
 			'loadBefore': ['50', '20', '10', '50', '50'],
 			'loadAfter': ['0', '10', '20', '60', '40']
@@ -537,8 +540,8 @@ def graphMicrogrid(pathToOmd, pathToMicro, pathToCsv, workDir, maxTime, stepSize
 
 	# command = 'cmd /c ' + '"julia --project=' + '"C:/Users/granb/PowerModelsONM.jl-master/" ' + 'C:/Users/granb/PowerModelsONM.jl-master/src/cli/entrypoint.jl' + ' -n ' + '"' + str(workDir) + '/circuit.dss' + '"' + ' -o ' + '"C:/Users/granb/PowerModelsONM.jl-master/output.json"'
 	
-	if os.path.exists(f'{workDir}/outputLehigh.json') and sameFeeder:
-		with open(f'{workDir}/outputLehigh.json') as inFile:
+	if os.path.exists(f'{workDir}/test_output_3.json') and sameFeeder:
+		with open(f'{workDir}/test_output_3.json') as inFile:
 			data = json.load(inFile)
 			genProfiles = data['Generator profiles']
 			simTimeSteps = []
@@ -572,10 +575,10 @@ def graphMicrogrid(pathToOmd, pathToMicro, pathToCsv, workDir, maxTime, stepSize
 		command = f'{DIR}/build/bin/PowerModelsONM -n "{workDir}/circuit.dss" -o "{workDir}/onm_output.json"'
 		os.system(command)
 
-		with open(pJoin(__neoMetaModel__._omfDir,'static','testFiles','outputLehigh.json')) as inFile:
+		with open(pJoin(__neoMetaModel__._omfDir,'static','testFiles','test_output_3.json')) as inFile:
 		# with open(f'{workDir}/onm_output.json') as inFile:
 			data = json.load(inFile)
-			with open(f'{workDir}/outputLehigh.json', 'w') as outfile:
+			with open(f'{workDir}/test_output_3.json', 'w') as outfile:
 				json.dump(data, outfile)
 			genProfiles = data['Generator profiles']
 			simTimeSteps = []
@@ -688,7 +691,10 @@ def graphMicrogrid(pathToOmd, pathToMicro, pathToCsv, workDir, maxTime, stepSize
 								  'popupContent': 'Location: <b>' + str(coordStr) + '</b><br>Device: <b>' + str(device) + '</b><br>Time: <b>' + str(time) + '</b><br>Action: <b>' + str(action) + '</b><br>Load Before: <b>' + str(loadBefore) + '</b><br>Load After: <b>' + str(loadAfter) + '</b>.'}
 			feederMap['features'].append(Dict)
 		else:
+			print(len(coordLis))
+			print(device)
 			Dict['geometry'] = {'type': 'LineString', 'coordinates': [[coordLis[0], coordLis[1]], [coordLis[2], coordLis[3]]]}
+			print(Dict['geometry'])
 			Dict['type'] = 'Feature'
 			Dict['properties'] = {'device': device, 
 								  'time': time,
@@ -854,11 +860,11 @@ def new(modelDir):
 	defaultInputs = {
 		'modelType': modelName,
 		# 'feederName1': 'ieee37nodeFaultTester',
-		'feederName1': 'ieee37.dss',
-		# 'feederName1': 'ieee240.dss',
+		# 'feederName1': 'ieee37.dss',
+		'feederName1': 'iowa240c1.clean.dss',
 		'maxTime': '20',
 		'stepSize': '1',
-		'faultedLine': 'l32',
+		'faultedLine': 'l_1001_1002',
 		'timeMinFilter': '0',
 		'timeMaxFilter': '20',
 		'actionFilter': 'All',

@@ -17,6 +17,8 @@ except:
 	warnings.warn('nrel ditto not installed. opendss conversion disabled.')
 from collections import OrderedDict
 from omf import feeder, distNetViz
+import random
+import math
 from pprint import pprint as pp
 from omf.solvers import gridlabd
 from time import time
@@ -659,6 +661,40 @@ def evilToOmd(evilTree, outPath):
 	omdStruct['tree'] = evilTree
 	with open(outPath, 'w') as outFile:
 		json.dump(omdStruct, outFile, indent=4)
+
+def _name_to_key(glm):
+	''' Make fast lookup map by name in a glm.
+	WARNING: if the glm changes, the map will no longer be valid.'''
+	mapping = {}
+	for key, val in glm.items():
+		if 'name' in val:
+			mapping[val['name']] = key
+	return mapping
+
+def dssToOmd(dssFilePath, omdFilePath, RADIUS=0.0002):
+	''' Generate an OMD.
+	SIDE-EFFECTS: creates the OMD'''
+	# Injecting additional coordinates.
+	#TODO: derive sensible RADIUS from lat/lon numbers.
+	tree = dssToTree(dssFilePath)
+	evil_glm = evilDssTreeToGldTree(tree)
+	name_map = _name_to_key(evil_glm)
+	for ob in evil_glm.values():
+		ob_name = ob.get('name','')
+		ob_type = ob.get('object','')
+		if 'parent' in ob:
+			parent_loc = name_map[ob['parent']]
+			parent_ob = evil_glm[parent_loc]
+			parent_lat = parent_ob.get('latitude', None)
+			parent_lon = parent_ob.get('longitude', None)
+			# place randomly on circle around parent.
+			angle = random.random()*3.14159265*2;
+			x = math.cos(angle)*RADIUS;
+			y = math.sin(angle)*RADIUS;
+			ob['latitude'] = str(float(parent_lat) + x)
+			ob['longitude'] = str(float(parent_lon) + y)
+			# print(ob)
+	evilToOmd(evil_glm, omdFilePath)
 
 def _createAndCompareTestFile(inFile, userOutFile=''):
 	'''Input: the name of the file to be prepared for OMF consumption and perform subsequent checks (import to memory
