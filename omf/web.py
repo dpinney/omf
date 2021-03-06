@@ -10,6 +10,7 @@ import flask_login, boto3
 from flask_compress import Compress
 from jinja2 import Template
 import dateutil
+import re
 try:
 	import fcntl
 except:
@@ -1974,6 +1975,26 @@ def saveCommsMap(owner, modelName, feederName, feederNum):
 # OTHER FUNCTIONS
 ###################################################
 
+def _fast_input_scan(file_path):
+	# quickly get key info from input data.
+	keys = {'runTime':None, 'modelType':None, 'created':None}
+	hits = 0
+	with open(file_path, 'r') as file_data:
+		for line in file_data:
+			if hits == 3:
+				break
+			for key in keys:
+				if key in line:
+					keys[key] = line
+					hits += 1
+	for key in keys:
+		val = str(keys[key])
+		try:
+			clean_val = re.findall('"(.*?)"', val)[1]
+		except:
+			clean_val = ''
+		keys[key] = clean_val
+	return keys
 
 @app.route("/")
 @flask_login.login_required
@@ -2000,21 +2021,19 @@ def root():
 			for mod in safeListdir("data/Model/" + owner)]
 	# Grab metadata for model instances.
 	for mod in allModels:
+		modPath = "data/Model/" + mod["owner"] + "/" + mod["name"]
+		key_vals = _fast_input_scan(modPath + '/allInputData.json')
+		mod["runTime"] = key_vals.get("runTime","")
+		mod["modelType"] = key_vals.get("modelType","")
+		creation = key_vals.get("created","")
 		try:
-			modPath = "data/Model/" + mod["owner"] + "/" + mod["name"]
-			allInput = get_model_metadata(mod['owner'], mod['name'])
-			mod["runTime"] = allInput.get("runTime","")
-			mod["modelType"] = allInput.get("modelType","")
-			try:
-				mod["status"] = getattr(models, mod["modelType"]).getStatus(modPath)
-				creation = allInput.get("created","")
-				mod["created"] = creation[0:creation.rfind('.')]
-				# mod["editDate"] = time.strftime("%Y-%m-%d %H:%M:%S", time.gmtime(os.stat(modPath).st_ctime))
-			except: # the model type was deprecated, so the getattr will fail.
-				mod["status"] = "stopped"
-				mod["editDate"] = "N/A"
-		except:
-			continue
+			mod["status"] = getattr(models, mod["modelType"]).getStatus(modPath)
+			mod["created"] = creation[0:creation.rfind('.')]
+			# mod["editDate"] = time.strftime("%Y-%m-%d %H:%M:%S", time.gmtime(os.stat(modPath).st_ctime))
+		except: # the model type was deprecated, so the getattr will fail.
+			mod["created"] = creation
+			mod["status"] = "stopped"
+			mod["editDate"] = "N/A"
 	allModels.sort(key=lambda x:x.get('created',''), reverse=True)
 	# Get tooltips for model types.
 	modelTips = {}
@@ -2034,7 +2053,6 @@ def root():
 			modelNames.append(modelName)
 	modelNames.sort()
 	return render_template("home.html", models=allModels, current_user=User.cu(), is_admin=isAdmin, modelNames=modelNames, modelTips=modelTips)
-
 
 @app.route("/delete/<objectType>/<owner>/<objectName>", methods=["POST"])
 @flask_login.login_required
