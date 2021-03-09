@@ -67,29 +67,60 @@ def dssToGridLab(inFilePath, outFilePath, busCoords=None):
 	# TODO: no way to specify output filename, so move and rename.
 	glm_writer.write(model)
 
+def _checkScientificNotation(input_string):
+	'''Checks if a single string input value is denoted in scientific notation.'''
+	if len(input_string)>2 and (input_string[-2].lower()=='e' or input_string[-2].lower()=='-'):
+		return True
+	else:
+		return False
+
+def _handleScientificNotation(input_string):
+	'''converts a single string value represented in scientific notation to a string representation of of that value in decimal format.'''
+	instring = "{:f}".format(float(input_string))
+	return str(instring)
+
 def dss_to_clean_dss(dss_path, clean_out_path, exec_code = ''):
+	'''Converts raw OpenDSS circuit definition files to the *.clean.dss syntax required by OMF.
+	Does not support reverse polish notation.'''
 	runDssCommand('clear')
 	dss_response_to_redir = runDssCommand(f'Redirect "{dss_path}"')
 	all_classes = dss.Basic.Classes()
-	out_dss = f'new object=circuit.{dss.Circuit.Name()}'
+	#import inspect  # DEBUG
+	#exec_out = [n for n,m in inspect.getmembers(dss.Executive.) if not n.startswith("_")] # DEBUG
+	out_dss = f'clear\nnew object=circuit.{dss.Circuit.Name()}'
 	# todo: get actual circuit props.
 	# get all circuit elements.
 	for c in all_classes:
-		d = dss.utils.class_to_dataframe(c, dss=None, transform_string=None, clean_data=None).T.to_dict()
+		d = dss.utils.class_to_dataframe(c, dss=None, transform_string=None, clean_data=None).T.to_dict() #this method isn't in the online documentation >:/
 		if d != {}:
 			out_dss += f'\n! {c}s\n'
 			for name in d:
-				if c == 'Vsource' and name == 'Vsource.source':
+				if c.lower() == 'vsource' and name.lower() == 'vsource.source':
 					out_dss += f'edit object={name} '.lower()
 				else:
 					out_dss += f'new object={name} '.lower()
 				for key in d[name]:
 					val = d[name][key]
 					# clean up matrix format.
-					if type(val) is tuple:
-						val = str(val).replace("'","").replace(' ','')
-					if type(val) is list and len(val) != 0:
-						val = '[' + val[0].replace("'","").replace(' |', '|').replace(' ',',') + ']'
+					if type(val) is str: # DEBUG
+						val = str(val) # DEBUG
+						# HACK: detect scientific notation on vsources and fix it. 
+						if c.lower()=='vsource' and _checkScientificNotation(str(val)): # this checks for scientific notation because there won't be >9 decimal places.
+							val = _handleScientificNotation(val)
+					elif (type(val) is tuple) or (type(val) is list and not '|' in str(val)): # captures tuples and lists, but not matrices
+						val_out = "["
+						for x in val:
+							if _checkScientificNotation(x):
+								val_out += _handleScientificNotation(x) # still outputting scinot?!?
+							else:
+								val_out += str(x)
+							val_out += ','
+						val_out = val_out[:-1] + "]"
+						#val = str(val).replace("(","[").replace(")","]").replace("'","").replace(' ','')
+					elif type(val) is list and len(val) != 0:
+						val = '[' + val[0].replace("   "," ").replace("  "," ").replace(" | ","|").replace(" ",",").replace("'","") + ']'
+					else:
+						val = str(val)
 					# hack for malformed wdgcurrents
 					if key.lower() == 'wdgcurrents':
 						val = '[' + val.replace('(','').replace(')','').replace(' ','') + ']'
@@ -99,17 +130,26 @@ def dss_to_clean_dss(dss_path, clean_out_path, exec_code = ''):
 					if val not in bad_vals and key.lower() not in bad_props:
 						out_dss += f'{key}={val} '.lower()
 				out_dss += '\n'
-	# get buses.
+	# Make bus list, set/apply voltage bases, and set bus coordinates
 	all_bus_names = dss.Circuit.AllBusNames()
-	out_dss += f'\n! Buses\nmakebuslist\n'
+	out_dss += f'\n! Buses\nmakebuslist\nset voltagebases='
+	vbases = dss.Settings.VoltageBases()
+	vbases = str(vbases).replace("(","[").replace(")","]").replace("'","").replace(' ','')
+	out_dss += vbases + '\ncalcvoltagebases\n'
 	for bus_name in all_bus_names:
 		dss.Circuit.SetActiveBus(bus_name)
 		out_dss += f'setbusxy bus={bus_name} y={dss.Bus.Y()} x={dss.Bus.X()}\n'
 	# todo: all the settings? which are under dss.Solution and dss.Settings. or don't support them.
+	# note that some commands must enter the code in a specific location (order matters :/). Added where needed. There is also not an easy
+	# way to apply the settings, as the dss command string does not correlate to the retrieving function name (i.e. 'maxcontroliter'!='ControlIterations')
+	sln_ctrl_iters = dss.Solution.MaxControlIterations()
+	if not sln_ctrl_iters=='':
+		out_dss += f'set maxcontroliter=' + str(sln_ctrl_iters) + '\n'
 	out_dss += exec_code
 	# print(out_dss)
 	with open(clean_out_path,'w') as out_dss_file:
 		out_dss_file.write(out_dss)
+	return
 
 def dssToTree(pathToDss):
 	''' Convert a .dss file to an in-memory, OMF-compatible 'tree' object.
