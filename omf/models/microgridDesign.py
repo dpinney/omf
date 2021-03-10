@@ -68,6 +68,8 @@ def work(modelDir, inputDict):
 	minGenLoading = float(inputDict['minGenLoading'])
 	outage_start_hour = float(inputDict['outage_start_hour'])
 	outage_end_hour = outage_start_hour + float(inputDict['outageDuration'])
+	if outage_end_hour > 8759:
+		outage_end_hour = 8760
 	value_of_lost_load = float(inputDict['value_of_lost_load'])
 	solarCanExport = bool(inputDict['solarCanExport'])
 	solarCanCurtail = bool(inputDict['solarCanCurtail'])
@@ -278,6 +280,7 @@ def work(modelDir, inputDict):
 		# diesel generator does not follow on/off convention, as it is not turned on by user, but rather is automatically turned on when an outage is specified
 		outData['sizeDiesel' + indexString] = resultsSubset['Generator']['size_kw']
 		outData['sizeDieselRounded' + indexString] = round(resultsSubset['Generator']['size_kw'],1)
+		outData['dieselGenCost' + indexString] = float(inputDict['dieselGenCost'])
 		if resultsSubset['Generator']['size_kw'] == 0:
 			outData['sizeDieselRounded' + indexString] = 0
 		outData['fuelUsedDiesel' + indexString] = resultsSubset['Generator']['fuel_used_gal']
