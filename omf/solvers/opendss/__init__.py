@@ -426,7 +426,6 @@ def voltageCompare(in1, in2, saveascsv=False, with_plots=False, outdir='', outfi
 	'output_filename' parameter to set the output file name. Inputs can be formatted as a .dss file of voltages
 	output by OpenDSS, or as a dataframe of voltages obtained using the OMF's getVoltages().'''
 	#TODO: rewrite description
-	#TODO: set in1 as predicted/modded/final and handle it as such; in1 is the truth/original/initial
 	ins = [in1, in2]
 	txtins = [x for x in ins if type(x)==str and 'dss'==x.lower().split('.')[-1]]
 	memins = [x for x in ins if type(x)==pd.DataFrame]
@@ -444,20 +443,23 @@ def voltageCompare(in1, in2, saveascsv=False, with_plots=False, outdir='', outfi
 	avolts = memins[foob]
 	foob = 1-foob # returns 0 if foob==1 ; returns 1 if foob==0
 	bvolts = memins[foob]
-	# Match columns to rows, perform needed math, and save into resultErr.
-	cols = avolts.columns
+	# merge bvolts into avolts
+	cols = bvolts.columns
+	bvolts.columns = ["b_" + x for x in cols]
+	ins = avolts.join(bvolts)
+	del avolts
+	del bvolts
+	ins = ins.dropna()
 	cols = [c for c in cols if (not c.startswith(' pu')) and (not c.startswith(' Node'))]
-	resultErrD = pd.DataFrame(index=avolts.index, columns=cols)
+	resultErrD = pd.DataFrame(index=ins.index, columns=cols)
 	resultErrP = resultErrD.copy()
-	# TODO can this code block be sped up?
+
 	for col in cols:
-		for row in avolts.index:
-			if not row in bvolts.index:
-				continue
-			in1 = avolts.loc[row,col]
-			in2 = bvolts.loc[row,col]
-			resultErrP.loc[row,col] = 100*(in1 - in2)/in1 if in1!=0 else 0
-			resultErrD.loc[row,col] = in1 - in2
+		for row in ins.index:
+			ina = ins.loc[row,col]
+			inb = ins.loc[row,"b_" + col]
+			resultErrP.loc[row,col] = 100*(ina - inb)/ina if ina!=0 else 0
+			resultErrD.loc[row,col] = ina - inb
 	# Construct results
 	resultSummP = pd.DataFrame(index=['Max %Err', 'Avg %Err', 'Min %Err', 'RMSPE'], columns=cols)
 	resultSummD = pd.DataFrame(index=['Max Diff', 'Avg Diff', 'Min Diff', 'RMSE'], columns=cols)
@@ -1245,7 +1247,7 @@ def _tests():
 		rmtree(outdir)
 		errlim = 0.03 # threshold of 30% error between reduced files. 
 		assert maxPerrM <= errlim, 'The voltage magnitude error between the compared files exceeds the allowable limit of %s%%.'%(errlim*100)
-		#print('Objects removed: %s (of %s).\nPercent reduction: %s%%\nMax RMSPE for voltage magnitude: %s%%\nMax RMSPE for voltage angle: %s%%\nMax RMSE for voltage magnitude: %s\nMax RMSE for voltage angle: %s\n'%(oldsz-newsz, oldsz, (oldsz-newsz)*100/oldsz, maxPerrM, maxPerrA, maxDerrM, maxDerrA)) # DEBUG
+		print('Objects removed: %s (of %s).\nPercent reduction: %s%%\nMax RMSPE for voltage magnitude: %s%%\nMax RMSPE for voltage angle: %s%%\nMax RMSE for voltage magnitude: %s\nMax RMSE for voltage angle: %s\n'%(oldsz-newsz, oldsz, (oldsz-newsz)*100/oldsz, maxPerrM, maxPerrA, maxDerrM, maxDerrA)) # DEBUG
 		
 
 	# Make core output

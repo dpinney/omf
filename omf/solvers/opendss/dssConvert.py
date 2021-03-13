@@ -67,29 +67,60 @@ def dssToGridLab(inFilePath, outFilePath, busCoords=None):
 	# TODO: no way to specify output filename, so move and rename.
 	glm_writer.write(model)
 
+def _checkScientificNotation(input_string):
+	'''Checks if a single string input value is denoted in scientific notation.'''
+	if len(input_string)>2 and (input_string[-2].lower()=='e' or input_string[-2].lower()=='-'):
+		return True
+	else:
+		return False
+
+def _handleScientificNotation(input_string):
+	'''converts a single string value represented in scientific notation to a string representation of of that value in decimal format.'''
+	instring = "{:f}".format(float(input_string))
+	return str(instring)
+
 def dss_to_clean_dss(dss_path, clean_out_path, exec_code = ''):
+	'''Converts raw OpenDSS circuit definition files to the *.clean.dss syntax required by OMF.
+	Does not support reverse polish notation.'''
 	runDssCommand('clear')
 	dss_response_to_redir = runDssCommand(f'Redirect "{dss_path}"')
 	all_classes = dss.Basic.Classes()
-	out_dss = f'new object=circuit.{dss.Circuit.Name()}'
+	#import inspect  # DEBUG
+	#exec_out = [n for n,m in inspect.getmembers(dss.Executive.) if not n.startswith("_")] # DEBUG
+	out_dss = f'clear\nnew object=circuit.{dss.Circuit.Name()}'
 	# todo: get actual circuit props.
 	# get all circuit elements.
 	for c in all_classes:
-		d = dss.utils.class_to_dataframe(c, dss=None, transform_string=None, clean_data=None).T.to_dict()
+		d = dss.utils.class_to_dataframe(c, dss=None, transform_string=None, clean_data=None).T.to_dict() #this method isn't in the online documentation >:/
 		if d != {}:
 			out_dss += f'\n! {c}s\n'
 			for name in d:
-				if c == 'Vsource' and name == 'Vsource.source':
+				if c.lower() == 'vsource' and name.lower() == 'vsource.source':
 					out_dss += f'edit object={name} '.lower()
 				else:
 					out_dss += f'new object={name} '.lower()
 				for key in d[name]:
 					val = d[name][key]
 					# clean up matrix format.
-					if type(val) is tuple:
-						val = str(val).replace("'","").replace(' ','')
-					if type(val) is list and len(val) != 0:
-						val = '[' + val[0].replace("'","").replace(' |', '|').replace(' ',',') + ']'
+					if type(val) is str: # DEBUG
+						val = str(val) # DEBUG
+						# HACK: detect scientific notation on vsources and fix it. 
+						if c.lower()=='vsource' and _checkScientificNotation(str(val)): # this checks for scientific notation because there won't be >9 decimal places.
+							val = _handleScientificNotation(val)
+					elif (type(val) is tuple) or (type(val) is list and not '|' in str(val)): # captures tuples and lists, but not matrices
+						val_out = "["
+						for x in val:
+							if _checkScientificNotation(x):
+								val_out += _handleScientificNotation(x) # still outputting scinot?!?
+							else:
+								val_out += str(x)
+							val_out += ','
+						val_out = val_out[:-1] + "]"
+						#val = str(val).replace("(","[").replace(")","]").replace("'","").replace(' ','')
+					elif type(val) is list and len(val) != 0:
+						val = '[' + val[0].replace("   "," ").replace("  "," ").replace(" | ","|").replace(" ",",").replace("'","") + ']'
+					else:
+						val = str(val)
 					# hack for malformed wdgcurrents
 					if key.lower() == 'wdgcurrents':
 						val = '[' + val.replace('(','').replace(')','').replace(' ','') + ']'
@@ -99,18 +130,26 @@ def dss_to_clean_dss(dss_path, clean_out_path, exec_code = ''):
 					if val not in bad_vals and key.lower() not in bad_props:
 						out_dss += f'{key}={val} '.lower()
 				out_dss += '\n'
-	# get buses.
+	# Make bus list, set/apply voltage bases, and set bus coordinates
 	all_bus_names = dss.Circuit.AllBusNames()
-	out_dss += f'\n! Buses\nmakebuslist\n'
+	out_dss += f'\n! Buses\nmakebuslist\nset voltagebases='
+	vbases = dss.Settings.VoltageBases()
+	vbases = str(vbases).replace("(","[").replace(")","]").replace("'","").replace(' ','')
+	out_dss += vbases + '\ncalcvoltagebases\n'
 	for bus_name in all_bus_names:
 		dss.Circuit.SetActiveBus(bus_name)
 		out_dss += f'setbusxy bus={bus_name} y={dss.Bus.Y()} x={dss.Bus.X()}\n'
 	# todo: all the settings? which are under dss.Solution and dss.Settings. or don't support them.
+	# note that some commands must enter the code in a specific location (order matters :/). Added where needed. There is also not an easy
+	# way to apply the settings, as the dss command string does not correlate to the retrieving function name (i.e. 'maxcontroliter'!='ControlIterations')
+	sln_ctrl_iters = dss.Solution.MaxControlIterations()
+	if not sln_ctrl_iters=='':
+		out_dss += f'set maxcontroliter=' + str(sln_ctrl_iters) + '\n'
 	out_dss += exec_code
 	# print(out_dss)
 	with open(clean_out_path,'w') as out_dss_file:
 		out_dss_file.write(out_dss)
-
+	return
 
 def dssToTree(pathToDss):
 	''' Convert a .dss file to an in-memory, OMF-compatible 'tree' object.
@@ -332,76 +371,6 @@ def _dfToListOfDicts(dfin, objtype):
 		obj_dict = dict(zip(obj.index,obj))
 		dictlst.append(obj_dict)
 	return dictlst
-
-def _dssToTree_dssdirect(fpath):
-	'''Do not use this function other than to evaluate the accuracy of opendssdirect.py. 
-	After reviewing the file output at the end of this function, it is apparent that 
-	opendssdirect does not handle the three-winding/repeating key object property 
-	definition syntax. Because of this, it was decided that we should pursue a custom 
-	parser after all, roundtripping the user-input circuit definition file through OpenDSS 
-	to standardize it before parsing.'''
-	# import circuit via opendssdirect
-	import opendssdirect as dss
-	runDssCommand('Redirect ' + fpath)
-	runDssCommand('Solve')
-	tree = [] # list of dictionaries
-	tree.extend(_dfToListOfDicts(dss.utils.capacitors_to_dataframe(),'Capacitor'))
-	tree.extend(_dfToListOfDicts(dss.utils.fuses_to_dataframe(), 'Fuse'))
-	tree.extend(_dfToListOfDicts(dss.utils.generators_to_dataframe(), 'Generator'))
-	tree.extend(_dfToListOfDicts(dss.utils.isource_to_dataframe(), 'ISource'))
-	tree.extend(_dfToListOfDicts(dss.utils.lines_to_dataframe(), 'Line'))
-	tree.extend(_dfToListOfDicts(dss.utils.loads_to_dataframe(), 'Load'))
-	tree.extend(_dfToListOfDicts(dss.utils.loadshape_to_dataframe(), 'LoadShape'))
-	tree.extend(_dfToListOfDicts(dss.utils.meters_to_dataframe(), 'Meter'))
-	tree.extend(_dfToListOfDicts(dss.utils.monitors_to_dataframe(), 'Monitor'))
-	tree.extend(_dfToListOfDicts(dss.utils.pvsystems_to_dataframe(), 'PvSystem'))
-	tree.extend(_dfToListOfDicts(dss.utils.reclosers_to_dataframe(), 'Recloser'))
-	tree.extend(_dfToListOfDicts(dss.utils.regcontrols_to_dataframe(), 'RegControl'))
-	tree.extend(_dfToListOfDicts(dss.utils.relays_to_dataframe(), 'Relay'))
-	tree.extend(_dfToListOfDicts(dss.utils.sensors_to_dataframe(), 'Sensor'))
-	tree.extend(_dfToListOfDicts(dss.utils.transformers_to_dataframe(), 'Transformer'))
-	tree.extend(_dfToListOfDicts(dss.utils.vsources_to_dataframe(), 'VSource'))
-	tree.extend(_dfToListOfDicts(dss.utils.xycurves_to_dataframe(), 'XyCurve'))
-	
-	## One way of getting all the circuit elements....
-	# Add the connections (there is not a way I can see to get this info the pandas way...can we ask someone? Do it the other way)
-	with open('dssTreeRepresentation_direct.csv', 'w') as outFile:
-		for i,objd in enumerate(tree):
-			dss.Circuit.SetActiveElement(objd['Object'])
-			objd['Cnxns'] = dss.CktElement.BusNames()
-			outFile.write(str(i) + '\n')
-			for k,v in objd.items():
-					outFile.write(',' + str(k) + ',' + str(v) + '\n')
-	
-	## A second way of getting all the circuit elements....
-		## Add the connections (there is not a way I can see to get this info the pandas way...can we ask someone? Do it the other way)
-		#allelms = dss.Circuit.AllElementNames()
-		#for elm in allelms:
-			#dss.Circuit.SetActiveElement(elm)
-			## Get variable keys and values (not sure if these matter...)
-			#nms = dss.CktElement.AllVariableNames()
-			#vls = dss.CktElement.AllVariableValues()
-			#elm_dict = dict(zip(nms,vls))
-			#elm_dict_vrbls = dict(zip(nms,vls))
-			## Get property keys
-			#prp_keys = dss.CktElement.AllPropertyNames()
-			## Loop to get property values
-			#for item in dss.utils.Iterator(prp_keys):
-				#prp_keys.#how to read the property of the active element?
-			#elm_dict = elm_dict_vrbls.update(prps)
-			## Add busnames
-			#elm_dict['cnxns'] = dss.CktElement.BusNames()
-			#tree.append(elm_dict)
-		#allNodes = dss.Circuit.AllNodeNames()
-		#allbuses = dss.Circuit.AllBusNames()
-		#tree.append(allNodes)
-		## Get the buses
-		#for node in allNodes:
-			#pass
-		#for bus in allBuses:
-			#dss.Circuit.SetActiveBus(node)
-			#cnxns = dss.Bus.LineList().append(dss.Bus.LoadList())
-	return tree
 
 def _extend_with_exc(from_d, to_d, exclude_list):
 	''' Add all items in from_d to to_d that aren't in exclude_list. '''
@@ -695,20 +664,6 @@ def dssToOmd(dssFilePath, omdFilePath, RADIUS=0.0002):
 			ob['longitude'] = str(float(parent_lon) + y)
 			# print(ob)
 	evilToOmd(evil_glm, omdFilePath)
-
-def _createAndCompareTestFile(inFile, userOutFile=''):
-	'''Input: the name of the file to be prepared for OMF consumption and perform subsequent checks (import to memory
-	and voltage comparison). Provide a second filename via userOutFile to bypass file manipulation and perform only the 
-	subsequent checks.'''
-
-	outFile = userOutFile if userOutFile!='' else _dssFilePrep(inFile)
-	tree1 = dssToTree(outFile) # check that it can be parsed into a dssTree.
-	from omf.solvers.opendss import getVoltages, voltageCompare
-	involts = getVoltages(inFile, keep_output=False)
-	outvolts = getVoltages(outFile, keep_output=False)
-	resFile = 'voltsCompare__' + os.path.split(inFile)[1][:-4] + '___' + os.path.split(outFile)[1][:-4] + '.csv'
-	percSumm, diffSumm = voltageCompare(involts, outvolts, keep_output=True)
-	return 
 
 def _conversionTests():
 	# pass

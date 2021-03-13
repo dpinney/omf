@@ -46,6 +46,7 @@ def work(modelDir, inputDict):
 	longitude = float(inputDict['longitude'])
 	energyCost = float(inputDict['energyCost'])
 	demandCost = float(inputDict['demandCost'])
+	wholesaleCost = float(inputDict['wholesaleCost'])
 	year = int(inputDict['year'])
 	criticalLoadFactor = float(inputDict['criticalLoadFactor'])
 	solarCost = float(inputDict['solarCost'])
@@ -67,9 +68,20 @@ def work(modelDir, inputDict):
 	minGenLoading = float(inputDict['minGenLoading'])
 	outage_start_hour = float(inputDict['outage_start_hour'])
 	outage_end_hour = outage_start_hour + float(inputDict['outageDuration'])
+	if outage_end_hour > 8759:
+		outage_end_hour = 8760
 	value_of_lost_load = float(inputDict['value_of_lost_load'])
 	solarCanExport = bool(inputDict['solarCanExport'])
 	solarCanCurtail = bool(inputDict['solarCanCurtail'])
+	# explicitly convert string inputs from microgridDesign.html into usable boolean for REopt Scenario
+	if inputDict['solarCanExport'] == "true":
+		solarCanExport = True
+	elif inputDict['solarCanExport'] == "false":
+		solarCanExport = False
+	if inputDict['solarCanCurtail'] == "true":
+		solarCanCurtail = True
+	elif inputDict['solarCanCurtail'] == "false":
+		solarCanCurtail = False
 	dieselMax = float(inputDict['dieselMax'])
 
 
@@ -109,7 +121,9 @@ def work(modelDir, inputDict):
 					"ElectricTariff": {
 						"urdb_rate_name": "custom",
 						"blended_annual_rates_us_dollars_per_kwh": energyCost,
-						"blended_annual_demand_charges_us_dollars_per_kw": demandCost
+						"blended_annual_demand_charges_us_dollars_per_kw": demandCost,
+						"wholesale_rate_us_dollars_per_kwh": wholesaleCost,
+						"wholesale_rate_above_site_load_us_dollars_per_kwh": wholesaleCost
 					},
 					"LoadProfile": {
 						"loads_kw": jsonifiableLoad,
@@ -147,7 +161,11 @@ def work(modelDir, inputDict):
 		elif solar == 'on':
 			scenario['Scenario']['Site']['PV']['max_kw'] = solarMax
 			scenario['Scenario']['Site']['PV']['existing_kw'] = solarExisting
-			scenario['Scenario']['Site']['LoadProfile']['loads_kw_is_net'] = False;
+			scenario['Scenario']['Site']['LoadProfile']['loads_kw_is_net'] = False
+			# Too turn of energy export/net-metering, set wholesaleCost to "0" and excess PV gen will be curtailed
+			if solarCanExport == False:
+				scenario['Scenario']['Site']['ElectricTariff']["wholesale_rate_above_site_load_us_dollars_per_kwh"] = 0
+				scenario['Scenario']['Site']['ElectricTariff']["wholesale_rate_us_dollars_per_kwh"] = 0;
 		if wind == 'off':
 			scenario['Scenario']['Site']['Wind']['max_kw'] = 0
 		elif wind == 'on':
@@ -219,6 +237,7 @@ def work(modelDir, inputDict):
 			outData['powerPVToGrid' + indexString] = resultsSubset['PV']['year_one_to_grid_series_kw']
 			outData['sizePVExisting' + indexString] = results['inputs']['Scenario']['Site']['PV']['existing_kw']
 			outData['solarCost' + indexString] = float(inputDict['solarCost'])
+
 		else:
 			outData['sizePV' + indexString] = 0
 			outData['sizePVRounded' + indexString] = 0
@@ -261,6 +280,7 @@ def work(modelDir, inputDict):
 		# diesel generator does not follow on/off convention, as it is not turned on by user, but rather is automatically turned on when an outage is specified
 		outData['sizeDiesel' + indexString] = resultsSubset['Generator']['size_kw']
 		outData['sizeDieselRounded' + indexString] = round(resultsSubset['Generator']['size_kw'],1)
+		outData['dieselGenCost' + indexString] = float(inputDict['dieselGenCost'])
 		if resultsSubset['Generator']['size_kw'] == 0:
 			outData['sizeDieselRounded' + indexString] = 0
 		outData['fuelUsedDiesel' + indexString] = resultsSubset['Generator']['fuel_used_gal']
@@ -298,7 +318,7 @@ def work(modelDir, inputDict):
 		powerGridToLoad = go.Scatter(
 			x=pd.to_datetime(x, unit = 'h', origin = pd.Timestamp(f'{year}-01-01')),
 			y=outData['powerGridToLoad' + indexString],
-			line=dict( color=('red') ),
+			line=dict( color=('blue') ),
 			name="Load met by Grid",
 			hoverlabel = dict(namelength = -1),
 			showlegend=True,
@@ -310,7 +330,7 @@ def work(modelDir, inputDict):
 			powerPVToLoad = go.Scatter(
 				x=pd.to_datetime(x, unit = 'h', origin = pd.Timestamp(f'{year}-01-01')),
 				y=outData['powerPVToLoad' + indexString],
-				line=dict( color=('green') ),
+				line=dict( color=('yellow') ),
 				name="Load met by Solar",
 				hoverlabel = dict(namelength = -1),
 				stackgroup='one',
@@ -321,7 +341,7 @@ def work(modelDir, inputDict):
 			powerBatteryToLoad = go.Scatter(
 				x=pd.to_datetime(x, unit = 'h', origin = pd.Timestamp(f'{year}-01-01')),
 				y=outData['powerBatteryToLoad' + indexString],
-				line=dict( color=('blue') ),
+				line=dict( color=('gray') ),
 				name="Load met by Battery",
 				hoverlabel = dict(namelength = -1),
 				stackgroup='one',
@@ -332,7 +352,7 @@ def work(modelDir, inputDict):
 			powerWindToLoad = go.Scatter(
 				x=pd.to_datetime(x, unit = 'h', origin = pd.Timestamp(f'{year}-01-01')),
 				y=outData['powerWindToLoad' + indexString],
-				line=dict( color=('yellow') ),
+				line=dict( color=('purple') ),
 				name="Load met by Wind",
 				hoverlabel = dict(namelength = -1),
 				stackgroup='one',
@@ -361,7 +381,7 @@ def work(modelDir, inputDict):
 			powerPVToLoad = go.Scatter(
 				x=pd.to_datetime(x, unit = 'h', origin = pd.Timestamp(f'{year}-01-01')),
 				y=outData['powerPVToLoad' + indexString],
-				line=dict( color=('blue') ),
+				line=dict( color=('yellow') ),
 				name="Solar used to meet Load",
 				hoverlabel = dict(namelength = -1),
 				stackgroup='one',
@@ -371,7 +391,7 @@ def work(modelDir, inputDict):
 			powerPVToGrid = go.Scatter(
 				x=pd.to_datetime(x, unit = 'h', origin = pd.Timestamp(f'{year}-01-01')),
 				y=outData['powerPVToGrid' + indexString],
-				line=dict( color=('yellow') ),
+				line=dict( color=('blue') ),
 				name="Solar exported to Grid",
 				hoverlabel = dict(namelength = -1),
 				stackgroup='one',
@@ -381,7 +401,7 @@ def work(modelDir, inputDict):
 			powerPVCurtailed = go.Scatter(
 				x=pd.to_datetime(x, unit = 'h', origin = pd.Timestamp(f'{year}-01-01')),
 				y=outData['powerPVCurtailed' + indexString],
-				line=dict( color=('green') ),
+				line=dict( color=('red') ),
 				name="Solar power curtailed",
 				hoverlabel = dict(namelength = -1),
 				stackgroup='one',
@@ -392,7 +412,7 @@ def work(modelDir, inputDict):
 				powerPVToBattery = go.Scatter(
 					x=pd.to_datetime(x, unit = 'h', origin = pd.Timestamp(f'{year}-01-01')),
 					y=outData['powerPVToBattery' + indexString],
-					line=dict( color=('red') ),
+					line=dict( color=('gray') ),
 					name="Solar used to charge Battery",
 					hoverlabel = dict(namelength = -1),
 					stackgroup='one',
@@ -415,7 +435,7 @@ def work(modelDir, inputDict):
 			powerWindToLoad = go.Scatter(
 				x=pd.to_datetime(x, unit = 'h', origin = pd.Timestamp(f'{year}-01-01')),
 				y=outData['powerWindToLoad' + indexString],
-				line=dict( color=('green') ),
+				line=dict( color=('purple') ),
 				name="Wind used to meet Load",
 				hoverlabel = dict(namelength = -1),
 				stackgroup='one',
@@ -426,7 +446,7 @@ def work(modelDir, inputDict):
 				powerWindToBattery = go.Scatter(
 					x=pd.to_datetime(x, unit = 'h', origin = pd.Timestamp(f'{year}-01-01')),
 					y=outData['powerWindToBattery' + indexString],
-					line=dict( color=('yellow') ),
+					line=dict( color=('gray') ),
 					name="Wind used to charge Battery",
 					hoverlabel = dict(namelength = -1),
 					stackgroup='one',
@@ -459,7 +479,7 @@ def work(modelDir, inputDict):
 				powerDieselToBattery = go.Scatter(
 					x=pd.to_datetime(x, unit = 'h', origin = pd.Timestamp(f'{year}-01-01')),
 					y=outData['powerDieselToBattery' + indexString],
-					line=dict( color=('yellow') ),
+					line=dict( color=('gray') ),
 					name="Diesel used to charge Battery",
 					hoverlabel = dict(namelength = -1),
 					stackgroup='one',
@@ -490,7 +510,7 @@ def work(modelDir, inputDict):
 				powerPVToBattery = go.Scatter(
 					x=pd.to_datetime(x, unit = 'h', origin = pd.Timestamp(f'{year}-01-01')),
 					y=outData['powerPVToBattery' + indexString],
-					line=dict( color=('green') ),
+					line=dict( color=('yellow') ),
 					name="Solar",
 					stackgroup='one',
 					mode='none')
@@ -500,7 +520,7 @@ def work(modelDir, inputDict):
 				powerWindToBattery = go.Scatter(
 					x=pd.to_datetime(x, unit = 'h', origin = pd.Timestamp(f'{year}-01-01')),
 					y=outData['powerWindToBattery' + indexString],
-					line=dict( color=('yellow') ),
+					line=dict( color=('purple') ),
 					name="Wind",
 					stackgroup='one',
 					mode='none')
@@ -585,6 +605,7 @@ def new(modelDir):
 		"year" : '2017',
 		"energyCost" : "0.1",
 		"demandCost" : '20',
+		"wholesaleCost" : "0.034",
 		"solarCost" : "1600",
 		"windCost" : "4898",
 		"batteryPowerCost" : "840",
@@ -606,7 +627,7 @@ def new(modelDir):
 		"fuelAvailable": "40000",
 		"genExisting": 0,
 		"minGenLoading": "0.3",
-		#"windExisting": 0,
+		#"windExisting": "20",
 		#"batteryKwExisting": 0,
 		#"batteryKwhExisting": 0,
 		"value_of_lost_load": "100",
