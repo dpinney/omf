@@ -1,0 +1,1162 @@
+{
+    "links": [],
+    "hiddenLinks": [],
+    "nodes": [],
+    "hiddenNodes": [],
+    "layoutVars": {
+        "theta": "0.8",
+        "gravity": "0.01",
+        "friction": "0.9",
+        "linkStrength": "5",
+        "linkDistance": "5",
+        "charge": "-5"
+    },
+    "tree": {
+        "1": {
+            "object": "!CMD",
+            "name": "clear"
+        },
+        "2": {
+            "object": "circuit",
+            "name": "ieee37",
+            "basekv": "230",
+            "pu": "1.00",
+            "mvasc3": "200000",
+            "mvasc1": "210000"
+        },
+        "3": {
+            "object": "transformer",
+            "name": "subxf",
+            "from": "sourcebus",
+            "to": "799",
+            "phases": "3",
+            "xhl": "8",
+            "conns": "[delta,delta]",
+            "kvs": "[230,4.8]",
+            "kvas": "[2500,2500]",
+            "%rs": "[1,1]",
+            "!FROCODE": ".1.2.3",
+            "!TOCODE": ".1.2.3"
+        },
+        "4": {
+            "object": "linecode",
+            "name": "721",
+            "nphases": "3",
+            "basefreq": "60",
+            "rmatrix": "[0.055416667|0.012746212,0.050113636|0.006382576,0.012746212,0.055416667]",
+            "xmatrix": "[0.037367424|-0.006969697,0.035984848|-0.007897727,-0.006969697,0.037367424]",
+            "cmatrix": "[80.27484728|0,80.27484728|0,0,80.27484728]"
+        },
+        "5": {
+            "object": "linecode",
+            "name": "722",
+            "nphases": "3",
+            "basefreq": "60",
+            "rmatrix": "[0.089981061|0.030852273,0.085|0.023371212,0.030852273,0.089981061]",
+            "xmatrix": "[0.056306818|-0.006174242,0.050719697|-0.011496212,-0.006174242,0.056306818]",
+            "cmatrix": "[64.2184109|0,64.2184109|0,0,64.2184109]"
+        },
+        "6": {
+            "object": "linecode",
+            "name": "723",
+            "nphases": "3",
+            "basefreq": "60",
+            "rmatrix": "[0.245|0.092253788,0.246628788|0.086837121,0.092253788,0.245]",
+            "xmatrix": "[0.127140152|0.039981061,0.119810606|0.028806818,0.039981061,0.127140152]",
+            "cmatrix": "[37.5977112|0,37.5977112|0,0,37.5977112]"
+        },
+        "7": {
+            "object": "linecode",
+            "name": "724",
+            "nphases": "3",
+            "basefreq": "60",
+            "rmatrix": "[0.396818182|0.098560606,0.399015152|0.093295455,0.098560606,0.396818182]",
+            "xmatrix": "[0.146931818|0.051856061,0.140113636|0.040208333,0.051856061,0.146931818]",
+            "cmatrix": "[30.26701029|0,30.26701029|0,0,30.26701029]"
+        },
+        "8": {
+            "object": "line",
+            "name": "l1",
+            "from": "701",
+            "to": "702",
+            "!FROCODE": ".1.2.3",
+            "!TOCODE": ".1.2.3",
+            "phases": "3",
+            "linecode": "722",
+            "length": "0.96"
+        },
+        "9": {
+            "object": "line",
+            "name": "l2",
+            "from": "702",
+            "to": "705",
+            "!FROCODE": ".1.2.3",
+            "!TOCODE": ".1.2.3",
+            "phases": "3",
+            "linecode": "724",
+            "length": "0.4"
+        },
+        "10": {
+            "object": "line",
+            "name": "l3",
+            "from": "702",
+            "to": "713",
+            "!FROCODE": ".1.2.3",
+            "!TOCODE": ".1.2.3",
+            "phases": "3",
+            "linecode": "723",
+            "length": "0.36"
+        },
+        "11": {
+            "object": "line",
+            "name": "l4",
+            "from": "702",
+            "to": "703",
+            "!FROCODE": ".1.2.3",
+            "!TOCODE": ".1.2.3",
+            "phases": "3",
+            "linecode": "722",
+            "length": "1.32"
+        },
+        "12": {
+            "object": "line",
+            "name": "l5",
+            "from": "703",
+            "to": "727",
+            "!FROCODE": ".1.2.3",
+            "!TOCODE": ".1.2.3",
+            "phases": "3",
+            "linecode": "724",
+            "length": "0.24"
+        },
+        "13": {
+            "object": "line",
+            "name": "l6",
+            "from": "703",
+            "to": "730",
+            "!FROCODE": ".1.2.3",
+            "!TOCODE": ".1.2.3",
+            "phases": "3",
+            "linecode": "723",
+            "length": "0.6"
+        },
+        "14": {
+            "object": "line",
+            "name": "l7",
+            "from": "704",
+            "to": "714",
+            "!FROCODE": ".1.2.3",
+            "!TOCODE": ".1.2.3",
+            "phases": "3",
+            "linecode": "724",
+            "length": "0.08"
+        },
+        "15": {
+            "object": "line",
+            "name": "l8",
+            "from": "704",
+            "to": "720",
+            "!FROCODE": ".1.2.3",
+            "!TOCODE": ".1.2.3",
+            "phases": "3",
+            "linecode": "723",
+            "length": "0.8"
+        },
+        "16": {
+            "object": "line",
+            "name": "l9",
+            "from": "705",
+            "to": "742",
+            "!FROCODE": ".1.2.3",
+            "!TOCODE": ".1.2.3",
+            "phases": "3",
+            "linecode": "724",
+            "length": "0.32"
+        },
+        "17": {
+            "object": "line",
+            "name": "l10",
+            "from": "705",
+            "to": "712",
+            "!FROCODE": ".1.2.3",
+            "!TOCODE": ".1.2.3",
+            "phases": "3",
+            "linecode": "724",
+            "length": "0.24"
+        },
+        "18": {
+            "object": "line",
+            "name": "l11",
+            "from": "706",
+            "to": "725",
+            "!FROCODE": ".1.2.3",
+            "!TOCODE": ".1.2.3",
+            "phases": "3",
+            "linecode": "724",
+            "length": "0.28"
+        },
+        "19": {
+            "object": "line",
+            "name": "l12",
+            "from": "707",
+            "to": "724",
+            "!FROCODE": ".1.2.3",
+            "!TOCODE": ".1.2.3",
+            "phases": "3",
+            "linecode": "724",
+            "length": "0.76"
+        },
+        "20": {
+            "object": "line",
+            "name": "l13",
+            "from": "707",
+            "to": "722",
+            "!FROCODE": ".1.2.3",
+            "!TOCODE": ".1.2.3",
+            "phases": "3",
+            "linecode": "724",
+            "length": "0.12"
+        },
+        "21": {
+            "object": "line",
+            "name": "l14",
+            "from": "708",
+            "to": "733",
+            "!FROCODE": ".1.2.3",
+            "!TOCODE": ".1.2.3",
+            "phases": "3",
+            "linecode": "723",
+            "length": "0.32"
+        },
+        "22": {
+            "object": "line",
+            "name": "l15",
+            "from": "708",
+            "to": "732",
+            "!FROCODE": ".1.2.3",
+            "!TOCODE": ".1.2.3",
+            "phases": "3",
+            "linecode": "724",
+            "length": "0.32"
+        },
+        "23": {
+            "object": "line",
+            "name": "l16",
+            "from": "709",
+            "to": "731",
+            "!FROCODE": ".1.2.3",
+            "!TOCODE": ".1.2.3",
+            "phases": "3",
+            "linecode": "723",
+            "length": "0.6"
+        },
+        "24": {
+            "object": "line",
+            "name": "l17",
+            "from": "709",
+            "to": "708",
+            "!FROCODE": ".1.2.3",
+            "!TOCODE": ".1.2.3",
+            "phases": "3",
+            "linecode": "723",
+            "length": "0.32"
+        },
+        "25": {
+            "object": "line",
+            "name": "l18",
+            "from": "710",
+            "to": "735",
+            "!FROCODE": ".1.2.3",
+            "!TOCODE": ".1.2.3",
+            "phases": "3",
+            "linecode": "724",
+            "length": "0.2"
+        },
+        "26": {
+            "object": "line",
+            "name": "l19",
+            "from": "710",
+            "to": "736",
+            "!FROCODE": ".1.2.3",
+            "!TOCODE": ".1.2.3",
+            "phases": "3",
+            "linecode": "724",
+            "length": "1.28"
+        },
+        "27": {
+            "object": "line",
+            "name": "l20",
+            "from": "711",
+            "to": "741",
+            "!FROCODE": ".1.2.3",
+            "!TOCODE": ".1.2.3",
+            "phases": "3",
+            "linecode": "723",
+            "length": "0.4"
+        },
+        "28": {
+            "object": "line",
+            "name": "l21",
+            "from": "711",
+            "to": "740",
+            "!FROCODE": ".1.2.3",
+            "!TOCODE": ".1.2.3",
+            "phases": "3",
+            "linecode": "724",
+            "length": "0.2"
+        },
+        "29": {
+            "object": "line",
+            "name": "l22",
+            "from": "713",
+            "to": "704",
+            "!FROCODE": ".1.2.3",
+            "!TOCODE": ".1.2.3",
+            "phases": "3",
+            "linecode": "723",
+            "length": "0.52"
+        },
+        "30": {
+            "object": "line",
+            "name": "l23",
+            "from": "714",
+            "to": "718",
+            "!FROCODE": ".1.2.3",
+            "!TOCODE": ".1.2.3",
+            "phases": "3",
+            "linecode": "724",
+            "length": "0.52"
+        },
+        "31": {
+            "object": "line",
+            "name": "l24",
+            "from": "720",
+            "to": "707",
+            "!FROCODE": ".1.2.3",
+            "!TOCODE": ".1.2.3",
+            "phases": "3",
+            "linecode": "724",
+            "length": "0.92"
+        },
+        "32": {
+            "object": "line",
+            "name": "l25",
+            "from": "720",
+            "to": "706",
+            "!FROCODE": ".1.2.3",
+            "!TOCODE": ".1.2.3",
+            "phases": "3",
+            "linecode": "723",
+            "length": "0.6"
+        },
+        "33": {
+            "object": "line",
+            "name": "l26",
+            "from": "727",
+            "to": "744",
+            "!FROCODE": ".1.2.3",
+            "!TOCODE": ".1.2.3",
+            "phases": "3",
+            "linecode": "723",
+            "length": "0.28"
+        },
+        "34": {
+            "object": "line",
+            "name": "l27",
+            "from": "730",
+            "to": "709",
+            "!FROCODE": ".1.2.3",
+            "!TOCODE": ".1.2.3",
+            "phases": "3",
+            "linecode": "723",
+            "length": "0.2"
+        },
+        "35": {
+            "object": "line",
+            "name": "l28",
+            "from": "733",
+            "to": "734",
+            "!FROCODE": ".1.2.3",
+            "!TOCODE": ".1.2.3",
+            "phases": "3",
+            "linecode": "723",
+            "length": "0.56"
+        },
+        "36": {
+            "object": "line",
+            "name": "l29",
+            "from": "734",
+            "to": "737",
+            "!FROCODE": ".1.2.3",
+            "!TOCODE": ".1.2.3",
+            "phases": "3",
+            "linecode": "723",
+            "length": "0.64"
+        },
+        "37": {
+            "object": "line",
+            "name": "l30",
+            "from": "734",
+            "to": "710",
+            "!FROCODE": ".1.2.3",
+            "!TOCODE": ".1.2.3",
+            "phases": "3",
+            "linecode": "724",
+            "length": "0.52"
+        },
+        "38": {
+            "object": "line",
+            "name": "l31",
+            "from": "737",
+            "to": "738",
+            "!FROCODE": ".1.2.3",
+            "!TOCODE": ".1.2.3",
+            "phases": "3",
+            "linecode": "723",
+            "length": "0.4"
+        },
+        "39": {
+            "object": "line",
+            "name": "l32",
+            "from": "738",
+            "to": "711",
+            "!FROCODE": ".1.2.3",
+            "!TOCODE": ".1.2.3",
+            "phases": "3",
+            "linecode": "723",
+            "length": "0.4"
+        },
+        "40": {
+            "object": "line",
+            "name": "l33",
+            "from": "744",
+            "to": "728",
+            "!FROCODE": ".1.2.3",
+            "!TOCODE": ".1.2.3",
+            "phases": "3",
+            "linecode": "724",
+            "length": "0.2"
+        },
+        "41": {
+            "object": "line",
+            "name": "l34",
+            "from": "744",
+            "to": "729",
+            "!FROCODE": ".1.2.3",
+            "!TOCODE": ".1.2.3",
+            "phases": "3",
+            "linecode": "724",
+            "length": "0.28"
+        },
+        "42": {
+            "object": "line",
+            "name": "l35",
+            "from": "799r",
+            "to": "701",
+            "!FROCODE": ".1.2.3",
+            "!TOCODE": ".1.2.3",
+            "phases": "3",
+            "linecode": "721",
+            "length": "1.85"
+        },
+        "43": {
+            "object": "transformer",
+            "name": "reg1",
+            "from": "799",
+            "to": "799r",
+            "phases": "3",
+            "bank": "reg1",
+            "xhl": "0.01",
+            "kvas": "[2500,2500]",
+            "kvs": "[2.77128129,2.77128129]",
+            "%loadloss": "0.01",
+            "!FROCODE": ".1.2.3",
+            "!TOCODE": ".1.2.3"
+        },
+        "44": {
+            "object": "regcontrol",
+            "name": "reg1a",
+            "parent": "799r",
+            "!CONNCODE": ".1",
+            "transformer": "reg1",
+            "winding": "2",
+            "vreg": "138",
+            "band": "2",
+            "ptratio": "20",
+            "latitude": "-0.00018174037467734346",
+            "longitude": "-8.348913828839546e-05"
+        },
+        "45": {
+            "object": "load",
+            "name": "s701a",
+            "parent": "701",
+            "phases": "1",
+            "conn": "delta",
+            "model": "1",
+            "kv": "4.800",
+            "kw": "140.0",
+            "kvar": "70.0",
+            "!CONNCODE": ".1.2",
+            "latitude": "0.0001522119343776627",
+            "longitude": "-0.0001297363751343859"
+        },
+        "46": {
+            "object": "load",
+            "name": "s701b",
+            "parent": "701",
+            "phases": "1",
+            "conn": "delta",
+            "model": "1",
+            "kv": "4.800",
+            "kw": "140.0",
+            "kvar": "70.0",
+            "!CONNCODE": ".2.3",
+            "latitude": "-0.00019521808287475658",
+            "longitude": "-4.3472981479358825e-05"
+        },
+        "47": {
+            "object": "load",
+            "name": "s701c",
+            "parent": "701",
+            "phases": "1",
+            "conn": "delta",
+            "model": "1",
+            "kv": "4.800",
+            "kw": "350.0",
+            "kvar": "175.0",
+            "!CONNCODE": ".3.1",
+            "latitude": "-0.00019768648409246246",
+            "longitude": "-3.0332392044818776e-05"
+        },
+        "48": {
+            "object": "load",
+            "name": "s712c",
+            "parent": "712",
+            "phases": "1",
+            "conn": "delta",
+            "model": "1",
+            "kv": "4.800",
+            "kw": "85.0",
+            "kvar": "40.0",
+            "!CONNCODE": ".3.1",
+            "latitude": "0.00019908294656192704",
+            "longitude": "-1.9130613900784738e-05"
+        },
+        "49": {
+            "object": "load",
+            "name": "s713c",
+            "parent": "713",
+            "phases": "1",
+            "conn": "delta",
+            "model": "1",
+            "kv": "4.800",
+            "kw": "85.0",
+            "kvar": "40.0",
+            "!CONNCODE": ".3.1",
+            "latitude": "-9.13038813340289e-06",
+            "longitude": "0.0001997914813312455"
+        },
+        "50": {
+            "object": "load",
+            "name": "s714a",
+            "parent": "714",
+            "phases": "1",
+            "conn": "delta",
+            "model": "4",
+            "kv": "4.800",
+            "kw": "17.0",
+            "kvar": "8.0",
+            "!CONNCODE": ".1.2",
+            "latitude": "7.435500479129818e-05",
+            "longitude": "-0.00018566457190989893"
+        },
+        "51": {
+            "object": "load",
+            "name": "s714b",
+            "parent": "714",
+            "phases": "1",
+            "conn": "delta",
+            "model": "4",
+            "kv": "4.800",
+            "kw": "21.0",
+            "kvar": "10.0",
+            "!CONNCODE": ".2.3",
+            "latitude": "-0.000175324728679684",
+            "longitude": "9.623533401716435e-05"
+        },
+        "52": {
+            "object": "load",
+            "name": "s718a",
+            "parent": "718",
+            "phases": "1",
+            "conn": "delta",
+            "model": "2",
+            "kv": "4.800",
+            "kw": "85.0",
+            "kvar": "40.0",
+            "!CONNCODE": ".1.2",
+            "latitude": "0.00012450157264937747",
+            "longitude": "0.0001565227089205646"
+        },
+        "53": {
+            "object": "load",
+            "name": "s720c",
+            "parent": "720",
+            "phases": "1",
+            "conn": "delta",
+            "model": "1",
+            "kv": "4.800",
+            "kw": "85.0",
+            "kvar": "40.0",
+            "!CONNCODE": ".3.1",
+            "latitude": "0.00019150866538860433",
+            "longitude": "-5.765787960960401e-05"
+        },
+        "54": {
+            "object": "load",
+            "name": "s722b",
+            "parent": "722",
+            "phases": "1",
+            "conn": "delta",
+            "model": "4",
+            "kv": "4.800",
+            "kw": "140.0",
+            "kvar": "70.0",
+            "!CONNCODE": ".2.3",
+            "latitude": "-6.755218100780489e-05",
+            "longitude": "-0.00018824638865351113"
+        },
+        "55": {
+            "object": "load",
+            "name": "s722c",
+            "parent": "722",
+            "phases": "1",
+            "conn": "delta",
+            "model": "4",
+            "kv": "4.800",
+            "kw": "21.0",
+            "kvar": "10.0",
+            "!CONNCODE": ".3.1",
+            "latitude": "0.00010776813600756138",
+            "longitude": "0.00016848153863689564"
+        },
+        "56": {
+            "object": "load",
+            "name": "s724b",
+            "parent": "724",
+            "phases": "1",
+            "conn": "delta",
+            "model": "2",
+            "kv": "4.800",
+            "kw": "42.0",
+            "kvar": "21.0",
+            "!CONNCODE": ".2.3",
+            "latitude": "0.00012228424217711873",
+            "longitude": "0.00015826106316832255"
+        },
+        "57": {
+            "object": "load",
+            "name": "s725b",
+            "parent": "725",
+            "phases": "1",
+            "conn": "delta",
+            "model": "1",
+            "kv": "4.800",
+            "kw": "42.0",
+            "kvar": "21.0",
+            "!CONNCODE": ".2.3",
+            "latitude": "4.975909978718335e-06",
+            "longitude": "-0.000199938091217966"
+        },
+        "58": {
+            "object": "load",
+            "name": "s727c",
+            "parent": "727",
+            "phases": "1",
+            "conn": "delta",
+            "model": "1",
+            "kv": "4.800",
+            "kw": "42.0",
+            "kvar": "21.0",
+            "!CONNCODE": ".3.1",
+            "latitude": "-0.0001575082936239999",
+            "longitude": "0.00012325233239032776"
+        },
+        "59": {
+            "object": "load",
+            "name": "s728",
+            "parent": "728",
+            "phases": "3",
+            "conn": "delta",
+            "model": "1",
+            "kv": "4.800",
+            "kw": "126.0",
+            "kvar": "63.0",
+            "!CONNCODE": ".1.2.3",
+            "latitude": "-4.999052308839631e-06",
+            "longitude": "-0.00019993751392876098"
+        },
+        "60": {
+            "object": "load",
+            "name": "s729a",
+            "parent": "729",
+            "phases": "1",
+            "conn": "delta",
+            "model": "4",
+            "kv": "4.800",
+            "kw": "42.0",
+            "kvar": "21.0",
+            "!CONNCODE": ".1.2",
+            "latitude": "1.0301382937949308e-05",
+            "longitude": "0.0001997345275849064"
+        },
+        "61": {
+            "object": "load",
+            "name": "s730c",
+            "parent": "730",
+            "phases": "1",
+            "conn": "delta",
+            "model": "2",
+            "kv": "4.800",
+            "kw": "85.0",
+            "kvar": "40.0",
+            "!CONNCODE": ".3.1",
+            "latitude": "0.00015376800435255815",
+            "longitude": "0.00012788823572726173"
+        },
+        "62": {
+            "object": "load",
+            "name": "s731b",
+            "parent": "731",
+            "phases": "1",
+            "conn": "delta",
+            "model": "2",
+            "kv": "4.800",
+            "kw": "85.0",
+            "kvar": "40.0",
+            "!CONNCODE": ".2.3",
+            "latitude": "-0.00015383269761175362",
+            "longitude": "0.0001278104109432826"
+        },
+        "63": {
+            "object": "load",
+            "name": "s732c",
+            "parent": "732",
+            "phases": "1",
+            "conn": "delta",
+            "model": "1",
+            "kv": "4.800",
+            "kw": "42.0",
+            "kvar": "21.0",
+            "!CONNCODE": ".3.1",
+            "latitude": "-7.97677699987342e-05",
+            "longitude": "0.00018340420624791853"
+        },
+        "64": {
+            "object": "load",
+            "name": "s733a",
+            "parent": "733",
+            "phases": "1",
+            "conn": "delta",
+            "model": "4",
+            "kv": "4.800",
+            "kw": "85.0",
+            "kvar": "40.0",
+            "!CONNCODE": ".1.2",
+            "latitude": "-7.734344440583835e-05",
+            "longitude": "-0.0001844396692890144"
+        },
+        "65": {
+            "object": "load",
+            "name": "s734c",
+            "parent": "734",
+            "phases": "1",
+            "conn": "delta",
+            "model": "1",
+            "kv": "4.800",
+            "kw": "42.0",
+            "kvar": "21.0",
+            "!CONNCODE": ".3.1",
+            "latitude": "0.0001420781254873809",
+            "longitude": "-0.00014076152264732024"
+        },
+        "66": {
+            "object": "load",
+            "name": "s735c",
+            "parent": "735",
+            "phases": "1",
+            "conn": "delta",
+            "model": "1",
+            "kv": "4.800",
+            "kw": "85.0",
+            "kvar": "40.0",
+            "!CONNCODE": ".3.1",
+            "latitude": "0.00019699347478804494",
+            "longitude": "3.4548095330016554e-05"
+        },
+        "67": {
+            "object": "load",
+            "name": "s736b",
+            "parent": "736",
+            "phases": "1",
+            "conn": "delta",
+            "model": "2",
+            "kv": "4.800",
+            "kw": "42.0",
+            "kvar": "21.0",
+            "!CONNCODE": ".2.3",
+            "latitude": "-0.00019318838972672586",
+            "longitude": "-5.175177363911972e-05"
+        },
+        "68": {
+            "object": "load",
+            "name": "s737a",
+            "parent": "737",
+            "phases": "1",
+            "conn": "delta",
+            "model": "4",
+            "kv": "4.800",
+            "kw": "140.0",
+            "kvar": "70.0",
+            "!CONNCODE": ".1.2",
+            "latitude": "0.00014933670780658667",
+            "longitude": "0.0001330358887725044"
+        },
+        "69": {
+            "object": "load",
+            "name": "s738a",
+            "parent": "738",
+            "phases": "1",
+            "conn": "delta",
+            "model": "1",
+            "kv": "4.800",
+            "kw": "126.0",
+            "kvar": "62.0",
+            "!CONNCODE": ".1.2",
+            "latitude": "-0.00019999999847375487",
+            "longitude": "2.47082587261033e-08"
+        },
+        "70": {
+            "object": "load",
+            "name": "s740c",
+            "parent": "740",
+            "phases": "1",
+            "conn": "delta",
+            "model": "1",
+            "kv": "4.800",
+            "kw": "85.0",
+            "kvar": "40.0",
+            "!CONNCODE": ".3.1",
+            "latitude": "3.081450630472551e-05",
+            "longitude": "-0.00019761190804502656"
+        },
+        "71": {
+            "object": "load",
+            "name": "s741c",
+            "parent": "741",
+            "phases": "1",
+            "conn": "delta",
+            "model": "4",
+            "kv": "4.800",
+            "kw": "42.0",
+            "kvar": "21.0",
+            "!CONNCODE": ".3.1",
+            "latitude": "0.00013913942752788997",
+            "longitude": "-0.00014366704461083292"
+        },
+        "72": {
+            "object": "load",
+            "name": "s742a",
+            "parent": "742",
+            "phases": "1",
+            "conn": "delta",
+            "model": "2",
+            "kv": "4.800",
+            "kw": "8.0",
+            "kvar": "4.0",
+            "!CONNCODE": ".1.2",
+            "latitude": "-4.540753643224259e-05",
+            "longitude": "-0.00019477719485390112"
+        },
+        "73": {
+            "object": "load",
+            "name": "s742b",
+            "parent": "742",
+            "phases": "1",
+            "conn": "delta",
+            "model": "2",
+            "kv": "4.800",
+            "kw": "85.0",
+            "kvar": "40.0",
+            "!CONNCODE": ".2.3",
+            "latitude": "-0.0001567466234636044",
+            "longitude": "-0.00012421954770791525"
+        },
+        "74": {
+            "object": "load",
+            "name": "s744a",
+            "parent": "744",
+            "phases": "1",
+            "conn": "delta",
+            "model": "1",
+            "kv": "4.800",
+            "kw": "42.0",
+            "kvar": "21.0",
+            "!CONNCODE": ".1.2",
+            "latitude": "0.0001837589464931887",
+            "longitude": "-7.894713157368935e-05"
+        },
+        "75": {
+            "object": "!CMD",
+            "name": "makebuslist"
+        },
+        "76": {
+            "object": "!CMD",
+            "name": "set",
+            "voltagebases": "[230,4.8,0.48]"
+        },
+        "77": {
+            "object": "!CMD",
+            "name": "calcvoltagebases"
+        },
+        "78": {
+            "object": "bus",
+            "name": "sourcebus",
+            "latitude": "0",
+            "longitude": "0"
+        },
+        "79": {
+            "object": "bus",
+            "name": "701",
+            "latitude": "0",
+            "longitude": "0"
+        },
+        "80": {
+            "object": "bus",
+            "name": "702",
+            "latitude": "0",
+            "longitude": "0"
+        },
+        "81": {
+            "object": "bus",
+            "name": "705",
+            "latitude": "0",
+            "longitude": "0"
+        },
+        "82": {
+            "object": "bus",
+            "name": "713",
+            "latitude": "0",
+            "longitude": "0"
+        },
+        "83": {
+            "object": "bus",
+            "name": "703",
+            "latitude": "0",
+            "longitude": "0"
+        },
+        "84": {
+            "object": "bus",
+            "name": "727",
+            "latitude": "0",
+            "longitude": "0"
+        },
+        "85": {
+            "object": "bus",
+            "name": "730",
+            "latitude": "0",
+            "longitude": "0"
+        },
+        "86": {
+            "object": "bus",
+            "name": "704",
+            "latitude": "0",
+            "longitude": "0"
+        },
+        "87": {
+            "object": "bus",
+            "name": "714",
+            "latitude": "0",
+            "longitude": "0"
+        },
+        "88": {
+            "object": "bus",
+            "name": "720",
+            "latitude": "0",
+            "longitude": "0"
+        },
+        "89": {
+            "object": "bus",
+            "name": "742",
+            "latitude": "0",
+            "longitude": "0"
+        },
+        "90": {
+            "object": "bus",
+            "name": "712",
+            "latitude": "0",
+            "longitude": "0"
+        },
+        "91": {
+            "object": "bus",
+            "name": "706",
+            "latitude": "0",
+            "longitude": "0"
+        },
+        "92": {
+            "object": "bus",
+            "name": "725",
+            "latitude": "0",
+            "longitude": "0"
+        },
+        "93": {
+            "object": "bus",
+            "name": "707",
+            "latitude": "0",
+            "longitude": "0"
+        },
+        "94": {
+            "object": "bus",
+            "name": "724",
+            "latitude": "0",
+            "longitude": "0"
+        },
+        "95": {
+            "object": "bus",
+            "name": "722",
+            "latitude": "0",
+            "longitude": "0"
+        },
+        "96": {
+            "object": "bus",
+            "name": "708",
+            "latitude": "0",
+            "longitude": "0"
+        },
+        "97": {
+            "object": "bus",
+            "name": "733",
+            "latitude": "0",
+            "longitude": "0"
+        },
+        "98": {
+            "object": "bus",
+            "name": "732",
+            "latitude": "0",
+            "longitude": "0"
+        },
+        "99": {
+            "object": "bus",
+            "name": "709",
+            "latitude": "0",
+            "longitude": "0"
+        },
+        "100": {
+            "object": "bus",
+            "name": "731",
+            "latitude": "0",
+            "longitude": "0"
+        },
+        "101": {
+            "object": "bus",
+            "name": "710",
+            "latitude": "0",
+            "longitude": "0"
+        },
+        "102": {
+            "object": "bus",
+            "name": "735",
+            "latitude": "0",
+            "longitude": "0"
+        },
+        "103": {
+            "object": "bus",
+            "name": "736",
+            "latitude": "0",
+            "longitude": "0"
+        },
+        "104": {
+            "object": "bus",
+            "name": "711",
+            "latitude": "0",
+            "longitude": "0"
+        },
+        "105": {
+            "object": "bus",
+            "name": "741",
+            "latitude": "0",
+            "longitude": "0"
+        },
+        "106": {
+            "object": "bus",
+            "name": "740",
+            "latitude": "0",
+            "longitude": "0"
+        },
+        "107": {
+            "object": "bus",
+            "name": "718",
+            "latitude": "0",
+            "longitude": "0"
+        },
+        "108": {
+            "object": "bus",
+            "name": "744",
+            "latitude": "0",
+            "longitude": "0"
+        },
+        "109": {
+            "object": "bus",
+            "name": "734",
+            "latitude": "0",
+            "longitude": "0"
+        },
+        "110": {
+            "object": "bus",
+            "name": "737",
+            "latitude": "0",
+            "longitude": "0"
+        },
+        "111": {
+            "object": "bus",
+            "name": "738",
+            "latitude": "0",
+            "longitude": "0"
+        },
+        "112": {
+            "object": "bus",
+            "name": "728",
+            "latitude": "0",
+            "longitude": "0"
+        },
+        "113": {
+            "object": "bus",
+            "name": "729",
+            "latitude": "0",
+            "longitude": "0"
+        },
+        "114": {
+            "object": "bus",
+            "name": "799r",
+            "latitude": "0",
+            "longitude": "0"
+        },
+        "115": {
+            "object": "bus",
+            "name": "799",
+            "latitude": "0",
+            "longitude": "0"
+        },
+        "116": {
+            "object": "!CMD",
+            "name": "set",
+            "maxiterations": "100"
+        },
+        "117": {
+            "object": "!CMD",
+            "name": "solve"
+        }
+    },
+    "attachments": {},
+    "syntax": "DSS"
+}

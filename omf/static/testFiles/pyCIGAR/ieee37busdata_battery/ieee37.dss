@@ -1,0 +1,331 @@
+Clear
+
+! Note that this is a 3-wire delta system. 
+! Node voltages in OpenDSS are normally line-ground and may give strange-looking results
+! Be careful if you put line-neutral connected loads or other devices on this circuit.
+
+New object=circuit.ieee37
+~ basekv=230 pu=1.00 MVAsc3=200000 MVAsc1=210000
+
+
+! Substation Transformer
+New Transformer.SubXF Phases=3 Windings=2 Xhl=8
+~ wdg=1 bus=sourcebus conn=Delta kv=230   kva=2500   %r=1
+~ wdg=2 bus=799       conn=Delta kv=4.8   kva=2500   %r=1
+
+/*
+! Load Transformer
+New Transformer.XFM1  Phases=3 Windings=2 Xhl=1.81
+~ wdg=1 bus=709       conn=Delta kv=4.80  kva=500    %r=0.045
+~ wdg=2 bus=775       conn=Delta kv=0.48  kva=500    %r=0.045
+*/
+
+
+! import line codes with phase impedance matrices
+! this file was corrected 9/16/2010 to match the values in Kersting's files
+
+
+
+! These line codes are used in the 123-bus circuit
+
+New linecode.1 nphases=3 BaseFreq=60
+!!!~ rmatrix = (0.088205 | 0.0312137 0.0901946 | 0.0306264 0.0316143 0.0889665 )
+!!!~ xmatrix = (0.20744 | 0.0935314 0.200783 | 0.0760312 0.0855879 0.204877 )
+!!!~ cmatrix = (2.90301 | -0.679335 3.15896 | -0.22313 -0.481416 2.8965 )
+~ rmatrix = [0.086666667 | 0.029545455 0.088371212 | 0.02907197 0.029924242 0.087405303]
+~ xmatrix = [0.204166667 | 0.095018939 0.198522727 | 0.072897727 0.080227273 0.201723485]
+~ cmatrix = [2.851710072 | -0.920293787  3.004631862 | -0.350755566  -0.585011253 2.71134756]
+
+New linecode.2 nphases=3 BaseFreq=60
+!!!~ rmatrix = (0.0901946 | 0.0316143 0.0889665 | 0.0312137 0.0306264 0.088205 )
+!!!~ xmatrix = (0.200783 | 0.0855879 0.204877 | 0.0935314 0.0760312 0.20744 )
+!!!~ cmatrix = (3.15896 | -0.481416 2.8965 | -0.679335 -0.22313 2.90301 )
+~ rmatrix = [0.088371212 | 0.02992424  0.087405303 | 0.029545455 0.02907197 0.086666667]
+~ xmatrix = [0.198522727 | 0.080227273  0.201723485 | 0.095018939 0.072897727 0.204166667]
+~ cmatrix = [3.004631862 | -0.585011253 2.71134756 | -0.920293787  -0.350755566  2.851710072]
+
+New linecode.3 nphases=3 BaseFreq=60
+!!!~ rmatrix = (0.0889665 | 0.0306264 0.088205 | 0.0316143 0.0312137 0.0901946 )
+!!!~ xmatrix = (0.204877 | 0.0760312 0.20744 | 0.0855879 0.0935314 0.200783 )
+!!!~ cmatrix = (2.8965 | -0.22313 2.90301 | -0.481416 -0.679335 3.15896 )
+
+~ rmatrix = [0.087405303 | 0.02907197 0.086666667  | 0.029924242 0.029545455 0.088371212]
+~ xmatrix = [0.201723485 | 0.072897727 0.204166667 | 0.080227273 0.095018939 0.198522727]
+~ cmatrix = [2.71134756  | -0.350755566 2.851710072 | -0.585011253 -0.920293787 3.004631862]
+
+New linecode.4 nphases=3 BaseFreq=60
+!!!~ rmatrix = (0.0889665 | 0.0316143 0.0901946 | 0.0306264 0.0312137 0.088205 )
+!!!~ xmatrix = (0.204877 | 0.0855879 0.200783 | 0.0760312 0.0935314 0.20744 )
+!!!~ cmatrix = (2.8965 | -0.481416 3.15896 | -0.22313 -0.679335 2.90301 )
+~ rmatrix = [0.087405303 | 0.029924242 0.088371212 | 0.02907197   0.029545455 0.086666667]
+~ xmatrix = [0.201723485 | 0.080227273 0.198522727 | 0.072897727 0.095018939 0.204166667]
+~ cmatrix = [2.71134756  | 0.585011253 3.004631862 | -0.350755566 -0.920293787 2.851710072]
+
+New linecode.5 nphases=3 BaseFreq=60
+!!!~ rmatrix = (0.0901946 | 0.0312137 0.088205 | 0.0316143 0.0306264 0.0889665 )
+!!!~ xmatrix = (0.200783 | 0.0935314 0.20744 | 0.0855879 0.0760312 0.204877 )
+!!!~ cmatrix = (3.15896 | -0.679335 2.90301 | -0.481416 -0.22313 2.8965 )
+
+~ rmatrix = [0.088371212  |  0.029545455  0.086666667  |  0.029924242  0.02907197  0.087405303]
+~ xmatrix = [0.198522727  |  0.095018939  0.204166667  |  0.080227273  0.072897727  0.201723485]
+~ cmatrix = [3.004631862  | -0.920293787  2.851710072  |  -0.585011253  -0.350755566  2.71134756]
+
+New linecode.6 nphases=3 BaseFreq=60
+!!!~ rmatrix = (0.088205 | 0.0306264 0.0889665 | 0.0312137 0.0316143 0.0901946 )
+!!!~ xmatrix = (0.20744 | 0.0760312 0.204877 | 0.0935314 0.0855879 0.200783 )
+!!!~ cmatrix = (2.90301 | -0.22313 2.8965 | -0.679335 -0.481416 3.15896 )
+~ rmatrix = [0.086666667 | 0.02907197  0.087405303 | 0.029545455  0.029924242  0.088371212]
+~ xmatrix = [0.204166667 | 0.072897727  0.201723485 | 0.095018939  0.080227273  0.198522727]
+~ cmatrix = [2.851710072 | -0.350755566  2.71134756 | -0.920293787  -0.585011253  3.004631862]
+New linecode.7 nphases=2 BaseFreq=60
+!!!~ rmatrix = (0.088205 | 0.0306264 0.0889665 )
+!!!~ xmatrix = (0.20744 | 0.0760312 0.204877 )
+!!!~ cmatrix = (2.75692 | -0.326659 2.82313 )
+~ rmatrix = [0.086666667 | 0.02907197  0.087405303]
+~ xmatrix = [0.204166667 | 0.072897727  0.201723485]
+~ cmatrix = [2.569829596 | -0.52995137  2.597460011]
+New linecode.8 nphases=2 BaseFreq=60
+!!!~ rmatrix = (0.088205 | 0.0306264 0.0889665 )
+!!!~ xmatrix = (0.20744 | 0.0760312 0.204877 )
+!!!~ cmatrix = (2.75692 | -0.326659 2.82313 )
+~ rmatrix = [0.086666667 | 0.02907197  0.087405303]
+~ xmatrix = [0.204166667 | 0.072897727  0.201723485]
+~ cmatrix = [2.569829596 | -0.52995137  2.597460011]
+New linecode.9 nphases=1 BaseFreq=60
+!!!~ rmatrix = (0.254428 )
+!!!~ xmatrix = (0.259546 )
+!!!~ cmatrix = (2.50575 )
+~ rmatrix = [0.251742424]
+~ xmatrix = [0.255208333]
+~ cmatrix = [2.270366128]
+New linecode.10 nphases=1 BaseFreq=60
+!!!~ rmatrix = (0.254428 )
+!!!~ xmatrix = (0.259546 )
+!!!~ cmatrix = (2.50575 )
+~ rmatrix = [0.251742424]
+~ xmatrix = [0.255208333]
+~ cmatrix = [2.270366128]
+New linecode.11 nphases=1 BaseFreq=60
+!!!~ rmatrix = (0.254428 )
+!!!~ xmatrix = (0.259546 )
+!!!~ cmatrix = (2.50575 )
+~ rmatrix = [0.251742424]
+~ xmatrix = [0.255208333]
+~ cmatrix = [2.270366128]
+New linecode.12 nphases=3 BaseFreq=60
+!!!~ rmatrix = (0.291814 | 0.101656 0.294012 | 0.096494 0.101656 0.291814 )
+!!!~ xmatrix = (0.141848 | 0.0517936 0.13483 | 0.0401881 0.0517936 0.141848 )
+!!!~ cmatrix = (53.4924 | 0 53.4924 | 0 0 53.4924 )
+~ rmatrix = [0.288049242 | 0.09844697  0.29032197 | 0.093257576  0.09844697  0.288049242]
+~ xmatrix = [0.142443182 | 0.052556818  0.135643939 | 0.040852273  0.052556818  0.142443182]
+~ cmatrix = [33.77150149 | 0  33.77150149 | 0  0  33.77150149]
+
+! These line codes are used in the 34-node test feeder
+
+New linecode.300 nphases=3 basefreq=60   ! ohms per 1000ft  Corrected 11/30/05
+~ rmatrix = [0.253181818   |  0.039791667     0.250719697  |   0.040340909      0.039128788     0.251780303]  !ABC ORDER
+~ xmatrix = [0.252708333   |  0.109450758     0.256988636  |   0.094981061      0.086950758     0.255132576]
+~ CMATRIX = [2.680150309   | -0.769281006     2.5610381    |  -0.499507676     -0.312072984     2.455590387]
+New linecode.301 nphases=3 basefreq=60
+~ rmatrix = [0.365530303   |   0.04407197      0.36282197   |   0.04467803       0.043333333     0.363996212]
+~ xmatrix = [0.267329545   |   0.122007576     0.270473485  |   0.107784091      0.099204545     0.269109848] 
+~ cmatrix = [2.572492163   |  -0.72160598      2.464381882  |  -0.472329395     -0.298961096     2.368881119]
+New linecode.302 nphases=1 basefreq=60
+~ rmatrix = (0.530208 )
+~ xmatrix = (0.281345 )
+~ cmatrix = (2.12257 )
+New linecode.303 nphases=1 basefreq=60
+~ rmatrix = (0.530208 )
+~ xmatrix = (0.281345 )
+~ cmatrix = (2.12257 )
+New linecode.304 nphases=1 basefreq=60
+~ rmatrix = (0.363958 )
+~ xmatrix = (0.269167 )
+~ cmatrix = (2.1922 )
+
+
+! This may be for the 4-node test feeder, but is not actually referenced.
+!  instead, the 4Bus*.dss files all use the wiredata and linegeometry inputs
+!  to calculate these matrices from physical data.
+
+New linecode.400 nphases=3 BaseFreq=60
+~ rmatrix = (0.088205 | 0.0312137 0.0901946 | 0.0306264 0.0316143 0.0889665 )
+~ xmatrix = (0.20744 | 0.0935314 0.200783 | 0.0760312 0.0855879 0.204877 )
+~ cmatrix = (2.90301 | -0.679335 3.15896 | -0.22313 -0.481416 2.8965 )
+
+! These are for the 13-node test feeder
+
+New linecode.601 nphases=3 BaseFreq=60
+!!!~ rmatrix = (0.0674673 | 0.0312137 0.0654777 | 0.0316143 0.0306264 0.0662392 )
+!!!~ xmatrix = (0.195204  | 0.0935314 0.201861 | 0.0855879 0.0760312 0.199298 )
+!!!~ cmatrix = (3.32591   | -0.743055 3.04217 | -0.525237 -0.238111 3.03116 )
+~ rmatrix = [0.065625    | 0.029545455  0.063920455  | 0.029924242  0.02907197  0.064659091]
+~ xmatrix = [0.192784091 | 0.095018939  0.19844697   | 0.080227273  0.072897727  0.195984848]
+~ cmatrix = [3.164838036 | -1.002632425  2.993981593 | -0.632736516  -0.372608713  2.832670203]
+New linecode.602 nphases=3 BaseFreq=60
+!!!~ rmatrix = (0.144361 | 0.0316143 0.143133 | 0.0312137 0.0306264 0.142372 )
+!!!~ xmatrix = (0.226028 | 0.0855879 0.230122 | 0.0935314 0.0760312 0.232686 )
+!!!~ cmatrix = (3.01091  | -0.443561 2.77543  | -0.624494 -0.209615 2.77847 )
+~ rmatrix = [0.142537879 | 0.029924242  0.14157197   | 0.029545455  0.02907197  0.140833333]
+~ xmatrix = [0.22375     | 0.080227273  0.226950758  | 0.095018939  0.072897727  0.229393939]
+~ cmatrix = [2.863013423 | -0.543414918  2.602031589 | -0.8492585  -0.330962141  2.725162768]
+New linecode.603 nphases=2 BaseFreq=60
+!!!~ rmatrix = (0.254472 | 0.0417943 0.253371 )
+!!!~ xmatrix = (0.259467 | 0.0912376 0.261431 )
+!!!~ cmatrix = (2.54676  | -0.28882 2.49502 )
+~ rmatrix = [0.251780303 | 0.039128788  0.250719697]
+~ xmatrix = [0.255132576 | 0.086950758  0.256988636]
+~ cmatrix = [2.366017603 | -0.452083836  2.343963508]
+New linecode.604 nphases=2 BaseFreq=60
+!!!~ rmatrix = (0.253371 | 0.0417943 0.254472 )
+!!!~ xmatrix = (0.261431 | 0.0912376 0.259467 )
+!!!~ cmatrix = (2.49502 | -0.28882 2.54676 )
+~ rmatrix = [0.250719697 | 0.039128788   0.251780303]
+~ xmatrix = [0.256988636  | 0.086950758  0.255132576]
+~ cmatrix = [2.343963508 | -0.452083836 2.366017603]
+New linecode.605 nphases=1 BaseFreq=60
+!!!~ rmatrix = (0.254428 )
+!!!~ xmatrix = (0.259546 )
+!!!~ cmatrix = (2.50575 )
+~ rmatrix = [0.251742424]
+~ xmatrix = [0.255208333]
+~ cmatrix = [2.270366128]
+New linecode.606 nphases=3 BaseFreq=60
+!!!~ rmatrix = (0.152193 | 0.0611362 0.15035 | 0.0546992 0.0611362 0.152193 )
+!!!~ xmatrix = (0.0825685 | 0.00548281 0.0745027 | -0.00339824 0.00548281 0.0825685 )
+!!!~ cmatrix = (72.7203 | 0 72.7203 | 0 0 72.7203 )
+~ rmatrix = [0.151174242 | 0.060454545  0.149450758 | 0.053958333  0.060454545  0.151174242]
+~ xmatrix = [0.084526515 | 0.006212121  0.076534091 | -0.002708333  0.006212121  0.084526515]
+~ cmatrix = [48.67459408 | 0  48.67459408 | 0  0  48.67459408]
+New linecode.607 nphases=1 BaseFreq=60
+!!!~ rmatrix = (0.255799 )
+!!!~ xmatrix = (0.092284 )
+!!!~ cmatrix = (50.7067 )
+~ rmatrix = [0.254261364]
+~ xmatrix = [0.097045455]
+~ cmatrix = [44.70661522]
+
+! These are for the 37-node test feeder, all underground
+
+New linecode.721 nphases=3 BaseFreq=60
+!!!~ rmatrix = (0.0554906 | 0.0127467 0.0501597 | 0.00640446 0.0127467 0.0554906 )
+!!!~ xmatrix = (0.0372331 | -0.00704588 0.0358645 | -0.00796424 -0.00704588 0.0372331 )
+!!!~ cmatrix = (124.851 | 0 124.851 | 0 0 124.851 )
+~ rmatrix = [0.055416667 | 0.012746212  0.050113636  | 0.006382576  0.012746212  0.055416667]
+~ xmatrix = [0.037367424 | -0.006969697  0.035984848 | -0.007897727  -0.006969697  0.037367424]
+~ cmatrix = [80.27484728 | 0  80.27484728            | 0  0  80.27484728]
+New linecode.722 nphases=3 BaseFreq=60
+!!!~ rmatrix = (0.0902251 | 0.0309584 0.0851482 | 0.0234946 0.0309584 0.0902251 )
+!!!~ xmatrix = (0.055991 | -0.00646552 0.0504025 | -0.0117669 -0.00646552 0.055991 )
+!!!~ cmatrix = (93.4896 | 0 93.4896 | 0 0 93.4896 )
+~ rmatrix = [0.089981061 | 0.030852273  0.085        | 0.023371212  0.030852273  0.089981061]
+~ xmatrix = [0.056306818 | -0.006174242  0.050719697 | -0.011496212  -0.006174242  0.056306818]
+~ cmatrix = [64.2184109 | 0  64.2184109              | 0  0  64.2184109]
+New linecode.723 nphases=3 BaseFreq=60
+!!!~ rmatrix = (0.247572 | 0.0947678 0.249104 | 0.0893782 0.0947678 0.247572 )
+!!!~ xmatrix = (0.126339 | 0.0390337 0.118816 | 0.0279344 0.0390337 0.126339 )
+!!!~ cmatrix = (58.108 | 0 58.108 | 0 0 58.108 )
+~ rmatrix = [0.245 | 0.092253788  0.246628788 | 0.086837121  0.092253788  0.245]
+~ xmatrix = [0.127140152 | 0.039981061  0.119810606 | 0.028806818  0.039981061  0.127140152]
+~ cmatrix = [37.5977112 | 0  37.5977112 | 0  0  37.5977112]
+New linecode.724 nphases=3 BaseFreq=60
+!!!~ rmatrix = (0.399883 | 0.101765 0.402011 | 0.0965199 0.101765 0.399883 )
+!!!~ xmatrix = (0.146325 | 0.0510963 0.139305 | 0.0395402 0.0510963 0.146325 )
+!!!~ cmatrix = (46.9685 | 0 46.9685 | 0 0 46.9685 )
+~ rmatrix = [0.396818182 | 0.098560606  0.399015152 | 0.093295455  0.098560606  0.396818182]
+~ xmatrix = [0.146931818 | 0.051856061  0.140113636 | 0.040208333  0.051856061  0.146931818]
+~ cmatrix = [30.26701029 | 0  30.26701029 | 0  0  30.26701029]
+
+! Lines
+New Line.L1     Phases=3 Bus1=701.1.2.3  Bus2=702.1.2.3  LineCode=722  Length=0.96
+New Line.L2     Phases=3 Bus1=702.1.2.3  Bus2=705.1.2.3  LineCode=724  Length=0.4
+New Line.L3     Phases=3 Bus1=702.1.2.3  Bus2=713.1.2.3  LineCode=723  Length=0.36
+New Line.L4     Phases=3 Bus1=702.1.2.3  Bus2=703.1.2.3  LineCode=722  Length=1.32
+New Line.L5     Phases=3 Bus1=703.1.2.3  Bus2=727.1.2.3  LineCode=724  Length=0.24
+New Line.L6     Phases=3 Bus1=703.1.2.3  Bus2=730.1.2.3  LineCode=723  Length=0.6
+New Line.L7     Phases=3 Bus1=704.1.2.3  Bus2=714.1.2.3  LineCode=724  Length=0.08
+New Line.L8     Phases=3 Bus1=704.1.2.3  Bus2=720.1.2.3  LineCode=723  Length=0.8
+New Line.L9     Phases=3 Bus1=705.1.2.3  Bus2=742.1.2.3  LineCode=724  Length=0.32
+New Line.L10    Phases=3 Bus1=705.1.2.3  Bus2=712.1.2.3  LineCode=724  Length=0.24
+New Line.L11    Phases=3 Bus1=706.1.2.3  Bus2=725.1.2.3  LineCode=724  Length=0.28
+New Line.L12    Phases=3 Bus1=707.1.2.3  Bus2=724.1.2.3  LineCode=724  Length=0.76
+New Line.L13    Phases=3 Bus1=707.1.2.3  Bus2=722.1.2.3  LineCode=724  Length=0.12
+New Line.L14    Phases=3 Bus1=708.1.2.3  Bus2=733.1.2.3  LineCode=723  Length=0.32
+New Line.L15    Phases=3 Bus1=708.1.2.3  Bus2=732.1.2.3  LineCode=724  Length=0.32
+New Line.L16    Phases=3 Bus1=709.1.2.3  Bus2=731.1.2.3  LineCode=723  Length=0.6
+New Line.L17    Phases=3 Bus1=709.1.2.3  Bus2=708.1.2.3  LineCode=723  Length=0.32
+New Line.L18    Phases=3 Bus1=710.1.2.3  Bus2=735.1.2.3  LineCode=724  Length=0.2
+New Line.L19    Phases=3 Bus1=710.1.2.3  Bus2=736.1.2.3  LineCode=724  Length=1.28
+New Line.L20    Phases=3 Bus1=711.1.2.3  Bus2=741.1.2.3  LineCode=723  Length=0.4
+New Line.L21    Phases=3 Bus1=711.1.2.3  Bus2=740.1.2.3  LineCode=724  Length=0.2
+New Line.L22    Phases=3 Bus1=713.1.2.3  Bus2=704.1.2.3  LineCode=723  Length=0.52
+New Line.L23    Phases=3 Bus1=714.1.2.3  Bus2=718.1.2.3  LineCode=724  Length=0.52
+New Line.L24    Phases=3 Bus1=720.1.2.3  Bus2=707.1.2.3  LineCode=724  Length=0.92
+New Line.L25    Phases=3 Bus1=720.1.2.3  Bus2=706.1.2.3  LineCode=723  Length=0.6
+New Line.L26    Phases=3 Bus1=727.1.2.3  Bus2=744.1.2.3  LineCode=723  Length=0.28
+New Line.L27    Phases=3 Bus1=730.1.2.3  Bus2=709.1.2.3  LineCode=723  Length=0.2
+New Line.L28    Phases=3 Bus1=733.1.2.3  Bus2=734.1.2.3  LineCode=723  Length=0.56
+New Line.L29    Phases=3 Bus1=734.1.2.3  Bus2=737.1.2.3  LineCode=723  Length=0.64
+New Line.L30    Phases=3 Bus1=734.1.2.3  Bus2=710.1.2.3  LineCode=724  Length=0.52
+New Line.L31    Phases=3 Bus1=737.1.2.3  Bus2=738.1.2.3  LineCode=723  Length=0.4
+New Line.L32    Phases=3 Bus1=738.1.2.3  Bus2=711.1.2.3  LineCode=723  Length=0.4
+New Line.L33    Phases=3 Bus1=744.1.2.3  Bus2=728.1.2.3  LineCode=724  Length=0.2
+New Line.L34    Phases=3 Bus1=744.1.2.3  Bus2=729.1.2.3  LineCode=724  Length=0.28
+New Line.L35    Phases=3 Bus1=799r.1.2.3 Bus2=701.1.2.3  LineCode=721  Length=1.85
+
+/*
+! Regulator - open delta with C leading, A lagging, base LDC setting is 1.5 + j3
+new transformer.reg1a phases=1 windings=2 bank=reg1 buses=(799.1.2 799r.1.2) conns='delta delta' kvs="4.8 4.8" kvas="2000 2000" XHL=1
+new regcontrol.creg1a transformer=reg1a winding=2 vreg=122 band=2 ptratio=40 ctprim=350 R=-0.201 X=3.348
+new transformer.reg1c like=reg1a bank=reg1 buses=(799.3.2 799r.3.2)
+new regcontrol.creg1c like=creg1a transformer=reg1c R=2.799 X=1.848
+New Line.Jumper Phases=1 Bus1=799.2      Bus2=799r.2     r0=1e-3 r1=1e-3 x0=0 x1=0 c0=0 c1=0
+*/
+
+New Transformer.reg1 phases=3 bank=reg1 XHL=0.01 kVAs=[2500 2500]
+~ Buses=[799.1.2.3 799r.1.2.3] kVs=[2.77128129 2.77128129] %LoadLoss=0.01
+new regcontrol.reg1a transformer=reg1 bus=799r.1 winding=2 vreg=138 band=2 ptratio=20 !ctprim=700 !R=1  X=3
+
+! spot loads
+New Load.S701a      Bus1=701.1.2 Phases=1 Conn=Delta Model=1 kV=  4.800 kW= 140.0 kVAR=  70.0
+New Load.S701b      Bus1=701.2.3 Phases=1 Conn=Delta Model=1 kV=  4.800 kW= 140.0 kVAR=  70.0
+New Load.S701c      Bus1=701.3.1 Phases=1 Conn=Delta Model=1 kV=  4.800 kW= 350.0 kVAR= 175.0
+New Load.S712c      Bus1=712.3.1 Phases=1 Conn=Delta Model=1 kV=  4.800 kW=  85.0 kVAR=  40.0
+New Load.S713c      Bus1=713.3.1 Phases=1 Conn=Delta Model=1 kV=  4.800 kW=  85.0 kVAR=  40.0
+New Load.S714a      Bus1=714.1.2 Phases=1 Conn=Delta Model=4 kV=  4.800 kW=  17.0 kVAR=   8.0
+New Load.S714b      Bus1=714.2.3 Phases=1 Conn=Delta Model=4 kV=  4.800 kW=  21.0 kVAR=  10.0
+New Load.S718a      Bus1=718.1.2 Phases=1 Conn=Delta Model=2 kV=  4.800 kW=  85.0 kVAR=  40.0
+New Load.S720c      Bus1=720.3.1 Phases=1 Conn=Delta Model=1 kV=  4.800 kW=  85.0 kVAR=  40.0
+New Load.S722b      Bus1=722.2.3 Phases=1 Conn=Delta Model=4 kV=  4.800 kW= 140.0 kVAR=  70.0
+New Load.S722c      Bus1=722.3.1 Phases=1 Conn=Delta Model=4 kV=  4.800 kW=  21.0 kVAR=  10.0
+New Load.S724b      Bus1=724.2.3 Phases=1 Conn=Delta Model=2 kV=  4.800 kW=  42.0 kVAR=  21.0
+New Load.S725b      Bus1=725.2.3 Phases=1 Conn=Delta Model=1 kV=  4.800 kW=  42.0 kVAR=  21.0
+New Load.S727c      Bus1=727.3.1 Phases=1 Conn=Delta Model=1 kV=  4.800 kW=  42.0 kVAR=  21.0
+New Load.S728       Bus1=728   Phases=3 Conn=Delta Model=1 kV=  4.800 kW= 126.0 kVAR=  63.0
+New Load.S729a      Bus1=729.1.2 Phases=1 Conn=Delta Model=4 kV=  4.800 kW=  42.0 kVAR=  21.0
+New Load.S730c      Bus1=730.3.1 Phases=1 Conn=Delta Model=2 kV=  4.800 kW=  85.0 kVAR=  40.0
+New Load.S731b      Bus1=731.2.3 Phases=1 Conn=Delta Model=2 kV=  4.800 kW=  85.0 kVAR=  40.0
+New Load.S732c      Bus1=732.3.1 Phases=1 Conn=Delta Model=1 kV=  4.800 kW=  42.0 kVAR=  21.0
+New Load.S733a      Bus1=733.1.2 Phases=1 Conn=Delta Model=4 kV=  4.800 kW=  85.0 kVAR=  40.0
+New Load.S734c      Bus1=734.3.1 Phases=1 Conn=Delta Model=1 kV=  4.800 kW=  42.0 kVAR=  21.0
+New Load.S735c      Bus1=735.3.1 Phases=1 Conn=Delta Model=1 kV=  4.800 kW=  85.0 kVAR=  40.0
+New Load.S736b      Bus1=736.2.3 Phases=1 Conn=Delta Model=2 kV=  4.800 kW=  42.0 kVAR=  21.0
+New Load.S737a      Bus1=737.1.2 Phases=1 Conn=Delta Model=4 kV=  4.800 kW= 140.0 kVAR=  70.0
+New Load.S738a      Bus1=738.1.2 Phases=1 Conn=Delta Model=1 kV=  4.800 kW= 126.0 kVAR=  62.0
+New Load.S740c      Bus1=740.3.1 Phases=1 Conn=Delta Model=1 kV=  4.800 kW=  85.0 kVAR=  40.0
+New Load.S741c      Bus1=741.3.1 Phases=1 Conn=Delta Model=4 kV=  4.800 kW=  42.0 kVAR=  21.0
+New Load.S742a      Bus1=742.1.2 Phases=1 Conn=Delta Model=2 kV=  4.800 kW=   8.0 kVAR=   4.0
+New Load.S742b      Bus1=742.2.3 Phases=1 Conn=Delta Model=2 kV=  4.800 kW=  85.0 kVAR=  40.0
+New Load.S744a      Bus1=744.1.2 Phases=1 Conn=Delta Model=1 kV=  4.800 kW=  42.0 kVAR=  21.0
+
+Set VoltageBases = "230,4.8,0.48"
+CalcVoltageBases
+
+! solve mode=direct
+set maxiterations=100
+solve
+
+! show voltages LL Nodes
+! show currents residual=y elements
+! show powers kva elements
+! show taps
