@@ -161,6 +161,13 @@
 					<input id="storageFileName" name="storageFileName" value='' readonly class="uploadFileName">	
 				</div>
 			</div>
+			<div class="shortInput">
+				<label class="tooltip">Include Battery?<span class="classic">Select whether or not to include batteries on the circuit.</span></label>
+				<select id="includeBattery" name="includeBattery">
+					<option value="True">Yes</option>
+					<option value="False">No</option>
+				</select>
+			</div>
 			<div class="wideInput">
 				<p class="inputSectionHeader">Cyber Attack Specifications</p>
 			</div>
@@ -171,7 +178,6 @@
 					<option value="None">None</option>
 					<option value="VOLTAGE_OSCILLATION">Voltage Oscillation</option>
 					<option value="VOLTAGE_IMBALANCE">Voltage Imbalance</option>
-					<option value="PEAK_SHAVING">Peak Shaving</option>
 				</select>
 			</div>
 			<div class="shortInput">
