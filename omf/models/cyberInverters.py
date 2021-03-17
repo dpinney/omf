@@ -261,8 +261,8 @@ def work(modelDir, inputDict):
 		hackEndVal = attackVars[attackAgentType]["hackEnd"] #TODO: see if we need to change from a hard-coded value
 		percentHackVal = attackVars[attackAgentType]["percentHack"] #TODO: see if we need to change from a hard-coded value
 		if attackAgentType == "None":
-			attackType = "VOLTAGE_OSCILLATION" # When using this line, user must set hack percent to zero in the UI.
-			#attackType = None # This is the correct code. 16MAR2021
+			#attackType = "VOLTAGE_OSCILLATION"
+			attackType = None
 
 		#change percentHackVal to user input
 		elif hackPercentValue != None:
