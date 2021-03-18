@@ -567,7 +567,7 @@ def new(modelDir):
 		"trainAgent": "False",
 		"attackVariable": "None",
 		"defenseVariable": "None",
-		"hackPercent": "60",
+		"hackPercent": "50",
 		"defenseAgentNames": "policy_ieee37_oscillation_sample,policy_ieee37_unbalance_sample",
 		"storageFileName": sfName,
 		"storageFile": storageFile
