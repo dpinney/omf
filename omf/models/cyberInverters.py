@@ -63,7 +63,8 @@ def work(modelDir, inputDict):
 
 	#create startStep to represent which step pyCigar should start on - default = 100
 	startStep = 100
-
+	#startStep = 3600 # DEBUG, for battery scenario
+	
 	#None check for simulation length
 	if inputDict.get("simLength", "None") == "None":
 		simLengthValue = None
@@ -186,7 +187,6 @@ def work(modelDir, inputDict):
 	attackVars["None"] = {"hackStart": defaultHackStart, "hackEnd": None, "percentHack": 0.0}
 	attackVars["VOLTAGE_OSCILLATION"] = {"hackStart": defaultHackStart, "hackEnd": None, "percentHack": 0.15}
 	attackVars["VOLTAGE_IMBALANCE"] = {"hackStart": defaultHackStart, "hackEnd": None, "percentHack": 0.15} #percentHack must be between 0.1 and 0.4 for pre-trained VOLTAGE_IMBALANCE defense
-	attackVars["PEAK_SHAVING"] = {"hackStart": defaultHackStart, "hackEnd": None, "percentHack": 0.15}
 
 	#check to make sure attackAgentType is in the attackVars dictionary, otherwise set it to None. This shouldn't ever be a problem since the user selects attackAgentType from a preset HTML dropdown.
 	if attackAgentType not in attackVars:
@@ -261,30 +261,39 @@ def work(modelDir, inputDict):
 		hackEndVal = attackVars[attackAgentType]["hackEnd"] #TODO: see if we need to change from a hard-coded value
 		percentHackVal = attackVars[attackAgentType]["percentHack"] #TODO: see if we need to change from a hard-coded value
 		if attackAgentType == "None":
-			attackType = "VOLTAGE_OSCILLATION" #TODO: See if changes can be made to pycigar to implement a "None" attack type - for now, we set it to a voltage oscillation attack with percent hack = 0.0
+			#attackType = "VOLTAGE_OSCILLATION"
+			attackType = None
+
 		#change percentHackVal to user input
 		elif hackPercentValue != None:
 			percentHackVal = hackPercentValue / 100.0
+
+		includeBatt = False
+		battPath = None
+		if inputDict.get("includeBattery","None") == "True":
+			includeBatt = True
+			battPath = modelDir + "/PyCIGAR_inputs/storage_inputs.txt"
 
 		# check to see if we are trying to train a defense agent
 		if trainAgentValue:	
 			#runType of 0 implies the training scenario - runs to train a defense agent and outputs a zip containing defense agent files
 			# runType = 0 
 			pycigar.main(
-				modelDir + "/PyCIGAR_inputs/misc_inputs.csv",
-				modelDir + "/PyCIGAR_inputs/circuit.dss",
-				modelDir + "/PyCIGAR_inputs/load_solar_data.csv",
-				modelDir + "/PyCIGAR_inputs/breakpoints.csv",
-				'TRAIN',
-				type_attack=attackType,
-				policy=defenseAgentPath,
-				output=modelDir + "/pycigarOutput/",
-				start=startStep,
-				duration=simLengthAdjusted,
-				hack_start=hackStartVal,
-				hack_end=hackEndVal,
-				percentage_hack=percentHackVal,
-				battery_path=modelDir + "/PyCIGAR_inputs/storage_inputs.txt"
+				misc_inputs_path = modelDir + "/PyCIGAR_inputs/misc_inputs.csv",
+				dss_path = modelDir + "/PyCIGAR_inputs/circuit.dss",
+				load_solar_path = modelDir + "/PyCIGAR_inputs/load_solar_data.csv",
+				breakpoints_path = modelDir + "/PyCIGAR_inputs/breakpoints.csv",
+				test = 'TRAIN',
+				type_attack = attackType,
+				policy = defenseAgentPath,
+				output = modelDir + "/pycigarOutput/",
+				start = startStep,
+				duration = simLengthAdjusted,
+				hack_start = hackStartVal,
+				hack_end = hackEndVal,
+				percentage_hack = percentHackVal,
+				battery_path = battPath,
+				battery_status = includeBatt
 			)
 			# Report out the agent paths.
 			# TODO: test, this might break with allInputData file locking.
@@ -303,20 +312,21 @@ def work(modelDir, inputDict):
 		# TODO how to factor attackAgentType into pycigar inputs
 		# if there is no training selected and no attack variable, run without a defense agent
 		pycigar.main(
-			modelDir + "/PyCIGAR_inputs/misc_inputs.csv",
-			modelDir + "/PyCIGAR_inputs/circuit.dss",
-			modelDir + "/PyCIGAR_inputs/load_solar_data.csv",
-			modelDir + "/PyCIGAR_inputs/breakpoints.csv",
-			test=runType,
-			type_attack=attackType,
-			policy=defenseAgentPath,
-			output=modelDir + "/pycigarOutput/",
-			start=startStep,
-			duration=simLengthAdjusted,
-			hack_start=hackStartVal,
-			hack_end=hackEndVal,
-			percentage_hack=percentHackVal,
-			battery_path=modelDir + "/PyCIGAR_inputs/storage_inputs.txt"
+			misc_inputs_path = modelDir + "/PyCIGAR_inputs/misc_inputs.csv",
+			dss_path = modelDir + "/PyCIGAR_inputs/circuit.dss",
+			load_solar_path = modelDir + "/PyCIGAR_inputs/load_solar_data.csv",
+			breakpoints_path = modelDir + "/PyCIGAR_inputs/breakpoints.csv",
+			test = runType,
+			type_attack = attackType,
+			policy = defenseAgentPath,
+			output = modelDir + "/pycigarOutput/",
+			start = startStep,
+			duration = simLengthAdjusted,
+			hack_start = hackStartVal,
+			hack_end = hackEndVal,
+			percentage_hack = percentHackVal,
+			battery_path = battPath,
+			battery_status = includeBatt
 		)
 
 		#print("!!!!!!!!!!! Got through pyCigar !!!!!!!!!!!!")
@@ -531,8 +541,13 @@ def stringToMag(s):
 def new(modelDir):
 	''' Create a new instance of this model. Returns true on success, false on failure. '''
 	#circuit_dir = "ieee3busdata_battery" # DEBUG
+	#cktName = "ieee3" # DEBUG
+	#cktFile = "ieee3.dss", # DEBUG
 	circuit_dir = "ieee37busdata"
-	f1Name = "load_solar_data_850.csv"
+	cktName = "ieee37_LBL"
+	cktFile = "ieee37_LBL.dss"
+
+	f1Name = "load_solar_data.csv"
 	with open(pJoin(omf.omfDir, "static", "testFiles", "pyCIGAR", circuit_dir, f1Name)) as f1:
 		load_PV = f1.read()
 	f2Name = "breakpoints.csv"
@@ -541,21 +556,16 @@ def new(modelDir):
 	f4Name = "misc_inputs.csv"
 	with open(pJoin(omf.omfDir, "static", "testFiles", "pyCIGAR", circuit_dir, f4Name)) as f4:
 		miscFile = f4.read()
-	#sfName = "battery_inputs_cent.txt" TODO?: add a drop-down to include the battery - yes or no)
-	#with open(pJoin(omf.omfDir, "static", "testFiles", "pyCIGAR", circuit_dir, sfName)) as sf:
-	#	storageFile = sf.read()
-	sfName = "" # DEBUG
-	storageFile = "" # DEBUG
-
+	sfName = "battery_inputs.txt"
+	with open(pJoin(omf.omfDir, "static", "testFiles", "pyCIGAR", circuit_dir, sfName)) as sf:
+		storageFile = sf.read()
 
 	defaultInputs = {
 		"simStartDate": "2019-07-01T00:00:00Z",
 		"simLength": "750",
 		"simLengthUnits": "seconds",
-		#"feederName1": "ieee3", # DEBUG
-		"feederName1": "ieee37",
-		#"circuitFileName1": "ieee3.dss", # DEBUG
-		"circuitFileName1": "ieee37.dss",
+		"feederName1": cktName,
+		"circuitFileName1": cktFile,
 		"fileName1":f1Name,
 		"loadPV": load_PV,
 		"fileName2":f2Name,
@@ -570,8 +580,8 @@ def new(modelDir):
 		"hackPercent": "50",
 		"defenseAgentNames": "policy_ieee37_oscillation_sample,policy_ieee37_unbalance_sample",
 		"storageFileName": sfName,
-		"storageFile": storageFile
-		
+		"storageFile": storageFile,
+		"includeBattery": False
 	}
 	creationCode = __neoMetaModel__.new(modelDir, defaultInputs)
 	try:
