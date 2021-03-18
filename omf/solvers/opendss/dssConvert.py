@@ -67,18 +67,6 @@ def dssToGridLab(inFilePath, outFilePath, busCoords=None):
 	# TODO: no way to specify output filename, so move and rename.
 	glm_writer.write(model)
 
-def _checkScientificNotation(input_string):
-	'''Checks if a single string input value is denoted in scientific notation.'''
-	if len(input_string)>2 and (input_string[-2].lower()=='e' or input_string[-2].lower()=='-'):
-		return True
-	else:
-		return False
-
-def _handleScientificNotation(input_string):
-	'''converts a single string value represented in scientific notation to a string representation of of that value in decimal format.'''
-	instring = "{:f}".format(float(input_string))
-	return str(instring)
-
 def dss_to_clean_dss(dss_path, clean_out_path, exec_code = ''):
 	'''Converts raw OpenDSS circuit definition files to the *.clean.dss syntax required by OMF.
 	Does not support reverse polish notation.'''
@@ -104,19 +92,8 @@ def dss_to_clean_dss(dss_path, clean_out_path, exec_code = ''):
 					# clean up matrix format.
 					if type(val) is str: # DEBUG
 						val = str(val) # DEBUG
-						# HACK: detect scientific notation on vsources and fix it. 
-						if c.lower()=='vsource' and _checkScientificNotation(str(val)): # this checks for scientific notation because there won't be >9 decimal places.
-							val = _handleScientificNotation(val)
 					elif (type(val) is tuple) or (type(val) is list and not '|' in str(val)): # captures tuples and lists, but not matrices
-						val_out = "["
-						for x in val:
-							if _checkScientificNotation(x):
-								val_out += _handleScientificNotation(x) # still outputting scinot?!?
-							else:
-								val_out += str(x)
-							val_out += ','
-						val_out = val_out[:-1] + "]"
-						#val = str(val).replace("(","[").replace(")","]").replace("'","").replace(' ','')
+						val = str(val).replace("(","[").replace(")","]").replace("'","").replace(' ','')
 					elif type(val) is list and len(val) != 0:
 						val = '[' + val[0].replace("   "," ").replace("  "," ").replace(" | ","|").replace(" ",",").replace("'","") + ']'
 					else:
