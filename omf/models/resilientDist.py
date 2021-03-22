@@ -5,6 +5,7 @@ import os.path
 from os.path import join as pJoin
 import numpy as np
 import networkx as nx
+import math
 
 import matplotlib
 if platform.system() == 'Darwin':
@@ -18,6 +19,7 @@ import omf
 from omf import feeder, weather, distNetViz
 from omf.models import __neoMetaModel__
 from omf.models.__neoMetaModel__ import *
+from omf.weather import get_ndfd_data
 
 # Model metadata:
 modelName, template = __neoMetaModel__.metadata(__file__)
@@ -26,6 +28,37 @@ hidden = False
 
 # Constant for converting map-feet to lat-lon for GFM:
 HACK_SCALING_CONSTANT = 5000.0
+
+def ndfdToHazardFieldFile(xStart, xEnd, yStart, yEnd, cellsize, outFilePath):
+	# Loop through get_ndfd_data calls to populate HazardField data
+	fieldArray = []
+	xNumSteps = math.ceil((xEnd - xStart) / cellsize)
+	yNumSteps = math.ceil((yEnd - yStart) / cellsize)
+	for y_step in range(0, yNumSteps):
+		curRow = []
+		for x_step in range(0, xNumSteps):
+			xOffset = x_step * cellsize
+			yOffset = y_step * cellsize
+			outputVal = -9999.0
+			try:
+				output = get_ndfd_data(str(xStart + xOffset), str(yStart + yOffset))
+				outputVal = output['dmwl']['data']['parameters']['wind-speed']['value'][0]
+			except:
+				pass
+			# add value to row's list
+			curRow.append(outputVal)	
+		# add row of values to field
+		fieldArray.append(curRow)
+
+	# write the header of the .asc file
+	with open(outFilePath, "w", newline='') as hazardFieldFile:
+		hazardFieldFile.write("ncols " + str(yNumSteps+1) + "\n")
+		hazardFieldFile.write("nrows " + str(xNumSteps+1) + "\n")
+		hazardFieldFile.write("xllcorner " + str(xStart) + "\n")
+		hazardFieldFile.write("yllcorner " + str(yStart) + "\n")
+		hazardFieldFile.write("cellsize " + str(cellsize) + "\n")
+		hazardFieldFile.write("NODATA_value -9999.0" + "\n")
+		hazardFieldFile.writelines(' '.join(str(line)) for line in fieldArray)
 
 class HazardField(object):
 	''' Object to modify a hazard field from an .asc file. '''
@@ -147,6 +180,18 @@ def _testHazards():
 	hazard.randomField()
 	# hazard.exportHazardObj("modWindFile.asc")
 	# hazard.drawHeatMap()
+
+	# Test the ndfdToHazardFieldFile function
+	xStart1 = 38.912832283302436
+	yStart1 = -77.02056029181865
+	cellSize1 = 0.01
+	numRows1 = 2
+	numCols1 = 2
+	xEnd1 = xStart1 + (cellSize1*numCols1)
+	yEnd1 = yStart1 + (cellSize1*numRows1)
+	outFilePath1 = omf.omfDir + "/static/testFiles/ndfdTest.asc"
+	# ndfdToHazardFieldFile(38.912832283302436, 38.932832283302436, -77.02056029181865, -77.00056029181865, 0.01, outFilePath1)
+	ndfdToHazardFieldFile(xStart1, xEnd1, yStart1, yEnd1, cellSize1, outFilePath1)
 
 def getNodePhases(obj, maxRealPhase):
 	''' Convert phase info in GridLAB-D obj (e.g. ABC) to GFM phase format (e.g. [True,True,True].'''
