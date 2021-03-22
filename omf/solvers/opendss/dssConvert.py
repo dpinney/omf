@@ -79,7 +79,7 @@ def dss_to_clean_dss(dss_path, clean_out_path, exec_code = ''):
 	# todo: get actual circuit props.
 	# get all circuit elements.
 	for c in all_classes:
-		d = dss.utils.class_to_dataframe(c, dss=None, transform_string=None, clean_data=None).T.to_dict() #this method isn't in the online documentation >:/
+		d = dss.utils.class_to_dataframe(c, dss=None, transform_string=None, clean_data=None).T.to_dict()
 		if d != {}:
 			out_dss += f'\n! {c}s\n'
 			for name in d:
@@ -87,22 +87,18 @@ def dss_to_clean_dss(dss_path, clean_out_path, exec_code = ''):
 					out_dss += f'edit object={name} '.lower()
 				else:
 					out_dss += f'new object={name} '.lower()
-				# print(d[name])
-				# if 'default' in name.lower():
-				# 	print(d[name])
 				for key in d[name]:
-					if 'epsr' in key.lower():
-						print(key, d[name])
 					val = d[name][key]
 					# clean up matrix format.
-					if type(val) is str: # DEBUG
-						val = str(val) # DEBUG
-					elif type(val) is tuple: #or (type(val) is list and not '|' in str(val)): # captures tuples and lists, but not matrices
-						# print(val)
+					if type(val) is str:
+						val = str(val)
+					elif type(val) is tuple:
 						val = str(val).replace("(","[").replace(")","]").replace("'","").replace(' ','')
 					elif type(val) is list and len(val) == 1:
+						# Handle data that comes in like ['1 2 3'].
 						val = '[' + val[0].replace("   "," ").replace("  "," ").replace(" | ","|").replace(" ",",").replace("'","") + ']'
 					elif type(val) is list and len(val) != 1:
+						# Handle data that comes in valid list form.
 						val = str(val).replace(' ','').replace("'","")
 					else:
 						val = str(val)
@@ -110,8 +106,11 @@ def dss_to_clean_dss(dss_path, clean_out_path, exec_code = ''):
 					if key.lower() == 'wdgcurrents':
 						val = '[' + val.replace('(','').replace(')','').replace(' ','') + ']'
 					# ignore deprecated opendss props and bad values
-					bad_props = ['ratings', 'seasons', 'linetype', 'rneut', 'xneut', '%fuel', '%reserve', 'fuelkwh', 'refuel', '%cutin', '%cutout', 'varfollowinverter', 'kvarmax', 'kvarmaxabs', 'wattpriority', 'pfpriority', '%pminnovars', '%pminkvarmax', '%kwrated', '%cutin', '%cutout', 'varfollowinverter', 'kvarmax', 'kvarmaxabs', 'wattpriority', 'pfpriority', '%pminnovars', '%pminkvarmax', '%kwrated', '%cutin', '%cutout', 'varfollowinverter', 'kvarmax', 'kvarmaxabs', 'wattpriority', 'pfpriority', '%pminnovars', '%pminkvarmax', '%kwrated', '%pmpp', '%pmpp', '%pmpp', '%pmpp', '%pmpp']
+					bad_props = ['ratings', 'seasons', 'linetype', 'rneut', 'xneut', '%fuel', '%reserve', 'fuelkwh', 'refuel', '%cutin', '%cutout', 'varfollowinverter', 'kvarmax', 'kvarmaxabs', 'wattpriority', 'pfpriority', '%pminnovars', '%pminkvarmax', '%kwrated', '%cutin', '%cutout', 'varfollowinverter', 'kvarmax', 'kvarmaxabs', 'wattpriority', 'pfpriority', '%pminnovars', '%pminkvarmax', '%kwrated', '%cutin', '%cutout', 'varfollowinverter', 'kvarmax', 'kvarmaxabs', 'wattpriority', 'pfpriority', '%pminnovars', '%pminkvarmax', '%kwrated', '%pmpp', '%pmpp', '%pmpp', '%pmpp', '%pmpp','cond','wire','cncable','tscable','cncables','tscables']
 					bad_vals = ['', '----']
+					# hack for malformed gmrstrand, epsr, diains
+					if key.lower() in ['gmrstrand', 'epsr', 'diains'] and val in ['ft','kft','in']:
+						bad_props.append(key.lower())
 					if val not in bad_vals and key.lower() not in bad_props:
 						out_dss += f'{key}={val} '.lower()
 				out_dss += '\n'
@@ -372,121 +371,124 @@ def evilDssTreeToGldTree(dssTree):
 	bus_with_coords = []
 	# Handle all the components.
 	for ob in dssTree:
-		if ob['!CMD'] == 'setbusxy':
-			gldTree[str(g_id)] = {
-				'object': 'bus',
-				'name': ob['bus'],
-				'latitude': ob['y'],
-				'longitude': ob['x']
-			}
-			bus_with_coords.append(ob['bus'])
-		elif ob['!CMD'] == 'new':
-			obtype, name = ob['object'].split('.')
-			if 'bus1' in ob and 'bus2' in ob:
-				# line-like object. includes reactors.
-				fro, froCode = ob['bus1'].split('.', maxsplit=1)
-				to, toCode = ob['bus2'].split('.', maxsplit=1)
+		try:
+			if ob['!CMD'] == 'setbusxy':
+				gldTree[str(g_id)] = {
+					'object': 'bus',
+					'name': ob['bus'],
+					'latitude': ob['y'],
+					'longitude': ob['x']
+				}
+				bus_with_coords.append(ob['bus'])
+			elif ob['!CMD'] == 'new':
+				obtype, name = ob['object'].split('.')
+				if 'bus1' in ob and 'bus2' in ob:
+					# line-like object. includes reactors.
+					fro, froCode = ob['bus1'].split('.', maxsplit=1)
+					to, toCode = ob['bus2'].split('.', maxsplit=1)
+					gldTree[str(g_id)] = {
+						'object': obtype,
+						'name': name,
+						'from': fro,
+						'to': to,
+						'!FROCODE': '.' + froCode,
+						'!TOCODE': '.' + toCode
+					}
+					bus_names.extend([fro, to])
+					stuff = gldTree[str(g_id)]
+					_extend_with_exc(ob, stuff, ['object','bus1','bus2','!CMD'])
+				elif 'buses' in ob:
+					#transformer-like object.
+					bb = ob['buses']
+					bb = bb.replace(']','').replace('[','').split(',')
+					b1 = bb[0]
+					fro, froCode = b1.split('.', maxsplit=1)
+					ob['!FROCODE'] = '.' + froCode
+					b2 = bb[1]
+					to, toCode = b2.split('.', maxsplit=1)
+					ob['!TOCODE'] = '.' + toCode
+					gldobj = {
+						'object': obtype,
+						'name': name,
+						'from': fro,
+						'to': to
+					}
+					bus_names.extend([fro, to])
+					if len(bb)==3:
+						b3 = bb[2]
+						to2, to2Code = b3.split('.', maxsplit=1)
+						ob['!TO2CODE'] = '.' + to2Code
+						gldobj['to2'] = to2
+						bus_names.append(to2)
+					gldTree[str(g_id)] = gldobj
+					_extend_with_exc(ob, gldTree[str(g_id)], ['object','buses','!CMD'])
+				elif 'bus' in ob:
+					#load-like object.
+					bus_root, connCode = ob['bus'].split('.', maxsplit=1)
+					gldTree[str(g_id)] = {
+						'object': obtype,
+						'name': name,
+						'parent': bus_root,
+						'!CONNCODE': '.' + connCode
+					}
+					bus_names.append(bus_root)
+					_extend_with_exc(ob, gldTree[str(g_id)], ['object','bus','!CMD'])
+				elif 'bus1' in ob and 'bus2' not in ob:
+					#load-like object, alternate syntax
+					try:
+						bus_root, connCode = ob['bus1'].split('.', maxsplit=1)
+						ob['!CONNCODE'] = '.' + connCode
+					except:
+						bus_root = ob['bus1'] # this shoudln't happen if the .clean syntax guide is followed.
+					gldTree[str(g_id)] = {
+						'object': obtype,
+						'name': name,
+						'parent': bus_root,
+					}
+					bus_names.append(bus_root)
+					_extend_with_exc(ob, gldTree[str(g_id)], ['object','bus1','!CMD'])
+				elif 'element' in ob:
+					#control object (connected to another object instead of a bus)
+					#cobtype, cobname, connCode = ob['element'].split('.', maxsplit=2)
+					cobtype, cobname = ob['element'].split('.', maxsplit=1)
+					gldTree[str(g_id)] = {
+						'object': obtype,
+						'name': name,
+						'parent': cobtype + '.' + cobname,
+					}
+					_extend_with_exc(ob, gldTree[str(g_id)], ['object','element','!CMD'])
+				else:
+					#config-like object
+					gldTree[str(g_id)] = {
+						'object': obtype,
+						'name': name
+					}
+					_extend_with_exc(ob, gldTree[str(g_id)], ['object','!CMD'])
+			elif ob.get('object','').split('.')[0]=='vsource':
+				obtype, name = ob['object'].split('.')
+				conn, connCode = ob.get('bus1').split('.', maxsplit=1)
 				gldTree[str(g_id)] = {
 					'object': obtype,
 					'name': name,
-					'from': fro,
-					'to': to,
-					'!FROCODE': '.' + froCode,
-					'!TOCODE': '.' + toCode
-				}
-				bus_names.extend([fro, to])
-				stuff = gldTree[str(g_id)]
-				_extend_with_exc(ob, stuff, ['object','bus1','bus2','!CMD'])
-			elif 'buses' in ob:
-				#transformer-like object.
-				bb = ob['buses']
-				bb = bb.replace(']','').replace('[','').split(',')
-				b1 = bb[0]
-				fro, froCode = b1.split('.', maxsplit=1)
-				ob['!FROCODE'] = '.' + froCode
-				b2 = bb[1]
-				to, toCode = b2.split('.', maxsplit=1)
-				ob['!TOCODE'] = '.' + toCode
-				gldobj = {
-					'object': obtype,
-					'name': name,
-					'from': fro,
-					'to': to
-				}
-				bus_names.extend([fro, to])
-				if len(bb)==3:
-					b3 = bb[2]
-					to2, to2Code = b3.split('.', maxsplit=1)
-					ob['!TO2CODE'] = '.' + to2Code
-					gldobj['to2'] = to2
-					bus_names.append(to2)
-				gldTree[str(g_id)] = gldobj
-				_extend_with_exc(ob, gldTree[str(g_id)], ['object','buses','!CMD'])
-			elif 'bus' in ob:
-				#load-like object.
-				bus_root, connCode = ob['bus'].split('.', maxsplit=1)
-				gldTree[str(g_id)] = {
-					'object': obtype,
-					'name': name,
-					'parent': bus_root,
+					'parent': conn,
 					'!CONNCODE': '.' + connCode
 				}
-				bus_names.append(bus_root)
-				_extend_with_exc(ob, gldTree[str(g_id)], ['object','bus','!CMD'])
-			elif 'bus1' in ob and 'bus2' not in ob:
-				#load-like object, alternate syntax
-				try:
-					bus_root, connCode = ob['bus1'].split('.', maxsplit=1)
-					ob['!CONNCODE'] = '.' + connCode
-				except:
-					bus_root = ob['bus1'] # this shoudln't happen if the .clean syntax guide is followed.
+				_extend_with_exc(ob, gldTree[str(g_id)], ['object','bus1'])
+			elif ob['!CMD']=='edit':
+				#TODO: handle edited objects? maybe just extend the 'new' block (excluding vsource) because the functionality is basically the same.
+				warnings.warn(f"Ignored 'edit' command: {ob}")
+			elif ob['!CMD'] not in ['new', 'setbusxy', 'edit']: # what about 'set', 
+				#command-like objects.
 				gldTree[str(g_id)] = {
-					'object': obtype,
-					'name': name,
-					'parent': bus_root,
+					'object': '!CMD',
+					'name': ob['!CMD']
 				}
-				bus_names.append(bus_root)
-				_extend_with_exc(ob, gldTree[str(g_id)], ['object','bus1','!CMD'])
-			elif 'element' in ob:
-				#control object (connected to another object instead of a bus)
-				#cobtype, cobname, connCode = ob['element'].split('.', maxsplit=2)
-				cobtype, cobname = ob['element'].split('.', maxsplit=1)
-				gldTree[str(g_id)] = {
-					'object': obtype,
-					'name': name,
-					'parent': cobtype + '.' + cobname,
-				}
-				_extend_with_exc(ob, gldTree[str(g_id)], ['object','element','!CMD'])
+				_extend_with_exc(ob, gldTree[str(g_id)], ['!CMD'])
 			else:
-				#config-like object
-				gldTree[str(g_id)] = {
-					'object': obtype,
-					'name': name
-				}
-				_extend_with_exc(ob, gldTree[str(g_id)], ['object','!CMD'])
-		elif ob.get('object','').split('.')[0]=='vsource':
-			obtype, name = ob['object'].split('.')
-			conn, connCode = ob.get('bus1').split('.', maxsplit=1)
-			gldTree[str(g_id)] = {
-				'object': obtype,
-				'name': name,
-				'parent': conn,
-				'!CONNCODE': '.' + connCode
-			}
-			_extend_with_exc(ob, gldTree[str(g_id)], ['object','bus1'])
-		elif ob['!CMD']=='edit':
-			#TODO: handle edited objects? maybe just extend the 'new' block (excluding vsource) because the functionality is basically the same.
-			warnings.warn(f"Ignored 'edit' command: {ob}")
-		elif ob['!CMD'] not in ['new', 'setbusxy', 'edit']: # what about 'set', 
-			#command-like objects.
-			gldTree[str(g_id)] = {
-				'object': '!CMD',
-				'name': ob['!CMD']
-			}
-			_extend_with_exc(ob, gldTree[str(g_id)], ['!CMD'])
-		else:
-			warnings.warn(f"Ignored {ob}")
-		g_id += 1
+				warnings.warn(f"Ignored {ob}")
+			g_id += 1
+		except:
+			raise Exception(f"\n\nError encountered on parsing object {ob}\n")
 	# Warn on buses with no coords.
 	#no_coord_buses = set(bus_names) - set(bus_with_coords)
 	#if len(no_coord_buses) != 0:
