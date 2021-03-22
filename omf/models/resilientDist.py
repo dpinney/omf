@@ -5,7 +5,6 @@ import os.path
 from os.path import join as pJoin
 import numpy as np
 import networkx as nx
-import math
 
 import matplotlib
 if platform.system() == 'Darwin':
@@ -32,8 +31,8 @@ HACK_SCALING_CONSTANT = 5000.0
 def ndfdToHazardFieldFile(xStart, xEnd, yStart, yEnd, cellsize, outFilePath):
 	# Loop through get_ndfd_data calls to populate HazardField data
 	fieldArray = []
-	xNumSteps = math.ceil((xEnd - xStart) / cellsize)
-	yNumSteps = math.ceil((yEnd - yStart) / cellsize)
+	xNumSteps = round((xEnd - xStart) / cellsize)
+	yNumSteps = round((yEnd - yStart) / cellsize)
 	for y_step in range(0, yNumSteps):
 		curRow = []
 		for x_step in range(0, xNumSteps):
@@ -41,24 +40,24 @@ def ndfdToHazardFieldFile(xStart, xEnd, yStart, yEnd, cellsize, outFilePath):
 			yOffset = y_step * cellsize
 			outputVal = -9999.0
 			try:
-				output = get_ndfd_data(str(xStart + xOffset), str(yStart + yOffset))
-				outputVal = output['dmwl']['data']['parameters']['wind-speed']['value'][0]
+				output = get_ndfd_data(str(xStart + xOffset), str(yStart + yOffset), ['wspd'])
+				outputVal = output['dwml']['data']['parameters']['wind-speed']['value'][0]
 			except:
 				pass
 			# add value to row's list
-			curRow.append(outputVal)	
+			curRow.append(outputVal)
 		# add row of values to field
 		fieldArray.append(curRow)
 
 	# write the header of the .asc file
 	with open(outFilePath, "w", newline='') as hazardFieldFile:
-		hazardFieldFile.write("ncols " + str(yNumSteps+1) + "\n")
-		hazardFieldFile.write("nrows " + str(xNumSteps+1) + "\n")
+		hazardFieldFile.write("ncols " + str(xNumSteps) + "\n")
+		hazardFieldFile.write("nrows " + str(yNumSteps) + "\n")
 		hazardFieldFile.write("xllcorner " + str(xStart) + "\n")
 		hazardFieldFile.write("yllcorner " + str(yStart) + "\n")
 		hazardFieldFile.write("cellsize " + str(cellsize) + "\n")
 		hazardFieldFile.write("NODATA_value -9999.0" + "\n")
-		hazardFieldFile.writelines(' '.join(str(line)) for line in fieldArray)
+		hazardFieldFile.writelines(' '.join(str(val) for val in line) +'\n' for line in fieldArray)
 
 class HazardField(object):
 	''' Object to modify a hazard field from an .asc file. '''
@@ -186,7 +185,7 @@ def _testHazards():
 	yStart1 = -77.02056029181865
 	cellSize1 = 0.01
 	numRows1 = 2
-	numCols1 = 2
+	numCols1 = 4
 	xEnd1 = xStart1 + (cellSize1*numCols1)
 	yEnd1 = yStart1 + (cellSize1*numRows1)
 	outFilePath1 = omf.omfDir + "/static/testFiles/ndfdTest.asc"
