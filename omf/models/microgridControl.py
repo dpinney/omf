@@ -551,7 +551,6 @@ def graphMicrogrid(pathToOmd, pathToMicro, pathToCsv, workDir, maxTime, stepSize
 			loadServed = data['Load served']
 			storageSOC = data['Storage SOC (%)']
 			cached = 'yes'
-
 	else:
 		# Install if necessary.
 		DIR = f'{__neoMetaModel__._omfDir}/solvers/PowerModelsONM/'
@@ -574,7 +573,6 @@ def graphMicrogrid(pathToOmd, pathToMicro, pathToCsv, workDir, maxTime, stepSize
 		# Run command
 		command = f'{DIR}/build/bin/PowerModelsONM -n "{workDir}/circuit.dss" -o "{workDir}/onm_output.json"'
 		os.system(command)
-
 		with open(pJoin(__neoMetaModel__._omfDir,'static','testFiles','test_output_3.json')) as inFile:
 		# with open(f'{workDir}/onm_output.json') as inFile:
 			data = json.load(inFile)
@@ -790,8 +788,8 @@ def work(modelDir, inputDict):
 
 	tree = omd['tree']
 	# Output a .dss file, which will be needed for ONM.
-	# niceDss = dssConvert.evilGldTreeToDssTree(tree)
-	# dssConvert.treeToDss(niceDss, f'{modelDir}/circuit.dss')
+	niceDss = dssConvert.evilGldTreeToDssTree(tree)
+	dssConvert.treeToDss(niceDss, f'{modelDir}/circuit.dss')
 
 	# Run the main functions of the program
 	with open(pJoin(modelDir, inputDict['microFileName']), 'w') as f:

@@ -87,15 +87,23 @@ def dss_to_clean_dss(dss_path, clean_out_path, exec_code = ''):
 					out_dss += f'edit object={name} '.lower()
 				else:
 					out_dss += f'new object={name} '.lower()
+				# print(d[name])
+				# if 'default' in name.lower():
+				# 	print(d[name])
 				for key in d[name]:
+					if 'epsr' in key.lower():
+						print(key, d[name])
 					val = d[name][key]
 					# clean up matrix format.
 					if type(val) is str: # DEBUG
 						val = str(val) # DEBUG
-					elif (type(val) is tuple) or (type(val) is list and not '|' in str(val)): # captures tuples and lists, but not matrices
+					elif type(val) is tuple: #or (type(val) is list and not '|' in str(val)): # captures tuples and lists, but not matrices
+						# print(val)
 						val = str(val).replace("(","[").replace(")","]").replace("'","").replace(' ','')
-					elif type(val) is list and len(val) != 0:
+					elif type(val) is list and len(val) == 1:
 						val = '[' + val[0].replace("   "," ").replace("  "," ").replace(" | ","|").replace(" ",",").replace("'","") + ']'
+					elif type(val) is list and len(val) != 1:
+						val = str(val).replace(' ','').replace("'","")
 					else:
 						val = str(val)
 					# hack for malformed wdgcurrents
