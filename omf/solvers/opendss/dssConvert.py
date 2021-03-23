@@ -22,6 +22,8 @@ import math
 from pprint import pprint as pp
 from omf.solvers import gridlabd
 from time import time
+import re
+import shutil
 try:
 	import opendssdirect as dss
 except:
@@ -66,6 +68,56 @@ def dssToGridLab(inFilePath, outFilePath, busCoords=None):
 	glm_writer = gWriter(output_path='.')
 	# TODO: no way to specify output filename, so move and rename.
 	glm_writer.write(model)
+
+def dss_to_clean_via_save(dss_path, clean_out_path):
+	'''Converts raw OpenDSS circuit definition files to the *.clean.dss syntax required by OMF.
+	This version uses the opendss save functionality to better preserve dss syntax.'''
+	# Create the export folder
+	runDssCommand('clear')
+	dss_response_to_redir = runDssCommand(f'redirect "{dss_path}"')
+	dss_response_to_save = runDssCommand(f'save circuit dir="{clean_out_path}"')
+	# Get the master file.
+	master = open(f'{clean_out_path}/Master.DSS').readlines()
+	master = [x for x in master if x != '\n']
+	# Get the object files.
+	ob_files = sorted(os.listdir(clean_out_path))
+	ob_files.remove('Master.DSS')
+	# Clean each of the object files.
+	clean_copies = {}
+	for fname in ob_files:
+		with open(f'{clean_out_path}/{fname}', 'r') as ob_file:
+			ob_data = ob_file.read().lower() # lowercase everything
+			ob_data = ob_data.replace('"', '') # remove quote characters
+			ob_data = re.sub(r' +', r' ', ob_data) # remove consecutive spaces
+			ob_data = re.sub(r' *, *', r',', ob_data) # remove spaces around commas
+			ob_data = re.sub(r', *(\]|\))', r'\1', ob_data) # remove empty final list items
+			ob_data = re.sub(r' +\| +', '|', ob_data) # remove spaces around bar characters
+			ob_data = re.sub(r'(\[|\() *', r'\1', ob_data) # remove spaces after list start
+			ob_data = re.sub(r' *(\]|\))', r'\1', ob_data) # remove spaces before list end
+			ob_data = re.sub(r'(new|edit) ', r'\1 object=', ob_data) # add object= key
+			ob_data = re.sub(r'(\d) +(\d|\-)', r'\1,\2', ob_data) # replace space-separated lists with comma-separated
+			ob_data = re.sub(r'(\d) +(\d|\-)', r'\1,\2', ob_data) # HACK: second space-sep replacement to make sure it works
+			# print(ob_data,'\n')
+			clean_copies[fname.lower()] = ob_data
+	# Special handline for buscoords
+	if 'buscoords.dss' in clean_copies:
+		bus_data = clean_copies['buscoords.dss']
+		nice_buses = re.sub(r'([\w_\-\.]+),([\w_\-\.]+),([\w_\-\.]+)', r'setbusxy bus=\1 x=\2 y=\3', bus_data)
+		clean_copies['buscoords.dss'] = nice_buses
+	# Construct the clean single file output.
+	clean_out = ''
+	for line in master:
+		ob_file_name = re.findall(r'\w+\.[dD][sS][sS]', line)
+		if ob_file_name == []:
+			clean_out += line
+		else:
+			clean_out += f'\n!{line}'
+			clean_out += clean_copies[ob_file_name[0].lower()]
+	clean_out = clean_out.lower()
+	# Remove intermediate files and write a single clean file.
+	shutil.rmtree(clean_out_path, ignore_errors=True)
+	with open(clean_out_path, 'w') as out_file:
+		out_file.write(clean_out)
 
 def dss_to_clean_dss(dss_path, clean_out_path, exec_code = ''):
 	'''Converts raw OpenDSS circuit definition files to the *.clean.dss syntax required by OMF.
