@@ -75,17 +75,17 @@ def dss_to_clean_via_save(dss_path, clean_out_path):
 	# Create the export folder
 	runDssCommand('clear')
 	dss_response_to_redir = runDssCommand(f'redirect "{dss_path}"')
-	dss_response_to_save = runDssCommand(f'save circuit dir="{clean_out_path}"')
+	dss_response_to_save = runDssCommand(f'save circuit dir="{clean_out_path}_tempfolder"')
 	# Get the master file.
-	master = open(f'{clean_out_path}/Master.DSS').readlines()
+	master = open(f'{clean_out_path}_tempfolder/Master.DSS').readlines()
 	master = [x for x in master if x != '\n']
 	# Get the object files.
-	ob_files = sorted(os.listdir(clean_out_path))
+	ob_files = sorted(os.listdir(f'{clean_out_path}_tempfolder'))
 	ob_files.remove('Master.DSS')
 	# Clean each of the object files.
 	clean_copies = {}
 	for fname in ob_files:
-		with open(f'{clean_out_path}/{fname}', 'r') as ob_file:
+		with open(f'{clean_out_path}_tempfolder/{fname}', 'r') as ob_file:
 			ob_data = ob_file.read().lower() # lowercase everything
 			ob_data = ob_data.replace('"', '') # remove quote characters
 			ob_data = re.sub(r' +', r' ', ob_data) # remove consecutive spaces
@@ -115,7 +115,7 @@ def dss_to_clean_via_save(dss_path, clean_out_path):
 			clean_out += clean_copies[ob_file_name[0].lower()]
 	clean_out = clean_out.lower()
 	# Remove intermediate files and write a single clean file.
-	shutil.rmtree(clean_out_path, ignore_errors=True)
+	shutil.rmtree(f'{clean_out_path}_tempfolder', ignore_errors=True)
 	with open(clean_out_path, 'w') as out_file:
 		out_file.write(clean_out)
 
