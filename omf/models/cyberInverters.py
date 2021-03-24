@@ -581,7 +581,7 @@ def new(modelDir):
 		"defenseAgentNames": "policy_ieee37_oscillation_sample,policy_ieee37_unbalance_sample",
 		"storageFileName": sfName,
 		"storageFile": storageFile,
-		"includeBattery": False
+		"includeBattery": "False"
 	}
 	creationCode = __neoMetaModel__.new(modelDir, defaultInputs)
 	try:
