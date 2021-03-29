@@ -538,8 +538,9 @@ def graphMicrogrid(pathToOmd, pathToMicro, pathToCsv, workDir, maxTime, stepSize
 		workDir = tempfile.mkdtemp()
 		print('@@@@@@', workDir)
 
+	shutil.copyfile(f'{__neoMetaModel__._omfDir}/static/testFiles/test_output_3.json',f'{workDir}/test_output_3.json')
+
 	# command = 'cmd /c ' + '"julia --project=' + '"C:/Users/granb/PowerModelsONM.jl-master/" ' + 'C:/Users/granb/PowerModelsONM.jl-master/src/cli/entrypoint.jl' + ' -n ' + '"' + str(workDir) + '/circuit.dss' + '"' + ' -o ' + '"C:/Users/granb/PowerModelsONM.jl-master/output.json"'
-	
 	if os.path.exists(f'{workDir}/test_output_3.json') and sameFeeder:
 		with open(f'{workDir}/test_output_3.json') as inFile:
 			data = json.load(inFile)
