@@ -284,18 +284,21 @@ def work(modelDir, inputDict):
 		if resultsSubset['Generator']['size_kw'] == 0:
 			outData['sizeDieselRounded' + indexString] = 0
 		outData['fuelUsedDiesel' + indexString] = resultsSubset['Generator']['fuel_used_gal']
+		outData['fuelUsedDieselRounded' + indexString] = round(resultsSubset['Generator']['fuel_used_gal'],0)
 		outData['sizeDieselExisting' + indexString] = results['inputs']['Scenario']['Site']['Generator']['existing_kw']
 		outData['powerDiesel' + indexString] = resultsSubset['Generator']['year_one_power_production_series_kw']
 		outData['powerDieselToBattery' + indexString] = resultsSubset['Generator']['year_one_to_battery_series_kw']
 		outData['powerDieselToLoad' + indexString] = resultsSubset['Generator']['year_one_to_load_series_kw']
 
-		outData['resilience' + indexString] = resultsResilience['resilience_by_timestep']
-		outData['minOutage' + indexString] = resultsResilience['resilience_hours_min']
-		outData['maxOutage' + indexString] = resultsResilience['resilience_hours_max']
-		outData['avgOutage' + indexString] = resultsResilience['resilience_hours_avg']
-		outData['survivalProbX' + indexString] = resultsResilience['outage_durations']
-		outData['survivalProbY' + indexString] = resultsResilience['probs_of_surviving']
-		outData['avoidedOutageCosts' + indexString] = resultsResilience['avoided_outage_costs_us_dollars']
+		# output resilience stats if resilienceRun was successful
+		if 'resilience_by_timestep' in resultsResilience:
+			outData['resilience' + indexString] = resultsResilience['resilience_by_timestep']
+			outData['minOutage' + indexString] = resultsResilience['resilience_hours_min']
+			outData['maxOutage' + indexString] = resultsResilience['resilience_hours_max']
+			outData['avgOutage' + indexString] = resultsResilience['resilience_hours_avg']
+			outData['survivalProbX' + indexString] = resultsResilience['outage_durations']
+			outData['survivalProbY' + indexString] = resultsResilience['probs_of_surviving']
+			outData['avoidedOutageCosts' + indexString] = resultsResilience['avoided_outage_costs_us_dollars']
 
 		outData['runID' + indexString] = runID
 		outData['apiKey' + indexString] = 'WhEzm6QQQrks1hcsdN0Vrd56ZJmUyXJxTJFg6pn9'
@@ -552,29 +555,32 @@ def work(modelDir, inputDict):
 			outData["batteryChargeData" + indexString] = json.dumps(plotData, cls=plotly.utils.PlotlyJSONEncoder)
 			outData["batteryChargeLayout" + indexString] = json.dumps(plotlyLayout, cls=plotly.utils.PlotlyJSONEncoder)
 		
-		plotData = []
-		resilience = go.Scatter(
-			x=x,
-			y=outData['resilience' + indexString],
-			line=dict( color=('red') ),
-		)
-		plotData.append(resilience)
-		plotlyLayout['yaxis'].update(title='Longest Outage survived (Hours)')
-		plotlyLayout['xaxis'].update(title='Start Hour')
-		outData["resilienceData" + indexString] = json.dumps(plotData, cls=plotly.utils.PlotlyJSONEncoder)
-		outData["resilienceLayout" + indexString] = json.dumps(plotlyLayout, cls=plotly.utils.PlotlyJSONEncoder)
-		
-		plotData = []
-		survivalProb = go.Scatter(
-			x=outData['survivalProbX' + indexString],
-			y=outData['survivalProbY' + indexString],
-			line=dict( color=('red') ),
-			name="Load met by Battery")
-		plotData.append(survivalProb)
-		plotlyLayout['yaxis'].update(title='Probability of meeting critical Load')
-		plotlyLayout['xaxis'].update(title='Outage Length (Hours)')
-		outData["resilienceProbData" + indexString] = json.dumps(plotData, cls=plotly.utils.PlotlyJSONEncoder)
-		outData["resilienceProbLayout"  + indexString] = json.dumps(plotlyLayout, cls=plotly.utils.PlotlyJSONEncoder)
+
+		# plot resilience stats if resilienceRun was successful
+		if 'resilience_by_timestep' in resultsResilience:
+			plotData = []
+			resilience = go.Scatter(
+				x=x,
+				y=outData['resilience' + indexString],
+				line=dict( color=('red') ),
+			)
+			plotData.append(resilience)
+			plotlyLayout['yaxis'].update(title='Longest Outage survived (Hours)')
+			plotlyLayout['xaxis'].update(title='Start Hour')
+			outData["resilienceData" + indexString] = json.dumps(plotData, cls=plotly.utils.PlotlyJSONEncoder)
+			outData["resilienceLayout" + indexString] = json.dumps(plotlyLayout, cls=plotly.utils.PlotlyJSONEncoder)
+			
+			plotData = []
+			survivalProb = go.Scatter(
+				x=outData['survivalProbX' + indexString],
+				y=outData['survivalProbY' + indexString],
+				line=dict( color=('red') ),
+				name="Load met by Battery")
+			plotData.append(survivalProb)
+			plotlyLayout['yaxis'].update(title='Probability of meeting critical Load')
+			plotlyLayout['xaxis'].update(title='Outage Length (Hours)')
+			outData["resilienceProbData" + indexString] = json.dumps(plotData, cls=plotly.utils.PlotlyJSONEncoder)
+			outData["resilienceProbLayout"  + indexString] = json.dumps(plotlyLayout, cls=plotly.utils.PlotlyJSONEncoder)
 
 		if numCols == 1:
 			break # if we only have a single load, don't run an additional combined load shape run.

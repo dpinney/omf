@@ -8,7 +8,7 @@ from omf.solvers.REopt import logger
 
 def poller(url, poll_interval=2):
     """
-    Function for polling the REopt API results URL until status is not "Optimizing..."
+    Function for polling the REopt API Economic results URL until status is not "Optimizing..."
     :param url: results url to poll
     :param poll_interval: seconds
     :return: dictionary response (once status is not "Optimizing...")
@@ -41,13 +41,13 @@ def poller(url, poll_interval=2):
 
 def rez_poller(url, poll_interval=2):
     """
-    Function for polling the REopt API results URL until status is not "Optimizing..."
+    Function for polling the REopt Resilience API results URL until status is not "Optimizing..."
     :param url: results url to poll
     :param poll_interval: seconds
     :return: dictionary response (once status is not "Optimizing...")
     """
     key_error_count = 0
-    key_error_threshold = 40
+    key_error_threshold = 50
     status = ""
     logger.log.info("Polling {} for results with interval of {}s...".format(url, poll_interval))
     while True:
@@ -69,5 +69,4 @@ def rez_poller(url, poll_interval=2):
             break
         else:
             time.sleep(poll_interval)
-
     return resp_dict

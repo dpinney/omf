@@ -46,7 +46,12 @@ def runResilience(runID, outputPath):
 			raise KeyError(msg)
 		results = results_poller.rez_poller(url=results_url.replace('<RUN_ID>', run_id))
 		with open(outputPath, 'w') as fp:
-			json.dump(obj=results["outage_sim_results"], fp=fp, indent=4)
+			if "outage_sim_results" in results:
+				json.dump(obj=results["outage_sim_results"], fp=fp, indent=4)
+			else:
+				error_dict = {"Error":str(results['Error'])}
+				json.dump(obj=error_dict, fp=fp, indent=4)
+				logger.log.info("Warning: Response from {} did not contain outage_sim_results. Resilience metrics will not be included.".format(results_url))
 		logger.log.info("Saved results to {}".format(outputPath))
 
 def _test():
