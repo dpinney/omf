@@ -421,7 +421,7 @@ def capacityPlot(filePath):
 	
 def voltageCompare(in1, in2, saveascsv=False, with_plots=False, outdir='', outfilebase='voltageCompare'):
 	'''Compares two instances of the information provided by the 'Export voltages' opendss command and outputs 
-	the maximum error (% and absolute difference) encountered for any value compared. If the 'keep_output' flag is set to 'True', also 
+	the maximum error ([0,100]% and absolute difference in [-inf,inf] volts or [-180,180] degrees) encountered for any value compared. If the 'keep_output' flag is set to 'True', also 
 	outputs a file that describes the maximum, average, and minimum error encountered for each column. Use the 
 	'output_filename' parameter to set the output file name. Inputs can be formatted as a .dss file of voltages
 	output by OpenDSS, or as a dataframe of voltages obtained using the OMF's getVoltages().'''
@@ -451,89 +451,103 @@ def voltageCompare(in1, in2, saveascsv=False, with_plots=False, outdir='', outfi
 	del bvolts
 	ins = ins.dropna()
 	cols = [c for c in cols if (not c.startswith(' pu')) and (not c.startswith(' Node'))]
-	resultErrD = pd.DataFrame(index=ins.index, columns=cols)
-	resultErrP = resultErrD.copy()
+	colsP = [c + ' (0-100%)' for c in cols]
+	colsD = []
+	for c in cols:
+		if c.lower().startswith(' basekv'):
+			colsD.append(c + ' (kV)')
+		if c.lower().startswith(' magnitude'):
+			colsD.append(c + ' (V)')
+		if c.lower().startswith(' angle'):
+			colsD.append(c + ' (deg)')
 
-	for col in cols:
+	resultErrD = pd.DataFrame(index=ins.index, columns=colsD)
+	resultErrP = pd.DataFrame(index=ins.index, columns=colsP)
+
+	for i, col in enumerate(cols):
 		for row in ins.index:
 			ina = ins.loc[row,col]
 			inb = ins.loc[row,"b_" + col]
-			resultErrP.loc[row,col] = 100*(ina - inb)/ina if ina!=0 else 0
-			resultErrD.loc[row,col] = ina - inb
+			resultErrP.loc[row,colsP[i]] = 100*(ina - inb)/ina if ina!=0 else 0
+			resultErrD.loc[row,colsD[i]] = ina - inb
 	# Construct results
-	resultSummP = pd.DataFrame(index=['Max %Err', 'Avg %Err', 'Min %Err', 'RMSPE'], columns=cols)
-	resultSummD = pd.DataFrame(index=['Max Diff', 'Avg Diff', 'Min Diff', 'RMSE'], columns=cols)
-	for c in cols:
-		resultSummP.loc['Max %Err',c] = resultErrP.loc[:,c].max(skipna=True)
-		resultSummP.loc['Avg %Err',c] = resultErrP.loc[:,c].mean(skipna=True)
-		resultSummP.loc['Min %Err',c] = resultErrP.loc[:,c].min(skipna=True)
-		resultSummP.loc['RMSPE',c] = math.sqrt((resultErrP.loc[:,c]**2).mean())
-		resultSummD.loc['Max Diff',c] = resultErrD.loc[:,c].max(skipna=True)
-		resultSummD.loc['Avg Diff',c] = resultErrD.loc[:,c].mean(skipna=True)
-		resultSummD.loc['Min Diff',c] = resultErrD.loc[:,c].min(skipna=True)
-		resultSummD.loc['RMSE',c] = math.sqrt((resultErrD.loc[:,c]**2).mean())
+	resultSummP = pd.DataFrame(index=['Max %Err', 'Avg %Err', 'Min %Err', 'RMSPE'], columns=colsP)
+	resultSummD = pd.DataFrame(index=['Max Diff', 'Avg Diff', 'Min Diff', 'RMSE'], columns=colsD)
+	for cp in colsP:
+		resultSummP.loc['Max %Err',cp] = resultErrP.loc[:,cp].max(skipna=True)
+		resultSummP.loc['Avg %Err',cp] = resultErrP.loc[:,cp].mean(skipna=True)
+		resultSummP.loc['Min %Err',cp] = resultErrP.loc[:,cp].min(skipna=True)
+		resultSummP.loc['RMSPE',cp] = math.sqrt((resultErrP.loc[:,cp]**2).mean())
+	for cd in colsD:
+		resultSummD.loc['Max Diff',cd] = resultErrD.loc[:,cd].max(skipna=True)
+		resultSummD.loc['Avg Diff',cd] = resultErrD.loc[:,cd].mean(skipna=True)
+		resultSummD.loc['Min Diff',cd] = resultErrD.loc[:,cd].min(skipna=True)
+		resultSummD.loc['RMSE',cd] = math.sqrt((resultErrD.loc[:,cd]**2).mean())
 	if saveascsv:
 		outroot = outdir + '/' + outfilebase
+
 		resultErrP.dropna(inplace=True)
 		resultSummP.to_csv(outroot + '_Perc.csv', header=True, index=True, mode='w')
-		emptyline = pd.DataFrame(index=[''],columns=cols)
-		emptyline.to_csv(outroot + '_Perc.csv', header=False, index=True, mode='a')
+		emptylineP = pd.DataFrame(index=[''],columns=colsP)
+		emptylineP.to_csv(outroot + '_Perc.csv', header=False, index=True, mode='a')
 		resultErrP.to_csv(outroot + '_Perc.csv', header=True, index=True, mode='a')
+		
 		resultErrD.dropna(inplace=True)
 		resultSummD.to_csv(outroot + '_Diff.csv', header=True, index=True, mode='w')
-		emptyline.to_csv(outroot + '_Diff.csv', header=False, index=True, mode='a')
+		emptylineD = pd.DataFrame(index=[''],columns=colsD)
+		emptylineD.to_csv(outroot + '_Diff.csv', header=False, index=True, mode='a')
 		resultErrD.to_csv(outroot + '_Diff.csv', header=True, index=True, mode='a')
 	if with_plots:
 		# Produce boxplots to visually analyze the residuals
 		from matplotlib.pyplot import boxplot
-		magcols = [c for c in cols if c.lower().startswith(' magnitude')]
-		bxpltMdf = pd.DataFrame(index=bvolts.index,data=resultErrD,columns=magcols)
+		magcols = [c for c in colsD if c.lower().startswith(' magnitude')]
+		bxpltMdf = pd.DataFrame(index=ins.index,data=resultErrD,columns=magcols)
 		bxpltM = []
 		for item in magcols:
 			bxpltM.append(bxpltMdf[item])
 		figM, axM = plt.subplots()
-		axM.set_title('Boxplot of Residuals: Voltage Magnitude')
+		axM.set_title('Boxplot of Residuals: Voltage Magnitude (V)')
 		plt.xticks(rotation=45)
 		axM.set_xticklabels(magcols)
 		axM.boxplot(bxpltM)
 		figM.savefig(outroot + '_boxplot_Mag.png', bbox_inches='tight')
 		plt.close()
-		angcols = [c for c in cols if c.lower().startswith(' angle')]
+		angcols = [c for c in colsD if c.lower().startswith(' angle')]
 		bxpltAdf = pd.DataFrame(data=resultErrD[angcols],columns=angcols)
 		bxpltA = []
 		for item in angcols:
 			bxpltA.append(bxpltAdf[item])
 		figA, axA = plt.subplots()
-		axA.set_title('Boxplot of Residuals: Voltage Angle')
+		axA.set_title('Boxplot of Residuals: Voltage Angle (deg)')
 		plt.xticks(rotation=45)
 		axA.set_xticklabels(angcols)
 		axA.boxplot(bxpltA)
 		figA.savefig(outroot + '_boxplot_Ang.png', bbox_inches='tight')
 		plt.close()
-		for c in cols:
+		for i,c in enumerate(cols):
 			# construct a dataframe of busname, input, output, and residual
-			dat = pd.concat([avolts[c],bvolts[c],resultErrP[c],resultErrD[c]], axis=1,join='inner')
-			dat.columns = ['buses+','buses-','residuals_P','residuals_D'] # buses+ denotes the circuit with more buses; buses- denotes the one with fewer
+			dat = pd.concat([ins[c],ins['b_' + c],resultErrP[colsP[i]],resultErrD[colsD[i]]], axis=1,join='inner')
+			dat.columns = ['buses+','buses-','residuals_P','residuals_D'] # buses+ denotes the value (voltage or angle) of the circuit with more buses; buses- denotes that of the circuit with fewer
 			dat = dat.sort_values(by=['buses-','buses+'], ascending=True, na_position='first')
 			# Produce plot of residuals
 			#pltlenR = math.ceil(len(dat['residuals_P'])/2)
 			#figR, axR = plt.subplots(figsize=(pltlenR,12))
 			#axR.plot(dat['buses-'], 'k.', alpha=0.15)
 			figR, axR = plt.subplots()
-			axR.plot(dat['buses-'], dat['residuals_P'], 'k.', alpha=0.15)
-			axR.set_title('Plot of Residuals: ' + c)
+			axR.plot(dat['buses-'], dat['residuals_D'], 'k.', alpha=0.15)
+			axR.set_title('Plot of Residuals: ' + colsD[i])
 			#plt.xticks(rotation=45)
-			axR.set_xlabel('Value of ' + c + ' for circuit with fewer buses')
+			axR.set_xlabel('Value for circuit with fewer buses: ' + colsD[i])
 			axR.set_ylabel('Value of Residual')
-			figR.savefig(outroot + '_residualplot_' + c +'_.png', bbox_inches='tight')
+			figR.savefig(outroot + '_residualplot_' + colsD[i] +'_.png', bbox_inches='tight')
 			plt.close()
 			# Produce scatter plots
 			figS, axS = plt.subplots()
-			axS.set_title('Scatter Plot: ' + c)
+			axS.set_title('Scatter Plot: ' + colsD[i])
 			axS.plot(dat['buses-'], dat['buses+'], 'k.', alpha=0.15)
-			axS.set_xlabel('Value of ' + c + ' for circuit with fewer buses')
-			axS.set_ylabel('Value of ' + c + ' for circuit with more buses')
-			figS.savefig(outroot + '_scatterplot_' + c +'_.png', bbox_inches='tight')
+			axS.set_xlabel('Value of ' + colsD[i] + ' for circuit with fewer buses')
+			axS.set_ylabel('Value of ' + colsD[i] + ' for circuit with more buses')
+			figS.savefig(outroot + '_scatterplot_' + colsD[i] +'_.png', bbox_inches='tight')
 			plt.close()
 	return resultSummP, resultSummD
 
