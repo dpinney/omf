@@ -546,8 +546,8 @@ def new(modelDir):
 	#cktName = "ieee3" # DEBUG
 	#cktFile = "ieee3.dss", # DEBUG
 	circuit_dir = "ieee37busdata"
-	cktName = "ieee37_LBL"
-	cktFile = "ieee37_LBL.dss"
+	omdFilename = "ieee37_LBL"
+	dssFilename = "ieee37_LBL.dss"
 
 	f1Name = "load_solar_data.csv"
 	with open(pJoin(omf.omfDir, "static", "testFiles", "pyCIGAR", circuit_dir, f1Name)) as f1:
@@ -566,8 +566,8 @@ def new(modelDir):
 		"simStartDate": "2019-07-01T00:00:00Z",
 		"simLength": "750",
 		"simLengthUnits": "seconds",
-		"feederName1": cktName,
-		"circuitFileName1": cktFile,
+		"feederName1": omdFilename,
+		"circuitFileName1": dssFilename,
 		"fileName1":f1Name,
 		"loadPV": load_PV,
 		"fileName2":f2Name,
@@ -586,7 +586,8 @@ def new(modelDir):
 		"includeBattery": "False"
 	}
 	creationCode = __neoMetaModel__.new(modelDir, defaultInputs)
-	try:
+	try: 
+		# Grab pre-existing <feedername1>.omd from omf\static\publicfeeders
 		shutil.copyfile(pJoin(__neoMetaModel__._omfDir, "static", "publicFeeders", defaultInputs["feederName1"]+'.omd'), pJoin(modelDir, defaultInputs["feederName1"]+'.omd'))
 		# Move in default files and empty results folders.
 		os.mkdir(pJoin(modelDir,"PyCIGAR_inputs"))
