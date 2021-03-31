@@ -63,7 +63,6 @@ def work(modelDir, inputDict):
 
 	#create startStep to represent which step pyCigar should start on - default = 100
 	startStep = 100
-	#startStep = 3600 # DEBUG, for battery scenario
 	
 	#None check for simulation length
 	if inputDict.get("simLength", "None") == "None":
@@ -321,6 +320,7 @@ def work(modelDir, inputDict):
 			policy = defenseAgentPath,
 			output = modelDir + "/pycigarOutput/",
 			start = startStep,
+			#start = 3601,
 			duration = simLengthAdjusted,
 			hack_start = hackStartVal,
 			hack_end = hackEndVal,
@@ -434,17 +434,19 @@ def work(modelDir, inputDict):
 		for bname,batt_dict in pycigarJson["Battery Outputs"].items():
 			#create a new dictionary to represent the single battery 
 			new_batt_dict = {}
-			#get values from pycigar output for given single battery
-			batt_name = batt_dict["Name"]
-			batt_soc = [x*100 for x in batt_dict["SOC"]]
+			#populate the new dictionary with data for single battery
+			new_batt_dict["SOC"] = [x*100 for x in batt_dict["SOC"]]
+			new_batt_dict["Charge_Status"] = batt_dict["control_setting"]
+			#new_batt_dict["Power_Out"] = batt_dict["Power Output (W)"]
+			#new_batt_dict["Power_In"] = batt_dict["Power Input (W)"]
+			#create value for combined power in/output
 			batt_power = batt_dict["Power Output (W)"]
-			batt_status = batt_dict["control_setting"]
-			#populate single battery dict with pycigar values
-			new_batt_dict["SOC"] = batt_soc
+			for i, val in enumerate(batt_dict["Power Input (W)"]):
+				batt_power[i] = -(batt_power[i] + val)
 			new_batt_dict["Power"] = batt_power
-			new_batt_dict["Charge_Status"] = batt_status
-			#add single battery dict to dict of all the batteries using the battery name as the key 
-			battery_output_dict[batt_name] = new_batt_dict
+			# add single battery dict to dict of all the batteries using the battery name as the key 
+			battery_output_dict[batt_dict["Name"]] = new_batt_dict
+
 		outData["Battery_Outputs"] = battery_output_dict
 
 		# convert voltage imbalance data
