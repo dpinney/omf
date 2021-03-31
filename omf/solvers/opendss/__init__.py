@@ -625,6 +625,11 @@ def removeCnxns(tree):
 			del tree[i]['!CNXNS']
 	return tree
 
+def reduceCircuit(tree):
+	tree = mergeContigLines(tree)
+	tree = rollUpTriplex_approx(tree)
+	return tree
+
 def _mergeContigLinesOnce(tree):
 	'''Reduces circuit complexity by combining adjacent line segments having identical configurations.'''
 	# Applicable circuit model: [top bus]-[top line]-[middle bus]-[bottom line]-[bottom bus]-...
@@ -1157,9 +1162,7 @@ def _tests():
 		#gldtree = evilDssTreeToGldTree(tree) # DEBUG
 		#distNetViz.viz_mem(gldtree, open_file=True, forceLayout=True) # DEBUG
 		oldsz = len(tree)
-		tree = mergeContigLines(tree)
-		#tree = rollUpTriplex_approx(tree)
-		#tree = rollUpOnePhaseLoads(tree)
+		tree = reduceCircuit(tree)
 		newsz = len(tree)
 		#gldtree = evilDssTreeToGldTree(tree) # DEBUG
 		#distNetViz.viz_mem(gldtree, open_file=True, forceLayout=True) # DEBUG
