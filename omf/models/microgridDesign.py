@@ -83,6 +83,7 @@ def work(modelDir, inputDict):
 	elif inputDict['solarCanCurtail'] == "false":
 		solarCanCurtail = False
 	dieselMax = float(inputDict['dieselMax'])
+	dieselMin = float(inputDict['dieselMin'])
 
 
 	#outageStart = int(inputDict['outageStart'])
@@ -186,6 +187,7 @@ def work(modelDir, inputDict):
 			scenario['Scenario']['Site']['Generator']['min_turn_down_pct'] = minGenLoading
 			scenario['Scenario']['Site']['Generator']['existing_kw'] = genExisting
 			scenario['Scenario']['Site']['Generator']['max_kw'] = dieselMax
+			scenario['Scenario']['Site']['Generator']['min_kw'] = dieselMin
 
 		with open(pJoin(modelDir, "Scenario_test_POST.json"), "w") as jsonFile:
 			json.dump(scenario, jsonFile)
@@ -621,11 +623,12 @@ def new(modelDir):
 		"windMin": 0,
 		"batteryPowerMin": 0,
 		"batteryCapacityMin": 0,
+		"dieselMin": 0,
 		"solarMax": "10000000",
 		"windMax": "10000000",
 		"batteryPowerMax": "1000000",
 		"batteryCapacityMax": "1000000",
-		"dieselMax": "1000000",
+		"dieselMax": "100000",
 		"solarExisting": 0,
 		"criticalLoadFactor": "1",
 		"outage_start_hour": "500",
