@@ -163,7 +163,7 @@ def work(modelDir, inputDict):
 			scenario['Scenario']['Site']['PV']['max_kw'] = solarMax
 			scenario['Scenario']['Site']['PV']['existing_kw'] = solarExisting
 			scenario['Scenario']['Site']['LoadProfile']['loads_kw_is_net'] = False
-			# Too turn of energy export/net-metering, set wholesaleCost to "0" and excess PV gen will be curtailed
+			# To turn off energy export/net-metering, set wholesaleCost to "0" and excess PV gen will be curtailed
 			if solarCanExport == False:
 				scenario['Scenario']['Site']['ElectricTariff']["wholesale_rate_above_site_load_us_dollars_per_kwh"] = 0
 				scenario['Scenario']['Site']['ElectricTariff']["wholesale_rate_us_dollars_per_kwh"] = 0;
@@ -186,8 +186,15 @@ def work(modelDir, inputDict):
 			scenario['Scenario']['Site']['Generator']['fuel_avail_gal'] = fuelAvailable
 			scenario['Scenario']['Site']['Generator']['min_turn_down_pct'] = minGenLoading
 			scenario['Scenario']['Site']['Generator']['existing_kw'] = genExisting
-			scenario['Scenario']['Site']['Generator']['max_kw'] = dieselMax
-			scenario['Scenario']['Site']['Generator']['min_kw'] = dieselMin
+			# diesel has a quirk in how it gets inputted to REopt such that when strictly specified, allOutputData["sizeDiesel1"] = allInputData['dieselMax'] + allInputData['genExisting']
+			if dieselMax - genExisting > 0:
+				scenario['Scenario']['Site']['Generator']['max_kw'] = dieselMax - genExisting
+			else:
+				scenario['Scenario']['Site']['Generator']['max_kw'] = 0
+			if dieselMin - genExisting > 0:
+				scenario['Scenario']['Site']['Generator']['min_kw'] = dieselMin - genExisting
+			else:
+				scenario['Scenario']['Site']['Generator']['min_kw'] = 0
 
 		with open(pJoin(modelDir, "Scenario_test_POST.json"), "w") as jsonFile:
 			json.dump(scenario, jsonFile)
