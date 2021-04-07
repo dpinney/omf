@@ -80,8 +80,10 @@ def dss_to_clean_via_save(dss_path, clean_out_path):
 	master = open(f'{clean_out_path}_tempfolder/Master.DSS').readlines()
 	master = [x for x in master if x != '\n']
 	# Get the object files.
-	ob_files = sorted(os.listdir(f'{clean_out_path}_tempfolder'))
+	ob_files = os.listdir(f'{clean_out_path}_tempfolder')
+	ob_files = sorted(ob_files)
 	ob_files.remove('Master.DSS')
+	ob_files.remove('circuit')
 	# Clean each of the object files.
 	clean_copies = {}
 	for fname in ob_files:
