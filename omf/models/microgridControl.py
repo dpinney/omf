@@ -574,6 +574,8 @@ def graphMicrogrid(pathToOmd, pathToMicro, pathToCsv, workDir, maxTime, stepSize
 		# Run command
 		command = f'{DIR}/build/bin/PowerModelsONM -n "{workDir}/circuit.dss" -o "{workDir}/onm_output.json"'
 		os.system(command)
+		
+		#TODO: ignore test_output_3 and use actual onm output.
 		with open(pJoin(__neoMetaModel__._omfDir,'static','testFiles','test_output_3.json')) as inFile:
 		# with open(f'{workDir}/onm_output.json') as inFile:
 			data = json.load(inFile)
@@ -791,6 +793,15 @@ def work(modelDir, inputDict):
 	# Output a .dss file, which will be needed for ONM.
 	niceDss = dssConvert.evilGldTreeToDssTree(tree)
 	dssConvert.treeToDss(niceDss, f'{modelDir}/circuit.dss')
+	# Remove syntax that ONM doesn't like.
+	with open(f'{modelDir}/circuit.dss','r') as dss_file:
+		content = dss_file.read()
+		content = re.sub(r'(\d),(\d|\-)', r'\1 \2', content) #space sep lists
+		content = re.sub(r'(\d),(\d|\-)', r'\1 \2', content) #hack: no really, space sep
+		content = re.sub(r'.*spectrum.*', r'', content) #drop spectrum
+		content = re.sub(r'object=', r'', content) #drop object=
+	with open(f'{modelDir}/circuit.dss','w') as dss_file_2:
+		dss_file_2.write(content)
 
 	# Run the main functions of the program
 	with open(pJoin(modelDir, inputDict['microFileName']), 'w') as f:
@@ -861,6 +872,7 @@ def new(modelDir):
 		# 'feederName1': 'ieee37nodeFaultTester',
 		# 'feederName1': 'ieee37.dss',
 		'feederName1': 'iowa240c1.clean.dss',
+		# 'feederName1': 'iowa240c2_workingOnm.clean.dss',
 		'maxTime': '20',
 		'stepSize': '1',
 		'faultedLine': 'l_1001_1002',
