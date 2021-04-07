@@ -795,14 +795,12 @@ def rollUpTriplex_approx(tree):
 			load_obj = tree[name2key[load]]
 			conncode = load_obj.get('bus1','').split('.',1)[1]
 			load_obj['bus1'] = linebusid + '.' + conncode
-			# Check number of connections and fix load kw and kv values to capture triplex losses (0.1% per conductor)
+			# Check number of connections and fix load kw and kv values to capture triplex losses (0.81%)
 			conncode = conncode.split('.')
 			if '0' in conncode:
 				conncode.remove('0') # no losses for grounds.
-			numcnxns = len(conncode)
-			load_obj['kw'] = str(float(load_obj.get('kw','0')) * (1 + 0.001 * numcnxns))
-			#load_obj['kv'] = str(float(load_obj.get('kv','0')) * (1 - 0.001 * numcnxns))
-			# TODO: does powerfactor need to be corrected for the length/reactance characteristics?
+			load_obj['kw'] = str(float(load_obj.get('kw','0')) * 1.0081) # DEBUG
+			#note: Corrections to power factor are negligible because triplex lines are short.
 			tree[name2key[load]] = load_obj
 			# Add load to linebus connections
 			linebus_obj = tree[name2key[linebusid]]
