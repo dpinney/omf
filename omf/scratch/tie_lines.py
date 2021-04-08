@@ -19,7 +19,8 @@ from omf import feeder, weather, distNetViz
 from omf.models import __neoMetaModel__
 from omf.models.__neoMetaModel__ import *
 from omf.weather import get_ndfd_data
-
+from omf.solvers.opendss import dssConvert
+from omf.solvers import opendss
 
 # modelName, template = __neoMetaModel__.metadata(__file__)
 
@@ -78,6 +79,13 @@ def find_all_ties(circuit):
 
 def find_candidate_pair(circuit):
 	candidates = []
+
+def run_fault_study(circuit, tempFilePath, faultDetails=None):
+	niceDss = dssConvert.evilGldTreeToDssTree(tree)
+	dssConvert.treeToDss(niceDss, tempFilePath)
+	#TODO: add fault, see Daniel.
+	opendss.runDSS(tempFilePath)
+	#TODO: look at the output files, see what happened to the loads.
 
 def _runModel():
 	with open(pJoin(__neoMetaModel__._omfDir,"static","publicFeeders","iowa240c1.clean.dss.omd"), 'r') as omdFile:
