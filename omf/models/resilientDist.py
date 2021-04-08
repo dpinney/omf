@@ -184,8 +184,8 @@ def _testHazards():
 	xStart1 = 38.912832283302436
 	yStart1 = -77.02056029181865
 	cellSize1 = 0.01
-	numRows1 = 2
-	numCols1 = 4
+	numRows1 = 8
+	numCols1 = 8
 	xEnd1 = xStart1 + (cellSize1*numCols1)
 	yEnd1 = yStart1 + (cellSize1*numRows1)
 	outFilePath1 = omf.omfDir + "/static/testFiles/ndfdTest.asc"
