@@ -72,12 +72,14 @@ def dssToGridLab(inFilePath, outFilePath, busCoords=None):
 def dss_to_clean_via_save(dss_file, clean_out_path, add_pf_syntax=True, clean_up=False):
 	'''Converts raw OpenDSS circuit definition files to the *.clean.dss syntax required by OMF.
 	This version uses the opendss save functionality to better preserve dss syntax.'''
+	#TODO: Detect missing makebuslist, since windmil and others leave it out.
+	#TODO: Fix repeated wdg= keys!?!?!?
 	# Execute opendss's save command reliably on a circuit. opendssdirect fails at this.
 	dirname = os.path.dirname(dss_file)
 	shutil.rmtree(f'{dirname}/SAVED_DSS', ignore_errors=True)
 	# Make a dss file that can reliably save a dang circuit.
 	contents = open(dss_file,'r').read()
-	contents += '\nsave circuit dir="SAVED_DSS'
+	contents += '\nsave circuit dir=SAVED_DSS'
 	with open(f'{dirname}/saver.dss','w') as saver_file:
 		saver_file.write(contents)
 	# Run that saver file.
@@ -93,24 +95,24 @@ def dss_to_clean_via_save(dss_file, clean_out_path, add_pf_syntax=True, clean_up
 	# Clean each of the object files.
 	clean_copies = {}
 	for fname in ob_files:
-		with open(f'{dss_folder_path}/{fname}', 'r') as ob_file:
-			ob_data = ob_file.read().lower() # lowercase everything
-			ob_data = ob_data.replace('"', '') # remove quote characters
-			ob_data = ob_data.replace('\t', ' ') # tabs to spaces
-			ob_data = re.sub(r' +', r' ', ob_data) # remove consecutive spaces
-			ob_data = re.sub(r'(^ +| +$)', r'', ob_data) # remove leading and trailing whitespace
-			ob_data = ob_data.replace('\n~', '') # remove tildes
-			ob_data = re.sub(r' *, *', r',', ob_data) # remove spaces around commas
-			ob_data = re.sub(r', *(\]|\))', r'\1', ob_data) # remove empty final list items
-			ob_data = re.sub(r' +\| +', '|', ob_data) # remove spaces around bar characters
-			ob_data = re.sub(r'(\[|\() *', r'\1', ob_data) # remove spaces after list start
-			ob_data = re.sub(r' *(\]|\))', r'\1', ob_data) # remove spaces before list end
-			ob_data = re.sub(r'(new|edit) ', r'\1 object=', ob_data) # add object= key
-			ob_data = re.sub(r'(\d) +(\d|\-)', r'\1,\2', ob_data) # replace space-separated lists with comma-separated
-			ob_data = re.sub(r'(\d) +(\d|\-)', r'\1,\2', ob_data) # HACK: second space-sep replacement to make sure it works
-			ob_data = re.sub(r'zipv=([\d\.\-,]+)', r'zipv=(\1)', ob_data) # HACK: fix zipv with missing parens
-			# print(ob_data,'\n')
-			clean_copies[fname.lower()] = ob_data
+		if os.path.isfile(f'{dss_folder_path}/{fname}'):
+			with open(f'{dss_folder_path}/{fname}', 'r') as ob_file:
+				ob_data = ob_file.read().lower() # lowercase everything
+				ob_data = ob_data.replace('"', '') # remove quote characters
+				ob_data = ob_data.replace('\t', ' ') # tabs to spaces
+				ob_data = re.sub(r' +', r' ', ob_data) # remove consecutive spaces
+				ob_data = re.sub(r'(^ +| +$)', r'', ob_data) # remove leading and trailing whitespace
+				ob_data = ob_data.replace('\n~', '') # remove tildes
+				ob_data = re.sub(r' *, *', r',', ob_data) # remove spaces around commas
+				ob_data = re.sub(r', *(\]|\))', r'\1', ob_data) # remove empty final list items
+				ob_data = re.sub(r' +\| +', '|', ob_data) # remove spaces around bar characters
+				ob_data = re.sub(r'(\[|\() *', r'\1', ob_data) # remove spaces after list start
+				ob_data = re.sub(r' *(\]|\))', r'\1', ob_data) # remove spaces before list end
+				ob_data = re.sub(r'(new|edit) ', r'\1 object=', ob_data) # add object= key
+				ob_data = re.sub(r'(\d) +(\d|\-)', r'\1,\2', ob_data) # replace space-separated lists with comma-separated
+				ob_data = re.sub(r'(\d) +(\d|\-)', r'\1,\2', ob_data) # HACK: second space-sep replacement to make sure it works
+				ob_data = re.sub(r'zipv=([\d\.\-,]+)', r'zipv=(\1)', ob_data) # HACK: fix zipv with missing parens
+				clean_copies[fname.lower()] = ob_data
 	# Special handline for buscoords
 	if 'buscoords.dss' in clean_copies:
 		bus_data = clean_copies['buscoords.dss']
@@ -137,74 +139,6 @@ def dss_to_clean_via_save(dss_file, clean_out_path, add_pf_syntax=True, clean_up
 		shutil.rmtree(dss_folder_path, ignore_errors=True)
 	with open(clean_out_path, 'w') as out_file:
 		out_file.write(clean_out)
-
-def dss_to_clean_dss(dss_path, clean_out_path, exec_code = ''):
-	'''Converts raw OpenDSS circuit definition files to the *.clean.dss syntax required by OMF.
-	Does not support reverse polish notation.'''
-	runDssCommand('clear')
-	dss_response_to_redir = runDssCommand(f'Redirect "{dss_path}"')
-	all_classes = dss.Basic.Classes()
-	#import inspect  # DEBUG
-	#exec_out = [n for n,m in inspect.getmembers(dss.Executive.) if not n.startswith("_")] # DEBUG
-	out_dss = f'clear\nnew object=circuit.{dss.Circuit.Name()}'
-	# todo: get actual circuit props.
-	# get all circuit elements.
-	for c in all_classes:
-		d = dss.utils.class_to_dataframe(c, dss=None, transform_string=None, clean_data=None).T.to_dict()
-		if d != {}:
-			out_dss += f'\n! {c}s\n'
-			for name in d:
-				if c.lower() == 'vsource' and name.lower() == 'vsource.source':
-					out_dss += f'edit object={name} '.lower()
-				else:
-					out_dss += f'new object={name} '.lower()
-				for key in d[name]:
-					val = d[name][key]
-					# clean up matrix format.
-					if type(val) is str:
-						val = str(val)
-					elif type(val) is tuple:
-						val = str(val).replace("(","[").replace(")","]").replace("'","").replace(' ','')
-					elif type(val) is list and len(val) == 1:
-						# Handle data that comes in like ['1 2 3'].
-						val = '[' + val[0].replace("   "," ").replace("  "," ").replace(" | ","|").replace(" ",",").replace("'","") + ']'
-					elif type(val) is list and len(val) != 1:
-						# Handle data that comes in valid list form.
-						val = str(val).replace(' ','').replace("'","")
-					else:
-						val = str(val)
-					# hack for malformed wdgcurrents
-					if key.lower() == 'wdgcurrents':
-						val = '[' + val.replace('(','').replace(')','').replace(' ','') + ']'
-					# ignore deprecated opendss props and bad values
-					bad_props = ['ratings', 'seasons', 'linetype', 'rneut', 'xneut', '%fuel', '%reserve', 'fuelkwh', 'refuel', '%cutin', '%cutout', 'varfollowinverter', 'kvarmax', 'kvarmaxabs', 'wattpriority', 'pfpriority', '%pminnovars', '%pminkvarmax', '%kwrated', '%cutin', '%cutout', 'varfollowinverter', 'kvarmax', 'kvarmaxabs', 'wattpriority', 'pfpriority', '%pminnovars', '%pminkvarmax', '%kwrated', '%cutin', '%cutout', 'varfollowinverter', 'kvarmax', 'kvarmaxabs', 'wattpriority', 'pfpriority', '%pminnovars', '%pminkvarmax', '%kwrated', '%pmpp', '%pmpp', '%pmpp', '%pmpp', '%pmpp','cond','wire','cncable','tscable','cncables','tscables']
-					bad_vals = ['', '----']
-					# hack for malformed gmrstrand, epsr, diains
-					if key.lower() in ['gmrstrand', 'epsr', 'diains'] and val in ['ft','kft','in']:
-						bad_props.append(key.lower())
-					if val not in bad_vals and key.lower() not in bad_props:
-						out_dss += f'{key}={val} '.lower()
-				out_dss += '\n'
-	# Make bus list, set/apply voltage bases, and set bus coordinates
-	all_bus_names = dss.Circuit.AllBusNames()
-	out_dss += f'\n! Buses\nmakebuslist\nset voltagebases='
-	vbases = dss.Settings.VoltageBases()
-	vbases = str(vbases).replace("(","[").replace(")","]").replace("'","").replace(' ','')
-	out_dss += vbases + '\ncalcvoltagebases\n'
-	for bus_name in all_bus_names:
-		dss.Circuit.SetActiveBus(bus_name)
-		out_dss += f'setbusxy bus={bus_name} y={dss.Bus.Y()} x={dss.Bus.X()}\n'
-	# todo: all the settings? which are under dss.Solution and dss.Settings. or don't support them.
-	# note that some commands must enter the code in a specific location (order matters :/). Added where needed. There is also not an easy
-	# way to apply the settings, as the dss command string does not correlate to the retrieving function name (i.e. 'maxcontroliter'!='ControlIterations')
-	sln_ctrl_iters = dss.Solution.MaxControlIterations()
-	if not sln_ctrl_iters=='':
-		out_dss += f'set maxcontroliter=' + str(sln_ctrl_iters) + '\n'
-	out_dss += exec_code
-	# print(out_dss)
-	with open(clean_out_path,'w') as out_dss_file:
-		out_dss_file.write(out_dss)
-	return
 
 def dssToTree(pathToDss):
 	''' Convert a .dss file to an in-memory, OMF-compatible 'tree' object.
