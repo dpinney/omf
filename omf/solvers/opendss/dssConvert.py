@@ -69,28 +69,37 @@ def dssToGridLab(inFilePath, outFilePath, busCoords=None):
 	# TODO: no way to specify output filename, so move and rename.
 	glm_writer.write(model)
 
-def dss_to_clean_via_save(dss_path, clean_out_path):
+def dss_to_clean_via_save(dss_file, clean_out_path, add_pf_syntax=True, clean_up=False):
 	'''Converts raw OpenDSS circuit definition files to the *.clean.dss syntax required by OMF.
 	This version uses the opendss save functionality to better preserve dss syntax.'''
-	# Create the export folder
-	runDssCommand('clear')
-	dss_response_to_redir = runDssCommand(f'redirect "{dss_path}"')
-	dss_response_to_save = runDssCommand(f'save circuit dir="{clean_out_path}_tempfolder"')
-	# Get the master file.
-	master = open(f'{clean_out_path}_tempfolder/Master.DSS').readlines()
+	# Execute opendss's save command reliably on a circuit. opendssdirect fails at this.
+	dirname = os.path.dirname(dss_file)
+	shutil.rmtree(f'{dirname}/SAVED_DSS', ignore_errors=True)
+	# Make a dss file that can reliably save a dang circuit.
+	contents = open(dss_file,'r').read()
+	contents += '\nsave circuit dir="SAVED_DSS'
+	with open(f'{dirname}/saver.dss','w') as saver_file:
+		saver_file.write(contents)
+	# Run that saver file.
+	subprocess.run(['opendsscmd', 'saver.dss'], cwd=dirname)
+	dss_folder_path = f'{dirname}/SAVED_DSS'
+	# Get master file.
+	master = open(f'{dss_folder_path}/Master.DSS').readlines()
 	master = [x for x in master if x != '\n']
 	# Get the object files.
-	ob_files = os.listdir(f'{clean_out_path}_tempfolder')
+	ob_files = os.listdir(f'{dss_folder_path}')
 	ob_files = sorted(ob_files)
 	ob_files.remove('Master.DSS')
-	ob_files.remove('circuit')
 	# Clean each of the object files.
 	clean_copies = {}
 	for fname in ob_files:
-		with open(f'{clean_out_path}_tempfolder/{fname}', 'r') as ob_file:
+		with open(f'{dss_folder_path}/{fname}', 'r') as ob_file:
 			ob_data = ob_file.read().lower() # lowercase everything
 			ob_data = ob_data.replace('"', '') # remove quote characters
+			ob_data = ob_data.replace('\t', ' ') # tabs to spaces
 			ob_data = re.sub(r' +', r' ', ob_data) # remove consecutive spaces
+			ob_data = re.sub(r'(^ +| +$)', r'', ob_data) # remove leading and trailing whitespace
+			ob_data = ob_data.replace('\n~', '') # remove tildes
 			ob_data = re.sub(r' *, *', r',', ob_data) # remove spaces around commas
 			ob_data = re.sub(r', *(\]|\))', r'\1', ob_data) # remove empty final list items
 			ob_data = re.sub(r' +\| +', '|', ob_data) # remove spaces around bar characters
@@ -99,6 +108,7 @@ def dss_to_clean_via_save(dss_path, clean_out_path):
 			ob_data = re.sub(r'(new|edit) ', r'\1 object=', ob_data) # add object= key
 			ob_data = re.sub(r'(\d) +(\d|\-)', r'\1,\2', ob_data) # replace space-separated lists with comma-separated
 			ob_data = re.sub(r'(\d) +(\d|\-)', r'\1,\2', ob_data) # HACK: second space-sep replacement to make sure it works
+			ob_data = re.sub(r'zipv=([\d\.\-,]+)', r'zipv=(\1)', ob_data) # HACK: fix zipv with missing parens
 			# print(ob_data,'\n')
 			clean_copies[fname.lower()] = ob_data
 	# Special handline for buscoords
@@ -116,8 +126,13 @@ def dss_to_clean_via_save(dss_path, clean_out_path):
 			clean_out += f'\n!{line}'
 			clean_out += clean_copies[ob_file_name[0].lower()]
 	clean_out = clean_out.lower()
-	# Remove intermediate files and write a single clean file.
-	shutil.rmtree(f'{clean_out_path}_tempfolder', ignore_errors=True)
+	# Optional: include a slug of code to run powerflow
+	if add_pf_syntax:
+		powerflow_slug = '\n\n!powerflow code\nset maxiterations=1000\nset maxcontroliter=1000\ncalcv\nsolve\nshow voltage ln node'
+		clean_out = clean_out + powerflow_slug
+	# Optional: remove intermediate files and write a single clean file.
+	if clean_up:
+		shutil.rmtree(dss_folder_path, ignore_errors=True)
 	with open(clean_out_path, 'w') as out_file:
 		out_file.write(clean_out)
 
