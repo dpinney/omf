@@ -121,6 +121,8 @@ def dss_to_clean_via_save(dss_file, clean_out_path, add_pf_syntax=True, clean_up
 	for line in master:
 		ob_file_name = re.findall(r'\w+\.[dD][sS][sS]', line)
 		if ob_file_name == []:
+			if line.startswith('New Circuit.'):
+				line = 'new object=circuit.' + line[12:]
 			clean_out += line
 		else:
 			clean_out += f'\n!{line}'
@@ -128,7 +130,7 @@ def dss_to_clean_via_save(dss_file, clean_out_path, add_pf_syntax=True, clean_up
 	clean_out = clean_out.lower()
 	# Optional: include a slug of code to run powerflow
 	if add_pf_syntax:
-		powerflow_slug = '\n\n!powerflow code\nset maxiterations=1000\nset maxcontroliter=1000\ncalcv\nsolve\nshow voltage ln node'
+		powerflow_slug = '\n\n!powerflow code\nset maxiterations=1000\nset maxcontroliter=1000\ncalcv\nsolve\nshow quantity=voltage'
 		clean_out = clean_out + powerflow_slug
 	# Optional: remove intermediate files and write a single clean file.
 	if clean_up:
