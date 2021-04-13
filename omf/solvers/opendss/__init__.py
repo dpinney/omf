@@ -79,6 +79,7 @@ def newQstsPlot(filePath, stepSizeInMinutes, numberOfSteps, keepAllFiles=False, 
 	''' Use monitor objects to generate voltage values for a timeseries powerflow. '''
 	dssFileLoc = os.path.dirname(os.path.abspath(filePath))
 	volt_coord = runDSS(filePath)
+	runDssCommand(f'set datapath="{dssFileLoc}"')
 	# Attach Monitors
 	tree = dssConvert.dssToTree(filePath)
 	mon_names = []
