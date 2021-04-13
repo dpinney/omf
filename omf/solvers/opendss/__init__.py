@@ -627,8 +627,8 @@ def removeCnxns(tree):
 
 def reduceCircuit(tree):
 	tree = mergeContigLines(tree)
-	tree = rollUpTriplex_approx(tree)
-	tree = rollUpLoadTransformer_approx(tree)
+	tree = rollUpTriplex(tree)
+	tree = rollUpLoadTransformer(tree)
 	return tree
 
 def _mergeContigLinesOnce(tree):
@@ -651,7 +651,8 @@ def _mergeContigLinesOnce(tree):
 		# has this line already been removed?
 		if topid in removedids:
 			continue
-		# Is the top a switch? Let's skip these for now. TODO: handling for switches when merging them with adjacent line segments is feasible
+		# Is the top a switch? Let's skip these for now. 
+		# TODO: handle switches when merging them with adjacent line segments
 		if top.get('switch','None') in ['true','yes']:
 			continue
 		# Get the 'to' bus
@@ -671,7 +672,8 @@ def _mergeContigLinesOnce(tree):
 		bottom = treecopy[name2key[botid]]
 		if not bottom.get('object','None').startswith('line.'):
 			continue
-		# Is the bottom a switch? Let's skip these for now. TODO: handling for switches when merging them with adjacent line segments is feasible
+		# Is the bottom a switch? Let's skip these for now. 
+		# TODO: handle switches when merging them with adjacent line segments
 		if bottom.get('switch','None') in ['true','yes']:
 			continue
 		# Does the bottom have any other objects 'attached' to it? If so, we must not remove it. 
@@ -735,7 +737,7 @@ def mergeContigLines(tree):
 	tree = removeCnxns(tree)
 	return tree
 
-def rollUpTriplex_approx(tree):
+def rollUpTriplex(tree):
 	'''Remove a triplex line and capture losses in the load it serves by applying enineerging estimates. Applies 
 	to instances where one or more loads are connected to a single bus, and that bus is connected to a line which
 	is then connected to a transformer.'''
@@ -799,7 +801,7 @@ def rollUpTriplex_approx(tree):
 			conncode = conncode.split('.')
 			if '0' in conncode:
 				conncode.remove('0') # no losses for grounds.
-			load_obj['kw'] = str(float(load_obj.get('kw','0')) * 1.0081) # DEBUG
+			load_obj['kw'] = str(float(load_obj.get('kw','0')) * 1.0081)
 			#note: Corrections to power factor are negligible because triplex lines are short.
 			tree[name2key[load]] = load_obj
 			# Add load to linebus connections
@@ -830,13 +832,11 @@ def rollUpTriplex_approx(tree):
 			remfile.write(remid + '\n')
 	return tree
 
-def rollUpLoadTransformer_approx(tree):
+def rollUpLoadTransformer(tree):
 	'''Removes a load-serving transformer by capturing its losses in the loads it serves using 
 	engineering estimates. Applies to instances where one or more loads are connected to a 
-	single bus, and that bus is connected to a transformer which is connected to a bus which 
-	connects to one or two lines (because it either branches off the service feeder or it is 
-	at the end-of-line).'''
-	# Applicable circuit model: [one or more loads]-[bus]-[transformer]-[one or more lines]...
+	single bus, and that bus is connected to a transformer which is connected to a bus.'''
+	# Applicable circuit model: [one or more loads]-[bus]-[transformer]-[bus]...
 	tree = applyCnxns(tree)
 	from copy import deepcopy
 	from math import sqrt
@@ -878,48 +878,76 @@ def rollUpLoadTransformer_approx(tree):
 		xfrmrcnxns = xfrmr_obj.get('buses','None')
 		xfrmrcnxns = xfrmrcnxns.replace('[','').replace(']','')
 		xfrmrcnxns = xfrmrcnxns.split(',')
-		xfrmrbusid = xfrmrcnxns[0].split('.',1)[0] # by convention, the primary winding connects to the first bus listed
+		xfrmrbusid = xfrmrcnxns[0].split('.',1)[0] # by convention, the primary winding is first
 		# Get xfrmr primary winding connection code
 		xfrmrconncode = xfrmrcnxns[0].split('.',1)[1]
+		# Get xfrmr primary winding connection type (i.e. delta/wye)
+		xfrmrconntype = xfrmr_obj.get('conns').replace(']','').replace('[','')
+		xfrmrconntype = xfrmrconntype.split(',')[0] # by convention, the primary winding is first
 		# Get xfrmr primary winding voltage
 		#TODO: do we need to check that the base voltages are the same for the secondary windings before setting the load's kv?
 		xfrmrkv = xfrmr_obj.get('kvs','None')
 		xfrmrkv = xfrmrkv.replace('[','').replace(']','')
 		xfrmrkv = xfrmrkv.split(',')
 		xfrmrkv = xfrmrkv[0]
-		# Fix the loads' and xfrmrbus' connections, correct load kw for losses associated with removed xfrmr, and adjust kv to match xfrmr primary winding kv
-		continueflag = False
-		for load in loadids:
-			load_obj = tree[name2key[load]]
-			# Is this a split-phase configuration? If so, move on to the next object in treecopy
-			loadphases = load_obj.get('phases','None')
-			xfrmrphases = [c for c in xfrmrconncode.split('.') if c!='0']
-			if loadphases != str(len(xfrmrphases)):
-				continueflag = True
-				continue
-			# Connect the load to the xfrmrbus
-			load_obj['bus1'] = xfrmrbusid + '.' + xfrmrconncode
-			# Fix load kw values to capture xfrmr losses (2.5%)
-			load_obj['kw'] = str(float(load_obj.get('kw','None')) * 1.025)
-			# Set load kv to kv of primary winding.
-			load_obj['kv'] = xfrmrkv
-			tree[name2key[load]] = load_obj
-			# Correct the xfrmrbus connections to include the loads
-			xfrmrbus_obj = tree[name2key[xfrmrbusid]]
-			xfrmrbuscons = xfrmrbus_obj.get('!CNXNS','None')
-			xfrmrbuscons = xfrmrbuscons.replace('[','').replace(']','')
-			xfrmrbuscons = xfrmrbuscons.split(',')
-			if xfrmrid in xfrmrbuscons:
-				xfrmrbuscons.remove(xfrmrid)
-			cstr = '['
-			for elm in xfrmrbuscons:
-				cstr += elm + ','
-			cstr += load
-			cstr = cstr + ']'
-			xfrmrbus_obj['!CNXNS'] = cstr
-			tree[name2key[xfrmrbusid]] = xfrmrbus_obj
-		if continueflag:
-			continue
+		
+		load_obj = tree[name2key[objid]]	
+		# Connect the load to the xfrmrbus
+		load_obj['bus1'] = xfrmrbusid + '.' + xfrmrconncode
+		# Set load kv to kv of primary winding.
+		load_obj['kv'] = xfrmrkv
+		# Fix load kw values to capture xfrmr losses (2.5%); aggregate kw with any other sibling loads
+		newkw = 0
+		for lid in loadids:
+			lid_obj = tree[name2key[lid]]
+			newkw = newkw + float(lid_obj.get('kw','0'))*1.025 
+		load_obj['kw'] = str(newkw)
+		# Aggregate kvar (if existing) with any other sibling loads
+		if load_obj.get('kvar','None')!='None':
+			newkvar = 0
+			for lid in loadids:
+				lid_obj = tree[name2key[lid]]
+				newkvar = newkvar + float(lid_obj.get('kvar','0'))
+			load_obj['kvar'] = str(newkvar)
+		# Average pf (if existing) with any other sibling loads
+		if load_obj.get('pf','None')!='None':
+			pfs = []
+			for lid in loadids:
+				lid_obj = tree[name2key[lid]]
+				pfs.append(lid_obj.get('pf','None'))
+			newpf = 0
+			for pf in pfs:
+				newpf += float(pf)
+			load_obj['pf'] = str(newpf/len(pfs))
+		# Correct the number of phases on the load
+		xfrmrphases = [c for c in xfrmrconncode.split('.') if c!='0']
+		if xfrmrconntype == 'delta':
+			load_obj['phases'] = str(len(xfrmrphases)-1)
+		else:
+			load_obj['phases'] = str(len(xfrmrphases))
+		# Add load and remove transformer from xfrmrbus connections
+		xfrmrbus_obj = tree[name2key[xfrmrbusid]]
+		xfrmrbuscons = xfrmrbus_obj.get('!CNXNS','None')
+		xfrmrbuscons = xfrmrbuscons.replace('[','').replace(']','')
+		xfrmrbuscons = xfrmrbuscons.split(',')
+		if xfrmrid in xfrmrbuscons:
+			xfrmrbuscons.remove(xfrmrid)
+		cstr = '['
+		for elm in xfrmrbuscons:
+			cstr += elm + ','
+		for ld in loadids:
+			cstr += ld + ','
+		cstr = cstr[:-1] + ']'
+		xfrmrbus_obj['!CNXNS'] = cstr
+			
+		# Update the new load and its new parent bus in tree
+		tree[name2key[xfrmrbusid]] = xfrmrbus_obj
+		tree[name2key[objid]] = load_obj
+		# Remove from tree: Aggregated loads, xfrmr, loadbus
+		for ld in loadids:
+			if ld != objid:
+				removedids.append(ld)
+				del tree[name2key[ld]]
 		removedids.append(xfrmrid)
 		del tree[name2key[xfrmrid]]
 		removedids.append(loadbusid)
