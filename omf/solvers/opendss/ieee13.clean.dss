@@ -1,10 +1,9 @@
-clear 
 set defaultbasefrequency=60
 
 new object=circuit.ieee13nodeckt basekv=115 pu=1.0001 phases=3 bus1=sourcebus.1.2.3 angle=30 mvasc3=20000 mvasc1=21000 
 
 ! sub transformer definition 
-new object=transformer.sub phases=3 windings=2 xhl=0.008 windings=2 buses=[sourcebus.1.2.3,650.1.2.3] conns=[delta,wye] kvs=[115,4.16] kvas=[5000,5000] %rs=[0.0005,0.0005]
+new object=transformer.sub phases=3 xhl=0.008 windings=2 buses=[sourcebus.1.2.3,650.1.2.3] conns=[delta,wye] kvs=[115,4.16] kvas=[5000,5000] %rs=[0.0005,0.0005]
 
 ! feeder 1-phase voltage regulators
 ! define low-impedance 2-wdg transformer

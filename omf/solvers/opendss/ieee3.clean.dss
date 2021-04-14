@@ -1,4 +1,3 @@
-clear
 ! note that this is a 3-wire delta system.
 ! node voltages in OpenDss are normally line-ground and may give strange-looking results
 ! be careful if you put line-neutral connected loads or other devices on this circuit.
@@ -23,6 +22,7 @@ new object=load.s702a bus1=702.1 phases=1 conn=wye Model=1 kv=2.7712812921102037
 new object=load.s703a bus1=703.1 phases=1 conn=wye Model=1 kv=2.7712812921102037 kw=100.0 kvar=50.0
 makebuslist
 set voltagebases=[230,4.8]
+setbusxy bus=sourcebus x=0 y=0
 setbusxy bus=799 x=0 y=0
 setbusxy bus=799r x=0 y=0
 setbusxy bus=701 x=0 y=0
