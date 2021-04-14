@@ -1002,9 +1002,9 @@ def _tests():
 		from shutil import rmtree
 		os.remove(outckt_loc)
 		rmtree(outdir)
-		errlim = 0.3 # threshold of 30% error between reduced files. 
-		assert maxPerrM <= errlim, 'The voltage magnitude error between the compared files exceeds the allowable limit of %s%%.'%(errlim*100)
-		print('Objects removed: %s (of %s).\nPercent reduction: %s%%\nMax RMSPE for voltage magnitude: %s%%\nMax RMSPE for voltage angle: %s%%\nMax RMSE for voltage magnitude: %s\nMax RMSE for voltage angle: %s\n'%(oldsz-newsz, oldsz, (oldsz-newsz)*100/oldsz, maxPerrM, maxPerrA, maxDerrM, maxDerrA)) # DEBUG
+		#print('Objects removed: %s (of %s).\nPercent reduction: %s%%\nMax RMSPE for voltage magnitude: %s%%\nMax RMSPE for voltage angle: %s%%\nMax RMSE for voltage magnitude: %s\nMax RMSE for voltage angle: %s\n'%(oldsz-newsz, oldsz, (oldsz-newsz)*100/oldsz, maxPerrM, maxPerrA, maxDerrM, maxDerrA)) # DEBUG
+		errlim = 0.30 # threshold of 30% error between reduced files. 
+		assert maxPerrM <= errlim*100, 'The voltage magnitude error between the compared files exceeds the allowable limit of %s%%.'%(errlim*100)
 		
 
 	# Make core output
