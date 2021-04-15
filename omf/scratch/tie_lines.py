@@ -97,8 +97,30 @@ def find_all_ties(circuit):
 	return all_ties
 
 def find_candidate_pair(circuit):
-	candidates = []
-	
+	candidates = {}
+	short_phys = ()
+	long_path = ()
+	phys_path_dif = ()
+	all_ties = find_all_ties(circuit)
+	for tie in all_ties:
+		#Find the tie with the shortest physical distance
+		if short_phys == ():
+			short_phys = tie
+		if long_path == ():
+			long_path = tie
+		if phys_path_dif == ():
+			phys_path_dif = tie
+		if short_phys > all_ties[tie][0]:
+			short_phys = tie
+		if long_path < all_ties[tie][1]:
+			long_path = tie
+		if phys_path_dif < all_ties[tie][1] - all_ties[tie][0]:
+			phys_path_dif = tie
+	candidates['short_phys'] = short_phys
+	candidates['long_path'] = long_path
+	candidates['phys_path_dif'] = phys_path_dif
+
+	return candidates
 
 def run_fault_study(circuit, tempFilePath, faultDetails=None):
 	niceDss = dssConvert.evilGldTreeToDssTree(tree)
