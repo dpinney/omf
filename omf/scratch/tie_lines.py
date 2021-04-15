@@ -46,7 +46,26 @@ def node_distance(circuit, node_name_1, node_name_2):
 def path_distance(circuit, node_name_1, node_name_2):
 	# Given two nodes, node_name_1 and node_name_2, in a circuit, find the number of lines between the two
 	distance = -1.0
-	#TODO: Get Daniel's code for path distance
+	#TODO: Incorporate networkx path distance with length of lines as weights
+	# Create networkx graph
+	circuit_graph = feeder.treeToNxGraph(circuit["tree"])
+	#create edge_lengths dict to stor the distance of lines
+	edge_lengths = {}
+	for omdObj in circuit["tree"]:
+		if circuit["tree"][omdObj]["object"] == "line":
+			line_name = circuit["tree"][omdObj]["name"]
+			line_from = circuit["tree"][omdObj]["from"]
+			line_to = circuit["tree"][omdObj]["to"]
+			circuit_graph.edges[line_from, line_to]["weight"] = node_distance(circuit, line_from, line_to)
+
+	try:
+		# This returns the number of edges between the source and target node, but doesn't incorporate length of the path as a weight
+		#distance = nx.shortest_path_length(circuit_graph, source=node_name_1, target=node_name_2, weight="length")
+		distance, path_list = nx.single_source_dijkstra(circuit_graph, source=node_name_1, target=node_name_2, cutoff=None, weight="weight")
+		#distance = nx.single_source_dijkstra_path_length(circuit_graph, source=node_name_1, target=node_name_2, weight=)
+	except nx.NetworkXNoPath:
+		distance = -1.0
+
 	return distance
 
 def find_all_ties(circuit):
@@ -79,6 +98,7 @@ def find_all_ties(circuit):
 
 def find_candidate_pair(circuit):
 	candidates = []
+	
 
 def run_fault_study(circuit, tempFilePath, faultDetails=None):
 	niceDss = dssConvert.evilGldTreeToDssTree(tree)
@@ -91,8 +111,15 @@ def _runModel():
 	with open(pJoin(__neoMetaModel__._omfDir,"static","publicFeeders","iowa240c1.clean.dss.omd"), 'r') as omdFile:
 		circuit = json.load(omdFile)
 	# Test node_distance()
-	dist1 = node_distance(circuit, "load_1003", "load_3019")
-	print("load_1003 to load_3019 = " + dist1)
+	load1 = "load_1003"
+	load2 = "load_3019"
+	dist1 = node_distance(circuit, load1, load2)
+	dist2 = path_distance(circuit, load1, load2)
+	print("Straight distance from " + load1 + " to " + load2 + " = " + str(dist1) + "km")
+	if dist2 == -1.0:
+		print(load1 + " and " + load2 + " are not connected.")
+	else:
+		print("Line distance from " + load1 + " to " + load2 + " = " + str(dist2) + "km")
 	# Test the tie line creation code
 	# all_ties = find_all_ties(circuit)
 	# print(all_ties)
