@@ -83,7 +83,9 @@ def find_all_ties(circuit):
 		elif "latitude" in circuit["tree"][omdObj]:
 			node_name = circuit["tree"][omdObj]["name"]
 			nodes[node_name] = omdObj
-	
+	# Optional search reduction.
+	# all_pairs = zip(nodes, nodes) # [(n1, n2), (n2, n1), ...]
+	# unique_pairs = set([sorted(x) for x in all_pairs])
 	for node1 in nodes:
 		for node2 in nodes:
 			if node1 != node2:
