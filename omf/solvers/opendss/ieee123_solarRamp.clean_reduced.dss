@@ -50,6 +50,7 @@ new object=spectrum.defaultvsource numharm=1 harmonic=(1) %mag=(100) angle=(0)
 new object=spectrum.linear numharm=1 harmonic=(1) %mag=(100) angle=(0)
 new object=spectrum.pwm6 numharm=13 harmonic=(1,3,5,7,9,11,13,15,17,19,21,23,25) %mag=(100,4.4,76.5,62.7,2.9,24.8,12.7,0.5,7.1,8.4,0.9,4.4,3.3) angle=(-103,-5,28,-180,-33,-59,79,36,-253,-124,3,-30,86)
 new object=spectrum.dc6 numharm=10 harmonic=(1,3,5,7,9,11,13,15,17,19) %mag=(100,1.2,33.6,1.6,0.4,8.7,1.2,0.3,4.5,1.3) angle=(-75,28,156,29,-91,49,54,148,-57,-46)
+new object=line.l115 bus1=149.1.2.3 bus2=1.1.2.3 linecode=1 seasons=1 ratings=[400] normamps=400 emergamps=600 length=0.4 units=kft
 new object=line.l1 phases=1 bus1=1.2 bus2=2.2 linecode=10 seasons=1 ratings=[400] normamps=400 emergamps=600 length=0.175 units=kft
 new object=line.l2 phases=1 bus1=1.3 bus2=3.3 linecode=11 seasons=1 ratings=[400] normamps=400 emergamps=600 length=0.25 units=kft
 new object=line.l3 phases=3 bus1=1.1.2.3 bus2=7.1.2.3 linecode=1 seasons=1 ratings=[400] normamps=400 emergamps=600 length=0.3 units=kft
@@ -76,8 +77,9 @@ new object=line.l23 phases=1 bus1=23.3 bus2=24.3 linecode=11 seasons=1 ratings=[
 new object=line.l24 phases=3 bus1=23.1.2.3 bus2=25.1.2.3 linecode=2 seasons=1 ratings=[400] normamps=400 emergamps=600 length=0.275 units=kft
 new object=line.l25 phases=2 bus1=25r.1.3 bus2=26.1.3 linecode=7 seasons=1 ratings=[400] normamps=400 emergamps=600 length=0.35 units=kft
 new object=line.l26 phases=3 bus1=25.1.2.3 bus2=28.1.2.3 linecode=2 seasons=1 ratings=[400] normamps=400 emergamps=600 length=0.2 units=kft
-new object=line.l27 phases=2 bus1=26.1.3 bus2=33.1 linecode=7 seasons=1 ratings=[400] normamps=400 emergamps=600 length=0.775 units=kft
+new object=line.l27 phases=2 bus1=26.1.3 bus2=27.1.3 linecode=7 seasons=1 ratings=[400] normamps=400 emergamps=600 length=0.275 units=kft
 new object=line.l28 phases=1 bus1=26.3 bus2=31.3 linecode=11 seasons=1 ratings=[400] normamps=400 emergamps=600 length=0.225 units=kft
+new object=line.l29 phases=1 bus1=27.1 bus2=33.1 linecode=9 seasons=1 ratings=[400] normamps=400 emergamps=600 length=0.5 units=kft
 new object=line.l30 phases=3 bus1=28.1.2.3 bus2=29.1.2.3 linecode=2 seasons=1 ratings=[400] normamps=400 emergamps=600 length=0.3 units=kft
 new object=line.l31 phases=3 bus1=29.1.2.3 bus2=30.1.2.3 linecode=2 seasons=1 ratings=[400] normamps=400 emergamps=600 length=0.35 units=kft
 new object=line.l32 phases=3 bus1=30.1.2.3 bus2=250.1.2.3 linecode=2 seasons=1 ratings=[400] normamps=400 emergamps=600 length=0.2 units=kft
@@ -148,6 +150,7 @@ new object=line.l96 phases=3 bus1=97.1.2.3 bus2=98.1.2.3 linecode=3 seasons=1 ra
 new object=line.l97 phases=3 bus1=98.1.2.3 bus2=99.1.2.3 linecode=3 seasons=1 ratings=[400] normamps=400 emergamps=600 length=0.55 units=kft
 new object=line.l98 phases=3 bus1=99.1.2.3 bus2=100.1.2.3 linecode=3 seasons=1 ratings=[400] normamps=400 emergamps=600 length=0.3 units=kft
 new object=line.l99 phases=3 bus1=100.1.2.3 bus2=450.1.2.3 linecode=3 seasons=1 ratings=[400] normamps=400 emergamps=600 length=0.8 units=kft
+new object=line.l118 phases=3 bus1=197.1.2.3 bus2=101.1.2.3 linecode=3 seasons=1 ratings=[400] normamps=400 emergamps=600 length=0.25 units=kft
 new object=line.l100 phases=1 bus1=101.3 bus2=102.3 linecode=11 seasons=1 ratings=[400] normamps=400 emergamps=600 length=0.225 units=kft
 new object=line.l101 phases=3 bus1=101.1.2.3 bus2=105.1.2.3 linecode=3 seasons=1 ratings=[400] normamps=400 emergamps=600 length=0.275 units=kft
 new object=line.l102 phases=1 bus1=102.3 bus2=103.3 linecode=11 seasons=1 ratings=[400] normamps=400 emergamps=600 length=0.325 units=kft
@@ -162,12 +165,14 @@ new object=line.l110 phases=1 bus1=110.1 bus2=111.1 linecode=9 seasons=1 ratings
 new object=line.l111 phases=1 bus1=110.1 bus2=112.1 linecode=9 seasons=1 ratings=[400] normamps=400 emergamps=600 length=0.125 units=kft
 new object=line.l112 phases=1 bus1=112.1 bus2=113.1 linecode=9 seasons=1 ratings=[400] normamps=400 emergamps=600 length=0.525 units=kft
 new object=line.l113 phases=1 bus1=113.1 bus2=114.1 linecode=9 seasons=1 ratings=[400] normamps=400 emergamps=600 length=0.325 units=kft
+new object=line.l114 phases=3 bus1=135.1.2.3 bus2=35.1.2.3 linecode=4 seasons=1 ratings=[400] normamps=400 emergamps=600 length=0.375 units=kft
+new object=line.l116 phases=3 bus1=152.1.2.3 bus2=52.1.2.3 linecode=1 seasons=1 ratings=[400] normamps=400 emergamps=600 length=0.4 units=kft
 new object=line.l117 phases=3 bus1=160r.1.2.3 bus2=67.1.2.3 linecode=6 seasons=1 ratings=[400] normamps=400 emergamps=600 length=0.35 units=kft
-new object=line.sw1 phases=3 bus1=150r.1.2.3 bus2=1.1.2.3 r1=0.001 r0=0.001 x1=0 x0=0 c1=0 c0=0 length=0.401 switch=true
-new object=line.sw2 phases=3 bus1=13.1.2.3 bus2=52.1.2.3 r1=0.001 r0=0.001 x1=0 x0=0 c1=0 c0=0 length=0.401 switch=true
-new object=line.sw3 phases=3 bus1=18.1.2.3 bus2=35.1.2.3 r1=0.001 r0=0.001 x1=0 x0=0 c1=0 c0=0 length=0.376 switch=true
+new object=line.sw1 phases=3 bus1=150r.1.2.3 bus2=149.1.2.3 r1=0.001 r0=0.001 x1=0 x0=0 c1=0 c0=0 length=0.001 switch=true
+new object=line.sw2 phases=3 bus1=13.1.2.3 bus2=152.1.2.3 r1=0.001 r0=0.001 x1=0 x0=0 c1=0 c0=0 length=0.001 switch=true
+new object=line.sw3 phases=3 bus1=18.1.2.3 bus2=135.1.2.3 r1=0.001 r0=0.001 x1=0 x0=0 c1=0 c0=0 length=0.001 switch=true
 new object=line.sw4 phases=3 bus1=60.1.2.3 bus2=160.1.2.3 r1=0.001 r0=0.001 x1=0 x0=0 c1=0 c0=0 length=0.001 switch=true
-new object=line.sw5 phases=3 bus1=97.1.2.3 bus2=101.1.2.3 r1=0.001 r0=0.001 x1=0 x0=0 c1=0 c0=0 length=0.251 switch=true
+new object=line.sw5 phases=3 bus1=97.1.2.3 bus2=197.1.2.3 r1=0.001 r0=0.001 x1=0 x0=0 c1=0 c0=0 length=0.001 switch=true
 new object=line.sw6 phases=3 bus1=61.1.2.3 bus2=61s.1.2.3 r1=0.001 r0=0.001 x1=0 x0=0 c1=0 c0=0 length=0.001 switch=true
 new object=line.sw7 phases=3 bus1=151.1.2.3 bus2=300_open.1.2.3 r1=0.001 r0=0.001 x1=0 x0=0 c1=0 c0=0 length=0.001 switch=true
 new object=line.sw8 phases=1 bus1=54.1 bus2=94_open.1 r1=0.001 r0=0.001 x1=0 x0=0 c1=0 c0=0 length=0.001 switch=true
@@ -262,8 +267,8 @@ new object=load.s111a bus1=111.1 phases=1 conn=wye model=1 kv=2.4 kw=20 kvar=10
 new object=load.s112a bus1=112.1 phases=1 conn=wye model=5 kv=2.4 kw=20 kvar=10
 new object=load.s113a bus1=113.1 phases=1 conn=wye model=2 kv=2.4 kw=40 kvar=20
 new object=load.s114a bus1=114.1 phases=1 conn=wye model=1 kv=2.4 kw=20 kvar=10
-new object=transformer.reg1a phases=3 windings=2 buses=[150,150r] conns=[wye,wye] kvs=[4.16,4.16] kvas=[5000,5000] xhl=0.001 %loadloss=0.00001 ppm_antifloat=0
-new object=transformer.xfm1 phases=3 windings=2 xhl=2.72 buses=[61s,610] conns=[delta,delta] kvs=[4.16,0.48] kvas=[150,150] taps=[1,1] %rs=[0.635,0.635]
+new object=transformer.reg1a phases=3 windings=2 buses=[150.1.2.3,150r.1.2.3] conns=[wye,wye] kvs=[4.16,4.16] kvas=[5000,5000] xhl=0.001 %loadloss=0.00001 ppm_antifloat=0
+new object=transformer.xfm1 phases=3 windings=2 xhl=2.72 buses=[61s.1.2.3,610.1.2.3] conns=[delta,delta] kvs=[4.16,0.48] kvas=[150,150] taps=[1,1] %rs=[0.635,0.635]
 new object=transformer.reg2a phases=1 windings=2 bank=reg2 buses=[9.1,9r.1] conns=[wye,wye] kvs=[2.402,2.402] kvas=[2000,2000] xhl=0.01 %loadloss=0.00001 ppm_antifloat=0
 new object=transformer.reg3a phases=1 windings=2 bank=reg3 buses=[25.1,25r.1] conns=[wye,wye] kvs=[2.402,2.402] kvas=[2000,2000] xhl=0.01 %loadloss=0.00001 ppm_antifloat=0
 new object=transformer.reg4a phases=1 windings=2 bank=reg4 buses=[160.1,160r.1] conns=[wye,wye] kvs=[2.402,2.402] kvas=[2000,2000] xhl=0.01 %loadloss=0.00001 ppm_antifloat=0
@@ -284,7 +289,7 @@ new object=capacitor.c92c bus1=92.3 phases=1 kvar=[50] kv=2.402
 new object=generator.2mwgen bus1=450.1.2.3 kv=4.16 kw=2000 pf=1 duty=solarramp
 new object=monitor.mon1 element=line.l99 terminal=1
 makebuslist
-set voltagebases=(4.16,0.48)
+set voltagebases=[4.16,0.48]
 setbusxy bus=1 x=700 y=1500
 setbusxy bus=2 x=700 y=1675
 setbusxy bus=3 x=700 y=1250
@@ -311,6 +316,7 @@ setbusxy bus=23 x=1500 y=2875
 setbusxy bus=24 x=950 y=2875
 setbusxy bus=25 x=1500 y=3150
 setbusxy bus=26 x=1150 y=3150
+setbusxy bus=27 x=875 y=3150
 setbusxy bus=28 x=1500 y=3350
 setbusxy bus=29 x=1500 y=3650
 setbusxy bus=30 x=1850 y=3650
@@ -398,9 +404,13 @@ setbusxy bus=111 x=4275 y=3625
 setbusxy bus=112 x=4275 y=2925
 setbusxy bus=113 x=4800 y=2925
 setbusxy bus=114 x=5125 y=2925
+setbusxy bus=135 x=1600 y=2325
+setbusxy bus=149 x=300 y=1500
 setbusxy bus=150 x=100 y=1500
 setbusxy bus=151 x=3187 y=3928
+setbusxy bus=152 x=1600 y=1500
 setbusxy bus=160 x=3175 y=1850
+setbusxy bus=197 x=3525 y=2200
 setbusxy bus=250 x=2050 y=3650
 setbusxy bus=300 x=3245 y=4010
 setbusxy bus=450 x=5450 y=2100
@@ -412,3 +422,4 @@ setbusxy bus=300_open x=0 y=0
 setbusxy bus=61s x=3175 y=1300
 setbusxy bus=94_open x=0 y=0
 setbusxy bus=9r x=1200 y=1725
+set maxcontroliter=30
