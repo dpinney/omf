@@ -833,9 +833,9 @@ def rollUpTriplex(tree):
 			remfile.write(remid + '\n')
 	return tree
 
-def rollUpLoadTransformer(tree):
-	'''Removes a load-serving transformer by capturing its losses in the loads it serves using 
-	engineering estimates. Applies to instances where one or more loads are connected to a 
+def rollUpLoadTransformer(tree, combine_loads=True):
+	'''Removes a load-serving transformer and captures its losses in the loads it serves by applying 
+	an engineering estimate. This process also combines multiple loads into a single representative load. Applies to instances where one or more loads are connected to a 
 	single bus, and that bus is connected to a transformer which is connected to a bus.'''
 	# Applicable circuit model: [one or more loads]-[bus]-[transformer]-[bus]...
 	tree = applyCnxns(tree)
