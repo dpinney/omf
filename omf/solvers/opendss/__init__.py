@@ -891,68 +891,91 @@ def rollUpLoadTransformer(tree, combine_loads=True):
 		xfrmrkv = xfrmrkv.replace('[','').replace(']','')
 		xfrmrkv = xfrmrkv.split(',')
 		xfrmrkv = xfrmrkv[0]
-		
+		xfrmrphases = [c for c in xfrmrconncode.split('.') if c!='0']
+		xfrmrbus_obj = tree[name2key[xfrmrbusid]]
+		xfrmrbuscons = xfrmrbus_obj.get('!CNXNS','None')
+		xfrmrbuscons = xfrmrbuscons.replace('[','').replace(']','')
+		xfrmrbuscons = xfrmrbuscons.split(',')
+
 		load_obj = tree[name2key[objid]]	
 		# Connect the load to the xfrmrbus
 		load_obj['bus1'] = xfrmrbusid + '.' + xfrmrconncode
 		# Set load kv to kv of primary winding.
 		load_obj['kv'] = xfrmrkv
-		# Fix load kw values to capture xfrmr losses (2.5%); aggregate kw with any other sibling loads
-		newkw = 0
-		for lid in loadids:
-			lid_obj = tree[name2key[lid]]
-			newkw = newkw + float(lid_obj.get('kw','0'))*1.025 
-		load_obj['kw'] = str(newkw)
-		# Aggregate kvar (if existing) with any other sibling loads
-		if load_obj.get('kvar','None')!='None':
+		if combine_loads==True:
+			# Fix kw values to capture xfrmr losses (2.5%); aggregate kw, kvar, pf with any other sibling loads and correct the number of phases and the parent bus connection.
+			newkw = 0
 			newkvar = 0
-			for lid in loadids:
-				lid_obj = tree[name2key[lid]]
-				newkvar = newkvar + float(lid_obj.get('kvar','0'))
-			load_obj['kvar'] = str(newkvar)
-		# Average pf (if existing) with any other sibling loads
-		if load_obj.get('pf','None')!='None':
 			pfs = []
 			for lid in loadids:
 				lid_obj = tree[name2key[lid]]
-				pfs.append(lid_obj.get('pf','None'))
-			newpf = 0
-			for pf in pfs:
-				newpf += float(pf)
-			load_obj['pf'] = str(newpf/len(pfs))
-		# Correct the number of phases on the load
-		xfrmrphases = [c for c in xfrmrconncode.split('.') if c!='0']
-		if xfrmrconntype == 'delta':
-			load_obj['phases'] = str(len(xfrmrphases)-1)
+				newkw = newkw + float(lid_obj.get('kw','0'))*1.025
+				newkvar = newkvar + float(lid_obj.get('kvar','0'))
+				if lid_obj.get('pf','None') != 'None':
+					pfs.append(lid_obj.get('pf'))
+			load_obj['kw'] = str(newkw)
+			if load_obj.get('kvar','None') != 'None':
+				load_obj['kvar'] = str(newkvar)
+			if len(pfs) >0:
+				totpf = 0
+				for pf in pfs:
+					totpf += float(pf)
+				load_obj['pf'] = str(totpf/len(pfs))
+			# Correct the number of phases on the load
+			if xfrmrconntype == 'delta':
+				load_obj['phases'] = str(len(xfrmrphases)-1)
+			else:
+				load_obj['phases'] = str(len(xfrmrphases))
+			# Add load and remove transformer from xfrmrbus connections
+			if xfrmrid in xfrmrbuscons:
+				xfrmrbuscons.remove(xfrmrid)
+			cstr = '['
+			for elm in xfrmrbuscons:
+				cstr += elm + ','
+			cstr += objid + ','
+			cstr = cstr[:-1] + ']'
+			xfrmrbus_obj['!CNXNS'] = cstr
+			# Update the new load and its new parent bus in tree
+			tree[name2key[xfrmrbusid]] = xfrmrbus_obj
+			tree[name2key[objid]] = load_obj
+			# Remove from tree: Aggregated loads, xfrmr, loadbus
+			for ld in loadids:
+				if ld != objid:
+					removedids.append(ld)
+					del tree[name2key[ld]]
+			removedids.append(xfrmrid)
+			del tree[name2key[xfrmrid]]
+			removedids.append(loadbusid)
+			del tree[name2key[loadbusid]]
 		else:
-			load_obj['phases'] = str(len(xfrmrphases))
-		# Add load and remove transformer from xfrmrbus connections
-		xfrmrbus_obj = tree[name2key[xfrmrbusid]]
-		xfrmrbuscons = xfrmrbus_obj.get('!CNXNS','None')
-		xfrmrbuscons = xfrmrbuscons.replace('[','').replace(']','')
-		xfrmrbuscons = xfrmrbuscons.split(',')
-		if xfrmrid in xfrmrbuscons:
-			xfrmrbuscons.remove(xfrmrid)
-		cstr = '['
-		for elm in xfrmrbuscons:
-			cstr += elm + ','
-		for ld in loadids:
-			cstr += ld + ','
-		cstr = cstr[:-1] + ']'
-		xfrmrbus_obj['!CNXNS'] = cstr
-			
-		# Update the new load and its new parent bus in tree
-		tree[name2key[xfrmrbusid]] = xfrmrbus_obj
-		tree[name2key[objid]] = load_obj
-		# Remove from tree: Aggregated loads, xfrmr, loadbus
-		for ld in loadids:
-			if ld != objid:
-				removedids.append(ld)
-				del tree[name2key[ld]]
-		removedids.append(xfrmrid)
-		del tree[name2key[xfrmrid]]
-		removedids.append(loadbusid)
-		del tree[name2key[loadbusid]]
+			for lid in loadids:
+				lid_obj = tree[name2key[lid]]
+				# Fix load kw values to capture xfrmr losses (2.5%)
+				tree[name2key[lid["kw"]]] = float(lid_obj.get('kw','0'))*1.025
+				# Correct the number of phases on the loads
+				if xfrmrconntype == 'delta':
+					lid_obj['phases'] = str(len(xfrmrphases)-1)
+				else:
+					lid_obj['phases'] = str(len(xfrmrphases))
+				# update this load in tree
+				tree[name2key[lid]] = lid_obj
+			# Add load and remove transformer from xfrmrbus connections
+			if xfrmrid in xfrmrbuscons:
+				xfrmrbuscons.remove(xfrmrid)
+			cstr = '['
+			for elm in xfrmrbuscons:
+				cstr += elm + ','
+			for ld in loadids:
+				cstr += ld + ','
+			cstr = cstr[:-1] + ']'
+			xfrmrbus_obj['!CNXNS'] = cstr
+			# Update thenew parent bus in tree
+			tree[name2key[xfrmrbusid]] = xfrmrbus_obj
+			# Remove from tree: xfrmr, loadbus
+			removedids.append(xfrmrid)
+			del tree[name2key[xfrmrid]]
+			removedids.append(loadbusid)
+			del tree[name2key[loadbusid]]
 	tree = [v for k,v in tree.items()] # back to a list of dicts
 	tree = removeCnxns(tree)
 	if os.path.exists('removed_ids.txt'):
