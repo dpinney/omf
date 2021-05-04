@@ -80,12 +80,14 @@ def find_all_ties(circuit):
 			line_to = circuit["tree"][omdObj]["to"]
 			line_from = circuit["tree"][omdObj]["from"]
 			existing_lines[line_name] = (line_to, line_from)
-		elif "latitude" in circuit["tree"][omdObj]:
+		# elif "latitude" in circuit["tree"][omdObj]:
+		elif circuit["tree"][omdObj]["object"] == "bus":
 			node_name = circuit["tree"][omdObj]["name"]
 			nodes[node_name] = omdObj
 	# Optional search reduction.
 	# all_pairs = zip(nodes, nodes) # [(n1, n2), (n2, n1), ...]
 	# unique_pairs = set([sorted(x) for x in all_pairs])
+	print(nodes)
 	for node1 in nodes:
 		for node2 in nodes:
 			if node1 != node2:
@@ -100,27 +102,39 @@ def find_all_ties(circuit):
 
 def find_candidate_pair(circuit):
 	candidates = {}
-	short_phys = ()
-	long_path = ()
-	phys_path_dif = ()
+	short_phys_pair = ()
+	short_phys_val = 0.0
+	long_path_pair = ()
+	long_path_val = 0.0
+	phys_path_dif_pair = ()
+	phys_path_dif_val = 0.0
 	all_ties = find_all_ties(circuit)
 	for tie in all_ties:
 		#Find the tie with the shortest physical distance
-		if short_phys == ():
-			short_phys = tie
-		if long_path == ():
-			long_path = tie
-		if phys_path_dif == ():
-			phys_path_dif = tie
-		if short_phys > all_ties[tie][0]:
-			short_phys = tie
+		if short_phys_pair == ():
+			short_phys_pair = tie
+			short_phys_val = all_ties[tie][0]
+		if long_path_pair == ():
+			long_path_pair = tie
+			long_path_val = all_ties[tie][1]
+		if phys_path_dif_pair == ():
+			phys_path_dif_pair = tie
+			phys_path_dif_val = all_ties[tie][1] - all_ties[tie][0]
+		if short_phys_val > all_ties[tie][0]:
+			short_phys_pair = tie
+			short_phys_val = all_ties[tie][0]
 		if long_path < all_ties[tie][1]:
-			long_path = tie
-		if phys_path_dif < all_ties[tie][1] - all_ties[tie][0]:
-			phys_path_dif = tie
-	candidates['short_phys'] = short_phys
-	candidates['long_path'] = long_path
-	candidates['phys_path_dif'] = phys_path_dif
+			long_path_pair = tie
+			long_path_val = all_ties[tie][1]
+		if phys_path_dif_val < all_ties[tie][1] - all_ties[tie][0]:
+			phys_path_dif_pair = tie
+			phys_path_dif_val = all_ties[tie][1] - all_ties[tie][0]
+	candidates['short_phys_pair'] = short_phys_pair
+	candidates['short_phys_val'] = short_phys_val
+	candidates['long_path_pair'] = long_path_pair
+	candidates['long_path_val'] = long_path_val
+	candidates['phys_path_dif_pair'] = phys_path_dif_pair
+	candidates['phys_path_dif_val'] = phys_path_dif_val
 
 	return candidates
 
@@ -144,6 +158,16 @@ def _runModel():
 		print(load1 + " and " + load2 + " are not connected.")
 	else:
 		print("Line distance from " + load1 + " to " + load2 + " = " + str(dist2) + "km")
+	# Test find_all_ties()
+	all_ties_list = find_all_ties(circuit)
+	print("find_all_ties() completed!")
+	# Test find_candidate_pair()
+	potential_tie_lines = {}
+	potential_tie_lines = find_candidate_pair(circuit)
+	# print("Potential tie lines: " + potential_tie_lines)
+	print("Shortest physical distance between buses is " + potential_tie_lines['short_phys_val'] + "km between " + potential_tie_lines['short_phys_pair'][0] + " and " + potential_tie_lines['short_phys_pair'][1])
+	print("Longest line distance between buses is " + potential_tie_lines['long_path_val'] + "km between " + potential_tie_lines['long_path_pair'][0] + " and " + potential_tie_lines['long_path_pair'][1])
+	print("Greatest difference of line and physical distance between buses is " + potential_tie_lines['phys_path_dif_val'] + "km between " + potential_tie_lines['phys_path_dif_pair'][0] + " and " + potential_tie_lines['phys_path_dif_val'][1])
 	# Test the tie line creation code
 	# all_ties = find_all_ties(circuit)
 	# print(all_ties)

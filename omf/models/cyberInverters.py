@@ -16,13 +16,13 @@ from omf.solvers.opendss import dssConvert
 from shutil import copyfile, copytree
 
 # Model metadata:
+
 modelName, template = __neoMetaModel__.metadata(__file__)
 tooltip = "The cyberInverters model shows the impacts of inverter hacks on a feeder including system voltages, regulator actions, and capacitor responses."
 hidden = False
 
 def work(modelDir, inputDict):
-	''' Run the model in its directory. WARNING: GRIDLAB CAN TAKE HOURS TO COMPLETE. '''
-	# feederName = inputDict["feederName1"]
+	''' Run the model in its directory.'''
 	feederName = [x for x in os.listdir(modelDir) if x.endswith('.omd')][0][:-4]
 	inputDict["feederName1"] = feederName
 	inputDict["circuitFileName1"] = feederName
@@ -375,23 +375,18 @@ def work(modelDir, inputDict):
 				capNameList.append(key)
 
 		#convert regulator data
+		regDict = {}
 		for reg_name in regNameList:
-			outData[reg_name] = {}
-			regPhaseValue = pycigarJson[reg_name]["RegPhases"]
-			short_reg_name = reg_name[10:] #cut out "Regulator_" for naming purposes
-			if regPhaseValue.find('A') != -1:
-				#outData[reg_name]["RegTapA"] = pycigarJson[reg_name]["creg1a"]
-				outData[reg_name]["RegTapA"] = pycigarJson[reg_name][short_reg_name + "a"]
-
-			if regPhaseValue.find('B') != -1:
-				#outData[reg_name]["RegTapB"] = pycigarJson[reg_name]["creg1b"]
-				outData[reg_name]["RegTapA"] = pycigarJson[reg_name][short_reg_name + "b"]
-
-			if regPhaseValue.find('C') != -1:
-				#outData[reg_name]["RegTapC"] = pycigarJson[reg_name]["creg1c"]
-				outData[reg_name]["RegTapA"] = pycigarJson[reg_name][short_reg_name + "c"]
-
-			outData[reg_name]["RegPhases"] = regPhaseValue
+			short_reg_name = reg_name.replace("Regulator_","")
+			newReg = {}
+			newReg["phases"] = list(pycigarJson[reg_name]["RegPhases"])
+			tapchanges = {}
+			for phase in newReg["phases"]:
+				phsup = phase.upper()
+				tapchanges[phsup] = pycigarJson[reg_name][short_reg_name + phase.lower()]
+			newReg["tapchanges"] = tapchanges
+			regDict[reg_name.lower()] = newReg
+		outData["Regulator_Outputs"] = regDict
 
 		#convert inverter data
 		inverter_output_dict = {} 
@@ -411,42 +406,34 @@ def work(modelDir, inputDict):
 			inverter_output_dict[inv_name] = new_inv_dict
 		outData["Inverter_Outputs"] = inverter_output_dict
 
-		#convert capacitor data - Need one on test circuit first!
+		#convert capacitor data
+		# TODO: Need to test with a capacitor in the circuit! No idea if this code works.
+		capDict = {}
 		for cap_name in capNameList:
-			outData[cap_name] = {}
-			capPhaseValue = pycigarJson[cap_name]["CapPhases"]
-			if capPhaseValue.find('A') != -1:
-				outData[cap_name]['Cap1A'] = [0] * int(simLengthValue)
-				outData[cap_name]['Cap1A'] = pycigarJson[cap_name]['switchA']
-
-			if capPhaseValue.find('B') != -1:
-				outData[cap_name]['Cap1B'] = [0] * int(simLengthValue)
-				outData[cap_name]['Cap1B'] = pycigarJson[cap_name]['switchB']
-
-			if capPhaseValue.find('C') != -1:
-				outData[cap_name]['Cap1C'] = [0] * int(simLengthValue)
-				outData[cap_name]['Cap1C'] = pycigarJson[cap_name]['switchC']
-			
-			outData[cap_name]["CapPhases"] = capPhaseValue
+			short_cap_name = cap_name.replace("Capacitor_","")
+			newCap = {}
+			newCap["phases"] = list(pycigarJson[cap_name]["CapPhases"])
+			for phase in newCap["phases"]:
+				newCap["switch" + phase.upper()] = pycigarJson[cap_name]["switch" + phase.lower()]
+				newCap["timeseriesdata" + phase.upper()] = []
+			capDict[cap_name] = newCap
+		outData["Capacitor_Outputs"] = capDict
 		
 		#convert battery data
 		battery_output_dict = {} 
 		for bname,batt_dict in pycigarJson["Battery Outputs"].items():
-			#create a new dictionary to represent the single battery 
 			new_batt_dict = {}
-			#populate the new dictionary with data for single battery
 			new_batt_dict["SOC"] = [x*100 for x in batt_dict["SOC"]]
 			new_batt_dict["Charge_Status"] = batt_dict["control_setting"]
 			#new_batt_dict["Power_Out"] = batt_dict["Power Output (W)"]
 			#new_batt_dict["Power_In"] = batt_dict["Power Input (W)"]
-			#create value for combined power in/output
+			# create value for combined power in/output
 			batt_power = batt_dict["Power Output (W)"]
 			for i, val in enumerate(batt_dict["Power Input (W)"]):
 				batt_power[i] = -(batt_power[i] + val)
 			new_batt_dict["Power"] = batt_power
 			# add single battery dict to dict of all the batteries using the battery name as the key 
 			battery_output_dict[batt_dict["Name"]] = new_batt_dict
-
 		outData["Battery_Outputs"] = battery_output_dict
 
 		# convert voltage imbalance data
@@ -542,9 +529,6 @@ def stringToMag(s):
 
 def new(modelDir):
 	''' Create a new instance of this model. Returns true on success, false on failure. '''
-	#circuit_dir = "ieee3busdata_battery" # DEBUG
-	#cktName = "ieee3" # DEBUG
-	#cktFile = "ieee3.dss", # DEBUG
 	circuit_dir = "ieee37busdata"
 	omdFilename = "ieee37_LBL"
 	dssFilename = "ieee37_LBL.dss"

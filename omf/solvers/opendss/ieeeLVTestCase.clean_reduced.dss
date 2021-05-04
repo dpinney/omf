@@ -234,7 +234,8 @@ new object=line.line693 bus1=690.1.2.3 bus2=778.1.2.3 phases=3 linecode=2c_16 se
 new object=line.line694 bus1=690.1.2.3 bus2=701.1.2.3 phases=3 linecode=2c_16 seasons=1 ratings=[400] normamps=400 emergamps=600 length=6.4573 units=m
 new object=line.line690 bus1=686.1.2.3 bus2=691.1.2.3 phases=3 linecode=4c_1 seasons=1 ratings=[400] normamps=400 emergamps=600 length=10.5254 units=m
 new object=line.line695 bus1=691.1.2.3 bus2=702.1.2.3 phases=3 linecode=2c_16 seasons=1 ratings=[400] normamps=400 emergamps=600 length=14.9747 units=m
-new object=line.line696 bus1=691.1.2.3 bus2=703.1.2.3 phases=3 linecode=4c_1 seasons=1 ratings=[400] normamps=400 emergamps=600 length=4.5907 units=m
+new object=line.line696 bus1=691.1.2.3 bus2=697.1.2.3 phases=3 linecode=4c_1 seasons=1 ratings=[400] normamps=400 emergamps=600 length=2.1907 units=m
+new object=line.line702 bus1=697.1.2.3 bus2=703.1.2.3 phases=3 linecode=4c_06 seasons=1 ratings=[400] normamps=400 emergamps=600 length=2.4 units=m
 new object=line.line706 bus1=703.1.2.3 bus2=707.1.2.3 phases=3 linecode=4c_06 seasons=1 ratings=[400] normamps=400 emergamps=600 length=6.3308 units=m
 new object=line.line711 bus1=707.1.2.3 bus2=718.1.2.3 phases=3 linecode=4c_06 seasons=1 ratings=[400] normamps=400 emergamps=600 length=15.2459 units=m
 new object=line.line723 bus1=718.1.2.3 bus2=745.1.2.3 phases=3 linecode=4c_06 seasons=1 ratings=[400] normamps=400 emergamps=600 length=17.0068 units=m
@@ -350,6 +351,7 @@ new object=monitor.line825_vi_vs_time element=line.line825 terminal=2 mode=0
 new object=energymeter.m1 element=line.line1 terminal=1
 makebuslist
 set voltagebases=[11,0.416]
+setbusxy bus=sourcebus x=0 y=0
 setbusxy bus=1 x=390872.663 y=392887.379
 setbusxy bus=15 x=390872.292 y=392875.208
 setbusxy bus=25 x=390877.003 y=392873.341
@@ -381,6 +383,7 @@ setbusxy bus=615 x=390923.419 y=392763.338
 setbusxy bus=666 x=390925.444 y=392762.018
 setbusxy bus=686 x=390932.739 y=392768.301
 setbusxy bus=691 x=390940.702 y=392775.184
+setbusxy bus=697 x=390942.352 y=392776.625
 setbusxy bus=703 x=390944.148 y=392778.217
 setbusxy bus=830 x=390942.333 y=392778.516
 setbusxy bus=707 x=390948.941 y=392782.353

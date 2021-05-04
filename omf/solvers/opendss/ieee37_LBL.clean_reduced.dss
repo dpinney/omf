@@ -1,0 +1,117 @@
+clear
+new object=circuit.ieee37_lbl basekv=230 pu=1.00 mvasc3=200000 mvasc1=210000
+new object=transformer.subxf phases=3 xhl=8 buses=[sourcebus.1.2.3,799.1.2.3] conns=[delta,delta] kvs=[230,4.8] kvas=[2500,2500] %rs=[1,1]
+new object=linecode.721 nphases=3 basefreq=60 rmatrix=[0.055416667|0.012746212,0.050113636|0.006382576,0.012746212,0.055416667] xmatrix=[0.037367424|-0.006969697,0.035984848|-0.007897727,-0.006969697,0.037367424] cmatrix=[80.27484728|0,80.27484728|0,0,80.27484728]
+new object=linecode.722 nphases=3 basefreq=60 rmatrix=[0.089981061|0.030852273,0.085|0.023371212,0.030852273,0.089981061] xmatrix=[0.056306818|-0.006174242,0.050719697|-0.011496212,-0.006174242,0.056306818] cmatrix=[64.2184109|0,64.2184109|0,0,64.2184109]
+new object=linecode.723 nphases=3 basefreq=60 rmatrix=[0.245|0.092253788,0.246628788|0.086837121,0.092253788,0.245] xmatrix=[0.127140152|0.039981061,0.119810606|0.028806818,0.039981061,0.127140152] cmatrix=[37.5977112|0,37.5977112|0,0,37.5977112]
+new object=linecode.724 nphases=3 basefreq=60 rmatrix=[0.396818182|0.098560606,0.399015152|0.093295455,0.098560606,0.396818182] xmatrix=[0.146931818|0.051856061,0.140113636|0.040208333,0.051856061,0.146931818] cmatrix=[30.26701029|0,30.26701029|0,0,30.26701029]
+new object=line.l1 phases=3 bus1=701.1.2.3 bus2=702.1.2.3 linecode=722 length=0.96
+new object=line.l2 phases=3 bus1=702.1.2.3 bus2=705.1.2.3 linecode=724 length=0.4
+new object=line.l3 phases=3 bus1=702.1.2.3 bus2=713.1.2.3 linecode=723 length=0.36
+new object=line.l4 phases=3 bus1=702.1.2.3 bus2=703.1.2.3 linecode=722 length=1.32
+new object=line.l5 phases=3 bus1=703.1.2.3 bus2=727.1.2.3 linecode=724 length=0.24
+new object=line.l6 phases=3 bus1=703.1.2.3 bus2=730.1.2.3 linecode=723 length=0.6
+new object=line.l7 phases=3 bus1=704.1.2.3 bus2=714.1.2.3 linecode=724 length=0.08
+new object=line.l8 phases=3 bus1=704.1.2.3 bus2=720.1.2.3 linecode=723 length=0.8
+new object=line.l9 phases=3 bus1=705.1.2.3 bus2=742.1.2.3 linecode=724 length=0.32
+new object=line.l10 phases=3 bus1=705.1.2.3 bus2=712.1.2.3 linecode=724 length=0.24
+new object=line.l11 phases=3 bus1=706.1.2.3 bus2=725.1.2.3 linecode=724 length=0.28
+new object=line.l12 phases=3 bus1=707.1.2.3 bus2=724.1.2.3 linecode=724 length=0.76
+new object=line.l13 phases=3 bus1=707.1.2.3 bus2=722.1.2.3 linecode=724 length=0.12
+new object=line.l14 phases=3 bus1=708.1.2.3 bus2=733.1.2.3 linecode=723 length=0.32
+new object=line.l15 phases=3 bus1=708.1.2.3 bus2=732.1.2.3 linecode=724 length=0.32
+new object=line.l16 phases=3 bus1=709.1.2.3 bus2=731.1.2.3 linecode=723 length=0.6
+new object=line.l17 phases=3 bus1=709.1.2.3 bus2=708.1.2.3 linecode=723 length=0.32
+new object=line.l18 phases=3 bus1=710.1.2.3 bus2=735.1.2.3 linecode=724 length=0.2
+new object=line.l19 phases=3 bus1=710.1.2.3 bus2=736.1.2.3 linecode=724 length=1.28
+new object=line.l20 phases=3 bus1=711.1.2.3 bus2=741.1.2.3 linecode=723 length=0.4
+new object=line.l21 phases=3 bus1=711.1.2.3 bus2=740.1.2.3 linecode=724 length=0.2
+new object=line.l22 phases=3 bus1=713.1.2.3 bus2=704.1.2.3 linecode=723 length=0.52
+new object=line.l23 phases=3 bus1=714.1.2.3 bus2=718.1.2.3 linecode=724 length=0.52
+new object=line.l24 phases=3 bus1=720.1.2.3 bus2=707.1.2.3 linecode=724 length=0.92
+new object=line.l25 phases=3 bus1=720.1.2.3 bus2=706.1.2.3 linecode=723 length=0.6
+new object=line.l26 phases=3 bus1=727.1.2.3 bus2=744.1.2.3 linecode=723 length=0.28
+new object=line.l27 phases=3 bus1=730.1.2.3 bus2=709.1.2.3 linecode=723 length=0.2
+new object=line.l28 phases=3 bus1=733.1.2.3 bus2=734.1.2.3 linecode=723 length=0.56
+new object=line.l29 phases=3 bus1=734.1.2.3 bus2=737.1.2.3 linecode=723 length=0.64
+new object=line.l30 phases=3 bus1=734.1.2.3 bus2=710.1.2.3 linecode=724 length=0.52
+new object=line.l31 phases=3 bus1=737.1.2.3 bus2=738.1.2.3 linecode=723 length=0.4
+new object=line.l32 phases=3 bus1=738.1.2.3 bus2=711.1.2.3 linecode=723 length=0.4
+new object=line.l33 phases=3 bus1=744.1.2.3 bus2=728.1.2.3 linecode=724 length=0.2
+new object=line.l34 phases=3 bus1=744.1.2.3 bus2=729.1.2.3 linecode=724 length=0.28
+new object=line.l35 phases=3 bus1=799r.1.2.3 bus2=701.1.2.3 linecode=721 length=1.85
+new object=transformer.reg1 phases=3 bank=reg1 xhl=0.01 kvas=[2500,2500] buses=[799.1.2.3,799r.1.2.3] kvs=[2.77128129,2.77128129] %loadloss=0.01
+new object=regcontrol.reg1a transformer=reg1 bus=799r.1 winding=2 vreg=138 band=2 ptratio=20
+new object=load.s701a bus1=701.1.2 phases=1 conn=delta model=1 kv=4.800 kw=140.0 kvar=70.0
+new object=load.s701b bus1=701.2.3 phases=1 conn=delta model=1 kv=4.800 kw=140.0 kvar=70.0
+new object=load.s701c bus1=701.3.1 phases=1 conn=delta model=1 kv=4.800 kw=350.0 kvar=175.0
+new object=load.s712c bus1=712.3.1 phases=1 conn=delta model=1 kv=4.800 kw=85.0 kvar=40.0
+new object=load.s713c bus1=713.3.1 phases=1 conn=delta model=1 kv=4.800 kw=85.0 kvar=40.0
+new object=load.s714a bus1=714.1.2 phases=1 conn=delta model=4 kv=4.800 kw=17.0 kvar=8.0
+new object=load.s714b bus1=714.2.3 phases=1 conn=delta model=4 kv=4.800 kw=21.0 kvar=10.0
+new object=load.s718a bus1=718.1.2 phases=1 conn=delta model=2 kv=4.800 kw=85.0 kvar=40.0
+new object=load.s720c bus1=720.3.1 phases=1 conn=delta model=1 kv=4.800 kw=85.0 kvar=40.0
+new object=load.s722b bus1=722.2.3 phases=1 conn=delta model=4 kv=4.800 kw=140.0 kvar=70.0
+new object=load.s722c bus1=722.3.1 phases=1 conn=delta model=4 kv=4.800 kw=21.0 kvar=10.0
+new object=load.s724b bus1=724.2.3 phases=1 conn=delta model=2 kv=4.800 kw=42.0 kvar=21.0
+new object=load.s725b bus1=725.2.3 phases=1 conn=delta model=1 kv=4.800 kw=42.0 kvar=21.0
+new object=load.s727c bus1=727.3.1 phases=1 conn=delta model=1 kv=4.800 kw=42.0 kvar=21.0
+new object=load.s728 bus1=728.1.2.3 phases=3 conn=delta model=1 kv=4.800 kw=126.0 kvar=63.0
+new object=load.s729a bus1=729.1.2 phases=1 conn=delta model=4 kv=4.800 kw=42.0 kvar=21.0
+new object=load.s730c bus1=730.3.1 phases=1 conn=delta model=2 kv=4.800 kw=85.0 kvar=40.0
+new object=load.s731b bus1=731.2.3 phases=1 conn=delta model=2 kv=4.800 kw=85.0 kvar=40.0
+new object=load.s732c bus1=732.3.1 phases=1 conn=delta model=1 kv=4.800 kw=42.0 kvar=21.0
+new object=load.s733a bus1=733.1.2 phases=1 conn=delta model=4 kv=4.800 kw=85.0 kvar=40.0
+new object=load.s734c bus1=734.3.1 phases=1 conn=delta model=1 kv=4.800 kw=42.0 kvar=21.0
+new object=load.s735c bus1=735.3.1 phases=1 conn=delta model=1 kv=4.800 kw=85.0 kvar=40.0
+new object=load.s736b bus1=736.2.3 phases=1 conn=delta model=2 kv=4.800 kw=42.0 kvar=21.0
+new object=load.s737a bus1=737.1.2 phases=1 conn=delta model=4 kv=4.800 kw=140.0 kvar=70.0
+new object=load.s738a bus1=738.1.2 phases=1 conn=delta model=1 kv=4.800 kw=126.0 kvar=62.0
+new object=load.s740c bus1=740.3.1 phases=1 conn=delta model=1 kv=4.800 kw=85.0 kvar=40.0
+new object=load.s741c bus1=741.3.1 phases=1 conn=delta model=4 kv=4.800 kw=42.0 kvar=21.0
+new object=load.s742a bus1=742.1.2 phases=1 conn=delta model=2 kv=4.800 kw=8.0 kvar=4.0
+new object=load.s742b bus1=742.2.3 phases=1 conn=delta model=2 kv=4.800 kw=85.0 kvar=40.0
+new object=load.s744a bus1=744.1.2 phases=1 conn=delta model=1 kv=4.800 kw=42.0 kvar=21.0
+makebuslist
+set voltagebases=[230,4.8,0.48]
+calcvoltagebases
+setbusxy bus=701 x=0 y=-1.85
+setbusxy bus=702 x=0 y=-2.81
+setbusxy bus=703 x=0 y=-4.13
+setbusxy bus=704 x=0.88 y=-2.81
+setbusxy bus=705 x=-0.4 y=-2.81
+setbusxy bus=706 x=1.68 y=-3.41
+setbusxy bus=707 x=1.68 y=-1.89
+setbusxy bus=708 x=-0.32 y=-4.93
+setbusxy bus=709 x=0 y=-4.93
+setbusxy bus=710 x=-0.84 y=-5.81
+setbusxy bus=711 x=0.48 y=-6.45
+setbusxy bus=712 x=-0.4 y=-2.57
+setbusxy bus=713 x=0.36 y=-2.81
+setbusxy bus=714 x=0.88 y=-2.89
+setbusxy bus=718 x=0.88 y=-3.41
+setbusxy bus=720 x=1.68 y=-2.81
+setbusxy bus=722 x=1.56 y=-1.89
+setbusxy bus=724 x=1.68 y=-1.13
+setbusxy bus=725 x=1.68 y=-3.69
+setbusxy bus=727 x=-0.24 y=-4.13
+setbusxy bus=728 x=-0.52 y=-4.33
+setbusxy bus=729 x=-0.8 y=-4.13
+setbusxy bus=730 x=0 y=-4.73
+setbusxy bus=731 x=0.6 y=-4.93
+setbusxy bus=732 x=-0.64 y=-4.93
+setbusxy bus=733 x=-0.32 y=-5.25
+setbusxy bus=734 x=-0.32 y=-5.81
+setbusxy bus=735 x=-0.84 y=-6.01
+setbusxy bus=736 x=-0.84 y=-4.53
+setbusxy bus=737 x=-0.32 y=-6.45
+setbusxy bus=738 x=0.08 y=-6.45
+setbusxy bus=740 x=0.48 y=-6.25
+setbusxy bus=741 x=0.88 y=-6.45
+setbusxy bus=742 x=-0.72 y=-2.81
+setbusxy bus=744 x=-0.52 y=-4.13
+setbusxy bus=799 x=0 y=0.01
+setbusxy bus=799r x=0 y=0
+setbusxy bus=sourcebus x=0 y=0.02
+set maxiterations=100
+solve
