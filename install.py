@@ -60,8 +60,8 @@ elif platform.system()=='Windows':
 	os.system("choco install -y --no-progress octave.portable")
 	# TODO: find way to install mdbtools.
 	# Install GridLAB-D.
-	os.system("wget --no-check-certificate https://sourceforge.net/projects/gridlab-d/files/gridlab-d/Candidate%20release/gridlabd-4.0_RC1.exe")
-	os.system("gridlabd-4.0_RC1.exe/silent")
+	#os.system("wget --no-check-certificate https://sourceforge.net/projects/gridlab-d/files/gridlab-d/Candidate%20release/gridlabd-4.0_RC1.exe")
+	os.system("omf/static/gridlabd-4.0_RC1.exe/silent")
 	#Install splat
 	#os.system(wget http://www.ve3ncq.ca/software/SPLAT-1.3.1.zip)
 	#os.system(unzip SPLAT-1.3.1.zip) #need to rename/copy these files.
@@ -80,8 +80,8 @@ elif platform.system()=='Windows':
 elif platform.system()=="Darwin": # MacOS
 	# Install homebrew
 	os.system("HOMEBREW_NO_AUTO_UPDATE=1 brew install wget ffmpeg git graphviz octave mdbtools") # Set no-update to keep homebrew from blowing away python3.
-	os.system("wget -O gridlabd.dmg --no-check-certificate https://sourceforge.net/projects/gridlab-d/files/gridlab-d/Candidate%20release/gridlabd_4.0.0.dmg")
-	os.system("sudo hdiutil attach gridlabd.dmg")
+	#os.system("wget -O gridlabd.dmg --no-check-certificate https://sourceforge.net/projects/gridlab-d/files/gridlab-d/Candidate%20release/gridlabd_4.0.0.dmg")
+	os.system("sudo hdiutil attach omf/static/gridlabd-4.0_RC1.dmg")
 	os.system('sudo installer -package "/Volumes/GridLAB-D 4.0.0/gridlabd.mpkg" -target /')
 	os.system('sudo hdiutil detach "/Volumes/GridLAB-D 4.0.0"')
 	# splat install
