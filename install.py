@@ -61,7 +61,7 @@ elif platform.system()=='Windows':
 	# TODO: find way to install mdbtools.
 	# Install GridLAB-D.
 	#os.system("wget --no-check-certificate https://sourceforge.net/projects/gridlab-d/files/gridlab-d/Candidate%20release/gridlabd-4.0_RC1.exe")
-	os.system("omf/static/gridlabd-4.0_RC1.exe/silent")
+	os.system("cd omf/static; gridlabd-4.0_RC1.exe/silent")
 	#Install splat
 	#os.system(wget http://www.ve3ncq.ca/software/SPLAT-1.3.1.zip)
 	#os.system(unzip SPLAT-1.3.1.zip) #need to rename/copy these files.
