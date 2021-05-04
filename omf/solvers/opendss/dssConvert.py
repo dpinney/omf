@@ -214,7 +214,7 @@ def dssToTree(pathToDss):
 					else: # if single key has not already been added, add it
 						ob[k] = v
 		except:
-			raise Exception(f"Error encountered in group (space delimited) #{jpos+1} of line {i + 1}: {line}")
+			raise Exception(f"\nError encountered in group (space delimited) #{jpos+1} of line {i + 1}: {line}")
 			# raise Exception("Temp fix but error in loop at line 76")
 		contents[i] = ob
 	# Print to file

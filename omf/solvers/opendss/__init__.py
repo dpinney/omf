@@ -75,6 +75,156 @@ def _getByName(tree, name):
                 matches.append(x)
     return matches[0]
 
+def new_newQstsPlot(filePath, stepSizeInMinutes, numberOfSteps, keepAllFiles=False, actions={}, filePrefix='timeseries'):
+	''' QSTS with native opendsscmd binary to avoid segfaults in opendssdirect. '''
+	dssFileLoc = os.path.dirname(os.path.abspath(filePath))
+	dss_run_file = ''
+	# volt_coord = runDSS(filePath)
+	dss_run_file += f'redirect {filePath}\n'
+	dss_run_file += f'set datapath="{dssFileLoc}"\n'
+	dss_run_file += f'calcvoltagebases\n'
+	# Attach Monitors
+	tree = dssConvert.dssToTree(filePath)
+	mon_names = []
+	circ_name = 'NONE'
+	base_kvs = pd.DataFrame()
+	for ob in tree:
+		obData = ob.get('object','NONE.NONE')
+		obType, name = obData.split('.')
+		mon_name = f'mon{obType}-{name}'
+		if obData.startswith('circuit.'):
+			circ_name = name
+		elif obData.startswith('vsource.'):
+			dss_run_file += f'new object=monitor.{mon_name} element={obType}.{name} terminal=1 mode=0\n'
+			mon_names.append(mon_name)
+		elif obData.startswith('isource.'):
+			dss_run_file += f'new object=monitor.{mon_name} element={obType}.{name} terminal=1 mode=0\n'
+			mon_names.append(mon_name)
+		elif obData.startswith('generator.') or obData.startswith('isource.') or obData.startswith('storage.'):
+			mon_name = f'mongenerator-{name}'
+			dss_run_file += f'new object=monitor.{mon_name} element={obType}.{name} terminal=1 mode=1 ppolar=no\n'
+			mon_names.append(mon_name)
+		elif ob.get('object','').startswith('load.'):
+			dss_run_file += f'new object=monitor.{mon_name} element={obType}.{name} terminal=1 mode=0\n'
+			mon_names.append(mon_name)
+			new_kv = pd.DataFrame({'kv':[float(ob.get('kv',1.0))],'Name':['monload-' + name]})
+			base_kvs = base_kvs.append(new_kv)
+		elif ob.get('object','').startswith('capacitor.'):
+			dss_run_file += f'new object=monitor.{mon_name} element={obType}.{name} terminal=1 mode=6\n'
+			mon_names.append(mon_name)
+		elif ob.get('object','').startswith('regcontrol.'):
+			tformer = ob.get('transformer','NONE')
+			winding = ob.get('winding',1)
+			dss_run_file += f'new object=monitor.{mon_name} element=transformer.{tformer} terminal={winding} mode=2\n'
+			mon_names.append(mon_name)
+	# Run DSS
+	dss_run_file += f'set mode=yearly stepsize={stepSizeInMinutes}m \n'
+	if actions == {}:
+		# Run all steps directly.
+		dss_run_file += f'set number={numberOfSteps}\n'
+		dss_run_file += 'solve\n'
+	else:
+		# Actions defined, run them at the appropriate timestep.
+		dss_run_file += f'set number=1\n'
+		for step in range(1, numberOfSteps+1):
+			action = actions.get(step)
+			if action != None:
+				print(f'Step {step} executing:', action)
+				dss_run_file += action
+			dss_run_file += 'solve\n'
+	# Export all monitors
+	for name in mon_names:
+		dss_run_file += f'export monitors monitorname={name}\n'
+	# Write runner file and run.
+	os.system(f'opendsscmd {dssFileLoc}/dss_run_file.dss')
+	with open(f'{dssFileLoc}/dss_run_file.dss', 'w') as run_file:
+		run_file.write(dss_run_file)
+	# Aggregate monitors
+	all_gen_df = pd.DataFrame()
+	all_load_df = pd.DataFrame()
+	all_source_df = pd.DataFrame()
+	all_control_df = pd.DataFrame()
+	for name in mon_names:
+		csv_path = f'{dssFileLoc}/{circ_name}_Mon_{name}.csv'
+		df = pd.read_csv(f'{circ_name}_Mon_{name}.csv')
+		if name.startswith('monload-'):
+			#TODO: debug such that load data moves to the correct column for that phase instead of reassigning column headings. Concatenation step resets column headings.
+			#TODO: current logic here does not change column headings in df.head()
+			# ob_name = name.split('-')[1]
+			# the_object = _getByName(tree, ob_name)
+			# phase_ids = the_object.get('bus1','').split('.')[1:]
+			# if len(phase_ids) == 1:
+			# 	df.rename({'V1': f'V{phase_ids[0]}'}, axis='columns')
+			# 	#print(df.head(10))
+			# elif len(phase_ids) == 2:
+			# 	df.rename({'V1': f'V{phase_ids[0]}'}, axis='columns')
+			# 	df.rename({'V2': f'V{phase_ids[1]}'}, axis='columns')
+			df['Name'] = name
+			all_load_df = pd.concat([all_load_df, df], ignore_index=True, sort=False)
+			#pd.set_option('display.max_columns', None)
+			#print("all_load_df:", df.head(50))
+		elif name.startswith('mongenerator-'):
+			df['Name'] = name
+			all_gen_df = pd.concat([all_gen_df, df], ignore_index=True, sort=False)
+		elif name.startswith('monvsource-'):
+			df['Name'] = name
+			all_source_df = pd.concat([all_source_df, df], ignore_index=True, sort=False)
+		elif name.startswith('monisource-'):
+			df['Name'] = name
+			all_source_df = pd.concat([all_source_df, df], ignore_index=True, sort=False)
+		elif name.startswith('moncapacitor-'):
+			df['Type'] = 'Capacitor'
+			df['Name'] = name
+			df = df.rename({' Step_1 ': 'Tap(pu)'}, axis='columns') #HACK: rename to match regulator tap name
+			all_control_df = pd.concat([all_control_df, df], ignore_index=True, sort=False)
+		elif name.startswith('monregcontrol-'):
+			df['Type'] = 'Transformer'
+			df['Name'] = name
+			df = df.rename({' Tap (pu)': 'Tap(pu)'}, axis='columns') #HACK: rename to match cap tap name
+			all_control_df = pd.concat([all_control_df, df], ignore_index=True, sort=False)
+		if not keepAllFiles:
+			os.remove(csv_path)
+	# Collect switching actions
+	for key, ob in actions.items():
+		if ob.startswith('open'):
+			switch_ob = ob.split()
+			ob_name = switch_ob[1][7:]
+			new_row = {'hour':key, 't(sec)':0.0,'Tap(pu)':1,'Type':'Switch','Name':ob_name}
+			all_control_df = all_control_df.append(new_row, ignore_index=True)
+	for key, ob in actions.items():
+		if ob.startswith('close'):
+			switch_ob = ob.split()
+			ob_name = switch_ob[1][7:]
+			new_row = {'hour':key, 't(sec)':0.0,'Tap(pu)':1,'Type':'Switch','Name':ob_name}
+			all_control_df = all_control_df.append(new_row, ignore_index=True)
+	# Write final aggregates
+	if not all_gen_df.empty:
+		all_gen_df.sort_values(['Name','hour'], inplace=True)
+		all_gen_df.columns = all_gen_df.columns.str.replace(r'[ "]','',regex=True)
+		all_gen_df.to_csv(f'{dssFileLoc}/{filePrefix}_gen.csv', index=False)
+	if not all_control_df.empty:
+		all_control_df.sort_values(['Name','hour'], inplace=True)
+		all_control_df.columns = all_control_df.columns.str.replace(r'[ "]','',regex=True)
+		all_control_df.to_csv(f'{dssFileLoc}/{filePrefix}_control.csv', index=False)
+	if not all_source_df.empty:
+		all_source_df.sort_values(['Name','hour'], inplace=True)
+		all_source_df.columns = all_source_df.columns.str.replace(r'[ "]','',regex=True)
+		all_source_df["P1(kW)"] = all_source_df["V1"].astype(float) * all_source_df["I1"].astype(float) / 1000.0
+		all_source_df["P2(kW)"] = all_source_df["V2"].astype(float) * all_source_df["I2"].astype(float) / 1000.0
+		all_source_df["P3(kW)"] = all_source_df["V3"].astype(float) * all_source_df["I3"].astype(float) / 1000.0
+		all_source_df.to_csv(f'{dssFileLoc}/{filePrefix}_source.csv', index=False)
+	if not all_load_df.empty:
+		all_load_df.sort_values(['Name','hour'], inplace=True)
+		all_load_df.columns = all_load_df.columns.str.replace(r'[ "]','',regex=True)
+		all_load_df = all_load_df.join(base_kvs.set_index('Name'), on='Name')
+		# TODO: insert ANSI bands here based on base_kv?  How to not display two bands per load with the appended CSV format?
+		all_load_df['V1(PU)'] = all_load_df['V1'].astype(float) / (all_load_df['kv'].astype(float) * 1000.0)
+		# HACK: reassigning 0V to "NaN" as below does not removes 0V phases but could impact 2 phase systems
+		#all_load_df['V2'][(all_load_df['VAngle2']==0) & (all_load_df['V2']==0)] = "NaN"
+		all_load_df['V2(PU)'] = all_load_df['V2'].astype(float) / (all_load_df['kv'].astype(float) * 1000.0)
+		all_load_df['V3(PU)'] = all_load_df['V3'].astype(float) / (all_load_df['kv'].astype(float) * 1000.0)
+		all_load_df.to_csv(f'{dssFileLoc}/{filePrefix}_load.csv', index=False)
+
 def newQstsPlot(filePath, stepSizeInMinutes, numberOfSteps, keepAllFiles=False, actions={}, filePrefix='timeseries'):
 	''' Use monitor objects to generate voltage values for a timeseries powerflow. '''
 	dssFileLoc = os.path.dirname(os.path.abspath(filePath))
@@ -269,7 +419,7 @@ def currentPlot(filePath):
 	plt.savefig(dssFileLoc + '/Current Profile.png')
 	plt.clf()
 
-def networkPlot(filePath):
+def networkPlot(filePath, figsize=(20,20), output_name='networkPlot.png'):
 	''' Plot the physical topology of the circuit. '''
 	dssFileLoc = os.path.dirname(os.path.abspath(filePath))
 	coords = runDSS(filePath)
@@ -285,14 +435,14 @@ def networkPlot(filePath):
 		except:
 			bus_name = row['Bus']
 		G.add_node(bus_name)
-		pos[bus_name] = (row['X'], row['Y'])
- 	# Get the connecting edges using Pandas.
+		pos[bus_name] = (float(row['X']), float(row['Y']))
+	# Get the connecting edges using Pandas.
 	lines = dss.utils.lines_to_dataframe()
 	edges = []
 	for index, row in lines.iterrows():
-		#HACK: dss upercases everything in the outputs.
-		bus1 = row['Bus1'][:4].upper().replace('.', '')
-		bus2 = row['Bus2'][:4].upper().replace('.', '')
+		#HACK: dss upercases everything in the coordinate output.
+		bus1 = row['Bus1'].split('.')[0].upper()
+		bus2 = row['Bus2'].split('.')[0].upper()
 		edges.append((bus1, bus2))
 	G.add_edges_from(edges)
 	# We'll color the nodes according to voltage.
@@ -303,13 +453,14 @@ def networkPlot(filePath):
 		labels[row['Bus']] = row['Bus']
 	colorCode = [volt_values.get(node, 0.0) for node in G.nodes()]
 	# Start drawing.
+	plt.figure(figsize=figsize) 
 	nodes = nx.draw_networkx_nodes(G, pos, node_color=colorCode)
 	edges = nx.draw_networkx_edges(G, pos)
 	nx.draw_networkx_labels(G, pos, labels, font_size=8)
 	plt.colorbar(nodes)
 	plt.xlabel('Distance [m]')
 	plt.title('Network Voltage Layout')
-	plt.savefig(dssFileLoc + '/networkPlot.png')
+	plt.savefig(dssFileLoc + '/' + output_name)
 	plt.clf()
 
 def THD(filePath):
