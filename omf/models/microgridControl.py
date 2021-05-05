@@ -576,8 +576,8 @@ def graphMicrogrid(pathToOmd, pathToMicro, pathToCsv, workDir, maxTime, stepSize
 		os.system(command)
 		
 		#TODO: ignore test_output_3 and use actual onm output.
-		with open(pJoin(__neoMetaModel__._omfDir,'static','testFiles','test_output_3.json')) as inFile:
-		# with open(f'{workDir}/onm_output.json') as inFile:
+		# with open(pJoin(__neoMetaModel__._omfDir,'static','testFiles','test_output_3.json')) as inFile:
+		with open(f'{workDir}/onm_output.json') as inFile:
 			data = json.load(inFile)
 			with open(f'{workDir}/test_output_3.json', 'w') as outfile:
 				json.dump(data, outfile)
@@ -798,6 +798,7 @@ def work(modelDir, inputDict):
 		content = dss_file.read()
 		content = re.sub(r'(\d),(\d|\-)', r'\1 \2', content) #space sep lists
 		content = re.sub(r'(\d),(\d|\-)', r'\1 \2', content) #hack: no really, space sep
+		# content = re.sub(r',,', r',0\.0,', content) #hack: replace null entries in matrices with zeros.
 		content = re.sub(r'.*spectrum.*', r'', content) #drop spectrum
 		content = re.sub(r'object=', r'', content) #drop object=
 	with open(f'{modelDir}/circuit.dss','w') as dss_file_2:
@@ -871,8 +872,8 @@ def new(modelDir):
 		'modelType': modelName,
 		# 'feederName1': 'ieee37nodeFaultTester',
 		# 'feederName1': 'ieee37.dss',
-		'feederName1': 'iowa240c1.clean.dss',
-		# 'feederName1': 'iowa240c2_workingOnm.clean.dss',
+		# 'feederName1': 'iowa240c1.clean.dss',
+		'feederName1': 'iowa240c2_workingOnm.clean.dss',
 		'maxTime': '20',
 		'stepSize': '1',
 		'faultedLine': 'l_1001_1002',
