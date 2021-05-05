@@ -68,7 +68,7 @@ def path_distance(circuit, node_name_1, node_name_2):
 
 	return distance
 
-def find_all_ties(circuit):
+def find_all_ties(circuit, circuit_name):
 	#Given a cicuit, find all possible tie lines between all nodes, excluding ones that already exist
 	all_ties = {}
 	nodes = {}
@@ -87,20 +87,39 @@ def find_all_ties(circuit):
 	# Optional search reduction.
 	# all_pairs = zip(nodes, nodes) # [(n1, n2), (n2, n1), ...]
 	# unique_pairs = set([sorted(x) for x in all_pairs])
-	print(nodes)
+	# get rid of the source bus for optimization purposes
+	nodes.pop("eq_source_bus")
+	nodes_temp = {}
 	for node1 in nodes:
+		print("node1 = " + node1)
+		# Remove node1 from nodes_temp to avoid multiple checks of same node pairings
+		nodes_temp[node1] = nodes[node1]
 		for node2 in nodes:
-			if node1 != node2:
+			if node2 in nodes_temp:
+				pass
+			else:
+				print("node2 = " + node2)
+				# if node1 != node2:
+				contains_1 = (node1, node2) in existing_lines.values()
+				contains_2 = (node2, node1) in existing_lines.values()
 				# Narrow down results by eliminating existing lines on the circuit
-				if (node1, node2) not in existing_lines.values() and (node2, node1) not in existing_lines.values():
+				if (not contains_1) and (not contains_2):
+					contains_3 = (node1, node2) in all_ties
+					contains_4 = (node2, node1) in all_ties
 					# Make sure you haven't already added (node1, node2) to your list of possible tie lines
-					if (node1, node2) not in all_ties and (node2, node1) not in all_ties:
+					if (not contains_3) and (not contains_4):
 						physical_dist = node_distance(circuit, node1, node2)
 						path_dist = path_distance(circuit, node1, node2)
 						all_ties[(node1, node2)] = [physical_dist, path_dist]
+						tie_str = ", ".join(str(x) for x in all_ties[(node1, node2)])
+						print("New addition to all_ties: (" + node1 + ", " + node2 + "): [" + tie_str + "]")
+	# For testing purposes, save all_ties dict to a file to prevent LONG runtime of find_all_ties()
+	ties_file_name = circuit_name+"_allTies.json"
+	with open(pJoin(__neoMetaModel__._omfDir,"scratch",ties_file_name), 'w') as jsonFile:
+		json.dump(all_ties, jsonFile)
 	return all_ties
 
-def find_candidate_pair(circuit):
+def find_candidate_pair(circuit, circuit_name, saved_ties):
 	candidates = {}
 	short_phys_pair = ()
 	short_phys_val = 0.0
@@ -108,7 +127,20 @@ def find_candidate_pair(circuit):
 	long_path_val = 0.0
 	phys_path_dif_pair = ()
 	phys_path_dif_val = 0.0
-	all_ties = find_all_ties(circuit)
+	if saved_ties:
+		ties_file_name = circuit_name+"_allTies.json"
+		try:
+			with open(pJoin(__neoMetaModel__._omfDir,"scratch",ties_file_name), 'r') as tiesFile:
+				all_ties = json.load(tiesFile)
+		except IOError as e:
+			print("Error reading " + pJoin(__neoMetaModel__._omfDir,"scratch",ties_file_name) + ":")
+			print(e)
+			all_ties = find_all_ties(circuit)
+		except:
+			print("Unknown Error reading " + pJoin(__neoMetaModel__._omfDir,"scratch",ties_file_name) + ":")
+			all_ties = find_all_ties(circuit)
+	else:
+		all_ties = find_all_ties(circuit)
 	for tie in all_ties:
 		#Find the tie with the shortest physical distance
 		if short_phys_pair == ():
@@ -146,7 +178,9 @@ def run_fault_study(circuit, tempFilePath, faultDetails=None):
 	#TODO: look at the output files, see what happened to the loads.
 
 def _runModel():
-	with open(pJoin(__neoMetaModel__._omfDir,"static","publicFeeders","iowa240c1.clean.dss.omd"), 'r') as omdFile:
+	full_circuit_name = pJoin(__neoMetaModel__._omfDir,"static","publicFeeders","iowa240c1.clean.dss.omd")
+	circuit_name = "iowa240c1.clean.dss.omd"
+	with open(full_circuit_name, 'r') as omdFile:
 		circuit = json.load(omdFile)
 	# Test node_distance()
 	load1 = "load_1003"
@@ -159,11 +193,11 @@ def _runModel():
 	else:
 		print("Line distance from " + load1 + " to " + load2 + " = " + str(dist2) + "km")
 	# Test find_all_ties()
-	all_ties_list = find_all_ties(circuit)
+	all_ties_list = find_all_ties(circuit, circuit_name)
 	print("find_all_ties() completed!")
 	# Test find_candidate_pair()
 	potential_tie_lines = {}
-	potential_tie_lines = find_candidate_pair(circuit)
+	potential_tie_lines = find_candidate_pair(circuit, circuit_name, saved_ties=True)
 	# print("Potential tie lines: " + potential_tie_lines)
 	print("Shortest physical distance between buses is " + potential_tie_lines['short_phys_val'] + "km between " + potential_tie_lines['short_phys_pair'][0] + " and " + potential_tie_lines['short_phys_pair'][1])
 	print("Longest line distance between buses is " + potential_tie_lines['long_path_val'] + "km between " + potential_tie_lines['long_path_pair'][0] + " and " + potential_tie_lines['long_path_pair'][1])
