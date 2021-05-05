@@ -419,7 +419,7 @@ def currentPlot(filePath):
 	plt.savefig(dssFileLoc + '/Current Profile.png')
 	plt.clf()
 
-def networkPlot(filePath, figsize=(20,20), output_name='networkPlot.png'):
+def networkPlot(filePath, figsize=(20,20), output_name='networkPlot.png', show_labels=True, node_size=300, font_size=8):
 	''' Plot the physical topology of the circuit. '''
 	dssFileLoc = os.path.dirname(os.path.abspath(filePath))
 	coords = runDSS(filePath)
@@ -454,12 +454,13 @@ def networkPlot(filePath, figsize=(20,20), output_name='networkPlot.png'):
 	colorCode = [volt_values.get(node, 0.0) for node in G.nodes()]
 	# Start drawing.
 	plt.figure(figsize=figsize) 
-	nodes = nx.draw_networkx_nodes(G, pos, node_color=colorCode)
+	nodes = nx.draw_networkx_nodes(G, pos, node_color=colorCode, node_size=node_size)
 	edges = nx.draw_networkx_edges(G, pos)
-	nx.draw_networkx_labels(G, pos, labels, font_size=8)
+	if show_labels:
+		nx.draw_networkx_labels(G, pos, labels, font_size=font_size)
 	plt.colorbar(nodes)
-	plt.xlabel('Distance [m]')
 	plt.title('Network Voltage Layout')
+	plt.tight_layout()
 	plt.savefig(dssFileLoc + '/' + output_name)
 	plt.clf()
 
