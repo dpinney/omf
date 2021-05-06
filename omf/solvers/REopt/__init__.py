@@ -4,8 +4,8 @@ from omf.solvers.REopt import logger
 from omf.solvers.REopt import results_poller
 
 def run(inJSONPath, outputPath):
-	API_KEY = 'WhEzm6QQQrks1hcsdN0Vrd56ZJmUyXJxTJFg6pn9'  # REPLACE WITH YOUR API KEY
-	# API_KEY = 'Y8GMAFsqcPtxhjIa1qfNj5ILxN5DH5cjV3i6BeNE'
+	# API_KEY = 'WhEzm6QQQrks1hcsdN0Vrd56ZJmUyXJxTJFg6pn9'  # REPLACE WITH YOUR API KEY
+	API_KEY = 'Y8GMAFsqcPtxhjIa1qfNj5ILxN5DH5cjV3i6BeNE'
 	root_url = 'https://developer.nrel.gov/api/reopt'
 	post_url = root_url + '/v1/job/?api_key=' + API_KEY
 	results_url = root_url + '/v1/job/<run_uuid>/results/?api_key=' + API_KEY
@@ -28,8 +28,8 @@ def run(inJSONPath, outputPath):
 		logger.log.info("Saved results to {}".format(outputPath))
 
 def runResilience(runID, outputPath):
-	API_KEY = 'WhEzm6QQQrks1hcsdN0Vrd56ZJmUyXJxTJFg6pn9'  # REPLACE WITH YOUR API KEY
-	# API_KEY = 'Y8GMAFsqcPtxhjIa1qfNj5ILxN5DH5cjV3i6BeNE'
+	# API_KEY = 'WhEzm6QQQrks1hcsdN0Vrd56ZJmUyXJxTJFg6pn9'  # REPLACE WITH YOUR API KEY
+	API_KEY = 'Y8GMAFsqcPtxhjIa1qfNj5ILxN5DH5cjV3i6BeNE'
 	root_url = 'https://developer.nrel.gov/api/reopt'
 	post_url = root_url + '/v1/outagesimjob/?api_key=' + API_KEY
 	results_url = root_url + '/v1/job/<RUN_ID>/resilience_stats/?api_key=' + API_KEY
