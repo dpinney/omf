@@ -23,7 +23,7 @@ from omf.solvers.opendss import dssConvert
 # Model metadata:
 tooltip = 'outageCost calculates reliability metrics and creates a leaflet graph based on data from an input csv file.'
 modelName, template = __neoMetaModel__.metadata(__file__)
-hidden = True
+hidden = False
 
 def datetime_to_float(d):
 	'helper function to convert a datetime object to a float'
@@ -187,7 +187,7 @@ def customerOutageTable(customerOutageData, outageCost, workDir):
 		
 		row = 0
 		while row < len(customerOutageData):
-			new_html_str += '<tr><td>' + str(customerOutageData.loc[row, 'Customer Name']) + '</td><td>' + str(customerOutageData.loc[row, 'Duration']) + '</td><td>' + str(customerOutageData.loc[row, 'Season']) + '</td><td>' + str(customerOutageData.loc[row, 'Annual kWh']) + '</td><td>' + str(customerOutageData.loc[row, 'Business Type']) + '</td><td>' + str(outageCost[row])+ '</td></tr>'
+			new_html_str += '<tr><td>' + str(customerOutageData.loc[row, 'Customer Name']) + '</td><td>' + str(customerOutageData.loc[row, 'Duration']) + '</td><td>' + str(customerOutageData.loc[row, 'Season']) + '</td><td>' + '{0:.2f}'.format(customerOutageData.loc[row, 'Annual kWh']) + '</td><td>' + str(customerOutageData.loc[row, 'Business Type']) + '</td><td>' + str(outageCost[row])+ '</td></tr>'
 			row += 1
 
 		new_html_str +="""</tbody></table>"""
