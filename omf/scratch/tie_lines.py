@@ -68,10 +68,12 @@ def path_distance(circuit, node_name_1, node_name_2):
 
 	return distance
 
-def find_all_ties(circuit, circuit_name):
+def find_all_ties(circuit, circuit_name, bus_limit):
 	#Given a cicuit, find all possible tie lines between all nodes, excluding ones that already exist
 	all_ties = {}
+	all_ties_json = {}
 	nodes = {}
+	nodes_limited = {}
 	existing_lines = {}
 	# keys for the dict are pairs of node names, with the first value being physical distance and second being path distance
 	for omdObj in circuit["tree"]:
@@ -88,9 +90,21 @@ def find_all_ties(circuit, circuit_name):
 	# all_pairs = zip(nodes, nodes) # [(n1, n2), (n2, n1), ...]
 	# unique_pairs = set([sorted(x) for x in all_pairs])
 	# get rid of the source bus for optimization purposes
-	nodes.pop("eq_source_bus")
+	# nodes.pop("eq_source_bus")
+	if bus_limit > 0:
+		# randomly add the number of nodes denoted by bus_limit and the possible tie_lines will only be ones that are within this set
+		import random
+		node_keys = list(nodes.keys())
+		for x in range(0, bus_limit):
+			random_key = random.choice(node_keys)
+			nodes_limited[random_key] = nodes[random_key]
+			node_keys.remove(random_key)
+	else:
+		nodes_limited = nodes
+	all_ties["selected_buses"] = nodes_limited
+	all_ties_json["selected_buses"] = nodes_limited
 	nodes_temp = {}
-	for node1 in nodes:
+	for node1 in nodes_limited:
 		print("node1 = " + node1)
 		# Remove node1 from nodes_temp to avoid multiple checks of same node pairings
 		nodes_temp[node1] = nodes[node1]
@@ -111,16 +125,20 @@ def find_all_ties(circuit, circuit_name):
 						physical_dist = node_distance(circuit, node1, node2)
 						path_dist = path_distance(circuit, node1, node2)
 						all_ties[(node1, node2)] = [physical_dist, path_dist]
+						# json cannot have tuples as keys, so make a new dict with string type keys
+						json_key = ", ".join((node1, node2))
+						all_ties_json[json_key] = [physical_dist, path_dist]
 						tie_str = ", ".join(str(x) for x in all_ties[(node1, node2)])
-						print("New addition to all_ties: (" + node1 + ", " + node2 + "): [" + tie_str + "]")
+						print("New addition to all_ties: (" + json_key + "): [" + tie_str + "]")
 	# For testing purposes, save all_ties dict to a file to prevent LONG runtime of find_all_ties()
 	ties_file_name = circuit_name+"_allTies.json"
 	with open(pJoin(__neoMetaModel__._omfDir,"scratch",ties_file_name), 'w') as jsonFile:
-		json.dump(all_ties, jsonFile)
+		json.dump(all_ties_json, jsonFile)
 	return all_ties
 
-def find_candidate_pair(circuit, circuit_name, saved_ties):
+def find_candidate_pair(circuit, circuit_name, bus_limit, saved_ties):
 	candidates = {}
+	all_ties = {}
 	short_phys_pair = ()
 	short_phys_val = 0.0
 	long_path_pair = ()
@@ -128,45 +146,53 @@ def find_candidate_pair(circuit, circuit_name, saved_ties):
 	phys_path_dif_pair = ()
 	phys_path_dif_val = 0.0
 	if saved_ties:
+		# read in values from saved json file with all ties
 		ties_file_name = circuit_name+"_allTies.json"
 		try:
 			with open(pJoin(__neoMetaModel__._omfDir,"scratch",ties_file_name), 'r') as tiesFile:
-				all_ties = json.load(tiesFile)
+				all_ties_json = json.load(tiesFile)
+				# Convert json string key back into tuple
+				for tie_key in all_ties_json:
+					if tie_key != "selected_buses":
+						tuple_key = tuple(tie_key.split(", "))
+						all_ties[tuple_key] = all_ties_json[tie_key]
 		except IOError as e:
 			print("Error reading " + pJoin(__neoMetaModel__._omfDir,"scratch",ties_file_name) + ":")
 			print(e)
-			all_ties = find_all_ties(circuit)
+			all_ties = find_all_ties(circuit, circuit_name, bus_limit=bus_limit)
 		except:
 			print("Unknown Error reading " + pJoin(__neoMetaModel__._omfDir,"scratch",ties_file_name) + ":")
-			all_ties = find_all_ties(circuit)
+			all_ties = find_all_ties(circuit, circuit_name, bus_limit=bus_limit)
 	else:
-		all_ties = find_all_ties(circuit)
-	for tie in all_ties:
-		#Find the tie with the shortest physical distance
-		if short_phys_pair == ():
-			short_phys_pair = tie
-			short_phys_val = all_ties[tie][0]
-		if long_path_pair == ():
-			long_path_pair = tie
-			long_path_val = all_ties[tie][1]
-		if phys_path_dif_pair == ():
-			phys_path_dif_pair = tie
-			phys_path_dif_val = all_ties[tie][1] - all_ties[tie][0]
-		if short_phys_val > all_ties[tie][0]:
-			short_phys_pair = tie
-			short_phys_val = all_ties[tie][0]
-		if long_path < all_ties[tie][1]:
-			long_path_pair = tie
-			long_path_val = all_ties[tie][1]
-		if phys_path_dif_val < all_ties[tie][1] - all_ties[tie][0]:
-			phys_path_dif_pair = tie
-			phys_path_dif_val = all_ties[tie][1] - all_ties[tie][0]
+		all_ties = find_all_ties(circuit, circuit_name, bus_limit=bus_limit)
+	for tie in all_ties.keys():
+		if tie != "selected_buses":
+			#Find the tie with the shortest physical distance
+			if short_phys_pair == ():
+				short_phys_pair = tie
+				short_phys_val = all_ties[tie][0]
+			if long_path_pair == ():
+				long_path_pair = tie
+				long_path_val = all_ties[tie][1]
+			if phys_path_dif_pair == ():
+				phys_path_dif_pair = tie
+				phys_path_dif_val = all_ties[tie][1] - all_ties[tie][0]
+			if short_phys_val > all_ties[tie][0]:
+				short_phys_pair = tie
+				short_phys_val = all_ties[tie][0]
+			if long_path_val < all_ties[tie][1]:
+				long_path_pair = tie
+				long_path_val = all_ties[tie][1]
+			if phys_path_dif_val < all_ties[tie][1] - all_ties[tie][0]:
+				phys_path_dif_pair = tie
+				phys_path_dif_val = all_ties[tie][1] - all_ties[tie][0]
 	candidates['short_phys_pair'] = short_phys_pair
 	candidates['short_phys_val'] = short_phys_val
 	candidates['long_path_pair'] = long_path_pair
 	candidates['long_path_val'] = long_path_val
 	candidates['phys_path_dif_pair'] = phys_path_dif_pair
 	candidates['phys_path_dif_val'] = phys_path_dif_val
+	candidates['selected_buses'] = all_ties["selected_buses"]
 
 	return candidates
 
@@ -193,18 +219,18 @@ def _runModel():
 	else:
 		print("Line distance from " + load1 + " to " + load2 + " = " + str(dist2) + "km")
 	# Test find_all_ties()
-	all_ties_list = find_all_ties(circuit, circuit_name)
-	print("find_all_ties() completed!")
+	# all_ties_list = find_all_ties(circuit, circuit_name, bus_limit=5)
+	# print("find_all_ties() completed!")
 	# Test find_candidate_pair()
 	potential_tie_lines = {}
-	potential_tie_lines = find_candidate_pair(circuit, circuit_name, saved_ties=True)
+	potential_tie_lines = find_candidate_pair(circuit, circuit_name, bus_limit=3, saved_ties=False)
+	# potential_tie_lines = find_candidate_pair(circuit, circuit_name, bus_limit=3, saved_ties=True)
 	# print("Potential tie lines: " + potential_tie_lines)
-	print("Shortest physical distance between buses is " + potential_tie_lines['short_phys_val'] + "km between " + potential_tie_lines['short_phys_pair'][0] + " and " + potential_tie_lines['short_phys_pair'][1])
-	print("Longest line distance between buses is " + potential_tie_lines['long_path_val'] + "km between " + potential_tie_lines['long_path_pair'][0] + " and " + potential_tie_lines['long_path_pair'][1])
-	print("Greatest difference of line and physical distance between buses is " + potential_tie_lines['phys_path_dif_val'] + "km between " + potential_tie_lines['phys_path_dif_pair'][0] + " and " + potential_tie_lines['phys_path_dif_val'][1])
-	# Test the tie line creation code
-	# all_ties = find_all_ties(circuit)
-	# print(all_ties)
+	print("Selected buses are " + str(potential_tie_lines['selected_buses']))
+	print("Shortest physical distance between buses is " + '{0:.4f}'.format(potential_tie_lines['short_phys_val']) + "km between " + potential_tie_lines['short_phys_pair'][0] + " and " + potential_tie_lines['short_phys_pair'][1])
+	print("Longest line distance between buses is " + '{0:.4f}'.format(potential_tie_lines['long_path_val']) + "km between " + potential_tie_lines['long_path_pair'][0] + " and " + potential_tie_lines['long_path_pair'][1])
+	print("Greatest difference of line and physical distance between buses is " + '{0:.4f}'.format(potential_tie_lines['phys_path_dif_val']) + "km between " + potential_tie_lines['phys_path_dif_pair'][0] + " and " + potential_tie_lines['phys_path_dif_pair'][1])
+
 
 if __name__ == '__main__':
 	_runModel()
