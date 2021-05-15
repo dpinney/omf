@@ -178,7 +178,7 @@ def customerOutageTable(customerOutageData, outageCost, workDir):
 						<th>Customer Name</th>
 						<th>Duration</th>
 						<th>Season</th>
-						<th>Annual kWh</th>
+						<th>Average kW/hr</th>
 						<th>Business Type</th>
 						<th>Outage Cost</th>
 					</tr>
@@ -187,7 +187,7 @@ def customerOutageTable(customerOutageData, outageCost, workDir):
 		
 		row = 0
 		while row < len(customerOutageData):
-			new_html_str += '<tr><td>' + str(customerOutageData.loc[row, 'Customer Name']) + '</td><td>' + str(customerOutageData.loc[row, 'Duration']) + '</td><td>' + str(customerOutageData.loc[row, 'Season']) + '</td><td>' + '{0:.2f}'.format(customerOutageData.loc[row, 'Annual kWh']) + '</td><td>' + str(customerOutageData.loc[row, 'Business Type']) + '</td><td>' + str(outageCost[row])+ '</td></tr>'
+			new_html_str += '<tr><td>' + str(customerOutageData.loc[row, 'Customer Name']) + '</td><td>' + str(customerOutageData.loc[row, 'Duration']) + '</td><td>' + str(customerOutageData.loc[row, 'Season']) + '</td><td>' + '{0:.2f}'.format(customerOutageData.loc[row, 'Average kW/hr']) + '</td><td>' + str(customerOutageData.loc[row, 'Business Type']) + '</td><td>' + str(outageCost[row])+ '</td></tr>'
 			row += 1
 
 		new_html_str +="""</tbody></table>"""
@@ -240,17 +240,17 @@ def utilityOutageTable(customerCost, restoration_cost, hardware_cost, outageDura
 
 	return utilityOutageHtml
 
-def customerCost1(workDir, customerName, duration, season, averagekW, businessType):
+def customerCost1(workDir, customerName, duration, season, averagekWperhr, businessType):
 	'function to determine customer outage cost based on season, annual kWh usage, and business type'
 	duration = int(duration)
-	averagekW = int(averagekW)
+	averagekW = int(averagekWperhr)
 
 	times = np.array([0,1,2,3,4,5,6,7,8])
-	# load the customer outage cost data (compared with annual kWh usage) from the 2002 Lawton survey
+	# load the customer outage cost data (compared with average kW/hr usage) from the 2009 survey
 	kWTemplate = {}
 
-	# NOTE: We set a maximum kWh value constant so the model doesn't crash for very large annualkWh inputs. However, the
-	# model would still likely be very inaccurate for any value above 175000000
+	# NOTE: We set a maximum average kW/hr set of values so the model doesn't crash for very large averagekWperhr inputs. However, the
+	# model would still likely be very inaccurate for any value above 2500
 	
 	if businessType != 'residential':
 		kWTemplate[5000.0] = np.array([50000, 70000, 120000, 16000, 200000, 260000, 300000, 320000, 350000])
@@ -269,10 +269,10 @@ def customerCost1(workDir, customerName, duration, season, averagekW, businessTy
 		kWTemplate[2.5] = np.array([3, 4, 6, 7, 8, 10, 11, 12, 12])
 		kWTemplate[1.0] = np.array([3, 4, 5, 6, 7, 8, 9, 10, 10])
 		kWTemplate[0.25] = np.array([2, 3, 4, 5, 5, 6, 7, 7, 8])
-	# NOTE: We set a minimum kWh value so the model doesn't crash for low values.
+	# NOTE: We set a minimum average kWperhr value so the model doesn't crash for low values.
 	kWTemplate[0] = np.array([0,0,0,0,0,0,0,0,0])
 
-	def kWhApprox(kWDict, averagekW, iterate):
+	def kWhApprox(kWDict, averagekWperhr, iterate):
 		'helper function for approximating customer outage cost based on annualkWh by iteratively "averaging" the curves'
 		step = 0
 
@@ -283,11 +283,11 @@ def customerCost1(workDir, customerName, duration, season, averagekW, businessTy
 			keys = list(kWDict.keys())
 			keys.sort()
 
-			# find the current kWh values estimated that are closest to the annualkWh input...
-			# ...then, estimate the outage costs for the kWh value directly between these
+			# find the current kWh values estimated that are closest to the average kW/hr input...
+			# ...then, estimate the outage costs for the kW/hr value directly between these
 			key = 0
 			while key < len(keys):
-				if averagekW > keys[key]:			
+				if int(averagekWperhr) > keys[key]:			
 					key+=1
 				else:
 					newEntry = (keys[key] + keys[key+1])/2
@@ -299,11 +299,11 @@ def customerCost1(workDir, customerName, duration, season, averagekW, businessTy
 				return(kWDict[newEntry])
 
 	# estimate customer outage cost based on annualkWh
-	kWhEstimate = kWhApprox(kWTemplate, averagekW, 20)
+	kWperhrEstimate = kWhApprox(kWTemplate, averagekWperhr, 20)
 
 	# based on the annualkWh usage, import the average relationship between season/business type and outage cost
 	# NOTE: This data is also taken from the Lawton survey
-	if averagekW > 10:
+	if int(averagekWperhr) > 10:
 		winter = np.array([10000, 19000, 27000, 41000, 59000, 72000, 83000, 91000, 93000])
 		summer = np.array([11000, 20000, 31000, 43000, 60000, 73000, 84000, 92000, 94500])
 		manufacturing = np.array([25000, 35000, 54000, 77000, 106000, 127000, 147000, 161000, 165000])
@@ -342,7 +342,7 @@ def customerCost1(workDir, customerName, duration, season, averagekW, businessTy
 		seasonMultiplier = averageSummer/averageSeason
 	else:
 		seasonMultiplier = averageWinter/averageSeason
-	kWhEstimate = kWhEstimate * seasonMultiplier
+	kWperhrEstimate = kWperhrEstimate * seasonMultiplier
 
 	# adjust the estimated customer outage cost by the difference between the average outage cost and the average business type cost
 	if businessType != 'residential':
@@ -374,26 +374,26 @@ def customerCost1(workDir, customerName, duration, season, averagekW, businessTy
 		else:
 			averagePublic = np.sum(public)/9
 			businessMultiplier = averagePublic/averageBusiness
-		kWhEstimate = kWhEstimate * businessMultiplier
+		kWperhrEstimate = kWperhrEstimate * businessMultiplier
 
 	# adjust for inflation from 2008 to 2020 using the CPI
-	kWhEstimate = 1.21 * kWhEstimate
+	kWperhrEstimate = 1.21 * kWperhrEstimate
 
 	# find the estimated customer outage cost for the customer in question, given the duration of the outage
 	times = np.array([0,1,2,3,4,5,6,7,8])
-	outageCost = kWhEstimate[duration]
+	outageCost = kWperhrEstimate[duration]
 	localMax = 0
 	row = 0
 	while row < 9:
-		if kWhEstimate[row] > localMax:
-			localMax = kWhEstimate[row]
+		if kWperhrEstimate[row] > localMax:
+			localMax = kWperhrEstimate[row]
 		row+=1
 	
 	# plot the expected customer outage cost over the duration of the outage
 	# plt.plot(times, kWhEstimate)
 	# plt.savefig(workDir + '/customerCostFig')
 	# return {'customerOutageCost': outageCost}
-	return outageCost, kWhEstimate, times, localMax
+	return outageCost, kWperhrEstimate, times, localMax
 
 
 def graphMicrogrid(pathToOmd, pathToMicro, pathToCsv, workDir, maxTime, stepSize, faultedLine, timeMinFilter, timeMaxFilter, actionFilter, outageDuration, restoration_cost, hardware_cost, sameFeeder):
@@ -595,10 +595,10 @@ def graphMicrogrid(pathToOmd, pathToMicro, pathToCsv, workDir, maxTime, stepSize
 		customerName = str(customerOutageData.loc[row, 'Customer Name'])
 		duration = str(customerOutageData.loc[row, 'Duration'])
 		season = str(customerOutageData.loc[row, 'Season'])
-		annualkWh = str(customerOutageData.loc[row, 'Annual kWh'])
+		averagekWperhr = str(customerOutageData.loc[row, 'Average kW/hr'])
 		businessType = str(customerOutageData.loc[row, 'Business Type'])
 
-		customerOutageCost, kWhEstimate, times, localMax = customerCost1(workDir, customerName, duration, season, annualkWh, businessType)
+		customerOutageCost, kWperhrEstimate, times, localMax = customerCost1(workDir, customerName, duration, season, averagekWperhr, businessType)
 		outageCost.append(customerOutageCost)
 		if localMax > globalMax:
 			globalMax = localMax
@@ -608,10 +608,10 @@ def graphMicrogrid(pathToOmd, pathToMicro, pathToCsv, workDir, maxTime, stepSize
 		print(math.floor(row/2))
 		print(row%2)
 		if numberRows > 1:
-			axs[math.floor(row/2), row%2].plot(times, kWhEstimate)
+			axs[math.floor(row/2), row%2].plot(times, kWperhrEstimate)
 			axs[math.floor(row/2), row%2].set_title(str(customerName))
 		else:
-			axs[row%2].plot(times, kWhEstimate)
+			axs[row%2].plot(times, kWperhrEstimate)
 			axs[row%2].set_title(str(customerName))
 		row+=1
 	for ax in axs.flat:
