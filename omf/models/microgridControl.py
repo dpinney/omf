@@ -203,14 +203,14 @@ def customerOutageTable(customerOutageData, outageCost, workDir):
 
 	return customerOutageHtml
 
-def utilityOutageTable(customerCost, restoration_cost, hardware_cost, outageDuration, workDir):
+def utilityOutageTable(average_lost_kwh, profit_on_energy_sales, restoration_cost, hardware_cost, outageDuration, workDir):
 	# check to see if work directory is specified; otherwise, create a temporary directory
 	if not workDir:
 		workDir = tempfile.mkdtemp()
 		print('@@@@@@', workDir)
 	
 	# TODO: update table after calculating outage stats
-	def utilityOutageStats(customerCost, restoration_cost, hardware_cost, outageDuration):
+	def utilityOutageStats(average_lost_kwh, profit_on_energy_sales, restoration_cost, hardware_cost, outageDuration):
 		new_html_str = """
 			<table cellpadding="0" cellspacing="0">
 				<thead>
@@ -223,7 +223,7 @@ def utilityOutageTable(customerCost, restoration_cost, hardware_cost, outageDura
 				</thead>
 				<tbody>"""
 		
-		new_html_str += '<tr><td>' + str(int(sum(customerCost))) + '</td><td>' + str(restoration_cost*outageDuration) + '</td><td>' + str(hardware_cost) + '</td><td>' + str(int(sum(customerCost)) + restoration_cost*outageDuration + hardware_cost)+ '</td></tr>'
+		new_html_str += '<tr><td>' + str(int(sum(average_lost_kwh))*profit_on_energy_sales*outageDuration) + '</td><td>' + str(restoration_cost*outageDuration) + '</td><td>' + str(hardware_cost) + '</td><td>' + str(int(sum(average_lost_kwh))*profit_on_energy_sales*outageDuration + restoration_cost*outageDuration + hardware_cost) + '</td></tr>'
 
 		new_html_str +="""</tbody></table>"""
 
@@ -231,7 +231,8 @@ def utilityOutageTable(customerCost, restoration_cost, hardware_cost, outageDura
 
 	# print business information and estimated customer outage costs
 	utilityOutageHtml = utilityOutageStats(
-		customerCost = customerCost,
+		average_lost_kwh = average_lost_kwh,
+		profit_on_energy_sales = profit_on_energy_sales,
 		restoration_cost = restoration_cost,
 		hardware_cost = hardware_cost,
 		outageDuration = outageDuration)
@@ -396,7 +397,7 @@ def customerCost1(workDir, customerName, duration, season, averagekWperhr, busin
 	return outageCost, kWperhrEstimate, times, localMax
 
 
-def graphMicrogrid(pathToOmd, pathToMicro, pathToCsv, workDir, maxTime, stepSize, faultedLine, timeMinFilter, timeMaxFilter, actionFilter, outageDuration, restoration_cost, hardware_cost, sameFeeder):
+def graphMicrogrid(pathToOmd, pathToMicro, pathToCsv, workDir, maxTime, stepSize, faultedLine, timeMinFilter, timeMaxFilter, actionFilter, outageDuration, profit_on_energy_sales, restoration_cost, hardware_cost, sameFeeder):
 	# read in the OMD file as a tree and create a geojson map of the system
 	if not workDir:
 		workDir = tempfile.mkdtemp()
@@ -440,8 +441,8 @@ def graphMicrogrid(pathToOmd, pathToMicro, pathToCsv, workDir, maxTime, stepSize
 		os.system(command)
 		
 		#TODO: ignore test_output_3 and use actual onm output.
-		# with open(pJoin(__neoMetaModel__._omfDir,'static','testFiles','test_output_3.json')) as inFile:
-		with open(f'{workDir}/onm_output.json') as inFile:
+		with open(pJoin(__neoMetaModel__._omfDir,'static','testFiles','test_output_3.json')) as inFile:
+		# with open(f'{workDir}/onm_output.json') as inFile:
 			data = json.load(inFile)
 			with open(f'{workDir}/test_output_3.json', 'w') as outfile:
 				json.dump(data, outfile)
@@ -589,6 +590,7 @@ def graphMicrogrid(pathToOmd, pathToMicro, pathToCsv, workDir, maxTime, stepSize
 	numberRows = math.ceil(customerOutageData.shape[0]/2)
 	fig, axs = plt.subplots(numberRows, 2)
 	row = 0
+	average_lost_kwh = []
 	outageCost = []
 	globalMax = 0
 	while row < customerOutageData.shape[0]:
@@ -599,6 +601,7 @@ def graphMicrogrid(pathToOmd, pathToMicro, pathToCsv, workDir, maxTime, stepSize
 		businessType = str(customerOutageData.loc[row, 'Business Type'])
 
 		customerOutageCost, kWperhrEstimate, times, localMax = customerCost1(workDir, customerName, duration, season, averagekWperhr, businessType)
+		average_lost_kwh.append(float(averagekWperhr))
 		outageCost.append(customerOutageCost)
 		if localMax > globalMax:
 			globalMax = localMax
@@ -624,11 +627,12 @@ def graphMicrogrid(pathToOmd, pathToMicro, pathToCsv, workDir, maxTime, stepSize
 
 	customerOutageHtml = customerOutageTable(customerOutageData, outageCost, workDir)
 
+	profit_on_energy_sales = float(profit_on_energy_sales)
 	restoration_cost = int(restoration_cost)
 	hardware_cost = int(hardware_cost)
 	outageDuration = int(outageDuration)
 
-	utilityOutageHtml = utilityOutageTable(outageCost, restoration_cost, hardware_cost, outageDuration, workDir)
+	utilityOutageHtml = utilityOutageTable(average_lost_kwh, profit_on_energy_sales, restoration_cost, hardware_cost, outageDuration, workDir)
 
 	return {'utilityOutageHtml': utilityOutageHtml, 'customerOutageHtml': customerOutageHtml, 'timelineStatsHtml': timelineStatsHtml, 'gens': gens, 'loads': loads, 'volts': volts, 'customerOutageCost': customerOutageCost}
 
@@ -688,6 +692,7 @@ def work(modelDir, inputDict):
 		inputDict['timeMaxFilter'],
 		inputDict['actionFilter'],
 		inputDict['outageDuration'],
+		inputDict['profit_on_energy_sales'],
 		inputDict['restoration_cost'],
 		inputDict['hardware_cost'],
 		sameFeeder)
@@ -745,9 +750,10 @@ def new(modelDir):
 		'timeMinFilter': '0',
 		'timeMaxFilter': '20',
 		'actionFilter': 'All',
-		'outageDuration': '5', 
-		'restoration_cost': '1000',
-		'hardware_cost': '5500',
+		'outageDuration': '5',
+		'profit_on_energy_sales': '0.03',
+		'restoration_cost': '100',
+		'hardware_cost': '550',
 		'microFileName': 'microComponents.json',
 		'microData': micro_data,
 		'customerData': customer_data,
