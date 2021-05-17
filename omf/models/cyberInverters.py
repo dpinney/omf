@@ -24,8 +24,8 @@ hidden = False
 def work(modelDir, inputDict):
 	''' Run the model in its directory.'''
 	feederName = [x for x in os.listdir(modelDir) if x.endswith('.omd')][0][:-4]
-	inputDict["feederName1"] = feederName
-	inputDict["circuitFileName1"] = feederName
+	inputDict["omdFileName"] = feederName
+	inputDict["dssFileName"] = feederName
 	zipCode = "59001" #TODO get zip code from the PV and Load input file
 
 	# Output a .dss file, which will be needed for ONM.
@@ -33,18 +33,18 @@ def work(modelDir, inputDict):
 		omd = json.load(omdFile)
 	tree = omd['tree']
 	niceDss = dssConvert.evilGldTreeToDssTree(tree)
-	dssConvert.treeToDss(niceDss, f'{modelDir}/{inputDict["circuitFileName1"]}')
+	dssConvert.treeToDss(niceDss, f'{modelDir}/{inputDict["dssFileName"]}')
 	# dssConvert.treeToDss(niceDss, f'{modelDir}/circuit.dss')
 
 	# Confirm dss file name.
 	dssName = [x for x in os.listdir(modelDir) if x.endswith('.dss')][0]
-	inputDict["circuitFileName1"] = dssName
+	inputDict["dssFileName"] = dssName
 
 	#Value check for attackVariable
 	if inputDict.get("attackVariable", "None") == "None":
 		attackAgentType = "None"
 	else:
-		attackAgentType = inputDict['attackVariable']
+		attackAgentType = inputDict["attackVariable"]
 
 	# Value check for train
 	if inputDict.get("trainAgent", "") == "True":
@@ -56,19 +56,20 @@ def work(modelDir, inputDict):
 	if inputDict.get("hackPercent", "None") == "None":
 		hackPercentValue = None
 	else:
-		hackPercentValue = float(inputDict['hackPercent'])
+		hackPercentValue = float(inputDict["hackPercent"])
 
 	# create solarPVLengthValue to represent number of steps in simulation - will be manipulated by number of rows in load solar data csv file
 	solarPVLengthValue = 0
 
-	#create startStep to represent which step pyCigar should start on - default = 100
-	startStep = 100
+	#create startStep to represent which step pyCigar should start on. Minimum = 100 steps
+	#startStep = 100
+	startStep = int(inputDict["simEntryStep"])
 	
 	#None check for simulation length
 	if inputDict.get("simLength", "None") == "None":
 		simLengthValue = None
 	else:
-		simLengthValue = int(inputDict['simLength'])
+		simLengthValue = int(inputDict["simLength"])
 
 	#None check for simulation length units
 	if inputDict.get("simLengthUnits", "None") == "None":
@@ -111,26 +112,20 @@ def work(modelDir, inputDict):
 			print("Error occurred creating PyCIGAR_inputs folder")
 
 		#create misc_inputs.csv file in folder
-		with open(pJoin(modelDir,"PyCIGAR_inputs","misc_inputs.csv"),"w", newline='') as miscFile:
-			#Populate misc_inputs.csv
-			# miscFile.write(misc_inputs)
-			# for key in misc_dict.keys():
-			# 	miscFile.write("%s,%s\n"%(key,misc_dict[key]))
-			miscFile.write(inputDict['miscFile'])
+		with open(pJoin(modelDir,"PyCIGAR_inputs","misc_inputs.csv"),"w", newline='') as misc_stream:
+			misc_stream.write(inputDict['miscFileContent'])
 
 		#create dss file in folder
-		# copyfile(f'{modelDir}/circuit.dss', f'{modelDir}/PyCIGAR_inputs/circuit.dss')
 		copyfile(f'{modelDir}/{dssName}', f'{modelDir}/PyCIGAR_inputs/circuit.dss')
-		# copyfile(f'{__neoMetaModel__._omfDir}/solvers/opendss/ieee37_ours.dss', f'{modelDir}/PyCIGAR_inputs/circuit.dss')
 
 		#create load_solar_data.csv file in folder
 		rowCount = 0
-		with open(pJoin(modelDir,"PyCIGAR_inputs","load_solar_data.csv"),"w", newline='') as loadPVFile:
-			loadPVFile.write(inputDict['loadPV'])
+		with open(pJoin(modelDir,"PyCIGAR_inputs","load_solar_data.csv"),"w", newline='') as pv_stream:
+			pv_stream.write(inputDict['loadPVFileContent'])
 			#Open load and PV input file
 		try:
-			with open(pJoin(modelDir,"PyCIGAR_inputs","load_solar_data.csv"), newline='') as inFile:
-				reader = csv.reader(inFile)
+			with open(pJoin(modelDir,"PyCIGAR_inputs","load_solar_data.csv"), newline='') as pv_stream2:
+				reader = csv.reader(pv_stream2)
 				for row in reader:
 					rowCount = rowCount+1
 			#Check to see if the simulation length matches the load and solar csv
@@ -144,15 +139,12 @@ def work(modelDir, inputDict):
 			raise Exception(errorMessage)
 
 		#create breakpoints.csv file in folder
-		# f1Name = "breakpoints.csv"
-		# with open(pJoin(omf.omfDir, "static", "testFiles", "pyCIGAR", f1Name)) as f1:
-		# 	breakpoints_inputs = f1.read()
-		with open(pJoin(modelDir,"PyCIGAR_inputs","breakpoints.csv"),"w", newline='') as breakpointsFile:
-			breakpointsFile.write(inputDict['breakpoints'])
+		with open(pJoin(modelDir,"PyCIGAR_inputs","breakpoints.csv"),"w", newline='') as bp_stream:
+			bp_stream.write(inputDict['breakpointsFileContent'])
 
 		#create storage_inputs.txt file in folder
-		with open(pJoin(modelDir,"PyCIGAR_inputs","storage_inputs.txt"),"w", newline='') as storageIns:
-			storageIns.writelines(inputDict['storageFile'])
+		with open(pJoin(modelDir,"PyCIGAR_inputs","storage_inputs.txt"),"w", newline='') as batt_stream:
+			batt_stream.writelines(inputDict['storageFileContent'])
 
 		return solarPVLengthValue
 
@@ -529,45 +521,47 @@ def stringToMag(s):
 
 def new(modelDir):
 	''' Create a new instance of this model. Returns true on success, false on failure. '''
-	circuit_dir = "ieee37busdata"
-	omdFilename = "ieee37_LBL"
-	dssFilename = "ieee37_LBL.dss"
+	# default model files:
+	ckt_dir = "ieee37busdata"
+	omd_fn = "ieee37_LBL"
+	dss_fn = "ieee37_LBL.dss"
+	pv_fn = "load_solar_data.csv"
+	bp_fn = "breakpoints.csv"
+	misc_fn = "misc_inputs.csv"
+	batt_fn = "battery_inputs.txt"
 
-	f1Name = "load_solar_data.csv"
-	with open(pJoin(omf.omfDir, "static", "testFiles", "pyCIGAR", circuit_dir, f1Name)) as f1:
-		load_PV = f1.read()
-	f2Name = "breakpoints.csv"
-	with open(pJoin(omf.omfDir, "static", "testFiles", "pyCIGAR", circuit_dir, f2Name)) as f2:
-		breakpoints_inputs = f2.read()
-	f4Name = "misc_inputs.csv"
-	with open(pJoin(omf.omfDir, "static", "testFiles", "pyCIGAR", circuit_dir, f4Name)) as f4:
-		miscFile = f4.read()
-	sfName = "battery_inputs.txt"
-	with open(pJoin(omf.omfDir, "static", "testFiles", "pyCIGAR", circuit_dir, sfName)) as sf:
-		storageFile = sf.read()
+	with open(pJoin(omf.omfDir, "static", "testFiles", "pyCIGAR", ckt_dir, pv_fn)) as pv_stream:
+		pv_ins = pv_stream.read()
+	with open(pJoin(omf.omfDir, "static", "testFiles", "pyCIGAR", ckt_dir, bp_fn)) as bp_stream:
+		bp_ins = bp_stream.read()
+	with open(pJoin(omf.omfDir, "static", "testFiles", "pyCIGAR", ckt_dir, misc_fn)) as misc_stream:
+		misc_ins = misc_stream.read()
+	with open(pJoin(omf.omfDir, "static", "testFiles", "pyCIGAR", ckt_dir, batt_fn)) as batt_stream:
+		batt_ins = batt_stream.read()
 
 	defaultInputs = {
 		"simStartDate": "2019-07-01T00:00:00Z",
 		"simLength": "750",
-		"simLengthUnits": "seconds",
-		"feederName1": omdFilename,
-		"circuitFileName1": dssFilename,
-		"fileName1":f1Name,
-		"loadPV": load_PV,
-		"fileName2":f2Name,
-		"breakpoints": breakpoints_inputs,
-		"fileName4":f4Name,
-		"miscFile": miscFile,
+		"simStepUnits": "seconds",
+		"simEntryStep": "100",
+		"feederName1": omd_fn,
+		"circuitFileName1": dss_fn,
+		"loadPVFileName": pv_fn,
+		"loadPVFileContent": pv_ins,
+		"breakpointsFileName":bp_fn,
+		"breakpointsFileContent": bp_ins,
+		"miscFileName": misc_fn,
+		"miscFileContent": misc_ins,
+		"storageFileName": batt_fn,
+		"storageFileContent": batt_ins,
+		"includeBattery": "False",
 		"modelType": modelName,
 		"zipCode": "59001",
 		"trainAgent": "False",
 		"attackVariable": "None",
 		"defenseVariable": "None",
 		"hackPercent": "50",
-		"defenseAgentNames": "policy_ieee37_oscillation_sample,policy_ieee37_unbalance_sample",
-		"storageFileName": sfName,
-		"storageFile": storageFile,
-		"includeBattery": "False"
+		"defenseAgentNames": "policy_ieee37_oscillation_sample,policy_ieee37_unbalance_sample"
 	}
 	creationCode = __neoMetaModel__.new(modelDir, defaultInputs)
 	try: 

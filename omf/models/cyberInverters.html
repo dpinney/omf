@@ -11,11 +11,9 @@
 	<script type="text/javascript" src="{{pathPrefix}}/static/omf.js"></script>
 	<script type="text/javascript" src="{{pathPrefix}}/static/jquery-1.9.1.js"></script>
 	<script src="{{pathPrefix}}/static/highcharts4.src.js"></script>
-<!--DEBUG: BEGIN REMOVE?-->
 	<!-- Data  Imports -->
 	<script src="{{pathPrefix}}/static/d3.v3.js"></script>
 	<script>modelStatus="{{modelStatus}}"</script>
-<!--DEBUG: END REMOVE?-->
 	<!-- Global Functions -->
 	<script type="text/javascript">
 		function editFeeder(modelName, feederNum) {
@@ -33,6 +31,14 @@
 			})
 		})
 	</script>
+	{% macro insert_file_upload_block(fileName, dataVariableName) -%}
+		<input id="{{dataVariableName}}Handler" type="file" style="display:none" onchange="handle_files(this.files,'{{dataVariableName}}','{{fileName}}')">
+		<input id="{{dataVariableName}}" name="{{dataVariableName}}" value="{{allInputDataDict[dataVariableName]}}" type="hidden">
+		<div>
+			<label for="{{dataVariableName}}Handler" class="fileButton">Choose File</label>
+			<input id="{{fileName}}" name="{{fileName}}" value="{{allInputDataDict[fileName]}}" readonly class="uploadFileName">    
+		</div>
+	{%- endmacro %}
 </head>
 <body>
 	<div id="header">
@@ -77,78 +83,56 @@
 			</div>
 			<hr>
 			<div class="shortInput">
-				<!--<label>Simulation Start Date (YYYY-MM-DDTHH:mm:SSZ)</label>-->
-				<label>Experiment Start Date (YYYY-MM-DDTHH:mm:SSZ)</label>
+				<label>Simulation Start Time (YYYY-MM-DDTHH:mm:SSZ)</label>
 				<input type="text" id="simStartDate" name="simStartDate" value="{{allInputDataDict.simStartDate}}" required="required" pattern="^\d\d\d\d-\d\d-\d\dT\d\d:\d\d:\d\d(Z|(\+|-)\d\d:\d\d)$"/>
 			</div>
-			<!--<div class="shortInput">
-				<label class="tooltip">Simulation Entry Point<span class="classic"></span>This defines the time at which the simulation enters the experiment. Attacks will enter the simulation 250 time units after the number specified here. </label>
-				<input type="number" id="simLength" name="simLength" min ="100" max = "9999" value={{allInputDataDict.simStartDate}}/>
-			</div>-->
 			<div class="shortInput">
-				<label class="tooltip">Simulation Length<span class="classic">Number of time steps in the installation. If left blank, Simulation Length will be set to step through each row in Load and PV Output file. Warning: The simulation needs 100 time steps to warm up, so Simulation Length must be less than or equal to the number of rows in your load and solar data file minus 100.</span></label>
-				<!--<label class="tooltip">Simulation Length<span class="classic">Number of time steps over which the simulation is acting. This number must be less than the number of rows in your load/PV file minus the value entered under "Simulation Start".</span></label>-->
-				<input type="number" id="simLength" name="simLength"  min ="3" max = "9999" value="{{allInputDataDict.simLength}}"/>
+				<label class="tooltip">Simulation Timestep Units<span class="classic">The unit of time represented by each row in the 'Load and PV Output' .csv file.</span></label>
+				<select id="simStepUnits" name="simStepUnits" value="{{allInputDataDict.simStepUnits}}">
+					<option value="hours" {% if allInputDataDict.simStepUnits == 'hours' %}selected{% endif %}>Hours</option>
+					<option value="minutes" {% if allInputDataDict.simStepUnits == 'minutes' %}selected{% endif %}>Minutes</option>
+					<option value="seconds" {% if allInputDataDict.simStepUnits == 'seconds' %}selected{% endif %}>Seconds</option>
+				</select>
 			</div>
 			<div class="shortInput">
-				<label>Simulation Length Units</label>
-				<select id="simLengthUnits" name="simLengthUnits" value="{{allInputDataDict.simLengthUnits}}">
-					<option value="hours" {% if allInputDataDict.simLengthUnits == 'hours' %}selected{% endif %}>Hours</option>
-					<option value="minutes" {% if allInputDataDict.simLengthUnits == 'minutes' %}selected{% endif %}>Minutes</option>
-					<option value="seconds" {% if allInputDataDict.simLengthUnits == 'seconds' %}selected{% endif %}>Seconds</option>
-				</select>
+				<label class="tooltip">Simulation Entry Point<span class="classic">This defines the time at which the simulation enters the experiment. Attacks will enter the simulation 250 time units after the number specified here.</span></label>
+				<input type="number" id="simEntryStep" name="simEntryStep" min ="100" max = "9999" value="{{allInputDataDict.simEntryStep}}"/>
+			</div>
+			<div class="shortInput">
+				<label class="tooltip">Simulation Length<span class="classic">Number of time steps over which the simulation is acting. This number must be less than the number of rows in your load/PV file minus the value entered under "Simulation Entry Point".</span></label>
+				<input type="number" id="simLength" name="simLength"  min ="3" max = "9999" value="{{allInputDataDict.simLength}}"/>
 			</div>
 <!--TODO: make this update feederName1 and circuitFileName1 when a file is uploaded through distNetViz-->
 			<div class="shortInput">
-				<label class="tooltip">Circuit Editor - Visual<span class="classic">Use a visual interface to upload, view, and manipulate a .dss circuit file.</span></label>
+				<label class="tooltip">Circuit Editor<span class="classic">Use a visual interface to upload, view, and manipulate a .dss circuit file.</span></label>
 				<button id="feederButton" type="button" onclick="editFeeder('{{allInputDataDict.modelName}}',1)" style="display:block;width:125px;">Open Editor</button>
 			</div>
-			<div class="shortInput"><!--HACK:pass feeder name back and forth to backend.-->
+			<div class="shortInput" style="display:none"><!--HACK:pass feeder name back and forth to backend.-->
 				<input type="text" id="feederName1" name="feederName1" value="{{allInputDataDict.feederName1}}">
 			</div>
 <!--TODO: make this update feederName1 and circuitFileName1 when a file is uploaded through distNetViz-->
-			<div class="shortInput">
+			<!--<div class="shortInput">
 				<label class="tooltip">Circuit Editor - Text<span class="classic">Manipulate a .dss circuit file directly in the definition file.</span></label>
 				<button id="OpenDSSButton" type="button" onclick="editDSS('{{allInputDataDict.modelName}}',1)" style="display:block;width:125px;">Open Editor</button>
 			</div>
-			<div class="shortInput" style="display:none"><!--HACK:pass dss name back and forth to backend.-->
+			<div class="shortInput" style="display:none">
 				<input type="text" id="circuitFileName1" name="circuitFileName1" value="{{allInputDataDict.circuitFileName1}}">
+			</div>-->
+			<div class="shortInput">
+				<label class="tooltip">Load and PV Output<span class="classic">Import a .csv file that describes the power output of all loads and PV units.</span></label>
+				<div>{{ insert_file_upload_block('loadPVFileName','loadPVFileContent') }}</div>
 			</div>
 			<div class="shortInput">
-				<label class="tooltip">Load and PV Output<span class="classic">Import the .csv file representing the load and PV output.</span></label>
-				<input id="loadPVFile" type="file" style="display:none" onchange="handle_files(this.files,'loadPV','fileName1')">
-				<input id="loadPV" name="loadPV" value="{{allInputDataDict.loadPV}}" type="hidden">
-				<div>
-					<label for="loadPVFile" class="fileButton">Choose File</label>
-					<input id="fileName1" name="fileName1" value="{{allInputDataDict.fileName1}}" readonly class="uploadFileName">	
-				</div>
+				<label class="tooltip">Breakpoints File Input<span class="classic">Import a .csv file containing the breakpoints that describe the volt-var curve of each inverter.</span></label>
+				<div>{{ insert_file_upload_block('breakpointsFileName','breakpointsFileContent') }}</div>
 			</div>
 			<div class="shortInput">
-				<label class="tooltip">Breakpoints File Input<span class="classic">Import the .csv file representing the breakpoint data.</span></label>
-				<input id="breakpointsFile" type="file" style="display:none" onchange="handle_files(this.files,'breakpoints','fileName2')">
-				<input id="breakpoints" name="breakpoints" value="{{allInputDataDict.breakpoints}}" type="hidden">
-				<div>
-					<label for="breakpointsFile" class="fileButton">Choose File</label>
-					<input id="fileName2" name="fileName2" value="{{allInputDataDict.fileName2}}" readonly class="uploadFileName">	
-				</div>
+				<label class="tooltip">Miscellaneous File Input<span class="classic">Import a .csv file that contains hyperparameters for the model. </span></label>
+				<div>{{ insert_file_upload_block('miscFileName','miscFileContent') }}</div>
 			</div>
 			<div class="shortInput">
-				<label class="tooltip">Miscellaneous File Input<span class="classic">Import the .csv file representing the miscellaneous inputs data.</span></label>
-				<input id="chooseMiscFile" type="file" style="display:none" onchange="handle_files(this.files,'miscFile','fileName4')">
-				<input id="miscFile" name="miscFile" value="{{allInputDataDict.miscFile}}" type="hidden">
-				<div>
-					<label for="chooseMiscFile" class="fileButton">Choose File</label>
-					<input id="fileName4" name="fileName4" value="{{allInputDataDict.fileName4}}" readonly class="uploadFileName">	
-				</div>
-			</div>
-			<div class="shortInput">
-				<label class="tooltip">Battery File Input<span class="classic">Import the .csv file representing the energy storage inputs data.</span></label>
-				<input id="chooseStorageFile" type="file" style="display:none" onchange="handle_files(this.files,'storageFile','storageFileName')">
-				<input id="storageFile" name="storageFile" value="{{allInputDataDict.storageFile}}" type="hidden">
-				<div>
-					<label for="chooseStorageFile" class="fileButton">Choose File</label>
-					<input id="storageFileName" name="storageFileName" value="{{allInputDataDict.storageFileName}}" readonly class="uploadFileName">	
-				</div>
+				<label class="tooltip">Battery File Input<span class="classic">Import a .csv file that describes the characteristics of the battery energy storage system.</span></label>
+				<div>{{ insert_file_upload_block('storageFileName','storageFileContent') }}</div>
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Include Battery?<span class="classic">Select whether or not to include batteries on the circuit.</span></label>
