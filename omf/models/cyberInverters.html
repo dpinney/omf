@@ -241,8 +241,10 @@
 				maxVolts = {{allOutputDataDict.maxVoltBand}}
 				var swingVoltageSeries = {
 					"marker":{"enabled":false},
-					"color":"blue","data":swingVoltage,
-					"name":"Transmission Voltage (V)","visible":true
+					"color":"blue",
+					"data":swingVoltage,
+					"name":"Transmission Voltage (V)",
+					"visible":true
 				}
 				var downlineNodeVoltsSeries = {
 					"marker":{"enabled":false},
@@ -254,6 +256,7 @@
 				var localHighChart = JSON.parse(JSON.stringify(highChartsTemplate))
 				localHighChart["chart"]["renderTo"] = "voltageTimeSeries"
 				localHighChart["chart"]["type"] = "line"
+				localHighChart["tooltip"]["pointFormat"] = "{point.y:.5f}"
 				localHighChart["series"] = [swingVoltageSeries, downlineNodeVoltsSeries]
 				localHighChart["yAxis"]= [{"title":{"text":"Voltage (V)","style":{"color":"black"}},"plotLines": [
 							{"color": 'gray', "dashStyle": 'ShortDash', "width": 2, "value": minVolts, "zIndex": 0},
@@ -278,8 +281,100 @@
 				localHighChart["chart"]["type"] = "line"
 				localHighChart["series"] = [swingPfSeries]
 				localHighChart["tooltip"]["pointFormat"] = "{point.y:.5f}"
-				localHighChart["yAxis"]= [{"title":{"text":"Per Unit (PU)","style":{"color":"black"}},"min":-1,"max":1}]
+				localHighChart["yAxis"]= [{"title":{"text":"Per Unit (PU)","style":{"color":"black"}},"min":-1,"max":1,"tickPositions":[-1,1],"startOnTick":false,"endOnTick":false}]
 				new Highcharts.Chart(localHighChart);
+			</script>
+		</div>
+		<p class="reportTitle">Regulator Tap Changes <a target="_self" class="toggle">Hide / Show</a></p>
+		<div id="newRegulatorReport" class="tightContent">
+			{% if allOutputDataDict.Regulator_Outputs|length == 0 %}
+			<script type="text/javascript">	
+				$("#newRegulatorReport").html("<p>&#160;&#160;&#160;No regulators were found on the feeder.</p>")
+			</script>
+			{% endif %}
+			<script type="text/javascript">
+			for (let [regname, regitems] of Object.entries({{allOutputDataDict.Regulator_Outputs|tojson}})) {
+				$("<div/>").appendTo("#newRegulatorReport")
+					.attr("class", "regContainer")
+					.attr("id", regname)
+				$("<div/>").appendTo("#newRegulatorReport")
+					.attr("id", "regulatorSeries_" + regname)
+				localHighChart = JSON.parse(JSON.stringify(highChartsTemplate))
+				localHighChart["chart"]["renderTo"] = "regulatorSeries_" + regname
+				localHighChart["chart"]["inverted"] = false
+				localHighChart["chart"]["type"] = "line"
+				localHighChart["tooltip"]["pointFormat"] = "{point.y:.0f}"
+				localHighChart["title"]["text"] = regname.toLowerCase()
+				localHighChart["series"] = []
+				localHighChart["yAxis"] = {
+					"min":-17, 
+					"max":17,
+					"startOnTick":false,
+					"endOnTick":false,
+					"tickPositions":[-16,16],
+					"title":{"text":"Tap Position"}
+				}
+				for (let [phs, dat] of Object.entries(regitems["tapchanges"])) {
+					if (phs=='C') {
+						color = "Green"
+					} else if (phs=='B') {
+						color = "Red"
+					} else {
+						color = "RoyalBlue"
+					}
+					localHighChart["series"].push({
+						"pointWidth": 40,
+						"data": dat,
+						"name": phs,
+						"color": color,
+					})
+				}
+				new Highcharts.Chart(localHighChart)
+			}
+			</script>
+		</div>
+		<p class="reportTitle">Cap Bank Activation <a target="_self" class="toggle">Hide / Show</a></p>
+		<div id="newCapbankReport" class="tightContent">
+			{% if allOutputDataDict.Capacitor_Outputs|length == 0 %}
+			<script type="text/javascript">	
+				$("#newCapbankReport").html("<p>&#160;&#160;&#160;No capacitors were found on the feeder.</p>")
+			</script>
+			{% endif %}
+			<script type="text/javascript">
+			for (let [capname, capitems] of Object.entries({{allOutputDataDict.Capacitor_Outputs|tojson}})) {
+				$("<div/>").appendTo("#newCapbankReport")
+					.attr("class", "capContainer")
+					.attr("id", capname)
+				$("<div/>").appendTo("#newCapbankReport")
+					.attr("id", "capacitorSeries_" + capname)
+				localHighChart = JSON.parse(JSON.stringify(highChartsTemplate))
+				localHighChart["chart"]["renderTo"] = "capacitorSeries_" + capname
+				localHighChart["chart"]["inverted"] = false
+				localHighChart["chart"]["type"] = "line"
+				localHighChart["title"]["text"] = capname.toLowerCase()
+				localHighChart["series"] = []
+				localHighChart["yAxis"] = {
+					"min": -17, 
+					"max" : 17,
+					"title":{ "text": "Tap position"}
+				}
+				for (let [phs, dat] of Object.entries(capitems["tapchanges"])) {
+					if (phs=='C') {
+						color = "Green"
+					} else if (phs=='B') {
+						color = "Red"
+					} else {
+						color = "RoyalBlue"
+					}
+					localHighChart["series"].push({
+						"pointWidth": 40,
+						"data": dat,
+						"name": phs,
+						"color": color,
+					})
+				}
+				new Highcharts.Chart(localHighChart)
+			}
 			</script>
 		</div>
 		<p class="reportTitle">Energy Balance <a target="_self" class="toggle">Hide / Show</a></p>
@@ -322,28 +417,28 @@
 					"color":"seagreen", 
 					"data":[tDG], 
 					"type":"bar", 
-					"name":"DG"
+					"name":"Generated" // Previously named "DG"
 				}
 				tFromGridSeries = {
 					"pointWidth": 40,  
 					"color":"Red", 
 					"data":[tFromGrid,0], 
 					"type":"bar", 
-					"name":"FromGrid"
+					"name":"Imported" // Previously named "FromGrid"
 				}
 				tDGDirectSeries = {
 					"pointWidth": 40, 
 					"color":"RoyalBlue", 
 					"data":[tDGDirect,0], 
 					"type":"bar", 
-					"name":"DGDirect"
+					"name":"DG Direct Use" // Prevously named "DGDirect"
 				}
 				tDGExportedSeries = {
 					"pointWidth": 40, 
 					"color":"LightSeaGreen", 
 					"data":[tDGExported,0], 
 					"type":"bar", 
-					"name":"DG Exported"
+					"name":"DG Exported" // Previously named "DG Exported"
 				}
 				localHighChart = JSON.parse(JSON.stringify(highChartsTemplate))
 				localHighChart["chart"]["renderTo"] = "newEnergyBalanceReport"
@@ -366,48 +461,78 @@
 				new Highcharts.Chart(localHighChart)
 			</script>
 		</div>
-		<p class="reportTitle">Regulator Tap Changes <a target="_self" class="toggle">Hide / Show</a></p>
-		<div id="newRegulatorReport" class="tightContent">
-			{% if allOutputDataDict.Regulator_Outputs|length == 0 %}
+		<p class="reportTitle">Voltage Imbalances <a target="_self" class="toggle">Hide / Show</a></p>
+		<div id="voltageImbalancesReport" class="tightContent">
+			<div id="voltageImbalancesChart"></div>
+			{% if allOutputDataDict.voltageImbalances|length == 0 %}
 			<script type="text/javascript">	
-				$("#newRegulatorReport").html("<p>&#160;&#160;&#160;No regulators were found on the feeder.</p>")
+				$("#voltageImbalancesReport").html("<p>&#160;&#160;&#160;No voltage imbalance values were returned.</p>")
 			</script>
 			{% endif %}
+			<script type="text/javascript">	
+			localHighChart = JSON.parse(JSON.stringify(highChartsTemplate))
+			localHighChart["chart"]["renderTo"] = "voltageImbalancesChart"
+			localHighChart["chart"]["height"] = 200
+			localHighChart["chart"]["type"] = "line"
+			localHighChart["yAxis"] = {"title":{"text":"Imbalance (%)","style":{"color":"black"}}}
+			for (let [busName,imbalseries] of Object.entries({{allOutputDataDict.voltageImbalances}})) {
+				localHighChart["series"].push({
+					"pointWidth": 40,
+					"marker": {"enabled":false}, 
+					"color": "gray", 
+					"data": imbalseries.map(x => 100 * x), 
+					"name": busName,
+					"visible":true,
+				})
+			}
+			new Highcharts.Chart(localHighChart)
+			</script>
+		</div>
+		<p class="reportTitle">Triplex Meter Voltages <a target="_self" class="toggle">Hide / Show</a></p>
+		<div id="triplexMeterVoltageReport" class="tightContent">
+			<div id="triplexMeterVoltageChart"></div>
 			<script type="text/javascript">
-			for (let [regname, regitems] of Object.entries({{allOutputDataDict.Regulator_Outputs|tojson}})) {
-				$("<div/>").appendTo("#newRegulatorReport")
-					.attr("class", "regContainer")
-					.attr("id", regname)
-				$("<div/>").appendTo("#newRegulatorReport")
-					.attr("id", "regulatorSeries_" + regname)
-				localHighChart = JSON.parse(JSON.stringify(highChartsTemplate))
-				localHighChart["chart"]["renderTo"] = "regulatorSeries_" + regname
-				localHighChart["chart"]["inverted"] = false
-				localHighChart["chart"]["type"] = "line"
-				localHighChart["title"]["text"] = regname.toLowerCase()
-				localHighChart["series"] = []
-				localHighChart["yAxis"] = {
-					"min": -17, 
-					"max" : 17,
-					"title":{ "text": "Tap position"}
+				triplexMin = {
+					"marker": {"enabled":false}, 
+					"color":"LightBlue", 
+					"data":{{allOutputDataDict.allMeterVoltages.Min}}, 
+					"name":"Min"
 				}
-				for (let [phs, dat] of Object.entries(regitems["tapchanges"])) {
-					if (phs=='C') {
-						color = "Green"
-					} else if (phs=='B') {
-						color = "Red"
-					} else {
-						color = "RoyalBlue"
-					}
-					localHighChart["series"].push({
-						"pointWidth": 40,
-						"data": dat,
-						"name": phs,
-						"color": color,
-					})
+				triplexMean = {
+					"marker":{"enabled":false}, 
+					"color":"Blue", 
+					"data":{{allOutputDataDict.allMeterVoltages.Mean}}, 
+					"name":"Mean"
+				}
+				triplexMax = {
+					"marker":{"enabled":false}, 
+					"color":"CadetBlue", 
+					"data":{{allOutputDataDict.allMeterVoltages.Max}}, 
+					"name":"Max"
+				}
+				var localHighChart = JSON.parse(JSON.stringify(highChartsTemplate))
+				localHighChart["chart"]["renderTo"] = "triplexMeterVoltageChart"
+				localHighChart["chart"]["height"] = 200
+				localHighChart["chart"]["type"] = "line"
+				localHighChart["series"] = [triplexMin,triplexMean,triplexMax]
+				localHighChart["yAxis"] = {
+					"maxRange":20,
+					"plotLines": [{
+						"color": 'gray', 
+						"dashStyle": 'ShortDash', 
+						"width": 2, 
+						"value": 114, 
+						"zIndex": 0
+					},{
+						"color": 'gray',
+						"dashStyle": 'ShortDash',
+						"width": 2, 
+						"value": 126, 
+						"zIndex": 0
+					}],
+					"title":{"text":"Voltage (V)"}
 				}
 				new Highcharts.Chart(localHighChart)
-			}
 			</script>
 		</div>
 		<p class="reportTitle">Inverter Outputs <a target="_self" class="toggle">Hide / Show</a></p>
@@ -499,194 +624,6 @@
 			}
 			</script>
 		</div>
-		<p class="reportTitle">Cap Bank Activation<a target="_self" class="toggle">Hide / Show</a></p>
-		<div id="newCapbankReport" class="tightContent">
-			{% if allOutputDataDict.Capacitor_Outputs|length == 0 %}
-			<script type="text/javascript">	
-				$("#newCapbankReport").html("<p>&#160;&#160;&#160;No capacitors were found on the feeder.</p>")
-			</script>
-			{% endif %}
-			<script type="text/javascript">
-			for (let [capname, capitems] of Object.entries({{allOutputDataDict.Capacitor_Outputs|tojson}})) {
-				$("<div/>").appendTo("#newCapbankReport")
-					.attr("class", "capContainer")
-					.attr("id", capname)
-				$("<div/>").appendTo("#newCapbankReport")
-					.attr("id", "capacitorSeries_" + capname)
-				localHighChart = JSON.parse(JSON.stringify(highChartsTemplate))
-				localHighChart["chart"]["renderTo"] = "capacitorSeries_" + capname
-				localHighChart["chart"]["inverted"] = false
-				localHighChart["chart"]["type"] = "line"
-				localHighChart["title"]["text"] = capname.toLowerCase()
-				localHighChart["series"] = []
-				localHighChart["yAxis"] = {
-					"min": -17, 
-					"max" : 17,
-					"title":{ "text": "Tap position"}
-				}
-				for (let [phs, dat] of Object.entries(capitems["tapchanges"])) {
-					if (phs=='C') {
-						color = "Green"
-					} else if (phs=='B') {
-						color = "Red"
-					} else {
-						color = "RoyalBlue"
-					}
-					localHighChart["series"].push({
-						"pointWidth": 40,
-						"data": dat,
-						"name": phs,
-						"color": color,
-					})
-				}
-				new Highcharts.Chart(localHighChart)
-			}
-			</script>
-		</div>
-		<p class="reportTitle">Triplex Meter Voltages <a target="_self" class="toggle">Hide / Show</a></p>
-		<div id="triplexMeterVoltageReport" class="tightContent">
-			<div id="triplexMeterVoltageChart"></div>
-			<script type="text/javascript">
-				triplexMin = {
-					"marker": {"enabled":false}, 
-					"color":"LightBlue", 
-					"data":{{allOutputDataDict.allMeterVoltages.Min}}, 
-					"name":"Min"
-				}
-				triplexMean = {
-					"marker":{"enabled":false}, 
-					"color":"Blue", 
-					"data":{{allOutputDataDict.allMeterVoltages.Mean}}, 
-					"name":"Mean"
-				}
-				triplexMax = {
-					"marker":{"enabled":false}, 
-					"color":"CadetBlue", 
-					"data":{{allOutputDataDict.allMeterVoltages.Max}}, 
-					"name":"Max"
-				}
-				var localHighChart = JSON.parse(JSON.stringify(highChartsTemplate))
-				localHighChart["chart"]["renderTo"] = "triplexMeterVoltageChart"
-				localHighChart["chart"]["height"] = 200
-				localHighChart["chart"]["type"] = "line"
-				localHighChart["series"] = [triplexMin,triplexMean,triplexMax]
-				localHighChart["yAxis"] = {
-					"maxRange":20,
-					"plotLines": [{
-						"color": 'gray', 
-						"dashStyle": 'ShortDash', 
-						"width": 2, 
-						"value": 114, 
-						"zIndex": 0
-					},{
-						"color": 'gray',
-						"dashStyle": 'ShortDash',
-						"width": 2, 
-						"value": 126, 
-						"zIndex": 0
-					}],
-					"title":{"text":"Volts (V)"}
-				}
-				new Highcharts.Chart(localHighChart)
-			</script>
-		</div>
-		<p class="reportTitle">Voltage Imbalances <a target="_self" class="toggle">Hide / Show</a></p>
-		<div id="voltageImbalancesReport" class="tightContent">
-			<div id="voltageImbalancesChart"></div>
-			{% if allOutputDataDict.voltageImbalances|length == 0 %}
-			<script type="text/javascript">	
-				$("#voltageImbalancesReport").html("<p>&#160;&#160;&#160;No voltage imbalance values were returned.</p>")
-			</script>
-			{% endif %}
-			<script type="text/javascript">	
-			localHighChart = JSON.parse(JSON.stringify(highChartsTemplate))
-			localHighChart["chart"]["renderTo"] = "voltageImbalancesChart"
-			localHighChart["chart"]["height"] = 200
-			localHighChart["chart"]["type"] = "line"
-			localHighChart["yAxis"] = {"title":{"text":"Imbalance %","style":{"color":"black"}}}
-			for (let [busName,imbalseries] of Object.entries({{allOutputDataDict.voltageImbalances}})) {
-				localHighChart["series"].push({
-					"pointWidth": 40,
-					"marker": {"enabled":false}, 
-					"color": "gray", 
-					"data": imbalseries.map(x => 100 * x), 
-					"name": busName,
-					"visible":true,
-				})
-			}
-			new Highcharts.Chart(localHighChart)
-			</script>
-		</div>
-		<p class="reportTitle">Solar Data <a target="_self" class="toggle">Hide / Show</a></p>
-		<div id="irradianceReport" class="tightContent">
-			<div id="irradianceChartDiv"></div>
-				<p>&#160;&#160;&#160;No solar data inputs. Inverter outputs defined explicitly.</p>
-			<!-- <script>
-				irradianceSeriesData = [
-					{"name":'Global Horizontal',"marker":{"enabled":false},"color":"gold","data":allOutputData.climate['Global Horizontal (W/sm)'],"visible":true}]
-				new Highcharts.Chart({
-					"credits":{"enabled":false},
-					"plotOptions":{
-						"series":{"animation": false, "pointStart":pointStart,"shadow":false,"pointInterval":pointInterval},
-						"line":{"marker":{"enabled":true}}},
-					"xAxis":{"maxZoom":1000,"tickColor":"gray","type":"datetime","lineColor":"gray"},
-					"title":{"text":null},
-					"series":irradianceSeriesData,
-					"yAxis":{"title":{"text":"Irradiance ( W / m^2 )","style":{"color":"gray"}}, "min":0},
-					"chart":{"marginBottom":35,"zoomType":"x","renderTo":"irradianceChartDiv","type":"line","marginRight":20, "height":300,"width":1000},
-					"tooltip":false,
-					"legend":{"verticalAlign":"top","align":"top","borderWidth":0,"x":50,"y":-10,"layout":"horizontal"}})
-			</script> -->
-		</div>
-		<!-- <p class="reportTitle postRun">Study Details <a target="_self" class="toggle">Hide / Show</a></p>
-		<div id="studyDetails" class="tightContent postRun detailsContainer" style="position: relative;">
-			<div id="mapHere" style="width:495px; height:340px; display:inline-block"></div>
-			<script type="text/javascript">
-				width = 495, height = 340
-				projection = d3.geo.albersUsa().scale(600).translate([width/2, height/2])
-				path = d3.geo.path()
-					.projection(projection)
-				svg = d3.select("#mapHere").append("svg")
-					.attr("width", width)
-					.attr("height", height)
-				group = svg.append("g")
-				group.attr("transorm", "scale(.2, .2)")
-				d3.json("{{pathPrefix}}/static/state_boundaries.json", function(collection) {
-					group.selectAll('path')
-						.data(collection.features)
-						.enter().append('path')
-						.attr('d', d3.geo.path().projection(projection))
-						.attr('id', function(d){return d.properties.name.replace(/\s+/g, '')})
-						.style('fill', 'gray')
-						.style('stroke', 'white')
-						.style('stroke-width', 1)})
-				d3.json("{{pathPrefix}}/static/city_locations.json", function(new_us_places){
-					climate = allInputData.climateName
-					ST_NAME = climate.split("-")
-					ST = ST_NAME[0]
-					NAME = ST_NAME[1].replace("_"," ")
-					my_coords = projection(new_us_places[ST][NAME])
-					r = 5
-					circle = svg.append("circle")
-						.attr("cx", my_coords[0])
-						.attr("cy", my_coords[1])
-						.attr("r", 5)
-						.attr("class", "HighlightCircle")
-					circle.append("svg:title").text(climate)})
-			</script>
-			<div id="runtimeStatsReport" style="width:495px; height:340px; margin:5 0 0 0; overflow-y:scroll; overflow-x:hidden; display:inline-block; vertical-align:top">
-				<pre id="stdout" style="font-size:13px; text-align:left"></pre>
-			</div>
-			<script>gebi("stdout").innerHTML = allOutputData.stdout</script>
-		</div> -->
-<!-- 		<p class="reportTitle postRun">Study Details and Standard Output<a target="_self" class="toggle">Hide / Show</a></p>
-		<div id="studyDetails" class="tightContent postRun detailsContainer" style="position: relative;">
-			<div id="runtimeStatsReport" style="width:100%; height:340px; margin:5 0 0 0; overflow-y:scroll; overflow-x:hidden; display:inline-block; vertical-align:top">
-				<pre id="stdout" style="font-size:13px; text-align:left"></pre>
-			</div>
-			<script>gebi("stdout").innerHTML = allOutputData.stdout</script>
-		</div> -->
-
 		<p class="reportTitle">Battery Power Output (W) <a target="_self" class="toggle">Hide / Show</a></p>
 <!--TODO: Combine with SOC to reduce # of plots?-->
 		<div id="batteryPowerReport" class="tightContent" style="max-height:600px; overflow-y: scroll;">
@@ -801,6 +738,75 @@
 			}					
 			</script>
 		</div>
+		<p class="reportTitle">Solar Data <a target="_self" class="toggle">Hide / Show</a></p>
+		<div id="irradianceReport" class="tightContent">
+			<div id="irradianceChartDiv"></div>
+				<p>&#160;&#160;&#160;No solar data inputs. Inverter outputs defined explicitly.</p>
+			<!-- <script>
+				irradianceSeriesData = [
+					{"name":'Global Horizontal',"marker":{"enabled":false},"color":"gold","data":allOutputData.climate['Global Horizontal (W/sm)'],"visible":true}]
+				new Highcharts.Chart({
+					"credits":{"enabled":false},
+					"plotOptions":{
+						"series":{"animation": false, "pointStart":pointStart,"shadow":false,"pointInterval":pointInterval},
+						"line":{"marker":{"enabled":true}}},
+					"xAxis":{"maxZoom":1000,"tickColor":"gray","type":"datetime","lineColor":"gray"},
+					"title":{"text":null},
+					"series":irradianceSeriesData,
+					"yAxis":{"title":{"text":"Irradiance ( W / m^2 )","style":{"color":"gray"}}, "min":0},
+					"chart":{"marginBottom":35,"zoomType":"x","renderTo":"irradianceChartDiv","type":"line","marginRight":20, "height":300,"width":1000},
+					"tooltip":false,
+					"legend":{"verticalAlign":"top","align":"top","borderWidth":0,"x":50,"y":-10,"layout":"horizontal"}})
+			</script> -->
+		</div>
+		<!-- <p class="reportTitle postRun">Study Details <a target="_self" class="toggle">Hide / Show</a></p>
+		<div id="studyDetails" class="tightContent postRun detailsContainer" style="position: relative;">
+			<div id="mapHere" style="width:495px; height:340px; display:inline-block"></div>
+			<script type="text/javascript">
+				width = 495, height = 340
+				projection = d3.geo.albersUsa().scale(600).translate([width/2, height/2])
+				path = d3.geo.path()
+					.projection(projection)
+				svg = d3.select("#mapHere").append("svg")
+					.attr("width", width)
+					.attr("height", height)
+				group = svg.append("g")
+				group.attr("transorm", "scale(.2, .2)")
+				d3.json("{{pathPrefix}}/static/state_boundaries.json", function(collection) {
+					group.selectAll('path')
+						.data(collection.features)
+						.enter().append('path')
+						.attr('d', d3.geo.path().projection(projection))
+						.attr('id', function(d){return d.properties.name.replace(/\s+/g, '')})
+						.style('fill', 'gray')
+						.style('stroke', 'white')
+						.style('stroke-width', 1)})
+				d3.json("{{pathPrefix}}/static/city_locations.json", function(new_us_places){
+					climate = allInputData.climateName
+					ST_NAME = climate.split("-")
+					ST = ST_NAME[0]
+					NAME = ST_NAME[1].replace("_"," ")
+					my_coords = projection(new_us_places[ST][NAME])
+					r = 5
+					circle = svg.append("circle")
+						.attr("cx", my_coords[0])
+						.attr("cy", my_coords[1])
+						.attr("r", 5)
+						.attr("class", "HighlightCircle")
+					circle.append("svg:title").text(climate)})
+			</script>
+			<div id="runtimeStatsReport" style="width:495px; height:340px; margin:5 0 0 0; overflow-y:scroll; overflow-x:hidden; display:inline-block; vertical-align:top">
+				<pre id="stdout" style="font-size:13px; text-align:left"></pre>
+			</div>
+			<script>gebi("stdout").innerHTML = allOutputData.stdout</script>
+		</div> -->
+<!-- 		<p class="reportTitle postRun">Study Details and Standard Output<a target="_self" class="toggle">Hide / Show</a></p>
+		<div id="studyDetails" class="tightContent postRun detailsContainer" style="position: relative;">
+			<div id="runtimeStatsReport" style="width:100%; height:340px; margin:5 0 0 0; overflow-y:scroll; overflow-x:hidden; display:inline-block; vertical-align:top">
+				<pre id="stdout" style="font-size:13px; text-align:left"></pre>
+			</div>
+			<script>gebi("stdout").innerHTML = allOutputData.stdout</script>
+		</div> -->
 		{{rawOutputFiles}}
 	</div>
 	{% endif %}
