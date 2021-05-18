@@ -1,9 +1,13 @@
-import json
+import json, os
+from os.path import join as pJoin
+import omf
+from omf.models import __neoMetaModel__
+from omf.models.__neoMetaModel__ import *
 
-good_coords = '/Users/dpinney/gdrive/LATERBASE/omf/omf/static/publicFeeders/iowa240c1.clean.dss.omd'
-
-data_working = '/Users/dpinney/gdrive/LATERBASE/omf/omf/static/publicFeeders/iowa240c2_workingOnm.clean.dss.omd'
-
+good_coords = pJoin(__neoMetaModel__._omfDir,'static','publicFeeders','iowa240c1.clean.dss.omd')
+# good_coords = '/Users/dpinney/gdrive/LATERBASE/omf/omf/static/publicFeeders/iowa240c1.clean.dss.omd'
+data_working = pJoin(__neoMetaModel__._omfDir,'static','publicFeeders','iowa240c2_workingOnm.clean.dss.omd')
+# data_working = '/Users/dpinney/gdrive/LATERBASE/omf/omf/static/publicFeeders/iowa240c2_workingOnm.clean.dss.omd'
 with open(good_coords,'r') as good_file:
 	with open(data_working,'r') as data_work_file:
 		good_coord_omd = json.load(good_file)
