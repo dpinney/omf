@@ -1,4 +1,4 @@
-Customer Name,Duration,Season,Annual kWh,Business Type
+Customer Name,Duration,Season,Average kW/hr,Business Type
 Hank's Bank,5,summer,550,finance
 Mary's Metal,3,winter,2300,manufacturing
 Gus's Buses,7,summer,44,utilities

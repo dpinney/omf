@@ -274,7 +274,7 @@ def customerCost1(workDir, customerName, duration, season, averagekWperhr, busin
 	kWTemplate[0] = np.array([0,0,0,0,0,0,0,0,0])
 
 	def kWhApprox(kWDict, averagekWperhr, iterate):
-		'helper function for approximating customer outage cost based on annualkWh by iteratively "averaging" the curves'
+		'helper function for approximating customer outage cost based on annual kWh by iteratively "averaging" the curves'
 		step = 0
 
 		# iterate the process a set number of times
