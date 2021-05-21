@@ -86,6 +86,15 @@
 				<label>Simulation Start Time (YYYY-MM-DDTHH:mm:SSZ)</label>
 				<input type="text" id="simStartDate" name="simStartDate" value="{{allInputDataDict.simStartDate}}" required="required" pattern="^\d\d\d\d-\d\d-\d\dT\d\d:\d\d:\d\d(Z|(\+|-)\d\d:\d\d)$"/>
 			</div>
+
+			<div class="shortInput">
+				<label class="tooltip">Simulation Length<span class="classic">Number of time steps over which the simulation is acting. This number must be less than the number of rows in your load/PV file minus the value entered under "Simulation Entry Point".</span></label>
+				<input type="number" id="simLength" name="simLength"  min ="3" max = "9999" value="{{allInputDataDict.simLength}}"/>
+			</div>			
+			<div class="shortInput">
+				<label class="tooltip">Simulation Entry Point<span class="classic">This defines the time at which the simulation enters the experiment. Attacks will enter the simulation 250 time units after the number specified here.</span></label>
+				<input type="number" id="simEntryStep" name="simEntryStep" min ="100" max = "9999" value="{{allInputDataDict.simEntryStep}}"/>
+			</div>
 			<div class="shortInput">
 				<label class="tooltip">Simulation Timestep Units<span class="classic">The unit of time represented by each row in the 'Load and PV Output' .csv file.</span></label>
 				<select id="simStepUnits" name="simStepUnits" value="{{allInputDataDict.simStepUnits}}">
@@ -93,14 +102,6 @@
 					<option value="minutes" {% if allInputDataDict.simStepUnits == 'minutes' %}selected{% endif %}>Minutes</option>
 					<option value="seconds" {% if allInputDataDict.simStepUnits == 'seconds' %}selected{% endif %}>Seconds</option>
 				</select>
-			</div>
-			<div class="shortInput">
-				<label class="tooltip">Simulation Entry Point<span class="classic">This defines the time at which the simulation enters the experiment. Attacks will enter the simulation 250 time units after the number specified here.</span></label>
-				<input type="number" id="simEntryStep" name="simEntryStep" min ="100" max = "9999" value="{{allInputDataDict.simEntryStep}}"/>
-			</div>
-			<div class="shortInput">
-				<label class="tooltip">Simulation Length<span class="classic">Number of time steps over which the simulation is acting. This number must be less than the number of rows in your load/PV file minus the value entered under "Simulation Entry Point".</span></label>
-				<input type="number" id="simLength" name="simLength"  min ="3" max = "9999" value="{{allInputDataDict.simLength}}"/>
 			</div>
 <!--TODO: make this update feederName1 and circuitFileName1 when a file is uploaded through distNetViz-->
 			<div class="shortInput">
@@ -154,6 +155,14 @@
 				</select>
 			</div>
 			<div class="shortInput">
+				<label class="tooltip">Attack Agent Entry Point<span class="classic">The severity of attack represented by percentage</span></label>
+				<input type="number" id="hackStart" name="hackStart"  value="{{allInputDataDict.hackStart}}"/>
+			</div>
+			<div class="shortInput">
+				<label class="tooltip">Attack Agent Exit Point<span class="classic">The severity of attack represented by percentage</span></label>
+				<input type="number" id="hackEnd" name="hackEnd"  value="{{allInputDataDict.hackEnd}}"/>
+			</div>
+			<div class="shortInput">
 				<label class="tooltip">Hack Percentage<span class="classic">The severity of attack represented by percentage</span></label>
 				<input type="number" id="hackPercent" name="hackPercent" min ="0" max = "100" value="{{allInputDataDict.hackPercent}}"/>
 			</div>
@@ -180,7 +189,7 @@
 	{{ omfRunDebugBlock }}
 	{% if modelStatus == 'finished' %}
 	<div id="output">
-		<script type="text/javascript">
+		<script>
 			// Global setting of Highcharts
 			Highcharts.setOptions({global: {useUTC: true}})
 			// Clean up the non-ISO date strings we get.
@@ -198,6 +207,177 @@
 				"tooltip":{"valueDecimals":1},
 				"series":[]}
 		</script>
+		<p class="reportTitle">Voltage Imbalance Summary <a target="_self" class="toggle">Hide / Show</a></p>
+		<div id="voltageImbalancesReport" class="tightContent">
+			{% if allOutputDataDict.voltageImbalances|length == 0 %}
+			<script type="text/javascript">	
+				$("#voltageImbalancesReport").html("<p>&#160;&#160;&#160;No voltage imbalance values were returned.</p>")
+			</script>
+			{% endif %}
+			<script type="text/javascript">	
+			localHighChart = JSON.parse(JSON.stringify(highChartsTemplate))
+			localHighChart["chart"]["renderTo"] = "voltageImbalancesReport"
+			localHighChart["chart"]["height"] = 200
+			localHighChart["chart"]["type"] = "line"
+			localHighChart["yAxis"] = {"title":{"text":"Imbalance (%)","style":{"color":"gray"}}}
+			for (let [busName,imbalseries] of Object.entries({{allOutputDataDict.voltageImbalances}})) {
+				localHighChart["series"].push({
+					"pointWidth": 40,
+					"marker": {"enabled":false}, 
+					"color": "gray", 
+					"data": imbalseries.map(x => 100 * x), 
+					"name": busName,
+					"visible":true,
+				})
+			}
+			new Highcharts.Chart(localHighChart)
+			</script>
+		</div>
+		<!--<p class="reportTitle">Voltage Imbalance by  Bus <a target="_self" class="toggle">Hide / Show</a></p>
+		<div id="voltageImbalancesByBusReport" class="tightContent" style="max-height:600px; overflow-y: scroll;">
+			{% if allOutputDataDict.voltageImbalances|length == 0 %}
+			<script type="text/javascript">	
+				$("#voltageImbalancesByBusReport").html("<p>&#160;&#160;&#160;No three-phase bus voltage imbalance values were returned.</p>")
+			</script>
+			{% endif %}
+			<script type="text/javascript">
+			for (let [busName,imbalseries] of Object.entries({{allOutputDataDict.voltageImbalances|tojson}})) {
+				$("<div/>").appendTo("#voltageImbalancesByBusReport")
+					.attr("class", "busContainer")
+					.attr("id", busName)
+				$("<div/>").appendTo("#voltageImbalancesByBusReport")
+					.attr("id", "busSeries_" + busName)
+				localHighChart = JSON.parse(JSON.stringify(highChartsTemplate))
+				localHighChart["chart"]["renderTo"] = "busSeries_" + busName
+				localHighChart["chart"]["zoomType"] = 'xy'
+				localHighChart["chart"]["height"] = 200
+				localHighChart["chart"]["marginRight"] = 150
+				localHighChart["chart"]["type"] = "line"
+				localHighChart["title"]["text"] = busName.toLowerCase()
+				localHighChart["title"]["align"] = "right"
+				localHighChart["title"]["x"] = -50
+				localHighChart["tooltip"]["shared"] = true
+				localHighChart["yAxis"] = [{//Volts Axis
+						"min": voltageMin,
+						"max" : voltageMax,
+						"title": {"text": "Voltage (V)","style": {"color":"gray"}}
+					}, { //Watts Axis
+						"min": yPowerMin, 
+						"max" : yPowerMax,
+						"title": { "text": "Real Power (W)","style": {"color": "gray"}},
+						"opposite": true
+					}, { //VARs Axis
+						"min": yPowerMin, 
+						"max" : yPowerMax,
+						"title": {"text": "Reactive Power Output (VAR)"},
+						"opposite": true
+					}]
+				localHighChart["series"] = [{
+					"pointWidth": 40,
+					"color":"RoyalBlue",
+					"data": invVoltage,
+					"name":"Voltage"
+				},{
+					"pointWidth": 40,
+					"color":"crimson",
+					"data": invPowerReal,
+					"name":"Power Output",
+					"yAxis": 1
+				},{
+					"pointWidth": 40,
+					"color":"orange",
+					"data": invPowerImag,
+					"name":"Reactive Power Output",
+					"yAxis": 2
+				}]
+				new Highcharts.Chart(localHighChart)
+			}
+			</script>
+		</div>-->
+		<p class="reportTitle">Energy Balance <a target="_self" class="toggle">Hide / Show</a></p>
+		<div id="newEnergyBalanceReport" class="tightContent">
+			<script type="text/javascript">
+				function arrSum(arr) {
+					myVal = eval(arr.join("+"))
+					if (typeof myVal == "undefined") {return 0} else {return myVal}
+				}
+				tPower = eval({{allOutputDataDict.Consumption.Power}}.join("+"))
+				tLosses = eval({{allOutputDataDict.Consumption.Losses}}.join("+"))
+				tDG = eval({{allOutputDataDict.Consumption.DG}}.join("+"))
+				tLoads = tPower + tDG - tLosses
+				dgExported = []
+				fromGrid = []
+				for (i = 0; i < {{allOutputDataDict.Consumption.Power}}.length; i++) {
+					curVal = {{allOutputDataDict.Consumption.Power}}[i]
+					if (curVal < 0) {dgExported.push(curVal)} else {fromGrid.push(curVal)}
+				}
+				tDGExported = arrSum(dgExported)
+				tFromGrid = arrSum(fromGrid)
+				tDGDirect = tLoads + tLosses - tFromGrid
+				// Series formatting.
+				tLossesSeries = {
+					"pointWidth": 40,  
+					"color":"orangered", 
+					"data":[0,tLosses], 
+					"type":"bar", 
+					"name":"Losses"
+				}
+				tLoadsSeries = {
+					"pointWidth": 40, 
+					"color":"darkorange", 
+					"data":[0,tLoads], 
+					"type":"bar", 
+					"name":"Loads"
+				}
+				tDGSeries = {
+					"pointWidth": 40, 
+					"color":"seagreen", 
+					"data":[tDG], 
+					"type":"bar", 
+					"name":"Generated" // Previously named "DG"
+				}
+				tFromGridSeries = {
+					"pointWidth": 40,  
+					"color":"crimson", 
+					"data":[tFromGrid,0], 
+					"type":"bar", 
+					"name":"Imported" // Previously named "FromGrid"
+				}
+				tDGDirectSeries = {
+					"pointWidth": 40, 
+					"color":"RoyalBlue", 
+					"data":[tDGDirect,0], 
+					"type":"bar", 
+					"name":"DG Direct Use" // Prevously named "DGDirect"
+				}
+				tDGExportedSeries = {
+					"pointWidth": 40, 
+					"color":"LightSeaGreen", 
+					"data":[tDGExported,0], 
+					"type":"bar", 
+					"name":"DG Exported" // Previously named "DG Exported"
+				}
+				localHighChart = JSON.parse(JSON.stringify(highChartsTemplate))
+				localHighChart["chart"]["renderTo"] = "newEnergyBalanceReport"
+				localHighChart["chart"]["inverted"] = false
+				localHighChart["chart"]["height"] = 250
+				localHighChart["chart"]["marginBottom"] = 50
+				localHighChart["series"] = [tFromGridSeries,tDGDirectSeries,tDGExportedSeries,tLossesSeries,tLoadsSeries]
+				localHighChart["xAxis"] = {
+					"tickColor":"gray",
+					"lineColor":"gray",
+					"categories":["Source","Destination"]
+					}
+				localHighChart["yAxis"] = {
+					"title": {
+						"text": 'Energy (Wh)',
+						"offset":20}},
+				localHighChart["plotOptions"] = {
+					"bar":{"stacking":"normal"},
+				}
+				new Highcharts.Chart(localHighChart)
+			</script>
+		</div>
 		<p class="reportTitle">Power Consumption From Transmission System <a target="_self" class="toggle">Hide / Show</a></p>
 		<div id="powerConsumptionReport" class="tightContent">
 			<div id="powerTimeSeries"></div>
@@ -208,7 +388,7 @@
 				dg = {{allOutputDataDict.Consumption.DG}}
 				powerSeries = {
 					"marker":{"enabled":false},
-					"color":"red",
+					"color":"crimson",
 					"data":power,
 					"name":"Substation Powerflow (W)"}
 				lossesSeries = {
@@ -219,7 +399,7 @@
 					"visible": false}
 				DGSeries = {
 					"marker":{"enabled":false},
-					"color":"seagreen",
+					"color":"darkturquoise",
 					"data":dg,
 					"name":"DG Power (W)",
 					"visible": false}
@@ -250,15 +430,16 @@
 					"marker":{"enabled":false},
 					"color":"orange",
 					"data":downlineNodeVolts,
-					"name":"First Node after Regulator (V)",
+					"name":"Voltage at First Node after Regulator (V)",
 					"visible":true
 				}
 				var localHighChart = JSON.parse(JSON.stringify(highChartsTemplate))
 				localHighChart["chart"]["renderTo"] = "voltageTimeSeries"
 				localHighChart["chart"]["type"] = "line"
-				localHighChart["tooltip"]["pointFormat"] = "{point.y:.5f}"
+				//localHighChart["tooltip"]["shared"] = true
+				//localHighChart["tooltip"]["pointFormat"] = "{point.y:.5f}"
 				localHighChart["series"] = [swingVoltageSeries, downlineNodeVoltsSeries]
-				localHighChart["yAxis"]= [{"title":{"text":"Voltage (V)","style":{"color":"black"}},"plotLines": [
+				localHighChart["yAxis"]= [{"title":{"text":"Voltage (V)","style":{"color":"gray"}},"plotLines": [
 							{"color": 'gray', "dashStyle": 'ShortDash', "width": 2, "value": minVolts, "zIndex": 0},
 							{"color": 'gray', "dashStyle": 'ShortDash', "width": 2, "value": maxVolts, "zIndex": 0}]}]
 				new Highcharts.Chart(localHighChart);
@@ -268,7 +449,7 @@
 		<div id="substationPowerFactorReport" class="tightContent">
 			<div id="powerFactorTimeSeries"></div>
 			<script type="text/javascript">
-				swingPf = {{allOutputDataDict.powerFactors}}
+				swingPf = {{allOutputDataDict.powerFactor}}
 				var swingPfSeries = {
 					"marker":{"enabled":false},
 					"color":"blue",
@@ -280,8 +461,8 @@
 				localHighChart["chart"]["renderTo"] = "powerFactorTimeSeries"
 				localHighChart["chart"]["type"] = "line"
 				localHighChart["series"] = [swingPfSeries]
-				localHighChart["tooltip"]["pointFormat"] = "{point.y:.5f}"
-				localHighChart["yAxis"]= [{"title":{"text":"Per Unit (PU)","style":{"color":"black"}},"min":-1,"max":1,"tickPositions":[-1,1],"startOnTick":false,"endOnTick":false}]
+				//localHighChart["tooltip"]["pointFormat"] = "{point.y:.5f}"
+				localHighChart["yAxis"]= [{"title":{"text":"Per Unit (PU)","style":{"color":"gray"}},"min":-1,"max":1,"tickPositions":[-1,1],"startOnTick":false,"endOnTick":false}]
 				new Highcharts.Chart(localHighChart);
 			</script>
 		</div>
@@ -303,7 +484,7 @@
 				localHighChart["chart"]["renderTo"] = "regulatorSeries_" + regname
 				localHighChart["chart"]["inverted"] = false
 				localHighChart["chart"]["type"] = "line"
-				localHighChart["tooltip"]["pointFormat"] = "{point.y:.0f}"
+				//localHighChart["tooltip"]["pointFormat"] = "{point.y:.0f}"
 				localHighChart["title"]["text"] = regname.toLowerCase()
 				localHighChart["series"] = []
 				localHighChart["yAxis"] = {
@@ -377,136 +558,25 @@
 			}
 			</script>
 		</div>
-		<p class="reportTitle">Energy Balance <a target="_self" class="toggle">Hide / Show</a></p>
-		<div id="newEnergyBalanceReport" class="tightContent">
-			<script type="text/javascript">
-				function arrSum(arr) {
-					myVal = eval(arr.join("+"))
-					if (typeof myVal == "undefined") {return 0} else {return myVal}
-				}
-				tPower = eval({{allOutputDataDict.Consumption.Power}}.join("+"))
-				tLosses = eval({{allOutputDataDict.Consumption.Losses}}.join("+"))
-				tDG = eval({{allOutputDataDict.Consumption.DG}}.join("+"))
-				tLoads = tPower + tDG - tLosses
-				dgExported = []
-				fromGrid = []
-				for (i = 0; i < {{allOutputDataDict.Consumption.Power}}.length; i++) {
-					curVal = {{allOutputDataDict.Consumption.Power}}[i]
-					if (curVal < 0) {dgExported.push(curVal)} else {fromGrid.push(curVal)}
-				}
-				tDGExported = arrSum(dgExported)
-				tFromGrid = arrSum(fromGrid)
-				tDGDirect = tLoads + tLosses - tFromGrid
-				// Series formatting.
-				tLossesSeries = {
-					"pointWidth": 40,  
-					"color":"orangered", 
-					"data":[0,tLosses], 
-					"type":"bar", 
-					"name":"Losses"
-				}
-				tLoadsSeries = {
-					"pointWidth": 40, 
-					"color":"darkorange", 
-					"data":[0,tLoads], 
-					"type":"bar", 
-					"name":"Loads"
-				}
-				tDGSeries = {
-					"pointWidth": 40, 
-					"color":"seagreen", 
-					"data":[tDG], 
-					"type":"bar", 
-					"name":"Generated" // Previously named "DG"
-				}
-				tFromGridSeries = {
-					"pointWidth": 40,  
-					"color":"Red", 
-					"data":[tFromGrid,0], 
-					"type":"bar", 
-					"name":"Imported" // Previously named "FromGrid"
-				}
-				tDGDirectSeries = {
-					"pointWidth": 40, 
-					"color":"RoyalBlue", 
-					"data":[tDGDirect,0], 
-					"type":"bar", 
-					"name":"DG Direct Use" // Prevously named "DGDirect"
-				}
-				tDGExportedSeries = {
-					"pointWidth": 40, 
-					"color":"LightSeaGreen", 
-					"data":[tDGExported,0], 
-					"type":"bar", 
-					"name":"DG Exported" // Previously named "DG Exported"
-				}
-				localHighChart = JSON.parse(JSON.stringify(highChartsTemplate))
-				localHighChart["chart"]["renderTo"] = "newEnergyBalanceReport"
-				localHighChart["chart"]["inverted"] = false
-				localHighChart["chart"]["height"] = 250
-				localHighChart["chart"]["marginBottom"] = 50
-				localHighChart["series"] = [tFromGridSeries,tDGDirectSeries,tDGExportedSeries,tLossesSeries,tLoadsSeries]
-				localHighChart["xAxis"] = {
-					"tickColor":"gray",
-					"lineColor":"gray",
-					"categories":["Source","Destination"]
-					}
-				localHighChart["yAxis"] = {
-					"title": {
-						"text": 'Energy (Wh)',
-						"offset":20}},
-				localHighChart["plotOptions"] = {
-					"bar":{"stacking":"normal"},
-				}
-				new Highcharts.Chart(localHighChart)
-			</script>
-		</div>
-		<p class="reportTitle">Voltage Imbalances <a target="_self" class="toggle">Hide / Show</a></p>
-		<div id="voltageImbalancesReport" class="tightContent">
-			<div id="voltageImbalancesChart"></div>
-			{% if allOutputDataDict.voltageImbalances|length == 0 %}
-			<script type="text/javascript">	
-				$("#voltageImbalancesReport").html("<p>&#160;&#160;&#160;No voltage imbalance values were returned.</p>")
-			</script>
-			{% endif %}
-			<script type="text/javascript">	
-			localHighChart = JSON.parse(JSON.stringify(highChartsTemplate))
-			localHighChart["chart"]["renderTo"] = "voltageImbalancesChart"
-			localHighChart["chart"]["height"] = 200
-			localHighChart["chart"]["type"] = "line"
-			localHighChart["yAxis"] = {"title":{"text":"Imbalance (%)","style":{"color":"black"}}}
-			for (let [busName,imbalseries] of Object.entries({{allOutputDataDict.voltageImbalances}})) {
-				localHighChart["series"].push({
-					"pointWidth": 40,
-					"marker": {"enabled":false}, 
-					"color": "gray", 
-					"data": imbalseries.map(x => 100 * x), 
-					"name": busName,
-					"visible":true,
-				})
-			}
-			new Highcharts.Chart(localHighChart)
-			</script>
-		</div>
 		<p class="reportTitle">Triplex Meter Voltages <a target="_self" class="toggle">Hide / Show</a></p>
 		<div id="triplexMeterVoltageReport" class="tightContent">
 			<div id="triplexMeterVoltageChart"></div>
 			<script type="text/javascript">
 				triplexMin = {
 					"marker": {"enabled":false}, 
-					"color":"LightBlue", 
+					"color":"skyblue", 
 					"data":{{allOutputDataDict.allMeterVoltages.Min}}, 
 					"name":"Min"
 				}
 				triplexMean = {
 					"marker":{"enabled":false}, 
-					"color":"Blue", 
+					"color":"royalblue", 
 					"data":{{allOutputDataDict.allMeterVoltages.Mean}}, 
 					"name":"Mean"
 				}
 				triplexMax = {
 					"marker":{"enabled":false}, 
-					"color":"CadetBlue", 
+					"color":"steelblue", 
 					"data":{{allOutputDataDict.allMeterVoltages.Max}}, 
 					"name":"Max"
 				}
@@ -551,6 +621,8 @@
 				realPowerMax = Math.max(...invPowerReal)
 				imagPowerMin = Math.min(...invPowerImag)
 				imagPowerMax = Math.max(...invPowerImag)
+				voltageMin = Math.min(...invVoltage)
+				voltageMax = Math.max(...invVoltage)
 				yPowerMin = 0
 				yPowerMax = 0
 				if (realPowerMin <= imagPowerMin){
@@ -585,8 +657,8 @@
 				localHighChart["title"]["x"] = -50
 				localHighChart["tooltip"]["shared"] = true
 				localHighChart["yAxis"] = [{//Volts Axis
-						"min": 110, 
-						"max" : 130,
+						"min": voltageMin,
+						"max" : voltageMax,
 						"title": {"text": "Voltage (V)","style": {"color":"gray"}}
 					}, { //Watts Axis
 						"min": yPowerMin, 
@@ -599,141 +671,125 @@
 						"title": {"text": "Reactive Power Output (VAR)"},
 						"opposite": true
 					}]
-				localHighChart["series"] = []
-				localHighChart["series"].push({
+				localHighChart["series"] = [{
 					"pointWidth": 40,
 					"color":"RoyalBlue",
 					"data": invVoltage,
 					"name":"Voltage"
-				})
-				localHighChart["series"].push({
+				},{
 					"pointWidth": 40,
-					"color":"Crimson",
+					"color":"crimson",
 					"data": invPowerReal,
 					"name":"Power Output",
 					"yAxis": 1
-				})
-				localHighChart["series"].push({
+				},{
 					"pointWidth": 40,
-					"color":"LimeGreen",
+					"color":"orange",
 					"data": invPowerImag,
 					"name":"Reactive Power Output",
 					"yAxis": 2
-				})
+				}]
 				new Highcharts.Chart(localHighChart)
 			}
 			</script>
 		</div>
-		<p class="reportTitle">Battery Power Output (W) <a target="_self" class="toggle">Hide / Show</a></p>
-<!--TODO: Combine with SOC to reduce # of plots?-->
-		<div id="batteryPowerReport" class="tightContent" style="max-height:600px; overflow-y: scroll;">
+		<p class="reportTitle">Battery Outputs <a target="_self" class="toggle">Hide / Show</a></p>
+		<div id="batteryReport" class="tightContent" style="max-height:600px; overflow-y: scroll;">
 			{% if allOutputDataDict.Battery_Outputs|length == 0 %}
 			<script type="text/javascript">	
-				$("#batteryPowerReport").html("<p>&#160;&#160;&#160;No battery storage units were found on the feeder.</p>")
-			</script>
-			{% endif %}
-			<script type="text/javascript">
-			for (let [battname, battdat] of Object.entries({{allOutputDataDict.Battery_Outputs|tojson}})) {
-				battpower = battdat["Power"]
-				min = Math.min(...battpower)
-				max = Math.max(...battpower)
-				$("<div/>").appendTo("#batteryPowerReport")
-					.attr("class", "batteryContainer")
-					.attr("id", battname)
-				$("<div/>").appendTo("#batteryPowerReport")
-					.attr("id", "batterySeries_" + battname)
-				localHighChart = JSON.parse(JSON.stringify(highChartsTemplate))
-				localHighChart["chart"]["renderTo"] = "batterySeries_" + battname
-				localHighChart["chart"]["zoomType"] = 'xy'
-				localHighChart["chart"]["inverted"] = false
-				localHighChart["chart"]["height"] = 200
-				localHighChart["chart"]["marginRight"] = 150
-				localHighChart["chart"]["type"] = "line"
-				localHighChart["title"]["text"] = battname.toLowerCase()
-				localHighChart["title"]["align"] = "right"
-				localHighChart["title"]["x"] = -50
-				localHighChart["tooltip"]["shared"] = true
-				localHighChart["yAxis"] = [{
-					"min": min, 
-					"max" : max,
-					"title": {"text": "Power Output (W)"}
-				}]
-				localHighChart["series"] = [{
-					"pointWidth": 40,
-					"color":"RoyalBlue",
-					"data": battpower,
-					"name":"Power"
-				}]
-				new Highcharts.Chart(localHighChart);
-			}
-			</script>
-		</div>
-		<p class="reportTitle">Battery State of Charge (%) <a target="_self" class="toggle">Hide / Show</a></p>
-<!--TODO: Combine with Power to reduce # of plots?-->
-		<div id="batterySOCReport" class="tightContent" style="max-height:600px; overflow-y: scroll;">
-			{% if allOutputDataDict.Battery_Outputs|length == 0 %}
-			<script type="text/javascript">	
-				$("#batterySOCReport").html("<p>&#160;&#160;&#160;No battery storage units were found on the feeder.</p>")
+				$("#batteryReport").html("<p>&#160;&#160;&#160;No battery storage units were found on the feeder.</p>")
 			</script>
 			{% endif %}
 			<script type="text/javascript">	
 			//var dodFactor = 100 - parseFloat(allInputData.dodFactor) //There is not an input for this in the interface
-			dodFactor = 100 // hardcode 100% allowable discharge
-			for (let [battname, battdat] of Object.entries({{allOutputDataDict.Battery_Outputs|tojson}})) {
-				$("<div/>").appendTo("#batterySOCReport")
+			dodFactor = 25 // hardcode 100% allowable discharge
+			for (let [battName, battDat] of Object.entries({{allOutputDataDict.Battery_Outputs|tojson}})) {
+				battSOC = battDat["SOC"]
+				battStatus = battDat["Charge_Status"]
+				battCycles = battDat["Cycles"]
+				battPower = battDat["Power"]
+				minPower = Math.min(...battPower)
+				maxPower = Math.max(...battPower)
+				$("<div/>").appendTo("#batteryReport")
 					.attr("class", "batteryContainer")
-					.attr("id", battname)
-				$("<div/>").appendTo("#batterySOCReport")
-					.attr("id", "batterySOCSeries_" + battname)
+					.attr("id", battName)
+				$("<div/>").appendTo("#batteryReport")
+					.attr("id", "batterySeries_" + battName)
 				localHighChart = JSON.parse(JSON.stringify(highChartsTemplate))
-				localHighChart["chart"]["renderTo"] = "batterySOCSeries_" + battname
+				localHighChart["chart"]["renderTo"] = "batterySeries_" + battName
 				localHighChart["chart"]["zoomType"] = 'xy'
 				localHighChart["chart"]["inverted"] = false
 				localHighChart["chart"]["height"] = 200
 				localHighChart["chart"]["marginRight"] = 150
 				localHighChart["chart"]["type"] = "line"
-				localHighChart["title"]["text"] = battname
+				//localHighChart["tooltip"]["shared"] = true
+				localHighChart["title"]["text"] = battName
 				localHighChart["title"]["align"] = "right"
 				localHighChart["title"]["x"] = -50
-				localHighChart["tooltip"]["shared"] = true
-				localHighChart["series"] = [{
-					"pointWidth": 40,
-					"color":"RoyalBlue",
-					"data": battdat["SOC"],
-					"name":"Battery State of Charge",
-					"marker":{"enabled":false}
-				}]
 				localHighChart["yAxis"] = [{
-					"title":{"text":"Battery SoC (%)"},
+					"title": {"text": "Power (W)"},
+					"min": minPower, 
+					"max" : maxPower
+				},{
+					"title":{"text":"SoC (%)"},
 					"min":0, 
 					"max":100,
-					"minorTickColor":"gray", 
-					"minorTickInterval":5,
-					//"plotLines":[{
-					//	"color": "gray",
-					//	"dashStyle": "ShortDash",
-					//	"width": 2,
-						//"label":{
-						//	"text":"Max specified DOD:" + dodFactor + "%",
-						//	"align":"right",
-						//	"y":-5,
-						//	"x":-630, 
-						//	"style":{"color":"gray", "fontsize":"12px"}
-						//	},
-					//	"value": 100-dodFactor,
-					//	"zIndex": 10
-					//}]
+					"opposite":true,
+					"tickPositions":[0,25,50,75,100],
+					"plotLines":[{
+						"color": "gray",
+						"dashStyle": "ShortDash",
+						"width": 2,
+						"label":{
+							"text":"Max DOD:" + dodFactor + "%",
+							"align":"left",
+							"x":-5,
+							"style":{"color":"gray", "fontsize":"12px"}
+							},
+						"value": 100-dodFactor,
+						"zIndex": 10
+					},{
+						"color": "gray",
+						"dashStyle": "ShortDash",
+						"width": 1,
+						"label":{
+							"text":"Cycle Equivalents: " + delimitNumbers(battCycles.toFixed(1)), 
+							"align":"right",
+							"x":-5,
+							"style":{"color":"gray", "fontsize":"12px"}
+							},
+						"value": 100-dodFactor,
+						"zIndex": 10
+					}]
+				},{
+					"title":{"text":"Status"},
+					"categories":["discharge", "standby", "charge"],
+					"min":0,
+					"max":2,
+					"endOnTick": false,
+					"startOnTick": false,
+					"opposite":true
 				}]
-				// From storagePeakShave Battery SOC output plot:
-				//localHighChart["title"] = {
-				//	//"text":"Cycle Equivalents:" + delimitNumbers(allOutputData.cycleEquivalents.toFixed(1))+ "  Battery Life:" + delimitNumbers(allOutputData.batteryLife.toFixed(1)) + " yrs", 
-				//	"text":"Cycle Equivalents:" + " xx" + "  Battery Life: xx yrs", 
-				//	"verticalAlign":"bottom", 
-				//	"align":"right", 
-				//	"y":-28-dodFactor*2, 
-				//	"x":-10, 
-				//	"style":{"color":"#333333", "fontSize":"12px"}
-				//},
+				localHighChart["series"] = [{
+					"name":"Power Output",
+					"pointWidth": 40,
+					"color":"crimson",
+					"data": battPower,
+					"yAxis": 0,
+				},{
+					"name":"State of Charge",
+					"pointWidth": 40,
+					"color":"royalblue",
+					"data": battSOC,
+					"yAxis": 1
+				},{
+					"name":"Control Status",
+					"pointWidth": 40,
+					"color":"lightseagreen",
+					"data": battStatus,
+					"visible":false,
+					"yAxis": 2
+				}]
 				new Highcharts.Chart(localHighChart);
 			}					
 			</script>

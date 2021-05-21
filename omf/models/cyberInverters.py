@@ -166,18 +166,18 @@ def work(modelDir, inputDict):
 	# #hard-coding simLengthAdjusted for testing purposes 
 	# simLengthAdjusted = 750
 
-	# create value to represent the timestep in which the hack starts and adjust it to make sure it is within the bounds or the simulation length
-	defaultHackStart = 250
-	if defaultHackStart > simLengthAdjusted:
-		defaultHackStart = simLengthAdjusted/5
+	# create value to represent the timestep in which the hack starts and adjust it to make sure it is within the bounds of the simulation length
+	hackStartVal = int(inputDict["hackStart"])
+	hackEndVal = int(inputDict["hackEnd"])
+	assert (hackStartVal <= simLengthAdjusted) or (hackEndVal <= simLengthAdjusted) or (hackEndVal-hackStartVal <= simLengthAdjusted), "Please ensure that the hack start and end times fall within the simulation length."
 
 	# attackVars = dict of attack types and their corresponding parameter values
 	# to add new attack: attackVars[attackAgentType_name] = {"hackStart": val, "hackEnd": val, "percentHack": val}
 	# MAKE SURE to add attackVars entry when adding another Attack Agent option to the html dropdown list and the name must match the value passed back from the form (inputDict["attackVariable"])!
 	attackVars = {}
-	attackVars["None"] = {"hackStart": defaultHackStart, "hackEnd": None, "percentHack": 0.0}
-	attackVars["VOLTAGE_OSCILLATION"] = {"hackStart": defaultHackStart, "hackEnd": None, "percentHack": 0.15}
-	attackVars["VOLTAGE_IMBALANCE"] = {"hackStart": defaultHackStart, "hackEnd": None, "percentHack": 0.15} #percentHack must be between 0.1 and 0.4 for pre-trained VOLTAGE_IMBALANCE defense
+	attackVars["None"] = {"hackStart": hackStartVal, "hackEnd": hackEndVal, "percentHack": 0.0}
+	attackVars["VOLTAGE_OSCILLATION"] = {"hackStart": hackStartVal, "hackEnd": hackEndVal, "percentHack": 0.15}
+	attackVars["VOLTAGE_IMBALANCE"] = {"hackStart": hackStartVal, "hackEnd": hackEndVal, "percentHack": 0.15} #percentHack must be between 0.1 and 0.4 for pre-trained VOLTAGE_IMBALANCE defense
 
 	#check to make sure attackAgentType is in the attackVars dictionary, otherwise set it to None. This shouldn't ever be a problem since the user selects attackAgentType from a preset HTML dropdown.
 	if attackAgentType not in attackVars:
@@ -241,18 +241,12 @@ def work(modelDir, inputDict):
 		runType = "NO_DEFENSE"
 		defenseAgentPath = None
 
-		#set default values for attack variables
-		hackStartVal = defaultHackStart
-		hackEndVal = None
-		percentHackVal = 0.0
-		
 		#set pycigar attack variables
 		attackType = attackAgentType
 		hackStartVal = attackVars[attackAgentType]["hackStart"]
-		hackEndVal = attackVars[attackAgentType]["hackEnd"] #TODO: see if we need to change from a hard-coded value
-		percentHackVal = attackVars[attackAgentType]["percentHack"] #TODO: see if we need to change from a hard-coded value
+		hackEndVal = attackVars[attackAgentType]["hackEnd"]
+		percentHackVal = attackVars[attackAgentType]["percentHack"]
 		if attackAgentType == "None":
-			#attackType = "VOLTAGE_OSCILLATION"
 			attackType = None
 
 		#change percentHackVal to user input
@@ -300,7 +294,6 @@ def work(modelDir, inputDict):
 			#runType of 1 implies the defense scenario - not training a defense agent, but a defense agent zip was uploaded
 			runType = "DEFENSE" 
 
-		# TODO how to factor attackAgentType into pycigar inputs
 		# if there is no training selected and no attack variable, run without a defense agent
 		pycigar.main(
 			misc_inputs_path = modelDir + "/PyCIGAR_inputs/misc_inputs.csv",
@@ -342,8 +335,8 @@ def work(modelDir, inputDict):
 		#convert "Consumption"."DG"
 		outData["Consumption"]["DG"] = [-1.0 * x for x in pycigarJson["Consumption"]["DG Output (W)"]]
 
-		#convert "powerFactors"
-		outData["powerFactors"] = pycigarJson["Substation Power Factor (%)"]	
+		#convert "powerFactor"
+		outData["powerFactor"] = pycigarJson["Substation Power Factor (%)"]	
 
 		#convert "swingVoltage"
 		outData["swingVoltage"] = pycigarJson["Substation Top Voltage(V)"]
@@ -412,11 +405,12 @@ def work(modelDir, inputDict):
 		outData["Capacitor_Outputs"] = capDict
 		
 		#convert battery data
-		battery_output_dict = {} 
+		battery_output_dict = {}
+		transformatter = {"discharge":0,"standby":1,"charge":2}
 		for bname,batt_dict in pycigarJson["Battery Outputs"].items():
 			new_batt_dict = {}
 			new_batt_dict["SOC"] = [x*100 for x in batt_dict["SOC"]]
-			new_batt_dict["Charge_Status"] = batt_dict["control_setting"]
+			new_batt_dict["Charge_Status"] = [transformatter[x] for x in batt_dict["control_setting"]]
 			#new_batt_dict["Power_Out"] = batt_dict["Power Output (W)"]
 			#new_batt_dict["Power_In"] = batt_dict["Power Input (W)"]
 			# create value for combined power in/output
@@ -424,6 +418,10 @@ def work(modelDir, inputDict):
 			for i, val in enumerate(batt_dict["Power Input (W)"]):
 				batt_power[i] = -(batt_power[i] + val)
 			new_batt_dict["Power"] = batt_power
+			if len(batt_dict["bat_cycle"]) == 0:
+				new_batt_dict["Cycles"] = 0.0
+			else:
+				new_batt_dict["Cycles"] = batt_dict["bat_cycle"][-1]
 			# add single battery dict to dict of all the batteries using the battery name as the key 
 			battery_output_dict[batt_dict["Name"]] = new_batt_dict
 		outData["Battery_Outputs"] = battery_output_dict
@@ -560,6 +558,8 @@ def new(modelDir):
 		"trainAgent": "False",
 		"attackVariable": "None",
 		"defenseVariable": "None",
+		"hackStart": "250",
+		"hackEnd": "650",
 		"hackPercent": "50",
 		"defenseAgentNames": "policy_ieee37_oscillation_sample,policy_ieee37_unbalance_sample"
 	}
