@@ -180,6 +180,7 @@ def customerOutageTable(customerOutageData, outageCost, workDir):
 						<th>Season</th>
 						<th>Average kW/hr</th>
 						<th>Business Type</th>
+						<th>Load Name</th>
 						<th>Outage Cost</th>
 					</tr>
 				</thead>
@@ -187,7 +188,7 @@ def customerOutageTable(customerOutageData, outageCost, workDir):
 		
 		row = 0
 		while row < len(customerOutageData):
-			new_html_str += '<tr><td>' + str(customerOutageData.loc[row, 'Customer Name']) + '</td><td>' + str(customerOutageData.loc[row, 'Duration']) + '</td><td>' + str(customerOutageData.loc[row, 'Season']) + '</td><td>' + '{0:.2f}'.format(customerOutageData.loc[row, 'Average kW/hr']) + '</td><td>' + str(customerOutageData.loc[row, 'Business Type']) + '</td><td>' + str(outageCost[row])+ '</td></tr>'
+			new_html_str += '<tr><td>' + str(customerOutageData.loc[row, 'Customer Name']) + '</td><td>' + str(customerOutageData.loc[row, 'Duration']) + '</td><td>' + str(customerOutageData.loc[row, 'Season']) + '</td><td>' + '{0:.2f}'.format(customerOutageData.loc[row, 'Average kW/hr']) + '</td><td>' + str(customerOutageData.loc[row, 'Business Type']) + '</td><td>' + str(customerOutageData.loc[row, 'Load Name']) + '</td><td>' + str(outageCost[row])+ '</td></tr>'
 			row += 1
 
 		new_html_str +="""</tbody></table>"""
@@ -241,10 +242,10 @@ def utilityOutageTable(average_lost_kwh, profit_on_energy_sales, restoration_cos
 
 	return utilityOutageHtml
 
-def customerCost1(workDir, customerName, duration, season, averagekWperhr, businessType):
+def customerCost1(workDir, customerName, duration, season, averagekWperhr, businessType, loadName):
 	'function to determine customer outage cost based on season, annual kWh usage, and business type'
 	duration = int(duration)
-	averagekW = int(averagekWperhr)
+	averagekW = float(averagekWperhr)
 
 	times = np.array([0,1,2,3,4,5,6,7,8])
 	# load the customer outage cost data (compared with average kW/hr usage) from the 2009 survey
@@ -288,7 +289,7 @@ def customerCost1(workDir, customerName, duration, season, averagekWperhr, busin
 			# ...then, estimate the outage costs for the kW/hr value directly between these
 			key = 0
 			while key < len(keys):
-				if int(averagekWperhr) > keys[key]:			
+				if float(averagekWperhr) > keys[key]:			
 					key+=1
 				else:
 					newEntry = (keys[key] + keys[key+1])/2
@@ -304,7 +305,7 @@ def customerCost1(workDir, customerName, duration, season, averagekWperhr, busin
 
 	# based on the annualkWh usage, import the average relationship between season/business type and outage cost
 	# NOTE: This data is also taken from the Lawton survey
-	if int(averagekWperhr) > 10:
+	if float(averagekWperhr) > 10:
 		winter = np.array([10000, 19000, 27000, 41000, 59000, 72000, 83000, 91000, 93000])
 		summer = np.array([11000, 20000, 31000, 43000, 60000, 73000, 84000, 92000, 94500])
 		manufacturing = np.array([25000, 35000, 54000, 77000, 106000, 127000, 147000, 161000, 165000])
@@ -403,11 +404,11 @@ def graphMicrogrid(pathToOmd, pathToMicro, pathToCsv, workDir, maxTime, stepSize
 		workDir = tempfile.mkdtemp()
 		print('@@@@@@', workDir)
 
-	shutil.copyfile(f'{__neoMetaModel__._omfDir}/static/testFiles/test_output_3.json',f'{workDir}/test_output_3.json')
+	shutil.copyfile(f'{__neoMetaModel__._omfDir}/static/testFiles/output.json',f'{workDir}/output.json')
 
 	# command = 'cmd /c ' + '"julia --project=' + '"C:/Users/granb/PowerModelsONM.jl-master/" ' + 'C:/Users/granb/PowerModelsONM.jl-master/src/cli/entrypoint.jl' + ' -n ' + '"' + str(workDir) + '/circuit.dss' + '"' + ' -o ' + '"C:/Users/granb/PowerModelsONM.jl-master/output.json"'
-	if os.path.exists(f'{workDir}/test_output_3.json') and sameFeeder:
-		with open(f'{workDir}/test_output_3.json') as inFile:
+	if os.path.exists(f'{workDir}/output.json') and sameFeeder:
+		with open(f'{workDir}/output.json') as inFile:
 			data = json.load(inFile)
 			genProfiles = data['Generator profiles']
 			simTimeSteps = []
@@ -437,14 +438,14 @@ def graphMicrogrid(pathToOmd, pathToMicro, pathToCsv, workDir, maxTime, stepSize
 				# Disable quarantine.
 				os.system(f'xattr -dr com.apple.quarantine {DIR}')
 		# Run command
-		command = f'{DIR}/build/bin/PowerModelsONM -n "{workDir}/circuit.dss" -o "{workDir}/onm_output.json"'
-		os.system(command)
+		# command = f'{DIR}/build/bin/PowerModelsONM -n "{workDir}/circuit.dss" -o "{workDir}/onm_output.json"'
+		# os.system(command)
 		
 		#TODO: ignore test_output_3 and use actual onm output.
-		with open(pJoin(__neoMetaModel__._omfDir,'static','testFiles','test_output_3.json')) as inFile:
+		with open(pJoin(__neoMetaModel__._omfDir,'static','testFiles','output.json')) as inFile:
 		# with open(f'{workDir}/onm_output.json') as inFile:
 			data = json.load(inFile)
-			with open(f'{workDir}/test_output_3.json', 'w') as outfile:
+			with open(f'{workDir}/output.json', 'w') as outfile:
 				json.dump(data, outfile)
 			genProfiles = data['Generator profiles']
 			simTimeSteps = []
@@ -599,8 +600,9 @@ def graphMicrogrid(pathToOmd, pathToMicro, pathToCsv, workDir, maxTime, stepSize
 		season = str(customerOutageData.loc[row, 'Season'])
 		averagekWperhr = str(customerOutageData.loc[row, 'Average kW/hr'])
 		businessType = str(customerOutageData.loc[row, 'Business Type'])
+		loadName = str(customerOutageData.loc[row, 'Load Name'])
 
-		customerOutageCost, kWperhrEstimate, times, localMax = customerCost1(workDir, customerName, duration, season, averagekWperhr, businessType)
+		customerOutageCost, kWperhrEstimate, times, localMax = customerCost1(workDir, customerName, duration, season, averagekWperhr, businessType, loadName)
 		average_lost_kwh.append(float(averagekWperhr))
 		outageCost.append(customerOutageCost)
 		if localMax > globalMax:
