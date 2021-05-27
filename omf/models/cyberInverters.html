@@ -20,9 +20,9 @@
 			studyUser = "{{allInputDataDict.user}}"
 			window.open("/feeder/" + studyUser + "/" + modelName + "/" + feederNum,  "_blank")
 		}
-		function editDSS(modelName, fileNum) {
+		function editDSS(modelName, fileName) {
 			studyUser = "{{allInputDataDict.user}}"
-			window.open("/rawTextEdit/" + studyUser + "/" + modelName + "/" + fileNum,  "_blank")
+			window.open("/rawTextEdit/" + studyUser + "/" + modelName + "/" + fileName,  "_blank")
 		}
 		// Code to make the toggles work:
 		$(document).ready(function(){
@@ -86,15 +86,6 @@
 				<label>Simulation Start Time (YYYY-MM-DDTHH:mm:SSZ)</label>
 				<input type="text" id="simStartDate" name="simStartDate" value="{{allInputDataDict.simStartDate}}" required="required" pattern="^\d\d\d\d-\d\d-\d\dT\d\d:\d\d:\d\d(Z|(\+|-)\d\d:\d\d)$"/>
 			</div>
-
-			<div class="shortInput">
-				<label class="tooltip">Simulation Length<span class="classic">Number of time steps over which the simulation is acting. This number must be less than the number of rows in your load/PV file minus the value entered under "Simulation Entry Point".</span></label>
-				<input type="number" id="simLength" name="simLength"  min ="3" max = "9999" value="{{allInputDataDict.simLength}}"/>
-			</div>			
-			<div class="shortInput">
-				<label class="tooltip">Simulation Entry Point<span class="classic">This defines the time at which the simulation enters the experiment. Attacks will enter the simulation 250 time units after the number specified here.</span></label>
-				<input type="number" id="simEntryStep" name="simEntryStep" min ="100" max = "9999" value="{{allInputDataDict.simEntryStep}}"/>
-			</div>
 			<div class="shortInput">
 				<label class="tooltip">Simulation Timestep Units<span class="classic">The unit of time represented by each row in the 'Load and PV Output' .csv file.</span></label>
 				<select id="simStepUnits" name="simStepUnits" value="{{allInputDataDict.simStepUnits}}">
@@ -103,7 +94,15 @@
 					<option value="seconds" {% if allInputDataDict.simStepUnits == 'seconds' %}selected{% endif %}>Seconds</option>
 				</select>
 			</div>
-<!--TODO: make this update feederName1 and circuitFileName1 when a file is uploaded through distNetViz-->
+			<div class="shortInput">
+				<label class="tooltip">Simulation Length<span class="classic">Number of timesteps over which the simulation is acting. This number must be less than the number of rows in your load/PV file minus the value entered under "Simulation Entry Point".</span></label>
+				<input type="number" id="simLength" name="simLength"  min ="3" max = "9999" value="{{allInputDataDict.simLength}}"/>
+			</div>			
+			<div class="shortInput">
+				<label class="tooltip">Simulation Entry Point<span class="classic">At the beginning of the simulation, the number of timesteps allowed for the powerflow solution to stabilize. Marks the beginning of the experiment (i.e. t=0).</span></label>
+				<input type="number" id="simEntryStep" name="simEntryStep" min ="100" max = "9999" value="{{allInputDataDict.simEntryStep}}"/>
+			</div>
+<!--TODO: make circuitFileNameDSS also update when a file is uploaded through distNetViz-->
 			<div class="shortInput">
 				<label class="tooltip">Circuit Editor<span class="classic">Use a visual interface to upload, view, and manipulate a .dss circuit file.</span></label>
 				<button id="feederButton" type="button" onclick="editFeeder('{{allInputDataDict.modelName}}',1)" style="display:block;width:125px;">Open Editor</button>
@@ -111,13 +110,13 @@
 			<div class="shortInput" style="display:none"><!--HACK:pass feeder name back and forth to backend.-->
 				<input type="text" id="feederName1" name="feederName1" value="{{allInputDataDict.feederName1}}">
 			</div>
-<!--TODO: make this update feederName1 and circuitFileName1 when a file is uploaded through distNetViz-->
+<!--TODO: make feederName1 also update when a file is uploaded through distText-->
 			<!--<div class="shortInput">
 				<label class="tooltip">Circuit Editor - Text<span class="classic">Manipulate a .dss circuit file directly in the definition file.</span></label>
-				<button id="OpenDSSButton" type="button" onclick="editDSS('{{allInputDataDict.modelName}}',1)" style="display:block;width:125px;">Open Editor</button>
+				<button id="OpenDSSButton" type="button" onclick="editDSS('{{allInputDataDict.modelName}}','{{allInputDataDict.circuitFileNameDSS}}')" style="display:block;width:125px;">Open Editor</button>
 			</div>
 			<div class="shortInput" style="display:none">
-				<input type="text" id="circuitFileName1" name="circuitFileName1" value="{{allInputDataDict.circuitFileName1}}">
+				<input type="text" id="circuitFileNameDSS" name="circuitFileNameDSS" value="{{allInputDataDict.circuitFileNameDSS}}">
 			</div>-->
 			<div class="shortInput">
 				<label class="tooltip">Load and PV Output<span class="classic">Import a .csv file that describes the power output of all loads and PV units.</span></label>
@@ -481,7 +480,7 @@
 			</script>
 		</div>
 		<p class="reportTitle">Regulator Tap Changes <a target="_self" class="toggle">Hide / Show</a></p>
-		<div id="newRegulatorReport" class="tightContent">
+		<div id="newRegulatorReport" class="tightContent" style="max-height:610px; overflow-y: scroll;">
 			{% if allOutputDataDict.Regulator_Outputs|length == 0 %}
 			<script type="text/javascript">	
 				$("#newRegulatorReport").html("<p>&#160;&#160;&#160;No regulators were found on the feeder.</p>")
@@ -530,7 +529,7 @@
 			</script>
 		</div>
 		<p class="reportTitle">Cap Bank Activation <a target="_self" class="toggle">Hide / Show</a></p>
-		<div id="newCapbankReport" class="tightContent">
+		<div id="newCapbankReport" class="tightContent" style="max-height:610px; overflow-y: scroll;">
 			{% if allOutputDataDict.Capacitor_Outputs|length == 0 %}
 			<script type="text/javascript">	
 				$("#newCapbankReport").html("<p>&#160;&#160;&#160;No capacitors were found on the feeder.</p>")
@@ -622,7 +621,7 @@
 			</script>
 		</div>
 		<p class="reportTitle">Inverter Outputs <a target="_self" class="toggle">Hide / Show</a></p>
-		<div id="newInverterReport" class="tightContent" style="max-height:700px; overflow-y: scroll;">
+		<div id="newInverterReport" class="tightContent" style="max-height:610px; overflow-y: scroll;">
 			{% if allOutputDataDict.Inverter_Outputs|length == 0 %}
 			<script type="text/javascript">	
 				$("#newInverterReport").html("<p>&#160;&#160;&#160;No inverters were found on the feeder.</p>")
@@ -703,7 +702,7 @@
 			</script>
 		</div>
 		<p class="reportTitle">Battery Outputs <a target="_self" class="toggle">Hide / Show</a></p>
-		<div id="batteryReport" class="tightContent" style="max-height:600px; overflow-y: scroll;">
+		<div id="batteryReport" class="tightContent" style="max-height:610px; overflow-y: scroll;">
 			{% if allOutputDataDict.Battery_Outputs|length == 0 %}
 			<script type="text/javascript">	
 				$("#batteryReport").html("<p>&#160;&#160;&#160;No battery storage units were found on the feeder.</p>")

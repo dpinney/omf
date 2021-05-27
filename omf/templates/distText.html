@@ -908,7 +908,7 @@ function saveFile(file) {
     formData.set("fileContents", file);
     const postRequest = $.ajax({
         type: "POST",
-        url: `/saveFile/${gThisOwner}/${gThisModelName}/${gThisFileName}/${gThisFileNum}`,
+        url: `/saveFile/${gThisOwner}/${gThisModelName}/${gThisFileName}`,
         data: formData,
         processData: false,
         contentType: false,

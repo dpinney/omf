@@ -439,84 +439,6 @@ def work(modelDir, inputDict):
 	convertOutputs()
 	return outData
 
-def avg(inList):
-	''' Average a list. Really wish this was built-in. '''
-	return sum(inList)/len(inList)
-
-def hdmAgg(series, func, level):
-	''' Simple hour/day/month aggregation for Gridlab. '''
-	if level in ['days','months']:
-		return aggSeries(stamps, series, func, level)
-	else:
-		return series
-
-def aggSeries(timeStamps, timeSeries, func, level):
-	''' Aggregate a list + timeStamps up to the required time level. '''
-	# Different substring depending on what level we aggregate to:
-	if level=='months': endPos = 7
-	elif level=='days': endPos = 10
-	combo = list(zip(timeStamps, timeSeries))
-	# Group by level:
-	groupedCombo = _groupBy(combo, lambda x1,x2: x1[0][0:endPos]==x2[0][0:endPos])
-	# Get rid of the timestamps:
-	groupedRaw = [[pair[1] for pair in group] for group in groupedCombo]
-	return list(map(func, groupedRaw))
-
-def _pyth(x,y):
-	''' Compute the third side of a triangle--BUT KEEP SIGNS THE SAME FOR DG. '''
-	sign = lambda z:(-1 if z<0 else 1)
-	fullSign = sign(sign(x)*x*x + sign(y)*y*y)
-	return fullSign*math.sqrt(x*x + y*y)
-
-def _digits(x):
-	''' Returns number of digits before the decimal in the float x. '''
-	return math.ceil(math.log10(x+1))
-
-def vecPyth(vx,vy):
-	''' Pythagorean theorem for pairwise elements from two vectors. '''
-	rows = zip(vx,vy)
-	return [_pyth(*x) for x in rows]
-
-def vecSum(*args):
-	''' Add n vectors. '''
-	return list(map(sum,zip(*args)))
-
-def _prod(inList):
-	''' Product of all values in a list. '''
-	return reduce(lambda x,y:x*y, inList, 1)
-
-def vecProd(*args):
-	''' Multiply n vectors. '''
-	return list(map(_prod, zip(*args)))
-
-def threePhasePowFac(ra,rb,rc,ia,ib,ic):
-	''' Get power factor for a row of threephase volts and amps. Gridlab-specific. '''
-	pfRow = lambda row:math.cos(math.atan((row[0]+row[1]+row[2])/(row[3]+row[4]+row[5])))
-	rows = zip(ra,rb,rc,ia,ib,ic)
-	return list(map(pfRow, rows))
-
-def roundSeries(ser):
-	''' Round everything in a vector to 4 sig figs. '''
-	return [roundSig(x, 4) for x in ser]
-
-def _groupBy(inL, func):
-	''' Take a list and func, and group items in place comparing with func. Make sure the func is an equivalence relation, or your brain will hurt. '''
-	if inL == []: return inL
-	if len(inL) == 1: return [inL]
-	newL = [[inL[0]]]
-	for item in inL[1:]:
-		if func(item, newL[-1][0]):
-			newL[-1].append(item)
-		else:
-			newL.append([item])
-	return newL
-
-def stringToMag(s):
-	if 'd' in s:
-		return complex(s.replace('d','j')).real
-	elif 'j' in s or 'i' in s:
-		return abs(complex(s.replace('i','j')))
-
 def new(modelDir):
 	''' Create a new instance of this model. Returns true on success, false on failure. '''
 	# default model files:
@@ -542,8 +464,8 @@ def new(modelDir):
 		"simLength": "750",
 		"simStepUnits": "seconds",
 		"simEntryStep": "100",
-		"feederName1": omd_fn,
-		"circuitFileName1": dss_fn,
+		"feederName1": omd_fn, # this is the .omd file (used by distnetviz.html and web.saveFeeder)
+		"circuitFileNameDSS": dss_fn, # this is the .dss file (used by distText.html and web.saveFile)
 		"loadPVFileName": pv_fn,
 		"loadPVFileContent": pv_ins,
 		"breakpointsFileName":bp_fn,
@@ -580,7 +502,7 @@ def new(modelDir):
 			omd = json.load(omdFile)
 		tree = omd['tree']
 		niceDss = dssConvert.evilGldTreeToDssTree(tree)
-		dssConvert.treeToDss(niceDss, f'{modelDir}/{defaultInputs["circuitFileName1"]}')
+		dssConvert.treeToDss(niceDss, f'{modelDir}/{defaultInputs["circuitFileNameDSS"]}')
 	except:
 		return False
 	return creationCode
