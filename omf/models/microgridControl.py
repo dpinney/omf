@@ -398,7 +398,7 @@ def customerCost1(workDir, customerName, duration, season, averagekWperhr, busin
 	return outageCost, kWperhrEstimate, times, localMax
 
 
-def graphMicrogrid(pathToOmd, pathToMicro, pathToCsv, workDir, maxTime, stepSize, faultedLine, timeMinFilter, timeMaxFilter, actionFilter, outageDuration, profit_on_energy_sales, restoration_cost, hardware_cost, sameFeeder):
+def graphMicrogrid(pathToOmd, pathToCsv, workDir, maxTime, stepSize, faultedLine, timeMinFilter, timeMaxFilter, actionFilter, outageDuration, profit_on_energy_sales, restoration_cost, hardware_cost, sameFeeder):
 	# read in the OMD file as a tree and create a geojson map of the system
 	if not workDir:
 		workDir = tempfile.mkdtemp()
@@ -675,16 +675,12 @@ def work(modelDir, inputDict):
 		dss_file_2.write(content)
 
 	# Run the main functions of the program
-	with open(pJoin(modelDir, inputDict['microFileName']), 'w') as f:
-		pathToData = f.name
-		f.write(inputDict['microData'])
 	with open(pJoin(modelDir, inputDict['customerFileName']), 'w') as f1:
 		pathToData1 = f1.name
 		f1.write(inputDict['customerData'])
 
 	plotOuts = graphMicrogrid(
 		modelDir + '/' + feederName + '.omd', #OMD Path
-		pathToData,
 		pathToData1,
 		modelDir, #Work directory.
 		inputDict['maxTime'], #computational time limit
@@ -735,8 +731,6 @@ def work(modelDir, inputDict):
 
 def new(modelDir):
 	''' Create a new instance of this model. Returns true on success, false on failure. '''
-	with open(pJoin(__neoMetaModel__._omfDir,'static','testFiles','microComponents.json')) as f:
-		micro_data = f.read()
 	with open(pJoin(__neoMetaModel__._omfDir,'static','testFiles','customerInfo.csv')) as f1:
 		customer_data = f1.read()
 	defaultInputs = {
@@ -746,7 +740,7 @@ def new(modelDir):
 		# 'feederName1': 'iowa240c1.clean.dss',
 		# 'feederName1': 'iowa240c2_workingOnm.clean.dss',
 		'feederName1': 'iowa240c2_working_coords.clean',
-		'maxTime': '20',
+		'maxTime': '25',
 		'stepSize': '1',
 		'faultedLine': 'l_1001_1002',
 		'timeMinFilter': '0',
@@ -756,8 +750,6 @@ def new(modelDir):
 		'profit_on_energy_sales': '0.03',
 		'restoration_cost': '100',
 		'hardware_cost': '550',
-		'microFileName': 'microComponents.json',
-		'microData': micro_data,
 		'customerData': customer_data,
 		'customerFileName': 'customerInfo.csv'
 	}
