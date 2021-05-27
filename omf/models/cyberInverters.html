@@ -201,8 +201,8 @@
 				"title":{"text":null},
 				"legend":{"layout":"horizontal", "align":"top", "verticalAlign":"top", "x":50, "y":-10, "borderWidth":0},
 				"credits":{"enabled":false},
-				"xAxis":{"type":"datetime","maxZoom":1000, "tickColor":"gray","lineColor":"gray"},
-				"yAxis":{"title":{"text":null, "style":{"color":"gray"}}},
+				"xAxis":{"showEmpty": false, "type":"datetime","maxZoom":1000, "tickColor":"gray","lineColor":"gray"},
+				"yAxis":{"showEmpty": false, "title":{"text":null, "style":{"color":"gray"}}},
 				"plotOptions":{"line":{"marker":{"enabled":false}}, "series":{"shadow":false, "pointInterval":pointInterval, "pointStart":pointStart}},
 				"tooltip":{"valueDecimals":1},
 				"series":[]}
@@ -219,15 +219,13 @@
 			localHighChart["chart"]["renderTo"] = "voltageImbalancesReport"
 			localHighChart["chart"]["height"] = 200
 			localHighChart["chart"]["type"] = "line"
-			localHighChart["yAxis"] = {"title":{"text":"Imbalance (%)","style":{"color":"gray"}}}
+			localHighChart["yAxis"] = {"title":{"text":"Imbalance (%)"}}
 			for (let [busName,imbalseries] of Object.entries({{allOutputDataDict.voltageImbalances}})) {
 				localHighChart["series"].push({
-					"pointWidth": 40,
 					"marker": {"enabled":false}, 
-					"color": "gray", 
+					"color": "rgba(128,128,128,0.15)",
 					"data": imbalseries.map(x => 100 * x), 
 					"name": busName,
-					"visible":true,
 				})
 			}
 			new Highcharts.Chart(localHighChart)
@@ -256,7 +254,6 @@
 				localHighChart["title"]["text"] = busName.toLowerCase()
 				localHighChart["title"]["align"] = "right"
 				localHighChart["title"]["x"] = -50
-				localHighChart["tooltip"]["shared"] = true
 				localHighChart["yAxis"] = [{//Volts Axis
 						"min": voltageMin,
 						"max" : voltageMax,
@@ -334,28 +331,28 @@
 					"color":"seagreen", 
 					"data":[tDG], 
 					"type":"bar", 
-					"name":"Generated" // Previously named "DG"
+					"name":"Generated"
 				}
 				tFromGridSeries = {
 					"pointWidth": 40,  
 					"color":"crimson", 
 					"data":[tFromGrid,0], 
 					"type":"bar", 
-					"name":"Imported" // Previously named "FromGrid"
+					"name":"Imported"
 				}
 				tDGDirectSeries = {
 					"pointWidth": 40, 
 					"color":"RoyalBlue", 
 					"data":[tDGDirect,0], 
 					"type":"bar", 
-					"name":"DG Direct Use" // Prevously named "DGDirect"
+					"name":"DG Direct Use"
 				}
 				tDGExportedSeries = {
 					"pointWidth": 40, 
 					"color":"LightSeaGreen", 
 					"data":[tDGExported,0], 
 					"type":"bar", 
-					"name":"DG Exported" // Previously named "DG Exported"
+					"name":"DG Exported"
 				}
 				localHighChart = JSON.parse(JSON.stringify(highChartsTemplate))
 				localHighChart["chart"]["renderTo"] = "newEnergyBalanceReport"
@@ -364,14 +361,14 @@
 				localHighChart["chart"]["marginBottom"] = 50
 				localHighChart["series"] = [tFromGridSeries,tDGDirectSeries,tDGExportedSeries,tLossesSeries,tLoadsSeries]
 				localHighChart["xAxis"] = {
-					"tickColor":"gray",
-					"lineColor":"gray",
 					"categories":["Source","Destination"]
 					}
 				localHighChart["yAxis"] = {
 					"title": {
 						"text": 'Energy (Wh)',
-						"offset":20}},
+						//"offset":20
+					}
+				}
 				localHighChart["plotOptions"] = {
 					"bar":{"stacking":"normal"},
 				}
@@ -396,18 +393,20 @@
 					"color":"orangered",
 					"data":losses,
 					"name":"Technical Losses (W)",
-					"visible": false}
+					"visible":false}
 				DGSeries = {
 					"marker":{"enabled":false},
 					"color":"darkturquoise",
 					"data":dg,
 					"name":"DG Power (W)",
-					"visible": false}
+					"visible":false}
 				var localHighChart = JSON.parse(JSON.stringify(highChartsTemplate))
 				localHighChart["chart"]["renderTo"] = "powerTimeSeries"
 				localHighChart["chart"]["type"] = "line"
 				localHighChart["series"] = [powerSeries, lossesSeries, DGSeries]
-				localHighChart["yAxis"] = [{"title":{"text": "Power (W)"}}]
+				localHighChart["yAxis"] = [{
+					"title":{"text":"Power (W)"},
+				}]
 				new Highcharts.Chart(localHighChart);
 			</script>
 		</div>
@@ -417,31 +416,39 @@
 			<script type="text/javascript">
 				swingVoltage = {{allOutputDataDict.swingVoltage}}
 				downlineNodeVolts = {{allOutputDataDict.downlineNodeVolts}}
-				minVolts = {{allOutputDataDict.minVoltBand}}
-				maxVolts = {{allOutputDataDict.maxVoltBand}}
 				var swingVoltageSeries = {
 					"marker":{"enabled":false},
 					"color":"blue",
 					"data":swingVoltage,
-					"name":"Transmission Voltage (V)",
+					"name":"Transmission Voltage (PU)",
 					"visible":true
 				}
 				var downlineNodeVoltsSeries = {
 					"marker":{"enabled":false},
 					"color":"orange",
 					"data":downlineNodeVolts,
-					"name":"Voltage at First Node after Regulator (V)",
+					"name":"Voltage at First Node after Regulator (PU)",
 					"visible":true
 				}
 				var localHighChart = JSON.parse(JSON.stringify(highChartsTemplate))
 				localHighChart["chart"]["renderTo"] = "voltageTimeSeries"
 				localHighChart["chart"]["type"] = "line"
-				//localHighChart["tooltip"]["shared"] = true
-				//localHighChart["tooltip"]["pointFormat"] = "{point.y:.5f}"
 				localHighChart["series"] = [swingVoltageSeries, downlineNodeVoltsSeries]
-				localHighChart["yAxis"]= [{"title":{"text":"Voltage (V)","style":{"color":"gray"}},"plotLines": [
-							{"color": 'gray', "dashStyle": 'ShortDash', "width": 2, "value": minVolts, "zIndex": 0},
-							{"color": 'gray', "dashStyle": 'ShortDash', "width": 2, "value": maxVolts, "zIndex": 0}]}]
+				localHighChart["tooltip"]["valueDecimals"] = 3
+				localHighChart["yAxis"]= [{
+					"title":{"text":"Voltage (PU)"},
+					"plotLines":[{
+						"color":'gray', 
+						"dashStyle":'ShortDash', 
+						"width":2, 
+						"value":114
+					},{
+						"color":'gray', 
+						"dashStyle":'ShortDash', 
+						"width":2, 
+						"value":126
+					}]
+				}]
 				new Highcharts.Chart(localHighChart);
 			</script>
 		</div>
@@ -461,8 +468,15 @@
 				localHighChart["chart"]["renderTo"] = "powerFactorTimeSeries"
 				localHighChart["chart"]["type"] = "line"
 				localHighChart["series"] = [swingPfSeries]
-				//localHighChart["tooltip"]["pointFormat"] = "{point.y:.5f}"
-				localHighChart["yAxis"]= [{"title":{"text":"Per Unit (PU)","style":{"color":"gray"}},"min":-1,"max":1,"tickPositions":[-1,1],"startOnTick":false,"endOnTick":false}]
+				localHighChart["tooltip"]["valueDecimals"] = 3
+				localHighChart["yAxis"]= [{
+					"title":{"text": "Power Factor"},
+					"min": -1,
+					"max": 1,
+					"tickPositions": [-1,1],
+					"startOnTick": false,
+					"endOnTick": false
+				}]
 				new Highcharts.Chart(localHighChart);
 			</script>
 		</div>
@@ -482,10 +496,11 @@
 					.attr("id", "regulatorSeries_" + regname)
 				localHighChart = JSON.parse(JSON.stringify(highChartsTemplate))
 				localHighChart["chart"]["renderTo"] = "regulatorSeries_" + regname
-				localHighChart["chart"]["inverted"] = false
 				localHighChart["chart"]["type"] = "line"
-				//localHighChart["tooltip"]["pointFormat"] = "{point.y:.0f}"
-				localHighChart["title"]["text"] = regname.toLowerCase()
+				localHighChart["tooltip"]["valueDecimals"] = 0
+				localHighChart["title"]["text"] = regname
+				localHighChart["title"]["align"] = "right"
+				localHighChart["title"]["x"] = -50
 				localHighChart["series"] = []
 				localHighChart["yAxis"] = {
 					"min":-17, 
@@ -532,12 +547,15 @@
 				localHighChart["chart"]["renderTo"] = "capacitorSeries_" + capname
 				localHighChart["chart"]["inverted"] = false
 				localHighChart["chart"]["type"] = "line"
-				localHighChart["title"]["text"] = capname.toLowerCase()
+				localHighChart["title"]["text"] = capname
 				localHighChart["series"] = []
 				localHighChart["yAxis"] = {
-					"min": -17, 
-					"max" : 17,
-					"title":{ "text": "Tap position"}
+					"min":-17, 
+					"max":17,
+					"startOnTick":false,
+					"endOnTick":false,
+					"tickPositions":[-16,16],
+					"title":{"text":"Tap Position"}
 				}
 				for (let [phs, dat] of Object.entries(capitems["tapchanges"])) {
 					if (phs=='C') {
@@ -587,26 +605,24 @@
 				localHighChart["series"] = [triplexMin,triplexMean,triplexMax]
 				localHighChart["yAxis"] = {
 					"maxRange":20,
-					"plotLines": [{
-						"color": 'gray', 
-						"dashStyle": 'ShortDash', 
-						"width": 2, 
-						"value": 114, 
-						"zIndex": 0
+					"title":{"text":"Voltage (V)"},
+					"plotLines":[{
+						"color":'gray', 
+						"dashStyle":'ShortDash', 
+						"width":2, 
+						"value":114, 
 					},{
-						"color": 'gray',
-						"dashStyle": 'ShortDash',
-						"width": 2, 
-						"value": 126, 
-						"zIndex": 0
+						"color":'gray',
+						"dashStyle":'ShortDash',
+						"width":2, 
+						"value":126, 
 					}],
-					"title":{"text":"Voltage (V)"}
 				}
 				new Highcharts.Chart(localHighChart)
 			</script>
 		</div>
 		<p class="reportTitle">Inverter Outputs <a target="_self" class="toggle">Hide / Show</a></p>
-		<div id="newInverterReport" class="tightContent" style="max-height:600px; overflow-y: scroll;">
+		<div id="newInverterReport" class="tightContent" style="max-height:700px; overflow-y: scroll;">
 			{% if allOutputDataDict.Inverter_Outputs|length == 0 %}
 			<script type="text/javascript">	
 				$("#newInverterReport").html("<p>&#160;&#160;&#160;No inverters were found on the feeder.</p>")
@@ -648,46 +664,39 @@
 				localHighChart = JSON.parse(JSON.stringify(highChartsTemplate))
 				localHighChart["chart"]["renderTo"] = "inverterSeries_" + invname
 				localHighChart["chart"]["zoomType"] = 'xy'
-				localHighChart["chart"]["inverted"] = false
 				localHighChart["chart"]["height"] = 200
-				localHighChart["chart"]["marginRight"] = 150
+				localHighChart["chart"]["marginRight"] = 80
 				localHighChart["chart"]["type"] = "line"
-				localHighChart["title"]["text"] = invname.toLowerCase()
+				localHighChart["title"]["text"] = invname
 				localHighChart["title"]["align"] = "right"
 				localHighChart["title"]["x"] = -50
-				localHighChart["tooltip"]["shared"] = true
-				localHighChart["yAxis"] = [{//Volts Axis
-						"min": voltageMin,
-						"max" : voltageMax,
-						"title": {"text": "Voltage (V)","style": {"color":"gray"}}
-					}, { //Watts Axis
-						"min": yPowerMin, 
-						"max" : yPowerMax,
-						"title": { "text": "Power Output (W)","style": {"color": "gray"}},
-						"opposite": true
-					}, { //VARs Axis
-						"min": yPowerMin, 
-						"max" : yPowerMax,
-						"title": {"text": "Reactive Power Output (VAR)"},
-						"opposite": true
+				localHighChart["yAxis"] = [{
+						"min":voltageMin,
+						"max":voltageMax,
+						"title":{"text": "Voltage (V)"},
+					}, {
+						"min":yPowerMin, 
+						"max":yPowerMax,
+						"title":{"text":"Power (W or VAR)"},
+						"opposite":true,
 					}]
 				localHighChart["series"] = [{
-					"pointWidth": 40,
+					"pointWidth":40,
 					"color":"RoyalBlue",
-					"data": invVoltage,
+					"data":invVoltage,
 					"name":"Voltage"
 				},{
 					"pointWidth": 40,
 					"color":"crimson",
-					"data": invPowerReal,
-					"name":"Power Output",
-					"yAxis": 1
+					"data":invPowerReal,
+					"name":"Real Power Output",
+					"yAxis":1
 				},{
 					"pointWidth": 40,
 					"color":"orange",
-					"data": invPowerImag,
+					"data":invPowerImag,
 					"name":"Reactive Power Output",
-					"yAxis": 2
+					"yAxis":1
 				}]
 				new Highcharts.Chart(localHighChart)
 			}
@@ -701,8 +710,8 @@
 			</script>
 			{% endif %}
 			<script type="text/javascript">	
-			//var dodFactor = 100 - parseFloat(allInputData.dodFactor) //There is not an input for this in the interface
-			dodFactor = 25 // hardcode 100% allowable discharge
+			//var dodFactor = parseFloat(allInputData.dodFactor) //We need an output for this from pyCigar, as it will be contained in the battery control spec
+			dodFactor = 90 // hardcode allowable discharge
 			for (let [battName, battDat] of Object.entries({{allOutputDataDict.Battery_Outputs|tojson}})) {
 				battSOC = battDat["SOC"]
 				battStatus = battDat["Charge_Status"]
@@ -720,26 +729,25 @@
 				localHighChart["chart"]["zoomType"] = 'xy'
 				localHighChart["chart"]["inverted"] = false
 				localHighChart["chart"]["height"] = 200
-				localHighChart["chart"]["marginRight"] = 150
+				localHighChart["chart"]["marginRight"] = 120
 				localHighChart["chart"]["type"] = "line"
-				//localHighChart["tooltip"]["shared"] = true
 				localHighChart["title"]["text"] = battName
 				localHighChart["title"]["align"] = "right"
 				localHighChart["title"]["x"] = -50
 				localHighChart["yAxis"] = [{
-					"title": {"text": "Power (W)"},
-					"min": minPower, 
-					"max" : maxPower
+					"title":{"text":"Power (W)"},
+					"min":minPower, 
+					"max":maxPower,
 				},{
 					"title":{"text":"SoC (%)"},
 					"min":0, 
 					"max":100,
-					"opposite":true,
+					"opposite": true,
 					"tickPositions":[0,25,50,75,100],
 					"plotLines":[{
-						"color": "gray",
-						"dashStyle": "ShortDash",
-						"width": 2,
+						"color":"gray",
+						"dashStyle":"ShortDash",
+						"width":2,
 						"label":{
 							"text":"Max DOD:" + dodFactor + "%",
 							"align":"left",
@@ -747,11 +755,10 @@
 							"style":{"color":"gray", "fontsize":"12px"}
 							},
 						"value": 100-dodFactor,
-						"zIndex": 10
 					},{
-						"color": "gray",
-						"dashStyle": "ShortDash",
-						"width": 1,
+						"color":"gray",
+						"dashStyle":"ShortDash",
+						"width":1,
 						"label":{
 							"text":"Cycle Equivalents: " + delimitNumbers(battCycles.toFixed(1)), 
 							"align":"right",
@@ -759,7 +766,6 @@
 							"style":{"color":"gray", "fontsize":"12px"}
 							},
 						"value": 100-dodFactor,
-						"zIndex": 10
 					}]
 				},{
 					"title":{"text":"Status"},
