@@ -233,10 +233,12 @@
 				Plotly.newPlot("fig3Chart", JSON.parse(allOutputData["fig3Data"]), JSON.parse(allOutputData["fig3Layout"]) || {})
 			</script>
 		</div>
-		<p class="reportTitle postRun">Customer Outage Plots (wrt time)</p>
-		<div id="customerCostFig" class="content postRun" style="margin-top:0px">
-			<img id="customerCostFigImage" style="width:980px" />
-			<script>gebi("customerCostFigImage").src = "data:image/png;base64," + allOutputData["customerCostFig.png"]</script>
+		<p class="reportTitle postRun">Customer Outage Plots (wrt duration)</p>
+		<div id="fig4" class="tightContent postRun">
+			<div id="fig4Chart" style="width:1000px"></div>
+			<script type="text/javascript">
+				Plotly.newPlot("fig4Chart", JSON.parse(allOutputData["fig4Data"]), JSON.parse(allOutputData["fig4Layout"]) || {})
+			</script>
 		</div>
 		<p class="reportTitle postRun" style="page-break-before:always">Customer Outage Cost</p>
 		<div id="customerOutageCostCalc" class="tightContent postRun">

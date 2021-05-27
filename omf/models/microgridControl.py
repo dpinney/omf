@@ -419,24 +419,24 @@ def graphMicrogrid(pathToOmd, pathToCsv, workDir, maxTime, stepSize, faultedLine
 			storageSOC = data['Storage SOC (%)']
 			cached = 'yes'
 	else:
-		# Install if necessary.
-		DIR = f'{__neoMetaModel__._omfDir}/solvers/PowerModelsONM/'
-		if not os.path.isdir(f'{DIR}build'):
-			if platform.system() == "Linux":
-				FNAME = 'PowerModelsONM_ubuntu-latest_x64.zip'
-			elif platform.system() == "Windows":
-				FNAME = 'PowerModelsONM_windows-latest_x64.zip'
-			elif platform.system() == "Darwin":
-				FNAME = 'PowerModelsONM_macOS-latest_x64.zip'
-			else:
-				raise Exception('Unsupported ONM platform.')
-			URL = 'https://github.com/lanl-ansi/PowerModelsONM.jl/releases/download/v0.0.9/' + FNAME
-			os.system(f'wget -nv {URL} -P {DIR}')
-			os.system(f'unzip {DIR}{FNAME} -d {DIR}')
-			os.system(f'rm {DIR}{FNAME}')
-			if platform.system() == "Darwin":
-				# Disable quarantine.
-				os.system(f'xattr -dr com.apple.quarantine {DIR}')
+		# # Install if necessary.
+		# DIR = f'{__neoMetaModel__._omfDir}/solvers/PowerModelsONM/'
+		# if not os.path.isdir(f'{DIR}build'):
+		# 	if platform.system() == "Linux":
+		# 		FNAME = 'PowerModelsONM_ubuntu-latest_x64.zip'
+		# 	elif platform.system() == "Windows":
+		# 		FNAME = 'PowerModelsONM_windows-latest_x64.zip'
+		# 	elif platform.system() == "Darwin":
+		# 		FNAME = 'PowerModelsONM_macOS-latest_x64.zip'
+		# 	else:
+		# 		raise Exception('Unsupported ONM platform.')
+		# 	URL = 'https://github.com/lanl-ansi/PowerModelsONM.jl/releases/download/v0.0.9/' + FNAME
+		# 	os.system(f'wget -nv {URL} -P {DIR}')
+		# 	os.system(f'unzip {DIR}{FNAME} -d {DIR}')
+		# 	os.system(f'rm {DIR}{FNAME}')
+		# 	if platform.system() == "Darwin":
+		# 		# Disable quarantine.
+		# 		os.system(f'xattr -dr com.apple.quarantine {DIR}')
 		# Run command
 		# command = f'{DIR}/build/bin/PowerModelsONM -n "{workDir}/circuit.dss" -o "{workDir}/onm_output.json"'
 		# os.system(command)
@@ -594,6 +594,7 @@ def graphMicrogrid(pathToOmd, pathToCsv, workDir, maxTime, stepSize, faultedLine
 	average_lost_kwh = []
 	outageCost = []
 	globalMax = 0
+	fig = go.Figure()
 	while row < customerOutageData.shape[0]:
 		customerName = str(customerOutageData.loc[row, 'Customer Name'])
 		duration = str(customerOutageData.loc[row, 'Duration'])
@@ -603,6 +604,7 @@ def graphMicrogrid(pathToOmd, pathToCsv, workDir, maxTime, stepSize, faultedLine
 		loadName = str(customerOutageData.loc[row, 'Load Name'])
 
 		customerOutageCost, kWperhrEstimate, times, localMax = customerCost1(workDir, customerName, duration, season, averagekWperhr, businessType, loadName)
+		print(kWperhrEstimate)
 		average_lost_kwh.append(float(averagekWperhr))
 		outageCost.append(customerOutageCost)
 		if localMax > globalMax:
@@ -612,20 +614,37 @@ def graphMicrogrid(pathToOmd, pathToCsv, workDir, maxTime, stepSize, faultedLine
 		print(numberRows)
 		print(math.floor(row/2))
 		print(row%2)
-		if numberRows > 1:
-			axs[math.floor(row/2), row%2].plot(times, kWperhrEstimate)
-			axs[math.floor(row/2), row%2].set_title(str(customerName))
-		else:
-			axs[row%2].plot(times, kWperhrEstimate)
-			axs[row%2].set_title(str(customerName))
-		row+=1
-	for ax in axs.flat:
-		ax.set(xlabel='Duration (hrs)', ylabel='Customer Outage Cost')
-		ax.set_xlim([0, 8])
-		ax.set_ylim([0, globalMax + .05*globalMax])
-	for ax in axs.flat:
-		ax.label_outer()
-	plt.savefig(workDir + '/customerCostFig')
+  
+		# creating series
+		timesSeries = pd.Series(times)
+		kWperhrSeries = pd.Series(kWperhrEstimate)
+
+		trace = py.graph_objs.Scatter(
+			x = timesSeries,
+			y = kWperhrSeries,
+			name = customerName,
+			hoverlabel = dict(namelength = -1)
+		)
+		fig.add_trace(trace)
+		row += 1
+	fig.update_layout(xaxis_title = 'Duration (hours)',
+		yaxis_title = 'Cost ($)')
+	py.offline.plot(fig, filename=f'Output.plot.html', auto_open=True)
+
+	# 	if numberRows > 1:
+	# 		axs[math.floor(row/2), row%2].plot(times, kWperhrEstimate)
+	# 		axs[math.floor(row/2), row%2].set_title(str(customerName))
+	# 	else:
+	# 		axs[row%2].plot(times, kWperhrEstimate)
+	# 		axs[row%2].set_title(str(customerName))
+	# 	row+=1
+	# for ax in axs.flat:
+	# 	ax.set(xlabel='Duration (hrs)', ylabel='Customer Outage Cost')
+	# 	ax.set_xlim([0, 8])
+	# 	ax.set_ylim([0, globalMax + .05*globalMax])
+	# for ax in axs.flat:
+	# 	ax.label_outer()
+	# plt.savefig(workDir + '/customerCostFig')
 
 	customerOutageHtml = customerOutageTable(customerOutageData, outageCost, workDir)
 
@@ -636,7 +655,7 @@ def graphMicrogrid(pathToOmd, pathToCsv, workDir, maxTime, stepSize, faultedLine
 
 	utilityOutageHtml = utilityOutageTable(average_lost_kwh, profit_on_energy_sales, restoration_cost, hardware_cost, outageDuration, workDir)
 
-	return {'utilityOutageHtml': utilityOutageHtml, 'customerOutageHtml': customerOutageHtml, 'timelineStatsHtml': timelineStatsHtml, 'gens': gens, 'loads': loads, 'volts': volts, 'customerOutageCost': customerOutageCost}
+	return {'utilityOutageHtml': utilityOutageHtml, 'customerOutageHtml': customerOutageHtml, 'timelineStatsHtml': timelineStatsHtml, 'gens': gens, 'loads': loads, 'volts': volts, 'fig': fig, 'customerOutageCost': customerOutageCost}
 
 def work(modelDir, inputDict):
 	# Copy specific climate data into model directory
@@ -712,8 +731,8 @@ def work(modelDir, inputDict):
 		outData['geoDict'] = inFile.read().decode()
 
 	# Image outputs.
-	with open(pJoin(modelDir,'customerCostFig.png'),'rb') as inFile:
-		outData['customerCostFig.png'] = base64.standard_b64encode(inFile.read()).decode()
+	# with open(pJoin(modelDir,'customerCostFig.png'),'rb') as inFile:
+	# 	outData['customerCostFig.png'] = base64.standard_b64encode(inFile.read()).decode()
 
 	# Plotly outputs.
 	layoutOb = go.Layout()
@@ -723,6 +742,8 @@ def work(modelDir, inputDict):
 	outData['fig2Layout'] = json.dumps(layoutOb, cls=py.utils.PlotlyJSONEncoder)
 	outData['fig3Data'] = json.dumps(plotOuts.get('loads',{}), cls=py.utils.PlotlyJSONEncoder)
 	outData['fig3Layout'] = json.dumps(layoutOb, cls=py.utils.PlotlyJSONEncoder)
+	outData['fig4Data'] = json.dumps(plotOuts.get('fig',{}), cls=py.utils.PlotlyJSONEncoder)
+	outData['fig4Layout'] = json.dumps(layoutOb, cls=py.utils.PlotlyJSONEncoder)
 
 	# Stdout/stderr.
 	outData['stdout'] = 'Success'
