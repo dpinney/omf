@@ -629,7 +629,7 @@ def graphMicrogrid(pathToOmd, pathToCsv, workDir, maxTime, stepSize, faultedLine
 		row += 1
 	fig.update_layout(xaxis_title = 'Duration (hours)',
 		yaxis_title = 'Cost ($)')
-	py.offline.plot(fig, filename=f'Output.plot.html', auto_open=True)
+	py.offline.plot(fig, filename=f'Output.plot.html', auto_open=False)
 
 	# 	if numberRows > 1:
 	# 		axs[math.floor(row/2), row%2].plot(times, kWperhrEstimate)
