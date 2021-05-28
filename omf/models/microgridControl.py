@@ -399,23 +399,22 @@ def customerCost1(workDir, customerName, duration, season, averagekWperhr, busin
 	return outageCost, kWperhrEstimate, times, localMax
 
 def check_and_install():
-	ONM_DIR = f'{__neoMetaModel__._omfDir}/solvers/PowerModelsONM/'
-	if not os.path.isdir(f'{DIR}build'):
-		if platform.system() == "Linux":
-			FNAME = 'PowerModelsONM_ubuntu-latest_x64.zip'
-		elif platform.system() == "Windows":
-			FNAME = 'PowerModelsONM_windows-latest_x64.zip'
-		elif platform.system() == "Darwin":
-			FNAME = 'PowerModelsONM_macOS-latest_x64.zip'
-		else:
-			raise Exception('Unsupported ONM platform.')
-		URL = 'https://github.com/lanl-ansi/PowerModelsONM.jl/releases/download/v0.0.9/' + FNAME
-		os.system(f'wget -nv {URL} -P {DIR}')
-		os.system(f'unzip {DIR}{FNAME} -d {DIR}')
-		os.system(f'rm {DIR}{FNAME}')
+	if platform.system() == "Linux":
+		FNAME = 'PowerModelsONM_ubuntu-latest_x64.zip'
+	elif platform.system() == "Windows":
+		FNAME = 'PowerModelsONM_windows-latest_x64.zip'
+	elif platform.system() == "Darwin":
+		FNAME = 'PowerModelsONM_macOS-latest_x64.zip'
+	else:
+		raise Exception('Unsupported ONM platform.')
+	if not os.path.isdir(f'{ONM_DIR}build'):
+		URL = 'https://github.com/lanl-ansi/PowerModelsONM.jl/releases/download/v0.4.0/' + FNAME
+		os.system(f'wget -nv {URL} -P {ONM_DIR}')
+		os.system(f'unzip {ONM_DIR}{FNAME} -d {ONM_DIR}')
+		os.system(f'rm {ONM_DIR}{FNAME}')
 		if platform.system() == "Darwin":
 			# Disable quarantine.
-			os.system(f'xattr -dr com.apple.quarantine {DIR}')
+			os.system(f'sudo xattr -dr com.apple.quarantine {ONM_DIR}')
 
 def graphMicrogrid(pathToOmd, pathToCsv, workDir, maxTime, stepSize, faultedLine, timeMinFilter, timeMaxFilter, actionFilter, outageDuration, profit_on_energy_sales, restoration_cost, hardware_cost, sameFeeder):
 	''' Run full microgrid control process. '''
@@ -435,7 +434,7 @@ def graphMicrogrid(pathToOmd, pathToCsv, workDir, maxTime, stepSize, faultedLine
 	# command = 'cmd /c ' + '"julia --project=' + '"C:/Users/granb/PowerModelsONM.jl-master/" ' + 'C:/Users/granb/PowerModelsONM.jl-master/src/cli/entrypoint.jl' + ' -n ' + '"' + str(workDir) + '/circuit.dss' + '"' + ' -o ' + '"C:/Users/granb/PowerModelsONM.jl-master/output.json"'
 
 	if os.path.exists(f'{workDir}/output.json') and sameFeeder:
-		# Check for cache, skip ONM if necessary
+		# Cache exists, skip ONM running
 		with open(f'{workDir}/output.json') as inFile:
 			data = json.load(inFile)
 			genProfiles = data['Generator profiles']
