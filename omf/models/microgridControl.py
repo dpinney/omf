@@ -24,6 +24,7 @@ from omf.solvers.opendss import dssConvert
 tooltip = 'outageCost calculates reliability metrics and creates a leaflet graph based on data from an input csv file.'
 modelName, template = __neoMetaModel__.metadata(__file__)
 hidden = False
+ONM_DIR = f'{__neoMetaModel__._omfDir}/solvers/PowerModelsONM/'
 
 def datetime_to_float(d):
 	'helper function to convert a datetime object to a float'
@@ -397,17 +398,44 @@ def customerCost1(workDir, customerName, duration, season, averagekWperhr, busin
 	# return {'customerOutageCost': outageCost}
 	return outageCost, kWperhrEstimate, times, localMax
 
+def check_and_install():
+	ONM_DIR = f'{__neoMetaModel__._omfDir}/solvers/PowerModelsONM/'
+	if not os.path.isdir(f'{DIR}build'):
+		if platform.system() == "Linux":
+			FNAME = 'PowerModelsONM_ubuntu-latest_x64.zip'
+		elif platform.system() == "Windows":
+			FNAME = 'PowerModelsONM_windows-latest_x64.zip'
+		elif platform.system() == "Darwin":
+			FNAME = 'PowerModelsONM_macOS-latest_x64.zip'
+		else:
+			raise Exception('Unsupported ONM platform.')
+		URL = 'https://github.com/lanl-ansi/PowerModelsONM.jl/releases/download/v0.0.9/' + FNAME
+		os.system(f'wget -nv {URL} -P {DIR}')
+		os.system(f'unzip {DIR}{FNAME} -d {DIR}')
+		os.system(f'rm {DIR}{FNAME}')
+		if platform.system() == "Darwin":
+			# Disable quarantine.
+			os.system(f'xattr -dr com.apple.quarantine {DIR}')
 
 def graphMicrogrid(pathToOmd, pathToCsv, workDir, maxTime, stepSize, faultedLine, timeMinFilter, timeMaxFilter, actionFilter, outageDuration, profit_on_energy_sales, restoration_cost, hardware_cost, sameFeeder):
+	''' Run full microgrid control process. '''
+	# TODO: run check_install, disable always_cached
+	# check_and_install()
+	sameFeeder = True
+
 	# read in the OMD file as a tree and create a geojson map of the system
 	if not workDir:
 		workDir = tempfile.mkdtemp()
 		print('@@@@@@', workDir)
 
+	# New model cache.
 	shutil.copyfile(f'{__neoMetaModel__._omfDir}/static/testFiles/output.json',f'{workDir}/output.json')
 
+	# Native Julia Command
 	# command = 'cmd /c ' + '"julia --project=' + '"C:/Users/granb/PowerModelsONM.jl-master/" ' + 'C:/Users/granb/PowerModelsONM.jl-master/src/cli/entrypoint.jl' + ' -n ' + '"' + str(workDir) + '/circuit.dss' + '"' + ' -o ' + '"C:/Users/granb/PowerModelsONM.jl-master/output.json"'
+
 	if os.path.exists(f'{workDir}/output.json') and sameFeeder:
+		# Check for cache, skip ONM if necessary
 		with open(f'{workDir}/output.json') as inFile:
 			data = json.load(inFile)
 			genProfiles = data['Generator profiles']
@@ -419,31 +447,10 @@ def graphMicrogrid(pathToOmd, pathToCsv, workDir, maxTime, stepSize, faultedLine
 			storageSOC = data['Storage SOC (%)']
 			cached = 'yes'
 	else:
-		# # Install if necessary.
-		# DIR = f'{__neoMetaModel__._omfDir}/solvers/PowerModelsONM/'
-		# if not os.path.isdir(f'{DIR}build'):
-		# 	if platform.system() == "Linux":
-		# 		FNAME = 'PowerModelsONM_ubuntu-latest_x64.zip'
-		# 	elif platform.system() == "Windows":
-		# 		FNAME = 'PowerModelsONM_windows-latest_x64.zip'
-		# 	elif platform.system() == "Darwin":
-		# 		FNAME = 'PowerModelsONM_macOS-latest_x64.zip'
-		# 	else:
-		# 		raise Exception('Unsupported ONM platform.')
-		# 	URL = 'https://github.com/lanl-ansi/PowerModelsONM.jl/releases/download/v0.0.9/' + FNAME
-		# 	os.system(f'wget -nv {URL} -P {DIR}')
-		# 	os.system(f'unzip {DIR}{FNAME} -d {DIR}')
-		# 	os.system(f'rm {DIR}{FNAME}')
-		# 	if platform.system() == "Darwin":
-		# 		# Disable quarantine.
-		# 		os.system(f'xattr -dr com.apple.quarantine {DIR}')
-		# Run command
-		# command = f'{DIR}/build/bin/PowerModelsONM -n "{workDir}/circuit.dss" -o "{workDir}/onm_output.json"'
-		# os.system(command)
-		
-		#TODO: ignore test_output_3 and use actual onm output.
-		with open(pJoin(__neoMetaModel__._omfDir,'static','testFiles','output.json')) as inFile:
-		# with open(f'{workDir}/onm_output.json') as inFile:
+		# No cache, so run ONM.
+		command = f'{ONM_DIR}/build/bin/PowerModelsONM -n "{workDir}/circuit.dss" -o "{workDir}/onm_output.json"'
+		os.system(command)
+		with open(f'{workDir}/onm_output.json') as inFile:
 			data = json.load(inFile)
 			with open(f'{workDir}/output.json', 'w') as outfile:
 				json.dump(data, outfile)
@@ -629,7 +636,7 @@ def graphMicrogrid(pathToOmd, pathToCsv, workDir, maxTime, stepSize, faultedLine
 		row += 1
 	fig.update_layout(xaxis_title = 'Duration (hours)',
 		yaxis_title = 'Cost ($)')
-	py.offline.plot(fig, filename=f'Output.plot.html', auto_open=False)
+	# py.offline.plot(fig, filename=f'Output.plot.html', auto_open=False)
 
 	# 	if numberRows > 1:
 	# 		axs[math.floor(row/2), row%2].plot(times, kWperhrEstimate)
@@ -667,7 +674,6 @@ def work(modelDir, inputDict):
 	with open(f'{modelDir}/{feederName}.omd', 'r') as omdFile:
 		omd = json.load(omdFile)
 	sameFeeder = False
-
 	
 	if os.path.exists(f'{modelDir}/feeder.json'):
 		sameFeeder = open(f'{modelDir}/feeder.json').read() == omd		
