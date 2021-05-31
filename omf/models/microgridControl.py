@@ -122,9 +122,19 @@ def createTimeline():
 	timeline = pd.DataFrame(data, columns = ['time','device','action','loadBefore','loadAfter'])
 	return timeline
 
-def colormap(time):
-	color = 8438271 - 10*int(time)
-	return '{:x}'.format(int(color))
+def colormap(action):
+	if action == 'Load Shed':
+		color = '0000FF'
+	elif action == 'Load Pickup':
+		color = '00C957'
+	elif action == 'Switching':
+		color = 'FF8000'
+	elif action == 'Battery Control':
+		color = 'FFFF00'
+	elif action == 'Generator Control':
+		color = '9B30FF'
+
+	return color
 
 def microgridTimeline(outputTimeline, workDir):
 	# check to see if work directory is specified; otherwise, create a temporary directory
@@ -428,14 +438,14 @@ def graphMicrogrid(pathToOmd, pathToCsv, workDir, maxTime, stepSize, faultedLine
 		print('@@@@@@', workDir)
 
 	# New model cache.
-	shutil.copyfile(f'{__neoMetaModel__._omfDir}/static/testFiles/output.json',f'{workDir}/output.json')
+	shutil.copyfile(f'{__neoMetaModel__._omfDir}/static/testFiles/output_no_events.json',f'{workDir}/output_no_events.json')
 
 	# Native Julia Command
 	# command = 'cmd /c ' + '"julia --project=' + '"C:/Users/granb/PowerModelsONM.jl-master/" ' + 'C:/Users/granb/PowerModelsONM.jl-master/src/cli/entrypoint.jl' + ' -n ' + '"' + str(workDir) + '/circuit.dss' + '"' + ' -o ' + '"C:/Users/granb/PowerModelsONM.jl-master/output.json"'
 
-	if os.path.exists(f'{workDir}/output.json') and sameFeeder:
+	if os.path.exists(f'{workDir}/output_no_events.json') and sameFeeder:
 		# Cache exists, skip ONM running
-		with open(f'{workDir}/output.json') as inFile:
+		with open(f'{workDir}/output_no_events.json') as inFile:
 			data = json.load(inFile)
 			genProfiles = data['Generator profiles']
 			simTimeSteps = []
@@ -451,7 +461,7 @@ def graphMicrogrid(pathToOmd, pathToCsv, workDir, maxTime, stepSize, faultedLine
 		os.system(command)
 		with open(f'{workDir}/onm_output.json') as inFile:
 			data = json.load(inFile)
-			with open(f'{workDir}/output.json', 'w') as outfile:
+			with open(f'{workDir}/output_no_events.json', 'w') as outfile:
 				json.dump(data, outfile)
 			genProfiles = data['Generator profiles']
 			simTimeSteps = []
@@ -560,7 +570,7 @@ def graphMicrogrid(pathToOmd, pathToCsv, workDir, maxTime, stepSize, faultedLine
 								  'timeMin': timeMin, 
 								  'timeMax': timeMax,
 								  'actionFilter': actionFilter,
-								  'pointColor': '#' + str(colormap(time)), 
+								  'pointColor': '#' + str(colormap(action)), 
 								  'popupContent': 'Location: <b>' + str(coordStr) + '</b><br>Device: <b>' + str(device) + '</b><br>Time: <b>' + str(time) + '</b><br>Action: <b>' + str(action) + '</b><br>Load Before: <b>' + str(loadBefore) + '</b><br>Load After: <b>' + str(loadAfter) + '</b>.'}
 			feederMap['features'].append(Dict)
 		else:
@@ -577,7 +587,7 @@ def graphMicrogrid(pathToOmd, pathToCsv, workDir, maxTime, stepSize, faultedLine
 								  'timeMin': timeMin, 
 								  'timeMax': timeMax,
 								  'actionFilter': actionFilter,
-								  'edgeColor': '#' + str(colormap(time)),
+								  'edgeColor': '#' + str(colormap(action)),
 								  'popupContent': 'Location: <b>' + str(coordStr) + '</b><br>Device: <b>' + str(device) + '</b><br>Time: <b>' + str(time) + '</b><br>Action: <b>' + str(action) + '</b><br>Load Before: <b>' + str(loadBefore) + '</b><br>Load After: <b>' + str(loadAfter) + '</b>.'}
 			feederMap['features'].append(Dict)
 		row += 1
