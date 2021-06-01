@@ -230,15 +230,15 @@
 			new Highcharts.Chart(localHighChart)
 			</script>
 		</div>
-		<!--<p class="reportTitle">Voltage Imbalance by  Bus <a target="_self" class="toggle">Hide / Show</a></p>
-		<div id="voltageImbalancesByBusReport" class="tightContent" style="max-height:600px; overflow-y: scroll;">
-			{% if allOutputDataDict.voltageImbalances|length == 0 %}
+		<p class="reportTitle">Voltage Imbalance by Bus <a target="_self" class="toggle">Hide / Show</a></p>
+		<div id="voltageImbalancesByBusReport" class="tightContent" style="max-height:610px; overflow-y: scroll;">
+			{% if allOutputDataDict.Bus_Voltages|length == 0 %}
 			<script type="text/javascript">	
-				$("#voltageImbalancesByBusReport").html("<p>&#160;&#160;&#160;No three-phase bus voltage imbalance values were returned.</p>")
+				$("#voltageImbalancesByBusReport").html("<p>&#160;&#160;&#160;No bus voltage imbalance values were returned.</p>")
 			</script>
 			{% endif %}
 			<script type="text/javascript">
-			for (let [busName,imbalseries] of Object.entries({{allOutputDataDict.voltageImbalances|tojson}})) {
+			for (let [busName,phsVolts] of Object.entries({{allOutputDataDict.Bus_Voltages|tojson}})) {
 				$("<div/>").appendTo("#voltageImbalancesByBusReport")
 					.attr("class", "busContainer")
 					.attr("id", busName)
@@ -250,46 +250,31 @@
 				localHighChart["chart"]["height"] = 200
 				localHighChart["chart"]["marginRight"] = 150
 				localHighChart["chart"]["type"] = "line"
-				localHighChart["title"]["text"] = busName.toLowerCase()
+				localHighChart["title"]["text"] = busName
 				localHighChart["title"]["align"] = "right"
 				localHighChart["title"]["x"] = -50
-				localHighChart["yAxis"] = [{//Volts Axis
-						"min": voltageMin,
-						"max" : voltageMax,
-						"title": {"text": "Voltage (V)","style": {"color":"gray"}}
-					}, { //Watts Axis
-						"min": yPowerMin, 
-						"max" : yPowerMax,
-						"title": { "text": "Real Power (W)","style": {"color": "gray"}},
-						"opposite": true
-					}, { //VARs Axis
-						"min": yPowerMin, 
-						"max" : yPowerMax,
-						"title": {"text": "Reactive Power Output (VAR)"},
-						"opposite": true
+				localHighChart["yAxis"] = [{
+						"title": {"text": "Voltage (PU)","style": {"color":"gray"}}
 					}]
-				localHighChart["series"] = [{
-					"pointWidth": 40,
-					"color":"RoyalBlue",
-					"data": invVoltage,
-					"name":"Voltage"
-				},{
-					"pointWidth": 40,
-					"color":"crimson",
-					"data": invPowerReal,
-					"name":"Power Output",
-					"yAxis": 1
-				},{
-					"pointWidth": 40,
-					"color":"orange",
-					"data": invPowerImag,
-					"name":"Reactive Power Output",
-					"yAxis": 2
-				}]
+				for (let [phs, dat] of Object.entries(phsVolts)) {
+				if (phs=='C') {
+					color = "Seagreen"
+				} else if (phs=='B') {
+					color = "Crimson"
+				} else {
+					color = "RoyalBlue"
+				}
+				localHighChart["series"].push({
+						"pointWidth": 40,
+						"data": dat,
+						"name": phs,
+						"color": color,
+					})
+				}
 				new Highcharts.Chart(localHighChart)
 			}
 			</script>
-		</div>-->
+		</div>
 		<p class="reportTitle">Energy Balance <a target="_self" class="toggle">Hide / Show</a></p>
 		<div id="newEnergyBalanceReport" class="tightContent">
 			<script type="text/javascript">
@@ -511,9 +496,9 @@
 				}
 				for (let [phs, dat] of Object.entries(regitems["tapchanges"])) {
 					if (phs=='C') {
-						color = "Green"
+						color = "Seagreen"
 					} else if (phs=='B') {
-						color = "Red"
+						color = "Crimson"
 					} else {
 						color = "RoyalBlue"
 					}
@@ -558,9 +543,9 @@
 				}
 				for (let [phs, dat] of Object.entries(capitems["tapchanges"])) {
 					if (phs=='C') {
-						color = "Green"
+						color = "Seagreen"
 					} else if (phs=='B') {
-						color = "Red"
+						color = "Crimson"
 					} else {
 						color = "RoyalBlue"
 					}
