@@ -438,14 +438,14 @@ def graphMicrogrid(pathToOmd, pathToCsv, workDir, maxTime, stepSize, faultedLine
 		print('@@@@@@', workDir)
 
 	# New model cache.
-	shutil.copyfile(f'{__neoMetaModel__._omfDir}/static/testFiles/output_no_events.json',f'{workDir}/output_no_events.json')
+	shutil.copyfile(f'{__neoMetaModel__._omfDir}/static/testFiles/output.json',f'{workDir}/output.json')
 
 	# Native Julia Command
 	# command = 'cmd /c ' + '"julia --project=' + '"C:/Users/granb/PowerModelsONM.jl-master/" ' + 'C:/Users/granb/PowerModelsONM.jl-master/src/cli/entrypoint.jl' + ' -n ' + '"' + str(workDir) + '/circuit.dss' + '"' + ' -o ' + '"C:/Users/granb/PowerModelsONM.jl-master/output.json"'
 
-	if os.path.exists(f'{workDir}/output_no_events.json') and sameFeeder:
+	if os.path.exists(f'{workDir}/output.json') and sameFeeder:
 		# Cache exists, skip ONM running
-		with open(f'{workDir}/output_no_events.json') as inFile:
+		with open(f'{workDir}/output.json') as inFile:
 			data = json.load(inFile)
 			genProfiles = data['Generator profiles']
 			simTimeSteps = []
@@ -461,7 +461,7 @@ def graphMicrogrid(pathToOmd, pathToCsv, workDir, maxTime, stepSize, faultedLine
 		os.system(command)
 		with open(f'{workDir}/onm_output.json') as inFile:
 			data = json.load(inFile)
-			with open(f'{workDir}/output_no_events.json', 'w') as outfile:
+			with open(f'{workDir}/output.json', 'w') as outfile:
 				json.dump(data, outfile)
 			genProfiles = data['Generator profiles']
 			simTimeSteps = []
