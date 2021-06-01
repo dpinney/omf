@@ -101,7 +101,7 @@ def new_newQstsPlot(filePath, stepSizeInMinutes, numberOfSteps, keepAllFiles=Fal
 		elif obData.startswith('isource.'):
 			dss_run_file += f'new object=monitor.{mon_name} element={obType}.{name} terminal=1 mode=0\n'
 			mon_names.append(mon_name)
-		elif obData.startswith('generator.') or obData.startswith('isource.') or obData.startswith('storage.'):
+		elif obData.startswith('generator.') or obData.startswith('isource.') or obData.startswith('storage.') or obData.startswith('pvsystem.'):
 			mon_name = f'mongenerator-{name}'
 			dss_run_file += f'new object=monitor.{mon_name} element={obType}.{name} terminal=1 mode=1 ppolar=no\n'
 			mon_names.append(mon_name)
@@ -248,7 +248,7 @@ def newQstsPlot(filePath, stepSizeInMinutes, numberOfSteps, keepAllFiles=False, 
 		elif obData.startswith('isource.'):
 			runDssCommand(f'new object=monitor.{mon_name} element={obType}.{name} terminal=1 mode=0')
 			mon_names.append(mon_name)
-		elif obData.startswith('generator.') or obData.startswith('isource.') or obData.startswith('storage.'):
+		elif obData.startswith('generator.') or obData.startswith('isource.') or obData.startswith('storage.') or obData.startswith('pvsystem.'):
 			mon_name = f'mongenerator-{name}'
 			runDssCommand(f'new object=monitor.{mon_name} element={obType}.{name} terminal=1 mode=1 ppolar=no')
 			mon_names.append(mon_name)
