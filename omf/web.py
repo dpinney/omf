@@ -67,14 +67,7 @@ def getDataNames():
 		for fname in filenames:
 			if fname.endswith('.omd') and fname != 'feeder.omd':
 				publicFeeders.append({'name': fname[:-4], 'model': dirpath.split('/')[-1]})
-	# Public circuit files too.
-	publicCircuitFiles = []
-	for (dirpath, dirnames, filenames) in os.walk(os.path.join(_omfDir, "solvers","opendss")):
-		for fname in filenames:
-			if fname.endswith('.dss') and fname != 'feeder.dss':
-				# publicCircuitFiles.append({'name': fname[:-4], 'model': dirpath.split('/')[-1]})
-				publicCircuitFiles.append({'name': fname, 'model': dirpath.split('/')[-1]})
-	return {"climates":sorted(climates), "feeders":feeders, "circuitFiles":circuitFiles, "networks":networks, "publicFeeders":publicFeeders, "publicCircuitFiles":publicCircuitFiles, "currentUser":currUser}
+	return {"climates":sorted(climates), "feeders":feeders, "networks":networks, "publicFeeders":publicFeeders, "currentUser":currUser}
 
 # @app.before_request
 # def csrf_protect():
