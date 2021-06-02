@@ -144,6 +144,15 @@
 				</div>
 			</div>
 			<div class="shortInput">
+				<label class="tooltip">Event Information (.json file)<span class="classic">Please see the documentation at the help link for the required format</span></label>
+				<input id="eventFile" type="file" style="display:none" onchange="handle_files(this.files,'eventData','eventFileName')">
+				<input id="eventData" name="eventData" type="hidden">
+				<div>
+					<label for="eventFile" class="fileButton">Choose File</label>
+					<input id="eventFileName" name="eventFileName" value='' readonly class="uploadFileName">
+				</div>
+			</div>
+			<div class="shortInput">
 				<label class="tooltip">Duration of Outage (h)<span class="classic">The amount of time the outage lasts in hours.</span></label>
 				<input type="text" id="outageDuration" name="outageDuration">
 			</div>
@@ -355,6 +364,16 @@
 			else if (feature.geometry['type'] == 'Polygon'){
 				geojsonLayer.addData(feature);
 			}
+		
+		var radiusId = document.getElementById("radiusInput");
+		var radiusVal = radiusId.value * 1609.34;
+
+		$('#radiusInput').on('change', function(event) {
+			radiusVal = event.target.value * 1609.34;
+			radiusLayer.eachLayer(function(layer){
+				layer.setRadius(radiusVal);
+			});
+
 		});
 
 		//function clickFeature(e) {

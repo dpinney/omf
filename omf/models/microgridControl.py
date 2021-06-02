@@ -426,7 +426,7 @@ def check_and_install():
 			# Disable quarantine.
 			os.system(f'sudo xattr -dr com.apple.quarantine {ONM_DIR}')
 
-def graphMicrogrid(pathToOmd, pathToCsv, workDir, maxTime, stepSize, faultedLine, timeMinFilter, timeMaxFilter, actionFilter, outageDuration, profit_on_energy_sales, restoration_cost, hardware_cost, sameFeeder):
+def graphMicrogrid(pathToOmd, pathToJson, pathToCsv, workDir, maxTime, stepSize, faultedLine, timeMinFilter, timeMaxFilter, actionFilter, outageDuration, profit_on_energy_sales, restoration_cost, hardware_cost, sameFeeder):
 	''' Run full microgrid control process. '''
 	# TODO: run check_install, disable always_cached
 	# check_and_install()
@@ -713,8 +713,13 @@ def work(modelDir, inputDict):
 		pathToData1 = f1.name
 		f1.write(inputDict['customerData'])
 
+	with open(pJoin(modelDir, inputDict['eventFileName']), 'w') as f:
+		pathToData = f.name
+		f.write(inputDict['eventData'])
+
 	plotOuts = graphMicrogrid(
 		modelDir + '/' + feederName + '.omd', #OMD Path
+		pathToData,
 		pathToData1,
 		modelDir, #Work directory.
 		inputDict['maxTime'], #computational time limit
@@ -767,6 +772,8 @@ def work(modelDir, inputDict):
 
 def new(modelDir):
 	''' Create a new instance of this model. Returns true on success, false on failure. '''
+	with open(pJoin(__neoMetaModel__._omfDir,'static','testFiles','events.json')) as f:
+		event_data = f.read()
 	with open(pJoin(__neoMetaModel__._omfDir,'static','testFiles','customerInfo.csv')) as f1:
 		customer_data = f1.read()
 	defaultInputs = {
@@ -786,6 +793,8 @@ def new(modelDir):
 		'profit_on_energy_sales': '0.03',
 		'restoration_cost': '100',
 		'hardware_cost': '550',
+		'eventData': event_data,
+		'eventFileName': 'events.json',
 		'customerData': customer_data,
 		'customerFileName': 'customerInfo.csv'
 	}
