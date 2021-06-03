@@ -365,14 +365,14 @@
 				geojsonLayer.addData(feature);
 			}
 		
-		var radiusId = document.getElementById("radiusInput");
-		var radiusVal = radiusId.value * 1609.34;
+		// var radiusId = document.getElementById("radiusInput");
+		// var radiusVal = radiusId.value * 1609.34;
 
-		$('#radiusInput').on('change', function(event) {
-			radiusVal = event.target.value * 1609.34;
-			radiusLayer.eachLayer(function(layer){
-				layer.setRadius(radiusVal);
-			});
+		// $('#radiusInput').on('change', function(event) {
+		// 	radiusVal = event.target.value * 1609.34;
+		// 	radiusLayer.eachLayer(function(layer){
+		// 		layer.setRadius(radiusVal);
+		// 	});
 
 		});
 
