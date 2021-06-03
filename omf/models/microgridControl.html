@@ -269,8 +269,8 @@
 		</div>
 		<div id="slider" style="top: 0px; right: 1px; margin: 10px 25px;"></div>
 		<div style="margin-right: auto; margin-left: auto; width: 90%; margin-bottom: 10px; text-align: center;">
-		<input type="number" min='1' max='999' id="input-number-min">
-		<input type="number" min='2' max='1000' id="input-number-max">
+		<input type="number" min='1' max='99' id="input-number-min">
+		<input type="number" min='2' max='100' id="input-number-max">
 		</div>
 		<script type="text/javascript">
 		//Hack to stop leaflet from loading before geojson data loads 
@@ -355,7 +355,8 @@
 				if (feature.properties.edgeColor){
 					return {
 						"color": feature.properties.edgeColor,
-						"time": feature.properties.time
+						"time": feature.properties.time,
+						"colorTemp": feature.properties.edgeColor
 					}
 				}
 				else{
@@ -398,63 +399,11 @@
 			else if (feature.geometry['type'] == 'Polygon'){
 				geojsonLayer.addData(feature);
 			}
-		
-		// var radiusId = document.getElementById("radiusInput");
-		// var radiusVal = radiusId.value * 1609.34;
-
-		// $('#radiusInput').on('change', function(event) {
-		// 	radiusVal = event.target.value * 1609.34;
-		// 	radiusLayer.eachLayer(function(layer){
-		// 		layer.setRadius(radiusVal);
-		// 	});
 
 		});
 
-		//function clickFeature(e) {
-		//	if (typeof clickedFeature != 'undefined') {clickedFeature.setRadius(3);}
-
-		//	var layer = e.target;
-		//	e.target.setRadius(5);
-		//	clickedFeature = e.target;
-		//	update(feature.properties.radius);
-		//}
-
-		//var update = function(feature, latlng) {
-		//	return L.circleMarker(latlng)
-		//}
-
-		//function onEachFeature2(feature,layer) {
-		//	layer.on({click: clickFeature,})
-		//}
-
-		// Optional forcing of canvas renderer:
-		// var map = L.map('map', {renderer: L.canvas()}).fitBounds(bounds);
 		var bounds = geojsonLayer.getBounds();
 		var map = L.map('map').fitBounds(bounds);
-
-		//geojson.features.forEach(function(feature1) {
-		//	if (feature1.properties['meters']) {
-		//		var feature1.properties['name'] = new L.geoJSON(false, {
-		//			onEachFeature: onEachFeature2,
-		//			pointToLayer: function(feature, latlng) {
-		//				return L.circleMarker(latlng, {
-		//					radius: 3,
-		//					fillColor: 'gray',
-		//					color: '#000',
-		//					opacity : 1,
-		//					weight: 1.5,
-		//					fillOpacity: 1
-		//				});
-		//			}
-		//		});
-		//		feature1.properties['name'].addData(feature1);
-		//		geojson.features.forEach(function(feature2){
-		//			if (feature1.properties['meters'].includes(feature2.properties['name'])) {
-		//				feature1.properties['name'].addData(feature2);
-		//			}					
-		//		});
-		//	}
-		//});
 		
 		mapLink = '<a href="http://openstreetmap.org">OpenStreetMap</a>';
 		L.tileLayer(
@@ -469,14 +418,14 @@
 		var slidervar = document.getElementById('slider');
 		noUiSlider.create(slidervar, {
 			connect: true,
-			start: [ 1, 1000 ],
+			start: [ 1, 100 ],
 			range: {
 				min: 1,
-				max: 1000
+				max: 100
 			}
 		});
 		document.getElementById('input-number-min').setAttribute("value", 1);
-		document.getElementById('input-number-max').setAttribute("value", 1000);
+		document.getElementById('input-number-max').setAttribute("value", 100);
 
 		var inputNumberMin = document.getElementById('input-number-min');
 		var inputNumberMax = document.getElementById('input-number-max');
@@ -497,16 +446,18 @@
 			rangeMin = document.getElementById('input-number-min').value;
 			rangeMax = document.getElementById('input-number-max').value;
 			eventLayer.eachLayer(function(layer){
-				if ((parseInt(layer.options.time) >= rangeMax) || (parseInt(layer.options.time) <= rangeMin)){
+				if (((parseInt(layer.options.time) <= rangeMax) && (parseInt(layer.options.time) >= rangeMin)) || layer.options.colorTemp == 'red'){
 					layer.setStyle({
-						radius: 4,
-						fillColor: 'gray'
+						radius: 6,
+						fillColor: layer.options.tempFillColor,
+						"color": layer.options.colorTemp
 					});
 				}
 				else{
 					layer.setStyle({
-						radius: 6,
-						fillColor: layer.options.tempFillColor
+						radius: 4,
+						fillColor: 'gray',
+						"color": 'black'
 					});
 				}
 			});
