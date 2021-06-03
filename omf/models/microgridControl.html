@@ -45,6 +45,16 @@
 		left: 0.0%;
 		top: 0.0%;
 		}
+
+		#controlBox{
+		position: fixed;
+		top: 10px;
+		right: 10px;
+		width: 175px;
+		border: 2px solid #777;
+		background: rgba(255, 255, 255, 0.5);
+		font: 12px/1.5 "Helvetica Neue", Arial, Helvetica, sans-serif;
+		z-index: 400;}
 	</style>
 </head>
 <body onload="init()">
@@ -263,6 +273,10 @@
 		</div>
 		<!-- Leaflet map directly inline with model-->
 		<div id="mapInsert"></div>
+		<div id="controlBox">
+			<p style="text-align:center">Time: <input type="number" min="0" value="6" style="width:50px" id="radiusInput"> hours</p>
+			<!-- <input type="submit"> -->
+		</div>
 		<script type="text/javascript">
 		//Hack to stop leaflet from loading before geojson data loads 
 		if(modelStatus === "finished"){
@@ -312,11 +326,7 @@
 
 		function pointToLayerNode(feature, latlng) {
 			let fillColorValue = 'gray';
-			let rad = 3
-			if (feature.properties['pointColor']){
-				fillColorValue = feature.properties['pointColor'];
-				rad = 6;
-			}
+			let rad = 3;
 			return L.circleMarker(latlng, {
 				radius: rad,
 				fillColor: fillColorValue,
@@ -325,6 +335,24 @@
 				opacity: 1,
 				fillOpacity: 0.8
 			});
+		}
+
+		function pointToEvent(feature, latlng) {
+			if (feature.properties['pointColor']){
+				let fillColorValue = feature.properties['pointColor'];
+				let rad = 6;
+			
+				return L.circleMarker(latlng, {
+					radius: rad,
+					fillColor: fillColorValue,
+					color: "#000",
+					weight: 1,
+					opacity: 1,
+					fillOpacity: 0.8,
+					time: feature.properties['time'],
+					tempFillColor: fillColorValue
+				});
+			}
 		}
 
 		function lineStyle(feature){
@@ -350,6 +378,13 @@
 		geojsonLayer = L.geoJSON(false, {
 					pointToLayer: pointToLayerNode,
 					onEachFeature: onEachFeature,
+					filter: filterFunction
+				});
+		eventLayer = L.geoJSON(false, {
+					pointToLayer:
+						pointToEvent,
+					onEachFeature:
+						onEachFeature,
 					filter: filterFunction,
 					style: lineStyle
 				});
@@ -357,9 +392,12 @@
 		geojson.features.forEach(function(feature){
 			if (feature.geometry['type'] == 'Point'){
 				geojsonLayer.addData(feature);
+				eventLayer.addData(
+					feature);
 			}
 			else if (feature.geometry['type'] == 'LineString'){
-				geojsonLayer.addData(feature);
+				eventLayer.addData(
+					feature);
 			}
 			else if (feature.geometry['type'] == 'Polygon'){
 				geojsonLayer.addData(feature);
@@ -430,6 +468,28 @@
 			}).addTo(map);
 		L.control.scale().addTo(map);
 		geojsonLayer.addTo(map);
+		eventLayer.addTo(map);
+		
+		var radiusId = document.getElementById("radiusInput");
+		var radiusVal = radiusId.value;
+
+		$('#radiusInput').on('change', function(event) {
+			radiusVal = parseInt(event.target.value);
+			eventLayer.eachLayer(function(layer){
+				if (parseInt(layer.options.time) > radiusVal){
+					layer.setStyle({
+						radius: 4,
+						fillColor: 'gray'
+					});
+				}
+				if (parseInt(layer.options.time) <= radiusVal){
+					layer.setStyle({
+						radius: 6,
+						fillColor: layer.options.tempFillColor
+					});
+				}
+			});
+		});
 	}
 	</script>
 		<!-- TODO: Remove? -->
