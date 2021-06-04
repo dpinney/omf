@@ -206,75 +206,6 @@
 				"tooltip":{"valueDecimals":1},
 				"series":[]}
 		</script>
-		<p class="reportTitle">Voltage Imbalance Summary <a target="_self" class="toggle">Hide / Show</a></p>
-		<div id="voltageImbalancesReport" class="tightContent">
-			{% if allOutputDataDict.voltageImbalances|length == 0 %}
-			<script type="text/javascript">	
-				$("#voltageImbalancesReport").html("<p>&#160;&#160;&#160;No voltage imbalance values were returned.</p>")
-			</script>
-			{% endif %}
-			<script type="text/javascript">	
-			localHighChart = JSON.parse(JSON.stringify(highChartsTemplate))
-			localHighChart["chart"]["renderTo"] = "voltageImbalancesReport"
-			localHighChart["chart"]["height"] = 200
-			localHighChart["chart"]["type"] = "line"
-			localHighChart["yAxis"] = {"title":{"text":"Imbalance (%)"}}
-			for (let [busName,imbalseries] of Object.entries({{allOutputDataDict.voltageImbalances}})) {
-				localHighChart["series"].push({
-					"marker": {"enabled":false}, 
-					"color": "rgba(128,128,128,0.15)",
-					"data": imbalseries.map(x => 100 * x), 
-					"name": busName,
-				})
-			}
-			new Highcharts.Chart(localHighChart)
-			</script>
-		</div>
-		<p class="reportTitle">Voltage Imbalance by Bus <a target="_self" class="toggle">Hide / Show</a></p>
-		<div id="voltageImbalancesByBusReport" class="tightContent" style="max-height:610px; overflow-y: scroll;">
-			{% if allOutputDataDict.Bus_Voltages|length == 0 %}
-			<script type="text/javascript">	
-				$("#voltageImbalancesByBusReport").html("<p>&#160;&#160;&#160;No bus voltage imbalance values were returned.</p>")
-			</script>
-			{% endif %}
-			<script type="text/javascript">
-			for (let [busName,phsVolts] of Object.entries({{allOutputDataDict.Bus_Voltages|tojson}})) {
-				$("<div/>").appendTo("#voltageImbalancesByBusReport")
-					.attr("class", "busContainer")
-					.attr("id", busName)
-				$("<div/>").appendTo("#voltageImbalancesByBusReport")
-					.attr("id", "busSeries_" + busName)
-				localHighChart = JSON.parse(JSON.stringify(highChartsTemplate))
-				localHighChart["chart"]["renderTo"] = "busSeries_" + busName
-				localHighChart["chart"]["zoomType"] = 'xy'
-				localHighChart["chart"]["height"] = 200
-				localHighChart["chart"]["marginRight"] = 150
-				localHighChart["chart"]["type"] = "line"
-				localHighChart["title"]["text"] = busName
-				localHighChart["title"]["align"] = "right"
-				localHighChart["title"]["x"] = -50
-				localHighChart["yAxis"] = [{
-						"title": {"text": "Voltage (PU)","style": {"color":"gray"}}
-					}]
-				for (let [phs, dat] of Object.entries(phsVolts)) {
-				if (phs=='C') {
-					color = "Seagreen"
-				} else if (phs=='B') {
-					color = "Crimson"
-				} else {
-					color = "RoyalBlue"
-				}
-				localHighChart["series"].push({
-						"pointWidth": 40,
-						"data": dat,
-						"name": phs,
-						"color": color,
-					})
-				}
-				new Highcharts.Chart(localHighChart)
-			}
-			</script>
-		</div>
 		<p class="reportTitle">Energy Balance <a target="_self" class="toggle">Hide / Show</a></p>
 		<div id="newEnergyBalanceReport" class="tightContent">
 			<script type="text/javascript">
@@ -560,7 +491,31 @@
 			}
 			</script>
 		</div>
-		<p class="reportTitle">Triplex Meter Voltages <a target="_self" class="toggle">Hide / Show</a></p>
+		<p class="reportTitle">Triplex Meter Imbalances <a target="_self" class="toggle">Hide / Show</a></p>
+		<div id="voltageImbalancesReport" class="tightContent">
+			{% if allOutputDataDict.voltageImbalances|length == 0 %}
+			<script type="text/javascript">	
+				$("#voltageImbalancesReport").html("<p>&#160;&#160;&#160;No voltage imbalance values were returned.</p>")
+			</script>
+			{% endif %}
+			<script type="text/javascript">	
+			localHighChart = JSON.parse(JSON.stringify(highChartsTemplate))
+			localHighChart["chart"]["renderTo"] = "voltageImbalancesReport"
+			localHighChart["chart"]["height"] = 200
+			localHighChart["chart"]["type"] = "line"
+			localHighChart["yAxis"] = {"title":{"text":"Imbalance (%)"}}
+			for (let [busName,imbalseries] of Object.entries({{allOutputDataDict.voltageImbalances}})) {
+				localHighChart["series"].push({
+					"marker": {"enabled":false}, 
+					"color": "rgba(128,128,128,0.15)",
+					"data": imbalseries.map(x => 100 * x), 
+					"name": busName,
+				})
+			}
+			new Highcharts.Chart(localHighChart)
+			</script>
+		</div>
+		<p class="reportTitle">Triplex Meter Voltage Summary <a target="_self" class="toggle">Hide / Show</a></p>
 		<div id="triplexMeterVoltageReport" class="tightContent">
 			<div id="triplexMeterVoltageChart"></div>
 			<script type="text/javascript">
@@ -603,6 +558,51 @@
 					}],
 				}
 				new Highcharts.Chart(localHighChart)
+			</script>
+		</div>
+		<p class="reportTitle">Triplex Meter Voltage Detail <a target="_self" class="toggle">Hide / Show</a></p>
+		<div id="voltageImbalancesByBusReport" class="tightContent" style="max-height:610px; overflow-y: scroll;">
+			{% if allOutputDataDict.Bus_Voltages|length == 0 %}
+			<script type="text/javascript">	
+				$("#voltageImbalancesByBusReport").html("<p>&#160;&#160;&#160;No bus voltage imbalance values were returned.</p>")
+			</script>
+			{% endif %}
+			<script type="text/javascript">
+			for (let [busName,phsVolts] of Object.entries({{allOutputDataDict.Bus_Voltages|tojson}})) {
+				$("<div/>").appendTo("#voltageImbalancesByBusReport")
+					.attr("class", "busContainer")
+					.attr("id", busName)
+				$("<div/>").appendTo("#voltageImbalancesByBusReport")
+					.attr("id", "busSeries_" + busName)
+				localHighChart = JSON.parse(JSON.stringify(highChartsTemplate))
+				localHighChart["chart"]["renderTo"] = "busSeries_" + busName
+				localHighChart["chart"]["zoomType"] = 'xy'
+				localHighChart["chart"]["height"] = 200
+				localHighChart["chart"]["marginRight"] = 150
+				localHighChart["chart"]["type"] = "line"
+				localHighChart["title"]["text"] = busName
+				localHighChart["title"]["align"] = "right"
+				localHighChart["title"]["x"] = -50
+				localHighChart["yAxis"] = [{
+						"title": {"text": "Voltage (PU)","style": {"color":"gray"}}
+					}]
+				for (let [phs, dat] of Object.entries(phsVolts)) {
+				if (phs=='C') {
+					color = "Seagreen"
+				} else if (phs=='B') {
+					color = "Crimson"
+				} else {
+					color = "RoyalBlue"
+				}
+				localHighChart["series"].push({
+						"pointWidth": 40,
+						"data": dat,
+						"name": phs,
+						"color": color,
+					})
+				}
+				new Highcharts.Chart(localHighChart)
+			}
 			</script>
 		</div>
 		<p class="reportTitle">Inverter Outputs <a target="_self" class="toggle">Hide / Show</a></p>

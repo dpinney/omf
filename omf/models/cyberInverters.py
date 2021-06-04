@@ -432,19 +432,9 @@ def work(modelDir, inputDict):
 			outData["voltageImbalances"][bus_name] = pycigarJson["Voltage Imbalances"][bus_name]
 
 		# convert bus voltage data
-		bus_voltage_output_dict = {} 
+		outData["Bus_Voltages"] = {}
 		for busname in pycigarJson["Bus Voltages"].keys():
-			new_bv_dict = {
-				"A":[],
-				"B":[],
-				"C":[]
-			}
-			for tstep in pycigarJson["Bus Voltages"][busname]:
-				new_bv_dict["A"].append(tstep[0])
-				new_bv_dict["B"].append(tstep[1])
-				new_bv_dict["C"].append(tstep[2])
-			bus_voltage_output_dict[busname] = new_bv_dict
-		outData["Bus_Voltages"] = bus_voltage_output_dict
+			outData["Bus_Voltages"][busname] = { k:v for k,v in pycigarJson["Bus Voltages"][busname].items() if k!="Phases" }
 
 		outData["stdout"] = pycigarJson["stdout"]
 
