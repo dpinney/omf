@@ -426,7 +426,7 @@ def check_and_install():
 			# Disable quarantine.
 			os.system(f'sudo xattr -dr com.apple.quarantine {ONM_DIR}')
 
-def graphMicrogrid(pathToOmd, pathToCsv, workDir, maxTime, stepSize, faultedLine, timeMinFilter, timeMaxFilter, actionFilter, outageDuration, profit_on_energy_sales, restoration_cost, hardware_cost, sameFeeder):
+def graphMicrogrid(pathToOmd, pathToJson, pathToCsv, workDir, maxTime, stepSize, faultedLine, timeMinFilter, timeMaxFilter, actionFilter, outageDuration, profit_on_energy_sales, restoration_cost, hardware_cost, sameFeeder):
 	''' Run full microgrid control process. '''
 	# TODO: run check_install, disable always_cached
 	# check_and_install()
@@ -438,14 +438,14 @@ def graphMicrogrid(pathToOmd, pathToCsv, workDir, maxTime, stepSize, faultedLine
 		print('@@@@@@', workDir)
 
 	# New model cache.
-	shutil.copyfile(f'{__neoMetaModel__._omfDir}/static/testFiles/output_no_events.json',f'{workDir}/output_no_events.json')
+	shutil.copyfile(f'{__neoMetaModel__._omfDir}/static/testFiles/output_later.json',f'{workDir}/output.json')
 
 	# Native Julia Command
 	# command = 'cmd /c ' + '"julia --project=' + '"C:/Users/granb/PowerModelsONM.jl-master/" ' + 'C:/Users/granb/PowerModelsONM.jl-master/src/cli/entrypoint.jl' + ' -n ' + '"' + str(workDir) + '/circuit.dss' + '"' + ' -o ' + '"C:/Users/granb/PowerModelsONM.jl-master/output.json"'
 
-	if os.path.exists(f'{workDir}/output_no_events.json') and sameFeeder:
+	if os.path.exists(f'{workDir}/output.json') and sameFeeder:
 		# Cache exists, skip ONM running
-		with open(f'{workDir}/output_no_events.json') as inFile:
+		with open(f'{workDir}/output.json') as inFile:
 			data = json.load(inFile)
 			genProfiles = data['Generator profiles']
 			simTimeSteps = []
@@ -461,7 +461,7 @@ def graphMicrogrid(pathToOmd, pathToCsv, workDir, maxTime, stepSize, faultedLine
 		os.system(command)
 		with open(f'{workDir}/onm_output.json') as inFile:
 			data = json.load(inFile)
-			with open(f'{workDir}/output_no_events.json', 'w') as outfile:
+			with open(f'{workDir}/output.json', 'w') as outfile:
 				json.dump(data, outfile)
 			genProfiles = data['Generator profiles']
 			simTimeSteps = []
@@ -713,8 +713,13 @@ def work(modelDir, inputDict):
 		pathToData1 = f1.name
 		f1.write(inputDict['customerData'])
 
+	with open(pJoin(modelDir, inputDict['eventFileName']), 'w') as f:
+		pathToData = f.name
+		f.write(inputDict['eventData'])
+
 	plotOuts = graphMicrogrid(
 		modelDir + '/' + feederName + '.omd', #OMD Path
+		pathToData,
 		pathToData1,
 		modelDir, #Work directory.
 		inputDict['maxTime'], #computational time limit
@@ -767,6 +772,8 @@ def work(modelDir, inputDict):
 
 def new(modelDir):
 	''' Create a new instance of this model. Returns true on success, false on failure. '''
+	with open(pJoin(__neoMetaModel__._omfDir,'static','testFiles','events.json')) as f:
+		event_data = f.read()
 	with open(pJoin(__neoMetaModel__._omfDir,'static','testFiles','customerInfo.csv')) as f1:
 		customer_data = f1.read()
 	defaultInputs = {
@@ -787,6 +794,8 @@ def new(modelDir):
 		'profit_on_energy_sales': '0.03',
 		'restoration_cost': '100',
 		'hardware_cost': '550',
+		'eventData': event_data,
+		'eventFileName': 'events.json',
 		'customerData': customer_data,
 		'customerFileName': 'customerInfo.csv'
 	}

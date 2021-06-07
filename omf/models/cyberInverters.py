@@ -362,7 +362,7 @@ def work(modelDir, inputDict):
 		#convert regulator data
 		regDict = {}
 		for reg_name in regNameList:
-			short_reg_name = reg_name.replace("Regulator_","")
+			short_reg_name = reg_name.replace("Regulator_","") # TODO: ask LBL to alter regulator, capacitor output to match that of "bus voltages"
 			newReg = {}
 			newReg["phases"] = list(pycigarJson[reg_name]["RegPhases"])
 			tapchanges = {}
@@ -370,8 +370,21 @@ def work(modelDir, inputDict):
 				phsup = phase.upper()
 				tapchanges[phsup] = pycigarJson[reg_name][short_reg_name + phase.lower()]
 			newReg["tapchanges"] = tapchanges
-			regDict[reg_name.lower()] = newReg
+			regDict[reg_name] = newReg
 		outData["Regulator_Outputs"] = regDict
+
+		#convert capacitor data
+		# TODO: Need to test with a capacitor in the circuit! No idea if this code works.
+		capDict = {}
+		for cap_name in capNameList:
+			short_cap_name = cap_name.replace("Capacitor_","")
+			newCap = {}
+			newCap["phases"] = list(pycigarJson[cap_name]["CapPhases"])
+			for phase in newCap["phases"]:
+				newCap["switch" + phase.upper()] = pycigarJson[cap_name]["switch" + phase.lower()]
+				newCap["timeseriesdata" + phase.upper()] = []
+			capDict[cap_name] = newCap
+		outData["Capacitor_Outputs"] = capDict
 
 		#convert inverter data
 		inverter_output_dict = {} 
@@ -390,19 +403,6 @@ def work(modelDir, inputDict):
 			#add single inverter dict to dict of all the inverters using the inverter name as the key 
 			inverter_output_dict[inv_name] = new_inv_dict
 		outData["Inverter_Outputs"] = inverter_output_dict
-
-		#convert capacitor data
-		# TODO: Need to test with a capacitor in the circuit! No idea if this code works.
-		capDict = {}
-		for cap_name in capNameList:
-			short_cap_name = cap_name.replace("Capacitor_","")
-			newCap = {}
-			newCap["phases"] = list(pycigarJson[cap_name]["CapPhases"])
-			for phase in newCap["phases"]:
-				newCap["switch" + phase.upper()] = pycigarJson[cap_name]["switch" + phase.lower()]
-				newCap["timeseriesdata" + phase.upper()] = []
-			capDict[cap_name] = newCap
-		outData["Capacitor_Outputs"] = capDict
 		
 		#convert battery data
 		battery_output_dict = {}
@@ -429,8 +429,12 @@ def work(modelDir, inputDict):
 		# convert voltage imbalance data
 		outData["voltageImbalances"] = {}
 		for bus_name in pycigarJson["Voltage Imbalances"].keys():
-			outData["voltageImbalances"][bus_name] = []
 			outData["voltageImbalances"][bus_name] = pycigarJson["Voltage Imbalances"][bus_name]
+
+		# convert bus voltage data
+		outData["Bus_Voltages"] = {}
+		for busname in pycigarJson["Bus Voltages"].keys():
+			outData["Bus_Voltages"][busname] = { k:v for k,v in pycigarJson["Bus Voltages"][busname].items() if k!="Phases" }
 
 		outData["stdout"] = pycigarJson["stdout"]
 
