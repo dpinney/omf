@@ -775,7 +775,8 @@ def new(modelDir):
 		# 'feederName1': 'ieee37.dss',
 		# 'feederName1': 'iowa240c1.clean.dss',
 		# 'feederName1': 'iowa240c2_workingOnm.clean.dss',
-		'feederName1': 'iowa240c2_working_coords.clean',
+		# 'feederName1': 'iowa240c2_working_coords.clean',
+		'feederName1': 'iowa240c2_fixed_coords.clean',
 		'maxTime': '25',
 		'stepSize': '1',
 		'faultedLine': 'l_1001_1002',
@@ -791,7 +792,8 @@ def new(modelDir):
 	}
 	creationCode = __neoMetaModel__.new(modelDir, defaultInputs)
 	try:
-		shutil.copyfile(pJoin(__neoMetaModel__._omfDir, 'static', 'publicFeeders', defaultInputs['feederName1']+'.omd'), pJoin(modelDir, defaultInputs['feederName1']+'.omd'))
+		# shutil.copyfile(pJoin(__neoMetaModel__._omfDir, 'static', 'publicFeeders', defaultInputs['feederName1']+'.omd'), pJoin(modelDir, defaultInputs['feederName1']+'.omd'))
+		shutil.copyfile(pJoin(__neoMetaModel__._omfDir, 'scratch', 'MapTestOutput', defaultInputs['feederName1']+'.omd'), pJoin(modelDir, defaultInputs['feederName1']+'.omd'))
 	except:
 		return False
 	return __neoMetaModel__.new(modelDir, defaultInputs)
