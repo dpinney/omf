@@ -10375,7 +10375,7 @@
     "885": {
       "object": "energymeter",
       "name": "circuit",
-      "parent": "transformer.sub_xfmr"
+      "parent": "sub_xfmr"
     },
     "886": {
       "object": "!CMD",

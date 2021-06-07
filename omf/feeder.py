@@ -367,33 +367,74 @@ def removeNumberRefs(tree):
 					if val == obType and subkey != 'object':
 						tree[key][subkey] = goodName
 
-def findParentCoords(inTree, item):
+def findParentCoords(inTree, item, defaultCoords):
 	nameRefTree = {}
 	for key in inTree:
-		item = inTree[key]
-		if 'name' in item.keys():
-			itemName = item['name']
+		itemOb = inTree[key]
+		if 'name' in itemOb.keys():
+			itemName = itemOb['name']
 			nameRefTree[itemName] = key
+
 	if 'parent' in item.keys():
 		parentName = item['parent']
 		#check to see if the parent object is in nameRefTree
 		if parentName in nameRefTree.keys():
-			parentKey = nameRefTree[item['parent']]
+			parentKey = nameRefTree[parentName]
 			parentItem = inTree[parentKey]
 			try:
 				parentCoords = (float(parentItem['latitude']), float(parentItem['longitude']))
+				print("Coordinates found for " + parentName + ", parent of " + item['name'] + " : " + str(parentCoords))
 			except KeyError:
-				print("No coordinates for " + parentName + ", parent of " + item['name'])
-				parentCoords = findParentCoords(inTree, parentItem)
+				print("No coordinates for " + parentName + ", parent of " + item['name'] + ", looking for parent coordinates now...")
+				parentCoords = findParentCoords(inTree, parentItem, defaultCoords)
 		else:
-			return (0.0, 0.0)
+			print(parentName + ", parent of " + item['name'] + ", was not found in nameRefTree, assigning default coordinates.")
+			parentCoords = defaultCoords
+	elif 'from' in item.keys():
+		#case in which the parent of an object is an edge (transformers are represented this way sometimes)
+		fromName = item['from']
+		if fromName in nameRefTree.keys():
+			fromKey = nameRefTree[fromName]
+			fromItem = inTree[fromKey]
+			try:
+				parentCoords = (float(fromItem['latitude']), float(fromItem['longitude']))
+				print("Coordinates found for " + fromName + ", \"from\" of " + item['name'] + " : " + str(parentCoords))
+			except KeyError:
+				print("No coordinates for " + fromName + ", \"from\" of " + item['name'] + ", looking for parent coordinates now...")
+				parentCoords = findParentCoords(inTree, fromItem, defaultCoords)
 	else:
-		parentCoords = (0.0, 0.0)
+		print("No parent found for " + item['name'] + ", assigning default coordinates.")
+		parentCoords = defaultCoords
 	return parentCoords
+
+def calcDefaultCoords(inTree):
+	lats = []
+	lons = []
+	for key in inTree:
+		item = inTree[key]
+		if 'latitude' in item.keys():
+			lats.append(float(item['latitude']))
+		if 'longitude' in item.keys():
+			lons.append(float(item['longitude']))
+	if len(lats) != 0:
+		latitude_min = min(lats)
+		latitude_max = max(lats)
+	else:
+		latitude_min = 0.0
+		latitude_max = 0.0
+	if len(lons) != 0:
+		longitude_min = min(lons)
+		longitude_max = max(lons)
+	else:
+		longitude_min = 0.0
+		longitude_max = 0.0
+	return (latitude_max, longitude_min)
 
 def treeToNxGraph(inTree):
 	''' Convert feeder tree to networkx graph. '''
 	outGraph = nx.Graph()
+	#TODO: make default coordinates change slightly each time they are assigned to a node to prevent multiple location-less nodes to just be stacked on top of each other
+	defaultCoords = calcDefaultCoords(inTree)
 	for key in inTree:
 		item = inTree[key]
 		# This check is why configuration objects never get coordinates. Or maybe this is intentional because configuration objects are added later?
@@ -403,9 +444,13 @@ def treeToNxGraph(inTree):
 				outGraph.nodes[item['name']]['type'] = item['object']
 				# Note that attached houses via gridEdit.html won't have lat/lon values, so this try is a workaround.
 				try:
-					outGraph.nodes[item['name']]['pos'] = (float(item.get('latitude', 0)), float(item.get('longitude', 0)))
+					outGraph.nodes[item['name']]['pos'] = (float(item['latitude']), float(item['longitude']))
+				except KeyError:
+					#if the grid object doesn't have a lat/lon, give it a lat/lon close or same to that of its parent if it has one
+					print("No coordinates found for " + item['name'] + ", looking for parent coordinates now...")
+					outGraph.nodes[item['name']]['pos'] = findParentCoords(inTree, item, defaultCoords)
 				except:
-					outGraph.nodes[item['name']]['pos'] = (0.0, 0.0)
+					outGraph.nodes[item['name']]['pos'] = defaultCoords
 			elif 'from' in item.keys():
 				myPhase = _phaseCount(item.get('phases','AN'))
 				outGraph.add_edge(item['from'], item['to'], name=item.get('name',''), type=item['object'], phases=myPhase)
@@ -419,11 +464,8 @@ def treeToNxGraph(inTree):
 				if 'from' not in item.keys():
 					try:
 						outGraph.nodes[item['name']]['pos'] = (float(item['latitude']), float(item['longitude'])) 
-					except KeyError:
-						#if the grid object doesn't have a lat/lon, give it a lat/lon close or same to that of its parent if it has one
-						outGraph.nodes[item['name']]['pos'] = findParentCoords(inTree, item)
 					except:
-						outGraph.nodes[item['name']]['pos'] = (0.0, 0.0)
+						outGraph.nodes[item['name']]['pos'] = defaultCoords
 	return outGraph
 
 
