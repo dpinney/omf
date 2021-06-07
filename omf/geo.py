@@ -573,6 +573,7 @@ def graphValidator(pathToOmdFile, inGraph):
 	return nxG
 
 def fixMissingNodes(pathToOmdFile, pathToCoordsOmdFile, outfilePath):
+	'''Function to check if missing nodes in one file are present in an adjacent file (one that represents the same distribution grid, but maybe contains more information), fills in those missing values and saves the complete tree to another omd file'''
 	with open(pathToOmdFile) as inFile:
 		fullFile = json.load(inFile)
 		tree = fullFile['tree']
@@ -666,8 +667,8 @@ def _tests():
 	# rasterTilesFromOmd(prefix / 'static/publicFeeders/Autocli Alberich Calibrated.omd', prefix / 'scratch/omdTests/autoclitiles', conversion=True)
 	# print(convertOmd(prefix / 'static/publicFeeders/Autocli Alberich Calibrated.omd'))
 	# mapOmd(pJoin(__neoMetaModel__._omfDir, 'static', 'publicFeeders', 'iowa240c2_working_coords.clean.omd'), pJoin(__neoMetaModel__._omfDir, 'scratch', 'MapTestOutput'), 'html', openBrowser=True, conversion=False)
-	fixMissingNodes(pJoin(__neoMetaModel__._omfDir, 'static', 'publicFeeders', 'iowa240c2_working_coords.clean.omd'), pJoin(__neoMetaModel__._omfDir, 'static', 'publicFeeders', 'iowa240c1.clean.dss.omd'), pJoin(__neoMetaModel__._omfDir, 'scratch', 'MapTestOutput', 'iowa240c2_fixed_coords.clean.omd'))
-	mapOmd(pJoin(__neoMetaModel__._omfDir, 'scratch', 'MapTestOutput', 'iowa240c2_fixed_coords.clean.omd'), pJoin(__neoMetaModel__._omfDir, 'scratch', 'MapTestOutput'), 'html', openBrowser=True, conversion=False, offline=True)
+	fixMissingNodes(pJoin(__neoMetaModel__._omfDir, 'static', 'publicFeeders', 'iowa240c2_working_coords.clean.omd'), pJoin(__neoMetaModel__._omfDir, 'static', 'publicFeeders', 'iowa240c1.clean.dss.omd'), pJoin(__neoMetaModel__._omfDir, 'scratch', 'MapTestOutput', 'iowa240c2_fixed_coords2.clean.omd'))
+	mapOmd(pJoin(__neoMetaModel__._omfDir, 'scratch', 'MapTestOutput', 'iowa240c2_fixed_coords2.clean.omd'), pJoin(__neoMetaModel__._omfDir, 'scratch', 'MapTestOutput'), 'html', openBrowser=True, conversion=False, offline=True)
 
 if __name__ == '__main__':
 	_tests()

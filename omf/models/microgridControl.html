@@ -264,18 +264,17 @@
 			{{ allOutputDataDict['timelineStatsHtml'] }}
 		</div>
 		<!-- Leaflet map directly inline with model-->
+		<p class="reportTitle">Outage Map and Time Slider</p>
+		<div class="tightContent postRun">
+			<div id="slider" style="top: 0px; right: 1px; margin: 10px 25px;"></div>
+			<input type="number" min='1' max='99' id="input-number-min">
+			<input type="number" min='2' max='100' id="input-number-max">
+		</div>
 		<div id="mapInsert"></div>
-			<!-- <input type="submit"> -->
-		</div>
-		<div id="slider" style="top: 0px; right: 1px; margin: 10px 25px;"></div>
-		<div style="margin-right: auto; margin-left: auto; width: 90%; margin-bottom: 10px; text-align: center;">
-		<input type="number" min='1' max='99' id="input-number-min">
-		<input type="number" min='2' max='100' id="input-number-max">
-		</div>
 		<script type="text/javascript">
 		//Hack to stop leaflet from loading before geojson data loads 
 		if(modelStatus === "finished"){
-		mapHtml = '<p class="reportTitle">Outage Map (Original Faults Marked in Blue, New Faults Marked in Red)</p><div id="mapHolder" class="tightContent"><div id="map"></div></div>';
+		mapHtml = '<div id="mapHolder" class="tightContent"><div id="map"></div></div>';
 		gebi('mapInsert').innerHTML = mapHtml;
 		//Parse geojson dict (instead of reading from geojson.js - doesn't really matter if you want to load from geojson.js, was just quicker to prototype) 
 		var geojson = JSON.parse(allOutputData['geoDict']);
