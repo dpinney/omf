@@ -46,6 +46,10 @@ def work(modelDir, inputDict):
 	longitude = float(inputDict['longitude'])
 	energyCost = float(inputDict['energyCost'])
 	demandCost = float(inputDict['demandCost'])
+	# TODO: Enable all instances of 'annualCostSwitch', 'energyCostMonthly', 'demandCostMonthly' in mgDesign.py once a suitable way to enter a list of 12 monthly rates is found for mgDesign.html
+	# annualCostSwitch = inputDict['annualCostSwitch']
+	# energyCostMonthly = inputDict['energyCostMonthly']
+	# demandCostMonthly = inputDict['demandCostMonthly']
 	wholesaleCost = float(inputDict['wholesaleCost'])
 	year = int(inputDict['year'])
 	criticalLoadFactor = float(inputDict['criticalLoadFactor'])
@@ -114,6 +118,7 @@ def work(modelDir, inputDict):
 		jsonifiableLoad = list(load);
 
 		# Create the input JSON file for REopt
+		# TODO: To use energyCostMonthly, comment out demandCost and energyCost lines in the Scenario JSON
 		scenario = {
 			"Scenario": {
 				"Site": {
@@ -156,6 +161,14 @@ def work(modelDir, inputDict):
 			}
 		}
 
+		# TODO: Enable all instances of 'annualCostSwitch', 'energyCostMonthly', 'demandCostMonthly' in mgDesign.py once a suitable way to enter a list of 12 monthly rates is found for mgDesign.html
+		# pick whether to use annual or monthly rates
+		# if annualCostSwitch == 'on':
+		# 	scenario['Scenario']['Site']['ElectricTariff']['blended_annual_rates_us_dollars_per_kwh'] = energyCost
+		# 	scenario['Scenario']['Site']['ElectricTariff']['blended_annual_demand_charges_us_dollars_per_kw'] = demandCost
+		# elif annualCostSwitch == 'off':
+		# 	scenario['Scenario']['Site']['ElectricTariff']['blended_monthly_rates_us_dollars_per_kwh'] = energyCostMonthly
+		# 	scenario['Scenario']['Site']['ElectricTariff']['blended_monthly_demand_charges_us_dollars_per_kw'] = demandCostMonthly
 		# solar and battery have default 'max_kw' == 1000000000; Wind has default 'max_kw' == 0 and thus must be set explicitly; Check https://developer.nrel.gov/docs/energy-optimization/reopt-v1 for updates
 		if solar == 'off':
 			scenario['Scenario']['Site']['PV']['max_kw'] = 0
@@ -620,6 +633,10 @@ def new(modelDir):
 		"year" : '2017',
 		"energyCost" : "0.1",
 		"demandCost" : '20',
+		# TODO: Enable all instances of 'annualCostSwitch', 'energyCostMonthly', 'demandCostMonthly' in mgDesign.py once a suitable way to enter a list of 12 monthly rates is found for mgDesign.html
+		# "annualCostSwitch": "off",
+		# "energyCostMonthly" : [0.0531, 0.0531, 0.0531, 0.0531, 0.0531, 0.0531, 0.0531, 0.0531, 0.0531, 0.0531, 0.0531, 0.0531],
+		# "demandCostMonthly" : [8.6879, 8.6879, 8.6879, 8.6879, 8.6879, 8.6879, 8.6879, 8.6879, 8.6879, 8.6879, 8.6879, 8.6879],
 		"wholesaleCost" : "0.034",
 		"solarCost" : "1600",
 		"windCost" : "4898",
