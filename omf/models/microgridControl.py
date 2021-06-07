@@ -454,6 +454,7 @@ def graphMicrogrid(pathToOmd, pathToJson, pathToCsv, workDir, maxTime, stepSize,
 			voltages = data['Voltages']
 			loadServed = data['Load served']
 			storageSOC = data['Storage SOC (%)']
+			switchLoadAction = data['Device action timeline']
 			cached = 'yes'
 	else:
 		# No cache, so run ONM.
@@ -470,9 +471,59 @@ def graphMicrogrid(pathToOmd, pathToJson, pathToCsv, workDir, maxTime, stepSize,
 			voltages = data['Voltages']
 			loadServed = data['Load served']
 			storageSOC = data['Storage SOC (%)']
+			switchLoadAction = data['Device action timeline']
 			cached = 'no'
 	
-	outputTimeline = createTimeline()
+	# {'time': ['1', '3', '7', '10', '15'],
+	# 		'device': ['l_1006_1007', 'load_1003', 'load_1016', 'bus1014', 'bus2053'],
+	# 		# devices on ieee37
+	# 		#'device': ['l2', 's701a', 's713c', '799r', '705'],
+	# 		'action': ['Switching', 'Load Shed', 'Load Pickup', 'Battery Control', 'Generator Control'],
+	# 		'loadBefore': ['50', '20', '10', '50', '50'],
+	# 		'loadAfter': ['0', '10', '20', '60', '40']
+	# 		}
+	# timeline = pd.DataFrame(data, columns = ['time','device','action','loadBefore','loadAfter'])
+	# outputTimeline = createTimeline()
+
+	actionTime = []
+	actionDevice = []
+	actionAction = []
+	actionLoadBefore = []
+	actionLoadAfter = []
+
+	timestep = 1
+	for key in switchLoadAction:
+		if timestep == 1:
+			switchActionsOld = key['Switch configurations']
+		else:
+			switchActionsNew = key['Switch configurations']
+			for entry in switchActionsNew:
+				if switchActionsNew[entry] != switchActionsOld[entry]:
+					actionDevice.append(entry)
+					actionTime.append(str(timestep))
+					actionAction.append('Switching')
+					actionLoadBefore.append(switchActionsOld[entry])
+					actionLoadAfter.append(switchActionsNew[entry])
+			switchActionsOld = key['Switch configurations']
+		loadShed = key['Shedded loads']
+		if len(loadShed) != 0:
+			for entry in loadShed:
+				actionDevice.append(entry)
+				actionTime.append(timestep)
+				actionAction.append('Load Shed')
+				actionLoadBefore.append('N/A')
+				actionLoadAfter.append('N/A')
+		timestep += 1
+
+	line = {'time': actionTime,
+			'device': actionDevice,
+			'action': actionAction,
+			'loadBefore': actionLoadBefore,
+			'loadAfter': actionLoadAfter
+			}
+
+	print(line)
+	outputTimeline = pd.DataFrame(line, columns = ['time','device','action','loadBefore','loadAfter'])
 
 	# Create traces
 	gens = go.Figure()
