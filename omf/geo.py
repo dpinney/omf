@@ -12,6 +12,8 @@ from matplotlib import pyplot as plt
 
 import omf
 from omf import feeder
+from omf.models import __neoMetaModel__
+from omf.models.__neoMetaModel__ import *
 
 # Source: https://github.com/fitnr/stateplane/blob/master/stateplane/dicts.py
 # These are NAD83 EPSG identifiers.
@@ -112,6 +114,7 @@ def omdGeoJson(pathToOmdFile, conversion=False):
 	#Add nodes to geoJSON
 	node_positions = {nodewithPosition: nxG.nodes[nodewithPosition]['pos'] for nodewithPosition in nx.get_node_attributes(nxG, 'pos')}
 	node_types = {nodewithType: nxG.nodes[nodewithType]['type'] for nodewithType in nx.get_node_attributes(nxG, 'type')}
+	# print(node_positions)
 	for node in node_positions:
 		geoJsonDict['features'].append({
 			"type": "Feature", 
@@ -129,18 +132,21 @@ def omdGeoJson(pathToOmdFile, conversion=False):
 	edge_types = {edge: nxG[edge[0]][edge[1]]['type'] for edge in nx.get_edge_attributes(nxG, 'type')}
 	edge_phases = {edge: nxG[edge[0]][edge[1]]['phases'] for edge in nx.get_edge_attributes(nxG, 'phases')}
 	for edge in nx.edges(nxG):
-		geoJsonDict['features'].append({
-			"type": "Feature", 
-			"geometry": {
-				"type": "LineString",
-				"coordinates": [[node_positions[edge[0]][1], node_positions[edge[0]][0]], [node_positions[edge[1]][1], node_positions[edge[1]][0]]]
-			},
-			"properties":{
-				#"phase": edge_phases[edge],
-				#"edgeType": edge_types[edge],
-				#"edgeColor":_obToCol(edge_types[edge])
-			}
-		})
+		try:
+			geoJsonDict['features'].append({
+				"type": "Feature", 
+				"geometry": {
+					"type": "LineString",
+					"coordinates": [[node_positions[edge[0]][1], node_positions[edge[0]][0]], [node_positions[edge[1]][1], node_positions[edge[1]][0]]]
+				},
+				"properties":{
+					#"phase": edge_phases[edge],
+					#"edgeType": edge_types[edge],
+					#"edgeColor":_obToCol(edge_types[edge])
+				}
+			})
+		except KeyError:
+			print("!!! KeyError exception for edge " + str(edge))
 	return geoJsonDict
 	#if not os.path.exists(outputPath):
 	#	os.makedirs(outputPath)
@@ -547,11 +553,13 @@ def convertOmd(pathToOmdFile):
 
 
 def graphValidator(pathToOmdFile, inGraph):
-	'''If the nodes/edges positions are not in the tree, the spurces and targets in the links key of the omd.json are used. '''
+	'''If the nodes/edges positions are not in the tree, the sources and targets in the links key of the omd.json are used. '''
 	try:
-		node_positions = {nodewithPosition: inGraph.nodes[nodewithPosition]['pos'] for nodewithPosition  in nx.get_node_attributes(inGraph, 'pos')}
+		node_positions = {nodewithPosition: inGraph.nodes[nodewithPosition]['pos'] for nodewithPosition in nx.get_node_attributes(inGraph, 'pos')}
+		# print(node_positions)
 		for edge in nx.edges(inGraph):
-			validator = (node_positions[edge[0]] or nxG.nodes[edge[1]])
+			# validator = (node_positions[edge[0]] or nxG.nodes[edge[1]])
+			validator = (node_positions[edge[0]] or inGraph.nodes[edge[1]])
 	except KeyError:
 		try:
 			nxG = latLonValidation(convertOmd(pathToOmdFile))
@@ -564,6 +572,42 @@ def graphValidator(pathToOmdFile, inGraph):
 	nxG = latLonValidation(inGraph)
 	return nxG
 
+def fixMissingNodes(pathToOmdFile, pathToCoordsOmdFile, outfilePath):
+	with open(pathToOmdFile) as inFile:
+		fullFile = json.load(inFile)
+		tree = fullFile['tree']
+	inGraph = feeder.treeToNxGraph(tree)
+
+	missingNodes = {}
+	edgeStr = "Placeholder"
+	node_positions = {nodewithPosition: inGraph.nodes[nodewithPosition]['pos'] for nodewithPosition in nx.get_node_attributes(inGraph, 'pos')}
+	# print(nx.edges(inGraph))
+	for edge in nx.edges(inGraph):
+		try:
+			edgePairStr = str(edge)
+			edgeStr = str(edge[0])
+			validator = node_positions[edge[0]]
+			edgeStr = str(edge[1])
+			validator = inGraph.nodes[edge[1]]
+			validator = (node_positions[edge[0]] or inGraph.nodes[edge[1]])
+		except KeyError:
+			print("!!!KeyError occurred!!! for " + edgeStr + " in " + edgePairStr)
+			missingNodes[edgeStr] = "Missing"
+	
+	with open(pathToCoordsOmdFile) as inFile2:
+		tree2 = json.load(inFile2)['tree']
+	for objectKey in tree2:
+		objectName = tree2[objectKey]['name']
+		if objectName in missingNodes.keys():
+			newObjectKey = str(len(tree)+1)
+			tree[newObjectKey] = tree2[objectKey]
+			missingNodes[objectName] = "Found in " + pathToCoordsOmdFile
+	# print(missingNodes)
+	fullFile['tree'] = tree
+	with open(outfilePath, 'w') as outFile:
+		json.dump(fullFile, outFile)
+
+		
 def latLonValidation(inGraph):
 	'''Checks if an omd has invalid latlons, and if so, converts to stateplane coordinates or generates random values '''
 	#try:
@@ -621,6 +665,9 @@ def _tests():
 	# showOnMap(omdGeoJson(prefix / 'static/publicFeeders/ABEC Frank LO Houses.omd', conversion=False))
 	# rasterTilesFromOmd(prefix / 'static/publicFeeders/Autocli Alberich Calibrated.omd', prefix / 'scratch/omdTests/autoclitiles', conversion=True)
 	# print(convertOmd(prefix / 'static/publicFeeders/Autocli Alberich Calibrated.omd'))
+	# mapOmd(pJoin(__neoMetaModel__._omfDir, 'static', 'publicFeeders', 'iowa240c2_working_coords.clean.omd'), pJoin(__neoMetaModel__._omfDir, 'scratch', 'MapTestOutput'), 'html', openBrowser=True, conversion=False)
+	fixMissingNodes(pJoin(__neoMetaModel__._omfDir, 'static', 'publicFeeders', 'iowa240c2_working_coords.clean.omd'), pJoin(__neoMetaModel__._omfDir, 'static', 'publicFeeders', 'iowa240c1.clean.dss.omd'), pJoin(__neoMetaModel__._omfDir, 'scratch', 'MapTestOutput', 'iowa240c2_fixed_coords.clean.omd'))
+	mapOmd(pJoin(__neoMetaModel__._omfDir, 'scratch', 'MapTestOutput', 'iowa240c2_fixed_coords.clean.omd'), pJoin(__neoMetaModel__._omfDir, 'scratch', 'MapTestOutput'), 'html', openBrowser=True, conversion=False, offline=True)
 
 if __name__ == '__main__':
 	_tests()

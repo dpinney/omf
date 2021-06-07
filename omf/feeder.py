@@ -367,6 +367,29 @@ def removeNumberRefs(tree):
 					if val == obType and subkey != 'object':
 						tree[key][subkey] = goodName
 
+def findParentCoords(inTree, item):
+	nameRefTree = {}
+	for key in inTree:
+		item = inTree[key]
+		if 'name' in item.keys():
+			itemName = item['name']
+			nameRefTree[itemName] = key
+	if 'parent' in item.keys():
+		parentName = item['parent']
+		#check to see if the parent object is in nameRefTree
+		if parentName in nameRefTree.keys():
+			parentKey = nameRefTree[item['parent']]
+			parentItem = inTree[parentKey]
+			try:
+				parentCoords = (float(parentItem['latitude']), float(parentItem['longitude']))
+			except KeyError:
+				print("No coordinates for " + parentName + ", parent of " + item['name'])
+				parentCoords = findParentCoords(inTree, parentItem)
+		else:
+			return (0.0, 0.0)
+	else:
+		parentCoords = (0.0, 0.0)
+	return parentCoords
 
 def treeToNxGraph(inTree):
 	''' Convert feeder tree to networkx graph. '''
@@ -396,6 +419,9 @@ def treeToNxGraph(inTree):
 				if 'from' not in item.keys():
 					try:
 						outGraph.nodes[item['name']]['pos'] = (float(item['latitude']), float(item['longitude'])) 
+					except KeyError:
+						#if the grid object doesn't have a lat/lon, give it a lat/lon close or same to that of its parent if it has one
+						outGraph.nodes[item['name']]['pos'] = findParentCoords(inTree, item)
 					except:
 						outGraph.nodes[item['name']]['pos'] = (0.0, 0.0)
 	return outGraph

@@ -67,14 +67,7 @@ def getDataNames():
 		for fname in filenames:
 			if fname.endswith('.omd') and fname != 'feeder.omd':
 				publicFeeders.append({'name': fname[:-4], 'model': dirpath.split('/')[-1]})
-	# Public circuit files too.
-	publicCircuitFiles = []
-	for (dirpath, dirnames, filenames) in os.walk(os.path.join(_omfDir, "solvers","opendss")):
-		for fname in filenames:
-			if fname.endswith('.dss') and fname != 'feeder.dss':
-				# publicCircuitFiles.append({'name': fname[:-4], 'model': dirpath.split('/')[-1]})
-				publicCircuitFiles.append({'name': fname, 'model': dirpath.split('/')[-1]})
-	return {"climates":sorted(climates), "feeders":feeders, "circuitFiles":circuitFiles, "networks":networks, "publicFeeders":publicFeeders, "publicCircuitFiles":publicCircuitFiles, "currentUser":currUser}
+	return {"climates":sorted(climates), "feeders":feeders, "networks":networks, "publicFeeders":publicFeeders, "currentUser":currUser}
 
 # @app.before_request
 # def csrf_protect():
@@ -718,25 +711,18 @@ def distribution_get(owner, modelName, feeder_num):
 		publicFeeders=public_feeders, userFeeders=user_feeders, showFileMenu=show_file_menu, currentUser=User.cu(), dssSchema=dssSchema
 	)
 
-@app.route('/rawTextEdit/<owner>/<modelName>/<file_num>/test')
-@app.route('/rawTextEdit/<owner>/<modelName>/<file_num>')
+@app.route('/rawTextEdit/<owner>/<modelName>/<fileName>/test')
+@app.route('/rawTextEdit/<owner>/<modelName>/<fileName>')
 @flask_login.login_required
 @read_permission_function
-def distribution_text_get(owner, modelName, file_num):
+def distribution_text_get(owner, modelName, fileName):
 	'''Render the raw text editing interface for distribution networks.'''
-	file_dict = get_model_metadata(owner, modelName)
-	# file_name = file_dict.get('feederName' + str(file_num))
-	file_name = file_dict.get('circuitFileName' + str(file_num))
-	# file_filepath = os.path.join(_omfDir, 'data', 'Model', owner, modelName, file_name + '.omd')
-	# file_filepath = os.path.join(_omfDir, 'data', 'Model', owner, modelName, 'PyCIGAR_inputs', file_name + '.dss')
-	file_filepath = os.path.join(_omfDir, 'data', 'Model', owner, modelName, file_name)
-	# file_filepath = os.path.join(_omfDir, 'data', 'Model', owner, modelName, file_name + '.dss')
+	file_filepath = os.path.join(_omfDir, 'data', 'Model', owner, modelName, fileName)
 	try:
 		with locked_open(file_filepath) as f:
 			data = f.read()
 	except FileNotFoundError:
-		with locked_open(os.path.join(_omfDir, 'solvers', 'opendss', file_name)) as f:
-		# with locked_open(os.path.join(_omfDir, 'solvers', 'opendss', file_name + '.dss')) as f:
+		with locked_open(os.path.join(_omfDir, 'solvers', 'opendss', fileName)) as f:
 			data = f.read()
 	file = data
 	jasmine = spec = None
@@ -746,15 +732,15 @@ def distribution_text_get(owner, modelName, file_num):
 		jasmine = tests['jasmine']
 		spec = tests['spec']
 	all_data = getDataNames()
-	user_files = all_data['circuitFiles']
+	user_files = all_data['feeders']
 	# Must get rid of the 'u' for unicode strings before passing the strings to JavaScript
 	for dictionary in user_files:
 		dictionary['model'] = str(dictionary['model'])
 		dictionary['name'] = str(dictionary['name'])
-	public_files = all_data['publicCircuitFiles']
+	public_files = all_data['publicFeeders']
 	show_file_menu = User.cu() == owner or User.cu() == 'admin'
 	return render_template(
-		'distText.html', thisFileData=file, thisFileName=file_name, thisFileNum=file_num,
+		'distText.html', thisFileData=file, thisFileName=fileName,
 		thisModelName=modelName, thisOwner=owner, jasmine=jasmine, spec=spec,
 		publicFiles=public_files, userFiles=user_files, showFileMenu=show_file_menu, currentUser=User.cu()
 	)
@@ -1385,12 +1371,11 @@ def saveFeeder(owner, modelName, feederName, feederNum):
 			json.dump(payload, f, indent=4)
 	return 'Success'
 
-@app.route("/saveFile/<owner>/<modelName>/<fileName>/<int:fileNum>", methods=["POST"])
+@app.route("/saveFile/<owner>/<modelName>/<fileName>", methods=["POST"])
 @flask_login.login_required
 @write_permission_function
-def saveFile(owner, modelName, fileName, fileNum):
+def saveFile(owner, modelName, fileName):
 	"""Save file data. Also used for cancelling a file import, file conversion, or file-load overwrite."""
-	print("Saving file for:%s, with model: %s, and file: %s"%(owner, modelName, fileName))
 	model_dir = os.path.join(_omfDir, "data/Model", owner, modelName)
 	for filename in ["gridError.txt", "error.txt", "weatherError.txt"]:
 		error_file = os.path.join(model_dir, filename)
@@ -1423,9 +1408,8 @@ def saveFile(owner, modelName, fileName, fileNum):
 					pass
 				else:
 					raise
-	writeToInput(model_dir, fileName, 'circuitFileName' + str(fileNum)) # TODO: Incorporate other files, not just dss
+	writeToInput(model_dir, fileName, 'circuitFileNameDSS') # TODO: Incorporate other files, not just dss
 	payload = request.form.get('fileContents', '')
-	# file_file = os.path.join(model_dir, fileName + ".dss") # TODO: Incorporate other files, not just dss
 	file_file = os.path.join(model_dir, fileName)
 	if os.path.isfile(file_file):
 		with locked_open(file_file, 'r+') as f:

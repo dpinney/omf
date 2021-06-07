@@ -24,6 +24,7 @@ from omf.solvers.opendss import dssConvert
 tooltip = 'outageCost calculates reliability metrics and creates a leaflet graph based on data from an input csv file.'
 modelName, template = __neoMetaModel__.metadata(__file__)
 hidden = False
+ONM_DIR = f'{__neoMetaModel__._omfDir}/solvers/PowerModelsONM/'
 
 def datetime_to_float(d):
 	'helper function to convert a datetime object to a float'
@@ -121,9 +122,19 @@ def createTimeline():
 	timeline = pd.DataFrame(data, columns = ['time','device','action','loadBefore','loadAfter'])
 	return timeline
 
-def colormap(time):
-	color = 8438271 - 10*int(time)
-	return '{:x}'.format(int(color))
+def colormap(action):
+	if action == 'Load Shed':
+		color = '0000FF'
+	elif action == 'Load Pickup':
+		color = '00C957'
+	elif action == 'Switching':
+		color = 'FF8000'
+	elif action == 'Battery Control':
+		color = 'FFFF00'
+	elif action == 'Generator Control':
+		color = '9B30FF'
+
+	return color
 
 def microgridTimeline(outputTimeline, workDir):
 	# check to see if work directory is specified; otherwise, create a temporary directory
@@ -180,6 +191,7 @@ def customerOutageTable(customerOutageData, outageCost, workDir):
 						<th>Season</th>
 						<th>Average kW/hr</th>
 						<th>Business Type</th>
+						<th>Load Name</th>
 						<th>Outage Cost</th>
 					</tr>
 				</thead>
@@ -187,7 +199,7 @@ def customerOutageTable(customerOutageData, outageCost, workDir):
 		
 		row = 0
 		while row < len(customerOutageData):
-			new_html_str += '<tr><td>' + str(customerOutageData.loc[row, 'Customer Name']) + '</td><td>' + str(customerOutageData.loc[row, 'Duration']) + '</td><td>' + str(customerOutageData.loc[row, 'Season']) + '</td><td>' + '{0:.2f}'.format(customerOutageData.loc[row, 'Average kW/hr']) + '</td><td>' + str(customerOutageData.loc[row, 'Business Type']) + '</td><td>' + str(outageCost[row])+ '</td></tr>'
+			new_html_str += '<tr><td>' + str(customerOutageData.loc[row, 'Customer Name']) + '</td><td>' + str(customerOutageData.loc[row, 'Duration']) + '</td><td>' + str(customerOutageData.loc[row, 'Season']) + '</td><td>' + '{0:.2f}'.format(customerOutageData.loc[row, 'Average kW/hr']) + '</td><td>' + str(customerOutageData.loc[row, 'Business Type']) + '</td><td>' + str(customerOutageData.loc[row, 'Load Name']) + '</td><td>' + str(outageCost[row])+ '</td></tr>'
 			row += 1
 
 		new_html_str +="""</tbody></table>"""
@@ -241,10 +253,10 @@ def utilityOutageTable(average_lost_kwh, profit_on_energy_sales, restoration_cos
 
 	return utilityOutageHtml
 
-def customerCost1(workDir, customerName, duration, season, averagekWperhr, businessType):
+def customerCost1(workDir, customerName, duration, season, averagekWperhr, businessType, loadName):
 	'function to determine customer outage cost based on season, annual kWh usage, and business type'
 	duration = int(duration)
-	averagekW = int(averagekWperhr)
+	averagekW = float(averagekWperhr)
 
 	times = np.array([0,1,2,3,4,5,6,7,8])
 	# load the customer outage cost data (compared with average kW/hr usage) from the 2009 survey
@@ -274,7 +286,7 @@ def customerCost1(workDir, customerName, duration, season, averagekWperhr, busin
 	kWTemplate[0] = np.array([0,0,0,0,0,0,0,0,0])
 
 	def kWhApprox(kWDict, averagekWperhr, iterate):
-		'helper function for approximating customer outage cost based on annualkWh by iteratively "averaging" the curves'
+		'helper function for approximating customer outage cost based on annual kWh by iteratively "averaging" the curves'
 		step = 0
 
 		# iterate the process a set number of times
@@ -288,7 +300,7 @@ def customerCost1(workDir, customerName, duration, season, averagekWperhr, busin
 			# ...then, estimate the outage costs for the kW/hr value directly between these
 			key = 0
 			while key < len(keys):
-				if int(averagekWperhr) > keys[key]:			
+				if float(averagekWperhr) > keys[key]:			
 					key+=1
 				else:
 					newEntry = (keys[key] + keys[key+1])/2
@@ -304,7 +316,7 @@ def customerCost1(workDir, customerName, duration, season, averagekWperhr, busin
 
 	# based on the annualkWh usage, import the average relationship between season/business type and outage cost
 	# NOTE: This data is also taken from the Lawton survey
-	if int(averagekWperhr) > 10:
+	if float(averagekWperhr) > 10:
 		winter = np.array([10000, 19000, 27000, 41000, 59000, 72000, 83000, 91000, 93000])
 		summer = np.array([11000, 20000, 31000, 43000, 60000, 73000, 84000, 92000, 94500])
 		manufacturing = np.array([25000, 35000, 54000, 77000, 106000, 127000, 147000, 161000, 165000])
@@ -396,18 +408,44 @@ def customerCost1(workDir, customerName, duration, season, averagekWperhr, busin
 	# return {'customerOutageCost': outageCost}
 	return outageCost, kWperhrEstimate, times, localMax
 
+def check_and_install():
+	if platform.system() == "Linux":
+		FNAME = 'PowerModelsONM_ubuntu-latest_x64.zip'
+	elif platform.system() == "Windows":
+		FNAME = 'PowerModelsONM_windows-latest_x64.zip'
+	elif platform.system() == "Darwin":
+		FNAME = 'PowerModelsONM_macOS-latest_x64.zip'
+	else:
+		raise Exception('Unsupported ONM platform.')
+	if not os.path.isdir(f'{ONM_DIR}build'):
+		URL = 'https://github.com/lanl-ansi/PowerModelsONM.jl/releases/download/v0.4.0/' + FNAME
+		os.system(f'wget -nv {URL} -P {ONM_DIR}')
+		os.system(f'unzip {ONM_DIR}{FNAME} -d {ONM_DIR}')
+		os.system(f'rm {ONM_DIR}{FNAME}')
+		if platform.system() == "Darwin":
+			# Disable quarantine.
+			os.system(f'sudo xattr -dr com.apple.quarantine {ONM_DIR}')
 
-def graphMicrogrid(pathToOmd, pathToMicro, pathToCsv, workDir, maxTime, stepSize, faultedLine, timeMinFilter, timeMaxFilter, actionFilter, outageDuration, profit_on_energy_sales, restoration_cost, hardware_cost, sameFeeder):
+def graphMicrogrid(pathToOmd, pathToJson, pathToCsv, workDir, maxTime, stepSize, faultedLine, timeMinFilter, timeMaxFilter, actionFilter, outageDuration, profit_on_energy_sales, restoration_cost, hardware_cost, sameFeeder):
+	''' Run full microgrid control process. '''
+	# TODO: run check_install, disable always_cached
+	# check_and_install()
+	sameFeeder = True
+
 	# read in the OMD file as a tree and create a geojson map of the system
 	if not workDir:
 		workDir = tempfile.mkdtemp()
 		print('@@@@@@', workDir)
 
-	shutil.copyfile(f'{__neoMetaModel__._omfDir}/static/testFiles/test_output_3.json',f'{workDir}/test_output_3.json')
+	# New model cache.
+	shutil.copyfile(f'{__neoMetaModel__._omfDir}/static/testFiles/output_later.json',f'{workDir}/output.json')
 
+	# Native Julia Command
 	# command = 'cmd /c ' + '"julia --project=' + '"C:/Users/granb/PowerModelsONM.jl-master/" ' + 'C:/Users/granb/PowerModelsONM.jl-master/src/cli/entrypoint.jl' + ' -n ' + '"' + str(workDir) + '/circuit.dss' + '"' + ' -o ' + '"C:/Users/granb/PowerModelsONM.jl-master/output.json"'
-	if os.path.exists(f'{workDir}/test_output_3.json') and sameFeeder:
-		with open(f'{workDir}/test_output_3.json') as inFile:
+
+	if os.path.exists(f'{workDir}/output.json') and sameFeeder:
+		# Cache exists, skip ONM running
+		with open(f'{workDir}/output.json') as inFile:
 			data = json.load(inFile)
 			genProfiles = data['Generator profiles']
 			simTimeSteps = []
@@ -418,33 +456,12 @@ def graphMicrogrid(pathToOmd, pathToMicro, pathToCsv, workDir, maxTime, stepSize
 			storageSOC = data['Storage SOC (%)']
 			cached = 'yes'
 	else:
-		# Install if necessary.
-		DIR = f'{__neoMetaModel__._omfDir}/solvers/PowerModelsONM/'
-		if not os.path.isdir(f'{DIR}build'):
-			if platform.system() == "Linux":
-				FNAME = 'PowerModelsONM_ubuntu-latest_x64.zip'
-			elif platform.system() == "Windows":
-				FNAME = 'PowerModelsONM_windows-latest_x64.zip'
-			elif platform.system() == "Darwin":
-				FNAME = 'PowerModelsONM_macOS-latest_x64.zip'
-			else:
-				raise Exception('Unsupported ONM platform.')
-			URL = 'https://github.com/lanl-ansi/PowerModelsONM.jl/releases/download/v0.0.9/' + FNAME
-			os.system(f'wget -nv {URL} -P {DIR}')
-			os.system(f'unzip {DIR}{FNAME} -d {DIR}')
-			os.system(f'rm {DIR}{FNAME}')
-			if platform.system() == "Darwin":
-				# Disable quarantine.
-				os.system(f'xattr -dr com.apple.quarantine {DIR}')
-		# Run command
-		command = f'{DIR}/build/bin/PowerModelsONM -n "{workDir}/circuit.dss" -o "{workDir}/onm_output.json"'
+		# No cache, so run ONM.
+		command = f'{ONM_DIR}/build/bin/PowerModelsONM -n "{workDir}/circuit.dss" -o "{workDir}/onm_output.json"'
 		os.system(command)
-		
-		#TODO: ignore test_output_3 and use actual onm output.
-		with open(pJoin(__neoMetaModel__._omfDir,'static','testFiles','test_output_3.json')) as inFile:
-		# with open(f'{workDir}/onm_output.json') as inFile:
+		with open(f'{workDir}/onm_output.json') as inFile:
 			data = json.load(inFile)
-			with open(f'{workDir}/test_output_3.json', 'w') as outfile:
+			with open(f'{workDir}/output.json', 'w') as outfile:
 				json.dump(data, outfile)
 			genProfiles = data['Generator profiles']
 			simTimeSteps = []
@@ -553,7 +570,7 @@ def graphMicrogrid(pathToOmd, pathToMicro, pathToCsv, workDir, maxTime, stepSize
 								  'timeMin': timeMin, 
 								  'timeMax': timeMax,
 								  'actionFilter': actionFilter,
-								  'pointColor': '#' + str(colormap(time)), 
+								  'pointColor': '#' + str(colormap(action)), 
 								  'popupContent': 'Location: <b>' + str(coordStr) + '</b><br>Device: <b>' + str(device) + '</b><br>Time: <b>' + str(time) + '</b><br>Action: <b>' + str(action) + '</b><br>Load Before: <b>' + str(loadBefore) + '</b><br>Load After: <b>' + str(loadAfter) + '</b>.'}
 			feederMap['features'].append(Dict)
 		else:
@@ -570,7 +587,7 @@ def graphMicrogrid(pathToOmd, pathToMicro, pathToCsv, workDir, maxTime, stepSize
 								  'timeMin': timeMin, 
 								  'timeMax': timeMax,
 								  'actionFilter': actionFilter,
-								  'edgeColor': '#' + str(colormap(time)),
+								  'edgeColor': '#' + str(colormap(action)),
 								  'popupContent': 'Location: <b>' + str(coordStr) + '</b><br>Device: <b>' + str(device) + '</b><br>Time: <b>' + str(time) + '</b><br>Action: <b>' + str(action) + '</b><br>Load Before: <b>' + str(loadBefore) + '</b><br>Load After: <b>' + str(loadAfter) + '</b>.'}
 			feederMap['features'].append(Dict)
 		row += 1
@@ -593,14 +610,17 @@ def graphMicrogrid(pathToOmd, pathToMicro, pathToCsv, workDir, maxTime, stepSize
 	average_lost_kwh = []
 	outageCost = []
 	globalMax = 0
+	fig = go.Figure()
 	while row < customerOutageData.shape[0]:
 		customerName = str(customerOutageData.loc[row, 'Customer Name'])
 		duration = str(customerOutageData.loc[row, 'Duration'])
 		season = str(customerOutageData.loc[row, 'Season'])
 		averagekWperhr = str(customerOutageData.loc[row, 'Average kW/hr'])
 		businessType = str(customerOutageData.loc[row, 'Business Type'])
+		loadName = str(customerOutageData.loc[row, 'Load Name'])
 
-		customerOutageCost, kWperhrEstimate, times, localMax = customerCost1(workDir, customerName, duration, season, averagekWperhr, businessType)
+		customerOutageCost, kWperhrEstimate, times, localMax = customerCost1(workDir, customerName, duration, season, averagekWperhr, businessType, loadName)
+		print(kWperhrEstimate)
 		average_lost_kwh.append(float(averagekWperhr))
 		outageCost.append(customerOutageCost)
 		if localMax > globalMax:
@@ -610,20 +630,37 @@ def graphMicrogrid(pathToOmd, pathToMicro, pathToCsv, workDir, maxTime, stepSize
 		print(numberRows)
 		print(math.floor(row/2))
 		print(row%2)
-		if numberRows > 1:
-			axs[math.floor(row/2), row%2].plot(times, kWperhrEstimate)
-			axs[math.floor(row/2), row%2].set_title(str(customerName))
-		else:
-			axs[row%2].plot(times, kWperhrEstimate)
-			axs[row%2].set_title(str(customerName))
-		row+=1
-	for ax in axs.flat:
-		ax.set(xlabel='Duration (hrs)', ylabel='Customer Outage Cost')
-		ax.set_xlim([0, 8])
-		ax.set_ylim([0, globalMax + .05*globalMax])
-	for ax in axs.flat:
-		ax.label_outer()
-	plt.savefig(workDir + '/customerCostFig')
+  
+		# creating series
+		timesSeries = pd.Series(times)
+		kWperhrSeries = pd.Series(kWperhrEstimate)
+
+		trace = py.graph_objs.Scatter(
+			x = timesSeries,
+			y = kWperhrSeries,
+			name = customerName,
+			hoverlabel = dict(namelength = -1)
+		)
+		fig.add_trace(trace)
+		row += 1
+	fig.update_layout(xaxis_title = 'Duration (hours)',
+		yaxis_title = 'Cost ($)')
+	# py.offline.plot(fig, filename=f'Output.plot.html', auto_open=False)
+
+	# 	if numberRows > 1:
+	# 		axs[math.floor(row/2), row%2].plot(times, kWperhrEstimate)
+	# 		axs[math.floor(row/2), row%2].set_title(str(customerName))
+	# 	else:
+	# 		axs[row%2].plot(times, kWperhrEstimate)
+	# 		axs[row%2].set_title(str(customerName))
+	# 	row+=1
+	# for ax in axs.flat:
+	# 	ax.set(xlabel='Duration (hrs)', ylabel='Customer Outage Cost')
+	# 	ax.set_xlim([0, 8])
+	# 	ax.set_ylim([0, globalMax + .05*globalMax])
+	# for ax in axs.flat:
+	# 	ax.label_outer()
+	# plt.savefig(workDir + '/customerCostFig')
 
 	customerOutageHtml = customerOutageTable(customerOutageData, outageCost, workDir)
 
@@ -634,7 +671,7 @@ def graphMicrogrid(pathToOmd, pathToMicro, pathToCsv, workDir, maxTime, stepSize
 
 	utilityOutageHtml = utilityOutageTable(average_lost_kwh, profit_on_energy_sales, restoration_cost, hardware_cost, outageDuration, workDir)
 
-	return {'utilityOutageHtml': utilityOutageHtml, 'customerOutageHtml': customerOutageHtml, 'timelineStatsHtml': timelineStatsHtml, 'gens': gens, 'loads': loads, 'volts': volts, 'customerOutageCost': customerOutageCost}
+	return {'utilityOutageHtml': utilityOutageHtml, 'customerOutageHtml': customerOutageHtml, 'timelineStatsHtml': timelineStatsHtml, 'gens': gens, 'loads': loads, 'volts': volts, 'fig': fig, 'customerOutageCost': customerOutageCost}
 
 def work(modelDir, inputDict):
 	# Copy specific climate data into model directory
@@ -646,7 +683,6 @@ def work(modelDir, inputDict):
 	with open(f'{modelDir}/{feederName}.omd', 'r') as omdFile:
 		omd = json.load(omdFile)
 	sameFeeder = False
-
 	
 	if os.path.exists(f'{modelDir}/feeder.json'):
 		sameFeeder = open(f'{modelDir}/feeder.json').read() == omd		
@@ -673,12 +709,13 @@ def work(modelDir, inputDict):
 		dss_file_2.write(content)
 
 	# Run the main functions of the program
-	with open(pJoin(modelDir, inputDict['microFileName']), 'w') as f:
-		pathToData = f.name
-		f.write(inputDict['microData'])
 	with open(pJoin(modelDir, inputDict['customerFileName']), 'w') as f1:
 		pathToData1 = f1.name
 		f1.write(inputDict['customerData'])
+
+	with open(pJoin(modelDir, inputDict['eventFileName']), 'w') as f:
+		pathToData = f.name
+		f.write(inputDict['eventData'])
 
 	plotOuts = graphMicrogrid(
 		modelDir + '/' + feederName + '.omd', #OMD Path
@@ -714,8 +751,8 @@ def work(modelDir, inputDict):
 		outData['geoDict'] = inFile.read().decode()
 
 	# Image outputs.
-	with open(pJoin(modelDir,'customerCostFig.png'),'rb') as inFile:
-		outData['customerCostFig.png'] = base64.standard_b64encode(inFile.read()).decode()
+	# with open(pJoin(modelDir,'customerCostFig.png'),'rb') as inFile:
+	# 	outData['customerCostFig.png'] = base64.standard_b64encode(inFile.read()).decode()
 
 	# Plotly outputs.
 	layoutOb = go.Layout()
@@ -725,6 +762,8 @@ def work(modelDir, inputDict):
 	outData['fig2Layout'] = json.dumps(layoutOb, cls=py.utils.PlotlyJSONEncoder)
 	outData['fig3Data'] = json.dumps(plotOuts.get('loads',{}), cls=py.utils.PlotlyJSONEncoder)
 	outData['fig3Layout'] = json.dumps(layoutOb, cls=py.utils.PlotlyJSONEncoder)
+	outData['fig4Data'] = json.dumps(plotOuts.get('fig',{}), cls=py.utils.PlotlyJSONEncoder)
+	outData['fig4Layout'] = json.dumps(layoutOb, cls=py.utils.PlotlyJSONEncoder)
 
 	# Stdout/stderr.
 	outData['stdout'] = 'Success'
@@ -733,8 +772,8 @@ def work(modelDir, inputDict):
 
 def new(modelDir):
 	''' Create a new instance of this model. Returns true on success, false on failure. '''
-	with open(pJoin(__neoMetaModel__._omfDir,'static','testFiles','microComponents.json')) as f:
-		micro_data = f.read()
+	with open(pJoin(__neoMetaModel__._omfDir,'static','testFiles','events.json')) as f:
+		event_data = f.read()
 	with open(pJoin(__neoMetaModel__._omfDir,'static','testFiles','customerInfo.csv')) as f1:
 		customer_data = f1.read()
 	defaultInputs = {
@@ -743,8 +782,9 @@ def new(modelDir):
 		# 'feederName1': 'ieee37.dss',
 		# 'feederName1': 'iowa240c1.clean.dss',
 		# 'feederName1': 'iowa240c2_workingOnm.clean.dss',
-		'feederName1': 'iowa240c2_working_coords.clean',
-		'maxTime': '20',
+		# 'feederName1': 'iowa240c2_working_coords.clean',
+		'feederName1': 'iowa240c2_fixed_coords.clean',
+		'maxTime': '25',
 		'stepSize': '1',
 		'faultedLine': 'l_1001_1002',
 		'timeMinFilter': '0',
@@ -754,14 +794,15 @@ def new(modelDir):
 		'profit_on_energy_sales': '0.03',
 		'restoration_cost': '100',
 		'hardware_cost': '550',
-		'microFileName': 'microComponents.json',
-		'microData': micro_data,
+		'eventData': event_data,
+		'eventFileName': 'events.json',
 		'customerData': customer_data,
 		'customerFileName': 'customerInfo.csv'
 	}
 	creationCode = __neoMetaModel__.new(modelDir, defaultInputs)
 	try:
-		shutil.copyfile(pJoin(__neoMetaModel__._omfDir, 'static', 'publicFeeders', defaultInputs['feederName1']+'.omd'), pJoin(modelDir, defaultInputs['feederName1']+'.omd'))
+		# shutil.copyfile(pJoin(__neoMetaModel__._omfDir, 'static', 'publicFeeders', defaultInputs['feederName1']+'.omd'), pJoin(modelDir, defaultInputs['feederName1']+'.omd'))
+		shutil.copyfile(pJoin(__neoMetaModel__._omfDir, 'scratch', 'MapTestOutput', defaultInputs['feederName1']+'.omd'), pJoin(modelDir, defaultInputs['feederName1']+'.omd'))
 	except:
 		return False
 	return __neoMetaModel__.new(modelDir, defaultInputs)
