@@ -455,6 +455,7 @@ def graphMicrogrid(pathToOmd, pathToJson, pathToCsv, workDir, maxTime, stepSize,
 			loadServed = data['Load served']
 			storageSOC = data['Storage SOC (%)']
 			switchLoadAction = data['Device action timeline']
+			powerflow = data['Powerflow output']
 			cached = 'yes'
 	else:
 		# No cache, so run ONM.
@@ -472,6 +473,7 @@ def graphMicrogrid(pathToOmd, pathToJson, pathToCsv, workDir, maxTime, stepSize,
 			loadServed = data['Load served']
 			storageSOC = data['Storage SOC (%)']
 			switchLoadAction = data['Device action timeline']
+			powerflow = data['Powerflow output']
 			cached = 'no'
 	
 	# {'time': ['1', '3', '7', '10', '15'],
@@ -509,10 +511,36 @@ def graphMicrogrid(pathToOmd, pathToJson, pathToCsv, workDir, maxTime, stepSize,
 		if len(loadShed) != 0:
 			for entry in loadShed:
 				actionDevice.append(entry)
-				actionTime.append(timestep)
+				actionTime.append(str(timestep))
 				actionAction.append('Load Shed')
 				actionLoadBefore.append('N/A')
 				actionLoadAfter.append('N/A')
+		timestep += 1
+	timestep = 0
+	while timestep < 24:
+		if timestep == 0:
+			powerflowOld = powerflow[timestep]
+		else:
+			powerflowNew = powerflow[timestep]
+			for generator in list(powerflowNew['generator'].keys()):
+				entryNew = powerflowNew['generator'][generator]['real power setpoint (kW)'][0]
+				entryOld = powerflowOld['generator'][generator]['real power setpoint (kW)'][0]
+				if math.sqrt(((entryNew - entryOld)/entryOld)**2) > 0.5:
+					actionDevice.append(generator)
+					actionTime.append(str(timestep + 1))
+					actionAction.append('Generator Control')
+					actionLoadBefore.append(str(entryOld))
+					actionLoadAfter.append(str(entryNew))
+			for battery in list(powerflowNew['storage'].keys()):
+				entryNew = powerflowNew['storage'][battery]['real power setpoint (kW)'][0]
+				entryOld = powerflowOld['storage'][battery]['real power setpoint (kW)'][0]
+				if math.sqrt(((entryNew - entryOld)/entryOld)**2) > 0.5:
+					actionDevice.append(battery)
+					actionTime.append(str(timestep + 1))
+					actionAction.append('Battery Control')
+					actionLoadBefore.append(str(entryOld))
+					actionLoadAfter.append(str(entryNew))
+			powerflowOld = powerflow[timestep]
 		timestep += 1
 
 	line = {'time': actionTime,
@@ -522,7 +550,6 @@ def graphMicrogrid(pathToOmd, pathToJson, pathToCsv, workDir, maxTime, stepSize,
 			'loadAfter': actionLoadAfter
 			}
 
-	print(line)
 	outputTimeline = pd.DataFrame(line, columns = ['time','device','action','loadBefore','loadAfter'])
 
 	# Create traces
