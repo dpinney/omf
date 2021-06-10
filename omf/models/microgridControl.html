@@ -102,35 +102,37 @@
 				<input type="text" id="feederName1" name="feederName1" style="display:none">
 			</div>
 			<div class="shortInput">
+				<label class="tooltip">Event Information (.json file)<span class="classic">Please see the documentation at the help link for the required format</span></label>
+				<input id="eventFile" type="file" style="display:none" onchange="handle_files(this.files,'eventData','eventFileName')">
+				<input id="eventData" name="eventData" type="hidden">
+				<div>
+					<label for="eventFile" class="fileButton">Choose File</label>
+					<input id="eventFileName" name="eventFileName" value='' readonly class="uploadFileName">
+				</div>
+			</div>
+			<div class="shortInput">
+				<label class="tooltip">Cached Output (.json file)<span class="classic">Please see the documentation at the help link for the required format</span></label>
+				<input id="outputFile" type="file" style="display:none" onchange="handle_files(this.files,'outputData','outputFileName')">
+				<input id="outputData" name="outputData" type="hidden">
+				<div>
+					<label for="outputFile" class="fileButton">Choose File</label>
+					<input id="outputFileName" name="outputFileName" value='' readonly class="uploadFileName">
+				</div>
+			</div>
+			<div class="shortInput">
+				<label class="tooltip">Cached Output?<span class="classic">If yes, use the Cached Output provided; if no, use the events.json to run the feeder system through ONM.</span></label>
+				<select id="useCache" name="useCache" />
+					<option value='True'>Yes</option>
+					<option value='False'>No</option>
+				</select>
+			</div>
+			<div class="shortInput">
 				<label class="tooltip">Maximum Runtime (h)<span class="classic">Runtime of the system in hours.</span></label>
 				<input type="text" id="maxTime" name="maxTime">
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Step Size (h)<span class="classic">The duration of each step in hours used for Powerflow calculations.</span></label>
 				<input type="text" id="stepSize" name="stepSize">
-			</div>
-			<div class="shortInput">
-				<label class="tooltip">Faulted Line<span class="classic">The line on which there is an outage at the beginning of the simulation.</span></label>
-				<input type="text" id="faultedLine" name="faultedLine">
-			</div>
-			<div class="shortInput">
-				<label class="tooltip">Minimum Time Filter<span class="classic">Filter the fault data shown by leaflet map based on a lower bound on the time the faults can occur.</span></label>
-				<input type="text" id="timeMinFilter" name="timeMinFilter">
-			</div>
-			<div class="shortInput">
-				<label class="tooltip">Maximum Time Filter<span class="classic">Filter the fault data shown by leaflet map based on an upper bound on the time the faults can occur.</span></label>
-				<input type="text" id="timeMaxFilter" name="timeMaxFilter">
-			</div>
-			<div class="shortInput">
-				<label class="tooltip">Action Filter<span class="classic">Filter the timeline data shown by leaflet map based on a specific action. Entering "All" will yield all actions being shown on the map.</span></label>
-				<select id="actionFilter" name="actionFilter" />
-					<option value="All">All Actions</option>
-					<option value="Switching">Switching</option>
-					<option value="Load Shed">Load Shed</option>
-					<option value="Battery Control">Battery Control</option>
-					<option value="Load Pickup">Load Pickup</option>
-					<option value="Generator Control">Generator Control</option>
-				</select>
 			</div>
 			<div class="wideInput">
 				<p class="inputSectionHeader">Outage Cost Parameters</p>
@@ -146,15 +148,6 @@
 				</div>
 			</div>
 			<div class="shortInput">
-				<label class="tooltip">Event Information (.json file)<span class="classic">Please see the documentation at the help link for the required format</span></label>
-				<input id="eventFile" type="file" style="display:none" onchange="handle_files(this.files,'eventData','eventFileName')">
-				<input id="eventData" name="eventData" type="hidden">
-				<div>
-					<label for="eventFile" class="fileButton">Choose File</label>
-					<input id="eventFileName" name="eventFileName" value='' readonly class="uploadFileName">
-				</div>
-			</div>
-			<div class="shortInput">
 				<label class="tooltip">Duration of Outage (h)<span class="classic">The amount of time the outage lasts in hours.</span></label>
 				<input type="text" id="outageDuration" name="outageDuration">
 			</div>
@@ -166,30 +159,6 @@
 				<label class="tooltip">Hardware Cost<span class="classic">Hardware cost parameter for calculating outage costs.</span></label>
 				<input type="text" id="hardware_cost" name="hardware_cost" pattern="^\d+\.?\d*$" required="required">
 			</div>
-			<!-- <div class="shortInput">
-				<label class="tooltip">Season<span class="classic">Specifies the season in which the outage occurs.</span></label>
-				<select id="season" name="season" />
-					<option value='summer'>Summer</option>
-					<option value='winter'>Winter</option>
-				</select>
-			</div>				
-			<div class="shortInput">
-				<label class="tooltip">Annual kWh Usage<span class="classic">Specifies the average amount of energy used each year by the customer.</span></label>
-				<input type="text" id="annualkWh" name="annualkWh">
-			</div>
-			<div class="shortInput">
-				<label class="tooltip">Business Type<span class="classic">Specifies the type of business under consideration.</span></label>
-				<select id="businessType" name="businessType" />
-					<option value='manufacturing'>Manufacturing</option>
-					<option value='construction'>Construction</option>
-					<option value='finance'>Finance</option>
-					<option value='retail'>Retail</option>
-					<option value='services'>Services</option>
-					<option value='utilities'>Utilities/Transportation</option>
-					<option value='public'>Public</option>
-					<option value='residential'>Residential</option>
-				</select>
-			</div>	 -->
 			<div class="wideInput" style="text-align:right">
 				<button id="deleteButton" type="button" class="stoppedInline postRunInline" onclick="deleteModel()">Delete</button>
 				<button id="shareButton" type="button" class="postRunInline" onclick="shareModel()">Share</button>
@@ -264,51 +233,21 @@
 			{{ allOutputDataDict['timelineStatsHtml'] }}
 		</div>
 		<!-- Leaflet map directly inline with model-->
+		<p class="reportTitle">Outage Map and Time Slider</p>
+		<div class="tightContent postRun">
+			<div id="slider" style="top: 0px; right: 1px; margin: 10px 25px;"></div>
+			<input type="number" min='1' max='23' id="input-number-min">
+			<input type="number" min='2' max='24' id="input-number-max">
+		</div>
 		<div id="mapInsert"></div>
-			<!-- <input type="submit"> -->
-		</div>
-		<div id="slider" style="top: 0px; right: 1px; margin: 10px 25px;"></div>
-		<div style="margin-right: auto; margin-left: auto; width: 90%; margin-bottom: 10px; text-align: center;">
-		<input type="number" min='1' max='99' id="input-number-min">
-		<input type="number" min='2' max='100' id="input-number-max">
-		</div>
 		<script type="text/javascript">
 		//Hack to stop leaflet from loading before geojson data loads 
 		if(modelStatus === "finished"){
-		mapHtml = '<p class="reportTitle">Outage Map (Original Faults Marked in Blue, New Faults Marked in Red)</p><div id="mapHolder" class="tightContent"><div id="map"></div></div>';
+		mapHtml = '<div id="mapHolder" class="tightContent"><div id="map"></div></div>';
 		gebi('mapInsert').innerHTML = mapHtml;
 		//Parse geojson dict (instead of reading from geojson.js - doesn't really matter if you want to load from geojson.js, was just quicker to prototype) 
 		var geojson = JSON.parse(allOutputData['geoDict']);
 		console.log(geojson);
-
-		function filterFunction(feature, layer) {
-			time = feature.properties['time'];
-			timeMin = feature.properties['timeMin'];
-			timeMax = feature.properties['timeMax'];
-			action = feature.properties['action'];
-			actionFilter = feature.properties['actionFilter'];
-			
-			thisAction = false;
-			if (actionFilter != 'All') {
-				if (actionFilter == action) {
-					thisAction = true;
-				}
-				else thisAction = false;
-			}
-			else thisAction = true;
-			if (thisAction == false) {
-				return false;
-			}
-			thisTime = false;
-			if (timeMin > timeMax)
-				return false;
-			if (time > timeMax || time < timeMin)
-				thisTime = false;
-			else thisTime = true;
-			if (thisTime == false)
-				return false;
-			return true;
-		}
 
 		function onEachFeature(feature, layer) {
 			var popup = '';
@@ -375,14 +314,12 @@
 		geojsonLayer = L.geoJSON(false, {
 					pointToLayer: pointToLayerNode,
 					onEachFeature: onEachFeature,
-					filter: filterFunction
 				});
 		eventLayer = L.geoJSON(false, {
 					pointToLayer:
 						pointToEvent,
 					onEachFeature:
 						onEachFeature,
-					filter: filterFunction,
 					style: lineStyle
 				});
 
@@ -418,14 +355,14 @@
 		var slidervar = document.getElementById('slider');
 		noUiSlider.create(slidervar, {
 			connect: true,
-			start: [ 1, 100 ],
+			start: [ 1, 24 ],
 			range: {
 				min: 1,
-				max: 100
+				max: 24
 			}
 		});
 		document.getElementById('input-number-min').setAttribute("value", 1);
-		document.getElementById('input-number-max').setAttribute("value", 100);
+		document.getElementById('input-number-max').setAttribute("value", 24);
 
 		var inputNumberMin = document.getElementById('input-number-min');
 		var inputNumberMax = document.getElementById('input-number-max');
@@ -455,8 +392,8 @@
 				}
 				else{
 					layer.setStyle({
-						radius: 4,
-						fillColor: 'gray',
+						radius: 1,
+						fillColor: 'black',
 						"color": 'black'
 					});
 				}

@@ -110,17 +110,17 @@ def pullDataForGraph(tree, feederMap, outputTimeline, row):
 		loadAfter = outputTimeline.loc[row, 'loadAfter']
 		return device, coordLis, coordStr, time, action, loadBefore, loadAfter
 
-def createTimeline():
-	data = {'time': ['1', '3', '7', '10', '15'],
-			'device': ['l_1006_1007', 'load_1003', 'load_1016', 'bus1014', 'bus2053'],
-			# devices on ieee37
-			#'device': ['l2', 's701a', 's713c', '799r', '705'],
-			'action': ['Switching', 'Load Shed', 'Load Pickup', 'Battery Control', 'Generator Control'],
-			'loadBefore': ['50', '20', '10', '50', '50'],
-			'loadAfter': ['0', '10', '20', '60', '40']
-			}
-	timeline = pd.DataFrame(data, columns = ['time','device','action','loadBefore','loadAfter'])
-	return timeline
+# def createTimeline():
+# 	data = {'time': ['1', '3', '7', '10', '15'],
+# 			'device': ['l_1006_1007', 'load_1003', 'load_1016', 'bus1014', 'bus2053'],
+# 			# devices on ieee37
+# 			#'device': ['l2', 's701a', 's713c', '799r', '705'],
+# 			'action': ['Switching', 'Load Shed', 'Load Pickup', 'Battery Control', 'Generator Control'],
+# 			'loadBefore': ['50', '20', '10', '50', '50'],
+# 			'loadAfter': ['0', '10', '20', '60', '40']
+# 			}
+# 	timeline = pd.DataFrame(data, columns = ['time','device','action','loadBefore','loadAfter'])
+# 	return timeline
 
 def colormap(action):
 	if action == 'Load Shed':
@@ -426,11 +426,10 @@ def check_and_install():
 			# Disable quarantine.
 			os.system(f'sudo xattr -dr com.apple.quarantine {ONM_DIR}')
 
-def graphMicrogrid(pathToOmd, pathToJson, pathToCsv, workDir, maxTime, stepSize, faultedLine, timeMinFilter, timeMaxFilter, actionFilter, outageDuration, profit_on_energy_sales, restoration_cost, hardware_cost, sameFeeder):
+def graphMicrogrid(pathToOmd, pathToJson, pathToCsv, outputFile, useCache, workDir, maxTime, stepSize, outageDuration, profit_on_energy_sales, restoration_cost, hardware_cost):
 	''' Run full microgrid control process. '''
-	# TODO: run check_install, disable always_cached
+
 	# check_and_install()
-	sameFeeder = True
 
 	# read in the OMD file as a tree and create a geojson map of the system
 	if not workDir:
@@ -442,9 +441,23 @@ def graphMicrogrid(pathToOmd, pathToJson, pathToCsv, workDir, maxTime, stepSize,
 
 	# Native Julia Command
 	# command = 'cmd /c ' + '"julia --project=' + '"C:/Users/granb/PowerModelsONM.jl-master/" ' + 'C:/Users/granb/PowerModelsONM.jl-master/src/cli/entrypoint.jl' + ' -n ' + '"' + str(workDir) + '/circuit.dss' + '"' + ' -o ' + '"C:/Users/granb/PowerModelsONM.jl-master/output.json"'
-
-	if os.path.exists(f'{workDir}/output.json') and sameFeeder:
-		# Cache exists, skip ONM running
+	
+	if  useCache == 'True':
+		with open(outputFile) as inFile:
+			data = json.load(inFile)
+			genProfiles = data['Generator profiles']
+			simTimeSteps = []
+			for i in data['Simulation time steps']:
+				simTimeSteps.append(float(i))
+			voltages = data['Voltages']
+			loadServed = data['Load served']
+			storageSOC = data['Storage SOC (%)']
+			switchLoadAction = data['Device action timeline']
+			powerflow = data['Powerflow output']
+	else:
+		# No cache, so run ONM.
+		command = f'{ONM_DIR}/build/bin/PowerModelsONM -n "{workDir}/circuit.dss" -o "{workDir}/output.json"'
+		os.system(command)
 		with open(f'{workDir}/output.json') as inFile:
 			data = json.load(inFile)
 			genProfiles = data['Generator profiles']
@@ -454,25 +467,74 @@ def graphMicrogrid(pathToOmd, pathToJson, pathToCsv, workDir, maxTime, stepSize,
 			voltages = data['Voltages']
 			loadServed = data['Load served']
 			storageSOC = data['Storage SOC (%)']
-			cached = 'yes'
-	else:
-		# No cache, so run ONM.
-		command = f'{ONM_DIR}/build/bin/PowerModelsONM -n "{workDir}/circuit.dss" -o "{workDir}/onm_output.json"'
-		os.system(command)
-		with open(f'{workDir}/onm_output.json') as inFile:
-			data = json.load(inFile)
-			with open(f'{workDir}/output.json', 'w') as outfile:
-				json.dump(data, outfile)
-			genProfiles = data['Generator profiles']
-			simTimeSteps = []
-			for i in data['Simulation time steps']:
-				simTimeSteps.append(float(i))
-			voltages = data['Voltages']
-			loadServed = data['Load served']
-			storageSOC = data['Storage SOC (%)']
-			cached = 'no'
-	
-	outputTimeline = createTimeline()
+			switchLoadAction = data['Device action timeline']
+			powerflow = data['Powerflow output']
+
+	actionTime = []
+	actionDevice = []
+	actionAction = []
+	actionLoadBefore = []
+	actionLoadAfter = []
+
+	timestep = 1
+	for key in switchLoadAction:
+		if timestep == 1:
+			switchActionsOld = key['Switch configurations']
+		else:
+			switchActionsNew = key['Switch configurations']
+			for entry in switchActionsNew:
+				if switchActionsNew[entry] != switchActionsOld[entry]:
+					actionDevice.append(entry)
+					actionTime.append(str(timestep))
+					actionAction.append('Switching')
+					actionLoadBefore.append(switchActionsOld[entry])
+					actionLoadAfter.append(switchActionsNew[entry])
+			switchActionsOld = key['Switch configurations']
+		loadShed = key['Shedded loads']
+		if len(loadShed) != 0:
+			for entry in loadShed:
+				actionDevice.append(entry)
+				actionTime.append(str(timestep))
+				actionAction.append('Load Shed')
+				actionLoadBefore.append('N/A')
+				actionLoadAfter.append('N/A')
+		timestep += 1
+	timestep = 0
+	while timestep < 24:
+		if timestep == 0:
+			powerflowOld = powerflow[timestep]
+		else:
+			powerflowNew = powerflow[timestep]
+			for generator in list(powerflowNew['generator'].keys()):
+				entryNew = powerflowNew['generator'][generator]['real power setpoint (kW)'][0]
+				entryOld = powerflowOld['generator'][generator]['real power setpoint (kW)'][0]
+				if math.sqrt(((entryNew - entryOld)/entryOld)**2) > 0.5:
+					actionDevice.append(generator)
+					actionTime.append(str(timestep + 1))
+					actionAction.append('Generator Control')
+					actionLoadBefore.append(str(entryOld))
+					actionLoadAfter.append(str(entryNew))
+			for battery in list(powerflowNew['storage'].keys()):
+				entryNew = powerflowNew['storage'][battery]['real power setpoint (kW)'][0]
+				entryOld = powerflowOld['storage'][battery]['real power setpoint (kW)'][0]
+				if math.sqrt(((entryNew - entryOld)/entryOld)**2) > 0.5:
+					actionDevice.append(battery)
+					actionTime.append(str(timestep + 1))
+					actionAction.append('Battery Control')
+					actionLoadBefore.append(str(entryOld))
+					actionLoadAfter.append(str(entryNew))
+			powerflowOld = powerflow[timestep]
+		timestep += 1
+
+	line = {'time': actionTime,
+			'device': actionDevice,
+			'action': actionAction,
+			'loadBefore': actionLoadBefore,
+			'loadAfter': actionLoadAfter
+			}
+
+	outputTime = pd.DataFrame(line, columns = ['time','device','action','loadBefore','loadAfter'])
+	outputTimeline = outputTime.sort_values('time')
 
 	# Create traces
 	gens = go.Figure()
@@ -526,32 +588,11 @@ def graphMicrogrid(pathToOmd, pathToJson, pathToCsv, workDir, maxTime, stepSize,
 		tree = json.load(inFile)['tree']
 	feederMap = geo.omdGeoJson(pathToOmd, conversion = False)
 
-	# find a node associated with the faulted line
-	faultedNode = ''
-	faultedNode2 = ''
-	for key in tree.keys():
-		if tree[key].get('name','') == faultedLine:
-			faultedNode = tree[key]['from']
-			faultedNode2 = tree[key]['to']
-
 	# generate a list of substations
 	busNodes = []
 	for key in tree.keys():
 		if tree[key].get('bustype','') == 'SWING':
 			busNodes.append(tree[key]['name'])
-
-	Dict = {}
-	faultedNodeCoordLis1, faultedNodeCoordStr1 = nodeToCoords(feederMap, str(faultedNode))
-	faultedNodeCoordLis2, faultedNodeCoordStr2 = nodeToCoords(feederMap, str(faultedNode2))
-	Dict['geometry'] = {'type': 'LineString', 'coordinates': [faultedNodeCoordLis2, faultedNodeCoordLis1]}
-	Dict['type'] = 'Feature'
-	Dict['properties'] = {'name': faultedLine,
-						  'edgeColor': 'red',
-						  'popupContent': 'Location: <b>' + str(faultedNodeCoordStr1) + ', ' + str(faultedNodeCoordStr2) + '</b><br>Faulted Line: <b>' + str(faultedLine)}
-	feederMap['features'].append(Dict)
-
-	timeMin = int(timeMinFilter)
-	timeMax = int(timeMaxFilter)
 
 	row = 0
 	row_count_timeline = outputTimeline.shape[0]
@@ -567,9 +608,6 @@ def graphMicrogrid(pathToOmd, pathToJson, pathToCsv, workDir, maxTime, stepSize,
 								  'action': action,
 								  'loadBefore': loadBefore,
 								  'loadAfter': loadAfter,
-								  'timeMin': timeMin, 
-								  'timeMax': timeMax,
-								  'actionFilter': actionFilter,
 								  'pointColor': '#' + str(colormap(action)), 
 								  'popupContent': 'Location: <b>' + str(coordStr) + '</b><br>Device: <b>' + str(device) + '</b><br>Time: <b>' + str(time) + '</b><br>Action: <b>' + str(action) + '</b><br>Load Before: <b>' + str(loadBefore) + '</b><br>Load After: <b>' + str(loadAfter) + '</b>.'}
 			feederMap['features'].append(Dict)
@@ -584,9 +622,6 @@ def graphMicrogrid(pathToOmd, pathToJson, pathToCsv, workDir, maxTime, stepSize,
 								  'action': action,
 								  'loadBefore': loadBefore,
 								  'loadAfter': loadAfter,
-								  'timeMin': timeMin, 
-								  'timeMax': timeMax,
-								  'actionFilter': actionFilter,
 								  'edgeColor': '#' + str(colormap(action)),
 								  'popupContent': 'Location: <b>' + str(coordStr) + '</b><br>Device: <b>' + str(device) + '</b><br>Time: <b>' + str(time) + '</b><br>Action: <b>' + str(action) + '</b><br>Load Before: <b>' + str(loadBefore) + '</b><br>Load After: <b>' + str(loadAfter) + '</b>.'}
 			feederMap['features'].append(Dict)
@@ -645,22 +680,6 @@ def graphMicrogrid(pathToOmd, pathToJson, pathToCsv, workDir, maxTime, stepSize,
 		row += 1
 	fig.update_layout(xaxis_title = 'Duration (hours)',
 		yaxis_title = 'Cost ($)')
-	# py.offline.plot(fig, filename=f'Output.plot.html', auto_open=False)
-
-	# 	if numberRows > 1:
-	# 		axs[math.floor(row/2), row%2].plot(times, kWperhrEstimate)
-	# 		axs[math.floor(row/2), row%2].set_title(str(customerName))
-	# 	else:
-	# 		axs[row%2].plot(times, kWperhrEstimate)
-	# 		axs[row%2].set_title(str(customerName))
-	# 	row+=1
-	# for ax in axs.flat:
-	# 	ax.set(xlabel='Duration (hrs)', ylabel='Customer Outage Cost')
-	# 	ax.set_xlim([0, 8])
-	# 	ax.set_ylim([0, globalMax + .05*globalMax])
-	# for ax in axs.flat:
-	# 	ax.label_outer()
-	# plt.savefig(workDir + '/customerCostFig')
 
 	customerOutageHtml = customerOutageTable(customerOutageData, outageCost, workDir)
 
@@ -682,16 +701,6 @@ def work(modelDir, inputDict):
 	inputDict['feederName1'] = feederName
 	with open(f'{modelDir}/{feederName}.omd', 'r') as omdFile:
 		omd = json.load(omdFile)
-	sameFeeder = False
-	
-	if os.path.exists(f'{modelDir}/feeder.json'):
-		sameFeeder = open(f'{modelDir}/feeder.json').read() == omd		
-
-	if not sameFeeder:
-		with open(f'{modelDir}/feeder.json', 'wt') as feederFile:
-			with open(f'{modelDir}/{feederName}.omd', 'r') as omdFile:
-				json.dump(json.load(omdFile), feederFile)
-
 
 	tree = omd['tree']
 	# Output a .dss file, which will be needed for ONM.
@@ -709,6 +718,10 @@ def work(modelDir, inputDict):
 		dss_file_2.write(content)
 
 	# Run the main functions of the program
+	with open(pJoin(modelDir, inputDict['outputFileName']), 'w') as f2:
+		pathToData2 = f2.name
+		f2.write(inputDict['outputData'])
+
 	with open(pJoin(modelDir, inputDict['customerFileName']), 'w') as f1:
 		pathToData1 = f1.name
 		f1.write(inputDict['customerData'])
@@ -721,18 +734,15 @@ def work(modelDir, inputDict):
 		modelDir + '/' + feederName + '.omd', #OMD Path
 		pathToData,
 		pathToData1,
+		pathToData2,
+		inputDict['useCache'],
 		modelDir, #Work directory.
 		inputDict['maxTime'], #computational time limit
 		inputDict['stepSize'], #time step size
-		inputDict['faultedLine'],#line faulted
-		inputDict['timeMinFilter'],
-		inputDict['timeMaxFilter'],
-		inputDict['actionFilter'],
 		inputDict['outageDuration'],
 		inputDict['profit_on_energy_sales'],
 		inputDict['restoration_cost'],
-		inputDict['hardware_cost'],
-		sameFeeder)
+		inputDict['hardware_cost'])
 	
 	# Textual outputs of outage timeline
 	with open(pJoin(modelDir,'timelineStats.html')) as inFile:
@@ -776,6 +786,8 @@ def new(modelDir):
 		event_data = f.read()
 	with open(pJoin(__neoMetaModel__._omfDir,'static','testFiles','customerInfo.csv')) as f1:
 		customer_data = f1.read()
+	with open(pJoin(__neoMetaModel__._omfDir,'static','testFiles','output_later.json')) as f2:
+		output_file = f2.read()
 	defaultInputs = {
 		'modelType': modelName,
 		# 'feederName1': 'ieee37nodeFaultTester',
@@ -784,12 +796,9 @@ def new(modelDir):
 		# 'feederName1': 'iowa240c2_workingOnm.clean.dss',
 		# 'feederName1': 'iowa240c2_working_coords.clean',
 		'feederName1': 'iowa240c2_fixed_coords.clean',
+		'useCache': 'True',
 		'maxTime': '25',
 		'stepSize': '1',
-		'faultedLine': 'l_1001_1002',
-		'timeMinFilter': '0',
-		'timeMaxFilter': '20',
-		'actionFilter': 'All',
 		'outageDuration': '5',
 		'profit_on_energy_sales': '0.03',
 		'restoration_cost': '100',
@@ -797,7 +806,9 @@ def new(modelDir):
 		'eventData': event_data,
 		'eventFileName': 'events.json',
 		'customerData': customer_data,
-		'customerFileName': 'customerInfo.csv'
+		'customerFileName': 'customerInfo.csv',
+		'outputData': output_file,
+		'outputFileName': 'output_later.json'
 	}
 	creationCode = __neoMetaModel__.new(modelDir, defaultInputs)
 	try:
