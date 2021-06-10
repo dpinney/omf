@@ -111,6 +111,22 @@
 				</div>
 			</div>
 			<div class="shortInput">
+				<label class="tooltip">Cached Output (.json file)<span class="classic">Please see the documentation at the help link for the required format</span></label>
+				<input id="outputFile" type="file" style="display:none" onchange="handle_files(this.files,'outputData','outputFileName')">
+				<input id="outputData" name="outputData" type="hidden">
+				<div>
+					<label for="outputFile" class="fileButton">Choose File</label>
+					<input id="outputFileName" name="outputFileName" value='' readonly class="uploadFileName">
+				</div>
+			</div>
+			<div class="shortInput">
+				<label class="tooltip">Cached Output?<span class="classic">If yes, use the Cached Output provided; if no, use the events.json to run the feeder system through ONM.</span></label>
+				<select id="useCache" name="useCache" />
+					<option value='True'>Yes</option>
+					<option value='False'>No</option>
+				</select>
+			</div>
+			<div class="shortInput">
 				<label class="tooltip">Maximum Runtime (h)<span class="classic">Runtime of the system in hours.</span></label>
 				<input type="text" id="maxTime" name="maxTime">
 			</div>

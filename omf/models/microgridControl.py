@@ -426,11 +426,10 @@ def check_and_install():
 			# Disable quarantine.
 			os.system(f'sudo xattr -dr com.apple.quarantine {ONM_DIR}')
 
-def graphMicrogrid(pathToOmd, pathToJson, pathToCsv, workDir, maxTime, stepSize, outageDuration, profit_on_energy_sales, restoration_cost, hardware_cost, sameFeeder):
+def graphMicrogrid(pathToOmd, pathToJson, pathToCsv, outputFile, useCache, workDir, maxTime, stepSize, outageDuration, profit_on_energy_sales, restoration_cost, hardware_cost):
 	''' Run full microgrid control process. '''
-	# TODO: run check_install, disable always_cached
+
 	# check_and_install()
-	sameFeeder = True
 
 	# read in the OMD file as a tree and create a geojson map of the system
 	if not workDir:
@@ -442,9 +441,23 @@ def graphMicrogrid(pathToOmd, pathToJson, pathToCsv, workDir, maxTime, stepSize,
 
 	# Native Julia Command
 	# command = 'cmd /c ' + '"julia --project=' + '"C:/Users/granb/PowerModelsONM.jl-master/" ' + 'C:/Users/granb/PowerModelsONM.jl-master/src/cli/entrypoint.jl' + ' -n ' + '"' + str(workDir) + '/circuit.dss' + '"' + ' -o ' + '"C:/Users/granb/PowerModelsONM.jl-master/output.json"'
-
-	if os.path.exists(f'{workDir}/output.json') and sameFeeder:
-		# Cache exists, skip ONM running
+	
+	if  useCache == 'True':
+		with open(outputFile) as inFile:
+			data = json.load(inFile)
+			genProfiles = data['Generator profiles']
+			simTimeSteps = []
+			for i in data['Simulation time steps']:
+				simTimeSteps.append(float(i))
+			voltages = data['Voltages']
+			loadServed = data['Load served']
+			storageSOC = data['Storage SOC (%)']
+			switchLoadAction = data['Device action timeline']
+			powerflow = data['Powerflow output']
+	else:
+		# No cache, so run ONM.
+		command = f'{ONM_DIR}/build/bin/PowerModelsONM -n "{workDir}/circuit.dss" -o "{workDir}/output.json"'
+		os.system(command)
 		with open(f'{workDir}/output.json') as inFile:
 			data = json.load(inFile)
 			genProfiles = data['Generator profiles']
@@ -456,25 +469,6 @@ def graphMicrogrid(pathToOmd, pathToJson, pathToCsv, workDir, maxTime, stepSize,
 			storageSOC = data['Storage SOC (%)']
 			switchLoadAction = data['Device action timeline']
 			powerflow = data['Powerflow output']
-			cached = 'yes'
-	else:
-		# No cache, so run ONM.
-		command = f'{ONM_DIR}/build/bin/PowerModelsONM -n "{workDir}/circuit.dss" -o "{workDir}/onm_output.json"'
-		os.system(command)
-		with open(f'{workDir}/onm_output.json') as inFile:
-			data = json.load(inFile)
-			with open(f'{workDir}/output.json', 'w') as outfile:
-				json.dump(data, outfile)
-			genProfiles = data['Generator profiles']
-			simTimeSteps = []
-			for i in data['Simulation time steps']:
-				simTimeSteps.append(float(i))
-			voltages = data['Voltages']
-			loadServed = data['Load served']
-			storageSOC = data['Storage SOC (%)']
-			switchLoadAction = data['Device action timeline']
-			powerflow = data['Powerflow output']
-			cached = 'no'
 
 	actionTime = []
 	actionDevice = []
@@ -539,7 +533,8 @@ def graphMicrogrid(pathToOmd, pathToJson, pathToCsv, workDir, maxTime, stepSize,
 			'loadAfter': actionLoadAfter
 			}
 
-	outputTimeline = pd.DataFrame(line, columns = ['time','device','action','loadBefore','loadAfter'])
+	outputTime = pd.DataFrame(line, columns = ['time','device','action','loadBefore','loadAfter'])
+	outputTimeline = outputTime.sort_values('time')
 
 	# Create traces
 	gens = go.Figure()
@@ -706,16 +701,6 @@ def work(modelDir, inputDict):
 	inputDict['feederName1'] = feederName
 	with open(f'{modelDir}/{feederName}.omd', 'r') as omdFile:
 		omd = json.load(omdFile)
-	sameFeeder = False
-	
-	if os.path.exists(f'{modelDir}/feeder.json'):
-		sameFeeder = (open(f'{modelDir}/feeder.json').read() == omd)	
-
-	if not sameFeeder:
-		with open(f'{modelDir}/feeder.json', 'wt') as feederFile:
-			with open(f'{modelDir}/{feederName}.omd', 'r') as omdFile:
-				json.dump(json.load(omdFile), feederFile)
-
 
 	tree = omd['tree']
 	# Output a .dss file, which will be needed for ONM.
@@ -733,6 +718,10 @@ def work(modelDir, inputDict):
 		dss_file_2.write(content)
 
 	# Run the main functions of the program
+	with open(pJoin(modelDir, inputDict['outputFileName']), 'w') as f2:
+		pathToData2 = f2.name
+		f2.write(inputDict['outputData'])
+
 	with open(pJoin(modelDir, inputDict['customerFileName']), 'w') as f1:
 		pathToData1 = f1.name
 		f1.write(inputDict['customerData'])
@@ -745,14 +734,15 @@ def work(modelDir, inputDict):
 		modelDir + '/' + feederName + '.omd', #OMD Path
 		pathToData,
 		pathToData1,
+		pathToData2,
+		inputDict['useCache'],
 		modelDir, #Work directory.
 		inputDict['maxTime'], #computational time limit
 		inputDict['stepSize'], #time step size
 		inputDict['outageDuration'],
 		inputDict['profit_on_energy_sales'],
 		inputDict['restoration_cost'],
-		inputDict['hardware_cost'],
-		sameFeeder)
+		inputDict['hardware_cost'])
 	
 	# Textual outputs of outage timeline
 	with open(pJoin(modelDir,'timelineStats.html')) as inFile:
@@ -796,6 +786,8 @@ def new(modelDir):
 		event_data = f.read()
 	with open(pJoin(__neoMetaModel__._omfDir,'static','testFiles','customerInfo.csv')) as f1:
 		customer_data = f1.read()
+	with open(pJoin(__neoMetaModel__._omfDir,'static','testFiles','output_later.json')) as f2:
+		output_file = f2.read()
 	defaultInputs = {
 		'modelType': modelName,
 		# 'feederName1': 'ieee37nodeFaultTester',
@@ -804,6 +796,7 @@ def new(modelDir):
 		# 'feederName1': 'iowa240c2_workingOnm.clean.dss',
 		# 'feederName1': 'iowa240c2_working_coords.clean',
 		'feederName1': 'iowa240c2_fixed_coords.clean',
+		'useCache': 'True',
 		'maxTime': '25',
 		'stepSize': '1',
 		'outageDuration': '5',
@@ -813,7 +806,9 @@ def new(modelDir):
 		'eventData': event_data,
 		'eventFileName': 'events.json',
 		'customerData': customer_data,
-		'customerFileName': 'customerInfo.csv'
+		'customerFileName': 'customerInfo.csv',
+		'outputData': output_file,
+		'outputFileName': 'output_later.json'
 	}
 	creationCode = __neoMetaModel__.new(modelDir, defaultInputs)
 	try:
