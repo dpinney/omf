@@ -39,7 +39,25 @@ def work(modelDir, inputDict):
 				loadShape.append(row) 
 			if len(loadShape)!=8760: raise Exception
 	except:
-		errorMessage = "CSV file is incorrect format. Please see valid format definition at <a target='_blank' href='https://github.com/dpinney/omf/wiki/Models-~-demandResponse#walkthrough'>OMF Wiki demandResponse</a>"
+		errorMessage = "Loadshape CSV file is incorrect format. Please see valid format definition at <a target='_blank' href='https://github.com/dpinney/omf/wiki/Models-~-demandResponse#walkthrough'>OMF Wiki demandResponse</a>"
+		raise Exception(errorMessage)
+
+	# Setting up the criticalLoadShape file.
+	# ToDo: make a condition to make criticalLoadShape file optional, and not needed in default
+	# make a switch for "User supplying critical loadshape?"
+	# if "User supplying critical loadshape?" = True:
+	with open(pJoin(modelDir,"criticalLoadShape.csv"),"w") as criticalLoadShapeFile:
+		criticalLoadShapeFile.write(inputDict['criticalLoadShape'])
+
+	try:
+		criticalLoadShape = []
+		with open(pJoin(modelDir,"criticalLoadShape.csv"), newline='') as inFile:
+			reader = csv.reader(inFile)
+			for row in reader:
+				criticalLoadShape.append(row) 
+			if len(criticalLoadShape)!=8760: raise Exception
+	except:
+		errorMessage = "Critical Loadshape CSV file is incorrect format. Please see valid format definition at <a target='_blank' href='https://github.com/dpinney/omf/wiki/Models-~-demandResponse#walkthrough'>OMF Wiki demandResponse</a>"
 		raise Exception(errorMessage)
 
 	latitude = float(inputDict['latitude'])
@@ -86,6 +104,11 @@ def work(modelDir, inputDict):
 		solarCanCurtail = True
 	elif inputDict['solarCanCurtail'] == "false":
 		solarCanCurtail = False
+	userCriticalLoadShape = bool(inputDict['userCriticalLoadShape'])
+	if inputDict['userCriticalLoadShape'] == "true":
+		userCriticalLoadShape = True
+	elif inputDict['userCriticalLoadShape'] == "false":
+		userCriticalLoadShape = False
 	dieselMax = float(inputDict['dieselMax'])
 	dieselMin = float(inputDict['dieselMin'])
 
@@ -99,23 +122,32 @@ def work(modelDir, inputDict):
 		#singleOutage = False
 	
 	loadShape = np.array(loadShape)
+	criticalLoadShape = np.array(criticalLoadShape)
 	numRows = loadShape.shape[0]
 	numCols = loadShape.shape[1]
 	outData['numScenarios'] = numCols+1;
 
 	totalLoad = np.zeros(numRows)
+	totalCriticalLoad = np.zeros(numRows)
 	for i in range(0,1+numCols):
 		indexString = str(i+1)
 
 		if i == numCols:
 			load = totalLoad
+			criticalLoad = totalCriticalLoad
 		else:
 			load = loadShape[:,i]
 			print(type(load), load[0], load )
 			load = [float(x) for x in load]
 			totalLoad = np.add(totalLoad, load)
 
-		jsonifiableLoad = list(load);
+			criticalLoad = criticalLoadShape[:,i]
+			# print(type(load), load[0], load )
+			criticalLoad = [float(x) for x in criticalLoad]
+			totalCriticalLoad = np.add(totalCriticalLoad, criticalLoad)
+
+		jsonifiableLoad = list(load)
+		jsonifiableCriticalLoad = list(criticalLoad);
 
 		# Create the input JSON file for REopt
 		# TODO: To use energyCostMonthly, comment out demandCost and energyCost lines in the Scenario JSON
@@ -199,6 +231,9 @@ def work(modelDir, inputDict):
 			scenario['Scenario']['Site']['Generator']['fuel_avail_gal'] = fuelAvailable
 			scenario['Scenario']['Site']['Generator']['min_turn_down_pct'] = minGenLoading
 			scenario['Scenario']['Site']['Generator']['existing_kw'] = genExisting
+			# use userCriticalLoadShape only if True, else model defaults to criticalLoadFactor
+			if userCriticalLoadShape == True:
+				scenario['Scenario']['Site']['LoadProfile']['critical_loads_kw'] = jsonifiableCriticalLoad
 			# diesel has a quirk in how it gets inputted to REopt such that when strictly specified, allOutputData["sizeDiesel1"] = allInputData['dieselMax'] + allInputData['genExisting']
 			if dieselMax - genExisting > 0:
 				scenario['Scenario']['Site']['Generator']['max_kw'] = dieselMax - genExisting
@@ -620,14 +655,20 @@ def new(modelDir):
 	fName = "input - 200 Employee Office, Springfield Illinois, 2001.csv"
 	with open(pJoin(omf.omfDir, "static", "testFiles", fName)) as f:
 		load_shape = f.read()
+
+	cfName = "critical_load_test.csv"
+	with open(pJoin(omf.omfDir, "static", "testFiles", cfName)) as f:
+		crit_load_shape = f.read()
 	defaultInputs = {
 		"modelType": modelName,
 		"runTime": "",
 		"loadShape" : load_shape,
+		"criticalLoadShape" : crit_load_shape,
 		"solar" : "on",
 		"wind" : "off",
 		"battery" : "on",
 		"fileName" : fName,
+		"criticalFileName" : cfName,
 		"latitude" : '39.7817',
 		"longitude" : '-89.6501',
 		"year" : '2017',
@@ -654,6 +695,7 @@ def new(modelDir):
 		"batteryCapacityMax": "1000000",
 		"dieselMax": "100000",
 		"solarExisting": 0,
+		"userCriticalLoadShape": False,
 		"criticalLoadFactor": "1",
 		"outage_start_hour": "500",
 		"outageDuration": "24",

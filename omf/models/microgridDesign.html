@@ -450,6 +450,22 @@
 				<input type="number" id="outageDuration" name="outageDuration" min="1" max="8760" required="required"/>
 			</div>
 			<div class="shortInput">
+				<label class="tooltip">User supplies Optional Critical Load Shape (.csv)?<span class="classic">Check "Yes" if user uploads Optional Critical Load Shape (.csv). Else, indicate "Critical Load Factor"</span></label>
+				<select id="userCriticalLoadShape" name="userCriticalLoadShape"/>
+					<option value=true>Yes</option>
+					<option value=false>No</option>
+				</select>
+			</div>
+			<div class="shortInput">
+				<label class="tooltip">Optional Critical Load Shape (.csv) <span class="classic">Optional: Please enter the name of a .csv file representing the hourly critical load shape. Number of columns much match LoadShape file. Overrides "Critical Load Factor" if present</span></label>
+				<input id="criticalLoadShapeFile" type="file" style="display:none" onchange="handle_files(this.files,'criticalLoadShape','criticalFileName')">
+				<input id="criticalLoadShape" name="criticalLoadShape" type="hidden">
+				<div>
+					<label for="criticalLoadShapeFile" class="fileButton">Choose File</label>
+					<input id="criticalFileName" name="criticalFileName" readonly class="uploadFileName">
+				</div>
+			</div>
+			<div class="shortInput">
 				<label class="tooltip">Critical Load Factor<span class="classic">Please enter a number 0-1 for the fraction of total typical load that must be met during a grid outage.</span></label>
 				<input type="number" id="criticalLoadFactor" name="criticalLoadFactor" step="0.01" min="0.0" max="1.0" required="required"/>
 			</div>
