@@ -19,6 +19,7 @@ from omf import geo
 from omf.models import __neoMetaModel__
 from omf.models.__neoMetaModel__ import *
 from omf.solvers.opendss import dssConvert
+from omf.solvers import PowerModelsONM
 
 # Model metadata:
 tooltip = 'outageCost calculates reliability metrics and creates a leaflet graph based on data from an input csv file.'
@@ -408,68 +409,37 @@ def customerCost1(workDir, customerName, duration, season, averagekWperhr, busin
 	# return {'customerOutageCost': outageCost}
 	return outageCost, kWperhrEstimate, times, localMax
 
-def check_and_install():
-	if platform.system() == "Linux":
-		FNAME = 'PowerModelsONM_ubuntu-latest_x64.zip'
-	elif platform.system() == "Windows":
-		FNAME = 'PowerModelsONM_windows-latest_x64.zip'
-	elif platform.system() == "Darwin":
-		FNAME = 'PowerModelsONM_macOS-latest_x64.zip'
-	else:
-		raise Exception('Unsupported ONM platform.')
-	if not os.path.isdir(f'{ONM_DIR}build'):
-		URL = 'https://github.com/lanl-ansi/PowerModelsONM.jl/releases/download/v0.4.0/' + FNAME
-		os.system(f'wget -nv {URL} -P {ONM_DIR}')
-		os.system(f'unzip {ONM_DIR}{FNAME} -d {ONM_DIR}')
-		os.system(f'rm {ONM_DIR}{FNAME}')
-		if platform.system() == "Darwin":
-			# Disable quarantine.
-			os.system(f'sudo xattr -dr com.apple.quarantine {ONM_DIR}')
-
 def graphMicrogrid(pathToOmd, pathToJson, pathToCsv, outputFile, useCache, workDir, maxTime, stepSize, outageDuration, profit_on_energy_sales, restoration_cost, hardware_cost):
 	''' Run full microgrid control process. '''
 
-	# check_and_install()
+	# Setup ONM if it hasn't been done already.
+	if not PowerModelsONM.check_instantiated():
+		PowerModelsONM.instantiate()
 
 	# read in the OMD file as a tree and create a geojson map of the system
 	if not workDir:
 		workDir = tempfile.mkdtemp()
 		print('@@@@@@', workDir)
 
-	# New model cache.
-	shutil.copyfile(f'{__neoMetaModel__._omfDir}/static/testFiles/output_later.json',f'{workDir}/output.json')
-
-	# Native Julia Command
-	# command = 'cmd /c ' + '"julia --project=' + '"C:/Users/granb/PowerModelsONM.jl-master/" ' + 'C:/Users/granb/PowerModelsONM.jl-master/src/cli/entrypoint.jl' + ' -n ' + '"' + str(workDir) + '/circuit.dss' + '"' + ' -o ' + '"C:/Users/granb/PowerModelsONM.jl-master/output.json"'
-	
+	# useCache = False # Force cache invalidation.
+	# Run ONM.
 	if  useCache == 'True':
-		with open(outputFile) as inFile:
-			data = json.load(inFile)
-			genProfiles = data['Generator profiles']
-			simTimeSteps = []
-			for i in data['Simulation time steps']:
-				simTimeSteps.append(float(i))
-			voltages = data['Voltages']
-			loadServed = data['Load served']
-			storageSOC = data['Storage SOC (%)']
-			switchLoadAction = data['Device action timeline']
-			powerflow = data['Powerflow output']
+		shutil.copyfile(f'{__neoMetaModel__._omfDir}/static/testFiles/output_later.json',f'{workDir}/output.json')
 	else:
-		# No cache, so run ONM.
-		command = f'{ONM_DIR}/build/bin/PowerModelsONM -n "{workDir}/circuit.dss" -o "{workDir}/output.json"'
-		os.system(command)
-		with open(f'{workDir}/output.json') as inFile:
-			data = json.load(inFile)
-			genProfiles = data['Generator profiles']
-			simTimeSteps = []
-			for i in data['Simulation time steps']:
-				simTimeSteps.append(float(i))
-			voltages = data['Voltages']
-			loadServed = data['Load served']
-			storageSOC = data['Storage SOC (%)']
-			switchLoadAction = data['Device action timeline']
-			powerflow = data['Powerflow output']
+		PowerModelsONM.run(f'{workDir}/circuit.dss', f'{workDir}/output.json')
 
+	# Gather output data.
+	with open(f'{workDir}/output.json') as inFile:
+		data = json.load(inFile)
+		genProfiles = data['Generator profiles']
+		simTimeSteps = []
+		for i in data['Simulation time steps']:
+			simTimeSteps.append(float(i))
+		voltages = data['Voltages']
+		loadServed = data['Load served']
+		storageSOC = data['Storage SOC (%)']
+		switchLoadAction = data['Device action timeline']
+		powerflow = data['Powerflow output']
 	actionTime = []
 	actionDevice = []
 	actionAction = []

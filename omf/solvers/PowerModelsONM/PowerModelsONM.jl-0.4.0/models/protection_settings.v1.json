@@ -1,0 +1,47 @@
+{
+  "type": "array",
+  "description": "",
+  "minItems": 1,
+  "uniqueItems": true,
+  "items": {
+    "type": "object",
+    "properties": {
+      "primary pickup (A)": {
+        "type": "array",
+        "items": {
+          "type": "number"
+        }
+      },
+      "TDS": {
+        "type": "array",
+        "items": {
+          "type": "number"
+        }
+      },
+      "to": {
+        "type": "array",
+        "items": {
+          "type": "string"
+        }
+      },
+      "from": {
+        "type": "array",
+        "items": {
+          "type": "string"
+        }
+      },
+      "TOC": {
+        "type": "array",
+        "items": {
+          "type": "string"
+        }
+      },
+      "operating time (s)": {
+        "type": "array",
+        "items": {
+          "type": "number"
+        }
+      }
+    }
+  }
+}

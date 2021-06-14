@@ -32,6 +32,7 @@ omf/scratch/CIGAR/VoltPostFault.csv
 omf/scratch/CIGAR/VOLTOUT.png
 omf/scratch/CIGAR/scratchwindow.py
 omf/solvers/PowerModelsONM/build/*
+omf/solvers/PowerModelsONM/instantiated.txt
 gridlabd.dmg
 omf/omf.error.log
 *.pem
