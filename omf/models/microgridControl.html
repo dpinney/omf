@@ -444,13 +444,15 @@
 						fillColor: layer.options.tempFillColor,
 						"color": layer.options.colorTemp
 					});
+					layer.bringToFront()
 				}
 				else{
 					layer.setStyle({
 						radius: 1,
 						fillColor: 'black',
-						"color": 'black'
+						"color": 'black',
 					});
+					layer.bringToBack()
 				}
 			});
 		})
