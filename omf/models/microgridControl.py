@@ -146,14 +146,14 @@ def microgridTimeline(outputTimeline, workDir):
 	# TODO: update table after calculating outage stats
 	def timelineStats(outputTimeline):
 		new_html_str = """
-			<table cellpadding="0" cellspacing="0">
+			<table class="sortable" cellpadding="0" cellspacing="0">
 				<thead>
 					<tr>
 						<th>Device</th>
 						<th>Time</th>
 						<th>Action</th>
-						<th>Load Before</th>
-						<th>Load After</th>
+						<th>Before</th>
+						<th>After</th>
 					</tr>
 				</thead>
 				<tbody>"""
@@ -421,7 +421,7 @@ def graphMicrogrid(pathToOmd, pathToJson, pathToCsv, outputFile, useCache, workD
 		workDir = tempfile.mkdtemp()
 		print('@@@@@@', workDir)
 
-	# useCache = False # Force cache invalidation.
+	# useCache = 'False' # Force cache invalidation.
 	# Run ONM.
 	if  useCache == 'True':
 		shutil.copyfile(f'{__neoMetaModel__._omfDir}/static/testFiles/output_later.json',f'{workDir}/output.json')
@@ -445,6 +445,7 @@ def graphMicrogrid(pathToOmd, pathToJson, pathToCsv, outputFile, useCache, workD
 	actionAction = []
 	actionLoadBefore = []
 	actionLoadAfter = []
+	loadsShed = []
 
 	timestep = 1
 	for key in switchLoadAction:
@@ -463,11 +464,20 @@ def graphMicrogrid(pathToOmd, pathToJson, pathToCsv, outputFile, useCache, workD
 		loadShed = key['Shedded loads']
 		if len(loadShed) != 0:
 			for entry in loadShed:
-				actionDevice.append(entry)
-				actionTime.append(str(timestep))
-				actionAction.append('Load Shed')
-				actionLoadBefore.append('N/A')
-				actionLoadAfter.append('N/A')
+				if entry not in loadsShed:
+					actionDevice.append(entry)
+					actionTime.append(str(timestep))
+					actionAction.append('Load Shed')
+					actionLoadBefore.append('online')
+					actionLoadAfter.append('offline')
+					loadsShed.append(entry)
+				else:
+					actionDevice.append(entry)
+					actionTime.append(str(timestep))
+					actionAction.append('Load Pickup')
+					actionLoadBefore.append('offline')
+					actionLoadAfter.append('online')
+					loadsShed.remove(entry)
 		timestep += 1
 	timestep = 0
 	while timestep < 24:
@@ -579,7 +589,7 @@ def graphMicrogrid(pathToOmd, pathToJson, pathToCsv, outputFile, useCache, workD
 								  'loadBefore': loadBefore,
 								  'loadAfter': loadAfter,
 								  'pointColor': '#' + str(colormap(action)), 
-								  'popupContent': 'Location: <b>' + str(coordStr) + '</b><br>Device: <b>' + str(device) + '</b><br>Time: <b>' + str(time) + '</b><br>Action: <b>' + str(action) + '</b><br>Load Before: <b>' + str(loadBefore) + '</b><br>Load After: <b>' + str(loadAfter) + '</b>.'}
+								  'popupContent': 'Location: <b>' + str(coordStr) + '</b><br>Device: <b>' + str(device) + '</b><br>Time: <b>' + str(time) + '</b><br>Action: <b>' + str(action) + '</b><br>Before: <b>' + str(loadBefore) + '</b><br>After: <b>' + str(loadAfter) + '</b>.'}
 			feederMap['features'].append(Dict)
 		else:
 			print(len(coordLis))
@@ -593,7 +603,7 @@ def graphMicrogrid(pathToOmd, pathToJson, pathToCsv, outputFile, useCache, workD
 								  'loadBefore': loadBefore,
 								  'loadAfter': loadAfter,
 								  'edgeColor': '#' + str(colormap(action)),
-								  'popupContent': 'Location: <b>' + str(coordStr) + '</b><br>Device: <b>' + str(device) + '</b><br>Time: <b>' + str(time) + '</b><br>Action: <b>' + str(action) + '</b><br>Load Before: <b>' + str(loadBefore) + '</b><br>Load After: <b>' + str(loadAfter) + '</b>.'}
+								  'popupContent': 'Location: <b>' + str(coordStr) + '</b><br>Device: <b>' + str(device) + '</b><br>Time: <b>' + str(time) + '</b><br>Action: <b>' + str(action) + '</b><br>Before: <b>' + str(loadBefore) + '</b><br>After: <b>' + str(loadAfter) + '</b>.'}
 			feederMap['features'].append(Dict)
 		row += 1
 

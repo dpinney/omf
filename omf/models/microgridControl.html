@@ -3,8 +3,60 @@
 	<meta charset="utf-8">
 	<link href="{{pathPrefix}}/static/omf.css" type="text/css" rel="stylesheet"/>
 	<link rel="shortcut icon" href="{{pathPrefix}}/static/favicon.ico">
+	<script src="{{pathPrefix}}/static/sorttable.js"></script>
 	<style>
-	/*Styles here*/
+		.tab {
+		    overflow: hidden;
+		    margin-left: auto;
+		    margin-right: auto;
+		    width: 1000px;
+		}
+
+		.tab button {
+			color: black;
+		    background-color: inherit;
+		    float: left;
+		    border: none;
+		    outline: none;
+		    cursor: pointer;
+		    padding: 14px 16px;
+		    border-radius: 5px 5px 0px 0px;
+		}
+
+		.tab button:hover {
+		    background-color: white;
+		}
+
+		.tab button.active {
+		    background-color: seagreen;
+		    color: white;
+		}
+
+		.tabcontent {
+		    display: none;
+		} 
+
+		table { width: 100%; border-spacing: 2px; table-layout: fixed;  }
+		td,th { 
+			border: 1px;
+			border-style: solid;
+			border-color: black;
+			text-align: center;
+			vertical-align: center;
+			overflow-wrap: break-word
+		 }
+		 table.sortable th:not(.sorttable_sorted):not(.sorttable_sorted_reverse):not(.sorttable_nosort):after {
+		    content: " \25B4\25BE" 	
+		 }
+
+		 .tableContainer {max-height: 80%; overflow-y: auto;}
+		 @media print{
+		 	.tableContainer{max-height: none; overflow: visible;}
+		 	div#triangle-parent{visibility: hidden;}
+		 }
+	</style>
+
+	<!-- /*Styles here*/
 		table {
 			border-collapse: collapse;
 			width: 100%;
@@ -15,13 +67,16 @@
 			padding-top: 10px;
 			padding-bottom: 10px;
 		}
+		table.sortable th:not(.sorttable_sorted):not(.sorttable_sorted_reverse):not(.sorttable_nosort):after {
+		    content: " \25B4\25BE" 	
+		 }
 		th {
 			background-color: #8c8c8c;
 		}
 		tr:nth-child(even) {
 			background-color: #e6e6e6;
 		}
-	</style>
+	</style> -->
 	{% if modelStatus == "running" %}<meta http-equiv="refresh" content="5"/>{% endif %}
 	<!-- Library Imports -->
 	<script type="text/javascript" src="{{pathPrefix}}/static/omf.js"></script>
@@ -229,7 +284,7 @@
 			{{ allOutputDataDict['utilityOutageHtml'] }}
 		</div>
 		<p class="reportTitle postRun" style="page-break-before:always">Timeline</p>
-		<div id="outageCostCalc" class="tightContent postRun">
+		<div id="outageCostCalc" class="tightContent postRun sorttable">
 			{{ allOutputDataDict['timelineStatsHtml'] }}
 		</div>
 		<!-- Leaflet map directly inline with model-->
