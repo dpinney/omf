@@ -421,7 +421,7 @@ def graphMicrogrid(pathToOmd, pathToJson, pathToCsv, outputFile, useCache, workD
 		workDir = tempfile.mkdtemp()
 		print('@@@@@@', workDir)
 
-	#useCache = 'False' # Force cache invalidation.
+	useCache = 'False' # Force cache invalidation.
 	# Run ONM.
 	if  useCache == 'True':
 		shutil.copyfile(f'{__neoMetaModel__._omfDir}/static/testFiles/output_later.json',f'{workDir}/output.json')
@@ -488,7 +488,7 @@ def graphMicrogrid(pathToOmd, pathToJson, pathToCsv, outputFile, useCache, workD
 			for generator in list(powerflowNew['generator'].keys()):
 				entryNew = powerflowNew['generator'][generator]['real power setpoint (kW)'][0]
 				entryOld = powerflowOld['generator'][generator]['real power setpoint (kW)'][0]
-				if math.sqrt(((entryNew - entryOld)/entryOld)**2) > 0.5:
+				if math.sqrt(((entryNew - entryOld)/(entryOld + 0.0000001))**2) > 0.5:
 					actionDevice.append(generator)
 					actionTime.append(str(timestep + 1))
 					actionAction.append('Generator Control')
@@ -497,7 +497,7 @@ def graphMicrogrid(pathToOmd, pathToJson, pathToCsv, outputFile, useCache, workD
 			for battery in list(powerflowNew['storage'].keys()):
 				entryNew = powerflowNew['storage'][battery]['real power setpoint (kW)'][0]
 				entryOld = powerflowOld['storage'][battery]['real power setpoint (kW)'][0]
-				if math.sqrt(((entryNew - entryOld)/entryOld)**2) > 0.5:
+				if math.sqrt(((entryNew - entryOld)/(entryOld + 0.0000001))**2) > 0.5:
 					actionDevice.append(battery)
 					actionTime.append(str(timestep + 1))
 					actionAction.append('Battery Control')

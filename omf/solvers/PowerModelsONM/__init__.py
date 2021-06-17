@@ -21,7 +21,7 @@ def instantiate():
 		instant_file.write('instantiated')
 
 def run(dssPath, outPath, event_file):
-	os.system(f'julia --project="{thisDir}/PowerModelsONM.jl-0.4.0" "{thisDir}/PowerModelsONM.jl-0.4.0/src/cli/entrypoint.jl" -n "{dssPath}" -o "{outPath}" --events {event_file}')
+	os.system(f'julia --project="{thisDir}/PowerModelsONM.jl-0.4.0" "{thisDir}/PowerModelsONM.jl-0.4.0/src/cli/entrypoint.jl" -n "{dssPath}" -o "{outPath}" --events "{event_file}"')
 
 def binary_install():
 	''' WARNING: DEPRECATED '''
