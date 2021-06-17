@@ -421,12 +421,12 @@ def graphMicrogrid(pathToOmd, pathToJson, pathToCsv, outputFile, useCache, workD
 		workDir = tempfile.mkdtemp()
 		print('@@@@@@', workDir)
 
-	useCache = 'False' # Force cache invalidation.
+	#useCache = 'False' # Force cache invalidation.
 	# Run ONM.
 	if  useCache == 'True':
 		shutil.copyfile(f'{__neoMetaModel__._omfDir}/static/testFiles/output_later.json',f'{workDir}/output.json')
 	else:
-		PowerModelsONM.run(f'{workDir}/circuit.dss', f'{workDir}/output.json')
+		PowerModelsONM.run(f'{workDir}/circuit.dss', f'{workDir}/output.json',f'{workDir}/events.json')
 
 	# Gather output data.
 	with open(f'{workDir}/output.json') as inFile:

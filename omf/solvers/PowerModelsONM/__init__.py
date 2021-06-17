@@ -14,14 +14,14 @@ def instantiate():
 	except:
 		raise Exception('Julia not installed. ONM requires Julia v1.6.')
 	# Instantiate
-	os.system('julia -e \'using Pkg; Pkg.rm("gurobi")\'')
-	os.system(f'julia --project="{thisDir}/PowerModelsONM.jl-0.4.0" -e \'using Pkg; Pkg.instantiate()\'')
+	os.system('julia -e \"using Pkg; Pkg.rm("gurobi")\"')
+	os.system(f'julia --project="{thisDir}/PowerModelsONM.jl-0.4.0" -e \"using Pkg; Pkg.instantiate()\"')
 	# Remember we instantiated.
 	with open(f'{thisDir}/instantiated.txt','w+') as instant_file:
 		instant_file.write('instantiated')
 
-def run(dssPath, outPath):
-	os.system(f'julia --project="{thisDir}/PowerModelsONM.jl-0.4.0" "{thisDir}/PowerModelsONM.jl-0.4.0/src/cli/entrypoint.jl" -n "{dssPath}" -o "{outPath}"')
+def run(dssPath, outPath, event_file):
+	os.system(f'julia --project="{thisDir}/PowerModelsONM.jl-0.4.0" "{thisDir}/PowerModelsONM.jl-0.4.0/src/cli/entrypoint.jl" -n "{dssPath}" -o "{outPath}" --events {event_file}')
 
 def binary_install():
 	''' WARNING: DEPRECATED '''
@@ -41,3 +41,5 @@ def binary_install():
 		if platform.system() == "Darwin":
 			# Disable quarantine.
 			os.system(f'sudo xattr -dr com.apple.quarantine {ONM_DIR}')
+
+#instantiate()
