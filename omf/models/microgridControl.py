@@ -85,11 +85,11 @@ def lineToCoords(tree, feederMap, lineName):
 	for key in tree.keys():
 		if tree[key].get('name','') == lineName:
 			lineNode = tree[key]['from']
-			print(lineNode)
+			# print(lineNode)
 			lineNode2 = tree[key]['to']
-			print(lineNode2)
+			# print(lineNode2)
 			coordLis1, coordStr1 = nodeToCoords(feederMap, lineNode)
-			print(coordLis1)
+			# print(coordLis1)
 			coordLis2, coordStr2 = nodeToCoords(feederMap, lineNode2)
 			coordLis = []
 			coordLis.append(coordLis1[0])
@@ -421,7 +421,7 @@ def graphMicrogrid(pathToOmd, pathToJson, pathToCsv, outputFile, useCache, workD
 		workDir = tempfile.mkdtemp()
 		print('@@@@@@', workDir)
 
-	# useCache = 'False' # Force cache invalidation.
+	useCache = 'False' # Force cache invalidation.
 	# Run ONM.
 	if  useCache == 'True':
 		shutil.copyfile(f'{__neoMetaModel__._omfDir}/static/testFiles/output_later.json',f'{workDir}/output.json')
@@ -592,10 +592,10 @@ def graphMicrogrid(pathToOmd, pathToJson, pathToCsv, outputFile, useCache, workD
 								  'popupContent': 'Location: <b>' + str(coordStr) + '</b><br>Device: <b>' + str(device) + '</b><br>Time: <b>' + str(time) + '</b><br>Action: <b>' + str(action) + '</b><br>Before: <b>' + str(loadBefore) + '</b><br>After: <b>' + str(loadAfter) + '</b>.'}
 			feederMap['features'].append(Dict)
 		else:
-			print(len(coordLis))
-			print(device)
+			# print(len(coordLis))
+			# print(device)
 			Dict['geometry'] = {'type': 'LineString', 'coordinates': [[coordLis[0], coordLis[1]], [coordLis[2], coordLis[3]]]}
-			print(Dict['geometry'])
+			# print(Dict['geometry'])
 			Dict['type'] = 'Feature'
 			Dict['properties'] = {'device': device, 
 								  'time': time,
@@ -635,16 +635,16 @@ def graphMicrogrid(pathToOmd, pathToJson, pathToCsv, outputFile, useCache, workD
 		loadName = str(customerOutageData.loc[row, 'Load Name'])
 
 		customerOutageCost, kWperhrEstimate, times, localMax = customerCost1(workDir, customerName, duration, season, averagekWperhr, businessType, loadName)
-		print(kWperhrEstimate)
+		# print(kWperhrEstimate)
 		average_lost_kwh.append(float(averagekWperhr))
 		outageCost.append(customerOutageCost)
 		if localMax > globalMax:
 			globalMax = localMax
-		print(customerName)
-		print(customerOutageCost)
-		print(numberRows)
-		print(math.floor(row/2))
-		print(row%2)
+		# print(customerName)
+		# print(customerOutageCost)
+		# print(numberRows)
+		# print(math.floor(row/2))
+		# print(row%2)
   
 		# creating series
 		timesSeries = pd.Series(times)
@@ -810,8 +810,6 @@ def _debugging():
 		pass
 	# Create New.
 	new(modelLoc)
-	with open(f'{modelLoc}/allInputData.json') as file:
-		print(json.load(file))
 	# Pre-run.
 	# renderAndShow(modelLoc)
 	# Run the model.
