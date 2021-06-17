@@ -17,7 +17,8 @@ def instantiate():
 	os.system('julia -e \'using Pkg; Pkg.rm("gurobi")\'')
 	os.system(f'julia --project="{thisDir}/PowerModelsONM.jl-0.4.0" -e \'using Pkg; Pkg.instantiate()\'')
 	# Remember we instantiated.
-	os.system(f'touch {thisDir}/instantiated.txt')
+	with open('{thisDir}/instantiated.txt','w') as instant_file:
+		instant_file.write('instantiated')
 
 def run(dssPath, outPath):
 	os.system(f'julia --project="{thisDir}/PowerModelsONM.jl-0.4.0" "{thisDir}/PowerModelsONM.jl-0.4.0/src/cli/entrypoint.jl" -n "{dssPath}" -o "{outPath}"')
