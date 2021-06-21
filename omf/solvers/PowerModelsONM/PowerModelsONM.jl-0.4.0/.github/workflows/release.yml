@@ -1,0 +1,74 @@
+on:
+  push:
+    tags:
+    - 'v*'
+name: Release
+jobs:
+  create_release:
+    name: Create GitHub Release
+    runs-on: ubuntu-latest
+    outputs:
+      upload_url: ${{ steps.create_release.outputs.upload_url }}
+    steps:
+      - name: Create Release
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ github.ref }}
+          release_name: Release ${{ github.ref }}
+          draft: false
+          prerelease: false
+  build_release:
+    name: Build release - ${{ matrix.os }} - ${{ matrix.arch }}
+    needs: create_release
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        version:
+          - '1'
+        os:
+          - ubuntu-latest
+          - macOS-latest
+          - windows-latest
+        arch:
+          - x64
+    steps:
+      - uses: actions/checkout@v2
+      - uses: julia-actions/setup-julia@v1
+        with:
+          version: ${{ matrix.version }}
+          arch: ${{ matrix.arch }}
+      - uses: actions/cache@v2
+        env:
+          cache-name: cache-artifacts
+        with:
+          path: ~/.julia/artifacts
+          key: ${{ runner.os }}-test-${{ env.cache-name }}-${{ hashFiles('**/Project.toml') }}
+          restore-keys: |
+            ${{ runner.os }}-test-${{ env.cache-name }}-
+            ${{ runner.os }}-test-
+            ${{ runner.os }}-
+      - run: julia --color=yes --project -e 'using Pkg; Pkg.rm("Gurobi");'
+        shell: bash
+      - uses: julia-actions/julia-buildpkg@latest
+      - name: Build binary
+        shell: bash
+        run: julia -q --project=. -e 'using PackageCompiler; create_app("$(pwd())", "build"; include_lazy_artifacts=false);'
+      - name: Compress binary - windows
+        if: matrix.os == 'windows-latest'
+        run: 7z a -tzip -r build.zip ./build/*
+      - name: Compress binary - mac / linux
+        if: matrix.os != 'windows-latest'
+        run: zip -r build.zip ./build/*
+      - name: Upload Release Asset
+        id: upload-release-asset
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ needs.create_release.outputs.upload_url }}
+          asset_path: ./build.zip
+          asset_name: PowerModelsONM_${{ matrix.os }}_${{ matrix.arch }}.zip
+          asset_content_type: application/zip

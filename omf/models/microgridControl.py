@@ -19,6 +19,7 @@ from omf import geo
 from omf.models import __neoMetaModel__
 from omf.models.__neoMetaModel__ import *
 from omf.solvers.opendss import dssConvert
+from omf.solvers import PowerModelsONM
 
 # Model metadata:
 tooltip = 'outageCost calculates reliability metrics and creates a leaflet graph based on data from an input csv file.'
@@ -84,11 +85,11 @@ def lineToCoords(tree, feederMap, lineName):
 	for key in tree.keys():
 		if tree[key].get('name','') == lineName:
 			lineNode = tree[key]['from']
-			print(lineNode)
+			# print(lineNode)
 			lineNode2 = tree[key]['to']
-			print(lineNode2)
+			# print(lineNode2)
 			coordLis1, coordStr1 = nodeToCoords(feederMap, lineNode)
-			print(coordLis1)
+			# print(coordLis1)
 			coordLis2, coordStr2 = nodeToCoords(feederMap, lineNode2)
 			coordLis = []
 			coordLis.append(coordLis1[0])
@@ -145,14 +146,14 @@ def microgridTimeline(outputTimeline, workDir):
 	# TODO: update table after calculating outage stats
 	def timelineStats(outputTimeline):
 		new_html_str = """
-			<table cellpadding="0" cellspacing="0">
+			<table class="sortable" cellpadding="0" cellspacing="0">
 				<thead>
 					<tr>
 						<th>Device</th>
 						<th>Time</th>
 						<th>Action</th>
-						<th>Load Before</th>
-						<th>Load After</th>
+						<th>Before</th>
+						<th>After</th>
 					</tr>
 				</thead>
 				<tbody>"""
@@ -408,73 +409,43 @@ def customerCost1(workDir, customerName, duration, season, averagekWperhr, busin
 	# return {'customerOutageCost': outageCost}
 	return outageCost, kWperhrEstimate, times, localMax
 
-def check_and_install():
-	if platform.system() == "Linux":
-		FNAME = 'PowerModelsONM_ubuntu-latest_x64.zip'
-	elif platform.system() == "Windows":
-		FNAME = 'PowerModelsONM_windows-latest_x64.zip'
-	elif platform.system() == "Darwin":
-		FNAME = 'PowerModelsONM_macOS-latest_x64.zip'
-	else:
-		raise Exception('Unsupported ONM platform.')
-	if not os.path.isdir(f'{ONM_DIR}build'):
-		URL = 'https://github.com/lanl-ansi/PowerModelsONM.jl/releases/download/v0.4.0/' + FNAME
-		os.system(f'wget -nv {URL} -P {ONM_DIR}')
-		os.system(f'unzip {ONM_DIR}{FNAME} -d {ONM_DIR}')
-		os.system(f'rm {ONM_DIR}{FNAME}')
-		if platform.system() == "Darwin":
-			# Disable quarantine.
-			os.system(f'sudo xattr -dr com.apple.quarantine {ONM_DIR}')
-
 def graphMicrogrid(pathToOmd, pathToJson, pathToCsv, outputFile, useCache, workDir, maxTime, stepSize, outageDuration, profit_on_energy_sales, restoration_cost, hardware_cost):
 	''' Run full microgrid control process. '''
 
-	# check_and_install()
+	# Setup ONM if it hasn't been done already.
+	if not PowerModelsONM.check_instantiated():
+		PowerModelsONM.instantiate()
 
 	# read in the OMD file as a tree and create a geojson map of the system
 	if not workDir:
 		workDir = tempfile.mkdtemp()
 		print('@@@@@@', workDir)
 
-	# New model cache.
-	shutil.copyfile(f'{__neoMetaModel__._omfDir}/static/testFiles/output_later.json',f'{workDir}/output.json')
-
-	# Native Julia Command
-	# command = 'cmd /c ' + '"julia --project=' + '"C:/Users/granb/PowerModelsONM.jl-master/" ' + 'C:/Users/granb/PowerModelsONM.jl-master/src/cli/entrypoint.jl' + ' -n ' + '"' + str(workDir) + '/circuit.dss' + '"' + ' -o ' + '"C:/Users/granb/PowerModelsONM.jl-master/output.json"'
-	
+	useCache = 'False' # Force cache invalidation.
+	# Run ONM.
 	if  useCache == 'True':
-		with open(outputFile) as inFile:
-			data = json.load(inFile)
-			genProfiles = data['Generator profiles']
-			simTimeSteps = []
-			for i in data['Simulation time steps']:
-				simTimeSteps.append(float(i))
-			voltages = data['Voltages']
-			loadServed = data['Load served']
-			storageSOC = data['Storage SOC (%)']
-			switchLoadAction = data['Device action timeline']
-			powerflow = data['Powerflow output']
+		shutil.copyfile(f'{__neoMetaModel__._omfDir}/static/testFiles/output_later.json',f'{workDir}/output.json')
 	else:
-		# No cache, so run ONM.
-		command = f'{ONM_DIR}/build/bin/PowerModelsONM -n "{workDir}/circuit.dss" -o "{workDir}/output.json"'
-		os.system(command)
-		with open(f'{workDir}/output.json') as inFile:
-			data = json.load(inFile)
-			genProfiles = data['Generator profiles']
-			simTimeSteps = []
-			for i in data['Simulation time steps']:
-				simTimeSteps.append(float(i))
-			voltages = data['Voltages']
-			loadServed = data['Load served']
-			storageSOC = data['Storage SOC (%)']
-			switchLoadAction = data['Device action timeline']
-			powerflow = data['Powerflow output']
+		PowerModelsONM.run(f'{workDir}/circuit.dss', f'{workDir}/output.json',f'{workDir}/events.json')
 
+	# Gather output data.
+	with open(f'{workDir}/output.json') as inFile:
+		data = json.load(inFile)
+		genProfiles = data['Generator profiles']
+		simTimeSteps = []
+		for i in data['Simulation time steps']:
+			simTimeSteps.append(float(i))
+		voltages = data['Voltages']
+		loadServed = data['Load served']
+		storageSOC = data['Storage SOC (%)']
+		switchLoadAction = data['Device action timeline']
+		powerflow = data['Powerflow output']
 	actionTime = []
 	actionDevice = []
 	actionAction = []
 	actionLoadBefore = []
 	actionLoadAfter = []
+	loadsShed = []
 
 	timestep = 1
 	for key in switchLoadAction:
@@ -493,11 +464,20 @@ def graphMicrogrid(pathToOmd, pathToJson, pathToCsv, outputFile, useCache, workD
 		loadShed = key['Shedded loads']
 		if len(loadShed) != 0:
 			for entry in loadShed:
-				actionDevice.append(entry)
-				actionTime.append(str(timestep))
-				actionAction.append('Load Shed')
-				actionLoadBefore.append('N/A')
-				actionLoadAfter.append('N/A')
+				if entry not in loadsShed:
+					actionDevice.append(entry)
+					actionTime.append(str(timestep))
+					actionAction.append('Load Shed')
+					actionLoadBefore.append('online')
+					actionLoadAfter.append('offline')
+					loadsShed.append(entry)
+				else:
+					actionDevice.append(entry)
+					actionTime.append(str(timestep))
+					actionAction.append('Load Pickup')
+					actionLoadBefore.append('offline')
+					actionLoadAfter.append('online')
+					loadsShed.remove(entry)
 		timestep += 1
 	timestep = 0
 	while timestep < 24:
@@ -508,7 +488,7 @@ def graphMicrogrid(pathToOmd, pathToJson, pathToCsv, outputFile, useCache, workD
 			for generator in list(powerflowNew['generator'].keys()):
 				entryNew = powerflowNew['generator'][generator]['real power setpoint (kW)'][0]
 				entryOld = powerflowOld['generator'][generator]['real power setpoint (kW)'][0]
-				if math.sqrt(((entryNew - entryOld)/entryOld)**2) > 0.5:
+				if math.sqrt(((entryNew - entryOld)/(entryOld + 0.0000001))**2) > 0.5:
 					actionDevice.append(generator)
 					actionTime.append(str(timestep + 1))
 					actionAction.append('Generator Control')
@@ -517,7 +497,7 @@ def graphMicrogrid(pathToOmd, pathToJson, pathToCsv, outputFile, useCache, workD
 			for battery in list(powerflowNew['storage'].keys()):
 				entryNew = powerflowNew['storage'][battery]['real power setpoint (kW)'][0]
 				entryOld = powerflowOld['storage'][battery]['real power setpoint (kW)'][0]
-				if math.sqrt(((entryNew - entryOld)/entryOld)**2) > 0.5:
+				if math.sqrt(((entryNew - entryOld)/(entryOld + 0.0000001))**2) > 0.5:
 					actionDevice.append(battery)
 					actionTime.append(str(timestep + 1))
 					actionAction.append('Battery Control')
@@ -609,13 +589,13 @@ def graphMicrogrid(pathToOmd, pathToJson, pathToCsv, outputFile, useCache, workD
 								  'loadBefore': loadBefore,
 								  'loadAfter': loadAfter,
 								  'pointColor': '#' + str(colormap(action)), 
-								  'popupContent': 'Location: <b>' + str(coordStr) + '</b><br>Device: <b>' + str(device) + '</b><br>Time: <b>' + str(time) + '</b><br>Action: <b>' + str(action) + '</b><br>Load Before: <b>' + str(loadBefore) + '</b><br>Load After: <b>' + str(loadAfter) + '</b>.'}
+								  'popupContent': 'Location: <b>' + str(coordStr) + '</b><br>Device: <b>' + str(device) + '</b><br>Time: <b>' + str(time) + '</b><br>Action: <b>' + str(action) + '</b><br>Before: <b>' + str(loadBefore) + '</b><br>After: <b>' + str(loadAfter) + '</b>.'}
 			feederMap['features'].append(Dict)
 		else:
-			print(len(coordLis))
-			print(device)
+			# print(len(coordLis))
+			# print(device)
 			Dict['geometry'] = {'type': 'LineString', 'coordinates': [[coordLis[0], coordLis[1]], [coordLis[2], coordLis[3]]]}
-			print(Dict['geometry'])
+			# print(Dict['geometry'])
 			Dict['type'] = 'Feature'
 			Dict['properties'] = {'device': device, 
 								  'time': time,
@@ -623,7 +603,7 @@ def graphMicrogrid(pathToOmd, pathToJson, pathToCsv, outputFile, useCache, workD
 								  'loadBefore': loadBefore,
 								  'loadAfter': loadAfter,
 								  'edgeColor': '#' + str(colormap(action)),
-								  'popupContent': 'Location: <b>' + str(coordStr) + '</b><br>Device: <b>' + str(device) + '</b><br>Time: <b>' + str(time) + '</b><br>Action: <b>' + str(action) + '</b><br>Load Before: <b>' + str(loadBefore) + '</b><br>Load After: <b>' + str(loadAfter) + '</b>.'}
+								  'popupContent': 'Location: <b>' + str(coordStr) + '</b><br>Device: <b>' + str(device) + '</b><br>Time: <b>' + str(time) + '</b><br>Action: <b>' + str(action) + '</b><br>Before: <b>' + str(loadBefore) + '</b><br>After: <b>' + str(loadAfter) + '</b>.'}
 			feederMap['features'].append(Dict)
 		row += 1
 
@@ -655,16 +635,16 @@ def graphMicrogrid(pathToOmd, pathToJson, pathToCsv, outputFile, useCache, workD
 		loadName = str(customerOutageData.loc[row, 'Load Name'])
 
 		customerOutageCost, kWperhrEstimate, times, localMax = customerCost1(workDir, customerName, duration, season, averagekWperhr, businessType, loadName)
-		print(kWperhrEstimate)
+		# print(kWperhrEstimate)
 		average_lost_kwh.append(float(averagekWperhr))
 		outageCost.append(customerOutageCost)
 		if localMax > globalMax:
 			globalMax = localMax
-		print(customerName)
-		print(customerOutageCost)
-		print(numberRows)
-		print(math.floor(row/2))
-		print(row%2)
+		# print(customerName)
+		# print(customerOutageCost)
+		# print(numberRows)
+		# print(math.floor(row/2))
+		# print(row%2)
   
 		# creating series
 		timesSeries = pd.Series(times)
@@ -830,8 +810,6 @@ def _debugging():
 		pass
 	# Create New.
 	new(modelLoc)
-	with open(f'{modelLoc}/allInputData.json') as file:
-		print(json.load(file))
 	# Pre-run.
 	# renderAndShow(modelLoc)
 	# Run the model.
