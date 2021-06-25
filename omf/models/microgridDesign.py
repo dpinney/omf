@@ -435,7 +435,7 @@ def work(modelDir, inputDict):
 				x=pd.to_datetime(x, unit = 'h', origin = pd.Timestamp(f'{year}-01-01')),
 				y=outData['powerDieselToLoad' + indexString],
 				line=dict( color=('brown') ),
-				name="Load met by Diesel",
+				name="Load met by Fossil Gen",
 				hoverlabel = dict(namelength = -1),
 				stackgroup='one',
 				mode='none')
@@ -540,7 +540,7 @@ def work(modelDir, inputDict):
 				x=pd.to_datetime(x, unit = 'h', origin = pd.Timestamp(f'{year}-01-01')),
 				y=outData['powerDieselToLoad' + indexString],
 				line=dict( color=('brown') ),
-				name="Diesel used to meet Load",
+				name="Fossil Gen used to meet Load",
 				hoverlabel = dict(namelength = -1),
 				stackgroup='one',
 				mode='none')
@@ -551,7 +551,7 @@ def work(modelDir, inputDict):
 					x=pd.to_datetime(x, unit = 'h', origin = pd.Timestamp(f'{year}-01-01')),
 					y=outData['powerDieselToBattery' + indexString],
 					line=dict( color=('gray') ),
-					name="Diesel used to charge Battery",
+					name="Fossil Gen used to charge Battery",
 					hoverlabel = dict(namelength = -1),
 					stackgroup='one',
 					mode='none')
@@ -561,7 +561,7 @@ def work(modelDir, inputDict):
 			# 	x=pd.to_datetime(x, unit = 'h', origin = pd.Timestamp(f'{year}-01-01')),
 			# 	y=outData['powerDiesel' + indexString],
 			# 	line=dict( color=('red') ),
-			# 	name="Diesel Generation")
+			# 	name="Fossil Generation")
 			# plotData.append(powerDiesel)
 
 		outData["dieselData"  + indexString] = json.dumps(plotData, cls=plotly.utils.PlotlyJSONEncoder)
@@ -602,7 +602,7 @@ def work(modelDir, inputDict):
 					x=pd.to_datetime(x, unit = 'h', origin = pd.Timestamp(f'{year}-01-01')),
 					y=outData['powerDieselToBattery' + indexString],
 					line=dict( color=('brown') ),
-					name="Diesel",
+					name="Fossil Gen",
 					stackgroup='one',
 					mode='none')
 				plotData.append(powerDieselToBattery)
