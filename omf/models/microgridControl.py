@@ -85,11 +85,11 @@ def lineToCoords(tree, feederMap, lineName):
 	for key in tree.keys():
 		if tree[key].get('name','') == lineName:
 			lineNode = tree[key]['from']
-			print(lineNode)
+			# print(lineNode)
 			lineNode2 = tree[key]['to']
-			print(lineNode2)
+			# print(lineNode2)
 			coordLis1, coordStr1 = nodeToCoords(feederMap, lineNode)
-			print(coordLis1)
+			# print(coordLis1)
 			coordLis2, coordStr2 = nodeToCoords(feederMap, lineNode2)
 			coordLis = []
 			coordLis.append(coordLis1[0])
@@ -111,29 +111,19 @@ def pullDataForGraph(tree, feederMap, outputTimeline, row):
 		loadAfter = outputTimeline.loc[row, 'loadAfter']
 		return device, coordLis, coordStr, time, action, loadBefore, loadAfter
 
-# def createTimeline():
-# 	data = {'time': ['1', '3', '7', '10', '15'],
-# 			'device': ['l_1006_1007', 'load_1003', 'load_1016', 'bus1014', 'bus2053'],
-# 			# devices on ieee37
-# 			#'device': ['l2', 's701a', 's713c', '799r', '705'],
-# 			'action': ['Switching', 'Load Shed', 'Load Pickup', 'Battery Control', 'Generator Control'],
-# 			'loadBefore': ['50', '20', '10', '50', '50'],
-# 			'loadAfter': ['0', '10', '20', '60', '40']
-# 			}
-# 	timeline = pd.DataFrame(data, columns = ['time','device','action','loadBefore','loadAfter'])
-# 	return timeline
-
 def colormap(action):
 	if action == 'Load Shed':
 		color = '0000FF'
 	elif action == 'Load Pickup':
 		color = '00C957'
-	elif action == 'Switching':
+	elif action == 'Switch Opening':
 		color = 'FF8000'
+	elif action == 'Switch Closing':
+		color = '9370DB'
 	elif action == 'Battery Control':
 		color = 'FFFF00'
 	elif action == 'Generator Control':
-		color = '9B30FF'
+		color = 'E0FFFF'
 
 	return color
 
@@ -200,7 +190,7 @@ def customerOutageTable(customerOutageData, outageCost, workDir):
 		
 		row = 0
 		while row < len(customerOutageData):
-			new_html_str += '<tr><td>' + str(customerOutageData.loc[row, 'Customer Name']) + '</td><td>' + str(customerOutageData.loc[row, 'Duration']) + '</td><td>' + str(customerOutageData.loc[row, 'Season']) + '</td><td>' + '{0:.2f}'.format(customerOutageData.loc[row, 'Average kW/hr']) + '</td><td>' + str(customerOutageData.loc[row, 'Business Type']) + '</td><td>' + str(customerOutageData.loc[row, 'Load Name']) + '</td><td>' + str(outageCost[row])+ '</td></tr>'
+			new_html_str += '<tr><td>' + str(customerOutageData.loc[row, 'Customer Name']) + '</td><td>' + str(customerOutageData.loc[row, 'Duration']) + '</td><td>' + str(customerOutageData.loc[row, 'Season']) + '</td><td>' + '{0:.2f}'.format(customerOutageData.loc[row, 'Average kW/hr']) + '</td><td>' + str(customerOutageData.loc[row, 'Business Type']) + '</td><td>' + str(customerOutageData.loc[row, 'Load Name']) + '</td><td>' + "${:,.2f}".format(outageCost[row])+ '</td></tr>'
 			row += 1
 
 		new_html_str +="""</tbody></table>"""
@@ -236,7 +226,7 @@ def utilityOutageTable(average_lost_kwh, profit_on_energy_sales, restoration_cos
 				</thead>
 				<tbody>"""
 		
-		new_html_str += '<tr><td>' + str(int(sum(average_lost_kwh))*profit_on_energy_sales*outageDuration) + '</td><td>' + str(restoration_cost*outageDuration) + '</td><td>' + str(hardware_cost) + '</td><td>' + str(int(sum(average_lost_kwh))*profit_on_energy_sales*outageDuration + restoration_cost*outageDuration + hardware_cost) + '</td></tr>'
+		new_html_str += '<tr><td>' + str(int(sum(average_lost_kwh))*profit_on_energy_sales*outageDuration) + '</td><td>' + "${:,.2f}".format(restoration_cost*outageDuration) + '</td><td>' + "${:,.2f}".format(hardware_cost) + '</td><td>' + "${:,.2f}".format(int(sum(average_lost_kwh))*profit_on_energy_sales*outageDuration + restoration_cost*outageDuration + hardware_cost) + '</td></tr>'
 
 		new_html_str +="""</tbody></table>"""
 
@@ -403,10 +393,6 @@ def customerCost1(workDir, customerName, duration, season, averagekWperhr, busin
 			localMax = kWperhrEstimate[row]
 		row+=1
 	
-	# plot the expected customer outage cost over the duration of the outage
-	# plt.plot(times, kWhEstimate)
-	# plt.savefig(workDir + '/customerCostFig')
-	# return {'customerOutageCost': outageCost}
 	return outageCost, kWperhrEstimate, times, localMax
 
 def graphMicrogrid(pathToOmd, pathToJson, pathToCsv, outputFile, useCache, workDir, maxTime, stepSize, outageDuration, profit_on_energy_sales, restoration_cost, hardware_cost):
@@ -426,7 +412,7 @@ def graphMicrogrid(pathToOmd, pathToJson, pathToCsv, outputFile, useCache, workD
 	if  useCache == 'True':
 		shutil.copyfile(f'{__neoMetaModel__._omfDir}/static/testFiles/output_later.json',f'{workDir}/output.json')
 	else:
-		PowerModelsONM.run(f'{workDir}/circuit.dss', f'{workDir}/output.json')
+		PowerModelsONM.run(f'{workDir}/circuit.dss', f'{workDir}/output.json',f'{workDir}/events.json')
 
 	# Gather output data.
 	with open(f'{workDir}/output.json') as inFile:
@@ -457,7 +443,10 @@ def graphMicrogrid(pathToOmd, pathToJson, pathToCsv, outputFile, useCache, workD
 				if switchActionsNew[entry] != switchActionsOld[entry]:
 					actionDevice.append(entry)
 					actionTime.append(str(timestep))
-					actionAction.append('Switching')
+					if switchActionsNew[entry] == 'open':
+						actionAction.append('Switch Opening')
+					else:
+						actionAction.append('Switch Closing')
 					actionLoadBefore.append(switchActionsOld[entry])
 					actionLoadAfter.append(switchActionsNew[entry])
 			switchActionsOld = key['Switch configurations']
@@ -488,7 +477,7 @@ def graphMicrogrid(pathToOmd, pathToJson, pathToCsv, outputFile, useCache, workD
 			for generator in list(powerflowNew['generator'].keys()):
 				entryNew = powerflowNew['generator'][generator]['real power setpoint (kW)'][0]
 				entryOld = powerflowOld['generator'][generator]['real power setpoint (kW)'][0]
-				if math.sqrt(((entryNew - entryOld)/entryOld)**2) > 0.5:
+				if math.sqrt(((entryNew - entryOld)/(entryOld + 0.0000001))**2) > 0.5:
 					actionDevice.append(generator)
 					actionTime.append(str(timestep + 1))
 					actionAction.append('Generator Control')
@@ -497,7 +486,7 @@ def graphMicrogrid(pathToOmd, pathToJson, pathToCsv, outputFile, useCache, workD
 			for battery in list(powerflowNew['storage'].keys()):
 				entryNew = powerflowNew['storage'][battery]['real power setpoint (kW)'][0]
 				entryOld = powerflowOld['storage'][battery]['real power setpoint (kW)'][0]
-				if math.sqrt(((entryNew - entryOld)/entryOld)**2) > 0.5:
+				if math.sqrt(((entryNew - entryOld)/(entryOld + 0.0000001))**2) > 0.5:
 					actionDevice.append(battery)
 					actionTime.append(str(timestep + 1))
 					actionAction.append('Battery Control')
@@ -592,10 +581,7 @@ def graphMicrogrid(pathToOmd, pathToJson, pathToCsv, outputFile, useCache, workD
 								  'popupContent': 'Location: <b>' + str(coordStr) + '</b><br>Device: <b>' + str(device) + '</b><br>Time: <b>' + str(time) + '</b><br>Action: <b>' + str(action) + '</b><br>Before: <b>' + str(loadBefore) + '</b><br>After: <b>' + str(loadAfter) + '</b>.'}
 			feederMap['features'].append(Dict)
 		else:
-			print(len(coordLis))
-			print(device)
 			Dict['geometry'] = {'type': 'LineString', 'coordinates': [[coordLis[0], coordLis[1]], [coordLis[2], coordLis[3]]]}
-			print(Dict['geometry'])
 			Dict['type'] = 'Feature'
 			Dict['properties'] = {'device': device, 
 								  'time': time,
@@ -635,16 +621,10 @@ def graphMicrogrid(pathToOmd, pathToJson, pathToCsv, outputFile, useCache, workD
 		loadName = str(customerOutageData.loc[row, 'Load Name'])
 
 		customerOutageCost, kWperhrEstimate, times, localMax = customerCost1(workDir, customerName, duration, season, averagekWperhr, businessType, loadName)
-		print(kWperhrEstimate)
 		average_lost_kwh.append(float(averagekWperhr))
 		outageCost.append(customerOutageCost)
 		if localMax > globalMax:
 			globalMax = localMax
-		print(customerName)
-		print(customerOutageCost)
-		print(numberRows)
-		print(math.floor(row/2))
-		print(row%2)
   
 		# creating series
 		timesSeries = pd.Series(times)
@@ -810,14 +790,13 @@ def _debugging():
 		pass
 	# Create New.
 	new(modelLoc)
-	with open(f'{modelLoc}/allInputData.json') as file:
-		print(json.load(file))
 	# Pre-run.
 	# renderAndShow(modelLoc)
 	# Run the model.
 	__neoMetaModel__.runForeground(modelLoc)
 	# Show the output.
 	__neoMetaModel__.renderAndShow(modelLoc)
+
 
 if __name__ == '__main__':
 	_debugging()

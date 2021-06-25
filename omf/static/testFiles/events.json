@@ -7,7 +7,7 @@
       "type": "breaker"
     },
     "event_type": "switch",
-    "timestep": 1
+    "timestep": 3
   },
   {
     "affected_asset": "line.cb_201",
@@ -17,7 +17,7 @@
       "type": "breaker"
     },
     "event_type": "switch",
-    "timestep": 1
+    "timestep": 3
   },
   {
     "affected_asset": "line.cb_301",
@@ -27,7 +27,7 @@
       "type": "breaker"
     },
     "event_type": "switch",
-    "timestep": 1
+    "timestep": 3
   },
   {
     "affected_asset": "line.cb_102",
@@ -38,7 +38,7 @@
       "type": "tie"
     },
     "event_type": "switch",
-    "timestep": 1
+    "timestep": 3
   },
   {
     "affected_asset": "line.cb_204",
@@ -49,7 +49,7 @@
       "type": "tie"
     },
     "event_type": "switch",
-    "timestep": 1
+    "timestep": 3
   },
   {
     "affected_asset": "line.cb_303",
@@ -60,7 +60,7 @@
       "type": "tie"
     },
     "event_type": "switch",
-    "timestep": 1
+    "timestep": 3
   },
   {
     "affected_asset": "line.cb_101",
@@ -68,7 +68,7 @@
       "dispatchable": true
     },
     "event_type": "switch",
-    "timestep": "2.0"
+    "timestep": "9"
   },
   {
     "affected_asset": "line.cb_201",
@@ -76,7 +76,7 @@
       "dispatchable": true
     },
     "event_type": "switch",
-    "timestep": "2.0"
+    "timestep": "9"
   },
   {
     "affected_asset": "line.cb_301",
@@ -84,6 +84,6 @@
       "dispatchable": true
     },
     "event_type": "switch",
-    "timestep": "2.0"
+    "timestep": "9"
   }
 ]
