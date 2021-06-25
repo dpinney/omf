@@ -5,7 +5,7 @@ from results_poller import poller
 
 results_file = 'results.json'
 API_KEY = 'WhEzm6QQQrks1hcsdN0Vrd56ZJmUyXJxTJFg6pn9'  # REPLACE WITH YOUR API KEY
-
+# API_KEY = 'Y8GMAFsqcPtxhjIa1qfNj5ILxN5DH5cjV3i6BeNE'
 
 root_url = 'https://developer.nrel.gov/api/reopt'
 post_url = root_url + '/v1/job/?api_key=' + API_KEY

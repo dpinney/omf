@@ -62,9 +62,9 @@
 							'<th class="windDisplay">Total Wind (kW)</th>'+
 							'<th class="batteryDisplay">Total Battery Power (kW)</th>'+
 							'<th class="batteryDisplay">Total Battery Capacity (kWh)</th>'+
-							'<th>Total Diesel Generation (kW)</th>'+
+							'<th>Total Fossil Generation (kW)</th>'+
 							'<th>Average length of survived Outage (hours)</th>'+
-							'<th>Diesel consumed during specified Outage Duration (gallons)</th>'+
+							'<th>Fossil Fuel consumed during specified Outage Duration (gallons)</th>'+
 						'</tr>';
 
 			for (var i = 0; i < numCols ; i++) {
@@ -167,7 +167,7 @@
 					'<p class="windDisplay reportTitle" style="page-break-before:always">Wind Generation</p>'+
 					'<div id="windPlotly' + indexString + '" class="windDisplay tightContent"></div>'+
 					
-					'<p class="reportTitle" style="page-break-before:always">Diesel Generation</p>'+
+					'<p class="reportTitle" style="page-break-before:always">Fossil Generation</p>'+
 					'<div id="dieselPlotly' + indexString + '" class="tightContent"></div>'+
 
 					'<p class="batteryDisplay reportTitle" style="page-break-before:always">Battery Charge Source</p>'+
@@ -442,7 +442,7 @@
 			</div>
 			<hr>
 			<div class="shortInput">
-				<label class="tooltip">Outage Start Hour<span class="classic">A major outage is added starting at this hour. Specify an hour greater than 0 but less than 8760 to trigger optimization for resilience and include diesel generation. If 0 is entered, the model will run an economic optimization without diesel generation.</span></label>
+				<label class="tooltip">Outage Start Hour<span class="classic">A major outage is added starting at this hour. Specify an hour greater than 0 but less than 8760 to trigger optimization for resilience and include fossil generation. If 0 is entered, the model will run an economic optimization without fossil generation.</span></label>
 				<input type="number" id="outage_start_hour" name="outage_start_hour" min="0" max="8760" required="required"/>
 			</div>
 			<div class="shortInput">
@@ -470,11 +470,11 @@
 				<input type="number" id="criticalLoadFactor" name="criticalLoadFactor" step="0.01" min="0.0" max="1.0" required="required"/>
 			</div>
 			<div class="shortInput">
-				<label class="tooltip">Pre-existing Generator Size (kW)<span class="classic">Specify the total capacity of any pre-existing generators in kW. The outputted "Total Diesel Gen" will be inclusive of existing diesel gen.</span></label>
+				<label class="tooltip">Pre-existing Fossil Generator Size (kW)<span class="classic">Specify the total capacity of any pre-existing generators in kW. The outputted "Total Fossil Gen" will be inclusive of existing fossil gen.</span></label>
 				<input type="text" id="genExisting" name="genExisting" required="required"/>
 			</div>
 			<div class="shortInput">
-				<label class="tooltip">Available Generator Fuel (gallons)<span class="classic">Specify the amount of fuel available for any pre-existing generators in gallons.</span></label>
+				<label class="tooltip">Available Generator Fuel (gallons)<span class="classic">Specify the amount of fuel available for all new and pre-existing generators in gallons.</span></label>
 				<input type="text" id="fuelAvailable" name="fuelAvailable" required="required"/>
 			</div>
 			<div class="shortInput">
@@ -482,16 +482,32 @@
 				<input type="number" id="minGenLoading" name="minGenLoading" step="0.01" min="0.0" max="1.0"  required="required"/>
 			</div>
 			<div class="shortInput">
-				<label class="tooltip">Diesel Generator Cost ($/kW)<span class="classic">Specify the cost in $/kWh.</span></label>
+				<label class="tooltip">Fossil Generator Cost ($/kW)<span class="classic">Specify the cost in $/kWh.</span></label>
 				<input type="text" id="dieselGenCost" name="dieselGenCost" pattern="^\d+\.?\d*?$" required="required"/>
 			</div>
 			<div class="shortInput">
-				<label class="tooltip">Diesel Generator Min (kW)<span class="classic">Specify minimum diesel generation in kW. Only specify if needed, as the optimization runs best if left unedited.</span></label>
+				<label class="tooltip">Fossil Generator Min (kW)<span class="classic">Specify minimum fossil generation in kW. Only specify if needed, as the optimization runs best if left unedited.</span></label>
 				<input type="text" id="dieselMin" name="dieselMin" pattern="^\d+\.?\d*?$" required="required"/>
 			</div>
 			<div class="shortInput">
-				<label class="tooltip">Diesel Generator Max (kW)<span class="classic">Specify max diesel generation in kW. Only specify if needed, as the optimization runs best if left unedited.</span></label>
+				<label class="tooltip">Fossil Generator Max (kW)<span class="classic">Specify max fossil generation in kW. Only specify if needed, as the optimization runs best if left unedited.</span></label>
 				<input type="text" id="dieselMax" name="dieselMax" pattern="^\d+\.?\d*?$" required="required"/>
+			</div>
+			<div class="shortInput">
+				<label class="tooltip">Fossil Fuel Cost (gal)<span class="classic">Specify cost of fuel in $ per gallon. To convert $/MMBTU of Natural gas to gallons, divide $/MMBTU market rate by 4.85 to account for 50% lower efficiency of natural gas reciprocating engines and lower fuel density as compared to diesel.</span></label>
+				<input type="text" id="dieselFuelCostGal" name="dieselFuelCostGal" pattern="^\d+\.?\d*?$" required="required"/>
+			</div>
+			<div class="shortInput">
+				<label class="tooltip">Fossil Emissions Factor (lb CO2/gal)<span class="classic">Specify fossil emissions factor in pounds of carbon dioxide per gallon. Default 22.4 is for diesel. Natural gas can be modeled using 24.1 </span></label>
+				<input type="text" id="dieselCO2Factor" name="dieselCO2Factor" pattern="^\d+\.?\d*?$" required="required"/>
+			</div>
+			<div class="shortInput">
+				<label class="tooltip">Fossil O+M Cost ($/kW/year)<span class="classic">Specify annual operations and maintenance cost per kilowatt per year.</span></label>
+				<input type="text" id="dieselOMCostKw" name="dieselOMCostKw" pattern="^\d+\.?\d*?$" required="required"/>
+			</div>
+			<div class="shortInput">
+				<label class="tooltip">Fossil O+M Cost ($/kWh/year)<span class="classic">Specify annual operations and maintenance cost per kilowatt-hour per year. Format "0.XX"</span></label>
+				<input type="text" id="dieselOMCostKwh" name="dieselOMCostKwh" pattern="^\d+\.?\d*?$" required="required"/>
 			</div>
 
 

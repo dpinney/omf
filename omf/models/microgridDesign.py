@@ -111,6 +111,10 @@ def work(modelDir, inputDict):
 		userCriticalLoadShape = False
 	dieselMax = float(inputDict['dieselMax'])
 	dieselMin = float(inputDict['dieselMin'])
+	dieselFuelCostGal = float(inputDict['dieselFuelCostGal'])
+	dieselCO2Factor = float(inputDict['dieselCO2Factor'])
+	dieselOMCostKw = float(inputDict['dieselOMCostKw'])
+	dieselOMCostKwh = float(inputDict['dieselOMCostKwh'])
 
 
 	#outageStart = int(inputDict['outageStart'])
@@ -187,7 +191,8 @@ def work(modelDir, inputDict):
 						"min_kw": windMin
 					},
 					"Generator": {
-						"installed_cost_us_dollars_per_kw": dieselGenCost
+						"installed_cost_us_dollars_per_kw": dieselGenCost,
+
 					}
 				}
 			}
@@ -231,6 +236,12 @@ def work(modelDir, inputDict):
 			scenario['Scenario']['Site']['Generator']['fuel_avail_gal'] = fuelAvailable
 			scenario['Scenario']['Site']['Generator']['min_turn_down_pct'] = minGenLoading
 			scenario['Scenario']['Site']['Generator']['existing_kw'] = genExisting
+			scenario['Scenario']['Site']['Generator']['diesel_fuel_cost_us_dollars_per_gallon'] = dieselFuelCostGal
+			scenario['Scenario']['Site']['Generator']['emissions_factor_lb_CO2_per_gal'] = dieselCO2Factor
+			scenario['Scenario']['Site']['Generator']['om_cost_us_dollars_per_kw'] = dieselOMCostKw
+			scenario['Scenario']['Site']['Generator']['om_cost_us_dollars_per_kwh'] = dieselOMCostKwh
+			
+
 			# use userCriticalLoadShape only if True, else model defaults to criticalLoadFactor
 			if userCriticalLoadShape == True:
 				scenario['Scenario']['Site']['LoadProfile']['critical_loads_kw'] = jsonifiableCriticalLoad
@@ -696,12 +707,16 @@ def new(modelDir):
 		"dieselMax": "100000",
 		"solarExisting": 0,
 		"userCriticalLoadShape": False,
-		"criticalLoadFactor": "1",
+		"criticalLoadFactor": ".5",
 		"outage_start_hour": "500",
 		"outageDuration": "24",
 		"fuelAvailable": "40000",
 		"genExisting": 0,
 		"minGenLoading": "0.3",
+		"dieselFuelCostGal": 3, # default value for diesel
+		"dieselCO2Factor": 22.4, # default value for diesel
+		"dieselOMCostKw": 10, # default value for diesel
+		"dieselOMCostKwh": 0, # default value for diesel
 		#"windExisting": "20",
 		#"batteryKwExisting": 0,
 		#"batteryKwhExisting": 0,
