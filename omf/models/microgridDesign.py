@@ -295,6 +295,14 @@ def work(modelDir, inputDict):
 		outData['load' + indexString] = resultsSubset['LoadProfile']['year_one_electric_load_series_kw']
 		outData['avgLoad' + indexString] = round(sum(resultsSubset['LoadProfile']['year_one_electric_load_series_kw'])/len(resultsSubset['LoadProfile']['year_one_electric_load_series_kw']),1)
 
+		# outputs to be used in microgridUp.py
+		outData['yearOneEmissionsLbsBau' + indexString] = resultsSubset['year_one_emissions_bau_lb_C02']
+		outData['yearOneEmissionsLbs' + indexString] = resultsSubset['year_one_emissions_lb_C02']
+		outData['yearOneEmissionsTons' + indexString] = round((outData['yearOneEmissionsLbs' + indexString])/2000,0)
+		outData['yearOneEmissionsReducedTons' + indexString] = round((resultsSubset['year_one_emissions_bau_lb_C02'] - resultsSubset['year_one_emissions_lb_C02'])/2000,0)
+		outData['yearOnePercentRenewable' + indexString] = round(resultsSubset['renewable_electricity_energy_pct']*100,0)
+		outData['yearOneOMCostsBeforeTax' + indexString] = round(resultsSubset['Financial']['year_one_om_costs_before_tax_us_dollars'],0)
+
 		if solar == 'on':
 			outData['sizePV' + indexString] = resultsSubset['PV']['size_kw']
 			outData['sizePVRounded' + indexString] = round(resultsSubset['PV']['size_kw'],1)
