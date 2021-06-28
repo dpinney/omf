@@ -14,6 +14,7 @@ def instantiate():
 	except:
 		raise Exception('Julia not installed. ONM requires Julia v1.6.')
 	# Instantiate
+	# os.system(julia -e 'using Pkg; try Pkg.rm("gurobi"); catch; end')
 	os.system('julia -e \"using Pkg; Pkg.rm("gurobi")\"')
 	os.system(f'julia --project="{thisDir}/PowerModelsONM.jl-0.4.0" -e \"using Pkg; Pkg.instantiate()\"')
 	# Remember we instantiated.

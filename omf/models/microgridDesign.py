@@ -111,6 +111,10 @@ def work(modelDir, inputDict):
 		userCriticalLoadShape = False
 	dieselMax = float(inputDict['dieselMax'])
 	dieselMin = float(inputDict['dieselMin'])
+	dieselFuelCostGal = float(inputDict['dieselFuelCostGal'])
+	dieselCO2Factor = float(inputDict['dieselCO2Factor'])
+	dieselOMCostKw = float(inputDict['dieselOMCostKw'])
+	dieselOMCostKwh = float(inputDict['dieselOMCostKwh'])
 
 
 	#outageStart = int(inputDict['outageStart'])
@@ -187,7 +191,8 @@ def work(modelDir, inputDict):
 						"min_kw": windMin
 					},
 					"Generator": {
-						"installed_cost_us_dollars_per_kw": dieselGenCost
+						"installed_cost_us_dollars_per_kw": dieselGenCost,
+
 					}
 				}
 			}
@@ -231,6 +236,12 @@ def work(modelDir, inputDict):
 			scenario['Scenario']['Site']['Generator']['fuel_avail_gal'] = fuelAvailable
 			scenario['Scenario']['Site']['Generator']['min_turn_down_pct'] = minGenLoading
 			scenario['Scenario']['Site']['Generator']['existing_kw'] = genExisting
+			scenario['Scenario']['Site']['Generator']['diesel_fuel_cost_us_dollars_per_gallon'] = dieselFuelCostGal
+			scenario['Scenario']['Site']['Generator']['emissions_factor_lb_CO2_per_gal'] = dieselCO2Factor
+			scenario['Scenario']['Site']['Generator']['om_cost_us_dollars_per_kw'] = dieselOMCostKw
+			scenario['Scenario']['Site']['Generator']['om_cost_us_dollars_per_kwh'] = dieselOMCostKwh
+			
+
 			# use userCriticalLoadShape only if True, else model defaults to criticalLoadFactor
 			if userCriticalLoadShape == True:
 				scenario['Scenario']['Site']['LoadProfile']['critical_loads_kw'] = jsonifiableCriticalLoad
@@ -283,6 +294,14 @@ def work(modelDir, inputDict):
 		outData['initial_capital_costs_after_incentives' + indexString] = resultsSubset['Financial']['initial_capital_costs_after_incentives']
 		outData['load' + indexString] = resultsSubset['LoadProfile']['year_one_electric_load_series_kw']
 		outData['avgLoad' + indexString] = round(sum(resultsSubset['LoadProfile']['year_one_electric_load_series_kw'])/len(resultsSubset['LoadProfile']['year_one_electric_load_series_kw']),1)
+
+		# outputs to be used in microgridUp.py
+		outData['yearOneEmissionsLbsBau' + indexString] = resultsSubset['year_one_emissions_bau_lb_C02']
+		outData['yearOneEmissionsLbs' + indexString] = resultsSubset['year_one_emissions_lb_C02']
+		outData['yearOneEmissionsTons' + indexString] = round((outData['yearOneEmissionsLbs' + indexString])/2000,0)
+		outData['yearOneEmissionsReducedTons' + indexString] = round((resultsSubset['year_one_emissions_bau_lb_C02'] - resultsSubset['year_one_emissions_lb_C02'])/2000,0)
+		outData['yearOnePercentRenewable' + indexString] = round(resultsSubset['renewable_electricity_energy_pct']*100,0)
+		outData['yearOneOMCostsBeforeTax' + indexString] = round(resultsSubset['Financial']['year_one_om_costs_before_tax_us_dollars'],0)
 
 		if solar == 'on':
 			outData['sizePV' + indexString] = resultsSubset['PV']['size_kw']
@@ -424,7 +443,7 @@ def work(modelDir, inputDict):
 				x=pd.to_datetime(x, unit = 'h', origin = pd.Timestamp(f'{year}-01-01')),
 				y=outData['powerDieselToLoad' + indexString],
 				line=dict( color=('brown') ),
-				name="Load met by Diesel",
+				name="Load met by Fossil Gen",
 				hoverlabel = dict(namelength = -1),
 				stackgroup='one',
 				mode='none')
@@ -529,7 +548,7 @@ def work(modelDir, inputDict):
 				x=pd.to_datetime(x, unit = 'h', origin = pd.Timestamp(f'{year}-01-01')),
 				y=outData['powerDieselToLoad' + indexString],
 				line=dict( color=('brown') ),
-				name="Diesel used to meet Load",
+				name="Fossil Gen used to meet Load",
 				hoverlabel = dict(namelength = -1),
 				stackgroup='one',
 				mode='none')
@@ -540,7 +559,7 @@ def work(modelDir, inputDict):
 					x=pd.to_datetime(x, unit = 'h', origin = pd.Timestamp(f'{year}-01-01')),
 					y=outData['powerDieselToBattery' + indexString],
 					line=dict( color=('gray') ),
-					name="Diesel used to charge Battery",
+					name="Fossil Gen used to charge Battery",
 					hoverlabel = dict(namelength = -1),
 					stackgroup='one',
 					mode='none')
@@ -550,7 +569,7 @@ def work(modelDir, inputDict):
 			# 	x=pd.to_datetime(x, unit = 'h', origin = pd.Timestamp(f'{year}-01-01')),
 			# 	y=outData['powerDiesel' + indexString],
 			# 	line=dict( color=('red') ),
-			# 	name="Diesel Generation")
+			# 	name="Fossil Generation")
 			# plotData.append(powerDiesel)
 
 		outData["dieselData"  + indexString] = json.dumps(plotData, cls=plotly.utils.PlotlyJSONEncoder)
@@ -591,7 +610,7 @@ def work(modelDir, inputDict):
 					x=pd.to_datetime(x, unit = 'h', origin = pd.Timestamp(f'{year}-01-01')),
 					y=outData['powerDieselToBattery' + indexString],
 					line=dict( color=('brown') ),
-					name="Diesel",
+					name="Fossil Gen",
 					stackgroup='one',
 					mode='none')
 				plotData.append(powerDieselToBattery)
@@ -696,12 +715,16 @@ def new(modelDir):
 		"dieselMax": "100000",
 		"solarExisting": 0,
 		"userCriticalLoadShape": False,
-		"criticalLoadFactor": "1",
+		"criticalLoadFactor": ".5",
 		"outage_start_hour": "500",
 		"outageDuration": "24",
 		"fuelAvailable": "40000",
 		"genExisting": 0,
 		"minGenLoading": "0.3",
+		"dieselFuelCostGal": 3, # default value for diesel
+		"dieselCO2Factor": 22.4, # default value for diesel
+		"dieselOMCostKw": 10, # default value for diesel
+		"dieselOMCostKwh": 0, # default value for diesel
 		#"windExisting": "20",
 		#"batteryKwExisting": 0,
 		#"batteryKwhExisting": 0,

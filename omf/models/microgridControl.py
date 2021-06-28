@@ -22,7 +22,7 @@ from omf.solvers.opendss import dssConvert
 from omf.solvers import PowerModelsONM
 
 # Model metadata:
-tooltip = 'outageCost calculates reliability metrics and creates a leaflet graph based on data from an input csv file.'
+tooltip = 'Calculate load, generator and switching controls to maximize power restoration for a circuit with multiple networked microgrids.'
 modelName, template = __neoMetaModel__.metadata(__file__)
 hidden = False
 ONM_DIR = f'{__neoMetaModel__._omfDir}/solvers/PowerModelsONM/'
@@ -111,29 +111,19 @@ def pullDataForGraph(tree, feederMap, outputTimeline, row):
 		loadAfter = outputTimeline.loc[row, 'loadAfter']
 		return device, coordLis, coordStr, time, action, loadBefore, loadAfter
 
-# def createTimeline():
-# 	data = {'time': ['1', '3', '7', '10', '15'],
-# 			'device': ['l_1006_1007', 'load_1003', 'load_1016', 'bus1014', 'bus2053'],
-# 			# devices on ieee37
-# 			#'device': ['l2', 's701a', 's713c', '799r', '705'],
-# 			'action': ['Switching', 'Load Shed', 'Load Pickup', 'Battery Control', 'Generator Control'],
-# 			'loadBefore': ['50', '20', '10', '50', '50'],
-# 			'loadAfter': ['0', '10', '20', '60', '40']
-# 			}
-# 	timeline = pd.DataFrame(data, columns = ['time','device','action','loadBefore','loadAfter'])
-# 	return timeline
-
 def colormap(action):
 	if action == 'Load Shed':
 		color = '0000FF'
 	elif action == 'Load Pickup':
 		color = '00C957'
-	elif action == 'Switching':
+	elif action == 'Switch Opening':
 		color = 'FF8000'
+	elif action == 'Switch Closing':
+		color = '9370DB'
 	elif action == 'Battery Control':
 		color = 'FFFF00'
 	elif action == 'Generator Control':
-		color = '9B30FF'
+		color = 'E0FFFF'
 
 	return color
 
@@ -410,10 +400,6 @@ def customerCost1(workDir, customerName, duration, season, averagekWperhr, busin
 			localMax = kWperhrEstimate[row]
 		row+=1
 	
-	# plot the expected customer outage cost over the duration of the outage
-	# plt.plot(times, kWhEstimate)
-	# plt.savefig(workDir + '/customerCostFig')
-	# return {'customerOutageCost': outageCost}
 	return outageCost, kWperhrEstimate, times, localMax
 
 def graphMicrogrid(pathToOmd, pathToJson, pathToCsv, outputFile, useCache, workDir, maxTime, stepSize, outageDuration, profit_on_energy_sales, restoration_cost, hardware_cost):
@@ -464,7 +450,10 @@ def graphMicrogrid(pathToOmd, pathToJson, pathToCsv, outputFile, useCache, workD
 				if switchActionsNew[entry] != switchActionsOld[entry]:
 					actionDevice.append(entry)
 					actionTime.append(str(timestep))
-					actionAction.append('Switching')
+					if switchActionsNew[entry] == 'open':
+						actionAction.append('Switch Opening')
+					else:
+						actionAction.append('Switch Closing')
 					actionLoadBefore.append(switchActionsOld[entry])
 					actionLoadAfter.append(switchActionsNew[entry])
 			switchActionsOld = key['Switch configurations']
@@ -602,10 +591,7 @@ def graphMicrogrid(pathToOmd, pathToJson, pathToCsv, outputFile, useCache, workD
 								  'popupContent': 'Location: <b>' + str(coordStr) + '</b><br>Device: <b>' + str(device) + '</b><br>Time: <b>' + str(time) + '</b><br>Action: <b>' + str(action) + '</b><br>Before: <b>' + str(loadBefore) + '</b><br>After: <b>' + str(loadAfter) + '</b>.'}
 			feederMap['features'].append(Dict)
 		else:
-			# print(len(coordLis))
-			# print(device)
 			Dict['geometry'] = {'type': 'LineString', 'coordinates': [[coordLis[0], coordLis[1]], [coordLis[2], coordLis[3]]]}
-			# print(Dict['geometry'])
 			Dict['type'] = 'Feature'
 			Dict['properties'] = {'device': device, 
 								  'time': time,
@@ -645,16 +631,10 @@ def graphMicrogrid(pathToOmd, pathToJson, pathToCsv, outputFile, useCache, workD
 		loadName = str(customerOutageData.loc[row, 'Load Name'])
 
 		customerOutageCost, kWperhrEstimate, times, localMax = customerCost1(workDir, customerName, duration, season, averagekWperhr, businessType, loadName)
-		# print(kWperhrEstimate)
 		average_lost_kwh.append(float(averagekWperhr))
 		outageCost.append(customerOutageCost)
 		if localMax > globalMax:
 			globalMax = localMax
-		# print(customerName)
-		# print(customerOutageCost)
-		# print(numberRows)
-		# print(math.floor(row/2))
-		# print(row%2)
   
 		# creating series
 		timesSeries = pd.Series(times)

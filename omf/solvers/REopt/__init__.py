@@ -4,8 +4,8 @@ from omf.solvers.REopt import logger
 from omf.solvers.REopt import results_poller
 
 def run(inJSONPath, outputPath):
-	# API_KEY = 'WhEzm6QQQrks1hcsdN0Vrd56ZJmUyXJxTJFg6pn9'  # REPLACE WITH YOUR API KEY
-	API_KEY = 'Y8GMAFsqcPtxhjIa1qfNj5ILxN5DH5cjV3i6BeNE'
+	API_KEY = 'WhEzm6QQQrks1hcsdN0Vrd56ZJmUyXJxTJFg6pn9'  # REPLACE WITH YOUR API KEY
+	# API_KEY = 'Y8GMAFsqcPtxhjIa1qfNj5ILxN5DH5cjV3i6BeNE'
 	root_url = 'https://developer.nrel.gov/api/reopt'
 	post_url = root_url + '/v1/job/?api_key=' + API_KEY
 	results_url = root_url + '/v1/job/<run_uuid>/results/?api_key=' + API_KEY
@@ -28,8 +28,8 @@ def run(inJSONPath, outputPath):
 		logger.log.info("Saved results to {}".format(outputPath))
 
 def runResilience(runID, outputPath):
-	# API_KEY = 'WhEzm6QQQrks1hcsdN0Vrd56ZJmUyXJxTJFg6pn9'  # REPLACE WITH YOUR API KEY
-	API_KEY = 'Y8GMAFsqcPtxhjIa1qfNj5ILxN5DH5cjV3i6BeNE'
+	API_KEY = 'WhEzm6QQQrks1hcsdN0Vrd56ZJmUyXJxTJFg6pn9'  # REPLACE WITH YOUR API KEY
+	# API_KEY = 'Y8GMAFsqcPtxhjIa1qfNj5ILxN5DH5cjV3i6BeNE'
 	root_url = 'https://developer.nrel.gov/api/reopt'
 	post_url = root_url + '/v1/outagesimjob/?api_key=' + API_KEY
 	results_url = root_url + '/v1/job/<RUN_ID>/resilience_stats/?api_key=' + API_KEY
@@ -57,9 +57,9 @@ def runResilience(runID, outputPath):
 		logger.log.info("Saved results to {}".format(outputPath))
 
 def _test():
-	run('Scenario_POST14.json', 'results_S14.json')
+	run('Scenario_POST35.json', 'results_S35.json')
 
-	with open('results_S14.json') as jsonFile:
+	with open('results_S35.json') as jsonFile:
 		results = json.load(jsonFile)
 		
 	test_ID = results['outputs']['Scenario']['run_uuid']
@@ -70,7 +70,12 @@ def _test():
 	print("Generator fuel_used_gal:", results['outputs']['Scenario']['Site']['Generator']['fuel_used_gal'])
 	print("Generator size_kw:", results['outputs']['Scenario']['Site']['Generator']['size_kw'])
 	print("npv_us_dollars:", results['outputs']['Scenario']['Site']['Financial']['npv_us_dollars'])
-	runResilience(test_ID, 'resultsResilience_S14.json')
+	print("initial_capital_costs:", results['outputs']['Scenario']['Site']['Financial']['initial_capital_costs'])
+	print("CHP size_kw:", results['outputs']['Scenario']['Site']['CHP']['size_kw'])
+	print("CHP year_one_fuel_used_mmbtu:", results['outputs']['Scenario']['Site']['CHP']['year_one_fuel_used_mmbtu'])
+	print("CHP year_one_electric_energy_produced_kwh:", results['outputs']['Scenario']['Site']['CHP']['year_one_electric_energy_produced_kwh'])
+
+	runResilience(test_ID, 'resultsResilience_S35.json')
 
 
 
