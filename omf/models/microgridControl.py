@@ -22,7 +22,7 @@ from omf.solvers.opendss import dssConvert
 from omf.solvers import PowerModelsONM
 
 # Model metadata:
-tooltip = 'outageCost calculates reliability metrics and creates a leaflet graph based on data from an input csv file.'
+tooltip = 'Calculate load, generator and switching controls to maximize power restoration for a circuit with multiple networked microgrids.'
 modelName, template = __neoMetaModel__.metadata(__file__)
 hidden = False
 ONM_DIR = f'{__neoMetaModel__._omfDir}/solvers/PowerModelsONM/'
