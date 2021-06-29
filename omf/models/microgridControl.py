@@ -22,7 +22,7 @@ from omf.solvers.opendss import dssConvert
 from omf.solvers import PowerModelsONM
 
 # Model metadata:
-tooltip = 'outageCost calculates reliability metrics and creates a leaflet graph based on data from an input csv file.'
+tooltip = 'Calculate load, generator and switching controls to maximize power restoration for a circuit with multiple networked microgrids.'
 modelName, template = __neoMetaModel__.metadata(__file__)
 hidden = False
 ONM_DIR = f'{__neoMetaModel__._omfDir}/solvers/PowerModelsONM/'
@@ -150,7 +150,14 @@ def microgridTimeline(outputTimeline, workDir):
 		
 		row = 0
 		while row < len(outputTimeline):
-			new_html_str += '<tr><td>' + str(outputTimeline.loc[row, 'device']) + '</td><td>' + str(outputTimeline.loc[row, 'time']) + '</td><td>' + str(outputTimeline.loc[row, 'action']) + '</td><td>' + str(outputTimeline.loc[row, 'loadBefore']) + '</td><td>' + str(outputTimeline.loc[row, 'loadAfter']) + '</td></tr>'
+			loadBeforeStr = outputTimeline.loc[row, 'loadBefore']
+			loadAfterStr = outputTimeline.loc[row, 'loadAfter']
+			loadStringDict = ["open", "closed", "online", "offline"]
+			if str(loadBeforeStr) not in loadStringDict:
+				loadBeforeStr = '{0:.3f}'.format(float(loadBeforeStr))
+			if str(loadAfterStr) not in loadStringDict:
+				loadAfterStr = '{0:.3f}'.format(float(loadAfterStr))
+			new_html_str += '<tr><td>' + str(outputTimeline.loc[row, 'device']) + '</td><td>' + str(outputTimeline.loc[row, 'time']) + '</td><td>' + str(outputTimeline.loc[row, 'action']) + '</td><td>' + loadBeforeStr + '</td><td>' + loadAfterStr + '</td></tr>'
 			row += 1
 
 		new_html_str +="""</tbody></table>"""
@@ -297,7 +304,7 @@ def customerCost1(workDir, customerName, duration, season, averagekWperhr, busin
 					newEntry = (keys[key] + keys[key+1])/2
 					averageCost = (kWDict[keys[key]] + kWDict[keys[key+1]])/2
 					kWDict[newEntry] = averageCost
-					break
+					break 
 			step+=1
 			if step == iterate:
 				return(kWDict[newEntry])
@@ -521,7 +528,8 @@ def graphMicrogrid(pathToOmd, pathToJson, pathToCsv, outputFile, useCache, workD
 							name='Grid Mix'))
 	# Edit the layout
 	gens.update_layout(xaxis_title='Hours',
-						yaxis_title='Power (kW)')
+						yaxis_title='Power (kW)',
+						legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1))
 
 	volts = go.Figure()
 	volts.add_trace(go.Scatter(x=simTimeSteps, y=voltages['Min voltage (p.u.)'],
@@ -535,7 +543,8 @@ def graphMicrogrid(pathToOmd, pathToJson, pathToCsv, outputFile, useCache, workD
 							name='Mean Voltage'))
 	# Edit the layout
 	volts.update_layout(xaxis_title='Hours',
-						yaxis_title='Power (p.u.)')
+						yaxis_title='Power (p.u.)',
+						legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1))
 
 	loads = go.Figure()
 	loads.add_trace(go.Scatter(x=simTimeSteps, y=loadServed['Feeder load (%)'],
@@ -549,7 +558,8 @@ def graphMicrogrid(pathToOmd, pathToJson, pathToCsv, outputFile, useCache, workD
 							name='Bonus Load via Microgrid'))
 	# Edit the layout
 	loads.update_layout(xaxis_title='Hours',
-						yaxis_title='Load (%)')
+						yaxis_title='Load (%)',
+						legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1))
 
 	timelineStatsHtml = microgridTimeline(outputTimeline, workDir)
 
@@ -639,7 +649,8 @@ def graphMicrogrid(pathToOmd, pathToJson, pathToCsv, outputFile, useCache, workD
 		fig.add_trace(trace)
 		row += 1
 	fig.update_layout(xaxis_title = 'Duration (hours)',
-		yaxis_title = 'Cost ($)')
+		yaxis_title = 'Cost ($)',
+		legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1))
 
 	customerOutageHtml = customerOutageTable(customerOutageData, outageCost, workDir)
 
