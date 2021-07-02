@@ -358,6 +358,8 @@ def work(modelDir, inputDict):
 		outData['sizeDiesel' + indexString] = resultsSubset['Generator']['size_kw']
 		outData['sizeDieselRounded' + indexString] = round(resultsSubset['Generator']['size_kw'],1)
 		outData['dieselGenCost' + indexString] = float(inputDict['dieselGenCost'])
+		outData['dieselOMCostKw' + indexString] = float(inputDict['dieselOMCostKw'])
+		outData['dieselOMCostKwh' + indexString] = float(inputDict['dieselOMCostKwh'])
 		if resultsSubset['Generator']['size_kw'] == 0:
 			outData['sizeDieselRounded' + indexString] = 0
 		outData['fuelUsedDiesel' + indexString] = resultsSubset['Generator']['fuel_used_gal']
