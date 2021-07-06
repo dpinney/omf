@@ -492,7 +492,8 @@ def currentPlot(filePath):
 	plt.clf()
 
 def networkPlot(filePath, figsize=(20,20), output_name='networkPlot.png', show_labels=True, node_size=300, font_size=8):
-	''' Plot the physical topology of the circuit. '''
+	''' Plot the physical topology of the circuit.
+	Returns a networkx graph of the circuit as a bonus. '''
 	dssFileLoc = os.path.dirname(os.path.abspath(filePath))
 	coords = runDSS(filePath)
 	runDssCommand('Export voltages "' + dssFileLoc + '/volts.csv"')
@@ -535,6 +536,7 @@ def networkPlot(filePath, figsize=(20,20), output_name='networkPlot.png', show_l
 	plt.tight_layout()
 	plt.savefig(dssFileLoc + '/' + output_name)
 	plt.clf()
+	return G
 
 def THD(filePath):
 	''' Calculate and plot total harmonic distortion. '''
