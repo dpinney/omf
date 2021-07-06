@@ -243,9 +243,15 @@
 		<!-- Leaflet map directly inline with model-->
 		<p class="reportTitle postRun">Outage Map and Time Slider</p>
 		<div class="tightContent postRun">
-			<div id="slider" style="top: 0px; right: 1px; margin: 10px 25px;"></div>
-			<input type="number" min='1' max='23' id="input-number-min">
-			<input type="number" min='2' max='24' id="input-number-max">
+			<div style="display: inline-block; width: inherit;">
+				<div style="display: inline-block; width: 8%; margin-top: 5px; margin-bottom: 5px; margin-right: 2%; float: left">
+					<input type="number" min='1' max='23' id="input-number-min" style="width: 100%;">
+				</div>
+				<div id="slider" style="display: inline-block; top: 0px; right: 1px; margin: 10px 0px; width: 80%;"></div>
+				<div style="display: inline-block; width: 8%; margin-top: 5px; margin-bottom: 5px; margin-left: 2%; float: right">
+					<input type="number" min='2' max='24' id="input-number-max" style="width: 100%;">
+				</div>
+			</div>
 		</div>
 		<div id="mapInsert"></div>
 		<script type="text/javascript">
