@@ -24,6 +24,7 @@ from omf.solvers import gridlabd
 from time import time
 import re
 import shutil
+import networkx as nx
 try:
 	import opendssdirect as dss
 except:
@@ -656,6 +657,20 @@ def dssToOmd(dssFilePath, omdFilePath, RADIUS=0.0002):
 			ob['longitude'] = str(float(parent_lon) + y)
 			# print(ob)
 	evilToOmd(evil_glm, omdFilePath)
+
+def dss_to_networkx(dssFilePath):
+	''' Return a networkx directed graph from a dss file. '''
+	tree = dssToTree(dssFilePath)
+	omd = evilDssTreeToGldTree(tree)
+	# Gather edges, leave out source and circuit objects
+	edges = [(ob['from'],ob['to']) for ob in omd.values() if 'from' in ob and 'to' in ob]
+	edges_sub = [
+		(ob['parent'],ob['name']) for ob in omd.values()
+		if 'name' in ob and 'parent' in ob and ob.get('object') not in ['circuit', 'vsource']
+	]
+	full_edges = edges + edges_sub
+	G = nx.DiGraph(full_edges)
+	return G
 
 def _conversionTests():
 	# pass
