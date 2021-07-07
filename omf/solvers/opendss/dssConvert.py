@@ -633,9 +633,9 @@ def _name_to_key(glm):
 			mapping[val['name']] = key
 	return mapping
 
-def dssToOmd(dssFilePath, omdFilePath, RADIUS=0.0002):
-	''' Generate an OMD.
-	SIDE-EFFECTS: creates the OMD'''
+def dssToOmd(dssFilePath, omdFilePath, RADIUS=0.0002, write_out=True):
+	''' Converts the dss file to an OMD, returns the omd tree
+	SIDE-EFFECTS: creates the OMD file'''
 	# Injecting additional coordinates.
 	#TODO: derive sensible RADIUS from lat/lon numbers.
 	tree = dssToTree(dssFilePath)
@@ -656,7 +656,9 @@ def dssToOmd(dssFilePath, omdFilePath, RADIUS=0.0002):
 			ob['latitude'] = str(float(parent_lat) + x)
 			ob['longitude'] = str(float(parent_lon) + y)
 			# print(ob)
-	evilToOmd(evil_glm, omdFilePath)
+	if write_out:
+		evilToOmd(evil_glm, omdFilePath)
+	return evil_glm
 
 def dss_to_networkx(dssFilePath):
 	''' Return a networkx directed graph from a dss file. '''
