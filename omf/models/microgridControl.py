@@ -516,16 +516,28 @@ def graphMicrogrid(pathToOmd, pathToJson, pathToCsv, outputFile, useCache, workD
 	gens = go.Figure()
 	gens.add_trace(go.Scatter(x=simTimeSteps, y=genProfiles['Diesel DG (kW)'],
 							mode='lines',
-							name='Diesel DG'))
+							name='Diesel DG',
+							hovertemplate=
+							'<b>Time Step</b>: %{x}<br>' +
+							'<b>Diesel DG</b>: %{y:.3f}kW'))
 	gens.add_trace(go.Scatter(x=simTimeSteps, y=genProfiles['Energy storage (kW)'],
 							mode='lines',
-							name='Energy Storage'))
+							name='Energy Storage',
+							hovertemplate=
+							'<b>Time Step</b>: %{x}<br>' +
+							'<b>Energy Storage</b>: %{y:.3f}kW'))
 	gens.add_trace(go.Scatter(x=simTimeSteps, y=genProfiles['Solar DG (kW)'],
 							mode='lines',
-							name='Solar DG'))
+							name='Solar DG',
+							hovertemplate=
+							'<b>Time Step</b>: %{x}<br>' +
+							'<b>Solar DG</b>: %{y:.3f}kW'))
 	gens.add_trace(go.Scatter(x=simTimeSteps, y=genProfiles['Grid mix (kW)'],
 							mode='lines',
-							name='Grid Mix'))
+							name='Grid Mix',
+							hovertemplate=
+							'<b>Time Step</b>: %{x}<br>' +
+							'<b>Grid Mix</b>: %{y:.3f}kW'))
 	# Edit the layout
 	gens.update_layout(xaxis_title='Hours',
 						yaxis_title='Power (kW)',
@@ -534,13 +546,22 @@ def graphMicrogrid(pathToOmd, pathToJson, pathToCsv, outputFile, useCache, workD
 	volts = go.Figure()
 	volts.add_trace(go.Scatter(x=simTimeSteps, y=voltages['Min voltage (p.u.)'],
 							mode='lines',
-							name='Minimum Voltage'))
+							name='Minimum Voltage',
+							hovertemplate=
+							'<b>Time Step</b>: %{x}<br>' +
+							'<b>Minimum Voltage</b>: %{y:.4f}'))
 	volts.add_trace(go.Scatter(x=simTimeSteps, y=voltages['Max voltage (p.u.)'],
 							mode='lines',
-							name='Maximum Voltage'))
+							name='Maximum Voltage',
+							hovertemplate=
+							'<b>Time Step</b>: %{x}<br>' +
+							'<b>Maximum Voltage</b>: %{y:.4f}'))
 	volts.add_trace(go.Scatter(x=simTimeSteps, y=voltages['Mean voltage (p.u.)'],
 							mode='lines',
-							name='Mean Voltage'))
+							name='Mean Voltage',
+							hovertemplate=
+							'<b>Time Step</b>: %{x}<br>' +
+							'<b>Mean Voltage</b>: %{y:.4f}'))
 	# Edit the layout
 	volts.update_layout(xaxis_title='Hours',
 						yaxis_title='Power (p.u.)',
@@ -549,13 +570,22 @@ def graphMicrogrid(pathToOmd, pathToJson, pathToCsv, outputFile, useCache, workD
 	loads = go.Figure()
 	loads.add_trace(go.Scatter(x=simTimeSteps, y=loadServed['Feeder load (%)'],
 							mode='lines',
-							name='Feeder Load'))
+							name='Feeder Load',
+							hovertemplate=
+							'<b>Time Step</b>: %{x}<br>' +
+							'<b>Feeder Load</b>: %{y:.2f}%'))
 	loads.add_trace(go.Scatter(x=simTimeSteps, y=loadServed['Microgrid load (%)'],
 							mode='lines',
-							name='Microgrid Load'))
+							name='Microgrid Load',
+							hovertemplate=
+							'<b>Time Step</b>: %{x}<br>' +
+							'<b>Microgrid Load</b>: %{y:.2f}%'))
 	loads.add_trace(go.Scatter(x=simTimeSteps, y=loadServed['Bonus load via microgrid (%)'],
 							mode='lines',
-							name='Bonus Load via Microgrid'))
+							name='Bonus Load via Microgrid',
+							hovertemplate=
+							'<b>Time Step</b>: %{x}<br>' +
+							'<b>Bonus Load via Microgrid</b>: %{y:.2f}%'))
 	# Edit the layout
 	loads.update_layout(xaxis_title='Hours',
 						yaxis_title='Load (%)',
@@ -644,7 +674,10 @@ def graphMicrogrid(pathToOmd, pathToJson, pathToCsv, outputFile, useCache, workD
 			x = timesSeries,
 			y = kWperhrSeries,
 			name = customerName,
-			hoverlabel = dict(namelength = -1)
+			hoverlabel = dict(namelength = -1),
+			hovertemplate = 
+			'<b>Duration</b>: %{x} h<br>' +
+			'<b>Cost</b>: $%{y:.2f}'
 		)
 		fig.add_trace(trace)
 		row += 1
@@ -737,6 +770,7 @@ def work(modelDir, inputDict):
 
 	# Plotly outputs.
 	layoutOb = go.Layout()
+
 	outData['fig1Data'] = json.dumps(plotOuts.get('gens',{}), cls=py.utils.PlotlyJSONEncoder)
 	outData['fig1Layout'] = json.dumps(layoutOb, cls=py.utils.PlotlyJSONEncoder)
 	outData['fig2Data'] = json.dumps(plotOuts.get('volts',{}), cls=py.utils.PlotlyJSONEncoder)
