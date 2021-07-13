@@ -24,6 +24,7 @@ from omf.solvers import gridlabd
 from time import time
 import re
 import shutil
+import networkx as nx
 try:
 	import opendssdirect as dss
 except:
@@ -632,9 +633,9 @@ def _name_to_key(glm):
 			mapping[val['name']] = key
 	return mapping
 
-def dssToOmd(dssFilePath, omdFilePath, RADIUS=0.0002):
-	''' Generate an OMD.
-	SIDE-EFFECTS: creates the OMD'''
+def dssToOmd(dssFilePath, omdFilePath, RADIUS=0.0002, write_out=True):
+	''' Converts the dss file to an OMD, returns the omd tree
+	SIDE-EFFECTS: creates the OMD file'''
 	# Injecting additional coordinates.
 	#TODO: derive sensible RADIUS from lat/lon numbers.
 	tree = dssToTree(dssFilePath)
@@ -655,7 +656,23 @@ def dssToOmd(dssFilePath, omdFilePath, RADIUS=0.0002):
 			ob['latitude'] = str(float(parent_lat) + x)
 			ob['longitude'] = str(float(parent_lon) + y)
 			# print(ob)
-	evilToOmd(evil_glm, omdFilePath)
+	if write_out:
+		evilToOmd(evil_glm, omdFilePath)
+	return evil_glm
+
+def dss_to_networkx(dssFilePath):
+	''' Return a networkx directed graph from a dss file. '''
+	tree = dssToTree(dssFilePath)
+	omd = evilDssTreeToGldTree(tree)
+	# Gather edges, leave out source and circuit objects
+	edges = [(ob['from'],ob['to']) for ob in omd.values() if 'from' in ob and 'to' in ob]
+	edges_sub = [
+		(ob['parent'],ob['name']) for ob in omd.values()
+		if 'name' in ob and 'parent' in ob and ob.get('object') not in ['circuit', 'vsource']
+	]
+	full_edges = edges + edges_sub
+	G = nx.DiGraph(full_edges)
+	return G
 
 def _conversionTests():
 	# pass
