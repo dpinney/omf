@@ -70,6 +70,7 @@ def work(modelDir, inputDict):
 	# demandCostMonthly = inputDict['demandCostMonthly']
 	wholesaleCost = float(inputDict['wholesaleCost'])
 	year = int(inputDict['year'])
+	analysisYears = int(inputDict['analysisYears'])
 	criticalLoadFactor = float(inputDict['criticalLoadFactor'])
 	solarCost = float(inputDict['solarCost'])
 	windCost = float(inputDict['windCost'])
@@ -172,7 +173,8 @@ def work(modelDir, inputDict):
 						"year": year
 					},
 					"Financial": {
-						"value_of_lost_load_us_dollars_per_kwh": value_of_lost_load
+						"value_of_lost_load_us_dollars_per_kwh": value_of_lost_load,
+						"analysis_years": analysisYears
 					},
 					"PV": {
 						"installed_cost_us_dollars_per_kw": solarCost,
@@ -694,6 +696,7 @@ def new(modelDir):
 		"latitude" : '39.7817',
 		"longitude" : '-89.6501',
 		"year" : '2017',
+		"analysisYears" : '25',
 		"energyCost" : "0.1",
 		"demandCost" : '20',
 		# TODO: Enable all instances of 'annualCostSwitch', 'energyCostMonthly', 'demandCostMonthly' in mgDesign.py once a suitable way to enter a list of 12 monthly rates is found for mgDesign.html
@@ -721,10 +724,10 @@ def new(modelDir):
 		"criticalLoadFactor": ".5",
 		"outage_start_hour": "500",
 		"outageDuration": "24",
-		"fuelAvailable": "40000",
+		"fuelAvailable": "20000",
 		"genExisting": 0,
 		"minGenLoading": "0.3",
-		"dieselFuelCostGal": 3, # default value for diesel
+		"dieselFuelCostGal": "0.543", # default value for diesel
 		"dieselCO2Factor": 22.4, # default value for diesel
 		"dieselOMCostKw": 10, # default value for diesel
 		"dieselOMCostKwh": 0, # default value for diesel
