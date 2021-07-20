@@ -350,6 +350,16 @@ def newQstsPlot(filePath, stepSizeInMinutes, numberOfSteps, keepAllFiles=False, 
 				df[[' V3']] = df[[' V1']]
 				df[[' V1']] = np.NaN
 				df[[' V2']] = np.NaN
+			elif len(phase_ids) == 2:
+				#HACK: correct split phase VLN.
+				df[[' V1']] = df[[' V1']] * math.sqrt(3)
+				df[[' V2']] = df[[' V2']] * math.sqrt(3)
+			elif len(phase_ids) == 3:
+				#HACK: correct 3 phase VLN.
+				df[[' V1']] = df[[' V1']] * math.sqrt(3)
+				df[[' V2']] = df[[' V2']] * math.sqrt(3)
+				df[[' V3']] = df[[' V3']] * math.sqrt(3)
+			#TODO: fix phase attachment for split phase transformers. It's going to be e.g. blah.2.3 means v1->v2, v2->v3
 			# print("df after phase reassignment:")
 			# print(df.head(10))
 			df['Name'] = name
@@ -364,7 +374,7 @@ def newQstsPlot(filePath, stepSizeInMinutes, numberOfSteps, keepAllFiles=False, 
 			# print("the_object:", the_object)
 			# create phase list, removing neutral phases
 			phase_ids = the_object.get('bus1','').replace('.0','').split('.')[1:]
-			#print("phase_ids:", phase_ids)
+			# print("phase_ids:", phase_ids)
 			# print("headings list:", df.columns)
 			if phase_ids == ['1']:
 				df[[' P2 (kW)']] = np.NaN
