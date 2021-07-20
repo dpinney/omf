@@ -56,7 +56,7 @@
 					'<table>'+
 						'<tr>'+
 							'<th></th>'+
-							'<th>Total Savings ($ over 20 years)</th>'+
+							'<th>Total Savings ($ over analysis period)</th>'+
 							'<th>Average Load (kWh)</th>'+
 							'<th class="solarDisplay">Total Solar (kW)</th>'+
 							'<th class="windDisplay">Total Wind (kW)</th>'+
@@ -327,6 +327,10 @@
 			<div class="shortInput">
 				<label class="tooltip">Year<span class="classic">Specify the year to which the load shape values corresond.</span></label>
 				<input type="text" id="year" name="year" pattern="^\d{4}$" required="required"/>
+			</div>
+			<div class="shortInput">
+				<label class="tooltip">Analysis Period (years)<span class="classic">Specify the length of financial analysis in years.</span></label>
+				<input type="number" id="analysisYears" name="analysisYears" step="1" min="2" max="75"  required="required"/>
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Cost of Energy ($/kWh)<span class="classic">Specify the energy cost in $/kWh.</span></label>
