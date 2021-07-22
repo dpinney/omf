@@ -116,7 +116,11 @@ def work(modelDir, inputDict):
 	dieselCO2Factor = float(inputDict['dieselCO2Factor'])
 	dieselOMCostKw = float(inputDict['dieselOMCostKw'])
 	dieselOMCostKwh = float(inputDict['dieselOMCostKwh'])
-
+	dieselOnlyRunsDuringOutage = bool(inputDict['dieselOnlyRunsDuringOutage'])
+	if inputDict['dieselOnlyRunsDuringOutage'] == "true":
+		dieselOnlyRunsDuringOutage = True
+	elif inputDict['dieselOnlyRunsDuringOutage'] == "false":
+		dieselOnlyRunsDuringOutage = False
 
 	#outageStart = int(inputDict['outageStart'])
 	#outageEnd = outageStart + indexStringnt(inputDict['outageDuration'])
@@ -194,7 +198,7 @@ def work(modelDir, inputDict):
 					},
 					"Generator": {
 						"installed_cost_us_dollars_per_kw": dieselGenCost,
-
+						"generator_only_runs_during_grid_outage": dieselOnlyRunsDuringOutage
 					}
 				}
 			}
@@ -242,7 +246,7 @@ def work(modelDir, inputDict):
 			scenario['Scenario']['Site']['Generator']['emissions_factor_lb_CO2_per_gal'] = dieselCO2Factor
 			scenario['Scenario']['Site']['Generator']['om_cost_us_dollars_per_kw'] = dieselOMCostKw
 			scenario['Scenario']['Site']['Generator']['om_cost_us_dollars_per_kwh'] = dieselOMCostKwh
-			
+
 
 			# use userCriticalLoadShape only if True, else model defaults to criticalLoadFactor
 			if userCriticalLoadShape == True:
@@ -360,6 +364,7 @@ def work(modelDir, inputDict):
 		outData['sizeDiesel' + indexString] = resultsSubset['Generator']['size_kw']
 		outData['sizeDieselRounded' + indexString] = round(resultsSubset['Generator']['size_kw'],1)
 		outData['dieselGenCost' + indexString] = float(inputDict['dieselGenCost'])
+		outData['dieselOnlyRunsDuringOutage' + indexString] = bool(inputDict['dieselOnlyRunsDuringOutage'])
 		outData['dieselOMCostKw' + indexString] = float(inputDict['dieselOMCostKw'])
 		outData['dieselOMCostKwh' + indexString] = float(inputDict['dieselOMCostKwh'])
 		if resultsSubset['Generator']['size_kw'] == 0:
@@ -736,7 +741,8 @@ def new(modelDir):
 		#"batteryKwhExisting": 0,
 		"value_of_lost_load": "100",
 		"solarCanCurtail": True,
-		"solarCanExport": True
+		"solarCanExport": True,
+		"dieselOnlyRunsDuringOutage": True
 	}
 	creationCode = __neoMetaModel__.new(modelDir, defaultInputs)
 	try:

@@ -482,7 +482,7 @@
 				<input type="text" id="fuelAvailable" name="fuelAvailable" required="required"/>
 			</div>
 			<div class="shortInput">
-				<label class="tooltip">Minimum Generator Loading<span class="classic">Please enter a number 0-1 for the the minimum fraction of rated total kVA load that must be maintained by the generator. >/= 0.3 recommended for extended operation.</span></label>
+				<label class="tooltip">Minimum Generator Loading<span class="classic">Please enter a number 0-1 for the the minimum fraction of rated total kVA load that must be maintained by the generator. >/= 0.3 recommended for extended diesel operation. Set to 0 for highest likelihood of success in solving optimization.</span></label>
 				<input type="number" id="minGenLoading" name="minGenLoading" step="0.01" min="0.0" max="1.0"  required="required"/>
 			</div>
 			<div class="shortInput">
@@ -512,6 +512,13 @@
 			<div class="shortInput">
 				<label class="tooltip">Fossil O+M Cost ($/kWh/year)<span class="classic">Specify annual operations and maintenance cost per kilowatt-hour per year. Format "0.XX"</span></label>
 				<input type="text" id="dieselOMCostKwh" name="dieselOMCostKwh" pattern="^\d+\.?\d*?$" required="required"/>
+			</div>
+			<div class="shortInput">
+				<label class="tooltip">Fossil gen only runs during outage?<span class="classic">"No" signifies that fossil generator is enabled to run at any point in the year.</span></label>
+				<select id="dieselOnlyRunsDuringOutage" name="dieselOnlyRunsDuringOutage"/>
+					<option value=true>Yes</option>
+					<option value=false>No</option>
+				</select>
 			</div>
 
 
