@@ -83,6 +83,17 @@ def find_all_ties(circuit, circuit_name, bus_limit=-1):
 	nodes = {}
 	nodes_limited = {}
 	existing_lines = {}
+
+	# Create networkx graph
+	circuit_graph = feeder.treeToNxGraph(circuit["tree"])
+
+	for omdObj in circuit["tree"]:
+		if circuit["tree"][omdObj]["object"] == "line":
+			line_name = circuit["tree"][omdObj]["name"]
+			line_from = circuit["tree"][omdObj]["from"]
+			line_to = circuit["tree"][omdObj]["to"]
+			circuit_graph.edges[line_from, line_to]["weight"] = node_distance(circuit, line_from, line_to)
+
 	# keys for the dict are pairs of node names, with the first value being physical distance and second being path distance
 	for omdObj in circuit["tree"]:
 		if circuit["tree"][omdObj]["object"] == "line":
@@ -131,7 +142,15 @@ def find_all_ties(circuit, circuit_name, bus_limit=-1):
 					# Make sure you haven't already added (node1, node2) to your list of possible tie lines
 					if (not contains_3) and (not contains_4):
 						physical_dist = node_distance(circuit, node1, node2)
-						path_dist = path_distance(circuit, node1, node2)
+						path_dist = -1
+						try:
+							# This returns the number of edges between the source and target node, but doesn't incorporate length of the path as a weight
+							#distance = nx.shortest_path_length(circuit_graph, source=node_name_1, target=node_name_2, weight="length")
+							path_dist, path_list = nx.single_source_dijkstra(circuit_graph, source=node1, target=node2, cutoff=None, weight="weight")
+							#distance = nx.single_source_dijkstra_path_length(circuit_graph, source=node_name_1, target=node_name_2, weight=)
+						except nx.NetworkXNoPath:
+							path_dist = -1.0
+						#path_dist = path_distance(circuit, node1, node2)
 						all_ties[(node1, node2)] = [physical_dist, path_dist]
 						# json cannot have tuples as keys, so make a new dict with string type keys
 						json_key = ", ".join((node1, node2))
@@ -273,7 +292,7 @@ def _runModel():
 	potential_tie_lines = {}
 	# potential_tie_lines = find_candidate_pair(circuit, circuit_name, bus_limit=3, saved_ties=False)
 	# potential_tie_lines = find_candidate_pair(circuit, circuit_name, bus_limit=3, saved_ties=True)
-	potential_tie_lines = find_candidate_pair(circuit, circuit_name, bus_limit=7)
+	potential_tie_lines = find_candidate_pair(circuit, circuit_name)
 	# print("Potential tie lines: " + potential_tie_lines)
 	print("Selected buses are " + str(potential_tie_lines['selected_buses']))
 	print("Shortest physical distance between buses is " + '{0:.4f}'.format(potential_tie_lines['short_phys_val']) + "km between " + potential_tie_lines['short_phys_pair'][0] + " and " + potential_tie_lines['short_phys_pair'][1])
