@@ -76,7 +76,7 @@ def path_distance(circuit, node_name_1, node_name_2):
 
 	return distance
 
-def find_all_ties(circuit, circuit_name, bus_limit):
+def find_all_ties(circuit, circuit_name, bus_limit=-1):
 	#Given a cicuit, find all possible tie lines between all nodes, excluding ones that already exist
 	all_ties = {}
 	all_ties_json = {}
@@ -140,11 +140,11 @@ def find_all_ties(circuit, circuit_name, bus_limit):
 						print("New addition to all_ties: (" + json_key + "): [" + tie_str + "]")
 	# For testing purposes, save all_ties dict to a file to prevent LONG runtime of find_all_ties()
 	ties_file_name = circuit_name+"_allTies.json"
-	with open(pJoin(__neoMetaModel__._omfDir,"scratch",ties_file_name), 'w') as jsonFile:
+	with open(pJoin(__neoMetaModel__._omfDir,"scratch","tie_line_testing",ties_file_name), 'w') as jsonFile:
 		json.dump(all_ties_json, jsonFile)
 	return all_ties
 
-def find_candidate_pair(circuit, circuit_name, bus_limit, saved_ties):
+def find_candidate_pair(circuit, circuit_name, bus_limit=-1, saved_ties=False):
 	candidates = {}
 	all_ties = {}
 	short_phys_pair = ()
@@ -157,7 +157,7 @@ def find_candidate_pair(circuit, circuit_name, bus_limit, saved_ties):
 		# read in values from saved json file with all ties
 		ties_file_name = circuit_name+"_allTies.json"
 		try:
-			with open(pJoin(__neoMetaModel__._omfDir,"scratch",ties_file_name), 'r') as tiesFile:
+			with open(pJoin(__neoMetaModel__._omfDir,"scratch","tie_line_testing",ties_file_name), 'r') as tiesFile:
 				all_ties_json = json.load(tiesFile)
 				# Convert json string key back into tuple
 				for tie_key in all_ties_json:
@@ -167,11 +167,11 @@ def find_candidate_pair(circuit, circuit_name, bus_limit, saved_ties):
 					else:
 						all_ties[tie_key] = all_ties_json[tie_key]
 		except IOError as e:
-			print("Error reading " + pJoin(__neoMetaModel__._omfDir,"scratch",ties_file_name) + ":")
+			print("Error reading " + pJoin(__neoMetaModel__._omfDir,"scratch","tie_line_testing",ties_file_name) + ":")
 			print(e)
 			all_ties = find_all_ties(circuit, circuit_name, bus_limit=bus_limit)
 		except:
-			print("Unknown Error reading " + pJoin(__neoMetaModel__._omfDir,"scratch",ties_file_name) + ":")
+			print("Unknown Error reading " + pJoin(__neoMetaModel__._omfDir,"scratch","tie_line_testing",ties_file_name) + ":")
 			all_ties = find_all_ties(circuit, circuit_name, bus_limit=bus_limit)
 	else:
 		all_ties = find_all_ties(circuit, circuit_name, bus_limit=bus_limit)
@@ -230,7 +230,7 @@ def add_tie_line(circuit, circuit_path, circuit_name, tie_line, create_copy=True
 			omd_tie_name = tie_circuit_name
 		else:
 			omd_tie_name = circuit_name[:-4] + "." + tie_name + ".omd"
-		full_circuit_path = pJoin(__neoMetaModel__._omfDir, "scratch", omd_tie_name)
+		full_circuit_path = pJoin(__neoMetaModel__._omfDir, "scratch","tie_line_testing", omd_tie_name)
 		with open(full_circuit_path, 'w') as omdFile:
 			json.dump(circuit, omdFile)
 	else:
@@ -248,8 +248,10 @@ def run_fault_study(circuit, tempFilePath, faultDetails=None):
 	#TODO: look at the output files, see what happened to the loads.
 
 def _runModel():
+	# circuit_path = pJoin(__neoMetaModel__._omfDir,"static","publicFeeders")
+	# circuit_name = "iowa240c1.clean.dss.omd"
 	circuit_path = pJoin(__neoMetaModel__._omfDir,"static","publicFeeders")
-	circuit_name = "iowa240c1.clean.dss.omd"
+	circuit_name = "iowa240c2_working_coords.clean.omd"
 	full_circuit_name = pJoin(circuit_path, circuit_name)
 	with open(full_circuit_name, 'r') as omdFile:
 		circuit = json.load(omdFile)
@@ -270,7 +272,8 @@ def _runModel():
 	# Test find_candidate_pair()
 	potential_tie_lines = {}
 	# potential_tie_lines = find_candidate_pair(circuit, circuit_name, bus_limit=3, saved_ties=False)
-	potential_tie_lines = find_candidate_pair(circuit, circuit_name, bus_limit=3, saved_ties=True)
+	# potential_tie_lines = find_candidate_pair(circuit, circuit_name, bus_limit=3, saved_ties=True)
+	potential_tie_lines = find_candidate_pair(circuit, circuit_name, bus_limit=7)
 	# print("Potential tie lines: " + potential_tie_lines)
 	print("Selected buses are " + str(potential_tie_lines['selected_buses']))
 	print("Shortest physical distance between buses is " + '{0:.4f}'.format(potential_tie_lines['short_phys_val']) + "km between " + potential_tie_lines['short_phys_pair'][0] + " and " + potential_tie_lines['short_phys_pair'][1])
