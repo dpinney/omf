@@ -95,10 +95,12 @@
 	// var map = L.map('map').fitBounds(bounds);
 	var esri_images = L.esri.basemapLayer('Imagery').addTo(map);
 	var streets = L.esri.basemapLayer('Streets');
+	var blank = L.tileLayer('');
 	var layerControl = L.control.layers(
 		{
 			'Satellite': esri_images,
-			'Streets': streets
+			'Streets': streets,
+			'Blank': blank
 		},
 		{},
 		{

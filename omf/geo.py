@@ -174,13 +174,15 @@ def mapOmd(pathToOmdFile, outputPath, fileFormat, openBrowser=False, conversion=
 			os.makedirs(outputPath)
 		if offline == False:
 			shutil.copy(omf.omfDir + '/templates/geoJsonMap.html', outputPath)
+			fname = 'geoJsonMap.html'
 		else:
 			shutil.copy(omf.omfDir + '/templates/geoJsonMap_offline.html', outputPath)
+			fname = 'geoJsonMap_offline.html'
 		with open(pJoin(outputPath,'geoJsonFeatures.js'),"w") as outFile:
 			outFile.write("var geojson =")
 			json.dump(geoJsonDict, outFile, indent=4)
 		if openBrowser:
-			openInBrowser(pJoin(outputPath,'geoJsonMap.html'))
+			openInBrowser(pJoin(outputPath,fname))
 	elif fileFormat == 'png':
 		if not conversion:
 			with open(pathToOmdFile) as inFile:
@@ -667,7 +669,7 @@ def _tests():
 	# rasterTilesFromOmd(prefix / 'static/publicFeeders/Autocli Alberich Calibrated.omd', prefix / 'scratch/omdTests/autoclitiles', conversion=True)
 	# print(convertOmd(prefix / 'static/publicFeeders/Autocli Alberich Calibrated.omd'))
 	# mapOmd(pJoin(__neoMetaModel__._omfDir, 'static', 'publicFeeders', 'iowa240c2_working_coords.clean.omd'), pJoin(__neoMetaModel__._omfDir, 'scratch', 'MapTestOutput'), 'html', openBrowser=True, conversion=False)
-	fixMissingNodes(pJoin(__neoMetaModel__._omfDir, 'static', 'publicFeeders', 'iowa240c2_working_coords.clean.omd'), pJoin(__neoMetaModel__._omfDir, 'static', 'publicFeeders', 'iowa240c1.clean.dss.omd'), pJoin(__neoMetaModel__._omfDir, 'scratch', 'MapTestOutput', 'iowa240c2_fixed_coords2.clean.omd'))
+	# fixMissingNodes(pJoin(__neoMetaModel__._omfDir, 'static', 'publicFeeders', 'iowa240c2_working_coords.clean.omd'), pJoin(__neoMetaModel__._omfDir, 'static', 'publicFeeders', 'iowa240c1.clean.dss.omd'), pJoin(__neoMetaModel__._omfDir, 'scratch', 'MapTestOutput', 'iowa240c2_fixed_coords2.clean.omd'))
 	mapOmd(pJoin(__neoMetaModel__._omfDir, 'scratch', 'MapTestOutput', 'iowa240c2_fixed_coords2.clean.omd'), pJoin(__neoMetaModel__._omfDir, 'scratch', 'MapTestOutput'), 'html', openBrowser=True, conversion=False, offline=True)
 
 if __name__ == '__main__':
