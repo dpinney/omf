@@ -14,6 +14,10 @@
 		<link rel="stylesheet" href="/static/omf.css" />
 		<link rel="shortcut icon" href="/static/favicon.ico" />
 		<script type='text/javascript' src='/static/jquery-1.9.1.js'></script>
+		<script src="https://cdn.maptiler.com/mapbox-gl-js/v1.5.1/mapbox-gl.js"></script>
+		<script src="https://cdn.maptiler.com/mapbox-gl-leaflet/latest/leaflet-mapbox-gl.js"></script>
+		<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.0.3/leaflet.css" />
+		<link rel="stylesheet" href="https://cdn.maptiler.com/mapbox-gl-js/v1.5.1/mapbox-gl.css" />
 	</head>
 	<style>
 		#map {
@@ -108,12 +112,17 @@
 			var bounds = geojsonLayer.getBounds();
 			var map = L.map('map', { renderer: L.canvas() }).fitBounds(bounds);
 			var esri_images = L.esri.basemapLayer('Imagery').addTo(map);
-			var streets = L.esri.basemapLayer('Streets');
+			var topo = L.esri.basemapLayer('Streets');
 			var blank = L.tileLayer('');
+			var gl = L.mapboxGL({
+				attribution: "",
+				style: 'https://api.maptiler.com/maps/basic/style.json?key=WOwRKyy0L6AwPBuM4Ggj'
+			});
 			var layerControl = L.control.layers(
 				{
 					'Satellite': esri_images,
-					'Streets': streets,
+					'Streets': gl,
+					'Topo': topo,
 					'Blank': blank
 				},
 				{},
