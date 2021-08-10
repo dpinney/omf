@@ -8,6 +8,10 @@
 	<script src="https://unpkg.com/leaflet@1.0.3/dist/leaflet.js" integrity="sha512-A7vV8IFfih/D732iSSKi20u/ooOfj/AGehOKq0f4vLT1Zr2Y+RX7C+w8A1gaSasGtRUZpF/NZgzSAu4/Gc41Lg=="
 		crossorigin=""></script>
 	<script src="https://unpkg.com/esri-leaflet@2.5.0/dist/esri-leaflet.js" integrity="sha512-ucw7Grpc+iEQZa711gcjgMBnmd9qju1CICsRaryvX7HJklK0pGl/prxKvtHwpgm5ZHdvAil7YPxI1oWPOWK3UQ==" crossorigin=""></script>
+	<script src="https://cdn.maptiler.com/mapbox-gl-js/v1.5.1/mapbox-gl.js"></script>
+	<script src="https://cdn.maptiler.com/mapbox-gl-leaflet/latest/leaflet-mapbox-gl.js"></script>
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.0.3/leaflet.css" />
+	<link rel="stylesheet" href="https://cdn.maptiler.com/mapbox-gl-js/v1.5.1/mapbox-gl.css" />
 </head>
 	<style>html, body {
 		width: 100%;
@@ -26,7 +30,7 @@
 </head>
 <body>
 	<div id="map"></div>
-	<script>var geojson={% if geojson %}{{geojson | tojson}}{% else %}null{% endif %}</script>
+	<!-- <script>var geojson={% if geojson %}{{geojson | tojson}}{% else %}null{% endif %}</script> -->
 	<script type="text/javascript" src="geoJsonFeatures.js"></script>
 	<script type="text/javascript">
 	function onEachFeature(feature, layer) {
@@ -94,11 +98,18 @@
 	// Optional SVG Renderer:
 	// var map = L.map('map').fitBounds(bounds);
 	var esri_images = L.esri.basemapLayer('Imagery').addTo(map);
-	var streets = L.esri.basemapLayer('Streets');
+	var topo = L.esri.basemapLayer('Streets');
+	var blank = L.tileLayer('');
+	var gl = L.mapboxGL({
+		attribution: "",
+		style: 'https://api.maptiler.com/maps/basic/style.json?key=WOwRKyy0L6AwPBuM4Ggj'
+	});
 	var layerControl = L.control.layers(
 		{
 			'Satellite': esri_images,
-			'Streets': streets
+			'Streets': gl,
+			'Topo': topo,
+			'Blank': blank
 		},
 		{},
 		{

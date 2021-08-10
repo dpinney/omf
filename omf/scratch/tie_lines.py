@@ -41,6 +41,14 @@ def node_distance(circuit, node_name_1, node_name_2):
 	coords_1 = (lat_1, lon_1)
 	coords_2 = (lat_2, lon_2)
 	dist = distance.distance(coords_1, coords_2).km
+	# if dist_units == 'km':
+	# 	dist = distance.distance(coords_1, coords_2).km
+	# elif dist_units == 'ft':
+	# 	dist = distance.distance(coords_1, coords_2).ft
+	# elif dist_units == 'mi':
+	# 	dist = distance.distance(coords_1, coords_2).mi
+	# else:
+	# 	dist = distance.distance(coords_1, coords_2).km
 	return dist
 
 def path_distance(circuit, node_name_1, node_name_2):
@@ -68,13 +76,24 @@ def path_distance(circuit, node_name_1, node_name_2):
 
 	return distance
 
-def find_all_ties(circuit, circuit_name, bus_limit):
+def find_all_ties(circuit, circuit_name, bus_limit=-1):
 	#Given a cicuit, find all possible tie lines between all nodes, excluding ones that already exist
 	all_ties = {}
 	all_ties_json = {}
 	nodes = {}
 	nodes_limited = {}
 	existing_lines = {}
+
+	# Create networkx graph
+	circuit_graph = feeder.treeToNxGraph(circuit["tree"])
+
+	for omdObj in circuit["tree"]:
+		if circuit["tree"][omdObj]["object"] == "line":
+			line_name = circuit["tree"][omdObj]["name"]
+			line_from = circuit["tree"][omdObj]["from"]
+			line_to = circuit["tree"][omdObj]["to"]
+			circuit_graph.edges[line_from, line_to]["weight"] = node_distance(circuit, line_from, line_to)
+
 	# keys for the dict are pairs of node names, with the first value being physical distance and second being path distance
 	for omdObj in circuit["tree"]:
 		if circuit["tree"][omdObj]["object"] == "line":
@@ -123,7 +142,15 @@ def find_all_ties(circuit, circuit_name, bus_limit):
 					# Make sure you haven't already added (node1, node2) to your list of possible tie lines
 					if (not contains_3) and (not contains_4):
 						physical_dist = node_distance(circuit, node1, node2)
-						path_dist = path_distance(circuit, node1, node2)
+						path_dist = -1
+						try:
+							# This returns the number of edges between the source and target node, but doesn't incorporate length of the path as a weight
+							#distance = nx.shortest_path_length(circuit_graph, source=node_name_1, target=node_name_2, weight="length")
+							path_dist, path_list = nx.single_source_dijkstra(circuit_graph, source=node1, target=node2, cutoff=None, weight="weight")
+							#distance = nx.single_source_dijkstra_path_length(circuit_graph, source=node_name_1, target=node_name_2, weight=)
+						except nx.NetworkXNoPath:
+							path_dist = -1.0
+						#path_dist = path_distance(circuit, node1, node2)
 						all_ties[(node1, node2)] = [physical_dist, path_dist]
 						# json cannot have tuples as keys, so make a new dict with string type keys
 						json_key = ", ".join((node1, node2))
@@ -132,11 +159,11 @@ def find_all_ties(circuit, circuit_name, bus_limit):
 						print("New addition to all_ties: (" + json_key + "): [" + tie_str + "]")
 	# For testing purposes, save all_ties dict to a file to prevent LONG runtime of find_all_ties()
 	ties_file_name = circuit_name+"_allTies.json"
-	with open(pJoin(__neoMetaModel__._omfDir,"scratch",ties_file_name), 'w') as jsonFile:
+	with open(pJoin(__neoMetaModel__._omfDir,"scratch","tie_line_testing",ties_file_name), 'w') as jsonFile:
 		json.dump(all_ties_json, jsonFile)
 	return all_ties
 
-def find_candidate_pair(circuit, circuit_name, bus_limit, saved_ties):
+def find_candidate_pair(circuit, circuit_name, bus_limit=-1, saved_ties=False):
 	candidates = {}
 	all_ties = {}
 	short_phys_pair = ()
@@ -149,19 +176,21 @@ def find_candidate_pair(circuit, circuit_name, bus_limit, saved_ties):
 		# read in values from saved json file with all ties
 		ties_file_name = circuit_name+"_allTies.json"
 		try:
-			with open(pJoin(__neoMetaModel__._omfDir,"scratch",ties_file_name), 'r') as tiesFile:
+			with open(pJoin(__neoMetaModel__._omfDir,"scratch","tie_line_testing",ties_file_name), 'r') as tiesFile:
 				all_ties_json = json.load(tiesFile)
 				# Convert json string key back into tuple
 				for tie_key in all_ties_json:
 					if tie_key != "selected_buses":
 						tuple_key = tuple(tie_key.split(", "))
 						all_ties[tuple_key] = all_ties_json[tie_key]
+					else:
+						all_ties[tie_key] = all_ties_json[tie_key]
 		except IOError as e:
-			print("Error reading " + pJoin(__neoMetaModel__._omfDir,"scratch",ties_file_name) + ":")
+			print("Error reading " + pJoin(__neoMetaModel__._omfDir,"scratch","tie_line_testing",ties_file_name) + ":")
 			print(e)
 			all_ties = find_all_ties(circuit, circuit_name, bus_limit=bus_limit)
 		except:
-			print("Unknown Error reading " + pJoin(__neoMetaModel__._omfDir,"scratch",ties_file_name) + ":")
+			print("Unknown Error reading " + pJoin(__neoMetaModel__._omfDir,"scratch","tie_line_testing",ties_file_name) + ":")
 			all_ties = find_all_ties(circuit, circuit_name, bus_limit=bus_limit)
 	else:
 		all_ties = find_all_ties(circuit, circuit_name, bus_limit=bus_limit)
@@ -196,6 +225,40 @@ def find_candidate_pair(circuit, circuit_name, bus_limit, saved_ties):
 
 	return candidates
 
+def add_tie_line(circuit, circuit_path, circuit_name, tie_line, create_copy=True, tie_circuit_name = None):
+	lineOb_index = len(circuit["tree"])+1
+	#create new line object for given tie line
+	tie_from = tie_line[0]
+	tie_to = tie_line[1]
+	tie_name = "tie_" + tie_from + "_" + tie_to
+	tie_length = node_distance(circuit, tie_from, tie_to)
+	tie_info = {"object": "line",
+				"name": tie_name,
+				"from": tie_from,
+				"to": tie_to,
+				"!FROCODE": ".1.2.3",
+				"!TOCODE": ".1.2.3",
+				"phases": "3",
+				"length": tie_length,
+				"units": "km",
+				"linecode": "ug_3p_type1"}
+	circuit["tree"][lineOb_index] = tie_info
+	if create_copy:
+		# create new file in scratch folder
+		if tie_circuit_name != None:
+			omd_tie_name = tie_circuit_name
+		else:
+			omd_tie_name = circuit_name[:-4] + "." + tie_name + ".omd"
+		full_circuit_path = pJoin(__neoMetaModel__._omfDir, "scratch","tie_line_testing", omd_tie_name)
+		with open(full_circuit_path, 'w') as omdFile:
+			json.dump(circuit, omdFile)
+	else:
+		# edit the original omd
+		full_circuit_path = pJoin(circuit_path, circuit_name)
+		with open(full_circuit_path, w) as omdFile:
+			json.dump(circuit, omdFile)
+	return full_circuit_path
+
 def run_fault_study(circuit, tempFilePath, faultDetails=None):
 	niceDss = dssConvert.evilGldTreeToDssTree(tree)
 	dssConvert.treeToDss(niceDss, tempFilePath)
@@ -204,32 +267,44 @@ def run_fault_study(circuit, tempFilePath, faultDetails=None):
 	#TODO: look at the output files, see what happened to the loads.
 
 def _runModel():
-	full_circuit_name = pJoin(__neoMetaModel__._omfDir,"static","publicFeeders","iowa240c1.clean.dss.omd")
-	circuit_name = "iowa240c1.clean.dss.omd"
+	# circuit_path = pJoin(__neoMetaModel__._omfDir,"static","publicFeeders")
+	# circuit_name = "iowa240c1.clean.dss.omd"
+	circuit_path = pJoin(__neoMetaModel__._omfDir,"static","publicFeeders")
+	circuit_name = "iowa240c2_working_coords.clean.omd"
+	full_circuit_name = pJoin(circuit_path, circuit_name)
 	with open(full_circuit_name, 'r') as omdFile:
 		circuit = json.load(omdFile)
 	# Test node_distance()
 	load1 = "load_1003"
 	load2 = "load_3019"
+	dist_units = "km"
 	dist1 = node_distance(circuit, load1, load2)
 	dist2 = path_distance(circuit, load1, load2)
-	print("Straight distance from " + load1 + " to " + load2 + " = " + str(dist1) + "km")
+	print("Straight distance from " + load1 + " to " + load2 + " = " + str(dist1) + dist_units)
 	if dist2 == -1.0:
 		print(load1 + " and " + load2 + " are not connected.")
 	else:
-		print("Line distance from " + load1 + " to " + load2 + " = " + str(dist2) + "km")
+		print("Line distance from " + load1 + " to " + load2 + " = " + str(dist2) + dist_units)
 	# Test find_all_ties()
 	# all_ties_list = find_all_ties(circuit, circuit_name, bus_limit=5)
 	# print("find_all_ties() completed!")
 	# Test find_candidate_pair()
 	potential_tie_lines = {}
-	potential_tie_lines = find_candidate_pair(circuit, circuit_name, bus_limit=3, saved_ties=False)
+	# potential_tie_lines = find_candidate_pair(circuit, circuit_name, bus_limit=3, saved_ties=False)
 	# potential_tie_lines = find_candidate_pair(circuit, circuit_name, bus_limit=3, saved_ties=True)
+	potential_tie_lines = find_candidate_pair(circuit, circuit_name)
 	# print("Potential tie lines: " + potential_tie_lines)
 	print("Selected buses are " + str(potential_tie_lines['selected_buses']))
 	print("Shortest physical distance between buses is " + '{0:.4f}'.format(potential_tie_lines['short_phys_val']) + "km between " + potential_tie_lines['short_phys_pair'][0] + " and " + potential_tie_lines['short_phys_pair'][1])
 	print("Longest line distance between buses is " + '{0:.4f}'.format(potential_tie_lines['long_path_val']) + "km between " + potential_tie_lines['long_path_pair'][0] + " and " + potential_tie_lines['long_path_pair'][1])
 	print("Greatest difference of line and physical distance between buses is " + '{0:.4f}'.format(potential_tie_lines['phys_path_dif_val']) + "km between " + potential_tie_lines['phys_path_dif_pair'][0] + " and " + potential_tie_lines['phys_path_dif_pair'][1])
+	# Add the tie line(s) to the omd file and visualize
+	tie_line_to_add = potential_tie_lines['phys_path_dif_pair']
+	omd_with_tie_path = add_tie_line(circuit, circuit_path, circuit_name, tie_line_to_add, create_copy=True)
+	# visualize original circuit
+	distNetViz.viz(full_circuit_name, forceLayout=False, outputPath=None)
+	# visualize circuit with tie line
+	distNetViz.viz(omd_with_tie_path, forceLayout=False, outputPath=None)
 
 
 if __name__ == '__main__':

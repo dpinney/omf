@@ -7,6 +7,7 @@ import networkx as nx
 import numpy as np
 from scipy.spatial import ConvexHull
 from sklearn.cluster import KMeans
+from jinja2 import Template
 from flask import Flask, send_file, render_template
 from matplotlib import pyplot as plt
 
@@ -155,7 +156,7 @@ def omdGeoJson(pathToOmdFile, conversion=False):
 	#	json.dump(geoJsonDict, outFile, indent=4)
 
 
-def mapOmd(pathToOmdFile, outputPath, fileFormat, openBrowser=False, conversion=False, offline=False):
+def mapOmd(pathToOmdFile, outputPath, fileFormat, openBrowser=False, conversion=False):
 	'''
 	Draw an omd on a map.
 	
@@ -167,20 +168,22 @@ def mapOmd(pathToOmdFile, outputPath, fileFormat, openBrowser=False, conversion=
 	if fileFormat == 'html':
 		if not conversion:
 			geoJsonDict = omdGeoJson(pathToOmdFile)
-		#use conversion for testing other feeders
-		if conversion:
+		else:
 			geoJsonDict = omdGeoJson(pathToOmdFile, conversion=True)
 		if not os.path.exists(outputPath):
 			os.makedirs(outputPath)
-		if offline == False:
-			shutil.copy(omf.omfDir + '/templates/geoJsonMap.html', outputPath)
-		else:
-			shutil.copy(omf.omfDir + '/templates/geoJsonMap_offline.html', outputPath)
-		with open(pJoin(outputPath,'geoJsonFeatures.js'),"w") as outFile:
-			outFile.write("var geojson =")
-			json.dump(geoJsonDict, outFile, indent=4)
+		# Render html
+		offline_template = open(omf.omfDir + '/templates/geoJsonMap_offline.html','r').read()
+		rendered = Template(offline_template).render(geojson=geoJsonDict)
+		with open(os.path.join(outputPath,'geoJsonMap_offline.html'),'w') as outFile:
+			outFile.write(rendered)
+		# Deprecated js include method.
+		# shutil.copy(omf.omfDir + '/templates/geoJsonMap_offline.html', outputPath)
+		# with open(pJoin(outputPath,'geoJsonFeatures.js'),"w") as outFile:
+		# 	outFile.write("var geojson =")
+		# 	json.dump(geoJsonDict, outFile, indent=4)
 		if openBrowser:
-			openInBrowser(pJoin(outputPath,'geoJsonMap.html'))
+			openInBrowser(pJoin(outputPath,'geoJsonMap_offline.html'))
 	elif fileFormat == 'png':
 		if not conversion:
 			with open(pathToOmdFile) as inFile:
@@ -667,8 +670,8 @@ def _tests():
 	# rasterTilesFromOmd(prefix / 'static/publicFeeders/Autocli Alberich Calibrated.omd', prefix / 'scratch/omdTests/autoclitiles', conversion=True)
 	# print(convertOmd(prefix / 'static/publicFeeders/Autocli Alberich Calibrated.omd'))
 	# mapOmd(pJoin(__neoMetaModel__._omfDir, 'static', 'publicFeeders', 'iowa240c2_working_coords.clean.omd'), pJoin(__neoMetaModel__._omfDir, 'scratch', 'MapTestOutput'), 'html', openBrowser=True, conversion=False)
-	fixMissingNodes(pJoin(__neoMetaModel__._omfDir, 'static', 'publicFeeders', 'iowa240c2_working_coords.clean.omd'), pJoin(__neoMetaModel__._omfDir, 'static', 'publicFeeders', 'iowa240c1.clean.dss.omd'), pJoin(__neoMetaModel__._omfDir, 'scratch', 'MapTestOutput', 'iowa240c2_fixed_coords2.clean.omd'))
-	mapOmd(pJoin(__neoMetaModel__._omfDir, 'scratch', 'MapTestOutput', 'iowa240c2_fixed_coords2.clean.omd'), pJoin(__neoMetaModel__._omfDir, 'scratch', 'MapTestOutput'), 'html', openBrowser=True, conversion=False, offline=True)
+	# fixMissingNodes(pJoin(__neoMetaModel__._omfDir, 'static', 'publicFeeders', 'iowa240c2_working_coords.clean.omd'), pJoin(__neoMetaModel__._omfDir, 'static', 'publicFeeders', 'iowa240c1.clean.dss.omd'), pJoin(__neoMetaModel__._omfDir, 'scratch', 'MapTestOutput', 'iowa240c2_fixed_coords2.clean.omd'))
+	mapOmd(pJoin(__neoMetaModel__._omfDir, 'scratch', 'MapTestOutput', 'iowa240c2_fixed_coords2.clean.omd'), pJoin(__neoMetaModel__._omfDir, 'scratch', 'MapTestOutput'), 'html', openBrowser=True, conversion=False)
 
 if __name__ == '__main__':
 	_tests()
