@@ -137,9 +137,9 @@ def new_newQstsPlot(filePath, stepSizeInMinutes, numberOfSteps, keepAllFiles=Fal
 	for name in mon_names:
 		dss_run_file += f'export monitors monitorname={name}\n'
 	# Write runner file and run.
-	os.system(f'opendsscmd {dssFileLoc}/dss_run_file.dss')
 	with open(f'{dssFileLoc}/dss_run_file.dss', 'w') as run_file:
 		run_file.write(dss_run_file)
+	os.system(f'opendsscmd {dssFileLoc}/dss_run_file.dss')
 	# Aggregate monitors
 	all_gen_df = pd.DataFrame()
 	all_load_df = pd.DataFrame()
@@ -359,7 +359,7 @@ def newQstsPlot(filePath, stepSizeInMinutes, numberOfSteps, keepAllFiles=False, 
 				df[[' V1']] = df[[' V1']] * math.sqrt(3)
 				df[[' V2']] = df[[' V2']] * math.sqrt(3)
 				df[[' V3']] = df[[' V3']] * math.sqrt(3)
-			#TODO: fix phase attachment for split phase transformers. It's going to be e.g. blah.2.3 means v1->v2, v2->v3
+				#TODO: fix phase attachment for split phase transformers. It's going to be e.g. blah.2.3 means v1->v2, v2->v3
 			# print("df after phase reassignment:")
 			# print(df.head(10))
 			df['Name'] = name
