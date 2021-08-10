@@ -348,6 +348,18 @@
 				<label class="tooltip">Value of Lost Load ($/kWh)<span class="classic">Specify the value of lost load during a power outage in $/kWh.</span></label>
 				<input type="text" id="value_of_lost_load" name="value_of_lost_load" pattern="^\d+\.?\d*?$" required="required"/>
 			</div>
+			<div class="shortInput">
+				<label class="tooltip">Use URDB Rate?<span class="classic">Utilizing a rate from the Utility Rate Database overrides Cost of Energy and Cost of Demand rates above. See https://openei.org/services/doc/rest/util_rates/?version=3</span></label>
+				<select id="urdbLabelSwitch" name="urdbLabelSwitch"/>
+					<option value="on">Yes</option>
+					<option value="off">No</option>
+				</select>
+			</div>
+			<div class="shortInput">
+				<label class="tooltip">URDB Label<span class="classic">Input the string found at the end of the URDB Rate URL, For example https://openei.org/apps/IURDB/rate/view/5b75cfe95457a3454faf0aea would yield "5b75cfe95457a3454faf0aea"</span></label>
+				<input type="text" id="urdbLabel" name="urdbLabel" required="required"/>
+			</div>
+
 			
 			<div class="wideInput">
 				<p class="inputSectionHeader">Generation Technologies</p>

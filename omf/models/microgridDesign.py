@@ -22,10 +22,12 @@ def work(modelDir, inputDict):
 	solar = inputDict['solar'] 
 	wind = inputDict['wind']
 	battery = inputDict['battery']
+	urdbLabelSwitch = inputDict['urdbLabelSwitch']
 	outData['solar'] = inputDict['solar']
 	outData['wind'] = inputDict['wind']
 	outData['battery'] = inputDict['battery']
 	outData['year'] = inputDict['year']
+	outData['urdbLabelSwitch'] = inputDict['urdbLabelSwitch']
 
 	# Setting up the loadShape file.
 	with open(pJoin(modelDir,"loadShape.csv"),"w") as loadShapeFile:
@@ -64,6 +66,8 @@ def work(modelDir, inputDict):
 	longitude = float(inputDict['longitude'])
 	energyCost = float(inputDict['energyCost'])
 	demandCost = float(inputDict['demandCost'])
+	if urdbLabelSwitch == 'on':
+		urdbLabel = str(inputDict['urdbLabel'])
 	# TODO: Enable all instances of 'annualCostSwitch', 'energyCostMonthly', 'demandCostMonthly' in mgDesign.py once a suitable way to enter a list of 12 monthly rates is found for mgDesign.html
 	# annualCostSwitch = inputDict['annualCostSwitch']
 	# energyCostMonthly = inputDict['energyCostMonthly']
@@ -166,9 +170,6 @@ def work(modelDir, inputDict):
 					"latitude": latitude,
 					"longitude": longitude,
 					"ElectricTariff": {
-						"urdb_rate_name": "custom",
-						"blended_annual_rates_us_dollars_per_kwh": energyCost,
-						"blended_annual_demand_charges_us_dollars_per_kw": demandCost,
 						"wholesale_rate_us_dollars_per_kwh": wholesaleCost,
 						"wholesale_rate_above_site_load_us_dollars_per_kwh": wholesaleCost
 					},
@@ -260,6 +261,14 @@ def work(modelDir, inputDict):
 				scenario['Scenario']['Site']['Generator']['min_kw'] = dieselMin - genExisting
 			else:
 				scenario['Scenario']['Site']['Generator']['min_kw'] = 0
+
+		# set rates
+		if urdbLabelSwitch == 'off':
+			scenario['Scenario']['Site']['ElectricTariff']['blended_annual_rates_us_dollars_per_kwh'] = energyCost
+			scenario['Scenario']['Site']['ElectricTariff']['blended_annual_demand_charges_us_dollars_per_kw'] = demandCost
+		elif urdbLabelSwitch == 'on':
+			scenario['Scenario']['Site']['ElectricTariff']['urdb_label'] = urdbLabel
+
 
 		with open(pJoin(modelDir, "Scenario_test_POST.json"), "w") as jsonFile:
 			json.dump(scenario, jsonFile)
@@ -704,6 +713,8 @@ def new(modelDir):
 		"analysisYears" : '25',
 		"energyCost" : "0.1",
 		"demandCost" : '20',
+		"urdbLabelSwitch": "on",
+		"urdbLabel" : '5b75cfe95457a3454faf0aea',
 		# TODO: Enable all instances of 'annualCostSwitch', 'energyCostMonthly', 'demandCostMonthly' in mgDesign.py once a suitable way to enter a list of 12 monthly rates is found for mgDesign.html
 		# "annualCostSwitch": "off",
 		# "energyCostMonthly" : [0.0531, 0.0531, 0.0531, 0.0531, 0.0531, 0.0531, 0.0531, 0.0531, 0.0531, 0.0531, 0.0531, 0.0531],
