@@ -713,7 +713,7 @@ def new(modelDir):
 		"analysisYears" : '25',
 		"energyCost" : "0.1",
 		"demandCost" : '20',
-		"urdbLabelSwitch": "on",
+		"urdbLabelSwitch": "off",
 		"urdbLabel" : '5b75cfe95457a3454faf0aea',
 		# TODO: Enable all instances of 'annualCostSwitch', 'energyCostMonthly', 'demandCostMonthly' in mgDesign.py once a suitable way to enter a list of 12 monthly rates is found for mgDesign.html
 		# "annualCostSwitch": "off",
@@ -743,7 +743,7 @@ def new(modelDir):
 		"fuelAvailable": "20000",
 		"genExisting": 0,
 		"minGenLoading": "0.3",
-		"dieselFuelCostGal": "0.543", # default value for diesel
+		"dieselFuelCostGal": "3", # default value for diesel
 		"dieselCO2Factor": 22.4, # default value for diesel
 		"dieselOMCostKw": 10, # default value for diesel
 		"dieselOMCostKwh": 0, # default value for diesel
