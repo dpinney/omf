@@ -1,7 +1,0 @@
-{
-  "title": "fault_currents.v1",
-  "type": "array",
-  "items": {
-    "type": "object"
-  }
-}
