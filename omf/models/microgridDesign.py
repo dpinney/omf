@@ -73,6 +73,7 @@ def work(modelDir, inputDict):
 	# energyCostMonthly = inputDict['energyCostMonthly']
 	# demandCostMonthly = inputDict['demandCostMonthly']
 	wholesaleCost = float(inputDict['wholesaleCost'])
+	omCostEscalator = float(inputDict['omCostEscalator'])
 	year = int(inputDict['year'])
 	analysisYears = int(inputDict['analysisYears'])
 	criticalLoadFactor = float(inputDict['criticalLoadFactor'])
@@ -179,7 +180,8 @@ def work(modelDir, inputDict):
 					},
 					"Financial": {
 						"value_of_lost_load_us_dollars_per_kwh": value_of_lost_load,
-						"analysis_years": analysisYears
+						"analysis_years": analysisYears,
+						"om_cost_escalation_pct": omCostEscalator
 					},
 					"PV": {
 						"installed_cost_us_dollars_per_kw": solarCost,
@@ -720,6 +722,7 @@ def new(modelDir):
 		# "energyCostMonthly" : [0.0531, 0.0531, 0.0531, 0.0531, 0.0531, 0.0531, 0.0531, 0.0531, 0.0531, 0.0531, 0.0531, 0.0531],
 		# "demandCostMonthly" : [8.6879, 8.6879, 8.6879, 8.6879, 8.6879, 8.6879, 8.6879, 8.6879, 8.6879, 8.6879, 8.6879, 8.6879],
 		"wholesaleCost" : "0.034",
+		"omCostEscalator" : "0.025", # annual O+M cost escalation rate for all generation types
 		"solarCost" : "1600",
 		"windCost" : "4898",
 		"batteryPowerCost" : "840",

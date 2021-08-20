@@ -333,31 +333,35 @@
 				<input type="number" id="analysisYears" name="analysisYears" step="1" min="2" max="75"  required="required"/>
 			</div>
 			<div class="shortInput">
-				<label class="tooltip">Cost of Energy ($/kWh)<span class="classic">Specify the energy cost in $/kWh.</span></label>
+				<label class="tooltip">Cost of Energy ($/kWh)<span class="classic">Specify the energy cost in $/kWh. Format 0.XX</span></label>
 				<input type="text" id="energyCost" name="energyCost" pattern="^\d+\.?\d*?$" required="required"/>
 			</div>
 			<div class="shortInput">
-				<label class="tooltip">Cost of Demand ($/kW)<span class="classic">Specify the demand cost in $/kW.</span></label>
+				<label class="tooltip">Cost of Demand ($/kW)<span class="classic">Specify the demand cost in $/kW. Format 0.XX</span></label>
 				<input type="text" id="demandCost" name="demandCost" pattern="^\d+\.?\d*?$" required="required"/>
 			</div>
 			<div class="shortInput">
-				<label class="tooltip">Wholesale Price ($/kWh)<span class="classic">Specify wholesale price for selling excess electricity back to the grid operator.</span></label>
+				<label class="tooltip">Wholesale Price ($/kWh)<span class="classic">Specify wholesale price for selling excess electricity back to the grid operator. Format 0.XX</span></label>
 				<input type="text" id="wholesaleCost" name="wholesaleCost" pattern="^\d+\.?\d*?$" required="required"/>
 			</div>
 			<div class="shortInput">
-				<label class="tooltip">Value of Lost Load ($/kWh)<span class="classic">Specify the value of lost load during a power outage in $/kWh.</span></label>
+				<label class="tooltip">Value of Lost Load ($/kWh)<span class="classic">Specify the value of lost load during a power outage in $/kWh. </span></label>
 				<input type="text" id="value_of_lost_load" name="value_of_lost_load" pattern="^\d+\.?\d*?$" required="required"/>
 			</div>
 			<div class="shortInput">
-				<label class="tooltip">Use URDB Rate?<span class="classic">Utilizing a rate from the Utility Rate Database overrides Cost of Energy and Cost of Demand rates above. See https://openei.org/services/doc/rest/util_rates/?version=3</span></label>
+				<label class="tooltip">Use URDB Rate?<span class="classic">Utilizing a rate from the Utility Rate Database overrides Cost of Energy and Cost of Demand rates above. See https://openei.org/services/<br>doc/rest/util_rates/</span></label>
 				<select id="urdbLabelSwitch" name="urdbLabelSwitch"/>
 					<option value="on">Yes</option>
 					<option value="off">No</option>
 				</select>
 			</div>
 			<div class="shortInput">
-				<label class="tooltip">URDB Label<span class="classic">Input the string found at the end of the URDB Rate URL, For example https://openei.org/apps/IURDB/rate/view/5b75cfe95457a3454faf0aea would yield "5b75cfe95457a3454faf0aea"</span></label>
+				<label class="tooltip">URDB Label<span class="classic">Input the string found at the end of the URDB Rate URL, For example https://openei.org/apps/<br>IURDB/rate/view/<br> 5b75cfe95457a3454faf0aea <br> would yield "5b75cfe95457a3454faf0aea"</span></label>
 				<input type="text" id="urdbLabel" name="urdbLabel" required="required"/>
+			</div>
+			<div class="shortInput">
+				<label class="tooltip">O+M Escalation <span class="classic">Please enter a number 0-1 for the Annual nominal O&M cost escalation rate. Format 0.XX</span></label>
+				<input type="number" id="omCostEscalator" name="omCostEscalator" step="0.01" min="0.0" max="1.0" required="required"/>
 			</div>
 
 			
@@ -473,7 +477,7 @@
 				</select>
 			</div>
 			<div class="shortInput">
-				<label class="tooltip">Optional Critical Load Shape (.csv) <span class="classic">Optional: Please enter the name of a .csv file representing the hourly critical load shape. Number of columns much match LoadShape file. Overrides "Critical Load Factor" if present</span></label>
+				<label class="tooltip">Optional Critical Load Shape (.csv) <span class="classic">Optional: Please enter the name of a .csv file representing the hourly critical load shape. Number of columns much match LoadShape file. Overrides "Critical Load Factor" if present.</span></label>
 				<input id="criticalLoadShapeFile" type="file" style="display:none" onchange="handle_files(this.files,'criticalLoadShape','criticalFileName')">
 				<input id="criticalLoadShape" name="criticalLoadShape" type="hidden">
 				<div>
@@ -482,7 +486,7 @@
 				</div>
 			</div>
 			<div class="shortInput">
-				<label class="tooltip">Critical Load Factor<span class="classic">Please enter a number 0-1 for the fraction of total typical load that must be met during a grid outage.</span></label>
+				<label class="tooltip">Critical Load Factor<span class="classic">Please enter a number 0-1 for the fraction of total typical load that must be met during a grid outage. Format 0.XX</span></label>
 				<input type="number" id="criticalLoadFactor" name="criticalLoadFactor" step="0.01" min="0.0" max="1.0" required="required"/>
 			</div>
 			<div class="shortInput">
@@ -494,7 +498,7 @@
 				<input type="text" id="fuelAvailable" name="fuelAvailable" required="required"/>
 			</div>
 			<div class="shortInput">
-				<label class="tooltip">Minimum Generator Loading<span class="classic">Please enter a number 0-1 for the the minimum fraction of rated total kVA load that must be maintained by the generator. >/= 0.3 recommended for extended diesel operation. Set to 0 for highest likelihood of success in solving optimization.</span></label>
+				<label class="tooltip">Minimum Generator Loading<span class="classic">Please enter a number 0-1 for the the minimum fraction of rated total kVA load that must be maintained by the generator. >/= 0.3 recommended for extended diesel operation. Set to 0 for highest likelihood of success in solving optimization. Format 0.XX</span></label>
 				<input type="number" id="minGenLoading" name="minGenLoading" step="0.01" min="0.0" max="1.0"  required="required"/>
 			</div>
 			<div class="shortInput">
@@ -510,7 +514,7 @@
 				<input type="text" id="dieselMax" name="dieselMax" pattern="^\d+\.?\d*?$" required="required"/>
 			</div>
 			<div class="shortInput">
-				<label class="tooltip">Fossil Fuel Cost (gal)<span class="classic">Specify cost of fuel in $ per gallon. To convert $/MMBTU of Natural gas to gallons, divide $/MMBTU market rate by 4.85 to account for 50% lower efficiency of natural gas reciprocating engines and lower fuel density as compared to diesel.</span></label>
+				<label class="tooltip">Fossil Fuel Cost (gal)<span class="classic">Specify cost of fuel in $ per gallon. To convert $/MMBTU of Natural gas to gallons, divide $/MMBTU market rate by 4.85 to account for 50% lower efficiency of natural gas reciprocating engines and lower fuel density as compared to diesel. Format X.XX</span></label>
 				<input type="text" id="dieselFuelCostGal" name="dieselFuelCostGal" pattern="^\d+\.?\d*?$" required="required"/>
 			</div>
 			<div class="shortInput">
@@ -522,7 +526,7 @@
 				<input type="text" id="dieselOMCostKw" name="dieselOMCostKw" pattern="^\d+\.?\d*?$" required="required"/>
 			</div>
 			<div class="shortInput">
-				<label class="tooltip">Fossil O+M Cost ($/kWh/year)<span class="classic">Specify annual operations and maintenance cost per kilowatt-hour per year. Format "0.XX"</span></label>
+				<label class="tooltip">Fossil O+M Cost ($/kWh/year)<span class="classic">Specify annual operations and maintenance cost per kilowatt-hour per year. Format "X.XX"</span></label>
 				<input type="text" id="dieselOMCostKwh" name="dieselOMCostKwh" pattern="^\d+\.?\d*?$" required="required"/>
 			</div>
 			<div class="shortInput">
