@@ -360,7 +360,7 @@
 				<input type="text" id="urdbLabel" name="urdbLabel" required="required"/>
 			</div>
 			<div class="shortInput">
-				<label class="tooltip">O+M Escalation <span class="classic">Please enter a number 0-1 for the Annual nominal O&M cost escalation rate. Format 0.XX</span></label>
+				<label class="tooltip">O+M Escalation (% per year)<span class="classic">Please enter a number 0-1 for the Annual nominal O&M cost escalation rate. Format 0.XX</span></label>
 				<input type="number" id="omCostEscalator" name="omCostEscalator" step="0.01" min="0.0" max="1.0" required="required"/>
 			</div>
 
@@ -420,6 +420,14 @@
 					<option value=false>No</option>
 				</select>
 			</div>
+			<div class="shortInput">
+				<label class="tooltip">Solar MACRS Years<span class="classic">MACRS schedule for financial analysis. Possible inputs are 0, 5 and 7 years. Set to zero to disable accelerated deprection accounting for solar.</span></label>
+				<input type="number" id="solarMacrsOptionYears" name="solarMacrsOptionYears" min="0" max="7" required="required"/>
+			</div>
+			<div class="shortInput">
+				<label class="tooltip">Solar ITC (%)<span class="classic">Please enter a number 0-1 for the solar investment tax credit. Format 0.XX</span></label>
+				<input type="number" id="solarItcPercent" name="solarItcPercent" step="0.01" min="0.0" max="1.0" required="required"/>
+			</div>
 			<div class="shortInput windDisplayInput">
 				<label class="tooltip">Wind Cost ($/kW)<span class="classic">Specify the cost in $/kW.</span></label>
 				<input type="text" id="windCost" name="windCost" pattern="^\d+\.?\d*?$" required="required"/>
@@ -431,6 +439,14 @@
 			<div class="shortInput windDisplayInput">
 				<label class="tooltip">Wind Maximum Power (kW)<span class="classic">Specify the maximum desired generation in kW. Leave at default for full optimization on wind power.</span></label>
 				<input type="text" id="windMax" name="windMax" required="required"/>
+			</div>
+			<div class="shortInput">
+				<label class="tooltip">Wind MACRS Years<span class="classic">MACRS schedule for financial analysis. Possible inputs are 0, 5 and 7 years. Set to zero to disable accelerated deprection accounting for wind.</span></label>
+				<input type="number" id="windMacrsOptionYears" name="windMacrsOptionYears" min="0" max="7" required="required"/>
+			</div>
+			<div class="shortInput">
+				<label class="tooltip">Wind ITC (%)<span class="classic">Please enter a number 0-1 for the wind investment tax credit. Format 0.XX</span></label>
+				<input type="number" id="windItcPercent" name="windItcPercent" step="0.01" min="0.0" max="1.0" required="required"/>
 			</div>
 			<div class="shortInput batteryDisplayInput">
 				<label class="tooltip">Battery Power Cost ($/kW)<span class="classic">Specify the cost in $/kW.</span></label>
@@ -455,6 +471,14 @@
 			<div class="shortInput BatteryDisplayInput">
 				<label class="tooltip">Battery Maximum Capacity (kWh)<span class="classic">Specify the maximum desired battery capacity in kWh.</span></label>
 				<input type="text" id="batteryCapacityMax" name="batteryCapacityMax" required="required"/>
+			</div>
+			<div class="shortInput">
+				<label class="tooltip">Battery MACRS Years<span class="classic">MACRS schedule for financial analysis. Possible inputs are 0, 5 and 7 years. Set to zero to disable accelerated deprection accounting for batteries.</span></label>
+				<input type="number" id="batteryMacrsOptionYears" name="batteryMacrsOptionYears" min="0" max="7" required="required"/>
+			</div>
+			<div class="shortInput">
+				<label class="tooltip">Battery ITC (%)<span class="classic">Please enter a number 0-1 for the battery investment tax credit. Format 0.XX</span></label>
+				<input type="number" id="batteryItcPercent" name="batteryItcPercent" step="0.01" min="0.0" max="1.0" required="required"/>
 			</div>
 
 			<div class="wideInput">
@@ -535,6 +559,10 @@
 					<option value=true>Yes</option>
 					<option value=false>No</option>
 				</select>
+			</div>
+			<div class="shortInput">
+				<label class="tooltip">Fossil MACRS Years<span class="classic">MACRS schedule for financial analysis. Possible inputs are 0, 5 and 7 years. Set to zero to disable accelerated deprection accounting for fossil generators.</span></label>
+				<input type="number" id="dieselMacrsOptionYears" name="dieselMacrsOptionYears" min="0" max="7" required="required"/>
 			</div>
 
 

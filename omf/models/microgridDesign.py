@@ -77,6 +77,13 @@ def work(modelDir, inputDict):
 	year = int(inputDict['year'])
 	analysisYears = int(inputDict['analysisYears'])
 	criticalLoadFactor = float(inputDict['criticalLoadFactor'])
+	solarMacrsOptionYears = float(inputDict['solarMacrsOptionYears'])
+	windMacrsOptionYears = float(inputDict['windMacrsOptionYears'])
+	batteryMacrsOptionYears = float(inputDict['batteryMacrsOptionYears'])
+	dieselMacrsOptionYears = float(inputDict['dieselMacrsOptionYears'])
+	solarItcPercent = float(inputDict['solarItcPercent'])
+	windItcPercent = float(inputDict['windItcPercent'])
+	batteryItcPercent = float(inputDict['batteryItcPercent'])
 	solarCost = float(inputDict['solarCost'])
 	windCost = float(inputDict['windCost'])
 	batteryPowerCost = float(inputDict['batteryPowerCost'])
@@ -187,21 +194,28 @@ def work(modelDir, inputDict):
 						"installed_cost_us_dollars_per_kw": solarCost,
 						"min_kw": solarMin,
 						"can_export_beyond_site_load": solarCanExport,
-						"can_curtail": solarCanCurtail
+						"can_curtail": solarCanCurtail,
+						"macrs_option_years": solarMacrsOptionYears,
+						"federal_itc_pct": solarItcPercent
 					},
 					"Storage": {
 						"installed_cost_us_dollars_per_kw": batteryPowerCost,
 						"installed_cost_us_dollars_per_kwh": batteryCapacityCost,
 						"min_kw": batteryPowerMin,
-						"min_kwh": batteryCapacityMin
+						"min_kwh": batteryCapacityMin,
+						"macrs_option_years": batteryMacrsOptionYears,
+						"total_itc_percent": batteryItcPercent
 					},
 					"Wind": {
 						"installed_cost_us_dollars_per_kw": windCost,
-						"min_kw": windMin
+						"min_kw": windMin,
+						"macrs_option_years": windMacrsOptionYears,
+						"federal_itc_pct": windItcPercent
 					},
 					"Generator": {
 						"installed_cost_us_dollars_per_kw": dieselGenCost,
-						"generator_only_runs_during_grid_outage": dieselOnlyRunsDuringOutage
+						"generator_only_runs_during_grid_outage": dieselOnlyRunsDuringOutage,
+						"macrs_option_years": dieselMacrsOptionYears
 					}
 				}
 			}
@@ -723,6 +737,13 @@ def new(modelDir):
 		# "demandCostMonthly" : [8.6879, 8.6879, 8.6879, 8.6879, 8.6879, 8.6879, 8.6879, 8.6879, 8.6879, 8.6879, 8.6879, 8.6879],
 		"wholesaleCost" : "0.034",
 		"omCostEscalator" : "0.025", # annual O+M cost escalation rate for all generation types
+		"solarMacrsOptionYears": "5", # Set to zero to disable MACRS accelerated depreciation
+		"windMacrsOptionYears": "5", # Set to zero to disable MACRS accelerated depreciation
+		"batteryMacrsOptionYears": "7", # Set to zero to disable MACRS accelerated depreciation
+		"dieselMacrsOptionYears": 0, # Set to zero to disable MACRS accelerated depreciation
+		"solarItcPercent": "0.26",
+		"windItcPercent": "0.26",
+		"batteryItcPercent": 0,
 		"solarCost" : "1600",
 		"windCost" : "4898",
 		"batteryPowerCost" : "840",
