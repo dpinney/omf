@@ -862,6 +862,16 @@ def _randomTest():
 		for x in testSet:
 			csv_writer.writerow([x])
 
+def _dssToOmdTest():
+	curDir = os.getcwd()
+	os.chdir('../..')
+	omfDir = os.getcwd()
+	dssFileName = 'ieee37.clean.dss'
+	dssFilePath = pJoin(curDir, dssFileName)
+	omdFileName = dssFileName + '.omd'
+	omdFilePath = pJoin(omfDir, 'static', 'publicFeeders', omdFileName)
+	dssToOmd(dssFilePath, omdFilePath, RADIUS=0.0002, write_out=True)
+
 def _tests():
 	from omf.solvers.opendss import getVoltages, voltageCompare
 	import pandas as pd
@@ -903,3 +913,4 @@ if __name__ == '__main__':
 	_tests()
 	# _randomTest()
 	# _conversionTests()
+	#_dssToOmdTest()

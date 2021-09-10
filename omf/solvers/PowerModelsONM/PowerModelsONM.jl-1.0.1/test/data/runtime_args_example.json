@@ -1,0 +1,10 @@
+{
+    "network": "../test/data/IEEE13Nodeckt_mod.dss",
+    "gurobi": false,
+    "settings": "../test/data/settings.json",
+    "faults": "../test/data/faults.json",
+    "inverters": "../test/data/inverters.json",
+    "events": "../test/data/events.json",
+    "quiet": true,
+    "opt-disp-formulation": "acr"
+}

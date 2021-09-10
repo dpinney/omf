@@ -15,14 +15,16 @@ def instantiate():
 		raise Exception('Julia not installed. ONM requires Julia v1.6.')
 	# Instantiate
 	# os.system(julia -e 'using Pkg; try Pkg.rm("gurobi"); catch; end')
-	os.system('julia -e \"using Pkg; Pkg.rm("gurobi")\"')
-	os.system(f'julia --project="{thisDir}/PowerModelsONM.jl-1.0.0" -e \"using Pkg; Pkg.instantiate()\"')
+	# os.system('julia -e \"using Pkg; Pkg.rm("gurobi")\"')
+	# os.system(f'julia -e \"import Pkg; Pkg.add("gurobi")\"')
+	os.system(f'julia --project="{thisDir}/PowerModelsONM.jl-1.0.1" -e \"using Pkg; Pkg.instantiate()\"')
+	# os.system(f'julia --project="{thisDir}/PowerModelsONM.jl-1.0.1" -e \"using Pkg; Pkg.add("Gurobi"); Pkg.instantiate()\"')
 	# Remember we instantiated.
 	with open(f'{thisDir}/instantiated.txt','w+') as instant_file:
 		instant_file.write('instantiated')
 
 def run(dssPath, outPath, event_file):
-	os.system(f'julia --project="{thisDir}/PowerModelsONM.jl-1.0.0" "{thisDir}/PowerModelsONM.jl-1.0.0/src/cli/entrypoint.jl" -n "{dssPath}" -o "{outPath}" --events "{event_file}"')
+	os.system(f'julia --project="{thisDir}/PowerModelsONM.jl-1.0.1" "{thisDir}/PowerModelsONM.jl-1.0.1/src/cli/entrypoint.jl" -n "{dssPath}" -o "{outPath}" --events "{event_file}" --gurobi')
 
 def binary_install():
 	''' WARNING: DEPRECATED '''
@@ -35,7 +37,7 @@ def binary_install():
 	else:
 		raise Exception('Unsupported ONM platform.')
 	if not os.path.isdir(f'{ONM_DIR}build'):
-		URL = 'https://github.com/lanl-ansi/PowerModelsONM.jl/releases/download/v1.0.0/' + FNAME
+		URL = 'https://github.com/lanl-ansi/PowerModelsONM.jl/releases/download/v1.0.1/' + FNAME
 		os.system(f'wget -nv {URL} -P {ONM_DIR}')
 		os.system(f'unzip {ONM_DIR}{FNAME} -d {ONM_DIR}')
 		os.system(f'rm {ONM_DIR}{FNAME}')

@@ -1,0 +1,425 @@
+{
+  "meta:license": [
+    "Copyright (c) 2020, Triad National Security, LLC.",
+    "This code is provided under a BSD license as part of the Multi-Infrastructure Control",
+    "and Optimization Toolkit (MICOT) project, LA-CC-13-108.",
+    "You may not use this file except in compliance with the License. You may obtain a copy",
+    "of the License at https://github.com/lanl-ansi/PowerModelsONM.jl/blob/main/LICENSE.md"
+  ],
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "schemas/outputs",
+  "type": "object",
+  "title": "Outputs",
+  "x-tags": [
+    "output"
+  ],
+  "description": "This is the schema for the output statistics and analytics from the ONM workflow using [`entrypoint`](@ref entrypoint) and [`analyze_results!`](@ref analyze_results!)",
+  "additionalProperties": false,
+  "examples": [
+    {
+      "Events": [
+        {
+          "event_data": {
+            "status": 1,
+            "dispatchable": false,
+            "type": "breaker",
+            "state": "open"
+          },
+          "timestep": 1,
+          "affected_asset": "line.671700",
+          "event_type": "switch"
+        }
+      ],
+      "Generator profiles": {
+        "Diesel DG (kW)": [
+          0,
+          0,
+          0
+        ],
+        "Energy storage (kW)": [
+          0,
+          0,
+          0
+        ],
+        "Solar DG (kW)": [
+          200,
+          175,
+          100
+        ],
+        "Grid mix (kW)": [
+          1750,
+          2000,
+          3000
+        ]
+      },
+      "Fault currents": [
+        {
+          "701_lg_1": {
+            "fault": {
+              "susceptance (S)": [
+                [
+                  0,
+                  0
+                ],
+                [
+                  0,
+                  0
+                ]
+              ],
+              "connections": [
+                1,
+                4
+              ],
+              "conductance (S)": [
+                [
+                  100,
+                  -100
+                ],
+                [
+                  -100,
+                  100
+                ]
+              ],
+              "bus": "701",
+              "type": "lg"
+            },
+            "switch": {
+              "671692": {
+                "|I| (A)": null,
+                "|I2| (A)": 0.8,
+                "|I0| (A)": 1.2,
+                "|I1| (A)": 90.1,
+                "|V| (V)": [
+                  2.5,
+                  2.5,
+                  2.5
+                ]
+              }
+            }
+          }
+        }
+      ],
+      "Runtime timestamp": "2021-01-01T00:00:00.000",
+      "Switch changes": [
+        [],
+        [
+          "671700"
+        ],
+        [
+          "701702"
+        ]
+      ],
+      "Runtime arguments": {
+        "events": "../test/data/events.json",
+        "faults": "../test/data/faults.json",
+        "voltage-angle-difference": 5,
+        "network": "../test/data/IEEE13Nodeckt_mod.dss",
+        "settings": "../test/data/settings.json",
+        "voltage-lower-bound": 0.8,
+        "quiet": true,
+        "inverters": "../test/data/inverters.json",
+        "max-switch-actions": 1,
+        "voltage-upper-bound": 1.2
+      },
+      "Simulation time steps": [
+        1,
+        2,
+        3
+      ],
+      "Voltages": {
+        "Min voltage (p.u.)": [
+          1,
+          1,
+          1
+        ],
+        "Max voltage (p.u.)": [
+          1.2,
+          1,
+          1.1
+        ],
+        "Mean voltage (p.u.)": [
+          1.1,
+          1,
+          1
+        ]
+      },
+      "Additional statistics": {},
+      "Storage SOC (%)": [
+        null,
+        null,
+        null
+      ],
+      "Powerflow output": [
+        {
+          "voltage_source": {
+            "source": {
+              "real power setpoint (kW)": [
+                581.8173560045832,
+                468.8619242602074,
+                708.8039492196247
+              ],
+              "reactive power setpoint (kVar)": [
+                244.09972136399347,
+                32.25338488759224,
+                40.35427973972425
+              ]
+            }
+          },
+          "solar": {
+            "pv1": {
+              "real power setpoint (kW)": [
+                64.49371884320102,
+                64.507863885424,
+                64.49849984139108
+              ],
+              "reactive power setpoint (kVar)": [
+                41.23181415943054,
+                41.23340639500285,
+                41.23312440672468
+              ]
+            }
+          },
+          "bus": {
+            "611": {
+              "voltage (V)": [
+                2.5217499128997907
+              ]
+            }
+          }
+        }
+      ],
+      "Small signal stable": [
+        false,
+        false,
+        false
+      ],
+      "Load served": {
+        "Bonus load via microgrid (%)": [
+          0,
+          0,
+          0
+        ],
+        "Feeder load (%)": [
+          85.8,
+          91.2,
+          96.7
+        ],
+        "Microgrid load (%)": [
+          9.4,
+          9,
+          3.2
+        ]
+      },
+      "Device action timeline": [
+        {
+          "Shedded loads": [
+            "701",
+            "700"
+          ],
+          "Switch configurations": {
+            "671692": "closed",
+            "671700": "open",
+            "701702": "open"
+          }
+        },
+        {
+          "Shedded loads": [],
+          "Switch configurations": {
+            "671692": "closed",
+            "671700": "closed",
+            "701702": "open"
+          }
+        },
+        {
+          "Shedded loads": [],
+          "Switch configurations": {
+            "671692": "closed",
+            "671700": "closed",
+            "701702": "closed"
+          }
+        }
+      ]
+    }
+  ],
+  "properties": {
+    "Simulation time steps": {
+      "type": "array",
+      "description": "The actual timesteps, either in datetime strings, or as numbers",
+      "items": {
+        "type": [
+          "string",
+          "number"
+        ],
+        "format": "date-time"
+      }
+    },
+    "Load served": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "Statistics about the load served, in percent, either by the Grid (feeder), or by the microgrids",
+      "required": [
+        "Feeder load (%)",
+        "Microgrid load (%)",
+        "Bonus load via microgrid (%)"
+      ],
+      "properties": {
+        "Feeder load (%)": {
+          "type": "array",
+          "description": "The percent of load served by the feeder (grid)",
+          "items": {
+            "type": "number",
+            "format": "float"
+          }
+        },
+        "Microgrid load (%)": {
+          "type": "array",
+          "description": "The percent of load served by the microgrids",
+          "items": {
+            "type": "number",
+            "format": "float"
+          }
+        },
+        "Bonus load via microgrid (%)": {
+          "type": "array",
+          "description": "The percent of additional load that microgrids are supporting outside of their predefined microgrid zones",
+          "items": {
+            "type": "number",
+            "format": "float"
+          }
+        }
+      }
+    },
+    "Generator profiles": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "Statistics about the sources of generation, including solar PV, energy storage, traditional diesel, and from the grid (feeder)",
+      "required": [
+        "Grid mix (kW)",
+        "Solar DG (kW)",
+        "Energy storage (kW)",
+        "Diesel DG (kW)"
+      ],
+      "properties": {
+        "Grid mix (kW)": {
+          "type": "array",
+          "description": "The amount of power provided from the grid (feeder) in kW",
+          "items": {
+            "type": "number"
+          }
+        },
+        "Solar DG (kW)": {
+          "type": "array",
+          "description": "The amount of power provided by solar PV sources kW",
+          "items": {
+            "type": "number"
+          }
+        },
+        "Energy storage (kW)": {
+          "type": "array",
+          "description": "The amount of power provided by energy storage sources in kW",
+          "items": {
+            "type": "number"
+          }
+        },
+        "Diesel DG (kW)": {
+          "type": "array",
+          "description": "The amount of power provided by tranditional diesel generation in kW",
+          "items": {
+            "type": "number"
+          }
+        }
+      }
+    },
+    "Voltages": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "Min voltage (p.u.)",
+        "Mean voltage (p.u.)",
+        "Max voltage (p.u.)"
+      ],
+      "description": "Statistics about the voltage magnitudes at each timestep",
+      "properties": {
+        "Min voltage (p.u.)": {
+          "type": "array",
+          "description": "The minimum voltage over the whole feeder at each timestep in per-unit representation",
+          "items": {
+            "type": "number"
+          }
+        },
+        "Mean voltage (p.u.)": {
+          "type": "array",
+          "description": "The mean voltage over the whole feeder at each timestep in per-unit representation",
+          "items": {
+            "type": "number"
+          }
+        },
+        "Max voltage (p.u.)": {
+          "type": "array",
+          "description": "The maximum voltage over the whole feeder at each timestep in per-unit representation",
+          "items": {
+            "type": "number"
+          }
+        }
+      }
+    },
+    "Storage SOC (%)": {
+      "type": "array",
+      "description": "The storage state of charge for each timestep in percent of total possible charge of all storage in the feeder",
+      "items": {
+        "type": "number"
+      }
+    },
+    "Device action timeline": {
+      "$ref": "./device_action_timeline.schema.json"
+    },
+    "Powerflow output": {
+      "$ref": "./powerflow.schema.json"
+    },
+    "Additional statistics": {
+      "$ref": "./additional_statistics.schema.json"
+    },
+    "Events": {
+      "$ref": "./events.schema.json"
+    },
+    "Runtime arguments": {
+      "$ref": "./runtime_arguments.schema.json"
+    },
+    "Fault currents": {
+      "$ref": "./fault_currents.schema.json"
+    },
+    "Small signal stable": {
+      "type": "array",
+      "items": {
+        "type": "boolean"
+      }
+    },
+    "Runtime timestamp": {
+      "type": "string",
+      "description": "Time at which ONM algorithm was executed",
+      "format": "date-time"
+    },
+    "Switch changes": {
+      "type": "array",
+      "description": "List of lists of switches whose state changed between timesteps",
+      "items": {
+        "type": "array",
+        "description": "List of switches whose state changed from the previous timestep",
+        "items": {
+          "type": "string"
+        }
+      }
+    }
+  },
+  "required": [
+    "Simulation time steps",
+    "Load served",
+    "Generator profiles",
+    "Voltages",
+    "Storage SOC (%)",
+    "Device action timeline",
+    "Powerflow output",
+    "Runtime arguments",
+    "Switch changes"
+  ]
+}
