@@ -810,7 +810,7 @@ def _tests():
 	print('Parsed tokens into object of type:', obType)
 	assert obType is dict
 	# GLM parsing test.
-	smsTree = parse(os.path.join(os.path.dirname(__file__), 'scratch/simpleMarket/sms.glm'), filePath=True)
+	smsTree = parse(os.path.join(os.path.dirname(__file__), 'static/testFiles/sms.glm'), filePath=True)
 	keyLen = len(smsTree.keys())
 	print('Parsed a test glm file with', keyLen, 'keys.')
 	assert keyLen == 41
