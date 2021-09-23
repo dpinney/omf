@@ -1,7 +1,0 @@
-XXX 7 kWh powerwall daily cycle
-XXX GridLabMulti - cost charts start at zero. What about negative values? Eh, ignore them...
-XXX Integrate GLD team things.
-XXX Final ask for PNNL: one of each house type from example data.
-XXX Excess energy metering? Later.
-XXX Full model update--convergence fails with IVVC.
-OOO Bonus: Add a third case (different price signals, more utility control).
