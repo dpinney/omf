@@ -1,0 +1,5 @@
+[deps]
+Documenter = "e30172f5-a6a5-5a46-863b-614d45cd2de4"
+Gumbo = "708ec375-b3d6-5a57-a7ce-8257bf98657a"
+NodeJS = "2bd173c7-0d6d-553b-b6af-13a54713934c"
+Pluto = "c3e4b0f8-55cb-11ea-2926-15256bba5781"

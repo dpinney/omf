@@ -1,0 +1,166 @@
+{
+  "meta:license": [
+    "Copyright (c) 2020, Triad National Security, LLC.",
+    "This code is provided under a BSD license as part of the Multi-Infrastructure Control",
+    "and Optimization Toolkit (MICOT) project, LA-CC-13-108.",
+    "You may not use this file except in compliance with the License. You may obtain a copy",
+    "of the License at https://github.com/lanl-ansi/PowerModelsONM.jl/blob/main/LICENSE.md"
+  ],
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "schemas/device_action_timeline",
+  "type": "array",
+  "description": "A list of events, ordered (_i.e._, later events will overwrite earlier ones if there is a conflict), that can either be a switching action, or a fault.",
+  "minItems": 0,
+  "uniqueItems": false,
+  "x-examples": {
+    "switch-example": [
+      {
+        "timestep": "1.0",
+        "event_type": "switch",
+        "affected_asset": "line.asset_name",
+        "event_data": {
+          "duration_ms": 100,
+          "type": "breaker",
+          "state": "open",
+          "dispatchable": true,
+          "pre_event_actions": [],
+          "post_event_actions": [
+            {
+              "timestep": "1.0",
+              "event_type": "loadshed",
+              "affected_asset": "load.asset_name",
+              "event_data": {
+                "status": 0
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "fault-example": [
+      {
+        "timestep": "1.0",
+        "event_type": "fault",
+        "affected_asset": "line.asset_name",
+        "event_data": {
+          "duration_ms": 100
+        }
+      }
+    ]
+  },
+  "items": {
+    "type": "object",
+    "additionalProperties": false,
+    "description": "Event definition",
+    "properties": {
+      "timestep": {
+        "type": [
+          "string",
+          "integer",
+          "number"
+        ],
+        "minLength": 1,
+        "pattern": "^\\d+\\.*\\d*",
+        "example": "1.0",
+        "description": "Timestep, in string, integer, or float, that identifies the timestep at which this event is applied."
+      },
+      "event_type": {
+        "type": "string",
+        "minLength": 1,
+        "enum": [
+          "fault",
+          "switch"
+        ],
+        "example": "switch",
+        "description": "The type of event (switch or fault)"
+      },
+      "affected_asset": {
+        "type": "string",
+        "minLength": 5,
+        "pattern": "^line\\..+$",
+        "example": "line.asset_name",
+        "description": "The asset that is being affected by the event"
+      },
+      "event_data": {
+        "anyOf": [
+          {
+            "description": "Switch event data",
+            "additionalProperties": false,
+            "properties": {
+              "type": {
+                "type": "string",
+                "description": "Type of switch, e.g., \"fuse\", \"breaker\", \"recloser\", etc.",
+                "example": "breaker"
+              },
+              "state": {
+                "type": "string",
+                "description": "What is the state of the switch, \"open\" or \"closed\"? Only used if \"event_type\" is \"switch\".",
+                "enum": [
+                  "open",
+                  "closed"
+                ],
+                "example": "open"
+              },
+              "dispatchable": {
+                "type": "boolean",
+                "description": "Is the affected object dispatchable? (i.e., can be opened or closed), default is false",
+                "default": false
+              },
+              "status": {
+                "type": "integer",
+                "enum": [
+                  0,
+                  1
+                ],
+                "example": 1,
+                "description": "Status of the object, if 0, completely outaged from the model. Default 1.",
+                "default": 1
+              }
+            }
+          },
+          {
+            "description": "Fault event data",
+            "additionalProperties": false,
+            "properties": {
+              "duration_ms": {
+                "type": "number",
+                "minimum": -1,
+                "description": "Duration of a fault, in milliseconds, -1 ==> permanent fault",
+                "format": "float",
+                "example": 100
+              }
+            }
+          }
+        ],
+        "description": "The event data",
+        "type": "object"
+      }
+    },
+    "required": [
+      "timestep",
+      "event_type",
+      "affected_asset",
+      "event_data"
+    ]
+  },
+  "title": "Events",
+  "x-tags": [
+    "input",
+    "output"
+  ],
+  "examples": [
+    [
+      {
+        "timestep": 1,
+        "event_type": "switch",
+        "affected_asset": "line.switch_name",
+        "event_data": {
+          "type": "breaker",
+          "state": "open",
+          "dispatchable": false,
+          "status": 1
+        }
+      }
+    ]
+  ]
+}
