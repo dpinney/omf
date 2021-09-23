@@ -483,7 +483,10 @@ def graphMicrogrid(pathToOmd, pathToJson, pathToCsv, outputFile, useCache, workD
 			powerflowNew = powerflow[timestep]
 			for generator in list(powerflowNew['generator'].keys()):
 				entryNew = powerflowNew['generator'][generator]['real power setpoint (kW)'][0]
-				entryOld = powerflowOld['generator'][generator]['real power setpoint (kW)'][0]
+				if generator in list(powerflowOld['generator'].keys()):
+					entryOld = powerflowOld['generator'][generator]['real power setpoint (kW)'][0]
+				else:
+					entryOld = 0.0
 				if math.sqrt(((entryNew - entryOld)/(entryOld + 0.0000001))**2) > 0.5:
 					actionDevice.append(generator)
 					actionTime.append(str(timestep + 1))
@@ -492,7 +495,10 @@ def graphMicrogrid(pathToOmd, pathToJson, pathToCsv, outputFile, useCache, workD
 					actionLoadAfter.append(str(entryNew))
 			for battery in list(powerflowNew['storage'].keys()):
 				entryNew = powerflowNew['storage'][battery]['real power setpoint (kW)'][0]
-				entryOld = powerflowOld['storage'][battery]['real power setpoint (kW)'][0]
+				if battery in list(powerflowOld['storage'].keys()):
+					entryOld = powerflowOld['storage'][battery]['real power setpoint (kW)'][0]
+				else:
+					entryOld = 0.0
 				if math.sqrt(((entryNew - entryOld)/(entryOld + 0.0000001))**2) > 0.5:
 					actionDevice.append(battery)
 					actionTime.append(str(timestep + 1))
