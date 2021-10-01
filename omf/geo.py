@@ -671,7 +671,8 @@ def _tests():
 	# print(convertOmd(prefix / 'static/publicFeeders/Autocli Alberich Calibrated.omd'))
 	# mapOmd(pJoin(__neoMetaModel__._omfDir, 'static', 'publicFeeders', 'iowa240c2_working_coords.clean.omd'), pJoin(__neoMetaModel__._omfDir, 'scratch', 'MapTestOutput'), 'html', openBrowser=True, conversion=False)
 	# fixMissingNodes(pJoin(__neoMetaModel__._omfDir, 'static', 'publicFeeders', 'iowa240c2_working_coords.clean.omd'), pJoin(__neoMetaModel__._omfDir, 'static', 'publicFeeders', 'iowa240c1.clean.dss.omd'), pJoin(__neoMetaModel__._omfDir, 'scratch', 'MapTestOutput', 'iowa240c2_fixed_coords2.clean.omd'))
-	mapOmd(pJoin(__neoMetaModel__._omfDir, 'scratch', 'MapTestOutput', 'iowa240c2_fixed_coords2.clean.omd'), pJoin(__neoMetaModel__._omfDir, 'scratch', 'MapTestOutput'), 'html', openBrowser=True, conversion=False)
+	# mapOmd(pJoin(__neoMetaModel__._omfDir, 'scratch', 'MapTestOutput', 'iowa240c2_fixed_coords2.clean.omd'), pJoin(__neoMetaModel__._omfDir, 'scratch', 'MapTestOutput'), 'html', openBrowser=True, conversion=False)
+	mapOmd(pJoin(__neoMetaModel__._omfDir, 'scratch', 'RONM', 'ieee8500-unbal_no_fuses.clean_reduced.good_coords2.dss.omd'), pJoin(__neoMetaModel__._omfDir, 'scratch', 'RONM'), 'html', openBrowser=True, conversion=False)
 
 if __name__ == '__main__':
 	_tests()

@@ -103,11 +103,28 @@ def dssCoords_to_spreadsheet(pathToInputFile, pathToOutputFile, xBase, yBase, co
 			xAdj = newCoordsDict[bus_name]["xAdj"]
 			yAdj = newCoordsDict[bus_name]["yAdj"]
 			writer.writerow([bus_name, xVal, yVal, xDif, yDif, xAdj, yAdj])
+	return newCoordsDict
 	
 
-def cleanCoordsDss(pathToDssInputFile, pathToCsvCoordsFile, pathToDssOutputFile):
+def cleanCoordsDss(pathToDssInputFile, pathToCsvCoordsFile, pathToDssOutputFile, coordsDict):
 	# Takes in the original openDSS file and csv file with correct coordinates information and writes a new openDSS file with correct lat/lons 
-	print("work in progress")
+	with open(pathToDssInputFile, "r") as inFile:
+		allLines = inFile.readlines()
+		coordsEntered = False
+		with open(pathToDssOutputFile, 'w') as outFile:
+			for line in allLines:
+				if line.startswith("setbusxy"):
+					if not coordsEntered:
+						for bus_name in coordsDict:
+							xyLine = "setbusxy bus=" + bus_name + " x=" + str(coordsDict[bus_name]['xAdj']) + " y=" + str(coordsDict[bus_name]['yAdj']) + "\n"
+							#write the line into the new dss file
+							outFile.write(xyLine)
+						coordsEntered = True
+				else:
+					#write the original line
+					outFile.write(line)
+	# 	outFile.close()
+	# inFile.close()
 		
 def _test():
 	lon_orig = -84.946092
@@ -115,9 +132,9 @@ def _test():
 	coordsFormat = "ft"
 	dssInputFile = pJoin(__neoMetaModel__._omfDir, 'solvers', 'opendss', 'ieee8500-unbal_no_fuses.clean_reduced.dss')
 	csvCoordsFile = pJoin(__neoMetaModel__._omfDir, 'scratch', 'RONM', 'ieee8500-unbal_no_fuses.clean_reduced.coords.csv')
-	dssOutputFile = pJoin(__neoMetaModel__._omfDir, 'scratch', 'RONM', 'ieee8500-unbal_no_fuses.clean_reduced.good_coords.csv')
-	dssCoords_to_spreadsheet(dssInputFile, csvCoordsFile, lon_orig, lat_orig, coordsFormat)
-	# cleanCoordsDss(dssInputFile, csvCoordsFile, dssOutputFile)
+	dssOutputFile = pJoin(__neoMetaModel__._omfDir, 'scratch', 'RONM', 'ieee8500-unbal_no_fuses.clean_reduced.good_coords.dss')
+	coordsDict = dssCoords_to_spreadsheet(dssInputFile, csvCoordsFile, lon_orig, lat_orig, coordsFormat)
+	cleanCoordsDss(dssInputFile, csvCoordsFile, dssOutputFile, coordsDict)
 
 
 if __name__ == '__main__':
