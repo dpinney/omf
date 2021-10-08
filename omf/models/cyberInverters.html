@@ -96,7 +96,7 @@
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Simulation Length<span class="classic">Number of timesteps over which the simulation is acting. This number must be less than the number of rows in your load/PV file minus the value entered under "Simulation Entry Point".</span></label>
-				<input type="number" id="simLength" name="simLength"  min ="3" max = "9999" value="{{allInputDataDict.simLength}}"/>
+				<input type="number" id="simLength" name="simLength"  min ="3" max = "14400" value="{{allInputDataDict.simLength}}"/>
 			</div>			
 			<div class="shortInput">
 				<label class="tooltip">Simulation Entry Point<span class="classic">At the beginning of the simulation, the number of timesteps allowed for the powerflow solution to stabilize. Marks the beginning of the experiment (i.e. t=0).</span></label>
@@ -583,8 +583,9 @@
 				localHighChart["title"]["text"] = busName
 				localHighChart["title"]["align"] = "right"
 				localHighChart["title"]["x"] = -50
+				localHighChart["tooltip"]["valueDecimals"] = 3
 				localHighChart["yAxis"] = [{
-						"title": {"text": "Voltage (PU)","style": {"color":"gray"}}
+						"title": {"text": "Voltage (V)","style": {"color":"gray"}}
 					}]
 				for (let [phs, dat] of Object.entries(phsVolts)) {
 				if (phs=='C') {
