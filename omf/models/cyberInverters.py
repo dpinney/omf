@@ -334,6 +334,7 @@ def work(modelDir, inputDict):
 
 		#convert "Consumption"."DG"
 		outData["Consumption"]["DG"] = [-1.0 * x for x in pycigarJson["Consumption"]["DG Output (W)"]]
+		#outData["Consumption"]["DG"] = pycigarJson["Consumption"]["DG Output (W)"]
 
 		#convert "powerFactor"
 		outData["powerFactor"] = pycigarJson["Substation Power Factor (%)"]	
@@ -396,10 +397,10 @@ def work(modelDir, inputDict):
 			inv_volt = inv_dict["Voltage (V)"]
 			#populate single inverter dict with pycigar values
 			new_inv_dict["Voltage"] = inv_volt
-			#new_inv_dict["Power_Real"] = [ -1 * x for x in inv_dict["Power Output (W)"] ]
-			#new_inv_dict["Power_Imag"] = [-1 * x for x in inv_dict["Reactive Power Output (VAR)"] ]
-			new_inv_dict["Power_Real"] = inv_dict["Power Output (W)"]
-			new_inv_dict["Power_Imag"] = inv_dict["Reactive Power Output (VAR)"]
+			new_inv_dict["Power_Real"] = [ -1 * x for x in inv_dict["Power Output (W)"] ]
+			new_inv_dict["Power_Imag"] = [-1 * x for x in inv_dict["Reactive Power Output (VAR)"] ]
+			#new_inv_dict["Power_Real"] = inv_dict["Power Output (W)"]
+			#new_inv_dict["Power_Imag"] = inv_dict["Reactive Power Output (VAR)"]
 			#add single inverter dict to dict of all the inverters using the inverter name as the key 
 			inverter_output_dict[inv_name] = new_inv_dict
 		outData["Inverter_Outputs"] = inverter_output_dict
