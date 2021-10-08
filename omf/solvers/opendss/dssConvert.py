@@ -457,10 +457,15 @@ def evilDssTreeToGldTree(dssTree):
 					#control object (connected to another object instead of a bus)
 					#cobtype, cobname, connCode = ob['element'].split('.', maxsplit=2)
 					cobtype, cobname = ob['element'].split('.', maxsplit=1)
+					# if obtype == 'capcontrol':
+					# 	obparent = ob['capacitor']
+					# else:
+					# 	obparent = cobtype + '.' + cobname
+					obparent = cobtype + '.' + cobname
 					gldTree[str(g_id)] = {
 						'object': obtype,
 						'name': name,
-						'parent': cobtype + '.' + cobname,
+						'parent': obparent,
 					}
 					_extend_with_exc(ob, gldTree[str(g_id)], ['object','element','!CMD'])
 				else:
@@ -641,11 +646,41 @@ def dssToOmd(dssFilePath, omdFilePath, RADIUS=0.0002, write_out=True):
 	tree = dssToTree(dssFilePath)
 	evil_glm = evilDssTreeToGldTree(tree)
 	name_map = _name_to_key(evil_glm)
+	# print(str(name_map))
+	# print(str(evil_glm.values()))
+	# print(tree)
 	for ob in evil_glm.values():
 		ob_name = ob.get('name','')
 		ob_type = ob.get('object','')
 		if 'parent' in ob:
-			parent_loc = name_map[ob['parent']]
+			parent_name = ob['parent']
+			if ob_type == 'capcontrol':
+				cap_name = ob['capacitor']
+				cap_id = name_map[cap_name]
+				if 'parent' in evil_glm[cap_id]:
+					parent_name = evil_glm[cap_id]['parent']
+				else:
+					parent_name = ob['parent']
+			if ob_type == 'energymeter':
+				short_parent_name = parent_name.split('.')[1]
+				parent_id = name_map[short_parent_name]
+				if 'parent' in evil_glm[parent_id]:
+					parent_name = evil_glm[parent_id]['parent']
+				elif evil_glm[parent_id].get('object','') == 'line':
+					from_name = evil_glm[parent_id].get('from', None)
+					to_name = evil_glm[parent_id].get('from', None)
+					if from_name is not None:
+						parent_name = from_name
+					elif to_name is not None:
+						parent_name = to_name
+					else:
+						parent_name = ob['parent']
+			# try:
+			# 	parent_loc = name_map[parent_name]
+			# except KeyError:
+			# 	short_parent_name = parent_name.split('.')[1]
+			# 	parent_loc = name_map[short_parent_name]
+			parent_loc = name_map[parent_name]
 			parent_ob = evil_glm[parent_loc]
 			parent_lat = parent_ob.get('latitude', None)
 			parent_lon = parent_ob.get('longitude', None)
@@ -866,10 +901,13 @@ def _dssToOmdTest():
 	curDir = os.getcwd()
 	os.chdir('../..')
 	omfDir = os.getcwd()
-	dssFileName = 'ieee37.clean.dss'
-	dssFilePath = pJoin(curDir, dssFileName)
+	# dssFileName = 'ieee37.clean.dss'
+	# dssFilePath = pJoin(curDir, dssFileName)
+	dssFileName = 'ieee8500-unbal_no_fuses.clean_reduced.good_coords2.dss'
+	dssFilePath = pJoin(omfDir, 'scratch', 'RONM', dssFileName)
 	omdFileName = dssFileName + '.omd'
-	omdFilePath = pJoin(omfDir, 'static', 'publicFeeders', omdFileName)
+	omdFilePath = pJoin(omfDir, 'scratch', 'RONM', omdFileName)
+	# omdFilePath = pJoin(omfDir, 'static', 'publicFeeders', omdFileName)
 	dssToOmd(dssFilePath, omdFilePath, RADIUS=0.0002, write_out=True)
 
 def _tests():
@@ -910,7 +948,7 @@ def _tests():
 	#TODO: a little help on the frontend to hide invalid commands.
 
 if __name__ == '__main__':
-	_tests()
+	# _tests()
 	# _randomTest()
 	# _conversionTests()
-	#_dssToOmdTest()
+	_dssToOmdTest()
