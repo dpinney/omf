@@ -1,0 +1,242 @@
+{
+  "meta:license": [
+    "Copyright (c) 2020, Triad National Security, LLC.",
+    "This code is provided under a BSD license as part of the Multi-Infrastructure Control",
+    "and Optimization Toolkit (MICOT) project, LA-CC-13-108.",
+    "You may not use this file except in compliance with the License. You may obtain a copy",
+    "of the License at https://github.com/lanl-ansi/PowerModelsONM.jl/blob/main/LICENSE.md"
+  ],
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "schemas/runtime_arguments",
+  "type": "object",
+  "title": "Runtime arguments",
+  "additionalProperties": false,
+  "x-tags": [
+    "input"
+  ],
+  "examples": [
+    {
+      "network": "../test/data/IEEE13Nodeckt_mod.dss",
+      "gurobi": false,
+      "settings": "../test/data/settings.json",
+      "faults": "../test/data/faults.json",
+      "inverters": "../test/data/inverters.json",
+      "events": "../test/data/events.json",
+      "quiet": true,
+      "opt-disp-formulation": "acr"
+    }
+  ],
+  "description": "The allowed runtime arguments for PowerModelsONM's [`entrypoint`](@ref entrypoint).",
+  "properties": {
+    "network": {
+      "type": "string",
+      "description": "The network file path (DSS format)"
+    },
+    "output": {
+      "type": "string",
+      "description": "The path to the output file (JSON format)"
+    },
+    "faults": {
+      "type": "string",
+      "description": "The path to the faults input file (JSON format)"
+    },
+    "events": {
+      "type": "string",
+      "description": "The path to the events input file (JSON format)"
+    },
+    "inverters": {
+      "type": "string",
+      "description": "The path to the inverters input file (JSON format)"
+    },
+    "settings": {
+      "type": "string",
+      "description": "The path to the settings input file (JSON format)"
+    },
+    "quiet": {
+      "type": "boolean",
+      "default": false,
+      "description": "A flag to indicate the log level should be :Error"
+    },
+    "verbose": {
+      "type": "boolean",
+      "default": false,
+      "description": "A flag to indicate the log level should be :Info"
+    },
+    "debug": {
+      "type": "boolean",
+      "default": false,
+      "description": "A flag to indicate the log level should be :Debug"
+    },
+    "gurobi": {
+      "type": "boolean",
+      "default": false,
+      "description": "A flag to signal to use the Gurobi solver"
+    },
+    "opt-switch-formulation": {
+      "type": "string",
+      "enum": [
+        "lindistflow",
+        "nfa",
+        "fbs",
+        "fot"
+      ],
+      "default": "lindistflow"
+    },
+    "opt-switch-algorithm": {
+      "type": "string",
+      "description": "Flag to use multinetwork problem for optimal switching algorithm",
+      "enum": [
+        "iterative",
+        "global"
+      ],
+      "default": "iterative"
+    },
+    "opt-switch-solver": {
+      "type": "string",
+      "enum": [
+        "misocp_solver",
+        "nlp_solver",
+        "minlp_solver",
+        "mip_solver"
+      ],
+      "default": "misocp_solver"
+    },
+    "opt-disp-formulation": {
+      "type": "string",
+      "enum": [
+        "acp",
+        "acr",
+        "lindistflow",
+        "nfa",
+        "fbs",
+        "fot"
+      ],
+      "description": "Formulation to use for [`optimize_dispath`](@ref optimize_dispatch), which includes the real power only formulation (`nfa`), the LinDist3Flow formulation (`lindistflow`), the AC-rectangular formulation (`acr`), or the AC-polar formulation (`acp`)"
+    },
+    "opt-disp-algorithm": {
+      "type": "string",
+      "enum": [
+        "opf",
+        "mld",
+        "oltc"
+      ],
+      "default": "opf"
+    },
+    "opt-disp-solver": {
+      "type": "string",
+      "enum": [
+        "nlp_solver",
+        "misocp_solver",
+        "minlp_solver",
+        "mip_solver"
+      ],
+      "description": "Which solver (from the solver instances built-in to ONM) to use for the optimal dispatch problem. WARNING: solver capabilities should match the optimal dispatch formulation",
+      "default": "nlp_solver"
+    },
+    "network-file": {
+      "type": "string",
+      "deprecated": true,
+      "description": "DEPRECIATED: the path to the network file (DSS format)"
+    },
+    "output-file": {
+      "type": "string",
+      "deprecated": true,
+      "description": "DEPRECIATED: the path to the output file (JSON format)"
+    },
+    "problem": {
+      "type": "string",
+      "deprecated": true,
+      "enum": [
+        "opf",
+        "mld"
+      ],
+      "description": "DEPRECIATED: algorithm to use for [`optimize_dispatch`](@ref optimize_dispatch), either the optimal power flow (`opf`) or load shed (`mld`)"
+    },
+    "formulation": {
+      "type": "string",
+      "deprecated": true,
+      "enum": [
+        "acr",
+        "acp",
+        "lindistflow",
+        "nfa"
+      ],
+      "description": "DEPRECIATED: Formulation to use for [`optimize_dispath`](@ref optimize_dispatch), which includes the real power only formulation (`nfa`), the LinDist3Flow formulation (`lindistflow`), the AC-rectangular formulation (`acr`), or the AC-polar formulation (`acp`)"
+    },
+    "protection-settings": {
+      "type": "string",
+      "deprecated": true,
+      "description": "DEPRECIATED: enumerations of the protection settings (XLSX format)"
+    },
+    "debug-export-file": {
+      "type": "string",
+      "deprecated": true,
+      "description": "DEPRECIATED: the path to the debug output (JSON format)"
+    },
+    "use-gurobi": {
+      "type": "boolean",
+      "default": false,
+      "deprecated": true,
+      "description": "DEPRECIATED: flag to indicate usage of the Gurobi solver"
+    },
+    "solver-tolerance": {
+      "type": "number",
+      "default": 0.0001,
+      "deprecated": true,
+      "description": "DEPRECIATED: tolerance of the nonlinear optimization solver"
+    },
+    "max-switch-actions": {
+      "type": "integer",
+      "default": 0,
+      "deprecated": true,
+      "description": "DEPRECIATED: maximum allowed switching actions"
+    },
+    "timestep-hours": {
+      "type": "number",
+      "default": 1,
+      "deprecated": true,
+      "description": "DEPRECIATED: the timestep delta, in hours"
+    },
+    "voltage-lower-bound": {
+      "default": 0.8,
+      "deprecated": true,
+      "type": "number",
+      "description": "DEPRECIATED: the voltage magnitude lower bound for buses, in per-unit representation"
+    },
+    "voltage-upper-bound": {
+      "type": "number",
+      "default": 1.2,
+      "deprecated": true,
+      "description": "DEPRECIATED: the voltage magnitude upper bound for buses in per-unit representation"
+    },
+    "voltage-angle-difference": {
+      "type": "number",
+      "default": 5,
+      "deprecated": true,
+      "description": "DEPRECIATED: the maximum allowed voltage angle difference across lines, in degrees"
+    },
+    "clpu-factor": {
+      "type": "number",
+      "description": "DEPRECIATED: the cold load pickup factor"
+    },
+    "skip": {
+      "type": "array",
+      "uniqueItems": true,
+      "description": "Parts of the ONM algorithm to skip, e.g. \"--skip faults\" to skip fault studies, or \"--skip faults,stability\" to skip both fault studies and stability analysis",
+      "items": {
+        "type": "string",
+        "enum": [
+          "stability",
+          "faults",
+          "dispatch",
+          "switching"
+        ]
+      }
+    },
+    "pretty-print": {
+      "type": "boolean",
+      "description": "Toggle to enable pretty-printed output json",
+      "default": false
+    }
+  }
+}

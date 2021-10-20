@@ -1,4 +1,0 @@
-{
-    "stderr": "main.2019-05-28-16-03-14.glm(188): property powerN_rating is not defined in class transformer_configuration\nmain.2019-05-28-16-03-14.glm(182): load failed at or near 'object trans...'\nFATAL    [INIT] : shutdown after command line rejected", 
-    "stdout": ""
-}

@@ -1,0 +1,13 @@
+.DS_Store
+
+Manifest.toml
+*.jl.cov
+*.jl.*.cov
+*.jl.mem
+deps/deps.jl
+docs/build
+
+output.json
+test_output*.json
+
+build/

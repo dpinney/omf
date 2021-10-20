@@ -227,7 +227,7 @@ def work(modelDir, inputDict):
 	try:
 		os.mkdir(pJoin(modelDir,"pycigarOutput"))
 	except FileExistsError:
-		print("pycigarOutput folder already exists!")
+		print("Found pre-existing output for this model.")
 		pass
 	except:
 		print("Error occurred creating pycigarOutput folder")
@@ -334,15 +334,16 @@ def work(modelDir, inputDict):
 
 		#convert "Consumption"."DG"
 		outData["Consumption"]["DG"] = [-1.0 * x for x in pycigarJson["Consumption"]["DG Output (W)"]]
+		#outData["Consumption"]["DG"] = pycigarJson["Consumption"]["DG Output (W)"]
 
 		#convert "powerFactor"
 		outData["powerFactor"] = pycigarJson["Substation Power Factor (%)"]	
 
 		#convert "swingVoltage"
-		outData["swingVoltage"] = pycigarJson["Substation Top Voltage(V)"]
+		outData["swingVoltage"] = pycigarJson["Substation Top Voltage (U)"]
 
 		#convert "downlineNodeVolts"
-		outData["downlineNodeVolts"] = pycigarJson["Substation Bottom Voltage(V)"]
+		outData["downlineNodeVolts"] = pycigarJson["Substation Bottom Voltage (U)"]
 
 		#convert "minVoltBand"
 		outData["minVoltBand"] = pycigarJson["Substation Regulator Minimum Voltage(V)"]
@@ -394,12 +395,12 @@ def work(modelDir, inputDict):
 			#get values from pycigar output for given single inverter
 			inv_name = inv_dict["Name"]
 			inv_volt = inv_dict["Voltage (V)"]
-			inv_pow_real = inv_dict["Power Output (W)"]
-			inv_pow_imag = inv_dict["Reactive Power Output (VAR)"]
 			#populate single inverter dict with pycigar values
 			new_inv_dict["Voltage"] = inv_volt
-			new_inv_dict["Power_Real"] = inv_pow_real
-			new_inv_dict["Power_Imag"] = inv_pow_imag
+			new_inv_dict["Power_Real"] = [ -1 * x for x in inv_dict["Power Output (W)"] ]
+			new_inv_dict["Power_Imag"] = [-1 * x for x in inv_dict["Reactive Power Output (VAR)"] ]
+			#new_inv_dict["Power_Real"] = inv_dict["Power Output (W)"]
+			#new_inv_dict["Power_Imag"] = inv_dict["Reactive Power Output (VAR)"]
 			#add single inverter dict to dict of all the inverters using the inverter name as the key 
 			inverter_output_dict[inv_name] = new_inv_dict
 		outData["Inverter_Outputs"] = inverter_output_dict

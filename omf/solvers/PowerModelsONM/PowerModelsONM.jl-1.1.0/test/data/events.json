@@ -1,0 +1,68 @@
+[
+  {
+    "affected_asset": "line.671700",
+    "event_type": "switch",
+    "timestep": 1,
+    "event_data": {
+      "dispatchable": false,
+      "state": "open",
+      "type": "breaker",
+      "status": 1
+    }
+  },
+  {
+    "affected_asset": "line.701702",
+    "event_type": "switch",
+    "timestep": 1,
+    "event_data": {
+      "dispatchable": true,
+      "state": "open",
+      "type": "breaker"
+    }
+  },
+  {
+    "affected_asset": "line.703800",
+    "event_type": "switch",
+    "timestep": 1,
+    "event_data": {
+      "dispatchable": false,
+      "state": "open",
+      "type": "breaker"
+    }
+  },
+  {
+    "affected_asset": "line.800801",
+    "event_type": "switch",
+    "timestep": 1,
+    "event_data": {
+      "dispatchable": false,
+      "state": "open",
+      "type": "breaker"
+    }
+  },
+  {
+    "affected_asset": "line.671700",
+    "event_type": "switch",
+    "timestep": 2,
+    "event_data": {
+      "dispatchable": true
+    }
+  },
+
+  {
+    "affected_asset": "line.703800",
+    "event_type": "switch",
+    "timestep": 2,
+    "event_data": {
+      "dispatchable": true
+    }
+  },
+  {
+    "affected_asset": "line.800801",
+    "event_type": "switch",
+    "timestep": 2,
+    "event_data": {
+      "dispatchable": true
+    }
+  }
+]
