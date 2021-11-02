@@ -76,6 +76,7 @@ def work(modelDir, inputDict):
 	omCostEscalator = float(inputDict['omCostEscalator'])
 	year = int(inputDict['year'])
 	analysisYears = int(inputDict['analysisYears'])
+	discountRate = float(inputDict['discountRate'])
 	criticalLoadFactor = float(inputDict['criticalLoadFactor'])
 	solarMacrsOptionYears = float(inputDict['solarMacrsOptionYears'])
 	windMacrsOptionYears = float(inputDict['windMacrsOptionYears'])
@@ -188,7 +189,8 @@ def work(modelDir, inputDict):
 					"Financial": {
 						"value_of_lost_load_us_dollars_per_kwh": value_of_lost_load,
 						"analysis_years": analysisYears,
-						"om_cost_escalation_pct": omCostEscalator
+						"om_cost_escalation_pct": omCostEscalator,
+						"offtaker_discount_pct": discountRate
 					},
 					"PV": {
 						"installed_cost_us_dollars_per_kw": solarCost,
@@ -323,6 +325,10 @@ def work(modelDir, inputDict):
 		outData['initial_capital_costs_after_incentives' + indexString] = resultsSubset['Financial']['initial_capital_costs_after_incentives']
 		outData['load' + indexString] = resultsSubset['LoadProfile']['year_one_electric_load_series_kw']
 		outData['avgLoad' + indexString] = round(sum(resultsSubset['LoadProfile']['year_one_electric_load_series_kw'])/len(resultsSubset['LoadProfile']['year_one_electric_load_series_kw']),1)
+		
+		# carry over analysisYears as this is not an REopt output
+		outData['analysisYears' + indexString] = analysisYears
+		outData['discountRate' + indexString] = discountRate
 
 		# outputs to be used in microgridup.py
 		outData['yearOneEmissionsLbsBau' + indexString] = resultsSubset['year_one_emissions_bau_lb_C02']
@@ -332,8 +338,7 @@ def work(modelDir, inputDict):
 		outData['yearOneEmissionsReducedPercent' + indexString] = round((resultsSubset['year_one_emissions_bau_lb_C02'] - resultsSubset['year_one_emissions_lb_C02'])/resultsSubset['year_one_emissions_bau_lb_C02']*100,0)		
 		outData['yearOnePercentRenewable' + indexString] = round(resultsSubset['renewable_electricity_energy_pct']*100,0)
 		outData['yearOneOMCostsBeforeTax' + indexString] = round(resultsSubset['Financial']['year_one_om_costs_before_tax_us_dollars'],0)
-		# carry over analysisYears as this is not an REopt output
-		outData['analysisYears' + indexString] = analysisYears
+		
 
 		if solar == 'on':
 			outData['sizePV' + indexString] = resultsSubset['PV']['size_kw']
@@ -727,6 +732,7 @@ def new(modelDir):
 		"longitude" : '-89.6501',
 		"year" : '2017',
 		"analysisYears" : '25',
+		"discountRate" : '0.083', # Nominal energy offtaker discount rate. In single ownership model the offtaker is also the generation owner
 		"energyCost" : "0.1",
 		"demandCost" : '20',
 		"urdbLabelSwitch": "off",
