@@ -89,6 +89,10 @@ def work(modelDir, inputDict):
 	windCost = float(inputDict['windCost'])
 	batteryPowerCost = float(inputDict['batteryPowerCost'])
 	batteryCapacityCost = float(inputDict['batteryCapacityCost'])
+	batteryPowerCostReplace = float(inputDict['batteryPowerCostReplace'])
+	batteryCapacityCostReplace = float(inputDict['batteryCapacityCostReplace'])
+	batteryPowerReplaceYear = float(inputDict['batteryPowerReplaceYear'])
+	batteryCapacityReplaceYear = float(inputDict['batteryCapacityReplaceYear'])
 	dieselGenCost = float(inputDict['dieselGenCost'])
 	solarMin = float(inputDict['solarMin'])
 	windMin = float(inputDict['windMin'])
@@ -203,6 +207,10 @@ def work(modelDir, inputDict):
 					"Storage": {
 						"installed_cost_us_dollars_per_kw": batteryPowerCost,
 						"installed_cost_us_dollars_per_kwh": batteryCapacityCost,
+						"replace_cost_us_dollars_per_kw": batteryPowerCostReplace,
+						"replace_cost_us_dollars_per_kwh": batteryCapacityCostReplace,
+						"inverter_replacement_year": batteryPowerReplaceYear,
+						"battery_replacement_year": batteryCapacityReplaceYear,
 						"min_kw": batteryPowerMin,
 						"min_kwh": batteryCapacityMin,
 						"macrs_option_years": batteryMacrsOptionYears,
@@ -754,6 +762,10 @@ def new(modelDir):
 		"windCost" : "4898",
 		"batteryPowerCost" : "840",
 		"batteryCapacityCost" : "420",
+		"batteryPowerCostReplace" : "410",
+		"batteryCapacityCostReplace" : "200",
+		"batteryPowerReplaceYear": '10', # year at which batteryPowerCostReplace (the inverter) is reinstalled, one time
+		"batteryCapacityReplaceYear": '10', # year at which batteryCapacityCostReplace (the battery cells) is reinstalled, one time
 		"dieselGenCost": "500",
 		"solarMin": 0,
 		"windMin": 0,
