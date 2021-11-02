@@ -304,8 +304,6 @@ def work(modelDir, inputDict):
 		if outData['demandCostBAU' + indexString] is None:
 			errMsg = results['messages'].get('error','API currently unavailable please try again later')
 			raise Exception('The REopt data analysis API by NREL had the following error: ' + errMsg) 
-
-		# calculate wind and battery existing costs here for microgridUp
 	
 		outData['demandCost' + indexString] = resultsSubset['ElectricTariff']['total_demand_cost_us_dollars']
 		outData['demandCostDiff' + indexString] = round(outData['demandCostBAU' + indexString] - outData['demandCost' + indexString],2)
@@ -326,7 +324,7 @@ def work(modelDir, inputDict):
 		outData['load' + indexString] = resultsSubset['LoadProfile']['year_one_electric_load_series_kw']
 		outData['avgLoad' + indexString] = round(sum(resultsSubset['LoadProfile']['year_one_electric_load_series_kw'])/len(resultsSubset['LoadProfile']['year_one_electric_load_series_kw']),1)
 
-		# outputs to be used in microgridUp.py
+		# outputs to be used in microgridup.py
 		outData['yearOneEmissionsLbsBau' + indexString] = resultsSubset['year_one_emissions_bau_lb_C02']
 		outData['yearOneEmissionsLbs' + indexString] = resultsSubset['year_one_emissions_lb_C02']
 		outData['yearOneEmissionsTons' + indexString] = round((outData['yearOneEmissionsLbs' + indexString])/2205,0)
@@ -334,6 +332,8 @@ def work(modelDir, inputDict):
 		outData['yearOneEmissionsReducedPercent' + indexString] = round((resultsSubset['year_one_emissions_bau_lb_C02'] - resultsSubset['year_one_emissions_lb_C02'])/resultsSubset['year_one_emissions_bau_lb_C02']*100,0)		
 		outData['yearOnePercentRenewable' + indexString] = round(resultsSubset['renewable_electricity_energy_pct']*100,0)
 		outData['yearOneOMCostsBeforeTax' + indexString] = round(resultsSubset['Financial']['year_one_om_costs_before_tax_us_dollars'],0)
+		# carry over analysisYears as this is not an REopt output
+		outData['analysisYears' + indexString] = analysisYears
 
 		if solar == 'on':
 			outData['sizePV' + indexString] = resultsSubset['PV']['size_kw']
