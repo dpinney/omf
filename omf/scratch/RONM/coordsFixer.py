@@ -125,7 +125,29 @@ def cleanCoordsDss(pathToDssInputFile, pathToCsvCoordsFile, pathToDssOutputFile,
 					outFile.write(line)
 	# 	outFile.close()
 	# inFile.close()
-		
+
+def totalLoadFinder(pathToDssFile):
+	with open(pathToDssFile, "r") as inFile:
+		allLines = inFile.readlines()
+		totalLoad = 0.0
+		allLoads = {}
+		for line in allLines:
+			if line.startswith("new object=load"):
+				lineSplit = line.split()
+				loadName = "unknown"
+				loadData = {}
+				for seg in lineSplit:
+					if seg.startswith("object=load."):
+						loadName = seg.lstrip("object=load.")
+					if seg.startswith("kw="):
+						kw_val = float(seg.lstrip("kw="))
+						loadData["kw"] = kw_val
+						totalLoad = totalLoad + kw_val
+					# TODO: expand to include other values within load objects
+				allLoads[loadName] = loadData
+	return totalLoad
+
+
 def _test():
 	lon_orig = -84.946092
 	lat_orig = 30.134247
@@ -136,6 +158,11 @@ def _test():
 	coordsDict = dssCoords_to_spreadsheet(dssInputFile, csvCoordsFile, lon_orig, lat_orig, coordsFormat)
 	cleanCoordsDss(dssInputFile, csvCoordsFile, dssOutputFile, coordsDict)
 
+def _testLoad():
+	dssInputFile = pJoin(__neoMetaModel__._omfDir, 'scratch', 'RONM', 'ieee8500-unbal_no_fuses.clean_reduced.good_coords3.dg_added.dss')
+	totalLoad = totalLoadFinder(dssInputFile)
+	print(totalLoad)
+
 
 if __name__ == '__main__':
-	_test()
+	_testLoad()
