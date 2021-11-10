@@ -3138,17 +3138,22 @@ new object=regcontrol.feeder_regb transformer=feeder_regb winding=2 tapwinding=2
 new object=regcontrol.feeder_regc transformer=feeder_regc winding=2 tapwinding=2 vreg=126.5 ptratio=60 band=2
 new object=reactor.hvmv_sub_hsb bus1=sourcebus.1.2.3 bus2=hvmv_sub_hsb.1.2.3 r=0 x=14.798307 normamps=400 emergamps=400
 new loadshape.pvscaling1 mult=(0 0 0 0 0 0 0 0.084654201 0.4084613 0.676864065 0.859273011 0.976124644 1 0.934483244 0.778657014 0.531155984 0.209112825 0 0 0 0 0 0 0)
-new pvsystem.pv1 bus1=m3032980.1.2.3 phases=3 kv=13.8 conn=wye irradiance=1 pmpp=110 kva=100 pf=1 balanced=true limitcurrent=true vminpu=0.9090909 daily=pvscaling1
-new storage.bat1 bus1=m3032980.1.2.3 phases=3 kv=13.8 kwhstored=200 kwhrated=200 kva=100 kvar=100 %charge=100 %discharge=100 %effcharge=100 %effdischarge=100 %idlingkw=1 %r=0 %x=50
-new pvsystem.pv2 bus1=m1047299.1.2.3 phases=3 kv=13.8 conn=wye irradiance=1 pmpp=110 kva=100 pf=1 balanced=true limitcurrent=true vminpu=0.9090909 daily=pvscaling1
-new storage.bat2 bus1=m1047299.1.2.3 phases=3 kv=13.8 kwhstored=800 kwhrated=800 kva=400 kvar=400 %charge=100 %discharge=100 %effcharge=100 %effdischarge=100 %idlingkw=1 %r=0 %x=50
-new pvsystem.pv3 bus1=m1069217.1.2.3 phases=3 kv=13.8 conn=wye irradiance=1 pmpp=110 kva=100 pf=1 balanced=true limitcurrent=true vminpu=0.9090909 daily=pvscaling1
-new storage.bat3 bus1=m1069217.1.2.3 phases=3 kv=13.8 kwhstored=800 kwhrated=800 kva=400 kvar=400 %charge=100 %discharge=100 %effcharge=100 %effdischarge=100 %idlingkw=1 %r=0 %x=50
-new pvsystem.pv4 bus1=l2711225.1.2.3 phases=3 kv=13.8 conn=wye irradiance=1 pmpp=110 kva=100 pf=1 balanced=true limitcurrent=true vminpu=0.9090909 daily=pvscaling1
+new pvsystem.pv1 bus1=l2728247.1.2.3 phases=3 kv=13.8 conn=wye irradiance=1 pmpp=110 kva=100 pf=1 balanced=true limitcurrent=true vminpu=0.9090909 daily=pvscaling1
+new storage.bat1 bus1=l2728247.1.2.3 phases=3 kv=13.8 kwhstored=200 kwhrated=200 kva=100 kvar=100 %charge=100 %discharge=100 %effcharge=100 %effdischarge=100 %idlingkw=1 %r=0 %x=50
+new pvsystem.pv2 bus1=293471.1.2.3 phases=3 kv=13.8 conn=wye irradiance=1 pmpp=110 kva=100 pf=1 balanced=true limitcurrent=true vminpu=0.9090909 daily=pvscaling1
+new storage.bat2 bus1=293471.1.2.3 phases=3 kv=13.8 kwhstored=800 kwhrated=800 kva=400 kvar=400 %charge=100 %discharge=100 %effcharge=100 %effdischarge=100 %idlingkw=1 %r=0 %x=50
+new pvsystem.pv3 bus1=l2767340.1.2.3 phases=3 kv=13.8 conn=wye irradiance=1 pmpp=110 kva=100 pf=1 balanced=true limitcurrent=true vminpu=0.9090909 daily=pvscaling1
+new storage.bat3 bus1=l2767340.1.2.3 phases=3 kv=13.8 kwhstored=800 kwhrated=800 kva=400 kvar=400 %charge=100 %discharge=100 %effcharge=100 %effdischarge=100 %idlingkw=1 %r=0 %x=50
+new pvsystem.pv4 bus1=l3216370.1.2.3 phases=3 kv=13.8 conn=wye irradiance=1 pmpp=110 kva=100 pf=1 balanced=true limitcurrent=true vminpu=0.9090909 daily=pvscaling1
 // TODO: Need to figure out how the transformer should work
-// new transformer.t_3082 windings=2 buses=[bus3082.1.2.3.0,t_bus3082_l.1.2.3] phases=3 xhl=4.98 conns=[wye,delta] kv=[13.8 0.48] kva=[750 750] %r=[0.55 0.55]
-// new generator.gen3 bus1=t_bus3082_l.1.2.3 phases=3 kv=0.48 pf=1 conn=wye kw=750 kvar=0 xdp=0.15 h=1.5 d=1.0
-new object=energymeter.m1 element=line.ln5815900-1 terminal=1
+new transformer.t_m1142880 windings=2 buses=[m1142880.1.2.3.0,t_m1142880_l.1.2.3] phases=3 xhl=4.98 conns=[wye,delta] kv=[13.8 0.48] kva=[750 750] %r=[0.55 0.55]
+new generator.gen1 bus1=l3215385.1.2.3 phases=3 kv=0.48 pf=1 conn=wye kw=750 kvar=0 xdp=0.15 h=1.5 d=1.0
+new generator.gen2 bus1=l3215203.1.2.3 phases=3 kv=0.48 pf=1 conn=wye kw=750 kvar=0 xdp=0.15 h=1.5 d=1.0
+new generator.gen3 bus1=l3011293.1.2.3 phases=3 kv=0.48 pf=1 conn=wye kw=750 kvar=0 xdp=0.15 h=1.5 d=1.0
+new generator.gen4 bus1=l3234149.1.2.3 phases=3 kv=0.48 pf=1 conn=wye kw=750 kvar=0 xdp=0.15 h=1.5 d=1.0
+new generator.gen5 bus1=l2803199.1.2.3 phases=3 kv=0.48 pf=1 conn=wye kw=750 kvar=0 xdp=0.15 h=1.5 d=1.0
+new generator.gen6 bus1=l2803199.1.2.3 phases=3 kv=0.48 pf=1 conn=wye kw=750 kvar=0 xdp=0.15 h=1.5 d=1.0
+new object=energymeter.m1 element=line.ln5815900-1 terminal=1 
 makebuslist
 set voltagebases=[115,12.47,0.48,0.208]
 setbusxy bus=sourcebus x=-84.946092 y=30.134247
@@ -4975,4 +4980,5 @@ setbusxy bus=hvmv_sub_48332 x=-84.946092 y=30.134247
 setbusxy bus=d5710794-3_int x=-84.946092 y=30.134247
 setbusxy bus=hvmv_sub_hsb x=-84.946092 y=30.134247
 setbusxy bus=regxfmr_hvmv_sub_lsb x=-84.946092 y=30.134247
+setbusxy bus=t_m1142880_l x=-84.96890215319999 y=30.160909725000003
 set maxcontroliter=30

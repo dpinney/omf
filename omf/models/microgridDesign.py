@@ -76,6 +76,7 @@ def work(modelDir, inputDict):
 	omCostEscalator = float(inputDict['omCostEscalator'])
 	year = int(inputDict['year'])
 	analysisYears = int(inputDict['analysisYears'])
+	discountRate = float(inputDict['discountRate'])
 	criticalLoadFactor = float(inputDict['criticalLoadFactor'])
 	solarMacrsOptionYears = float(inputDict['solarMacrsOptionYears'])
 	windMacrsOptionYears = float(inputDict['windMacrsOptionYears'])
@@ -88,6 +89,10 @@ def work(modelDir, inputDict):
 	windCost = float(inputDict['windCost'])
 	batteryPowerCost = float(inputDict['batteryPowerCost'])
 	batteryCapacityCost = float(inputDict['batteryCapacityCost'])
+	batteryPowerCostReplace = float(inputDict['batteryPowerCostReplace'])
+	batteryCapacityCostReplace = float(inputDict['batteryCapacityCostReplace'])
+	batteryPowerReplaceYear = float(inputDict['batteryPowerReplaceYear'])
+	batteryCapacityReplaceYear = float(inputDict['batteryCapacityReplaceYear'])
 	dieselGenCost = float(inputDict['dieselGenCost'])
 	solarMin = float(inputDict['solarMin'])
 	windMin = float(inputDict['windMin'])
@@ -188,7 +193,8 @@ def work(modelDir, inputDict):
 					"Financial": {
 						"value_of_lost_load_us_dollars_per_kwh": value_of_lost_load,
 						"analysis_years": analysisYears,
-						"om_cost_escalation_pct": omCostEscalator
+						"om_cost_escalation_pct": omCostEscalator,
+						"offtaker_discount_pct": discountRate
 					},
 					"PV": {
 						"installed_cost_us_dollars_per_kw": solarCost,
@@ -201,6 +207,10 @@ def work(modelDir, inputDict):
 					"Storage": {
 						"installed_cost_us_dollars_per_kw": batteryPowerCost,
 						"installed_cost_us_dollars_per_kwh": batteryCapacityCost,
+						"replace_cost_us_dollars_per_kw": batteryPowerCostReplace,
+						"replace_cost_us_dollars_per_kwh": batteryCapacityCostReplace,
+						"inverter_replacement_year": batteryPowerReplaceYear,
+						"battery_replacement_year": batteryCapacityReplaceYear,
 						"min_kw": batteryPowerMin,
 						"min_kwh": batteryCapacityMin,
 						"macrs_option_years": batteryMacrsOptionYears,
@@ -304,8 +314,6 @@ def work(modelDir, inputDict):
 		if outData['demandCostBAU' + indexString] is None:
 			errMsg = results['messages'].get('error','API currently unavailable please try again later')
 			raise Exception('The REopt data analysis API by NREL had the following error: ' + errMsg) 
-
-		# calculate wind and battery existing costs here for microgridUp
 	
 		outData['demandCost' + indexString] = resultsSubset['ElectricTariff']['total_demand_cost_us_dollars']
 		outData['demandCostDiff' + indexString] = round(outData['demandCostBAU' + indexString] - outData['demandCost' + indexString],2)
@@ -325,8 +333,12 @@ def work(modelDir, inputDict):
 		outData['initial_capital_costs_after_incentives' + indexString] = resultsSubset['Financial']['initial_capital_costs_after_incentives']
 		outData['load' + indexString] = resultsSubset['LoadProfile']['year_one_electric_load_series_kw']
 		outData['avgLoad' + indexString] = round(sum(resultsSubset['LoadProfile']['year_one_electric_load_series_kw'])/len(resultsSubset['LoadProfile']['year_one_electric_load_series_kw']),1)
+		
+		# carry over analysisYears as this is not an REopt output
+		outData['analysisYears' + indexString] = analysisYears
+		outData['discountRate' + indexString] = discountRate
 
-		# outputs to be used in microgridUp.py
+		# outputs to be used in microgridup.py
 		outData['yearOneEmissionsLbsBau' + indexString] = resultsSubset['year_one_emissions_bau_lb_C02']
 		outData['yearOneEmissionsLbs' + indexString] = resultsSubset['year_one_emissions_lb_C02']
 		outData['yearOneEmissionsTons' + indexString] = round((outData['yearOneEmissionsLbs' + indexString])/2205,0)
@@ -334,6 +346,7 @@ def work(modelDir, inputDict):
 		outData['yearOneEmissionsReducedPercent' + indexString] = round((resultsSubset['year_one_emissions_bau_lb_C02'] - resultsSubset['year_one_emissions_lb_C02'])/resultsSubset['year_one_emissions_bau_lb_C02']*100,0)		
 		outData['yearOnePercentRenewable' + indexString] = round(resultsSubset['renewable_electricity_energy_pct']*100,0)
 		outData['yearOneOMCostsBeforeTax' + indexString] = round(resultsSubset['Financial']['year_one_om_costs_before_tax_us_dollars'],0)
+		
 
 		if solar == 'on':
 			outData['sizePV' + indexString] = resultsSubset['PV']['size_kw']
@@ -727,6 +740,7 @@ def new(modelDir):
 		"longitude" : '-89.6501',
 		"year" : '2017',
 		"analysisYears" : '25',
+		"discountRate" : '0.083', # Nominal energy offtaker discount rate. In single ownership model the offtaker is also the generation owner
 		"energyCost" : "0.1",
 		"demandCost" : '20',
 		"urdbLabelSwitch": "off",
@@ -748,6 +762,10 @@ def new(modelDir):
 		"windCost" : "4898",
 		"batteryPowerCost" : "840",
 		"batteryCapacityCost" : "420",
+		"batteryPowerCostReplace" : "410",
+		"batteryCapacityCostReplace" : "200",
+		"batteryPowerReplaceYear": '10', # year at which batteryPowerCostReplace (the inverter) is reinstalled, one time
+		"batteryCapacityReplaceYear": '10', # year at which batteryCapacityCostReplace (the battery cells) is reinstalled, one time
 		"dieselGenCost": "500",
 		"solarMin": 0,
 		"windMin": 0,
