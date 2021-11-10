@@ -139,7 +139,11 @@ def new_newQstsPlot(filePath, stepSizeInMinutes, numberOfSteps, keepAllFiles=Fal
 	# Write runner file and run.
 	with open(f'{dssFileLoc}/dss_run_file.dss', 'w') as run_file:
 		run_file.write(dss_run_file)
-	os.system(f'opendsscmd {dssFileLoc}/dss_run_file.dss')
+	# Hack to run in the right directory.
+	my_dir = os.getcwd()
+	os.chdir(dssFileLoc)
+	os.system(f'opendsscmd dss_run_file.dss')
+	os.chdir(my_dir)
 	# Aggregate monitors
 	all_gen_df = pd.DataFrame()
 	all_load_df = pd.DataFrame()
