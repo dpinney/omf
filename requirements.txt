@@ -13,7 +13,7 @@ pyparsing>=2.0.1
 python-dateutil>=2.2
 six>=1.5.2
 tornado>=3.2
-numpy>=1.8.0,<1.21
+numpy>=1.8.0,<1.20
 matplotlib
 xlwt>=0.7.5
 pathlib>=1.0.1
