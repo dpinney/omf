@@ -1,5 +1,6 @@
 wheel
-numpy<=1.18,>=1.8.0
+numpy<=1.18
+numpy-financial
 Flask>=0.9
 Flask-Login==0.2.11
 Jinja2>=2.7.2

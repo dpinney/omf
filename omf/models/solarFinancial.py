@@ -2,7 +2,7 @@
 
 import json, shutil, datetime as dt
 from os.path import join as pJoin
-from numpy import irr, npv
+from numpy_financial import irr, npv
 import xlwt
 
 # OMF imports

@@ -3,7 +3,7 @@ import sys, shutil, csv, hashlib, plotly, json
 from os.path import isdir, join as pJoin
 from io import StringIO
 import numpy as np
-from numpy import npv
+from numpy_financial import npv
 import pandas as pd
 from sklearn.neighbors import LocalOutlierFactor
 from sklearn.ensemble import IsolationForest

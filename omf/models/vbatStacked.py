@@ -6,7 +6,7 @@ from os.path import join as pJoin
 #import csv
 import pandas as pd
 import numpy as np
-from numpy import npv
+from numpy_financial import npv
 
 from omf.solvers import VB
 from omf.models import __neoMetaModel__

@@ -1,7 +1,7 @@
 ''' Calculate solar photovoltaic system output using our special financial model. '''
 
 import json, shutil, math, datetime as dt
-from numpy import npv, pmt, ppmt, ipmt, irr
+from numpy_financial import npv, pmt, ppmt, ipmt, irr
 from os.path import join as pJoin
 
 # OMF imports

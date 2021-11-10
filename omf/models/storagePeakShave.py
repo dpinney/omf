@@ -4,7 +4,7 @@ import sys, shutil, csv, base64
 from datetime import datetime as dt, timedelta
 import pulp
 from os.path import isdir, join as pJoin
-from numpy import npv
+from numpy_financial import npv
 import pandas as pd
 
 from omf import forecast as fc

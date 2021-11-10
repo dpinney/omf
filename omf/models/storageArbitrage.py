@@ -3,7 +3,7 @@
 import sys, shutil, csv
 from datetime import datetime as dt, timedelta
 from os.path import isdir, join as pJoin
-from numpy import npv
+from numpy_financial import npv
 from omf.models import __neoMetaModel__
 from omf.models.__neoMetaModel__ import *
 

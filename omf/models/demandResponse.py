@@ -3,7 +3,7 @@
 import json, shutil, datetime, csv, calendar, math, operator, copy
 from os.path import join as pJoin
 #from dateutil.parser import parse
-from numpy import npv
+from numpy_financial import npv
 from omf.models import __neoMetaModel__
 from omf.models.__neoMetaModel__ import *
 

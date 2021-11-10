@@ -3,7 +3,7 @@
 import shutil, csv, pulp, os
 from os.path import join as pJoin
 import numpy as np
-from numpy import npv
+from numpy_financial import npv
 #import platform, subprocess
 #from numpy import arctan as atan, array
 
