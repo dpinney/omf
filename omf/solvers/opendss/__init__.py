@@ -77,13 +77,13 @@ def _getByName(tree, name):
                 matches.append(x)
     return matches[0]
 
-def new_newQstsPlot(filePath, stepSizeInMinutes, numberOfSteps, keepAllFiles=False, actions={}, filePrefix='timeseries'):
+def newQstsPlot(filePath, stepSizeInMinutes, numberOfSteps, keepAllFiles=False, actions={}, filePrefix='timeseries'):
 	''' QSTS with native opendsscmd binary to avoid segfaults in opendssdirect. '''
 	dssFileLoc = os.path.dirname(os.path.abspath(filePath))
 	dss_run_file = ''
 	# volt_coord = runDSS(filePath)
 	dss_run_file += f'redirect {filePath}\n'
-	# dss_run_file += f'set datapath="{dssFileLoc}"\n'
+	dss_run_file += f'set datapath="{dssFileLoc}"\n'
 	dss_run_file += f'calcvoltagebases\n'
 	# Attach Monitors
 	tree = dssConvert.dssToTree(filePath)
@@ -202,193 +202,6 @@ def new_newQstsPlot(filePath, stepSizeInMinutes, numberOfSteps, keepAllFiles=Fal
 				df[[' P2 (kW)']] = np.NaN
 			# # print("df after phase reassignment:")
 			# # print(df.head(10))
-			df['Name'] = name
-			all_gen_df = pd.concat([all_gen_df, df], ignore_index=True, sort=False)
-		elif name.startswith('monvsource-'):
-			df['Name'] = name
-			all_source_df = pd.concat([all_source_df, df], ignore_index=True, sort=False)
-		elif name.startswith('monisource-'):
-			df['Name'] = name
-			all_source_df = pd.concat([all_source_df, df], ignore_index=True, sort=False)
-		elif name.startswith('moncapacitor-'):
-			df['Type'] = 'Capacitor'
-			df['Name'] = name
-			df = df.rename({' Step_1 ': 'Tap(pu)'}, axis='columns') #HACK: rename to match regulator tap name
-			all_control_df = pd.concat([all_control_df, df], ignore_index=True, sort=False)
-		elif name.startswith('monregcontrol-'):
-			df['Type'] = 'Transformer'
-			df['Name'] = name
-			df = df.rename({' Tap (pu)': 'Tap(pu)'}, axis='columns') #HACK: rename to match cap tap name
-			all_control_df = pd.concat([all_control_df, df], ignore_index=True, sort=False)
-		if not keepAllFiles:
-			os.remove(csv_path)
-	# Collect switching actions
-	for key, ob in actions.items():
-		if ob.startswith('open'):
-			switch_ob = ob.split()
-			ob_name = switch_ob[1][7:]
-			new_row = {'hour':key, 't(sec)':0.0,'Tap(pu)':1,'Type':'Switch','Name':ob_name}
-			all_control_df = all_control_df.append(new_row, ignore_index=True)
-	for key, ob in actions.items():
-		if ob.startswith('close'):
-			switch_ob = ob.split()
-			ob_name = switch_ob[1][7:]
-			new_row = {'hour':key, 't(sec)':0.0,'Tap(pu)':1,'Type':'Switch','Name':ob_name}
-			all_control_df = all_control_df.append(new_row, ignore_index=True)
-	# Write final aggregates
-	if not all_gen_df.empty:
-		all_gen_df.sort_values(['Name','hour'], inplace=True)
-		all_gen_df.columns = all_gen_df.columns.str.replace(r'[ "]','',regex=True)
-		all_gen_df.to_csv(f'{dssFileLoc}/{filePrefix}_gen.csv', index=False)
-	if not all_control_df.empty:
-		all_control_df.sort_values(['Name','hour'], inplace=True)
-		all_control_df.columns = all_control_df.columns.str.replace(r'[ "]','',regex=True)
-		all_control_df.to_csv(f'{dssFileLoc}/{filePrefix}_control.csv', index=False)
-	if not all_source_df.empty:
-		all_source_df.sort_values(['Name','hour'], inplace=True)
-		all_source_df.columns = all_source_df.columns.str.replace(r'[ "]','',regex=True)
-		all_source_df["P1(kW)"] = all_source_df["V1"].astype(float) * all_source_df["I1"].astype(float) / 1000.0
-		all_source_df["P2(kW)"] = all_source_df["V2"].astype(float) * all_source_df["I2"].astype(float) / 1000.0
-		all_source_df["P3(kW)"] = all_source_df["V3"].astype(float) * all_source_df["I3"].astype(float) / 1000.0
-		all_source_df.to_csv(f'{dssFileLoc}/{filePrefix}_source.csv', index=False)
-	if not all_load_df.empty:
-		all_load_df.sort_values(['Name','hour'], inplace=True)
-		all_load_df.columns = all_load_df.columns.str.replace(r'[ "]','',regex=True)
-		all_load_df = all_load_df.join(base_kvs.set_index('Name'), on='Name')
-		# TODO: insert ANSI bands here based on base_kv?  How to not display two bands per load with the appended CSV format?
-		all_load_df['V1(PU)'] = all_load_df['V1'].astype(float) / (all_load_df['kv'].astype(float) * 1000.0)
-		# HACK: reassigning 0V to "NaN" as below does not removes 0V phases but could impact 2 phase systems
-		#all_load_df['V2'][(all_load_df['VAngle2']==0) & (all_load_df['V2']==0)] = "NaN"
-		all_load_df['V2(PU)'] = all_load_df['V2'].astype(float) / (all_load_df['kv'].astype(float) * 1000.0)
-		all_load_df['V3(PU)'] = all_load_df['V3'].astype(float) / (all_load_df['kv'].astype(float) * 1000.0)
-		all_load_df.to_csv(f'{dssFileLoc}/{filePrefix}_load.csv', index=False)
-
-def newQstsPlot(filePath, stepSizeInMinutes, numberOfSteps, keepAllFiles=False, actions={}, filePrefix='timeseries'):
-	''' Use monitor objects to generate voltage values for a timeseries powerflow. '''
-	dssFileLoc = os.path.dirname(os.path.abspath(filePath))
-	volt_coord = runDSS(filePath)
-	runDssCommand(f'set datapath="{dssFileLoc}"')
-	# Attach Monitors
-	tree = dssConvert.dssToTree(filePath)
-	mon_names = []
-	circ_name = 'NONE'
-	base_kvs = pd.DataFrame()
-	for ob in tree:
-		obData = ob.get('object','NONE.NONE')
-		obType, name = obData.split('.')
-		mon_name = f'mon{obType}-{name}'
-		if obData.startswith('circuit.'):
-			circ_name = name
-		elif obData.startswith('vsource.'):
-			runDssCommand(f'new object=monitor.{mon_name} element={obType}.{name} terminal=1 mode=0')
-			mon_names.append(mon_name)
-		elif obData.startswith('isource.'):
-			runDssCommand(f'new object=monitor.{mon_name} element={obType}.{name} terminal=1 mode=0')
-			mon_names.append(mon_name)
-		elif obData.startswith('generator.') or obData.startswith('isource.') or obData.startswith('storage.') or obData.startswith('pvsystem.'):
-			mon_name = f'mongenerator-{name}'
-			runDssCommand(f'new object=monitor.{mon_name} element={obType}.{name} terminal=1 mode=1 ppolar=no')
-			mon_names.append(mon_name)
-		elif ob.get('object','').startswith('load.'):
-			runDssCommand(f'new object=monitor.{mon_name} element={obType}.{name} terminal=1 mode=0')
-			mon_names.append(mon_name)
-			new_kv = pd.DataFrame({'kv':[float(ob.get('kv',1.0))],'Name':['monload-' + name]})
-			base_kvs = base_kvs.append(new_kv)
-		elif ob.get('object','').startswith('capacitor.'):
-			runDssCommand(f'new object=monitor.{mon_name} element={obType}.{name} terminal=1 mode=6')
-			mon_names.append(mon_name)
-		elif ob.get('object','').startswith('regcontrol.'):
-			tformer = ob.get('transformer','NONE')
-			winding = ob.get('winding',1)
-			runDssCommand(f'new object=monitor.{mon_name} element=transformer.{tformer} terminal={winding} mode=2')
-			mon_names.append(mon_name)
-	# Run DSS
-	runDssCommand(f'set mode=yearly stepsize={stepSizeInMinutes}m ')
-	if actions == {}:
-		# Run all steps directly.
-		runDssCommand(f'set number={numberOfSteps}')
-		runDssCommand('solve')
-	else:
-		# Actions defined, run them at the appropriate timestep.
-		runDssCommand(f'set number=1')
-		for step in range(1, numberOfSteps+1):
-			action = actions.get(step)
-			if action != None:
-				print(f'Step {step} executing:', action)
-				runDssCommand(action)
-			runDssCommand('solve')
-	# Export all monitors
-	for name in mon_names:
-		runDssCommand(f'export monitors monitorname={name}')
-	# Aggregate monitors
-	all_gen_df = pd.DataFrame()
-	all_load_df = pd.DataFrame()
-	all_source_df = pd.DataFrame()
-	all_control_df = pd.DataFrame()
-	for name in mon_names:
-		csv_path = f'{dssFileLoc}/{circ_name}_Mon_{name}.csv'
-		df = pd.read_csv(f'{circ_name}_Mon_{name}.csv')
-		if name.startswith('monload-'):
-			# reassign V1 single phase voltages outputted by DSS to the appropriate column and filling Nans for neutral phases (V2)
-			# three phase print out should work fine as is
-			ob_name = name.split('-')[1]
-			# print("ob_name:", ob_name)
-			the_object = _getByName(tree, ob_name)
-			# print("the_object:", the_object)
-			# create phase list, removing neutral phases
-			phase_ids = the_object.get('bus1','').replace('.0','').split('.')[1:]
-			# print("phase_ids:", phase_ids)
-			# print("headings list:", df.columns)
-			if phase_ids == ['1']:
-				df[[' V2']] = np.NaN
-				df[[' V3']] = np.NaN
-			elif phase_ids == ['2']:
-				df[[' V2']] = df[[' V1']]
-				df[[' V1']] = np.NaN
-				df[[' V3']] = np.NaN
-			elif phase_ids == ['3']:
-				df[[' V3']] = df[[' V1']]
-				df[[' V1']] = np.NaN
-				df[[' V2']] = np.NaN
-			elif len(phase_ids) == 2:
-				#HACK: correct split phase VLN.
-				df[[' V1']] = df[[' V1']] * math.sqrt(3)
-				df[[' V2']] = df[[' V2']] * math.sqrt(3)
-			elif len(phase_ids) == 3:
-				#HACK: correct 3 phase VLN.
-				df[[' V1']] = df[[' V1']] * math.sqrt(3)
-				df[[' V2']] = df[[' V2']] * math.sqrt(3)
-				df[[' V3']] = df[[' V3']] * math.sqrt(3)
-				#TODO: fix phase attachment for split phase transformers. It's going to be e.g. blah.2.3 means v1->v2, v2->v3
-			# print("df after phase reassignment:")
-			# print(df.head(10))
-			df['Name'] = name
-			all_load_df = pd.concat([all_load_df, df], ignore_index=True, sort=False)
-			# pd.set_option('display.max_columns', None)
-		elif name.startswith('mongenerator-'):
-			# reassign V1 single phase voltages outputted by DSS to the appropriate column and filling Nans for neutral phases (V2)
-			# three phase print out should work fine as is
-			ob_name = name.split('-')[1]
-			# print("ob_name:", ob_name)
-			the_object = _getByName(tree, ob_name)
-			# print("the_object:", the_object)
-			# create phase list, removing neutral phases
-			phase_ids = the_object.get('bus1','').replace('.0','').split('.')[1:]
-			# print("phase_ids:", phase_ids)
-			# print("headings list:", df.columns)
-			if phase_ids == ['1']:
-				df[[' P2 (kW)']] = np.NaN
-				df[[' P3 (kW)']] = np.NaN
-			elif phase_ids == ['2']:
-				df[[' P2 (kW)']] = df[[' P1 (kW)']]
-				df[[' P1 (kW)']] = np.NaN
-				df[[' P3 (kW)']] = np.NaN
-			elif phase_ids == ['3']:
-				df[[' P3 (kW)']] = df[[' P1 (kW)']]
-				df[[' P1 (kW)']] = np.NaN
-				df[[' P2 (kW)']] = np.NaN
-			# print("df after phase reassignment:")
-			# print(df.head(10))
 			df['Name'] = name
 			all_gen_df = pd.concat([all_gen_df, df], ignore_index=True, sort=False)
 		elif name.startswith('monvsource-'):
