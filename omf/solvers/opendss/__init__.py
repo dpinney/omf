@@ -7,6 +7,7 @@ import networkx as nx
 import math
 import os
 import warnings
+import subprocess
 try:
 	import opendssdirect as dss
 except:
@@ -82,7 +83,7 @@ def new_newQstsPlot(filePath, stepSizeInMinutes, numberOfSteps, keepAllFiles=Fal
 	dss_run_file = ''
 	# volt_coord = runDSS(filePath)
 	dss_run_file += f'redirect {filePath}\n'
-	dss_run_file += f'set datapath="{dssFileLoc}"\n'
+	# dss_run_file += f'set datapath="{dssFileLoc}"\n'
 	dss_run_file += f'calcvoltagebases\n'
 	# Attach Monitors
 	tree = dssConvert.dssToTree(filePath)
@@ -139,11 +140,8 @@ def new_newQstsPlot(filePath, stepSizeInMinutes, numberOfSteps, keepAllFiles=Fal
 	# Write runner file and run.
 	with open(f'{dssFileLoc}/dss_run_file.dss', 'w') as run_file:
 		run_file.write(dss_run_file)
-	# Hack to run in the right directory.
-	my_dir = os.getcwd()
-	os.chdir(dssFileLoc)
-	os.system(f'opendsscmd dss_run_file.dss')
-	os.chdir(my_dir)
+	# Run in the right directory.
+	subprocess.run('opendsscmd dss_run_file.dss', cwd=dssFileLoc, shell=True, check=True, capture_output=True)
 	# Aggregate monitors
 	all_gen_df = pd.DataFrame()
 	all_load_df = pd.DataFrame()
@@ -153,28 +151,27 @@ def new_newQstsPlot(filePath, stepSizeInMinutes, numberOfSteps, keepAllFiles=Fal
 		csv_path = f'{dssFileLoc}/{circ_name}_Mon_{name}.csv'
 		df = pd.read_csv(f'{circ_name}_Mon_{name}.csv')
 		if name.startswith('monload-'):
-			# # TODO: TEST THAT the commented out phasing code below works after new_newQSTSplot() is updated
-			# # reassign V1 single phase voltages outputted by DSS to the appropriate column and filling Nans for neutral phases (V2)
-			# # three phase print out should work fine as is
-			# ob_name = name.split('-')[1]
-			# # print("ob_name:", ob_name)
-			# the_object = _getByName(tree, ob_name)
-			# # print("the_object:", the_object)
-			# # create phase list, removing neutral phases
-			# phase_ids = the_object.get('bus1','').replace('.0','').split('.')[1:]
-			# # print("phase_ids:", phase_ids)
-			# # print("headings list:", df.columns)
-			# if phase_ids == ['1']:
-			# 	df[[' V2']] = np.NaN
-			# 	df[[' V3']] = np.NaN
-			# elif phase_ids == ['2']:
-			# 	df[[' V2']] = df[[' V1']]
-			# 	df[[' V1']] = np.NaN
-			# 	df[[' V3']] = np.NaN
-			# elif phase_ids == ['3']:
-			# 	df[[' V3']] = df[[' V1']]
-			# 	df[[' V1']] = np.NaN
-			# 	df[[' V2']] = np.NaN
+			# reassign V1 single phase voltages outputted by DSS to the appropriate column and filling Nans for neutral phases (V2)
+			# three phase print out should work fine as is
+			ob_name = name.split('-')[1]
+			# print("ob_name:", ob_name)
+			the_object = _getByName(tree, ob_name)
+			# print("the_object:", the_object)
+			# create phase list, removing neutral phases
+			phase_ids = the_object.get('bus1','').replace('.0','').split('.')[1:]
+			# print("phase_ids:", phase_ids)
+			# print("headings list:", df.columns)
+			if phase_ids == ['1']:
+				df[[' V2']] = np.NaN
+				df[[' V3']] = np.NaN
+			elif phase_ids == ['2']:
+				df[[' V2']] = df[[' V1']]
+				df[[' V1']] = np.NaN
+				df[[' V3']] = np.NaN
+			elif phase_ids == ['3']:
+				df[[' V3']] = df[[' V1']]
+				df[[' V1']] = np.NaN
+				df[[' V2']] = np.NaN
 			# # print("df after phase reassignment:")
 			# # print(df.head(10))
 			df['Name'] = name
@@ -182,28 +179,27 @@ def new_newQstsPlot(filePath, stepSizeInMinutes, numberOfSteps, keepAllFiles=Fal
 			#pd.set_option('display.max_columns', None)
 			#print("all_load_df:", df.head(50))
 		elif name.startswith('mongenerator-'):
-			# # TODO: TEST THAT the commented out phasing code below works after new_newQSTSplot() is updated
-			# # reassign V1 single phase voltages outputted by DSS to the appropriate column and filling Nans for neutral phases (V2)
-			# # three phase print out should work fine as is
-			# ob_name = name.split('-')[1]
-			# # print("ob_name:", ob_name)
-			# the_object = _getByName(tree, ob_name)
-			# # print("the_object:", the_object)
-			# # create phase list, removing neutral phases
-			# phase_ids = the_object.get('bus1','').replace('.0','').split('.')[1:]
-			# # print("phase_ids:", phase_ids)
-			# # print("headings list:", df.columns)
-			# if phase_ids == ['1']:
-			# 	df[[' P2 (kW)']] = np.NaN
-			# 	df[[' P3 (kW)']] = np.NaN
-			# elif phase_ids == ['2']:
-			# 	df[[' P2 (kW)']] = df[[' P1 (kW)']]
-			# 	df[[' P1 (kW)']] = np.NaN
-			# 	df[[' P3 (kW)']] = np.NaN
-			# elif phase_ids == ['3']:
-			# 	df[[' P3 (kW)']] = df[[' P1 (kW)']]
-			# 	df[[' P1 (kW)']] = np.NaN
-			# 	df[[' P2 (kW)']] = np.NaN
+			# reassign V1 single phase voltages outputted by DSS to the appropriate column and filling Nans for neutral phases (V2)
+			# three phase print out should work fine as is
+			ob_name = name.split('-')[1]
+			# print("ob_name:", ob_name)
+			the_object = _getByName(tree, ob_name)
+			# print("the_object:", the_object)
+			# create phase list, removing neutral phases
+			phase_ids = the_object.get('bus1','').replace('.0','').split('.')[1:]
+			# print("phase_ids:", phase_ids)
+			# print("headings list:", df.columns)
+			if phase_ids == ['1']:
+				df[[' P2 (kW)']] = np.NaN
+				df[[' P3 (kW)']] = np.NaN
+			elif phase_ids == ['2']:
+				df[[' P2 (kW)']] = df[[' P1 (kW)']]
+				df[[' P1 (kW)']] = np.NaN
+				df[[' P3 (kW)']] = np.NaN
+			elif phase_ids == ['3']:
+				df[[' P3 (kW)']] = df[[' P1 (kW)']]
+				df[[' P1 (kW)']] = np.NaN
+				df[[' P2 (kW)']] = np.NaN
 			# # print("df after phase reassignment:")
 			# # print(df.head(10))
 			df['Name'] = name
