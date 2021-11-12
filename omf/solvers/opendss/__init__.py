@@ -383,48 +383,30 @@ def THD(filePath):
 	plt.savefig(dssFileLoc + '/THD.png')
 	plt.clf()
 
-def dynamicPlot(filePath, time_step, iterations, at_bus='SOURCEBUS', source_name='Vsource.SOURCE'):
+def dynamicPlot(filePath, time_step_s=0.001, iterations=100, at_elem='Vsource.SOURCE'):
 	''' Do a dynamic, long-term study of the powerflow. time_step is in seconds. '''
 	dssFileLoc = os.path.dirname(os.path.abspath(filePath))	
 	runDSS(filePath)
-	runDssCommand('Solve')
-	dynamicCommand = f'Solve mode=dynamics stepsize={time_step} number={iterations}'
-	runDssCommand(dynamicCommand)
-	for i in range(iterations):
-		voltString = f'Export voltages "{dssFileLoc}/dynamicVolt{i}.csv"'
-		currentString = f'Export currents "{dssFileLoc}/dynamicCurrent{i}.csv"'
-		runDssCommand(voltString)
-		runDssCommand(currentString)
-	powerData = []
-	#TODO: check the math here.
-	for j in range(iterations):
-		curVolt = f'dynamicvolt{j}.csv'
-		curCurrent = f'dynamiccurrent{j}.csv'
-		voltProfile = pd.read_csv(dssFileLoc + '/' + curVolt)
-		voltProfile.columns = voltProfile.columns.str.strip()
-		voltProfile['step'] = j
-		curProfile = pd.read_csv(dssFileLoc + '/' + curCurrent)
-		curProfile.columns = curProfile.columns.str.strip()
-		curProfile['step'] = j
-		sourceVoltage = voltProfile.loc[voltProfile['Bus'] == at_bus]
-		sourceCurrent = curProfile.loc[curProfile['Element'] == source_name]
-		data_summary = {'Volts': (sourceVoltage['Magnitude1'], sourceVoltage['Magnitude2'], sourceVoltage['Magnitude3']), 
-		'Currents': (sourceCurrent['I1_1'], sourceCurrent['I1_2'], sourceCurrent['I1_3'])}
-		power_triplet = (data_summary['Volts'][0]*data_summary['Currents'][0], data_summary['Volts'][1]*data_summary['Currents'][1], data_summary['Volts'][2]*data_summary['Currents'][2])
-		powerData.append(power_triplet)
-	first_phase = [item[0] for item in powerData]
-	second_phase = [item[1] for item in powerData]
-	third_phase = [item[2] for item in powerData]
-	plt.plot(first_phase, label='Phase one')
-	plt.plot(second_phase, label='Phase two')
-	plt.plot(third_phase, label='Phase three')
-	plt.legend(loc='upper center')
-	plt.xlim(0, iterations-1)
-	plt.xlabel('Time [step]')
-	plt.ylabel('Power [kW]')
-	plt.title(f'Dynamic Simulation Power Plot at {at_bus} from {source_name}')
-	plt.savefig(dssFileLoc + '/DynamicPowerPlot.png')
-	os.system('rm ' + dssFileLoc + '/dynamicvolt* ' + dssFileLoc + '/dynamiccurrent*')
+	runDssCommand(f'new object=monitor.dynamic_monitor element={at_elem}')
+	runDssCommand('solve')
+	runDssCommand(f'solve mode=dynamics stepsize={time_step_s} number={iterations}')
+	runDssCommand('export monitor dynamic_monitor filename=dynamic_monitor.csv')
+	circ_name = dss.Circuit.Name()
+	allDF = pd.read_csv(f'{dssFileLoc}/{circ_name}_Mon_dynamic_monitor.csv')
+	fig, axs = plt.subplots(2)
+	for vname in [' V1',' V2',' V3']:
+		axs[0].plot(allDF[vname], label=vname)
+	for cname in [' I1',' I2',' I3']:
+		axs[1].plot(allDF[cname], label=cname)
+	# # plt.xticks(range(iterations), [time_step_s * x for x in range(iterations)])
+	axs[0].set_xlabel('Time [step]')
+	axs[1].set_xlabel('Time [step]')
+	axs[0].set_ylabel('Voltage [V]')
+	axs[1].set_ylabel('Current [A]')
+	axs[0].legend()
+	fig.suptitle(f'Dynamic Simulation at {at_elem}')
+	fig.tight_layout()
+	fig.savefig(dssFileLoc + '/DynamicPowerPlot.png')
 
 def faultPlot(filePath, faultCommand):
 	''' Plot fault study for filePath dss and faultCommand (valid opendss fault str) ''' 
