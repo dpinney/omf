@@ -30,15 +30,6 @@ try:
 except:
 	warnings.warn('opendssdirect not installed; opendss functionality disabled.')
 
-def runDssCommand(dsscmd):
-	''' todo: dedup with __init__ version. '''
-	from opendssdirect import run_command, Error
-	x = run_command(dsscmd)
-	latest_error = Error.Description()
-	if latest_error != '':
-		print('OpenDSS Error:', latest_error)
-	return x
-
 def gridLabToDSS(inFilePath, outFilePath):
 	''' Convert gridlab file to dss. ''' 
 	#TODO: delete because obsolete?
