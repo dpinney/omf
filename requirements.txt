@@ -42,3 +42,4 @@ pystan
 tensorflow
 xmltodict>=0.12.0
 decorator
+OpenDSSDirect.py[extras]
