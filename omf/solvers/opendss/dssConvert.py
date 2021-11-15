@@ -30,36 +30,43 @@ try:
 except:
 	warnings.warn('opendssdirect not installed; opendss functionality disabled.')
 
-def gridLabToDSS(inFilePath, outFilePath):
-	''' Convert gridlab file to dss. ''' 
-	#TODO: delete because obsolete?
-	model = Store()
-	# HACK: the gridlab reader can't handle brace syntax that ditto itself writes...
-	# command = 'sed -i -E "s/{/ {/" ' + inFilePath
-	# os.system(command)
-	gld_reader = gReader(input_file = inFilePath)
-	gld_reader.parse(model)
-	model.set_names()
-	dss_writer = dWriter(output_path='.')
-	# TODO: no way to specify output filename, so move and rename.
-	# use tempfile.temp_dir()
-	# spawn the write function working in that directory via subprocess.
-	# subprocess.Popen("ls", cwd="/")
-	# gather up the stuff in output dir, place it at outFilePath
-	# What do we do if the ouput from ditto is multiple files or a dir? Ideally wanna merge, but making sure outFilePath is at least a dir is a good start
-	dss_writer.write(model)
+def cyme_to_dss(cyme_dir, out_path, inter_dir=None):
+	''' Converts cyme txt files into an opendss file with nrel/ditto.
+	Need equipment.txt, load.txt, and network.txt in cyme_dir '''
+	if inter_dir:
+		tdir = inter_dir
+	else:
+		tdir = tempfile.mkdtemp()
+	print('Ditto Conversion Dir:', tdir)
+	root = os.path.abspath(cyme_dir)
+	cmd = f'ditto-cli convert --from cyme --input "{root}" --to opendss --output {tdir}'
+	os.system(cmd)
+	dss_to_clean_via_save(f'{tdir}/Master.dss', out_path)
 
-def dssToGridLab(inFilePath, outFilePath, busCoords=None):
-	''' Convert dss file to gridlab. '''
-	#TODO: delete because obsolete?
-	model = Store()
-	#TODO: do something about busCoords: 
-	dss_reader = dReader(master_file = inFilePath)
-	dss_reader.parse(model)
-	model.set_names()
-	glm_writer = gWriter(output_path='.')
-	# TODO: no way to specify output filename, so move and rename.
-	glm_writer.write(model)
+def gld_to_dss(glm_path, out_path, inter_dir=None):
+	''' Converts GridLAB-D files to opendss with nrel/ditto'''
+	if inter_dir:
+		tdir = inter_dir
+	else:
+		tdir = tempfile.mkdtemp()
+	print('Ditto Conversion Dir:', tdir)
+	root = os.path.abspath(glm_path)
+	cmd = f'ditto-cli convert --from glm --input "{root}" --to opendss --output {tdir}'
+	os.system(cmd)
+	dss_to_clean_via_save(f'{tdir}/Master.dss', out_path)
+
+def dss_to_gld(opendss_path, out_path, inter_dir=None):
+	''' Converts opendss files to GridLAB-D with nrel/ditto'''
+	#TODO: test.
+	if inter_dir:
+		tdir = inter_dir
+	else:
+		tdir = tempfile.mkdtemp()
+	print('Ditto Conversion Dir:', tdir)
+	root = os.path.abspath(opendss_path)
+	cmd = f'ditto-cli convert --from opendss --input "{root}" --to glm --output {tdir}'
+	os.system(cmd)
+	dss_to_clean_via_save(f'{tdir}/Master.dss', out_path)
 
 def dss_to_clean_via_save(dss_file, clean_out_path, add_pf_syntax=True, clean_up=False):
 	'''Converts raw OpenDSS circuit definition files to the *.clean.dss syntax required by OMF.
