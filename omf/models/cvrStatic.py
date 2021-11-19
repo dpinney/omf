@@ -349,7 +349,7 @@ def work(modelDir, inputDict):
 	   ncol=2, mode="expand", borderaxespad=0.1)
 	plt.xticks([t+0.5 for t in ticks],indices)
 	plt.ylabel('Utility Savings ($)')
-	plt.tight_layout(5.5,1.3,1.2)
+	plt.tight_layout()
 	fig.autofmt_xdate()
 	plt.savefig(pJoin(modelDir,"spendChart.png"))
 	outData["energyReductionDollars"] = d1
