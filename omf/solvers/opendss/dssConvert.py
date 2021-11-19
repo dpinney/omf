@@ -893,7 +893,7 @@ def _dssToOmdTest():
 	omfDir = os.getcwd()
 	# dssFileName = 'ieee37.clean.dss'
 	# dssFilePath = pJoin(curDir, dssFileName)
-	dssFileName = 'ieee8500-unbal_no_fuses.clean_reduced.good_coords2.dss'
+	dssFileName = 'nreca1824.dss'
 	dssFilePath = pJoin(omfDir, 'scratch', 'RONM', dssFileName)
 	omdFileName = dssFileName + '.omd'
 	omdFilePath = pJoin(omfDir, 'scratch', 'RONM', omdFileName)

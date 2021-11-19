@@ -1063,6 +1063,9 @@ def _tests():
 		errlim = 0.30 # threshold of 30% error between reduced files. 
 		assert maxPerrM <= errlim*100, 'The voltage magnitude error between the compared files exceeds the allowable limit of %s%%.'%(errlim*100)
 		
+def _runTest():
+	runDSS('nreca1824.dss', keep_output=False)
+	# runDSS('iowa240.clean.dss', keep_output=False)
 
 	# Make core output
 	#FPATH = 'iowa240.clean.dss'
@@ -1091,3 +1094,4 @@ def _tests():
 
 if __name__ == "__main__":
 	_tests()
+	# _runTest()
