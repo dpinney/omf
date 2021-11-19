@@ -3137,7 +3137,7 @@ new object=regcontrol.feeder_rega transformer=feeder_rega winding=2 tapwinding=2
 new object=regcontrol.feeder_regb transformer=feeder_regb winding=2 tapwinding=2 vreg=126.5 ptratio=60 band=2
 new object=regcontrol.feeder_regc transformer=feeder_regc winding=2 tapwinding=2 vreg=126.5 ptratio=60 band=2
 new object=reactor.hvmv_sub_hsb bus1=sourcebus.1.2.3 bus2=hvmv_sub_hsb.1.2.3 r=0 x=14.798307 normamps=400 emergamps=400
-new loadshape.pvscaling1 mult=(0 0 0 0 0 0 0 0.084654201 0.4084613 0.676864065 0.859273011 0.976124644 1 0.934483244 0.778657014 0.531155984 0.209112825 0 0 0 0 0 0 0)
+new loadshape.pvscaling1 mult=[0 0 0 0 0 0 0 0.084654201 0.4084613 0.676864065 0.859273011 0.976124644 1 0.934483244 0.778657014 0.531155984 0.209112825 0 0 0 0 0 0 0]
 new pvsystem.pv01 bus1=l2728247.1.2.3 phases=3 kv=13.8 conn=wye irradiance=1 pmpp=110 kva=100 pf=1 balanced=true limitcurrent=true vminpu=0.9090909 daily=pvscaling1
 new storage.bat01 bus1=l2728247.1.2.3 phases=3 kv=13.8 kwhstored=200 kwhrated=200 kva=100 kvar=100 %charge=100 %discharge=100 %effcharge=100 %effdischarge=100 %idlingkw=1 %r=0 %x=50
 new pvsystem.pv02 bus1=293471.1.2.3 phases=3 kv=13.8 conn=wye irradiance=1 pmpp=110 kva=100 pf=1 balanced=true limitcurrent=true vminpu=0.9090909 daily=pvscaling1

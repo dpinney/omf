@@ -795,10 +795,15 @@ def new(modelDir):
 	''' Create a new instance of this model. Returns true on success, false on failure. '''
 	with open(pJoin(__neoMetaModel__._omfDir,'static','testFiles','events.json')) as f:
 		event_data = f.read()
+	# with open(pJoin(__neoMetaModel__._omfDir,'scratch','RONM','events.ieee8500.json')) as f:
+	# 	event_data = f.read()
 	with open(pJoin(__neoMetaModel__._omfDir,'static','testFiles','customerInfo.csv')) as f1:
 		customer_data = f1.read()
 	with open(pJoin(__neoMetaModel__._omfDir,'static','testFiles','output_later.json')) as f2:
 		output_file = f2.read()
+	# with open(pJoin(__neoMetaModel__._omfDir,'scratch','RONM','output.ieee8500.ts=60min.global.json')) as f2:
+	# 	output_file = f2.read()
+
 	defaultInputs = {
 		'modelType': modelName,
 		# 'feederName1': 'ieee37nodeFaultTester',
@@ -807,6 +812,7 @@ def new(modelDir):
 		# 'feederName1': 'iowa240c2_workingOnm.clean.dss',
 		# 'feederName1': 'iowa240c2_working_coords.clean',
 		'feederName1': 'iowa240c2_fixed_coords.clean',
+		# 'feederName1': 'nreca1824.dss',
 		'useCache': 'True',
 		'maxTime': '25',
 		'stepSize': '1',
@@ -816,10 +822,12 @@ def new(modelDir):
 		'hardware_cost': '550',
 		'eventData': event_data,
 		'eventFileName': 'events.json',
+		# 'eventFileName': 'events.ieee8500.json',
 		'customerData': customer_data,
 		'customerFileName': 'customerInfo.csv',
 		'outputData': output_file,
 		'outputFileName': 'output_later.json'
+		# 'outputFileName': 'output.ieee8500.ts=60min.global.json'
 	}
 	creationCode = __neoMetaModel__.new(modelDir, defaultInputs)
 	try:
