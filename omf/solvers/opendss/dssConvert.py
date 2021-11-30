@@ -685,6 +685,13 @@ def dssToOmd(dssFilePath, omdFilePath, RADIUS=0.0002, write_out=True):
 		evilToOmd(evil_glm, omdFilePath)
 	return evil_glm
 
+def omdToTree(omdFilePath):
+	''' Get a nice opendss tree in memory from an OMD. '''
+	omd = json.load(open(omdFilePath))
+	evil_tree = omd.get('tree',{})
+	dss_tree = evilGldTreeToDssTree(evil_tree)
+	return dss_tree
+
 def dss_to_networkx(dssFilePath):
 	''' Return a networkx directed graph from a dss file. '''
 	tree = dssToTree(dssFilePath)
@@ -938,7 +945,7 @@ def _tests():
 	#TODO: a little help on the frontend to hide invalid commands.
 
 if __name__ == '__main__':
-	# _tests()
+	_tests()
 	# _randomTest()
 	# _conversionTests()
-	_dssToOmdTest()
+	# _dssToOmdTest()
