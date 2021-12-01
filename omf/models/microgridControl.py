@@ -798,11 +798,15 @@ def work(modelDir, inputDict):
 
 def new(modelDir):
 	''' Create a new instance of this model. Returns true on success, false on failure. '''
-	feeder_file_path = [__neoMetaModel__._omfDir,'scratch','MapTestOutput','iowa240c2_fixed_coords.clean.omd']
+	# ====== For All Test Cases
 	cust_file_path = [__neoMetaModel__._omfDir,'static','testFiles','customerInfo.csv']
+	# ====== Iowa240 Test Case
+	feeder_file_path = [__neoMetaModel__._omfDir,'scratch','MapTestOutput','iowa240c2_fixed_coords.clean.omd']
 	event_file_path = [__neoMetaModel__._omfDir,'static','testFiles','events.json']
-	# event_file_path = [__neoMetaModel__._omfDir,'scratch','RONM','events.ieee8500.json']
 	output_file_path = [__neoMetaModel__._omfDir,'static','testFiles','output_later.json']
+	# ====== 8500ish Test Case
+	# event_file_path = [__neoMetaModel__._omfDir,'scratch','RONM','events.ieee8500.json']
+	# output_file_path = [__neoMetaModel__._omfDir,'static','testFiles','output_simple_cobb.json']
 	# output_file_path = [__neoMetaModel__._omfDir,'scratch','RONM','output.ieee8500.ts=60min.global.json']
 	defaultInputs = {
 		'modelType': modelName,
