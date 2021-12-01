@@ -643,44 +643,47 @@ def dssToOmd(dssFilePath, omdFilePath, RADIUS=0.0002, write_out=True):
 		ob_name = ob.get('name','')
 		ob_type = ob.get('object','')
 		if 'parent' in ob:
-			parent_name = ob['parent']
-			if ob_type == 'capcontrol':
-				cap_name = ob['capacitor']
-				cap_id = name_map[cap_name]
-				if 'parent' in evil_glm[cap_id]:
-					parent_name = evil_glm[cap_id]['parent']
-				else:
-					parent_name = ob['parent']
-			if ob_type == 'energymeter':
-				short_parent_name = parent_name.split('.')[1]
-				parent_id = name_map[short_parent_name]
-				if 'parent' in evil_glm[parent_id]:
-					parent_name = evil_glm[parent_id]['parent']
-				elif evil_glm[parent_id].get('object','') == 'line':
-					from_name = evil_glm[parent_id].get('from', None)
-					to_name = evil_glm[parent_id].get('from', None)
-					if from_name is not None:
-						parent_name = from_name
-					elif to_name is not None:
-						parent_name = to_name
+			try:
+				parent_name = ob['parent']
+				if ob_type == 'capcontrol':
+					cap_name = ob['capacitor']
+					cap_id = name_map[cap_name]
+					if 'parent' in evil_glm[cap_id]:
+						parent_name = evil_glm[cap_id]['parent']
 					else:
 						parent_name = ob['parent']
-			# try:
-			# 	parent_loc = name_map[parent_name]
-			# except KeyError:
-			# 	short_parent_name = parent_name.split('.')[1]
-			# 	parent_loc = name_map[short_parent_name]
-			parent_loc = name_map[parent_name]
-			parent_ob = evil_glm[parent_loc]
-			parent_lat = parent_ob.get('latitude', None)
-			parent_lon = parent_ob.get('longitude', None)
-			# place randomly on circle around parent.
-			angle = random.random()*3.14159265*2;
-			x = math.cos(angle)*RADIUS;
-			y = math.sin(angle)*RADIUS;
-			ob['latitude'] = str(float(parent_lat) + x)
-			ob['longitude'] = str(float(parent_lon) + y)
-			# print(ob)
+				if ob_type == 'energymeter':
+					short_parent_name = parent_name.split('.')[1]
+					parent_id = name_map[short_parent_name]
+					if 'parent' in evil_glm[parent_id]:
+						parent_name = evil_glm[parent_id]['parent']
+					elif evil_glm[parent_id].get('object','') == 'line':
+						from_name = evil_glm[parent_id].get('from', None)
+						to_name = evil_glm[parent_id].get('from', None)
+						if from_name is not None:
+							parent_name = from_name
+						elif to_name is not None:
+							parent_name = to_name
+						else:
+							parent_name = ob['parent']
+				# try:
+				# 	parent_loc = name_map[parent_name]
+				# except KeyError:
+				# 	short_parent_name = parent_name.split('.')[1]
+				# 	parent_loc = name_map[short_parent_name]
+				parent_loc = name_map[parent_name]
+				parent_ob = evil_glm[parent_loc]
+				parent_lat = parent_ob.get('latitude', None)
+				parent_lon = parent_ob.get('longitude', None)
+				# place randomly on circle around parent.
+				angle = random.random()*3.14159265*2;
+				x = math.cos(angle)*RADIUS;
+				y = math.sin(angle)*RADIUS;
+				ob['latitude'] = str(float(parent_lat) + x)
+				ob['longitude'] = str(float(parent_lon) + y)
+				# print(ob)
+			except:
+				print('ERROR on converting',ob)
 	if write_out:
 		evilToOmd(evil_glm, omdFilePath)
 	return evil_glm
