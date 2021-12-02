@@ -83,20 +83,23 @@ def lineToCoords(tree, feederMap, lineName):
 	lineNode = ''
 	lineNode2 = ''
 	for key in tree.keys():
-		if tree[key].get('name','') == lineName:
-			lineNode = tree[key]['from']
-			# print(lineNode)
-			lineNode2 = tree[key]['to']
-			# print(lineNode2)
-			coordLis1, coordStr1 = nodeToCoords(feederMap, lineNode)
-			# print(coordLis1)
-			coordLis2, coordStr2 = nodeToCoords(feederMap, lineNode2)
-			coordLis = []
-			coordLis.append(coordLis1[0])
-			coordLis.append(coordLis1[1])
-			coordLis.append(coordLis2[0])
-			coordLis.append(coordLis2[1])
-			coordStr = str(coordLis[0]) + ' ' + str(coordLis[1]) + ' ' + str(coordLis[2]) + ' ' + str(coordLis[3])
+		try:
+			if tree[key].get('name','') == lineName:
+				lineNode = tree[key]['from']
+				# print(lineNode)
+				lineNode2 = tree[key]['to']
+				# print(lineNode2)
+				coordLis1, coordStr1 = nodeToCoords(feederMap, lineNode)
+				# print(coordLis1)
+				coordLis2, coordStr2 = nodeToCoords(feederMap, lineNode2)
+				coordLis = []
+				coordLis.append(coordLis1[0])
+				coordLis.append(coordLis1[1])
+				coordLis.append(coordLis2[0])
+				coordLis.append(coordLis2[1])
+				coordStr = str(coordLis[0]) + ' ' + str(coordLis[1]) + ' ' + str(coordLis[2]) + ' ' + str(coordLis[3])
+		except:
+			print('BAD COORDS for', tree[key])
 	return coordLis, coordStr
 
 def pullDataForGraph(tree, feederMap, outputTimeline, row):
@@ -417,7 +420,7 @@ def graphMicrogrid(pathToOmd, pathToJson, pathToCsv, outputFile, useCache, workD
 	useCache = 'True' # Force cache invalidation.
 	# Run ONM.
 	if  useCache == 'True':
-		shutil.copyfile(f'{__neoMetaModel__._omfDir}/static/testFiles/output_later.json',f'{workDir}/output.json')
+		shutil.copyfile(outputFile,f'{workDir}/output.json')
 	else:
 		PowerModelsONM.run(f'{workDir}/circuit.dss', f'{workDir}/output.json',f'{workDir}/events.json')
 
@@ -612,33 +615,35 @@ def graphMicrogrid(pathToOmd, pathToJson, pathToCsv, outputFile, useCache, workD
 	row = 0
 	row_count_timeline = outputTimeline.shape[0]
 	while row < row_count_timeline:
-		device, coordLis, coordStr, time, action, loadBefore, loadAfter = pullDataForGraph(tree, feederMap, outputTimeline, row)
-
-		Dict = {}
-		if len(coordLis) == 2:
-			Dict['geometry'] = {'type': 'Point', 'coordinates': [coordLis[0], coordLis[1]]}
-			Dict['type'] = 'Feature'
-			Dict['properties'] = {'device': device, 
-								  'time': time,
-								  'action': action,
-								  'loadBefore': loadBefore,
-								  'loadAfter': loadAfter,
-								  'pointColor': '#' + str(colormap(action)), 
-								  'popupContent': 'Location: <b>' + str(coordStr) + '</b><br>Device: <b>' + str(device) + '</b><br>Time: <b>' + str(time) + '</b><br>Action: <b>' + str(action) + '</b><br>Before: <b>' + str(loadBefore) + '</b><br>After: <b>' + str(loadAfter) + '</b>.'}
-			feederMap['features'].append(Dict)
-		else:
-			Dict['geometry'] = {'type': 'LineString', 'coordinates': [[coordLis[0], coordLis[1]], [coordLis[2], coordLis[3]]]}
-			Dict['type'] = 'Feature'
-			Dict['properties'] = {'device': device, 
-								  'time': time,
-								  'action': action,
-								  'loadBefore': loadBefore,
-								  'loadAfter': loadAfter,
-								  'edgeColor': '#' + str(colormap(action)),
-								  'popupContent': 'Location: <b>' + str(coordStr) + '</b><br>Device: <b>' + str(device) + '</b><br>Time: <b>' + str(time) + '</b><br>Action: <b>' + str(action) + '</b><br>Before: <b>' + str(loadBefore) + '</b><br>After: <b>' + str(loadAfter) + '</b>.'}
-			feederMap['features'].append(Dict)
+		full_data = pullDataForGraph(tree, feederMap, outputTimeline, row)
+		device, coordLis, coordStr, time, action, loadBefore, loadAfter = full_data
+		dev_dict = {}
+		try:
+			if len(coordLis) == 2:
+				dev_dict['geometry'] = {'type': 'Point', 'coordinates': [coordLis[0], coordLis[1]]}
+				dev_dict['type'] = 'Feature'
+				dev_dict['properties'] = {'device': device, 
+									  'time': time,
+									  'action': action,
+									  'loadBefore': loadBefore,
+									  'loadAfter': loadAfter,
+									  'pointColor': '#' + str(colormap(action)), 
+									  'popupContent': 'Location: <b>' + str(coordStr) + '</b><br>Device: <b>' + str(device) + '</b><br>Time: <b>' + str(time) + '</b><br>Action: <b>' + str(action) + '</b><br>Before: <b>' + str(loadBefore) + '</b><br>After: <b>' + str(loadAfter) + '</b>.'}
+				feederMap['features'].append(dev_dict)
+			else:
+				dev_dict['geometry'] = {'type': 'LineString', 'coordinates': [[coordLis[0], coordLis[1]], [coordLis[2], coordLis[3]]]}
+				dev_dict['type'] = 'Feature'
+				dev_dict['properties'] = {'device': device, 
+									  'time': time,
+									  'action': action,
+									  'loadBefore': loadBefore,
+									  'loadAfter': loadAfter,
+									  'edgeColor': '#' + str(colormap(action)),
+									  'popupContent': 'Location: <b>' + str(coordStr) + '</b><br>Device: <b>' + str(device) + '</b><br>Time: <b>' + str(time) + '</b><br>Action: <b>' + str(action) + '</b><br>Before: <b>' + str(loadBefore) + '</b><br>After: <b>' + str(loadAfter) + '</b>.'}
+				feederMap['features'].append(dev_dict)
+		except:
+			print('MESSED UP MAPPING on', device, full_data)
 		row += 1
-
 	if not os.path.exists(workDir):
 		os.makedirs(workDir)
 	shutil.copy(omf.omfDir + '/templates/geoJsonMap.html', workDir)
@@ -793,20 +798,19 @@ def work(modelDir, inputDict):
 
 def new(modelDir):
 	''' Create a new instance of this model. Returns true on success, false on failure. '''
-	with open(pJoin(__neoMetaModel__._omfDir,'static','testFiles','events.json')) as f:
-		event_data = f.read()
-	with open(pJoin(__neoMetaModel__._omfDir,'static','testFiles','customerInfo.csv')) as f1:
-		customer_data = f1.read()
-	with open(pJoin(__neoMetaModel__._omfDir,'static','testFiles','output_later.json')) as f2:
-		output_file = f2.read()
+	# ====== For All Test Cases
+	cust_file_path = [__neoMetaModel__._omfDir,'static','testFiles','customerInfo.csv']
+	# ====== Iowa240 Test Case
+	feeder_file_path = [__neoMetaModel__._omfDir,'scratch','MapTestOutput','iowa240c2_fixed_coords.clean.omd']
+	event_file_path = [__neoMetaModel__._omfDir,'static','testFiles','events.json']
+	output_file_path = [__neoMetaModel__._omfDir,'static','testFiles','output_later.json']
+	# ====== 8500ish Test Case
+	# event_file_path = [__neoMetaModel__._omfDir,'scratch','RONM','events.ieee8500.json']
+	# output_file_path = [__neoMetaModel__._omfDir,'static','testFiles','output_simple_cobb.json']
+	# output_file_path = [__neoMetaModel__._omfDir,'scratch','RONM','output.ieee8500.ts=60min.global.json']
 	defaultInputs = {
 		'modelType': modelName,
-		# 'feederName1': 'ieee37nodeFaultTester',
-		# 'feederName1': 'ieee37.dss',
-		# 'feederName1': 'iowa240c1.clean.dss',
-		# 'feederName1': 'iowa240c2_workingOnm.clean.dss',
-		# 'feederName1': 'iowa240c2_working_coords.clean',
-		'feederName1': 'iowa240c2_fixed_coords.clean',
+		'feederName1': feeder_file_path[-1][0:-4],
 		'useCache': 'True',
 		'maxTime': '25',
 		'stepSize': '1',
@@ -814,17 +818,16 @@ def new(modelDir):
 		'profit_on_energy_sales': '0.03',
 		'restoration_cost': '100',
 		'hardware_cost': '550',
-		'eventData': event_data,
-		'eventFileName': 'events.json',
-		'customerData': customer_data,
-		'customerFileName': 'customerInfo.csv',
-		'outputData': output_file,
-		'outputFileName': 'output_later.json'
+		'customerFileName': cust_file_path[-1],
+		'customerData': open(pJoin(*cust_file_path)).read(),
+		'eventFileName': event_file_path[-1],
+		'eventData': open(pJoin(*event_file_path)).read(),
+		'outputFileName': output_file_path[-1],
+		'outputData': open(pJoin(*output_file_path)).read(),
 	}
 	creationCode = __neoMetaModel__.new(modelDir, defaultInputs)
 	try:
-		# shutil.copyfile(pJoin(__neoMetaModel__._omfDir, 'static', 'publicFeeders', defaultInputs['feederName1']+'.omd'), pJoin(modelDir, defaultInputs['feederName1']+'.omd'))
-		shutil.copyfile(pJoin(__neoMetaModel__._omfDir, 'scratch', 'MapTestOutput', defaultInputs['feederName1']+'.omd'), pJoin(modelDir, defaultInputs['feederName1']+'.omd'))
+		shutil.copyfile(pJoin(*feeder_file_path), pJoin(modelDir, defaultInputs['feederName1']+'.omd'))
 	except:
 		return False
 	return __neoMetaModel__.new(modelDir, defaultInputs)

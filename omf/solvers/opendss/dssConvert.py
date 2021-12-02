@@ -7,14 +7,6 @@ import csv
 import json
 import warnings
 import traceback
-try:
-	from ditto.store import Store
-	from ditto.readers.opendss.read import Reader as dReader
-	from ditto.writers.opendss.write import Writer as dWriter
-	from ditto.readers.gridlabd.read import Reader as gReader
-	from ditto.writers.gridlabd.write import Writer as gWriter
-except:
-	warnings.warn('nrel ditto not installed. opendss conversion disabled.')
 from collections import OrderedDict
 from omf import feeder, distNetViz
 import random
@@ -30,45 +22,43 @@ try:
 except:
 	warnings.warn('opendssdirect not installed; opendss functionality disabled.')
 
-def runDssCommand(dsscmd):
-	''' todo: dedup with __init__ version. '''
-	from opendssdirect import run_command, Error
-	x = run_command(dsscmd)
-	latest_error = Error.Description()
-	if latest_error != '':
-		print('OpenDSS Error:', latest_error)
-	return x
+def cyme_to_dss(cyme_dir, out_path, inter_dir=None):
+	''' Converts cyme txt files into an opendss file with nrel/ditto.
+	Need equipment.txt, load.txt, and network.txt in cyme_dir '''
+	if inter_dir:
+		tdir = inter_dir
+	else:
+		tdir = tempfile.mkdtemp()
+	print('Ditto Conversion Dir:', tdir)
+	root = os.path.abspath(cyme_dir)
+	cmd = f'ditto-cli convert --from cyme --input "{root}" --to opendss --output {tdir}'
+	os.system(cmd)
+	dss_to_clean_via_save(f'{tdir}/Master.dss', out_path)
 
-def gridLabToDSS(inFilePath, outFilePath):
-	''' Convert gridlab file to dss. ''' 
-	#TODO: delete because obsolete?
-	model = Store()
-	# HACK: the gridlab reader can't handle brace syntax that ditto itself writes...
-	# command = 'sed -i -E "s/{/ {/" ' + inFilePath
-	# os.system(command)
-	gld_reader = gReader(input_file = inFilePath)
-	gld_reader.parse(model)
-	model.set_names()
-	dss_writer = dWriter(output_path='.')
-	# TODO: no way to specify output filename, so move and rename.
-	# use tempfile.temp_dir()
-	# spawn the write function working in that directory via subprocess.
-	# subprocess.Popen("ls", cwd="/")
-	# gather up the stuff in output dir, place it at outFilePath
-	# What do we do if the ouput from ditto is multiple files or a dir? Ideally wanna merge, but making sure outFilePath is at least a dir is a good start
-	dss_writer.write(model)
+def gld_to_dss(glm_path, out_path, inter_dir=None):
+	''' Converts GridLAB-D files to opendss with nrel/ditto'''
+	if inter_dir:
+		tdir = inter_dir
+	else:
+		tdir = tempfile.mkdtemp()
+	print('Ditto Conversion Dir:', tdir)
+	root = os.path.abspath(glm_path)
+	cmd = f'ditto-cli convert --from glm --input "{root}" --to opendss --output {tdir}'
+	os.system(cmd)
+	dss_to_clean_via_save(f'{tdir}/Master.dss', out_path)
 
-def dssToGridLab(inFilePath, outFilePath, busCoords=None):
-	''' Convert dss file to gridlab. '''
-	#TODO: delete because obsolete?
-	model = Store()
-	#TODO: do something about busCoords: 
-	dss_reader = dReader(master_file = inFilePath)
-	dss_reader.parse(model)
-	model.set_names()
-	glm_writer = gWriter(output_path='.')
-	# TODO: no way to specify output filename, so move and rename.
-	glm_writer.write(model)
+def dss_to_gld(opendss_path, out_path, inter_dir=None):
+	''' Converts opendss files to GridLAB-D with nrel/ditto'''
+	#TODO: test.
+	if inter_dir:
+		tdir = inter_dir
+	else:
+		tdir = tempfile.mkdtemp()
+	print('Ditto Conversion Dir:', tdir)
+	root = os.path.abspath(opendss_path)
+	cmd = f'ditto-cli convert --from opendss --input "{root}" --to glm --output {tdir}'
+	os.system(cmd)
+	dss_to_clean_via_save(f'{tdir}/Master.dss', out_path)
 
 def dss_to_clean_via_save(dss_file, clean_out_path, add_pf_syntax=True, clean_up=False):
 	'''Converts raw OpenDSS circuit definition files to the *.clean.dss syntax required by OMF.
@@ -653,47 +643,57 @@ def dssToOmd(dssFilePath, omdFilePath, RADIUS=0.0002, write_out=True):
 		ob_name = ob.get('name','')
 		ob_type = ob.get('object','')
 		if 'parent' in ob:
-			parent_name = ob['parent']
-			if ob_type == 'capcontrol':
-				cap_name = ob['capacitor']
-				cap_id = name_map[cap_name]
-				if 'parent' in evil_glm[cap_id]:
-					parent_name = evil_glm[cap_id]['parent']
-				else:
-					parent_name = ob['parent']
-			if ob_type == 'energymeter':
-				short_parent_name = parent_name.split('.')[1]
-				parent_id = name_map[short_parent_name]
-				if 'parent' in evil_glm[parent_id]:
-					parent_name = evil_glm[parent_id]['parent']
-				elif evil_glm[parent_id].get('object','') == 'line':
-					from_name = evil_glm[parent_id].get('from', None)
-					to_name = evil_glm[parent_id].get('from', None)
-					if from_name is not None:
-						parent_name = from_name
-					elif to_name is not None:
-						parent_name = to_name
+			try:
+				parent_name = ob['parent']
+				if ob_type == 'capcontrol':
+					cap_name = ob['capacitor']
+					cap_id = name_map[cap_name]
+					if 'parent' in evil_glm[cap_id]:
+						parent_name = evil_glm[cap_id]['parent']
 					else:
 						parent_name = ob['parent']
-			# try:
-			# 	parent_loc = name_map[parent_name]
-			# except KeyError:
-			# 	short_parent_name = parent_name.split('.')[1]
-			# 	parent_loc = name_map[short_parent_name]
-			parent_loc = name_map[parent_name]
-			parent_ob = evil_glm[parent_loc]
-			parent_lat = parent_ob.get('latitude', None)
-			parent_lon = parent_ob.get('longitude', None)
-			# place randomly on circle around parent.
-			angle = random.random()*3.14159265*2;
-			x = math.cos(angle)*RADIUS;
-			y = math.sin(angle)*RADIUS;
-			ob['latitude'] = str(float(parent_lat) + x)
-			ob['longitude'] = str(float(parent_lon) + y)
-			# print(ob)
+				if ob_type == 'energymeter':
+					short_parent_name = parent_name.split('.')[1]
+					parent_id = name_map[short_parent_name]
+					if 'parent' in evil_glm[parent_id]:
+						parent_name = evil_glm[parent_id]['parent']
+					elif evil_glm[parent_id].get('object','') == 'line':
+						from_name = evil_glm[parent_id].get('from', None)
+						to_name = evil_glm[parent_id].get('from', None)
+						if from_name is not None:
+							parent_name = from_name
+						elif to_name is not None:
+							parent_name = to_name
+						else:
+							parent_name = ob['parent']
+				# try:
+				# 	parent_loc = name_map[parent_name]
+				# except KeyError:
+				# 	short_parent_name = parent_name.split('.')[1]
+				# 	parent_loc = name_map[short_parent_name]
+				parent_loc = name_map[parent_name]
+				parent_ob = evil_glm[parent_loc]
+				parent_lat = parent_ob.get('latitude', None)
+				parent_lon = parent_ob.get('longitude', None)
+				# place randomly on circle around parent.
+				angle = random.random()*3.14159265*2;
+				x = math.cos(angle)*RADIUS;
+				y = math.sin(angle)*RADIUS;
+				ob['latitude'] = str(float(parent_lat) + x)
+				ob['longitude'] = str(float(parent_lon) + y)
+				# print(ob)
+			except:
+				print('ERROR on converting',ob)
 	if write_out:
 		evilToOmd(evil_glm, omdFilePath)
 	return evil_glm
+
+def omdToTree(omdFilePath):
+	''' Get a nice opendss tree in memory from an OMD. '''
+	omd = json.load(open(omdFilePath))
+	evil_tree = omd.get('tree',{})
+	dss_tree = evilGldTreeToDssTree(evil_tree)
+	return dss_tree
 
 def dss_to_networkx(dssFilePath):
 	''' Return a networkx directed graph from a dss file. '''
@@ -903,7 +903,7 @@ def _dssToOmdTest():
 	omfDir = os.getcwd()
 	# dssFileName = 'ieee37.clean.dss'
 	# dssFilePath = pJoin(curDir, dssFileName)
-	dssFileName = 'ieee8500-unbal_no_fuses.clean_reduced.good_coords2.dss'
+	dssFileName = 'nreca1824.dss'
 	dssFilePath = pJoin(omfDir, 'scratch', 'RONM', dssFileName)
 	omdFileName = dssFileName + '.omd'
 	omdFilePath = pJoin(omfDir, 'scratch', 'RONM', omdFileName)
@@ -948,7 +948,7 @@ def _tests():
 	#TODO: a little help on the frontend to hide invalid commands.
 
 if __name__ == '__main__':
-	# _tests()
+	_tests()
 	# _randomTest()
 	# _conversionTests()
-	_dssToOmdTest()
+	# _dssToOmdTest()

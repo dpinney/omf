@@ -81,7 +81,6 @@ def newQstsPlot(filePath, stepSizeInMinutes, numberOfSteps, keepAllFiles=False, 
 	''' QSTS with native opendsscmd binary to avoid segfaults in opendssdirect. '''
 	dssFileLoc = os.path.dirname(os.path.abspath(filePath))
 	dss_run_file = ''
-	# volt_coord = runDSS(filePath)
 	dss_run_file += f'redirect {filePath}\n'
 	dss_run_file += f'set datapath="{dssFileLoc}"\n'
 	dss_run_file += f'calcvoltagebases\n'
@@ -265,31 +264,25 @@ def newQstsPlot(filePath, stepSizeInMinutes, numberOfSteps, keepAllFiles=False, 
 
 def voltagePlot(filePath, PU=True):
 	''' Voltage plotting routine. Creates 'voltages.csv' and 'Voltage [PU|V].png' in directory of input file.'''
-	# TODO: use getVoltages() here
 	dssFileLoc = os.path.dirname(os.path.abspath(filePath))
-	# TODO: use getCoords() here, if we write it.
-	#volt_coord = runDSS(filePath, keep_output=False)
 	volt_coord = runDSS(filePath)
 	runDssCommand('Export voltages "' + dssFileLoc + '/volts.csv"')
-	voltage = pd.read_csv(dssFileLoc + '/volts.csv')
-	# Generate voltage plots.
-	volt_coord.columns = ['Bus', 'X', 'Y', 'radius'] # radius would be obtained by getCoords().
-	voltageDF = pd.merge(volt_coord, voltage, on='Bus') # Merge on the bus axis so that all data is in one frame.
+	voltageDF = pd.read_csv(dssFileLoc + '/volts.csv')
 	plt.title('Voltage Profile')
-	plt.xlabel('Distance from source[miles]')
+	plt.ylabel('Count')
 	if PU:
 		for i in range(1, 4): 
 			volt_ind = ' pu' + str(i)
-			plt.scatter(voltageDF['radius'], voltageDF[volt_ind], label='Phase ' + str(i))
-		plt.ylabel('Voltage [PU]')
+			plt.hist(voltageDF[volt_ind], label='Phase ' + str(i))
+		plt.xlabel('Voltage [PU]')
 		plt.legend()
 		plt.savefig(dssFileLoc + '/Voltage Profile [PU].png')
 	else:
 		# plt.axis([1, 7, 2000, 3000]) # Ignore sourcebus-much greater-for overall magnitude.
 		for i in range(1, 4): 
 			mag_ind = ' Magnitude' + str(i)
-			plt.scatter(voltageDF['radius'], voltageDF[mag_ind], label='Phase ' + str(i))
-		plt.ylabel('Voltage [V]')
+			plt.hist(voltageDF[mag_ind], label='Phase ' + str(i))
+		plt.xlabel('Voltage [V]')
 		plt.legend()
 		plt.savefig(dssFileLoc + '/Voltage Profile [V].png')
 	plt.clf()
@@ -299,17 +292,14 @@ def currentPlot(filePath):
 	dssFileLoc = os.path.dirname(os.path.abspath(filePath))
 	curr_coord = runDSS(filePath)
 	runDssCommand('Export currents "' + dssFileLoc + '/currents.csv"')
-	current = pd.read_csv(dssFileLoc + '/currents.csv')
-	curr_coord.columns = ['Index', 'X', 'Y', 'radius'] # DSS buses don't have current, but are connected to it. 
-	curr_hyp = []
-	currentDF = pd.concat([curr_coord, current], axis=1)
-	plt.xlabel('Distance from source [km]')
-	plt.ylabel('Current [Amps]')
+	currentDF = pd.read_csv(dssFileLoc + '/currents.csv')
+	plt.xlabel('Current [A]')
+	plt.ylabel('Count')
 	plt.title('Current Profile')
 	for i in range(1, 3):
 		for j in range(1, 4):
 			cur_ind = ' I' + str(i) + '_' + str(j)
-			plt.scatter(currentDF['radius'], currentDF[cur_ind], label=cur_ind)
+			plt.hist(currentDF[cur_ind], label=cur_ind)
 	plt.legend()
 	plt.savefig(dssFileLoc + '/Current Profile.png')
 	plt.clf()
@@ -341,12 +331,18 @@ def networkPlot(filePath, figsize=(20,20), output_name='networkPlot.png', show_l
 		bus2 = row['Bus2'].split('.')[0].upper()
 		edges.append((bus1, bus2))
 	G.add_edges_from(edges)
+	# Remove buses withouts coords
+	no_pos_nodes = set(G.nodes()) - set(pos)
+	if len(no_pos_nodes) > 0:
+		warnings.warn(f'Node positions missing for {no_pos_nodes}')
+	G.remove_nodes_from(list(no_pos_nodes))
 	# We'll color the nodes according to voltage.
 	volt_values = {}
 	labels = {}
 	for index, row in volts.iterrows():
-		volt_values[row['Bus']] = row[' pu1']
-		labels[row['Bus']] = row['Bus']
+		if row['Bus'].upper() in [x.upper() for x in pos]:
+			volt_values[row['Bus']] = row[' pu1']
+			labels[row['Bus']] = row['Bus']
 	colorCode = [volt_values.get(node, 0.0) for node in G.nodes()]
 	# Start drawing.
 	plt.figure(figsize=figsize) 
@@ -355,6 +351,7 @@ def networkPlot(filePath, figsize=(20,20), output_name='networkPlot.png', show_l
 	if show_labels:
 		nx.draw_networkx_labels(G, pos, labels, font_size=font_size)
 	plt.colorbar(nodes)
+	plt.legend()
 	plt.title('Network Voltage Layout')
 	plt.tight_layout()
 	plt.savefig(dssFileLoc + '/' + output_name)
@@ -377,74 +374,59 @@ def THD(filePath):
 	voltHarmonics = pd.read_csv(dssFileLoc + '/voltharmonics.csv')
 	bus_coords.columns = ['Bus', 'X', 'Y', 'radius']
 	voltHarmonics.columns.str.strip()
-	for index, row in voltHarmonics.iterrows():
-		voltHarmonics['THD'] = row[' Magnitude1']/(math.sqrt(row[' Magnitude2']**2 + row[' Magnitude3']**2))
-	distortionDF = pd.merge(bus_coords, voltHarmonics, on='Bus') # Merge on the bus axis so that all data is in one frame.
-	plt.scatter(distortionDF['radius'], distortionDF['THD'])
-	plt.xlabel('Distance from Source [miles]')
-	plt.ylabel('THD [Percentage]')
+	# for index, row in voltHarmonics.iterrows():
+	voltHarmonics['THD'] = (voltHarmonics[' Magnitude1'] + voltHarmonics[' Magnitude2'] + voltHarmonics[' Magnitude3'])/3
+	plt.hist(voltHarmonics['THD'])
+	plt.xlabel('THD [Avg%]')
+	plt.ylabel('Count')
 	plt.title('Total Harmonic Distortion')
 	plt.savefig(dssFileLoc + '/THD.png')
 	plt.clf()
 
-def dynamicPlot(filePath, time_step, iterations):
+def dynamicPlot(filePath, time_step_s=0.001, iterations=100, at_elem='Vsource.SOURCE'):
 	''' Do a dynamic, long-term study of the powerflow. time_step is in seconds. '''
 	dssFileLoc = os.path.dirname(os.path.abspath(filePath))	
 	runDSS(filePath)
-	runDssCommand('Solve')
-	dynamicCommand = 'Solve mode=dynamics stepsize=%d number=%d' % (time_step, iterations)
-	runDssCommand(dynamicCommand)
-	for i in range(iterations):
-		voltString = 'Export voltages "' + dssFileLoc + '/dynamicVolt%d.csv"' % i
-		currentString = 'Export currents "' + dssFileLoc + '/dynamicCurrent%d.csv"' % i
-		runDssCommand(voltString)
-		runDssCommand(currentString)
-	powerData = []
-	for j in range(iterations):
-		curVolt = 'dynamicvolt%d.csv' % j
-		curCurrent = 'dynamiccurrent%d.csv' % j
-		voltProfile = pd.read_csv(dssFileLoc + '/' + curVolt)
-		voltProfile.columns = voltProfile.columns.str.replace(' ', '')
-		curProfile = pd.read_csv(dssFileLoc + '/' + curCurrent)
-		curProfile.columns = curProfile.columns.str.replace(' ', '')
-		sourceVoltage = voltProfile.loc[voltProfile['Bus'] == 'SOURCEBUS']
-		sourceCurrent = curProfile.loc[curProfile['Element'] == 'Vsource.SOURCE']
-		data_summary = {'Volts': (sourceVoltage['Magnitude1'], sourceVoltage['Magnitude2'], sourceVoltage['Magnitude3']), 
-		'Currents': (sourceCurrent['I1_1'], sourceCurrent['I1_2'], sourceCurrent['I1_3'])}
-		power_triplet = (data_summary['Volts'][0]*data_summary['Currents'][0], data_summary['Volts'][1]*data_summary['Currents'][1], data_summary['Volts'][2]*data_summary['Currents'][2])
-		powerData.append(power_triplet)
-	first_phase = [item[0] for item in powerData]
-	second_phase = [item[1] for item in powerData]
-	third_phase = [item[2] for item in powerData]
-	plt.plot(first_phase, label='Phase one')
-	plt.plot(second_phase, label='Phase two')
-	plt.plot(third_phase, label='Phase three')
-	plt.legend()
-	plt.xlim(0, iterations-1)
-	plt.xlabel('Time [s]')
-	plt.ylabel('Power [kW]')
-	plt.title('Dynamic Simulation Power Plot')
-	plt.savefig(dssFileLoc + '/DynamicPowerPlot.png')
-	os.system('rm ' + dssFileLoc + '/dynamicvolt* ' + dssFileLoc + '/dynamiccurrent*')
+	runDssCommand(f'new object=monitor.dynamic_monitor element={at_elem}')
+	runDssCommand('solve')
+	runDssCommand(f'solve mode=dynamics stepsize={time_step_s} number={iterations}')
+	runDssCommand('export monitor dynamic_monitor filename=dynamic_monitor.csv')
+	circ_name = dss.Circuit.Name()
+	allDF = pd.read_csv(f'{dssFileLoc}/{circ_name}_Mon_dynamic_monitor.csv')
+	fig, axs = plt.subplots(2)
+	for vname in [' V1',' V2',' V3']:
+		axs[0].plot(allDF[vname], label=vname)
+	for cname in [' I1',' I2',' I3']:
+		axs[1].plot(allDF[cname], label=cname)
+	# # plt.xticks(range(iterations), [time_step_s * x for x in range(iterations)])
+	axs[0].set_xlabel('Time [step]')
+	axs[1].set_xlabel('Time [step]')
+	axs[0].set_ylabel('Voltage [V]')
+	axs[1].set_ylabel('Current [A]')
+	axs[0].legend()
+	fig.suptitle(f'Dynamic Simulation at {at_elem}')
+	fig.tight_layout()
+	fig.savefig(dssFileLoc + '/DynamicPowerPlot.png')
 
-def faultPlot(filePath):
-	''' Plot fault study. ''' 
+def faultPlot(filePath, faultCommand):
+	''' Plot fault study for filePath dss and faultCommand (valid opendss fault str) ''' 
 	dssFileLoc = os.path.dirname(os.path.abspath(filePath))
-	bus_coord = runDSS(filePath)
+	runDSS(filePath)
+	runDssCommand(faultCommand)
 	runDssCommand('Solve Mode=FaultStudy')
 	runDssCommand('Export fault "' + dssFileLoc + '/faults.csv"')
-	faultData = pd.read_csv(dssFileLoc + '/faults.csv')
-	bus_coord.columns = ['Bus', 'X', 'Y', 'radius']
-	faultDF = pd.concat([bus_coord, faultData], axis=1)
+	faultDF = pd.read_csv(dssFileLoc + '/faults.csv')
 	faultDF.columns = faultDF.columns.str.strip()
-	plt.axis([-1, 6, 0, 8000])
-	plt.xlabel('Distance From Source [Miles]')
+	plt.xlabel('Bus Index')
 	plt.ylabel('Current [Amps]')
+	plt.yscale('log')
 	plt.title('Fault Study')
-	plt.scatter(faultDF['radius'], faultDF['3-Phase'], label='3-Phase to Ground')
-	plt.scatter(faultDF['radius'], faultDF['1-Phase'], label='1-Phase to Ground')
-	plt.scatter(faultDF['radius'], faultDF['L-L'], label='Line-to-Line')
-	plt.legend()
+	xpos = [x*4 for x in range(len(faultDF['Bus']))]
+	plt.bar(xpos, faultDF['1-Phase'], label='1-Phase to Ground [A]')
+	plt.bar([x+1 for x in xpos], faultDF['3-Phase'], label='3-Phase to Ground [A]')
+	plt.bar([x+2 for x in xpos], faultDF['L-L'], label='Line-to-Line [A]')
+	plt.xticks([x+1 for x in xpos], [int(x/4) for x in xpos])
+	plt.legend(loc='upper center')
 	plt.savefig(dssFileLoc + '/Fault Currents.png')
 	plt.clf()
 
@@ -453,19 +435,21 @@ def capacityPlot(filePath):
 	dssFileLoc = os.path.dirname(os.path.abspath(filePath))
 	coords = runDSS(filePath)
 	runDssCommand('Export Capacity "' + dssFileLoc + '/capacity.csv"')
-	capacityData = pd.read_csv(dssFileLoc + '/capacity.csv')
-	coords.columns = ['Index', 'X', 'Y', 'radius']
-	capacityDF = pd.concat([coords, capacityData], axis=1)
-	#TODO set any missing buscoords to (0,0) or remove NaN rows using dataframe.dropna(). Currently fails iowa240 without this fix.
-	fig, ax1 = plt.subplots()
-	ax1.set_xlabel('Distance From Source [Miles]')
-	ax1.set_ylabel('Power [kW]')
-	ax1.scatter(capacityDF['radius'], capacityData[' kW'], label='Power')
-	ax2 = ax1.twinx()
-	ax2.set_ylabel('Maximum transformer percentage (One-side)')
-	ax2.scatter(capacityDF['radius'], capacityDF.iloc[:, 2]+capacityDF.iloc[:, 3], label='Transformer Loading', color='red')
-	fig.tight_layout() # otherwise the right y-label is slightly clipped
-	fig.legend()
+	capacityDF = pd.read_csv(dssFileLoc + '/capacity.csv')
+	plt.title('Transformer Loading')
+	plt.ylabel('Loading Normal Rating [%]')
+	plt.xlabel('Component Index')
+	# print(capacityDF)
+	x = capacityDF['Name']
+	x_pos = range(len(x))
+	plt.bar(
+		x_pos,
+		capacityDF[' %normal'],
+		color='red'
+	)
+	plt.tight_layout() # Otherwise the right y-label is slightly clipped
+	# plt.xticks(x_pos, x) # Doesn't fit. Names too long.
+	# plt.legend()
 	plt.savefig(dssFileLoc + '/Capacity Profile.png')
 	plt.clf()
 	
@@ -1079,6 +1063,9 @@ def _tests():
 		errlim = 0.30 # threshold of 30% error between reduced files. 
 		assert maxPerrM <= errlim*100, 'The voltage magnitude error between the compared files exceeds the allowable limit of %s%%.'%(errlim*100)
 		
+def _runTest():
+	runDSS('nreca1824.dss', keep_output=False)
+	# runDSS('iowa240.clean.dss', keep_output=False)
 
 	# Make core output
 	#FPATH = 'iowa240.clean.dss'
@@ -1107,3 +1094,4 @@ def _tests():
 
 if __name__ == "__main__":
 	_tests()
+	# _runTest()
