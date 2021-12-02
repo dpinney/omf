@@ -372,7 +372,15 @@ def work(modelDir, inputDict):
 			outData['powerBatteryToLoad' + indexString] = resultsSubset['Storage']['year_one_to_load_series_kw']
 			outData['batteryPowerCost' + indexString] = float(inputDict['batteryPowerCost'])
 			outData['batteryCapacityCost' + indexString] = float(inputDict['batteryCapacityCost'])
-			# batteryKwExisting and batteryKwhExisting are pass through variables used in microgridUp project
+			# batteryPowerReplaceYear, batteryCapacityReplaceYear, 'batteryPowerCostReplace', 'batteryCapacityCostReplace', batteryKwExisting and batteryKwhExisting are pass through variables used in microgridUp project
+			if 'batteryPowerCostReplace' in inputDict.keys():
+				outData['batteryPowerCostReplace' + indexString] = float(inputDict['batteryPowerCostReplace'])
+			if 'batteryCapacityCostReplace' in inputDict.keys():
+				outData['batteryCapacityCostReplace' + indexString] = float(inputDict['batteryCapacityCostReplace'])
+			if 'batteryPowerReplaceYear' in inputDict.keys():
+				outData['batteryPowerReplaceYear' + indexString] = float(inputDict['batteryPowerReplaceYear'])
+			if 'batteryCapacityReplaceYear' in inputDict.keys():
+				outData['batteryCapacityReplaceYear' + indexString] = float(inputDict['batteryCapacityReplaceYear'])
 			if 'batteryKwExisting' in inputDict.keys():
 				outData['batteryKwExisting' + indexString] = float(inputDict['batteryKwExisting'])
 			if 'batteryKwhExisting' in inputDict.keys():
