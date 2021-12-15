@@ -263,8 +263,8 @@
 
 		function onEachFeature(feature, layer) {
 			var popup = '';
-			if (feature.properties['popupContent']){
-				popup += feature.properties['name']
+			if (feature.properties['popupContent']) {
+				//popup += feature.properties['name']
 				popup += feature.properties['popupContent'];
 				layer.bindPopup(popup);
 			}
