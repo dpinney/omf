@@ -364,17 +364,27 @@
 		geojsonLayer.addTo(map);
 		eventLayer.addTo(map);
 		
+		var stepSizeVal = parseFloat(allInputData.stepSize) //This should be the value of the stepsize
+		var maxTimeVal = parseFloat(allInputData.maxTime) //This should be the value of the runtime
+		document.getElementById('input-number-min').setAttribute("min", stepSizeVal);
+		document.getElementById('input-number-min').setAttribute("max", maxTimeVal-stepSizeVal);
+		document.getElementById('input-number-max').setAttribute("min", stepSizeVal*2);
+		document.getElementById('input-number-max').setAttribute("min", maxTimeVal);
+		// var runtimeVal = allInputData.runTime
+		var numSteps = maxTimeVal/stepSizeVal
 		var slidervar = document.getElementById('slider');
 		noUiSlider.create(slidervar, {
 			connect: true,
-			start: [ 1, 24 ],
+			start: [ stepSizeVal, maxTimeVal ],
 			range: {
-				min: 1,
-				max: 24
+				min: stepSizeVal,
+				max: maxTimeVal
 			}
 		});
-		document.getElementById('input-number-min').setAttribute("value", 1);
-		document.getElementById('input-number-max').setAttribute("value", 24);
+		// document.getElementById('input-number-min').setAttribute("value", 1);
+		// document.getElementById('input-number-max').setAttribute("value", 24);
+		document.getElementById('input-number-min').setAttribute("value", stepSizeVal);
+		document.getElementById('input-number-max').setAttribute("value", maxTimeVal);
 
 		var inputNumberMin = document.getElementById('input-number-min');
 		var inputNumberMax = document.getElementById('input-number-max');
