@@ -279,7 +279,7 @@
 				color: "#000",
 				weight: 1,
 				opacity: 1,
-				fillOpacity: 0.8
+				fillOpacity: 1,//0.8
 			});
 		}
 
@@ -294,7 +294,7 @@
 					color: "#000",
 					weight: 1,
 					opacity: 1,
-					fillOpacity: 0.8,
+					fillOpacity: 1,//0.8,
 					time: feature.properties['time'],
 					tempFillColor: fillColorValue
 				});
@@ -352,7 +352,8 @@
 		});
 
 		var bounds = geojsonLayer.getBounds();
-		var map = L.map('map').fitBounds(bounds);
+		// var map = L.map('map').fitBounds(bounds);
+		var map = L.map('map', { renderer: L.canvas() }).fitBounds(bounds);
 		
 		mapLink = '<a href="http://openstreetmap.org">OpenStreetMap</a>';
 		L.tileLayer(
