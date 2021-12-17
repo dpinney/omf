@@ -339,12 +339,17 @@ def work(modelDir, inputDict):
 		outData['discountRate' + indexString] = discountRate
 
 		# outputs to be used in microgridup.py
-		outData['yearOneEmissionsLbsBau' + indexString] = resultsSubset['year_one_emissions_bau_lb_C02']
-		outData['yearOneEmissionsLbs' + indexString] = resultsSubset['year_one_emissions_lb_C02']
-		outData['yearOneEmissionsTons' + indexString] = round((outData['yearOneEmissionsLbs' + indexString])/2205,0)
-		outData['yearOneEmissionsReducedTons' + indexString] = round((resultsSubset['year_one_emissions_bau_lb_C02'] - resultsSubset['year_one_emissions_lb_C02'])/2205,0)
-		outData['yearOneEmissionsReducedPercent' + indexString] = round((resultsSubset['year_one_emissions_bau_lb_C02'] - resultsSubset['year_one_emissions_lb_C02'])/resultsSubset['year_one_emissions_bau_lb_C02']*100,0)		
-		outData['yearOnePercentRenewable' + indexString] = round(resultsSubset['renewable_electricity_energy_pct']*100,0)
+		# outData['yearOneEmissionsLbsBau' + indexString] = resultsSubset['year_one_emissions_bau_lb_C02']
+		# outData['yearOneEmissionsLbs' + indexString] = resultsSubset['year_one_emissions_lb_C02']
+		# outData['yearOneEmissionsTons' + indexString] = round((outData['yearOneEmissionsLbs' + indexString])/2205,0)
+		# outData['yearOneEmissionsReducedTons' + indexString] = round((resultsSubset['year_one_emissions_bau_lb_C02'] - resultsSubset['year_one_emissions_lb_C02'])/2205,0)
+		# outData['yearOneEmissionsReducedPercent' + indexString] = round((resultsSubset['year_one_emissions_bau_lb_C02'] - resultsSubset['year_one_emissions_lb_C02'])/resultsSubset['year_one_emissions_bau_lb_C02']*100,0)		
+		# outData['yearOnePercentRenewable' + indexString] = round(resultsSubset['renewable_electricity_energy_pct']*100,0)
+		
+		outData['yearOneEmissionsTons' + indexString] = round(resultsSubset['year_one_emissions_tCO2'])
+		outData['yearOneEmissionsReducedTons' + indexString] = round(resultsSubset['year_one_emissions_tCO2_bau'] - resultsSubset['year_one_emissions_tCO2'])
+		outData['yearOneEmissionsReducedPercent' + indexString] = round((resultsSubset['year_one_emissions_tCO2_bau'] - resultsSubset['year_one_emissions_tCO2'])/resultsSubset['year_one_emissions_tCO2_bau']*100,0)
+		outData['yearOnePercentRenewable' + indexString] = round(resultsSubset['annual_renewable_electricity_pct']*100,0)
 		outData['yearOneOMCostsBeforeTax' + indexString] = round(resultsSubset['Financial']['year_one_om_costs_before_tax_us_dollars'],0)
 		
 
