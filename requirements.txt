@@ -1,5 +1,5 @@
 wheel
-numpy<=1.18
+numpy<=1.19
 numpy-financial
 Flask>=0.9
 Flask-Login==0.2.11
