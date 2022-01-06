@@ -83,6 +83,7 @@ def newQstsPlot(filePath, stepSizeInMinutes, numberOfSteps, keepAllFiles=False, 
 	dss_run_file = ''
 	dss_run_file += f'redirect {filePath}\n'
 	dss_run_file += f'set datapath="{dssFileLoc}"\n'
+	dss_run_file += f'set maxcontroliter=1000\n'
 	dss_run_file += f'calcvoltagebases\n'
 	# Attach Monitors
 	tree = dssConvert.dssToTree(filePath)
