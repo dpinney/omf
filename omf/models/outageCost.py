@@ -778,7 +778,7 @@ def stats(mc, sustainedOutageThreshold, numberOfCustomers):
 	# calculate CAIDI
 	if (SAIDI != 0):
 		CAIDI = round(SAIDI / SAIFI)
-	else: CAIDI = 'Error: Check sustained outage threshold'
+	else: CAIDI = 0
 
 	# calculate ASAI
 	ASAI = round((int(numberOfCustomers) * 8760 - customerInterruptionDurations) / (int(numberOfCustomers) * 8760), 5)
