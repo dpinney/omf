@@ -1148,7 +1148,7 @@ def work(modelDir, inputDict):
 
 def new(modelDir):
 	''' Create a new instance of this model. Returns true on success, false on failure. '''
-	with open(pJoin(__neoMetaModel__._omfDir,'scratch','smartSwitching','outagesNew5.csv')) as f:
+	with open(pJoin(__neoMetaModel__._omfDir,'static','testFiles','smartswitch_outagesNew5.csv')) as f:
 		outage_data = f.read()
 	defaultInputs = {
 		'modelType': modelName,
