@@ -1,4 +1,4 @@
-,Annual Event #,Metric Interval Event #,Start,Finish,Object type,Object Name,Inducing Object,Protective Device,Desired Fault type,Implemented Fault Type,Number customers affected,Secondary number of customers affected,Location,Meters Affected,Cause
+Index,Annual Event #,Metric Interval Event #,Start,Finish,Object type,Object Name,Inducing Object,Protective Device,Desired Fault type,Implemented Fault Type,Number customers affected,Secondary number of customers affected,Location,Meters Affected,Cause
 0,1,1,2000-01-01 21:31:20,2000-01-01 21:31:29,underground_line,node720-707,RandEvent,SwingNode781,TLG,TLG,26,0,-102.762312261 32.9854616316,1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26,bird
 1,2,2,2000-01-04 08:37:01,2000-01-04 08:37:02,underground_line,node737-738,RandEvent,SwingNode781,TLG,TLG,26,0,-102.76392234 32.9925513472,1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26,bird
 2,3,3,2000-01-04 11:19:31,2000-01-04 11:20:16,underground_line,node744-729,RandEvent,SwingNode781,TLG,TLG,26,0,-102.758628466 32.9891634306,1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26,bird
