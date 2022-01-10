@@ -508,7 +508,7 @@ def flisr(pathToOmd, pathToTieLines, faultedLine, workDir, radial, drawMap):
 
 	return {'bestReclosers':bestReclosers, 'bestTies':bestTies, 'switchStatsHtml': switchStatsHtml, 'powered': powered}
 
-#flisr('C:/Users/granb/omf/omf/static/publicFeeders/Olin Barre Fault Test 2.omd', 'C:/Users/granb/omf/omf/scratch/blackstart/test.csv', "19186", None, True)
+#flisr('C:/Users/granb/omf/omf/static/publicFeeders/Olin Barre Fault Test 2.omd', 'C:/Users/granb/omf/omf/static/testFiles/flisr_test.csv', "19186", None, True)
 
 def work(modelDir, inputDict):
 	# Copy specific climate data into model directory
@@ -544,7 +544,7 @@ def work(modelDir, inputDict):
 
 def new(modelDir):
 	''' Create a new instance of this model. Returns true on success, false on failure. '''
-	with open(pJoin(__neoMetaModel__._omfDir,'scratch','blackstart','testOlinBarreFault.csv')) as f:
+	with open(pJoin(__neoMetaModel__._omfDir,'static','testFiles','testOlinBarreFault.csv')) as f:
 		tie_data = f.read()
 	defaultInputs = {
 		'modelType': modelName,
@@ -558,7 +558,7 @@ def new(modelDir):
 	}
 	creationCode = __neoMetaModel__.new(modelDir, defaultInputs)
 	try:
-		shutil.copyfile(pJoin(__neoMetaModel__._omfDir, 'scratch', 'blackstart', defaultInputs['feederName1']+'.omd'), pJoin(modelDir, defaultInputs['feederName1']+'.omd'))
+		shutil.copyfile(pJoin(__neoMetaModel__._omfDir, 'static', 'publicFeeders', defaultInputs['feederName1']+'.omd'), pJoin(modelDir, defaultInputs['feederName1']+'.omd'))
 	except:
 		return False
 	return __neoMetaModel__.new(modelDir, defaultInputs)

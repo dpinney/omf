@@ -559,9 +559,9 @@ def work(modelDir, inputDict):
 
 def new(modelDir):
 	''' Create a new instance of this model. Returns true on success, false on failure. '''
-	with open(pJoin(__neoMetaModel__._omfDir,'scratch','smartSwitching','volt1.csv')) as f:
+	with open(pJoin(__neoMetaModel__._omfDir,'public','testFiles','smartswitch_volt1.csv')) as f:
 		voltage_data = f.read()
-	with open(pJoin(__neoMetaModel__._omfDir,'scratch','smartSwitching','training.csv')) as f:
+	with open(pJoin(__neoMetaModel__._omfDir,'public','testFiles','smartswitch_training.csv')) as f:
 		training_data = f.read()
 	defaultInputs = {
 		'modelType': modelName,

@@ -1161,9 +1161,9 @@ def work(modelDir, inputDict):
 
 def new(modelDir):
 	''' Create a new instance of this model. Returns true on success, false on failure. '''
-	with open(pJoin(__neoMetaModel__._omfDir,'scratch','smartSwitching','outagesNew3.csv')) as f:
+	with open(pJoin(__neoMetaModel__._omfDir,'static','testFiles','smartswitch_outagesNew3.csv')) as f:
 		outage_data = f.read()
-	with open(pJoin(__neoMetaModel__._omfDir,'scratch','blackstart','testOlinBarreFault.csv')) as f:
+	with open(pJoin(__neoMetaModel__._omfDir,'static','testFiles','testOlinBarreFault.csv')) as f:
 		tie_data = f.read()
 	defaultInputs = {
 		'modelType': modelName,
@@ -1198,7 +1198,7 @@ def new(modelDir):
 	return __neoMetaModel__.new(modelDir, defaultInputs)
 
 def _debugging():
-	# outageCostAnalysis(omf.omfDir + '/static/publicFeeders/Olin Barre LatLon.omd', omf.omfDir + '/scratch/smartSwitching/Outages.csv', None, '60', '1')
+	# outageCostAnalysis(omf.omfDir + '/static/publicFeeders/Olin Barre LatLon.omd', omf.omfDir + '/public/testFiles/smartswitch_Outages.csv', None, '60', '1')
 	# Location
 	modelLoc = pJoin(__neoMetaModel__._omfDir,'data','Model','admin','Automated Testing of ' + modelName)
 	# Blow away old test results if necessary.
