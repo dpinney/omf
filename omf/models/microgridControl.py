@@ -254,7 +254,7 @@ def utilityOutageTable(average_lost_kwh, profit_on_energy_sales, restoration_cos
 
 	return utilityOutageHtml
 
-def customerCost1(workDir, customerName, duration, season, averagekWperhr, businessType, loadName):
+def customerCost1(duration, season, averagekWperhr, businessType):
 	'function to determine customer outage cost based on season, annual kWh usage, and business type'
 	duration = int(duration)
 	averagekW = float(averagekWperhr)
@@ -670,8 +670,7 @@ def graphMicrogrid(pathToOmd, pathToJson, pathToCsv, outputFile, useCache, workD
 		averagekWperhr = str(customerOutageData.loc[row, 'Average kW/hr'])
 		businessType = str(customerOutageData.loc[row, 'Business Type'])
 		loadName = str(customerOutageData.loc[row, 'Load Name'])
-
-		customerOutageCost, kWperhrEstimate, times, localMax = customerCost1(workDir, customerName, duration, season, averagekWperhr, businessType, loadName)
+		customerOutageCost, kWperhrEstimate, times, localMax = customerCost1(duration, season, averagekWperhr, businessType)
 		average_lost_kwh.append(float(averagekWperhr))
 		outageCost.append(customerOutageCost)
 		if localMax > globalMax:
