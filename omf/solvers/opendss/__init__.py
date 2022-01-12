@@ -37,6 +37,7 @@ def runDSS(dssFilePath, keep_output=True):
 		print('While accessing the file located at %s, the following exception occured: %s'%(dssFileLoc, ex))
 	runDssCommand('Clear')
 	runDssCommand('Redirect "' + fullPath + '"')
+	runDssCommand('calcvoltagebases')
 	runDssCommand('Solve')
 	# also generate coordinates.
 	# TODO?: Get the coords as a separate function (i.e. getCoords() below) and instead return dssFileLoc.
@@ -1076,8 +1077,8 @@ def _tests():
 		assert maxPerrM <= errlim*100, 'The voltage magnitude error between the compared files exceeds the allowable limit of %s%%.'%(errlim*100)
 		
 def _runTest():
-	runDSS('nreca1824.dss', keep_output=False)
-	# runDSS('iowa240.clean.dss', keep_output=False)
+	# runDSS('nreca1824.dss', keep_output=False)
+	runDSS('iowa240.clean.dss', keep_output=False)
 
 	# Make core output
 	#FPATH = 'iowa240.clean.dss'
