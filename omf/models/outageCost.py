@@ -755,7 +755,7 @@ def randomFaultsRefined(pathToCsv, pathToOmd, workDir, gridLines, faultsGenerate
 	faults = pd.DataFrame(data)
 	return faults
 
-def stats(mc, sustainedOutageThreshold, numberOfCustomers):
+def stats(mc, sustainedOutageThresholdSeconds, numberOfCustomers):
 	''' calculate reliability metrics: SAIDI, SAIFI, CAIDI, MAIFI, ASAI. '''
 	customerInterruptionDurations = 0.0
 	row = 0
@@ -769,10 +769,10 @@ def stats(mc, sustainedOutageThreshold, numberOfCustomers):
 		out_duration = out_end_time - out_start_time
 		entry = str(mc.loc[row, 'Meters Affected'])
 		meters = entry.split()
-		if out_duration > int(sustainedOutageThreshold):
+		if out_duration > int(sustainedOutageThresholdSeconds):
 			customerInterruptionDurations += (out_end_time - out_start_time) * len(meters) / 3600
 			customersAffected += len(meters)
-		if (out_end_time - out_start_time) <= int(sustainedOutageThreshold):
+		else:
 			customersAffectedMomentary += len(meters)
 		row += 1
 	# Calc stats
