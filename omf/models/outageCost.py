@@ -760,41 +760,28 @@ def stats(mc, sustainedOutageThreshold, numberOfCustomers):
 	customerInterruptionDurations = 0.0
 	row = 0
 	row_count_mc = mc.shape[0]
-	totalInterruptions = 0.0
 	customersAffected = 0
+	customersAffectedMomentary = 0.0	
+	parse_row_date = lambda row,col_name: datetime_to_float(datetime.datetime.strptime(mc.loc[row, col_name], '%Y-%m-%d %H:%M:%S'))
 	while row < row_count_mc:
-		if (datetime_to_float(datetime.datetime.strptime(mc.loc[row, 'Finish'], '%Y-%m-%d %H:%M:%S')) - datetime_to_float(datetime.datetime.strptime(mc.loc[row, 'Start'], '%Y-%m-%d %H:%M:%S'))) > int(sustainedOutageThreshold):
-			entry = str(mc.loc[row, 'Meters Affected'])
-			meters = entry.split()
-			customerInterruptionDurations += (datetime_to_float(datetime.datetime.strptime(mc.loc[row, 'Finish'], '%Y-%m-%d %H:%M:%S')) - datetime_to_float(datetime.datetime.strptime(mc.loc[row, 'Start'], '%Y-%m-%d %H:%M:%S'))) * len(meters) / 3600
+		out_end_time = parse_row_date(row, 'Finish')
+		out_start_time = parse_row_date(row, 'Start')
+		out_duration = out_end_time - out_start_time
+		entry = str(mc.loc[row, 'Meters Affected'])
+		meters = entry.split()
+		if out_duration > int(sustainedOutageThreshold):
+			customerInterruptionDurations += (out_end_time - out_start_time) * len(meters) / 3600
 			customersAffected += len(meters)
+		if (out_end_time - out_start_time) <= int(sustainedOutageThreshold):
+			customersAffectedMomentary += len(meters)
 		row += 1
-
+	# Calc stats
 	SAIDI = round(customerInterruptionDurations / int(numberOfCustomers), 5)
-
-	# calculate SAIFI
 	SAIFI = round(float(customersAffected) / int(numberOfCustomers), 5)
-
-	# calculate CAIDI
-	if (SAIDI != 0):
-		CAIDI = round(SAIDI / SAIFI)
-	else: CAIDI = 0
-
-	# calculate ASAI
+	CAIDI = (0 if SAIDI == 0 else round(SAIDI / SAIFI))
 	ASAI = round((int(numberOfCustomers) * 8760 - customerInterruptionDurations) / (int(numberOfCustomers) * 8760), 5)
-
-	# calculate MAIFI
-	sumCustomersAffected = 0.0
-	row = 0
-	while row < row_count_mc:
-		if (datetime_to_float(datetime.datetime.strptime(mc.loc[row, 'Finish'], '%Y-%m-%d %H:%M:%S')) - datetime_to_float(datetime.datetime.strptime(mc.loc[row, 'Start'], '%Y-%m-%d %H:%M:%S'))) <= int(sustainedOutageThreshold):
-			entry = str(mc.loc[row, 'Meters Affected'])
-			meters = entry.split()
-			sumCustomersAffected += len(meters)
-		row += 1
-
-	MAIFI = round(sumCustomersAffected / int(numberOfCustomers), 5)
-
+	MAIFI = round(customersAffectedMomentary / int(numberOfCustomers), 5)
+	# And return
 	return SAIDI, SAIFI, CAIDI, ASAI, MAIFI
 
 def outageCostAnalysis(pathToOmd, pathToCsv, workDir, generateRandom, graphData, numberOfCustomers, sustainedOutageThreshold, causeFilter, componentTypeFilter, faultTypeFilter, timeMinFilter, timeMaxFilter, meterMinFilter, meterMaxFilter, durationMinFilter, durationMaxFilter, gridLinesStr, faultsGeneratedStr, test, depDist, pathToTieLines):
