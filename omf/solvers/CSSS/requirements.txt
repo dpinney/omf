@@ -15,7 +15,7 @@ fastcache==1.0.2
 futures==3.2.0
 idna==2.6
 ipykernel==4.8.2
-ipython==5.5.0
+ipython==7.16.3
 ipython-genutils==0.2.0
 jupyter-client==5.2.2
 jupyter-core==4.4.0
