@@ -45,4 +45,29 @@ def binary_install():
 			# Disable quarantine.
 			os.system(f'sudo xattr -dr com.apple.quarantine {ONM_DIR}')
 
+def install_onm(target='Darwin'):
+	''' WARNING, WIP. TODO: OS check, linux support, license check, tests. '''
+	try: os.system('sudo cat /Library/gurobi/gurobi.lic') # Fixme; check for '# Gurobi'.
+	except:
+		return('Please install valid license file in /Library/gurobi')
+	os.system('brew install julia') # installs julia
+	os.system('pip3 install julia') # installs pyJulia
+	os.system('wget "https://packages.gurobi.com/9.1/gurobi9.1.2_mac64.pkg"') # d/l gurobi
+	os.system('sudo installer -pkg gurobi9.1.2_mac64.pkg -target /') # install gurobi
+	os.system('echo "export GUROBI_HOME=/Library/gurobi9.1.2" >>  ~/.zshrc')
+	os.system('echo "export PATH=/Library/gurobi912/mac64/bin:$PATH" >>  ~/.zshrc')
+	os.system('echo "export LD_LIBRARY_PATH=/Library/gurobi912/mac64lib" >>  ~/.zshrc')
+	# Notebook notes "You should make a LOCAL project to contain both Gurobi and PowerModelsONM"; does this do that?
+	os.system('''julia --project=. -e "import Pkg; Pkg.add('Gurobi')"''')
+	os.system('''julia --project=. -e "import Pkg; Pkg.build('Gurobi')"''')
+	os.system('''julia --project=. -e "import Pkg; Pkg.add(Pkg.PackageSpec(;name='PowerModelsONM', rev='main'));"''') # TODO pin version
+	os.system('''julia --project=. -e "import Pkg; Pkg.add(Pkg.PackageSpec(;name='PowerModelsDistribution', rev='main'));"''') # TODO pin version
+
+def build_settings_file(circuitPath='circuit.dss',settingsPath='settings.json', max_switch_actions=1, vm_lb_pu=0.9, vm_ub_pu=1.1, sbase_default=0.001, line_limit_mult=1.0E10, vad_deg=5.0):
+	os.system(f'''julia --project=. -e "using PowerModelsONM; build_settings_file('{circuitPath}', '{settingsPath}'; max_switch_actions={max_switch_actions}, vm_lb_pu={vm_lb_pu}, vm_ub_pu={vm_ub_pu}, sbase_default={sbase_default}, line_limit_mult={line_limit_mult}, vad_deg={vad_deg})"''')
+
+def run_onm(circuitPath='circuit.dss', settingsPath='settings.json', outputPath="onm_out.json", eventsPath="events.json", gurobi=true, verbose=true, optSwitchSolver="mip_solver", fixSmallNumbers=true):
+	'''WARNING: WIP TODO: skip list, testing'''
+	os.system(f'''julia --project=. -e "import Gurobi; using PowerModelsONM; args = Dict{{String,Any}}('network'=>'{circuitPath}', 'settings'=>'{settingsPath}', 'output'=>'{outputPath}', 'events'=>'{eventsPath}', 'gurobi'=>{gurobi}, 'verbose'=>{verbose}, 'opt-switch-solver'=>'{optSwitchSolver}', 'fix-small-numbers'=>{fixSmallNumbers}, 'skip'=>['faults','stability']); entrypoint(args);"''')
+
 #instantiate()
