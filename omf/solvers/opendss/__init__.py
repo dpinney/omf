@@ -265,9 +265,11 @@ def newQstsPlot(filePath, stepSizeInMinutes, numberOfSteps, keepAllFiles=False, 
 		all_load_df['V3(PU)'] = all_load_df['V3'].astype(float) / (all_load_df['kv'].astype(float) * 1000.0)
 		all_load_df.to_csv(f'{dssFileLoc}/{filePrefix}_load.csv', index=False)
 
-def get_obj_by_name(name, tree):
+def get_obj_by_name(name, tree, cmd=None):
 	''' Get object with given name in tree. If multiple or zero objs found, raise exceptions. '''
 	all_obs_name = [x for x in tree if x.get('object','').endswith(f'.{name}')]
+	if cmd:
+		all_obs_name = [x for x in all_obs_name if x.get('!CMD','') == cmd]
 	num_found = len(all_obs_name)
 	if num_found == 1:
 		return all_obs_name[0]
@@ -280,7 +282,7 @@ def get_obj_by_name(name, tree):
 
 def get_subtree_obs(line, tree):
 	''' Get all objects down-line from the affected line. '''
-	aff_ob = get_obj_by_name(line, tree)
+	aff_ob = get_obj_by_name(line, tree, cmd='new')
 	aff_bus = aff_ob.get('bus2').split('.')[0]
 	net = dssConvert.dss_to_networkx(None, tree=tree)
 	sub_tree = dfs_tree(net, aff_bus)
