@@ -4,6 +4,7 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 import networkx as nx
+from networkx.algorithms.traversal.depth_first_search import dfs_tree
 import math
 import os
 import warnings
@@ -37,6 +38,7 @@ def runDSS(dssFilePath, keep_output=True):
 		print('While accessing the file located at %s, the following exception occured: %s'%(dssFileLoc, ex))
 	runDssCommand('Clear')
 	runDssCommand('Redirect "' + fullPath + '"')
+	runDssCommand('calcvoltagebases')
 	runDssCommand('Solve')
 	# also generate coordinates.
 	# TODO?: Get the coords as a separate function (i.e. getCoords() below) and instead return dssFileLoc.
@@ -262,6 +264,29 @@ def newQstsPlot(filePath, stepSizeInMinutes, numberOfSteps, keepAllFiles=False, 
 		all_load_df['V2(PU)'] = all_load_df['V2'].astype(float) / (all_load_df['kv'].astype(float) * 1000.0)
 		all_load_df['V3(PU)'] = all_load_df['V3'].astype(float) / (all_load_df['kv'].astype(float) * 1000.0)
 		all_load_df.to_csv(f'{dssFileLoc}/{filePrefix}_load.csv', index=False)
+
+def get_obj_by_name(name, tree):
+	''' Get object with given name in tree. If multiple or zero objs found, raise exceptions. '''
+	all_obs_name = [x for x in tree if x.get('object','').endswith(f'.{name}')]
+	num_found = len(all_obs_name)
+	if num_found == 1:
+		return all_obs_name[0]
+	elif num_found == 0:
+		err = f'No object with name "{name}" found.'
+		raise Exception(err)
+	else:
+		err = f'Multiple objects with given name found: {all_obs_name}'
+		raise Exception(err)
+
+def get_subtree_obs(line, tree):
+	''' Get all objects down-line from the affected line. '''
+	aff_ob = get_obj_by_name(line, tree)
+	aff_bus = aff_ob.get('bus2').split('.')[0]
+	net = dssConvert.dss_to_networkx(None, tree=tree)
+	sub_tree = dfs_tree(net, aff_bus)
+	sub_names = [x for x in sub_tree.nodes]
+	sub_obs = [x for x in tree if x.get('object','NO.NO').split('.')[1] in sub_names]
+	return sub_obs
 
 def voltagePlot(filePath, PU=True):
 	''' Voltage plotting routine. Creates 'voltages.csv' and 'Voltage [PU|V].png' in directory of input file.'''
@@ -1076,8 +1101,8 @@ def _tests():
 		assert maxPerrM <= errlim*100, 'The voltage magnitude error between the compared files exceeds the allowable limit of %s%%.'%(errlim*100)
 		
 def _runTest():
-	runDSS('nreca1824.dss', keep_output=False)
-	# runDSS('iowa240.clean.dss', keep_output=False)
+	# runDSS('nreca1824.dss', keep_output=False)
+	runDSS('iowa240.clean.dss', keep_output=False)
 
 	# Make core output
 	#FPATH = 'iowa240.clean.dss'

@@ -200,3 +200,4 @@ if __name__ == '__main__':
 	#viz('C:\Users\Tuomas\SkyDrive\NRECA Code\Utility Data\DEC Robinsonville Substation\DEC Robinsonville Original.omd', forceLayout=False, outputPath=None)
 	# viz('/Users/dpinney/Desktop/LATERBASE/NRECA/GridBallast/DM1.3.1 Go-No-Go - Demonstration of GridBallast Performance in Simulation - FINISHED/Utility Data/DEC Robinsonville Substation/DEC Robinsonville Original.omd', forceLayout=False, outputPath=None)
 	# viz('static/publicFeeders/ieee37fixed.omd')
+	# viz('/Users/ryanmahoney/omf/omf/scratch/RONM/nreca1824cleanCoords.dss.omd')

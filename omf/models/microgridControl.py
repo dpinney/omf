@@ -254,7 +254,7 @@ def utilityOutageTable(average_lost_kwh, profit_on_energy_sales, restoration_cos
 
 	return utilityOutageHtml
 
-def customerCost1(workDir, customerName, duration, season, averagekWperhr, businessType, loadName):
+def customerCost1(duration, season, averagekWperhr, businessType):
 	'function to determine customer outage cost based on season, annual kWh usage, and business type'
 	duration = int(duration)
 	averagekW = float(averagekWperhr)
@@ -670,8 +670,7 @@ def graphMicrogrid(pathToOmd, pathToJson, pathToCsv, outputFile, useCache, workD
 		averagekWperhr = str(customerOutageData.loc[row, 'Average kW/hr'])
 		businessType = str(customerOutageData.loc[row, 'Business Type'])
 		loadName = str(customerOutageData.loc[row, 'Load Name'])
-
-		customerOutageCost, kWperhrEstimate, times, localMax = customerCost1(workDir, customerName, duration, season, averagekWperhr, businessType, loadName)
+		customerOutageCost, kWperhrEstimate, times, localMax = customerCost1(duration, season, averagekWperhr, businessType)
 		average_lost_kwh.append(float(averagekWperhr))
 		outageCost.append(customerOutageCost)
 		if localMax > globalMax:
@@ -801,14 +800,15 @@ def new(modelDir):
 	# ====== For All Test Cases
 	cust_file_path = [__neoMetaModel__._omfDir,'static','testFiles','customerInfo.csv']
 	# ====== Iowa240 Test Case
-	feeder_file_path = [__neoMetaModel__._omfDir,'scratch','MapTestOutput','iowa240c2_fixed_coords.clean.omd']
-	event_file_path = [__neoMetaModel__._omfDir,'static','testFiles','events.json']
+	# feeder_file_path = [__neoMetaModel__._omfDir,'scratch','MapTestOutput','iowa240c2_fixed_coords.clean.omd']
+	# event_file_path = [__neoMetaModel__._omfDir,'static','testFiles','events.json']
 	# event_file_path = [__neoMetaModel__._omfDir,'static','testFiles','events_iowa240_7to17.json']
-	output_file_path = [__neoMetaModel__._omfDir,'static','testFiles','output_later.json']
+	# output_file_path = [__neoMetaModel__._omfDir,'static','testFiles','output_later.json']
 	# ====== 8500ish Test Case
-	# event_file_path = [__neoMetaModel__._omfDir,'scratch','RONM','events.ieee8500.json']
+	feeder_file_path = [__neoMetaModel__._omfDir,'scratch','RONM','nreca1824.dss.omd']
+	event_file_path = [__neoMetaModel__._omfDir,'scratch','RONM','events.ieee8500.json']
 	# output_file_path = [__neoMetaModel__._omfDir,'static','testFiles','output_simple_cobb.json']
-	# output_file_path = [__neoMetaModel__._omfDir,'scratch','RONM','output.ieee8500.ts=60min.global.json']
+	output_file_path = [__neoMetaModel__._omfDir,'scratch','RONM','output.ieee8500.ts=60min.global.json']
 	defaultInputs = {
 		'modelType': modelName,
 		'feederName1': feeder_file_path[-1][0:-4],
@@ -834,7 +834,7 @@ def new(modelDir):
 	return __neoMetaModel__.new(modelDir, defaultInputs)
 
 def _debugging():
-	# outageCostAnalysis(omf.omfDir + '/static/publicFeeders/Olin Barre LatLon.omd', omf.omfDir + '/scratch/smartSwitching/Outages.csv', None, '60', '1')
+	# outageCostAnalysis(omf.omfDir + '/static/publicFeeders/Olin Barre LatLon.omd', omf.omfDir + '/static/testFiles/smartswitch_Outages.csv', None, '60', '1')
 	# Location
 	modelLoc = pJoin(__neoMetaModel__._omfDir,'data','Model','admin','Automated Testing of ' + modelName)
 	# Blow away old test results if necessary.

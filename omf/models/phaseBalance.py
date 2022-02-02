@@ -27,6 +27,7 @@ def motor_efficiency(x):
 	return .0179 + .402*x + .134*x**2 # curve fit from data from NREL analysis
 
 def lifespan(x, ind):
+	''' x is unabalance at the motor bus, ind['motor_lifetime'] is the lifetime of the motor, good default is 25 (years). '''
 	return float(ind['motor_lifetime'])-19.8*math.exp(-.679*x) # curve fit from data from NREL analysis
 
 def pf(real, var):
