@@ -410,7 +410,7 @@ def graphMicrogrid(pathToOmd, pathToJson, pathToCsv, outputFile, useCache, workD
 
 	# Setup ONM if it hasn't been done already.
 	if not PowerModelsONM.check_instantiated():
-		PowerModelsONM.instantiate()
+		PowerModelsONM.install_onm()
 
 	# read in the OMD file as a tree and create a geojson map of the system
 	if not workDir:
@@ -422,7 +422,7 @@ def graphMicrogrid(pathToOmd, pathToJson, pathToCsv, outputFile, useCache, workD
 	if  useCache == 'True':
 		shutil.copyfile(outputFile,f'{workDir}/output.json')
 	else:
-		PowerModelsONM.run(f'{workDir}/circuit.dss', f'{workDir}/output.json',f'{workDir}/events.json')
+		PowerModelsONM.run_onm(f'{workDir}/circuit.dss', f'{workDir}/output.json',f'{workDir}/events.json')
 
 	# Gather output data.
 	with open(f'{workDir}/output.json') as inFile:
