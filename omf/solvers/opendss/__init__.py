@@ -179,7 +179,7 @@ def newQstsPlot(filePath, stepSizeInMinutes, numberOfSteps, keepAllFiles=False, 
 			df['Name'] = name
 			all_load_df = pd.concat([all_load_df, df], ignore_index=True, sort=False)
 			#pd.set_option('display.max_columns', None)
-			#print("all_load_df:", df.head(50))
+			# print("all_load_df:", df.head(50))
 		elif name.startswith('mongenerator-'):
 			# reassign V1 single phase voltages outputted by DSS to the appropriate column and filling Nans for neutral phases (V2)
 			# three phase print out should work fine as is
@@ -323,7 +323,7 @@ def get_bus_kv_mappings(path_to_dss):
 	volt_df = pd.read_csv(volt_file_loc)
 	volt_df['kv_ln'] = volt_df[' BasekV']/math.sqrt(3)
 	out_data = volt_df[['Bus','kv_ln']].values.tolist()
-	out_dict = {x[0]:x[1] for x in out_data}
+	out_dict = {x[0].lower():x[1] for x in out_data}
 	return out_dict
 
 def currentPlot(filePath):

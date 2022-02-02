@@ -624,6 +624,121 @@ def latLonValidation(inGraph):
 			inGraph.nodes[nodeToChange]['pos'] = statePlaneToLatLon(inGraph.nodes[nodeToChange]['pos'][1], inGraph.nodes[nodeToChange]['pos'][0])
 	return inGraph
 
+def findCorruptNodes(pathToOmdFile, badLat, badLon, exceptNodes):
+	'''Helper function that finds and returns a list of nodes within a feeder that have incorrect lat/lon values due to file conversion or corrput data. Does so by targeting nodes/buses that have the same auto-assigned coordinates (badLat, badLon) and adding them to the list to return (ignoring the nodes specified in exceptNodes list).'''
+	with open(pathToOmdFile) as inFile:
+		tree = json.load(inFile)["tree"]
+	corruptNodes = []
+	for key in tree:
+		obLat = "500.0"
+		obLon = "500.0"
+		try:
+			obName = tree[key]['name']
+			obLat = tree[key]['latitude']
+			obLon = tree[key]['longitude']
+		except KeyError:
+			#Don't need to do anything - if it doesn't have a lat/lon, we shouldn't care
+			x = 0
+		if obLat == badLat and obLon == badLon and obName not in exceptNodes:
+			corruptNodes.append(obName)
+	return corruptNodes
+
+def fixCorruptedLatLons(pathToOmdFile, listOfBadNodes, exceptNodes):
+	'''This method takes in a path to the omd of the feeder that has corrupted lat/lon values, a list of nodes/buses whose coordinates are incorrect and need to be altered, as well as a list of nodes that should be ignored in the process (might have the same values for the auto-assigned coordinates, but they're the ones the auto-assignment pulled from in the first place) and returns a dictionary of the converterd bad coordinate nodes and their respective correct coordinates'''
+	with open(pathToOmdFile) as inFile:
+		tree = json.load(inFile)["tree"]
+	inGraph = feeder.treeToNxGraph(tree)
+
+	print("listOfBadNodes: " + str(listOfBadNodes))
+
+	#dict - keys are the names of the nodes with corrupted lat/lons and their values are all the other nodes that are 
+	allTouchNodes = {}
+	for node in listOfBadNodes:
+		touchNodes = []
+		#Check for lines to other nodes
+		for edge in nx.edges(inGraph):
+			if str(edge[0]) == node:
+				touchNodes.append(str(edge[1]))
+			elif str(edge[1]) == node:
+				touchNodes.append(str(edge[0]))
+		allTouchNodes[node] = touchNodes
+	print("allTouchNodes: " + str(allTouchNodes))
+
+	fixedNodes = {}
+	keepGoing = True
+	count = 0
+	while len(listOfBadNodes) > 0 and keepGoing:
+		count = count+1
+		fixedNodesStart = len(fixedNodes)
+		print("Loop iteration #" + str(count))
+		for badNode in allTouchNodes.keys():
+			if badNode in listOfBadNodes:
+				goodTouchNodes = {}
+				for node in allTouchNodes[badNode]:
+					if node not in listOfBadNodes and node not in exceptNodes:
+						print("---------------Looking for coordinates for " + badNode + ":")
+						if node in fixedNodes.keys():
+							goodTouchNodes[node] = fixedNodes[node]
+							print("          ----------------Found coordinates for " + node + " in fixedNodes: " + str(fixedNodes[node]))
+						else:
+							latLon = inGraph.nodes[node]['pos']
+							goodTouchNodes[node] = latLon
+							print("          ----------------Found coordinates for " + node + " in inGraph: " + str(latLon))
+				if len(goodTouchNodes) >= 1:
+					newLatLon = latLonByNeighbor(goodTouchNodes)
+					fixedNodes[badNode] = newLatLon
+					listOfBadNodes.remove(badNode)
+					# allTouchNodes.pop(badNode, None)
+		fixedNodesEnd = len(fixedNodes)
+		if fixedNodesEnd > fixedNodesStart:
+			keepGoing = True
+		else:
+			keepGoing = False
+		print("-----fixedNodesStart: " + str(fixedNodesStart))
+		print("-------fixedNodesEnd: " + str(fixedNodesEnd))
+		print("-----------keepGoing: " + str(keepGoing))
+
+	print("Fixed Nodes: " + str(fixedNodes))
+	print("Unfixed Nodes: " + str(listOfBadNodes))
+	return(fixedNodes)
+
+def latLonByNeighbor(dictOfNeighbors):
+	'''Helper function for fixCorruptedLatLons() that takes in a dict of nodes/buses that are connected to a specific node (keys) and their respective coordinates and returns the correct coordinates for that node'''
+	numNeighbors = len(dictOfNeighbors)
+	if numNeighbors == 1:
+		neighbor = list(dictOfNeighbors.keys())[0]
+		# to avoid putting buses/nodes on top of each other, place it 15 ft NE
+		lat = dictOfNeighbors[neighbor][0] + .00004
+		lon = dictOfNeighbors[neighbor][1] + .00005
+		latLon = (lat, lon)
+	elif numNeighbors > 1:
+		lat = 0.0
+		lon = 0.0
+		for neighbor in dictOfNeighbors.keys():
+			lat += dictOfNeighbors[neighbor][0]
+			lon += dictOfNeighbors[neighbor][1]
+		lat = lat/numNeighbors
+		lon = lon/numNeighbors
+		latLon = (lat, lon)
+	return latLon
+
+def createFixedLatLonOmd(pathToOmdFile, fixedLatLonDict, outfilePath):
+	'''This method takes in a path to the omd of the feeder that has corrupted lat/lon values, a dictionary that contains the correct lat/lons (values) for the nodes/buses (keys) that were previously incorrect and creates a new omd file that contains the correct coordinates at the specified output file path (outfilePath)'''
+	with open(pathToOmdFile) as inFile:
+		fullFile = json.load(inFile)
+		tree = fullFile['tree']
+	
+	for objectKey in tree:
+		objectName = tree[objectKey]['name']
+		if objectName in fixedLatLonDict.keys():
+			origLat = tree[objectKey]['latitude']
+			origLon = tree[objectKey]['longitude']
+			tree[objectKey]['latitude'] = str(fixedLatLonDict[objectName][0])
+			tree[objectKey]['longitude'] = str(fixedLatLonDict[objectName][1])
+			print("Changed " + objectName + " coordinates from (" + origLat + ", " + origLon + ") to (" + tree[objectKey]['latitude'] + ", " + tree[objectKey]['longitude'] + ")" )
+	fullFile['tree'] = tree
+	with open(outfilePath, 'w') as outFile:
+		json.dump(fullFile, outFile)
 
 def openInBrowser(pathToFile):
 	'''Helper function for mapOmd. Try popular web browsers first because png might open in native application. Othwerwise use default program as fallback'''
@@ -637,6 +752,20 @@ def showOnMap(geoJson):
 		outFile.write("var geojson =")
 		json.dump(geoJson, outFile, indent=4)
 	webbrowser.open('file://' + pJoin(tempDir,'geoJsonMap.html'))
+
+def _testLatLonfix():
+	'''Test for fixing a feeder with corrupted auto-assign lat/lon values using findCorruptNodes(), fixCorruptedLatLons(), and createFixedLatLonOmd()'''
+	exceptNodes = ['sourcebus', '_hvmv_sub_lsb', 'hvmv_sub_48332', 'hvmv_sub_hsb', 'regxfmr_hvmv_sub_lsb']
+	# omdPath = pJoin(__neoMetaModel__._omfDir, 'scratch', 'RONM', 'nreca1824.dss.omd')
+	omdPath = pJoin(__neoMetaModel__._omfDir, 'scratch', 'RONM', 'nreca1824cleanishCoords.dss.omd')
+	newOmdPath = pJoin(__neoMetaModel__._omfDir, 'scratch', 'RONM', 'nreca1824cleanCoords.dss.omd')
+	badNodes = findCorruptNodes(omdPath, '30.134247', '-84.946092', exceptNodes)
+	# badNodes = ['l0247160', 'l0247162', 'l0247171']
+	print("Number of bad nodes: " + str(len(badNodes)))
+	fixedCoords = fixCorruptedLatLons(omdPath, badNodes, exceptNodes)
+	createFixedLatLonOmd(omdPath, fixedCoords, newOmdPath)
+	mapOmd(newOmdPath, pJoin(__neoMetaModel__._omfDir, 'scratch', 'RONM'), 'html', openBrowser=True, conversion=False)
+
 
 def _tests():
 	e, n = 249.2419752733258, 1186.1488466689188
@@ -676,3 +805,4 @@ def _tests():
 
 if __name__ == '__main__':
 	_tests()
+	# _testLatLonfix()
