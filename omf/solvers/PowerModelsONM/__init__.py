@@ -43,4 +43,4 @@ def run_onm(circuitPath='circuit.dss', settingsPath='settings.json', outputPath=
 
 #instantiate()
 #install_onm()
-run_onm()
+# run_onm()
