@@ -34,7 +34,7 @@ def install_onm(target='Darwin'):
 	print('PowerModelsDistribution package added to Julia')
 	os.system(f'touch {thisDir}/instantiated.txt')
 
-def build_settings_file(circuitPath='circuit.dss',settingsPath='settings.json', max_switch_actions=1, vm_lb_pu=0.9, vm_ub_pu=1.1, sbase_default=0.001, line_limit_mult=1.0E10, vad_deg=5.0):
+def build_settings_file(circuitPath='circuit.dss',settingsPath='settings.json', max_switch_actions=1, vm_lb_pu=0.9, vm_ub_pu=1.1, sbase_default=0.001, line_limit_mult='Inf', vad_deg=5.0):
 	os.system(f"julia --project={thisDir} -e 'using PowerModelsONM; build_settings_file(\"{circuitPath}\", \"{settingsPath}\"; max_switch_actions={max_switch_actions}, vm_lb_pu={vm_lb_pu}, vm_ub_pu={vm_ub_pu}, sbase_default={sbase_default}, line_limit_mult={line_limit_mult}, vad_deg={vad_deg})'")
 
 def run_onm(circuitPath='circuit.dss', settingsPath='settings.json', outputPath="onm_out.json", eventsPath="events.json", gurobi='true', verbose='true', optSwitchSolver="mip_solver", fixSmallNumbers='true', skipList='[\"faults\",\"stability\"]'):
