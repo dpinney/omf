@@ -1,0 +1,39 @@
+We request that publications derived from the use of SynGrid explicitly
+acknowledge that fact by citing one or more of the following references:
+
+  Z. Wang, A. Scaglione and R. J. Thomas, "Generating Statistically
+  Correct Random Topologies for Testing Smart Grid Communication and
+  Control Networks," Smart Grid, IEEE Transactions on, vol. 1,
+  no. 1, pp. 28-39, June 2010.
+  doi: 10.1109/TSG.2010.2044814
+
+  S. H. Elyas and Z. Wang, "Improved Synthetic Power Grid Modeling
+  With Correlated Bus Type Assignments," Power Systems, IEEE
+  Transactions on, vol. 32, no. 5, pp. 3391-3402, Sept. 2017.
+  doi: 10.1109/TPWRS.2016.2634318
+
+  E. Schweitzer, A. Scaglione, "A Mathematical Programing Solution
+  for Automatic Generation of Synthetic Power Flow Cases," Power
+  Systems, IEEE Transactions on, 2018.
+  doi: 10.1109/TPWRS.2018.2863266
+
+The SynGrid User's Manual should also be cited explicitly in work that
+refers to or is derived from its content. The citation and DOI can be
+version-specific or general, as appropriate. For version 1.0.1, use:
+
+  Z. Wang, H. Sadeghian, S. H. Elyas, R. D. Zimmerman, E. Schweitzer,
+  A. Scaglione. SynGrid User's Manual, Version 1.0.1. 2019. [Online].
+  Available: https://matpower.org/docs/SynGrid-manual-1.0.1.pdf
+  doi: 10.5281/zenodo.3251099
+
+For a version non-specific citation, use the following citation and DOI,
+with <YEAR> replaced by the year of the most recent release:
+
+  Z. Wang, H. Sadeghian, S. H. Elyas, R. D. Zimmerman, E. Schweitzer,
+  A. Scaglione. SynGrid User's Manual. <YEAR>. [Online].
+  Available: https://matpower.org/docs/SynGrid-manual.pdf
+  doi: 10.5281/zenodo.3238679
+
+A list of versions of the User's Manual with release dates and
+version-specific DOI's can be found via the general DOI at
+https://doi.org/10.5281/zenodo.3238679.

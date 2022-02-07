@@ -1,0 +1,85 @@
+sudo: required
+dist: xenial
+
+language: generic
+
+addons:
+  apt:
+    sources:
+    - sourceline: 'ppa:octave/stable'   ## without this, it's octave 4.0.0
+    packages:
+    - coinor-libipopt-dev
+    - liboctave-dev
+    - octave        # octave 4.2.2
+    - libopenblas-dev
+    update: true
+
+install:
+# # https://github.com/travis-ci/travis-ci/issues/9080
+# - sudo systemctl disable apt-daily.timer
+# - sudo killall apt.systemd.daily || true
+# 
+# - sudo apt-add-repository -y ppa:octave/stable
+# - sudo apt-get update -qq
+# - sudo apt-get install -qq coinor-libipopt-dev octave liboctave-dev libopenblas-dev
+- git clone --depth=50 https://github.com/MATPOWER/matpower.git $TRAVIS_BUILD_DIR/matpower
+- git clone -b R20180817 https://github.com/yalmip/YALMIP.git $TRAVIS_BUILD_DIR/yalmip
+- git clone https://github.com/sqlp/sdpt3.git $TRAVIS_BUILD_DIR/sdpt3
+- git clone https://github.com/sqlp/sedumi.git $TRAVIS_BUILD_DIR/sedumi
+
+env:
+  global:
+    - IPOPT_VER=3.11.9
+    - MATPOWER_PATH=$TRAVIS_BUILD_DIR/matpower
+    - OPT_PKG_BUILD_DIR=$TRAVIS_BUILD_DIR/optpkg
+
+script:
+# move YALMIP, SDPT3, SeDuMi to optional package build dir
+- mkdir $OPT_PKG_BUILD_DIR
+- mv $TRAVIS_BUILD_DIR/yalmip $OPT_PKG_BUILD_DIR
+- mv $TRAVIS_BUILD_DIR/sdpt3 $OPT_PKG_BUILD_DIR
+- mv $TRAVIS_BUILD_DIR/sedumi $OPT_PKG_BUILD_DIR
+
+# move all to matpower/extras (except matpower, $OPT_PKG_BUILD_DIR, .* sub-dirs)
+# - ls -al $TRAVIS_BUILD_DIR
+- mkdir -p $TRAVIS_BUILD_DIR/matpower/extras
+- find $TRAVIS_BUILD_DIR -maxdepth 1 | grep -v $TRAVIS_BUILD_DIR/matpower | grep -v $OPT_PKG_BUILD_DIR | grep -v "$TRAVIS_BUILD_DIR/\." | grep -v "^$TRAVIS_BUILD_DIR$" | xargs -I{} mv {} $TRAVIS_BUILD_DIR/matpower/extras
+# - ls -al $TRAVIS_BUILD_DIR
+# - ls -al $TRAVIS_BUILD_DIR/matpower/extras
+
+# display Octave version
+- octave-cli --no-gui --eval ver
+
+# build IPOPT MEX file
+- curl -SL https://www.coin-or.org/download/source/Ipopt/Ipopt-${IPOPT_VER}.tgz | tar -xzC $OPT_PKG_BUILD_DIR
+- mv $OPT_PKG_BUILD_DIR/Ipopt-${IPOPT_VER}/Ipopt/contrib/MatlabInterface $OPT_PKG_BUILD_DIR/ipopt
+- mv $TRAVIS_BUILD_DIR/.travis/Makefile $OPT_PKG_BUILD_DIR/ipopt/src
+- make -C $OPT_PKG_BUILD_DIR/ipopt/src
+- mv $OPT_PKG_BUILD_DIR/ipopt/src/*.mex $OPT_PKG_BUILD_DIR/ipopt/
+- octave-cli --no-gui --eval "addpath('$OPT_PKG_BUILD_DIR/ipopt'); savepath"
+
+# build and install SeDuMi file
+- cd $OPT_PKG_BUILD_DIR/sedumi
+- patch blksdp.h < $MATPOWER_PATH/extras/sdp_pf/.travis/f77blas_h.patch
+- mv vec.m vec.m.disabled
+- octave-cli --no-gui --eval "install_sedumi('-rebuild'); savepath"
+
+# build and install SDPT3 file
+- cd $OPT_PKG_BUILD_DIR/sdpt3
+- octave-cli --no-gui --eval "install_sdpt3('-rebuild'); savepath"
+
+# install YALMIP
+- cd $TRAVIS_BUILD_DIR
+- octave-cli --no-gui --eval "addpath(genpath('$OPT_PKG_BUILD_DIR/yalmip', '.git', 'o_win', 'dev'), '-end'); savepath"
+
+# install MATPOWER, with extras
+- octave-cli --no-gui -p $MATPOWER_PATH --eval "install_matpower(1,1,1)"
+- octave-cli --no-gui --eval mpver
+
+# run tests
+- octave-cli --no-gui --eval "test_mll_main(0,1)"
+- octave-cli --no-gui --eval "test_sdp_pf(0,1)"
+- octave-cli --no-gui --eval "test_smartmarket(0,1)"
+- octave-cli --no-gui --eval "test_syngrid(0,1)"
+# print IPOPT version number
+# - octave-cli --no-gui --eval "feval('qps_ipopt', [],[1; 1],[1 1],[2],[2],[1; 1],[1; 1],[1; 1],struct('verbose', 2));"

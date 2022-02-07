@@ -1,0 +1,45 @@
+
+%\documentclass{standalone}
+%\standaloneconfig{border=1pt}
+%
+%\usepackage{tikz}                  % load graphics drawing packgate tikz
+%\usetikzlibrary{graphs,arrows.meta,decorations.pathreplacing,intersections,positioning,calc}
+%\usetikzlibrary{datavisualization.formats.functions,datavisualization,shapes.geometric}
+%\usepackage{amsmath}
+
+%\begin{document}
+
+\begin{tikzpicture}[%
+    thick,
+    >={Latex},
+    input/.style={trapezium,draw=black, text=black,trapezium left angle=60, trapezium right angle=120, align=center},
+    process/.style={rectangle, draw=black, text=black, align=center, execute at begin node=\setlength{\baselineskip}{1em}},
+    start/.style={ellipse,draw=black, text=black},
+    decision/.style={diamond, aspect=2, draw=black, text=black, align=center, execute at begin node=\setlength{\baselineskip}{1em}}
+    ]
+
+\node[input] (input) {\texttt{TOPO} or \texttt{N}, \texttt{DATA}};
+\node[process, right=of input] (samp) {Initialize seed \texttt{MPC} by sampling data\\ (Sec~\ref{sec:vm_smpl}, Table~\ref{tab:smplopt})};
+\node[process, right=of samp] (init) {\textbf{Initialize generation 0} (Sec~\ref{sec:vm_init}):\\ -Random branch permutations \\ -Node placement based on $Z_{dr}$};
+\node[process, below=of init] (branch) {\textbf{Branch Permutation} (Sec~\ref{sec:vm_branch}, Table~\ref{tab:branchpermopt}):\\ Create new individuals by permuting $w_{\ell}$\\ to alleviate overloads};
+\node[process, left=of branch] (selection_b) {Prune Individuals\\(Sec~\ref{sec:vm_ea}, Table~\ref{tab:eaopt})};
+\node[process, below=of selection_b] (node) {\textbf{Node Permutation} (Sec~\ref{sec:vm_node}, Table~\ref{tab:nodepermopt}):\\ Create new individuals by permuting $w_{n}$\\ to alleviate overloads and extreme voltages.};
+\node[process, right=of node] (selection_n) {Prune Individuals\\(Sec~\ref{sec:vm_ea}, Table~\ref{tab:eaopt})};
+\node[decision, below=of selection_n] (loop) {\textbf{If}:\\ generation limit OR \\ no new better solutions \\ (Sec~\ref{sec:vm_ea}, Table~\ref{tab:eaopt})};
+\node[process, left=of loop] (selection_f) {Final Selection\\(Sec~\ref{sec:vm_ea}, Table~\ref{tab:eaopt})};
+\node[process, left=of selection_f] (shunts) {\textbf{Reactive Planning} (Sec~\ref{sec:vm_shunts}, Table~\ref{tab:shuntsopt}): \\ Add shunts to meet voltage limits and target LMP range};
+
+\draw[->] (input) -- (samp);
+\draw[->] (samp) -- (init);
+\draw[->] (init) -- (branch);
+\draw[->] (branch) -- (selection_b);
+\draw[->] (selection_b) -- (node);
+\draw[->] (node) -- (selection_n);
+\draw[->] (selection_n) -- (loop);
+\draw[->] (loop) -- node[pos=0.3][auto]{True} (selection_f);
+\draw[->] (selection_f) -- (shunts);
+\draw[->] (loop.east) -- node[auto]{False} +(2cm, 0) |- (branch);
+
+\end{tikzpicture}
+
+%\end{document}
