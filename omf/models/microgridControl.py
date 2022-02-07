@@ -25,7 +25,6 @@ from omf.solvers import PowerModelsONM
 tooltip = 'Calculate load, generator and switching controls to maximize power restoration for a circuit with multiple networked microgrids.'
 modelName, template = __neoMetaModel__.metadata(__file__)
 hidden = False
-ONM_DIR = f'{__neoMetaModel__._omfDir}/solvers/PowerModelsONM/'
 
 def datetime_to_float(d):
 	'helper function to convert a datetime object to a float'
@@ -405,14 +404,11 @@ def customerCost1(duration, season, averagekWperhr, businessType):
 	
 	return outageCost, kWperhrEstimate, times, localMax
 
-def graphMicrogrid(pathToOmd, pathToJson, pathToCsv, outputFile, useCache, workDir, maxTime, stepSize, outageDuration, profit_on_energy_sales, restoration_cost, hardware_cost):
+def graphMicrogrid(pathToOmd, pathToJson, pathToCsv, outputFile, useCache, workDir, maxTime, stepSize, outageDuration, profit_on_energy_sales, restoration_cost, hardware_cost, eventsFilename):
 	''' Run full microgrid control process. '''
-
 	# Setup ONM if it hasn't been done already.
 	if not PowerModelsONM.check_instantiated():
 		PowerModelsONM.install_onm()
-
-	# read in the OMD file as a tree and create a geojson map of the system
 	if not workDir:
 		workDir = tempfile.mkdtemp()
 		print('@@@@@@', workDir)
@@ -420,10 +416,10 @@ def graphMicrogrid(pathToOmd, pathToJson, pathToCsv, outputFile, useCache, workD
 	useCache = 'True' # Force cache invalidation.
 	# Run ONM.
 	if  useCache == 'True':
-		shutil.copyfile(outputFile,f'{workDir}/output.json')
+		shutil.copyfile(outputFile, f'{workDir}/output.json')
 	else:
-		PowerModelsONM.run_onm(f'{workDir}/circuit.dss', f'{workDir}/output.json',f'{workDir}/events.json')
-
+		PowerModelsONM.build_settings_file(circuitPath=f'{workDir}/circuit.dss', settingsPath=f'{workDir}/settings.json', max_switch_actions=1, vm_lb_pu=0.9, vm_ub_pu=1.1, sbase_default=0.001, line_limit_mult=1.0E10, vad_deg=5.0)
+		PowerModelsONM.run_onm(circuitPath=f'{workDir}/circuit.dss', settingsPath=f'{workDir}/settings.json', outputPath=f'{workDir}/output.json', eventsPath=f'{workDir}/{eventsFilename}', gurobi='true', verbose='true', optSwitchSolver="mip_solver", fixSmallNumbers='true')
 	# Gather output data.
 	with open(f'{workDir}/output.json') as inFile:
 		data = json.load(inFile)
@@ -756,7 +752,8 @@ def work(modelDir, inputDict):
 		inputDict['outageDuration'],
 		inputDict['profit_on_energy_sales'],
 		inputDict['restoration_cost'],
-		inputDict['hardware_cost'])
+		inputDict['hardware_cost'],
+		inputDict['eventFileName'])
 	
 	# Textual outputs of outage timeline
 	with open(pJoin(modelDir,'timelineStats.html')) as inFile:
@@ -800,15 +797,15 @@ def new(modelDir):
 	# ====== For All Test Cases
 	cust_file_path = [__neoMetaModel__._omfDir,'static','testFiles','customerInfo.csv']
 	# ====== Iowa240 Test Case
-	# feeder_file_path = [__neoMetaModel__._omfDir,'scratch','MapTestOutput','iowa240c2_fixed_coords.clean.omd']
+	feeder_file_path = [__neoMetaModel__._omfDir,'scratch','MapTestOutput','iowa240c2_fixed_coords.clean.omd']
 	# event_file_path = [__neoMetaModel__._omfDir,'static','testFiles','events.json']
-	# event_file_path = [__neoMetaModel__._omfDir,'static','testFiles','events_iowa240_7to17.json']
-	# output_file_path = [__neoMetaModel__._omfDir,'static','testFiles','output_later.json']
+	event_file_path = [__neoMetaModel__._omfDir,'static','testFiles','events_iowa240_7to17.json']
+	output_file_path = [__neoMetaModel__._omfDir,'static','testFiles','output_later.json']
 	# ====== 8500ish Test Case
-	feeder_file_path = [__neoMetaModel__._omfDir,'scratch','RONM','nreca1824.dss.omd']
-	event_file_path = [__neoMetaModel__._omfDir,'scratch','RONM','events.ieee8500.json']
+	# feeder_file_path = [__neoMetaModel__._omfDir,'scratch','RONM','nreca1824.dss.omd']
+	# event_file_path = [__neoMetaModel__._omfDir,'scratch','RONM','events.ieee8500.json']
 	# output_file_path = [__neoMetaModel__._omfDir,'static','testFiles','output_simple_cobb.json']
-	output_file_path = [__neoMetaModel__._omfDir,'scratch','RONM','output.ieee8500.ts=60min.global.json']
+	# output_file_path = [__neoMetaModel__._omfDir,'scratch','RONM','output.ieee8500.ts=60min.global.json']
 	defaultInputs = {
 		'modelType': modelName,
 		'feederName1': feeder_file_path[-1][0:-4],

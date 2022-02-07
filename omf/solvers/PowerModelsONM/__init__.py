@@ -1,4 +1,5 @@
 import os, platform, subprocess
+from pathlib import Path
 
 thisDir = os.path.abspath(os.path.dirname(__file__))
 
@@ -25,22 +26,24 @@ def install_onm(target='Darwin'):
 	os.system('source ~/.zshrc')
 	print('Environmental variables set')
 	# Notebook notes "You should make a LOCAL project to contain both Gurobi and PowerModelsONM"; does this do that?
-	os.system("julia --project=. -e 'import Pkg; Pkg.add(\"Gurobi\")'")
+	os.system(f"julia --project={thisDir} -e 'import Pkg; Pkg.add(\"Gurobi\")'")
 	print('Gurobi package added')
-	os.system("julia --project=. -e 'import Pkg; Pkg.build(\"Gurobi\")'")
+	os.system(f"julia --project={thisDir} -e 'import Pkg; Pkg.build(\"Gurobi\")'")
 	print('Gurobi package built')
-	os.system("julia --project=. -e 'import Pkg; Pkg.add(Pkg.PackageSpec(;name=\"PowerModelsONM\", rev=\"main\"));'") # TODO pin version
+	os.system(f"julia --project={thisDir} -e 'import Pkg; Pkg.add(Pkg.PackageSpec(;name=\"PowerModelsONM\", rev=\"main\"));'") # TODO pin version
 	print('PowerONM package added to Julia')
-	os.system("julia --project=. -e 'import Pkg; Pkg.add(Pkg.PackageSpec(;name=\"PowerModelsDistribution\", rev=\"main\"));'") # TODO pin version
+	os.system(f"julia --project={thisDir} -e 'import Pkg; Pkg.add(Pkg.PackageSpec(;name=\"PowerModelsDistribution\", rev=\"main\"));'") # TODO pin version
 	print('PowerModelsDistribution package added to Julia')
+	os.system(f'touch {thisDir}/instantiated.txt')
 
 def build_settings_file(circuitPath='circuit.dss',settingsPath='settings.json', max_switch_actions=1, vm_lb_pu=0.9, vm_ub_pu=1.1, sbase_default=0.001, line_limit_mult=1.0E10, vad_deg=5.0):
-	os.system(f"julia --project=. -e 'using PowerModelsONM; build_settings_file(\"{circuitPath}\", \"{settingsPath}\"; max_switch_actions={max_switch_actions}, vm_lb_pu={vm_lb_pu}, vm_ub_pu={vm_ub_pu}, sbase_default={sbase_default}, line_limit_mult={line_limit_mult}, vad_deg={vad_deg})'")
+	os.system(f"julia --project={thisDir} -e 'using PowerModelsONM; build_settings_file(\"{circuitPath}\", \"{settingsPath}\"; max_switch_actions={max_switch_actions}, vm_lb_pu={vm_lb_pu}, vm_ub_pu={vm_ub_pu}, sbase_default={sbase_default}, line_limit_mult={line_limit_mult}, vad_deg={vad_deg})'")
 
 def run_onm(circuitPath='circuit.dss', settingsPath='settings.json', outputPath="onm_out.json", eventsPath="events.json", gurobi='true', verbose='true', optSwitchSolver="mip_solver", fixSmallNumbers='true'):
 	'''WARNING: WIP TODO: skip list'''
-	os.system(f"julia --project=. -e 'import Gurobi; using PowerModelsONM; args = Dict{{String,Any}}(\"network\"=>\"{circuitPath}\", \"settings\"=>\"{settingsPath}\", \"output\"=>\"{outputPath}\", \"events\"=>\"{eventsPath}\", \"gurobi\"=>{gurobi}, \"verbose\"=>{verbose}, \"opt-switch-solver\"=>\"{optSwitchSolver}\", \"fix-small-numbers\"=>{fixSmallNumbers}, \"skip\"=>[\"faults\",\"stability\"]); entrypoint(args);'")
+	os.system(f"julia --project='{thisDir}' -e 'import Gurobi; using PowerModelsONM; args = Dict{{String,Any}}(\"network\"=>\"{circuitPath}\", \"settings\"=>\"{settingsPath}\", \"output\"=>\"{outputPath}\", \"events\"=>\"{eventsPath}\", \"gurobi\"=>{gurobi}, \"verbose\"=>{verbose}, \"opt-switch-solver\"=>\"{optSwitchSolver}\", \"fix-small-numbers\"=>{fixSmallNumbers}, \"skip\"=>[\"faults\",\"stability\"]); entrypoint(args);'")
 
-#instantiate()
-#install_onm()
-# run_onm()
+if __name__ == '__main__':
+	# Basic Tests
+	build_settings_file(circuitPath=f'{thisDir}/../../data/Model/admin/Automated Testing of microgridControl/circuit.dss',settingsPath='./settings.json', max_switch_actions=1, vm_lb_pu=0.9, vm_ub_pu=1.1, sbase_default=0.001, line_limit_mult=1.0E10, vad_deg=5.0)
+	run_onm(circuitPath=f'{thisDir}/../../data/Model/admin/Automated Testing of microgridControl/circuit.dss', settingsPath='./settings.json', outputPath="./onm_out.json", eventsPath=f"{thisDir}/../../data/Model/admin/Automated Testing of microgridControl/events.ieee8500.json", gurobi='true', verbose='true', optSwitchSolver="mip_solver", fixSmallNumbers='true')
