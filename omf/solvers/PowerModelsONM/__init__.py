@@ -13,10 +13,8 @@ def install_onm(target='Darwin'):
 		os.system('sudo cat /Library/gurobi/gurobi.lic') # Fixme; check for '# Gurobi'.
 	except:
 		return('Please install valid license file in /Library/gurobi')
-	os.system('brew install julia') # installs julia
+	os.system('HOMEBREW_NO_AUTO_UPDATE=1 brew install julia') # installs julia
 	print('Julia installed')
-	os.system('pip3 install julia') # installs pyJulia
-	print('installed pyJulia')
 	os.system('wget "https://packages.gurobi.com/9.1/gurobi9.1.2_mac64.pkg"') # d/l gurobi
 	print('Downloaded Gurobi')
 	os.system('sudo installer -pkg gurobi9.1.2_mac64.pkg -target /') # install gurobi
