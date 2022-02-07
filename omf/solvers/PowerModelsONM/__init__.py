@@ -37,13 +37,12 @@ def install_onm(target='Darwin'):
 def build_settings_file(circuitPath='circuit.dss',settingsPath='settings.json', max_switch_actions=1, vm_lb_pu=0.9, vm_ub_pu=1.1, sbase_default=0.001, line_limit_mult=1.0E10, vad_deg=5.0):
 	os.system(f"julia --project={thisDir} -e 'using PowerModelsONM; build_settings_file(\"{circuitPath}\", \"{settingsPath}\"; max_switch_actions={max_switch_actions}, vm_lb_pu={vm_lb_pu}, vm_ub_pu={vm_ub_pu}, sbase_default={sbase_default}, line_limit_mult={line_limit_mult}, vad_deg={vad_deg})'")
 
-def run_onm(circuitPath='circuit.dss', settingsPath='settings.json', outputPath="onm_out.json", eventsPath="events.json", gurobi='true', verbose='true', optSwitchSolver="mip_solver", fixSmallNumbers='true'):
-	'''WARNING: WIP TODO: skip list'''
-	os.system(f"julia --project='{thisDir}' -e 'import Gurobi; using PowerModelsONM; args = Dict{{String,Any}}(\"network\"=>\"{circuitPath}\", \"settings\"=>\"{settingsPath}\", \"output\"=>\"{outputPath}\", \"events\"=>\"{eventsPath}\", \"gurobi\"=>{gurobi}, \"verbose\"=>{verbose}, \"opt-switch-solver\"=>\"{optSwitchSolver}\", \"fix-small-numbers\"=>{fixSmallNumbers}, \"skip\"=>[\"faults\",\"stability\"]); entrypoint(args);'")
+def run_onm(circuitPath='circuit.dss', settingsPath='settings.json', outputPath="onm_out.json", eventsPath="events.json", gurobi='true', verbose='true', optSwitchSolver="mip_solver", fixSmallNumbers='true', skipList='[\"faults\",\"stability\"]'):
+	os.system(f"julia --project='{thisDir}' -e 'import Gurobi; using PowerModelsONM; args = Dict{{String,Any}}(\"network\"=>\"{circuitPath}\", \"settings\"=>\"{settingsPath}\", \"output\"=>\"{outputPath}\", \"events\"=>\"{eventsPath}\", \"gurobi\"=>{gurobi}, \"verbose\"=>{verbose}, \"opt-switch-solver\"=>\"{optSwitchSolver}\", \"fix-small-numbers\"=>{fixSmallNumbers}, \"skip\"=>{skipList}); entrypoint(args);'")
 
 if __name__ == '__main__':
 	# Basic Tests
 	thisDirPath = Path(thisDir)
 	omfDir = thisDirPath.parent.parent.absolute()
-	build_settings_file(circuitPath=f'{omfDir}/scratch/RONM/circuit_onm_test.dss', settingsPath='./settings.json', max_switch_actions=1, vm_lb_pu=0.9, vm_ub_pu=1.1, sbase_default=0.001, line_limit_mult=1.0E10, vad_deg=5.0)
-	run_onm(circuitPath=f'{omfDir}/scratch/RONM/circuit_onm_test.dss', settingsPath='./settings.json', outputPath="./onm_out.json", eventsPath=f'{omfDir}/scratch/RONM/events_onm_test.json', gurobi='true', verbose='true', optSwitchSolver="mip_solver", fixSmallNumbers='true')
+	build_settings_file(circuitPath=f'{omfDir}/scratch/RONM/circuit_onm_test.dss', settingsPath='./settings.json', max_switch_actions=1, vm_lb_pu=0.9, vm_ub_pu=1.1, sbase_default=0.001, line_limit_mult='Inf', vad_deg=5.0)
+	run_onm(circuitPath=f'{omfDir}/scratch/RONM/circuit_onm_test.dss', settingsPath='./settings.json', outputPath="./onm_out.json", eventsPath=f'{omfDir}/scratch/RONM/events_onm_test.json', gurobi='true', verbose='true', optSwitchSolver="mip_solver", fixSmallNumbers='true', skipList='["faults","stability"]')
