@@ -26,12 +26,6 @@ tooltip = 'Calculate load, generator and switching controls to maximize power re
 modelName, template = __neoMetaModel__.metadata(__file__)
 hidden = False
 
-def datetime_to_float(d):
-	'helper function to convert a datetime object to a float'
-	epoch = datetime.datetime.utcfromtimestamp(0)
-	total_seconds = (d - epoch).total_seconds()
-	return total_seconds
-
 def coordsFromString(entry):
 	'helper function to take a location string to two integer values'
 	p = re.compile(r'-?\d+\.\d+')  # Compile a pattern to capture float values
@@ -102,18 +96,20 @@ def lineToCoords(tree, feederMap, lineName):
 	return coordLis, coordStr
 
 def pullDataForGraph(tree, feederMap, outputTimeline, row):
-		device = outputTimeline.loc[row, 'device']
-		action = outputTimeline.loc[row, 'action']
-		if action == 'Load Shed' or action == 'Battery Control' or action == 'Generator Control' or action == 'Load Pickup':
-			coordLis, coordStr = nodeToCoords(feederMap, device)
-		else:
-			coordLis, coordStr = lineToCoords(tree, feederMap, device)
-		time = outputTimeline.loc[row, 'time']
-		loadBefore = outputTimeline.loc[row, 'loadBefore']
-		loadAfter = outputTimeline.loc[row, 'loadAfter']
-		return device, coordLis, coordStr, time, action, loadBefore, loadAfter
+	'get necessary data to build the activity graph'
+	device = outputTimeline.loc[row, 'device']
+	action = outputTimeline.loc[row, 'action']
+	if action == 'Load Shed' or action == 'Battery Control' or action == 'Generator Control' or action == 'Load Pickup':
+		coordLis, coordStr = nodeToCoords(feederMap, device)
+	else:
+		coordLis, coordStr = lineToCoords(tree, feederMap, device)
+	time = outputTimeline.loc[row, 'time']
+	loadBefore = outputTimeline.loc[row, 'loadBefore']
+	loadAfter = outputTimeline.loc[row, 'loadAfter']
+	return device, coordLis, coordStr, time, action, loadBefore, loadAfter
 
 def colormap(action):
+	'color map for drawing the map nodes'
 	if action == 'Load Shed':
 		color = '0000FF'
 	elif action == 'Load Pickup':
@@ -126,15 +122,14 @@ def colormap(action):
 		color = 'FFFF00'
 	elif action == 'Generator Control':
 		color = 'E0FFFF'
-
 	return color
 
 def microgridTimeline(outputTimeline, workDir):
+	'generate timeline of microgrid events'
 	# check to see if work directory is specified; otherwise, create a temporary directory
 	if not workDir:
 		workDir = tempfile.mkdtemp()
 		print('@@@@@@', workDir)
-	
 	# TODO: update table after calculating outage stats
 	def timelineStats(outputTimeline):
 		new_html_str = """
@@ -149,7 +144,6 @@ def microgridTimeline(outputTimeline, workDir):
 					</tr>
 				</thead>
 				<tbody>"""
-		
 		row = 0
 		while row < len(outputTimeline):
 			loadBeforeStr = outputTimeline.loc[row, 'loadBefore']
@@ -161,25 +155,21 @@ def microgridTimeline(outputTimeline, workDir):
 				loadAfterStr = '{0:.3f}'.format(float(loadAfterStr))
 			new_html_str += '<tr><td>' + str(outputTimeline.loc[row, 'device']) + '</td><td>' + str(outputTimeline.loc[row, 'time']) + '</td><td>' + str(outputTimeline.loc[row, 'action']) + '</td><td>' + loadBeforeStr + '</td><td>' + loadAfterStr + '</td></tr>'
 			row += 1
-
 		new_html_str +="""</tbody></table>"""
-
 		return new_html_str
-
 	# print all intermediate and final costs
 	timelineStatsHtml = timelineStats(
 		outputTimeline = outputTimeline)
 	with open(pJoin(workDir, 'timelineStats.html'), 'w') as timelineFile:
 		timelineFile.write(timelineStatsHtml)
-
 	return timelineStatsHtml
 
 def customerOutageTable(customerOutageData, outageCost, workDir):
+	'generate html table of customer outages'
 	# check to see if work directory is specified; otherwise, create a temporary directory
 	if not workDir:
 		workDir = tempfile.mkdtemp()
 		print('@@@@@@', workDir)
-	
 	# TODO: update table after calculating outage stats
 	def customerOutageStats(customerOutageData, outageCost):
 		new_html_str = """
@@ -196,14 +186,11 @@ def customerOutageTable(customerOutageData, outageCost, workDir):
 					</tr>
 				</thead>
 				<tbody>"""
-		
 		row = 0
 		while row < len(customerOutageData):
 			new_html_str += '<tr><td>' + str(customerOutageData.loc[row, 'Customer Name']) + '</td><td>' + str(customerOutageData.loc[row, 'Duration']) + '</td><td>' + str(customerOutageData.loc[row, 'Season']) + '</td><td>' + '{0:.2f}'.format(customerOutageData.loc[row, 'Average kW/hr']) + '</td><td>' + str(customerOutageData.loc[row, 'Business Type']) + '</td><td>' + str(customerOutageData.loc[row, 'Load Name']) + '</td><td>' + "${:,.2f}".format(outageCost[row])+ '</td></tr>'
 			row += 1
-
 		new_html_str +="""</tbody></table>"""
-
 		return new_html_str
 
 	# print business information and estimated customer outage costs
@@ -391,7 +378,6 @@ def customerCost1(duration, season, averagekWperhr, businessType):
 
 	# adjust for inflation from 2008 to 2020 using the CPI
 	kWperhrEstimate = 1.21 * kWperhrEstimate
-
 	# find the estimated customer outage cost for the customer in question, given the duration of the outage
 	times = np.array([0,1,2,3,4,5,6,7,8])
 	outageCost = kWperhrEstimate[duration]
@@ -401,7 +387,6 @@ def customerCost1(duration, season, averagekWperhr, businessType):
 		if kWperhrEstimate[row] > localMax:
 			localMax = kWperhrEstimate[row]
 		row+=1
-	
 	return outageCost, kWperhrEstimate, times, localMax
 
 def graphMicrogrid(pathToOmd, pathToJson, pathToCsv, outputFile, useCache, workDir, maxTime, stepSize, outageDuration, profit_on_energy_sales, restoration_cost, hardware_cost, eventsFilename):
@@ -438,7 +423,6 @@ def graphMicrogrid(pathToOmd, pathToJson, pathToCsv, outputFile, useCache, workD
 	actionLoadBefore = []
 	actionLoadAfter = []
 	loadsShed = []
-
 	timestep = 1
 	for key in switchLoadAction:
 		if timestep == 1:
@@ -506,108 +490,121 @@ def graphMicrogrid(pathToOmd, pathToJson, pathToCsv, outputFile, useCache, workD
 					actionLoadAfter.append(str(entryNew))
 			powerflowOld = powerflow[timestep]
 		timestep += 1
-
-	line = {'time': actionTime,
-			'device': actionDevice,
-			'action': actionAction,
-			'loadBefore': actionLoadBefore,
-			'loadAfter': actionLoadAfter
-			}
-
+	line = {
+		'time': actionTime,
+		'device': actionDevice,
+		'action': actionAction,
+		'loadBefore': actionLoadBefore,
+		'loadAfter': actionLoadAfter}
 	outputTime = pd.DataFrame(line, columns = ['time','device','action','loadBefore','loadAfter'])
 	outputTimeline = outputTime.sort_values('time')
-
 	# Create traces
 	gens = go.Figure()
-	gens.add_trace(go.Scatter(x=simTimeSteps, y=genProfiles['Diesel DG (kW)'],
-							mode='lines',
-							name='Diesel DG',
-							hovertemplate=
-							'<b>Time Step</b>: %{x}<br>' +
-							'<b>Diesel DG</b>: %{y:.3f}kW'))
-	gens.add_trace(go.Scatter(x=simTimeSteps, y=genProfiles['Energy storage (kW)'],
-							mode='lines',
-							name='Energy Storage',
-							hovertemplate=
-							'<b>Time Step</b>: %{x}<br>' +
-							'<b>Energy Storage</b>: %{y:.3f}kW'))
-	gens.add_trace(go.Scatter(x=simTimeSteps, y=genProfiles['Solar DG (kW)'],
-							mode='lines',
-							name='Solar DG',
-							hovertemplate=
-							'<b>Time Step</b>: %{x}<br>' +
-							'<b>Solar DG</b>: %{y:.3f}kW'))
-	gens.add_trace(go.Scatter(x=simTimeSteps, y=genProfiles['Grid mix (kW)'],
-							mode='lines',
-							name='Grid Mix',
-							hovertemplate=
-							'<b>Time Step</b>: %{x}<br>' +
-							'<b>Grid Mix</b>: %{y:.3f}kW'))
+	gens.add_trace(go.Scatter(
+		x=simTimeSteps,
+		y=genProfiles['Diesel DG (kW)'],
+		mode='lines',
+		name='Diesel DG',
+		hovertemplate=
+		'<b>Time Step</b>: %{x}<br>' +
+		'<b>Diesel DG</b>: %{y:.3f}kW'))
+	gens.add_trace(go.Scatter(
+		x=simTimeSteps,
+		y=genProfiles['Energy storage (kW)'],
+		mode='lines',
+		name='Energy Storage',
+		hovertemplate=
+		'<b>Time Step</b>: %{x}<br>' +
+		'<b>Energy Storage</b>: %{y:.3f}kW'))
+	gens.add_trace(go.Scatter(
+		x=simTimeSteps,
+		y=genProfiles['Solar DG (kW)'],
+		mode='lines',
+		name='Solar DG',
+		hovertemplate=
+		'<b>Time Step</b>: %{x}<br>' +
+		'<b>Solar DG</b>: %{y:.3f}kW'))
+	gens.add_trace(go.Scatter(
+		x=simTimeSteps,
+		y=genProfiles['Grid mix (kW)'],
+		mode='lines',
+		name='Grid Mix',
+		hovertemplate=
+		'<b>Time Step</b>: %{x}<br>' +
+		'<b>Grid Mix</b>: %{y:.3f}kW'))
 	# Edit the layout
-	gens.update_layout(xaxis_title='Hours',
-						yaxis_title='Power (kW)',
-						legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1))
-
+	gens.update_layout(
+		xaxis_title='Hours',
+		yaxis_title='Power (kW)',
+		legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1))
 	volts = go.Figure()
-	volts.add_trace(go.Scatter(x=simTimeSteps, y=voltages['Min voltage (p.u.)'],
-							mode='lines',
-							name='Minimum Voltage',
-							hovertemplate=
-							'<b>Time Step</b>: %{x}<br>' +
-							'<b>Minimum Voltage</b>: %{y:.4f}'))
-	volts.add_trace(go.Scatter(x=simTimeSteps, y=voltages['Max voltage (p.u.)'],
-							mode='lines',
-							name='Maximum Voltage',
-							hovertemplate=
-							'<b>Time Step</b>: %{x}<br>' +
-							'<b>Maximum Voltage</b>: %{y:.4f}'))
-	volts.add_trace(go.Scatter(x=simTimeSteps, y=voltages['Mean voltage (p.u.)'],
-							mode='lines',
-							name='Mean Voltage',
-							hovertemplate=
-							'<b>Time Step</b>: %{x}<br>' +
-							'<b>Mean Voltage</b>: %{y:.4f}'))
+	volts.add_trace(go.Scatter(
+		x=simTimeSteps,
+		y=voltages['Min voltage (p.u.)'],
+		mode='lines',
+		name='Minimum Voltage',
+		hovertemplate=
+		'<b>Time Step</b>: %{x}<br>' +
+		'<b>Minimum Voltage</b>: %{y:.4f}'))
+	volts.add_trace(go.Scatter(
+		x=simTimeSteps, y=voltages['Max voltage (p.u.)'],
+		mode='lines',
+		name='Maximum Voltage',
+		hovertemplate=
+		'<b>Time Step</b>: %{x}<br>' +
+		'<b>Maximum Voltage</b>: %{y:.4f}'))
+	volts.add_trace(go.Scatter(
+		x=simTimeSteps,
+		y=voltages['Mean voltage (p.u.)'],
+		mode='lines',
+		name='Mean Voltage',
+		hovertemplate=
+		'<b>Time Step</b>: %{x}<br>' +
+		'<b>Mean Voltage</b>: %{y:.4f}'))
 	# Edit the layout
-	volts.update_layout(xaxis_title='Hours',
-						yaxis_title='Power (p.u.)',
-						legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1))
-
+	volts.update_layout(
+		xaxis_title='Hours',
+		yaxis_title='Power (p.u.)',
+		legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1))
 	loads = go.Figure()
-	loads.add_trace(go.Scatter(x=simTimeSteps, y=loadServed['Feeder load (%)'],
-							mode='lines',
-							name='Feeder Load',
-							hovertemplate=
-							'<b>Time Step</b>: %{x}<br>' +
-							'<b>Feeder Load</b>: %{y:.2f}%'))
-	loads.add_trace(go.Scatter(x=simTimeSteps, y=loadServed['Microgrid load (%)'],
-							mode='lines',
-							name='Microgrid Load',
-							hovertemplate=
-							'<b>Time Step</b>: %{x}<br>' +
-							'<b>Microgrid Load</b>: %{y:.2f}%'))
-	loads.add_trace(go.Scatter(x=simTimeSteps, y=loadServed['Bonus load via microgrid (%)'],
-							mode='lines',
-							name='Bonus Load via Microgrid',
-							hovertemplate=
-							'<b>Time Step</b>: %{x}<br>' +
-							'<b>Bonus Load via Microgrid</b>: %{y:.2f}%'))
+	loads.add_trace(go.Scatter(
+		x=simTimeSteps,
+		y=loadServed['Feeder load (%)'],
+		mode='lines',
+		name='Feeder Load',
+		hovertemplate=
+		'<b>Time Step</b>: %{x}<br>' +
+		'<b>Feeder Load</b>: %{y:.2f}%'))
+	loads.add_trace(go.Scatter(
+		x=simTimeSteps,
+		y=loadServed['Microgrid load (%)'],
+		mode='lines',
+		name='Microgrid Load',
+		hovertemplate=
+		'<b>Time Step</b>: %{x}<br>' +
+		'<b>Microgrid Load</b>: %{y:.2f}%'))
+	loads.add_trace(go.Scatter(
+		x=simTimeSteps,
+		y=loadServed['Bonus load via microgrid (%)'],
+		mode='lines',
+		name='Bonus Load via Microgrid',
+		hovertemplate=
+		'<b>Time Step</b>: %{x}<br>' +
+		'<b>Bonus Load via Microgrid</b>: %{y:.2f}%'))
 	# Edit the layout
-	loads.update_layout(xaxis_title='Hours',
-						yaxis_title='Load (%)',
-						legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1))
-
+	loads.update_layout(
+		xaxis_title='Hours',
+		yaxis_title='Load (%)',
+		legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1))
 	timelineStatsHtml = microgridTimeline(outputTimeline, workDir)
-
 	with open(pathToOmd) as inFile:
 		tree = json.load(inFile)['tree']
 	feederMap = geo.omdGeoJson(pathToOmd, conversion = False)
-
 	# generate a list of substations
 	busNodes = []
 	for key in tree.keys():
 		if tree[key].get('bustype','') == 'SWING':
 			busNodes.append(tree[key]['name'])
-
 	row = 0
 	row_count_timeline = outputTimeline.shape[0]
 	while row < row_count_timeline:
@@ -618,24 +615,26 @@ def graphMicrogrid(pathToOmd, pathToJson, pathToCsv, outputFile, useCache, workD
 			if len(coordLis) == 2:
 				dev_dict['geometry'] = {'type': 'Point', 'coordinates': [coordLis[0], coordLis[1]]}
 				dev_dict['type'] = 'Feature'
-				dev_dict['properties'] = {'device': device, 
-									  'time': time,
-									  'action': action,
-									  'loadBefore': loadBefore,
-									  'loadAfter': loadAfter,
-									  'pointColor': '#' + str(colormap(action)), 
-									  'popupContent': 'Location: <b>' + str(coordStr) + '</b><br>Device: <b>' + str(device) + '</b><br>Time: <b>' + str(time) + '</b><br>Action: <b>' + str(action) + '</b><br>Before: <b>' + str(loadBefore) + '</b><br>After: <b>' + str(loadAfter) + '</b>.'}
+				dev_dict['properties'] = {
+					'device': device, 
+					'time': time,
+					'action': action,
+					'loadBefore': loadBefore,
+					'loadAfter': loadAfter,
+					'pointColor': '#' + str(colormap(action)), 
+					'popupContent': 'Location: <b>' + str(coordStr) + '</b><br>Device: <b>' + str(device) + '</b><br>Time: <b>' + str(time) + '</b><br>Action: <b>' + str(action) + '</b><br>Before: <b>' + str(loadBefore) + '</b><br>After: <b>' + str(loadAfter) + '</b>.' }
 				feederMap['features'].append(dev_dict)
 			else:
 				dev_dict['geometry'] = {'type': 'LineString', 'coordinates': [[coordLis[0], coordLis[1]], [coordLis[2], coordLis[3]]]}
 				dev_dict['type'] = 'Feature'
-				dev_dict['properties'] = {'device': device, 
-									  'time': time,
-									  'action': action,
-									  'loadBefore': loadBefore,
-									  'loadAfter': loadAfter,
-									  'edgeColor': '#' + str(colormap(action)),
-									  'popupContent': 'Location: <b>' + str(coordStr) + '</b><br>Device: <b>' + str(device) + '</b><br>Time: <b>' + str(time) + '</b><br>Action: <b>' + str(action) + '</b><br>Before: <b>' + str(loadBefore) + '</b><br>After: <b>' + str(loadAfter) + '</b>.'}
+				dev_dict['properties'] = {
+					'device': device, 
+					'time': time,
+					'action': action,
+					'loadBefore': loadBefore,
+					'loadAfter': loadAfter,
+					'edgeColor': '#' + str(colormap(action)),
+					'popupContent': 'Location: <b>' + str(coordStr) + '</b><br>Device: <b>' + str(device) + '</b><br>Time: <b>' + str(time) + '</b><br>Action: <b>' + str(action) + '</b><br>Before: <b>' + str(loadBefore) + '</b><br>After: <b>' + str(loadAfter) + '</b>.' }
 				feederMap['features'].append(dev_dict)
 		except:
 			print('MESSED UP MAPPING on', device, full_data)
@@ -646,11 +645,10 @@ def graphMicrogrid(pathToOmd, pathToJson, pathToCsv, outputFile, useCache, workD
 	with open(pJoin(workDir,'geoJsonFeatures.js'),'w') as outFile:
 		outFile.write('var geojson =')
 		json.dump(feederMap, outFile, indent=4)
-
-	#Save geojson dict to then read into outdata in work function below
+	# Save geojson dict to then read into outdata in work function below
 	with open(pJoin(workDir,'geoDict.js'),'w') as outFile:
 		json.dump(feederMap, outFile, indent=4)
-
+	# Generate customer outage outputs
 	customerOutageData = pd.read_csv(pathToCsv)
 	numberRows = math.ceil(customerOutageData.shape[0]/2)
 	fig, axs = plt.subplots(numberRows, 2)
@@ -671,11 +669,9 @@ def graphMicrogrid(pathToOmd, pathToJson, pathToCsv, outputFile, useCache, workD
 		outageCost.append(customerOutageCost)
 		if localMax > globalMax:
 			globalMax = localMax
-  
 		# creating series
 		timesSeries = pd.Series(times)
 		kWperhrSeries = pd.Series(kWperhrEstimate)
-
 		trace = py.graph_objs.Scatter(
 			x = timesSeries,
 			y = kWperhrSeries,
@@ -683,35 +679,28 @@ def graphMicrogrid(pathToOmd, pathToJson, pathToCsv, outputFile, useCache, workD
 			hoverlabel = dict(namelength = -1),
 			hovertemplate = 
 			'<b>Duration</b>: %{x} h<br>' +
-			'<b>Cost</b>: $%{y:.2f}'
-		)
+			'<b>Cost</b>: $%{y:.2f}')
 		fig.add_trace(trace)
 		row += 1
 	fig.update_layout(xaxis_title = 'Duration (hours)',
 		yaxis_title = 'Cost ($)',
 		legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1))
-
 	customerOutageHtml = customerOutageTable(customerOutageData, outageCost, workDir)
-
 	profit_on_energy_sales = float(profit_on_energy_sales)
 	restoration_cost = int(restoration_cost)
 	hardware_cost = int(hardware_cost)
 	outageDuration = int(outageDuration)
-
 	utilityOutageHtml = utilityOutageTable(average_lost_kwh, profit_on_energy_sales, restoration_cost, hardware_cost, outageDuration, workDir)
-
 	return {'utilityOutageHtml': utilityOutageHtml, 'customerOutageHtml': customerOutageHtml, 'timelineStatsHtml': timelineStatsHtml, 'gens': gens, 'loads': loads, 'volts': volts, 'fig': fig, 'customerOutageCost': customerOutageCost}
 
 def work(modelDir, inputDict):
 	# Copy specific climate data into model directory
 	outData = {}
-
 	# Write in the feeder
 	feederName = [x for x in os.listdir(modelDir) if x.endswith('.omd')][0][:-4]
 	inputDict['feederName1'] = feederName
 	with open(f'{modelDir}/{feederName}.omd', 'r') as omdFile:
 		omd = json.load(omdFile)
-
 	tree = omd['tree']
 	# Output a .dss file, which will be needed for ONM.
 	niceDss = dssConvert.evilGldTreeToDssTree(tree)
@@ -726,7 +715,6 @@ def work(modelDir, inputDict):
 		content = re.sub(r'object=', r'', content) #drop object=
 	with open(f'{modelDir}/circuit.dss','w') as dss_file_2:
 		dss_file_2.write(content)
-
 	# Run the main functions of the program
 	with open(pJoin(modelDir, inputDict['outputFileName']), 'w') as f2:
 		pathToData2 = f2.name
@@ -754,30 +742,23 @@ def work(modelDir, inputDict):
 		inputDict['restoration_cost'],
 		inputDict['hardware_cost'],
 		inputDict['eventFileName'])
-	
 	# Textual outputs of outage timeline
 	with open(pJoin(modelDir,'timelineStats.html')) as inFile:
 		outData['timelineStatsHtml'] = inFile.read()
-
 	# Textual outputs of customer cost statistic
 	with open(pJoin(modelDir,'customerOutageTable.html')) as inFile:
 		outData['customerOutageHtml'] = inFile.read()
-
 	# Textual outputs of utility cost statistic
 	with open(pJoin(modelDir,'utilityOutageTable.html')) as inFile:
 		outData['utilityOutageHtml'] = inFile.read()
-
 	#The geojson dictionary to load into the outageCost.py template
 	with open(pJoin(modelDir,'geoDict.js'),'rb') as inFile:
 		outData['geoDict'] = inFile.read().decode()
-
 	# Image outputs.
 	# with open(pJoin(modelDir,'customerCostFig.png'),'rb') as inFile:
 	# 	outData['customerCostFig.png'] = base64.standard_b64encode(inFile.read()).decode()
-
 	# Plotly outputs.
 	layoutOb = go.Layout()
-
 	outData['fig1Data'] = json.dumps(plotOuts.get('gens',{}), cls=py.utils.PlotlyJSONEncoder)
 	outData['fig1Layout'] = json.dumps(layoutOb, cls=py.utils.PlotlyJSONEncoder)
 	outData['fig2Data'] = json.dumps(plotOuts.get('volts',{}), cls=py.utils.PlotlyJSONEncoder)
@@ -786,7 +767,6 @@ def work(modelDir, inputDict):
 	outData['fig3Layout'] = json.dumps(layoutOb, cls=py.utils.PlotlyJSONEncoder)
 	outData['fig4Data'] = json.dumps(plotOuts.get('fig',{}), cls=py.utils.PlotlyJSONEncoder)
 	outData['fig4Layout'] = json.dumps(layoutOb, cls=py.utils.PlotlyJSONEncoder)
-
 	# Stdout/stderr.
 	outData['stdout'] = 'Success'
 	outData['stderr'] = ''
@@ -848,7 +828,6 @@ def _debugging():
 	__neoMetaModel__.runForeground(modelLoc)
 	# Show the output.
 	__neoMetaModel__.renderAndShow(modelLoc)
-
 
 if __name__ == '__main__':
 	_debugging()
