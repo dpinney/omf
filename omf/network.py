@@ -294,7 +294,9 @@ def viz(omt_filepath, output_path=None, output_name="viewer.html", open_file=Tru
 def _tests():
 	# Parse mat to dictionary.
 	networkName = 'case9'
-	netPath = os.path.join(os.path.dirname(__file__), 'solvers', 'matpower7.0', 'data', networkName + '.m')
+	netPath = os.path.join(omf.omfDir, 'solvers', 'matpower7.0', 'data', networkName + '.m')
+	print('NETPATH', netPath)
+	os.system(f'ls {os.path.dirname(netPath)}')
 	networkJson = parse(netPath, filePath=True)
 	keyLen = len(networkJson.keys())
 	print('Parsed MAT file with %s buses, %s generators, and %s branches.'%(len(networkJson['bus']),len(networkJson['gen']),len(networkJson['branch'])))
