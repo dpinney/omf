@@ -25,7 +25,7 @@ def install_onm(target='Darwin'):
 	os.system('echo "export LD_LIBRARY_PATH=/Library/gurobi912/mac64/lib" >>  ~/.zshrc')
 	os.system('source ~/.zshrc')
 	print('Environmental variables set')
-	# Notebook notes "You should make a LOCAL project to contain both Gurobi and PowerModelsONM"; does this do that?
+	# Local julia project installs to contain both Gurobi and PowerModelsONM"
 	os.system(f"julia --project={thisDir} -e 'import Pkg; Pkg.add(\"Gurobi\")'")
 	print('Gurobi package added')
 	os.system(f"julia --project={thisDir} -e 'import Pkg; Pkg.build(\"Gurobi\")'")
@@ -45,5 +45,7 @@ def run_onm(circuitPath='circuit.dss', settingsPath='settings.json', outputPath=
 
 if __name__ == '__main__':
 	# Basic Tests
-	build_settings_file(circuitPath=f'{thisDir}/../../data/Model/admin/Automated Testing of microgridControl/circuit.dss',settingsPath='./settings.json', max_switch_actions=1, vm_lb_pu=0.9, vm_ub_pu=1.1, sbase_default=0.001, line_limit_mult=1.0E10, vad_deg=5.0)
-	run_onm(circuitPath=f'{thisDir}/../../data/Model/admin/Automated Testing of microgridControl/circuit.dss', settingsPath='./settings.json', outputPath="./onm_out.json", eventsPath=f"{thisDir}/../../data/Model/admin/Automated Testing of microgridControl/events.ieee8500.json", gurobi='true', verbose='true', optSwitchSolver="mip_solver", fixSmallNumbers='true')
+	thisDirPath = Path(thisDir)
+	omfDir = thisDirPath.parent.parent.absolute()
+	build_settings_file(circuitPath=f'{omfDir}/scratch/RONM/circuit_onm_test.dss', settingsPath='./settings.json', max_switch_actions=1, vm_lb_pu=0.9, vm_ub_pu=1.1, sbase_default=0.001, line_limit_mult=1.0E10, vad_deg=5.0)
+	run_onm(circuitPath=f'{omfDir}/scratch/RONM/circuit_onm_test.dss', settingsPath='./settings.json', outputPath="./onm_out.json", eventsPath=f'{omfDir}/scratch/RONM/events_onm_test.json', gurobi='true', verbose='true', optSwitchSolver="mip_solver", fixSmallNumbers='true')
