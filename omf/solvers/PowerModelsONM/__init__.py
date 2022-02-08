@@ -29,8 +29,8 @@ def install_onm(target='Darwin'):
 	os.system(f'''julia -e 'import Pkg; Pkg.build("Gurobi")' ''')
 	print('Gurobi package built')
 	print('PowerONM package added to Julia')
-	os.system(f'''julia -e 'import Pkg; Pkg.add(Pkg.PackageSpec(;name="PowerModelsDistribution", rev="main"));' ''') # TODO pin version
-	os.system(f'''julia -e 'import Pkg; Pkg.add(Pkg.PackageSpec(;name="PowerModelsONM", rev="main"));' ''') # TODO pin version
+	os.system(f'''julia -e 'import Pkg; Pkg.add(Pkg.PackageSpec(;name="PowerModelsDistribution", version="2.1.0"));' ''') # TODO test version pin.
+	os.system(f'''julia -e 'import Pkg; Pkg.add(Pkg.PackageSpec(;name="PowerModelsONM", version="2.1.0"));' ''') # TODO test version pin.
 	print('PowerModelsDistribution package added to Julia')
 	os.system(f'touch {thisDir}/instantiated.txt')
 
