@@ -904,10 +904,14 @@ def _dssToOmdTest():
 	omfDir = os.getcwd()
 	# dssFileName = 'ieee37.clean.dss'
 	# dssFilePath = pJoin(curDir, dssFileName)
-	dssFileName = 'nreca1824.dss'
-	dssFilePath = pJoin(omfDir, 'scratch', 'RONM', dssFileName)
+	# dssFileName = 'nreca1824.dss'
+	dssFileName = 'network.iowa240.reduced.dss'
+	# dssFilePath = pJoin(omfDir, 'scratch', 'RONM', dssFileName)
+	dssFilePath = pJoin(omfDir, 'static', 'testFiles', 'iowa_240', dssFileName)
+	# omdFileName = dssFileName + '.omd'
 	omdFileName = dssFileName + '.omd'
-	omdFilePath = pJoin(omfDir, 'scratch', 'RONM', omdFileName)
+	# omdFilePath = pJoin(omfDir, 'scratch', 'RONM', omdFileName)
+	omdFilePath = pJoin(omfDir, 'static', 'testFiles', 'iowa_240', omdFileName)
 	# omdFilePath = pJoin(omfDir, 'static', 'publicFeeders', omdFileName)
 	dssToOmd(dssFilePath, omdFilePath, RADIUS=0.0002, write_out=True)
 
@@ -949,7 +953,7 @@ def _tests():
 	#TODO: a little help on the frontend to hide invalid commands.
 
 if __name__ == '__main__':
-	_tests()
+	# _tests()
 	# _randomTest()
 	# _conversionTests()
-	# _dssToOmdTest()
+	_dssToOmdTest()
