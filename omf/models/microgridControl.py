@@ -389,7 +389,17 @@ def customerCost1(duration, season, averagekWperhr, businessType):
 		row+=1
 	return outageCost, kWperhrEstimate, times, localMax
 
-def graphMicrogrid(pathToOmd, pathToJson, pathToCsv, outputFile, useCache, workDir, maxTime, stepSize, outageDuration, profit_on_energy_sales, restoration_cost, hardware_cost, eventsFilename):
+def validateSettingsFile(settingsFile):
+	# TODO: check to see if settings file input is correct
+	#if settings file is in correct format return 'True'
+	condition = True
+	if condition:
+		return 'True'
+	#if settings file is incorrect, return 'Corrupted Settings file input, generating default settings'
+	else:
+		return 'Corrupted Settings file input, generating default settings'
+
+def graphMicrogrid(pathToOmd, pathToJson, pathToCsv, outputFile, settingsFile, useCache, workDir, maxTime, stepSize, outageDuration, profit_on_energy_sales, restoration_cost, hardware_cost, eventsFilename, genSettings):
 	''' Run full microgrid control process. '''
 	# Setup ONM if it hasn't been done already.
 	if not PowerModelsONM.check_instantiated():
@@ -398,12 +408,26 @@ def graphMicrogrid(pathToOmd, pathToJson, pathToCsv, outputFile, useCache, workD
 		workDir = tempfile.mkdtemp()
 		print('@@@@@@', workDir)
 
+	# Handle Settings file generation or upload
+	if genSettings == 'False' and settingsFile != None:
+		correctSettings = validateSettingsFile(settingsFile)
+		if correctSettings == 'True':
+			# Scenario 1: The user chose to upload their own setttings file and it is formatted correctly
+			shutil.copyfile(settingsFile,f'{workDir}/settings.json')
+		else:
+			# Scenario 2: The user chose to upload their own setttings file and it is formatted incorrectly
+			print("Warning: " + correctSettings)
+			PowerModelsONM.build_settings_file(circuitPath=f'{workDir}/circuit.dss', settingsPath=f'{workDir}/settings.json', max_switch_actions=1, vm_lb_pu=0.9, vm_ub_pu=1.1, sbase_default=0.001, line_limit_mult=1.0E10, vad_deg=5.0)
+	else:
+		# Scenario 3: The user wants to generate a settings file
+		PowerModelsONM.build_settings_file(circuitPath=f'{workDir}/circuit.dss', settingsPath=f'{workDir}/settings.json', max_switch_actions=1, vm_lb_pu=0.9, vm_ub_pu=1.1, sbase_default=0.001, line_limit_mult=1.0E10, vad_deg=5.0)
+
 	useCache = 'True' # Force cache invalidation.
 	# Run ONM.
-	if  useCache == 'True':
+	if  useCache == 'True' and outputFile != None:
 		shutil.copyfile(outputFile, f'{workDir}/output.json')
 	else:
-		PowerModelsONM.build_settings_file(circuitPath=f'{workDir}/circuit.dss', settingsPath=f'{workDir}/settings.json', max_switch_actions=1, vm_lb_pu=0.9, vm_ub_pu=1.1, sbase_default=0.001, line_limit_mult='Inf', vad_deg=5.0)
+		# PowerModelsONM.build_settings_file(circuitPath=f'{workDir}/circuit.dss', settingsPath=f'{workDir}/settings.json', max_switch_actions=1, vm_lb_pu=0.9, vm_ub_pu=1.1, sbase_default=0.001, line_limit_mult='Inf', vad_deg=5.0)
 		PowerModelsONM.run_onm(circuitPath=f'{workDir}/circuit.dss', settingsPath=f'{workDir}/settings.json', outputPath=f'{workDir}/output.json', eventsPath=f'{workDir}/{eventsFilename}', gurobi='true', verbose='true', optSwitchSolver="mip_solver", fixSmallNumbers='true')
 	# Gather output data.
 	with open(f'{workDir}/output.json') as inFile:
@@ -716,9 +740,27 @@ def work(modelDir, inputDict):
 	with open(f'{modelDir}/circuit.dss','w') as dss_file_2:
 		dss_file_2.write(content)
 	# Run the main functions of the program
-	with open(pJoin(modelDir, inputDict['outputFileName']), 'w') as f2:
-		pathToData2 = f2.name
-		f2.write(inputDict['outputData'])
+	if inputDict['genSettings'] == 'False':
+		try:
+			with open(pJoin(modelDir, inputDict['settingsFileName']), 'w') as f3:
+				pathToData3 = f3.name
+				f3.write(inputDict['settingsData'])
+		except:
+			pathToData3 = None
+			print("ERROR - Unable to read Settings file: " + str(inputDict['settingsFileName']))
+	else:
+		pathToData3 = None
+
+	if inputDict['useCache'] == 'True':
+		try:
+			with open(pJoin(modelDir, inputDict['outputFileName']), 'w') as f2:
+				pathToData2 = f2.name
+				f2.write(inputDict['outputData'])
+		except:
+			pathToData2 = None
+			print("ERROR - Unable to read Cached output file: " + str(inputDict['outputFileName']))
+	else:
+		pathToData2 = None
 
 	with open(pJoin(modelDir, inputDict['customerFileName']), 'w') as f1:
 		pathToData1 = f1.name
@@ -733,6 +775,7 @@ def work(modelDir, inputDict):
 		pathToData,
 		pathToData1,
 		pathToData2,
+		pathToData3,
 		inputDict['useCache'],
 		modelDir, #Work directory.
 		inputDict['maxTime'], #computational time limit
@@ -741,7 +784,8 @@ def work(modelDir, inputDict):
 		inputDict['profit_on_energy_sales'],
 		inputDict['restoration_cost'],
 		inputDict['hardware_cost'],
-		inputDict['eventFileName'])
+		inputDict['eventFileName'],
+		inputDict['genSettings'])
 	# Textual outputs of outage timeline
 	with open(pJoin(modelDir,'timelineStats.html')) as inFile:
 		outData['timelineStatsHtml'] = inFile.read()
@@ -781,11 +825,19 @@ def new(modelDir):
 	event_file_path = [__neoMetaModel__._omfDir,'static','testFiles','events.json']
 	# event_file_path = [__neoMetaModel__._omfDir,'static','testFiles','events_iowa240_7to17.json']
 	output_file_path = [__neoMetaModel__._omfDir,'static','testFiles','output_later.json']
+	settings_file_path = [__neoMetaModel__._omfDir,'static','testFiles','iowa_240','settings.iowa240.json']
+	# ====== New Iowa240 Test case from ONM
+	# feeder_file_path = [__neoMetaModel__._omfDir,'static','testFiles','iowa_240','network.iowa240.reduced.dss.omd']
+	# event_file_path = [__neoMetaModel__._omfDir,'static','testFiles','iowa_240','events.iowa240.json']
+	# output_file_path = [__neoMetaModel__._omfDir,'static','testFiles','iowa_240','output.iowa240.switchglobal.block.ldf-gurobi.displdf-ipopt.json']
+	# settings_file_path = [__neoMetaModel__._omfDir,'static','testFiles','iowa_240','settings.iowa240.json']
 	# ====== 8500ish Test Case
 	# feeder_file_path = [__neoMetaModel__._omfDir,'scratch','RONM','nreca1824.dss.omd']
 	# event_file_path = [__neoMetaModel__._omfDir,'scratch','RONM','events.ieee8500.json']
 	# output_file_path = [__neoMetaModel__._omfDir,'static','testFiles','output_simple_cobb.json']
 	# output_file_path = [__neoMetaModel__._omfDir,'scratch','RONM','output.ieee8500.ts=60min.global.json']
+	# settings_file_path = [__neoMetaModel__._omfDir,'scratch','RONM','defaultSettings.nreca1824.json']
+	# Need to generate a base settings file - otherwise set genSettings to 'True' to have ONM generate the settings file
 	defaultInputs = {
 		'modelType': modelName,
 		'feederName1': feeder_file_path[-1][0:-4],
@@ -802,6 +854,9 @@ def new(modelDir):
 		'eventData': open(pJoin(*event_file_path)).read(),
 		'outputFileName': output_file_path[-1],
 		'outputData': open(pJoin(*output_file_path)).read(),
+		'genSettings': 'True',
+		'settingsFileName': settings_file_path[-1],
+		'settingsData': open(pJoin(*settings_file_path)).read(),
 	}
 	creationCode = __neoMetaModel__.new(modelDir, defaultInputs)
 	try:
