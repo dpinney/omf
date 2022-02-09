@@ -7,46 +7,64 @@ def check_instantiated():
 	''' Check whether ONM was previously instantiated and working. '''
 	return os.path.isfile(f'{thisDir}/instantiated.txt')
 
-def install_onm(target='Darwin'):
-	''' WARNING, WIP. TODO: OS check, linux support, license check, tests. '''
-	try:
-		os.system('sudo cat /Library/gurobi/gurobi.lic') # Fixme; check for '# Gurobi'.
-	except:
-		return('Please install valid license file in /Library/gurobi')
-	os.system('HOMEBREW_NO_AUTO_UPDATE=1 brew install julia') # installs julia
-	print('Julia installed')
-	os.system('wget "https://packages.gurobi.com/9.1/gurobi9.1.2_mac64.pkg"') # d/l gurobi
-	print('Downloaded Gurobi')
-	os.system('sudo installer -pkg gurobi9.1.2_mac64.pkg -target /') # install gurobi
-	os.system('echo "export GUROBI_HOME=/Library/gurobi912/mac64" >> ~/.zshrc')
-	os.system('echo "export PATH=/Library/gurobi912/mac64/bin:$PATH" >> ~/.zshrc')
-	os.system('echo "export LD_LIBRARY_PATH=/Library/gurobi912/mac64/lib" >> ~/.zshrc')
-	os.system('source ~/.zshrc')
-	print('Environmental variables set')
-	# Local julia project installs to contain both Gurobi and PowerModelsONM"
-	os.system(f'''julia -e 'import Pkg; Pkg.add("Gurobi")' ''')
-	print('Gurobi package added')
-	os.system(f'''julia -e 'import Pkg; Pkg.build("Gurobi")' ''')
-	print('Gurobi package built')
-	print('PowerONM package added to Julia')
-	os.system(f'''julia -e 'import Pkg; Pkg.add(Pkg.PackageSpec(;name="PowerModelsDistribution", version="2.1.0"));' ''') # TODO test version pin.
-	os.system(f'''julia -e 'import Pkg; Pkg.add(Pkg.PackageSpec(;name="PowerModelsONM", version="2.1.0"));' ''') # TODO test version pin.
-	print('PowerModelsDistribution package added to Julia')
-	os.system(f'touch {thisDir}/instantiated.txt')
+def runCommands(commandList : list):
+    for x in commandList:
+        try: 
+            print(f'Running "{x}"')
+            os.system(x)
+        except: 
+            return(print(f'Failed to run {x}'))
+    print('Successful')
+
+def install_onm(target : list = platform.system()):
+    ''' WARNING, WIP. TODO: Linux support, license check, tests. '''
+    installCmd = {
+        'Darwin' : [
+            'sudo cat /Library/gurobi/gurobi.lic',
+            'HOMEBREW_NO_AUTO_UPDATE=1 brew install julia',
+            'wget "https://packages.gurobi.com/9.1/gurobi9.1.2_mac64.pkg"',
+            'sudo installer -pkg gurobi9.1.2_mac64.pkg -target /',
+            'echo "export GUROBI_HOME=/Library/gurobi912/mac64" >> ~/.zshrc',
+            'echo "export PATH=/Library/gurobi912/mac64/bin:$PATH" >> ~/.zshrc',
+            'echo "export LD_LIBRARY_PATH=/Library/gurobi912/mac64/lib" >> ~/.zshrc',
+            'source ~/.zshrc',
+            '''julia -e 'import Pkg; Pkg.add("Gurobi")' ''',
+            '''julia -e 'import Pkg; Pkg.build("Gurobi")' ''',
+            '''julia -e 'import Pkg; Pkg.add(Pkg.PackageSpec(;name="PowerModelsDistribution", version="2.1.0"));' ''',
+            '''julia -e 'import Pkg; Pkg.add(Pkg.PackageSpec(;name="PowerModelsONM", version="2.1.0"));' ''',
+            f'touch {thisDir}/instantiated.txt'
+        ],
+        'Linux' : [
+            'rm "julia-1.7.0-linux-x86_64.tar.gz"',
+            'wget "https://julialang-s3.julialang.org/bin/linux/x64/1.7/julia-1.7.0-linux-x86_64.tar.gz"',
+            'tar -x -f "julia-1.7.0-linux-x86_64.tar.gz" -C /usr/local --strip-components 1',
+            'pip install julia',
+            'rm "gurobi9.1.2_linux64.tar.gz"',
+            'wget "https://packages.gurobi.com/9.1/gurobi9.1.2_linux64.tar.gz"',
+            'tar -x -f "gurobi9.1.2_linux64.tar.gz"',
+            'echo "export GUROBI_HOME=/content/gurobi912/linux64" >> ./bashrc',
+            'echo "export PATH=/content/gurobi912/linux64/bin:$PATH" >> ./bashrc',
+            'echo "export LD_LIBRARY_PATH=/content/gurobi912/linux64/lib:$PATH" >> ./bashrc',
+            'source ~/.bashrc',
+            '''julia -e 'import Pkg; Pkg.add("Gurobi")' ''',
+            '''julia -e 'import Pkg; Pkg.build("Gurobi")' ''',
+            '''julia -e 'import Pkg; Pkg.add(Pkg.PackageSpec(;name="PowerModelsDistribution", version="2.1.0"));’ ''',
+            '''julia -e 'import Pkg; Pkg.add(Pkg.PackageSpec(;name="PowerModelsONM", version="2.1.0"));' ''',
+            f'touch {thisDir}/instantiated.txt'
+        ]
+    }
+    runCommands(installCmd.get(target,'Linux'))
 
 def build_settings_file(circuitPath='circuit.dss',settingsPath='settings.json', max_switch_actions=1, vm_lb_pu=0.9, vm_ub_pu=1.1, sbase_default=0.001, line_limit_mult='Inf', vad_deg=5.0):
-	cmd_string = f'''julia -e 'using PowerModelsONM; build_settings_file("{circuitPath}", "{settingsPath}"; max_switch_actions={max_switch_actions}, vm_lb_pu={vm_lb_pu}, vm_ub_pu={vm_ub_pu}, sbase_default={sbase_default}, line_limit_mult={line_limit_mult}, vad_deg={vad_deg})' '''
-	print('ONM SETTING FILE GEN:', cmd_string)
-	os.system(cmd_string)
+	runCommands([f'''julia -e 'using PowerModelsONM; build_settings_file("{circuitPath}", "{settingsPath}"; max_switch_actions={max_switch_actions}, vm_lb_pu={vm_lb_pu}, vm_ub_pu={vm_ub_pu}, sbase_default={sbase_default}, line_limit_mult={line_limit_mult}, vad_deg={vad_deg})' '''])
 
 def run_onm(circuitPath='circuit.dss', settingsPath='settings.json', outputPath="onm_out.json", eventsPath="events.json", gurobi='true', verbose='true', optSwitchSolver="mip_solver", fixSmallNumbers='true', skipList='["faults","stability"]'):
-	cmd_string = f'''julia -e 'import Gurobi; using PowerModelsONM; args = Dict{{String,Any}}("network"=>"{circuitPath}", "settings"=>"{settingsPath}", "output"=>"{outputPath}", "events"=>"{eventsPath}", "gurobi"=>{gurobi}, "verbose"=>{verbose}, "opt-switch-solver"=>"{optSwitchSolver}", "fix-small-numbers"=>{fixSmallNumbers}, "skip"=>{skipList}); entrypoint(args);' '''
-	print('ONM RUNNING:', cmd_string)
-	os.system(cmd_string)
+	runCommands([f'''julia -e 'import Gurobi; using PowerModelsONM; args = Dict{{String,Any}}("network"=>"{circuitPath}", "settings"=>"{settingsPath}", "output"=>"{outputPath}", "events"=>"{eventsPath}", "gurobi"=>{gurobi}, "verbose"=>{verbose}, "opt-switch-solver"=>"{optSwitchSolver}", "fix-small-numbers"=>{fixSmallNumbers}, "skip"=>{skipList}); entrypoint(args);' '''])
 
 if __name__ == '__main__':
 	# Basic Tests
 	thisDirPath = Path(thisDir)
 	omfDir = thisDirPath.parent.parent.absolute()
+	# install_onm()
 	build_settings_file(circuitPath=f'{omfDir}/scratch/RONM/circuit_onm_test.dss', settingsPath='./settings.json', max_switch_actions=1, vm_lb_pu=0.9, vm_ub_pu=1.1, sbase_default=0.001, line_limit_mult='Inf', vad_deg=5.0)
 	run_onm(circuitPath=f'{omfDir}/scratch/RONM/circuit_onm_test.dss', settingsPath='./settings.json', outputPath="./onm_out.json", eventsPath=f'{omfDir}/scratch/RONM/events_onm_test.json', gurobi='true', verbose='true', optSwitchSolver="mip_solver", fixSmallNumbers='true', skipList='["faults","stability"]')

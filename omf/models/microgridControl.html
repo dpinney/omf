@@ -113,6 +113,22 @@
 				</div>
 			</div>
 			<div class="shortInput">
+				<label class="tooltip">Generate Default Settings?<span class="classic">If yes, a default settings file will be generated; if no, the user must upload a settings file.</span></label>
+				<select id="generateSettings" name="generateSettings" />
+					<option value='True'>Yes</option>
+					<option value='False'>No</option>
+				</select>
+			</div>
+			<div class="shortInput">
+				<label class="tooltip">Settings (.json file)<span class="classic">Please see the documentation at the help link for the required format. You can also select "Yes" for the "Generate Default Settings?" field to run using a generated default settings file.</span></label>
+				<input id="settingsFile" type="file" style="display:none" onchange="handle_files(this.files,'settingsData','settingsFileName')">
+				<input id="settingsData" name="settingsData" type="hidden">
+				<div>
+					<label for="settingsFile" class="fileButton">Choose File</label>
+					<input id="settingsFileName" name="settingsFileName" value='' readonly class="uploadFileName">
+				</div>
+			</div>
+			<div class="shortInput">
 				<label class="tooltip">Cached Output (.json file)<span class="classic">Please see the documentation at the help link for the required format</span></label>
 				<input id="outputFile" type="file" style="display:none" onchange="handle_files(this.files,'outputData','outputFileName')">
 				<input id="outputData" name="outputData" type="hidden">
