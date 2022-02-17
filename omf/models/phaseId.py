@@ -25,7 +25,7 @@ from omf.solvers import sandia_ami_phase_id
 # Model metadata:
 modelName, template = __neoMetaModel__.metadata(__file__)
 tooltip = "Identifies true meter phases by comparing AMI and SCADA data."
-hidden = True
+hidden = False
 
 def _unzip(zipdir, target):
 	with ZipFile(zipdir, 'r') as zip:
