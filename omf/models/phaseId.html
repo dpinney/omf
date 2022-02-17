@@ -60,15 +60,6 @@
 			</div>
 			<hr>
 			<div class="shortInput">
-				<label class="tooltip">Substation Meter Data (.csv file)<span class="classic">Please see the documentation at the green 'Help?' link above for the required format and an example file.</span></label>
-				<input id="subMeterFile" type="file" style="display:none" onchange="handle_files(this.files,'subMeterData','subMeterFileName')">
-				<input id="subMeterData" name="subMeterData" type="hidden">
-				<div>
-					<label for="subMeterFile" class="fileButton">Choose File</label>
-					<input id="subMeterFileName" name="subMeterFileName" value='' readonly class="uploadFileName">
-				</div>
-			</div>
-			<div class="shortInput">
 				<label class="tooltip">AMI Meter Data (.csv file)<span class="classic">Please see the documentation at the green 'Help?' link above for the required format and an example file.</span></label>
 				<input id="amiMeterFile" type="file" style="display:none" onchange="handle_files(this.files,'amiMeterData','amiMeterDataName')">
 				<input id="amiMeterData" name="amiMeterData" type="hidden">
@@ -78,32 +69,19 @@
 				</div>
 			</div>
 			<div class="shortInput">
-				<label class="tooltip">AMI Check Meter<span class="classic">Filename for one of the AMI meters to display versus SCADA as a sanity check.</span></label>
-				<input type="text" id="checkMeter" name="checkMeter"/>
+				<label class="tooltip">Clusters<span class="classic">Number of regions to phase. 7 is a good default, or you can set this to 3 * number of regulators + 2</span></label>
+				<input type="text" id="kFinal" name="kFinal"/>
+			</div>
+			<div class="shortInput">
+				<label class="tooltip">Window Size<span class="classic">Number of samples to compare. Please set to number of samples in 5 days of data. If set to 'default' then we use 3% of the data as the window.</span></label>
+				<input type="text" id="windowSize" name="windowSize"/>
 			</div>
 			<!-- Required Buttons -->
-			<div class="wideInput" style="text-align:right">
-				<button id="deleteButton" type="button" class="stoppedInline postRunInline" onclick="deleteModel()">Delete</button>
-				<button id="shareButton" type="button" class="postRunInline" onclick="shareModel()">Share</button>
-				<button id="duplicateButton" type="button" class="postRunInline" onclick="duplicateModel()">Duplicate</button>
-				<button id="cancelButton" class="runningInline" type="button" onclick="cancelModel()">Cancel Run</button>
-				<button id="runButton" type="submit" class="stoppedInline postRunInline">Run Model</button>
-			</div>
+			{{ omfModelButtons }}
 		</form>
 	</div>
-	<div id ="runIndicator" class="content running">
-		Model running on server. Refresh the page to check for results, or wait for automatic refresh every 5 seconds.<br>
-		{{allInputData[allInputData.find('"runTimeEstimate"') + 20:allInputData.find('minutes.", ') + 8]}}
-	</div>
-	<div id ="stopIndicator" class="content stopped" style="visibility: hidden">
-		<pre id='errorText' style='overflow-x:scroll'></pre>
-		<script type="text/javascript">
-		if (typeof(allInputData.stderr) !== 'undefined') {
-			gebi('stopIndicator').style.visibility = 'visible'
-			gebi('errorText').innerHTML = 'MODEL ENCOUNTERED AN ERROR AS FOLLOWS: \n\n' + allInputData.stderr}
-		</script>
-	</div>
-	<p class="reportTitle postRun" style="page-break-before:always"><b>Confusion Matrix</b></p>	
+	{{ omfRunDebugBlock }}
+	<p class="reportTitle postRun" style="page-break-before:always"><b>Meter Phase Identification Overview</b></p>
 	<div id="confusionMatrix" class="tightContent postRun">
 		<img id="confusionMatrixImg" style="width:100%"/>
 		<script type="text/javascript">gebi("confusionMatrixImg").src = "data:image/png;base64," + allOutputData.confusionMatrixImg</script>
@@ -111,27 +89,14 @@
 	<p class="reportTitle postRun" style="page-break-before:always"><b>Predicted Phases</b></p>
 	<div id="predictedPhases" class="tightContent postRun">
 		<table style="width:100%">
-		{% for row in allOutputDataDict['regressionResult'] %}
+		{% for row in allOutputDataDict['phasingResults'] %}
 			<tr>
 			{% for td in row %}
 				<td>{{td}}</td>
-			{% endfor %}		
+			{% endfor %}
 			</tr>
 		{% endfor %}
 		</table>
 	</div>
-	<p class="reportTitle postRun" style="page-break-before:always"><b>Check Meter Detail</b></p>	
-	<div id="meterDetail" class="tightContent postRun">
-		<div id="meterDetail">
-		</div>
-		<script type="text/javascript">
-			Plotly.newPlot("meterDetail", JSON.parse(allOutputData["meterDetailData"]), JSON.parse(allOutputData["meterDetailLayout"]) || {})
-		</script>
-	</div>
-	<p class="reportTitle postRun"><b>Raw Input and Output Files</b></p>
-	<div id="rawOutput" class="content postRun" style="margin-top:0px">
-		{% for name in allOutputDataDict['fileNames'] %}
-			{% if loop.index > 1 %}&mdash; {% endif %}<a href="/downloadModelData/{{allInputDataDict['user']}}/{{allInputDataDict['modelName']}}/{{name}}">{{name}}</a>
-		{% endfor %}
-	</div>
+	{{ rawOutputFiles }}
 </body>

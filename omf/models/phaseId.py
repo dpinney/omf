@@ -20,13 +20,14 @@ from matplotlib import pyplot as plt
 
 from omf.models import __neoMetaModel__
 from omf.models.__neoMetaModel__ import *
+from omf.solvers import sandia_ami_phase_id
 
 # Model metadata:
 modelName, template = __neoMetaModel__.metadata(__file__)
 tooltip = "Identifies true meter phases by comparing AMI and SCADA data."
 hidden = True
 
-def unzip(zipdir, target):
+def _unzip(zipdir, target):
 	with ZipFile(zipdir, 'r') as zip:
 		# zip.printdir()
 		shutil.rmtree(target, ignore_errors=True)
@@ -53,7 +54,7 @@ def _split(csvPath, newDir):
 		clean = subset.rename(index=str, columns={name + '.csv-V_A':'V_A', name + '.csv-V_B':'V_B', name + '.csv-V_C':'V_C'})
 		clean.to_csv(newDir + '/' + name + '.csv', index=False)
 
-def file_transform_gld(METER_DIR, SUB_METER_FILE):
+def _file_transform_gld(METER_DIR, SUB_METER_FILE):
 	''' This function transform the original Meter and substation voltage files from GridLAB-D to
 	... more neat form. More specifically, change all polar or rectangular
 	... form of voltage to magnitude'''
@@ -106,14 +107,9 @@ def file_transform_gld(METER_DIR, SUB_METER_FILE):
 			pass
 		df_v.to_csv(file_path, header=True, index=False, sep=',', mode='w')
 
-def work(modelDir, inputDict):
-	""" Run the model in its directory."""
-	outData = {}
-	# write input file to modelDir sans carriage returns
-	with open(pJoin(modelDir, "rec_sub_meter.csv"), "w") as subFile:
-		subFile.write(inputDict["subMeterData"].replace("\r", ""))
-	# Voltage data transformation and preparation 
-	# TODO: drop support for Zip INPUT_TYPE
+def __keen_method(INPUTS_TBD):
+	''' Deprecated classical method comparing SCADA-AMI correlation.
+	New method performs better with DERs and downline regulators. '''
 	INPUT_TYPE = 'Single' # 'Zip', 'GLD' 
 	METER_DIR = 'Temp Unzipped Data'
 	if INPUT_TYPE == 'GLD':
@@ -122,7 +118,7 @@ def work(modelDir, inputDict):
 		ZIP_FILE = 'meters_gld.zip'
 		SUB_METER_FILE = 'rec_R1-12-47-3_node_53.csv'
 		unzip(ZIP_FILE, 'Temp Unzipped Data')
-		file_transform_gld(pJoin(modelDir, METER_DIR), pJoin(modelDir, SUB_METER_FILE))
+		_file_transform_gld(pJoin(modelDir, METER_DIR), pJoin(modelDir, SUB_METER_FILE))
 		ssdir = os.path.join(modelDir, 'Revised Substation Voltage Files', SUB_METER_FILE)
 	elif INPUT_TYPE == 'Zip':
 		ZIP_FILE = 'meters_transformed.zip'
@@ -227,32 +223,10 @@ def work(modelDir, inputDict):
 	y_pred = df_final['Predicted Phase']
 	classes=['A', 'B','C', 'ABC']
 	confusion_matrix(y_true, y_pred, labels=['A', 'B', 'C','ABC'])
-	# modified confusion matrix from self-defined function
 	cnf_matrix = confusion_matrix(y_true, y_pred, labels=['A', 'B','C', 'ABC'])
 	np.set_printoptions(precision=2)
 	plt.figure(dpi=200, figsize=(10,5))
 	plt.grid(b=False)
-		# Confusion Matrix Generation
-	def plot_confusion_matrix(
-			cm,
-			classes,
-			cmap=plt.cm.Blues
-		):
-		'''Self-defined function for better illustrating confusion matrix.'''
-		plt.imshow(cm, interpolation='nearest', cmap=cmap, aspect='auto')
-		plt.colorbar()
-		tick_marks = np.arange(len(classes))
-		plt.xticks(tick_marks, classes, rotation=45)
-		plt.yticks(tick_marks, classes)
-		fmt = 'd'
-		thresh = cm.max() / 2.
-		for i, j in itertools.product(range(cm.shape[0]), range(cm.shape[1])):
-			plt.text(j, i, format(cm[i, j], fmt),
-					horizontalalignment="center",
-					color="white" if cm[i, j] > thresh else "black")
-		plt.ylabel('Input Label')
-		plt.xlabel('Predicted Label')
-		plt.tight_layout()
 	plot_confusion_matrix(cnf_matrix, classes=['A', 'B', 'C','ABC'])
 	plt.savefig(pJoin(modelDir,'output-conf-matrix.png'))
 	# Offline Plotly plot
@@ -327,41 +301,72 @@ def work(modelDir, inputDict):
 			pad=4
 	    ),
 	)
-	# fig = tools.make_subplots(rows=4, cols=1, subplot_titles=('SS','SSS','SSSS','SSSSSS'))
-	# fig.append_trace(trace0, 1, 1)
-	# fig.append_trace(trace1, 2, 1)
-	# fig.append_trace(trace2, 3, 1)
-	# fig.append_trace(trace3, 4, 1)
-	# fig['layout'].update(height=800, width=1000, showlegend=False)
-	# meterDetailLayout = fig['layout']
 	# For non-jupyter plotting.
 	plotly.offline.plot(data, filename=pJoin(modelDir, 'output-chart.html'), auto_open=False)
-	# Clean up temp files (optional)
-	shutil.rmtree(pJoin(modelDir, METER_DIR), ignore_errors=True)
-	shutil.rmtree(pJoin(modelDir, 'Revised Meter Voltage Files'), ignore_errors=True)
-	shutil.rmtree(pJoin(modelDir, 'Revised Substation Voltage Files'), ignore_errors=True)
+
+def plot_confusion_matrix(
+		cm,
+		classes,
+		cmap=plt.cm.Blues
+	):
+	'''Self-defined function for better illustrating confusion matrix.'''
+	plt.imshow(cm, interpolation='nearest', cmap=cmap, aspect='auto')
+	plt.colorbar()
+	tick_marks = np.arange(len(classes))
+	plt.xticks(tick_marks, classes, rotation=45)
+	plt.yticks(tick_marks, classes)
+	fmt = 'd'
+	thresh = cm.max() / 2.
+	for i, j in itertools.product(range(cm.shape[0]), range(cm.shape[1])):
+		plt.text(j, i, format(cm[i, j], fmt),
+				horizontalalignment="center",
+				color="white" if cm[i, j] > thresh else "black")
+	plt.ylabel('Input Label')
+	plt.xlabel('Predicted Label')
+	plt.tight_layout()
+
+def work(modelDir, inputDict):
+	""" Run the model in its directory."""
+	outData = {}
+	# write input file to modelDir
+	with open(pJoin(modelDir, inputDict["amiMeterDataName"]), "w") as amiFile:
+		amiFile.write(inputDict["amiMeterData"])
+	# run core algorithm
+	sandia_ami_phase_id.main_csv(
+		pJoin(modelDir, inputDict["amiMeterDataName"]),
+		pJoin(modelDir, "output.csv"),
+		kFinal=int(inputDict["kFinal"]),
+		windowSize=inputDict["windowSize"]
+	)
+	# generate "confusion matrix"
+	df_final = pd.read_csv(pJoin(modelDir, "output.csv"))
+	y_true = df_final['Original Phase Labels']
+	y_pred = df_final['Predicted Phase Labels']
+	classes=[1,2,3]
+	cnf_matrix = confusion_matrix(y_true, y_pred, labels=classes)
+	np.set_printoptions(precision=2)
+	plt.figure(dpi=200, figsize=(10,5))
+	plt.grid(b=False)
+	plot_confusion_matrix(cnf_matrix, classes=classes)
+	plt.savefig(pJoin(modelDir,'output-conf-matrix.png'))
 	# write our outData
+	with open(pJoin(modelDir, "output.csv"), "r") as outFile:
+		phasingResults = list(csv.reader(outFile))
+	outData["phasingResults"] = phasingResults
 	with open(pJoin(modelDir,"output-conf-matrix.png"),"rb") as inFile:
 		outData["confusionMatrixImg"] = base64.standard_b64encode(inFile.read()).decode()
-	with open(pJoin(modelDir,"output-regression-result.csv"), newline='') as inFile:
-		outData["regressionResult"] = list(csv.reader(inFile))
-	outData["meterDetailData"] = json.dumps(data, cls=plotly.utils.PlotlyJSONEncoder)
-	outData["meterDetailLayout"] = json.dumps(meterDetailLayout, cls=plotly.utils.PlotlyJSONEncoder)
 	return outData
 
 def new(modelDir):
 	""" Create a new instance of this model. Returns true on success, false on failure. """
-	with open(pJoin(__neoMetaModel__._omfDir, "static", "testFiles", "combined.csv")) as f:
+	with open(pJoin(__neoMetaModel__._omfDir, "solvers", "sandia_ami_phase_id", "sandia_test_data_2k_readings.csv")) as f:
 		ami_meter_data = f.read()
-	with open(pJoin(__neoMetaModel__._omfDir, "static", "testFiles", "rec_sub_meter.csv")) as f:
-		sub_meter_data = f.read()
 	defaultInputs = {
 		"user": "admin",
-		"subMeterData": sub_meter_data,
-		"subMeterFileName": "rec_sub_meter.csv",
 		"amiMeterData": ami_meter_data,
-		"amiMeterDataName": "combined.csv",
-		"checkMeter": 'Meter_17.csv',
+		"amiMeterDataName": "sandia_test_data_2k_readings.csv",
+		"kFinal": "7",
+		"windowSize": "default",
 		"modelType": modelName
 	}
 	creationCode = __neoMetaModel__.new(modelDir, defaultInputs)

@@ -867,7 +867,7 @@ def PlotHistogramOfCCSeparation(ccSeparation,xLim=0.2,savePath=-1):
 		plt.savefig(Path(savePath,filename))
 	plt.close()
 
-def main_csv(inputPath, outputPath, kFinal=7, validationData=None):
+def main_csv(inputPath, outputPath, kFinal=7, validationData=None, windowSize='default'):
 	''' Perform phasing identification using input CSV.
 	If validationData is provided, calculate a validation score. Needs to be a numpy array with shape(1,number_of_meters)
 	'''
@@ -879,9 +879,9 @@ def main_csv(inputPath, outputPath, kFinal=7, validationData=None):
 	# print('ERROR PHASE DATA', np.shape(phaseLabelsErrors), phaseLabelsErrors)
 	custIDInput = list(raw_data.columns)
 	# print('CUST DATA', custIDInput)
-	main(voltageInputCust, validationData, phaseLabelsErrors, custIDInput, outputPath, kFinal=kFinal)
+	main(voltageInputCust, validationData, phaseLabelsErrors, custIDInput, outputPath, kFinal=kFinal, windowSize='default')
 
-def main_npy(voltageDataPath, phaseLabelsTruePath, phaseLabelsErrorsPath, customerIdsPath, outputPath, kFinal=7):
+def main_npy(voltageDataPath, phaseLabelsTruePath, phaseLabelsErrorsPath, customerIdsPath, outputPath, kFinal=7, windowSize='default'):
 	voltageInputCust = np.load(voltageDataPath)
 	# print('VOLTAGE INPUT', np.shape(voltageInputCust), voltageInputCust)
 	# np.savetxt("./zin_volts.csv", voltageInputCust, delimiter=",")
@@ -894,9 +894,9 @@ def main_npy(voltageDataPath, phaseLabelsTruePath, phaseLabelsErrorsPath, custom
 	custIDInput = list(np.load(customerIdsPath))
 	# print('CUSTOMER IDS', np.shape(custIDInput), custIDInput)
 	# np.savetxt("./zin_cust_ids.csv", [np.load(customerIdsPath)],  fmt='%s', delimiter=',')
-	main(voltageInputCust, phaseLabelsTrue, phaseLabelsErrors, custIDInput, outputPath, kFinal=kFinal)
+	main(voltageInputCust, phaseLabelsTrue, phaseLabelsErrors, custIDInput, outputPath, kFinal=kFinal, windowSize='default')
 
-def main(voltageInputCust, phaseLabelsTrue, phaseLabelsErrors, custIDInput, outputPath, kFinal=7):
+def main(voltageInputCust, phaseLabelsTrue, phaseLabelsErrors, custIDInput, outputPath, kFinal=7, windowSize='default'):
 	'Execute phaseID analysis'
 	# Co-Association Matrix Ensemble Phase Identification
 	# Data pre-processing steps
@@ -919,7 +919,9 @@ def main(voltageInputCust, phaseLabelsTrue, phaseLabelsErrors, custIDInput, outp
 	# DWP note: switched to 1/30th of input data to give it the ability to work with shorter datasets.
 	# Original window size was 384 on a dataset with 11,520 readings.
 	voltage_measurements_count = len(voltageInputCust)
-	windowSize = int(voltage_measurements_count/30)
+	if windowSize == 'default':
+		windowSize = int(voltage_measurements_count/30)
+	# print('WINDOW SIZE', windowSize)
 	# windowSize = 384
 	# This is the primary phase identification function - See documentation in CA_Ensemble_Funcs.py for details on the inputs/outputs
 	finalClusterLabels, noVotesIndex, noVotesIDs, clusteredIDs, aggWM, custWindowCounts = CAEnsemble(vNDV,kVector,kFinal,custIDInput,windowSize)
@@ -957,7 +959,7 @@ def main(voltageInputCust, phaseLabelsTrue, phaseLabelsErrors, custIDInput, outp
 	# Write outputs to csv file
 	df = pd.DataFrame()
 	df['Meter ID'] = custIDFound
-	df['Original Phase Labels (with errors)'] = clusteredPhaseLabels[0,:].astype(int)
+	df['Original Phase Labels'] = clusteredPhaseLabels[0,:].astype(int)
 	df['Predicted Phase Labels'] = predictedPhases[0,:].astype(int)
 	if phaseLabelsTrue is not None:
 		df['Actual Phase Labels'] = clusteredTruePhaseLabels[0,:].astype(int)
