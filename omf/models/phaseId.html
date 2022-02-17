@@ -98,5 +98,7 @@
 		{% endfor %}
 		</table>
 	</div>
-	{{ rawOutputFiles }}
+	{% if modelStatus == 'finished' %}
+		{{ rawOutputFiles }}
+	{% endif %}
 </body>
