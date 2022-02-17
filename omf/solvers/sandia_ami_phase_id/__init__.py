@@ -12,7 +12,6 @@ import pandas as pd
 import warnings
 from copy import deepcopy
 import matplotlib.pyplot as plt
-# import seaborn as sns
 import datetime
 from scipy import stats
 from sklearn.cluster import SpectralClustering
@@ -735,6 +734,7 @@ def PlotHistogramOfWinVotesConfScore(winVotesConfScore,savePath=-1):
 
 			"""
 	plt.figure(figsize=(12,9))
+	import seaborn as sns
 	sns.histplot(winVotesConfScore)
 	plt.xlabel('Window Votes Confidence Score', fontweight = 'bold',fontsize=32)
 	plt.ylabel('Count', fontweight = 'bold',fontsize=32)
@@ -773,6 +773,7 @@ def PlotHistogramOfCombinedConfScore(confScoreCombined,savePath=-1):
 
 			"""
 	plt.figure(figsize=(12,9))
+	import seaborn as sns
 	sns.histplot(confScoreCombined)
 	plt.xlabel('Combined Confidence Score', fontweight = 'bold',fontsize=32)
 	plt.ylabel('Count', fontweight = 'bold',fontsize=32)
@@ -809,6 +810,7 @@ def PlotHistogramOfSensVotesConfScore(sensVotesConfScore,savePath=-1):
 			"""
 	percentages = np.array(sensVotesConfScore) * 100
 	plt.figure(figsize=(12,9))
+	import seaborn as sns
 	sns.histplot(percentages)
 	plt.xlabel('Percentage of Sensor Agreement', fontweight = 'bold',fontsize=32)
 	plt.ylabel('Count', fontweight = 'bold',fontsize=32)
@@ -846,6 +848,7 @@ def PlotHistogramOfCCSeparation(ccSeparation,xLim=0.2,savePath=-1):
 		None
 			"""
 	plt.figure(figsize=(12,9))
+	import seaborn as sns
 	sns.histplot(ccSeparation)
 	plt.xlabel('Correlation Coefficient Separation', fontweight = 'bold',fontsize=32)
 	plt.ylabel('Count', fontweight = 'bold',fontsize=32)
