@@ -12,7 +12,7 @@ INCLUDE_DIRS = ['omf', 'models']
 PY_BIN_NAME = 'python3'
 
 if platform.system()=='Windows':
-	NO_WINDOWS_SUPPORT = ['solarDisagg.py', 'cymeToGridlab.py', 'rfCoverage.py', 'solarEngineering.py', 'transmission.py', 'phaseBalance.py', 'forecastTool.py', 'network.py']
+	NO_WINDOWS_SUPPORT = ['solarDisagg.py', 'cymeToGridlab.py', 'rfCoverage.py', 'solarEngineering.py', 'transmission.py', 'phaseBalance.py', 'forecastTool.py', 'network.py', 'distNetViz.py', 'derInterconnection.py', 'flisr.py', 'networkStructure.py', 'smartSwitching.py']
 	PY_BIN_NAME = 'python'
 	IGNORE_FILES.extend(NO_WINDOWS_SUPPORT)
 
