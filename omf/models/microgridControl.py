@@ -631,6 +631,21 @@ def graphMicrogrid(pathToOmd, pathToJson, pathToCsv, outputFile, settingsFile, u
 			busNodes.append(tree[key]['name'])
 	row = 0
 	row_count_timeline = outputTimeline.shape[0]
+	
+	def coordStrFormatter(coordString):
+		coordList = coordString.split()
+		newCoordString = ""
+		count = 0
+		for x in coordList:
+			if count%2 == 0:
+				newCoordString = newCoordString + "(" + x + ", "
+			else:
+				newCoordString = newCoordString + x + ")"
+				if count < len(coordList) - 1:
+					newCoordString = newCoordString + ", \n"
+			count = count+1
+		return newCoordString
+
 	while row < row_count_timeline:
 		full_data = pullDataForGraph(tree, feederMap, outputTimeline, row)
 		device, coordLis, coordStr, time, action, loadBefore, loadAfter = full_data
@@ -646,7 +661,7 @@ def graphMicrogrid(pathToOmd, pathToJson, pathToCsv, outputFile, settingsFile, u
 					'loadBefore': loadBefore,
 					'loadAfter': loadAfter,
 					'pointColor': '#' + str(colormap(action)), 
-					'popupContent': 'Location: <b>' + str(coordStr) + '</b><br>Device: <b>' + str(device) + '</b><br>Time: <b>' + str(time) + '</b><br>Action: <b>' + str(action) + '</b><br>Before: <b>' + str(loadBefore) + '</b><br>After: <b>' + str(loadAfter) + '</b>.' }
+					'popupContent': 'Location: <b>' + coordStrFormatter(str(coordStr)) + '</b><br>Device: <b>' + str(device) + '</b><br>Time: <b>' + str(time) + '</b><br>Action: <b>' + str(action) + '</b><br>Before: <b>' + str(loadBefore) + '</b><br>After: <b>' + str(loadAfter) + '</b>.' }
 				feederMap['features'].append(dev_dict)
 			else:
 				dev_dict['geometry'] = {'type': 'LineString', 'coordinates': [[coordLis[0], coordLis[1]], [coordLis[2], coordLis[3]]]}
@@ -658,7 +673,7 @@ def graphMicrogrid(pathToOmd, pathToJson, pathToCsv, outputFile, settingsFile, u
 					'loadBefore': loadBefore,
 					'loadAfter': loadAfter,
 					'edgeColor': '#' + str(colormap(action)),
-					'popupContent': 'Location: <b>' + str(coordStr) + '</b><br>Device: <b>' + str(device) + '</b><br>Time: <b>' + str(time) + '</b><br>Action: <b>' + str(action) + '</b><br>Before: <b>' + str(loadBefore) + '</b><br>After: <b>' + str(loadAfter) + '</b>.' }
+					'popupContent': 'Location: <b>' + coordStrFormatter(str(coordStr)) + '</b><br>Device: <b>' + str(device) + '</b><br>Time: <b>' + str(time) + '</b><br>Action: <b>' + str(action) + '</b><br>Before: <b>' + str(loadBefore) + '</b><br>After: <b>' + str(loadAfter) + '</b>.' }
 				feederMap['features'].append(dev_dict)
 		except:
 			print('MESSED UP MAPPING on', device, full_data)
