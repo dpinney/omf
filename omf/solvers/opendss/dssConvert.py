@@ -710,6 +710,27 @@ def dss_to_networkx(dssFilePath, tree=None):
 	G = nx.DiGraph(full_edges)
 	return G
 
+def getDssCoordinates(omdFilePath, outFilePath):
+	''' Gets a list of location assignments for loads and buses given an omd with valid coordinates '''
+	omd = json.load(open(omdFilePath))
+	evil_tree = omd.get('tree',{})
+	coordinateDict = {}
+	for ob in evil_tree.values():
+		obType = ob['object']
+		obName = ob['name']
+		if obType == 'bus' and obName not in coordinateDict.keys():
+			print(obType + " --- " + obName)
+			latitude = ob['latitude']
+			longitude = ob['longitude']
+			coordinateDict[obName] = (latitude, longitude)
+
+	with open(outFilePath, "w") as coordinateListFile:
+		for bus in coordinateDict.keys():
+			busLat = coordinateDict[bus][0]
+			busLon = coordinateDict[bus][1]
+			lineStr = "setbusxy bus=" + bus + " x=" + busLon + " y=" + busLat + "\n"
+			coordinateListFile.write(lineStr)
+
 def _conversionTests():
 	# pass
 	glmList = set()
@@ -915,6 +936,14 @@ def _dssToOmdTest():
 	# omdFilePath = pJoin(omfDir, 'static', 'publicFeeders', omdFileName)
 	dssToOmd(dssFilePath, omdFilePath, RADIUS=0.0002, write_out=True)
 
+def _dssCoordTest():
+	curDir = os.getcwd()
+	os.chdir('../..')
+	omfDir = os.getcwd()
+	omdFilePath = pJoin(omfDir, "scratch", "MapTestOutput", "iowa240c2_fixed_coords2.clean.omd")
+	outFilePath = pJoin(omfDir, "static", "testFiles", "iowa_240", "iowa240_cleanCoords.csv")
+	getDssCoordinates(omdFilePath, outFilePath)
+
 def _tests():
 	from omf.solvers.opendss import getVoltages, voltageCompare
 	import pandas as pd
@@ -957,3 +986,4 @@ if __name__ == '__main__':
 	# _randomTest()
 	# _conversionTests()
 	_dssToOmdTest()
+	#_dssCoordTest()
