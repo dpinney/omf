@@ -851,7 +851,7 @@ def new(modelDir):
 	defaultInputs = {
 		'modelType': modelName,
 		'feederName1': feeder_file_path[-1][0:-4],
-		'useCache': 'False',
+		'useCache': 'True',
 		'maxTime': '25',
 		'stepSize': '1',
 		'outageDuration': '5',
@@ -864,7 +864,7 @@ def new(modelDir):
 		'eventData': open(pJoin(*event_file_path)).read(),
 		'outputFileName': output_file_path[-1],
 		'outputData': open(pJoin(*output_file_path)).read(),
-		'genSettings': 'True',
+		'genSettings': 'False',
 		'settingsFileName': settings_file_path[-1],
 		'settingsData': open(pJoin(*settings_file_path)).read(),
 	}
