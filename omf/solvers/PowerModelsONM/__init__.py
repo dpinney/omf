@@ -50,19 +50,62 @@ def install_onm(target : list = platform.system()):
 	}
 	runCommands(installCmd.get(target,'Linux'))
 
-def build_settings_file(circuitPath='circuit.dss',settingsPath='settings.json', max_switch_actions=1, vm_lb_pu=0.9, vm_ub_pu=1.1, sbase_default=0.001, line_limit_mult='Inf', vad_deg=5.0):
-	runCommands([f'''julia -e 'using PowerModelsONM; build_settings_file("{circuitPath}", "{settingsPath}"; max_switch_actions={max_switch_actions}, vm_lb_pu={vm_lb_pu}, vm_ub_pu={vm_ub_pu}, sbase_default={sbase_default}, line_limit_mult={line_limit_mult}, vad_deg={vad_deg})' '''])
+def build_settings_file(circuitPath='circuit.dss',settingsPath='settings.json', max_switch_actions=1, vm_lb_pu=0.9, vm_ub_pu=1.1, sbase_default=1000.0, line_limit_mult='Inf', vad_deg=5.0):
+	cmd_string = f'''julia -e '
+		using PowerModelsONM;
+		build_settings_file(
+			"{circuitPath}",
+			"{settingsPath}",
+			max_switch_actions={max_switch_actions}, #actions per time step. should always be 1, could be 2 or 3.
+			vm_lb_pu={vm_lb_pu}, # min voltage allowed in per-unit
+			vm_ub_pu={vm_ub_pu}, # max voltage allowed in per-unit
+			sbase_default={sbase_default}, # between 1k and 100k
+			line_limit_mult={line_limit_mult},
+			vad_deg={vad_deg}
+		)
+	' '''
+	runCommands([cmd_string])
 
-def run_onm(circuitPath='circuit.dss', settingsPath='settings.json', outputPath="onm_out.json", eventsPath="events.json", gurobi='true', verbose='true', optSwitchSolver="mip_solver", fixSmallNumbers='true', skipList='["faults","stability"]'):
-	runCommands([f'''julia -e 'import Gurobi; using PowerModelsONM; args = Dict{{String,Any}}("network"=>"{circuitPath}", "settings"=>"{settingsPath}", "output"=>"{outputPath}", "events"=>"{eventsPath}", "gurobi"=>{gurobi}, "verbose"=>{verbose}, "opt-switch-solver"=>"{optSwitchSolver}", "fix-small-numbers"=>{fixSmallNumbers}, "skip"=>{skipList}); entrypoint(args);' '''])
+def run_onm(circuitPath='circuit.dss', settingsPath='settings.json', outputPath="onm_out.json", eventsPath="events.json", gurobi='true', verbose='true', optSwitchSolver="mip_solver", fixSmallNumbers='true', applySwitchScores='true', skipList='["faults","stability"]', prettyPrint='true'):
+	#TODO: allow arguments to function for the ones hardcoded!
+	cmd_string = f'''julia -e '
+		import Gurobi;
+		using PowerModelsONM;
+		args = Dict{{String,Any}}(
+			"network"=>"{circuitPath}",
+			"settings"=>"{settingsPath}",
+			"events"=>"{eventsPath}",
+			"output"=>"{outputPath}",
+			"verbose"=>{verbose},
+			"skip"=>{skipList},
+			"fix-small-numbers"=>{fixSmallNumbers},
+			"apply-switch-scores" => {applySwitchScores},
+			"pretty-print" => {prettyPrint},
+			"gurobi"=>{gurobi},
+			"opt-switch-solver"=>"{optSwitchSolver}",
+			"opt-switch-formulation" => "lindistflow",
+			"opt-switch-solver" => "mip_solver",
+			"opt-switch-algorithm" => "global",
+			"opt-switch-problem" => "block",
+			"opt-disp-formulation" => "lindistflow",
+			"opt-disp-solver" => "mip_solver"
+		);
+		entrypoint(args);
+	' '''
+	runCommands([cmd_string])
 
 if __name__ == '__main__':
 	# Basic Tests
 	thisDirPath = Path(thisDir)
 	omfDir = thisDirPath.parent.parent.absolute()
 	# install_onm()
-	# build_settings_file(circuitPath=f'{omfDir}/static/testFiles/iowa_240/network.iowa240.reduced.dss', settingsPath='./settings.json', max_switch_actions=1, vm_lb_pu=0.9, vm_ub_pu=1.1, sbase_default=0.001, line_limit_mult='Inf', vad_deg=5.0)
-	# run_onm(circuitPath=f'{omfDir}/static/testFiles/iowa_240/network.iowa240.reduced.dss', settingsPath='./settings.json', outputPath="./onm_out.json", eventsPath=f'{omfDir}/static/testFiles/iowa_240/events.iowa240.json', gurobi='true', verbose='true', optSwitchSolver="mip_solver", fixSmallNumbers='true', skipList='["faults","stability"]')
-	build_settings_file(circuitPath=f'{omfDir}/static/testFiles/iowa_240/network.iowa240.dss', settingsPath='./settings.working.json', max_switch_actions=1, vm_lb_pu=0.9, vm_ub_pu=1.1, sbase_default=0.001, line_limit_mult='Inf', vad_deg=5.0)
-	run_onm(circuitPath=f'{omfDir}/static/testFiles/iowa_240/network.iowa240.dss', settingsPath='./settings.working.json', outputPath="./onm_out.json", eventsPath=f'{omfDir}/static/testFiles/iowa_240/events.iowa240.json', gurobi='true', verbose='true', optSwitchSolver="mip_solver", fixSmallNumbers='true', skipList='["faults","stability"]')
-	# run_onm(circuitPath=f'{omfDir}/static/testFiles/iowa_240/network.iowa240.dss', settingsPath=f'{omfDir}/static/testFiles/iowa_240/settings.iowa240.json', outputPath="./onm_out.json", eventsPath=f'{omfDir}/static/testFiles/iowa_240/events.iowa240.json', gurobi='true', verbose='true', optSwitchSolver="mip_solver", fixSmallNumbers='true', skipList='["faults","stability"]')
+	build_settings_file(
+		circuitPath=f'{omfDir}/static/testFiles/iowa_240/network.iowa240.dss',
+		settingsPath='./settings.working.json'
+	)
+	run_onm(
+		circuitPath=f'{omfDir}/static/testFiles/iowa_240/network.iowa240.dss',
+		settingsPath='./settings.working.json',
+		outputPath='./onm_out.json',
+		eventsPath=f'{omfDir}/static/testFiles/iowa_240/events.iowa240.json',
+	)

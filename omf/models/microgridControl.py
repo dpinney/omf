@@ -407,28 +407,29 @@ def graphMicrogrid(pathToOmd, pathToJson, pathToCsv, outputFile, settingsFile, u
 	if not workDir:
 		workDir = tempfile.mkdtemp()
 		print('@@@@@@', workDir)
-
 	# Handle Settings file generation or upload
 	if genSettings == 'False' and settingsFile != None:
 		correctSettings = validateSettingsFile(settingsFile)
 		if correctSettings == 'True':
 			# Scenario 1: The user chose to upload their own setttings file and it is formatted correctly
-			shutil.copyfile(settingsFile,f'{workDir}/settings.json')
+			shutil.copyfile(settingsFile, f'{workDir}/settings.json')
 		else:
 			# Scenario 2: The user chose to upload their own setttings file and it is formatted incorrectly
 			print("Warning: " + correctSettings)
-			PowerModelsONM.build_settings_file(circuitPath=f'{workDir}/circuit.dss', settingsPath=f'{workDir}/settings.json', max_switch_actions=1, vm_lb_pu=0.9, vm_ub_pu=1.1, sbase_default=0.001, line_limit_mult=1.0E10, vad_deg=5.0)
+			PowerModelsONM.build_settings_file(circuitPath=f'{workDir}/circuit.dss', settingsPath=f'{workDir}/settings.json')
 	else:
 		# Scenario 3: The user wants to generate a settings file
-		PowerModelsONM.build_settings_file(circuitPath=f'{workDir}/circuit.dss', settingsPath=f'{workDir}/settings.json', max_switch_actions=1, vm_lb_pu=0.9, vm_ub_pu=1.1, sbase_default=0.001, line_limit_mult=1.0E10, vad_deg=5.0)
-
-	useCache = 'True' # Force cache invalidation.
+		PowerModelsONM.build_settings_file(circuitPath=f'{workDir}/circuit.dss', settingsPath=f'{workDir}/settings.json')
 	# Run ONM.
 	if  useCache == 'True' and outputFile != None:
 		shutil.copyfile(outputFile, f'{workDir}/output.json')
 	else:
-		# PowerModelsONM.build_settings_file(circuitPath=f'{workDir}/circuit.dss', settingsPath=f'{workDir}/settings.json', max_switch_actions=1, vm_lb_pu=0.9, vm_ub_pu=1.1, sbase_default=0.001, line_limit_mult='Inf', vad_deg=5.0)
-		PowerModelsONM.run_onm(circuitPath=f'{workDir}/circuit.dss', settingsPath=f'{workDir}/settings.json', outputPath=f'{workDir}/output.json', eventsPath=f'{workDir}/{eventsFilename}', gurobi='true', verbose='true', optSwitchSolver="mip_solver", fixSmallNumbers='true')
+		PowerModelsONM.run_onm(
+			circuitPath=f'{workDir}/circuit.dss',
+			settingsPath=f'{workDir}/settings.json',
+			outputPath=f'{workDir}/output.json',
+			eventsPath=f'{workDir}/{eventsFilename}'
+		)
 	# Gather output data.
 	with open(f'{workDir}/output.json') as inFile:
 		data = json.load(inFile)
@@ -836,16 +837,10 @@ def new(modelDir):
 	# ====== For All Test Cases
 	cust_file_path = [__neoMetaModel__._omfDir,'static','testFiles','customerInfo.csv']
 	# ====== Iowa240 Test Case
-	feeder_file_path = [__neoMetaModel__._omfDir,'scratch','MapTestOutput','iowa240c2_fixed_coords.clean.omd']
-	event_file_path = [__neoMetaModel__._omfDir,'static','testFiles','events.json']
-	# event_file_path = [__neoMetaModel__._omfDir,'static','testFiles','events_iowa240_7to17.json']
+	feeder_file_path= [__neoMetaModel__._omfDir,'static','testFiles','iowa240_dwp_22.dss.omd']
+	event_file_path = [__neoMetaModel__._omfDir,'static','testFiles','iowa240_dwp_22.events.json']
 	output_file_path = [__neoMetaModel__._omfDir,'static','testFiles','output_later.json']
-	settings_file_path = [__neoMetaModel__._omfDir,'static','testFiles','iowa_240','settings.iowa240.json']
-	# ====== New Iowa240 Test case from ONM
-	# feeder_file_path = [__neoMetaModel__._omfDir,'static','testFiles','iowa_240','network.iowa240.reduced.dss.omd']
-	# event_file_path = [__neoMetaModel__._omfDir,'static','testFiles','iowa_240','events.iowa240.json']
-	# output_file_path = [__neoMetaModel__._omfDir,'static','testFiles','iowa_240','output.iowa240.switchglobal.block.ldf-gurobi.displdf-ipopt.json']
-	# settings_file_path = [__neoMetaModel__._omfDir,'static','testFiles','iowa_240','settings.iowa240.json']
+	settings_file_path = [__neoMetaModel__._omfDir,'static','testFiles','iowa240_dwp_22.settings.json']
 	# ====== 8500ish Test Case
 	# feeder_file_path = [__neoMetaModel__._omfDir,'scratch','RONM','nreca1824.dss.omd']
 	# event_file_path = [__neoMetaModel__._omfDir,'scratch','RONM','events.ieee8500.json']
@@ -856,7 +851,7 @@ def new(modelDir):
 	defaultInputs = {
 		'modelType': modelName,
 		'feederName1': feeder_file_path[-1][0:-4],
-		'useCache': 'True',
+		'useCache': 'False',
 		'maxTime': '25',
 		'stepSize': '1',
 		'outageDuration': '5',
