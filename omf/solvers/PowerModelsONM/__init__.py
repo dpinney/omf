@@ -66,7 +66,7 @@ def build_settings_file(circuitPath='circuit.dss',settingsPath='settings.json', 
 	' '''
 	runCommands([cmd_string])
 
-def run_onm(circuitPath='circuit.dss', settingsPath='settings.json', outputPath="onm_out.json", eventsPath="events.json", gurobi='true', verbose='true', optSwitchSolver="mip_solver", fixSmallNumbers='true', applySwitchScores='true', skipList='["faults","stability"]', prettyPrint='true'):
+def run_onm(circuitPath='circuit.dss', settingsPath='settings.json', outputPath="onm_out.json", eventsPath="events.json", gurobi='true', verbose='true', optSwitchSolver="mip_solver", fixSmallNumbers='true', applySwitchScores='true', skipList='["faults","stability"]', prettyPrint='true',mip_solver_gap=0.05):
 	#TODO: allow arguments to function for the ones hardcoded!
 	cmd_string = f'''julia -e '
 		import Gurobi;
@@ -88,7 +88,8 @@ def run_onm(circuitPath='circuit.dss', settingsPath='settings.json', outputPath=
 			"opt-switch-algorithm" => "global",
 			"opt-switch-problem" => "block",
 			"opt-disp-formulation" => "lindistflow",
-			"opt-disp-solver" => "mip_solver"
+			"opt-disp-solver" => "mip_solver",
+			"mip_solver_gap" => {mip_solver_gap} #0.02 = slow, 0.05 = default, 0.10 = fast
 		);
 		entrypoint(args);
 	' '''
@@ -107,5 +108,5 @@ if __name__ == '__main__':
 		circuitPath=f'{omfDir}/static/testFiles/iowa_240/network.iowa240.dss',
 		settingsPath='./settings.working.json',
 		outputPath='./onm_out.json',
-		eventsPath=f'{omfDir}/static/testFiles/iowa_240/events.iowa240.json',
+		eventsPath=f'{omfDir}/static/testFiles/iowa_240/events.iowa240.json'
 	)
