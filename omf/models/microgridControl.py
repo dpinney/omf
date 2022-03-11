@@ -839,19 +839,16 @@ def new(modelDir):
 	# ====== Iowa240 Test Case
 	feeder_file_path= [__neoMetaModel__._omfDir,'static','testFiles','iowa240_dwp_22.dss.omd']
 	event_file_path = [__neoMetaModel__._omfDir,'static','testFiles','iowa240_dwp_22.events.json']
-	output_file_path = [__neoMetaModel__._omfDir,'static','testFiles','output_later.json']
 	settings_file_path = [__neoMetaModel__._omfDir,'static','testFiles','iowa240_dwp_22.settings.json']
-	# ====== 8500ish Test Case
-	# feeder_file_path = [__neoMetaModel__._omfDir,'scratch','RONM','nreca1824.dss.omd']
-	# event_file_path = [__neoMetaModel__._omfDir,'scratch','RONM','events.ieee8500.json']
-	# output_file_path = [__neoMetaModel__._omfDir,'static','testFiles','output_simple_cobb.json']
-	# output_file_path = [__neoMetaModel__._omfDir,'scratch','RONM','output.ieee8500.ts=60min.global.json']
-	# settings_file_path = [__neoMetaModel__._omfDir,'scratch','RONM','defaultSettings.nreca1824.json']
-	# Need to generate a base settings file - otherwise set genSettings to 'True' to have ONM generate the settings file
+	output_file_path = [__neoMetaModel__._omfDir,'static','testFiles','iowa240_dwp_22.output.json']
+	# ====== Nreca1824 Test Case
+	# feeder_file_path = [__neoMetaModel__._omfDir,'static','testFiles','nreca1824_dwp.omd']
+	# event_file_path = [__neoMetaModel__._omfDir,'static','testFiles','nreca1824_dwp.events.json']
+	# settings_file_path = [__neoMetaModel__._omfDir,'static','testFiles','nreca1824_dwp.settings.json']
+	# output_file_path = [__neoMetaModel__._omfDir,'static','testFiles','nreca1824_dwp.output.json']
 	defaultInputs = {
 		'modelType': modelName,
 		'feederName1': feeder_file_path[-1][0:-4],
-		'useCache': 'True',
 		'maxTime': '25',
 		'stepSize': '1',
 		'outageDuration': '5',
@@ -864,9 +861,10 @@ def new(modelDir):
 		'eventData': open(pJoin(*event_file_path)).read(),
 		'outputFileName': output_file_path[-1],
 		'outputData': open(pJoin(*output_file_path)).read(),
-		'genSettings': 'False',
+		'useCache': 'True',
 		'settingsFileName': settings_file_path[-1],
 		'settingsData': open(pJoin(*settings_file_path)).read(),
+		'genSettings': 'False',
 	}
 	creationCode = __neoMetaModel__.new(modelDir, defaultInputs)
 	try:
