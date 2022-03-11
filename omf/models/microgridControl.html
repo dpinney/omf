@@ -267,11 +267,11 @@
 				</div>
 			</div>
 		</div>
-		<div id="mapInsert"></div>
+		<div id="mapInsert" style="width: 1000px; margin-left: auto; margin-right: auto;"></div>
 		<script type="text/javascript">
 		//Hack to stop leaflet from loading before geojson data loads 
 		if(modelStatus === "finished"){
-		mapHtml = '<div id="mapHolder" class="tightContent"><div id="map"></div></div>';
+		mapHtml = '<div id="map"></div>';
 		gebi('mapInsert').innerHTML = mapHtml;
 		//Parse geojson dict (instead of reading from geojson.js - doesn't really matter if you want to load from geojson.js, was just quicker to prototype) 
 		var geojson = JSON.parse(allOutputData['geoDict']);
