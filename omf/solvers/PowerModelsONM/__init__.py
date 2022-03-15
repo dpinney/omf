@@ -99,14 +99,18 @@ if __name__ == '__main__':
 	# Basic Tests
 	thisDirPath = Path(thisDir)
 	omfDir = thisDirPath.parent.parent.absolute()
+	circuitFile = 'iowa240_dwp_22.dss'
+	eventsFile = 'iowa240_dwp_22.events.json'
+	# circuitFile = 'nreca1824_dwp.dss'
+	# eventsFile = 'nreca1824_dwp.events.json'
 	# install_onm()
 	build_settings_file(
-		circuitPath=f'{omfDir}/static/testFiles/iowa_240/network.iowa240.dss',
+		circuitPath=f'{omfDir}/static/testFiles/{circuitFile}',
 		settingsPath='./settings.working.json'
 	)
 	run_onm(
-		circuitPath=f'{omfDir}/static/testFiles/iowa_240/network.iowa240.dss',
+		circuitPath=f'{omfDir}/static/testFiles/{circuitFile}',
 		settingsPath='./settings.working.json',
 		outputPath='./onm_out.json',
-		eventsPath=f'{omfDir}/static/testFiles/iowa_240/events.iowa240.json'
+		eventsPath=f'{omfDir}/static/testFiles/{eventsFile}'
 	)
