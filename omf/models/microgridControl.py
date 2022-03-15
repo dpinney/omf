@@ -399,7 +399,7 @@ def validateSettingsFile(settingsFile):
 	else:
 		return 'Corrupted Settings file input, generating default settings'
 
-def graphMicrogrid(pathToOmd, pathToJson, pathToCsv, outputFile, settingsFile, useCache, workDir, maxTime, stepSize, outageDuration, profit_on_energy_sales, restoration_cost, hardware_cost, eventsFilename, genSettings):
+def graphMicrogrid(pathToOmd, pathToJson, pathToCsv, outputFile, settingsFile, useCache, workDir, maxTime, stepSize, outageDuration, profit_on_energy_sales, restoration_cost, hardware_cost, eventsFilename, genSettings, solFidelity):
 	''' Run full microgrid control process. '''
 	# Setup ONM if it hasn't been done already.
 	if not PowerModelsONM.check_instantiated():
@@ -407,6 +407,13 @@ def graphMicrogrid(pathToOmd, pathToJson, pathToCsv, outputFile, settingsFile, u
 	if not workDir:
 		workDir = tempfile.mkdtemp()
 		print('@@@@@@', workDir)
+	# get mip_solver_gap info (solFidelity)
+	solFidelityVal = 0.05 #default to medium fidelity
+	if solFidelity == '0.10':
+		solFidelityVal = 0.10
+	elif solFidelity == '0.02':
+		solFidelityVal = 0.02
+
 	# Handle Settings file generation or upload
 	if genSettings == 'False' and settingsFile != None:
 		correctSettings = validateSettingsFile(settingsFile)
@@ -428,7 +435,8 @@ def graphMicrogrid(pathToOmd, pathToJson, pathToCsv, outputFile, settingsFile, u
 			circuitPath=f'{workDir}/circuit.dss',
 			settingsPath=f'{workDir}/settings.json',
 			outputPath=f'{workDir}/output.json',
-			eventsPath=f'{workDir}/{eventsFilename}'
+			eventsPath=f'{workDir}/{eventsFilename}',
+			mip_solver_gap=solFidelityVal
 		)
 	# Gather output data.
 	with open(f'{workDir}/output.json') as inFile:
@@ -801,7 +809,8 @@ def work(modelDir, inputDict):
 		inputDict['restoration_cost'],
 		inputDict['hardware_cost'],
 		inputDict['eventFileName'],
-		inputDict['genSettings'])
+		inputDict['genSettings'],
+		inputDict['solFidelity'])
 	# Textual outputs of outage timeline
 	with open(pJoin(modelDir,'timelineStats.html')) as inFile:
 		outData['timelineStatsHtml'] = inFile.read()
@@ -861,10 +870,11 @@ def new(modelDir):
 		'eventData': open(pJoin(*event_file_path)).read(),
 		'outputFileName': output_file_path[-1],
 		'outputData': open(pJoin(*output_file_path)).read(),
-		'useCache': 'True',
+		'useCache': 'False',
 		'settingsFileName': settings_file_path[-1],
 		'settingsData': open(pJoin(*settings_file_path)).read(),
 		'genSettings': 'False',
+		'solFidelity': '0.05',
 	}
 	creationCode = __neoMetaModel__.new(modelDir, defaultInputs)
 	try:

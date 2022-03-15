@@ -114,7 +114,7 @@
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Generate Default Settings?<span class="classic">If yes, a default settings file will be generated; if no, the user must upload a settings file.</span></label>
-				<select id="generateSettings" name="generateSettings" />
+				<select id="genSettings" name="genSettings" />
 					<option value='True'>Yes</option>
 					<option value='False'>No</option>
 				</select>
@@ -151,6 +151,14 @@
 			<div class="shortInput">
 				<label class="tooltip">Step Size (h)<span class="classic">The duration of each step in hours used for Powerflow calculations.</span></label>
 				<input type="text" id="stepSize" name="stepSize">
+			</div>
+			<div class="shortInput">
+				<label class="tooltip">Solution Fidelity<span class="classic">Select an option for the level of fidelity of the results.</span></label>
+				<select id="solFidelity" name="solFidelity" />
+					<option value='0.10'>Low</option>
+					<option value='0.05'>Medium</option>
+					<option value='0.02'>High</option>
+				</select>
 			</div>
 			<div class="wideInput">
 				<p class="inputSectionHeader">Outage Cost Parameters</p>
