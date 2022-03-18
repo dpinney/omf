@@ -33,7 +33,7 @@ if platform.system() == "Linux" and platform.linux_distribution()[0] in ["Ubuntu
 	pipInstallInOrder("pip3")
 	os.system("python3 setup.py develop")
 # TODO: Double check CentOS installation to support Python 3.7 or up
-elif platform.system() == "Linux" and platform.linux_distribution()[0]=="CentOS Linux":
+elif platform.system() == "Linux" and platform.linux_distribution()[0] in ["CentOS Linux",""]:
 	# CentOS Docker image appears to come with en_US.UTF-8 locale built-in, but we might need to install that locale in the future. That currently is not done here.
 	os.system("yum -y update") # Make sure yum is updated to prevent any weird package installation issues
 	os.system("sudo yum -y install wget git graphviz gcc xerces-c python-devel tkinter octave 'graphviz-devel.x86_64'")
