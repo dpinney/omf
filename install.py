@@ -32,8 +32,8 @@ if platform.system() == "Linux" and platform.linux_distribution()[0] in ["Ubuntu
 	os.system("pip3 install --upgrade pip setuptools")
 	pipInstallInOrder("pip3")
 	os.system("python3 setup.py develop")
-# TODO: Double check CentOS installation to support Python 3.7 or up
 elif platform.system() == "Linux" and platform.linux_distribution()[0] in ["CentOS Linux",""]:
+	# TODO: Double check CentOS installation to support Python 3.7 or up
 	# CentOS Docker image appears to come with en_US.UTF-8 locale built-in, but we might need to install that locale in the future. That currently is not done here.
 	os.system("yum -y update") # Make sure yum is updated to prevent any weird package installation issues
 	os.system("sudo yum -y install wget git graphviz gcc xerces-c python-devel tkinter octave 'graphviz-devel.x86_64'")
@@ -49,8 +49,9 @@ elif platform.system() == "Linux" and platform.linux_distribution()[0] in ["Cent
 	# os.system(f"unzip '{source_dir}/omf/solvers/matpower7.0.zip' -d {source_dir}/omf/solvers/")
 	os.system(f'octave-cli --no-gui -p "{source_dir}/omf/solvers/matpower7.0" --eval "install_matpower(1,1,1)"')
 	os.system("cd omf")
-	pipInstallInOrder("pip3")
-	os.system("pip3 install --ignore-installed six")
+	os.system("python3 -m pip install --upgrade pip")
+	pipInstallInOrder("python3 -m pip")
+	os.system("python3 -m pip install --ignore-installed six")
 	os.system("python3 setup.py develop")
 elif platform.system()=='Windows':
 	# Update pip to remove warnings
