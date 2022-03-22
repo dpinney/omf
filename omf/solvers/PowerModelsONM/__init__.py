@@ -1,4 +1,4 @@
-import os, platform, subprocess
+import os, platform, subprocess, json
 from pathlib import Path
 
 thisDir = os.path.abspath(os.path.dirname(__file__))
@@ -26,7 +26,7 @@ def install_onm(target : list = platform.system()):
 			'source ~/.zshrc',
 			'''julia -e 'import Pkg; Pkg.add("Gurobi")' ''',
 			'''julia -e 'import Pkg; Pkg.build("Gurobi")' ''',
-			'''julia -e 'import Pkg; Pkg.add(Pkg.PackageSpec(;name="PowerModelsDistribution", version="2.1.0"));' ''',
+			'''julia -e 'import Pkg; Pkg.add(Pkg.PackageSpec(;name="PowerModelsDistribution", version="0.14.1"));' ''',
 			'''julia -e 'import Pkg; Pkg.add(Pkg.PackageSpec(;name="PowerModelsONM", version="2.1.0"));' ''',
 			f'touch {thisDir}/instantiated.txt'
 		],
@@ -43,19 +43,41 @@ def install_onm(target : list = platform.system()):
 			'source ~/.bashrc',
 			'''julia -e 'import Pkg; Pkg.add("Gurobi")' ''',
 			'''julia -e 'import Pkg; Pkg.build("Gurobi")' ''',
-			'''julia -e 'import Pkg; Pkg.add(Pkg.PackageSpec(;name="PowerModelsDistribution", version="2.1.0"));’ ''',
+			'''julia -e 'import Pkg; Pkg.add(Pkg.PackageSpec(;name="PowerModelsDistribution", version="0.14.1"));’ ''',
 			'''julia -e 'import Pkg; Pkg.add(Pkg.PackageSpec(;name="PowerModelsONM", version="2.1.0"));' ''',
 			f'touch {thisDir}/instantiated.txt'
 		]
 	}
 	runCommands(installCmd.get(target,'Linux'))
 
-def build_settings_file(circuitPath='circuit.dss',settingsPath='settings.json', max_switch_actions=1, vm_lb_pu=0.9, vm_ub_pu=1.1, sbase_default=1000.0, line_limit_mult='Inf', vad_deg=5.0):
+def build_settings_file(circuitPath='circuit.dss',settingsPath='settings.json', loadPrioritiesFile='', max_switch_actions=1, vm_lb_pu=0.9, vm_ub_pu=1.1, sbase_default=1000.0, line_limit_mult='Inf', vad_deg=5.0):
+	if loadPrioritiesFile: 
+		with open(loadPrioritiesFile) as loadPrioritiesJson:
+			loadPriorities = json.load(loadPrioritiesJson)
+		prioritiesFormatted = ''
+		for load in loadPriorities:
+			prioritiesFormatted += f'''
+				"{load}" => Dict{{String,Any}}(
+        		    "priority" => {loadPriorities[load]},
+      			),'''
+		priorityDictBuilder =f'''
+		custom_settings = Dict{{String,Any}}(
+    		"load" => Dict{{String,Any}}(
+   				{prioritiesFormatted}
+ 		   ),
+		);'''
+		prioritiesSwitch = f' custom_settings=custom_settings, '
+	else:
+		loadPriorities = ''
+		priorityDictBuilder = ''
+		prioritiesSwitch = ''
+
 	cmd_string = f'''julia -e '
 		using PowerModelsONM;
+		{priorityDictBuilder}
 		build_settings_file(
 			"{circuitPath}",
-			"{settingsPath}",
+			"{settingsPath}",{prioritiesSwitch}
 			max_switch_actions={max_switch_actions}, #actions per time step. should always be 1, could be 2 or 3.
 			vm_lb_pu={vm_lb_pu}, # min voltage allowed in per-unit
 			vm_ub_pu={vm_ub_pu}, # max voltage allowed in per-unit
@@ -65,6 +87,7 @@ def build_settings_file(circuitPath='circuit.dss',settingsPath='settings.json', 
 		)
 	' '''
 	runCommands([cmd_string])
+
 
 def run_onm(circuitPath='circuit.dss', settingsPath='settings.json', outputPath="onm_out.json", eventsPath="events.json", gurobi='true', verbose='true', fixSmallNumbers='true', applySwitchScores='true', skipList='["faults","stability"]', prettyPrint='true', optSwitchFormulation="lindistflow", optSwitchSolver="mip_solver", optSwitchAlgorithm="global", optSwitchProblem="block", optDispFormulation="lindistflow", optDispSolver="mip_solver", mip_solver_gap=0.05):
 	#TODO: allow arguments to function for the ones hardcoded!
