@@ -144,14 +144,14 @@
 					<option value='False'>No</option>
 				</select>
 			</div>
-			<div class="shortInput">
+			<!-- <div class="shortInput">
 				<label class="tooltip">Maximum Runtime (h)<span class="classic">Runtime of the system in hours.</span></label>
 				<input type="text" id="maxTime" name="maxTime">
-			</div>
-			<div class="shortInput">
+			</div> -->
+			<!-- <div class="shortInput">
 				<label class="tooltip">Step Size (h)<span class="classic">The duration of each step in hours used for Powerflow calculations.</span></label>
 				<input type="text" id="stepSize" name="stepSize">
-			</div>
+			</div> -->
 			<div class="shortInput">
 				<label class="tooltip">Solution Fidelity<span class="classic">Select an option for the level of fidelity of the results.</span></label>
 				<select id="solFidelity" name="solFidelity" />
@@ -389,28 +389,30 @@
 		geojsonLayer.addTo(map);
 		eventLayer.addTo(map);
 		
-		var stepSizeVal = parseFloat(allInputData.stepSize) //This should be the value of the stepsize
-		var maxTimeVal = parseFloat(allInputData.maxTime) //This should be the value of the runtime
-		document.getElementById('input-number-min').setAttribute("min", stepSizeVal);
-		document.getElementById('input-number-min').setAttribute("max", maxTimeVal-stepSizeVal);
-		document.getElementById('input-number-max').setAttribute("min", stepSizeVal*2);
-		document.getElementById('input-number-max').setAttribute("min", maxTimeVal);
+		// var stepSizeVal = parseFloat(allInputData.stepSize)
+		var stepSizeVal = parseFloat(allOutputData['stepSize']) //This should be the value of the stepsize
+		// var maxTimeVal = parseFloat(allInputData.maxTime)
+		var maxTimeVal = parseFloat(allOutputData['numTimeSteps']) //This should be the value of the runtime
+		document.getElementById('input-number-min').setAttribute("min", 0);
+		document.getElementById('input-number-min').setAttribute("max", maxTimeVal-stepSizeVal*2);
+		document.getElementById('input-number-max').setAttribute("min", stepSizeVal);
+		document.getElementById('input-number-max').setAttribute("max", maxTimeVal-stepSizeVal);
 		// var runtimeVal = allInputData.runTime
 		var numSteps = maxTimeVal/stepSizeVal
 		var slidervar = document.getElementById('slider');
 		noUiSlider.create(slidervar, {
 			connect: true,
-			step: 1,
-			start: [ stepSizeVal, maxTimeVal ],
+			step: stepSizeVal,
+			start: [ 0, maxTimeVal-stepSizeVal ],
 			range: {
-				min: stepSizeVal,
-				max: maxTimeVal
+				min: 0,
+				max: maxTimeVal-stepSizeVal
 			}
 		});
 		// document.getElementById('input-number-min').setAttribute("value", 1);
 		// document.getElementById('input-number-max').setAttribute("value", 24);
-		document.getElementById('input-number-min').setAttribute("value", stepSizeVal);
-		document.getElementById('input-number-max').setAttribute("value", maxTimeVal);
+		document.getElementById('input-number-min').setAttribute("value", 0);
+		document.getElementById('input-number-max').setAttribute("value", maxTimeVal-stepSizeVal);
 
 		var inputNumberMin = document.getElementById('input-number-min');
 		var inputNumberMax = document.getElementById('input-number-max');

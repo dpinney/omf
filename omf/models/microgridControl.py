@@ -399,7 +399,7 @@ def validateSettingsFile(settingsFile):
 	else:
 		return 'Corrupted Settings file input, generating default settings'
 
-def graphMicrogrid(pathToOmd, pathToJson, pathToCsv, outputFile, settingsFile, useCache, workDir, maxTime, stepSize, outageDuration, profit_on_energy_sales, restoration_cost, hardware_cost, eventsFilename, genSettings, solFidelity):
+def graphMicrogrid(pathToOmd, pathToJson, pathToCsv, outputFile, settingsFile, useCache, workDir, outageDuration, profit_on_energy_sales, restoration_cost, hardware_cost, eventsFilename, genSettings, solFidelity):
 	''' Run full microgrid control process. '''
 	# Setup ONM if it hasn't been done already.
 	if not PowerModelsONM.check_instantiated():
@@ -445,6 +445,8 @@ def graphMicrogrid(pathToOmd, pathToJson, pathToCsv, outputFile, settingsFile, u
 		simTimeSteps = []
 		for i in data['Simulation time steps']:
 			simTimeSteps.append(float(i))
+		numTimeSteps = len(simTimeSteps)
+		stepSize = 1 #TODO: change this to be total_simulation_time/numTimeSteps, but for now, we default to 1 hr
 		voltages = data['Voltages']
 		loadServed = data['Load served']
 		storageSOC = data['Storage SOC (%)']
@@ -456,9 +458,11 @@ def graphMicrogrid(pathToOmd, pathToJson, pathToCsv, outputFile, settingsFile, u
 	actionLoadBefore = []
 	actionLoadAfter = []
 	loadsShed = []
-	timestep = 1
+	timestep = 0
+	# timestep = 1 #TODO: switch back to this value if timestep should start at 1, not zero
 	for key in switchLoadAction:
-		if timestep == 1:
+		# if timestep == 0: #TODO: switch back to this value if timestep should start at 1, not zero
+		if timestep == 0:
 			switchActionsOld = key['Switch configurations']
 		else:
 			switchActionsNew = key['Switch configurations']
@@ -492,7 +496,8 @@ def graphMicrogrid(pathToOmd, pathToJson, pathToCsv, outputFile, settingsFile, u
 					loadsShed.remove(entry)
 		timestep += 1
 	timestep = 0
-	while timestep < 24:
+	# while timestep < 24:
+	while timestep < numTimeSteps:
 		if timestep == 0:
 			powerflowOld = powerflow[timestep]
 		else:
@@ -505,7 +510,8 @@ def graphMicrogrid(pathToOmd, pathToJson, pathToCsv, outputFile, settingsFile, u
 					entryOld = 0.0
 				if math.sqrt(((entryNew - entryOld)/(entryOld + 0.0000001))**2) > 0.5:
 					actionDevice.append(generator)
-					actionTime.append(str(timestep + 1))
+					actionTime.append(str(timestep))
+					# actionTime.append(str(timestep + 1)) #TODO: switch back to this value if timestep should start at 1, not zero
 					actionAction.append('Generator Control')
 					actionLoadBefore.append(str(entryOld))
 					actionLoadAfter.append(str(entryNew))
@@ -517,7 +523,8 @@ def graphMicrogrid(pathToOmd, pathToJson, pathToCsv, outputFile, settingsFile, u
 					entryOld = 0.0
 				if math.sqrt(((entryNew - entryOld)/(entryOld + 0.0000001))**2) > 0.5:
 					actionDevice.append(battery)
-					actionTime.append(str(timestep + 1))
+					actionTime.append(str(timestep))
+					# actionTime.append(str(timestep + 1)) #TODO: switch back to this value if timestep should start at 1, not zero
 					actionAction.append('Battery Control')
 					actionLoadBefore.append(str(entryOld))
 					actionLoadAfter.append(str(entryNew))
@@ -739,7 +746,7 @@ def graphMicrogrid(pathToOmd, pathToJson, pathToCsv, outputFile, settingsFile, u
 	hardware_cost = int(hardware_cost)
 	outageDuration = int(outageDuration)
 	utilityOutageHtml = utilityOutageTable(average_lost_kwh, profit_on_energy_sales, restoration_cost, hardware_cost, outageDuration, workDir)
-	return {'utilityOutageHtml': utilityOutageHtml, 'customerOutageHtml': customerOutageHtml, 'timelineStatsHtml': timelineStatsHtml, 'gens': gens, 'loads': loads, 'volts': volts, 'fig': fig, 'customerOutageCost': customerOutageCost}
+	return {'utilityOutageHtml': utilityOutageHtml, 'customerOutageHtml': customerOutageHtml, 'timelineStatsHtml': timelineStatsHtml, 'gens': gens, 'loads': loads, 'volts': volts, 'fig': fig, 'customerOutageCost': customerOutageCost, 'numTimeSteps': numTimeSteps, 'stepSize': stepSize}
 
 def work(modelDir, inputDict):
 	# Copy specific climate data into model directory
@@ -801,9 +808,7 @@ def work(modelDir, inputDict):
 		pathToData2,
 		pathToData3,
 		inputDict['useCache'],
-		modelDir, #Work directory.
-		inputDict['maxTime'], #computational time limit
-		inputDict['stepSize'], #time step size
+		modelDir, #Work directory
 		inputDict['outageDuration'],
 		inputDict['profit_on_energy_sales'],
 		inputDict['restoration_cost'],
@@ -839,6 +844,8 @@ def work(modelDir, inputDict):
 	# Stdout/stderr.
 	outData['stdout'] = 'Success'
 	outData['stderr'] = ''
+	outData['numTimeSteps'] = plotOuts.get('numTimeSteps', 24)
+	outData['stepSize'] = plotOuts.get('stepSize', 1)
 	return outData
 
 def new(modelDir):
@@ -858,8 +865,6 @@ def new(modelDir):
 	defaultInputs = {
 		'modelType': modelName,
 		'feederName1': feeder_file_path[-1][0:-4],
-		'maxTime': '25',
-		'stepSize': '1',
 		'outageDuration': '5',
 		'profit_on_energy_sales': '0.03',
 		'restoration_cost': '100',
