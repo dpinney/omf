@@ -3108,24 +3108,24 @@ new object=load.226195194c0a phases=1 bus1=l3027124.3 kv=12.47 status=variable m
 new object=load.251865c0a phases=1 bus1=l3142050.3 kv=12.47 status=variable model=1 conn=wye kw=6.303145250000003 pf=0.97 vminpu=0.88 daily=default
 new object=load.346639c0a phases=1 bus1=l2992556.3 kv=12.47 status=variable model=1 conn=wye kw=6.303145249999999 pf=0.97 vminpu=0.88 daily=default
 new object=capacitor.capbank2a bus1=r20185.1 kv=12.47 kvar=[300] phases=1 conn=wye
-new object=capcontrol.capbank2a_ctrl capacitor=capbank2a element=line.cap_1a terminal=1 type=kvar ptratio=1 ctratio=1 onsetting=150 offsetting=-225 voltoverride=y vmin=7110 vmax=7740 delay=100 delayoff=100
+!new object=capcontrol.capbank2a_ctrl capacitor=capbank2a element=line.cap_1a terminal=1 type=kvar ptratio=1 ctratio=1 onsetting=150 offsetting=-225 voltoverride=y vmin=7110 vmax=7740 delay=100 delayoff=100
 new object=capacitor.capbank2b bus1=r20185.2 kv=12.47 kvar=[300] phases=1 conn=wye
-new object=capcontrol.capbank2b_ctrl capacitor=capbank2b element=line.cap_1b terminal=1 type=kvar ptratio=1 ctratio=1 onsetting=150 offsetting=-225 voltoverride=y vmin=7110 vmax=7740 delay=101 delayoff=101
+!new object=capcontrol.capbank2b_ctrl capacitor=capbank2b element=line.cap_1b terminal=1 type=kvar ptratio=1 ctratio=1 onsetting=150 offsetting=-225 voltoverride=y vmin=7110 vmax=7740 delay=101 delayoff=101
 new object=capacitor.capbank2c bus1=r20185.3 kv=12.47 kvar=[300] phases=1 conn=wye
-new object=capcontrol.capbank2c_ctrl capacitor=capbank2c element=line.cap_1c terminal=1 type=kvar ptratio=1 ctratio=1 onsetting=150 offsetting=-225 voltoverride=y vmin=7110 vmax=7740 delay=102 delayoff=102
+!new object=capcontrol.capbank2c_ctrl capacitor=capbank2c element=line.cap_1c terminal=1 type=kvar ptratio=1 ctratio=1 onsetting=150 offsetting=-225 voltoverride=y vmin=7110 vmax=7740 delay=102 delayoff=102
 new object=capacitor.capbank1a bus1=r42247.1 kv=12.47 kvar=[300] phases=1 conn=wye
-new object=capcontrol.capbank1a_ctrl capacitor=capbank1a element=line.cap_2a terminal=1 type=kvar ptratio=1 ctratio=1 onsetting=150 offsetting=-225 voltoverride=y vmin=7110 vmax=7740 delay=100 delayoff=90
+!new object=capcontrol.capbank1a_ctrl capacitor=capbank1a element=line.cap_2a terminal=1 type=kvar ptratio=1 ctratio=1 onsetting=150 offsetting=-225 voltoverride=y vmin=7110 vmax=7740 delay=100 delayoff=90
 new object=capacitor.capbank1b bus1=r42247.2 kv=12.47 kvar=[300] phases=1 conn=wye
-new object=capcontrol.capbank1b_ctrl capacitor=capbank1b element=line.cap_2b terminal=1 type=kvar ptratio=1 ctratio=1 onsetting=150 offsetting=-225 voltoverride=y vmin=7110 vmax=7740 delay=101 delayoff=91
+!new object=capcontrol.capbank1b_ctrl capacitor=capbank1b element=line.cap_2b terminal=1 type=kvar ptratio=1 ctratio=1 onsetting=150 offsetting=-225 voltoverride=y vmin=7110 vmax=7740 delay=101 delayoff=91
 new object=capacitor.capbank1c bus1=r42247.3 kv=12.47 kvar=[300] phases=1 conn=wye
-new object=capcontrol.capbank1c_ctrl capacitor=capbank1c element=line.cap_2c terminal=1 type=kvar ptratio=1 ctratio=1 onsetting=150 offsetting=-225 voltoverride=y vmin=7110 vmax=7740 delay=102 delayoff=92
+!new object=capcontrol.capbank1c_ctrl capacitor=capbank1c element=line.cap_2c terminal=1 type=kvar ptratio=1 ctratio=1 onsetting=150 offsetting=-225 voltoverride=y vmin=7110 vmax=7740 delay=102 delayoff=92
 new object=capacitor.capbank3 bus1=r18242.1.2.3 kv=12.47112 kvar=[900] conn=wye
 new object=capacitor.capbank0a bus1=r42246.1 kv=12.47 kvar=[400] phases=1 conn=wye
-new object=capcontrol.capbank0a_ctrl capacitor=capbank0a element=line.cap_3a terminal=1 type=kvar ptratio=1 ctratio=1 onsetting=200 offsetting=-300 voltoverride=y vmin=7110 vmax=7740 delay=100 delayoff=80
+!new object=capcontrol.capbank0a_ctrl capacitor=capbank0a element=line.cap_3a terminal=1 type=kvar ptratio=1 ctratio=1 onsetting=200 offsetting=-300 voltoverride=y vmin=7110 vmax=7740 delay=100 delayoff=80
 new object=capacitor.capbank0b bus1=r42246.2 kv=12.47 kvar=[400] phases=1 conn=wye
-new object=capcontrol.capbank0b_ctrl capacitor=capbank0b element=line.cap_3b terminal=1 type=kvar ptratio=1 ctratio=1 onsetting=200 offsetting=-300 voltoverride=y vmin=7110 vmax=7740 delay=101 delayoff=81
+!new object=capcontrol.capbank0b_ctrl capacitor=capbank0b element=line.cap_3b terminal=1 type=kvar ptratio=1 ctratio=1 onsetting=200 offsetting=-300 voltoverride=y vmin=7110 vmax=7740 delay=101 delayoff=81
 new object=capacitor.capbank0c bus1=r42246.3 kv=12.47 kvar=[400] phases=1 conn=wye
-new object=capcontrol.capbank0c_ctrl capacitor=capbank0c element=line.cap_3c terminal=1 type=kvar ptratio=1 ctratio=1 onsetting=200 offsetting=-300 voltoverride=y vmin=7110 vmax=7740 delay=102 delayoff=82
+!new object=capcontrol.capbank0c_ctrl capacitor=capbank0c element=line.cap_3c terminal=1 type=kvar ptratio=1 ctratio=1 onsetting=200 offsetting=-300 voltoverride=y vmin=7110 vmax=7740 delay=102 delayoff=82
 new object=line.hvmv_sub_connector bus1=_hvmv_sub_lsb.1.2.3 bus2=hvmv_sub_48332.1.2.3 length=0.001 units=none r1=0.001 r0=0.001 x1=0.01 x0=0.01 c1=0 c0=0
 new object=line.a8735_48332_sw bus1=d5710794-3_int.1.2.3 bus2=e192860.1.2.3 switch=true r1=1 x1=1 r0=1 x0=1 length=0.001
 new object=line.ln5710794-3 bus1=hvmv_sub_48332.1.2.3 bus2=d5710794-3_int.1.2.3 length=0.01943604 units=km linecode=3ph_h-397_acsr397_acsr397_acsr397_acsr normamps=400 emergamps=600
