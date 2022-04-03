@@ -27,7 +27,7 @@ def install_onm(target : list = platform.system()):
 			'''julia -e 'import Pkg; Pkg.add("Gurobi")' ''',
 			'''julia -e 'import Pkg; Pkg.build("Gurobi")' ''',
 			'''julia -e 'import Pkg; Pkg.add(Pkg.PackageSpec(;name="PowerModelsDistribution", version="0.14.1"));' ''',
-			'''julia -e 'import Pkg; Pkg.add(Pkg.PackageSpec(;name="PowerModelsONM", version="2.1.0"));' ''',
+			'''julia -e 'import Pkg; Pkg.add(Pkg.PackageSpec(;name="PowerModelsONM", version="2.1.1"));' ''',
 			f'touch {thisDir}/instantiated.txt'
 		],
 		'Linux' : [
@@ -44,13 +44,14 @@ def install_onm(target : list = platform.system()):
 			'''julia -e 'import Pkg; Pkg.add("Gurobi")' ''',
 			'''julia -e 'import Pkg; Pkg.build("Gurobi")' ''',
 			'''julia -e 'import Pkg; Pkg.add(Pkg.PackageSpec(;name="PowerModelsDistribution", version="0.14.1"));’ ''',
-			'''julia -e 'import Pkg; Pkg.add(Pkg.PackageSpec(;name="PowerModelsONM", version="2.1.0"));' ''',
+			'''julia -e 'import Pkg; Pkg.add(Pkg.PackageSpec(;name="PowerModelsONM", version="2.1.1"));' ''',
 			f'touch {thisDir}/instantiated.txt'
 		]
 	}
 	runCommands(installCmd.get(target,'Linux'))
 
-def build_settings_file(circuitPath='circuit.dss',settingsPath='settings.json', loadPrioritiesFile='', max_switch_actions=1, vm_lb_pu=0.9, vm_ub_pu=1.1, sbase_default=1000.0, line_limit_mult='Inf', vad_deg=5.0):
+def build_settings_file(circuitPath='circuit.dss',settingsPath='settings.json', loadPrioritiesFile='', microgridTaggingFile='', max_switch_actions=1, vm_lb_pu=0.9, vm_ub_pu=1.1, sbase_default=1000.0, line_limit_mult='Inf', vad_deg=5.0):
+	#Check for load priorities input
 	if loadPrioritiesFile: 
 		with open(loadPrioritiesFile) as loadPrioritiesJson:
 			loadPriorities = json.load(loadPrioritiesJson)
@@ -58,26 +59,52 @@ def build_settings_file(circuitPath='circuit.dss',settingsPath='settings.json', 
 		for load in loadPriorities:
 			prioritiesFormatted += f'''
 				"{load}" => Dict{{String,Any}}(
-        		    "priority" => {loadPriorities[load]},
-      			),'''
-		priorityDictBuilder =f'''
-		custom_settings = Dict{{String,Any}}(
-    		"load" => Dict{{String,Any}}(
-   				{prioritiesFormatted}
- 		   ),
-		);'''
-		prioritiesSwitch = f' custom_settings=custom_settings, '
+					"priority" => {loadPriorities[load]},
+				),'''
+		priorityDictBuilder = f'''
+			"load" => Dict{{String,Any}}(
+				{prioritiesFormatted}
+			),'''
 	else:
 		loadPriorities = ''
 		priorityDictBuilder = ''
-		prioritiesSwitch = ''
+
+	#Check for microgrid tagging input
+	if microgridTaggingFile: 
+		with open(microgridTaggingFile) as microgridTaggingJson:
+			microgridTags = json.load(microgridTaggingJson)
+		mgTaggingFormatted = ''
+		for bus in microgridTags:
+			mgTaggingFormatted += f'''
+				"{bus}" => Dict{{String,Any}}(
+					"microgrid_id" => "{microgridTags[bus]}",
+				),'''
+		mgTaggingDictBuilder = f'''
+			"bus" => Dict{{String,Any}}(
+				{mgTaggingFormatted}
+			),'''
+	else:
+		microgridTags = ''
+		mgTaggingDictBuilder = ''
+
+	if loadPrioritiesFile or microgridTaggingFile:
+		#Create the custom settings dict builder and custom settings parameter call
+		settingsHead = f'''custom_settings = Dict{{String,Any}}('''
+		settingsEnd = f'''
+			);'''
+		customSettingsDictBuilder = settingsHead + priorityDictBuilder + mgTaggingDictBuilder + settingsEnd
+		customSettingsSwitch = f'custom_settings=custom_settings,'
+	else:
+		customSettingsDictBuilder = ''
+		customSettingsSwitch = ''
 
 	cmd_string = f'''julia -e '
 		using PowerModelsONM;
-		{priorityDictBuilder}
+		{customSettingsDictBuilder}
 		build_settings_file(
 			"{circuitPath}",
-			"{settingsPath}",{prioritiesSwitch}
+			"{settingsPath}",
+			{customSettingsSwitch}
 			max_switch_actions={max_switch_actions}, #actions per time step. should always be 1, could be 2 or 3.
 			vm_lb_pu={vm_lb_pu}, # min voltage allowed in per-unit
 			vm_ub_pu={vm_ub_pu}, # max voltage allowed in per-unit
@@ -121,14 +148,20 @@ if __name__ == '__main__':
 	# Basic Tests
 	thisDirPath = Path(thisDir)
 	omfDir = thisDirPath.parent.parent.absolute()
+	loadPrioritiesPath = ''
+	microgridTaggingPath = ''
 	circuitFile = 'iowa240_dwp_22.dss'
 	eventsFile = 'iowa240_dwp_22.events.json'
+	# loadPrioritiesPath = f'{omfDir}/static/testFiles/iowa240_dwp_22.loadPriority.basic.json'
+	# microgridTaggingPath = f'{omfDir}/static/testFiles/iowa240_dwp_22.microgridTagging.basic.json'
 	# circuitFile = 'nreca1824_dwp.dss'
 	# eventsFile = 'nreca1824_dwp.events.json'
-	# install_onm()
+	install_onm()
 	build_settings_file(
 		circuitPath=f'{omfDir}/static/testFiles/{circuitFile}',
-		settingsPath='./settings.working.json'
+		settingsPath='./settings.working.json',
+		loadPrioritiesFile=f'{loadPrioritiesPath}',
+		microgridTaggingFile=f'{microgridTaggingPath}'
 	)
 	run_onm(
 		circuitPath=f'{omfDir}/static/testFiles/{circuitFile}',

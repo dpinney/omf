@@ -113,6 +113,14 @@
 				</div>
 			</div>
 			<div class="shortInput">
+				<label class="tooltip">Solution Fidelity<span class="classic">Select an option for the level of fidelity of the results.</span></label>
+				<select id="solFidelity" name="solFidelity" />
+					<option value='0.10'>Low</option>
+					<option value='0.05'>Medium</option>
+					<option value='0.02'>High</option>
+				</select>
+			</div>
+			<div class="shortInput">
 				<label class="tooltip">Generate Default Settings?<span class="classic">If yes, a default settings file will be generated; if no, the user must upload a settings file.</span></label>
 				<select id="genSettings" name="genSettings" />
 					<option value='True'>Yes</option>
@@ -129,12 +137,12 @@
 				</div>
 			</div>
 			<div class="shortInput">
-				<label class="tooltip">Cached Output (.json file)<span class="classic">Please see the documentation at the help link for the required format</span></label>
-				<input id="outputFile" type="file" style="display:none" onchange="handle_files(this.files,'outputData','outputFileName')">
-				<input id="outputData" name="outputData" type="hidden">
+				<label class="tooltip">Load Priorities (.json file)<span class="classic">Please see the documentation at the help link for the required format of custom load priority file input.</span></label>
+				<input id="loadPriorityFile" type="file" style="display:none" onchange="handle_files(this.files,'loadPriorityData','loadPriorityFileName')">
+				<input id="loadPriorityData" name="loadPriorityData" type="hidden">
 				<div>
-					<label for="outputFile" class="fileButton">Choose File</label>
-					<input id="outputFileName" name="outputFileName" value='' readonly class="uploadFileName">
+					<label for="loadPriorityFile" class="fileButton">Choose File</label>
+					<input id="loadPriorityFileName" name="loadPriorityFileName" value='' readonly class="uploadFileName">
 				</div>
 			</div>
 			<div class="shortInput">
@@ -144,6 +152,24 @@
 					<option value='False'>No</option>
 				</select>
 			</div>
+			<div class="shortInput">
+				<label class="tooltip">Cached Output (.json file)<span class="classic">Please see the documentation at the help link for the required format</span></label>
+				<input id="outputFile" type="file" style="display:none" onchange="handle_files(this.files,'outputData','outputFileName')">
+				<input id="outputData" name="outputData" type="hidden">
+				<div>
+					<label for="outputFile" class="fileButton">Choose File</label>
+					<input id="outputFileName" name="outputFileName" value='' readonly class="uploadFileName">
+				</div>
+			</div>
+			<div class="shortInput">
+				<label class="tooltip">Microgrid Tagging (.csv file)<span class="classic">Please see the documentation at the help link for the required format custom microgrid tagging file input.</span></label>
+				<input id="microgridTaggingFile" type="file" style="display:none" onchange="handle_files(this.files,'microgridTaggingData','microgridTaggingFileName')">
+				<input id="microgridTaggingData" name="microgridTaggingData" type="hidden">
+				<div>
+					<label for="microgridTaggingFile" class="fileButton">Choose File</label>
+					<input id="microgridTaggingFileName" name="microgridTaggingFileName" value='' readonly class="uploadFileName">
+				</div>
+			</div>
 			<!-- <div class="shortInput">
 				<label class="tooltip">Maximum Runtime (h)<span class="classic">Runtime of the system in hours.</span></label>
 				<input type="text" id="maxTime" name="maxTime">
@@ -152,14 +178,6 @@
 				<label class="tooltip">Step Size (h)<span class="classic">The duration of each step in hours used for Powerflow calculations.</span></label>
 				<input type="text" id="stepSize" name="stepSize">
 			</div> -->
-			<div class="shortInput">
-				<label class="tooltip">Solution Fidelity<span class="classic">Select an option for the level of fidelity of the results.</span></label>
-				<select id="solFidelity" name="solFidelity" />
-					<option value='0.10'>Low</option>
-					<option value='0.05'>Medium</option>
-					<option value='0.02'>High</option>
-				</select>
-			</div>
 			<div class="wideInput">
 				<p class="inputSectionHeader">Outage Cost Parameters</p>
 			</div>

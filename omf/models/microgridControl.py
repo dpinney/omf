@@ -399,7 +399,7 @@ def validateSettingsFile(settingsFile):
 	else:
 		return 'Corrupted Settings file input, generating default settings'
 
-def graphMicrogrid(pathToOmd, pathToJson, pathToCsv, outputFile, settingsFile, useCache, workDir, outageDuration, profit_on_energy_sales, restoration_cost, hardware_cost, eventsFilename, genSettings, solFidelity):
+def graphMicrogrid(pathToOmd, pathToJson, pathToCsv, outputFile, settingsFile, useCache, workDir, outageDuration, profit_on_energy_sales, restoration_cost, hardware_cost, eventsFilename, genSettings, solFidelity, loadPriorityFile, microgridTaggingFile):
 	''' Run full microgrid control process. '''
 	# Setup ONM if it hasn't been done already.
 	if not PowerModelsONM.check_instantiated():
@@ -414,6 +414,19 @@ def graphMicrogrid(pathToOmd, pathToJson, pathToCsv, outputFile, settingsFile, u
 	elif solFidelity == '0.02':
 		solFidelityVal = 0.02
 
+	# check custom load priorities file input
+	if loadPriorityFile != None:
+		loadPriorityFilePath = f'{workDir}/loadPriorities.json'
+		shutil.copyfile(loadPriorityFile, loadPriorityFilePath)
+	else:
+		loadPriorityFilePath = ''
+	# check custom microgrid tagging file input
+	if microgridTaggingFile != None:
+		microgridTaggingFilePath = f'{workDir}/microgridTagging.json'
+		shutil.copyfile(microgridTaggingFile, microgridTaggingFilePath)
+	else:
+		microgridTaggingFilePath = ''
+
 	# Handle Settings file generation or upload
 	if genSettings == 'False' and settingsFile != None:
 		correctSettings = validateSettingsFile(settingsFile)
@@ -423,10 +436,10 @@ def graphMicrogrid(pathToOmd, pathToJson, pathToCsv, outputFile, settingsFile, u
 		else:
 			# Scenario 2: The user chose to upload their own setttings file and it is formatted incorrectly
 			print("Warning: " + correctSettings)
-			PowerModelsONM.build_settings_file(circuitPath=f'{workDir}/circuit.dss', settingsPath=f'{workDir}/settings.json')
+			PowerModelsONM.build_settings_file(circuitPath=f'{workDir}/circuit.dss', settingsPath=f'{workDir}/settings.json', loadPrioritiesFile=loadPriorityFilePath, microgridTaggingFile=microgridTaggingFilePath)
 	else:
 		# Scenario 3: The user wants to generate a settings file
-		PowerModelsONM.build_settings_file(circuitPath=f'{workDir}/circuit.dss', settingsPath=f'{workDir}/settings.json')
+		PowerModelsONM.build_settings_file(circuitPath=f'{workDir}/circuit.dss', settingsPath=f'{workDir}/settings.json', loadPrioritiesFile=loadPriorityFilePath, microgridTaggingFile=microgridTaggingFilePath)
 	# Run ONM.
 	if  useCache == 'True' and outputFile != None:
 		shutil.copyfile(outputFile, f'{workDir}/output.json')
@@ -771,6 +784,29 @@ def work(modelDir, inputDict):
 	with open(f'{modelDir}/circuit.dss','w') as dss_file_2:
 		dss_file_2.write(content)
 	# Run the main functions of the program
+
+	if inputDict['microgridTaggingFileName'] != '':
+		try:
+			with open(pJoin(modelDir, inputDict['microgridTaggingFileName']), 'w') as f5:
+				pathToData5 = f5.name
+				f5.write(inputDict['microgridTaggingData'])
+		except:
+			pathToData5 = None
+			print("ERROR - Unable to read microgrid tagging file: " + str(inputDict['microgridTaggingFileName']))
+	else:
+		pathToData5 = None
+
+	if inputDict['loadPriorityFileName'] != '':
+		try:
+			with open(pJoin(modelDir, inputDict['loadPriorityFileName']), 'w') as f4:
+				pathToData4 = f4.name
+				f4.write(inputDict['loadPriorityData'])
+		except:
+			pathToData4 = None
+			print("ERROR - Unable to read load priority file: " + str(inputDict['loadPriorityFileName']))
+	else:
+		pathToData4 = None
+
 	if inputDict['genSettings'] == 'False':
 		try:
 			with open(pJoin(modelDir, inputDict['settingsFileName']), 'w') as f3:
@@ -815,7 +851,10 @@ def work(modelDir, inputDict):
 		inputDict['hardware_cost'],
 		inputDict['eventFileName'],
 		inputDict['genSettings'],
-		inputDict['solFidelity'])
+		inputDict['solFidelity'],
+		pathToData4,
+		pathToData5
+		)
 	# Textual outputs of outage timeline
 	with open(pJoin(modelDir,'timelineStats.html')) as inFile:
 		outData['timelineStatsHtml'] = inFile.read()
@@ -852,16 +891,30 @@ def new(modelDir):
 	''' Create a new instance of this model. Returns true on success, false on failure. '''
 	# ====== For All Test Cases
 	cust_file_path = [__neoMetaModel__._omfDir,'static','testFiles','customerInfo.csv']
+	# ====== Optional inputs for custom load priority and microgrid tagging - set the file path to '' and data to None initially and change their value below if desired
+	loadPriority_file_path = ['']
+	loadPriority_file_data = None
+	microgridTagging_file_path = ['']
+	microgridTagging_file_data = None
 	# ====== Iowa240 Test Case
 	feeder_file_path= [__neoMetaModel__._omfDir,'static','testFiles','iowa240_dwp_22.dss.omd']
 	event_file_path = [__neoMetaModel__._omfDir,'static','testFiles','iowa240_dwp_22.events.json']
 	settings_file_path = [__neoMetaModel__._omfDir,'static','testFiles','iowa240_dwp_22.settings.json']
 	output_file_path = [__neoMetaModel__._omfDir,'static','testFiles','iowa240_dwp_22.output.json']
+	loadPriority_file_path = [__neoMetaModel__._omfDir,'static','testFiles','iowa240_dwp_22.loadPriority.basic.json']
+	loadPriority_file_data = open(pJoin(*loadPriority_file_path)).read()
+	microgridTagging_file_path = [__neoMetaModel__._omfDir,'static','testFiles','iowa240_dwp_22.microgridTagging.basic.json']
+	microgridTagging_file_data = open(pJoin(*microgridTagging_file_path)).read()
 	# ====== Nreca1824 Test Case
 	# feeder_file_path = [__neoMetaModel__._omfDir,'static','testFiles','nreca1824_dwp.omd']
 	# event_file_path = [__neoMetaModel__._omfDir,'static','testFiles','nreca1824_dwp.events.json']
 	# settings_file_path = [__neoMetaModel__._omfDir,'static','testFiles','nreca1824_dwp.settings.json']
 	# output_file_path = [__neoMetaModel__._omfDir,'static','testFiles','nreca1824_dwp.output.json']
+	# loadPriority_file_path = [__neoMetaModel__._omfDir,'static','testFiles','nreca1824_dwp.loadPriority.basic.json']
+	# loadPriority_file_data = open(pJoin(*loadPriority_file_path)).read()
+	# microgridTagging_file_path = [__neoMetaModel__._omfDir,'static','testFiles','nreca1824_dwp.microgridTagging.basic.json']
+	# microgridTagging_file_data = open(pJoin(*microgridTagging_file_path)).read()
+	# ====== Nreca1824 Test Case
 	defaultInputs = {
 		'modelType': modelName,
 		'feederName1': feeder_file_path[-1][0:-4],
@@ -878,8 +931,12 @@ def new(modelDir):
 		'useCache': 'False',
 		'settingsFileName': settings_file_path[-1],
 		'settingsData': open(pJoin(*settings_file_path)).read(),
-		'genSettings': 'False',
+		'genSettings': 'True',
 		'solFidelity': '0.05',
+		'loadPriorityFileName': loadPriority_file_path[-1],
+		'loadPriorityData': loadPriority_file_data,
+		'microgridTaggingFileName': microgridTagging_file_path[-1],
+		'microgridTaggingData': microgridTagging_file_data,
 	}
 	creationCode = __neoMetaModel__.new(modelDir, defaultInputs)
 	try:
