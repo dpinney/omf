@@ -899,6 +899,7 @@ def main_npy(voltageDataPath, phaseLabelsTruePath, phaseLabelsErrorsPath, custom
 	# np.savetxt("./zin_cust_ids.csv", [np.load(customerIdsPath)],  fmt='%s', delimiter=',')
 	main(voltageInputCust, phaseLabelsTrue, phaseLabelsErrors, custIDInput, outputPath, kFinal=kFinal, windowSize='default')
 
+
 def main(voltageInputCust, phaseLabelsTrue, phaseLabelsErrors, custIDInput, outputPath, kFinal=7, windowSize='default'):
 	'Execute phaseID analysis'
 	# Co-Association Matrix Ensemble Phase Identification
@@ -919,15 +920,14 @@ def main(voltageInputCust, phaseLabelsTrue, phaseLabelsErrors, custIDInput, outp
 	#   window.
 	kVector = [6,12,15,30]
 	# windowSize is the number of datapoints used in each window of the ensemble
-	# DWP note: switched to 1/30th of input data to give it the ability to work with shorter datasets.
+	# DWP note: switched to 1/30th of input data to give it the ability to work with shorter datasets. Then switched back on Sandia's advice to a fixed 384.
 	# Original window size was 384 on a dataset with 11,520 readings.
 	voltage_measurements_count = len(voltageInputCust)
 	if windowSize == 'default':
-		windowSize = int(voltage_measurements_count/30)
+		windowSize = 384
 	# print('WINDOW SIZE', windowSize)
-	# windowSize = 384
 	# This is the primary phase identification function - See documentation in CA_Ensemble_Funcs.py for details on the inputs/outputs
-	finalClusterLabels, noVotesIndex, noVotesIDs, clusteredIDs, aggWM, custWindowCounts = CAEnsemble(vNDV,kVector,kFinal,custIDInput,windowSize)
+	finalClusterLabels, noVotesIndex, noVotesIDs, clusteredIDs, caMatrix, custWindowCounts = CAEnsemble(vNDV,kVector,kFinal,custIDInput,windowSize)
 	# Remove any omitted customers from the list of phase labels
 	if len(noVotesIndex) != 0:
 		clusteredPhaseLabels = np.delete(phaseLabelsErrors,noVotesIndex,axis=1)
