@@ -69,7 +69,7 @@
 				</div>
 			</div>
 			<div class="shortInput">
-				<label class="tooltip">Clusters<span class="classic">Number of regions to phase. 7 is a good default, or you can set this to 3 * number of regulators + 2</span></label>
+				<label class="tooltip">Clusters<span class="classic">Number of regions with similar voltage. 7 is a good default, or you can set this to 3 * number of regulators + 2 on the system. Somewhere between 3 and 25 clusters is recommended.</span></label>
 				<input type="text" id="kFinal" name="kFinal"/>
 			</div>
 			<div class="shortInput">
@@ -86,11 +86,11 @@
 		<img id="confusionMatrixImg" style="width:100%"/>
 		<script type="text/javascript">gebi("confusionMatrixImg").src = "data:image/png;base64," + allOutputData.confusionMatrixImg</script>
 	</div>
-	<p class="reportTitle postRun" style="page-break-before:always"><b>Predicted Phases</b></p>
+	<p class="reportTitle postRun" style="page-break-before:always"><b>Predicted Phases (Phasing Errors in Red)</b></p>
 	<div id="predictedPhases" class="tightContent postRun">
 		<table style="width:100%">
 		{% for row in allOutputDataDict['phasingResults'] %}
-			<tr>
+			<tr style="{% if row[1] != row[2] and row[0] != 'Meter ID' %}color:red{% endif %}">
 			{% for td in row %}
 				<td>{{td}}</td>
 			{% endfor %}
