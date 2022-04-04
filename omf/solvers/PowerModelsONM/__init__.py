@@ -115,6 +115,31 @@ def build_settings_file(circuitPath='circuit.dss',settingsPath='settings.json', 
 	' '''
 	runCommands([cmd_string])
 
+def build_events_file(circuitPath='circuit.dss', eventsPath="events.json", custom_events='', default_switch_state='PMD.OPEN', default_switch_dispatchable='PMD.NO', default_switch_status='PMD.ENABLED'):
+	# For now, custom_events follows the already established schema in Julia Vector or Dicts format
+	if custom_events: 
+		with open(custom_events) as custom_events_file:
+			custom_events_data = custom_events_file.read()
+		customEventsDictBuilder = f'''custom_events = {custom_events_data};
+		'''
+		customEventsSwitch = f'custom_events=custom_events,'
+	else:
+		customEventsDictBuilder = ''
+		customEventsSwitch = ''
+
+	cmd_string = f'''julia -e '
+		using PowerModelsONM;
+		{customEventsDictBuilder}
+		build_events_file(
+			"{circuitPath}",
+			"{eventsPath}",
+			{customEventsSwitch}
+			default_switch_state={default_switch_state},
+			default_switch_dispatchable={default_switch_dispatchable},
+			default_switch_status={default_switch_status}
+		)
+	' '''
+	runCommands([cmd_string])
 
 def run_onm(circuitPath='circuit.dss', settingsPath='settings.json', outputPath="onm_out.json", eventsPath="events.json", gurobi='true', verbose='true', fixSmallNumbers='true', applySwitchScores='true', skipList='["faults","stability"]', prettyPrint='true', optSwitchFormulation="lindistflow", optSwitchSolver="mip_solver", optSwitchAlgorithm="global", optSwitchProblem="block", optDispFormulation="lindistflow", optDispSolver="mip_solver", mip_solver_gap=0.05):
 	#TODO: allow arguments to function for the ones hardcoded!
@@ -157,15 +182,21 @@ if __name__ == '__main__':
 	# circuitFile = 'nreca1824_dwp.dss'
 	# eventsFile = 'nreca1824_dwp.events.json'
 	# install_onm()
-	build_settings_file(
+	# build_settings_file(
+	# 	circuitPath=f'{omfDir}/static/testFiles/{circuitFile}',
+	# 	settingsPath='./settings.working.json',
+	# 	loadPrioritiesFile=f'{loadPrioritiesPath}',
+	# 	microgridTaggingFile=f'{microgridTaggingPath}'
+	# )
+	build_events_file(
 		circuitPath=f'{omfDir}/static/testFiles/{circuitFile}',
-		settingsPath='./settings.working.json',
-		loadPrioritiesFile=f'{loadPrioritiesPath}',
-		microgridTaggingFile=f'{microgridTaggingPath}'
+		eventsPath='./built_events.json',
+		default_switch_state='PMD.OPEN',
+		default_switch_dispatchable='PMD.NO'
 	)
-	run_onm(
-		circuitPath=f'{omfDir}/static/testFiles/{circuitFile}',
-		settingsPath='./settings.working.json',
-		outputPath='./onm_out.json',
-		eventsPath=f'{omfDir}/static/testFiles/{eventsFile}'
-	)
+	# run_onm(
+	# 	circuitPath=f'{omfDir}/static/testFiles/{circuitFile}',
+	# 	settingsPath='./settings.working.json',
+	# 	outputPath='./onm_out.json',
+	# 	eventsPath=f'{omfDir}/static/testFiles/{eventsFile}'
+	# )
