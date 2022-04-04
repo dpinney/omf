@@ -107,7 +107,7 @@ elif platform.system()=="Darwin": # MacOS
 	# pip installs
 	os.system("cd omf")
  	# os.system('pip3 install ecos')
-	os.system('pip3 install pygraphviz --install-option="--include-path=/usr/local/include/graphviz" --install-option="--library-path=/usr/local/lib/graphviz/"')
+	os.system('python3 -m pip install pygraphviz --install-option="--include-path=/usr/local/include/" --install-option="--library-path=/usr/local/lib/"')
 	pipInstallInOrder("pip3")
 	os.system("python3 setup.py develop")
 else:
