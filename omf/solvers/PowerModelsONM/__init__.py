@@ -156,7 +156,7 @@ if __name__ == '__main__':
 	# microgridTaggingPath = f'{omfDir}/static/testFiles/iowa240_dwp_22.microgridTagging.basic.json'
 	# circuitFile = 'nreca1824_dwp.dss'
 	# eventsFile = 'nreca1824_dwp.events.json'
-	install_onm()
+	# install_onm()
 	build_settings_file(
 		circuitPath=f'{omfDir}/static/testFiles/{circuitFile}',
 		settingsPath='./settings.working.json',

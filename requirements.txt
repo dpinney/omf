@@ -5,7 +5,7 @@ Flask>=0.9
 Flask-Login==0.2.11
 Jinja2>=2.7.2
 MarkupSafe>=0.18
-Werkzeug>=0.9.4
+Werkzeug>=0.9.4,<2.1
 argparse>=1.2.1
 backports.ssl-match-hostname>=3.4.0.2
 boto3
