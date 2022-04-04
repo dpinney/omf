@@ -131,6 +131,50 @@ def dss_to_clean_via_save(dss_file, clean_out_path, add_pf_syntax=True, clean_up
 	with open(clean_out_path, 'w') as out_file:
 		out_file.write(clean_out)
 
+def dssCleanLists(pathToDss):
+	'''Helper function to go through dss file and reformat lists (rmatrix, xmatrix, 
+	mult, buses, conns, kvs, kvas) with commas and no spaces'''
+	with open(pathToDss, 'r') as dssFile:
+		contents = dssFile.readlines()
+	fixedContents = []
+	for line in contents:
+		lineItems = line.split()
+		openedList = False
+		lineString = ""
+		for item in lineItems:
+			if lineString == "":
+				#first item in line
+				lineString = lineString + item
+			else:
+				listOpeners = [ '(' , '[' , '{' ]
+				listClosers = [ ')' , ']' , '}' ]
+				hasOpener = [x for x in listOpeners if(x in item)]
+				hasCloser = [x for x in listClosers if(x in item)]
+				noCommas = [ '(' , '[' , '{' , ',' , '|' ]
+				if '=' in item:
+					lineString = lineString + " " + item
+					if hasCloser:
+						openedList = False
+					elif hasOpener:
+						openedList = True
+				elif openedList:
+					if (lineString[-1] in noCommas) or (item[0] in listClosers) or (item[0] == '|'):
+						lineString = lineString + item
+					else:
+						lineString = lineString + ',' + item
+					if hasCloser:
+						openedList = False
+				else:
+					lineString = lineString + " " + item
+					if hasOpener and not hasCloser:
+						openedList = True
+		fixedContents.append(lineString)
+	outPath = pathToDss[:-4] + "_cleanLists.dss"
+	with open(outPath, 'w') as outFile:
+		for fixedLine in fixedContents:
+			outFile.write(f'{fixedLine}\n')
+
+
 def dssToTree(pathToDss):
 	''' Convert a .dss file to an in-memory, OMF-compatible 'tree' object.
 	Note that we only support a VERY specifically-formatted DSS file.'''
@@ -205,7 +249,7 @@ def dssToTree(pathToDss):
 					else: # if single key has not already been added, add it
 						ob[k] = v
 		except:
-			raise Exception(f"\nError encountered in group (space delimited) #{jpos+1} of line {i + 1}: {line}")
+			raise Exception(f'\nError encountered in group (space delimited) #{jpos+1} of line {i + 1}: {line}')
 			# raise Exception("Temp fix but error in loop at line 76")
 		contents[i] = ob
 	# Print to file
@@ -925,14 +969,17 @@ def _dssToOmdTest():
 	omfDir = os.getcwd()
 	# dssFileName = 'ieee37.clean.dss'
 	# dssFilePath = pJoin(curDir, dssFileName)
-	# dssFileName = 'nreca1824.dss'
-	dssFileName = 'network.iowa240.reduced.dss'
-	# dssFilePath = pJoin(omfDir, 'scratch', 'RONM', dssFileName)
-	dssFilePath = pJoin(omfDir, 'static', 'testFiles', 'iowa_240', dssFileName)
+	dssFileName = 'nreca1824_dwp.dss'
+	# dssFileName = 'Master3.dss'
+	dssFilePath = pJoin(omfDir, 'static', 'testFiles', dssFileName)
+	# dssFilePath = pJoin(omfDir, 'static', 'testFiles', 'Delete', dssFileName)
+	# dssCleanLists(dssFilePath)
+	# dssFileName = 'Master3_cleanLists.dss'
+	# dssFilePath = pJoin(omfDir, 'static', 'testFiles', 'Delete', dssFileName)
 	# omdFileName = dssFileName + '.omd'
 	omdFileName = dssFileName + '.omd'
-	# omdFilePath = pJoin(omfDir, 'scratch', 'RONM', omdFileName)
-	omdFilePath = pJoin(omfDir, 'static', 'testFiles', 'iowa_240', omdFileName)
+	omdFilePath = pJoin(omfDir, 'static', 'testFiles', omdFileName)
+	# omdFilePath = pJoin(omfDir, 'static', 'testFiles', 'Delete', omdFileName)
 	# omdFilePath = pJoin(omfDir, 'static', 'publicFeeders', omdFileName)
 	dssToOmd(dssFilePath, omdFilePath, RADIUS=0.0002, write_out=True)
 
