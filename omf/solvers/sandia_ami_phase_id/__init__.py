@@ -15,6 +15,7 @@ import matplotlib.pyplot as plt
 import datetime
 from scipy import stats
 from sklearn.cluster import SpectralClustering
+import seaborn as sns
 
 _myDir = os.path.abspath(os.path.dirname(__file__))
 
@@ -461,7 +462,6 @@ def UpdateAggWM(clusterLabels,custID,currentIDs,aggWM,windowCtr):
 	else:
 		for custCtr in range(0,len(allIndices)):
 			windowCtr[allIndices[custCtr],allIndices] = windowCtr[allIndices[custCtr],allIndices] + 1
-	# End of custCtr for loop
 	return aggWM, windowCtr
 
 def NormalizeAggWM(aggWM,windowCtr):
@@ -734,7 +734,6 @@ def PlotHistogramOfWinVotesConfScore(winVotesConfScore,savePath=-1):
 
 			"""
 	plt.figure(figsize=(12,9))
-	import seaborn as sns
 	sns.histplot(winVotesConfScore)
 	plt.xlabel('Window Votes Confidence Score', fontweight = 'bold',fontsize=32)
 	plt.ylabel('Count', fontweight = 'bold',fontsize=32)
@@ -869,7 +868,6 @@ def PlotHistogramOfCCSeparation(ccSeparation,xLim=0.2,savePath=-1):
 	else:
 		plt.savefig(Path(savePath,filename))
 	plt.close()
-    
 
 def Plot_ModifiedSilhouetteCoefficients(allSC,savePath=-1):
 	""" This function takes the results from the 
@@ -883,29 +881,24 @@ def Plot_ModifiedSilhouetteCoefficients(allSC,savePath=-1):
 		savePath: str or pathlib object - the path to save the histogram 
 		figure.  If none is specified the figure is saved in the current
 		directory        
-                
+				
 	Returns
 	-------
 		None
 	"""
-        
 	# Plot and save histogram
-	plt.figure(figsize=(12,9))
+	plt.figure(figsize=(12,6))
 	sns.histplot(allSC)
-	plt.xlabel('Modified Silhouette Score (values < 0.2 should be considered low confidence)', fontweight = 'bold',fontsize=15)
-	plt.ylabel('Number of Customers', fontweight = 'bold',fontsize=20)
-	plt.title('Histogram of Silhouette Coefficients (Larger values indicate higher confidence in phase predictions)',fontweight='bold',fontsize=12)
+	plt.xlabel('Modified Silhouette Score (values < 0.2 should be considered low confidence)')
+	plt.ylabel('Number of Customers')
+	plt.title('Histogram of Silhouette Coefficients (Larger values indicate higher confidence in phase predictions)')
 	plt.tight_layout()
 	#plt.show()
-	figName =  'ModifiedSC_HIST.png' 
-
+	figName =  'ModifiedSC_HIST.png'
 	if type(savePath) != int:
 		plt.savefig(Path(savePath,figName))
 	else:
 		plt.savefig(figName)
-# End of Plot_ModifiedSilhouetteCoefficients Function   
-
-
 
 def Calculate_ModifiedSilhouetteCoefficients(caMatrix,clusteredIDs,finalClusterLabels,predictedPhases,kFinal):
 	""" This function takes the results from running the Ensemble Spectral Cluster
@@ -987,10 +980,6 @@ def Calculate_ModifiedSilhouetteCoefficients(caMatrix,clusteredIDs,finalClusterL
 		allSC.append(s)
 
 	return allSC
-# End of Calculate_ModifiedSilhouetteCoefficients Function   
-
-
-
 
 def CreateFullListCustomerResults_CAEns(clusteredPhaseLabels,phaseLabelsOriginal,clusteredIDs,custID,noVotesIDs,predictedPhases,allSC,phaseLabelsTrue=-1):
 	""" This function takes the results from the co-association matrix ensemble
@@ -1079,7 +1068,6 @@ def CreateFullListCustomerResults_CAEns(clusteredPhaseLabels,phaseLabelsOriginal
 		else:
 			phaseLabelsTrue_FullList = -1
 	return phaseLabelsOrg_FullList, phaseLabelsPred_FullList, phaseLabelsTrue_FullList,custID_FullList, allSC_FullList
-# End of CreateFullListCustomerResults_CAEns
 
 def main_csv(inputPath, outputPath, kFinal=7, validationData=None, windowSize='default'):
 	''' Perform phasing identification using input CSV.
@@ -1152,6 +1140,19 @@ def main(voltageInputCust, phaseLabelsTrue, phaseLabelsErrors, custIDInput, outp
 	predictedPhases = CalcPredictedPhaseNoLabels(finalClusterLabels, clusteredPhaseLabels,clusteredIDs)
 	# This shows how many of the predicted phase labels are different from the original phase labels
 	diffIndices = np.where(predictedPhases != clusteredPhaseLabels)[1]
+	# Make chart of percentage changes.
+	countOmittedCustomers = len(noVotesIndex)
+	countDiffPredicted = len(diffIndices)
+	countTotal = len(phaseLabelsErrors[0])
+	countNoChange = countTotal - countDiffPredicted - countOmittedCustomers
+	plt.figure(figsize=(12,2))
+	plt.barh([0], [countDiffPredicted/countTotal], label=f'Changed {countDiffPredicted/countTotal:.1%}', color='steelblue')
+	plt.barh([0], [countNoChange/countTotal], left=countDiffPredicted/countTotal, label=f'No Change {countNoChange/countTotal:.1%}', color='gray')
+	plt.barh([0], [countOmittedCustomers/countTotal], left=countDiffPredicted/countTotal + countNoChange/countTotal, label=f'Omitted {countOmittedCustomers/countTotal:.1%}', color='khaki')
+	plt.yticks([])
+	plt.legend(loc="upper center", ncol=3, bbox_to_anchor=(0.5, 1.4))
+	plt.tight_layout()
+	plt.savefig( Path(outputPath).parent / 'PercentagePlot.png')
 	# If we have known-good phase labels, use them here to calculate accuracy.
 	if phaseLabelsTrue is not None:
 		if len(noVotesIndex) != 0:
@@ -1170,7 +1171,6 @@ def main(voltageInputCust, phaseLabelsTrue, phaseLabelsErrors, custIDInput, outp
 		with open(outputPath + '_VALIDATION.txt','w') as outFile:
 			outFile.write(accuracy_report)
 		print(accuracy_report)
-
 	# Calculate and Plot the confidence scores - Modified Silhouette Coefficients
 	allSC = Calculate_ModifiedSilhouetteCoefficients(caMatrix,clusteredIDs,finalClusterLabels,predictedPhases,kFinal)
 
@@ -1178,7 +1178,6 @@ def main(voltageInputCust, phaseLabelsTrue, phaseLabelsErrors, custIDInput, outp
 		phaseLabelsOrg_FullList, phaseLabelsPred_FullList, phaseLabelsTrue_FullList,custID_FullList, allSC_FullList = CreateFullListCustomerResults_CAEns(clusteredPhaseLabels,phaseLabelsErrors,clusteredIDs,custIDInput,noVotesIDs,predictedPhases,allSC,phaseLabelsTrue=clusteredTruePhaseLabels)
 	else:
 		phaseLabelsOrg_FullList, phaseLabelsPred_FullList, phaseLabelsTrue_FullList,custID_FullList, allSC_FullList = CreateFullListCustomerResults_CAEns(clusteredPhaseLabels,phaseLabelsErrors,clusteredIDs,custIDInput,noVotesIDs,predictedPhases,allSC)
-
 	# Write outputs to csv file
 	df = pd.DataFrame()
 	df['Meter ID'] = custID_FullList
@@ -1187,6 +1186,7 @@ def main(voltageInputCust, phaseLabelsTrue, phaseLabelsErrors, custIDInput, outp
 	if phaseLabelsTrue is not None:
 		df['Actual Phase Labels'] = phaseLabelsTrue_FullList[0,:].astype(int)
 	df['Confidence Score'] = allSC_FullList
+	Plot_ModifiedSilhouetteCoefficients(allSC_FullList, Path(outputPath).parent)
 	df.to_csv(outputPath, index=False)
 	print(f'Phasing algorithm corrected {diffIndices.shape[0]} meter phase labels.')
 	print(f'Predicted phase labels written to {outputPath}')

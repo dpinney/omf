@@ -86,6 +86,16 @@
 		<img id="confusionMatrixImg" style="width:100%"/>
 		<script type="text/javascript">gebi("confusionMatrixImg").src = "data:image/png;base64," + allOutputData.confusionMatrixImg</script>
 	</div>
+	<p class="reportTitle postRun"><b>Confidence Scores Overview</b></p>
+	<div id="confidenceHistogram" class="tightContent postRun">
+		<img id="confidenceHistogramImg" style="width:100%"/>
+		<script type="text/javascript">gebi("confidenceHistogramImg").src = "data:image/png;base64," + allOutputData.confidenceHistogramImg</script>
+	</div>
+	<p class="reportTitle postRun"><b>Percentage of Meter Phasing That Changed</b></p>
+	<div id="PercentagePlot" class="tightContent postRun">
+		<img id="PercentagePlotImg" style="width:100%"/>
+		<script type="text/javascript">gebi("PercentagePlotImg").src = "data:image/png;base64," + allOutputData.PercentagePlotImg</script>
+	</div>
 	<p class="reportTitle postRun" style="page-break-before:always"><b>Predicted Phases (Phasing Errors in Red)</b></p>
 	<div id="predictedPhases" class="tightContent postRun">
 		<table style="width:100%">
