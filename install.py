@@ -41,16 +41,16 @@ if platform.system() == "Linux" and platform.linux_distribution()[0] in ["Ubuntu
 elif platform.system() == "Linux" and platform.linux_distribution()[0] in ["CentOS Linux",""]:
 	# TODO: Double check CentOS installation to support Python 3.7 or up
 	# CentOS Docker image appears to come with en_US.UTF-8 locale built-in, but we might need to install that locale in the future. That currently is not done here.
-	os.system("yum -y update") # Make sure yum is updated to prevent any weird package installation issues
+	os.system("sudo yum -y update") # Make sure yum is updated to prevent any weird package installation issues
 	os.system("sudo yum -y install wget git graphviz gcc xerces-c python-devel tkinter octave 'graphviz-devel.x86_64'")
-	os.system("yum --enablerepo=extras install epel-release")
+	os.system("sudo yum --enablerepo=extras install epel-release")
 	os.system("sudo yum -y install mdbtools")
 	os.system("sudo rpm --import http://li.nux.ro/download/nux/RPM-GPG-KEY-nux.ro")
 	os.system("sudo rpm -Uvh http://li.nux.ro/download/nux/dextop/el7/x86_64/nux-dextop-release-0-1.el7.nux.noarch.rpm")
 	os.system("sudo yum -y install ffmpeg ffmpeg-devel -y")
 	os.system("sudo yum -y install python-pip")
 	#os.system("wget --no-check-certificate https://sourceforge.net/projects/gridlab-d/files/gridlab-d/Candidate%20release/gridlabd-4.0.0-1.el6.x86_64.rpm")
-	os.system("rpm -Uvh omf/static/gridlabd-4.0.0-1.el6.x86_64.rpm")
+	os.system("sudo rpm -Uvh omf/static/gridlabd-4.0.0-1.el6.x86_64.rpm")
 	# os.system(f"wget -P {source_dir}/omf/solvers/ 'https://github.com/MATPOWER/matpower/releases/download/7.0/matpower7.0.zip'")
 	# os.system(f"unzip '{source_dir}/omf/solvers/matpower7.0.zip' -d {source_dir}/omf/solvers/")
 	os.system(f'octave-cli --no-gui -p "{source_dir}/omf/solvers/matpower7.0" --eval "install_matpower(1,1,1)"')
