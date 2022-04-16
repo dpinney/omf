@@ -8,6 +8,10 @@ if sys.version_info[0] != 3:
 	print('We only support python major version 3. Install aborted.')
 	sys.exit()
 
+# Detect platform
+major_platform = platform.system()
+linux_distro = platform.uname()[3].lower()
+
 def pipInstallInOrder(pipCommandString):
 	''' This shouldn't be required, but pip doesn't resolve dependencies correctly unless we do this.'''
 	with open("requirements.txt","r") as f:
@@ -17,7 +21,7 @@ def pipInstallInOrder(pipCommandString):
 	# Removes pip log files.
 	os.system("rm \\=*")
 
-if platform.system() == "Linux" and platform.linux_distribution()[0] in ["Ubuntu"]:
+if major_platform == "Linux" and "ubuntu" in linux_distro:
 	os.system("sudo ACCEPT_EULA=Y apt-get -yq install mssql-tools msodbcsql mdbtools") # workaround for the package EULA, which otherwise breaks upgrade!!
 	os.system("sudo apt-get -y update")# && sudo apt-get -y upgrade") # Make sure apt-get is updated to prevent any weird package installation issues
 	os.system("sudo apt-get -y install language-pack-en") # Install English locale 
@@ -38,8 +42,7 @@ if platform.system() == "Linux" and platform.linux_distribution()[0] in ["Ubuntu
 	os.system(f"{sys.executable} -m pip install --upgrade pip setuptools")
 	pipInstallInOrder(f"{sys.executable} -m pip")
 	os.system(f"{sys.executable} setup.py develop")
-elif platform.system() == "Linux" and platform.linux_distribution()[0] in ["CentOS Linux",""]:
-	# TODO: Double check CentOS installation to support Python 3.7 or up
+elif major_platform == "Linux" and "ubuntu" not in linux_distro:
 	# CentOS Docker image appears to come with en_US.UTF-8 locale built-in, but we might need to install that locale in the future. That currently is not done here.
 	os.system("sudo yum -y update") # Make sure yum is updated to prevent any weird package installation issues
 	os.system("sudo yum -y install wget git graphviz gcc xerces-c python-devel tkinter octave 'graphviz-devel.x86_64'")
@@ -59,7 +62,7 @@ elif platform.system() == "Linux" and platform.linux_distribution()[0] in ["Cent
 	pipInstallInOrder(f"{sys.executable} -m pip")
 	os.system(f"{sys.executable} -m pip install --ignore-installed six")
 	os.system(f"{sys.executable} setup.py develop")
-elif platform.system()=='Windows':
+elif major_platform == 'Windows':
 	# Update pip to remove warnings
 	os.system(f"{sys.executable} -m pip install --upgrade pip")
 	# Install choco packages.
@@ -92,7 +95,7 @@ elif platform.system()=='Windows':
 	pipInstallInOrder(f"{sys.executable} -m pip")
 	os.system(f"{sys.executable} setup.py develop")
 	# os.system("refreshenv") # Refresh local environment variables via choco tool.
-elif platform.system()=="Darwin": # MacOS
+elif major_platform == "Darwin": # MacOS
 	# Install homebrew
 	os.system("HOMEBREW_NO_AUTO_UPDATE=1 brew install wget ffmpeg git graphviz octave mdbtools") # Set no-update to keep homebrew from blowing away python3.
 	#os.system("wget -O gridlabd.dmg --no-check-certificate https://sourceforge.net/projects/gridlab-d/files/gridlab-d/Candidate%20release/gridlabd_4.0.0.dmg")
