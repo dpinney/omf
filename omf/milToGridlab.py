@@ -1799,7 +1799,7 @@ def split(fileToSplit, pathToDir=None):
 	noots = dict()
 
 	with open(fileToSplit, 'r') as f:
-		header = f.next()
+		header = f.readline()
 		for i, line in enumerate(f):
 			rows.append(line)
 			line = line.split(',')
