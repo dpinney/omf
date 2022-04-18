@@ -1240,12 +1240,12 @@ def convert(stdString, seqString, rescale=True):
 			if 'latitude' in parentOb and 'longitude' in parentOb:
 				thisOb['latitude'] = str(float(parentOb['latitude']) + random.uniform(-5,5))
 				thisOb['longitude'] = str(float(parentOb['longitude']) + random.uniform(-5,5))
-	# Final Output
-	warnings.warn('*** DONE! %0.3f' % (time.time()-start_time))
 	# 8B research fixes
 	glmTree = phasingMismatchFix(glmTree)
 	glmTree = missingConductorsFix(glmTree)
 	glmTree = fixOrphanedLoads(glmTree)
+	# Final Output
+	warnings.warn('*** DONE! %0.3f' % (time.time()-start_time))
 	return glmTree
 
 def stdSeqToGlm(seqPath, stdPath, glmPath):
