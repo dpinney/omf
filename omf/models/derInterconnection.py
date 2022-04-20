@@ -235,7 +235,7 @@ def work(modelDir, inputDict):
 
 
 			# if der is Off set added DER offline, if its On set DER online
-			if der is 'Off':
+			if der == 'Off':
 				tree[addedDerKey]['generator_status'] = 'OFFLINE'
 				tree[addedDerInverterKey]['generator_status'] = 'OFFLINE'
 			else: # der is on 
