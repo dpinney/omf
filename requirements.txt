@@ -1,5 +1,5 @@
 wheel
-numpy<=1.19
+numpy
 numpy-financial
 Flask>=0.9
 Werkzeug==2.0.3

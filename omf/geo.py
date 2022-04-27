@@ -722,23 +722,32 @@ def latLonByNeighbor(dictOfNeighbors):
 		latLon = (lat, lon)
 	return latLon
 
-def createFixedLatLonOmd(pathToOmdFile, fixedLatLonDict, outfilePath):
+def createFixedLatLonOmd(pathToOmdFile, fixedLatLonDict, outfilePath, fixUndefinedObs):
 	'''This method takes in a path to the omd of the feeder that has corrupted lat/lon values, a dictionary that contains the correct lat/lons (values) for the nodes/buses (keys) that were previously incorrect and creates a new omd file that contains the correct coordinates at the specified output file path (outfilePath)'''
 	with open(pathToOmdFile) as inFile:
 		fullFile = json.load(inFile)
 		tree = fullFile['tree']
-	
+	badCoordObs = []
+	exceptNodes = []
 	for objectKey in tree:
 		objectName = tree[objectKey]['name']
 		if objectName in fixedLatLonDict.keys():
-			origLat = tree[objectKey]['latitude']
-			origLon = tree[objectKey]['longitude']
+			origLat = tree[objectKey].get('latitude', "N/A")
+			origLon = tree[objectKey].get('longitude', "N/A")
 			tree[objectKey]['latitude'] = str(fixedLatLonDict[objectName][0])
 			tree[objectKey]['longitude'] = str(fixedLatLonDict[objectName][1])
 			print("Changed " + objectName + " coordinates from (" + origLat + ", " + origLon + ") to (" + tree[objectKey]['latitude'] + ", " + tree[objectKey]['longitude'] + ")" )
+		else:
+			origLat = tree[objectKey].get('latitude', "N/A")
+			origLon = tree[objectKey].get('longitude', "N/A")
+			if origLat != "N/A" and origLon != "N/A":
+				badCoordObs.append(objectName)
 	fullFile['tree'] = tree
 	with open(outfilePath, 'w') as outFile:
 		json.dump(fullFile, outFile)
+	if fixUndefinedObs:
+		fixedMissingNodes = fixCorruptedLatLons(outfilePath, badCoordObs, exceptNodes)
+		createFixedLatLonOmd(outfilePath, fixedMissingNodes, outfilePath, False)
 
 def openInBrowser(pathToFile):
 	'''Helper function for mapOmd. Try popular web browsers first because png might open in native application. Othwerwise use default program as fallback'''
@@ -753,6 +762,16 @@ def showOnMap(geoJson):
 		json.dump(geoJson, outFile, indent=4)
 	webbrowser.open('file://' + pJoin(tempDir,'geoJsonMap.html'))
 
+def _testFixedLatLonOmd():
+	import csv
+	omdFilePath = pJoin(__neoMetaModel__._omfDir, 'static', 'testFiles', 'iowa240_dwp_22.dss.omd')
+	coordFilePath = pJoin(__neoMetaModel__._omfDir, 'static', 'testFiles', 'BuscoordsLatLon.csv') #coordinate file is csv with each row containing busName, yValue(longitude), xValue(latitude)
+	with open(coordFilePath, 'r') as coordFile:
+		coordReader = csv.reader(coordFile)
+		coordDict = {row[0]:(row[2],row[1]) for row in coordReader}
+	outFilePath = pJoin(__neoMetaModel__._omfDir, 'static', 'testFiles', 'iowa240_dwp_22.goodCoords.dss.omd')
+	createFixedLatLonOmd(omdFilePath, coordDict, outFilePath, True)
+
 def _testLatLonfix():
 	'''Test for fixing a feeder with corrupted auto-assign lat/lon values using findCorruptNodes(), fixCorruptedLatLons(), and createFixedLatLonOmd()'''
 	exceptNodes = ['sourcebus', '_hvmv_sub_lsb', 'hvmv_sub_48332', 'hvmv_sub_hsb', 'regxfmr_hvmv_sub_lsb']
@@ -763,7 +782,7 @@ def _testLatLonfix():
 	# badNodes = ['l0247160', 'l0247162', 'l0247171']
 	print("Number of bad nodes: " + str(len(badNodes)))
 	fixedCoords = fixCorruptedLatLons(omdPath, badNodes, exceptNodes)
-	createFixedLatLonOmd(omdPath, fixedCoords, newOmdPath)
+	createFixedLatLonOmd(omdPath, fixedCoords, newOmdPath, False)
 	mapOmd(newOmdPath, pJoin(__neoMetaModel__._omfDir, 'scratch', 'RONM'), 'html', openBrowser=True, conversion=False)
 
 
@@ -806,3 +825,4 @@ def _tests():
 if __name__ == '__main__':
 	_tests()
 	# _testLatLonfix()
+	# _testFixedLatLonOmd()
