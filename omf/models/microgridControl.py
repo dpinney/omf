@@ -770,8 +770,8 @@ def graphMicrogrid(pathToOmd, pathToJson, pathToCsv, outputFile, settingsFile, u
 	outageCostByType = {busType: sum(outageCostsByType[busType]) for busType in businessTypes}
 	customerCountByType = {busType: len(outageCostsByType[busType]) for busType in businessTypes}
 	meanCustomerCostByType = {busType: outageCostByType[busType]/customerCountByType[busType] for busType in businessTypes}
-	customersByTypeAndDecile = [{busType: len([cost for cost in outageCostsByType[busType] if (cost>costDeciles[x])*(cost<=costDeciles[x+1])]) for busType in businessTypes} for x in range(10)]
-	print(customersOutByTime, customerCostByTime, totalCustomerCost, meanCustomerCost, outageCostByType, meanCustomerCostByType, outageDeciles, costDeciles, customersByTypeAndDecile) # ToDo: Display in front end.
+	# customersByTypeAndDecile = [{busType: len([cost for cost in outageCostsByType[busType] if (cost>costDeciles[x])*(cost<=costDeciles[x+1])]) for busType in businessTypes} for x in range(10)]
+	# print(customersOutByTime, customerCostByTime, totalCustomerCost, meanCustomerCost, outageCostByType, meanCustomerCostByType, outageDeciles, costDeciles, customersByTypeAndDecile) # ToDo: Display in front end.
 
 
 	fig.update_layout(xaxis_title = 'Duration (hours)',
@@ -952,10 +952,10 @@ def new(modelDir):
 		'eventData': open(pJoin(*event_file_path)).read(),
 		'outputFileName': output_file_path[-1],
 		'outputData': open(pJoin(*output_file_path)).read(),
-		'useCache': 'False',
+		'useCache': 'True',
 		'settingsFileName': settings_file_path[-1],
 		'settingsData': open(pJoin(*settings_file_path)).read(),
-		'genSettings': 'True',
+		'genSettings': 'False',
 		'solFidelity': '0.05',
 		'loadPriorityFileName': loadPriority_file_path[-1],
 		'loadPriorityData': loadPriority_file_data,
