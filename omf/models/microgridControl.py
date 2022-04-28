@@ -12,6 +12,7 @@ import plotly as py
 import plotly.graph_objs as go
 from plotly.tools import make_subplots
 import platform
+from statistics import quantiles
 
 # OMF imports
 import omf
@@ -726,6 +727,12 @@ def graphMicrogrid(pathToOmd, pathToJson, pathToCsv, outputFile, settingsFile, u
 	outageCost = []
 	globalMax = 0
 	fig = go.Figure()
+	businessTypes = set(customerOutageData['Business Type'])
+	maxDuration = max([float(x) for x in list(customerOutageData['Duration'])])
+	customersOutByTime = [{busType: 0 for busType in businessTypes} for x in range(math.ceil(maxDuration)+1)]
+	customerCostByTime = [{busType: 0.0 for busType in businessTypes} for x in range(math.ceil(maxDuration)+1)]
+	outageCostsByType = {busType: [] for busType in businessTypes}
+	customerCountByType = {busType: 0 for busType in businessTypes}
 	while row < customerOutageData.shape[0]:
 		customerName = str(customerOutageData.loc[row, 'Customer Name'])
 		duration = str(customerOutageData.loc[row, 'Duration'])
@@ -738,6 +745,10 @@ def graphMicrogrid(pathToOmd, pathToJson, pathToCsv, outputFile, settingsFile, u
 		outageCost.append(customerOutageCost)
 		if localMax > globalMax:
 			globalMax = localMax
+		customersOutByTime[math.floor(float(duration))][businessType] += 1
+		customerCostByTime[math.floor(float(duration))][businessType] += float(customerOutageCost)
+		outageCostsByType[businessType].append(float(customerOutageCost))
+		customerCountByType[businessType] += 1
 		# creating series
 		timesSeries = pd.Series(times)
 		kWperhrSeries = pd.Series(kWperhrEstimate)
@@ -751,6 +762,18 @@ def graphMicrogrid(pathToOmd, pathToJson, pathToCsv, outputFile, settingsFile, u
 			'<b>Cost</b>: $%{y:.2f}')
 		fig.add_trace(trace)
 		row += 1
+	def deciles(dList): return [0.0] + quantiles([float(x) for x in dList], n=10) + [max([float(x) for x in dList])]
+	outageDeciles = deciles(customerOutageData['Duration'].tolist())
+	costDeciles = deciles(outageCost)
+	totalCustomerCost = sum(outageCost)
+	meanCustomerCost = totalCustomerCost / len(outageCost)
+	outageCostByType = {busType: sum(outageCostsByType[busType]) for busType in businessTypes}
+	customerCountByType = {busType: len(outageCostsByType[busType]) for busType in businessTypes}
+	meanCustomerCostByType = {busType: outageCostByType[busType]/customerCountByType[busType] for busType in businessTypes}
+	customersByTypeAndDecile = [{busType: len([cost for cost in outageCostsByType[busType] if (cost>costDeciles[x])*(cost<=costDeciles[x+1])]) for busType in businessTypes} for x in range(10)]
+	print(customersOutByTime, customerCostByTime, totalCustomerCost, meanCustomerCost, outageCostByType, meanCustomerCostByType, outageDeciles, costDeciles, customersByTypeAndDecile) # ToDo: Display in front end.
+
+
 	fig.update_layout(xaxis_title = 'Duration (hours)',
 		yaxis_title = 'Cost ($)',
 		legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1))
