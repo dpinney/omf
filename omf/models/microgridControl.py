@@ -12,7 +12,7 @@ import plotly as py
 import plotly.graph_objs as go
 from plotly.tools import make_subplots
 import platform
-from statistics import quantiles
+# from statistics import quantiles
 
 # OMF imports
 import omf
@@ -762,9 +762,9 @@ def graphMicrogrid(pathToOmd, pathToJson, pathToCsv, outputFile, settingsFile, u
 			'<b>Cost</b>: $%{y:.2f}')
 		fig.add_trace(trace)
 		row += 1
-	def deciles(dList): return [0.0] + quantiles([float(x) for x in dList], n=10) + [max([float(x) for x in dList])]
-	outageDeciles = deciles(customerOutageData['Duration'].tolist())
-	costDeciles = deciles(outageCost)
+	# def deciles(dList): return [0.0] + quantiles([float(x) for x in dList], n=10) + [max([float(x) for x in dList])]
+	# outageDeciles = deciles(customerOutageData['Duration'].tolist())
+	# costDeciles = deciles(outageCost)
 	totalCustomerCost = sum(outageCost)
 	meanCustomerCost = totalCustomerCost / len(outageCost)
 	outageCostByType = {busType: sum(outageCostsByType[busType]) for busType in businessTypes}
