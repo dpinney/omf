@@ -97,7 +97,7 @@ elif major_platform == 'Windows':
 	# os.system("refreshenv") # Refresh local environment variables via choco tool.
 elif major_platform == "Darwin": # MacOS
 	# Install homebrew
-	os.system("HOMEBREW_NO_AUTO_UPDATE=1 brew install wget ffmpeg git graphviz@2 octave mdbtools") # Set no-update to keep homebrew from blowing away python3.
+	os.system("HOMEBREW_NO_AUTO_UPDATE=1 brew install wget ffmpeg git graphviz octave mdbtools") # Set no-update to keep homebrew from blowing away python3.
 	#os.system("wget -O gridlabd.dmg --no-check-certificate https://sourceforge.net/projects/gridlab-d/files/gridlab-d/Candidate%20release/gridlabd_4.0.0.dmg")
 	os.system("sudo hdiutil attach omf/static/gridlabd-4.0_RC1.dmg")
 	os.system('sudo installer -package "/Volumes/GridLAB-D 4.0.0/gridlabd.mpkg" -target /')
