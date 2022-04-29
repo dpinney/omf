@@ -116,7 +116,7 @@ elif major_platform == "Darwin": # MacOS
 	# pip installs
 	os.system("cd omf")
  	# os.system('pip3 install ecos')
-	os.system(f'{sys.executable} -m pip install pygraphviz --global-option=build_ext --global-option="-I/usr/local/include" --global-option="-L/usr/local/lib"')
+	os.system(f'{sys.executable} -m pip install pygraphviz --global-option=build_ext --global-option="-I/usr/local/include/" --global-option="-L/usr/local/lib/"')
 	pipInstallInOrder(f"{sys.executable} -m pip")
 	os.system(f"{sys.executable} setup.py develop")
 else:
