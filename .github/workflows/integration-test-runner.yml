@@ -25,6 +25,7 @@ jobs:
           pip3 install ecos #because it's having trouble not going first
           HOMEBREW_NO_AUTO_UPDATE=1 brew install graphviz #this and 1 below workaround for very flakey pygraphviz install
           pip3 install --global-option=build_ext --global-option="-I$(brew --prefix graphviz)/include/" --global-option="-L$(brew --prefix graphviz)/lib/" pygraphviz
+          HOMEBREW_NO_AUTO_UPDATE=1 brew install octave #workaround for flakey octave
           python3 install.py
       - name: Run tests
         run: |
