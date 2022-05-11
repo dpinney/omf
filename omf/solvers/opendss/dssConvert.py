@@ -440,23 +440,13 @@ def evilDssTreeToGldTree(dssTree):
 				elif 'buses' in ob:
 					#transformer-like object.
 					bb = ob['buses']
-					if not isinstance(bb, list):
-						bb = list(ob['buses'])
-					bb = str(bb).replace(']','').replace('[','').split(',')
+					bb = bb.replace(']','').replace('[','').split(',')
 					b1 = bb[0]
+					fro, froCode = b1.split('.', maxsplit=1)
+					ob['!FROCODE'] = '.' + froCode
 					b2 = bb[1]
-					try:
-						fro, froCode = b1.split('.', maxsplit=1)
-						ob['!FROCODE'] = '.' + froCode
-					except ValueError:
-						fro = b1
-						ob['!FROCODE'] = ''
-					try:
-						to, toCode = b2.split('.', maxsplit=1)
-						ob['!TOCODE'] = '.' + toCode
-					except ValueError:
-						to = b2
-						ob['!TOCODE'] = '' 
+					to, toCode = b2.split('.', maxsplit=1)
+					ob['!TOCODE'] = '.' + toCode
 					gldobj = {
 						'object': obtype,
 						'name': name,
@@ -785,16 +775,6 @@ def getDssCoordinates(omdFilePath, outFilePath):
 			lineStr = "setbusxy bus=" + bus + " x=" + busLon + " y=" + busLat + "\n"
 			coordinateListFile.write(lineStr)
 
-def formatDssCoordinates(coordFilePath, outFilePath):
-	with open(coordFilePath, 'r') as coordFile:
-		coordReader = csv.reader(coordFile)
-		coordDict = {row[0]:(row[1],row[2]) for row in coordReader}
-	with open(outFilePath, 'w') as outFile:
-		for bus in coordDict.keys():
-			line = f'setbusxy bus={bus} x={coordDict[bus][1]} y={coordDict[bus][0]}\n'
-			print(line)
-			outFile.write(line)
-
 def _conversionTests():
 	# pass
 	glmList = set()
@@ -983,23 +963,6 @@ def _randomTest():
 		for x in testSet:
 			csv_writer.writerow([x])
 
-def _formatDssCoordsTest():
-	curDir = os.getcwd()
-	os.chdir('../..')
-	omfDir = os.getcwd()
-	coordFilePath = pJoin(omfDir, 'static', 'testFiles', 'BuscoordsLatLon.csv')
-	outFilePath = pJoin(omfDir, 'static', 'testFiles', 'BuscoordsLatLon.dss')
-	formatDssCoordinates(coordFilePath, outFilePath)
-
-def _omdToDssTest():
-	curDir = os.getcwd()
-	os.chdir('../..')
-	omfDir = os.getcwd()
-	omdFilePath = omdFilePath = pJoin(omfDir, 'static', 'testFiles', 'iowa240_dwp_22.dss.omd')
-	dssTree = omdToTree(omdFilePath)
-	dssFilePath = pJoin(omfDir, 'static', 'testFiles', 'iowa240_dwp_22_converted.dss.omd')
-	treeToDss(dssTree, dssFilePath)
-
 def _dssToOmdTest():
 	curDir = os.getcwd()
 	os.chdir('../..')
@@ -1008,10 +971,12 @@ def _dssToOmdTest():
 	# dssFilePath = pJoin(curDir, dssFileName)
 	dssFileName = 'nreca1824_dwp.dss'
 	# dssFileName = 'Master3.dss'
-	# dssFileName = 'Master3_cleanLists_goodCoords.dss'
 	dssFilePath = pJoin(omfDir, 'static', 'testFiles', dssFileName)
 	# dssFilePath = pJoin(omfDir, 'static', 'testFiles', 'Delete', dssFileName)
 	# dssCleanLists(dssFilePath)
+	# dssFileName = 'Master3_cleanLists.dss'
+	# dssFilePath = pJoin(omfDir, 'static', 'testFiles', 'Delete', dssFileName)
+	# omdFileName = dssFileName + '.omd'
 	omdFileName = dssFileName + '.omd'
 	omdFilePath = pJoin(omfDir, 'static', 'testFiles', omdFileName)
 	# omdFilePath = pJoin(omfDir, 'static', 'testFiles', 'Delete', omdFileName)
@@ -1068,6 +1033,4 @@ if __name__ == '__main__':
 	# _randomTest()
 	# _conversionTests()
 	_dssToOmdTest()
-	# _omdToDssTest()
 	#_dssCoordTest()
-	# _formatDssCoordsTest()
