@@ -186,7 +186,7 @@ def workIso(modelDir, inputDict):
 	if contamination == 0:
 		contamination = 'auto'
 	clf =  IsolationForest(max_samples=samples,	n_estimators=estimators,
-		contamination=contamination, behaviour='new', random_state=42)
+		contamination=contamination, random_state=42)
 
 	# load our csv to df
 	f = StringIO(inputDict["file"])

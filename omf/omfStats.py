@@ -54,14 +54,17 @@ def genModelDatabase(outPath):
 		for owner in [x for x in os.listdir(modelDir) if not x.startswith('.')]:
 			ownerDir = os.path.join(modelDir, owner)
 			for project in [x for x in os.listdir(ownerDir) if not x.startswith('.')]:
-				projectDir = os.path.join(ownerDir, project)
-				with open(projectDir + '/allInputData.json') as j:
-					jData = json.load(j)
-				created = jData.get('created','2014-07-15 12:00:00').split('.')[0]
-				if 'runTime' in jData:
-					writer.writerow([owner, project, jData['modelType'], jData['runTime'], 'NOSTATUS', created])
-				else:
-					writer.writerow([owner, project, jData['modelType'], '0:00:00', 'NOSTATUS', created])
+				try:
+					projectDir = os.path.join(ownerDir, project)
+					with open(projectDir + '/allInputData.json') as j:
+						jData = json.load(j)
+					created = jData.get('created','2014-07-15 12:00:00').split('.')[0]
+					if 'runTime' in jData:
+						writer.writerow([owner, project, jData['modelType'], jData['runTime'], 'NOSTATUS', created])
+					else:
+						writer.writerow([owner, project, jData['modelType'], '0:00:00', 'NOSTATUS', created])
+				except:
+					pass #busted json
 
 def genAllImages():
 	'''Creates tsv database of models and images from log'''
