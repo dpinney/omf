@@ -337,7 +337,8 @@ def regenOmfStats():
 	'''Regenarate stats images.'''
 	if User.cu() != "admin":
 		return redirect("/")
-	genImagesProc = Process(target=omfStats.genAllImages, args=[])
+	genAllImages = omfStats.genAllImages
+	genImagesProc = Process(target=genAllImages, args=[])
 	genImagesProc.start()
 	return redirect("/omfStats")
 
