@@ -1,7 +1,13 @@
 /**********************************************
 HEADER and MENU LINKS
 **********************************************/
-div#header{width:100%;min-width:1000px;height:25px;background:black;padding:0.6em 0 0.6em 0;}
+div#header{
+	width:100%;
+	min-width:1000px;
+	height:25px;
+	background:black;
+	padding:0.6em 0 0.6em 0;
+	box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.15) !important; }
 div#headInnerBlock{width:1000px;height:40px;font-size:medium;color:white;margin: 4px auto 0 auto;}
 div#menuLeft{height:40px;float:left;font-size:medium;color:white;margin-left:5px;}
 div#menuRight{height:40px;font-size:medium;color:white;float:right;}
@@ -76,9 +82,6 @@ body {
 	min-width: 1000px; }
 div.content {
 	background: white;
-	border-width: 1px 0px 1px 0px;
-	border-color: gray;
-	border-style: solid;
 	padding: 10px;
 	width: 980px;
 	max-width:980px;
@@ -86,7 +89,11 @@ div.content {
 	margin-left: auto;
 	margin-right: auto;
 	margin-top: 20px;
-	margin-bottom: 30px; }
+	margin-bottom: 30px;
+	border: 0.5px solid lightgray;
+	border-radius: 8px;
+	box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.15) !important;
+	}
 @media print {
 	body {background:white}
 	button {display:none !important} }
@@ -94,7 +101,10 @@ div.content {
 /**********************************************
 FORMS, LABELS, BUTTONS AND INPUT FIELDS
 **********************************************/
-form {line-height:10pt; padding: 0px; margin: 0px;}
+form {
+	line-height:10pt;
+	padding: 0px;
+	margin: 0px;}
 input {
 	border-bottom: thin dotted black; 
 	text-align: right;
@@ -116,7 +126,8 @@ select, input[type='text'], input[type='email'], input[type='file'], input[type=
 	margin:0px;
 	border-width:1px;
 	border-color:white;
-	border-style:solid; }
+	border-style:solid; 
+	border-radius: 7px;}
 button, input[type='submit'], label.fileButton {
 	width:auto;
 	padding: 4px;
@@ -177,10 +188,10 @@ div.tightContent {
 	margin-right: auto; 
 	margin-top: 0px; 
 	margin-bottom: 20px; 
-	border-style: solid; 
-	border-color: gray;
-	border-width: 1px 0px 1px 0px; 
-	background-color: white;}
+	background-color: white;
+	border: 0.5px solid lightgray;
+	border-radius: 8px;
+	box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.15) !important; }
 div.tightContent div {
 	margin-top: 0px;
 	margin-bottom: 0px; 
@@ -462,7 +473,7 @@ div#triangle-message {
 	text-align: center;
 	z-index:1;
 	top:5px;
-	color: #000000; 
+	color: white; 
 	outline: none;
 	cursor: help;
 }

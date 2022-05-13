@@ -31,6 +31,7 @@
 				color:white;
                 background-color: dimgrey;
                 left: 5px;
+                border-radius: 5px;
 			}
             #scaleButton {
                 top: 175px;
@@ -299,6 +300,7 @@
             .floatingTables {
                 position: absolute;
                 top: 0px;
+                right: 51vw;
                 height: 0px;
             }
 
@@ -333,6 +335,7 @@
             .tableTitle {
                 background-color: black;
                 color: white;
+                cursor: move;
             }
 			tbody {
                 border-collapse: collapse;
@@ -390,7 +393,7 @@
             <div id="descriptionTables" class="floatingTables"></div>
             <div id="selectionTable" class="floatingTables"></div>
             <!-- Controls -->
-            <div style="top:55px;" class="divButton" onclick="window.panZoom.zoomIn()" title="Zoom In">+</div>
+            <div style="top:55px; line-height:25px" class="divButton" onclick="window.panZoom.zoomIn()" title="Zoom In">+</div>
             <div style="top:95px;" class="divButton" onclick="window.panZoom.zoomOut()" title="Zoom Out">-</div>
             <div style="top:135px;" class="divButton" onclick="window.panZoom.reset()" title="Reset Zoom">R</div>
             <div id="scaleButton" class="divButton" title="Scale To">S</div>
