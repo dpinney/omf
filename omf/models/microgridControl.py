@@ -407,7 +407,7 @@ def validateSettingsFile(settingsFile):
 	else:
 		return 'Corrupted Settings file input, generating default settings'
 
-def graphMicrogrid(pathToOmd, pathToJson, pathToCsv, outputFile, settingsFile, useCache, workDir, outageDuration, profit_on_energy_sales, restoration_cost, hardware_cost, eventsFilename, genSettings, solFidelity, loadPriorityFile, microgridTaggingFile):
+def graphMicrogrid(pathToOmd, pathToJson, pathToCsv, outputFile, settingsFile, useCache, workDir, profit_on_energy_sales, restoration_cost, hardware_cost, eventsFilename, genSettings, solFidelity, loadPriorityFile, microgridTaggingFile):
 	''' Run full microgrid control process. '''
 	# Setup ONM if it hasn't been done already.
 	if not PowerModelsONM.check_instantiated():
@@ -469,6 +469,7 @@ def graphMicrogrid(pathToOmd, pathToJson, pathToCsv, outputFile, settingsFile, u
 		numTimeSteps = len(simTimeSteps)
 		stepSize = 1 #TODO: change this to be total_simulation_time/numTimeSteps, but for now, we default to 1 hr
 		voltages = data['Voltages']
+		outageDuration = stepSize * numTimeSteps
 		loadServed = data['Load served']
 		storageSOC = data['Storage SOC (%)']
 		switchLoadAction = data['Device action timeline']
@@ -940,7 +941,6 @@ def work(modelDir, inputDict):
 		pathToData3,
 		inputDict['useCache'],
 		modelDir, #Work directory
-		inputDict['outageDuration'],
 		inputDict['profit_on_energy_sales'],
 		inputDict['restoration_cost'],
 		inputDict['hardware_cost'],
