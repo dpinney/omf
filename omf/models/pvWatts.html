@@ -23,7 +23,7 @@
 		</div>
 	</div>
 	<div id="triangle-parent">
-		<div id="triangle-message">New Version<span class="classic-triangle">A new version of the model has been added to the OMF. To get the new outputs, please fill in any missing inputs and hit "Run Model". You can also just look at the old inputs/outputs.</span></div>
+		<div id="triangle-message">New Version<span class="classic-triangle">A new version of the model has been added to the OMF. To get the new outputs, please fill in any missing inputs and hit "Run Model". You can also just look at the old inputs, outputs.</span></div>
 		<div id="triangle-topright"></div>
 	</div>
 	<p class="reportTitle">Model Input</p>
@@ -120,8 +120,8 @@
 				<label>Length Units</label>
 				<select id="simLengthUnits" name="simLengthUnits" value="{{allInputDataDict.simLengthUnits}}">
 					<!--<option value="minutes">Minutes</option> -->
-					<option value="hours">Hours</option>
-					<option value="days">Days</option>
+					<option value="hours" {% if allInputDataDict.simLengthUnits == 'hours' %}selected{% endif %}>Hours</option>
+					<option value="days" {% if allInputDataDict.simLengthUnits == 'days' %}selected{% endif %}>Days</option>
 				</select>
 			</div>
 			{{ omfModelButtons }}
