@@ -44,16 +44,16 @@
 				<label>Model Name</label>
 				<input type="text" id="modelName" name="modelName" value="{{allInputDataDict.modelName}}" pattern="^[\w\s\d\.-]+$" required="required">
 			</div>
-			<div class="shortInput runningInline postRunInline">
+			<div class="shortInput">
 				<label>User</label>
 				<input type="text" id="user" name="user" value="{{allInputDataDict.user}}" readonly/>
 			</div>
-			<div class="runningInline postRunInline shortInput">
+			<div class="shortInput">
 				<label>Created</label>
 				<input type="text" id="created" name="created" value="{{allInputDataDict.created}}" readonly/>
 			</div>
 			{% if modelStatus == 'finished' %}
-			<div class="postRunInline shortInput">
+			<div class="shortInput">
 				<label>Run Time</label>
 				<input type="text" id="runTime" name="runTime" value="{{allInputDataDict.runTime}}" readonly/>
 			</div>
