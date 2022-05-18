@@ -11,6 +11,7 @@
 	<script type="text/javascript" src="{{pathPrefix}}/static/omf.js"></script>
 	<script type="text/javascript" src="{{pathPrefix}}/static/jquery-1.9.1.js"></script>
 	<script src="{{pathPrefix}}/static/highcharts4.src.js"></script>
+	<script>allInputData = {{allInputDataDict}}</script>
 </head>
 <body>
 	<div id="header">
@@ -47,7 +48,7 @@
 			{% if modelStatus == 'finished' %}
 			<div class="shortInput">
 				<label>Run Time</label>
-				<input type="text" id="runTime" name="runTime" value={{allInputDataDict.runTime}} readonly/>
+				<input type="text" id="runTime" name="runTime" value="{{allInputDataDict.runTime}}" readonly/>
 			</div>
 			{% endif %}
 			<div class="wideInput">

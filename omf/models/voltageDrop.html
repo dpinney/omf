@@ -11,24 +11,21 @@
 	<script type="text/javascript" src="{{pathPrefix}}/static/omf.js"></script>
 	<script type="text/javascript" src="{{pathPrefix}}/static/jquery-1.9.1.js"></script>
 	<!-- Data  Imports -->
-	<script>allInputData={% if allInputDataDict %}{{allInputDataDict | tojson}}{% else %}null{% endif %}</script>
-	<script>allOutputData={% if allOutputDataDict %}{{allOutputDataDict | tojson}}{% else %}null{% endif %}</script>
-	<script>modelStatus="{{modelStatus}}"</script>
-	<script>currentUser="{{datastoreNames.get('currentUser','test')}}"</script>
 	<script type="text/javascript">
 		function editFeeder(modelName, feederNum) {
 			console.log("modelName:",modelName)
-			studyUser = allInputData.user
+			studyUser = "{{allInputDataDict.user}}"
 			window.open("/feeder/" + studyUser + "/" + modelName + "/" + feederNum,  "_blank")
 		}
 	</script>
+	<script>allInputData = {{allInputDataDict}}</script>
 </head>
-<body onload="init()">
+<body>
 	<div id="header">
 		<div id="headInnerBlock">
 			<div id="menuLeft">
 				<a style="color:white" href="/">Open Modeling Framework</a> &#187;&nbsp;&nbsp;Model
-				&#8220;<p id="titleText" style="display:inline"></p>&#8221;
+				&#8220;<p id="titleText" style="display:inline">{{allInputDataDict.modelName}}</p>&#8221;
 			</div>
 		</div>
 	</div>
@@ -45,110 +42,92 @@
 			</div>
 			<div class="shortInput">
 				<label>Model Name</label>
-				<input type="text" id="modelName" name="modelName" pattern="^[\w\s\d\.-]+$" required="required">
+				<input type="text" id="modelName" name="modelName" value="{{allInputDataDict.modelName}}" pattern="^[\w\s\d\.-]+$" required="required">
 			</div>
 			<div class="shortInput runningInline postRunInline">
 				<label>User</label>
-				<input type="text" id="user" name="user" readonly/>
+				<input type="text" id="user" name="user" value="{{allInputDataDict.user}}" readonly/>
 			</div>
 			<div class="runningInline postRunInline shortInput">
 				<label>Created</label>
-				<input type="text" id="created" name="created" readonly/>
+				<input type="text" id="created" name="created" value="{{allInputDataDict.created}}" readonly/>
 			</div>
+			{% if modelStatus == 'finished' %}
 			<div class="postRunInline shortInput">
 				<label>Run Time</label>
-				<input type="text" id="runTime" name="runTime" readonly/>
+				<input type="text" id="runTime" name="runTime" value="{{allInputDataDict.runTime}}" readonly/>
 			</div>
+			{% endif %}
 			<div class="shortInput">
 				<label>Feeder</label>
 				<button id="feederButton" type="button" onclick="javascript:editFeeder(allInputData.modelName,1);" style="display:block;width:125px;">Open Editor</button>
-				<input type="text" id="feederName1" name="feederName1" style="display:none">
+				<input type="text" id="feederName1" name="feederName1" value="{{allInputDataDict.feederName1}}" style="display:none">
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Layout Algorithm<span class="classic">Geospatial shows the circuit the same way it was defined in the feeder editor. Force Directed uses an algorithm to show the circuit elements evenly spaced (useful for circuits without location data).</span></label>
 				<select id="layoutAlgorithm" name="layoutAlgorithm">
-					<option value="geospatial">Geospatial</option>
-					<option value="forceDirected">Force Directed</option>
+					<option value="geospatial" {% if allInputDataDict.layoutAlgorithm == "geospatial" %}selected{% endif %}>Geospatial</option>
+					<option value="forceDirected" {% if allInputDataDict.layoutAlgorithm == "forceDirected" %}selected{% endif %}>Force Directed</option>
 				</select>
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Node Coloring By<span class="classic">Select the simulation output value that will be used to color the nodes in the circuit.</span></label>
 				<select id="nodeCol" name="nodeCol">
-					<option value="Voltage">Voltage (V)</option>
-					<option value="VoltageImbalance">Voltage Imbalance (%)</option>
-					<option value="perUnitVoltage">Per-Unit Voltage (unitless)</option>
-					<option value="perUnit120Voltage">120 V Scaled Per-Unit Voltage (V)</option>
-					<option value="None">No Node Coloring</option>
+					<option value="Voltage" {% if allInputDataDict.nodeCol == "Voltage" %}selected{% endif %}>Voltage (V)</option>
+					<option value="VoltageImbalance" {% if allInputDataDict.nodeCol == "VoltageImbalance" %}selected{% endif %}>Voltage Imbalance (%)</option>
+					<option value="perUnitVoltage" {% if allInputDataDict.nodeCol == "perUnitVoltage" %}selected{% endif %}>Per-Unit Voltage (unitless)</option>
+					<option value="perUnit120Voltage" {% if allInputDataDict.nodeCol == "perUnit120Voltage" %}selected{% endif %}>120 V Scaled Per-Unit Voltage (V)</option>
+					<option value="None" {% if allInputDataDict.nodeCol == "None" %}selected{% endif %}>No Node Coloring</option>
 				</select>
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Line Coloring By<span class="classic">Select the simulation output value that will be used to color the lines in the circuit.</span></label>
 				<select id="edgeCol" name="edgeCol">
-					<option value="Current">Current (A)</option>
-					<option value="Power">Power (W)</option>
-					<option value="Rating">Line Rating (A)</option>
-					<option value="PercentOfRating">Current vs. Line Rating (%)</option>
-					<option value="None">No Line Coloring</option>
+					<option value="Current" {% if allInputDataDict.edgeCol == "Current" %}selected{% endif %}>Current (A)</option>
+					<option value="Power" {% if allInputDataDict.edgeCol == "Power" %}selected{% endif %}>Power (W)</option>
+					<option value="Rating" {% if allInputDataDict.edgeCol == "Rating" %}selected{% endif %}>Line Rating (A)</option>
+					<option value="PercentOfRating" {% if allInputDataDict.edgeCol == "PercentOfRating" %}selected{% endif %}>Current vs. Line Rating (%)</option>
+					<option value="None" {% if allInputDataDict.edgeCol == "None" %}selected{% endif %}>No Line Coloring</option>
 				</select>
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Node Labels<span class="classic">Text labels on nodes.</span></label>
 				<select id="nodeLabs" name="nodeLabs">
-					<option value="Name">Component Name</option>
-					<option value="Value">Simulation Value</option>
-					<option value="None">No Label</option>
+					<option value="Name" {% if allInputDataDict.nodeLabs == "Name" %}selected{% endif %}>Component Name</option>
+					<option value="Value" {% if allInputDataDict.nodeLabs == "Value" %}selected{% endif %}>Simulation Value</option>
+					<option value="None" {% if allInputDataDict.nodeLabs == "None" %}selected{% endif %}>No Label</option>
 				</select>
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Line Labels<span class="classic">Text labels on linesn</span></label>
 				<select id="edgeLabs" name="edgeLabs">
-					<option value="Name">Component Name</option>
-					<option value="Value">Simulation Value</option>
-					<option value="None">No Label</option>
+					<option value="Name" {% if allInputDataDict.edgeLabs == "Name" %}selected{% endif %}>Component Name</option>
+					<option value="Value" {% if allInputDataDict.edgeLabs == "Value" %}selected{% endif %}>Simulation Value</option>
+					<option value="None" {% if allInputDataDict.edgeLabs == "None" %}selected{% endif %}>No Label</option>
 				</select>
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Color Map<span class="classic">Select a gradient for coloring the physical values</span></label>
 				<select id="customColormap" name="customColormap">
-					<option value="False">Viridis</option>
-					<option value="True">Gray, Red, Blue</option>
+					<option value="False" {% if allInputDataDict.customColormap == "False" %}selected{% endif %}>Viridis</option>
+					<option value="True" {% if allInputDataDict.customColormap == "True" %}selected{% endif %}>Gray, Red, Blue</option>
 				</select>
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Image Resolution (sq. in.)<span class="classic">Please select a value lower than 10,000</span></label>
-				<input type="text" id="rezSqIn" name="rezSqIn" pattern="^\d{1,4}$"/>
+				<input type="text" id="rezSqIn" name="rezSqIn" value="{{allInputDataDict.rezSqIn}}" pattern="^\d{1,4}$"/>
 			</div>
-			<div class="wideInput" style="text-align:right">
-				<button id="deleteButton" type="button" class="stoppedInline postRunInline" onclick="deleteModel()">Delete</button>
-				<button id="shareButton" type="button" class="postRunInline" onclick="shareModel()">Share</button>
-				<button id="duplicateButton" type="button" class="postRunInline" onclick="duplicateModel()">Duplicate</button>
-				<button id="cancelButton" class="runningInline" type="button" onclick="cancelModel()">Cancel Run</button>
-				<button id="runButton" class="stoppedInline postRunInline" type="submit">Run Model</button>
-			</div>
+			{{ omfModelButtons }}
 		</form>
 	</div>
-	<div id ="runIndicator" class="content running">
-		Model running on server. Refresh the page to check for results, or wait for automatic refresh every 5 seconds.
-	</div>
-	<div id ="stopIndicator" class="content stopped" style="visibility: hidden">
-		<pre id='errorText' style='overflow-x:scroll'></pre>
-		<script type="text/javascript">
-		if (typeof(allInputData.stderr) !== 'undefined') {
-			gebi('stopIndicator').style.visibility = 'visible'
-			gebi('errorText').innerHTML = 'MODEL ENCOUNTERED AN ERROR AS FOLLOWS: \n\n' + allInputData.stderr}
-		</script>
-	</div>
+	{{ omfRunDebugBlock }}
+	{% if modelStatus == 'finished' %}
 	<div id="output">
-		<p class="reportTitle postRun" style="page-break-before:always">Voltage Drop Diagram</p>
-		<div id="voltageDropDiagram" class="tightContent postRun">
-			<img id="voltageDropChart" style="width:1000px;" />
-			<script type="text/javascript">gebi("voltageDropChart").src = "data:image/png;base64," + allOutputData.voltageDrop</script>
+		<p class="reportTitle" style="page-break-before:always">Voltage Drop Diagram</p>
+		<div id="voltageDropDiagram" class="tightContent">
+			<img id="voltageDropChart" style="width:1000px;" src="data:image/png;base64,{{allOutputDataDict.voltageDrop}}"/>
 		</div>
+		{{ rawOutputFiles }}
 	</div>
-	<p class="reportTitle postRun"><b>Raw Input and Output Files</b></p>
-	<div id="rawOutput" class="content postRun" style="margin-top:0px">
-		{% for name in allOutputDataDict['fileNames'] %}
-			{% if loop.index > 1 %}&mdash; {% endif %}<a href="/downloadModelData/{{allInputDataDict['user']}}/{{allInputDataDict['modelName']}}/{{name}}">{{name}}</a>
-		{% endfor %}
-	</div>
+	{% endif %}
 </body>
