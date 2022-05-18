@@ -18,12 +18,13 @@
 	<script>allOutputData={% if allOutputDataDict %}{{allOutputDataDict | tojson}}{% else %}null{% endif %}</script>
 	<script>modelStatus="{{modelStatus}}"</script>
 	<script>currentUser="{{datastoreNames.get('currentUser','test')}}"</script>
+	<script>user="{{allInputDataDict.user}}"</script>
 </head>
-<body onload="init()">
+<body>
 	<div id="header">
 		<div id="menuLeft">
 			<a style="color:white" href="/">Open Modeling Framework</a> &#187;&nbsp;&nbsp;Model
-			&#8220;<p id="titleText" style="display:inline"></p>&#8221;
+			&#8220;<p id="titleText" style="display:inline">{{allInputDataDict.modelName}}</p>&#8221;
 		</div>
 	</div>
 	<div id="triangle-parent">
@@ -40,15 +41,15 @@
 			</div>
 			<div class="circModelBox">
 				<label>Model Name</label><br>
-				<input type="text" id="modelName" name="modelName" pattern="^[\w\s\d\.-]+$" required="required"></td>
+				<input type="text" id="modelName" name="modelName" value="{{allInputDataDict.modelName}}" pattern="^[\w\s\d\.-]+$" required="required"></td>
 			</div>
-			<div class="runningInline postRunInline circModelBox">
+			<div class="circModelBox">
 				<label>User</label><br>
-				<input type="text" id="user" name="user" readonly/>
+				<input type="text" id="user" name="user" value="{{allInputDataDict.user}}" readonly/>
 			</div>
-			<div class="runningInline postRunInline circModelBox">
+			<div class="circModelBox">
 				<label>Created</label><br>
-				<input type="text" id="created" name="created" readonly/>
+				<input type="text" id="created" name="created" value="{{allInputDataDict.created}}" readonly/>
 			</div>
 			<div class="circModelBox">
 				<button id="deleteButton" type="button" class="circModelButtons stoppedInline postRunInline" onclick="deleteModel()">Delete</button>
@@ -56,7 +57,7 @@
 				<button id="duplicateButton" type="button" class="circModelButtons stoppedInline postRunInline" onclick="duplicateModel()">Duplicate</button>
 				<button id="runButton" type="submit" class="circModelButtons stoppedInline postRunInline" onclick="circSave()">Save</button>
 			</div>
-			<input type="hidden" id="circString" name="circString" value="" readonly/>
+			<input type="hidden" id="circString" name="circString" value="{{allInputDataDict.circString}}" readonly/>
 			<div id="copyrightNotice" style="color:gray;line-height:14pt;margin-top:20px">Circuit Simulator Applet was developed by <a href="http://www.falstad.com/" target="_blank">Paul Falstad</a></div>
 		</form>
 	</div>
