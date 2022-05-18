@@ -557,3 +557,9 @@ function createModelName(modelType, modelName) {
 function showSaveAlert(url){
 	alert("To return to this model in the future, save this url:\n" + url)
 }
+
+function editFeeder(modelName, feederNum) {
+	console.log("modelName:",modelName)
+	studyUser = allInputData.user
+	window.open("/feeder/" + studyUser + "/" + modelName + "/" + feederNum,  "_blank")
+}
