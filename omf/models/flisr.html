@@ -38,11 +38,12 @@
 	<link rel="stylesheet" href="https://unpkg.com/leaflet@1.5.1/dist/leaflet.css"	integrity="sha512-xwE/Az9zrjBIphAcBb3F6JVqxf46+CDLwfLMHloNu6KEQCAWi6HcDUbeOfBIptF7tcCzusKFjFw2yuvEpDL9wQ=="	crossorigin=""/>
 	<script src="https://unpkg.com/leaflet@1.5.1/dist/leaflet.js" integrity="sha512-GffPMF3RvMeYyc1LWMHtK8EbPv0iNZ8/oTtHPx9/cc2ILxQ+u905qIwdpULaqDkyBKgOaB57QTMg7ztg8Jm2Og==" crossorigin=""></script>
 	<!-- Data  Imports -->
-	<script>allInputData={% if allInputDataDict %}{{allInputDataDict | tojson}}{% else %}null{% endif %}</script>
-	<script>allOutputData={% if allOutputDataDict %}{{allOutputDataDict | tojson}}{% else %}null{% endif %}</script>
-	<script>currentUser="{{datastoreNames.get('currentUser','test')}}"</script>
+	<script>allInputData = {% if allInputDataDict %}{{allInputDataDict | tojson}}{% else %}null{% endif %}</script>
+	<script>allOutputData = {% if allOutputDataDict %}{{allOutputDataDict | tojson}}{% else %}null{% endif %}</script>
+	<script>currentUser = "{{datastoreNames.get('currentUser','test')}}"</script>
+	<script>modelStatus = "{{modelStatus}}"</script>
 </head>
-<body onload="init()">
+<body>
 	<div id="header">
 		<div id="headInnerBlock">
 			<div id="menuLeft">
@@ -57,26 +58,26 @@
 	</div>
 	<p class="reportTitle">Model Input</p>
 	<div id="input" class="content">
-		<form name="inputForm" action="/runModel/" onsubmit="event.preventDefault(); return isFormValid();" method="post">
+		<form name= "inputForm" action="/runModel/" onsubmit="event.preventDefault(); return isFormValid();" method="post">
 			<div class="shortInput">
 				<label>Model Type <a href="https://github.com/dpinney/omf/wiki/Models-~-flisr" target="blank">Help?</a></label>
-				<input type="text" id="modelType" name="modelType" value="{{modelName}}" readonly/>
+				<input type="text" id="modelType" name="modelType" value="{{allInputDataDict.modelType}}" value="{{modelName}}" readonly/>
 			</div>
 			<div class="shortInput">
 				<label>Model Name</label>
-				<input type="text" id="modelName" name="modelName" pattern="^[\w\s\d\.-]+$" required="required">
+				<input type="text" id="modelName" name="modelName" value="{{allInputDataDict.modelName}}" pattern="^[\w\s\d\.-]+$" required="required">
 			</div>
-			<div class="shortInput runningInline postRunInline">
+			<div class="shortInput">
 				<label>User</label>
-				<input type="text" id="user" name="user" readonly/>
+				<input type="text" id="user" name="user" value="{{allInputDataDict.user}}" readonly/>
 			</div>
-			<div class="shortInput runningInline postRunInline ">
+			<div class="shortInput ">
 				<label>Created</label>
-				<input type="text" id="created" name="created" readonly/>
+				<input type="text" id="created" name="created" value="{{allInputDataDict.created}}" readonly/>
 			</div>
-			<div class="shortInput postRunInline">
+			<div class="shortInput">
 				<label>Run Time</label>
-				<input type="text" id="runTime" name="runTime" readonly/>
+				<input type="text" id="runTime" name="runTime" value="{{allInputDataDict.runTime}}" readonly/>
 			</div>
 			<div class="wideInput">
 				<p class="inputSectionHeader">Model Specifications</p>
@@ -84,85 +85,51 @@
 			<hr>
 			<div class="shortInput">
 				<label>Feeder</label>
-				<script type="text/javascript">
-				function editFeeder(modelName, feederNum) {
-					console.log("modelName:",modelName)
-					studyUser = allInputData.user
-					window.open("/feeder/" + studyUser + "/" + modelName + "/" + feederNum,  "_blank")
-				}
-				</script>
 				<button id="feederButton" type="button" onclick="javascript:editFeeder(allInputData.modelName,1);" style="display:block;width:125px;">Open Editor</button>
-				<input type="text" id="feederName1" name="feederName1" style="display:none">
+				<input type="text" id="feederName1" name="feederName1" value="{{allInputDataDict.feederName1}}" style="display:none">
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Tie Data (.csv file)<span class="classic">Please see the documentation at the help link for the required format</span></label>
 				<input id="tieFile" type="file" style="display:none" onchange="handle_files(this.files,'tieData','tieFileName')">
-				<input id="tieData" name="tieData" type="hidden">
+				<input id="tieData" name="tieData" value="{{allInputDataDict.tieData}}" type="hidden">
 				<div>
 					<label for="tieFile" class="fileButton">Choose File</label>
-					<input id="tieFileName" name="tieFileName" value='' readonly class="uploadFileName">
+					<input id="tieFileName" name="tieFileName" value="{{allInputDataDict.tieFileName}}" value='' readonly class="uploadFileName">
 				</div>
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Radial?<span class="classic">If yes, a simplification to the algorithm will be used.</span></label>
-				<select id="radial" name="radial" />
-					<option value='True'>Yes</option>
-					<option value='False'>No</option>
+				<select id="radial" name="radial" value="{{allInputDataDict.radial}}" />
+					<option value='True' {% if allInputDataDict.radial == 'True' %}selected{% endif %}>Yes</option>
+					<option value='False' {% if allInputDataDict.radial == 'False' %}selected{% endif %}>No</option>
 				</select>
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Show Leaflet Map?<span class="classic">If yes, a simplification to the algorithm will be used.</span></label>
-				<select id="drawMap" name="drawMap" />
-					<option value='True'>Yes</option>
-					<option value='False'>No</option>
+				<select id="drawMap" name="drawMap" value="{{allInputDataDict.drawMap}}" />
+					<option value='True' {% if allInputDataDict.drawMap == 'True' %}selected{% endif %}>Yes</option>
+					<option value='False' {% if allInputDataDict.drawMap == 'False' %}selected{% endif %}>No</option>
 				</select>
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Faulted Line<span class="classic">The line affected by the fault.</span></label>
-				<input type="text" id="faultedLine" name="faultedLine" required="required">
+				<input type="text" id="faultedLine" name="faultedLine" value="{{allInputDataDict.faultedLine}}" required="required">
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Run Powerflow?<span class="classic">If yes, powerflow will be run with GridLAB-D after the algorithm terminates.</span></label>
-				<select id="runPowerflow" name="runPowerflow" />
-					<option value='True'>Yes</option>
-					<option value='False'>No</option>
+				<select id="runPowerflow" name="runPowerflow" value="{{allInputDataDict.runPowerflow}}" />
+					<option value='True' {% if allInputDataDict.runPowerflow == 'True' %}selected{% endif %}>Yes</option>
+					<option value='False' {% if allInputDataDict.runPowerflow == 'False' %}selected{% endif %}>No</option>
 				</select>
 			</div>
-			<div class="wideInput" style="text-align:right">
-				<button id="deleteButton" type="button" class="stoppedInline postRunInline" onclick="deleteModel()">Delete</button>
-				<button id="shareButton" type="button" class="postRunInline" onclick="shareModel()">Share</button>
-				<button id="duplicateButton" type="button" class="postRunInline" onclick="duplicateModel()">Duplicate</button>
-				<button id="cancelButton" class="runningInline" type="button" onclick="cancelModel()">Cancel Run</button>
-				<button id="runButton" class="stoppedInline postRunInline" type="submit">Run Model</button>
-				<!-- Function to send rendered html page to server proof of concept
-				<button id="save" class="stoppedInline postRunInline" type="button">Save Template</button>
-					<script>
-					$('#save').click(function() {
-						myhtml = $('html').html();
-						$.ajax({
-							type: "POST",
-							url: "{{pathPrefix}}/renderToFile",
-							data: {html:myhtml}
-						});
-					});
-				</script> -->
-			</div>
+			{{ omfModelButtons }}
 		</form>
 	</div>
-	<div id ="runIndicator" class="content running">
-		Model running on server. Refresh the page to check for results, or wait for automatic refresh every 5 seconds.
-	</div>
-	<div id ="stopIndicator" class="content stopped" style="visibility: hidden">
-		<pre id='errorText' style='overflow-x:scroll'></pre>
-		<script type="text/javascript">
-		if (typeof(allInputData.stderr) !== 'undefined') {	
-			gebi('stopIndicator').style.visibility = 'visible'
-			gebi('errorText').innerHTML = 'MODEL ENCOUNTERED AN ERROR AS FOLLOWS: \n\n' + allInputData.stderr}
-		</script>
-	</div>
+	{{ omfRunDebugBlock }}
+	{% if modelStatus == 'finished' %}
 	<div id="output">
-		<p class="reportTitle postRun" style="page-break-before:always">Switch Stats</p>
-		<div id="outageCostCalc" class="tightContent postRun">
+		<p class="reportTitle" style="page-break-before:always">Switch Stats</p>
+		<div id="outageCostCalc" class="tightContent">
 			{{ allOutputDataDict['switchStatsHtml'] }}
 		</div>
 		<!-- Leaflet map directly inline with model-->
@@ -363,7 +330,6 @@
 		//		});
 		//	}
 		//});
-		
 		mapLink = '<a href="http://openstreetmap.org">OpenStreetMap</a>';
 		L.tileLayer(
 			'http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -374,20 +340,7 @@
 		geojsonLayer.addTo(map);
 	}
 	</script>
-		<!-- TODO: Remove? -->
-		<!-- <script type="text/javascript">
-			// Global Highcharts settings.
-			Highcharts.setOptions({global:{useUTC:true}})
-			// Clean up the non-ISO date strings we get.
-			function dateOb(inStr) {return Date.parse(inStr.replace(/-/g,"/"))}
-			pointStart = dateOb(allOutputData.timeStamps[0])
-			pointInterval = dateOb(allOutputData.timeStamps[1]) - pointStart
-		</script> -->
-		<p class="reportTitle postRun">Raw Input and Output Files</p>
-		<div id="rawOutput" class="content postRun" style="margin-top:0px">
-			{% for name in allOutputDataDict['fileNames'] %}
-				{% if loop.index > 1 %}&mdash; {% endif %}<a href="/downloadModelData/{{allInputDataDict['user']}}/{{allInputDataDict['modelName']}}/{{name}}">{{name}}</a>
-			{% endfor %}
-		</div>
+	{{ rawOutputFiles }}
 	</div>
+	{% endif %}
 </body>
