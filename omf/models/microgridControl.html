@@ -192,10 +192,6 @@
 				</div>
 			</div>
 			<div class="shortInput">
-				<label class="tooltip">Duration of Outage (h)<span class="classic">The amount of time the outage lasts in hours.</span></label>
-				<input type="text" id="outageDuration" name="outageDuration">
-			</div>
-			<div class="shortInput">
 				<label class="tooltip">Restoration Cost ($/hr)<span class="classic">Restoration cost parameter for calculating outage costs.</span></label>
 				<input type="text" id="restoration_cost" name="restoration_cost" pattern="^\d+\.?\d*$" required="required">
 			</div>
@@ -271,6 +267,13 @@
 		<p class="reportTitle postRun" style="page-break-before:always">Customer Outage Cost</p>
 		<div id="customerOutageCostCalc" class="tightContent postRun" style="max-height:500px; overflow-y:scroll">
 			{{ allOutputDataDict['customerOutageHtml'] }}
+		</div>
+		<p class="reportTitle postRun">Customer Outage Histogram</p>
+		<div id="fig5" class="tightContent postRun">
+			<div id="fig5Chart" style="width:1000px"></div>
+			<script type="text/javascript">
+				Plotly.newPlot("fig5Chart", JSON.parse(allOutputData["fig5Data"]), JSON.parse(allOutputData["fig5Layout"]) || {})
+			</script>
 		</div>
 		<p class="reportTitle postRun" style="page-break-before:always">Utility Outage Cost</p>
 		<div id="utilityOutageCostCalc" class="tightContent postRun">

@@ -288,14 +288,20 @@ def customerCost1(duration, season, averagekWperhr, businessType):
 			# find the current kWh values estimated that are closest to the average kW/hr input...
 			# ...then, estimate the outage costs for the kW/hr value directly between these
 			key = 0
-			while key < len(keys):
-				if float(averagekWperhr) > keys[key]:			
+			newEntry = 0
+			while key < len(keys)-1:
+				if key == len(keys)-2:
+					newEntry = (keys[key] + keys[key+1])/2
+					averageCost = (kWDict[keys[key]] + kWDict[keys[key+1]])/2
+					kWDict[newEntry] = averageCost
+					break
+				if float(averagekWperhr) > keys[key]:
 					key+=1
 				else:
 					newEntry = (keys[key] + keys[key+1])/2
 					averageCost = (kWDict[keys[key]] + kWDict[keys[key+1]])/2
 					kWDict[newEntry] = averageCost
-					break 
+					break
 			step+=1
 			if step == iterate:
 				return(kWDict[newEntry])
@@ -401,7 +407,7 @@ def validateSettingsFile(settingsFile):
 	else:
 		return 'Corrupted Settings file input, generating default settings'
 
-def graphMicrogrid(pathToOmd, pathToJson, pathToCsv, outputFile, settingsFile, useCache, workDir, outageDuration, profit_on_energy_sales, restoration_cost, hardware_cost, eventsFilename, genSettings, solFidelity, loadPriorityFile, microgridTaggingFile):
+def graphMicrogrid(pathToOmd, pathToJson, pathToCsv, outputFile, settingsFile, useCache, workDir, profit_on_energy_sales, restoration_cost, hardware_cost, eventsFilename, genSettings, solFidelity, loadPriorityFile, microgridTaggingFile):
 	''' Run full microgrid control process. '''
 	# Setup ONM if it hasn't been done already.
 	if not PowerModelsONM.check_instantiated():
@@ -463,6 +469,7 @@ def graphMicrogrid(pathToOmd, pathToJson, pathToCsv, outputFile, settingsFile, u
 		numTimeSteps = len(simTimeSteps)
 		stepSize = 1 #TODO: change this to be total_simulation_time/numTimeSteps, but for now, we default to 1 hr
 		voltages = data['Voltages']
+		outageDuration = stepSize * numTimeSteps
 		loadServed = data['Load served']
 		storageSOC = data['Storage SOC (%)']
 		switchLoadAction = data['Device action timeline']
@@ -765,6 +772,10 @@ def graphMicrogrid(pathToOmd, pathToJson, pathToCsv, outputFile, settingsFile, u
 	# def deciles(dList): return [0.0] + quantiles([float(x) for x in dList], n=10) + [max([float(x) for x in dList])]
 	# outageDeciles = deciles(customerOutageData['Duration'].tolist())
 	# costDeciles = deciles(outageCost)
+	minCustomerCost = min(outageCost)
+	maxCustomerCost = max(outageCost)
+	numBins = 30
+	binSize = (maxCustomerCost-minCustomerCost)/numBins
 	totalCustomerCost = sum(outageCost)
 	meanCustomerCost = totalCustomerCost / len(outageCost)
 	outageCostByType = {busType: sum(outageCostsByType[busType]) for busType in businessTypes}
@@ -777,13 +788,74 @@ def graphMicrogrid(pathToOmd, pathToJson, pathToCsv, outputFile, settingsFile, u
 	fig.update_layout(xaxis_title = 'Duration (hours)',
 		yaxis_title = 'Cost ($)',
 		legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1))
+	# Customer Outage Histogram
+	busColors = {'residential':'#0000ff', 'manufacturing':'#ff0000', 'mining':'#708090', 'construction':'#ff8c00', 'agriculture':'#008000', 'finance':'#d6b600', 'retail':'#ff69b4', 'services':'#191970', 'utilities':'#8b4513', 'public':'#9932cc'}
+	custHist = go.Figure()
+	custHist.add_trace(go.Histogram(
+		x=outageCost,
+		xbins=dict(
+			start=minCustomerCost,
+			end=maxCustomerCost+binSize,
+			size=binSize
+		)
+	))
+	# for busType in businessTypes:
+	# 	custHist.add_trace(go.Histogram(
+	# 		x=outageCostsByType[busType],
+	# 		name=busType, # name used in legend and hover labels
+	# 		xbins=dict(
+	# 			start=minCustomerCost,
+	# 			end=maxCustomerCost,
+	# 			size=binSize
+	# 		),
+	# 		bingroup=1,
+	# 		marker_color=busColors[busType]
+	# 	))
+	custHist.update_layout(
+		xaxis_title_text='Outage Cost ($)', # xaxis label
+		yaxis_title_text='Customer Count', # yaxis label
+		bargap=0.1 # gap between bars of adjacent location coordinates
+	)
+	meanCustomerCostStr = "Mean Outage Cost: $"+"{:.2f}".format(meanCustomerCost)
+	# custHist.add_vline(
+	# 	x=meanCustomerCost,
+	# 	line_width=3, 
+	# 	line_dash="dash",
+	# 	line_color="black",
+	# 	annotation_text=meanCustomerCostStr, 
+	# 	annotation_position="top right"
+	# )
+	custHist.add_shape(
+		type="line",
+		xref="x", 
+		yref="paper", 
+		x0=meanCustomerCost, 
+		y0=0, 
+		x1=meanCustomerCost,
+		y1=1.0, 
+		line=dict(
+			color="black",
+			width=3,
+			dash="dash"
+		)
+	)
+	custHist.add_annotation(
+		xref="x",
+		yref="paper",
+		x=meanCustomerCost,
+		y=1.0,
+		xanchor="left",
+		text=meanCustomerCostStr,
+		showarrow=False
+	)
+
 	customerOutageHtml = customerOutageTable(customerOutageData, outageCost, workDir)
 	profit_on_energy_sales = float(profit_on_energy_sales)
 	restoration_cost = int(restoration_cost)
 	hardware_cost = int(hardware_cost)
 	outageDuration = int(outageDuration)
 	utilityOutageHtml = utilityOutageTable(average_lost_kwh, profit_on_energy_sales, restoration_cost, hardware_cost, outageDuration, workDir)
-	return {'utilityOutageHtml': utilityOutageHtml, 'customerOutageHtml': customerOutageHtml, 'timelineStatsHtml': timelineStatsHtml, 'gens': gens, 'loads': loads, 'volts': volts, 'fig': fig, 'customerOutageCost': customerOutageCost, 'numTimeSteps': numTimeSteps, 'stepSize': stepSize}
+	return {'utilityOutageHtml': utilityOutageHtml, 'customerOutageHtml': customerOutageHtml, 'timelineStatsHtml': timelineStatsHtml, 'gens': gens, 'loads': loads, 'volts': volts, 'fig': fig, 'customerOutageCost': customerOutageCost, 'numTimeSteps': numTimeSteps, 'stepSize': stepSize, 'custHist': custHist}
 
 def work(modelDir, inputDict):
 	# Copy specific climate data into model directory
@@ -869,7 +941,6 @@ def work(modelDir, inputDict):
 		pathToData3,
 		inputDict['useCache'],
 		modelDir, #Work directory
-		inputDict['outageDuration'],
 		inputDict['profit_on_energy_sales'],
 		inputDict['restoration_cost'],
 		inputDict['hardware_cost'],
@@ -904,6 +975,8 @@ def work(modelDir, inputDict):
 	outData['fig3Layout'] = json.dumps(layoutOb, cls=py.utils.PlotlyJSONEncoder)
 	outData['fig4Data'] = json.dumps(plotOuts.get('fig',{}), cls=py.utils.PlotlyJSONEncoder)
 	outData['fig4Layout'] = json.dumps(layoutOb, cls=py.utils.PlotlyJSONEncoder)
+	outData['fig5Data'] = json.dumps(plotOuts.get('custHist',{}), cls=py.utils.PlotlyJSONEncoder)
+	outData['fig5Layout'] = json.dumps(layoutOb, cls=py.utils.PlotlyJSONEncoder)
 	# Stdout/stderr.
 	outData['stdout'] = 'Success'
 	outData['stderr'] = ''
@@ -938,7 +1011,7 @@ def new(modelDir):
 	# loadPriority_file_data = open(pJoin(*loadPriority_file_path)).read()
 	# microgridTagging_file_path = [__neoMetaModel__._omfDir,'static','testFiles','nreca1824_dwp.microgridTagging.basic.json']
 	# microgridTagging_file_data = open(pJoin(*microgridTagging_file_path)).read()
-	# ====== Nreca1824 Test Case
+
 	defaultInputs = {
 		'modelType': modelName,
 		'feederName1': feeder_file_path[-1][0:-4],
