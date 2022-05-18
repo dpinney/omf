@@ -4,7 +4,6 @@
 	<link href="{{pathPrefix}}/static/omf.css" type="text/css" rel="stylesheet"/>
 	<link rel="shortcut icon" href="{{pathPrefix}}/static/favicon.ico">
 	<style>
-	/*Styles here*/
 		table {
 			border-collapse: collapse;
 			width: 100%;
@@ -21,6 +20,13 @@
 		tr:nth-child(even) {
 			background-color: #e6e6e6;
 		}
+		#map {
+			position: relative;
+			width: 100.0%;
+			height: 100.0%;
+			left: 0.0%;
+			top: 0.0%;
+		}
 	</style>
 	{% if modelStatus == "running" %}<meta http-equiv="refresh" content="5"/>{% endif %}
 	<!-- Library Imports -->
@@ -34,23 +40,14 @@
 	<!-- Data  Imports -->
 	<script>allInputData={% if allInputDataDict %}{{allInputDataDict | tojson}}{% else %}null{% endif %}</script>
 	<script>allOutputData={% if allOutputDataDict %}{{allOutputDataDict | tojson}}{% else %}null{% endif %}</script>
-	<script>modelStatus="{{modelStatus}}"</script>
 	<script>currentUser="{{datastoreNames.get('currentUser','test')}}"</script>
-	<style>#map{
-		position: relative;
-		width: 100.0%;
-		height: 100.0%;
-		left: 0.0%;
-		top: 0.0%;
-		}
-	</style>
 </head>
 <body onload="init()">
 	<div id="header">
 		<div id="headInnerBlock">
 			<div id="menuLeft">
 				<a style="color:white" href="/">Open Modeling Framework</a> &#187;&nbsp;&nbsp;Model
-				&#8220;<p id="titleText" style="display:inline"></p>&#8221;
+				&#8220;<p id="titleText" style="display:inline">{{allInputDataDict.modelName}}</p>&#8221;
 			</div>
 		</div>
 	</div>

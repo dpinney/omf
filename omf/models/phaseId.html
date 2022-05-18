@@ -17,6 +17,7 @@
 	<!-- Data  Imports -->
 	<script>allInputData={% if allInputDataDict %}{{allInputDataDict | tojson}}{% else %}null{% endif %}</script>
 	<script>allOutputData={% if allOutputDataDict %}{{allOutputDataDict | tojson}}{% else %}null{% endif %}</script>
+	<script>currentUser="{{datastoreNames.get('currentUser','test')}}"</script>
 </script>
 </head>
 <body>
