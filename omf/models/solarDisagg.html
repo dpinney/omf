@@ -35,12 +35,12 @@
         }
     </style>
 </head>
-<body onload="init()">
+<body>
 	<div id="header">
 		<div id="headInnerBlock">
 			<div id="menuLeft">
 				<a style="color:white" href="/">Open Modeling Framework</a> &#187;&nbsp;&nbsp;Model
-				&#8220;<p id="titleText" style="display:inline"></p>&#8221;
+				&#8220;<p id="titleText" style="display:inline">{{allInputDataDict.modelName}}</p>&#8221;
 			</div>
 		</div>
 	</div>
@@ -50,23 +50,23 @@
 			<!-- Required Inputs -->
 			<div class="shortInput">
 				<label>Model Type <a href="https://github.com/dpinney/omf/wiki/Models-~-solarDisagg" target="blank">Help?</a></label>
-				<input type="text" id="modelType" name="modelType" value="{{modelName}}" readonly/>
+				<input type="text" id="modelType" name="modelType" value="{{allInputDataDict.modelType}}" value="{{modelName}}" readonly/>
 			</div>
 			<div class="shortInput">
 				<label>Model Name</label>
-				<input type="text" id="modelName" name="modelName" pattern="^[\w\s\d\.-]+$" required="required">
+				<input type="text" id="modelName" name="modelName" value="{{allInputDataDict.modelName}}" pattern="^[\w\s\d\.-]+$" required="required">
 			</div>
-			<div class="shortInput runningInline postRunInline">
+			<div class="shortInput">
 				<label>User</label>
-				<input type="text" id="user" name="user" readonly/>
+				<input type="text" id="user" name="user" value="{{allInputDataDict.user}}" readonly/>
 			</div>
-			<div class="shortInput runningInline postRunInline ">
+			<div class="shortInput">
 				<label>Created</label>
-				<input type="text" id="created" name="created" readonly/>
+				<input type="text" id="created" name="created" value="{{allInputDataDict.created}}" readonly/>
 			</div>
-			<div class="shortInput postRunInline">
+			<div class="shortInput">
 				<label>Run Time</label>
-				<input type="text" id="runTime" name="runTime" readonly/>
+				<input type="text" id="runTime" name="runTime" value="{{allInputDataDict.runTime}}" readonly/>
 			</div>
 			<!-- Model Specific Inputs -->
 			<div class="wideInput">
@@ -99,11 +99,11 @@
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Start Date<span class="classic">Enter start date of the period you are uploading.</span></label>
-				<input type="text" id="year" name="year" required="required" placeholder="2017-01-01"/>
+				<input type="text" id="year" name="year" value="{{allInputDataDict.year}}" required="required" placeholder="2017-01-01"/>
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">ASOS Weather Station<span class="classic">Please see the documentation at the green 'Help?' for information on selecting an appropriate ASOS station.</span></label>
-				<select id="asosStation" name="asosStation">
+				<select id="asosStation" name="asosStation" value="{{allInputDataDict.asosStation}}">
 					<script type="text/javascript">
 						//Load asos station and populate the dropdown list
 						d3.csv("{{pathPrefix}}/static/asosStationTable.csv", function(data) {
@@ -117,39 +117,22 @@
 					</script>
 				</select>
 			</div>
-			<!-- Required Buttons -->
-			<div class="wideInput" style="text-align:right">
-				<button id="deleteButton" type="button" class="stoppedInline postRunInline" onclick="deleteModel()">Delete</button>
-				<button id="shareButton" type="button" class="postRunInline" onclick="shareModel()">Share</button>
-				<button id="duplicateButton" type="button" class="postRunInline" onclick="duplicateModel()">Duplicate</button>
-				<button id="cancelButton" class="runningInline" type="button" onclick="cancelModel()">Cancel Run</button>
-				<button id="runButton" class="stoppedInline postRunInline" type="submit">Run Model</button>
-			</div>
+			{{ omfModelButtons}}
 		</form>
 	</div>
-	<div id ="runIndicator" class="content running">
-		Model running on server. Refresh the page to check for results, or wait for automatic refresh every 5 seconds.
-	</div>
-	<div id ="stopIndicator" class="content stopped" style="visibility: hidden">
-		<pre id='errorText' style='overflow-x:scroll'></pre>
-		<script type="text/javascript">
-		if (typeof(allInputData.stderr) !== 'undefined') {
-			gebi('stopIndicator').style.visibility = 'visible'
-			gebi('errorText').innerHTML = 'MODEL ENCOUNTERED AN ERROR AS FOLLOWS: \n\n' + allInputData.stderr}
-		</script>
-	</div>
-	<!-- Output tables, graphs, etc -->
+	{{ omfRunDebugBlock }}
+	{% if modelStatus == 'finished' %}
 	<div id="output">
 		<!-- Subgraphs
-		<p class="reportTitle postRun">Solar Disaggregation Results</p>
-		<div id="analysisSummary" class="content postRun">
+		<p class="reportTitle">Solar Disaggregation Results</p>
+		<div id="analysisSummary" class="content">
 			<div id="plotly-div"></div>
 			<script type="text/javascript">
   				Plotly.newPlot("plotly-div", JSON.parse(allOutputData["graphJSON"]), JSON.parse(allOutputData["layoutJSON"]) || {})
 			</script>
 		</div> -->
-		<p class="reportTitle postRun">Solar Disaggregation Results</p>
-		<div id="analysisSummary2" class="content postRun">
+		<p class="reportTitle">Solar Disaggregation Results</p>
+		<div id="analysisSummary2" class="content">
 			<div id="plotly-div2"></div>
 			<script type="text/javascript">
   				Plotly.newPlot("plotly-div2", JSON.parse(allOutputData["graphWeatherJSON"]), JSON.parse(allOutputData["layoutWeatherJSON"]) || {})
@@ -253,5 +236,7 @@
 				);
 			}
 		</script>
+		{{ rawOutputFiles }}
 	</div>
+	{% endif %}
 </body>
