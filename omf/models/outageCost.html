@@ -221,23 +221,23 @@
 	{{ omfRunDebugBlock }}
 	{% if modelStatus == 'finished' %}
 	<div id="output">
-		<p class="reportTitle postRun" style="page-break-before:always">Reliability Metrics for Input Data</p>
-		<div id="statsCalc" class="tightContent postRun">
+		<p class="reportTitle" style="page-break-before:always">Reliability Metrics for Input Data</p>
+		<div id="statsCalc" class="tightContent">
 			{{ allOutputDataDict['statsHtml'] }}
 		</div>
-		<p class="reportTitle postRun" style="page-break-before:always">Reliability Metrics for Input Data (with FLISR Implemented)</p>
-		<div id="flisrStatsCalc" class="tightContent postRun">
+		<p class="reportTitle" style="page-break-before:always">Reliability Metrics for Input Data (with FLISR Implemented)</p>
+		<div id="flisrStatsCalc" class="tightContent">
 			{{ allOutputDataDict['flisrStatsHtml'] }}
 		</div>
-		<p class="reportTitle postRun">Outage Timeline for Input Data</p>
-		<div id="timeline" class="tightContent postRun">
+		<p class="reportTitle">Outage Timeline for Input Data</p>
+		<div id="timeline" class="tightContent">
 			<div id="timelineChart" style="width:1000px"></div>
 			<script type="text/javascript">
 				Plotly.newPlot("timelineChart", JSON.parse(allOutputData["timelineData"]), JSON.parse(allOutputData["timelineLayout"]) || {})
 			</script>
 		</div>
-		<p class="reportTitle postRun">Outage Timeline for Randomly Generated Faults</p>
-		<div id="timeline1" class="tightContent postRun">
+		<p class="reportTitle">Outage Timeline for Randomly Generated Faults</p>
+		<div id="timeline1" class="tightContent">
 			<div id="timeline1Chart" style="width:1000px"></div>
 			<script type="text/javascript">
 				Plotly.newPlot("timeline1Chart", JSON.parse(allOutputData["timeline1Data"]), JSON.parse(allOutputData["timeline1Layout"]) || {})
