@@ -75,42 +75,46 @@
 		});
 	</script>
 </head>
-<body onload="init()">
+<body>
 	<div id="header">
 		<div id="headInnerBlock">
 			<div id="menuLeft">
 				<a style="color:white" href="/">Open Modeling Framework</a> &#187;&nbsp;&nbsp;Model
-				&#8220;<p id="titleText" style="display:inline"></p>&#8221;
+				&#8220;<p id="titleText" style="display:inline">{{allInputDataDict.modelName}}</p>&#8221;
 			</div>
 		</div>
+	</div>
+	<div id="triangle-parent">
+		<div id="triangle-message">New Version<span class="classic-triangle">A new version of the model has been added to the OMF. To get the new outputs, please fill in any missing inputs and hit "Run Model". You can also just look at the old inputs, outputs.</span></div>
+		<div id="triangle-topright"></div>
 	</div>
 	<p class="reportTitle">Model Input</p>
 	<div id="input" class="content">
 		<form name="inputForm" action="/runModel/" onsubmit="event.preventDefault(); return isFormValid();" method="post">
 			<div class="shortInput">
 				<label>Model Type <a href="https://github.com/dpinney/omf/wiki/Models-~-voltageDrop" target="blank">Help?</a></label>
-				<input type="text" id="modelType" name="modelType" value="{{modelName}}" readonly/>
+				<input type="text" id="modelType" name="modelType" value="{{allInputDataDict.modelType}}" value="{{modelName}}" readonly/>
 			</div>
 			<div class="shortInput">
 				<label>Model Name</label>
-				<input type="text" id="modelName" name="modelName" pattern="^[\w\s\d\.-]+$" required="required">
+				<input type="text" id="modelName" name="modelName" value="{{allInputDataDict.modelName}}" pattern="^[\w\s\d\.-]+$" required="required">
 			</div>
-			<div class="shortInput runningInline postRunInline">
+			<div class="shortInput ">
 				<label>User</label>
-				<input type="text" id="user" name="user" readonly/>
+				<input type="text" id="user" name="user" value="{{allInputDataDict.user}}" readonly/>
 			</div>
-			<div class="runningInline postRunInline shortInput">
+			<div class="shortInput">
 				<label>Created</label>
-				<input type="text" id="created" name="created" readonly/>
+				<input type="text" id="created" name="created" value="{{allInputDataDict.created}}" readonly/>
 			</div>
-			<div class="postRunInline shortInput">
+			<div class="shortInput">
 				<label>Run Time</label>
-				<input type="text" id="runTime" name="runTime" readonly/>
+				<input type="text" id="runTime" name="runTime" value="{{allInputDataDict.runTime}}" readonly/>
 			</div>
 			<div class="shortInput">
 				<label>Feeder</label>
 				<button id="feederButton" type="button" onclick="javascript:editFeeder(allInputData.modelName,1);" style="display:block;width:125px;">Open Editor</button>
-				<input type="text" id="feederName1" name="feederName1" style="display:none">
+				<input type="text" id="feederName1" name="feederName1" value="{{allInputDataDict.feederName1}}" style="display:none">
 			</div>
 			<div class="wideInput">
 				<p class="inputSectionHeader">Financial Variables</p>
@@ -118,35 +122,31 @@
 			<hr>
 			<div class="shortInput">
 				<label class="tooltip">Production Energy Cost ($/kWh)<span class="classic">Production rate.</span></label>
-				<input type="text" id="productionCost" name="productionCost" required="required"/>
+				<input type="text" id="productionCost" name="productionCost" value="{{allInputDataDict.productionCost}}" required="required"/>
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Retail Energy Cost ($/kWh)<span class="classic">Residential rate.</span></label>
-				<input type="text" id="retailCost" name="retailCost" required="required"/>
+				<input type="text" id="retailCost" name="retailCost" value="{{allInputDataDict.retailCost}}" required="required"/>
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">PF Penalty<span class="classic">Annual power factor penalty</span></label>
-				<input type="text" id="pf_penalty" name="pf_penalty" required="required"/>
+				<input type="text" id="pf_penalty" name="pf_penalty" value="{{allInputDataDict.pf_penalty}}" required="required"/>
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">PF Threshold<span class="classic">Threshold over which a penalty would be charged</span></label>
-				<input type="text" id="pf_threshold" name="pf_threshold" required="required"/>
+				<input type="text" id="pf_threshold" name="pf_threshold" value="{{allInputDataDict.pf_threshold}}" required="required"/>
 			</div>
-<!-- 			<div class="shortInput">
-				<label class="tooltip">Avg value of motor ($)<span class="classic">FILL ME!</span></label>
-				<input type="text" id="motor_cost" name="motor_cost" required="required"/>
-			</div> -->
 			<div class="shortInput">
 				<label class="tooltip">Avg motor value ($/MW)<span class="classic">Average cost of motors on the system.</span></label>
-				<input type="text" id="motor_value" name="motor_value" required="required"/>
+				<input type="text" id="motor_value" name="motor_value" value="{{allInputDataDict.motor_value}}" required="required"/>
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Avg motor lifetime (years)<span class="classic">The average motor lifespan in years</span></label>
-				<input type="text" id="motor_lifetime" name="motor_lifetime" required="required"/>
+				<input type="text" id="motor_lifetime" name="motor_lifetime" value="{{allInputDataDict.motor_lifetime}}" required="required"/>
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Discount Rate (%)<span class="classic">Discount rate used in discounted cashflow analysis output.</span></label>
-				<input type="text" id="discountRate" name="discountRate" pattern="^(100|\d\d|\d)(\.\d+)?$" required="required"/>
+				<input type="text" id="discountRate" name="discountRate" value="{{allInputDataDict.discountRate}}" pattern="^(100|\d\d|\d)(\.\d+)?$" required="required"/>
 			</div>
 			<div class="wideInput">
 				<p class="inputSectionHeader">Controller Parameters</p>
@@ -154,40 +154,40 @@
 			<hr>
 			<div class="shortInput">
 				<label class="tooltip">Strategy<span class="classic">What strategy would you like to deploy?</span></label>
-				<select id="strategy" name="strategy">
-					<option value="constant">constant</option>
-					<option value="decentralized">decentralized</option>
+				<select id="strategy" name="strategy" value="{{allInputDataDict.strategy}}">
+					<option value="constant" {% if allInputDataDict.strategy == 'constant' %}selected{% endif %}>constant</option>
+					<option value="decentralized" {% if allInputDataDict.strategy == 'decentralized' %}selected{% endif %}>decentralized</option>
 				</select>
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Constant Power Factor<span class="classic">If constant strategy, enter the preferred power factor. 0 < PF < 1 sets a lagging power factor, 1 < PF < 2 sets a leading power factor. </span></label>
-				<input type="text" id="constant_pf" name="constant_pf" required="required"/>
+				<input type="text" id="constant_pf" name="constant_pf" value="{{allInputDataDict.constant_pf}}" required="required"/>
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Zip Code<span class="classic">Zip code of the planned array's geographical location.</span></label>
-				<input type="text" id="zipCode" name="zipCode" pattern="^\d{5}(?:[-\s]\d{4})?$" required="required">
+				<input type="text" id="zipCode" name="zipCode" value="{{allInputDataDict.zipCode}}" pattern="^\d{5}(?:[-\s]\d{4})?$" required="required">
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">PV Connection<span class="classic">How is the PV system connected?</span></label>
-				<select id="pvConnection" name="pvConnection">
-					<option value="Wye">Wye</option>
-					<option value="Delta">Delta</option>
+				<select id="pvConnection" name="pvConnection" value="{{allInputDataDict.pvConnection}}">
+					<option value="Wye" {% if allInputDataDict.pvConnection == 'Wye' %}selected{% endif %}>Wye</option>
+					<option value="Delta" {% if allInputDataDict.pvConnection == 'Delta' %}selected{% endif %}>Delta</option>
 				</select>
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Objective Function<span class="classic">'Phase to Ground' or 'VUF' minimizes negative sequence. 'Phase to Phase' or 'I0' minimizes zero sequence</span></label>
-				<select id="objectiveFunction" name="objectiveFunction">
-					<option value="VUF">Phase to Ground</option>
-					<option value="I0">Phase to Phase</option>
+				<select id="objectiveFunction" name="objectiveFunction" value="{{allInputDataDict.objectiveFunction}}">
+					<option value="VUF" {% if allInputDataDict.objectiveFunction == 'VUF' %}selected{% endif %}>Phase to Ground</option>
+					<option value="I0" {% if allInputDataDict.objectiveFunction == 'IO' %}selected{% endif %}>Phase to Phase</option>
 				</select>
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Critical Node<span class="classic">What node should we minimize?</span></label>
-				<input type="text" id="criticalNode" name="criticalNode" required="required"/>
+				<input type="text" id="criticalNode" name="criticalNode" value="{{allInputDataDict.criticalNode}}" required="required"/>
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Iterations<span class="classic">How many iterations should be run</span></label>
-				<input type="text" id="iterations" name="iterations" pattern="^\d+\.?\d*$" required="required"/>
+				<input type="text" id="iterations" name="iterations" value="{{allInputDataDict.iterations}}" pattern="^\d+\.?\d*$" required="required"/>
 			</div>
 			<div class="wideInput">
 				<p class="inputSectionHeader">Display Options</p>
@@ -195,96 +195,83 @@
 			<hr>
 			<div class="shortInput">
 				<label class="tooltip">Node Coloring By<span class="classic">Select the simulation output value that will be used to color the nodes in the circuit.</span></label>
-				<select id="nodeCol" name="nodeCol">
-					<option value="Voltage">Voltage (V)</option>
-					<option value="VoltageImbalance">Voltage Imbalance (%)</option>
-					<option value="perUnitVoltage">Per-Unit Voltage (unitless)</option>
-					<option value="perUnit120Voltage">120 V Scaled Per-Unit Voltage (V)</option>
-					<option value="None">No Node Coloring</option>
+				<select id="nodeCol" name="nodeCol" value="{{allInputDataDict.nodeCol}}">
+					<option value="Voltage" {% if allInputDataDict.nodeCol == 'Voltage' %}selected{% endif %}>Voltage (V)</option>
+					<option value="VoltageImbalance" {% if allInputDataDict.nodeCol == 'VoltageImbalance' %}selected{% endif %}>Voltage Imbalance (%)</option>
+					<option value="perUnitVoltage" {% if allInputDataDict.nodeCol == 'perUnitVoltage' %}selected{% endif %}>Per-Unit Voltage (unitless)</option>
+					<option value="perUnit120Voltage" {% if allInputDataDict.nodeCol == 'perUnit120Voltage' %}selected{% endif %}>120 V Scaled Per-Unit Voltage (V)</option>
+					<option value="None" {% if allInputDataDict.nodeCol == 'None' %}selected{% endif %}>No Node Coloring</option>
 				</select>
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Layout Algorithm<span class="classic">Geospatial shows the circuit the same way it was defined in the feeder editor. Force Directed uses an algorithm to show the circuit elements evenly spaced (useful for circuits without location data).</span></label>
-				<select id="layoutAlgorithm" name="layoutAlgorithm">
-					<option value="geospatial">Geospatial</option>
-					<option value="forceDirected">Force Directed</option>
+				<select id="layoutAlgorithm" name="layoutAlgorithm" value="{{allInputDataDict.layoutAlgorithm}}">
+					<option value="geospatial" {% if allInputDataDict.layoutAlgorithm == 'geospatial' %}selected{% endif %}>Geospatial</option>
+					<option value="forceDirected" {% if allInputDataDict.layoutAlgorithm == 'forceDirected' %}selected{% endif %}>Force Directed</option>
 				</select>
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Line Coloring By<span class="classic">Select the simulation output value that will be used to color the lines in the circuit.</span></label>
-				<select id="edgeCol" name="edgeCol">
-					<option value="Current">Current (A)</option>
-					<option value="Power">Power (W)</option>
-					<option value="Rating">Line Rating (A)</option>
-					<option value="PercentOfRating">Current vs. Line Rating (%)</option>
-					<option value="None">No Line Coloring</option>
+				<select id="edgeCol" name="edgeCol" value="{{allInputDataDict.edgeCol}}">
+					<option value="Current" {% if allInputDataDict.edgeCol == 'Current' %}selected{% endif %}>Current (A)</option>
+					<option value="Power" {% if allInputDataDict.edgeCol == 'Power' %}selected{% endif %}>Power (W)</option>
+					<option value="Rating" {% if allInputDataDict.edgeCol == 'Rating' %}selected{% endif %}>Line Rating (A)</option>
+					<option value="PercentOfRating" {% if allInputDataDict.edgeCol == 'percentOfRating' %}selected{% endif %}>Current vs. Line Rating (%)</option>
+					<option value="None" {% if allInputDataDict.edgeCol == 'None' %}selected{% endif %}>No Line Coloring</option>
 				</select>
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Node Labels<span class="classic">Text labels on nodes.</span></label>
-				<select id="nodeLabs" name="nodeLabs">
-					<option value="Name">Component Name</option>
-					<option value="Value">Simulation Value</option>
-					<option value="None">No Label</option>
+				<select id="nodeLabs" name="nodeLabs" value="{{allInputDataDict.nodeLabs}}">
+					<option value="Name" {% if allInputDataDict.nodeLabs == 'Name' %}selected{% endif %}>Component Name</option>
+					<option value="Value" {% if allInputDataDict.nodeLabs == 'Value' %}selected{% endif %}>Simulation Value</option>
+					<option value="None" {% if allInputDataDict.nodeLabs == 'None' %}selected{% endif %}>No Label</option>
 				</select>
 			</div>
 			<div class="shortInput">
-				<label class="tooltip">Line Labels<span class="classic">Text labels on linesn</span></label>
-				<select id="edgeLabs" name="edgeLabs">
-					<option value="Name">Component Name</option>
-					<option value="Value">Simulation Value</option>
-					<option value="None">No Label</option>
+				<label class="tooltip">Line Labels<span class="classic">Text labels on lines</span></label>
+				<select id="edgeLabs" name="edgeLabs" value="{{allInputDataDict.edgeLabs}}">
+					<option value="Name" {% if allInputDataDict.edgeLabs == 'Name' %}selected{% endif %}>Component Name</option>
+					<option value="Fault" {% if allInputDataDict.edgeLabs == 'Fault' %}selected{% endif %}>Fault Location</option>
+					<option value="Value" {% if allInputDataDict.edgeLabs == 'Value' %}selected{% endif %}>Simulation Value</option>
+					<option value="ProtDevs" {% if allInputDataDict.edgeLabs == 'ProtDevs' %}selected{% endif %}>Protective Devices</option>
+					<option value="None" {% if allInputDataDict.edgeLabs == 'None' %}selected{% endif %}>No Label</option>
 				</select>
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Color Map<span class="classic">Select a gradient for coloring the physical values</span></label>
-				<select id="customColormap" name="customColormap">
-					<option value="False">Viridis</option>
-					<option value="True">Gray, Red, Blue</option>
+				<select id="customColormap" name="customColormap" value="{{allInputDataDict.customColormap}}">
+					<option value="False" {% if allInputDataDict.customColormap == 'False' %}selected{% endif %}>Viridis</option>
+					<option value="True" {% if allInputDataDict.customColormap == 'True' %}selected{% endif %}>Gray, Red, Blue</option>
 				</select>
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Color Min<span class="classic">What W outliers would you like observed? Otherwise, submit "auto".</span></label>
-				<input type="text" id="colorMin" name="colorMin"/>
+				<input type="text" id="colorMin" name="colorMin" value="{{allInputDataDict.colorMin}}"/>
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Color Max<span class="classic">What W outliers would you like observed? Otherwise, submit "auto".</span></label>
-				<input type="text" id="colorMax" name="colorMax"/>
+				<input type="text" id="colorMax" name="colorMax" value="{{allInputDataDict.colorMax}}"/>
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Image Resolution (sq. in.)<span class="classic">Please select a value lower than 10,000</span></label>
-				<input type="text" id="rezSqIn" name="rezSqIn" pattern="^\d{1,4}$"/>
+				<input type="text" id="rezSqIn" name="rezSqIn" value="{{allInputDataDict.rezSqIn}}" pattern="^\d{1,4}$"/>
 			</div>
-			<div class="wideInput" style="text-align:right">
-				<button id="deleteButton" type="button" class="stoppedInline postRunInline" onclick="deleteModel()">Delete</button>
-				<button id="shareButton" type="button" class="postRunInline" onclick="shareModel()">Share</button>
-				<button id="duplicateButton" type="button" class="postRunInline" onclick="duplicateModel()">Duplicate</button>
-				<button id="cancelButton" class="runningInline" type="button" onclick="cancelModel()">Cancel Run</button>
-				<button id="runButton" class="stoppedInline postRunInline" type="submit">Run Model</button>
-			</div>
+			{{ omfModelButtons }}
 		</form>
 	</div>
-	<div id ="runIndicator" class="content running">
-		Model running on server. Refresh the page to check for results, or wait for automatic refresh every 5 seconds.
-	</div>
-	<div id ="stopIndicator" class="content stopped" style="visibility: hidden">
-		<pre id='errorText' style='overflow-x:scroll'></pre>
-		<script type="text/javascript">
-		if (typeof(allInputData.stderr) !== 'undefined') {
-			gebi('stopIndicator').style.visibility = 'visible'
-			gebi('errorText').innerHTML = 'MODEL ENCOUNTERED AN ERROR AS FOLLOWS: \n\n' + allInputData.stderr}
-		</script>
-	</div>
+	{{ omfRunDebugBlock }}
+	{% if modelStatus == 'finished' %}
 	<div id="output">
-		<p class="reportTitle postRun" style="page-break-before:always">Circuit Locational Metrics</p>
+		<p class="reportTitle" style="page-break-before:always">Circuit Locational Metrics</p>
 		<!-- Tab links -->
-		<div class="tab postRun">
+		<div class="tab">
 		  <button id='firstTabButton' class="tabLinks active" onclick="openTab(event, 'baseDiagram')">Base</button>
 		  <button class="tabLinks" onclick="openTab(event, 'solarDiagram')">Solar</button>
 		  <button class="tabLinks" onclick="openTab(event, 'controlledDiagram')">Controlled</button>
 		</div>
 		<!-- Tab content -->
-		<div id="phaseUnbalanceDiagrams" class="postRun tabPlots">
+		<div id="phaseUnbalanceDiagrams" class="tabPlots">
 			<div class="tightContent tabContent baseDiagram firstTab">
 				<img id="base_image" style="width:1000px;height:1000px;"/>
 				<script type="text/javascript">gebi("base_image").src = "data:image/png;base64," + allOutputData.base_image</script>
@@ -299,8 +286,8 @@
 			</div>	
 		</div>
 		<script>document.getElementById('firstTabButton').click();//Hack, get first tab to show.</script>
-		<p class="reportTitle postRun" style="page-break-before:always">Feeder Power Summary</p>
-		<div class="tightContent tableContainer postRun">
+		<p class="reportTitle" style="page-break-before:always">Feeder Power Summary</p>
+		<div class="tightContent tableContainer">
 			{% if allOutputDataDict %}
 			<table id="feederSummary">
 				<tr>
@@ -354,8 +341,8 @@
 			</table>
 			{% endif %}
 		</div>
-		<p class="reportTitle postRun" style="page-break-before:always">Financial Summary</p>
-		<div class="tightContent tableContainer postRun">
+		<p class="reportTitle" style="page-break-before:always">Financial Summary</p>
+		<div class="tightContent tableContainer">
 			{% if allOutputDataDict %}
 			<table id="feederSummary">
 				<tr>
@@ -391,8 +378,8 @@
 			</table>
 			{% endif %}
 		</div>
-		<p class="reportTitle postRun" style="page-break-before:always">Inverter Power Outputs</p>
-		<div class="tightContent tableContainer postRun" style="max-height:250px; overflow-y: scroll;">
+		<p class="reportTitle" style="page-break-before:always">Inverter Power Outputs</p>
+		<div class="tightContent tableContainer" style="max-height:250px; overflow-y: scroll;">
 			<table class="dt" id="inverterOutputs" style="padding: 10px;">
 				<thead>
 					<tr>
@@ -407,9 +394,9 @@
 				</tbody>
 			</table>
 		</div>
-	<p class="reportTitle postRun" style="page-break-before:always; text-align:center; font-weight: bold;">Three Phase Motor Loads Voltage and Imbalance</p>
-	<p class="reportTitle postRun" style="page-break-before:always">Base</p>
-		<div class="tightContent tableContainer postRun" style="max-height:250px; overflow-y: scroll;">
+	<p class="reportTitle" style="page-break-before:always; text-align:center; font-weight: bold;">Three Phase Motor Loads Voltage and Imbalance</p>
+	<p class="reportTitle" style="page-break-before:always">Base</p>
+		<div class="tightContent tableContainer" style="max-height:250px; overflow-y: scroll;">
 			<table class="dt" id="realImgPower">
 				<thead>
 					<tr>
@@ -427,8 +414,8 @@
 				{{allOutputDataDict['motor_table_base']}}
 			</table>
 		</div>
-		<p class="reportTitle postRun" style="page-break-before:always">Solar</p>
-		<div class="tightContent tableContainer postRun" style="max-height:250px; overflow-y: scroll;">
+		<p class="reportTitle" style="page-break-before:always">Solar</p>
+		<div class="tightContent tableContainer" style="max-height:250px; overflow-y: scroll;">
 			<table class="dt" id="realImgPower">
 				<thead>
 					<tr>
@@ -447,8 +434,8 @@
 			</table>
 		</div>
 	</div>
-	<p class="reportTitle postRun" style="page-break-before:always">Controlled</p>
-		<div class="tightContent tableContainer postRun" style="max-height:250px; overflow-y: scroll;">
+	<p class="reportTitle" style="page-break-before:always">Controlled</p>
+		<div class="tightContent tableContainer" style="max-height:250px; overflow-y: scroll;">
 			<table class="dt" id="realImgPower">
 				<thead>
 					<tr>
@@ -466,17 +453,12 @@
 				{{allOutputDataDict['motor_table_controlled']}}
 			</table>
 		</div>
+		{{ rawOutputFiles}}
 	</div>
-	<p class="reportTitle postRun">Raw Input and Output Files</p>
-	<div id="rawOutput" class="content postRun" style="margin-top:0px">
-		{% for name in allOutputDataDict['fileNames'] %}
-			{% if loop.index > 1 %}&mdash; {% endif %}<a href="/downloadModelData/{{allInputDataDict['user']}}/{{allInputDataDict['modelName']}}/{{name}}">{{name}}</a>
-		{% endfor %}
-	</div>
+	{% endif %}
 </body>
-
-		<!-- <p class="reportTitle postRun">Simulation Location</p>
-		<div id="studyDetail" class="tightContent postRun detailsContainer" style="position: relative">
+		<!-- <p class="reportTitle">Simulation Location</p>
+		<div id="studyDetail" class="tightContent detailsContainer" style="position: relative">
 			<div id="mapHere"></div>
 			<script type="text/javascript">
 				width = 1000, height = 350
