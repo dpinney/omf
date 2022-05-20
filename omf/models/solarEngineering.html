@@ -35,11 +35,6 @@
 			"plotOptions":{"line":{"marker":{"enabled":false}}, "series":{"shadow":false, "pointInterval":pointInterval, "pointStart":pointStart}},
 			"tooltip":{"valueDecimals":1},
 			"series":[]}
-		function editFeeder(modelName, feederNum) {
-			console.log("modelName:",modelName)
-			studyUser = allInputData.user
-			window.open("/feeder/" + studyUser + "/" + modelName + "/" + feederNum,  "_blank")
-		}
 		// Code to make the toggles work:
 		$(document).ready(function(){
 			$(".toggle").click(function(){
@@ -53,7 +48,7 @@
 		<div id="headInnerBlock">
 			<div id="menuLeft">
 				<a style="color:white" href="/">Open Modeling Framework</a> &#187;&nbsp;&nbsp;Model
-				&#8220;<p id="titleText" style="display:inline"></p>&#8221;
+				&#8220;<p id="titleText" style="display:inline">{{allInputDataDict.modelName}}</p>&#8221;
 			</div>
 		</div>
 	</div>
@@ -63,14 +58,14 @@
 	</div>
 	<p class="reportTitle">Model Input</p>
 	<div id="input" class="content">
-		<form name="inputForm" action="/runModel/" onsubmit="event.preventDefault(); return isFormValid();" method="post">
+		<form name="inputForm" value="{{allInputDataDict.inputForm}}" action="/runModel/" onsubmit="event.preventDefault(); return isFormValid();" method="post">
 			<div class="shortInput">
 				<label>Model Type <a href="https://github.com/dpinney/omf/wiki/Models-~-solarEngineering" target="blank">Help?</a></label>
-				<input type="text" id="modelType" name="modelType" value="{{modelName}}" readonly/>
+				<input type="text" id="modelType" name="modelType" value="{{allInputDataDict.modelType}}" value="{{modelName}}" readonly/>
 			</div>
 			<div class="shortInput">
 				<label>Model Name</label>
-				<input type="text" id="modelName" name="modelName" required="required" pattern="^[\w\s]+$"/></td>
+				<input type="text" id="modelName" name="modelName" value="{{allInputDataDict.modelName}}" required="required" pattern="^[\w\s]+$"/></td>
 			</div>
 			<div class="shortInput">
 				<label>Feeder</label>
@@ -78,60 +73,45 @@
 			</div>
 			<div class="shortInput" style="display:none"><!--HACK:pass feeder name back and forth to backend.-->
 				<label>feederName1</label>
-				<input type="text" id="feederName1" name="feederName1">
+				<input type="text" id="feederName1" name="feederName1" value="{{allInputDataDict.feederName1}}">
 			</div>
 			<div class="shortInput runningInline postRunInline">
 				<label>User</label>
-				<input type="text" id="user" name="user" readonly/></td>
+				<input type="text" id="user" name="user" value="{{allInputDataDict.user}}" readonly/></td>
 			</div>
 			<div class="shortInput runningInline postRunInline">
 				<label>Created</label>
-				<input type="text" id="created" name="created" readonly/></td>
+				<input type="text" id="created" name="created" value="{{allInputDataDict.created}}" readonly/></td>
 			</div>
 			<div class="shortInput postRunInline">
 				<label>Run Time</label>
-				<input type="text" id="runTime" name="runTime" readonly/></td>
+				<input type="text" id="runTime" name="runTime" value="{{allInputDataDict.runTime}}" readonly/></td>
 			</div>
 			<hr>
 			<div class="shortInput">
 				<label class="tooltip">Zip Code<span class="classic">Zip code of the planned array's geographical location. Use 5-digit Zip Code format</span></label>
-				<input type="text" id="zipCode" name="zipCode" pattern="[0-9]{5}" required="required">
+				<input type="text" id="zipCode" name="zipCode" value="{{allInputDataDict.zipCode}}" pattern="[0-9]{5}" required="required">
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Simulation Length<span class="classic">Number of time steps in the installation. The current range of acceptable values is 3 - 9999.</span></label>
-				<input type="number" id="simLength" name="simLength" required="required" min ="3" max = "9999"/>
+				<input type="number" id="simLength" name="simLength" value="{{allInputDataDict.simLength}}" required="required" min ="3" max = "9999"/>
 			</div>
 			<div class="shortInput">
 				<label>Length Units</label>
-				<select id="simLengthUnits" name="simLengthUnits">
-					<option value="hours">Hours</option>
-					<option value="minutes">Minutes</option>
+				<select id="simLengthUnits" name="simLengthUnits" value="{{allInputDataDict.simLengthUnits}}">
+					<option value="hours" {% if allInputDataDict.simLengthUnits == 'hours' %}selected{% endif %}>Hours</option>
+					<option value="minutes" {% if allInputDataDict.simLengthUnits == 'minutes' %}selected{% endif %}>Minutes</option>
 				</select>
 			</div>
 			<div class="shortInput">
 				<label>Simulation Start Date (YYYY-MM-DD)</label>
-				<input type="text" id="simStartDate" name="simStartDate" required="required" pattern="^\d\d\d\d-\d\d-\d\d$"/>
+				<input type="text" id="simStartDate" name="simStartDate" value="{{allInputDataDict.simStartDate}}" required="required" pattern="^\d\d\d\d-\d\d-\d\d$"/>
 			</div>
-			<div class="wideInput" style="text-align:right">
-				<button id="deleteButton" type="button" class="stoppedInline postRunInline" onclick="deleteModel()">Delete</button>
-				<button id="shareButton" type="button" class="postRunInline" onclick="shareModel()">Share</button>
-				<button id="duplicateButton" type="button" class="postRunInline" onclick="duplicateModel()">Duplicate</button>
-				<button id="cancelButton" class="runningInline" type="button" onclick="cancelModel()">Cancel Run</button>
-				<button id="runButton" class="postRunInline stoppedInline" type="submit">Run Model</button>
-			</div>
+			{{omfModelButtons}}
 		</form>
 	</div>
-	<div id ="runIndicator" class="content running">
-		Model running on server. Refresh the page to check for results, or wait for automatic refresh every 5 seconds.
-	</div>
-	<div id ="stopIndicator" class="content stopped" style="visibility: hidden">
-		<pre style='overflow-x: scroll;' id='errorText'></pre>
-		<script type="text/javascript">
-		if (typeof(allInputData.stderr) !== 'undefined') {	
-			gebi('stopIndicator').style.visibility = 'visible'
-			gebi('errorText').innerHTML = 'MODEL ENCOUNTERED AN ERROR AS FOLLOWS: \n\n' + allInputData.stderr}
-		</script>
-	</div>
+	{{ omfRunDebugBlock }}
+	{% if modelStatus == 'finished' %}
 	<div id="output">
 		<p class="reportTitle postRun">Power Consumption From Transmission System <a target="_self" class="toggle">Hide / Show</a></p>
 		<div id="powerConsumptionReport" class="tightContent postRun">
@@ -619,5 +599,7 @@
 				<pre id="vioLog" style="font-size:13px; height: 400px; text-align:left; overflow-x: scroll; overflow-y: scroll; width: 100%"></pre>
 			<script>gebi("vioLog").innerHTML = allOutputData.violationLog</script>
 		</div>
+		{{ rawOutputFiles }}
 	</div>
+	{% endif %}
 </body>
