@@ -31,20 +31,13 @@
 	<script>allOutputData={% if allOutputDataDict %}{{allOutputDataDict | tojson}}{% else %}null{% endif %}</script>
 	<script>modelStatus="{{modelStatus}}"</script>
 	<script>currentUser="{{datastoreNames.get('currentUser','test')}}"</script>
-	<script type="text/javascript">
-		function editFeeder(modelName, feederNum) {
-			console.log("modelName:",modelName)
-			studyUser = allInputData.user
-			window.open("/feeder/" + studyUser + "/" + modelName + "/" + feederNum,  "_blank")
-		}
-	</script>
 </head>
-<body onload="init()">
+<body>
 	<div id="header">
 		<div id="headInnerBlock">
 			<div id="menuLeft">
 				<a style="color:white" href="/">Open Modeling Framework</a> &#187;&nbsp;&nbsp;Model
-				&#8220;<p id="titleText" style="display:inline"></p>&#8221;
+				&#8220;<p id="titleText" style="display:inline">{{ allInputDataDict.modelName }}</p>&#8221;
 			</div>
 		</div>
 	</div>
@@ -57,162 +50,149 @@
 			<form name="inputForm" action="/runModel/" onsubmit="event.preventDefault(); return isFormValid();" method="post">
 			<div class="shortInput">
 				<label>Model Type <a href="https://github.com/dpinney/omf/wiki/Models-~-voltageDrop" target="blank">Help?</a></label>
-				<input type="text" id="modelType" name="modelType" value="{{modelName}}" readonly/>
+				<input type="text" id="modelType" name="modelType" value="{{allInputDataDict.modelType}}" value="{{modelName}}" readonly/>
 			</div>
 			<div class="shortInput">
 				<label>Model Name</label>
-				<input type="text" id="modelName" name="modelName" pattern="^[\w\s\d\.-]+$" required="required">
+				<input type="text" id="modelName" name="modelName" value="{{allInputDataDict.modelName}}" pattern="^[\w\s\d\.-]+$" required="required">
 			</div>
-			<div class="shortInput runningInline postRunInline">
+			<div class="shortInput">
 				<label>User</label>
-				<input type="text" id="user" name="user" readonly/>
+				<input type="text" id="user" name="user" value="{{allInputDataDict.user}}" readonly/>
 			</div>
-			<div class="runningInline postRunInline shortInput">
+			<div class="shortInput">
 				<label>Created</label>
-				<input type="text" id="created" name="created" readonly/>
+				<input type="text" id="created" name="created" value="{{allInputDataDict.created}}" readonly/>
 			</div>
-			<div class="postRunInline shortInput">
+			<div class="shortInput">
 				<label>Run Time</label>
-				<input type="text" id="runTime" name="runTime" readonly/>
+				<input type="text" id="runTime" name="runTime" value="{{allInputDataDict.runTime}}" readonly/>
 			</div>
 			<div class="shortInput">
 				<label>Feeder</label>
 				<button id="feederButton" type="button" onclick="javascript:editFeeder(allInputData.modelName,1);" style="display:block;width:125px;">Open Editor</button>
-				<input type="text" id="feederName1" name="feederName1" style="display:none">
+				<input type="text" id="feederName1" name="feederName1" value="{{allInputDataDict.feederName1}}" style="display:none">
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Layout Algorithm<span class="classic">Geospatial shows the circuit the same way it was defined in the feeder editor. Force Directed uses an algorithm to show the circuit elements evenly spaced (useful for circuits without location data).</span></label>
-				<select id="layoutAlgorithm" name="layoutAlgorithm">
-					<option value="geospatial">Geospatial</option>
-					<option value="forceDirected">Force Directed</option>
+				<select id="layoutAlgorithm" name="layoutAlgorithm" value="{{allInputDataDict.layoutAlgorithm}}">
+					<option value="geospatial" {% if allInputDataDict.layoutAlgorithm == 'geospatial' %}selected{% endif %}>Geospatial</option>
+					<option value="forceDirected" {% if allInputDataDict.layoutAlgorithm == 'forceDirected' %}selected{% endif %}>Force Directed</option>
 				</select>
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Node Coloring By<span class="classic">Select the simulation output value that will be used to color the nodes in the circuit.</span></label>
-				<select id="nodeCol" name="nodeCol">
-					<option value="Voltage">Voltage (V)</option>
-					<option value="VoltageImbalance">Voltage Imbalance (%)</option>
-					<option value="perUnitVoltage">Per-Unit Voltage (unitless)</option>
-					<option value="perUnit120Voltage">120 V Scaled Per-Unit Voltage (V)</option>
+				<select id="nodeCol" name="nodeCol" value="{{allInputDataDict.nodeCol}}">
+					<option value="Voltage" {% if allInputDataDict.nodeCol == 'Voltage' %}selected{% endif %}>Voltage (V)</option>
+					<option value="VoltageImbalance" {% if allInputDataDict.nodeCol == 'VoltageImbalance' %}selected{% endif %}>Voltage Imbalance (%)</option>
+					<option value="perUnitVoltage" {% if allInputDataDict.nodeCol == 'perUnitVoltage' %}selected{% endif %}>Per-Unit Voltage (unitless)</option>
+					<option value="perUnit120Voltage" {% if allInputDataDict.nodeCol == 'perUnit120Voltage' %}selected{% endif %}>120 V Scaled Per-Unit Voltage (V)</option>
 					<option value="None">No Node Coloring</option>
 				</select>
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Line Coloring By<span class="classic">Select the simulation output value that will be used to color the lines in the circuit.</span></label>
-				<select id="edgeCol" name="edgeCol">
-					<option value="Current">Current (A)</option>
-					<option value="Power">Power (W)</option>
-					<option value="Rating">Line Rating (A)</option>
-					<option value="PercentOfRating">Current vs. Line Rating (%)</option>
-					<option value="None">No Line Coloring</option>
+				<select id="edgeCol" name="edgeCol" value="{{allInputDataDict.edgeCol}}">
+					<option value="Current" {% if allInputDataDict.edgeCol == 'Current' %}selected{% endif %}>Current (A)</option>
+					<option value="Power" {% if allInputDataDict.edgeCol == 'Power' %}selected{% endif %}>Power (W)</option>
+					<option value="Rating" {% if allInputDataDict.edgeCol == 'Rating' %}selected{% endif %}>Line Rating (A)</option>
+					<option value="PercentOfRating" {% if allInputDataDict.edgeCol == 'percentOfRating' %}selected{% endif %}>Current vs. Line Rating (%)</option>
+					<option value="None" {% if allInputDataDict.edgeCol == 'None' %}selected{% endif %}>No Line Coloring</option>
 				</select>
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Node Labels<span class="classic">Text labels on nodes.</span></label>
-				<select id="nodeLabs" name="nodeLabs">
-					<option value="Name">Component Name</option>
-					<option value="Value">Simulation Value</option>
-					<option value="None">No Label</option>
+				<select id="nodeLabs" name="nodeLabs" value="{{allInputDataDict.nodeLabs}}">
+					<option value="Name" {% if allInputDataDict.nodeLabs == 'Name' %}selected{% endif %}>Component Name</option>
+					<option value="Value" {% if allInputDataDict.nodeLabs == 'Value' %}selected{% endif %}>Simulation Value</option>
+					<option value="None" {% if allInputDataDict.nodeLabs == 'None' %}selected{% endif %}>No Label</option>
 				</select>
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Line Labels<span class="classic">Text labels on lines</span></label>
-				<select id="edgeLabs" name="edgeLabs">
-					<option value="Name">Component Name</option>
-					<option value="Fault">Fault Location</option>
-					<option value="Value">Simulation Value</option>
-					<option value="ProtDevs">Protective Devices</option>
-					<option value="None">No Label</option>
+				<select id="edgeLabs" name="edgeLabs" value="{{allInputDataDict.edgeLabs}}">
+					<option value="Name" {% if allInputDataDict.edgeLabs == 'Name' %}selected{% endif %}>Component Name</option>
+					<option value="Fault" {% if allInputDataDict.edgeLabs == 'Fault' %}selected{% endif %}>Fault Location</option>
+					<option value="Value" {% if allInputDataDict.edgeLabs == 'Value' %}selected{% endif %}>Simulation Value</option>
+					<option value="ProtDevs" {% if allInputDataDict.edgeLabs == 'ProtDevs' %}selected{% endif %}>Protective Devices</option>
+					<option value="None" {% if allInputDataDict.edgeLabs == 'None' %}selected{% endif %}>No Label</option>
 				</select>
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Color Map<span class="classic">Select a gradient for coloring the physical values</span></label>
-				<select id="customColormap" name="customColormap">
-					<option value="False">Viridis</option>
-					<option value="True">Gray, Red, Blue</option>
+				<select id="customColormap" name="customColormap" value="{{allInputDataDict.customColormap}}">
+					<option value="False" {% if allInputDataDict.customColormap == 'False' %}selected{% endif %}>Viridis</option>
+					<option value="True" {% if allInputDataDict.customColormap == 'True' %}selected{% endif %}>Gray, Red, Blue</option>
 				</select>
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Color Scale Min (Optional)<span class="classic">Please specify a minimum value for a custom color scale or enter "None" for default.</span></label>
-				<input type="text" id="scaleMin" name="scaleMin" pattern="^(\d*\.?\d*)|None$"/>
+				<input type="text" id="scaleMin" name="scaleMin" value="{{allInputDataDict.scaleMin}}" pattern="^(\d*\.?\d*)|None$"/>
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Color Scale Max (Optional)<span class="classic">Please specify a maximum value for a custom color scale or enter "None" for default.</span></label>
-				<input type="text" id="scaleMax" name="scaleMax" pattern="^(\d*\.?\d*)|None$"/>
+				<input type="text" id="scaleMax" name="scaleMax" value="{{allInputDataDict.scaleMax}}" pattern="^(\d*\.?\d*)|None$"/>
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Image Resolution (sq. in.)<span class="classic">Please select a value lower than 10,000</span></label>
-				<input type="text" id="rezSqIn" name="rezSqIn" pattern="^\d{1,4}$"/>
+				<input type="text" id="rezSqIn" name="rezSqIn" value="{{allInputDataDict.rezSqIn}}" pattern="^\d{1,4}$"/>
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Fault Location (Name of Line)<span class="classic">Please indicate the line in which the fault should occur</span></label>
-				<input type="text" id="faultLoc" name="faultLoc"/>
+				<input type="text" id="faultLoc" name="faultLoc" value="{{allInputDataDict.faultLoc}}"/>
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Fault Type <span class="classic">Select the type of fault to simulate</span></label>
-				<select id="faultType" name="faultType">
-					<option value="None">No Fault</option>
-					<option value="SLG-A">Single-Line-Ground A</option>
-					<option value="SLG-B">Single-Line-Ground B</option>
-					<option value="SLG-C">Single-Line-Ground C</option>
-					<option value="SLG-X">Single-Line-Ground Random</option>
-					<option value="DLG-AB">Double-Line-Ground AB</option>
-					<option value="DLG-BC">Double-Line-Ground BC</option>
-					<option value="DLG-CA">Double-Line-Ground CA</option>
-					<option value="DLG-X">Double-Line-Ground Random</option>
-					<option value="LL-AB">Line-Line AB</option>
-					<option value="LL-BC">Line-Line BC</option>
-					<option value="LL-CA">Line-Line CA</option>
-					<option value="LL-X">Line-Line Random</option>
-					<option value="TLG">Triple-Line-Ground</option>
-					<option value="OC-A">Single Open Conductor A</option>
-					<option value="OC1-A">Single Open Conductor A</option>
-					<option value="OC-B">Single Open Conductor B</option>
-					<option value="OC1-B">Single Open Conductor B</option>
-					<option value="OC-C">Single Open Conductor C</option>
-					<option value="OC1-C">Single Open Conductor C</option>
-					<option value="OC-X">Single Open Conductor Random</option>
-					<option value="OC1-X">Single Open Conductor Random</option>
-					<option value="OC2-AB">Double Open Conductor AB</option>
-					<option value="OC2-BC">Double Open Conductor BC</option>
-					<option value="OC2-CA">Double Open Conductor CA</option>
-					<option value="OC2-X">Double Open Conductor Random</option>
-					<option value="OC3">Triple Open Conductor</option>
+				<select id="faultType" name="faultType" value="{{allInputDataDict.faultType}}">
+					<option value="None" {% if allInputDataDict.faultType == 'None' %}selected{% endif %}>No Fault</option>
+					<option value="SLG-A" {% if allInputDataDict.faultType == 'SLG-A' %}selected{% endif %}>Single-Line-Ground A</option>
+					<option value="SLG-B" {% if allInputDataDict.faultType == 'SLG-B' %}selected{% endif %}>Single-Line-Ground B</option>
+					<option value="SLG-C" {% if allInputDataDict.faultType == 'SLG-C' %}selected{% endif %}>Single-Line-Ground C</option>
+					<option value="SLG-X" {% if allInputDataDict.faultType == 'SLG-X' %}selected{% endif %}>Single-Line-Ground Random</option>
+					<option value="DLG-AB" {% if allInputDataDict.faultType == 'DLG-AB' %}selected{% endif %}>Double-Line-Ground AB</option>
+					<option value="DLG-BC" {% if allInputDataDict.faultType == 'DLG-BC' %}selected{% endif %}>Double-Line-Ground BC</option>
+					<option value="DLG-CA" {% if allInputDataDict.faultType == 'DLG-CA' %}selected{% endif %}>Double-Line-Ground CA</option>
+					<option value="DLG-X" {% if allInputDataDict.faultType == 'DLG-X' %}selected{% endif %}>Double-Line-Ground Random</option>
+					<option value="LL-AB" {% if allInputDataDict.faultType == 'LL-AB' %}selected{% endif %}>Line-Line AB</option>
+					<option value="LL-BC" {% if allInputDataDict.faultType == 'LL-BC' %}selected{% endif %}>Line-Line BC</option>
+					<option value="LL-CA" {% if allInputDataDict.faultType == 'LL-CA' %}selected{% endif %}>Line-Line CA</option>
+					<option value="LL-X" {% if allInputDataDict.faultType == 'LL-X' %}selected{% endif %}>Line-Line Random</option>
+					<option value="TLG" {% if allInputDataDict.faultType == 'TLG' %}selected{% endif %}>Triple-Line-Ground</option>
+					<option value="OC-A" {% if allInputDataDict.faultType == 'OC-A' %}selected{% endif %}>Single Open Conductor A</option>
+					<option value="OC1-A" {% if allInputDataDict.faultType == 'OC1-A' %}selected{% endif %}>Single Open Conductor A</option>
+					<option value="OC-B" {% if allInputDataDict.faultType == 'OC-B' %}selected{% endif %}>Single Open Conductor B</option>
+					<option value="OC1-B" {% if allInputDataDict.faultType == 'OC1-B' %}selected{% endif %}>Single Open Conductor B</option>
+					<option value="OC-C" {% if allInputDataDict.faultType == 'OC-C' %}selected{% endif %}>Single Open Conductor C</option>
+					<option value="OC1-C" {% if allInputDataDict.faultType == 'OC1-C' %}selected{% endif %}>Single Open Conductor C</option>
+					<option value="OC-X" {% if allInputDataDict.faultType == 'OC-X' %}selected{% endif %}>Single Open Conductor Random</option>
+					<option value="OC1-X" {% if allInputDataDict.faultType == 'OC1-X' %}selected{% endif %}>Single Open Conductor Random</option>
+					<option value="OC2-AB" {% if allInputDataDict.faultType == 'OC2-AB' %}selected{% endif %}>Double Open Conductor AB</option>
+					<option value="OC2-BC" {% if allInputDataDict.faultType == 'OC2-BC' %}selected{% endif %}>Double Open Conductor BC</option>
+					<option value="OC2-CA" {% if allInputDataDict.faultType == 'OC2-CA' %}selected{% endif %}>Double Open Conductor CA</option>
+					<option value="OC2-X" {% if allInputDataDict.faultType == 'OC2-X' %}selected{% endif %}>Double Open Conductor Random</option>
+					<option value="OC3" {% if allInputDataDict.faultType == 'OC3' %}selected{% endif %}>Triple Open Conductor</option>
 				</select>
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Simulation Time<span class="classic">Please indicate the time at which the simulation will occur in format YYYY-MM-DD hh-mm-ss</span></label>
-				<input type="text" id="simTime" name="simTime"/>
+				<input type="text" id="simTime" name="simTime" value="{{allInputDataDict.simTime}}"/>
 			</div>
-			<div class="wideInput" style="text-align:right">
-				<button id="deleteButton" type="button" class="stoppedInline postRunInline" onclick="deleteModel()">Delete</button>
-				<button id="shareButton" type="button" class="postRunInline" onclick="shareModel()">Share</button>
-				<button id="duplicateButton" type="button" class="postRunInline" onclick="duplicateModel()">Duplicate</button>
-				<button id="cancelButton" class="runningInline" type="button" onclick="cancelModel()">Cancel Run</button>
-				<button id="runButton" class="stoppedInline postRunInline" type="submit">Run Model</button>
-			</div>
+			{{ omfModelButtons }}
 		</form>
 	</div>
-	<div id ="runIndicator" class="content running">
-		Model running on server. Refresh the page to check for results, or wait for automatic refresh every 5 seconds.
-	</div>
-	<div id ="stopIndicator" class="content stopped" style="visibility: hidden">
-		<pre id='errorText' style='overflow-x:scroll'></pre>
-		<script type="text/javascript">
-		if (typeof(allInputData.stderr) !== 'undefined') {
-			gebi('stopIndicator').style.visibility = 'visible'
-			gebi('errorText').innerHTML = 'MODEL ENCOUNTERED AN ERROR AS FOLLOWS: \n\n' + allInputData.stderr}
-		</script>
-	</div>
+	{{ omfRunDebugBlock }}
+	{% if modelStatus == 'finished' %}
 	<div id="output">
-		<p class="reportTitle postRun" style="page-break-before:always">Voltage Drop Diagram</p>
-		<div id="voltageDropDiagram" class="tightContent postRun">
+		<p class="reportTitle" style="page-break-before:always">Voltage Drop Diagram</p>
+		<div id="voltageDropDiagram" class="tightContent">
 			<img id="voltageDropChart" style="width:1000px;height:1000px;" />
 			<script type="text/javascript">gebi("voltageDropChart").src = "data:image/png;base64," + allOutputData.voltageDrop</script>
 		</div>
-		<p class="reportTitle postRun" style="page-break-before:always">Protective Device Status</p>
-		<div id="protDevStatus" class="tightContent postRun">
+		<p class="reportTitle" style="page-break-before:always">Protective Device Status</p>
+		<div id="protDevStatus" class="tightContent">
 			{{ allOutputDataDict['tableHtml'] }}
 		</div>
+		{{ rawOutputFiles }}
 	</div>
+	{% endif %}
 </body>
