@@ -33,17 +33,18 @@ def heavyProcessing(modelDir, test_mode=False):
 			inputDict = json.load(f)
 		# Place run start time.
 		inputDict['runStartTime'] = startTime.isoformat()
-		with open(pJoin(modelDir, 'allInputData.json'), 'w') as f:
-			json.dump(inputDict, f, indent=4)
+		# Estimate runtime if possible.
+		try:
+			inputDict['runtimeEst_min'] = getattr(omf.models, inputDict['modelType']).runtimeEstimate(modelDir)
+		except:
+			pass
+		# Write input with new synth inputs.
+		with web.locked_open(pJoin(modelDir,"allInputData.json"),"w") as inFile:
+			json.dump(inputDict, inFile, indent=4)
 		# Remove old outputs.
 		try:
 			os.remove(pJoin(modelDir,"allOutputData.json"))
 		except Exception as e:
-			pass
-		# Estimate runtime if possible.
-		try:
-			inputDict['runtimeEst_min'] = getattr(omf.models, inputDict['modelType']).runtimeEstimate(modelDir)
-		except: 
 			pass
 		# Get the function and run it.
 		work = getattr(omf.models, inputDict['modelType']).work
