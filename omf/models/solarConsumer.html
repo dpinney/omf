@@ -24,7 +24,7 @@
 		<div id="headInnerBlock">
 			<div id="menuLeft">
 				<a style="color:white" href="/">Open Modeling Framework</a> &#187;&nbsp;&nbsp;Model
-				&#8220;<p id="titleText" style="display:inline"></p>&#8221;
+				&#8220;<p id="titleText" style="display:inline">{{allInputDataDict.modelName}}</p>&#8221;
 			</div>
 		</div>
 	</div>
@@ -37,23 +37,23 @@
 		<form name="inputForm" action="/runModel/" onsubmit="event.preventDefault(); return isFormValid();" method="post">
 			<div class="shortInput">
 				<label>Model Type <a href="https://github.com/dpinney/omf/wiki/Models-~-solarConsumer" target="blank">Help?</a></label>
-				<input type="text" id="modelType" name="modelType" value="{{modelName}}" readonly/>
+				<input type="text" id="modelType" name="modelType" value="{{allInputDataDict.modelType}}" value="{{modelName}}" readonly/>
 			</div>
 			<div class="shortInput">
 				<label>Model Name</label>
-				<input type="text" id="modelName" name="modelName" pattern="^[\w\s\d\.-]+$" required="required">
+				<input type="text" id="modelName" name="modelName" value="{{allInputDataDict.modelName}}" pattern="^[\w\s\d\.-]+$" required="required">
 			</div>
-			<div class="shortInput runningInline postRunInline">
+			<div class="shortInput">
 				<label>User</label>
-				<input type="text" id="user" name="user" readonly/>
+				<input type="text" id="user" name="user" value="{{allInputDataDict.user}}" readonly/>
 			</div>
-			<div class="shortInput runningInline postRunInline">
+			<div class="shortInput">
 				<label>Created</label>
-				<input type="text" id="created" name="created" readonly/>
+				<input type="text" id="created" name="created" value="{{allInputDataDict.created}}" readonly/>
 			</div>
-			<div class="shortInput postRunInline">
+			<div class="shortInput">
 				<label>Run Time</label>
-				<input type="text" id="runTime" name="runTime" readonly/>
+				<input type="text" id="runTime" name="runTime" value="{{allInputDataDict.runTime}}" readonly/>
 			</div>
 			<div class="wideInput">
 				<p class="inputSectionHeader">Solar System Parameters</p>
@@ -61,15 +61,15 @@
 			<hr>
 			<div class="shortInput">
 				<label class="tooltip">Zip Code<span class="classic">Zip code of the planned array's geographical location.</span></label>
-				<input type="text" id="zipCode" name="zipCode" pattern="^\d{5}(?:[-\s]\d{4})?$" required="required">
+				<input type="text" id="zipCode" name="zipCode" value="{{allInputDataDict.zipCode}}" pattern="^\d{5}(?:[-\s]\d{4})?$" required="required">
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">System Size (kWp-DC)<span class="classic">DC output rating of the solar panels in kilowatts.</span></label>
-				<input type="text" id="SystemSize" name="SystemSize" pattern="^\d+\.?\d*$" required="required">
+				<input type="text" id="SystemSize" name="SystemSize" value="{{allInputDataDict.SystemSize}}" pattern="^\d+\.?\d*$" required="required">
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Projected System Life (years)<span class="classic">How many years you expect the system to last. Up to 100 years.</span></label>
-				<input type="text" id="years" name="years" pattern="^(100|\d{1,2})(\.\d+)?$" required="required">
+				<input type="text" id="years" name="years" value="{{allInputDataDict.years}}" pattern="^(100|\d{1,2})(\.\d+)?$" required="required">
 			</div>
 			<div class="wideInput">
 				<p class="inputSectionHeader">Financial Variables</p>
@@ -77,86 +77,71 @@
 			<hr>
 			<div class="shortInput">
 				<label class="tooltip">Retail Energy Cost ($/kWh)<span class="classic">Retail rate for residential consumers.</span></label>
-				<input type="text" id="retailCost" name="retailCost" pattern="^\d+\.?\d*$" required="required">
+				<input type="text" id="retailCost" name="retailCost" value="{{allInputDataDict.retailCost}}" pattern="^\d+\.?\d*$" required="required">
 			</div>
 			<div class="shortInput">
 				<label>Rate Increase (%)</label>
-				<input type="text" id="rateIncrease" name="rateIncrease" pattern="^\d+\.?\d*$" required="required">
+				<input type="text" id="rateIncrease" name="rateIncrease" value="{{allInputDataDict.rateIncrease}}" pattern="^\d+\.?\d*$" required="required">
 			</div>
 			<div class="shortInput">
 				<label>Value of Solar Monthly Rate ($)</label>
-				<input type="text" id="valueOfSolarRate" name="valueOfSolarRate" pattern="^\d+\.?\d*$" required="required">
+				<input type="text" id="valueOfSolarRate" name="valueOfSolarRate" value="{{allInputDataDict.valueOfSolarRate}}" pattern="^\d+\.?\d*$" required="required">
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Metering Type<span class="classic">netEnergyMetering: total cost reduced by total solar gen * retail rate.<br><br>
 				production: total cost reduced by total solar gen * wholesale rate.<br><br>
 				excessEnergyMetering: total cost reduced by total solar gen * retail rate; but, if generation exceeds demand (over the life of the system), only get paid wholesale rate for the excess.</span></label>
-				<select id="meteringType" name="meteringType" required="required"/>
-					<option value="netEnergyMetering">Net Energy Metering</option>
-					<option value="production">Production</option>
-					<option value="excessEnergyMetering">Excess Energy Metering</option>
+				<select id="meteringType" name="meteringType" value="{{allInputDataDict.meteringType}}" required="required"/>
+					<option value="netEnergyMetering" {% if allInputDataDict.meteringType == 'netEnergyMetering' %}selected{% endif %}>Net Energy Metering</option>
+					<option value="production" {% if allInputDataDict.meteringType == 'production' %}selected{% endif %}>Production</option>
+					<option value="excessEnergyMetering" {% if allInputDataDict.meteringType == 'excessEnergyMetering' %}selected{% endif %}>Excess Energy Metering</option>
 				</select>
 			</div>
 			<div class="shortInput">
 				<label>Renewables in G&amp;T Fuel Mix (%)</label>
-				<input type="text" id="greenFuelMix" name="greenFuelMix" pattern="^\d+\.?\d*$" required="required">
+				<input type="text" id="greenFuelMix" name="greenFuelMix" value="{{allInputDataDict.greenFuelMix}}" pattern="^\d+\.?\d*$" required="required">
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Rooftop Upfront Costs ($)<span class="classic">Cost of a residential rooftop system varies from $2.75/Wdc to $4.15/Wdc.</span></label>
-				<input type="text" id="roofUpfrontCosts" name="roofUpfrontCosts" pattern="^\d+\.?\d*$" required="required">
+				<input type="text" id="roofUpfrontCosts" name="roofUpfrontCosts" value="{{allInputDataDict.roofUpfrontCosts}}" pattern="^\d+\.?\d*$" required="required">
 			</div>
 			<div class="shortInput">
 				<label>Utility Solar Charge ($)</label>
-				<input type="text" id="utilitySolarMonthlyCharge" name="utilitySolarMonthlyCharge" pattern="^\d+\.?\d*$" required="required">
+				<input type="text" id="utilitySolarMonthlyCharge" name="utilitySolarMonthlyCharge" value="{{allInputDataDict.utilitySolarMonthlyCharge}}" pattern="^\d+\.?\d*$" required="required">
 			</div>
 			<div class="shortInput">
 				<label>3rd Party Rate ($)</label>
-				<input type="text" id="ThirdPartyRate" name="ThirdPartyRate" pattern="^\d+\.?\d*$" required="required">
+				<input type="text" id="ThirdPartyRate" name="ThirdPartyRate" value="{{allInputDataDict.ThirdPartyRate}}" pattern="^\d+\.?\d*$" required="required">
 			</div>
 			<div class="shortInput">
 				<label>3rd Party Annual Rate Increase (%)</label>
-				<input type="text" id="ThirdPartyRateIncrease" name="ThirdPartyRateIncrease" pattern="^\d+\.?\d*$" required="required">
+				<input type="text" id="ThirdPartyRateIncrease" name="ThirdPartyRateIncrease" value="{{allInputDataDict.ThirdPartyRateIncrease}}" pattern="^\d+\.?\d*$" required="required">
 			</div>
 			<div class="shortInput">
 				<label>Community Solar Upfront Cost ($)</label>
-				<input type="text" id="comUpfrontCosts" name="comUpfrontCosts" pattern="^\d+\.?\d*$" required="required">
+				<input type="text" id="comUpfrontCosts" name="comUpfrontCosts" value="{{allInputDataDict.comUpfrontCosts}}" pattern="^\d+\.?\d*$" required="required">
 			</div>
 			<div class="shortInput">
 				<label>Community Solar Monthly Charge ($)</label>
-				<input type="text" id="comMonthlyCharge" name="comMonthlyCharge" pattern="^\d+\.?\d*$" required="required">
+				<input type="text" id="comMonthlyCharge" name="comMonthlyCharge" value="{{allInputDataDict.comMonthlyCharge}}" pattern="^\d+\.?\d*$" required="required">
 			</div>
 			<div class="shortInput">
 				<label>Community Solar Rate ($/kWh)</label>
-				<input type="text" id="comRate" name="comRate" pattern="^\d+\.?\d*$" required="required">
+				<input type="text" id="comRate" name="comRate" value="{{allInputDataDict.comRate}}" pattern="^\d+\.?\d*$" required="required">
 			</div>
 			<div class="shortInput">
 				<label>Community Solar Rate Increase (%)</label>
-				<input type="text" id="comRateIncrease" name="comRateIncrease" pattern="^\d+\.?\d*$" required="required">
+				<input type="text" id="comRateIncrease" name="comRateIncrease" value="{{allInputDataDict.comRateIncrease}}" pattern="^\d+\.?\d*$" required="required">
 			</div>
 			<div class="shortInput" style="width:66.5%">
 				<label class="tooltip">Monthly Demand (kWh CSV)<span class="classic">12 comma-separated demand values for each month of a typical year.</span></label>
-				<input type="text" id="monthlyDemand" name="monthlyDemand" pattern="^(\d*)(,\d*){11}$" required="required">
+				<input type="text" id="monthlyDemand" name="monthlyDemand" value="{{allInputDataDict.monthlyDemand}}" pattern="^(\d*)(,\d*){11}$" required="required">
 			</div>
-			<div class="wideInput" style="text-align:right">
-				<button id="deleteButton" type="button" class="stoppedInline postRunInline" onclick="deleteModel()">Delete</button>
-				<button id="shareButton" type="button" class="postRunInline" onclick="shareModel()">Share</button>
-				<button id="duplicateButton" type="button" class="postRunInline" onclick="duplicateModel()">Duplicate</button>
-				<button id="cancelButton" class="runningInline" type="button" onclick="cancelModel()">Cancel Run</button>
-				<button id="runButton" class="stoppedInline postRunInline" type="submit">Run Model</button>
-			</div>
+			{{ omfModelButtons }}
 		</form>
 	</div>
-	<div id ="runIndicator" class="content running">
-		Model running on server. Refresh the page to check for results, or wait for automatic refresh every 5 seconds.
-	</div>
-	<div id ="stopIndicator" class="content stopped" style="visibility: hidden">
-		<pre id='errorText' style='overflow-x:scroll'></pre>
-		<script type="text/javascript">
-		if (typeof(allInputData.stderr) !== 'undefined') {	
-			gebi('stopIndicator').style.visibility = 'visible'
-			gebi('errorText').innerHTML = 'MODEL ENCOUNTERED AN ERROR AS FOLLOWS: \n\n' + allInputData.stderr}
-		</script>
-	</div>
+	{{ omfRunDebugBlock }}
+	{% if modelStatus == 'finished' %}
 	<div id="output">
 		<script id="globalOutputScripting">
 			Highcharts.setOptions({global: { useUTC: false }, credits:{enabled:false} })
@@ -165,8 +150,8 @@
 			pointStart = dateOb(allOutputData.timeStamps[0])
 			pointInterval = dateOb(allOutputData.timeStamps[1]) - pointStart
 		</script>
-		<p class="reportTitle postRun">Lifetime Energy Costs</p>
-		<div id="lifetimeCostsReport" class="tightContent postRun">
+		<p class="reportTitle">Lifetime Energy Costs</p>
+		<div id="lifetimeCostsReport" class="tightContent">
 			<div id="lifetimeCostsChartDiv"></div>
 			<script>
 				levelCostData = [
@@ -185,8 +170,8 @@
 					legend:false})
 			</script>
 		</div>
-		<p class="reportTitle postRun" style="page-break-before:always">Cumulative Costs</p>
-		<div id="cumulativeCostsReport" class="tightContent postRun">
+		<p class="reportTitle" style="page-break-before:always">Cumulative Costs</p>
+		<div id="cumulativeCostsReport" class="tightContent">
 			<div id="cumulativeCostsChartDiv"></div>
 			<script>
 				cumulCostChart = new Highcharts.Chart({"credits":{"enabled":false},
@@ -206,8 +191,8 @@
 					"legend":{"verticalAlign":"top","align":"top","borderWidth":0,"x":50,"y":-10,"layout":"horizontal"}})
 			</script>
 		</div>
-		<p class="reportTitle postRun">Detailed Costs By Purchase Type</p>
-		<div id="detailedCostsReport" class="tightContent postRun">
+		<p class="reportTitle">Detailed Costs By Purchase Type</p>
+		<div id="detailedCostsReport" class="tightContent">
 			<style>
 				table{width:980px; font-size:16; padding:5px;}
 				td {padding:2px;}
@@ -247,8 +232,8 @@
 				insertMetric("detailedCostsTable","3rd Party Solar",[0, allOutputData["totalCost3rdParty"],allOutputData["totalSavedBy3rdParty"], allOutputData["avgMonthlyBill3rdParty"],allOutputData["kWhCost3rdParty"], allOutputData["spp3rdParty"], allOutputData["greenElectrons"]])
 			</script>
 		</div>
-		<p class="reportTitle postRun">Hourly Solar Generation</p>
-		<div id="powerGenerationReport" class="tightContent postRun">
+		<p class="reportTitle">Hourly Solar Generation</p>
+		<div id="powerGenerationReport" class="tightContent">
 			<div id="powerTimeSeries"></div>
 			<script>
 				new Highcharts.Chart({"credits":{"enabled":false},
@@ -268,8 +253,8 @@
 					"legend":false})
 			</script>
 		</div>
-		<p class="reportTitle postRun">Irradiance</p>
-		<div id="irradianceReport" class="tightContent postRun">
+		<p class="reportTitle">Irradiance</p>
+		<div id="irradianceReport" class="tightContent">
 			<div id="irradianceChartDiv"></div>
 			<script>
 				irradianceSeriesData = [
@@ -287,8 +272,8 @@
 					"legend":{"verticalAlign":"top","align":"top","borderWidth":0,"x":50,"y":-10,"layout":"horizontal"}})
 			</script>
 		</div>
-		<p class="reportTitle postRun" style="page-break-before:always">Other Climate Variables</p>
-		<div id="climateReport" class="tightContent postRun">
+		<p class="reportTitle" style="page-break-before:always">Other Climate Variables</p>
+		<div id="climateReport" class="tightContent">
 			<div id="climateChartDiv"></div>
 			<script>
 				climateSeriesData = [
@@ -307,5 +292,7 @@
 					"legend":{"verticalAlign":"top","align":"top","borderWidth":0,"x":50,"y":-10,"layout":"horizontal"}})
 			</script>
 		</div>
+		{{ rawOutputFiles }}
 	</div>
+	{% endif %}
 </body>
