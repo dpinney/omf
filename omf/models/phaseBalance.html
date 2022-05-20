@@ -55,11 +55,6 @@
 	<script>modelStatus="{{modelStatus}}"</script>
 	<script>currentUser="{{datastoreNames.get('currentUser','test')}}"</script>
 	<script type="text/javascript">
-		function editFeeder(modelName, feederNum) {
-			console.log("modelName:",modelName)
-			studyUser = allInputData.user
-			window.open("/feeder/" + studyUser + "/" + modelName + "/" + feederNum,  "_blank")
-		}
 		function openTab(evt, tabName) {
 			var i, tabContent, tabLinks;
 			// Get all elements with class="tabContent" and hide them

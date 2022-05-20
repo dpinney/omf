@@ -51,12 +51,6 @@
 	<script>modelStatus="{{modelStatus}}"</script>
 	<script>currentUser="{{datastoreNames.get('currentUser','test')}}"</script>
 	<script type="text/javascript">
-		function editFeeder(modelName, feederNum) {
-			console.log("modelName:",modelName)
-			studyUser = allInputData.user
-			window.open("/feeder/" + studyUser + "/" + modelName + "/" + feederNum,  "_blank")
-		}
-
 		function downloadTextFile(fileName, text) {
 			console.log(text)
 			var element = document.createElement('a');

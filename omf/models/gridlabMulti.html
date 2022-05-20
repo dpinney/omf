@@ -107,10 +107,6 @@
 					alert("Rem Feeder!")
 					//post_to_url("/removeFeeder/" + allInputData.user + "/" + allInputData.modelName + "/" + (index+2))
 				}
-				function editFeeder(modelName, feederNum) {
-					studyUser = allInputData.user
-					window.open("/feeder/" + studyUser + "/" + modelName + "/" + feederNum,  "_blank")
-				}
 				// Put the feeders in:
 				firstFeeder = true
 				for (key in allInputData) {

@@ -16,10 +16,6 @@
 	<script>modelStatus="{{modelStatus}}"</script>
 	<!-- Global Functions -->
 	<script type="text/javascript">
-		function editFeeder(modelName, feederNum) {
-			studyUser = "{{allInputDataDict.user}}"
-			window.open("/feeder/" + studyUser + "/" + modelName + "/" + feederNum,  "_blank")
-		}
 		function editDSS(modelName, fileName) {
 			studyUser = "{{allInputDataDict.user}}"
 			window.open("/rawTextEdit/" + studyUser + "/" + modelName + "/" + fileName,  "_blank")

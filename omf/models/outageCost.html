@@ -71,13 +71,6 @@
 			<hr>
 			<div class="shortInput">
 				<label>Feeder</label>
-				<script type="text/javascript">
-				function editFeeder(modelName, feederNum) {
-					console.log("modelName:",modelName)
-					studyUser = allInputData.user
-					window.open("/feeder/" + studyUser + "/" + modelName + "/" + feederNum,  "_blank")
-				}
-				</script>
 				<button id="feederButton" type="button" onclick="javascript:editFeeder(allInputData.modelName,1);" style="display:block;width:125px;">Open Editor</button>
 				<input type="text" id="feederName1" name="feederName1" style="display:none">
 			</div>
