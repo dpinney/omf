@@ -10,7 +10,7 @@ from omf.models.__neoMetaModel__ import *
 # Model metadata:
 tooltip = "The rfCoverage model provides a visualization of radio frequency propogation"
 modelName, template = __neoMetaModel__.metadata(__file__)
-hidden = True
+hidden = False
 
 def work(modelDir, inputDict):
 
