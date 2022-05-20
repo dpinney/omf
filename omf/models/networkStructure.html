@@ -58,15 +58,15 @@
 				<label>Model Name</label>
 				<input type="text" id="modelName" name="modelName" value="{{allInputDataDict.modelName}}" pattern="^[\w\s\d\.-]+$" required="required">
 			</div>
-			<div class="shortInput runningInline postRunInline">
+			<div class="shortInput">
 				<label>User</label>
 				<input type="text" id="user" name="user" value="{{allInputDataDict.user}}" readonly/>
 			</div>
-			<div class="shortInput runningInline postRunInline ">
+			<div class="shortInput ">
 				<label>Created</label>
 				<input type="text" id="created" name="created" value="{{allInputDataDict.created}}" readonly/>
 			</div>
-			<div class="shortInput postRunInline">
+			<div class="shortInputInline">
 				<label>Run Time</label>
 				<input type="text" id="runTime" name="runTime" value="{{allInputDataDict.runTime}}" readonly/>
 			</div>
@@ -124,27 +124,27 @@
 	{{ omfRunDebugBlock }}
 	{% if modelStatus == 'finished' %}
 	<div id="output">
-		<p class="reportTitle postRun">Actual Connectivity Graph</p>
-		<div id="actualGraph" class="content postRun" style="margin-top:0px">
+		<p class="reportTitle">Actual Connectivity Graph</p>
+		<div id="actualGraph" class="content" style="margin-top:0px">
 			<img id="actualGraphImage" style="width:980px" />
 			<script>gebi("actualGraphImage").src = "data:image/png;base64," + allOutputData["actual_graph.png"]</script>
 		</div>
-		<p class="reportTitle postRun">Distance Connectivity Graph (generated solely with distance data)</p>
-		<div id="DistanceGraph" class="content postRun" style="margin-top:0px">
+		<p class="reportTitle">Distance Connectivity Graph (generated solely with distance data)</p>
+		<div id="DistanceGraph" class="content" style="margin-top:0px">
 			<img id="DistanceGraphImage" style="width:980px" />
 			<script>gebi("DistanceGraphImage").src = "data:image/png;base64," + allOutputData["distance_graph.png"]</script>
 		</div>
-		<p class="reportTitle postRun">Voltage Connectivity Graph</p>
-		<div id="voltageGraph" class="content postRun" style="margin-top:0px">
+		<p class="reportTitle">Voltage Connectivity Graph</p>
+		<div id="voltageGraph" class="content" style="margin-top:0px">
 			<img id="voltageGraphImage" style="width:980px" />
 			<script>gebi("voltageGraphImage").src = "data:image/png;base64," + allOutputData["voltage_graph.png"]</script>
 		</div>
-		<p class="reportTitle postRun" style="page-break-before:always">Connectivity Tests and Accuracy</p>
-		<div id="outageCostCalc" class="tightContent postRun">
+		<p class="reportTitle" style="page-break-before:always">Connectivity Tests and Accuracy</p>
+		<div id="outageCostCalc" class="tightContent">
 			{{ allOutputDataDict['statsCalc'] }}
 		</div>
-		<p class="reportTitle postRun" style="page-break-before:always">Support Vector Machine Results</p>
-		<div id="outageCostCalc" class="tightContent postRun">
+		<p class="reportTitle" style="page-break-before:always">Support Vector Machine Results</p>
+		<div id="outageCostCalc" class="tightContent">
 			{{ allOutputDataDict['svmCalc'] }}
 		</div>
 		<!-- TODO: Remove? -->
