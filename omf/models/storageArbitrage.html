@@ -54,12 +54,12 @@
 	<script>modelStatus="{{modelStatus}}"</script>
 	<script>currentUser="{{datastoreNames.get('currentUser','test')}}"</script>
 </head>
-<body onload="init()">
+<body>
 	<div id="header">
 		<div id="headInnerBlock">
 			<div id="menuLeft">
 				<a style="color:white" href="/">Open Modeling Framework</a> &#187;&nbsp;&nbsp;Model
-				&#8220;<p id="titleText" style="display:inline"></p>&#8221;
+				&#8220;<p id="titleText" style="display:inline">{{ allInputDataDict.modelName }}</p>&#8221;
 			</div>
 		</div>
 	</div>
@@ -72,23 +72,23 @@
 		<form name="inputForm" action="/runModel/" onsubmit="event.preventDefault(); return isFormValid();" method="post">
 			<div class="shortInput">
 				<label>Model Type <a href="https://github.com/dpinney/omf/wiki/Models-~-storageArbitrage" target="blank">Help?</a></label>
-				<input type="text" id="modelType" name="modelType" value="{{modelName}}" readonly/>
+				<input type="text" id="modelType" name="modelType" value="{{allInputDataDict.modelType}}" value="{{modelName}}" readonly/>
 			</div>
 			<div class="shortInput">
 				<label>Model Name</label>
-				<input type="text" id="modelName" name="modelName" pattern="^[\w\s\d\.-]+$" required="required">
+				<input type="text" id="modelName" name="modelName" value="{{allInputDataDict.modelName}}" pattern="^[\w\s\d\.-]+$" required="required">
 			</div>
-			<div class="shortInput runningInline postRunInline">
+			<div class="shortInput">
 				<label>User</label>
-				<input type="text" id="user" name="user" readonly/>
+				<input type="text" id="user" name="user" value="{{allInputDataDict.user}}" readonly/>
 			</div>
-			<div class="shortInput runningInline postRunInline ">
+			<div class="shortInput ">
 				<label>Created</label>
-				<input type="text" id="created" name="created" readonly/>
+				<input type="text" id="created" name="created" value="{{allInputDataDict.created}}" readonly/>
 			</div>
-			<div class="shortInput postRunInline">
+			<div class="shortInput">
 				<label>Run Time</label>
-				<input type="text" id="runTime" name="runTime" readonly/>
+				<input type="text" id="runTime" name="runTime" value="{{allInputDataDict.runTime}}" readonly/>
 			</div>
 			<div class="wideInput">
 				<p class="inputSectionHeader">Economic Variables</p>
@@ -96,55 +96,55 @@
 			<hr>
 			<div class="shortInput">
 				<label>Unit Capacity (kWh-AC)</label>
-				<input type="text" id="cellCapacity" name="cellCapacity" required="required" pattern="^\d+\.?\d*?$"/>
+				<input type="text" id="cellCapacity" name="cellCapacity" value="{{allInputDataDict.cellCapacity}}" required="required" pattern="^\d+\.?\d*?$"/>
 			</div>
 			<div class="shortInput">
 				<label>Charge Rating (kW)</label>
-				<input type="text" id="chargeRate" name="chargeRate" required="required" pattern="^\d+\.?\d*?$"/>
+				<input type="text" id="chargeRate" name="chargeRate" value="{{allInputDataDict.chargeRate}}" required="required" pattern="^\d+\.?\d*?$"/>
 			</div>
 			<div class="shortInput">
 				<label>Discharge Rating (kW)</label>
-				<input type="text" id="dischargeRate" name="dischargeRate" required="required" pattern="^\d+\.?\d*?$"/>
+				<input type="text" id="dischargeRate" name="dischargeRate" value="{{allInputDataDict.dischargeRate}}" required="required" pattern="^\d+\.?\d*?$"/>
 			</div>
 			<div class="shortInput">
 				<label>Unit Quantity</label>
-				<input type="text" id="cellQuantity" name="cellQuantity" required="required" pattern="^\d+$"/>
+				<input type="text" id="cellQuantity" name="cellQuantity" value="{{allInputDataDict.cellQuantity}}" required="required" pattern="^\d+$"/>
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Maximum Depth of Discharge (%)<span class="classic">The maximum safe discharge capacity of the battery system, typically between 80% - 90%.</span></label>
-				<input type="text" id="dodFactor" name="dodFactor" required="required" pattern="^\d+\.?\d*?$"/>
+				<input type="text" id="dodFactor" name="dodFactor" value="{{allInputDataDict.dodFactor}}" required="required" pattern="^\d+\.?\d*?$"/>
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Battery Round Trip Efficiency (%)<span class="classic">The efficiency of the DC battery system, to be used with the Inverter efficiency to get Battery System AC Round Trip Efficiency equal to this value times <i>Inverter Efficiency &amp; Transformer Efficiency</i> &#178;</span></label>
-				<input type="text" id="batteryEfficiency" name="batteryEfficiency" required="required" pattern="^\d+\.?\d*?$">
+				<input type="text" id="batteryEfficiency" name="batteryEfficiency" value="{{allInputDataDict.batteryEfficiency}}" required="required" pattern="^\d+\.?\d*?$">
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Inverter &amp; Transformer Efficiency (%)<span class="classic">Combined Inverter and Transformer Efficiency in converting DC power to AC power. Used in the Battery System AC Round Trip Efficiency calculation. The Inverter efficiency is obtained from the Weighted Efficiency (CEC) Method.</span></label>
-				<input type="text" id="inverterEfficiency" name="inverterEfficiency" pattern="^(100|\d\d|\d)(\.\d+)?$" required="required" >
+				<input type="text" id="inverterEfficiency" name="inverterEfficiency" value="{{allInputDataDict.inverterEfficiency}}" pattern="^(100|\d\d|\d)(\.\d+)?$" required="required" >
 			</div>
 			<div class="shortInput">
 				<label>Unit Cost (installed)</label>
-				<input type="text" id="cellCost" name="cellCost" required="required" pattern="^\d+\.?\d*?$"/>
+				<input type="text" id="cellCost" name="cellCost" value="{{allInputDataDict.cellCost}}" required="required" pattern="^\d+\.?\d*?$"/>
 			</div>
 			<div class="shortInput">
 				<label>Battery Cycles in Lifetime</label>
-				<input type="text" id="batteryCycleLife" name="batteryCycleLife" required="required" pattern="^\d+\.?\d*?$"/>
+				<input type="text" id="batteryCycleLife" name="batteryCycleLife" value="{{allInputDataDict.batteryCycleLife}}" required="required" pattern="^\d+\.?\d*?$"/>
 			</div>
 			<div class="shortInput">
 				<label>Financial Projection Length (years)</label>
-				<input type="text" id="projYears" name="projYears" required="required" pattern="^\d+$"/>
+				<input type="text" id="projYears" name="projYears" value="{{allInputDataDict.projYears}}" required="required" pattern="^\d+$"/>
 			</div>
 			<div class="shortInput">
 				<label>Discount Rate (%)</label>
-				<input type="text" id="discountRate" name="discountRate" required="required" pattern="^\d+\.?\d*?$"/>
+				<input type="text" id="discountRate" name="discountRate" value="{{allInputDataDict.discountRate}}" required="required" pattern="^\d+\.?\d*?$"/>
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Demand Curve (.csv file)<span class="classic">Please see the documentation at the green 'Help?' link above for the required format and an example file.</span></label>
 				<input id="demandCurveFile" type="file" style="display:none" onchange="handle_files(this.files,'demandCurve','fileName')">
-				<input id="demandCurve" name="demandCurve" type="hidden">
+				<input id="demandCurve" name="demandCurve" value="{{allInputDataDict.demandCurve}}" type="hidden">
 				<div>
 					<label for="demandCurveFile" class="fileButton">Choose File</label>
-					<input id="fileName" name="fileName" value='' readonly class="uploadFileName">
+					<input id="fileName" name="fileName" value="{{allInputDataDict.fileName}}" value='' readonly class="uploadFileName">
 				</div>
 			</div>
 			<div class="wideInput">
@@ -154,41 +154,26 @@
 			<div class="shortInput">
 				<label class="tooltip">Price Curve (.csv file)<span class="classic">Please see the documentation at the help link for the required format.</span></label>
 				<input id="priceCurveFile" type="file" style="display:none" onchange="handle_files(this.files,'priceCurve','priceFileName')">
-				<input id="priceCurve" name="priceCurve" type="hidden">
+				<input id="priceCurve" name="priceCurve" value="{{allInputDataDict.priceCurve}}" type="hidden">
 				<div>
 					<label for="priceCurveFile" class="fileButton">Choose File</label>
-					<input id="priceFileName" name="priceFileName" value='' readonly class="uploadFileName">
+					<input id="priceFileName" name="priceFileName" value="{{allInputDataDict.priceFileName}}" value='' readonly class="uploadFileName">
 				</div>
 			</div>
 			<div class="shortInput">
 				<label></label>
 				<label class="tooltip">Price Threshold for Discharge ($)<span class="classic">The model discharges the battery when the current price is greater than this value.</span></label>
-				<input type="text" id="dischargePriceThreshold" name="dischargePriceThreshold" required="required" pattern="^\d+\.?\d*?$"/>
+				<input type="text" id="dischargePriceThreshold" name="dischargePriceThreshold" value="{{allInputDataDict.dischargePriceThreshold}}" required="required" pattern="^\d+\.?\d*?$"/>
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Price Threshold for Charge ($)<span class="classic">The model charges the battery when the current price is less than this value.</span></label>
-				<input type="text" id="chargePriceThreshold" name="chargePriceThreshold" required="required" pattern="^\d+\.?\d*?$"/>
+				<input type="text" id="chargePriceThreshold" name="chargePriceThreshold" value="{{allInputDataDict.chargePriceThreshold}}" required="required" pattern="^\d+\.?\d*?$"/>
 			</div>
-			<div class="wideInput" style="text-align:right">
-				<button id="deleteButton" type="button" class="stoppedInline postRunInline" onclick="deleteModel()">Delete</button>
-				<button id="shareButton" type="button" class="postRunInline" onclick="shareModel()">Share</button>
-				<button id="duplicateButton" type="button" class="postRunInline" onclick="duplicateModel()">Duplicate</button>
-				<button id="cancelButton" class="runningInline" type="button" onclick="cancelModel()">Cancel Run</button>
-				<button id="runButton" class="stoppedInline postRunInline" type="submit">Run Model</button>
-			</div>
+			{{ omfModelButtons }}
 		</form>
 	</div>
-	<div id ="runIndicator" class="content running">
-		Model running on server. Refresh the page to check for results, or wait for automatic refresh every 5 seconds.
-	</div>
-	<div id ="stopIndicator" class="content stopped" style="visibility: hidden">
-		<pre id='errorText' style='overflow-x:scroll'></pre>
-		<script type="text/javascript">
-		if (typeof(allInputData.stderr) !== 'undefined') {	
-			gebi('stopIndicator').style.visibility = 'visible'
-			gebi('errorText').innerHTML = 'MODEL ENCOUNTERED AN ERROR AS FOLLOWS: \n\n' + allInputData.stderr}
-		</script>
-	</div>
+	{{ omfRunDebugBlock }}
+	{% if modelStatus == 'finished' %}
 	<div id="output">
 		<script id="globalOutputScripting">
 			function insertMetric(tableId, name, vector) {
@@ -214,8 +199,8 @@
 				}
 			}
 		</script>
-		<p class="reportTitle postRun">Monthly Cost Comparison</p>
-		<div id="levelizedCostReport" class="tightContent postRun">
+		<p class="reportTitle">Monthly Cost Comparison</p>
+		<div id="levelizedCostReport" class="tightContent">
 			<div id="levelizedCostTableDiv" style="display:inline-block; width:1000px">
 				<table id="monthlySummaryTable" style="margin:5px;width:990px">
 					<style>td, th {padding:7 0 5 20;text-align: left;font-size:0.7em;}</style>
@@ -266,8 +251,8 @@
 			// Global Highcharts settings.
 			Highcharts.setOptions({global:{useUTC:true}})
 		</script>
-		<p class="reportTitle postRun" style="page-break-before:always">Demand Before and After Storage</p>
-		<div id="irradianceReport" class="tightContent postRun">
+		<p class="reportTitle" style="page-break-before:always">Demand Before and After Storage</p>
+		<div id="irradianceReport" class="tightContent">
 			<div id="demandBattChart"></div>
 			<script>
 				new Highcharts.Chart({"credits":{"enabled":false},
@@ -304,8 +289,8 @@
 					"legend":{"verticalAlign":"top","align":"top","borderWidth":0,"x":50,"y":-10,"layout":"horizontal"}})
 			</script>
 		</div>
-		<p class="reportTitle postRun">Battery State of Charge</p>
-		<div id="irradianceReport" class="tightContent postRun">
+		<p class="reportTitle">Battery State of Charge</p>
+		<div id="irradianceReport" class="tightContent">
 			<div id="batterySocChart"></div>
 			<script>
 				var dodFactor = 100 - parseFloat(allInputData.dodFactor)
@@ -343,8 +328,8 @@
 		</div>
 		<!-- TODO: Make into preview graph: http://jsfiddle.net/gh/get/jquery/1.7.2/highslide-software/highcharts.com/tree/master/samples/stock/xaxis/minorticks/	 -->
 		<!-- TEST AREA BEGIN -->
-		<p class="reportTitle postRun">Price Input</p>
-		<div id="Price Input" class="tightContent postRun">
+		<p class="reportTitle">Price Input</p>
+		<div id="Price Input" class="tightContent">
 			<div id="priceChart"></div>
 			<script>
 				new Highcharts.Chart({"credits":{"enabled":false},
@@ -376,8 +361,8 @@
 			</script>
 		</div>
 		<!-- TEST AREA END. -->
-		<p class="reportTitle postRun" style="page-break-before:always">Cash Flow</p>
-		<div id="cashFlowReport" class="tightContent postRun">
+		<p class="reportTitle" style="page-break-before:always">Cash Flow</p>
+		<div id="cashFlowReport" class="tightContent">
 			<div id="cashFlowChartDiv"></div>
 			<script>
 				new Highcharts.Chart({"credits":{"enabled":false},
@@ -393,5 +378,7 @@
 					"legend":{"verticalAlign":"top","align":"top","borderWidth":0,"x":50,"y":-10,"layout":"horizontal"}})
 			</script>
 		</div>
+		{{ rawOutputFiles }}
 	</div>
+	{% endif %}
 </body>
