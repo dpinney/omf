@@ -241,8 +241,6 @@ div.stdouts {
 	overflow-x: auto;
 	white-space: nowrap; 
 	margin-top: 0px;}
-.preRun, .running, .postRun, p.postRun, .runningInline, .postRunInline, .stoppedInline, .stopped, div.preRun, div.running, div.postRun, div.runningInline, div.postRunInline, div.stoppedInline, div.stopped, div.warnings {
-	display: none;}
 .tooltip {
 	border-bottom: 1px dotted #000000; 
 	color: #000000; 

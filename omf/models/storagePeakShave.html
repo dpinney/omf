@@ -215,8 +215,8 @@
 				}
 			}
 		</script>
-		<p class="reportTitle postRun">Monthly Cost Comparison</p>
-		<div id="levelizedCostReport" class="tightContent postRun">
+		<p class="reportTitle">Monthly Cost Comparison</p>
+		<div id="levelizedCostReport" class="tightContent">
 			<div id="levelizedCostTableDiv" style="display:inline-block; width:1000px; height:150px; overflow-y:hidden; overflow-x:auto;">
 				<table id="monthlySummaryTable" style="margin:5px;margin: 5px;width: 990px;font-size: 14pt">
 					<style>td, th {padding:7 0 5 20;text-align: left;font-size:0.7em;}</style>
@@ -250,8 +250,8 @@
 			// Global Highcharts settings.
 			Highcharts.setOptions({global:{useUTC:true}})
 		</script>
-		<p class="reportTitle postRun" style="page-break-before:always">Demand Before and After Storage</p>
-		<div id="irradianceReport" class="tightContent postRun">
+		<p class="reportTitle" style="page-break-before:always">Demand Before and After Storage</p>
+		<div id="irradianceReport" class="tightContent">
 			<div id="demandBattChart"></div>
 			<script>
 				new Highcharts.Chart({"credits":{"enabled":false},
@@ -289,8 +289,8 @@
 					"legend":{"verticalAlign":"top","align":"top","borderWidth":0,"x":50,"y":-10,"layout":"horizontal"}})
 			</script>
 		</div>
-		<p class="reportTitle postRun">Battery State of Charge</p>
-		<div id="irradianceReport" class="tightContent postRun">
+		<p class="reportTitle">Battery State of Charge</p>
+		<div id="irradianceReport" class="tightContent">
 			<div id="batterySocChart"></div>
 			<script>
 				var dodFactor = 100 - parseFloat(allInputData.dodFactor)
@@ -327,8 +327,8 @@
 			</script>
 		</div>
 		<!-- TODO: Make into preview graph: http://jsfiddle.net/gh/get/jquery/1.7.2/highslide-software/highcharts.com/tree/master/samples/stock/xaxis/minorticks/	 -->
-		<p class="reportTitle postRun" style="page-break-before:always">Cash Flow</p>
-		<div id="cashFlowReport" class="tightContent postRun">
+		<p class="reportTitle" style="page-break-before:always">Cash Flow</p>
+		<div id="cashFlowReport" class="tightContent">
 			<div id="cashFlowChartDiv"></div>
 			<script>
 				new Highcharts.Chart({"credits":{"enabled":false},
@@ -344,8 +344,8 @@
 					"legend":{"verticalAlign":"top","align":"top","borderWidth":0,"x":50,"y":-10,"layout":"horizontal"}})
 			</script>
 		</div>
-		<p class="reportTitle postRun" style="page-break-before:always">Forecast Dispatch Accuracy and Effectiveness</p>
-		<div id="effectiveness" class="content postRun detailsContainer" style="margin-top:0px">
+		<p class="reportTitle" style="page-break-before:always">Forecast Dispatch Accuracy and Effectiveness</p>
+		<div id="effectiveness" class="content detailsContainer" style="margin-top:0px">
 <pre>Load prediction training accuracy (MAPE):
 {{allOutputDataDict['trainAccuracy'] or 'N/A'}}%
 

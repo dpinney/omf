@@ -83,16 +83,16 @@
 				<label>Model Name</label>
 				<input type="text" id="modelName" name="modelName" value="{{allInputDataDict.modelName}}" pattern="^[\w\s\d\.-]+$">
 			</div>
-			<div class="shortInput runningInline postRunInline">
+			<div class="shortInput">
 				<label>User</label>
 				<input type="text" id="user" name="user" value="{{allInputDataDict.user}}" readonly/>
 			</div>
 		
-			<div class="runningInline postRunInline shortInput">
+			<div class="shortInput">
 				<label>Created</label>
 				<input type="text" id="created" name="created" value="{{allInputDataDict.created}}" readonly/>
 			</div>
-			<div class="postRunInline shortInput">
+			<div class="shortInput">
 				<label>Run Time</label>
 				<input type="text" id="runTime" name="runTime" value="{{allInputDataDict.runTime}}" readonly/>
 			</div>	
@@ -223,7 +223,7 @@
 	</div>
 	{{ omfRunDebugBlock }}
 	{% if modelStatus == 'finished' %}
-	<div id="output" class="postRun">
+	<div id="output">
 		<p class="reportTitle" style="page-break-before:always"><b>One Line Diagram (Scroll to Zoom, Drag to Pan)</b></p>
 		<div class="content" style="margin-top:0px">
 			<p>{{allOutputDataDict['warning']}}</p>

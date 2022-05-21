@@ -50,10 +50,10 @@
 				<input type="text" id="created" name="created" value="{{allInputDataDict.created}}" readonly/>
 			</div>
 			<div class="circModelBox">
-				<button id="deleteButton" type="button" class="circModelButtons stoppedInline postRunInline" onclick="deleteModel()">Delete</button>
-				<button id="shareButton" type="button" class="circModelButtons stoppedInline postRunInline" onclick="shareModel()">Share</button>
-				<button id="duplicateButton" type="button" class="circModelButtons stoppedInline postRunInline" onclick="duplicateModel()">Duplicate</button>
-				<button id="runButton" type="submit" class="circModelButtons stoppedInline postRunInline" onclick="circSave()">Save</button>
+				<button id="deleteButton" type="button" class="circModelButtons" onclick="deleteModel()">Delete</button>
+				<button id="shareButton" type="button" class="circModelButtons" onclick="shareModel()">Share</button>
+				<button id="duplicateButton" type="button" class="circModelButtons" onclick="duplicateModel()">Duplicate</button>
+				<button id="runButton" type="submit" class="circModelButtons" onclick="circSave()">Save</button>
 			</div>
 			<input type="hidden" id="circString" name="circString" value="{{allInputDataDict.circString}}" readonly/>
 			<div id="copyrightNotice" style="color:gray;line-height:14pt;margin-top:20px">Circuit Simulator Applet was developed by <a href="http://www.falstad.com/" target="_blank">Paul Falstad</a></div>
