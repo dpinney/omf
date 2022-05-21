@@ -1,8 +1,5 @@
 <head>
-	<title>Open Modeling Framework</title>
-	<meta charset="utf-8">
-	<link href="{{pathPrefix}}/static/omf.css" type="text/css" rel="stylesheet"/>
-	<link rel="shortcut icon" href="{{pathPrefix}}/static/favicon.ico">
+	{{ omfHeaders }}
 	<style>
 		thead{font-weight:bold} table{width:980px; font-size:10}
 		g.node rect, circle {fill:lightgray}
@@ -10,32 +7,12 @@
 		text {font-size:10pt}
 		.inVal {text-decoration:underline}
 	</style>
-	{% if modelStatus == "running" %}<meta http-equiv="refresh" content="5"/>{% endif %}
-	<!-- Library Imports -->
-	<script type="text/javascript" src="{{pathPrefix}}/static/omf.js"></script>
-	<script type="text/javascript" src="{{pathPrefix}}/static/jquery-1.9.1.js"></script>
 	<script src="{{pathPrefix}}/static/highcharts4.src.js"></script>
 	<script src="{{pathPrefix}}/static/heatmap.src.js"></script>
 	<script src="{{pathPrefix}}/static/d3.v3.js"></script>
-	<!-- Data  Imports -->
-	<script>allInputData={% if allInputDataDict %}{{allInputDataDict | tojson}}{% else %}null{% endif %}</script>
-	<script>allOutputData={% if allOutputDataDict %}{{allOutputDataDict | tojson}}{% else %}null{% endif %}</script>
-	<script>modelStatus="{{modelStatus}}"</script>
-	<script>currentUser="{{datastoreNames.get('currentUser','test')}}"</script>
 </head>
 <body>
-	<div id="header">
-		<div id="headInnerBlock">
-			<div id="menuLeft">
-				<a style="color:white" href="/">Open Modeling Framework</a> &#187;&nbsp;&nbsp;Model
-				&#8220;<p id="titleText" style="display:inline">{{allInputDataDict.modelName}}</p>&#8221;
-			</div>
-		</div>
-	</div>
-	<div id="triangle-parent">
-		<div id="triangle-message">New Version<span class="classic-triangle">A new version of the model has been added to the OMF. To get the new outputs, please fill in any missing inputs and hit "Run Model". You can also just look at the old inputs/outputs.</span></div>
-		<div id="triangle-topright"></div>
-	</div>
+	{{ omfModelTitle }}
 	<p class="reportTitle">Model Input</p>
 	<div id="input" class="content">
 		<form name="inputForm" action="/runModel/" onsubmit="event.preventDefault(); return isFormValid();" method="post">

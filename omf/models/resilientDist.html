@@ -1,8 +1,5 @@
 <head>
-	<title>Open Modeling Framework</title>
-	<meta charset="utf-8">
-	<link href="{{pathPrefix}}/static/omf.css" type="text/css" rel="stylesheet"/>
-	<link rel="shortcut icon" href="{{pathPrefix}}/static/favicon.ico">
+	{{ omfHeaders }}
 	<style type="text/css">
 	/*Styles here*/
 		.wrapper{float: left; width: 50%; height: 90%; position: relative;}
@@ -42,14 +39,6 @@
 		}
 	</style>
 	{% if modelStatus == "running" %}<meta http-equiv="refresh" content="5"/>{% endif %}
-	<!-- Library Imports -->
-	<script type="text/javascript" src="{{pathPrefix}}/static/omf.js"></script>
-	<script type="text/javascript" src="{{pathPrefix}}/static/jquery-1.9.1.js"></script>
-	<!-- Data  Imports -->
-	<script>allInputData={% if allInputDataDict %}{{allInputDataDict | tojson}}{% else %}null{% endif %}</script>
-	<script>allOutputData={% if allOutputDataDict %}{{allOutputDataDict | tojson}}{% else %}null{% endif %}</script>
-	<script>modelStatus="{{modelStatus}}"</script>
-	<script>currentUser="{{datastoreNames.get('currentUser','test')}}"</script>
 	<script type="text/javascript">
 		function downloadTextFile(fileName, text) {
 			console.log(text)
@@ -64,14 +53,7 @@
 	</script>
 </head>
 <body>
-	<div id="header">
-		<div id="headInnerBlock">
-			<div id="menuLeft">
-				<a style="color:white" href="/">Open Modeling Framework</a> &#187;&nbsp;&nbsp;Model
-				&#8220;<p id="titleText" style="display:inline">{{allInputDataDict.modelName}}</p>&#8221;
-			</div>
-		</div>
-	</div>
+	{{ omfModelTitle }}
 	<p class="reportTitle">Model Input</p>
 	<div id="input" class="content">
 		<form name="inputForm" action="/runModel/" onsubmit="event.preventDefault(); return isFormValid();" method="post">

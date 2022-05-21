@@ -9,7 +9,6 @@ import pandas as pd
 import omf.models
 from omf import web
 
-
 # Locational variables so we don't have to rely on OMF being in the system path.
 _myDir = os.path.dirname(os.path.abspath(__file__))
 _omfDir = os.path.dirname(_myDir)
@@ -200,7 +199,8 @@ def renderTemplate(modelDir, absolutePaths=False, datastoreNames={}):
 		<script>allInputData={% if allInputDataDict %}{{allInputDataDict | tojson}}{% else %}null{% endif %}</script>
 		<script>allOutputData={% if allOutputDataDict %}{{allOutputDataDict | tojson}}{% else %}null{% endif %}</script>
 		<script>currentUser="{{loggedInUser}}"</script>
-		<script>modelStatus="{{modelStatus}}"</script> '''
+		<script>modelStatus="{{modelStatus}}"</script>
+		<script>{% if allOutputDataDict['oldVersion'] %}document.getElementById("triangle-parent").style.visibility = "visible";{% endif %}</script>'''
 	omfHeaders = Template(omfHeadersTemplate).render(modelStatus=modelStatus, loggedInUser=loggedInUser, allInputDataDict=inJson, allOutputDataDict=outJson, pathPrefix=pathPrefix)
 	# Generate standard OMF model title.
 	omfModelTitleTemplate = '''
