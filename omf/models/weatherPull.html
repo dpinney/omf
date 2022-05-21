@@ -18,40 +18,223 @@
 	<script>allOutputData={% if allOutputDataDict %}{{allOutputDataDict | tojson}}{% else %}null{% endif %}</script>
 	<script>modelStatus="{{modelStatus}}"</script>
 	<script>currentUser="{{datastoreNames.get('currentUser','test')}}"</script>
+	<script>
+	function loadWeatherParameters(){
+		// var nodes = document.getElementsByTagName('input');
+		const source = document.getElementById('source').value;
+		if (source == 'USCRN'){
+			document.getElementById("stationASOS").disabled = true;
+			document.getElementById("stationUSCRN").disabled = false;
+			document.getElementById("LatInput").disabled = true;
+			document.getElementById("LonInput").disabled = true;
+			document.getElementById("weatherParameterASOS").disabled = true;
+			document.getElementById("weatherParameterUSCRN").disabled = false;
+			document.getElementById("weatherParameterdarkSky").disabled = true;
+			document.getElementById("weatherParameterNRSDB").disabled = true;
+			document.getElementById("weatherParameterTmy3").disabled = true;
+			document.getElementById("easySolarStation").disabled = true;
+			document.getElementById("weatherParameterSurfrad").disabled = true;
+			document.getElementById("surfradSite").disabled = true;
+			document.getElementById("ndfdParam").disabled = true;
+
+		}
+		else if (source == 'ASOS'){
+			document.getElementById("stationASOS").disabled = false;
+			document.getElementById("stationUSCRN").disabled = true;
+			document.getElementById("LatInput").disabled = true;
+			document.getElementById("LonInput").disabled = true;
+			document.getElementById("weatherParameterASOS").disabled = false;
+			document.getElementById("weatherParameterUSCRN").disabled = true;
+			document.getElementById("weatherParameterdarkSky").disabled = true;
+			document.getElementById("weatherParameterNRSDB").disabled = true;
+			document.getElementById("weatherParameterTmy3").disabled = true;
+			document.getElementById("easySolarStation").disabled = true;
+			document.getElementById("weatherParameterSurfrad").disabled = true;
+			document.getElementById("surfradSite").disabled = true;
+			document.getElementById("ndfdParam").disabled = true;
+
+		}
+		else if (source == 'darkSky'){
+			document.getElementById("stationASOS").disabled = true;
+			document.getElementById("stationUSCRN").disabled = true;
+			document.getElementById("LatInput").disabled = false;
+			document.getElementById("LonInput").disabled = false;
+			document.getElementById("weatherParameterASOS").disabled = true;
+			document.getElementById("weatherParameterUSCRN").disabled = true;
+			document.getElementById("weatherParameterdarkSky").disabled = false;
+			document.getElementById("weatherParameterNRSDB").disabled = true;
+			document.getElementById("weatherParameterTmy3").disabled = true;
+			document.getElementById("easySolarStation").disabled = true;
+			document.getElementById("weatherParameterSurfrad").disabled = true;
+			document.getElementById("surfradSite").disabled = true;
+			document.getElementById("ndfdParam").disabled = true;
+
+		}
+		else if (source == 'NRSDB'){
+			document.getElementById("stationASOS").disabled = true;
+			document.getElementById("stationUSCRN").disabled = true;
+			document.getElementById("LatInput").disabled = false;
+			document.getElementById("LonInput").disabled = false;
+			document.getElementById("weatherParameterASOS").disabled = true;
+			document.getElementById("weatherParameterUSCRN").disabled = true;
+			document.getElementById("weatherParameterdarkSky").disabled = true;
+			document.getElementById("weatherParameterNRSDB").disabled = false;
+			document.getElementById("weatherParameterTmy3").disabled = true;
+			document.getElementById("easySolarStation").disabled = true;
+			document.getElementById("weatherParameterSurfrad").disabled = true;
+			document.getElementById("surfradSite").disabled = true;
+			document.getElementById("ndfdParam").disabled = true;
+
+		}
+		else if (source == 'easySolarGhi')
+			{
+			document.getElementById("stationASOS").disabled = true;
+			document.getElementById("stationUSCRN").disabled = true;
+			document.getElementById("LatInput").disabled = true;
+			document.getElementById("LonInput").disabled = true;
+			document.getElementById("weatherParameterASOS").disabled = true;
+			document.getElementById("weatherParameterUSCRN").disabled = true;
+			document.getElementById("weatherParameterdarkSky").disabled = true;
+			document.getElementById("weatherParameterNRSDB").disabled = true;
+			document.getElementById("weatherParameterTmy3").disabled = true;
+			document.getElementById("easySolarStation").disabled = false;
+			document.getElementById("weatherParameterSurfrad").disabled = true;
+			document.getElementById("surfradSite").disabled = true;
+			document.getElementById("ndfdParam").disabled = true;
+
+		}
+		else if (source == 'easySolarDhi'){
+			document.getElementById("stationASOS").disabled = true;
+			document.getElementById("stationUSCRN").disabled = true;
+			document.getElementById("LatInput").disabled = true;
+			document.getElementById("LonInput").disabled = true;
+			document.getElementById("weatherParameterASOS").disabled = true;
+			document.getElementById("weatherParameterUSCRN").disabled = true;
+			document.getElementById("weatherParameterdarkSky").disabled = true;
+			document.getElementById("weatherParameterNRSDB").disabled = true;
+			document.getElementById("weatherParameterTmy3").disabled = true;
+			document.getElementById("easySolarStation").disabled = false;
+			document.getElementById("weatherParameterSurfrad").disabled = true;
+			document.getElementById("surfradSite").disabled = true;
+			document.getElementById("ndfdParam").disabled = true;
+
+		}
+		else if (source == 'easySolarDni'){
+			document.getElementById("stationASOS").disabled = true;
+			document.getElementById("stationUSCRN").disabled = true;
+			document.getElementById("LatInput").disabled = true;
+			document.getElementById("LonInput").disabled = true;
+			document.getElementById("weatherParameterASOS").disabled = true;
+			document.getElementById("weatherParameterUSCRN").disabled = true;
+			document.getElementById("weatherParameterdarkSky").disabled = true;
+			document.getElementById("weatherParameterNRSDB").disabled = true;
+			document.getElementById("weatherParameterTmy3").disabled = true;
+			document.getElementById("easySolarStation").disabled = false;
+			document.getElementById("weatherParameterSurfrad").disabled = true;
+			document.getElementById("surfradSite").disabled = true;
+			document.getElementById("ndfdParam").disabled = true;
+
+		}
+		else if (source == 'tmy3'){
+			document.getElementById("stationASOS").disabled = true;
+			document.getElementById("stationUSCRN").disabled = true;
+			document.getElementById("LatInput").disabled = false;
+			document.getElementById("LonInput").disabled = false;
+			document.getElementById("weatherParameterASOS").disabled = true;
+			document.getElementById("weatherParameterUSCRN").disabled = true;
+			document.getElementById("weatherParameterdarkSky").disabled = true;
+			document.getElementById("weatherParameterNRSDB").disabled = true;
+			document.getElementById("weatherParameterTmy3").disabled = false;
+			document.getElementById("easySolarStation").disabled = true;
+			document.getElementById("weatherParameterSurfrad").disabled = true;
+			document.getElementById("surfradSite").disabled = true;
+			document.getElementById("ndfdParam").disabled = true;
+
+		}
+		else if (source == 'surfrad'){
+			document.getElementById("stationASOS").disabled = true;
+			document.getElementById("stationUSCRN").disabled = true;
+			document.getElementById("LatInput").disabled = true;
+			document.getElementById("LonInput").disabled = true;
+			document.getElementById("weatherParameterASOS").disabled = true;
+			document.getElementById("weatherParameterUSCRN").disabled = true;
+			document.getElementById("weatherParameterdarkSky").disabled = true;
+			document.getElementById("weatherParameterNRSDB").disabled = true;
+			document.getElementById("weatherParameterTmy3").disabled = true;
+			document.getElementById("easySolarStation").disabled = true;
+			document.getElementById("weatherParameterSurfrad").disabled = false;
+			document.getElementById("surfradSite").disabled = false;
+			document.getElementById("ndfdParam").disabled = true;
+
+
+		}
+		else if (source == 'ndfd'){
+			document.getElementById("stationASOS").disabled = true;
+			document.getElementById("stationUSCRN").disabled = true;
+			document.getElementById("year").disabled = true;
+			document.getElementById("LatInput").disabled = false;
+			document.getElementById("LonInput").disabled = false;
+			document.getElementById("weatherParameterASOS").disabled = true;
+			document.getElementById("weatherParameterUSCRN").disabled = true;
+			document.getElementById("weatherParameterdarkSky").disabled = true;
+			document.getElementById("weatherParameterNRSDB").disabled = true;
+			document.getElementById("weatherParameterTmy3").disabled = true;
+			document.getElementById("easySolarStation").disabled = true;
+			document.getElementById("weatherParameterSurfrad").disabled = true;
+			document.getElementById("surfradSite").disabled = true;
+			document.getElementById("ndfdParam").disabled = false;
+		}
+		else{
+			document.getElementById("stationASOS").disabled = true;
+			document.getElementById("stationUSCRN").disabled = true;
+			document.getElementById("LatInput").disabled = true;
+			document.getElementById("LonInput").disabled = true;
+			document.getElementById("weatherParameterASOS").disabled = true;
+			document.getElementById("weatherParameterUSCRN").disabled = true;
+			document.getElementById("weatherParameterdarkSky").disabled = true;
+			document.getElementById("weatherParameterNRSDB").disabled = true;
+			document.getElementById("weatherParameterTmy3").disabled = true;
+			document.getElementById("easySolarStation").disabled = true;
+			document.getElementById("weatherParameterSurfrad").disabled = true;
+			document.getElementById("surfradSite").disabled = true;
+			document.getElementById("ndfdParam").disabled = true;
+
+		}
+	}
 	</script>
 </head>
-<body onload="init()">
+<body>
 	<div id="header">
 		<div id="headInnerBlock">
 			<div id="menuLeft">
 				<a style="color:white" href="/">Open Modeling Framework</a> &#187;&nbsp;&nbsp;Model
-				&#8220;<p id="titleText" style="display:inline"></p>&#8221;
+				&#8220;<p id="titleText" style="display:inline">{{allInputDataDict.modelName}}</p>&#8221;
 			</div>
 		</div>
 	</div>
 	<p class="reportTitle">Model Input</p>
 	<div id="input" class="content">
-		<form name="inputForm" action="/runModel/" onsubmit="event.preventDefault(); return isFormValid();" method="post">
+		<form name="inputForm" value="{{allInputDataDict.inputForm}}" action="/runModel/" onsubmit="event.preventDefault(); return isFormValid();" method="post">
 			<!-- Required Inputs -->
 			<div class="shortInput">
 				<label>Model Type <a href="https://github.com/dpinney/omf/wiki/Models-~-weatherPull" target="blank">Help?</a></label>
-				<input type="text" id="modelType" name="modelType" value="{{modelName}}" readonly/>
+				<input type="text" id="modelType" name="modelType" value="{{allInputDataDict.modelType}}" value="{{modelName}}" readonly/>
 			</div>
 			<div class="shortInput">
 				<label>Model Name</label>
-				<input type="text" id="modelName" name="modelName" pattern="^[\w\s\d\.-]+$" required="required">
+				<input type="text" id="modelName" name="modelName" value="{{allInputDataDict.modelName}}" pattern="^[\w\s\d\.-]+$" required="required">
 			</div>
-			<div class="shortInput runningInline postRunInline">
+			<div class="shortInput">
 				<label>User</label>
-				<input type="text" id="user" name="user" readonly/>
+				<input type="text" id="user" name="user" value="{{allInputDataDict.user}}" readonly/>
 			</div>
-			<div class="shortInput runningInline postRunInline ">
+			<div class="shortInput">
 				<label>Created</label>
-				<input type="text" id="created" name="created" readonly/>
+				<input type="text" id="created" name="created" value="{{allInputDataDict.created}}" readonly/>
 			</div>
-			<div class="shortInput postRunInline">
+			<div class="shortInput">
 				<label>Run Time</label>
-				<input type="text" id="runTime" name="runTime" readonly/>
+				<input type="text" id="runTime" name="runTime" value="{{allInputDataDict.runTime}}" readonly/>
 			</div>
 			<!-- Model Specific Inputs -->
 			<div class="wideInput">
@@ -59,842 +242,638 @@
 			</div>
 			<hr>
 			<div class="shortInput">
-					<!-- Grey out function -->
-				<script type="text/javascript">
-					function loadWeatherParameters(){
-						// var nodes = document.getElementsByTagName('input');
-						const source = document.getElementById('source').value;
-						if (source == 'USCRN'){
-							document.getElementById("stationASOS").disabled = true;
-							document.getElementById("stationUSCRN").disabled = false;
-							document.getElementById("LatInput").disabled = true;
-							document.getElementById("LonInput").disabled = true;
-							document.getElementById("weatherParameterASOS").disabled = true;
-							document.getElementById("weatherParameterUSCRN").disabled = false;
-							document.getElementById("weatherParameterdarkSky").disabled = true;
-							document.getElementById("weatherParameterNRSDB").disabled = true;
-							document.getElementById("weatherParameterTmy3").disabled = true;
-							document.getElementById("easySolarStation").disabled = true;
-							document.getElementById("weatherParameterSurfrad").disabled = true;
-							document.getElementById("surfradSite").disabled = true;
-							document.getElementById("ndfdParam").disabled = true;
-
-						}
-						else if (source == 'ASOS'){
-							document.getElementById("stationASOS").disabled = false;
-							document.getElementById("stationUSCRN").disabled = true;
-							document.getElementById("LatInput").disabled = true;
-							document.getElementById("LonInput").disabled = true;
-							document.getElementById("weatherParameterASOS").disabled = false;
-							document.getElementById("weatherParameterUSCRN").disabled = true;
-							document.getElementById("weatherParameterdarkSky").disabled = true;
-							document.getElementById("weatherParameterNRSDB").disabled = true;
-							document.getElementById("weatherParameterTmy3").disabled = true;
-							document.getElementById("easySolarStation").disabled = true;
-							document.getElementById("weatherParameterSurfrad").disabled = true;
-							document.getElementById("surfradSite").disabled = true;
-							document.getElementById("ndfdParam").disabled = true;
-
-						}
-						else if (source == 'darkSky'){
-							document.getElementById("stationASOS").disabled = true;
-							document.getElementById("stationUSCRN").disabled = true;
-							document.getElementById("LatInput").disabled = false;
-							document.getElementById("LonInput").disabled = false;
-							document.getElementById("weatherParameterASOS").disabled = true;
-							document.getElementById("weatherParameterUSCRN").disabled = true;
-							document.getElementById("weatherParameterdarkSky").disabled = false;
-							document.getElementById("weatherParameterNRSDB").disabled = true;
-							document.getElementById("weatherParameterTmy3").disabled = true;
-							document.getElementById("easySolarStation").disabled = true;
-							document.getElementById("weatherParameterSurfrad").disabled = true;
-							document.getElementById("surfradSite").disabled = true;
-							document.getElementById("ndfdParam").disabled = true;
-
-						}
-						else if (source == 'NRSDB'){
-							document.getElementById("stationASOS").disabled = true;
-							document.getElementById("stationUSCRN").disabled = true;
-							document.getElementById("LatInput").disabled = false;
-							document.getElementById("LonInput").disabled = false;
-							document.getElementById("weatherParameterASOS").disabled = true;
-							document.getElementById("weatherParameterUSCRN").disabled = true;
-							document.getElementById("weatherParameterdarkSky").disabled = true;
-							document.getElementById("weatherParameterNRSDB").disabled = false;
-							document.getElementById("weatherParameterTmy3").disabled = true;
-							document.getElementById("easySolarStation").disabled = true;
-							document.getElementById("weatherParameterSurfrad").disabled = true;
-							document.getElementById("surfradSite").disabled = true;
-							document.getElementById("ndfdParam").disabled = true;
-
-						}
-						else if (source == 'easySolarGhi')
-							{
-							document.getElementById("stationASOS").disabled = true;
-							document.getElementById("stationUSCRN").disabled = true;
-							document.getElementById("LatInput").disabled = true;
-							document.getElementById("LonInput").disabled = true;
-							document.getElementById("weatherParameterASOS").disabled = true;
-							document.getElementById("weatherParameterUSCRN").disabled = true;
-							document.getElementById("weatherParameterdarkSky").disabled = true;
-							document.getElementById("weatherParameterNRSDB").disabled = true;
-							document.getElementById("weatherParameterTmy3").disabled = true;
-							document.getElementById("easySolarStation").disabled = false;
-							document.getElementById("weatherParameterSurfrad").disabled = true;
-							document.getElementById("surfradSite").disabled = true;
-							document.getElementById("ndfdParam").disabled = true;
-
-						}
-						else if (source == 'easySolarDhi'){
-							document.getElementById("stationASOS").disabled = true;
-							document.getElementById("stationUSCRN").disabled = true;
-							document.getElementById("LatInput").disabled = true;
-							document.getElementById("LonInput").disabled = true;
-							document.getElementById("weatherParameterASOS").disabled = true;
-							document.getElementById("weatherParameterUSCRN").disabled = true;
-							document.getElementById("weatherParameterdarkSky").disabled = true;
-							document.getElementById("weatherParameterNRSDB").disabled = true;
-							document.getElementById("weatherParameterTmy3").disabled = true;
-							document.getElementById("easySolarStation").disabled = false;
-							document.getElementById("weatherParameterSurfrad").disabled = true;
-							document.getElementById("surfradSite").disabled = true;
-							document.getElementById("ndfdParam").disabled = true;
-
-						}
-						else if (source == 'easySolarDni'){
-							document.getElementById("stationASOS").disabled = true;
-							document.getElementById("stationUSCRN").disabled = true;
-							document.getElementById("LatInput").disabled = true;
-							document.getElementById("LonInput").disabled = true;
-							document.getElementById("weatherParameterASOS").disabled = true;
-							document.getElementById("weatherParameterUSCRN").disabled = true;
-							document.getElementById("weatherParameterdarkSky").disabled = true;
-							document.getElementById("weatherParameterNRSDB").disabled = true;
-							document.getElementById("weatherParameterTmy3").disabled = true;
-							document.getElementById("easySolarStation").disabled = false;
-							document.getElementById("weatherParameterSurfrad").disabled = true;
-							document.getElementById("surfradSite").disabled = true;
-							document.getElementById("ndfdParam").disabled = true;
-
-						}
-						else if (source == 'tmy3'){
-							document.getElementById("stationASOS").disabled = true;
-							document.getElementById("stationUSCRN").disabled = true;
-							document.getElementById("LatInput").disabled = false;
-							document.getElementById("LonInput").disabled = false;
-							document.getElementById("weatherParameterASOS").disabled = true;
-							document.getElementById("weatherParameterUSCRN").disabled = true;
-							document.getElementById("weatherParameterdarkSky").disabled = true;
-							document.getElementById("weatherParameterNRSDB").disabled = true;
-							document.getElementById("weatherParameterTmy3").disabled = false;
-							document.getElementById("easySolarStation").disabled = true;
-							document.getElementById("weatherParameterSurfrad").disabled = true;
-							document.getElementById("surfradSite").disabled = true;
-							document.getElementById("ndfdParam").disabled = true;
-
-						}
-						else if (source == 'surfrad'){
-							document.getElementById("stationASOS").disabled = true;
-							document.getElementById("stationUSCRN").disabled = true;
-							document.getElementById("LatInput").disabled = true;
-							document.getElementById("LonInput").disabled = true;
-							document.getElementById("weatherParameterASOS").disabled = true;
-							document.getElementById("weatherParameterUSCRN").disabled = true;
-							document.getElementById("weatherParameterdarkSky").disabled = true;
-							document.getElementById("weatherParameterNRSDB").disabled = true;
-							document.getElementById("weatherParameterTmy3").disabled = true;
-							document.getElementById("easySolarStation").disabled = true;
-							document.getElementById("weatherParameterSurfrad").disabled = false;
-							document.getElementById("surfradSite").disabled = false;
-							document.getElementById("ndfdParam").disabled = true;
-
-
-						}
-						else if (source == 'ndfd'){
-							document.getElementById("stationASOS").disabled = true;
-							document.getElementById("stationUSCRN").disabled = true;
-							document.getElementById("year").disabled = true;
-							document.getElementById("LatInput").disabled = false;
-							document.getElementById("LonInput").disabled = false;
-							document.getElementById("weatherParameterASOS").disabled = true;
-							document.getElementById("weatherParameterUSCRN").disabled = true;
-							document.getElementById("weatherParameterdarkSky").disabled = true;
-							document.getElementById("weatherParameterNRSDB").disabled = true;
-							document.getElementById("weatherParameterTmy3").disabled = true;
-							document.getElementById("easySolarStation").disabled = true;
-							document.getElementById("weatherParameterSurfrad").disabled = true;
-							document.getElementById("surfradSite").disabled = true;
-							document.getElementById("ndfdParam").disabled = false;
-						}
-						else{
-							document.getElementById("stationASOS").disabled = true;
-							document.getElementById("stationUSCRN").disabled = true;
-							document.getElementById("LatInput").disabled = true;
-							document.getElementById("LonInput").disabled = true;
-							document.getElementById("weatherParameterASOS").disabled = true;
-							document.getElementById("weatherParameterUSCRN").disabled = true;
-							document.getElementById("weatherParameterdarkSky").disabled = true;
-							document.getElementById("weatherParameterNRSDB").disabled = true;
-							document.getElementById("weatherParameterTmy3").disabled = true;
-							document.getElementById("easySolarStation").disabled = true;
-							document.getElementById("weatherParameterSurfrad").disabled = true;
-							document.getElementById("surfradSite").disabled = true;
-							document.getElementById("ndfdParam").disabled = true;
-
-						}
-					}
-				</script>
 				<label class="tooltip">Source<span class="classic">Source of data</span></label>
-				<select id="source" name="source" onchange="loadWeatherParameters()" >
-					<option value="ASOS">ASOS</option>
-					<option value="USCRN">USCRN</option>
-					<option value="darkSky">darkSky</option>    
-					<option value="NRSDB">NRSDB</option>
-					<option value="tmy3">tmy3</option>
-					<option value="easySolarGhi">GHI Estimation</option>
-					<option value="easySolarDhi">DHI Estimation</option>
-					<option value="easySolarDni">DNI Estimation</option>
-					<option value="surfrad">SURFRAD Data</option>
-					<option value="ndfd">NDFD Data</option>
+				<select id="source" name="source" value="{{allInputDataDict.source}}" onchange="loadWeatherParameters()" >
+					<option value="ASOS" {% 'selected' if allInputDataDict.source == 'ASOS' %}>ASOS</option>
+					<option value="USCRN" {% 'selected' if allInputDataDict.source == 'USCRN' %}>USCRN</option>
+					<option value="darkSky" {% 'selected' if allInputDataDict.source == 'darkSky' %}>darkSky</option>    
+					<option value="NRSDB" {% 'selected' if allInputDataDict.source == 'NRSDB' %}>NRSDB</option>
+					<option value="tmy3" {% 'selected' if allInputDataDict.source == 'tmy3' %}>tmy3</option>
+					<option value="easySolarGhi" {% 'selected' if allInputDataDict.source == 'easySolarGhi' %}>GHI Estimation</option>
+					<option value="easySolarDhi" {% 'selected' if allInputDataDict.source == 'easySolarDhi' %}>DHI Estimation</option>
+					<option value="easySolarDni" {% 'selected' if allInputDataDict.source == 'easySolarDni' %}>DNI Estimation</option>
+					<option value="surfrad" {% 'selected' if allInputDataDict.source == 'surfrad' %}>SURFRAD Data</option>
+					<option value="ndfd" {% 'selected' if allInputDataDict.source == 'ndfd' %}>NDFD Data</option>
 				</select>
 			</div>
-			 <div class="shortInput">
+			<div class="shortInput">
 				<label class="tooltip">Station - ASOS<span class="classic">ASOS Code, for USA codes (starting with K) exclude the first letter.</span></label>
-				<input type="text" id="stationASOS" name="stationASOS" value="LWD" pattern="[a-zA-Z]{3,4}" required="required"/>
+				<input type="text" id="stationASOS" name="stationASOS" value="{{allInputDataDict.stationASOS}}" value="LWD" pattern="[a-zA-Z]{3,4}" required="required"/>
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Station - USCRN<span class="classic">USCRN: Dropdown menu of stations</span></label>
-				<select id="stationUSCRN" name="stationUSCRN" required="required">
-					<option value="AK_Utqiagvik_formerly_Barrow_4_ENE">AK_Utqiagvik</option>
-					<option value="AK_Cordova_14_ESE">AK_Cordova</option>
-					<option value="AK_Deadhorse_3_S">AK_Deadhorse</option>
-					<option value="AK_Denali_27_N">AK_Denali</option>
-					<option value="AK_Fairbanks_11_NE">AK_Fairbanks</option>
-					<option value="AK_Glennallen_64_N">AK_Glennallen</option>
-					<option value="AK_Gustavus_2_NE">AK_Gustavus</option>
-					<option value="AK_Ivotuk_1_NNE">AK_Ivotuk</option>
-					<option value="AK_Kenai_29_ENE">AK_Kenai</option>
-					<option value="AK_King_Salmon_42_SE">AK_King_Salmon</option>
-					<option value="AK_Metlakatla_6_S">AK_Metlakatla</option>
-					<option value="AK_Port_Alsworth_1_SW">AK_Port_Alsworth</option>
-					<option value="AK_Red_Dog_Mine_3_SSW">AK_Red_Dog_Mine</option>
-					<option value="AK_Ruby_44_ESE">AK_Ruby</option>
-					<option value="AK_Sand_Point_1_ENE">AK_Sand_Point</option>
-					<option value="AK_Selawik_28_E">AK_Selawik</option>
-					<option value="AK_Sitka_1_NE">AK_Sitka</option>
-					<option value="AK_St._Paul_4_NE">AK_St._Paul</option>
-					<option value="AK_Tok_70_SE">AK_Tok</option>
-					<option value="AK_Toolik_Lake_5_ENE">AK_Toolik_Lake</option>
-					<option value="AK_Yakutat_3_SSE">AK_Yakutat</option>
-					<option value="AL_Brewton_3_NNE">AL_Brewton</option>
-					<option value="AL_Clanton_2_NE">AL_Clanton</option>
-					<option value="AL_Courtland_2_WSW">AL_Courtland</option>
-					<option value="AL_Cullman_3_ENE">AL_Cullman</option>
-					<option value="AL_Fairhope_3_NE">AL_Fairhope</option>
-					<option value="AL_Gadsden_19_N">AL_Gadsden</option>
-					<option value="AL_Gainesville_2_NE">AL_Gainesville</option>
-					<option value="AL_Greensboro_2_WNW">AL_Greensboro</option>
-					<option value="AL_Highland_Home_2_S">AL_Highland_Home</option>
-					<option value="AL_Muscle_Shoals_2_N">AL_Muscle_Shoals</option>
-					<option value="AL_Northport_2_S">AL_Northport</option>
-					<option value="AL_Russellville_4_SSE">AL_Russellville</option>
-					<option value="AL_Scottsboro_2_NE">AL_Scottsboro</option>
-					<option value="AL_Selma_6_SSE">AL_Selma</option>
-					<option value="AL_Selma_13_WNW">AL_Selma</option>
-					<option value="AL_Talladega_10_NNE">AL_Talladega</option>
-					<option value="AL_Thomasville_2_S">AL_Thomasville</option>
-					<option value="AL_Troy_2_W">AL_Troy</option>
-					<option value="AL_Valley_Head_1_SSW">AL_Valley_Head</option>
-					<option value="AR_Batesville_8_WNW">AR_Batesville</option>
-					<option value="AZ_Elgin_5_S">AZ_Elgin</option>
-					<option value="AZ_Tucson_11_W">AZ_Tucson</option>
-					<option value="AZ_Williams_35_NNW">AZ_Williams</option>
-					<option value="AZ_Yuma_27_ENE">AZ_Yuma</option>
-					<option value="CA_Bodega_6_WSW">CA_Bodega</option>
-					<option value="CA_Fallbrook_5_NE">CA_Fallbrook</option>
-					<option value="CA_Merced_23_WSW">CA_Merced</option>
-					<option value="CA_Redding_12_WNW">CA_Redding</option>
-					<option value="CA_Santa_Barbara_11_W">CA_Santa_Barbara</option>
-					<option value="CA_Stovepipe_Wells_1_SW">CA_Stovepipe_Wells</option>
-					<option value="CA_Yosemite_Village_12_W">CA_Yosemite_Village</option>
-					<option value="CO_Boulder_14_W">CO_Boulder</option>
-					<option value="CO_Cortez_8_SE">CO_Cortez</option>
-					<option value="CO_Dinosaur_2_E">CO_Dinosaur</option>
-					<option value="CO_La_Junta_17_WSW">CO_La_Junta</option>
-					<option value="CO_Montrose_11_ENE">CO_Montrose</option>
-					<option value="CO_Nunn_7_NNE">CO_Nunn</option>
-					<option value="FL_Everglades_City_5_NE">FL_Everglades_City</option>
-					<option value="FL_Sebring_23_SSE">FL_Sebring</option>
-					<option value="FL_Titusville_7_E">FL_Titusville</option>
-					<option value="GA_Brunswick_23_S">GA_Brunswick</option>
-					<option value="GA_Newton_8_W">GA_Newton</option>
-					<option value="GA_Newton_11_SW">GA_Newton</option>
-					<option value="GA_Watkinsville_5_SSE">GA_Watkinsville</option>
-					<option value="HI_Hilo_5_S">HI_Hilo</option>
-					<option value="HI_Mauna_Loa_5_NNE">HI_Mauna_Loa</option>
-					<option value="IA_Des_Moines_17_E">IA_Des_Moines</option>
-					<option value="ID_Arco_17_SW">ID_Arco</option>
-					<option value="ID_Murphy_10_W">ID_Murphy</option>
-					<option value="IL_Champaign_9_SW">IL_Champaign</option>
-					<option value="IL_Shabbona_5_NNE">IL_Shabbona</option>
-					<option value="IN_Bedford_5_WNW">IN_Bedford</option>
-					<option value="KS_Manhattan_6_SSW">KS_Manhattan</option>
-					<option value="KS_Oakley_19_SSW">KS_Oakley</option>
-					<option value="KY_Bowling_Green_21_NNE">KY_Bowling_Green</option>
-					<option value="KY_Versailles_3_NNW">KY_Versailles</option>
-					<option value="LA_Lafayette_13_SE">LA_Lafayette</option>
-					<option value="LA_Monroe_26_N">LA_Monroe</option>
-					<option value="ME_Limestone_4_NNW">ME_Limestone</option>
-					<option value="ME_Old_Town_2_W">ME_Old_Town</option>
-					<option value="MI_Chatham_1_SE">MI_Chatham</option>
-					<option value="MI_Gaylord_9_SSW">MI_Gaylord</option>
-					<option value="MN_Goodridge_12_NNW">MN_Goodridge</option>
-					<option value="MN_Sandstone_6_W">MN_Sandstone</option>
-					<option value="MO_Chillicothe_22_ENE">MO_Chillicothe</option>
-					<option value="MO_Joplin_24_N">MO_Joplin</option>
-					<option value="MO_Salem_10_W">MO_Salem</option>
-					<option value="MS_Holly_Springs_4_N">MS_Holly_Springs</option>
-					<option value="MS_Newton_5_ENE">MS_Newton</option>
-					<option value="MT_Dillon_18_WSW">MT_Dillon</option>
-					<option value="MT_Lewistown_42_WSW">MT_Lewistown</option>
-					<option value="MT_St._Mary_1_SSW">MT_St._Mary</option>
-					<option value="MT_Wolf_Point_29_ENE">MT_Wolf_Point</option>
-					<option value="MT_Wolf_Point_34_NE">MT_Wolf_Point</option>
-					<option value="NC_Asheville_8_SSW">NC_Asheville</option>
-					<option value="NC_Asheville_13_S">NC_Asheville</option>
-					<option value="NC_Durham_11_W">NC_Durham</option>
-					<option value="ND_Jamestown_38_WSW">ND_Jamestown</option>
-					<option value="ND_Medora_7_E">ND_Medora</option>
-					<option value="ND_Northgate_5_ESE">ND_Northgate</option>
-					<option value="NE_Harrison_20_SSE">NE_Harrison</option>
-					<option value="NE_Lincoln_8_ENE">NE_Lincoln</option>
-					<option value="NE_Lincoln_11_SW">NE_Lincoln</option>
-					<option value="NE_Whitman_5_ENE">NE_Whitman</option>
-					<option value="NH_Durham_2_N">NH_Durham</option>
-					<option value="NH_Durham_2_SSW">NH_Durham</option>
-					<option value="NM_Las_Cruces_20_N">NM_Las_Cruces</option>
-					<option value="NM_Los_Alamos_13_W">NM_Los_Alamos</option>
-					<option value="NM_Socorro_20_N">NM_Socorro</option>
-					<option value="NV_Baker_5_W">NV_Baker</option>
-					<option value="NV_Denio_52_WSW">NV_Denio</option>
-					<option value="NV_Mercury_3_SSW">NV_Mercury</option>
-					<option value="NY_Ithaca_13_E">NY_Ithaca</option>
-					<option value="NY_Millbrook_3_W">NY_Millbrook</option>
-					<option value="OH_Wooster_3_SSE">OH_Wooster</option>
-					<option value="OK_Goodwell_2_E">OK_Goodwell</option>
-					<option value="OK_Goodwell_2_SE">OK_Goodwell</option>
-					<option value="OK_Stillwater_2_W">OK_Stillwater</option>
-					<option value="OK_Stillwater_5_WNW">OK_Stillwater</option>
-					<option value="ON_Egbert_1_W">ON_Egbert</option>
-					<option value="OR_Coos_Bay_8_SW">OR_Coos_Bay</option>
-					<option value="OR_Corvallis_10_SSW">OR_Corvallis</option>
-					<option value="OR_John_Day_35_WNW">OR_John_Day</option>
-					<option value="OR_Riley_10_WSW">OR_Riley</option>
-					<option value="PA_Avondale_2_N">PA_Avondale</option>
-					<option value="RI_Kingston_1_NW">RI_Kingston</option>
-					<option value="RI_Kingston_1_W">RI_Kingston</option>
-					<option value="SA_Tiksi_4_SSE">SA_Tiksi</option>
-					<option value="SC_Blackville_3_W">SC_Blackville</option>
-					<option value="SC_McClellanville_7_NE">SC_McClellanville</option>
-					<option value="SD_Aberdeen_35_WNW">SD_Aberdeen</option>
-					<option value="SD_Buffalo_13_ESE">SD_Buffalo</option>
-					<option value="SD_Pierre_24_S">SD_Pierre</option>
-					<option value="SD_Sioux_Falls_14_NNE">SD_Sioux_Falls</option>
-					<option value="TN_Crossville_7_NW">TN_Crossville</option>
-					<option value="TX_Austin_33_NW">TX_Austin</option>
-					<option value="TX_Bronte_11_NNE">TX_Bronte</option>
-					<option value="TX_Edinburg_17_NNE">TX_Edinburg</option>
-					<option value="TX_Monahans_6_ENE">TX_Monahans</option>
-					<option value="TX_Muleshoe_19_S">TX_Muleshoe</option>
-					<option value="TX_Palestine_6_WNW">TX_Palestine</option>
-					<option value="TX_Panther_Junction_2_N">TX_Panther_Junction</option>
-					<option value="TX_Port_Aransas_32_NNE">TX_Port_Aransas</option>
-					<option value="UT_Brigham_City_28_WNW">UT_Brigham_City</option>
-					<option value="UT_Torrey_7_E">UT_Torrey</option>
-					<option value="VA_Cape_Charles_5_ENE">VA_Cape_Charles</option>
-					<option value="VA_Charlottesville_2_SSE">VA_Charlottesville</option>
-					<option value="WA_Darrington_21_NNE">WA_Darrington</option>
-					<option value="WA_Quinault_4_NE">WA_Quinault</option>
-					<option value="WA_Spokane_17_SSW">WA_Spokane</option>
-					<option value="WI_Necedah_5_WNW">WI_Necedah</option>
-					<option value="WV_Elkins_21_ENE">WV_Elkins</option>
-					<option value="WY_Lander_11_SSE">WY_Lander</option>
-					<option value="WY_Moose_1_NNE">WY_Moose</option>
-					<option value="WY_Sundance_8_NNW">WY_Sundance</option>
+				<select id="stationUSCRN" name="stationUSCRN" value="{{allInputDataDict.stationUSCRN}}" required="required">
+					<option value="AK_Utqiagvik_formerly_Barrow_4_ENE" {% 'selected' if allInputDataDict.VALUE == 'AK_Utqiagvik_formerly_Barrow_4_ENE' %}>AK_Utqiagvik</option>
+					<option value="AK_Cordova_14_ESE" {% 'selected' if allInputDataDict.stationUSCRN == 'AK_Cordova_14_ESE' %}>AK_Cordova</option>
+					<option value="AK_Deadhorse_3_S" {% 'selected' if allInputDataDict.stationUSCRN == 'AK_Deadhorse_3_S' %}>AK_Deadhorse</option>
+					<option value="AK_Denali_27_N" {% 'selected' if allInputDataDict.stationUSCRN == 'AK_Denali_27_N' %}>AK_Denali</option>
+					<option value="AK_Fairbanks_11_NE" {% 'selected' if allInputDataDict.stationUSCRN == 'AK_Fairbanks_11_NE' %}>AK_Fairbanks</option>
+					<option value="AK_Glennallen_64_N" {% 'selected' if allInputDataDict.stationUSCRN == 'AK_Glennallen_64_N' %}>AK_Glennallen</option>
+					<option value="AK_Gustavus_2_NE" {% 'selected' if allInputDataDict.stationUSCRN == 'AK_Gustavus_2_NE' %}>AK_Gustavus</option>
+					<option value="AK_Ivotuk_1_NNE" {% 'selected' if allInputDataDict.stationUSCRN == 'AK_Ivotuk_1_NNE' %}>AK_Ivotuk</option>
+					<option value="AK_Kenai_29_ENE" {% 'selected' if allInputDataDict.stationUSCRN == 'AK_Kenai_29_ENE' %}>AK_Kenai</option>
+					<option value="AK_King_Salmon_42_SE" {% 'selected' if allInputDataDict.stationUSCRN == 'AK_King_Salmon_42_SE' %}>AK_King_Salmon</option>
+					<option value="AK_Metlakatla_6_S" {% 'selected' if allInputDataDict.stationUSCRN == 'AK_Metlakatla_6_S' %}>AK_Metlakatla</option>
+					<option value="AK_Port_Alsworth_1_SW" {% 'selected' if allInputDataDict.stationUSCRN == 'AK_Port_Alsworth_1_SW' %}>AK_Port_Alsworth</option>
+					<option value="AK_Red_Dog_Mine_3_SSW" {% 'selected' if allInputDataDict.stationUSCRN == 'AK_Red_Dog_Mine_3_SSW' %}>AK_Red_Dog_Mine</option>
+					<option value="AK_Ruby_44_ESE" {% 'selected' if allInputDataDict.stationUSCRN == 'AK_Ruby_44_ESE' %}>AK_Ruby</option>
+					<option value="AK_Sand_Point_1_ENE" {% 'selected' if allInputDataDict.stationUSCRN == 'AK_Sand_Point_1_ENE' %}>AK_Sand_Point</option>
+					<option value="AK_Selawik_28_E" {% 'selected' if allInputDataDict.stationUSCRN == 'AK_Selawik_28_E' %}>AK_Selawik</option>
+					<option value="AK_Sitka_1_NE" {% 'selected' if allInputDataDict.stationUSCRN == 'AK_Sitka_1_NE' %}>AK_Sitka</option>
+					<option value="AK_St._Paul_4_NE" {% 'selected' if allInputDataDict.stationUSCRN == 'AK_St._Paul_4_NE' %}>AK_St._Paul</option>
+					<option value="AK_Tok_70_SE" {% 'selected' if allInputDataDict.stationUSCRN == 'AK_Tok_70_SE' %}>AK_Tok</option>
+					<option value="AK_Toolik_Lake_5_ENE" {% 'selected' if allInputDataDict.stationUSCRN == 'AK_Toolik_Lake_5_ENE' %}>AK_Toolik_Lake</option>
+					<option value="AK_Yakutat_3_SSE" {% 'selected' if allInputDataDict.stationUSCRN == 'AK_Yakutat_3_SSE' %}>AK_Yakutat</option>
+					<option value="AL_Brewton_3_NNE" {% 'selected' if allInputDataDict.stationUSCRN == 'AL_Brewton_3_NNE' %}>AL_Brewton</option>
+					<option value="AL_Clanton_2_NE" {% 'selected' if allInputDataDict.stationUSCRN == 'AL_Clanton_2_NE' %}>AL_Clanton</option>
+					<option value="AL_Courtland_2_WSW" {% 'selected' if allInputDataDict.stationUSCRN == 'AL_Courtland_2_WSW' %}>AL_Courtland</option>
+					<option value="AL_Cullman_3_ENE" {% 'selected' if allInputDataDict.stationUSCRN == 'AL_Cullman_3_ENE' %}>AL_Cullman</option>
+					<option value="AL_Fairhope_3_NE" {% 'selected' if allInputDataDict.stationUSCRN == 'AL_Fairhope_3_NE' %}>AL_Fairhope</option>
+					<option value="AL_Gadsden_19_N" {% 'selected' if allInputDataDict.stationUSCRN == 'AL_Gadsden_19_N' %}>AL_Gadsden</option>
+					<option value="AL_Gainesville_2_NE" {% 'selected' if allInputDataDict.stationUSCRN == 'AL_Gainesville_2_NE' %}>AL_Gainesville</option>
+					<option value="AL_Greensboro_2_WNW" {% 'selected' if allInputDataDict.stationUSCRN == 'AL_Greensboro_2_WNW' %}>AL_Greensboro</option>
+					<option value="AL_Highland_Home_2_S" {% 'selected' if allInputDataDict.stationUSCRN == 'AL_Highland_Home_2_S' %}>AL_Highland_Home</option>
+					<option value="AL_Muscle_Shoals_2_N" {% 'selected' if allInputDataDict.stationUSCRN == 'AL_Muscle_Shoals_2_N' %}>AL_Muscle_Shoals</option>
+					<option value="AL_Northport_2_S" {% 'selected' if allInputDataDict.stationUSCRN == 'AL_Northport_2_S' %}>AL_Northport</option>
+					<option value="AL_Russellville_4_SSE" {% 'selected' if allInputDataDict.stationUSCRN == 'AL_Russellville_4_SSE' %}>AL_Russellville</option>
+					<option value="AL_Scottsboro_2_NE" {% 'selected' if allInputDataDict.stationUSCRN == 'AL_Scottsboro_2_NE' %}>AL_Scottsboro</option>
+					<option value="AL_Selma_6_SSE" {% 'selected' if allInputDataDict.stationUSCRN == 'AL_Selma_6_SSE' %}>AL_Selma</option>
+					<option value="AL_Selma_13_WNW" {% 'selected' if allInputDataDict.stationUSCRN == 'AL_Selma_13_WNW' %}>AL_Selma</option>
+					<option value="AL_Talladega_10_NNE" {% 'selected' if allInputDataDict.stationUSCRN == 'AL_Talladega_10_NNE' %}>AL_Talladega</option>
+					<option value="AL_Thomasville_2_S" {% 'selected' if allInputDataDict.stationUSCRN == 'AL_Thomasville_2_S' %}>AL_Thomasville</option>
+					<option value="AL_Troy_2_W" {% 'selected' if allInputDataDict.stationUSCRN == 'AL_Troy_2_W' %}>AL_Troy</option>
+					<option value="AL_Valley_Head_1_SSW" {% 'selected' if allInputDataDict.stationUSCRN == 'AL_Valley_Head_1_SSW' %}>AL_Valley_Head</option>
+					<option value="AR_Batesville_8_WNW" {% 'selected' if allInputDataDict.stationUSCRN == 'AR_Batesville_8_WNW' %}>AR_Batesville</option>
+					<option value="AZ_Elgin_5_S" {% 'selected' if allInputDataDict.stationUSCRN == 'AZ_Elgin_5_S' %}>AZ_Elgin</option>
+					<option value="AZ_Tucson_11_W" {% 'selected' if allInputDataDict.stationUSCRN == 'AZ_Tucson_11_W' %}>AZ_Tucson</option>
+					<option value="AZ_Williams_35_NNW" {% 'selected' if allInputDataDict.stationUSCRN == 'AZ_Williams_35_NNW' %}>AZ_Williams</option>
+					<option value="AZ_Yuma_27_ENE" {% 'selected' if allInputDataDict.stationUSCRN == 'AZ_Yuma_27_ENE' %}>AZ_Yuma</option>
+					<option value="CA_Bodega_6_WSW" {% 'selected' if allInputDataDict.stationUSCRN == 'CA_Bodega_6_WSW' %}>CA_Bodega</option>
+					<option value="CA_Fallbrook_5_NE" {% 'selected' if allInputDataDict.stationUSCRN == 'CA_Fallbrook_5_NE' %}>CA_Fallbrook</option>
+					<option value="CA_Merced_23_WSW" {% 'selected' if allInputDataDict.stationUSCRN == 'CA_Merced_23_WSW' %}>CA_Merced</option>
+					<option value="CA_Redding_12_WNW" {% 'selected' if allInputDataDict.stationUSCRN == 'CA_Redding_12_WNW' %}>CA_Redding</option>
+					<option value="CA_Santa_Barbara_11_W" {% 'selected' if allInputDataDict.stationUSCRN == 'CA_Santa_Barbara_11_W' %}>CA_Santa_Barbara</option>
+					<option value="CA_Stovepipe_Wells_1_SW" {% 'selected' if allInputDataDict.stationUSCRN == 'CA_Stovepipe_Wells_1_SW' %}>CA_Stovepipe_Wells</option>
+					<option value="CA_Yosemite_Village_12_W" {% 'selected' if allInputDataDict.stationUSCRN == 'CA_Yosemite_Village_12_W' %}>CA_Yosemite_Village</option>
+					<option value="CO_Boulder_14_W" {% 'selected' if allInputDataDict.stationUSCRN == 'CO_Boulder_14_W' %}>CO_Boulder</option>
+					<option value="CO_Cortez_8_SE" {% 'selected' if allInputDataDict.stationUSCRN == 'CO_Cortez_8_SE' %}>CO_Cortez</option>
+					<option value="CO_Dinosaur_2_E" {% 'selected' if allInputDataDict.stationUSCRN == 'CO_Dinosaur_2_E' %}>CO_Dinosaur</option>
+					<option value="CO_La_Junta_17_WSW" {% 'selected' if allInputDataDict.stationUSCRN == 'CO_La_Junta_17_WSW' %}>CO_La_Junta</option>
+					<option value="CO_Montrose_11_ENE" {% 'selected' if allInputDataDict.stationUSCRN == 'CO_Montrose_11_ENE' %}>CO_Montrose</option>
+					<option value="CO_Nunn_7_NNE" {% 'selected' if allInputDataDict.stationUSCRN == 'CO_Nunn_7_NNE' %}>CO_Nunn</option>
+					<option value="FL_Everglades_City_5_NE" {% 'selected' if allInputDataDict.stationUSCRN == 'FL_Everglades_City_5_NE' %}>FL_Everglades_City</option>
+					<option value="FL_Sebring_23_SSE" {% 'selected' if allInputDataDict.stationUSCRN == 'FL_Sebring_23_SSE' %}>FL_Sebring</option>
+					<option value="FL_Titusville_7_E" {% 'selected' if allInputDataDict.stationUSCRN == 'FL_Titusville_7_E' %}>FL_Titusville</option>
+					<option value="GA_Brunswick_23_S" {% 'selected' if allInputDataDict.stationUSCRN == 'GA_Brunswick_23_S' %}>GA_Brunswick</option>
+					<option value="GA_Newton_8_W" {% 'selected' if allInputDataDict.stationUSCRN == 'GA_Newton_8_W' %}>GA_Newton</option>
+					<option value="GA_Newton_11_SW" {% 'selected' if allInputDataDict.stationUSCRN == 'GA_Newton_11_SW' %}>GA_Newton</option>
+					<option value="GA_Watkinsville_5_SSE" {% 'selected' if allInputDataDict.stationUSCRN == 'GA_Watkinsville_5_SSE' %}>GA_Watkinsville</option>
+					<option value="HI_Hilo_5_S" {% 'selected' if allInputDataDict.stationUSCRN == 'HI_Hilo_5_S' %}>HI_Hilo</option>
+					<option value="HI_Mauna_Loa_5_NNE" {% 'selected' if allInputDataDict.stationUSCRN == 'HI_Mauna_Loa_5_NNE' %}>HI_Mauna_Loa</option>
+					<option value="IA_Des_Moines_17_E" {% 'selected' if allInputDataDict.stationUSCRN == 'IA_Des_Moines_17_E' %}>IA_Des_Moines</option>
+					<option value="ID_Arco_17_SW" {% 'selected' if allInputDataDict.stationUSCRN == 'ID_Arco_17_SW' %}>ID_Arco</option>
+					<option value="ID_Murphy_10_W" {% 'selected' if allInputDataDict.stationUSCRN == 'ID_Murphy_10_W' %}>ID_Murphy</option>
+					<option value="IL_Champaign_9_SW" {% 'selected' if allInputDataDict.stationUSCRN == 'IL_Champaign_9_SW' %}>IL_Champaign</option>
+					<option value="IL_Shabbona_5_NNE" {% 'selected' if allInputDataDict.stationUSCRN == 'IL_Shabbona_5_NNE' %}>IL_Shabbona</option>
+					<option value="IN_Bedford_5_WNW" {% 'selected' if allInputDataDict.stationUSCRN == 'IN_Bedford_5_WNW' %}>IN_Bedford</option>
+					<option value="KS_Manhattan_6_SSW" {% 'selected' if allInputDataDict.stationUSCRN == 'KS_Manhattan_6_SSW' %}>KS_Manhattan</option>
+					<option value="KS_Oakley_19_SSW" {% 'selected' if allInputDataDict.stationUSCRN == 'KS_Oakley_19_SSW' %}>KS_Oakley</option>
+					<option value="KY_Bowling_Green_21_NNE" {% 'selected' if allInputDataDict.stationUSCRN == 'KY_Bowling_Green_21_NNE' %}>KY_Bowling_Green</option>
+					<option value="KY_Versailles_3_NNW" {% 'selected' if allInputDataDict.stationUSCRN == 'KY_Versailles_3_NNW' %}>KY_Versailles</option>
+					<option value="LA_Lafayette_13_SE" {% 'selected' if allInputDataDict.stationUSCRN == 'LA_Lafayette_13_SE' %}>LA_Lafayette</option>
+					<option value="LA_Monroe_26_N" {% 'selected' if allInputDataDict.stationUSCRN == 'LA_Monroe_26_N' %}>LA_Monroe</option>
+					<option value="ME_Limestone_4_NNW" {% 'selected' if allInputDataDict.stationUSCRN == 'ME_Limestone_4_NNW' %}>ME_Limestone</option>
+					<option value="ME_Old_Town_2_W" {% 'selected' if allInputDataDict.stationUSCRN == 'ME_Old_Town_2_W' %}>ME_Old_Town</option>
+					<option value="MI_Chatham_1_SE" {% 'selected' if allInputDataDict.stationUSCRN == 'MI_Chatham_1_SE' %}>MI_Chatham</option>
+					<option value="MI_Gaylord_9_SSW" {% 'selected' if allInputDataDict.stationUSCRN == 'MI_Gaylord_9_SSW' %}>MI_Gaylord</option>
+					<option value="MN_Goodridge_12_NNW" {% 'selected' if allInputDataDict.stationUSCRN == 'MN_Goodridge_12_NNW' %}>MN_Goodridge</option>
+					<option value="MN_Sandstone_6_W" {% 'selected' if allInputDataDict.stationUSCRN == 'MN_Sandstone_6_W' %}>MN_Sandstone</option>
+					<option value="MO_Chillicothe_22_ENE" {% 'selected' if allInputDataDict.stationUSCRN == 'MO_Chillicothe_22_ENE' %}>MO_Chillicothe</option>
+					<option value="MO_Joplin_24_N" {% 'selected' if allInputDataDict.stationUSCRN == 'MO_Joplin_24_N' %}>MO_Joplin</option>
+					<option value="MO_Salem_10_W" {% 'selected' if allInputDataDict.stationUSCRN == 'MO_Salem_10_W' %}>MO_Salem</option>
+					<option value="MS_Holly_Springs_4_N" {% 'selected' if allInputDataDict.stationUSCRN == 'MS_Holly_Springs_4_N' %}>MS_Holly_Springs</option>
+					<option value="MS_Newton_5_ENE" {% 'selected' if allInputDataDict.stationUSCRN == 'MS_Newton_5_ENE' %}>MS_Newton</option>
+					<option value="MT_Dillon_18_WSW" {% 'selected' if allInputDataDict.stationUSCRN == 'MT_Dillon_18_WSW' %}>MT_Dillon</option>
+					<option value="MT_Lewistown_42_WSW" {% 'selected' if allInputDataDict.stationUSCRN == 'MT_Lewistown_42_WSW' %}>MT_Lewistown</option>
+					<option value="MT_St._Mary_1_SSW" {% 'selected' if allInputDataDict.stationUSCRN == 'MT_St._Mary_1_SSW' %}>MT_St._Mary</option>
+					<option value="MT_Wolf_Point_29_ENE" {% 'selected' if allInputDataDict.stationUSCRN == 'MT_Wolf_Point_29_ENE' %}>MT_Wolf_Point</option>
+					<option value="MT_Wolf_Point_34_NE" {% 'selected' if allInputDataDict.stationUSCRN == 'MT_Wolf_Point_34_NE' %}>MT_Wolf_Point</option>
+					<option value="NC_Asheville_8_SSW" {% 'selected' if allInputDataDict.stationUSCRN == 'NC_Asheville_8_SSW' %}>NC_Asheville</option>
+					<option value="NC_Asheville_13_S" {% 'selected' if allInputDataDict.stationUSCRN == 'NC_Asheville_13_S' %}>NC_Asheville</option>
+					<option value="NC_Durham_11_W" {% 'selected' if allInputDataDict.stationUSCRN == 'NC_Durham_11_W' %}>NC_Durham</option>
+					<option value="ND_Jamestown_38_WSW" {% 'selected' if allInputDataDict.stationUSCRN == 'ND_Jamestown_38_WSW' %}>ND_Jamestown</option>
+					<option value="ND_Medora_7_E" {% 'selected' if allInputDataDict.stationUSCRN == 'ND_Medora_7_E' %}>ND_Medora</option>
+					<option value="ND_Northgate_5_ESE" {% 'selected' if allInputDataDict.stationUSCRN == 'ND_Northgate_5_ESE' %}>ND_Northgate</option>
+					<option value="NE_Harrison_20_SSE" {% 'selected' if allInputDataDict.stationUSCRN == 'NE_Harrison_20_SSE' %}>NE_Harrison</option>
+					<option value="NE_Lincoln_8_ENE" {% 'selected' if allInputDataDict.stationUSCRN == 'NE_Lincoln_8_ENE' %}>NE_Lincoln</option>
+					<option value="NE_Lincoln_11_SW" {% 'selected' if allInputDataDict.stationUSCRN == 'NE_Lincoln_11_SW' %}>NE_Lincoln</option>
+					<option value="NE_Whitman_5_ENE" {% 'selected' if allInputDataDict.stationUSCRN == 'NE_Whitman_5_ENE' %}>NE_Whitman</option>
+					<option value="NH_Durham_2_N" {% 'selected' if allInputDataDict.stationUSCRN == 'NH_Durham_2_N' %}>NH_Durham</option>
+					<option value="NH_Durham_2_SSW" {% 'selected' if allInputDataDict.stationUSCRN == 'NH_Durham_2_SSW' %}>NH_Durham</option>
+					<option value="NM_Las_Cruces_20_N" {% 'selected' if allInputDataDict.stationUSCRN == 'NM_Las_Cruces_20_N' %}>NM_Las_Cruces</option>
+					<option value="NM_Los_Alamos_13_W" {% 'selected' if allInputDataDict.stationUSCRN == 'NM_Los_Alamos_13_W' %}>NM_Los_Alamos</option>
+					<option value="NM_Socorro_20_N" {% 'selected' if allInputDataDict.stationUSCRN == 'NM_Socorro_20_N' %}>NM_Socorro</option>
+					<option value="NV_Baker_5_W" {% 'selected' if allInputDataDict.stationUSCRN == 'NV_Baker_5_W' %}>NV_Baker</option>
+					<option value="NV_Denio_52_WSW" {% 'selected' if allInputDataDict.stationUSCRN == 'NV_Denio_52_WSW' %}>NV_Denio</option>
+					<option value="NV_Mercury_3_SSW" {% 'selected' if allInputDataDict.stationUSCRN == 'NV_Mercury_3_SSW' %}>NV_Mercury</option>
+					<option value="NY_Ithaca_13_E" {% 'selected' if allInputDataDict.stationUSCRN == 'NY_Ithaca_13_E' %}>NY_Ithaca</option>
+					<option value="NY_Millbrook_3_W" {% 'selected' if allInputDataDict.stationUSCRN == 'NY_Millbrook_3_W' %}>NY_Millbrook</option>
+					<option value="OH_Wooster_3_SSE" {% 'selected' if allInputDataDict.stationUSCRN == 'OH_Wooster_3_SSE' %}>OH_Wooster</option>
+					<option value="OK_Goodwell_2_E" {% 'selected' if allInputDataDict.stationUSCRN == 'OK_Goodwell_2_E' %}>OK_Goodwell</option>
+					<option value="OK_Goodwell_2_SE" {% 'selected' if allInputDataDict.stationUSCRN == 'OK_Goodwell_2_SE' %}>OK_Goodwell</option>
+					<option value="OK_Stillwater_2_W" {% 'selected' if allInputDataDict.stationUSCRN == 'OK_Stillwater_2_W' %}>OK_Stillwater</option>
+					<option value="OK_Stillwater_5_WNW" {% 'selected' if allInputDataDict.stationUSCRN == 'OK_Stillwater_5_WNW' %}>OK_Stillwater</option>
+					<option value="ON_Egbert_1_W" {% 'selected' if allInputDataDict.stationUSCRN == 'ON_Egbert_1_W' %}>ON_Egbert</option>
+					<option value="OR_Coos_Bay_8_SW" {% 'selected' if allInputDataDict.stationUSCRN == 'OR_Coos_Bay_8_SW' %}>OR_Coos_Bay</option>
+					<option value="OR_Corvallis_10_SSW" {% 'selected' if allInputDataDict.stationUSCRN == 'OR_Corvallis_10_SSW' %}>OR_Corvallis</option>
+					<option value="OR_John_Day_35_WNW" {% 'selected' if allInputDataDict.stationUSCRN == 'OR_John_Day_35_WNW' %}>OR_John_Day</option>
+					<option value="OR_Riley_10_WSW" {% 'selected' if allInputDataDict.stationUSCRN == 'OR_Riley_10_WSW' %}>OR_Riley</option>
+					<option value="PA_Avondale_2_N" {% 'selected' if allInputDataDict.stationUSCRN == 'PA_Avondale_2_N' %}>PA_Avondale</option>
+					<option value="RI_Kingston_1_NW" {% 'selected' if allInputDataDict.stationUSCRN == 'RI_Kingston_1_NW' %}>RI_Kingston</option>
+					<option value="RI_Kingston_1_W" {% 'selected' if allInputDataDict.stationUSCRN == 'RI_Kingston_1_W' %}>RI_Kingston</option>
+					<option value="SA_Tiksi_4_SSE" {% 'selected' if allInputDataDict.stationUSCRN == 'SA_Tiksi_4_SSE' %}>SA_Tiksi</option>
+					<option value="SC_Blackville_3_W" {% 'selected' if allInputDataDict.stationUSCRN == 'SC_Blackville_3_W' %}>SC_Blackville</option>
+					<option value="SC_McClellanville_7_NE" {% 'selected' if allInputDataDict.stationUSCRN == 'SC_McClellanville_7_NE' %}>SC_McClellanville</option>
+					<option value="SD_Aberdeen_35_WNW" {% 'selected' if allInputDataDict.stationUSCRN == 'SD_Aberdeen_35_WNW' %}>SD_Aberdeen</option>
+					<option value="SD_Buffalo_13_ESE" {% 'selected' if allInputDataDict.stationUSCRN == 'SD_Buffalo_13_ESE' %}>SD_Buffalo</option>
+					<option value="SD_Pierre_24_S" {% 'selected' if allInputDataDict.stationUSCRN == 'SD_Pierre_24_S' %}>SD_Pierre</option>
+					<option value="SD_Sioux_Falls_14_NNE" {% 'selected' if allInputDataDict.stationUSCRN == 'SD_Sioux_Falls_14_NNE' %}>SD_Sioux_Falls</option>
+					<option value="TN_Crossville_7_NW" {% 'selected' if allInputDataDict.stationUSCRN == 'TN_Crossville_7_NW' %}>TN_Crossville</option>
+					<option value="TX_Austin_33_NW" {% 'selected' if allInputDataDict.stationUSCRN == 'TX_Austin_33_NW' %}>TX_Austin</option>
+					<option value="TX_Bronte_11_NNE" {% 'selected' if allInputDataDict.stationUSCRN == 'TX_Bronte_11_NNE' %}>TX_Bronte</option>
+					<option value="TX_Edinburg_17_NNE" {% 'selected' if allInputDataDict.stationUSCRN == 'TX_Edinburg_17_NNE' %}>TX_Edinburg</option>
+					<option value="TX_Monahans_6_ENE" {% 'selected' if allInputDataDict.stationUSCRN == 'TX_Monahans_6_ENE' %}>TX_Monahans</option>
+					<option value="TX_Muleshoe_19_S" {% 'selected' if allInputDataDict.stationUSCRN == 'TX_Muleshoe_19_S' %}>TX_Muleshoe</option>
+					<option value="TX_Palestine_6_WNW" {% 'selected' if allInputDataDict.stationUSCRN == 'TX_Palestine_6_WNW' %}>TX_Palestine</option>
+					<option value="TX_Panther_Junction_2_N" {% 'selected' if allInputDataDict.stationUSCRN == 'TX_Panther_Junction_2_N' %}>TX_Panther_Junction</option>
+					<option value="TX_Port_Aransas_32_NNE" {% 'selected' if allInputDataDict.stationUSCRN == 'TX_Port_Aransas_32_NNE' %}>TX_Port_Aransas</option>
+					<option value="UT_Brigham_City_28_WNW" {% 'selected' if allInputDataDict.stationUSCRN == 'UT_Brigham_City_28_WNW' %}>UT_Brigham_City</option>
+					<option value="UT_Torrey_7_E" {% 'selected' if allInputDataDict.stationUSCRN == 'UT_Torrey_7_E' %}>UT_Torrey</option>
+					<option value="VA_Cape_Charles_5_ENE" {% 'selected' if allInputDataDict.stationUSCRN == 'VA_Cape_Charles_5_ENE' %}>VA_Cape_Charles</option>
+					<option value="VA_Charlottesville_2_SSE" {% 'selected' if allInputDataDict.stationUSCRN == 'VA_Charlottesville_2_SSE' %}>VA_Charlottesville</option>
+					<option value="WA_Darrington_21_NNE" {% 'selected' if allInputDataDict.stationUSCRN == 'WA_Darrington_21_NNE' %}>WA_Darrington</option>
+					<option value="WA_Quinault_4_NE" {% 'selected' if allInputDataDict.stationUSCRN == 'WA_Quinault_4_NE' %}>WA_Quinault</option>
+					<option value="WA_Spokane_17_SSW" {% 'selected' if allInputDataDict.stationUSCRN == 'WA_Spokane_17_SSW' %}>WA_Spokane</option>
+					<option value="WI_Necedah_5_WNW" {% 'selected' if allInputDataDict.stationUSCRN == 'WI_Necedah_5_WNW' %}>WI_Necedah</option>
+					<option value="WV_Elkins_21_ENE" {% 'selected' if allInputDataDict.stationUSCRN == 'WV_Elkins_21_ENE' %}>WV_Elkins</option>
+					<option value="WY_Lander_11_SSE" {% 'selected' if allInputDataDict.stationUSCRN == 'WY_Lander_11_SSE' %}>WY_Lander</option>
+					<option value="WY_Moose_1_NNE" {% 'selected' if allInputDataDict.stationUSCRN == 'WY_Moose_1_NNE' %}>WY_Moose</option>
+					<option value="WY_Sundance_8_NNW" {% 'selected' if allInputDataDict.stationUSCRN == 'WY_Sundance_8_NNW' %}>WY_Sundance</option>
 				</select>
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Year<span class="classic">Year, (2005 or before for tmy3, and after 2008 for GHI/DHI/DNI prediction)</span></label>
-				<input type="text" id="year" name="year" pattern="[1-2][0-9][0-9][0-9]" required="required"/>
+				<input type="text" id="year" name="year" value="{{allInputDataDict.year}}" pattern="[1-2][0-9][0-9][0-9]" required="required"/>
 			</div>	
 			<div class="shortInput">
 				<label class="tooltip">Latitude<span class="classic">Enter in Latitude of location</span></label>
-				<input type="text" id="LatInput" name="LatInput" value=90 pattern="[-+]?[0-9]*\.?[0-9]+"/>
+				<input type="text" id="LatInput" name="LatInput" value="{{allInputDataDict.LatInput}}" value=90 pattern="[-+]?[0-9]*\.?[0-9]+"/>
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Longitude<span class="classic">Enter in Longitude of location</span></label>
-				<input type="text" id="LonInput" name="LonInput" value=-30 pattern="[-+]?[0-9]*\.?[0-9]+"/>
+				<input type="text" id="LonInput" name="LonInput" value="{{allInputDataDict.LonInput}}" value=-30 pattern="[-+]?[0-9]*\.?[0-9]+"/>
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Weather Parameter - ASOS<span class="classic">Data that should be pulled</span></label>
-				<select id="weatherParameterASOS" name="weatherParameterASOS" required="required">
-					<option value="tmpc">Temperature (Celsius)</option>
-					<option value="tmpf">Temperature (Fahrenheit)</option>
-					<option value="dwpc">Dew Point (Celsius)</option>
-					<option value="dwpf">Dew Point (Fahrenheit)</option>
-					<option value="relh">Relative Humidity (%)</option>
-					<option value="drct">Wind Direction</option>
-					<option value="sknt">Wind Speed (knots)</option>
-					<option value="sped">Wind Speed (mph)</option>
-					<option value="alti">Altimeter (inches)</option>
-					<option value="mslp">Sea Level Pressure (mb)</option>
-					<option value="p01m">1 Hour Precipitation (mm)</option>
-					<option value="p01i">1 Hour Precipitation (inch)</option>
-					<option value="vsby">Visibility (miles)</option>
-					<option value="gust">Wind Gust (knots)</option>
-					<option value="gust_mph">Wind Gust (mph)</option>
-					<option value="skyc1">Cloud Coverage Level 1</option>
-					<option value="skyc2">Cloud Coverage Level 2</option>
-					<option value="skyc3">Cloud Coverage Level 3</option>
-					<option value="skyl1">Cloud Height Level 1 (ft)</option>
-					<option value="skyl2">Cloud Height Level 2 (ft)</option>
-					<option value="skyl3">Cloud Height Level 3 (ft)</option>
-					<option value="presentwx">Weather Codes</option>
-					<option value="asos">Raw ASOS</option>
+				<select id="weatherParameterASOS" name="weatherParameterASOS" value="{{allInputDataDict.weatherParameterASOS}}" required="required">
+					<option value="tmpc" {% 'selected' if allInputDataDict.weatherParameterASOS == 'tmpc' %}>Temperature (Celsius)</option>
+					<option value="tmpf" {% 'selected' if allInputDataDict.weatherParameterASOS == 'tmpf' %}>Temperature (Fahrenheit)</option>
+					<option value="dwpc" {% 'selected' if allInputDataDict.weatherParameterASOS == 'dwpc' %}>Dew Point (Celsius)</option>
+					<option value="dwpf" {% 'selected' if allInputDataDict.weatherParameterASOS == 'dwpf' %}>Dew Point (Fahrenheit)</option>
+					<option value="relh" {% 'selected' if allInputDataDict.weatherParameterASOS == 'relh' %}>Relative Humidity (%)</option>
+					<option value="drct" {% 'selected' if allInputDataDict.weatherParameterASOS == 'drct' %}>Wind Direction</option>
+					<option value="sknt" {% 'selected' if allInputDataDict.weatherParameterASOS == 'sknt' %}>Wind Speed (knots)</option>
+					<option value="sped" {% 'selected' if allInputDataDict.weatherParameterASOS == 'sped' %}>Wind Speed (mph)</option>
+					<option value="alti" {% 'selected' if allInputDataDict.weatherParameterASOS == 'alti' %}>Altimeter (inches)</option>
+					<option value="mslp" {% 'selected' if allInputDataDict.weatherParameterASOS == 'mslp' %}>Sea Level Pressure (mb)</option>
+					<option value="p01m" {% 'selected' if allInputDataDict.weatherParameterASOS == 'p01m' %}>1 Hour Precipitation (mm)</option>
+					<option value="p01i" {% 'selected' if allInputDataDict.weatherParameterASOS == 'p01i' %}>1 Hour Precipitation (inch)</option>
+					<option value="vsby" {% 'selected' if allInputDataDict.weatherParameterASOS == 'vsby' %}>Visibility (miles)</option>
+					<option value="gust" {% 'selected' if allInputDataDict.weatherParameterASOS == 'gust' %}>Wind Gust (knots)</option>
+					<option value="gust_mph" {% 'selected' if allInputDataDict.weatherParameterASOS == 'gust_mph' %}>Wind Gust (mph)</option>
+					<option value="skyc1" {% 'selected' if allInputDataDict.weatherParameterASOS == 'skyc1' %}>Cloud Coverage Level 1</option>
+					<option value="skyc2" {% 'selected' if allInputDataDict.weatherParameterASOS == 'skyc2' %}>Cloud Coverage Level 2</option>
+					<option value="skyc3" {% 'selected' if allInputDataDict.weatherParameterASOS == 'skyc3' %}>Cloud Coverage Level 3</option>
+					<option value="skyl1" {% 'selected' if allInputDataDict.weatherParameterASOS == 'skyl1' %}>Cloud Height Level 1 (ft)</option>
+					<option value="skyl2" {% 'selected' if allInputDataDict.weatherParameterASOS == 'skyl2' %}>Cloud Height Level 2 (ft)</option>
+					<option value="skyl3" {% 'selected' if allInputDataDict.weatherParameterASOS == 'skyl3' %}>Cloud Height Level 3 (ft)</option>
+					<option value="presentwx" {% 'selected' if allInputDataDict.weatherParameterASOS == 'presentwx' %}>Weather Codes</option>
+					<option value="asos" {% 'selected' if allInputDataDict.weatherParameterASOS == 'asos' %}>Raw ASOS</option>
 				</select>
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Weather Parameter - USCRN<span class="classic">Data that should be pulled</span></label>
-				<select id="weatherParameterUSCRN" name="weatherParameterUSCRN" required="required">
-					<option value="T_CALC">Air temperature (Celsius)</option>
-					<option value="T_HR_AVG">Average air temperature (Celsius)</option>
-					<option value="T_MAX">Maximum air temperature (Celsius)</option>
-					<option value="T_MIN">Minimum air temperature (Celsius)</option>
-					<option value="P_CALC">Precipitation (mm)</option>
-					<option value="SOLARAD">Average global solar radiation (watts/meter^2)</option>
-					<option value="SOLARAD_MAX">Maximum global solar radiation (watts/meter^2)</option>
-					<option value="SOLARAD_MIN">Minimum global solar radiation (watts/meter^2)</option>
-					<option value="SUR_TEMP">Average infrared surface temperature (Celsius)</option>
-					<option value="SUR_TEMP_MAX">Maximum infrared surface temperature (Celsius)</option>
-					<option value="SUR_TEMP_MIN">Minimum infrared surface temperature (Celsius)</option>
-					<option value="RH_HR_AVG">RH average for hour (%)</option>
-					<option value="SOIL_MOISTURE_5">Average soil moisture at 5 cm below the surface (m^3/m^3)</option>
-					<option value="SOIL_MOISTURE_10">Average soil moisture at 10 cm below the surface (m^3/m^3)</option>
-					<option value="SOIL_MOISTURE_20">Average soil moisture at 20 cm below the surface (m^3/m^3)</option>
-					<option value="SOIL_MOISTURE_50">Average soil moisture at 50 cm below the surface (m^3/m^3)</option>
-					<option value="SOIL_MOISTURE_100">Average soil moisture at 100 cm below the surface (m^3/m^3)</option>
-					<option value="SOIL_TEMP_5">Average soil temperature at 5 cm below the surface (Celsius)</option>
-					<option value="SOIL_TEMP_10">Average soil temperature at 10 cm below the surface (Celsius)</option>
-					<option value="SOIL_TEMP_20">Average soil temperature at 20 cm below the surface (Celsius)</option>
-					<option value="SOIL_TEMP_50">Average soil temperature at 50 cm below the surface (Celsius)</option>
-					<option value="SOIL_TEMP_100">Average soil temperature at 100 cm below the surface (Celsius)</option>					
+				<select id="weatherParameterUSCRN" name="weatherParameterUSCRN" value="{{allInputDataDict.weatherParameterUSCRN}}" required="required">
+					<option value="T_CALC" {% 'selected' if allInputDataDict.weatherParameterUSCRN == 'T_CALC' %}>Air temperature (Celsius)</option>
+					<option value="T_HR_AVG" {% 'selected' if allInputDataDict.weatherParameterUSCRN == 'T_HR_AVG' %}>Average air temperature (Celsius)</option>
+					<option value="T_MAX" {% 'selected' if allInputDataDict.weatherParameterUSCRN == 'T_MAX' %}>Maximum air temperature (Celsius)</option>
+					<option value="T_MIN" {% 'selected' if allInputDataDict.weatherParameterUSCRN == 'T_MIN' %}>Minimum air temperature (Celsius)</option>
+					<option value="P_CALC" {% 'selected' if allInputDataDict.weatherParameterUSCRN == 'P_CALC' %}>Precipitation (mm)</option>
+					<option value="SOLARAD" {% 'selected' if allInputDataDict.weatherParameterUSCRN == 'SOLARAD' %}>Average global solar radiation (watts/meter^2)</option>
+					<option value="SOLARAD_MAX" {% 'selected' if allInputDataDict.weatherParameterUSCRN == 'SOLARAD_MAX' %}>Maximum global solar radiation (watts/meter^2)</option>
+					<option value="SOLARAD_MIN" {% 'selected' if allInputDataDict.weatherParameterUSCRN == 'SOLARAD_MIN' %}>Minimum global solar radiation (watts/meter^2)</option>
+					<option value="SUR_TEMP" {% 'selected' if allInputDataDict.weatherParameterUSCRN == 'SUR_TEMP' %}>Average infrared surface temperature (Celsius)</option>
+					<option value="SUR_TEMP_MAX" {% 'selected' if allInputDataDict.weatherParameterUSCRN == 'SUR_TEMP_MAX' %}>Maximum infrared surface temperature (Celsius)</option>
+					<option value="SUR_TEMP_MIN" {% 'selected' if allInputDataDict.weatherParameterUSCRN == 'SUR_TEMP_MIN' %}>Minimum infrared surface temperature (Celsius)</option>
+					<option value="RH_HR_AVG" {% 'selected' if allInputDataDict.weatherParameterUSCRN == 'RH_HR_AVG' %}>RH average for hour (%)</option>
+					<option value="SOIL_MOISTURE_5" {% 'selected' if allInputDataDict.weatherParameterUSCRN == 'SOIL_MOISTURE_5' %}>Average soil moisture at 5 cm below the surface (m^3/m^3)</option>
+					<option value="SOIL_MOISTURE_10" {% 'selected' if allInputDataDict.weatherParameterUSCRN == 'SOIL_MOISTURE_10' %}>Average soil moisture at 10 cm below the surface (m^3/m^3)</option>
+					<option value="SOIL_MOISTURE_20" {% 'selected' if allInputDataDict.weatherParameterUSCRN == 'SOIL_MOISTURE_20' %}>Average soil moisture at 20 cm below the surface (m^3/m^3)</option>
+					<option value="SOIL_MOISTURE_50" {% 'selected' if allInputDataDict.weatherParameterUSCRN == 'SOIL_MOISTURE_50' %}>Average soil moisture at 50 cm below the surface (m^3/m^3)</option>
+					<option value="SOIL_MOISTURE_100" {% 'selected' if allInputDataDict.weatherParameterUSCRN == 'SOIL_MOISTURE_100' %}>Average soil moisture at 100 cm below the surface (m^3/m^3)</option>
+					<option value="SOIL_TEMP_5" {% 'selected' if allInputDataDict.weatherParameterUSCRN == 'SOIL_TEMP_5' %}>Average soil temperature at 5 cm below the surface (Celsius)</option>
+					<option value="SOIL_TEMP_10" {% 'selected' if allInputDataDict.weatherParameterUSCRN == 'SOIL_TEMP_10' %}>Average soil temperature at 10 cm below the surface (Celsius)</option>
+					<option value="SOIL_TEMP_20" {% 'selected' if allInputDataDict.weatherParameterUSCRN == 'SOIL_TEMP_20' %}>Average soil temperature at 20 cm below the surface (Celsius)</option>
+					<option value="SOIL_TEMP_50" {% 'selected' if allInputDataDict.weatherParameterUSCRN == 'SOIL_TEMP_50' %}>Average soil temperature at 50 cm below the surface (Celsius)</option>
+					<option value="SOIL_TEMP_100" {% 'selected' if allInputDataDict.weatherParameterUSCRN == 'SOIL_TEMP_100' %}>Average soil temperature at 100 cm below the surface (Celsius)</option>					
 				</select>
 			</div>
 			<!-- NEED TO VERIFY UNITS FROM DARKSKY API -->
 			<div class="shortInput">
 				<label class="tooltip">Weather Parameter - darkSky<span class="classic">Data that should be pulled</span></label>
-				<select id="weatherParameterdarkSky" name="weatherParameterdarkSky" required="required">
-					<option value="precipIntensity">Precipitation Intensity (mm/hour)</option>
-					<option value="precipProbability">Probability of Precipitation</option>
-					<option value="temperature">Temperature (Celsius)</option>
-					<option value="apparentTemperature">Apparent Temperature (Celsius)</option>
-					<option value="dewPoint">Dew Point (Celcius)</option>
-					<option value="humidity">Humidity (%)</option>
-					<option value="pressure">Pressure (Hectopascals)</option>
-					<option value="windSpeed">Wind Speed (kph)</option>
-					<option value="windGust">Wind Gust (kph)</option>
-					<option value="windBearing">Wind Direction (degrees)</option>
-					<option value="cloudCover">Cloud Cover (%)</option>
-					<option value="uvIndex">UV Index</option>
-					<option value="visibility">Visibility (km)</option>
-					<option value="ozone">Ozone (Dobsons)</option>
+				<select id="weatherParameterdarkSky" name="weatherParameterdarkSky" value="{{allInputDataDict.weatherParameterdarkSky}}" required="required">
+					<option value="precipIntensity" {% 'selected' if allInputDataDict.weatherParameterdarkSky == 'precipIntensity' %}>Precipitation Intensity (mm/hour)</option>
+					<option value="precipProbability" {% 'selected' if allInputDataDict.weatherParameterdarkSky == 'precipProbability' %}>Probability of Precipitation</option>
+					<option value="temperature" {% 'selected' if allInputDataDict.weatherParameterdarkSky == 'temperature' %}>Temperature (Celsius)</option>
+					<option value="apparentTemperature" {% 'selected' if allInputDataDict.weatherParameterdarkSky == 'apparentTemperature' %}>Apparent Temperature (Celsius)</option>
+					<option value="dewPoint" {% 'selected' if allInputDataDict.weatherParameterdarkSky == 'dewPoint' %}>Dew Point (Celcius)</option>
+					<option value="humidity" {% 'selected' if allInputDataDict.weatherParameterdarkSky == 'humidity' %}>Humidity (%)</option>
+					<option value="pressure" {% 'selected' if allInputDataDict.weatherParameterdarkSky == 'pressure' %}>Pressure (Hectopascals)</option>
+					<option value="windSpeed" {% 'selected' if allInputDataDict.weatherParameterdarkSky == 'windSpeed' %}>Wind Speed (kph)</option>
+					<option value="windGust" {% 'selected' if allInputDataDict.weatherParameterdarkSky == 'windGust' %}>Wind Gust (kph)</option>
+					<option value="windBearing" {% 'selected' if allInputDataDict.weatherParameterdarkSky == 'windBearing' %}>Wind Direction (degrees)</option>
+					<option value="cloudCover" {% 'selected' if allInputDataDict.weatherParameterdarkSky == 'cloudCover' %}>Cloud Cover (%)</option>
+					<option value="uvIndex" {% 'selected' if allInputDataDict.weatherParameterdarkSky == 'uvIndex' %}>UV Index</option>
+					<option value="visibility" {% 'selected' if allInputDataDict.weatherParameterdarkSky == 'visibility' %}>Visibility (km)</option>
+					<option value="ozone" {% 'selected' if allInputDataDict.weatherParameterdarkSky == 'ozone' %}>Ozone (Dobsons)</option>
 
 				</select>
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Weather Parameter - NRSDB<span class="classic">Data that should be pulled</span></label>
-				<select id="weatherParameterNRSDB" name="weatherParameterNRSDB" required="required">
-					<option value="Temperature">Temperature (C) </option>
-					<option value="Clearsky DHI">Clearsky DHI (w/m2)</option>
-					<option value="Clearsky DNI">Clearsky DNI (w/m2)</option>
-					<option value="Clearsky GHI">Clearsky GHI (w/m2)</option>
-					<option value="Cloud Type">Cloud Type</option>
-					<option value="Dew Point">Dew Point (C)</option>
-					<option value="DHI">DHI (w/m2)</option>
-					<option value="DNI">DNI (w/m2)</option>
-					<option value="Fill Flag">Fill Flag</option>
-					<option value="GHI">GHI (w/m2)</option>
-					<option value="Relative Humidity">Relative Humidity (%)</option>
-					<option value="Solar Zenith Angle">Solar Zenith Angle (deg)</option>
-					<option value="Surface Albedo Pressure">Surface Albedo</option>
-					<option value="Precipitable Water">Precipitable Water (cm)</option>
-					<option value="Wind Direction">Wind Direction (Deg)</option>
-					<option value="Pressure">Pressure (mbar)</option>
-					<option value="Wind Speed">Wind Speed (m/s)</option>
+				<select id="weatherParameterNRSDB" name="weatherParameterNRSDB" value="{{allInputDataDict.weatherParameterNRSDB}}" required="required">
+					<option value="Temperature" {% 'selected' if allInputDataDict.weatherParameterNRSDB == 'Temperature' %}>Temperature (C) </option>
+					<option value="Clearsky DHI" {% 'selected' if allInputDataDict.weatherParameterNRSDB == 'Clearsky DHI' %}>Clearsky DHI (w/m2)</option>
+					<option value="Clearsky DNI" {% 'selected' if allInputDataDict.weatherParameterNRSDB == 'Clearsky DNI' %}>Clearsky DNI (w/m2)</option>
+					<option value="Clearsky GHI" {% 'selected' if allInputDataDict.weatherParameterNRSDB == 'Clearsky GHI' %}>Clearsky GHI (w/m2)</option>
+					<option value="Cloud Type" {% 'selected' if allInputDataDict.weatherParameterNRSDB == 'Cloud Type' %}>Cloud Type</option>
+					<option value="Dew Point" {% 'selected' if allInputDataDict.weatherParameterNRSDB == 'Dew Point' %}>Dew Point (C)</option>
+					<option value="DHI" {% 'selected' if allInputDataDict.weatherParameterNRSDB == 'DHI' %}>DHI (w/m2)</option>
+					<option value="DNI" {% 'selected' if allInputDataDict.weatherParameterNRSDB == 'DNI' %}>DNI (w/m2)</option>
+					<option value="Fill Flag" {% 'selected' if allInputDataDict.weatherParameterNRSDB == 'Fill Flag' %}>Fill Flag</option>
+					<option value="GHI" {% 'selected' if allInputDataDict.weatherParameterNRSDB == 'GHI' %}>GHI (w/m2)</option>
+					<option value="Relative Humidity" {% 'selected' if allInputDataDict.weatherParameterNRSDB == 'Relative Humidity' %}>Relative Humidity (%)</option>
+					<option value="Solar Zenith Angle" {% 'selected' if allInputDataDict.weatherParameterNRSDB == 'Solar Zenith Angle' %}>Solar Zenith Angle (deg)</option>
+					<option value="Surface Albedo Pressure" {% 'selected' if allInputDataDict.weatherParameterNRSDB == 'Surface Albedo Pressure' %}>Surface Albedo</option>
+					<option value="Precipitable Water" {% 'selected' if allInputDataDict.weatherParameterNRSDB == 'Precipitable Water' %}>Precipitable Water (cm)</option>
+					<option value="Wind Direction" {% 'selected' if allInputDataDict.weatherParameterNRSDB == 'Wind Direction' %}>Wind Direction (Deg)</option>
+					<option value="Pressure" {% 'selected' if allInputDataDict.weatherParameterNRSDB == 'Pressure' %}>Pressure (mbar)</option>
+					<option value="Wind Speed" {% 'selected' if allInputDataDict.weatherParameterNRSDB == 'Wind Speed' %}>Wind Speed (m/s)</option>
 				</select>
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Weather Parameter - Tmy3<span class="classic">Data that should be pulled</span></label>
-				<select id="weatherParameterTmy3" name="weatherParameterTmy3" required="required">
-					<option value="ETR (W/m^2)">Extraterrestrial Radiation on a Horizontal Surface (W/m^2)</option>
-					<option value="ETRN (W/m^2)">Hourly extraterrestrial radiation normal to the sun (W/m^2)</option>
-					<option value="GHI (W/m^2)">Global Horizontal Irradiance (GHI)  (Wh/m2)</option>
-					<option value="GHI source">Global Horizontal Irradiance Source</option>
-					<option value="GHI uncert (%)">GHI Uncertainty</option>
-					<option value="DNI (W/m^2)">Direct Normal Irradiance (DNI) (Wh/m^2)</option>
-					<option value="DNI source">DNI Source</option>
-					<option value="DNI uncert (%)">DNI Uncertainty</option>
-					<option value="DHI (W/m^2)">Diffuse Horizontal Irradience (DHI) Wh/m^2</option>
-					<option value="DHI source">DHI Source</option>
-					<option value="DHI uncert (%)">DHI Uncertainty</option>
-					<option value="GH illum (lx)">Global horizontal Illuminance (Lux)</option>
-					<option value="GH illum source">Global horizontal Illuminance Source</option>
-					<option value="Global illum uncert (%)">Global horizontal Illuminance uncertainty</option>
-					<option value="DN illum (lx)">Direct Normal Illuminance (Lux)</option>
-					<option value="DN illum source">Direct Normal Illuminance Source</option>
-					<option value="DN illum uncert (%)">Direct Normal Illuminance Uncert (%)</option>
-					<option value="DH illum (lx)">Diffuse Horizontal Illuminance (Lux)</option>
-					<option value="DH illum source">Diffuse Horizontal Illuminance Source</option>
-					<option value="DH illum uncert (%)">Diffuse Horizontal Illuminance Uncertainty</option>
-					<option value="Zenith lum (cd/m^2)">Zenith Illuminance (10 cd/m^2)</option>
-					<option value="Zenith lum source">Zenith Illuminance Source</option>
-					<option value="Zenith lum uncert (%)">Zenith Illuminance Uncertainty</option>
-					<option value="TotCld (tenths)">Total Sky Cover (tenths of sky)</option>
-					<option value="TotCld source">Total Sky Cover Source</option>
-					<option value="TotCld uncert (code)">Total Sky Cover Uncertainty</option>
-					<option value="OpqCld (tenths)">Opaque Sky Cover (tenths of sky)</option>
-					<option value="OpqCld source">Opaque Sky Cover Source</option>
-					<option value="OpqCld uncert (code)">Opaque Sky Cover Uncertainty</option>
-					<option value="Dry-bulb (C)">Dry-bulb temperature (Celsius)</option>
-					<option value="Dry-bulb source">Dry-bulb temperature source</option>
-					<option value="Dry-bulb uncert (code)">Dry bulb temperature uncertainty</option>
-					<option value="Dew-point (C)">Dew Point Temperature (C)</option>
-					<option value="Dew-point source">Dew Point Temperature source</option>
-					<option value="Dew-point uncert (code)">Dew Point Temperature uncertainty</option>
-					<option value="RHum (%)">Relative Humidity(%)</option>
-					<option value="RHum source">Relative Humidity Source</option>
-					<option value="Rhum uncert (code)">Relative Humidity uncertainty</option>
-					<option value="Presssure (mbar)">Pressure (mbar)</option>
-					<option value="Pressure source">Pressure source</option>
-					<option value="Pressure uncert (code)">Pressure uncertainty</option>
-					<option value="Wdir (degrees)">Wind Direction (degrees)</option>
-					<option value="Wdir source">Wind Direction Source</option>
-					<option value="Wdir uncert (code)">Wind Direction uncertainty</option>
-					<option value="Wspd (m/s)">Wind Speed (m/s)</option>
-					<option value="Wspd source">Wind Speed Source</option>
-					<option value="Wspd uncert (code)">Wind Speed uncertainty</option>
-					<option value="Hvis (m)">Horizontal Visibility (m)</option>
-					<option value="Hvis source">Horizontal Visibility Source</option>
-					<option value="Hvis uncert (code)">Horizontal Vis uncertainty</option>
-					<option value="CeilHgt (m)">Cloud Ceiling (m)</option>
-					<option value="CeilHgt source">Cloud Ceiling Source</option>
-					<option value="CeilHgt uncert (code)">Cloud Ceiling uncertainty</option>
-					<option value="Pwat (cm)">Precipitable Water (cm)</option>
-					<option value="Pwat source">Precipitable Water Source</option>
-					<option value="Pwat uncert (code)">Precipitable Water uncertainty</option>
-					<option value="AOD (unitless)">Aerosol Optical Depth</option>
-					<option value="AOD source">Aerosol Optical Depth Source</option>
-					<option value="AOD uncert (code)">Aerosol Optical Depth Uncertainty</option>
-					<option value="Alb (unitless)">Albedo</option>
-					<option value="Alb source">Albedo source</option>
-					<option value="Alb uncert (code)">Albedo uncertainty</option>
-					<option value="Lprecip depth (mm)">Liquid Precipitation Depth (mm)</option>
-					<option value="Lprecip quantity (hr)">Liquid Precipitation Quantity (hour)</option>
-					<option value="Lprecip source">Liquid Precipitation Source</option>
-					<option value="Lprecip uncert (code)">Liquid Precipitation Uncert</option>
+				<select id="weatherParameterTmy3" name="weatherParameterTmy3" value="{{allInputDataDict.weatherParameterTmy3}}" required="required">
+					<option value="ETR (W/m^2)" {% 'selected' if allInputDataDict.weatherParameterTmy3 == 'ETR (W/m^2)' %}>Extraterrestrial Radiation on a Horizontal Surface (W/m^2)</option>
+					<option value="ETRN (W/m^2)" {% 'selected' if allInputDataDict.weatherParameterTmy3 == 'ETRN (W/m^2)' %}>Hourly extraterrestrial radiation normal to the sun (W/m^2)</option>
+					<option value="GHI (W/m^2)" {% 'selected' if allInputDataDict.weatherParameterTmy3 == 'GHI (W/m^2)' %}>Global Horizontal Irradiance (GHI)  (Wh/m2)</option>
+					<option value="GHI source" {% 'selected' if allInputDataDict.weatherParameterTmy3 == 'GHI source' %}>Global Horizontal Irradiance Source</option>
+					<option value="GHI uncert (%)" {% 'selected' if allInputDataDict.weatherParameterTmy3 == 'GHI uncert (%)' %}>GHI Uncertainty</option>
+					<option value="DNI (W/m^2)" {% 'selected' if allInputDataDict.weatherParameterTmy3 == 'DNI (W/m^2)' %}>Direct Normal Irradiance (DNI) (Wh/m^2)</option>
+					<option value="DNI source" {% 'selected' if allInputDataDict.weatherParameterTmy3 == 'DNI source' %}>DNI Source</option>
+					<option value="DNI uncert (%)" {% 'selected' if allInputDataDict.weatherParameterTmy3 == 'DNI uncert (%)' %}>DNI Uncertainty</option>
+					<option value="DHI (W/m^2)" {% 'selected' if allInputDataDict.weatherParameterTmy3 == 'DHI (W/m^2)' %}>Diffuse Horizontal Irradience (DHI) Wh/m^2</option>
+					<option value="DHI source" {% 'selected' if allInputDataDict.weatherParameterTmy3 == 'DHI source' %}>DHI Source</option>
+					<option value="DHI uncert (%)" {% 'selected' if allInputDataDict.weatherParameterTmy3 == 'DHI uncert (%)' %}>DHI Uncertainty</option>
+					<option value="GH illum (lx)" {% 'selected' if allInputDataDict.weatherParameterTmy3 == 'GH illum (lx)' %}>Global horizontal Illuminance (Lux)</option>
+					<option value="GH illum source" {% 'selected' if allInputDataDict.weatherParameterTmy3 == 'GH illum source' %}>Global horizontal Illuminance Source</option>
+					<option value="Global illum uncert (%)" {% 'selected' if allInputDataDict.weatherParameterTmy3 == 'Global illum uncert (%)' %}>Global horizontal Illuminance uncertainty</option>
+					<option value="DN illum (lx)" {% 'selected' if allInputDataDict.weatherParameterTmy3 == 'DN illum (lx)' %}>Direct Normal Illuminance (Lux)</option>
+					<option value="DN illum source" {% 'selected' if allInputDataDict.weatherParameterTmy3 == 'DN illum source' %}>Direct Normal Illuminance Source</option>
+					<option value="DN illum uncert (%)" {% 'selected' if allInputDataDict.weatherParameterTmy3 == 'DN illum uncert (%)' %}>Direct Normal Illuminance Uncert (%)</option>
+					<option value="DH illum (lx)" {% 'selected' if allInputDataDict.weatherParameterTmy3 == 'DH illum (lx)' %}>Diffuse Horizontal Illuminance (Lux)</option>
+					<option value="DH illum source" {% 'selected' if allInputDataDict.weatherParameterTmy3 == 'DH illum source' %}>Diffuse Horizontal Illuminance Source</option>
+					<option value="DH illum uncert (%)" {% 'selected' if allInputDataDict.weatherParameterTmy3 == 'DH illum uncert (%)' %}>Diffuse Horizontal Illuminance Uncertainty</option>
+					<option value="Zenith lum (cd/m^2)" {% 'selected' if allInputDataDict.weatherParameterTmy3 == 'Zenith lum (cd/m^2)' %}>Zenith Illuminance (10 cd/m^2)</option>
+					<option value="Zenith lum source" {% 'selected' if allInputDataDict.weatherParameterTmy3 == 'Zenith lum source' %}>Zenith Illuminance Source</option>
+					<option value="Zenith lum uncert (%)" {% 'selected' if allInputDataDict.weatherParameterTmy3 == 'Zenith lum uncert (%)' %}>Zenith Illuminance Uncertainty</option>
+					<option value="TotCld (tenths)" {% 'selected' if allInputDataDict.weatherParameterTmy3 == 'TotCld (tenths)' %}>Total Sky Cover (tenths of sky)</option>
+					<option value="TotCld source" {% 'selected' if allInputDataDict.weatherParameterTmy3 == 'TotCld source' %}>Total Sky Cover Source</option>
+					<option value="TotCld uncert (code)" {% 'selected' if allInputDataDict.weatherParameterTmy3 == 'TotCld uncert (code)' %}>Total Sky Cover Uncertainty</option>
+					<option value="OpqCld (tenths)" {% 'selected' if allInputDataDict.weatherParameterTmy3 == 'OpqCld (tenths)' %}>Opaque Sky Cover (tenths of sky)</option>
+					<option value="OpqCld source" {% 'selected' if allInputDataDict.weatherParameterTmy3 == 'OpqCld source' %}>Opaque Sky Cover Source</option>
+					<option value="OpqCld uncert (code)" {% 'selected' if allInputDataDict.weatherParameterTmy3 == 'OpqCld uncert (code)' %}>Opaque Sky Cover Uncertainty</option>
+					<option value="Dry-bulb (C)" {% 'selected' if allInputDataDict.weatherParameterTmy3 == 'Dry-bulb (C)' %}>Dry-bulb temperature (Celsius)</option>
+					<option value="Dry-bulb source" {% 'selected' if allInputDataDict.weatherParameterTmy3 == 'Dry-bulb source' %}>Dry-bulb temperature source</option>
+					<option value="Dry-bulb uncert (code)" {% 'selected' if allInputDataDict.weatherParameterTmy3 == 'Dry-bulb uncert (code)' %}>Dry bulb temperature uncertainty</option>
+					<option value="Dew-point (C)" {% 'selected' if allInputDataDict.weatherParameterTmy3 == 'Dew-point (C)' %}>Dew Point Temperature (C)</option>
+					<option value="Dew-point source" {% 'selected' if allInputDataDict.weatherParameterTmy3 == 'Dew-point source' %}>Dew Point Temperature source</option>
+					<option value="Dew-point uncert (code)" {% 'selected' if allInputDataDict.weatherParameterTmy3 == 'Dew-point uncert (code)' %}>Dew Point Temperature uncertainty</option>
+					<option value="RHum (%)" {% 'selected' if allInputDataDict.weatherParameterTmy3 == 'RHum (%)' %}>Relative Humidity(%)</option>
+					<option value="RHum source" {% 'selected' if allInputDataDict.weatherParameterTmy3 == 'RHum source' %}>Relative Humidity Source</option>
+					<option value="Rhum uncert (code)" {% 'selected' if allInputDataDict.weatherParameterTmy3 == 'Rhum uncert (code)' %}>Relative Humidity uncertainty</option>
+					<option value="Presssure (mbar)" {% 'selected' if allInputDataDict.weatherParameterTmy3 == 'Presssure (mbar)' %}>Pressure (mbar)</option>
+					<option value="Pressure source" {% 'selected' if allInputDataDict.weatherParameterTmy3 == 'Pressure source' %}>Pressure source</option>
+					<option value="Pressure uncert (code)" {% 'selected' if allInputDataDict.weatherParameterTmy3 == 'Pressure uncert (code)' %}>Pressure uncertainty</option>
+					<option value="Wdir (degrees)" {% 'selected' if allInputDataDict.weatherParameterTmy3 == 'Wdir (degrees)' %}>Wind Direction (degrees)</option>
+					<option value="Wdir source" {% 'selected' if allInputDataDict.weatherParameterTmy3 == 'Wdir source' %}>Wind Direction Source</option>
+					<option value="Wdir uncert (code)" {% 'selected' if allInputDataDict.weatherParameterTmy3 == 'Wdir uncert (code)' %}>Wind Direction uncertainty</option>
+					<option value="Wspd (m/s)" {% 'selected' if allInputDataDict.weatherParameterTmy3 == 'Wspd (m/s)' %}>Wind Speed (m/s)</option>
+					<option value="Wspd source" {% 'selected' if allInputDataDict.weatherParameterTmy3 == 'Wspd source' %}>Wind Speed Source</option>
+					<option value="Wspd uncert (code)" {% 'selected' if allInputDataDict.weatherParameterTmy3 == 'Wspd uncert (code)' %}>Wind Speed uncertainty</option>
+					<option value="Hvis (m)" {% 'selected' if allInputDataDict.weatherParameterTmy3 == 'Hvis (m)' %}>Horizontal Visibility (m)</option>
+					<option value="Hvis source" {% 'selected' if allInputDataDict.weatherParameterTmy3 == 'Hvis source' %}>Horizontal Visibility Source</option>
+					<option value="Hvis uncert (code)" {% 'selected' if allInputDataDict.weatherParameterTmy3 == 'Hvis uncert (code)' %}>Horizontal Vis uncertainty</option>
+					<option value="CeilHgt (m)" {% 'selected' if allInputDataDict.weatherParameterTmy3 == 'CeilHgt (m)' %}>Cloud Ceiling (m)</option>
+					<option value="CeilHgt source" {% 'selected' if allInputDataDict.weatherParameterTmy3 == 'CeilHgt source' %}>Cloud Ceiling Source</option>
+					<option value="CeilHgt uncert (code)" {% 'selected' if allInputDataDict.weatherParameterTmy3 == 'CeilHgt uncert (code)' %}>Cloud Ceiling uncertainty</option>
+					<option value="Pwat (cm)" {% 'selected' if allInputDataDict.weatherParameterTmy3 == 'Pwat (cm)' %}>Precipitable Water (cm)</option>
+					<option value="Pwat source" {% 'selected' if allInputDataDict.weatherParameterTmy3 == 'Pwat source' %}>Precipitable Water Source</option>
+					<option value="Pwat uncert (code)" {% 'selected' if allInputDataDict.weatherParameterTmy3 == 'Pwat uncert (code)' %}>Precipitable Water uncertainty</option>
+					<option value="AOD (unitless)" {% 'selected' if allInputDataDict.weatherParameterTmy3 == 'AOD (unitless)' %}>Aerosol Optical Depth</option>
+					<option value="AOD source" {% 'selected' if allInputDataDict.weatherParameterTmy3 == 'AOD source' %}>Aerosol Optical Depth Source</option>
+					<option value="AOD uncert (code)" {% 'selected' if allInputDataDict.weatherParameterTmy3 == 'AOD uncert (code)' %}>Aerosol Optical Depth Uncertainty</option>
+					<option value="Alb (unitless)" {% 'selected' if allInputDataDict.weatherParameterTmy3 == 'Alb (unitless)' %}>Albedo</option>
+					<option value="Alb source" {% 'selected' if allInputDataDict.weatherParameterTmy3 == 'Alb source' %}>Albedo source</option>
+					<option value="Alb uncert (code)" {% 'selected' if allInputDataDict.weatherParameterTmy3 == 'Alb uncert (code)' %}>Albedo uncertainty</option>
+					<option value="Lprecip depth (mm)" {% 'selected' if allInputDataDict.weatherParameterTmy3 == 'Lprecip depth (mm)' %}>Liquid Precipitation Depth (mm)</option>
+					<option value="Lprecip quantity (hr)" {% 'selected' if allInputDataDict.weatherParameterTmy3 == 'Lprecip quantity (hr)' %}>Liquid Precipitation Quantity (hour)</option>
+					<option value="Lprecip source" {% 'selected' if allInputDataDict.weatherParameterTmy3 == 'Lprecip source' %}>Liquid Precipitation Source</option>
+					<option value="Lprecip uncert (code)" {% 'selected' if allInputDataDict.weatherParameterTmy3 == 'Lprecip uncert (code)' %}>Liquid Precipitation Uncert</option>
 				</select>
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Station - GHI/DHI/DNI Estimation<span class="classic">USCRN: Dropdown menu of stations</span></label>
-				<select id="easySolarStation" name="easySolarStation"required="required">
-					<option value="AK_Utqiagvik_formerly_Barrow_4_ENE">AK_Utqiagvik</option>
-					<option value="AK_Cordova_14_ESE">AK_Cordova</option>
-					<option value="AK_Deadhorse_3_S">AK_Deadhorse</option>
-					<option value="AK_Denali_27_N">AK_Denali</option>
-					<option value="AK_Fairbanks_11_NE">AK_Fairbanks</option>
-					<option value="AK_Glennallen_64_N">AK_Glennallen</option>
-					<option value="AK_Gustavus_2_NE">AK_Gustavus</option>
-					<option value="AK_Ivotuk_1_NNE">AK_Ivotuk</option>
-					<option value="AK_Kenai_29_ENE">AK_Kenai</option>
-					<option value="AK_King_Salmon_42_SE">AK_King_Salmon</option>
-					<option value="AK_Metlakatla_6_S">AK_Metlakatla</option>
-					<option value="AK_Port_Alsworth_1_SW">AK_Port_Alsworth</option>
-					<option value="AK_Red_Dog_Mine_3_SSW">AK_Red_Dog_Mine</option>
-					<option value="AK_Ruby_44_ESE">AK_Ruby</option>
-					<option value="AK_Sand_Point_1_ENE">AK_Sand_Point</option>
-					<option value="AK_Selawik_28_E">AK_Selawik</option>
-					<option value="AK_Sitka_1_NE">AK_Sitka</option>
-					<option value="AK_St._Paul_4_NE">AK_St._Paul</option>
-					<option value="AK_Tok_70_SE">AK_Tok</option>
-					<option value="AK_Toolik_Lake_5_ENE">AK_Toolik_Lake</option>
-					<option value="AK_Yakutat_3_SSE">AK_Yakutat</option>
-					<option value="AL_Brewton_3_NNE">AL_Brewton</option>
-					<option value="AL_Clanton_2_NE">AL_Clanton</option>
-					<option value="AL_Courtland_2_WSW">AL_Courtland</option>
-					<option value="AL_Cullman_3_ENE">AL_Cullman</option>
-					<option value="AL_Fairhope_3_NE">AL_Fairhope</option>
-					<option value="AL_Gadsden_19_N">AL_Gadsden</option>
-					<option value="AL_Gainesville_2_NE">AL_Gainesville</option>
-					<option value="AL_Greensboro_2_WNW">AL_Greensboro</option>
-					<option value="AL_Highland_Home_2_S">AL_Highland_Home</option>
-					<option value="AL_Muscle_Shoals_2_N">AL_Muscle_Shoals</option>
-					<option value="AL_Northport_2_S">AL_Northport</option>
-					<option value="AL_Russellville_4_SSE">AL_Russellville</option>
-					<option value="AL_Scottsboro_2_NE">AL_Scottsboro</option>
-					<option value="AL_Selma_6_SSE">AL_Selma</option>
-					<option value="AL_Selma_13_WNW">AL_Selma</option>
-					<option value="AL_Talladega_10_NNE">AL_Talladega</option>
-					<option value="AL_Thomasville_2_S">AL_Thomasville</option>
-					<option value="AL_Troy_2_W">AL_Troy</option>
-					<option value="AL_Valley_Head_1_SSW">AL_Valley_Head</option>
-					<option value="AR_Batesville_8_WNW">AR_Batesville</option>
-					<option value="AZ_Elgin_5_S">AZ_Elgin</option>
-					<option value="AZ_Tucson_11_W">AZ_Tucson</option>
-					<option value="AZ_Williams_35_NNW">AZ_Williams</option>
-					<option value="AZ_Yuma_27_ENE">AZ_Yuma</option>
-					<option value="CA_Bodega_6_WSW">CA_Bodega</option>
-					<option value="CA_Fallbrook_5_NE">CA_Fallbrook</option>
-					<option value="CA_Merced_23_WSW">CA_Merced</option>
-					<option value="CA_Redding_12_WNW">CA_Redding</option>
-					<option value="CA_Santa_Barbara_11_W">CA_Santa_Barbara</option>
-					<option value="CA_Stovepipe_Wells_1_SW">CA_Stovepipe_Wells</option>
-					<option value="CA_Yosemite_Village_12_W">CA_Yosemite_Village</option>
-					<option value="CO_Boulder_14_W">CO_Boulder</option>
-					<option value="CO_Cortez_8_SE">CO_Cortez</option>
-					<option value="CO_Dinosaur_2_E">CO_Dinosaur</option>
-					<option value="CO_La_Junta_17_WSW">CO_La_Junta</option>
-					<option value="CO_Montrose_11_ENE">CO_Montrose</option>
-					<option value="CO_Nunn_7_NNE">CO_Nunn</option>
-					<option value="FL_Everglades_City_5_NE">FL_Everglades_City</option>
-					<option value="FL_Sebring_23_SSE">FL_Sebring</option>
-					<option value="FL_Titusville_7_E">FL_Titusville</option>
-					<option value="GA_Brunswick_23_S">GA_Brunswick</option>
-					<option value="GA_Newton_8_W">GA_Newton</option>
-					<option value="GA_Newton_11_SW">GA_Newton</option>
-					<option value="GA_Watkinsville_5_SSE">GA_Watkinsville</option>
-					<option value="HI_Hilo_5_S">HI_Hilo</option>
-					<option value="HI_Mauna_Loa_5_NNE">HI_Mauna_Loa</option>
-					<option value="IA_Des_Moines_17_E">IA_Des_Moines</option>
-					<option value="ID_Arco_17_SW">ID_Arco</option>
-					<option value="ID_Murphy_10_W">ID_Murphy</option>
-					<option value="IL_Champaign_9_SW">IL_Champaign</option>
-					<option value="IL_Shabbona_5_NNE">IL_Shabbona</option>
-					<option value="IN_Bedford_5_WNW">IN_Bedford</option>
-					<option value="KS_Manhattan_6_SSW">KS_Manhattan</option>
-					<option value="KS_Oakley_19_SSW">KS_Oakley</option>
-					<option value="KY_Bowling_Green_21_NNE">KY_Bowling_Green</option>
-					<option value="KY_Versailles_3_NNW">KY_Versailles</option>
-					<option value="LA_Lafayette_13_SE">LA_Lafayette</option>
-					<option value="LA_Monroe_26_N">LA_Monroe</option>
-					<option value="ME_Limestone_4_NNW">ME_Limestone</option>
-					<option value="ME_Old_Town_2_W">ME_Old_Town</option>
-					<option value="MI_Chatham_1_SE">MI_Chatham</option>
-					<option value="MI_Gaylord_9_SSW">MI_Gaylord</option>
-					<option value="MN_Goodridge_12_NNW">MN_Goodridge</option>
-					<option value="MN_Sandstone_6_W">MN_Sandstone</option>
-					<option value="MO_Chillicothe_22_ENE">MO_Chillicothe</option>
-					<option value="MO_Joplin_24_N">MO_Joplin</option>
-					<option value="MO_Salem_10_W">MO_Salem</option>
-					<option value="MS_Holly_Springs_4_N">MS_Holly_Springs</option>
-					<option value="MS_Newton_5_ENE">MS_Newton</option>
-					<option value="MT_Dillon_18_WSW">MT_Dillon</option>
-					<option value="MT_Lewistown_42_WSW">MT_Lewistown</option>
-					<option value="MT_St._Mary_1_SSW">MT_St._Mary</option>
-					<option value="MT_Wolf_Point_29_ENE">MT_Wolf_Point</option>
-					<option value="MT_Wolf_Point_34_NE">MT_Wolf_Point</option>
-					<option value="NC_Asheville_8_SSW">NC_Asheville</option>
-					<option value="NC_Asheville_13_S">NC_Asheville</option>
-					<option value="NC_Durham_11_W">NC_Durham</option>
-					<option value="ND_Jamestown_38_WSW">ND_Jamestown</option>
-					<option value="ND_Medora_7_E">ND_Medora</option>
-					<option value="ND_Northgate_5_ESE">ND_Northgate</option>
-					<option value="NE_Harrison_20_SSE">NE_Harrison</option>
-					<option value="NE_Lincoln_8_ENE">NE_Lincoln</option>
-					<option value="NE_Lincoln_11_SW">NE_Lincoln</option>
-					<option value="NE_Whitman_5_ENE">NE_Whitman</option>
-					<option value="NH_Durham_2_N">NH_Durham</option>
-					<option value="NH_Durham_2_SSW">NH_Durham</option>
-					<option value="NM_Las_Cruces_20_N">NM_Las_Cruces</option>
-					<option value="NM_Los_Alamos_13_W">NM_Los_Alamos</option>
-					<option value="NM_Socorro_20_N">NM_Socorro</option>
-					<option value="NV_Baker_5_W">NV_Baker</option>
-					<option value="NV_Denio_52_WSW">NV_Denio</option>
-					<option value="NV_Mercury_3_SSW">NV_Mercury</option>
-					<option value="NY_Ithaca_13_E">NY_Ithaca</option>
-					<option value="NY_Millbrook_3_W">NY_Millbrook</option>
-					<option value="OH_Wooster_3_SSE">OH_Wooster</option>
-					<option value="OK_Goodwell_2_E">OK_Goodwell</option>
-					<option value="OK_Goodwell_2_SE">OK_Goodwell</option>
-					<option value="OK_Stillwater_2_W">OK_Stillwater</option>
-					<option value="OK_Stillwater_5_WNW">OK_Stillwater</option>
-					<option value="ON_Egbert_1_W">ON_Egbert</option>
-					<option value="OR_Coos_Bay_8_SW">OR_Coos_Bay</option>
-					<option value="OR_Corvallis_10_SSW">OR_Corvallis</option>
-					<option value="OR_John_Day_35_WNW">OR_John_Day</option>
-					<option value="OR_Riley_10_WSW">OR_Riley</option>
-					<option value="PA_Avondale_2_N">PA_Avondale</option>
-					<option value="RI_Kingston_1_NW">RI_Kingston</option>
-					<option value="RI_Kingston_1_W">RI_Kingston</option>
-					<option value="SA_Tiksi_4_SSE">SA_Tiksi</option>
-					<option value="SC_Blackville_3_W">SC_Blackville</option>
-					<option value="SC_McClellanville_7_NE">SC_McClellanville</option>
-					<option value="SD_Aberdeen_35_WNW">SD_Aberdeen</option>
-					<option value="SD_Buffalo_13_ESE">SD_Buffalo</option>
-					<option value="SD_Pierre_24_S">SD_Pierre</option>
-					<option value="SD_Sioux_Falls_14_NNE">SD_Sioux_Falls</option>
-					<option value="TN_Crossville_7_NW">TN_Crossville</option>
-					<option value="TX_Austin_33_NW">TX_Austin</option>
-					<option value="TX_Bronte_11_NNE">TX_Bronte</option>
-					<option value="TX_Edinburg_17_NNE">TX_Edinburg</option>
-					<option value="TX_Monahans_6_ENE">TX_Monahans</option>
-					<option value="TX_Muleshoe_19_S">TX_Muleshoe</option>
-					<option value="TX_Palestine_6_WNW">TX_Palestine</option>
-					<option value="TX_Panther_Junction_2_N">TX_Panther_Junction</option>
-					<option value="TX_Port_Aransas_32_NNE">TX_Port_Aransas</option>
-					<option value="UT_Brigham_City_28_WNW">UT_Brigham_City</option>
-					<option value="UT_Torrey_7_E">UT_Torrey</option>
-					<option value="VA_Cape_Charles_5_ENE">VA_Cape_Charles</option>
-					<option value="VA_Charlottesville_2_SSE">VA_Charlottesville</option>
-					<option value="WA_Darrington_21_NNE">WA_Darrington</option>
-					<option value="WA_Quinault_4_NE">WA_Quinault</option>
-					<option value="WA_Spokane_17_SSW">WA_Spokane</option>
-					<option value="WI_Necedah_5_WNW">WI_Necedah</option>
-					<option value="WV_Elkins_21_ENE">WV_Elkins</option>
-					<option value="WY_Lander_11_SSE">WY_Lander</option>
-					<option value="WY_Moose_1_NNE">WY_Moose</option>
-					<option value="WY_Sundance_8_NNW">WY_Sundance</option>
+				<select id="easySolarStation" name="easySolarStation" required="required">
+					<option value="AK_Utqiagvik_formerly_Barrow_4_ENE" {% 'selected' if allInputDataDict.VALUE == 'AK_Utqiagvik_formerly_Barrow_4_ENE' %}>AK_Utqiagvik</option>
+					<option value="AK_Cordova_14_ESE" {% 'selected' if allInputDataDict.easySolarStation == 'AK_Cordova_14_ESE' %}>AK_Cordova</option>
+					<option value="AK_Deadhorse_3_S" {% 'selected' if allInputDataDict.easySolarStation == 'AK_Deadhorse_3_S' %}>AK_Deadhorse</option>
+					<option value="AK_Denali_27_N" {% 'selected' if allInputDataDict.easySolarStation == 'AK_Denali_27_N' %}>AK_Denali</option>
+					<option value="AK_Fairbanks_11_NE" {% 'selected' if allInputDataDict.easySolarStation == 'AK_Fairbanks_11_NE' %}>AK_Fairbanks</option>
+					<option value="AK_Glennallen_64_N" {% 'selected' if allInputDataDict.easySolarStation == 'AK_Glennallen_64_N' %}>AK_Glennallen</option>
+					<option value="AK_Gustavus_2_NE" {% 'selected' if allInputDataDict.easySolarStation == 'AK_Gustavus_2_NE' %}>AK_Gustavus</option>
+					<option value="AK_Ivotuk_1_NNE" {% 'selected' if allInputDataDict.easySolarStation == 'AK_Ivotuk_1_NNE' %}>AK_Ivotuk</option>
+					<option value="AK_Kenai_29_ENE" {% 'selected' if allInputDataDict.easySolarStation == 'AK_Kenai_29_ENE' %}>AK_Kenai</option>
+					<option value="AK_King_Salmon_42_SE" {% 'selected' if allInputDataDict.easySolarStation == 'AK_King_Salmon_42_SE' %}>AK_King_Salmon</option>
+					<option value="AK_Metlakatla_6_S" {% 'selected' if allInputDataDict.easySolarStation == 'AK_Metlakatla_6_S' %}>AK_Metlakatla</option>
+					<option value="AK_Port_Alsworth_1_SW" {% 'selected' if allInputDataDict.easySolarStation == 'AK_Port_Alsworth_1_SW' %}>AK_Port_Alsworth</option>
+					<option value="AK_Red_Dog_Mine_3_SSW" {% 'selected' if allInputDataDict.easySolarStation == 'AK_Red_Dog_Mine_3_SSW' %}>AK_Red_Dog_Mine</option>
+					<option value="AK_Ruby_44_ESE" {% 'selected' if allInputDataDict.easySolarStation == 'AK_Ruby_44_ESE' %}>AK_Ruby</option>
+					<option value="AK_Sand_Point_1_ENE" {% 'selected' if allInputDataDict.easySolarStation == 'AK_Sand_Point_1_ENE' %}>AK_Sand_Point</option>
+					<option value="AK_Selawik_28_E" {% 'selected' if allInputDataDict.easySolarStation == 'AK_Selawik_28_E' %}>AK_Selawik</option>
+					<option value="AK_Sitka_1_NE" {% 'selected' if allInputDataDict.easySolarStation == 'AK_Sitka_1_NE' %}>AK_Sitka</option>
+					<option value="AK_St._Paul_4_NE" {% 'selected' if allInputDataDict.easySolarStation == 'AK_St._Paul_4_NE' %}>AK_St._Paul</option>
+					<option value="AK_Tok_70_SE" {% 'selected' if allInputDataDict.easySolarStation == 'AK_Tok_70_SE' %}>AK_Tok</option>
+					<option value="AK_Toolik_Lake_5_ENE" {% 'selected' if allInputDataDict.easySolarStation == 'AK_Toolik_Lake_5_ENE' %}>AK_Toolik_Lake</option>
+					<option value="AK_Yakutat_3_SSE" {% 'selected' if allInputDataDict.easySolarStation == 'AK_Yakutat_3_SSE' %}>AK_Yakutat</option>
+					<option value="AL_Brewton_3_NNE" {% 'selected' if allInputDataDict.easySolarStation == 'AL_Brewton_3_NNE' %}>AL_Brewton</option>
+					<option value="AL_Clanton_2_NE" {% 'selected' if allInputDataDict.easySolarStation == 'AL_Clanton_2_NE' %}>AL_Clanton</option>
+					<option value="AL_Courtland_2_WSW" {% 'selected' if allInputDataDict.easySolarStation == 'AL_Courtland_2_WSW' %}>AL_Courtland</option>
+					<option value="AL_Cullman_3_ENE" {% 'selected' if allInputDataDict.easySolarStation == 'AL_Cullman_3_ENE' %}>AL_Cullman</option>
+					<option value="AL_Fairhope_3_NE" {% 'selected' if allInputDataDict.easySolarStation == 'AL_Fairhope_3_NE' %}>AL_Fairhope</option>
+					<option value="AL_Gadsden_19_N" {% 'selected' if allInputDataDict.easySolarStation == 'AL_Gadsden_19_N' %}>AL_Gadsden</option>
+					<option value="AL_Gainesville_2_NE" {% 'selected' if allInputDataDict.easySolarStation == 'AL_Gainesville_2_NE' %}>AL_Gainesville</option>
+					<option value="AL_Greensboro_2_WNW" {% 'selected' if allInputDataDict.easySolarStation == 'AL_Greensboro_2_WNW' %}>AL_Greensboro</option>
+					<option value="AL_Highland_Home_2_S" {% 'selected' if allInputDataDict.easySolarStation == 'AL_Highland_Home_2_S' %}>AL_Highland_Home</option>
+					<option value="AL_Muscle_Shoals_2_N" {% 'selected' if allInputDataDict.easySolarStation == 'AL_Muscle_Shoals_2_N' %}>AL_Muscle_Shoals</option>
+					<option value="AL_Northport_2_S" {% 'selected' if allInputDataDict.easySolarStation == 'AL_Northport_2_S' %}>AL_Northport</option>
+					<option value="AL_Russellville_4_SSE" {% 'selected' if allInputDataDict.easySolarStation == 'AL_Russellville_4_SSE' %}>AL_Russellville</option>
+					<option value="AL_Scottsboro_2_NE" {% 'selected' if allInputDataDict.easySolarStation == 'AL_Scottsboro_2_NE' %}>AL_Scottsboro</option>
+					<option value="AL_Selma_6_SSE" {% 'selected' if allInputDataDict.easySolarStation == 'AL_Selma_6_SSE' %}>AL_Selma</option>
+					<option value="AL_Selma_13_WNW" {% 'selected' if allInputDataDict.easySolarStation == 'AL_Selma_13_WNW' %}>AL_Selma</option>
+					<option value="AL_Talladega_10_NNE" {% 'selected' if allInputDataDict.easySolarStation == 'AL_Talladega_10_NNE' %}>AL_Talladega</option>
+					<option value="AL_Thomasville_2_S" {% 'selected' if allInputDataDict.easySolarStation == 'AL_Thomasville_2_S' %}>AL_Thomasville</option>
+					<option value="AL_Troy_2_W" {% 'selected' if allInputDataDict.easySolarStation == 'AL_Troy_2_W' %}>AL_Troy</option>
+					<option value="AL_Valley_Head_1_SSW" {% 'selected' if allInputDataDict.easySolarStation == 'AL_Valley_Head_1_SSW' %}>AL_Valley_Head</option>
+					<option value="AR_Batesville_8_WNW" {% 'selected' if allInputDataDict.easySolarStation == 'AR_Batesville_8_WNW' %}>AR_Batesville</option>
+					<option value="AZ_Elgin_5_S" {% 'selected' if allInputDataDict.easySolarStation == 'AZ_Elgin_5_S' %}>AZ_Elgin</option>
+					<option value="AZ_Tucson_11_W" {% 'selected' if allInputDataDict.easySolarStation == 'AZ_Tucson_11_W' %}>AZ_Tucson</option>
+					<option value="AZ_Williams_35_NNW" {% 'selected' if allInputDataDict.easySolarStation == 'AZ_Williams_35_NNW' %}>AZ_Williams</option>
+					<option value="AZ_Yuma_27_ENE" {% 'selected' if allInputDataDict.easySolarStation == 'AZ_Yuma_27_ENE' %}>AZ_Yuma</option>
+					<option value="CA_Bodega_6_WSW" {% 'selected' if allInputDataDict.easySolarStation == 'CA_Bodega_6_WSW' %}>CA_Bodega</option>
+					<option value="CA_Fallbrook_5_NE" {% 'selected' if allInputDataDict.easySolarStation == 'CA_Fallbrook_5_NE' %}>CA_Fallbrook</option>
+					<option value="CA_Merced_23_WSW" {% 'selected' if allInputDataDict.easySolarStation == 'CA_Merced_23_WSW' %}>CA_Merced</option>
+					<option value="CA_Redding_12_WNW" {% 'selected' if allInputDataDict.easySolarStation == 'CA_Redding_12_WNW' %}>CA_Redding</option>
+					<option value="CA_Santa_Barbara_11_W" {% 'selected' if allInputDataDict.easySolarStation == 'CA_Santa_Barbara_11_W' %}>CA_Santa_Barbara</option>
+					<option value="CA_Stovepipe_Wells_1_SW" {% 'selected' if allInputDataDict.easySolarStation == 'CA_Stovepipe_Wells_1_SW' %}>CA_Stovepipe_Wells</option>
+					<option value="CA_Yosemite_Village_12_W" {% 'selected' if allInputDataDict.easySolarStation == 'CA_Yosemite_Village_12_W' %}>CA_Yosemite_Village</option>
+					<option value="CO_Boulder_14_W" {% 'selected' if allInputDataDict.easySolarStation == 'CO_Boulder_14_W' %}>CO_Boulder</option>
+					<option value="CO_Cortez_8_SE" {% 'selected' if allInputDataDict.easySolarStation == 'CO_Cortez_8_SE' %}>CO_Cortez</option>
+					<option value="CO_Dinosaur_2_E" {% 'selected' if allInputDataDict.easySolarStation == 'CO_Dinosaur_2_E' %}>CO_Dinosaur</option>
+					<option value="CO_La_Junta_17_WSW" {% 'selected' if allInputDataDict.easySolarStation == 'CO_La_Junta_17_WSW' %}>CO_La_Junta</option>
+					<option value="CO_Montrose_11_ENE" {% 'selected' if allInputDataDict.easySolarStation == 'CO_Montrose_11_ENE' %}>CO_Montrose</option>
+					<option value="CO_Nunn_7_NNE" {% 'selected' if allInputDataDict.easySolarStation == 'CO_Nunn_7_NNE' %}>CO_Nunn</option>
+					<option value="FL_Everglades_City_5_NE" {% 'selected' if allInputDataDict.easySolarStation == 'FL_Everglades_City_5_NE' %}>FL_Everglades_City</option>
+					<option value="FL_Sebring_23_SSE" {% 'selected' if allInputDataDict.easySolarStation == 'FL_Sebring_23_SSE' %}>FL_Sebring</option>
+					<option value="FL_Titusville_7_E" {% 'selected' if allInputDataDict.easySolarStation == 'FL_Titusville_7_E' %}>FL_Titusville</option>
+					<option value="GA_Brunswick_23_S" {% 'selected' if allInputDataDict.easySolarStation == 'GA_Brunswick_23_S' %}>GA_Brunswick</option>
+					<option value="GA_Newton_8_W" {% 'selected' if allInputDataDict.easySolarStation == 'GA_Newton_8_W' %}>GA_Newton</option>
+					<option value="GA_Newton_11_SW" {% 'selected' if allInputDataDict.easySolarStation == 'GA_Newton_11_SW' %}>GA_Newton</option>
+					<option value="GA_Watkinsville_5_SSE" {% 'selected' if allInputDataDict.easySolarStation == 'GA_Watkinsville_5_SSE' %}>GA_Watkinsville</option>
+					<option value="HI_Hilo_5_S" {% 'selected' if allInputDataDict.easySolarStation == 'HI_Hilo_5_S' %}>HI_Hilo</option>
+					<option value="HI_Mauna_Loa_5_NNE" {% 'selected' if allInputDataDict.easySolarStation == 'HI_Mauna_Loa_5_NNE' %}>HI_Mauna_Loa</option>
+					<option value="IA_Des_Moines_17_E" {% 'selected' if allInputDataDict.easySolarStation == 'IA_Des_Moines_17_E' %}>IA_Des_Moines</option>
+					<option value="ID_Arco_17_SW" {% 'selected' if allInputDataDict.easySolarStation == 'ID_Arco_17_SW' %}>ID_Arco</option>
+					<option value="ID_Murphy_10_W" {% 'selected' if allInputDataDict.easySolarStation == 'ID_Murphy_10_W' %}>ID_Murphy</option>
+					<option value="IL_Champaign_9_SW" {% 'selected' if allInputDataDict.easySolarStation == 'IL_Champaign_9_SW' %}>IL_Champaign</option>
+					<option value="IL_Shabbona_5_NNE" {% 'selected' if allInputDataDict.easySolarStation == 'IL_Shabbona_5_NNE' %}>IL_Shabbona</option>
+					<option value="IN_Bedford_5_WNW" {% 'selected' if allInputDataDict.easySolarStation == 'IN_Bedford_5_WNW' %}>IN_Bedford</option>
+					<option value="KS_Manhattan_6_SSW" {% 'selected' if allInputDataDict.easySolarStation == 'KS_Manhattan_6_SSW' %}>KS_Manhattan</option>
+					<option value="KS_Oakley_19_SSW" {% 'selected' if allInputDataDict.easySolarStation == 'KS_Oakley_19_SSW' %}>KS_Oakley</option>
+					<option value="KY_Bowling_Green_21_NNE" {% 'selected' if allInputDataDict.easySolarStation == 'KY_Bowling_Green_21_NNE' %}>KY_Bowling_Green</option>
+					<option value="KY_Versailles_3_NNW" {% 'selected' if allInputDataDict.easySolarStation == 'KY_Versailles_3_NNW' %}>KY_Versailles</option>
+					<option value="LA_Lafayette_13_SE" {% 'selected' if allInputDataDict.easySolarStation == 'LA_Lafayette_13_SE' %}>LA_Lafayette</option>
+					<option value="LA_Monroe_26_N" {% 'selected' if allInputDataDict.easySolarStation == 'LA_Monroe_26_N' %}>LA_Monroe</option>
+					<option value="ME_Limestone_4_NNW" {% 'selected' if allInputDataDict.easySolarStation == 'ME_Limestone_4_NNW' %}>ME_Limestone</option>
+					<option value="ME_Old_Town_2_W" {% 'selected' if allInputDataDict.easySolarStation == 'ME_Old_Town_2_W' %}>ME_Old_Town</option>
+					<option value="MI_Chatham_1_SE" {% 'selected' if allInputDataDict.easySolarStation == 'MI_Chatham_1_SE' %}>MI_Chatham</option>
+					<option value="MI_Gaylord_9_SSW" {% 'selected' if allInputDataDict.easySolarStation == 'MI_Gaylord_9_SSW' %}>MI_Gaylord</option>
+					<option value="MN_Goodridge_12_NNW" {% 'selected' if allInputDataDict.easySolarStation == 'MN_Goodridge_12_NNW' %}>MN_Goodridge</option>
+					<option value="MN_Sandstone_6_W" {% 'selected' if allInputDataDict.easySolarStation == 'MN_Sandstone_6_W' %}>MN_Sandstone</option>
+					<option value="MO_Chillicothe_22_ENE" {% 'selected' if allInputDataDict.easySolarStation == 'MO_Chillicothe_22_ENE' %}>MO_Chillicothe</option>
+					<option value="MO_Joplin_24_N" {% 'selected' if allInputDataDict.easySolarStation == 'MO_Joplin_24_N' %}>MO_Joplin</option>
+					<option value="MO_Salem_10_W" {% 'selected' if allInputDataDict.easySolarStation == 'MO_Salem_10_W' %}>MO_Salem</option>
+					<option value="MS_Holly_Springs_4_N" {% 'selected' if allInputDataDict.easySolarStation == 'MS_Holly_Springs_4_N' %}>MS_Holly_Springs</option>
+					<option value="MS_Newton_5_ENE" {% 'selected' if allInputDataDict.easySolarStation == 'MS_Newton_5_ENE' %}>MS_Newton</option>
+					<option value="MT_Dillon_18_WSW" {% 'selected' if allInputDataDict.easySolarStation == 'MT_Dillon_18_WSW' %}>MT_Dillon</option>
+					<option value="MT_Lewistown_42_WSW" {% 'selected' if allInputDataDict.easySolarStation == 'MT_Lewistown_42_WSW' %}>MT_Lewistown</option>
+					<option value="MT_St._Mary_1_SSW" {% 'selected' if allInputDataDict.easySolarStation == 'MT_St._Mary_1_SSW' %}>MT_St._Mary</option>
+					<option value="MT_Wolf_Point_29_ENE" {% 'selected' if allInputDataDict.easySolarStation == 'MT_Wolf_Point_29_ENE' %}>MT_Wolf_Point</option>
+					<option value="MT_Wolf_Point_34_NE" {% 'selected' if allInputDataDict.easySolarStation == 'MT_Wolf_Point_34_NE' %}>MT_Wolf_Point</option>
+					<option value="NC_Asheville_8_SSW" {% 'selected' if allInputDataDict.easySolarStation == 'NC_Asheville_8_SSW' %}>NC_Asheville</option>
+					<option value="NC_Asheville_13_S" {% 'selected' if allInputDataDict.easySolarStation == 'NC_Asheville_13_S' %}>NC_Asheville</option>
+					<option value="NC_Durham_11_W" {% 'selected' if allInputDataDict.easySolarStation == 'NC_Durham_11_W' %}>NC_Durham</option>
+					<option value="ND_Jamestown_38_WSW" {% 'selected' if allInputDataDict.easySolarStation == 'ND_Jamestown_38_WSW' %}>ND_Jamestown</option>
+					<option value="ND_Medora_7_E" {% 'selected' if allInputDataDict.easySolarStation == 'ND_Medora_7_E' %}>ND_Medora</option>
+					<option value="ND_Northgate_5_ESE" {% 'selected' if allInputDataDict.easySolarStation == 'ND_Northgate_5_ESE' %}>ND_Northgate</option>
+					<option value="NE_Harrison_20_SSE" {% 'selected' if allInputDataDict.easySolarStation == 'NE_Harrison_20_SSE' %}>NE_Harrison</option>
+					<option value="NE_Lincoln_8_ENE" {% 'selected' if allInputDataDict.easySolarStation == 'NE_Lincoln_8_ENE' %}>NE_Lincoln</option>
+					<option value="NE_Lincoln_11_SW" {% 'selected' if allInputDataDict.easySolarStation == 'NE_Lincoln_11_SW' %}>NE_Lincoln</option>
+					<option value="NE_Whitman_5_ENE" {% 'selected' if allInputDataDict.easySolarStation == 'NE_Whitman_5_ENE' %}>NE_Whitman</option>
+					<option value="NH_Durham_2_N" {% 'selected' if allInputDataDict.easySolarStation == 'NH_Durham_2_N' %}>NH_Durham</option>
+					<option value="NH_Durham_2_SSW" {% 'selected' if allInputDataDict.easySolarStation == 'NH_Durham_2_SSW' %}>NH_Durham</option>
+					<option value="NM_Las_Cruces_20_N" {% 'selected' if allInputDataDict.easySolarStation == 'NM_Las_Cruces_20_N' %}>NM_Las_Cruces</option>
+					<option value="NM_Los_Alamos_13_W" {% 'selected' if allInputDataDict.easySolarStation == 'NM_Los_Alamos_13_W' %}>NM_Los_Alamos</option>
+					<option value="NM_Socorro_20_N" {% 'selected' if allInputDataDict.easySolarStation == 'NM_Socorro_20_N' %}>NM_Socorro</option>
+					<option value="NV_Baker_5_W" {% 'selected' if allInputDataDict.easySolarStation == 'NV_Baker_5_W' %}>NV_Baker</option>
+					<option value="NV_Denio_52_WSW" {% 'selected' if allInputDataDict.easySolarStation == 'NV_Denio_52_WSW' %}>NV_Denio</option>
+					<option value="NV_Mercury_3_SSW" {% 'selected' if allInputDataDict.easySolarStation == 'NV_Mercury_3_SSW' %}>NV_Mercury</option>
+					<option value="NY_Ithaca_13_E" {% 'selected' if allInputDataDict.easySolarStation == 'NY_Ithaca_13_E' %}>NY_Ithaca</option>
+					<option value="NY_Millbrook_3_W" {% 'selected' if allInputDataDict.easySolarStation == 'NY_Millbrook_3_W' %}>NY_Millbrook</option>
+					<option value="OH_Wooster_3_SSE" {% 'selected' if allInputDataDict.easySolarStation == 'OH_Wooster_3_SSE' %}>OH_Wooster</option>
+					<option value="OK_Goodwell_2_E" {% 'selected' if allInputDataDict.easySolarStation == 'OK_Goodwell_2_E' %}>OK_Goodwell</option>
+					<option value="OK_Goodwell_2_SE" {% 'selected' if allInputDataDict.easySolarStation == 'OK_Goodwell_2_SE' %}>OK_Goodwell</option>
+					<option value="OK_Stillwater_2_W" {% 'selected' if allInputDataDict.easySolarStation == 'OK_Stillwater_2_W' %}>OK_Stillwater</option>
+					<option value="OK_Stillwater_5_WNW" {% 'selected' if allInputDataDict.easySolarStation == 'OK_Stillwater_5_WNW' %}>OK_Stillwater</option>
+					<option value="ON_Egbert_1_W" {% 'selected' if allInputDataDict.easySolarStation == 'ON_Egbert_1_W' %}>ON_Egbert</option>
+					<option value="OR_Coos_Bay_8_SW" {% 'selected' if allInputDataDict.easySolarStation == 'OR_Coos_Bay_8_SW' %}>OR_Coos_Bay</option>
+					<option value="OR_Corvallis_10_SSW" {% 'selected' if allInputDataDict.easySolarStation == 'OR_Corvallis_10_SSW' %}>OR_Corvallis</option>
+					<option value="OR_John_Day_35_WNW" {% 'selected' if allInputDataDict.easySolarStation == 'OR_John_Day_35_WNW' %}>OR_John_Day</option>
+					<option value="OR_Riley_10_WSW" {% 'selected' if allInputDataDict.easySolarStation == 'OR_Riley_10_WSW' %}>OR_Riley</option>
+					<option value="PA_Avondale_2_N" {% 'selected' if allInputDataDict.easySolarStation == 'PA_Avondale_2_N' %}>PA_Avondale</option>
+					<option value="RI_Kingston_1_NW" {% 'selected' if allInputDataDict.easySolarStation == 'RI_Kingston_1_NW' %}>RI_Kingston</option>
+					<option value="RI_Kingston_1_W" {% 'selected' if allInputDataDict.easySolarStation == 'RI_Kingston_1_W' %}>RI_Kingston</option>
+					<option value="SA_Tiksi_4_SSE" {% 'selected' if allInputDataDict.easySolarStation == 'SA_Tiksi_4_SSE' %}>SA_Tiksi</option>
+					<option value="SC_Blackville_3_W" {% 'selected' if allInputDataDict.easySolarStation == 'SC_Blackville_3_W' %}>SC_Blackville</option>
+					<option value="SC_McClellanville_7_NE" {% 'selected' if allInputDataDict.easySolarStation == 'SC_McClellanville_7_NE' %}>SC_McClellanville</option>
+					<option value="SD_Aberdeen_35_WNW" {% 'selected' if allInputDataDict.easySolarStation == 'SD_Aberdeen_35_WNW' %}>SD_Aberdeen</option>
+					<option value="SD_Buffalo_13_ESE" {% 'selected' if allInputDataDict.easySolarStation == 'SD_Buffalo_13_ESE' %}>SD_Buffalo</option>
+					<option value="SD_Pierre_24_S" {% 'selected' if allInputDataDict.easySolarStation == 'SD_Pierre_24_S' %}>SD_Pierre</option>
+					<option value="SD_Sioux_Falls_14_NNE" {% 'selected' if allInputDataDict.easySolarStation == 'SD_Sioux_Falls_14_NNE' %}>SD_Sioux_Falls</option>
+					<option value="TN_Crossville_7_NW" {% 'selected' if allInputDataDict.easySolarStation == 'TN_Crossville_7_NW' %}>TN_Crossville</option>
+					<option value="TX_Austin_33_NW" {% 'selected' if allInputDataDict.easySolarStation == 'TX_Austin_33_NW' %}>TX_Austin</option>
+					<option value="TX_Bronte_11_NNE" {% 'selected' if allInputDataDict.easySolarStation == 'TX_Bronte_11_NNE' %}>TX_Bronte</option>
+					<option value="TX_Edinburg_17_NNE" {% 'selected' if allInputDataDict.easySolarStation == 'TX_Edinburg_17_NNE' %}>TX_Edinburg</option>
+					<option value="TX_Monahans_6_ENE" {% 'selected' if allInputDataDict.easySolarStation == 'TX_Monahans_6_ENE' %}>TX_Monahans</option>
+					<option value="TX_Muleshoe_19_S" {% 'selected' if allInputDataDict.easySolarStation == 'TX_Muleshoe_19_S' %}>TX_Muleshoe</option>
+					<option value="TX_Palestine_6_WNW" {% 'selected' if allInputDataDict.easySolarStation == 'TX_Palestine_6_WNW' %}>TX_Palestine</option>
+					<option value="TX_Panther_Junction_2_N" {% 'selected' if allInputDataDict.easySolarStation == 'TX_Panther_Junction_2_N' %}>TX_Panther_Junction</option>
+					<option value="TX_Port_Aransas_32_NNE" {% 'selected' if allInputDataDict.easySolarStation == 'TX_Port_Aransas_32_NNE' %}>TX_Port_Aransas</option>
+					<option value="UT_Brigham_City_28_WNW" {% 'selected' if allInputDataDict.easySolarStation == 'UT_Brigham_City_28_WNW' %}>UT_Brigham_City</option>
+					<option value="UT_Torrey_7_E" {% 'selected' if allInputDataDict.easySolarStation == 'UT_Torrey_7_E' %}>UT_Torrey</option>
+					<option value="VA_Cape_Charles_5_ENE" {% 'selected' if allInputDataDict.easySolarStation == 'VA_Cape_Charles_5_ENE' %}>VA_Cape_Charles</option>
+					<option value="VA_Charlottesville_2_SSE" {% 'selected' if allInputDataDict.easySolarStation == 'VA_Charlottesville_2_SSE' %}>VA_Charlottesville</option>
+					<option value="WA_Darrington_21_NNE" {% 'selected' if allInputDataDict.easySolarStation == 'WA_Darrington_21_NNE' %}>WA_Darrington</option>
+					<option value="WA_Quinault_4_NE" {% 'selected' if allInputDataDict.easySolarStation == 'WA_Quinault_4_NE' %}>WA_Quinault</option>
+					<option value="WA_Spokane_17_SSW" {% 'selected' if allInputDataDict.easySolarStation == 'WA_Spokane_17_SSW' %}>WA_Spokane</option>
+					<option value="WI_Necedah_5_WNW" {% 'selected' if allInputDataDict.easySolarStation == 'WI_Necedah_5_WNW' %}>WI_Necedah</option>
+					<option value="WV_Elkins_21_ENE" {% 'selected' if allInputDataDict.easySolarStation == 'WV_Elkins_21_ENE' %}>WV_Elkins</option>
+					<option value="WY_Lander_11_SSE" {% 'selected' if allInputDataDict.easySolarStation == 'WY_Lander_11_SSE' %}>WY_Lander</option>
+					<option value="WY_Moose_1_NNE" {% 'selected' if allInputDataDict.easySolarStation == 'WY_Moose_1_NNE' %}>WY_Moose</option>
+					<option value="WY_Sundance_8_NNW" {% 'selected' if allInputDataDict.easySolarStation == 'WY_Sundance_8_NNW' %}>WY_Sundance</option>
 				</select>
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">SURFRAD Site<span class="classic"></span></label>
-				<select id="surfradSite" name="surfradSite"required="required">
-					<option value="Boulder_CO">Boulder, CO</option>
-					<option value="Alamosa_CO">Alamosa, CO</option>
-					<option value="Desert_Rock_NV">Desert Rock, NV</option>
-					<option value="Fort_Peck_MT">Fort Peck, MT</option>
-					<option value="Goodwin_Creek_MS">Goodwin, MS</option>
-					<option value="Penn_State_PA">Penn State, PA</option>
-					<option value="Red_Lake_AZ">RedLake, AZ</option>
-					<option value="Rutland_VT">Rutland, VT</option>
-					<option value="Sioux_Falls_SD">Sioux Falls, SD</option>
-					<option value="Wasco_OR">Wasco, OR</option>
+				<select id="surfradSite" name="surfradSite" value="{{allInputDataDict.surfradSite}}"required="required">
+					<option value="Boulder_CO" {% 'selected' if allInputDataDict.surfradSite == 'Boulder_CO' %}>Boulder, CO</option>
+					<option value="Alamosa_CO" {% 'selected' if allInputDataDict.surfradSite == 'Alamosa_CO' %}>Alamosa, CO</option>
+					<option value="Desert_Rock_NV" {% 'selected' if allInputDataDict.surfradSite == 'Desert_Rock_NV' %}>Desert Rock, NV</option>
+					<option value="Fort_Peck_MT" {% 'selected' if allInputDataDict.surfradSite == 'Fort_Peck_MT' %}>Fort Peck, MT</option>
+					<option value="Goodwin_Creek_MS" {% 'selected' if allInputDataDict.surfradSite == 'Goodwin_Creek_MS' %}>Goodwin, MS</option>
+					<option value="Penn_State_PA" {% 'selected' if allInputDataDict.surfradSite == 'Penn_State_PA' %}>Penn State, PA</option>
+					<option value="Red_Lake_AZ" {% 'selected' if allInputDataDict.surfradSite == 'Red_Lake_AZ' %}>RedLake, AZ</option>
+					<option value="Rutland_VT" {% 'selected' if allInputDataDict.surfradSite == 'Rutland_VT' %}>Rutland, VT</option>
+					<option value="Sioux_Falls_SD" {% 'selected' if allInputDataDict.surfradSite == 'Sioux_Falls_SD' %}>Sioux Falls, SD</option>
+					<option value="Wasco_OR" {% 'selected' if allInputDataDict.surfradSite == 'Wasco_OR' %}>Wasco, OR</option>
 				</select>
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Weather Parameter - SURFRAD<span class="classic">Data that should be pulled</span></label>
-				<select id="weatherParameterSurfrad" name="weatherParameterSurfrad" required="required">
-					<option value="zen">Solar Zenith Angle</option>
-					<option value="dw_solar">Downwelling global solar (Watts m^-2)</option>
-					<option value="uw_solar">Upwelling global solar (Watts m^-2)</option>
-					<option value="direct_n">Direct-Normal Solar (Watts m^-2)</option>
-					<option value="diffuse">Downwelling Diffuse Solar (Watts m^-2)</option>
-					<option value="dw_ir">Downwelling Thermal Infrared (Watts m^-2)</option>
-					<option value="dw_casetemp">Downwelling IR case temp. (K)</option>
-					<option value="dw_dometemp">Downwelling IR dome temp. (K)</option>
-					<option value="uw_ir">Upwelling Thermal Infrared (Watts m^-2)</option>
-					<option value="uw_casetemp">Upwelling IR case temp. (K)</option>
-					<option value="uw_dometemp">Upwelling IR dome temp. (K)</option>
-					<option value="uvb">Global UVB (milliWatts m^-2)</option>
-					<option value="par">Photosynthetically Active Radiation (Watts m^-2)</option>
-					<option value="netsolar">Net Solar (dw_solar - uw_solar) (Watts m^-2)</option>
-					<option value="netir">net infrared (dw_ir - uw_ir) (Watts m^-2)</option>
-					<option value="totalnet">net radiation (netsolar+netir) (Watts m^-2)</option>
-					<option value="temp">10-meter air temperature (Celsius)</option>
-					<option value="rh">Relative Humidity</option>
-					<option value="windspd">Wind Speed (ms^-1)</option>
-					<option value="winddir">Wind Direction (degrees, clockwise from north)</option>
-					<option value="pressure">Pressure (mb)</option>
+				<select id="weatherParameterSurfrad" name="weatherParameterSurfrad" value="{{allInputDataDict.weatherParameterSurfrad}}" required="required">
+					<option value="zen" {% 'selected' if allInputDataDict.weatherParameterSurfrad == 'zen' %}>Solar Zenith Angle</option>
+					<option value="dw_solar" {% 'selected' if allInputDataDict.weatherParameterSurfrad == 'dw_solar' %}>Downwelling global solar (Watts m^-2)</option>
+					<option value="uw_solar" {% 'selected' if allInputDataDict.weatherParameterSurfrad == 'uw_solar' %}>Upwelling global solar (Watts m^-2)</option>
+					<option value="direct_n" {% 'selected' if allInputDataDict.weatherParameterSurfrad == 'direct_n' %}>Direct-Normal Solar (Watts m^-2)</option>
+					<option value="diffuse" {% 'selected' if allInputDataDict.weatherParameterSurfrad == 'diffuse' %}>Downwelling Diffuse Solar (Watts m^-2)</option>
+					<option value="dw_ir" {% 'selected' if allInputDataDict.weatherParameterSurfrad == 'dw_ir' %}>Downwelling Thermal Infrared (Watts m^-2)</option>
+					<option value="dw_casetemp" {% 'selected' if allInputDataDict.weatherParameterSurfrad == 'dw_casetemp' %}>Downwelling IR case temp. (K)</option>
+					<option value="dw_dometemp" {% 'selected' if allInputDataDict.weatherParameterSurfrad == 'dw_dometemp' %}>Downwelling IR dome temp. (K)</option>
+					<option value="uw_ir" {% 'selected' if allInputDataDict.weatherParameterSurfrad == 'uw_ir' %}>Upwelling Thermal Infrared (Watts m^-2)</option>
+					<option value="uw_casetemp" {% 'selected' if allInputDataDict.weatherParameterSurfrad == 'uw_casetemp' %}>Upwelling IR case temp. (K)</option>
+					<option value="uw_dometemp" {% 'selected' if allInputDataDict.weatherParameterSurfrad == 'uw_dometemp' %}>Upwelling IR dome temp. (K)</option>
+					<option value="uvb" {% 'selected' if allInputDataDict.weatherParameterSurfrad == 'uvb' %}>Global UVB (milliWatts m^-2)</option>
+					<option value="par" {% 'selected' if allInputDataDict.weatherParameterSurfrad == 'par' %}>Photosynthetically Active Radiation (Watts m^-2)</option>
+					<option value="netsolar" {% 'selected' if allInputDataDict.weatherParameterSurfrad == 'netsolar' %}>Net Solar (dw_solar - uw_solar) (Watts m^-2)</option>
+					<option value="netir" {% 'selected' if allInputDataDict.weatherParameterSurfrad == 'netir' %}>net infrared (dw_ir - uw_ir) (Watts m^-2)</option>
+					<option value="totalnet" {% 'selected' if allInputDataDict.weatherParameterSurfrad == 'totalnet' %}>net radiation (netsolar+netir) (Watts m^-2)</option>
+					<option value="temp" {% 'selected' if allInputDataDict.weatherParameterSurfrad == 'temp' %}>10-meter air temperature (Celsius)</option>
+					<option value="rh" {% 'selected' if allInputDataDict.weatherParameterSurfrad == 'rh' %}>Relative Humidity</option>
+					<option value="windspd" {% 'selected' if allInputDataDict.weatherParameterSurfrad == 'windspd' %}>Wind Speed (ms^-1)</option>
+					<option value="winddir" {% 'selected' if allInputDataDict.weatherParameterSurfrad == 'winddir' %}>Wind Direction (degrees, clockwise from north)</option>
+					<option value="pressure" {% 'selected' if allInputDataDict.weatherParameterSurfrad == 'pressure' %}>Pressure (mb)</option>
 				</select>
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Weather Parameter - NDFD<span class="classic">Data that should be pulled</span></label>
-				<select id="ndfdParam" name="ndfdParam" required="required">
-					<option value="maxt">Maximum Temperature</option>
-					<option value="mint">Minimum Temperature</option>
-					<option value="temp">3 Hourly Temperature</option>
-					<option value="dew">Dew Point Temperature</option>
-					<option value="appt">Apparent Temperature</option>
-					<option value="pop12">12 Hour Probability of Precipitation</option>
-					<option value="qpf">Liquid Precipitation Amount</option>
-					<option value="snow">Snowfall Amount</option>
-					<option value="sky">Cloud Cover Amount</option>
-					<option value="rh">Relative Humidity</option>
-					<option value="wspd">Wind Speed</option>
-					<option value="wdir">Wind Direction</option>
-					<option value="wx">Weather Zone</option>
-					<option value="icons">Weather Icons</option>
-					<option value="waveh">Wave Height</option>
-					<option value="incw34">Probabilistic Tropical Cyclone Wind Speed >34 Knots (Incremental)</option>
-					<option value="incw50">Probabilistic Tropical Cyclone Wind Speed >50 Knots (Incremental)</option>
-					<option value="incw64">Probabilistic Tropical Cyclone Wind Speed >64 Knots (Incremental)</option>
-					<option value="cumw34">Probabilistic Tropical Cyclone Wind Speed >34 Knots (Cumulative)</option>
-					<option value="cumw50">Probabilistic Tropical Cyclone Wind Speed >50 Knots (Cumulative)</option>	
-					<option value="cumw64">Probabilistic Tropical Cyclone Wind Speed >64 Knots (Cumulative)</option>
-					<option value="wgust">Wind Gust</option>
-					<option value="critfireo">Fire Weather From Wind and Relative Humidity</option>
-					<option value="dryfireo">Fire Weather from Dry Thundrestorms</option>
-					<option value="conhazo">Convective Hazard Outlook</option>
-					<option value="ptornado">Probability of Tornadoes</option>
-					<option value="phail">Probability of Hail</option>
-					<option value="ptstmwinds">Probability of Damaging Thunderstorm Winds</option>
-					<option value="pxtornado">Probability of Extreme Tornadoes</option>
-					<option value="pxhail">Probability of Extreme Hail</option>
-					<option value="pxtstmwinds">Probability of Extreme Thunderstorm Winds</option>
-					<option value="ptotsvrtstm">Probability of Severe Thunderstorms</option>
-					<option value="pxtotsvrtstm">Probability of Extreme Severe Thunderstorms</option>
-					<option value="tmpabv14d">Probability of 8-14 Day Average Temperature Above Normal</option>
-					<option value="tmpblw14d">Probability of 8-14 Day Average Temperature Below Normal</option>
-					<option value="tmpabv30d">Probability of 30 Day Average Temperature Above Normal</option>
-					<option value="tmpblw30d">Probability of 30 Day Average Temperature below Normal</option>
-					<option value="tmpabv90d">Probability of 90 Day Average Temperature Above Normal</option>
-					<option value="tmpblw90d">Probability of 90 Day Average Temperature below Normal</option>
-					<option value="prcpabv14d">Probability of 8-14 day total precipitation above median</option>
-					<option value="prcpblw14d">Probability of 8-14 day total precipitation below median</option>
-					<option value="prcpabv30d">Probability of 30 day precipitation above median</option>
-					<option value="prcpblw30d">Probability of 30 day precipitation below median</option>
-					<option value="prcpabv90d">Probability of 90 day precipitation above median</option>
-					<option value="prcpblw90d">Probability of 90 day precipitation below median</option>
-					<option value="precipa_r">Real-time Mesoscale Analysis Precipitation</option>
-					<option value="sky_r">Real Time Mesoscale Analysis GOES Effective Cloud Amount</option>
-					<option value="td_r">Real-time Mesosscale Analysis Dew Point Temperature</option>
-					<option value="temp_r">Real-time Mesoscale Analysis Temperature</option>
-					<option value="wdir_r">Real-time Mesoscale Analysis Wind Direction</option>
-					<option value="wspd_r">Real-time Mesoscale Analysis Wind Speed</option>
-					<option value="wwa">Watches, Warnings, and Advisories</option>
-					<option value="iceaccum">Ice Accumulation</option>
-					<option value="maxrh">Maximum Relative Humidity</option>
-					<option value="minrh">Minimum Relative Humidity</option>
+				<select id="ndfdParam" name="ndfdParam" value="{{allInputDataDict.ndfdParam}}" required="required">
+					<option value="maxt" {% 'selected' if allInputDataDict.ndfdParam == 'maxt' %}>Maximum Temperature</option>
+					<option value="mint" {% 'selected' if allInputDataDict.ndfdParam == 'mint' %}>Minimum Temperature</option>
+					<option value="temp" {% 'selected' if allInputDataDict.ndfdParam == 'temp' %}>3 Hourly Temperature</option>
+					<option value="dew" {% 'selected' if allInputDataDict.ndfdParam == 'dew' %}>Dew Point Temperature</option>
+					<option value="appt" {% 'selected' if allInputDataDict.ndfdParam == 'appt' %}>Apparent Temperature</option>
+					<option value="pop12" {% 'selected' if allInputDataDict.ndfdParam == 'pop12' %}>12 Hour Probability of Precipitation</option>
+					<option value="qpf" {% 'selected' if allInputDataDict.ndfdParam == 'qpf' %}>Liquid Precipitation Amount</option>
+					<option value="snow" {% 'selected' if allInputDataDict.ndfdParam == 'snow' %}>Snowfall Amount</option>
+					<option value="sky" {% 'selected' if allInputDataDict.ndfdParam == 'sky' %}>Cloud Cover Amount</option>
+					<option value="rh" {% 'selected' if allInputDataDict.ndfdParam == 'rh' %}>Relative Humidity</option>
+					<option value="wspd" {% 'selected' if allInputDataDict.ndfdParam == 'wspd' %}>Wind Speed</option>
+					<option value="wdir" {% 'selected' if allInputDataDict.ndfdParam == 'wdir' %}>Wind Direction</option>
+					<option value="wx" {% 'selected' if allInputDataDict.ndfdParam == 'wx' %}>Weather Zone</option>
+					<option value="icons" {% 'selected' if allInputDataDict.ndfdParam == 'icons' %}>Weather Icons</option>
+					<option value="waveh" {% 'selected' if allInputDataDict.ndfdParam == 'waveh' %}>Wave Height</option>
+					<option value="incw34" {% 'selected' if allInputDataDict.ndfdParam == 'incw34' %}>Probabilistic Tropical Cyclone Wind Speed >34 Knots (Incremental)</option>
+					<option value="incw50" {% 'selected' if allInputDataDict.ndfdParam == 'incw50' %}>Probabilistic Tropical Cyclone Wind Speed >50 Knots (Incremental)</option>
+					<option value="incw64" {% 'selected' if allInputDataDict.ndfdParam == 'incw64' %}>Probabilistic Tropical Cyclone Wind Speed >64 Knots (Incremental)</option>
+					<option value="cumw34" {% 'selected' if allInputDataDict.ndfdParam == 'cumw34' %}>Probabilistic Tropical Cyclone Wind Speed >34 Knots (Cumulative)</option>
+					<option value="cumw50" {% 'selected' if allInputDataDict.ndfdParam == 'cumw50' %}>Probabilistic Tropical Cyclone Wind Speed >50 Knots (Cumulative)</option>	
+					<option value="cumw64" {% 'selected' if allInputDataDict.ndfdParam == 'cumw64' %}>Probabilistic Tropical Cyclone Wind Speed >64 Knots (Cumulative)</option>
+					<option value="wgust" {% 'selected' if allInputDataDict.ndfdParam == 'wgust' %}>Wind Gust</option>
+					<option value="critfireo" {% 'selected' if allInputDataDict.ndfdParam == 'critfireo' %}>Fire Weather From Wind and Relative Humidity</option>
+					<option value="dryfireo" {% 'selected' if allInputDataDict.ndfdParam == 'dryfireo' %}>Fire Weather from Dry Thundrestorms</option>
+					<option value="conhazo" {% 'selected' if allInputDataDict.ndfdParam == 'conhazo' %}>Convective Hazard Outlook</option>
+					<option value="ptornado" {% 'selected' if allInputDataDict.ndfdParam == 'ptornado' %}>Probability of Tornadoes</option>
+					<option value="phail" {% 'selected' if allInputDataDict.ndfdParam == 'phail' %}>Probability of Hail</option>
+					<option value="ptstmwinds" {% 'selected' if allInputDataDict.ndfdParam == 'ptstmwinds' %}>Probability of Damaging Thunderstorm Winds</option>
+					<option value="pxtornado" {% 'selected' if allInputDataDict.ndfdParam == 'pxtornado' %}>Probability of Extreme Tornadoes</option>
+					<option value="pxhail" {% 'selected' if allInputDataDict.ndfdParam == 'pxhail' %}>Probability of Extreme Hail</option>
+					<option value="pxtstmwinds" {% 'selected' if allInputDataDict.ndfdParam == 'pxtstmwinds' %}>Probability of Extreme Thunderstorm Winds</option>
+					<option value="ptotsvrtstm" {% 'selected' if allInputDataDict.ndfdParam == 'ptotsvrtstm' %}>Probability of Severe Thunderstorms</option>
+					<option value="pxtotsvrtstm" {% 'selected' if allInputDataDict.ndfdParam == 'pxtotsvrtstm' %}>Probability of Extreme Severe Thunderstorms</option>
+					<option value="tmpabv14d" {% 'selected' if allInputDataDict.ndfdParam == 'tmpabv14d' %}>Probability of 8-14 Day Average Temperature Above Normal</option>
+					<option value="tmpblw14d" {% 'selected' if allInputDataDict.ndfdParam == 'tmpblw14d' %}>Probability of 8-14 Day Average Temperature Below Normal</option>
+					<option value="tmpabv30d" {% 'selected' if allInputDataDict.ndfdParam == 'tmpabv30d' %}>Probability of 30 Day Average Temperature Above Normal</option>
+					<option value="tmpblw30d" {% 'selected' if allInputDataDict.ndfdParam == 'tmpblw30d' %}>Probability of 30 Day Average Temperature below Normal</option>
+					<option value="tmpabv90d" {% 'selected' if allInputDataDict.ndfdParam == 'tmpabv90d' %}>Probability of 90 Day Average Temperature Above Normal</option>
+					<option value="tmpblw90d" {% 'selected' if allInputDataDict.ndfdParam == 'tmpblw90d' %}>Probability of 90 Day Average Temperature below Normal</option>
+					<option value="prcpabv14d" {% 'selected' if allInputDataDict.ndfdParam == 'prcpabv14d' %}>Probability of 8-14 day total precipitation above median</option>
+					<option value="prcpblw14d" {% 'selected' if allInputDataDict.ndfdParam == 'prcpblw14d' %}>Probability of 8-14 day total precipitation below median</option>
+					<option value="prcpabv30d" {% 'selected' if allInputDataDict.ndfdParam == 'prcpabv30d' %}>Probability of 30 day precipitation above median</option>
+					<option value="prcpblw30d" {% 'selected' if allInputDataDict.ndfdParam == 'prcpblw30d' %}>Probability of 30 day precipitation below median</option>
+					<option value="prcpabv90d" {% 'selected' if allInputDataDict.ndfdParam == 'prcpabv90d' %}>Probability of 90 day precipitation above median</option>
+					<option value="prcpblw90d" {% 'selected' if allInputDataDict.ndfdParam == 'prcpblw90d' %}>Probability of 90 day precipitation below median</option>
+					<option value="precipa_r" {% 'selected' if allInputDataDict.ndfdParam == 'precipa_r' %}>Real-time Mesoscale Analysis Precipitation</option>
+					<option value="sky_r" {% 'selected' if allInputDataDict.ndfdParam == 'sky_r' %}>Real Time Mesoscale Analysis GOES Effective Cloud Amount</option>
+					<option value="td_r" {% 'selected' if allInputDataDict.ndfdParam == 'td_r' %}>Real-time Mesosscale Analysis Dew Point Temperature</option>
+					<option value="temp_r" {% 'selected' if allInputDataDict.ndfdParam == 'temp_r' %}>Real-time Mesoscale Analysis Temperature</option>
+					<option value="wdir_r" {% 'selected' if allInputDataDict.ndfdParam == 'wdir_r' %}>Real-time Mesoscale Analysis Wind Direction</option>
+					<option value="wspd_r" {% 'selected' if allInputDataDict.ndfdParam == 'wspd_r' %}>Real-time Mesoscale Analysis Wind Speed</option>
+					<option value="wwa" {% 'selected' if allInputDataDict.ndfdParam == 'wwa' %}>Watches, Warnings, and Advisories</option>
+					<option value="iceaccum" {% 'selected' if allInputDataDict.ndfdParam == 'iceaccum' %}>Ice Accumulation</option>
+					<option value="maxrh" {% 'selected' if allInputDataDict.ndfdParam == 'maxrh' %}>Maximum Relative Humidity</option>
+					<option value="minrh" {% 'selected' if allInputDataDict.ndfdParam == 'minrh' %}>Minimum Relative Humidity</option>
 				</select>
 			</div>
-
-
-			<!-- Required Buttons -->
-			<div class="wideInput" style="text-align:right">
-				<button id="deleteButton" type="button" class="stoppedInline postRunInline" onclick="deleteModel()">Delete</button>
-				<button id="shareButton" type="button" class="postRunInline" onclick="shareModel()">Share</button>
-				<button id="duplicateButton" type="button" class="postRunInline" onclick="duplicateModel()">Duplicate</button>
-				<button id="cancelButton" class="runningInline" type="button" onclick="cancelModel()">Cancel Run</button>
-				<button id="runButton" type="submit" class="stoppedInline postRunInline">Run Model</button>
-			</div>
+			{{ omfModelButtons }}
 		</form>
 	</div>
-	<div id ="runIndicator" class="content running">
-		Model running on server. Refresh the page to check for results, or wait for automatic refresh every 5 seconds.<br>
-		{{allInputData[allInputData.find('"runTimeEstimate"') + 20:allInputData.find('minutes.", ') + 8]}}
-	</div>
-	<div id ="stopIndicator" class="content stopped" style="visibility: hidden">
-		<pre id='errorText' style='overflow-x:scroll'></pre>
-		<script type="text/javascript">
-		if (typeof(allInputData.stderr) !== 'undefined') {
-			gebi('stopIndicator').style.visibility = 'visible'
-			gebi('errorText').innerHTML = 'MODEL ENCOUNTERED AN ERROR AS FOLLOWS: \n\n' + allInputData.stderr}
-		</script>
-	</div>
-	<p class="reportTitle postRun" style="page-break-before:always">Download Output Data</p>	
-	<div style="text-align:left" class="tightContent postRun">
+	{{ omfRunDebugBlock }}
+	{% if modelStatus == 'finished' %}
+	<p class="reportTitle" style="page-break-before:always">Download Output Data</p>	
+	<div style="text-align:left" class="content">
 		<a id="dTest" download>Output Download</a><br>
 		<script>gebi('dTest').href = "/downloadModelData/" + allInputData.user + "/" + allInputData.modelName + "/weather.csv"</script>
-		<p id="errorDisplay" class="postRun"></p>
+		<p id="errorDisplay"></p>
 		<script type="text/javascript">
 		if(allInputData.source == "ASOS"){
 			station = allInputData.stationASOS
@@ -910,8 +889,8 @@
 			" is completed. There were no errors found in this data pull"}
 		</script>
 	</div>
-	<p class="reportTitle postRun" style="page-break-before:always">Data Pulled Plot</p>	
-	<div id="dataPlot" class="tightContent postRun">
+	<p class="reportTitle" style="page-break-before:always">Data Pulled Plot</p>	
+	<div id="dataPlot" class="tightContent">
 		<div id="dataChart"></div>
 		<script>
 			new Highcharts.Chart({"credits":{"enabled":false},
@@ -943,4 +922,6 @@
 					"legend":{"enabled":false}})// "legend":{"verticalAlign":"top","align":"top","borderWidth":0,"x":50,"y":-10,"layout":"horizontal"}})
 		</script>
 	</div>
+	{{ rawOuputFiles }}
+	{% endif %}
 </body>

@@ -59,6 +59,82 @@
 				}
 			}
 		}
+		function init() {
+			// If we have input, put it back.
+			if (allInputData != null) {
+				restoreInputs()
+				$("#modelName").prop("readonly", true)
+			}
+			if (allOutputData != null) {
+				if (allOutputData['oldVersion'] == true) {
+					try {
+						document.getElementById("triangle-parent").style.visibility = "visible";
+					}
+					catch (e){}
+				}
+			} 
+			if (allInputData != null) {
+				modelUser = allInputData["user"]
+			} else {
+				modelUser = "none"
+			}
+			// Display elements based on model status
+			if (modelStatus === "finished") {
+				console.log("FINISHED")
+				$(".postRun").css('display', 'block')
+				$(".postRunInline").css('display', 'inline-block')
+			} else if (modelStatus === "running") {
+				console.log("RUNNING")
+				$(".running").css('display', 'block')
+				$(".runningInline").css('display', 'inline-block')
+				$("input").prop("readonly", true)
+				$("select").prop("disabled", true)
+			} else {
+				// stopped
+				if (allInputData != null) {
+					$(".stopped").show()
+					$(".stoppedInline").show()
+				}
+			}
+			/**
+			 * Everyone can see the "duplicate" button, but only if the model is "finished" or stopped"
+			 * Only model owners (and admin) can see the "share" button, but only if the model is "stopped" or "finished"
+			 * Only model owners (and admin) can see the "run" button, but only if the model is "stopped" or "finished"
+			 * Only model owners (and admin) can see the "delete" button, at ALL times
+			 * Only model owners (and admin) can see the "cancel run" button, but only if the model is "running"
+			 * Other stuff must display in accordance with the model status, the current viewer notwithstanding
+			 */
+			$("button#deleteButton").hide();
+			$("button#shareButton").hide();
+			$("button#duplicateButton").hide();
+			$("button#runButton").hide();
+			$("button#cancelButton").hide();
+			// Display elements based on model status and user authorization
+			if (modelStatus === "finished" || modelStatus === "stopped") {
+				// Anyone can see the duplicate button
+				$("button#duplicateButton").show();
+			}
+			if (modelUser === currentUser || currentUser === "admin") { 
+				$("button#deleteButton").show();
+				if (modelStatus == "stopped" || modelStatus == "finished") {
+					$("button#shareButton").show();
+					$("button#runButton").show();
+				} else {
+					// running
+					$("button#cancelButton").show();
+				}
+			}
+		}
+			
+
+		function restoreInputs() {
+			// Restore all the input values that were used and stored in allInputData.json
+			gebi("titleText").innerHTML = allInputData.modelName
+			for (index in allInputData) {
+				try {document.querySelector("#" + index).value = allInputData[index]}
+				catch(err){}
+			}
+		}
 	</script>
 </head>
 <body onload="init()">
