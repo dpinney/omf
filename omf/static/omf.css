@@ -128,6 +128,15 @@ select, input[type='text'], input[type='email'], input[type='file'], input[type=
 	border-color:white;
 	border-style:solid; 
 	border-radius: 7px;}
+select {
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  background: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='100' height='100' fill='black'><polygon points='0,0 100,0 50,50'/></svg>") no-repeat;
+  background-size: 12px;
+  background-position: calc(100% - 10px) 75%;
+  background-repeat: no-repeat;
+  background-color: gainsboro;}
 button, input[type='submit'], label.fileButton {
 	width:auto;
 	padding: 4px;
