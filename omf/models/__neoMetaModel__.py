@@ -201,7 +201,7 @@ def renderTemplate(modelDir, absolutePaths=False, datastoreNames={}):
 		<script>allOutputData={% if allOutputDataDict %}{{allOutputDataDict | tojson}}{% else %}null{% endif %}</script>
 		<script>currentUser="{{loggedInUser}}"</script>
 		<script>modelStatus="{{modelStatus}}"</script> '''
-	omfHeaders = Template(omfHeadersTemplate).render(modelStatus=modelStatus, loggedInUser=loggedInUser, allInputDataDict=inJson, allOutputDataDict=outJson)
+	omfHeaders = Template(omfHeadersTemplate).render(modelStatus=modelStatus, loggedInUser=loggedInUser, allInputDataDict=inJson, allOutputDataDict=outJson, pathPrefix=pathPrefix)
 	# Generate standard OMF model title.
 	omfModelTitleTemplate = '''
 		<div id="header">
