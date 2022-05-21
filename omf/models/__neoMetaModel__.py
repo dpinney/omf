@@ -199,8 +199,7 @@ def renderTemplate(modelDir, absolutePaths=False, datastoreNames={}):
 		<script>allInputData={% if allInputDataDict %}{{allInputDataDict | tojson}}{% else %}null{% endif %}</script>
 		<script>allOutputData={% if allOutputDataDict %}{{allOutputDataDict | tojson}}{% else %}null{% endif %}</script>
 		<script>currentUser="{{loggedInUser}}"</script>
-		<script>modelStatus="{{modelStatus}}"</script>
-		<script>{% if allOutputDataDict['oldVersion'] %}document.getElementById("triangle-parent").style.visibility = "visible";{% endif %}</script>'''
+		<script>modelStatus="{{modelStatus}}"</script>'''
 	omfHeaders = Template(omfHeadersTemplate).render(modelStatus=modelStatus, loggedInUser=loggedInUser, allInputDataDict=inJson, allOutputDataDict=outJson, pathPrefix=pathPrefix)
 	# Generate standard OMF model title.
 	omfModelTitleTemplate = '''
@@ -215,8 +214,10 @@ def renderTemplate(modelDir, absolutePaths=False, datastoreNames={}):
 		<div id="triangle-parent">
 			<div id="triangle-message">New Version<span class="classic-triangle">A new version of the model has been added to the OMF. To get the new outputs, please fill in any missing inputs and hit "Run Model". You can also just look at the old inputs, outputs.</span></div>
 			<div id="triangle-topright"></div>
-		</div>'''
-	omfModelTitle = Template(omfModelTitleTemplate).render(allInputDataDict=inJson)
+		</div>
+		<script>{% if allOutputDataDict['oldVersion'] %}document.getElementById("triangle-parent").style.visibility = "visible";{% endif %}</script>
+		'''
+	omfModelTitle = Template(omfModelTitleTemplate).render(allInputDataDict=inJson, allOutputDataDict=allOutputData)
 	# Generate standard status content.
 	omfModelButtons = Template(omfModelButtonsTemplate).render(modelStatus=modelStatus, loggedInUser=loggedInUser, modelOwner=modelOwner)
 	now = datetime.datetime.now()
