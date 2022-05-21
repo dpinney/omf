@@ -90,48 +90,16 @@
 		    //gebi(tabName).style.display = "block";
 		    evt.currentTarget.className += " active";
 		}
-
-		function insert_file_upload_block(fileName, dataVariableName) {
-			parentDiv = document.currentScript.parentElement;
-
-			let inputNode1 = document.createElement("input");
-			inputNode1.setAttribute("id", fileName + "Handler");
-			inputNode1.setAttribute("type", "file");
-			inputNode1.style.display = "none";
-			//inputNode1.addEventListener("change", handle_files(this.files,dataVariableName,fileName));
-			parentDiv.appendChild(inputNode1);
-
-			let inputNode2 = document.createElement("input");
-			inputNode2.setAttribute("id", dataVariableName);
-			inputNode2.setAttribute("name", dataVariableName);
-			inputNode2.type = "hidden";
-			parentDiv.appendChild(inputNode2);
-
-			let innerDiv = document.createElement("div");
-			parentDiv.appendChild(innerDiv);
-
-			let labelNode = document.createElement("label");
-			labelNode.setAttribute("for", fileName + "Handler");
-			labelNode.className = "fileButton";
-			labelNode.innerHTML = "Choose File";
-			innerDiv.appendChild(labelNode);
-
-			let inputNode3 = document.createElement("input");
-			inputNode3.setAttribute("id", fileName);
-			inputNode3.setAttribute("name", fileName);
-			inputNode3.value = '';
-			inputNode3.readOnly = true;
-			inputNode3.className = "uploadFileName";
-			innerDiv.appendChild(inputNode3)
-
-			//inputNode1.addEventListener("change", handle_files(this.files,dataVariableName,fileName));
-			inputNode1.addEventListener("change", function (){
-				handle_files(this.files,dataVariableName,fileName);
-			});
-
-		}
 	</script>
 </head>
+{% macro insert_file_upload_block(fileName, dataVariableName) -%}
+	<input id="{{dataVariableName}}Handler" type="file" style="display:none" onchange="handle_files(this.files,'{{dataVariableName}}','{{fileName}}')">
+	<input id="{{dataVariableName}}" name="{{dataVariableName}}" value="{{allInputDataDict[dataVariableName]}}" type="hidden">
+	<div>
+		<label for="{{dataVariableName}}Handler" class="fileButton">Choose File</label>
+		<input id="{{fileName}}" name="{{fileName}}" value="{{allInputDataDict[fileName]}}" readonly class="uploadFileName">    
+	</div>
+{%- endmacro %}
 <body>
 	<div id="header">
 		<div id="headInnerBlock">
@@ -233,17 +201,13 @@
 				<label class="tooltip">Peak Load (.csv file) <i>optional</i>
 					<span class="classic">Please see the documentation at the green 'Help?' link above for more information including the expected file format</span>
 				</label>
-				<script type="text/javascript">
-					insert_file_upload_block('peakLoadFileName', 'peakLoadData');
-				</script>
+				{{ insert_file_upload_block('peakLoadFileName','peakLoadData') }}
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Min Load (.csv file) <i>optional</i>
 					<span class="classic">Please see the documentation at the green 'Help?' link above for more information including expected file format</span>
 				</label>
-				<script type="text/javascript">
-					insert_file_upload_block('minLoadFileName', 'minLoadData');
-				</script>
+				{{ insert_file_upload_block('minLoadFileName','minLoadData') }}
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Display Format<span class="classic">Geospatial shows the circuit the same way it was defined in the feeder editor. Force Directed uses an algorithm to show the circuit elements evenly spaced (useful for circuits without location data).</span></label>

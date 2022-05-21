@@ -3,9 +3,6 @@
 	<meta charset="utf-8">
 	<link href="{{pathPrefix}}/static/omf.css" type="text/css" rel="stylesheet"/>
 	<link rel="shortcut icon" href="{{pathPrefix}}/static/favicon.ico">
-	<style>
-	/*Styles here*/
-	</style>
 	{% if modelStatus == "running" %}<meta http-equiv="refresh" content="5"/>{% endif %}
 	<!-- Library Imports -->
 	<script type="text/javascript" src="{{pathPrefix}}/static/omf.js"></script>
@@ -48,6 +45,14 @@
 		}
 	</script>
 </head>
+{% macro insert_file_upload_block(fileName, dataVariableName) -%}
+	<input id="{{dataVariableName}}Handler" type="file" style="display:none" onchange="handle_files(this.files,'{{dataVariableName}}','{{fileName}}')">
+	<input id="{{dataVariableName}}" name="{{dataVariableName}}" value="{{allInputDataDict[dataVariableName]}}" type="hidden">
+	<div>
+		<label for="{{dataVariableName}}Handler" class="fileButton">Choose File</label>
+		<input id="{{fileName}}" name="{{fileName}}" value="{{allInputDataDict[fileName]}}" readonly class="uploadFileName">    
+	</div>
+{%- endmacro %}
 <body>
 	<div id="header">
 		<div id="headInnerBlock">
@@ -113,17 +118,13 @@
 				<label class="tooltip">Training Data (.csv file) 
 					<span class="classic">Please see the documentation at the green 'Help?' link above for more information including the expected file format</span>
 				</label>
-				<script type="text/javascript">
-					insert_file_upload_block('trainFileName', 'trainingData');
-				</script>
+				{{ insert_file_upload_block('trainFileName', 'trainingData') }}
 			</div>
 			<div class="shortInput" id="testFile" style="display: none;">
 				<label class="tooltip">Testing Data (.csv file) 
 					<span class="classic">Please see the documentation at the green 'Help?' link above for more information including the expected file format</span>
 				</label>
-				<script type="text/javascript">
-					insert_file_upload_block('testFileName', 'testingData');
-				</script>
+				{{ insert_file_upload_block('testFileName', 'testingData') }}
 			</div>			
 			<div class="shortInput" id="trainBuild">
 				<label class="tooltip">Training Building<span class="classic">Select the building to use for training</span></label>

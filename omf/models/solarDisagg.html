@@ -35,6 +35,14 @@
         }
     </style>
 </head>
+{% macro insert_file_upload_block(fileName, dataVariableName) -%}
+	<input id="{{dataVariableName}}Handler" type="file" style="display:none" onchange="handle_files(this.files,'{{dataVariableName}}','{{fileName}}')">
+	<input id="{{dataVariableName}}" name="{{dataVariableName}}" value="{{allInputDataDict[dataVariableName]}}" type="hidden">
+	<div>
+		<label for="{{dataVariableName}}Handler" class="fileButton">Choose File</label>
+		<input id="{{fileName}}" name="{{fileName}}" value="{{allInputDataDict[fileName]}}" readonly class="uploadFileName">    
+	</div>
+{%- endmacro %}
 <body>
 	<div id="header">
 		<div id="headInnerBlock">
@@ -75,27 +83,19 @@
 			<hr>
 			<div class="shortInput">
 				<label class="tooltip">Aggregate Net Loads (.csv file)<span class="classic">Please see the documentation at the green 'Help?' link above for the required format and an example file.</span></label>
-				<script type="text/javascript">
-					insert_file_upload_block('meterFileName', 'meterData');
-				</script>
+				{{ insert_file_upload_block('meterFileName', 'meterData') }}
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Solar Load (.csv file)<span class="classic">Please see the documentation at the green 'Help?' link above for the required format and an example file.</span></label>
-				<script type="text/javascript">
-					insert_file_upload_block('solarFileName', 'solarData');
-				</script>
+				{{ insert_file_upload_block('solarFileName', 'solarData') }}
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">LatLon Coordinates Dynamic (.csv file)<span class="classic">Please see the documentation at the green 'Help?' link above for the required format and an example file.</span></label>
-				<script type="text/javascript">
-					insert_file_upload_block('latLonFileName', 'latLonData');
-				</script>
+				{{ insert_file_upload_block('latLonFileName', 'latLonData') }}
 			</div>
 			<div style="display:none" class="shortInput">
 				<label class="tooltip">Weather Coordinates (.csv file)<span class="classic">Please see the documentation at the green 'Help?' link above for the required format and an example file.</span></label>
-				<script type="text/javascript">
-					insert_file_upload_block('weatherFileName', 'weatherData');
-				</script>
+				{{ insert_file_upload_block('weatherFileName', 'weatherData') }}
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Start Date<span class="classic">Enter start date of the period you are uploading.</span></label>
