@@ -467,7 +467,8 @@ def graphMicrogrid(pathToOmd, pathToJson, pathToCsv, outputFile, settingsFile, u
 		for i in data['Simulation time steps']:
 			simTimeSteps.append(float(i))
 		numTimeSteps = len(simTimeSteps)
-		stepSize = 1 #TODO: change this to be total_simulation_time/numTimeSteps, but for now, we default to 1 hr
+		stepSize = 1 #TODO: change this to use the "Simulation time steps" interval in the ONM output. Note the unit is hours.
+		#TODO: change stepSize to stepSizeHours to make it clear what's going on.
 		voltages = data['Voltages']
 		outageDuration = stepSize * numTimeSteps
 		loadServed = data['Load served']
