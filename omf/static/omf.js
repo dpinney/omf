@@ -28,49 +28,6 @@ function handle_files(files, contentsId, nameId) {
 	}
 }
 
-function insert_file_upload_block(fileName, dataVariableName) {
-	// Helper function to insert a fully formed and omf-compatible file upload input item.
-	// We built this because there are about 7 variables that refer to each and need to all be set correctly.
-	parentDiv = document.currentScript.parentElement;
-
-	let inputNode1 = document.createElement("input");
-	inputNode1.setAttribute("id", fileName + "Handler");
-	inputNode1.setAttribute("type", "file");
-	inputNode1.style.display = "none";
-	//inputNode1.addEventListener("change", handle_files(this.files,dataVariableName,fileName));
-	parentDiv.appendChild(inputNode1);
-
-	let inputNode2 = document.createElement("input");
-	inputNode2.setAttribute("id", dataVariableName);
-	inputNode2.setAttribute("name", dataVariableName);
-	inputNode2.type = "hidden";
-	parentDiv.appendChild(inputNode2);
-
-	let innerDiv = document.createElement("div");
-	parentDiv.appendChild(innerDiv);
-
-	let labelNode = document.createElement("label");
-	labelNode.setAttribute("for", fileName + "Handler");
-	labelNode.className = "fileButton";
-	labelNode.innerHTML = "Choose File";
-	innerDiv.appendChild(labelNode);
-
-	let inputNode3 = document.createElement("input");
-	inputNode3.setAttribute("id", fileName);
-	inputNode3.setAttribute("name", fileName);
-	inputNode3.value = '';
-	inputNode3.readOnly = true;
-	inputNode3.className = "uploadFileName";
-	innerDiv.appendChild(inputNode3)
-
-	//inputNode1.addEventListener("change", handle_files(this.files,dataVariableName,fileName));
-	inputNode1.addEventListener("change", function (){
-		handle_files(this.files,dataVariableName,fileName);
-	});
-
-}
-
-
 function ajaxReq(requestType, URL, asynch) {
 	var xmlhttp
 	if (window.XMLHttpRequest) {// code for IE7+, Firefox, Chrome, Opera, Safari
@@ -227,82 +184,6 @@ function clickCloseEvent(labelName, buttonName) {
 	thisButton.innerHTML = labelName + ' ▾'
 	this.removeEventListener('click', arguments.callee, true)
 	if (window.event.toElement==thisButton) {event.stopPropagation()}
-}
-function init() {
-	// If we have input, put it back.
-	if (allInputData != null) {
-		restoreInputs()
-		$("#modelName").prop("readonly", true)
-	}
-	if (allOutputData != null) {
-		if (allOutputData['oldVersion'] == true) {
-			try {
-				document.getElementById("triangle-parent").style.visibility = "visible";
-			}
-			catch (e){}
-		}
-	} 
-	if (allInputData != null) {
-		modelUser = allInputData["user"]
-	} else {
-		modelUser = "none"
-	}
-	// Display elements based on model status
-	if (modelStatus === "finished") {
-		console.log("FINISHED")
-		$(".postRun").css('display', 'block')
-		$(".postRunInline").css('display', 'inline-block')
-	} else if (modelStatus === "running") {
-		console.log("RUNNING")
-		$(".running").css('display', 'block')
-		$(".runningInline").css('display', 'inline-block')
-		$("input").prop("readonly", true)
-		$("select").prop("disabled", true)
-	} else {
-		// stopped
-		if (allInputData != null) {
-			$(".stopped").show()
-			$(".stoppedInline").show()
-		}
-	}
-	/**
-	 * Everyone can see the "duplicate" button, but only if the model is "finished" or stopped"
-	 * Only model owners (and admin) can see the "share" button, but only if the model is "stopped" or "finished"
-	 * Only model owners (and admin) can see the "run" button, but only if the model is "stopped" or "finished"
-	 * Only model owners (and admin) can see the "delete" button, at ALL times
-	 * Only model owners (and admin) can see the "cancel run" button, but only if the model is "running"
-	 * Other stuff must display in accordance with the model status, the current viewer notwithstanding
-	 */
-	$("button#deleteButton").hide();
-	$("button#shareButton").hide();
-	$("button#duplicateButton").hide();
-	$("button#runButton").hide();
-	$("button#cancelButton").hide();
-	// Display elements based on model status and user authorization
-	if (modelStatus === "finished" || modelStatus === "stopped") {
-		// Anyone can see the duplicate button
-		$("button#duplicateButton").show();
-	}
-	if (modelUser === currentUser || currentUser === "admin") { 
-		$("button#deleteButton").show();
-		if (modelStatus == "stopped" || modelStatus == "finished") {
-			$("button#shareButton").show();
-			$("button#runButton").show();
-		} else {
-			// running
-			$("button#cancelButton").show();
-		}
-	}
-}
-	
-
-function restoreInputs() {
-	// Restore all the input values that were used and stored in allInputData.json
-	gebi("titleText").innerHTML = allInputData.modelName
-	for (index in allInputData) {
-		try {document.querySelector("#" + index).value = allInputData[index]}
-		catch(err){}
-	}
 }
 
 function delimitNumbers(nStr) {

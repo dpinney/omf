@@ -1,8 +1,5 @@
 <head>
-	<title>Open Modeling Framework</title>
-	<meta charset="utf-8">
-	<link href="{{pathPrefix}}/static/omf.css" type="text/css" rel="stylesheet"/>
-	<link rel="shortcut icon" href="{{pathPrefix}}/static/favicon.ico">
+	{{ omfHeaders }}
 	<style>
 		#Metric {
 			font-weight:bold;
@@ -12,30 +9,10 @@
 			font-weight:bold;
 		}
 	</style>
-	{% if modelStatus == "running" %}<meta http-equiv="refresh" content="5"/>{% endif %}
-	<!-- Library Imports -->
-	<script type="text/javascript" src="{{pathPrefix}}/static/omf.js"></script>
-	<script type="text/javascript" src="{{pathPrefix}}/static/jquery-1.9.1.js"></script>
 	<script src="{{pathPrefix}}/static/highcharts4.src.js"></script>
-	<!-- Data  Imports -->
-	<script>allInputData={% if allInputDataDict %}{{allInputDataDict | tojson}}{% else %}null{% endif %}</script>
-	<script>allOutputData={% if allOutputDataDict %}{{allOutputDataDict | tojson}}{% else %}null{% endif %}</script>
-	<script>modelStatus="{{modelStatus}}"</script>
-	<script>currentUser="{{datastoreNames.get('currentUser','test')}}"</script>
 </head>
-<body onload="init()">
-	<div id="header">
-		<div id="headInnerBlock">
-			<div id="menuLeft">
-				<a style="color:white" href="/">Open Modeling Framework</a> &#187;&nbsp;&nbsp;Model
-				&#8220;<p id="titleText" style="display:inline">{{ allInputDataDict.modelName }}</p>&#8221;
-			</div>
-		</div>
-	</div>
-	<div id="triangle-parent">
-		<div id="triangle-message">New Version<span class="classic-triangle">A new version of the model has been added to the OMF. To get the new outputs, please fill in any missing inputs and hit "Run Model". You can also just look at the old inputs/outputs.</span></div>
-		<div id="triangle-topright"></div>
-	</div>
+<body>
+	{{ omfModelTitle }}
 	<p class="reportTitle">Model Input</p>
 	<div id="input" class="content">
 		<form name="inputForm" value="{{allInputDataDict.inputForm}}" action="/runModel/" onsubmit="event.preventDefault(); return isFormValid();" method="post">
@@ -215,8 +192,8 @@
 				}
 			}
 		</script>
-		<p class="reportTitle postRun">Monthly Cost Comparison</p>
-		<div id="levelizedCostReport" class="tightContent postRun">
+		<p class="reportTitle">Monthly Cost Comparison</p>
+		<div id="levelizedCostReport" class="tightContent">
 			<div id="levelizedCostTableDiv" style="display:inline-block; width:1000px; height:150px; overflow-y:hidden; overflow-x:auto;">
 				<table id="monthlySummaryTable" style="margin:5px;margin: 5px;width: 990px;font-size: 14pt">
 					<style>td, th {padding:7 0 5 20;text-align: left;font-size:0.7em;}</style>
@@ -250,8 +227,8 @@
 			// Global Highcharts settings.
 			Highcharts.setOptions({global:{useUTC:true}})
 		</script>
-		<p class="reportTitle postRun" style="page-break-before:always">Demand Before and After Storage</p>
-		<div id="irradianceReport" class="tightContent postRun">
+		<p class="reportTitle" style="page-break-before:always">Demand Before and After Storage</p>
+		<div id="irradianceReport" class="tightContent">
 			<div id="demandBattChart"></div>
 			<script>
 				new Highcharts.Chart({"credits":{"enabled":false},
@@ -289,8 +266,8 @@
 					"legend":{"verticalAlign":"top","align":"top","borderWidth":0,"x":50,"y":-10,"layout":"horizontal"}})
 			</script>
 		</div>
-		<p class="reportTitle postRun">Battery State of Charge</p>
-		<div id="irradianceReport" class="tightContent postRun">
+		<p class="reportTitle">Battery State of Charge</p>
+		<div id="irradianceReport" class="tightContent">
 			<div id="batterySocChart"></div>
 			<script>
 				var dodFactor = 100 - parseFloat(allInputData.dodFactor)
@@ -327,8 +304,8 @@
 			</script>
 		</div>
 		<!-- TODO: Make into preview graph: http://jsfiddle.net/gh/get/jquery/1.7.2/highslide-software/highcharts.com/tree/master/samples/stock/xaxis/minorticks/	 -->
-		<p class="reportTitle postRun" style="page-break-before:always">Cash Flow</p>
-		<div id="cashFlowReport" class="tightContent postRun">
+		<p class="reportTitle" style="page-break-before:always">Cash Flow</p>
+		<div id="cashFlowReport" class="tightContent">
 			<div id="cashFlowChartDiv"></div>
 			<script>
 				new Highcharts.Chart({"credits":{"enabled":false},
@@ -344,8 +321,8 @@
 					"legend":{"verticalAlign":"top","align":"top","borderWidth":0,"x":50,"y":-10,"layout":"horizontal"}})
 			</script>
 		</div>
-		<p class="reportTitle postRun" style="page-break-before:always">Forecast Dispatch Accuracy and Effectiveness</p>
-		<div id="effectiveness" class="content postRun detailsContainer" style="margin-top:0px">
+		<p class="reportTitle" style="page-break-before:always">Forecast Dispatch Accuracy and Effectiveness</p>
+		<div id="effectiveness" class="content detailsContainer" style="margin-top:0px">
 <pre>Load prediction training accuracy (MAPE):
 {{allOutputDataDict['trainAccuracy'] or 'N/A'}}%
 

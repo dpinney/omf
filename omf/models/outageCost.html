@@ -1,25 +1,12 @@
 <head>
-	<title>Open Modeling Framework</title>
-	<meta charset="utf-8">
-	<link href="{{pathPrefix}}/static/omf.css" type="text/css" rel="stylesheet"/>
-	<link rel="shortcut icon" href="{{pathPrefix}}/static/favicon.ico">
-	<style>
-	/*Styles will go here*/
-	</style>
-	{% if modelStatus == "running" %}<meta http-equiv="refresh" content="5"/>{% endif %}
+	{{ omfHeaders }}
 	<!-- Library Imports -->
-	<script type="text/javascript" src="{{pathPrefix}}/static/omf.js"></script>
-	<script type="text/javascript" src="{{pathPrefix}}/static/jquery-1.9.1.js"></script>
 	<script src="{{pathPrefix}}/static/highcharts4.src.js"></script>
 	<script src="https://cdn.plot.ly/plotly-1.50.1.min.js"></script>
 	<!-- Leaflet -->
 	<link rel="stylesheet" href="https://unpkg.com/leaflet@1.5.1/dist/leaflet.css"	integrity="sha512-xwE/Az9zrjBIphAcBb3F6JVqxf46+CDLwfLMHloNu6KEQCAWi6HcDUbeOfBIptF7tcCzusKFjFw2yuvEpDL9wQ=="	crossorigin=""/>
 	<script src="https://unpkg.com/leaflet@1.5.1/dist/leaflet.js" integrity="sha512-GffPMF3RvMeYyc1LWMHtK8EbPv0iNZ8/oTtHPx9/cc2ILxQ+u905qIwdpULaqDkyBKgOaB57QTMg7ztg8Jm2Og==" crossorigin=""></script>
 	<!-- Data  Imports -->
-	<script>allInputData={% if allInputDataDict %}{{allInputDataDict | tojson}}{% else %}null{% endif %}</script>
-	<script>allOutputData={% if allOutputDataDict %}{{allOutputDataDict | tojson}}{% else %}null{% endif %}</script>
-	<script>modelStatus="{{modelStatus}}"</script>
-	<script>currentUser="{{datastoreNames.get('currentUser','test')}}"</script>
 	<style>#map{
 		position: relative;
 		width: 100.0%;
@@ -29,41 +16,30 @@
 		}
 	</style>
 </head>
-<body onload="init()">
-	<div id="header">
-		<div id="headInnerBlock">
-			<div id="menuLeft">
-				<a style="color:white" href="/">Open Modeling Framework</a> &#187;&nbsp;&nbsp;Model
-				&#8220;<p id="titleText" style="display:inline"></p>&#8221;
-			</div>
-		</div>
-	</div>
-	<div id="triangle-parent">
-		<div id="triangle-message">New Version<span class="classic-triangle">A new version of the model has been added to the OMF. To get the new outputs, please fill in any missing inputs and hit "Run Model". You can also just look at the old inputs/outputs.</span></div>
-		<div id="triangle-topright"></div>
-	</div>
+<body>
+	{{ omfModelTitle }}
 	<p class="reportTitle">Model Input</p>
 	<div id="input" class="content">
-		<form name="inputForm" action="/runModel/" onsubmit="event.preventDefault(); return isFormValid();" method="post">
+		<form name="inputForm" value="{{allInputDataDict.inputForm}}" action="/runModel/" onsubmit="event.preventDefault(); return isFormValid();" method="post">
 			<div class="shortInput">
 				<label>Model Type <a href="https://github.com/dpinney/omf/wiki/Models-~-outageCost" target="blank">Help?</a></label>
-				<input type="text" id="modelType" name="modelType" value="{{modelName}}" readonly/>
+				<input type="text" id="modelType" name="modelType" value="{{allInputDataDict.modelType}}" value="{{modelName}}" readonly/>
 			</div>
 			<div class="shortInput">
 				<label>Model Name</label>
-				<input type="text" id="modelName" name="modelName" pattern="^[\w\s\d\.-]+$" required="required">
+				<input type="text" id="modelName" name="modelName" value="{{allInputDataDict.modelName}}" pattern="^[\w\s\d\.-]+$" required="required">
 			</div>
-			<div class="shortInput runningInline postRunInline">
+			<div class="shortInput">
 				<label>User</label>
-				<input type="text" id="user" name="user" readonly/>
+				<input type="text" id="user" name="user" value="{{allInputDataDict.user}}" readonly/>
 			</div>
-			<div class="shortInput runningInline postRunInline ">
+			<div class="shortInput">
 				<label>Created</label>
-				<input type="text" id="created" name="created" readonly/>
+				<input type="text" id="created" name="created" value="{{allInputDataDict.created}}" readonly/>
 			</div>
-			<div class="shortInput postRunInline">
+			<div class="shortInput">
 				<label>Run Time</label>
-				<input type="text" id="runTime" name="runTime" readonly/>
+				<input type="text" id="runTime" name="runTime" value="{{allInputDataDict.runTime}}" readonly/>
 			</div>
 			<div class="wideInput">
 				<p class="inputSectionHeader">Model Specifications</p>
@@ -72,189 +48,172 @@
 			<div class="shortInput">
 				<label>Feeder</label>
 				<button id="feederButton" type="button" onclick="javascript:editFeeder(allInputData.modelName,1);" style="display:block;width:125px;">Open Editor</button>
-				<input type="text" id="feederName1" name="feederName1" style="display:none">
+				<input type="text" id="feederName1" name="feederName1" value="{{allInputDataDict.feederName1}}" style="display:none">
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Outage Data (.csv file)<span class="classic">Please see the documentation at the help link for the required format</span></label>
 				<input id="outageFile" type="file" style="display:none" onchange="handle_files(this.files,'outageData','outageFileName')">
-				<input id="outageData" name="outageData" type="hidden">
+				<input id="outageData" name="outageData" value="{{allInputDataDict.outageData}}" type="hidden">
 				<div>
 					<label for="outageFile" class="fileButton">Choose File</label>
-					<input id="outageFileName" name="outageFileName" value='' readonly class="uploadFileName">
+					<input id="outageFileName" name="outageFileName" value="{{allInputDataDict.outageFileName}}" value='' readonly class="uploadFileName">
 				</div>
 			</div>
 			<div class="shortInput">
+				<label class="tooltip">Tie Line Data (.csv file)<span class="classic">Please see the documentation at the help link for the required format</span></label>
+				<input id="tieFile" type="file" style="display:none" onchange="handle_files(this.files,'tieData','tieFileName')">
+				<input id="tieData" name="tieData" value="{{allInputDataDict.tieData}}" type="hidden">
+				<div>
+					<label for="tieFile" class="fileButton">Choose File</label>
+					<input id="tieFileName" name="tieFileName" value="{{allInputDataDict.tieFileName}}" value='' readonly class="uploadFileName">
+				</div>
+			</div>
+
+			<div class="shortInput">
 				<label class="tooltip">Generate Faults?<span class="classic">This input decides whether random faults will be generated and shown on the leaflet map. It is also possible to generate faults using two different methods. Check the wiki to read about how these methods differ.</span></label>
-				<select id="generateRandom" name="generateRandom" />
-					<option value="0">No New Faults</option>
-					<option value="1">Simple Method</option>
-					<option value="2">Lattice Method</option>
+				<select id="generateRandom" name="generateRandom" value="{{allInputDataDict.generateRandom}}" />
+					<option value="0" {% if allInputDataDict.generateRandom == '0' %}selected{% endif %}>No New Faults</option>
+					<option value="1" {% if allInputDataDict.generateRandom == '1' %}selected{% endif %}>Simple Method</option>
+					<option value="2" {% if allInputDataDict.generateRandom == '2' %}selected{% endif %}>Lattice Method</option>
 				</select>
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Data to be Graphed<span class="classic">This input decides whether the faults dictated by the input .csv file, the random faults generated, or all faults will be graphed on the leaflet plot.</span></label>
-				<select id="graphData" name="graphData" />
-					<option value="0">Graph All Faults</option>
-					<option value="1">Graph Original Faults</option>
-					<option value="2">Graph Generated Faults</option>
+				<select id="graphData" name="graphData" value="{{allInputDataDict.graphData}}" />
+					<option value="0" {% if allInputDataDict.graphData == '0' %}selected{% endif %}>Graph All Faults</option>
+					<option value="1" {% if allInputDataDict.graphData == '1' %}selected{% endif %}>Graph Original Faults</option>
+					<option value="2" {% if allInputDataDict.graphData == '2' %}selected{% endif %}>Graph Generated Faults</option>
 				</select>
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Number of Customers<span class="classic">The number of meters on the feeder system.</span></label>
-				<input type="text" id="numberOfCustomers" name="numberOfCustomers">
+				<input type="text" id="numberOfCustomers" name="numberOfCustomers" value="{{allInputDataDict.numberOfCustomers}}">
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Sustained Outage Threshold<span class="classic">The threshold for how many seconds an outage lasts before it is considered a sustained outage.</span></label>
-				<input type="text" id="sustainedOutageThreshold" name="sustainedOutageThreshold">
+				<input type="text" id="sustainedOutageThreshold" name="sustainedOutageThreshold" value="{{allInputDataDict.sustainedOutageThreshold}}">
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Cause Filter<span class="classic">Filter the fault data shown by leaflet map based on a specific cause. Entering "0" will yield all causes being shown on the map.</span></label>
-				<input type="text" id="causeFilter" name="causeFilter">
+				<input type="text" id="causeFilter" name="causeFilter" value="{{allInputDataDict.causeFilter}}">
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Component Type Filter<span class="classic">Filter the fault data shown by leaflet map based on a specific component type. Entering "All" will yield all faults of any component type being shown on the map.</span></label>
-				<select id="componentTypeFilter" name="componentTypeFilter" />
-					<option value="All">All Components</option>
-					<option value="overhead_line">Overhead Line</option>
-					<option value="underground_line">Underground Line</option>
-					<option value="triplex_line">Triplex Line</option>
+				<select id="componentTypeFilter" name="componentTypeFilter" value="{{allInputDataDict.componentTypeFilter}}" />
+					<option value="All" {% if allInputDataDict.componentTypeFilter == 'All' %}selected{% endif %}>All Components</option>
+					<option value="overhead_line" {% if allInputDataDict.componentTypeFilter == 'overhead_line' %}selected{% endif %}>Overhead Line</option>
+					<option value="underground_line" {% if allInputDataDict.componentTypeFilter == 'underground_line' %}selected{% endif %}>Underground Line</option>
+					<option value="triplex_line" {% if allInputDataDict.componentTypeFilter == 'triplex_line' %}selected{% endif %}>Triplex Line</option>
 				</select>
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Fault Type Filter<span class="classic">Filter the fault data shown by leaflet map based on a specific fault type. Entering "All" will yield all faults of any fault type being shown on the map.</span></label>
-				<select id="faultTypeFilter" name="faultTypeFilter" />
-					<option value="All">All Faults</option>
-					<option value="SLG-A">Single-Line-Ground A</option>
-					<option value="SLG-B">Single-Line-Ground B</option>
-					<option value="SLG-C">Single-Line-Ground C</option>
-					<option value="SLG-X">Single-Line-Ground Random</option>
-					<option value="DLG-AB">Double-Line-Ground AB</option>
-					<option value="DLG-BC">Double-Line-Ground BC</option>
-					<option value="DLG-CA">Double-Line-Ground CA</option>
-					<option value="DLG-X">Double-Line-Ground Random</option>
-					<option value="LL-AB">Line-Line AB</option>
-					<option value="LL-BC">Line-Line BC</option>
-					<option value="LL-CA">Line-Line CA</option>
-					<option value="LL-X">Line-Line Random</option>
-					<option value="TLG">Triple-Line-Ground</option>
-					<option value="OC-A">Single Open Conductor A</option>
-					<option value="OC1-A">Single Open Conductor A</option>
-					<option value="OC-B">Single Open Conductor B</option>
-					<option value="OC1-B">Single Open Conductor B</option>
-					<option value="OC-C">Single Open Conductor C</option>
-					<option value="OC1-C">Single Open Conductor C</option>
-					<option value="OC-X">Single Open Conductor Random</option>
-					<option value="OC1-X">Single Open Conductor Random</option>
-					<option value="OC2-AB">Double Open Conductor AB</option>
-					<option value="OC2-BC">Double Open Conductor BC</option>
-					<option value="OC2-CA">Double Open Conductor CA</option>
-					<option value="OC2-X">Double Open Conductor Random</option>
-					<option value="OC3">Triple Open Conductor</option>
+				<select id="faultTypeFilter" name="faultTypeFilter" value="{{allInputDataDict.faultTypeFilter}}" />
+					<option value="All" {{ 'selected' if allInputDataDict.faultTypeFilter == 'All' }}>All Faults</option>
+					<option value="SLG-A" {{ 'selected' if allInputDataDict.faultTypeFilter == 'SLG-A' }}>Single-Line-Ground A</option>
+					<option value="SLG-B" {{ 'selected' if allInputDataDict.faultTypeFilter == 'SLG-B' }}>Single-Line-Ground B</option>
+					<option value="SLG-C" {{ 'selected' if allInputDataDict.faultTypeFilter == 'SLG-C' }}>Single-Line-Ground C</option>
+					<option value="SLG-X" {{ 'selected' if allInputDataDict.faultTypeFilter == 'SLG-X' }}>Single-Line-Ground Random</option>
+					<option value="DLG-AB" {{ 'selected' if allInputDataDict.faultTypeFilter == 'DLG-AB' }}>Double-Line-Ground AB</option>
+					<option value="DLG-BC" {{ 'selected' if allInputDataDict.faultTypeFilter == 'DLG-BC' }}>Double-Line-Ground BC</option>
+					<option value="DLG-CA" {{ 'selected' if allInputDataDict.faultTypeFilter == 'DLG-CA' }}>Double-Line-Ground CA</option>
+					<option value="DLG-X" {{ 'selected' if allInputDataDict.faultTypeFilter == 'DLG-X' }}>Double-Line-Ground Random</option>
+					<option value="LL-AB" {{ 'selected' if allInputDataDict.faultTypeFilter == 'LL-AB' }}>Line-Line AB</option>
+					<option value="LL-BC" {{ 'selected' if allInputDataDict.faultTypeFilter == 'LL-BC' }}>Line-Line BC</option>
+					<option value="LL-CA" {{ 'selected' if allInputDataDict.faultTypeFilter == 'LL-CA' }}>Line-Line CA</option>
+					<option value="LL-X" {{ 'selected' if allInputDataDict.faultTypeFilter == 'LL-X' }}>Line-Line Random</option>
+					<option value="TLG" {{ 'selected' if allInputDataDict.faultTypeFilter == 'TLG' }}>Triple-Line-Ground</option>
+					<option value="OC-A" {{ 'selected' if allInputDataDict.faultTypeFilter == 'OC-A' }}>Single Open Conductor A</option>
+					<option value="OC1-A" {{ 'selected' if allInputDataDict.faultTypeFilter == 'OC1-A' }}>Single Open Conductor A</option>
+					<option value="OC-B" {{ 'selected' if allInputDataDict.faultTypeFilter == 'OC-B' }}>Single Open Conductor B</option>
+					<option value="OC1-B" {{ 'selected' if allInputDataDict.faultTypeFilter == 'OC1-B' }}>Single Open Conductor B</option>
+					<option value="OC-C" {{ 'selected' if allInputDataDict.faultTypeFilter == 'OC-C' }}>Single Open Conductor C</option>
+					<option value="OC1-C" {{ 'selected' if allInputDataDict.faultTypeFilter == 'OC1-C' }}>Single Open Conductor C</option>
+					<option value="OC-X" {{ 'selected' if allInputDataDict.faultTypeFilter == 'OC-X' }}>Single Open Conductor Random</option>
+					<option value="OC1-X" {{ 'selected' if allInputDataDict.faultTypeFilter == 'OC1-X' }}>Single Open Conductor Random</option>
+					<option value="OC2-AB" {{ 'selected' if allInputDataDict.faultTypeFilter == 'OC2-AB' }}>Double Open Conductor AB</option>
+					<option value="OC2-BC" {{ 'selected' if allInputDataDict.faultTypeFilter == 'OC2-BC' }}>Double Open Conductor BC</option>
+					<option value="OC2-CA" {{ 'selected' if allInputDataDict.faultTypeFilter == 'OC2-CA' }}>Double Open Conductor CA</option>
+					<option value="OC2-X" {{ 'selected' if allInputDataDict.faultTypeFilter == 'OC2-X' }}>Double Open Conductor Random</option>
+					<option value="OC3" {{ 'selected' if allInputDataDict.faultTypeFilter == 'OC3' }}>Triple Open Conductor</option>
 				</select>
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Minimum Time Filter<span class="classic">Filter the fault data shown by leaflet map based on a lower bound on the time the faults can occur.</span></label>
-				<input type="text" id="timeMinFilter" name="timeMinFilter">
+				<input type="text" id="timeMinFilter" name="timeMinFilter" value="{{allInputDataDict.timeMinFilter}}">
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Maximum Time Filter<span class="classic">Filter the fault data shown by leaflet map based on an upper bound on the time the faults can occur.</span></label>
-				<input type="text" id="timeMaxFilter" name="timeMaxFilter">
+				<input type="text" id="timeMaxFilter" name="timeMaxFilter" value="{{allInputDataDict.timeMaxFilter}}">
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Minimum Meter Filter<span class="classic">Filter the fault data shown by leaflet map based on a minimum number of meters affected by the fault.</span></label>
-				<input type="text" id="meterMinFilter" name="meterMinFilter">
+				<input type="text" id="meterMinFilter" name="meterMinFilter" value="{{allInputDataDict.meterMinFilter}}">
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Maximum Meter Filter<span class="classic">Filter the fault data shown by leaflet map based on a maximum number of meters affected by the fault.</span></label>
-				<input type="text" id="meterMaxFilter" name="meterMaxFilter">
+				<input type="text" id="meterMaxFilter" name="meterMaxFilter" value="{{allInputDataDict.meterMaxFilter}}">
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Minimum Duration Filter<span class="classic">Filter the fault data shown by leaflet map based on a minimum in fault duration (in seconds).</span></label>
-				<input type="text" id="durationMinFilter" name="durationMinFilter">
+				<input type="text" id="durationMinFilter" name="durationMinFilter" value="{{allInputDataDict.durationMinFilter}}">
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Maximum Duration Filter<span class="classic">Filter the fault data shown by leaflet map based on a maximum in fault duration (in seconds).</span></label>
-				<input type="text" id="durationMaxFilter" name="durationMaxFilter">
+				<input type="text" id="durationMaxFilter" name="durationMaxFilter" value="{{allInputDataDict.durationMaxFilter}}">
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Number of Faults Generated<span class="classic">The number of random faults generated, if random faults are generated.</span></label>
-				<input type="text" id="faultsGeneratedStr" name="faultsGeneratedStr">
+				<input type="text" id="faultsGeneratedStr" name="faultsGeneratedStr" value="{{allInputDataDict.faultsGeneratedStr}}">
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Number of Grid Lines<span class="classic">If the lattice method is used to generate random faults, this input dictates how many grid lines will be used when creating the lattice and generating the heat map for location of outages.</span></label>
-				<input type="text" id="gridLinesStr" name="gridLinesStr">
+				<input type="text" id="gridLinesStr" name="gridLinesStr" value="{{allInputDataDict.gridLinesStr}}">
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Duration Distribution Generator<span class="classic">If time data is provided by the user and random faults are generated, this input dictates the method by which the new duration data will be generated.</span></label>
-				<select id="test" name="test" />
-					<option value="0">Input Durations</option>
-					<option value="chi_square">Chi-Squared Test</option>
-					<option value="p_value">Kolmogorov-Smirnov Test</option>
-					<option value="dependent">Dependent Normal Distributions</option>
+				<select id="test" name="test" value="{{allInputDataDict.test}}" />
+					<option value="0" {{ 'selected' if allInputDataDict.test == 'chi_square' }}>Input Durations</option>
+					<option value="chi_square" {{ 'selected' if allInputDataDict.test == 'chi_square' }}>Chi-Squared Test</option>
+					<option value="p_value" {{ 'selected' if allInputDataDict.test == 'p_value' }}>Kolmogorov-Smirnov Test</option>
+					<option value="dependent" {{ 'selected' if allInputDataDict.test == 'dependent' }}>Dependent Normal Distributions</option>
 				</select>
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Dependent Variables for Distribution<span class="classic">If new distribution data is generated using the dependent normal distributions, this input dictates the variables on which the duration data is dependent.</span></label>
-				<select id="depDist" name="depDist" />
-					<option value="0">Cause/time/location</option>
-					<option value="1">Cause/time</option>
-					<option value="2">Cause/location</option>
-					<option value="3">Time/location</option>
-					<option value="4">Cause</option>
-					<option value="5">Time</option>
-					<option value="6">Location</option>
+				<select id="depDist" name="depDist" value="{{allInputDataDict.depDist}}" />
+					<option value="0" {{ 'selected' if allInputDataDict.depDist == '0' }}>Cause/time/location</option>
+					<option value="1" {{ 'selected' if allInputDataDict.depDist == '1' }}>Cause/time</option>
+					<option value="2" {{ 'selected' if allInputDataDict.depDist == '2' }}>Cause/location</option>
+					<option value="3" {{ 'selected' if allInputDataDict.depDist == '3' }}>Time/location</option>
+					<option value="4" {{ 'selected' if allInputDataDict.depDist == '4' }}>Cause</option>
+					<option value="5" {{ 'selected' if allInputDataDict.depDist == '5' }}>Time</option>
+					<option value="6" {{ 'selected' if allInputDataDict.depDist == '6' }}>Location</option>
 				</select>
 			</div>
-			<div class="wideInput" style="text-align:right">
-				<button id="deleteButton" type="button" class="stoppedInline postRunInline" onclick="deleteModel()">Delete</button>
-				<button id="shareButton" type="button" class="postRunInline" onclick="shareModel()">Share</button>
-				<button id="duplicateButton" type="button" class="postRunInline" onclick="duplicateModel()">Duplicate</button>
-				<button id="cancelButton" class="runningInline" type="button" onclick="cancelModel()">Cancel Run</button>
-				<button id="runButton" class="stoppedInline postRunInline" type="submit">Run Model</button>
-				<!-- Function to send rendered html page to server proof of concept
-				<button id="save" class="stoppedInline postRunInline" type="button">Save Template</button>
-					<script>
-					$('#save').click(function() {
-						myhtml = $('html').html();
-						$.ajax({
-							type: "POST",
-							url: "{{pathPrefix}}/renderToFile",
-							data: {html:myhtml}
-						});
-					});
-				</script> -->
-			</div>
+			{{ omfModelButtons }}
 		</form>
 	</div>
-	<div id ="runIndicator" class="content running">
-		Model running on server. Refresh the page to check for results, or wait for automatic refresh every 5 seconds.
-	</div>
-	<div id ="stopIndicator" class="content stopped" style="visibility: hidden">
-		<pre id='errorText' style='overflow-x:scroll'></pre>
-		<script type="text/javascript">
-		if (typeof(allInputData.stderr) !== 'undefined') {	
-			gebi('stopIndicator').style.visibility = 'visible'
-			gebi('errorText').innerHTML = 'MODEL ENCOUNTERED AN ERROR AS FOLLOWS: \n\n' + allInputData.stderr}
-		</script>
-	</div>
+	{{ omfRunDebugBlock }}
+	{% if modelStatus == 'finished' %}
 	<div id="output">
-		<p class="reportTitle postRun" style="page-break-before:always">Reliability Metrics for Input Data</p>
-		<div id="statsCalc" class="tightContent postRun">
+		<p class="reportTitle" style="page-break-before:always">Reliability Metrics for Input Data</p>
+		<div id="statsCalc" class="tightContent">
 			{{ allOutputDataDict['statsHtml'] }}
 		</div>
-		<p class="reportTitle postRun" style="page-break-before:always">Reliability Metrics for Input Data (with FLISR Implemented)</p>
-		<div id="flisrStatsCalc" class="tightContent postRun">
+		<p class="reportTitle" style="page-break-before:always">Reliability Metrics for Input Data (with FLISR Implemented)</p>
+		<div id="flisrStatsCalc" class="tightContent">
 			{{ allOutputDataDict['flisrStatsHtml'] }}
 		</div>
-		<p class="reportTitle postRun">Outage Timeline for Input Data</p>
-		<div id="timeline" class="tightContent postRun">
+		<p class="reportTitle">Outage Timeline for Input Data</p>
+		<div id="timeline" class="tightContent">
 			<div id="timelineChart" style="width:1000px"></div>
 			<script type="text/javascript">
 				Plotly.newPlot("timelineChart", JSON.parse(allOutputData["timelineData"]), JSON.parse(allOutputData["timelineLayout"]) || {})
 			</script>
 		</div>
-		<p class="reportTitle postRun">Outage Timeline for Randomly Generated Faults</p>
-		<div id="timeline1" class="tightContent postRun">
+		<p class="reportTitle">Outage Timeline for Randomly Generated Faults</p>
+		<div id="timeline1" class="tightContent">
 			<div id="timeline1Chart" style="width:1000px"></div>
 			<script type="text/javascript">
 				Plotly.newPlot("timeline1Chart", JSON.parse(allOutputData["timeline1Data"]), JSON.parse(allOutputData["timeline1Layout"]) || {})
@@ -469,21 +428,8 @@
 		L.control.scale().addTo(map);
 		geojsonLayer.addTo(map);
 	}
-	</script>
-		<!-- TODO: Remove? -->
-		<!-- <script type="text/javascript">
-			// Global Highcharts settings.
-			Highcharts.setOptions({global:{useUTC:true}})
-			// Clean up the non-ISO date strings we get.
-			function dateOb(inStr) {return Date.parse(inStr.replace(/-/g,"/"))}
-			pointStart = dateOb(allOutputData.timeStamps[0])
-			pointInterval = dateOb(allOutputData.timeStamps[1]) - pointStart
-		</script> -->
-		<p class="reportTitle postRun">Raw Input and Output Files</p>
-		<div id="rawOutput" class="content postRun" style="margin-top:0px">
-			{% for name in allOutputDataDict['fileNames'] %}
-				{% if loop.index > 1 %}&mdash; {% endif %}<a href="/downloadModelData/{{allInputDataDict['user']}}/{{allInputDataDict['modelName']}}/{{name}}">{{name}}</a>
-			{% endfor %}
-		</div>
+		</script>
+		{{ rawOutputFiles }}
 	</div>
+	{% endif %}
 </body>

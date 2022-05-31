@@ -1,20 +1,7 @@
 <head>
-	<title>Open Modeling Framework</title>
-	<meta charset="utf-8">
-	<link href="{{pathPrefix}}/static/omf.css" type="text/css" rel="stylesheet"/>
-	<link rel="shortcut icon" href="{{pathPrefix}}/static/favicon.ico">
-	<style>
-	/*Styles will go here*/
-	</style>
-	{% if modelStatus == "running" %}<meta http-equiv="refresh" content="5"/>{% endif %}
-	<!-- Library Imports -->
-	<script type="text/javascript" src="{{pathPrefix}}/static/omf.js"></script>
-	<script type="text/javascript" src="{{pathPrefix}}/static/jquery-1.9.1.js"></script>
+	{{ omfHeaders }}
 	<script src="{{pathPrefix}}/static/highcharts4.src.js"></script>
-	<!-- Data  Imports -->
 	<script src="{{pathPrefix}}/static/d3.v3.js"></script>
-	<script>modelStatus="{{modelStatus}}"</script>
-	<!-- Global Functions -->
 	<script type="text/javascript">
 		function editDSS(modelName, fileName) {
 			studyUser = "{{allInputDataDict.user}}"
@@ -37,18 +24,7 @@
 	{%- endmacro %}
 </head>
 <body>
-	<div id="header">
-		<div id="headInnerBlock">
-			<div id="menuLeft">
-				<a style="color:white" href="/">Open Modeling Framework</a> &#187;&nbsp;&nbsp;Model
-				&#8220;<p id="titleText" style="display:inline">{{allInputDataDict.modelName}}</p>&#8221;
-			</div>
-		</div>
-	</div>
-	<div id="triangle-parent">
-		<div id="triangle-message">New Version<span class="classic-triangle">A new version of the model has been added to the OMF. To get the new outputs, please fill in any missing inputs and hit "Run Model". You can also just look at the old inputs/outputs.</span></div>
-		<div id="triangle-topright"></div>
-	</div>
+	{{ omfModelTitle }}
 	<p class="reportTitle">Model Input</p>
 	<div id="input" class="content">
 		<form name="inputForm" action="/runModel/" onsubmit="event.preventDefault(); return isFormValid();" method="post">
@@ -803,8 +779,8 @@
 					"legend":{"verticalAlign":"top","align":"top","borderWidth":0,"x":50,"y":-10,"layout":"horizontal"}})
 			</script> -->
 		</div>
-		<!-- <p class="reportTitle postRun">Study Details <a target="_self" class="toggle">Hide / Show</a></p>
-		<div id="studyDetails" class="tightContent postRun detailsContainer" style="position: relative;">
+		<!-- <p class="reportTitle">Study Details <a target="_self" class="toggle">Hide / Show</a></p>
+		<div id="studyDetails" class="tightContent detailsContainer" style="position: relative;">
 			<div id="mapHere" style="width:495px; height:340px; display:inline-block"></div>
 			<script type="text/javascript">
 				width = 495, height = 340
@@ -844,8 +820,8 @@
 			</div>
 			<script>gebi("stdout").innerHTML = allOutputData.stdout</script>
 		</div> -->
-<!-- 		<p class="reportTitle postRun">Study Details and Standard Output<a target="_self" class="toggle">Hide / Show</a></p>
-		<div id="studyDetails" class="tightContent postRun detailsContainer" style="position: relative;">
+<!-- 		<p class="reportTitle">Study Details and Standard Output<a target="_self" class="toggle">Hide / Show</a></p>
+		<div id="studyDetails" class="tightContent detailsContainer" style="position: relative;">
 			<div id="runtimeStatsReport" style="width:100%; height:340px; margin:5 0 0 0; overflow-y:scroll; overflow-x:hidden; display:inline-block; vertical-align:top">
 				<pre id="stdout" style="font-size:13px; text-align:left"></pre>
 			</div>

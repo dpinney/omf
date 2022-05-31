@@ -1,8 +1,5 @@
 <head>
-	<title>Open Modeling Framework</title>
-	<meta charset="utf-8">
-	<link href="{{pathPrefix}}/static/omf.css" type="text/css" rel="stylesheet"/>
-	<link rel="shortcut icon" href="{{pathPrefix}}/static/favicon.ico">
+	{{ omfHeaders }}
 	<style>
 		.tab {
 		    overflow: hidden;
@@ -49,16 +46,7 @@
 		 	div#triangle-parent{visibility: hidden;}
 		 }
 	</style>
-	{% if modelStatus == "running" %}<meta http-equiv="refresh" content="5"/>{% endif %}
-	<!-- Library Imports -->
-	<script type="text/javascript" src="{{pathPrefix}}/static/omf.js"></script>
-	<script type="text/javascript" src="{{pathPrefix}}/static/jquery-1.9.1.js"></script>
 	<script src="/static/sorttable.js"></script>
-	<!-- Data  Imports -->
-	<script>allInputData={% if allInputDataDict %}{{allInputDataDict | tojson}}{% else %}null{% endif %}</script>
-	<script>allOutputData={% if allOutputDataDict %}{{allOutputDataDict | tojson}}{% else %}null{% endif %}</script>
-	<script>modelStatus="{{modelStatus}}"</script>
-	<script>currentUser="{{datastoreNames.get('currentUser','test')}}"</script>
 	<script type="text/javascript">
 		function displayAppropriately(){
 			//console.log("der " + $('input[name= "derRadio"]:checked').val());
@@ -73,78 +61,31 @@
 		}
 
 		function openTab(evt, tabName) {
-		    
 		    var i, tabContent, tabLinks;
-
 		    // Get all elements with class="tabContent" and hide them
 			$(".tabContent").hide();
-
 		    // Get all elements with class="tabLinks" and remove the class "active"
 		    tabLinks = document.getElementsByClassName("tabLinks");
 		    for (i = 0; i < tabLinks.length; i++) {
 		        tabLinks[i].className = tabLinks[i].className.replace(" active", "");
 		    }
-
 		    // Show the current tab, and add an "active" class to the button that opened the tab
 		    $("." + tabName).show();
 		    //gebi(tabName).style.display = "block";
 		    evt.currentTarget.className += " active";
 		}
-
-		function insert_file_upload_block(fileName, dataVariableName) {
-			parentDiv = document.currentScript.parentElement;
-
-			let inputNode1 = document.createElement("input");
-			inputNode1.setAttribute("id", fileName + "Handler");
-			inputNode1.setAttribute("type", "file");
-			inputNode1.style.display = "none";
-			//inputNode1.addEventListener("change", handle_files(this.files,dataVariableName,fileName));
-			parentDiv.appendChild(inputNode1);
-
-			let inputNode2 = document.createElement("input");
-			inputNode2.setAttribute("id", dataVariableName);
-			inputNode2.setAttribute("name", dataVariableName);
-			inputNode2.type = "hidden";
-			parentDiv.appendChild(inputNode2);
-
-			let innerDiv = document.createElement("div");
-			parentDiv.appendChild(innerDiv);
-
-			let labelNode = document.createElement("label");
-			labelNode.setAttribute("for", fileName + "Handler");
-			labelNode.className = "fileButton";
-			labelNode.innerHTML = "Choose File";
-			innerDiv.appendChild(labelNode);
-
-			let inputNode3 = document.createElement("input");
-			inputNode3.setAttribute("id", fileName);
-			inputNode3.setAttribute("name", fileName);
-			inputNode3.value = '';
-			inputNode3.readOnly = true;
-			inputNode3.className = "uploadFileName";
-			innerDiv.appendChild(inputNode3)
-
-			//inputNode1.addEventListener("change", handle_files(this.files,dataVariableName,fileName));
-			inputNode1.addEventListener("change", function (){
-				handle_files(this.files,dataVariableName,fileName);
-			});
-
-		}
 	</script>
 </head>
+{% macro insert_file_upload_block(fileName, dataVariableName) -%}
+	<input id="{{dataVariableName}}Handler" type="file" style="display:none" onchange="handle_files(this.files,'{{dataVariableName}}','{{fileName}}')">
+	<input id="{{dataVariableName}}" name="{{dataVariableName}}" value="{{allInputDataDict[dataVariableName]}}" type="hidden">
+	<div>
+		<label for="{{dataVariableName}}Handler" class="fileButton">Choose File</label>
+		<input id="{{fileName}}" name="{{fileName}}" value="{{allInputDataDict[fileName]}}" readonly class="uploadFileName">    
+	</div>
+{%- endmacro %}
 <body>
-	<div id="header">
-		<div id="headInnerBlock">
-			<div id="menuLeft">
-				<a style="color:white" href="/">Open Modeling Framework</a> &#187;&nbsp;&nbsp;Model
-				&#8220;<p id="titleText" style="display:inline">{{allInputDataDict.modelName}}</p>&#8221;
-			</div>
-		</div>
-	</div>
-	<div id="triangle-parent">
-		<div id="triangle-message">New Version<span class="classic-triangle">A new version of the model has been added to the OMF. To get the new outputs, please fill in any missing inputs and hit "Run Model". You can also just look at the old inputs/outputs.</span></div>
-		<div id="triangle-topright"></div>
-	</div>
+	{{ omfModelTitle }}
 	<p class="reportTitle">Model Input</p>
 	<div id="input" class="content">
 		<form name= "inputForm" action="/runModel/" onsubmit="event.preventDefault(); return isFormValid();" method="post">
@@ -233,17 +174,13 @@
 				<label class="tooltip">Peak Load (.csv file) <i>optional</i>
 					<span class="classic">Please see the documentation at the green 'Help?' link above for more information including the expected file format</span>
 				</label>
-				<script type="text/javascript">
-					insert_file_upload_block('peakLoadFileName', 'peakLoadData');
-				</script>
+				{{ insert_file_upload_block('peakLoadFileName','peakLoadData') }}
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Min Load (.csv file) <i>optional</i>
 					<span class="classic">Please see the documentation at the green 'Help?' link above for more information including expected file format</span>
 				</label>
-				<script type="text/javascript">
-					insert_file_upload_block('minLoadFileName', 'minLoadData');
-				</script>
+				{{ insert_file_upload_block('minLoadFileName','minLoadData') }}
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Display Format<span class="classic">Geospatial shows the circuit the same way it was defined in the feeder editor. Force Directed uses an algorithm to show the circuit elements evenly spaced (useful for circuits without location data).</span></label>

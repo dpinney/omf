@@ -388,7 +388,7 @@ def customerCost1(duration, season, averagekWperhr, businessType):
 	kWperhrEstimate = 1.21 * kWperhrEstimate
 	# find the estimated customer outage cost for the customer in question, given the duration of the outage
 	times = np.array([0,1,2,3,4,5,6,7,8])
-	outageCost = kWperhrEstimate[duration]
+	outageCost = kWperhrEstimate[duration] * (duration>0)
 	localMax = 0
 	row = 0
 	while row < 9:
@@ -467,7 +467,8 @@ def graphMicrogrid(pathToOmd, pathToJson, pathToCsv, outputFile, settingsFile, u
 		for i in data['Simulation time steps']:
 			simTimeSteps.append(float(i))
 		numTimeSteps = len(simTimeSteps)
-		stepSize = 1 #TODO: change this to be total_simulation_time/numTimeSteps, but for now, we default to 1 hr
+		stepSize = 1 #TODO: change this to use the "Simulation time steps" interval in the ONM output. Note the unit is hours.
+		#TODO: change stepSize to stepSizeHours to make it clear what's going on.
 		voltages = data['Voltages']
 		outageDuration = stepSize * numTimeSteps
 		loadServed = data['Load served']
@@ -480,6 +481,7 @@ def graphMicrogrid(pathToOmd, pathToJson, pathToCsv, outputFile, settingsFile, u
 	actionLoadBefore = []
 	actionLoadAfter = []
 	loadsShed = []
+	cumulativeLoadsShed = []
 	timestep = 0
 	# timestep = 1 #TODO: switch back to this value if timestep should start at 1, not zero
 	for key in switchLoadAction:
@@ -502,6 +504,7 @@ def graphMicrogrid(pathToOmd, pathToJson, pathToCsv, outputFile, settingsFile, u
 		loadShed = key['Shedded loads']
 		if len(loadShed) != 0:
 			for entry in loadShed:
+				cumulativeLoadsShed.append(entry)
 				if entry not in loadsShed:
 					actionDevice.append(entry)
 					actionTime.append(str(timestep))
@@ -726,7 +729,25 @@ def graphMicrogrid(pathToOmd, pathToJson, pathToCsv, outputFile, settingsFile, u
 	with open(pJoin(workDir,'geoDict.js'),'w') as outFile:
 		json.dump(feederMap, outFile, indent=4)
 	# Generate customer outage outputs
-	customerOutageData = pd.read_csv(pathToCsv)
+	try:
+		customerOutageData = pd.read_csv(pathToCsv)
+	except:
+		deviceTimeline = data["Device action timeline"]
+		loadsShed = []
+		for line in deviceTimeline:
+			loadsShed.append(line["Shedded loads"])
+		customerOutageData = pd.DataFrame(columns=['Customer Name','Season','Business Type','Load Name'])
+		for elementDict in tree.values():
+			if elementDict['object'] == 'load' and float(elementDict['kw'])>.1 and elementDict['name'] in loadsShed[0]:
+				loadName = elementDict['name']
+				avgLoad = float(elementDict['kw'])/2.5
+				busType = 'residential'*(avgLoad<=10) + 'retail'*(avgLoad>10)*(avgLoad<=20) + 'agriculture'*(avgLoad>20)*(avgLoad<=39) + 'public'*(avgLoad>39)*(avgLoad<=50) + 'services'*(avgLoad>50)*(avgLoad<=100) + 'manufacturing'*(avgLoad>100)
+				outDuration = 0
+				for line in loadsShed:
+					if loadName in line and outDuration <= 23:
+						outDuration += stepSize
+				outDuration = int(outDuration)
+				customerOutageData.loc[len(customerOutageData.index)] =[loadName,'summer',busType,loadName]
 	numberRows = math.ceil(customerOutageData.shape[0]/2)
 	fig, axs = plt.subplots(numberRows, 2)
 	row = 0
@@ -735,40 +756,55 @@ def graphMicrogrid(pathToOmd, pathToJson, pathToCsv, outputFile, settingsFile, u
 	globalMax = 0
 	fig = go.Figure()
 	businessTypes = set(customerOutageData['Business Type'])
+	avgkWColumn = []
+	durationColumn = []
+	while row < customerOutageData.shape[0]:
+		customerName = str(customerOutageData.loc[row, 'Customer Name'])
+		loadName = str(customerOutageData.loc[row, 'Load Name'])
+		businessType = str(customerOutageData.loc[row, 'Business Type'])
+		duration = str(0)
+		averagekWperhr = str(0)
+		for elementDict in tree.values():
+			if elementDict['object'] == 'load' and elementDict['name'] == loadName:
+				averagekWperhr = str(float(elementDict['kw'])/2.5)
+				duration = str(cumulativeLoadsShed.count(loadName) * stepSize)
+		if float(duration) >= .1 and float(averagekWperhr) >= .1:
+			durationColumn.append(duration)
+			avgkWColumn.append(float(averagekWperhr))
+			season = str(customerOutageData.loc[row, 'Season'])
+			customerOutageCost, kWperhrEstimate, times, localMax = customerCost1(duration, season, averagekWperhr, businessType)
+			average_lost_kwh.append(float(averagekWperhr))
+			outageCost.append(customerOutageCost)
+			if localMax > globalMax:
+				globalMax = localMax
+			# creating series
+			timesSeries = pd.Series(times)
+			kWperhrSeries = pd.Series(kWperhrEstimate)
+			trace = py.graph_objs.Scatter(
+				x = timesSeries,
+				y = kWperhrSeries,
+				name = customerName,
+				hoverlabel = dict(namelength = -1),
+				hovertemplate = 
+				'<b>Duration</b>: %{x} h<br>' +
+				'<b>Cost</b>: $%{y:.2f}')
+			fig.add_trace(trace)
+			row += 1
+		else:
+			customerOutageData = customerOutageData.drop(index=row)
+			customerOutageData = customerOutageData.reset_index(drop=True)
+	customerOutageData.insert(1, "Duration", durationColumn, True)
+	customerOutageData.insert(3, "Average kW/hr", avgkWColumn, True)
 	maxDuration = max([float(x) for x in list(customerOutageData['Duration'])])
 	customersOutByTime = [{busType: 0 for busType in businessTypes} for x in range(math.ceil(maxDuration)+1)]
 	customerCostByTime = [{busType: 0.0 for busType in businessTypes} for x in range(math.ceil(maxDuration)+1)]
 	outageCostsByType = {busType: [] for busType in businessTypes}
 	customerCountByType = {busType: 0 for busType in businessTypes}
-	while row < customerOutageData.shape[0]:
-		customerName = str(customerOutageData.loc[row, 'Customer Name'])
-		duration = str(customerOutageData.loc[row, 'Duration'])
-		season = str(customerOutageData.loc[row, 'Season'])
-		averagekWperhr = str(customerOutageData.loc[row, 'Average kW/hr'])
-		businessType = str(customerOutageData.loc[row, 'Business Type'])
-		loadName = str(customerOutageData.loc[row, 'Load Name'])
-		customerOutageCost, kWperhrEstimate, times, localMax = customerCost1(duration, season, averagekWperhr, businessType)
-		average_lost_kwh.append(float(averagekWperhr))
-		outageCost.append(customerOutageCost)
-		if localMax > globalMax:
-			globalMax = localMax
-		customersOutByTime[math.floor(float(duration))][businessType] += 1
-		customerCostByTime[math.floor(float(duration))][businessType] += float(customerOutageCost)
-		outageCostsByType[businessType].append(float(customerOutageCost))
-		customerCountByType[businessType] += 1
-		# creating series
-		timesSeries = pd.Series(times)
-		kWperhrSeries = pd.Series(kWperhrEstimate)
-		trace = py.graph_objs.Scatter(
-			x = timesSeries,
-			y = kWperhrSeries,
-			name = customerName,
-			hoverlabel = dict(namelength = -1),
-			hovertemplate = 
-			'<b>Duration</b>: %{x} h<br>' +
-			'<b>Cost</b>: $%{y:.2f}')
-		fig.add_trace(trace)
-		row += 1
+	customersOutByTime[math.floor(float(duration))][businessType] += 1
+	customerCostByTime[math.floor(float(duration))][businessType] += float(customerOutageCost)
+	outageCostsByType[businessType].append(float(customerOutageCost))
+	customerCountByType[businessType] += 1
+
 	# def deciles(dList): return [0.0] + quantiles([float(x) for x in dList], n=10) + [max([float(x) for x in dList])]
 	# outageDeciles = deciles(customerOutageData['Duration'].tolist())
 	# costDeciles = deciles(outageCost)
@@ -780,7 +816,7 @@ def graphMicrogrid(pathToOmd, pathToJson, pathToCsv, outputFile, settingsFile, u
 	meanCustomerCost = totalCustomerCost / len(outageCost)
 	outageCostByType = {busType: sum(outageCostsByType[busType]) for busType in businessTypes}
 	customerCountByType = {busType: len(outageCostsByType[busType]) for busType in businessTypes}
-	meanCustomerCostByType = {busType: outageCostByType[busType]/customerCountByType[busType] for busType in businessTypes}
+	# meanCustomerCostByType = {busType: outageCostByType[busType]/customerCountByType[busType] for busType in businessTypes}
 	# customersByTypeAndDecile = [{busType: len([cost for cost in outageCostsByType[busType] if (cost>costDeciles[x])*(cost<=costDeciles[x+1])]) for busType in businessTypes} for x in range(10)]
 	# print(customersOutByTime, customerCostByTime, totalCustomerCost, meanCustomerCost, outageCostByType, meanCustomerCostByType, outageDeciles, costDeciles, customersByTypeAndDecile) # ToDo: Display in front end.
 
