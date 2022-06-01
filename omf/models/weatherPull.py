@@ -154,7 +154,7 @@ def new(modelDir):
         #'tmy3',
         #'surfrad',
         #'ndfd'
-        ][8]
+        ][0]
 	defaultInputs = {
 		"user": "admin",
 		'source': source,
