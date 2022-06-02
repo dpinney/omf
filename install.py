@@ -28,9 +28,7 @@ if major_platform == "Linux" and "ubuntu" in linux_distro:
 	# os.system("sudo apt-get dist-upgrade")
 	# os.system("sudo apt --fix-broken install")
 	# os.system("sudo dpkg --configure -a")
-	os.system("sudo DEBIAN_FRONTEND=noninteractive apt-get -y install git python3-pip python3-dev python3-numpy graphviz \
-		unixodbc-dev libfreetype6-dev pkg-config alien libgraphviz-dev python3-pydot python3-tk octave libblas-dev liblapack-dev \
-		libatlas-base-dev gfortran wget splat python3-pygraphviz")
+	os.system("sudo DEBIAN_FRONTEND=noninteractive apt-get -y install git python3-pip python3-dev python3-numpy unixodbc-dev libfreetype6-dev pkg-config alien python3-pydot python3-tk octave libblas-dev liblapack-dev libatlas-base-dev gfortran wget splat")
 	os.system("sudo apt-get -y install ffmpeg python3-cairocffi") # Separate to better support debian.
 	# os.system("wget https://sourceforge.net/projects/gridlab-d/files/gridlab-d/Candidate%20release/gridlabd-4.0.0-1.el6.x86_64.rpm")
 	os.system("sudo alien -i omf/static/gridlabd-4.0.0-1.el6.x86_64.rpm")
@@ -45,7 +43,7 @@ if major_platform == "Linux" and "ubuntu" in linux_distro:
 elif major_platform == "Linux" and "ubuntu" not in linux_distro:
 	# CentOS Docker image appears to come with en_US.UTF-8 locale built-in, but we might need to install that locale in the future. That currently is not done here.
 	os.system("sudo yum -y update") # Make sure yum is updated to prevent any weird package installation issues
-	os.system("sudo yum -y install wget git graphviz gcc xerces-c python-devel tkinter octave 'graphviz-devel.x86_64'")
+	os.system("sudo yum -y install wget git gcc xerces-c python-devel tkinter octave")
 	os.system("sudo yum --enablerepo=extras install epel-release")
 	os.system("sudo yum -y install mdbtools")
 	os.system("sudo rpm --import http://li.nux.ro/download/nux/RPM-GPG-KEY-nux.ro")
@@ -69,7 +67,6 @@ elif major_platform == 'Windows':
 	os.system("choco install -y --no-progress wget")
 	# os.system("choco install -y --no-progress vcredist-all")
 	os.system("choco install -y --no-progress ffmpeg")
-	os.system("choco install graphviz --no-progress --version=2.38.0.20171119")
 	os.system("choco install -y --no-progress pip")
 	os.system("choco install -y --no-progress octave.portable")
 	# TODO: find way to install mdbtools.
@@ -84,20 +81,13 @@ elif major_platform == 'Windows':
 	# os.system(f"wget -P {source_dir}/omf/solvers/ 'https://github.com/MATPOWER/matpower/releases/download/7.0/matpower7.0.zip'")
 	# os.system(f"unzip '{source_dir}/omf/solvers/matpower7.0.zip' -d {source_dir}/omf/solvers/")
 	os.system(f'octave-cli --no-gui -p "{source_dir}/omf/solvers/matpower7.0" --eval "install_matpower(1,1,1)"')
-	# Install pygraphviz from wheel because it's finicky
-	graphVizBinPath = 'C:\\Program Files (x86)\\Graphviz2.38\\bin'
-	os.system(f'setx path "%path%;{graphVizBinPath}"')
-	os.system(f"set PATH=%PATH%;{graphVizBinPath}")
-	os.system("wget --no-check-certificate https://github.com/CristiFati/Prebuilt-Binaries/blob/667f5add9c244096d6ecfb44e510b4ab20b93cac/PyGraphviz/v1.6/pygraphviz-1.6-cp39-cp39-win_amd64.whl")
-	os.system(f'{sys.executable} -m pip install pygraphviz-1.6-cp39-cp39-win_amd64.whl')
-	# os.system('python -m pip install omf\\static\\pygraphviz-1.5-cp36-cp36m-win_amd64.whl')
 	# Finish up installation with pip.
 	pipInstallInOrder(f"{sys.executable} -m pip")
 	os.system(f"{sys.executable} setup.py develop")
 	# os.system("refreshenv") # Refresh local environment variables via choco tool.
 elif major_platform == "Darwin": # MacOS
 	# Install homebrew
-	os.system("HOMEBREW_NO_AUTO_UPDATE=1 brew install wget ffmpeg git graphviz octave mdbtools") # Set no-update to keep homebrew from blowing away python3.
+	os.system("HOMEBREW_NO_AUTO_UPDATE=1 brew install wget ffmpeg git octave mdbtools") # Set no-update to keep homebrew from blowing away python3.
 	#os.system("wget -O gridlabd.dmg --no-check-certificate https://sourceforge.net/projects/gridlab-d/files/gridlab-d/Candidate%20release/gridlabd_4.0.0.dmg")
 	os.system("sudo hdiutil attach omf/static/gridlabd-4.0_RC1.dmg")
 	os.system('sudo installer -package "/Volumes/GridLAB-D 4.0.0/gridlabd.mpkg" -target /')
@@ -116,7 +106,6 @@ elif major_platform == "Darwin": # MacOS
 	# pip installs
 	os.system("cd omf")
  	# os.system('pip3 install ecos')
-	os.system(f'{sys.executable} -m pip install --global-option=build_ext --global-option="-I$(brew --prefix graphviz)/include/" --global-option="-L$(brew --prefix graphviz)/lib/" pygraphviz')
 	pipInstallInOrder(f"{sys.executable} -m pip")
 	os.system(f"{sys.executable} setup.py develop")
 else:

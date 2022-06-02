@@ -201,7 +201,9 @@ def latlonToNet(inGraph, inNet):
 	''' Add lat/lon information to network json. '''
 	cleanG = nx.Graph(inGraph.edges())
 	cleanG.add_nodes_from(inGraph)
-	pos = nx.nx_agraph.graphviz_layout(cleanG, prog='neato')
+	# pos = nx.nx_agraph.graphviz_layout(cleanG, prog='neato')
+	pos = nx.kamada_kawai_layout(cleanG)
+	pos = {k:(1000 * pos[k][0],1000 * pos[k][1]) for k in pos} # get out of array notation
 	for idnum, item in inNet['bus'].items():
 		obName = item.get('bus_i')
 		thisPos = pos.get(obName, None)

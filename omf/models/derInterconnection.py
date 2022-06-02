@@ -2,7 +2,6 @@
 import glob, json, os, tempfile, shutil, csv, math, warnings, random, copy, base64, platform
 from os.path import join as pJoin
 import networkx as nx
-from networkx.drawing.nx_agraph import graphviz_layout
 
 # Hack: Agg backend doesn't work for interactivity. Switch to something we can use:
 import matplotlib
@@ -711,7 +710,9 @@ def drawPlot(tree, nodeDict=None, edgeDict=None, edgeLabsDict=None, displayLabs=
 		# HACK: work on a new graph without attributes because graphViz tries to read attrs.
 		cleanG = nx.Graph(fGraph.edges())
 		cleanG.add_nodes_from(fGraph)
-		positions = graphviz_layout(cleanG, prog='neato')
+		# positions = graphviz_layout(cleanG, prog='neato')
+		positions = nx.kamada_kawai_layout(cleanG)
+		positions = {k:(1000 * pos[k][0],1000 * pos[k][1]) for k in pos} # get out of array notation
 	else:
 		positions = {n:fGraph.nodes[n].get('pos',(0,0))[::-1] for n in fGraph}
 	
