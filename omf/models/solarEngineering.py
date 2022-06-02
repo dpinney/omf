@@ -356,7 +356,7 @@ def generateVoltChart(tree, rawOut, modelDir, neatoLayout=True):
 		# was formerly : positions = nx.graphviz_layout(cleanG, prog='neato') but this threw an error
 		# positions = nx.nx_agraph.graphviz_layout(cleanG, prog='neato')
 		positions = nx.kamada_kawai_layout(cleanG)
-		positions = {k:(1000 * pos[k][0],1000 * pos[k][1]) for k in pos} # get out of array notation
+		positions = {k:(1000 * positions[k][0],1000 * positions[k][1]) for k in positions} # get out of array notation
 	else:
 		rawPositions = {n:fGraph.nodes[n].get('pos',(0,0)) for n in fGraph}
 		#HACK: the import code reverses the y coords.
