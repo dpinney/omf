@@ -325,7 +325,7 @@ def adminControls():
 
 @app.route("/omfStats")
 @flask_login.login_required
-def omfStats():
+def omfStatsView():
 	'''Render log visualizations.'''
 	if User.cu() != "admin":
 		return redirect("/")
@@ -338,8 +338,7 @@ def regenOmfStats():
 	'''Regenarate stats images.'''
 	if User.cu() != "admin":
 		return redirect("/")
-	genAllImages = omfStats.genAllImages
-	genImagesProc = Process(target=genAllImages, args=[])
+	genImagesProc = Process(target=omfStats.genAllImages, args=[])
 	genImagesProc.start()
 	return redirect("/omfStats")
 
@@ -2116,6 +2115,6 @@ if __name__ == "__main__":
 	template_files = ["templates/"+ x  for x in safeListdir("templates")]
 	model_files = ["models/" + x for x in safeListdir("models")]
 	print('App starting with gunicorn. Errors are going to omf.error.log.')
-	appProc = Popen(['gunicorn', '-w', '5', '-b', '0.0.0.0:5000', 'web:app','--worker-class=sync', '--access-logfile', 'omf.access.log', '--error-logfile', 'omf.error.log', '--capture-output', '--reload', '--reload-extra-file', 'templates', '--reload-extra-file', 'models'])
+	appProc = Popen(['gunicorn', '-w', '5', '-b', '0.0.0.0:5000', '--preload', 'web:app','--worker-class=sync', '--access-logfile', 'omf.access.log', '--error-logfile', 'omf.error.log', '--capture-output'])
 	appProc.wait()
 	# app.run(debug=True, host="0.0.0.0", extra_files=template_files + model_files)
