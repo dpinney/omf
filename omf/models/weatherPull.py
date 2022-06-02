@@ -140,19 +140,38 @@ def work(modelDir, inputDict):
 		'errorCount': len([e for e in data if e in [-9999.0, -99999.0, -999.0, -99.0]]),
 		'stdout': 'Success' }
 
+
 def new(modelDir):
 	''' Create a new instance of this model. Returns true on success, false on failure. '''
+	source = [
+        'ASOS',
+        'USCRN',
+        #'darkSky',
+        'NRSDB',
+        'easySolarGhi',
+        'easySolarDhi',
+        'easySolarDni',
+        #'tmy3',
+        #'surfrad',
+        #'ndfd'
+        ][0]
 	defaultInputs = {
 		"user": "admin",
-		#"source":"ASOS", 
-		"source": "USCRN",
+		'source': source,
 		"year": "2013",
 		"stationASOS": "LWD",
 		"stationUSCRN": "KY_Versailles_3_NNW",
 		"weatherParameterUSCRN": "SOLARAD",
 		"weatherParameterASOS": "tmpc",
-		"LatInput": "39.828362",
-		"LonInput": "-98.579490",
+		'LatInput': '39.828362',
+		'LonInput': '-98.579490',
+		'weatherParameterdarkSky': '',
+		'weatherParameterNRSDB': 'Pressure',
+		'easySolarStation': 'TX_Austin_33_NW',
+		'weatherParameterTmy3': 'TBD',
+		'weatherParameterSurfrad': '',
+		'surfradSite': 'PSU',
+		'ndfdParam': '',
 		"modelType": modelName}
 	return __neoMetaModel__.new(modelDir, defaultInputs)
 
