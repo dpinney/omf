@@ -1,4 +1,4 @@
-import platform, os, sys
+import platform, os, sys, urllib
 
 source_dir = os.path.dirname(__file__)
 
@@ -28,7 +28,7 @@ if major_platform == "Linux" and "ubuntu" in linux_distro:
 	# os.system("sudo apt-get dist-upgrade")
 	# os.system("sudo apt --fix-broken install")
 	# os.system("sudo dpkg --configure -a")
-	os.system("sudo DEBIAN_FRONTEND=noninteractive apt-get -y install git python3-pip python3-dev python3-numpy unixodbc-dev libfreetype6-dev pkg-config alien python3-pydot python3-tk octave libblas-dev liblapack-dev libatlas-base-dev gfortran wget splat")
+	os.system("sudo DEBIAN_FRONTEND=noninteractive apt-get -y install git python3-pip python3-dev python3-numpy unixodbc-dev libfreetype6-dev pkg-config alien python3-pydot python3-tk octave libblas-dev liblapack-dev libatlas-base-dev gfortran splat")
 	os.system("sudo apt-get -y install ffmpeg python3-cairocffi") # Separate to better support debian.
 	# os.system("wget https://sourceforge.net/projects/gridlab-d/files/gridlab-d/Candidate%20release/gridlabd-4.0.0-1.el6.x86_64.rpm")
 	os.system("sudo alien -i omf/static/gridlabd-4.0.0-1.el6.x86_64.rpm")
@@ -43,7 +43,7 @@ if major_platform == "Linux" and "ubuntu" in linux_distro:
 elif major_platform == "Linux" and "ubuntu" not in linux_distro:
 	# CentOS Docker image appears to come with en_US.UTF-8 locale built-in, but we might need to install that locale in the future. That currently is not done here.
 	os.system("sudo yum -y update") # Make sure yum is updated to prevent any weird package installation issues
-	os.system("sudo yum -y install wget git gcc xerces-c python-devel tkinter octave")
+	os.system("sudo yum -y install git gcc xerces-c python-devel tkinter octave")
 	os.system("sudo yum --enablerepo=extras install epel-release")
 	os.system("sudo yum -y install mdbtools")
 	os.system("sudo rpm --import http://li.nux.ro/download/nux/RPM-GPG-KEY-nux.ro")
@@ -64,7 +64,6 @@ elif major_platform == 'Windows':
 	# Update pip to remove warnings
 	os.system(f"{sys.executable} -m pip install --upgrade pip")
 	# Install choco packages.
-	os.system("choco install -y --no-progress wget")
 	# os.system("choco install -y --no-progress vcredist-all")
 	os.system("choco install -y --no-progress ffmpeg")
 	os.system("choco install -y --no-progress pip")
@@ -87,21 +86,22 @@ elif major_platform == 'Windows':
 	# os.system("refreshenv") # Refresh local environment variables via choco tool.
 elif major_platform == "Darwin": # MacOS
 	# Install homebrew
-	os.system("HOMEBREW_NO_AUTO_UPDATE=1 brew install wget ffmpeg git octave mdbtools") # Set no-update to keep homebrew from blowing away python3.
+	os.system("HOMEBREW_NO_AUTO_UPDATE=1 brew install ffmpeg git octave mdbtools") # Set no-update to keep homebrew from blowing away python3.
 	#os.system("wget -O gridlabd.dmg --no-check-certificate https://sourceforge.net/projects/gridlab-d/files/gridlab-d/Candidate%20release/gridlabd_4.0.0.dmg")
 	os.system("sudo hdiutil attach omf/static/gridlabd-4.0_RC1.dmg")
 	os.system('sudo installer -package "/Volumes/GridLAB-D 4.0.0/gridlabd.mpkg" -target /')
 	os.system('sudo hdiutil detach "/Volumes/GridLAB-D 4.0.0"')
 	# splat install
-	os.system("wget https://www.qsl.net/kd2bd/splat-1.4.2-osx.tgz")
+	urllib.request.urlretrieve("https://www.qsl.net/kd2bd/splat-1.4.2-osx.tgz", "splat-1.4.2-osx.tgz")
+	# os.system("wget https://www.qsl.net/kd2bd/splat-1.4.2-osx.tgz")
 	os.system("sudo tar -xvzf splat-1.4.2-osx.tgz")
 	os.system('''
 		cd splat-1.4.2;
 		sed -i '' 's/ans=""/ans="2"/g' configure;
 		sudo bash configure;
 	''') # sed is to hack the build to work without user input.
-	os.system(f"wget -P {source_dir}/omf/solvers/ 'https://github.com/MATPOWER/matpower/releases/download/7.0/matpower7.0.zip'")
-	os.system(f"unzip '{source_dir}/omf/solvers/matpower7.0.zip' -d {source_dir}/omf/solvers/")
+	# os.system(f"wget -P {source_dir}/omf/solvers/ 'https://github.com/MATPOWER/matpower/releases/download/7.0/matpower7.0.zip'")
+	# os.system(f"unzip '{source_dir}/omf/solvers/matpower7.0.zip' -d {source_dir}/omf/solvers/")
 	os.system(f'octave-cli --no-gui -p "{source_dir}/omf/solvers/matpower7.0" --eval "install_matpower(1,1,1)"')
 	# pip installs
 	os.system("cd omf")

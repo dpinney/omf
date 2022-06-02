@@ -14,6 +14,7 @@ def runCommands(commandList : list):
 
 def install_onm(target : list = platform.system()):
 	''' WARNING, WIP. TODO: Linux support, license check, tests. '''
+	#TODO: replace wget with `python -c "from urllib.request import urlretrieve as wget; wget(URL, OUT_FILE_PATH)"`
 	installCmd = {
 		'Darwin' : [
 			'sudo cat /Library/gurobi/gurobi.lic',
