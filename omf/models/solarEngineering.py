@@ -487,7 +487,7 @@ def generateVoltChart(tree, rawOut, modelDir, neatoLayout=True):
 		return nodeColors,
 	mapTimestamp = datetime.datetime.now().strftime("%Y-%m-%d_%H:%M:%S")
 	anim = FuncAnimation(voltChart, update, frames=len(rawOut['aVoltDump.csv']['# timestamp']), interval=200, blit=False)
-	anim.save(pJoin(modelDir,'voltageChart_'+ mapTimestamp +'.mp4'), codec='h264', extra_args=['-pix_fmt', 'yuv420p'])
+	anim.save(pJoin(modelDir,'voltageChart_'+ mapTimestamp +'.mp4'), codec='h264') #, extra_args=['-pix_fmt', 'yuv420p']
 	# Reclaim memory by closing, deleting and garbage collecting the last chart.
 	voltChart.clf()
 	plt.close()
