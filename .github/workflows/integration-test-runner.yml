@@ -23,7 +23,7 @@ jobs:
         run: |
           brew link --overwrite python@3.8 #already installed but python3.9 is default
           pip3 install ecos #because it's having trouble not going first
-          HOMEBREW_NO_AUTO_UPDATE=1 brew install octave #workaround for flakey octave
+          HOMEBREW_NO_AUTO_UPDATE=1 brew install octave ffmpeg #workaround for flakey pathing
           python3 install.py
       - name: Run tests
         run: |

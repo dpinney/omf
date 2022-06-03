@@ -11,7 +11,7 @@ from matplotlib import animation
 from matplotlib.animation import FuncAnimation
 if platform.system() == 'Darwin':
 	matplotlib.use('TkAgg')
-	plt.rcParams['animation.ffmpeg_path'] = '/usr/local/bin/ffmpeg'
+	# plt.rcParams['animation.ffmpeg_path'] = '/usr/local/bin/ffmpeg'
 else:
 	matplotlib.use('Agg')
 from omf import feeder, weather
