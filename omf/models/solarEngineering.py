@@ -5,17 +5,15 @@ from os.path import join as pJoin
 from functools import reduce
 import numpy as np
 import networkx as nx
-
 import matplotlib
-if platform.system() == 'Darwin':
-	matplotlib.use('TkAgg')
-else:
-	matplotlib.use('Agg')
 from matplotlib import pyplot as plt
 from matplotlib import animation
 from matplotlib.animation import FuncAnimation
-
-# OMF imports
+if platform.system() == 'Darwin':
+	matplotlib.use('TkAgg')
+	plt.rcParams['animation.ffmpeg_path'] = '/usr/local/bin/ffmpeg'
+else:
+	matplotlib.use('Agg')
 from omf import feeder, weather
 from omf.solvers import gridlabd
 from omf.models import __neoMetaModel__
