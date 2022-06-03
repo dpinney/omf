@@ -12,6 +12,7 @@ if platform.system() == 'Darwin':
 else:
 	matplotlib.use('Agg')
 from matplotlib import pyplot as plt
+from matplotlib import animation
 from matplotlib.animation import FuncAnimation
 
 # OMF imports
@@ -477,6 +478,7 @@ def generateVoltChart(tree, rawOut, modelDir, neatoLayout=True):
 	plt.clim(110,130)
 	plt.colorbar()
 	plt.title(rawOut['aVoltDump.csv']['# timestamp'][0])
+	plt.tight_layout()
 	def update(step):
 		nodeColors = np.array([nodeVolts[step].get(n,0) for n in fGraph.nodes()])
 		if len(lineCurrents)>0:
@@ -487,7 +489,8 @@ def generateVoltChart(tree, rawOut, modelDir, neatoLayout=True):
 		return nodeColors,
 	mapTimestamp = datetime.datetime.now().strftime("%Y-%m-%d_%H:%M:%S")
 	anim = FuncAnimation(voltChart, update, frames=len(rawOut['aVoltDump.csv']['# timestamp']), interval=200, blit=False)
-	anim.save(pJoin(modelDir,'voltageChart_'+ mapTimestamp +'.mp4'), codec='h264', writer="ffmpeg") #, extra_args=['-pix_fmt', 'yuv420p']
+	ffmpegwriter = animation.FFMpegWriter(codec='h264', extra_args=['-pix_fmt', 'yuv420p'])
+	anim.save(pJoin(modelDir,'voltageChart_'+ mapTimestamp +'.mp4'), writer=ffmpegwriter)
 	# Reclaim memory by closing, deleting and garbage collecting the last chart.
 	voltChart.clf()
 	plt.close()
