@@ -758,15 +758,24 @@ def graphMicrogrid(pathToOmd, pathToJson, pathToCsv, outputFile, settingsFile, u
 	businessTypes = set(customerOutageData['Business Type'])
 	avgkWColumn = []
 	durationColumn = []
+	dssTree = dssConvert.dssToTree(f'{workDir}/circuitOmfCompatible.dss')
+	loadShapeMean = {}
+	for dssLine in dssTree:
+		if 'object' in dssLine and dssLine['object'].split('.')[0] == 'loadshape':
+			shape = dssLine['mult'].replace('[','').replace('(','').replace(']','').replace(')','').split(',')
+			shape = [float(y) for y in shape]
+			loadShapeMean[dssLine['object'].split('.')[1]] = np.mean(shape)
+
 	while row < customerOutageData.shape[0]:
 		customerName = str(customerOutageData.loc[row, 'Customer Name'])
 		loadName = str(customerOutageData.loc[row, 'Load Name'])
 		businessType = str(customerOutageData.loc[row, 'Business Type'])
 		duration = str(0)
 		averagekWperhr = str(0)
-		for elementDict in tree.values():
-			if elementDict['object'] == 'load' and elementDict['name'] == loadName:
-				averagekWperhr = str(float(elementDict['kw'])/2.5)
+		for elementDict in dssTree:
+			if 'object' in elementDict and elementDict['object'].split('.')[0] == 'load' and elementDict['object'].split('.')[1] == loadName:
+				if 'daily' in elementDict: averagekWperhr = float(loadShapeMean[elementDict['daily']]) * float(elementDict['kw'])
+				else: averagekWperhr = str(float(elementDict['kw'])/2.5)
 				duration = str(cumulativeLoadsShed.count(loadName) * stepSize)
 		if float(duration) >= .1 and float(averagekWperhr) >= .1:
 			durationColumn.append(duration)
@@ -904,6 +913,7 @@ def work(modelDir, inputDict):
 	tree = omd['tree']
 	# Output a .dss file, which will be needed for ONM.
 	niceDss = dssConvert.evilGldTreeToDssTree(tree)
+	dssConvert.treeToDss(niceDss, f'{modelDir}/circuitOmfCompatible.dss') # for querying loadshapes
 	dssConvert.treeToDss(niceDss, f'{modelDir}/circuit.dss')
 	# Remove syntax that ONM doesn't like.
 	with open(f'{modelDir}/circuit.dss','r') as dss_file:
