@@ -243,7 +243,7 @@ def utilityOutageTable(average_lost_kwh, profit_on_energy_sales, restoration_cos
 
 def customerCost1(duration, season, averagekWperhr, businessType):
 	'function to determine customer outage cost based on season, annual kWh usage, and business type'
-	duration = int(duration)
+	duration = float(duration)
 	averagekW = float(averagekWperhr)
 
 	times = np.array([0,1,2,3,4,5,6,7,8])
@@ -388,7 +388,9 @@ def customerCost1(duration, season, averagekWperhr, businessType):
 	kWperhrEstimate = 1.21 * kWperhrEstimate
 	# find the estimated customer outage cost for the customer in question, given the duration of the outage
 	times = np.array([0,1,2,3,4,5,6,7,8])
-	outageCost = kWperhrEstimate[duration] * (duration>0)
+	wholeHours = int(math.floor(duration))
+	partialHour = duration - wholeHours
+	outageCost = (kWperhrEstimate[wholeHours] + (kWperhrEstimate[wholeHours+1] - kWperhrEstimate[wholeHours])*partialHour) * (duration>0)
 	localMax = 0
 	row = 0
 	while row < 9:
@@ -467,7 +469,7 @@ def graphMicrogrid(pathToOmd, pathToJson, pathToCsv, outputFile, settingsFile, u
 		for i in data['Simulation time steps']:
 			simTimeSteps.append(float(i))
 		numTimeSteps = len(simTimeSteps)
-		stepSize = 1 #TODO: change this to use the "Simulation time steps" interval in the ONM output. Note the unit is hours.
+		stepSize = simTimeSteps[1]-simTimeSteps[0]
 		#TODO: change stepSize to stepSizeHours to make it clear what's going on.
 		voltages = data['Voltages']
 		outageDuration = stepSize * numTimeSteps
@@ -742,11 +744,6 @@ def graphMicrogrid(pathToOmd, pathToJson, pathToCsv, outputFile, settingsFile, u
 				loadName = elementDict['name']
 				avgLoad = float(elementDict['kw'])/2.5
 				busType = 'residential'*(avgLoad<=10) + 'retail'*(avgLoad>10)*(avgLoad<=20) + 'agriculture'*(avgLoad>20)*(avgLoad<=39) + 'public'*(avgLoad>39)*(avgLoad<=50) + 'services'*(avgLoad>50)*(avgLoad<=100) + 'manufacturing'*(avgLoad>100)
-				outDuration = 0
-				for line in loadsShed:
-					if loadName in line and outDuration <= 23:
-						outDuration += stepSize
-				outDuration = int(outDuration)
 				customerOutageData.loc[len(customerOutageData.index)] =[loadName,'summer',busType,loadName]
 	numberRows = math.ceil(customerOutageData.shape[0]/2)
 	fig, axs = plt.subplots(numberRows, 2)
@@ -759,12 +756,14 @@ def graphMicrogrid(pathToOmd, pathToJson, pathToCsv, outputFile, settingsFile, u
 	avgkWColumn = []
 	durationColumn = []
 	dssTree = dssConvert.dssToTree(f'{workDir}/circuitOmfCompatible.dss')
-	loadShapeMean = {}
+	loadShapeMeanMultiplier = {}
+	loadShapeMeanActual = {}
 	for dssLine in dssTree:
 		if 'object' in dssLine and dssLine['object'].split('.')[0] == 'loadshape':
 			shape = dssLine['mult'].replace('[','').replace('(','').replace(']','').replace(')','').split(',')
 			shape = [float(y) for y in shape]
-			loadShapeMean[dssLine['object'].split('.')[1]] = np.mean(shape)
+			if 'useactual' in dssLine and dssLine['useactual'] == 'yes': loadShapeMeanActual[dssLine['object'].split('.')[1]] = np.mean(shape)
+			else: loadShapeMeanMultiplier[dssLine['object'].split('.')[1]] = np.mean(shape)
 
 	while row < customerOutageData.shape[0]:
 		customerName = str(customerOutageData.loc[row, 'Customer Name'])
@@ -774,8 +773,8 @@ def graphMicrogrid(pathToOmd, pathToJson, pathToCsv, outputFile, settingsFile, u
 		averagekWperhr = str(0)
 		for elementDict in dssTree:
 			if 'object' in elementDict and elementDict['object'].split('.')[0] == 'load' and elementDict['object'].split('.')[1] == loadName:
-				if 'daily' in elementDict: averagekWperhr = float(loadShapeMean[elementDict['daily']]) * float(elementDict['kw'])
-				else: averagekWperhr = str(float(elementDict['kw'])/2.5)
+				if 'daily' in elementDict: averagekWperhr = float(loadShapeMeanMultiplier.get(elementDict['daily'],0)) * float(elementDict['kw']) + float(loadShapeMeanActual.get(elementDict['daily'],0))
+				else: averagekWperhr = float(elementDict['kw'])/2
 				duration = str(cumulativeLoadsShed.count(loadName) * stepSize)
 		if float(duration) >= .1 and float(averagekWperhr) >= .1:
 			durationColumn.append(duration)
@@ -1066,7 +1065,7 @@ def new(modelDir):
 		'restoration_cost': '100',
 		'hardware_cost': '550',
 		'customerFileName': cust_file_path[-1],
-		'customerData': open(pJoin(*cust_file_path)).read(),
+		'customerData': '',
 		'eventFileName': event_file_path[-1],
 		'eventData': open(pJoin(*event_file_path)).read(),
 		'outputFileName': output_file_path[-1],
