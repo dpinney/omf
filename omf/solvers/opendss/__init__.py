@@ -326,6 +326,21 @@ def get_bus_kv_mappings(path_to_dss):
 	out_dict = {x[0].lower():x[1] for x in out_data}
 	return out_dict
 
+def get_bus_phasing_map(path_to_dss):
+	''' Returns a map {bus_name:phase_list} where phase list a list of all powered phases (e.g. [1,3]).'''
+	voltagePlot(path_to_dss)
+	path_to_dss = os.path.abspath(path_to_dss)
+	file_loc = os.path.dirname(path_to_dss)
+	volt_file_loc = f'{file_loc}/volts.csv'
+	volt_df = pd.read_csv(volt_file_loc).set_index('Bus')
+	bus_df = volt_df.transpose()
+	results = {bus:[] for bus in bus_df.columns}
+	for bus in bus_df.columns:
+		for i, pu in enumerate([' pu1', ' pu2', ' pu3']):
+			if bus_df[bus][pu] > 0:
+				results[bus].append(i + 1)
+	return results
+
 def currentPlot(filePath):
 	''' Current plotting function.'''
 	dssFileLoc = os.path.dirname(os.path.abspath(filePath))
