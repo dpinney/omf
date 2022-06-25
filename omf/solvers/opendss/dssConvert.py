@@ -752,6 +752,11 @@ def dss_to_networkx(dssFilePath, tree=None):
 	]
 	full_edges = edges + edges_sub
 	G = nx.DiGraph(full_edges)
+	for ob in omd.values():
+		if 'latitude' in ob and 'longitude' in ob:
+			G.add_node(ob['name'],pos=(ob['longitude'],ob['latitude']))
+		else:
+			G.add_node(ob['name'])
 	return G
 
 def getDssCoordinates(omdFilePath, outFilePath):
