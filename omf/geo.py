@@ -112,23 +112,9 @@ def omdGeoJson(pathToOmdFile, conversion=False):
 		"type": "FeatureCollection",
 		"features": []
 	}
-	#Add nodes to geoJSON
+	#Get nodes
 	node_positions = {nodewithPosition: nxG.nodes[nodewithPosition]['pos'] for nodewithPosition in nx.get_node_attributes(nxG, 'pos')}
 	node_types = {nodewithType: nxG.nodes[nodewithType]['type'] for nodewithType in nx.get_node_attributes(nxG, 'type')}
-	# print(node_positions)
-	for node in node_positions:
-		geoJsonDict['features'].append({
-			"type": "Feature", 
-			"geometry":{
-				"type": "Point",
-				"coordinates": [node_positions[node][1], node_positions[node][0]]
-			},
-			"properties":{
-				"name": node,
-				#"pointType": node_types[node],
-				#"pointColor": _obToCol(node_types[node])
-			}
-		})
 	#Add edges to geoJSON
 	edge_types = {edge: nxG[edge[0]][edge[1]]['type'] for edge in nx.get_edge_attributes(nxG, 'type')}
 	edge_phases = {edge: nxG[edge[0]][edge[1]]['phases'] for edge in nx.get_edge_attributes(nxG, 'phases')}
@@ -148,6 +134,20 @@ def omdGeoJson(pathToOmdFile, conversion=False):
 			})
 		except KeyError:
 			print("!!! KeyError exception for edge " + str(edge))
+	# Add nodes 2nd so they show up on top of the z-order.
+	for node in node_positions:
+		geoJsonDict['features'].append({
+			"type": "Feature", 
+			"geometry":{
+				"type": "Point",
+				"coordinates": [node_positions[node][1], node_positions[node][0]]
+			},
+			"properties":{
+				"name": node,
+				#"pointType": node_types[node],
+				#"pointColor": _obToCol(node_types[node])
+			}
+		})
 	return geoJsonDict
 	#if not os.path.exists(outputPath):
 	#	os.makedirs(outputPath)
