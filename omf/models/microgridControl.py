@@ -303,14 +303,11 @@ def customerCost1(duration, season, averagekWperhr, businessType):
 	def kWhApprox(kWDict, averagekWperhr, iterate):
 		'helper function for approximating customer outage cost based on annual kWh by iteratively "averaging" the curves'
 		step = 0
-
 		# iterate the process a set number of times
 		while step < iterate:
-
 			#sort the current kWh values for which we have customer outage costs
 			keys = list(kWDict.keys())
 			keys.sort()
-
 			# find the current kWh values estimated that are closest to the average kW/hr input...
 			# ...then, estimate the outage costs for the kW/hr value directly between these
 			key = 0
@@ -321,7 +318,7 @@ def customerCost1(duration, season, averagekWperhr, businessType):
 					averageCost = (kWDict[keys[key]] + kWDict[keys[key+1]])/2
 					kWDict[newEntry] = averageCost
 					break
-				if float(averagekWperhr) > keys[key]:
+				if float(averagekWperhr) > keys[key+1]:
 					key+=1
 				else:
 					newEntry = (keys[key] + keys[key+1])/2
