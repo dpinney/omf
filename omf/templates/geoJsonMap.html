@@ -142,7 +142,8 @@
 			var popupContent = '';
 			for (const key in feature.properties) {
 				if (feature.properties.hasOwnProperty(key)) {
-					popupContent += feature.properties[key];
+					value = feature.properties[key]
+					popupContent += '<div>' + key + ': ' + value + '</div>'
 					layer.bindPopup(popupContent);
 				}
 			}

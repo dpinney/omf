@@ -439,33 +439,46 @@ def treeToNxGraph(inTree):
 		item = inTree[key]
 		# This check is why configuration objects never get coordinates. Or maybe this is intentional because configuration objects are added later?
 		if 'name' in item.keys():
+			item_name = item['name']
 			if 'parent' in item.keys():
-				outGraph.add_edge(item['name'], item['parent'], type='parentChild', phases=1)
-				outGraph.nodes[item['name']]['type'] = item['object']
+				# add edge and node for an object with a parent.
+				outGraph.add_edge(item_name, item['parent'], type='parentChild', phases=1)
+				# set all attributes.
+				for k in item:
+					outGraph.nodes[item_name][k] = item[k]
+				outGraph.nodes[item_name]['type'] = item['object']
 				# Note that attached houses via gridEdit.html won't have lat/lon values, so this try is a workaround.
 				try:
-					outGraph.nodes[item['name']]['pos'] = (float(item['latitude']), float(item['longitude']))
+					outGraph.nodes[item_name]['pos'] = (float(item['latitude']), float(item['longitude']))
 				except KeyError:
 					#if the grid object doesn't have a lat/lon, give it a lat/lon close or same to that of its parent if it has one
-					print("No coordinates found for " + item['name'] + ", looking for parent coordinates now...")
-					outGraph.nodes[item['name']]['pos'] = findParentCoords(inTree, item, defaultCoords)
+					print("No coordinates found for " + item_name + ", looking for parent coordinates now...")
+					outGraph.nodes[item_name]['pos'] = findParentCoords(inTree, item, defaultCoords)
 				except:
-					outGraph.nodes[item['name']]['pos'] = defaultCoords
+					outGraph.nodes[item_name]['pos'] = defaultCoords
 			elif 'from' in item.keys():
+				# add an edge for an edge-type object
 				myPhase = _phaseCount(item.get('phases','AN'))
 				outGraph.add_edge(item['from'], item['to'], name=item.get('name',''), type=item['object'], phases=myPhase)
-			elif item['name'] in outGraph:
+				for k in item:
+					outGraph.edges[(item['from'], item['to'])][k] = item[k]
+			elif item_name in outGraph:
 				# Edge already led to node's addition, so just set the attributes:
-				outGraph.nodes[item['name']]['type'] = item['object']
+				outGraph.nodes[item_name]['type'] = item['object']
+				for k in item:
+					outGraph.nodes[item_name][k] = item[k]
 			else:
-				outGraph.add_node(item['name'], type=item['object'])
+				# else must be a node, so add it.
+				outGraph.add_node(item_name, type=item['object'])
+				for k in item:
+					outGraph.nodes[item_name][k] = item[k]
 			if 'latitude' in item.keys() and 'longitude' in item.keys():
 				# Ignore lines that have "latitude" and "longitude" properties
 				if 'from' not in item.keys():
 					try:
-						outGraph.nodes[item['name']]['pos'] = (float(item['latitude']), float(item['longitude'])) 
+						outGraph.nodes[item_name]['pos'] = (float(item['latitude']), float(item['longitude'])) 
 					except:
-						outGraph.nodes[item['name']]['pos'] = defaultCoords
+						outGraph.nodes[item_name]['pos'] = defaultCoords
 	return outGraph
 
 

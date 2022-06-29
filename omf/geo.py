@@ -104,7 +104,7 @@ def omdGeoJson(pathToOmdFile, conversion=False):
 	with open(pathToOmdFile) as inFile:
 		tree = json.load(inFile)['tree']
 	nxG = feeder.treeToNxGraph(tree)
-	#use conversion for testing other feeders
+	# Use conversion for testing other feeders
 	nxG = graphValidator(pathToOmdFile, nxG)
 	if conversion:
 		nxG = convertOmd(pathToOmdFile)
@@ -112,12 +112,12 @@ def omdGeoJson(pathToOmdFile, conversion=False):
 		"type": "FeatureCollection",
 		"features": []
 	}
-	#Get nodes
+	# Get nodes and edges.
 	node_positions = {nodewithPosition: nxG.nodes[nodewithPosition]['pos'] for nodewithPosition in nx.get_node_attributes(nxG, 'pos')}
 	node_types = {nodewithType: nxG.nodes[nodewithType]['type'] for nodewithType in nx.get_node_attributes(nxG, 'type')}
-	#Add edges to geoJSON
 	edge_types = {edge: nxG[edge[0]][edge[1]]['type'] for edge in nx.get_edge_attributes(nxG, 'type')}
 	edge_phases = {edge: nxG[edge[0]][edge[1]]['phases'] for edge in nx.get_edge_attributes(nxG, 'phases')}
+	# Add edges to geoJSON
 	for edge in nx.edges(nxG):
 		try:
 			geoJsonDict['features'].append({
@@ -126,11 +126,7 @@ def omdGeoJson(pathToOmdFile, conversion=False):
 					"type": "LineString",
 					"coordinates": [[node_positions[edge[0]][1], node_positions[edge[0]][0]], [node_positions[edge[1]][1], node_positions[edge[1]][0]]]
 				},
-				"properties":{
-					#"phase": edge_phases[edge],
-					#"edgeType": edge_types[edge],
-					#"edgeColor":_obToCol(edge_types[edge])
-				}
+				"properties": nxG.edges[edge]
 			})
 		except KeyError:
 			print("!!! KeyError exception for edge " + str(edge))
@@ -142,19 +138,9 @@ def omdGeoJson(pathToOmdFile, conversion=False):
 				"type": "Point",
 				"coordinates": [node_positions[node][1], node_positions[node][0]]
 			},
-			"properties":{
-				"name": node,
-				#"pointType": node_types[node],
-				#"pointColor": _obToCol(node_types[node])
-			}
+			"properties": nxG.nodes[node]
 		})
 	return geoJsonDict
-	#if not os.path.exists(outputPath):
-	#	os.makedirs(outputPath)
-	#shutil.copy('static/geoPolyLeaflet.html', outputPath)
-	#with open(pJoin(outputPath,'geoPointsLines.json'),"w") as outFile:
-	#	json.dump(geoJsonDict, outFile, indent=4)
-
 
 def mapOmd(pathToOmdFile, outputPath, fileFormat, openBrowser=False, conversion=False):
 	'''
@@ -533,7 +519,6 @@ def convertOmd(pathToOmdFile):
 				targetEdge = key['target']['name'] + ' Target'
 			except KeyError:
 				targetEdge = str(key['target']) + ' Missing Name'
-
 		#nxG.add_edge(key['source']['name'], key['target']['name'])
 		nxG.add_edge(sourceEdge, targetEdge)
 		nxG.nodes[sourceEdge]['pos'] = (float(key['source']['y']), float(key['source']['x']))
@@ -799,6 +784,7 @@ def _tests():
 	# showOnMap(hullOfOmd(prefix / 'static/publicFeeders/Olin Barre LatLon.omd', conversion=False))
 	# showOnMap(simplifiedOmdShape(prefix / 'static/publicFeeders/Olin Barre LatLon.omd', conversion=False))
 	# x = omdGeoJson(prefix / 'static/publicFeeders/Olin Barre LatLon.omd', conversion=False)
+	# print(x)
 	# import json
 	# with open ('scratch/wind/circuit.geojson', 'w') as outFile:
 	# 	json.dump(x, outFile, indent=4)
