@@ -219,14 +219,16 @@ def customerOutageTable(customerOutageData, outageCost, workDir):
 			row += 1
 		new_html_str +="""</tbody></table>"""
 		return new_html_str
-
 	# print business information and estimated customer outage costs
-	customerOutageHtml = customerOutageStats(
-		customerOutageData = customerOutageData,
-		outageCost = outageCost)
+	try:
+		customerOutageHtml = customerOutageStats(
+			customerOutageData = customerOutageData,
+			outageCost = outageCost)
+	except:
+		customerOutageHtml = ''
+		 #HACKCOBB: work aroun.
 	with open(pJoin(workDir, 'customerOutageTable.html'), 'w') as customerOutageFile:
 		customerOutageFile.write(customerOutageHtml)
-
 	return customerOutageHtml
 
 def utilityOutageTable(average_lost_kwh, profit_on_energy_sales, restoration_cost, hardware_cost, outageDuration, workDir):
@@ -787,7 +789,6 @@ def graphMicrogrid(pathToOmd, pathToJson, pathToCsv, outputFile, settingsFile, u
 			shape = [float(y) for y in shape]
 			if 'useactual' in dssLine and dssLine['useactual'] == 'yes': loadShapeMeanActual[dssLine['object'].split('.')[1]] = np.mean(shape)
 			else: loadShapeMeanMultiplier[dssLine['object'].split('.')[1]] = np.mean(shape)
-
 	while row < customerOutageData.shape[0]:
 		customerName = str(customerOutageData.loc[row, 'Customer Name'])
 		loadName = str(customerOutageData.loc[row, 'Load Name'])
@@ -826,7 +827,11 @@ def graphMicrogrid(pathToOmd, pathToJson, pathToCsv, outputFile, settingsFile, u
 			customerOutageData = customerOutageData.reset_index(drop=True)
 	customerOutageData.insert(1, "Duration", durationColumn, True)
 	customerOutageData.insert(3, "Average kW/hr", avgkWColumn, True)
-	maxDuration = max([float(x) for x in list(customerOutageData['Duration'])])
+	durations = customerOutageData.get('Duration',['0'])
+	try:
+		maxDuration = max([float(x) for x in durations])
+	except:
+		maxDuration = 12.0 #HACKCOBB: Duration comes back as 'Duration'
 	customersOutByTime = [{busType: 0 for busType in businessTypes} for x in range(math.ceil(maxDuration)+1)]
 	customerCostByTime = [{busType: 0.0 for busType in businessTypes} for x in range(math.ceil(maxDuration)+1)]
 	outageCostsByType = {busType: [] for busType in businessTypes}
@@ -835,7 +840,6 @@ def graphMicrogrid(pathToOmd, pathToJson, pathToCsv, outputFile, settingsFile, u
 	customerCostByTime[math.floor(float(duration))][businessType] += float(customerOutageCost)
 	outageCostsByType[businessType].append(float(customerOutageCost))
 	customerCountByType[businessType] += 1
-
 	# def deciles(dList): return [0.0] + quantiles([float(x) for x in dList], n=10) + [max([float(x) for x in dList])]
 	# outageDeciles = deciles(customerOutageData['Duration'].tolist())
 	# costDeciles = deciles(outageCost)
@@ -948,7 +952,6 @@ def work(modelDir, inputDict):
 	with open(f'{modelDir}/circuit.dss','w') as dss_file_2:
 		dss_file_2.write(content)
 	# Run the main functions of the program
-
 	if inputDict['microgridTaggingFileName'] != '':
 		try:
 			with open(pJoin(modelDir, inputDict['microgridTaggingFileName']), 'w') as f5:
@@ -1079,7 +1082,6 @@ def new(modelDir):
 	# loadPriority_file_data = open(pJoin(*loadPriority_file_path)).read()
 	# microgridTagging_file_path = [__neoMetaModel__._omfDir,'static','testFiles','nreca1824_dwp.microgridTagging.basic.json']
 	# microgridTagging_file_data = open(pJoin(*microgridTagging_file_path)).read()
-
 	defaultInputs = {
 		'modelType': modelName,
 		'feederName1': feeder_file_path[-1][0:-4],
