@@ -93,6 +93,7 @@ def find_all_ties(circuit, circuit_name, bus_limit=-1):
 			line_from = circuit["tree"][omdObj]["from"]
 			line_to = circuit["tree"][omdObj]["to"]
 			circuit_graph.edges[line_from, line_to]["weight"] = node_distance(circuit, line_from, line_to)
+			circuit_graph.edges[line_from, line_to]["oneVal"] = 1.0
 
 	# keys for the dict are pairs of node names, with the first value being physical distance and second being path distance
 	for omdObj in circuit["tree"]:
@@ -143,18 +144,21 @@ def find_all_ties(circuit, circuit_name, bus_limit=-1):
 					if (not contains_3) and (not contains_4):
 						physical_dist = node_distance(circuit, node1, node2)
 						path_dist = -1
+						path_num_edges = -1
 						try:
 							# This returns the number of edges between the source and target node, but doesn't incorporate length of the path as a weight
 							#distance = nx.shortest_path_length(circuit_graph, source=node_name_1, target=node_name_2, weight="length")
 							path_dist, path_list = nx.single_source_dijkstra(circuit_graph, source=node1, target=node2, cutoff=None, weight="weight")
+							path_num_edges, path_list = nx.single_source_dijkstra(circuit_graph, source=node1, target=node2, cutoff=None, weight="oneVal")
 							#distance = nx.single_source_dijkstra_path_length(circuit_graph, source=node_name_1, target=node_name_2, weight=)
 						except nx.NetworkXNoPath:
 							path_dist = -1.0
+							path_num_edges = -1.0
 						#path_dist = path_distance(circuit, node1, node2)
-						all_ties[(node1, node2)] = [physical_dist, path_dist]
+						all_ties[(node1, node2)] = [physical_dist, path_dist, path_num_edges]
 						# json cannot have tuples as keys, so make a new dict with string type keys
 						json_key = ", ".join((node1, node2))
-						all_ties_json[json_key] = [physical_dist, path_dist]
+						all_ties_json[json_key] = [physical_dist, path_dist, path_num_edges]
 						tie_str = ", ".join(str(x) for x in all_ties[(node1, node2)])
 						print("New addition to all_ties: (" + json_key + "): [" + tie_str + "]")
 	# For testing purposes, save all_ties dict to a file to prevent LONG runtime of find_all_ties()
@@ -170,8 +174,14 @@ def find_candidate_pair(circuit, circuit_name, bus_limit=-1, saved_ties=False):
 	short_phys_val = 0.0
 	long_path_pair = ()
 	long_path_val = 0.0
+	most_path_nodes_pair = ()
+	most_path_nodes_val = 0.0
 	phys_path_dif_pair = ()
 	phys_path_dif_val = 0.0
+	edges_per_km_pair = ()
+	edges_per_km_val = 0.0
+	edges2_per_km_pair = ()
+	edges2_per_km_val = 0.0
 	if saved_ties:
 		# read in values from saved json file with all ties
 		ties_file_name = circuit_name+"_allTies.json"
@@ -203,26 +213,51 @@ def find_candidate_pair(circuit, circuit_name, bus_limit=-1, saved_ties=False):
 			if long_path_pair == ():
 				long_path_pair = tie
 				long_path_val = all_ties[tie][1]
+			if most_path_nodes_pair == ():
+				most_path_nodes_pair = tie
+				most_path_nodes_val = all_ties[tie][2]
 			if phys_path_dif_pair == ():
 				phys_path_dif_pair = tie
 				phys_path_dif_val = all_ties[tie][1] - all_ties[tie][0]
+			if edges_per_km_pair == ():
+				if all_ties[tie][2] != 0.0 and all_ties[tie][0] != 0.0:
+					edges_per_km_pair = tie
+					edges_per_km_val = all_ties[tie][2]/all_ties[tie][0]
+			if edges2_per_km_pair == ():
+				if all_ties[tie][2] != 0.0 and all_ties[tie][1] != 0.0 and all_ties[tie][1] != 0.0:
+					edges2_per_km_pair = tie
+					edges2_per_km_val = all_ties[tie][2]*all_ties[tie][1]/all_ties[tie][0]
 			if short_phys_val > all_ties[tie][0]:
 				short_phys_pair = tie
 				short_phys_val = all_ties[tie][0]
 			if long_path_val < all_ties[tie][1]:
 				long_path_pair = tie
 				long_path_val = all_ties[tie][1]
+			if most_path_nodes_val < all_ties[tie][2]:
+				most_path_nodes_pair = tie
+				most_path_nodes_val = all_ties[tie][2]
 			if phys_path_dif_val < all_ties[tie][1] - all_ties[tie][0]:
 				phys_path_dif_pair = tie
 				phys_path_dif_val = all_ties[tie][1] - all_ties[tie][0]
+			if all_ties[tie][2] != 0.0 and all_ties[tie][0] != 0.0:
+				if edges_per_km_val < all_ties[tie][2]/all_ties[tie][0]:
+					edges_per_km_pair = tie
+					edges_per_km_val = all_ties[tie][2]/all_ties[tie][0]
+				if all_ties[tie][1] != 0.0:
+					if edges2_per_km_val < all_ties[tie][2]*all_ties[tie][1]/all_ties[tie][0]:
+						edges2_per_km_pair = tie
+						edges2_per_km_val = all_ties[tie][2]*all_ties[tie][1]/all_ties[tie][0]
 	candidates['short_phys_pair'] = short_phys_pair
 	candidates['short_phys_val'] = short_phys_val
 	candidates['long_path_pair'] = long_path_pair
 	candidates['long_path_val'] = long_path_val
 	candidates['phys_path_dif_pair'] = phys_path_dif_pair
 	candidates['phys_path_dif_val'] = phys_path_dif_val
+	candidates['edges_per_km_pair'] = edges_per_km_pair
+	candidates['edges_per_km_val'] = edges_per_km_val
+	candidates['edges2_per_km_pair'] = edges2_per_km_pair
+	candidates['edges2_per_km_val'] = edges2_per_km_val
 	candidates['selected_buses'] = all_ties["selected_buses"]
-
 	return candidates
 
 def add_tie_line(circuit, circuit_path, circuit_name, tie_line, create_copy=True, tie_circuit_name = None):
@@ -262,7 +297,7 @@ def add_tie_line(circuit, circuit_path, circuit_name, tie_line, create_copy=True
 def run_fault_study(circuit, tempFilePath, faultDetails=None):
 	niceDss = dssConvert.evilGldTreeToDssTree(tree)
 	dssConvert.treeToDss(niceDss, tempFilePath)
-	#TODO: add fault, see Daniel.
+	#TODO: add fault, see Thomas Jankovic.
 	opendss.runDSS(tempFilePath)
 	#TODO: look at the output files, see what happened to the loads.
 
@@ -270,21 +305,25 @@ def _runModel():
 	# circuit_path = pJoin(__neoMetaModel__._omfDir,"static","publicFeeders")
 	# circuit_name = "iowa240c1.clean.dss.omd"
 	circuit_path = pJoin(__neoMetaModel__._omfDir,"static","publicFeeders")
+	# circuit_path = pJoin(__neoMetaModel__._omfDir,"scratch","tie_line_testing")
 	circuit_name = "iowa240c2_working_coords.clean.omd"
+	# circuit_name = "iowa240c2_working_coords.clean.tie_bus2058_bus3155.omd"
+	# circuit_name = "iowa240c2_working_coords.clean.tie_bus2058_bus3155.tie_bus2037_bus3091.omd"
+	# circuit_name = "iowa240c2_working_coords.clean.tie_bus2058_bus3155.tie_bus1017_bus2056.omd"
 	full_circuit_name = pJoin(circuit_path, circuit_name)
 	with open(full_circuit_name, 'r') as omdFile:
 		circuit = json.load(omdFile)
 	# Test node_distance()
-	load1 = "load_1003"
-	load2 = "load_3019"
-	dist_units = "km"
-	dist1 = node_distance(circuit, load1, load2)
-	dist2 = path_distance(circuit, load1, load2)
-	print("Straight distance from " + load1 + " to " + load2 + " = " + str(dist1) + dist_units)
-	if dist2 == -1.0:
-		print(load1 + " and " + load2 + " are not connected.")
-	else:
-		print("Line distance from " + load1 + " to " + load2 + " = " + str(dist2) + dist_units)
+	# load1 = "load_1003"
+	# load2 = "load_3019"
+	# dist_units = "km"
+	# dist1 = node_distance(circuit, load1, load2)
+	# dist2 = path_distance(circuit, load1, load2)
+	# print("Straight distance from " + load1 + " to " + load2 + " = " + str(dist1) + dist_units)
+	# if dist2 == -1.0:
+	# 	print(load1 + " and " + load2 + " are not connected.")
+	# else:
+	# 	print("Line distance from " + load1 + " to " + load2 + " = " + str(dist2) + dist_units)
 	# Test find_all_ties()
 	# all_ties_list = find_all_ties(circuit, circuit_name, bus_limit=5)
 	# print("find_all_ties() completed!")
@@ -298,8 +337,11 @@ def _runModel():
 	print("Shortest physical distance between buses is " + '{0:.4f}'.format(potential_tie_lines['short_phys_val']) + "km between " + potential_tie_lines['short_phys_pair'][0] + " and " + potential_tie_lines['short_phys_pair'][1])
 	print("Longest line distance between buses is " + '{0:.4f}'.format(potential_tie_lines['long_path_val']) + "km between " + potential_tie_lines['long_path_pair'][0] + " and " + potential_tie_lines['long_path_pair'][1])
 	print("Greatest difference of line and physical distance between buses is " + '{0:.4f}'.format(potential_tie_lines['phys_path_dif_val']) + "km between " + potential_tie_lines['phys_path_dif_pair'][0] + " and " + potential_tie_lines['phys_path_dif_pair'][1])
+	print("Most lines per km of the tie line is " + '{0:.4f}'.format(potential_tie_lines['edges_per_km_val']) + "edges/km between " + potential_tie_lines['edges_per_km_pair'][0] + " and " + potential_tie_lines['edges_per_km_pair'][1])
+	print("Greatest lines*path length per km of the tie line is " + '{0:.4f}'.format(potential_tie_lines['edges2_per_km_val']) + "edges*path_km/tie_km between " + potential_tie_lines['edges2_per_km_pair'][0] + " and " + potential_tie_lines['edges2_per_km_pair'][1])
 	# Add the tie line(s) to the omd file and visualize
-	tie_line_to_add = potential_tie_lines['phys_path_dif_pair']
+	# tie_line_to_add = potential_tie_lines['phys_path_dif_pair']
+	tie_line_to_add = potential_tie_lines['edges2_per_km_pair']
 	omd_with_tie_path = add_tie_line(circuit, circuit_path, circuit_name, tie_line_to_add, create_copy=True)
 	# visualize original circuit
 	distNetViz.viz(full_circuit_name, forceLayout=False, outputPath=None)

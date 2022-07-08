@@ -165,32 +165,6 @@ def microgridTimeline(outputTimeline, workDir):
 		timelineFile.write(timelineStatsHtml)
 	return timelineStatsHtml
 
-def buildCustomerInfo(inFile = '/Users/george/omf/omf/Cobb.clean.dss.omd', modelOut = '/Users/george/Downloads/output.Master3.no-networking2.json', outFile = '/Users/george/Desktop/no-netcustomerInfo2.csv', season = 'summer', timestep = .25, maxDuration = 8):
-	''' Build a customer info file for a given OMD. '''
-	with open(inFile) as inF:
-		tree = json.load(inF)['tree']
-	with open(modelOut) as mo:
-		deviceTimeline = json.load(mo)["Device action timeline"]
-	loadsShed = []
-	for line in deviceTimeline:
-		loadsShed.append(line["Shedded loads"])
-	custInfo = ['Customer Name,Duration,Season,Average kW/hr,Business Type,Load Name']
-	for elementDict in tree.values():
-		if elementDict['object'] == 'load' and float(elementDict['kw'])>.1 and elementDict['name'] in loadsShed[0]:
-			loadName = elementDict['name']
-			avgLoad = float(elementDict['kw'])/2.5
-			busType = 'residential'*(avgLoad<=10) + 'retail'*(avgLoad>10)*(avgLoad<=20) + 'agriculture'*(avgLoad>20)*(avgLoad<=39) + 'public'*(avgLoad>39)*(avgLoad<=50) + 'services'*(avgLoad>50)*(avgLoad<=100) + 'manufacturing'*(avgLoad>100)
-			outDuration = 0
-			for line in loadsShed:
-				if loadName in line and outDuration <= maxDuration:
-					outDuration += timestep
-			outDuration = int(outDuration)
-			custInfo.append(f"{loadName},{outDuration},{season},{avgLoad},{busType},{loadName}")
-	with open(outFile, 'w') as customerInfoFile:
-		for line in custInfo:
-			customerInfoFile.write(line)
-			customerInfoFile.write('\n')
-
 def customerOutageTable(customerOutageData, outageCost, workDir):
 	'generate html table of customer outages'
 	# check to see if work directory is specified; otherwise, create a temporary directory
@@ -219,16 +193,14 @@ def customerOutageTable(customerOutageData, outageCost, workDir):
 			row += 1
 		new_html_str +="""</tbody></table>"""
 		return new_html_str
+
 	# print business information and estimated customer outage costs
-	try:
-		customerOutageHtml = customerOutageStats(
-			customerOutageData = customerOutageData,
-			outageCost = outageCost)
-	except:
-		customerOutageHtml = ''
-		 #HACKCOBB: work aroun.
+	customerOutageHtml = customerOutageStats(
+		customerOutageData = customerOutageData,
+		outageCost = outageCost)
 	with open(pJoin(workDir, 'customerOutageTable.html'), 'w') as customerOutageFile:
 		customerOutageFile.write(customerOutageHtml)
+
 	return customerOutageHtml
 
 def utilityOutageTable(average_lost_kwh, profit_on_energy_sales, restoration_cost, hardware_cost, outageDuration, workDir):
@@ -271,7 +243,7 @@ def utilityOutageTable(average_lost_kwh, profit_on_energy_sales, restoration_cos
 
 def customerCost1(duration, season, averagekWperhr, businessType):
 	'function to determine customer outage cost based on season, annual kWh usage, and business type'
-	duration = float(duration)
+	duration = int(duration)
 	averagekW = float(averagekWperhr)
 
 	times = np.array([0,1,2,3,4,5,6,7,8])
@@ -305,11 +277,14 @@ def customerCost1(duration, season, averagekWperhr, businessType):
 	def kWhApprox(kWDict, averagekWperhr, iterate):
 		'helper function for approximating customer outage cost based on annual kWh by iteratively "averaging" the curves'
 		step = 0
+
 		# iterate the process a set number of times
 		while step < iterate:
+
 			#sort the current kWh values for which we have customer outage costs
 			keys = list(kWDict.keys())
 			keys.sort()
+
 			# find the current kWh values estimated that are closest to the average kW/hr input...
 			# ...then, estimate the outage costs for the kW/hr value directly between these
 			key = 0
@@ -320,7 +295,7 @@ def customerCost1(duration, season, averagekWperhr, businessType):
 					averageCost = (kWDict[keys[key]] + kWDict[keys[key+1]])/2
 					kWDict[newEntry] = averageCost
 					break
-				if float(averagekWperhr) > keys[key+1]:
+				if float(averagekWperhr) > keys[key]:
 					key+=1
 				else:
 					newEntry = (keys[key] + keys[key+1])/2
@@ -413,9 +388,7 @@ def customerCost1(duration, season, averagekWperhr, businessType):
 	kWperhrEstimate = 1.21 * kWperhrEstimate
 	# find the estimated customer outage cost for the customer in question, given the duration of the outage
 	times = np.array([0,1,2,3,4,5,6,7,8])
-	wholeHours = int(math.floor(duration))
-	partialHour = duration - wholeHours
-	outageCost = (kWperhrEstimate[wholeHours] + (kWperhrEstimate[wholeHours+1] - kWperhrEstimate[wholeHours])*partialHour) * (duration>0)
+	outageCost = kWperhrEstimate[duration]
 	localMax = 0
 	row = 0
 	while row < 9:
@@ -434,7 +407,7 @@ def validateSettingsFile(settingsFile):
 	else:
 		return 'Corrupted Settings file input, generating default settings'
 
-def graphMicrogrid(pathToOmd, pathToJson, pathToCsv, outputFile, settingsFile, useCache, workDir, profit_on_energy_sales, restoration_cost, hardware_cost, eventsFilename, genSettings, solFidelity, loadPriorityFile, microgridTaggingFile):
+def graphMicrogrid(pathToOmd, pathToJson, pathToCsv, outputFile, settingsFile, useCache, workDir, outageDuration, profit_on_energy_sales, restoration_cost, hardware_cost, eventsFilename, genSettings, solFidelity, loadPriorityFile, microgridTaggingFile):
 	''' Run full microgrid control process. '''
 	# Setup ONM if it hasn't been done already.
 	if not PowerModelsONM.check_instantiated():
@@ -494,10 +467,8 @@ def graphMicrogrid(pathToOmd, pathToJson, pathToCsv, outputFile, settingsFile, u
 		for i in data['Simulation time steps']:
 			simTimeSteps.append(float(i))
 		numTimeSteps = len(simTimeSteps)
-		stepSize = simTimeSteps[1]-simTimeSteps[0]
-		#TODO: change stepSize to stepSizeHours to make it clear what's going on.
+		stepSize = 1 #TODO: change this to be total_simulation_time/numTimeSteps, but for now, we default to 1 hr
 		voltages = data['Voltages']
-		outageDuration = stepSize * numTimeSteps
 		loadServed = data['Load served']
 		storageSOC = data['Storage SOC (%)']
 		switchLoadAction = data['Device action timeline']
@@ -508,7 +479,6 @@ def graphMicrogrid(pathToOmd, pathToJson, pathToCsv, outputFile, settingsFile, u
 	actionLoadBefore = []
 	actionLoadAfter = []
 	loadsShed = []
-	cumulativeLoadsShed = []
 	timestep = 0
 	# timestep = 1 #TODO: switch back to this value if timestep should start at 1, not zero
 	for key in switchLoadAction:
@@ -531,7 +501,6 @@ def graphMicrogrid(pathToOmd, pathToJson, pathToCsv, outputFile, settingsFile, u
 		loadShed = key['Shedded loads']
 		if len(loadShed) != 0:
 			for entry in loadShed:
-				cumulativeLoadsShed.append(entry)
 				if entry not in loadsShed:
 					actionDevice.append(entry)
 					actionTime.append(str(timestep))
@@ -756,20 +725,7 @@ def graphMicrogrid(pathToOmd, pathToJson, pathToCsv, outputFile, settingsFile, u
 	with open(pJoin(workDir,'geoDict.js'),'w') as outFile:
 		json.dump(feederMap, outFile, indent=4)
 	# Generate customer outage outputs
-	try:
-		customerOutageData = pd.read_csv(pathToCsv)
-	except:
-		deviceTimeline = data["Device action timeline"]
-		loadsShed = []
-		for line in deviceTimeline:
-			loadsShed.append(line["Shedded loads"])
-		customerOutageData = pd.DataFrame(columns=['Customer Name','Season','Business Type','Load Name'])
-		for elementDict in tree.values():
-			if elementDict['object'] == 'load' and float(elementDict['kw'])>.1 and elementDict['name'] in loadsShed[0]:
-				loadName = elementDict['name']
-				avgLoad = float(elementDict['kw'])/2.5
-				busType = 'residential'*(avgLoad<=10) + 'retail'*(avgLoad>10)*(avgLoad<=20) + 'agriculture'*(avgLoad>20)*(avgLoad<=39) + 'public'*(avgLoad>39)*(avgLoad<=50) + 'services'*(avgLoad>50)*(avgLoad<=100) + 'manufacturing'*(avgLoad>100)
-				customerOutageData.loc[len(customerOutageData.index)] =[loadName,'summer',busType,loadName]
+	customerOutageData = pd.read_csv(pathToCsv)
 	numberRows = math.ceil(customerOutageData.shape[0]/2)
 	fig, axs = plt.subplots(numberRows, 2)
 	row = 0
@@ -778,83 +734,57 @@ def graphMicrogrid(pathToOmd, pathToJson, pathToCsv, outputFile, settingsFile, u
 	globalMax = 0
 	fig = go.Figure()
 	businessTypes = set(customerOutageData['Business Type'])
-	avgkWColumn = []
-	durationColumn = []
-	dssTree = dssConvert.dssToTree(f'{workDir}/circuitOmfCompatible.dss')
-	loadShapeMeanMultiplier = {}
-	loadShapeMeanActual = {}
-	for dssLine in dssTree:
-		if 'object' in dssLine and dssLine['object'].split('.')[0] == 'loadshape':
-			shape = dssLine['mult'].replace('[','').replace('(','').replace(']','').replace(')','').split(',')
-			shape = [float(y) for y in shape]
-			if 'useactual' in dssLine and dssLine['useactual'] == 'yes': loadShapeMeanActual[dssLine['object'].split('.')[1]] = np.mean(shape)
-			else: loadShapeMeanMultiplier[dssLine['object'].split('.')[1]] = np.mean(shape)
-	while row < customerOutageData.shape[0]:
-		customerName = str(customerOutageData.loc[row, 'Customer Name'])
-		loadName = str(customerOutageData.loc[row, 'Load Name'])
-		businessType = str(customerOutageData.loc[row, 'Business Type'])
-		duration = str(0)
-		averagekWperhr = str(0)
-		for elementDict in dssTree:
-			if 'object' in elementDict and elementDict['object'].split('.')[0] == 'load' and elementDict['object'].split('.')[1] == loadName:
-				if 'daily' in elementDict: averagekWperhr = float(loadShapeMeanMultiplier.get(elementDict['daily'],0)) * float(elementDict['kw']) + float(loadShapeMeanActual.get(elementDict['daily'],0))
-				else: averagekWperhr = float(elementDict['kw'])/2
-				duration = str(cumulativeLoadsShed.count(loadName) * stepSize)
-		if float(duration) >= .1 and float(averagekWperhr) >= .1:
-			durationColumn.append(duration)
-			avgkWColumn.append(float(averagekWperhr))
-			season = str(customerOutageData.loc[row, 'Season'])
-			customerOutageCost, kWperhrEstimate, times, localMax = customerCost1(duration, season, averagekWperhr, businessType)
-			average_lost_kwh.append(float(averagekWperhr))
-			outageCost.append(customerOutageCost)
-			if localMax > globalMax:
-				globalMax = localMax
-			# creating series
-			timesSeries = pd.Series(times)
-			kWperhrSeries = pd.Series(kWperhrEstimate)
-			trace = py.graph_objs.Scatter(
-				x = timesSeries,
-				y = kWperhrSeries,
-				name = customerName,
-				hoverlabel = dict(namelength = -1),
-				hovertemplate = 
-				'<b>Duration</b>: %{x} h<br>' +
-				'<b>Cost</b>: $%{y:.2f}')
-			fig.add_trace(trace)
-			row += 1
-		else:
-			customerOutageData = customerOutageData.drop(index=row)
-			customerOutageData = customerOutageData.reset_index(drop=True)
-	customerOutageData.insert(1, "Duration", durationColumn, True)
-	customerOutageData.insert(3, "Average kW/hr", avgkWColumn, True)
-	durations = customerOutageData.get('Duration',['0'])
-	try:
-		maxDuration = max([float(x) for x in durations])
-	except:
-		maxDuration = 12.0 #HACKCOBB: Duration comes back as 'Duration'
+	maxDuration = max([float(x) for x in list(customerOutageData['Duration'])])
 	customersOutByTime = [{busType: 0 for busType in businessTypes} for x in range(math.ceil(maxDuration)+1)]
 	customerCostByTime = [{busType: 0.0 for busType in businessTypes} for x in range(math.ceil(maxDuration)+1)]
 	outageCostsByType = {busType: [] for busType in businessTypes}
 	customerCountByType = {busType: 0 for busType in businessTypes}
-	customersOutByTime[math.floor(float(duration))][businessType] += 1
-	customerCostByTime[math.floor(float(duration))][businessType] += float(customerOutageCost)
-	outageCostsByType[businessType].append(float(customerOutageCost))
-	customerCountByType[businessType] += 1
+	while row < customerOutageData.shape[0]:
+		customerName = str(customerOutageData.loc[row, 'Customer Name'])
+		duration = str(customerOutageData.loc[row, 'Duration'])
+		season = str(customerOutageData.loc[row, 'Season'])
+		averagekWperhr = str(customerOutageData.loc[row, 'Average kW/hr'])
+		businessType = str(customerOutageData.loc[row, 'Business Type'])
+		loadName = str(customerOutageData.loc[row, 'Load Name'])
+		customerOutageCost, kWperhrEstimate, times, localMax = customerCost1(duration, season, averagekWperhr, businessType)
+		average_lost_kwh.append(float(averagekWperhr))
+		outageCost.append(customerOutageCost)
+		if localMax > globalMax:
+			globalMax = localMax
+		customersOutByTime[math.floor(float(duration))][businessType] += 1
+		customerCostByTime[math.floor(float(duration))][businessType] += float(customerOutageCost)
+		outageCostsByType[businessType].append(float(customerOutageCost))
+		customerCountByType[businessType] += 1
+		# creating series
+		timesSeries = pd.Series(times)
+		kWperhrSeries = pd.Series(kWperhrEstimate)
+		trace = py.graph_objs.Scatter(
+			x = timesSeries,
+			y = kWperhrSeries,
+			name = customerName,
+			hoverlabel = dict(namelength = -1),
+			hovertemplate = 
+			'<b>Duration</b>: %{x} h<br>' +
+			'<b>Cost</b>: $%{y:.2f}')
+		fig.add_trace(trace)
+		row += 1
 	# def deciles(dList): return [0.0] + quantiles([float(x) for x in dList], n=10) + [max([float(x) for x in dList])]
 	# outageDeciles = deciles(customerOutageData['Duration'].tolist())
 	# costDeciles = deciles(outageCost)
 	minCustomerCost = min(outageCost)
 	maxCustomerCost = max(outageCost)
-	numBins = 30
+	numBins = 45
 	binSize = (maxCustomerCost-minCustomerCost)/numBins
 	totalCustomerCost = sum(outageCost)
 	meanCustomerCost = totalCustomerCost / len(outageCost)
 	outageCostByType = {busType: sum(outageCostsByType[busType]) for busType in businessTypes}
 	customerCountByType = {busType: len(outageCostsByType[busType]) for busType in businessTypes}
-	# meanCustomerCostByType = {busType: outageCostByType[busType]/customerCountByType[busType] for busType in businessTypes}
+	meanCustomerCostByType = {busType: outageCostByType[busType]/customerCountByType[busType] for busType in businessTypes}
 	# customersByTypeAndDecile = [{busType: len([cost for cost in outageCostsByType[busType] if (cost>costDeciles[x])*(cost<=costDeciles[x+1])]) for busType in businessTypes} for x in range(10)]
 	# print(customersOutByTime, customerCostByTime, totalCustomerCost, meanCustomerCost, outageCostByType, meanCustomerCostByType, outageDeciles, costDeciles, customersByTypeAndDecile) # ToDo: Display in front end.
-
+	print("Total outage cost: " + str(totalCustomerCost))
+	meanCustomerCostByTypeStr = json.dumps(meanCustomerCostByType)
+	print("Mean customer costs by type: " + meanCustomerCostByTypeStr)
 
 	fig.update_layout(xaxis_title = 'Duration (hours)',
 		yaxis_title = 'Cost ($)',
@@ -862,29 +792,30 @@ def graphMicrogrid(pathToOmd, pathToJson, pathToCsv, outputFile, settingsFile, u
 	# Customer Outage Histogram
 	busColors = {'residential':'#0000ff', 'manufacturing':'#ff0000', 'mining':'#708090', 'construction':'#ff8c00', 'agriculture':'#008000', 'finance':'#d6b600', 'retail':'#ff69b4', 'services':'#191970', 'utilities':'#8b4513', 'public':'#9932cc'}
 	custHist = go.Figure()
-	custHist.add_trace(go.Histogram(
-		x=outageCost,
-		xbins=dict(
-			start=minCustomerCost,
-			end=maxCustomerCost+binSize,
-			size=binSize
-		)
-	))
-	# for busType in businessTypes:
-	# 	custHist.add_trace(go.Histogram(
-	# 		x=outageCostsByType[busType],
-	# 		name=busType, # name used in legend and hover labels
-	# 		xbins=dict(
-	# 			start=minCustomerCost,
-	# 			end=maxCustomerCost,
-	# 			size=binSize
-	# 		),
-	# 		bingroup=1,
-	# 		marker_color=busColors[busType]
-	# 	))
+	# custHist.add_trace(go.Histogram(
+	# 	x=outageCost,
+	# 	xbins=dict(
+	# 		start=minCustomerCost,
+	# 		end=maxCustomerCost+binSize,
+	# 		size=binSize
+	# 	)
+	# ))
+	for busType in businessTypes:
+		custHist.add_trace(go.Histogram(
+			x=outageCostsByType[busType],
+			name=busType, # name used in legend and hover labels
+			xbins=dict(
+				start=minCustomerCost,
+				end=maxCustomerCost+binSize,
+				size=binSize
+			),
+			bingroup=1,
+			marker_color=busColors[busType]
+		))
 	custHist.update_layout(
 		xaxis_title_text='Outage Cost ($)', # xaxis label
 		yaxis_title_text='Customer Count', # yaxis label
+		barmode='stack',
 		bargap=0.1 # gap between bars of adjacent location coordinates
 	)
 	meanCustomerCostStr = "Mean Outage Cost: $"+"{:.2f}".format(meanCustomerCost)
@@ -939,7 +870,6 @@ def work(modelDir, inputDict):
 	tree = omd['tree']
 	# Output a .dss file, which will be needed for ONM.
 	niceDss = dssConvert.evilGldTreeToDssTree(tree)
-	dssConvert.treeToDss(niceDss, f'{modelDir}/circuitOmfCompatible.dss') # for querying loadshapes
 	dssConvert.treeToDss(niceDss, f'{modelDir}/circuit.dss')
 	# Remove syntax that ONM doesn't like.
 	with open(f'{modelDir}/circuit.dss','r') as dss_file:
@@ -952,6 +882,7 @@ def work(modelDir, inputDict):
 	with open(f'{modelDir}/circuit.dss','w') as dss_file_2:
 		dss_file_2.write(content)
 	# Run the main functions of the program
+
 	if inputDict['microgridTaggingFileName'] != '':
 		try:
 			with open(pJoin(modelDir, inputDict['microgridTaggingFileName']), 'w') as f5:
@@ -1012,6 +943,7 @@ def work(modelDir, inputDict):
 		pathToData3,
 		inputDict['useCache'],
 		modelDir, #Work directory
+		inputDict['outageDuration'],
 		inputDict['profit_on_energy_sales'],
 		inputDict['restoration_cost'],
 		inputDict['hardware_cost'],
@@ -1082,6 +1014,13 @@ def new(modelDir):
 	# loadPriority_file_data = open(pJoin(*loadPriority_file_path)).read()
 	# microgridTagging_file_path = [__neoMetaModel__._omfDir,'static','testFiles','nreca1824_dwp.microgridTagging.basic.json']
 	# microgridTagging_file_data = open(pJoin(*microgridTagging_file_path)).read()
+	
+	# ====== Comment this out if no output file is specified (running ONM)
+	output_file_data = open(pJoin(*output_file_path)).read()
+	# ====== Comment this out if no load priority file is specified
+	# loadPriority_file_data = open(pJoin(*loadPriority_file_path)).read()
+	# ====== Comment this out if no load microgrid tagging file is specified
+	# microgridTagging_file_data = open(pJoin(*microgridTagging_file_path)).read()
 	defaultInputs = {
 		'modelType': modelName,
 		'feederName1': feeder_file_path[-1][0:-4],
@@ -1090,7 +1029,7 @@ def new(modelDir):
 		'restoration_cost': '100',
 		'hardware_cost': '550',
 		'customerFileName': cust_file_path[-1],
-		'customerData': '',
+		'customerData': open(pJoin(*cust_file_path)).read(),
 		'eventFileName': event_file_path[-1],
 		'eventData': open(pJoin(*event_file_path)).read(),
 		'outputFileName': output_file_path[-1],
