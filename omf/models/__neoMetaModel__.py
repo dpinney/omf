@@ -9,7 +9,6 @@ import pandas as pd
 import omf.models
 from omf import web
 
-
 # Locational variables so we don't have to rely on OMF being in the system path.
 _myDir = os.path.dirname(os.path.abspath(__file__))
 _omfDir = os.path.dirname(_myDir)
@@ -33,17 +32,18 @@ def heavyProcessing(modelDir, test_mode=False):
 			inputDict = json.load(f)
 		# Place run start time.
 		inputDict['runStartTime'] = startTime.isoformat()
-		with open(pJoin(modelDir, 'allInputData.json'), 'w') as f:
-			json.dump(inputDict, f, indent=4)
+		# Estimate runtime if possible.
+		try:
+			inputDict['runtimeEst_min'] = getattr(omf.models, inputDict['modelType']).runtimeEstimate(modelDir)
+		except:
+			pass
+		# Write input with new synth inputs.
+		with web.locked_open(pJoin(modelDir,"allInputData.json"),"w") as inFile:
+			json.dump(inputDict, inFile, indent=4)
 		# Remove old outputs.
 		try:
 			os.remove(pJoin(modelDir,"allOutputData.json"))
 		except Exception as e:
-			pass
-		# Estimate runtime if possible.
-		try:
-			inputDict['runtimeEst_min'] = getattr(omf.models, inputDict['modelType']).runtimeEstimate(modelDir)
-		except: 
 			pass
 		# Get the function and run it.
 		work = getattr(omf.models, inputDict['modelType']).work
@@ -185,9 +185,40 @@ def renderTemplate(modelDir, absolutePaths=False, datastoreNames={}):
 		{% endif %}
 	</div>
 	'''
-	# Generate standard status content.
-	loggedInUser = datastoreNames.get('currentUser', 'test')
+	# Generate standard OMF headers.
 	modelStatus = getStatus(modelDir)
+	loggedInUser = datastoreNames.get('currentUser', 'test')
+	omfHeadersTemplate = '''
+		<title>Open Modeling Framework - {{allInputDataDict.modelType}} - {{allInputDataDict.modelName}}</title>
+		<meta charset="utf-8">
+		<link href="{{pathPrefix}}/static/omf.css" type="text/css" rel="stylesheet"/>
+		<link rel="shortcut icon" href="{{pathPrefix}}/static/favicon.ico">
+		{% if modelStatus == "running" %}<meta http-equiv="refresh" content="5"/>{% endif %}
+		<script type="text/javascript" src="{{pathPrefix}}/static/omf.js"></script>
+		<script type="text/javascript" src="{{pathPrefix}}/static/jquery-1.9.1.js"></script>
+		<script>allInputData={% if allInputDataDict %}{{allInputDataDict | tojson}}{% else %}null{% endif %}</script>
+		<script>allOutputData={% if allOutputDataDict %}{{allOutputDataDict | tojson}}{% else %}null{% endif %}</script>
+		<script>currentUser="{{loggedInUser}}"</script>
+		<script>modelStatus="{{modelStatus}}"</script>'''
+	omfHeaders = Template(omfHeadersTemplate).render(modelStatus=modelStatus, loggedInUser=loggedInUser, allInputDataDict=inJson, allOutputDataDict=outJson, pathPrefix=pathPrefix)
+	# Generate standard OMF model title.
+	omfModelTitleTemplate = '''
+		<div id="header">
+			<div id="headInnerBlock">
+				<div id="menuLeft">
+					<a style="color:white" href="/">Open Modeling Framework</a>
+					<p id="titleText" style="display:inline">&#187;&nbsp; {{allInputDataDict.modelType}} &#187;&nbsp; &#8220;{{allInputDataDict.modelName}}&#8221;</p>
+				</div>
+			</div>
+		</div>
+		<div id="triangle-parent">
+			<div id="triangle-message">New Version<span class="classic-triangle">A new version of the model has been added to the OMF. To get the new outputs, please fill in any missing inputs and hit "Run Model". You can also just look at the old inputs, outputs.</span></div>
+			<div id="triangle-topright"></div>
+		</div>
+		<script>{% if allOutputDataDict['oldVersion'] %}document.getElementById("triangle-parent").style.visibility = "visible";{% endif %}</script>
+		'''
+	omfModelTitle = Template(omfModelTitleTemplate).render(allInputDataDict=inJson, allOutputDataDict=allOutputData)
+	# Generate standard status content.
 	omfModelButtons = Template(omfModelButtonsTemplate).render(modelStatus=modelStatus, loggedInUser=loggedInUser, modelOwner=modelOwner)
 	now = datetime.datetime.now()
 	try:
@@ -213,7 +244,7 @@ def renderTemplate(modelDir, absolutePaths=False, datastoreNames={}):
 	omfRunDebugBlock = Template(runDebugTemplate).render(modelStatus=modelStatus, stderr=inJson.get('stderr', ''), elapsed_min=round(elapsed_min,2), remain_min=round(remain_min,2))
 	# Raw input output include.
 	return template.render(allInputData=allInputData, allOutputData=allOutputData, modelStatus=modelStatus, pathPrefix=pathPrefix,
-		datastoreNames=datastoreNames, modelName=modelType, allInputDataDict=inJson, allOutputDataDict=outJson, rawOutputFiles=rawOutputFiles, omfModelButtons=omfModelButtons, omfRunDebugBlock=omfRunDebugBlock)
+		datastoreNames=datastoreNames, modelName=modelType, allInputDataDict=inJson, allOutputDataDict=outJson, rawOutputFiles=rawOutputFiles, omfModelButtons=omfModelButtons, omfRunDebugBlock=omfRunDebugBlock, omfHeaders=omfHeaders, omfModelTitle=omfModelTitle)
 
 def renderAndShow(modelDir, datastoreNames={}):
 	''' Render and open a template (blank or with output) in a local browser. '''

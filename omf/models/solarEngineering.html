@@ -1,22 +1,7 @@
 <head>
-	<title>Open Modeling Framework</title>
-	<meta charset="utf-8">
-	<link href="{{pathPrefix}}/static/omf.css" type="text/css" rel="stylesheet"/>
-	<link rel="shortcut icon" href="{{pathPrefix}}/static/favicon.ico">
-	<style>
-	/*Styles will go here*/
-	</style>
-	{% if modelStatus == "running" %}<meta http-equiv="refresh" content="5"/>{% endif %}
-	<!-- Library Imports -->
-	<script type="text/javascript" src="{{pathPrefix}}/static/omf.js"></script>
-	<script type="text/javascript" src="{{pathPrefix}}/static/jquery-1.9.1.js"></script>
+	{{ omfHeaders }}
 	<script src="{{pathPrefix}}/static/highcharts4.src.js"></script>
 	<script src="{{pathPrefix}}/static/d3.v3.js"></script>
-	<!-- Data  Imports -->
-	<script>allInputData={% if allInputDataDict %}{{allInputDataDict | tojson}}{% else %}null{% endif %}</script>
-	<script>allOutputData={% if allOutputDataDict %}{{allOutputDataDict | tojson}}{% else %}null{% endif %}</script>
-	<script>modelStatus="{{modelStatus}}"</script>
-	<script>currentUser="{{datastoreNames.get('currentUser','test')}}"</script>
 	<!-- Global Functions -->
 	<script type="text/javascript">
 		// Global setting of Highcharts
@@ -35,11 +20,6 @@
 			"plotOptions":{"line":{"marker":{"enabled":false}}, "series":{"shadow":false, "pointInterval":pointInterval, "pointStart":pointStart}},
 			"tooltip":{"valueDecimals":1},
 			"series":[]}
-		function editFeeder(modelName, feederNum) {
-			console.log("modelName:",modelName)
-			studyUser = allInputData.user
-			window.open("/feeder/" + studyUser + "/" + modelName + "/" + feederNum,  "_blank")
-		}
 		// Code to make the toggles work:
 		$(document).ready(function(){
 			$(".toggle").click(function(){
@@ -48,29 +28,18 @@
 		})
 	</script>
 </head>
-<body onload="init()">
-	<div id="header">
-		<div id="headInnerBlock">
-			<div id="menuLeft">
-				<a style="color:white" href="/">Open Modeling Framework</a> &#187;&nbsp;&nbsp;Model
-				&#8220;<p id="titleText" style="display:inline"></p>&#8221;
-			</div>
-		</div>
-	</div>
-	<div id="triangle-parent">
-		<div id="triangle-message">New Version<span class="classic-triangle">A new version of the model has been added to the OMF. To get the new outputs, please fill in any missing inputs and hit "Run Model". You can also just look at the old inputs/outputs.</span></div>
-		<div id="triangle-topright"></div>
-	</div>
+<body>
+	{{ omfModelTitle }}
 	<p class="reportTitle">Model Input</p>
 	<div id="input" class="content">
-		<form name="inputForm" action="/runModel/" onsubmit="event.preventDefault(); return isFormValid();" method="post">
+		<form name="inputForm" value="{{allInputDataDict.inputForm}}" action="/runModel/" onsubmit="event.preventDefault(); return isFormValid();" method="post">
 			<div class="shortInput">
 				<label>Model Type <a href="https://github.com/dpinney/omf/wiki/Models-~-solarEngineering" target="blank">Help?</a></label>
-				<input type="text" id="modelType" name="modelType" value="{{modelName}}" readonly/>
+				<input type="text" id="modelType" name="modelType" value="{{allInputDataDict.modelType}}" value="{{modelName}}" readonly/>
 			</div>
 			<div class="shortInput">
 				<label>Model Name</label>
-				<input type="text" id="modelName" name="modelName" required="required" pattern="^[\w\s]+$"/></td>
+				<input type="text" id="modelName" name="modelName" value="{{allInputDataDict.modelName}}" required="required" pattern="^[\w\s]+$"/></td>
 			</div>
 			<div class="shortInput">
 				<label>Feeder</label>
@@ -78,63 +47,48 @@
 			</div>
 			<div class="shortInput" style="display:none"><!--HACK:pass feeder name back and forth to backend.-->
 				<label>feederName1</label>
-				<input type="text" id="feederName1" name="feederName1">
+				<input type="text" id="feederName1" name="feederName1" value="{{allInputDataDict.feederName1}}">
 			</div>
-			<div class="shortInput runningInline postRunInline">
+			<div class="shortInput">
 				<label>User</label>
-				<input type="text" id="user" name="user" readonly/></td>
+				<input type="text" id="user" name="user" value="{{allInputDataDict.user}}" readonly/></td>
 			</div>
-			<div class="shortInput runningInline postRunInline">
+			<div class="shortInput">
 				<label>Created</label>
-				<input type="text" id="created" name="created" readonly/></td>
+				<input type="text" id="created" name="created" value="{{allInputDataDict.created}}" readonly/></td>
 			</div>
-			<div class="shortInput postRunInline">
+			<div class="shortInput">
 				<label>Run Time</label>
-				<input type="text" id="runTime" name="runTime" readonly/></td>
+				<input type="text" id="runTime" name="runTime" value="{{allInputDataDict.runTime}}" readonly/></td>
 			</div>
 			<hr>
 			<div class="shortInput">
 				<label class="tooltip">Zip Code<span class="classic">Zip code of the planned array's geographical location. Use 5-digit Zip Code format</span></label>
-				<input type="text" id="zipCode" name="zipCode" pattern="[0-9]{5}" required="required">
+				<input type="text" id="zipCode" name="zipCode" value="{{allInputDataDict.zipCode}}" pattern="[0-9]{5}" required="required">
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Simulation Length<span class="classic">Number of time steps in the installation. The current range of acceptable values is 3 - 9999.</span></label>
-				<input type="number" id="simLength" name="simLength" required="required" min ="3" max = "9999"/>
+				<input type="number" id="simLength" name="simLength" value="{{allInputDataDict.simLength}}" required="required" min ="3" max = "9999"/>
 			</div>
 			<div class="shortInput">
 				<label>Length Units</label>
-				<select id="simLengthUnits" name="simLengthUnits">
-					<option value="hours">Hours</option>
-					<option value="minutes">Minutes</option>
+				<select id="simLengthUnits" name="simLengthUnits" value="{{allInputDataDict.simLengthUnits}}">
+					<option value="hours" {% if allInputDataDict.simLengthUnits == 'hours' %}selected{% endif %}>Hours</option>
+					<option value="minutes" {% if allInputDataDict.simLengthUnits == 'minutes' %}selected{% endif %}>Minutes</option>
 				</select>
 			</div>
 			<div class="shortInput">
 				<label>Simulation Start Date (YYYY-MM-DD)</label>
-				<input type="text" id="simStartDate" name="simStartDate" required="required" pattern="^\d\d\d\d-\d\d-\d\d$"/>
+				<input type="text" id="simStartDate" name="simStartDate" value="{{allInputDataDict.simStartDate}}" required="required" pattern="^\d\d\d\d-\d\d-\d\d$"/>
 			</div>
-			<div class="wideInput" style="text-align:right">
-				<button id="deleteButton" type="button" class="stoppedInline postRunInline" onclick="deleteModel()">Delete</button>
-				<button id="shareButton" type="button" class="postRunInline" onclick="shareModel()">Share</button>
-				<button id="duplicateButton" type="button" class="postRunInline" onclick="duplicateModel()">Duplicate</button>
-				<button id="cancelButton" class="runningInline" type="button" onclick="cancelModel()">Cancel Run</button>
-				<button id="runButton" class="postRunInline stoppedInline" type="submit">Run Model</button>
-			</div>
+			{{omfModelButtons}}
 		</form>
 	</div>
-	<div id ="runIndicator" class="content running">
-		Model running on server. Refresh the page to check for results, or wait for automatic refresh every 5 seconds.
-	</div>
-	<div id ="stopIndicator" class="content stopped" style="visibility: hidden">
-		<pre style='overflow-x: scroll;' id='errorText'></pre>
-		<script type="text/javascript">
-		if (typeof(allInputData.stderr) !== 'undefined') {	
-			gebi('stopIndicator').style.visibility = 'visible'
-			gebi('errorText').innerHTML = 'MODEL ENCOUNTERED AN ERROR AS FOLLOWS: \n\n' + allInputData.stderr}
-		</script>
-	</div>
+	{{ omfRunDebugBlock }}
+	{% if modelStatus == 'finished' %}
 	<div id="output">
-		<p class="reportTitle postRun">Power Consumption From Transmission System <a target="_self" class="toggle">Hide / Show</a></p>
-		<div id="powerConsumptionReport" class="tightContent postRun">
+		<p class="reportTitle ">Power Consumption From Transmission System <a target="_self" class="toggle">Hide / Show</a></p>
+		<div id="powerConsumptionReport" class="tightContent ">
 			<div id="powerTimeSeries"></div>
 			<script type="text/javascript">
 				// power series data
@@ -174,8 +128,8 @@
 				new Highcharts.Chart(localHighChart);
 			</script>
 		</div>
-		<p class="reportTitle postRun">Transmission Voltage <a target="_self" class="toggle">Hide / Show</a></p>
-		<div id="swingVoltageReport" class="tightContent postRun">
+		<p class="reportTitle ">Transmission Voltage <a target="_self" class="toggle">Hide / Show</a></p>
+		<div id="swingVoltageReport" class="tightContent ">
 			<div id="voltageTimeSeries"></div>
 			<script type="text/javascript">
 				swingPointStart = dateOb(allOutputData.swingTimestamps[0])
@@ -220,8 +174,8 @@
 				new Highcharts.Chart(localHighChart);
 			</script>
 		</div>
-		<p class="reportTitle postRun">Substation Power Factor <a target="_self" class="toggle">Hide / Show</a></p>
-		<div id="substationPowerFactorReport" class="tightContent postRun">
+		<p class="reportTitle ">Substation Power Factor <a target="_self" class="toggle">Hide / Show</a></p>
+		<div id="substationPowerFactorReport" class="tightContent ">
 			<div id="powerFactorTimeSeries"></div>
 			<script type="text/javascript">
 				swingPointStart = dateOb(allOutputData.swingTimestamps[0])
@@ -255,8 +209,8 @@
 				new Highcharts.Chart(localHighChart);
 			</script>
 		</div>
-		<p class="reportTitle postRun" style="page-break-before:always">Energy Balance <a target="_self" class="toggle">Hide / Show</a></p>
-		<div id="newEnergyBalanceReport" class="tightContent postRun">
+		<p class="reportTitle " style="page-break-before:always">Energy Balance <a target="_self" class="toggle">Hide / Show</a></p>
+		<div id="newEnergyBalanceReport" class="tightContent ">
 			<script type="text/javascript">
 				function arrSum(arr) {
 					myVal = eval(arr.join("+"))
@@ -303,8 +257,8 @@
 				new Highcharts.Chart(localHighChart);
 			</script>
 		</div>
-			<p class="reportTitle postRun" style="">Regulator Tap Changes <a target="_self" class="toggle">Hide / Show</a></p>
-			<div id="newRegulatorReport" class="tightContent postRun">
+			<p class="reportTitle " style="">Regulator Tap Changes <a target="_self" class="toggle">Hide / Show</a></p>
+			<div id="newRegulatorReport" class="tightContent ">
 				<script type="text/javascript">
 
 					var regNamesArray=[]
@@ -394,8 +348,8 @@
 
 				</script>
 			</div>
-			<p class="reportTitle postRun">Cap Bank Activation <a target="_self" class="toggle">Hide / Show</a></p>
-			<div id="newCapbankReport" class="tightContent postRun">
+			<p class="reportTitle ">Cap Bank Activation <a target="_self" class="toggle">Hide / Show</a></p>
+			<div id="newCapbankReport" class="tightContent ">
 				<script type="text/javascript">
 					var capNamesArray=[]
 					for (var key in allOutputData)
@@ -486,8 +440,8 @@
 					}
 				</script>
 			</div>
-		<p class="reportTitle postRun" style="">Triplex Meter Voltages <a target="_self" class="toggle">Hide / Show</a></p>
-		<div id="triplexMeterVoltageReport" class="tightContent postRun">
+		<p class="reportTitle " style="">Triplex Meter Voltages <a target="_self" class="toggle">Hide / Show</a></p>
+		<div id="triplexMeterVoltageReport" class="tightContent ">
 			<div id="triplexMeterVoltageChart"></div>
 			<script type="text/javascript">
 					triplexSeriesData = [
@@ -509,9 +463,9 @@
 					new Highcharts.Chart(localHighChart)
 			</script>
 		</div>
-		<p class="reportTitle postRun" style="page-break-before:always">System Voltage Map <a target="_self" class="toggle">Hide / Show</a></p>
-		<div id="systemVoltageMap" class="tightContent postRun" style="height:1030px">
-			<video width="1000" height="1000" controls preload="auto">
+		<p class="reportTitle " style="page-break-before:always">System Voltage Map <a target="_self" class="toggle">Hide / Show</a></p>
+		<div id="systemVoltageMap" class="tightContent " style="height:1030px">
+			<video width="1000" height="1000" controls preload="auto" style="border-radius:8px">
 				<source id="timeTravelMovie" src="" type="video/mp4" codecs="h264">
 				Your browser does not support the video tag.
 				{% if pathPrefix == "" %}
@@ -521,8 +475,8 @@
 				{% endif %}
 			</video>
 		</div>
-		<p class="reportTitle postRun" style="page-break-before:always">Solar Data <a target="_self" class="toggle">Hide / Show</a></p>
-		<div id="irradianceReport" class="tightContent postRun">
+		<p class="reportTitle " style="page-break-before:always">Solar Data <a target="_self" class="toggle">Hide / Show</a></p>
+		<div id="irradianceReport" class="tightContent ">
 			<div id="irradianceChartDiv"></div>
 			<script>
 				irradianceSeriesData = [
@@ -541,8 +495,8 @@
 					"legend":{"verticalAlign":"top","align":"top","borderWidth":0,"x":50,"y":-10,"layout":"horizontal"}})
 			</script>
 		</div>
-		<p class="reportTitle postRun">Other Climate Variables <a target="_self" class="toggle">Hide / Show</a></p>
-		<div id="climateReport" class="tightContent postRun">
+		<p class="reportTitle ">Other Climate Variables <a target="_self" class="toggle">Hide / Show</a></p>
+		<div id="climateReport" class="tightContent ">
 			<div id="climateChartDiv"></div>
 			<script type="text/javascript">
 				climateSeriesData = [
@@ -563,8 +517,8 @@
 					"legend":{"verticalAlign":"top","align":"top","borderWidth":0,"x":50,"y":-10,"layout":"horizontal"}})
 			</script>
 		</div>
-		<p class="reportTitle postRun">Study Details <a target="_self" class="toggle">Hide / Show</a></p>
-		<div id="studyDetails" class="tightContent postRun detailsContainer" style="position: relative;">
+		<p class="reportTitle ">Study Details <a target="_self" class="toggle">Hide / Show</a></p>
+		<div id="studyDetails" class="tightContent  detailsContainer" style="position: relative;">
 			<div id="mapHere" style="width:495px; height:340px; display:inline-block"></div>
 			<script type="text/javascript">
 				width = 495, height = 340
@@ -604,20 +558,22 @@
 			</div>
 			<script>gebi("stdout").innerHTML = allOutputData.stdout</script>
 		</div>
-		<p class="reportTitle postRun" style="page-break-before:always">Gridlab-D Warnings <a target="_self" class="toggle">Hide / Show</a></p>
-		<div id="gridlabDWarningsBlock" class="tightContent postRun detailsContainer" style="position: relative;">
+		<p class="reportTitle " style="page-break-before:always">Gridlab-D Warnings <a target="_self" class="toggle">Hide / Show</a></p>
+		<div id="gridlabDWarningsBlock" class="tightContent  detailsContainer" style="position: relative;">
 				<pre id="stderr" style="font-size:13px; text-align:left; padding-left: 10px;overflow-x: scroll; overflow-y: scroll; width: 100%"></pre>
 			<script>gebi("stderr").innerHTML = allOutputData.stderr</script>
 		</div>
-		<p class="reportTitle postRun">Gridlab-D Violation Summary <a target="_self" class="toggle">Hide / Show</a></p>
-		<div id="gridlabDViolationSummary" class="tightContent postRun detailsContainer" style="position: relative;">
+		<p class="reportTitle ">Gridlab-D Violation Summary <a target="_self" class="toggle">Hide / Show</a></p>
+		<div id="gridlabDViolationSummary" class="tightContent  detailsContainer" style="position: relative;">
 				<pre id="vioSum" style="font-size:13px; text-align:left; padding-left: 10px;overflow-x: scroll; overflow-y: scroll; width: 100%"></pre>
 			<script>gebi("vioSum").innerHTML = allOutputData.violationSummary</script>
 		</div>
-		<p class="reportTitle postRun">Gridlab-D Violation Log <a target="_self" class="toggle">Hide / Show</a></p>
-		<div id="gridlabDViolationLog" class="tightContent postRun detailsContainer" style="position: relative;">
+		<p class="reportTitle ">Gridlab-D Violation Log <a target="_self" class="toggle">Hide / Show</a></p>
+		<div id="gridlabDViolationLog" class="tightContent  detailsContainer" style="position: relative;">
 				<pre id="vioLog" style="font-size:13px; height: 400px; text-align:left; overflow-x: scroll; overflow-y: scroll; width: 100%"></pre>
 			<script>gebi("vioLog").innerHTML = allOutputData.violationLog</script>
 		</div>
+		{{ rawOutputFiles }}
 	</div>
+	{% endif %}
 </body>

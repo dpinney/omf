@@ -1,30 +1,9 @@
 <head>
-	<title>Open Modeling Framework</title>
-	<meta charset="utf-8">
-	<link href="{{pathPrefix}}/static/omf.css" type="text/css" rel="stylesheet"/>
-	<link rel="shortcut icon" href="{{pathPrefix}}/static/favicon.ico">
-	<style>
-	/*Styles will go here*/
-	</style>
-	{% if modelStatus == "running" %}<meta http-equiv="refresh" content="5"/>{% endif %}
-	<!-- Library Imports -->
-	<script type="text/javascript" src="{{pathPrefix}}/static/omf.js"></script>
-	<script type="text/javascript" src="{{pathPrefix}}/static/jquery-1.9.1.js"></script>
+	{{ omfHeaders }}
 	<script src="{{pathPrefix}}/static/highcharts4.src.js"></script>
 </head>
 <body>
-	<div id="header">
-		<div id="headInnerBlock">
-			<div id="menuLeft">
-				<a style="color:white" href="/">Open Modeling Framework</a> &#187;&nbsp;&nbsp;Model
-				&#8220;<p id="titleText" style="display:inline">{{allInputDataDict.modelName}}</p>&#8221;
-			</div>
-		</div>
-	</div>
-	<div id="triangle-parent">
-		<div id="triangle-message">New Version<span class="classic-triangle">A new version of the model has been added to the OMF. To get the new outputs, please fill in any missing inputs and hit "Run Model". You can also just look at the old inputs/outputs.</span></div>
-		<div id="triangle-topright"></div>
-	</div>
+	{{ omfModelTitle }}
 	<p class="reportTitle">Model Input</p>
 	<div id="input" class="content">
 		<form name="inputForm" action="/runModel/" onsubmit="event.preventDefault(); return isFormValid();" method="post">
@@ -47,7 +26,7 @@
 			{% if modelStatus == 'finished' %}
 			<div class="shortInput">
 				<label>Run Time</label>
-				<input type="text" id="runTime" name="runTime" value={{allInputDataDict.runTime}} readonly/>
+				<input type="text" id="runTime" name="runTime" value="{{allInputDataDict.runTime}}" readonly/>
 			</div>
 			{% endif %}
 			<div class="wideInput">
@@ -119,8 +98,8 @@
 				<label>Length Units</label>
 				<select id="simLengthUnits" name="simLengthUnits" value="{{allInputDataDict.simLengthUnits}}">
 					<!--<option value="minutes">Minutes</option> -->
-					<option value="hours">Hours</option>
-					<option value="days">Days</option>
+					<option value="hours" {% if allInputDataDict.simLengthUnits == 'hours' %}selected{% endif %}>Hours</option>
+					<option value="days" {% if allInputDataDict.simLengthUnits == 'days' %}selected{% endif %}>Days</option>
 				</select>
 			</div>
 			{{ omfModelButtons }}
@@ -130,11 +109,8 @@
 	{{ omfRunDebugBlock }}
 	{% if modelStatus == 'finished' %}
 	<div id="output">
-		<div style="text-align:left" class="tightContent">
-			<p id="dataLocation"></p>
-			<script type="text/javascript">
-				gebi('dataLocation').innerHTML = "Showing data from the closest available city: {{allOutputDataDict.city}}, {{allOutputDataDict.state}}"
-			</script>
+		<div style="text-align:left" class="content">
+			<p id="dataLocation">Showing data from the closest available city: {{allOutputDataDict.city}}, {{allOutputDataDict.state}}</p>
 		</div>
 		<script type="text/javascript">
 			// Global Highcharts settings.

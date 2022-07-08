@@ -1,21 +1,6 @@
 <head>
-	
-	<title>Open Modeling Framework</title>
-	<meta charset="utf-8">
-	<link href="{{pathPrefix}}/static/omf.css" type="text/css" rel="stylesheet"/>
-	<link rel="shortcut icon" href="{{pathPrefix}}/static/favicon.ico">
-	{% if modelStatus == "running" %}<meta http-equiv="refresh" content="5"/>{% endif %}
-	<!-- Library Imports -->
-	<script type="text/javascript" src="{{pathPrefix}}/static/omf.js"></script>
-	<script type="text/javascript" src="{{pathPrefix}}/static/jquery-1.9.1.js"></script>
+	{{ omfHeaders }}
 	<script src="https://cdn.plot.ly/plotly-1.50.1.min.js"></script>	
-	<!-- Data  Imports -->
-	<script>allInputData={% if allInputDataDict %}{{allInputDataDict | tojson}}{% else %}null{% endif %}</script>
-	<script>allOutputData={% if allOutputDataDict %}{{allOutputDataDict | tojson}}{% else %}null{% endif %}</script>
-	<script>modelStatus="{{modelStatus}}"</script>
-	<script>currentUser="{{datastoreNames.get('currentUser','test')}}"</script>
-
-
 	<script type="text/javascript">
 
 		function populateTables() {
@@ -264,45 +249,31 @@
 	
 </head>
 
-<body onload="init()">
-	<div id="header">
-		<div id="headInnerBlock">
-			<div id="menuLeft">
-				<a style="color:white" href="/">Open Modeling Framework</a> &#187;&nbsp;&nbsp;Model
-				&#8220;<p id="titleText" style="display:inline"></p>&#8221;
-			</div>
-		</div>
-	</div>
-	<div id="triangle-parent">
-		<div id="triangle-message">New Version<span class="classic-triangle">A new version of the model has been added to the OMF. To get the new outputs, please fill in any missing inputs and hit "Run Model". You can also just look at the old inputs/outputs.</span></div>
-		<div id="triangle-topright"></div>
-	</div>
+<body>
+	{{ omfModelTitle }}
 	<p class="reportTitle">Model Input</p>
 	<div id="input" class="content">
 		<form name="inputForm" action="/runModel/" onsubmit="event.preventDefault(); return isFormValid();" method="post">
-			
 			<div class="shortInput">
 				<label>Model Type <a href="https://github.com/dpinney/omf/wiki/Models-~-microgridDesign" target="blank">Help?</a></label>
-				<input type="text" id="modelType" name="modelType" value="{{modelName}}" readonly/>
+				<input type="text" id="modelType" name="modelType" value="{{allInputDataDict.modelType}}" value="{{modelName}}" readonly/>
 			</div>
 			<div class="shortInput">
 				<label>Model Name</label>
-				<input type="text" id="modelName" name="modelName" pattern="^[\w\s\d\.-]+$" required="required">
+				<input type="text" id="modelName" name="modelName" value="{{allInputDataDict.modelName}}" pattern="^[\w\s\d\.-]+$" required="required">
 			</div>
-			<div class="shortInput runningInline postRunInline">
+			<div class="shortInput">
 				<label>User</label>
-				<input type="text" id="user" name="user" readonly/>
+				<input type="text" id="user" name="user" value="{{allInputDataDict.user}}" readonly/>
 			</div>
-			<div class="runningInline postRunInline shortInput">
+			<div class="shortInput">
 				<label>Created</label>
-				<input type="text" id="created" name="created" readonly/>
+				<input type="text" id="created" name="created" value="{{allInputDataDict.created}}" readonly/>
 			</div>
-			<div class="postRunInline shortInput">
+			<div class="shortInput">
 				<label>Run Time</label>
-				<input type="text" id="runTime" name="runTime" readonly/>
-			</div>
-
-			
+				<input type="text" id="runTime" name="runTime" value="{{allInputDataDict.runTime}}" readonly/>
+			</div>			
 			<div class="wideInput">
 				<p class="inputSectionHeader">Grid Parameters</p>
 			</div>
@@ -310,309 +281,303 @@
 			<div class="shortInput">
 				<label class="tooltip">Hourly Load Shape (.csv file)<span class="classic">Please enter the name of a .csv file representing the hourly load shape.</span></label>
 				<input id="loadShapeFile" type="file" style="display:none" onchange="handle_files(this.files,'loadShape','fileName')">
-				<input id="loadShape" name="loadShape" type="hidden">
+				<input id="loadShape" name="loadShape" value="{{allInputDataDict.loadShape}}" type="hidden">
 				<div>
 					<label for="loadShapeFile" class="fileButton">Choose File</label>
-					<input id="fileName" name="fileName" readonly class="uploadFileName">	
+					<input id="fileName" name="fileName" value="{{allInputDataDict.fileName}}" readonly class="uploadFileName">	
 				</div>
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Latitude<span class="classic">Specify the latitude of the load/grid.</span></label>
-				<input type="text" id="latitude" name="latitude" pattern="^\-?\d+\.?\d*?$" required="required"/>
+				<input type="text" id="latitude" name="latitude" value="{{allInputDataDict.latitude}}" pattern="^\-?\d+\.?\d*?$" required="required"/>
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Longitude<span class="classic">Specify the longitude of the load/grid.</span></label>
-				<input type="text" id="longitude" name="longitude" pattern="^\-?\d+\.?\d*?$" required="required"/>
+				<input type="text" id="longitude" name="longitude" value="{{allInputDataDict.longitude}}" pattern="^\-?\d+\.?\d*?$" required="required"/>
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Year<span class="classic">Specify the year to which the load shape values corresond.</span></label>
-				<input type="text" id="year" name="year" pattern="^\d{4}$" required="required"/>
+				<input type="text" id="year" name="year" value="{{allInputDataDict.year}}" pattern="^\d{4}$" required="required"/>
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Analysis Period (years)<span class="classic">Specify the length of financial analysis in years.</span></label>
-				<input type="number" id="analysisYears" name="analysisYears" step="1" min="2" max="75"  required="required"/>
+				<input type="number" id="analysisYears" name="analysisYears" value="{{allInputDataDict.analysisYears}}" step="1" min="2" max="75"  required="required"/>
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Cost of Energy ($/kWh)<span class="classic">Specify the energy cost in $/kWh. Format 0.XX</span></label>
-				<input type="text" id="energyCost" name="energyCost" pattern="^\d+\.?\d*?$" required="required"/>
+				<input type="text" id="energyCost" name="energyCost" value="{{allInputDataDict.energyCost}}" pattern="^\d+\.?\d*?$" required="required"/>
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Cost of Demand ($/kW)<span class="classic">Specify the demand cost in $/kW. Format 0.XX</span></label>
-				<input type="text" id="demandCost" name="demandCost" pattern="^\d+\.?\d*?$" required="required"/>
+				<input type="text" id="demandCost" name="demandCost" value="{{allInputDataDict.demandCost}}" pattern="^\d+\.?\d*?$" required="required"/>
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Wholesale Price ($/kWh)<span class="classic">Specify wholesale price for selling excess electricity back to the grid operator. Format 0.XX</span></label>
-				<input type="text" id="wholesaleCost" name="wholesaleCost" pattern="^\d+\.?\d*?$" required="required"/>
+				<input type="text" id="wholesaleCost" name="wholesaleCost" value="{{allInputDataDict.wholesaleCost}}" pattern="^\d+\.?\d*?$" required="required"/>
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Value of Lost Load ($/kWh)<span class="classic">Specify the value of lost load during a power outage in $/kWh. </span></label>
-				<input type="text" id="value_of_lost_load" name="value_of_lost_load" pattern="^\d+\.?\d*?$" required="required"/>
+				<input type="text" id="value_of_lost_load" name="value_of_lost_load" value="{{allInputDataDict.value_of_lost_load}}" pattern="^\d+\.?\d*?$" required="required"/>
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Use URDB Rate?<span class="classic">Utilizing a rate from the Utility Rate Database overrides Cost of Energy and Cost of Demand rates above. See https://openei.org/services/<br>doc/rest/util_rates/</span></label>
-				<select id="urdbLabelSwitch" name="urdbLabelSwitch"/>
-					<option value="on">Yes</option>
-					<option value="off">No</option>
+				<select id="urdbLabelSwitch" name="urdbLabelSwitch" value="{{allInputDataDict.urdbLabelSwitch}}"/>
+					<option value="on" {{ 'selected' if allInputDataDict.urdbLabelSwitch == 'on' }}>Yes</option>
+					<option value="off" {{ 'selected' if allInputDataDict.urdbLabelSwitch == 'off' }}>No</option>
 				</select>
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">URDB Label<span class="classic">Input the string found at the end of the URDB Rate URL, For example https://openei.org/apps/<br>IURDB/rate/view/<br> 5b75cfe95457a3454faf0aea <br> would yield "5b75cfe95457a3454faf0aea"</span></label>
-				<input type="text" id="urdbLabel" name="urdbLabel" required="required"/>
+				<input type="text" id="urdbLabel" name="urdbLabel" value="{{allInputDataDict.urdbLabel}}" required="required"/>
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">O+M Escalation (% per year)<span class="classic">Please enter a number 0-1 for the Annual nominal O&M cost escalation rate. Format 0.XXX</span></label>
-				<input type="number" id="omCostEscalator" name="omCostEscalator" step="0.001" min="0.0" max="1.0" required="required"/>
+				<input type="number" id="omCostEscalator" name="omCostEscalator" value="{{allInputDataDict.omCostEscalator}}" step="0.001" min="0.0" max="1.0" required="required"/>
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Discount Rate (% per year)<span class="classic">Please enter a number 0-1 for the Nominal energy offtaker discount rate. In single ownership model the offtaker is also the generation owner. Format 0.XXX</span></label>
-				<input type="number" id="discountRate" name="discountRate" step="0.001" min="0.0" max="1.0" required="required"/>
+				<input type="number" id="discountRate" name="discountRate" value="{{allInputDataDict.discountRate}}" step="0.001" min="0.0" max="1.0" required="required"/>
 			</div>
-
-			
 			<div class="wideInput">
 				<p class="inputSectionHeader">Generation Technologies</p>
 			</div>
 			<hr>
 			<div class="shortInput">
 				<label class="tooltip">Solar<span class="classic">Include solar in the microgrid design?</span></label>
-				<select id="solar" name="solar"/>
-					<option value="on">Yes</option>
-					<option value="off">No</option>
+				<select id="solar" name="solar" value="{{allInputDataDict.solar}}"/>
+					<option value="on" {{ 'selected' if allInputDataDict.solar == 'on' }}>Yes</option>
+					<option value="off" {{ 'selected' if allInputDataDict.solar == 'off' }}>No</option>
 				</select>
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Wind<span class="classic">Include wind in the microgrid design?</span></label>
-				<select id="wind" name="wind"/>
-					<option value="on">Yes</option>
-					<option value="off">No</option>
+				<select id="wind" name="wind" value="{{allInputDataDict.wind}}"/>
+					<option value="on" {{ 'selected' if allInputDataDict.wind == 'on' }}>Yes</option>
+					<option value="off" {{ 'selected' if allInputDataDict.wind == 'off' }}>No</option>
 				</select>
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Battery<span class="classic">Include batteries in the microgrid design?</span></label>
-				<select id="battery" name="battery"/>
-					<option value="on">Yes</option>
-					<option value="off">No</option>
+				<select id="battery" name="battery" value="{{allInputDataDict.battery}}"/>
+					<option value="on" {{ 'selected' if allInputDataDict.battery == 'on' }}>Yes</option>
+					<option value="off" {{ 'selected' if allInputDataDict.battery == 'off' }}>No</option>
 				</select>
 			</div>
 			<div class="shortInput solarDisplayInput">
 				<label class="tooltip">Solar Cost ($/kW)<span class="classic">Specify the cost in $/kW.</span></label>
-				<input type="text" id="solarCost" name="solarCost" pattern="^\d+\.?\d*?$" required="required"/>
+				<input type="text" id="solarCost" name="solarCost" value="{{allInputDataDict.solarCost}}" pattern="^\d+\.?\d*?$" required="required"/>
 			</div>
 			<div class="shortInput solarDisplayInput">
 				<label class="tooltip">Solar Minimum Power (kW)<span class="classic">Specify the minimum desired generation in kW.</span></label>
-				<input type="text" id="solarMin" name="solarMin" required="required"/>
+				<input type="text" id="solarMin" name="solarMin" value="{{allInputDataDict.solarMin}}" required="required"/>
 			</div>
 			<div class="shortInput solarDisplayInput">
 				<label class="tooltip">Solar Maximum Power (kW)<span class="classic">Specify the maximum desired generation in kW. Leave at default for full optimization on solar power.</span></label>
-				<input type="text" id="solarMax" name="solarMax" required="required"/>
+				<input type="text" id="solarMax" name="solarMax" value="{{allInputDataDict.solarMax}}" required="required"/>
 			</div>
 			<div class="shortInput solarDisplayInput">
 				<label class="tooltip">Pre-existing Solar Size (kW)<span class="classic">Specify the total capacity of any pre-existing solar arrays in kW. The outputted "Total Solar" will be inclusive of existing solar.</span></label>
-				<input type="text" id="solarExisting" name="solarExisting" required="required"/>
+				<input type="text" id="solarExisting" name="solarExisting" value="{{allInputDataDict.solarExisting}}" required="required"/>
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Solar power can be curtailed?<span class="classic">Allows for excess solar power to be automatically curtailed.</span></label>
-				<select id="solarCanCurtail" name="solarCanCurtail"/>
-					<option value=true>Yes</option>
-					<option value=false>No</option>
+				<select id="solarCanCurtail" name="solarCanCurtail" value="{{allInputDataDict.solarCanCurtail}}"/>
+					<option value=true {{ 'selected' if allInputDataDict.solarCanCurtail == 'true' }}>Yes</option>
+					<option value=false {{ 'selected' if allInputDataDict.solarCanCurtail == 'false' }}>No</option>
 				</select>
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Solar power can be exported?<span class="classic">Allows for excess solar power to be sold back to the grid.</span></label>
-				<select id="solarCanExport" name="solarCanExport"/>
-					<option value=true>Yes</option>
-					<option value=false>No</option>
+				<select id="solarCanExport" name="solarCanExport" value="{{allInputDataDict.solarCanExport}}"/>
+					<option value=true {{ 'selected' if allInputDataDict.solarCanExport == 'true' }}>Yes</option>
+					<option value=false {{ 'selected' if allInputDataDict.solarCanExport == 'false' }}>No</option>
 				</select>
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Solar MACRS Years<span class="classic">MACRS schedule for financial analysis. Possible inputs are 0, 5 and 7 years. Set to zero to disable accelerated depreciation accounting for solar.</span></label>
-				<select id="solarMacrsOptionYears" name="solarMacrsOptionYears"/>
-					<option value="0">0</option>
-					<option value="5">5</option>
-					<option value="7">7</option>
+				<select id="solarMacrsOptionYears" name="solarMacrsOptionYears" value="{{allInputDataDict.solarMacrsOptionYears}}"/>
+					<option value="0" {{ 'selected' if allInputDataDict.solarMacrsOptionYears == '0' }}>0</option>
+					<option value="5" {{ 'selected' if allInputDataDict.solarMacrsOptionYears == '5' }}>5</option>
+					<option value="7" {{ 'selected' if allInputDataDict.solarMacrsOptionYears == '7' }}>7</option>
 				</select>
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Solar ITC (%)<span class="classic">Please enter a number 0-1 for the solar investment tax credit. Format 0.XX</span></label>
-				<input type="number" id="solarItcPercent" name="solarItcPercent" step="0.01" min="0.0" max="1.0" required="required"/>
+				<input type="number" id="solarItcPercent" name="solarItcPercent" value="{{allInputDataDict.solarItcPercent}}" step="0.01" min="0.0" max="1.0" required="required"/>
 			</div>
 			<div class="shortInput windDisplayInput">
 				<label class="tooltip">Wind Cost ($/kW)<span class="classic">Specify the cost in $/kW.</span></label>
-				<input type="text" id="windCost" name="windCost" pattern="^\d+\.?\d*?$" required="required"/>
+				<input type="text" id="windCost" name="windCost" value="{{allInputDataDict.windCost}}" pattern="^\d+\.?\d*?$" required="required"/>
 			</div>
 			<div class="shortInput windDisplayInput">
 				<label class="tooltip">Wind Minimum Power (kW)<span class="classic">Specify the minimum desired generation in kW.</span></label>
-				<input type="text" id="windMin" name="windMin" required="required"/>
+				<input type="text" id="windMin" name="windMin" value="{{allInputDataDict.windMin}}" required="required"/>
 			</div>
 			<div class="shortInput windDisplayInput">
 				<label class="tooltip">Wind Maximum Power (kW)<span class="classic">Specify the maximum desired generation in kW. Leave at default for full optimization on wind power.</span></label>
-				<input type="text" id="windMax" name="windMax" required="required"/>
+				<input type="text" id="windMax" name="windMax" value="{{allInputDataDict.windMax}}" required="required"/>
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Wind MACRS Years<span class="classic">MACRS schedule for financial analysis. Possible inputs are 0, 5 and 7 years. Set to zero to disable accelerated depreciation accounting for solar.</span></label>
-				<select id="windMacrsOptionYears" name="windMacrsOptionYears"/>
-					<option value="0">0</option>
-					<option value="5">5</option>
-					<option value="7">7</option>
+				<select id="windMacrsOptionYears" name="windMacrsOptionYears" value="{{allInputDataDict.windMacrsOptionYears}}"/>
+					<option value="0" {{ 'selected' if allInputDataDict.windMacrsOptionYears == '0' }}>0</option>
+					<option value="5" {{ 'selected' if allInputDataDict.windMacrsOptionYears == '5' }}>5</option>
+					<option value="7" {{ 'selected' if allInputDataDict.windMacrsOptionYears == '7' }}>7</option>
 				</select>
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Wind ITC (%)<span class="classic">Please enter a number 0-1 for the wind investment tax credit. Format 0.XX</span></label>
-				<input type="number" id="windItcPercent" name="windItcPercent" step="0.01" min="0.0" max="1.0" required="required"/>
+				<input type="number" id="windItcPercent" name="windItcPercent" value="{{allInputDataDict.windItcPercent}}" step="0.01" min="0.0" max="1.0" required="required"/>
 			</div>
 			<div class="shortInput batteryDisplayInput">
 				<label class="tooltip">Battery Power Cost ($/kW)<span class="classic">Specify the cost in $/kW.</span></label>
-				<input type="text" id="batteryPowerCost" name="batteryPowerCost" pattern="^\d+\.?\d*?$" required="required"/>
+				<input type="text" id="batteryPowerCost" name="batteryPowerCost" value="{{allInputDataDict.batteryPowerCost}}" pattern="^\d+\.?\d*?$" required="required"/>
 			</div>
 			<div class="shortInput BatteryDisplayInput">
 				<label class="tooltip">Battery Minimum Power (kW)<span class="classic">Specify the minimum desired battery power in kW.</span></label>
-				<input type="text" id="batteryPowerMin" name="batteryPowerMin" required="required"/>
+				<input type="text" id="batteryPowerMin" name="batteryPowerMin" value="{{allInputDataDict.batteryPowerMin}}" required="required"/>
 			</div>
 			<div class="shortInput BatteryDisplayInput">
 				<label class="tooltip">Battery Maximum Power (kW)<span class="classic">Specify the maximum desired battery power in kW.</span></label>
-				<input type="text" id="batteryPowerMax" name="batteryPowerMax" required="required"/>
+				<input type="text" id="batteryPowerMax" name="batteryPowerMax" value="{{allInputDataDict.batteryPowerMax}}" required="required"/>
 			</div>
 			<div class="shortInput batteryDisplayInput">
 				<label class="tooltip">Battery Capacity Cost ($/kWh)<span class="classic">Specify the cost in $/kWh.</span></label>
-				<input type="text" id="batteryCapacityCost" name="batteryCapacityCost" pattern="^\d+\.?\d*?$" required="required"/>
+				<input type="text" id="batteryCapacityCost" name="batteryCapacityCost" value="{{allInputDataDict.batteryCapacityCost}}" pattern="^\d+\.?\d*?$" required="required"/>
 			</div>
 			<div class="shortInput BatteryDisplayInput">
 				<label class="tooltip">Battery Minimum Capacity (kWh)<span class="classic">Specify the minimum desired battery capacity in kWh.</span></label>
-				<input type="text" id="batteryCapacityMin" name="batteryCapacityMin" required="required"/>
+				<input type="text" id="batteryCapacityMin" name="batteryCapacityMin" value="{{allInputDataDict.batteryCapacityMin}}" required="required"/>
 			</div>
 			<div class="shortInput BatteryDisplayInput">
 				<label class="tooltip">Battery Maximum Capacity (kWh)<span class="classic">Specify the maximum desired battery capacity in kWh.</span></label>
-				<input type="text" id="batteryCapacityMax" name="batteryCapacityMax" required="required"/>
+				<input type="text" id="batteryCapacityMax" name="batteryCapacityMax" value="{{allInputDataDict.batteryCapacityMax}}" required="required"/>
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Battery MACRS Years<span class="classic">MACRS schedule for financial analysis. Possible inputs are 0, 5 and 7 years. Set to zero to disable accelerated depreciation accounting for solar.</span></label>
-				<select id="batteryMacrsOptionYears" name="batteryMacrsOptionYears"/>
-					<option value="0">0</option>
-					<option value="5">5</option>
-					<option value="7">7</option>
+				<select id="batteryMacrsOptionYears" name="batteryMacrsOptionYears" value="{{allInputDataDict.batteryMacrsOptionYears}}"/>
+					<option value="0" {{ 'selected' if allInputDataDict.batteryMacrsOptionYears == '0' }}>0</option>
+					<option value="5" {{ 'selected' if allInputDataDict.batteryMacrsOptionYears == '5' }}>5</option>
+					<option value="7" {{ 'selected' if allInputDataDict.batteryMacrsOptionYears == '7' }}>7</option>
 				</select>
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Battery ITC (%)<span class="classic">Please enter a number 0-1 for the battery investment tax credit. Format 0.XX</span></label>
-				<input type="number" id="batteryItcPercent" name="batteryItcPercent" step="0.01" min="0.0" max="1.0" required="required"/>
+				<input type="number" id="batteryItcPercent" name="batteryItcPercent" value="{{allInputDataDict.batteryItcPercent}}" step="0.01" min="0.0" max="1.0" required="required"/>
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Battery Replacement Power Cost ($/kW)<span class="classic">Specify the cost of replacing the battery inverter at the specified year in $/kW.</span></label>
-				<input type="text" id="batteryPowerCostReplace" name="batteryPowerCostReplace" pattern="^\d+\.?\d*?$" required="required"/>
+				<input type="text" id="batteryPowerCostReplace" name="batteryPowerCostReplace" value="{{allInputDataDict.batteryPowerCostReplace}}" pattern="^\d+\.?\d*?$" required="required"/>
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Battery Replacement Capacity Cost ($/kWh)<span class="classic">Specify the cost of replacing the battery capacity at the specified year in $/kWh.</span></label>
-				<input type="text" id="batteryCapacityCostReplace" name="batteryCapacityCostReplace" pattern="^\d+\.?\d*?$" required="required"/>
+				<input type="text" id="batteryCapacityCostReplace" name="batteryCapacityCostReplace" value="{{allInputDataDict.batteryCapacityCostReplace}}" pattern="^\d+\.?\d*?$" required="required"/>
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Battery Inverter Replacement (years)<span class="classic">Specify a year in which the battery inverter will be replaced at the cost specified in Battery Replacement Power Cost. Input is an integer less than or equal to the analysis period in years.</span></label>
-				<input type="text" id="batteryPowerReplaceYear" name="batteryPowerReplaceYear" required="required"/>
+				<input type="text" id="batteryPowerReplaceYear" name="batteryPowerReplaceYear" value="{{allInputDataDict.batteryPowerReplaceYear}}" required="required"/>
 			</div>
 				<div class="shortInput">
 				<label class="tooltip">Battery Replacement (years)<span class="classic">Specify a year in which the battery cells will be replaced at the cost specified in Battery Replacement Capacity Cost. Input is an integer less than or equal to the analysis period in years.</span></label>
-				<input type="text" id="batteryCapacityReplaceYear" name="batteryCapacityReplaceYear" required="required"/>
+				<input type="text" id="batteryCapacityReplaceYear" name="batteryCapacityReplaceYear" value="{{allInputDataDict.batteryCapacityReplaceYear}}" required="required"/>
 			</div>
-
-
 			<div class="wideInput">
 				<p class="inputSectionHeader">Resilience - To optimize for resilience, specify an Outage Start Hour greater than 0</p>
 			</div>
 			<hr>
 			<div class="shortInput">
 				<label class="tooltip">Outage Start Hour<span class="classic">A major outage is added starting at this hour. Specify an hour greater than 0 but less than 8760 to trigger optimization for resilience and include fossil generation. If 0 is entered, the model will run an economic optimization without fossil generation.</span></label>
-				<input type="number" id="outage_start_hour" name="outage_start_hour" min="0" max="8760" required="required"/>
+				<input type="number" id="outage_start_hour" name="outage_start_hour" value="{{allInputDataDict.outage_start_hour}}" min="0" max="8760" required="required"/>
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Outage Duration (hours)<span class="classic">The added major outage is given this duration.</span></label>
-				<input type="number" id="outageDuration" name="outageDuration" min="1" max="8760" required="required"/>
+				<input type="number" id="outageDuration" name="outageDuration" value="{{allInputDataDict.outageDuration}}" min="1" max="8760" required="required"/>
 			</div>
 			<div class="shortInput">
-				<label class="tooltip">User supplies Optional Critical Load Shape (.csv)?<span class="classic">Check "Yes" if user uploads Optional Critical Load Shape (.csv). Else, indicate "Critical Load Factor"</span></label>
-				<select id="userCriticalLoadShape" name="userCriticalLoadShape"/>
-					<option value=true>Yes</option>
-					<option value=false>No</option>
+				<label class="tooltip">User-supplied Critical Load Shape (.csv)?<span class="classic">Check "Yes" if user uploads Optional Critical Load Shape (.csv). Else, indicate "Critical Load Factor"</span></label>
+				<select id="userCriticalLoadShape" name="userCriticalLoadShape" value="{{allInputDataDict.userCriticalLoadShape}}"/>
+					<option value=true {{ 'selected' if allInputDataDict.userCriticalLoadShape == 'true' }}>Yes</option>
+					<option value=false {{ 'selected' if allInputDataDict.userCriticalLoadShape == 'false' }}>No</option>
 				</select>
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Optional Critical Load Shape (.csv) <span class="classic">Optional: Please enter the name of a .csv file representing the hourly critical load shape. Number of columns much match LoadShape file. Overrides "Critical Load Factor" if present.</span></label>
 				<input id="criticalLoadShapeFile" type="file" style="display:none" onchange="handle_files(this.files,'criticalLoadShape','criticalFileName')">
-				<input id="criticalLoadShape" name="criticalLoadShape" type="hidden">
+				<input id="criticalLoadShape" name="criticalLoadShape" value="{{allInputDataDict.criticalLoadShape}}" type="hidden">
 				<div>
 					<label for="criticalLoadShapeFile" class="fileButton">Choose File</label>
-					<input id="criticalFileName" name="criticalFileName" readonly class="uploadFileName">
+					<input id="criticalFileName" name="criticalFileName" value="{{allInputDataDict.criticalFileName}}" readonly class="uploadFileName">
 				</div>
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Critical Load Factor<span class="classic">Please enter a number 0-1 for the fraction of total typical load that must be met during a grid outage. Format 0.XX</span></label>
-				<input type="number" id="criticalLoadFactor" name="criticalLoadFactor" step="0.01" min="0.0" max="1.0" required="required"/>
+				<input type="number" id="criticalLoadFactor" name="criticalLoadFactor" value="{{allInputDataDict.criticalLoadFactor}}" step="0.01" min="0.0" max="1.0" required="required"/>
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Pre-existing Fossil Generator Size (kW)<span class="classic">Specify the total capacity of any pre-existing generators in kW. The outputted "Total Fossil Gen" will be inclusive of existing fossil gen.</span></label>
-				<input type="text" id="genExisting" name="genExisting" required="required"/>
+				<input type="text" id="genExisting" name="genExisting" value="{{allInputDataDict.genExisting}}" required="required"/>
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Available Generator Fuel (gallons)<span class="classic">Specify the amount of fuel available for all new and pre-existing generators in gallons.</span></label>
-				<input type="text" id="fuelAvailable" name="fuelAvailable" required="required"/>
+				<input type="text" id="fuelAvailable" name="fuelAvailable" value="{{allInputDataDict.fuelAvailable}}" required="required"/>
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Minimum Generator Loading<span class="classic">Please enter a number 0-1 for the the minimum fraction of rated total kVA load that must be maintained by the generator. >/= 0.3 recommended for extended diesel operation. Set to 0 for highest likelihood of success in solving optimization. Format 0.XX</span></label>
-				<input type="number" id="minGenLoading" name="minGenLoading" step="0.01" min="0.0" max="1.0"  required="required"/>
+				<input type="number" id="minGenLoading" name="minGenLoading" value="{{allInputDataDict.minGenLoading}}" step="0.01" min="0.0" max="1.0"  required="required"/>
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Fossil Generator Cost ($/kW)<span class="classic">Specify the cost in $/kWh.</span></label>
-				<input type="text" id="dieselGenCost" name="dieselGenCost" pattern="^\d+\.?\d*?$" required="required"/>
+				<input type="text" id="dieselGenCost" name="dieselGenCost" value="{{allInputDataDict.dieselGenCost}}" pattern="^\d+\.?\d*?$" required="required"/>
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Fossil Generator Min (kW)<span class="classic">Specify minimum fossil generation in kW. Only specify if needed, as the optimization runs best if left unedited.</span></label>
-				<input type="text" id="dieselMin" name="dieselMin" pattern="^\d+\.?\d*?$" required="required"/>
+				<input type="text" id="dieselMin" name="dieselMin" value="{{allInputDataDict.dieselMin}}" pattern="^\d+\.?\d*?$" required="required"/>
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Fossil Generator Max (kW)<span class="classic">Specify max fossil generation in kW. Only specify if needed, as the optimization runs best if left unedited.</span></label>
-				<input type="text" id="dieselMax" name="dieselMax" pattern="^\d+\.?\d*?$" required="required"/>
+				<input type="text" id="dieselMax" name="dieselMax" value="{{allInputDataDict.dieselMax}}" pattern="^\d+\.?\d*?$" required="required"/>
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Fossil Fuel Cost (diesel gal equiv)<span class="classic">Specify cost of fuel in $ per gallon. To convert $/MMBTU of Natural gas to gallons of diesel, divide $/MMBTU market rate by 4.85 to account for 50% lower efficiency of natural gas reciprocating engines and lower fuel density as compared to diesel. Format X.XX</span></label>
-				<input type="text" id="dieselFuelCostGal" name="dieselFuelCostGal" pattern="^\d+\.?\d*?$" required="required"/>
+				<input type="text" id="dieselFuelCostGal" name="dieselFuelCostGal" value="{{allInputDataDict.dieselFuelCostGal}}" pattern="^\d+\.?\d*?$" required="required"/>
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Fossil Emissions Factor (lb CO2/gal)<span class="classic">Specify fossil emissions factor in pounds of carbon dioxide per gallon. Default 22.4 is for diesel. Natural gas can be modeled using 24.1 </span></label>
-				<input type="text" id="dieselCO2Factor" name="dieselCO2Factor" pattern="^\d+\.?\d*?$" required="required"/>
+				<input type="text" id="dieselCO2Factor" name="dieselCO2Factor" value="{{allInputDataDict.dieselCO2Factor}}" pattern="^\d+\.?\d*?$" required="required"/>
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Fossil O+M Cost ($/kW/year)<span class="classic">Specify annual operations and maintenance cost per kilowatt per year.</span></label>
-				<input type="text" id="dieselOMCostKw" name="dieselOMCostKw" pattern="^\d+\.?\d*?$" required="required"/>
+				<input type="text" id="dieselOMCostKw" name="dieselOMCostKw" value="{{allInputDataDict.dieselOMCostKw}}" pattern="^\d+\.?\d*?$" required="required"/>
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Fossil O+M Cost ($/kWh/year)<span class="classic">Specify annual operations and maintenance cost per kilowatt-hour per year. Format "X.XX"</span></label>
-				<input type="text" id="dieselOMCostKwh" name="dieselOMCostKwh" pattern="^\d+\.?\d*?$" required="required"/>
+				<input type="text" id="dieselOMCostKwh" name="dieselOMCostKwh" value="{{allInputDataDict.dieselOMCostKwh}}" pattern="^\d+\.?\d*?$" required="required"/>
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Fossil gen only runs during outage?<span class="classic">"No" signifies that fossil generator is enabled to run at any point in the year.</span></label>
-				<select id="dieselOnlyRunsDuringOutage" name="dieselOnlyRunsDuringOutage"/>
-					<option value=true>Yes</option>
-					<option value=false>No</option>
+				<select id="dieselOnlyRunsDuringOutage" name="dieselOnlyRunsDuringOutage" value="{{allInputDataDict.dieselOnlyRunsDuringOutage}}"/>
+					<option value=true {{ 'selected' if allInputDataDict.dieselOnlyRunsDuringOutage == 'true' }}>Yes</option>
+					<option value=false {{ 'selected' if allInputDataDict.dieselOnlyRunsDuringOutage == 'false' }}>No</option>
 				</select>
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Fossil MACRS Years<span class="classic">MACRS schedule for financial analysis. Possible inputs are 0, 5 and 7 years. Set to zero to disable accelerated depreciation accounting for solar.</span></label>
-				<select id="dieselMacrsOptionYears" name="dieselMacrsOptionYears"/>
-					<option value="0">0</option>
-					<option value="5">5</option>
-					<option value="7">7</option>
+				<select id="dieselMacrsOptionYears" name="dieselMacrsOptionYears" value="{{allInputDataDict.dieselMacrsOptionYears}}"/>
+					<option value="0" {{ 'selected' if allInputDataDict.dieselMacrsOptionYears == '0' }}>0</option>
+					<option value="5" {{ 'selected' if allInputDataDict.dieselMacrsOptionYears == '5' }}>5</option>
+					<option value="7" {{ 'selected' if allInputDataDict.dieselMacrsOptionYears == '7' }}>7</option>
 				</select>
 			</div>
-
-
 			{{ omfModelButtons }}
 		</form>
 	</div>
 	{{ omfRunDebugBlock }}
-	<div id="output" class="postRun">
+	{% if modelStatus == 'finished' %}
+	<div id="output">
 		<table>
 			<tr><th></th></tr>
 		</table>
 	</div>
-	<div id="raw_out" class="postRun">
-		{{ rawOutputFiles }}
-	</div>
+	{{ rawOutputFiles }}
+	{% endif %}
 </body>

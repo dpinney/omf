@@ -36,7 +36,6 @@ def _tests():
 		print(errorMessage)
 	viz(FEEDER_PATH, forceLayout=DO_FORCE_LAYOUT, outputPath=None)
 
-
 def insert_coordinates(tree):
 	# type: (dict) -> None
 	"""Insert additional latitude and longitude data into the dictionary."""
@@ -47,7 +46,9 @@ def insert_coordinates(tree):
 	cleanG = nx.Graph(inGraph.edges())
 	# HACK2: might miss nodes without edges without the following.
 	cleanG.add_nodes_from(inGraph)
-	pos = nx.nx_agraph.graphviz_layout(cleanG, prog='neato')
+	# pos = nx.nx_agraph.graphviz_layout(cleanG, prog='neato')
+	pos = nx.kamada_kawai_layout(cleanG)
+	pos = {k:(1000 * pos[k][0],1000 * pos[k][1]) for k in pos} # get out of array notation
 	# # Charting the feeder in matplotlib:
 	# feeder.latLonNxGraph(inGraph, labels=False, neatoLayout=True, showPlot=True)
 	# Insert the latlons.
@@ -57,7 +58,6 @@ def insert_coordinates(tree):
 		if thisPos != None:
 			tree[key]['longitude'] = thisPos[0]
 			tree[key]['latitude'] = thisPos[1]
-
 
 def contains_valid_coordinates(tree):
 	'''
@@ -73,7 +73,6 @@ def contains_valid_coordinates(tree):
 				else:
 					return True
 	return False
-
 
 def get_components():
 	directory = os.path.join(omf.omfDir, "data/Component")
@@ -189,15 +188,17 @@ def viz(pathToOmdOrGlm, forceLayout=False, outputPath=None, outputName='viewer.h
 	if open_file:
 		open_browser(tempDir, outputName)
 
-
 def open_browser(tempDir, outputName):
 	webbrowser.open_new("file://" + tempDir + '/' + outputName)
-
 
 if __name__ == '__main__':
 	_tests()
 	#viz('/Users/tuomastalvitie/OneDrive/NRECA Code/DEC Robinsonville Original.omd', forceLayout=False, outputPath=None)
 	#viz('C:\Users\Tuomas\SkyDrive\NRECA Code\Utility Data\DEC Robinsonville Substation\DEC Robinsonville Original.omd', forceLayout=False, outputPath=None)
 	# viz('/Users/dpinney/Desktop/LATERBASE/NRECA/GridBallast/DM1.3.1 Go-No-Go - Demonstration of GridBallast Performance in Simulation - FINISHED/Utility Data/DEC Robinsonville Substation/DEC Robinsonville Original.omd', forceLayout=False, outputPath=None)
-	# viz('static/publicFeeders/ieee37fixed.omd')
+	# viz('static/publicFeeders/ieee37fixed.omd', forceLayout=True)
+	# viz('static/publicFeeders/DEC Red Base.omd', forceLayout=True)
+	# viz('static/publicFeeders/Olin Barre Geo.omd', forceLayout=True)
+	# viz('static/publicFeeders/greensboro_NC_rural.omd')
+	viz('static/publicFeeders/ieee240.dss.omd', forceLayout=True)
 	# viz('/Users/ryanmahoney/omf/omf/scratch/RONM/nreca1824cleanCoords.dss.omd')

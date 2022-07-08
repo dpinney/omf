@@ -135,6 +135,7 @@ def new(modelDir):
 		"beta": 0.05,
 		"simStartDate": "2002-01-01",
 		"modelType": modelName,
+		"prophet": 0
 	}
 	creationCode = __neoMetaModel__.new(modelDir, defaultInputs)
 	return creationCode

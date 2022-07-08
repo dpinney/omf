@@ -1,1 +1,2 @@
-omf/solvers/* linguist-vendored
+omf/solvers/** linguist-vendored
+omf/scratch/** linguist-vendored

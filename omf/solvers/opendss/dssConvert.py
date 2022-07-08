@@ -710,22 +710,23 @@ def dssToOmd(dssFilePath, omdFilePath, RADIUS=0.0002, write_out=True):
 							parent_name = to_name
 						else:
 							parent_name = ob['parent']
-				# try:
-				# 	parent_loc = name_map[parent_name]
-				# except KeyError:
-				# 	short_parent_name = parent_name.split('.')[1]
-				# 	parent_loc = name_map[short_parent_name]
-				parent_loc = name_map[parent_name]
-				parent_ob = evil_glm[parent_loc]
-				parent_lat = parent_ob.get('latitude', None)
-				parent_lon = parent_ob.get('longitude', None)
-				# place randomly on circle around parent.
-				angle = random.random()*3.14159265*2;
-				x = math.cos(angle)*RADIUS;
-				y = math.sin(angle)*RADIUS;
-				ob['latitude'] = str(float(parent_lat) + x)
-				ob['longitude'] = str(float(parent_lon) + y)
-				# print(ob)
+				try:
+					# move towards parent.
+					parent_loc = name_map[parent_name]
+					short_parent_name = parent_name.split('.')[1]
+					parent_loc = name_map[short_parent_name]
+					parent_loc = name_map[parent_name]
+					parent_ob = evil_glm[parent_loc]
+					parent_lat = parent_ob.get('latitude', None)
+					parent_lon = parent_ob.get('longitude', None)
+					# place randomly on circle around parent.
+					angle = random.random()*3.14159265*2;
+					x = math.cos(angle)*RADIUS;
+					y = math.sin(angle)*RADIUS;
+					ob['latitude'] = str(float(parent_lat) + x)
+					ob['longitude'] = str(float(parent_lon) + y)
+				except:
+					pass # too fragile to debug right now.
 			except:
 				print('ERROR on converting',ob)
 	if write_out:
@@ -752,6 +753,11 @@ def dss_to_networkx(dssFilePath, tree=None):
 	]
 	full_edges = edges + edges_sub
 	G = nx.DiGraph(full_edges)
+	for ob in omd.values():
+		if 'latitude' in ob and 'longitude' in ob:
+			G.add_node(ob['name'], pos=(float(ob['longitude']), float(ob['latitude'])))
+		else:
+			G.add_node(ob['name'])
 	return G
 
 def getDssCoordinates(omdFilePath, outFilePath):
@@ -767,7 +773,6 @@ def getDssCoordinates(omdFilePath, outFilePath):
 			latitude = ob['latitude']
 			longitude = ob['longitude']
 			coordinateDict[obName] = (latitude, longitude)
-
 	with open(outFilePath, "w") as coordinateListFile:
 		for bus in coordinateDict.keys():
 			busLat = coordinateDict[bus][0]
