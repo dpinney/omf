@@ -169,6 +169,7 @@ def run_onm(circuitPath='circuit.dss', settingsPath='settings.json', outputPath=
 	' '''
 	runCommands([cmd_string])
 
+
 if __name__ == '__main__':
 	# Basic Tests
 	thisDirPath = Path(thisDir)
@@ -176,7 +177,9 @@ if __name__ == '__main__':
 	loadPrioritiesPath = ''
 	microgridTaggingPath = ''
 	circuitFile = 'iowa240_dwp_22.dss'
+	settingsFile = 'iowa240_dwp_22.settings.json'
 	eventsFile = 'iowa240_dwp_22.events.json'
+	outputFile = './onm_out.json'
 	# loadPrioritiesPath = f'{omfDir}/static/testFiles/iowa240_dwp_22.loadPriority.basic.json'
 	# microgridTaggingPath = f'{omfDir}/static/testFiles/iowa240_dwp_22.microgridTagging.basic.json'
 	# circuitFile = 'nreca1824_dwp.dss'
@@ -184,19 +187,20 @@ if __name__ == '__main__':
 	# install_onm()
 	# build_settings_file(
 	# 	circuitPath=f'{omfDir}/static/testFiles/{circuitFile}',
-	# 	settingsPath='./settings.working.json',
+	# 	settingsPath=f'{omfDir}/static/testFiles/{settingsFile}',
 	# 	loadPrioritiesFile=f'{loadPrioritiesPath}',
 	# 	microgridTaggingFile=f'{microgridTaggingPath}'
 	# )
-	build_events_file(
-		circuitPath=f'{omfDir}/static/testFiles/{circuitFile}',
-		eventsPath='./built_events.json',
-		default_switch_state='PMD.OPEN',
-		default_switch_dispatchable='PMD.NO'
-	)
-	# run_onm(
+	# build_events_file(
 	# 	circuitPath=f'{omfDir}/static/testFiles/{circuitFile}',
-	# 	settingsPath='./settings.working.json',
-	# 	outputPath='./onm_out.json',
-	# 	eventsPath=f'{omfDir}/static/testFiles/{eventsFile}'
+	# 	eventsPath=f'{omfDir}/static/testFiles/{eventsFile}',
+	# 	default_switch_state='PMD.OPEN',
+	# 	default_switch_dispatchable='PMD.NO'
 	# )
+
+	run_onm(
+		circuitPath=f'{omfDir}/static/testFiles/{circuitFile}',
+		settingsPath=f'{omfDir}/static/testFiles/{settingsFile}',
+		outputPath=outputFile,
+		eventsPath=f'{omfDir}/static/testFiles/{eventsFile}'
+	)

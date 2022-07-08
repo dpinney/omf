@@ -773,7 +773,7 @@ def graphMicrogrid(pathToOmd, pathToJson, pathToCsv, outputFile, settingsFile, u
 	# costDeciles = deciles(outageCost)
 	minCustomerCost = min(outageCost)
 	maxCustomerCost = max(outageCost)
-	numBins = 30
+	numBins = 45
 	binSize = (maxCustomerCost-minCustomerCost)/numBins
 	totalCustomerCost = sum(outageCost)
 	meanCustomerCost = totalCustomerCost / len(outageCost)
@@ -782,7 +782,9 @@ def graphMicrogrid(pathToOmd, pathToJson, pathToCsv, outputFile, settingsFile, u
 	meanCustomerCostByType = {busType: outageCostByType[busType]/customerCountByType[busType] for busType in businessTypes}
 	# customersByTypeAndDecile = [{busType: len([cost for cost in outageCostsByType[busType] if (cost>costDeciles[x])*(cost<=costDeciles[x+1])]) for busType in businessTypes} for x in range(10)]
 	# print(customersOutByTime, customerCostByTime, totalCustomerCost, meanCustomerCost, outageCostByType, meanCustomerCostByType, outageDeciles, costDeciles, customersByTypeAndDecile) # ToDo: Display in front end.
-
+	print("Total outage cost: " + str(totalCustomerCost))
+	meanCustomerCostByTypeStr = json.dumps(meanCustomerCostByType)
+	print("Mean customer costs by type: " + meanCustomerCostByTypeStr)
 
 	fig.update_layout(xaxis_title = 'Duration (hours)',
 		yaxis_title = 'Cost ($)',
@@ -790,29 +792,30 @@ def graphMicrogrid(pathToOmd, pathToJson, pathToCsv, outputFile, settingsFile, u
 	# Customer Outage Histogram
 	busColors = {'residential':'#0000ff', 'manufacturing':'#ff0000', 'mining':'#708090', 'construction':'#ff8c00', 'agriculture':'#008000', 'finance':'#d6b600', 'retail':'#ff69b4', 'services':'#191970', 'utilities':'#8b4513', 'public':'#9932cc'}
 	custHist = go.Figure()
-	custHist.add_trace(go.Histogram(
-		x=outageCost,
-		xbins=dict(
-			start=minCustomerCost,
-			end=maxCustomerCost+binSize,
-			size=binSize
-		)
-	))
-	# for busType in businessTypes:
-	# 	custHist.add_trace(go.Histogram(
-	# 		x=outageCostsByType[busType],
-	# 		name=busType, # name used in legend and hover labels
-	# 		xbins=dict(
-	# 			start=minCustomerCost,
-	# 			end=maxCustomerCost,
-	# 			size=binSize
-	# 		),
-	# 		bingroup=1,
-	# 		marker_color=busColors[busType]
-	# 	))
+	# custHist.add_trace(go.Histogram(
+	# 	x=outageCost,
+	# 	xbins=dict(
+	# 		start=minCustomerCost,
+	# 		end=maxCustomerCost+binSize,
+	# 		size=binSize
+	# 	)
+	# ))
+	for busType in businessTypes:
+		custHist.add_trace(go.Histogram(
+			x=outageCostsByType[busType],
+			name=busType, # name used in legend and hover labels
+			xbins=dict(
+				start=minCustomerCost,
+				end=maxCustomerCost+binSize,
+				size=binSize
+			),
+			bingroup=1,
+			marker_color=busColors[busType]
+		))
 	custHist.update_layout(
 		xaxis_title_text='Outage Cost ($)', # xaxis label
 		yaxis_title_text='Customer Count', # yaxis label
+		barmode='stack',
 		bargap=0.1 # gap between bars of adjacent location coordinates
 	)
 	meanCustomerCostStr = "Mean Outage Cost: $"+"{:.2f}".format(meanCustomerCost)
@@ -1011,7 +1014,13 @@ def new(modelDir):
 	# loadPriority_file_data = open(pJoin(*loadPriority_file_path)).read()
 	# microgridTagging_file_path = [__neoMetaModel__._omfDir,'static','testFiles','nreca1824_dwp.microgridTagging.basic.json']
 	# microgridTagging_file_data = open(pJoin(*microgridTagging_file_path)).read()
-
+	
+	# ====== Comment this out if no output file is specified (running ONM)
+	output_file_data = open(pJoin(*output_file_path)).read()
+	# ====== Comment this out if no load priority file is specified
+	# loadPriority_file_data = open(pJoin(*loadPriority_file_path)).read()
+	# ====== Comment this out if no load microgrid tagging file is specified
+	# microgridTagging_file_data = open(pJoin(*microgridTagging_file_path)).read()
 	defaultInputs = {
 		'modelType': modelName,
 		'feederName1': feeder_file_path[-1][0:-4],
