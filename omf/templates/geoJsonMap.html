@@ -18,6 +18,7 @@
 		<script src="https://cdn.maptiler.com/mapbox-gl-leaflet/latest/leaflet-mapbox-gl.js"></script>
 		<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.0.3/leaflet.css" />
 		<link rel="stylesheet" href="https://cdn.maptiler.com/mapbox-gl-js/v1.5.1/mapbox-gl.css" />
+		<script src='https://unpkg.com/@turf/turf@6/turf.min.js'></script>
 	</head>
 	<style>
 		#map {
@@ -148,32 +149,48 @@
 				}
 			}
 		}
+
 		function pointToLayerNode(feature, latlng) {
 			let fillColorValue = 'gray';
-			if (feature.properties['pointColor']) {
+			if (feature.properties['pointColor']){
 				fillColorValue = feature.properties['pointColor'];
+			} else if (feature.properties.object === 'capacitor'){
+				fillColorValue = 'purple'
+			} else if (feature.properties.object === 'generator' || feature.properties.object === 'storage'){
+				fillColorValue = 'red'
+			} else if (feature.properties.object === 'load'){
+				fillColorValue = 'blue'
 			}
 			return L.circleMarker(latlng, {
-				radius: 2,
+				radius: 5,
 				fillColor: fillColorValue,
-				color: '#000',
+				color: "#000",
 				weight: 1,
 				opacity: 1,
 				fillOpacity: 0.8
 			});
 		}
 
-		function lineStyle(feature) {
-			if (feature.geometry['type'] == 'LineString') {
-				if (feature.properties.edgeColor) {
-					return { 'color': feature.properties.edgeColor }
-				}
-				else {
-					return { 'color': 'black' }
+		function lineStyle(feature){
+			if (feature.geometry['type'] == 'LineString'){
+				if (feature.properties.edgeColor){
+					return {
+						"color": feature.properties.edgeColor
+					}
+				} else if (feature.properties.object === 'transformer'){
+					return {
+						"color": "orange"
+					}
+				} else {
+					return {
+						"color": "black"
+					}
 				}
 			}
-			else if (feature.geometry['type'] == 'Polygon') {
-				return { 'color': 'blue' }
+			else if (feature.geometry['type'] == 'Polygon'){
+				return {
+					"color": "blue"
+				}
 			}
 		}
 

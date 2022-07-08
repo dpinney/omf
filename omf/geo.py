@@ -133,7 +133,7 @@ def omdGeoJson(pathToOmdFile, conversion=False):
 		})
 	return geoJsonDict
 
-def mapOmd(pathToOmdFile, outputPath, fileFormat, openBrowser=False, conversion=False):
+def mapOmd(pathToOmdFile, outputPath, fileFormat, openBrowser=False, conversion=False, all_mg_elements=None):
 	'''
 	Draw an omd on a map.
 	
@@ -151,7 +151,7 @@ def mapOmd(pathToOmdFile, outputPath, fileFormat, openBrowser=False, conversion=
 			os.makedirs(outputPath)
 		# Render html
 		offline_template = open(omf.omfDir + '/templates/geoJsonMap_offline.html','r').read()
-		rendered = Template(offline_template).render(geojson=geoJsonDict)
+		rendered = Template(offline_template).render(geojson=geoJsonDict, all_mg_elements=all_mg_elements)
 		with open(os.path.join(outputPath,'geoJsonMap_offline.html'),'w') as outFile:
 			outFile.write(rendered)
 		# Deprecated js include method.
