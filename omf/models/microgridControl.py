@@ -897,6 +897,43 @@ def graphMicrogrid(pathToOmd, pathToJson, pathToCsv, outputFile, settingsFile, u
 	utilityOutageHtml = utilityOutageTable(average_lost_kwh, profit_on_energy_sales, restoration_cost, hardware_cost, outageDuration, workDir)
 	return {'utilityOutageHtml': utilityOutageHtml, 'customerOutageHtml': customerOutageHtml, 'timelineStatsHtml': timelineStatsHtml, 'gens': gens, 'loads': loads, 'volts': volts, 'fig': fig, 'customerOutageCost': customerOutageCost, 'numTimeSteps': numTimeSteps, 'stepSize': stepSize, 'custHist': custHist}
 
+def buildCustomSettings(settingsCSV, feeder, defaultDispatchable = 'true'):
+	with open(settingsCSV) as customEventInput:
+		outageReader = csv.DictReader(customEventInput)
+	if feeder.endswith('.omd'):
+		with open(feeder) as omdFile:
+			tree = json.load(omdFile)['tree']
+		niceDss = dssConvert.evilGldTreeToDssTree(tree)
+		dssConvert.treeToDss(niceDss, 'circuitOmfCompatible.dss')
+		dssTree = dssConvert.dssToTree('circuitOmfCompatible.dss')
+	else: return('Error: Feeder must be an OMD file.')
+	outageAssets = [row.get('asset') for row in customEventInput]
+	unaffectedOpenAssets = [dssLine.get('object').split('.')[1] for dssLine in dssTree if dssLine.get('!CMD') == 'open']
+	unaffectedClosedAssets = [dssLine.get('object').split('.')[1] for dssLine in dssTree if dssLine.get('!CMD') == 'new' \
+		and dssLine.get('object').split('.')[0] == 'line' \
+		and 'switch' in [key for key in dssLine] \
+		and dssLine.get('switch') == 'y' \
+		and (dssLine.get('object').split('.')[1] not in (unaffectedOpenAssets + outageAssets))]
+	def eventJson(dispatchable, state, timestep, affected_asset):
+		return {
+			"event_data": {
+				"status": 1,
+				"dispatchable": dispatchable,
+				"type": "breaker",
+				"state": state
+			},
+			"timestep": timestep,
+			"affected_asset": affected_asset,
+			"event_type": "switch"
+		}
+	customEventList = [eventJson(defaultDispatchable,'open',1,asset) for asset in unaffectedOpenAssets] 
+	customEventList += [eventJson(defaultDispatchable,'closed',1,asset) for asset in unaffectedClosedAssets]
+	def outageSwitchState(outDict): return ('open'*(outDict.get('defaultState') == 'closed') + 'closed'*(outDict.get('defaultState')=='open'))
+	customEventList += [eventJson('false',outageSwitchState(row),int(row.get('start')),row.get('asset')) for row in outageReader if int(row.get('start'))>0] 
+	customEventList += [eventJson(row.get('dispatchable'),row.get('defaultState',int(row.get('timestep'))),row.get('asset')) for row in outageReader if int(row.get('stop'))>0]
+	with open('events.json','w') as eventsFile:
+		eventsFile.write(json.dump(customEventList))
+
 def work(modelDir, inputDict):
 	# Copy specific climate data into model directory
 	outData = {}
@@ -1033,7 +1070,7 @@ def work(modelDir, inputDict):
 def new(modelDir):
 	''' Create a new instance of this model. Returns true on success, false on failure. '''
 	# ====== For All Test Cases
-	cust_file_path = [__neoMetaModel__._omfDir,'static','testFiles','customerInfo.csv']
+	cust_file_path = ''
 	# ====== Optional inputs for custom load priority and microgrid tagging - set the file path to '' and data to None initially and change their value below if desired
 	loadPriority_file_path = ['']
 	loadPriority_file_data = None
@@ -1072,7 +1109,7 @@ def new(modelDir):
 		'restoration_cost': '100',
 		'hardware_cost': '550',
 		'customerFileName': '',
-		'customerData': open(pJoin(*cust_file_path)).read(),
+		'customerData': '',
 		'eventFileName': event_file_path[-1],
 		'eventData': open(pJoin(*event_file_path)).read(),
 		'outputFileName': output_file_path[-1],
