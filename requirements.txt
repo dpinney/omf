@@ -1,8 +1,8 @@
 wheel
 numpy
 numpy-financial
-Flask<2.1
-Werkzeug<2.1
+Flask<2
+Werkzeug<2
 Flask-Login==0.2.11
 Jinja2>=2.7.2
 MarkupSafe>=0.18
