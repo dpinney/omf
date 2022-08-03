@@ -81,7 +81,8 @@ elif major_platform == 'Windows':
 	# os.system(f"unzip '{source_dir}/omf/solvers/matpower7.0.zip' -d {source_dir}/omf/solvers/")
 	os.system(f'octave-cli --no-gui -p "{source_dir}/omf/solvers/matpower7.0" --eval "install_matpower(1,1,1)"')
 	# Finish up installation with pip.
-	pipInstallInOrder(f"{sys.executable} -m pip")
+	# pipInstallInOrder(f"{sys.executable} -m pip")
+	os.system(f"{sys.executable} -m pip install -r requirements.txt")
 	os.system(f"{sys.executable} setup.py develop")
 	# os.system("refreshenv") # Refresh local environment variables via choco tool.
 elif major_platform == "Darwin": # MacOS
