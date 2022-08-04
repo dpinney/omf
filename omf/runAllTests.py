@@ -3,7 +3,6 @@
 import os, sys, subprocess, re, platform
 from pathlib import PurePath, Path
 
-
 # These files aren't supposed to have tests
 IGNORE_FILES = ['runAllTests.py', 'install.py', 'setup.py', 'webProd.py', 'web.py', 'omfStats.py', '__init__.py', 'phaseId.py', 'solarDisagg.py']
 # Only search these directories
@@ -42,7 +41,7 @@ def runAllTests(startingdir):
 					has_tests = True
 					tested.append(item)
 					print(f'********** TESTING {item} ************')
-					p = subprocess.Popen([PY_BIN_NAME, item], stderr=subprocess.STDOUT)
+					p = subprocess.Popen([PY_BIN_NAME, item], stderr=subprocess.STDOUT, shell=True)
 					p.wait()
 					if p.returncode:
 						misfires[os.path.join(os.getcwd(), item)] = 'ERR'
