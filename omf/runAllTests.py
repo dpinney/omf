@@ -40,6 +40,8 @@ def runAllTests(startingdir):
 				if has_main and test_regex.match(line):
 					has_tests = True
 					tested.append(item)
+					pyv = os.system(f'{PY_BIN_NAME} --version')
+					print(f'**PYTHON_VERSION**: {pyv}')
 					print(f'********** TESTING {item} ************')
 					p = subprocess.Popen([PY_BIN_NAME, item], stderr=subprocess.STDOUT, shell=True)
 					p.wait()
