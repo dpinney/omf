@@ -44,7 +44,7 @@ jobs:
       - name: Install dependencies
         continue-on-error: true
         run: |
-          choco install python --no-progress --version 3.6.8
+          # choco install python --no-progress --version 3.6.8
           python install.py
       - name: Run tests
         run: |
