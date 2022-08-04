@@ -44,8 +44,8 @@ jobs:
       - name: Install dependencies
         continue-on-error: true
         run: |
-          # choco install python --no-progress --version 3.6.8
-          python install.py
+          choco install python --no-progress --version 3.6.8
+          python3 install.py
       - name: Run tests
         run: |
-          python omf/runAllTests.py
+          python3 omf/runAllTests.py
