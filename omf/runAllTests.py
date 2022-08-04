@@ -41,7 +41,7 @@ def runAllTests(startingdir):
 					has_tests = True
 					tested.append(item)
 					print(f'********** TESTING {item} ************')
-					p = subprocess.Popen([PY_BIN_NAME, item], stderr=subprocess.STDOUT, shell=True)
+					p = subprocess.Popen([PY_BIN_NAME, item], stderr=subprocess.STDOUT)
 					p.wait()
 					if p.returncode:
 						misfires[os.path.join(os.getcwd(), item)] = 'ERR'
