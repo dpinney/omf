@@ -38,6 +38,7 @@ omf/solvers/PowerModelsONM/build/*
 omf/solvers/PowerModelsONM/instantiated.txt
 gridlabd.dmg
 omf/omf.error.log
+omf/omf.access.log
 *.pem
 omf/static/testFiles/bavarian_solar.omd
 omf/static/testFiles/turkey_solar.omd

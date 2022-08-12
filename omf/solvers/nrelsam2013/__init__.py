@@ -6,7 +6,7 @@
 # #####################################################################
 
 
-import string, sys, struct, math, os
+import string, sys, struct, math, os, platform
 from ctypes import *
 
 myDir = os.path.dirname(__file__)
@@ -20,7 +20,10 @@ class SSCAPI():
 			_dll = CDLL(os.path.join(myDir,"ssc32.dll"))
 #		return _dll
 	elif sys.platform == 'darwin':
-		_dll = CDLL(os.path.join(myDir,"ssc64.dylib"))
+		if platform.processor() == 'arm':
+			_dll = CDLL(os.path.join(myDir,"ssc.dylib"))
+		else:
+			_dll = CDLL(os.path.join(myDir,"ssc64.dylib"))
 	elif sys.platform == 'linux':
 		_dll = CDLL(os.path.join(myDir,"ssc64.so"))
 	else:

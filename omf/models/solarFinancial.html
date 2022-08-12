@@ -1,59 +1,33 @@
 <head>
-	<title>Open Modeling Framework</title>
-	<meta charset="utf-8">
-	<link href="{{pathPrefix}}/static/omf.css" type="text/css" rel="stylesheet"/>
-	<link rel="shortcut icon" href="{{pathPrefix}}/static/favicon.ico">
-	<style>
-		thead{font-weight:bold} table{width:980px; font-size:10}
-	</style>
-	{% if modelStatus == "running" %}<meta http-equiv="refresh" content="5"/>{% endif %}
-	<!-- Library Imports -->
-	<script type="text/javascript" src="{{pathPrefix}}/static/omf.js"></script>
-	<script type="text/javascript" src="{{pathPrefix}}/static/jquery-1.9.1.js"></script>
+	{{ omfHeaders }}
 	<script src="{{pathPrefix}}/static/highcharts4.src.js"></script>
 	<script src="{{pathPrefix}}/static/heatmap.src.js"></script>
 	<script src="{{pathPrefix}}/static/d3.v3.js"></script>
-	<!-- Data  Imports -->
-	<script>allInputData={% if allInputDataDict %}{{allInputDataDict | tojson}}{% else %}null{% endif %}</script>
-	<script>allOutputData={% if allOutputDataDict %}{{allOutputDataDict | tojson}}{% else %}null{% endif %}</script>
-	<script>modelStatus="{{modelStatus}}"</script>
-	<script>currentUser="{{datastoreNames.get('currentUser','test')}}"</script>
 </head>
-<body onload="init()">
-	<div id="header">
-		<div id="headInnerBlock">
-			<div id="menuLeft">
-				<a style="color:white" href="/">Open Modeling Framework</a> &#187;&nbsp;&nbsp;Model
-				&#8220;<p id="titleText" style="display:inline"></p>&#8221;
-			</div>
-		</div>
-	</div>
-	<div id="triangle-parent">
-		<div id="triangle-message">New Version<span class="classic-triangle">A new version of the model has been added to the OMF. To get the new outputs, please fill in any missing inputs and hit "Run Model". You can also just look at the old inputs/outputs.</span></div>
-		<div id="triangle-topright"></div>
-	</div>
+<body>
+	{{ omfModelTitle }}
 	<p class="reportTitle">Model Input</p>
 	<div id="input" class="content">
-		<form name="inputForm" action="/runModel/" onsubmit="event.preventDefault(); return isFormValid();" method="post">
+		<form name="inputForm"action="/runModel/" onsubmit="event.preventDefault(); return isFormValid();" method="post">
 			<div class="shortInput">
 				<label>Model Type <a href="https://github.com/dpinney/omf/wiki/Models-~-solarFinancial" target="blank">Help?</a></label>
-				<input type="text" id="modelType" name="modelType" value="{{modelName}}" readonly/>
+				<input type="text" id="modelType" name="modelType" value="{{allInputDataDict.modelType}}" value="{{modelName}}" readonly/>
 			</div>
 			<div class="shortInput">
 				<label>Model Name</label>
-				<input type="text" id="modelName" name="modelName" pattern="^[\w\s\d\.-]+$" required="required">
+				<input type="text" id="modelName" name="modelName" value="{{allInputDataDict.modelName}}" pattern="^[\w\s\d\.-]+$" required="required">
 			</div>
-			<div class="shortInput runningInline postRunInline">
+			<div class="shortInput">
 				<label>User</label>
-				<input type="text" id="user" name="user" readonly/>
+				<input type="text" id="user" name="user" value="{{allInputDataDict.user}}" readonly/>
 			</div>
-			<div class="shortInput runningInline postRunInline">
+			<div class="shortInput">
 				<label>Created</label>
-				<input type="text" id="created" name="created" readonly/>
+				<input type="text" id="created" name="created" value="{{allInputDataDict.created}}" readonly/>
 			</div>
-			<div class="shortInput postRunInline">
+			<div class="shortInput">
 				<label>Run Time</label>
-				<input type="text" id="runTime" name="runTime" readonly/>
+				<input type="text" id="runTime" name="runTime" value="{{allInputDataDict.runTime}}" readonly/>
 			</div>
 			<div class="wideInput">
 				<p class="inputSectionHeader">Solar System Parameters</p>
@@ -61,23 +35,23 @@
 			<hr>
 			<div class="shortInput">
 				<label class="tooltip">Zip Code<span class="classic">Zip code of the planned array's geographical location.</span></label>
-				<input type="text" id="zipCode" name="zipCode" pattern="^\d{5}(?:[-\s]\d{4})?$" required="required">
+				<input type="text" id="zipCode" name="zipCode" value="{{allInputDataDict.zipCode}}" pattern="^\d{5}(?:[-\s]\d{4})?$" required="required">
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">System Size (kWp-DC)<span class="classic">DC output rating of the solar panels in kilowatts.</span></label>
-				<input type="text" id="systemSize" name="systemSize" pattern="^\d+\.?\d*$" required="required">
+				<input type="text" id="systemSize" name="systemSize" value="{{allInputDataDict.systemSize}}" pattern="^\d+\.?\d*$" required="required">
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Inverter Size (kW-AC)<span class="classic">Size of the total inverters in kW-AC for the system. Used to determine energy clipping in the Hourly System Average Power Output graph.</span></label>
-				<input type="text" id="inverterSize" name="inverterSize" required="required" pattern="^\d+\.?\d*?$">
+				<input type="text" id="inverterSize" name="inverterSize" value="{{allInputDataDict.inverterSize}}" required="required" pattern="^\d+\.?\d*?$">
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Inverter &amp; Transformer Efficiency (%)<span class="classic">Combined Inverter and Transformer Efficiency in converting DC power to AC power. The Inverter efficiency can be obtained from the Weighted Efficiency (CEC) Method.</span></label>
-				<input type="text" id="inverterEfficiency" name="inverterEfficiency" pattern="^(100|\d\d|\d)(\.\d+)?$" required="required" >
+				<input type="text" id="inverterEfficiency" name="inverterEfficiency" value="{{allInputDataDict.inverterEfficiency}}" pattern="^(100|\d\d|\d)(\.\d+)?$" required="required" >
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Projected Life of System (Years)<span class="classic">Typical industry standard is 30 years.</span></label>
-				<input type="text" id="lifeSpan" name="lifeSpan" pattern="^\d+$" required="required"/>
+				<input type="text" id="lifeSpan" name="lifeSpan" value="{{allInputDataDict.lifeSpan}}" pattern="^\d+$" required="required"/>
 			</div>
 			<div class="wideInput">
 				<p class="inputSectionHeader">Financial Variables</p>
@@ -85,23 +59,23 @@
 			<hr>
 			<div class="shortInput">
 				<label class="tooltip">Retail Energy Cost ($/kWh)<span class="classic">Residential rate.</span></label>
-				<input type="text" id="retailCost" name="retailCost" pattern="^\d+\.?\d*$" required="required"/>
+				<input type="text" id="retailCost" name="retailCost" value="{{allInputDataDict.retailCost}}" pattern="^\d+\.?\d*$" required="required"/>
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Discount Rate (%)<span class="classic">Discount rate used in discounted cashflow analysis output.</span></label>
-				<input type="text" id="discountRate" name="discountRate" pattern="^(100|\d\d|\d)(\.\d+)?$" required="required"/>
+				<input type="text" id="discountRate" name="discountRate" value="{{allInputDataDict.discountRate}}" pattern="^(100|\d\d|\d)(\.\d+)?$" required="required"/>
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">SREC Cashflow<span class="classic">Annual income expcted from Solar Renewable Energy Credits. Input a value for each year separated by commas. For example, income of 100 dollars for 3 years and then 50 dollars on the 4th year would be entered as <em>100,100,100,50.</em></label>
-				<input type="text" id="srecCashFlow" name="srecCashFlow" pattern="^(\d,)*\d$" required="required"/>
+				<input type="text" id="srecCashFlow" name="srecCashFlow" value="{{allInputDataDict.srecCashFlow}}" pattern="^(\d,)*\d$" required="required"/>
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Installation Cost ($)<span class="classic">Full cost of the system.</span></label>
-				<input type="text" id="installCost" name="installCost" pattern="^\d+\.?\d*$" required="required">
+				<input type="text" id="installCost" name="installCost" value="{{allInputDataDict.installCost}}" pattern="^\d+\.?\d*$" required="required">
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Op. and Maint. Cost ($)<span class="classic">Annual cost to operate and maintain the system.</span></label>
-				<input type="text" id="omCost" name="omCost" pattern="^\d+\.?\d*$" required="required">
+				<input type="text" id="omCost" name="omCost" value="{{allInputDataDict.omCost}}" pattern="^\d+\.?\d*$" required="required">
 			</div>
 			<div class="wideInput">
 				<p class="inputSectionHeader">Advanced Options</p>
@@ -109,109 +83,90 @@
 			<hr>
 			<div class="shortInput">
 				<label class="tooltip">Max Power Temperature Coefficient (%/&deg;C)<span class="classic">Percentage decrease  of the solar module's output power for every degree over 25 degrees centigrade.</span></label>
-				<input type="text" id="gamma" name="gamma" required="required" />
+				<input type="text" id="gamma" name="gamma" value="{{allInputDataDict.gamma}}" required="required" />
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Tracker Rotation Limit (degrees)<span class="classic">How far each module in a tracking system is able to rotate if on a tracker, measured from the horizontal.</span></label>
-				<input type="text" id="rotlim" name="rotlim" pattern="^\d+\.?\d*$" required="required" />
+				<input type="text" id="rotlim" name="rotlim" value="{{allInputDataDict.rotlim}}" pattern="^\d+\.?\d*$" required="required" />
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Tracking Mode<span class="classic">Type of tracking system the PV array will use if any.</span></label>
-				<select id="trackingMode" name="trackingMode"/>
-					<option value="0">Fixed</option>
-					<option value="1">1 Axis</option>
-					<option value="2">2 Axis</option>
-					<option value="3">Azimuth Axis</option>
+				<select id="trackingMode" name="trackingMode" value="{{allInputDataDict.trackingMode}}"/>
+					<option value="0" {% if allInputDataDict.trackingMode == '0' %}selected{% endif %}>Fixed</option>
+					<option value="1" {% if allInputDataDict.trackingMode == '1' %}selected{% endif %}>1 Axis</option>
+					<option value="2" {% if allInputDataDict.trackingMode == '2' %}selected{% endif %}>2 Axis</option>
+					<option value="3" {% if allInputDataDict.trackingMode == '3' %}selected{% endif %}>Azimuth Axis</option>
 				</select>
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Tilt (degrees)<span class="classic">The tilt of the solar panels measured as an angle in degrees between panels and ground. If '-' is entered, the latitude of the zipcode will be used.</span></label>
-				<input type="text" id="tilt" name="tilt" pattern="^(90|[1-8]\d|\d)?$|-" required="required"/>
+				<input type="text" id="tilt" name="tilt" value="{{allInputDataDict.tilt}}" pattern="^(90|[1-8]\d|\d)?$|-" required="required"/>
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Azimuth (degrees)<span class="classic">Cardinal direction the PV system will face. 180 in the northern hemisphere is due South.</span></label>
-				<input type="text" id="azimuth" name="azimuth" pattern="^\d+\.?\d*$" required="required" />
+				<input type="text" id="azimuth" name="azimuth" value="{{allInputDataDict.azimuth}}" pattern="^\d+\.?\d*$" required="required" />
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">PV Module Derate (%)<span class="classic">Derate factor accounting for DC to AC conversion losses.</span></label>
-				<input type="text" id="pvModuleDerate" name="pvModuleDerate" pattern="^(100|\d\d|\d)(\.\d+)?$" required="required" >
+				<input type="text" id="pvModuleDerate" name="pvModuleDerate" value="{{allInputDataDict.pvModuleDerate}}" pattern="^(100|\d\d|\d)(\.\d+)?$" required="required" >
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Annual Array Degradation (%)<span class="classic">Typical industry standard is 0.5% degradation per year.</span></label>
-				<input type="text" id="degradation" name="degradation" pattern="^(100|\d\d|\d)(\.\d+)?$" required="required"/>
+				<input type="text" id="degradation" name="degradation" value="{{allInputDataDict.degradation}}" pattern="^(100|\d\d|\d)(\.\d+)?$" required="required"/>
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Mismatch Derate (%)<span class="classic">The derate factor for PV module mismatch accounts for manufacturing tolerances that yield PV modules with slightly different current-voltage characteristics. Consequently, when connected together electrically they do not operate at their respective peak efficiencies.</span></label>
-				<input type="text" id="mismatch" name="mismatch" pattern="^(100|\d\d|\d)(\.\d+)?$" required="required" >
+				<input type="text" id="mismatch" name="mismatch" value="{{allInputDataDict.mismatch}}" pattern="^(100|\d\d|\d)(\.\d+)?$" required="required" >
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Diodes/Connection Derate (%)<span class="classic">The derate factor for diodes and connections accounts for losses from voltage drops across diodes used to block the reverse flow of current and from resistive losses in electrical connections.</span></label>
-				<input type="text" id="diodes" name="diodes" pattern="^(100|\d\d|\d)(\.\d+)?$" required="required" >
+				<input type="text" id="diodes" name="diodes" value="{{allInputDataDict.diodes}}" pattern="^(100|\d\d|\d)(\.\d+)?$" required="required" >
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">DC Wiring Derate (%)<span class="classic">The derate factor for DC wiring accounts for resistive losses in the wiring between modules and the wiring connecting the PV array to the inverter.</span></label>
-				<input type="text" id="dcWiring" name="dcWiring" pattern="^(100|\d\d|\d)(\.\d+)?$" required="required" >
+				<input type="text" id="dcWiring" name="dcWiring" value="{{allInputDataDict.dcWiring}}" pattern="^(100|\d\d|\d)(\.\d+)?$" required="required" >
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">AC Wiring Derate (%)<span class="classic">The derate factor for AC wiring accounts for resistive losses in the wiring between the inverter and the connection to the local utility service.</span></label>
-				<input type="text" id="acWiring" name="acWiring" pattern="^(100|\d\d|\d)(\.\d+)?$" required="required" >
+				<input type="text" id="acWiring" name="acWiring" value="{{allInputDataDict.acWiring}}" pattern="^(100|\d\d|\d)(\.\d+)?$" required="required" >
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Soiling Derate (%)<span class="classic">The derate factor for soiling accounts for dirt, snow, or other foreign matter on the front surface of the PV module that reduces the amount of solar radiation reaching the solar cells of the PV module. Dirt accumulation on the PV module surface is location and weather dependent, with greater soiling losses (up to 25% for some California locations) for high-trafffic, high-pollution areas with infrequent rain. For northern locations in winter, snow will reduce the amount of energy produced, with the severity of the reduction a function of the amount of snow received and how long it remains on the PV modules. Snow remains the longest when sub-freezing temperatures prevail, small PV array tilt angles prevent snow from sliding off, the PV array is closely integrated into the roof, and the roof or other structure in the vicinity facilitates snow drifting onto the PV modules. </span></label>
-				<input type="text" id="soiling" name="soiling" pattern="^(100|\d\d|\d)(\.\d+)?$" required="required" >
+				<input type="text" id="soiling" name="soiling" value="{{allInputDataDict.soiling}}" pattern="^(100|\d\d|\d)(\.\d+)?$" required="required" >
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Shading Derate (%)<span class="classic">The derate factor for shading accounts for situations when PV modules are shaded by nearby buildings, objects, or other PV modules and array structure.</span></label>
-				<input type="text" id="shading" name="shading" pattern="^(100|\d\d|\d)(\.\d+)?$" required="required" >
+				<input type="text" id="shading" name="shading" value="{{allInputDataDict.shading}}" pattern="^(100|\d\d|\d)(\.\d+)?$" required="required" >
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">System Availibility Derate<span class="classic">The derate factor for system availability accounts for times when the system is off due to maintenance and inverter and utility outages.</span></label>
-				<input type="text" id="sysAvail" name="sysAvail" pattern="^(100|\d\d|\d)(\.\d+)?$" required="required" >
+				<input type="text" id="sysAvail" name="sysAvail" value="{{allInputDataDict.sysAvail}}" pattern="^(100|\d\d|\d)(\.\d+)?$" required="required" >
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Age Derate<span class="classic">The derate factor for age accounts for losses in performance over time due primarily to weathering of the PV modules. The loss in performance is typically 0.5% per year.</span></label>
-				<input type="text" id="age" name="age" pattern="^(100|\d\d|\d)(\.\d+)?$" required="required" >
+				<input type="text" id="age" name="age" value="{{allInputDataDict.age}}" pattern="^(100|\d\d|\d)(\.\d+)?$" required="required" >
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Simulation Start Date (YYYY-MM-DD)<span class="classic">Currently we only support a yearlong analysis starting on 1 Jan; the year has no effect on the results.</span></label>
-				<input type="text" id="simStartDate" name="simStartDate" pattern="^\d\d\d\d-\d\d-\d\d$" readonly/>
+				<input type="text" id="simStartDate" name="simStartDate" value="{{allInputDataDict.simStartDate}}" pattern="^\d\d\d\d-\d\d-\d\d$" readonly/>
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Simulation Length<span class="classic">Currently we only support a yearlong analysis, i.e. 8760 hours.</span></label>
-				<input type="text" id="simLength" name="simLength" pattern="^\d+$" readonly />
+				<input type="text" id="simLength" name="simLength" value="{{allInputDataDict.simLength}}" pattern="^\d+$" readonly />
 			</div>
 			<div class="shortInput">
 				<label>Length Units</label>
-				<select id="simLengthUnits" name="simLengthUnits" disabled="true">
-					<option value="minutes">Minutes</option>
-					<option value="hours" selected>Hours</option>
-					<option value="days">Days</option>
+				<select id="simLengthUnits" name="simLengthUnits" value="{{allInputDataDict.simLengthUnits}}" disabled="true">
+					<option value="minutes" {% if allInputDataDict.simLengthUnits == 'minutes' %}selected{% endif %}>Minutes</option>
+					<option value="hours" {% if allInputDataDict.simLengthUnits == 'hours' %}selected{% endif %}>Hours</option>
+					<option value="days" {% if allInputDataDict.simLengthUnits == 'days' %}selected{% endif %}>Days</option>
 				</select>
 			</div>
-			<div class="wideInput" style="text-align:right">
-				<a id="downloadLink" type="button" class="stoppedInline postRunInline" href="#" download>Download Excel</a>
-				<script type="text/javascript">
-					$("#downloadLink").attr("href", "/downloadModelData/"+allInputData.user+"/"+allInputData.modelName+"/"+allOutputData.excel)
-				</script>
-				<button id="deleteButton" type="button" class="stoppedInline postRunInline" onclick="deleteModel()">Delete</button>
-				<button id="shareButton" type="button" class="postRunInline" onclick="shareModel()">Share</button>
-				<button id="duplicateButton" type="button" class="postRunInline" onclick="duplicateModel()">Duplicate</button>
-				<button id="cancelButton" class="runningInline" type="button" onclick="cancelModel()">Cancel Run</button>
-				<button id="runButton" class="stoppedInline postRunInline" type="submit">Run Model</button>
-			</div>
+			{{ omfModelButtons }}
 		</form>
 	</div>
-	<div id ="runIndicator" class="content running">
-		Model running on server. Refresh the page to check for results, or wait for automatic refresh every 5 seconds.
-	</div>
-	<div id ="stopIndicator" class="content stopped" style="visibility: hidden">
-		<pre id='errorText' style='overflow-x:scroll'></pre>
-		<script type="text/javascript">
-		if (typeof(allInputData.stderr) !== 'undefined') {	
-			gebi('stopIndicator').style.visibility = 'visible'
-			gebi('errorText').innerHTML = 'MODEL ENCOUNTERED AN ERROR AS FOLLOWS: \n\n' + allInputData.stderr}
-		</script>
-	</div>
+	{{ omfRunDebugBlock }}
+	{% if modelStatus == 'finished' %}
 	<div id="output">
 		<script id="globalOutputScripting">
 			Highcharts.setOptions({global: { useUTC: true }})
@@ -230,8 +185,8 @@
 				}
 			}
 		</script>
-		<p class="reportTitle postRun" style="page-break-before:always">Summary of Analysis</p>
-		<div id="analysisSummary" class="content postRun">
+		<p class="reportTitle" style="page-break-before:always">Summary of Analysis</p>
+		<div id="analysisSummary" class="content">
 			<div class="shortInput">
 				<strong>Project Name</strong>
 				<p id="projName"></p>
@@ -320,8 +275,8 @@
 				gebi("IRR").innerHTML = parseFloat(allOutputData.IRR)
 			</script>
 		</div>
-		<p class="reportTitle postRun">Hourly Solar Generation</p>
-		<div id="powerGenerationReport" class="tightContent postRun">
+		<p class="reportTitle">Hourly Solar Generation</p>
+		<div id="powerGenerationReport" class="tightContent">
 			<div id="powerTimeSeries"></div>
 			<script>
 				new Highcharts.Chart({"credits":{"enabled":false},
@@ -344,8 +299,8 @@
 					"legend":{"verticalAlign":"top","align":"top","borderWidth":0,"x":50,"y":-10,"layout":"horizontal"}})
 			</script>
 		</div>
-		<p class="reportTitle postRun">Monthly Energy Output</p>
-		<div id="monthlyPerformanceReport" class="tightContent postRun">
+		<p class="reportTitle">Monthly Energy Output</p>
+		<div id="monthlyPerformanceReport" class="tightContent">
 			<div id="monthlyPerformanceDiv"></div>
 			<script>
 				new Highcharts.Chart({"credits":{"enabled":false},
@@ -359,8 +314,8 @@
 					"legend":false})
 			</script>
 		</div>
-		<p class="reportTitle postRun" style="page-break-before:always">Seasonal System Performance</p>
-		<div id="seasonalPerformanceChart" class="tightContent postRun">
+		<p class="reportTitle" style="page-break-before:always">Seasonal System Performance</p>
+		<div id="seasonalPerformanceChart" class="tightContent">
 			<div id="seasonalPerformanceDiv"></div>
 			<script>
 				new Highcharts.Chart({"credits":{"enabled":false},
@@ -379,8 +334,8 @@
 						dataLabels: {enabled:false}}]})
 			</script>
 		</div>
-		<p class="reportTitle postRun">Cash Flow</p>
-		<div id="cashFlowReport" class="tightContent postRun">
+		<p class="reportTitle">Cash Flow</p>
+		<div id="cashFlowReport" class="tightContent">
 			<div id="cashFlowChartDiv"></div>
 			<script>
 				new Highcharts.Chart({"credits":{"enabled":false},
@@ -398,8 +353,8 @@
 					"legend":{"verticalAlign":"top","align":"top","borderWidth":0,"x":50,"y":-10,"layout":"horizontal"}})
 			</script>
 		</div>
-		<p class="reportTitle postRun">Monthly Data Table</p>
-		<div id="monthlySummaryReport" class="tightContent postRun tableReport">
+		<p class="reportTitle">Monthly Data Table</p>
+		<div id="monthlySummaryReport" class="tightContent tableReport">
 			<table id="monthlySummaryTable">
 			</table>
 			<script>
@@ -413,8 +368,8 @@
 				insertMetric("monthlySummaryTable","Single Residential PV System Generation (kWh)", allOutputData.monthlyGeneration.map(function(x){return x[1]/1000}))
 			</script>
 		</div>
-		<p class="reportTitle postRun">Annual Data Table</p>
-		<div id="annualSummaryReport" class="tightContent postRun tableReport">
+		<p class="reportTitle">Annual Data Table</p>
+		<div id="annualSummaryReport" class="tightContent tableReport">
 			<table id="annualSummaryTable">
 			</table>
 			<script>
@@ -426,8 +381,8 @@
 				insertMetric("annualSummaryTable","Cumulative Income", allOutputData.cumCashFlow)
 			</script>
 		</div>
-		<p class="reportTitle postRun" style="page-break-before:always">Irradiance</p>
-		<div id="irradianceReport" class="tightContent postRun">
+		<p class="reportTitle" style="page-break-before:always">Irradiance</p>
+		<div id="irradianceReport" class="tightContent">
 			<div id="irradianceChartDiv"></div>
 			<script>
 				irradianceSeriesData = [
@@ -445,8 +400,8 @@
 					"legend":{"verticalAlign":"top","align":"top","borderWidth":0,"x":50,"y":-10,"layout":"horizontal"}})
 			</script>
 		</div>
-		<p class="reportTitle postRun">Other Climate Variables</p>
-		<div id="climateReport" class="tightContent postRun">
+		<p class="reportTitle">Other Climate Variables</p>
+		<div id="climateReport" class="tightContent">
 			<div id="climateChartDiv"></div>
 			<script>
 				climateSeriesData = [
@@ -465,8 +420,8 @@
 					"legend":{"verticalAlign":"top","align":"top","borderWidth":0,"x":50,"y":-10,"layout":"horizontal"}})
 			</script>
 		</div>
-		<p class="reportTitle postRun">Simulation Location</p>
-		<div id="studyDetail" class="tightContent postRun detailsContainer" style="position: relative">
+		<p class="reportTitle">Simulation Location</p>
+		<div id="studyDetail" class="tightContent detailsContainer" style="position: relative">
 			<div id="mapHere"></div>
 			<script type="text/javascript">
 				width = 1000, height = 350
@@ -502,5 +457,7 @@
 					circle.append("svg:title").text(climate)})
 			</script>
 		</div>
+		{{ rawOutputFiles }}
 	</div>
+	{% endif %}
 </body>

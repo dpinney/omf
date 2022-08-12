@@ -1,35 +1,16 @@
 <head>
-	<title>Open Modeling Framework</title>
-	<meta charset="utf-8">
-	<link href="{{pathPrefix}}/static/omf.css" type="text/css" rel="stylesheet"/>
-	<link rel="shortcut icon" href="{{pathPrefix}}/static/favicon.ico">
+	{{ omfHeaders }}
 	<style>
 		table {width: 80%;margin-left:auto; margin-right:auto;}
 		td {padding:2px; text-align: center;border-top: 1px solid #ccc;}
 		th {padding:2px; text-align: center}
 	</style>
-	{% if modelStatus == "running" %}<meta http-equiv="refresh" content="5"/>{% endif %}
-	<!-- Library Imports -->
-	<script type="text/javascript" src="{{pathPrefix}}/static/omf.js"></script>
-	<script type="text/javascript" src="{{pathPrefix}}/static/jquery-1.9.1.js"></script>
 	<script src="{{pathPrefix}}/static/highcharts4.src.js"></script>
 	<script src="https://cdn.plot.ly/plotly-1.50.1.min.js"></script>
-	<!-- Data  Imports -->
-	<script>allInputData={% if allInputDataDict %}{{allInputDataDict | tojson}}{% else %}null{% endif %}</script>
-	<script>allOutputData={% if allOutputDataDict %}{{allOutputDataDict | tojson}}{% else %}null{% endif %}</script>
-	<script>modelStatus="{{modelStatus}}"</script>
-	<script>currentUser="{{datastoreNames.get('currentUser','test')}}"</script>
-	</script>
+</script>
 </head>
-<body onload="init()">
-	<div id="header">
-		<div id="headInnerBlock">
-			<div id="menuLeft">
-				<a style="color:white" href="/">Open Modeling Framework</a> &#187;&nbsp;&nbsp;Model
-				&#8220;<p id="titleText" style="display:inline"></p>&#8221;
-			</div>
-		</div>
-	</div>
+<body>
+	{{ omfModelTitle }}
 	<p class="reportTitle"><b>Model Input</b></p>
 	<div id="input" class="content">
 		<form name="inputForm" action="/runModel/" onsubmit="event.preventDefault(); return isFormValid();" method="post">
@@ -40,19 +21,19 @@
 			</div>
 			<div class="shortInput">
 				<label>Model Name</label>
-				<input type="text" id="modelName" name="modelName" pattern="^[\w\s\d\.-]+$" required="required">
+				<input type="text" id="modelName" name="modelName" value="{{allInputDataDict.modelName}}" pattern="^[\w\s\d\.-]+$" required="required">
 			</div>
-			<div class="shortInput runningInline postRunInline">
+			<div class="shortInput">
 				<label>User</label>
-				<input type="text" id="user" name="user" readonly/>
+				<input type="text" id="user" name="user" value="{{allInputDataDict.user}}" readonly/>
 			</div>
-			<div class="shortInput runningInline postRunInline ">
+			<div class="shortInput ">
 				<label>Created</label>
-				<input type="text" id="created" name="created" readonly/>
+				<input type="text" id="created" name="created" value="{{allInputDataDict.created}}" readonly/>
 			</div>
-			<div class="shortInput postRunInline">
+			<div class="shortInput">
 				<label>Run Time</label>
-				<input type="text" id="runTime" name="runTime" readonly/>
+				<input type="text" id="runTime" name="runTime" value="{{allInputDataDict.runTime}}" readonly/>
 			</div>
 			<!-- Model Specific Inputs -->
 			<div class="wideInput">
@@ -62,43 +43,55 @@
 			<div class="shortInput">
 				<label class="tooltip">AMI Meter Data (.csv file)<span class="classic">Please see the documentation at the green 'Help?' link above for the required format and an example file.</span></label>
 				<input id="amiMeterFile" type="file" style="display:none" onchange="handle_files(this.files,'amiMeterData','amiMeterDataName')">
-				<input id="amiMeterData" name="amiMeterData" type="hidden">
+				<input id="amiMeterData" name="amiMeterData" value="{{allInputDataDict.amiMeterData}}" type="hidden">
 				<div>
 					<label for="amiMeterFile" class="fileButton">Choose File</label>
-					<input id="amiMeterDataName" name="amiMeterDataName" value='' readonly class="uploadFileName">
+					<input id="amiMeterDataName" name="amiMeterDataName" value="{{allInputDataDict.amiMeterDataName}}" readonly class="uploadFileName">
 				</div>
 			</div>
 			<div class="shortInput">
-				<label class="tooltip">Clusters<span class="classic">Number of regions to phase. 7 is a good default, or you can set this to 3 * number of regulators + 2</span></label>
-				<input type="text" id="kFinal" name="kFinal"/>
+				<label class="tooltip">Clusters<span class="classic">Number of regions with similar voltage. 7 is a good default, or you can set this to 3 * number of regulators + 2 on the system. Somewhere between 3 and 25 clusters is recommended.</span></label>
+				<input type="text" id="kFinal" name="kFinal" value="{{allInputDataDict.kFinal}}"/>
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Window Size<span class="classic">Number of samples to compare. Please set to number of samples in 5 days of data. If set to 'default' then we use 3% of the data as the window.</span></label>
-				<input type="text" id="windowSize" name="windowSize"/>
+				<input type="text" id="windowSize" name="windowSize" value="{{allInputDataDict.windowSize}}"/>
 			</div>
 			<!-- Required Buttons -->
 			{{ omfModelButtons }}
 		</form>
 	</div>
 	{{ omfRunDebugBlock }}
-	<p class="reportTitle postRun" style="page-break-before:always"><b>Meter Phase Identification Overview</b></p>
-	<div id="confusionMatrix" class="tightContent postRun">
-		<img id="confusionMatrixImg" style="width:100%"/>
-		<script type="text/javascript">gebi("confusionMatrixImg").src = "data:image/png;base64," + allOutputData.confusionMatrixImg</script>
-	</div>
-	<p class="reportTitle postRun" style="page-break-before:always"><b>Predicted Phases</b></p>
-	<div id="predictedPhases" class="tightContent postRun">
-		<table style="width:100%">
-		{% for row in allOutputDataDict['phasingResults'] %}
-			<tr>
-			{% for td in row %}
-				<td>{{td}}</td>
-			{% endfor %}
-			</tr>
-		{% endfor %}
-		</table>
-	</div>
 	{% if modelStatus == 'finished' %}
+	<div id="output">
+		<p class="reportTitle" style="page-break-before:always"><b>Meter Phase Identification Overview</b></p>
+		<div id="confusionMatrix" class="tightContent">
+			<img id="confusionMatrixImg" style="width:100%; border-radius:8px"/>
+			<script type="text/javascript">gebi("confusionMatrixImg").src = "data:image/png;base64," + allOutputData.confusionMatrixImg</script>
+		</div>
+		<p class="reportTitle"><b>Confidence Scores Overview</b></p>
+		<div id="confidenceHistogram" class="tightContent">
+			<img id="confidenceHistogramImg" style="width:100%; border-radius:8px"/>
+			<script type="text/javascript">gebi("confidenceHistogramImg").src = "data:image/png;base64," + allOutputData.confidenceHistogramImg</script>
+		</div>
+		<p class="reportTitle"><b>Percentage of Meter Phasing That Changed</b></p>
+		<div id="PercentagePlot" class="tightContent">
+			<img id="PercentagePlotImg" style="width:100%; border-radius:8px"/>
+			<script type="text/javascript">gebi("PercentagePlotImg").src = "data:image/png;base64," + allOutputData.PercentagePlotImg</script>
+		</div>
+		<p class="reportTitle" style="page-break-before:always"><b>Predicted Phases (Phasing Errors in Red)</b></p>
+		<div id="predictedPhases" class="tightContent">
+			<table style="width:100%">
+				{% for row in allOutputDataDict['phasingResults'] %}
+				<tr style="{% if row[1] != row[2] and row[0] != 'Meter ID' %}color:red{% endif %}">
+					{% for td in row %}
+					<td>{{td}}</td>
+					{% endfor %}
+				</tr>
+				{% endfor %}
+			</table>
+		</div>
 		{{ rawOutputFiles }}
+	</div>
 	{% endif %}
 </body>

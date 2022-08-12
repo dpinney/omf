@@ -69,35 +69,35 @@ g7 = pp.create_gen(net, bus7, p_mw=gen_amounts[7], min_p_mw=0, max_p_mw=gen_amou
 
 # Put the loads and gens on the graph.
 for n_i in g.nodes():
-    g.node[n_i]['load'] = load_amounts[n_i]
-    g.node[n_i]['gen'] = gen_amounts[n_i]
-    g.node[n_i]['demand'] = load_amounts[n_i] - gen_amounts[n_i]
-    if g.node[n_i]['demand'] <= 0:
-        g.node[n_i]['color'] = 'lightgreen'
+    g.nodes[n_i]['load'] = load_amounts[n_i]
+    g.nodes[n_i]['gen'] = gen_amounts[n_i]
+    g.nodes[n_i]['demand'] = load_amounts[n_i] - gen_amounts[n_i]
+    if g.nodes[n_i]['demand'] <= 0:
+        g.nodes[n_i]['color'] = 'lightgreen'
     else:
-        g.node[n_i]['color'] = 'lightgray'
-demands = [g.node[x]['demand'] for x in g.node]
+        g.nodes[n_i]['color'] = 'lightgray'
+demands = [g.nodes[x]['demand'] for x in g.nodes]
 print(demands, sum(demands))
 
 # Make labels and colors
-ugly_labels = {x:'G{gen}\nL{load}'.format(**g.node[x]) for x in g.node}
+ugly_labels = {x:'G{gen}\nL{load}'.format(**g.nodes[x]) for x in g.nodes}
 def get_colors():
-    return [g.node[x]['color'] for x in g.node]
+    return [g.nodes[x]['color'] for x in g.nodes]
 
 # Drawing.
 plt.figure(figsize=(10,5))
 gpos = nx.layout.spring_layout(g)
-nx.draw(g, gpos, node_color=get_colors(), alph=0.7)
+nx.draw(g, gpos, node_color=get_colors(), alpha=0.7)
 nx.draw_networkx_labels(g, gpos, labels=ugly_labels, font_size=7, font_color='black');
 plt.show()
 
 # Add a neighbor to an already energized (neighbor)hood.
 def energize_hood_neighbor(good_hood, prints=False):
-    hood_demand = sum([g.node[x]['demand'] for x in good_hood])
+    hood_demand = sum([g.nodes[x]['demand'] for x in good_hood])
     flatten = lambda x:[item for sublist in x for item in sublist]
     mega_hood = flatten([g.neighbors(n_i) for n_i in good_hood])
     all_hood_nbs = list(set(mega_hood) - set(good_hood))
-    first_nb = g.node[all_hood_nbs[0]]
+    first_nb = g.nodes[all_hood_nbs[0]]
     if first_nb['demand'] < abs(hood_demand):
         if prints:
             print('ENERGIZABLE!')
@@ -131,7 +131,7 @@ for j in range(7):
 for i in range(7):
     plt.subplot(331 + i)
     plt.title(i)
-    nx.draw(g, gpos, node_color=red_coloring(best), alph=0.7)
+    nx.draw(g, gpos, node_color=red_coloring(best), alpha=0.7)
     best = energize_hood_neighbor(best)
 print(best)
 plt.show()

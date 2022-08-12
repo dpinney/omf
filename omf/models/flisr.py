@@ -374,7 +374,9 @@ def flisr(pathToOmd, pathToTieLines, faultedLine, workDir, radial, drawMap):
 		cleanG = nx.Graph(inGraph.edges())
 		# HACK2: might miss nodes without edges without the following.
 		cleanG.add_nodes_from(inGraph)
-		pos = nx.nx_agraph.graphviz_layout(cleanG, prog='neato')
+		# pos = nx.nx_agraph.graphviz_layout(cleanG, prog='neato')
+		pos = nx.kamada_kawai_layout(cleanG)
+		pos = {k:(1000 * pos[k][0],1000 * pos[k][1]) for k in pos} # get out of array notation
 		# # Charting the feeder in matplotlib:
 		# feeder.latLonNxGraph(inGraph, labels=False, neatoLayout=True, showPlot=True)
 		# Insert the latlons.

@@ -131,6 +131,50 @@ def dss_to_clean_via_save(dss_file, clean_out_path, add_pf_syntax=True, clean_up
 	with open(clean_out_path, 'w') as out_file:
 		out_file.write(clean_out)
 
+def dssCleanLists(pathToDss):
+	'''Helper function to go through dss file and reformat lists (rmatrix, xmatrix, 
+	mult, buses, conns, kvs, kvas) with commas and no spaces'''
+	with open(pathToDss, 'r') as dssFile:
+		contents = dssFile.readlines()
+	fixedContents = []
+	for line in contents:
+		lineItems = line.split()
+		openedList = False
+		lineString = ""
+		for item in lineItems:
+			if lineString == "":
+				#first item in line
+				lineString = lineString + item
+			else:
+				listOpeners = [ '(' , '[' , '{' ]
+				listClosers = [ ')' , ']' , '}' ]
+				hasOpener = [x for x in listOpeners if(x in item)]
+				hasCloser = [x for x in listClosers if(x in item)]
+				noCommas = [ '(' , '[' , '{' , ',' , '|' ]
+				if '=' in item:
+					lineString = lineString + " " + item
+					if hasCloser:
+						openedList = False
+					elif hasOpener:
+						openedList = True
+				elif openedList:
+					if (lineString[-1] in noCommas) or (item[0] in listClosers) or (item[0] == '|'):
+						lineString = lineString + item
+					else:
+						lineString = lineString + ',' + item
+					if hasCloser:
+						openedList = False
+				else:
+					lineString = lineString + " " + item
+					if hasOpener and not hasCloser:
+						openedList = True
+		fixedContents.append(lineString)
+	outPath = pathToDss[:-4] + "_cleanLists.dss"
+	with open(outPath, 'w') as outFile:
+		for fixedLine in fixedContents:
+			outFile.write(f'{fixedLine}\n')
+
+
 def dssToTree(pathToDss):
 	''' Convert a .dss file to an in-memory, OMF-compatible 'tree' object.
 	Note that we only support a VERY specifically-formatted DSS file.'''
@@ -205,7 +249,7 @@ def dssToTree(pathToDss):
 					else: # if single key has not already been added, add it
 						ob[k] = v
 		except:
-			raise Exception(f"\nError encountered in group (space delimited) #{jpos+1} of line {i + 1}: {line}")
+			raise Exception(f'\nError encountered in group (space delimited) #{jpos+1} of line {i + 1}: {line}')
 			# raise Exception("Temp fix but error in loop at line 76")
 		contents[i] = ob
 	# Print to file
@@ -609,7 +653,8 @@ def evilGldTreeToDssTree(evil_gld_tree):
 			_extend_with_exc(ob, new_ob, ['!CMD', 'name', 'object','latitude','longitude'])
 			dssTree.append(new_ob)
 		else:
-			warnings.warn(f"Unprocessed object: {ob}")
+			print(f"Unprocessed object: {ob}")
+			# warnings.warn(f"Unprocessed object: {ob}")
 	return dssTree
 
 def evilToOmd(evilTree, outPath):
@@ -636,54 +681,44 @@ def dssToOmd(dssFilePath, omdFilePath, RADIUS=0.0002, write_out=True):
 	tree = dssToTree(dssFilePath)
 	evil_glm = evilDssTreeToGldTree(tree)
 	name_map = _name_to_key(evil_glm)
-	# print(str(name_map))
-	# print(str(evil_glm.values()))
-	# print(tree)
+	print(name_map)
 	for ob in evil_glm.values():
 		ob_name = ob.get('name','')
 		ob_type = ob.get('object','')
 		if 'parent' in ob:
-			try:
-				parent_name = ob['parent']
-				if ob_type == 'capcontrol':
-					cap_name = ob['capacitor']
-					cap_id = name_map[cap_name]
-					if 'parent' in evil_glm[cap_id]:
-						parent_name = evil_glm[cap_id]['parent']
+			parent_name = ob['parent']
+			if ob_type == 'capcontrol':
+				cap_name = ob['capacitor']
+				cap_id = name_map[cap_name]
+				if 'parent' in evil_glm[cap_id]:
+					parent_name = evil_glm[cap_id]['parent']
+				else:
+					parent_name = ob['parent']
+			if ob_type == 'energymeter':
+				short_parent_name = parent_name.split('.')[1]
+				parent_id = name_map[short_parent_name]
+				if 'parent' in evil_glm[parent_id]:
+					parent_name = evil_glm[parent_id]['parent']
+				elif evil_glm[parent_id].get('object','') == 'line':
+					from_name = evil_glm[parent_id].get('from', None)
+					to_name = evil_glm[parent_id].get('from', None)
+					if from_name is not None:
+						parent_name = from_name
+					elif to_name is not None:
+						parent_name = to_name
 					else:
 						parent_name = ob['parent']
-				if ob_type == 'energymeter':
-					short_parent_name = parent_name.split('.')[1]
-					parent_id = name_map[short_parent_name]
-					if 'parent' in evil_glm[parent_id]:
-						parent_name = evil_glm[parent_id]['parent']
-					elif evil_glm[parent_id].get('object','') == 'line':
-						from_name = evil_glm[parent_id].get('from', None)
-						to_name = evil_glm[parent_id].get('from', None)
-						if from_name is not None:
-							parent_name = from_name
-						elif to_name is not None:
-							parent_name = to_name
-						else:
-							parent_name = ob['parent']
-				# try:
-				# 	parent_loc = name_map[parent_name]
-				# except KeyError:
-				# 	short_parent_name = parent_name.split('.')[1]
-				# 	parent_loc = name_map[short_parent_name]
-				parent_loc = name_map[parent_name]
-				parent_ob = evil_glm[parent_loc]
-				parent_lat = parent_ob.get('latitude', None)
-				parent_lon = parent_ob.get('longitude', None)
-				# place randomly on circle around parent.
-				angle = random.random()*3.14159265*2;
-				x = math.cos(angle)*RADIUS;
-				y = math.sin(angle)*RADIUS;
-				ob['latitude'] = str(float(parent_lat) + x)
-				ob['longitude'] = str(float(parent_lon) + y)
-				# print(ob)
-			except:
-				print('ERROR on converting',ob)
+			# get location of parent object.
+			parent_loc = name_map[parent_name]
+			parent_ob = evil_glm[parent_loc]
+			parent_lat = parent_ob.get('latitude', None)
+			parent_lon = parent_ob.get('longitude', None)
+			# place randomly on circle around parent.
+			angle = random.random()*3.14159265*2;
+			x = math.cos(angle)*RADIUS;
+			y = math.sin(angle)*RADIUS;
+			ob['latitude'] = str(float(parent_lat) + x)
+			ob['longitude'] = str(float(parent_lon) + y)
 	if write_out:
 		evilToOmd(evil_glm, omdFilePath)
 	return evil_glm
@@ -708,7 +743,32 @@ def dss_to_networkx(dssFilePath, tree=None):
 	]
 	full_edges = edges + edges_sub
 	G = nx.DiGraph(full_edges)
+	for ob in omd.values():
+		if 'latitude' in ob and 'longitude' in ob:
+			G.add_node(ob['name'], pos=(float(ob['longitude']), float(ob['latitude'])))
+		else:
+			G.add_node(ob['name'])
 	return G
+
+def getDssCoordinates(omdFilePath, outFilePath):
+	''' Gets a list of location assignments for loads and buses given an omd with valid coordinates '''
+	omd = json.load(open(omdFilePath))
+	evil_tree = omd.get('tree',{})
+	coordinateDict = {}
+	for ob in evil_tree.values():
+		obType = ob['object']
+		obName = ob['name']
+		if obType == 'bus' and obName not in coordinateDict.keys():
+			print(obType + " --- " + obName)
+			latitude = ob['latitude']
+			longitude = ob['longitude']
+			coordinateDict[obName] = (latitude, longitude)
+	with open(outFilePath, "w") as coordinateListFile:
+		for bus in coordinateDict.keys():
+			busLat = coordinateDict[bus][0]
+			busLon = coordinateDict[bus][1]
+			lineStr = "setbusxy bus=" + bus + " x=" + busLon + " y=" + busLat + "\n"
+			coordinateListFile.write(lineStr)
 
 def _conversionTests():
 	# pass
@@ -904,16 +964,27 @@ def _dssToOmdTest():
 	omfDir = os.getcwd()
 	# dssFileName = 'ieee37.clean.dss'
 	# dssFilePath = pJoin(curDir, dssFileName)
-	# dssFileName = 'nreca1824.dss'
-	dssFileName = 'network.iowa240.reduced.dss'
-	# dssFilePath = pJoin(omfDir, 'scratch', 'RONM', dssFileName)
-	dssFilePath = pJoin(omfDir, 'static', 'testFiles', 'iowa_240', dssFileName)
+	dssFileName = 'nreca1824_dwp.dss'
+	# dssFileName = 'Master3.dss'
+	dssFilePath = pJoin(omfDir, 'static', 'testFiles', dssFileName)
+	# dssFilePath = pJoin(omfDir, 'static', 'testFiles', 'Delete', dssFileName)
+	# dssCleanLists(dssFilePath)
+	# dssFileName = 'Master3_cleanLists.dss'
+	# dssFilePath = pJoin(omfDir, 'static', 'testFiles', 'Delete', dssFileName)
 	# omdFileName = dssFileName + '.omd'
 	omdFileName = dssFileName + '.omd'
-	# omdFilePath = pJoin(omfDir, 'scratch', 'RONM', omdFileName)
-	omdFilePath = pJoin(omfDir, 'static', 'testFiles', 'iowa_240', omdFileName)
+	omdFilePath = pJoin(omfDir, 'static', 'testFiles', omdFileName)
+	# omdFilePath = pJoin(omfDir, 'static', 'testFiles', 'Delete', omdFileName)
 	# omdFilePath = pJoin(omfDir, 'static', 'publicFeeders', omdFileName)
 	dssToOmd(dssFilePath, omdFilePath, RADIUS=0.0002, write_out=True)
+
+def _dssCoordTest():
+	curDir = os.getcwd()
+	os.chdir('../..')
+	omfDir = os.getcwd()
+	omdFilePath = pJoin(omfDir, "scratch", "MapTestOutput", "iowa240c2_fixed_coords2.clean.omd")
+	outFilePath = pJoin(omfDir, "static", "testFiles", "iowa_240", "iowa240_cleanCoords.csv")
+	getDssCoordinates(omdFilePath, outFilePath)
 
 def _tests():
 	from omf.solvers.opendss import getVoltages, voltageCompare
@@ -957,3 +1028,4 @@ if __name__ == '__main__':
 	# _randomTest()
 	# _conversionTests()
 	_dssToOmdTest()
+	#_dssCoordTest()

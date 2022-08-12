@@ -1,8 +1,5 @@
 <head>
-	<title>Open Modeling Framework</title>
-	<meta charset="utf-8">
-	<link href="{{pathPrefix}}/static/omf.css" type="text/css" rel="stylesheet"/>
-	<link rel="shortcut icon" href="{{pathPrefix}}/static/favicon.ico">
+	{{ omfHeaders }}
 	<script src="{{pathPrefix}}/static/sorttable.js"></script>
 	<style>
 	<!-- /*Styles here*/ -->
@@ -26,10 +23,6 @@
 			background-color: #e6e6e6;
 		}
 	</style>
-	{% if modelStatus == "running" %}<meta http-equiv="refresh" content="5"/>{% endif %}
-	<!-- Library Imports -->
-	<script type="text/javascript" src="{{pathPrefix}}/static/omf.js"></script>
-	<script type="text/javascript" src="{{pathPrefix}}/static/jquery-1.9.1.js"></script>
 	<script src="{{pathPrefix}}/static/highcharts4.src.js"></script>
 	<script src="https://cdn.plot.ly/plotly-1.50.1.min.js"></script>
 	<!-- Leaflet -->
@@ -37,11 +30,6 @@
 	<script src="https://unpkg.com/leaflet@1.5.1/dist/leaflet.js" integrity="sha512-GffPMF3RvMeYyc1LWMHtK8EbPv0iNZ8/oTtHPx9/cc2ILxQ+u905qIwdpULaqDkyBKgOaB57QTMg7ztg8Jm2Og==" crossorigin=""></script>
 	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/noUiSlider/8.5.1/nouislider.min.css" />
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/noUiSlider/8.5.1/nouislider.min.js"></script>
-	<!-- Data  Imports -->
-	<script>allInputData={% if allInputDataDict %}{{allInputDataDict | tojson}}{% else %}null{% endif %}</script>
-	<script>allOutputData={% if allOutputDataDict %}{{allOutputDataDict | tojson}}{% else %}null{% endif %}</script>
-	<script>modelStatus="{{modelStatus}}"</script>
-	<script>currentUser="{{datastoreNames.get('currentUser','test')}}"</script>
 	<style>#map{
 		position: relative;
 		width: 100.0%;
@@ -51,41 +39,30 @@
 		}
 	</style>
 </head>
-<body onload="init()">
-	<div id="header">
-		<div id="headInnerBlock">
-			<div id="menuLeft">
-				<a style="color:white" href="/">Open Modeling Framework</a> &#187;&nbsp;&nbsp;Model
-				&#8220;<p id="titleText" style="display:inline"></p>&#8221;
-			</div>
-		</div>
-	</div>
-	<div id="triangle-parent">
-		<div id="triangle-message">New Version<span class="classic-triangle">A new version of the model has been added to the OMF. To get the new outputs, please fill in any missing inputs and hit "Run Model". You can also just look at the old inputs/outputs.</span></div>
-		<div id="triangle-topright"></div>
-	</div>
+<body>
+	{{ omfModelTitle }}
 	<p class="reportTitle">Model Input</p>
 	<div id="input" class="content">
 		<form name="inputForm" action="/runModel/" onsubmit="event.preventDefault(); return isFormValid();" method="post">
 			<div class="shortInput">
 				<label>Model Type <a href="https://github.com/dpinney/omf/wiki/Models-~-microgridControl" target="blank">Help?</a></label>
-				<input type="text" id="modelType" name="modelType" value="{{modelName}}" readonly/>
+				<input type="text" id="modelType" name="modelType" value="{{allInputDataDict.modelType}}" value="{{modelName}}" readonly/>
 			</div>
 			<div class="shortInput">
 				<label>Model Name</label>
-				<input type="text" id="modelName" name="modelName" pattern="^[\w\s\d\.-]+$" required="required">
+				<input type="text" id="modelName" name="modelName" value="{{allInputDataDict.modelName}}" pattern="^[\w\s\d\.-]+$" required="required">
 			</div>
-			<div class="shortInput runningInline postRunInline">
+			<div class="shortInput">
 				<label>User</label>
-				<input type="text" id="user" name="user" readonly/>
+				<input type="text" id="user" name="user" value="{{allInputDataDict.user}}" readonly/>
 			</div>
-			<div class="shortInput runningInline postRunInline ">
+			<div class="shortInput ">
 				<label>Created</label>
-				<input type="text" id="created" name="created" readonly/>
+				<input type="text" id="created" name="created" value="{{allInputDataDict.created}}" readonly/>
 			</div>
-			<div class="shortInput postRunInline">
+			<div class="shortInput">
 				<label>Run Time</label>
-				<input type="text" id="runTime" name="runTime" readonly/>
+				<input type="text" id="runTime" name="runTime" value="{{allInputDataDict.runTime}}" readonly/>
 			</div>
 			<div class="wideInput">
 				<p class="inputSectionHeader">Model Specifications</p>
@@ -101,56 +78,74 @@
 				}
 				</script>
 				<button id="feederButton" type="button" onclick="javascript:editFeeder(allInputData.modelName,1);" style="display:block;width:125px;">Open Editor</button>
-				<input type="text" id="feederName1" name="feederName1" style="display:none">
+				<input type="text" id="feederName1" name="feederName1" value="{{allInputDataDict.feederName1}}" style="display:none">
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Event Information (.json file)<span class="classic">Please see the documentation at the help link for the required format</span></label>
 				<input id="eventFile" type="file" style="display:none" onchange="handle_files(this.files,'eventData','eventFileName')">
-				<input id="eventData" name="eventData" type="hidden">
+				<input id="eventData" name="eventData" value="{{allInputDataDict.eventData}}" type="hidden">
 				<div>
 					<label for="eventFile" class="fileButton">Choose File</label>
-					<input id="eventFileName" name="eventFileName" value='' readonly class="uploadFileName">
+					<input id="eventFileName" name="eventFileName" value="{{allInputDataDict.eventFileName}}" value='' readonly class="uploadFileName">
 				</div>
 			</div>
 			<div class="shortInput">
+				<label class="tooltip">Solution Fidelity<span class="classic">Select an option for the level of fidelity of the results.</span></label>
+				<select id="solFidelity" name="solFidelity" value="{{allInputDataDict.solFidelity}}" />
+					<option value='0.10' {% if allInputDataDict.solFidelity == '0.10%' %}selected{% endif %}>Low</option>
+					<option value='0.05' {% if allInputDataDict.solFidelity == '0.05%' %}selected{% endif %}>Medium</option>
+					<option value='0.02' {% if allInputDataDict.solFidelity == '0.02%' %}selected{% endif %}>High</option>
+				</select>
+			</div>
+			<div class="shortInput">
 				<label class="tooltip">Generate Default Settings?<span class="classic">If yes, a default settings file will be generated; if no, the user must upload a settings file.</span></label>
-				<select id="generateSettings" name="generateSettings" />
-					<option value='True'>Yes</option>
-					<option value='False'>No</option>
+				<select id="genSettings" name="genSettings" value="{{allInputDataDict.genSettings}}" />
+					<option value='True' {% if allInputDataDict.genSettings == 'True' %}selected{% endif %}>Yes</option>
+					<option value='False' {% if allInputDataDict.genSettings == 'False' %}selected{% endif %}>No</option>
 				</select>
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Settings (.json file)<span class="classic">Please see the documentation at the help link for the required format. You can also select "Yes" for the "Generate Default Settings?" field to run using a generated default settings file.</span></label>
 				<input id="settingsFile" type="file" style="display:none" onchange="handle_files(this.files,'settingsData','settingsFileName')">
-				<input id="settingsData" name="settingsData" type="hidden">
+				<input id="settingsData" name="settingsData" value="{{allInputDataDict.settingsData}}" type="hidden">
 				<div>
 					<label for="settingsFile" class="fileButton">Choose File</label>
-					<input id="settingsFileName" name="settingsFileName" value='' readonly class="uploadFileName">
+					<input id="settingsFileName" name="settingsFileName" value="{{allInputDataDict.settingsFileName}}" value='' readonly class="uploadFileName">
 				</div>
 			</div>
 			<div class="shortInput">
-				<label class="tooltip">Cached Output (.json file)<span class="classic">Please see the documentation at the help link for the required format</span></label>
-				<input id="outputFile" type="file" style="display:none" onchange="handle_files(this.files,'outputData','outputFileName')">
-				<input id="outputData" name="outputData" type="hidden">
+				<label class="tooltip">Load Priorities (.json file)<span class="classic">Please see the documentation at the help link for the required format of custom load priority file input.</span></label>
+				<input id="loadPriorityFile" type="file" style="display:none" onchange="handle_files(this.files,'loadPriorityData','loadPriorityFileName')">
+				<input id="loadPriorityData" name="loadPriorityData" value="{{allInputDataDict.loadPriorityData}}" type="hidden">
 				<div>
-					<label for="outputFile" class="fileButton">Choose File</label>
-					<input id="outputFileName" name="outputFileName" value='' readonly class="uploadFileName">
+					<label for="loadPriorityFile" class="fileButton">Choose File</label>
+					<input id="loadPriorityFileName" name="loadPriorityFileName" value="{{allInputDataDict.loadPriorityFileName}}" value='' readonly class="uploadFileName">
 				</div>
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Cached Output?<span class="classic">If yes, use the Cached Output provided; if no, use the events.json to run the feeder system through ONM.</span></label>
-				<select id="useCache" name="useCache" />
-					<option value='True'>Yes</option>
-					<option value='False'>No</option>
+				<select id="useCache" name="useCache" value="{{allInputDataDict.useCache}}" />
+					<option value='True' {% if allInputDataDict.useCache == 'True' %}selected{% endif %}>Yes</option>
+					<option value='False' {% if allInputDataDict.useCache == 'False' %}selected{% endif %}>No</option>
 				</select>
 			</div>
 			<div class="shortInput">
-				<label class="tooltip">Maximum Runtime (h)<span class="classic">Runtime of the system in hours.</span></label>
-				<input type="text" id="maxTime" name="maxTime">
+				<label class="tooltip">Cached Output (.json file)<span class="classic">Please see the documentation at the help link for the required format</span></label>
+				<input id="outputFile" type="file" style="display:none" onchange="handle_files(this.files,'outputData','outputFileName')">
+				<input id="outputData" name="outputData" value="{{allInputDataDict.outputData}}" type="hidden">
+				<div>
+					<label for="outputFile" class="fileButton">Choose File</label>
+					<input id="outputFileName" name="outputFileName" value="{{allInputDataDict.outputFileName}}" value='' readonly class="uploadFileName">
+				</div>
 			</div>
 			<div class="shortInput">
-				<label class="tooltip">Step Size (h)<span class="classic">The duration of each step in hours used for Powerflow calculations.</span></label>
-				<input type="text" id="stepSize" name="stepSize">
+				<label class="tooltip">Microgrid Tagging (.csv file)<span class="classic">Please see the documentation at the help link for the required format custom microgrid tagging file input.</span></label>
+				<input id="microgridTaggingFile" type="file" style="display:none" onchange="handle_files(this.files,'microgridTaggingData','microgridTaggingFileName')">
+				<input id="microgridTaggingData" name="microgridTaggingData" value="{{allInputDataDict.microgridTaggingData}}" type="hidden">
+				<div>
+					<label for="microgridTaggingFile" class="fileButton">Choose File</label>
+					<input id="microgridTaggingFileName" name="microgridTaggingFileName" value="{{allInputDataDict.microgridTaggingFileName}}" value='' readonly class="uploadFileName">
+				</div>
 			</div>
 			<div class="wideInput">
 				<p class="inputSectionHeader">Outage Cost Parameters</p>
@@ -159,104 +154,80 @@
 			<div class="shortInput">
 				<label class="tooltip">Customer Information (.csv file)<span class="classic">Please see the documentation at the help link for the required format</span></label>
 				<input id="customerFile" type="file" style="display:none" onchange="handle_files(this.files,'customerData','customerFileName')">
-				<input id="customerData" name="customerData" type="hidden">
+				<input id="customerData" name="customerData" value="{{allInputDataDict.customerData}}" type="hidden">
 				<div>
 					<label for="customerFile" class="fileButton">Choose File</label>
-					<input id="customerFileName" name="customerFileName" value='' readonly class="uploadFileName">
+					<input id="customerFileName" name="customerFileName" value="{{allInputDataDict.customerFileName}}" value='' readonly class="uploadFileName">
 				</div>
 			</div>
 			<div class="shortInput">
-				<label class="tooltip">Duration of Outage (h)<span class="classic">The amount of time the outage lasts in hours.</span></label>
-				<input type="text" id="outageDuration" name="outageDuration">
-			</div>
-			<div class="shortInput">
 				<label class="tooltip">Restoration Cost ($/hr)<span class="classic">Restoration cost parameter for calculating outage costs.</span></label>
-				<input type="text" id="restoration_cost" name="restoration_cost" pattern="^\d+\.?\d*$" required="required">
+				<input type="text" id="restoration_cost" name="restoration_cost" value="{{allInputDataDict.restoration_cost}}" pattern="^\d+\.?\d*$" required="required">
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Hardware Cost ($)<span class="classic">Hardware cost parameter for calculating outage costs.</span></label>
-				<input type="text" id="hardware_cost" name="hardware_cost" pattern="^\d+\.?\d*$" required="required">
+				<input type="text" id="hardware_cost" name="hardware_cost" value="{{allInputDataDict.hardware_cost}}" pattern="^\d+\.?\d*$" required="required">
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Energy Sales Margin<span class="classic">Decimal representing the percentage of profit on energy sales.</span></label>
-				<input type="text" id="profit_on_energy_sales" name="profit_on_energy_sales" pattern="^\d{1,3}(\.\d*?)?$" required="required">
+				<input type="text" id="profit_on_energy_sales" name="profit_on_energy_sales" value="{{allInputDataDict.profit_on_energy_sales}}" pattern="^\d{1,3}(\.\d*?)?$" required="required">
 			</div>
-			<div class="wideInput" style="text-align:right">
-				<button id="deleteButton" type="button" class="stoppedInline postRunInline" onclick="deleteModel()">Delete</button>
-				<button id="shareButton" type="button" class="postRunInline" onclick="shareModel()">Share</button>
-				<button id="duplicateButton" type="button" class="postRunInline" onclick="duplicateModel()">Duplicate</button>
-				<button id="cancelButton" class="runningInline" type="button" onclick="cancelModel()">Cancel Run</button>
-				<button id="runButton" class="stoppedInline postRunInline" type="submit">Run Model</button>
-				<!-- Function to send rendered html page to server proof of concept
-				<button id="save" class="stoppedInline postRunInline" type="button">Save Template</button>
-					<script>
-					$('#save').click(function() {
-						myhtml = $('html').html();
-						$.ajax({
-							type: "POST",
-							url: "{{pathPrefix}}/renderToFile",
-							data: {html:myhtml}
-						});
-					});
-				</script> -->
-			</div>
+			{{ omfModelButtons }}
 		</form>
 	</div>
-	<div id ="runIndicator" class="content running">
-		Model running on server. Refresh the page to check for results, or wait for automatic refresh every 5 seconds.
-	</div>
-	<div id ="stopIndicator" class="content stopped" style="visibility: hidden">
-		<pre id='errorText' style='overflow-x:scroll'></pre>
-		<script type="text/javascript">
-		if (typeof(allInputData.stderr) !== 'undefined') {	
-			gebi('stopIndicator').style.visibility = 'visible'
-			gebi('errorText').innerHTML = 'MODEL ENCOUNTERED AN ERROR AS FOLLOWS: \n\n' + allInputData.stderr}
-		</script>
-	</div>
+	{{ omfRunDebugBlock }}
+	{% if modelStatus == 'finished' %}
 	<div id="output">
-		<p class="reportTitle postRun">Generator Profiles</p>
-		<div id="fig1" class="tightContent postRun">
+		<p class="reportTitle">Generator Profiles</p>
+		<div id="fig1" class="tightContent">
 			<div id="fig1Chart" style="width:1000px"></div>
 			<script type="text/javascript">
 				Plotly.newPlot("fig1Chart", JSON.parse(allOutputData["fig1Data"]), JSON.parse(allOutputData["fig1Layout"]) || {})
 			</script>
 		</div>
-		<p class="reportTitle postRun">Voltages</p>
-		<div id="fig2" class="tightContent postRun">
+		<p class="reportTitle">Voltages</p>
+		<div id="fig2" class="tightContent">
 			<div id="fig2Chart" style="width:1000px"></div>
 			<script type="text/javascript">
 				Plotly.newPlot("fig2Chart", JSON.parse(allOutputData["fig2Data"]), JSON.parse(allOutputData["fig2Layout"]) || {})
 			</script>
 		</div>
-		<p class="reportTitle postRun">Loads Served</p>
-		<div id="fig3" class="tightContent postRun">
+		<p class="reportTitle">Loads Served</p>
+		<div id="fig3" class="tightContent">
 			<div id="fig3Chart" style="width:1000px"></div>
 			<script type="text/javascript">
 				Plotly.newPlot("fig3Chart", JSON.parse(allOutputData["fig3Data"]), JSON.parse(allOutputData["fig3Layout"]) || {})
 			</script>
 		</div>
-		<p class="reportTitle postRun">Customer Outage Plots (wrt duration)</p>
-		<div id="fig4" class="tightContent postRun">
+		<p class="reportTitle">Customer Outage Plots (wrt duration)</p>
+		<div id="fig4" class="tightContent">
 			<div id="fig4Chart" style="width:1000px"></div>
 			<script type="text/javascript">
 				Plotly.newPlot("fig4Chart", JSON.parse(allOutputData["fig4Data"]), JSON.parse(allOutputData["fig4Layout"]) || {})
 			</script>
 		</div>
-		<p class="reportTitle postRun" style="page-break-before:always">Customer Outage Cost</p>
-		<div id="customerOutageCostCalc" class="tightContent postRun">
+		<p class="reportTitle" style="page-break-before:always">Customer Outage Cost</p>
+		<div id="customerOutageCostCalc" class="tightContent" style="max-height:500px; overflow-y:scroll">
 			{{ allOutputDataDict['customerOutageHtml'] }}
 		</div>
-		<p class="reportTitle postRun" style="page-break-before:always">Utility Outage Cost</p>
-		<div id="utilityOutageCostCalc" class="tightContent postRun">
+		<p class="reportTitle">Customer Outage Histogram</p>
+		<div id="fig5" class="tightContent">
+			<div id="fig5Chart" style="width:1000px"></div>
+			<script type="text/javascript">
+				Plotly.newPlot("fig5Chart", JSON.parse(allOutputData["fig5Data"]), JSON.parse(allOutputData["fig5Layout"]) || {})
+			</script>
+		</div>
+		<p class="reportTitle" style="page-break-before:always">Utility Outage Cost</p>
+		<div id="utilityOutageCostCalc" class="tightContent">
 			{{ allOutputDataDict['utilityOutageHtml'] }}
 		</div>
-		<p class="reportTitle postRun" style="page-break-before:always">Timeline</p>
-		<div id="outageCostCalc" class="tightContent postRun sorttable" style="max-height:500px; overflow-y:scroll">
+		<p class="reportTitle" style="page-break-before:always">Timeline</p>
+		<div id="outageCostCalc" class="tightContent sorttable" style="max-height:500px; overflow-y:scroll">
 			{{ allOutputDataDict['timelineStatsHtml'] }}
 		</div>
 		<!-- Leaflet map directly inline with model-->
-		<p class="reportTitle postRun">Outage Map and Time Slider</p>
-		<div class="tightContent postRun" style="margin-bottom:-1px">
+		<p class="reportTitle">Outage Map and Time Slider</p>
+		<div class="tightContent" style="margin-bottom:-1px">
 			<div style="display: inline-block; width: inherit;">
 				<div style="display: inline-block; width: 8%; margin-top: 5px; margin-bottom: 5px; margin-right: 2%; float: left">
 					<input type="number" min='1' max='23' id="input-number-min" style="width: 100%; background-color:white">
@@ -267,11 +238,11 @@
 				</div>
 			</div>
 		</div>
-		<div id="mapInsert"></div>
+		<div id="mapInsert" style="width: 1000px; margin-left: auto; margin-right: auto;"></div>
 		<script type="text/javascript">
 		//Hack to stop leaflet from loading before geojson data loads 
 		if(modelStatus === "finished"){
-		mapHtml = '<div id="mapHolder" class="tightContent"><div id="map"></div></div>';
+		mapHtml = '<div id="map"></div>';
 		gebi('mapInsert').innerHTML = mapHtml;
 		//Parse geojson dict (instead of reading from geojson.js - doesn't really matter if you want to load from geojson.js, was just quicker to prototype) 
 		var geojson = JSON.parse(allOutputData['geoDict']);
@@ -381,27 +352,30 @@
 		geojsonLayer.addTo(map);
 		eventLayer.addTo(map);
 		
-		var stepSizeVal = parseFloat(allInputData.stepSize) //This should be the value of the stepsize
-		var maxTimeVal = parseFloat(allInputData.maxTime) //This should be the value of the runtime
-		document.getElementById('input-number-min').setAttribute("min", stepSizeVal);
-		document.getElementById('input-number-min').setAttribute("max", maxTimeVal-stepSizeVal);
-		document.getElementById('input-number-max').setAttribute("min", stepSizeVal*2);
-		document.getElementById('input-number-max').setAttribute("min", maxTimeVal);
+		// var stepSizeVal = parseFloat(allInputData.stepSize)
+		var stepSizeVal = parseFloat(allOutputData['stepSize']) //This should be the value of the stepsize
+		// var maxTimeVal = parseFloat(allInputData.maxTime)
+		var maxTimeVal = parseFloat(allOutputData['numTimeSteps']) //This should be the value of the runtime
+		document.getElementById('input-number-min').setAttribute("min", 0);
+		document.getElementById('input-number-min').setAttribute("max", maxTimeVal-stepSizeVal*2);
+		document.getElementById('input-number-max').setAttribute("min", stepSizeVal);
+		document.getElementById('input-number-max').setAttribute("max", maxTimeVal-stepSizeVal);
 		// var runtimeVal = allInputData.runTime
 		var numSteps = maxTimeVal/stepSizeVal
 		var slidervar = document.getElementById('slider');
 		noUiSlider.create(slidervar, {
 			connect: true,
-			start: [ stepSizeVal, maxTimeVal ],
+			step: stepSizeVal,
+			start: [ 0, maxTimeVal-stepSizeVal ],
 			range: {
-				min: stepSizeVal,
-				max: maxTimeVal
+				min: 0,
+				max: maxTimeVal-stepSizeVal
 			}
 		});
 		// document.getElementById('input-number-min').setAttribute("value", 1);
 		// document.getElementById('input-number-max').setAttribute("value", 24);
-		document.getElementById('input-number-min').setAttribute("value", stepSizeVal);
-		document.getElementById('input-number-max').setAttribute("value", maxTimeVal);
+		document.getElementById('input-number-min').setAttribute("value", 0);
+		document.getElementById('input-number-max').setAttribute("value", maxTimeVal-stepSizeVal);
 
 		var inputNumberMin = document.getElementById('input-number-min');
 		var inputNumberMax = document.getElementById('input-number-max');
@@ -442,20 +416,7 @@
 		})
 	}
 	</script>
-		<!-- TODO: Remove? -->
-		<!-- <script type="text/javascript">
-			// Global Highcharts settings.
-			Highcharts.setOptions({global:{useUTC:true}})
-			// Clean up the non-ISO date strings we get.
-			function dateOb(inStr) {return Date.parse(inStr.replace(/-/g,"/"))}
-			pointStart = dateOb(allOutputData.timeStamps[0])
-			pointInterval = dateOb(allOutputData.timeStamps[1]) - pointStart
-		</script> -->
-		<p class="reportTitle postRun">Raw Input and Output Files</p>
-		<div id="rawOutput" class="content postRun" style="margin-top:0px">
-			{% for name in allOutputDataDict['fileNames'] %}
-				{% if loop.index > 1 %}&mdash; {% endif %}<a href="/downloadModelData/{{allInputDataDict['user']}}/{{allInputDataDict['modelName']}}/{{name}}">{{name}}</a>
-			{% endfor %}
-		</div>
+	{{ rawOutputFiles }}
 	</div>
+	{% endif %}
 </body>

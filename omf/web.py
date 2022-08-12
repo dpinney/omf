@@ -10,6 +10,7 @@ import flask_login, boto3
 from flask_compress import Compress
 from jinja2 import Template
 import dateutil
+from subprocess import Popen
 import re
 try:
 	import fcntl
@@ -324,7 +325,7 @@ def adminControls():
 
 @app.route("/omfStats")
 @flask_login.login_required
-def omfStats():
+def omfStatsView():
 	'''Render log visualizations.'''
 	if User.cu() != "admin":
 		return redirect("/")
@@ -2113,4 +2114,7 @@ if __name__ == "__main__":
 		multiprocessing.set_start_method('forkserver') # Workaround for new Catalina exec/fork behavior
 	template_files = ["templates/"+ x  for x in safeListdir("templates")]
 	model_files = ["models/" + x for x in safeListdir("models")]
-	app.run(debug=True, host="0.0.0.0", extra_files=template_files + model_files)
+	print('App starting with gunicorn. Errors are going to omf.error.log.')
+	appProc = Popen(['gunicorn', '-w', '5', '-b', '0.0.0.0:5000', '--preload', 'web:app','--worker-class=sync', '--access-logfile', 'omf.access.log', '--error-logfile', 'omf.error.log', '--capture-output'])
+	appProc.wait()
+	# app.run(debug=True, host="0.0.0.0", extra_files=template_files + model_files)

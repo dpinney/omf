@@ -160,7 +160,7 @@ def new(modelDir):
 		"demandCurve": demandCurve,
 		"fileName": "FrankScadaValidCSV_Copy.csv",
 		"priceCurve": priceCurve,
-		"fileNamed":"priceCurve_Copy.csv",
+		"priceFileName":"priceCurve_Copy.csv",
 		"cellCost": "7140",
 		"cellQuantity": "10",
 		"runTime": "0:00:03",

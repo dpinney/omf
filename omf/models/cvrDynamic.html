@@ -1,136 +1,90 @@
 <head>
-	<title>Open Modeling Framework</title>
-	<meta charset="utf-8">
-	<link href="{{pathPrefix}}/static/omf.css" type="text/css" rel="stylesheet"/>
-	<link rel="shortcut icon" href="{{pathPrefix}}/static/favicon.ico">
+	{{ omfHeaders }}
 	<style>
 		pre{font-size:13pt;margin-top:10px;margin-bottom:10px;margin-left:20px;white-space:pre-wrap;white-space:-moz-pre-wrap;white-space:-pre-wrap;white-space:-o-pre-wrap;word-wrap:break-word;}
 	</style>
-	{% if modelStatus == "running" %}<meta http-equiv="refresh" content="5"/>{% endif %}
-	<!-- Library Imports -->
-	<script type="text/javascript" src="{{pathPrefix}}/static/omf.js"></script>
-	<script type="text/javascript" src="{{pathPrefix}}/static/jquery-1.9.1.js"></script>
 	<script src="{{pathPrefix}}/static/highcharts4.src.js"></script>
-	<!-- Data  Imports -->
-	<script>allInputData={% if allInputDataDict %}{{allInputDataDict | tojson}}{% else %}null{% endif %}</script>
-	<script>allOutputData={% if allOutputDataDict %}{{allOutputDataDict | tojson}}{% else %}null{% endif %}</script>
-	<script>modelStatus="{{modelStatus}}"</script>
-	<script>currentUser="{{datastoreNames.get('currentUser','test')}}"</script>
-	<!-- Global Functions -->
-	<script type="text/javascript">
-		function editFeeder(modelName, feederNum) {
-			console.log("modelName:",modelName)
-			studyUser = allInputData.user
-			window.open("/feeder/" + studyUser + "/" + modelName + "/" + feederNum,  "_blank")
-		}
-	</script>
 </head>
-<body onload="init()">
-	<div id="header">
-		<div id="headInnerBlock">
-			<div id="menuLeft">
-				<a style="color:white" href="/">Open Modeling Framework</a> &#187;&nbsp;&nbsp;Model
-				&#8220;<p id="titleText" style="display:inline"></p>&#8221;
-			</div>
-		</div>
-	</div>
-	<div id="triangle-parent">
-		<div id="triangle-message">New Version<span class="classic-triangle">A new version of the model has been added to the OMF. To get the new outputs, please fill in any missing inputs and hit "Run Model". You can also just look at the old inputs/outputs.</span></div>
-		<div id="triangle-topright"></div>
-	</div>
+<body>
+	{{ omfModelTitle }}
 	<p class="reportTitle">Model Input</p>
 	<div id="input" class="content">
-		<form name="inputForm" action="/runModel/" onsubmit="event.preventDefault(); return isFormValid();" method="post">
+		<form name= "inputForm" action="/runModel/" onsubmit="event.preventDefault(); return isFormValid();" method="post">
 			<div class="shortInput">
 				<label>Model Type <a href="https://github.com/dpinney/omf/wiki/Models:-~-cvrDynamic" target="blank">Help?</a></label>
 				<input type="text" id="modelType" name="modelType" value="{{modelName}}" readonly/>
 			</div>
 			<div class="shortInput">
 				<label>Model Name</label>
-				<input type="text" id="modelName" name="modelName" pattern="^[\w\s\d\.-]+$" required="required"/></td>
+				<input type="text" id="modelName" name="modelName" value="{{allInputDataDict.modelName}}" pattern="^[\w\s\d\.-]+$" required="required"/></td>
 			</div>
 			<div class="shortInput">
 				<label>Feeder</label>
 				<button id="feederButton" type="button" onclick="javascript:editFeeder(allInputData.modelName,1);" style="display:block;width:125px;">Open Editor</button>
-				<input type="text" id="feederName1" name="feederName1" style="display:none">
+				<input type="text" id="feederName1" name="feederName1" value="{{allInputDataDict.feederName1}}" style="display:none">
 			</div>
-			<div class="shortInput runningInline postRunInline">
+			<div class="shortInput">
 				<label>User</label>
-				<input type="text" id="user" name="user" readonly/></td>
+				<input type="text" id="user" name="user" value="{{allInputDataDict.user}}" readonly/></td>
 			</div>
-			<div class="shortInput runningInline postRunInline">
+			<div class="shortInput">
 				<label>Created</label>
-				<input type="text" id="created" name="created" readonly/></td>
+				<input type="text" id="created" name="created" value="{{allInputDataDict.created}}" readonly/></td>
 			</div>
-			<div class="shortInput postRunInline">
+			<div class="shortInput">
 				<label>Run Time</label>
-				<input type="text" id="runTime" name="runTime" readonly/></td>
+				<input type="text" id="runTime" name="runTime" value="{{allInputDataDict.runTime}}" readonly/></td>
 			</div>
 			<hr>
 			<div class="shortInput">
 				<label class="tooltip">Voltage Node Name<span class="classic">The name of end-node obtained from the feeder, where the Integrated Volt Var Controller will be connected.<br><br>The IVVC measures voltage across multiple nodes in an attempt to properly scale the voltage down from the substation to the end-node.</span></label>
-				<input type="text" id="voltageNodes" name="voltageNodes"/></td>
+				<input type="text" id="voltageNodes" name="voltageNodes" value="{{allInputDataDict.voltageNodes}}"/></td>
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Capital Cost<span class="classic">Capital Cost<br><em>Type: float</em></span></label>
-				<input type="text" id="capitalCost" name="capitalCost" pattern="^\d+\.?\d*$" required="required"/></td>
+				<input type="text" id="capitalCost" name="capitalCost" value="{{allInputDataDict.capitalCost}}" pattern="^\d+\.?\d*$" required="required"/></td>
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">OM Cost<span class="classic">OM Cost<br><em>Type: float</em></span></label>
-				<input type="text" id="omCost" name="omCost" pattern="^\d+\.?\d*$" required="required"/></td>
+				<input type="text" id="omCost" name="omCost" value="{{allInputDataDict.omCost}}" pattern="^\d+\.?\d*$" required="required"/></td>
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Wholesale Energy Cost ($/kWh)<span class="classic">Wholesale Energy Cost<br><em>Type: float</em></span></label>
-				<input type="text" id="wholesaleEnergyCostPerKwh" name="wholesaleEnergyCostPerKwh" pattern="^\d+\.?\d*$" required="required"/></td>
+				<input type="text" id="wholesaleEnergyCostPerKwh" name="wholesaleEnergyCostPerKwh" value="{{allInputDataDict.wholesaleEnergyCostPerKwh}}" pattern="^\d+\.?\d*$" required="required"/></td>
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Retail Energy Cost ($/kWh)<span class="classic">Retail Energy Cost<br><em>Type: float</em></span></label>
-				<input type="text" id="retailEnergyCostPerKwh" name="retailEnergyCostPerKwh" pattern="^\d+\.?\d*$" required="required"/></td>
+				<input type="text" id="retailEnergyCostPerKwh" name="retailEnergyCostPerKwh" value="{{allInputDataDict.retailEnergyCostPerKwh}}" pattern="^\d+\.?\d*$" required="required"/></td>
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Spring Demand Charge ($/kW)<span class="classic">Spring Demand Charge<br><em>Type: float</em></span></label>
-				<input type="text" id="peakDemandCostSpringPerKw" name="peakDemandCostSpringPerKw" pattern="^\d+\.?\d*$" required="required"/></td>
+				<input type="text" id="peakDemandCostSpringPerKw" name="peakDemandCostSpringPerKw" value="{{allInputDataDict.peakDemandCostSpringPerKw}}" pattern="^\d+\.?\d*$" required="required"/></td>
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Summer Demand Charge ($/kW)<span class="classic">Summer Demand Charge<br><em>Type: float</em></span></label>
-				<input type="text" id="peakDemandCostSummerPerKw" name="peakDemandCostSummerPerKw" pattern="^\d+\.?\d*$" required="required"/></td>
+				<input type="text" id="peakDemandCostSummerPerKw" name="peakDemandCostSummerPerKw" value="{{allInputDataDict.peakDemandCostSummerPerKw}}" pattern="^\d+\.?\d*$" required="required"/></td>
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Fall Demand Charge ($/kW)<span class="classic">Fall Demand Charge<br><em>Type: float</em></span></label>
-				<input type="text" id="peakDemandCostFallPerKw" name="peakDemandCostFallPerKw" pattern="^\d+\.?\d*$" required="required"/></td>
+				<input type="text" id="peakDemandCostFallPerKw" name="peakDemandCostFallPerKw" value="{{allInputDataDict.peakDemandCostFallPerKw}}" pattern="^\d+\.?\d*$" required="required"/></td>
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Winter Demand Charge ($/kW)<span class="classic">Winter Demand Charge<br><em>Type: float</em></span></label>
-				<input type="text" id="peakDemandCostWinterPerKw" name="peakDemandCostWinterPerKw" pattern="^\d+\.?\d*$" required="required"/></td>
+				<input type="text" id="peakDemandCostWinterPerKw" name="peakDemandCostWinterPerKw" value="{{allInputDataDict.peakDemandCostWinterPerKw}}" pattern="^\d+\.?\d*$" required="required"/></td>
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Simulation start date (YYYY-MM-DD)<span class="classic">Simulation start date</span></label>
-				<input type="text" id="simStart" name="simStart" pattern="^\d\d\d\d-\d\d-\d\d$" required="required"/></td>
+				<input type="text" id="simStart" name="simStart" value="{{allInputDataDict.simStart}}" pattern="^\d\d\d\d-\d\d-\d\d$" required="required"/></td>
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Simulation length (HOURS)<span class="classic">Simulation length</span></label>
-				<input type="text" id="simLengthHours" name="simLengthHours" pattern="^\d+$" required="required"/></td>
+				<input type="text" id="simLengthHours" name="simLengthHours" value="{{allInputDataDict.simLengthHours}}" pattern="^\d+$" required="required"/></td>
 			</div>
-			<div class="wideInput" style="text-align:right">
-				<button id="deleteButton" type="button" class="stoppedInline postRunInline" onclick="deleteModel()">Delete</button>
-				<button id="shareButton" type="button" class="postRunInline" onclick="shareModel()">Share</button>
-				<button id="duplicateButton" type="button" class="postRunInline" onclick="duplicateModel()">Duplicate</button>
-				<button id="cancelButton" class="runningInline" type="button" onclick="cancelModel()">Cancel Run</button>
-				<button id="runButton" class="postRunInline stoppedInline" type="submit">Run Model</button>
-			</div>
+			{{ omfModelButtons }}
 		</form>
 	</div>
-	<div id ="runIndicator" class="content running">
-		Model running on server. Refresh the page to check for results, or wait for automatic refresh every 5 seconds.
-	</div>
-	<div id ="stopIndicator" class="content stopped" style="visibility: hidden">
-		<pre id='errorText' style='overflow-x:scroll'></pre>
-		<script type="text/javascript">
-		if (typeof(allInputData.stderr) !== 'undefined') {
-			gebi('stopIndicator').style.visibility = 'visible'
-			gebi('errorText').innerHTML = 'MODEL ENCOUNTERED AN ERROR AS FOLLOWS: \n\n' + allInputData.stderr}
-		</script>
-	</div>
+	{{ omfRunDebugBlock }}
+	{% if modelStatus == 'finished' %}
 	<script type="text/javascript">
 		/*
 		 * Global setting of Highcharts
@@ -165,8 +119,8 @@
 				gebi('warningText').innerHTML = allOutputData.warnings
 			}</script>
 		</div>
-		<p class="reportTitle postRun">Total loads and Losses</p>
-		<div id="totalEnergyReport" class="tightContent postRun">
+		<p class="reportTitle">Total loads and Losses</p>
+		<div id="totalEnergyReport" class="tightContent">
 			<script type="text/javascript">
 				new Highcharts.Chart({
 					"chart":{
@@ -221,8 +175,8 @@
 			</script>
 		</div>
 
-		<p class="reportTitle postRun">Powerflow at Substation</p>
-		<div id="realPowerflow" class="tightContent postRun">
+		<p class="reportTitle">Powerflow at Substation</p>
+		<div id="realPowerflow" class="tightContent">
 			<script type="text/javascript">
 				powerData = [{
 					"marker":{
@@ -254,8 +208,8 @@
 				new Highcharts.Chart(localHighChart);
 			</script>
 		</div>
-		<p class="reportTitle postRun">Voltages at All Meters</p>
-		<div id="minMaxVoltRecord" class="tightContent postRun">
+		<p class="reportTitle">Voltages at All Meters</p>
+		<div id="minMaxVoltRecord" class="tightContent">
 			<script type="text/javascript">
 				// Chart #1
 				studyList = []
@@ -359,8 +313,8 @@
 				}
 			</script>
 		</div>
-		<p class="reportTitle postRun">Regulator Tap Positions</p>
-		<div id="tapStatus" class="tightContent postRun">
+		<p class="reportTitle">Regulator Tap Positions</p>
+		<div id="tapStatus" class="tightContent">
 			<script type="text/javascript">
 				// Chart #1
 				studyList = []
@@ -470,8 +424,8 @@
 				}
 			</script>
 		</div>
-		<p class="reportTitle postRun">Capacitor Switch Positions</p>
-		<div id="CapSwitchStat" class="tightContent postRun">
+		<p class="reportTitle">Capacitor Switch Positions</p>
+		<div id="CapSwitchStat" class="tightContent">
 			<script type="text/javascript">
 				// Chart #1
 				studyList = []
@@ -582,8 +536,8 @@
 			</script>
 		</div>
 
-		<p class="reportTitle postRun">Substation Voltages</p>
-		<div id="voltagePlots" class="tightContent postRun">
+		<p class="reportTitle">Substation Voltages</p>
+		<div id="voltagePlots" class="tightContent">
 			<script type="text/javascript">
 				// Chart #1
 				studyList = []
@@ -693,8 +647,8 @@
 				}
 			</script>
 		</div>
-		<p class="reportTitle postRun">Projected Savings From CVR by Month</p>
-		<div id="spendReport" class="tightContent postRun">
+		<p class="reportTitle">Projected Savings From CVR by Month</p>
+		<div id="spendReport" class="tightContent">
 			<table style="margin:5px;text-align:center">
 				<style>td, th {padding:5 0 5 20;}</style>
 				<thead>
@@ -714,8 +668,8 @@
 				</tr>
 			</table>
 		</div>
-		<p class="reportTitle postRun">Projected Savings From CVR Over System Lifetime</p>
-		<div id="savingsReport" class="tightContent postRun">
+		<p class="reportTitle">Projected Savings From CVR Over System Lifetime</p>
+		<div id="savingsReport" class="tightContent">
 			<script type="text/javascript">
 				new Highcharts.Chart({
 					"chart":{
@@ -765,5 +719,7 @@
 
 			</script>
 		</div>
+		{{ rawOutputFiles }}
 	</div>
+	{% endif %}
 </body>
