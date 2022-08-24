@@ -28,7 +28,7 @@ def install_onm(target : list = platform.system()):
 			'''julia -e 'import Pkg; Pkg.add("Gurobi")' ''',
 			'''julia -e 'import Pkg; Pkg.build("Gurobi")' ''',
 			'''julia -e 'import Pkg; Pkg.add(Pkg.PackageSpec(;name="PowerModelsDistribution", version="0.14.1"));' ''',
-			'''julia -e 'import Pkg; Pkg.add(Pkg.PackageSpec(;name="PowerModelsONM", version="2.1.1"));' ''',
+			'''julia -e 'import Pkg; Pkg.add(Pkg.PackageSpec(;name="PowerModelsONM", version="3.0.1"));' ''',
 			f'touch {thisDir}/instantiated.txt'
 		],
 		'Linux' : [
@@ -142,7 +142,7 @@ def build_events_file(circuitPath='circuit.dss', eventsPath="events.json", custo
 	' '''
 	runCommands([cmd_string])
 
-def run_onm(circuitPath='circuit.dss', settingsPath='settings.json', outputPath="onm_out.json", eventsPath="events.json", gurobi='true', verbose='true', fixSmallNumbers='true', applySwitchScores='true', skipList='["faults","stability"]', prettyPrint='true', optSwitchFormulation="lindistflow", optSwitchSolver="mip_solver", optSwitchAlgorithm="global", optSwitchProblem="block", optDispFormulation="lindistflow", optDispSolver="mip_solver", mip_solver_gap=0.05):
+def run_onm(circuitPath='circuit.dss', settingsPath='settings.json', outputPath="onm_out.json", eventsPath="events.json", faultsPath='', gurobi='true', verbose='true', fixSmallNumbers='true', applySwitchScores='true', skipList='["faults","stability"]', prettyPrint='true', optSwitchFormulation="lindistflow", optSwitchSolver="mip_solver", optSwitchAlgorithm="global", optSwitchProblem="block", optDispFormulation="lindistflow", optDispSolver="mip_solver", mip_solver_gap=0.05):
 	#TODO: allow arguments to function for the ones hardcoded!
 	cmd_string = f'''julia -e '
 		import Gurobi;
@@ -151,6 +151,7 @@ def run_onm(circuitPath='circuit.dss', settingsPath='settings.json', outputPath=
 			"network"=>"{circuitPath}",
 			"settings"=>"{settingsPath}",
 			"events"=>"{eventsPath}",
+			"faults"=>"{faultsPath}",
 			"output"=>"{outputPath}",
 			"verbose"=>{verbose},
 			"skip"=>{skipList},
