@@ -897,23 +897,8 @@ def graphMicrogrid(pathToOmd, pathToJson, pathToCsv, outputFile, settingsFile, u
 	utilityOutageHtml = utilityOutageTable(average_lost_kwh, profit_on_energy_sales, restoration_cost, hardware_cost, outageDuration, workDir)
 	return {'utilityOutageHtml': utilityOutageHtml, 'customerOutageHtml': customerOutageHtml, 'timelineStatsHtml': timelineStatsHtml, 'gens': gens, 'loads': loads, 'volts': volts, 'fig': fig, 'customerOutageCost': customerOutageCost, 'numTimeSteps': numTimeSteps, 'stepSize': stepSize, 'custHist': custHist}
 
-def buildCustomSettings(settingsCSV, feeder, defaultDispatchable = 'true'):
-	with open(settingsCSV) as customEventInput:
-		outageReader = csv.DictReader(customEventInput)
-	if feeder.endswith('.omd'):
-		with open(feeder) as omdFile:
-			tree = json.load(omdFile)['tree']
-		niceDss = dssConvert.evilGldTreeToDssTree(tree)
-		dssConvert.treeToDss(niceDss, 'circuitOmfCompatible.dss')
-		dssTree = dssConvert.dssToTree('circuitOmfCompatible.dss')
-	else: return('Error: Feeder must be an OMD file.')
-	outageAssets = [row.get('asset') for row in customEventInput]
-	unaffectedOpenAssets = [dssLine.get('object').split('.')[1] for dssLine in dssTree if dssLine.get('!CMD') == 'open']
-	unaffectedClosedAssets = [dssLine.get('object').split('.')[1] for dssLine in dssTree if dssLine.get('!CMD') == 'new' \
-		and dssLine.get('object').split('.')[0] == 'line' \
-		and 'switch' in [key for key in dssLine] \
-		and dssLine.get('switch') == 'y' \
-		and (dssLine.get('object').split('.')[1] not in (unaffectedOpenAssets + outageAssets))]
+def buildCustomSettings(settingsCSV='/Users/George/omf/omf/static/testFiles/nreca1824events.csv', feeder='/Users/George/omf/omf/static/testFiles/nreca1824_dwp.omd', defaultDispatchable = 'true'):
+	def outageSwitchState(outList): return ('open'*(outList[3] == 'closed') + 'closed'*(outList[3]=='open'))
 	def eventJson(dispatchable, state, timestep, affected_asset):
 		return {
 			"event_data": {
@@ -926,13 +911,41 @@ def buildCustomSettings(settingsCSV, feeder, defaultDispatchable = 'true'):
 			"affected_asset": affected_asset,
 			"event_type": "switch"
 		}
-	customEventList = [eventJson(defaultDispatchable,'open',1,asset) for asset in unaffectedOpenAssets] 
+	outageReader = csv.reader(open(settingsCSV))
+	if feeder.endswith('.omd'):
+		with open(feeder) as omdFile:
+			tree = json.load(omdFile)['tree']
+		niceDss = dssConvert.evilGldTreeToDssTree(tree)
+		dssConvert.treeToDss(niceDss, 'circuitOmfCompatible.dss')
+		dssTree = dssConvert.dssToTree('circuitOmfCompatible.dss')
+#		print([str(dssLine) for dssLine in dssTree])
+	else: return('Error: Feeder must be an OMD file.')
+	outageAssets = [] # formerly row[0] for row in outageReader
+	customEventList = []
+	for row in outageReader:
+		outageAssets.append(row[0])
+		try: 
+			customEventList.append(eventJson('false',outageSwitchState(row[3]),int(row[1]),row[0]))
+			if int(row[2])>0:
+				customEventList.append(eventJson(row[4],row[3],int(row[2]),row[0]))
+		except: pass
+	unaffectedOpenAssets = [dssLine['object'].split('.')[1] for dssLine in dssTree if dssLine['!CMD'] == 'open']
+	unaffectedClosedAssets = [dssLine['object'].split('.')[1] for dssLine in dssTree if dssLine.get('!CMD') == 'new' \
+		and dssLine['object'].split('.')[0] == 'line' \
+		and 'switch' in [key for key in dssLine] \
+	#	and dssLine['switch'] == 'y'] # \
+		and (dssLine['object'].split('.')[1] not in (unaffectedOpenAssets + outageAssets))]
+	customEventList += [eventJson(defaultDispatchable,'open',1,asset) for asset in unaffectedOpenAssets] 
 	customEventList += [eventJson(defaultDispatchable,'closed',1,asset) for asset in unaffectedClosedAssets]
-	def outageSwitchState(outDict): return ('open'*(outDict.get('defaultState') == 'closed') + 'closed'*(outDict.get('defaultState')=='open'))
-	customEventList += [eventJson('false',outageSwitchState(row),int(row.get('start')),row.get('asset')) for row in outageReader if int(row.get('start'))>0] 
-	customEventList += [eventJson(row.get('dispatchable'),row.get('defaultState',int(row.get('timestep'))),row.get('asset')) for row in outageReader if int(row.get('stop'))>0]
-	with open('events.json','w') as eventsFile:
-		eventsFile.write(json.dump(customEventList))
+	customEventList += [eventJson('false',outageSwitchState(row),int(row[1]),row[0]) for row in outageReader]
+	customEventList += [eventJson(row.get('dispatchable'),row.get('defaultState',int(row.get('timestep'))),row.get('asset')) for row in outageReader if int(row[2])>0]
+	print('Outage assets: ' + str(outageAssets))
+	print('Expected be the same as outageAssets?: ' + str([row[0] for row in outageReader]))
+	print('Unaffected Open Assets: ' + str(unaffectedOpenAssets))
+	print('Unaffected Closed Assets: ' + str(unaffectedClosedAssets))
+	print('Custom Events list-of-dicts: ' + str(customEventList))
+	with open('customEvents.json','w') as eventsFile:
+		json.dump(customEventList, eventsFile)
 
 def work(modelDir, inputDict):
 	# Copy specific climate data into model directory
@@ -1134,6 +1147,7 @@ def new(modelDir):
 def _debugging():
 	# outageCostAnalysis(omf.omfDir + '/static/publicFeeders/Olin Barre LatLon.omd', omf.omfDir + '/static/testFiles/smartswitch_Outages.csv', None, '60', '1')
 	# Location
+	# buildCustomSettings()
 	modelLoc = pJoin(__neoMetaModel__._omfDir,'data','Model','admin','Automated Testing of ' + modelName)
 	# Blow away old test results if necessary.
 	try:
