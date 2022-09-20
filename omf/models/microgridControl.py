@@ -743,7 +743,7 @@ def graphMicrogrid(pathToOmd, pathToJson, pathToCsv, outputFile, settingsFile, u
  				avgLoad = float(elementDict['kw'])/2.5
  				busType = 'residential'*(avgLoad<=10) + 'retail'*(avgLoad>10)*(avgLoad<=20) + 'agriculture'*(avgLoad>20)*(avgLoad<=39) + 'public'*(avgLoad>39)*(avgLoad<=50) + 'services'*(avgLoad>50)*(avgLoad<=100) + 'manufacturing'*(avgLoad>100)
  				customerOutageData.loc[len(customerOutageData.index)] =[loadName,'summer',busType,loadName]
-	numberRows = math.ceil(customerOutageData.shape[0]/2)
+	numberRows = max(math.ceil(customerOutageData.shape[0]/2),1)
 	fig, axs = plt.subplots(numberRows, 2)
 	row = 0
 	average_lost_kwh = []
@@ -751,6 +751,7 @@ def graphMicrogrid(pathToOmd, pathToJson, pathToCsv, outputFile, settingsFile, u
 	globalMax = 0
 	fig = go.Figure()
 	businessTypes = set(customerOutageData['Business Type'])
+	outageCostsByType = {busType: [] for busType in businessTypes}
 	avgkWColumn = []
 	durationColumn = []
 	dssTree = dssConvert.dssToTree(f'{workDir}/circuitOmfCompatible.dss')
@@ -761,7 +762,7 @@ def graphMicrogrid(pathToOmd, pathToJson, pathToCsv, outputFile, settingsFile, u
  			shape = dssLine['mult'].replace('[','').replace('(','').replace(']','').replace(')','').split(',')
  			shape = [float(y) for y in shape]
  			if 'useactual' in dssLine and dssLine['useactual'] == 'yes': loadShapeMeanActual[dssLine['object'].split('.')[1]] = np.mean(shape)
- 			else: loadShapeMeanMultiplier[dssLine['object'].split('.')[1]] = np.mean(shape)
+ 			else: loadShapeMeanMultiplier[dssLine['object'].split('.')[1]] = np.mean(shape)/np.max(shape)
 	while row < customerOutageData.shape[0]:
  		customerName = str(customerOutageData.loc[row, 'Customer Name'])
  		loadName = str(customerOutageData.loc[row, 'Load Name'])
@@ -780,6 +781,7 @@ def graphMicrogrid(pathToOmd, pathToJson, pathToCsv, outputFile, settingsFile, u
  			customerOutageCost, kWperhrEstimate, times, localMax = customerCost1(duration, season, averagekWperhr, businessType)
  			average_lost_kwh.append(float(averagekWperhr))
  			outageCost.append(customerOutageCost)
+ 			outageCostsByType[businessType].append(customerOutageCost)
  			if localMax > globalMax:
  				globalMax = localMax
  			# creating series
@@ -807,22 +809,17 @@ def graphMicrogrid(pathToOmd, pathToJson, pathToCsv, outputFile, settingsFile, u
 		maxDuration = 12.0 #HACKCOBB: Duration comes back as 'Duration'
 	customersOutByTime = [{busType: 0 for busType in businessTypes} for x in range(math.ceil(maxDuration)+1)]
 	customerCostByTime = [{busType: 0.0 for busType in businessTypes} for x in range(math.ceil(maxDuration)+1)]
-	outageCostsByType = {busType: [] for busType in businessTypes}
 	customerCountByType = {busType: 0 for busType in businessTypes}
 	# def deciles(dList): return [0.0] + quantiles([float(x) for x in dList], n=10) + [max([float(x) for x in dList])]
 	# outageDeciles = deciles(customerOutageData['Duration'].tolist())
 	# costDeciles = deciles(outageCost)
+	if not outageCost: outageCost = [.001]
 	minCustomerCost = min(outageCost)
 	maxCustomerCost = max(outageCost)
 	numBins = 45
 	binSize = (maxCustomerCost-minCustomerCost)/numBins
 	totalCustomerCost = sum(outageCost)
 	meanCustomerCost = totalCustomerCost / len(outageCost)
-	outageCostByType = {busType: sum(outageCostsByType[busType]) for busType in businessTypes}
-	customerCountByType = {busType: len(outageCostsByType[busType]) for busType in businessTypes}
-	# meanCustomerCostByType = {busType: outageCostByType[busType]/customerCountByType[busType] for busType in businessTypes}
-	# customersByTypeAndDecile = [{busType: len([cost for cost in outageCostsByType[busType] if (cost>costDeciles[x])*(cost<=costDeciles[x+1])]) for busType in businessTypes} for x in range(10)]
-	# print(customersOutByTime, customerCostByTime, totalCustomerCost, meanCustomerCost, outageCostByType, meanCustomerCostByType, outageDeciles, costDeciles, customersByTypeAndDecile) # ToDo: Display in front end.
 
 	fig.update_layout(xaxis_title = 'Duration (hours)',
 		yaxis_title = 'Cost ($)',
@@ -895,9 +892,11 @@ def graphMicrogrid(pathToOmd, pathToJson, pathToCsv, outputFile, settingsFile, u
 	hardware_cost = int(hardware_cost)
 	outageDuration = int(outageDuration)
 	utilityOutageHtml = utilityOutageTable(average_lost_kwh, profit_on_energy_sales, restoration_cost, hardware_cost, outageDuration, workDir)
+	try: customerOutageCost = customerOutageCost
+	except: customerOutageCost = 0
 	return {'utilityOutageHtml': utilityOutageHtml, 'customerOutageHtml': customerOutageHtml, 'timelineStatsHtml': timelineStatsHtml, 'gens': gens, 'loads': loads, 'volts': volts, 'fig': fig, 'customerOutageCost': customerOutageCost, 'numTimeSteps': numTimeSteps, 'stepSize': stepSize, 'custHist': custHist}
 
-def buildCustomSettings(settingsCSV='/Users/George/omf/omf/static/testFiles/nreca1824events.csv', feeder='/Users/George/omf/omf/static/testFiles/nreca1824_dwp.omd', defaultDispatchable = 'true'):
+def buildCustomSettings(settingsCSV='', feeder='', customSettings='customSettings.json', defaultDispatchable = 'true'):
 	def outageSwitchState(outList): return ('open'*(outList[3] == 'closed') + 'closed'*(outList[3]=='open'))
 	def eventJson(dispatchable, state, timestep, affected_asset):
 		return {
@@ -908,7 +907,7 @@ def buildCustomSettings(settingsCSV='/Users/George/omf/omf/static/testFiles/nrec
 				"state": state
 			},
 			"timestep": timestep,
-			"affected_asset": affected_asset,
+			"affected_asset": ("line." + affected_asset),
 			"event_type": "switch"
 		}
 	outageReader = csv.reader(open(settingsCSV))
@@ -918,14 +917,13 @@ def buildCustomSettings(settingsCSV='/Users/George/omf/omf/static/testFiles/nrec
 		niceDss = dssConvert.evilGldTreeToDssTree(tree)
 		dssConvert.treeToDss(niceDss, 'circuitOmfCompatible.dss')
 		dssTree = dssConvert.dssToTree('circuitOmfCompatible.dss')
-#		print([str(dssLine) for dssLine in dssTree])
 	else: return('Error: Feeder must be an OMD file.')
 	outageAssets = [] # formerly row[0] for row in outageReader
 	customEventList = []
 	for row in outageReader:
 		outageAssets.append(row[0])
-		try: 
-			customEventList.append(eventJson('false',outageSwitchState(row[3]),int(row[1]),row[0]))
+		try:
+			customEventList.append(eventJson('false',outageSwitchState(row),int(row[1]),row[0]))
 			if int(row[2])>0:
 				customEventList.append(eventJson(row[4],row[3],int(row[2]),row[0]))
 		except: pass
@@ -939,12 +937,7 @@ def buildCustomSettings(settingsCSV='/Users/George/omf/omf/static/testFiles/nrec
 	customEventList += [eventJson(defaultDispatchable,'closed',1,asset) for asset in unaffectedClosedAssets]
 	customEventList += [eventJson('false',outageSwitchState(row),int(row[1]),row[0]) for row in outageReader]
 	customEventList += [eventJson(row.get('dispatchable'),row.get('defaultState',int(row.get('timestep'))),row.get('asset')) for row in outageReader if int(row[2])>0]
-	print('Outage assets: ' + str(outageAssets))
-	print('Expected be the same as outageAssets?: ' + str([row[0] for row in outageReader]))
-	print('Unaffected Open Assets: ' + str(unaffectedOpenAssets))
-	print('Unaffected Closed Assets: ' + str(unaffectedClosedAssets))
-	print('Custom Events list-of-dicts: ' + str(customEventList))
-	with open('customEvents.json','w') as eventsFile:
+	with open(customSettings,'w') as eventsFile:
 		json.dump(customEventList, eventsFile)
 
 def work(modelDir, inputDict):
@@ -1100,6 +1093,7 @@ def new(modelDir):
 	microgridTagging_file_data = open(pJoin(*microgridTagging_file_path)).read()
 	# ====== Nreca1824 Test Case
 	# feeder_file_path = [__neoMetaModel__._omfDir,'static','testFiles','nreca1824_dwp.omd']
+	# event_csv_path = [__neoMetaModel__._omfDir,'static','testFiles','nreca1824events.csv']
 	# event_file_path = [__neoMetaModel__._omfDir,'static','testFiles','nreca1824_dwp.events.json']
 	# settings_file_path = [__neoMetaModel__._omfDir,'static','testFiles','nreca1824_dwp.settings.json']
 	# output_file_path = [__neoMetaModel__._omfDir,'static','testFiles','nreca1824_dwp.output.json']
@@ -1147,8 +1141,8 @@ def new(modelDir):
 def _debugging():
 	# outageCostAnalysis(omf.omfDir + '/static/publicFeeders/Olin Barre LatLon.omd', omf.omfDir + '/static/testFiles/smartswitch_Outages.csv', None, '60', '1')
 	# Location
-	# buildCustomSettings()
 	modelLoc = pJoin(__neoMetaModel__._omfDir,'data','Model','admin','Automated Testing of ' + modelName)
+	# buildCustomSettings(pJoin(omf.omfDir,'static','testFiles','nreca1824events.csv'),pJoin(omf.omfDir,'static','testFiles','nreca1824_dwp.omd'),pJoin(modelLoc,'customSettings.json'))
 	# Blow away old test results if necessary.
 	try:
 		shutil.rmtree(modelLoc)
