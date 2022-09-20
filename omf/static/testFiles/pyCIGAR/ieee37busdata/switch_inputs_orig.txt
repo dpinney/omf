@@ -1,0 +1,3 @@
+device class=switch_device name=sw_A line=L6 default_control_setting=close
+
+controller class=switch_controller name=switch_controller default_control_setting=close devices=[sw_a]

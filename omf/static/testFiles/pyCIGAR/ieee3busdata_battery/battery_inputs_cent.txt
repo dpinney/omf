@@ -1,5 +1,0 @@
-device class=battery_storage_device name=bsd_1 node=s701a default_control_setting=standby min_SOC=0.2 max_SOC=1.0 total_capacity=10 current_capacity=9 max_charge_power=20 max_discharge_power=25 max_ramp_rate=0.5
-device class=battery_storage_device name=bsd_2 node=s702a default_control_setting=standby min_SOC=0.2 max_SOC=1.0 total_capacity=10 current_capacity=8 max_charge_power=20 max_discharge_power=30 max_ramp_rate=0.5
-device class=battery_storage_device name=bsd_3 node=s703a default_control_setting=standby min_SOC=0.2 max_SOC=1.0 total_capacity=10 current_capacity=8 max_charge_power=5 max_discharge_power=10 max_ramp_rate=0.5
-
-controller class=battery_peak_shaving_controller_cent name=psc lowpass_filter_frequency=0.05 active_power_target=750 eta=0.01 K_P=0.75 K_I=0.05 K_D=0.02 default_control_setting=standby devices=[bsd_1,bsd_2,bsd_3]
