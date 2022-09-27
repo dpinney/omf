@@ -274,7 +274,7 @@ def customerCost1(duration, season, averagekWperhr, businessType):
 		kWTemplate[1.0] = np.array([3,4,5,6,7,8,9,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10])
 		kWTemplate[0.25] = np.array([2,3,4,5,5,6,7,7,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8])
 	# NOTE: We set a minimum average kWperhr value so the model doesn't crash for low values.
-	kWTemplate[0] = np.array([0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0])
+	kWTemplate[0] = np.array([0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0])
 
 	def kWhApprox(kWDict, averagekWperhr, iterate):
 		'helper function for approximating customer outage cost based on annual kWh by iteratively "averaging" the curves'
@@ -754,7 +754,7 @@ def graphMicrogrid(pathToOmd, pathToJson, pathToCsv, outputFile, settingsFile, u
 	outageCostsByType = {busType: [] for busType in businessTypes}
 	avgkWColumn = []
 	durationColumn = []
-	dssTree = dssConvert.dssToTree(f'{workDir}/circuitOmfCompatible.dss')
+	dssTree = dssConvert.dssToTree(f'{workDir}/circuitOmfCompatible_cleanLists.dss')
 	loadShapeMeanMultiplier = {}
 	loadShapeMeanActual = {}
 	for dssLine in dssTree:
@@ -916,7 +916,8 @@ def buildCustomSettings(settingsCSV='', feeder='', customSettings='customSetting
 			tree = json.load(omdFile)['tree']
 		niceDss = dssConvert.evilGldTreeToDssTree(tree)
 		dssConvert.treeToDss(niceDss, 'circuitOmfCompatible.dss')
-		dssTree = dssConvert.dssToTree('circuitOmfCompatible.dss')
+		dssConvert.dssCleanLists('circuitOmfCompatible.dss')
+		dssTree = dssConvert.dssToTree('circuitOmfCompatible_cleanLists.dss')
 	else: return('Error: Feeder must be an OMD file.')
 	outageAssets = [] # formerly row[0] for row in outageReader
 	customEventList = []
@@ -952,7 +953,8 @@ def work(modelDir, inputDict):
 	# Output a .dss file, which will be needed for ONM.
 	niceDss = dssConvert.evilGldTreeToDssTree(tree)
 	dssConvert.treeToDss(niceDss, f'{modelDir}/circuit.dss')
-	dssConvert.treeToDss(niceDss, f'{modelDir}/circuitOmfCompatible.dss') # for querying loadshapes
+	dssConvert.treeToDss(niceDss, f'{modelDir}/circuitOmfCompatible.dss')
+	dssConvert.dssCleanLists(f'{modelDir}/circuitOmfCompatible.dss') # for querying loadshapes
 
 	# Remove syntax that ONM doesn't like.
 	with open(f'{modelDir}/circuit.dss','r') as dss_file:
@@ -1083,14 +1085,14 @@ def new(modelDir):
 	microgridTagging_file_path = ['']
 	microgridTagging_file_data = None
 	# ====== Iowa240 Test Case
-	feeder_file_path= [__neoMetaModel__._omfDir,'static','testFiles','iowa240_dwp_22.dss.omd']
-	event_file_path = [__neoMetaModel__._omfDir,'static','testFiles','iowa240_dwp_22.events.json']
-	settings_file_path = [__neoMetaModel__._omfDir,'static','testFiles','iowa240_dwp_22.settings.json']
-	output_file_path = [__neoMetaModel__._omfDir,'static','testFiles','iowa240_dwp_22.output.json']
-	loadPriority_file_path = [__neoMetaModel__._omfDir,'static','testFiles','iowa240_dwp_22.loadPriority.basic.json']
-	loadPriority_file_data = open(pJoin(*loadPriority_file_path)).read()
-	microgridTagging_file_path = [__neoMetaModel__._omfDir,'static','testFiles','iowa240_dwp_22.microgridTagging.basic.json']
-	microgridTagging_file_data = open(pJoin(*microgridTagging_file_path)).read()
+	# feeder_file_path= [__neoMetaModel__._omfDir,'static','testFiles','iowa240_dwp_22.dss.omd']
+	# event_file_path = [__neoMetaModel__._omfDir,'static','testFiles','iowa240_dwp_22.events.json']
+	# settings_file_path = [__neoMetaModel__._omfDir,'static','testFiles','iowa240_dwp_22.settings.json']
+	# output_file_path = [__neoMetaModel__._omfDir,'static','testFiles','iowa240_dwp_22.output.json']
+	# loadPriority_file_path = [__neoMetaModel__._omfDir,'static','testFiles','iowa240_dwp_22.loadPriority.basic.json']
+	# loadPriority_file_data = open(pJoin(*loadPriority_file_path)).read()
+	# microgridTagging_file_path = [__neoMetaModel__._omfDir,'static','testFiles','iowa240_dwp_22.microgridTagging.basic.json']
+	# microgridTagging_file_data = open(pJoin(*microgridTagging_file_path)).read()
 	# ====== Nreca1824 Test Case
 	# feeder_file_path = [__neoMetaModel__._omfDir,'static','testFiles','nreca1824_dwp.omd']
 	# event_csv_path = [__neoMetaModel__._omfDir,'static','testFiles','nreca1824events.csv']
@@ -1102,6 +1104,11 @@ def new(modelDir):
 	# microgridTagging_file_path = [__neoMetaModel__._omfDir,'static','testFiles','nreca1824_dwp.microgridTagging.basic.json']
 	# microgridTagging_file_data = open(pJoin(*microgridTagging_file_path)).read()
 	
+	feeder_file_path = [__neoMetaModel__._omfDir,'static','testFiles','Delete','Cobb2.clean.goodCoords.dss.omd']
+	event_file_path = [__neoMetaModel__._omfDir,'static','testFiles','Delete','events','events.6hrOutage.json']
+	settings_file_path = [__neoMetaModel__._omfDir,'static','testFiles','Delete','settings.cobb2.clean.goodCoords.json']
+	output_file_path = [__neoMetaModel__._omfDir,'static','testFiles','Delete','20220901_cobb_output_data_noFaults','output.6hr.networking.1switchActions.json']
+
 	# ====== Comment this out if no output file is specified (running ONM)
 	output_file_data = open(pJoin(*output_file_path)).read()
 	# ====== Comment this out if no load priority file is specified
