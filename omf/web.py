@@ -182,7 +182,7 @@ def login():
 @app.route("/login_page")
 def login_page():
 	nextUrl = str(request.args.get("next","/"))
-	if flask_login.current_user.is_authenticated:
+	if flask_login.current_user.is_authenticated():
 		return redirect(nextUrl)
 	return render_template("clusterLogin.html", next=nextUrl)
 
