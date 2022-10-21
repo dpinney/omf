@@ -18,18 +18,24 @@ class SSCAPI():
 			_dll = CDLL(os.path.join(myDir,"ssc64.dll")) 
 		else:
 			_dll = CDLL(os.path.join(myDir,"ssc32.dll"))
-#		return _dll
 	elif sys.platform == 'darwin':
 		if platform.processor() == 'arm':
-			_dll = CDLL(os.path.join(myDir,"ssc.dylib"))
+			print('The nrelsam2013 solver is not supported on Mac running on an ARM processor')
+			# - The shared library import below works, but the code doesn't because this Python API doesn't work with the new version of the solver.
+			#   It's better to given an error
+			#_dll = CDLL(os.path.join(myDir,"ssc.dylib"))
 		else:
 			_dll = CDLL(os.path.join(myDir,"ssc64.dylib"))
 	elif sys.platform == 'linux':
-		_dll = CDLL(os.path.join(myDir,"ssc64.so"))
+		if platform.processor() not in ['arm', 'aarch64']:
+			_dll = CDLL(os.path.join(myDir,"ssc64.so"))
+		else:
+			print('The nrelsam2013 solver is not supported on Linux running on an ARM processor')
+            # - We don't have a shared library for Linux running on an ARM processor
 	else:
 		print("Platform not supported ", sys.platform)
-	# print "\n   _dll chosen=", _dll, "(for ", sys.platform, ")"
-	
+        # print "\n   _dll chosen=", _dll, "(for ", sys.platform, ")"
+
 
 	@staticmethod
 	def ssc_version():
