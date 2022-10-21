@@ -143,16 +143,16 @@ def newQstsPlot(filePath, stepSizeInMinutes, numberOfSteps, keepAllFiles=False, 
 	# Write runner file and run.
 	with open(f'{dssFileLoc}/dss_run_file.dss', 'w') as run_file:
 		run_file.write(dss_run_file)
-	# Run in the right directory.
-	subprocess.run('opendsscmd dss_run_file.dss', cwd=dssFileLoc, shell=True, check=True, capture_output=True)
+	# Run in the right directory and suppress the output
+	subprocess.run('opendsscmd dss_run_file.dss', cwd=dssFileLoc, shell=True, check=True, stdout=subprocess.DEVNULL)
 	# Aggregate monitors
 	all_gen_df = pd.DataFrame()
 	all_load_df = pd.DataFrame()
 	all_source_df = pd.DataFrame()
 	all_control_df = pd.DataFrame()
 	for name in mon_names:
-		csv_path = f'{dssFileLoc}/{circ_name}_Mon_{name}.csv'
-		df = pd.read_csv(f'{circ_name}_Mon_{name}.csv')
+		csv_path = f'{dssFileLoc}/{circ_name}_Mon_{name}_1.csv'
+		df = pd.read_csv(f'{circ_name}_Mon_{name}_1.csv')
 		if name.startswith('monload-'):
 			# reassign V1 single phase voltages outputted by DSS to the appropriate column and filling Nans for neutral phases (V2)
 			# three phase print out should work fine as is
