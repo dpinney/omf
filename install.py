@@ -12,15 +12,6 @@ if sys.version_info[0] != 3:
 major_platform = platform.system()
 linux_distro = platform.uname()[3].lower()
 
-def pipInstallInOrder(pipCommandString):
-	''' This shouldn't be required, but pip doesn't resolve dependencies correctly unless we do this.'''
-	with open("requirements.txt","r") as f:
-		for line in f:
-			if not line.startswith('#'):
-				os.system(pipCommandString + " install " + line)
-	# Removes pip log files.
-	os.system("rm \\=*")
-
 if major_platform == "Linux" and "ubuntu" in linux_distro:
 	os.system("sudo ACCEPT_EULA=Y apt-get -yq install mssql-tools msodbcsql mdbtools") # workaround for the package EULA, which otherwise breaks upgrade!!
 	os.system("sudo apt-get -y update")# && sudo apt-get -y upgrade") # Make sure apt-get is updated to prevent any weird package installation issues
@@ -37,8 +28,9 @@ if major_platform == "Linux" and "ubuntu" in linux_distro:
 	# os.system(f"unzip '{source_dir}/omf/solvers/matpower7.0.zip' -d {source_dir}/omf/solvers/")
 	os.system(f'octave-cli --no-gui -p "{source_dir}/omf/solvers/matpower7.0" --eval "install_matpower(1,1,1)"')
 	os.system("cd omf")
+	# finish up install with pip and setup.py
 	os.system(f"{sys.executable} -m pip install --upgrade pip setuptools")
-	pipInstallInOrder(f"{sys.executable} -m pip")
+	os.system(f"{sys.executable} -m pip install -r requirements.txt")
 	os.system(f"{sys.executable} setup.py develop")
 elif major_platform == "Linux" and "ubuntu" not in linux_distro:
 	# CentOS Docker image appears to come with en_US.UTF-8 locale built-in, but we might need to install that locale in the future. That currently is not done here.
@@ -56,8 +48,9 @@ elif major_platform == "Linux" and "ubuntu" not in linux_distro:
 	# os.system(f"unzip '{source_dir}/omf/solvers/matpower7.0.zip' -d {source_dir}/omf/solvers/")
 	os.system(f'octave-cli --no-gui -p "{source_dir}/omf/solvers/matpower7.0" --eval "install_matpower(1,1,1)"')
 	os.system("cd omf")
+	# finish up install with pip and setup.py
 	os.system(f"{sys.executable} -m pip install --upgrade pip")
-	pipInstallInOrder(f"{sys.executable} -m pip")
+	os.system(f"{sys.executable} -m pip install -r requirements.txt")
 	os.system(f"{sys.executable} -m pip install --ignore-installed six")
 	os.system(f"{sys.executable} setup.py develop")
 elif major_platform == 'Windows':
@@ -80,11 +73,9 @@ elif major_platform == 'Windows':
 	# os.system(f"wget -P {source_dir}/omf/solvers/ 'https://github.com/MATPOWER/matpower/releases/download/7.0/matpower7.0.zip'")
 	# os.system(f"unzip '{source_dir}/omf/solvers/matpower7.0.zip' -d {source_dir}/omf/solvers/")
 	os.system(f'octave-cli --no-gui -p "{source_dir}/omf/solvers/matpower7.0" --eval "install_matpower(1,1,1)"')
-	# Finish up installation with pip.
-	# pipInstallInOrder(f"{sys.executable} -m pip")
+	# Finish up installation with pip and setup.py.
 	os.system(f"{sys.executable} -m pip install -r requirements.txt")
 	os.system(f"{sys.executable} setup.py develop")
-	# os.system("refreshenv") # Refresh local environment variables via choco tool.
 elif major_platform == "Darwin": # MacOS
 	# Install homebrew
 	os.system("HOMEBREW_NO_AUTO_UPDATE=1 brew wget install ffmpeg git octave mdbtools") # Set no-update to keep homebrew from blowing away python3.
@@ -106,8 +97,8 @@ elif major_platform == "Darwin": # MacOS
 	os.system(f'octave-cli --no-gui -p "{source_dir}/omf/solvers/matpower7.0" --eval "install_matpower(1,1,1)"')
 	# pip installs
 	os.system("cd omf")
- 	# os.system('pip3 install ecos')
-	pipInstallInOrder(f"{sys.executable} -m pip")
+ 	# finish up install with pip and setup.py
+	os.system(f"{sys.executable} -m pip install -r requirements.txt")
 	os.system(f"{sys.executable} setup.py develop")
 else:
 	print("Your operating system is not currently supported. Platform detected: " + str(platform.system()) + str(platform.linux_distribution()))
