@@ -20,12 +20,11 @@ if major_platform == "Linux" and "ubuntu" in linux_distro:
 	os.system("sudo apt-get -y install ffmpeg python3-cairocffi") # Separate from above to better support debian.
 	os.system("sudo alien -i omf/static/gridlabd-4.0.0-1.el6.x86_64.rpm")
 	os.system("sudo apt-get install -f")
-	os.system("cd omf")
 	os.system(f"{sys.executable} -m pip install --upgrade pip setuptools")
 	os.system(f"{sys.executable} -m pip install -r requirements.txt")
 	os.system(f"{sys.executable} setup.py develop")
 elif major_platform == "Linux" and "ubuntu" not in linux_distro:
-	# CentOS Docker image appears to come with en_US.UTF-8 locale built-in, but we might need to install that locale in the future. That currently is not done here.
+	# CentOS and or Redhat install
 	os.system("sudo yum -y update") # Make sure yum is updated to prevent any weird package installation issues
 	os.system("sudo yum -y install git gcc xerces-c python-devel tkinter")
 	os.system("sudo yum --enablerepo=extras install epel-release")
@@ -35,24 +34,20 @@ elif major_platform == "Linux" and "ubuntu" not in linux_distro:
 	os.system("sudo yum -y install ffmpeg ffmpeg-devel -y")
 	os.system("sudo yum -y install python-pip")
 	os.system("sudo rpm -Uvh omf/static/gridlabd-4.0.0-1.el6.x86_64.rpm")
-	os.system("cd omf")
 	os.system(f"{sys.executable} -m pip install --upgrade pip")
 	os.system(f"{sys.executable} -m pip install -r requirements.txt")
 	os.system(f"{sys.executable} -m pip install --ignore-installed six")
 	os.system(f"{sys.executable} setup.py develop")
 elif major_platform == 'Windows':
-	# Update pip to remove warnings
 	os.system("choco install -y --no-progress ffmpeg")
 	os.system("choco install -y --no-progress pip")
 	# TODO: find way to install mdbtools.
 	os.system(".\\omf\\static\\gridlabd-4.0_RC1.exe /silent")
 	#TODO: install SPLAT
-	# Finish up installation with pip and setup.py.
 	os.system(f"{sys.executable} -m pip install --upgrade pip")
 	os.system(f"{sys.executable} -m pip install -r requirements.txt")
 	os.system(f"{sys.executable} setup.py develop")
 elif major_platform == "Darwin": # MacOS
-	# Install homebrew
 	os.system("HOMEBREW_NO_AUTO_UPDATE=1 brew wget install ffmpeg git mdbtools") # Set no-update to keep homebrew from blowing away python3.
 	os.system("sudo hdiutil attach omf/static/gridlabd-4.0_RC1.dmg")
 	os.system('sudo installer -package "/Volumes/GridLAB-D 4.0.0/gridlabd.mpkg" -target /')
@@ -64,7 +59,6 @@ elif major_platform == "Darwin": # MacOS
 		sed -i '' 's/ans=""/ans="2"/g' configure;
 		sudo bash configure;
 	''') # sed is to hack the build to work without user input.
-	os.system("cd omf")
 	os.system(f"{sys.executable} -m pip install -r requirements.txt")
 	os.system(f"{sys.executable} setup.py develop")
 else:
