@@ -141,11 +141,9 @@ def _rawToMat(inputStr, filePath=True):
 	else:
 		rawfile_name = inputStr
 		matfile_name = os.path.splitext(inputStr)[0] + '.m' 
-
 	# Prepare Octave with correct path.
 	matpowerDir =  pJoin(omf.omfDir,'solvers','matpower7.0')
 	matPath = _getMatPath(matpowerDir)
-
 	# TODO: Test code on Windows.
 	if platform.system() == "Windows":
 		# Find the location of octave-cli tool.
@@ -177,7 +175,6 @@ def _rawToMat(inputStr, filePath=True):
 				raise Exception('Matpower/Octave setup is incorrect.')
 			else: 
 				raise ValueError('RAW file/string does not contain valid data.')
-		
 	return matfile_name
 
 def netToNxGraph(inNet):
