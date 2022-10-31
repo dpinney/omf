@@ -132,6 +132,11 @@ def _rawToMat(inputStr, filePath=True):
 	''' Turn a RAW file/string into a MATPOWER case structure. 
 	See the following for details: https://matpower.org/docs/ref/matpower5.0/psse2mpc.html
 	'''
+	#TODO: offer installs below, or at least check for octave + matpower availability.
+	# ALSO NEED OCTAVE INSTALL, WILL BE PLATFORM DEPENDENT
+	# os.system(f"wget -P {source_dir}/omf/solvers/ 'https://github.com/MATPOWER/matpower/releases/download/7.0/matpower7.0.zip'")
+	# os.system(f"unzip '{source_dir}/omf/solvers/matpower7.0.zip' -d {source_dir}/omf/solvers/")
+	# os.system(f'octave-cli --no-gui -p "{source_dir}/omf/solvers/matpower7.0" --eval "install_matpower(1,1,1)"')
 	if not filePath: # create a temp file location for the RAW string
 		now = datetime.datetime.now()
 		rawfile_name = pJoin(omf.omfDir, 'temp' + now + '.raw')
@@ -141,11 +146,9 @@ def _rawToMat(inputStr, filePath=True):
 	else:
 		rawfile_name = inputStr
 		matfile_name = os.path.splitext(inputStr)[0] + '.m' 
-
 	# Prepare Octave with correct path.
 	matpowerDir =  pJoin(omf.omfDir,'solvers','matpower7.0')
 	matPath = _getMatPath(matpowerDir)
-
 	# TODO: Test code on Windows.
 	if platform.system() == "Windows":
 		# Find the location of octave-cli tool.
@@ -177,7 +180,6 @@ def _rawToMat(inputStr, filePath=True):
 				raise Exception('Matpower/Octave setup is incorrect.')
 			else: 
 				raise ValueError('RAW file/string does not contain valid data.')
-		
 	return matfile_name
 
 def netToNxGraph(inNet):
@@ -296,7 +298,7 @@ def viz(omt_filepath, output_path=None, output_name="viewer.html", open_file=Tru
 def _tests():
 	# Parse mat to dictionary.
 	networkName = 'case9'
-	netPath = os.path.join(omf.omfDir, 'solvers', 'matpower7.0', 'data', networkName + '.m')
+	netPath = os.path.join(omf.omfDir, 'static', 'testFiles', networkName + '.m')
 	print('NETPATH', netPath)
 	os.system(f'ls {os.path.dirname(netPath)}')
 	networkJson = parse(netPath, filePath=True)

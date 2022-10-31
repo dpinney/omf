@@ -200,5 +200,5 @@ if __name__ == '__main__':
 	# viz('static/publicFeeders/DEC Red Base.omd', forceLayout=True)
 	# viz('static/publicFeeders/Olin Barre Geo.omd', forceLayout=True)
 	# viz('static/publicFeeders/greensboro_NC_rural.omd')
-	viz('static/publicFeeders/ieee240.dss.omd', forceLayout=True)
+	viz('static/publicFeeders/ieee240.dss.omd', forceLayout=False)
 	# viz('/Users/ryanmahoney/omf/omf/scratch/RONM/nreca1824cleanCoords.dss.omd')

@@ -1,4 +1,4 @@
-import platform, os, sys, urllib, pathlib
+import platform, os, sys, urllib, subprocess, pathlib
 
 source_dir = str(pathlib.Path(__file__).resolve().parent)
 
@@ -10,62 +10,35 @@ if sys.version_info[0] != 3:
 
 # Detect platform
 major_platform = platform.system()
-if platform.uname()[0] == 'Linux':
-    try:
-        with open('/etc/os-release') as f:
-            linux_distro = dict([[val.strip('\"\n') for val in line.split('=')] for line in f.readlines() if line.find('=') != -1])['PRETTY_NAME'].lower()
-    except FileNotFoundError as e:
-        linux_distro = platform.uname()[3].lower()
-
-def pipInstallInOrder(pipCommandString):
-	''' This shouldn't be required, but pip doesn't resolve dependencies correctly unless we do this.'''
-	with open("requirements.txt","r") as f:
-		for line in f:
-			if not line.startswith('#'):
-				os.system(pipCommandString + " install " + line)
-	# Removes pip log files.
-	os.system("rm \\=*")
+linux_distro = str(subprocess.check_output(['cat','/etc/os-release'])).lower()
 
 if major_platform == "Linux" and "ubuntu" in linux_distro:
 	os.system("sudo ACCEPT_EULA=Y apt-get -yq install mssql-tools msodbcsql mdbtools") # workaround for the package EULA, which otherwise breaks upgrade!!
 	os.system("sudo apt-get -y update")# && sudo apt-get -y upgrade") # Make sure apt-get is updated to prevent any weird package installation issues
 	os.system("sudo apt-get -y install language-pack-en") # Install English locale 
-	# os.system("sudo apt-get dist-upgrade")
-	# os.system("sudo apt --fix-broken install")
-	# os.system("sudo dpkg --configure -a")
-	os.system("sudo DEBIAN_FRONTEND=noninteractive apt-get -y install git python3-pip python3-dev python3-numpy unixodbc-dev libfreetype6-dev pkg-config alien python3-pydot python3-tk octave libblas-dev liblapack-dev libatlas-base-dev gfortran splat")
-	os.system("sudo apt-get -y install ffmpeg python3-cairocffi") # Separate to better support debian.
-	# os.system("wget https://sourceforge.net/projects/gridlab-d/files/gridlab-d/Candidate%20release/gridlabd-4.0.0-1.el6.x86_64.rpm")
+	os.system("sudo DEBIAN_FRONTEND=noninteractive apt-get -y install git python3-pip python3-dev python3-numpy unixodbc-dev libfreetype6-dev pkg-config alien python3-pydot python3-tk libblas-dev liblapack-dev libatlas-base-dev gfortran splat")
+	os.system("sudo apt-get -y install ffmpeg python3-cairocffi") # Separate from above to better support debian.
 	os.system(f"sudo alien -i {source_dir}/omf/static/gridlabd-4.0.0-1.el6.x86_64.rpm")
 	os.system("sudo apt-get install -f")
-	# os.system(f"wget -P {source_dir}/omf/solvers/ 'https://github.com/MATPOWER/matpower/releases/download/7.0/matpower7.0.zip'")
-	# os.system(f"unzip '{source_dir}/omf/solvers/matpower7.0.zip' -d {source_dir}/omf/solvers/")
-	os.system(f'octave-cli --no-gui -p "{source_dir}/omf/solvers/matpower7.0" --eval "install_matpower(1,1,1)"')
-	os.system("cd omf")
 	os.system(f"{sys.executable} -m pip install --upgrade pip setuptools")
-	pipInstallInOrder(f"{sys.executable} -m pip")
+	os.system(f"{sys.executable} -m pip install -r requirements.txt")
 	os.system(f"{sys.executable} setup.py develop")
 	os.system(f'sudo chmod 755 {source_dir}/omf/solvers/opendss/opendsscmd-1.7.4-linux-x64-installer.run && {source_dir}/omf/solvers/opendss/opendsscmd-1.7.4-linux-x64-installer.run --mode unattended')
     # - If using Docker, this configuration should be done in the Dockerfile
 	print('*****\nRun $ export LC_ALL=C.UTF-8 $ if running phaseId._tests() gives an ascii decode error.\n*****')
 elif major_platform == "Linux" and "ubuntu" not in linux_distro:
-	# CentOS Docker image appears to come with en_US.UTF-8 locale built-in, but we might need to install that locale in the future. That currently is not done here.
-	os.system("sudo yum -y update")
-	os.system("sudo yum -y install git gcc xerces-c python-devel tkinter octave")
+	# CentOS and or Redhat install
+	os.system("sudo yum -y update") # Make sure yum is updated to prevent any weird package installation issues
+	os.system("sudo yum -y install git gcc python-devel tkinter") # Deleted "xerces-c"
 	os.system("sudo yum --enablerepo=extras install epel-release")
 	os.system("sudo yum -y install mdbtools")
 	os.system("sudo rpm --import http://li.nux.ro/download/nux/RPM-GPG-KEY-nux.ro")
 	os.system("sudo rpm -Uvh http://li.nux.ro/download/nux/dextop/el7/x86_64/nux-dextop-release-0-1.el7.nux.noarch.rpm")
 	os.system("sudo yum -y install ffmpeg ffmpeg-devel -y")
 	os.system("sudo yum -y install python-pip")
-	#os.system("wget --no-check-certificate https://sourceforge.net/projects/gridlab-d/files/gridlab-d/Candidate%20release/gridlabd-4.0.0-1.el6.x86_64.rpm")
 	os.system(f"sudo rpm -Uvh {source_dir}/omf/static/gridlabd-4.0.0-1.el6.x86_64.rpm")
-	# os.system(f"wget -P {source_dir}/omf/solvers/ 'https://github.com/MATPOWER/matpower/releases/download/7.0/matpower7.0.zip'")
-	# os.system(f"unzip '{source_dir}/omf/solvers/matpower7.0.zip' -d {source_dir}/omf/solvers/")
-	os.system(f'octave-cli --no-gui -p "{source_dir}/omf/solvers/matpower7.0" --eval "install_matpower(1,1,1)"')
-	os.system("cd omf")
 	os.system(f"{sys.executable} -m pip install --upgrade pip")
-	pipInstallInOrder(f"{sys.executable} -m pip")
+	os.system(f"{sys.executable} -m pip install -r requirements.txt")
 	os.system(f"{sys.executable} -m pip install --ignore-installed six")
 	os.system(f"{sys.executable} setup.py develop")
 	os.system(f"{sys.executable} -m pip install -r requirements.txt") # Yes, we have to do this again
@@ -73,40 +46,20 @@ elif major_platform == "Linux" and "ubuntu" not in linux_distro:
     # - If using Docker, this configuration should be done in the Dockerfile
 	print('*****\nRun $ export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/local/lib $ if opendsscmd gives a shared library error.\n*****')
 elif major_platform == 'Windows':
-	# Update pip to remove warnings
-	os.system(f"{sys.executable} -m pip install --upgrade pip")
-	# Install choco packages.
-	# os.system("choco install -y --no-progress vcredist-all")
 	os.system("choco install -y --no-progress ffmpeg")
 	os.system("choco install -y --no-progress pip")
-	os.system("choco install -y --no-progress octave.portable")
 	# TODO: find way to install mdbtools.
-	# Install GridLAB-D.
-	#os.system("wget --no-check-certificate https://sourceforge.net/projects/gridlab-d/files/gridlab-d/Candidate%20release/gridlabd-4.0_RC1.exe")
 	os.system(".\\omf\\static\\gridlabd-4.0_RC1.exe /silent")
-	#Install splat
-	#os.system(wget http://www.ve3ncq.ca/software/SPLAT-1.3.1.zip)
-	#os.system(unzip SPLAT-1.3.1.zip) #need to rename/copy these files.
-	#os.system(f'octave-cli --no-gui -p "{source_dir}/omf/solvers/matpower7.0" --eval "install_matpower(1,1,1)"')
-	# Install matpower
-	# os.system(f"wget -P {source_dir}/omf/solvers/ 'https://github.com/MATPOWER/matpower/releases/download/7.0/matpower7.0.zip'")
-	# os.system(f"unzip '{source_dir}/omf/solvers/matpower7.0.zip' -d {source_dir}/omf/solvers/")
-	os.system(f'octave-cli --no-gui -p "{source_dir}/omf/solvers/matpower7.0" --eval "install_matpower(1,1,1)"')
-	# Finish up installation with pip.
-	# pipInstallInOrder(f"{sys.executable} -m pip")
+	#TODO: install SPLAT
+	os.system(f"{sys.executable} -m pip install --upgrade pip")
 	os.system(f"{sys.executable} -m pip install -r requirements.txt")
 	os.system(f"{sys.executable} setup.py develop")
-	# os.system("refreshenv") # Refresh local environment variables via choco tool.
 	os.system(f'{source_dir}\\omf\\solvers\\opendss\\opendsscmd-1.7.4-windows-installer.exe --mode unattended')
 elif major_platform == "Darwin": # MacOS
-	# Install homebrew
-	os.system("HOMEBREW_NO_AUTO_UPDATE=1 brew wget install ffmpeg git octave mdbtools") # Set no-update to keep homebrew from blowing away python3.
-	#os.system("wget -O gridlabd.dmg --no-check-certificate https://sourceforge.net/projects/gridlab-d/files/gridlab-d/Candidate%20release/gridlabd_4.0.0.dmg")
+	os.system("HOMEBREW_NO_AUTO_UPDATE=1 brew wget install ffmpeg git mdbtools") # Set no-update to keep homebrew from blowing away python3.
 	os.system(f"sudo hdiutil attach {source_dir}/omf/static/gridlabd-4.0_RC1.dmg")
 	os.system('sudo installer -package "/Volumes/GridLAB-D 4.0.0/gridlabd.mpkg" -target /')
 	os.system('sudo hdiutil detach "/Volumes/GridLAB-D 4.0.0"')
-	# splat install
-	# urllib.request.urlretrieve("https://www.qsl.net/kd2bd/splat-1.4.2-osx.tgz", "splat-1.4.2-osx.tgz")
 	os.system("wget https://www.qsl.net/kd2bd/splat-1.4.2-osx.tgz")
 	os.system("sudo tar -xvzf splat-1.4.2-osx.tgz")
 	os.system('''
@@ -114,13 +67,7 @@ elif major_platform == "Darwin": # MacOS
 		sed -i '' 's/ans=""/ans="2"/g' configure;
 		sudo bash configure;
 	''') # sed is to hack the build to work without user input.
-	# os.system(f"wget -P {source_dir}/omf/solvers/ 'https://github.com/MATPOWER/matpower/releases/download/7.0/matpower7.0.zip'")
-	# os.system(f"unzip '{source_dir}/omf/solvers/matpower7.0.zip' -d {source_dir}/omf/solvers/")
-	os.system(f'octave-cli --no-gui -p "{source_dir}/omf/solvers/matpower7.0" --eval "install_matpower(1,1,1)"')
-	# pip installs
-	os.system("cd omf")
- 	# os.system('pip3 install ecos')
-	pipInstallInOrder(f"{sys.executable} -m pip")
+	os.system(f"{sys.executable} -m pip install -r requirements.txt")
 	os.system(f"{sys.executable} setup.py develop")
 	os.system(f'sudo hdiutil attach {source_dir}/omf/solvers/opendss/opendsscmd-1.7.4-osx-installer.dmg')
 	os.system('open /Volumes/OpenDSS/opendsscmd-1.7.4-osx-installer.app')
