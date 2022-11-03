@@ -22,7 +22,7 @@ if major_platform == "Linux" and "ubuntu" in linux_distro:
 	os.system("sudo apt-get install -f")
 	os.system(f"{sys.executable} -m pip install --upgrade pip setuptools")
 	os.system(f"{sys.executable} -m pip install -r requirements.txt")
-	os.system(f"{sys.executable} setup.py develop")
+	os.system(f"{sys.executable} -m pip install -e .")
 	os.system(f'sudo chmod 755 {source_dir}/omf/solvers/opendss/opendsscmd-1.7.4-linux-x64-installer.run && sudo {source_dir}/omf/solvers/opendss/opendsscmd-1.7.4-linux-x64-installer.run --mode unattended')
     # - If using Docker, this configuration should be done in the Dockerfile
 	print('*****\nRun $ export LC_ALL=C.UTF-8 $ if running phaseId._tests() gives an ascii decode error.\n*****')
@@ -52,7 +52,7 @@ elif major_platform == 'Windows':
 	#TODO: install SPLAT
 	os.system(f"{sys.executable} -m pip install --upgrade pip")
 	os.system(f"{sys.executable} -m pip install -r requirements.txt")
-	os.system(f"{sys.executable} setup.py develop")
+	os.system(f"{sys.executable} -m pip install -e .")
 	os.system(f'{source_dir}\\omf\\solvers\\opendss\\opendsscmd-1.7.4-windows-installer.exe --mode unattended')
 elif major_platform == "Darwin": # MacOS
 	os.system("HOMEBREW_NO_AUTO_UPDATE=1 brew wget install ffmpeg git mdbtools") # Set no-update to keep homebrew from blowing away python3.
@@ -67,7 +67,7 @@ elif major_platform == "Darwin": # MacOS
 		sudo bash configure;
 	''') # sed is to hack the build to work without user input.
 	os.system(f"{sys.executable} -m pip install -r requirements.txt")
-	os.system(f"{sys.executable} setup.py develop")
+	os.system(f"{sys.executable} -m pip install -e .")
 	os.system(f'sudo hdiutil attach {source_dir}/omf/solvers/opendss/opendsscmd-1.7.4-osx-installer.dmg')
 	os.system('open /Volumes/OpenDSS/opendsscmd-1.7.4-osx-installer.app')
 	print('Please go to System Preferences to finish installing OpenDSS on Mac')
