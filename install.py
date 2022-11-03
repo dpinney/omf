@@ -23,13 +23,13 @@ if major_platform == "Linux" and "ubuntu" in linux_distro:
 	os.system(f"{sys.executable} -m pip install --upgrade pip setuptools")
 	os.system(f"{sys.executable} -m pip install -r requirements.txt")
 	os.system(f"{sys.executable} setup.py develop")
-	os.system(f'sudo chmod 755 {source_dir}/omf/solvers/opendss/opendsscmd-1.7.4-linux-x64-installer.run && {source_dir}/omf/solvers/opendss/opendsscmd-1.7.4-linux-x64-installer.run --mode unattended')
+	os.system(f'sudo chmod 755 {source_dir}/omf/solvers/opendss/opendsscmd-1.7.4-linux-x64-installer.run && sudo {source_dir}/omf/solvers/opendss/opendsscmd-1.7.4-linux-x64-installer.run --mode unattended')
     # - If using Docker, this configuration should be done in the Dockerfile
 	print('*****\nRun $ export LC_ALL=C.UTF-8 $ if running phaseId._tests() gives an ascii decode error.\n*****')
 elif major_platform == "Linux" and "ubuntu" not in linux_distro:
-	# CentOS and or Redhat install
+	# Amazon Linux (CentOS) install, but not RedHat Docker ubi
 	os.system("sudo yum -y update") # Make sure yum is updated to prevent any weird package installation issues
-	os.system("sudo yum -y install git gcc python-devel tkinter") # Deleted "xerces-c"
+	os.system("sudo yum -y install git gcc xerces-c python-devel tkinter")
 	os.system("sudo yum --enablerepo=extras install epel-release")
 	os.system("sudo yum -y install mdbtools")
 	os.system("sudo rpm --import http://li.nux.ro/download/nux/RPM-GPG-KEY-nux.ro")
@@ -40,9 +40,8 @@ elif major_platform == "Linux" and "ubuntu" not in linux_distro:
 	os.system(f"{sys.executable} -m pip install --upgrade pip")
 	os.system(f"{sys.executable} -m pip install -r requirements.txt")
 	os.system(f"{sys.executable} -m pip install --ignore-installed six")
-	os.system(f"{sys.executable} setup.py develop")
-	os.system(f"{sys.executable} -m pip install -r requirements.txt") # Yes, we have to do this again
-	os.system(f'sudo chmod 755 {source_dir}/omf/solvers/opendss/opendsscmd-1.7.4-linux-x64-installer.run && {source_dir}/omf/solvers/opendss/opendsscmd-1.7.4-linux-x64-installer.run --mode unattended')
+	os.system(f"{sys.executable} -m pip install -e .")
+	os.system(f'sudo chmod 755 {source_dir}/omf/solvers/opendss/opendsscmd-1.7.4-linux-x64-installer.run && sudo {source_dir}/omf/solvers/opendss/opendsscmd-1.7.4-linux-x64-installer.run --mode unattended')
     # - If using Docker, this configuration should be done in the Dockerfile
 	print('*****\nRun $ export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/local/lib $ if opendsscmd gives a shared library error.\n*****')
 elif major_platform == 'Windows':
