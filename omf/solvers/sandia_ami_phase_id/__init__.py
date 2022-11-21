@@ -992,7 +992,7 @@ def Calculate_ModifiedSilhouetteCoefficients(caMatrix,clusteredIDs,finalClusterL
 
 
 
-def CreateFullListCustomerResults_CAEns(clusteredPhaseLabels,phaseLabelsOriginal,clusteredIDs,custID,noVotesIDs,predictedPhases,allSC,phaseLabelsTrue=-1):
+def CreateFullListCustomerResults_CAEns(clusteredPhaseLabels,phaseLabelsOriginal,finalClusterLabels,clusteredIDs,custID,noVotesIDs,predictedPhases,allSC,phaseLabelsTrue=-1):
 	""" This function takes the results from the co-association matrix ensemble
 			and adds back the customers which were omitted due to missing data.
 			Those customers are given a predictedPhase and silhouette coefficient
@@ -1007,6 +1007,10 @@ def CreateFullListCustomerResults_CAEns(clusteredPhaseLabels,phaseLabelsOriginal
 			identification algorithm.  These phase labels may contain errors. 
 		phaseLabelsOriginal: ndarray of int (1,customers) - the full list of
 			original phase labels.  These phase labels may contain errors.
+        finalClusterLabels: ndarray of int (customers) - the integer label for
+            which final cluster a customer was placed in.  These clusters will
+            represent phase groupings without necessarily knowing which phase
+            these customers are            
 		clusteredIDs: list of str - the list of customer ids for which a predicted
 			phase was produced
 		custID: list of str - the complete list of customer ids
@@ -1029,6 +1033,9 @@ def CreateFullListCustomerResults_CAEns(clusteredPhaseLabels,phaseLabelsOriginal
 			list of predicted phase labels.  Customers which were omitted 
 			due to missing data are moved to the end of the list and given
 			a predicted label of -99 to indicate they were not included
+        allFinalClusterLabels: list of int - the list of final cluster labels
+            for each customer.  Omitted customers will have a placeholder of
+            -99 to indicate they were not included in the results            
 		phaseLabelsTrue_FullList: ndarray of int - the full list of true
 			phase labels for each customer.  The customers omitted from the
 			results are moved to the end of the array.  If phaseLabelsTrue was
@@ -1047,6 +1054,8 @@ def CreateFullListCustomerResults_CAEns(clusteredPhaseLabels,phaseLabelsOriginal
 		phaseLabelsPred_FullList = np.zeros((1,numCust),dtype=int)
 		custID_FullList = list(deepcopy(clusteredIDs))
 		allSC_FullList = deepcopy(allSC)
+        allFinalClusterLabels = list(deepcopy(finalClusterLabels))
+        
 		if type(phaseLabelsTrue) != int:
 			phaseLabelsTrue_FullList = np.zeros((1,numCust),dtype=int)
 		else:
@@ -1069,16 +1078,20 @@ def CreateFullListCustomerResults_CAEns(clusteredPhaseLabels,phaseLabelsOriginal
 			phaseLabelsPred_FullList[0,(custCtr+numClusteredCust)] = -99
 			custID_FullList.append(currID)
 			allSC_FullList.append(-99)      
+            allFinalClusterLabels.append(-99)
+            
 	else: # Copy the original fields and return them as-is
 		phaseLabelsOrg_FullList = deepcopy(phaseLabelsOriginal)
 		phaseLabelsPred_FullList = deepcopy(predictedPhases)
 		custID_FullList = deepcopy(clusteredIDs)
 		allSC_FullList = deepcopy(allSC)
+        allFinalClusterLabels = list(deepcopy(finalClusterLabels))
+        
 		if type(phaseLabelsTrue) != int:
 			phaseLabelsTrue_FullList = deepcopy(phaseLabelsTrue)
 		else:
 			phaseLabelsTrue_FullList = -1
-	return phaseLabelsOrg_FullList, phaseLabelsPred_FullList, phaseLabelsTrue_FullList,custID_FullList, allSC_FullList
+	return phaseLabelsOrg_FullList, phaseLabelsPred_FullList,allFinalClusterLabels, phaseLabelsTrue_FullList,custID_FullList, allSC_FullList
 # End of CreateFullListCustomerResults_CAEns
 
 def main_csv(inputPath, outputPath, kFinal=7, validationData=None, windowSize='default'):
@@ -1087,9 +1100,9 @@ def main_csv(inputPath, outputPath, kFinal=7, validationData=None, windowSize='d
 	'''
 	raw_data = pd.read_csv(inputPath)
 	# print(raw_data)
-	voltageInputCust = raw_data.iloc[1:].to_numpy()
+	voltageInputCust = raw_data.iloc[1:].to_numpy(dtype=float)
 	# print('VOLT DATA', np.shape(voltageInputCust), voltageInputCust)
-	phaseLabelsErrors = raw_data.iloc[0].to_numpy().reshape(1,200)
+	phaseLabelsErrors = raw_data.iloc[0].to_numpy(dtype=int).reshape(1,voltageInputCust.shape[1])
 	# print('ERROR PHASE DATA', np.shape(phaseLabelsErrors), phaseLabelsErrors)
 	custIDInput = list(raw_data.columns)
 	# print('CUST DATA', custIDInput)
@@ -1175,9 +1188,9 @@ def main(voltageInputCust, phaseLabelsTrue, phaseLabelsErrors, custIDInput, outp
 	allSC = Calculate_ModifiedSilhouetteCoefficients(caMatrix,clusteredIDs,finalClusterLabels,predictedPhases,kFinal)
 
 	if phaseLabelsTrue is not None:
-		phaseLabelsOrg_FullList, phaseLabelsPred_FullList, phaseLabelsTrue_FullList,custID_FullList, allSC_FullList = CreateFullListCustomerResults_CAEns(clusteredPhaseLabels,phaseLabelsErrors,clusteredIDs,custIDInput,noVotesIDs,predictedPhases,allSC,phaseLabelsTrue=clusteredTruePhaseLabels)
+		phaseLabelsOrg_FullList, phaseLabelsPred_FullList,allFinalClusterLabels, phaseLabelsTrue_FullList,custID_FullList, allSC_FullList = CreateFullListCustomerResults_CAEns(clusteredPhaseLabels,phaseLabelsErrors,finalClusterLabels,clusteredIDs,custIDInput,noVotesIDs,predictedPhases,allSC,phaseLabelsTrue=clusteredTruePhaseLabels)
 	else:
-		phaseLabelsOrg_FullList, phaseLabelsPred_FullList, phaseLabelsTrue_FullList,custID_FullList, allSC_FullList = CreateFullListCustomerResults_CAEns(clusteredPhaseLabels,phaseLabelsErrors,clusteredIDs,custIDInput,noVotesIDs,predictedPhases,allSC)
+		phaseLabelsOrg_FullList, phaseLabelsPred_FullList,allFinalClusterLabels, phaseLabelsTrue_FullList,custID_FullList, allSC_FullList = CreateFullListCustomerResults_CAEns(clusteredPhaseLabels,phaseLabelsErrors,finalClusterLabels,clusteredIDs,custIDInput,noVotesIDs,predictedPhases,allSC)
 
 	# Write outputs to csv file
 	df = pd.DataFrame()
@@ -1187,6 +1200,7 @@ def main(voltageInputCust, phaseLabelsTrue, phaseLabelsErrors, custIDInput, outp
 	if phaseLabelsTrue is not None:
 		df['Actual Phase Labels'] = phaseLabelsTrue_FullList[0,:].astype(int)
 	df['Confidence Score'] = allSC_FullList
+    df['Final Cluster Label'] = allFinalClusterLabels
 	df.to_csv(outputPath, index=False)
 	print(f'Phasing algorithm corrected {diffIndices.shape[0]} meter phase labels.')
 	print(f'Predicted phase labels written to {outputPath}')
