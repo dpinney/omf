@@ -1007,10 +1007,10 @@ def CreateFullListCustomerResults_CAEns(clusteredPhaseLabels,phaseLabelsOriginal
 			identification algorithm.  These phase labels may contain errors. 
 		phaseLabelsOriginal: ndarray of int (1,customers) - the full list of
 			original phase labels.  These phase labels may contain errors.
-        finalClusterLabels: ndarray of int (customers) - the integer label for
-            which final cluster a customer was placed in.  These clusters will
-            represent phase groupings without necessarily knowing which phase
-            these customers are            
+		finalClusterLabels: ndarray of int (customers) - the integer label for
+			which final cluster a customer was placed in.  These clusters will
+			represent phase groupings without necessarily knowing which phase
+			these customers are            
 		clusteredIDs: list of str - the list of customer ids for which a predicted
 			phase was produced
 		custID: list of str - the complete list of customer ids
@@ -1033,9 +1033,9 @@ def CreateFullListCustomerResults_CAEns(clusteredPhaseLabels,phaseLabelsOriginal
 			list of predicted phase labels.  Customers which were omitted 
 			due to missing data are moved to the end of the list and given
 			a predicted label of -99 to indicate they were not included
-        allFinalClusterLabels: list of int - the list of final cluster labels
-            for each customer.  Omitted customers will have a placeholder of
-            -99 to indicate they were not included in the results            
+		allFinalClusterLabels: list of int - the list of final cluster labels
+			for each customer.  Omitted customers will have a placeholder of
+			-99 to indicate they were not included in the results            
 		phaseLabelsTrue_FullList: ndarray of int - the full list of true
 			phase labels for each customer.  The customers omitted from the
 			results are moved to the end of the array.  If phaseLabelsTrue was
@@ -1054,8 +1054,8 @@ def CreateFullListCustomerResults_CAEns(clusteredPhaseLabels,phaseLabelsOriginal
 		phaseLabelsPred_FullList = np.zeros((1,numCust),dtype=int)
 		custID_FullList = list(deepcopy(clusteredIDs))
 		allSC_FullList = deepcopy(allSC)
-        allFinalClusterLabels = list(deepcopy(finalClusterLabels))
-        
+		allFinalClusterLabels = list(deepcopy(finalClusterLabels))
+
 		if type(phaseLabelsTrue) != int:
 			phaseLabelsTrue_FullList = np.zeros((1,numCust),dtype=int)
 		else:
@@ -1078,15 +1078,15 @@ def CreateFullListCustomerResults_CAEns(clusteredPhaseLabels,phaseLabelsOriginal
 			phaseLabelsPred_FullList[0,(custCtr+numClusteredCust)] = -99
 			custID_FullList.append(currID)
 			allSC_FullList.append(-99)      
-            allFinalClusterLabels.append(-99)
-            
+			allFinalClusterLabels.append(-99)
+
 	else: # Copy the original fields and return them as-is
 		phaseLabelsOrg_FullList = deepcopy(phaseLabelsOriginal)
 		phaseLabelsPred_FullList = deepcopy(predictedPhases)
 		custID_FullList = deepcopy(clusteredIDs)
 		allSC_FullList = deepcopy(allSC)
-        allFinalClusterLabels = list(deepcopy(finalClusterLabels))
-        
+		allFinalClusterLabels = list(deepcopy(finalClusterLabels))
+
 		if type(phaseLabelsTrue) != int:
 			phaseLabelsTrue_FullList = deepcopy(phaseLabelsTrue)
 		else:
@@ -1200,7 +1200,7 @@ def main(voltageInputCust, phaseLabelsTrue, phaseLabelsErrors, custIDInput, outp
 	if phaseLabelsTrue is not None:
 		df['Actual Phase Labels'] = phaseLabelsTrue_FullList[0,:].astype(int)
 	df['Confidence Score'] = allSC_FullList
-    df['Final Cluster Label'] = allFinalClusterLabels
+	df['Final Cluster Label'] = allFinalClusterLabels
 	df.to_csv(outputPath, index=False)
 	print(f'Phasing algorithm corrected {diffIndices.shape[0]} meter phase labels.')
 	print(f'Predicted phase labels written to {outputPath}')
