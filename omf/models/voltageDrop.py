@@ -3,7 +3,6 @@
 import json, os, tempfile, shutil, csv, math, warnings, base64, platform
 from os.path import join as pJoin
 import networkx as nx
-from networkx.drawing.nx_agraph import graphviz_layout
 
 import matplotlib
 if platform.system() == 'Darwin':
@@ -475,7 +474,9 @@ def drawPlot(path, workDir=None, neatoLayout=False, edgeLabs=None, nodeLabs=None
 		# HACK: work on a new graph without attributes because graphViz tries to read attrs.
 		cleanG = nx.Graph(fGraph.edges())
 		cleanG.add_nodes_from(fGraph)
-		positions = graphviz_layout(cleanG, prog='neato')
+		# positions = graphviz_layout(cleanG, prog='neato')
+		positions = nx.kamada_kawai_layout(cleanG)
+		positions = {k:(1000 * positions[k][0],1000 * positions[k][1]) for k in positions} # get out of array notation		
 	else:
 		remove_nodes = [n for n in fGraph if fGraph.nodes[n].get('pos', (0, 0)) == (0, 0)]
 		fGraph.remove_nodes_from(remove_nodes)

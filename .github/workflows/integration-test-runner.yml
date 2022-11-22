@@ -14,41 +14,39 @@ jobs:
           sudo python3 install.py
       - name: Run Tests
         run: sudo python3 omf/runAllTests.py
-  macOS:
-    name: Test OMF on macOS
-    runs-on: macos-latest
-    steps:
-      - uses: actions/checkout@v2
-      - name: Install dependencies
-        run: |
-          brew link --overwrite python@3.8 #already installed but python3.9 is default
-          pip3 install ecos #because it's having trouble not going first
-          python3 install.py
-      - name: Run tests
-        run: |
-          python3 omf/runAllTests.py
-  Windows:
-    name: Test OMF on Windows
-    runs-on: windows-latest
-    steps:
-      - uses: actions/checkout@v2
-      - name: Fix Pathing
-        continue-on-error: true
-        shell: bash
-        run: |
-          # https://docs.github.com/en/free-pro-team@latest/actions/reference/workflow-commands-for-github-actions#setting-an-environment-variable
-          echo "GLPATH=C:\\Program Files\\GridLAB-D\\bin;C:\\Program Files\\GridLAB-D\\etc;C:\\Program Files\\GridLAB-D\\lib;C:\\Program Files\\GridLAB-D\\samples;C:\\Program Files\\GridLAB-D\\rt;C:\\Program Files\\GridLAB-D\\tmy" >> $GITHUB_ENV
-          echo "GRIDLABD=C:\\Program Files\\GridLAB-D" >> $GITHUB_ENV
-          echo "C:\\Program Files\\GridLAB-D\\bin;C:\\Program Files\\GridLAB-D\\lib;C:\\Program Files (x86)\\Graphviz2.38\\bin" >> $GITHUB_PATH
-      - name: Install dependencies
-        continue-on-error: true
-        run: |
-          choco install python --no-progress --version 3.6.8
-          choco install wget --no-progress
-          python install.py
-          # workaround for busted pygraphviz on windoze
-          wget -nv --no-check-certificate "https://github.com/CristiFati/Prebuilt-Binaries/raw/master/PyGraphviz/v1.5/Graphviz-2.42.2/pygraphviz-1.5-cp37-cp37m-win_amd64.whl"
-          python -m pip install pygraphviz-1.5-cp37-cp37m-win_amd64.whl
-      - name: Run tests
-        run: |
-          python omf/runAllTests.py
+#   macOS:
+#     name: Test OMF on macOS
+#     runs-on: macos-latest
+#     steps:
+#       - uses: actions/checkout@v2
+#       - name: Install dependencies
+#         run: |
+#           brew link --overwrite python@3.8 #already installed but python3.9 is default
+#           pip3 install ecos #because it's having trouble not going first
+#           HOMEBREW_NO_AUTO_UPDATE=1 brew install octave ffmpeg #workaround for flakey pathing
+#           python3 install.py
+#       - name: Run tests
+#         run: |
+#           python3 omf/runAllTests.py
+#   Windows:
+#     name: Test OMF on Windows
+#     runs-on: windows-latest
+#     steps:
+#       - uses: actions/checkout@v2
+#       - name: Fix Pathing
+#         continue-on-error: true
+#         shell: bash
+#         run: |
+#           # https://docs.github.com/en/free-pro-team@latest/actions/reference/workflow-commands-for-github-actions#setting-an-environment-variable
+#           echo "GLPATH=C:\\Program Files\\GridLAB-D\\bin;C:\\Program Files\\GridLAB-D\\etc;C:\\Program Files\\GridLAB-D\\lib;C:\\Program Files\\GridLAB-D\\samples;C:\\Program Files\\GridLAB-D\\rt;C:\\Program Files\\GridLAB-D\\tmy" >> $GITHUB_ENV
+#           echo "GRIDLABD=C:\\Program Files\\GridLAB-D" >> $GITHUB_ENV
+#           echo "C:\\Program Files\\GridLAB-D\\bin;C:\\Program Files\\GridLAB-D\\lib" >> $GITHUB_PATH
+#       - name: Install dependencies
+#         continue-on-error: true
+#         run: |
+#           #choco install python --no-progress --version 3.6.8
+#           python install.py
+#           python -m pip install -r requirements.txt
+#       - name: Run tests
+#         run: |
+#           python omf/runAllTests.py

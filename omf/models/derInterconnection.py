@@ -2,7 +2,6 @@
 import glob, json, os, tempfile, shutil, csv, math, warnings, random, copy, base64, platform
 from os.path import join as pJoin
 import networkx as nx
-from networkx.drawing.nx_agraph import graphviz_layout
 
 # Hack: Agg backend doesn't work for interactivity. Switch to something we can use:
 import matplotlib
@@ -235,7 +234,7 @@ def work(modelDir, inputDict):
 
 
 			# if der is Off set added DER offline, if its On set DER online
-			if der is 'Off':
+			if der == 'Off':
 				tree[addedDerKey]['generator_status'] = 'OFFLINE'
 				tree[addedDerInverterKey]['generator_status'] = 'OFFLINE'
 			else: # der is on 
@@ -711,7 +710,9 @@ def drawPlot(tree, nodeDict=None, edgeDict=None, edgeLabsDict=None, displayLabs=
 		# HACK: work on a new graph without attributes because graphViz tries to read attrs.
 		cleanG = nx.Graph(fGraph.edges())
 		cleanG.add_nodes_from(fGraph)
-		positions = graphviz_layout(cleanG, prog='neato')
+		# positions = graphviz_layout(cleanG, prog='neato')
+		positions = nx.kamada_kawai_layout(cleanG)
+		positions = {k:(1000 * positions[k][0],1000 * positions[k][1]) for k in positions} # get out of array notation
 	else:
 		positions = {n:fGraph.nodes[n].get('pos',(0,0))[::-1] for n in fGraph}
 	

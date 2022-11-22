@@ -1,7 +1,6 @@
 clear
 new object=circuit.ieee123
 
-
 ! redirect vsource.dss
 edit object=vsource.source basekv=4.16 bus1=150.1.2.3 pu=1.00 r1=0 x1=0.0001 r0=0 x0=0.0001
 ! redirect linecode.dss
@@ -299,13 +298,21 @@ new object=capacitor.c83 bus1=83.1.2.3 phases=3 kvar=[600] kv=4.16
 new object=capacitor.c88a bus1=88.1 phases=1 kvar=[50] kv=2.402
 new object=capacitor.c90b bus1=90.2 phases=1 kvar=[50] kv=2.402
 new object=capacitor.c92c bus1=92.3 phases=1 kvar=[50] kv=2.402
+! capcontrols defined 23 June 2022 by Lisa M. Slaughter (lisa.slaughter@nreca.coop or lisa.m.slaughter@gmail.com)
+! new object=capcontrol.c88a_ctrl element=line.l87 capacitor=c88a type=voltage ptratio=1 ctratio=1 ONsetting=2432 OFFsetting=2582 Delay=100 Delayoff=100
+! new object=capcontrol.c90b_ctrl element=line.l89 capacitor=c90b type=voltage ptratio=1 ctratio=1 ONsetting=2432 OFFsetting=2582 Delay=101 Delayoff=101
+! new object=capcontrol.c92c_ctrl element=line.l91 capacitor=c92c type=voltage ptratio=1 ctratio=1 ONsetting=2432 OFFsetting=2582 Delay=102 Delayoff=102 
 ! redirect generator.dss
 new object=generator.2mwgen bus1=450.1.2.3 kv=4.16 kw=2000 pf=1 duty=solarramp
 ! redirect monitor.dss
 new object=monitor.mon1 element=line.l99 terminal=1
+! energymeter from run_ieee123bus.dss
+new object=energymeter.feeder element=line.l115 terminal=1
+
 makebuslist
 ! redirect busvoltagebases.dss  ! set voltage bases
 set voltagebases=[4.16,0.48]
+
 ! buscoords buscoords.dss
 setbusxy bus=1 x=700 y=1500
 setbusxy bus=2 x=700 y=1675
@@ -440,4 +447,4 @@ setbusxy bus=61s x=3175 y=1300
 setbusxy bus=94_open x=0 y=0
 setbusxy bus=9r x=1200 y=1725
 
-Set maxcontroliter=30
+set maxcontroliter=30

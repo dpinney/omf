@@ -1,123 +1,89 @@
 <head>
-	<title>Open Modeling Framework</title>
-	<meta charset="utf-8">
-	<link href="{{pathPrefix}}/static/omf.css" type="text/css" rel="stylesheet"/>
-	<link rel="shortcut icon" href="{{pathPrefix}}/static/favicon.ico">
-	<style>
-	/*Styles will go here*/
-	</style>
-	{% if modelStatus == "running" %}<meta http-equiv="refresh" content="5"/>{% endif %}
-	<!-- Library Imports -->
-	<script type="text/javascript" src="{{pathPrefix}}/static/omf.js"></script>
-	<script type="text/javascript" src="{{pathPrefix}}/static/jquery-1.9.1.js"></script>
+	{{ omfHeaders }}
 	<script src="{{pathPrefix}}/static/highcharts4.src.js"></script>
-	<!-- Data  Imports -->
-	<script>allInputData={% if allInputDataDict %}{{allInputDataDict | tojson}}{% else %}null{% endif %}</script>
-	<script>allOutputData={% if allOutputDataDict %}{{allOutputDataDict | tojson}}{% else %}null{% endif %}</script>
-	<script>modelStatus="{{modelStatus}}"</script>
-	<script>currentUser="{{datastoreNames.get('currentUser','test')}}"</script>
-	<!-- Global Functions -->
-	<script type="text/javascript">
-		function editFeeder(modelName, feederNum) {
-			console.log("modelName:",modelName)
-			studyUser = allInputData.user
-			window.open("/feeder/" + studyUser + "/" + modelName + "/" + feederNum,  "_blank")
-		}
-	</script>
 </head>
-<body onload="init()">
-	<div id="header">
-		<div id="headInnerBlock">
-			<div id="menuLeft">
-				<a style="color:white" href="/">Open Modeling Framework</a> &#187;&nbsp;&nbsp;Model
-				&#8220;<p id="titleText" style="display:inline"></p>&#8221;
-			</div>
-		</div>
-	</div>
-	<div id="triangle-parent">
-		<div id="triangle-message">New Version<span class="classic-triangle">A new version of the model has been added to the OMF. To get the new outputs, please fill in any missing inputs and hit "Run Model". You can also just look at the old inputs/outputs.</span></div>
-		<div id="triangle-topright"></div>
-	</div>
+<body>
+	{{ omfModelTitle }}
 	<p class="reportTitle">Model Input</p>
 	<div id="input" class="content">
-		<form name="inputForm" action="/runModel/" onsubmit="event.preventDefault(); return isFormValid();" method="post">
+		<form name= "inputForm" action="/runModel/" onsubmit="event.preventDefault(); return isFormValid();" method="post">
 			<div class="shortInput">
 				<label>Model Type <a href="https://github.com/dpinney/omf/wiki/Models-~-cvrStatic" target="blank">Help?</a></label>
-				<input type="text" id="modelType" name="modelType" value="{{modelName}}" readonly/>
+				<input type="text" id="modelType" name="modelType" value="{{allInputDataDict.modelType}}" value="{{modelName}}" readonly/>
 			</div>
 			<div class="shortInput">
 				<label>Model Name</label>
-				<input type="text" id="modelName" name="modelName" pattern="^[\w\s\d\.-]+$" required="required"></td>
+				<input type="text" id="modelName" name="modelName" value="{{allInputDataDict.modelName}}" pattern="^[\w\s\d\.-]+$" required="required"></td>
 			</div>
 			<div class="shortInput">
 				<label>Feeder</label>
 				<button id="feederButton" type="button" onclick="javascript:editFeeder(allInputData.modelName,1);" style="display:block;width:125px;">Open Editor</button>
-				<input type="text" id="feederName1" name="feederName1" style="display:none">
+				<input type="text" id="feederName1" name="feederName1" value="{{allInputDataDict.feederName1}}" style="display:none">
 			</div>
-			<div class="shortInput runningInline postRunInline">
+			<div class="shortInput">
 				<label>User</label>
-				<input type="text" id="user" name="user" readonly/></td>
+				<input type="text" id="user" name="user" value="{{allInputDataDict.user}}" readonly/></td>
 			</div>
-			<div class="shortInput runningInline postRunInline">
+			<div class="shortInput">
 				<label>Created</label>
-				<input type="text" id="created" name="created" readonly/></td>
+				<input type="text" id="created" name="created" value="{{allInputDataDict.created}}" readonly/></td>
 			</div>
-			<div class="shortInput postRunInline">
+			<div class="shortInput">
 				<label>Run Time</label>
-				<input type="text" id="runTime" name="runTime" readonly/></td>
+				<input type="text" id="runTime" name="runTime" value="{{allInputDataDict.runTime}}" readonly/></td>
 			</div>
 			<hr>
 			<div class="shortInput">
 				<label class="tooltip">Capital Cost<span class="classic">Installation captial cost<br> Type: <em>float</em></span></label>
-				<input type="text" id="capitalCost" name="capitalCost" pattern="^\d+\.?\d*$" required="required"></td>
+				<input type="text" id="capitalCost" name="capitalCost" value="{{allInputDataDict.capitalCost}}" pattern="^\d+\.?\d*$" required="required"></td>
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">OM Cost<span class="classic">Operating and maintainance cost<br> Type: <em>float</em></span></label>
-				<input type="text" id="omCost" name="omCost" pattern="^\d+\.?\d*$" required="required"></td>
+				<input type="text" id="omCost" name="omCost" value="{{allInputDataDict.omCost}}" pattern="^\d+\.?\d*$" required="required"></td>
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Wholesale Energy Cost ($/kWh)</label>
-				<input type="text" id="wholesaleEnergyCostPerKwh" name="wholesaleEnergyCostPerKwh" pattern="^\d+\.?\d*$" required="required"></td>
+				<input type="text" id="wholesaleEnergyCostPerKwh" name="wholesaleEnergyCostPerKwh" value="{{allInputDataDict.wholesaleEnergyCostPerKwh}}" pattern="^\d+\.?\d*$" required="required"></td>
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Retail Energy Cost ($/kWh)</label>
-				<input type="text" id="retailEnergyCostPerKwh" name="retailEnergyCostPerKwh" pattern="^\d+\.?\d*$" required="required"></td>
+				<input type="text" id="retailEnergyCostPerKwh" name="retailEnergyCostPerKwh" value="{{allInputDataDict.retailEnergyCostPerKwh}}" pattern="^\d+\.?\d*$" required="required"></td>
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Spring Demand Charge ($/kW)</label>
-				<input type="text" id="peakDemandCostSpringPerKw" name="peakDemandCostSpringPerKw" pattern="^\d+\.?\d*$" required="required"></td>
+				<input type="text" id="peakDemandCostSpringPerKw" name="peakDemandCostSpringPerKw" value="{{allInputDataDict.peakDemandCostSpringPerKw}}" pattern="^\d+\.?\d*$" required="required"></td>
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Summer Demand Charge ($/kW)</label>
-				<input type="text" id="peakDemandCostSummerPerKw" name="peakDemandCostSummerPerKw" pattern="^\d+\.?\d*$" required="required"></td>
+				<input type="text" id="peakDemandCostSummerPerKw" name="peakDemandCostSummerPerKw" value="{{allInputDataDict.peakDemandCostSummerPerKw}}" pattern="^\d+\.?\d*$" required="required"></td>
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Fall Demand Charge ($/kW)</label>
-				<input type="text" id="peakDemandCostFallPerKw" name="peakDemandCostFallPerKw" pattern="^\d+\.?\d*$" required="required"></td>
+				<input type="text" id="peakDemandCostFallPerKw" name="peakDemandCostFallPerKw" value="{{allInputDataDict.peakDemandCostFallPerKw}}" pattern="^\d+\.?\d*$" required="required"></td>
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Winter Demand Charge ($/kW)</label>
-				<input type="text" id="peakDemandCostWinterPerKw" name="peakDemandCostWinterPerKw" pattern="^\d+\.?\d*$" required="required"></td>
+				<input type="text" id="peakDemandCostWinterPerKw" name="peakDemandCostWinterPerKw" value="{{allInputDataDict.peakDemandCostWinterPerKw}}" pattern="^\d+\.?\d*$" required="required"></td>
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">baselineTap</label>
-				<input type="text" id="baselineTap" name="baselineTap" /></td>
+				<input type="text" id="baselineTap" name="baselineTap" value="{{allInputDataDict.baselineTap}}" /></td>
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Z (%)</label>
-				<input type="text" id="z_percent" name="z_percent" /></td>
+				<input type="text" id="z_percent" name="z_percent" value="{{allInputDataDict.z_percent}}" /></td>
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">I (%)</label>
-				<input type="text" id="i_percent" name="i_percent" /></td>
+				<input type="text" id="i_percent" name="i_percent" value="{{allInputDataDict.i_percent}}" /></td>
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">P (%)</label>
-				<input type="text" id="p_percent" name="p_percent" /></td>
+				<input type="text" id="p_percent" name="p_percent" value="{{allInputDataDict.p_percent}}" /></td>
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Power factor</label>
-				<input type="text" id="power_factor" name="power_factor" /></td>
+				<input type="text" id="power_factor" name="power_factor" value="{{allInputDataDict.power_factor}}" /></td>
 			</div>
 			<hr>
 			<div class="wideInput">
@@ -139,56 +105,41 @@
 					</tr>
 					<tr>
 						<th>Avg Load</th>
-						<td><input type="text" id="janAvg" name="janAvg" pattern="^\d+\.?\d*$" required="required"></td>
-						<td><input type="text" id="febAvg" name="febAvg" pattern="^\d+\.?\d*$" required="required"></td>
-						<td><input type="text" id="marAvg" name="marAvg" pattern="^\d+\.?\d*$" required="required"></td>
-						<td><input type="text" id="aprAvg" name="aprAvg" pattern="^\d+\.?\d*$" required="required"></td>
-						<td><input type="text" id="mayAvg" name="mayAvg" pattern="^\d+\.?\d*$" required="required"></td>
-						<td><input type="text" id="junAvg" name="junAvg" pattern="^\d+\.?\d*$" required="required"></td>
-						<td><input type="text" id="julAvg" name="julAvg" pattern="^\d+\.?\d*$" required="required"></td>
-						<td><input type="text" id="augAvg" name="augAvg" pattern="^\d+\.?\d*$" required="required"></td>
-						<td><input type="text" id="sepAvg" name="sepAvg" pattern="^\d+\.?\d*$" required="required"></td>
-						<td><input type="text" id="octAvg" name="octAvg" pattern="^\d+\.?\d*$" required="required"></td>
-						<td><input type="text" id="novAvg" name="novAvg" pattern="^\d+\.?\d*$" required="required"></td>
-						<td><input type="text" id="decAvg" name="decAvg" pattern="^\d+\.?\d*$" required="required"></td>
+						<td><input type="text" id="janAvg" name="janAvg" value="{{allInputDataDict.janAvg}}" pattern="^\d+\.?\d*$" required="required"></td>
+						<td><input type="text" id="febAvg" name="febAvg" value="{{allInputDataDict.febAvg}}" pattern="^\d+\.?\d*$" required="required"></td>
+						<td><input type="text" id="marAvg" name="marAvg" value="{{allInputDataDict.marAvg}}" pattern="^\d+\.?\d*$" required="required"></td>
+						<td><input type="text" id="aprAvg" name="aprAvg" value="{{allInputDataDict.aprAvg}}" pattern="^\d+\.?\d*$" required="required"></td>
+						<td><input type="text" id="mayAvg" name="mayAvg" value="{{allInputDataDict.mayAvg}}" pattern="^\d+\.?\d*$" required="required"></td>
+						<td><input type="text" id="junAvg" name="junAvg" value="{{allInputDataDict.junAvg}}" pattern="^\d+\.?\d*$" required="required"></td>
+						<td><input type="text" id="julAvg" name="julAvg" value="{{allInputDataDict.julAvg}}" pattern="^\d+\.?\d*$" required="required"></td>
+						<td><input type="text" id="augAvg" name="augAvg" value="{{allInputDataDict.augAvg}}" pattern="^\d+\.?\d*$" required="required"></td>
+						<td><input type="text" id="sepAvg" name="sepAvg" value="{{allInputDataDict.sepAvg}}" pattern="^\d+\.?\d*$" required="required"></td>
+						<td><input type="text" id="octAvg" name="octAvg" value="{{allInputDataDict.octAvg}}" pattern="^\d+\.?\d*$" required="required"></td>
+						<td><input type="text" id="novAvg" name="novAvg" value="{{allInputDataDict.novAvg}}" pattern="^\d+\.?\d*$" required="required"></td>
+						<td><input type="text" id="decAvg" name="decAvg" value="{{allInputDataDict.decAvg}}" pattern="^\d+\.?\d*$" required="required"></td>
 					</tr>
 					<tr>
 						<th>Peak Load</th>
-						<td><input type="text" id="janPeak" name="janPeak" pattern="^\d+\.?\d*$" required="required"></td>
-						<td><input type="text" id="febPeak" name="febPeak" pattern="^\d+\.?\d*$" required="required"></td>
-						<td><input type="text" id="marPeak" name="marPeak" pattern="^\d+\.?\d*$" required="required"></td>
-						<td><input type="text" id="aprPeak" name="aprPeak" pattern="^\d+\.?\d*$" required="required"></td>
-						<td><input type="text" id="mayPeak" name="mayPeak" pattern="^\d+\.?\d*$" required="required"></td>
-						<td><input type="text" id="junPeak" name="junPeak" pattern="^\d+\.?\d*$" required="required"></td>
-						<td><input type="text" id="julPeak" name="julPeak" pattern="^\d+\.?\d*$" required="required"></td>
-						<td><input type="text" id="augPeak" name="augPeak" pattern="^\d+\.?\d*$" required="required"></td>
-						<td><input type="text" id="sepPeak" name="sepPeak" pattern="^\d+\.?\d*$" required="required"></td>
-						<td><input type="text" id="octPeak" name="octPeak" pattern="^\d+\.?\d*$" required="required"></td>
-						<td><input type="text" id="novPeak" name="novPeak" pattern="^\d+\.?\d*$" required="required"></td>
-						<td><input type="text" id="decPeak" name="decPeak" pattern="^\d+\.?\d*$" required="required"></td>
+						<td><input type="text" id="janPeak" name="janPeak" value="{{allInputDataDict.janPeak}}" pattern="^\d+\.?\d*$" required="required"></td>
+						<td><input type="text" id="febPeak" name="febPeak" value="{{allInputDataDict.febPeak}}" pattern="^\d+\.?\d*$" required="required"></td>
+						<td><input type="text" id="marPeak" name="marPeak" value="{{allInputDataDict.marPeak}}" pattern="^\d+\.?\d*$" required="required"></td>
+						<td><input type="text" id="aprPeak" name="aprPeak" value="{{allInputDataDict.aprPeak}}" pattern="^\d+\.?\d*$" required="required"></td>
+						<td><input type="text" id="mayPeak" name="mayPeak" value="{{allInputDataDict.mayPeak}}" pattern="^\d+\.?\d*$" required="required"></td>
+						<td><input type="text" id="junPeak" name="junPeak" value="{{allInputDataDict.junPeak}}" pattern="^\d+\.?\d*$" required="required"></td>
+						<td><input type="text" id="julPeak" name="julPeak" value="{{allInputDataDict.julPeak}}" pattern="^\d+\.?\d*$" required="required"></td>
+						<td><input type="text" id="augPeak" name="augPeak" value="{{allInputDataDict.augPeak}}" pattern="^\d+\.?\d*$" required="required"></td>
+						<td><input type="text" id="sepPeak" name="sepPeak" value="{{allInputDataDict.sepPeak}}" pattern="^\d+\.?\d*$" required="required"></td>
+						<td><input type="text" id="octPeak" name="octPeak" value="{{allInputDataDict.octPeak}}" pattern="^\d+\.?\d*$" required="required"></td>
+						<td><input type="text" id="novPeak" name="novPeak" value="{{allInputDataDict.novPeak}}" pattern="^\d+\.?\d*$" required="required"></td>
+						<td><input type="text" id="decPeak" name="decPeak" value="{{allInputDataDict.decPeak}}" pattern="^\d+\.?\d*$" required="required"></td>
 					</tr>
 				</table>
 			</div>
-			<div class="wideInput" style="text-align:right">
-				<button id="deleteButton" type="button" class="stoppedInline postRunInline" onclick="deleteModel()">Delete</button>
-				<button id="shareButton" type="button" class="postRunInline" onclick="shareModel()">Share</button>
-				<button id="duplicateButton" type="button" class="postRunInline" onclick="duplicateModel()">Duplicate</button>
-				<button id="cancelButton" class="runningInline" type="button" onclick="cancelModel()">Cancel Run</button>
-				<button id="runButton" class="postRunInline stoppedInline" type="submit">Run Model</button>
-			</div>
+			{{ omfModelButtons }}
 		</form>
 	</div>
-	<div id ="runIndicator" class="content running">
-		Model running on server. Refresh the page to check for results, or wait for automatic refresh every 5 seconds.
-	</div>
-	<div id ="stopIndicator" class="content stopped" style="visibility: hidden">
-		<pre id='errorText' style='overflow-x:scroll'></pre>
-		<script type="text/javascript">
-		if (typeof(allInputData.stderr) !== 'undefined') {
-			gebi('stopIndicator').style.visibility = 'visible'
-			gebi('errorText').innerHTML = 'MODEL ENCOUNTERED AN ERROR AS FOLLOWS: \n\n' + allInputData.stderr}
-		</script>
-	</div>
+	{{ omfRunDebugBlock }}
+	{% if modelStatus == 'finished' %}
 	<div id="output">
 		<script type="text/javascript">
 		function insertMetric(tableId, name, vector) {
@@ -202,8 +153,8 @@
 				}
 			}
 		</script>
-		<p class="reportTitle postRun">Historical Loads</p>
-		<div id="scadaReport" class="tightContent postRun">
+		<p class="reportTitle">Historical Loads</p>
+		<div id="scadaReport" class="tightContent">
 			<script type="text/javascript">
 				new Highcharts.Chart({
 					"chart":{
@@ -260,13 +211,13 @@
 				})
 			</script>
 		</div>
-		<p class="reportTitle postRun" style="page-break-before:always">One Line Diagram</p>
-		<div id="feederReport" class="tightContent postRun">
+		<p class="reportTitle" style="page-break-before:always">One Line Diagram</p>
+		<div id="feederReport" class="tightContent">
 			<img id="feederChart" />
 			<script type="text/javascript">gebi("feederChart").src = "data:image/png;base64," + allOutputData.feederChart</script>
 		</div>
-		<p class="reportTitle postRun" style="page-break-before:always">Projected Savings by Month</p>
-		<div id="spendReport" class="tightContent postRun">
+		<p class="reportTitle" style="page-break-before:always">Projected Savings by Month</p>
+		<div id="spendReport" class="tightContent">
 			<script type="text/javascript">
 				new Highcharts.Chart({
 					"chart":{
@@ -329,8 +280,8 @@
 				})
 			</script>
 		</div>
-		<p class="reportTitle postRun">Projected Avoided Cost</p>
-		<div id="savingsReport" class="tightContent postRun">
+		<p class="reportTitle">Projected Avoided Cost</p>
+		<div id="savingsReport" class="tightContent">
 			<script type="text/javascript">
 				paybackYear = null
 				for (i=0; i<=30; i++) {
@@ -388,8 +339,8 @@
 				})
 			</script>
 		</div>
-		<p class="reportTitle postRun">Power Flows at Various Loads</p>
-		<div id="powerflowReport" class="tightContent postRun tableReport">
+		<p class="reportTitle">Power Flows at Various Loads</p>
+		<div id="powerflowReport" class="tightContent tableReport">
 			<table id="powerflowReportTable"></table>
 			<script type="text/javascript">
 				for (row in allOutputData["monthDataMat"]){
@@ -397,8 +348,8 @@
 				}
 			</script>
 		</div>
-		<p class="reportTitle postRun">Savings at Various Loads</p>
-		<div id="moneyReport" class="tightContent postRun tableReport">
+		<p class="reportTitle">Savings at Various Loads</p>
+		<div id="moneyReport" class="tightContent tableReport">
 			<table id="moneyReportTable"></table>
 			<script type="text/javascript">
 				for (row in allOutputData["monthDataPart"]){
@@ -406,5 +357,7 @@
 				}
 			</script>
 		</div>
+		{{ rawOutputFiles }}
 	</div>
+	{% endif %}
 </body>

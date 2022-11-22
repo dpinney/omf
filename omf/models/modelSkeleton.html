@@ -1,31 +1,9 @@
 <head>
-	<title>Open Modeling Framework</title>
-	<meta charset="utf-8">
-	<link href="{{pathPrefix}}/static/omf.css" type="text/css" rel="stylesheet"/>
-	<link rel="shortcut icon" href="{{pathPrefix}}/static/favicon.ico">
-	<style>
-	/*Styles go here.*/
-	</style>
-	{% if modelStatus == "running" %}<meta http-equiv="refresh" content="5"/>{% endif %}
-	<!-- Library Imports -->
-	<script type="text/javascript" src="{{pathPrefix}}/static/omf.js"></script>
-	<script type="text/javascript" src="{{pathPrefix}}/static/jquery-1.9.1.js"></script>
+	{{ omfHeaders }}
 	<script src="{{pathPrefix}}/static/highcharts4.src.js"></script>
-	<!-- Data  Imports -->
-	<script>allInputData={% if allInputDataDict %}{{allInputDataDict | tojson}}{% else %}null{% endif %}</script>
-	<script>allOutputData={% if allOutputDataDict %}{{allOutputDataDict | tojson}}{% else %}null{% endif %}</script>
-	<script>modelStatus="{{modelStatus}}"</script>
-	<script>currentUser="{{datastoreNames.get('currentUser','test')}}"</script>
 </head>
-<body onload="init()">
-	<div id="header">
-		<div id="headInnerBlock">
-			<div id="menuLeft">
-				<a style="color:white" href="/">Open Modeling Framework</a> &#187;&nbsp;&nbsp;Model
-				&#8220;<p id="titleText" style="display:inline"></p>&#8221;
-			</div>
-		</div>
-	</div>
+<body>
+	{{ omfModelTitle }}
 	<p class="reportTitle">Model Input</p>
 	<div id="input" class="content">
 		<form name="inputForm" action="/runModel/" onsubmit="event.preventDefault(); return isFormValid();" method="post">
@@ -36,19 +14,19 @@
 			</div>
 			<div class="shortInput">
 				<label>Model Name</label>
-				<input type="text" id="modelName" name="modelName" pattern="^[\w\s\d\.-]+$" required="required">
+				<input type="text" id="modelName" name="modelName" value="{{allInputDataDict.modelName}}"pattern="^[\w\s\d\.-]+$" required="required">
 			</div>
-			<div class="shortInput runningInline postRunInline">
+			<div class="shortInput">
 				<label>User</label>
-				<input type="text" id="user" name="user" readonly/>
+				<input type="text" id="user" name="user" value="{{allInputDataDict.user}}"readonly/>
 			</div>
-			<div class="shortInput runningInline postRunInline ">
+			<div class="shortInput">
 				<label>Created</label>
-				<input type="text" id="created" name="created" readonly/>
+				<input type="text" id="created" name="created" value="{{allInputDataDict.created}}"readonly/>
 			</div>
-			<div class="shortInput postRunInline">
+			<div class="shortInput">
 				<label>Run Time</label>
-				<input type="text" id="runTime" name="runTime" readonly/>
+				<input type="text" id="runTime" name="runTime" value="{{allInputDataDict.runTime}}"readonly/>
 			</div>
 			<!-- Model Specific Inputs -->
 			<div class="wideInput">
@@ -57,52 +35,36 @@
 			<hr>
 			<div class="shortInput">
 				<label class="tooltip">Input 1<span class="classic">Enter an input of any kind.</span></label>
-				<input type="text" id="input1" name="input1" required="required" placeholder="abc1 Easy as..."/>
+				<input type="text" id="input1" name="input1" value="{{allInputDataDict.input1}}"required="required" placeholder="abc1 Easy as..."/>
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Input 2<span class="classic">Enter an input of another kind.</span></label>
-				<input type="text" id="input2" name="input2" required="required" placeholder="123 Or Simple as.."/>
+				<input type="text" id="input2" name="input2" value="{{allInputDataDict.input2}}"required="required" placeholder="123 Or Simple as.."/>
 			</div>
-			<!-- Required Buttons -->
-			<div class="wideInput" style="text-align:right">
-				<button id="deleteButton" type="button" class="stoppedInline postRunInline" onclick="deleteModel()">Delete</button>
-				<button id="shareButton" type="button" class="postRunInline" onclick="shareModel()">Share</button>
-				<button id="duplicateButton" type="button" class="postRunInline" onclick="duplicateModel()">Duplicate</button>
-				<button id="runButton" class="stoppedInline postRunInline" type="submit">Run Model</button>
-			</div>
+			{{ omfModelButtons }}
 		</form>
 	</div>
-	<div id ="stopIndicator" class="content stopped" style="visibility: hidden">
-		<pre id='errorText' style='overflow-x:scroll'></pre>
-		<script type="text/javascript">
-		if (typeof(allInputData.stderr) !== 'undefined') {
-			gebi('stopIndicator').style.visibility = 'visible'
-			gebi('errorText').innerHTML = 'MODEL ENCOUNTERED AN ERROR AS FOLLOWS: \n\n' + allInputData.stderr}
-		</script>
-	</div>
+	{{ omfRunDebugBlock }}
+	{% if modelStatus == 'finished' %}
 	<!-- Output tables, graphs, etc -->
 	<div id="output">
 		<!-- Integer Sum Table -->
-		<p class="reportTitle postRun">Model Skeleton Integer Sum</p>
-		<div id="analysisSummary" class="content postRun">
+		<p class="reportTitle">Model Skeleton Integer Sum</p>
+		<div id="analysisSummary" class="content">
 			<div class="shortInput">
 				<strong>Input 1</strong>
-				<p id="input1Out"></p>
+				<p id="input1Out">{{allInputDataDict.input1}}</p>
 			</div>
 			<div class="shortInput">
 				<strong>Input 2</strong>
-				<p id="input2Out"></p>
+				<p id="input2Out">{{allInputDataDict.input1}}</p>
 			</div>
 			<div class="shortInput">
 				<strong>Output</strong>
-				<p id="sumOut"></p>
+				<p id="sumOut">{{allOutputDataDict.output}}</p>
 			</div>
-			<script type="text/javascript">
-				// Set values for this section.
-				gebi("input1Out").innerHTML = allInputData.input1
-				gebi("input2Out").innerHTML = allInputData.input2
-				gebi("sumOut").innerHTML = allOutputData.output
-			</script>
 		</div>
+		{{ rawOutputFiles }}
 	</div>
+	{% endif %}
 </body>

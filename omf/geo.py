@@ -34,7 +34,6 @@ def statePlaneToLatLon(easting, northing, epsg = None):
 	lat, lon = transformer.transform(easting, northing)
 	return (lat, lon)
 
-
 def latLonToStatePlane(lat, lon, epsg = None):
 	if not epsg:
 		# Center of the USA default
@@ -45,7 +44,6 @@ def latLonToStatePlane(lat, lon, epsg = None):
 	easting, northing = transformer.transform(lon, lat)
 	return (easting, northing)
 
-
 def dd2dms(dd):
 	'Decimal degrees to Degrees/Minutes/Seconds'
 	d = int(dd)
@@ -54,7 +52,6 @@ def dd2dms(dd):
 	sd = (md - m) * 60
 	return (d, m, sd)
 
-
 def dms2dd(degrees, minutes, seconds, direction):
 	'Degree/minute/second to decimal degrees'
 	dd = float(degrees) + float(minutes)/60 + float(seconds)/(60*60);
@@ -62,12 +59,10 @@ def dms2dd(degrees, minutes, seconds, direction):
 		dd *= -1
 	return dd
 
-
 def openInGoogleMaps(lat, lon):
 	"Open a browser to the (lat, lon) in Google Maps"
 	loc = 'https://www.google.com/maps/place/{}+{}/'.format(lat,lon)
 	webbrowser.open_new(loc)
-
 
 def hullOfOmd(pathToOmdFile, conversion=False):
 	'''Convex hull of an omd in the form of a geojson dictionary with a single ploygon.'''
@@ -98,13 +93,12 @@ def hullOfOmd(pathToOmdFile, conversion=False):
 	}
 	return geoJsonDict
 
-
 def omdGeoJson(pathToOmdFile, conversion=False):
 	'''Create a geojson standards compliant file (https://tools.ietf.org/html/rfc7946) from an omd.'''
 	with open(pathToOmdFile) as inFile:
 		tree = json.load(inFile)['tree']
 	nxG = feeder.treeToNxGraph(tree)
-	#use conversion for testing other feeders
+	# Use conversion for testing other feeders
 	nxG = graphValidator(pathToOmdFile, nxG)
 	if conversion:
 		nxG = convertOmd(pathToOmdFile)
@@ -112,26 +106,9 @@ def omdGeoJson(pathToOmdFile, conversion=False):
 		"type": "FeatureCollection",
 		"features": []
 	}
-	#Add nodes to geoJSON
+	# Get nodes and edges.
 	node_positions = {nodewithPosition: nxG.nodes[nodewithPosition]['pos'] for nodewithPosition in nx.get_node_attributes(nxG, 'pos')}
-	node_types = {nodewithType: nxG.nodes[nodewithType]['type'] for nodewithType in nx.get_node_attributes(nxG, 'type')}
-	# print(node_positions)
-	for node in node_positions:
-		geoJsonDict['features'].append({
-			"type": "Feature", 
-			"geometry":{
-				"type": "Point",
-				"coordinates": [node_positions[node][1], node_positions[node][0]]
-			},
-			"properties":{
-				"name": node,
-				#"pointType": node_types[node],
-				#"pointColor": _obToCol(node_types[node])
-			}
-		})
-	#Add edges to geoJSON
-	edge_types = {edge: nxG[edge[0]][edge[1]]['type'] for edge in nx.get_edge_attributes(nxG, 'type')}
-	edge_phases = {edge: nxG[edge[0]][edge[1]]['phases'] for edge in nx.get_edge_attributes(nxG, 'phases')}
+	# Add edges to geoJSON
 	for edge in nx.edges(nxG):
 		try:
 			geoJsonDict['features'].append({
@@ -140,23 +117,23 @@ def omdGeoJson(pathToOmdFile, conversion=False):
 					"type": "LineString",
 					"coordinates": [[node_positions[edge[0]][1], node_positions[edge[0]][0]], [node_positions[edge[1]][1], node_positions[edge[1]][0]]]
 				},
-				"properties":{
-					#"phase": edge_phases[edge],
-					#"edgeType": edge_types[edge],
-					#"edgeColor":_obToCol(edge_types[edge])
-				}
+				"properties": nxG.edges[edge]
 			})
 		except KeyError:
 			print("!!! KeyError exception for edge " + str(edge))
+	# Add nodes 2nd so they show up on top of the z-order.
+	for node in node_positions:
+		geoJsonDict['features'].append({
+			"type": "Feature", 
+			"geometry":{
+				"type": "Point",
+				"coordinates": [node_positions[node][1], node_positions[node][0]]
+			},
+			"properties": nxG.nodes[node]
+		})
 	return geoJsonDict
-	#if not os.path.exists(outputPath):
-	#	os.makedirs(outputPath)
-	#shutil.copy('static/geoPolyLeaflet.html', outputPath)
-	#with open(pJoin(outputPath,'geoPointsLines.json'),"w") as outFile:
-	#	json.dump(geoJsonDict, outFile, indent=4)
 
-
-def mapOmd(pathToOmdFile, outputPath, fileFormat, openBrowser=False, conversion=False):
+def mapOmd(pathToOmdFile, outputPath, fileFormat, openBrowser=False, conversion=False, all_mg_elements=None):
 	'''
 	Draw an omd on a map.
 	
@@ -174,7 +151,7 @@ def mapOmd(pathToOmdFile, outputPath, fileFormat, openBrowser=False, conversion=
 			os.makedirs(outputPath)
 		# Render html
 		offline_template = open(omf.omfDir + '/templates/geoJsonMap_offline.html','r').read()
-		rendered = Template(offline_template).render(geojson=geoJsonDict)
+		rendered = Template(offline_template).render(geojson=geoJsonDict, all_mg_elements=all_mg_elements)
 		with open(os.path.join(outputPath,'geoJsonMap_offline.html'),'w') as outFile:
 			outFile.write(rendered)
 		# Deprecated js include method.
@@ -533,7 +510,6 @@ def convertOmd(pathToOmdFile):
 				targetEdge = key['target']['name'] + ' Target'
 			except KeyError:
 				targetEdge = str(key['target']) + ' Missing Name'
-
 		#nxG.add_edge(key['source']['name'], key['target']['name'])
 		nxG.add_edge(sourceEdge, targetEdge)
 		nxG.nodes[sourceEdge]['pos'] = (float(key['source']['y']), float(key['source']['x']))
@@ -722,23 +698,32 @@ def latLonByNeighbor(dictOfNeighbors):
 		latLon = (lat, lon)
 	return latLon
 
-def createFixedLatLonOmd(pathToOmdFile, fixedLatLonDict, outfilePath):
+def createFixedLatLonOmd(pathToOmdFile, fixedLatLonDict, outfilePath, fixUndefinedObs):
 	'''This method takes in a path to the omd of the feeder that has corrupted lat/lon values, a dictionary that contains the correct lat/lons (values) for the nodes/buses (keys) that were previously incorrect and creates a new omd file that contains the correct coordinates at the specified output file path (outfilePath)'''
 	with open(pathToOmdFile) as inFile:
 		fullFile = json.load(inFile)
 		tree = fullFile['tree']
-	
+	badCoordObs = []
+	exceptNodes = []
 	for objectKey in tree:
 		objectName = tree[objectKey]['name']
 		if objectName in fixedLatLonDict.keys():
-			origLat = tree[objectKey]['latitude']
-			origLon = tree[objectKey]['longitude']
+			origLat = tree[objectKey].get('latitude', "N/A")
+			origLon = tree[objectKey].get('longitude', "N/A")
 			tree[objectKey]['latitude'] = str(fixedLatLonDict[objectName][0])
 			tree[objectKey]['longitude'] = str(fixedLatLonDict[objectName][1])
 			print("Changed " + objectName + " coordinates from (" + origLat + ", " + origLon + ") to (" + tree[objectKey]['latitude'] + ", " + tree[objectKey]['longitude'] + ")" )
+		else:
+			origLat = tree[objectKey].get('latitude', "N/A")
+			origLon = tree[objectKey].get('longitude', "N/A")
+			if origLat != "N/A" and origLon != "N/A":
+				badCoordObs.append(objectName)
 	fullFile['tree'] = tree
 	with open(outfilePath, 'w') as outFile:
 		json.dump(fullFile, outFile)
+	if fixUndefinedObs:
+		fixedMissingNodes = fixCorruptedLatLons(outfilePath, badCoordObs, exceptNodes)
+		createFixedLatLonOmd(outfilePath, fixedMissingNodes, outfilePath, False)
 
 def openInBrowser(pathToFile):
 	'''Helper function for mapOmd. Try popular web browsers first because png might open in native application. Othwerwise use default program as fallback'''
@@ -753,6 +738,16 @@ def showOnMap(geoJson):
 		json.dump(geoJson, outFile, indent=4)
 	webbrowser.open('file://' + pJoin(tempDir,'geoJsonMap.html'))
 
+def _testFixedLatLonOmd():
+	import csv
+	omdFilePath = pJoin(__neoMetaModel__._omfDir, 'static', 'testFiles', 'iowa240_dwp_22.dss.omd')
+	coordFilePath = pJoin(__neoMetaModel__._omfDir, 'static', 'testFiles', 'BuscoordsLatLon.csv') #coordinate file is csv with each row containing busName, yValue(longitude), xValue(latitude)
+	with open(coordFilePath, 'r') as coordFile:
+		coordReader = csv.reader(coordFile)
+		coordDict = {row[0]:(row[2],row[1]) for row in coordReader}
+	outFilePath = pJoin(__neoMetaModel__._omfDir, 'static', 'testFiles', 'iowa240_dwp_22.goodCoords.dss.omd')
+	createFixedLatLonOmd(omdFilePath, coordDict, outFilePath, True)
+
 def _testLatLonfix():
 	'''Test for fixing a feeder with corrupted auto-assign lat/lon values using findCorruptNodes(), fixCorruptedLatLons(), and createFixedLatLonOmd()'''
 	exceptNodes = ['sourcebus', '_hvmv_sub_lsb', 'hvmv_sub_48332', 'hvmv_sub_hsb', 'regxfmr_hvmv_sub_lsb']
@@ -763,7 +758,7 @@ def _testLatLonfix():
 	# badNodes = ['l0247160', 'l0247162', 'l0247171']
 	print("Number of bad nodes: " + str(len(badNodes)))
 	fixedCoords = fixCorruptedLatLons(omdPath, badNodes, exceptNodes)
-	createFixedLatLonOmd(omdPath, fixedCoords, newOmdPath)
+	createFixedLatLonOmd(omdPath, fixedCoords, newOmdPath, False)
 	mapOmd(newOmdPath, pJoin(__neoMetaModel__._omfDir, 'scratch', 'RONM'), 'html', openBrowser=True, conversion=False)
 
 
@@ -776,10 +771,11 @@ def _tests():
 	print (e2, n2) # (249.24197527189972, 1186.1488466408398)
 	prefix = Path(__file__).parent
 	# mapOmd(prefix / 'static/publicFeeders/Olin Barre LatLon.omd', 'testOutput', 'png', openBrowser=True, conversion=False)
-	mapOmd(prefix / 'static/publicFeeders/Olin Barre LatLon.omd', 'testOutput', 'html', openBrowser=True, conversion=False)
+	mapOmd(prefix / 'static/publicFeeders/Olin Barre LatLon.omd', './', 'html', openBrowser=True, conversion=False)
 	# showOnMap(hullOfOmd(prefix / 'static/publicFeeders/Olin Barre LatLon.omd', conversion=False))
 	# showOnMap(simplifiedOmdShape(prefix / 'static/publicFeeders/Olin Barre LatLon.omd', conversion=False))
 	# x = omdGeoJson(prefix / 'static/publicFeeders/Olin Barre LatLon.omd', conversion=False)
+	# print(x)
 	# import json
 	# with open ('scratch/wind/circuit.geojson', 'w') as outFile:
 	# 	json.dump(x, outFile, indent=4)
@@ -806,3 +802,4 @@ def _tests():
 if __name__ == '__main__':
 	_tests()
 	# _testLatLonfix()
+	# _testFixedLatLonOmd()

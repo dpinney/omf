@@ -1,9 +1,5 @@
 <head>
-	<title>Open Modeling Framework</title>
-	<meta charset="utf-8">
-	<link href="{{pathPrefix}}/static/omf.css" type="text/css" rel="stylesheet"/>
-	<link rel="shortcut icon" href="{{pathPrefix}}/static/favicon.ico">
-
+	{{ omfHeaders }}
 	<style>
 		.tab {
 		    overflow: hidden;
@@ -11,7 +7,6 @@
 		    margin-right: auto;
 		    width: 1000px;
 		}
-
 		.tab button {
 			color: black;
 		    background-color: inherit;
@@ -22,20 +17,16 @@
 		    padding: 14px 16px;
 		    border-radius: 5px 5px 0px 0px;
 		}
-
 		.tab button:hover {
 		    background-color: white;
 		}
-
 		.tab button.active {
 		    background-color: seagreen;
 		    color: white;
 		}
-
 		.tabcontent {
 		    display: none;
 		} 
-
 		table { width: 100%; border-spacing: 2px; table-layout: fixed;  }
 		td,th { 
 			border: 1px;
@@ -55,32 +46,14 @@
 		 	div#triangle-parent{visibility: hidden;}
 		 }
 	</style>
-
-	{% if modelStatus == "running" %}<meta http-equiv="refresh" content="5"/>{% endif %}
-	<!-- Library Imports -->
-	<script type="text/javascript" src="{{pathPrefix}}/static/omf.js"></script>
-	<script type="text/javascript" src="{{pathPrefix}}/static/jquery-1.9.1.js"></script>
 	<script src="/static/sorttable.js"></script>
-	<!-- Data  Imports -->
-	<script>allInputData={% if allInputDataDict %}{{allInputDataDict | tojson}}{% else %}null{% endif %}</script>
-	<script>allOutputData={% if allOutputDataDict %}{{allOutputDataDict | tojson}}{% else %}null{% endif %}</script>
-	<script>modelStatus="{{modelStatus}}"</script>
-	<script>currentUser="{{datastoreNames.get('currentUser','test')}}"</script>
 	<script type="text/javascript">
-		function editFeeder(modelName, feederNum) {
-			console.log("modelName:",modelName)
-			studyUser = allInputData.user
-			window.open("/feeder/" + studyUser + "/" + modelName + "/" + feederNum,  "_blank")
-		}
-	</script>
-	<script type="text/javascript">
-
 		function displayAppropriately(){
-			//console.log("der " + $('input[name="derRadio"]:checked').val());
-			//console.log("load " + $('input[name="loadRadio"]:checked').val());
+			//console.log("der " + $('input[name= "derRadio"]:checked').val());
+			//console.log("load " + $('input[name= "loadRadio"]:checked').val());
 			$('.tabPlots').hide();
-			var derOn = $('input[name="derRadio"]:checked').val() == 1;
-			var peakLoad = $('input[name="loadRadio"]:checked').val() == 1;
+			var derOn = $('input[name= "derRadio"]:checked').val() == 1;
+			var peakLoad = $('input[name= "loadRadio"]:checked').val() == 1;
 			if (derOn && peakLoad) 			{$('#derOnPeakLoad').show();	}
 			else if (derOn && !peakLoad) 	{$('#derOnMinLoad').show();		}
 			else if (!derOn && peakLoad) 	{$('#derOffPeakLoad').show(); 	}
@@ -88,107 +61,58 @@
 		}
 
 		function openTab(evt, tabName) {
-		    
 		    var i, tabContent, tabLinks;
-
 		    // Get all elements with class="tabContent" and hide them
 			$(".tabContent").hide();
-
 		    // Get all elements with class="tabLinks" and remove the class "active"
 		    tabLinks = document.getElementsByClassName("tabLinks");
 		    for (i = 0; i < tabLinks.length; i++) {
 		        tabLinks[i].className = tabLinks[i].className.replace(" active", "");
 		    }
-
 		    // Show the current tab, and add an "active" class to the button that opened the tab
 		    $("." + tabName).show();
 		    //gebi(tabName).style.display = "block";
 		    evt.currentTarget.className += " active";
 		}
-
-		function insert_file_upload_block(fileName, dataVariableName) {
-			parentDiv = document.currentScript.parentElement;
-
-			let inputNode1 = document.createElement("input");
-			inputNode1.setAttribute("id", fileName + "Handler");
-			inputNode1.setAttribute("type", "file");
-			inputNode1.style.display = "none";
-			//inputNode1.addEventListener("change", handle_files(this.files,dataVariableName,fileName));
-			parentDiv.appendChild(inputNode1);
-
-			let inputNode2 = document.createElement("input");
-			inputNode2.setAttribute("id", dataVariableName);
-			inputNode2.setAttribute("name", dataVariableName);
-			inputNode2.type = "hidden";
-			parentDiv.appendChild(inputNode2);
-
-			let innerDiv = document.createElement("div");
-			parentDiv.appendChild(innerDiv);
-
-			let labelNode = document.createElement("label");
-			labelNode.setAttribute("for", fileName + "Handler");
-			labelNode.className = "fileButton";
-			labelNode.innerHTML = "Choose File";
-			innerDiv.appendChild(labelNode);
-
-			let inputNode3 = document.createElement("input");
-			inputNode3.setAttribute("id", fileName);
-			inputNode3.setAttribute("name", fileName);
-			inputNode3.value = '';
-			inputNode3.readOnly = true;
-			inputNode3.className = "uploadFileName";
-			innerDiv.appendChild(inputNode3)
-
-			//inputNode1.addEventListener("change", handle_files(this.files,dataVariableName,fileName));
-			inputNode1.addEventListener("change", function (){
-				handle_files(this.files,dataVariableName,fileName);
-			});
-
-		}
 	</script>
 </head>
-
-<body onload="init()">
-	
-	<div id="header">
-		<div id="headInnerBlock">
-			<div id="menuLeft">
-				<a style="color:white" href="/">Open Modeling Framework</a> &#187;&nbsp;&nbsp;Model
-				&#8220;<p id="titleText" style="display:inline"></p>&#8221;
-			</div>
-		</div>
+{% macro insert_file_upload_block(fileName, dataVariableName) -%}
+	<input id="{{dataVariableName}}Handler" type="file" style="display:none" onchange="handle_files(this.files,'{{dataVariableName}}','{{fileName}}')">
+	<input id="{{dataVariableName}}" name="{{dataVariableName}}" value="{{allInputDataDict[dataVariableName]}}" type="hidden">
+	<div>
+		<label for="{{dataVariableName}}Handler" class="fileButton">Choose File</label>
+		<input id="{{fileName}}" name="{{fileName}}" value="{{allInputDataDict[fileName]}}" readonly class="uploadFileName">    
 	</div>
-	<div id="triangle-parent">
-		<div id="triangle-message">New Version<span class="classic-triangle">A new version of the model has been added to the OMF. To get the new outputs, please fill in any missing inputs and hit "Run Model". You can also just look at the old inputs/outputs.</span></div>
-		<div id="triangle-topright"></div>
-	</div>
+{%- endmacro %}
+<body>
+	{{ omfModelTitle }}
 	<p class="reportTitle">Model Input</p>
 	<div id="input" class="content">
-		<form name="inputForm" action="/runModel/" onsubmit="event.preventDefault(); return isFormValid();" method="post">
+		<form name= "inputForm" action="/runModel/" onsubmit="event.preventDefault(); return isFormValid();" method="post">
 			<div class="shortInput">
 				<label>Model Type <a href="https://github.com/dpinney/omf/wiki/Models-~-derInterconnection" target="blank">Help?</a></label>
-				<input type="text" id="modelType" name="modelType" value="{{modelName}}" readonly/>
+				<input type="text" id="modelType" name="modelType" value="{{allInputDataDict.modelType}}" value="{{modelName}}" readonly/>
 			</div>
 			<div class="shortInput">
 				<label>Model Name</label>
-				<input type="text" id="modelName" name="modelName" pattern="^[\w\s\d\.-]+$" required="required">
+				<input type="text" id="modelName" name="modelName" value="{{allInputDataDict.modelName}}" pattern="^[\w\s\d\.-]+$" required="required">
 			</div>
-			<div class="shortInput runningInline postRunInline">
+			<div class="shortInput">
 				<label>User</label>
-				<input type="text" id="user" name="user" readonly/>
+				<input type="text" id="user" name="user" value="{{allInputDataDict.user}}" readonly/>
 			</div>
-			<div class="runningInline postRunInline shortInput">
+			<div class="shortInput">
 				<label>Created</label>
-				<input type="text" id="created" name="created" readonly/>
+				<input type="text" id="created" name="created" value="{{allInputDataDict.created}}" readonly/>
 			</div>
-			<div class="postRunInline shortInput">
+			<div class="shortInput">
 				<label>Run Time</label>
-				<input type="text" id="runTime" name="runTime" readonly/>
+				<input type="text" id="runTime" name="runTime" value="{{allInputDataDict.runTime}}" readonly/>
 			</div>
 			<div class="shortInput">
 				<label>Feeder</label>
 				<button id="feederButton" type="button" onclick="javascript:editFeeder(allInputData.modelName,1);" style="display:block;width:125px;">Open Editor</button>
-				<input type="text" id="feederName1" name="feederName1" style="display:none">
+				<input type="text" id="feederName1" name="feederName1" value="{{allInputDataDict.feederName1}}" style="display:none">
 			</div>
 			<hr>
 			<!-- model inputs -->
@@ -196,124 +120,99 @@
 				<label class="tooltip">Added System Name
 					<span class="classic">Name of the added generation in the circuit</span>
 				</label>
-				<input type="text" id="newGeneration" name="newGeneration" required="required"/>
+				<input type="text" id="newGeneration" name="newGeneration" value="{{allInputDataDict.newGeneration}}" required="required"/>
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Generation Step-up Transformer Name
 					<span class="classic">Name of the step-up transformer at the added generation</span>
 				</label>
-				<input type="text" id="newGenerationStepUp" name="newGenerationStepUp" required="required"/>
+				<input type="text" id="newGenerationStepUp" name="newGenerationStepUp" value="{{allInputDataDict.newGenerationStepUp}}" required="required"/>
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Generation Breaker Name
 					<span class="classic">Name of the breaker at the added generation</span>
 				</label>
-				<input type="text" id="newGenerationBreaker" name="newGenerationBreaker" required="required"/>
+				<input type="text" id="newGenerationBreaker" name="newGenerationBreaker" value="{{allInputDataDict.newGenerationBreaker}}" required="required"/>
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Added System Insolation (W/sf)
 					<span class="classic">Insolation of the added solar generation between 0 and 1000 W per sq ft; The default value is an approximation of the highest expected insolation in the US given an average year. See the green 'Help?' link above for more information</span>
 				</label>
-				<input type="text" id="newGenerationInsolation" name="newGenerationInsolation" required="required"/>
+				<input type="text" id="newGenerationInsolation" name="newGenerationInsolation" value="{{allInputDataDict.newGenerationInsolation}}" required="required"/>
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Max Line loading(&percnt; rating)
 					<span class="classic">Higher line loadings will be considered violations</span>
 				</label>
-				<input type="text" id="thermalThreshold" name="thermalThreshold" required="required"/>
+				<input type="text" id="thermalThreshold" name="thermalThreshold" value="{{allInputDataDict.thermalThreshold}}" required="required"/>
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Max Voltage Flicker(&percnt;)
 					<span class="classic">Higher voltage flickers will be considered violations</span>
 				</label>
-				<input type="text" id="flickerThreshold" name="flickerThreshold" required="required"/>
+				<input type="text" id="flickerThreshold" name="flickerThreshold" value="{{allInputDataDict.flickerThreshold}}" required="required"/>
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Max Tap Position Difference
 					<span class="classic">Higher differences in tap positions between the DER on and DER off scenarios will be considered violations</span>
 				</label>
-				<input type="text" id="tapThreshold" name="tapThreshold" required="required"/>
+				<input type="text" id="tapThreshold" name="tapThreshold" value="{{allInputDataDict.tapThreshold}}" required="required"/>
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Max Fault Current Difference(&percnt;)
 					<span class="classic">Higher absolute differences in pre-fault and post-fault currents as a percentage of pre-fault current will be considered violations</span>
 				</label>
-				<input type="text" id="faultCurrentThreshold" name="faultCurrentThreshold" required="required"/>
+				<input type="text" id="faultCurrentThreshold" name="faultCurrentThreshold" value="{{allInputDataDict.faultCurrentThreshold}}" required="required"/>
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Max Fault Voltage at POI(&percnt;)
 					<span class="classic">If the post-fault voltage as a percentage of pre-fault voltage is higher than this threshold, it will be considered a violation</span>
 				</label>
-				<input type="text" id="faultVoltsThreshold" name="faultVoltsThreshold" required="required"/>
+				<input type="text" id="faultVoltsThreshold" name="faultVoltsThreshold" value="{{allInputDataDict.faultVoltsThreshold}}" required="required"/>
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Peak Load (.csv file) <i>optional</i>
 					<span class="classic">Please see the documentation at the green 'Help?' link above for more information including the expected file format</span>
 				</label>
-				<script type="text/javascript">
-					insert_file_upload_block('peakLoadFileName', 'peakLoadData');
-				</script>
+				{{ insert_file_upload_block('peakLoadFileName','peakLoadData') }}
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Min Load (.csv file) <i>optional</i>
 					<span class="classic">Please see the documentation at the green 'Help?' link above for more information including expected file format</span>
 				</label>
-				<script type="text/javascript">
-					insert_file_upload_block('minLoadFileName', 'minLoadData');
-				</script>
+				{{ insert_file_upload_block('minLoadFileName','minLoadData') }}
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Display Format<span class="classic">Geospatial shows the circuit the same way it was defined in the feeder editor. Force Directed uses an algorithm to show the circuit elements evenly spaced (useful for circuits without location data).</span></label>
 				<select id="layoutAlgorithm" name="layoutAlgorithm">
-					<option value="geospatial">Geospatial</option>
-					<option value="forceDirected">Force Directed</option>
+					<option value="geospatial" {% if allInputDataDict.layoutAlgorithm == 'geospatial' %}selected{% endif %}>Geospatial</option>
+					<option value="forceDirected" {% if allInputDataDict.layoutAlgorithm == 'forceDirected' %}selected{% endif %}>Force Directed</option>
 				</select>
 			</div>
-			<div class="wideInput" style="text-align:right">
-				<button id="deleteButton" type="button" class="stoppedInline postRunInline" onclick="deleteModel()">Delete</button>
-				<button id="shareButton" type="button" class="postRunInline" onclick="shareModel()">Share</button>
-				<button id="duplicateButton" type="button" class="postRunInline" onclick="duplicateModel()">Duplicate</button>
-				<button id="cancelButton" class="runningInline" type="button" onclick="cancelModel()">Cancel Run</button>
-				<button id="runButton" class="stoppedInline postRunInline" type="submit">Run Model</button>
-			</div>
+			{{ omfModelButtons }}
 		</form>
 	</div>
-
-	<div id ="runIndicator" class="content running">
-		Model running on server. Refresh the page to check for results, or wait for automatic refresh every 5 seconds.
-	</div>
-
-	<div id ="stopIndicator" class="content stopped" style="visibility: hidden">
-		<pre id='errorText' style='overflow-x:scroll'></pre>
-		<script type="text/javascript">
-		if (typeof(allInputData.stderr) !== 'undefined') {
-			gebi('stopIndicator').style.visibility = 'visible'
-			gebi('errorText').innerHTML = 'MODEL ENCOUNTERED AN ERROR AS FOLLOWS: \n\n' + allInputData.stderr}
-		</script>
-	</div>
-
-	<div id="output" class="postRun">
-
+	{{ omfRunDebugBlock }}
+	{% if modelStatus == 'finished' %}
+	<div id="output">
 		<p class="reportTitle" style="page-break-before:always">Load Flow Analysis</p>
-
 		<!-- Radio Buttons -->
 		<div class="content">
 			<table style="width: 100%">
 			<tr>
 				<td style="text-align: left; border: 0px;">
 					Distributed Energy Resource Status:
-					<label>	<input class="plotRadios" type="radio" name="derRadio" value="1" checked="true" onchange="displayAppropriately()">On</label>
-					<label><input class="plotRadios" type="radio" name="derRadio" value="0" onchange="displayAppropriately()">Off</label>
+					<label>	<input class="plotRadios" type="radio" name= "derRadio" value="1" checked="true" onchange="displayAppropriately()">On</label>
+					<label><input class="plotRadios" type="radio" name= "derRadio" value="0" onchange="displayAppropriately()">Off</label>
 				</td>
 				<td style="text-align: left; border: 0px;">
 					Load Type:
-					<label><input class="plotRadios" type="radio" name="loadRadio" value="1" checked="true" onchange="displayAppropriately()">Peak</label>
-					<label><input class="plotRadios" type="radio" name="loadRadio" value="0" onchange="displayAppropriately()">Minimum</label>
+					<label><input class="plotRadios" type="radio" name= "loadRadio" value="1" checked="true" onchange="displayAppropriately()">Peak</label>
+					<label><input class="plotRadios" type="radio" name= "loadRadio" value="0" onchange="displayAppropriately()">Minimum</label>
 				</td>
 			</tr>
 			</table>
 		</div>
-
 		<!-- Tab links -->
 		<div class="tab">
 		  <button class="tabLinks active" onclick="openTab(event, 'voltageDiagram')">Voltage</button>
@@ -321,7 +220,6 @@
 		  <button class="tabLinks" onclick="openTab(event, 'thermalDiagram')">Line Loading</button>
 		  <button class="tabLinks" onclick="openTab(event, 'flickerDiagram')">Flicker</button>
 		</div>
-
 		<!-- Tab content -->
 		<div id="derOnPeakLoad" class="tabPlots" style="display: block;">
 			<!--DEBUG derOn peakLoad-->
@@ -759,6 +657,7 @@
 			</script> 
 			<span style="color: red">Post-fault voltage  values as a percent of the pre-fault voltage that are greater than or equal to the input threshold are displayed in red</span>
 		</div>
-	
+		{{ rawOutputFiles }}
 	</div>
+	{% endif %}
 </body>

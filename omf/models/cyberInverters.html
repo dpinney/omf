@@ -1,25 +1,8 @@
 <head>
-	<title>Open Modeling Framework</title>
-	<meta charset="utf-8">
-	<link href="{{pathPrefix}}/static/omf.css" type="text/css" rel="stylesheet"/>
-	<link rel="shortcut icon" href="{{pathPrefix}}/static/favicon.ico">
-	<style>
-	/*Styles will go here*/
-	</style>
-	{% if modelStatus == "running" %}<meta http-equiv="refresh" content="5"/>{% endif %}
-	<!-- Library Imports -->
-	<script type="text/javascript" src="{{pathPrefix}}/static/omf.js"></script>
-	<script type="text/javascript" src="{{pathPrefix}}/static/jquery-1.9.1.js"></script>
+	{{ omfHeaders }}
 	<script src="{{pathPrefix}}/static/highcharts4.src.js"></script>
-	<!-- Data  Imports -->
 	<script src="{{pathPrefix}}/static/d3.v3.js"></script>
-	<script>modelStatus="{{modelStatus}}"</script>
-	<!-- Global Functions -->
 	<script type="text/javascript">
-		function editFeeder(modelName, feederNum) {
-			studyUser = "{{allInputDataDict.user}}"
-			window.open("/feeder/" + studyUser + "/" + modelName + "/" + feederNum,  "_blank")
-		}
 		function editDSS(modelName, fileName) {
 			studyUser = "{{allInputDataDict.user}}"
 			window.open("/rawTextEdit/" + studyUser + "/" + modelName + "/" + fileName,  "_blank")
@@ -41,18 +24,7 @@
 	{%- endmacro %}
 </head>
 <body>
-	<div id="header">
-		<div id="headInnerBlock">
-			<div id="menuLeft">
-				<a style="color:white" href="/">Open Modeling Framework</a> &#187;&nbsp;&nbsp;Model
-				&#8220;<p id="titleText" style="display:inline">{{allInputDataDict.modelName}}</p>&#8221;
-			</div>
-		</div>
-	</div>
-	<div id="triangle-parent">
-		<div id="triangle-message">New Version<span class="classic-triangle">A new version of the model has been added to the OMF. To get the new outputs, please fill in any missing inputs and hit "Run Model". You can also just look at the old inputs/outputs.</span></div>
-		<div id="triangle-topright"></div>
-	</div>
+	{{ omfModelTitle }}
 	<p class="reportTitle">Model Input</p>
 	<div id="input" class="content">
 		<form name="inputForm" action="/runModel/" onsubmit="event.preventDefault(); return isFormValid();" method="post">
@@ -102,6 +74,13 @@
 				<label class="tooltip">Simulation Entry Point<span class="classic">At the beginning of the simulation, the number of timesteps allowed for the powerflow solution to stabilize. Marks the beginning of the experiment (i.e. t=0).</span></label>
 				<input type="number" id="simEntryStep" name="simEntryStep" min ="100" max = "9999" value="{{allInputDataDict.simEntryStep}}"/>
 			</div>
+			<div class="shortInput">
+				<label class="tooltip">Include Battery?<span class="classic">Select whether or not to include batteries on the circuit.</span></label>
+				<select id="includeBattery" name="includeBattery" value="{{allInputDataDict.includeBattery}}">
+					<option value="True" {% if allInputDataDict.includeBattery == 'True' %}selected{% endif %}>Yes</option>
+					<option value="False" {% if allInputDataDict.includeBattery == 'False' %}selected{% endif %}>No</option>
+				</select>
+			</div>
 <!--TODO: make circuitFileNameDSS also update when a file is uploaded through distNetViz-->
 			<div class="shortInput">
 				<label class="tooltip">Circuit Editor<span class="classic">Use a visual interface to upload, view, and manipulate a .dss circuit file.</span></label>
@@ -135,12 +114,10 @@
 				<div>{{ insert_file_upload_block('storageFileName','storageFileContent') }}</div>
 			</div>
 			<div class="shortInput">
-				<label class="tooltip">Include Battery?<span class="classic">Select whether or not to include batteries on the circuit.</span></label>
-				<select id="includeBattery" name="includeBattery" value="{{allInputDataDict.includeBattery}}">
-					<option value="True" {% if allInputDataDict.includeBattery == 'True' %}selected{% endif %}>Yes</option>
-					<option value="False" {% if allInputDataDict.includeBattery == 'False' %}selected{% endif %}>No</option>
-				</select>
+				<label class="tooltip">Switch File Input<span class="classic">Import a .csv file that define the characteristics of any switches to be toggled during the simulation.</span></label>
+				<div>{{ insert_file_upload_block('switchFileName','switchFileContent') }}</div>
 			</div>
+			
 			<div class="wideInput">
 				<p class="inputSectionHeader">Cyber Attack Specifications</p>
 			</div>
@@ -184,7 +161,7 @@
 			</div>
 			{{ omfModelButtons }}
 		</form>
-		<div> PyCigar commit 42b66d1 </div>
+		<div> PyCigar commit 5e4633e </div> <!-- as of 28 June 2022 -->
 	</div>
 	{{ omfRunDebugBlock }}
 	{% if modelStatus == 'finished' %}
@@ -214,14 +191,14 @@
 					myVal = eval(arr.join("+"))
 					if (typeof myVal == "undefined") {return 0} else {return myVal}
 				}
-				tPower = eval({{allOutputDataDict.Consumption.Power}}.join("+"))
-				tLosses = eval({{allOutputDataDict.Consumption.Losses}}.join("+"))
-				tDG = eval({{allOutputDataDict.Consumption.DG}}.join("+"))
-				tLoads = tPower + tDG - tLosses
+				tPower = eval({{allOutputDataDict.Consumption.realPower}}.join("+"))
+				tLosses = eval({{allOutputDataDict.Consumption.losses}}.join("+"))
+				tDG = eval({{allOutputDataDict.Consumption.realDG}}.join("+"))
+				tLoads = tPower + tDG - tLosses 
 				dgExported = []
 				fromGrid = []
-				for (i = 0; i < {{allOutputDataDict.Consumption.Power}}.length; i++) {
-					curVal = {{allOutputDataDict.Consumption.Power}}[i]
+				for (i = 0; i < {{allOutputDataDict.Consumption.realPower}}.length; i++) {
+					curVal = {{allOutputDataDict.Consumption.realPower}}[i]
 					if (curVal < 0) {dgExported.push(curVal)} else {fromGrid.push(curVal)}
 				}
 				tDGExported = arrSum(dgExported)
@@ -291,37 +268,56 @@
 				new Highcharts.Chart(localHighChart)
 			</script>
 		</div>
-		<p class="reportTitle">Power Consumption From Transmission System <a target="_self" class="toggle">Hide / Show</a></p>
+		<p class="reportTitle">Power Profile at Substation <a target="_self" class="toggle">Hide / Show</a></p>
 		<div id="powerConsumptionReport" class="tightContent">
 			<div id="powerTimeSeries"></div>
-			<script>
+			<script type="text/javascript">
 				// power series data
-				power = {{allOutputDataDict.Consumption.Power}}
-				losses = {{allOutputDataDict.Consumption.Losses}}
-				dg = {{allOutputDataDict.Consumption.DG}}
-				powerSeries = {
+				apparentPower = {{allOutputDataDict.Consumption.apparentPower}}
+				realPower = {{allOutputDataDict.Consumption.realPower}}
+				reactivePower = {{allOutputDataDict.Consumption.reactivePower}}
+				losses = {{allOutputDataDict.Consumption.losses}}
+				realDG = {{allOutputDataDict.Consumption.realDG}}
+				//reactiveDG = {{allOutputDataDict.Consumption.reactiveDG}}
+				apparentPowerSeries = {
+					"marker":{"enabled":false},
+					"color":"royalblue",
+					"data":apparentPower,
+					"name":"Apparent Power (VA)"}
+				realPowerSeries = {
 					"marker":{"enabled":false},
 					"color":"crimson",
-					"data":power,
-					"name":"Substation Powerflow (W)"}
+					"data":realPower,
+					"name":"Real Power (W)"}
+				reactivePowerSeries = {
+					"marker":{"enabled":false},
+					"color":"orange",
+					"data":reactivePower,
+					"name":"Reactive Power (VAR)"}
 				lossesSeries = {
 					"marker":{"enabled":false},
 					"color":"orangered",
 					"data":losses,
 					"name":"Technical Losses (W)",
 					"visible":false}
-				DGSeries = {
+				realDGSeries = {
 					"marker":{"enabled":false},
 					"color":"darkturquoise",
-					"data":dg,
-					"name":"DG Power (W)",
+					"data":realDG,
+					"name":"DG Real Power (W)",
 					"visible":false}
+				//reactiveDGSeries = {
+				//	"marker":{"enabled":false},
+				//	"color":"",
+				//	"data":reactiveDG,
+				//	"name":"Reactive DG Power (VAR)",
+				//	"visible":false} // Reactive power from the battery isn't a monitored data point in pycigar, but the reactive power on the inverters is. don't the batteries need to be behind the inverters?
 				var localHighChart = JSON.parse(JSON.stringify(highChartsTemplate))
 				localHighChart["chart"]["renderTo"] = "powerTimeSeries"
 				localHighChart["chart"]["type"] = "line"
-				localHighChart["series"] = [powerSeries, lossesSeries, DGSeries]
+				localHighChart["series"] = [apparentPowerSeries, realPowerSeries, reactivePowerSeries, lossesSeries, realDGSeries]
 				localHighChart["yAxis"] = [{
-					"title":{"text":"Power (W)"},
+					"title":{"text":"Power"},
 				}]
 				new Highcharts.Chart(localHighChart);
 			</script>
@@ -697,14 +693,15 @@
 			{% endif %}
 			<script type="text/javascript">	
 			//var dodFactor = parseFloat(allInputData.dodFactor) //We need an output for this from pyCigar, as it will be contained in the battery control spec
-			dodFactor = 90 // hardcode allowable discharge
+			//dodFactor = 90 // hardcode allowable discharge
 			for (let [battName, battDat] of Object.entries({{allOutputDataDict.Battery_Outputs|tojson}})) {
 				battSOC = battDat["SOC"]
 				battStatus = battDat["Charge_Status"]
 				battCycles = battDat["Cycles"]
-				battPower = battDat["Power"]
-				minPower = Math.min(...battPower)
-				maxPower = Math.max(...battPower)
+				battRealPower = battDat["Real_Power"]
+				//battReactivePower = battDat["Reactive_Power"]
+				minPower = Math.min(...battRealPower)
+				maxPower = Math.max(...battRealPower)
 				$("<div/>").appendTo("#batteryReport")
 					.attr("class", "batteryContainer")
 					.attr("id", battName)
@@ -730,29 +727,29 @@
 					"max":100,
 					"opposite": true,
 					"tickPositions":[0,25,50,75,100],
-					"plotLines":[{
-						"color":"gray",
-						"dashStyle":"ShortDash",
-						"width":2,
-						"label":{
-							"text":"Max DOD:" + dodFactor + "%",
-							"align":"left",
-							"x":-5,
-							"style":{"color":"gray", "fontsize":"12px"}
-							},
-						"value": 100-dodFactor,
-					},{
-						"color":"gray",
-						"dashStyle":"ShortDash",
-						"width":1,
-						"label":{
-							"text":"Cycle Equivalents: " + delimitNumbers(battCycles.toFixed(1)), 
-							"align":"right",
-							"x":-5,
-							"style":{"color":"gray", "fontsize":"12px"}
-							},
-						"value": 100-dodFactor,
-					}]
+					//"plotLines":[{
+					//	"color":"gray",
+					//	"dashStyle":"ShortDash",
+					//	"width":2,
+					//	"label":{
+					//		"text":"Max DOD:" + dodFactor + "%",
+					//		"align":"left",
+					//		"x":-5,
+					//		"style":{"color":"gray", "fontsize":"12px"}
+					//		},
+					//	"value": 100-dodFactor,
+					//},{
+					//	"color":"gray",
+					//	"dashStyle":"ShortDash",
+					//	"width":1,
+					//	"label":{
+					//		"text":"Cycle Equivalents: " + delimitNumbers(battCycles.toFixed(1)), 
+					//		"align":"right",
+					//		"x":-5,
+					//		"style":{"color":"gray", "fontsize":"12px"}
+					//		},
+					//	"value": 100-dodFactor,
+					//}]
 				},{
 					"title":{"text":"Status"},
 					"categories":["discharge", "standby", "charge"],
@@ -763,18 +760,26 @@
 					"opposite":true
 				}]
 				localHighChart["series"] = [{
-					"name":"Power Output",
-					"pointWidth": 40,
-					"color":"crimson",
-					"data": battPower,
-					"yAxis": 0,
-				},{
 					"name":"State of Charge",
 					"pointWidth": 40,
 					"color":"royalblue",
 					"data": battSOC,
 					"yAxis": 1
 				},{
+					"name":"Real Power",
+					"pointWidth": 40,
+					"color":"crimson",
+					"data": battRealPower,
+					"yAxis": 0,
+				},
+				//{	
+				//	"name":"Reactive Power",
+				//	"pointWidth": 40,
+				//	"color":"orange",
+				//	"data": battReactivePower,
+				//	"yAxis": 0,
+				//},
+				{
 					"name":"Control Status",
 					"pointWidth": 40,
 					"color":"lightseagreen",
@@ -786,11 +791,11 @@
 			}					
 			</script>
 		</div>
-		<p class="reportTitle">Solar Data <a target="_self" class="toggle">Hide / Show</a></p>
+		<!--<p class="reportTitle">Solar Data <a target="_self" class="toggle">Hide / Show</a></p>
 		<div id="irradianceReport" class="tightContent">
 			<div id="irradianceChartDiv"></div>
 				<p>&#160;&#160;&#160;No solar data inputs. Inverter outputs defined explicitly.</p>
-			<!-- <script>
+			<script>
 				irradianceSeriesData = [
 					{"name":'Global Horizontal',"marker":{"enabled":false},"color":"gold","data":allOutputData.climate['Global Horizontal (W/sm)'],"visible":true}]
 				new Highcharts.Chart({
@@ -805,10 +810,10 @@
 					"chart":{"marginBottom":35,"zoomType":"x","renderTo":"irradianceChartDiv","type":"line","marginRight":20, "height":300,"width":1000},
 					"tooltip":false,
 					"legend":{"verticalAlign":"top","align":"top","borderWidth":0,"x":50,"y":-10,"layout":"horizontal"}})
-			</script> -->
-		</div>
-		<!-- <p class="reportTitle postRun">Study Details <a target="_self" class="toggle">Hide / Show</a></p>
-		<div id="studyDetails" class="tightContent postRun detailsContainer" style="position: relative;">
+			</script>
+		</div>-->
+		<!-- <p class="reportTitle">Study Details <a target="_self" class="toggle">Hide / Show</a></p>
+		<div id="studyDetails" class="tightContent detailsContainer" style="position: relative;">
 			<div id="mapHere" style="width:495px; height:340px; display:inline-block"></div>
 			<script type="text/javascript">
 				width = 495, height = 340
@@ -848,8 +853,8 @@
 			</div>
 			<script>gebi("stdout").innerHTML = allOutputData.stdout</script>
 		</div> -->
-<!-- 		<p class="reportTitle postRun">Study Details and Standard Output<a target="_self" class="toggle">Hide / Show</a></p>
-		<div id="studyDetails" class="tightContent postRun detailsContainer" style="position: relative;">
+		<!-- <p class="reportTitle">Study Details and Standard Output<a target="_self" class="toggle">Hide / Show</a></p>
+		<div id="studyDetails" class="tightContent detailsContainer" style="position: relative;">
 			<div id="runtimeStatsReport" style="width:100%; height:340px; margin:5 0 0 0; overflow-y:scroll; overflow-x:hidden; display:inline-block; vertical-align:top">
 				<pre id="stdout" style="font-size:13px; text-align:left"></pre>
 			</div>

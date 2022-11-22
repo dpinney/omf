@@ -186,7 +186,7 @@ def workIso(modelDir, inputDict):
 	if contamination == 0:
 		contamination = 'auto'
 	clf =  IsolationForest(max_samples=samples,	n_estimators=estimators,
-		contamination=contamination, behaviour='new', random_state=42)
+		contamination=contamination, random_state=42)
 
 	# load our csv to df
 	f = StringIO(inputDict["file"])
@@ -511,12 +511,10 @@ def workSAX(modelDir, inputDict):
 		marker={'color': repeats[:,0], 'colorbar': {'title': 'repeats'},
 		'colorscale': 'thermal', 'showscale':True})
 	plotData.append(data)
-
 	return plotData
 
 def work(modelDir, inputDict):
 	""" Model processing done here. """
-
 	outData = {}
 	outData = workProphet(modelDir, inputDict)
 	plotData = workLof(modelDir, inputDict)
@@ -525,9 +523,11 @@ def work(modelDir, inputDict):
 	outData['plotIso'] = json.dumps(plotData, cls=plotly.utils.PlotlyJSONEncoder)
 	plotData = workSAX(modelDir, inputDict)
 	outData['plotSax'] = json.dumps(plotData, cls=plotly.utils.PlotlyJSONEncoder)
-
 	return outData
 
+def runtimeEstimate(modelDir):
+	''' Estimated runtime of model in minutes. '''
+	return 8.5
 
 def new(modelDir):
 	""" Create a new instance of this model. Returns true on success, false on failure. """
@@ -548,8 +548,8 @@ def new(modelDir):
 		"estimators": "100",
 		"samples":"0.1",
 		"alphabetSize":"9",
-		"windowSize":"12"
-
+		"windowSize":"12",
+		"demandTempBool":"True"
 	}
 	return __neoMetaModel__.new(modelDir, defaultInputs)
 

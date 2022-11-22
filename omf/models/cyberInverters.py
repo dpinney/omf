@@ -26,7 +26,7 @@ def work(modelDir, inputDict):
 	feederName = [x for x in os.listdir(modelDir) if x.endswith('.omd')][0][:-4]
 	inputDict["omdFileName"] = feederName
 	inputDict["dssFileName"] = feederName
-	zipCode = "59001" #TODO get zip code from the PV and Load input file
+	#zipCode = "59001" #TODO get zip code from the PV and Load input file
 
 	# Output a .dss file, which will be needed for ONM.
 	with open(f'{modelDir}/{feederName}.omd', 'r') as omdFile:
@@ -97,9 +97,9 @@ def work(modelDir, inputDict):
 			defenseAgentName = None
 			raise Exception(errorMessage)
 
-	inputDict["climateName"] = weather.zipCodeToClimateName(zipCode)
-	shutil.copy(pJoin(__neoMetaModel__._omfDir, "data", "Climate", inputDict["climateName"] + ".tmy2"),
-		pJoin(modelDir, "climate.tmy2"))
+	#inputDict["climateName"] = weather.zipCodeToClimateName(zipCode)
+	#shutil.copy(pJoin(__neoMetaModel__._omfDir, "data", "Climate", inputDict["climateName"] + ".tmy2"),
+	#	pJoin(modelDir, "climate.tmy2"))
 	
 	def convertInputs():
 		#create the PyCIGAR_inputs folder to store the input files to run PyCIGAR
@@ -145,6 +145,10 @@ def work(modelDir, inputDict):
 		#create storage_inputs.txt file in folder
 		with open(pJoin(modelDir,"PyCIGAR_inputs","storage_inputs.txt"),"w", newline='') as batt_stream:
 			batt_stream.writelines(inputDict['storageFileContent'])
+
+		#create switch_inputs.txt file in folder
+		with open(pJoin(modelDir,"PyCIGAR_inputs","switch_inputs.txt"),"w", newline='') as sw_stream:
+			sw_stream.writelines(inputDict['switchFileContent'])
 
 		return solarPVLengthValue
 
@@ -300,6 +304,7 @@ def work(modelDir, inputDict):
 			dss_path = modelDir + "/PyCIGAR_inputs/circuit.dss",
 			load_solar_path = modelDir + "/PyCIGAR_inputs/load_solar_data.csv",
 			breakpoints_path = modelDir + "/PyCIGAR_inputs/breakpoints.csv",
+			switch_path = modelDir + "/PyCIGAR_inputs/switch_inputs.txt",
 			test = runType,
 			type_attack = attackType,
 			policy = defenseAgentPath,
@@ -322,36 +327,27 @@ def work(modelDir, inputDict):
 		with open(pJoin(modelDir,"pycigarOutput","pycigar_output_specs.json"), 'r') as f:
 			pycigarJson = json.load(f)
 		
-		#convert "allMeterVoltages"
+		#convert meter voltage data
 		outData["allMeterVoltages"] = pycigarJson["allMeterVoltages"]
 		
-		#convert "Consumption"."Power"
-		# HACK! Units are actually kW. Needs to be fixed in pyCigar.
-		outData["Consumption"]["Power"] = pycigarJson["Consumption"]["Power Substation (W)"]
+		#convert consumption data		
+		outData["Consumption"]["realPower"] = pycigarJson["Consumption"]["Power Substation (W)"]
+		outData["Consumption"]["apparentPower"] = pycigarJson["Consumption"]["Apparent Power Substation (VA)"]
+		outData["Consumption"]["reactivePower"] = pycigarJson["Consumption"]["Reactive Power Substation (V)"]
+		outData["Consumption"]["losses"] = pycigarJson["Consumption"]["Losses Total (W)"]
+		outData["Consumption"]["realDG"] = [-1.0 * x for x in pycigarJson["Consumption"]["DG Output (W)"] ]
+		#outData["Consumption"]["realDG"] = [-1.0 * x for x in pycigarJson["Consumption"]["Real DG Output (W)"] ]
+		#outData["Consumption"]["reactiveDG"] = [-1.0 * x for x in pycigarJson["Consumption"]["Reactive DG Output (V)"] ]
 
-		#convert "Consumption"."Losses"
-		outData["Consumption"]["Losses"] = pycigarJson["Consumption"]["Losses Total (W)"]
-
-		#convert "Consumption"."DG"
-		outData["Consumption"]["DG"] = [-1.0 * x for x in pycigarJson["Consumption"]["DG Output (W)"]]
-		#outData["Consumption"]["DG"] = pycigarJson["Consumption"]["DG Output (W)"]
-
-		#convert "powerFactor"
+		#convert substation data
 		outData["powerFactor"] = pycigarJson["Substation Power Factor (%)"]	
-
-		#convert "swingVoltage"
 		outData["swingVoltage"] = pycigarJson["Substation Top Voltage (U)"]
-
-		#convert "downlineNodeVolts"
 		outData["downlineNodeVolts"] = pycigarJson["Substation Bottom Voltage (U)"]
+		outData["minVoltBand"] = pycigarJson["Substation Regulator Minimum Voltage (V)"] # unused?
+		outData["maxVoltBand"] = pycigarJson["Substation Regulator Maximum Voltage (V)"] # unused?
 
-		#convert "minVoltBand"
-		outData["minVoltBand"] = pycigarJson["Substation Regulator Minimum Voltage(V)"]
-
-		#convert "maxVoltBand"
-		outData["maxVoltBand"] = pycigarJson["Substation Regulator Maximum Voltage(V)"]
-
-		#create lists of circuit object names
+		#Convert capacitor, regulator data
+		# create lists of regulator and capacitor object names
 		regNameList = []
 		capNameList = []
 		for key in pycigarJson:
@@ -359,8 +355,7 @@ def work(modelDir, inputDict):
 				regNameList.append(key)
 			elif key.startswith('Capacitor_'):
 				capNameList.append(key)
-
-		#convert regulator data
+		# regulators
 		regDict = {}
 		for reg_name in regNameList:
 			short_reg_name = reg_name.replace("Regulator_","") # TODO: ask LBL to alter regulator, capacitor output to match that of "bus voltages"
@@ -373,9 +368,8 @@ def work(modelDir, inputDict):
 			newReg["tapchanges"] = tapchanges
 			regDict[reg_name] = newReg
 		outData["Regulator_Outputs"] = regDict
-
-		#convert capacitor data
-		# TODO: Need to test with a capacitor in the circuit! No idea if this code works.
+		# capacitors
+		# TODO: Need to test with a capacitor in the circuit
 		capDict = {}
 		for cap_name in capNameList:
 			short_cap_name = cap_name.replace("Capacitor_","")
@@ -418,7 +412,12 @@ def work(modelDir, inputDict):
 			batt_power = batt_dict["Power Output (W)"]
 			for i, val in enumerate(batt_dict["Power Input (W)"]):
 				batt_power[i] = -(batt_power[i] + val)
-			new_batt_dict["Power"] = batt_power
+			new_batt_dict["Real_Power"] = batt_power
+			#TODO: uncomment this when Sy-Toan makes the change
+			#batt_power = batt_dict["Reactive Power Output (VAR)"]
+			#for i, val in enumerate(batt_dict["Reactive Power Input (W)"]):
+			#	batt_power[i] = -(batt_power[i] + val)
+			#new_batt_dict["Reactive_Power"] = batt_power
 			if len(batt_dict["bat_cycle"]) == 0:
 				new_batt_dict["Cycles"] = 0.0
 			else:
@@ -437,6 +436,7 @@ def work(modelDir, inputDict):
 		for busname in pycigarJson["Bus Voltages"].keys():
 			outData["Bus_Voltages"][busname] = { k:v for k,v in pycigarJson["Bus Voltages"][busname].items() if k!="Phases" }
 
+		#capture the pycigar output file
 		outData["stdout"] = pycigarJson["stdout"]
 
 	runPyCIGAR()
@@ -454,6 +454,8 @@ def new(modelDir):
 	bp_fn = "breakpoints.csv"
 	misc_fn = "misc_inputs.csv"
 	batt_fn = "battery_inputs.txt"
+	sw_fn = "switch_inputs.txt"
+
 
 	with open(pJoin(omf.omfDir, "static", "testFiles", "pyCIGAR", ckt_dir, pv_fn)) as pv_stream:
 		pv_ins = pv_stream.read()
@@ -463,6 +465,8 @@ def new(modelDir):
 		misc_ins = misc_stream.read()
 	with open(pJoin(omf.omfDir, "static", "testFiles", "pyCIGAR", ckt_dir, batt_fn)) as batt_stream:
 		batt_ins = batt_stream.read()
+	with open(pJoin(omf.omfDir, "static", "testFiles", "pyCIGAR", ckt_dir, sw_fn)) as sw_stream:
+		sw_ins = sw_stream.read()
 
 	defaultInputs = {
 		"simStartDate": "2019-07-01T00:00:00Z",
@@ -479,6 +483,8 @@ def new(modelDir):
 		"miscFileContent": misc_ins,
 		"storageFileName": batt_fn,
 		"storageFileContent": batt_ins,
+		"switchFileName": sw_fn,
+		"switchFileContent": sw_ins,
 		"includeBattery": "False",
 		"modelType": modelName,
 		"zipCode": "59001",

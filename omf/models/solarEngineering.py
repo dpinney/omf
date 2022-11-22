@@ -5,16 +5,15 @@ from os.path import join as pJoin
 from functools import reduce
 import numpy as np
 import networkx as nx
-
 import matplotlib
+from matplotlib import pyplot as plt
+from matplotlib import animation
+from matplotlib.animation import FuncAnimation
 if platform.system() == 'Darwin':
 	matplotlib.use('TkAgg')
+	# plt.rcParams['animation.ffmpeg_path'] = '/usr/local/bin/ffmpeg'
 else:
 	matplotlib.use('Agg')
-from matplotlib import pyplot as plt
-from matplotlib.animation import FuncAnimation
-
-# OMF imports
 from omf import feeder, weather
 from omf.solvers import gridlabd
 from omf.models import __neoMetaModel__
@@ -354,7 +353,9 @@ def generateVoltChart(tree, rawOut, modelDir, neatoLayout=True):
 		cleanG = nx.Graph(fGraph.edges())
 		cleanG.add_nodes_from(fGraph)
 		# was formerly : positions = nx.graphviz_layout(cleanG, prog='neato') but this threw an error
-		positions = nx.nx_agraph.graphviz_layout(cleanG, prog='neato')
+		# positions = nx.nx_agraph.graphviz_layout(cleanG, prog='neato')
+		positions = nx.kamada_kawai_layout(cleanG)
+		positions = {k:(1000 * positions[k][0],1000 * positions[k][1]) for k in positions} # get out of array notation
 	else:
 		rawPositions = {n:fGraph.nodes[n].get('pos',(0,0)) for n in fGraph}
 		#HACK: the import code reverses the y coords.
@@ -475,6 +476,7 @@ def generateVoltChart(tree, rawOut, modelDir, neatoLayout=True):
 	plt.clim(110,130)
 	plt.colorbar()
 	plt.title(rawOut['aVoltDump.csv']['# timestamp'][0])
+	plt.tight_layout()
 	def update(step):
 		nodeColors = np.array([nodeVolts[step].get(n,0) for n in fGraph.nodes()])
 		if len(lineCurrents)>0:
@@ -485,7 +487,8 @@ def generateVoltChart(tree, rawOut, modelDir, neatoLayout=True):
 		return nodeColors,
 	mapTimestamp = datetime.datetime.now().strftime("%Y-%m-%d_%H:%M:%S")
 	anim = FuncAnimation(voltChart, update, frames=len(rawOut['aVoltDump.csv']['# timestamp']), interval=200, blit=False)
-	anim.save(pJoin(modelDir,'voltageChart_'+ mapTimestamp +'.mp4'), codec='h264', extra_args=['-pix_fmt', 'yuv420p'])
+	ffmpegwriter = animation.FFMpegWriter(codec='h264', extra_args=['-pix_fmt', 'yuv420p'])
+	anim.save(pJoin(modelDir,'voltageChart_'+ mapTimestamp +'.mp4'), writer=ffmpegwriter)
 	# Reclaim memory by closing, deleting and garbage collecting the last chart.
 	voltChart.clf()
 	plt.close()

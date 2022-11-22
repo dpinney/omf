@@ -411,7 +411,9 @@ def genDiagram(outputDir, feederJson, damageDict, critLoads, damagedLoads, edgeL
 		cleanG = nx.Graph(inGraph.edges())
 		# HACK2: might miss nodes without edges without the following.
 		cleanG.add_nodes_from(inGraph)
-		pos = nx.nx_agraph.graphviz_layout(cleanG, prog='neato')
+		# pos = nx.nx_agraph.graphviz_layout(cleanG, prog='neato')
+		pos = nx.kamada_kawai_layout(cleanG)
+		pos = {k:(1000 * pos[k][0],1000 * pos[k][1]) for k in pos} # get out of array notation
 	else:
 		pos = {n:inGraph.nodes[n].get('pos',(0,0)) for n in inGraph}
 	# Rescale using the magic number.
