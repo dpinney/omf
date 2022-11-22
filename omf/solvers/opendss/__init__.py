@@ -9,6 +9,7 @@ import math
 import os
 import warnings
 import subprocess
+from copy import deepcopy
 try:
 	import opendssdirect as dss
 except:
@@ -142,16 +143,16 @@ def newQstsPlot(filePath, stepSizeInMinutes, numberOfSteps, keepAllFiles=False, 
 	# Write runner file and run.
 	with open(f'{dssFileLoc}/dss_run_file.dss', 'w') as run_file:
 		run_file.write(dss_run_file)
-	# Run in the right directory.
-	subprocess.run('opendsscmd dss_run_file.dss', cwd=dssFileLoc, shell=True, check=True, capture_output=True)
+	# Run in the right directory and suppress the output
+	subprocess.run('opendsscmd dss_run_file.dss', cwd=dssFileLoc, shell=True, check=True, stdout=subprocess.DEVNULL)
 	# Aggregate monitors
 	all_gen_df = pd.DataFrame()
 	all_load_df = pd.DataFrame()
 	all_source_df = pd.DataFrame()
 	all_control_df = pd.DataFrame()
 	for name in mon_names:
-		csv_path = f'{dssFileLoc}/{circ_name}_Mon_{name}.csv'
-		df = pd.read_csv(f'{circ_name}_Mon_{name}.csv')
+		csv_path = f'{dssFileLoc}/{circ_name}_Mon_{name}_1.csv'
+		df = pd.read_csv(f'{circ_name}_Mon_{name}_1.csv')
 		if name.startswith('monload-'):
 			# reassign V1 single phase voltages outputted by DSS to the appropriate column and filling Nans for neutral phases (V2)
 			# three phase print out should work fine as is
@@ -265,6 +266,126 @@ def newQstsPlot(filePath, stepSizeInMinutes, numberOfSteps, keepAllFiles=False, 
 		all_load_df['V3(PU)'] = all_load_df['V3'].astype(float) / (all_load_df['kv'].astype(float) * 1000.0)
 		all_load_df.to_csv(f'{dssFileLoc}/{filePrefix}_load.csv', index=False)
 
+def hosting_capacity(FNAME:str, GEN_BUSES:list, STEPS:int, KW:float):
+	''' Using DSS circuit at FNAME, add KW sized generators at each of the GEN_BUSES up to STEPS times.
+		Returns two values:
+			a dataframe with max per-phase voltages after each addition, and
+			the kW addition that pushed voltages over the limit.
+	'''
+	# Derived constants.
+	fullpath = os.path.abspath(FNAME)
+	filedir = os.path.dirname(fullpath)
+	volt_file = f'{filedir}/volts.csv'
+	ansi_a_max_pu = 1.05
+	ansi_b_max_pu = 1.058
+	DEFAULT_KV = 2.14
+	tree = dssConvert.dssToTree(fullpath)
+	# Find the insertion kv levels.
+	kv_mappings = get_bus_kv_mappings(fullpath)
+	for bus in GEN_BUSES:
+		if bus not in kv_mappings:
+			warnings.warn(f'Voltage unkown for {bus}, defaulting to {DEFAULT_KV}')
+	# Get insertion bus; should always be safe to insert above makebuslist.
+	for i, ob in enumerate(tree):
+		if ob.get('!CMD', None) == 'makebuslist':
+			insertion_index = i
+	max_kw = 0.0
+	buses_with_cap_left = {}
+	results = [['kw_add', 'v_max_pu1', 'v_max_pu2', 'v_max_pu3', 'v_max_all_pu']]
+	for step in [0] + list(range(1, STEPS + 1)):
+		new_tree = deepcopy(tree)
+		# Insert generators.
+		gen_template = {
+			'!CMD': 'new',
+			'object': None,
+			'bus1': None,
+			'kw': KW * step,
+			'pf': '1.0',
+			'conn': 'wye',
+			'phases': '3',
+			'kv': None,
+			'model': '1' }
+		for bus in GEN_BUSES:
+			if step != 0: # skip generation adding for baseline
+				new_gen = dict(gen_template)
+				new_gen['object'] = f'generator.hostcap_{bus}'
+				new_gen['bus1'] = f'{bus}.1.2.3'
+				new_gen['kv'] = kv_mappings.get(bus, DEFAULT_KV)
+				new_tree.insert(insertion_index, new_gen)
+		# Calc voltages.
+		dssConvert.treeToDss(new_tree, 'HOSTCAP.dss')
+		voltagePlot('HOSTCAP.dss')
+		df = pd.read_csv(volt_file)
+		v_max_pu1, v_max_pu2, v_max_pu3 =  df[' pu1'].max(), df[' pu2'].max(), df[' pu2'].max()
+		v_max_pu_all = max(v_max_pu1, v_max_pu2, v_max_pu3)
+		results.append([KW * step, v_max_pu1, v_max_pu2, v_max_pu3, v_max_pu_all])
+		# Determine which buses still have capacity
+		if v_max_pu_all > ansi_b_max_pu:
+			max_kw = KW * max(step - 1, 0)
+			df = pd.DataFrame(results[1:], columns=results[0])
+			return df, max_kw
+	df = pd.DataFrame(results[1:], columns=results[0])
+	return df, max_kw
+
+def hosting_capacity_max(FNAME, GEN_BUSES, STEPS, KW):
+	''' Keep calculating hosting capacity, uniformly distributing generation, dropping the lowest capacity bus each time.
+		Gives a decent estimate of the amount of hosting capacity at each gen_bus when deploying generation on all of them.
+	'''
+	results = {}
+	prev_max = 0
+	DEFAULT_KV = 2.14
+	fullpath = os.path.abspath(FNAME)
+	for i in range(len(GEN_BUSES) - 1):
+		# Run uniform hosting capacity.
+		df, max_kw = hosting_capacity(FNAME, GEN_BUSES, STEPS, KW)
+		# print('RUNNING ON', GEN_BUSES)
+		# print(df)
+		# print(max_kw)
+		prev_max = prev_max + max_kw
+		# Update the file with new max generators.
+		tree = dssConvert.dssToTree(FNAME)
+		kv_mappings = get_bus_kv_mappings(fullpath)
+		for j, ob in enumerate(tree):
+			if ob.get('!CMD', None) == 'makebuslist':
+				insertion_index = j
+		for bus in GEN_BUSES:
+			gen = {
+				'!CMD': 'new',
+				'object': f'generator.hostcap_{bus}_{i}_old',
+				'bus1': f'{bus}.1.2.3',
+				'kw': max_kw,
+				'pf': '1.0',
+				'conn': 'wye',
+				'phases': '3',
+				'kv': kv_mappings.get(bus, DEFAULT_KV),
+				'model': '1' }
+			tree.insert(insertion_index, gen)
+		dssConvert.treeToDss(tree, f'HOSTCAP_{i}.dss')
+		FNAME = f'HOSTCAP_{i}.dss'
+		# Individual caps left.
+		cap_left = {}
+		for bus in GEN_BUSES:
+			df, ind_max_kw = hosting_capacity(FNAME, [bus], STEPS, KW)
+			cap_left[bus] = ind_max_kw
+		# print(cap_left)
+		# Drop zeroes and lowest
+		cap_rem_pairs = list(cap_left.items())
+		cap_rem_pairs.sort(key=lambda x:x[1])
+		removes = [x for x in cap_rem_pairs if x[1] == 0.0]
+		if len(removes) == 0:
+			# no zeroes so drop lowest
+			min_cap = cap_rem_pairs[0][0]
+			cap_added = cap_rem_pairs[0][1]
+			removes.append((min_cap,cap_added))
+		# print('REMOVES',removes)
+		if len(removes) > 0:
+			for bus, ignore in removes:
+				results[bus] = prev_max
+				GEN_BUSES.remove(bus)
+		if len(GEN_BUSES) < 2:
+			return results
+	return results
+
 def get_obj_by_name(name, tree, cmd=None):
 	''' Get object with given name in tree. If multiple or zero objs found, raise exceptions. '''
 	all_obs_name = [x for x in tree if x.get('object','').endswith(f'.{name}')]
@@ -325,6 +446,21 @@ def get_bus_kv_mappings(path_to_dss):
 	out_data = volt_df[['Bus','kv_ln']].values.tolist()
 	out_dict = {x[0].lower():x[1] for x in out_data}
 	return out_dict
+
+def get_bus_phasing_map(path_to_dss):
+	''' Returns a map {bus_name:phase_list} where phase list a list of all powered phases (e.g. [1,3]).'''
+	voltagePlot(path_to_dss)
+	path_to_dss = os.path.abspath(path_to_dss)
+	file_loc = os.path.dirname(path_to_dss)
+	volt_file_loc = f'{file_loc}/volts.csv'
+	volt_df = pd.read_csv(volt_file_loc).set_index('Bus')
+	bus_df = volt_df.transpose()
+	results = {bus:[] for bus in bus_df.columns}
+	for bus in bus_df.columns:
+		for i, pu in enumerate([' pu1', ' pu2', ' pu3']):
+			if bus_df[bus][pu] > 0:
+				results[bus].append(i + 1)
+	return results
 
 def currentPlot(filePath):
 	''' Current plotting function.'''

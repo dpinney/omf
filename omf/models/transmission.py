@@ -13,6 +13,7 @@ else:
 	matplotlib.use('Agg')
 from matplotlib import pyplot as plt
 import matplotlib.cm as cm
+import pandapower as ppow
 
 from omf import network
 from omf.models import __neoMetaModel__
@@ -31,7 +32,7 @@ def work(modelDir, inputDict):
 		'voltsChart' : '', 'powerReactChart' : '', 'powerRealChart' : '',
 		'stdout' : '', 'stderr' : ''
 		}
-	# Read feeder and convert to .mat.
+	# Read feeder and convert to .m.
 	try:
 		networkName = [x for x in os.listdir(modelDir) if x.endswith('.omt')][0][0:-4]
 	except:
@@ -41,106 +42,35 @@ def work(modelDir, inputDict):
 	matName = 'matIn'
 	matFileName = matName + '.m'
 	matStr = network.netToMat(networkJson, matName)
+	matStr = matStr + ['''mpc.gencost = [
+	2	1500	0	3	0.11	5	150;
+	2	2000	0	3	0.085	1.2	600;
+	2	3000	0	3	0.1225	1	335;
+	];'''] #HACK: include gencost
 	with open(pJoin(modelDir, matFileName),"w") as outMat:
 		for row in matStr: outMat.write(row)		
-	# Build the MATPOWER command.
-	matDir =  pJoin(__neoMetaModel__._omfDir,'solvers','matpower7.0')
-	matPath = _getMatPath(matDir)
-	algorithm = inputDict.get("algorithm","NR")
-	pfArg = "'pf.alg', '" + algorithm + "'"
-	modelArg = "'model', '" + inputDict.get("model","AC") + "'"
-	iterCode = "pf." + algorithm[:2].lower() + ".max_it"
-	pfItArg = "'" + iterCode + "', " + str(inputDict.get("iteration",10))
-	pfTolArg = "'pf.tol', " + str(inputDict.get("tolerance",math.pow(10,-8)))
-	pfEnflArg = "'pf.enforce_q_lims', " + str(inputDict.get("genLimits",0))
-	if platform.system() == "Windows":
-		# Find the location of octave-cli tool.
-		envVars = os.environ["PATH"].split(';')
-		octavePath = "C:\\Octave\\Octave-4.2.0"
-		for pathVar in envVars:
-			if "octave" in pathVar.lower():
-				octavePath = pathVar
-		# Run Windows-specific Octave command.
-		mpoptArg = "mpoption(" + pfArg + ", " + modelArg + ", " + pfItArg + ", " + pfTolArg+", " + pfEnflArg + ") "
-		cmd = "runpf('"+pJoin(modelDir,matFileName)+"'," + mpoptArg +")"
-		args = [octavePath + '\\bin\\octave-cli','-p',matPath, "--eval",  cmd]
-		myOut = subprocess.check_output(args, shell=True)
-		with open(pJoin(modelDir, "matout.txt"), "w") as matOut:
-			matOut.write(myOut)
-	else:
-		# Run UNIX Octave command.
-		mpoptArg = "mpopt = mpoption("+pfArg+", "+modelArg+", "+pfItArg+", "+pfTolArg+", "+pfEnflArg+"); "
-		command = "octave -p " + matPath + "--no-gui --eval \""+mpoptArg+"runpf('"+pJoin(modelDir,matFileName)+"', mpopt)\" > \"" + pJoin(modelDir,"matout.txt") + "\""
-		proc = subprocess.Popen(command, stdout=subprocess.PIPE, shell=True)
-		print(command)
-		(out, err) = proc.communicate()
-	imgSrc = pJoin(__neoMetaModel__._omfDir,'scratch','transmission','inData')
-	# Read matout.txt and parse into outData.
-	gennums=[]
-	todo = None
-	with open(pJoin(modelDir,"matout.txt")) as f:
-		for i,line in enumerate(f):
-			# Determine what type of data is coming up.
-			if "How many?" in line:
-				todo = "count"
-			elif "Generator Data" in line:
-				todo = "gen"
-				lineNo = i
-			elif "Bus Data" in line:
-				todo = "node"
-				lineNo = i
-			elif "Branch Data" in line:
-				todo = "line"
-				lineNo = i
-			# Parse lines.
-			line = line.split(' ')
-			line = [a for a in line if a != '']
-			if todo=="count":
-				if "Buses" in line:
-					busCount = int(line[1])
-				elif "Generators" in line:
-					genCount = int(line[1])
-				elif "Loads" in line:
-					loadCount = int(line[1])
-				elif "Branches" in line:
-					branchCount = int(line[1])
-				elif "Transformers" in line:
-					transfCount = int(line[1])
-					todo = None
-			elif todo=="gen":
-				if i>(lineNo+4) and i<(lineNo+4+genCount+1):
-					# gen bus numbers.
-					gennums.append(line[1])
-				elif i>(lineNo+4+genCount+1):
-					todo = None
-			elif todo=="node":
-				if i>(lineNo+4) and i<(lineNo+4+busCount+1):
-					# voltage
-					if line[0] in gennums: comp="gen"
-					else: comp="node"
-					outData['tableData']['volts'][0].append(comp+str(line[0]))
-					outData['tableData']['powerReal'][0].append(comp+str(line[0]))
-					outData['tableData']['powerReact'][0].append(comp+str(line[0]))
-					outData['tableData']['volts'][1].append(line[1])
-					outData['tableData']['powerReal'][1].append(line[3])
-					outData['tableData']['powerReact'][1].append(line[4])
-				elif i>(lineNo+4+busCount+1):
-					todo = None
-			elif todo=="line":
-				if i>(lineNo+4) and i<(lineNo+4+branchCount+1):
-					# power
-					outData['tableData']['powerReal'][0].append("line"+str(line[0]))
-					outData['tableData']['powerReact'][0].append("line"+str(line[0]))
-					outData['tableData']['powerReal'][1].append(line[3])
-					outData['tableData']['powerReact'][1].append(line[4])
-				elif i>(lineNo+4+branchCount+1):
-					todo = None
-	# Massage the data.
-	for powerOrVolt in outData['tableData'].keys():
-		for i in range(len(outData['tableData'][powerOrVolt][1])):
-			if outData['tableData'][powerOrVolt][1][i]!='-':
-				outData['tableData'][powerOrVolt][1][i]=float(outData['tableData'][powerOrVolt][1][i])
-	#Create chart
+	# Run pandapower powerflow and generate results
+	case = ppow.converter.from_mpc(pJoin(modelDir, matFileName))
+	ppow.runpp(case)
+	bus_labels = [f'bus{x}' for x in case.res_bus.index]
+	volt_amounts = list(case.res_bus['vm_pu'])
+	pow_amounts = list(case.res_bus['p_mw'])
+	react_amounts = list(case.res_bus['q_mvar'])
+	outData['tableData'] = {
+		"volts":[
+			bus_labels,
+			volt_amounts
+		],
+		"powerReal":[
+			bus_labels,
+			pow_amounts
+		],
+		"powerReact":[
+			bus_labels,
+			react_amounts
+		]
+	}
+	# Create chart
 	nodeVolts = outData["tableData"]["volts"][1]
 	minNum = min(nodeVolts)
 	maxNum = max(nodeVolts)

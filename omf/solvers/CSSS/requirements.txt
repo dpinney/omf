@@ -21,7 +21,7 @@ jupyter-client==5.2.2
 jupyter-core==4.4.0
 matplotlib==2.1.2
 multiprocess==0.70.5
-numpy==1.21.0
+numpy==1.22.0
 pandas==0.22.0
 pathlib2==2.3.0
 pexpect==4.4.0

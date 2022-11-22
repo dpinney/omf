@@ -1,10 +1,6 @@
 <head>
-	<title>Open Modeling Framework</title>
-	<meta charset="utf-8">
-	<link href="{{pathPrefix}}/static/omf.css" type="text/css" rel="stylesheet"/>
-	<link rel="shortcut icon" href="{{pathPrefix}}/static/favicon.ico">
+	{{ omfHeaders }}
 	<style>
-	/*Styles here*/
 		table {
 			border-collapse: collapse;
 			width: 100%;
@@ -22,53 +18,33 @@
 			background-color: #e6e6e6;
 		}
 	</style>
-	{% if modelStatus == "running" %}<meta http-equiv="refresh" content="5"/>{% endif %}
-	<!-- Library Imports -->
-	<script type="text/javascript" src="{{pathPrefix}}/static/omf.js"></script>
-	<script type="text/javascript" src="{{pathPrefix}}/static/jquery-1.9.1.js"></script>
 	<script src="{{pathPrefix}}/static/highcharts4.src.js"></script>
 	<script src="https://cdn.plot.ly/plotly-1.50.1.min.js"></script>
-	<!-- Data  Imports -->
-	<script>allInputData={% if allInputDataDict %}{{allInputDataDict | tojson}}{% else %}null{% endif %}</script>
-	<script>allOutputData={% if allOutputDataDict %}{{allOutputDataDict | tojson}}{% else %}null{% endif %}</script>
-	<script>modelStatus="{{modelStatus}}"</script>
-	<script>currentUser="{{datastoreNames.get('currentUser','test')}}"</script>
 </head>
-<body onload="init()">
-	<div id="header">
-		<div id="headInnerBlock">
-			<div id="menuLeft">
-				<a style="color:white" href="/">Open Modeling Framework</a> &#187;&nbsp;&nbsp;Model
-				&#8220;<p id="titleText" style="display:inline"></p>&#8221;
-			</div>
-		</div>
-	</div>
-	<div id="triangle-parent">
-		<div id="triangle-message">New Version<span class="classic-triangle">A new version of the model has been added to the OMF. To get the new outputs, please fill in any missing inputs and hit "Run Model". You can also just look at the old inputs/outputs.</span></div>
-		<div id="triangle-topright"></div>
-	</div>
+<body>
+	{{ omfModelTitle }}
 	<p class="reportTitle">Model Input</p>
 	<div id="input" class="content">
-		<form name="inputForm" action="/runModel/" onsubmit="event.preventDefault(); return isFormValid();" method="post">
+		<form name="inputForm" value="{{allInputDataDict.inputForm}}" action="/runModel/" onsubmit="event.preventDefault(); return isFormValid();" method="post">
 			<div class="shortInput">
 				<label>Model Type <a href="https://github.com/dpinney/omf/wiki/Models-~-smartSwitching" target="blank">Help?</a></label>
-				<input type="text" id="modelType" name="modelType" value="{{modelName}}" readonly/>
+				<input type="text" id="modelType" name="modelType" value="{{allInputDataDict.modelType}}" value="{{modelName}}" readonly/>
 			</div>
 			<div class="shortInput">
 				<label>Model Name</label>
-				<input type="text" id="modelName" name="modelName" pattern="^[\w\s\d\.-]+$" required="required">
+				<input type="text" id="modelName" name="modelName" value="{{allInputDataDict.modelName}}" pattern="^[\w\s\d\.-]+$" required="required">
 			</div>
-			<div class="shortInput runningInline postRunInline">
+			<div class="shortInput">
 				<label>User</label>
-				<input type="text" id="user" name="user" readonly/>
+				<input type="text" id="user" name="user" value="{{allInputDataDict.user}}" readonly/>
 			</div>
-			<div class="shortInput runningInline postRunInline ">
+			<div class="shortInput">
 				<label>Created</label>
-				<input type="text" id="created" name="created" readonly/>
+				<input type="text" id="created" name="created" value="{{allInputDataDict.created}}" readonly/>
 			</div>
-			<div class="shortInput postRunInline">
+			<div class="shortInput">
 				<label>Run Time</label>
-				<input type="text" id="runTime" name="runTime" readonly/>
+				<input type="text" id="runTime" name="runTime" value="{{allInputDataDict.runTime}}" readonly/>
 			</div>
 			<div class="wideInput">
 				<p class="inputSectionHeader">Model Specifications</p>
@@ -76,195 +52,148 @@
 			<hr>
 			<div class="shortInput">
 				<label>Feeder</label>
-				<script type="text/javascript">
-				function editFeeder(modelName, feederNum) {
-					console.log("modelName:",modelName)
-					studyUser = allInputData.user
-					window.open("/feeder/" + studyUser + "/" + modelName + "/" + feederNum,  "_blank")
-				}
-				</script>
 				<button id="feederButton" type="button" onclick="javascript:editFeeder(allInputData.modelName,1);" style="display:block;width:125px;">Open Editor</button>
-				<input type="text" id="feederName1" name="feederName1" style="display:none">
+				<input type="text" id="feederName1" name="feederName1" value="{{allInputDataDict.feederName1}}" style="display:none">
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Outage Data (.csv file)<span class="classic">Please see the documentation at the help link for the required format</span></label>
 				<input id="outageFile" type="file" style="display:none" onchange="handle_files(this.files,'outageData','outageFileName')">
-				<input id="outageData" name="outageData" type="hidden">
+				<input id="outageData" name="outageData" value="{{allInputDataDict.outageData}}" type="hidden">
 				<div>
 					<label for="outageFile" class="fileButton">Choose File</label>
-					<input id="outageFileName" name="outageFileName" value='' readonly class="uploadFileName">
+					<input id="outageFileName" name="outageFileName" value="{{allInputDataDict.outageFileName}}" value='' readonly class="uploadFileName">
 				</div>
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Generate Random Faults?<span class="classic">If yes, generate a random set of faults using a distribution; if no, use the input .csv file to generate faults manually.</span></label>
-				<select id="generateRandomFaults" name="generateRandomFaults" />
-					<option value='True'>Yes</option>
-					<option value='False'>No</option>
+				<select id="generateRandomFaults" name="generateRandomFaults" value="{{allInputDataDict.generateRandomFaults}}" />
+					<option value="True" {% if allInputDataDict.generateRandomFaults == 'True' %}selected{% endif %}>Yes</option>
+					<option value="False" {% if allInputDataDict.generateRandomFaults == 'False' %}selected{% endif %}>No</option>
 				</select>
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Line for Faults<span class="classic">The type of line on which the random faults can occur.</span></label>
-				<select id="lineTypeForFaults" name="lineTypeForFaults" />
-					<option value="underground_line">Underground Lines</option>
-					<option value="overhead_line">Overhead Lines</option>
-					<option value="triplex_line">Triplex Lines</option>
+				<select id="lineTypeForFaults" name="lineTypeForFaults" value="{{allInputDataDict.lineTypeForFaults}}" />
+					<option value="underground_line" {% if allInputDataDict.lineTypeForFaults == 'underground_line' %}selected{% endif %}>Underground Lines</option>
+					<option value="overhead_line" {% if allInputDataDict.lineTypeForFaults == 'overhead_line' %}selected{% endif %}>Overhead Lines</option>
+					<option value="triplex_line" {% if allInputDataDict.lineTypeForFaults == 'triplex_line' %}selected{% endif %}>Triplex Lines</option>
 				</select>
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Recloser Location<span class="classic">Location where recloser is added.</span></label>
-				<input type="text" id="recloserLocation" name="recloserLocation">
+				<input type="text" id="recloserLocation" name="recloserLocation" value="{{allInputDataDict.recloserLocation}}">
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Failure Distribution<span class="classic">Distribution for the failure generation function.</span></label>
-				<select id="failureDistribution" name="failureDistribution" />
-					<option value="UNIFORM">Uniform</option>
-					<option value="NORMAL">Normal</option>
-					<option value="BERNOULLI">Bernoulli</option>
-					<option value="LOGNORMAL">Lognormal</option>
-					<option value="PARETO">Pareto</option>
-					<option value="EXPONENTIAL">Exponential</option>
-					<option value="WEIBULL">Weibull</option>
-					<option value="GAMMA">Gamma</option>
-					<option value="BETA">Beta</option>
-					<option value="TRIANGLE">Triangle</option>
+				<select id="failureDistribution" name="failureDistribution" value="{{allInputDataDict.failureDistribution}}" />
+					<option value="UNIFORM" {% if allInputDataDict.failureDistribution == 'UNIFORM' %}selected{% endif %}>Uniform</option>
+					<option value="NORMAL" {% if allInputDataDict.failureDistribution == 'NORMAL' %}selected{% endif %}>Normal</option>
+					<option value="BERNOULLI" {% if allInputDataDict.failureDistribution == 'BERNOULLI' %}selected{% endif %}>Bernoulli</option>
+					<option value="LOGNORMAL" {% if allInputDataDict.failureDistribution == 'LOGNORMAL' %}selected{% endif %}>Lognormal</option>
+					<option value="PARETO" {% if allInputDataDict.failureDistribution == 'PARETO' %}selected{% endif %}>Pareto</option>
+					<option value="EXPONENTIAL" {% if allInputDataDict.failureDistribution == 'EXPONENTIAL' %}selected{% endif %}>Exponential</option>
+					<option value="WEIBULL" {% if allInputDataDict.failureDistribution == 'WEIBULL' %}selected{% endif %}>Weibull</option>
+					<option value="GAMMA" {% if allInputDataDict.failureDistribution == 'GAMMA' %}selected{% endif %}>Gamma</option>
+					<option value="BETA" {% if allInputDataDict.failureDistribution == 'BETA' %}selected{% endif %}>Beta</option>
+					<option value="TRIANGLE" {% if allInputDataDict.failureDistribution == 'TRIANGLE' %}selected{% endif %}>Triangle</option>
 				</select>
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Failure Dist. Param. 1<span class="classic">First parameter for failure distribution.</span></label>
-				<input type="text" id="failureDistParam1" name="failureDistParam1" required="required">
+				<input type="text" id="failureDistParam1" name="failureDistParam1" value="{{allInputDataDict.failureDistParam1}}" required="required">
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Failure Dist. Param. 2<span class="classic">Second parameter for failure distribution.</span></label>
-				<input type="text" id="failureDistParam2" name="failureDistParam2" required="required">
+				<input type="text" id="failureDistParam2" name="failureDistParam2" value="{{allInputDataDict.failureDistParam2}}" required="required">
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Restoration Distribution<span class="classic">Distribution for the restoration generation function.</span></label>
-				<select id="restorationDistribution" name="restorationDistribution" />
-					<option value="UNIFORM">Uniform</option>
-					<option value="NORMAL">Normal</option>
-					<option value="BERNOULLI">Bernoulli</option>
-					<option value="LOGNORMAL">Lognormal</option>
-					<option value="PARETO">Pareto</option>
-					<option value="EXPONENTIAL">Exponential</option>
-					<option value="WEIBULL">Weibull</option>
-					<option value="GAMMA">Gamma</option>
-					<option value="BETA">Beta</option>
-					<option value="TRIANGLE">Triangle</option>
+				<select id="restorationDistribution" name="restorationDistribution" value="{{allInputDataDict.restorationDistribution}}" />
+					<option value="UNIFORM" {% if allInputDataDict.restorationDistribution == 'UNIFORM' %}selected{% endif %}>Uniform</option>
+					<option value="NORMAL" {% if allInputDataDict.restorationDistribution == 'NORMAL' %}selected{% endif %}>Normal</option>
+					<option value="BERNOULLI" {% if allInputDataDict.restorationDistribution == 'BERNOULLI' %}selected{% endif %}>Bernoulli</option>
+					<option value="LOGNORMAL" {% if allInputDataDict.restorationDistribution == 'LOGNORMAL' %}selected{% endif %}>Lognormal</option>
+					<option value="PARETO" {% if allInputDataDict.restorationDistribution == 'PARETO' %}selected{% endif %}>Pareto</option>
+					<option value="EXPONENTIAL" {% if allInputDataDict.restorationDistribution == 'EXPONENTIAL' %}selected{% endif %}>Exponential</option>
+					<option value="WEIBULL" {% if allInputDataDict.restorationDistribution == 'WEIBULL' %}selected{% endif %}>Weibull</option>
+					<option value="GAMMA" {% if allInputDataDict.restorationDistribution == 'GAMMA' %}selected{% endif %}>Gamma</option>
+					<option value="BETA" {% if allInputDataDict.restorationDistribution == 'BETA' %}selected{% endif %}>Beta</option>
+					<option value="TRIANGLE" {% if allInputDataDict.restorationDistribution == 'TRIANGLE' %}selected{% endif %}>Triangle</option>
 				</select>
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Restoration Dist. Param. 1<span class="classic">First parameter for restoration distribution.</span></label>
-				<input type="text" id="restorationDistParam1" name="restorationDistParam1" required="required">
+				<input type="text" id="restorationDistParam1" name="restorationDistParam1" value="{{allInputDataDict.restorationDistParam1}}" required="required">
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Restoration Dist. Param. 2<span class="classic">Second parameter for restoration distribution.</span></label>
-				<input type="text" id="restorationDistParam2" name="restorationDistParam2" required="required">
+				<input type="text" id="restorationDistParam2" name="restorationDistParam2" value="{{allInputDataDict.restorationDistParam2}}" required="required">
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Maximum Fault Length<span class="classic">A global maximum (in seconds) on the amount of time for which any fault can occur.</span></label>
-				<input type="text" id="maxFaultLength" name="maxFaultLength">
+				<input type="text" id="maxFaultLength" name="maxFaultLength" value="{{allInputDataDict.maxFaultLength}}">
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">KWH Cost<span class="classic">KWH cost parameter for calculating outage costs.</span></label>
-				<input type="text" id="kwh_cost" name="kwh_cost" pattern="^\d+\.?\d*$" required="required">
+				<input type="text" id="kwh_cost" name="kwh_cost" value="{{allInputDataDict.kwh_cost}}" pattern="^\d+\.?\d*$" required="required">
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Restoration Cost<span class="classic">Restoration cost parameter for calculating outage costs.</span></label>
-				<input type="text" id="restoration_cost" name="restoration_cost" pattern="^\d+\.?\d*$" required="required">
+				<input type="text" id="restoration_cost" name="restoration_cost" value="{{allInputDataDict.restoration_cost}}" pattern="^\d+\.?\d*$" required="required">
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Average Hardware Cost<span class="classic">Average hardware cost parameter for calculating outage costs.</span></label>
-				<input type="text" id="average_hardware_cost" name="average_hardware_cost" pattern="^\d+\.?\d*$" required="required">
+				<input type="text" id="average_hardware_cost" name="average_hardware_cost" value="{{allInputDataDict.average_hardware_cost}}" pattern="^\d+\.?\d*$" required="required">
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Simulation Start Time<span class="classic">The date and time that the simulation begins.</span></label>
-				<input type="text" id="simTime" name="simTime">
+				<input type="text" id="simTime" name="simTime" value="{{allInputDataDict.simTime}}">
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Fault type<span class="classic">The type of fault that occurs on the lines.</span></label>
-				<input type="text" id="faultType" name="faultType">
+				<input type="text" id="faultType" name="faultType" value="{{allInputDataDict.faultType}}">
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Sustained Outage Threshold<span class="classic">The threshold for how many seconds an outage lasts before it is considered a sustained outage.</span></label>
-				<input type="text" id="sustainedOutageThreshold" name="sustainedOutageThreshold" pattern="^\d+\.?\d*$" required="required">
+				<input type="text" id="sustainedOutageThreshold" name="sustainedOutageThreshold" value="{{allInputDataDict.sustainedOutageThreshold}}" pattern="^\d+\.?\d*$" required="required">
 			</div>
-			<div class="wideInput" style="text-align:right">
-				<button id="deleteButton" type="button" class="stoppedInline postRunInline" onclick="deleteModel()">Delete</button>
-				<button id="shareButton" type="button" class="postRunInline" onclick="shareModel()">Share</button>
-				<button id="duplicateButton" type="button" class="postRunInline" onclick="duplicateModel()">Duplicate</button>
-				<button id="cancelButton" class="runningInline" type="button" onclick="cancelModel()">Cancel Run</button>
-				<button id="runButton" class="stoppedInline postRunInline" type="submit">Run Model</button>
-				<!-- Function to send rendered html page to server proof of concept
-				<button id="save" class="stoppedInline postRunInline" type="button">Save Template</button>
-					<script>
-					$('#save').click(function() {
-						myhtml = $('html').html();
-						$.ajax({
-							type: "POST",
-							url: "{{pathPrefix}}/renderToFile",
-							data: {html:myhtml}
-						});
-					});
-				</script> -->
-			</div>
+			{{ omfModelButtons }}
 		</form>
 	</div>
-	<div id ="runIndicator" class="content running">
-		Model running on server. Refresh the page to check for results, or wait for automatic refresh every 5 seconds.
-	</div>
-	<div id ="stopIndicator" class="content stopped" style="visibility: hidden">
-		<pre id='errorText' style='overflow-x:scroll'></pre>
-		<script type="text/javascript">
-		if (typeof(allInputData.stderr) !== 'undefined') {	
-			gebi('stopIndicator').style.visibility = 'visible'
-			gebi('errorText').innerHTML = 'MODEL ENCOUNTERED AN ERROR AS FOLLOWS: \n\n' + allInputData.stderr}
-		</script>
-	</div>
+	{{ omfRunDebugBlock }}
+	{% if modelStatus == 'finished' %}
 	<div id="output">
-		<p class="reportTitle postRun">Feeder Diagram (Added Recloser Shown in Pink, Other Reclosers Shown as Black Dotted Lines)</p>
-		<div id="feederChart" class="content postRun" style="margin-top:0px">
+		<p class="reportTitle">Feeder Diagram (Added Recloser Shown in Pink, Other Reclosers Shown as Black Dotted Lines)</p>
+		<div id="feederChart" class="content" style="margin-top:0px">
 			<img id="feederChartImage" style="width:980px" />
 			<script>gebi("feederChartImage").src = "data:image/png;base64," + allOutputData["feeder_chart.png"]</script>
 		</div>
-		<p class="reportTitle postRun" style="page-break-before:always">Outage Cost Comparison</p>
-		<div id="outageCostCalc" class="tightContent postRun">
+		<p class="reportTitle" style="page-break-before:always">Outage Cost Comparison</p>
+		<div id="outageCostCalc" class="tightContent">
 			{{ allOutputDataDict['costStatsHtml'] }}
 		</div>
-		<!-- TODO: Remove? -->
-		<!-- <script type="text/javascript">
-			// Global Highcharts settings.
-			Highcharts.setOptions({global:{useUTC:true}})
-			// Clean up the non-ISO date strings we get.
-			function dateOb(inStr) {return Date.parse(inStr.replace(/-/g,"/"))}
-			pointStart = dateOb(allOutputData.timeStamps[0])
-			pointInterval = dateOb(allOutputData.timeStamps[1]) - pointStart
-		</script> -->
-		<p class="reportTitle postRun">Change in SAIDI/SAIFI and MAIFI Values</p>
-		<div id="fig1" class="tightContent postRun">
+		<p class="reportTitle">Change in SAIDI/SAIFI and MAIFI Values</p>
+		<div id="fig1" class="tightContent">
 			<div id="fig1Chart" style="width:1000px"></div>
 			<script type="text/javascript">
 				Plotly.newPlot("fig1Chart", JSON.parse(allOutputData["fig1Data"]), JSON.parse(allOutputData["fig1Layout"]) || {})
 			</script>
 		</div>
-		<p class="reportTitle postRun">Outage Distribution Data</p>
-		<div id="fig2" class="tightContent postRun">
+		<p class="reportTitle">Outage Distribution Data</p>
+		<div id="fig2" class="tightContent">
 			<div id="fig2Chart" style="width:1000px"></div>
 			<script type="text/javascript">
 				Plotly.newPlot("fig2Chart", JSON.parse(allOutputData["fig2Data"]), JSON.parse(allOutputData["fig2Layout"]) || {})
 			</script>
 		</div>
-		<p class="reportTitle postRun">Outage Timeline</p>
-		<div id="fig3" class="tightContent postRun">
+		<p class="reportTitle">Outage Timeline</p>
+		<div id="fig3" class="tightContent">
 			<div id="fig3Chart" style="width:1000px"></div>
 			<script type="text/javascript">
 				Plotly.newPlot("fig3Chart", JSON.parse(allOutputData["fig3Data"]), JSON.parse(allOutputData["fig3Layout"]) || {})
 			</script>
 		</div>
-		<p class="reportTitle postRun">Raw Input and Output Files</p>
-		<div id="rawOutput" class="content postRun" style="margin-top:0px">
-			{% for name in allOutputDataDict['fileNames'] %}
-				{% if loop.index > 1 %}&mdash; {% endif %}<a href="/downloadModelData/{{allInputDataDict['user']}}/{{allInputDataDict['modelName']}}/{{name}}">{{name}}</a>
-			{% endfor %}
-		</div>
+		{{ rawOutputFiles }}
 	</div>
+	{% endif %}
 </body>

@@ -1,8 +1,5 @@
 <head>
-	<title>Open Modeling Framework</title>
-	<meta charset="utf-8">
-	<link href="{{pathPrefix}}/static/omf.css" type="text/css" rel="stylesheet"/>
-	<link rel="shortcut icon" href="{{pathPrefix}}/static/favicon.ico">
+	{{ omfHeaders }}
 	<style>
 		thead{font-weight:bold} table{width:980px; font-size:10}
 		g.node rect, circle {fill:lightgray}
@@ -10,54 +7,34 @@
 		text {font-size:10pt}
 		.inVal {text-decoration:underline}
 	</style>
-	{% if modelStatus == "running" %}<meta http-equiv="refresh" content="5"/>{% endif %}
-	<!-- Library Imports -->
-	<script type="text/javascript" src="{{pathPrefix}}/static/omf.js"></script>
-	<script type="text/javascript" src="{{pathPrefix}}/static/jquery-1.9.1.js"></script>
 	<script src="{{pathPrefix}}/static/highcharts4.src.js"></script>
 	<script src="{{pathPrefix}}/static/heatmap.src.js"></script>
 	<script src="{{pathPrefix}}/static/d3.v3.js"></script>
-	<!-- Data  Imports -->
-	<script>allInputData={% if allInputDataDict %}{{allInputDataDict | tojson}}{% else %}null{% endif %}</script>
-	<script>allOutputData={% if allOutputDataDict %}{{allOutputDataDict | tojson}}{% else %}null{% endif %}</script>
-	<script>modelStatus="{{modelStatus}}"</script>
-	<script>currentUser="{{datastoreNames.get('currentUser','test')}}"</script>
 </head>
-<body onload="init()">
-	<div id="header">
-		<div id="headInnerBlock">
-			<div id="menuLeft">
-				<a style="color:white" href="/">Open Modeling Framework</a> &#187;&nbsp;&nbsp;Model
-				&#8220;<p id="titleText" style="display:inline"></p>&#8221;
-			</div>
-		</div>
-	</div>
-	<div id="triangle-parent">
-		<div id="triangle-message">New Version<span class="classic-triangle">A new version of the model has been added to the OMF. To get the new outputs, please fill in any missing inputs and hit "Run Model". You can also just look at the old inputs/outputs.</span></div>
-		<div id="triangle-topright"></div>
-	</div>
+<body>
+	{{ omfModelTitle }}
 	<p class="reportTitle">Model Input</p>
 	<div id="input" class="content">
 		<form name="inputForm" action="/runModel/" onsubmit="event.preventDefault(); return isFormValid();" method="post">
 			<div class="shortInput">
 				<label>Model Type <a href="https://github.com/dpinney/omf/wiki/Models-~-solarCashflow" target="blank">Help?</a></label>
-				<input type="text" id="modelType" name="modelType" value="{{modelName}}" readonly/>
+				<input type="text" id="modelType" name="modelType" value="{{allInputDataDict.modelType}}" value="{{modelName}}" readonly/>
 			</div>
 			<div class="shortInput">
 				<label>Model Name</label>
-				<input type="text" id="modelName" name="modelName" pattern="^[\w\s\d\.-]+$" required="required">
+				<input type="text" id="modelName" name="modelName" value="{{allInputDataDict.modelName}}" pattern="^[\w\s\d\.-]+$" required="required">
 			</div>
-			<div class="shortInput runningInline postRunInline">
+			<div class="shortInput">
 				<label>User</label>
-				<input type="text" id="user" name="user" readonly/>
+				<input type="text" id="user" name="user" value="{{allInputDataDict.user}}" readonly/>
 			</div>
-			<div class="shortInput runningInline postRunInline">
+			<div class="shortInput">
 				<label>Created</label>
-				<input type="text" id="created" name="created" readonly/>
+				<input type="text" id="created" name="created" value="{{allInputDataDict.created}}" readonly/>
 			</div>
-			<div class="shortInput postRunInline">
+			<div class="shortInput">
 				<label>Run Time</label>
-				<input type="text" id="runTime" name="runTime" readonly/>
+				<input type="text" id="runTime" name="runTime" value="{{allInputDataDict.runTime}}" readonly/>
 			</div>
 			<div class="wideInput">
 				<p class="inputSectionHeader">Solar System Parameters</p>
@@ -65,15 +42,15 @@
 			<hr>
 			<div class="shortInput">
 				<label class="tooltip">Zip Code<span class="classic">Zip code of the planned array's geographical location.</span></label>
-				<input type="text" id="zipCode" name="zipCode" pattern="^\d{5}(?:[-\s]\d{4})?$" required="required">
+				<input type="text" id="zipCode" name="zipCode" value="{{allInputDataDict.zipCode}}" pattern="^\d{5}(?:[-\s]\d{4})?$" required="required">
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">System Size (kWp-DC)<span class="classic">Average residential PV system size in your service territory, in kilowatts-DC.</span></label>
-				<input type="text" id="systemSize" name="systemSize" pattern="^\d+\.?\d*$" required="required">
+				<input type="text" id="systemSize" name="systemSize" value="{{allInputDataDict.systemSize}}" pattern="^\d+\.?\d*$" required="required">
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Residential Customers With Solar (%)<span class="classic">Percentage of residential customers who own PV systems. A value of five percent is entered as a "5".</span></label>
-				<input type="text" id="resPenetration" name="resPenetration" pattern="^(100|\d\d|\d)(\.\d+)?$" required="required">
+				<input type="text" id="resPenetration" name="resPenetration" value="{{allInputDataDict.resPenetration}}" pattern="^(100|\d\d|\d)(\.\d+)?$" required="required">
 			</div>
 			<div class="wideInput">
 				<p class="inputSectionHeader">Financial Variables</p>
@@ -81,23 +58,23 @@
 			<hr>
 			<div class="shortInput">
 				<label class="tooltip">Retail Energy Cost ($/kWh)<span class="classic">Retail rate for residential consumers.</span></label>
-				<input type="text" id="retailCost" name="retailCost" pattern="^\d+\.?\d*$" required="required"/>
+				<input type="text" id="retailCost" name="retailCost" value="{{allInputDataDict.retailCost}}" pattern="^\d+\.?\d*$" required="required"/>
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Average Cost of Purchased Power ($/kWh)<span class="classic">Automatically calculated from other inputs as: Form 7 R.17.m/R.15.m.</span></label>
-				<input type="text" id="costofPower" name="costofPower" value = "0.081" readonly/>
+				<input type="text" id="costofPower" name="costofPower" value="{{allInputDataDict.costofPower}}" value = "0.081" readonly/>
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Solar Service Charge ($/month)<span class="classic">Monthly charge for residential customers with solar installed.</span></label>
-				<input type="text" id="solarServiceCharge" name="solarServiceCharge" pattern="^\d+\.?\d*$" required="required">
+				<input type="text" id="solarServiceCharge" name="solarServiceCharge" value="{{allInputDataDict.solarServiceCharge}}" pattern="^\d+\.?\d*$" required="required">
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Solar Levelized Cost of Energy ($/kWh)<span class="classic">Estimated levelized costs for the energy provided from solar. This estimate effects average bill size for solar residential customers but it doesn't impact rate change assessments.</span></label>
-				<input type="text" id="solarLCoE" name="solarLCoE" pattern="^\d+\.?\d*$" required="required">
+				<input type="text" id="solarLCoE" name="solarLCoE" value="{{allInputDataDict.solarLCoE}}" pattern="^\d+\.?\d*$" required="required">
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Customer Service Charge ($)<span class="classic">Monthly service charge for residential customers if any.</span></label>
-				<input type="text" id="customServiceCharge" name="customServiceCharge" pattern="^\d+\.?\d*$" value="15" required="required"/>
+				<input type="text" id="customServiceCharge" name="customServiceCharge" value="{{allInputDataDict.customServiceCharge}}" pattern="^\d+\.?\d*$" value="15" required="required"/>
 			</div>
 			<div class="wideInput">
 				<p class="inputSectionHeader">Form 7 Financial Variables</p>
@@ -105,95 +82,95 @@
 			<hr>
 			<div class="shortInput">
 				<label>A.2.b Power Production Expense</label>
-				<input type="text" id="powerProExpense" name="powerProExpense" pattern="^-?\d+\.?\d*$" required="required"/>
+				<input type="text" id="powerProExpense" name="powerProExpense" value="{{allInputDataDict.powerProExpense}}" pattern="^-?\d+\.?\d*$" required="required"/>
 			</div>
 			<div class="shortInput">
 				<label>A.3.b Cost of Purchased Power</label>
-				<input type="text" id="costPurchasedPower" name="costPurchasedPower" pattern="^-?\d+\.?\d*$" required="required"/>
+				<input type="text" id="costPurchasedPower" name="costPurchasedPower" value="{{allInputDataDict.costPurchasedPower}}" pattern="^-?\d+\.?\d*$" required="required"/>
 			</div>
 			<div class="shortInput">
 				<label>A.4.b Transmission Expense</label>
-				<input type="text" id="transExpense" name="transExpense" pattern="^-?\d+\.?\d*$" required="required"/>
+				<input type="text" id="transExpense" name="transExpense" value="{{allInputDataDict.transExpense}}" pattern="^-?\d+\.?\d*$" required="required"/>
 			</div>
 			<div class="shortInput">
 				<label>A.5.b Distribution Expense - Operation</label>
-				<input type="text" id="distriExpenseO" name="distriExpenseO" pattern="^-?\d+\.?\d*$" required="required"/>
+				<input type="text" id="distriExpenseO" name="distriExpenseO" value="{{allInputDataDict.distriExpenseO}}" pattern="^-?\d+\.?\d*$" required="required"/>
 			</div>
 			<div class="shortInput">
 				<label>A.6.b Distribution Expense - Maintenance</label>
-				<input type="text" id="distriExpenseM" name="distriExpenseM" pattern="^-?\d+\.?\d*$" required="required"/>
+				<input type="text" id="distriExpenseM" name="distriExpenseM" value="{{allInputDataDict.distriExpenseM}}" pattern="^-?\d+\.?\d*$" required="required"/>
 			</div>
 			<div class="shortInput">
 				<label>A.7.b Customer Accounts Expense</label>
-				<input type="text" id="customerAccountExpense" name="customerAccountExpense" pattern="^-?\d+\.?\d*$" required="required"/>
+				<input type="text" id="customerAccountExpense" name="customerAccountExpense" value="{{allInputDataDict.customerAccountExpense}}" pattern="^-?\d+\.?\d*$" required="required"/>
 			</div>
 			<div class="shortInput">
 				<label>A.8.b Customer Service and Informational Expense</label>
-				<input type="text" id="customerServiceExpense" name="customerServiceExpense" pattern="^-?\d+\.?\d*$" required="required"/>
+				<input type="text" id="customerServiceExpense" name="customerServiceExpense" value="{{allInputDataDict.customerServiceExpense}}" pattern="^-?\d+\.?\d*$" required="required"/>
 			</div>
 			<div class="shortInput">
 				<label>A.9.b Sales Expense</label>
-				<input type="text" id="salesExpense" name="salesExpense" pattern="^-?\d+\.?\d*$" required="required"/>
+				<input type="text" id="salesExpense" name="salesExpense" value="{{allInputDataDict.salesExpense}}" pattern="^-?\d+\.?\d*$" required="required"/>
 			</div>
 			<div class="shortInput">
 				<label>A.10.b Administrative and General Expense</label>
-				<input type="text" id="adminGeneralExpense" name="adminGeneralExpense" pattern="^-?\d+\.?\d*$" required="required"/>
+				<input type="text" id="adminGeneralExpense" name="adminGeneralExpense" value="{{allInputDataDict.adminGeneralExpense}}" pattern="^-?\d+\.?\d*$" required="required"/>
 			</div>
 			<div class="shortInput">
 				<label>A.12.b Depreciation and Amortization Expense</label>
-				<input type="text" id="depreAmortiExpense" name="depreAmortiExpense" pattern="^-?\d+\.?\d*$" required="required"/>
+				<input type="text" id="depreAmortiExpense" name="depreAmortiExpense" value="{{allInputDataDict.depreAmortiExpense}}" pattern="^-?\d+\.?\d*$" required="required"/>
 			</div>
 			<div class="shortInput">
 				<label>A.13.b Tax Expense - Property &amp; Gross Receipts</label>
-				<input type="text" id="taxExpensePG" name="taxExpensePG" pattern="^-?\d+\.?\d*$" required="required"/>
+				<input type="text" id="taxExpensePG" name="taxExpensePG" value="{{allInputDataDict.taxExpensePG}}" pattern="^-?\d+\.?\d*$" required="required"/>
 			</div>
 			<div class="shortInput">
 				<label>A.14.b Tax Expense - Other</label>
-				<input type="text" id="taxExpense" name="taxExpense" pattern="^-?\d+\.?\d*$" required="required"/>
+				<input type="text" id="taxExpense" name="taxExpense" value="{{allInputDataDict.taxExpense}}" pattern="^-?\d+\.?\d*$" required="required"/>
 			</div>
 			<div class="shortInput">
 				<label>A.15.b Interest on Long-Term Debt</label>
-				<input type="text" id="interestLongTerm" name="interestLongTerm" pattern="^-?\d+\.?\d*$" required="required"/>
+				<input type="text" id="interestLongTerm" name="interestLongTerm" value="{{allInputDataDict.interestLongTerm}}" pattern="^-?\d+\.?\d*$" required="required"/>
 			</div>
 			<div class="shortInput">
 				<label>A.16.b Interest Charged to Construction - Credit</label>
-				<input type="text" id="interestConstruction" name="interestConstruction" pattern="^-?\d+\.?\d*$" required="required"/>
+				<input type="text" id="interestConstruction" name="interestConstruction" value="{{allInputDataDict.interestConstruction}}" pattern="^-?\d+\.?\d*$" required="required"/>
 			</div>
 			<div class="shortInput">
 				<label>A.17.b Interest Expense - Other</label>
-				<input type="text" id="interestExpense" name="interestExpense" pattern="^-?\d+\.?\d*$" required="required"/>
+				<input type="text" id="interestExpense" name="interestExpense" value="{{allInputDataDict.interestExpense}}" pattern="^-?\d+\.?\d*$" required="required"/>
 			</div>
 			<div class="shortInput">
 				<label>A.18.b Other Deductions</label>
-				<input type="text" id="otherDeductions" name="otherDeductions" pattern="^-?\d+\.?\d*$" required="required"/>
+				<input type="text" id="otherDeductions" name="otherDeductions" value="{{allInputDataDict.otherDeductions}}" pattern="^-?\d+\.?\d*$" required="required"/>
 			</div>
 			<div class="shortInput">
 				<label>A.21.b Non Operating Margins - Interest</label>
-				<input type="text" id="nonOpMarginInterest" name="nonOpMarginInterest" pattern="^-?\d+\.?\d*$" required="required"/>
+				<input type="text" id="nonOpMarginInterest" name="nonOpMarginInterest" value="{{allInputDataDict.nonOpMarginInterest}}" pattern="^-?\d+\.?\d*$" required="required"/>
 			</div>
 			<div class="shortInput">
 				<label>A.22.b Allowance for Funds Used During Construction</label>
-				<input type="text" id="fundsUsedConstruc" name="fundsUsedConstruc" pattern="^-?\d+\.?\d*$" required="required"/>
+				<input type="text" id="fundsUsedConstruc" name="fundsUsedConstruc" value="{{allInputDataDict.fundsUsedConstruc}}" pattern="^-?\d+\.?\d*$" required="required"/>
 			</div>
 			<div class="shortInput">
 				<label>A.23.b Income (Loss) from Equity Investments</label>
-				<input type="text" id="incomeEquityInvest" name="incomeEquityInvest" pattern="^-?\d+\.?\d*$" required="required"/>
+				<input type="text" id="incomeEquityInvest" name="incomeEquityInvest" value="{{allInputDataDict.incomeEquityInvest}}" pattern="^-?\d+\.?\d*$" required="required"/>
 			</div>
 			<div class="shortInput">
 				<label>A.24.b Non Operating Margins - Other</label>
-				<input type="text" id="nonOpMarginOther" name="nonOpMarginOther" pattern="^-?\d+\.?\d*$" required="required"/>
+				<input type="text" id="nonOpMarginOther" name="nonOpMarginOther" value="{{allInputDataDict.nonOpMarginOther}}" pattern="^-?\d+\.?\d*$" required="required"/>
 			</div>
 			<div class="shortInput">
 				<label>A.25.b Generation and Transmission Capital Credits</label>
-				<input type="text" id="genTransCapCredits" name="genTransCapCredits" pattern="^-?\d+\.?\d*$" required="required"/>
+				<input type="text" id="genTransCapCredits" name="genTransCapCredits" value="{{allInputDataDict.genTransCapCredits}}" pattern="^-?\d+\.?\d*$" required="required"/>
 			</div>
 			<div class="shortInput">
 				<label>A.26.b Other Capital Credits and Patronage Dividends</label>
-				<input type="text" id="otherCapCreditsPatroDivident" name="otherCapCreditsPatroDivident" pattern="^-?\d+\.?\d*$" required="required"/>
+				<input type="text" id="otherCapCreditsPatroDivident" name="otherCapCreditsPatroDivident" value="{{allInputDataDict.otherCapCreditsPatroDivident}}" pattern="^-?\d+\.?\d*$" required="required"/>
 			</div>
 			<div class="shortInput">
 				<label>A.27.b Extraordinary Items</label>
-				<input type="text" id="extraItems" name="extraItems" pattern="^-?\d+\.?\d*$" required="required"/>
+				<input type="text" id="extraItems" name="extraItems" value="{{allInputDataDict.extraItems}}" pattern="^-?\d+\.?\d*$" required="required"/>
 			</div>
 			<div class="wideInput">
 				<p class="inputSectionHeader" style="page-break-before:always">Form 7 Table O (a.k.a. R) Variables</p>
@@ -218,109 +195,94 @@
 					</tr>
 					<tr>
 						<th>Residential Consumers Served</th>
-						<td><input type="text" id="janSale" name="janSale" pattern="^\d+\.?\d*$" required="required"></td>
-						<td><input type="text" id="febSale" name="febSale" pattern="^\d+\.?\d*$" required="required"></td>
-						<td><input type="text" id="marSale" name="marSale" pattern="^\d+\.?\d*$" required="required"></td>
-						<td><input type="text" id="aprSale" name="aprSale" pattern="^\d+\.?\d*$" required="required"></td>
-						<td><input type="text" id="maySale" name="maySale" pattern="^\d+\.?\d*$" required="required"></td>
-						<td><input type="text" id="junSale" name="junSale" pattern="^\d+\.?\d*$" required="required"></td>
-						<td><input type="text" id="julSale" name="julSale" pattern="^\d+\.?\d*$" required="required"></td>
-						<td><input type="text" id="augSale" name="augSale" pattern="^\d+\.?\d*$" required="required"></td>
-						<td><input type="text" id="sepSale" name="sepSale" pattern="^\d+\.?\d*$" required="required"></td>
-						<td><input type="text" id="octSale" name="octSale" pattern="^\d+\.?\d*$" required="required"></td>
-						<td><input type="text" id="novSale" name="novSale" pattern="^\d+\.?\d*$" required="required"></td>
-						<td><input type="text" id="decSale" name="decSale" pattern="^\d+\.?\d*$" required="required"></td>
+						<td><input type="text" id="janSale" name="janSale" value="{{allInputDataDict.janSale}}" pattern="^\d+\.?\d*$" required="required"></td>
+						<td><input type="text" id="febSale" name="febSale" value="{{allInputDataDict.febSale}}" pattern="^\d+\.?\d*$" required="required"></td>
+						<td><input type="text" id="marSale" name="marSale" value="{{allInputDataDict.marSale}}" pattern="^\d+\.?\d*$" required="required"></td>
+						<td><input type="text" id="aprSale" name="aprSale" value="{{allInputDataDict.aprSale}}" pattern="^\d+\.?\d*$" required="required"></td>
+						<td><input type="text" id="maySale" name="maySale" value="{{allInputDataDict.maySale}}" pattern="^\d+\.?\d*$" required="required"></td>
+						<td><input type="text" id="junSale" name="junSale" value="{{allInputDataDict.junSale}}" pattern="^\d+\.?\d*$" required="required"></td>
+						<td><input type="text" id="julSale" name="julSale" value="{{allInputDataDict.julSale}}" pattern="^\d+\.?\d*$" required="required"></td>
+						<td><input type="text" id="augSale" name="augSale" value="{{allInputDataDict.augSale}}" pattern="^\d+\.?\d*$" required="required"></td>
+						<td><input type="text" id="sepSale" name="sepSale" value="{{allInputDataDict.sepSale}}" pattern="^\d+\.?\d*$" required="required"></td>
+						<td><input type="text" id="octSale" name="octSale" value="{{allInputDataDict.octSale}}" pattern="^\d+\.?\d*$" required="required"></td>
+						<td><input type="text" id="novSale" name="novSale" value="{{allInputDataDict.novSale}}" pattern="^\d+\.?\d*$" required="required"></td>
+						<td><input type="text" id="decSale" name="decSale" value="{{allInputDataDict.decSale}}" pattern="^\d+\.?\d*$" required="required"></td>
 					</tr>
 					<tr>
 						<th>Residential KWh Sold</th>
-						<td><input type="text" id="janKWh" name="janKWh" pattern="^\d+\.?\d*$" required="required"></td>
-						<td><input type="text" id="febKWh" name="febKWh" pattern="^\d+\.?\d*$" required="required"></td>
-						<td><input type="text" id="marKWh" name="marKWh" pattern="^\d+\.?\d*$" required="required"></td>
-						<td><input type="text" id="aprKWh" name="aprKWh" pattern="^\d+\.?\d*$" required="required"></td>
-						<td><input type="text" id="mayKWh" name="mayKWh" pattern="^\d+\.?\d*$" required="required"></td>
-						<td><input type="text" id="junKWh" name="junKWh" pattern="^\d+\.?\d*$" required="required"></td>
-						<td><input type="text" id="julKWh" name="julKWh" pattern="^\d+\.?\d*$" required="required"></td>
-						<td><input type="text" id="augKWh" name="augKWh" pattern="^\d+\.?\d*$" required="required"></td>
-						<td><input type="text" id="sepKWh" name="sepKWh" pattern="^\d+\.?\d*$" required="required"></td>
-						<td><input type="text" id="octKWh" name="octKWh" pattern="^\d+\.?\d*$" required="required"></td>
-						<td><input type="text" id="novKWh" name="novKWh" pattern="^\d+\.?\d*$" required="required"></td>
-						<td><input type="text" id="decKWh" name="decKWh" pattern="^\d+\.?\d*$" required="required"></td>
+						<td><input type="text" id="janKWh" name="janKWh" value="{{allInputDataDict.janKWh}}" pattern="^\d+\.?\d*$" required="required"></td>
+						<td><input type="text" id="febKWh" name="febKWh" value="{{allInputDataDict.febKWh}}" pattern="^\d+\.?\d*$" required="required"></td>
+						<td><input type="text" id="marKWh" name="marKWh" value="{{allInputDataDict.marKWh}}" pattern="^\d+\.?\d*$" required="required"></td>
+						<td><input type="text" id="aprKWh" name="aprKWh" value="{{allInputDataDict.aprKWh}}" pattern="^\d+\.?\d*$" required="required"></td>
+						<td><input type="text" id="mayKWh" name="mayKWh" value="{{allInputDataDict.mayKWh}}" pattern="^\d+\.?\d*$" required="required"></td>
+						<td><input type="text" id="junKWh" name="junKWh" value="{{allInputDataDict.junKWh}}" pattern="^\d+\.?\d*$" required="required"></td>
+						<td><input type="text" id="julKWh" name="julKWh" value="{{allInputDataDict.julKWh}}" pattern="^\d+\.?\d*$" required="required"></td>
+						<td><input type="text" id="augKWh" name="augKWh" value="{{allInputDataDict.augKWh}}" pattern="^\d+\.?\d*$" required="required"></td>
+						<td><input type="text" id="sepKWh" name="sepKWh" value="{{allInputDataDict.sepKWh}}" pattern="^\d+\.?\d*$" required="required"></td>
+						<td><input type="text" id="octKWh" name="octKWh" value="{{allInputDataDict.octKWh}}" pattern="^\d+\.?\d*$" required="required"></td>
+						<td><input type="text" id="novKWh" name="novKWh" value="{{allInputDataDict.novKWh}}" pattern="^\d+\.?\d*$" required="required"></td>
+						<td><input type="text" id="decKWh" name="decKWh" value="{{allInputDataDict.decKWh}}" pattern="^\d+\.?\d*$" required="required"></td>
 					</tr>
 					<tr>
 						<th>Residential Revenue</th>
-						<td><input type="text" id="janRev" name="janRev" pattern="^\d+\.?\d*$" required="required"></td>
-						<td><input type="text" id="febRev" name="febRev" pattern="^\d+\.?\d*$" required="required"></td>
-						<td><input type="text" id="marRev" name="marRev" pattern="^\d+\.?\d*$" required="required"></td>
-						<td><input type="text" id="aprRev" name="aprRev" pattern="^\d+\.?\d*$" required="required"></td>
-						<td><input type="text" id="mayRev" name="mayRev" pattern="^\d+\.?\d*$" required="required"></td>
-						<td><input type="text" id="junRev" name="junRev" pattern="^\d+\.?\d*$" required="required"></td>
-						<td><input type="text" id="julRev" name="julRev" pattern="^\d+\.?\d*$" required="required"></td>
-						<td><input type="text" id="augRev" name="augRev" pattern="^\d+\.?\d*$" required="required"></td>
-						<td><input type="text" id="sepRev" name="sepRev" pattern="^\d+\.?\d*$" required="required"></td>
-						<td><input type="text" id="octRev" name="octRev" pattern="^\d+\.?\d*$" required="required"></td>
-						<td><input type="text" id="novRev" name="novRev" pattern="^\d+\.?\d*$" required="required"></td>
-						<td><input type="text" id="decRev" name="decRev" pattern="^\d+\.?\d*$" required="required"></td>
+						<td><input type="text" id="janRev" name="janRev" value="{{allInputDataDict.janRev}}" pattern="^\d+\.?\d*$" required="required"></td>
+						<td><input type="text" id="febRev" name="febRev" value="{{allInputDataDict.febRev}}" pattern="^\d+\.?\d*$" required="required"></td>
+						<td><input type="text" id="marRev" name="marRev" value="{{allInputDataDict.marRev}}" pattern="^\d+\.?\d*$" required="required"></td>
+						<td><input type="text" id="aprRev" name="aprRev" value="{{allInputDataDict.aprRev}}" pattern="^\d+\.?\d*$" required="required"></td>
+						<td><input type="text" id="mayRev" name="mayRev" value="{{allInputDataDict.mayRev}}" pattern="^\d+\.?\d*$" required="required"></td>
+						<td><input type="text" id="junRev" name="junRev" value="{{allInputDataDict.junRev}}" pattern="^\d+\.?\d*$" required="required"></td>
+						<td><input type="text" id="julRev" name="julRev" value="{{allInputDataDict.julRev}}" pattern="^\d+\.?\d*$" required="required"></td>
+						<td><input type="text" id="augRev" name="augRev" value="{{allInputDataDict.augRev}}" pattern="^\d+\.?\d*$" required="required"></td>
+						<td><input type="text" id="sepRev" name="sepRev" value="{{allInputDataDict.sepRev}}" pattern="^\d+\.?\d*$" required="required"></td>
+						<td><input type="text" id="octRev" name="octRev" value="{{allInputDataDict.octRev}}" pattern="^\d+\.?\d*$" required="required"></td>
+						<td><input type="text" id="novRev" name="novRev" value="{{allInputDataDict.novRev}}" pattern="^\d+\.?\d*$" required="required"></td>
+						<td><input type="text" id="decRev" name="decRev" value="{{allInputDataDict.decRev}}" pattern="^\d+\.?\d*$" required="required"></td>
 					</tr>
 					<tr>
 						<th>Total KWh Sold</th>
-						<td><input type="text" id="janKWhT" name="janKWhT" pattern="^\d+\.?\d*$" required="required"></td>
-						<td><input type="text" id="febKWhT" name="febKWhT" pattern="^\d+\.?\d*$" required="required"></td>
-						<td><input type="text" id="marKWhT" name="marKWhT" pattern="^\d+\.?\d*$" required="required"></td>
-						<td><input type="text" id="aprKWhT" name="aprKWhT" pattern="^\d+\.?\d*$" required="required"></td>
-						<td><input type="text" id="mayKWhT" name="mayKWhT" pattern="^\d+\.?\d*$" required="required"></td>
-						<td><input type="text" id="junKWhT" name="junKWhT" pattern="^\d+\.?\d*$" required="required"></td>
-						<td><input type="text" id="julKWhT" name="julKWhT" pattern="^\d+\.?\d*$" required="required"></td>
-						<td><input type="text" id="augKWhT" name="augKWhT" pattern="^\d+\.?\d*$" required="required"></td>
-						<td><input type="text" id="sepKWhT" name="sepKWhT" pattern="^\d+\.?\d*$" required="required"></td>
-						<td><input type="text" id="octKWhT" name="octKWhT" pattern="^\d+\.?\d*$" required="required"></td>
-						<td><input type="text" id="novKWhT" name="novKWhT" pattern="^\d+\.?\d*$" required="required"></td>
-						<td><input type="text" id="decKWhT" name="decKWhT" pattern="^\d+\.?\d*$" required="required"></td>
+						<td><input type="text" id="janKWhT" name="janKWhT" value="{{allInputDataDict.janKWhT}}" pattern="^\d+\.?\d*$" required="required"></td>
+						<td><input type="text" id="febKWhT" name="febKWhT" value="{{allInputDataDict.febKWhT}}" pattern="^\d+\.?\d*$" required="required"></td>
+						<td><input type="text" id="marKWhT" name="marKWhT" value="{{allInputDataDict.marKWhT}}" pattern="^\d+\.?\d*$" required="required"></td>
+						<td><input type="text" id="aprKWhT" name="aprKWhT" value="{{allInputDataDict.aprKWhT}}" pattern="^\d+\.?\d*$" required="required"></td>
+						<td><input type="text" id="mayKWhT" name="mayKWhT" value="{{allInputDataDict.mayKWhT}}" pattern="^\d+\.?\d*$" required="required"></td>
+						<td><input type="text" id="junKWhT" name="junKWhT" value="{{allInputDataDict.junKWhT}}" pattern="^\d+\.?\d*$" required="required"></td>
+						<td><input type="text" id="julKWhT" name="julKWhT" value="{{allInputDataDict.julKWhT}}" pattern="^\d+\.?\d*$" required="required"></td>
+						<td><input type="text" id="augKWhT" name="augKWhT" value="{{allInputDataDict.augKWhT}}" pattern="^\d+\.?\d*$" required="required"></td>
+						<td><input type="text" id="sepKWhT" name="sepKWhT" value="{{allInputDataDict.sepKWhT}}" pattern="^\d+\.?\d*$" required="required"></td>
+						<td><input type="text" id="octKWhT" name="octKWhT" value="{{allInputDataDict.octKWhT}}" pattern="^\d+\.?\d*$" required="required"></td>
+						<td><input type="text" id="novKWhT" name="novKWhT" value="{{allInputDataDict.novKWhT}}" pattern="^\d+\.?\d*$" required="required"></td>
+						<td><input type="text" id="decKWhT" name="decKWhT" value="{{allInputDataDict.decKWhT}}" pattern="^\d+\.?\d*$" required="required"></td>
 					</tr>
 					<tr>
 						<th>Total Revenue</th>
-						<td><input type="text" id="janRevT" name="janRevT" pattern="^\d+\.?\d*$" required="required"></td>
-						<td><input type="text" id="febRevT" name="febRevT" pattern="^\d+\.?\d*$" required="required"></td>
-						<td><input type="text" id="marRevT" name="marRevT" pattern="^\d+\.?\d*$" required="required"></td>
-						<td><input type="text" id="aprRevT" name="aprRevT" pattern="^\d+\.?\d*$" required="required"></td>
-						<td><input type="text" id="mayRevT" name="mayRevT" pattern="^\d+\.?\d*$" required="required"></td>
-						<td><input type="text" id="junRevT" name="junRevT" pattern="^\d+\.?\d*$" required="required"></td>
-						<td><input type="text" id="julRevT" name="julRevT" pattern="^\d+\.?\d*$" required="required"></td>
-						<td><input type="text" id="augRevT" name="augRevT" pattern="^\d+\.?\d*$" required="required"></td>
-						<td><input type="text" id="sepRevT" name="sepRevT" pattern="^\d+\.?\d*$" required="required"></td>
-						<td><input type="text" id="octRevT" name="octRevT" pattern="^\d+\.?\d*$" required="required"></td>
-						<td><input type="text" id="novRevT" name="novRevT" pattern="^\d+\.?\d*$" required="required"></td>
-						<td><input type="text" id="decRevT" name="decRevT" pattern="^\d+\.?\d*$" required="required"></td>
+						<td><input type="text" id="janRevT" name="janRevT" value="{{allInputDataDict.janRevT}}" pattern="^\d+\.?\d*$" required="required"></td>
+						<td><input type="text" id="febRevT" name="febRevT" value="{{allInputDataDict.febRevT}}" pattern="^\d+\.?\d*$" required="required"></td>
+						<td><input type="text" id="marRevT" name="marRevT" value="{{allInputDataDict.marRevT}}" pattern="^\d+\.?\d*$" required="required"></td>
+						<td><input type="text" id="aprRevT" name="aprRevT" value="{{allInputDataDict.aprRevT}}" pattern="^\d+\.?\d*$" required="required"></td>
+						<td><input type="text" id="mayRevT" name="mayRevT" value="{{allInputDataDict.mayRevT}}" pattern="^\d+\.?\d*$" required="required"></td>
+						<td><input type="text" id="junRevT" name="junRevT" value="{{allInputDataDict.junRevT}}" pattern="^\d+\.?\d*$" required="required"></td>
+						<td><input type="text" id="julRevT" name="julRevT" value="{{allInputDataDict.julRevT}}" pattern="^\d+\.?\d*$" required="required"></td>
+						<td><input type="text" id="augRevT" name="augRevT" value="{{allInputDataDict.augRevT}}" pattern="^\d+\.?\d*$" required="required"></td>
+						<td><input type="text" id="sepRevT" name="sepRevT" value="{{allInputDataDict.sepRevT}}" pattern="^\d+\.?\d*$" required="required"></td>
+						<td><input type="text" id="octRevT" name="octRevT" value="{{allInputDataDict.octRevT}}" pattern="^\d+\.?\d*$" required="required"></td>
+						<td><input type="text" id="novRevT" name="novRevT" value="{{allInputDataDict.novRevT}}" pattern="^\d+\.?\d*$" required="required"></td>
+						<td><input type="text" id="decRevT" name="decRevT" value="{{allInputDataDict.decRevT}}" pattern="^\d+\.?\d*$" required="required"></td>
 					</tr>
 				</table>
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Form 7.R.13.TOTAL Other Electric Revenue.<span class="classic">Additional revenue from Form 7 Table R.</span></label>
-				<input type="text" id="otherElecRevenue" name="otherElecRevenue" pattern="^\d+\.?\d*$" required="required"/>
+				<input type="text" id="otherElecRevenue" name="otherElecRevenue" value="{{allInputDataDict.otherElecRevenue}}" pattern="^\d+\.?\d*$" required="required"/>
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Form 7.L.5.c TOTAL kWh Purchased<span class="classic">Total energy purchased from Form 7 Table R.</span></label>
-				<input type="text" id="totalKWhPurchased" name="totalKWhPurchased" pattern="^\d+\.?\d*$" required="required"/>
+				<input type="text" id="totalKWhPurchased" name="totalKWhPurchased" value="{{allInputDataDict.totalKWhPurchased}}" pattern="^\d+\.?\d*$" required="required"/>
 			</div>
-			<div class="wideInput" style="text-align:right">
-				<button id="deleteButton" type="button" class="stoppedInline postRunInline" onclick="deleteModel()">Delete</button>
-				<button id="shareButton" type="button" class="postRunInline" onclick="shareModel()">Share</button>
-				<button id="duplicateButton" type="button" class="postRunInline" onclick="duplicateModel()">Duplicate</button>
-				<button id="cancelButton" class="runningInline" type="button" onclick="cancelModel()">Cancel Run</button>
-				<button id="runButton" class="stoppedInline postRunInline" type="submit">Run Model</button>
-			</div>
+			{{ omfModelButtons }}
 		</form>
 	</div>
-	<div id ="runIndicator" class="content running">
-		Model running on server. Refresh the page to check for results, or wait for automatic refresh every 5 seconds.
-	</div>
-	<div id ="stopIndicator" class="content stopped" style="visibility: hidden">
-		<pre id='errorText' style='overflow-x:scroll'></pre>
-		<script type="text/javascript">
-		if (typeof(allInputData.stderr) !== 'undefined') {	
-			gebi('stopIndicator').style.visibility = 'visible'
-			gebi('errorText').innerHTML = 'MODEL ENCOUNTERED AN ERROR AS FOLLOWS: \n\n' + allInputData.stderr}
-		</script>
-	</div>
+	{{ omfRunDebugBlock }}
+	{% if modelStatus == 'finished' %}
 	<div id="output">
 		<script id="globalOutputScripting">
 			Highcharts.setOptions({global: { useUTC: true }})
@@ -339,8 +301,8 @@
 				}
 			}
 		</script>
-		<p class="reportTitle postRun">Hourly Solar Generation Per Generator</p>
-		<div id="powerGenerationReport" class="tightContent postRun">
+		<p class="reportTitle">Hourly Solar Generation Per Generator</p>
+		<div id="powerGenerationReport" class="tightContent">
 			<div id="powerTimeSeries"></div>
 			<script>
 				new Highcharts.Chart({"credits":{"enabled":false},
@@ -361,8 +323,8 @@
 					"legend":false})
 			</script>
 		</div>
-		<p class="reportTitle postRun">Monthly Utility Energy Consumption</p>
-		<div id="monthlyPerformanceReport" class="tightContent postRun">
+		<p class="reportTitle">Monthly Utility Energy Consumption</p>
+		<div id="monthlyPerformanceReport" class="tightContent">
 			<div id="monthlyPerformanceDiv"></div>
 			<script>
 				new Highcharts.Chart({"credits":{"enabled":false},
@@ -376,8 +338,8 @@
 					"legend":{"verticalAlign":"top","align":"top","borderWidth":0,"x":50,"y":-10,"layout":"horizontal"}})
 			</script>
 		</div>
-		<p class="reportTitle  postRun" style="page-break-before:always">Annual Cash and Power Flows</p>
-		<div id="graphicChart" class="tightContent postRun tableReport" style="overflow-x:hidden;overflow-y:hidden;">
+		<p class="reportTitle " style="page-break-before:always">Annual Cash and Power Flows</p>
+		<div id="graphicChart" class="tightContent tableReport" style="overflow-x:hidden;overflow-y:hidden;">
 			<svg width="1000px" height="520px" viewBox="0.00 0.00 1000.00 500.00">
 				<g id="graph0" class="graph">
 					<defs>
@@ -458,8 +420,8 @@
 				</g>
 			</svg>
 		</div>
-		<p class="reportTitle postRun">Form 7.A Statement of Operations - Business as Usual Versus Residential Solar</p>
-		<div id="tableReport" class="tightContent postRun tableReport">
+		<p class="reportTitle">Form 7.A Statement of Operations - Business as Usual Versus Residential Solar</p>
+		<div id="tableReport" class="tightContent tableReport">
 			<table id="bauVersusSolarTable">
 				<tr><th>ID</th><th>Item</th><th><label class="tooltip">Business as Usual<span class="classic">Underlined values comes directly from the input. All other values in this table are calculated.</span></label></th><th>Solar</th></tr>
 				<tr><td>7.A.1.b</td><td>Operating Revenue and Patronage Capital</td><td id="bau_operRevPatroCap" class="inVal"></td><td id="sol_operRevPatroCap"></td></tr>
@@ -502,8 +464,8 @@
 			</script>
 		</div>
 		<!-- TODO: Split into two separate sheet -->
-		<p class="reportTitle postRun" style="page-break-before:always">Monthly Data Table</p>
-		<div id="monthlySummaryReport" class="tightContent postRun tableReport">
+		<p class="reportTitle" style="page-break-before:always">Monthly Data Table</p>
+		<div id="monthlySummaryReport" class="tightContent tableReport">
 			<table id="monthlySummaryTable">
 			</table>
 			<script>
@@ -524,8 +486,8 @@
 				insertMetric("monthlySummaryTable","Total Revenue from Sales of Electric Energy", allOutputData.monthlyTotalRevenue.map(function(x){return x[1]}))
 			</script>
 		</div>
-		<p class="reportTitle postRun">Irradiance</p>
-		<div id="irradianceReport" class="tightContent postRun">
+		<p class="reportTitle">Irradiance</p>
+		<div id="irradianceReport" class="tightContent">
 			<div id="irradianceChartDiv"></div>
 			<script>
 				irradianceSeriesData = [
@@ -543,8 +505,8 @@
 					"legend":{"verticalAlign":"top","align":"top","borderWidth":0,"x":50,"y":-10,"layout":"horizontal"}})
 			</script>
 		</div>
-		<p class="reportTitle postRun">Other Climate Variables</p>
-		<div id="climateReport" class="tightContent postRun">
+		<p class="reportTitle">Other Climate Variables</p>
+		<div id="climateReport" class="tightContent">
 			<div id="climateChartDiv"></div>
 			<script>
 				climateSeriesData = [
@@ -563,5 +525,7 @@
 					"legend":{"verticalAlign":"top","align":"top","borderWidth":0,"x":50,"y":-10,"layout":"horizontal"}})
 			</script>
 		</div>
+		{{ rawOutputFiles }}
 	</div>
+	{% endif %}
 </body>

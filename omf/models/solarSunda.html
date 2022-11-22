@@ -1,71 +1,45 @@
 <head>
-	<title>Open Modeling Framework</title>
-	<meta charset="utf-8">
-	<link href="{{pathPrefix}}/static/omf.css" type="text/css" rel="stylesheet"/>
-	<link rel="shortcut icon" href="{{pathPrefix}}/static/favicon.ico">
-	<style>
-	/*Styles will go here*/
-	</style>
-	{% if modelStatus == "running" %}<meta http-equiv="refresh" content="5"/>{% endif %}
-	<!-- Library Imports -->
-	<script type="text/javascript" src="{{pathPrefix}}/static/omf.js"></script>
-	<script type="text/javascript" src="{{pathPrefix}}/static/jquery-1.9.1.js"></script>
+	{{ omfHeaders }}
 	<script src="{{pathPrefix}}/static/highcharts4.src.js"></script>
 	<script src="{{pathPrefix}}/static/d3.v3.js"></script>
-	<!-- Data  Imports -->
-	<script>allInputData={% if allInputDataDict %}{{allInputDataDict | tojson}}{% else %}null{% endif %}</script>
-	<script>allOutputData={% if allOutputDataDict %}{{allOutputDataDict | tojson}}{% else %}null{% endif %}</script>
-	<script>modelStatus="{{modelStatus}}"</script>
-	<script>currentUser="{{datastoreNames.get('currentUser','test')}}"</script>
 </head>
-<body onload="init()">
-	<div id="header">
-		<div id="headInnerBlock">
-			<div id="menuLeft">
-				<a style="color:white" href="/">Open Modeling Framework</a> &#187;&nbsp;&nbsp;Model
-				&#8220;<p id="titleText" style="display:inline"></p>&#8221;
-			</div>
-		</div>
-	</div>
-	<div id="triangle-parent">
-		<div id="triangle-message">New VersionA<span class="classic-triangle">A new version of the model has been added to the OMF. To get the new outputs, please fill in any missing inputs and hit "Run Model". You can also just look at the old inputs/outputs.</span></div>
-		<div id="triangle-topright"></div>
-	</div>
+<body>
+	{{ omfModelTitle }}
 	<p class="reportTitle">Model Description</p>
 	<div id="input" class="content" style="page-break-after:always">
 		<form name="inputForm" action="/runModel/" onsubmit="event.preventDefault(); return isFormValid();" method="post">
 			<div class="shorterInput">
 				<label>Model Type <a href="https://github.com/dpinney/omf/wiki/Models-~-solarSunda" target="blank">Help?</a> </label>
-				<input type="text" id="modelType" name="modelType" value="{{modelName}}" readonly/>
+				<input type="text" id="modelType" name="modelType" value="{{allInputDataDict.modelType}}" value="{{modelName}}" readonly/>
 			</div>
 			<div class="shorterInput">
 				<label>Model Name</label>
-				<input type="text" id="modelName" name="modelName" pattern="^[\w\s\d\.-]+$" required="required">
+				<input type="text" id="modelName" name="modelName" value="{{allInputDataDict.modelName}}" pattern="^[\w\s\d\.-]+$" required="required">
 			</div>
-			<div class="shorterInput runningInline postRunInline">
+			<div class="shorterInput">
 				<label>User</label>
-				<input type="text" id="user" name="user" readonly/>
+				<input type="text" id="user" name="user" value="{{allInputDataDict.user}}" readonly/>
 			</div>
-			<div class="shorterInput runningInline postRunInline">
+			<div class="shorterInput">
 				<label>Created</label>
-				<input type="text" id="created" name="created" readonly/>
+				<input type="text" id="created" name="created" value="{{allInputDataDict.created}}" readonly/>
 			</div>
-			<div class="shorterInput postRunInline">
+			<div class="shorterInput">
 				<label>Run Time</label>
-				<input type="text" id="runTime" name="runTime" readonly/>
+				<input type="text" id="runTime" name="runTime" value="{{allInputDataDict.runTime}}" readonly/>
 			</div>
 			<div class="shorterInput">
 				<label class="tooltip">Zip Code<span class="classic">Zip code of the planned array's geographical location.</span></label>
-				<input type="text" id="zipCode" name="zipCode" pattern="^\d{5}(?:[-\s]\d{4})?$" required="required">
+				<input type="text" id="zipCode" name="zipCode" value="{{allInputDataDict.zipCode}}" pattern="^\d{5}(?:[-\s]\d{4})?$" required="required">
 			</div>
 			<!-- TODO: Use bigger tooltip size -->
 			<div class="shorterInput">
 				<label class="tooltip">System Array Size (kW-DC)<span class="classic">Nameplate generation of array solar panels in kW-DC. If '-' is entered, a panel size of 1.4 times the System Output Size (kW-AC) will be used. <br><br> The SUNDA project recommends a panel size of 1.4 times larger than the desired System Output Size kW-AC (inverter size). E.g. the SUNDA 1 mW-AC template system has panels sized at 1.4 mW-DC nameplate capacity. System Array Size cannot be smaller than 1.</span></label>
-				<input type="text" id="systemSize" name="systemSize" required="required" pattern="^(\d{2,}|[1-9])(\.\d+)?$">
+				<input type="text" id="systemSize" name="systemSize" value="{{allInputDataDict.systemSize}}" required="required" pattern="^(\d{2,}|[1-9])(\.\d+)?$">
 			</div>
 			<div class="shorterInput">
 				<label class="tooltip">System Output Size (kW-AC)<span class="classic">Size of the total inverters in kW-AC for the system. System Output Size cannot be smaller than 1.</span></label>
-				<input type="text" id="inverterSize" name="inverterSize" required="required" pattern="^(\d{2,}|[1-9])(\.\d+)?$">
+				<input type="text" id="inverterSize" name="inverterSize" value="{{allInputDataDict.inverterSize}}" required="required" pattern="^(\d{2,}|[1-9])(\.\d+)?$">
 			</div>
 			<div class="wideInput">
 				<p class="inputSectionHeader">PV System Specs</p>
@@ -73,23 +47,23 @@
 			<hr>
 			<div class="shorterInput">
 				<label class="tooltip">PV Degradation (%/year)<span class="classic">Please note that the default is 0.8% per year, not 80% per year.</span></label>
-				<input type="text" id="degradation" name="degradation" required="required" pattern="^\d+\.?\d*?$">
+				<input type="text" id="degradation" name="degradation" value="{{allInputDataDict.degradation}}" required="required" pattern="^\d+\.?\d*?$">
 			</div>
 			<div class="shorterInput">
 				<label class="tooltip">Inverter Efficiency (%)<span class="classic">This value will be available on the inverter datasheet. Inverter Efficiency cannot be less than 1%.</span></label>
-				<input type="text" id="inverterEfficiency" name="inverterEfficiency" pattern="^(100|\d{2}|[1-9])(\.\d+)?$" required="required" />
+				<input type="text" id="inverterEfficiency" name="inverterEfficiency" value="{{allInputDataDict.inverterEfficiency}}" pattern="^(100|\d{2}|[1-9])(\.\d+)?$" required="required" />
 			</div>
 			<div class="shorterInput">
 				<label class="tooltip">Non-Inverter Efficiency (%)<span class="classic">This takes into account losses from soiling, shading, wiring, diode losses, etc. Non-Inverter Efficiency cannot be less than 1%.</span></label>
-				<input type="text" id="nonInverterEfficiency" name="nonInverterEfficiency" pattern="^(100|\d{2}|[1-9])(\.\d+)?$" required="required" />
+				<input type="text" id="nonInverterEfficiency" name="nonInverterEfficiency" value="{{allInputDataDict.nonInverterEfficiency}}" pattern="^(100|\d{2}|[1-9])(\.\d+)?$" required="required" />
 			</div>
 			<div class="shorterInput">
 				<label class="tooltip">Tilt (degrees)<span class="classic">The tilt of the solar panels measured as an angle in degrees between panels and ground. If '-' is entered, the latitude of the zipcode will be used.</span></label>
-				<input type="text" id="tilt" name="tilt" pattern="^(90|[1-8]\d|\d)?$|-" required="required"/>
+				<input type="text" id="tilt" name="tilt" value="{{allInputDataDict.tilt}}" pattern="^(90|[1-8]\d|\d)?$|-" required="required"/>
 			</div>
 			<div class="shorterInput">
 				<label class="tooltip">Azimuth (degrees)<span class="classic">Cardinal direction the PV system will face. 180 in the northern hemisphere is due South. Azimuth is restricted to 0-360 degrees. Azimuth of 360 should be denoted as 0.</span></label>
-				<input type="text" id="azimuth" name="azimuth" pattern="^(3[0-5]\d|[1-2]\d{2}|\d{2}|\d)(\.\d+)?$" required="required" />
+				<input type="text" id="azimuth" name="azimuth" value="{{allInputDataDict.azimuth}}" pattern="^(3[0-5]\d|[1-2]\d{2}|\d{2}|\d)(\.\d+)?$" required="required" />
 			</div>
 			<div class="wideInput">
 				<p class="inputSectionHeader">Construction Costs</p>
@@ -97,55 +71,55 @@
 			<hr>
 			<div class="shorterInput">
 				<label>Land (acres)</label>
-				<input type="text" id="landAmount" name="landAmount" pattern="^\d+\.?\d*$" required="required">
+				<input type="text" id="landAmount" name="landAmount" value="{{allInputDataDict.landAmount}}" pattern="^\d+\.?\d*$" required="required">
 			</div>
 			<div class="shorterInput">
 				<label class="tooltip">Land Acquisition<span class="classic">If this is equal to owned, land cost will be zero. Otherwise it will be calculated based on the 'Land Cost' input.</span></label>
-				<select id="landOwnership" name="landOwnership">
-					<option value="Owned">Owned</option>
-					<option value="Purchased">Purchased</option>
-					<option value="Leased">Leased</option>
+				<select id="landOwnership" name="landOwnership" value="{{allInputDataDict.landOwnership}}">
+					<option value="Owned" {% if allInputDataDict.landOwnership == 'Owned' %}selected{% endif %}>Owned</option>
+					<option value="Purchased" {% if allInputDataDict.landOwnership == 'Purchased' %}selected{% endif %}>Purchased</option>
+					<option value="Leased" {% if allInputDataDict.landOwnership == 'Leased' %}selected{% endif %}>Leased</option>
 				</select>
 			</div>
 			<div class="shorterInput">
 				<label>Land Cost ($/acre)</label>
-				<input type="text" id="costAcre" name="costAcre" pattern="^\d+\.?\d*$" required="required">
+				<input type="text" id="costAcre" name="costAcre" value="{{allInputDataDict.costAcre}}" pattern="^\d+\.?\d*$" required="required">
 			</div>
 			<div class="shorterInput">
 				<label>Module Cost ($/Wp)</label>
-				<input type="text" id="moduleCost" name="moduleCost" pattern="^\d+\.?\d*$" required="required">
+				<input type="text" id="moduleCost" name="moduleCost" value="{{allInputDataDict.moduleCost}}" pattern="^\d+\.?\d*$" required="required">
 			</div>
 			<div class="shorterInput">
 				<label>Racking Cost ($/Wp)</label>
-				<input type="text" id="rackCost" name="rackCost" pattern="^\d+\.?\d*$" required="required">
+				<input type="text" id="rackCost" name="rackCost" value="{{allInputDataDict.rackCost}}" pattern="^\d+\.?\d*$" required="required">
 			</div>
 			<div class="shorterInput">
 				<label class="tooltip">Inverter Unit Cost ($)<span class="classic">For each 500 kW-AC inverter, the SUNDA template cost is $107,000. For smaller systems, a 250 kW-AC inverter is available at $61,963.</span></label>
-				<input type="text" id="inverterCost" name="inverterCost" pattern="^\d+\.?\d*$" required="required">
+				<input type="text" id="inverterCost" name="inverterCost" value="{{allInputDataDict.inverterCost}}" pattern="^\d+\.?\d*$" required="required">
 			</div>
 			<div class="shorterInput">
 				<label class="tooltip">Mechanical Labor ($/hr)<span class="classic">For installation.</span></label>
-				<input type="text" id="mechLabor" name="mechLabor" pattern="^\d+\.?\d*$" required="required">
+				<input type="text" id="mechLabor" name="mechLabor" value="{{allInputDataDict.mechLabor}}" pattern="^\d+\.?\d*$" required="required">
 			</div>
 			<div class="shorterInput">
 				<label class="tooltip">Electrical Labor ($/hr)<span class="classic">For installation.</span></label>
-				<input type="text" id="elecLabor" name="elecLabor" pattern="^\d+\.?\d*$" required="required">
+				<input type="text" id="elecLabor" name="elecLabor" value="{{allInputDataDict.elecLabor}}" pattern="^\d+\.?\d*$" required="required">
 			</div>
 			<div class="shorterInput">
 				<label class="tooltip">Project Management Cost ($)<span class="classic">Covers the cost for co-op time and expense in doing the project.</span></label>
-				<input type="text" id="pmCost" name="pmCost" pattern="^\d+\.?\d*$" required="required">
+				<input type="text" id="pmCost" name="pmCost" value="{{allInputDataDict.pmCost}}" pattern="^\d+\.?\d*$" required="required">
 			</div>
 			<div class="shorterInput">
 				<label class="tooltip">Interconnect Costs ($)<span class="classic">Costs for connecting from the design included medium voltage transformer to the substation.</span></label>
-				<input type="text" id="interCost" name="interCost" pattern="^\d+\.?\d*$" required="required">
+				<input type="text" id="interCost" name="interCost" value="{{allInputDataDict.interCost}}" pattern="^\d+\.?\d*$" required="required">
 			</div>
 			<div class="shorterInput">
 				<label class="tooltip">Development Costs (%)<span class="classic">The consulting, legal and banking costs associated with setting up such a system. If doing a Tax Equity flip this may be as much as 5%.</span></label>
-				<input type="text" id="devCost" name="devCost" pattern="^(100|\d\d|\d)(\.\d+)?$" required="required">
+				<input type="text" id="devCost" name="devCost" value="{{allInputDataDict.devCost}}" pattern="^(100|\d\d|\d)(\.\d+)?$" required="required">
 			</div>
 			<div class="shorterInput">
 				<label class="tooltip">EPC Markup (%)<span class="classic">Costs as a percent of hardware costs. Usually 10% of Hardware Costs, but some EPCs allow the co-op to directly purchase the big ticket items like PV modules, inverters and racking through National Discount program and only charge the 10% on the balance of the system hardware needed to complete, thus an effective 3% in that case.</span></label>
-				<input type="text" id="EPCRate" name="EPCRate" pattern="^(100|\d\d|\d)(\.\d+)?$" required="required"/>
+				<input type="text" id="EPCRate" name="EPCRate" value="{{allInputDataDict.EPCRate}}" pattern="^(100|\d\d|\d)(\.\d+)?$" required="required"/>
 			</div>
 			<div class="wideInput">
 				<p class="inputSectionHeader">Financing Information</p>
@@ -153,27 +127,27 @@
 			<hr>
 			<div class="shorterInput">
 				<label class="tooltip">Discount Rate (%)<span class="classic">The cost of capital to the co-op. The default is close to the 20yr Treasury-bill rate for the project period.</span></label>
-				<input type="text" id="discRate" name="discRate" pattern="^(100|\d\d|\d)(\.\d+)?$" required="required"/>
+				<input type="text" id="discRate" name="discRate" value="{{allInputDataDict.discRate}}" pattern="^(100|\d\d|\d)(\.\d+)?$" required="required"/>
 			</div>
 			<div class="shorterInput">
 				<label class="tooltip">Loan Interest Rate (%)<span class="classic">Loan interest rate, usually from 2.0% for RUS to 8.5% for a commercial lender.</span></label>
-				<input type="text" id="loanRate" name="loanRate" pattern="^(100|\d\d|\d)(\.\d+)?$" required="required"/>
+				<input type="text" id="loanRate" name="loanRate" value="{{allInputDataDict.loanRate}}" pattern="^(100|\d\d|\d)(\.\d+)?$" required="required"/>
 			</div>
 			<div class="shorterInput">
 				<label class="tooltip">NCREB Tax Credit Rate (%)<span class="classic">The rate used by the Treasury Department to calculate the 70% interest reimbursement.</span></label>
-				<input type="text" id="NCREBRate" name="NCREBRate" pattern="^(100|\d\d|\d)(\.\d+)?$" required="required"/>
+				<input type="text" id="NCREBRate" name="NCREBRate" value="{{allInputDataDict.NCREBRate}}" pattern="^(100|\d\d|\d)(\.\d+)?$" required="required"/>
 			</div>
 			<div class="shorterInput">
 				<label class="tooltip">Lease Buyback Rate (%)<span class="classic">Lease buyback effective rate. Only available if there is a for-profit subsidiary owned by the co-op.</span></label>
-				<input type="text" id="taxLeaseRate" name="taxLeaseRate" pattern="^-?(100|\d{2}|[1-9]|0\.\d*[1-9])(\.\d*[1-9])?" required="required"/>
+				<input type="text" id="taxLeaseRate" name="taxLeaseRate" value="{{allInputDataDict.taxLeaseRate}}" pattern="^-?(100|\d{2}|[1-9]|0\.\d*[1-9])(\.\d*[1-9])?" required="required"/>
 			</div>
 			<div class="shorterInput">
 				<label class="tooltip">Targeted Tax Equity Return (%)<span class="classic">Tax equity return rate. Typical Tax equity partners in the renewable market are looking for about 8.5%</span></label>
-				<input type="text" id="taxEquityReturn" name="taxEquityReturn" pattern="^(100|\d\d|\d)(\.\d+)?$" required="required"/>
+				<input type="text" id="taxEquityReturn" name="taxEquityReturn" value="{{allInputDataDict.taxEquityReturn}}" pattern="^(100|\d\d|\d)(\.\d+)?$" required="required"/>
 			</div>
 			<div class="shorterInput">
 				<label class="tooltip">Distribution Adder ($/kWH)<span class="classic">An adder for the real costs of distributing the electricity from the PV array to the end customers. Used to provide comparison of PV rate to existing retail rate. </span></label>
-				<input type="text" id="distAdder" name="distAdder" pattern="^\d+\.?\d*$" required="required">
+				<input type="text" id="distAdder" name="distAdder" value="{{allInputDataDict.distAdder}}" pattern="^\d+\.?\d*$" required="required">
 			</div>
 			<div class="wideInput">
 				<p class="inputSectionHeader">PPA Information</p>
@@ -181,32 +155,17 @@
 			<hr>
 			<div class="shorterInput">
 				<label class="tooltip">First year energy cost ($/MWh)<span class="classic">Used to compare Utility-owned facilities to 3rd party PPA offerings. Set to 0 if unneeded.</span></label>
-				<input type="text" id="firstYearEnergyCostPPA" name="firstYearEnergyCostPPA" pattern="^\d+\.?\d*?$" required="required"/>
+				<input type="text" id="firstYearEnergyCostPPA" name="firstYearEnergyCostPPA" value="{{allInputDataDict.firstYearEnergyCostPPA}}" pattern="^\d+\.?\d*?$" required="required"/>
 			</div>
 			<div class="shorterInput">
 				<label class="tooltip">Annual Escalation Rate (%)<span class="classic">A fixed escalation rate at which the price will increase year to year.</span></label>
-				<input type="text" id="annualEscRatePPA" name="annualEscRatePPA" pattern="^(100|\d\d|\d)(\.\d+)?$" required="required"/>
+				<input type="text" id="annualEscRatePPA" name="annualEscRatePPA" value="{{allInputDataDict.annualEscRatePPA}}" pattern="^(100|\d\d|\d)(\.\d+)?$" required="required"/>
 			</div>
-			<div class="wideInput" style="text-align:right">
-				<button id="deleteButton" type="button" class="stoppedInline postRunInline" onclick="deleteModel()">Delete</button>
-				<button id="shareButton" type="button" class="postRunInline" onclick="shareModel()">Share</button>
-				<button id="duplicateButton" type="button" class="postRunInline" onclick="duplicateModel()">Duplicate</button>
-				<button id="cancelButton" class="runningInline" type="button" onclick="cancelModel()">Cancel Run</button>
-				<button id="runButton" class="stoppedInline postRunInline" type="submit">Run Model</button>
-			</div>
+			{{ omfModelButtons }}
 		</form>
 	</div>
-	<div id ="runIndicator" class="content running">
-		Model running on server. Refresh the page to check for results, or wait for automatic refresh every 5 seconds.
-	</div>
-	<div id ="stopIndicator" class="content stopped" style="visibility: hidden">
-		<pre id='errorText' style='overflow-x:scroll'></pre>
-		<script type="text/javascript">
-		if (typeof(allInputData.stderr) !== 'undefined') {	
-			gebi('stopIndicator').style.visibility = 'visible'
-			gebi('errorText').innerHTML = 'MODEL ENCOUNTERED AN ERROR AS FOLLOWS: \n\n' + allInputData.stderr}
-		</script>
-	</div>
+	{{ omfRunDebugBlock }}
+	{% if modelStatus == 'finished' %}
 	<div id="output">
 		<script id="globalOutputScripting">
 			// Global settings for charts.
@@ -215,7 +174,7 @@
 			arrayOfMaxes = allOutputData.LevelizedCosts.filter(function(x){return x[1]==200})
 			if (arrayOfMaxes.length > 0) {alert("Warning: a levelized cost was higher than the loan algorithms could calculate. It is being displayed as $200/MWh.")}
 			if (parseFloat(allInputData.landAmount) < allOutputData.minLandSize) {alert("Warning: the minimum amount of land required for this system based on its latitude is " + allOutputData.minLandSize + " acres, but you have specified " + allInputData.landAmount + " acres.")}
-			if (parseFloat(allInputData.systemSize) > 2.0 * allInputData.inverterSize) {alert("Warning: the inverter appears to be poorly sized to the Array size.  Please review your inputs. Array size is: " + allInputData.systemSize + "kW and your inverter is only " + allInputData.inverterSize + "kW. Most inverts will not tolerate more than 2x nameplate rating")}
+			if (parseFloat(allInputData.systemSize) > 2.0 * allInputData.inverterSize) {alert("Warning: the inverter appears to be poorly sized to the Array size. Please review your inputs. Array size is: " + allInputData.systemSize + "kW and your inverter is only " + allInputData.inverterSize + "kW. Most inverts will not tolerate more than 2x nameplate rating")}
 			// Function to add a vector to a table as a row.
 			function insertMetric(tableId, name, vector) {
 				table = gebi(tableId)
@@ -227,8 +186,8 @@
 				}
 			}
 		</script>
-		<p class="reportTitle postRun">Levelized Cost Comparison <font size="2">(based on a 25yr system life)</font></p>
-		<div id="levelizedCostReport" class="tightContent postRun">
+		<p class="reportTitle">Levelized Cost Comparison <font size="2">(based on a 25yr system life)</font></p>
+		<div id="levelizedCostReport" class="tightContent">
 			<div id="levelizedCostDiv" style="display:inline-block"></div>
 			<script>
 				levelizedCostChart = new Highcharts.Chart({
@@ -295,8 +254,8 @@
 			</div>
 		</div>
 		<!-- TODO: Add units to costs and percentages -->
-		<p class="reportTitle postRun">Cost Breakdown</p>
-		<div id="levelizedCostReport" class="tightContent postRun">
+		<p class="reportTitle">Cost Breakdown</p>
+		<div id="levelizedCostReport" class="tightContent">
 			<div id="breakdownPieChart" style="display:inline-block"></div>
 			<script>
 				costChart = new Highcharts.Chart({
@@ -325,8 +284,8 @@
 				</script>
 			</div>
 		</div>
-		<p class="reportTitle postRun">Additional Output</p>
-		<div id="additionalOutputReport" class="content postRun" style="margin-top:5px; height:300px">
+		<p class="reportTitle">Additional Output</p>
+		<div id="additionalOutputReport" class="content" style="margin-top:5px; height:300px">
 			<div id="mapHere" style="display:inline-block; width:490px; height:280px; float:left"></div>
 			<script>
 				width = 490, height = 280
@@ -374,7 +333,7 @@
 			<div class="shorterInput">
 				<strong class="tooltip" style="display:inline">Calculated Capacity Factor<span class="classic">Calculated as first year generation (kWh-AC) divided by inverters size (kW-AC).</span></strong>
 				<p id="capFactor"></p>
-				<script>gebi("capFactor").innerHTML = delimitNumbers(parseFloat(allOutputData.capFactor).toFixed(0)) +  "%"</script>
+				<script>gebi("capFactor").innerHTML = delimitNumbers(parseFloat(allOutputData.capFactor).toFixed(0)) + "%"</script>
 			</div>
 			<div class="shorterInput">
 				<strong>Percentage Clipping</strong>
@@ -396,10 +355,11 @@
 				<script>gebi("climSource").innerHTML = allInputData.climateName</script>
 			</div>
 		</div>
-		<p class="reportTitle postRun" style="page-break-before:always">Download Full Model</p>
-		<div id="fullModelDownload" class="content postRun" style="margin-top:5px">
+		<p class="reportTitle" style="page-break-before:always">Download Full Model</p>
+		<div id="fullModelDownload" class="content" style="margin-top:5px">
 			<p>A more detailed and fully editable Excel version of this model is <a href="https://www.dropbox.com/s/piyh2qc806c7ab2/SUNDA%20Solar%20Costing%20%20Financing%20Screening%20Tool%20-%20released.xlsm?dl=1">available here.</a></p>
 		</div>
-
+		{{ rawOutputFiles }}
 	</div>
+	{% endif %}
 </body>

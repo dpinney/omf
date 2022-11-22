@@ -1,9 +1,5 @@
 <head>
-
-	<title>Open Modeling Framework</title>
-	<meta charset="utf-8">
-	<link href="{{pathPrefix}}/static/omf.css" type="text/css" rel="stylesheet"/>
-	<link rel="shortcut icon" href="{{pathPrefix}}/static/favicon.ico">
+	{{ omfHeaders }}
 	<style>
 		#Metric {
 			font-weight:bold;
@@ -13,80 +9,43 @@
 			font-weight:bold;
 		}
 	</style>
-	{% if modelStatus == "running" %}<meta http-equiv="refresh" content="5"/>{% endif %}
-	
-	<!-- Library Imports -->
-	<script type="text/javascript" src="{{pathPrefix}}/static/omf.js"></script>
-	<script type="text/javascript" src="{{pathPrefix}}/static/jquery-1.9.1.js"></script>
 	<script src="{{pathPrefix}}/static/highcharts4.src.js"></script>
 	<script src="{{pathPrefix}}/static/highcharts-more.src.js"></script>
 	<script src="https://cdn.plot.ly/plotly-1.50.1.min.js"></script>	
-	
-	<!-- Data  Imports -->
-	<script>allInputData={% if allInputDataDict %}{{allInputDataDict | tojson}}{% else %}null{% endif %}</script>
-	<script>allOutputData={% if allOutputDataDict %}{{allOutputDataDict | tojson}}{% else %}null{% endif %}</script>
-	<script>modelStatus="{{modelStatus}}"</script>
-	<script>currentUser="{{datastoreNames.get('currentUser','test')}}"</script>
-
 	<!-- Helper Functions -->
 	<script type="text/javascript">
-
-		function showInputs(){
-			//$('.algoInputs').hide();
-			//algo = $('#algorithm').val();
-			console.log(algo+'Inputs');
-			//$('.'+algo+'Inputs').show();
-		}
-
 		$(window).on('pageshow',function(){
 			Plotly.newPlot( 'plotSax', JSON.parse(allOutputData['plotSax']) );
 			Plotly.newPlot( 'plotLof', JSON.parse(allOutputData['plotLof']) );
 			Plotly.newPlot( 'plotIso', JSON.parse(allOutputData['plotIso']) );
 		});
-
 	</script>
-
 </head>
-
-<body onload="init()">
-
-	<div id="header">
-		<div id="headInnerBlock">
-			<div id="menuLeft">
-				<a style="color:white" href="/">Open Modeling Framework</a> &#187;&nbsp;&nbsp;Model
-				&#8220;<p id="titleText" style="display:inline"></p>&#8221;
-			</div>
-		</div>
-	</div>
-	<div id="triangle-parent">
-		<div id="triangle-message">New Version<span class="classic-triangle">A new version of the model has been added to the OMF. To get the new outputs, please fill in any missing inputs and hit "Run Model". You can also just look at the old inputs/outputs.</span></div>
-		<div id="triangle-topright"></div>
-	</div>
+<body>
+	{{ omfModelTitle }}
 	<p class="reportTitle">Model Input</p>
-
 	<div id="input" class="content">
 		<form name="inputForm" action="/runModel/" onsubmit="event.preventDefault(); return isFormValid();" method="post">
 			<div class="shortInput">
 				<label>Model Type <a href="https://github.com/dpinney/omf/wiki/Models-~-anomalyDetector" target="blank">Help?</a></label>
-				<input type="text" id="modelType" name="modelType" value="{{modelName}}" readonly/>
+				<input type="text" id="modelType" name="modelType" value="{{allInputDataDict.modelType}}" value="{{modelName}}" readonly/>
 			</div>
 			<div class="shortInput">
 				<label>Model Name</label>
-				<input type="text" id="modelName" name="modelName" pattern="^[\w\s\d\.-]+$" required="required">
+				<input type="text" id="modelName" name="modelName" value="{{allInputDataDict.modelName}}" pattern="^[\w\s\d\.-]+$" required="required">
 			</div>
-			<div class="shortInput runningInline postRunInline">
+			<div class="shortInput">
 				<label>User</label>
-				<input type="text" id="user" name="user" readonly/>
+				<input type="text" id="user" name="user" value="{{allInputDataDict.user}}" readonly/>
 			</div>
-			<div class="shortInput runningInline postRunInline ">
+			<div class="shortInput">
 				<label>Created</label>
-				<input type="text" id="created" name="created" readonly/>
+				<input type="text" id="created" name="created" value="{{allInputDataDict.created}}" readonly/>
 			</div>
-			<div class="shortInput postRunInline">
+			<div class="shortInput">
 				<label>Run Time</label>
-				<input type="text" id="runTime" name="runTime" readonly/>
-			</div>
-			
+				<input type="text" id="runTime" name="runTime" value="{{allInputDataDict.runTime}}" readonly/>
+			</div>			
 			<div class="wideInput">
 				<p class="inputSectionHeader">Anomaly Detection Parameters</p>
 			</div>
@@ -94,129 +53,67 @@
 			<div class="shortInput">
 				<label class="tooltip">Data (.csv file)<span class="classic">Please see the documentation at the green 'Help?' link above for the required format and an example file.</span></label>
 				<input id="inputFile" type="file" style="display:none" onchange="handle_files(this.files,'file','fileName')">
-				<input id="file" name="file" type="hidden">
+				<input id="file" name="file" value="{{allInputDataDict.file}}" type="hidden">
 				<div>
 					<label for="inputFile" class="fileButton">Choose File</label>
-					<input id="fileName" name="fileName" value='' readonly class="uploadFileName">
-				</div>
-				<div class="shortInput" >
-					<label>Is the format of this file forecastLoad compliant?</label>
-					<input type="checkbox"  id="demandTempBool" name="demandTempBool" checked/>
+					<input id="fileName" name="fileName" value="{{allInputDataDict.fileName}}" value='' readonly class="uploadFileName">
 				</div>
 			</div>
-
-			<div class="wideInput">
-				<p class="inputSectionHeader">Prophet Parameters</p>
+			<div class="shortInput">
+				<label>Is the format of this file forecastLoad compliant?</label>
+				<input type="checkbox"  id="demandTempBool" name="demandTempBool" {% if allInputDataDict.demandTempBool %}checked{% endif %}/>
 			</div>
-			<hr>
-			<div class="algoInputs prophetInputs">
-				<div class="shortInput" >
-					<label>Dependent variable column name</label>
-					<input type="text"  id="yLabel" name="yLabel" />
-				</div>
-				<div class="shortInput" >
-					<label>Data Start Date (YYYY-MM-DD)</label>
-					<input type="text"  id="startDate" name="startDate" pattern="^\d\d\d\d-\d\d-\d\d$"/>
-				</div>
+			<div class="shortInput">
+				<label>Prophet - Dependent Variable Name</label>
+				<input type="text"  id="yLabel" name="yLabel" value="{{allInputDataDict.yLabel}}" />
 			</div>
-			<div class="wideInput">
-				<p class="inputSectionHeader">Eliptic Envelope Parameters</p>
+			<div class="shortInput">
+				<label>Prophet - Start Date (YYYY-MM-DD)</label>
+				<input type="text"  id="startDate" name="startDate" value="{{allInputDataDict.startDate}}" pattern="^\d\d\d\d-\d\d-\d\d$"/>
 			</div>
-			<hr>
-			<div class="algoInputs elipticInputs">
-			
-				<div class="shortInput" >
-					<label>Gaussian level for Elliptic Envelope (&lt; 1)</label>
-					<input type="number"  id="norm_confidence" name="norm_confidence" min="0.01" max="1" step="any"/>
-				</div>
+			<div class="shortInput">
+				<label>Elliptic - Gaussian Level (&lt; 1)</label>
+				<input type="number"  id="norm_confidence" name="norm_confidence" value="{{allInputDataDict.norm_confidence}}" min="0.01" max="1" step="any"/>
 			</div>
-			<div class="wideInput">
-				<p class="inputSectionHeader">Peak Forecast T-test Parameters</p>
+			<div class="shortInput">
+				<label>T-Test - Confidenc Level (&lt; 1)</label>
+				<input type="number"  id="confidence" name="confidence" value="{{allInputDataDict.confidence}}" min="0.5" max="1" step="any"/>
 			</div>
-			<hr>
-			<div class="algoInputs tTestInputs">
-			
-				<div class="shortInput" >
-					<label>Anomalous confidence level (&lt; 1)</label>
-					<input type="number"  id="confidence" name="confidence" min="0.5" max="1" step="any"/>
-				</div>
+			<div class="shortInput">
+				<label class="tooltip">Local Outlier Factor - Contamination Level<span class="classic">The percent of data expected to be anomalous. value must be between 0 and 0.5; if the value is set to 0 the contamination level is determined automatically.</span></label>
+				<input type="number"  id="contaminationLof" name="contaminationLof" value="{{allInputDataDict.contaminationLof}}" min="0" max="0.5" step="0.01"/>
 			</div>
-
-			<div class="wideInput">
-				<p class="inputSectionHeader">Local Outlier Factor specific Parameters</p>
+			<div class="shortInput">
+				<label class="tooltip">Local Outlier Factor - Neighbors<span class="classic">The number of neighbors to use to determine whether a point is an outlier or not; If the number of neighbors provided is larger than the number of samples provided, all samples will be used.</span></label>
+				<input type="number"  id="neighbors" name="neighbors" value="{{allInputDataDict.neighbors}}" min="0" step="1"/>
 			</div>
-			<hr>
-			<div class="algoInputs lofInputs">
-				<div class="shortInput" >
-					<label class="tooltip">Contamination level<span class="classic">The percent of data expected to be anomalous. value must be between 0 and 0.5; if the value is set to 0 the contamination level is determined automatically.</span></label>
-					<input type="number"  id="contaminationLof" name="contaminationLof" min="0" max="0.5" step="0.01"/>
-				</div>
-				<div class="shortInput" >
-					<label class="tooltip">Number of Neighbors<span class="classic">The number of neighbors to use to determine whether a point is an outlier or not; If the number of neighbors provided is larger than the number of samples provided, all samples will be used.</span></label>
-					<input type="number"  id="neighbors" name="neighbors" min="0" step="1"/>
-				</div>
+			<div class="shortInput">
+				<label class="tooltip">Isolation Forest - Contamination Level<span class="classic">The percent of data expected to be anomalous. value must be between 0 and 0.5; if the value is set to 0 the contamination level is determined automatically.</span></label>
+				<input type="number"  id="contaminationIso" name="contaminationIso" value="{{allInputDataDict.contaminationIso}}" min="0" max="0.5" step="0.01"/>
 			</div>
-
-
-			<div class="wideInput">
-				<p class="inputSectionHeader">Isolation Forest specific Parameters</p>
+			<div class="shortInput">
+				<label class="tooltip">Isolation Forest - Number of Estimators<span class="classic">The number of trees to generate within the ensemble to determine whether a point is an outlier or not.</span></label>
+				<input type="number"  id="estimators" name="estimators" value="{{allInputDataDict.estimators}}" min="0" step="1"/>
 			</div>
-			<hr>
-			<div class="algoInputs isoForestInputs">
-				<div class="shortInput" >
-					<label class="tooltip">Contamination level<span class="classic">The percent of data expected to be anomalous. value must be between 0 and 0.5; if the value is set to 0 the contamination level is determined automatically.</span></label>
-					<input type="number"  id="contaminationIso" name="contaminationIso" min="0" max="0.5" step="0.01"/>
-				</div>
-				<div class="shortInput" >
-					<label class="tooltip">Number of Estimators<span class="classic">The number of trees to generate within the ensemble to determine whether a point is an outlier or not.</span></label>
-					<input type="number"  id="estimators" name="estimators" min="0" step="1"/>
-				</div>
-				<div class="shortInput" >
-					<label class="tooltip">Sample percentage<span class="classic">The percentage of datapoints sampled to generate each tree in the ensemble.</span></label>
-					<input type="number"  id="samples" name="samples" min="0" max="1" step="any"/>
-				</div>
+			<div class="shortInput">
+				<label class="tooltip">Isolation Forest - Sample Percentage<span class="classic">The percentage of datapoints sampled to generate each tree in the ensemble.</span></label>
+				<input type="number"  id="samples" name="samples" value="{{allInputDataDict.samples}}" min="0" max="1" step="any"/>
 			</div>
-
-
-			<div class="wideInput">
-				<p class="inputSectionHeader">SAX-Sequitur specific Parameters</p>
+			<div class="shortInput">
+				<label class="tooltip">SAX - Normailzation Window Size<span class="classic">The number of datapoints to consider for normalizing data shapes.</span></label>
+				<input type="number"  id="windowSize" name="windowSize" value="{{allInputDataDict.windowSize}}" min="1" step="1"/>
 			</div>
-			<hr>
-			<div class="algoInputs saxInputs">
-				<div class="shortInput" >
-					<label class="tooltip">Normailzation Window Size<span class="classic">The number of datapoints to consider for normalizing data shapes.</span></label>
-					<input type="number"  id="windowSize" name="windowSize" min="1" step="1"/>
-				</div>
-				<div class="shortInput" >
-					<label class="tooltip">Alphabet Size<span class="classic">The number of symbols to use to approximate the signal, the larger the number the less the algorithm with generalize (must be between 3 and 20)</span></label>
-					<input type="number"  id="alphabetSize" name="alphabetSize" min="3" max="20" step="1"/>
-				</div>
+			<div class="shortInput">
+				<label class="tooltip">SAX - Alphabet Size<span class="classic">The number of symbols to use to approximate the signal, the larger the number the less the algorithm with generalize (must be between 3 and 20)</span></label>
+				<input type="number"  id="alphabetSize" name="alphabetSize" value="{{allInputDataDict.alphabetSize}}" min="3" max="20" step="1"/>
 			</div>
-
-			<div class="wideInput" style="text-align:right">
-				<button id="deleteButton" type="button" class="stoppedInline postRunInline" onclick="deleteModel()">Delete</button>
-				<button id="shareButton" type="button" class="postRunInline" onclick="shareModel()">Share</button>
-				<button id="duplicateButton" type="button" class="postRunInline" onclick="duplicateModel()">Duplicate</button>
-				<button id="cancelButton" class="runningInline" type="button" onclick="cancelModel()">Cancel Run</button>
-				<button id="runButton" class="stoppedInline postRunInline" type="submit">Run Model</button>
-			</div>
+			{{ omfModelButtons }}
 		</form>
 	</div>
-
-	<div id ="runIndicator" class="content running">
-		Model running on server. Refresh the page to check for results, or wait for automatic refresh every 5 seconds.
-	</div>
-	<div id ="stopIndicator" class="content stopped" style="visibility: hidden">
-		<pre id='errorText' style='overflow-x:scroll'></pre>
-		<script type="text/javascript">
-		if (typeof(allInputData.stderr) !== 'undefined') {
-			gebi('stopIndicator').style.visibility = 'visible'
-			gebi('errorText').innerHTML = 'MODEL ENCOUNTERED AN ERROR AS FOLLOWS: \n\n' + allInputData.stderr}
-		</script>
-	</div>
-
-	<p class="reportTitle postRun" style="page-break-before:always">Prophet (Monovariate)</p>
-	<div id="prophetPlot" class="tightContent postRun">
+	{{ omfRunDebugBlock }}
+	{% if modelStatus == 'finished' %}
+	<p class="reportTitle" style="page-break-before:always">Prophet (Monovariate)</p>
+	<div id="prophetPlot" class="tightContent">
 		<div id="prophetChart"></div>
 		<script>
 			var prophetOutliers = [];
@@ -287,9 +184,8 @@
 					"legend":{"verticalAlign":"top","align":"top","borderWidth":0,"x":50,"y":-10,"layout":"horizontal"}})
 		</script>
 	</div>
-
-	<p class="reportTitle postRun" style="page-break-before:always">Elliptic Envelope</p>	
-	<div id="ellipticPlot" class="tightContent postRun">
+	<p class="reportTitle" style="page-break-before:always">Elliptic Envelope</p>
+	<div id="ellipticPlot" class="tightContent">
 		{% if elliptic_outlier is not defined %}Warning: input data is not Gaussian, so elliptic envelope method is invalid.{% endif %}
 		<div id="ellipticChart"></div>
 		<script>
@@ -350,8 +246,8 @@
 		</script>
 	</div>
 
-	<p class="reportTitle postRun" style="page-break-before:always">Peak Forecast T-Test Method</p>
-	<div id="katPlot" class="tightContent postRun">
+	<p class="reportTitle" style="page-break-before:always">Peak Forecast T-Test Method</p>
+	<div id="katPlot" class="tightContent">
 		{% if pk_bool is not defined %}Peak forecast t-test method was not run, as the checkbox indicating that the input data conforms to the forecastLoad data formatting requirements was not checked. {% endif %}
 		<div id="katChart"></div>
 		<script>
@@ -397,14 +293,11 @@
 					"legend":{"verticalAlign":"top","align":"top","borderWidth":0,"x":50,"y":-10,"layout":"horizontal"}})
 		</script>
 	</div>
-
-	<p class="reportTitle postRun" style="page-break-before:always">Local Outlier Factor</p>
-	<div id="plotLof" class="tightContent postRun"></div>
-
-	<p class="reportTitle postRun" style="page-break-before:always">Isolation Forest</p>
-	<div id="plotIso" class="tightContent postRun"></div>
-
-	<p class="reportTitle postRun" style="page-break-before:always">SAX-Sequitur</p>
-	<div id="plotSax" class="tightContent postRun"></div>
-
+	<p class="reportTitle" style="page-break-before:always">Local Outlier Factor</p>
+	<div id="plotLof" class="tightContent"></div>
+	<p class="reportTitle" style="page-break-before:always">Isolation Forest</p>
+	<div id="plotIso" class="tightContent"></div>
+	<p class="reportTitle" style="page-break-before:always">SAX-Sequitur</p>
+	<div id="plotSax" class="tightContent"></div>
+	{% endif %}
 </body>

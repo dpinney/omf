@@ -12,6 +12,7 @@
 	<script src="https://cdn.maptiler.com/mapbox-gl-leaflet/latest/leaflet-mapbox-gl.js"></script>
 	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.0.3/leaflet.css" />
 	<link rel="stylesheet" href="https://cdn.maptiler.com/mapbox-gl-js/v1.5.1/mapbox-gl.css" />
+	<script src='https://unpkg.com/@turf/turf@6/turf.min.js'></script>
 </head>
 	<style>html, body {
 		width: 100%;
@@ -31,23 +32,32 @@
 <body>
 	<div id="map"></div>
 	<script>var geojson={% if geojson %}{{geojson | tojson}}{% else %}null{% endif %}</script>
+	<script>var all_mg_elements={% if all_mg_elements %}{{all_mg_elements | tojson}}{% else %}null{% endif %}</script>
 	<script type="text/javascript">
 	function onEachFeature(feature, layer) {
 		var popupContent = '';
 		for (const key in feature.properties) {
 			if (feature.properties.hasOwnProperty(key)) {
-				popupContent += feature.properties[key];
+				value = feature.properties[key]
+				popupContent += '<div>' + key + ': <b>' + value + '</b></div>'
 				layer.bindPopup(popupContent);
 			}
 		}
 	}
+
 	function pointToLayerNode(feature, latlng) {
 		let fillColorValue = 'gray';
 		if (feature.properties['pointColor']){
 			fillColorValue = feature.properties['pointColor'];
+		} else if (feature.properties.object === 'capacitor'){
+			fillColorValue = 'purple'
+		} else if (feature.properties.object === 'generator' || feature.properties.object === 'storage'){
+			fillColorValue = 'red'
+		} else if (feature.properties.object === 'load'){
+			fillColorValue = 'blue'
 		}
 		return L.circleMarker(latlng, {
-			radius: 2,
+			radius: 5,
 			fillColor: fillColorValue,
 			color: "#000",
 			weight: 1,
@@ -62,8 +72,11 @@
 				return {
 					"color": feature.properties.edgeColor
 				}
-			}
-			else{
+			} else if (feature.properties.object === 'transformer'){
+				return {
+					"color": "orange"
+				}
+			} else {
 				return {
 					"color": "black"
 				}
@@ -103,6 +116,31 @@
 		attribution: "",
 		style: 'https://api.maptiler.com/maps/basic/style.json?key=WOwRKyy0L6AwPBuM4Ggj'
 	});
+	// Generate hulls for microgrids
+	allHulls = L.layerGroup()
+	// Add new hull to map for each microgrid.
+	var check_box_elements = {}
+	if (all_mg_elements != null) {
+		for (i = 0; i < Object.keys(all_mg_elements).length; i++) {
+			var mgFeatureCollection = turf.featureCollection(features = [])
+			var mg = all_mg_elements[Object.keys(all_mg_elements)[i]]
+			// If geojson feature is in mg, add a turf point.
+			for (j = 0; j < Object.keys(geojson.features).length; j++) {
+				let isPoint = geojson['features'][j]['geometry']['type'] == 'Point'
+				let itemName = geojson['features'][j]['properties']['name']
+				if (isPoint && mg.indexOf(itemName) > -1) {
+					mgFeatureCollection['features'].push(turf.point(geojson['features'][j]['geometry']['coordinates']))
+				}
+			}
+			var hull = turf.convex(mgFeatureCollection);
+			hullLayer = L.geoJSON(hull).bindPopup(Object.keys(all_mg_elements)[i])
+			allHulls.addLayer(hullLayer)
+			// hullLayer.addTo(map)
+		}
+		allHulls.addTo(map)
+		check_box_elements['Hulls'] = allHulls
+	}
+	// Add layer control
 	var layerControl = L.control.layers(
 		{
 			'Satellite': esri_images,
@@ -110,7 +148,7 @@
 			'Topo': topo,
 			'Blank': blank
 		},
-		{},
+		check_box_elements,
 		{
 			position: 'topleft',
 			collapsed: false		

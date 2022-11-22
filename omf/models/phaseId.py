@@ -355,6 +355,10 @@ def work(modelDir, inputDict):
 	outData["phasingResults"] = phasingResults
 	with open(pJoin(modelDir,"output-conf-matrix.png"),"rb") as inFile:
 		outData["confusionMatrixImg"] = base64.standard_b64encode(inFile.read()).decode()
+	with open(pJoin(modelDir,"ModifiedSC_HIST.png"),"rb") as inFile:
+		outData["confidenceHistogramImg"] = base64.standard_b64encode(inFile.read()).decode()
+	with open(pJoin(modelDir,"PercentagePlot.png"),"rb") as inFile:
+		outData["PercentagePlotImg"] = base64.standard_b64encode(inFile.read()).decode()
 	return outData
 
 def new(modelDir):

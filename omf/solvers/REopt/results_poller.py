@@ -20,6 +20,7 @@ def poller(url, poll_interval=2):
     while True:
 
         resp = requests.get(url=url)
+        # print("resp from results_poller.poller():", resp)
         resp_dict = json.loads(resp.text)
 
         try:
@@ -47,7 +48,7 @@ def rez_poller(url, poll_interval=2):
     :return: dictionary response (once status is not "Optimizing...")
     """
     key_error_count = 0
-    key_error_threshold = 40
+    key_error_threshold = 70
     status = ""
     logger.log.info("Polling {} for results with interval of {}s...".format(url, poll_interval))
     while True:

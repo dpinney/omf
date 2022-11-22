@@ -1,8 +1,5 @@
 <head>
-	<title>Open Modeling Framework</title>
-	<meta charset="utf-8">
-	<link href="{{pathPrefix}}/static/omf.css" type="text/css" rel="stylesheet"/>
-	<link rel="shortcut icon" href="{{pathPrefix}}/static/favicon.ico">
+	{{ omfHeaders }}
 	<style>#map{
 		position: relative;
 		width: 100.0%;
@@ -11,56 +8,36 @@
 		top: 0.0%;
 		}
 	</style>
-	{% if modelStatus == "running" %}<meta http-equiv="refresh" content="5"/>{% endif %}
-	<!-- Library Imports -->
-	<script type="text/javascript" src="{{pathPrefix}}/static/omf.js"></script>
-	<script type="text/javascript" src="{{pathPrefix}}/static/jquery-1.9.1.js"></script>
-	<!-- Data  Imports -->
-	<script>allInputData={% if allInputDataDict %}{{allInputDataDict | tojson}}{% else %}null{% endif %}</script>
-	<script>allOutputData={% if allOutputDataDict %}{{allOutputDataDict | tojson}}{% else %}null{% endif %}</script>
-	<script>modelStatus="{{modelStatus}}"</script>
-	<script>currentUser="{{datastoreNames.get('currentUser','test')}}"</script>
 	<!-- Leaflet Imports-->
 	<link rel="stylesheet" href="https://unpkg.com/leaflet@1.0.3/dist/leaflet.css" integrity="sha512-07I2e+7D8p6he1SIM+1twR5TIrhUQn9+I6yjqD53JQjFiMf8EtC93ty0/5vJTZGF8aAocvHYNEDJajGdNx1IsQ=="
 		crossorigin="" />
 	<script src="https://unpkg.com/leaflet@1.0.3/dist/leaflet.js" integrity="sha512-A7vV8IFfih/D732iSSKi20u/ooOfj/AGehOKq0f4vLT1Zr2Y+RX7C+w8A1gaSasGtRUZpF/NZgzSAu4/Gc41Lg=="
 		crossorigin=""></script>
 </head>
-<body onload="init()">
-	<div id="header">
-		<div id="headInnerBlock">
-			<div id="menuLeft">
-				<a style="color:white" href="/">Open Modeling Framework</a> &#187;&nbsp;&nbsp;Model
-				&#8220;<p id="titleText" style="display:inline"></p>&#8221;
-			</div>
-		</div>
-	</div>
-	<div id="triangle-parent">
-		<div id="triangle-message">New Version<span class="classic-triangle">A new version of the model has been added to the OMF. To get the new outputs, please fill in any missing inputs and hit "Run Model". You can also just look at the old inputs/outputs.</span></div>
-		<div id="triangle-topright"></div>
-	</div>
+<body>
+	{{ omfModelTitle }}
 	<p class="reportTitle">Model Input</p>
 	<div id="input" class="content">
 		<form name="inputForm" action="/runModel/" onsubmit="event.preventDefault(); return isFormValid();" method="post">
 			<div class="shortInput">
 				<label>Model Type <a href="https://github.com/dpinney/omf/wiki/Models-~-rfCoverage" target="blank">Help?</a></label>
-				<input type="text" id="modelType" name="modelType" value="{{modelName}}" readonly/>
+				<input type="text" id="modelType" name="modelType" value="{{allInputDataDict.modelType}}" value="{{modelName}}" readonly/>
 			</div>
 			<div class="shortInput">
 				<label>Model Name</label>
-				<input type="text" id="modelName" name="modelName" pattern="^[\w\s\d\.-]+$" required="required">
+				<input type="text" id="modelName" name="modelName" value="{{allInputDataDict.modelName}}" pattern="^[\w\s\d\.-]+$" required="required">
 			</div>
-			<div class="shortInput runningInline postRunInline">
+			<div class="shortInput">
 				<label>User</label>
-				<input type="text" id="user" name="user" readonly/>
+				<input type="text" id="user" name="user" value="{{allInputDataDict.user}}" readonly/>
 			</div>
-			<div class="shortInput runningInline postRunInline ">
+			<div class="shortInput">
 				<label>Created</label>
-				<input type="text" id="created" name="created" readonly/>
+				<input type="text" id="created" name="created" value="{{allInputDataDict.created}}" readonly/>
 			</div>
-			<div class="shortInput postRunInline">
+			<div class="shortInput">
 				<label>Run Time</label>
-				<input type="text" id="runTime" name="runTime" readonly/>
+				<input type="text" id="runTime" name="runTime" value="{{allInputDataDict.runTime}}" readonly/>
 			</div>
 			<div class="wideInput">
 				<p class="inputSectionHeader">RF Tower Specifications</p>
@@ -68,69 +45,53 @@
 			<hr>
 			<div class="shortInput">
 				<label class="tooltip">Latitude<span class="classic">Latitude of the tower.</span></label>
-				<input type="text" id="towerLatitude" name="towerLatitude" pattern="^\d+\.?\d*$" required="required">
+				<input type="text" id="towerLatitude" name="towerLatitude" value="{{allInputDataDict.towerLatitude}}" pattern="^\d+\.?\d*$" required="required">
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Longitude<span class="classic">Longitude of the tower.</span></label>
-				<input type="text" id="towerLongitude" name="towerLongitude" pattern="^\d+\.?\d*$" required="required">
+				<input type="text" id="towerLongitude" name="towerLongitude" value="{{allInputDataDict.towerLongitude}}" pattern="^\d+\.?\d*$" required="required">
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Height (Meters)<span class="classic">Height of the tower in meters.</span></label>
-				<input type="text" id="towerHeight" name="towerHeight" pattern="^\d+\.?\d*$" required="required"/>
+				<input type="text" id="towerHeight" name="towerHeight" value="{{allInputDataDict.towerHeight}}" pattern="^\d+\.?\d*$" required="required"/>
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Frequency (MHz)<span class="classic">Use value within range 20 MHz to 20 GHz.</span></label>
-				<input type="text" id="frequency" name="frequency" pattern="^\d+\.?\d*$" required="required"/>
+				<input type="text" id="frequency" name="frequency" value="{{allInputDataDict.frequency}}" pattern="^\d+\.?\d*$" required="required"/>
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Polarization<span class="classic">Enter 0 for horizontal or 1 for vertical.</span></label>
-				<input type="text" id="polarization" name="polarization" pattern="^\d+\.?\d*$" required="required">
+				<input type="text" id="polarization" name="polarization" value="{{allInputDataDict.polarization}}" pattern="^\d+\.?\d*$" required="required">
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Analysis Type<span class="classic">lineOfSight: geometric line of site coverage map.<br><br>
 				pathLoss: expected signal levels in decibels.<br><br>
 				fieldStrength: field strength contours referenced to decibels over one microvolt per meter dBuV/m.<br><br>
 				recievedPower: received power level contours referenced to decibels over one milliwatt (dBm) are produced.</span></label>
-				<select id="analysisType" name="analysisType" required="required"/>
-					<option value="lineOfSight">Line of Sight</option>
-					<option value="pathLoss">Path Loss</option>
-					<option value="fieldStrength">Field Strength</option>
-					<option value="recievedPower">Recieved Power</option>
+				<select id="analysisType" name="analysisType" value="{{allInputDataDict.analysisType}}" required="required"/>
+					<option value="lineOfSight" {% if allInputDataDict.analysisType == 'lineOfSight' %}selected{% endif %}>Line of Sight</option>
+					<option value="pathLoss" {% if allInputDataDict.analysisType == 'pathLoss' %}selected{% endif %}>Path Loss</option>
+					<option value="fieldStrength" {% if allInputDataDict.analysisType == 'fieldStrength' %}selected{% endif %}>Field Strength</option>
+					<option value="recievedPower" {% if allInputDataDict.analysisType == 'recievedPower' %}selected{% endif %}>Recieved Power</option>
 				</select>
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Topography<span class="classic">seaLevel: Assume sea level.<br><br>
 				digitalElevationModel: Account for topographic interference with elevation data.</span></label>
-				<select id="elevation" name="elevation" required="required"/>
-					<option value="seaLevel">Sea Level</option>
-					<option value="digitalElevationModel">Digital Elevation Model</option>
+				<select id="elevation" name="elevation" value="{{allInputDataDict.elevation}}" required="required"/>
+					<option value="seaLevel" {% if allInputDataDict.elevation == 'seaLevel' %}selected{% endif %}>Sea Level</option>
+					<option value="digitalElevationModel" {% if allInputDataDict.elevation == 'digitalElevationModel' %}selected{% endif %}>Digital Elevation Model</option>
 				</select>
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Effective Radiated Power (Watts)<span class="classic">No impact on path loss or line of sight analysis</span></label>
-				<input type="text" id="erp" name="erp" pattern="^\d+\.?\d*$">
+				<input type="text" id="erp" name="erp" value="{{allInputDataDict.erp}}" pattern="^\d+\.?\d*$">
 			</div>
-			<div class="wideInput" style="text-align:right">
-				<button id="deleteButton" type="button" class="stoppedInline postRunInline" onclick="deleteModel()">Delete</button>
-				<button id="shareButton" type="button" class="postRunInline" onclick="shareModel()">Share</button>
-				<button id="duplicateButton" type="button" class="postRunInline" onclick="duplicateModel()">Duplicate</button>
-				<button id="cancelButton" class="runningInline" type="button" onclick="cancelModel()">Cancel Run</button>
-				<button id="runButton" class="stoppedInline postRunInline" type="submit">Run Model</button>
-			</div>
+			{{ omfModelButtons }}
 		</form>
 	</div>
-	<div id ="runIndicator" class="content running">
-		Model running on server. Refresh the page to check for results, or wait for automatic refresh every 5 seconds.<br>
-		If you chose the 'Digital Elevation Model' topography option, expect a run time greater than 7 minutes.
-	</div>
-	<div id ="stopIndicator" class="content stopped" style="visibility: hidden">
-		<pre id='errorText' style='overflow-x:scroll'></pre>
-		<script type="text/javascript">
-		if (typeof(allInputData.stderr) !== 'undefined') {	
-			gebi('stopIndicator').style.visibility = 'visible'
-			gebi('errorText').innerHTML = 'MODEL ENCOUNTERED AN ERROR AS FOLLOWS: \n\n' + allInputData.stderr}
-		</script>
-	</div>
+	{{ omfRunDebugBlock }}
+	{% if modelStatus == 'finished' %}
 	<div id="output">
 		<div id="mapInsert"></div>
 		<script type="text/javascript">
@@ -168,5 +129,7 @@
 			L.control.rfscale({ position: 'bottomleft'}).addTo(map);
 			</script>
 		</div>
+		{{ rawOutputFiles }}
 	</div>
+	{% endif %}
 </body>

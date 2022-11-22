@@ -430,85 +430,59 @@ def calcDefaultCoords(inTree):
 		longitude_max = 0.0
 	return (latitude_max, longitude_min)
 
-def treeToNxGraph(inTree):
-	''' Convert feeder tree to networkx graph. '''
-	outGraph = nx.Graph()
+def treeToNxGraph(inTree, digraph=False):
+	''' Convert feeder tree to networkx graph. If digraph then make it a directed graph. '''
+	if digraph:
+		outGraph = nx.DiGraph()
+	else:
+		outGraph = nx.Graph()
 	#TODO: make default coordinates change slightly each time they are assigned to a node to prevent multiple location-less nodes to just be stacked on top of each other
 	defaultCoords = calcDefaultCoords(inTree)
 	for key in inTree:
 		item = inTree[key]
 		# This check is why configuration objects never get coordinates. Or maybe this is intentional because configuration objects are added later?
 		if 'name' in item.keys():
+			item_name = item['name']
 			if 'parent' in item.keys():
-				outGraph.add_edge(item['name'], item['parent'], type='parentChild', phases=1)
-				outGraph.nodes[item['name']]['type'] = item['object']
+				# add edge and node for an object with a parent.
+				outGraph.add_edge(item_name, item['parent'], type='parentChild', phases=1)
+				# set all attributes.
+				for k in item:
+					outGraph.nodes[item_name][k] = item[k]
+				outGraph.nodes[item_name]['type'] = item['object']
 				# Note that attached houses via gridEdit.html won't have lat/lon values, so this try is a workaround.
 				try:
-					outGraph.nodes[item['name']]['pos'] = (float(item['latitude']), float(item['longitude']))
+					outGraph.nodes[item_name]['pos'] = (float(item['latitude']), float(item['longitude']))
 				except KeyError:
 					#if the grid object doesn't have a lat/lon, give it a lat/lon close or same to that of its parent if it has one
-					print("No coordinates found for " + item['name'] + ", looking for parent coordinates now...")
-					outGraph.nodes[item['name']]['pos'] = findParentCoords(inTree, item, defaultCoords)
+					print("No coordinates found for " + item_name + ", looking for parent coordinates now...")
+					outGraph.nodes[item_name]['pos'] = findParentCoords(inTree, item, defaultCoords)
 				except:
-					outGraph.nodes[item['name']]['pos'] = defaultCoords
+					outGraph.nodes[item_name]['pos'] = defaultCoords
 			elif 'from' in item.keys():
+				# add an edge for an edge-type object
 				myPhase = _phaseCount(item.get('phases','AN'))
 				outGraph.add_edge(item['from'], item['to'], name=item.get('name',''), type=item['object'], phases=myPhase)
-			elif item['name'] in outGraph:
+				for k in item:
+					outGraph.edges[(item['from'], item['to'])][k] = item[k]
+			elif item_name in outGraph:
 				# Edge already led to node's addition, so just set the attributes:
-				outGraph.nodes[item['name']]['type'] = item['object']
+				outGraph.nodes[item_name]['type'] = item['object']
+				for k in item:
+					outGraph.nodes[item_name][k] = item[k]
 			else:
-				outGraph.add_node(item['name'], type=item['object'])
+				# else must be a node, so add it.
+				outGraph.add_node(item_name, type=item['object'])
+				for k in item:
+					outGraph.nodes[item_name][k] = item[k]
 			if 'latitude' in item.keys() and 'longitude' in item.keys():
 				# Ignore lines that have "latitude" and "longitude" properties
 				if 'from' not in item.keys():
 					try:
-						outGraph.nodes[item['name']]['pos'] = (float(item['latitude']), float(item['longitude'])) 
+						outGraph.nodes[item_name]['pos'] = (float(item['latitude']), float(item['longitude'])) 
 					except:
-						outGraph.nodes[item['name']]['pos'] = defaultCoords
+						outGraph.nodes[item_name]['pos'] = defaultCoords
 	return outGraph
-
-
-# TODO: fix the case for nameless objects that aren't lines
-def treeToDiNxGraph(inTree):
-	''' Convert feeder tree to a DIRECTED networkx graph. '''
-	outGraph = nx.DiGraph()
-	network_objects = ['regulator', 'overhead_line', 'underground_line', 'transformer', 'fuse', 'switch', 'triplex_line', 'node', 'triplex_node', 'meter', 'triplex_meter', 'load', 'triplex_load', 'series_reactor']
-	for key in inTree:
-		item = inTree[key]
-		if 'object' in item:
-			if item['object'] == 'switch':
-				if 'OPEN' in item.values(): #super hacky
-					continue
-		if 'name' in item.keys(): # sometimes network objects aren't named!
-			if 'parent' in item.keys():
-				outGraph.add_edge(item['parent'], item['name'], type='parentChild', phases=1, length=0)
-				outGraph.nodes[item['name']]['type'] = item['object']
-				outGraph.nodes[item['name']]['pos'] = (float(item.get('latitude', 0)), float(item.get('longitude', 0)))
-			elif 'from' in item.keys():
-				myPhase = _phaseCount(item.get('phases','AN'))
-				outGraph.add_edge(item['from'], item['to'], type=item['object'], phases=myPhase, length=float(item.get('length',0)))
-			elif item['name'] in outGraph:
-				# Edge already led to node's addition, so just set the attributes:
-				outGraph.nodes[item['name']]['type'] = item['object']
-			else:
-				outGraph.add_node(item['name'], type=item['object'])
-			if 'latitude' in item.keys() and 'longitude' in item.keys():
-				try:
-					outGraph.nodes[item['name']]['pos'] = (float(item['latitude']), float(item['longitude']))
-				except:
-					outGraph.nodes[item['name']]['pos'] = (0.0, 0.0)
-		elif 'object' in item.keys() and item['object'] in network_objects: # when name doesn't exist
-			if 'from' in item.keys():
-				myPhase = _phaseCount(item.get('phases', 'AN'))
-				outGraph.add_edge(item['from'], item['to'], type=item['object'], phases=myPhase, length=float(item.get('length', 0)))
-			if 'latitude' in item.keys() and 'longitude' in item.keys():
-				# Not sure what to do here. The tree item (a dict) doesn't have a "name", so how can we assigned a "pos" attribute via the NodeView if
-				# there is no name key? I'm leaving this line alone (even though it's wrong) for now because this function isn't actually used
-				# anywhere
-				outGraph.nodes.get(item['name'],{})['pos']=(float(item['latitude']),float(item['longitude']))
-	return outGraph
-
 
 def latLonNxGraph(inGraph, labels=False, neatoLayout=False, showPlot=False):
 	''' Draw a networkx graph representing a feeder.'''
@@ -525,7 +499,9 @@ def latLonNxGraph(inGraph, labels=False, neatoLayout=False, showPlot=False):
 		cleanG = nx.Graph(inGraph.edges()) # Return a list of edges
 		# HACK2: might miss nodes without edges without the following.
 		cleanG.add_nodes_from(inGraph)
-		pos = nx.nx_agraph.graphviz_layout(cleanG, prog='neato')
+		# pos = nx.nx_agraph.graphviz_layout(cleanG, prog='neato')
+		pos = nx.kamada_kawai_layout(cleanG)
+		pos = {k:(1000 * pos[k][0],1000 * pos[k][1]) for k in pos} # get out of array notation
 	else:
 		pos = {n: inGraph.nodes[n].get('pos', (0, 0)) for n in inGraph}
 	# Draw all the edges.
