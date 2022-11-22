@@ -1410,11 +1410,12 @@ def main(voltageInputCust, phaseLabelsTrue, phaseLabelsErrors, custIDInput, outp
 		print(accuracy_report)
 	# Calculate and Plot the confidence scores - Modified Silhouette Coefficients
 	allSC = Calculate_ModifiedSilhouetteCoefficients(caMatrix,clusteredIDs,finalClusterLabels,predictedPhases,kFinal)
-
 	if phaseLabelsTrue is not None:
 		phaseLabelsOrg_FullList, phaseLabelsPred_FullList,allFinalClusterLabels, phaseLabelsTrue_FullList,custID_FullList, allSC_FullList = CreateFullListCustomerResults_CAEns(clusteredPhaseLabels,phaseLabelsErrors,finalClusterLabels,clusteredIDs,custIDInput,noVotesIDs,predictedPhases,allSC,phaseLabelsTrue=clusteredTruePhaseLabels)
 	else:
 		phaseLabelsOrg_FullList, phaseLabelsPred_FullList,allFinalClusterLabels, phaseLabelsTrue_FullList,custID_FullList, allSC_FullList = CreateFullListCustomerResults_CAEns(clusteredPhaseLabels,phaseLabelsErrors,finalClusterLabels,clusteredIDs,custIDInput,noVotesIDs,predictedPhases,allSC)
+	# Write the silhouette coefficients.
+	Plot_ModifiedSilhouetteCoefficients(allSC, savePath=os.path.dirname(outputPath))
 	# Write outputs to csv file
 	df = pd.DataFrame()
 	df['Meter ID'] = custID_FullList
