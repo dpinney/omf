@@ -1,0 +1,4 @@
+battery device class=battery_storage_device name=bsd_1 bus=730 default_control_setting=standby min_SOC=0.2 max_SOC=1.0 total_capacity=20 current_capacity=17 max_charge_power=25 max_discharge_power=35 max_ramp_rate=0.5
+battery device class=battery_storage_device name=bsd_2 bus=701 default_control_setting=standby min_SOC=0.2 max_SOC=1.0 total_capacity=10 current_capacity=8 max_charge_power=20 max_discharge_power=30 max_ramp_rate=0.5
+
+battery controller class=battery_controller_cent name=psc control_mode=psvf lowpass_filter_frequency=0.05 peak_active_power_target=1700 valley_active_power_target=1500 K_P=0.75 K_I=0.05 K_D=0.02 default_control_setting=standby devices=[bsd_1,bsd_2]

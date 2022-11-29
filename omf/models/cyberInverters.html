@@ -61,8 +61,8 @@
 			<div class="shortInput">
 				<label class="tooltip">Simulation Timestep Units<span class="classic">The unit of time represented by each row in the 'Load and PV Output' .csv file.</span></label>
 				<select id="simStepUnits" name="simStepUnits" value="{{allInputDataDict.simStepUnits}}">
-					<option value="hours" {% if allInputDataDict.simStepUnits == 'hours' %}selected{% endif %}>Hours</option>
-					<option value="minutes" {% if allInputDataDict.simStepUnits == 'minutes' %}selected{% endif %}>Minutes</option>
+					<!--<option value="hours" {% if allInputDataDict.simStepUnits == 'hours' %}selected{% endif %}>Hours</option>
+					<option value="minutes" {% if allInputDataDict.simStepUnits == 'minutes' %}selected{% endif %}>Minutes</option>-->
 					<option value="seconds" {% if allInputDataDict.simStepUnits == 'seconds' %}selected{% endif %}>Seconds</option>
 				</select>
 			</div>
@@ -74,13 +74,13 @@
 				<label class="tooltip">Simulation Entry Point<span class="classic">At the beginning of the simulation, the number of timesteps allowed for the powerflow solution to stabilize. Marks the beginning of the experiment (i.e. t=0).</span></label>
 				<input type="number" id="simEntryStep" name="simEntryStep" min ="100" max = "9999" value="{{allInputDataDict.simEntryStep}}"/>
 			</div>
-			<div class="shortInput">
+			<!--<div class="shortInput">
 				<label class="tooltip">Include Battery?<span class="classic">Select whether or not to include batteries on the circuit.</span></label>
 				<select id="includeBattery" name="includeBattery" value="{{allInputDataDict.includeBattery}}">
 					<option value="True" {% if allInputDataDict.includeBattery == 'True' %}selected{% endif %}>Yes</option>
 					<option value="False" {% if allInputDataDict.includeBattery == 'False' %}selected{% endif %}>No</option>
 				</select>
-			</div>
+			</div>-->
 <!--TODO: make circuitFileNameDSS also update when a file is uploaded through distNetViz-->
 			<div class="shortInput">
 				<label class="tooltip">Circuit Editor<span class="classic">Use a visual interface to upload, view, and manipulate a .dss circuit file.</span></label>
@@ -98,7 +98,7 @@
 				<input type="text" id="circuitFileNameDSS" name="circuitFileNameDSS" value="{{allInputDataDict.circuitFileNameDSS}}">
 			</div>-->
 			<div class="shortInput">
-				<label class="tooltip">Load and PV Output<span class="classic">Import a .csv file that describes the power output of all loads and PV units.</span></label>
+				<label class="tooltip">Time-Series Data File Input<span class="classic">Import a .csv file that describes the power output of all loads and PV as well as the control schedules for batteries and switches.</span></label>
 				<div>{{ insert_file_upload_block('loadPVFileName','loadPVFileContent') }}</div>
 			</div>
 			<div class="shortInput">
@@ -110,12 +110,8 @@
 				<div>{{ insert_file_upload_block('miscFileName','miscFileContent') }}</div>
 			</div>
 			<div class="shortInput">
-				<label class="tooltip">Battery File Input<span class="classic">Import a .csv file that describes the characteristics of the battery energy storage system.</span></label>
-				<div>{{ insert_file_upload_block('storageFileName','storageFileContent') }}</div>
-			</div>
-			<div class="shortInput">
-				<label class="tooltip">Switch File Input<span class="classic">Import a .csv file that define the characteristics of any switches to be toggled during the simulation.</span></label>
-				<div>{{ insert_file_upload_block('switchFileName','switchFileContent') }}</div>
+				<label class="tooltip">Device File Input<span class="classic">Import a .txt file that describes the characteristics of any switches and battery energy storage systems to be controlled during the simulation.</span></label>
+				<div>{{ insert_file_upload_block('deviceFileName','deviceFileContent') }}</div>
 			</div>
 			
 			<div class="wideInput">
@@ -131,11 +127,11 @@
 				</select>
 			</div>
 			<div class="shortInput">
-				<label class="tooltip">Attack Agent Entry Point<span class="classic">The severity of attack represented by percentage</span></label>
+				<label class="tooltip">Attack Agent Entry Point<span class="classic">The timestep of the simulation at which the attack should begin.</span></label>
 				<input type="number" id="hackStart" name="hackStart"  value="{{allInputDataDict.hackStart}}"/>
 			</div>
 			<div class="shortInput">
-				<label class="tooltip">Attack Agent Exit Point<span class="classic">The severity of attack represented by percentage</span></label>
+				<label class="tooltip">Attack Agent Exit Point<span class="classic">The timestep of the simulation at which the attack should end.</span></label>
 				<input type="number" id="hackEnd" name="hackEnd"  value="{{allInputDataDict.hackEnd}}"/>
 			</div>
 			<div class="shortInput">
@@ -161,7 +157,7 @@
 			</div>
 			{{ omfModelButtons }}
 		</form>
-		<div> PyCigar commit 5e4633e </div> <!-- as of 28 June 2022 -->
+		<div> PyCigar commit 43fbc8e </div> <!-- as of 02 Nov 2022 -->
 	</div>
 	{{ omfRunDebugBlock }}
 	{% if modelStatus == 'finished' %}
@@ -392,7 +388,7 @@
 				new Highcharts.Chart(localHighChart);
 			</script>
 		</div>
-		<p class="reportTitle">Regulator Tap Changes <a target="_self" class="toggle">Hide / Show</a></p>
+		<!--<p class="reportTitle">Regulator Tap Changes <a target="_self" class="toggle">Hide / Show</a></p>
 		<div id="newRegulatorReport" class="tightContent" style="max-height:610px; overflow-y: scroll;">
 			{% if allOutputDataDict.Regulator_Outputs|length == 0 %}
 			<script type="text/javascript">	
@@ -440,8 +436,8 @@
 				new Highcharts.Chart(localHighChart)
 			}
 			</script>
-		</div>
-		<p class="reportTitle">Cap Bank Activation <a target="_self" class="toggle">Hide / Show</a></p>
+		</div> -->
+		<!-- <p class="reportTitle">Cap Bank Activation <a target="_self" class="toggle">Hide / Show</a></p>
 		<div id="newCapbankReport" class="tightContent" style="max-height:610px; overflow-y: scroll;">
 			{% if allOutputDataDict.Capacitor_Outputs|length == 0 %}
 			<script type="text/javascript">	
@@ -487,7 +483,7 @@
 				new Highcharts.Chart(localHighChart)
 			}
 			</script>
-		</div>
+		</div> -->
 		<p class="reportTitle">Triplex Meter Imbalances <a target="_self" class="toggle">Hide / Show</a></p>
 		<div id="voltageImbalancesReport" class="tightContent">
 			{% if allOutputDataDict.voltageImbalances|length == 0 %}

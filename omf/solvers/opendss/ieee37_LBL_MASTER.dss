@@ -1,0 +1,135 @@
+Clear
+New object=Circuit.ieee37
+
+
+! Redirect Vsource.dss
+Edit object=Vsource.source bus1=sourcebus basekv=230 pu=1.00 MVAsc3=2E5 MVAsc1=2.1E5
+! Redirect LineCode.DSS
+New object=LineCode.1 nphases=3 baseFreq=60 rmatrix=[0.08666667,0.02954546,0.02907197|0.02954546,0.08837121,0.02992424|0.02907197,0.02992424,0.08740530] xmatrix=[0.20416667,0.09501894,0.07289773|0.09501894,0.19852273,0.08022727|0.07289773,0.08022727,0.20172349] cmatrix=[2.85171007,-0.92029379,-0.35075557|-0.92029379,3.00463186,-0.58501125|-0.35075557,-0.58501125,2.71134756]
+New object=LineCode.2 nphases=3 baseFreq=60 rmatrix=[0.08837121,0.02992424,0.02954546|0.02992424,0.08740530,0.02907197|0.02954546,0.02907197,0.08666667] xmatrix=[0.19852273,0.08022727,0.09501894|0.08022727,0.20172349,0.07289773|0.09501894,0.07289773,0.20416667] cmatrix=[3.00463186,-0.58501125,-0.92029379|-0.58501125,2.71134756,-0.35075557|-0.92029379,-0.35075557,2.85171007]
+New object=LineCode.3 nphases=3 baseFreq=60 rmatrix=[0.08740530,0.02907197,0.02992424|0.02907197,0.08666667,0.02954546|0.02992424,0.02954546,0.08837121] xmatrix=[0.20172349,0.07289773,0.08022727|0.07289773,0.20416667,0.09501894|0.08022727,0.09501894,0.19852273] cmatrix=[2.71134756,-0.35075557,-0.58501125|-0.35075557,2.85171007,-0.92029379|-0.58501125,-0.92029379,3.00463186]
+New object=LineCode.4 nphases=3 baseFreq=60 rmatrix=[0.08740530,0.02992424,0.02907197|0.02992424,0.08837121,0.02954546|0.02907197,0.02954546,0.08666667] xmatrix=[0.20172349,0.08022727,0.07289773|0.08022727,0.19852273,0.09501894|0.07289773,0.09501894,0.20416667] cmatrix=[2.71134756,0.58501125,-0.35075557|0.58501125,3.00463186,-0.92029379|-0.35075557,-0.92029379,2.85171007]
+New object=LineCode.5 nphases=3 baseFreq=60 rmatrix=[0.08837121,0.02954546,0.02992424|0.02954546,0.08666667,0.02907197|0.02992424,0.02907197,0.08740530] xmatrix=[0.19852273,0.09501894,0.08022727|0.09501894,0.20416667,0.07289773|0.08022727,0.07289773,0.20172349] cmatrix=[3.00463186,-0.92029379,-0.58501125|-0.92029379,2.85171007,-0.35075557|-0.58501125,-0.35075557,2.71134756]
+New object=LineCode.6 nphases=3 baseFreq=60 rmatrix=[0.08666667,0.02907197,0.02954546|0.02907197,0.08740530,0.02992424|0.02954546,0.02992424,0.08837121] xmatrix=[0.20416667,0.07289773,0.09501894|0.07289773,0.20172349,0.08022727|0.09501894,0.08022727,0.19852273] cmatrix=[2.85171007,-0.35075557,-0.92029379|-0.35075557,2.71134756,-0.58501125|-0.92029379,-0.58501125,3.00463186]
+New object=LineCode.7 nphases=2 baseFreq=60 rmatrix=[0.08666667,0.02907197|0.02907197,0.08740530] xmatrix=[0.20416667,0.07289773|0.07289773,0.20172349] cmatrix=[2.56982960,-0.52995137|-0.52995137,2.59746001]
+New object=LineCode.8 nphases=2 baseFreq=60 rmatrix=[0.08666667,0.02907197|0.02907197,0.08740530] xmatrix=[0.20416667,0.07289773|0.07289773,0.20172349] cmatrix=[2.56982960,-0.52995137|-0.52995137,2.59746001]
+New object=LineCode.9 nphases=1 baseFreq=60 rmatrix=[0.25174242] xmatrix=[0.25520833] cmatrix=[2.27036613]
+New object=LineCode.10 nphases=1 baseFreq=60 rmatrix=[0.25174242] xmatrix=[0.25520833] cmatrix=[2.27036613]
+New object=LineCode.11 nphases=1 baseFreq=60 rmatrix=[0.25174242] xmatrix=[0.25520833] cmatrix=[2.27036613]
+New object=LineCode.12 nphases=3 baseFreq=60 rmatrix=[0.28804924,0.09844697,0.09325758|0.09844697,0.29032197,0.09844697|0.09325758,0.09844697,0.28804924] xmatrix=[0.14244318,0.05255682,0.04085227|0.05255682,0.13564394,0.05255682|0.04085227,0.05255682,0.14244318] cmatrix=[33.77150149,0.00000000,0.00000000|0.00000000,33.77150149,0.00000000|0.00000000,0.00000000,33.77150149]
+New object=LineCode.300 nphases=3 baseFreq=60 rmatrix=[0.25318182,0.03979167,0.04034091|0.03979167,0.25071970,0.03912879|0.04034091,0.03912879,0.25178030] xmatrix=[0.25270833,0.10945076,0.09498106|0.10945076,0.25698864,0.08695076|0.09498106,0.08695076,0.25513258] cmatrix=[2.68015031,-0.76928101,-0.49950768|-0.76928101,2.56103810,-0.31207298|-0.49950768,-0.31207298,2.45559039]
+New object=LineCode.301 nphases=3 baseFreq=60 rmatrix=[0.36553030,0.04407197,0.04467803|0.04407197,0.36282197,0.04333333|0.04467803,0.04333333,0.36399621] xmatrix=[0.26732955,0.12200758,0.10778409|0.12200758,0.27047349,0.09920455|0.10778409,0.09920455,0.26910985] cmatrix=[2.57249216,-0.72160598,-0.47232940|-0.72160598,2.46438188,-0.29896110|-0.47232940,-0.29896110,2.36888112]
+New object=LineCode.302 nphases=1 baseFreq=60 rmatrix=[0.53020800] xmatrix=[0.28134500] cmatrix=[2.12257000]
+New object=LineCode.303 nphases=1 baseFreq=60 rmatrix=[0.53020800] xmatrix=[0.28134500] cmatrix=[2.12257000]
+New object=LineCode.304 nphases=1 baseFreq=60 rmatrix=[0.36395800] xmatrix=[0.26916700] cmatrix=[2.19220000]
+New object=LineCode.400 nphases=3 baseFreq=60 rmatrix=[0.08820500,0.03121370,0.03062640|0.03121370,0.09019460,0.03161430|0.03062640,0.03161430,0.08896650] xmatrix=[0.20744000,0.09353140,0.07603120|0.09353140,0.20078300,0.08558790|0.07603120,0.08558790,0.20487700] cmatrix=[2.90301000,-0.67933500,-0.22313000|-0.67933500,3.15896000,-0.48141600|-0.22313000,-0.48141600,2.89650000]
+New object=LineCode.601 nphases=3 baseFreq=60 rmatrix=[0.06562500,0.02954546,0.02992424|0.02954546,0.06392046,0.02907197|0.02992424,0.02907197,0.06465909] xmatrix=[0.19278409,0.09501894,0.08022727|0.09501894,0.19844697,0.07289773|0.08022727,0.07289773,0.19598485] cmatrix=[3.16483804,-1.00263243,-0.63273652|-1.00263243,2.99398159,-0.37260871|-0.63273652,-0.37260871,2.83267020]
+New object=LineCode.602 nphases=3 baseFreq=60 rmatrix=[0.14253788,0.02992424,0.02954546|0.02992424,0.14157197,0.02907197|0.02954546,0.02907197,0.14083333] xmatrix=[0.22375000,0.08022727,0.09501894|0.08022727,0.22695076,0.07289773|0.09501894,0.07289773,0.22939394] cmatrix=[2.86301342,-0.54341492,-0.84925850|-0.54341492,2.60203159,-0.33096214|-0.84925850,-0.33096214,2.72516277]
+New object=LineCode.603 nphases=2 baseFreq=60 rmatrix=[0.25178030,0.03912879|0.03912879,0.25071970] xmatrix=[0.25513258,0.08695076|0.08695076,0.25698864] cmatrix=[2.36601760,-0.45208384|-0.45208384,2.34396351]
+New object=LineCode.604 nphases=2 baseFreq=60 rmatrix=[0.25071970,0.03912879|0.03912879,0.25178030] xmatrix=[0.25698864,0.08695076|0.08695076,0.25513258] cmatrix=[2.34396351,-0.45208384|-0.45208384,2.36601760]
+New object=LineCode.605 nphases=1 baseFreq=60 rmatrix=[0.25174242] xmatrix=[0.25520833] cmatrix=[2.27036613]
+New object=LineCode.606 nphases=3 baseFreq=60 rmatrix=[0.15117424,0.06045455,0.05395833|0.06045455,0.14945076,0.06045455|0.05395833,0.06045455,0.15117424] xmatrix=[0.08452652,0.00621212,-0.00270833|0.00621212,0.07653409,0.00621212|-0.00270833,0.00621212,0.08452652] cmatrix=[48.67459408,0.00000000,0.00000000|0.00000000,48.67459408,0.00000000|0.00000000,0.00000000,48.67459408]
+New object=LineCode.607 nphases=1 baseFreq=60 rmatrix=[0.25426136] xmatrix=[0.09704546] cmatrix=[44.70661522]
+New object=LineCode.721 nphases=3 baseFreq=60 rmatrix=[0.05541667,0.01274621,0.00638258|0.01274621,0.05011364,0.01274621|0.00638258,0.01274621,0.05541667] xmatrix=[0.03736742,-0.00696970,-0.00789773|-0.00696970,0.03598485,-0.00696970|-0.00789773,-0.00696970,0.03736742] cmatrix=[80.27484728,0.00000000,0.00000000|0.00000000,80.27484728,0.00000000|0.00000000,0.00000000,80.27484728]
+New object=LineCode.722 nphases=3 baseFreq=60 rmatrix=[0.08998106,0.03085227,0.02337121|0.03085227,0.08500000,0.03085227|0.02337121,0.03085227,0.08998106] xmatrix=[0.05630682,-0.00617424,-0.01149621|-0.00617424,0.05071970,-0.00617424|-0.01149621,-0.00617424,0.05630682] cmatrix=[64.21841090,0.00000000,0.00000000|0.00000000,64.21841090,0.00000000|0.00000000,0.00000000,64.21841090]
+New object=LineCode.723 nphases=3 baseFreq=60 rmatrix=[0.24500000,0.09225379,0.08683712|0.09225379,0.24662879,0.09225379|0.08683712,0.09225379,0.24500000] xmatrix=[0.12714015,0.03998106,0.02880682|0.03998106,0.11981061,0.03998106|0.02880682,0.03998106,0.12714015] cmatrix=[37.59771120,0.00000000,0.00000000|0.00000000,37.59771120,0.00000000|0.00000000,0.00000000,37.59771120]
+New object=LineCode.724 nphases=3 baseFreq=60 rmatrix=[0.39681818,0.09856061,0.09329546|0.09856061,0.39901515,0.09856061|0.09329546,0.09856061,0.39681818] xmatrix=[0.14693182,0.05185606,0.04020833|0.05185606,0.14011364,0.05185606|0.04020833,0.05185606,0.14693182] cmatrix=[30.26701029,0.00000000,0.00000000|0.00000000,30.26701029,0.00000000|0.00000000,0.00000000,30.26701029]
+! Redirect LoadShape.DSS
+New object=LoadShape.default npts=24 npts=24 interval=1 mult=[0.677,0.6256,0.6087,0.5833,0.58028,0.6025,0.657,0.7477,0.832,0.88,0.94,0.989,0.985,0.98,0.9898,0.999,1,0.958,0.936,0.913,0.876,0.876,0.828,0.756]
+! Redirect GrowthShape.DSS
+New object=GrowthShape.default npts=2 year=[1,20] mult=[1.025,1.025]
+! Redirect TCC_Curve.DSS
+New object=TCC_Curve.a npts=5 C_array=[1,2.5,4.5,8,14] T_array=[0.15,0.07,0.05,0.045,0.045]
+New object=TCC_Curve.d npts=5 C_array=[1,2.5,4.5,8,14] T_array=[6,0.7,0.2,0.06,0.02]
+New object=TCC_Curve.tlink npts=7 C_array=[2,2.1,3,4,6,22,50] T_array=[300,100,10.1,4,1.4,0.1,0.02]
+New object=TCC_Curve.klink npts=6 C_array=[2,2.2,3,4,6,30] T_array=[300,20,4,1.3,0.41,0.02]
+New object=TCC_Curve.uv1547 npts=2 C_array=[0.5,0.9] T_array=[0.166,2]
+New object=TCC_Curve.ov1547 npts=2 C_array=[1.1,1.2] T_array=[2,0.166]
+New object=TCC_Curve.mod_inv npts=15 C_array=[1.1,1.3,1.5,2,3,4,5,6,7,8,9,10,20,50,100] T_array=[27.1053,9.9029,6.439,3.8032,2.4322,1.9458,1.6883,1.5255,1.4117,1.3267,1.2604,1.2068,0.9481,0.7468,0.6478]
+New object=TCC_Curve.very_inv npts=15 C_array=[1.1,1.3,1.5,2,3,4,5,6,7,8,9,10,20,50,100] T_array=[93.872,28.9113,16.179,7.0277,2.9423,1.7983,1.3081,1.0513,0.8995,0.8023,0.7361,0.6891,0.5401,0.4988,0.493]
+New object=TCC_Curve.ext_inv npts=15 C_array=[1.1,1.3,1.5,2,3,4,5,6,7,8,9,10,20,50,100] T_array=[134.407,40.9913,22.6817,9.5217,3.6467,2.0017,1.2967,0.9274,0.7092,0.5693,0.4742,0.4065,0.1924,0.133,0.1245]
+New object=TCC_Curve.definite npts=3 C_array=[1,1.001,100] T_array=[300,1,1]
+! Redirect Spectrum.DSS
+New object=Spectrum.default NumHarm=7 harmonic=[1,3,5,7,9,11,13] %mag=[100,33,20,14,11,9,7] angle=[0,0,0,0,0,0,0]
+New object=Spectrum.defaultload NumHarm=7 harmonic=[1,3,5,7,9,11,13] %mag=[100,1.5,20,14,1,9,7] angle=[0,180,180,180,180,180,180]
+New object=Spectrum.defaultgen NumHarm=7 harmonic=[1,3,5,7,9,11,13] %mag=[100,5,3,1.5,1,0.7,0.5] angle=[0,0,0,0,0,0,0]
+New object=Spectrum.defaultvsource NumHarm=1 harmonic=[1] %mag=[100] angle=[0]
+New object=Spectrum.linear NumHarm=1 harmonic=[1] %mag=[100] angle=[0]
+New object=Spectrum.pwm6 NumHarm=13 harmonic=[1,3,5,7,9,11,13,15,17,19,21,23,25] %mag=[100,4.4,76.5,62.7,2.9,24.8,12.7,0.5,7.1,8.4,0.9,4.4,3.3] angle=[-103,-5,28,-180,-33,-59,79,36,-253,-124,3,-30,86]
+New object=Spectrum.dc6 NumHarm=10 harmonic=[1,3,5,7,9,11,13,15,17,19] %mag=[100,1.2,33.6,1.6,0.4,8.7,1.2,0.3,4.5,1.3] angle=[-75,28,156,29,-91,49,54,148,-57,-46]
+! Redirect Line.DSS
+New object=Line.l1 phases=3 bus1=701.1.2.3 bus2=702.1.2.3 linecode=722 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.96
+New object=Line.l2 phases=3 bus1=702.1.2.3 bus2=705.1.2.3 linecode=724 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.4
+New object=Line.l3 phases=3 bus1=702.1.2.3 bus2=713.1.2.3 linecode=723 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.36
+New object=Line.l4 phases=3 bus1=702.1.2.3 bus2=703.1.2.3 linecode=722 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=1.32
+New object=Line.l5 phases=3 bus1=703.1.2.3 bus2=727.1.2.3 linecode=724 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.24
+New object=Line.l6 phases=3 bus1=703.1.2.3 bus2=730.1.2.3 linecode=723 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.6
+New object=Line.l7 phases=3 bus1=704.1.2.3 bus2=714.1.2.3 linecode=724 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.08
+New object=Line.l8 phases=3 bus1=704.1.2.3 bus2=720.1.2.3 linecode=723 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.8
+New object=Line.l9 phases=3 bus1=705.1.2.3 bus2=742.1.2.3 linecode=724 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.32
+New object=Line.l10 phases=3 bus1=705.1.2.3 bus2=712.1.2.3 linecode=724 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.24
+New object=Line.l11 phases=3 bus1=706.1.2.3 bus2=725.1.2.3 linecode=724 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.28
+New object=Line.l12 phases=3 bus1=707.1.2.3 bus2=724.1.2.3 linecode=724 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.76
+New object=Line.l13 phases=3 bus1=707.1.2.3 bus2=722.1.2.3 linecode=724 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.12
+New object=Line.l14 phases=3 bus1=708.1.2.3 bus2=733.1.2.3 linecode=723 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.32
+New object=Line.l15 phases=3 bus1=708.1.2.3 bus2=732.1.2.3 linecode=724 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.32
+New object=Line.l16 phases=3 bus1=709.1.2.3 bus2=731.1.2.3 linecode=723 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.6
+New object=Line.l17 phases=3 bus1=709.1.2.3 bus2=708.1.2.3 linecode=723 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.32
+New object=Line.l18 phases=3 bus1=710.1.2.3 bus2=735.1.2.3 linecode=724 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.2
+New object=Line.l19 phases=3 bus1=710.1.2.3 bus2=736.1.2.3 linecode=724 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=1.28
+New object=Line.l20 phases=3 bus1=711.1.2.3 bus2=741.1.2.3 linecode=723 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.4
+New object=Line.l21 phases=3 bus1=711.1.2.3 bus2=740.1.2.3 linecode=724 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.2
+New object=Line.l22 phases=3 bus1=713.1.2.3 bus2=704.1.2.3 linecode=723 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.52
+New object=Line.l23 phases=3 bus1=714.1.2.3 bus2=718.1.2.3 linecode=724 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.52
+New object=Line.l24 phases=3 bus1=720.1.2.3 bus2=707.1.2.3 linecode=724 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.92
+New object=Line.l25 phases=3 bus1=720.1.2.3 bus2=706.1.2.3 linecode=723 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.6
+New object=Line.l26 phases=3 bus1=727.1.2.3 bus2=744.1.2.3 linecode=723 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.28
+New object=Line.l27 phases=3 bus1=730.1.2.3 bus2=709.1.2.3 linecode=723 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.2
+New object=Line.l28 phases=3 bus1=733.1.2.3 bus2=734.1.2.3 linecode=723 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.56
+New object=Line.l29 phases=3 bus1=734.1.2.3 bus2=737.1.2.3 linecode=723 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.64
+New object=Line.l30 phases=3 bus1=734.1.2.3 bus2=710.1.2.3 linecode=724 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.52
+New object=Line.l31 phases=3 bus1=737.1.2.3 bus2=738.1.2.3 linecode=723 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.4
+New object=Line.l32 phases=3 bus1=738.1.2.3 bus2=711.1.2.3 linecode=723 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.4
+New object=Line.l33 phases=3 bus1=744.1.2.3 bus2=728.1.2.3 linecode=724 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.2
+New object=Line.l34 phases=3 bus1=744.1.2.3 bus2=729.1.2.3 linecode=724 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=0.28
+New object=Line.l35 phases=3 bus1=799r.1.2.3 bus2=701.1.2.3 linecode=721 Seasons=1 Ratings=[400] normamps=400 emergamps=600 length=1.85
+! Redirect Load.DSS
+New object=Load.s701a bus1=701.1.2 phases=1 conn=Delta model=1 kV=4.8 kW=140 kvar=70
+New object=Load.s701b bus1=701.2.3 phases=1 conn=Delta model=1 kV=4.8 kW=140 kvar=70
+New object=Load.s701c bus1=701.3.1 phases=1 conn=Delta model=1 kV=4.8 kW=350 kvar=175
+New object=Load.s712c bus1=712.3.1 phases=1 conn=Delta model=1 kV=4.8 kW=85 kvar=40
+New object=Load.s713c bus1=713.3.1 phases=1 conn=Delta model=1 kV=4.8 kW=85 kvar=40
+New object=Load.s714a bus1=714.1.2 phases=1 conn=Delta model=4 kV=4.8 kW=17 kvar=8
+New object=Load.s714b bus1=714.2.3 phases=1 conn=Delta model=4 kV=4.8 kW=21 kvar=10
+New object=Load.s718a bus1=718.1.2 phases=1 conn=Delta model=2 kV=4.8 kW=85 kvar=40
+New object=Load.s720c bus1=720.3.1 phases=1 conn=Delta model=1 kV=4.8 kW=85 kvar=40
+New object=Load.s722b bus1=722.2.3 phases=1 conn=Delta model=4 kV=4.8 kW=140 kvar=70
+New object=Load.s722c bus1=722.3.1 phases=1 conn=Delta model=4 kV=4.8 kW=21 kvar=10
+New object=Load.s724b bus1=724.2.3 phases=1 conn=Delta model=2 kV=4.8 kW=42 kvar=21
+New object=Load.s725b bus1=725.2.3 phases=1 conn=Delta model=1 kV=4.8 kW=42 kvar=21
+New object=Load.s727c bus1=727.3.1 phases=1 conn=Delta model=1 kV=4.8 kW=42 kvar=21
+New object=Load.s728 bus1=728 phases=3 conn=Delta model=1 kV=4.8 kW=126 kvar=63
+New object=Load.s729a bus1=729.1.2 phases=1 conn=Delta model=4 kV=4.8 kW=42 kvar=21
+New object=Load.s730c bus1=730.3.1 phases=1 conn=Delta model=2 kV=4.8 kW=85 kvar=40
+New object=Load.s731b bus1=731.2.3 phases=1 conn=Delta model=2 kV=4.8 kW=85 kvar=40
+New object=Load.s732c bus1=732.3.1 phases=1 conn=Delta model=1 kV=4.8 kW=42 kvar=21
+New object=Load.s733a bus1=733.1.2 phases=1 conn=Delta model=4 kV=4.8 kW=85 kvar=40
+New object=Load.s734c bus1=734.3.1 phases=1 conn=Delta model=1 kV=4.8 kW=42 kvar=21
+New object=Load.s735c bus1=735.3.1 phases=1 conn=Delta model=1 kV=4.8 kW=85 kvar=40
+New object=Load.s736b bus1=736.2.3 phases=1 conn=Delta model=2 kV=4.8 kW=42 kvar=21
+New object=Load.s737a bus1=737.1.2 phases=1 conn=Delta model=4 kV=4.8 kW=140 kvar=70
+New object=Load.s738a bus1=738.1.2 phases=1 conn=Delta model=1 kV=4.8 kW=126 kvar=62
+New object=Load.s740c bus1=740.3.1 phases=1 conn=Delta model=1 kV=4.8 kW=85 kvar=40
+New object=Load.s741c bus1=741.3.1 phases=1 conn=Delta model=4 kV=4.8 kW=42 kvar=21
+New object=Load.s742a bus1=742.1.2 phases=1 conn=Delta model=2 kV=4.8 kW=8 kvar=4
+New object=Load.s742b bus1=742.2.3 phases=1 conn=Delta model=2 kV=4.8 kW=85 kvar=40
+New object=Load.s744a bus1=744.1.2 phases=1 conn=Delta model=1 kV=4.8 kW=42 kvar=21
+! Redirect Transformer.DSS
+New object=Transformer.subxf phases=3 windings=2 XHL=8 buses=[sourcebus,799] conns=[delta,delta] kVs=[230,4.8] kVAs=[2500,2500] taps=[1,1] wdg=1 %R=1 RdcOhms=179.86 wdg=2 %R=1 RdcOhms=0.078336
+New object=Transformer.reg1 phases=3 bank=reg1 XHL=0.01 kVAs=[2500,2500] buses=[799.1.2.3,799r.1.2.3] kVs=[2.771281,2.771281] %loadloss=0.01
+! Redirect RegControl.DSS
+New object=RegControl.reg1a transformer=reg1 bus=799r.1 winding=2 tapwinding=2 vreg=138 band=2 ptratio=20
+MakeBusList
+! Redirect BusVoltageBases.dss  ! set voltage bases
+Set Voltagebases=[230,4.8,0.48]
+! Buscoords buscoords.dss
