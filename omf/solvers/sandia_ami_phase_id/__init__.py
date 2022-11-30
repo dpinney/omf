@@ -1184,6 +1184,8 @@ def Calculate_ModifiedSilhouetteCoefficients(caMatrix,clusteredIDs,finalClusterL
 				allClusterPhases.append(clusterPhase)
 			else:
 				indices = np.where(finalClusterLabels == clustCtr)[0]
+				if len(indices) == 0:
+					continue
 				currB = np.mean(aggWMDist[custCtr,indices])
 				currBAff = np.mean(caMatrix[custCtr,indices])
 				allBs.append(currB)
