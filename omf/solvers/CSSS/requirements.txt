@@ -2,7 +2,7 @@ appnope==0.1.0
 backports-abc==0.5
 backports.functools-lru-cache==1.5
 backports.shutil-get-terminal-size==1.0.0
-certifi==2018.4.16
+certifi==2022.12.7
 chardet==3.0.4
 CVXcanon==0.1.1
 cvxpy==0.4.11
