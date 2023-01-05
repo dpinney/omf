@@ -395,7 +395,7 @@ def genDiagram(outputDir, feederJson, damageDict, critLoads, damagedLoads, edgeL
 		aLon = tree[key].get('longitude')
 		aFrom = tree[key].get('from')
 		if aLat is None and aLon is None and aFrom is None:
-			 tree.pop(key)
+			tree.pop(key)
 	# Create and save the graphic.
 	inGraph = feeder.treeToNxGraph(tree)
 	labels=True
