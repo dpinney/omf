@@ -1,0 +1,5 @@
+Spectral Clustering Ensemble Phase Identification Results
+There are 18 customers with different phase labels compared to the original phase labeling.
+The accuracy of the predicted phase is 100.0% after comparing to the ground truth phase labels
+There are 0 incorrectly predicted customers
+There are 0 customers not predicted due to missing data

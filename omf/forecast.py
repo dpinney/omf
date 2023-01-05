@@ -518,7 +518,6 @@ def makeUsefulDf(df, noise=2.5, hours_prior=24, structure=None):
 		s = data.to_numpy()
 		for i in range(s.shape[0]-timesteps):
 			m.append(s[i:i+timesteps].tolist())
-
 		if var == 'x':
 			t = np.zeros((len(m), len(m[0]), len(m[0][0])))
 			for i, x in enumerate(m):
@@ -531,34 +530,29 @@ def makeUsefulDf(df, noise=2.5, hours_prior=24, structure=None):
 				for j, y in enumerate(x):
 					t[i, j] = y
 		return t
-
-
+	# file loading
 	this_directory = os.path.dirname(os.path.realpath(__file__))
 	with open(pJoin(this_directory, 'static', 'testFiles', 'holidays.pickle'), 'rb') as f:
 		nerc6 = pickle.load(f, encoding='latin_1') # Is this the right codec? It might be cp1252
-
+	# add dates
 	if 'dates' not in df.columns:
 		df['dates'] = df.apply(lambda x: dt(int(x['year']), int(x['month']), int(x['day']), int(x['hour'])), axis=1)
-
 	r_df = pd.DataFrame()
-	
-	# LOAD
+	# load processing
 	r_df["load_n"] = zscore(df["load"])
 	r_df["load_prev_n"] = r_df["load_n"].shift(hours_prior)
 	r_df["load_prev_n"].bfill(inplace=True)
-	
 	if structure != '3D':
 		def _chunks(l, n):
 			return [l[i : i + n] for i in range(0, len(l), n)]
-		n = np.array([val for val in _chunks(list(r_df["load_n"]), 24) for _ in range(24)])
+		pre_n = [val for val in _chunks(list(r_df["load_n"]), 24) for _ in range(24)]
+		n = np.array(pre_n)
 		l = ["l" + str(i) for i in range(24)]
 		for i, s in enumerate(l):
 			r_df[s] = n[:, i]
 			r_df[s] = r_df[s].shift(hours_prior)
 			r_df[s] = r_df[s].bfill()
-	
 	r_df.drop(['load_n'], axis=1, inplace=True)
-
 	# DATE
 	r_df["years_n"] = zscore(df["dates"].dt.year)
 	r_df = pd.concat([r_df, pd.get_dummies(df.dates.dt.hour, prefix='hour')], axis=1)
@@ -566,12 +560,10 @@ def makeUsefulDf(df, noise=2.5, hours_prior=24, structure=None):
 	r_df = pd.concat([r_df, pd.get_dummies(df.dates.dt.month, prefix='month')], axis=1)
 	for holiday in ["New Year's Day", "Memorial Day", "Independence Day", "Labor Day", "Thanksgiving", "Christmas Day"]:
 		r_df[holiday] = _isHoliday(holiday, df)
-
 	# TEMP
 	temp_noise = df['tempc'] + np.random.normal(0, noise, df.shape[0])
 	r_df["temp_n"] = zscore(temp_noise)
 	r_df['temp_n^2'] = zscore([x*x for x in temp_noise])
-
 	return (r_df, df['load']) if structure != '3D' else (_data_transform_3d(r_df, var='x'), _data_transform_3d(df['load'], var='y'))
 
 def MAPE(predictions, answers):

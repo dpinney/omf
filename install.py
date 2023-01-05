@@ -55,7 +55,7 @@ elif major_platform == 'Windows':
 	os.system(f"{sys.executable} -m pip install -e {source_dir}")
 	os.system(f'{source_dir}\\omf\\solvers\\opendss\\opendsscmd-1.7.4-windows-installer.exe --mode unattended')
 elif major_platform == "Darwin": # MacOS
-	os.system("HOMEBREW_NO_AUTO_UPDATE=1 brew wget install ffmpeg git mdbtools") # Set no-update to keep homebrew from blowing away python3.
+	os.system("HOMEBREW_NO_AUTO_UPDATE=1 brew install wget ffmpeg mdbtools") # Set no-update to keep homebrew from blowing away python3.
 	os.system(f"sudo hdiutil attach {source_dir}/omf/static/gridlabd-4.0_RC1.dmg")
 	os.system('sudo installer -package "/Volumes/GridLAB-D 4.0.0/gridlabd.mpkg" -target /')
 	os.system('sudo hdiutil detach "/Volumes/GridLAB-D 4.0.0"')

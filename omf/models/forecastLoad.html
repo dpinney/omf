@@ -14,7 +14,7 @@
 		<form name="inputForm" action="/runModel/" onsubmit="event.preventDefault(); return isFormValid();" method="post">
 			<!-- Required Inputs -->
 			<div class="shortInput">
-				<label>Model Type <a href="https://github.com/dpinney/omf/wiki/Models-~-loadForecast" target="blank">Help?</a></label>
+				<label>Model Type <a href="https://github.com/dpinney/omf/wiki/Models-~-forecastLoad" target="blank">Help?</a></label>
 				<input type="text" id="modelType" name="modelType" value="{{allInputDataDict.modelType}}" value="{{modelName}}" readonly/>
 			</div>
 			<div class="shortInput">
@@ -57,8 +57,8 @@
 				</div>
 			</div>
 			<div class="shortInput">
-				<label>Number of partitions for Prophet training</label>
-				<input type="number" id="prophet" name="prophet" value="{{allInputDataDict.prophet}}" min=0 max=20 required="required">
+				<label>Number of partitions for Prophet training<span class="classic">If 0 then don't run prophet. Otherwise this is the number of hours ahead the forecast will be for (up to 24).</span></label>
+				<input type="number" id="prophet" name="prophet" value="{{allInputDataDict.prophet}}" min=0 max=24 required="required">
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Simulation Start Date (YYYY-MM-DD)<span class="classic">Simulation Start Date (YYYY-MM-DD)</span></label>
