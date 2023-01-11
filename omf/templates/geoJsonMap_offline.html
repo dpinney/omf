@@ -33,6 +33,7 @@
 	<div id="map"></div>
 	<script>var geojson={% if geojson %}{{geojson | tojson}}{% else %}null{% endif %}</script>
 	<script>var all_mg_elements={% if all_mg_elements %}{{all_mg_elements | tojson}}{% else %}null{% endif %}</script>
+	<script>var components={% if components %}{{components | tojson}}{% else %}null{% endif %}</script>
 	<script type="text/javascript">
 	function onEachFeature(feature, layer) {
 		var popupContent = '';
