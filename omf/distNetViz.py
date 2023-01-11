@@ -74,6 +74,7 @@ def contains_valid_coordinates(tree):
 					return True
 	return False
 
+# - TODO: move this into geo.py once the old editor is deprecated so that this whole file is easier to deprecate. Some imports will need to be changed
 def get_components():
 	directory = os.path.join(omf.omfDir, "data/Component")
 	components = {}
