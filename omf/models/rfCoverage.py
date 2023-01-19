@@ -1,4 +1,4 @@
-''' RF Coverage Model'''
+''' Determine optimal location for RF network nodes. '''
 
 import datetime, shutil, subprocess, requests, tempfile, xml.etree.ElementTree as ET, base64
 from zipfile import ZipFile

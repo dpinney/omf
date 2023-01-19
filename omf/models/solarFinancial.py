@@ -1,4 +1,4 @@
-''' Calculate solar photovoltaic system output using our special financial model. '''
+''' Gives users the expected financial output of a PV system based on its costs and the amount energy it will likely produce. '''
 
 import json, shutil, datetime as dt
 from os.path import join as pJoin

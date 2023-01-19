@@ -1,3 +1,4 @@
+''' Calculate FLISR, fault location isolation and restoration. '''
 import random, re, datetime, json, os, tempfile, shutil, csv, math, platform, base64
 from os.path import join as pJoin
 import pandas as pd

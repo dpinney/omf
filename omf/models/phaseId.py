@@ -1,3 +1,4 @@
+''' Identify phasing from meter data.'''
 import json, datetime, csv, os, shutil, re, warnings, itertools, base64, platform
 from os.path import join as pJoin
 from base64 import b64decode

@@ -1,3 +1,4 @@
+''' Calculate costs of outages. '''
 import random, re, datetime, json, os, tempfile, shutil, csv, math
 from os.path import join as pJoin
 import pandas as pd

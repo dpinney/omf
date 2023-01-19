@@ -1,4 +1,4 @@
-''' Graph the voltage drop on a feeder. '''
+''' Determine impacts of distribution faults. '''
 
 import json, os, shutil, csv, warnings, base64, platform
 from os.path import join as pJoin
