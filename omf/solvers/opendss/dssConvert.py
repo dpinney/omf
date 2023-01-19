@@ -77,14 +77,15 @@ def dss_to_clean_via_save(dss_file, clean_out_path, add_pf_syntax=True, clean_up
 	subprocess.run(['opendsscmd', 'saver.dss'], cwd=dirname)
 	dss_folder_path = f'{dirname}/SAVED_DSS'
 	# Get master file.
-	master = open(f'{dss_folder_path}/Master.DSS').readlines()
+	master = open(f'{dss_folder_path}/Master.dss').readlines()
 	master = [x for x in master if x != '\n']
 	# Get the object files.
 	ob_files = os.listdir(f'{dss_folder_path}')
 	ob_files = sorted(ob_files)
-	ob_files.remove('Master.DSS')
+	ob_files.remove('Master.dss')
 	# Clean each of the object files.
 	clean_copies = {}
+	print('OB_FILES!',ob_files)
 	for fname in ob_files:
 		if os.path.isfile(f'{dss_folder_path}/{fname}'):
 			with open(f'{dss_folder_path}/{fname}', 'r') as ob_file:

@@ -1,3 +1,4 @@
+''' Geospatial analysis of circuit models.'''
 import json, os, shutil, math, tempfile, random, webbrowser, platform
 from pathlib import Path
 from os.path import join as pJoin

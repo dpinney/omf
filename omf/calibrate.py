@@ -1,3 +1,4 @@
+''' Calibrate load models based on SCADA data.'''
 import csv, datetime as dt, json, tempfile, os, random, platform
 from os.path import join as pJoin
 import numpy as np
