@@ -43,5 +43,5 @@ xmltodict>=0.12.0
 decorator
 OpenDSSDirect.py[extras]
 seaborn
-pandapower
+pandapower==2.10.1
 matpowercaseframes
