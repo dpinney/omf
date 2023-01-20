@@ -61,7 +61,81 @@ def dss_to_gld(opendss_path, out_path, inter_dir=None):
 	dss_to_clean_via_save(f'{tdir}/Master.dss', out_path)
 
 def dss_to_clean_via_save(dss_file, clean_out_path, add_pf_syntax=True, clean_up=False):
-	'''Converts raw OpenDSS circuit definition files to the *.clean.dss syntax required by OMF.
+	'''Updated function for OpenDSS v1.7.4 which does everything differently from earlier versions...
+	Converts raw OpenDSS circuit definition files to the *.clean.dss syntax required by OMF.
+	This version uses the opendss save functionality to better preserve dss syntax.'''
+	#TODO: Detect missing makebuslist, since windmil and others leave it out.
+	#TODO: Fix repeated wdg= keys!?!?!?
+	# Execute opendss's save command reliably on a circuit. opendssdirect fails at this.
+	import os, re, shutil, subprocess
+	dirname = os.path.dirname(dss_file)
+	shutil.rmtree(f'{dirname}/SAVED_DSS', ignore_errors=True)
+	# Make a dss file that can reliably save a dang circuit.
+	contents = open(dss_file,'r').read()
+	contents += '\nsave circuit dir=SAVED_DSS'
+	with open(f'{dirname}/saver.dss','w') as saver_file:
+		saver_file.write(contents)
+	# Run that saver file.
+	subprocess.run(['opendsscmd', 'saver.dss'], cwd=dirname)
+	dss_folder_path = f'{dirname}/SAVED_DSS'
+	# Get the object files.
+	ob_files = os.listdir(f'{dss_folder_path}')
+	ob_files = sorted(ob_files)
+	# Generate clean each of the object files.
+	clean_copies = {}
+	print('All files detected:',ob_files)
+	for fname in ob_files:
+		if os.path.isfile(f'{dss_folder_path}/{fname}'):
+			with open(f'{dss_folder_path}/{fname}', 'r') as ob_file:
+				ob_data = ob_file.read().lower() # lowercase everything
+				ob_data = ob_data.replace('"', '') # remove quote characters
+				ob_data = ob_data.replace('\t', ' ') # tabs to spaces
+				ob_data = re.sub(r' +', r' ', ob_data) # remove consecutive spaces
+				ob_data = re.sub(r'(^ +| +$)', r'', ob_data) # remove leading and trailing whitespace
+				ob_data = ob_data.replace('\n~', '') # remove tildes
+				ob_data = re.sub(r' *, *', r',', ob_data) # remove spaces around commas
+				ob_data = re.sub(r', *(\]|\))', r'\1', ob_data) # remove empty final list items
+				ob_data = re.sub(r' +\| +', '|', ob_data) # remove spaces around bar characters
+				ob_data = re.sub(r'(\[|\() *', r'\1', ob_data) # remove spaces after list start
+				ob_data = re.sub(r' *(\]|\))', r'\1', ob_data) # remove spaces before list end
+				ob_data = re.sub(r'(new|edit) ', r'\1 object=', ob_data) # add object= key
+				ob_data = re.sub(r'(\d) +(\d|\-)', r'\1,\2', ob_data) # replace space-separated lists with comma-separated
+				ob_data = re.sub(r'(\d) +(\d|\-)', r'\1,\2', ob_data) # HACK: second space-sep replacement to make sure it works
+				ob_data = re.sub(r'zipv=([\d\.\-,]+)', r'zipv=(\1)', ob_data) # HACK: fix zipv with missing parens
+				ob_data = re.sub(r'(redirect |buscoords |giscoords |makebuslist)', r'!\1', ob_data) # remove troublesome Master.dss redirects.
+				clean_copies[fname.lower()] = ob_data
+	# Special handling for buscoords
+	if 'buscoords.dss' in clean_copies:
+		bus_data = clean_copies['buscoords.dss']
+		nice_buses = re.sub(r'([\w_\-\.]+),([\w_\-\.]+),([\w_\-\.]+)', r'setbusxy bus=\1 x=\2 y=\3', bus_data)
+		clean_copies['buscoords.dss'] = 'makebuslist\n' + nice_buses
+	#HACK: This is the order in which things need to be inserted or opendss errors out. Lame!
+	CANONICAL_DSS_ORDER = ['master.dss', 'vsource.dss', 'transformer.dss', 'reactor.dss', 'regcontrol.dss', 'cndata.dss', 'wiredata.dss', 'linecode.dss', 'spectrum.dss', 'swtcontrol.dss', 'tcc_curve.dss', 'capacitor.dss', 'loadshape.dss', 'growthshape.dss', 'line.dss', 'generator.dss', 'load.dss', 'buscoords.dss', 'busvoltagebases.dss']
+	# Note files we got that aren't in canonical files:
+	for fname in clean_copies:
+		if fname not in CANONICAL_DSS_ORDER:
+			print(f'File available but ignored: {fname}')
+	# Construct output from files, ignoring master, which is bugged in opendss as of 2023-01-17
+	clean_out = ''
+	for fname in CANONICAL_DSS_ORDER:
+		if fname not in clean_copies:
+			print(f'Missing file: {fname}')
+		clean_out += f'\n\n!!!{fname}\n'
+		clean_out += clean_copies[fname]
+	clean_out = clean_out.lower()
+	# Optional: include a slug of code to run powerflow
+	if add_pf_syntax:
+		powerflow_slug = '\n\n!powerflow code\nset maxiterations=1000\nset maxcontroliter=1000\ncalcv\nsolve\nshow quantity=voltage'
+		clean_out = clean_out + powerflow_slug
+	# Optional: remove intermediate files and write a single clean file.
+	if clean_up:
+		shutil.rmtree(dss_folder_path, ignore_errors=True)
+	with open(clean_out_path, 'w') as out_file:
+		out_file.write(clean_out)
+
+def _old_dss_to_clean_via_save(dss_file, clean_out_path, add_pf_syntax=True, clean_up=False):
+	'''Works with OpenDSS versions<1.7.4.
+	Converts raw OpenDSS circuit definition files to the *.clean.dss syntax required by OMF.
 	This version uses the opendss save functionality to better preserve dss syntax.'''
 	#TODO: Detect missing makebuslist, since windmil and others leave it out.
 	#TODO: Fix repeated wdg= keys!?!?!?
