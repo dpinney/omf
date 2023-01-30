@@ -760,20 +760,18 @@ def convert_omd_to_featurecollection(omd):
         if k != 'tree':
             meta_feature['properties'][k] = v
     # - Add tree data
-    name_to_treekey = _get_name_to_treekey_map(omd)
+    name_to_treekey = NameToTreeKeyMap(omd)
     for k, v in omd['tree'].items():
         # - Existing code base is used to dealing with strings of ints so I'm doing that
         feature = {'type': 'Feature', 'properties': {'treeKey': str(k)}}
-        # - Deal with nodes that were originally missing by adding a meta property that will control their visual appearance in the editor
-        if v.get('geo_py_validation_status') == 'originally_missing':
-            feature['properties']['geo_py_validation_status'] = 'originally_missing'
-            del v['geo_py_validation_status']
+        # - The "geo_py_validation_status" property should be kept in the "treeProps" namespace so that the user can delete the property in the
+        #   front-end if they want. It's NOT a meta-property
         feature['properties']['treeProps'] = v
         if 'from' in v and 'to' in v:
-            src_key = name_to_treekey[v['from']][0]
+            src_key = name_to_treekey.get_key(v['from'], v)
             src_lon = float(omd['tree'][src_key]['longitude'])
             src_lat = float(omd['tree'][src_key]['latitude'])
-            dst_key = name_to_treekey[v['to']][0]
+            dst_key = name_to_treekey.get_key(v['to'], v)
             dst_lon = float(omd['tree'][dst_key]['longitude'])
             dst_lat = float(omd['tree'][dst_key]['latitude'])
             feature['geometry'] = {
@@ -796,6 +794,7 @@ def convert_omd_to_featurecollection(omd):
                 del v[prop]
     return feature_collection
 
+
 def convert_featurecollection_to_omd(feature_collection):
     '''
     Convert a GeoJSON FeatureCollection dict into an OMD dict
@@ -805,8 +804,6 @@ def convert_featurecollection_to_omd(feature_collection):
     :return: an OMD
     :rtype: dict
     '''
-    #non_tree_keys = ['attachments', 'hiddenLinks', 'hiddenNodes', 'layoutVars', 'links', 'name2', 'nodes', 'owner', 'syntax']
-    # - Only nodes that are configuration objects are permitted to lack ...
     omd = {'tree': {}}
     for f in feature_collection['features']:
         # - Add non-tree keys
@@ -827,45 +824,93 @@ def convert_featurecollection_to_omd(feature_collection):
                 if not _is_configuration_or_special_node(f['properties']['treeProps']):
                     f['properties']['treeProps']['latitude'] = float(f['geometry']['coordinates'][1])
                     f['properties']['treeProps']['longitude'] = float(f['geometry']['coordinates'][0])
-            properties = f['properties']['treeProps']
-            omd['tree'][str(f['properties']['treeKey'])] = properties
+            omd['tree'][str(f['properties']['treeKey'])] = f['properties']['treeProps']
     return omd
 
-def _get_name_to_treekey_map(omd):
-    '''
-    OMD objects can have the same name, but should have unique tree keys. Lines look up nodes by name and children look up parents by name, so return
-    a map of names to tree keys
 
-    :param omd: an OMD
-    :type omd: dict
-    :return: a new dict that maps every name to one or more tree keys, since multiple OMD objects can have the same name
-    :rtype: dict
+class NameToTreeKeyMap:
     '''
-    name_to_treekey = {}
-    for k, v in omd['tree'].items():
-        name = v.get('name')
-        if name is not None:
-            if name not in name_to_treekey:
-                name_to_treekey[name] = [k]
+    This class encapsulates a dictionary that maps the "name" property of objects and lines to tree keys. A simple Python dictionary is not sufficient
+    because multiple tree objects can share the same name. As a result, the correct tree key that should be returned for a given name depends on which
+    object is requesting the tree key
+        E.g. if a linecode and bus share a name, and a child node uses that name as its parent reference, then the tree key of the bus should be
+        returned, but that's only because a child node was requesting a tree key.
+        In the case of unresolvable name collisions (e.g. two buses share a name and a child node uses that name as its parent reference, and we don't
+        know which bus to return), we raise an exception
+    '''
+
+    def __init__(self, omd):
+        '''
+        :param omd: an OMD
+        :type omd: dict
+        :rtype: None
+        '''
+        self._omd = omd
+        self._map = {}
+        for k, v in omd['tree'].items():
+            name = v.get('name')
+            if name is not None:
+                if name not in self._map:
+                    self._map[name] = [k]
+                else:
+                    self._map[name].append(k)
+
+    def get_key(self, name, treeProps):
+        '''
+        Return a key for the given name, or None if a key cannot be found. Raise an exception if the key can't unambiguously selected from multiple
+        possible keys
+
+        :param name: the name of a tree object
+        :type name: str
+        :param treeProps: a tree object (e.g. a child object or line object) that is requesting the tree object with the given name Nodes and lines
+            can be parents.
+        :type treeProps: dict
+        :return: the key of the object with the provided name
+        :rtype: str
+        '''
+        keys = self._map.get(name)
+        if keys is None:
+            return None
+        elif len(keys) == 1:
+            return keys[0]
+        objects_with_line_parents = ['recorder']
+        if treeProps['object'] in objects_with_line_parents:
+            line_keys = list(
+                filter(lambda k: 'from' in self._omd['tree'][k] and 'to' in  self._omd['tree'][k],
+                keys))
+            if len(line_keys) == 1:
+                return line_keys[0]
             else:
-                name_to_treekey[name].append(k)
-    return name_to_treekey
+                raise ValueError(f'The NameToTreeKeyMap could not unambiguously find a line for the object named "{treeProps["name"]}"')
+        else:
+            node_keys = list(
+                filter(lambda k: 'from' not in self._omd['tree'][k] and 'to' not in self._omd['tree'][k] and
+                    not _is_configuration_or_special_node(self._omd['tree'][k]),
+                keys))
+            if len(node_keys) == 1:
+                return node_keys[0]
+            else:
+                raise ValueError(f'The NameToTreeKeyMap could not unambiguously find a node for the object named "{treeProps["name"]}"')
+
 
 def _is_configuration_or_special_node(tree_properties):
     '''
     :param tree_properties: a dict of an OMD object's properties
     :type tree_properties: dict
-    :return: whether the tree_properties describe a node that isn't supposed to have coordinates (i.e. a "configuration object" or "special object")
+    :return: whether the tree_properties describe a node that isn't supposed to be visually displayed in the front-end map (i.e. a "configuration
+        object" or "special object"). A configuration/special node is converted into a feature that has None latitude and longitude values
     :rtype: bool
     '''
-    # - These OMD objects don't have latitude or longitude properties
+    # - The "circuit" object needs to be vsource object, so it's NOT a configuration node
+    #   - The exception with "trilby" is therefore correct. I need to ask David how to resolve that problem
     CONFIGURATION_OBJECTS = (
-        '!CMD', 'climate', 'circuit', 'growthshape', 'line_configuration', 'line_spacing', 'linecode', 'loadshape', 'overhead_line_conductor',
+        '!CMD', 'climate', 'growthshape', 'line_configuration', 'line_spacing', 'linecode', 'loadshape', 'overhead_line_conductor',
         'player', 'regulator_configuration', 'schedule', 'spectrum', 'tcc_curve', 'triplex_line_conductor', 'transformer_configuration',
         'triplex_line_configuration', 'underground_line_conductor', 'volt_var_control')
     # - These OMD objects lack the "object" property entirely
     SPECIAL_OBJECTS = ('clock', 'omftype', 'module', 'class')
     return (tree_properties.get('object') is None and len(set(tree_properties.keys()) & set(SPECIAL_OBJECTS)) > 0) or tree_properties['object'] in CONFIGURATION_OBJECTS
+
 
 def insert_missing_nodes(omd):
     '''
@@ -876,53 +921,53 @@ def insert_missing_nodes(omd):
     :type omd: dict
     :rtype: None
     '''
-    name_to_treekey = _get_name_to_treekey_map(omd)
+    name_to_treekey = NameToTreeKeyMap(omd)
     max_tree_key = max([int(k) for k in omd['tree'].keys()], default=0)
     new_tree = {}
+    #missing_nodes = []
+    #looped_lines = []
+    #shared_names = []
     for k, v in omd['tree'].items():
-        # - Deal with lines that have missing nodes
+        # - Deal with lines that have missing/identical nodes
         if v.get('from') is not None and v.get('to') is not None:
-            src_keys = name_to_treekey.get(v['from'])
-            if src_keys is not None:
-                if len(src_keys) > 1:
-                    raise Exception(f'The line with tree key {k} references multiple "from" nodes')
-            else:
+            if v['from'] == v['to']:
+                v['geo_py_validation_status'] = 'looped'
+                #looped_lines.append(v['from'])
+                #raise ValueError(f'The line with tree key {k} uses the same name \"{v.get("from")}\" for its "from" and "to" nodes')
+            src_key = name_to_treekey.get_key(v['from'], v)
+            if src_key is None: 
                 max_tree_key += 1
-                # - I grepped through all the files and no OMD tree object used "geo_py_validation_status" as key
-                new_tree[max_tree_key] = {'name': v['from'], 'object': 'bus', 'geo_py_validation_status': 'originally_missing'}
-                name_to_treekey[v['from']] = [max_tree_key]
-                print(f'omf.geo._insert_missing_nodes() created a placeholder bus node for the missing node named {v["from"]}')
-            dst_keys = name_to_treekey.get(v['to'])
-            if dst_keys is not None:
-                if len(dst_keys) > 1:
-                    # - TODO: handle this instead of throwing an exception?
-                    raise Exception(f'The line with tree key {k} references multiple "to" nodes')
-            else:
+                # - I grepped through all the files and no OMD tree object used "geo_py_validation_status" as a key
+                new_tree[max_tree_key] = {'name': v['from'], 'object': 'bus', 'geo_py_validation_status': 'missing'}
+                name_to_treekey._map[v['from']] = [max_tree_key]
+                #missing_nodes.append(v['from'])
+                #print(f'omf.geo.insert_missing_nodes() created a placeholder bus node for the missing node named {v["from"]}')
+            dst_key = name_to_treekey.get_key(v['to'], v)
+            if dst_key is None:
                 max_tree_key += 1
-                new_tree[max_tree_key] = {'name': v['to'], 'object': 'bus', 'geo_py_validation_status': 'originally_missing'}
-                name_to_treekey[v['to']] = [max_tree_key]
-                print(f'omf.geo._insert_missing_nodes() created a placeholder bus node for the missing node named {v["to"]}')
+                new_tree[max_tree_key] = {'name': v['to'], 'object': 'bus', 'geo_py_validation_status': 'missing'}
+                name_to_treekey._map[v['to']] = [max_tree_key]
+                #missing_nodes.append(v['to'])
+                #print(f'omf.geo.insert_missing_nodes() created a placeholder bus node for the missing node named {v["to"]}')
         else:
             # - Deal with child nodes that have missing parents
             if v.get('parent') is not None:
-                parent_keys = name_to_treekey.get(v['parent'])
-                if parent_keys is not None:
-                    if len(parent_keys) > 1:
-                        # - TODO: handle this instead of throwing an exception?
-                        raise Exception(f'The node with tree key {k} references multiple "parent" nodes')
-                else:
+                parent_key = name_to_treekey.get_key(v['parent'], v)
+                if parent_key is None:
                     max_tree_key += 1
-                    new_tree[max_tree_key] = {'name': v['parent'], 'object': 'bus', 'geo_py_validation_status': 'originally_missing'}
-                    name_to_treekey[v['parent']] = [max_tree_key]
-                    print(f'omf.geo._insert_missing_nodes() created a placeholder bus node for the missing node named {v["parent"]}')
+                    new_tree[max_tree_key] = {'name': v['parent'], 'object': 'bus', 'geo_py_validation_status': 'missing'}
+                    name_to_treekey._map[v['parent']] = [max_tree_key]
+                    #print(f'omf.geo.insert_missing_nodes() created a placeholder bus node for the missing node named {v["parent"]}')
     for k in new_tree.keys():
         omd['tree'][str(k)] = new_tree[k]
+    #return (shared_names, looped_lines)
+
 
 def insert_coordinates(omd, force_layout=False, center=(30.285013, -84.073493)):
     '''
-    Iterate over an OMD's tree in-place and insert "latitude" and "longitude" properties for nodes that are (1) missing latitude and/or longitude, or
-    (2) have non-numeric or out-of-bounds latitude or longitude values
-        This function assumes there are no missing nodes. Run the OMD through _add_missing_nodes() first
+    Iterate over an OMD's tree in-place and insert "latitude" and "longitude" properties for nodes that are (1) missing latitude/longitude, or (2)
+    have non-numeric or out-of-bounds latitude/longitude, or (3) have non-standard latitude/longitude
+        This function assumes there are no missing nodes. Run the OMD through insert_missing_nodes() first
 
     :param omd: an OMD
     :type omd: dict
@@ -954,21 +999,21 @@ def insert_coordinates(omd, force_layout=False, center=(30.285013, -84.073493)):
     max_lat = max(lats, default=None)
     min_lon = min(lons, default=None)
     max_lon = max(lons, default=None)
-    # - If there were no latitude values, there is no min_lat or max_lat, so use the latitude provided by "center"
+    # - If there were no valid latitude values, there is no min_lat or max_lat, so use the latitude provided by "center"
     if min_lat is None:
         lat_source = 'layout'
         avg_lat = center[0]
     else:
         lat_source = 'average'
         avg_lat = sum((max_lat, min_lat)) / 2
-    # - If there were no longitude values, there is no min_lon or max_lon, so use the longitude provided by "center"
+    # - If there were no valid longitude values, there is no min_lon or max_lon, so use the longitude provided by "center"
     if min_lon is None:
         lon_source = 'layout'
         avg_lon = center[1]
     else:
         lon_source = 'average'
         avg_lon = sum((max_lon, min_lon)) / 2
-    name_to_treekey = _get_name_to_treekey_map(omd)
+    name_to_treekey = NameToTreeKeyMap(omd)
     graph = nx.Graph()
     # - Iterate once to build the graph for the layout algorithm and determine how a node will get new coordinates if it needs them
     for k, v in omd['tree'].items():
@@ -977,15 +1022,19 @@ def insert_coordinates(omd, force_layout=False, center=(30.285013, -84.073493)):
             #   - As a result, children of lines could be placed near their line parents (but they currently aren't. see TODO)
             # - The "weight" parameter determines how far apart nodes will be in the layout generated by the networkx layout algorithm
             #   - TODO: divide weight in half becuase I'm creating two edges out of one?
-            weight = float(v.get('length')) if v.get('length') is not None else 1
-            src_key = name_to_treekey[v['from']][0]
+            try:
+                weight = float(v.get('length'))
+            except (TypeError, ValueError) as e:
+                # - Ignore non-numeric values like "1 mile" for the purposes of graph layout
+                weight = 1
+            src_key = name_to_treekey.get_key(v['from'], v)
             graph.add_edge(src_key, k, weight=weight)
-            dst_key = name_to_treekey[v['to']][0]
+            dst_key = name_to_treekey.get_key(v['to'], v)
             graph.add_edge(k, dst_key, weight=weight)
         else:
             if not _is_configuration_or_special_node(v):
                 if v.get('parent') is not None:
-                    parent_key = name_to_treekey[v['parent']][0]
+                    parent_key = name_to_treekey.get_key(v['parent'], v)
                     graph.add_edge(parent_key, k, weight=1)
                     parent = omd['tree'][parent_key]
                     # - TODO: What if the parent is a line? Currently, the child of a line is just plopped in the middle somewhere
@@ -995,10 +1044,16 @@ def insert_coordinates(omd, force_layout=False, center=(30.285013, -84.073493)):
                         graph.add_node(k)
                 else:
                     graph.add_node(k)
-    #pos = nx.kamada_kawai_layout(graph, scale=1) # Takes too long
-    #pos = nx.nx_pydot.pydot_layout(graph) # Needs more dependencies
-    #pos = nx.nx_pydot.graphviz_layout(graph) # Needs more dependencies
-    pos = nx.circular_layout(graph, scale=1) # Fast!
+
+    #pos = nx.kamada_kawai_layout(graph, scale=1) # Too slow
+    #pos = nx.spectral_layout(graph) # Too slow
+    #pos = nx.nx_pydot.pydot_layout(graph, prog='neato', root=None) # Requires pydot. Fast, but default looks horrible
+    #pos = nx.nx_pydot.graphviz_layout(graph, prog='neato', root=None) # Requires pydot. Fast, but default looks horrible
+    pos = nx.circular_layout(graph, scale=0.2) # Fast but ugly!
+    #pos = nx.shell_layout(graph, scale=0.1) # Could this work?
+    #pos = nx.spring_layout(graph, scale=0.1)
+    #pos = nx.planar_layout(graph, scale=0.1)
+
     for k in pos:
         obj = omd['tree'][k]
         if obj.get('from') is None and obj.get('to') is None and not _is_configuration_or_special_node(obj):
@@ -1015,7 +1070,7 @@ def insert_coordinates(omd, force_layout=False, center=(30.285013, -84.073493)):
                         omd['tree'][k]['latitude'] = float(pos[k][0]) + center[0]
                     # - TODO: What if the parent is a line? Currently, the child of a line is just plopped in the middle somewhere
                     elif graph.nodes[k].get('coordinate_source') == 'parent':
-                        parent_lat = omd['tree'][name_to_treekey[omd['tree'][k]['parent']][0]]['latitude']
+                        parent_lat = omd['tree'][name_to_treekey.get_key(omd['tree'][k]['parent'], omd['tree'][k])]['latitude']
                         omd['tree'][k]['latitude'] = float(pos[k][0]) + float(parent_lat)
                     else:
                         omd['tree'][k]['latitude'] = float(pos[k][0]) + avg_lat
@@ -1028,14 +1083,15 @@ def insert_coordinates(omd, force_layout=False, center=(30.285013, -84.073493)):
                         omd['tree'][k]['longitude'] = float(pos[k][1]) + center[1]
                     # - TODO: What if the parent is a line? Currently, the child of a line is just plopped in the middle somewhere
                     elif graph.nodes[k].get('coordinate_source') == 'parent':
-                        parent_lon = omd['tree'][name_to_treekey[omd['tree'][k]['parent']][0]]['longitude']
+                        parent_lon = omd['tree'][name_to_treekey.get_key(omd['tree'][k]['parent'], omd['tree'][k])]['longitude']
                         omd['tree'][k]['longitude'] = float(pos[k][1]) + float(parent_lon)
                     else:
                         omd['tree'][k]['longitude'] = float(pos[k][1]) + avg_lon
     # - Optional check for disconnected nodes. Can be commented out
-    for n in graph.nodes.keys():
-        if graph.degree[n] == 0 and not _is_configuration_or_special_node(omd['tree'][n]):
-            print(f'The node with tree key {n} does not have children, nor is it connected to any line. Is it connected to the rest of the graph?')
+    #for n in graph.nodes.keys():
+    #    if graph.degree[n] == 0 and not _is_configuration_or_special_node(omd['tree'][n]):
+    #        print(f'The node with tree key {n} does not have children, nor is it connected to any line. Is it connected to the rest of the graph?')
+
 
 def get_components_featurecollection():
     '''
@@ -1048,6 +1104,7 @@ def get_components_featurecollection():
     for k, v in json.loads(distNetViz.get_components()).items():
         featureCollection['features'].append(_convert_component_to_geojson_feature(k, v))
     return featureCollection
+
 
 def _convert_component_to_geojson_feature(component_name, component_properties):
     if 'name' not in component_properties:
