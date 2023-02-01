@@ -1,7 +1,8 @@
 import json, os, shutil, math, tempfile, random, webbrowser, platform
 from pathlib import Path
 from os.path import join as pJoin
-from pyproj import Proj, transform, Transformer
+from pyproj import Proj, transform, Transformer # Remove this import when deprecating other functions
+import pyproj
 import requests
 import networkx as nx
 import numpy as np
@@ -904,9 +905,9 @@ def _is_configuration_or_special_node(tree_properties):
     # - The "circuit" object needs to be vsource object, so it's NOT a configuration node
     #   - The exception with "trilby" is therefore correct. I need to ask David how to resolve that problem
     CONFIGURATION_OBJECTS = (
-        '!CMD', 'climate', 'growthshape', 'line_configuration', 'line_spacing', 'linecode', 'loadshape', 'overhead_line_conductor',
-        'player', 'regulator_configuration', 'schedule', 'spectrum', 'tcc_curve', 'triplex_line_conductor', 'transformer_configuration',
-        'triplex_line_configuration', 'underground_line_conductor', 'volt_var_control')
+        '!CMD', 'climate', 'cndata', 'growthshape', 'line_configuration', 'line_spacing', 'linecode', 'loadshape', 'overhead_line_conductor',
+        'player', 'regcontrol', 'regulator_configuration', 'schedule', 'spectrum', 'swtcontrol', 'tcc_curve', 'triplex_line_conductor', 'transformer_configuration',
+        'triplex_line_configuration', 'underground_line_conductor', 'volt_var_control', 'wiredata')
     # - These OMD objects lack the "object" property entirely
     SPECIAL_OBJECTS = ('clock', 'omftype', 'module', 'class')
     return (tree_properties.get('object') is None and len(set(tree_properties.keys()) & set(SPECIAL_OBJECTS)) > 0) or tree_properties['object'] in CONFIGURATION_OBJECTS
@@ -924,34 +925,25 @@ def insert_missing_nodes(omd):
     name_to_treekey = NameToTreeKeyMap(omd)
     max_tree_key = max([int(k) for k in omd['tree'].keys()], default=0)
     new_tree = {}
-    #missing_nodes = []
-    #looped_lines = []
-    #shared_names = []
     for k, v in omd['tree'].items():
         # - Deal with lines that have missing/identical nodes
-        if v.get('from') is not None and v.get('to') is not None:
+        if 'from' in v and 'to' in v:
             if v['from'] == v['to']:
                 v['geo_py_validation_status'] = 'looped'
-                #looped_lines.append(v['from'])
-                #raise ValueError(f'The line with tree key {k} uses the same name \"{v.get("from")}\" for its "from" and "to" nodes')
             src_key = name_to_treekey.get_key(v['from'], v)
             if src_key is None: 
                 max_tree_key += 1
                 # - I grepped through all the files and no OMD tree object used "geo_py_validation_status" as a key
                 new_tree[max_tree_key] = {'name': v['from'], 'object': 'bus', 'geo_py_validation_status': 'missing'}
                 name_to_treekey._map[v['from']] = [max_tree_key]
-                #missing_nodes.append(v['from'])
-                #print(f'omf.geo.insert_missing_nodes() created a placeholder bus node for the missing node named {v["from"]}')
             dst_key = name_to_treekey.get_key(v['to'], v)
             if dst_key is None:
                 max_tree_key += 1
                 new_tree[max_tree_key] = {'name': v['to'], 'object': 'bus', 'geo_py_validation_status': 'missing'}
                 name_to_treekey._map[v['to']] = [max_tree_key]
-                #missing_nodes.append(v['to'])
-                #print(f'omf.geo.insert_missing_nodes() created a placeholder bus node for the missing node named {v["to"]}')
         else:
             # - Deal with child nodes that have missing parents
-            if v.get('parent') is not None:
+            if 'parent' in v:
                 parent_key = name_to_treekey.get_key(v['parent'], v)
                 if parent_key is None:
                     max_tree_key += 1
@@ -960,91 +952,114 @@ def insert_missing_nodes(omd):
                     #print(f'omf.geo.insert_missing_nodes() created a placeholder bus node for the missing node named {v["parent"]}')
     for k in new_tree.keys():
         omd['tree'][str(k)] = new_tree[k]
-    #return (shared_names, looped_lines)
 
 
-def insert_coordinates(omd, force_layout=False, center=(30.285013, -84.073493)):
+def insert_coordinates(omd, center=(36.6, -98.5), spcs_epsg=None, force_layout=False):
     '''
-    Iterate over an OMD's tree in-place and insert "latitude" and "longitude" properties for nodes that are (1) missing latitude/longitude, or (2)
-    have non-numeric or out-of-bounds latitude/longitude, or (3) have non-standard latitude/longitude
-        This function assumes there are no missing nodes. Run the OMD through insert_missing_nodes() first
-
+    - Iterate over an OMD's tree in-place and insert WGS 84 "latitude" and "longitude" properties
+        - If a node is missing latitude or longitude properties, or has non-numeric latitude or longitude properties, create new WGS 84 coordinates
+          with a layout algorithm
+        - If a node has state plane coordinates, convert them into WGS 84 coordinates
+            - If an EPSG code is given, perform a proper transformation of state plane coordinates into WGS 84 coordinates
+            - If an EPSG code is not given, convert every state plane coordinate into a WGS 84 coordiante, subtract the minimum latitude from all
+              latitudes and subtract the minimum longitude from all longitudes to convert the WGS 84 coordinates into offset values, then add the
+              "center" latitude to every latitude and the "center" longitude to every longitude to shift the coordinates to the desired location
+    - This function assumes there are no missing nodes. Run the OMD through insert_missing_nodes() first
+    
     :param omd: an OMD
     :type omd: dict
-    :param center: a coordinate pair around which to center the nodes. If force_layout=True, all nodes will be centered around these coordinates. If
-        no nodes have coordinates, then all nodes will be centered around these coordinates regardless of force_layout. If some, but not all, nodes
-        have coordinates and force_layout=False, center is ignored and the existing coordinates will be used to determine coordinates for nodes that
-        lack coordinates
+    :param center: a WGS 84 coordinate pair which will serve as the bottom left corner of the circuit coordinates. If force_layout=True, all nodes
+        will be centered around these coordinates according to some layout algorithm. If no nodes have coordinates, then all nodes will be centered
+        around these coordinates with a layout algorithm regardless of force_layout. If some, but not all, nodes have coordinates and
+        force_layout=False, center is ignored and the existing coordinates will be used to determine coordinates for nodes that lack coordinates.
     :type center: tuple
-    :param force_layout: whether to insert new coordinates regardless of existing coordinates
+    :param spcs_espg: a state plane coordinate system European Petroleum Survey Group code that should be used to transform the given state plane
+        coordinates. E.g. EPSG:26978 is the European Petroleum Survey Group code for the "Kansas South" state plane with the "NAD 83" datum, which
+        also has a USA FIPS identifier of 1502. http://gsp.humboldt.edu/olm/Lessons/GIS/03%20Projections/Images2/StatePlane.png. If this argument is
+        provided, then (1) the coordinates will be converted, even if they weren't actually state plane coordinates and (2) force_layout is ignored.
+    :type spcs_epg: str
+    :param force_layout: whether to insert new coordinates using a layout algorithm regardless of existing coordinates. 
     :type force_layout: bool
     :rtype: None
     '''
     lats = []
     lons = []
+    # - Iterate once to find the minimum latitude and longitude and to determine what coordinate system was used
     for d in omd['tree'].values():
         try:
             lat = float(d['latitude'])
-            if lat >= -90 and lat <= 90:
-                lats.append(lat)
-        except (ValueError, TypeError, KeyError) as e:
+            lats.append(lat)
+        except (KeyError, ValueError) as e:
             pass
         try:
             lon = float(d['longitude'])
-            if lon >= -180 and lon <= 180:
-                lons.append(lon)
-        except (ValueError, TypeError, KeyError) as e:
+            lons.append(lon)
+        except (KeyError, ValueError) as e:
             pass
     min_lat = min(lats, default=None)
     max_lat = max(lats, default=None)
     min_lon = min(lons, default=None)
     max_lon = max(lons, default=None)
-    # - If there were no valid latitude values, there is no min_lat or max_lat, so use the latitude provided by "center"
-    if min_lat is None:
-        lat_source = 'layout'
-        avg_lat = center[0]
-    else:
-        lat_source = 'average'
-        avg_lat = sum((max_lat, min_lat)) / 2
-    # - If there were no valid longitude values, there is no min_lon or max_lon, so use the longitude provided by "center"
-    if min_lon is None:
-        lon_source = 'layout'
-        avg_lon = center[1]
-    else:
-        lon_source = 'average'
-        avg_lon = sum((max_lon, min_lon)) / 2
+    if min_lat is not None and min_lon is not None:
+        # - If we have huge coordinate values, or the user says we have state plane coordinates, convert existing state plane coordinates into WGS 84
+        #   coordinates
+        if spcs_epsg is not None or max_lat > 90 or max_lon > 180:
+            max_lon = -180
+            max_lat = -90
+            # - The user knows their EPSG state plane code, so do a proper conversion
+            if spcs_epsg is not None:
+                transformer = pyproj.Transformer.from_crs(spcs_epsg, 'EPSG:4326', always_xy=True)
+            # - The user did not know their EPSG state plane code, so preserve relative distances between nodes
+            else:
+                # - Convert from "Kansas South NAD 83 State Plane Coordinate System" to the World Geodetic System 1984. It doesn't really matter which
+                #   state plane we use. They should preserve distances between nodes roughly equally
+                transformer = pyproj.Transformer.from_crs('EPSG:26978', 'EPSG:4326', always_xy=True)
+                x_subtrahend, y_subtrahend = transformer.transform(min_lon, min_lat)
+            for d in omd['tree'].values():
+                try:
+                    easting = float(d['longitude'])
+                    northing = float(d['latitude'])
+                    x, y = transformer.transform(easting, northing)
+                    if spcs_epsg is None:
+                        x = (x - x_subtrahend) + center[1]
+                        y = (y - y_subtrahend) + center[0]
+                    d['longitude'] = x
+                    d['latitude'] = y
+                    if x < min_lon:
+                        min_lon = x
+                    if y < min_lat:
+                        min_lat = y
+                    if x > max_lon:
+                        max_lon = x
+                    if y > max_lat:
+                        max_lat = y
+                except (KeyError, ValueError) as e:
+                    pass
     name_to_treekey = NameToTreeKeyMap(omd)
     graph = nx.Graph()
-    # - Iterate once to build the graph for the layout algorithm and determine how a node will get new coordinates if it needs them
+    # - Iterate a second time to build the graph for the layout algorithm and determine how a node will get new coordinates if it needs them
     for k, v in omd['tree'].items():
-        if v.get('from') is not None and v.get('to') is not None:
-            # - Lines are modeled as nodes in the networkx graph because they can have children
-            #   - As a result, children of lines could be placed near their line parents (but they currently aren't. see TODO)
-            # - The "weight" parameter determines how far apart nodes will be in the layout generated by the networkx layout algorithm
-            #   - TODO: divide weight in half becuase I'm creating two edges out of one?
+        if 'from' in v and 'to' in v:
             try:
-                weight = float(v.get('length'))
-            except (TypeError, ValueError) as e:
+                weight = float(v['length'])
+            except (KeyError, ValueError) as e:
                 # - Ignore non-numeric values like "1 mile" for the purposes of graph layout
                 weight = 1
-            src_key = name_to_treekey.get_key(v['from'], v)
-            graph.add_edge(src_key, k, weight=weight)
-            dst_key = name_to_treekey.get_key(v['to'], v)
-            graph.add_edge(k, dst_key, weight=weight)
+            graph.add_edge(name_to_treekey.get_key(v['from'], v), name_to_treekey.get_key(v['to'], v), weight=weight)
         else:
             if not _is_configuration_or_special_node(v):
-                if v.get('parent') is not None:
+                if 'parent' in v:
                     parent_key = name_to_treekey.get_key(v['parent'], v)
-                    graph.add_edge(parent_key, k, weight=1)
                     parent = omd['tree'][parent_key]
-                    # - TODO: What if the parent is a line? Currently, the child of a line is just plopped in the middle somewhere
-                    if parent.get('latitude') is not None and parent.get('longitude') is not None:
+                    # - Don't create edges between recorder objects and their line parents because I don't want to deal with that right now
+                    if 'from' not in parent and 'to' not in parent:
+                        graph.add_edge(parent_key, k, weight=1)
                         graph.add_node(k, coordinate_source='parent')
                     else:
                         graph.add_node(k)
                 else:
                     graph.add_node(k)
-
+    # - Run the layout algorithm to generate coordinates
     #pos = nx.kamada_kawai_layout(graph, scale=1) # Too slow
     #pos = nx.spectral_layout(graph) # Too slow
     #pos = nx.nx_pydot.pydot_layout(graph, prog='neato', root=None) # Requires pydot. Fast, but default looks horrible
@@ -1053,44 +1068,60 @@ def insert_coordinates(omd, force_layout=False, center=(30.285013, -84.073493)):
     #pos = nx.shell_layout(graph, scale=0.1) # Could this work?
     #pos = nx.spring_layout(graph, scale=0.1)
     #pos = nx.planar_layout(graph, scale=0.1)
-
+    # - Iterate a third time to give coordinates to all nodes
+    avg_lat = center[0]
+    if min_lat is not None and (-90 <= min_lat <= 90):
+        avg_lat = (max_lat + min_lat) / 2
+    avg_lon = center[1]
+    if min_lon is not None and (-180 <= min_lon <= 180):
+        avg_lon = (max_lon + min_lon) / 2
     for k in pos:
         obj = omd['tree'][k]
-        if obj.get('from') is None and obj.get('to') is None and not _is_configuration_or_special_node(obj):
+        if 'from' not in obj and 'to' not in obj and not _is_configuration_or_special_node(obj):
             if force_layout:
                 omd['tree'][k]['latitude'] = float(pos[k][0]) + center[0]
                 omd['tree'][k]['longitude'] = float(pos[k][1]) + center[1]
             else:
+                if graph.nodes[k].get('coordinate_source') == 'parent':
+                    parent_key = name_to_treekey.get_key(obj['parent'], obj)
+                    parent = omd['tree'][parent_key]
                 try:
                     lat = float(obj['latitude'])
-                    if lat < -90 or lat > 90:
+                    if not (-90 <= lat <= 90):
                         raise ValueError
-                except (ValueError, TypeError, KeyError) as e:
-                    if lat_source == 'layout':
-                        omd['tree'][k]['latitude'] = float(pos[k][0]) + center[0]
-                    # - TODO: What if the parent is a line? Currently, the child of a line is just plopped in the middle somewhere
-                    elif graph.nodes[k].get('coordinate_source') == 'parent':
-                        parent_lat = omd['tree'][name_to_treekey.get_key(omd['tree'][k]['parent'], omd['tree'][k])]['latitude']
-                        omd['tree'][k]['latitude'] = float(pos[k][0]) + float(parent_lat)
+                except (KeyError, ValueError) as e:
+                    if graph.nodes[k].get('coordinate_source') == 'parent':
+                        try:
+                            parent_lat = float(parent['latitude'])
+                            if not (-90 <= parent_lat <= 90):
+                                raise ValueError
+                        except (KeyError, ValueError) as e:
+                            parent_lat = float(pos[parent_key][0]) + avg_lat
+                            parent['latitude'] = parent_lat
+                        obj['latitude'] = parent_lat + round(random.uniform(-.003, .003), 4)
                     else:
-                        omd['tree'][k]['latitude'] = float(pos[k][0]) + avg_lat
+                        obj['latitude'] = float(pos[k][0]) + avg_lat
                 try:
                     lon = float(obj['longitude'])
-                    if lon < -180 or lon > 180:
+                    if not (-180 <= lon <= 180):
                         raise ValueError
-                except (ValueError, TypeError, KeyError) as e:
-                    if lon_source == 'layout':
-                        omd['tree'][k]['longitude'] = float(pos[k][1]) + center[1]
-                    # - TODO: What if the parent is a line? Currently, the child of a line is just plopped in the middle somewhere
-                    elif graph.nodes[k].get('coordinate_source') == 'parent':
-                        parent_lon = omd['tree'][name_to_treekey.get_key(omd['tree'][k]['parent'], omd['tree'][k])]['longitude']
-                        omd['tree'][k]['longitude'] = float(pos[k][1]) + float(parent_lon)
+                except (KeyError, ValueError) as e:
+                    if graph.nodes[k].get('coordinate_source') == 'parent':
+                        try:
+                            parent_lon = float(parent['longitude'])
+                            if not (-180 <= parent_lon <= 180):
+                                raise ValueError
+                        except (KeyError, ValueError) as e:
+                            parent_lon = float(pos[parent_key][1]) + avg_lon
+                            parent['longitude'] = parent_lon
+                        obj['longitude'] = parent_lon + round(random.uniform(-.003, .003), 4)
                     else:
-                        omd['tree'][k]['longitude'] = float(pos[k][1]) + avg_lon
-    # - Optional check for disconnected nodes. Can be commented out
-    #for n in graph.nodes.keys():
-    #    if graph.degree[n] == 0 and not _is_configuration_or_special_node(omd['tree'][n]):
-    #        print(f'The node with tree key {n} does not have children, nor is it connected to any line. Is it connected to the rest of the graph?')
+                        obj['longitude'] = float(pos[k][1]) + avg_lon
+    # - Optional check for disconnected nodes. Can be commented out. This is great for discovering new types of configuration nodes that aren't
+    #   supposed to be displayed
+    for n in graph.nodes.keys():
+        if graph.degree[n] == 0 and not _is_configuration_or_special_node(omd['tree'][n]):
+            print(f'The node with tree key {n} does not have children, nor is it connected to any line. Is it connected to the rest of the graph?')
 
 
 def get_components_featurecollection():
