@@ -1,3 +1,4 @@
+''' Give the expected reliability improvement from adding reclosers to a circuit '''
 import json, os, tempfile, shutil, csv, math, itertools, base64, re, datetime, platform
 from os.path import join as pJoin
 import pandas as pd

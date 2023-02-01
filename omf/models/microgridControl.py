@@ -1,3 +1,4 @@
+''' Calculate optimal restoration scheme for distribution system with multiple microgrids. '''
 import random, re, datetime, json, os, tempfile, shutil, csv, math, base64, io
 from os.path import join as pJoin
 import subprocess

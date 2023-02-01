@@ -1,4 +1,4 @@
-''' Graph the voltage drop on a feeder. '''
+''' Generate interconnection results for EVs. '''
 
 import json, os, shutil, csv, warnings, base64, platform
 from os.path import join as pJoin

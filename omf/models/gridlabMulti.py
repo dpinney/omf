@@ -1,4 +1,4 @@
-''' Powerflow results for one Gridlab instance. '''
+''' Powerflow results for multiple Gridlab instances. '''
 
 import json, os, sys, tempfile, webbrowser, time, shutil, datetime, subprocess, math, multiprocessing, traceback
 from os.path import join as pJoin

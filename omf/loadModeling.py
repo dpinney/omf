@@ -1,3 +1,4 @@
+''' Model loads using various techniques.'''
 import json, xml.etree.ElementTree as ET, random, os
 from functools import lru_cache
 import requests

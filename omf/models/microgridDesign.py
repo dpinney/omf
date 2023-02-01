@@ -1,3 +1,4 @@
+''' Design microgrid with optimal generation mix for economics and/or reliability. '''
 import warnings, csv, json
 from os.path import join as pJoin
 import numpy as np

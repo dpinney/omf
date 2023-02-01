@@ -1,3 +1,4 @@
+''' Functions to detect anomalies in timeseries data (usually meter data).'''
 import os
 from os.path import join as pJoin
 import numpy as np

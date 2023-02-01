@@ -1,3 +1,4 @@
+''' Communications network modeling and visualization.'''
 import json, os, shutil, math, tempfile, random, webbrowser
 from os.path import join as pJoin
 from collections import defaultdict
@@ -5,7 +6,6 @@ from pyproj import Proj, transform, Geod
 from scipy.spatial import ConvexHull, Delaunay
 import networkx as nx
 import numpy as np
-
 
 def treeToNxGraph(inTree):
 	''' Convert feeder tree to networkx graph. '''

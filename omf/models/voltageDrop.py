@@ -1,5 +1,4 @@
 ''' Graph the voltage drop on a feeder. '''
-
 import json, os, tempfile, shutil, csv, math, warnings, base64, platform
 from os.path import join as pJoin
 import networkx as nx

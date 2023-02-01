@@ -1,4 +1,4 @@
-''' A model skeleton for future models: Calculates the sum of two integers. '''
+''' Disaggregate solar output from meter data. '''
 
 import json, shutil, datetime, csv, requests
 from io import StringIO

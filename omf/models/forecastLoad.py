@@ -1,3 +1,4 @@
+''' Forecast load.'''
 import json
 from os.path import join as pJoin
 from datetime import datetime as dt

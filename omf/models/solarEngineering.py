@@ -1,4 +1,4 @@
-''' Powerflow results for one Gridlab instance. '''
+''' Shows users the technical system impacts of solar on a feeder including DG power generated, regulator tap changes, capacitor activation, and meter voltages '''
 
 import json, os, csv, shutil, datetime, math, gc, platform
 from os.path import join as pJoin

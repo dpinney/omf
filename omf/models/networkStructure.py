@@ -1,3 +1,4 @@
+''' Reconstruct distribution network structure from meter data. '''
 import json, os, tempfile, shutil, csv, math, re, base64, platform
 from os.path import join as pJoin
 import pandas as pd

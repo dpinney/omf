@@ -1,4 +1,4 @@
-''' Calculate the costs and benefits of energy storage from a distribution utility perspective. '''
+''' Operational interface for multi-day-ahead load forecasts. '''
 
 import shutil, base64
 from datetime import datetime as dt, timedelta

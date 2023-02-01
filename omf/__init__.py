@@ -2,22 +2,35 @@
 
 __version__ = 0.2
 
+# Helper Imports
 import os as _os
-import importlib.util
-
 
 # Our OMF location
 omfDir = _os.path.dirname(__file__)
 
-# Get sub-modules
-mod_files = [x for x in _os.listdir(omfDir) if x.endswith('.py')]
-good_mods = set([x[0:-3] for x in mod_files if x not in ['__init__.py', 'web.py', 'webProd.py']])
+# OMF module mports
+from omf import milToGridlab
+from omf import cosim
+from omf import anomalyDetection
+from omf import loadModeling
+from omf import cymeToGridlab
+from omf import distNetViz
+from omf import runAllTests
+from omf import weather
+from omf import calibrate
+from omf import feeder
+from omf import comms
+from omf import omfStats
+from omf import geo
+from omf import loadModelingAmi
+from omf import network
+from omf import cyberAttack
+from omf import forecast
+from omf import anonymization
 
-# Import modules
-for mod in good_mods:
-	# start = time.process_time()
-	spec = importlib.util.spec_from_file_location(mod, f"{omfDir}/{mod}.py")
-	mod_ob = importlib.util.module_from_spec(spec)
-	spec.loader.exec_module(mod_ob)
-	# __import__(mod)
-	# print('{:f}'.format(time.process_time() - start), mod)
+# OMF package imports
+from omf import solvers
+from omf import models
+
+# for debugging import times
+# print('{:f}'.format(time.process_time() - start), mod)

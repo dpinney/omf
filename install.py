@@ -47,7 +47,7 @@ elif major_platform == "Linux" and "ubuntu" not in linux_distro:
 elif major_platform == 'Windows':
 	os.system("choco install -y --no-progress ffmpeg")
 	os.system("choco install -y --no-progress pip")
-	# TODO: find way to install mdbtools.
+	#TODO: find way to install mdbtools.
 	os.system(".\\omf\\static\\gridlabd-4.0_RC1.exe /silent")
 	#TODO: install SPLAT
 	os.system(f"{sys.executable} -m pip install --upgrade pip")

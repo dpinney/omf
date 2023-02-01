@@ -2022,14 +2022,14 @@ def root():
 	allModels.sort(key=lambda x:x.get('created',''), reverse=True)
 	# Get tooltips for model types.
 	modelTips = {}
-	for name in models.__all__:
+	for name in [x for x in dir(models) if not x.startswith('_')]:
 		try:
 			modelTips[name] = getattr(models, name).tooltip
 		except:
 			pass
 	# Generate list of model types.
 	modelNames = []
-	for modelName in models.__all__:
+	for modelName in [x for x in dir(models) if not x.startswith('_')]:
 		thisModel = getattr(models, modelName)
 		hideFlag = thisModel.__dict__.get('hidden', False)
 		#HACK: support for old underscore hiding.

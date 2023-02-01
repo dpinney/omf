@@ -1,3 +1,4 @@
+''' Cosimulation framework for GridLAB-D.'''
 import subprocess, time, warnings
 try:
 	from urllib.request import urlopen
