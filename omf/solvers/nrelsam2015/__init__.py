@@ -7,7 +7,7 @@
 
 
 from __future__ import print_function
-import string, sys, struct, math, os
+import string, sys, struct, math, os, platform
 from ctypes import *
 
 myDir = os.path.dirname(__file__)
@@ -21,7 +21,13 @@ class SSCAPI():
 			_dll = CDLL(os.path.join(myDir,"ssc32.dll"))
 #		return _dll
 	elif sys.platform == 'darwin':
-		_dll = CDLL(os.path.join(myDir,"ssc64.dylib"))
+		if platform.processor() == 'arm':
+			print('The nrelsam2015 solver is not supported on Mac running on an ARM processor')
+			# - The shared library import below works, but the code doesn't because this Python API doesn't work with the new version of the solver.
+			#   It's better to given an error
+			#_dll = CDLL(os.path.join(myDir,"ssc.dylib"))
+		else:
+			_dll = CDLL(os.path.join(myDir,"ssc64.dylib"))
 #		return _dll
 	elif sys.platform == 'linux2':
 		_dll = CDLL(os.path.join(myDir,"ssc64.so"))
