@@ -16,6 +16,26 @@ from omf.models.__neoMetaModel__ import *
 modelName, template = __neoMetaModel__.metadata(__file__)
 hidden = True
 
+def castAddInputs(val1,val2):
+	''' Casts string inputs to appropriate type and returns their sum. 
+		If inputs are cast to floats, rounds their sum to avoid float subtraction errors.'''
+	try:
+		cast1 = int(val1)
+		cast2 = int(val2)
+		return cast1+cast2
+	except ValueError:
+		try:
+			cast1 = float(val1)
+			cast2 = float(val2)
+            #Find longest decimal place of the numbers and round their sum to that place to avoid float arithmetic errors
+			decPl1 = val1.strip()[::-1].find('.')
+			decPl2 = val2.strip()[::-1].find('.')  
+            #valX.strip() used instead of str(castX) because str(castX) may return scientific notation
+			roundedSum = round(cast1+cast2,max(decPl1,decPl2,1))     
+			return roundedSum
+		except ValueError:
+			return val1+val2
+
 def work(modelDir, inputDict):
 	''' Run the model in its directory. '''
 	# Delete output file every run if it exists
@@ -23,7 +43,7 @@ def work(modelDir, inputDict):
 	# Model operations goes here.
 	inputOne = inputDict.get("input1", 123)
 	inputTwo = inputDict.get("input2", 867)
-	output = inputOne + inputTwo
+	output = str(castAddInputs(inputOne,inputTwo))
 	outData["output"] = output
 	# Model operations typically ends here.
 	# Stdout/stderr.
