@@ -885,20 +885,14 @@ class NameToTreeKeyMap:
             else:
                 raise ValueError(f'The NameToTreeKeyMap could not unambiguously find a line for the object named "{treeProps["name"]}"')
         else:
-            node_keys = list(filter(lambda k: 'from' not in self._omd['tree'][k] and 'to' not in self._omd['tree'][k] and not _is_configuration_or_special_node(self._omd['tree'][k]), keys))
+            node_keys = list(
+                filter(lambda k: 'from' not in self._omd['tree'][k] and 'to' not in self._omd['tree'][k] and
+                    not _is_configuration_or_special_node(self._omd['tree'][k]),
+                keys))
             if len(node_keys) == 1:
                 return node_keys[0]
             else:
-                #raise ValueError(f'The NameToTreeKeyMap could not unambiguously find a node for the object named "{treeProps["name"]}"')
-                # - HACK (David): How to deal with circuit vs. bus object with same name, or duplicate bus objects with same name?
-                #   - Always assume that the line or child wants the "bus" object, not the "circuit" object
-                #   - If two buses have identical names, just choose the first bus arbitrarily
-                buses = list(filter(lambda k: self._omd['tree'][k].get('object') == 'bus', node_keys))
-                if len(buses) > 0:
-                    return buses[0]
-                else:
-                    # - In really weird situations, such as a case of multiple circuit objects with the same name, just return the first object
-                    return node_keys[0]
+                raise ValueError(f'The NameToTreeKeyMap could not unambiguously find a node for the object named "{treeProps["name"]}"')
 
 
 def _is_configuration_or_special_node(tree_properties):
@@ -911,36 +905,10 @@ def _is_configuration_or_special_node(tree_properties):
     '''
     # - The "circuit" object needs to be vsource object, so it's NOT a configuration node
     #   - The exception with "trilby" is therefore correct. I need to ask David how to resolve that problem
-    # - TODO: add regex matching
     CONFIGURATION_OBJECTS = (
-        '!CMD',
-        'climate',
-        'cndata',
-        'energymeter',
-        'growthshape',
-        'line_configuration',
-        'line_spacing',
-        'linecode',
-        'line_configuration:606'
-        'line_configuration:607',
-        'loadshape',
-        'overhead_line_conductor',
-        'player',
-        'regcontrol',
-        'regulator_configuration',
-        'regulator_configuration:6506321',
-        'schedule',
-        'spectrum',
-        'swtcontrol',
-        'tcc_curve',
-        'triplex_line_conductor',
-        'transformer_configuration',
-        'triplex_line_configuration',
-        'underground_line_conductor',
-        'underground_line_conductor:6060', # This is GridLAB-D syntax, not OpenDSS syntax. Just use regex to detect it, or detect if it ends with a colon
-        'volt_var_control',
-        'voltdump',
-        'wiredata')
+        '!CMD', 'climate', 'cndata', 'growthshape', 'line_configuration', 'line_spacing', 'linecode', 'loadshape', 'overhead_line_conductor',
+        'player', 'regcontrol', 'regulator_configuration', 'schedule', 'spectrum', 'swtcontrol', 'tcc_curve', 'triplex_line_conductor', 'transformer_configuration',
+        'triplex_line_configuration', 'underground_line_conductor', 'volt_var_control', 'wiredata')
     # - These OMD objects lack the "object" property entirely
     SPECIAL_OBJECTS = ('clock', 'omftype', 'module', 'class')
     return (tree_properties.get('object') is None and len(set(tree_properties.keys()) & set(SPECIAL_OBJECTS)) > 0) or tree_properties['object'] in CONFIGURATION_OBJECTS
@@ -987,17 +955,17 @@ def insert_missing_nodes(omd):
         omd['tree'][str(k)] = new_tree[k]
 
 
-def insert_wgs84_coordinates(omd, center=(36.6, -98.5), spcs_epsg=None, force_layout=False):
+def insert_coordinates(omd, center=(36.6, -98.5), spcs_epsg=None, force_layout=False):
     '''
-    - Iterate over an OMD's tree in-place and insert WGS 84 "latitude" and "longitude" properties.
-        - If a node is missing latitude or longitude properties, or has non-numeric latitude or longitude properties, or has non-state-plane
-          out-of-bounds coordinates, create new WGS 84 coordinates with a layout algorithm.
-        - If a node has state plane coordinates, convert them into WGS 84 coordinates.
-            - If an EPSG code is given, perform a proper transformation of state plane coordinates into WGS 84 coordinates.
+    - Iterate over an OMD's tree in-place and insert WGS 84 "latitude" and "longitude" properties
+        - If a node is missing latitude or longitude properties, or has non-numeric latitude or longitude properties, create new WGS 84 coordinates
+          with a layout algorithm
+        - If a node has state plane coordinates, convert them into WGS 84 coordinates
+            - If an EPSG code is given, perform a proper transformation of state plane coordinates into WGS 84 coordinates
             - If an EPSG code is not given, convert every state plane coordinate into a WGS 84 coordiante, subtract the minimum latitude from all
               latitudes and subtract the minimum longitude from all longitudes to convert the WGS 84 coordinates into offset values, then add the
-              "center" latitude to every latitude and the "center" longitude to every longitude to shift the coordinates to the desired location.
-    - This function assumes there are no missing nodes. Run the OMD through insert_missing_nodes() first.
+              "center" latitude to every latitude and the "center" longitude to every longitude to shift the coordinates to the desired location
+    - This function assumes there are no missing nodes. Run the OMD through insert_missing_nodes() first
     
     :param omd: an OMD
     :type omd: dict
@@ -1009,30 +977,45 @@ def insert_wgs84_coordinates(omd, center=(36.6, -98.5), spcs_epsg=None, force_la
     :param spcs_espg: a state plane coordinate system European Petroleum Survey Group code that should be used to transform the given state plane
         coordinates. E.g. EPSG:26978 is the European Petroleum Survey Group code for the "Kansas South" state plane with the "NAD 83" datum, which
         also has a USA FIPS identifier of 1502. http://gsp.humboldt.edu/olm/Lessons/GIS/03%20Projections/Images2/StatePlane.png. If this argument is
-        provided, then the coordinates will be converted, even if they weren't actually state plane coordinates.
+        provided, then (1) the coordinates will be converted, even if they weren't actually state plane coordinates and (2) force_layout is ignored.
     :type spcs_epg: str
     :param force_layout: whether to insert new coordinates using a layout algorithm regardless of existing coordinates. 
     :type force_layout: bool
     :rtype: None
     '''
-    # - Iterate the first time to find the min/max latitude/longitude to detect state plane coordinates
-    min_lat, max_lat, min_lon, max_lon = _get_min_max_lat_lon(omd)
-    if max_lat is not None and max_lon is not None:
+    lats = []
+    lons = []
+    # - Iterate once to find the minimum latitude and longitude and to determine what coordinate system was used
+    for d in omd['tree'].values():
+        try:
+            lat = float(d['latitude'])
+            lats.append(lat)
+        except (KeyError, ValueError) as e:
+            pass
+        try:
+            lon = float(d['longitude'])
+            lons.append(lon)
+        except (KeyError, ValueError) as e:
+            pass
+    min_lat = min(lats, default=None)
+    max_lat = max(lats, default=None)
+    min_lon = min(lons, default=None)
+    max_lon = max(lons, default=None)
+    if min_lat is not None and min_lon is not None:
         # - If we have huge coordinate values, or the user says we have state plane coordinates, convert existing state plane coordinates into WGS 84
         #   coordinates
-        if spcs_epsg is not None or max_lat > 72 or max_lon > -66:
+        if spcs_epsg is not None or max_lat > 90 or max_lon > 180:
+            max_lon = -180
+            max_lat = -90
             # - The user knows their EPSG state plane code, so do a proper conversion
             if spcs_epsg is not None:
-                in_proj = Proj(init=spcs_epsg, preserve_units=True)
+                transformer = pyproj.Transformer.from_crs(spcs_epsg, 'EPSG:4326', always_xy=True)
             # - The user did not know their EPSG state plane code, so preserve relative distances between nodes
             else:
                 # - Convert from "Kansas South NAD 83 State Plane Coordinate System" to the World Geodetic System 1984. It doesn't really matter which
                 #   state plane we use. They should preserve distances between nodes roughly equally
-                #in_proj = Proj(init='EPSG:26978') # - This "Kansas South NAD 83 State Plane Coordinate System" projection uses meters. Nodes will be spaced further apart
-                in_proj = Proj(init='EPSG:3420', preserve_units=True) # - This "Kansas South NAD 83 State Plane Coordinate System" projection uses the US survey foot. Nodes will be closer together
-            out_proj = Proj(init='EPSG:4326')
-            transformer = pyproj.Transformer.from_proj(in_proj, out_proj, always_xy=True)
-            x_subtrahend, y_subtrahend = transformer.transform(min_lon, min_lat)
+                transformer = pyproj.Transformer.from_crs('EPSG:26978', 'EPSG:4326', always_xy=True)
+                x_subtrahend, y_subtrahend = transformer.transform(min_lon, min_lat)
             for d in omd['tree'].values():
                 try:
                     easting = float(d['longitude'])
@@ -1043,6 +1026,14 @@ def insert_wgs84_coordinates(omd, center=(36.6, -98.5), spcs_epsg=None, force_la
                         y = (y - y_subtrahend) + center[0]
                     d['longitude'] = x
                     d['latitude'] = y
+                    if x < min_lon:
+                        min_lon = x
+                    if y < min_lat:
+                        min_lat = y
+                    if x > max_lon:
+                        max_lon = x
+                    if y > max_lat:
+                        max_lat = y
                 except (KeyError, ValueError) as e:
                     pass
     name_to_treekey = NameToTreeKeyMap(omd)
@@ -1061,29 +1052,30 @@ def insert_wgs84_coordinates(omd, center=(36.6, -98.5), spcs_epsg=None, force_la
                 if 'parent' in v:
                     parent_key = name_to_treekey.get_key(v['parent'], v)
                     parent = omd['tree'][parent_key]
-                    graph.add_edge(parent_key, k, weight=1)
-                    graph.add_node(k, coordinate_source='parent')
+                    # - Don't create edges between recorder objects and their line parents because I don't want to deal with that right now
+                    if 'from' not in parent and 'to' not in parent:
+                        graph.add_edge(parent_key, k, weight=1)
+                        graph.add_node(k, coordinate_source='parent')
+                    else:
+                        graph.add_node(k)
                 else:
                     graph.add_node(k)
     # - Run the layout algorithm to generate coordinates
-    #   - Is there a fast tree layout somewhere???? They only work with directed graphs, so we could build a directed graph
     #pos = nx.kamada_kawai_layout(graph, scale=1) # Too slow
     #pos = nx.spectral_layout(graph) # Too slow
     #pos = nx.nx_pydot.pydot_layout(graph, prog='neato', root=None) # Requires pydot. Fast, but default looks horrible
     #pos = nx.nx_pydot.graphviz_layout(graph, prog='neato', root=None) # Requires pydot. Fast, but default looks horrible
-    pos = nx.circular_layout(graph, scale=0.05) # Fast but ugly!
+    pos = nx.circular_layout(graph, scale=0.2) # Fast but ugly!
     #pos = nx.shell_layout(graph, scale=0.1) # Could this work?
     #pos = nx.spring_layout(graph, scale=0.1)
     #pos = nx.planar_layout(graph, scale=0.1)
-    # - Iterate a third time to find the valid min/max lat/lon to determine if we need to use the "center" parameter or not
-    min_lat, max_lat, min_lon, max_lon = _get_min_max_lat_lon(omd, min_lat=18, max_lat=72, min_lon=-172, max_lon=-66)
+    # - Iterate a third time to give coordinates to all nodes
     avg_lat = center[0]
-    if min_lat is not None and max_lat is not None:
+    if min_lat is not None and (-90 <= min_lat <= 90):
         avg_lat = (max_lat + min_lat) / 2
     avg_lon = center[1]
-    if min_lon is not None and max_lon is not None:
+    if min_lon is not None and (-180 <= min_lon <= 180):
         avg_lon = (max_lon + min_lon) / 2
-    # - Iterate a fourth time to give coordinates to all nodes that need them
     for k in pos:
         obj = omd['tree'][k]
         if 'from' not in obj and 'to' not in obj and not _is_configuration_or_special_node(obj):
@@ -1096,37 +1088,33 @@ def insert_wgs84_coordinates(omd, center=(36.6, -98.5), spcs_epsg=None, force_la
                     parent = omd['tree'][parent_key]
                 try:
                     lat = float(obj['latitude'])
-                    if not (18 <= lat <= 72):
+                    if not (-90 <= lat <= 90):
                         raise ValueError
                 except (KeyError, ValueError) as e:
                     if graph.nodes[k].get('coordinate_source') == 'parent':
                         try:
                             parent_lat = float(parent['latitude'])
-                            if not (18 <= parent_lat <= 72):
+                            if not (-90 <= parent_lat <= 90):
                                 raise ValueError
                         except (KeyError, ValueError) as e:
                             parent_lat = float(pos[parent_key][0]) + avg_lat
-                            # - Lines that are parents can have coordinates for the sake of their children, but they can't have coordinates themselves
-                            if 'from' not in obj and 'to' not in obj:
-                                parent['latitude'] = parent_lat
+                            parent['latitude'] = parent_lat
                         obj['latitude'] = parent_lat + round(random.uniform(-.003, .003), 4)
                     else:
                         obj['latitude'] = float(pos[k][0]) + avg_lat
                 try:
                     lon = float(obj['longitude'])
-                    if not (-172 <= lon <= -66):
+                    if not (-180 <= lon <= 180):
                         raise ValueError
                 except (KeyError, ValueError) as e:
                     if graph.nodes[k].get('coordinate_source') == 'parent':
                         try:
                             parent_lon = float(parent['longitude'])
-                            if not (-172 <= parent_lon <= -66):
+                            if not (-180 <= parent_lon <= 180):
                                 raise ValueError
                         except (KeyError, ValueError) as e:
                             parent_lon = float(pos[parent_key][1]) + avg_lon
-                            # - Lines that are parents can have coordinates for the sake of their children, but they can't have coordinates themselves
-                            if 'from' not in obj and 'to' not in obj:
-                                parent['longitude'] = parent_lon
+                            parent['longitude'] = parent_lon
                         obj['longitude'] = parent_lon + round(random.uniform(-.003, .003), 4)
                     else:
                         obj['longitude'] = float(pos[k][1]) + avg_lon
@@ -1135,71 +1123,6 @@ def insert_wgs84_coordinates(omd, center=(36.6, -98.5), spcs_epsg=None, force_la
     for n in graph.nodes.keys():
         if graph.degree[n] == 0 and not _is_configuration_or_special_node(omd['tree'][n]):
             print(f'The node with tree key {n} does not have children, nor is it connected to any line. Is it connected to the rest of the graph?')
-
-
-def _get_min_max_lat_lon(omd, min_lat=None, max_lat=None, min_lon=None, max_lon=None):
-    '''
-    - Return the valid minimum latitude, maximum latitude, minimum longitude, and maximum longitude found across all nodes in the omd
-    - This helper function is needed twice in insert_coordinates(). It's used the first time to get the actual min/max lat/lons for detecting state
-      plane coordinates. It's used the second time to get valid min/max lat/lons for assigning coordinates to nodes without valid lat/lons
-        - Lats outside the range of 18 <= <lat> <= 72 are invalid. Lons outside the range of -172 <= <lon> <= -66 are invalid. Those min/maxes form a
-          bounding box around most of the USA
-
-    :param omd: an OMD
-    :type omd: dict
-    :param min_lat: the minimum (inclusive) bound of valid latitude values. Latitude values that are less than this are ignored
-    :type min_lat: float
-    :param max_lat: the maximum (inclusive) bound of valid latitude values. Latitude values that are greater than this are ignored
-    :type max_lat: float
-    :param min_lon: the minimum (inclusive) bound of valid longitude values. Longitude values that are less than this are ignored
-    :type: min_lon: float
-    :param max_lon: the maximum (inclusive) bound of valid longitude values. Longitude values that are greater than this are ignored
-    :type max_lon: float
-    :return: a tuple of (<min lat>, <max lat>, <min lon>, <max lon>)
-    :rtype: tuple
-    '''
-    lats = []
-    lons = []
-    for d in omd['tree'].values():
-        try:
-            lat = float(d['latitude'])
-            if min_lat is not None:
-                if lat >= min_lat:
-                    if max_lat is not None:
-                        if lat <= max_lat:
-                            lats.append(lat)
-                    else:
-                        lats.append(lat)
-            else:
-                if max_lat is not None:
-                    if lat <= max_lat:
-                        lats.append(lat)
-                else:
-                    lats.append(lat)
-        except (KeyError, ValueError) as e:
-            pass
-        try:
-            lon = float(d['longitude'])
-            if min_lon is not None:
-                if lon >= min_lon:
-                    if max_lon is not None:
-                        if lon <= max_lon:
-                            lons.append(lon)
-                    else:
-                        lons.append(lon)
-            else:
-                if max_lon is not None:
-                    if lon <= max_lon:
-                        lons.append(lon)
-                else:
-                    lons.append(lon)
-        except (KeyError, ValueError) as e:
-            pass
-    min_lat = min(lats, default=None)
-    max_lat = max(lats, default=None)
-    min_lon = min(lons, default=None)
-    max_lon = max(lons, default=None)
-    return (min_lat, max_lat, min_lon, max_lon)
 
 
 def get_components_featurecollection():
