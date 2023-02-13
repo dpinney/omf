@@ -875,11 +875,10 @@ class NameToTreeKeyMap:
             return None
         elif len(keys) == 1:
             return keys[0]
+        # - For recorders, return the first line with the given name. Is this right?
         objects_with_line_parents = ['recorder']
         if treeProps['object'] in objects_with_line_parents:
-            line_keys = list(
-                filter(lambda k: 'from' in self._omd['tree'][k] and 'to' in  self._omd['tree'][k],
-                keys))
+            line_keys = list(filter(lambda k: 'from' in self._omd['tree'][k] and 'to' in  self._omd['tree'][k], keys))
             if len(line_keys) == 1:
                 return line_keys[0]
             else:
@@ -893,9 +892,9 @@ class NameToTreeKeyMap:
                 # - HACK (David): How to deal with circuit vs. bus object with same name, or duplicate bus objects with same name?
                 #   - Always assume that the line or child wants the "bus" object, not the "circuit" object
                 #   - If two buses have identical names, just choose the first bus arbitrarily
-                buses = list(filter(lambda k: self._omd['tree'][k].get('object') == 'bus', node_keys))
-                if len(buses) > 0:
-                    return buses[0]
+                bus_keys = list(filter(lambda k: self._omd['tree'][k].get('object') == 'bus', node_keys))
+                if len(bus_keys) > 0:
+                    return bus_keys[0]
                 else:
                     # - In really weird situations, such as a case of multiple circuit objects with the same name, just return the first object
                     return node_keys[0]
@@ -911,6 +910,8 @@ def _is_configuration_or_special_node(tree_properties):
     '''
     # - The "circuit" object needs to be vsource object, so it's NOT a configuration node
     #   - The exception with "trilby" is therefore correct. I need to ask David how to resolve that problem
+    # - The "regcontrol" object is NOT a configuraiton node
+    #   - iowa240c1.clean.dss.omd assigns latitude and longitude values to it
     # - TODO: add regex matching
     CONFIGURATION_OBJECTS = (
         '!CMD',
@@ -926,7 +927,6 @@ def _is_configuration_or_special_node(tree_properties):
         'loadshape',
         'overhead_line_conductor',
         'player',
-        'regcontrol',
         'regulator_configuration',
         'regulator_configuration:6506321',
         'schedule',
