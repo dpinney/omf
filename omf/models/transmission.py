@@ -15,7 +15,7 @@ from matplotlib import pyplot as plt
 import matplotlib.cm as cm
 import pandapower as ppow
 
-from omf import network
+from omf import transmission as network
 from omf.models import __neoMetaModel__
 from omf.models.__neoMetaModel__ import *
 

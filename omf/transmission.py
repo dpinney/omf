@@ -19,10 +19,8 @@ def parseRaw(inputStr, filePath=True):
 	'''
 	matfile_name = _rawToMat(inputStr, filePath)
 	matDict = _dictConversion(matfile_name, True)
-
 	if not filePath:
 		os.remove(matfile_name)
-
 	return matDict
 
 def write(inNet):

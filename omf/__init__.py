@@ -23,7 +23,7 @@ from omf import comms
 from omf import omfStats
 from omf import geo
 from omf import loadModelingAmi
-from omf import network
+from omf import transmission
 from omf import cyberAttack
 from omf import forecast
 from omf import anonymization
