@@ -47,7 +47,6 @@ elif major_platform == "Linux" and "ubuntu" not in linux_distro:
 	print('*****\nRun $ export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/local/lib $ if opendsscmd gives a shared library error.\n*****')
 elif major_platform == 'Windows':
 	os.system("choco install -y --no-progress ffmpeg")
-	os.system("choco install -y --no-progress pip")
 	#TODO: find way to install mdbtools.
 	os.system(".\\omf\\static\\gridlabd-4.0_RC1.exe /silent")
 	#TODO: install SPLAT
