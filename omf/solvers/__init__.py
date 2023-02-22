@@ -3,7 +3,6 @@
 from omf.solvers import CSSS
 from omf.solvers import gfm
 from omf.solvers import gridlabd
-from omf.solvers import gridlabd_gridballast
 from omf.solvers import gridlabdv990
 from omf.solvers import nilmtk
 from omf.solvers import nrelsam2013
