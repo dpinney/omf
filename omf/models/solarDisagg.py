@@ -7,7 +7,7 @@ from os.path import join as pJoin
 import numpy as np
 
 # OMF imports
-from omf.solvers.CSSS.csss import SolarDisagg
+from omf.solvers.CSSS import SolarDisagg
 from omf.models import __neoMetaModel__
 from omf.models.__neoMetaModel__ import *
 
@@ -157,6 +157,10 @@ def work(modelDir, inputDict):
 	#print(tempregress)
 
 	#CSSS run CSSS algo for individual home scenario
+	print('netload', netload)
+	print('solarproxy', solarproxy)
+	print('loadregressors', loadregressors)
+	print('meterNames', meterNames)
 	sdmod0 = SolarDisagg.SolarDisagg_IndvHome(netloads=netload, solarregressors=solarproxy, loadregressors=loadregressors, names=meterNames)
 	#
 	sdmod0.constructSolve()

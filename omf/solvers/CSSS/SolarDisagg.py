@@ -1,4 +1,4 @@
-import omf.solvers.CSSS.csss.CSSS as CSSS
+import omf.solvers.CSSS.CSSS as CSSS
 import numpy as np
 import pandas as pd
 from sklearn.linear_model import LinearRegression as LR

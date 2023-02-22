@@ -25,7 +25,6 @@ tqdm>=4.19.6
 scipy>=1.4.1
 flask_compress>=1.4.0
 plotly>=4.0.0
-cvxpy>=1.0.28
 scikit-learn>=0.23.0
 gevent
 iso3166
