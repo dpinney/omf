@@ -22,7 +22,7 @@ except:
 	fcntl.flock = flock
 	(fcntl.LOCK_EX, fcntl.LOCK_SH, fcntl.LOCK_UN, fcntl.LOCK_NB) = (0, 0, 0, 0)
 import omf
-from omf import (models, feeder, network, milToGridlab, cymeToGridlab, weather, anonymization, distNetViz, calibrate, omfStats, loadModeling,
+from omf import (models, feeder, network, milToGridlab, cymeToGridlab, weather, anonymization, distNetViz, loadModelingScada, omfStats, loadModeling,
 	loadModelingAmi, geo, comms)
 from omf.solvers.opendss import dssConvert
 
@@ -1106,7 +1106,7 @@ def backgroundScadaLoadshape(owner, modelName, feederName, loadName):
 		solver = 'FBS'
 		calibrateError = (0.05, 5)
 		trim = 5
-		calibrate.omfCalibrate(workDir, feederPath, scadaPath, simStartDate, simLength, simLengthUnits, solver, calibrateError, trim)
+		loadModelingScada.omfCalibrate(workDir, feederPath, scadaPath, simStartDate, simLength, simLengthUnits, solver, calibrateError, trim)
 		# move calibrated file to model folder, old omd files are backedup
 		if feederPath.endswith('.omd'):
 			os.rename(feederPath, feederPath + '.backup')
