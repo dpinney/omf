@@ -17,7 +17,7 @@ from omf import cymeToGridlab
 from omf import distNetViz
 from omf import runAllTests
 from omf import weather
-from omf import calibrate
+from omf import loadModelingScada
 from omf import feeder
 from omf import comms
 from omf import omfStats
