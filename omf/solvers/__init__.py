@@ -12,3 +12,5 @@ from omf.solvers import rdt
 from omf.solvers import REopt
 from omf.solvers import sandia_ami_phase_id
 from omf.solvers import saxSequitur
+from omf.solvers import SteinmetzController
+from omf.solvers import VB
