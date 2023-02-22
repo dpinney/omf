@@ -3,14 +3,12 @@ import os.path
 from os.path import join as pJoin
 import numpy as np
 import networkx as nx
-
 import matplotlib
 if platform.system() == 'Darwin':
 	matplotlib.use('TkAgg')
 else:
 	matplotlib.use('Agg')
 from matplotlib import pyplot as plt
-
 from geopy import distance
 
 # OMF imports

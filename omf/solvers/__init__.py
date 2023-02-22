@@ -7,7 +7,6 @@ from omf.solvers import gridlabd_gridballast
 from omf.solvers import gridlabdv990
 from omf.solvers import nilmtk
 from omf.solvers import nrelsam2013
-from omf.solvers import nrelsam2015
 from omf.solvers import opendss
 from omf.solvers import PowerModelsONM
 from omf.solvers import rdt
