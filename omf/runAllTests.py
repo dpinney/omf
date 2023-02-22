@@ -74,6 +74,15 @@ def testRunner():
 
 def get_all_omf_test_funcs():
 	import pkgutil, importlib, omf
+	# These files aren't supposed to have tests
+	IGNORE_FILES = ['omf.runAllTests', 'omf.webProd', 'omf.web', 'omf.omfStats', 'omf.models.phaseId', 'omf.models.solarDisagg', 'omf.tests']
+	# Some tests are very finicky on windows
+	NO_WINDOWS_SUPPORT = ['omf.cymeToGridlab', 'omf.models.rfCoverage', 'omf.models.solarEngineering', 'omf.models.phaseBalance', 'omf.models.forecastTool', 'omf.distNetViz', 'omf.models.derInterconnection', 'omf.models.flisr', 'omf.models.networkStructure', 'omf.models.smartSwitching']
+	# Different platforms like to name the python binary differently
+	PY_BIN_NAME = 'python3'
+	if platform.system()=='Windows':
+		PY_BIN_NAME = 'python'
+		IGNORE_FILES.extend(NO_WINDOWS_SUPPORT)
 	# get all module names recursively
 	mod_names = []
 	for _, modname, _ in pkgutil.walk_packages(path=omf.__path__, prefix=omf.__name__+'.'):
