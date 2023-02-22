@@ -3,7 +3,7 @@
 import os, sys, subprocess, re, platform
 
 # These files aren't supposed to have tests
-IGNORE_FILES = ['runAllTests.py', 'install.py', 'setup.py', 'webProd.py', 'web.py', '__init__.py', 'phaseId.py', 'solarDisagg.py']
+IGNORE_FILES = ['runAllTests.py', 'install.py', 'setup.py', 'webProd.py', 'web.py', 'omfStats.py', '__init__.py', 'phaseId.py', 'solarDisagg.py']
 # Only search these directories
 INCLUDE_DIRS = ['omf', 'models']
 # Different platforms like to name the python binary differently
@@ -75,7 +75,7 @@ def testRunner():
 def get_all_omf_test_funcs():
 	import pkgutil, importlib, omf
 	# These files aren't supposed to have tests
-	IGNORE_FILES = ['omf.runAllTests', 'omf.webProd', 'omf.web', 'omf.models.phaseId', 'omf.models.solarDisagg', 'omf.tests']
+	IGNORE_FILES = ['omf.runAllTests', 'omf.webProd', 'omf.web', 'omf.omfStats', 'omf.models.phaseId', 'omf.models.solarDisagg', 'omf.tests']
 	# Some tests are very finicky on windows
 	NO_WINDOWS_SUPPORT = ['omf.cymeToGridlab', 'omf.models.rfCoverage', 'omf.models.solarEngineering', 'omf.models.phaseBalance', 'omf.models.forecastTool', 'omf.distNetViz', 'omf.models.derInterconnection', 'omf.models.flisr', 'omf.models.networkStructure', 'omf.models.smartSwitching']
 	# Different platforms like to name the python binary differently
