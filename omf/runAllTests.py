@@ -1,7 +1,6 @@
 ''' Walk the /omf/ directory, run _tests() in all modules. '''
 
 import os, sys, subprocess, re, platform
-from pathlib import PurePath, Path
 
 # These files aren't supposed to have tests
 IGNORE_FILES = ['runAllTests.py', 'install.py', 'setup.py', 'webProd.py', 'web.py', 'omfStats.py', '__init__.py', 'phaseId.py', 'solarDisagg.py']
@@ -72,6 +71,33 @@ def testRunner():
 	print(not_tested, '\n')
 	if len(misfires) > 0:
 		sys.exit(1) # trigger build failure.
+
+def get_all_omf_test_funcs():
+	import pkgutil, importlib, omf
+	# get all module names recursively
+	mod_names = []
+	for _, modname, _ in pkgutil.walk_packages(path=omf.__path__, prefix=omf.__name__+'.'):
+		mod_names.append(modname)
+	# filter out broken tests.
+	good_mod_names = set(mod_names) - set(IGNORE_FILES)
+	# get all test funcs
+	test_funcs = []
+	for mod_name in good_mod_names:
+		try:
+			this_mod = importlib.import_module(mod_name)
+			sub_names = dir(this_mod)
+			if '_tests' in sub_names:
+				test_funcs.append(mod_name)
+		except ImportError:
+			pass
+	return test_funcs
+
+def run_tests_on_module(mod_name):
+	''' e.g. run_tests_on_module('omf.models.pvWatts')'''
+	import importlib
+	my_mod = importlib.import_module(mod_name)
+	test_func = getattr(my_mod, '_tests')
+	test_func()
 
 if __name__ == "__main__"  :
 	testRunner()
