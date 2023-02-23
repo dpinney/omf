@@ -13,7 +13,7 @@ jobs:
         run: |
           sudo python3 install.py
       - name: Run Tests
-        run: sudo python3 omf/runAllTests.py
+        run: python3 -m omf.runAllTests
 #   macOS:
 #     name: Test OMF on macOS
 #     runs-on: macos-latest

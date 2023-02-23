@@ -72,7 +72,8 @@ def testRunner():
 	if len(misfires) > 0:
 		sys.exit(1) # trigger build failure.
 
-def get_all_omf_test_funcs():
+def get_all_testable_modules()
+	''' Find all modules in the OMF with ._tests() functions defined, minus the ignored modules. '''
 	import pkgutil, importlib, omf
 	# These files aren't supposed to have tests
 	IGNORE_FILES = ['omf.runAllTests', 'omf.webProd', 'omf.web', 'omf.omfStats', 'omf.models.phaseId', 'omf.models.solarDisagg', 'omf.tests']
@@ -108,5 +109,27 @@ def run_tests_on_module(mod_name):
 	test_func = getattr(my_mod, '_tests')
 	test_func()
 
+def run_all_tests():
+	all_testable_mods = get_all_testable_modules()
+	misfires = []
+	for mod in all_testable_mods:
+		print(f'!!!!! NOW TESTING {mod} !!!!!')
+		try:
+			run_tests_on_module(mod)
+		except:
+			misfires.append(mod)
+	_print_header('regular tests report')
+	print(f'Number of modules tested: {len(all_testable_mods)}')
+	print(all_testable_mods)
+	_print_header('failed tests report')
+	print(f'Number of tests failed: {len(misfires)}')
+	print(misfires)
+	_print_header('untested modules report')
+	print(f'Number of untested modules: TBD_LATER')
+	print('[TBD_LATER]', '\n')
+	if len(misfires) > 0:
+		sys.exit(1) # trigger build failure.
+
 if __name__ == "__main__"  :
-	testRunner()
+	# testRunner()
+	run_all_tests()
