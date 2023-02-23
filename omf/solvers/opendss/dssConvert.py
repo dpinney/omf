@@ -1065,8 +1065,8 @@ def _tests():
 	from omf.solvers.opendss import getVoltages, voltageCompare
 	import pandas as pd
 	FNAMES =  ['ieee37.clean.dss', 'ieee123_solarRamp.clean.dss', 'iowa240.clean.dss', 'ieeeLVTestCase.clean.dss', 'ieee8500-unbal_no_fuses.clean.dss']
-	
 	for fname in FNAMES:
+		fname = omf.omfDir + '/' + fname
 		print('!!!!!!!!!!!!!! ',fname,' !!!!!!!!!!!!!!')
 		# Roundtrip conversion test
 		errorLimit = 0.001

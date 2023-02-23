@@ -1199,6 +1199,7 @@ def _tests():
 	fpath = ['ieee37.clean.dss','ieee123_solarRamp.clean.dss','iowa240.clean.dss','ieeeLVTestCase.clean.dss','ieee8500-unbal_no_fuses.clean.dss']
 
 	for ckt in fpath:
+		ckt = omf.omfDir + '/' + ckt
 		print('!!!!!!!!!!!!!! ',ckt,' !!!!!!!!!!!!!!')
 		# Test for reduceCircuit, voltageCompare, getVoltages, and runDSS.
 		tree = dssToTree(ckt)
@@ -1240,7 +1241,7 @@ def _tests():
 		
 def _runTest():
 	# runDSS('nreca1824.dss', keep_output=False)
-	runDSS('iowa240.clean.dss', keep_output=False)
+	runDSS(omf.omfDir + '/iowa240.clean.dss', keep_output=False)
 
 	# Make core output
 	#FPATH = 'iowa240.clean.dss'
