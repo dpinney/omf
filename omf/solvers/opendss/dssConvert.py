@@ -21,6 +21,7 @@ try:
 	import opendssdirect as dss
 except:
 	warnings.warn('opendssdirect not installed; opendss functionality disabled.')
+import omf
 
 def cyme_to_dss(cyme_dir, out_path, inter_dir=None):
 	''' Converts cyme txt files into an opendss file with nrel/ditto.
@@ -1034,9 +1035,7 @@ def _randomTest():
 			csv_writer.writerow([x])
 
 def _dssToOmdTest():
-	curDir = os.getcwd()
-	os.chdir('../..')
-	omfDir = os.getcwd()
+	omfDir = omf.omfDir
 	# dssFileName = 'ieee37.clean.dss'
 	# dssFilePath = pJoin(curDir, dssFileName)
 	dssFileName = 'nreca1824_dwp.dss'
@@ -1054,9 +1053,7 @@ def _dssToOmdTest():
 	dssToOmd(dssFilePath, omdFilePath, RADIUS=0.0002, write_out=True)
 
 def _dssCoordTest():
-	curDir = os.getcwd()
-	os.chdir('../..')
-	omfDir = os.getcwd()
+	omfDir = omf.omfDir
 	omdFilePath = pJoin(omfDir, "scratch", "MapTestOutput", "iowa240c2_fixed_coords2.clean.omd")
 	outFilePath = pJoin(omfDir, "static", "testFiles", "iowa_240", "iowa240_cleanCoords.csv")
 	getDssCoordinates(omdFilePath, outFilePath)

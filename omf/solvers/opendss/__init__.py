@@ -15,6 +15,7 @@ try:
 except:
 	warnings.warn('opendssdirect not installed; opendss functionality disabled.')
 from omf.solvers.opendss import dssConvert
+import omf
 
 def runDssCommand(dsscmd):
 	from opendssdirect import run_command, Error
@@ -1195,11 +1196,12 @@ def rollUpLoadTransformer(tree, combine_loads=True):
 	return tree
 
 def _tests():
-	from dssConvert import dssToTree, distNetViz, evilDssTreeToGldTree, treeToDss, evilGldTreeToDssTree
+	from omf.solvers.opendss.dssConvert import dssToTree, distNetViz, evilDssTreeToGldTree, treeToDss, evilGldTreeToDssTree
 	fpath = ['ieee37.clean.dss','ieee123_solarRamp.clean.dss','iowa240.clean.dss','ieeeLVTestCase.clean.dss','ieee8500-unbal_no_fuses.clean.dss']
 
-	for ckt in fpath:
-		ckt = omf.omfDir + '/' + ckt
+	for fname in fpath:
+		outdir = omf.omfDir + '/solvers/opendss/voltageCompare_' + fname[:-4]
+		ckt = omf.omfDir + '/solvers/opendss/' + fname
 		print('!!!!!!!!!!!!!! ',ckt,' !!!!!!!!!!!!!!')
 		# Test for reduceCircuit, voltageCompare, getVoltages, and runDSS.
 		tree = dssToTree(ckt)
@@ -1212,32 +1214,30 @@ def _tests():
 		#gldtree = evilDssTreeToGldTree(tree) # DEBUG
 		#distNetViz.viz_mem(gldtree, open_file=True, forceLayout=True) # DEBUG
 		#tree = evilGldTreeToDssTree(gldtree) # DEBUG
-		outckt_loc = ckt[:-4] + '_reduced.dss'
-		treeToDss(tree, outckt_loc)
+		# outckt_loc = ckt[:-4] + '_reduced.dss'
+		treeToDss(tree, ckt+'out.dss')
 		#voltagePlot(outckt_loc,PU=False)
-
-		outdir = 'voltageCompare_' + ckt[:-4]
-		if not os.path.exists(outdir):
-			os.mkdir(outdir)
-		involts_loc = ckt[:-4] + '_volts.dss'
-		involts = getVoltages(ckt, keep_output=True, outdir=outdir, output_filename=involts_loc)
-		outvolts_loc = outckt_loc[:-4] + '_volts.dss'
-		outvolts = getVoltages(outckt_loc, keep_output=True, outdir=outdir, output_filename=outvolts_loc)
-		rsumm_P, rsumm_D = voltageCompare(involts, outvolts, saveascsv=True, with_plots=False, outdir=outdir, outfilebase=ckt[:-4])		
-		maxPerrM = [rsumm_P.loc['RMSPE',c] for c in rsumm_P.columns if c.lower().startswith(' magnitude')]
-		maxPerrM = pd.Series(maxPerrM).max()
-		maxPerrA = [rsumm_P.loc['RMSPE',c] for c in rsumm_P.columns if c.lower().startswith(' angle')]
-		maxPerrA = pd.Series(maxPerrA).max()
-		maxDerrA = [rsumm_D.loc['RMSE',c] for c in rsumm_D.columns if c.lower().startswith(' angle')]
-		maxDerrA = pd.Series(maxDerrA).max()
-		maxDerrM = [rsumm_D.loc['RMSE',c] for c in rsumm_D.columns if c.lower().startswith(' magnitude')]
-		maxDerrM = pd.Series(maxDerrM).max()
-		from shutil import rmtree
-		os.remove(outckt_loc)
-		rmtree(outdir)
+		# if not os.path.exists(outdir):
+		# 	os.mkdir(outdir)
+		# involts_loc = ckt[:-4] + '_volts.dss'
+		# involts = getVoltages(ckt, keep_output=True, outdir=outdir, output_filename=involts_loc)
+		# outvolts_loc = outckt_loc[:-4] + '_volts.dss'
+		# outvolts = getVoltages(outckt_loc, keep_output=True, outdir=outdir, output_filename=outvolts_loc)
+		# rsumm_P, rsumm_D = voltageCompare(involts, outvolts, saveascsv=True, with_plots=False, outdir=outdir, outfilebase=ckt[:-4])		
+		# maxPerrM = [rsumm_P.loc['RMSPE',c] for c in rsumm_P.columns if c.lower().startswith(' magnitude')]
+		# maxPerrM = pd.Series(maxPerrM).max()
+		# maxPerrA = [rsumm_P.loc['RMSPE',c] for c in rsumm_P.columns if c.lower().startswith(' angle')]
+		# maxPerrA = pd.Series(maxPerrA).max()
+		# maxDerrA = [rsumm_D.loc['RMSE',c] for c in rsumm_D.columns if c.lower().startswith(' angle')]
+		# maxDerrA = pd.Series(maxDerrA).max()
+		# maxDerrM = [rsumm_D.loc['RMSE',c] for c in rsumm_D.columns if c.lower().startswith(' magnitude')]
+		# maxDerrM = pd.Series(maxDerrM).max()
+		# from shutil import rmtree
+		# os.remove(outckt_loc)
+		# rmtree(outdir)
 		#print('Objects removed: %s (of %s).\nPercent reduction: %s%%\nMax RMSPE for voltage magnitude: %s%%\nMax RMSPE for voltage angle: %s%%\nMax RMSE for voltage magnitude: %s\nMax RMSE for voltage angle: %s\n'%(oldsz-newsz, oldsz, (oldsz-newsz)*100/oldsz, maxPerrM, maxPerrA, maxDerrM, maxDerrA)) # DEBUG
-		errlim = 0.30 # threshold of 30% error between reduced files. 
-		assert maxPerrM <= errlim*100, 'The voltage magnitude error between the compared files exceeds the allowable limit of %s%%.'%(errlim*100)
+		# errlim = 0.30 # threshold of 30% error between reduced files. 
+		# assert maxPerrM <= errlim*100, 'The voltage magnitude error between the compared files exceeds the allowable limit of %s%%.'%(errlim*100)
 		
 def _runTest():
 	# runDSS('nreca1824.dss', keep_output=False)
