@@ -72,7 +72,7 @@ def testRunner():
 	if len(misfires) > 0:
 		sys.exit(1) # trigger build failure.
 
-def get_all_testable_modules()
+def get_all_testable_modules():
 	''' Find all modules in the OMF with ._tests() functions defined, minus the ignored modules. '''
 	import pkgutil, importlib, omf
 	# These files aren't supposed to have tests
