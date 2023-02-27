@@ -1,5 +1,5 @@
 ''' Geospatial analysis of circuit models.'''
-import json, os, shutil, math, tempfile, random, webbrowser, platform
+import json, os, shutil, math, tempfile, random, webbrowser, platform, re
 from pathlib import Path
 from os.path import join as pJoin
 from pyproj import Proj, transform, Transformer # Remove this import when deprecating other functions
@@ -910,25 +910,29 @@ def _is_configuration_or_special_node(tree_properties):
     '''
     # - The "circuit" object needs to be vsource object, so it's NOT a configuration node
     #   - The exception with "trilby" is therefore correct. I need to ask David how to resolve that problem
+    # - The "energymeter" object is NOT a configuration node
+    #   - iowa240c2_working_coords.clean.tie_bus2058_bus3155.omd assigns a parent to it
     # - The "regcontrol" object is NOT a configuraiton node
-    #   - iowa240c1.clean.dss.omd assigns latitude and longitude values to it
-    # - TODO: add regex matching
+    #   - iowa240c1.clean.dss.omd assigns latitude and longitude values to it. So does pvrea_trilby.omd
     CONFIGURATION_OBJECTS = (
+        'auction',
         '!CMD',
+        #'circuit',
         'climate',
         'cndata',
-        'energymeter',
+        'csv_reader',
+        'currdump',
+        #'energymeter',
+        'group_recorder',
         'growthshape',
         'line_configuration',
         'line_spacing',
         'linecode',
-        'line_configuration:606'
-        'line_configuration:607',
         'loadshape',
         'overhead_line_conductor',
         'player',
+        #'regcontrol',
         'regulator_configuration',
-        'regulator_configuration:6506321',
         'schedule',
         'spectrum',
         'swtcontrol',
@@ -937,13 +941,13 @@ def _is_configuration_or_special_node(tree_properties):
         'transformer_configuration',
         'triplex_line_configuration',
         'underground_line_conductor',
-        'underground_line_conductor:6060', # This is GridLAB-D syntax, not OpenDSS syntax. Just use regex to detect it, or detect if it ends with a colon
         'volt_var_control',
         'voltdump',
         'wiredata')
     # - These OMD objects lack the "object" property entirely
     SPECIAL_OBJECTS = ('clock', 'omftype', 'module', 'class')
-    return (tree_properties.get('object') is None and len(set(tree_properties.keys()) & set(SPECIAL_OBJECTS)) > 0) or tree_properties['object'] in CONFIGURATION_OBJECTS
+    return ((tree_properties.get('object') is None and len(set(tree_properties.keys()) & set(SPECIAL_OBJECTS)) > 0) or
+        re.match(r'($|:)|'.join(CONFIGURATION_OBJECTS) + r'($|:)', tree_properties['object']))
 
 
 def insert_missing_nodes(omd):
@@ -1086,6 +1090,13 @@ def insert_wgs84_coordinates(omd, center=(36.6, -98.5), spcs_epsg=None, force_la
     # - Iterate a fourth time to give coordinates to all nodes that need them
     for k in pos:
         obj = omd['tree'][k]
+        # - Mark nodes that are disconnected from the rest of the circuit as "isolated". This can be commented out because I don't which
+        #   non-configuration nodes are allowed to be isolated vs. which nodes should never be isolated
+        if graph.degree[k] == 0 and not _is_configuration_or_special_node(obj):
+            if obj.get('geo_py_validation_status') is None:
+                obj['geo_py_validation_status'] = 'isolated'
+            else:
+                obj['geo_py_validation_status'] += ' & isolated'
         if 'from' not in obj and 'to' not in obj and not _is_configuration_or_special_node(obj):
             if force_layout:
                 omd['tree'][k]['latitude'] = float(pos[k][0]) + center[0]
@@ -1130,11 +1141,6 @@ def insert_wgs84_coordinates(omd, center=(36.6, -98.5), spcs_epsg=None, force_la
                         obj['longitude'] = parent_lon + round(random.uniform(-.003, .003), 4)
                     else:
                         obj['longitude'] = float(pos[k][1]) + avg_lon
-    # - Optional check for disconnected nodes. Can be commented out. This is great for discovering new types of configuration nodes that aren't
-    #   supposed to be displayed
-    for n in graph.nodes.keys():
-        if graph.degree[n] == 0 and not _is_configuration_or_special_node(omd['tree'][n]):
-            print(f'The node with tree key {n} does not have children, nor is it connected to any line. Is it connected to the rest of the graph?')
 
 
 def _get_min_max_lat_lon(omd, min_lat=None, max_lat=None, min_lon=None, max_lon=None):
