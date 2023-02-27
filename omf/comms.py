@@ -6,6 +6,7 @@ from pyproj import Proj, transform, Geod
 from scipy.spatial import ConvexHull, Delaunay
 import networkx as nx
 import numpy as np
+import omf
 
 def treeToNxGraph(inTree):
 	''' Convert feeder tree to networkx graph. '''
@@ -491,7 +492,7 @@ def omcToNxg(omc, fromFile=False):
 def showOnMap(geoJson):
 	'''Open a browser to display a geoJSON object on a map.'''
 	tempDir = tempfile.mkdtemp()
-	shutil.copy('templates/commsNetViz.html', tempDir)
+	shutil.copy(omf.omfDir + '/templates/commsNetViz.html', tempDir)
 	with open(pJoin(tempDir,'commsGeoJson.js'),"w") as outFile:
 		outFile.write("var geojson =")
 		json.dump(geoJson, outFile, indent=4)
@@ -693,7 +694,7 @@ def stitch_boundaries(edges):
 
 def _tests():
 	#setup a comms network, run calculations and display
-	nxG = createGraph('static/publicFeeders/Olin Barre LatLon.omd')
+	nxG = createGraph(omf.omfDir + '/static/publicFeeders/Olin Barre LatLon.omd')
 	
 	#Create a comms network
 	setSmartMeters(nxG)
@@ -723,7 +724,7 @@ def _tests():
 	showOnMap(graphGeoJson(newNxg))
 
 	#Display mesh network levels on a leaflet map
-	nxG = createGraph('static/publicFeeders/Olin Barre LatLon.omd')
+	nxG = createGraph(omf.omfDir + '/static/publicFeeders/Olin Barre LatLon.omd')
 	setSmartMeters(nxG)
 	meshMap(nxG)
 

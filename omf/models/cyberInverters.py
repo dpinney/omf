@@ -106,7 +106,7 @@ def work(modelDir, inputDict):
 		try:
 			os.mkdir(pJoin(modelDir,"PyCIGAR_inputs"))
 		except FileExistsError:
-			print("PyCIGAR_inputs folder already exists!")
+			print("Found pre-existing input data for this model.")
 			pass
 		except:
 			print("Error occurred creating PyCIGAR_inputs folder")
@@ -343,17 +343,14 @@ def work(modelDir, inputDict):
 		outData["downlineNodeVolts"] = pycigarJson["Substation Bottom Voltage (U)"]
 		outData["minVoltBand"] = pycigarJson["Substation Regulator Minimum Voltage(V)"]
 		outData["maxVoltBand"] = pycigarJson["Substation Regulator Maximum Voltage(V)"]
+		outData["Capacitor_Outputs"] = pycigarJson["Capacitor Outputs"]
 
-		#Convert capacitor, regulator data
-		# create lists of regulator and capacitor object names
+		#convert regulator data
+		# create lists of regulator object names
 		regNameList = []
-		capNameList = []
 		for key in pycigarJson:
 			if key.startswith('Regulator_'):
 				regNameList.append(key)
-			elif key.startswith('Capacitor_'):
-				capNameList.append(key)
-		# regulators
 		regDict = {}
 		for reg_name in regNameList:
 			short_reg_name = reg_name.replace("Regulator_","") # TODO: ask LBL to alter regulator, capacitor output to match that of "bus voltages"
@@ -366,18 +363,6 @@ def work(modelDir, inputDict):
 			newReg["tapchanges"] = tapchanges
 			regDict[reg_name] = newReg
 		outData["Regulator_Outputs"] = regDict
-		# capacitors
-		# TODO: Need to test with a capacitor in the circuit
-		capDict = {}
-		for cap_name in capNameList:
-			short_cap_name = cap_name.replace("Capacitor_","")
-			newCap = {}
-			newCap["phases"] = list(pycigarJson[cap_name]["CapPhases"])
-			for phase in newCap["phases"]:
-				newCap["switch" + phase.upper()] = pycigarJson[cap_name]["switch" + phase.lower()]
-				newCap["timeseriesdata" + phase.upper()] = []
-			capDict[cap_name] = newCap
-		outData["Capacitor_Outputs"] = capDict
 
 		#convert inverter data
 		inverter_output_dict = {} 

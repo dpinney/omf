@@ -1,4 +1,4 @@
-import os, platform, subprocess, json
+import os, platform, json
 from pathlib import Path
 
 thisDir = os.path.abspath(os.path.dirname(__file__))

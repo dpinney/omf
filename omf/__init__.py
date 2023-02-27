@@ -17,13 +17,13 @@ from omf import cymeToGridlab
 from omf import distNetViz
 from omf import runAllTests
 from omf import weather
-from omf import calibrate
+from omf import loadModelingScada
 from omf import feeder
 from omf import comms
 from omf import omfStats
 from omf import geo
 from omf import loadModelingAmi
-from omf import network
+from omf import transmission
 from omf import cyberAttack
 from omf import forecast
 from omf import anonymization

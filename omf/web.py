@@ -22,7 +22,7 @@ except:
 	fcntl.flock = flock
 	(fcntl.LOCK_EX, fcntl.LOCK_SH, fcntl.LOCK_UN, fcntl.LOCK_NB) = (0, 0, 0, 0)
 import omf
-from omf import (models, feeder, network, milToGridlab, cymeToGridlab, weather, anonymization, distNetViz, calibrate, omfStats, loadModeling,
+from omf import (models, feeder, transmission, milToGridlab, cymeToGridlab, weather, anonymization, distNetViz, loadModelingScada, omfStats, loadModeling,
 	loadModelingAmi, geo, comms)
 from omf.solvers.opendss import dssConvert
 
@@ -880,8 +880,8 @@ def matImportBackground(owner, modelName, networkName, networkNum):
 		network_filepath, model_dir, pid_filepath = [
 			os.path.join(_omfDir, 'data', 'Model', owner, modelName, filename) for filename in [networkName + '.m', '', 'ZPID.txt']
 		]
-		newNet = network.parse(network_filepath, filePath=True)
-		network.layout(newNet)
+		newNet = transmission.parse(network_filepath, filePath=True)
+		transmission.layout(newNet)
 		with locked_open(network_filepath, 'w') as f:
 			json.dump(newNet, f, indent=4)
 		os.rename(network_filepath, os.path.join(model_dir, networkName + '.omt'))
@@ -927,8 +927,8 @@ def rawImportBackground(owner, modelName, networkName, networkNum):
 		network_filepath, model_dir, pid_filepath = [
 			os.path.join(_omfDir, 'data', 'Model', owner, modelName, filename) for filename in [networkName + '.raw', '', 'ZPID.txt']
 		]
-		newNet = network.parseRaw(network_filepath, filePath=True)
-		network.layout(newNet)
+		newNet = transmission.parseRaw(network_filepath, filePath=True)
+		transmission.layout(newNet)
 		with locked_open(network_filepath, 'w') as f:
 			json.dump(newNet, f, indent=4)
 		os.rename(network_filepath, os.path.join(model_dir, networkName + '.omt'))
@@ -1106,7 +1106,7 @@ def backgroundScadaLoadshape(owner, modelName, feederName, loadName):
 		solver = 'FBS'
 		calibrateError = (0.05, 5)
 		trim = 5
-		calibrate.omfCalibrate(workDir, feederPath, scadaPath, simStartDate, simLength, simLengthUnits, solver, calibrateError, trim)
+		loadModelingScada.omfCalibrate(workDir, feederPath, scadaPath, simStartDate, simLength, simLengthUnits, solver, calibrateError, trim)
 		# move calibrated file to model folder, old omd files are backedup
 		if feederPath.endswith('.omd'):
 			os.rename(feederPath, feederPath + '.backup')

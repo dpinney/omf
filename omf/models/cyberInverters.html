@@ -157,7 +157,7 @@
 			</div>
 			{{ omfModelButtons }}
 		</form>
-		<div> PyCigar commit 43fbc8e </div> <!-- as of 02 Nov 2022 -->
+		<div> PyCigar commit 56fa6a2 </div> <!-- as of 27 FEB 2023 -->
 	</div>
 	{{ omfRunDebugBlock }}
 	{% if modelStatus == 'finished' %}
@@ -388,7 +388,7 @@
 				new Highcharts.Chart(localHighChart);
 			</script>
 		</div>
-		<!--<p class="reportTitle">Regulator Tap Changes <a target="_self" class="toggle">Hide / Show</a></p>
+		<p class="reportTitle">Regulator Tap Changes <a target="_self" class="toggle">Hide / Show</a></p>
 		<div id="newRegulatorReport" class="tightContent" style="max-height:610px; overflow-y: scroll;">
 			{% if allOutputDataDict.Regulator_Outputs|length == 0 %}
 			<script type="text/javascript">	
@@ -436,8 +436,8 @@
 				new Highcharts.Chart(localHighChart)
 			}
 			</script>
-		</div> -->
-		<!-- <p class="reportTitle">Cap Bank Activation <a target="_self" class="toggle">Hide / Show</a></p>
+		</div>
+		<p class="reportTitle">Cap Bank Activation <a target="_self" class="toggle">Hide / Show</a></p>
 		<div id="newCapbankReport" class="tightContent" style="max-height:610px; overflow-y: scroll;">
 			{% if allOutputDataDict.Capacitor_Outputs|length == 0 %}
 			<script type="text/javascript">	
@@ -456,34 +456,25 @@
 				localHighChart["chart"]["inverted"] = false
 				localHighChart["chart"]["type"] = "line"
 				localHighChart["title"]["text"] = capname
-				localHighChart["series"] = []
-				localHighChart["yAxis"] = {
-					"min":-17, 
-					"max":17,
-					"startOnTick":false,
-					"endOnTick":false,
-					"tickPositions":[-16,16],
-					"title":{"text":"Tap Position"}
-				}
-				for (let [phs, dat] of Object.entries(capitems["tapchanges"])) {
-					if (phs=='C') {
-						color = "Seagreen"
-					} else if (phs=='B') {
-						color = "Crimson"
-					} else {
-						color = "RoyalBlue"
-					}
-					localHighChart["series"].push({
-						"pointWidth": 40,
-						"data": dat,
-						"name": phs,
-						"color": color,
-					})
-				}
+				localHighChart["title"]["align"] = "right"
+				localHighChart["title"]["x"] = -50
+				localHighChart["series"] = [{
+					"pointWidth": 40,
+					"data": capitems["state"],
+					"name": "Control Status",
+					"color": "royalblue"
+				}]
+				localHighChart["yAxis"] = [{
+					"title":{"text":""},
+					"categories":["off", "on"],
+					"min":0,
+					"max":1,
+					"tickPositions": [0,1]
+				}]
 				new Highcharts.Chart(localHighChart)
 			}
 			</script>
-		</div> -->
+		</div>
 		<p class="reportTitle">Triplex Meter Imbalances <a target="_self" class="toggle">Hide / Show</a></p>
 		<div id="voltageImbalancesReport" class="tightContent">
 			{% if allOutputDataDict.voltageImbalances|length == 0 %}
@@ -571,7 +562,6 @@
 				localHighChart["chart"]["renderTo"] = "busSeries_" + busName
 				localHighChart["chart"]["zoomType"] = 'xy'
 				localHighChart["chart"]["height"] = 200
-				localHighChart["chart"]["marginRight"] = 150
 				localHighChart["chart"]["type"] = "line"
 				localHighChart["title"]["text"] = busName
 				localHighChart["title"]["align"] = "right"

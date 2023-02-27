@@ -1,24 +1,12 @@
-import json, os, shutil, subprocess, datetime, re, random, copy, warnings, base64, platform
-import os.path
+import json
 from os.path import join as pJoin
-import numpy as np
 import networkx as nx
-
-import matplotlib
-if platform.system() == 'Darwin':
-	matplotlib.use('TkAgg')
-else:
-	matplotlib.use('Agg')
-from matplotlib import pyplot as plt
-
 from geopy import distance
 
 # OMF imports
-import omf
-from omf import feeder, weather, distNetViz
+from omf import feeder, distNetViz
 from omf.models import __neoMetaModel__
 from omf.models.__neoMetaModel__ import *
-from omf.weather import get_ndfd_data
 from omf.solvers.opendss import dssConvert
 from omf.solvers import opendss
 
