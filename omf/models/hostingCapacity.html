@@ -8,7 +8,7 @@
 	<div id="input" class="content">
 		<form name="inputForm" action="/runModel/" onsubmit="event.preventDefault(); return isFormValid();" method="post">
 			<div class="shortInput">
-				<label>Model Type <a href="https://github.com/dpinney/omf/wiki/Models-~-pvWatts" target="blank">Help?</a></label>
+				<label>Model Type <a href="https://github.com/dpinney/omf/wiki/Models-~-hostingCapacity" target="blank">Help?</a></label>
 				<input type="text" id="modelType" name="modelType" value="{{modelName}}" readonly/>
 			</div>
 			<div class="shortInput">
@@ -30,78 +30,48 @@
 			</div>
 			{% endif %}
 			<div class="wideInput">
-				<p class="inputSectionHeader">System Specifications</p>
+				<p class="inputSectionHeader">Mohca Algorithm Required Inputs</p>
 			</div>
 			<hr>
 			<div class="shortInput">
-				<label class="tooltip">Zip Code<span class="classic">Zip code of the planned array's geographical location.</span></label>
-				<input type="text" id="zipCode" name="zipCode" value="{{allInputDataDict.zipCode}}" pattern="^\d{5}(?:[-\s]\d{4})?$" required="required">
+				<label class="tooltip">Busname<span class="classic">Assume each meter is uniquely connected to one bus.</span></label>
+				<input type="text" id="busName" name="busName" value="{{allInputDataDict.busName}}" pattern="^[\w\s\d\.-]+$" required="required"/>
 			</div>
 			<div class="shortInput">
-				<label class="tooltip">System Size (kWp-DC)<span class="classic">DC output rating of the solar panels in kilowatts.</span></label>
-				<input type="text" id="systemSize" name="systemSize" value="{{allInputDataDict.systemSize}}" pattern="^\d+\.?\d*$" required="required">
+				<label class="tooltip">Date & Time<span class="classic">Format: YYYY-MM-DDTHH:mmZ</span></label>
+				<input type="text" id="dateTime" name="dateTime" value="{{allInputDataDict.dateTime}}" pattern="^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}[+-]\d{2}:\d{2}$" required="required"/>
 			</div>
 			<div class="shortInput">
-				<label class="tooltip">Inverter Size (kW-AC)<span class="classic">Size of the total inverters in kW-AC for the system. If zero, it will be set to the system size.</span></label>
-				<input type="text" id="inverterSize" name="inverterSize" value="{{allInputDataDict.inverterSize}}" pattern="^\d+\.?\d*$" required="required"/>
+				<label class="tooltip">Voltage Reading<span class="classic">Must be actual - not PU.</span></label>
+				<input type="text" id="vReading" name="vReading" value="{{allInputDataDict.vReading}}" pattern="^\d+\.?\d*$" required="required"/>
 			</div>
 			<div class="shortInput">
-				<label class="tooltip">Inverter Efficiency (%)<span class="classic">Inverter Efficiency in converting DC power to AC power. It can be obtained from the Weighted Efficiency (CEC) Method.</span></label>
-				<input type="text" id="inverterEfficiency" name="inverterEfficiency" value="{{allInputDataDict.inverterEfficiency}}" pattern="^(100|\d\d|\d)(\.\d+)?$" required="required"/>
+				<label class="tooltip">kW Reading<span class="classic">Average over the measurement interval.</span></label>
+				<input type="text" id="kwReading" name="kwReading" value="{{allInputDataDict.kwReading}}" pattern="^\d+\.?\d*$" required="required"/>
 			</div>
 			<div class="shortInput">
-				<label class="tooltip">Non-Inverter Efficiency (%)<span class="classic">This takes in to account losses from soiling, shading, wiring and diode losses, etc.</span></label>
-				<input type="text" id="nonInverterEfficiency" name="nonInverterEfficiency" value="{{allInputDataDict.nonInverterEfficiency}}" pattern="^(100|\d\d|\d)(\.\d+)?$" required="required">
+				<label class="tooltip">kVAR Reading<span class="classic">Average over the measurement interval.</span></label>
+				<input type="text" id="kvarReading" name="kvarReading" value="{{allInputDataDict.kvarReading}}" pattern="^\d+\.?\d*$" required="required"/>
 			</div>
 			<div class="wideInput">
-				<p class="inputSectionHeader">Advanced Options</p>
+				<p class="inputSectionHeader">Mohca Algorithm Optional Inputs</p>
 			</div>
 			<hr>
 			<div class="shortInput">
-				<label class="tooltip">Max Power Temperature Coefficient (%/&deg;C)<span class="classic">Percentage decrease  of the solar module's output power for every degree over 25 degrees centigrade.</span></label>
-				<input type="text" id="gamma" name="gamma" value="{{allInputDataDict.gamma}}" pattern="^(100|\d\d|\d)(\.\d+)?$" required="required"/>
+				<label>Latitude</label>
+				<input type="text" id="latitude" name="latitude" value="{{allInputDataDict.latitude}}" pattern="^\d+\.?\d*$"/>
 			</div>
 			<div class="shortInput">
-				<label class="tooltip">Tracker Rotation Limit (degrees)<span class="classic">How far each module in a tracking system is able to rotate if on a tracker, measured from the horizontal.</span></label>
-				<input type="text" id="rotlim" name="rotlim" value="{{allInputDataDict.rotlim}}" pattern="^\d+\.?\d*$" required="required"/>
+				<label>Longitude</label>
+				<input type="text" id="longitude" name="longitude" value="{{allInputDataDict.longitude}}" pattern="^\d+\.?\d*$"/>
 			</div>
 			<div class="shortInput">
-				<label class="tooltip">Tracking Mode<span class="classic">Type of tracking system the PV array will use if any.</span></label>
-				<select id="trackingMode" name="trackingMode"/>
-					<option value="0" {% if allInputDataDict.trackingMode == '0' %}selected{% endif %}>Fixed</option>
-					<option value="1" {% if allInputDataDict.trackingMode == '1' %}selected{% endif %}>1 Axis</option>
-					<option value="2" {% if allInputDataDict.trackingMode == '2' %}selected{% endif %}>2 Axis</option>
-					<option value="3" {% if allInputDataDict.trackingMode == '3' %}selected{% endif %}>Azimuth Axis</option>
-				</select>
+				<label class="tooltip">Service Tx Name <span class="classic">Transformer name.</span></label>
+				<input type="text" id="serviceTxName" name="serviceTxName" value="{{allInputDataDict.serviceTxName}}" pattern="^[\w\s\d\.-]+$"/>
 			</div>
 			<div class="shortInput">
-				<label class="tooltip">Tilt (degrees)<span class="classic">The tilt of the solar panels measured as an angle in degrees between panels and ground. If '-' is entered, the latitude of the zipcode will be used.</span></label>
-				<input type="text" id="tilt" name="tilt" value="{{allInputDataDict.tilt}}" pattern="^(90|[1-8]\d|\d)?$|-" required="required"/>
-			</div>
-			<div class="shortInput">
-				<label class="tooltip">Azimuth (degrees)<span class="classic">Cardinal direction the PV system will face. 180 in the northenr hemisphere is due South.</span></label>
-				<input type="text" id="azimuth" name="azimuth" value="{{allInputDataDict.azimuth}}" pattern="^\d+\.?\d*$" required="required"/>
-			</div>
-			<div class="shortInput">
-				<label class="tooltip">Wind stow speed (m/s)<span class="classic">When the wind velocity from the weather file for the current hour is greater than or equal to this value, the concentrator moves into stow position to prevent wind damage. The solar power intercepted by the receiver is zero during this hour.</span></label>
-				<input type="text" id="w_stow" name="w_stow" value="{{allInputDataDict.w_stow}}" pattern="^\d+\.?\d*$" required="required"/>
-			</div>
-			<div class="shortInput">
-				<label>Simulation Start Date (YYYY-MM-DD)</label>
-				<input type="text" id="simStartDate" name="simStartDate" value="{{allInputDataDict.simStartDate}}" pattern="^\d\d\d\d-\d\d-\d\d$" required="required">
-			</div>
-			<div class="shortInput">
-				<label>Simulation Length</label>
-				<input type="text" id="simLength" name="simLength" value="{{allInputDataDict.simLength}}" pattern="^\d+$" required="required" >
-			</div>
-			<div class="shortInput">
-				<label>Length Units</label>
-				<select id="simLengthUnits" name="simLengthUnits" value="{{allInputDataDict.simLengthUnits}}">
-					<!--<option value="minutes">Minutes</option> -->
-					<option value="hours">Hours</option>
-					<option value="days">Days</option>
-				</select>
-			</div>
+				<label class="tooltip">Phase Count<span class="classic">"1" or "3".</span></label>
+				<input type="text" id="phaseCount" name="phaseCount" value="{{allInputDataDict.phaseCount}}" pattern="^[1|3]$">
 			{{ omfModelButtons }}
 		</form>
 	</div>
