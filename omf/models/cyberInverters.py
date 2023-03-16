@@ -328,10 +328,10 @@ def work(modelDir, inputDict):
 			pycigarJson = json.load(f)
 
 		# Get KPIs from Logger into outData
-		outData['oscillation_kpi'] = logger().log_dict['oscillation_kpi']
-		outData['oscillation_kpi_area_under_curve'] = logger().log_dict['oscillation_kpi_area_under_curve']
-		outData['oscillation_kpi_bus_oscillation_voltage'] = logger().log_dict['oscillation_kpi_bus_oscillation_voltage']
-		outData['unbalance_kpi'] = logger().log_dict['unbalance_kpi']
+		# outData['oscillation_kpi'] = logger().log_dict['oscillation_kpi']
+		# outData['oscillation_kpi_area_under_curve'] = logger().log_dict['oscillation_kpi_area_under_curve']
+		# outData['oscillation_kpi_bus_oscillation_voltage'] = logger().log_dict['oscillation_kpi_bus_oscillation_voltage']
+		# outData['unbalance_kpi'] = logger().log_dict['unbalance_kpi']
 		
 		#convert meter voltage data
 		outData["allMeterVoltages"] = pycigarJson["allMeterVoltages"]
