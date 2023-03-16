@@ -5,7 +5,7 @@ from os.path import join as pJoin
 from functools import reduce
 from datetime import timedelta, datetime, tzinfo
 from dateutil import parser as dt_parser
-from pycigar.utils.logging import logger
+# from pycigar.utils.logging import logger
 
 # OMF imports
 from omf import feeder, weather
