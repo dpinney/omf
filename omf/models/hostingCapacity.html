@@ -47,15 +47,18 @@
 			</div>
 			<div class="shortInput">
 				<label>Mohca Algorithm</label>
-				<select id="mohcaAlgorithm" name="mohcaAlgorithm" value="{{allInputDataDict.mohcaAlgorithm}}">
+				<select id="mohcaAlgorithm" name="mohcaAlgorithm" value="{{allInputDataDict.mohcaAlgorithm}}" required>
+					<option value="">None</option>
 					<option value="sandia1" {% if allInputDataDict.mohcaAlgorithm == 'sandia1' %}selected{% endif %}>sandia1</option>
 					<option value="sandia2" {% if allInputDataDict.mohcaAlgorithm == 'sandia2' %}selected{% endif %}>sandia2</option>
 				</select>
 			</div>
+			<!--
 			<div class="shortInput">
 				<label class="tooltip">Circuit<span class="classic">TBD.</span></label>
 				<input type="text" id="circuit" name="circuit" value="{{allInputDataDict.circuit}}" pattern="^[\w\s\d\.-]+$"/>
 			</div>
+		    -->
 			{{ omfModelButtons }}
 		</form>
 	</div>
@@ -63,103 +66,6 @@
 	{{ omfRunDebugBlock }}
 	{% if modelStatus == 'finished' %}
 	<div id="output">
-		<div style="text-align:left" class="tightContent">
-			<p id="dataLocation"></p>
-			<script type="text/javascript">
-				gebi('dataLocation').innerHTML = "Showing data from the closest available city: {{allOutputDataDict.city}}, {{allOutputDataDict.state}}"
-			</script>
-		</div>
-		<script type="text/javascript">
-			// Global Highcharts settings.
-			Highcharts.setOptions({global:{useUTC:true}})
-			// Clean up the non-ISO date strings we get.
-			function dateOb(inStr) {return Date.parse(inStr.replace(/-/g,"/"))}
-			pointStart = dateOb("{{allOutputDataDict.timeStamps[0]}}")
-			pointInterval = dateOb("{{allOutputDataDict.timeStamps[1]}}") - pointStart
-		</script>
-		<p class="reportTitle">Hourly Solar Generation</p>
-		<div id="powerGenerationReport" class="tightContent">
-			<div id="powerTimeSeries"></div>
-			<div id="energyBalance"></div>
-			<script>
-				// Handle special case for inverter sizing:
-				if ({{allInputDataDict.inverterSize}} == 0) {
-					chartInverter = {{allInputDataDict.systemSize}}
-				}
-				else {chartInverter = {{allInputDataDict.inverterSize}}}
-				parseFloat({{allInputDataDict.systemSize}})*1000
-				power = {{allOutputDataDict.Consumption['Power']}}
-				powerSeries = [{"marker":{"enabled":false},"dataLabels":{"enabled":false}, "color":"red","data":power,"name":"Power Generated"}]
-				new Highcharts.Chart({ "credits":{"enabled":false},
-					"plotOptions":{ "series":{"pointStart":pointStart,"shadow":false,"pointInterval":pointInterval, "animation": false}, "line":{"marker":{"enabled":false}}},
-					"xAxis":{"maxZoom":108000000,"tickColor":"gray","type":"datetime","lineColor":"gray"},
-					"title":{"text":null},
-					"series":powerSeries,
-					"tooltip": false,
-					"yAxis":{"title":{"text":"Power (W-AC)","style":{"color":"gray"}},
-						"min":0,
-						"plotLines":[{"color": "orange",
-							"dashStyle": "ShortDash",
-							"width": 2,
-							"label":{"text":"Panels Nameplate","align":"right","y":12,"x":0},
-							"value": systemSize,"zIndex": 10},
-							{"color": "orange",
-							"dashStyle": "ShortDash",
-							"width": 2,
-							"label":{"text":"Inverter Nameplate","align":"left","y":12,"x":0},
-							"value": parseFloat(chartInverter)*1000,"zIndex": 10} ] },
-					"chart":{"zoomType":"x","marginBottom":35,"width":1000,"height":250,"marginRight":20,"renderTo":"powerTimeSeries","type":"line"},
-					"legend":false } )
-			</script>
-		</div>
-		<p class="reportTitle">Irradiance</p>
-		<div id="irradianceReport" class="tightContent">
-			<div id="irradianceChartDiv"></div>
-			<script>
-				poai = {{allOutputDataDict["climate"]["Plane of Array Irradiance (W/m^2)"]}}
-				bni = {{allOutputDataDict["climate"]["Beam Normal Irradiance (W/m^2)"]}}
-				di = {{allOutputDataDict["climate"]["Diffuse Irradiance (W/m^2)"]}}
-				irradianceSeriesData = [
-					{"name":"Plane of Array Irradiance (W/m^2)","marker":{"enabled":false},"color":"yellow","data":poai},
-					{"name":"Beam Normal Irradiance (W/m^2)","marker":{"enabled":false},"color":"gold","data":bni},
-					{"name":"Diffuse Irradiance (W/m^2)","marker":{"enabled":false},"color":"lemonchiffon","data":di}
-				]
-				new Highcharts.Chart({"credits":{"enabled":false},
-					"plotOptions":{"series":{"animation": false, "pointStart":pointStart,"shadow":false,"pointInterval":pointInterval},"line":{"marker":{"enabled":false}}},
-					"xAxis":{"maxZoom":108000000,"tickColor":"gray","type":"datetime","lineColor":"gray"},
-					"title":{"text":null},
-					"series":irradianceSeriesData,
-					"yAxis":{"title":{"text":"Climate Units","style":{"color":"gray"}}, "min":0},
-					"chart":{"marginBottom":35,"zoomType":"x","renderTo":"irradianceChartDiv","type":"line","marginRight":20, "height":250,"width":1000},
-					"tooltip":false,
-					"legend":{"verticalAlign":"top","align":"top","borderWidth":0,"x":50,"y":-10,"layout":"horizontal"}})
-			</script>
-		</div>
-		<p class="reportTitle">Other Climate Variables</p>
-		<div id="climateReport" class="tightContent">
-			<div id="climateChartDiv"></div>
-			<script>
-				amt = {{allOutputDataDict["climate"]["Ambient Temperature (F)"]}}
-				ct = {{allOutputDataDict["climate"]["Cell Temperature (F)"]}}
-				ws = {{allOutputDataDict["climate"]["Wind Speed (m/s)"]}}
-				climateSeriesData = [
-					{"name":"Ambient Temperature (F)","marker":{"enabled":false},"color":"dimgray","data":amt},
-					{"name":"Cell Temperature (F)","marker":{"enabled":false},"color":"gainsboro","data":ct},
-					{"name":"Wind Speed (m/s)","marker":{"enabled":false},"color":"darkgray","data":ws}
-				]
-				new Highcharts.Chart(
-					{"credits":{"enabled":false},
-					"plotOptions":{"series":{"animation": false, "pointStart":pointStart,"shadow":false,"pointInterval":pointInterval},"line":{"marker":{"enabled":false}}},
-					"xAxis":{"maxZoom":108000000,"tickColor":"gray","type":"datetime","lineColor":"gray"},
-					"title":{"text":null},
-					"series":climateSeriesData,
-					"yAxis":{"title":{"text":"Climate Units","style":{"color":"gray"}}},
-					"chart":{"marginBottom":35,"zoomType":"x","renderTo":"climateChartDiv","type":"line","marginRight":20, "height":250,"width":1000},
-					"tooltip":false,
-					"legend":{"verticalAlign":"top","align":"top","borderWidth":0,"x":50,"y":-10,"layout":"horizontal"}}
-				)
-			</script>
-		</div>
 		{{ rawOutputFiles }}
 	</div>
 	{% endif %}
