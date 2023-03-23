@@ -499,6 +499,30 @@
 			new Highcharts.Chart(localHighChart)
 			</script>
 		</div>
+		<p class="reportTitle">Triplex Meter Oscillation <a target="_self" class="toggle">Hide / Show</a></p>
+		<div id="voltageOscillationReport" class="tightContent">
+			{% if allOutputDataDict.oscillation_kpi_bus_oscillation_voltage|length == 0 %}
+			<script type="text/javascript">	
+				$("#voltageOscillationReport").html("<p>&#160;&#160;&#160;No voltage oscillation values were returned.</p>")
+			</script>
+			{% endif %}
+			<script type="text/javascript">	
+			localHighChart = JSON.parse(JSON.stringify(highChartsTemplate))
+			localHighChart["chart"]["renderTo"] = "voltageOscillationReport"
+			localHighChart["chart"]["height"] = 200
+			localHighChart["chart"]["type"] = "line"
+			localHighChart["yAxis"] = {"title":{"text":"Imbalance (%)"}}
+			for (let [busName,imbalseries] of Object.entries({{allOutputDataDict.oscillation_kpi_bus_oscillation_voltage}})) {
+				localHighChart["series"].push({
+					"marker": {"enabled":false}, 
+					"color": "rgba(128,128,128,0.15)",
+					"data": imbalseries.map(x => 100 * x), 
+					"name": busName,
+				})
+			}
+			new Highcharts.Chart(localHighChart)
+			</script>
+		</div>
 		<p class="reportTitle">Triplex Meter Voltage Summary <a target="_self" class="toggle">Hide / Show</a></p>
 		<div id="triplexMeterVoltageReport" class="tightContent">
 			<div id="triplexMeterVoltageChart"></div>
