@@ -1,6 +1,6 @@
 ''' Walk the omf submodules, run _tests() in all modules. '''
 
-import sys, platform, pkgutil, importlib, omf
+import sys, platform, pkgutil, importlib, omf, traceback
 
 # master override disabling testing.
 IGNORE_FILES = ['omf.runAllTests', 'omf.webProd', 'omf.web', 'omf.omfStats', 'omf.models.phaseId', 'omf.models.solarDisagg', 'omf.tests']
@@ -54,6 +54,7 @@ def run_all_tests():
 			run_tests_on_module(mod)
 		except:
 			misfires.append(mod)
+			traceback.print_exc()
 	_print_header('regular tests report')
 	print(f'Number of modules tested: {len(all_testable_mods)}')
 	print(all_testable_mods)
