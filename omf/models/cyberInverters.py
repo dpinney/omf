@@ -5,7 +5,6 @@ from os.path import join as pJoin
 from functools import reduce
 from datetime import timedelta, datetime, tzinfo
 from dateutil import parser as dt_parser
-# from pycigar.utils.logging import logger
 
 # OMF imports
 from omf import feeder, weather
@@ -289,7 +288,7 @@ def work(modelDir, inputDict):
 			# TODO: test, this might break with allInputData file locking.
 			defAgentFolders = os.listdir(pJoin(modelDir,"pycigarOutput"))
 			inputDict['defenseAgentNames'] = ','.join([x for x in defAgentFolders if x.startswith('policy_')])
-			inputDict['kpi'] = ['oscillation_kpi', 'unbalance_kpi', 'network_kpi', 'RedTeam_kpi']
+			# inputDict['kpi'] = ['oscillation_kpi', 'unbalance_kpi', 'network_kpi', 'RedTeam_kpi']
 			print(inputDict['defenseAgentNames'])
 			with open(pJoin(modelDir, "allInputData.json")) as inFileOb:
 				json.dump(inputDict, inFileOb, indent=4)
@@ -322,16 +321,18 @@ def work(modelDir, inputDict):
 		#print("!!!!!!!!!!! Got through pyCigar !!!!!!!!!!!!")
 
 	def convertOutputs():
+		from pycigar.utils.logging import logger
+
 		#set outData[] values to those from modelDir/pycigarOutput/pycigar_output_specs_.json
 		#read in the pycigar-outputed json
 		with open(pJoin(modelDir,"pycigarOutput","pycigar_output_specs.json"), 'r') as f:
 			pycigarJson = json.load(f)
 
 		# Get KPIs from Logger into outData
-		# outData['oscillation_kpi'] = logger().log_dict['oscillation_kpi']
-		# outData['oscillation_kpi_area_under_curve'] = logger().log_dict['oscillation_kpi_area_under_curve']
-		# outData['oscillation_kpi_bus_oscillation_voltage'] = logger().log_dict['oscillation_kpi_bus_oscillation_voltage']
-		# outData['unbalance_kpi'] = logger().log_dict['unbalance_kpi']
+		outData['oscillation_kpi'] = logger().log_dict['oscillation_kpi']
+		outData['oscillation_kpi_area_under_curve'] = logger().log_dict['oscillation_kpi_area_under_curve']
+		outData['oscillation_kpi_bus_oscillation_voltage'] = logger().log_dict['oscillation_kpi_bus_oscillation_voltage']
+		outData['unbalance_kpi'] = logger().log_dict['unbalance_kpi']
 		
 		#convert meter voltage data
 		outData["allMeterVoltages"] = pycigarJson["allMeterVoltages"]
