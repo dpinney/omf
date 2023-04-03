@@ -243,13 +243,16 @@ def dssCleanLists(pathToDss):
 			outFile.write(f'{fixedLine}\n')
 
 
-def dssToTree(pathToDss):
+def dssToTree(pathToDssOrString, is_path=True):
 	''' Convert a .dss file to an in-memory, OMF-compatible 'tree' object.
 	Note that we only support a VERY specifically-formatted DSS file.'''
 	# TODO: Consider removing the handling for 'wdg=' syntax within this block, as we will not support it in an input file. 
 	# Ingest file.
-	with open(pathToDss, 'r') as dssFile:
-		contents = dssFile.readlines()
+	if is_path:
+		with open(pathToDssOrString, 'r') as dssFile:
+			contents = dssFile.readlines()
+	else:
+		contents = pathToDssOrString
 	# Lowercase everything. OpenDSS is case insensitive.
 	contents = [x.lower() for x in contents]
 	# Clean up the file.
