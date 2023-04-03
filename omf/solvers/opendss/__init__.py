@@ -114,7 +114,7 @@ def newQstsPlot(filePath, stepSizeInMinutes, numberOfSteps, keepAllFiles=False, 
 			dss_run_file += f'new object=monitor.{mon_name} element={obType}.{name} terminal=1 mode=0\n'
 			mon_names.append(mon_name)
 			new_kv = pd.DataFrame({'kv':[float(ob.get('kv',1.0))],'Name':['monload-' + name]})
-			base_kvs = base_kvs.append(new_kv)
+			base_kvs = pd.concat([base_kvs,new_kv])
 		elif ob.get('object','').startswith('capacitor.'):
 			dss_run_file += f'new object=monitor.{mon_name} element={obType}.{name} terminal=1 mode=6\n'
 			mon_names.append(mon_name)
@@ -232,13 +232,13 @@ def newQstsPlot(filePath, stepSizeInMinutes, numberOfSteps, keepAllFiles=False, 
 			switch_ob = ob.split()
 			ob_name = switch_ob[1][7:]
 			new_row = {'hour':key, 't(sec)':0.0,'Tap(pu)':1,'Type':'Switch','Name':ob_name}
-			all_control_df = all_control_df.append(new_row, ignore_index=True)
+			all_control_df = pd.concat([all_control_df, new_row], ignore_index=True, sort=False)
 	for key, ob in actions.items():
 		if ob.startswith('close'):
 			switch_ob = ob.split()
 			ob_name = switch_ob[1][7:]
 			new_row = {'hour':key, 't(sec)':0.0,'Tap(pu)':1,'Type':'Switch','Name':ob_name}
-			all_control_df = all_control_df.append(new_row, ignore_index=True)
+			all_control_df = pd.concat([all_control_df, new_row], ignore_index=True, sort=False)
 	# Write final aggregates
 	if not all_gen_df.empty:
 		all_gen_df.sort_values(['Name','hour'], inplace=True)
