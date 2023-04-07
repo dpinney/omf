@@ -103,7 +103,7 @@ def dss_to_clean_via_save(dss_file, clean_out_path, add_pf_syntax=True, clean_up
 		nice_buses = re.sub(r'([\w_\-\.]+),([\w_\-\.]+),([\w_\-\.]+)', r'setbusxy bus=\1 x=\2 y=\3', bus_data)
 		clean_copies['buscoords.dss'] = 'makebuslist\n' + nice_buses
 	#HACK: This is the order in which things need to be inserted or opendss errors out. Lame!
-	CANONICAL_DSS_ORDER = ['master.dss', 'vsource.dss', 'transformer.dss', 'reactor.dss', 'regcontrol.dss', 'cndata.dss', 'wiredata.dss', 'linecode.dss', 'spectrum.dss', 'swtcontrol.dss', 'tcc_curve.dss', 'capacitor.dss', 'loadshape.dss', 'growthshape.dss', 'line.dss', 'generator.dss', 'load.dss', 'buscoords.dss', 'busvoltagebases.dss']
+	CANONICAL_DSS_ORDER = ['master.dss', 'loadshape.dss', 'vsource.dss', 'transformer.dss', 'reactor.dss', 'regcontrol.dss', 'cndata.dss', 'wiredata.dss', 'linegeometry.dss', 'linecode.dss', 'spectrum.dss', 'swtcontrol.dss', 'tcc_curve.dss', 'capacitor.dss', 'growthshape.dss', 'line.dss', 'generator.dss', 'load.dss', 'energymeter.dss', 'buscoords.dss', 'busvoltagebases.dss']
 	# Note files we got that aren't in canonical files:
 	for fname in clean_copies:
 		if fname not in CANONICAL_DSS_ORDER:
@@ -113,8 +113,9 @@ def dss_to_clean_via_save(dss_file, clean_out_path, add_pf_syntax=True, clean_up
 	for fname in CANONICAL_DSS_ORDER:
 		if fname not in clean_copies:
 			print(f'Missing file: {fname}')
-		clean_out += f'\n\n!!!{fname}\n'
-		clean_out += clean_copies[fname]
+		else:
+			clean_out += f'\n\n!!!{fname}\n'
+			clean_out += clean_copies[fname]
 	clean_out = clean_out.lower()
 	# Optional: include a slug of code to run powerflow
 	if add_pf_syntax:
