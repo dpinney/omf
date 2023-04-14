@@ -776,20 +776,16 @@ def convert_omd_to_featurecollection(omd):
             dst_key = name_to_treekey.get_key(v['to'], v)
             dst_lon = float(omd['tree'][dst_key]['longitude'])
             dst_lat = float(omd['tree'][dst_key]['latitude'])
-            feature['geometry'] = {
-                'coordinates': [[src_lon, src_lat], [dst_lon, dst_lat]],
-                'type': 'LineString'
-            }
+            feature['geometry'] = {'coordinates': [[src_lon, src_lat], [dst_lon, dst_lat]], 'type': 'LineString'}
         else:
             if _is_configuration_or_special_node(v):
                 coordinates = [None, None]
             else:
                 coordinates = [float(v['longitude']), float(v['latitude'])]
-            feature['geometry'] = {
-                'coordinates': coordinates,
-                'type': 'Point'
-            }
+            feature['geometry'] = {'coordinates': coordinates, 'type': 'Point'}
         feature_collection['features'].append(feature)
+    # - I iterate again at the end to remove "latitude" and "longitude" because a line may need to get coordinates from a node before I remove the
+    #   node's coordinates
     for k, v in omd['tree'].items():
         for prop in ['latitude', 'longitude']:
             if prop in v:
@@ -912,8 +908,10 @@ def _is_configuration_or_special_node(tree_properties):
     #   - The exception with "trilby" is therefore correct. I need to ask David how to resolve that problem
     # - The "energymeter" object is NOT a configuration node
     #   - iowa240c2_working_coords.clean.tie_bus2058_bus3155.omd assigns a parent to it
-    # - The "regcontrol" object is NOT a configuraiton node
+    # - The "regcontrol" object is NOT a configuration node
     #   - iowa240c1.clean.dss.omd assigns latitude and longitude values to it. So does pvrea_trilby.omd
+    # - The "player" object is NOT a configuration node
+    #   - ABEC Frank Calibrated With Voltage gives one such object a "parent" attribute
     CONFIGURATION_OBJECTS = (
         'auction',
         '!CMD',
@@ -930,7 +928,7 @@ def _is_configuration_or_special_node(tree_properties):
         'linecode',
         'loadshape',
         'overhead_line_conductor',
-        'player',
+        #'player',
         #'regcontrol',
         'regulator_configuration',
         'schedule',
@@ -991,9 +989,9 @@ def insert_missing_nodes(omd):
         omd['tree'][str(k)] = new_tree[k]
 
 
-def insert_wgs84_coordinates(omd, center=(36.6, -98.5), spcs_epsg=None, force_layout=False):
+def insert_wgs84_coordinates(omd, center=(38.92720, -94.95520), spcs_epsg=None, force_layout=False, scale=.01):
     '''
-    - Iterate over an OMD's tree in-place and insert WGS 84 "latitude" and "longitude" properties.
+    - Iterate over an OMD's tree in-place and insert WGS 84 "latitude" and "longitude" property values in decimal degrees.
         - If a node is missing latitude or longitude properties, or has non-numeric latitude or longitude properties, or has non-state-plane
           out-of-bounds coordinates, create new WGS 84 coordinates with a layout algorithm.
         - If a node has state plane coordinates, convert them into WGS 84 coordinates.
@@ -1070,15 +1068,23 @@ def insert_wgs84_coordinates(omd, center=(36.6, -98.5), spcs_epsg=None, force_la
                 else:
                     graph.add_node(k)
     # - Run the layout algorithm to generate coordinates
-    #   - Is there a fast tree layout somewhere???? They only work with directed graphs, so we could build a directed graph
-    #pos = nx.kamada_kawai_layout(graph, scale=1) # Too slow
+    try:
+        scale = float(scale)
+    except:
+        scale = .01
+    if force_layout:
+        # This is really slow. The user must specify force_layout to do this.
+        pos = nx.kamada_kawai_layout(graph, scale=scale)
+    else:
+        pos = nx.circular_layout(graph, scale=scale) # Fast, but ugly!
+    # - Is there a fast tree layout somewhere???? They only work with directed graphs, so we could build a directed graph
     #pos = nx.spectral_layout(graph) # Too slow
     #pos = nx.nx_pydot.pydot_layout(graph, prog='neato', root=None) # Requires pydot. Fast, but default looks horrible
     #pos = nx.nx_pydot.graphviz_layout(graph, prog='neato', root=None) # Requires pydot. Fast, but default looks horrible
-    pos = nx.circular_layout(graph, scale=0.05) # Fast but ugly!
     #pos = nx.shell_layout(graph, scale=0.1) # Could this work?
     #pos = nx.spring_layout(graph, scale=0.1)
     #pos = nx.planar_layout(graph, scale=0.1)
+
     # - Iterate a third time to find the valid min/max lat/lon to determine if we need to use the "center" parameter or not
     min_lat, max_lat, min_lon, max_lon = _get_min_max_lat_lon(omd, min_lat=18, max_lat=72, min_lon=-172, max_lon=-66)
     avg_lat = center[0]
@@ -1208,6 +1214,102 @@ def _get_min_max_lat_lon(omd, min_lat=None, max_lat=None, min_lon=None, max_lon=
     return (min_lat, max_lat, min_lon, max_lon)
 
 
+def transform_wgs84_coordinates(omd, center=None, vertical_translation=None, horizontal_translation=None, rotation=None):
+    '''
+    - Perform a transformation on the coordinates of an OMD. This function assumes the omd has entirely valid WGS 84 coordinates (floats or strings)
+      in decimal degrees that are bounded within the USA (contiguous and non-contiguous). Run the omd through insert_wgs84_coordinates() first.
+      Centering is done first, followed by vertical translation, followed by horizontal translation, followed by rotation.
+
+    :param omd: an OMD
+    :type omd: dict
+    :param center: a new center for all of the coordinates in (<lat>, <lon>) decimal degrees. If it is provided, calculate the existing center of the
+        coordinates, calculate the offset from the existing center to the new specified center, then shift all coordinates by that offset amount
+	:type center: tuple
+    :param vertical_translation: a distance, in meters, that the user wants to move the coordinates upwards by. If it is provided, shift all
+        coordinates straight upwards by that many meters
+    :type vertical_translation: float
+    :param horizontal_translation: a distance, in meters, that the user wants to move the coordinates rightwards. If it is provided, shift all
+        coordinates straight rightwards by that many meters
+    :type horizontal_translation: an amount, in degrees (not radians!), to rotate the coordinates counterclockwise around their midpoint by
+    :param rotation: float
+    '''
+    center, vertical_translation, horizontal_translation, rotation = _validate_transform_wgs84_coordinates_arguments(center, vertical_translation, horizontal_translation, rotation)
+    if center is not None:
+        # - If a center was provided, the user wants to translate the entire graph to a new position. First step is to determine the relative center of
+        #   the graph
+        min_lat, max_lat, min_lon, max_lon = _get_min_max_lat_lon(omd, min_lat=18, max_lat=72, min_lon=-172, max_lon=-66)
+        avg_coords = ((max_lat + min_lat) / 2, (max_lon + min_lon) / 2)
+        # - Next step is to compute the vertical distance between the existing center and the new center and the horizontal distance between the
+        #   existing center and the new center
+        coords_diff = (center[0] - avg_coords[0], center[1] - avg_coords[1])
+    # - The distance that 1 degree of latitude represents is the same everywhere on earth. Assume the earth has a radius of 6,378 km
+    there_are_this_many_meters_in_one_degree_of_latitude = (6378000 * (math.pi / 2)) / 90
+    for v in omd['tree'].values():
+        if v.get('latitude') is not None:
+            if center is not None:
+                v['latitude'] = float(v['latitude']) + coords_diff[0]
+            if vertical_translation is not None:
+                v['latitude'] = float(v['latitude']) + (1 / there_are_this_many_meters_in_one_degree_of_latitude) * vertical_translation
+        if v.get('longitude') is not None:
+            if center is not None:
+                v['longitude'] = float(v['longitude']) + coords_diff[1]
+            if horizontal_translation is not None:
+                # - The distance that 1 degree of longitude represents depends on the given latitude. Assume the earth has a radius of 6,378 km
+                #   - Distance of 1 degree of longitude = cos(<given latitude>) * distance of 1 degree of latitude
+                #   - Distance of 1 degree of longitude = cos(<given latitude>) * ((6,378,000 m * (pi / 2)) / 90) v['longitude'] =
+                v['longitude'] = float(v['longitude']) + (1 / (math.cos(math.radians(float(v['latitude']))) * there_are_this_many_meters_in_one_degree_of_latitude)) * horizontal_translation
+    if rotation is not None:
+        # - Need to get the bounds again just in case anything was shifted
+        min_lat, max_lat, min_lon, max_lon = _get_min_max_lat_lon(omd, min_lat=18, max_lat=72, min_lon=-172, max_lon=-66)
+        mid_lat = (max_lat + min_lat) / 2
+        mid_lon = (max_lon + min_lon) / 2
+        # - Convert from degrees to radians
+        rotation = math.radians(float(rotation))
+        # - If you rotate point (px, py) around point (ox, oy) by angle theta you'll get:
+        #   - p'y = sin(theta) * (px-ox) + cos(theta) * (py-oy) + oy
+        #   - p'x = cos(theta) * (px-ox) - sin(theta) * (py-oy) + ox
+        for v in omd['tree'].values():
+            if v.get('latitude') is not None and v.get('longitude') is not None:
+                y = float(v['latitude'])
+                x = float(v['longitude'])
+                v['latitude'] = (math.sin(rotation) * (x - mid_lon)) + (math.cos(rotation) * (y - mid_lat)) + mid_lat
+                v['longitude'] = (math.cos(rotation) * (x - mid_lon)) - (math.sin(rotation) * (y - mid_lat)) + mid_lon
+
+
+def _validate_transform_wgs84_coordinates_arguments(center, vertical_translation, horizontal_translation, rotation):
+    '''
+    - Temporary hack for dealing with annoying input from the front-end
+    '''
+    if isinstance(center, str):
+        try:
+            center = center.replace('(', '')
+            center = center.replace(')', '')
+            center = center.replace(',', ' ')
+            center = center.split()
+            assert len(center) == 2
+        except:
+            center = None
+    try:
+        center[0] = float(center[0])
+        center[1] = float(center[1])
+    except:
+        center = None
+    try:
+        vertical_translation = float(vertical_translation)
+    except:
+        vertical_translation = None
+    try:
+        horizontal_translation = float(horizontal_translation)
+    except:
+        horizontal_translation = None
+    try:
+        rotation = float(rotation)
+    except:
+        rotation = None
+    return (center, vertical_translation, horizontal_translation, rotation)
+
+
+# - Get rid of these two functions once mapOmd is deprecated
 def get_components_featurecollection():
     '''
     - Currently, there are 536 node components, 39 children components, and 7 line components
@@ -1219,8 +1321,6 @@ def get_components_featurecollection():
     for k, v in json.loads(distNetViz.get_components()).items():
         featureCollection['features'].append(_convert_component_to_geojson_feature(k, v))
     return featureCollection
-
-
 def _convert_component_to_geojson_feature(component_name, component_properties):
     if 'name' not in component_properties:
         # - Use the filename of the component if necessary to identify it
@@ -1241,6 +1341,44 @@ def _convert_component_to_geojson_feature(component_name, component_properties):
         feature['geometry']['type'] = 'Point'
         feature['geometry']['coordinates'] = [None, None]
     return feature
+
+
+# - Keep and rename this function. This is what the new editor uses
+def get_component_featurecollection():
+    feature_collection = {'type': 'FeatureCollection', 'features': []}
+    # - This isn't an actual tree key, but it's needed to insert components into a FeatureMap in the front-end
+    tree_key = 1
+    for p in (Path(omf.omfDir).resolve() / 'data').glob('Component*/*.json'):
+        # - Does having non-numeric tree keys for components break anything?
+        feature = {'type': 'Feature', 'properties': {'treeKey': 'component:' + str(tree_key)}}
+        if p.parent.name == 'ComponentDss':
+            feature['properties']['componentType'] = 'opendss'
+        else:
+            feature['properties']['componentType'] = 'gridlabd'
+        with p.open() as f:
+            tree_props = json.load(f)
+            # - Use the filename of the component if necessary to identify it
+            if 'name' not in tree_props:
+                tree_props['name'] = p.stem
+        feature['properties']['treeProps'] = tree_props
+        if 'from' in tree_props or 'to' in tree_props:
+            if 'from' in tree_props and 'to' in tree_props:
+                feature['geometry'] = {'coordinates': [[0, 0], [0, 0]], 'type': 'LineString'}
+            else:
+                # - This exception should never be raised. If it is, there's a typo in a component file
+                raise Exception(f'The component {tree_props["name"]} doesn\'t have both the "from" and "to" keys, but has one of them')
+        else:
+            if _is_configuration_or_special_node(tree_props):
+                coordinates = [None, None]
+            else:
+                coordinates = [0, 0]
+            feature['geometry'] = {'coordinates': coordinates, 'type': 'Point'}
+        for prop in ['latitude', 'longitude']:
+            if prop in tree_props:
+                del tree_props[prop]
+        feature_collection['features'].append(feature)
+        tree_key += 1
+    return feature_collection
 
 
 def _testFixedLatLonOmd():
