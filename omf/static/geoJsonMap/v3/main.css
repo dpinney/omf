@@ -1,0 +1,71 @@
+* {
+    box-sizing: border-box;
+    font-family: Helvetica, Arial, Sans-Serif;
+    --headerHeight: 64px;
+}
+
+/*******/
+/* IDs */
+/*******/
+#map {
+    height: calc(100vh - var(--headerHeight));
+    z-index: 0;
+}
+#menuInsert {
+    display: flex;
+    position: absolute;
+    right: 10px;
+    top: 12px;
+    z-index: 10;
+}
+a {
+    text-decoration: none;
+    color: #00b11a;
+}
+body {
+    height: 100vh;
+    margin: 0;
+}
+header {
+    background: black;
+    display: flex;
+    height: var(--headerHeight);
+    /*justify-content: space-between;*/
+    /* If I don't make the header absolutely positioned, I can remove the margin from <main></main>*/
+    /*position: fixed;*/
+    /*top: 0;*/
+    width: 100%;
+    z-index: 1;
+}
+main {
+    /* This isn't needed anymore, but keep it in case */
+    /*margin: var(--headerHeight) 0 0 0;*/
+    /* Is this needed ? */
+    height: calc(100% - var(--headerHeight));
+}
+
+.leaflet-popup-content {
+    width: 500px !important;
+    font-family: sans-serif;
+}
+.svg--icon-gray {
+    fill: gray;
+    fill-opacity: 80%;
+}
+
+.svg--icon-gray {
+    fill: gray;
+    fill-opacity: 80%;
+}
+.svg--icon-red {
+    fill: red;
+    fill-opacity: 80%;
+}
+.svg--icon-purple {
+    fill: purple;
+    fill-opacity: 80%;
+}
+.svg--icon-blue {
+    fill: blue;
+    fill-opacity: 80%;
+}

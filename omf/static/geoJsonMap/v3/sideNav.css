@@ -1,0 +1,43 @@
+:root {
+    /*--sideNavWidth: 272px;*/
+    /*--sideNavWidth: 750px;*/
+    --sideNavWidth: 550px;
+    --sideNavTransitionTime: 0.3s;
+}
+article.js-article--sideNavArticle {
+    /* Set position:relative; so that any absolutely positioned elements within the article don't go out of bounds*/
+    position: relative;
+    transition: margin-left var(--sideNavTransitionTime);
+}
+article.js-article--sideNavArticle.compressed {
+    margin-left: var(--sideNavWidth);
+    transition: margin-left var(--sideNavTransitionTime);
+}
+nav.js-nav--sideNav {
+    background-color: #FFFFFF;
+    box-shadow: inset -1px 0px darkgray;
+    font-family: sans-serif;
+    height: 100%;
+    /*overflow-y: auto;*/
+    position: fixed;
+    transform: translate(calc(var(--sideNavWidth) * -1), 0px);
+    transition: transform var(--sideNavTransitionTime);
+    width: var(--sideNavWidth);
+    z-index: 2;
+}
+nav.js-nav--sideNav.open {
+    transform: translate(0px, 0px);
+}
+div.js-div--sideNavCover {
+    display: none;
+    z-index: 1;
+}
+@media screen and (max-width: 976px) {
+    div.js-div--sideNavCover.open {
+        background-color: rgba(189, 189, 189, 0.6);
+        display: initial;
+        height: 100%;
+        position: fixed;
+        width: 100%;
+    }
+}

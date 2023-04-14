@@ -1,0 +1,33 @@
+:root {
+    --headerHeight: 64px;
+}
+nav.js-nav--topNav {
+    background: black;
+    display: flex;
+    height: 100%;
+}
+nav.js-nav--topNav a {
+    text-decoration: none;
+}
+nav.js-nav--topNav button {
+    background-color: transparent;
+    border: 0;
+    cursor: pointer;
+    padding: 14px;
+    width: var(--headerHeight);
+}
+nav.js-nav--topNav button:hover {
+    background-color: gray;
+    transition: background-color 0.2s ease-out;
+}
+nav.js-nav--topNav div {
+    align-items: center;
+    display: flex;
+}
+nav.js-nav--topNav span {
+    color: white;
+    font-size: 2rem; 
+}
+nav.js-nav--topNav svg path {
+    fill: white;
+}

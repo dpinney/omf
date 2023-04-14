@@ -1,0 +1,249 @@
+* {
+    --headerHeight: 64px;
+    --regularFontSize: 1.3rem;
+    --regularFontPadding: .75rem;
+    --tableRowMinHeight: 3rem;
+}
+
+/*******/
+/* IDs */
+/*******/
+#modalInsert {
+    align-items: center;
+    background-color: rgba(0,0,0,0.4);
+    display: none;
+    /* The modalInsert div needs a height in order for inner divs to be able to use percentage values for max-height */
+    height: 100%; /* DO NOT CHANGE THIS */
+    justify-content: center;
+    position: absolute;
+    /*top: calc(var(--headerHeight));*/
+    top: 0;
+    width: 100%;
+    /* z-index is is needed to cover the sideNav */
+    z-index: 2;
+
+}
+#modalInsert.visible {
+    display: flex;
+}
+
+/******************/
+/* Shared classes */
+/******************/
+.horizontalFlex {
+    display: flex;
+}
+div.horizontalFlex { 
+    min-height: var(--tableRowMinHeight);
+}
+.verticalFlex {
+    display: flex;
+    flex-direction: column;
+}
+.centerMainAxisFlex {
+    justify-content: center;;
+}
+.centerCrossAxisFlex {
+    align-items: center;
+}
+.hoverable:hover {
+    background-color: seagreen;
+    color: white;
+}
+.halfWidth {
+    width: 50%;
+}
+.fullWidth {
+    width: 100%;
+}
+.indent1 {
+    padding: 0 0 0 var(--regularFontSize);
+}
+.indent2 {
+    padding: 0 0 0 calc(2 * var(--regularFontSize)); 
+}
+
+/* TODO use media queries to set max-width based on screen size. Don't create additional classes. 50% max width is fine in 90% of cases */
+/**********************************************/
+/* Default styling. BE CAREFUL WHEN CHANGING! */
+/**********************************************/
+div.js-div--modal {
+    /* Material design says that the background color doesn't affect brand, so it should be plain white */
+    background: #FFFFFF;
+    /* Material design uses 4dp rounded corners. 5px looks close enough */
+    border-radius: 5px;
+    /* Only overflowing modals (e.g. the "Load Feeder" modal) need a height of 100%. Unfortunately, this height must be set to 100% so that
+    overflowing modals may constrain themselves. The majority of modals will need to set their height back "initial" */
+    height: 100%;
+    max-height: 75vh;
+    max-width: 75vw;
+    /* Don't add padding because it lets stuff scroll above a sticky thead */
+    /*padding: 1rem;*/
+    overflow: auto;
+    width: 100%;
+}
+div.js-div--modal.fitContent {
+    height: initial;
+    width: initial;
+}
+div.js-div--modal.outerModal {
+    padding: 1rem;
+}
+div.js-div--modal.collapsed {
+    max-height: 0;
+    overflow: hidden;
+    /*transition: max-height 10s ease;*/
+}
+div.js-div--modal.expanded {
+    /* This property and the "expanded" class exist to prevent the scrollbar from appearing while the div is expanding */
+    overflow: hidden;
+    /*transition: max-height .2s;*/
+}
+div.js-div--modal button {
+    background-color: hsla(228, 100%, 41%, 1);
+    border: none;
+    border-radius: 5px;
+    color: white;
+    cursor: pointer;
+    padding: .25rem;
+}
+div.js-div--modal button.delete {
+    background-color: hsla(0, 100%, 45%, 1);   
+}
+div.js-div--modal button.add {
+    background-color: hsla(122, 100%, 32%, 1);
+}
+div.js-div--modal input {
+    border: 1px solid black;
+    box-sizing: border-box;
+    font-size: var(--regularFontSize);
+    margin: 0;
+    padding: .2rem;
+    width: 100%;
+}
+div.js-div--modal select {
+    background-color: #FFFFFF;
+    border: 1px solid black;
+    border-radius: 5px;
+    font-size: var(--regularFontSize);
+    padding: .2rem;
+}
+div.js-div--modal span {
+    font-size: var(--regularFontSize);
+}
+div.js-div--modal textarea {
+    height: 100%;
+    width: 100%;
+}
+div.js-div--modal table.table--modal span {
+    width: 100%;
+}
+div.div--modalBanner {
+    font-size: 24px;
+    padding: 1rem;
+    text-align: center;
+}
+div.div--modalBanner.caution {
+    background-color: hsla(50, 100%, 70%, 1);
+}
+div.div--modalTitle span {
+    font-size: 32px;
+    font-weight: bold;
+    padding: var(--regularFontPadding);
+}
+div.div--modalTitle.caution {
+    background-color: hsla(50, 100%, 70%, 1);
+}
+div.div--modalElementContainer {
+    height: 100%;
+    /* HACK: I should know how to subtract 100% of the height to get an actual height instead of guessing */
+    max-height: 92%;
+    width: 100%;
+}
+table.table--modal {
+    border-collapse: collapse;
+    font-size: var(--regularFontSize);
+    table-layout: fixed;
+    word-wrap: break-word;
+}
+table.table--modal.centeredTable {
+    margin: auto;
+}
+table.table--modal td div, table.table--modal th div {
+    display: flex;
+    align-items: center;
+    min-height: var(--tableRowMinHeight);
+}
+table.table--modal td {
+    padding: 0;
+}
+table.table--modal td:not(:first-child), table.table--modal th:not(:first-child) {
+    padding: 0 0 0 var(--regularFontPadding);
+}
+table.table--modal thead {
+    background: white;
+    position: sticky;
+    top: 0;
+}
+
+/****************************/
+/* TreeFeatureModal styling */
+/****************************/
+div.js-div--modal.treeFeatureModal {
+    max-height: 70vh;
+}
+div.js-div--modal.treeFeatureModal table.table--modal td:nth-child(2) {
+    max-width: 175px;
+    width: 175px;
+}
+
+/***********************/
+/* SearchModal styling */
+/***********************/
+div.js-div--modal.searchModal {
+    border-radius: 0;
+    box-shadow: inset -1px 0px darkgray;
+    max-height: 20vh;
+}
+div.js-div--modal.searchModal div.div--modalElementContainer {
+    height: initial;
+}
+div.js-div--modal.searchModal table.table--modal td:nth-child(2) select {
+    max-width: 50px;
+    width: 50px;
+}
+div.js-div--modal.searchModal table.table--modal td:nth-child(3) select {
+    max-width: 175px;
+    width: 175px;
+}
+div.js-div--modal.searchModal table.table--modal td:nth-child(4) select {
+    max-width: 75px;
+    width: 75px;
+}
+
+/*****************************/
+/* Load feeder modal styling */
+/*****************************/
+/* Hack to stop overflow. Seems to work though */
+/*div.js-div--modal.loadFeederModal div.div--modalElementContainer {
+    height: 100%;
+    max-height: 92%;
+}*/
+div.js-div--modal.loadFeederModal div.div--modalElementContainer div.js-div--modal {
+    flex: 1;
+}
+div.js-div--modal.loadFeederModal table.table--modal td div, div.js-div--modal.loadFeederModal table.table--modal th div {
+    display: block;
+    min-height: initial;
+}
+/*div.js-div--modal.loadFeederModal div.div--modalElementContainer div.js-div--modal:first-child table {
+    border-right: 1px solid black;
+    border-radius: 0;
+}*/
+div.js-div--modal.loadFeederModal div.hoverable {
+    padding: var(--regularFontPadding);
+    word-break: break-word;
+}
+div.js-div--modal.loadFeederModal div.hoverable > div:first-child {
+    font-weight: bold;
+}
