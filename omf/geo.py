@@ -153,7 +153,9 @@ def mapOmd(pathToOmdFile, outputPath, fileFormat, openBrowser=False, conversion=
 		if not os.path.exists(outputPath):
 			os.makedirs(outputPath)
 		# Render html
-		offline_template = open(omf.omfDir + '/templates/geoJsonMap_offline.html','r').read()
+		with open(omf.omfDir + '/templates/geoJsonMap_offline.html','r') as file:
+			offline_template = file.read()	
+		# offline_template = open(omf.omfDir + '/templates/geoJsonMap_offline.html','r').read()
 		rendered = Template(offline_template).render(geojson=geoJsonDict, all_mg_elements=all_mg_elements, components=get_components_featurecollection())
 		with open(os.path.join(outputPath,'geoJsonMap_offline.html'),'w') as outFile:
 			outFile.write(rendered)
