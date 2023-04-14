@@ -1,0 +1,110 @@
+* {
+    --headerHeight: 64px;
+    --regularFontSize: 1.3rem;
+    --regularFontPadding: .75rem;
+    --tableRowMinHeight: 3rem;
+}
+
+/**********************************************/
+/* Default styling. BE CAREFUL WHEN CHANGING! */
+/**********************************************/
+button.js-button--dropdown {
+    align-items: center;
+    border: 0;
+    cursor: pointer;
+    display: flex;
+    padding: 0;
+    width: 100%;
+}
+div.js-div--dropdown {
+    height: 100%;
+    /* Don't set max-height here because it makes TreeFeatureModals cover stuff in the side bar */
+}
+div.js-div--dropdown span {
+    font-size: var(--regularFontSize);
+}
+div.js-div--dropdownContent {
+    max-height: 0;
+    overflow: hidden;
+}
+div.js-div--dropdownContent.expanded {
+    max-height: 100%;
+    overflow: auto;
+}
+svg.js-svg--dropdown {
+    transform: rotate(0deg);
+    transition: transform 0.25s ease;
+}
+svg.js-svg--dropdown.rotated {
+    transform: rotate(90deg);
+    transition: transform 0.25s ease;
+}
+
+/********************/
+/* Side nav styling */
+/********************/
+div.js-div--dropdown.sideNav button.js-button--dropdown {
+    background-color: #FFFFFF;
+    border-top: 1px solid black;
+    justify-content: space-between;
+    padding: .5rem 0 .5rem 0;
+}
+div.selected > div.js-div--dropdown.sideNav {
+    /* HACK: hardcoded height */
+    max-height: 68vh;
+}
+div.selected > div.js-div--dropdown.sideNav button.js-button--dropdown {
+    box-shadow: inset -1px 0px darkgray;
+}
+div.js-div--dropdown.sideNav span {
+    padding: 0 0 0 var(--regularFontSize);
+    text-align: left;
+}
+div.js-div--dropdown.sideNav span > div:first-child {
+    font-weight: bold;
+}
+div.js-div--dropdown.sideNav div.js-div--dropdownContent span {
+    padding: 0 0 0 calc(2 * var(--regularFontSize)); 
+    text-align: left;
+}
+div.js-div--dropdown.sideNav button.horizontalFlex span {
+    padding: 0;
+}
+
+
+/****************/
+/* Menu styling */
+/****************/
+div.js-div--dropdown.menu {
+    white-space: nowrap;
+    width: 85px;
+}
+div.js-div--dropdown.menu button.js-button--dropdown {
+    background-color: transparent;
+    color: white;
+    justify-content: end;
+}
+div.js-div--dropdown.menu button.js-button--dropdown.expanded {
+    background-color: #FFFFFF;
+    border-radius: 5px 5px 0px 0px;
+    color: black
+}
+div.js-div--dropdown.menu button.js-button--dropdown svg.js-svg--dropdown path {
+    fill: white;
+}
+div.js-div--dropdown.menu button.js-button--dropdown.expanded svg.js-svg--dropdown path {
+    fill: black;
+}
+div.js-div--dropdown.menu div.js-div--dropdownContent {
+    background-color: #FFFFFF;
+    border-radius: 5px 0px 5px 5px;
+    float: right;
+    overflow-x: visible;
+}
+div.js-div--dropdown.menu div.js-div--dropdownContent.expanded {
+    box-shadow: 0 10px 14px rgba(0,0,0,0.4)
+}
+div.js-div--dropdown.menu div.js-div--dropdownContent div {
+    font-size: 1.1rem;
+    padding: 0 .25rem 0 .25rem;
+}

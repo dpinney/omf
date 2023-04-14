@@ -805,7 +805,7 @@ def milsoftImport(owner):
 		os.remove(error_filepath)
 	feederName = str(request.form.get('feederNameM', 'feeder'))
 	feederNum = request.form.get("feederNum",1)
-	std_filepath, seq_filepath = [os.path.join(_omfDir, 'data', 'Model', owner, modelName, filename) for filename in (feederName + '.std', feederName + '.std')]
+	std_filepath, seq_filepath = [os.path.join(_omfDir, 'data', 'Model', owner, modelName, filename) for filename in (feederName + '.std', feederName + '.seq')]
 	request.files.get('stdFile').save(std_filepath)
 	request.files.get('seqFile').save(seq_filepath)
 	importProc = Process(target=milImportBackground, args=[owner, modelName, feederName, feederNum])
@@ -1050,7 +1050,7 @@ def dssImportBackground(owner, modelName, feederName, feederNum):
 	except Exception: 
 		filepath = os.path.join(_omfDir, 'data', 'Model', owner, modelName, 'gridError.txt')
 		with locked_open(filepath, 'w') as errorFile:
-			errorFile.write('glmError')
+			errorFile.write('dssError')
 
 
 @app.route("/scadaLoadshape/<owner>/<feederName>", methods=["POST"])
@@ -1165,6 +1165,7 @@ def cymeImport(owner):
 	feederNum = request.form.get("feederNum",1)
 	feederName = str(request.form.get("feederNameC",""))
 	mdbFileObject = request.files["mdbNetFile"]
+	mdb_filepath = os.path.join(_omfDir, 'data', 'Model', owner, modelName, feederName + '.mdb')
 	mdbFileObject.save(mdb_filepath)
 	print(mdbFileObject.filename)
 	importProc = Process(target=cymeImportBackground, args=[owner, modelName, feederNum, feederName])
@@ -1176,7 +1177,7 @@ def cymeImportBackground(owner, modelName, feederNum, feederName):
 	''' Function to run in the background for Milsoft import. '''
 	try:
 		pid_filepath, error_filepath, mdb_filepath, feeder_filepath, modelDir = [os.path.join(_omfDir, 'data', 'Model', owner, modelName, filename) for filename in 
-			['ZPID.txt', 'gridError.txt', mdbFileObject.filename, feederName + '.omd', '']
+			['ZPID.txt', 'gridError.txt', feederName + '.mdb', feederName + '.omd', '']
 		]
 		with locked_open(pid_filepath, 'w') as pid_file:
 			pid_file.write(str(os.getpid()))
@@ -1361,6 +1362,8 @@ def saveFeeder(owner, modelName, feederName, feederNum):
 					raise
 	writeToInput(model_dir, feederName, 'feederName' + str(feederNum))
 	payload = json.loads(request.form.get('feederObjectJson', '{}'))
+	if isinstance(payload, dict) and payload.get('type') == 'FeatureCollection':
+		payload = omf.geo.convert_featurecollection_to_omd(payload)
 	feeder_file = os.path.join(model_dir, feederName + ".omd")
 	if os.path.isfile(feeder_file):
 		with locked_open(feeder_file, 'r+') as f:
@@ -1672,6 +1675,7 @@ def anonymize(owner, feederName):
 	# form variables
 	nameOption = request.form.get('anonymizeNameOption')
 	locOption = request.form.get('anonymizeLocationOption')
+	new_center_coords = request.form.get('new_center_coords')
 	translationRight = request.form.get('translateRight')
 	translationUp = request.form.get('translateUp')
 	rotation = request.form.get('rotate')
@@ -1681,13 +1685,14 @@ def anonymize(owner, feederName):
 	smoothLoadGen = request.form.get('smoothLoadGen')
 	shuffleLoadGen = request.form.get('shuffleLoadGen')
 	addNoise = request.form.get('addNoise')
+	scale = request.form.get('scale')
 	# start background process
-	importProc = Process(target=backgroundAnonymize, args=[modelDir, omdPath, owner, modelName, nameOption, locOption, translationRight, translationUp, rotation, shufPerc, noisePerc, modifyLengthSize, smoothLoadGen, shuffleLoadGen, addNoise])
+	importProc = Process(target=backgroundAnonymize, args=[modelDir, omdPath, owner, modelName, nameOption, locOption, new_center_coords, translationRight, translationUp, rotation, shufPerc, noisePerc, modifyLengthSize, smoothLoadGen, shuffleLoadGen, addNoise, scale])
 	importProc.start()
 	return 'Success'
 
 
-def backgroundAnonymize(modelDir, omdPath, owner, modelName, nameOption, locOption, translationRight, translationUp, rotation, shufPerc, noisePerc, modifyLengthSize, smoothLoadGen, shuffleLoadGen, addNoise):
+def backgroundAnonymize(modelDir, omdPath, owner, modelName, nameOption, locOption, new_center_coords, translationRight, translationUp, rotation, shufPerc, noisePerc, modifyLengthSize, smoothLoadGen, shuffleLoadGen, addNoise, scale):
 	try:
 		pid_filepath = os.path.join(_omfDir, "data/Model", owner, modelName, "NPID.txt")
 		with locked_open(pid_filepath, 'w') as pid_file:
@@ -1702,20 +1707,25 @@ def backgroundAnonymize(modelDir, omdPath, owner, modelName, nameOption, locOpti
 			anonymization.distRandomizeNames(inFeeder)
 		# Location Option
 		if locOption == 'translation':
-			anonymization.distTranslateLocations(inFeeder, translationRight, translationUp, rotation)
+			#anonymization.distTranslateLocations(inFeeder, translationRight, translationUp, rotation)
+			geo.insert_missing_nodes(inFeeder)
+			geo.insert_wgs84_coordinates(inFeeder)
+			geo.transform_wgs84_coordinates(inFeeder, new_center_coords, translationUp, translationRight, rotation)
 		elif locOption == 'randomize':
 			anonymization.distRandomizeLocations(inFeeder)
 		elif locOption == 'forceLayout':
-			distNetViz.insert_coordinates(inFeeder["tree"])
+			#distNetViz.insert_coordinates(inFeeder["tree"])
+			geo.insert_missing_nodes(inFeeder)
+			geo.insert_wgs84_coordinates(inFeeder, force_layout=True, scale=scale)
 		# Electrical Properties
-		if modifyLengthSize:
+		if modifyLengthSize == 'modifyLengthSize':
 			anonymization.distModifyTriplexLengths(inFeeder)
 			anonymization.distModifyConductorLengths(inFeeder)
-		if smoothLoadGen:
+		if smoothLoadGen == 'smoothLoadGen':
 			anonymization.distSmoothLoads(inFeeder)
-		if shuffleLoadGen:
+		if shuffleLoadGen == 'shuffleLoadGen':
 			anonymization.distShuffleLoads(inFeeder, shufPerc)
-		if addNoise:
+		if addNoise == 'addNoise':
 			anonymization.distAddNoise(inFeeder, noisePerc)
 		with locked_open(omdPath, 'r+') as f:
 			f.truncate(0)
@@ -1864,34 +1874,30 @@ def checkAnonymizeTran(owner, modelName):
 @read_permission_function
 def displayOmdMap(owner, modelName, feederNum):
 	'''API to render omd on a leaflet map using a new template '''
+	feeder_dict = get_model_metadata(owner, modelName)
+	feeder_name = feeder_dict.get('feederName' + str(feederNum))
+	feeder_filepath = os.path.join(_omfDir, 'data', 'Model', owner, modelName, feeder_name + '.omd')
+	with locked_open(feeder_filepath) as f:
+		omd = json.load(f)
+	omf.geo.insert_missing_nodes(omd)
+	omf.geo.insert_wgs84_coordinates(omd) # Place coordinate-less OMDs in Lousiana
+	feature_collection = omf.geo.convert_omd_to_featurecollection(omd)
+	featureCollection = json.dumps(feature_collection)
+	components_collection = omf.geo.get_component_featurecollection()
+	componentsCollection = json.dumps(components_collection)
+	# - The csrf token is automatically passed to all template
+	all_data = getDataNames()
+	user_feeders = all_data['feeders']
+	# - Must get rid of the 'u' for unicode strings before passing the strings to JavaScript
+	for dictionary in user_feeders:
+		dictionary['model'] = str(dictionary['model'])
+		dictionary['name'] = str(dictionary['name'])
+	public_feeders = all_data['publicFeeders']
+	show_file_menu = User.cu() == owner or User.cu() == 'admin'
+	return render_template('geoJson.html', featureCollection=featureCollection, componentsCollection=componentsCollection,
+		thisFeederName=feeder_name, thisFeederNum=feederNum, thisModelName=modelName, thisOwner=owner, publicFeeders=public_feeders,
+		userFeeders=user_feeders, showFileMenu=show_file_menu, currentUser=User.cu())
 
-	#handle geoJsonFeatures.js load so it doesn't throw 500 error - this line is there to load geojson variable when not rendering with flask
-	if feederNum == 'geoJsonFeatures.js':
-		return ""
-
-	# get tree size first (TODO: use this for a more clever wait message??)
-	feederDict = get_model_metadata(owner, modelName)
-	feederName = feederDict.get('feederName' + str(feederNum))
-	errorPath, conFilePath, modelDir = [os.path.join(_omfDir, "data", 'Model', owner, modelName, fileName) for fileName in ('error.txt', 'ZPID.txt', '')]
-	feederFile = os.path.join(modelDir, feederName + '.omd')
-	with locked_open(feederFile) as inFile:
-		treeSize = len(json.load(inFile)['tree'])
-	
-	# delete existing geojson and error files
-	if os.path.isfile(errorPath):
-		os.remove(errorPath)
-	for filename in safeListdir(modelDir):
-		if filename.endswith(".geojson"):
-			os.remove(os.path.join(modelDir, filename))
-
-	# write process file
-	with locked_open(conFilePath, 'w') as conFile:
-		conFile.write("WORKING")
-
-	# start the background process
-	importProc = Process(target=omdToGeoJson, args=[feederName, modelDir])
-	importProc.start()
-	return render_template('geoJsonMap.html', treeSize=treeSize, modelName=modelName, owner=owner, feederName=feederName)
 
 def omdToGeoJson(feederName, modelDir):
 	''' Function to run in the background for displaying omd on leaflet map, by converting omd to geojson. '''

@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <!-- Leaflet -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.3/dist/leaflet.css" integrity="sha256-kLaT2GOSpHechhsozzB+flnD+zUyjE2LlfWPgU04xyI=" crossorigin=""/>
+    <script src="https://unpkg.com/leaflet@1.9.3/dist/leaflet.js" integrity="sha256-WBkoXOwTeyKclOHuWtc+i2uENFpDZ9YPdf5Hf+D7ewM=" crossorigin=""> </script> 
+    <!-- Graphology -->
+    <script src="/static/geoJsonMap/v3/graphology-0.25.1.min.js"></script>
+    <!-- Maplibre GL Do I need this for fancy layers???? This lags sometimes. Get rid of it and download local copies-->
+    <link href="https://unpkg.com/maplibre-gl@2.2.1/dist/maplibre-gl.css" rel='stylesheet' />
+    <script src="https://unpkg.com/maplibre-gl@2.2.1/dist/maplibre-gl.js"></script>
+    <script src="https://unpkg.com/@maplibre/maplibre-gl-leaflet@0.0.17/leaflet-maplibre-gl.js"></script>
+    <!-- jQuery -->
+    <script src="https://code.jquery.com/jquery-3.6.3.min.js" integrity="sha256-pvPw+upLPUjgMXY0G+8O0xUf+/Im1MZjXxxgOcBQBXU=" crossorigin="anonymous"></script>
+    <!-- Local --> 
+    <link rel="stylesheet" href="/static/geoJsonMap/v3/dropdownDiv.css"> 
+    <link rel="stylesheet" href="/static/geoJsonMap/v3/main.css">
+    <link rel="stylesheet" href="/static/geoJsonMap/v3/modal.css"> 
+    <link rel="stylesheet" href="/static/geoJsonMap/v3/sideNav.css"> 
+    <link rel="stylesheet" href="/static/geoJsonMap/v3/topNav.css"> 
+    <link rel="stylesheet" href="/static/geoJsonMap/v3/topTab.css"> 
+    <meta charset="utf-8">
+    <title>OMF GeoJSON Editor</title>
+  </head>
+  <body>
+    <header>
+        <div id="menuInsert"></div>
+    </header>
+    <main></main>
+    <script>
+        'use strict';
+        const gFeatureCollection = {% if featureCollection %}{{ featureCollection | safe }}{% else %}null{% endif %};
+        const gComponentsCollection = {% if componentsCollection %}{{ componentsCollection | safe }}{% else %}null{% endif %};
+        const gThisOwner = "{% if thisOwner %}{{ thisOwner | safe }}{% else %}null{% endif %}";
+        const gThisModelName = "{% if thisModelName %}{{ thisModelName | safe }}{% else %}null{% endif %}";
+        const gThisFeederName = "{% if thisFeederName %}{{ thisFeederName | safe }}{% else %}null{% endif %}";
+        const gThisFeederNum = {% if thisFeederNum %}{{ thisFeederNum | safe }}{% else %}null{% endif %};
+        const gPublicFeeders = {% if publicFeeders %}{{ publicFeeders | safe }}{% else %}null{% endif %};
+        const gUserFeeders = {% if userFeeders %}{{ userFeeders | safe }}{% else %}null{% endif %};
+        const gCurrentUser = "{% if currentUser %}{{ currentUser | safe }}{% else %}null{% endif %}";
+    </script>
+    <script type="module" src="/static/geoJsonMap/v3/main.js"></script>
+  </body>
+</html>
