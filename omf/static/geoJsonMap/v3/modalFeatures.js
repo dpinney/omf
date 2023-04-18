@@ -1617,7 +1617,7 @@ function _getScadaModal(controller) {
     scadaInput.id = 'scadaInput'; 
     const scadaLabel = document.createElement('label');
     scadaLabel.htmlFor = 'scadaInput';
-    scadaLabel.innerHTML = 'File containing Scada load data (.csv)';
+    scadaLabel.innerHTML = 'File containing SCADA load data (.csv)';
     // - Format help anchor
     const anchor = document.createElement('a');
     anchor.href = 'https://github.com/dpinney/omf/wiki/Tools-~-gridEdit#scada-loadshapes';
@@ -1648,7 +1648,7 @@ function _getScadaModal(controller) {
         modal.showProgress(true, 'Importing file...', 'caution');
         controller.submitFeature(modal);
     });
-    modal.setTitle('Scada Loadshapes');
+    modal.setTitle('SCADA Loadshapes');
     modal.addStyleClass('horizontalFlex',       'titleElement');
     modal.addStyleClass('centerMainAxisFlex',   'titleElement');
     modal.addStyleClass('centerCrossAxisFlex',  'titleElement');
@@ -1699,7 +1699,7 @@ function getScadaDiv(featureGraph) {
     const controller = new FeatureController(featureGraph, ['modal:scada']);
     const modal = _getScadaModal(controller);
     const modalInsert = document.getElementById('modalInsert');
-    const div = _getMenuDiv('Scada Loadshapes...');
+    const div = _getMenuDiv('SCADA Loadshapes...');
     div.addEventListener('click', function() {
         modalInsert.replaceChildren(modal.divElement);
         modalInsert.classList.add('visible');
