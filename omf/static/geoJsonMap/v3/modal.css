@@ -100,18 +100,27 @@ div.js-div--modal.expanded {
     /*transition: max-height .2s;*/
 }
 div.js-div--modal button {
-    background-color: hsla(228, 100%, 41%, 1);
+    background-color: mediumblue;
     border: none;
     border-radius: 5px;
     color: white;
     cursor: pointer;
     padding: .25rem;
 }
+div.js-div--modal button:hover {
+    background-color: blue;
+}
 div.js-div--modal button.delete {
     background-color: crimson;
 }
+div.js-div--modal button.delete:hover {
+    background-color: red;
+}
 div.js-div--modal button.add {
     background-color: seagreen;
+}
+div.js-div--modal button.add:hover {
+    background-color: mediumseagreen;
 }
 div.js-div--modal input {
     border: 1px solid black;
