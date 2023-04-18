@@ -81,6 +81,25 @@ function setupHTML(featureGraph) {
     createHelpMenu();
     createEditMenu(featureGraph);
     createFileMenu(featureGraph);
+    // - Add event listeners to only allow either the file or edit menu to be open
+    const menuInsert = document.getElementById('menuInsert');
+    const buttons = menuInsert.getElementsByTagName('button');
+    const fileButton = buttons[0];
+    const editButton = buttons[1];
+    fileButton.addEventListener('click', function() {
+        if (this.classList.contains('expanded')) {
+            if (editButton.classList.contains('expanded')) {
+                editButton.click();
+            }
+        }
+    });
+    editButton.addEventListener('click', function() {
+        if (this.classList.contains('expanded')) {
+            if (fileButton.classList.contains('expanded')) {
+                fileButton.click();
+            }
+        }
+    });
     // - Save before rendering the interface to remove any previous error files
     document.getElementById('saveDiv').click();
     // - Allow the modal insert to be closed
