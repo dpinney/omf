@@ -37,13 +37,28 @@ function main() {
         }
     });
     setupHTML(featureGraph);
-    const osm = L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        maxZoom: 29,
-        attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+
+    /****************/
+    /* Setup layers */
+    /****************/
+
+    //const osm = L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    //    maxZoom: 29,
+    //    attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+    //});
+    var esri_satellite_layer = L.esri.basemapLayer('Imagery');
+    const mapbox_layer = L.mapboxGL({
+        attribution: "",
+        style: 'https://api.maptiler.com/maps/basic/style.json?key=WOwRKyy0L6AwPBuM4Ggj'
     });
+    const esri_topography_layer = L.esri.basemapLayer('Streets');
+    const blank_layer = L.tileLayer('');
     const baseMaps = {
-        'Raster tiles': osm
-        //'Vector tiles': mapTiler
+        //'Basic tiles': osm,
+        'Satellite': esri_satellite_layer,
+        'Streets': mapbox_layer,
+        'Topo': esri_topography_layer,
+        'Blank': blank_layer
     };
     const overlayMaps = {
         'Nodes': LeafletLayer.nodeLayers,
@@ -55,12 +70,12 @@ function main() {
         // - This zoom level sensibly displays all circuits to start, even the ones with weird one-off players that skew where the center is
         zoom: 14,
         // - Provide the layers that the map should start with
-        layers: [osm, LeafletLayer.nodeLayers, LeafletLayer.lineLayers, LeafletLayer.parentChildLineLayers],
+        layers: [esri_satellite_layer, LeafletLayer.nodeLayers, LeafletLayer.lineLayers, LeafletLayer.parentChildLineLayers],
         // - Better performance for large datasets
         renderer: L.canvas()
     });
     LeafletLayer.map = map;
-    L.control.layers(baseMaps, overlayMaps).addTo(map);
+    L.control.layers(baseMaps, overlayMaps, { position: 'topleft', collapsed: false }).addTo(map);
     // - Disable the following annoying default Leaflet keyboard shortcuts:
     //  - TODO: do a better job and stop the event(s) from propagating in text inputs instead
     document.getElementById('map').onkeydown = function(e) {
