@@ -148,6 +148,7 @@ div.js-div--modal table.table--modal span {
     width: 100%;
 }
 div.div--modalBanner {
+    border-radius: 5px;
     font-size: 24px;
     padding: 1rem;
     text-align: center;

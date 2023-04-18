@@ -553,8 +553,10 @@ class FeatureController { // implements ControllerInterface
     // ** Private methods ** 
     // *********************
 
+    /**
+     * - Force the client to always request new files from the server without using the browser cache.
+     */
     #reloadPage() {
-        // - Force the client to always request new files from the server without using the browser cache. 
         window.location.reload(true);
         //console.log('Reloaded page');
     }
