@@ -108,10 +108,10 @@ div.js-div--modal button {
     padding: .25rem;
 }
 div.js-div--modal button.delete {
-    background-color: hsla(0, 100%, 45%, 1);   
+    background-color: crimson;
 }
 div.js-div--modal button.add {
-    background-color: hsla(122, 100%, 32%, 1);
+    background-color: seagreen;
 }
 div.js-div--modal input {
     border: 1px solid black;
