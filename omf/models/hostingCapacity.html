@@ -1,6 +1,8 @@
 <head>
 	{{ omfHeaders }}
+	<!-- Library Imports -->
 	<script src="{{pathPrefix}}/static/highcharts4.src.js"></script>
+	<script src="https://cdn.plot.ly/plotly-1.50.1.min.js"></script>
 	{% macro insert_file_upload_block(fileName, dataVariableName) -%}
 		<input id="{{dataVariableName}}Handler" type="file" style="display:none" onchange="handle_files(this.files,'{{dataVariableName}}','{{fileName}}')">
 		<input id="{{dataVariableName}}" name="{{dataVariableName}}" value="{{allInputDataDict[dataVariableName]}}" type="hidden">
@@ -53,12 +55,11 @@
 					<option value="sandia2" {% if allInputDataDict.mohcaAlgorithm == 'sandia2' %}selected{% endif %}>sandia2</option>
 				</select>
 			</div>
-			<!--
-			<div class="shortInput">
-				<label class="tooltip">Circuit<span class="classic">TBD.</span></label>
-				<input type="text" id="circuit" name="circuit" value="{{allInputDataDict.circuit}}" pattern="^[\w\s\d\.-]+$"/>
-			</div>
-		    -->
+            <!--<div class="shortInput">
+				<label>Circuit</label>
+				<button id="feederButton" type="button" onclick="javascript:editFeeder(allInputData.modelName,1);" style="display:block;width:125px;">Open Editor</button>
+				<input type="text" id="circuitName" name="circuitName" value="{{allInputDataDict.circuitName}}" style="display:none">
+			</div>-->
 			{{ omfModelButtons }}
 		</form>
 	</div>
@@ -66,6 +67,36 @@
 	{{ omfRunDebugBlock }}
 	{% if modelStatus == 'finished' %}
 	<div id="output">
+		<p class="reportTitle">Mohca Generated Hosting Capacity</p>
+		<div id="hostingCapacityColumnChart" class="tightContent">
+			<div id="hostingCapacityColumnChart" style="width:1000px"></div>
+			<script type="text/javascript">
+				Plotly.newPlot("hostingCapacityColumnChart", JSON.parse( allOutputData["columnChartData"]) )
+			</script>
+		</div>
+        <div id="hostingCapacityTimeChart" class="tightContent">
+			<div id="hostingCapacityTimeChart" style="width:1000px"></div>
+			<script type="text/javascript">
+				Plotly.newPlot("hostingCapacityTimeChart", JSON.parse( allOutputData["timeSeriesData"]) )
+			</script>
+		</div>
+        <p class="reportTitle" style="page-break-before:always"><b>Hosting Capacity</b></p>
+		<div id="hostingCapacityTable" class="tightContent">
+			<table style="width:100%">
+                <tr>
+                   {% for header in allOutputDataDict["tableHeadings"] %}
+                   <th>{{ header }}</th>
+                   {% endfor %}
+                </tr>
+                {% for values in allOutputDataDict["tableValues"] %}
+                <tr>
+                    {% for val in values %}
+					<td>{{ val }}</td>
+					{% endfor %}
+                </tr>
+                {% endfor %}
+            </table> 
+		</div>
 		{{ rawOutputFiles }}
 	</div>
 	{% endif %}
