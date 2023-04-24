@@ -1,6 +1,3 @@
-:root {
-    --headerHeight: 64px;
-}
 nav.js-nav--topNav {
     background: black;
     display: flex;

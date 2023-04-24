@@ -1,7 +1,14 @@
 * {
     box-sizing: border-box;
     font-family: Helvetica, Arial, Sans-Serif;
+}
+:root {
     --headerHeight: 64px;
+    --regularFontSize: 1.3rem;
+    --regularFontPadding: .75rem;
+    --sideNavWidth: 550px;
+    --sideNavTransitionTime: 0.3s;
+    --tableRowMinHeight: 3rem;
 }
 
 /*******/

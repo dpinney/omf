@@ -1,9 +1,3 @@
-:root {
-    /*--sideNavWidth: 272px;*/
-    /*--sideNavWidth: 750px;*/
-    --sideNavWidth: 550px;
-    --sideNavTransitionTime: 0.3s;
-}
 article.js-article--sideNavArticle {
     /* Set position:relative; so that any absolutely positioned elements within the article don't go out of bounds*/
     position: relative;
