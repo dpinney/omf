@@ -1,4 +1,5 @@
 export { Modal };
+'use strict';
 
 class Modal {
     divElement;         // - The divElement is the outermost div that contains the modal's content

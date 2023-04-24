@@ -1,5 +1,6 @@
 export { FeatureGraph, FeatureNotFoundError };
 import { Feature } from './feature.js';
+'use strict';
 
 /**
  * - TODO (3/18/23): A FeatureGraph is really an implementation of an ObservableGraphInterface, which I need to define and diagram. All data formats

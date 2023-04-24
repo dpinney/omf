@@ -2,13 +2,12 @@ import { DropdownDiv } from './dropdownDiv.js';
 import { Feature } from  './feature.js';
 import { FeatureGraph } from  './featureGraph.js';
 import { FeatureController } from './featureController.js';
-import { getLoadingModal, getAnonymizationDiv, getSaveDiv, getRawDataDiv, getRenameDiv, getLoadFeederDiv, 
-    getBlankFeederDiv, getWindmilDiv, getGridlabdDiv, getCymdistDiv, getOpendssDiv, getAmiDiv, 
-    getAttachmentsDiv, getClimateDiv, getScadaDiv, getStaticLoadsToHousesDiv } from './modalFeatures.js';
+import { getLoadingModal, getAnonymizationDiv, getSaveDiv, getRawDataDiv, getRenameDiv, getLoadFeederDiv, getBlankFeederDiv, getWindmilDiv, getGridlabdDiv, getCymdistDiv, getOpendssDiv, getAmiDiv, getAttachmentsDiv, getClimateDiv, getScadaDiv } from './modalFeatures.js';
 import { LeafletLayer } from './leafletLayer.js';
 import { Nav } from './nav.js';
 import { SearchModal } from './searchModal.js';
 import { TopTab } from './topTab.js';
+'use strict';
 
 function main() {
     const features = gFeatureCollection.features.map(f => new Feature(f));
@@ -95,28 +94,38 @@ function setupHTML(featureGraph) {
     createNav(featureGraph);
     createHelpMenu();
     createEditMenu(featureGraph);
-    createFileMenu(featureGraph);
+    if (gShowFileMenu) {
+        createFileMenu(featureGraph);
+    }
     // - Add event listeners to only allow either the file or edit menu to be open
-    const menuInsert = document.getElementById('menuInsert');
-    const buttons = menuInsert.getElementsByTagName('button');
-    const fileButton = buttons[0];
-    const editButton = buttons[1];
-    fileButton.addEventListener('click', function() {
-        if (this.classList.contains('expanded')) {
-            if (editButton.classList.contains('expanded')) {
-                editButton.click();
+    const fileMenu = document.getElementById('fileMenu');
+    let fileButton = null;
+    if (fileMenu !== null) {
+        fileButton = fileMenu.getElementsByTagName('button')[0];
+        fileButton.addEventListener('click', function() {
+            if (this.classList.contains('expanded')) {
+                if (editButton !== null && editButton.classList.contains('expanded')) {
+                    editButton.click();
+                }
             }
-        }
-    });
-    editButton.addEventListener('click', function() {
-        if (this.classList.contains('expanded')) {
-            if (fileButton.classList.contains('expanded')) {
-                fileButton.click();
+        });
+    }
+    const editMenu = document.getElementById('editMenu');
+    let editButton = null;
+    if (editMenu !== null) {
+        editButton = editMenu.getElementsByTagName('button')[0];
+        editButton.addEventListener('click', function() {
+            if (this.classList.contains('expanded')) {
+                if (fileButton !== null && fileButton.classList.contains('expanded')) {
+                    fileButton.click();
+                }
             }
-        }
-    });
-    // - Save before rendering the interface to remove any previous error files
-    document.getElementById('saveDiv').click();
+        });
+    }
+    // - Save before rendering the interface to remove any previous error files, but only in "online mode"
+    if (gIsOnline) {
+        document.getElementById('saveDiv').click();
+    }
     // - Allow the modal insert to be closed
     const modalInsert = document.getElementById('modalInsert');
     modalInsert.addEventListener('click', function() {
@@ -206,15 +215,19 @@ function createEditMenu(featureGraph) {
         throw Error('"featureGraph argument must be instanceof FeatureGraph');
     }
     const dropdownDiv = new DropdownDiv();
+    dropdownDiv.divElement.id = 'editMenu';
     dropdownDiv.addStyleClass('menu');
     dropdownDiv.setButton('Edit', true);
     document.getElementById('menuInsert').appendChild(dropdownDiv.divElement);
-    dropdownDiv.insertElement(getAmiDiv(featureGraph));
-    dropdownDiv.insertElement(getAnonymizationDiv(featureGraph));
+    if (gIsOnline) {
+        dropdownDiv.insertElement(getAmiDiv(featureGraph));
+        dropdownDiv.insertElement(getAnonymizationDiv(featureGraph));
+    }
     dropdownDiv.insertElement(getAttachmentsDiv(featureGraph));
-    dropdownDiv.insertElement(getClimateDiv(featureGraph));
-    dropdownDiv.insertElement(getScadaDiv(featureGraph));
-    //dropdownDiv.insertElement(getStaticLoadsToHousesDiv(featureGraph));
+    if (gIsOnline) {
+        dropdownDiv.insertElement(getClimateDiv(featureGraph));
+        dropdownDiv.insertElement(getScadaDiv(featureGraph));
+    }
 }
 
 /**
@@ -226,25 +239,32 @@ function createFileMenu(featureGraph) {
         throw Error('"featureGraph argument must be instanceof FeatureGraph');
     }
     const dropdownDiv = new DropdownDiv();
+    dropdownDiv.divElement.id = 'fileMenu';
     dropdownDiv.addStyleClass('menu');
     dropdownDiv.setButton('File', true);
     document.getElementById('menuInsert').appendChild(dropdownDiv.divElement);
-    dropdownDiv.insertElement(getSaveDiv(featureGraph));
+    if (gIsOnline) {
+        dropdownDiv.insertElement(getSaveDiv(featureGraph));
+    }
     dropdownDiv.insertElement(getRawDataDiv(featureGraph));
-    dropdownDiv.insertElement(getRenameDiv(featureGraph));
-    dropdownDiv.insertElement(getLoadFeederDiv(featureGraph));
-    dropdownDiv.insertElement(getBlankFeederDiv(featureGraph));
-    dropdownDiv.insertElement(getWindmilDiv(featureGraph));
-    dropdownDiv.insertElement(getGridlabdDiv(featureGraph));
-    dropdownDiv.insertElement(getCymdistDiv(featureGraph));
-    dropdownDiv.insertElement(getOpendssDiv(featureGraph));
+    if (gIsOnline) {
+        dropdownDiv.insertElement(getRenameDiv(featureGraph));
+        dropdownDiv.insertElement(getLoadFeederDiv(featureGraph));
+        dropdownDiv.insertElement(getBlankFeederDiv(featureGraph));
+        dropdownDiv.insertElement(getWindmilDiv(featureGraph));
+        dropdownDiv.insertElement(getGridlabdDiv(featureGraph));
+        dropdownDiv.insertElement(getCymdistDiv(featureGraph));
+        dropdownDiv.insertElement(getOpendssDiv(featureGraph));
+    }
 }
 
 (function loadInterface() {
     const modalInsert = document.createElement('div');
-    modalInsert.classList.add('visible');
     modalInsert.id = 'modalInsert';
-    modalInsert.replaceChildren(getLoadingModal().divElement);
+    if (gIsOnline) {
+        modalInsert.classList.add('visible');
+        modalInsert.replaceChildren(getLoadingModal().divElement);
+    }
     document.getElementsByTagName('main')[0].appendChild(modalInsert);
     setTimeout(() => main(), 1);
 })();

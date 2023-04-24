@@ -1,4 +1,5 @@
 export { TopTab };
+'use strict';
 
 class TopTab {
     divElement;         // Container for tabDivElement and contentDivElement;

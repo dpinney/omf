@@ -2,6 +2,7 @@ export { FeatureDropdownDiv };
 import { DropdownDiv } from './dropdownDiv.js';
 import { FeatureController } from './featureController.js';
 import { TreeFeatureModal } from './treeFeatureModal.js';
+'use strict';
 
 class FeatureDropdownDiv {
     #controller;    // - ControllerInterface instance

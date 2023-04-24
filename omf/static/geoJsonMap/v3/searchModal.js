@@ -4,6 +4,7 @@ import { FeatureController } from './featureController.js';
 import { FeatureDropdownDiv } from './featureDropdownDiv.js';
 import { getCirclePlusSvg, getTrashCanSvg } from './treeFeatureModal.js';
 import { Modal } from './modal.js';
+'use strict';
 
 // - A SearchModal doesn't have an underlying Feature instance, unlike a TreeFeatureModal and a ModalFeatureModal
 class SearchModal {

@@ -2,6 +2,7 @@ export { TreeFeatureModal, getCirclePlusSvg, getTrashCanSvg };
 import { Modal } from './modal.js';
 import { FeatureController } from './featureController.js';
 import { LeafletLayer } from './leafletLayer.js';
+'use strict';
 
 class TreeFeatureModal { // implements ObserverInterface
     #controller;    // - ControllerInterface instance

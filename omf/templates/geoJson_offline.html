@@ -11,17 +11,10 @@
     <link href='https://api.tiles.mapbox.com/mapbox-gl-js/v1.5.0/mapbox-gl.css' rel='stylesheet' />
     <script src='https://api.tiles.mapbox.com/mapbox-gl-js/v1.5.0/mapbox-gl.js'></script>
     <script src="https://unpkg.com/mapbox-gl-leaflet/leaflet-mapbox-gl.js"></script>
-    <!-- Use Graphology library for graph operations -->
-    <script src="/static/geoJsonMap/v3/graphology-0.25.1.min.js"></script>
     <!-- jQuery -->
     <script src="https://code.jquery.com/jquery-3.6.3.min.js" integrity="sha256-pvPw+upLPUjgMXY0G+8O0xUf+/Im1MZjXxxgOcBQBXU=" crossorigin="anonymous"></script>
     <!-- Local --> 
-    <link rel="stylesheet" href="/static/geoJsonMap/v3/dropdownDiv.css"> 
-    <link rel="stylesheet" href="/static/geoJsonMap/v3/main.css">
-    <link rel="stylesheet" href="/static/geoJsonMap/v3/modal.css"> 
-    <link rel="stylesheet" href="/static/geoJsonMap/v3/sideNav.css"> 
-    <link rel="stylesheet" href="/static/geoJsonMap/v3/topNav.css"> 
-    <link rel="stylesheet" href="/static/geoJsonMap/v3/topTab.css"> 
+    {{ css }}
     <meta charset="utf-8">
     <title>OMF GeoJSON Editor</title>
   </head>
@@ -44,6 +37,6 @@
         const gShowFileMenu = {% if showFileMenu %}{{ showFileMenu | safe }}{% else %}null{% endif %};
         const gIsOnline = {% if isOnline %}{{ isOnline | safe }}{% else %}null{% endif %};
     </script>
-    <script type="module" src="/static/geoJsonMap/v3/main.js"></script>
+    {{ js }}
   </body>
 </html>

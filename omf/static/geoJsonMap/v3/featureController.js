@@ -3,6 +3,7 @@ import { Feature } from './feature.js';
 import { FeatureGraph } from './featureGraph.js';
 import { LeafletLayer } from './leafletLayer.js';
 import { Modal } from './modal.js';
+'use strict';
 
 /**
  * - Preferrably, FeatureController instances should only be created on page load. After page load, use this.setIDs() to change the subset of

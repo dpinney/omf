@@ -1,6 +1,6 @@
 ''' Geospatial analysis of circuit models.'''
 import json, os, shutil, math, tempfile, random, webbrowser, platform, re
-from pathlib import Path
+import pathlib
 from os.path import join as pJoin
 from pyproj import Proj, transform, Transformer # Remove this import when deprecating other functions
 import pyproj
@@ -743,6 +743,54 @@ def showOnMap(geoJson):
 		json.dump(geoJson, outFile, indent=4)
 	webbrowser.open('file://' + pJoin(tempDir,'geoJsonMap.html'))
 
+
+def map_omd(omd_path, output_dir, open_browser=False):
+    '''
+    Create an HTML page of the GeoJSON circuit editor without Flask
+    '''
+    # - Load feeder data
+    with open(omd_path) as f:
+        omd = json.load(f)
+    omf.geo.insert_missing_nodes(omd)
+    omf.geo.insert_wgs84_coordinates(omd)
+    feature_collection = omf.geo.convert_omd_to_featurecollection(omd)
+    featureCollection = json.dumps(feature_collection)
+    components_collection = omf.geo.get_component_featurecollection()
+    componentsCollection = json.dumps(components_collection)
+    # - Load JavaScript
+    main_js_filepath = (pathlib.Path(omf.omfDir).resolve(True) / 'static' / 'geoJsonMap' / 'v3' / 'main.js').resolve(True)
+    all_js_filepaths = list((pathlib.Path(omf.omfDir).resolve(True) / 'static' / 'geoJsonMap' / 'v3').glob('**/*.js'))
+    all_js_filepaths.remove(main_js_filepath)
+    all_js_filepaths.append(main_js_filepath)
+    all_js_file_content = []
+    for filepath in all_js_filepaths:
+        with pathlib.Path(filepath).open() as f:
+            file_content = ''.join(list(filter(lambda line: not re.match(r'^\s*(?:import\s+|export\s+)', line), f.readlines())))
+            file_content = f'<script>\n{file_content}\n</script>\n'
+            all_js_file_content.append(file_content)
+    js = ''.join(all_js_file_content)
+    # - Load CSS
+    all_css_file_content = []
+    for filepath in (pathlib.Path(omf.omfDir).resolve(True) / 'static' / 'geoJsonMap' / 'v3').glob('**/*.css'):
+        with pathlib.Path(filepath).open() as f:
+            file_content = ''.join(f.readlines())
+            file_content = f'<style>\n{file_content}\n</style>\n'
+            all_css_file_content.append(file_content)
+    css = ''.join(all_css_file_content)
+    # - Write template
+    with (pathlib.Path(omf.omfDir).resolve(True) / 'templates' / 'geoJson_offline.html').open() as f:
+        template = f.read()
+    rendered = Template(template).render(featureCollection=featureCollection, componentsCollection=componentsCollection, thisOwner=None,
+        thisModelName=None, thisFeederName=None, thisFeederNum=None, publicFeeders=None, userFeeders=None,
+        currentUser=None, showFileMenu=json.dumps(False), isOnline=json.dumps(False), css=css, js=js)
+    output_dir = pathlib.Path(output_dir)
+    output_dir.mkdir(parents=True, exist_ok=True)
+    with open(output_dir / 'geoJson_offline.html', 'w') as f:
+        f.write(rendered)
+    if open_browser:
+        openInBrowser(str(output_dir / 'geoJson_offline.html'))
+
+
 def convert_omd_to_featurecollection(omd):
     '''
     Convert an OMD dict into a FeatureCollection dict
@@ -1350,7 +1398,7 @@ def get_component_featurecollection():
     feature_collection = {'type': 'FeatureCollection', 'features': []}
     # - This isn't an actual tree key, but it's needed to insert components into a FeatureMap in the front-end
     tree_key = 1
-    for p in (Path(omf.omfDir).resolve() / 'data').glob('Component*/*.json'):
+    for p in (pathlib.Path(omf.omfDir).resolve(True) / 'data').glob('Component*/*.json'):
         # - Does having non-numeric tree keys for components break anything?
         feature = {'type': 'Feature', 'properties': {'treeKey': 'component:' + str(tree_key)}}
         if p.parent.name == 'ComponentDss':
@@ -1415,7 +1463,7 @@ def _tests():
 	print (lat, lon) #(37.37267827914456, -89.89482331256504)
 	e2, n2 = latLonToStatePlane(lat, lon, epsg=2205)
 	print (e2, n2) # (249.24197527189972, 1186.1488466408398)
-	prefix = Path(__file__).parent
+	prefix = pathlib.Path(__file__).parent
 	# mapOmd(prefix / 'static/publicFeeders/Olin Barre LatLon.omd', 'testOutput', 'png', openBrowser=True, conversion=False)
 	mapOmd(prefix / 'static/publicFeeders/Olin Barre LatLon.omd', './', 'html', openBrowser=True, conversion=False)
 	# showOnMap(hullOfOmd(prefix / 'static/publicFeeders/Olin Barre LatLon.omd', conversion=False))

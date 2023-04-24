@@ -1,6 +1,7 @@
 export { LeafletLayer };
 import { FeatureController } from "./featureController.js";
 import { TreeFeatureModal } from './treeFeatureModal.js';
+'use strict';
 
 /**
  * - Each LeafletLayer instance (i.e. the view in the MVC pattern) observes an ObservableInterface instance (i.e. the model in the MVC pattern). An

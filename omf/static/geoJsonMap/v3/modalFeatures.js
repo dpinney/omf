@@ -1,10 +1,9 @@
-export { getLoadingModal, getAnonymizationDiv, getSaveDiv, getRawDataDiv, getRenameDiv, getLoadFeederDiv, 
-    getBlankFeederDiv, getWindmilDiv, getGridlabdDiv, getCymdistDiv, getOpendssDiv, getAmiDiv, getAttachmentsDiv,
-    getClimateDiv, getScadaDiv, getStaticLoadsToHousesDiv };
+export { getLoadingModal, getAnonymizationDiv, getSaveDiv, getRawDataDiv, getRenameDiv, getLoadFeederDiv, getBlankFeederDiv, getWindmilDiv, getGridlabdDiv, getCymdistDiv, getOpendssDiv, getAmiDiv, getAttachmentsDiv, getClimateDiv, getScadaDiv, getStaticLoadsToHousesDiv };
 import { Feature } from  './feature.js';
 import { FeatureController } from './featureController.js';
 import { FeatureGraph } from './featureGraph.js';
 import { Modal } from './modal.js';
+'use strict';
 
 /**
  * @returns {Modal}

@@ -1,4 +1,5 @@
 export { DropdownDiv };
+'use strict';
 
 class DropdownDiv {
     divElement;         // - The divElement is the outermost div that contains the DropdownDiv's button (if any) and content

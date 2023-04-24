@@ -1,6 +1,7 @@
 export { Feature };
 import { FeatureController } from './featureController.js';
 import { FeatureGraph } from './featureGraph.js';
+'use strict';
 
 class Feature {
     // - This class is designed around the Observer Pattern and the Model View Controller Pattern
