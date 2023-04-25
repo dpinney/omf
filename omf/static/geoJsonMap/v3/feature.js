@@ -504,18 +504,23 @@ class Feature {
      *  - E.g. a vanilla JavaSCript GeoJSON feature object
      */
     getObservableExportData() {
-        // - Recorders and players cannot have a "name" property when being saved, but they need to maintain that property in the interface
         const clone = structuredClone(this.#feature);
         if (clone.properties.hasOwnProperty('treeProps')) {
             if (clone.properties.treeProps.hasOwnProperty('object')) {
+                // - Recorders and players cannot have a "name" property when being saved, but they need to maintain that property in the interface
                 if (['recorder', 'player'].includes(clone.properties.treeProps.object)) {
                     if (clone.properties.treeProps.hasOwnProperty('name')) {
-                        const name = clone.properties.treeProps.name;
-                        const nameComponents = name.split(':');
+                        const nameComponents = clone.properties.treeProps.name.split(':');
                         if (nameComponents.length === 3 && nameComponents[2] === 'addedName') {
                             delete clone.properties.treeProps.name;
                         }
                     }
+                }
+                // - !CMD objects have their "name" property moved to the "command" property in the interface so that they have unique names. The
+                //   "name" property value must be set to the value of the "command" property on export
+                if (clone.properties.treeProps.object === '!CMD') {
+                    clone.properties.treeProps.name = clone.properties.treeProps.CMD_command;
+                    delete clone.properties.treeProps.CMD_command;
                 }
             }
         }

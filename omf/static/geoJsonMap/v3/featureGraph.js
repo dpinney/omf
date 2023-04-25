@@ -1,18 +1,6 @@
 export { FeatureGraph, FeatureNotFoundError };
 import { Feature } from './feature.js';
 
-/**
- * - TODO (3/18/23): A FeatureGraph is really an implementation of an ObservableGraphInterface, which I need to define and diagram. All data formats
- *   (distribution, transmission, OMD, GeoJSON, etc.) should be passing a graph around instead of an array of ObservableInterface instances
- *
- * - TODO: I really should go back and work the graph back into my Observer Pattern. I could call it a "ObserverProxy" interface or something. I just
- *   got tired of designing and wanted to code. All of these graph methods could actually be defined on the Feature class itself, but they would be
- *   harder to understand and probably slower.
- *  - E.g. insertFeature() is really analogous to registerObserver()
- *  - E.g. getFeature() is really analogous to a not-implemented method called getObserver(), which would be implemented through some combination of
- *    queryObserversAboutCoordinates() and/or queryObserversAboutProperty()
- *  - etc.
- */
 class FeatureGraph {
     // - Names are not unique, so I potentially need to map one name to multiple keys
     #nameToKey;     
@@ -240,6 +228,16 @@ class FeatureGraph {
                     const name = `${object}:${observableKey}:addedName`;
                     observable.setProperty('name', name);
                 }
+            }
+        }
+        // - !CMD objects need to be able to have the same command, but the name of the !CMD object is the command. Get around this by creating a new
+        //   "command" property whose value replaces the "name" property value on export
+        if (observable.hasProperty('object')) {
+            const object = observable.getProperty('object');
+            if (object === '!CMD') {
+                observable.setProperty('CMD_command', observable.getProperty('name'));
+                const name = `${object}:${observableKey}:addedName`;
+                observable.setProperty('name', name);
             }
         }
         // - Give the feature a pointer to this graph, which effectively makes the feature Observable to all other features and an Observer of all

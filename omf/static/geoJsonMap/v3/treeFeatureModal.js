@@ -8,7 +8,7 @@ class TreeFeatureModal { // implements ObserverInterface
     #modal;         // - A single Modal instance
     #observables;   // - An array of ObservableInterface instances
     #removed;       // - Whether this TreeFeatureModal instance has already been deleted
-    static #nonDeletableProperties = ['name', 'object', 'from', 'to', 'parent', 'latitude', 'longitude', 'treeKey'];
+    static #nonDeletableProperties = ['name', 'object', 'from', 'to', 'parent', 'latitude', 'longitude', 'treeKey', 'CMD_command'];
     
     /**
      * @param {FeatureController} controller - a ControllerInterface instance
