@@ -23,6 +23,9 @@
 /******************/
 /* Shared classes */
 /******************/
+.absolute {
+    position: absolute;
+}
 .horizontalFlex {
     display: flex;
 }
@@ -51,9 +54,11 @@ div.horizontalFlex {
 }
 .indent1 {
     padding: 0 0 0 var(--regularFontSize);
+    text-align: left;
 }
 .indent2 {
     padding: 0 0 0 calc(2 * var(--regularFontSize)); 
+    text-align: left;
 }
 
 /* TODO use media queries to set max-width based on screen size. Don't create additional classes. 50% max width is fine in 90% of cases */
@@ -98,7 +103,8 @@ div.js-div--modal button {
     border-radius: 5px;
     color: white;
     cursor: pointer;
-    padding: .25rem;
+    padding: .15rem;
+    z-index: 1;
 }
 div.js-div--modal button:hover {
     background-color: blue;
@@ -117,7 +123,6 @@ div.js-div--modal button.add:hover {
 }
 div.js-div--modal input {
     border: 1px solid black;
-    box-sizing: border-box;
     font-size: var(--regularFontSize);
     margin: 0;
     padding: .2rem;
@@ -129,6 +134,7 @@ div.js-div--modal select {
     border-radius: 5px;
     font-size: var(--regularFontSize);
     padding: .2rem;
+    /* width cannot be 100% for all modals because of big modal like anonymization */
 }
 div.js-div--modal span {
     font-size: var(--regularFontSize);
@@ -166,7 +172,9 @@ div.div--modalElementContainer {
 table.table--modal {
     border-collapse: collapse;
     font-size: var(--regularFontSize);
+    position: relative;
     table-layout: fixed;
+    text-align: left;
     word-wrap: break-word;
 }
 table.table--modal.centeredTable {
@@ -196,8 +204,8 @@ div.js-div--modal.treeFeatureModal {
     max-height: 70vh;
 }
 div.js-div--modal.treeFeatureModal table.table--modal td:nth-child(2) {
-    max-width: 175px;
-    width: 175px;
+    max-width: 180px;
+    width: 180px;
 }
 
 /***********************/
@@ -211,15 +219,22 @@ div.js-div--modal.searchModal {
 div.js-div--modal.searchModal div.div--modalElementContainer {
     height: initial;
 }
-div.js-div--modal.searchModal table.table--modal td:nth-child(2) select {
-    max-width: 50px;
-    width: 50px;
+div.js-div--modal.searchModal select {
+    width: 100%;
 }
-div.js-div--modal.searchModal table.table--modal td:nth-child(3) select {
-    max-width: 175px;
-    width: 175px;
+div.js-div--modal.searchModal table.table--modal td:first-child {
+    max-width: 32.8px;
+    width: 32.8px;
 }
-div.js-div--modal.searchModal table.table--modal td:nth-child(4) select {
+div.js-div--modal.searchModal table.table--modal td:nth-child(2) {
+    max-width: 58px;
+    width: 58px;
+}
+div.js-div--modal.searchModal table.table--modal td:nth-child(3) {
+    max-width: 170px;
+    width: 170px;
+}
+div.js-div--modal.searchModal table.table--modal td:nth-child(4) {
     max-width: 75px;
     width: 75px;
 }
@@ -227,11 +242,6 @@ div.js-div--modal.searchModal table.table--modal td:nth-child(4) select {
 /*****************************/
 /* Load feeder modal styling */
 /*****************************/
-/* Hack to stop overflow. Seems to work though */
-/*div.js-div--modal.loadFeederModal div.div--modalElementContainer {
-    height: 100%;
-    max-height: 92%;
-}*/
 div.js-div--modal.loadFeederModal div.div--modalElementContainer div.js-div--modal {
     flex: 1;
 }
@@ -239,10 +249,6 @@ div.js-div--modal.loadFeederModal table.table--modal td div, div.js-div--modal.l
     display: block;
     min-height: initial;
 }
-/*div.js-div--modal.loadFeederModal div.div--modalElementContainer div.js-div--modal:first-child table {
-    border-right: 1px solid black;
-    border-radius: 0;
-}*/
 div.js-div--modal.loadFeederModal div.hoverable {
     padding: var(--regularFontPadding);
     word-break: break-word;

@@ -7,7 +7,6 @@ import { LeafletLayer } from './leafletLayer.js';
 import { Nav } from './nav.js';
 import { SearchModal } from './searchModal.js';
 import { TopTab } from './topTab.js';
-'use strict';
 
 function main() {
     const features = gFeatureCollection.features.map(f => new Feature(f));
@@ -45,13 +44,22 @@ function main() {
     //    maxZoom: 29,
     //    attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
     //});
-    var esri_satellite_layer = L.esri.basemapLayer('Imagery');
+    const maxZoom = 25;
+    var esri_satellite_layer = L.esri.basemapLayer('Imagery', {
+        maxZoom: maxZoom
+    });
     const mapbox_layer = L.mapboxGL({
         attribution: "",
+        // - Odd behavior: maxboxGL will let the user keep zooming in past maxZoom, but the tiles won't change. No other layers do this
+        maxZoom: 25,
         style: 'https://api.maptiler.com/maps/basic/style.json?key=WOwRKyy0L6AwPBuM4Ggj'
     });
-    const esri_topography_layer = L.esri.basemapLayer('Streets');
-    const blank_layer = L.tileLayer('');
+    const esri_topography_layer = L.esri.basemapLayer('Streets', {
+        maxZoom: maxZoom
+    });
+    const blank_layer = L.tileLayer('', {
+        maxZoom: maxZoom
+    });
     const baseMaps = {
         //'Basic tiles': osm,
         'Satellite': esri_satellite_layer,
@@ -188,7 +196,7 @@ function createNav(featureGraph) {
 
 function createHelpMenu() {
     const div = document.createElement('div');
-    div.style.fontSize = '1.3rem';
+    div.style.fontSize = '1rem';
     div.style.height = '39px';
     div.style.width = '55px';
     div.style.color = 'white';
@@ -216,7 +224,7 @@ function createEditMenu(featureGraph) {
     }
     const dropdownDiv = new DropdownDiv();
     dropdownDiv.divElement.id = 'editMenu';
-    dropdownDiv.addStyleClass('menu');
+    dropdownDiv.addStyleClass('menu', 'divElement');
     dropdownDiv.setButton('Edit', true);
     document.getElementById('menuInsert').appendChild(dropdownDiv.divElement);
     if (gIsOnline) {
@@ -240,7 +248,7 @@ function createFileMenu(featureGraph) {
     }
     const dropdownDiv = new DropdownDiv();
     dropdownDiv.divElement.id = 'fileMenu';
-    dropdownDiv.addStyleClass('menu');
+    dropdownDiv.addStyleClass('menu', 'divElement');
     dropdownDiv.setButton('File', true);
     document.getElementById('menuInsert').appendChild(dropdownDiv.divElement);
     if (gIsOnline) {

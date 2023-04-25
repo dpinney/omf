@@ -4,11 +4,11 @@
 }
 :root {
     --headerHeight: 64px;
-    --regularFontSize: 1.3rem;
+    --regularFontSize: 1rem;
     --regularFontPadding: .75rem;
     --sideNavWidth: 550px;
     --sideNavTransitionTime: 0.3s;
-    --tableRowMinHeight: 3rem;
+    --tableRowMinHeight: 2.6rem;
 }
 
 /*******/
@@ -52,7 +52,7 @@ main {
 }
 
 .leaflet-popup-content {
-    width: 500px !important;
+    width: 400px !important;
     font-family: sans-serif;
 }
 .svg--icon-gray {

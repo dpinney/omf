@@ -4,7 +4,6 @@ import { FeatureController } from './featureController.js';
 import { FeatureDropdownDiv } from './featureDropdownDiv.js';
 import { getCirclePlusSvg, getTrashCanSvg } from './treeFeatureModal.js';
 import { Modal } from './modal.js';
-'use strict';
 
 // - A SearchModal doesn't have an underlying Feature instance, unlike a TreeFeatureModal and a ModalFeatureModal
 class SearchModal {
@@ -38,7 +37,7 @@ class SearchModal {
         this.#searchResults = null;
         //this.#searchResults = [...this.#observables];
         this.#dropdownDiv = new DropdownDiv();
-        this.#dropdownDiv.addStyleClass('sideNav');
+        this.#dropdownDiv.addStyleClass('sideNav', 'divElement');
         this.#searchResultControllers = [];
         this.#searchResultfeatureDropdownDivs = [];
         this.#removed = false;
@@ -63,6 +62,7 @@ class SearchModal {
             this.#observables = this.#observables.filter(ob => ob !== observable);
             this.#searchResults = this.#searchResults.filter(ob => ob !== observable);
             this.#dropdownDiv.setButton(`Search Results: ${this.#searchResults.length}`, true);
+            this.#dropdownDiv.buttonElement.getElementsByTagName('span')[0].classList.add('indent1');
             if (this.#observables.length === 0) {
                 this.remove();
             } else {
@@ -166,7 +166,7 @@ class SearchModal {
         //modal.addStyleClass('centerMainAxisFlex',   'titleElement');
         //modal.addStyleClass('centerCrossAxisFlex',  'titleElement');
         modal.insertTBodyRow([null, null, this.#getKeySelect(), this.#getOperatorSelect(), null], 'beforeEnd');
-        modal.insertTBodyRow([this.#getAddRowButton()]);
+        modal.insertTBodyRow([this.#getAddRowButton()], 'append', ['absolute']);
         modal.addStyleClass('centeredTable', 'tableElement');
         modal.insertElement(this.#getSearchButton());
         modal.insertElement(this.#getRefreshButton());
@@ -344,6 +344,7 @@ class SearchModal {
             return flag;
         });
         this.#dropdownDiv.setButton(`Search Results: ${this.#searchResults.length}`, true);
+        this.#dropdownDiv.buttonElement.getElementsByTagName('span')[0].classList.add('indent1');
         if (this.#dropdownDiv.contentDivElement.classList.contains('expanded')) {
             this.#dropdownDiv.buttonElement.click();
         }
@@ -351,6 +352,7 @@ class SearchModal {
         this.#dropdownDiv.buttonElement.addEventListener('click', () => {
             if (this.#dropdownDiv.contentDivElement.classList.contains('expanded')) {
                 this.#dropdownDiv.setButton('Loading search results...', true);
+                this.#dropdownDiv.buttonElement.getElementsByTagName('span')[0].classList.add('indent1');
             }
             // - Use setTimeout() to make the operation non-blocking (but it still blocks)
             // - TODO: use a web worker?
@@ -377,6 +379,7 @@ class SearchModal {
                     this.#searchResultfeatureDropdownDivs = [];
                 }
                 this.#dropdownDiv.setButton(`Search Results: ${this.#searchResults.length}`, true);
+                this.#dropdownDiv.buttonElement.getElementsByTagName('span')[0].classList.add('indent1');
             }, 1);
         });
     }
@@ -455,6 +458,9 @@ class SearchModal {
     #getAddRowButton() {
         const btn = document.createElement('button');
         btn.classList.add('add');
+        btn.classList.add('horizontalFlex');
+        btn.classList.add('centerMainAxisFlex');
+        btn.classList.add('centerCrossAxisFlex');
         btn.appendChild(getCirclePlusSvg());
         const that = this;
         btn.addEventListener('click', function() {
@@ -467,11 +473,14 @@ class SearchModal {
      * @returns {HTMLButtonElement}
      */
     #getDeleteRowButton() {
-        const button = document.createElement('button');
-        button.classList.add('delete');
-        button.appendChild(getTrashCanSvg());
+        const btn = document.createElement('button');
+        btn.classList.add('delete');
+        btn.classList.add('horizontalFlex');
+        btn.classList.add('centerMainAxisFlex');
+        btn.classList.add('centerCrossAxisFlex');
+        btn.appendChild(getTrashCanSvg());
         const that = this;
-        button.addEventListener('click', function(e) {
+        btn.addEventListener('click', function(e) {
             let parentElement = this.parentElement;
             while (!(parentElement instanceof HTMLTableRowElement)) {
                 parentElement = parentElement.parentElement;
@@ -484,7 +493,7 @@ class SearchModal {
             parentElement.remove();
             e.stopPropagation();
         });
-        return button;
+        return btn;
     }
 
     /**
@@ -595,8 +604,8 @@ class SearchModal {
 
 function getEyeGlassSvg() {
     const svg = document.createElementNS('http://www.w3.org/2000/svg','svg');
-    svg.setAttribute('width', '32px');
-    svg.setAttribute('height', '32px');
+    svg.setAttribute('width', '28px');
+    svg.setAttribute('height', '28px');
     svg.setAttribute('viewBox', '0 0 24 24'); 
     svg.setAttribute('fill', 'none'); 
     const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');

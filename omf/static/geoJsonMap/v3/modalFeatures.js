@@ -3,7 +3,6 @@ import { Feature } from  './feature.js';
 import { FeatureController } from './featureController.js';
 import { FeatureGraph } from './featureGraph.js';
 import { Modal } from './modal.js';
-'use strict';
 
 /**
  * @returns {Modal}

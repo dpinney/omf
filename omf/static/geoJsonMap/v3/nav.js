@@ -1,7 +1,6 @@
 export { Nav };
 import { SideNav } from './sideNav.js';
 import { TopNav } from './TopNav.js';
-'use strict';
 
 class Nav {
     sideNav;

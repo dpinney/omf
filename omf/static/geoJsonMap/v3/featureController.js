@@ -3,7 +3,6 @@ import { Feature } from './feature.js';
 import { FeatureGraph } from './featureGraph.js';
 import { LeafletLayer } from './leafletLayer.js';
 import { Modal } from './modal.js';
-'use strict';
 
 /**
  * - Preferrably, FeatureController instances should only be created on page load. After page load, use this.setIDs() to change the subset of
@@ -237,10 +236,12 @@ class FeatureController { // implements ControllerInterface
      */
     deleteProperty(propertyKey, namespace) {
         if (this.isComponentManager) {
-            const component = this.#componentMap[id];
-            if (component.hasProperty(propertyKey, namespace)) {
-                component.deleteProperty(propertyKey, namespace);
-            }
+            this.#ids.forEach(id => {
+                const component = this.#componentMap[id];
+                if (component.hasProperty(propertyKey, namespace)) {
+                    component.deleteProperty(propertyKey, namespace);
+                }
+            });
         } else {
             this.#ids.forEach(id => {
                 const observable = this.observableGraph.getObservable(id);

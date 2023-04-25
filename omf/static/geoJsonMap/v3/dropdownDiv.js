@@ -1,5 +1,4 @@
 export { DropdownDiv };
-'use strict';
 
 class DropdownDiv {
     divElement;         // - The divElement is the outermost div that contains the DropdownDiv's button (if any) and content
@@ -41,7 +40,7 @@ class DropdownDiv {
         } else if (position === 'append') {
             this.contentDivElement.appendChild(e);
         } else {
-            throw Error('Please specify a valid value for the "position" parameter: "prepend", "beforeEnd", or "append"')
+            throw Error('Please specify a valid value for the "position" parameter: "prepend", "beforeEnd", or "append".')
         }
     }
 
@@ -104,24 +103,63 @@ class DropdownDiv {
         };
     }
 
-    /**
-     * 
-     */
-    addStyleClass(style) {
+    addStyleClass(style, elementName) {
         if (typeof style !== 'string') {
             throw Error('The "style" argument must be a string');
         }
-        this.divElement.classList.add(style);
+        if (typeof elementName !== 'string') {
+            throw Error('The "elementName" argument must be a string');
+        }
+        switch (elementName) {
+            case 'divElement':
+                if (this.divElement !== null) {
+                    this.divElement.classList.add(style);
+                }
+                break;
+            case 'buttonElement':
+                if (this.buttonElement !== null) {
+                    this.buttonElement.classList.add(style);
+                }
+                break;
+            case 'contentDivElement':
+                if (this.contentDivElement !== null) {
+                    this.contentDivElement.classList.add(style);
+                }
+                break;
+            default:
+                throw Error('"elementName" argument must be "divElement", "buttonElement", or "contentDivElement".');
+        }
     }
 
     /**
      * 
      */
-    removeStyleClass(style) {
+    removeStyleClass(style, elementName) {
         if (typeof style !== 'string') {
             throw Error('The "style" argument must be a string');
         }
-        this.divElement.classList.remove(style);
+        if (typeof elementName !== 'string') {
+            throw Error('The "elementName" argument must be a string');
+        }
+        switch (elementName) {
+            case 'divElement':
+                if (this.divElement !== null) {
+                    this.divElement.classList.remove(style);
+                }
+                break;
+            case 'buttonElement':
+                if (this.buttonElement !== null) {
+                    this.buttonElement.classList.remove(style);
+                }
+                break;
+            case 'contentDivElement':
+                if (this.contentDivElement !== null) {
+                    this.contentDivElement.classList.remove(style);
+                }
+                break;
+            default:
+                throw Error('"elementName" argument must be "divElement", "buttonElement", or "contentDivElement".');
+        }
     }
 
     // *********************

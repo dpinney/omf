@@ -1,5 +1,4 @@
 export { TopNav };
-'use strict';
 
 class TopNav {
     navElement;

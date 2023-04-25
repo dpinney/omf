@@ -2,7 +2,6 @@ export { FeatureDropdownDiv };
 import { DropdownDiv } from './dropdownDiv.js';
 import { FeatureController } from './featureController.js';
 import { TreeFeatureModal } from './treeFeatureModal.js';
-'use strict';
 
 class FeatureDropdownDiv {
     #controller;    // - ControllerInterface instance
@@ -129,7 +128,7 @@ class FeatureDropdownDiv {
         } else {
             throw Error('This TreeFeatureDropdownDiv must observe at least one Feature');
         }
-        dropdownDiv.addStyleClass('sideNav');
+        dropdownDiv.addStyleClass('sideNav', 'divElement');
         if (this.#dropdownDiv === null) {
             this.#dropdownDiv = dropdownDiv;
         } else if (document.body.contains(this.#dropdownDiv.divElement)) {
@@ -151,6 +150,7 @@ class FeatureDropdownDiv {
     #getSingleObservableDropdownDiv(observable) {
         const dropdownDiv = new DropdownDiv();
         const buttonTextSpan = document.createElement('span');
+        buttonTextSpan.classList.add('indent2');
         if (observable.hasProperty('object')) {
             if (observable.hasProperty('name')) {
                 let div = document.createElement('div');

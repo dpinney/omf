@@ -1,5 +1,4 @@
 export { Modal };
-'use strict';
 
 class Modal {
     divElement;         // - The divElement is the outermost div that contains the modal's content
@@ -95,13 +94,17 @@ class Modal {
     /**
      * @param {Array} elements - an array of elements that should occupy a table body row. null elements just append empty <td>/<td> elements
      * @param {string} [position='append'] - the location to insert the tBody row. Can be "prepend", "beforeEnd", or "append"
+     * @param {Array} [styles=null] - any styles that should be applied to the row
      * @returns {undefined}
      */
-    insertTBodyRow(elements, position='append') {
+    insertTBodyRow(elements, position='append', styles=null) {
         if (this.#tableElement === null) {
             this.#createTableElement();    
         }
         const tr = document.createElement('tr');
+        if (styles !== null) {
+            tr.classList.add(styles);
+        }
         elements.forEach(e => {
             const td = document.createElement('td');
             const div = document.createElement('div');
@@ -273,7 +276,7 @@ class Modal {
         } else if (position === 'append') {
             this.#containerElement.appendChild(e);
         } else {
-            throw Error('Please specify a valid value for the "position" parameter: "prepend", "beforeEnd", or "append"')
+            throw Error('Please specify a valid value for the "position" parameter: "prepend", "beforeEnd", or "append".')
         } 
     }
 
