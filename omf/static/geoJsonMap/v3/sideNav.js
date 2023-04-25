@@ -1,5 +1,4 @@
 export { SideNav };
-'use strict';
 
 class SideNav {
     navElement; // Navigation pane. Contains divs

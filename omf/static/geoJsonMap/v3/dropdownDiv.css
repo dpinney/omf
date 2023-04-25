@@ -49,21 +49,12 @@ div.selected > div.js-div--dropdown.sideNav {
 div.selected > div.js-div--dropdown.sideNav button.js-button--dropdown {
     box-shadow: inset -1px 0px darkgray;
 }
-div.js-div--dropdown.sideNav span {
-    padding: 0 0 0 var(--regularFontSize);
-    text-align: left;
-}
 div.js-div--dropdown.sideNav span > div:first-child {
     font-weight: bold;
-}
-div.js-div--dropdown.sideNav div.js-div--dropdownContent span {
-    padding: 0 0 0 calc(2 * var(--regularFontSize)); 
-    text-align: left;
 }
 div.js-div--dropdown.sideNav button.horizontalFlex span {
     padding: 0;
 }
-
 
 /****************/
 /* Menu styling */
@@ -98,6 +89,6 @@ div.js-div--dropdown.menu div.js-div--dropdownContent.expanded {
     box-shadow: 0 10px 14px rgba(0,0,0,0.4)
 }
 div.js-div--dropdown.menu div.js-div--dropdownContent div {
-    font-size: 1.1rem;
+    font-size: var(--regularFontSize);
     padding: 0 .25rem 0 .25rem;
 }

@@ -766,7 +766,7 @@ def map_omd(omd_path, output_dir, open_browser=False):
     for filepath in all_js_filepaths:
         with pathlib.Path(filepath).open() as f:
             file_content = ''.join(list(filter(lambda line: not re.match(r'^\s*(?:import\s+|export\s+)', line), f.readlines())))
-            file_content = f'<script>\n{file_content}\n</script>\n'
+            file_content = f'<script>\n"use strict";\n{file_content}\n</script>\n'
             all_js_file_content.append(file_content)
     js = ''.join(all_js_file_content)
     # - Load CSS

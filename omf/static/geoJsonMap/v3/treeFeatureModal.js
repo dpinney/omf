@@ -2,7 +2,6 @@ export { TreeFeatureModal, getCirclePlusSvg, getTrashCanSvg };
 import { Modal } from './modal.js';
 import { FeatureController } from './featureController.js';
 import { LeafletLayer } from './leafletLayer.js';
-'use strict';
 
 class TreeFeatureModal { // implements ObserverInterface
     #controller;    // - ControllerInterface instance
@@ -183,7 +182,7 @@ class TreeFeatureModal { // implements ObserverInterface
             modal.insertTBodyRow([null, 'longitude', this.#createValueTextInput('longitude', coordinatesMap.longitudes)], 'prepend');
             modal.insertTBodyRow([null, 'latitude', this.#createValueTextInput('latitude', coordinatesMap.latitudes)], 'prepend');
         }
-        modal.insertTBodyRow([this.#getAddPropertyButton(), null, null]);
+        modal.insertTBodyRow([this.#getAddPropertyButton(), null, null], 'append', ['absolute']);
         // - Add buttons for regular features
         if (!this.#controller.hasComponents()) {
             if (!this.#controller.hasConfigurationObjects()) {
@@ -237,6 +236,9 @@ class TreeFeatureModal { // implements ObserverInterface
         }
         const btn = document.createElement('button');
         btn.classList.add('delete');
+        btn.classList.add('horizontalFlex');
+        btn.classList.add('centerMainAxisFlex');
+        btn.classList.add('centerCrossAxisFlex');
         btn.appendChild(getTrashCanSvg());
         const that = this;
         btn.addEventListener('click', function(e) {
@@ -451,6 +453,9 @@ class TreeFeatureModal { // implements ObserverInterface
     #getAddPropertyButton() {
         const btn = document.createElement('button');
         btn.classList.add('add');
+        btn.classList.add('horizontalFlex');
+        btn.classList.add('centerMainAxisFlex');
+        btn.classList.add('centerCrossAxisFlex');
         btn.appendChild(getCirclePlusSvg());
         const that = this;
         btn.addEventListener('click', function() {
@@ -656,8 +661,8 @@ class TreeFeatureModal { // implements ObserverInterface
 
 function getCirclePlusSvg() {
     const svg = document.createElementNS('http://www.w3.org/2000/svg','svg');
-    svg.setAttribute('width', '32px');
-    svg.setAttribute('height', '32px');
+    svg.setAttribute('width', '28px');
+    svg.setAttribute('height', '28px');
     svg.setAttribute('viewBox', '0 0 24 24'); 
     svg.setAttribute('fill', 'none'); 
     let path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
@@ -684,8 +689,8 @@ function getCirclePlusSvg() {
 
 function getTrashCanSvg() {
     const svg = document.createElementNS('http://www.w3.org/2000/svg','svg');
-    svg.setAttribute('width', '32px');
-    svg.setAttribute('height', '32px');
+    svg.setAttribute('width', '28px');
+    svg.setAttribute('height', '28px');
     svg.setAttribute('viewBox', '0 0 24 24'); 
     svg.setAttribute('fill', 'none'); 
     const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
@@ -701,8 +706,8 @@ function getTrashCanSvg() {
 
 function getPinSvg() {
     const svg = document.createElementNS('http://www.w3.org/2000/svg','svg');
-    svg.setAttribute('width', '32px');
-    svg.setAttribute('height', '32px');
+    svg.setAttribute('width', '28px');
+    svg.setAttribute('height', '28px');
     svg.setAttribute('viewBox', '0 0 24 24'); 
     svg.setAttribute('fill', 'none'); 
     const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
