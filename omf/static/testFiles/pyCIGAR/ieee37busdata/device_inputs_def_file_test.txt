@@ -1,0 +1,11 @@
+battery device class=battery_storage_device_vvc name=bsd_s701a bus=701 default_control_setting=standby min_SOC=0.0 max_SOC=1.0 total_capacity=2000 current_capacity=1800 max_charge_power=2000 max_discharge_power=2000 max_ramp_rate=1.0
+
+battery device class=battery_storage_device_vvc name=bsd_s730c_rl bus=730 default_control_setting=standby min_SOC=0.0 max_SOC=1.0 total_capacity=1000 current_capacity=1000 max_charge_power=1000 max_discharge_power=1000 max_ramp_rate=1.0 hack_phases=3
+battery device class=battery_storage_device_vvc name=bsd_s736b_rl bus=736 default_control_setting=standby min_SOC=0.0 max_SOC=1.0 total_capacity=1000 current_capacity=1000 max_charge_power=1000 max_discharge_power=1000 max_ramp_rate=1.0 hack_phases=3
+battery device class=battery_storage_device_vvc name=bsd_s714a_rl bus=714 default_control_setting=standby min_SOC=0.0 max_SOC=1.0 total_capacity=1000 current_capacity=1000 max_charge_power=1000 max_discharge_power=1000 max_ramp_rate=1.0 hack_phases=3
+
+battery controller class=battery_controller_cent control_mode=td apparent_power_target=2000 name=psc_cent_701 lowpass_filter_frequency=0.5 K_P=0.75 K_I=0.02 K_D=0.02 devices=[bsd_s701a]
+battery controller class=battery_controller_cent control_mode=td apparent_power_target=2000 name=psc_cent_730 lowpass_filter_frequency=0.5 K_P=0.75 K_I=0.02 K_D=0.02 devices=[bsd_s730c_rl]
+battery controller class=battery_controller_cent control_mode=td apparent_power_target=2000 name=psc_cent_736 lowpass_filter_frequency=0.5 K_P=0.75 K_I=0.02 K_D=0.02 devices=[bsd_s736b_rl]
+battery controller class=battery_controller_cent control_mode=td apparent_power_target=2000 name=psc_cent_714 lowpass_filter_frequency=0.5 K_P=0.75 K_I=0.02 K_D=0.02 devices=[bsd_s714a_rl]
+regulator device class=regulator_device name=reg1a max_tap_change=16 forward_band=2 tap_number=0 tap_delay=2

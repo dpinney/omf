@@ -173,10 +173,10 @@ def work(modelDir, inputDict):
 
 	# attackVars = dict of attack types and their corresponding parameter values
 	# to add new attack: attackVars[attackAgentType_name] = {"hackStart": val, "hackEnd": val, "percentHack": val}
-	# MAKE SURE to add attackVars entry when adding another Attack Agent option to the html dropdown list and the name must match the value passed back from the form (inputDict["attackVariable"])!
+	# MAKE SURE to add attackVars entry when adding another Attack Agent option to the html dropdown list and the name must match the value passed back from the form (inputDict["attackVariable"])
 	attackVars = {}
 	attackVars["None"] = {"hackStart": hackStartVal, "hackEnd": hackEndVal, "percentHack": 0.0}
-	attackVars["VOLTAGE_OSCILLATION"] = {"hackStart": hackStartVal, "hackEnd": hackEndVal, "percentHack": 0.15}
+	#attackVars["VOLTAGE_OSCILLATION"] = {"hackStart": hackStartVal, "hackEnd": hackEndVal, "percentHack": 0.15}
 	attackVars["VOLTAGE_IMBALANCE"] = {"hackStart": hackStartVal, "hackEnd": hackEndVal, "percentHack": 0.15} #percentHack must be between 0.1 and 0.4 for pre-trained VOLTAGE_IMBALANCE defense
 	#attackVars["VOLTAGE_OSCILLATION"] = {"hackStart": hackStartVal, "hackEnd": hackEndVal, "percentHack": hackPercentValue} #DEBUG percentHack was 0.15
 	#attackVars["VOLTAGE_IMBALANCE"] = {"hackStart": hackStartVal, "hackEnd": hackEndVal, "percentHack": hackPercentValue} #percentHack must be between 0.1 and 0.4 for pre-trained VOLTAGE_IMBALANCE defense
@@ -238,21 +238,19 @@ def work(modelDir, inputDict):
 		#import and run pycigar
 		import pycigar
 
-		#Set up runType scenarios
-		#runType of 2 implies the base scenario - not training a defense agent, nor is there a defense agent entered
-		runType = "NO_DEFENSE"
-		defenseAgentPath = None
+		
 
 		#set pycigar attack variables
-		attackType = attackAgentType
+		attackType = ""
 		hackStartVal = attackVars[attackAgentType]["hackStart"]
 		hackEndVal = attackVars[attackAgentType]["hackEnd"]
 		percentHackVal = attackVars[attackAgentType]["percentHack"]
 		if attackAgentType == "None":
 			attackType = None
-
+		else:
+			attackType = attackAgentType
 		#change percentHackVal to user input
-		elif hackPercentValue != None:
+		if hackPercentValue != None:
 			percentHackVal = hackPercentValue / 100.0
 
 		#includeBatt = False
@@ -263,16 +261,20 @@ def work(modelDir, inputDict):
 		includeBatt = True
 		dvcPath = modelDir + "/PyCIGAR_inputs/device_inputs.txt"
 
+		runType = "NO_DEFENSE"
+		defenseAgentPath = None
 		# check to see if we are trying to train a defense agent
 		if trainAgentValue:	
-			#runType of 0 implies the training scenario - runs to train a defense agent and outputs a zip containing defense agent files
-			# runType = 0 
+			runType = 'TRAIN'
+			# TODO: test training functionality 
+			# TODO: consider combining the two calls to pycigar
+			# TODO: make it possible to re-train a defense when 'TRAIN' is selected and so is one of the pre-trained defenses
 			pycigar.main(
 				misc_inputs_path = modelDir + "/PyCIGAR_inputs/misc_inputs.csv",
 				dss_path = modelDir + "/PyCIGAR_inputs/circuit.dss",
 				load_solar_path = modelDir + "/PyCIGAR_inputs/load_solar_data.csv",
 				breakpoints_path = modelDir + "/PyCIGAR_inputs/breakpoints.csv",
-				test = 'TRAIN',
+				test = runType,
 				type_attack = attackType,
 				policy = defenseAgentPath,
 				output = modelDir + "/pycigarOutput/",
@@ -282,43 +284,44 @@ def work(modelDir, inputDict):
 				hack_end = hackEndVal,
 				percentage_hack = percentHackVal,
 				device_path = dvcPath,
-				battery_status = includeBatt
+				battery_status = includeBatt,
+				battery_vvc = True
 			)
-			# Report out the agent paths.
-			# TODO: test, this might break with allInputData file locking.
-			defAgentFolders = os.listdir(pJoin(modelDir,"pycigarOutput"))
-			inputDict['defenseAgentNames'] = ','.join([x for x in defAgentFolders if x.startswith('policy_')])
+			# Report out the agent paths
+			# NOTE: This doesn't appear to be used anywhere later. Leave commented out. See additional note
+			#defAgentFolders = os.listdir(pJoin(modelDir,"pycigarOutput"))
+			#inputDict['defenseAgentNames'] = ','.join([x for x in defAgentFolders if x.startswith('policy_')]) # TODO: don't do it this way. Instead, save off the policy instead, and upload the names accordingly on startup.
 			# inputDict['kpi'] = ['oscillation_kpi', 'unbalance_kpi', 'network_kpi', 'RedTeam_kpi']
-			print(inputDict['defenseAgentNames'])
-			with open(pJoin(modelDir, "allInputData.json")) as inFileOb:
-				json.dump(inputDict, inFileOb, indent=4)
-
-		#check to see if user entered a defense agent file
+			# update the input data json file 
+			## Might break with allInputData file locking.
+			#with open(pJoin(modelDir, "allInputData.json")) as inFileOb:
+			#	json.dump(inputDict, inFileOb, indent=4)
+		
+		# If they aren't training a defense, maybe they selected a pre-trained one
 		elif defenseAgentName != None:
 			defenseAgentPath = pJoin(modelDir, "pycigarOutput", defenseAgentName)
 			#runType of 1 implies the defense scenario - not training a defense agent, but a defense agent zip was uploaded
 			runType = "DEFENSE" 
 
-		# if there is no training selected and no attack variable, run without a defense agent
-		pycigar.main(
-			misc_inputs_path = modelDir + "/PyCIGAR_inputs/misc_inputs.csv",
-			dss_path = modelDir + "/PyCIGAR_inputs/circuit.dss",
-			load_solar_path = modelDir + "/PyCIGAR_inputs/load_solar_data.csv",
-			breakpoints_path = modelDir + "/PyCIGAR_inputs/breakpoints.csv",
-			test = runType,
-			type_attack = attackType,
-			policy = defenseAgentPath,
-			output = modelDir + "/pycigarOutput/",
-			start = startStep,
-			duration = simLengthAdjusted,
-			hack_start = hackStartVal,
-			hack_end = hackEndVal,
-			percentage_hack = percentHackVal,
-			device_path = dvcPath,
-			battery_status = includeBatt
-		)
-
-		#print("!!!!!!!!!!! Got through pyCigar !!!!!!!!!!!!")
+		else:
+			pycigar.main(
+				misc_inputs_path = modelDir + "/PyCIGAR_inputs/misc_inputs.csv",
+				dss_path = modelDir + "/PyCIGAR_inputs/circuit.dss",
+				load_solar_path = modelDir + "/PyCIGAR_inputs/load_solar_data.csv",
+				breakpoints_path = modelDir + "/PyCIGAR_inputs/breakpoints.csv",
+				test = runType,
+				type_attack = attackType,
+				policy = defenseAgentPath,
+				output = modelDir + "/pycigarOutput/",
+				start = startStep,
+				duration = simLengthAdjusted,
+				hack_start = hackStartVal,
+				hack_end = hackEndVal,
+				percentage_hack = percentHackVal,
+				device_path = dvcPath,
+				battery_status = includeBatt,
+				battery_vvc = False
+			)
 
 	def convertOutputs():
 		from pycigar.utils.logging import logger
@@ -474,15 +477,16 @@ def new(modelDir):
 		"deviceFileName": dvc_fn,
 		"deviceFileContent": dvc_ins,
 		"includeBattery": "True",
+		"batteryVVC": "True",
 		"modelType": modelName,
 		"zipCode": "59001",
 		"trainAgent": "False",
 		"attackVariable": "None",
 		"defenseVariable": "None",
-		"hackStart": "250",
-		"hackEnd": "650",
-		"hackPercent": "50",
-		"defenseAgentNames": "policy_ieee37_oscillation_sample,policy_ieee37_unbalance_sample"
+		"hackStart": "0",
+		"hackEnd": "0",
+		"hackPercent": "0",
+		"defenseAgentNames": "policy_ieee37_imbalance_sample_feb2023"
 	}
 	creationCode = __neoMetaModel__.new(modelDir, defaultInputs)
 	try: 

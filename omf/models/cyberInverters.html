@@ -122,8 +122,8 @@
 				<label class="tooltip">Attack Agent Variable<span class="classic">Select the type of attack to occur.</span></label>
 				<select id="attackVariable" name="attackVariable" value="{{allInputDataDict.attackVariable}}">
 					<option value="None" {% if allInputDataDict.attackVariable == 'None' %}selected{% endif %}>None</option>
-					<option value="Voltage Oscillation" {% if allInputDataDict.attackVariable == 'Voltage Oscillation' %}selected{% endif %}>Voltage Oscillation</option>
-					<option value="Voltage Imbalance" {% if allInputDataDict.attackVariable == 'Voltage Imbalance' %}selected{% endif %}>Voltage Imbalance</option>
+					<!--<option value="VOLTAGE_OSCILLATION" {% if allInputDataDict.attackVariable == 'VOLTAGE_OSCILLATION' %}selected{% endif %}>Voltage Oscillation</option>-->
+					<option value="VOLTAGE_IMBALANCE" {% if allInputDataDict.attackVariable == 'VOLTAGE_IMBALANCE' %}selected{% endif %}>Voltage Imbalance</option>
 				</select>
 			</div>
 			<div class="shortInput">
