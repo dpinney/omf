@@ -1,14 +1,11 @@
 export { FeatureGraph, FeatureNotFoundError };
-import { Feature } from './feature.js';
+import { Feature, ObserverError, UnsupportedOperationError } from './feature.js';
 
 class FeatureGraph {
-    // - Names are not unique, so I potentially need to map one name to multiple keys
-    #nameToKey;     
-    // - Graphology graphs allow nodes and lines to have the same key. This is great for representing lines with children, but is annoying when trying
-    //   to retrieve a feature by its key
-    #keyToFeature;
-    // - This points to the actual graph data structure. I'm using the Graphology library
-    #graph;
+    #graph;         // - This points to the actual graph data structure. I'm using the Graphology library
+    #keyToFeature;  // - Graphology graphs allow nodes and lines to have the same key. This is great for representing lines with children, but is annoying when trying to retrieve a feature by its key
+    #nameToKey;     // - Names are not unique, so I potentially need to map one name to multiple keys
+    #observers;     // - A FeatureGraph implements ObservableInterface
 
     /**
      * - Create an empty graph that will connect all Feature instances (regular features, components, parent-child lines, etc.) as Observables and
@@ -16,10 +13,9 @@ class FeatureGraph {
      * @returns {Object} graph
      */
     constructor() {
-        this.#nameToKey = {};
-        this.#keyToFeature = {};
         const options = {
-            // - Do NOT allow self-loops. Even if a line starts and ends on the same node, the graph models it as three nodes connected by two edges
+            // - Do NOT allow self-loops. Even if a line starts and ends on the same node, the graph models it as two nodes connected by two edges
+            //   (i.e. a multi-edge)
             allowSelfLoops: false,   
             // - Allow multiple edges between nodes (OMDs have them)
             multi: true,            
@@ -27,6 +23,163 @@ class FeatureGraph {
             type: 'undirected'      
         };
         this.#graph = new graphology.Graph(options);
+        this.#keyToFeature = {};
+        this.#nameToKey = {};
+        this.#observers = [];
+    }
+
+    // *********************************
+    // ** ObservableInterface methods **
+    // *********************************
+
+    deleteProperty(propertyKey, namespace='treeProps') {
+        throw UnsupportedOperationError();
+    }
+
+    // - TODO: call handleDeletedObservable() on the observers of this graph in handleDeletedObservable()
+    deleteObservable() {
+        throw UnsupportedOperationError();
+    }
+
+    getCoordinates() {
+        throw UnsupportedOperationError();
+    }
+
+    /**
+     * @param {string} key - the key of the ObservableInterface object that I want
+     * @returns {Feature} an instance of my Feature class
+     */
+    getObservable(key) {
+        if (typeof key !== 'string') {
+            throw TypeError('"key" argument must be a string.');
+        }
+        if (!this.#keyToFeature.hasOwnProperty(key)) {
+            throw new FeatureNotFoundError(key);
+        }
+        return this.#keyToFeature[key];
+    }
+
+    /**
+     * @param {Function} [func=null] - a function that filters features so that only the desired features are returned. The function should take a
+     * single argument (a feature), and should return a boolean depending on whether to include the feature in the array
+     * - I could argue that the logic executed in Feature.getObservableExportData() could be provided via a function argument, as it is here, so while
+     *   the different method signatures violate the interface, I could make both conform to it
+     * @returns {Object} a GeoJSON FeatureCollection object
+     */
+    getObservableExportData(func=null) {
+        if (func !== null && typeof func !== 'function') {
+            throw TypeError('"func" argument must be null or a function');
+        }
+        if (func === null) {
+            func = function(f) {
+                if (f.getProperty('treeKey', 'meta') === 'omd') {
+                    return true;
+                } else {
+                    return isNaN(+f.getProperty('treeKey', 'meta')) ? false : true;
+                }
+            }
+        }
+        return { 
+            'type': 'FeatureCollection',
+            'features': this.getObservables(func).map(f => f.getObservableExportData())
+        };
+    }
+
+    /**
+     * @param {Function} func - a function that filters features so that only the desired features are returned. The function should take a single
+     * argument (a feature), and should return a boolean depending on whether to include the feature in the array
+     * @returns {Array} - an array of instances of my Feature class, where each instance met the filtering criteria
+     */
+    getObservables(func) {
+        if (typeof func !== 'undefined') {
+            return Object.values(this.#keyToFeature).filter(f => func(f));
+        }
+        return Object.values(this.#keyToFeature);
+    }
+
+    getObservers() {
+        throw UnsupportedOperationError();
+    }
+
+    getProperties(namespace) {
+        throw UnsupportedOperationError();
+    }
+
+    getProperty(propertyKey, namespace='treeProps') {
+        throw UnsupportedOperationError();
+    }
+
+    hasCoordinates() {
+        throw UnsupportedOperationError();
+    }
+
+    hasGraph() {
+        throw UnsupportedOperationError();
+    }
+
+    hasProperty(propertyKey, namespace='treeProps') {
+        throw UnsupportedOperationError();
+    }
+
+    /**
+     * @param {Feature} observable - the observable that was just added to this graph
+     * @returns {undefined}
+     */
+    notifyObserversOfNewObservable(observable) {
+        if (!(observable instanceof Feature)) {
+            throw TypeError('"observable" argument must be an instance of my Feature class.');
+        }
+        this.#observers.forEach(ob => ob.handleNewObservable(observable));
+    }
+
+    /**
+     * @param {Object} observer - an instance of ObserverInterface that wants to observer this ObservableInterface instance
+     *  - E.g. a SearchModal wants to observe this FeatureGraph
+     * @returns {undefined}
+     */
+    registerObserver(observer) {
+        // - The function signature above is part of the ObservableInterface API. The implementation below is not
+        if (observer instanceof Feature) {
+            throw ObserverError();
+        }
+        this.#observers.push(observer);
+    }
+
+    /**
+     * @param {Object} observer - an instance of ObserverInterface that no longer should observe this ObservableInterface instance
+     * @returns {undefined}
+     */
+    removeObserver(observer) {
+        // - The function signature above is part of the ObservableInterface API. The implementation below is not
+        if (observer instanceof Feature) {
+            throw ObserverError();
+        }
+        const index = this.#observers.indexOf(observer);
+        if (index > -1) {
+            this.#observers.splice(index, 1);
+        } else {
+            throw Error('The observer was not found in this.#observers');
+        }
+    }
+
+    setCoordinates(coordinates) {
+        throw UnsupportedOperationError();
+    }
+
+    setGraph(graph) {
+        throw UnsupportedOperationError();
+    }
+
+    setProperty(propertyKey, propertyValue, namespace='treeProps') {
+        throw UnsupportedOperationError();
+    }
+
+    updateCoordinatesOfObservers(oldCoordinates) {
+        throw UnsupportedOperationError();
+    }
+
+    updatePropertyOfObservers(propertyKey, oldPropertyValue, namespace='treeProps') {
+        throw UnsupportedOperationError();
     }
 
     // *******************************
@@ -54,7 +207,7 @@ class FeatureGraph {
                             observer.deleteObservable();
                         }
                     } else {
-                        throw NodeEdgeError(observableKey, observerKey);
+                        throw GraphNodeEdgeError(observableKey, observerKey);
                     }
                 });
             // - If a line is deleted, any attached lines also need to be deleted
@@ -89,6 +242,14 @@ class FeatureGraph {
     }
 
     /**
+     *
+     */
+    handleNewObservable(observable) {
+        // - The function signature above is part of the ObserverInterface API. The implementation below is not
+        throw UnsupportedOperationError();
+    }
+
+    /**
      * - Update this ObserverInterface instance (i.e. "this") based on the coordinates of the ObservableInterface instance (i.e. "observable") that
      *   have just changed and perform other actions as needed
      *  - E.g. update the line observer's coordinates to match the node observable's coordinates if the line was connected to the node
@@ -113,7 +274,7 @@ class FeatureGraph {
                     if (observer.isLine()) {
                         observer.handleUpdatedCoordinates(observable, oldCoordinates);
                     } else if (observable.isNode() && observer.isNode()) {
-                        throw NodeEdgeError(observableKey, observerKey);
+                        throw GraphNodeEdgeError(observableKey, observerKey);
                     }
                 }
             });
@@ -141,7 +302,10 @@ class FeatureGraph {
             throw TypeError('"namespace" argument must be a string.');
         }
         const observableKey = observable.getProperty('treeKey', 'meta');
-        this.#graph.setNodeAttribute(observableKey, 'visited', true);
+
+        // - I don't think I need to mark nodes as visited since there's no recursion
+        //this.#graph.setNodeAttribute(observableKey, 'visited', true);
+
         if (this.#graph.hasNode(observableKey)) {
             // - Deal with property updates that don't affect the connectivity of the graph
             if (propertyKey === 'name') {
@@ -205,160 +369,6 @@ class FeatureGraph {
     // ********************
 
     /**
-     * - This function accepts an ObservableInterface instance, rather than a basic GeoJSON feature, because I need to rely on the ObservableInterface
-     *   API for getting properties. I don't want to assume I'll always be working with true GeoJSON features. All nodes must be inserted before all
-     *   lines. If a line is inserted and its nodes don't exist, a ReferencError is thrown.
-     * @param {Feature} observable - an ObservableInterface instance
-     * @returns {undefined}
-     */
-    insertObservable(observable) {
-        if (!(observable instanceof Feature)) {
-            throw TypeError('"observable" argument must be an instance of my Feature class.');
-        }
-        this.#insertObservableIntoKeyToFeature(observable);
-        const observableKey = observable.getProperty('treeKey', 'meta');
-        this.#graph.addNode(observableKey);
-        // - Insert the feature into the nameToKey map
-        // - The following objects sometimes lack the "name" property: recorder, player
-        //  - By far, the easiest thing to do is give them a name. I can strip it out on export if needed
-        if (!observable.hasProperty('name')) {
-            if (observable.hasProperty('object')) {
-                const object = observable.getProperty('object');
-                if (['recorder', 'player'].includes(object)) {
-                    const name = `${object}:${observableKey}:addedName`;
-                    observable.setProperty('name', name);
-                }
-            }
-        }
-        // - !CMD objects need to be able to have the same command, but the name of the !CMD object is the command. Get around this by creating a new
-        //   "command" property whose value replaces the "name" property value on export
-        if (observable.hasProperty('object')) {
-            const object = observable.getProperty('object');
-            if (object === '!CMD') {
-                observable.setProperty('CMD_command', observable.getProperty('name'));
-                const name = `${object}:${observableKey}:addedName`;
-                observable.setProperty('name', name);
-            }
-        }
-        // - Give the feature a pointer to this graph, which effectively makes the feature Observable to all other features and an Observer of all
-        //   other features. This needs to be set after recorders and players are given names
-        observable._setGraph(this);
-        // - Configuration objects aren't pointed to by "to", "from", or "parent", so they don't need names
-        this.#insertObservableIntoNameToKey(observable);
-        // - Insert the feature into the actual graph
-        //  - This logic assumes the following insertion order: (1) all nodes nodes, (2) all lines
-        //  - Parent-child lines must be created and inserted with the other lines. They are not automatically created here. Why? Because calling
-        //    <ObservableInterface>.registerObserver(<ObserverInterface>) should not create and register another observer as a side-effect
-        // - All nodes and all lines are treated as nodes in the graph.
-        //  - E.g. a node and two lines are modeled as three nodes, one of which (the actual node) is connected via edges to the other two (line)
-        //    nodes
-        if (observable.isLine()) {
-            const sourceName = observable.getProperty('from');
-            const sourceKey = this.getKey(sourceName, observable.getProperty('treeKey', 'meta'));
-            // - <Graph>.addEdge() does throw an error for non-existent nodes, which is what I want
-            this.#graph.addEdge(sourceKey, observableKey);
-            const targetName = observable.getProperty('to');
-            const targetKey = this.getKey(targetName, observable.getProperty('treeKey', 'meta')); 
-            this.#graph.addEdge(observableKey, targetKey);    
-            const sourceObservable = this.getObservable(sourceKey);
-            const targetObservable = this.getObservable(targetKey);
-            if (sourceObservable.isChild()) {
-                if (sourceObservable.getProperty('parent') === targetName) {
-                    // - If these conditions are met, this line (which is modeled as a node in this graph) has "from" and "to" mixed up and I need to
-                    //   check my parent-child line creation code
-                    throw Error(`Parent-child lines should always go from parent (source) to child (target), but the line "${key}" has a source node "${sourceKey}" that is a child.`);
-                }
-                // - If both conditions are not met, then this line is not a parent-child line, but it is connected to a node that is also a child
-                //   node (with a separate parent-child line). This is weird but valid.
-            }
-            // - I don't need to add a special "isParentChild" attribute to edges anymore. When I inspect the node neighbors of a graph node, all the
-            //   information about whether the neighbor node is a another node, a line, a parent-child line, etc. is already present in the
-            //   ObservableInterface instance
-        }
-    }
-
-    /**
-     * @param {string} key - the key of the ObservableInterface object that I want
-     * @returns {Feature} an instance of my Feature class
-     */
-    getObservable(key) {
-        if (typeof key !== 'string') {
-            throw TypeError('"key" argument must be a string.');
-        }
-        if (!this.#keyToFeature.hasOwnProperty(key)) {
-            throw new FeatureNotFoundError(key);
-        }
-        return this.#keyToFeature[key];
-    }
-    
-    /**
-     * @param {Function} func - a function that filters features so that only the desired features are returned. The function should take a single
-     * argument (a feature), and should return a boolean depending on whether to include the feature in the array
-     * @returns {Array} - an array of instances of my Feature class, where each instance met the filtering criteria
-     */
-    getObservables(func) {
-        if (typeof func !== 'undefined') {
-            return Object.values(this.#keyToFeature).filter(f => func(f));
-        }
-        return Object.values(this.#keyToFeature);
-    }
-
-    /**
-     * @param {Function} [func=null] - a function that filters features so that only the desired features are returned. The function should take a single
-     * argument (a feature), and should return a boolean depending on whether to include the feature in the array
-     * @returns {Object} a GeoJSON FeatureCollection object
-     */
-    getObservablesExportData(func=null) {
-        if (func !== null && typeof func !== 'function') {
-            throw TypeError('"func" argument must be null or a function');
-        }
-        if (func === null) {
-            func = function(f) {
-                if (f.getProperty('treeKey', 'meta') === 'omd') {
-                    return true;
-                } else {
-                    return isNaN(+f.getProperty('treeKey', 'meta')) ? false : true;
-                }
-            }
-        }
-        return { 
-            'type': 'FeatureCollection',
-            'features': this.getObservables(func).map(f => f.getObservableExportData())
-        };
-    }
-
-    /**
-     * @param {string} namespace - the namespace of keys I'm interested in (e.g. "default" for normal keys and "parentChild" for parent-child lines)
-     * @returns {number} the current maximum tree key in this FeatureGraph
-     */
-    getMaxKey(namespace='default') {
-        let keys = [];
-        for (let k of Object.keys(this.#keyToFeature)) {
-            if (namespace === 'default') {
-                k = +k;
-                if (!isNaN(k)) {
-                    keys.push(k);
-                }
-            } else if (['parentChild'].includes(namespace)) {
-                if (k.startsWith(namespace)) {
-                    k = +k.split(':')[1];
-                    if (!isNaN(k)) {
-                        keys.push(k);
-                    }
-                }
-            } else {
-                throw ReferenceError(`The key namespace "${namespace}" does not exist in this FeatureGraph. Leave the "namespace" argument empty to use
-                    the "default" key namespace.`); 
-            }
-        }
-        // Math.max.apply(null, []) === -Infinity, so I start with 0
-        if (keys.length === 0) {
-            keys = [0];
-        }
-        return Math.max.apply(null, keys);
-    }
-
-    /**
      * @param {string} name - the name of the feature that I want to retrieve the key for
      * @param {string} featureKey - the key of an instance of my Feature class that is requesting the key
      * @returns {string} The correct tree key of the feature with the given name, depending on which object requested it, else throw an exception if
@@ -374,7 +384,7 @@ class FeatureGraph {
         const feature = this.getObservable(featureKey);
         const keys = this.#nameToKey[name];
         if (keys === undefined) {
-            throw Error(`This FeatureGraph could not find a key for the object named "${name}", as requested by the feature "${feature.getProperty('name')}". Missing objects are handled on the back-end, not here.`);
+            throw FeatureNameNotFoundError(name);
         } else if (keys.length === 1) {
             return keys[0];
         }
@@ -407,18 +417,18 @@ class FeatureGraph {
         }
     }
 
-   /**
-    * @param {string} name - the name of the feature that I want to retrieve the key for
-    * @returns {string} The correct tree key of the feature with the given name. If there are multiple keys, return the first one. Throw an exception
-    * if there is no matching tree key.
-    */
+    /**
+     * @param {string} name - the name of the feature that I want to retrieve the key for
+     * @returns {string} The correct tree key of the feature with the given name. If there are multiple keys, return the first one. Throw an exception
+     * if there is no matching tree key.
+     */
     getKeyForComponent(name) {
         if (typeof name !== 'string') {
             throw TypeError('"name" argument must be a string.');
         }
         const keys = this.#nameToKey[name];
         if (keys === undefined) {
-            throw Error(`This FeatureGraph could not find a key for the object named "${name}". Missing objects are handled on the back-end, not here.`);
+            throw FeatureNameNotFoundError(name);
         } else {
             return keys[0];
         }
@@ -459,6 +469,61 @@ class FeatureGraph {
             'targetLat': targetLat,
             'targetLon': targetLon
         }
+    }
+
+    /**
+     * @param {string} namespace - the namespace of keys I'm interested in (e.g. "default" for normal keys and "parentChild" for parent-child lines)
+     * @returns {number} the current maximum tree key in this FeatureGraph
+     */
+    getMaxKey(namespace='default') {
+        let keys = [];
+        for (let k of Object.keys(this.#keyToFeature)) {
+            if (namespace === 'default') {
+                k = +k;
+                if (!isNaN(k)) {
+                    keys.push(k);
+                }
+            } else if (['parentChild'].includes(namespace)) {
+                if (k.startsWith(namespace)) {
+                    k = +k.split(':')[1];
+                    if (!isNaN(k)) {
+                        keys.push(k);
+                    }
+                }
+            } else {
+                throw ReferenceError(`The key namespace "${namespace}" does not exist in this FeatureGraph. Leave the "namespace" argument empty to use the "default" key namespace.`);
+            }
+        }
+        // Math.max.apply(null, []) === -Infinity, so I start with 0
+        if (keys.length === 0) {
+            keys = [0];
+        }
+        return Math.max.apply(null, keys);
+    }
+
+    /**
+     * @param {string} childKey - the treeKey of the child that I want the line for
+     * @returns {Feature} - the parent-child line of the child
+     */
+    getParentChildLine(childKey) {
+        if (this.#graph.hasNode(childKey)) {
+            for (const edgeKey of this.#graph.edges(childKey)) {
+                const observerKey = this.#getObserverKey(childKey, edgeKey);
+                const observer = this.getObservable(observerKey);
+                if (observer.isLine()) {
+                    // - Currently, a node can only have a single parent, so I don't need to check any other properties of either object to confirm
+                    //   that this is the correct parent-child line
+                    if (observer.isParentChildLine()) {
+                        return observer;
+                    }
+                } else {
+                    throw GraphNodeEdgeError(childKey, observerKey);
+                }
+            }
+        } else {
+            throw FeatureNotFoundError(childKey);
+        }
+        throw Error(`A parent-child line could not be found for the feature "${childKey}".`);
     }
 
     /**
@@ -503,6 +568,79 @@ class FeatureGraph {
     }
 
     /**
+     * - This function accepts an ObservableInterface instance, rather than a basic GeoJSON feature, because I need to rely on the ObservableInterface
+     *   API for getting properties. I don't want to assume I'll always be working with true GeoJSON features. All nodes must be inserted before all
+     *   lines. If a line is inserted and its nodes don't exist, a ReferencError is thrown.
+     * @param {Feature} observable - an ObservableInterface instance
+     * @returns {undefined}
+     */
+    insertObservable(observable) {
+        if (!(observable instanceof Feature)) {
+            throw TypeError('"observable" argument must be an instance of my Feature class.');
+        }
+        this.#insertObservableIntoKeyToFeature(observable);
+        const observableKey = observable.getProperty('treeKey', 'meta');
+        this.#graph.addNode(observableKey);
+        // - Insert the feature into the nameToKey map
+        // - The following objects SOMETIMES lack the "name" property: recorder, player
+        //  - By far, the easiest thing to do is give them a name. I can strip it out on export if needed
+        if (!observable.hasProperty('name')) {
+            if (observable.hasProperty('object')) {
+                const object = observable.getProperty('object');
+                if (['recorder', 'player'].includes(object)) {
+                    const name = `${object}:${observableKey}:addedName`;
+                    observable.setProperty('name', name);
+                }
+            }
+        }
+        // - !CMD objects need to be able to have the same command, but the name of the !CMD object is the command. Get around this by creating a new
+        //   "CMD_command" property whose value replaces the "name" property value on export
+        if (observable.hasProperty('object')) {
+            const object = observable.getProperty('object');
+            if (object === '!CMD') {
+                observable.setProperty('CMD_command', observable.getProperty('name'));
+                const name = `${object}:${observableKey}:addedName`;
+                observable.setProperty('name', name);
+            }
+        }
+        // - Give the feature a pointer to this graph, which effectively makes the feature Observable to all other features and an Observer of all
+        //   other features. This needs to be set after recorders and players are given names
+        observable.setGraph(this);
+        // - Configuration objects aren't pointed to by "to", "from", or "parent", so they don't need names
+        this.#insertObservableIntoNameToKey(observable);
+        // - Insert the feature into the actual graph
+        //  - This logic assumes the following insertion order: (1) all nodes nodes, (2) all lines
+        //  - Parent-child lines must be created and inserted with the other lines. They are not automatically created here
+        // - All nodes and all lines are treated as nodes in the graph.
+        //  - E.g. a node and two lines are modeled as three nodes, one of which (the actual node) is connected via edges to the other two (line)
+        //    nodes
+        if (observable.isLine()) {
+            const sourceName = observable.getProperty('from');
+            const sourceKey = this.getKey(sourceName, observableKey);
+            // - <Graph>.addEdge() does throw an error for non-existent nodes, which is what I want
+            this.#graph.addEdge(sourceKey, observableKey);
+            const targetName = observable.getProperty('to');
+            const targetKey = this.getKey(targetName, observableKey);
+            this.#graph.addEdge(observableKey, targetKey);
+            const sourceObservable = this.getObservable(sourceKey);
+            //const targetObservable = this.getObservable(targetKey);
+            if (sourceObservable.isChild()) {
+                if (sourceObservable.getProperty('parent') === targetName) {
+                    // - If these conditions are met, this line (which is modeled as a node in this graph) has "from" and "to" mixed up and I need to
+                    //   check my parent-child line creation code
+                    throw Error(`Parent-child lines should always go from parent (source) to child (target), but the line "${observableKey}" has a source node "${sourceKey}" that is a child.`);
+                }
+                // - If both conditions are not met, then this line is not a parent-child line, but it is connected to a node that is also a child
+                //   node (with a separate parent-child line). This is weird but valid.
+            }
+            // - I don't need to add a special "isParentChild" attribute to edges anymore. When I inspect the node neighbors of a graph node, all the
+            //   information about whether the neighbor node is a another node, a line, a parent-child line, etc. is already present in the
+            //   ObservableInterface instance
+        }
+        this.notifyObserversOfNewObservable(observable);
+    }
+
+    /**
      * - Mark all nodes as unvisted. The ObservableController instance needs to call this function after calling <Observable>.setCoordinates()
      * @returns {undefined}
      */
@@ -527,7 +665,7 @@ class FeatureGraph {
         const sourceKey = this.#graph.source(edgeKey);
         const targetKey = this.#graph.target(edgeKey);
         if (sourceKey === targetKey) {
-            throw SelfLoopError(observableKey);
+            throw Error(`This FeatureGraph instance does not allow self-loops, but one exists on node "${sourceKey}".`);
         }
         if (sourceKey !== observableKey) {
             return sourceKey;
@@ -548,18 +686,6 @@ class FeatureGraph {
     }
 
     /**
-     * 
-     */
-    #removeObservableFromKeytoFeature(observable) {
-        const observableKey = observable.getProperty('treeKey', 'meta');
-        if (this.#keyToFeature.hasOwnProperty(observableKey)) {
-            delete this.#keyToFeature[observableKey];
-        } else {
-            throw Error(`The key "${observableKey}" does not exist in this.#keyToFeature.`);
-        }
-    }
-    
-    /**
      * - Insert an ObservableInterface instance into the nameToKey map
      * @param {Feature} observable - an ObservableInterface instance
      * @returns {undefined}
@@ -576,6 +702,18 @@ class FeatureGraph {
                 }
                 this.#nameToKey[name].push(key);
             }
+        }
+    }
+
+    /**
+     *
+     */
+    #removeObservableFromKeytoFeature(observable) {
+        const observableKey = observable.getProperty('treeKey', 'meta');
+        if (this.#keyToFeature.hasOwnProperty(observableKey)) {
+            delete this.#keyToFeature[observableKey];
+        } else {
+            throw Error(`The key "${observableKey}" does not exist in this.#keyToFeature.`);
         }
     }
 
@@ -619,25 +757,25 @@ class FeatureNotFoundError extends Error {
     constructor(key) {
         // - After this call to the Error constructor, "message" is undefined but that's okay because I set it immediately after
         super();
-        this.message = `This FeatureGraph instance does not have a node with the key "${key}".`;
+        this.message = `This FeatureGraph instance does not have a graph node with the key "${key}".`;
         this.name = 'FeatureNotFoundError';
     }
 }
 
-class SelfLoopError extends Error {
-    
-    constructor(key) {
+class FeatureNameNotFoundError extends Error {
+
+    constructor(name) {
         super();
-        this.message = `This FeatureGraph instance does not allow self-loops, but one exists on node "${key}".`;
-        this.name = 'SelfLoopError';
+        this.message = `This FeatureGraph instance could not find a key for the object named "${name}".`;
+        this.name = 'FeatureNameNotFoundError';
     }
 }
 
-class NodeEdgeError extends Error {
+class GraphNodeEdgeError extends Error {
     
     constructor(node1Key, node2Key) {
         super();
         this.message = `This FeatureGraph instance does not currently support edges between nodes, but an edge exists between nodes "${node1Key}" and "${node2Key}".`;
-        this.name = 'NodeEdgeError';
+        this.name = 'GraphNodeEdgeError';
     }
 }

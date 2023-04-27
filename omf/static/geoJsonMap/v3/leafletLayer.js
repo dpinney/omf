@@ -3,9 +3,9 @@ import { FeatureController } from "./featureController.js";
 import { TreeFeatureModal } from './treeFeatureModal.js';
 
 /**
- * - Each LeafletLayer instance (i.e. the view in the MVC pattern) observes an ObservableInterface instance (i.e. the model in the MVC pattern). An
- *   ObservableInterface instance does NOT observe a LeafletLayer instance. Instead, a LeafletLayer instance uses the controller to pass its own
- *   changes to the underlying ObservableInterface instance
+ * - Each LeafletLayer instance is a view in the MVC pattern. Each observes an ObservableInterface instance, which is part of the model in the MVC
+ *   pattern. An ObservableInterface instance does NOT observe a LeafletLayer instance. Instead, a LeafletLayer instance uses the controller to pass
+ *   its own changes to the underlying ObservableInterface instance
  */
 class LeafletLayer { // implements ObserverInterface
     layer;          // Leaflet layer
@@ -88,8 +88,6 @@ class LeafletLayer { // implements ObserverInterface
         const layer = Object.values(this.layer._layers)[0]; 
         layer.remove();
     }
-
-    // ** Coordinate-related methods **
 
     /**
      * - Update this ObserverInterface instance (i.e. "this") based on the coordinates of the ObservableInterface instance (i.e. "observable") that

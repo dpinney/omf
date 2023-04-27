@@ -28,10 +28,13 @@ function main() {
     // debug
     featureGraph.getObservables().forEach(observable => {
         if (!observable.isConfigurationObject()) {
-            // - Add first observer to a visible ObservableInterface instance
-            const controller = new FeatureController(featureGraph, [observable.getProperty('treeKey', 'meta')]);
-            // - Add second observer to a visible ObserverInterface instance
-            new LeafletLayer(controller);
+
+            new LeafletLayer(observable.getProperty('treeKey', 'meta'));
+
+            //// - Add first observer to a visible ObservableInterface instance
+            //const controller = new FeatureController(featureGraph, [observable.getProperty('treeKey', 'meta')]);
+            //// - Add second observer to a visible ObserverInterface instance
+            //new LeafletLayer(controller);
         }
     });
     setupHTML(featureGraph);
@@ -163,6 +166,8 @@ function createNav(featureGraph) {
     const searchTab = document.createElement('div');
     topTab.addTab('Search', searchTab);
     topTab.getTab('Search').tab.click();
+
+
     // - Add third observer to visible ObserverInterface instances
     let controller = new FeatureController(
         featureGraph,
@@ -188,6 +193,8 @@ function createNav(featureGraph) {
     searchModal = new SearchModal(controller);
     componentTab.appendChild(searchModal.getDOMElement());
     componentTab.appendChild(searchModal.getSearchResultsElement());
+
+
     // - Add map and modal insert divs
     let div = document.createElement('div');
     div.id = 'map';

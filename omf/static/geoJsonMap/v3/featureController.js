@@ -4,56 +4,137 @@ import { FeatureGraph } from './featureGraph.js';
 import { LeafletLayer } from './leafletLayer.js';
 import { Modal } from './modal.js';
 
-/**
- * - Preferrably, FeatureController instances should only be created on page load. After page load, use this.setIDs() to change the subset of
- *   ObservableInterface instances that a FeatureController manages
- * - Every ObserverInterface view needs to maintain an internal array of observables. Every time the view is rendered, it should deregister itself
- *   from all of its old observables, ask its FeatureController for new observables, then reregister itself on the new observables
- */
-// - TODO: There should be a ComponentController subclass of FeatureController. Maybe a subclass for submitting features too
 class FeatureController { // implements ControllerInterface
-    // - this.observableGraph conceptually acts like an array of ObservableInterface instances, but is really an ObservableGraphInterface instance
-    //  - It needs to be public because I sometimes create FeatureControllers with a subset of IDs
-    observableGraph; 
-    #ids;               // - this.#ids is the subset of treeKeys in the observableGraph that this FeatureController instance is managing
-    #removed;           // - Whether this FeatureController instance has already been deleted
-    isComponentManager; // - Whether this FeatureController is acting as a component manager
-    #componentMap;      // - A map of components
-    
+    #observableGraph; // - A FeatureGraph instance
+
     /**
-     * @param {FeatureGraph} observableGraph - the ObservableInterface instances (i.e. the model(s) in the MVC pattern) that this ControllerInterface
-     * is managing. Instead of passing an array of specific ObservableInterface instances into this constructor, I pass an ObservableGraphInterface
-     * instance and an array of unique IDs because a graph can update and track objects much more efficiently than an array. ObservableInterface
-     * instances are not defined to have unique IDs, but the IDs combined with the ObservableGraphInterface instance simulate passing in an array of
-     * specific (rather than an array of all) ObservableInterface instances
-     * @param {Array} ids
-     * @param {boolean} [isComponentManager=false] - whether this ControllerInterface instance is acting as a component manager, in which case its
-     * behavior is substantially different from normal
+     * @param {FeatureGraph} observableGraph - a FeatureGraph instance that contains all of the actual data
      */
-    constructor(observableGraph, ids, isComponentManager=false) {
+    constructor(observableGraph) {
         if (!(observableGraph instanceof FeatureGraph)) {
             throw TypeError('"observableGraph" argument must be instanceof FeatureGraph.')
         }
-        if (!(ids instanceof Array)) {
-            throw TypeError('"ids" argument must be an array.')
-        }
-        if (ids.length < 1) {
-            throw Error('"ids" argument must have at least one element.')
-        }
-        this.observableGraph = observableGraph;
-        this.#ids = null;
-        this.#removed = false;
-        this.isComponentManager = isComponentManager;
-        this.#componentMap = null;
-        if (this.isComponentManager) {
-            this.#componentMap = {}; 
-            gComponentsCollection.features.forEach(f => {
-                const feature = new Feature(f);
-                this.#componentMap[feature.getProperty('treeKey', 'meta')] = feature;
-            });
-        }
-        this.setIDs(ids);
+        this.#observableGraph = observableGraph;
     }
+
+    // *********************************
+    // ** ControllerInterface methods **
+    // *********************************
+
+    /**
+     * @param {Array} observables - an array of ObservableInterface instances that should be added to the graph
+     * @returns {undefined}
+     */
+    addObservables(observables) {
+
+    }
+
+    /**
+     * - Delete the property with the matching namespace and property key from all of the ObservableInterface instances
+     * @param {Array} observables - an array of ObservableInterface instances from which the property should be deleted
+     * @param {string} propertyKey - the property key of the property that is in the observables
+     * @param {string} namespace - the namespace of the property that is in the observables 
+     * @returns {undefined}
+     */
+    deleteProperty(observables, propertyKey, namespace) {
+        if (!(observables instanceof Array)) {
+            throw TypeError('"observables" argument must be instanceof Array.');
+        }
+        if (typeof propertyKey !== 'string') {
+            throw TypeError('"propertyKey" argument must be a string.');
+        }
+        if (typeof namespace !== 'string') {
+            throw TypeError('"namespace" argument must be a string.');
+        }
+        observables.forEach(ob => {
+            if (ob.hasProperty(propertyKey, namespace)) {
+                ob.deleteProperty(propertyKey, namespace);
+            }
+        });
+        // - Currently, this function is a convenience function that views could do themselves because nothing else needs to be done besides calling
+        //   deleteProperty() on the ObservableInterface instances
+    }
+
+    /**
+     * - Tell the ObservableInterface instances to delete themselves
+     * @param {Array} observables - an array of ObservableInterface instances from which the property should be deleted
+     * @returns {undefined}
+     */
+    deleteObservables(observables) {
+        if (!(observables instanceof Array)) {
+            throw TypeError('"observables" argument must be instanceof Array.');
+        }
+        observables.forEach(ob => {
+            ob.deleteObservable();
+        });
+        // - I shouldn't have to do this because all visited nodes are deleted
+        //this.observableGraph.markNodesAsUnvisited();
+        // - Currently, this function is a convenience function that views could do themselves because nothing else needs to be done besides calling
+        //   deleteObservable() on the ObservableInterface instances
+    }
+
+    /**
+     * @param {Array} observables - an array of ObservableInterface instances whose coordinates should be set
+     * @param {Array} coordinates - an array of coordinates for this ObservableInterface instance
+     *  - E.g. for node Feature instances this should be in [<lon>, <lat>] format
+     * @returns {undefined}
+     */
+    setCoordinates(observables, coordinates) {
+        if (!(observables instanceof Array)) {
+            throw TypeError('"observables" argument must be instanceof Array.');
+        }
+        if (!(coordinates instanceof Array)) {
+            throw TypeError('"coordinates" argument must be instanceof Array.');
+        }
+        observables.forEach(ob => {
+            ob.setCoordinates(coordinates);
+        });
+        // - I have to mark all the nodes as unvisted here because I can't do it in any of the other coordinate-related functions since they all call
+        //   each other
+        this.observableGraph.markNodesAsUnvisited();        
+    }
+
+    /**
+     * @param {Array} observables - an array of ObservableInterface instances whose property should be set
+     * @param {string} propertyKey - the property key of the property that is being created/changed in the ObservableInterface instances
+     * @param {(string|Object)} propertyValue - the property value of the property that is being created/changed in the ObservableInterface instances.
+     *  I don't like to store Objects, Arrays, etc. as property values, but it's required for certain observables like those that represent form
+     *  objects
+     * @param {string} [namespace='treeProps'] - the namespace of the property key in this observable. Whether a new namespace is created if a
+     *  non-existent namespace is passed is implementation dependent. I throw a ReferenceError because I don't want new namespaces
+     * @returns {undefined}
+     */
+    setProperty(observables, propertyKey, propertyValue, namespace='treeProps') {
+        if (!(observables instanceof Array)) {
+            throw TypeError('"observables" argument must be instanceof Array.');
+        }
+        if (typeof propertyKey !== 'string') {
+            throw TypeError('"propertyKey" argument must be a string.');
+        }
+        if (typeof namespace !== 'string') {
+            throw TypeError('"namespace" argument must be a string.');
+        }
+        observables.forEach(ob => {
+            ob.setProperty(propertyKey, propertyValue, namespace); 
+            const obKey = ob.getProperty('treeKey', 'meta');
+            if (['from', 'to'].includes(propertyKey)) {
+                const fromKey = this.#observableGraph.getKey(ob.getProperty('from'), obKey);
+                const toKey = this.#observableGraph.getKey(ob.getProperty('to'), obKey);
+                const { sourceLat, sourceLon, targetLat, targetLon } = this.#observableGraph.getLineLatLon(fromKey, toKey);
+                ob.setCoordinates([[sourceLon, sourceLat], [targetLon, targetLat]]);
+            } 
+            if (propertyKey === 'parent') {
+                const fromKey = this.#observableGraph.getKey(ob.getProperty('parent'), obKey);
+                const toKey = obKey;
+                const { sourceLat, sourceLon, targetLat, targetLon } = this.#observableGraph.getLineLatLon(fromKey, toKey);
+                const parentChildLine = this.#observableGraph.getParentChildLine(obKey);
+                parentChildLine.setCoordinates([[sourceLon, sourceLat], [targetLon, targetLat]]);
+            } 
+        });
+        // - ob.setProperty() eventually calls <FeatureGraph>.handleUpdatedProperty(), so I must mark nodes as unvisited here
+        this.#observableGraph.markNodesAsUnvisited();
+    }
+    
 
     // *******************************
     // ** ObserverInterface methods **
@@ -175,23 +256,6 @@ class FeatureController { // implements ControllerInterface
         }
     }
 
-    /**
-     * - Tell the ObservableInterface instances to delete themselves
-     * @returns {undefined}
-     */
-    deleteObservables() {
-        if (this.isComponentManager) {
-            this.#ids.forEach(id => {
-                this.#componentMap[id].deleteObservable();  
-            });
-        } else {
-            this.#ids.forEach(id => {
-                this.observableGraph.getObservable(id).deleteObservable();
-            });
-            // - I shouldn't have to do this because all visited nodes are deleted
-            //this.observableGraph.markNodesAsUnvisited();
-        }
-    }
 
     /**
      * @returns {Array} an array of the ObservableInterface instances (i.e. the model(s) in the MVC pattern) that this ControllerInterface is
@@ -206,51 +270,9 @@ class FeatureController { // implements ControllerInterface
         }
     }
 
-    /**
-     * @param {Array} coordinates - an array of coordinates for this ObservableInterface instance
-     *  - E.g. for node Feature instances this should be in [<lon>, <lat>] format
-     * @returns {undefined}
-     */
-    setCoordinates(coordinates) {
-        if (this.isComponentManager) {
-            this.#ids.forEach(id => {
-                const component = this.#componentMap[id];
-                component.setCoordinates(coordinates);
-            });
-        } else {
-            this.#ids.forEach(id => {
-                const observable = this.observableGraph.getObservable(id);
-                observable.setCoordinates(coordinates);
-            });
-            // - I have to mark all the nodes as unvisted here because I can't do it in any of the other coordinate-related functions since they all call
-            //   each other
-            this.observableGraph.markNodesAsUnvisited();        
-        }
-    }
 
-    /**
-     * - Delete the property with the matching namespace and property key in the ObservableInterface instances if it exists
-     * @param {string} propertyKey - the property key of the property that is in the observables
-     * @param {string} namespace - the namespace of the property that is in the observables 
-     *  - E.g. for Feature instances, this defaults to "treeProps" which corresponds to properties in the "treeProps" object
-     */
-    deleteProperty(propertyKey, namespace) {
-        if (this.isComponentManager) {
-            this.#ids.forEach(id => {
-                const component = this.#componentMap[id];
-                if (component.hasProperty(propertyKey, namespace)) {
-                    component.deleteProperty(propertyKey, namespace);
-                }
-            });
-        } else {
-            this.#ids.forEach(id => {
-                const observable = this.observableGraph.getObservable(id);
-                if (observable.hasProperty(propertyKey, namespace)) {
-                    observable.deleteProperty(propertyKey, namespace);
-                }
-            });
-        }
-    }
+
+
 
     /**
      * @param {string} propertyKey - the property key of the property that may or may not be in the observable(s) namespace 
@@ -265,47 +287,7 @@ class FeatureController { // implements ControllerInterface
         }
     }
 
-    /**
-     * @param {string} propertyKey - the property key of the property that is being created/changed in this ObservableInterface instance
-     * @param {(string|Object)} propertyValue - the property value of the property that is being created/changed in this observable. I don't like to
-     *  store Objects, Arrays, etc. as property values, but it's required for certain observables like those that represent form objects
-     * @param {string} [namespace='treeProps'] - the namespace of the property key in this observable. Whether a new namespace is created if a
-     *  non-existent namespace is passed is implementation dependent. I throw a ReferenceError because I don't want new namespaces
-     * @returns {undefined}
-     */
-    setProperty(propertyKey, propertyValue, namespace='treeProps') {
-        if (this.isComponentManager) {
-            this.#ids.forEach(id => {
-                const component = this.#componentMap[id];
-                component.setProperty(propertyKey, propertyValue, namespace);
-            });
-        } else {
-            this.#ids.forEach(id => {
-                const observable = this.observableGraph.getObservable(id);
-                // - If mass edit causes namespace issues (e.g. trying to add "from" to the giant OMD object), I'll deal with it later
-                observable.setProperty(propertyKey, propertyValue, namespace);
-                if (['from', 'to'].includes(propertyKey)) {
-                    const fromKey = this.observableGraph.getKey(observable.getProperty('from'), id);
-                    const toKey = this.observableGraph.getKey(observable.getProperty('to'), id);
-                    const { sourceLat, sourceLon, targetLat, targetLon } = this.observableGraph.getLineLatLon(fromKey, toKey);
-                    observable.setCoordinates([[sourceLon, sourceLat], [targetLon, targetLat]]);
-                }
-                if (propertyKey === 'parent') {
-                    const fromKey = this.observableGraph.getKey(observable.getProperty('parent'), id);
-                    const toKey = id;
-                    const { sourceLat, sourceLon, targetLat, targetLon } = this.observableGraph.getLineLatLon(fromKey, toKey);
-                    // - If this is really slow in the future, I could do something like use "id" to look up node neighbors of the child node to find the
-                    //   parent-child line more quickly
-                    const parentChildLine = this.observableGraph.getObservables((ob) => ob.isParentChildLine() && ob.getProperty('to') === observable.getProperty('name'));
-                    if (parentChildLine.length !== 1) {
-                        throw Error(`The Feature "${id}" has the "parent" property, but exactly one corresponding parent-child line could be found in the FeatureGraph.`);
-                    }
-                    parentChildLine[0].setCoordinates([[sourceLon, sourceLat], [targetLon, targetLat]]);
-                }
-            });
-            this.observableGraph.markNodesAsUnvisited();
-        }
-    }
+
 
     /**
      * @returns {boolean} true if any of the observables is a configuration object
