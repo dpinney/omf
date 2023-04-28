@@ -87,8 +87,11 @@ def work(modelDir, inputDict):
     # timeSeriesFigure.update_yaxes(rangemode="tozero") # This line sets the base of the y axis to be 0.
 
     # traditional hosting capacity
-    # test_dss_file = pJoin(omf.omfDir, 'static', 'testFiles', 'pyCIGAR', 'ieee37busdata', 'ieee37_LBL.dss')
-    # omf.solvers.opendss.hosting_capacity(test_dss_file, ['701', '730', '703', '724'], 1, 6.5)
+    # ATM 2 issues
+    # - don't know what inputs to put in for the traditional hosting capacity function
+    # - when attempting to run the function with guessing inputs,
+    test_dss_file = pJoin(omf.omfDir, 'static', 'testFiles', 'pyCIGAR', 'ieee37busdata', 'ieee37_LBL.dss')
+    omf.solvers.opendss.hosting_capacity(test_dss_file, ['701', '730', '703', '724'], 1, 6.5)
 
     outData = {}
     # Stdout/stderr.
