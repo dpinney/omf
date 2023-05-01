@@ -253,7 +253,7 @@ def dssToTree(pathToDssOrString, is_path=True):
 		with open(pathToDssOrString, 'r') as dssFile:
 			contents = dssFile.readlines()
 	else:
-		contents = pathToDssOrString
+		contents = pathToDssOrString.splitlines()
 	# Lowercase everything. OpenDSS is case insensitive.
 	contents = [x.lower() for x in contents]
 	# Clean up the file.
@@ -753,7 +753,7 @@ def dssToOmd(dssFilePath, omdFilePath, RADIUS=0.0002, write_out=True):
 	tree = dssToTree(dssFilePath)
 	evil_glm = evilDssTreeToGldTree(tree)
 	name_map = _name_to_key(evil_glm)
-	print(name_map)
+	# print(name_map)
 	for ob in evil_glm.values():
 		ob_name = ob.get('name','')
 		ob_type = ob.get('object','')
