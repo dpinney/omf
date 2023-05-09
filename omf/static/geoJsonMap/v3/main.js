@@ -39,14 +39,14 @@ function main() {
     /* Setup layers */
     /****************/
 
-    const maxZoom = 25;
+    const maxZoom = 30;
     var esri_satellite_layer = L.esri.basemapLayer('Imagery', {
         maxZoom: maxZoom
     });
     const mapbox_layer = L.mapboxGL({
         attribution: "",
         // - Odd behavior: maxboxGL will let the user keep zooming in past maxZoom, but the tiles won't change. No other layers do this
-        maxZoom: 25,
+        maxZoom: maxZoom,
         style: 'https://api.maptiler.com/maps/basic/style.json?key=WOwRKyy0L6AwPBuM4Ggj'
     });
     const esri_topography_layer = L.esri.basemapLayer('Streets', {
