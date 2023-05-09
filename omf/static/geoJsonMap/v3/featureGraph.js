@@ -174,12 +174,18 @@ class FeatureGraph {
         throw new UnsupportedOperationError();
     }
 
+    /**
+     *
+     */
     updateCoordinatesOfObservers(oldCoordinates) {
-        throw new UnsupportedOperationError();
+        this.#observers.forEach(ob => ob.handleUpdatedCoordinates(this, oldCoordinates))
     }
 
+    /**
+     *
+     */
     updatePropertyOfObservers(propertyKey, oldPropertyValue, namespace='treeProps') {
-        throw new UnsupportedOperationError();
+        this.#observers.forEach(ob => ob.handleUpdatedProperty(this, propertyKey, oldPropertyValue, namespace));
     }
 
     // *******************************
@@ -282,6 +288,7 @@ class FeatureGraph {
                     }
                 }
             });
+            this.updateCoordinatesOfObservers(oldCoordinates);
         } else {
             throw new FeatureNotFoundError(observableKey);
         }
@@ -361,6 +368,7 @@ class FeatureGraph {
                     }
                 }
             }
+            this.updatePropertyOfObservers(propertyKey, oldPropertyValue, namespace);
         } else {
             throw new FeatureNotFoundError(observableKey);
         }

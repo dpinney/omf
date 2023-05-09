@@ -104,8 +104,8 @@ class SearchModal {
      */
     handleUpdatedCoordinates(observable, oldCoordinates) {
         // - The function signature above is part of the ObserverInterface API. The implementation below is not
-        if (!(observable instanceof Feature)) {
-            throw TypeError('"observable" argument must be instanceof Feature.');
+        if (!(observable instanceof Feature) && !(observable instanceof FeatureGraph)) {
+            throw TypeError('"observable" argument must be instanceof Feature or FeatureGraph.');
         }
         if (!(oldCoordinates instanceof Array)) {
             throw TypeError('"oldCoordinates" argument must be an array.');
@@ -124,8 +124,10 @@ class SearchModal {
      */
     handleUpdatedProperty(observable, propertyKey, oldPropertyValue, namespace='treeProps') {
         // - The function signature above is part of the ObserverInterface API. The implementation below is not
-        if (!(observable instanceof Feature)) {
-            throw TypeError('"observable" argument must be instanceof Feature.');
+        // - A SearchModal can either directly observer Features or a FeatureGraph. Since in both cases the SearchModal response is the same, this is
+        //   a special case where the observable can be one of two classes
+        if (!(observable instanceof Feature) && !(observable instanceof FeatureGraph)) {
+            throw TypeError('"observable" argument must be instanceof Feature or FeatureGraph.');
         }
         if (typeof propertyKey !== 'string') {
             throw TypeError('"propertyKey" argument must be a string.');
@@ -158,7 +160,15 @@ class SearchModal {
      * @returns {undefined}
      */
     refreshContent() {
-
+        const keySelects = [...this.#keySelects];
+        keySelects.forEach(oldKeySelect => {
+            const index = this.#keySelects.indexOf(oldKeySelect);
+            if (index > -1) {
+                this.#keySelects.splice(index, 1);
+            }
+            const newKeySelect = this.#getKeySelect(oldKeySelect);
+            oldKeySelect.replaceWith(newKeySelect);
+        });
     }
 
     /**
@@ -415,19 +425,17 @@ class SearchModal {
             option.value = k;
             keySelect.add(option);
         });
-        if (oldKeySelect instanceof HTMLSelectElement) {
-            // - TODO: double check this is right
-            const oldValue = oldKeySelect.value;
-            for (const op of keySelect.options) {
-                if (op.value === oldValue) {
-                    op.selected = true;
-                }
-            }
-        }
-        // - Set default starting keySelect option
         for (const op of keySelect.options) {
             if (op.value === 'treeKey') {
                 keySelect.selectedIndex = op.index;
+            }
+        }
+        if (oldKeySelect instanceof HTMLSelectElement) {
+            const oldValue = oldKeySelect.value;
+            for (const op of keySelect.options) {
+                if (op.value === oldValue) {
+                    keySelect.selectedIndex = op.index;
+                }
             }
         }
         keySelect.classList.add('fullWidth');
