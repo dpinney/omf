@@ -82,13 +82,17 @@ def work(modelDir, inputDict):
     
     # post busSplitting
     mohcaResults = mohcaOutput[0]
-    columnChartFigure = px.bar(mohcaResults, x='busname', y='kW_hostable', color='kW_hostable') 
-    timeSeriesFigure = px.line(mohcaResults, x='busname', y='kW_hostable', markers=True, color='kW_hostable')
+    columnChartFigure = px.histogram(mohcaResults, x='busname', y='kW_hostable', color='kW_hostable', color_discrete_sequence=['purple', "blue", "green"] ) 
+    timeSeriesFigure = px.line( mohcaResults.sort_values( by="kW_hostable", ascending=False, ignore_index=True ), x='busname', y='kW_hostable', markers=True, color_discrete_sequence=['purple', "blue", "green"])
     # timeSeriesFigure.update_yaxes(rangemode="tozero") # This line sets the base of the y axis to be 0.
 
     # traditional hosting capacity
-    # test_dss_file = pJoin(omf.omfDir, 'static', 'testFiles', 'pyCIGAR', 'ieee37busdata', 'ieee37_LBL.dss')
-    # omf.solvers.opendss.hosting_capacity(test_dss_file, ['701', '730', '703', '724'], 1, 6.5)
+    # ATM 2 issues
+    # - don't know what inputs to put in for the traditional hosting capacity function
+    # - when attempting to run the function with guessing inputs,
+    test_dss_file = pJoin(omf.omfDir, 'static', 'hostingcapacityfiles', 'ieee37_LBL.dss')
+    # look at second val of results tuple
+    # traditionalHCresults = omf.solvers.opendss.hosting_capacity(test_dss_file, ['701', '730', '703', '724'], 1, 6.5)
 
     outData = {}
     # Stdout/stderr.
@@ -96,8 +100,10 @@ def work(modelDir, inputDict):
     outData['stderr'] = ""
     outData['columnChartData'] = json.dumps( columnChartFigure, cls=py.utils.PlotlyJSONEncoder )
     outData['timeSeriesData'] = json.dumps( timeSeriesFigure, cls=py.utils.PlotlyJSONEncoder )
-    outData['tableHeadings'] = ["busnames", "values"]
-    outData['tableValues'] = ( list(mohcaResults.itertuples(index=False, name=None)) )
+    outData['mohcaHCTableHeadings'] = mohcaResults.columns.values.tolist()
+    outData['mohcaHCTableValues'] = ( list(mohcaResults.sort_values( by="kW_hostable", ascending=False, ignore_index=True ).itertuples(index=False, name=None)) )
+    outData['traditionalHCTableHeadings'] = traditionalHCresults[0].columns.values.tolist()
+    outData['traditionalHCTableValues'] = ( list( traditionalHCresults[0].itertuples(index=False, name=None)))
     # Stdout/stderr.
     outData['stdout'] = "Success"
     outData['stderr'] = ""
@@ -112,15 +118,21 @@ def new(modelDir):
     test_file_name = 'sandia_loc1_test_data.csv'
     test_file_path = pJoin(omf.omfDir,'static','testFiles',test_file_name)
     test_file_contents = open(test_file_path).read()
-    test_dss_file = pJoin(omf.omfDir, 'static', 'testFiles', 'pyCIGAR', 'ieee37busdata', 'ieee37_LBL.dss')
+    test_omd_file = pJoin(omf.omfDir, 'static', 'hostingcapacityfiles', 'ieee37_LBL.omd')
     defaultInputs = {
         "dataVariableName": 'None',
+        "feederName1": "ieee37_LBL",
         "inputDataFileName": test_file_name,
         "inputDataFileContent": test_file_contents,
         "modelType": modelName,
         "mohcaAlgorithm": 'None'
     }
-    return __neoMetaModel__.new(modelDir, defaultInputs)
+    creationCode = __neoMetaModel__.new(modelDir, defaultInputs)
+    try:
+      shutil.copyfile(pJoin(__neoMetaModel__._omfDir, "static", "hostingcapacityfiles", defaultInputs["feederName1"]+'.omd'), pJoin(modelDir, defaultInputs["feederName1"]+'.omd'))
+    except:
+      return False
+    return creationCode
 
 @neoMetaModel_test_setup
 def _disabled_tests():

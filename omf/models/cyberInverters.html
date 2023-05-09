@@ -475,6 +475,46 @@
 			}
 			</script>
 		</div>
+
+		<p class="reportTitle">Switch State <a target="_self" class="toggle">Hide / Show</a></p>
+		<div id="newSwitchReport" class="tightContent" style="max-height:610px; overflow-y: scroll;">
+			{% if allOutputDataDict.switchStates|length == 0 %}
+			<script type="text/javascript">	
+				$("#newSwitchReport").html("<p>&#160;&#160;&#160;No switches were found on the feeder.</p>")
+			</script>
+			{% endif %}
+			<script type="text/javascript">
+				for (let [Name, state] of Object.entries({{allOutputDataDict.switchStates|tojson}})) {
+					$("<div/>").appendTo("#newSwitchReport")
+						.attr("class", "switchContainer")
+						.attr("id", Name)
+					$("<div/>").appendTo("#newSwitchReport")
+						.attr("id", "switchSeries_" + Name)
+					localHighChart = JSON.parse(JSON.stringify(highChartsTemplate))
+					localHighChart["chart"]["renderTo"] = "switchSeries_" + Name
+					localHighChart["chart"]["inverted"] = false
+					localHighChart["chart"]["type"] = "line"
+					localHighChart["title"]["text"] = Name
+					localHighChart["title"]["align"] = "right"
+					localHighChart["title"]["x"] = -50
+					localHighChart["series"] = [{
+						"pointWidth": 40,
+						"data": state["state"], // Use the 'state' variable instead of 'switchitems'
+						"name": "Control Status",
+						"color": "royalblue"
+					}]
+					localHighChart["yAxis"] = [{
+						"title":{"text":""},
+						"categories":["off", "on"],
+						"min":0,
+						"max":1,
+						"tickPositions": [0,1]
+					}]
+					new Highcharts.Chart(localHighChart)
+				}
+			</script>		</div>
+
+
 		<p class="reportTitle">Triplex Meter Imbalances <a target="_self" class="toggle">Hide / Show</a></p>
 		<div id="voltageImbalancesReport" class="tightContent">
 			{% if allOutputDataDict.voltageImbalances|length == 0 %}

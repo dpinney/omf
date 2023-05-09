@@ -357,6 +357,9 @@ def work(modelDir, inputDict):
 		outData["maxVoltBand"] = pycigarJson["Substation Regulator Maximum Voltage(V)"]
 		outData["Capacitor_Outputs"] = pycigarJson["Capacitor Outputs"]
 
+		#get switch info
+		outData["switchStates"] = pycigarJson["Switch Outputs"]
+
 		#convert regulator data
 		# create lists of regulator object names
 		regNameList = []
@@ -443,13 +446,13 @@ def work(modelDir, inputDict):
 def new(modelDir):
 	''' Create a new instance of this model. Returns true on success, false on failure. '''
 	# default model files:
-	ckt_dir = "ieee37busdata"
+	ckt_dir = "dl"
 	omd_fn = "ieee37_LBL"
 	dss_fn = "ieee37_LBL.dss"
-	pv_fn = "load_solar_data.csv"
-	bp_fn = "breakpoints.csv"
-	misc_fn = "misc_inputs.csv"
-	dvc_fn = "device_inputs.txt"
+	pv_fn = "ts.csv"
+	bp_fn = "bp.csv"
+	misc_fn = "misc.csv"
+	dvc_fn = "dev.txt"
 
 
 	with open(pJoin(omf.omfDir, "static", "testFiles", "pyCIGAR", ckt_dir, pv_fn)) as pv_stream:
@@ -463,7 +466,7 @@ def new(modelDir):
 
 	defaultInputs = {
 		"simStartDate": "2019-07-01T00:00:00Z",
-		"simLength": "750",
+		"simLength": "14400",
 		"simStepUnits": "seconds",
 		"simEntryStep": "100",
 		"feederName1": omd_fn, # this is the .omd file (used by distnetviz.html and web.saveFeeder)
