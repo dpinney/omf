@@ -1,6 +1,7 @@
 export { LeafletLayer };
+import { Feature } from './feature.js';
 import { FeatureController } from "./featureController.js";
-import { TreeFeatureModal } from './treeFeatureModal.js';
+import { FeatureEditModal } from './featureEditModal.js';
 
 /**
  * - Each LeafletLayer instance is a view in the MVC pattern. Each observes an ObservableInterface instance, which is part of the model in the MVC
@@ -8,67 +9,65 @@ import { TreeFeatureModal } from './treeFeatureModal.js';
  *   its own changes to the underlying ObservableInterface instance
  */
 class LeafletLayer { // implements ObserverInterface
-    layer;          // Leaflet layer
     #controller;    // ControllerInterface instance
-    static nodeLayers = L.featureGroup();
+    #layer;         // - Leaflet layer
+    #observable;    // - ObservableInterface instance
     static lineLayers = L.featureGroup();
-    static parentChildLineLayers = L.featureGroup();
     static map;
+    static nodeLayers = L.featureGroup();
+    static parentChildLineLayers = L.featureGroup();
 
     /**
-     * @param {FeatureController} controller - a ControllerInterface instance. This ControllerInterface instance has a reference to an
-     * ObservableInterface instance that can be used to register this LeafletLayer as an observer of an ObservableInterface instance
+     * @param {Feature} observable - an ObservableInterface instance
+     * @param {FeatureController} controller - a ControllerInterface instance
+     * @returns {undefined}
      */
-    constructor(controller) {
+    constructor(observable, controller) {
+        if (!(observable instanceof Feature)) {
+            throw TypeError('"observable" argument must be instance of Feature.');
+        }
         if (!(controller instanceof FeatureController)) {
-            throw Error('"controller" argument must be an instance of FeatureController');
+            throw Error('"controller" argument must be an instance of FeatureController.');
         }
         this.#controller = controller;
-        const observables = this.#controller.getObservables();
-        if (observables.length !== 1) {
-            throw Error('Each LeafletLayer instance should observe exactly one Feature');
-        }
-        const observable = observables[0];
+        this.#observable = observable;
         // - Here, the first observer is added to every visible feature
-        observable.registerObserver(this);
-        // - The Leaflet layer itself will contain a reference to a GeoJSON feature object that isn't part of the data model (i.e. it's a GeoJSON
-        //   object that won't be updated or referenced at all). That's fine because I won't be working directly with the Leaflet layer. I'll be
-        //   working with my own layer that actually will update the data model
+        this.#observable.registerObserver(this);
         const feature = {'type': 'Feature', 'geometry': {}};
-        if (observable.isNode()) {
+        if (this.#observable.isNode()) {
             feature.geometry.type = 'Point';
-        } else if (observable.isLine()) {
+        } else if (this.#observable.isLine()) {
             feature.geometry.type = 'LineString';
         }
-        feature.geometry.coordinates = observable.getCoordinates();
-        feature.properties = observable.getProperties('meta');
+        feature.geometry.coordinates = structuredClone(this.#observable.getCoordinates());
+        feature.properties = structuredClone(this.#observable.getProperties('meta'));
         // - L.geoJSON() returns an instance of https://leafletjs.com/reference.html#geojson
         //  - A GeoJSON object extends FeatureGroup which extends LayerGroup which extends Layer
         //  - Therefore, a GeoJSON object can contain one or more layers
         //  - Access the underlying layer(s) with <GeoJSON>._layers, which is a map (i.e. object) that maps layer ids to actual layer objects
-        this.layer = L.geoJSON(feature, {
+        this.#layer = L.geoJSON(feature, {
             pointToLayer: this.#pointToLayer.bind(this), 
             style: this.#styleLines.bind(this)
         });
-        if (observable.isNode()) {
-            LeafletLayer.nodeLayers.addLayer(this.layer);
-        } else if (observable.isLine()) {
-            if (observable.isParentChildLine()) {
-                LeafletLayer.parentChildLineLayers.addLayer(this.layer);
+        if (this.#observable.isNode()) {
+            LeafletLayer.nodeLayers.addLayer(this.#layer);
+        } else if (this.#observable.isLine()) {
+            if (this.#observable.isParentChildLine()) {
+                LeafletLayer.parentChildLineLayers.addLayer(this.#layer);
             } else {
-                LeafletLayer.lineLayers.addLayer(this.layer);
+                LeafletLayer.lineLayers.addLayer(this.#layer);
             }
         } else {
-            throw Error('"observable" was not a node or a line.');
+            // - TODO: get polygons working!
+            throw Error('"observable" argument was not a node or a line.');
         }
-        const layer = Object.values(this.layer._layers)[0];
-        let treeFeatureModal;
+        const layer = Object.values(this.#layer._layers)[0];
+        let featureEditModal;
         layer.bindPopup(() => {
-            // - Add temporary fifth observer to visible ObservableInterface instances
-            treeFeatureModal = new TreeFeatureModal(this.#controller);
-            return treeFeatureModal.getDOMElement();
+            featureEditModal = new FeatureEditModal([this.#observable], controller);
+            return featureEditModal.getDOMElement();
         });
-        this.layer.addEventListener('popupclose', () => observable.removeObserver(treeFeatureModal));
+        this.#layer.addEventListener('popupclose', () => this.#observable.removeObserver(featureEditModal));
     }
 
     // *******************************
@@ -85,7 +84,8 @@ class LeafletLayer { // implements ObserverInterface
     handleDeletedObservable(observable) {
         // - The function signature above is part of the ObserverInterface API. The implementation below is not
         observable.removeObserver(this);
-        const layer = Object.values(this.layer._layers)[0]; 
+        const layer = Object.values(this.#layer._layers)[0]; 
+        // - Why does this also delete the FeatureEditModal in the pop-up? I don't know but I have to deal with it
         layer.remove();
     }
 
@@ -107,9 +107,9 @@ class LeafletLayer { // implements ObserverInterface
         const coordinates = observable.getCoordinates();
         if (observable.isNode()) {
             // - Object.values(this.<GeoJSON>.<mapping object>)[0] === <Layer>
-            Object.values(this.layer._layers)[0].setLatLng([coordinates[1], coordinates[0]]);
+            Object.values(this.#layer._layers)[0].setLatLng([coordinates[1], coordinates[0]]);
         } else {
-            Object.values(this.layer._layers)[0].setLatLngs([[coordinates[0][1], coordinates[0][0]],[coordinates[1][1], coordinates[1][0]]]);
+            Object.values(this.#layer._layers)[0].setLatLngs([[coordinates[0][1], coordinates[0][0]],[coordinates[1][1], coordinates[1][0]]]);
         }
     }
 
@@ -134,18 +134,28 @@ class LeafletLayer { // implements ObserverInterface
         // - Change colors?
     }
 
-    // *******************************
+    // ********************
+    // ** Public methods **
+    // ********************
+
+    /**
+     * @returns {GeoJSON}
+     */
+    getLayer() {
+        return this.#layer;
+    }
+
+    // *********************
     // ** Private methods ** 
-    // *******************************
+    // *********************
 
     #pointToLayer() {
         let svgClass = 'gray';
-        const observable = this.#controller.getObservables()[0];
         // - TODO: verify pointColor works
-        if (observable.hasProperty('pointColor')) {
-            svgClass = observable.getProperty('pointColor');
-        } else if (observable.hasProperty('object')) {
-            const object = observable.getProperty('object');
+        if (this.#observable.hasProperty('pointColor')) {
+            svgClass = this.#observable.getProperty('pointColor');
+        } else if (this.#observable.hasProperty('object')) {
+            const object = this.#observable.getProperty('object');
             if (object === 'capacitor') {
                 svgClass = 'purple';
             }
@@ -164,7 +174,7 @@ class LeafletLayer { // implements ObserverInterface
             iconSize: [16, 16],
           });
         // - TODO: fix uneven panning speed
-        const coordinates = observable.getCoordinates();
+        const coordinates = this.#observable.getCoordinates();
         const marker = L.marker(
             [coordinates[1], coordinates[0]], {
             autoPan: true,
@@ -174,31 +184,30 @@ class LeafletLayer { // implements ObserverInterface
         const that = this;
         marker.on('drag', function(e) {
             const {lat, lng} = e.target.getLatLng();
-            that.#controller.setCoordinates([lng, lat]);
+            that.#controller.setCoordinates([that.#observable], [lng, lat]);
         });
         return marker;
     }
 
     #styleLines() {
-        const observable = this.#controller.getObservables()[0];
-        if (observable.isLine()) {
-            if (observable.hasProperty('edgeColor')) {
+        if (this.#observable.isLine()) {
+            if (this.#observable.hasProperty('edgeColor')) {
                 return {
-                    color: observable.getProperty('edgeColor')
+                    color: this.#observable.getProperty('edgeColor')
                 }
-            } else if (observable.hasProperty('object') && observable.getProperty('object') === 'transformer') {
+            } else if (this.#observable.hasProperty('object') && this.#observable.getProperty('object') === 'transformer') {
                 return {
                     color: 'orange'
                 }
-            } else if (observable.hasProperty('object') && observable.getProperty('object') === 'regulator') {
+            } else if (this.#observable.hasProperty('object') && this.#observable.getProperty('object') === 'regulator') {
                 return {
                     color: 'red'
                 }
-            } else if (observable.hasProperty('object') && observable.getProperty('object') === 'underground_line') {
+            } else if (this.#observable.hasProperty('object') && this.#observable.getProperty('object') === 'underground_line') {
                 return {
                     color: 'gray'
                 }
-            } else if (observable.isParentChildLine()) {
+            } else if (this.#observable.isParentChildLine()) {
                 return {
                     color: 'black',
                     // - Dashed lines are only useful if the child is reasonably far from the parent, so I need other differences in style
@@ -211,7 +220,7 @@ class LeafletLayer { // implements ObserverInterface
                     color: 'black'
                 }
             }
-        } else if (observable.isPolygon()) {
+        } else if (this.#observable.isPolygon()) {
             return {
                 color: 'blue'
             }

@@ -16,8 +16,15 @@ class DropdownDiv {
     }
 
     // ********************
-    // ** Public methods ** 
+    // ** Public methods **
     // ********************
+
+    /**
+     * @returns {boolean}
+     */
+    isExpanded() {
+        return this.contentDivElement !== null && this.contentDivElement.classList.contains('expanded');
+    }
 
    /**
     * @param {Node} e - an element to append to the content div
@@ -103,9 +110,14 @@ class DropdownDiv {
         };
     }
 
-    addStyleClass(style, elementName) {
-        if (typeof style !== 'string') {
-            throw Error('The "style" argument must be a string');
+    /**
+     * @param {Array} styles
+     * @param {string} elementName
+     * @returns {undefined}
+     */
+    addStyleClasses(styles, elementName) {
+        if (!(styles instanceof Array)) {
+            throw Error('"styles" argument must be an array.');
         }
         if (typeof elementName !== 'string') {
             throw Error('The "elementName" argument must be a string');
@@ -113,17 +125,17 @@ class DropdownDiv {
         switch (elementName) {
             case 'divElement':
                 if (this.divElement !== null) {
-                    this.divElement.classList.add(style);
+                    this.divElement.classList.add(...styles);
                 }
                 break;
             case 'buttonElement':
                 if (this.buttonElement !== null) {
-                    this.buttonElement.classList.add(style);
+                    this.buttonElement.classList.add(...styles);
                 }
                 break;
             case 'contentDivElement':
                 if (this.contentDivElement !== null) {
-                    this.contentDivElement.classList.add(style);
+                    this.contentDivElement.classList.add(...styles);
                 }
                 break;
             default:
@@ -132,11 +144,13 @@ class DropdownDiv {
     }
 
     /**
-     * 
+     * @param {Array} styles
+     * @param {string} elementName
+     * @returns {undefined}
      */
-    removeStyleClass(style, elementName) {
-        if (typeof style !== 'string') {
-            throw Error('The "style" argument must be a string');
+    removeStyleClasses(styles, elementName) {
+        if (!(styles instanceof Array)) {
+            throw Error('"styles" argument must be an array.');
         }
         if (typeof elementName !== 'string') {
             throw Error('The "elementName" argument must be a string');
@@ -144,17 +158,17 @@ class DropdownDiv {
         switch (elementName) {
             case 'divElement':
                 if (this.divElement !== null) {
-                    this.divElement.classList.remove(style);
+                    this.divElement.classList.remove(...styles);
                 }
                 break;
             case 'buttonElement':
                 if (this.buttonElement !== null) {
-                    this.buttonElement.classList.remove(style);
+                    this.buttonElement.classList.remove(...styles);
                 }
                 break;
             case 'contentDivElement':
                 if (this.contentDivElement !== null) {
-                    this.contentDivElement.classList.remove(style);
+                    this.contentDivElement.classList.remove(...styles);
                 }
                 break;
             default:
@@ -196,16 +210,8 @@ class DropdownDiv {
                         if (contentDiv.classList.contains('expanded')) {
                             innerDiv.children[0].click();
                         }
-                        
                     }
                 }
-                // - Old, buggy way of handling things
-                //for (const innerSvg of that.contentDivElement.getElementsByClassName('js-svg--dropdownSvg')) {
-                //    innerSvg.classList.remove('rotated');    
-                //}
-                //for (const innerContentDiv of that.contentDivElement.getElementsByClassName('js-div--dropdownContentDiv')) {
-                //    innerContentDiv.classList.remove('expanded');
-                //}
             }
         }
     }

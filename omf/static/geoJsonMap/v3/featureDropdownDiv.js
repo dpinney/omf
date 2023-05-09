@@ -1,21 +1,28 @@
 export { FeatureDropdownDiv };
 import { DropdownDiv } from './dropdownDiv.js';
+import { Feature, UnsupportedOperationError } from './feature.js';
 import { FeatureController } from './featureController.js';
-import { TreeFeatureModal } from './treeFeatureModal.js';
+import { FeatureEditModal } from './featureEditModal.js';
 
 class FeatureDropdownDiv {
-    #controller;    // - ControllerInterface instance
-    #dropdownDiv;   // - DropdownDiv instance
-    #observables;   // - An array of ObservableInterface instances
-    #removed;       // - Whether this FeatureDropdownDiv instance has already been deleted
+    #controller;        // - a ControllerInterface instance
+    #dropdownDiv;       // - a DropdownDiv instance
+    #featureEditModal;  // - a FeatureEditModal instance
+    #observable;        // - an ObservableInterface instance
+    #removed;           // - Whether this FeatureDropdownDiv instance has already been deleted
 
-    constructor(controller) {
+    constructor(observable, controller) {
+        if (!(observable instanceof Feature)) {
+            throw TypeError('"observable" argument must be instanceof Feature.');
+        }
         if (!(controller instanceof FeatureController)) {
-            throw Error('"controller" argument must be an instance of FeatureController');
+            throw TypeError('"controller" argument must be instanceof FeatureController.');
         }
         this.#controller = controller;
         this.#dropdownDiv = null;
-        this.#observables = null;
+        this.#featureEditModal = null;
+        this.#observable = observable;
+        this.#observable.registerObserver(this);
         this.#removed = false;
         this.renderContent();
     }
@@ -27,41 +34,47 @@ class FeatureDropdownDiv {
     /**
      * - Remove this ObserverInterface instance (i.e. "this") from the ObservableInterface instance (i.e. "observable") that has been deleted, and
      *   perform other actions as needed
-     * @param {Object} observable - an instance of ObservableInterface that this Observer is observing
+     * @param {Feature} observable - an ObservableInterface instance
      * @returns {undefined}
      */
     handleDeletedObservable(observable) {
         // - The function signature above is part of the ObserverInterface API. The implementation below is not
-        if (!this.#removed) {
-            observable.removeObserver(this);
-            this.#observables = this.#observables.filter(ob => ob !== observable);
-            if (this.#observables.length === 0) {
-                this.remove();
-            } else {
-                this.renderContent();
-            }
+        if (!(observable instanceof Feature)) {
+            throw TypeError('"observable" argument must be instanceof Feature.');
         }
+        this.remove();
+    }
+
+    /**
+     *
+     */
+    handleNewObservable(observable) {
+        // - The function signature above is part of the ObserverInterface API. The implementation below is not
+        throw new UnsupportedOperationError();
     }
 
     /**
      * - Update this ObserverInterface instance (i.e. "this") based on the coordinates of the ObservableInterface instance (i.e. "observable") that
      *   have just changed and perform other actions as needed
-     * @param {Object} observable - an instance of ObservableInterface that this Observer is observing
+     * @param {Feature} observable - an ObservableInterface instance
      * @param {Array} oldCoordinates - the old coordinates of the observable prior to the change in coordinates
      * @returns {undefined}
      */
     handleUpdatedCoordinates(observable, oldCoordinates) {
         // - The function signature above is part of the ObserverInterface API. The implementation below is not
+        if (!(observable instanceof Feature)) {
+            throw TypeError('"observable" argument must be instanceof Feature.');
+        }
         if (!(oldCoordinates instanceof Array)) {
             throw TypeError('"oldCoordinates" argument must be an array.');
         }
-        // - Do nothing. Any inner TreeFeatureModal instance should update itself
+        // - Do nothing. Any inner FeatureEditModal should update itself
     } 
 
     /**
      * - Update this ObserverInstance (i.e. "this") based on the property of the ObservableInterface instance (i.e. "observable") that has just
      *   changed and perform other actions as needed
-     * @param {Object} observable - the observable that this observer is observing
+     * @param {Feature} observable - an ObservableInterface instance
      * @param {string} propertyKey - the property key of the property that has been created/changed/deleted in the observable
      * @param {(string|Object)} oldPropertyValue - the previous value of the property that has been created/changed/deleted in the observable
      * @param {string} namespace - the namespace of the property that has been created/changed/deleted in the observable
@@ -69,122 +82,100 @@ class FeatureDropdownDiv {
      */
     handleUpdatedProperty(observable, propertyKey, oldPropertyValue, namespace='treeProps') {
         // - The function signature above is part of the ObserverInterface API. The implementation below is not
+        if (!(observable instanceof Feature)) {
+            throw TypeError('"observable" argument must be instanceof Feature.');
+        }
         if (typeof propertyKey !== 'string') {
             throw TypeError('"propertyKey" argument must be a string.');
         }
         if (typeof namespace !== 'string') {
             throw TypeError('"namespace" argument must be a string.');
         }
-        // - Do nothing. Any inner TreeFeatureModal instance should update itself
+        // - Do nothing. Any inner FeatureEditModal should update itself
     } 
 
-    // ********************
-    // ** Public methods ** 
-    // ********************
+    // ****************************
+    // ** ModalInterface methods **
+    // ****************************
 
     getDOMElement() {
         return this.#dropdownDiv.divElement;
     }
 
+    /**
+     * @returns {boolean}
+     */
+    isRemoved() {
+        return this.#removed;
+    }
+
+    /**
+     * @returns {undefined}
+     */
+    refreshContent() {
+
+    }
+
+    /**
+     * @returns {undefined}
+     */
     remove() {
-        // - Do not deregister this.#controller from the same observables. It's possible that the controller is managing multiple views 
-        //  - The controller has its own remove() method that can be called
         if (!this.#removed) {
-            this.#observables.forEach(ob => ob.removeObserver(this));
-            this.#observables = null;
-            this.#dropdownDiv.divElement.remove(); 
+            // - I have to check if this.#featureEditModal === null because often a FeatureDropdownDiv will be rendered, but the user will not have
+            //   clicked on it to expand it, so it won't contain a FeatureEditModal
+            if (this.#featureEditModal !== null) {
+                this.#featureEditModal.remove();
+                this.#featureEditModal = null;
+            }
+            this.#dropdownDiv.divElement.remove();
+            this.#dropdownDiv = null;
+            this.#observable.removeObserver(this);
+            this.#observable = null;
+            this.#controller = null;
             this.#removed = true;
         }
     }
 
-    renderContent() {
-        // - Click on the outermost button if the content div was open to ensure removal of all inner FeatureController instances and TreeFeatureModal
-        //   instances
-        if (this.#dropdownDiv !== null) {
-            if (this.#dropdownDiv.contentDivElement.classList.contains('expanded')) {
-                this.#dropdownDiv.buttonElement.click();
-            }
-        }
-        // - Deregister from previous ObservableInterface instances (e.g. let's say this FeatureDropdownDiv has been observing 10 features)
-        if (this.#observables !== null) {
-            this.#observables.forEach(ob => ob.removeObserver(this));
-        }
-        // - Ask the controller for the new ObservableInterface instances that should be observed (e.g. let's say a new search has updated the
-        //   FeatureController to only manage 5 of the original 10 features)
-        this.#observables = this.#controller.getObservables();
-        // - Register on the new ObservableInterface instances in case one of them gets deleted and a dropdown div needs to be removed
-        this.#observables.forEach(ob => ob.registerObserver(this));
-        let dropdownDiv;
-        if (this.#observables.length === 1) {
-            dropdownDiv = this.#getSingleObservableDropdownDiv(this.#observables[0]);
-        } else if (this.#observables.length > 1) {
-            dropdownDiv = new DropdownDiv();
-            dropdownDiv.setButton(`Search Results: ${this.#observables.length}`, true);
-            // - TODO: do I get better or worse performance by adding/removing inner DropdownDiv instances instead of just showing/hiding them?
-            this.#observables.forEach(ob => {
-                const innerDropdownDiv = this.#getSingleObservableDropdownDiv(ob);
-                dropdownDiv.insertElement(innerDropdownDiv.divElement);
-            });
-        } else {
-            throw Error('This TreeFeatureDropdownDiv must observe at least one Feature');
-        }
-        dropdownDiv.addStyleClass('sideNav', 'divElement');
-        if (this.#dropdownDiv === null) {
-            this.#dropdownDiv = dropdownDiv;
-        } else if (document.body.contains(this.#dropdownDiv.divElement)) {
-            this.#dropdownDiv.divElement.replaceWith(dropdownDiv.divElement);
-            this.#dropdownDiv = dropdownDiv;
-        } else {
-            throw Error('Error when creating a FeatureDropdownDiv.');
-        }
-    }
-
-    // *********************
-    // ** Private methods ** 
-    // *********************
-
     /**
-     * @param {Feature} - an ObservableInterface instance
-     * @returns {DropdownDiv}
+     * @returns {undefined}
      */
-    #getSingleObservableDropdownDiv(observable) {
+    renderContent() {
         const dropdownDiv = new DropdownDiv();
+        dropdownDiv.addStyleClasses(['sideNav'], 'divElement');
         const buttonTextSpan = document.createElement('span');
         buttonTextSpan.classList.add('indent2');
-        if (observable.hasProperty('object')) {
-            if (observable.hasProperty('name')) {
+        if (this.#observable.hasProperty('object')) {
+            if (this.#observable.hasProperty('name')) {
                 let div = document.createElement('div');
-                div.textContent = observable.getProperty('object');
+                div.textContent = this.#observable.getProperty('object');
                 buttonTextSpan.appendChild(div);
                 div = document.createElement('div');
-                div.textContent = observable.getProperty('name');
+                div.textContent = this.#observable.getProperty('name');
                 buttonTextSpan.appendChild(div);
             } else {
-                buttonTextSpan.textContent = observable.getProperty('object');
+                buttonTextSpan.textContent = this.#observable.getProperty('object');
             }
-        } else if (observable.hasProperty('name')) {
-            buttonTextSpan.textContent = observable.getProperty('name');
+        } else if (this.#observable.hasProperty('name')) {
+            buttonTextSpan.textContent = this.#observable.getProperty('name');
         } else {
-            buttonTextSpan.textContent = observable.getProperty('treeKey', 'meta');
+            buttonTextSpan.textContent = this.#observable.getProperty('treeKey', 'meta');
         }
         dropdownDiv.setButton(buttonTextSpan, true);
-        // - Here, the third observer is added to non-modal, non-component features
-        // - Here, the fifth observer is added to visible features
-        let controller;
-        let modal;
         const that = this;
-        const treeKey = observable.getProperty('treeKey', 'meta');
         dropdownDiv.buttonElement.addEventListener('click', function() {
             if (dropdownDiv.contentDivElement.classList.contains('expanded')) {
-                // - Add sixth observer to visible ObservableInterface instances                
-                controller = new FeatureController(that.#controller.observableGraph, [treeKey], that.#controller.isComponentManager);
-                modal = new TreeFeatureModal(controller);
-                dropdownDiv.insertElement(modal.getDOMElement());
+                that.#featureEditModal = new FeatureEditModal([that.#observable], that.#controller);
+                dropdownDiv.insertElement(that.#featureEditModal.getDOMElement());
             } else {
-                modal.remove();
-                controller.remove();
+                that.#featureEditModal.remove();
             }
         });
-        return dropdownDiv;
+        if (this.#dropdownDiv === null) {
+            this.#dropdownDiv = dropdownDiv;
+        }
+        if (document.body.contains(this.#dropdownDiv.divElement)) {
+            this.#dropdownDiv.divElement.replaceWith(dropdownDiv.divElement);
+            this.#dropdownDiv = dropdownDiv;
+        }
     }
 }

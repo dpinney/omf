@@ -10,8 +10,10 @@ button.js-button--dropdown {
     width: 100%;
 }
 div.js-div--dropdown {
-    height: 100%;
-    /* Don't set max-height here because it makes TreeFeatureModals cover stuff in the side bar */
+    /* Don't set height 100% because I need all three top-level dropdown divs to be up against each other */
+    /* Don't set max-height here because it makes FeatureEditModals cover stuff in the side bar */
+    /* This is done to make search results not have a weird horizontal bar pop up, but I can't set this here because it screws up the file menu */
+    /*overflow-x: hidden;*/
 }
 div.js-div--dropdown span {
     font-size: var(--regularFontSize);
@@ -36,21 +38,31 @@ svg.js-svg--dropdown.rotated {
 /********************/
 /* Side nav styling */
 /********************/
+
+div.js-div--dropdown.sideNav {
+    overflow-x: hidden;
+}
 div.js-div--dropdown.sideNav button.js-button--dropdown {
     background-color: #FFFFFF;
     border-top: 1px solid black;
     justify-content: space-between;
     padding: .5rem 0 .5rem 0;
 }
-div.selected > div.js-div--dropdown.sideNav {
+/* This is the search results div */
+div.selected > div:nth-child(2) {
     /* HACK: hardcoded height */
-    max-height: 68vh;
+    max-height: 72vh;
+    overflow: auto;
 }
-div.selected > div.js-div--dropdown.sideNav button.js-button--dropdown {
+div.selected div.js-div--dropdown.sideNav.searchCategory > button.js-button--dropdown {
     box-shadow: inset -1px 0px darkgray;
 }
 div.js-div--dropdown.sideNav span > div:first-child {
     font-weight: bold;
+}
+div.js-div--dropdown.sideNav.searchCategory > button.js-button--dropdown > span {
+    padding: 0 0 0 var(--regularFontSize);
+    text-align: left;
 }
 div.js-div--dropdown.sideNav button.horizontalFlex span {
     padding: 0;
@@ -59,6 +71,7 @@ div.js-div--dropdown.sideNav button.horizontalFlex span {
 /****************/
 /* Menu styling */
 /****************/
+
 div.js-div--dropdown.menu {
     white-space: nowrap;
     width: 85px;

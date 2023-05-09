@@ -72,7 +72,11 @@ class Feature {
      */
     deleteObservable() {
         // - The function signature above is part of the ObservableInterface API. The implementation below is not
-        this.#observers.forEach(ob => ob.handleDeletedObservable(this));
+        // - I need to clone the array because if I iterate over this.#observers while I'm removing elements from it, everything gets messed up
+        const observers = [...this.#observers];
+        observers.forEach(ob => {
+            ob.handleDeletedObservable(this);
+        });
         if (this.#graph instanceof FeatureGraph) {
             this.#graph.handleDeletedObservable(this);
         }
@@ -88,7 +92,7 @@ class Feature {
     }
 
     getObservable() {
-        throw UnsupportedOperationError();
+        throw new UnsupportedOperationError();
     }
 
     /**
@@ -120,7 +124,7 @@ class Feature {
     }
 
     getObservables(func) {
-        throw UnsupportedOperationError();
+        throw new UnsupportedOperationError();
     }
 
     /**
@@ -239,7 +243,7 @@ class Feature {
      * @returns {undefined}
      */
     notifyObserversOfNewObservable() {
-        throw UnsupportedOperationError();
+        throw new UnsupportedOperationError();
     }
 
     /**
@@ -250,7 +254,7 @@ class Feature {
     registerObserver(observer) {
         // - The function signature above is part of the ObservableInterface API. The implementation below is not
         if (observer instanceof Feature) {
-            throw ObserverError();
+            throw new ObserverError();
         }
         this.#observers.push(observer);
     }
@@ -263,13 +267,16 @@ class Feature {
     removeObserver(observer) {
         // - The function signature above is part of the ObservableInterface API. The implementation below is not
         if (observer instanceof Feature) {
-            throw ObserverError();
+            throw new ObserverError();
         }
         const index = this.#observers.indexOf(observer);
         if (index > -1) {
             this.#observers.splice(index, 1);
         } else {
-            throw Error('The observer was not found in this.#observers');
+            // - Unfortunately, <Leaflet layer>.remove() also removes the FeatureEditModal in the pop-up from this.#observers for some reason before
+            //   the FeatureEditModal is removed. I can't control the behavior of Leaflet, so I can't throw an error here
+            //console.log('The observer was not found in this.#observers');
+            //throw Error('The observer was not found in this.#observers');
         }
     }
 
@@ -422,12 +429,12 @@ class Feature {
      */
     handleDeletedObservable(observable) {
         // - The function signature above is part of the ObserverInterface API. The implementation below is not
-        throw UnsupportedOperationError();
+        throw new UnsupportedOperationError();
     }
 
     handleNewObservable(observable) {
         // - The function signature above is part of the ObserverInterface API. The implementation below is not
-        throw UnsupportedOperationError();
+        throw new UnsupportedOperationError();
     }
 
     /**
@@ -546,7 +553,7 @@ class Feature {
      * @returns {boolean} whether this ObservableInterface instance is a parent-child line
      */
     isParentChildLine() {
-        return this.getProperties('treeKey', 'meta').startsWith('parentChild:');
+        return this.getProperty('treeKey', 'meta').startsWith('parentChild:');
     }
 
     isPolygon() {

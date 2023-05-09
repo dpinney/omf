@@ -1,27 +1,29 @@
-export { getLoadingModal, getAnonymizationDiv, getSaveDiv, getRawDataDiv, getRenameDiv, getLoadFeederDiv, getBlankFeederDiv, getWindmilDiv, getGridlabdDiv, getCymdistDiv, getOpendssDiv, getAmiDiv, getAttachmentsDiv, getClimateDiv, getScadaDiv, getStaticLoadsToHousesDiv };
+export { getLoadingModal, getAnonymizationDiv, getSaveDiv, getRawDataDiv, getRenameDiv, getLoadFeederDiv, getBlankFeederDiv, getWindmilDiv, getGridlabdDiv, getCymdistDiv, getOpendssDiv, getAmiDiv, getAttachmentsDiv, getClimateDiv, getScadaDiv };
 import { Feature } from  './feature.js';
 import { FeatureController } from './featureController.js';
-import { FeatureGraph } from './featureGraph.js';
 import { Modal } from './modal.js';
 
-/**
+/*
  * @returns {Modal}
  */
 function getLoadingModal() {
     const modal = new Modal();
     modal.showProgress(true, 'Loading Map...');
-    modal.addStyleClass('outerModal',     'divElement');
-    modal.addStyleClass('fitContent',   'divElement');
+    modal.addStyleClasses(['outerModal', 'fitContent'], 'divElement');
     return modal;
 }
 
 /**
+ * @param {Feature} - an ObservableInterface instance
  * @param {FeatureController} controller - a ControllerInterface instance
  * @returns {Modal}
  */
-function _getAnonymizationModal(controller) {
+function _getAnonymizationModal(observable, controller) {
+    if (!(observable instanceof Feature)) {
+        throw TypeError('"observable" argument must be instanceof Feature.');
+    }
     if (!(controller instanceof FeatureController)) {
-        throw Error('"controller" argument must be an instance of FeatureController.');
+        throw TypeError('"controller" argument must be instanceof FeatureController.');
     }
     // - namesAndLabelsSelect
     const namesAndLabelsSelect = document.createElement('select');
@@ -134,16 +136,14 @@ function _getAnonymizationModal(controller) {
     // - Submit button
     const submitButton = _getSubmitButton();
     const submitDiv = _getSubmitDiv(submitButton);
-    // - Feature
-    const feature = controller.getObservables()[0];
     // - Event listeners
     // - namesAndLabelsSelect
     namesAndLabelsSelect.addEventListener('change', function() {
-        feature.setProperty(this.name, this.value, 'formProps');
+        observable.setProperty(this.name, this.value, 'formProps');
     });
     // - locationsSelect
     locationsSelect.addEventListener('change', function() {
-        feature.setProperty(this.name, this.value, 'formProps');
+        observable.setProperty(this.name, this.value, 'formProps');
         const translateModal = this.parentElement.nextElementSibling;
         if (this.value === 'translation') {
             translateModal.classList.remove('collapsed');
@@ -172,23 +172,23 @@ function _getAnonymizationModal(controller) {
     // - Locations inputs
     coordinatesInput.addEventListener('change', function() {
         const value = this.value.trim();
-        feature.setProperty(this.name, value, 'formProps');
+        observable.setProperty(this.name, value, 'formProps');
     });
     horizontalTranslationInput.addEventListener('change', function() {
         const value = this.value.trim();
-        feature.setProperty(this.name, value, 'formProps');
+        observable.setProperty(this.name, value, 'formProps');
     });
     verticalTranslationInput.addEventListener('change', function() {
         const value = this.value.trim();
-        feature.setProperty(this.name, value, 'formProps');
+        observable.setProperty(this.name, value, 'formProps');
     });
     rotationInput.addEventListener('change', function() {
         const value = this.value.trim();
-        feature.setProperty(this.name, value, 'formProps');
+        observable.setProperty(this.name, value, 'formProps');
     });
     scaleInput.addEventListener('change', function() {
         const value = this.value.trim();
-        feature.setProperty(this.name, value, 'formProps');
+        observable.setProperty(this.name, value, 'formProps');
     });
     // - conductorCheckbox
     conductorCheckbox.addEventListener('change', function() {
@@ -196,7 +196,7 @@ function _getAnonymizationModal(controller) {
         if (this.checked) {
             value = 'modifyLengthSize';
         }
-        feature.setProperty(this.name, value, 'formProps');
+        observable.setProperty(this.name, value, 'formProps');
     });
     // - smoothAMICheckbox
     smoothAMICheckbox.addEventListener('change', function() {
@@ -204,7 +204,7 @@ function _getAnonymizationModal(controller) {
         if (this.checked) {
             value = 'smoothLoadGen';
         }
-        feature.setProperty(this.name, value, 'formProps');
+        observable.setProperty(this.name, value, 'formProps');
     });
     // - shuffleLoadsCheckbox
     shuffleLoadsCheckbox.addEventListener('change', function() {
@@ -212,7 +212,7 @@ function _getAnonymizationModal(controller) {
         if (this.checked) {
             value = 'shuffleLoadGen';
         }
-        feature.setProperty(this.name, value, 'formProps');
+        observable.setProperty(this.name, value, 'formProps');
         let parentElement = this.parentElement;
         while (!parentElement.classList.contains('js-div--modal')) {
             parentElement = parentElement.parentElement;
@@ -228,7 +228,7 @@ function _getAnonymizationModal(controller) {
     });
     shuffleLoadsInput.addEventListener('change', function() {
         const value = this.value.trim();
-        feature.setProperty(this.name, value, 'formProps');
+        observable.setProperty(this.name, value, 'formProps');
     });
     // - addNoiseCheckbox
     addNoiseCheckbox.addEventListener('change', function() {
@@ -236,7 +236,7 @@ function _getAnonymizationModal(controller) {
         if (this.checked) {
             value = 'addNoise';
         }
-        feature.setProperty(this.name, value, 'formProps');
+        observable.setProperty(this.name, value, 'formProps');
         let parentElement = this.parentElement;
         while (!parentElement.classList.contains('js-div--modal')) {
             parentElement = parentElement.parentElement;
@@ -252,30 +252,25 @@ function _getAnonymizationModal(controller) {
     });
     addNoiseInput.addEventListener('change', function() {
         const value = this.value.trim();
-        feature.setProperty(this.name, value, 'formProps');
+        observable.setProperty(this.name, value, 'formProps');
     });
     // - Modal
     const mainModal = new Modal();
-    mainModal.addStyleClass('outerModal',  'divElement');
-    mainModal.addStyleClass('fitContent',  'divElement');
+    mainModal.addStyleClasses(['outerModal', 'fitContent'], 'divElement');
     submitButton.addEventListener('click', async function() {
-        const feature = controller.observableGraph.getObservable('modal:save');
-        feature.setProperty('feederObjectJson', JSON.stringify(controller.observableGraph.getObservablesExportData()), 'formProps')
-        // - It's okay to create another FeatureController here because the page will be reloaded
-        const saveController = new FeatureController(controller.observableGraph, ['modal:save']);
+        const saveFeature = _getSaveFeature();
+        saveFeature.setProperty('feederObjectJson', JSON.stringify(controller.observableGraph.getObservableExportData()), 'formProps');
         const saveModal = _getSaveModal(controller);
         const modalInsert = document.getElementById('modalInsert');
         modalInsert.replaceChildren(saveModal.divElement);
-        await saveController.submitFeature(saveModal, false);
+        await controller.submitFeature(saveFeature, saveModal, false);
         document.getElementById('modalInsert').classList.add('visible');
         modalInsert.replaceChildren(mainModal.divElement);
-        mainModal.showProgress(true, 'Anonymization working...', 'caution');
+        mainModal.showProgress(true, 'Anonymization working...', ['caution']);
         controller.submitFeature(mainModal);
     });
     mainModal.setTitle('Anonymization');
-    mainModal.addStyleClass('horizontalFlex',       'titleElement');
-    mainModal.addStyleClass('centerMainAxisFlex',   'titleElement');
-    mainModal.addStyleClass('centerCrossAxisFlex',  'titleElement');
+    mainModal.addStyleClasses(['horizontalFlex', 'centerMainAxisFlex', 'centerCrossAxisFlex'], 'titleElement');
     mainModal.insertElement(namesAndLabelsHeadingDiv);
     mainModal.insertElement(namesAndLabelsSelectDiv);
     mainModal.insertElement(locationsHeadingDiv);
@@ -285,14 +280,12 @@ function _getAnonymizationModal(controller) {
     translateModal.insertTBodyRow(['Translate', horizontalTranslationInput, 'meters rightwards']);
     translateModal.insertTBodyRow(['Translate', verticalTranslationInput, 'meters upwards']);
     translateModal.insertTBodyRow(['Rotate', rotationInput, 'degrees counterclockwise']);
-    translateModal.addStyleClass('collapsed',   'divElement');
-    translateModal.addStyleClass('indent2',     'divElement');
+    translateModal.addStyleClasses(['collapsed', 'indent2'], 'divElement');
     mainModal.insertElement(translateModal.divElement);
     const scaleModal = new Modal();
     scaleModal.insertTBodyRow(['Force layout with following scale factor', scaleInput]);
     scaleModal.insertElement(scaleTipDiv);
-    scaleModal.addStyleClass('collapsed',   'divElement');
-    scaleModal.addStyleClass('indent2',     'divElement');
+    scaleModal.addStyleClasses(['collapsed', 'indent2'], 'divElement');
     mainModal.insertElement(scaleModal.divElement);
     const electricalPropertiesHeadingModal = new Modal();
     electricalPropertiesHeadingModal.insertElement(electricalPropertiesHeadingDiv);
@@ -301,38 +294,34 @@ function _getAnonymizationModal(controller) {
     electricalPropertiesModal.insertTBodyRow([conductorCheckbox, conductorLabel]);
     electricalPropertiesModal.insertTBodyRow([smoothAMICheckbox, smoothAMILabel]);
     electricalPropertiesModal.insertTBodyRow([shuffleLoadsCheckbox, shuffleLoadsLabel]);
-    electricalPropertiesModal.addStyleClass('indent1',      'divElement');
+    electricalPropertiesModal.addStyleClasses(['indent1'], 'divElement');
     mainModal.insertElement(electricalPropertiesModal.divElement);
     const shuffleLoadsInputModal = new Modal();
     shuffleLoadsInputModal.insertTBodyRow(['Shuffle', shuffleLoadsInput, 'percent']);
-    shuffleLoadsInputModal.addStyleClass('collapsed',   'divElement');
-    shuffleLoadsInputModal.addStyleClass('indent2',     'divElement');
+    shuffleLoadsInputModal.addStyleClasses(['collapsed', 'indent2'], 'divElement');
     mainModal.insertElement(shuffleLoadsInputModal.divElement);
     const addNoiseCheckboxModal = new Modal();
     addNoiseCheckboxModal.insertTBodyRow([addNoiseCheckbox, addNoiseLabel])
-    addNoiseCheckboxModal.addStyleClass('indent1', 'divElement');
+    addNoiseCheckboxModal.addStyleClasses(['indent1'], 'divElement');
     mainModal.insertElement(addNoiseCheckboxModal.divElement);
     const addNoiseInputModal = new Modal();
     addNoiseInputModal.insertTBodyRow(['Add', addNoiseInput, 'percent noise']);
-    addNoiseInputModal.addStyleClass('collapsed',   'divElement');
-    addNoiseInputModal.addStyleClass('indent2',     'divElement');
+    addNoiseInputModal.addStyleClasses(['collapsed', 'indent2'], 'divElement');
     mainModal.insertElement(addNoiseInputModal.divElement);
     const submitDivModal = new Modal();
     submitDivModal.insertElement(submitDiv);
-    submitDivModal.addStyleClass('horizontalFlex',      'containerElement');
-    submitDivModal.addStyleClass('centerMainAxisFlex',  'containerElement');
-    submitDivModal.addStyleClass('centerCrossAxisFlex', 'containerElement');
+    submitDivModal.addStyleClasses(['horizontalFlex', 'centerMainAxisFlex', 'centerCrossAxisFlex'], 'containerElement');
     mainModal.insertElement(submitDivModal.divElement);
     return mainModal;
 }
 
 /**
- * @param {FeatureGraph} featureGraph - an instance of my ObservableGraph interface
+ * @param {FeatureController} controller - a FeatureController instance
  * @returns {HTMLDivElement}
  */
-function getAnonymizationDiv(featureGraph) {
-    if (!(featureGraph instanceof FeatureGraph)) {
-        throw Error('"featureGraph argument must be instanceof FeatureGraph');
+function getAnonymizationDiv(controller) {
+    if (!(controller instanceof FeatureController)) {
+        throw TypeError('"controller" argument must be instanceof FeatureController.');
     }
     const feature = new Feature({
         geometry: { 'coordinates': [null, null], 'type': 'Point' },
@@ -372,9 +361,7 @@ function getAnonymizationDiv(featureGraph) {
         },
         type: 'Feature'
     });
-    featureGraph.insertObservable(feature);
-    const controller = new FeatureController(featureGraph, ['modal:anonymization']);
-    const modal = _getAnonymizationModal(controller);
+    const modal = _getAnonymizationModal(feature, controller);
     const modalInsert = document.getElementById('modalInsert');
     const div = _getMenuDiv('Anonymization...');
     div.addEventListener('click', function() {
@@ -390,25 +377,42 @@ function getAnonymizationDiv(featureGraph) {
  */
 function _getSaveModal(controller) {
     if (!(controller instanceof FeatureController)) {
-        throw Error('"controller" argument must be an instance of FeatureController.');
+        throw TypeError('"controller" argument must be instanceof FeatureController.');
     }
     const modal = new Modal();
     modal.showProgress(true, 'Saving...');
-    modal.addStyleClass('outerModal',     'divElement');
-    modal.addStyleClass('fitContent',   'divElement');
+    modal.addStyleClasses(['outerModal', 'fitContent'], 'divElement');
     return modal;
 }
 
 /**
- * @param {FeatureGraph} featureGraph - an instance of my ObservableGraph interface
+ * @param {FeatureController} controller - a ControllerInterface instance
  * @returns {HTMLDivElement}
  */
-function getSaveDiv(featureGraph) {
-    if (!(featureGraph instanceof FeatureGraph)) {
-        throw Error('"featureGraph argument must be instanceof FeatureGraph');
+function getSaveDiv(controller) {
+    if (!(controller instanceof FeatureController)) {
+        throw TypeError('"controller" argument must be instanceof FeatureController.');
     }
-    // - Feature
-    const feature = new Feature({
+    const saveFeature = _getSaveFeature();
+    const modal = _getSaveModal(controller);
+    const modalInsert = document.getElementById('modalInsert');
+    const div = _getMenuDiv('Save');
+    div.id = 'saveDiv';
+    div.addEventListener('click', function() {
+        modalInsert.replaceChildren(modal.divElement);
+        modalInsert.classList.add('visible');
+        // - I only export features that were originally in the OMD (i.e. those features with numeric tree keys)
+        saveFeature.setProperty('feederObjectJson', JSON.stringify(controller.observableGraph.getObservableExportData()), 'formProps')
+        controller.submitFeature(saveFeature, modal, false); 
+    });
+    return div;
+}
+
+/**
+ * @returns {Feature}
+ */
+function _getSaveFeature() {
+    return new Feature({
         geometry: { 'coordinates': [null, null], 'type': 'Point' },
         properties: {
             treeKey: 'modal:save',
@@ -423,20 +427,6 @@ function getSaveDiv(featureGraph) {
         },
         type: 'Feature'
     });
-    featureGraph.insertObservable(feature);
-    const controller = new FeatureController(featureGraph, ['modal:save']);
-    const modal = _getSaveModal(controller);
-    const modalInsert = document.getElementById('modalInsert');
-    const div = _getMenuDiv('Save');
-    div.id = 'saveDiv';
-    div.addEventListener('click', function() {
-        modalInsert.replaceChildren(modal.divElement);
-        modalInsert.classList.add('visible');
-        // - I only export features that were originally in the OMD (i.e. those features with numeric tree keys)
-        feature.setProperty('feederObjectJson', JSON.stringify(featureGraph.getObservablesExportData()), 'formProps')
-        controller.submitFeature(modal, false); 
-    });
-    return div;
 }
 
 /**
@@ -445,39 +435,36 @@ function getSaveDiv(featureGraph) {
  */
 function _getRawDataModal(controller) {
     if (!(controller instanceof FeatureController)) {
-        throw Error('"controller" argument must be an instance of FeatureController.');
+        throw TypeError('"controller" argument must be instanceof FeatureController.');
     }
     const modal = new Modal();
     modal.showProgress(true, 'Opening a window with JSON in it that you can save as a .json file...');
-    modal.addStyleClass('outerModal',   'divElement');
-    modal.addStyleClass('fitContent',   'divElement');
+    modal.addStyleClasses(['outerModal', 'fitContent'], 'divElement');
     return modal;
 }
 
 /**
- * @param {FeatureGraph} featureGraph - an instance of my ObservableGraph interface
+ * @param {FeatureController} controller - a ControllerInterface instance
  * @returns {HTMLDivElement}
  */
-function getRawDataDiv(featureGraph) {
-    if (!(featureGraph instanceof FeatureGraph)) {
-        throw Error('"featureGraph argument must be instanceof FeatureGraph');
+function getRawDataDiv(controller) {
+    if (!(controller instanceof FeatureController)) {
+        throw TypeError('"controller" argument must be instanceof FeatureController.');
     }
-    const feature = new Feature({
-        geometry: { 'coordinates': [null, null], 'type': 'Point' },
-        properties: {
-            treeKey: 'modal:rawData',
-        },
-        type: 'Feature'
-    });
-    featureGraph.insertObservable(feature);
-    const controller = new FeatureController(featureGraph, ['modal:rawData']);
+    //const feature = new Feature({
+    //    geometry: { 'coordinates': [null, null], 'type': 'Point' },
+    //    properties: {
+    //        treeKey: 'modal:rawData',
+    //    },
+    //    type: 'Feature'
+    //});
     const modal = _getRawDataModal(controller);
     const modalInsert = document.getElementById('modalInsert');
     const div = _getMenuDiv('View Raw Data');
     div.addEventListener('click', function() {
         modalInsert.replaceChildren(modal.divElement);
         modalInsert.classList.add('visible');
-        const json = JSON.stringify(featureGraph.getObservablesExportData());
+        const json = JSON.stringify(controller.observableGraph.getObservableExportData());
         const win = window.open();
         win.document.write(json);
     });
@@ -485,20 +472,22 @@ function getRawDataDiv(featureGraph) {
 }
 
 /**
+ * @param {Feature} observable
  * @param {FeatureController} controller - a ControllerInterface instance
  * @returns {Modal}
  */
-function _getRenameModal(controller) {
+function _getRenameModal(observable, controller) {
+    if (!(observable instanceof Feature)) {
+        throw TypeError('"observable" argument must be instanceof Feature.');
+    }
     if (!(controller instanceof FeatureController)) {
-        throw Error('"controller" argument must be an instance of FeatureController.');
+        throw TypeError('"controller" argument must be instanceof FeatureController.');
     }
     // - Input
     const input = document.createElement('input');
     // - Submit div
     const submitButton = _getSubmitButton();
     const submitDiv = _getSubmitDiv(submitButton);
-    // - Feature
-    const feature = controller.getObservables()[0];
     // - Event listeners
     input.addEventListener('change', function() {
         let newName = this.value.trim();
@@ -509,51 +498,44 @@ function _getRenameModal(controller) {
             method: 'GET',
             url: `/uniqObjName/Feeder/${gThisOwner}/${newName}/${gThisModelName}`
         }
-        feature.setProperty('fileExistsUrl', fileExistsUrl, 'urlProps');
+        observable.setProperty('fileExistsUrl', fileExistsUrl, 'urlProps');
         const submitUrl = {
             method: 'GET',
             url: `/renameFeeder/${gThisOwner}/${gThisModelName}/${gThisFeederName}/${newName}/${gThisFeederNum}`
         }
-        feature.setProperty('submitUrl', submitUrl, 'urlProps');
+        observable.setProperty('submitUrl', submitUrl, 'urlProps');
     });
     // - Modal 
     const renameModal = new Modal();
-    renameModal.addStyleClass('outerModal',  'divElement');
-    renameModal.addStyleClass('fitContent',  'divElement');
+    renameModal.addStyleClasses(['outerModal', 'fitContent'], 'divElement');
     submitButton.addEventListener('click', async function() {
-        const feature = controller.observableGraph.getObservable('modal:save');
-        feature.setProperty('feederObjectJson', JSON.stringify(controller.observableGraph.getObservablesExportData()), 'formProps')
-        // - It's okay to create another FeatureController here because the page will be reloaded
-        const saveController = new FeatureController(controller.observableGraph, ['modal:save']);
+        const saveFeature = _getSaveFeature();
+        saveFeature.setProperty('feederObjectJson', JSON.stringify(controller.observableGraph.getObservableExportData()), 'formProps')
         const saveModal = _getSaveModal(controller);
         const modalInsert = document.getElementById('modalInsert');
         modalInsert.replaceChildren(saveModal.divElement);
-        await saveController.submitFeature(saveModal, false);
+        await controller.submitFeature(saveFeature, saveModal, false);
         document.getElementById('modalInsert').classList.add('visible');
         modalInsert.replaceChildren(renameModal.divElement);
         renameModal.showProgress(true, 'Renaming feeder...', 'caution');
         controller.submitFeature(renameModal);
     });
     renameModal.setTitle('Rename Feeder');
-    renameModal.addStyleClass('horizontalFlex',       'titleElement');
-    renameModal.addStyleClass('centerMainAxisFlex',   'titleElement');
-    renameModal.addStyleClass('centerCrossAxisFlex',  'titleElement');
+    renameModal.addStyleClasses(['horizontalFlex', 'centerMainAxisFlex', 'centerCrossAxisFlex'], 'titleElement');
     renameModal.insertTBodyRow(['New feeder name:', input]);
-    renameModal.addStyleClass('centeredTable', 'tableElement');
+    renameModal.addStyleClasses(['centeredTable'], 'tableElement');
     renameModal.insertElement(submitDiv);
-    renameModal.addStyleClass('verticalFlex',         'containerElement');
-    renameModal.addStyleClass('centerMainAxisFlex',   'containerElement');
-    renameModal.addStyleClass('centerCrossAxisFlex',  'containerElement');
+    renameModal.addStyleClasses(['verticalFlex', 'centerMainAxisFlex', 'centerCrossAxisFlex'], 'containerElement');
     return renameModal;
 }
 
 /**
- * @param {FeatureGraph} featureGraph - an instance of my ObservableGraph interface
+ * @param {FeatureController} controller - a ControllerInterface instance
  * @returns {HTMLDivElement}
  */
-function getRenameDiv(featureGraph) {
-    if (!(featureGraph instanceof FeatureGraph)) {
-        throw Error('"featureGraph argument must be instanceof FeatureGraph');
+function getRenameDiv(controller) {
+    if (!(controller instanceof FeatureController)) {
+        throw TypeError('"controller" argument must be instanceof FeatureController.');
     }
     const feature = new Feature({
         geometry: { 'coordinates': [null, null], 'type': 'Point' },
@@ -572,9 +554,7 @@ function getRenameDiv(featureGraph) {
         },
         type: 'Feature'
     });
-    featureGraph.insertObservable(feature);
-    const controller = new FeatureController(featureGraph, ['modal:rename']);
-    const modal = _getRenameModal(controller);
+    const modal = _getRenameModal(feature, controller);
     const modalInsert = document.getElementById('modalInsert');
     const div = _getMenuDiv('Rename...');
     div.addEventListener('click', function() {
@@ -585,15 +565,17 @@ function getRenameDiv(featureGraph) {
 }
 
 /**
+ * @param {Feature} observable
  * @param {FeatureController} controller - a ControllerInterface instance
  * @returns {Modal}
  */
-function _getLoadFeederModal(controller) {
-    if (!(controller instanceof FeatureController)) {
-        throw Error('"controller" argument must be an instance of FeatureController.');
+function _getLoadFeederModal(observable, controller) {
+    if (!(observable instanceof Feature)) {
+        throw TypeError('"observable" argument must be instanceof Feature.');
     }
-    // - Feature
-    const feature = controller.getObservables()[0];
+    if (!(controller instanceof FeatureController)) {
+        throw TypeError('"controller" argument must be instanceof FeatureController.');
+    }
     // - Create list of public feeders
     let publicFeeders = [];
     if (gPublicFeeders !== null) {
@@ -610,24 +592,22 @@ function _getLoadFeederModal(controller) {
         modelDiv.textContent = `from "${obj.model}"`;
         outerDiv.appendChild(modelDiv);
         outerDiv.addEventListener('click', function() {
-            feature.setProperty('fileExistsUrl', {
+            observable.setProperty('fileExistsUrl', {
                 method: 'GET', 
                 url: `/uniqObjName/Feeder/public/${obj.name}/${obj.model}`
             }, 'urlProps');
-            feature.setProperty('submitUrl', {
+            observable.setProperty('submitUrl', {
                 method: 'POST',
                 url: `/loadFeeder/${obj.name}/${obj.model}/${gThisModelName}/${gThisFeederNum}/public/${gThisOwner}`,
             }, 'urlProps');
-            controller.submitFeature(publicFeedersModal); 
+            controller.submitFeature(observable, publicFeedersModal); 
         });
         outerDiv.classList.add('hoverable');
         return outerDiv;
     }).forEach(div => publicFeedersModal.insertTBodyRow([div]));
     publicFeedersModal.setTitle('Public Feeders');
-    publicFeedersModal.addStyleClass('horizontalFlex',      'titleElement');
-    publicFeedersModal.addStyleClass('centerMainAxisFlex',  'titleElement');
-    publicFeedersModal.addStyleClass('centerCrossAxisFlex', 'titleElement');
-    publicFeedersModal.addStyleClass('fullWidth', 'tableElement');
+    publicFeedersModal.addStyleClasses(['horizontalFlex', 'centerMainAxisFlex', 'centerCrossAxisFlex'], 'titleElement');
+    publicFeedersModal.addStyleClasses(['fullWidth'], 'tableElement');
     // - Create list of user feeders
     let userFeeders = [];
     if (gUserFeeders !== null) {
@@ -644,7 +624,7 @@ function _getLoadFeederModal(controller) {
         modelDiv.textContent = `from "${obj.model}"`;
         outerDiv.appendChild(modelDiv);
         outerDiv.addEventListener('click', function() {
-            feature.setProperty('fileExistsUrl', {
+            observable.setProperty('fileExistsUrl', {
                 method: 'GET',
                 // - Let's say I'm an admin viewing some user's file. gCurrentUser = "admin" and gThisOwner = "test". userFeeders is all of the
                 //   admin's feeders. Therefore, to see if the admin's feeders exist in order to load them, I need /uniqObjName to check the current
@@ -652,41 +632,36 @@ function _getLoadFeederModal(controller) {
                 //   different
                 url: `/uniqObjName/Feeder/${gCurrentUser}/${obj.name}/${obj.model}`
             }, 'urlProps');
-            feature.setProperty('submitUrl', {
+            observable.setProperty('submitUrl', {
                 method: 'POST',
                 url: `/loadFeeder/${obj.name}/${obj.model}/${gThisModelName}/${gThisFeederNum}/${gCurrentUser}/${gThisOwner}`,
             }, 'urlProps');
-            controller.submitFeature(userFeedersModal); 
+            controller.submitFeature(observable, userFeedersModal); 
         });
         outerDiv.classList.add('hoverable');
         return outerDiv;
     }).forEach(div => userFeedersModal.insertTBodyRow([div]));
     userFeedersModal.setTitle('User Feeders');
-    userFeedersModal.addStyleClass('horizontalFlex',        'titleElement');
-    userFeedersModal.addStyleClass('centerMainAxisFlex',    'titleElement');
-    userFeedersModal.addStyleClass('centerCrossAxisFlex',   'titleElement');
-    userFeedersModal.addStyleClass('fullWidth', 'tableElement');
+    userFeedersModal.addStyleClasses(['horizontalFlex', 'centerMainAxisFlex', 'centerCrossAxisFlex'], 'titleElement');
+    userFeedersModal.addStyleClasses(['fullWidth'], 'tableElement');
     // - Main modal
     const mainModal = new Modal();
-    mainModal.addStyleClass('outerModal',       'divElement');
-    mainModal.addStyleClass('loadFeederModal',  'divElement');
+    mainModal.addStyleClasses(['outerModal', 'loadFeederModal'], 'divElement');
     mainModal.setTitle('Load Feeder');
-    mainModal.addStyleClass('horizontalFlex',       'titleElement');
-    mainModal.addStyleClass('centerMainAxisFlex',   'titleElement');
-    mainModal.addStyleClass('centerCrossAxisFlex',  'titleElement');
+    mainModal.addStyleClasses(['horizontalFlex', 'centerMainAxisFlex', 'centerCrossAxisFlex'], 'titleElement');
     mainModal.insertElement(publicFeedersModal.divElement);
     mainModal.insertElement(userFeedersModal.divElement);
-    mainModal.addStyleClass('horizontalFlex', 'containerElement');
+    mainModal.addStyleClasses(['horizontalFlex'], 'containerElement');
     return mainModal;
 }
 
 /**
- * @param {FeatureGraph} featureGraph - an instance of my ObservableGraph interface
+ * @param {FeatureController} controller - a ControllerInterface instance
  * @returns {HTMLDivElement}
  */
-function getLoadFeederDiv(featureGraph) {
-    if (!(featureGraph instanceof FeatureGraph)) {
-        throw Error('"featureGraph argument must be instanceof FeatureGraph');
+function getLoadFeederDiv(controller) {
+    if (!(controller instanceof FeatureController)) {
+        throw TypeError('"controller" argument must be instanceof FeatureController.');
     }
     const feature = new Feature({
         geometry: { 'coordinates': [null, null], 'type': 'Point' },
@@ -699,9 +674,7 @@ function getLoadFeederDiv(featureGraph) {
         },
         'type': 'Feature'
     });
-    featureGraph.insertObservable(feature);
-    const controller = new FeatureController(featureGraph, ['modal:loadFeeder']);
-    const modal = _getLoadFeederModal(controller);
+    const modal = _getLoadFeederModal(feature, controller);
     const modalInsert = document.getElementById('modalInsert');
     const div = _getMenuDiv('Load from Model...');
     div.addEventListener('click', function() {
@@ -712,56 +685,53 @@ function getLoadFeederDiv(featureGraph) {
 }
 
 /**
+ * @param {Feature} observable
  * @param {FeatureController} controller - a ControllerInterface instance
  * @returns {Modal}
  */
-function _getBlankFeederModal(controller) {
+function _getBlankFeederModal(observable, controller) {
+    if (!(observable instanceof Feature)) {
+        throw TypeError('"observable" argument must be instanceof Feature.');
+    }
     if (!(controller instanceof FeatureController)) {
-        throw Error('"controller" argument must be an instance of FeatureController.');
+        throw TypeError('"controller" argument must be instanceof FeatureController.');
     }
     // - Input
     const input = document.createElement('input');
     // - Submit div
     const submitButton = _getSubmitButton();
     const submitDiv = _getSubmitDiv(submitButton);
-    // - Feature
-    const feature = controller.getObservables()[0];
     // - Event listeners
     input.addEventListener('change', function() {
         let newName = this.value.trim();
         if (newName === '') {
             newName = 'Default Name';
         }
-        feature.setProperty('feederNameNew', newName, 'formProps');
+        observable.setProperty('feederNameNew', newName, 'formProps');
     });
     // - Modal
     const modal = new Modal();
-    modal.addStyleClass('outerModal',   'divElement');
-    modal.addStyleClass('fitContent',   'divElement');
+    modal.addStyleClasses(['outerModal', 'fitContent'], 'divElement');
     submitButton.addEventListener('click', function() {
         modal.showProgress(true, 'Creating new blank feeder...', 'caution');
-        controller.submitFeature(modal);
+        controller.submitFeature(observable, modal);
     });
     modal.setTitle('New Blank Feeder');
-    modal.addStyleClass('horizontalFlex',       'titleElement');
-    modal.addStyleClass('centerMainAxisFlex',   'titleElement');
-    modal.addStyleClass('centerCrossAxisFlex',  'titleElement');
+    modal.addStyleClasses(['horizontalFlex', 'centerMainAxisFlex', 'centerCrossAxisFlex'], 'titleElement');
     modal.insertTBodyRow(['Blank feeder name', input]);
-    modal.addStyleClass('centeredTable', 'tableElement');
+    modal.addStyleClasses(['centeredTable'], 'tableElement');
     modal.insertElement(submitDiv);
-    modal.addStyleClass('verticalFlex',         'containerElement');
-    modal.addStyleClass('centerMainAxisFlex',   'containerElement');
-    modal.addStyleClass('centerCrossAxisFlex',  'containerElement');
+    modal.addStyleClasses(['verticalFlex', 'centerMainAxisFlex', 'centerCrossAxisFlex'], 'containerElement');
     return modal;
 }
 
 /**
- * @param {FeatureGraph} featureGraph - an instance of my ObservableGraph interface
+ * @param {FeatureController} controller - a ControllerInterface instance
  * @returns {HTMLDivElement}
  */
-function getBlankFeederDiv(featureGraph) {
-    if (!(featureGraph instanceof FeatureGraph)) {
-        throw Error('"featureGraph argument must be instanceof FeatureGraph');
+function getBlankFeederDiv(controller) {
+    if (!(controller instanceof FeatureController)) {
+        throw TypeError('"controller" argument must be instanceof FeatureController.');
     }
     const feature = new Feature({
         geometry: { 'coordinates': [null, null], 'type': 'Point' },
@@ -782,9 +752,7 @@ function getBlankFeederDiv(featureGraph) {
         },
         type: 'Feature'
     });
-    featureGraph.insertObservable(feature);
-    const controller = new FeatureController(featureGraph, ['modal:blankFeeder']);
-    const modal = _getBlankFeederModal(controller);
+    const modal = _getBlankFeederModal(feature, controller);
     const modalInsert = document.getElementById('modalInsert');
     const div = _getMenuDiv('New blank feeder...');
     div.addEventListener('click', function() {
@@ -795,12 +763,16 @@ function getBlankFeederDiv(featureGraph) {
 }
 
 /**
+ * @param {Feature} observable
  * @param {FeatureController} controller - a ControllerInterface instance
  * @returns {Modal}
  */
-function _getWindmilModal(controller) {
+function _getWindmilModal(observable, controller) {
+    if (!(observable instanceof Feature)) {
+        throw TypeError('"observable" argument must be instanceof Feature.');
+    }
     if (!(controller instanceof FeatureController)) {
-        throw Error('"controller" argument must be an instance of FeatureController.');
+        throw TypeError('"controller" argument must be instanceof FeatureController.');
     }
     // - Name input
     const nameInput = document.createElement('input');
@@ -830,59 +802,52 @@ function _getWindmilModal(controller) {
     // - Submit div
     const submitButton = _getSubmitButton('Import');
     const submitDiv = _getSubmitDiv(submitButton);
-    // - Feature
-    const feature = controller.getObservables()[0];
     // - Event listeners
     nameInput.addEventListener('change', function() {
         let newName = this.value.trim();
         if (newName === '') {
             newName = 'Default Name';
         }
-        feature.setProperty('feederNameM', newName, 'formProps');
+        observable.setProperty('feederNameM', newName, 'formProps');
         const fileExistsUrl = {
             method: 'GET',
             url: `/uniqObjName/Feeder/${gThisOwner}/${newName}/${gThisModelName}`
         }
-        feature.setProperty('fileExistsUrl', fileExistsUrl, 'urlProps');
+        observable.setProperty('fileExistsUrl', fileExistsUrl, 'urlProps');
     });
     stdInput.addEventListener('change', function() {
         const stdFile = this.files[0];
-        feature.setProperty('stdFile', stdFile, 'formProps');
+        observable.setProperty('stdFile', stdFile, 'formProps');
 
     });
     seqInput.addEventListener('change', function() {
         const seqFile = this.files[0];
-        feature.setProperty('seqFile', seqFile, 'formProps');
+        observable.setProperty('seqFile', seqFile, 'formProps');
     });
     // - Modal
     const modal = new Modal();
-    modal.addStyleClass('outerModal',   'divElement');
-    modal.addStyleClass('fitContent',   'divElement');
+    modal.addStyleClasses(['outerModal', 'fitContent'], 'divElement');
     submitButton.addEventListener('click', function() {
         modal.showProgress(true, 'Importing file...', 'caution');
-        controller.submitFeature(modal);
+        controller.submitFeature(observable, modal);
     });
     modal.setTitle('Milsoft Conversion');
-    modal.addStyleClass('horizontalFlex',       'titleElement');
-    modal.addStyleClass('centerMainAxisFlex',   'titleElement');
-    modal.addStyleClass('centerCrossAxisFlex',  'titleElement');
+    modal.addStyleClasses(['horizontalFlex', 'centerMainAxisFlex', 'centerCrossAxisFlex'], 'titleElement');
     modal.insertTBodyRow([nameLabel, nameInput]);
     modal.insertTBodyRow([stdLabel, stdInput]);
     modal.insertTBodyRow([seqLabel, seqInput]);
     modal.insertElement(submitDiv);
-    modal.addStyleClass('verticalFlex',         'containerElement');
-    modal.addStyleClass('centerMainAxisFlex',   'containerElement');
-    modal.addStyleClass('centerCrossAxisFlex',  'containerElement');
+    modal.addStyleClasses(['verticalFlex', 'centerMainAxisFlex', 'centerCrossAxisFlex'], 'containerElement');
     return modal;
 }
 
 /**
- * @param {FeatureGraph} featureGraph - an instance of my ObservableGraph interface
+ * @param {FeatureController} controller - a ControllerInterface instance
  * @returns {HTMLDivElement}
  */
-function getWindmilDiv(featureGraph) {
-    if (!(featureGraph instanceof FeatureGraph)) {
-        throw Error('"featureGraph argument must be instanceof FeatureGraph');
+function getWindmilDiv(controller) {
+    if (!(controller instanceof FeatureController)) {
+        throw TypeError('"controller" argument must be instanceof FeatureController.');
     }
     const feature = new Feature({
         geometry: { 'coordinates': [null, null], 'type': 'Point' },
@@ -912,9 +877,7 @@ function getWindmilDiv(featureGraph) {
         },
         type: 'Feature'
     });
-    featureGraph.insertObservable(feature);
-    const controller = new FeatureController(featureGraph, ['modal:windmil']);
-    const modal = _getWindmilModal(controller);
+    const modal = _getWindmilModal(feature, controller);
     const modalInsert = document.getElementById('modalInsert');
     const div = _getMenuDiv('Windmil conversion...');
     div.addEventListener('click', function() {
@@ -925,12 +888,16 @@ function getWindmilDiv(featureGraph) {
 }
 
 /**
+ * @param {Feature} observable
  * @param {FeatureController} controller - a ControllerInterface instance
  * @returns {Modal}
  */
-function _getGridlabdModal(controller) {
+function _getGridlabdModal(observable, controller) {
+    if (!(observable instanceof Feature)) {
+        throw TypeError('"observable" argument must be instanceof Feature.');
+    }
     if (!(controller instanceof FeatureController)) {
-        throw Error('"controller" argument must be an instance of FeatureController.');
+        throw TypeError('"controller" argument must be instanceof FeatureController.');
     }
     // - Name input
     const nameInput = document.createElement('input');
@@ -951,53 +918,46 @@ function _getGridlabdModal(controller) {
     // - Submit div
     const submitButton = _getSubmitButton('Import');
     const submitDiv = _getSubmitDiv(submitButton);
-    // - Feature
-    const feature = controller.getObservables()[0];
     // - Event listeners
     nameInput.addEventListener('change', function() {
         let newName = this.value.trim();
         if (newName === '') {
             newName = 'Default Name';
         }
-        feature.setProperty('feederNameG', newName, 'formProps');
+        observable.setProperty('feederNameG', newName, 'formProps');
         const fileExistsUrl = {
             method: 'GET',
             url: `/uniqObjName/Feeder/${gThisOwner}/${newName}/${gThisModelName}`
         }
-        feature.setProperty('fileExistsUrl', fileExistsUrl, 'urlProps');
+        observable.setProperty('fileExistsUrl', fileExistsUrl, 'urlProps');
     });
     glmInput.addEventListener('change', function() {
         const glmFile = this.files[0];
-        feature.setProperty('glmFile', glmFile, 'formProps');
+        observable.setProperty('glmFile', glmFile, 'formProps');
     });
     // - Modal
     const modal = new Modal();
-    modal.addStyleClass('outerModal',   'divElement');
-    modal.addStyleClass('fitContent',   'divElement');
+    modal.addStyleClasses(['outerModal', 'fitContent'], 'divElement');
     submitButton.addEventListener('click', function() {
         modal.showProgress(true, 'Importing file...', 'caution');
-        controller.submitFeature(modal);
+        controller.submitFeature(observable, modal);
     });
     modal.setTitle('GridLABD-D Conversion');
-    modal.addStyleClass('horizontalFlex',       'titleElement');
-    modal.addStyleClass('centerMainAxisFlex',   'titleElement');
-    modal.addStyleClass('centerCrossAxisFlex',  'titleElement');
+    modal.addStyleClasses(['horizontalFlex', 'centerMainAxisFlex', 'centerCrossAxisFlex'], 'titleElement');
     modal.insertTBodyRow([nameLabel, nameInput]);
     modal.insertTBodyRow([glmLabel, glmInput]);
     modal.insertElement(submitDiv);
-    modal.addStyleClass('verticalFlex',         'containerElement');
-    modal.addStyleClass('centerMainAxisFlex',   'containerElement');
-    modal.addStyleClass('centerCrossAxisFlex',  'containerElement');
+    modal.addStyleClasses(['verticalFlex', 'centerMainAxisFlex', 'centerCrossAxisFlex'], 'containerElement');
     return modal;
 }
 
 /**
- * @param {FeatureGraph} featureGraph - an instance of my ObservableGraph interface
+ * @param {FeatureController} controller - a ControllerInterface instance
  * @returns {HTMLDivElement}
  */
-function getGridlabdDiv(featureGraph) {
-    if (!(featureGraph instanceof FeatureGraph)) {
-        throw Error('"featureGraph argument must be instanceof FeatureGraph');
+function getGridlabdDiv(controller) {
+    if (!(controller instanceof FeatureController)) {
+        throw TypeError('"controller" argument must be instanceof FeatureController.');
     }
     const feature = new Feature({
         geometry: { 'coordinates': [null, null], 'type': 'Point' },
@@ -1026,9 +986,7 @@ function getGridlabdDiv(featureGraph) {
         },
         type: 'Feature'
     });
-    featureGraph.insertObservable(feature);
-    const controller = new FeatureController(featureGraph, ['modal:gridlabd']);
-    const modal = _getGridlabdModal(controller);
+    const modal = _getGridlabdModal(feature, controller);
     const modalInsert = document.getElementById('modalInsert');
     const div = _getMenuDiv('GridLAB-D conversion...');
     div.addEventListener('click', function() {
@@ -1038,12 +996,16 @@ function getGridlabdDiv(featureGraph) {
     return div;
 }
 /**
+ * @param {Feature} observable
  * @param {FeatureController} controller - a ControllerInterface instance
  * @returns {Modal}
  */
-function _getCymdistModal(controller) {
+function _getCymdistModal(observable, controller) {
+    if (!(observable instanceof Feature)) {
+        throw TypeError('"observable" argument must be instanceof Feature.');
+    }
     if (!(controller instanceof FeatureController)) {
-        throw Error('"controller" argument must be an instance of FeatureController.');
+        throw TypeError('"controller" argument must be instanceof FeatureController.');
     }
     // - Name input
     const nameInput = document.createElement('input');
@@ -1064,53 +1026,46 @@ function _getCymdistModal(controller) {
     // - Submit div
     const submitButton = _getSubmitButton('Import');
     const submitDiv = _getSubmitDiv(submitButton);
-    // - Feature
-    const feature = controller.getObservables()[0];
     // - Event listeners
     nameInput.addEventListener('click', function() {
         let newName = this.value.trim();
         if (newName === '') {
             newName = 'Default Name';
         }
-        feature.setProperty('feederNameC', newName, 'formProps');
+        observable.setProperty('feederNameC', newName, 'formProps');
         const fileExistsUrl = {
             method: 'GET',
             url: `/uniqObjName/Feeder/${gThisOwner}/${newName}/${gThisModelName}`
         }
-        feature.setProperty('fileExistsUrl', fileExistsUrl, 'urlProps');
+        observable.setProperty('fileExistsUrl', fileExistsUrl, 'urlProps');
     });
     mdbInput.addEventListener('change', function() {
         const mdbFile = this.files[0];
-        feature.setProperty('mdbNetFile', mdbFile, 'formProps');
+        observable.setProperty('mdbNetFile', mdbFile, 'formProps');
     });
     // - Modal
     const modal = new Modal();
-    modal.addStyleClass('outerModal',   'divElement');
-    modal.addStyleClass('fitContent',   'divElement');
+    modal.addStyleClasses(['outerModal', 'fitContent'], 'divElement');
     submitButton.addEventListener('click', function() {
         modal.showProgress(true, 'Importing file...', 'caution');
-        controller.submitFeature(modal);
+        controller.submitFeature(observable, modal);
     });
     modal.setTitle('Cyme Conversion');
-    modal.addStyleClass('horizontalFlex',       'titleElement');
-    modal.addStyleClass('centerMainAxisFlex',   'titleElement');
-    modal.addStyleClass('centerCrossAxisFlex',  'titleElement');
+    modal.addStyleClasses(['horizontalFlex', 'centerMainAxisFlex', 'centerCrossAxisFlex'], 'titleElement');
     modal.insertTBodyRow([nameLabel, nameInput]);
     modal.insertTBodyRow([mdbLabel, mdbInput]);
     modal.insertElement(submitDiv);
-    modal.addStyleClass('verticalFlex',         'containerElement');
-    modal.addStyleClass('centerMainAxisFlex',   'containerElement');
-    modal.addStyleClass('centerCrossAxisFlex',  'containerElement');
+    modal.addStyleClasses(['verticalFlex', 'centerMainAxisFlex', 'centerCrossAxisFlex'], 'containerElement');
     return modal;
 }
 
 /**
- * @param {FeatureGraph} featureGraph - an instance of my ObservableGraph interface
+ * @param {FeatureController} controller - a ControllerInterface instance
  * @returns {HTMLDivElement}
  */
-function getCymdistDiv(featureGraph) {
-    if (!(featureGraph instanceof FeatureGraph)) {
-        throw Error('"featureGraph argument must be instanceof FeatureGraph');
+function getCymdistDiv(controller) {
+    if (!(controller instanceof FeatureController)) {
+        throw TypeError('"controller" argument must be instanceof FeatureController.');
     }
     const feature = new Feature({
         geometry: { 'coordinates': [null, null], 'type': 'Point' },
@@ -1139,9 +1094,7 @@ function getCymdistDiv(featureGraph) {
         },
         type: 'Feature'
     });
-    featureGraph.insertObservable(feature);
-    const controller = new FeatureController(featureGraph, ['modal:cymdist']);
-    const modal = _getCymdistModal(controller);
+    const modal = _getCymdistModal(feature, controller);
     const modalInsert = document.getElementById('modalInsert');
     const div = _getMenuDiv('CYMDIST conversion...');
     div.addEventListener('click', function() {
@@ -1152,12 +1105,16 @@ function getCymdistDiv(featureGraph) {
 }
 
 /**
+ * @param {Feature} observable
  * @param {FeatureController} controller - a ControllerInterface instance
  * @returns {Modal}
  */
-function _getOpendssModal(controller) {
+function _getOpendssModal(observable, controller) {
+    if (!(observable instanceof Feature)) {
+        throw TypeError('"observable" argument must be instanceof Feature.');
+    }
     if (!(controller instanceof FeatureController)) {
-        throw Error('"controller" argument must be an instance of FeatureController.');
+        throw TypeError('"controller" argument must be instanceof FeatureController.');
     }
     // - Name input
     const nameInput = document.createElement('input');
@@ -1178,53 +1135,46 @@ function _getOpendssModal(controller) {
     // - Submit div
     const submitButton = _getSubmitButton('Import');
     const submitDiv = _getSubmitDiv(submitButton);
-    // - Feature
-    const feature = controller.getObservables()[0];
     // - Event listeners 
     nameInput.addEventListener('change', function() {
         let newName = this.value.trim();
         if (newName === '') {
             newName = 'Default Name';
         }
-        feature.setProperty('feederNameOpendss', newName, 'formProps');
+        observable.setProperty('feederNameOpendss', newName, 'formProps');
         const fileExistsUrl = {
             method: 'GET',
             url: `/uniqObjName/Feeder/${gThisOwner}/${newName}/${gThisModelName}`
         }
-        feature.setProperty('fileExistsUrl', fileExistsUrl, 'urlProps');
+        observable.setProperty('fileExistsUrl', fileExistsUrl, 'urlProps');
     });
     dssInput.addEventListener('change', function() {
         const dssFile = this.files[0];
-        feature.setProperty('dssFile', dssFile, 'formProps');
+        observable.setProperty('dssFile', dssFile, 'formProps');
     });
     // - Modal
     const modal = new Modal();
-    modal.addStyleClass('outerModal',   'divElement');
-    modal.addStyleClass('fitContent',   'divElement');
+    modal.addStyleClasses(['outerModal', 'fitContent'], 'divElement');
     submitButton.addEventListener('click', function() {
         modal.showProgress(true, 'Importing .dss file...', 'caution');
-        controller.submitFeature(modal);
+        controller.submitFeature(observable, modal);
     });
     modal.setTitle('OpenDSS Conversion');
-    modal.addStyleClass('horizontalFlex',       'titleElement');
-    modal.addStyleClass('centerMainAxisFlex',   'titleElement');
-    modal.addStyleClass('centerCrossAxisFlex',  'titleElement');
+    modal.addStyleClasses(['horizontalFlex', 'centerMainAxisFlex', 'centerCrossAxisFlex'], 'titleElement');
     modal.insertTBodyRow([nameLabel, nameInput]);
     modal.insertTBodyRow([dssLabel, dssInput]);
     modal.insertElement(submitDiv);
-    modal.addStyleClass('verticalFlex',         'containerElement');
-    modal.addStyleClass('centerMainAxisFlex',   'containerElement');
-    modal.addStyleClass('centerCrossAxisFlex',  'containerElement');
+    modal.addStyleClasses(['verticalFlex', 'centerMainAxisFlex', 'centerCrossAxisFlex'], 'containerElement');
     return modal;
 }
 
 /**
- * @param {FeatureGraph} featureGraph - an instance of my ObservableGraph interface
+ * @param {FeatureController} controller - a ControllerInterface instance
  * @returns {HTMLDivElement}
  */
-function getOpendssDiv(featureGraph) {
-    if (!(featureGraph instanceof FeatureGraph)) {
-        throw Error('"featureGraph argument must be instanceof FeatureGraph');
+function getOpendssDiv(controller) {
+    if (!(controller instanceof FeatureController)) {
+        throw TypeError('"controller" argument must be instanceof FeatureController.');
     }
     const feature = new Feature({
         geometry: { 'coordinates': [null, null], 'type': 'Point' },
@@ -1253,9 +1203,7 @@ function getOpendssDiv(featureGraph) {
         },
         type: 'Feature'
     });
-    featureGraph.insertObservable(feature);
-    const controller = new FeatureController(featureGraph, ['modal:opendss']);
-    const modal = _getOpendssModal(controller);
+    const modal = _getOpendssModal(feature, controller);
     const modalInsert = document.getElementById('modalInsert');
     const div = _getMenuDiv('OpenDSS conversion...');
     div.addEventListener('click', function() {
@@ -1266,12 +1214,16 @@ function getOpendssDiv(featureGraph) {
 }
 
 /**
+ * @param {Feature} observable
  * @param {FeatureController} controller - a ControllerInterface instance
  * @returns {Modal}
  */
-function _getAmiModal(controller) {
+function _getAmiModal(observable, controller) {
+    if (!(observable instanceof Feature)) {
+        throw TypeError('"observable" argument must be instanceof Feature.');
+    }
     if (!(controller instanceof FeatureController)) {
-        throw Error('"controller" argument must be an instance of FeatureController.');
+        throw TypeError('"controller" argument must be instanceof FeatureController.');
     }
     // - csv file input
     const amiInput = document.createElement('input');
@@ -1297,42 +1249,35 @@ function _getAmiModal(controller) {
     // - Submit div
     const submitButton = _getSubmitButton('Import');
     const submitDiv = _getSubmitDiv(submitButton);
-    // - Feature
-    const feature = controller.getObservables()[0];
     // - Event listeners
     amiInput.addEventListener('change', function() {
         const amiFile = this.files[0];
-        feature.setProperty('amiFile', amiFile, 'formProps');
+        observable.setProperty('amiFile', amiFile, 'formProps');
     });
     // - Modal
     const modal = new Modal();
-    modal.addStyleClass('outerModal',   'divElement');
-    modal.addStyleClass('fitContent',   'divElement');
+    modal.addStyleClasses(['outerModal', 'fitContent'], 'divElement');
     submitButton.addEventListener('click', function() {
         modal.showProgress(true, 'Importing file...', 'caution');
-        controller.submitFeature(modal);
+        controller.submitFeature(observable, modal);
     });
     modal.setTitle('AMI Profiles');
-    modal.addStyleClass('horizontalFlex',       'titleElement');
-    modal.addStyleClass('centerMainAxisFlex',   'titleElement');
-    modal.addStyleClass('centerCrossAxisFlex',  'titleElement');
+    modal.addStyleClasses(['horizontalFlex', 'centerMainAxisFlex', 'centerCrossAxisFlex'], 'titleElement');
     modal.insertTBodyRow([anchor]);
     modal.insertTBodyRow([amiLabel, amiInput]);
     modal.insertElement(noteDiv);
     modal.insertElement(submitDiv);
-    modal.addStyleClass('verticalFlex',         'containerElement');
-    modal.addStyleClass('centerMainAxisFlex',   'containerElement');
-    modal.addStyleClass('centerCrossAxisFlex',  'containerElement');
+    modal.addStyleClasses(['verticalFlex', 'centerMainAxisFlex', 'centerCrossAxisFlex'], 'containerElement');
     return modal;
 }
 
 /**
- * @param {FeatureGraph} featureGraph - an instance of my ObservableGraph interface
+ * @param {FeatureController} controller - a ControllerInterface instance
  * @returns {HTMLDivElement}
  */
-function getAmiDiv(featureGraph) {
-    if (!(featureGraph instanceof FeatureGraph)) {
-        throw Error('"featureGraph argument must be instanceof FeatureGraph');
+function getAmiDiv(controller) {
+    if (!(controller instanceof FeatureController)) {
+        throw TypeError('"controller" argument must be instanceof FeatureController.');
     }
     const feature = new Feature({
         geometry: { 'coordinates': [null, null], 'type': 'Point' },
@@ -1359,9 +1304,7 @@ function getAmiDiv(featureGraph) {
         },
         type: 'Feature'
     });
-    featureGraph.insertObservable(feature);
-    const controller = new FeatureController(featureGraph, ['modal:ami']);
-    const modal = _getAmiModal(controller);
+    const modal = _getAmiModal(feature, controller);
     const modalInsert = document.getElementById('modalInsert');
     const div = _getMenuDiv('Add AMI Profiles...');
     div.addEventListener('click', function() {
@@ -1372,23 +1315,23 @@ function getAmiDiv(featureGraph) {
 }
 
 /**
+ * @param {Feature} observable
  * @param {FeatureController} controller - a ControllerInterface instance
  * @returns {Modal}
  */
-function _getAttachmentsModal(controller) {
-    if (!(controller instanceof FeatureController)) {
-        throw Error('"controller" argument must be an instance of FeatureController.');
+function _getAttachmentsModal(observable, controller) {
+    if (!(observable instanceof Feature)) {
+        throw TypeError('"observable" argument must be instanceof Feature.');
     }
-    // - Feature
-    const feature = controller.getObservables()[0];
+    if (!(controller instanceof FeatureController)) {
+        throw TypeError('"controller" argument must be instanceof FeatureController.');
+    }
     // - Modal
     const mainModal = new Modal();
-    mainModal.addStyleClass('outerModal', 'divElement');
+    mainModal.addStyleClasses(['outerModal'], 'divElement');
     mainModal.setTitle('Attachments');
-    mainModal.addStyleClass('horizontalFlex',       'titleElement');
-    mainModal.addStyleClass('centerMainAxisFlex',   'titleElement');
-    mainModal.addStyleClass('centerCrossAxisFlex',  'titleElement');
-    const attachments = feature.getProperty('attachments', 'meta');
+    mainModal.addStyleClasses(['horizontalFlex', 'centerMainAxisFlex', 'centerCrossAxisFlex'], 'titleElement');
+    const attachments = observable.getProperty('attachments', 'meta');
     for (const [key, val] of Object.entries(attachments)) {
         const modal = new Modal();
         const attachmentTitleDiv = _getHorizontalFlexDiv();
@@ -1397,8 +1340,7 @@ function _getAttachmentsModal(controller) {
         span.textContent = key;
         attachmentTitleDiv.appendChild(span);
         modal.insertElement(attachmentTitleDiv);
-        modal.addStyleClass('horizontalFlex',       'titleElement');
-        modal.addStyleClass('centerCrossAxisFlex',  'titleElement');
+        modal.addStyleClasses(['horizontalFlex', 'centerCrossAxisFlex'], 'titleElement');
         const textArea = document.createElement('textarea');
         textArea.value = val;
         textArea.addEventListener('change', function() {
@@ -1411,15 +1353,14 @@ function _getAttachmentsModal(controller) {
 }
 
 /**
- * @param {FeatureGraph} featureGraph - an instance of my ObservableGraph interface
+ * @param {FeatureController} controller - a ControllerInterface instance
  * @returns {HTMLDivElement}
  */
-function getAttachmentsDiv(featureGraph) {
-    if (!(featureGraph instanceof FeatureGraph)) {
-        throw Error('"featureGraph argument must be instanceof FeatureGraph');
+function getAttachmentsDiv(controller) {
+    if (!(controller instanceof FeatureController)) {
+        throw TypeError('"controller" argument must be instanceof FeatureController.');
     }
-    const controller = new FeatureController(featureGraph, ['omd']); 
-    const modal = _getAttachmentsModal(controller);
+    const modal = _getAttachmentsModal(controller.observableGraph.getObservable('omd'), controller);
     const modalInsert = document.getElementById('modalInsert');
     const div = _getMenuDiv('Attachments...');
     div.addEventListener('click', function() {
@@ -1430,12 +1371,16 @@ function getAttachmentsDiv(featureGraph) {
 }
 
 /**
+ * @param {Feature} observable
  * @param {FeatureController} controller - a ControllerInterface instance
  * @returns {Modal}
  */
-function _getClimateModal(controller) {
+function _getClimateModal(observable, controller) {
+    if (!(observable instanceof Feature)) {
+        throw TypeError('"observable" argument must be instanceof Feature.');
+    }
     if (!(controller instanceof FeatureController)) {
-        throw Error('"controller" argument must be an instance of FeatureController.');
+        throw TypeError('"controller" argument must be instanceof FeatureController.');
     }
     // - Climate import select
     const climateImportSelect = document.createElement('select');
@@ -1496,68 +1441,60 @@ function _getClimateModal(controller) {
     // - Submit div
     const submitButton = _getSubmitButton();
     const submitDiv = _getSubmitDiv(submitButton);
-    // - Feature
-    const feature = controller.getObservables()[0];
     // - Event listeners
     uscrnYearSelect.addEventListener('change', function() {
-        feature.setProperty('uscrnYear', this.value, 'formProps');
+        observable.setProperty('uscrnYear', this.value, 'formProps');
     });
     uscrnStationSelect.addEventListener('change', function() {
-        feature.setProperty('uscrnStation', this.value, 'formProps');
+        observable.setProperty('uscrnStation', this.value, 'formProps');
     });
     tmyInput.addEventListener('change', function() {
         const value = this.value.trim();
-        feature.setProperty('zipCode', value, 'formProps');
+        observable.setProperty('zipCode', value, 'formProps');
     });
     // - Modal
     const mainModal = new Modal();
     submitButton.addEventListener('click', function() {
         mainModal.showProgress(true, 'Adding climate data...', 'caution');
-        controller.submitFeature(mainModal);
+        controller.submitFeature(observable, mainModal);
     });
-    mainModal.addStyleClass('outerModal', 'divElement');
-    mainModal.addStyleClass('fitContent', 'divElement');
+    mainModal.addStyleClasses(['outerModal', 'fitContent'], 'divElement');
     mainModal.setTitle('Climate Change');
-    mainModal.addStyleClass('horizontalFlex',       'titleElement');
-    mainModal.addStyleClass('centerMainAxisFlex',   'titleElement');
-    mainModal.addStyleClass('centerCrossAxisFlex',  'titleElement');
+    mainModal.addStyleClasses(['horizontalFlex', 'centerMainAxisFlex', 'centerCrossAxisFlex'], 'titleElement');
     mainModal.insertTBodyRow([climateImportSelect]);
     const uscrnModal = new Modal();
-    uscrnModal.addStyleClass('indent1', 'divElement');
+    uscrnModal.addStyleClasses(['indent1'], 'divElement');
     uscrnModal.insertTBodyRow(['Year', uscrnYearSelect]);
     uscrnModal.insertTBodyRow(['Station', uscrnStationSelect]);
     mainModal.insertElement(uscrnModal.divElement);
     const tmyModal = new Modal();
-    tmyModal.addStyleClass('indent1', 'divElement');
-    tmyModal.addStyleClass('collapsed', 'divElement');
+    tmyModal.addStyleClasses(['indent1', 'collapsed'], 'divElement');
     tmyModal.insertTBodyRow([tmyInputLabel, tmyInput]);
     mainModal.insertElement(tmyModal.divElement);
     climateImportSelect.addEventListener('change', function() {
-        feature.setProperty('climateImportOption', this.value, 'formProps');
+        observable.setProperty('climateImportOption', this.value, 'formProps');
         if (this.value === 'USCRNImport') {
-            uscrnModal.removeStyleClass('collapsed', 'divElement');
-            tmyModal.addStyleClass('collapsed', 'divElement');
+            uscrnModal.removeStyleClasses(['collapsed'], 'divElement');
+            tmyModal.addStyleClasses(['collapsed'], 'divElement');
         } else {
-            uscrnModal.addStyleClass('collapsed', 'divElement');
-            tmyModal.removeStyleClass('collapsed', 'divElement');
+            uscrnModal.addStyleClasses(['collapsed'], 'divElement');
+            tmyModal.removeStyleClasses(['collapsed'], 'divElement');
         }
     });
     const submitDivModal = new Modal();
     submitDivModal.insertElement(submitDiv);
-    submitDivModal.addStyleClass('horizontalFlex', 'containerElement');
-    submitDivModal.addStyleClass('centerMainAxisFlex',   'containerElement');
-    submitDivModal.addStyleClass('centerCrossAxisFlex',  'containerElement');
+    submitDivModal.addStyleClasses(['horizontalFlex', 'centerMainAxisFlex', 'centerCrossAxisFlex'], 'containerElement');
     mainModal.insertElement(submitDivModal.divElement);
     return mainModal;
 }
 
 /**
- * @param {FeatureGraph} featureGraph - an instance of my ObservableGraph interface
+ * @param {FeatureController} controller - a ControllerInterface instance
  * @returns {HTMLDivElement}
  */
-function getClimateDiv(featureGraph) {
-    if (!(featureGraph instanceof FeatureGraph)) {
-        throw Error('"featureGraph argument must be instanceof FeatureGraph');
+function getClimateDiv(controller) {
+    if (!(controller instanceof FeatureController)) {
+        throw TypeError('"controller" argument must be instanceof FeatureController.');
     }
     const feature = new Feature({
         geometry: { 'coordinates': [null, null], 'type': 'Point' },
@@ -1587,9 +1524,7 @@ function getClimateDiv(featureGraph) {
         },
         type: 'Feature'
     });
-    featureGraph.insertObservable(feature);
-    const controller = new FeatureController(featureGraph, ['modal:climate']); 
-    const modal =_getClimateModal(controller);
+    const modal =_getClimateModal(feature, controller);
     const modalInsert = document.getElementById('modalInsert');
     const div = _getMenuDiv('Climate...');
     div.addEventListener('click', function() {
@@ -1600,12 +1535,16 @@ function getClimateDiv(featureGraph) {
 }
 
 /**
+ * @param {Feature} observable
  * @param {FeatureController} controller - a ControllerInterface instance
  * @returns {Modal}
  */
-function _getScadaModal(controller) {
+function _getScadaModal(observable, controller) {
+    if (!(observable instanceof Feature)) {
+        throw TypeError('"observable" argument must be instanceof Feature.');
+    }
     if (!(controller instanceof FeatureController)) {
-        throw Error('"controller" argument must be an instance of FeatureController.');
+        throw TypeError('"controller" argument must be instanceof FeatureController.');
     }
     // - csv file input
     const scadaInput = document.createElement('input');
@@ -1631,42 +1570,35 @@ function _getScadaModal(controller) {
     // - Submit div
     const submitButton = _getSubmitButton('Import');
     const submitDiv = _getSubmitDiv(submitButton);
-    // - Feature
-    const feature = controller.getObservables()[0];
     // - Event listeners
     scadaInput.addEventListener('change', function() {
         const scadaFile = this.files[0];
-        feature.setProperty('scadaFile', scadaFile, 'formProps');
+        observable.setProperty('scadaFile', scadaFile, 'formProps');
     }); 
     // - Modal
     const modal = new Modal();
-    modal.addStyleClass('outerModal',   'divElement');
-    modal.addStyleClass('fitContent',   'divElement');
+    modal.addStyleClasses(['outerModal', 'fitContent'], 'divElement');
     submitButton.addEventListener('click', function() {
         modal.showProgress(true, 'Importing file...', 'caution');
-        controller.submitFeature(modal);
+        controller.submitFeature(observable, modal);
     });
     modal.setTitle('SCADA Loadshapes');
-    modal.addStyleClass('horizontalFlex',       'titleElement');
-    modal.addStyleClass('centerMainAxisFlex',   'titleElement');
-    modal.addStyleClass('centerCrossAxisFlex',  'titleElement');
+    modal.addStyleClasses(['horizontalFlex', 'centerMainAxisFlex', 'centerCrossAxisFlex'], 'titleElement');
     modal.insertTBodyRow([anchor]);
     modal.insertTBodyRow([scadaLabel, scadaInput]);
     modal.insertElement(noteDiv);
     modal.insertElement(submitDiv);
-    modal.addStyleClass('verticalFlex',         'containerElement');
-    modal.addStyleClass('centerMainAxisFlex',   'containerElement');
-    modal.addStyleClass('centerCrossAxisFlex',  'containerElement');
+    modal.addStyleClasses(['verticalFlex', 'centerMainAxisFlex', 'centerCrossAxisFlex'], 'containerElement');
     return modal;
 }
 
 /**
- * @param {FeatureGraph} featureGraph - an instance of my ObservableGraph interface
+ * @param {FeatureController} controller - a ControllerInterface instance
  * @returns {HTMLDivElement}
  */
-function getScadaDiv(featureGraph) {
-    if (!(featureGraph instanceof FeatureGraph)) {
-        throw Error('"featureGraph argument must be instanceof FeatureGraph');
+function getScadaDiv(controller) {
+    if (!(controller instanceof FeatureController)) {
+        throw TypeError('"controller" argument must be instanceof FeatureController.');
     }
     const feature = new Feature({
         geometry: { 'coordinates': [null, null], 'type': 'Point' },
@@ -1693,9 +1625,7 @@ function getScadaDiv(featureGraph) {
         },
         type: 'Feature'
     });
-    featureGraph.insertObservable(feature);
-    const controller = new FeatureController(featureGraph, ['modal:scada']);
-    const modal = _getScadaModal(controller);
+    const modal = _getScadaModal(feature, controller);
     const modalInsert = document.getElementById('modalInsert');
     const div = _getMenuDiv('SCADA Loadshapes...');
     div.addEventListener('click', function() {
@@ -1707,46 +1637,46 @@ function getScadaDiv(featureGraph) {
 
 // - TODO: implement replacement function? I need to do components now
 /**
- * @param {FeatureGraph} featureGraph - an instance of my ObservableGraph interface
+ * @param {FeatureController} controller - a ControllerInterface instance
  * @returns {HTMLDivElement}
  */
-function _getStaticLoadsToHousesModal(featureGraph) {
-    if (!(featureGraph instanceof FeatureGraph)) {
-        throw Error('"featureGraph argument must be instanceof FeatureGraph');
-    }
-    const modal = new Modal();
-    modal.addStyleClass('outerModal',   'divElement');
-    modal.addStyleClass('fitContent',   'divElement');
-    const triplex_objects = featureGraph.getObservables(f => {
-        return f.hasProperty('object') && (f.getProperty('object') === 'triplex_load' || f.getProperty('object') === 'triplex_node')
-    });
-    if (triplex_objects.length > 0) {
-        modal.showProgress(true, 'Converting every triplex load and/or triplex node into a house with children. This could take a few seconds...');
-        //
-    } else {
-        modal.showProgress(false, 'This data has no triplex load or triplex node objects that can be converted into houses.');
-        //
-    }
-    return modal;
-}
+//function _getStaticLoadsToHousesModal(controller) {
+//    if (!(controller instanceof FeatureController)) {
+//        throw TypeError('"controller" argument must be instanceof FeatureController.');
+//    }
+//    const modal = new Modal();
+//    modal.addStyleClass('outerModal',   'divElement');
+//    modal.addStyleClass('fitContent',   'divElement');
+//    const triplex_objects = featureGraph.getObservables(f => {
+//        return f.hasProperty('object') && (f.getProperty('object') === 'triplex_load' || f.getProperty('object') === 'triplex_node')
+//    });
+//    if (triplex_objects.length > 0) {
+//        modal.showProgress(true, 'Converting every triplex load and/or triplex node into a house with children. This could take a few seconds...');
+//        //
+//    } else {
+//        modal.showProgress(false, 'This data has no triplex load or triplex node objects that can be converted into houses.');
+//        //
+//    }
+//    return modal;
+//}
 
 /**
- * @param {FeatureGraph} featureGraph - an instance of my ObservableGraph interface
+ * @param {FeatureController} controller - a ControllerInterface instance
  * @returns {HTMLDivElement}
  */
-function getStaticLoadsToHousesDiv(featureGraph) {
-    if (!(featureGraph instanceof FeatureGraph)) {
-        throw Error('"featureGraph argument must be instanceof FeatureGraph');
-    }
-    const modal = _getStaticLoadsToHousesModal(featureGraph);
-    const modalInsert = document.getElementById('modalInsert');
-    const div = _getMenuDiv('Static Loads to Houses');
-    div.addEventListener('click', function() {
-        modalInsert.replaceChildren(modal.divElement);
-        modalInsert.classList.add('visible');
-    });
-    return div;
-}
+//function getStaticLoadsToHousesDiv(controller) {
+//    if (!(controller instanceof FeatureController)) {
+//        throw TypeError('"controller" argument must be instanceof FeatureController.');
+//    }
+//    const modal = _getStaticLoadsToHousesModal(featureGraph);
+//    const modalInsert = document.getElementById('modalInsert');
+//    const div = _getMenuDiv('Static Loads to Houses');
+//    div.addEventListener('click', function() {
+//        modalInsert.replaceChildren(modal.divElement);
+//        modalInsert.classList.add('visible');
+//    });
+//    return div;
+//}
 
 /*********************************/
 /* Private convenience functions */
@@ -1766,7 +1696,7 @@ function _getSubmitButton(text='Submit') {
 
 function _getSubmitDiv(button) {
     if (!(button instanceof HTMLButtonElement)) {
-        throw TypeError('"button" argument must be instanceof HTMLButtonElement');
+        throw TypeError('"button" argument must be instanceof HTMLButtonElement.');
     }
     const submitDiv = document.createElement('div');
     submitDiv.classList.add('horizontalFlex');
@@ -1779,7 +1709,7 @@ function _getSubmitDiv(button) {
 
 function _getMenuDiv(text) {
     if (typeof text !== 'string') {
-        throw TypeError('"text" argument must be a string');
+        throw TypeError('"text" argument must be a string.');
     }
     const div = document.createElement('div');
     div.classList.add('hoverable', 'horizontalFlex', 'centerCrossAxisFlex');

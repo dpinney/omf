@@ -26,7 +26,7 @@ class TopTab {
      */
     addTab(label, content) {
         if (!(content instanceof Node)) {
-            throw Error('"content" argument must be an instance of Node.');
+            throw Error('"content" argument must be instanceof Node.');
         }
         if (this.#tabMap.hasOwnProperty(label)) {
             throw Error('The "label" argument must be unique across all tabs.');

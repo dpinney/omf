@@ -33,16 +33,16 @@ class FeatureGraph {
     // *********************************
 
     deleteProperty(propertyKey, namespace='treeProps') {
-        throw UnsupportedOperationError();
+        throw new UnsupportedOperationError();
     }
 
     // - TODO: call handleDeletedObservable() on the observers of this graph in handleDeletedObservable()
     deleteObservable() {
-        throw UnsupportedOperationError();
+        throw new UnsupportedOperationError();
     }
 
     getCoordinates() {
-        throw UnsupportedOperationError();
+        throw new UnsupportedOperationError();
     }
 
     /**
@@ -88,7 +88,7 @@ class FeatureGraph {
     /**
      * @param {Function} func - a function that filters features so that only the desired features are returned. The function should take a single
      * argument (a feature), and should return a boolean depending on whether to include the feature in the array
-     * @returns {Array} - an array of instances of my Feature class, where each instance met the filtering criteria
+     * @returns {Array} - an array of ObservableInterface instances, where each instance met the filtering criteria
      */
     getObservables(func) {
         if (typeof func !== 'undefined') {
@@ -98,27 +98,27 @@ class FeatureGraph {
     }
 
     getObservers() {
-        throw UnsupportedOperationError();
+        throw new UnsupportedOperationError();
     }
 
     getProperties(namespace) {
-        throw UnsupportedOperationError();
+        throw new UnsupportedOperationError();
     }
 
     getProperty(propertyKey, namespace='treeProps') {
-        throw UnsupportedOperationError();
+        throw new UnsupportedOperationError();
     }
 
     hasCoordinates() {
-        throw UnsupportedOperationError();
+        throw new UnsupportedOperationError();
     }
 
     hasGraph() {
-        throw UnsupportedOperationError();
+        throw new UnsupportedOperationError();
     }
 
     hasProperty(propertyKey, namespace='treeProps') {
-        throw UnsupportedOperationError();
+        throw new UnsupportedOperationError();
     }
 
     /**
@@ -140,7 +140,7 @@ class FeatureGraph {
     registerObserver(observer) {
         // - The function signature above is part of the ObservableInterface API. The implementation below is not
         if (observer instanceof Feature) {
-            throw ObserverError();
+            throw new ObserverError();
         }
         this.#observers.push(observer);
     }
@@ -152,7 +152,7 @@ class FeatureGraph {
     removeObserver(observer) {
         // - The function signature above is part of the ObservableInterface API. The implementation below is not
         if (observer instanceof Feature) {
-            throw ObserverError();
+            throw new ObserverError();
         }
         const index = this.#observers.indexOf(observer);
         if (index > -1) {
@@ -163,23 +163,23 @@ class FeatureGraph {
     }
 
     setCoordinates(coordinates) {
-        throw UnsupportedOperationError();
+        throw new UnsupportedOperationError();
     }
 
     setGraph(graph) {
-        throw UnsupportedOperationError();
+        throw new UnsupportedOperationError();
     }
 
     setProperty(propertyKey, propertyValue, namespace='treeProps') {
-        throw UnsupportedOperationError();
+        throw new UnsupportedOperationError();
     }
 
     updateCoordinatesOfObservers(oldCoordinates) {
-        throw UnsupportedOperationError();
+        throw new UnsupportedOperationError();
     }
 
     updatePropertyOfObservers(propertyKey, oldPropertyValue, namespace='treeProps') {
-        throw UnsupportedOperationError();
+        throw new UnsupportedOperationError();
     }
 
     // *******************************
@@ -189,11 +189,14 @@ class FeatureGraph {
     /**
      * - Remove this ObserverInterface instance (i.e. "this") from the ObservableInterface instance (i.e. "observable") that has been deleted, and
      *   perform other actions as needed
-     * @param {Object} observable - an instance of ObservableInterface that this Observer is observing
+     * @param {Feature} observable - an ObservableInterface instance
      * @returns {undefined}
      */
     handleDeletedObservable(observable) {
         // - The function signature above is part of the ObserverInterface API. The implementation below is not
+        if (!(observable instanceof Feature)) {
+            throw TypeError('"observable" argument must be instanceof Feature.');
+        }
         const observableKey = observable.getProperty('treeKey', 'meta');
         this.#graph.setNodeAttribute(observableKey, 'visited', true);
         if (this.#graph.hasNode(observableKey)) {
@@ -207,7 +210,7 @@ class FeatureGraph {
                             observer.deleteObservable();
                         }
                     } else {
-                        throw GraphNodeEdgeError(observableKey, observerKey);
+                        throw new GraphNodeEdgeError(observableKey, observerKey);
                     }
                 });
             // - If a line is deleted, any attached lines also need to be deleted
@@ -236,8 +239,9 @@ class FeatureGraph {
             this.#graph.dropNode(observableKey);
             this.#removeObservableFromNameToKey(observable, observable.getProperty('name'));
             this.#removeObservableFromKeytoFeature(observable);
+            this.#observers.forEach(ob => ob.handleDeletedObservable(observable));
         } else {
-            throw FeatureNotFoundError(key);
+            throw new FeatureNotFoundError(key);
         }
     }
 
@@ -246,7 +250,7 @@ class FeatureGraph {
      */
     handleNewObservable(observable) {
         // - The function signature above is part of the ObserverInterface API. The implementation below is not
-        throw UnsupportedOperationError();
+        throw new UnsupportedOperationError();
     }
 
     /**
@@ -274,12 +278,12 @@ class FeatureGraph {
                     if (observer.isLine()) {
                         observer.handleUpdatedCoordinates(observable, oldCoordinates);
                     } else if (observable.isNode() && observer.isNode()) {
-                        throw GraphNodeEdgeError(observableKey, observerKey);
+                        throw new GraphNodeEdgeError(observableKey, observerKey);
                     }
                 }
             });
         } else {
-            throw FeatureNotFoundError(observableKey);
+            throw new FeatureNotFoundError(observableKey);
         }
     }
 
@@ -302,10 +306,8 @@ class FeatureGraph {
             throw TypeError('"namespace" argument must be a string.');
         }
         const observableKey = observable.getProperty('treeKey', 'meta');
-
         // - I don't think I need to mark nodes as visited since there's no recursion
         //this.#graph.setNodeAttribute(observableKey, 'visited', true);
-
         if (this.#graph.hasNode(observableKey)) {
             // - Deal with property updates that don't affect the connectivity of the graph
             if (propertyKey === 'name') {
@@ -360,7 +362,7 @@ class FeatureGraph {
                 }
             }
         } else {
-            throw FeatureNotFoundError(observableKey);
+            throw new FeatureNotFoundError(observableKey);
         }
     }
 
@@ -369,6 +371,8 @@ class FeatureGraph {
     // ********************
 
     /**
+     * - TODO: could I have a single getKey() function for features and components that takes the "object" property of the requesting feature, instead
+     *   of requesting the entire feature?
      * @param {string} name - the name of the feature that I want to retrieve the key for
      * @param {string} featureKey - the key of an instance of my Feature class that is requesting the key
      * @returns {string} The correct tree key of the feature with the given name, depending on which object requested it, else throw an exception if
@@ -384,7 +388,7 @@ class FeatureGraph {
         const feature = this.getObservable(featureKey);
         const keys = this.#nameToKey[name];
         if (keys === undefined) {
-            throw FeatureNameNotFoundError(name);
+            throw new FeatureNameNotFoundError(name);
         } else if (keys.length === 1) {
             return keys[0];
         }
@@ -428,7 +432,7 @@ class FeatureGraph {
         }
         const keys = this.#nameToKey[name];
         if (keys === undefined) {
-            throw FeatureNameNotFoundError(name);
+            throw new FeatureNameNotFoundError(name);
         } else {
             return keys[0];
         }
@@ -517,33 +521,23 @@ class FeatureGraph {
                         return observer;
                     }
                 } else {
-                    throw GraphNodeEdgeError(childKey, observerKey);
+                    throw new GraphNodeEdgeError(childKey, observerKey);
                 }
             }
         } else {
-            throw FeatureNotFoundError(childKey);
+            throw new FeatureNotFoundError(childKey);
         }
         throw Error(`A parent-child line could not be found for the feature "${childKey}".`);
     }
 
     /**
-     * - Return a new Feature instance that will be used as a parent-child line. This function is a temporary workaround. The controller should just copy
-     *   the parent-child line component and insert it. This actually is a special case of the ControllerInterface calling addObservable(). I can think of
-     *   the main thread initialization as as special one-time view that should be using the controller to add parent-child line features. The
-     *   ControllerInterface should only take an ObservableInterface[], but it needs the graph to be effective. The graph really is an
-     *   ObservableInterface[] itself, but I can't put the graph in the UML diagram because then I'm mixing in an implementation. I'll probably just
-     *   diagram with the ObservableInterface[], but make the FeatureController actually take a graph. Table view will be created by passing in the entire
-     *   graph and an array of keys that the table can look at. "Feature searching" is really just filtering, which is really just calling
-     *   <Graph>.getFeatures() 
      * @param {string} parentKey - the key of an instance of my Feature class
      * @param {string} childKey - the key of an instance of my Feature class
      * @returns {Feature} - an instance of my Feature class
      */
     getParentChildLineFeature(parentKey, childKey) {
         const {sourceLat, sourceLon, targetLat, targetLon} = this.getLineLatLon(parentKey, childKey);
-        // - This is my custom schema for dealing with parent-child lines
-        const maxKey = this.getMaxKey('parentChild');
-        const parentChildLineKey = `parentChild:${maxKey + 1}`;
+        const parentChildLineKey = `parentChild:${this.getMaxKey('parentChild') + 1}`;
         const parentName = this.getObservable(parentKey).getProperty('name');
         const childName = this.getObservable(childKey).getProperty('name');
         const parentChildLineFeature = new Feature({
@@ -576,7 +570,7 @@ class FeatureGraph {
      */
     insertObservable(observable) {
         if (!(observable instanceof Feature)) {
-            throw TypeError('"observable" argument must be an instance of my Feature class.');
+            throw TypeError('"observable" argument must be an instance of Feature class.');
         }
         this.#insertObservableIntoKeyToFeature(observable);
         const observableKey = observable.getProperty('treeKey', 'meta');

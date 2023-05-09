@@ -29,10 +29,10 @@ class Modal {
 
     /**
      * @param {(string|Node)} banner - the banner to display
-     * @param {string} [style=null] - An optional style class that styles the banner
+     * @param {Array} [styles=null] - any styles that should be applied to the banner
      * @returns {undefined}
      */
-    setBanner(banner, style=null) {
+    setBanner(banner, styles=null) {
         if (this.#bannerElement === null) {
             this.#bannerElement = document.createElement('div');
             this.#bannerElement.classList.add('div--modalBanner');
@@ -47,23 +47,24 @@ class Modal {
         } else {
             throw TypeError('"banner" argument must be a string or Node.');
         }
-        if (typeof style !== 'string' && style !== null) {
-            throw TypeError('"style" argument must be a string or null.');
+        if (!(styles instanceof Array) && styles !== null) {
+            throw TypeError('"styles" argumet must be an array or null.');
         }
-        if (style !== null) {
-            this.#bannerElement.classList.add(style);
+        if (styles !== null) {
+            this.#bannerElement.classList.add(...styles);
         } else {
-            // - HACK
-            this.#bannerElement.classList.remove('caution');
+            // - "styles" was null, so styles besides "div--modalBanner" should be removed
+            this.#bannerElement.classList.value = 'div--modalBanner';
+            //this.#bannerElement.classList.remove('caution');
         }
     }
 
     /**
      * @param {(string|Node)} title - the title to display
-     * @param {string} [style=null] - An optional style that styles the title
+     * @param {Array} [styles=null] - any styles that should be applied to the title
      * @returns {undefined}
      */
-    setTitle(title, style=null) {
+    setTitle(title, styles=null) {
         if (this.#titleElement === null) {
             this.#titleElement = document.createElement('div');
             this.#titleElement.classList.add('div--modalTitle');
@@ -82,14 +83,15 @@ class Modal {
         } else {
             throw TypeError('"title" argument must be a string or Node.');
         }
-        if (typeof style !== 'string' && style !== null)  {
-            throw TypeError('"style" argument must be a string or null');
+        if (!(styles instanceof Array) && styles !== null) {
+            throw TypeError('"styles" argument must be an array or null.');
         }
-        if (style !== null) {
-            this.#titleElement.classList.add(style);
+        if (styles !== null) {
+            this.#titleElement.classList.add(...styles);
+        } else {
+            this.#titleElement.classList.value = 'div--modalTitle';
         }
     }
-
 
     /**
      * @param {Array} elements - an array of elements that should occupy a table body row. null elements just append empty <td>/<td> elements
@@ -98,12 +100,15 @@ class Modal {
      * @returns {undefined}
      */
     insertTBodyRow(elements, position='append', styles=null) {
+        if (!(styles instanceof Array) && styles !== null) {
+            throw TypeError('"styles" argumet must be an array or null.');
+        }
         if (this.#tableElement === null) {
             this.#createTableElement();    
         }
         const tr = document.createElement('tr');
         if (styles !== null) {
-            tr.classList.add(styles);
+            tr.classList.add(...styles);
         }
         elements.forEach(e => {
             const td = document.createElement('td');
@@ -117,7 +122,7 @@ class Modal {
                 div.appendChild(e);
                 td.appendChild(div);
             } else if (e !== null) {
-                throw Error(`The Table class only accepts arrays of null, Node, or string.`)
+                throw TypeError(`The Table class only accepts arrays of null, Node, or string.`)
             }
             tr.appendChild(td);
         });
@@ -130,20 +135,27 @@ class Modal {
         } else if (position === 'append') {
             this.#tableElement.tBodies[0].appendChild(tr);
         } else {
-            throw Error('Please specify a valid value for the "position" parameter: "prepend", "beforeEnd", or "append"')
+            throw Error('Please specify a valid value for the "position" parameter: "prepend", "beforeEnd", or "append".');
         }
     }
 
     /**
      * @param {Array} elements - an array of elements that should occupy a table header row. null elements just append empty <td>/<td> elements
      * @param {string} [position='append'] - the location to insert the tHead row. Can be "prepend", "beforeEnd", or "append"
+     * @param {Array} [styles=null] - any styles that should be applied to the row
      * @returns {undefined}
      */
-    insertTHeadRow(elements, position='append') {
+    insertTHeadRow(elements, position='append', styles=null) {
+        if (!(styles instanceof Array) && styles !== null) {
+            throw TypeError('"styles" argumet must be an array or null.');
+        }
         if (this.#tableElement === null) {
-            this.#createTableElement();    
+            this.#createTableElement();
         }
         const tr = document.createElement('tr');
+        if (styles !== null) {
+            tr.classList.add(...styles);
+        }
         elements.forEach(e => { 
             const th = document.createElement('th');
             const div = document.createElement('div');
@@ -156,7 +168,7 @@ class Modal {
                 div.appendChild(e);
                 th.appendChild(div);
             } else if (e !== null) {
-                throw Error(`The Table class only accepts arrays of null, Node, or string.`)
+                throw TypeError(`The Table class only accepts arrays of null, Node, or string.`);
             }
             tr.appendChild(th);
         });
@@ -169,100 +181,111 @@ class Modal {
         } else if (position === 'append') {
             this.#tableElement.tHead.appendChild(tr);
         } else {
-            throw Error('Please specify a valid value for the "position" parameter: "prepend", "beforeEnd", or "append"')
+            throw Error('Please specify a valid value for the "position" parameter: "prepend", "beforeEnd", or "append".');
         }
     }
 
     /**
-     * 
+     * @param {Array} styles
+     * @param {string} elementName
+     * @returns {undefined}
      */
-    addStyleClass(style, elementName) {
-        if (typeof style !== 'string') {
-            throw Error('The "style" argument must be a string');
+    addStyleClasses(styles, elementName) {
+        if (!(styles instanceof Array)) {
+            throw TypeError('"styles" argument must be an array.');
         }
         if (typeof elementName !== 'string') {
-            throw Error('The "elementName" argument must be a string');
+            throw TypeError('"elementName" argument must be a string.');
         }
         switch (elementName) {
             case 'divElement':
                 if (this.divElement !== null) {
-                    this.divElement.classList.add(style);
+                    this.divElement.classList.add(...styles);
                 }
                 break;
             case 'bannerElement':
                 if (this.#bannerElement !== null) {
-                    this.#bannerElement.classList.add(style);
+                    this.#bannerElement.classList.add(...styles);
                 }
                 break;
             case 'containerElement':
                 if (this.#containerElement !== null) {
-                    this.#containerElement.classList.add(style);
+                    this.#containerElement.classList.add(...styles);
                 }
                 break;
             case 'tableElement':
                 if (this.#tableElement !== null) {
-                    this.#tableElement.classList.add(style);
+                    this.#tableElement.classList.add(...styles);
                 }
                 break;
             case 'titleElement':
                 if (this.#titleElement !== null) {
-                    this.#titleElement.classList.add(style);
+                    this.#titleElement.classList.add(...styles);
                 }
                 break;
             default:
-                throw Error('"elementName" argument must be "divElement", "bannerElement", "containerElement", "tableElement", or "titleElement"');
+                throw Error('"elementName" argument must be "divElement", "bannerElement", "containerElement", "tableElement", or "titleElement".');
         }
     }
 
     /**
-     * 
+     * @param {Array} styles
+     * @param {string} elementName
+     * @returns {undefined}
      */
-    removeStyleClass(style, elementName) {
-        if (typeof style !== 'string') {
-            throw Error('The "style" argument must be a string');
+    removeStyleClass(styles, elementName) {
+        if (!(styles instanceof Array)) {
+            throw TypeError('"styles" argument must be an array.');
         }
         if (typeof elementName !== 'string') {
-            throw Error('The "elementName" argument must be a string');
+            throw TypeError('"elementName" argument must be a string.');
         }
         switch (elementName) {
             case 'divElement':
                 if (this.divElement !== null) {
-                    this.divElement.classList.remove(style);
+                    this.divElement.classList.remove(...styles);
                 }
                 break;
             case 'bannerElement':
                 if (this.#bannerElement !== null) {
-                    this.#bannerElement.classList.remove(style);
+                    this.#bannerElement.classList.remove(...styles);
                 }
                 break;
             case 'containerElement':
                 if (this.#containerElement !== null) {
-                    this.#containerElement.classList.remove(style);
+                    this.#containerElement.classList.remove(...styles);
                 }
                 break;
             case 'tableElement':
                 if (this.#tableElement !== null) {
-                    this.#tableElement.classList.remove(style);
+                    this.#tableElement.classList.remove(...styles);
                 }
                 break;
             case 'titleElement':
                 if (this.#titleElement !== null) {
-                    this.#titleElement.classList.remove(style);
+                    this.#titleElement.classList.remove(...styles);
                 }
                 break;
             default:
-                throw Error('"elementName" argument must be "divElement", "bannerElement", "containerElement", "tableElement", or "titleElement"');
+                throw Error('"elementName" argument must be "divElement", "bannerElement", "containerElement", "tableElement", or "titleElement".');
         }
     }
 
    /**
     * @param {Node} e - an element to append to the element div
     * @param {string} [position='append'] - the location to insert the element row. Can be "prepend", "beforeEnd", or "append"
+    * @param {Array} [styles=null] - any styles that should be applied to the element
     * @returns {undefined}
     */
-    insertElement(e, position='append') {
+    insertElement(e, position='append', styles=null) {
         if (!(e instanceof Node)) {
-            throw Error('"e" argument must be instanceof Node');
+            throw TypeError('"e" argument must be instanceof Node');
+        }
+        if (!(styles instanceof Array) && styles !== null) {
+            throw TypeError('"styles" argumet must be an array or null.');
+        }
+        if (styles !== null) {
+            e.classList.add(...styles);
         }
         if (this.#containerElement === null) {
             this.#createContainerElement();
@@ -283,18 +306,18 @@ class Modal {
     /**
      * @param {boolean} [spinner=true] - whether to show the spinner
      * @param {string} [bannerText=null] - the centered text to display below the spinnner, if the spinner exists
-     * @param {string} [style=null] - An optional style that styles the title and banner
+     * @param {Array} [styles=null] - any styles that should be applied to the title and banner
      * @returns {undefined}
      */
-    showProgress(showSpinner=true, bannerText=null, style=null) {
+    showProgress(showSpinner=true, bannerText=null, styles=null) {
         if (typeof showSpinner !== 'boolean') {
             throw TypeError('"showSpinner" argument must be a boolean.');
         }
         if (typeof bannerText !== 'string' && bannerText !== null) {
             throw TypeError('"bannerText" argument must be a string or null.');
         }
-        if (typeof style !== 'string' && style !== null) {
-            throw TypeError('"style" argument must be a string or null.');
+        if (!(styles instanceof Array) && styles !== null) {
+            throw TypeError('"styles" argument must be an Array or null.');
         }
         const outerDiv = document.createElement('div');
         if (showSpinner) {
@@ -304,14 +327,14 @@ class Modal {
         }
         if (bannerText !== null) {
             const innerDiv = document.createElement('div');
-            // - I don't want span. A span gives me regular-sized font. I want banner-sized font
+            // - I don't want a span. A span gives me regular-sized font. I want banner-sized font
             //const span = document.createElement('span');
             //span.textContent = bannerText;
             innerDiv.textContent = bannerText;
             //innerDiv.appendChild(span);
             outerDiv.appendChild(innerDiv);
         }
-        this.setBanner(outerDiv, style);
+        this.setBanner(outerDiv, styles);
     }
 
     // *********************

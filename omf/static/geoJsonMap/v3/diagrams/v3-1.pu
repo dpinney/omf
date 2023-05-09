@@ -1,0 +1,312 @@
+@startuml design
+' - Render this diagram with PlantUML
+
+interface ObservableInterface {
+    ' - The FeatureGraph and Feature classes follow the composite pattern by both implementing the ObservableInterface and the ObserverInterface
+    ' - Commented-out methods should exist for consistency but aren't implemented because they don't logically make sense
+
+    '+deleteCoordinates(): undefined
+    '   - I haven't encountered a situation where I would ever want to delete coordinates (yet)
+    +deleteProperty(propertyKey: string, namespace: string): undefined
+        ' - Does this method signature work for the composite pattern? Yes
+        '   - Feature: delete the property from the Feature
+        '   - FeatureGraph: throw an UnsupportedOperationError. A FeatureGraph does not have its own properties
+    +deleteObservable(): undefined
+        ' - Does this method signature work for the composite pattern? Yes
+        '   - Feature: mark the Feature instance as being deleted (I don't actually do anything for this) and the notify observers by calling their
+        '     handleDeletedObservable() method
+        '   - FeatureGraph: don't delete the FeatureGraph. Just notify observers of the FeatureGraph itself that the ObservableInterface instance was
+        '     deleted by calling the handleDeletedObservable() method on the FeatureGraph observers in the handleDeletedObservable() method of the
+        '     graph. I suppose if the entire graph gets deleted, then perhaps the FeatureGraph itself could be deleted. But this is such a weird
+        '     corner case that I'm not going to deal with it right now. Just throw an UnsupportedOperationError
+    '+deleteObserver(): undefined
+    '   - Observers don't need to be deleted. They're just removed as observers. They should be garbage collected if there are no memory leaks
+    +getCoordinates(): []
+        ' - Does this method signature work for the composite pattern? Yes
+        '   - Feature: return the coordinates of the Feature
+        '   - FeatureGraph: throw an UnsupportedOperationError. A FeatureGraph does not have its own coordinates
+    +getObservable(key: string): ObservableInterface
+        ' - Does this method signature work for the composite pattern? Yes
+        '   - Feature: throw an UnsupportedOperationError. A Feature already is the observable
+        '   - FeatureGraph: return the Feature with the matching key, or throw a FeatureNotFoundError
+    +getObservableExportData(): Object
+        ' - Does this method signature work for the composite pattern? Yes
+        '   - Feature: create a structuredClone() of the GeoJSON feature, modify it as necessary (e.g. remove names), and return it
+        '   - FeatureGraph: call getObservableExportData() on the desired Feature instances and return a FeatureCollection
+    +getObservables(func: Function): ObservableInterface[]
+        ' - Does this method signature work for the composite pattern? Yes
+        '   - Feature: throw an UnsupportedOperationError. A Feature already is the observable
+        '   - FeatureGraph: return an array of Features that satisfy the given function
+    +getObservers(): ObserverInterface[]
+        ' - Does this method signature work for the composite pattern? Yes
+        '   - Feature: return this.#observers
+        '   - FeatureGraph: return this.#observers. Not sure when this would be needed, but it's trivial to implement
+    +getProperties(namespace: string): Object
+        ' - Does this method signature work for the composite pattern? Yes
+        '   - Feature: return the properties in the given namespace on the Feature
+        '   - FeatureGraph: throw an UnsupportedOperationError. A FeatureGraph does not have its own properties
+    +getProperty(propertyKey: string, namespace: string): (string|Object)
+        ' - Does this method signature work for the composite pattern? Yes
+        '   - Feature: return the property value of the Feature
+        '   - FeatureGraph: throw an UnsupportedOperationError. A FeatureGraph does not have its own properties
+    +hasCoordinates(): boolean
+        ' - Does this method signature work for the composite pattern? Yes
+        '   - Feature: check if the Feature has coordinates
+        '   - FeatureGraph: throw an UnsupportedOperationError. A FeatureGraph does not have its own coordinates
+    +hasGraph():
+        ' - Does this method signature work for the composite pattern? Yes
+        '   - Feature: return whether the reference to a graph in the Feature is set
+        '   - FeatureGraph: throw an UnsupportedOperationError. At this time, graphs cannot be nested
+    +hasProperty(propertyKey: string, namespace: string): boolean
+        ' - Does this method signature work for the composite pattern? Yes
+        '   - Feature: check if the property exists on the Feature
+        '   - FeatureGraph: throw an UnsupportedOperationError. A FeatureGraph does not have its own properties
+    '+hasObservable(): boolean
+    '+hasObserver(): boolean
+    +notifyObserversOfNewObservable(observable: ObservableInterface): undefined
+        ' - Does this method signature work for the composite pattern? Yes
+        '   - Feature: throw an UnsupportedOperationError. When a Feature instance is created, it doesn't have any observers to notify
+        '   - FeatureGraph: call the handleNewObservable() method of observers of the FeatureGraph at the end of the insertObservable() method
+    +registerObserver(observer: ObserverInterface): undefined
+        ' - Does this method signature work for the composite pattern? Yes
+        '   - Feature: add the observer to this.#observers
+        '   - FeatureGraph: add the observer to this.#observers
+    +removeObserver(observer: ObserverInterface): undefined
+        ' - Does this method signature work for the composite pattern? Yes
+        '   - Feature: remove the observer from this.#observers
+        '   - FeatureGraph: remove the observer from this.#observers
+    +setCoordinates(coordinates: Array): undefined
+        ' - Does this method signature work for the composite pattern? Yes
+        '   - Feature: set the coordinates on the Feature and call updateCoordinatesOfObservers() 
+        '   - FeatureGraph: throw an UnsupportedOperationError. A FeatureGraph does not have its own coordinates
+    +setGraph(graph: FeatureGraph): undefined
+        ' - Does this method signature work for the composite pattern? Yes
+        '   - Feature: set a reference to the graph in the Feature
+        '   - FeatureGraph: throw an UnsupportedOperationError. At this time, graphs cannot be nested
+    +setProperty(propertyKey: string, propertyValue: (string|Object), namespace: string): undefined
+        ' - Does this method signature work for the composite pattern? Yes
+        '   - Feature: set the property on the Feature and call updatePropertyOfObservers() 
+        '   - FeatureGraph: throw an UnsupportedOperationError. A FeatureGraph does not have its own properties
+    '+setObservable(): undefined === +insertObservable(): undefined
+    '+setObserver():undefined === +registerObserver(): undefined
+    +updateCoordinatesOfObservers(oldCoordinates: Array): undefined
+        ' - Does this method signature work for the composite pattern? Yes
+        '   - Feature: call the handleUpdatedCoordinates() method of each observer. The FeatureGraph will be notified this way
+        '   - FeatureGraph: throw an UnsupportedOperationError. A FeatureGraph will notify observers, like the SearchModal, of
+        '     new/updated/deleted properties by calling handleUpdatedCoordinates() on its own observers within its own handleUpdatedCoordinates() method
+    +updatePropertyOfObservers(propertyKey: string, oldPropertyValue: (string|Object), namespace: string): undefined
+        ' - Does this method signature work for the composite pattern? Yes
+        '   - Feature: call the handleUpdatedProperty() method of each observer. The FeatureGraph will be notified this way
+        '   - FeatureGraph: throw an UnsupportedOperationError. A FeatureGraph will notify observers, like the SearchModal, of
+        '     new/updated/deleted properties by calling handleUpdatedProperty() on its own observers within its own handleUpdatedProperty() method
+}
+
+interface ObserverInterface {
+    +handleDeletedObservable(observable: ObservableInterface): undefined
+    +handleNewObservable(observable: ObservableInterface): undefined
+    +handleUpdatedCoordinates(observable: ObservableInterface, oldCoordinates: Array): undefined
+    +handleUpdatedProperty(observable: ObservableInterface, propertyKey: string, oldPropertyValue: (string|Object), namespace: string): undefined
+}
+
+Feature ..> ObserverError
+Feature ..> UnsupportedOperationError
+Feature ..|> ObservableInterface
+Feature ..|> ObserverInterface
+class Feature {
+    -Object feature
+    -FeatureGraph graph
+    -Array observers
+    -Object originalFeature
+    +isChild(): boolean
+    +isComponentFeature(): boolean
+    +isConfigurationObject(): boolean
+    +isLine(): boolean
+    +isModalFeature(): boolean
+    +isNode(): boolean
+    +isParentChildLine(): boolean
+    +isPolygon(): boolean
+    +resetState(): undefined
+}
+
+class ObserverError {}
+class ObserverNotFoundError {}
+class UnsupportedOperationError {}
+
+class FeatureNotFoundError {}
+class FeatureNameNotFoundError {}
+class GraphNodeEdgeError {}
+
+FeatureGraph ..> UnsupportedOperationError
+FeatureGraph ..> FeatureNotFoundError
+FeatureGraph ..> FeatureNameNotFoundError
+FeatureGraph ..> GraphNodeEdgeError
+FeatureGraph ..|> ObservableInterface
+FeatureGraph ..|> ObserverInterface
+class FeatureGraph {
+    -Graph graph
+    -Object keyToFeature
+    -Object nameToKey
+    -Array observers
+    +getKey(name: string, key: string): string
+        ' - Return the key of the Feature with the given name, or throw a FeatureNameNotFoundError
+    +getKeyForComponent(name): string
+        ' - Components are never part of a FeatureGraph, so I can't provide a key to specify what to do in case of duplicate names. Return the key if
+        '   there is a matching key, or throw a FeatureNameNotFoundError. If there are multiple keys, throw an Error or return the first key. The user
+        '   could fix this by changing the duplicate names, then re-trying the operation
+    +getLineLatLon(sourceKey, targetKey): Object
+        ' - This method belongs in the FeatureGraph because only the FeatureGraph can use multiple keys to find out the latitude and longitude values 
+    +getMaxKey(namespace: string): number
+    +getParentChildLineFeature(parentKey, childKey): Feature
+        ' - This method doesn't need to be located in the FeatureGraph class, but it works here. I could put it in the FeatureController class, but I
+        '   shouldn't need a controller to create parent-child lines, so I won't
+    +insertObservable(observable: ObservableInterface): undefined
+        ' - The crazy thing is that now I can insert graphs into other graphs
+    +markNodesAsUnvisited(): undefined
+    -getObserverKey(observableKey: string, edgeKey: string): string
+        ' - Throw a GraphNodeLoopError if an edge is discovered that loops back to the same graph node. This should never happen because I create a
+        '   Graphology graph that doesn't allow self-loops
+    -insertObservableIntoKeyToFeature(observable: ObservableInterface): undefined
+    -insertObservableIntoNameToKey(observable: ObservableInterface): undefined
+    -removeObservableFromKeytoFeature(observable: ObservableInterface): undefined
+    -removeObservableFromNameToKey(observable: ObservableInterface, oldName: string): undefined
+}
+
+interface ModalInterface {
+    +getDOMElement(): HTMLElement
+        ' - Return the outermost HTMLElement of the modal that is supposed to be inserted into the DOM
+    +isRemoved(): boolean
+        ' - Return whether the modal has been deleted
+    +refreshContent(): undefinded
+        ' - Replace select DOM nodes (e.g. <select> elements) with new DOM nodes in response to some event, but do not replace all of the DOM nodes in
+        '   order to preserve the state of the user's UI
+    +renderContent(): undefined
+        ' - Get a new set of DOM nodes that represent the initial state of the modal. If the old modal was already in the DOM, replace the old DOM
+        '   nodes with the new DOM nodes
+    +remove(): undefined
+        ' - Remove the DOM nodes of the modal from the DOM. Also perform other actions as needed (e.g. remove the modal as an observer from its
+        '   observables)
+}
+
+/'
+- Situations:
+    - A component is added to the FeatureGraph
+        - The FeatureGraph calls notifyObserversOfNewObservable(). Every observer of the graph has handleNewObservable() called. The SearchModal does
+          NOT register itself as an observer of the new Feature. It doesn't need to. It's already an observer of the graph. Instead, the SearchModal
+          just calls refreshContent() and updates its key selects. New keys may or may not appear in the key selects, depending on whether the new
+          Feature has new keys
+    - A feature is deleted from the FeatureGraph
+        - The FeatureGraph has handleDeletedObservable() called on it, which triggers it to call handleDeletedObservable() on all of its own
+          observers. The SearchModal does not remove itself as an observer of the deleted feature since it never observed it in the first place.
+          Instead, the SearchModal just calls refreshContent() and updates its key selects.
+    - A feature has the only instance of its key and that key is deleted from the feature 
+        - Eventually, the FeatureGraph has handleUpdatedProperty() called on it. The FeatureGraph will call handleUpdatedProperty() on all of its own
+          observers. The SearchModal simply calls refreshContent(). Note this will happen every time that any Feature's property changes, but that's
+          okay.
+    - A feature has a new key added to it that is unique across all features
+        - Same workflow as above
+'/
+SearchModal --> ControllerInterface
+SearchModal ..|> ObserverInterface
+SearchModal ..|> ModalInterface
+class SearchModal {
+    ' - I don't need to document public or private methods of this class
+}
+
+TreeFeatureModal --> ControllerInterface
+TreeFeatureModal ..|> ObserverInterface
+TreeFeatureModal ..|> ModalInterface
+class TreeFeatureModal {
+    ' - I don't need to document public or private methods of this class
+}
+
+' - Each FeatureDropdownDiv will only observe a single Feature. I'll use plain DropdownDivs for nodes, lines, and configuration objects
+'   - I will also use plain DropdownDivs for any other arbitrary groupings of features
+' - A FeatureDropdownDiv doesn't need a ControllerInterface, but to be consistent it will use on anyway
+FeatureDropdownDiv --> ControllerInterface
+FeatureDropdownDiv ..|> ObserverInterface
+FeatureDropdownDiv ..|> ModalInterface
+class FeatureDropdownDiv {
+
+}
+
+LeafletLayer --> ControllerInterface
+LeafletLayer ..|> ObserverInterface
+class LeafletLayer {
+    +getLayer(): GeoJson
+}
+
+' - Classes that implement the ControllerInterface should NOT also implement the ObserverInterface, although they could
+'   - The plan is for there to be a single ControllerInterface instance that gets passed around to all of the views. Each view can give the
+'     ControllerInterface a set of IDs that point to the ObservableInterface instances that should be affected by a given method/operation of the
+'     ControllerInterface. Actually, each view should give the controller an array of actual ObservableInterface instances. Each view should register
+'     itself on the relevant observables, store those observables in an array, and then pass that array to the controller when needed. There's no need
+'     to use IDs because then I'm just going to have to lookup those IDs more often in the graph which will slow things down (e.g. if I use IDs, I'll
+'     have to lookup each Feature in the graph before setting coordinates). Each view will implement the ObserverInterface. That way, every view stays
+'     in sync with all of the data and doesn't need to synchronize with the controller
+'   - This plan works for views that only observe the graph as well. E.g. the SearchModal only observes the FeatureGraph directly, so it's notified of
+'     any changes to the graph. However, after the SearchModal generates an array of ObservableInterface instances as search results, it can then pass
+'     that array to the FeatureController to perform the desired operations.
+'   - What about the distinction between the controller that manages actual features vs. the controller that manages components?
+'       - The distinction is no longer important since every operation passes the ObservableInterface instances that should be affected by the
+'         operation. E.g. can I delete component features? Yes! I can, but I won't. E.g. can I set coordinates/properties of component features? Yes!
+'         All observers of a component (e.g. TreeFeatureModal instances) will be notified correctly and the graph won't be affected because component
+'         features don't have a reference to the graph.
+interface ControllerInterface {
+    +addObservables(observables: ObservableInterface[]): undefined
+        ' - Insert each observable in the array into the FeatureGraph. Each observable should be a clone of a component. Each view should create the
+        '   clone, insert the clone into the array, and then pass the array to this method. The coordinates argument can be null, in which case the
+        '   existing coordinates on the clone will be used. Actually, no. There shouldn't be a coordinates argument. Each view should set the
+        '   coordinates on the clones correctly BEFORE passing the clones to this method. Parent-child lines should be created by views, then added to
+        '   the end of the array so they can be inserted just like the other observables. The one thing this method should do is check if each
+        '   observable in the array already has a reference to a graph via <ObservableInterface>.hasGraph() and throw a FeatureAlreadyInGraphError if
+        '   it does. Actually I don't even have to do this. Just make the Feature class do it in setGraph()
+        ' - This will handle mass add just fine
+    '+getObservables(): ObservableInterface[]
+        ' - Since views no longer rely on a ControllerInterface for observables, this method doesn't need to be implemented
+    +deleteProperty(observables: ObservableInterface[], propertyKey: string, namespace: string): undefined
+        ' - Call deleteProperty() on every ObservableInterface instance in the array and perform other actions if needed
+    +deleteObservables(observables: ObservableInterface[]): undefined
+        ' - Call deleteObservable() on every ObservableInterface instance in the arra and perform other actions if needed
+    '+hasComponents(): boolean
+        ' - Don't implement this. See hasProperty() for why
+    '+hasConfigurationObjects(): boolean
+        ' - Don't implement this. See hasProperty() for why
+    '+hasLines(): boolean
+        ' - Don't implement this. See hasProperty() for why
+    '+hasNodes(): boolean
+        ' - Don't implement this. See hasProperty() for why
+    '+hasProperty(observables: ObservableInterface[], propertyKey: string, namespace: string): boolean
+        ' - Technically, views are supposed to get state directly from the model. All this method does is provide the array of ObservableInterface
+        '   instances to Array.prototype.some() and return the result. The views can do that directly if they need that information. It's easier to
+        '   understand this operation when a view does it directly instead of delegating to the controller
+    '+remove(): undefined
+        ' - Since a ControllerInterface instance is no longer an observer, it never needs to be removed
+    +setCoordinates(observables: ObservableInterface[], coordinates: number[]): undefined
+        ' - Call setCoordinates() on every ObservableInterface instance in the array. In the event that I do something silly like try to set a line's
+        '   coordinates using node coordinates, then setCoordinates() defined in the Feature class should raise the appropriate exception. When
+        '   finished make the graph mark all nodes as unvisited.
+    '+setObservables(observables: ObservableInterface[]): undefined
+        ' - I don't implement this method because observables should be passed for every operation. If I set observables, it's possible that I might
+        '   forget to set new observables before an operation, which will result in the operation affecting unintended Features 
+    +setProperty(observable: ObservableInterface[], propertyKey: string, propertyValue: (string|Object), namespace: string): undefined
+        ' - Call setProperty() on each observable in the array. If "from"/"to" changed, also update coordinates of the observable. If "parent"
+        '   changed, update the coordinates of the parent-child line. I also need to mark all graph nodes as unvisited if any coordinates were
+        '   changed. Don't validate whether it makes sense to add the property to any observable. That's the job of the TreeFeatureModal and other
+        '   modals
+        ' - This will handle mass edit just fine
+}
+
+' - FeatureControler does NOT implement the Observer interface because it does not need to
+'   - Instead, every view uses the same FeatureController instance to perform operations and passes the ObservableInterface instances that should be
+'     affected by an operation
+FeatureController ..|> ControllerInterface
+class FeatureController {
+    +submitFeature(): undefined
+    -reloadPage(): undefined
+}
+
+' - There's no need to implement a separate class for components
+'ComponentController ..|> ControllerInterface
+'class ComponentController {}
+
+@enduml

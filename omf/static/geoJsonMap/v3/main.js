@@ -15,7 +15,7 @@ function main() {
     features.filter(f => !f.isLine()).forEach(f => featureGraph.insertObservable(f));
     // - Insert lines. Lines can be parents, so they must be inserted before parent-child lines
     features.filter(f => f.isLine()).forEach(f => featureGraph.insertObservable(f));
-    // - Create and insert parent-child lines. This logic should be moved to and manged by the controller somehow
+    // - Create and insert parent-child lines
     features.filter(f => f.isChild()).forEach(f => {
         const parentKey = featureGraph.getKey(f.getProperty('parent'), f.getProperty('treeKey', 'meta'));
         const childKey = f.getProperty('treeKey', 'meta');
@@ -26,27 +26,19 @@ function main() {
     window.gFeatures = features;
     window.gFeatureGraph = featureGraph;
     // debug
-    featureGraph.getObservables().forEach(observable => {
-        if (!observable.isConfigurationObject()) {
-
-            new LeafletLayer(observable.getProperty('treeKey', 'meta'));
-
-            //// - Add first observer to a visible ObservableInterface instance
-            //const controller = new FeatureController(featureGraph, [observable.getProperty('treeKey', 'meta')]);
-            //// - Add second observer to a visible ObserverInterface instance
-            //new LeafletLayer(controller);
+    const controller = new FeatureController(featureGraph);
+    featureGraph.getObservables().forEach(ob => {
+        if (!ob.isConfigurationObject()) {
+            // - Here, the first observer is added to every visible feature
+            new LeafletLayer(ob, controller);
         }
     });
-    setupHTML(featureGraph);
+    setupHTML(controller);
 
     /****************/
     /* Setup layers */
     /****************/
 
-    //const osm = L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
-    //    maxZoom: 29,
-    //    attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-    //});
     const maxZoom = 25;
     var esri_satellite_layer = L.esri.basemapLayer('Imagery', {
         maxZoom: maxZoom
@@ -64,7 +56,6 @@ function main() {
         maxZoom: maxZoom
     });
     const baseMaps = {
-        //'Basic tiles': osm,
         'Satellite': esri_satellite_layer,
         'Streets': mapbox_layer,
         'Topo': esri_topography_layer,
@@ -99,14 +90,26 @@ function main() {
         }
         //console.log(e.key);
 	};
+    // - Allow the modal insert to be closed (remove this event listener when a server process is running)
+    const modalInsert = document.getElementById('modalInsert');
+    modalInsert.addEventListener('click', function() {
+        modalInsert.classList.remove('visible');
+    });
 }
 
-function setupHTML(featureGraph) {
-    createNav(featureGraph);
+/**
+ * @param {FeatureController} controller - a FeatureController instance 
+ * @returns {undefined}
+ */
+function setupHTML(controller) {
+    if (!(controller instanceof FeatureController)) {
+        throw TypeError('"controller" argument must be instanceof FeatureController.');
+    }
+    createNav(controller);
     createHelpMenu();
-    createEditMenu(featureGraph);
-    if (gShowFileMenu) {
-        createFileMenu(featureGraph);
+    createEditMenu(controller);
+    if (gIsOnline && gShowFileMenu) {
+        createFileMenu(controller);
     }
     // - Add event listeners to only allow either the file or edit menu to be open
     const fileMenu = document.getElementById('fileMenu');
@@ -137,20 +140,15 @@ function setupHTML(featureGraph) {
     if (gIsOnline) {
         document.getElementById('saveDiv').click();
     }
-    // - Allow the modal insert to be closed
-    const modalInsert = document.getElementById('modalInsert');
-    modalInsert.addEventListener('click', function() {
-        modalInsert.classList.remove('visible');
-    });
 }
 
 /**
- * @param {FeatureGraph} featureGraph - an instance of my FeatureGraph class that has already been built
+ * @param {FeatureController} controller - a FeatureController instance
  * @returns {undefined}
  */
-function createNav(featureGraph) {
-    if (!(featureGraph instanceof FeatureGraph)) {
-        throw Error('"featureGraph argument must be instanceof FeatureGraph');
+function createNav(controller) {
+    if (!(controller instanceof FeatureController)) {
+        throw TypeError('"controller" argument must be instanceof FeatureController.');
     }
     const header = document.getElementsByTagName('header')[0];
     const nav = new Nav();
@@ -166,35 +164,31 @@ function createNav(featureGraph) {
     const searchTab = document.createElement('div');
     topTab.addTab('Search', searchTab);
     topTab.getTab('Search').tab.click();
-
-
-    // - Add third observer to visible ObserverInterface instances
-    let controller = new FeatureController(
-        featureGraph,
-        featureGraph.getObservables(f => {
-            return !f.isModalFeature() && !f.isComponentFeature() && f.getProperty('treeKey', 'meta') !== 'omd';
-        }).map(f => f.getProperty('treeKey', 'meta')));
-    // - Add fourth observer to visible ObserverInterface instances
     let searchModal = new SearchModal(controller);
     searchTab.appendChild(searchModal.getDOMElement());
-    searchTab.appendChild(searchModal.getSearchResultsElement());
+    let searchResultsDiv = document.createElement('div');
+    searchTab.appendChild(searchResultsDiv);
+    searchResultsDiv.appendChild(searchModal.getConfigSearchResultsDiv());
+    searchResultsDiv.appendChild(searchModal.getNodeSearchResultsDiv());
+    searchResultsDiv.appendChild(searchModal.getLineSearchResultsDiv());
     // - Add tab for adding components
     const componentTab = document.createElement('div');
     topTab.addTab('Add Components', componentTab);
     let components = gComponentsCollection.features.filter(f => f.properties.componentType === 'gridlabd');
-    const omdFeature = featureGraph.getObservable('omd');
+    const omdFeature = controller.observableGraph.getObservable('omd');
     if (omdFeature.hasProperty('syntax', 'meta')) {
         if (omdFeature.getProperty('syntax', 'meta') === 'DSS') {
             components = gComponentsCollection.features.filter(f => f.properties.componentType === 'opendss');
         }
     }
-    const componentIDs = components.map(f => f.properties.treeKey);
-    controller = new FeatureController(featureGraph, componentIDs, true);
-    searchModal = new SearchModal(controller);
+    components = components.map(f => new Feature(f));
+    searchModal = new SearchModal(controller, components);
     componentTab.appendChild(searchModal.getDOMElement());
-    componentTab.appendChild(searchModal.getSearchResultsElement());
-
-
+    searchResultsDiv = document.createElement('div');
+    componentTab.appendChild(searchResultsDiv);
+    searchResultsDiv.appendChild(searchModal.getConfigSearchResultsDiv()); 
+    searchResultsDiv.appendChild(searchModal.getNodeSearchResultsDiv()); 
+    searchResultsDiv.appendChild(searchModal.getLineSearchResultsDiv()); 
     // - Add map and modal insert divs
     let div = document.createElement('div');
     div.id = 'map';
@@ -222,55 +216,51 @@ function createHelpMenu() {
 }
 
 /**
- * @param {FeatureGraph} featureGraph - an instance of my FeatureGraph class that has already been built
+ * @param {FeatureController} controller - a FeatureController instance
  * @returns {undefined}
  */
-function createEditMenu(featureGraph) {
-    if (!(featureGraph instanceof FeatureGraph)) {
-        throw Error('"featureGraph argument must be instanceof FeatureGraph');
+function createEditMenu(controller) {
+    if (!(controller instanceof FeatureController)) {
+        throw TypeError('"controller" argument must be instanceof FeatureController.');
     }
     const dropdownDiv = new DropdownDiv();
     dropdownDiv.divElement.id = 'editMenu';
-    dropdownDiv.addStyleClass('menu', 'divElement');
+    dropdownDiv.addStyleClasses(['menu'], 'divElement');
     dropdownDiv.setButton('Edit', true);
     document.getElementById('menuInsert').appendChild(dropdownDiv.divElement);
     if (gIsOnline) {
-        dropdownDiv.insertElement(getAmiDiv(featureGraph));
-        dropdownDiv.insertElement(getAnonymizationDiv(featureGraph));
+        dropdownDiv.insertElement(getAmiDiv(controller));
+        dropdownDiv.insertElement(getAnonymizationDiv(controller));
     }
-    dropdownDiv.insertElement(getAttachmentsDiv(featureGraph));
+    dropdownDiv.insertElement(getAttachmentsDiv(controller));
+    dropdownDiv.insertElement(getRawDataDiv(controller));
     if (gIsOnline) {
-        dropdownDiv.insertElement(getClimateDiv(featureGraph));
-        dropdownDiv.insertElement(getScadaDiv(featureGraph));
+        dropdownDiv.insertElement(getClimateDiv(controller));
+        dropdownDiv.insertElement(getScadaDiv(controller));
     }
 }
 
 /**
- * @param {FeatureGraph} featureGraph - an instance of my FeatureGraph class that has already been built
+ * @param {FeatureController} controller - a FeatureController instance
  * @returns {undefined}
  */
-function createFileMenu(featureGraph) {
-    if (!(featureGraph instanceof FeatureGraph)) {
-        throw Error('"featureGraph argument must be instanceof FeatureGraph');
+function createFileMenu(controller) {
+    if (!(controller instanceof FeatureController)) {
+        throw TypeError('"controller" argument must be instanceof FeatureController.');
     }
     const dropdownDiv = new DropdownDiv();
     dropdownDiv.divElement.id = 'fileMenu';
-    dropdownDiv.addStyleClass('menu', 'divElement');
+    dropdownDiv.addStyleClasses(['menu'], 'divElement');
     dropdownDiv.setButton('File', true);
     document.getElementById('menuInsert').appendChild(dropdownDiv.divElement);
-    if (gIsOnline) {
-        dropdownDiv.insertElement(getSaveDiv(featureGraph));
-    }
-    dropdownDiv.insertElement(getRawDataDiv(featureGraph));
-    if (gIsOnline) {
-        dropdownDiv.insertElement(getRenameDiv(featureGraph));
-        dropdownDiv.insertElement(getLoadFeederDiv(featureGraph));
-        dropdownDiv.insertElement(getBlankFeederDiv(featureGraph));
-        dropdownDiv.insertElement(getWindmilDiv(featureGraph));
-        dropdownDiv.insertElement(getGridlabdDiv(featureGraph));
-        dropdownDiv.insertElement(getCymdistDiv(featureGraph));
-        dropdownDiv.insertElement(getOpendssDiv(featureGraph));
-    }
+    dropdownDiv.insertElement(getSaveDiv(controller));
+    dropdownDiv.insertElement(getRenameDiv(controller));
+    dropdownDiv.insertElement(getLoadFeederDiv(controller));
+    dropdownDiv.insertElement(getBlankFeederDiv(controller));
+    dropdownDiv.insertElement(getWindmilDiv(controller));
+    dropdownDiv.insertElement(getGridlabdDiv(controller));
+    dropdownDiv.insertElement(getCymdistDiv(controller));
+    dropdownDiv.insertElement(getOpendssDiv(controller));
 }
 
 (function loadInterface() {
