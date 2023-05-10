@@ -267,7 +267,7 @@ function _getAnonymizationModal(observable, controller) {
         document.getElementById('modalInsert').classList.add('visible');
         modalInsert.replaceChildren(mainModal.divElement);
         mainModal.showProgress(true, 'Anonymization working...', ['caution']);
-        controller.submitFeature(mainModal);
+        controller.submitFeature(observable, mainModal);
     });
     mainModal.setTitle('Anonymization');
     mainModal.addStyleClasses(['horizontalFlex', 'centerMainAxisFlex', 'centerCrossAxisFlex'], 'titleElement');
@@ -517,8 +517,8 @@ function _getRenameModal(observable, controller) {
         await controller.submitFeature(saveFeature, saveModal, false);
         document.getElementById('modalInsert').classList.add('visible');
         modalInsert.replaceChildren(renameModal.divElement);
-        renameModal.showProgress(true, 'Renaming feeder...', 'caution');
-        controller.submitFeature(renameModal);
+        renameModal.showProgress(true, 'Renaming feeder...', ['caution']);
+        controller.submitFeature(observable, renameModal);
     });
     renameModal.setTitle('Rename Feeder');
     renameModal.addStyleClasses(['horizontalFlex', 'centerMainAxisFlex', 'centerCrossAxisFlex'], 'titleElement');
@@ -713,7 +713,7 @@ function _getBlankFeederModal(observable, controller) {
     const modal = new Modal();
     modal.addStyleClasses(['outerModal', 'fitContent'], 'divElement');
     submitButton.addEventListener('click', function() {
-        modal.showProgress(true, 'Creating new blank feeder...', 'caution');
+        modal.showProgress(true, 'Creating new blank feeder...', ['caution']);
         controller.submitFeature(observable, modal);
     });
     modal.setTitle('New Blank Feeder');
@@ -828,7 +828,7 @@ function _getWindmilModal(observable, controller) {
     const modal = new Modal();
     modal.addStyleClasses(['outerModal', 'fitContent'], 'divElement');
     submitButton.addEventListener('click', function() {
-        modal.showProgress(true, 'Importing file...', 'caution');
+        modal.showProgress(true, 'Importing file...', ['caution']);
         controller.submitFeature(observable, modal);
     });
     modal.setTitle('Milsoft Conversion');
@@ -939,7 +939,7 @@ function _getGridlabdModal(observable, controller) {
     const modal = new Modal();
     modal.addStyleClasses(['outerModal', 'fitContent'], 'divElement');
     submitButton.addEventListener('click', function() {
-        modal.showProgress(true, 'Importing file...', 'caution');
+        modal.showProgress(true, 'Importing file...', ['caution']);
         controller.submitFeature(observable, modal);
     });
     modal.setTitle('GridLABD-D Conversion');
@@ -1047,7 +1047,7 @@ function _getCymdistModal(observable, controller) {
     const modal = new Modal();
     modal.addStyleClasses(['outerModal', 'fitContent'], 'divElement');
     submitButton.addEventListener('click', function() {
-        modal.showProgress(true, 'Importing file...', 'caution');
+        modal.showProgress(true, 'Importing file...', ['caution']);
         controller.submitFeature(observable, modal);
     });
     modal.setTitle('Cyme Conversion');
@@ -1156,7 +1156,7 @@ function _getOpendssModal(observable, controller) {
     const modal = new Modal();
     modal.addStyleClasses(['outerModal', 'fitContent'], 'divElement');
     submitButton.addEventListener('click', function() {
-        modal.showProgress(true, 'Importing .dss file...', 'caution');
+        modal.showProgress(true, 'Importing .dss file...', ['caution']);
         controller.submitFeature(observable, modal);
     });
     modal.setTitle('OpenDSS Conversion');
@@ -1258,7 +1258,7 @@ function _getAmiModal(observable, controller) {
     const modal = new Modal();
     modal.addStyleClasses(['outerModal', 'fitContent'], 'divElement');
     submitButton.addEventListener('click', function() {
-        modal.showProgress(true, 'Importing file...', 'caution');
+        modal.showProgress(true, 'Importing file...', ['caution']);
         controller.submitFeature(observable, modal);
     });
     modal.setTitle('AMI Profiles');
@@ -1455,7 +1455,7 @@ function _getClimateModal(observable, controller) {
     // - Modal
     const mainModal = new Modal();
     submitButton.addEventListener('click', function() {
-        mainModal.showProgress(true, 'Adding climate data...', 'caution');
+        mainModal.showProgress(true, 'Adding climate data...', ['caution']);
         controller.submitFeature(observable, mainModal);
     });
     mainModal.addStyleClasses(['outerModal', 'fitContent'], 'divElement');
@@ -1579,7 +1579,7 @@ function _getScadaModal(observable, controller) {
     const modal = new Modal();
     modal.addStyleClasses(['outerModal', 'fitContent'], 'divElement');
     submitButton.addEventListener('click', function() {
-        modal.showProgress(true, 'Importing file...', 'caution');
+        modal.showProgress(true, 'Importing file...', ['caution']);
         controller.submitFeature(observable, modal);
     });
     modal.setTitle('SCADA Loadshapes');
