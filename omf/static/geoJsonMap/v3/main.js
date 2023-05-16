@@ -2,7 +2,7 @@ import { DropdownDiv } from './dropdownDiv.js';
 import { Feature } from  './feature.js';
 import { FeatureGraph } from  './featureGraph.js';
 import { FeatureController } from './featureController.js';
-import { getLoadingModal, getAnonymizationDiv, getSaveDiv, getRawDataDiv, getRenameDiv, getLoadFeederDiv, getBlankFeederDiv, getWindmilDiv, getGridlabdDiv, getCymdistDiv, getOpendssDiv, getAmiDiv, getAttachmentsDiv, getClimateDiv, getScadaDiv } from './modalFeatures.js';
+import { getLoadingModal, getAnonymizationDiv, getSaveDiv, getRawDataDiv, getRenameDiv, getLoadFeederDiv, getBlankFeederDiv, getWindmilDiv, getGridlabdDiv, getCymdistDiv, getOpendssDiv, getAmiDiv, getAttachmentsDiv, getClimateDiv, getScadaDiv, getColorDiv } from './modalFeatures.js';
 import { LeafletLayer } from './leafletLayer.js';
 import { Nav } from './nav.js';
 import { SearchModal } from './searchModal.js';
@@ -152,7 +152,11 @@ function createNav(controller) {
     }
     const header = document.getElementsByTagName('header')[0];
     const nav = new Nav();
-    nav.topNav.setHomepageName(`"${gThisFeederName}" from ${gThisModelName}`);
+    if (gIsOnline) {
+        nav.topNav.setHomepageName(`"${gThisFeederName}" from ${gThisModelName}`);
+    } else {
+        nav.topNav.setHomepageName('');
+    }
     header.prepend(nav.topNavNavElement); 
     const main = document.getElementsByTagName('main')[0];
     main.prepend(nav.sideNavArticleElement);
@@ -238,6 +242,7 @@ function createEditMenu(controller) {
         dropdownDiv.insertElement(getClimateDiv(controller));
         dropdownDiv.insertElement(getScadaDiv(controller));
     }
+    dropdownDiv.insertElement(getColorDiv(controller));
 }
 
 /**
@@ -271,5 +276,8 @@ function createFileMenu(controller) {
         modalInsert.replaceChildren(getLoadingModal().divElement);
     }
     document.getElementsByTagName('main')[0].appendChild(modalInsert);
+    const legendInsert = document.createElement('div');
+    legendInsert.id = 'legendInsert';
+    document.getElementsByTagName('main')[0].appendChild(legendInsert);
     setTimeout(() => main(), 1);
 })();

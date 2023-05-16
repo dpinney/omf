@@ -2,6 +2,11 @@
 /* IDs */
 /*******/
 
+#legendInsert {
+    bottom: 0px;
+    position: absolute;
+    right: 0px;
+}
 #modalInsert {
     align-items: center;
     background-color: rgba(0,0,0,0.4);
@@ -31,12 +36,10 @@
 .horizontalFlex {
     display: flex;
 }
-
 button.horizontalFlex {
     /* HACK: hard-code height for buttons in modals */
     min-height: 28.8px;
 }
-
 div.horizontalFlex { 
     min-height: var(--tableRowMinHeight);
 }

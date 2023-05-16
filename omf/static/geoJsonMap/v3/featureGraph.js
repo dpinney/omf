@@ -388,10 +388,10 @@ class FeatureGraph {
      */
     getKey(name, featureKey) {
         if (typeof name !== 'string') {
-            throw TypeError('"name" argument must be a string.');
+            throw TypeError('"name" argument must be typeof string.');
         }
         if (typeof featureKey !== 'string') {
-            throw TypeError('"feature" argument must be a string.');
+            throw TypeError('"feature" argument must be typeof string.');
         }
         const feature = this.getObservable(featureKey);
         const keys = this.#nameToKey[name];

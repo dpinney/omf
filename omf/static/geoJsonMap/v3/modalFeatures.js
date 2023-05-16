@@ -1,7 +1,8 @@
-export { getLoadingModal, getAnonymizationDiv, getSaveDiv, getRawDataDiv, getRenameDiv, getLoadFeederDiv, getBlankFeederDiv, getWindmilDiv, getGridlabdDiv, getCymdistDiv, getOpendssDiv, getAmiDiv, getAttachmentsDiv, getClimateDiv, getScadaDiv };
+export { getLoadingModal, getAnonymizationDiv, getSaveDiv, getRawDataDiv, getRenameDiv, getLoadFeederDiv, getBlankFeederDiv, getWindmilDiv, getGridlabdDiv, getCymdistDiv, getOpendssDiv, getAmiDiv, getAttachmentsDiv, getClimateDiv, getScadaDiv, getColorDiv };
 import { Feature } from  './feature.js';
 import { FeatureController } from './featureController.js';
 import { Modal } from './modal.js';
+import { ColorModal } from './colorModal.js';
 
 /*
  * @returns {Modal}
@@ -1635,48 +1636,25 @@ function getScadaDiv(controller) {
     return div; 
 }
 
-// - TODO: implement replacement function? I need to do components now
 /**
  * @param {FeatureController} controller - a ControllerInterface instance
  * @returns {HTMLDivElement}
  */
-//function _getStaticLoadsToHousesModal(controller) {
-//    if (!(controller instanceof FeatureController)) {
-//        throw TypeError('"controller" argument must be instanceof FeatureController.');
-//    }
-//    const modal = new Modal();
-//    modal.addStyleClass('outerModal',   'divElement');
-//    modal.addStyleClass('fitContent',   'divElement');
-//    const triplex_objects = featureGraph.getObservables(f => {
-//        return f.hasProperty('object') && (f.getProperty('object') === 'triplex_load' || f.getProperty('object') === 'triplex_node')
-//    });
-//    if (triplex_objects.length > 0) {
-//        modal.showProgress(true, 'Converting every triplex load and/or triplex node into a house with children. This could take a few seconds...');
-//        //
-//    } else {
-//        modal.showProgress(false, 'This data has no triplex load or triplex node objects that can be converted into houses.');
-//        //
-//    }
-//    return modal;
-//}
+function getColorDiv(controller) {
+    if (!(controller instanceof FeatureController)) {
+        throw TypeError('"controller" argument must be instanceof FeatureController.');
+    }
+    const colorModal = new ColorModal(controller);
+    const divElement = colorModal.getDOMElement();
+    const modalInsert = document.getElementById('modalInsert');
+    const div = _getMenuDiv('Color circuit...');
+    div.addEventListener('click', function() {
+        modalInsert.replaceChildren(divElement);
+        modalInsert.classList.add('visible');
+    });
+    return div;
+}
 
-/**
- * @param {FeatureController} controller - a ControllerInterface instance
- * @returns {HTMLDivElement}
- */
-//function getStaticLoadsToHousesDiv(controller) {
-//    if (!(controller instanceof FeatureController)) {
-//        throw TypeError('"controller" argument must be instanceof FeatureController.');
-//    }
-//    const modal = _getStaticLoadsToHousesModal(featureGraph);
-//    const modalInsert = document.getElementById('modalInsert');
-//    const div = _getMenuDiv('Static Loads to Houses');
-//    div.addEventListener('click', function() {
-//        modalInsert.replaceChildren(modal.divElement);
-//        modalInsert.classList.add('visible');
-//    });
-//    return div;
-//}
 
 /*********************************/
 /* Private convenience functions */
@@ -1687,10 +1665,7 @@ function _getSubmitButton(text='Submit') {
     let span = document.createElement('span');
     span.textContent = text;
     submitButton.appendChild(span);
-    submitButton.classList.add('horizontalFlex');        
-    submitButton.classList.add('centerMainAxisFlex');
-    submitButton.classList.add('centerCrossAxisFlex');
-    submitButton.classList.add('fullWidth');
+    submitButton.classList.add('horizontalFlex', 'centerMainAxisFlex', 'centerCrossAxisFlex', 'fullWidth');
     return submitButton;
 }
 
@@ -1699,10 +1674,7 @@ function _getSubmitDiv(button) {
         throw TypeError('"button" argument must be instanceof HTMLButtonElement.');
     }
     const submitDiv = document.createElement('div');
-    submitDiv.classList.add('horizontalFlex');
-    submitDiv.classList.add('centerMainAxisFlex');
-    submitDiv.classList.add('centerCrossAxisFlex');
-    submitDiv.classList.add('halfWidth');
+    submitDiv.classList.add('horizontalFlex', 'centerMainAxisFlex', 'centerCrossAxisFlex', 'halfWidth');
     submitDiv.appendChild(button);
     return submitDiv;
 }
