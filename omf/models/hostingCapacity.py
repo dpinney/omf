@@ -84,21 +84,16 @@ def work(modelDir, inputDict):
     # allOutputs = pd.concat( mohcaOutput )
     
     # post busSplitting
-    mohcaResults = mohcaOutput[0]
-    mohcaHistogramFigure = px.histogram( mohcaResults, x='kW_hostable', template="simple_white", color_discrete_sequence=["MediumPurple"] )
+    mohcaResults = mohcaOutput[0].rename(columns={'kW_hostable': 'voltage_cap_kW'})
+    mohcaHistogramFigure = px.histogram( mohcaResults, x='voltage_cap_kW', template="simple_white", color_discrete_sequence=["MediumPurple"] )
     mohcaHistogramFigure.update_layout(  bargap=0.5, title=dict(text="Mohca Hosting Capacity Distribution", font=dict(size=20) ) )
 
-    # this one will be the one like in David's example with 3 columns including thermal
-    # Random Test Data
-    data = {
-    "busname": ["bus701", "bus702", "bus703"],
-    "kW_hostable": [7.065640504881261, 9.196584140907243, 7.140704846404064],
-    "thermal_cap": [10.7260823958, 7.5427021611472, 7.5427021611472],
-    "max_cap_kW": [7.065640504881261, 7.5427021611472, 7.140704846404064]
-    }
-    testDF = pd.DataFrame(data)
-    # "data" as the first argument would get changed to mohcaResults with the updated data. This is just for testing
-    mohcaBarChartFigure = px.bar(testDF, x='busname', y=['kW_hostable', 'thermal_cap', 'max_cap_kW'], barmode='group', color_discrete_sequence=["green", "lightblue", "MediumPurple"], template="simple_white" ) 
+    barChartDF = mohcaResults
+    barChartDF['thermal_cap'] = [6, 7, 8, 6, 7, 8, 6, 7]
+    barChartDF['max_cap_kW'] = np.minimum( barChartDF['voltage_cap_kW'], barChartDF['thermal_cap'])
+    print(barChartDF)
+
+    mohcaBarChartFigure = px.bar(barChartDF, x='busname', y=['voltage_cap_kW', 'thermal_cap', 'max_cap_kW'], barmode='group', color_discrete_sequence=["green", "lightblue", "MediumPurple"], template="simple_white" ) 
     mohcaBarChartFigure.update_layout( title=dict(text="Hosting Capacity by Bus", font=dict(size=20) ) )
 
     # Line graph of the data
@@ -107,7 +102,6 @@ def work(modelDir, inputDict):
 
     # traditional hosting capacity
     # ATM 2 issues
-
     # - don't know what inputs to put in for the traditional hosting capacity function
     # - output different than what we are looking for ( not sure what to do with second output ATM )
     test_dss_file = pJoin(omf.omfDir, 'static', 'hostingcapacityfiles', 'ieee37_LBL.dss')
@@ -145,7 +139,7 @@ def work(modelDir, inputDict):
     outData['mohcaHistogramFigure'] = json.dumps( mohcaHistogramFigure, cls=py.utils.PlotlyJSONEncoder )
     outData['mohcaBarChartFigure'] = json.dumps( mohcaBarChartFigure, cls=py.utils.PlotlyJSONEncoder )
     outData['mohcaHCTableHeadings'] = mohcaResults.columns.values.tolist()
-    outData['mohcaHCTableValues'] = ( list(mohcaResults.sort_values( by="kW_hostable", ascending=False, ignore_index=True ).itertuples(index=False, name=None)) )
+    outData['mohcaHCTableValues'] = ( list(mohcaResults.sort_values( by="voltage_cap_kW", ascending=False, ignore_index=True ).itertuples(index=False, name=None)) ) #NOTE: kW_hostable
     outData['traditionalGraphData'] = json.dumps( traditionalHCFigure, cls=py.utils.PlotlyJSONEncoder )
     outData['traditionalHCTableHeadings'] = traditionalHCResults[0].columns.values.tolist()
     outData['traditionalHCTableValues'] = ( list( traditionalHCResults[0].itertuples(index=False, name=None)))
