@@ -1,30 +1,119 @@
 export { ColorModal };
+import { Feature, UnsupportedOperationError } from './feature.js';
 import { FeatureController } from './featureController.js';
 import { LeafletLayer } from './leafletLayer.js';
 import { Modal } from './modal.js';
 
 // - Use voltDumpOlinBarre.csv and Olin Barre Fault.omd as examples
 
-class ColorModal { // implements ModalInterface
+class ColorModal { // implements ModalInterface, ObserverInterface
 
-    #colorFiles;    // - Array of ColorFiles
+    #colorFiles;    // - Object of ColorFiles
     #controller;    // - ControllerInterface instance
     #modal;         // - Modal instance
-    #removed;       // - Whether this FeatureEditModal instance has already been deleted
+    #observables;   // - An array of ObservableInterface instances
+    #removed;       // - Whether this ColorModal instance has already been deleted
 
     /**
+     * @param {Array} observables - an array of ObservableInterface instances
      * @param {FeatureController} controller - a ControllerInterface instance
      * @returns {undefined}
      */
-    constructor(controller) {
+    constructor(observables, controller) {
+        if (!(observables instanceof Array)) {
+            throw TypeError('"observables" argumnet must be an Array.');
+        }
         if (!(controller instanceof FeatureController)) {
             throw Error('"controller" argument must be instanceof FeatureController');
         }
-        this.#colorFiles = [];
+        this.#colorFiles = null;
         this.#controller = controller;
         this.#modal = null;
+        this.#observables = observables;
+        this.#observables.forEach(ob => ob.registerObserver(this));
         this.#removed = false;
         this.renderContent();
+        this.refreshContent();
+    }
+
+    // *******************************
+    // ** ObserverInterface methods **
+    // *******************************
+
+    /**
+     * - Remove this ObserverInterface instance (i.e. "this") from the ObservableInterface instance (i.e. "observable") that has been deleted, and
+     *   perform other actions as needed
+     * @param {Feature} observable - an ObservableInterface instance
+     * @returns {undefined}
+     */
+    handleDeletedObservable(observable) {
+        // - The function signature above is part of the ObserverInterface API. The implementation below is not
+        if (!(observable instanceof Feature)) {
+            throw TypeError('"observable" argument must be instanceof Feature.');
+        }
+        if (!this.#removed) {
+            observable.removeObserver(this);
+            const index = this.#observables.indexOf(observable);
+            if (index > -1) {
+                this.#observables.splice(index, 1);
+            } else {
+                throw Error('The observable was not found in this.#observables.');
+            }
+            if (this.#observables.length === 0) {
+                this.remove();
+            } else {
+                this.refreshContent();
+            }
+        }
+    }
+
+    /**
+     *
+     */
+    handleNewObservable(observable) {
+        // - The function signature above is part of the ObserverInterface API. The implementation below is not
+        throw new UnsupportedOperationError();
+    }
+
+    /**
+     * - Update this ObserverInterface instance (i.e. "this") based on the coordinates of the ObservableInterface instance (i.e. "observable") that
+     *   have just changed and perform other actions as needed
+     * @param {Feature} observable - an ObservableInterface instance
+     * @param {Array} oldCoordinates - the old coordinates of the observable prior to the change in coordinates
+     * @returns {undefined}
+     */
+    handleUpdatedCoordinates(observable, oldCoordinates) {
+        // - The function signature above is part of the ObserverInterface API. The implementation below is not
+        if (!(observable instanceof Feature)) {
+            throw TypeError('"observable" argument must be instanceof Feature.');
+        }
+        if (!(oldCoordinates instanceof Array)) {
+            throw TypeError('"oldCoordinates" argument must be an array.');
+        }
+        this.refreshContent();
+    }
+
+    /**
+     * - Update this ObserverInstance (i.e. "this") based on the property of the ObservableInterface instance (i.e. "observable") that has just
+     *   changed and perform other actions as needed
+     * @param {Feature} observable - an ObservableInterface instance
+     * @param {string} propertyKey - the property key of the property that has been created/changed/deleted in the observable
+     * @param {(string|Object)} oldPropertyValue - the previous value of the property that has been created/changed/deleted in the observable
+     * @param {string} namespace - the namespace of the property that has been created/changed/deleted in the observable
+     * @returns {undefined}
+     */
+    handleUpdatedProperty(observable, propertyKey, oldPropertyValue, namespace='treeProps') {
+        // - The function signature above is part of the ObserverInterface API. The implementation below is not
+        if (!(observable instanceof Feature)) {
+            throw TypeError('"observable" argument must be instanceof Feature.');
+        }
+        if (typeof propertyKey !== 'string') {
+            throw TypeError('"propertyKey" argument must be a string.');
+        }
+        if (typeof namespace !== 'string') {
+            throw TypeError('"namespace" argument must be a string.');
+        }
+        this.refreshContent();
     }
 
     // ****************************
@@ -42,34 +131,28 @@ class ColorModal { // implements ModalInterface
         return this.#removed;
     }
 
-    // - I don't want to set the class of the svg elements here. I couldn't possibly create a class for every possible color of the Viridis spectrum.
-    //   Instead, I need to set "fill" and related properties on the path object inside of the svg object
-
     /**
      * @returns {undefined}
      */
     refreshContent() {
+        this.#createColorFilesFromAttachments();
         const fileListModal = new Modal();
         const that = this;
-        this.#colorFiles.forEach(cf => {
+        Object.values(this.#colorFiles).forEach(colorFile => {
             const select = document.createElement('select');
-            const colorMaps = cf.getColorMaps();
+            const colorMaps = colorFile.getColorMaps();
             for (const [idx, cm] of Object.entries(colorMaps)) {
                 const option = document.createElement('option');
-                option.text = `${cm.getTitle()} (column ${idx})`;
+                option.text = `${cm.getColumnName()} (column ${idx})`;
                 option.value = idx;
                 select.add(option);
             }
-            //const buttonDiv = document.createElement('div');
-            //buttonDiv.style.display = 'inline-block';
-            //buttonDiv.classList.add('horizontalFlex', 'centerMainAxisFlex', 'centerCrossAxisFlex', 'halfWidth');
-            const button = document.createElement('button');
-            button.classList.add('horizontalFlex', 'centerMainAxisFlex', 'centerCrossAxisFlex', 'fullWidth');
-            const span = document.createElement('span');
+            const colorButton = document.createElement('button');
+            colorButton.classList.add('horizontalFlex', 'centerMainAxisFlex', 'centerCrossAxisFlex', 'fullWidth');
+            let span = document.createElement('span');
             span.textContent = 'Color';
-            button.appendChild(span);
-            //buttonDiv.appendChild(button);
-            button.addEventListener('click', function() {
+            colorButton.appendChild(span);
+            colorButton.addEventListener('click', function() {
                 const notFound = [];
                 const colorMap = colorMaps[select.value];
                 // - Color svgs
@@ -85,11 +168,26 @@ class ColorModal { // implements ModalInterface
                         notFound.push(name);
                     }
                 }
-                console.log(`The following names did not match any visible object in the circuit: ${notFound}`);
+                console.log(`The following names in the CSV did not match any visible object in the circuit: ${notFound}`);
                 // - Display legend
-                colorMap.displayLegend(cf.getTitle());
+                colorMap.displayLegend(colorFile.getFilename());
             });
-            fileListModal.insertTBodyRow([cf.getTitle(), select, button])
+            const removeButton = document.createElement('button');
+            removeButton.classList.add('horizontalFlex', 'centerMainAxisFlex', 'centerCrossAxisFlex', 'fullWidth', 'delete');
+            span = document.createElement('span');
+            span.textContent = 'Remove';
+            removeButton.appendChild(span);
+            removeButton.addEventListener('click', function() {
+                const attachments = that.#controller.observableGraph.getObservable('omd').getProperty('attachments', 'meta');
+                if (attachments.hasOwnProperty('coloringFiles')) {
+                    delete attachments.coloringFiles[colorFile.getFilename()];
+                    that.refreshContent();
+                    if (Object.keys(attachments.coloringFiles).length === 0) {
+                        delete attachments.coloringFiles;
+                    }
+                }
+            });
+            fileListModal.insertTBodyRow([colorFile.getFilename(), select, colorButton, removeButton])
         });
         const containerElement = this.#modal.divElement.getElementsByClassName('div--modalElementContainer')[0];
         const oldModal = containerElement.getElementsByClassName('js-div--modal');
@@ -105,6 +203,8 @@ class ColorModal { // implements ModalInterface
      */
     remove() {
         if (!this.#removed) {
+            this.#observables.forEach(ob => ob.removeObserver(this));
+            this.#observables = null;
             this.#modal.divElement.remove();
             this.#removed = true;
         }
@@ -125,8 +225,23 @@ class ColorModal { // implements ModalInterface
         colorInput.required = true;
         colorInput.id = 'colorInput';
         const that = this;
-        colorInput.addEventListener('change', function() {
-            that.#createColorFiles(this.files);
+        colorInput.addEventListener('change', async function() {
+            const file = this.files[0];
+            const results = await that.#parseCsv(file);
+            if (results.errors.length > 0) {
+                // - Papa Parse did parse the file, but there was some kind of small problem. Make the user fix it
+                that.#modal.showProgress(false, `There was an error "${results.errors[0].message}" when parsing the CSV file "${file.name}". Please double-check the CSV formatting.`, ['caution']);
+                return;
+            } else {
+                that.#modal.setBanner('', ['hidden']);
+            }
+            const csvString = Papa.unparse(results.data)
+            const attachments = that.#controller.observableGraph.getObservable('omd').getProperty('attachments', 'meta');
+            if (!attachments.hasOwnProperty('coloringFiles')) {
+                attachments.coloringFiles = {};
+            }
+            attachments.coloringFiles[file.name] = csvString;
+            that.refreshContent();
         });
         const colorLabel = document.createElement('label');
         colorLabel.htmlFor = 'colorInput';
@@ -180,25 +295,57 @@ class ColorModal { // implements ModalInterface
     }
 
     /**
-     * @param {FileList} files - the CSV file(s) to be used to color the graph
+     * @param {File} file
+     * @returns {string}
      */
-    async #createColorFiles(files) {
-        if (!(files instanceof FileList)) {
-            throw TypeError('"files" argument must be instanceof FileList.');
+    #parseCsv(file) {
+        if (!(file instanceof File)) {
+            throw TypeError('"file" argument must be instanceof File.');
         }
-        for (const f of [...files]) {
-            try {
-                const cf = new ColorFile();
-                await cf.buildColorMaps(f);
-                this.#colorFiles.push(cf);
-                this.refreshContent();
-                this.#modal.setBanner('');
-            } catch (e) {
-                this.#modal.showProgress(false, `The CSV file "${f.name}" could not be parsed. Please double-check the CSV formatting.`, ['caution']);
-            }
-        };
+        return new Promise(function(resolve, reject) {
+            Papa.parse(file, {
+                dynamicTyping: true,
+                complete: function(results, file) {
+                    resolve(results);
+                },
+                error: function(error, file) {
+                    reject(error.message);
+                }
+            });
+        });
     }
 
+
+    /**
+     * - Iterate through the strings in the attachments and create a ColorFile instance for each string
+     * @returns {undefined}
+     */
+    #createColorFilesFromAttachments() {
+        const attachments = this.#controller.observableGraph.getObservable('omd').getProperty('attachments', 'meta');
+        this.#colorFiles = {};
+        if (attachments.hasOwnProperty('coloringFiles')) {
+            for (const [filename, text] of Object.entries(attachments.coloringFiles)) {
+                // - Create a ColorFile as a container for one or more ColorMaps
+                const colorFile = new ColorFile(filename);
+                // - Fill the ColorFile with actual data
+                try {
+                    colorFile.createColorMaps(text);
+                    this.#modal.setBanner('', ['hidden']);
+                } catch (e) {
+                    // - Papa Parse did parse the file and didn't find any errors, but I still couldn't create a good ColorFile object, so tell the
+                    //   user to remove or fix the file
+                    this.#modal.showProgress(false, `The CSV "${filename}" was parsed, but there was an error "${e.message }" when converting the CSV values into colors. Please double-check the CSV content.`, ['caution']);
+                }
+                // - Don't save the ColorFile in any property of the ColorModal, just use a local array. Actually, do save the ColorFiles directly on
+                //   the ColorModal because then I can just use refreshContent() directly.
+                this.#colorFiles[filename] = colorFile;
+            }
+        }
+    }
+
+    /**
+     * @returns {undefined}
+     */
     #resetColors() {
         this.#controller.observableGraph.getObservables().forEach(observable => {
             observable.getObservers().filter(ob => ob instanceof LeafletLayer).forEach(ll => {
@@ -216,71 +363,70 @@ class ColorModal { // implements ModalInterface
 class ColorFile {
 
     #colorMaps;
-    #title;
+    #filename;
 
-    constructor() {
-        this.#title = null;
+    /**
+     * @param {string} filename - the filename of the CSV
+     */
+    constructor(filename) {
+        if (typeof filename !== 'string') {
+            throw TypeError('"filename" argument must be typeof string.');
+        }
         this.#colorMaps = {};   // - While columns in a CSV can have duplicate headings, they must have unique indexes
+        this.#filename = filename;
     }
 
     /**
-     * - I can't use Promises in a constructor, so this function must be called after the constructor
+     * @param {string} text - the text content of the CSV as a string
      * @returns {undefined}
      */
-    buildColorMaps(file) {
-        if (!(file instanceof File)) {
-            throw TypeError('"file" argumnet must be instanceof File.');
+    createColorMaps(text) {
+        if (typeof text !== 'string') {
+            throw TypeError('"text" argument must be typeof string.');
         }
-        this.#title = file.name;
-        const that = this;
-        return new Promise(function(resolve, reject) {
-            Papa.parse(file, {
-                dynamicTyping: true,
-                complete: function(results, file) {
-                    try {
-                        const headerRow = results.data[0];
-                        // - i = 1 because the first column contains names, not numeric values
-                        for (let i = 1; i < headerRow.length; i++) {
-                            const cm = new ColorMap(headerRow[i].toString());
-                            that.#colorMaps[i] = cm;
-                        }
-                        for (let i = 1; i < results.data.length; i++) {
-                            const row = results.data[i];
-                            for (let j = 1; j < row.length; j++) {
-                                that.#colorMaps[j].mapNameToValue(row[0].toString(), {color: null, float: row[j]});
-                            }
-                        }
-                        Object.values(that.#colorMaps).forEach(cm => cm.generateColorsFromFloats());
-                        resolve();
-                    } catch (e) {
-                        reject();
-                    }
-                }
-            });
-        });
+        const results = Papa.parse(text, {dynamicTyping: true});
+        const headerRow = results.data[0];
+        // - i = 1 because the first column contains names, not numeric values
+        for (let i = 1; i < headerRow.length; i++) {
+            const cm = new ColorMap(headerRow[i].toString());
+            this.#colorMaps[i] = cm;
+        }
+        for (let i = 1; i < results.data.length; i++) {
+            const row = results.data[i];
+            for (let j = 1; j < row.length; j++) {
+                this.#colorMaps[j].mapNameToValue(row[0].toString(), {color: null, float: row[j]});
+            }
+        }
+        Object.values(this.#colorMaps).forEach(cm => cm.generateColorsFromFloats());
     }
 
+    /**
+     * @returns {Object}
+     */
     getColorMaps() {
         return this.#colorMaps;
     }
 
-    getTitle() {
-        return this.#title;
+    /**
+     * @returns {string}
+     */
+    getFilename() {
+        return this.#filename;
     }
 }
 
 class ColorMap {
 
+    #columnName;
     #nameToValue;
-    #title;
     static viridisColors = ['#440154', '#482173', '#433e85', '#38588c', '#2d708e', '#25858e', '#1e9b8a', '#2ab07f', '#52c569', '#86d549', '#c2df23', '#fde725'];
 
-    constructor(title) {
-        this.#nameToValue = {};
-        if (typeof title !== 'string') {
-            throw TypeError('"title" argument must be typeof string.');
+    constructor(columnName) {
+        if (typeof columnName !== 'string') {
+            throw TypeError('"columnName" argument must be typeof string.');
         }
-        this.#title = title;
+        this.#columnName = columnName;
+        this.#nameToValue = {};
     }
 
     // ********************
@@ -288,11 +434,11 @@ class ColorMap {
     // ********************
 
     /**
-     *
+     * @param {string} filename
      */
-    displayLegend(fileName) {
-        if (typeof fileName !== 'string') {
-            throw TypeError('"fileName" argument must be typeof string.');
+    displayLegend(filename) {
+        if (typeof filename !== 'string') {
+            throw TypeError('"filename" argument must be typeof string.');
         }
         const modal = new Modal();
         modal.divElement.style.width = '300px';
@@ -300,13 +446,13 @@ class ColorMap {
         const fileColumnDiv = document.createElement('div');
         fileColumnDiv.style.textAlign = 'center';
         fileColumnDiv.style.wordBreak = 'break-word';
-        const fileNameHeading = document.createElement('h2');
-        fileNameHeading.style.width = '100%';
-        fileNameHeading.textContent = fileName;
-        fileColumnDiv.appendChild(fileNameHeading);
+        const filenameHeading = document.createElement('h2');
+        filenameHeading.style.width = '100%';
+        filenameHeading.textContent = filename;
+        fileColumnDiv.appendChild(filenameHeading);
         const columnNameHeading = document.createElement('h3');
         columnNameHeading.style.width = '100%';
-        columnNameHeading.textContent = this.#title;
+        columnNameHeading.textContent = this.#columnName;
         fileColumnDiv.appendChild(columnNameHeading);
         modal.setTitle(fileColumnDiv);
         // - Create color gradient
@@ -375,8 +521,8 @@ class ColorMap {
         return this.#nameToValue;
     }
 
-    getTitle() {
-        return this.#title;
+    getColumnName() {
+        return this.#columnName;
     }
 
     /**

@@ -167,6 +167,9 @@ div.div--modalBanner {
 div.div--modalBanner.caution {
     background-color: hsla(50, 100%, 70%, 1);
 }
+div.div--modalBanner.hidden {
+    display: none;
+}
 div.div--modalTitle span {
     font-size: 32px;
     font-weight: bold;

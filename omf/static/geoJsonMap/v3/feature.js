@@ -402,6 +402,7 @@ class Feature {
     }
 
     /**
+     * - This should really be called "notifyObserversOfChangedProperty"
      * @param {string} propertyKey - the property key of the property that is being created/changed/deleted in this ObservableInterface instance
      * @param {(string|Object)} oldPropertyValue - the previous property value of the property that was created/changed/deleted in this observable. I
      *  don't like to store Objects, Arrays, etc. as property values, but it's required for certain observables like those that represent form objects
@@ -411,6 +412,12 @@ class Feature {
      */
     updatePropertyOfObservers(propertyKey, oldPropertyValue, namespace='treeProps') {
         // - The function signature above is part of the ObservableInterface API. The implementation below is not
+        if (typeof propertyKey !== 'string') {
+            throw TypeError('"propertyKey" argument must be typeof string.');
+        }
+        if (typeof namespace !== 'string') {
+            throw TypeError('"namespace" argument must be typeof string.');
+        }
         this.#observers.forEach(ob => ob.handleUpdatedProperty(this, propertyKey, oldPropertyValue, namespace));
         if (this.#graph instanceof FeatureGraph) {
             this.#graph.handleUpdatedProperty(this, propertyKey, oldPropertyValue, namespace);

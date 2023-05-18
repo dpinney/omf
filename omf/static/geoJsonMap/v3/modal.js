@@ -51,11 +51,9 @@ class Modal {
             throw TypeError('"styles" argumet must be an array or null.');
         }
         if (styles !== null) {
-            this.#bannerElement.classList.add(...styles);
+            this.#bannerElement.classList.value = `div--modalBanner ${styles.join(' ')}`;
         } else {
-            // - "styles" was null, so styles besides "div--modalBanner" should be removed
             this.#bannerElement.classList.value = 'div--modalBanner';
-            //this.#bannerElement.classList.remove('caution');
         }
     }
 

@@ -1316,41 +1316,96 @@ function getAmiDiv(controller) {
 }
 
 /**
- * @param {Feature} observable
  * @param {FeatureController} controller - a ControllerInterface instance
  * @returns {Modal}
  */
-function _getAttachmentsModal(observable, controller) {
-    if (!(observable instanceof Feature)) {
-        throw TypeError('"observable" argument must be instanceof Feature.');
-    }
+function _getAttachmentsModal(controller) {
     if (!(controller instanceof FeatureController)) {
         throw TypeError('"controller" argument must be instanceof FeatureController.');
     }
-    // - Modal
     const mainModal = new Modal();
     mainModal.addStyleClasses(['outerModal'], 'divElement');
     mainModal.setTitle('Attachments');
     mainModal.addStyleClasses(['horizontalFlex', 'centerMainAxisFlex', 'centerCrossAxisFlex'], 'titleElement');
-    const attachments = observable.getProperty('attachments', 'meta');
+    const omdFeature = controller.observableGraph.getObservable('omd');
+    const attachments = omdFeature.getProperty('attachments', 'meta');
     for (const [key, val] of Object.entries(attachments)) {
-        const modal = new Modal();
-        const attachmentTitleDiv = _getHorizontalFlexDiv();
-        attachmentTitleDiv.classList.add('centerCrossAxisFlex');
-        const span = document.createElement('span');
-        span.textContent = key;
-        attachmentTitleDiv.appendChild(span);
-        modal.insertElement(attachmentTitleDiv);
-        modal.addStyleClasses(['horizontalFlex', 'centerCrossAxisFlex'], 'titleElement');
-        const textArea = document.createElement('textarea');
-        textArea.value = val;
-        textArea.addEventListener('change', function() {
-            attachments[key] = textArea.value;
-        });
-        modal.insertElement(textArea);
-        mainModal.insertElement(modal.divElement);
+        if (typeof val === 'string') {
+            const modal = _getTextAreaModal(key, val, attachments, omdFeature);
+            mainModal.insertElement(modal.divElement);
+        } else if (typeof val === 'object') {
+            const nestedObjects = _getNestedObjects(attachments);
+            nestedObjects.forEach(obj => {
+                if (obj.namespace === 'coloringFiles') {
+                    for (const [filename, csvText] of Object.entries(obj.object)) {
+                        const modal2 = _getTextAreaModal(filename, csvText, obj.object, omdFeature);
+                        mainModal.insertElement(modal2.divElement);
+                    }
+                }
+            });
+        }
     }
     return mainModal;
+}
+
+/**
+ * @param {Object} obj - the object that contains nested objects that I want to be able to access and modify
+ * @param {string} [namespace=''] - a string that indicates where in the top-level object the nested object exists
+ * @returns {Array} an array of actual objects in the top-level object
+ */
+function _getNestedObjects(obj, namespace='') {
+    const objects = [];
+    for (const [k, v] of Object.entries(obj)) {
+        // - I don't care if nulls and arrays are returned. Maybe I'll care about them eventually
+        if (typeof v === 'object') {
+            if (namespace !== '') {
+                namespace = `${namespace}.${k}`;
+            } else {
+                namespace = k;
+            }
+            objects.push({
+                namespace: namespace,
+                object: v
+            });
+            objects.push(..._getNestedObjects(v, k));
+        }
+    }
+    return objects;
+}
+
+/**
+ * @param {string} title
+ * @param {string} text
+ * @param {Object} object - the object that contains the key and value that created the text area
+ * @param {Feature} feature - the Feature that will have updatePropertyOfObservers() called on it (i.e. the "omd" feature)
+ * @returns {Modal}
+ */
+function _getTextAreaModal(title, text, object, feature) {
+    if (typeof title !== 'string') {
+        throw TypeError('"title" argument must be typeof string.');
+    }
+    if (typeof text !== 'string') {
+        throw TypeError('"text" argument must be typeof string.');
+    }
+    if (typeof object !== 'object') {
+        throw TypeError('"object" argument must be typeof object.');
+    }
+    const modal = new Modal();
+    const attachmentTitleDiv = _getHorizontalFlexDiv();
+    attachmentTitleDiv.classList.add('centerCrossAxisFlex');
+    const span = document.createElement('span');
+    span.textContent = title;
+    attachmentTitleDiv.appendChild(span);
+    modal.insertElement(attachmentTitleDiv);
+    modal.addStyleClasses(['horizontalFlex', 'centerCrossAxisFlex'], 'titleElement');
+    const textArea = document.createElement('textarea');
+    textArea.value = text;
+    textArea.addEventListener('change', function() {
+        object[title] = textArea.value;
+        feature.updatePropertyOfObservers('', '', '');
+    });
+    modal.insertElement(textArea);
+    return modal;
 }
 
 /**
@@ -1361,10 +1416,10 @@ function getAttachmentsDiv(controller) {
     if (!(controller instanceof FeatureController)) {
         throw TypeError('"controller" argument must be instanceof FeatureController.');
     }
-    const modal = _getAttachmentsModal(controller.observableGraph.getObservable('omd'), controller);
     const modalInsert = document.getElementById('modalInsert');
     const div = _getMenuDiv('Attachments...');
     div.addEventListener('click', function() {
+        const modal = _getAttachmentsModal(controller);
         modalInsert.replaceChildren(modal.divElement);
         modalInsert.classList.add('visible');
     });
@@ -1644,7 +1699,7 @@ function getColorDiv(controller) {
     if (!(controller instanceof FeatureController)) {
         throw TypeError('"controller" argument must be instanceof FeatureController.');
     }
-    const colorModal = new ColorModal(controller);
+    const colorModal = new ColorModal([controller.observableGraph.getObservable('omd')], controller);
     const divElement = colorModal.getDOMElement();
     const modalInsert = document.getElementById('modalInsert');
     const div = _getMenuDiv('Color circuit...');
