@@ -4,7 +4,7 @@ import { FeatureController } from './featureController.js';
 import { LeafletLayer } from './leafletLayer.js';
 import { Modal } from './modal.js';
 
-// - Use voltDumpOlinBarre.csv and Olin Barre Fault.omd as examples
+// - Use voltDumpOlinBarre.csv, currDumpOlinBarre.csv and Olin Barre Fault.omd as examples
 
 class ColorModal { // implements ModalInterface, ObserverInterface
 
@@ -24,7 +24,7 @@ class ColorModal { // implements ModalInterface, ObserverInterface
             throw TypeError('"observables" argumnet must be an Array.');
         }
         if (!(controller instanceof FeatureController)) {
-            throw Error('"controller" argument must be instanceof FeatureController');
+            throw Error('"controller" argument must be instanceof FeatureController.');
         }
         this.#colorFiles = null;
         this.#controller = controller;
@@ -135,59 +135,85 @@ class ColorModal { // implements ModalInterface, ObserverInterface
      * @returns {undefined}
      */
     refreshContent() {
-        this.#createColorFilesFromAttachments();
         const fileListModal = new Modal();
+        fileListModal.addStyleClasses(['colorModal'], 'divElement');
+        if (Object.values(this.#colorFiles).length > 0) {
+            fileListModal.insertTHeadRow(['Filename', 'Color-by Column', 'Apply Column Color on Page Load' ]);
+            fileListModal.addStyleClasses(['centeredTable'], 'tableElement');
+        }
         const that = this;
+        const attachments = this.#controller.observableGraph.getObservable('omd').getProperty('attachments', 'meta');
         Object.values(this.#colorFiles).forEach(colorFile => {
             const select = document.createElement('select');
-            const colorMaps = colorFile.getColorMaps();
-            for (const [idx, cm] of Object.entries(colorMaps)) {
+            for (const [idx, cm] of Object.entries(colorFile.getColorMaps())) {
                 const option = document.createElement('option');
                 option.text = `${cm.getColumnName()} (column ${idx})`;
                 option.value = idx;
                 select.add(option);
             }
+            const checkbox = document.createElement('input');
+            checkbox.type = 'checkbox';
+            checkbox.name = 'colorOnLoadColumnIndex';
+            select.addEventListener('change', function() {
+                // - Get the checkbox and check or uncheck it depending on colorOnLoad
+                if (this.value === attachments.coloringFiles[colorFile.getFilename()].colorOnLoadColumnIndex) {
+                    checkbox.checked = true;
+                } else {
+                    checkbox.checked = false;
+                }
+            });
+            // - Set the select option to the equivalent colorOnLoad column, if there was one
+            if (attachments.coloringFiles[colorFile.getFilename()].colorOnLoadColumnIndex !== null) {
+                for (const op of select.options) {
+                    if (op.value === attachments.coloringFiles[colorFile.getFilename()].colorOnLoadColumnIndex) {
+                        select.selectedIndex = op.index;
+                        checkbox.checked = true;
+                    }
+                }
+            }
+            checkbox.addEventListener('change', function() {
+                for (const [filename, obj] of Object.entries(attachments.coloringFiles)) {
+                    if (filename === colorFile.getFilename()) {
+                        if (this.checked) {
+                            obj.colorOnLoadColumnIndex = select.value;
+                        } else {
+                            obj.colorOnLoadColumnIndex = null;
+                        }
+                    } else {
+                        if (this.checked) {
+                            obj.colorOnLoadColumnIndex = null;
+                            for (const input of [...fileListModal.divElement.querySelectorAll('input[type="checkbox"][name="colorOnLoadColumnIndex"]')]) {
+                                if (input !== this) {
+                                    input.checked = false;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
             const colorButton = document.createElement('button');
             colorButton.classList.add('horizontalFlex', 'centerMainAxisFlex', 'centerCrossAxisFlex', 'fullWidth');
             let span = document.createElement('span');
             span.textContent = 'Color';
             colorButton.appendChild(span);
-            colorButton.addEventListener('click', function() {
-                const notFound = [];
-                const colorMap = colorMaps[select.value];
-                // - Color svgs
-                for (const [name, obj] of Object.entries(colorMap.getColorMapping())) {
-                    try {
-                        const key = that.#controller.observableGraph.getKeyForComponent(name);
-                        const observable = that.#controller.observableGraph.getObservable(key);
-                        observable.getObservers().filter(ob => ob instanceof LeafletLayer).forEach(ll => {
-                            const svg = Object.values(ll.getLayer()._layers)[0]._icon.children[0];
-                            that.#colorSvg(svg, obj.color);
-                        });
-                    } catch (e) {
-                        notFound.push(name);
-                    }
-                }
-                console.log(`The following names in the CSV did not match any visible object in the circuit: ${notFound}`);
-                // - Display legend
-                colorMap.displayLegend(colorFile.getFilename());
-            });
+            colorButton.addEventListener('click', () => this.#applyColorMap(colorFile, colorFile.getColorMaps()[select.value]));
             const removeButton = document.createElement('button');
             removeButton.classList.add('horizontalFlex', 'centerMainAxisFlex', 'centerCrossAxisFlex', 'fullWidth', 'delete');
             span = document.createElement('span');
             span.textContent = 'Remove';
             removeButton.appendChild(span);
             removeButton.addEventListener('click', function() {
-                const attachments = that.#controller.observableGraph.getObservable('omd').getProperty('attachments', 'meta');
                 if (attachments.hasOwnProperty('coloringFiles')) {
-                    delete attachments.coloringFiles[colorFile.getFilename()];
+                    const filename = colorFile.getFilename();
+                    delete attachments.coloringFiles[filename];
+                    delete that.#colorFiles[filename];
                     that.refreshContent();
                     if (Object.keys(attachments.coloringFiles).length === 0) {
                         delete attachments.coloringFiles;
                     }
                 }
             });
-            fileListModal.insertTBodyRow([colorFile.getFilename(), select, colorButton, removeButton])
+            fileListModal.insertTBodyRow([colorFile.getFilename(), select, checkbox, colorButton, removeButton])
         });
         const containerElement = this.#modal.divElement.getElementsByClassName('div--modalElementContainer')[0];
         const oldModal = containerElement.getElementsByClassName('js-div--modal');
@@ -215,6 +241,7 @@ class ColorModal { // implements ModalInterface, ObserverInterface
      * @returns {undefined}
      */
     renderContent() {
+        // - Build the modal
         const modal = new Modal();
         modal.addStyleClasses(['outerModal', 'fitContent'], 'divElement');
         modal.setTitle('Color Circuit');
@@ -235,19 +262,22 @@ class ColorModal { // implements ModalInterface, ObserverInterface
             } else {
                 that.#modal.setBanner('', ['hidden']);
             }
-            const csvString = Papa.unparse(results.data)
-            const attachments = that.#controller.observableGraph.getObservable('omd').getProperty('attachments', 'meta');
+            const csvString = Papa.unparse(results.data);
             if (!attachments.hasOwnProperty('coloringFiles')) {
                 attachments.coloringFiles = {};
             }
-            attachments.coloringFiles[file.name] = csvString;
+            attachments.coloringFiles[file.name] = {
+                csv: csvString,
+                // - colorOnLoad should specify a column index if the interface should color on load by a column, otherwise it should specify null
+                colorOnLoadColumnIndex: null,
+            }
+            that.#createColorFilesFromAttachments();
             that.refreshContent();
         });
         const colorLabel = document.createElement('label');
         colorLabel.htmlFor = 'colorInput';
-        colorLabel.innerHTML = 'File(s) containing bus names and electrical readings (.csv)';
+        colorLabel.innerHTML = 'Add a file containing bus names and electrical readings (.csv)';
         modal.insertTBodyRow([colorLabel, colorInput]);
-        //modal.addStyleClasses(['centeredTable'], 'tableElement');
         const resetButton = document.createElement('button');
         let span = document.createElement('span');
         span.textContent = 'Reset Colors';
@@ -266,6 +296,18 @@ class ColorModal { // implements ModalInterface, ObserverInterface
             this.#modal.divElement.replaceWith(modal.divElement);
             this.#modal = modal;
         }
+        // - Apply any colorOnLoad colorings
+        this.#createColorFilesFromAttachments();
+        const attachments = that.#controller.observableGraph.getObservable('omd').getProperty('attachments', 'meta');
+        if (attachments.hasOwnProperty('coloringFiles')) {
+            for (const [filename, obj] of Object.entries(attachments.coloringFiles)) {
+                if (obj.colorOnLoadColumnIndex !== null) {
+                    const colorFile = this.#colorFiles[filename];
+                    const colorMap = colorFile.getColorMaps()[obj.colorOnLoadColumnIndex];
+                    this.#applyColorMap(colorFile, colorMap);
+                }
+            }
+        }
     }
 
     // ********************
@@ -275,6 +317,36 @@ class ColorModal { // implements ModalInterface, ObserverInterface
     // *********************
     // ** Private methods **
     // *********************
+
+    /**
+     * @param {ColorFile} colorFile
+     * @param {ColorMap} colorMap
+     * @returns {undefined}
+     */
+    #applyColorMap(colorFile, colorMap) {
+        if (!(colorFile instanceof ColorFile)) {
+            throw TypeError('"colorFile" must be instanceof ColorFile.');
+        }
+        if (!(colorMap instanceof ColorMap)) {
+            throw TypeError('"colorMap" must be instanceof ColorMap.');
+        }
+        const notFound = [];
+        for (const [name, obj] of Object.entries(colorMap.getColorMapping())) {
+            try {
+                const key = this.#controller.observableGraph.getKeyForComponent(name);
+                const observable = this.#controller.observableGraph.getObservable(key);
+                observable.getObservers().filter(ob => ob instanceof LeafletLayer).forEach(ll => {
+                    const svg = Object.values(ll.getLayer()._layers)[0]._icon.children[0];
+                    this.#colorSvg(svg, obj.color);
+                });
+            } catch (e) {
+                notFound.push(name);
+            }
+        }
+        console.log(`The following names in the CSV did not match any visible object in the circuit: ${notFound}`);
+        // - Display legend
+        colorMap.displayLegend(colorFile.getFilename());
+    }
 
     /**
      * @param {SVGElement} svg
@@ -315,7 +387,6 @@ class ColorModal { // implements ModalInterface, ObserverInterface
         });
     }
 
-
     /**
      * - Iterate through the strings in the attachments and create a ColorFile instance for each string
      * @returns {undefined}
@@ -324,20 +395,20 @@ class ColorModal { // implements ModalInterface, ObserverInterface
         const attachments = this.#controller.observableGraph.getObservable('omd').getProperty('attachments', 'meta');
         this.#colorFiles = {};
         if (attachments.hasOwnProperty('coloringFiles')) {
-            for (const [filename, text] of Object.entries(attachments.coloringFiles)) {
+            for (const [filename, obj] of Object.entries(attachments.coloringFiles)) {
+                const csvString = obj.csv;
                 // - Create a ColorFile as a container for one or more ColorMaps
                 const colorFile = new ColorFile(filename);
                 // - Fill the ColorFile with actual data
                 try {
-                    colorFile.createColorMaps(text);
+                    colorFile.createColorMaps(csvString);
                     this.#modal.setBanner('', ['hidden']);
                 } catch (e) {
                     // - Papa Parse did parse the file and didn't find any errors, but I still couldn't create a good ColorFile object, so tell the
                     //   user to remove or fix the file
-                    this.#modal.showProgress(false, `The CSV "${filename}" was parsed, but there was an error "${e.message }" when converting the CSV values into colors. Please double-check the CSV content.`, ['caution']);
+                    this.#modal.showProgress(false, `The CSV "${filename}" was parsed, but there was an error "${e.message}" when converting the CSV values into colors. Please double-check the CSV content.`, ['caution']);
                 }
-                // - Don't save the ColorFile in any property of the ColorModal, just use a local array. Actually, do save the ColorFiles directly on
-                //   the ColorModal because then I can just use refreshContent() directly.
+                // - Save the colorFile so that refreshContent() can access it
                 this.#colorFiles[filename] = colorFile;
             }
         }
@@ -421,6 +492,9 @@ class ColorMap {
     #nameToValue;
     static viridisColors = ['#440154', '#482173', '#433e85', '#38588c', '#2d708e', '#25858e', '#1e9b8a', '#2ab07f', '#52c569', '#86d549', '#c2df23', '#fde725'];
 
+    /**
+     * @param {string} columnName
+     */
     constructor(columnName) {
         if (typeof columnName !== 'string') {
             throw TypeError('"columnName" argument must be typeof string.');
@@ -435,6 +509,7 @@ class ColorMap {
 
     /**
      * @param {string} filename
+     * @returns {undefined}
      */
     displayLegend(filename) {
         if (typeof filename !== 'string') {

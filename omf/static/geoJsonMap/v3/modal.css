@@ -200,7 +200,7 @@ table.table--modal td div, table.table--modal th div {
     align-items: center;
     min-height: var(--tableRowMinHeight);
 }
-table.table--modal td {
+table.table--modal td, table.table--modal th {
     padding: 0;
 }
 table.table--modal td:not(:first-child), table.table--modal th:not(:first-child) {
@@ -276,4 +276,12 @@ div.js-div--modal.loadFeederModal div.hoverable {
 }
 div.js-div--modal.loadFeederModal div.hoverable > div:first-child {
     font-weight: bold;
+}
+
+/*****************************/
+/* Color modal styling */
+/*****************************/
+
+div.js-div--modal.colorModal table.table--modal button {
+    min-width: 145.2px;
 }
