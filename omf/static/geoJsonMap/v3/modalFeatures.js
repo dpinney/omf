@@ -1331,15 +1331,18 @@ function _getAttachmentsModal(controller) {
     const attachments = omdFeature.getProperty('attachments', 'meta');
     for (const [key, val] of Object.entries(attachments)) {
         if (typeof val === 'string') {
-            const modal = _getTextAreaModal(key, val, attachments, omdFeature);
+            const modal = _getTextAreaModal(key, key, val, attachments, omdFeature);
             mainModal.insertElement(modal.divElement);
         } else if (typeof val === 'object') {
             const nestedObjects = _getNestedObjects(attachments);
             nestedObjects.forEach(obj => {
-                if (obj.namespace === 'coloringFiles') {
-                    for (const [filename, csvText] of Object.entries(obj.object)) {
-                        const modal2 = _getTextAreaModal(filename, csvText, obj.object, omdFeature);
-                        mainModal.insertElement(modal2.divElement);
+                const namespaces = obj.namespace.split('|');
+                if (namespaces.length > 1 && namespaces[1].endsWith('.csv')) {
+                    for (const [innerKey, csvText] of Object.entries(obj.object)) {
+                        if (typeof csvText === 'string') {
+                            const modal2 = _getTextAreaModal(`${namespaces[1]} ${innerKey}`, innerKey, csvText, obj.object, omdFeature);
+                            mainModal.insertElement(modal2.divElement);
+                        }
                     }
                 }
             });
@@ -1357,9 +1360,9 @@ function _getNestedObjects(obj, namespace='') {
     const objects = [];
     for (const [k, v] of Object.entries(obj)) {
         // - I don't care if nulls and arrays are returned. Maybe I'll care about them eventually
-        if (typeof v === 'object') {
+        if (typeof v === 'object' && v !== null) {
             if (namespace !== '') {
-                namespace = `${namespace}.${k}`;
+                namespace = `${namespace}|${k}`;
             } else {
                 namespace = k;
             }
@@ -1375,14 +1378,18 @@ function _getNestedObjects(obj, namespace='') {
 
 /**
  * @param {string} title
+ * @param {string} propertyKey
  * @param {string} text
  * @param {Object} object - the object that contains the key and value that created the text area
  * @param {Feature} feature - the Feature that will have updatePropertyOfObservers() called on it (i.e. the "omd" feature)
  * @returns {Modal}
  */
-function _getTextAreaModal(title, text, object, feature) {
+function _getTextAreaModal(title, propertyKey, text, object, feature) {
     if (typeof title !== 'string') {
         throw TypeError('"title" argument must be typeof string.');
+    }
+    if (typeof propertyKey !== 'string') {
+        throw TypeError('"propertyKey" argument must be typeof string.');
     }
     if (typeof text !== 'string') {
         throw TypeError('"text" argument must be typeof string.');
@@ -1401,7 +1408,7 @@ function _getTextAreaModal(title, text, object, feature) {
     const textArea = document.createElement('textarea');
     textArea.value = text;
     textArea.addEventListener('change', function() {
-        object[title] = textArea.value;
+        object[propertyKey] = textArea.value;
         feature.updatePropertyOfObservers('', '', '');
     });
     modal.insertElement(textArea);

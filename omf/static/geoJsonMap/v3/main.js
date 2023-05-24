@@ -33,7 +33,7 @@ function main() {
             new LeafletLayer(ob, controller);
         }
     });
-    setupHTML(controller);
+    createNav(controller);
 
     /****************/
     /* Setup layers */
@@ -95,6 +95,7 @@ function main() {
     modalInsert.addEventListener('click', function() {
         modalInsert.classList.remove('visible');
     });
+    setupHTML(controller);
 }
 
 /**
@@ -105,7 +106,6 @@ function setupHTML(controller) {
     if (!(controller instanceof FeatureController)) {
         throw TypeError('"controller" argument must be instanceof FeatureController.');
     }
-    createNav(controller);
     createHelpMenu();
     createEditMenu(controller);
     if (gIsOnline && gShowFileMenu) {
@@ -193,10 +193,14 @@ function createNav(controller) {
     searchResultsDiv.appendChild(searchModal.getConfigSearchResultsDiv()); 
     searchResultsDiv.appendChild(searchModal.getNodeSearchResultsDiv()); 
     searchResultsDiv.appendChild(searchModal.getLineSearchResultsDiv()); 
-    // - Add map and modal insert divs
+    // - Add map div
     let div = document.createElement('div');
     div.id = 'map';
     nav.sideNavArticleElement.prepend(div);
+    // - Add legend insert
+    const legendInsert = document.createElement('div');
+    legendInsert.id = 'legendInsert';
+    document.getElementsByTagName('main')[0].appendChild(legendInsert);
 }
 
 function createHelpMenu() {
@@ -276,8 +280,5 @@ function createFileMenu(controller) {
         modalInsert.replaceChildren(getLoadingModal().divElement);
     }
     document.getElementsByTagName('main')[0].appendChild(modalInsert);
-    const legendInsert = document.createElement('div');
-    legendInsert.id = 'legendInsert';
-    document.getElementsByTagName('main')[0].appendChild(legendInsert);
     setTimeout(() => main(), 1);
 })();
