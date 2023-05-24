@@ -1339,8 +1339,10 @@ function _getAttachmentsModal(controller) {
                 const namespaces = obj.namespace.split('|');
                 if (namespaces.length > 1 && namespaces[1].endsWith('.csv')) {
                     for (const [innerKey, csvText] of Object.entries(obj.object)) {
-                        const modal2 = _getTextAreaModal(`${namespaces[1]} ${innerKey}`, innerKey, csvText, obj.object, omdFeature);
-                        mainModal.insertElement(modal2.divElement);
+                        if (typeof csvText === 'string') {
+                            const modal2 = _getTextAreaModal(`${namespaces[1]} ${innerKey}`, innerKey, csvText, obj.object, omdFeature);
+                            mainModal.insertElement(modal2.divElement);
+                        }
                     }
                 }
             });
@@ -1358,7 +1360,7 @@ function _getNestedObjects(obj, namespace='') {
     const objects = [];
     for (const [k, v] of Object.entries(obj)) {
         // - I don't care if nulls and arrays are returned. Maybe I'll care about them eventually
-        if (typeof v === 'object') {
+        if (typeof v === 'object' && v !== null) {
             if (namespace !== '') {
                 namespace = `${namespace}|${k}`;
             } else {
