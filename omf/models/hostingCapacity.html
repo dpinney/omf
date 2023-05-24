@@ -68,16 +68,16 @@
 	{% if modelStatus == 'finished' %}
 	<div id="output">
 		<p class="reportTitle">Mohca Generated Hosting Capacity</p>
-		<div id="hostingCapacityColumnChart" class="tightContent">
-			<div id="hostingCapacityColumnChart" style="width:1000px"></div>
+		<div id="mohcaHistogramChart" class="tightContent">
+			<div id="mohcaHistogramChart" style="width:1000px"></div>
 			<script type="text/javascript">
-				Plotly.newPlot("hostingCapacityColumnChart", JSON.parse( allOutputData["columnChartData"]) )
+				Plotly.newPlot("mohcaHistogramChart", JSON.parse( allOutputData["mohcaHistogramFigure"]) )
 			</script>
 		</div>
-        <div id="hostingCapacityTimeChart" class="tightContent">
-			<div id="hostingCapacityTimeChart" style="width:1000px"></div>
+        <div id="mohcaBarChart" class="tightContent">
+			<div id="mohcaBarChart" style="width:1000px"></div>
 			<script type="text/javascript">
-				Plotly.newPlot("hostingCapacityTimeChart", JSON.parse( allOutputData["timeSeriesData"]) )
+				Plotly.newPlot("mohcaBarChart", JSON.parse( allOutputData["mohcaBarChartFigure"]) )
 			</script>
 		</div>
 		<div id="mohcaHostingCapacityTable" class="tightContent">
@@ -97,6 +97,12 @@
       </table> 
 		</div>
     <p class="reportTitle" style="page-break-before:always"><b>Traditional Hosting Capacity Outputs </b></p>
+    <div id="traditionalHCOutputs" class="tightContent">
+      <div id="traditionalHCOutputs" style="width:1000px"></div>
+      <script type="text/javascript">
+        Plotly.newPlot("traditionalHCOutputs", JSON.parse( allOutputData["traditionalGraphData"]) )
+      </script>
+    </div>
     <div id="traditionalHostingCapacityTable" class="tightContent">
       <table style="width:100%">
         <tr>
@@ -112,7 +118,15 @@
         </tr>
         {% endfor %}
     </table> 
+    <!--heatmap-->
     </div>
+    <div id="voltageHeatMap" class="tabPlots" style="display: none;">
+			<!--DEBUG derOff peakLoad-->
+			<div class="tightContent tabContent voltageDiagram firstTab">
+				<!--DEBUG volt-->
+				<img id="voltageHeatMap" style="width:1000px;height:1000px;" />
+				<script type="text/javascript">gebi("voltage").src = "data:image/png;base64," + allOutputData.voltage</script>
+			</div>
 		{{ rawOutputFiles }}
 	</div>
 	{% endif %}

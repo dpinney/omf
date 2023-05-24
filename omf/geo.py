@@ -136,7 +136,7 @@ def omdGeoJson(pathToOmdFile, conversion=False):
 		})
 	return geoJsonDict
 
-def mapOmd(pathToOmdFile, outputPath, fileFormat, openBrowser=False, conversion=False, all_mg_elements=None):
+def mapOmd_DEPRECATED(pathToOmdFile, outputPath, fileFormat, openBrowser=False, conversion=False, all_mg_elements=None):
 	'''
 	Draw an omd on a map.
 	
@@ -789,7 +789,6 @@ def map_omd(omd_path, output_dir, open_browser=False):
         f.write(rendered)
     if open_browser:
         openInBrowser(str(output_dir / 'geoJson_offline.html'))
-
 
 def convert_omd_to_featurecollection(omd):
     '''
@@ -1457,12 +1456,12 @@ def _testLatLonfix():
 
 
 def _tests():
-	e, n = 249.2419752733258, 1186.1488466689188
-	lat, lon = statePlaneToLatLon(e, n, 2205)
+	# e, n = 249.2419752733258, 1186.1488466689188
+	# lat, lon = statePlaneToLatLon(e, n, 2205)
 	#openInGoogleMaps(lat, lon)
-	print (lat, lon) #(37.37267827914456, -89.89482331256504)
-	e2, n2 = latLonToStatePlane(lat, lon, epsg=2205)
-	print (e2, n2) # (249.24197527189972, 1186.1488466408398)
+	# print (lat, lon) #(37.37267827914456, -89.89482331256504)
+	# e2, n2 = latLonToStatePlane(lat, lon, epsg=2205)
+	# print (e2, n2) # (249.24197527189972, 1186.1488466408398)
 	prefix = pathlib.Path(__file__).parent
 	# mapOmd(prefix / 'static/publicFeeders/Olin Barre LatLon.omd', 'testOutput', 'png', openBrowser=True, conversion=False)
 	# mapOmd(prefix / 'static/publicFeeders/Olin Barre LatLon.omd', './', 'html', openBrowser=True, conversion=False)
