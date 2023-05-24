@@ -7,7 +7,6 @@ import { Modal } from './modal.js';
 // - Use voltDumpOlinBarre.csv, currDumpOlinBarre.csv and Olin Barre Fault.omd as examples
 
 class ColorModal { // implements ModalInterface, ObserverInterface
-
     #colorFiles;    // - Object of ColorFiles
     #controller;    // - ControllerInterface instance
     #modal;         // - Modal instance
@@ -162,8 +161,8 @@ class ColorModal { // implements ModalInterface, ObserverInterface
                     checkbox.checked = false;
                 }
             });
-            // - Set the select option to the equivalent colorOnLoad column, if there was one
-            if (attachments.coloringFiles[colorFile.getFilename()].colorOnLoadColumnIndex !== null) {
+            // - On load, set the select option to the equivalent colorOnLoad column, if there was one
+            if (attachments.coloringFiles[colorFile.getFilename()].hasOwnProperty('colorOnLoadColumnIndex')) {
                 for (const op of select.options) {
                     if (op.value === attachments.coloringFiles[colorFile.getFilename()].colorOnLoadColumnIndex) {
                         select.selectedIndex = op.index;
@@ -177,11 +176,11 @@ class ColorModal { // implements ModalInterface, ObserverInterface
                         if (this.checked) {
                             obj.colorOnLoadColumnIndex = select.value;
                         } else {
-                            obj.colorOnLoadColumnIndex = null;
+                            delete obj.colorOnLoadColumnIndex;
                         }
                     } else {
                         if (this.checked) {
-                            obj.colorOnLoadColumnIndex = null;
+                            delete obj.colorOnLoadColumnIndex;
                             for (const input of [...fileListModal.divElement.querySelectorAll('input[type="checkbox"][name="colorOnLoadColumnIndex"]')]) {
                                 if (input !== this) {
                                     input.checked = false;
@@ -268,8 +267,8 @@ class ColorModal { // implements ModalInterface, ObserverInterface
             }
             attachments.coloringFiles[file.name] = {
                 csv: csvString,
-                // - colorOnLoad should specify a column index if the interface should color on load by a column, otherwise it should specify null
-                colorOnLoadColumnIndex: null,
+                // - colorOnLoadColumnIndex should specify a column index if the interface should color on load by a column, otherwise it shouldn't
+                //   exist
             }
             that.#createColorFilesFromAttachments();
             that.refreshContent();
@@ -301,10 +300,13 @@ class ColorModal { // implements ModalInterface, ObserverInterface
         const attachments = that.#controller.observableGraph.getObservable('omd').getProperty('attachments', 'meta');
         if (attachments.hasOwnProperty('coloringFiles')) {
             for (const [filename, obj] of Object.entries(attachments.coloringFiles)) {
-                if (obj.colorOnLoadColumnIndex !== null) {
+                if (obj.hasOwnProperty('colorOnLoadColumnIndex')) {
                     const colorFile = this.#colorFiles[filename];
                     const colorMap = colorFile.getColorMaps()[obj.colorOnLoadColumnIndex];
-                    this.#applyColorMap(colorFile, colorMap);
+                    // - This if-statement is just in case the colorOnLoadColumnIndex value is invalid for some reason
+                    if (colorMap instanceof ColorMap) {
+                        this.#applyColorMap(colorFile, colorMap);
+                    }
                 }
             }
         }
