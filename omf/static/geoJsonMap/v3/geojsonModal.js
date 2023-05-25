@@ -241,7 +241,7 @@ class GeojsonModal { // implements ModalInterface, ObserverInterface
         });
         const geojsonLabel = document.createElement('label');
         geojsonLabel.htmlFor = 'geojsonInput';
-        geojsonLabel.innerHTML = 'Add a file containing a GeoJSON feature collection (.json)';
+        geojsonLabel.innerHTML = 'Add a file containing a GeoJSON feature collection (.geojson)';
         modal.insertTBodyRow([geojsonLabel, geojsonInput]);
         modal.addStyleClasses(['centeredTable'], 'tableElement');
         // - Append an empty div so the containerElement isn't null
