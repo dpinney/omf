@@ -24,7 +24,7 @@ class ColorModal { // implements ModalInterface, ObserverInterface
         if (!(controller instanceof FeatureController)) {
             throw Error('"controller" argument must be instanceof FeatureController.');
         }
-        this.#colorFiles = null;
+        this.#colorFiles = {};
         this.#controller = controller;
         this.#modal = null;
         this.#observables = observables;
@@ -139,9 +139,8 @@ class ColorModal { // implements ModalInterface, ObserverInterface
             fileListModal.insertTHeadRow(['Filename', 'Color-by Column', 'Apply Column Color on Page Load' ]);
             fileListModal.addStyleClasses(['centeredTable'], 'tableElement');
         }
-        const that = this;
         const attachments = this.#controller.observableGraph.getObservable('omd').getProperty('attachments', 'meta');
-        Object.values(this.#colorFiles).forEach(colorFile => {
+        for (const colorFile of Object.values(this.#colorFiles)) {
             const select = document.createElement('select');
             for (const [idx, cm] of Object.entries(colorFile.getColorMaps())) {
                 const option = document.createElement('option');
@@ -200,6 +199,7 @@ class ColorModal { // implements ModalInterface, ObserverInterface
             span = document.createElement('span');
             span.textContent = 'Remove';
             removeButton.appendChild(span);
+            const that = this;
             removeButton.addEventListener('click', function() {
                 if (attachments.hasOwnProperty('coloringFiles')) {
                     const filename = colorFile.getFilename();
@@ -212,7 +212,7 @@ class ColorModal { // implements ModalInterface, ObserverInterface
                 }
             });
             fileListModal.insertTBodyRow([colorFile.getFilename(), select, checkbox, colorButton, removeButton])
-        });
+        }
         const containerElement = this.#modal.divElement.getElementsByClassName('div--modalElementContainer')[0];
         const oldModal = containerElement.getElementsByClassName('js-div--modal');
         if (oldModal.length === 0) {
@@ -275,6 +275,7 @@ class ColorModal { // implements ModalInterface, ObserverInterface
         colorLabel.htmlFor = 'colorInput';
         colorLabel.innerHTML = 'Add a file containing bus names and electrical readings (.csv)';
         modal.insertTBodyRow([colorLabel, colorInput]);
+        modal.addStyleClasses(['centeredTable'], 'tableElement');
         const resetButton = document.createElement('button');
         let span = document.createElement('span');
         span.textContent = 'Reset Colors';
@@ -393,7 +394,6 @@ class ColorModal { // implements ModalInterface, ObserverInterface
      */
     #createColorFilesFromAttachments() {
         const attachments = this.#controller.observableGraph.getObservable('omd').getProperty('attachments', 'meta');
-        this.#colorFiles = {};
         if (attachments.hasOwnProperty('coloringFiles')) {
             for (const [filename, obj] of Object.entries(attachments.coloringFiles)) {
                 // - Create a ColorFile as a container for one or more ColorMaps

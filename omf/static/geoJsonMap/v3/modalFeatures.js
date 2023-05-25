@@ -1335,15 +1335,12 @@ function _getAttachmentsModal(controller) {
             const modal = _getTextAreaModal(key, key, val, attachments, omdFeature);
             mainModal.insertElement(modal.divElement);
         } else if (typeof val === 'object') {
-            const nestedObjects = _getNestedObjects(attachments);
+            const nestedObjects = _getNestedObjects(val);
             nestedObjects.forEach(obj => {
-                const namespaces = obj.namespace.split('|');
-                if (namespaces.length > 1 && namespaces[1].endsWith('.csv')) {
-                    for (const [innerKey, csvText] of Object.entries(obj.object)) {
-                        if (typeof csvText === 'string') {
-                            const modal2 = _getTextAreaModal(`${namespaces[1]} ${innerKey}`, innerKey, csvText, obj.object, omdFeature);
-                            mainModal.insertElement(modal2.divElement);
-                        }
+                for (const [innerKey, text] of Object.entries(obj.object)) {
+                    if (typeof text === 'string') {
+                        const innerModal = _getTextAreaModal(`${obj.namespace} ${innerKey}`, innerKey, text, obj.object, omdFeature);
+                        mainModal.insertElement(innerModal.divElement);
                     }
                 }
             });
@@ -1362,13 +1359,14 @@ function _getNestedObjects(obj, namespace='') {
     for (const [k, v] of Object.entries(obj)) {
         // - I don't care if nulls and arrays are returned. Maybe I'll care about them eventually
         if (typeof v === 'object' && v !== null) {
-            if (namespace !== '') {
-                namespace = `${namespace}|${k}`;
+            let objNamespace;
+            if (namespace === '') {
+                objNamespace = k;
             } else {
-                namespace = k;
+                objNamespace = `${namespace}|${k}`;
             }
             objects.push({
-                namespace: namespace,
+                namespace: objNamespace,
                 object: v
             });
             objects.push(..._getNestedObjects(v, k));

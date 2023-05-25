@@ -59,25 +59,6 @@ class LeafletLayer { // implements ObserverInterface
             pointToLayer: this.#pointToLayer.bind(this), 
             style: this.#styleNonPointFeatures.bind(this)
         });
-        if (this.#observable.isNode()) {
-            LeafletLayer.nodeLayers.addLayer(this.#layer);
-        } else if (this.#observable.isLine()) {
-            if (this.#observable.isParentChildLine()) {
-                LeafletLayer.parentChildLineLayers.addLayer(this.#layer);
-            } else {
-                LeafletLayer.lineLayers.addLayer(this.#layer);
-            }
-        } else if (this.#observable.isPolygon()) {
-            // - Do nothing for now
-        } else if (this.#observable.isMultiPoint()) {
-            // - Do nothing for now
-        } else if (this.#observable.isMultiLineString()) {
-            // - Do nothing for now
-        } else if (this.#observable.isMultiPolygon()) {
-            // - Do nothing for now
-        } else {
-            throw Error('The observable does not reference a valid GeoJSON feature (is it a configuration object or GeometryCollection?)');
-        }
         if (this.#observable.isNode() || this.#observable.isLine() || this.#observable.isPolygon() || this.#observable.isMultiPolygon()) {
             const layer = Object.values(this.#layer._layers)[0];
             let featureEditModal;
@@ -238,7 +219,7 @@ class LeafletLayer { // implements ObserverInterface
                     color: 'black'
                 }
             }
-        } else if (this.#observable.isPolygon()) {
+        } else {
             return {
                 color: 'blue'
             }

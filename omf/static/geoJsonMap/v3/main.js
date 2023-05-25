@@ -30,7 +30,26 @@ function main() {
     featureGraph.getObservables().forEach(ob => {
         if (!ob.isConfigurationObject()) {
             // - Here, the first observer is added to every visible feature
-            new LeafletLayer(ob, controller);
+            const ll = new LeafletLayer(ob, controller);
+            if (ob.isNode()) {
+                LeafletLayer.nodeLayers.addLayer(ll.getLayer());
+            } else if (ob.isLine()) {
+                if (ob.isParentChildLine()) {
+                    LeafletLayer.parentChildLineLayers.addLayer(ll.getLayer());
+                } else {
+                    LeafletLayer.lineLayers.addLayer(ll.getLayer());
+                }
+            } else if (ob.isPolygon()) {
+                // - Do nothing for now
+            } else if (ob.isMultiPoint()) {
+                // - Do nothing for now
+            } else if (ob.isMultiLineString()) {
+                // - Do nothing for now
+            } else if (ob.isMultiPolygon()) {
+                // - Do nothing for now
+            } else {
+                throw Error('The observable does not reference a valid GeoJSON feature (is it a configuration object or GeometryCollection?)');
+            }
         }
     });
     createNav(controller);

@@ -5,7 +5,6 @@ import { LeafletLayer } from './leafletLayer.js';
 import { Modal } from './modal.js';
 
 class GeojsonModal { // implements ModalInterface, ObserverInterface
-
     #controller;            // - ControllerInterface instance
     #filenameToLayerGroup;  // - Container for LayerGroups
     #modal;                 // - Modal instance
@@ -59,6 +58,7 @@ class GeojsonModal { // implements ModalInterface, ObserverInterface
             if (this.#observables.length === 0) {
                 this.remove();
             } else {
+                this.#updateLayerGroups();
                 this.refreshContent();
             }
         }
@@ -87,6 +87,7 @@ class GeojsonModal { // implements ModalInterface, ObserverInterface
         if (!(oldCoordinates instanceof Array)) {
             throw TypeError('"oldCoordinates" argument must be an array.');
         }
+        this.#updateLayerGroups();
         this.refreshContent();
     }
 
@@ -110,6 +111,7 @@ class GeojsonModal { // implements ModalInterface, ObserverInterface
         if (typeof namespace !== 'string') {
             throw TypeError('"namespace" argument must be a string.');
         }
+        this.#updateLayerGroups();
         this.refreshContent();
     }
 
@@ -142,7 +144,7 @@ class GeojsonModal { // implements ModalInterface, ObserverInterface
         }
         const that = this;
         const attachments = this.#controller.observableGraph.getObservable('omd').getProperty('attachments', 'meta');
-        for (const [filename, obj] of Object.entries(this.#filenameToLayerGroup)) {
+        for (const filename of Object.keys(this.#filenameToLayerGroup)) {
             const checkbox = document.createElement('input');
             checkbox.type = 'checkbox';
             checkbox.name = 'displayOnLoad';
@@ -202,9 +204,6 @@ class GeojsonModal { // implements ModalInterface, ObserverInterface
         }
     }
 
-    // - Display the file input
-    // - Show any "displayOnLoad" GeoJSON files
-
     /**
      * - Render the modal for the first time
      * @returns {undefined}
@@ -228,22 +227,23 @@ class GeojsonModal { // implements ModalInterface, ObserverInterface
             try {
                 featureCollection = JSON.parse(text);
                 that.#modal.setBanner('', ['hidden']);
+                if (!attachments.hasOwnProperty('geojsonFiles')) {
+                    attachments.geojsonFiles = {};
+                }
+                attachments.geojsonFiles[file.name] = {
+                    json: JSON.stringify(featureCollection)
+                }
+                that.#updateLayerGroups();
+                that.refreshContent();
             } catch (e) {
                 that.#modal.showProgress(false, `There was an error "${e.message}" when parsing the JSON file "${file.name}". Please double-check the JSON formatting.`, ['caution']);
             }
-            if (!attachments.hasOwnProperty('geojsonFiles')) {
-                attachments.geojsonFiles = {};
-            }
-            attachments.geojsonFiles[file.name] = {
-                json: JSON.stringify(featureCollection)
-            }
-            that.#updateLayerGroups();
-            that.refreshContent();
         });
         const geojsonLabel = document.createElement('label');
         geojsonLabel.htmlFor = 'geojsonInput';
         geojsonLabel.innerHTML = 'Add a file containing a GeoJSON feature collection (.json)';
         modal.insertTBodyRow([geojsonLabel, geojsonInput]);
+        modal.addStyleClasses(['centeredTable'], 'tableElement');
         // - Append an empty div so the containerElement isn't null
         const submitDiv = document.createElement('div');
         modal.insertElement(submitDiv);
@@ -282,7 +282,7 @@ class GeojsonModal { // implements ModalInterface, ObserverInterface
      * - In this way, the attachments object will be synchronized with the geojsonFiles object. The user will be able to show/hide the LayerGroups via
      *   the normal Leaflet controls
      * - When is this function called? On renderContent(), in response to a file upload, and if a GeoJSON file is edited in the attachments modal
-     * @param {boolean} - whether this function was called on the initial renderContent() call
+     * @param {boolean} renderContent - whether this function was called on the initial renderContent() call
      * @returns {undefined}
      */
     #updateLayerGroups(renderContent=false) {
