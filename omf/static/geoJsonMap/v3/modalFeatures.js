@@ -1,8 +1,9 @@
-export { getLoadingModal, getAnonymizationDiv, getSaveDiv, getRawDataDiv, getRenameDiv, getLoadFeederDiv, getBlankFeederDiv, getWindmilDiv, getGridlabdDiv, getCymdistDiv, getOpendssDiv, getAmiDiv, getAttachmentsDiv, getClimateDiv, getScadaDiv, getColorDiv };
+export { getLoadingModal, getAnonymizationDiv, getSaveDiv, getRawDataDiv, getRenameDiv, getLoadFeederDiv, getBlankFeederDiv, getWindmilDiv, getGridlabdDiv, getCymdistDiv, getOpendssDiv, getAmiDiv, getAttachmentsDiv, getClimateDiv, getScadaDiv, getColorDiv, getGeojsonDiv };
+import { ColorModal } from './colorModal.js';
 import { Feature } from  './feature.js';
 import { FeatureController } from './featureController.js';
+import { GeojsonModal } from './geojsonModal.js';
 import { Modal } from './modal.js';
-import { ColorModal } from './colorModal.js';
 
 /*
  * @returns {Modal}
@@ -1710,6 +1711,25 @@ function getColorDiv(controller) {
     const divElement = colorModal.getDOMElement();
     const modalInsert = document.getElementById('modalInsert');
     const div = _getMenuDiv('Color circuit...');
+    div.addEventListener('click', function() {
+        modalInsert.replaceChildren(divElement);
+        modalInsert.classList.add('visible');
+    });
+    return div;
+}
+
+/**
+ * @param {FeatureController} controller - a ControllerInterface instance
+ * @returns {HTMLDivElement}
+ */
+function getGeojsonDiv(controller) {
+    if (!(controller instanceof FeatureController)) {
+        throw TypeError('"controller" argument must be instanceof FeatureController.');
+    }
+    const geojsonModal = new GeojsonModal([controller.observableGraph.getObservable('omd')], controller);
+    const divElement = geojsonModal.getDOMElement();
+    const modalInsert = document.getElementById('modalInsert');
+    const div = _getMenuDiv('Add GeoJSON data...');
     div.addEventListener('click', function() {
         modalInsert.replaceChildren(divElement);
         modalInsert.classList.add('visible');

@@ -185,17 +185,26 @@ class FeatureEditModal { // implements ObserverInterface, ModalInterface
         modal.addStyleClasses(['featureEditModal'], 'divElement');
         // - I don't create a value text input, so I have to decide whether to display an ID or a string here
         if (this.#observables.length === 1) {
-            modal.insertTHeadRow([null, 'ID', this.#observables[0].getProperty('treeKey', 'meta')]);
+            if (this.#observables[0].hasProperty('treeKey', 'meta')) {
+                modal.insertTHeadRow([null, 'ID', this.#observables[0].getProperty('treeKey', 'meta')]);
+            } else if (this.#observables[0].hasProperty('FID', 'meta')) {
+                modal.insertTHeadRow([null, 'FID', this.#observables[0].getProperty('FID', 'meta').toString()]);
+            } else {
+                modal.insertTHeadRow([null, 'ID', '<No ID>']);
+            }
         } else {
             modal.insertTHeadRow([null, 'ID', '<Multiple "ID" Values>']);
         }
         const keyToValues = {};
         this.#observables.forEach(ob => {
-            for (const [k, v] of Object.entries(ob.getProperties('treeProps'))) {
-                if (!keyToValues.hasOwnProperty(k)) {
-                    keyToValues[k] = [v];
-                } else if (!keyToValues[k].includes(v)) {
-                    keyToValues[k].push(v);
+            // - Let non-OMD-tree features display a table
+            if (ob.hasProperty('treeProps', 'meta')) {
+                for (const [k, v] of Object.entries(ob.getProperties('treeProps'))) {
+                    if (!keyToValues.hasOwnProperty(k)) {
+                        keyToValues[k] = [v];
+                    } else if (!keyToValues[k].includes(v)) {
+                        keyToValues[k].push(v);
+                    }
                 }
             }
             let coordinatesArray = [];
@@ -883,6 +892,25 @@ function zoom(observables) {
         } else if (observable.isLine()) {
             const [[lon1, lat1], [lon2, lat2]] = observable.getCoordinates();
             LeafletLayer.map.flyToBounds([[lat1, lon1], [lat2, lon2]], {duration: .3});
+            if (!layer.isPopupOpen()) {
+                layer.openPopup();
+            }
+        } else {
+            let coordinates;
+            if (observable.isPolygon()) {
+                coordinates = observable.getCoordinates().flat(1);
+            } else if (observable.isMultiPolygon()) {
+                coordinates = observable.getCoordinates().flat(2);
+            } else {
+                return;
+            }
+            const lons = [];
+            const lats = [];
+            coordinates.forEach(ary => { lons.push(ary[0]); lats.push(ary[1]); });
+            LeafletLayer.map.flyToBounds([
+                [Math.min.apply(null, lats), Math.min.apply(null, lons)],
+                [Math.max.apply(null, lats), Math.max.apply(null, lons)]],
+                {duration: .3});
             if (!layer.isPopupOpen()) {
                 layer.openPopup();
             }

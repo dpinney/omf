@@ -16,7 +16,6 @@ class ColorModal { // implements ModalInterface, ObserverInterface
     /**
      * @param {Array} observables - an array of ObservableInterface instances
      * @param {FeatureController} controller - a ControllerInterface instance
-     * @returns {undefined}
      */
     constructor(observables, controller) {
         if (!(observables instanceof Array)) {
@@ -261,12 +260,11 @@ class ColorModal { // implements ModalInterface, ObserverInterface
             } else {
                 that.#modal.setBanner('', ['hidden']);
             }
-            const csvString = Papa.unparse(results.data);
             if (!attachments.hasOwnProperty('coloringFiles')) {
                 attachments.coloringFiles = {};
             }
             attachments.coloringFiles[file.name] = {
-                csv: csvString,
+                csv: Papa.unparse(results.data)
                 // - colorOnLoadColumnIndex should specify a column index if the interface should color on load by a column, otherwise it shouldn't
                 //   exist
             }
@@ -398,12 +396,11 @@ class ColorModal { // implements ModalInterface, ObserverInterface
         this.#colorFiles = {};
         if (attachments.hasOwnProperty('coloringFiles')) {
             for (const [filename, obj] of Object.entries(attachments.coloringFiles)) {
-                const csvString = obj.csv;
                 // - Create a ColorFile as a container for one or more ColorMaps
                 const colorFile = new ColorFile(filename);
                 // - Fill the ColorFile with actual data
                 try {
-                    colorFile.createColorMaps(csvString);
+                    colorFile.createColorMaps(obj.csv);
                     this.#modal.setBanner('', ['hidden']);
                 } catch (e) {
                     // - Papa Parse did parse the file and didn't find any errors, but I still couldn't create a good ColorFile object, so tell the

@@ -2,7 +2,7 @@ import { DropdownDiv } from './dropdownDiv.js';
 import { Feature } from  './feature.js';
 import { FeatureGraph } from  './featureGraph.js';
 import { FeatureController } from './featureController.js';
-import { getLoadingModal, getAnonymizationDiv, getSaveDiv, getRawDataDiv, getRenameDiv, getLoadFeederDiv, getBlankFeederDiv, getWindmilDiv, getGridlabdDiv, getCymdistDiv, getOpendssDiv, getAmiDiv, getAttachmentsDiv, getClimateDiv, getScadaDiv, getColorDiv } from './modalFeatures.js';
+import { getLoadingModal, getAnonymizationDiv, getSaveDiv, getRawDataDiv, getRenameDiv, getLoadFeederDiv, getBlankFeederDiv, getWindmilDiv, getGridlabdDiv, getCymdistDiv, getOpendssDiv, getAmiDiv, getAttachmentsDiv, getClimateDiv, getScadaDiv, getColorDiv, getGeojsonDiv } from './modalFeatures.js';
 import { LeafletLayer } from './leafletLayer.js';
 import { Nav } from './nav.js';
 import { SearchModal } from './searchModal.js';
@@ -64,7 +64,7 @@ function main() {
     const overlayMaps = {
         'Nodes': LeafletLayer.nodeLayers,
         'Lines': LeafletLayer.lineLayers,
-        'Parent-Child Lines': LeafletLayer.parentChildLineLayers
+        'Parent-Child Lines': LeafletLayer.parentChildLineLayers,
     }
     const map = L.map('map', {
         center: LeafletLayer.nodeLayers.getBounds().getCenter(),
@@ -247,6 +247,7 @@ function createEditMenu(controller) {
         dropdownDiv.insertElement(getScadaDiv(controller));
     }
     dropdownDiv.insertElement(getColorDiv(controller));
+    dropdownDiv.insertElement(getGeojsonDiv(controller));
 }
 
 /**
