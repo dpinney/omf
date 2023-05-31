@@ -453,13 +453,6 @@ function getRawDataDiv(controller) {
     if (!(controller instanceof FeatureController)) {
         throw TypeError('"controller" argument must be instanceof FeatureController.');
     }
-    //const feature = new Feature({
-    //    geometry: { 'coordinates': [null, null], 'type': 'Point' },
-    //    properties: {
-    //        treeKey: 'modal:rawData',
-    //    },
-    //    type: 'Feature'
-    //});
     const modal = _getRawDataModal(controller);
     const modalInsert = document.getElementById('modalInsert');
     const div = _getMenuDiv('View Raw Data');
@@ -486,16 +479,7 @@ function _getRenameModal(observable, controller) {
         throw TypeError('"controller" argument must be instanceof FeatureController.');
     }
     // - Input
-    const input = document.createElement('input');
-    // - Submit div
-    const submitButton = _getSubmitButton();
-    const submitDiv = _getSubmitDiv(submitButton);
-    // - Event listeners
-    input.addEventListener('change', function() {
-        let newName = this.value.trim();
-        if (newName === '') {
-            newName = 'Default Name';
-        }
+    const input = getNameInput(observable, function(newName) {
         const fileExistsUrl = {
             method: 'GET',
             url: `/uniqObjName/Feeder/${gThisOwner}/${newName}/${gThisModelName}`
@@ -507,20 +491,27 @@ function _getRenameModal(observable, controller) {
         }
         observable.setProperty('submitUrl', submitUrl, 'urlProps');
     });
-    // - Modal 
+    // - Submit div
+    const submitButton = _getSubmitButton();
+    const submitDiv = _getSubmitDiv(submitButton);
+    // - Modal
     const renameModal = new Modal();
     renameModal.addStyleClasses(['outerModal', 'fitContent'], 'divElement');
     submitButton.addEventListener('click', async function() {
-        const saveFeature = _getSaveFeature();
-        saveFeature.setProperty('feederObjectJson', JSON.stringify(controller.observableGraph.getObservableExportData()), 'formProps')
-        const saveModal = _getSaveModal(controller);
-        const modalInsert = document.getElementById('modalInsert');
-        modalInsert.replaceChildren(saveModal.divElement);
-        await controller.submitFeature(saveFeature, saveModal, false);
-        document.getElementById('modalInsert').classList.add('visible');
-        modalInsert.replaceChildren(renameModal.divElement);
-        renameModal.showProgress(true, 'Renaming feeder...', ['caution']);
-        controller.submitFeature(observable, renameModal);
+        if (input.checkValidity()) {
+            const saveFeature = _getSaveFeature();
+            saveFeature.setProperty('feederObjectJson', JSON.stringify(controller.observableGraph.getObservableExportData()), 'formProps')
+            const saveModal = _getSaveModal(controller);
+            const modalInsert = document.getElementById('modalInsert');
+            modalInsert.replaceChildren(saveModal.divElement);
+            await controller.submitFeature(saveFeature, saveModal, false);
+            document.getElementById('modalInsert').classList.add('visible');
+            modalInsert.replaceChildren(renameModal.divElement);
+            renameModal.showProgress(true, 'Renaming feeder...', ['caution']);
+            controller.submitFeature(observable, renameModal);
+        } else {
+            input.reportValidity();
+        }
     });
     renameModal.setTitle('Rename Feeder');
     renameModal.addStyleClasses(['horizontalFlex', 'centerMainAxisFlex', 'centerCrossAxisFlex'], 'titleElement');
@@ -699,24 +690,22 @@ function _getBlankFeederModal(observable, controller) {
         throw TypeError('"controller" argument must be instanceof FeatureController.');
     }
     // - Input
-    const input = document.createElement('input');
+    const input = getNameInput(observable, function(newName) {
+        observable.setProperty('feederNameNew', newName, 'formProps');
+    });
     // - Submit div
     const submitButton = _getSubmitButton();
     const submitDiv = _getSubmitDiv(submitButton);
-    // - Event listeners
-    input.addEventListener('change', function() {
-        let newName = this.value.trim();
-        if (newName === '') {
-            newName = 'Default Name';
-        }
-        observable.setProperty('feederNameNew', newName, 'formProps');
-    });
     // - Modal
     const modal = new Modal();
     modal.addStyleClasses(['outerModal', 'fitContent'], 'divElement');
     submitButton.addEventListener('click', function() {
-        modal.showProgress(true, 'Creating new blank feeder...', ['caution']);
-        controller.submitFeature(observable, modal);
+        if (input.checkValidity()) {
+            modal.showProgress(true, 'Creating new blank feeder...', ['caution']);
+            controller.submitFeature(observable, modal);
+        } else {
+            input.reportValidity();
+        }
     });
     modal.setTitle('New Blank Feeder');
     modal.addStyleClasses(['horizontalFlex', 'centerMainAxisFlex', 'centerCrossAxisFlex'], 'titleElement');
@@ -777,8 +766,14 @@ function _getWindmilModal(observable, controller) {
         throw TypeError('"controller" argument must be instanceof FeatureController.');
     }
     // - Name input
-    const nameInput = document.createElement('input');
-    nameInput.required = true;
+    const nameInput = getNameInput(observable, function(newName) {
+        observable.setProperty('feederNameM', newName, 'formProps');
+        const fileExistsUrl = {
+            method: 'GET',
+            url: `/uniqObjName/Feeder/${gThisOwner}/${newName}/${gThisModelName}`
+        }
+        observable.setProperty('fileExistsUrl', fileExistsUrl, 'urlProps');
+    });
     nameInput.id = 'milsoftNameInput';
     const nameLabel = document.createElement('label');
     nameLabel.htmlFor = 'milsoftNameInput';
@@ -805,22 +800,9 @@ function _getWindmilModal(observable, controller) {
     const submitButton = _getSubmitButton('Import');
     const submitDiv = _getSubmitDiv(submitButton);
     // - Event listeners
-    nameInput.addEventListener('change', function() {
-        let newName = this.value.trim();
-        if (newName === '') {
-            newName = 'Default Name';
-        }
-        observable.setProperty('feederNameM', newName, 'formProps');
-        const fileExistsUrl = {
-            method: 'GET',
-            url: `/uniqObjName/Feeder/${gThisOwner}/${newName}/${gThisModelName}`
-        }
-        observable.setProperty('fileExistsUrl', fileExistsUrl, 'urlProps');
-    });
     stdInput.addEventListener('change', function() {
         const stdFile = this.files[0];
         observable.setProperty('stdFile', stdFile, 'formProps');
-
     });
     seqInput.addEventListener('change', function() {
         const seqFile = this.files[0];
@@ -830,8 +812,14 @@ function _getWindmilModal(observable, controller) {
     const modal = new Modal();
     modal.addStyleClasses(['outerModal', 'fitContent'], 'divElement');
     submitButton.addEventListener('click', function() {
-        modal.showProgress(true, 'Importing file...', ['caution']);
-        controller.submitFeature(observable, modal);
+        if (nameInput.checkValidity() && stdInput.checkValidity() && seqInput.checkValidity()) {
+            modal.showProgress(true, 'Importing file...', ['caution']);
+            controller.submitFeature(observable, modal);
+        } else {
+            nameInput.reportValidity();
+            stdInput.reportValidity();
+            seqInput.reportValidity();
+        }
     });
     modal.setTitle('Milsoft Conversion');
     modal.addStyleClasses(['horizontalFlex', 'centerMainAxisFlex', 'centerCrossAxisFlex'], 'titleElement');
@@ -902,8 +890,14 @@ function _getGridlabdModal(observable, controller) {
         throw TypeError('"controller" argument must be instanceof FeatureController.');
     }
     // - Name input
-    const nameInput = document.createElement('input');
-    nameInput.required = true;
+    const nameInput = getNameInput(observable, function(newName) {
+        observable.setProperty('feederNameG', newName, 'formProps');
+        const fileExistsUrl = {
+            method: 'GET',
+            url: `/uniqObjName/Feeder/${gThisOwner}/${newName}/${gThisModelName}`
+        }
+        observable.setProperty('fileExistsUrl', fileExistsUrl, 'urlProps');
+    });
     nameInput.id = 'gridlabdNameInput';
     const nameLabel = document.createElement('label');
     nameLabel.htmlFor = 'gridlabdNameInput';
@@ -921,18 +915,6 @@ function _getGridlabdModal(observable, controller) {
     const submitButton = _getSubmitButton('Import');
     const submitDiv = _getSubmitDiv(submitButton);
     // - Event listeners
-    nameInput.addEventListener('change', function() {
-        let newName = this.value.trim();
-        if (newName === '') {
-            newName = 'Default Name';
-        }
-        observable.setProperty('feederNameG', newName, 'formProps');
-        const fileExistsUrl = {
-            method: 'GET',
-            url: `/uniqObjName/Feeder/${gThisOwner}/${newName}/${gThisModelName}`
-        }
-        observable.setProperty('fileExistsUrl', fileExistsUrl, 'urlProps');
-    });
     glmInput.addEventListener('change', function() {
         const glmFile = this.files[0];
         observable.setProperty('glmFile', glmFile, 'formProps');
@@ -941,8 +923,13 @@ function _getGridlabdModal(observable, controller) {
     const modal = new Modal();
     modal.addStyleClasses(['outerModal', 'fitContent'], 'divElement');
     submitButton.addEventListener('click', function() {
-        modal.showProgress(true, 'Importing file...', ['caution']);
-        controller.submitFeature(observable, modal);
+        if (nameInput.checkValidity() && glmInput.checkValidity()) {
+            modal.showProgress(true, 'Importing file...', ['caution']);
+            controller.submitFeature(observable, modal);
+        } else {
+            nameInput.reportValidity();
+            glmInput.reportValidity();
+        }
     });
     modal.setTitle('GridLABD-D Conversion');
     modal.addStyleClasses(['horizontalFlex', 'centerMainAxisFlex', 'centerCrossAxisFlex'], 'titleElement');
@@ -1010,8 +997,14 @@ function _getCymdistModal(observable, controller) {
         throw TypeError('"controller" argument must be instanceof FeatureController.');
     }
     // - Name input
-    const nameInput = document.createElement('input');
-    nameInput.required = true;
+    const nameInput = getNameInput(observable, function(newName) {
+        observable.setProperty('feederNameC', newName, 'formProps');
+        const fileExistsUrl = {
+            method: 'GET',
+            url: `/uniqObjName/Feeder/${gThisOwner}/${newName}/${gThisModelName}`
+        }
+        observable.setProperty('fileExistsUrl', fileExistsUrl, 'urlProps');
+    });
     nameInput.id = 'cymdistNameInput';
     const nameLabel = document.createElement('label');
     nameLabel.htmlFor = 'cymdistNameInput';
@@ -1029,18 +1022,6 @@ function _getCymdistModal(observable, controller) {
     const submitButton = _getSubmitButton('Import');
     const submitDiv = _getSubmitDiv(submitButton);
     // - Event listeners
-    nameInput.addEventListener('click', function() {
-        let newName = this.value.trim();
-        if (newName === '') {
-            newName = 'Default Name';
-        }
-        observable.setProperty('feederNameC', newName, 'formProps');
-        const fileExistsUrl = {
-            method: 'GET',
-            url: `/uniqObjName/Feeder/${gThisOwner}/${newName}/${gThisModelName}`
-        }
-        observable.setProperty('fileExistsUrl', fileExistsUrl, 'urlProps');
-    });
     mdbInput.addEventListener('change', function() {
         const mdbFile = this.files[0];
         observable.setProperty('mdbNetFile', mdbFile, 'formProps');
@@ -1049,8 +1030,13 @@ function _getCymdistModal(observable, controller) {
     const modal = new Modal();
     modal.addStyleClasses(['outerModal', 'fitContent'], 'divElement');
     submitButton.addEventListener('click', function() {
-        modal.showProgress(true, 'Importing file...', ['caution']);
-        controller.submitFeature(observable, modal);
+        if (nameInput.checkValidity() && mdbInput.checkValidity()) {
+            modal.showProgress(true, 'Importing file...', ['caution']);
+            controller.submitFeature(observable, modal);
+        } else {
+            nameInput.reportValidity();
+            mdbInput.reportValidity();
+        }
     });
     modal.setTitle('Cyme Conversion');
     modal.addStyleClasses(['horizontalFlex', 'centerMainAxisFlex', 'centerCrossAxisFlex'], 'titleElement');
@@ -1119,8 +1105,14 @@ function _getOpendssModal(observable, controller) {
         throw TypeError('"controller" argument must be instanceof FeatureController.');
     }
     // - Name input
-    const nameInput = document.createElement('input');
-    nameInput.required = true;
+    const nameInput = getNameInput(observable, function(newName) {
+        observable.setProperty('feederNameOpendss', newName, 'formProps');
+        const fileExistsUrl = {
+            method: 'GET',
+            url: `/uniqObjName/Feeder/${gThisOwner}/${newName}/${gThisModelName}`
+        }
+        observable.setProperty('fileExistsUrl', fileExistsUrl, 'urlProps');
+    });
     nameInput.id = 'opendssNameInput';
     const nameLabel = document.createElement('label');
     nameLabel.htmlFor = 'opendssNameInput';
@@ -1138,18 +1130,6 @@ function _getOpendssModal(observable, controller) {
     const submitButton = _getSubmitButton('Import');
     const submitDiv = _getSubmitDiv(submitButton);
     // - Event listeners 
-    nameInput.addEventListener('change', function() {
-        let newName = this.value.trim();
-        if (newName === '') {
-            newName = 'Default Name';
-        }
-        observable.setProperty('feederNameOpendss', newName, 'formProps');
-        const fileExistsUrl = {
-            method: 'GET',
-            url: `/uniqObjName/Feeder/${gThisOwner}/${newName}/${gThisModelName}`
-        }
-        observable.setProperty('fileExistsUrl', fileExistsUrl, 'urlProps');
-    });
     dssInput.addEventListener('change', function() {
         const dssFile = this.files[0];
         observable.setProperty('dssFile', dssFile, 'formProps');
@@ -1158,8 +1138,13 @@ function _getOpendssModal(observable, controller) {
     const modal = new Modal();
     modal.addStyleClasses(['outerModal', 'fitContent'], 'divElement');
     submitButton.addEventListener('click', function() {
-        modal.showProgress(true, 'Importing .dss file...', ['caution']);
-        controller.submitFeature(observable, modal);
+        if (nameInput.checkValidity() && dssInput.checkValidity()) {
+            modal.showProgress(true, 'Importing .dss file...', ['caution']);
+            controller.submitFeature(observable, modal);
+        } else {
+            nameInput.reportValidity();
+            dssInput.reportValidity();
+        }
     });
     modal.setTitle('OpenDSS Conversion');
     modal.addStyleClasses(['horizontalFlex', 'centerMainAxisFlex', 'centerCrossAxisFlex'], 'titleElement');
@@ -1773,4 +1758,29 @@ function _getHorizontalFlexDiv() {
     const div = document.createElement('div');
     div.classList.add('horizontalFlex');
     return div;
+}
+
+/**
+ * - Firefox doesn't display the reportValidity() message correctly
+ * - I don't know why I can't get actual regular expression literals to work. Only the regex string works for me
+ * @param {Feature} observable
+ * @param {Function} func - a function that takes the new name as an argument
+ * @returns {HTMLInputElement}
+ */
+function getNameInput(observable, func) {
+    const input = document.createElement('input');
+    input.pattern = '(?:[\\w-]+\\s{0,1})+';
+    input.placeholder = 'New name';
+    input.required = true;
+    input.title = 'The new name must have one or more alphanumeric characters. Single spaces, hyphens, and underscores are allowed.';
+    input.addEventListener('change', function() {
+        this.setCustomValidity('');
+        if (this.validity.valueMissing || this.validity.patternMismatch) {
+            input.setCustomValidity('The new name must have one or more alphanumeric characters. Single spaces, hyphens, and underscores are allowed.');
+            input.reportValidity();
+        } else if (this.validity.valid) {
+            func(this.value.trim());
+        }
+    });
+    return input
 }

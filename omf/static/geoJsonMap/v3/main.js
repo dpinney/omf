@@ -196,7 +196,7 @@ function createNav(controller) {
     searchResultsDiv.appendChild(searchModal.getLineSearchResultsDiv());
     // - Add tab for adding components
     const componentTab = document.createElement('div');
-    topTab.addTab('Add Components', componentTab);
+    topTab.addTab('Add', componentTab);
     let components = gComponentsCollection.features.filter(f => f.properties.componentType === 'gridlabd');
     const omdFeature = controller.observableGraph.getObservable('omd');
     if (omdFeature.hasProperty('syntax', 'meta')) {
