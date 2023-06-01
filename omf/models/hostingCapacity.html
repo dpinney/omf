@@ -61,8 +61,8 @@
 			<div class="shortInput">
 				<label class="tooltip"> Apply traditional hosting capacity</label>
 				<select id="optionalCircuitFile" name="optionalCircuitFile" value="{{allInputDataDict.optionalCircuitFile}}" required>
-					<option value="Off" {% if allInputDataDict.optionalCircuitFile == 'off' %}selected{% endif %}>Off</option>
-					<option value="On" {% if allInputDataDict.optionalCircuitFile == 'on' %}selected{% endif %}>On</option>
+					<option value="off" {% if allInputDataDict.optionalCircuitFile == 'off' %}selected{% endif %}>Off</option>
+					<option value="on" {% if allInputDataDict.optionalCircuitFile == 'on' %}selected{% endif %}>On</option>
 				</select>
 			</div>
 			<div class="shortInput">
@@ -121,6 +121,7 @@
 				{% endfor %}
 			</table> 
 		</div>
+		{% if allInputDataDict['optionalCircuitFile'] == 'on' %}
 		<p class="reportTitle" style="page-break-before:always">Traditional Hosting Capacity Map</p>
 		<div id="traditionalHCMap" class="tightContent"></div>
 		<script>
@@ -156,6 +157,7 @@
 				{% endfor %}
 		</table>
 		</div>
+		{% endif %}
 		{{ rawOutputFiles }}
 	</div>
 	{% endif %}

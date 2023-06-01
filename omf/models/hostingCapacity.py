@@ -59,11 +59,11 @@ def work(modelDir, inputDict):
     # traditional hosting capacity
     # if they uploaded an omd circuit file
     circuitFileStatus = inputDict.get('optionalCircuitFile', 0)
+    print('STATUS!', circuitFileStatus, inputDict.get('optionalCircuitFile', 0))
     if ( circuitFileStatus == 'on' ):
       feederName = [x for x in os.listdir(modelDir) if x.endswith('.omd')][0]
       inputDict['feederName1'] = feederName
-
-      omd = json.load(open( pJoin( modelDir, inputDict['feederName1']) ))
+      omd = json.load(open(pJoin(modelDir, feederName)))
       tree = omd.get('tree',{})
       #for k, v in omd['tree'].items():
 
@@ -74,9 +74,7 @@ def work(modelDir, inputDict):
       tradHCDF = traditionalHCResults[0]
       print( tradHCDF )
 
-      filename = os.path.basename(inputDict['feederName1'])
-      omdInput = pJoin( modelDir, filename )
-      omf.geo.map_omd( omdInput, modelDir, open_browser=False )
+      omf.geo.map_omd(pJoin(modelDir, feederName), modelDir, open_browser=False )
       # outData['traditionalHCMap'] = pJoin( modelDir, 'geoJson_offline.html')
       outData['traditionalHCMap'] = open( pJoin( modelDir, "geoJson_offline.html"), 'r' ).read()
 
@@ -131,7 +129,6 @@ def new(modelDir):
     test_circuit_name = "ieee37_LBL"
     test_file_contents = open(test_file_path).read()
     defaultInputs = {
-        "dataVariableName": 'None',
         "mohcaAlgorithm": 'sandia1',
         "feederName1": test_circuit_name,
         "inputDataFileName": test_file_name,
