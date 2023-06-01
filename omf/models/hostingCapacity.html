@@ -88,19 +88,21 @@
 	{{ omfRunDebugBlock }}
 	{% if modelStatus == 'finished' %}
 	<div id="output">
-		<p class="reportTitle">Mohca Generated Hosting Capacity</p>
+		<p class="reportTitle">Mohca Hosting Capacity Distribution</p>
 		<div id="mohcaHistogramChart" class="tightContent">
 			<div id="mohcaHistogramChart" style="width:1000px"></div>
 			<script type="text/javascript">
 				Plotly.newPlot("mohcaHistogramChart", JSON.parse( allOutputData["mohcaHistogramFigure"]) )
 			</script>
 		</div>
-				<div id="mohcaBarChart" class="tightContent">
+		<p class="reportTitle">Mohca Hosting Capacity By Bus</p>
+		<div id="mohcaBarChart" class="tightContent">
 			<div id="mohcaBarChart" style="width:1000px"></div>
 			<script type="text/javascript">
 				Plotly.newPlot("mohcaBarChart", JSON.parse( allOutputData["mohcaBarChartFigure"]) )
 			</script>
 		</div>
+		<p class="reportTitle">Mohca Full Hosting Capacity Data Table</p>
 		<div id="mohcaHostingCapacityTable" class="tightContent">
 			<table style="width:100%">
 					<tr>
@@ -117,7 +119,7 @@
 					{% endfor %}
 			</table> 
 		</div>
-		<p class="reportTitle" style="page-break-before:always"><b>Traditional Hosting Capacity Outputs </b></p>
+		<p class="reportTitle" style="page-break-before:always">Traditional Hosting Capacity Map</p>
 		<div id="traditionalHCMap" class="tightContent"></div>
 		<script>
 			var mapContent = allOutputData["traditionalHCMap"]
@@ -128,12 +130,14 @@
 			iframe.contentWindow.document.write(mapContent);
 			iframe.contentWindow.document.close();
 		</script>
+		<p class="reportTitle">Traditional Hosting Capacity Voltage Trend</p>
 		<div id="traditionalHCGraph" class="tightContent">
 			<div id="traditionalHCGraph" style="width:1000px"></div>
 			<script type="text/javascript">
 				Plotly.newPlot("traditionalHCGraph", JSON.parse( allOutputData["traditionalGraphData"]) )
 			</script>
 		</div>
+		<p class="reportTitle">Traditional Hosting Capacity Full Data Table</p>
 		<div id="traditionalHostingCapacityTable" class="tightContent">
 			<table style="width:100%">
 				<tr>

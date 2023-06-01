@@ -43,14 +43,14 @@ def work(modelDir, inputDict):
     mohcaResults = mohcaOutput[0].rename(columns={'kW_hostable': 'voltage_cap_kW'})
 
     mohcaHistogramFigure = px.histogram( mohcaResults, x='voltage_cap_kW', template="simple_white", color_discrete_sequence=["MediumPurple"] )
-    mohcaHistogramFigure.update_layout(  bargap=0.5, title=dict(text="Mohca Hosting Capacity Distribution", font=dict(size=20) ) )
+    mohcaHistogramFigure.update_layout(bargap=0.5)
 
     barChartDF = mohcaResults
     barChartDF['thermal_cap'] = [1]
     barChartDF['max_cap_kW'] = np.minimum( barChartDF['voltage_cap_kW'], barChartDF['thermal_cap'])
 
     mohcaBarChartFigure = px.bar(barChartDF, x='busname', y=['voltage_cap_kW', 'thermal_cap', 'max_cap_kW'], barmode='group', color_discrete_sequence=["green", "lightblue", "MediumPurple"], template="simple_white" ) 
-    mohcaBarChartFigure.update_layout( title=dict(text="Hosting Capacity by Bus", font=dict(size=20) ) )
+    # mohcaBarChartFigure.update_layout()
 
     # Line graph of the data
     # timeSeriesFigure = px.line( mohcaResults.sort_values( by="kW_hostable", ascending=False, ignore_index=True ), x='busname', y='kW_hostable', markers=True, color_discrete_sequence=['purple', "blue", "green"])
