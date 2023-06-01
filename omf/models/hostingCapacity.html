@@ -50,7 +50,6 @@
 			<div class="shortInput">
 				<label>Mohca Algorithm</label>
 				<select id="mohcaAlgorithm" name="mohcaAlgorithm" value="{{allInputDataDict.mohcaAlgorithm}}" required>
-					<option value="">None</option>
 					<option value="sandia1" {% if allInputDataDict.mohcaAlgorithm == 'sandia1' %}selected{% endif %}>sandia1</option>
 					<option value="sandia2" {% if allInputDataDict.mohcaAlgorithm == 'sandia2' %}selected{% endif %}>sandia2</option>
 				</select>
@@ -61,7 +60,10 @@
 			<hr>
 			<div class="shortInput">
 				<label class="tooltip"> Apply traditional hosting capacity</label>
-				<input type="radio" id="optionalCircuitFile" name="optionalCircuitFile">
+				<select id="optionalCircuitFile" name="optionalCircuitFile" value="{{allInputDataDict.optionalCircuitFile}}" required>
+					<option value="Off" {% if allInputDataDict.optionalCircuitFile == 'off' %}selected{% endif %}>Off</option>
+					<option value="On" {% if allInputDataDict.optionalCircuitFile == 'on' %}selected{% endif %}>On</option>
+				</select>
 			</div>
 			<div class="shortInput">
 				<label>Circuit</label>
@@ -105,18 +107,18 @@
 		<p class="reportTitle">Mohca Full Hosting Capacity Data Table</p>
 		<div id="mohcaHostingCapacityTable" class="tightContent">
 			<table style="width:100%">
-					<tr>
-							{% for header in allOutputDataDict["mohcaHCTableHeadings"] %}
-							<th>{{ header }}</th>
-							{% endfor %}
-					</tr>
-					{% for values in allOutputDataDict["mohcaHCTableValues"] %}
-					<tr>
-							{% for val in values %}
-							<td>{{ val }}</td>
-							{% endfor %}
-					</tr>
+				<tr>
+				{% for header in allOutputDataDict["mohcaHCTableHeadings"] %}
+					<th>{{ header }}</th>
 					{% endfor %}
+				</tr>
+				{% for values in allOutputDataDict["mohcaHCTableValues"] %}
+				<tr>
+					{% for val in values %}
+					<td>{{ val }}</td>
+					{% endfor %}
+				</tr>
+				{% endfor %}
 			</table> 
 		</div>
 		<p class="reportTitle" style="page-break-before:always">Traditional Hosting Capacity Map</p>
