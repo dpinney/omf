@@ -40,7 +40,7 @@
 			</div>
 			{% endif %}
 			<div class="wideInput">
-				<p class="inputSectionHeader">Mohca Algorithm Inputs</p>
+				<p class="inputSectionHeader">Mohca Hosting Capacity</p>
 			</div>
 			<hr>
 			<div class="shortInput">
@@ -55,10 +55,31 @@
 					<option value="sandia2" {% if allInputDataDict.mohcaAlgorithm == 'sandia2' %}selected{% endif %}>sandia2</option>
 				</select>
 			</div>
+      <div class="wideInput">
+				<p class="inputSectionHeader">Traditional Hosting Capacity</p>
+			</div>
+			<hr>
+      <div class="shortInput">
+        <label class="tooltip"> Apply traditional hosting capacity for circuit file </label>
+        <input type="radio" id="optionalCircuitFile" name="optionalCircuitFile">
+      </div>
       <div class="shortInput">
 				<label>Circuit</label>
 				<button id="feederButton" type="button" onclick="javascript:editFeeder(allInputData.modelName,1);" style="display:block;width:125px;">Open Editor</button>
 				<input type="text" id="feederName1" name="feederName1" value="{{allInputDataDict.feederName1}}" style="display:none">
+			</div>
+      <div class="shortInput">
+				<label class="tooltip">Traditional Hosting Capacity Steps
+					<span class="classic">How many times the specified kW is added to determine max hosting capacity</span>
+				</label>
+				<input type="text" id="traditionalHCSteps" name="traditionalHCSteps" value="{{allInputDataDict.traditionalHCSteps}}" pattern="^[0-9]*$"/>
+			</div>
+      
+      <div class="shortInput">
+				<label class="tooltip">Traditional Hosting Capacity kW
+					<span class="classic">How much kW is added to each step to determine hostingCapacity</span>
+				</label>
+				<input type="text" id="traditionalHCkW" name="traditionalHCkW" value="{{allInputDataDict.traditionalHCkW}}">
 			</div>
 			{{ omfModelButtons }}
 		</form>
@@ -97,10 +118,13 @@
       </table> 
 		</div>
     <p class="reportTitle" style="page-break-before:always"><b>Traditional Hosting Capacity Outputs </b></p>
-    <div id="traditionalHCOutputs" class="tightContent">
-      <div id="traditionalHCOutputs" style="width:1000px"></div>
+    <div id="traditionalHCMap" class="tightContent">
+      <iframe srcdoc='{{ allOutputData["traditionalHCMap"] }}' title="Map"/>
+    </div>
+    <div id="traditionalHCGraph" class="tightContent">
+      <div id="traditionalHCGraph" style="width:1000px"></div>
       <script type="text/javascript">
-        Plotly.newPlot("traditionalHCOutputs", JSON.parse( allOutputData["traditionalGraphData"]) )
+        Plotly.newPlot("traditionalHCGraph", JSON.parse( allOutputData["traditionalGraphData"]) )
       </script>
     </div>
     <div id="traditionalHostingCapacityTable" class="tightContent">
@@ -117,16 +141,8 @@
             {% endfor %}
         </tr>
         {% endfor %}
-    </table> 
-    <!--heatmap-->
+    </table>
     </div>
-    <div id="voltageHeatMap" class="tabPlots" style="display: none;">
-			<!--DEBUG derOff peakLoad-->
-			<div class="tightContent tabContent voltageDiagram firstTab">
-				<!--DEBUG volt-->
-				<img id="voltageHeatMap" style="width:1000px;height:1000px;" />
-				<script type="text/javascript">gebi("voltage").src = "data:image/png;base64," + allOutputData.voltage</script>
-			</div>
 		{{ rawOutputFiles }}
 	</div>
 	{% endif %}
