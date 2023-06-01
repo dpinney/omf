@@ -75,13 +75,13 @@ def _getCoords(dssFilePath, keep_output=True):
 	return coords
 
 def _getByName(tree, name):
-    ''' Return first object with name in tree as an OrderedDict. '''
-    matches =[]
-    for x in tree:
-        if x.get('object',''):
-            if x.get('object','').split('.')[1] == name:
-                matches.append(x)
-    return matches[0]
+	''' Return first object with name in tree as an OrderedDict. '''
+	matches =[]
+	for x in tree:
+		if x.get('object',''):
+			if x.get('object','').split('.')[1] == name:
+				matches.append(x)
+	return matches[0]
 
 def newQstsPlot(filePath, stepSizeInMinutes, numberOfSteps, keepAllFiles=False, actions={}, filePrefix='timeseries'):
 	''' QSTS with native opendsscmd binary to avoid segfaults in opendssdirect. '''
@@ -330,27 +330,28 @@ def hosting_capacity(FNAME:str, GEN_BUSES:list, STEPS:int, KW:float):
 	df = pd.DataFrame(results[1:], columns=results[0])
 	return df, max_kw
 
-def hosting_capacity_verbose(FNAME:str, GEN_BUSES:list, STEPS:int, KW:float, MODELDIR:str ):
-	''' Using DSS circuit at FNAME, add KW sized generators at each of the GEN_BUSES up to STEPS times.
+def hosting_capacity_verbose(OMD_FILE_PATH:str, OUTPUT_PATH:str, GEN_BUSES:list, STEPS=30, KW=1.0):
+	''' Using DSS circuit at OMD_FILE_PATH, add KW sized generators at each of the GEN_BUSES up to STEPS times.
 		Returns two values:
 			a dataframe with max per-phase voltages after each addition, and
 			the kW addition that pushed voltages over the limit.
-		MODELDIR: model directory for output files to go
+		OUTPUT_PATH: model directory for output files to go
 	'''
 	# Derived constants.
-  # dssDir :: because dss cmds do not work properly in Linux depending on the path,
-  # all the functions and their corresponding output files have to go to static/hostingcapacityfiles
-  # if it gets to a point where this is not a linux issue, everything can be moved to the modeldir instead of dssdir
-	fullpath = os.path.abspath(FNAME)
-	filename = os.path.basename(FNAME)
+	# dssDir :: because dss cmds do not work properly in Linux depending on the path,
+ 	# all the functions and their corresponding output files have to go to static/hostingcapacityfiles
+ 	# if it gets to a point where this is not a linux issue, everything can be moved to the OUTPUT_PATH instead of dssdir
+ 	#TODO: Remove GEN_BUSES input, get them from the input.
+	fullpath = os.path.abspath(OMD_FILE_PATH)
+	filename = os.path.basename(OMD_FILE_PATH)
 	dssDir = pJoin( omf.omfDir, 'static', 'hostingcapacityfiles')
 	dssDirFile = pJoin( dssDir, "traditionalHCInput.dss")
 	hostingCapacityInput = dssDirFile
 	volt_file = f'{dssDir}/volts.csv'
-	if FNAME.endswith('.omd'):
-		omd_tree = omf.solvers.opendss.dssConvert.omdToTree( pJoin( MODELDIR, filename) )
+	if OMD_FILE_PATH.endswith('.omd'):
+		omd_tree = omf.solvers.opendss.dssConvert.omdToTree( pJoin( OUTPUT_PATH, filename) )
 		omf.solvers.opendss.dssConvert.treeToDss( omd_tree, hostingCapacityInput ) # this puts it in the dss directory
-	elif FNAME.endswith('.dss'):
+	elif OMD_FILE_PATH.endswith('.dss'):
 		dssFileDir = pJoin( dssDir, filename )
 		shutil.copyfile( fullpath, dssFileDir )
 		hostingCapacityInput = dssFileDir
