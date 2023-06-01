@@ -60,7 +60,7 @@
 			</div>
 			<hr>
       <div class="shortInput">
-        <label class="tooltip"> Apply traditional hosting capacity for circuit file </label>
+        <label class="tooltip"> Apply traditional hosting capacity</label>
         <input type="radio" id="optionalCircuitFile" name="optionalCircuitFile">
       </div>
       <div class="shortInput">
@@ -119,8 +119,16 @@
 		</div>
     <p class="reportTitle" style="page-break-before:always"><b>Traditional Hosting Capacity Outputs </b></p>
     <div id="traditionalHCMap" class="tightContent">
-      <iframe srcdoc='{{ allOutputData["traditionalHCMap"] }}' title="Map"/>
+      <iframe srcdoc='{{ allOutputDataDict["traditionalHCMap"] }}' title="Map"></iframe>
     </div>
+<!--     <script>
+    	var mapContent = 'allOutputDataDict["traditionalHCMap"]'
+    	var iframe = document.createElement('iframe');
+  		document.getElementByID('traditionalHCMap').appendChild(iframe);
+  		iframe.contentWindow.document.open();
+  		iframe.contentWindow.document.write(html);
+  		iframe.contentWindow.document.close();
+    </script> -->
     <div id="traditionalHCGraph" class="tightContent">
       <div id="traditionalHCGraph" style="width:1000px"></div>
       <script type="text/javascript">

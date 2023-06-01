@@ -32,9 +32,9 @@ def work(modelDir, inputDict):
     outputPath = pJoin(modelDir, 'mohcaOutput.csv')
 
     mohcaOutput = []
-    if ( inputDict[ "mohcaAlgorithm" ] == "sandia1" ):
+    if inputDict[ "mohcaAlgorithm" ] == "sandia1":
        mohcaOutput = mohca_cl.sandia1( inputPath, outputPath )
-    elif (inputDict[ "mohcaAlgorithm" ] == "sandia2"):
+    elif inputDict[ "mohcaAlgorithm" ] == "sandia2":
        mohcaOutput = mohca_cl.sandia2( inputPath, outputPath )
     else:
        errorMessage = "Algorithm name error"
@@ -46,7 +46,7 @@ def work(modelDir, inputDict):
     mohcaHistogramFigure.update_layout(  bargap=0.5, title=dict(text="Mohca Hosting Capacity Distribution", font=dict(size=20) ) )
 
     barChartDF = mohcaResults
-    barChartDF['thermal_cap'] = [6, 7, 8, 6, 7, 8, 6, 7]
+    barChartDF['thermal_cap'] = [1]
     barChartDF['max_cap_kW'] = np.minimum( barChartDF['voltage_cap_kW'], barChartDF['thermal_cap'])
 
     mohcaBarChartFigure = px.bar(barChartDF, x='busname', y=['voltage_cap_kW', 'thermal_cap', 'max_cap_kW'], barmode='group', color_discrete_sequence=["green", "lightblue", "MediumPurple"], template="simple_white" ) 
@@ -132,12 +132,13 @@ def new(modelDir):
     test_file_contents = open(test_file_path).read()
     defaultInputs = {
         "dataVariableName": 'None',
+        "mohcaAlgorithm": 'sandia1',
         "feederName1": test_circuit_name,
         "inputDataFileName": test_file_name,
         "inputDataFileContent": test_file_contents,
         "modelType": modelName,
-        "mohcaAlgorithm": 'None',
         "traditionalHCSteps": 10,
+        "optionalCircuitFile": 'on',
         "traditionalHCkW": 1
     }
     creationCode = __neoMetaModel__.new(modelDir, defaultInputs)
