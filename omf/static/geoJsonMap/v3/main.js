@@ -2,7 +2,7 @@ import { DropdownDiv } from './dropdownDiv.js';
 import { Feature } from  './feature.js';
 import { FeatureGraph } from  './featureGraph.js';
 import { FeatureController } from './featureController.js';
-import { getLoadingModal, getAnonymizationDiv, getSaveDiv, getRawDataDiv, getRenameDiv, getLoadFeederDiv, getBlankFeederDiv, getWindmilDiv, getGridlabdDiv, getCymdistDiv, getOpendssDiv, getAmiDiv, getAttachmentsDiv, getClimateDiv, getScadaDiv, getColorDiv } from './modalFeatures.js';
+import { getLoadingModal, getAnonymizationDiv, getSaveDiv, getRawDataDiv, getRenameDiv, getLoadFeederDiv, getBlankFeederDiv, getWindmilDiv, getGridlabdDiv, getCymdistDiv, getOpendssDiv, getAmiDiv, getAttachmentsDiv, getClimateDiv, getScadaDiv, getColorDiv, getGeojsonDiv } from './modalFeatures.js';
 import { LeafletLayer } from './leafletLayer.js';
 import { Nav } from './nav.js';
 import { SearchModal } from './searchModal.js';
@@ -30,10 +30,29 @@ function main() {
     featureGraph.getObservables().forEach(ob => {
         if (!ob.isConfigurationObject()) {
             // - Here, the first observer is added to every visible feature
-            new LeafletLayer(ob, controller);
+            const ll = new LeafletLayer(ob, controller);
+            if (ob.isNode()) {
+                LeafletLayer.nodeLayers.addLayer(ll.getLayer());
+            } else if (ob.isLine()) {
+                if (ob.isParentChildLine()) {
+                    LeafletLayer.parentChildLineLayers.addLayer(ll.getLayer());
+                } else {
+                    LeafletLayer.lineLayers.addLayer(ll.getLayer());
+                }
+            } else if (ob.isPolygon()) {
+                // - Do nothing for now
+            } else if (ob.isMultiPoint()) {
+                // - Do nothing for now
+            } else if (ob.isMultiLineString()) {
+                // - Do nothing for now
+            } else if (ob.isMultiPolygon()) {
+                // - Do nothing for now
+            } else {
+                throw Error('The observable does not reference a valid GeoJSON feature (is it a configuration object or GeometryCollection?)');
+            }
         }
     });
-    setupHTML(controller);
+    createNav(controller);
 
     /****************/
     /* Setup layers */
@@ -64,7 +83,7 @@ function main() {
     const overlayMaps = {
         'Nodes': LeafletLayer.nodeLayers,
         'Lines': LeafletLayer.lineLayers,
-        'Parent-Child Lines': LeafletLayer.parentChildLineLayers
+        'Parent-Child Lines': LeafletLayer.parentChildLineLayers,
     }
     const map = L.map('map', {
         center: LeafletLayer.nodeLayers.getBounds().getCenter(),
@@ -95,6 +114,7 @@ function main() {
     modalInsert.addEventListener('click', function() {
         modalInsert.classList.remove('visible');
     });
+    setupHTML(controller);
 }
 
 /**
@@ -105,7 +125,6 @@ function setupHTML(controller) {
     if (!(controller instanceof FeatureController)) {
         throw TypeError('"controller" argument must be instanceof FeatureController.');
     }
-    createNav(controller);
     createHelpMenu();
     createEditMenu(controller);
     if (gIsOnline && gShowFileMenu) {
@@ -177,7 +196,7 @@ function createNav(controller) {
     searchResultsDiv.appendChild(searchModal.getLineSearchResultsDiv());
     // - Add tab for adding components
     const componentTab = document.createElement('div');
-    topTab.addTab('Add Components', componentTab);
+    topTab.addTab('Add', componentTab);
     let components = gComponentsCollection.features.filter(f => f.properties.componentType === 'gridlabd');
     const omdFeature = controller.observableGraph.getObservable('omd');
     if (omdFeature.hasProperty('syntax', 'meta')) {
@@ -193,10 +212,14 @@ function createNav(controller) {
     searchResultsDiv.appendChild(searchModal.getConfigSearchResultsDiv()); 
     searchResultsDiv.appendChild(searchModal.getNodeSearchResultsDiv()); 
     searchResultsDiv.appendChild(searchModal.getLineSearchResultsDiv()); 
-    // - Add map and modal insert divs
+    // - Add map div
     let div = document.createElement('div');
     div.id = 'map';
     nav.sideNavArticleElement.prepend(div);
+    // - Add legend insert
+    const legendInsert = document.createElement('div');
+    legendInsert.id = 'legendInsert';
+    document.getElementsByTagName('main')[0].appendChild(legendInsert);
 }
 
 function createHelpMenu() {
@@ -243,6 +266,7 @@ function createEditMenu(controller) {
         dropdownDiv.insertElement(getScadaDiv(controller));
     }
     dropdownDiv.insertElement(getColorDiv(controller));
+    dropdownDiv.insertElement(getGeojsonDiv(controller));
 }
 
 /**
@@ -276,8 +300,5 @@ function createFileMenu(controller) {
         modalInsert.replaceChildren(getLoadingModal().divElement);
     }
     document.getElementsByTagName('main')[0].appendChild(modalInsert);
-    const legendInsert = document.createElement('div');
-    legendInsert.id = 'legendInsert';
-    document.getElementsByTagName('main')[0].appendChild(legendInsert);
     setTimeout(() => main(), 1);
 })();

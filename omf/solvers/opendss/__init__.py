@@ -87,7 +87,7 @@ def newQstsPlot(filePath, stepSizeInMinutes, numberOfSteps, keepAllFiles=False, 
 	''' QSTS with native opendsscmd binary to avoid segfaults in opendssdirect. '''
 	dssFileLoc = os.path.dirname(os.path.abspath(filePath))
 	dss_run_file = ''
-	dss_run_file += f'redirect "{filePath}\n"'
+	dss_run_file += f'redirect "{filePath}"\n'
 	dss_run_file += f'set datapath="{dssFileLoc}"\n'
 	dss_run_file += f'set maxcontroliter=1000\n'
 	dss_run_file += f'calcvoltagebases\n'

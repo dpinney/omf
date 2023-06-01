@@ -46,7 +46,7 @@ class Feature {
                     delete this.#feature.properties[namespace][propertyKey];
                     this.updatePropertyOfObservers(propertyKey, oldPropertyValue, namespace);
                 } else {
-                    throw ReferenceError(`The property "${propertyKey}" could not be found in the namespace "${namespace}" in the Feature instance "${this.getProperty('treeKey', 'meta')}."`);
+                    throw ReferenceError(`The property "${propertyKey}" could not be found in the namespace "${namespace}" in the Feature instance.`);
                 }
             } else {
                 throw ReferenceError(`This feature does not have the namespace "${namespace}".`);
@@ -57,7 +57,7 @@ class Feature {
                 delete this.#feature.properties[propertyKey];
                 this.updatePropertyOfObservers(propertyKey, oldPropertyValue, namespace);
             } else {
-                throw ReferenceError(`The property "${propertyKey}" could not be found in the namespace "${namespace}" in the Feature instance "${this.getProperty('treeKey', 'meta')}."`);
+                throw ReferenceError(`The property "${propertyKey}" could not be found in the namespace "${namespace}" in the Feature instance.`);
             }
         } else {
             throw ReferenceError(`The namespace "${namespace}" does not exist in this Feature. Leave the "namespace" argument empty to use the "treeProps" namespace.`);
@@ -181,7 +181,7 @@ class Feature {
                     // - At this point, I don't want to return a structuredClone becuase I use this method everywhere
                     return this.#feature.properties[namespace][propertyKey];
                 }
-                throw ReferenceError(`The property "${propertyKey}" could not be found in the namespace "${namespace}" in the Feature instance "${this.getProperty('treeKey', 'meta')}."`);
+                throw ReferenceError(`The property "${propertyKey}" could not be found in the namespace "${namespace}" in the Feature instance."`);
             }
             throw ReferenceError(`This feature does not have the namespace "${namespace}".`);
         } else if (namespace === 'meta') {
@@ -189,7 +189,7 @@ class Feature {
                 // - I need to be consistent
                 return this.#feature.properties[propertyKey];
             }
-            throw ReferenceError(`The property "${propertyKey}" could not be found in the namespace "${namespace}" in the Feature instance "${this.getProperty('treeKey', 'meta')}."`);
+            throw ReferenceError(`The property "${propertyKey}" could not be found in the namespace "${namespace}" in the Feature instance."`);
         }
         throw ReferenceError(`The namespace "${namespace}" does not exist in this Feature. Leave the "namespace" argument empty to use the "treeProps" namespace.`);
     }
@@ -202,8 +202,17 @@ class Feature {
         if (this.#feature.geometry.type === 'Point') {
             return !this.#feature.geometry.coordinates.some(c => typeof c !== 'number');
         } else if (this.#feature.geometry.type === 'LineString') {
-            return !this.#feature.geometry.coordinates[0].some(c => typeof c !== 'number') && !this.#feature.geometry.coordinates[1].some(c =>
-                typeof c !== 'number');
+            return !this.#feature.geometry.coordinates.flat().some(c => typeof c !== 'number');
+        } else if (this.#feature.geometry.type === 'Polygon') {
+            return !this.#feature.geometry.coordinates.flat(2).some(c => typeof c !== 'number');
+        } else if (this.#feature.geometry.type === 'MultiPoint') {
+            return !this.#feature.geometry.coordinates.flat().some(c => typeof c !== 'number');
+        } else if (this.#feature.geometry.type === 'MultiLineString') {
+            return !this.#feature.geometry.coordinates.flat(2).some(c => typeof c !== 'number');
+        } else if (this.#feature.geometry.type === 'MultiPolygon') {
+            return !this.#feature.geometry.coordinates.flat(3).some(c => typeof c !== 'number');
+        } else {
+            throw Error('The observable does not reference a valid GeoJSON feature (is it a configuration object or GeometryCollection?)');
         }
     }
 
@@ -288,40 +297,47 @@ class Feature {
     setCoordinates(coordinates) {
         // - The function signature above is part of the ObservableInterface API. The implementation below is not
         if (!(coordinates instanceof Array)) {
-            throw TypeError('"coordinates" argument must be an array.');
+            throw TypeError('"coordinates" argument must be instanceof Array.');
         }
         // - Check that all coordinate values are valid numbers
-        for (let i = 0; i < coordinates.length; i++) {
-            if (coordinates[i] instanceof Array) {
-                for (let j = 0; j < coordinates[i].length; j++) {
-                    if (typeof coordinates[i][j] !== 'string' && typeof coordinates[i][j] !== 'number') {
-                        throw TypeError(`"coordinates[${i}][${j}]" must be a number or valid number-string`);
-                    }
-                    coordinates[i][j] = +coordinates[i][j];
-                    if (isNaN(coordinates[i][j])) {
-                        throw TypeError(`"coordinates[${i}][${j}]" must be a number or valid number-string`);
-                    }
-                }
-            } else {
-                if (typeof coordinates[i] !== 'string' && typeof coordinates[i] !== 'number') {
-                    throw TypeError(`"coordinates[${i}]" must be a number or valid number-string`);
-                }
-                coordinates[i] = +coordinates[i];
-                if (isNaN(coordinates[i])) {
-                    throw TypeError(`"coordinates[${i}]" must be a number or valid number-string`);
-                }
+        const flatCoordinates = coordinates.flat(3);
+        for (let i = 0; i < flatCoordinates.length; i++) {
+            const coordinateType = typeof flatCoordinates[i];
+            if (!['string', 'number'].includes(coordinateType)) {
+                throw TypeError(`${flatCoordinates[i]} must be typeof number or string.`);
+            }
+            flatCoordinates[i] = +flatCoordinates[i];
+            if (isNaN(flatCoordinates[i])) {
+                throw TypeError(`${flatCoordinates[i]} must be a valid number.`);
             }
         }
-        // - Check that the right number of coordinates were passed
         if (this.isNode()) {
-            if (coordinates.length !== 2 || typeof coordinates[0] !== 'number' || typeof coordinates[1] !== 'number') {
-                throw TypeError('"coordinates" argument must be an array of two numbers for node features');
+            coordinates[0] = +coordinates[0];
+            coordinates[1] = +coordinates[1];
+            if (coordinates.length !== 2) {
+                throw Error('"coordinates" argument must be an array of two numbers for node features.');
             }
-        }
-        if (this.isLine()) {
-            if (coordinates.length !== 2 || coordinates[0].length !== 2 || coordinates[1].length !== 2) {
-                throw TypeError('"coordinates" argument must be an array of two arrays of two numbers for line features.');
+        } else if (this.isLine()) {
+            coordinates[0][0] = +coordinates[0][0];
+            coordinates[0][1] = +coordinates[0][1];
+            coordinates[1][0] = +coordinates[1][0];
+            coordinates[1][1] = +coordinates[1][1];
+            if (coordinates.length !== 2) {
+                throw Error('"coordinates" argument must be an array of two arrays of two numbers for line features.');
             }
+        } else if (this.isPolygon()) {
+            for (let i = 0; i < coordinates.length; i++) {
+                let ary = coordinates[i];
+                for (const innerAry of ary) {
+                    innerAry[0] = +innerAry[0];
+                    innerAry[1] = +innerAry[1];
+                    if (innerAry.length !== 2) {
+                        throw Error('"coordinates" argument must be an array of one or two arrays, each containing at least two arrays of points for polygon features.');
+                    }
+                }
+            }
+        } else {
+            throw Error('MultiPoint, MultiLineString, MultiPolygon, and GeometryCollection are not yet supported by setCoordinates().');
         }
         const oldCoordinates = this.getCoordinates();
         this.#feature.geometry.coordinates = coordinates;
@@ -523,7 +539,7 @@ class Feature {
      * is used to create displayed ObservableInterface instances. Non-configuration-object components DO have real coordinates.
      */
     isComponentFeature() {
-        return this.getProperty('treeKey', 'meta').startsWith('component:');
+        return this.hasProperty('treeKey', 'meta') && this.getProperty('treeKey', 'meta').startsWith('component:');
     }
 
     /**
@@ -533,38 +549,55 @@ class Feature {
         return !this.hasCoordinates();
     }
 
+    // - Deprecated because I should never be able to feed a GeometryCollection to the constructor anyway
+    //isGeometryCollection() {
+    //    return this.#feature.type === 'GeometryCollection' && !this.isConfigurationObject();
+    //}
+
     /**
      * @returns {boolean} whether this ObservableInterface instance is a line
      */
     isLine() {
-        return this.hasProperty('to') && this.hasProperty('from') && !this.isConfigurationObject();
+        return this.#feature.geometry.type === 'LineString' && !this.isConfigurationObject();
     }
 
     /**
+     * - Deprecated because I don't insert modal features into the FeatureGraph anymore, but don't delete
      * @returns {boolean} whether this ObservableInterface instance is a modal feature, which is a non-displayed ObservableInterface instance that is
      * used to create a modal.
      */
-    isModalFeature() {
-        return this.getProperty('treeKey', 'meta').startsWith('modal');
+    //isModalFeature() {
+    //    return this.getProperty('treeKey', 'meta').startsWith('modal');
+    //}
+
+    isMultiLineString() {
+        return this.#feature.geometry.type === 'MultiLineString' && !this.isConfigurationObject();
     }
 
+    isMultiPoint() {
+        return this.#feature.geometry.type === 'MultiPoint' && !this.isConfigurationObject();
+    }
+
+    isMultiPolygon() {
+        return this.#feature.geometry.type === 'MultiPolygon' && !this.isConfigurationObject();
+    }
 
     /**
      * @returns {boolean} whether this ObservableInterface instance is a node
      */
     isNode() {
-        return !this.isLine() && !this.isConfigurationObject();
+        return this.#feature.geometry.type === 'Point' && !this.isConfigurationObject();
     }
 
     /**
      * @returns {boolean} whether this ObservableInterface instance is a parent-child line
      */
     isParentChildLine() {
-        return this.getProperty('treeKey', 'meta').startsWith('parentChild:');
+        return this.hasProperty('treeKey', 'meta') && this.getProperty('treeKey', 'meta').startsWith('parentChild:');
     }
 
     isPolygon() {
-        return this.#feature.geometry.type === 'Polygon';
+        return this.#feature.geometry.type === 'Polygon' && !this.isConfigurationObject();
     }
 
     /**

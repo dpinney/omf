@@ -38,6 +38,16 @@ class LeafletLayer { // implements ObserverInterface
             feature.geometry.type = 'Point';
         } else if (this.#observable.isLine()) {
             feature.geometry.type = 'LineString';
+        } else if (this.#observable.isPolygon()) {
+            feature.geometry.type = 'Polygon';
+        } else if (this.#observable.isMultiPoint()) {
+            feature.geometry.type = 'MultiPoint';
+        } else if (this.#observable.isMultiLineString()) {
+            feature.geometry.type = 'MultiLineString';
+        } else if (this.#observable.isMultiPolygon()) {
+            feature.geometry.type = 'MultiPolygon';
+        } else {
+            throw Error('The observable does not reference a valid GeoJSON feature (is it a configuration object or GeometryCollection?)');
         }
         feature.geometry.coordinates = structuredClone(this.#observable.getCoordinates());
         feature.properties = structuredClone(this.#observable.getProperties('meta'));
@@ -47,27 +57,17 @@ class LeafletLayer { // implements ObserverInterface
         //  - Access the underlying layer(s) with <GeoJSON>._layers, which is a map (i.e. object) that maps layer ids to actual layer objects
         this.#layer = L.geoJSON(feature, {
             pointToLayer: this.#pointToLayer.bind(this), 
-            style: this.#styleLines.bind(this)
+            style: this.#styleNonPointFeatures.bind(this)
         });
-        if (this.#observable.isNode()) {
-            LeafletLayer.nodeLayers.addLayer(this.#layer);
-        } else if (this.#observable.isLine()) {
-            if (this.#observable.isParentChildLine()) {
-                LeafletLayer.parentChildLineLayers.addLayer(this.#layer);
-            } else {
-                LeafletLayer.lineLayers.addLayer(this.#layer);
-            }
-        } else {
-            // - TODO: get polygons working!
-            throw Error('"observable" argument was not a node or a line.');
+        if (this.#observable.isNode() || this.#observable.isLine() || this.#observable.isPolygon() || this.#observable.isMultiPolygon()) {
+            const layer = Object.values(this.#layer._layers)[0];
+            let featureEditModal;
+            layer.bindPopup(() => {
+                featureEditModal = new FeatureEditModal([this.#observable], controller);
+                return featureEditModal.getDOMElement();
+            });
+            this.#layer.addEventListener('popupclose', () => this.#observable.removeObserver(featureEditModal));
         }
-        const layer = Object.values(this.#layer._layers)[0];
-        let featureEditModal;
-        layer.bindPopup(() => {
-            featureEditModal = new FeatureEditModal([this.#observable], controller);
-            return featureEditModal.getDOMElement();
-        });
-        this.#layer.addEventListener('popupclose', () => this.#observable.removeObserver(featureEditModal));
     }
 
     // *******************************
@@ -131,7 +131,6 @@ class LeafletLayer { // implements ObserverInterface
         if (typeof namespace !== 'string') {
             throw TypeError('"namespace" argument must be a string.');
         }
-        // - Change colors?
     }
 
     // ********************
@@ -189,7 +188,7 @@ class LeafletLayer { // implements ObserverInterface
         return marker;
     }
 
-    #styleLines() {
+    #styleNonPointFeatures() {
         if (this.#observable.isLine()) {
             if (this.#observable.hasProperty('edgeColor')) {
                 return {
@@ -220,7 +219,7 @@ class LeafletLayer { // implements ObserverInterface
                     color: 'black'
                 }
             }
-        } else if (this.#observable.isPolygon()) {
+        } else {
             return {
                 color: 'blue'
             }
