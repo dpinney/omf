@@ -349,7 +349,7 @@ def hosting_capacity_verbose(OMD_FILE_PATH:str, OUTPUT_PATH:str, GEN_BUSES:list,
 	hostingCapacityInput = dssDirFile
 	volt_file = f'{dssDir}/volts.csv'
 	if OMD_FILE_PATH.endswith('.omd'):
-		omd_tree = omf.solvers.opendss.dssConvert.omdToTree( pJoin( OUTPUT_PATH, filename) )
+		omd_tree = omf.solvers.opendss.dssConvert.omdToTree(fullpath)
 		omf.solvers.opendss.dssConvert.treeToDss( omd_tree, hostingCapacityInput ) # this puts it in the dss directory
 	elif OMD_FILE_PATH.endswith('.dss'):
 		dssFileDir = pJoin( dssDir, filename )
