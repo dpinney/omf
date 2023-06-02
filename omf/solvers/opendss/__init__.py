@@ -1,5 +1,6 @@
 ''' Run OpenDSS and plot the results for arbitrary circuits. '''
 
+import shutil
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
@@ -7,6 +8,7 @@ import networkx as nx
 from networkx.algorithms.traversal.depth_first_search import dfs_tree
 import math
 import os
+from os.path import join as pJoin
 import warnings
 import subprocess
 from copy import deepcopy
@@ -73,13 +75,13 @@ def _getCoords(dssFilePath, keep_output=True):
 	return coords
 
 def _getByName(tree, name):
-    ''' Return first object with name in tree as an OrderedDict. '''
-    matches =[]
-    for x in tree:
-        if x.get('object',''):
-            if x.get('object','').split('.')[1] == name:
-                matches.append(x)
-    return matches[0]
+	''' Return first object with name in tree as an OrderedDict. '''
+	matches =[]
+	for x in tree:
+		if x.get('object',''):
+			if x.get('object','').split('.')[1] == name:
+				matches.append(x)
+	return matches[0]
 
 def newQstsPlot(filePath, stepSizeInMinutes, numberOfSteps, keepAllFiles=False, actions={}, filePrefix='timeseries'):
 	''' QSTS with native opendsscmd binary to avoid segfaults in opendssdirect. '''
@@ -325,6 +327,84 @@ def hosting_capacity(FNAME:str, GEN_BUSES:list, STEPS:int, KW:float):
 			max_kw = KW * max(step - 1, 0)
 			df = pd.DataFrame(results[1:], columns=results[0])
 			return df, max_kw
+	df = pd.DataFrame(results[1:], columns=results[0])
+	return df, max_kw
+
+def hosting_capacity_verbose(OMD_FILE_PATH:str, OUTPUT_PATH:str, GEN_BUSES:list, STEPS=30, KW=1.0):
+	''' Using DSS circuit at OMD_FILE_PATH, add KW sized generators at each of the GEN_BUSES up to STEPS times.
+		Returns two values:
+			a dataframe with max per-phase voltages after each addition, and
+			the kW addition that pushed voltages over the limit.
+		OUTPUT_PATH: model directory for output files to go
+	'''
+	# Derived constants.
+	# dssDir :: because dss cmds do not work properly in Linux depending on the path,
+ 	# all the functions and their corresponding output files have to go to static/hostingcapacityfiles
+ 	# if it gets to a point where this is not a linux issue, everything can be moved to the OUTPUT_PATH instead of dssdir
+ 	#TODO: Remove GEN_BUSES input, get them from the input.
+	fullpath = os.path.abspath(OMD_FILE_PATH)
+	filename = os.path.basename(OMD_FILE_PATH)
+	dssDir = pJoin( omf.omfDir, 'static', 'hostingcapacityfiles')
+	dssDirFile = pJoin( dssDir, "traditionalHCInput.dss")
+	hostingCapacityInput = dssDirFile
+	volt_file = f'{dssDir}/volts.csv'
+	if OMD_FILE_PATH.endswith('.omd'):
+		omd_tree = omf.solvers.opendss.dssConvert.omdToTree(fullpath)
+		omf.solvers.opendss.dssConvert.treeToDss( omd_tree, hostingCapacityInput ) # this puts it in the dss directory
+	elif OMD_FILE_PATH.endswith('.dss'):
+		dssFileDir = pJoin( dssDir, filename )
+		shutil.copyfile( fullpath, dssFileDir )
+		hostingCapacityInput = dssFileDir
+	ansi_a_max_pu = 1.05
+	ansi_b_max_pu = 1.058
+	DEFAULT_KV = 2.14
+	tree = dssConvert.dssToTree( hostingCapacityInput )
+	# Find the insertion kv levels.
+	kv_mappings = get_bus_kv_mappings( hostingCapacityInput )
+	for bus in GEN_BUSES:
+		if bus not in kv_mappings:
+			warnings.warn(f'Voltage unkown for {bus}, defaulting to {DEFAULT_KV}')
+	# Get insertion bus; should always be safe to insert above makebuslist.
+	for i, ob in enumerate(tree):
+		if ob.get('!CMD', None) == 'makebuslist':
+			insertion_index = i
+	max_kw = 0.0
+	buses_with_cap_left = {}
+	results = [['kw_add', 'v_max_pu1', 'v_max_pu2', 'v_max_pu3', 'v_max_all_pu']]
+	for step in [0] + list(range(1, STEPS + 1)):
+		new_tree = deepcopy(tree)
+		# Insert generators.
+		gen_template = {
+			'!CMD': 'new',
+			'object': None,
+			'bus1': None,
+			'kw': KW * step,
+			'pf': '1.0',
+			'conn': 'wye',
+			'phases': '3',
+			'kv': None,
+			'model': '1' }
+		for bus in GEN_BUSES:
+			if step != 0: # skip generation adding for baseline
+				new_gen = dict(gen_template)
+				new_gen['object'] = f'generator.hostcap_{bus}'
+				new_gen['bus1'] = f'{bus}.1.2.3'
+				new_gen['kv'] = kv_mappings.get(bus, DEFAULT_KV)
+				new_tree.insert(insertion_index, new_gen)
+		# Calc voltages.
+		dssConvert.treeToDss(new_tree, pJoin(dssDir, 'HOSTCAP.dss'))
+		voltagePlot( pJoin(dssDir,'HOSTCAP.dss') ) 
+		df = pd.read_csv(volt_file)
+		v_max_pu1, v_max_pu2, v_max_pu3 =  df[' pu1'].max(), df[' pu2'].max(), df[' pu2'].max()
+		v_max_pu_all = max(v_max_pu1, v_max_pu2, v_max_pu3)
+		results.append([KW * step, v_max_pu1, v_max_pu2, v_max_pu3, v_max_pu_all])
+		# Determine which buses still have capacity
+		if v_max_pu_all > ansi_b_max_pu:
+			max_kw = KW * max(step - 1, 0)
+			df = pd.DataFrame(results[1:], columns=results[0])
+			return df, max_kw
+		elif v_max_pu_all < ansi_b_max_pu:
+			max_kw = -1
 	df = pd.DataFrame(results[1:], columns=results[0])
 	return df, max_kw
 
