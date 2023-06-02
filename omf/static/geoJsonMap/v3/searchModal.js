@@ -405,13 +405,49 @@ class SearchModal {
                 });
             }
         });
+        // - Add fake key to search all fields
+        const option = document.createElement('option');
+        option.dataset.namespace = 'treeProps';
+        option.text = '<All Fields>';
+        option.value = 'searchModalSearchAllFields';
+        keySelect.add(option);
+        const that = this;
+        keySelect.addEventListener('change', function() {
+            let parentElement = this.parentElement;
+            while (!(parentElement instanceof HTMLTableRowElement)) {
+                parentElement = parentElement.parentElement;
+            }
+            const valueTextInput = parentElement.querySelector('input[data-role="valueInput"]');
+            const operatorSelect = parentElement.querySelector('select[data-role="operatorSelect"]');
+            if (keySelect.selectedIndex === 0) {
+                if (valueTextInput === null) {
+                    parentElement.lastChild.appendChild(that.#getValueTextInput());
+                }
+                const newOperatorSelect = document.createElement('select');
+                newOperatorSelect.dataset.role = 'operatorSelect';
+                ['contains', '! contains'].forEach(o => {
+                    const option = document.createElement('option');
+                    option.text = o;
+                    option.value = o;
+                    newOperatorSelect.add(option);
+                });
+                newOperatorSelect.value = 'contains';
+                operatorSelect.replaceWith(newOperatorSelect);
+            } else {
+                const oldValue = operatorSelect.value;
+                const newOperatorSelect = that.#getOperatorSelect();
+                newOperatorSelect.value = oldValue;
+                operatorSelect.replaceWith(newOperatorSelect);
+            }
+        });
+        // - Add regular keys
         metaKeys.sort((a, b) => a.localeCompare(b));
         keys.sort((a, b) => a.localeCompare(b));
         metaKeys.forEach(k => {
             const option = document.createElement('option');
             option.dataset.namespace = 'meta';
             if (k === 'treeKey') {
-                option.text = 'ID (treeKey)';
+                option.text = 'ID';
             } else {
                 option.text = k;
             }
@@ -461,12 +497,7 @@ class SearchModal {
             while (!(parentElement instanceof HTMLTableRowElement)) {
                 parentElement = parentElement.parentElement;
             }
-            let valueTextInput = null;
-            for (const input of parentElement.getElementsByTagName('input')) {
-                if (input.dataset.role = 'valueInput') {
-                    valueTextInput = input;
-                }
-            }
+            const valueTextInput = parentElement.querySelector('input[data-role="valueInput"]');
             if (['exists', '! exists'].includes(this.value)) {
                 if (valueTextInput !== null) {
                     valueTextInput.remove();
@@ -648,8 +679,13 @@ class SearchModal {
                 }
                 if (operator === 'contains') {
                     searchCriterion.searchFunction = function(ob) {
-                        if (ob.hasProperty(key, namespace)) {
-                            //return ob.getProperty(key, namespace).includes(valueInputValue);
+                        if (key === 'searchModalSearchAllFields') {
+                            for (const val of Object.values(ob.getProperties(namespace))) {
+                                if (val.toString().toLowerCase().includes(valueInputValue.toLowerCase())) {
+                                    return true;
+                                }
+                            }
+                        } else if (ob.hasProperty(key, namespace)) {
                             return ob.getProperty(key, namespace).toString().toLowerCase().includes(valueInputValue.toLowerCase());
                         }
                         return false;
@@ -657,8 +693,14 @@ class SearchModal {
                 }
                 if (operator === '! contains') {
                     searchCriterion.searchFunction = function(ob) {
-                        if (ob.hasProperty(key, namespace)) {
-                            //return !ob.getProperty(key, namespace).includes(valueInputValue);
+                        if (key === 'searchModalSearchAllFields') {
+                            for (const val of Object.values(ob.getProperties(namespace))) {
+                                if (val.toString().toLowerCase().includes(valueInputValue.toLowerCase())) {
+                                    return false;
+                                }
+                            }
+                            return true;
+                        } else if (ob.hasProperty(key, namespace)) {
                             return !ob.getProperty(key, namespace).toString().toLowerCase().includes(valueInputValue.toLowerCase());
                         }
                         return false;

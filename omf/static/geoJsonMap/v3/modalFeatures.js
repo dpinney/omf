@@ -84,7 +84,7 @@ function _getAnonymizationModal(observable, controller) {
     //  - Coordinates input
     const coordinatesInput = document.createElement('input');
     coordinatesInput.name = 'new_center_coords';
-    coordinatesInput.placeholder = 'lat, lon';
+    coordinatesInput.placeholder = 'lat°, lon°';
     coordinatesInput.pattern = '\\(?(-?\\d+(\\.\\d+)?),\\s*(-?\\d+(\\.\\d+)?)\\)?';
     //  - Horizontal translation input
     const horizontalTranslationInput = document.createElement('input');
@@ -333,7 +333,7 @@ function _getAnonymizationModal(observable, controller) {
     mainModal.insertElement(locationsHeadingDiv);
     mainModal.insertElement(locationsSelectDiv);
     const translateModal = new Modal();
-    translateModal.insertTBodyRow(['Shift center to', coordinatesInput, '(latitude, longitude) coordinates within the contiguous/non-contiguous USA']);
+    translateModal.insertTBodyRow(['Shift center to', coordinatesInput, 'coordinates within the contiguous/non-contiguous USA']);
     translateModal.insertTBodyRow(['Translate', horizontalTranslationInput, 'meters rightwards']);
     translateModal.insertTBodyRow(['Translate', verticalTranslationInput, 'meters upwards']);
     translateModal.insertTBodyRow(['Rotate', rotationInput, 'degrees counterclockwise']);
