@@ -584,12 +584,12 @@ class FeatureGraph {
         const observableKey = observable.getProperty('treeKey', 'meta');
         this.#graph.addNode(observableKey);
         // - Insert the feature into the nameToKey map
-        // - The following objects SOMETIMES lack the "name" property: recorder, player
+        // - The following objects SOMETIMES lack the "name" property: recorder, player, and sometimes other regular objects!
         //  - By far, the easiest thing to do is give them a name. I can strip it out on export if needed
         if (!observable.hasProperty('name')) {
             if (observable.hasProperty('object')) {
                 const object = observable.getProperty('object');
-                if (['recorder', 'player'].includes(object)) {
+                if (['recorder', 'player'].includes(object) || !observable.isConfigurationObject()) {
                     const name = `${object}:${observableKey}:addedName`;
                     observable.setProperty('name', name);
                 }

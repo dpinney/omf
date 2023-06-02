@@ -14,6 +14,7 @@
 /*******/
 /* IDs */
 /*******/
+
 #map {
     height: calc(100vh - var(--headerHeight));
     z-index: 0;
@@ -25,6 +26,11 @@
     top: 12px;
     z-index: 1;
 }
+
+/************/
+/* Elements */
+/************/
+
 a {
     text-decoration: none;
     color: #00b11a;
@@ -51,7 +57,19 @@ main {
     height: calc(100% - var(--headerHeight));
 }
 
+/***********/
+/* Classes */
+/***********/
+
 .leaflet-popup-content {
     width: 400px !important;
     font-family: sans-serif;
+}
+.leaflet-custom-control-button {
+    background-color: #FFFFFF;
+    border: none;
+    border-radius: 4px;
+    color: black;
+    cursor: pointer;
+    padding: .25rem;
 }

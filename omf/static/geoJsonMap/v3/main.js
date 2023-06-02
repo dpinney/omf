@@ -95,6 +95,7 @@ function main() {
         // - Better performance for large datasets
         renderer: L.canvas()
     });
+    addZoomToFitButon();
     LeafletLayer.map = map;
     L.control.layers(baseMaps, overlayMaps, { position: 'topleft', collapsed: false }).addTo(map);
     // - Disable the following annoying default Leaflet keyboard shortcuts:
@@ -296,6 +297,23 @@ function createFileMenu(controller) {
 function hideModalInsert() {
     const modalInsert = document.getElementById('modalInsert');
     modalInsert.classList.remove('visible');
+}
+
+/**
+ * @returns {undefined}
+ */
+function addZoomToFitButon() {
+    const leafletHookDiv = document.querySelector('div.leaflet-top.leaflet-left');
+    const div = document.createElement('div');
+    div.classList.add('leaflet-control', 'leaflet-touch', 'leaflet-control-layers', 'leaflet-bar');
+    const button = document.createElement('button');
+    button.classList.add('leaflet-custom-control-button');
+    button.textContent = 'Zoom to Fit';
+    button.addEventListener('click', function() {
+        LeafletLayer.map.fitBounds(LeafletLayer.nodeLayers.getBounds());
+    });
+    div.appendChild(button);
+    leafletHookDiv.appendChild(div);
 }
 
 (function loadInterface() {
