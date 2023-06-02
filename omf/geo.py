@@ -1305,7 +1305,7 @@ def transform_wgs84_coordinates(omd, center=None, vertical_translation=None, hor
             if horizontal_translation is not None:
                 # - The distance that 1 degree of longitude represents depends on the given latitude. Assume the earth has a radius of 6,378 km
                 #   - Distance of 1 degree of longitude = cos(<given latitude>) * distance of 1 degree of latitude
-                #   - Distance of 1 degree of longitude = cos(<given latitude>) * ((6,378,000 m * (pi / 2)) / 90) v['longitude'] =
+                #   - Distance of 1 degree of longitude = cos(<given latitude>) * ((6,378,000 m * (pi / 2)) / 90)
                 v['longitude'] = float(v['longitude']) + (1 / (math.cos(math.radians(float(v['latitude']))) * there_are_this_many_meters_in_one_degree_of_latitude)) * horizontal_translation
     if rotation is not None:
         # - Need to get the bounds again just in case anything was shifted

@@ -3,6 +3,7 @@ import { ColorModal } from './colorModal.js';
 import { Feature } from  './feature.js';
 import { FeatureController } from './featureController.js';
 import { GeojsonModal } from './geojsonModal.js';
+import { hideModalInsert } from './main.js'
 import { Modal } from './modal.js';
 
 /*
@@ -80,17 +81,31 @@ function _getAnonymizationModal(observable, controller) {
     locationsHeadingDiv.classList.add('centerCrossAxisFlex');
     locationsHeadingDiv.appendChild(locationsHeading);
     // - Locations inputs
+    //  - Coordinates input
     const coordinatesInput = document.createElement('input');
     coordinatesInput.name = 'new_center_coords';
+    coordinatesInput.placeholder = 'lat, lon';
+    coordinatesInput.pattern = '\\(?(-?\\d+(\\.\\d+)?),\\s*(-?\\d+(\\.\\d+)?)\\)?';
+    //  - Horizontal translation input
     const horizontalTranslationInput = document.createElement('input');
     horizontalTranslationInput.name = 'translateRight';
+    horizontalTranslationInput.placeholder = '(+/-)meters';
+    horizontalTranslationInput.pattern = '[-+]?\\d+';
+    //  - Vertical translation input
     const verticalTranslationInput = document.createElement('input');
     verticalTranslationInput.name = 'translateUp'
+    verticalTranslationInput.placeholder = '(+/-)meters';
+    verticalTranslationInput.pattern = '[-+]?\\d+';
+    //  - Rotation input
     const rotationInput = document.createElement('input');
     rotationInput.name = 'rotate';
+    rotationInput.placeholder = '(+/-)angle°';
+    rotationInput.pattern = '[-+]?\\d+(\\.\\d+)?'
+    //  - Scale input
     const scaleInput = document.createElement('input');
     scaleInput.name = 'scale';
     scaleInput.value = '.01';
+    scaleInput.pattern = '(\\d+)?(\\.\\d+)?';
     const scaleTipDiv = document.createElement('div');
     scaleTipDiv.textContent = 'Estimates: 0.001 = street-density, 0.01 = neighborhood-density, 0.1 = city-density, 1 = state-density';
     // - Electrical properties
@@ -125,6 +140,8 @@ function _getAnonymizationModal(observable, controller) {
     shuffleLoadsLabel.innerText = ' Shuffle Loads and Generators';
     const shuffleLoadsInput = document.createElement('input');
     shuffleLoadsInput.name = 'shufflePerc';
+    shuffleLoadsInput.placeholder = '(0-100)'
+    shuffleLoadsInput.pattern = '(\\d+)?(\\.\\d+)?';
     // - addNoiseCheckbox
     const addNoiseCheckbox = document.createElement('input');
     addNoiseCheckbox.id = 'addNoise';
@@ -135,6 +152,8 @@ function _getAnonymizationModal(observable, controller) {
     addNoiseLabel.innerText = 'Add Noise';
     const addNoiseInput = document.createElement('input');
     addNoiseInput.name = 'noisePerc';
+    addNoiseInput.placeholder = '(0-100)'
+    addNoiseInput.pattern = '(\\d+)?(\\.\\d+)?';
     // - Submit button
     const submitButton = _getSubmitButton();
     const submitDiv = _getSubmitDiv(submitButton);
@@ -213,6 +232,9 @@ function _getAnonymizationModal(observable, controller) {
         let value = '';
         if (this.checked) {
             value = 'shuffleLoadGen';
+        } else {
+            shuffleLoadsInput.setCustomValidity('');
+            shuffleLoadsInput.value = '';
         }
         observable.setProperty(this.name, value, 'formProps');
         let parentElement = this.parentElement;
@@ -229,14 +251,26 @@ function _getAnonymizationModal(observable, controller) {
         }
     });
     shuffleLoadsInput.addEventListener('change', function() {
-        const value = this.value.trim();
-        observable.setProperty(this.name, value, 'formProps');
+        this.setCustomValidity('');
+        const value = +this.value.trim();
+        if (isNaN(value)) {
+            this.setCustomValidity('Please enter a valid integer or float.');
+            this.reportValidity();
+        } else if (value <= 0 || value > 100 || this.validity.patternMismatch) {
+            this.setCustomValidity('Please enter a valid integer or float greater than 0 and less than or equal to 100.');
+            this.reportValidity();
+        } else if (this.validity.valid) {
+            observable.setProperty(this.name, value, 'formProps');
+        }
     });
     // - addNoiseCheckbox
     addNoiseCheckbox.addEventListener('change', function() {
         let value = '';
         if (this.checked) {
             value = 'addNoise';
+        } else {
+            addNoiseInput.setCustomValidity('');
+            addNoiseInput.value = '';
         }
         observable.setProperty(this.name, value, 'formProps');
         let parentElement = this.parentElement;
@@ -253,23 +287,44 @@ function _getAnonymizationModal(observable, controller) {
         }
     });
     addNoiseInput.addEventListener('change', function() {
-        const value = this.value.trim();
-        observable.setProperty(this.name, value, 'formProps');
+        this.setCustomValidity('');
+        const value = +this.value.trim();
+        if (isNaN(value)) {
+            this.setCustomValidity('Please enter a valid integer or float.');
+            this.reportValidity();
+        } else if (value <= 0 || value > 100 || this.validity.patternMismatch) {
+            this.setCustomValidity('Please enter a valid integer or float greater than 0 and less than or equal to 100.');
+            this.reportValidity();
+        } else if (this.validity.valid) {
+            observable.setProperty(this.name, value, 'formProps');
+        }
     });
     // - Modal
     const mainModal = new Modal();
     mainModal.addStyleClasses(['outerModal', 'fitContent'], 'divElement');
+    const modalInsert = document.getElementById('modalInsert');
     submitButton.addEventListener('click', async function() {
-        const saveFeature = _getSaveFeature();
-        saveFeature.setProperty('feederObjectJson', JSON.stringify(controller.observableGraph.getObservableExportData()), 'formProps');
-        const saveModal = _getSaveModal(controller);
-        const modalInsert = document.getElementById('modalInsert');
-        modalInsert.replaceChildren(saveModal.divElement);
-        await controller.submitFeature(saveFeature, saveModal, false);
-        document.getElementById('modalInsert').classList.add('visible');
-        modalInsert.replaceChildren(mainModal.divElement);
-        mainModal.showProgress(true, 'Anonymization working...', ['caution']);
-        controller.submitFeature(observable, mainModal);
+        if (coordinatesInput.checkValidity() && horizontalTranslationInput.checkValidity() && verticalTranslationInput.checkValidity() && rotationInput.checkValidity() && scaleInput.checkValidity() && shuffleLoadsInput.checkValidity() && addNoiseInput.checkValidity()) {
+            modalInsert.removeEventListener('click', hideModalInsert);
+            const saveFeature = _getSaveFeature();
+            saveFeature.setProperty('feederObjectJson', JSON.stringify(controller.observableGraph.getObservableExportData()), 'formProps');
+            const saveModal = _getSaveModal(controller);
+            modalInsert.replaceChildren(saveModal.divElement);
+            await controller.submitFeature(saveFeature, saveModal, null, false);
+            modalInsert.removeEventListener('click', hideModalInsert);
+            document.getElementById('modalInsert').classList.add('visible');
+            modalInsert.replaceChildren(mainModal.divElement);
+            mainModal.showProgress(true, 'Anonymization working...', ['caution']);
+            controller.submitFeature(observable, mainModal, submitButton);
+        } else {
+            coordinatesInput.reportValidity();
+            horizontalTranslationInput.reportValidity();
+            verticalTranslationInput.reportValidity();
+            rotationInput.reportValidity();
+            scaleInput.reportValidity();
+            shuffleLoadsInput.reportValidity();
+            addNoiseInput.reportValidity();
+        }
     });
     mainModal.setTitle('Anonymization');
     mainModal.addStyleClasses(['horizontalFlex', 'centerMainAxisFlex', 'centerCrossAxisFlex'], 'titleElement');
@@ -278,7 +333,7 @@ function _getAnonymizationModal(observable, controller) {
     mainModal.insertElement(locationsHeadingDiv);
     mainModal.insertElement(locationsSelectDiv);
     const translateModal = new Modal();
-    translateModal.insertTBodyRow(['Shift center to', coordinatesInput, '(latitude, longitude) coordinates']);
+    translateModal.insertTBodyRow(['Shift center to', coordinatesInput, '(latitude, longitude) coordinates within the contiguous/non-contiguous USA']);
     translateModal.insertTBodyRow(['Translate', horizontalTranslationInput, 'meters rightwards']);
     translateModal.insertTBodyRow(['Translate', verticalTranslationInput, 'meters upwards']);
     translateModal.insertTBodyRow(['Rotate', rotationInput, 'degrees counterclockwise']);
@@ -397,15 +452,16 @@ function getSaveDiv(controller) {
     }
     const saveFeature = _getSaveFeature();
     const modal = _getSaveModal(controller);
-    const modalInsert = document.getElementById('modalInsert');
     const div = _getMenuDiv('Save');
     div.id = 'saveDiv';
+    const modalInsert = document.getElementById('modalInsert');
     div.addEventListener('click', function() {
+        modalInsert.removeEventListener('click', hideModalInsert);
         modalInsert.replaceChildren(modal.divElement);
         modalInsert.classList.add('visible');
         // - I only export features that were originally in the OMD (i.e. those features with numeric tree keys)
         saveFeature.setProperty('feederObjectJson', JSON.stringify(controller.observableGraph.getObservableExportData()), 'formProps')
-        controller.submitFeature(saveFeature, modal, false); 
+        controller.submitFeature(saveFeature, modal, null, false); 
     });
     return div;
 }
@@ -454,8 +510,8 @@ function getRawDataDiv(controller) {
         throw TypeError('"controller" argument must be instanceof FeatureController.');
     }
     const modal = _getRawDataModal(controller);
-    const modalInsert = document.getElementById('modalInsert');
     const div = _getMenuDiv('View Raw Data');
+    const modalInsert = document.getElementById('modalInsert');
     div.addEventListener('click', function() {
         modalInsert.replaceChildren(modal.divElement);
         modalInsert.classList.add('visible');
@@ -497,18 +553,20 @@ function _getRenameModal(observable, controller) {
     // - Modal
     const renameModal = new Modal();
     renameModal.addStyleClasses(['outerModal', 'fitContent'], 'divElement');
+    const modalInsert = document.getElementById('modalInsert');
     submitButton.addEventListener('click', async function() {
         if (input.checkValidity()) {
+            modalInsert.removeEventListener('click', hideModalInsert);
             const saveFeature = _getSaveFeature();
             saveFeature.setProperty('feederObjectJson', JSON.stringify(controller.observableGraph.getObservableExportData()), 'formProps')
             const saveModal = _getSaveModal(controller);
-            const modalInsert = document.getElementById('modalInsert');
             modalInsert.replaceChildren(saveModal.divElement);
-            await controller.submitFeature(saveFeature, saveModal, false);
+            await controller.submitFeature(saveFeature, saveModal, null, false);
+            modalInsert.removeEventListener('click', hideModalInsert);
             document.getElementById('modalInsert').classList.add('visible');
             modalInsert.replaceChildren(renameModal.divElement);
             renameModal.showProgress(true, 'Renaming feeder...', ['caution']);
-            controller.submitFeature(observable, renameModal);
+            controller.submitFeature(observable, renameModal, submitButton);
         } else {
             input.reportValidity();
         }
@@ -548,8 +606,8 @@ function getRenameDiv(controller) {
         type: 'Feature'
     });
     const modal = _getRenameModal(feature, controller);
-    const modalInsert = document.getElementById('modalInsert');
     const div = _getMenuDiv('Rename...');
+    const modalInsert = document.getElementById('modalInsert');
     div.addEventListener('click', function() {
         modalInsert.replaceChildren(modal.divElement);
         modalInsert.classList.add('visible');
@@ -576,6 +634,7 @@ function _getLoadFeederModal(observable, controller) {
         publicFeeders.sort((a, b) => a.name.localeCompare(b.name, 'en', {numeric: true}));
     }
     const publicFeedersModal = new Modal();
+    const modalInsert = document.getElementById('modalInsert');
     publicFeeders.map(obj => {
         const outerDiv = document.createElement('div');
         const nameDiv = document.createElement('div');
@@ -585,6 +644,7 @@ function _getLoadFeederModal(observable, controller) {
         modelDiv.textContent = `from "${obj.model}"`;
         outerDiv.appendChild(modelDiv);
         outerDiv.addEventListener('click', function() {
+            modalInsert.removeEventListener('click', hideModalInsert);
             observable.setProperty('fileExistsUrl', {
                 method: 'GET', 
                 url: `/uniqObjName/Feeder/public/${obj.name}/${obj.model}`
@@ -617,6 +677,7 @@ function _getLoadFeederModal(observable, controller) {
         modelDiv.textContent = `from "${obj.model}"`;
         outerDiv.appendChild(modelDiv);
         outerDiv.addEventListener('click', function() {
+            modalInsert.removeEventListener('click', hideModalInsert);
             observable.setProperty('fileExistsUrl', {
                 method: 'GET',
                 // - Let's say I'm an admin viewing some user's file. gCurrentUser = "admin" and gThisOwner = "test". userFeeders is all of the
@@ -668,8 +729,8 @@ function getLoadFeederDiv(controller) {
         'type': 'Feature'
     });
     const modal = _getLoadFeederModal(feature, controller);
-    const modalInsert = document.getElementById('modalInsert');
     const div = _getMenuDiv('Load from Model...');
+    const modalInsert = document.getElementById('modalInsert');
     div.addEventListener('click', function() {
         modalInsert.replaceChildren(modal.divElement);
         modalInsert.classList.add('visible');
@@ -699,10 +760,12 @@ function _getBlankFeederModal(observable, controller) {
     // - Modal
     const modal = new Modal();
     modal.addStyleClasses(['outerModal', 'fitContent'], 'divElement');
+    const modalInsert = document.getElementById('modalInsert');
     submitButton.addEventListener('click', function() {
         if (input.checkValidity()) {
+            modalInsert.removeEventListener('click', hideModalInsert);
             modal.showProgress(true, 'Creating new blank feeder...', ['caution']);
-            controller.submitFeature(observable, modal);
+            controller.submitFeature(observable, modal, submitButton);
         } else {
             input.reportValidity();
         }
@@ -744,8 +807,8 @@ function getBlankFeederDiv(controller) {
         type: 'Feature'
     });
     const modal = _getBlankFeederModal(feature, controller);
-    const modalInsert = document.getElementById('modalInsert');
     const div = _getMenuDiv('New blank feeder...');
+    const modalInsert = document.getElementById('modalInsert');
     div.addEventListener('click', function() {
         modalInsert.replaceChildren(modal.divElement);
         modalInsert.classList.add('visible');
@@ -811,10 +874,12 @@ function _getWindmilModal(observable, controller) {
     // - Modal
     const modal = new Modal();
     modal.addStyleClasses(['outerModal', 'fitContent'], 'divElement');
+    const modalInsert = document.getElementById('modalInsert');
     submitButton.addEventListener('click', function() {
         if (nameInput.checkValidity() && stdInput.checkValidity() && seqInput.checkValidity()) {
+            modalInsert.removeEventListener('click', hideModalInsert);
             modal.showProgress(true, 'Importing file...', ['caution']);
-            controller.submitFeature(observable, modal);
+            controller.submitFeature(observable, modal, submitButton);
         } else {
             nameInput.reportValidity();
             stdInput.reportValidity();
@@ -868,8 +933,8 @@ function getWindmilDiv(controller) {
         type: 'Feature'
     });
     const modal = _getWindmilModal(feature, controller);
-    const modalInsert = document.getElementById('modalInsert');
     const div = _getMenuDiv('Windmil conversion...');
+    const modalInsert = document.getElementById('modalInsert');
     div.addEventListener('click', function() {
         modalInsert.replaceChildren(modal.divElement);
         modalInsert.classList.add('visible');
@@ -922,10 +987,12 @@ function _getGridlabdModal(observable, controller) {
     // - Modal
     const modal = new Modal();
     modal.addStyleClasses(['outerModal', 'fitContent'], 'divElement');
+    const modalInsert = document.getElementById('modalInsert');
     submitButton.addEventListener('click', function() {
         if (nameInput.checkValidity() && glmInput.checkValidity()) {
+            modalInsert.removeEventListener('click', hideModalInsert);
             modal.showProgress(true, 'Importing file...', ['caution']);
-            controller.submitFeature(observable, modal);
+            controller.submitFeature(observable, modal, submitButton);
         } else {
             nameInput.reportValidity();
             glmInput.reportValidity();
@@ -976,8 +1043,8 @@ function getGridlabdDiv(controller) {
         type: 'Feature'
     });
     const modal = _getGridlabdModal(feature, controller);
-    const modalInsert = document.getElementById('modalInsert');
     const div = _getMenuDiv('GridLAB-D conversion...');
+    const modalInsert = document.getElementById('modalInsert');
     div.addEventListener('click', function() {
         modalInsert.replaceChildren(modal.divElement);
         modalInsert.classList.add('visible');
@@ -1029,10 +1096,12 @@ function _getCymdistModal(observable, controller) {
     // - Modal
     const modal = new Modal();
     modal.addStyleClasses(['outerModal', 'fitContent'], 'divElement');
+    const modalInsert = document.getElementById('modalInsert');
     submitButton.addEventListener('click', function() {
         if (nameInput.checkValidity() && mdbInput.checkValidity()) {
+            modalInsert.removeEventListener('click', hideModalInsert);
             modal.showProgress(true, 'Importing file...', ['caution']);
-            controller.submitFeature(observable, modal);
+            controller.submitFeature(observable, modal, submitButton);
         } else {
             nameInput.reportValidity();
             mdbInput.reportValidity();
@@ -1083,8 +1152,8 @@ function getCymdistDiv(controller) {
         type: 'Feature'
     });
     const modal = _getCymdistModal(feature, controller);
-    const modalInsert = document.getElementById('modalInsert');
     const div = _getMenuDiv('CYMDIST conversion...');
+    const modalInsert = document.getElementById('modalInsert');
     div.addEventListener('click', function() {
         modalInsert.replaceChildren(modal.divElement);
         modalInsert.classList.add('visible');
@@ -1137,10 +1206,12 @@ function _getOpendssModal(observable, controller) {
     // - Modal
     const modal = new Modal();
     modal.addStyleClasses(['outerModal', 'fitContent'], 'divElement');
+    const modalInsert = document.getElementById('modalInsert');
     submitButton.addEventListener('click', function() {
         if (nameInput.checkValidity() && dssInput.checkValidity()) {
+            modalInsert.removeEventListener('click', hideModalInsert);
             modal.showProgress(true, 'Importing .dss file...', ['caution']);
-            controller.submitFeature(observable, modal);
+            controller.submitFeature(observable, modal, submitButton);
         } else {
             nameInput.reportValidity();
             dssInput.reportValidity();
@@ -1191,8 +1262,8 @@ function getOpendssDiv(controller) {
         type: 'Feature'
     });
     const modal = _getOpendssModal(feature, controller);
-    const modalInsert = document.getElementById('modalInsert');
     const div = _getMenuDiv('OpenDSS conversion...');
+    const modalInsert = document.getElementById('modalInsert');
     div.addEventListener('click', function() {
         modalInsert.replaceChildren(modal.divElement);
         modalInsert.classList.add('visible');
@@ -1244,9 +1315,15 @@ function _getAmiModal(observable, controller) {
     // - Modal
     const modal = new Modal();
     modal.addStyleClasses(['outerModal', 'fitContent'], 'divElement');
+    const modalInsert = document.getElementById('modalInsert');
     submitButton.addEventListener('click', function() {
-        modal.showProgress(true, 'Importing file...', ['caution']);
-        controller.submitFeature(observable, modal);
+        if (amiInput.checkValidity()) {
+            modalInsert.removeEventListener('click', hideModalInsert);
+            modal.showProgress(true, 'Importing file...', ['caution']);
+            controller.submitFeature(observable, modal, submitButton);
+        } else {
+            amiInput.reportValidity();
+        }
     });
     modal.setTitle('AMI Profiles');
     modal.addStyleClasses(['horizontalFlex', 'centerMainAxisFlex', 'centerCrossAxisFlex'], 'titleElement');
@@ -1292,8 +1369,8 @@ function getAmiDiv(controller) {
         type: 'Feature'
     });
     const modal = _getAmiModal(feature, controller);
-    const modalInsert = document.getElementById('modalInsert');
     const div = _getMenuDiv('Add AMI Profiles...');
+    const modalInsert = document.getElementById('modalInsert');
     div.addEventListener('click', function() {
         modalInsert.replaceChildren(modal.divElement);
         modalInsert.classList.add('visible');
@@ -1407,8 +1484,8 @@ function getAttachmentsDiv(controller) {
     if (!(controller instanceof FeatureController)) {
         throw TypeError('"controller" argument must be instanceof FeatureController.');
     }
-    const modalInsert = document.getElementById('modalInsert');
     const div = _getMenuDiv('Attachments...');
+    const modalInsert = document.getElementById('modalInsert');
     div.addEventListener('click', function() {
         const modal = _getAttachmentsModal(controller);
         modalInsert.replaceChildren(modal.divElement);
@@ -1501,9 +1578,11 @@ function _getClimateModal(observable, controller) {
     });
     // - Modal
     const mainModal = new Modal();
+    const modalInsert = document.getElementById('modalInsert');
     submitButton.addEventListener('click', function() {
+        modalInsert.removeEventListener('click', hideModalInsert);
         mainModal.showProgress(true, 'Adding climate data...', ['caution']);
-        controller.submitFeature(observable, mainModal);
+        controller.submitFeature(observable, mainModal, submitButton);
     });
     mainModal.addStyleClasses(['outerModal', 'fitContent'], 'divElement');
     mainModal.setTitle('Climate Change');
@@ -1572,8 +1651,8 @@ function getClimateDiv(controller) {
         type: 'Feature'
     });
     const modal =_getClimateModal(feature, controller);
-    const modalInsert = document.getElementById('modalInsert');
     const div = _getMenuDiv('Climate...');
+    const modalInsert = document.getElementById('modalInsert');
     div.addEventListener('click', function() {
         modalInsert.replaceChildren(modal.divElement);
         modalInsert.classList.add('visible');
@@ -1625,9 +1704,15 @@ function _getScadaModal(observable, controller) {
     // - Modal
     const modal = new Modal();
     modal.addStyleClasses(['outerModal', 'fitContent'], 'divElement');
+    const modalInsert = document.getElementById('modalInsert');
     submitButton.addEventListener('click', function() {
-        modal.showProgress(true, 'Importing file...', ['caution']);
-        controller.submitFeature(observable, modal);
+        if (scadaInput.checkValidity()) {
+            modalInsert.removeEventListener('click', hideModalInsert);
+            modal.showProgress(true, 'Importing file...', ['caution']);
+            controller.submitFeature(observable, modal, submitButton);
+        } else {
+            scadaInput.reportValidity();
+        }
     });
     modal.setTitle('SCADA Loadshapes');
     modal.addStyleClasses(['horizontalFlex', 'centerMainAxisFlex', 'centerCrossAxisFlex'], 'titleElement');
@@ -1673,8 +1758,8 @@ function getScadaDiv(controller) {
         type: 'Feature'
     });
     const modal = _getScadaModal(feature, controller);
-    const modalInsert = document.getElementById('modalInsert');
     const div = _getMenuDiv('SCADA Loadshapes...');
+    const modalInsert = document.getElementById('modalInsert');
     div.addEventListener('click', function() {
         modalInsert.replaceChildren(modal.divElement);
         modalInsert.classList.add('visible');
@@ -1692,8 +1777,8 @@ function getColorDiv(controller) {
     }
     const colorModal = new ColorModal([controller.observableGraph.getObservable('omd')], controller);
     const divElement = colorModal.getDOMElement();
-    const modalInsert = document.getElementById('modalInsert');
     const div = _getMenuDiv('Color circuit...');
+    const modalInsert = document.getElementById('modalInsert');
     div.addEventListener('click', function() {
         modalInsert.replaceChildren(divElement);
         modalInsert.classList.add('visible');
@@ -1711,8 +1796,8 @@ function getGeojsonDiv(controller) {
     }
     const geojsonModal = new GeojsonModal([controller.observableGraph.getObservable('omd')], controller);
     const divElement = geojsonModal.getDOMElement();
-    const modalInsert = document.getElementById('modalInsert');
     const div = _getMenuDiv('Add GeoJSON data...');
+    const modalInsert = document.getElementById('modalInsert');
     div.addEventListener('click', function() {
         modalInsert.replaceChildren(divElement);
         modalInsert.classList.add('visible');

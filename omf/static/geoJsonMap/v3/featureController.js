@@ -2,6 +2,7 @@ export { FeatureController };
 import { Feature } from './feature.js';
 import { FeatureGraph } from './featureGraph.js';
 import { LeafletLayer } from './leafletLayer.js';
+import { hideModalInsert } from './main.js';
 import { Modal } from './modal.js';
 
 class FeatureController { // implements ControllerInterface
@@ -164,20 +165,28 @@ class FeatureController { // implements ControllerInterface
      * - Send an AJAX request to the server
      * @param {Feature} observable - the ObservableInterface instance to submit
      * @param {ModalFeatureModal} modal
+     * @param {HTMLButtonElement} submitButton - a button to enable/disable depending on the state of the operation
      * @param {boolean} reload - whether or not to reload the page. This is necessary when chaining multiple operations together (e.g. every rename
      * operation must be preceeded by a save operation)
      * @returns {undefined}
      */
-    async submitFeature(observable, modal, reload=true) {
+    async submitFeature(observable, modal, submitButton=null, reload=true) {
         if (!(observable instanceof Feature)) {
             throw TypeError('"observable" argument must be instanceof Feature.');
         }
         if (!(modal instanceof Modal)) {
             throw TypeError('"modal" argument must be instanceof Modal.');
         }
+        if (!(submitButton instanceof HTMLButtonElement) && !(submitButton === null)) {
+            throw TypeError('"submitButton" argument must be instanceof HTMLButtonElement or null');
+        }
         if (typeof reload !== 'boolean') {
             throw TypeError('"reload" argument must be a boolean.');
         }
+        if (submitButton !== null) {
+            submitButton.disabled = true;
+        }
+        const modalInsert = document.getElementById('modalInsert');
         let data;
         if (observable.hasProperty('fileExistsUrl', 'urlProps')) {
             try {
@@ -193,6 +202,10 @@ class FeatureController { // implements ControllerInterface
                     case 'modal:gridlabd':
                         if (data.exists === true) {
                             modal.showProgress(false, 'You already have a feeder with that name. Please choose a different name', ['caution']);
+                            if (submitButton !== null) {
+                                submitButton.disabled = false;
+                            }
+                            modalInsert.addEventListener('click', hideModalInsert);
                             return;
                         }
                         break;
@@ -205,10 +218,18 @@ class FeatureController { // implements ControllerInterface
                     default:
                         if (data.exists !== true) {
                             modal.showProgress(false, 'This feeder no longer exists on the server, so the operation failed. Please save and try again.', ['caution']);
+                            if (submitButton !== null) {
+                                submitButton.disabled = false;
+                            }
+                            modalInsert.addEventListener('click', hideModalInsert);
                         }
                 }
             } catch {
                 modal.showProgress(false, 'The server raised an internal exception during the operation. Please save before trying again.', ['caution']); 
+                if (submitButton !== null) {
+                    submitButton.disabled = false;
+                }
+                modalInsert.addEventListener('click', hideModalInsert);
                 return;
             }
         }
@@ -228,6 +249,10 @@ class FeatureController { // implements ControllerInterface
             });
         } catch {
             modal.showProgress(false, 'The server raised an internal exception during the operation. Please save before trying again.', ['caution']); 
+            if (submitButton !== null) {
+                submitButton.disabled = false;
+            }
+            modalInsert.addEventListener('click', hideModalInsert);
             return;
         }
         const that = this;
@@ -235,11 +260,19 @@ class FeatureController { // implements ControllerInterface
         if (!observable.hasProperty('pollUrl', 'urlProps')) {
             if (data === 'Failure') {
                 modal.showProgress(false, 'The server operation failed.', ['caution']);
+                if (submitButton !== null) {
+                    submitButton.disabled = false;
+                }
+                modalInsert.addEventListener('click', hideModalInsert);
             } else {
                 if (reload) {
                     that.#reloadPage();
                 } else {
                     document.getElementById('modalInsert').classList.remove('visible');
+                    if (submitButton !== null) {
+                        submitButton.disabled = false;
+                    }
+                    modalInsert.addEventListener('click', hideModalInsert);
                 }
             }
         } else {
@@ -256,9 +289,17 @@ class FeatureController { // implements ControllerInterface
                             that.#reloadPage();
                         } else {
                             document.getElementById('modalInsert').classList.remove('visible');
+                            if (submitButton !== null) {
+                                submitButton.disabled = false;
+                            }
+                            modalInsert.addEventListener('click', hideModalInsert);
                         }
                     } else if (data.exists === undefined) {
                         clearInterval(intervalId);
+                        if (submitButton !== null) {
+                            submitButton.disabled = false;
+                        }
+                        modalInsert.addEventListener('click', hideModalInsert);
                         if (data === 'milError') {
                             modal.showProgress(false, 'The .std and .seq files used were incorrectly formatted. Please save before trying again.', ['caution']);
                         } else if (data === 'dssError') {
@@ -276,21 +317,28 @@ class FeatureController { // implements ControllerInterface
                                 data += '.';
                             }
                             data += ' Please save before trying again.';
-                            clearInterval(intervalId);
                             modal.showProgress(false, data, ['caution']);
                         }
                     // - The server process is ongoing, so let setInterval keep going
                     } else if (data.exists === true) {
                         // - Do nothing
                     } else {
+                        if (submitButton !== null) {
+                            submitButton.disabled = false;
+                        }
+                        modalInsert.addEventListener('click', hideModalInsert);
                         throw Error('Undefined value returned by server during the polling process.');
                     }
                 } catch {
                     clearInterval(intervalId);
                     modal.showProgress(false, 'The server raised an internal exception during the operation. Please save before trying again.', ['caution']);
+                    if (submitButton !== null) {
+                        submitButton.disabled = false;
+                    }
+                    modalInsert.addEventListener('click', hideModalInsert);
                     return;
                 }
-            }, 5000);
+            }, 10000);
         }
     }
 

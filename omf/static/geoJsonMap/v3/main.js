@@ -1,3 +1,4 @@
+export { hideModalInsert };
 import { DropdownDiv } from './dropdownDiv.js';
 import { Feature } from  './feature.js';
 import { FeatureGraph } from  './featureGraph.js';
@@ -109,11 +110,8 @@ function main() {
         }
         //console.log(e.key);
 	};
-    // - Allow the modal insert to be closed (remove this event listener when a server process is running)
     const modalInsert = document.getElementById('modalInsert');
-    modalInsert.addEventListener('click', function() {
-        modalInsert.classList.remove('visible');
-    });
+    modalInsert.addEventListener('click', hideModalInsert);
     setupHTML(controller);
 }
 
@@ -290,6 +288,14 @@ function createFileMenu(controller) {
     dropdownDiv.insertElement(getGridlabdDiv(controller));
     dropdownDiv.insertElement(getCymdistDiv(controller));
     dropdownDiv.insertElement(getOpendssDiv(controller));
+}
+
+/**
+ * @returns {undefined}
+ */
+function hideModalInsert() {
+    const modalInsert = document.getElementById('modalInsert');
+    modalInsert.classList.remove('visible');
 }
 
 (function loadInterface() {

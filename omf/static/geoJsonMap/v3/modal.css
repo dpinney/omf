@@ -133,6 +133,9 @@ div.js-div--modal button.add {
 div.js-div--modal button.add:hover {
     background-color: mediumseagreen;
 }
+div.js-div--modal button:disabled {
+    background-color: gray;
+}
 div.js-div--modal input {
     border: 1px solid black;
     font-size: var(--regularFontSize);
@@ -223,9 +226,6 @@ div.js-div--modal.featureEditModal table.table--modal td:nth-child(2) {
     max-width: 180px;
     width: 180px;
 }
-/*div.js-div--modal.featureEditModal table.table--modal input.invalid {
-    background-color: red;
-}*/
 
 /***********************/
 /* SearchModal styling */

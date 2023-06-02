@@ -392,7 +392,7 @@ class SearchModal {
         }
         observables.forEach(f => {
             Object.keys(f.getProperties('meta')).forEach(k => {
-                if (!['attachments', 'componentType', 'formProps', 'hiddenLinks', 'hiddenNodes', 'layoutVars', 'links', 'name2', 'nodes', 'owner',
+                if (!['attachments', 'componentType', 'formProps', 'hiddenLinks', 'hiddenNodes', 'layoutVars', 'links', 'name2', 'nodes', 'owner', 'syntax',
                     'treeProps', 'urlProps'].includes(k) && !metaKeys.includes(k)) {
                     metaKeys.push(k);
                 }
