@@ -1436,7 +1436,7 @@ function _getAttachmentsModal(controller) {
     });
     const saveDiv = _getSubmitDiv(saveButton);
     saveButtonModal.insertElement(saveDiv);
-    const resetButton = _getSubmitButton('Reset');
+    const resetButton = _getSubmitButton('Reset to last save');
     resetButton.classList.add('delete');
     resetButton.addEventListener('click', function() {
         textAreaModals.forEach(obj => {
