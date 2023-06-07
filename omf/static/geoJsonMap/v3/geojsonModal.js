@@ -290,25 +290,29 @@ class GeojsonModal { // implements ModalInterface, ObserverInterface
         if (attachments.hasOwnProperty('geojsonFiles')) {
             const that = this;
             for (const [filename, obj] of Object.entries(attachments.geojsonFiles)) {
-                const featureCollection = JSON.parse(obj.json);
-                const layerGroup = L.featureGroup();
-                featureCollection.features.map(f => new Feature(f)).map(f => new LeafletLayer(f, that.#controller)).forEach(ll => layerGroup.addLayer(ll.getLayer()));
-                const layerControl = L.control.layers(null, {[filename]: layerGroup}, { position: 'topleft', collapsed: false });
-                if (this.#filenameToLayerGroup.hasOwnProperty(filename)) {
-                    this.#filenameToLayerGroup[filename].layerGroup.remove();
-                    this.#filenameToLayerGroup[filename].layerControl.remove();
-                }
-                this.#filenameToLayerGroup[filename] = {
-                    layerGroup: layerGroup,
-                    layerControl: layerControl    
-                };
-                layerControl.addTo(LeafletLayer.map);
-                if (renderContent) {
-                    if (obj.displayOnLoad) {
+                try {
+                    const featureCollection = JSON.parse(obj.json);
+                    const layerGroup = L.featureGroup();
+                    featureCollection.features.map(f => new Feature(f)).map(f => new LeafletLayer(f, that.#controller)).forEach(ll => layerGroup.addLayer(ll.getLayer()));
+                    const layerControl = L.control.layers(null, {[filename]: layerGroup}, { position: 'topleft', collapsed: false });
+                    if (this.#filenameToLayerGroup.hasOwnProperty(filename)) {
+                        this.#filenameToLayerGroup[filename].layerGroup.remove();
+                        this.#filenameToLayerGroup[filename].layerControl.remove();
+                    }
+                    this.#filenameToLayerGroup[filename] = {
+                        layerGroup: layerGroup,
+                        layerControl: layerControl
+                    };
+                    layerControl.addTo(LeafletLayer.map);
+                    if (renderContent) {
+                        if (obj.displayOnLoad) {
+                            layerGroup.addTo(LeafletLayer.map);
+                        }
+                    } else {
                         layerGroup.addTo(LeafletLayer.map);
                     }
-                } else {
-                    layerGroup.addTo(LeafletLayer.map);
+                } catch (e) {
+                    console.log(`The GeoJSON in the attachments object could not be parsed: ${e}`);
                 }
             }
         }

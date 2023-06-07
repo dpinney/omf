@@ -32,13 +32,13 @@ class FeatureController { // implements ControllerInterface
             ob.setProperty('treeKey', key, 'meta');
             this.observableGraph.insertObservable(ob);
             if (!ob.isConfigurationObject()) {
-                new LeafletLayer(ob, this);
+                LeafletLayer.createAndGroupLayer(ob, this);
             }
             if (ob.isChild()) {
                 const parentKey = this.observableGraph.getKey(ob.getProperty('parent'), ob.getProperty('treeKey', 'meta'));
                 const parentChildLineFeature = this.observableGraph.getParentChildLineFeature(parentKey, key);
                 this.observableGraph.insertObservable(parentChildLineFeature);
-                new LeafletLayer(parentChildLineFeature, this);
+                LeafletLayer.createAndGroupLayer(parentChildLineFeature, this);
             }
         });
     }

@@ -115,6 +115,7 @@ div.js-div--modal button {
     border-radius: 5px;
     color: white;
     cursor: pointer;
+    max-width: 400px;
     padding: .15rem;
     z-index: 1;
 }
@@ -156,6 +157,7 @@ div.js-div--modal span {
 }
 div.js-div--modal textarea {
     height: 100%;
+    height: calc(100% - 84px);
     width: 100%;
 }
 div.js-div--modal table.table--modal span {
@@ -174,6 +176,7 @@ div.div--modalBanner.hidden {
     display: none;
 }
 div.div--modalTitle span {
+    /* This is 57px tall */
     font-size: 32px;
     font-weight: bold;
     padding: var(--regularFontPadding);
@@ -183,8 +186,11 @@ div.div--modalTitle.caution {
 }
 div.div--modalElementContainer {
     height: 100%;
-    /* HACK: I should know how to subtract 100% of the height to get an actual height instead of guessing */
-    max-height: 92%;
+    /* HACK: I should know how to subtract 100% of the height to get an actual height instead of guessing. This should be 92% default because that
+    makes the "Load Feeder" modal take up most of the space without leaving a big white zone at the bottom. The problem is the title takes up space in
+    a modal element container, so I can't just use 100%. 92% is actually fine. Use custom CSS for one-offs like the attachments modal. 89% works too.
+    */
+    max-height: calc(100% - 61px);
     width: 100%;
 }
 table.table--modal {

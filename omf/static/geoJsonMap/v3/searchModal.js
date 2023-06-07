@@ -197,7 +197,9 @@ class SearchModal {
     renderContent() {
         const modal = new Modal();
         modal.addStyleClasses(['outerModal', 'searchModal'], 'divElement');
-        modal.insertTBodyRow([null, null, this.#getKeySelect(), this.#getOperatorSelect(), null], 'beforeEnd');
+        const keySelect = this.#getKeySelect();
+        modal.insertTBodyRow([null, null, keySelect, this.#getOperatorSelect(), this.#getValueTextInput()], 'beforeEnd');
+        this.#handleKeySelectChange(keySelect);
         modal.insertTBodyRow([this.#getAddRowButton()], 'append', ['absolute']);
         modal.addStyleClasses(['centeredTable'], 'tableElement');
         modal.insertElement(this.#getSearchButton());
@@ -411,35 +413,7 @@ class SearchModal {
         option.text = '<All Fields>';
         option.value = 'searchModalSearchAllFields';
         keySelect.add(option);
-        const that = this;
-        keySelect.addEventListener('change', function() {
-            let parentElement = this.parentElement;
-            while (!(parentElement instanceof HTMLTableRowElement)) {
-                parentElement = parentElement.parentElement;
-            }
-            const valueTextInput = parentElement.querySelector('input[data-role="valueInput"]');
-            const operatorSelect = parentElement.querySelector('select[data-role="operatorSelect"]');
-            if (keySelect.selectedIndex === 0) {
-                if (valueTextInput === null) {
-                    parentElement.lastChild.appendChild(that.#getValueTextInput());
-                }
-                const newOperatorSelect = document.createElement('select');
-                newOperatorSelect.dataset.role = 'operatorSelect';
-                ['contains', '! contains'].forEach(o => {
-                    const option = document.createElement('option');
-                    option.text = o;
-                    option.value = o;
-                    newOperatorSelect.add(option);
-                });
-                newOperatorSelect.value = 'contains';
-                operatorSelect.replaceWith(newOperatorSelect);
-            } else {
-                const oldValue = operatorSelect.value;
-                const newOperatorSelect = that.#getOperatorSelect();
-                newOperatorSelect.value = oldValue;
-                operatorSelect.replaceWith(newOperatorSelect);
-            }
-        });
+        keySelect.addEventListener('change', this.#handleKeySelectChange.bind(this, keySelect));
         // - Add regular keys
         metaKeys.sort((a, b) => a.localeCompare(b));
         keys.sort((a, b) => a.localeCompare(b));
@@ -462,7 +436,7 @@ class SearchModal {
             keySelect.add(option);
         });
         for (const op of keySelect.options) {
-            if (op.value === 'treeKey') {
+            if (op.value === 'searchModalSearchAllFields') {
                 keySelect.selectedIndex = op.index;
             }
         }
@@ -508,6 +482,11 @@ class SearchModal {
                 }
             }
         });
+        for (const op of select.options) {
+            if (op.value === 'contains') {
+                select.selectedIndex = op.index;
+            }
+        }
         return select;
     }
 
@@ -553,7 +532,6 @@ class SearchModal {
             }
             return flag;
         };
-        //return func;
         return func.bind(this);
     }
 
@@ -601,6 +579,44 @@ class SearchModal {
         div.classList.add('centerCrossAxisFlex');
         div.classList.add('halfWidth');
         return div;
+    }
+
+    /**
+     * - This has to be a function because it's used as an event handler and it's called separately on page load to supply a correct operator select
+     * @param {HTMLSelectElement} select
+     * @returns {undefined}
+     */
+    #handleKeySelectChange(select) {
+        if (!(select instanceof HTMLSelectElement)) {
+            throw TypeError('"select" argument must be instanceof HTMLSelectElement');
+        }
+        let parentElement = select.parentElement;
+        while (!(parentElement instanceof HTMLTableRowElement)) {
+            parentElement = parentElement.parentElement;
+        }
+        const valueTextInput = parentElement.querySelector('input[data-role="valueInput"]');
+        const operatorSelect = parentElement.querySelector('select[data-role="operatorSelect"]');
+        // - This corresponds to the "<All Fields>" option being selected
+        if (select.selectedIndex === 0) {
+            if (valueTextInput === null) {
+                parentElement.lastChild.appendChild(this.#getValueTextInput());
+            }
+            const newOperatorSelect = document.createElement('select');
+            newOperatorSelect.dataset.role = 'operatorSelect';
+            ['contains', '! contains'].forEach(o => {
+                const option = document.createElement('option');
+                option.text = o;
+                option.value = o;
+                newOperatorSelect.add(option);
+            });
+            newOperatorSelect.value = 'contains';
+            operatorSelect.replaceWith(newOperatorSelect);
+        } else {
+            const oldValue = operatorSelect.value;
+            const newOperatorSelect = this.#getOperatorSelect();
+            newOperatorSelect.value = oldValue;
+            operatorSelect.replaceWith(newOperatorSelect);
+        }
     }
 
     /**
@@ -680,8 +696,8 @@ class SearchModal {
                 if (operator === 'contains') {
                     searchCriterion.searchFunction = function(ob) {
                         if (key === 'searchModalSearchAllFields') {
-                            for (const val of Object.values(ob.getProperties(namespace))) {
-                                if (val.toString().toLowerCase().includes(valueInputValue.toLowerCase())) {
+                            for (const [key, val] of Object.entries(ob.getProperties(namespace))) {
+                                if (val.toString().toLowerCase().includes(valueInputValue.toLowerCase()) || key.toString().toLowerCase().includes(valueInputValue.toLowerCase())) {
                                     return true;
                                 }
                             }
@@ -694,8 +710,8 @@ class SearchModal {
                 if (operator === '! contains') {
                     searchCriterion.searchFunction = function(ob) {
                         if (key === 'searchModalSearchAllFields') {
-                            for (const val of Object.values(ob.getProperties(namespace))) {
-                                if (val.toString().toLowerCase().includes(valueInputValue.toLowerCase())) {
+                            for (const [key, val] of Object.entries(ob.getProperties(namespace))) {
+                                if (val.toString().toLowerCase().includes(valueInputValue.toLowerCase()) || key.toString().toLowerCase().includes(valueInputValue.toLowerCase())) {
                                     return false;
                                 }
                             }

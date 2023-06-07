@@ -1392,9 +1392,17 @@ function _getAttachmentsModal(controller) {
     mainModal.addStyleClasses(['horizontalFlex', 'centerMainAxisFlex', 'centerCrossAxisFlex'], 'titleElement');
     const omdFeature = controller.observableGraph.getObservable('omd');
     const attachments = omdFeature.getProperty('attachments', 'meta');
+    const textAreaModals = [];
     for (const [key, val] of Object.entries(attachments)) {
         if (typeof val === 'string') {
             const modal = _getTextAreaModal(key, key, val, attachments, omdFeature);
+            textAreaModals.push({
+                object: attachments,
+                propertyKey: key,
+                textArea: modal.divElement.querySelector('textarea'),
+                feature: omdFeature,
+                text: val
+            });
             mainModal.insertElement(modal.divElement);
         } else if (typeof val === 'object') {
             const nestedObjects = _getNestedObjects(val);
@@ -1402,11 +1410,46 @@ function _getAttachmentsModal(controller) {
                 for (const [innerKey, text] of Object.entries(obj.object)) {
                     if (typeof text === 'string') {
                         const innerModal = _getTextAreaModal(`${obj.namespace} ${innerKey}`, innerKey, text, obj.object, omdFeature);
+                        textAreaModals.push({
+                            object: obj.object,
+                            propertyKey: innerKey,
+                            textArea: innerModal.divElement.querySelector('textarea'),
+                            feature: omdFeature,
+                            text: text
+                        });
                         mainModal.insertElement(innerModal.divElement);
                     }
                 }
             });
         }
+    }
+    const saveButtonModal = new Modal();
+    saveButtonModal.addStyleClasses(['fitContent'], 'divElement');
+    saveButtonModal.divElement.style.padding = '16px 0px 0px 0px';
+    const saveButton = _getSubmitButton('Save');
+    saveButton.addEventListener('click', function() {
+        textAreaModals.forEach(obj => {
+            obj.object[obj.propertyKey] = obj.textArea.value;
+            obj.feature.updatePropertyOfObservers('', '', '');
+            obj.text = obj.textArea.value;
+        });
+    });
+    const saveDiv = _getSubmitDiv(saveButton);
+    saveButtonModal.insertElement(saveDiv);
+    const resetButton = _getSubmitButton('Reset');
+    resetButton.classList.add('delete');
+    resetButton.addEventListener('click', function() {
+        textAreaModals.forEach(obj => {
+            obj.textArea.value = obj.text;
+        });
+    });
+    const resetDiv = _getSubmitDiv(resetButton);
+    saveButtonModal.insertElement(resetDiv);
+    saveButtonModal.addStyleClasses(['verticalFlex', 'centerMainAxisFlex', 'centerCrossAxisFlex'], 'containerElement');
+    const nestedModals = mainModal.divElement.querySelectorAll('div.js-div--modal');
+    if (nestedModals.length > 0) {
+        const lastNestedModal = nestedModals.item(nestedModals.length - 1)
+        lastNestedModal.querySelector('div.div--modalElementContainer').append(saveButtonModal.divElement);
     }
     return mainModal;
 }
@@ -1438,6 +1481,8 @@ function _getNestedObjects(obj, namespace='') {
 }
 
 /**
+ * - David wanted "save" and "cancel" buttons, so not all of these parameters are used anymore. Instead, these parameters are used to understand what
+ *   the "save" and "cancel" buttons do
  * @param {string} title
  * @param {string} propertyKey
  * @param {string} text
@@ -1468,10 +1513,10 @@ function _getTextAreaModal(title, propertyKey, text, object, feature) {
     modal.addStyleClasses(['horizontalFlex', 'centerCrossAxisFlex'], 'titleElement');
     const textArea = document.createElement('textarea');
     textArea.value = text;
-    textArea.addEventListener('change', function() {
-        object[propertyKey] = textArea.value;
-        feature.updatePropertyOfObservers('', '', '');
-    });
+    //textArea.addEventListener('change', function() {
+    //    object[propertyKey] = textArea.value;
+    //    feature.updatePropertyOfObservers('', '', '');
+    //});
     modal.insertElement(textArea);
     return modal;
 }

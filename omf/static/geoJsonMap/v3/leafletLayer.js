@@ -87,6 +87,26 @@ class LeafletLayer { // implements ObserverInterface
         const layer = Object.values(this.#layer._layers)[0]; 
         // - Why does this also delete the FeatureEditModal in the pop-up? I don't know but I have to deal with it
         layer.remove();
+        // - Need to explicitly remove the underlying layer from its LayerGroup
+        if (observable.isNode()) {
+            LeafletLayer.nodeLayers.removeLayer(this.#layer);
+        } else if (observable.isLine()) {
+            if (observable.isParentChildLine()) {
+                LeafletLayer.parentChildLineLayers.removeLayer(this.#layer);
+            } else {
+                LeafletLayer.lineLayers.removeLayer(this.#layer);
+            }
+        } else if (observable.isPolygon()) {
+            // - Do nothing for now
+        } else if (observable.isMultiPoint()) {
+            // - Do nothing for now
+        } else if (observable.isMultiLineString()) {
+            // - Do nothing for now
+        } else if (observable.isMultiPolygon()) {
+            // - Do nothing for now
+        } else {
+            throw Error('The observable does not reference a valid GeoJSON feature (is it a configuration object or GeometryCollection?)');
+        }
     }
 
     /**
@@ -136,6 +156,41 @@ class LeafletLayer { // implements ObserverInterface
     // ********************
     // ** Public methods **
     // ********************
+
+    /**
+     * - Creating a LeafletLayer with the constructor does not automatically add the underlying layer to a layer group by design. This function must
+     *   be called explicitly, or LayerGroups must be managed outside of this function
+     * @param {LeafletLayer} - layer
+     * @returns {undefined}
+     */
+    static createAndGroupLayer(observable, controller) {
+        if (!(observable instanceof Feature)) {
+            throw TypeError('"observable" argument must be instanceof Feature.');
+        }
+        if (!(controller instanceof FeatureController)) {
+            throw TypeError('"controller" argument must be instanceof FeatureController.');
+        }
+        const ll = new LeafletLayer(observable, controller);
+        if (observable.isNode()) {
+            LeafletLayer.nodeLayers.addLayer(ll.getLayer());
+        } else if (observable.isLine()) {
+            if (observable.isParentChildLine()) {
+                LeafletLayer.parentChildLineLayers.addLayer(ll.getLayer());
+            } else {
+                LeafletLayer.lineLayers.addLayer(ll.getLayer());
+            }
+        } else if (observable.isPolygon()) {
+            // - Do nothing for now
+        } else if (observable.isMultiPoint()) {
+            // - Do nothing for now
+        } else if (observable.isMultiLineString()) {
+            // - Do nothing for now
+        } else if (observable.isMultiPolygon()) {
+            // - Do nothing for now
+        } else {
+            throw Error('The observable does not reference a valid GeoJSON feature (is it a configuration object or GeometryCollection?)');
+        }
+    }
 
     /**
      * @returns {GeoJSON}

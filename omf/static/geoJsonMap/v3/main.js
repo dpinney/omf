@@ -31,26 +31,7 @@ function main() {
     featureGraph.getObservables().forEach(ob => {
         if (!ob.isConfigurationObject()) {
             // - Here, the first observer is added to every visible feature
-            const ll = new LeafletLayer(ob, controller);
-            if (ob.isNode()) {
-                LeafletLayer.nodeLayers.addLayer(ll.getLayer());
-            } else if (ob.isLine()) {
-                if (ob.isParentChildLine()) {
-                    LeafletLayer.parentChildLineLayers.addLayer(ll.getLayer());
-                } else {
-                    LeafletLayer.lineLayers.addLayer(ll.getLayer());
-                }
-            } else if (ob.isPolygon()) {
-                // - Do nothing for now
-            } else if (ob.isMultiPoint()) {
-                // - Do nothing for now
-            } else if (ob.isMultiLineString()) {
-                // - Do nothing for now
-            } else if (ob.isMultiPolygon()) {
-                // - Do nothing for now
-            } else {
-                throw Error('The observable does not reference a valid GeoJSON feature (is it a configuration object or GeometryCollection?)');
-            }
+            LeafletLayer.createAndGroupLayer(ob, controller);
         }
     });
     createNav(controller);
@@ -95,8 +76,9 @@ function main() {
         // - Better performance for large datasets
         renderer: L.canvas()
     });
-    addZoomToFitButon();
     LeafletLayer.map = map;
+    LeafletLayer.map.fitBounds(LeafletLayer.nodeLayers.getBounds());
+    addZoomToFitButon();
     L.control.layers(baseMaps, overlayMaps, { position: 'topleft', collapsed: false }).addTo(map);
     // - Disable the following annoying default Leaflet keyboard shortcuts:
     //  - TODO: do a better job and stop the event(s) from propagating in text inputs instead
@@ -203,7 +185,13 @@ function createNav(controller) {
             components = gComponentsCollection.features.filter(f => f.properties.componentType === 'opendss');
         }
     }
-    components = components.map(f => new Feature(f));
+    components = components.map(f => {
+        const feature = new Feature(f);
+        if (feature.hasProperty('name') && feature.getProperty('name').toString().toLowerCase() === 'null') {
+            feature.setProperty('name', 'new');
+        }
+        return feature;
+    });
     searchModal = new SearchModal(controller, components);
     componentTab.appendChild(searchModal.getDOMElement());
     searchResultsDiv = document.createElement('div');
@@ -308,7 +296,7 @@ function addZoomToFitButon() {
     div.classList.add('leaflet-control', 'leaflet-touch', 'leaflet-control-layers', 'leaflet-bar');
     const button = document.createElement('button');
     button.classList.add('leaflet-custom-control-button');
-    button.textContent = 'Zoom to Fit';
+    button.textContent = 'Zoom to fit';
     button.addEventListener('click', function() {
         LeafletLayer.map.fitBounds(LeafletLayer.nodeLayers.getBounds());
     });
