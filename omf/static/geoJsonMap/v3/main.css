@@ -3,12 +3,12 @@
     font-family: Helvetica, Arial, Sans-Serif;
 }
 :root {
-    --headerHeight: 64px;
-    --regularFontSize: 1rem;
-    --regularFontPadding: .75rem;
-    --sideNavWidth: 550px;
+    --headerHeight: 50px;
+    --regularFontSize: 13px;
+    --regularFontPadding: .5rem;
+    --sideNavWidth: 485px;
     --sideNavTransitionTime: 0.3s;
-    --tableRowMinHeight: 2.6rem;
+    --tableRowMinHeight: 2rem;
 }
 
 /*******/
@@ -23,7 +23,7 @@
     display: flex;
     position: absolute;
     right: 10px;
-    top: 12px;
+    top: 5px;
     z-index: 1;
 }
 
@@ -62,7 +62,7 @@ main {
 /***********/
 
 .leaflet-popup-content {
-    width: 400px !important;
+    width: 330px !important;
     font-family: sans-serif;
 }
 .leaflet-custom-control-button {

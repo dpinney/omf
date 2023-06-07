@@ -211,7 +211,7 @@ function createNav(controller) {
 
 function createHelpMenu() {
     const div = document.createElement('div');
-    div.style.fontSize = '1rem';
+    div.style.fontSize = '13px';
     div.style.height = '39px';
     div.style.width = '55px';
     div.style.color = 'white';

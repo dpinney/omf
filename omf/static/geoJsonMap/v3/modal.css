@@ -156,6 +156,7 @@ div.js-div--modal span {
     font-size: var(--regularFontSize);
 }
 div.js-div--modal textarea {
+    font-size: var(--regularFontSize);
     height: 100%;
     height: calc(100% - 84px);
     width: 100%;
@@ -176,8 +177,8 @@ div.div--modalBanner.hidden {
     display: none;
 }
 div.div--modalTitle span {
-    /* This is 57px tall */
-    font-size: 32px;
+    /* This is 43px tall */
+    font-size: 26px;
     font-weight: bold;
     padding: var(--regularFontPadding);
 }
@@ -190,7 +191,7 @@ div.div--modalElementContainer {
     makes the "Load Feeder" modal take up most of the space without leaving a big white zone at the bottom. The problem is the title takes up space in
     a modal element container, so I can't just use 100%. 92% is actually fine. Use custom CSS for one-offs like the attachments modal. 89% works too.
     */
-    max-height: calc(100% - 61px);
+    max-height: calc(100% - 43px);
     width: 100%;
 }
 table.table--modal {
@@ -229,8 +230,8 @@ div.js-div--modal.featureEditModal {
     max-height: 70vh;
 }
 div.js-div--modal.featureEditModal table.table--modal td:nth-child(2) {
-    max-width: 180px;
-    width: 180px;
+    max-width: 160px;
+    width: 160px;
 }
 
 /***********************/
@@ -249,16 +250,16 @@ div.js-div--modal.searchModal select {
     width: 100%;
 }
 div.js-div--modal.searchModal table.table--modal td:first-child {
-    max-width: 32.8px;
-    width: 32.8px;
+    max-width: 32px;
+    width: 32px;
 }
 div.js-div--modal.searchModal table.table--modal td:nth-child(2) {
-    max-width: 58px;
-    width: 58px;
+    max-width: 50px;
+    width: 50px;
 }
 div.js-div--modal.searchModal table.table--modal td:nth-child(3) {
-    max-width: 170px;
-    width: 170px;
+    max-width: 160px;
+    width: 160px;
 }
 div.js-div--modal.searchModal table.table--modal td:nth-child(4) {
     max-width: 75px;

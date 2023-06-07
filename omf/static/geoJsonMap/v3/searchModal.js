@@ -299,7 +299,7 @@ class SearchModal {
         btn.appendChild(getCirclePlusSvg());
         const that = this;
         btn.addEventListener('click', function() {
-            that.#modal.insertTBodyRow([that.#getDeleteRowButton(), that.#getAndOrSelect(), that.#getKeySelect(), that.#getOperatorSelect(), null], 'beforeEnd');
+            that.#modal.insertTBodyRow([that.#getDeleteRowButton(), that.#getAndOrSelect(), that.#getKeySelect(), that.#getOperatorSelect(), that.#getValueTextInput()], 'beforeEnd');
         });
         return btn;
     }
@@ -478,7 +478,7 @@ class SearchModal {
                 }
             } else {
                 if (valueTextInput === null) {
-                    parentElement.lastChild.appendChild(that.#getValueTextInput());
+                    parentElement.lastChild.lastChild.appendChild(that.#getValueTextInput());
                 }
             }
         });
@@ -599,7 +599,7 @@ class SearchModal {
         // - This corresponds to the "<All Fields>" option being selected
         if (select.selectedIndex === 0) {
             if (valueTextInput === null) {
-                parentElement.lastChild.appendChild(this.#getValueTextInput());
+                parentElement.lastChild.lastChild.appendChild(this.#getValueTextInput());
             }
             const newOperatorSelect = document.createElement('select');
             newOperatorSelect.dataset.role = 'operatorSelect';
@@ -784,8 +784,8 @@ class SearchModal {
  */
 function getEyeGlassSvg() {
     const svg = document.createElementNS('http://www.w3.org/2000/svg','svg');
-    svg.setAttribute('width', '28px');
-    svg.setAttribute('height', '28px');
+    svg.setAttribute('width', '22px');
+    svg.setAttribute('height', '22px');
     svg.setAttribute('viewBox', '0 0 24 24'); 
     svg.setAttribute('fill', 'none'); 
     const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
@@ -806,8 +806,8 @@ function getEyeGlassSvg() {
  */
 function getGearSvg() {
     const svg = document.createElementNS('http://www.w3.org/2000/svg','svg');
-    svg.setAttribute('width', '28px');
-    svg.setAttribute('height', '28px');
+    svg.setAttribute('width', '22px');
+    svg.setAttribute('height', '22px');
     svg.setAttribute('viewBox', '0 0 32 32');
     svg.setAttribute('fill', 'none');
     const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');

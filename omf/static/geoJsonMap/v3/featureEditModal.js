@@ -800,8 +800,8 @@ class FeatureEditModal { // implements ObserverInterface, ModalInterface
 
 function getCirclePlusSvg() {
     const svg = document.createElementNS('http://www.w3.org/2000/svg','svg');
-    svg.setAttribute('width', '28px');
-    svg.setAttribute('height', '28px');
+    svg.setAttribute('width', '22px');
+    svg.setAttribute('height', '22px');
     svg.setAttribute('viewBox', '0 0 24 24'); 
     svg.setAttribute('fill', 'none'); 
     let path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
@@ -828,8 +828,8 @@ function getCirclePlusSvg() {
 
 function getTrashCanSvg() {
     const svg = document.createElementNS('http://www.w3.org/2000/svg','svg');
-    svg.setAttribute('width', '28px');
-    svg.setAttribute('height', '28px');
+    svg.setAttribute('width', '22px');
+    svg.setAttribute('height', '22px');
     svg.setAttribute('viewBox', '0 0 24 24'); 
     svg.setAttribute('fill', 'none'); 
     const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
@@ -845,8 +845,8 @@ function getTrashCanSvg() {
 
 function getPinSvg() {
     const svg = document.createElementNS('http://www.w3.org/2000/svg','svg');
-    svg.setAttribute('width', '28px');
-    svg.setAttribute('height', '28px');
+    svg.setAttribute('width', '22px');
+    svg.setAttribute('height', '22px');
     svg.setAttribute('viewBox', '0 0 24 24'); 
     svg.setAttribute('fill', 'none'); 
     const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
