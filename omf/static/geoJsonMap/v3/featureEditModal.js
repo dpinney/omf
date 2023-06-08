@@ -458,11 +458,11 @@ class FeatureEditModal { // implements ObserverInterface, ModalInterface
         const that = this;
         btn.addEventListener('click', function(e) {
             that.#controller.deleteProperty(that.#observables, propertyKey);
-            //let parentElement = this.parentElement;
-            //while (!(parentElement instanceof HTMLTableRowElement)) {
-            //    parentElement = parentElement.parentElement;
-            //}
-            //parentElement.remove();
+            let parentElement = this.parentElement;
+            while (!(parentElement instanceof HTMLTableRowElement)) {
+                parentElement = parentElement.parentElement;
+            }
+            parentElement.remove();
             e.stopPropagation();
         });
         return btn;
