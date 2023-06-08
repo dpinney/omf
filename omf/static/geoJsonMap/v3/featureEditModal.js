@@ -458,6 +458,7 @@ class FeatureEditModal { // implements ObserverInterface, ModalInterface
         const that = this;
         btn.addEventListener('click', function(e) {
             that.#controller.deleteProperty(that.#observables, propertyKey);
+            // - This is code is required for a transitionalDeleteButton to remove the row
             let parentElement = this.parentElement;
             while (!(parentElement instanceof HTMLTableRowElement)) {
                 parentElement = parentElement.parentElement;

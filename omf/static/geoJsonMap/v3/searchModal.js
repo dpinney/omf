@@ -198,9 +198,8 @@ class SearchModal {
         const modal = new Modal();
         modal.addStyleClasses(['outerModal', 'searchModal'], 'divElement');
         const keySelect = this.#getKeySelect();
-        modal.insertTBodyRow([null, null, keySelect, this.#getOperatorSelect(), this.#getValueTextInput()], 'beforeEnd');
+        modal.insertTBodyRow([this.#getAddRowButton(), null, keySelect, this.#getOperatorSelect(), this.#getValueTextInput()], 'beforeEnd');
         this.#handleKeySelectChange(keySelect);
-        modal.insertTBodyRow([this.#getAddRowButton()], 'append', ['absolute']);
         modal.addStyleClasses(['centeredTable'], 'tableElement');
         modal.insertElement(this.#getSearchButton());
         modal.addStyleClasses(['verticalFlex', 'centerMainAxisFlex', 'centerCrossAxisFlex'], 'containerElement');
@@ -300,7 +299,7 @@ class SearchModal {
         const that = this;
         btn.addEventListener('click', function() {
             const keySelect = that.#getKeySelect();
-            that.#modal.insertTBodyRow([that.#getDeleteRowButton(), that.#getAndOrSelect(), keySelect, that.#getOperatorSelect(), that.#getValueTextInput()], 'beforeEnd');
+            that.#modal.insertTBodyRow([that.#getDeleteRowButton(), that.#getAndOrSelect(), keySelect, that.#getOperatorSelect(), that.#getValueTextInput()], 'append');
             that.#handleKeySelectChange(keySelect);
         });
         return btn;
