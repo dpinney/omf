@@ -299,7 +299,9 @@ class SearchModal {
         btn.appendChild(getCirclePlusSvg());
         const that = this;
         btn.addEventListener('click', function() {
-            that.#modal.insertTBodyRow([that.#getDeleteRowButton(), that.#getAndOrSelect(), that.#getKeySelect(), that.#getOperatorSelect(), that.#getValueTextInput()], 'beforeEnd');
+            const keySelect = that.#getKeySelect();
+            that.#modal.insertTBodyRow([that.#getDeleteRowButton(), that.#getAndOrSelect(), keySelect, that.#getOperatorSelect(), that.#getValueTextInput()], 'beforeEnd');
+            that.#handleKeySelectChange(keySelect);
         });
         return btn;
     }
