@@ -109,7 +109,9 @@ function _getAnonymizationModal(observable, controller) {
     scaleInput.value = '.01';
     scaleInput.pattern = '(\\d+)?(\\.\\d+)?';
     const scaleTipDiv = document.createElement('div');
-    scaleTipDiv.textContent = 'Estimates: 0.001 = street-density, 0.01 = neighborhood-density, 0.1 = city-density, 1 = state-density';
+    const scaleTipSpan = document.createElement('span');
+    scaleTipSpan.textContent = 'Estimates: 0.001 = street-density, 0.01 = neighborhood-density, 0.1 = city-density, 1 = state-density';
+    scaleTipDiv.appendChild(scaleTipSpan);
     // - Electrical properties
     const electricalPropertiesHeading = document.createElement('span');
     electricalPropertiesHeading.textContent = 'Electrical Properties';
