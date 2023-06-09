@@ -320,7 +320,7 @@ class FeatureEditModal { // implements ObserverInterface, ModalInterface
         btn.classList.add('add');
         btn.appendChild(getCirclePlusSvg());
         const span = document.createElement('span');
-        span.textContent = 'Add Config Object';
+        span.textContent = 'Add config object';
         btn.appendChild(span);
         btn.addEventListener('click', () => {
             if (this.#componentsStateIsValid()) {
@@ -341,7 +341,7 @@ class FeatureEditModal { // implements ObserverInterface, ModalInterface
         btn.classList.add('add');
         btn.appendChild(getCirclePlusSvg());
         const span = document.createElement('span');
-        span.textContent = 'Add Line with from/to';
+        span.textContent = 'Add line with from/to';
         btn.appendChild(span);
         btn.addEventListener('click', () => {
             if (this.#componentsStateIsValid()) {
@@ -362,7 +362,7 @@ class FeatureEditModal { // implements ObserverInterface, ModalInterface
         btn.classList.add('add');
         btn.appendChild(getCirclePlusSvg());
         const span = document.createElement('span');
-        span.textContent = 'Add with Coordinates';
+        span.textContent = 'Add with coordinates';
         btn.appendChild(span);
         btn.addEventListener('click', () => {
             if (this.#componentsStateIsValid()) {
@@ -383,7 +383,7 @@ class FeatureEditModal { // implements ObserverInterface, ModalInterface
         btn.classList.add('add');
         btn.appendChild(getCirclePlusSvg());
         const span = document.createElement('span');
-        span.textContent = 'Add with Map Click';
+        span.textContent = 'Add with map click';
         btn.appendChild(span);
         const that = this;
         btn.addEventListener('click', () => {
