@@ -196,7 +196,7 @@ class SearchModal {
      */
     renderContent() {
         const modal = new Modal();
-        modal.addStyleClasses(['outerModal', 'searchModal'], 'divElement');
+        modal.addStyleClasses(['searchModal'], 'divElement');
         const keySelect = this.#getKeySelect();
         modal.insertTBodyRow([this.#getAddRowButton(), null, keySelect, this.#getOperatorSelect(), this.#getValueTextInput()], 'beforeEnd');
         this.#handleKeySelectChange(keySelect);

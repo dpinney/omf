@@ -9,17 +9,19 @@ nav.js-nav--topNav a {
 nav.js-nav--topNav button {
     background-color: transparent;
     border: 0;
-    cursor: pointer;
+    /*cursor: pointer;*/
     padding: 14px;
     width: var(--headerHeight);
 }
-nav.js-nav--topNav button:hover {
+/*nav.js-nav--topNav button:hover {
     background-color: gray;
     transition: background-color 0.2s ease-out;
-}
+}*/
 nav.js-nav--topNav div {
     align-items: center;
     display: flex;
+    /* This padding was added because David removed the hamburger menu */
+    padding: 0 0 0 10px;
 }
 nav.js-nav--topNav span {
     color: white;

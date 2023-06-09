@@ -3,7 +3,7 @@ import { DropdownDiv } from './dropdownDiv.js';
 import { Feature } from  './feature.js';
 import { FeatureGraph } from  './featureGraph.js';
 import { FeatureController } from './featureController.js';
-import { getLoadingModal, getAnonymizationDiv, getSaveDiv, getRawDataDiv, getRenameDiv, getLoadFeederDiv, getBlankFeederDiv, getWindmilDiv, getGridlabdDiv, getCymdistDiv, getOpendssDiv, getAmiDiv, getAttachmentsDiv, getClimateDiv, getScadaDiv, getColorDiv, getGeojsonDiv } from './modalFeatures.js';
+import { getLoadingModal, getAnonymizationDiv, getSaveDiv, getRawDataDiv, getRenameDiv, getLoadFeederDiv, getBlankFeederDiv, getWindmilDiv, getGridlabdDiv, getCymdistDiv, getOpendssDiv, getAmiDiv, getAttachmentsDiv, getClimateDiv, getScadaDiv, getColorDiv, getGeojsonDiv, getSearchDiv, getAddComponentsDiv } from './modalFeatures.js';
 import { LeafletLayer } from './leafletLayer.js';
 import { Nav } from './nav.js';
 import { SearchModal } from './searchModal.js';
@@ -34,7 +34,10 @@ function main() {
             LeafletLayer.createAndGroupLayer(ob, controller);
         }
     });
-    createNav(controller);
+    const nav = new Nav();
+    setupNav(controller, nav);
+    const topTab = new TopTab();
+    createSearchModal(controller, nav, topTab);
 
     /****************/
     /* Setup layers */
@@ -95,22 +98,18 @@ function main() {
 	};
     const modalInsert = document.getElementById('modalInsert');
     modalInsert.addEventListener('click', hideModalInsert);
-    setupHTML(controller);
-}
-
-/**
- * @param {FeatureController} controller - a FeatureController instance 
- * @returns {undefined}
- */
-function setupHTML(controller) {
-    if (!(controller instanceof FeatureController)) {
-        throw TypeError('"controller" argument must be instanceof FeatureController.');
-    }
     createHelpMenu();
-    createEditMenu(controller);
+    createEditMenu(controller, nav, topTab);
     if (gIsOnline && gShowFileMenu) {
         createFileMenu(controller);
     }
+    addMenuEventHandlers();
+}
+
+/**
+ * @returns {undefined}
+ */
+function addMenuEventHandlers() {
     // - Add event listeners to only allow either the file or edit menu to be open
     const fileMenu = document.getElementById('fileMenu');
     let fileButton = null;
@@ -144,14 +143,17 @@ function setupHTML(controller) {
 
 /**
  * @param {FeatureController} controller - a FeatureController instance
+ * @param {Nav} nav - a Nav instance
  * @returns {undefined}
  */
-function createNav(controller) {
+function setupNav(controller, nav) {
     if (!(controller instanceof FeatureController)) {
         throw TypeError('"controller" argument must be instanceof FeatureController.');
     }
+    if (!(nav instanceof Nav)) {
+        throw TypeError('"nav" argument must be instanceof Nav.');
+    }
     const header = document.getElementsByTagName('header')[0];
-    const nav = new Nav();
     if (gIsOnline) {
         nav.topNav.setHomepageName(`"${gThisFeederName}" from ${gThisModelName}`);
     } else {
@@ -162,12 +164,29 @@ function createNav(controller) {
     main.prepend(nav.sideNavArticleElement);
     main.prepend(nav.sideNavDivElement);
     main.prepend(nav.sideNavNavElement);
-    const topTab = new TopTab();
+}
+
+/**
+ * @param {FeatureController} controller - a FeatureController instance
+ * @param {Nav} nav - a Nav instance
+ * @param {TopTab} topTab - a TopTap instance
+ * @returns {undefined}
+ */
+function createSearchModal(controller, nav, topTab) {
+    if (!(controller instanceof FeatureController)) {
+        throw TypeError('"controller" argument must be instanceof FeatureController.');
+    }
+    if (!(nav instanceof Nav)) {
+        throw TypeError('"nav" argument must be instanceof Nav.');
+    }
+    if (!(topTab instanceof TopTab)) {
+        throw TypeError('"topTab" argument must be instanceof TopTab.');
+    }
     nav.sideNavNavElement.appendChild(topTab.divElement); 
     // - Add tab for searching existing features
     const searchTab = document.createElement('div');
-    topTab.addTab('Search', searchTab);
-    topTab.getTab('Search').tab.click();
+    topTab.addTab('Search Objects', searchTab);
+    topTab.selectTab(topTab.getTab('Search Objects').tab);
     let searchModal = new SearchModal(controller);
     searchTab.appendChild(searchModal.getDOMElement());
     let searchResultsDiv = document.createElement('div');
@@ -177,7 +196,7 @@ function createNav(controller) {
     searchResultsDiv.appendChild(searchModal.getLineSearchResultsDiv());
     // - Add tab for adding components
     const componentTab = document.createElement('div');
-    topTab.addTab('Add', componentTab);
+    topTab.addTab('Add New Objects', componentTab);
     let components = gComponentsCollection.features.filter(f => f.properties.componentType === 'gridlabd');
     const omdFeature = controller.observableGraph.getObservable('omd');
     if (omdFeature.hasProperty('syntax', 'meta')) {
@@ -231,17 +250,27 @@ function createHelpMenu() {
 
 /**
  * @param {FeatureController} controller - a FeatureController instance
+ * @param {Nav} nav - a Nav instance
+ * @param {TopTab} topTab - a TopTab instance
  * @returns {undefined}
  */
-function createEditMenu(controller) {
+function createEditMenu(controller, nav, topTab) {
     if (!(controller instanceof FeatureController)) {
         throw TypeError('"controller" argument must be instanceof FeatureController.');
+    }
+    if (!(nav instanceof Nav)) {
+        throw TypeError('"nav" argument must be instanceof Nav.');
+    }
+    if (!(topTab instanceof TopTab)) {
+        throw TypeError('"topTab" argument must be instanceof TopTab.');
     }
     const dropdownDiv = new DropdownDiv();
     dropdownDiv.divElement.id = 'editMenu';
     dropdownDiv.addStyleClasses(['menu'], 'divElement');
     dropdownDiv.setButton('Edit', true);
     document.getElementById('menuInsert').appendChild(dropdownDiv.divElement);
+    dropdownDiv.insertElement(getSearchDiv(nav, topTab));
+    dropdownDiv.insertElement(getAddComponentsDiv(nav, topTab));
     if (gIsOnline) {
         dropdownDiv.insertElement(getAmiDiv(controller));
         dropdownDiv.insertElement(getAnonymizationDiv(controller));

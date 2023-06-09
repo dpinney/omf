@@ -32,10 +32,10 @@ class TopTab {
             throw Error('The "label" argument must be unique across all tabs.');
         }
         const tab = document.createElement('div');
-        const that = this;
-        tab.addEventListener('click', function() {
-            that.#selectTab(this);
-        });
+        //const that = this;
+        //tab.addEventListener('click', function() {
+        //    that.selectTab(this);
+        //});
         const span = document.createElement('span');
         if (typeof label === 'string') {
             span.textContent = label;
@@ -51,6 +51,10 @@ class TopTab {
         };
     }
 
+    getTab(label) {
+        return this.#tabMap[label];
+    }
+
     removeTab(label) {
         if (!this.#tabMap.hasOwnProperty(label)) {
             throw Error(`This TopTab does not have a tab with label ${label}`);
@@ -61,20 +65,15 @@ class TopTab {
         delete this.#tabMap[label];
     }
 
-    getTab(label) {
-        return this.#tabMap[label];
-    }
-
-    // *********************
-    // ** Private methods ** 
-    // *********************
-
     /**
      * - @param {HTMLDivElement} div - The <div></div> element that was clicked. The div element has the event listener instead of the inner span (or
      *   SVG) because the whole div should be clickable, especially if I choose not to visually round off my tabs. If the inner span (or SVG) is
      *   clicked, the event will bubble up to the div
      */
-    #selectTab(div) {
+    selectTab(div) {
+        if (!(div instanceof HTMLDivElement)) {
+            throw TypeError('"div" argument must be instanceof HTMLDivElement.');
+        }
         Object.values(this.#tabMap).forEach(obj => {
             if (obj.tab !== div) {
                 obj.tab.classList.remove('selected');   
@@ -85,4 +84,8 @@ class TopTab {
             }
         }); 
     }
+
+    // *********************
+    // ** Private methods **
+    // *********************
 }

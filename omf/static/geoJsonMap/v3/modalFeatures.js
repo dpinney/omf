@@ -1,10 +1,12 @@
-export { getLoadingModal, getAnonymizationDiv, getSaveDiv, getRawDataDiv, getRenameDiv, getLoadFeederDiv, getBlankFeederDiv, getWindmilDiv, getGridlabdDiv, getCymdistDiv, getOpendssDiv, getAmiDiv, getAttachmentsDiv, getClimateDiv, getScadaDiv, getColorDiv, getGeojsonDiv };
+export { getLoadingModal, getAnonymizationDiv, getSaveDiv, getRawDataDiv, getRenameDiv, getLoadFeederDiv, getBlankFeederDiv, getWindmilDiv, getGridlabdDiv, getCymdistDiv, getOpendssDiv, getAmiDiv, getAttachmentsDiv, getClimateDiv, getScadaDiv, getColorDiv, getGeojsonDiv, getSearchDiv, getAddComponentsDiv };
 import { ColorModal } from './colorModal.js';
 import { Feature } from  './feature.js';
 import { FeatureController } from './featureController.js';
 import { GeojsonModal } from './geojsonModal.js';
 import { hideModalInsert } from './main.js'
 import { Modal } from './modal.js';
+import { Nav } from './nav.js';
+import { TopTab } from './topTab.js';
 
 /*
  * @returns {Modal}
@@ -510,7 +512,7 @@ function getRawDataDiv(controller) {
         throw TypeError('"controller" argument must be instanceof FeatureController.');
     }
     const modal = _getRawDataModal(controller);
-    const div = _getMenuDiv('View Raw Data');
+    const div = _getMenuDiv('View raw data');
     const modalInsert = document.getElementById('modalInsert');
     div.addEventListener('click', function() {
         modalInsert.replaceChildren(modal.divElement);
@@ -535,7 +537,7 @@ function _getRenameModal(observable, controller) {
         throw TypeError('"controller" argument must be instanceof FeatureController.');
     }
     // - Input
-    const input = getNameInput(observable, function(newName) {
+    const input = _getNameInput(observable, function(newName) {
         const fileExistsUrl = {
             method: 'GET',
             url: `/uniqObjName/Feeder/${gThisOwner}/${newName}/${gThisModelName}`
@@ -729,7 +731,7 @@ function getLoadFeederDiv(controller) {
         'type': 'Feature'
     });
     const modal = _getLoadFeederModal(feature, controller);
-    const div = _getMenuDiv('Load from Model...');
+    const div = _getMenuDiv('Load from model...');
     const modalInsert = document.getElementById('modalInsert');
     div.addEventListener('click', function() {
         modalInsert.replaceChildren(modal.divElement);
@@ -751,7 +753,7 @@ function _getBlankFeederModal(observable, controller) {
         throw TypeError('"controller" argument must be instanceof FeatureController.');
     }
     // - Input
-    const input = getNameInput(observable, function(newName) {
+    const input = _getNameInput(observable, function(newName) {
         observable.setProperty('feederNameNew', newName, 'formProps');
     });
     // - Submit div
@@ -829,7 +831,7 @@ function _getWindmilModal(observable, controller) {
         throw TypeError('"controller" argument must be instanceof FeatureController.');
     }
     // - Name input
-    const nameInput = getNameInput(observable, function(newName) {
+    const nameInput = _getNameInput(observable, function(newName) {
         observable.setProperty('feederNameM', newName, 'formProps');
         const fileExistsUrl = {
             method: 'GET',
@@ -955,7 +957,7 @@ function _getGridlabdModal(observable, controller) {
         throw TypeError('"controller" argument must be instanceof FeatureController.');
     }
     // - Name input
-    const nameInput = getNameInput(observable, function(newName) {
+    const nameInput = _getNameInput(observable, function(newName) {
         observable.setProperty('feederNameG', newName, 'formProps');
         const fileExistsUrl = {
             method: 'GET',
@@ -1064,7 +1066,7 @@ function _getCymdistModal(observable, controller) {
         throw TypeError('"controller" argument must be instanceof FeatureController.');
     }
     // - Name input
-    const nameInput = getNameInput(observable, function(newName) {
+    const nameInput = _getNameInput(observable, function(newName) {
         observable.setProperty('feederNameC', newName, 'formProps');
         const fileExistsUrl = {
             method: 'GET',
@@ -1174,7 +1176,7 @@ function _getOpendssModal(observable, controller) {
         throw TypeError('"controller" argument must be instanceof FeatureController.');
     }
     // - Name input
-    const nameInput = getNameInput(observable, function(newName) {
+    const nameInput = _getNameInput(observable, function(newName) {
         observable.setProperty('feederNameOpendss', newName, 'formProps');
         const fileExistsUrl = {
             method: 'GET',
@@ -1369,7 +1371,7 @@ function getAmiDiv(controller) {
         type: 'Feature'
     });
     const modal = _getAmiModal(feature, controller);
-    const div = _getMenuDiv('Add AMI Profiles...');
+    const div = _getMenuDiv('Add AMI profiles...');
     const modalInsert = document.getElementById('modalInsert');
     div.addEventListener('click', function() {
         modalInsert.replaceChildren(modal.divElement);
@@ -1803,7 +1805,7 @@ function getScadaDiv(controller) {
         type: 'Feature'
     });
     const modal = _getScadaModal(feature, controller);
-    const div = _getMenuDiv('SCADA Loadshapes...');
+    const div = _getMenuDiv('SCADA loadshapes...');
     const modalInsert = document.getElementById('modalInsert');
     div.addEventListener('click', function() {
         modalInsert.replaceChildren(modal.divElement);
@@ -1850,10 +1852,121 @@ function getGeojsonDiv(controller) {
     return div;
 }
 
+/**
+ * @param {Nav} nav - a Nav instance
+ * @param {TopTab} topTab - a TopTab instance
+ * @returns {undefined}
+ */
+function getSearchDiv(nav, topTab) {
+    if (!(nav instanceof Nav)) {
+        throw TypeError('"nav" argument must be instanceof Nav.');
+    }
+    if (!(topTab instanceof TopTab)) {
+        throw TypeError('"topTab" argument must be instanceof TopTab.');
+    }
+    const div = _getMenuDiv('Search objects...');
+    div.addEventListener('click', function() {
+        if (nav.sideNavNavElement.classList.contains('open')) {
+            if (topTab.getTab('Search Objects').tab.classList.contains('selected')) {
+                nav.sideNavNavElement.classList.remove('open');
+                nav.sideNavDivElement.classList.remove('open');
+                nav.sideNavArticleElement.classList.remove('compressed');
+            }
+            if (topTab.getTab('Add New Objects').tab.classList.contains('selected')) {
+                topTab.selectTab(topTab.getTab('Search Objects').tab);
+            }
+        } else {
+            if (topTab.getTab('Add New Objects').tab.classList.contains('selected')) {
+                topTab.selectTab(topTab.getTab('Search Objects').tab);
+            }
+            nav.sideNavNavElement.classList.add('open');
+            nav.sideNavDivElement.classList.add('open');
+            nav.sideNavArticleElement.classList.add('compressed');
+        }
+    });
+    return div;
+}
+
+/**
+ * @param {Nav} nav - a Nav instance
+ * @param {TopTab} topTab - a TopTab instance
+ * @returns {undefined}
+ */
+function getAddComponentsDiv(nav, topTab) {
+    if (!(nav instanceof Nav)) {
+        throw TypeError('"nav" argument must be instanceof Nav.');
+    }
+    if (!(topTab instanceof TopTab)) {
+        throw TypeError('"topTab" argument must be instanceof TopTab.');
+    }
+    const div = _getMenuDiv('Add new objects...');
+    div.addEventListener('click', function() {
+        if (nav.sideNavNavElement.classList.contains('open')) {
+            if (topTab.getTab('Add New Objects').tab.classList.contains('selected')) {
+                nav.sideNavNavElement.classList.remove('open');
+                nav.sideNavDivElement.classList.remove('open');
+                nav.sideNavArticleElement.classList.remove('compressed');
+            }
+            if (topTab.getTab('Search Objects').tab.classList.contains('selected')) {
+                topTab.selectTab(topTab.getTab('Add New Objects').tab);
+            }
+        } else {
+            if (topTab.getTab('Search Objects').tab.classList.contains('selected')) {
+                topTab.selectTab(topTab.getTab('Add New Objects').tab);
+            }
+            nav.sideNavNavElement.classList.add('open');
+            nav.sideNavDivElement.classList.add('open');
+            nav.sideNavArticleElement.classList.add('compressed');
+        }
+    });
+    return div;
+}
+
 
 /*********************************/
 /* Private convenience functions */
 /*********************************/
+
+function _getHorizontalFlexDiv() {
+    const div = document.createElement('div');
+    div.classList.add('horizontalFlex');
+    return div;
+}
+
+function _getMenuDiv(text) {
+    if (typeof text !== 'string') {
+        throw TypeError('"text" argument must be a string.');
+    }
+    const div = document.createElement('div');
+    div.classList.add('hoverable', 'horizontalFlex', 'centerCrossAxisFlex');
+    div.textContent = text;
+    return div;
+}
+
+/**
+ * - Firefox doesn't display the reportValidity() message correctly
+ * - I don't know why I can't get actual regular expression literals to work. Only the regex string works for me
+ * @param {Feature} observable
+ * @param {Function} func - a function that takes the new name as an argument
+ * @returns {HTMLInputElement}
+ */
+function _getNameInput(observable, func) {
+    const input = document.createElement('input');
+    input.pattern = '(?:[\\w-]+\\s{0,1})+';
+    input.placeholder = 'New name';
+    input.required = true;
+    input.title = 'The new name must have one or more alphanumeric characters. Single spaces, hyphens, and underscores are allowed.';
+    input.addEventListener('change', function() {
+        this.setCustomValidity('');
+        if (this.validity.valueMissing || this.validity.patternMismatch) {
+            input.setCustomValidity('The new name must have one or more alphanumeric characters. Single spaces, hyphens, and underscores are allowed.');
+            input.reportValidity();
+        } else if (this.validity.valid) {
+            func(this.value.trim());
+        }
+    });
+    return input
+}
 
 function _getSubmitButton(text='Submit') {
     const submitButton = document.createElement('button');
@@ -1872,45 +1985,4 @@ function _getSubmitDiv(button) {
     submitDiv.classList.add('horizontalFlex', 'centerMainAxisFlex', 'centerCrossAxisFlex', 'halfWidth');
     submitDiv.appendChild(button);
     return submitDiv;
-}
-
-function _getMenuDiv(text) {
-    if (typeof text !== 'string') {
-        throw TypeError('"text" argument must be a string.');
-    }
-    const div = document.createElement('div');
-    div.classList.add('hoverable', 'horizontalFlex', 'centerCrossAxisFlex');
-    div.textContent = text;
-    return div;
-}
-
-function _getHorizontalFlexDiv() {
-    const div = document.createElement('div');
-    div.classList.add('horizontalFlex');
-    return div;
-}
-
-/**
- * - Firefox doesn't display the reportValidity() message correctly
- * - I don't know why I can't get actual regular expression literals to work. Only the regex string works for me
- * @param {Feature} observable
- * @param {Function} func - a function that takes the new name as an argument
- * @returns {HTMLInputElement}
- */
-function getNameInput(observable, func) {
-    const input = document.createElement('input');
-    input.pattern = '(?:[\\w-]+\\s{0,1})+';
-    input.placeholder = 'New name';
-    input.required = true;
-    input.title = 'The new name must have one or more alphanumeric characters. Single spaces, hyphens, and underscores are allowed.';
-    input.addEventListener('change', function() {
-        this.setCustomValidity('');
-        if (this.validity.valueMissing || this.validity.patternMismatch) {
-            input.setCustomValidity('The new name must have one or more alphanumeric characters. Single spaces, hyphens, and underscores are allowed.');
-            input.reportValidity();
-        } else if (this.validity.valid) {
-            func(this.value.trim());
-        }
-    });
-    return input
 }
