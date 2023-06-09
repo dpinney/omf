@@ -51,7 +51,7 @@ div.js-div--dropdown.sideNav button.js-button--dropdown {
 /* This is the search results div */
 div.selected > div:nth-child(2) {
     /* HACK: hardcoded height */
-    max-height: 71vh;
+    max-height: 69vh;
     overflow: auto;
 }
 div.selected div.js-div--dropdown.sideNav.searchCategory > button.js-button--dropdown {
