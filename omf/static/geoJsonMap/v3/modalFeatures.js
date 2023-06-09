@@ -144,7 +144,7 @@ function _getAnonymizationModal(observable, controller) {
     shuffleLoadsLabel.innerText = ' Shuffle Loads and Generators';
     const shuffleLoadsInput = document.createElement('input');
     shuffleLoadsInput.name = 'shufflePerc';
-    shuffleLoadsInput.placeholder = '(0-100)'
+    shuffleLoadsInput.placeholder = '(1-100)'
     shuffleLoadsInput.pattern = '(\\d+)?(\\.\\d+)?';
     // - addNoiseCheckbox
     const addNoiseCheckbox = document.createElement('input');
@@ -156,7 +156,7 @@ function _getAnonymizationModal(observable, controller) {
     addNoiseLabel.innerText = 'Add Noise';
     const addNoiseInput = document.createElement('input');
     addNoiseInput.name = 'noisePerc';
-    addNoiseInput.placeholder = '(0-100)'
+    addNoiseInput.placeholder = '(1-100)'
     addNoiseInput.pattern = '(\\d+)?(\\.\\d+)?';
     // - Submit button
     const submitButton = _getSubmitButton();
