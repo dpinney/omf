@@ -1885,6 +1885,7 @@ function getSearchDiv(nav, topTab) {
             nav.sideNavDivElement.classList.add('open');
             nav.sideNavArticleElement.classList.add('compressed');
         }
+        document.getElementById('editMenu').getElementsByTagName('button')[0].click();
     });
     return div;
 }
@@ -1920,10 +1921,10 @@ function getAddComponentsDiv(nav, topTab) {
             nav.sideNavDivElement.classList.add('open');
             nav.sideNavArticleElement.classList.add('compressed');
         }
+        document.getElementById('editMenu').getElementsByTagName('button')[0].click();
     });
     return div;
 }
-
 
 /*********************************/
 /* Private convenience functions */
