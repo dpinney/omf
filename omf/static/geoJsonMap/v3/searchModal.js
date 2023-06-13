@@ -696,11 +696,15 @@ class SearchModal {
                 }
                 if (operator === 'contains') {
                     searchCriterion.searchFunction = function(ob) {
+                        // - TODO: I really should use a JavaScript symbol or something instead of "searchModalSearchAllFields"
                         if (key === 'searchModalSearchAllFields') {
                             for (const [key, val] of Object.entries(ob.getProperties(namespace))) {
                                 if (val.toString().toLowerCase().includes(valueInputValue.toLowerCase()) || key.toString().toLowerCase().includes(valueInputValue.toLowerCase())) {
                                     return true;
                                 }
+                            }
+                            if (ob.getProperty('treeKey', 'meta').toString().toLowerCase().includes(valueInputValue.toLowerCase())) {
+                                return true;
                             }
                         } else if (ob.hasProperty(key, namespace)) {
                             return ob.getProperty(key, namespace).toString().toLowerCase().includes(valueInputValue.toLowerCase());
@@ -716,11 +720,13 @@ class SearchModal {
                                     return false;
                                 }
                             }
-                            return true;
+                            if (ob.getProperty('treeKey', 'meta').toString().toLowerCase().includes(valueInputValue.toLowerCase())) {
+                                return false;
+                            }
                         } else if (ob.hasProperty(key, namespace)) {
                             return !ob.getProperty(key, namespace).toString().toLowerCase().includes(valueInputValue.toLowerCase());
                         }
-                        return false;
+                        return true;
                     }
                 }
                 if (operator === '<') {
