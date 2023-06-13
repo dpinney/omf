@@ -32,10 +32,18 @@ class TopTab {
             throw Error('The "label" argument must be unique across all tabs.');
         }
         const tab = document.createElement('div');
+        const closeButton = document.createElement('button');
+        closeButton.textContent = '×';
+        closeButton.addEventListener('click', function() {
+            document.getElementsByClassName('js-nav--sideNav')[0].classList.remove('open');
+            document.getElementsByClassName('js-div--sideNavCover')[0].classList.remove('open');
+            document.getElementsByClassName('js-article--sideNavArticle')[0].classList.remove('compressed');
+        });
         //const that = this;
         //tab.addEventListener('click', function() {
         //    that.selectTab(this);
         //});
+        tab.appendChild(closeButton);
         const span = document.createElement('span');
         if (typeof label === 'string') {
             span.textContent = label;
@@ -43,6 +51,7 @@ class TopTab {
             span.appendChild(label);
         }
         tab.appendChild(span);
+
         this.#tabDivElement.appendChild(tab);
         this.#contentDivElement.appendChild(content);
         this.#tabMap[label] = {

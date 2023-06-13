@@ -21,6 +21,17 @@ div.div--topTabTabContainer > div.selected {
     padding: 14px;
     z-index: 1;
 }
+div.div--topTabTabContainer > div.selected > button {
+    background-color: transparent;
+    border: 0;
+    color: #757575;
+    cursor: pointer;
+    height: 24px;
+    position: absolute;
+    right: 0;
+    top: 0;
+    width: 24px;
+}
 div.div--topTabTabContainer > div.selected > span {
     font-weight: bold;
 }
