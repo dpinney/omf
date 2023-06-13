@@ -160,6 +160,7 @@ class SearchModal {
      */
     refreshContent() {
         const keySelects = [...this.#keySelects];
+        const that = this;
         keySelects.forEach(oldKeySelect => {
             const index = this.#keySelects.indexOf(oldKeySelect);
             if (index > -1) {
@@ -167,6 +168,7 @@ class SearchModal {
             }
             const newKeySelect = this.#getKeySelect(oldKeySelect);
             oldKeySelect.replaceWith(newKeySelect);
+            that.#handleKeySelectChange(newKeySelect);
         });
     }
 
@@ -723,10 +725,11 @@ class SearchModal {
                             if (ob.getProperty('treeKey', 'meta').toString().toLowerCase().includes(valueInputValue.toLowerCase())) {
                                 return false;
                             }
+                            return true;
                         } else if (ob.hasProperty(key, namespace)) {
                             return !ob.getProperty(key, namespace).toString().toLowerCase().includes(valueInputValue.toLowerCase());
                         }
-                        return true;
+                        return false;
                     }
                 }
                 if (operator === '<') {
