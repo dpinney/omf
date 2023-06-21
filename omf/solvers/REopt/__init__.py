@@ -11,8 +11,8 @@ def run(inJSONPath, outputPath):
 	# API_KEY = 'L2e5lfH2VDvEm2WOh0dJmzQaehORDT8CfCotaOcf'
 	# API_KEY = '08USmh2H2cOeAuQ3sCCLgzd30giHjfkhvsicUPPf'
 	root_url = 'https://developer.nrel.gov/api/reopt'
-	post_url = root_url + '/v1/job/?api_key=' + API_KEY
-	results_url = root_url + '/v1/job/<run_uuid>/results/?api_key=' + API_KEY
+	post_url = root_url + '/v2/job/?api_key=' + API_KEY
+	results_url = root_url + '/v2/job/<run_uuid>/results/?api_key=' + API_KEY
 	post = json.load(open(inJSONPath))
 	resp = requests.post(post_url, json=post)
 	if not resp.ok:
@@ -39,8 +39,8 @@ def runResilience(runID, outputPath):
 	# API_KEY = 'L2e5lfH2VDvEm2WOh0dJmzQaehORDT8CfCotaOcf'
 	# API_KEY = '08USmh2H2cOeAuQ3sCCLgzd30giHjfkhvsicUPPf'
 	root_url = 'https://developer.nrel.gov/api/reopt'
-	post_url = root_url + '/v1/outagesimjob/?api_key=' + API_KEY
-	results_url = root_url + '/v1/job/<RUN_ID>/resilience_stats/?api_key=' + API_KEY
+	post_url = root_url + '/v2/outagesimjob/?api_key=' + API_KEY
+	results_url = root_url + '/v2/job/<RUN_ID>/resilience_stats/?api_key=' + API_KEY
 	resp = requests.post(post_url, json={'run_uuid':runID, 'bau':False})
 	if not resp.ok:
 		logger.log.error("Status code {}. {}".format(resp.status_code, resp.content))
