@@ -442,5 +442,5 @@ function showSaveAlert(url){
 function editFeeder(modelName, feederNum) {
 	console.log("modelName:",modelName)
 	studyUser = allInputData.user
-	window.open("/feeder/" + studyUser + "/" + modelName + "/" + feederNum,  "_blank")
+	window.open('/displayMap/' + studyUser + '/' + modelName + '/' + feederNum, '_blank');
 }

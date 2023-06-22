@@ -6,7 +6,6 @@ import { LeafletLayer } from './leafletLayer.js';
 
 class FeatureEditModal { // implements ObserverInterface, ModalInterface
     #controller;    // - ControllerInterface instance
-    #keyToRow;      // - A map of property keys to table rows
     #modal;         // - A single Modal instance
     #observables;   // - An array of ObservableInterface instances
     #removed;       // - Whether this FeatureEditModal instance has already been deleted
@@ -25,7 +24,6 @@ class FeatureEditModal { // implements ObserverInterface, ModalInterface
             throw Error('"controller" argument must be instanceof FeatureController');
         }
         this.#controller = controller;
-        this.#keyToRow = {};
         this.#modal = null;
         this.#observables = observables;
         this.#observables.forEach(ob => ob.registerObserver(this));
@@ -87,8 +85,7 @@ class FeatureEditModal { // implements ObserverInterface, ModalInterface
         if (!(oldCoordinates instanceof Array)) {
             throw TypeError('"oldCoordinates" argument must be an array.');
         }
-        //this.refreshContent();
-        this.renderContent();
+        this.refreshContent();
     }
 
     /**
@@ -111,8 +108,7 @@ class FeatureEditModal { // implements ObserverInterface, ModalInterface
         if (typeof namespace !== 'string') {
             throw TypeError('"namespace" argument must be a string.');
         }
-        //this.refreshContent();
-        this.renderContent();
+        this.refreshContent();
     }
 
     // ****************************
@@ -161,7 +157,64 @@ class FeatureEditModal { // implements ObserverInterface, ModalInterface
      * @returns {undefined}
      */
     refreshContent() {
-
+        const tableState = {};
+        [...this.#modal.divElement.getElementsByTagName('tr')].filter(tr => tr.querySelector('span[data-property-key]') !== null).forEach(tr => {
+            const span = tr.getElementsByTagName('span')[0];
+            let namespace = span.dataset.propertyNamespace;
+            if (namespace === undefined) {
+                namespace = null;
+            }
+            let valueInput = tr.getElementsByTagName('input');
+            if (valueInput.length === 0) {
+                valueInput = null;
+            } else {
+                valueInput = valueInput[0];
+            }
+            tableState[span.dataset.propertyKey] = {
+                propertyNamespace: namespace,
+                propertyTableRow: tr,
+                propertyValueInput: valueInput
+            }
+        });
+        const tableKeys = Object.keys(tableState);
+        const observablesState = this.#getKeyToValuesMapping();
+        // - I don't need to iterate over the meta namespace because IDs are never added, removed, or changed
+        for (const [key, ary] of Object.entries(observablesState.treeProps)) {
+            // - First, compare the observables' state to the table state. If the observables' state has a property that is not in the table state,
+            //   add a row to the table
+            if (!tableKeys.includes(key)) {
+                const keySpan = document.createElement('span');
+                keySpan.textContent = key;
+                keySpan.dataset.propertyKey = key;
+                keySpan.dataset.propertyNamespace = 'treeProps';
+                this.#modal.insertTBodyRow([this.#getDeletePropertyButton(key), keySpan, this.#getValueTextInput(key, ary)], 'beforeEnd');
+            } else {
+                const valueInput = tableState[key].propertyValueInput;
+                if (valueInput !== null) {
+                    valueInput.replaceWith(this.#getValueTextInput(key, ary));
+                }
+            }
+        }
+        for (const [key, ary] of Object.entries(observablesState.coordinates)) {
+            // - Don't add latitude or longitude rows to tables that didn't already have those rows, just update the existing inputs
+            if (tableKeys.includes(key)) {
+                const valueInput = tableState[key].propertyValueInput;
+                if (valueInput !== null) {
+                    valueInput.replaceWith(this.#getValueTextInput(key, ary));
+                }
+            }
+        }
+        const observablesKeys = [];
+        for (const obj of Object.values(observablesState)) {
+            observablesKeys.push(...Object.keys(obj))
+        }
+        for (const [key, obj] of Object.entries(tableState)) {
+            // - Second, compare the observables' state to the table state. If the observables' state lacks a property that is in the table state,
+            //   remove the corresponding row from the table
+            if (!observablesKeys.includes(key)) {
+                obj.propertyTableRow.remove();
+            }
+        }
     }
 
     /**
@@ -183,74 +236,69 @@ class FeatureEditModal { // implements ObserverInterface, ModalInterface
     renderContent() {
         const modal = new Modal();
         modal.addStyleClasses(['featureEditModal'], 'divElement');
-        // - I don't create a value text input, so I have to decide whether to display an ID or a string here
-        if (this.#observables.length === 1) {
-            if (this.#observables[0].hasProperty('treeKey', 'meta')) {
-                modal.insertTHeadRow([null, 'ID', this.#observables[0].getProperty('treeKey', 'meta')]);
-            } else if (this.#observables[0].hasProperty('FID', 'meta')) {
-                modal.insertTHeadRow([null, 'FID', this.#observables[0].getProperty('FID', 'meta').toString()]);
-            } else {
-                modal.insertTHeadRow([null, 'ID', '<No ID>']);
-            }
-        } else {
-            modal.insertTHeadRow([null, 'ID', '<Multiple "ID" Values>']);
-        }
-        const keyToValues = {};
-        this.#observables.forEach(ob => {
-            // - Let non-OMD-tree features display a table
-            if (ob.hasProperty('treeProps', 'meta')) {
-                for (const [k, v] of Object.entries(ob.getProperties('treeProps'))) {
-                    if (!keyToValues.hasOwnProperty(k)) {
-                        keyToValues[k] = [v];
-                    } else if (!keyToValues[k].includes(v)) {
-                        keyToValues[k].push(v);
-                    }
-                }
-            }
-            let coordinatesArray = [];
-            if (ob.isNode()) {
-                const [lon, lat] = ob.getCoordinates(); 
-                coordinatesArray = [['longitude', +lon], ['latitude', +lat]];
-            }
-            if (ob.isLine()) {
-                const [[lon_1, lat_1], [lon_2, lat_2]] = ob.getCoordinates();
-                coordinatesArray = [['longitude', +lon_1], ['latitude', +lat_1], ['longitude', +lon_2], ['latitude', +lat_2]];
-            }
-            coordinatesArray.forEach(ary => {
-                const k = ary[0];
-                const v = ary[1];
-                if (!keyToValues.hasOwnProperty(k)) {
-                    keyToValues[k] = [v];
-                } else if (!keyToValues[k].includes(v)) {
-                    keyToValues[k].push(v);
-                }
-            });
-        });
-        for (const [k, ary] of Object.entries(keyToValues)) {
-            // - I don't create a value text input, so I have to decide whether to display the value of "object" or a string here 
-            if (k === 'object') {
+        const keyToValues = this.#getKeyToValuesMapping();
+        for (const [key, ary] of Object.entries(keyToValues.meta)) {
+            const keySpan = document.createElement('span');
+            if (key === 'treeKey') {
+                keySpan.textContent = 'ID';
+                keySpan.dataset.propertyKey = 'treeKey';
+                keySpan.dataset.propertyNamespace = 'meta';
                 if (ary.length === 1) {
-                    modal.insertTHeadRow([null, 'Object', ary[0]])
+                    modal.insertTHeadRow([null, keySpan, ary[0].toString()], 'prepend');
                 } else {
-                    modal.insertTHeadRow([null, 'Object', '<Multiple "Object" Values>']);
+                    modal.insertTHeadRow([null, keySpan, '<Multiple IDs>'], 'prepend');
+                }
+                continue;
+            }
+            if (key === 'FID') {
+                keySpan.textContent = 'FID';
+                keySpan.dataset.propertyKey = 'FID';
+                keySpan.dataset.propertyNamespace = 'meta';
+                if (ary.length === 1) {
+                    modal.insertTHeadRow([null, keySpan, ary[0].toString()], 'prepend');
+                } else {
+                    modal.insertTHeadRow([null, keySpan, '<Multiple FIDs>'], 'prepend');
+                }
+            }
+        }
+        for (const [key, ary] of Object.entries(keyToValues.treeProps)) {
+            const keySpan = document.createElement('span');
+            // - I don't create a value text input, so I have to decide whether to display the value of "object" or a string here 
+            if (key === 'object') {
+                keySpan.textContent = 'Object';
+                keySpan.dataset.propertyKey = 'object';
+                keySpan.dataset.propertyNamespace = 'treeProps';
+                if (ary.length === 1) {
+                    modal.insertTHeadRow([null, keySpan, ary[0].toString()])
+                } else {
+                    modal.insertTHeadRow([null, keySpan, '<Multiple "Object" Values>']);
                 }
                 continue;
             }
             // - Don't allow the "from", "to", or "type" properties of parent-child lines to be edited
-            if (['from', 'to', 'type'].includes(k) && this.#observables.some(ob => ob.isParentChildLine())) {
-                continue
-            } else if (['latitude', 'longitude'].includes(k)) {
+            if (['from', 'to', 'type'].includes(key) && this.#observables.some(ob => ob.isParentChildLine())) {
+                continue;
+            }
+            keySpan.textContent = key;
+            keySpan.dataset.propertyKey = key;
+            keySpan.dataset.propertyNamespace = 'treeProps';
+            let deleteButton = null;
+            if (!FeatureEditModal.#nonDeletableProperties.includes(key)) {
+                deleteButton = this.#getDeletePropertyButton(key);
+            }
+            modal.insertTBodyRow([deleteButton, keySpan, this.#getValueTextInput(key, ary)]);
+        }
+        for (const [key, ary] of Object.entries(keyToValues.coordinates)) {
+            const keySpan = document.createElement('span');
+            if (['latitude', 'longitude'].includes(key)) {
                 if (this.#observables.some(ob => ob.isConfigurationObject() || ob.isLine())) {
                     continue;
                 } else {
-                    modal.insertTBodyRow([null, k, this.#getValueTextInput(k, keyToValues[k])], 'prepend');
+                    keySpan.textContent = key;
+                    keySpan.dataset.propertyKey = key;
+                    // - longitude and latitude aren't in any property namespace
+                    modal.insertTBodyRow([null, keySpan, this.#getValueTextInput(key, ary)], 'prepend');
                 }
-            } else {
-                let deleteButton = null;
-                if (!FeatureEditModal.#nonDeletableProperties.includes(k)) {
-                    deleteButton = this.#getDeletePropertyButton(k);
-                }
-                modal.insertTBodyRow([deleteButton, k, this.#getValueTextInput(k, keyToValues[k])]);
             }
         }
         modal.insertTBodyRow([this.#getAddPropertyButton(), null, null], 'append', ['absolute']);
@@ -272,9 +320,9 @@ class FeatureEditModal { // implements ObserverInterface, ModalInterface
             } else {
                 if (this.#observables.every(ob => ob.isNode())) {
                     modal.insertElement(this.#getAddNodeWithCoordinatesDiv());
-                    modal.insertElement(this.#getAddNodeWithMapClickDiv()); 
+                    modal.insertElement(this.#getAddNodeWithMapClickDiv());
                 } else if (this.#observables.every(ob => ob.isLine())) {
-                    modal.insertElement(this.#getAddLineWithFromToDiv()); 
+                    modal.insertElement(this.#getAddLineWithFromToDiv());
                 } else {
                     // - Don't add buttons. The user's search returned both nodes and lines
                 }
@@ -470,6 +518,66 @@ class FeatureEditModal { // implements ObserverInterface, ModalInterface
     }
 
     /**
+     * - Iterate through all of the observables and map each property key to all unique values for that (treeProps) property key across all of the
+     *   observables. Also includes treeKey, longitude, and latitude values
+     * @returns {Object}
+     */
+    #getKeyToValuesMapping() {
+        const keyToValues = {
+            meta: {},
+            treeProps: {},
+            coordinates: {}
+        };
+        this.#observables.forEach(ob => {
+            // - Let non-OMD-tree features display a table
+            if (ob.hasProperty('treeKey', 'meta')) {
+                const treeKey = ob.getProperty('treeKey', 'meta');
+                if (!keyToValues.meta.hasOwnProperty('treeKey')) {
+                    keyToValues.meta.treeKey = [treeKey];
+                } else if (!keyToValues.meta.treeKey.includes(treeKey)) {
+                    keyToValues.meta.treeKey.push(treeKey);
+                }
+            }
+            if (ob.hasProperty('FID', 'meta')) {
+                const fid = ob.getProperty('FID', 'meta');
+                if (!keyToValues.meta.hasOwnProperty('FID')) {
+                    keyToValues.meta.FID = [fid];
+                } else if (!keyToValues.meta.FID.includes(fid)) {
+                    keyToValues.meta.FID.push(fid);
+                }
+            }
+            if (ob.hasProperty('treeProps', 'meta')) {
+                for (const [k, v] of Object.entries(ob.getProperties('treeProps'))) {
+                    if (!keyToValues.treeProps.hasOwnProperty(k)) {
+                        keyToValues.treeProps[k] = [v];
+                    } else if (!keyToValues.treeProps[k].includes(v)) {
+                        keyToValues.treeProps[k].push(v);
+                    }
+                }
+            }
+            let coordinatesArray = [];
+            if (ob.isNode()) {
+                const [lon, lat] = ob.getCoordinates();
+                coordinatesArray = [['longitude', +lon], ['latitude', +lat]];
+            }
+            if (ob.isLine()) {
+                const [[lon_1, lat_1], [lon_2, lat_2]] = ob.getCoordinates();
+                coordinatesArray = [['longitude', +lon_1], ['latitude', +lat_1], ['longitude', +lon_2], ['latitude', +lat_2]];
+            }
+            coordinatesArray.forEach(ary => {
+                const k = ary[0];
+                const v = ary[1];
+                if (!keyToValues.coordinates.hasOwnProperty(k)) {
+                    keyToValues.coordinates[k] = [v];
+                } else if (!keyToValues.coordinates[k].includes(v)) {
+                    keyToValues.coordinates[k].push(v);
+                }
+            });
+        });
+        return keyToValues;
+    }
+
+    /**
      * - TODO: move this into the controller? Wouldn't be so bad if I did. Actually I should because of mass add. But mass add should just be another
      *   button so this function can stay here.
      * @param {Feature} component - a component feature
@@ -518,10 +626,10 @@ class FeatureEditModal { // implements ObserverInterface, ModalInterface
      */
     #getValueTextInput(propertyKey, propertyValues=null) {
         if (typeof propertyKey !== 'string') {
-            throw TypeError('"propertyKey" argument must be a string.');
+            throw TypeError('"propertyKey" argument must be typeof string.');
         }
         if (!(propertyValues instanceof Array) && propertyValues !== null) {
-            throw TypeError('"propertyValues" argument must be an array or null.');
+            throw TypeError('"propertyValues" argument must be instanceof Array or null.');
         }
         const input = document.createElement('input');
         if (propertyValues === null) {
@@ -624,11 +732,16 @@ class FeatureEditModal { // implements ObserverInterface, ModalInterface
             const inputValue = this.value.trim();
             // - If the input value isn't valid, just don't create a text input for the value and don't update the feature's properties
             if (that.#keyTextInputIsValid(inputValue)) {
+                let parentElement = this.parentElement;
+                while (!(parentElement instanceof HTMLTableRowElement)) {
+                    parentElement = parentElement.parentElement;
+                }
+                parentElement.remove();
                 that.#controller.setProperty(that.#observables, inputValue, '', 'treeProps');
-                this.replaceWith(document.createTextNode(inputValue));
-                transitionalDeleteButton.replaceWith(that.#getDeletePropertyButton(inputValue));
-                valueInputPlaceholder.replaceWith(that.#getValueTextInput(inputValue));
-                originalValue = inputValue;
+                //this.replaceWith(document.createTextNode(inputValue));
+                //transitionalDeleteButton.replaceWith(that.#getDeletePropertyButton(inputValue));
+                //valueInputPlaceholder.replaceWith(that.#getValueTextInput(inputValue));
+                //originalValue = inputValue;
             } else {
                 input.value = originalValue;
             }
