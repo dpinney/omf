@@ -152,7 +152,7 @@ def work(modelDir, inputDict):
 	criticalLoadShape = np.array(criticalLoadShape)
 	numRows = loadShape.shape[0]
 	numCols = loadShape.shape[1]
-	outData['numScenarios'] = numCols+1;
+	outData['numScenarios'] = numCols+1
 
 	totalLoad = np.zeros(numRows)
 	totalCriticalLoad = np.zeros(numRows)
@@ -174,7 +174,7 @@ def work(modelDir, inputDict):
 			totalCriticalLoad = np.add(totalCriticalLoad, criticalLoad)
 
 		jsonifiableLoad = list(load)
-		jsonifiableCriticalLoad = list(criticalLoad);
+		jsonifiableCriticalLoad = list(criticalLoad)
 
 		# Create the input JSON file for REopt
 		# TODO: To use energyCostMonthly, comment out demandCost and energyCost lines in the Scenario JSON
@@ -250,17 +250,17 @@ def work(modelDir, inputDict):
 			# To turn off energy export/net-metering, set wholesaleCost to "0" and excess PV gen will be curtailed
 			if solarCanExport == False:
 				scenario['Scenario']['Site']['ElectricTariff']["wholesale_rate_above_site_load_us_dollars_per_kwh"] = 0
-				scenario['Scenario']['Site']['ElectricTariff']["wholesale_rate_us_dollars_per_kwh"] = 0;
+				scenario['Scenario']['Site']['ElectricTariff']["wholesale_rate_us_dollars_per_kwh"] = 0
 		if wind == 'off':
 			scenario['Scenario']['Site']['Wind']['max_kw'] = 0
 		elif wind == 'on':
-			scenario['Scenario']['Site']['Wind']['max_kw'] = windMax;
+			scenario['Scenario']['Site']['Wind']['max_kw'] = windMax
 		if battery == 'off':
 			scenario['Scenario']['Site']['Storage']['max_kw'] = 0
 			scenario['Scenario']['Site']['Storage']['max_kwh'] = 0 #May not be a needed constraint, even though it is stated as such in the NREL docs
 		elif battery == 'on':
 			scenario['Scenario']['Site']['Storage']['max_kw'] = batteryPowerMax
-			scenario['Scenario']['Site']['Storage']['max_kwh'] = batteryCapacityMax;
+			scenario['Scenario']['Site']['Storage']['max_kwh'] = batteryCapacityMax
 		# if outage_start_hour is > 0, a resiliency optimization that includes diesel is triggered
 		if outage_start_hour != 0:
 			scenario['Scenario']['Site']['LoadProfile']['outage_is_major_event'] = True

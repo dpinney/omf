@@ -13,17 +13,21 @@ def run(inJSONPath, outputPath):
 	root_url = 'https://developer.nrel.gov/api/reopt'
 	post_url = root_url + '/v2/job/?api_key=' + API_KEY
 	results_url = root_url + '/v2/job/<run_uuid>/results/?api_key=' + API_KEY
-	post = json.load(open(inJSONPath))
+	with open(inJSONPath) as f:
+		post = json.load(f)
 	resp = requests.post(post_url, json=post)
 	if not resp.ok:
-		logger.log.error("Status code {}. {}".format(resp.status_code, resp.content))
+		logger.log.error(f'Status code: {resp.status_code} - url: {post_url}')
+		with open(outputPath, 'w') as f:
+			json.dump(json.loads(resp.text), f, indent=4)
+		logger.log.warning((f'Warning: response from {post_url} did not start a scenario. This is probably because the submitted inputs were invaild.'))
 	else:
-		logger.log.info("Response OK from {}.".format(post_url))
+		logger.log.info(f'Status code: {resp.status_code} - url: {post_url}')
 		run_id_dict = json.loads(resp.text)
 		try:
 			run_id = run_id_dict['run_uuid']
 		except KeyError:
-			msg = "Response from {} did not contain run_uuid.".format(post_url)
+			msg = f'Warning: response from {post_url} did not contain a run_uuid, so an scenario was not started.'
 			logger.log.error(msg)
 			raise KeyError(msg)
 		results = results_poller.poller(url=results_url.replace('<run_uuid>', run_id))
@@ -41,17 +45,20 @@ def runResilience(runID, outputPath):
 	root_url = 'https://developer.nrel.gov/api/reopt'
 	post_url = root_url + '/v2/outagesimjob/?api_key=' + API_KEY
 	results_url = root_url + '/v2/job/<RUN_ID>/resilience_stats/?api_key=' + API_KEY
-	resp = requests.post(post_url, json={'run_uuid':runID, 'bau':False})
+	resp = requests.post(post_url, json={'run_uuid': runID, 'bau': False})
 	if not resp.ok:
-		logger.log.error("Status code {}. {}".format(resp.status_code, resp.content))
+		logger.log.error(f'Status code: {resp.status_code} - Response body: {resp.text} - url: {post_url}')
+		with open(outputPath, 'w') as f:
+			json.dump(json.loads(resp.text), f, indent=4)
+		logger.log.warning((f'Warning: response from {post_url} did not start an outage simulator job. This is probably because the initial scenario job did not '
+		    'complete successfully. Resilience metrics will not be included.'))
 	else:
-		logger.log.info("Response OK from {}.".format(post_url))
+		logger.log.info(f'Status code: {resp.status_code} - url: {post_url}')
 		run_id_dict = json.loads(resp.text)
-		print(resp.text)
 		try:
 			run_id = run_id_dict['run_uuid']
 		except KeyError:
-			msg = "Response from {} did not contain run_uuid.".format(post_url)
+			msg = f'Warning: response from {post_url} did not contain a run_uuid, so an outage simulator job was not started.'
 			logger.log.error(msg)
 			raise KeyError(msg)
 		results = results_poller.rez_poller(url=results_url.replace('<RUN_ID>', run_id))
