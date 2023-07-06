@@ -338,6 +338,10 @@
 				<label class="tooltip">Discount Rate (% per year)<span class="classic">Please enter a number 0-1 for the Nominal energy offtaker discount rate. In single ownership model the offtaker is also the generation owner. Format 0.XXX</span></label>
 				<input type="number" id="discountRate" name="discountRate" value="{{allInputDataDict.discountRate}}" step="0.001" min="0.0" max="1.0" required="required"/>
 			</div>
+            <div class="shortInput">
+                <label class="tooltip">Solver Tolerance<span class="classic">Please enter a number 0.0001 - 0.05 for the REopt optimality tolerance. A higher number increases the probability that the REopt financial scenario will successfully complete. A lower number ensures that slightly less optimal solutions will not be returned</span></label>
+                <input type="number" id="solverTolerance" name="solverTolerance" value="{{allInputDataDict.solverTolerance}}" step="0.0001" min="0.0001" max="0.05" required/>
+            </div>
 			<div class="wideInput">
 				<p class="inputSectionHeader">Generation Technologies</p>
 			</div>

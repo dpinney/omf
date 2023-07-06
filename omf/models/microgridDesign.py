@@ -180,6 +180,8 @@ def work(modelDir, inputDict):
 		# TODO: To use energyCostMonthly, comment out demandCost and energyCost lines in the Scenario JSON
 		scenario = {
 			"Scenario": {
+				"optimality_tolerance_bau": float(inputDict['solverTolerance']),
+				"optimality_tolerance_techs": float(inputDict['solverTolerance']),
 				"Site": {
 					"latitude": latitude,
 					"longitude": longitude,
@@ -755,6 +757,7 @@ def new(modelDir):
 		"year" : '2017',
 		"analysisYears" : '25',
 		"discountRate" : '0.083', # Nominal energy offtaker discount rate. In single ownership model the offtaker is also the generation owner
+        "solverTolerance": "0.05", # The threshold for the difference between the solution's objective value and the best possible value at which the solver terminates
 		"energyCost" : "0.1",
 		"demandCost" : '20',
 		"urdbLabelSwitch": "off",
