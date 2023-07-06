@@ -19,7 +19,7 @@ log = logging.getLogger('my_log_file')
 log.setLevel(logging.DEBUG)
 
 path = tempfile.mkdtemp() + '/test_scenario.log'
-print(f'Reopt logger is outputing to: {path}')
+#print(f'Reopt logger is outputing to: {path}')
 file_handler = logging.FileHandler(filename=path, mode='w')
 file_formatter = logging.Formatter('%(asctime)s %(name)-12s %(levelname)-8s %(message)s')
 file_handler.setFormatter(file_formatter)

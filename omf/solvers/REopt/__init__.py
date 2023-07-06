@@ -3,6 +3,7 @@ import requests
 from omf.solvers.REopt import logger
 from omf.solvers.REopt import results_poller
 
+
 def run(inJSONPath, outputPath):
 	API_KEY = 'WhEzm6QQQrks1hcsdN0Vrd56ZJmUyXJxTJFg6pn9'  # OMF KEY. REPLACE WITH YOUR API KEY
 	# API_KEY = 'Y8GMAFsqcPtxhjIa1qfNj5ILxN5DH5cjV3i6BeNE'
@@ -15,25 +16,18 @@ def run(inJSONPath, outputPath):
 	results_url = root_url + '/v2/job/<run_uuid>/results/?api_key=' + API_KEY
 	with open(inJSONPath) as f:
 		post = json.load(f)
-	resp = requests.post(post_url, json=post)
-	if not resp.ok:
-		logger.log.error(f'Status code: {resp.status_code} - url: {post_url}')
-		with open(outputPath, 'w') as f:
-			json.dump(json.loads(resp.text), f, indent=4)
-		logger.log.warning((f'Warning: response from {post_url} did not start a scenario. This is probably because the submitted inputs were invaild.'))
-	else:
-		logger.log.info(f'Status code: {resp.status_code} - url: {post_url}')
-		run_id_dict = json.loads(resp.text)
-		try:
-			run_id = run_id_dict['run_uuid']
-		except KeyError:
-			msg = f'Warning: response from {post_url} did not contain a run_uuid, so an scenario was not started.'
-			logger.log.error(msg)
-			raise KeyError(msg)
-		results = results_poller.poller(url=results_url.replace('<run_uuid>', run_id))
-		with open(outputPath, 'w') as fp:
-			json.dump(obj=results, fp=fp, indent=4)
-		logger.log.info("Saved results to {}".format(outputPath))
+	response = requests.post(post_url, json=post)
+	raise_if_unsuccessful(response, outputPath)
+	#logger.log.info(f'Status code: {response.status_code} - url: {post_url}')
+	run_id = json.loads(response.text)['run_uuid']
+	response = results_poller.poller(url=results_url.replace('<run_uuid>', run_id))
+	raise_if_unsuccessful(response, outputPath)
+	response_json = json.loads(response.text)
+	response_json['api_key'] = API_KEY
+	with open(outputPath, 'w') as f:
+		json.dump(response_json, f, indent=4)
+	#logger.log.info("Saved results to {}".format(outputPath))
+
 
 def runResilience(runID, outputPath):
 	API_KEY = 'WhEzm6QQQrks1hcsdN0Vrd56ZJmUyXJxTJFg6pn9'  # OMF KEY. REPLACE WITH YOUR API KEY
@@ -45,39 +39,56 @@ def runResilience(runID, outputPath):
 	root_url = 'https://developer.nrel.gov/api/reopt'
 	post_url = root_url + '/v2/outagesimjob/?api_key=' + API_KEY
 	results_url = root_url + '/v2/job/<RUN_ID>/resilience_stats/?api_key=' + API_KEY
-	resp = requests.post(post_url, json={'run_uuid': runID, 'bau': False})
-	if not resp.ok:
-		logger.log.error(f'Status code: {resp.status_code} - Response body: {resp.text} - url: {post_url}')
+	response = requests.post(post_url, json={'run_uuid': runID, 'bau': False})
+	raise_if_unsuccessful(response, outputPath)
+	#logger.log.info(f'Status code: {resp.status_code} - url: {post_url}')
+	run_id = json.loads(response.text)['run_uuid']
+	response = results_poller.rez_poller(url=results_url.replace('<RUN_ID>', run_id))
+	response_json = json.loads(response.text)
+	response_json['api_key'] = API_KEY
+	raise_if_unsuccessful(response, outputPath)
+	with open(outputPath, 'w') as f:
+		json.dump(response_json, f, indent=4)
+	#logger.log.info("Saved results to {}".format(outputPath))
+
+
+def raise_if_unsuccessful(response, outputPath):
+	'''
+	Raise a custom exception if the response did not successfully complete. If the response only contains a "run_uuid" key, it was successful. If it
+	contains other keys, it was unsuccessful
+
+	:param response: a Requests response object
+	:return: None
+	'''
+	response_json = json.loads(response.text)
+	if response_json.get('messages') is not None and response_json.get('messages').get('error') is not None:
+		if response_json['messages'].get('input_errors') is not None:
+			#logger.log.error(f'Status code: {response.status_code} - url: {response.url}')
+			#logger.log.warning((f'Warning: unsuccessful response from {response.url} did not start a scenario. This is probably because the submitted inputs were invaild.'))
+			with open(outputPath, 'w') as f:
+				json.dump(response_json, f, indent=4)
+			raise Exception(f'{response_json["messages"]["error"]}: {response_json["messages"]["input_errors"]}')
+		else:
+			#logger.log.error(f'Status code: {response.status_code} - url: {response.url}')
+			#logger.log.warning((f'Warning: response from {response.url} did not start a scenario. This is probably because the submitted inputs were invaild.'))
+			with open(outputPath, 'w') as f:
+				json.dump(response_json, f, indent=4)
+			raise Exception(f'{response_json["messages"]["error"]}')
+	if not response.ok:
+		#logger.log.error(f'Status code: {response.status_code} - url: {response.url}')
+		#logger.log.warning((f'Warning: response from {response.url} did not start a scenario. This is probably because the submitted inputs were invaild.'))
 		with open(outputPath, 'w') as f:
-			json.dump(json.loads(resp.text), f, indent=4)
-		logger.log.warning((f'Warning: response from {post_url} did not start an outage simulator job. This is probably because the initial scenario job did not '
-		    'complete successfully. Resilience metrics will not be included.'))
-	else:
-		logger.log.info(f'Status code: {resp.status_code} - url: {post_url}')
-		run_id_dict = json.loads(resp.text)
-		try:
-			run_id = run_id_dict['run_uuid']
-		except KeyError:
-			msg = f'Warning: response from {post_url} did not contain a run_uuid, so an outage simulator job was not started.'
-			logger.log.error(msg)
-			raise KeyError(msg)
-		results = results_poller.rez_poller(url=results_url.replace('<RUN_ID>', run_id))
-		with open(outputPath, 'w') as fp:
-			if "outage_sim_results" in results:
-				json.dump(obj=results["outage_sim_results"], fp=fp, indent=4)
-			else:
-				error_dict = {"Error":str(results['Error'])}
-				json.dump(obj=error_dict, fp=fp, indent=4)
-				logger.log.info("Warning: Response from {} did not contain outage_sim_results. Resilience metrics will not be included.".format(results_url))
-		logger.log.info("Saved results to {}".format(outputPath))
+			json.dump(response_json, f, indent=4)
+		raise Exception(response_json)
+
 
 def _test():
-	run('Scenario_POST72.json', 'results_S72.json')
-
-	with open('results_S72.json') as jsonFile:
+	#run('Scenario_POST40.json', 'results_S40.json')
+	run('/Users/austinchang/Downloads/CONWAY_30MAY23_SOLARBATTERY/Scenario_test_POST-modified.json', 'results_S40.json')
+	with open('results_S40.json') as jsonFile:
 		results = json.load(jsonFile)
-		
 	test_ID = results['outputs']['Scenario']['run_uuid']
+
 	print("PV size_kw:", results['outputs']['Scenario']['Site']['PV']['size_kw'])
 	print("Storage size_kw:", results['outputs']['Scenario']['Site']['Storage']['size_kw'])
 	print("Storage size_kwh:", results['outputs']['Scenario']['Site']['Storage']['size_kwh'])
@@ -88,16 +99,15 @@ def _test():
 	print("Generator average_yearly_energy_produced_kwh:", results['outputs']['Scenario']['Site']['Generator']['average_yearly_energy_produced_kwh'])
 	print("Generator average_yearly_energy_exported_kwh:", results['outputs']['Scenario']['Site']['Generator']['average_yearly_energy_exported_kwh'])
 	print("Generator existing_gen_total_fuel_cost_us_dollars:", results['outputs']['Scenario']['Site']['Generator']['existing_gen_total_fuel_cost_us_dollars'])
-	print("Generator year_one_emissions_lb_C02:", results['outputs']['Scenario']['Site']['Generator']['year_one_emissions_lb_C02'])
-	print("Generator year_one_emissions_bau_lb_C02:", results['outputs']['Scenario']['Site']['Generator']['year_one_emissions_bau_lb_C02'])
+	#print("Generator year_one_emissions_lb_C02:", results['outputs']['Scenario']['Site']['Generator']['year_one_emissions_lb_C02'])
+	#print("Generator year_one_emissions_bau_lb_C02:", results['outputs']['Scenario']['Site']['Generator']['year_one_emissions_bau_lb_C02'])
 	print("npv_us_dollars:", results['outputs']['Scenario']['Site']['Financial']['npv_us_dollars'])
 	print("initial_capital_costs:", results['outputs']['Scenario']['Site']['Financial']['initial_capital_costs'])
 	# print("CHP size_kw:", results['outputs']['Scenario']['Site']['CHP']['size_kw'])
 	# print("CHP year_one_fuel_used_mmbtu:", results['outputs']['Scenario']['Site']['CHP']['year_one_fuel_used_mmbtu'])
 	# print("CHP year_one_electric_energy_produced_kwh:", results['outputs']['Scenario']['Site']['CHP']['year_one_electric_energy_produced_kwh'])
 
-	# runResilience(test_ID, 'resultsResilience_S40.json')
-
+	runResilience(test_ID, 'resultsResilience_S40.json')
 
 
 if __name__ == '__main__':
