@@ -1097,5 +1097,6 @@ if __name__ == '__main__':
 	# _tests()
 	# _randomTest()
 	# _conversionTests()
-	_dssToOmdTest()
+	# _dssToOmdTest()
 	#_dssCoordTest()
+	pass

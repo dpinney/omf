@@ -3,7 +3,7 @@
 import sys, platform, pkgutil, importlib, omf, traceback
 
 # master override disabling testing.
-IGNORE_FILES = ['omf.runAllTests', 'omf.webProd', 'omf.web', 'omf.omfStats', 'omf.models.phaseId', 'omf.models.solarDisagg', 'omf.tests', 'omf.models.forecastTool', 'omf.models.transmission', 'omf.models.cvrStatic']
+IGNORE_FILES = ['omf.runAllTests', 'omf.webProd', 'omf.web', 'omf.omfStats', 'omf.models.phaseId', 'omf.models.solarDisagg', 'omf.tests', 'omf.models.forecastTool', 'omf.models.transmission', 'omf.models.cvrStatic', 'omf.models.smartSwitching']
 
 # Different platforms like to name the python binary differently
 PY_BIN_NAME = 'python3'
