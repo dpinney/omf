@@ -780,17 +780,19 @@ def dssToOmd(dssFilePath, omdFilePath, RADIUS=0.0002, write_out=True):
 						parent_name = to_name
 					else:
 						parent_name = ob['parent']
-			# get location of parent object.
-			parent_loc = name_map[parent_name]
-			parent_ob = evil_glm[parent_loc]
-			parent_lat = parent_ob.get('latitude', None)
-			parent_lon = parent_ob.get('longitude', None)
-			# place randomly on circle around parent.
-			angle = random.random()*3.14159265*2;
-			x = math.cos(angle)*RADIUS;
-			y = math.sin(angle)*RADIUS;
-			ob['latitude'] = str(float(parent_lat) + x)
-			ob['longitude'] = str(float(parent_lon) + y)
+			# Only do child movement if RADIUS > 0.
+			if RADIUS > 0:
+				# get location of parent object.
+				parent_loc = name_map[parent_name]
+				parent_ob = evil_glm[parent_loc]
+				parent_lat = parent_ob.get('latitude', None)
+				parent_lon = parent_ob.get('longitude', None)
+				# place randomly on circle around parent.
+				angle = random.random()*3.14159265*2;
+				x = math.cos(angle)*RADIUS;
+				y = math.sin(angle)*RADIUS;
+				ob['latitude'] = str(float(parent_lat) + x)
+				ob['longitude'] = str(float(parent_lon) + y)
 	if write_out:
 		evilToOmd(evil_glm, omdFilePath)
 	return evil_glm

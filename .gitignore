@@ -58,3 +58,4 @@ omf/scratch/disaggDataGeneration/regression/*
 omf/scratch/disaggDataGeneration/regression/workingDir/*
 __pycache__/
 .vscode/
+*.code-workspace

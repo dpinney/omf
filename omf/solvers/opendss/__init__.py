@@ -14,20 +14,19 @@ import subprocess
 from copy import deepcopy
 try:
 	import opendssdirect as dss
+	from opendssdirect import run_command, Error
 except:
 	warnings.warn('opendssdirect not installed; opendss functionality disabled.')
 from omf.solvers.opendss import dssConvert
 import omf
 
 def runDssCommand(dsscmd):
-	from opendssdirect import run_command, Error
-	x = run_command(dsscmd)
+	run_command(dsscmd)
 	latest_error = Error.Description()
 	if latest_error != '':
-		print('OpenDSS Error:', latest_error)
-	return x
+		raise Exception('OpenDSS Error:', latest_error)
 
-def runDSS(dssFilePath, keep_output=True):
+def runDSS(dssFilePath):
 	''' Run DSS circuit definition file and set export path. Generates file named coords.csv in directory of input file.
 	To avoid generating this file, set the 'keep_output' parameter to False.'''
 	# Check for valid .dss file
@@ -40,34 +39,19 @@ def runDSS(dssFilePath, keep_output=True):
 			pass
 	except Exception as ex:
 		print('While accessing the file located at %s, the following exception occured: %s'%(dssFileLoc, ex))
-	runDssCommand('Clear')
-	runDssCommand('Redirect "' + fullPath + '"')
+	runDssCommand('clear')
+	runDssCommand(f'redirect "{fullPath}"')
+	runDssCommand(f'set datapath="{dssFileLoc}"')
 	runDssCommand('calcvoltagebases')
-	runDssCommand('Solve')
-	# also generate coordinates.
-	# TODO?: Get the coords as a separate function (i.e. getCoords() below) and instead return dssFileLoc.
-	x = runDssCommand('Export BusCoords "' + dssFileLoc + '/coords.csv"')
-	coords = pd.read_csv(dssFileLoc + '/coords.csv', dtype=str, header=None, names=['Element', 'X', 'Y'])
-	# TODO: reverse keep_output logic - Should default to cleanliness. Requires addition of 'keep_output=True' to all function calls.
-	if not keep_output:
-		os.remove(x)
-	hyp = []
-	for index, row in coords.iterrows():
-		hyp.append(math.sqrt(float(row['X'])**2 + float(row['Y'])**2))
-	coords['radius'] = hyp
-	return coords
+	runDssCommand('solve')
 
-def _getCoords(dssFilePath, keep_output=True):
-	'''*Not approved for usage*. Takes in an OpenDSS circuit definition file and outputs the bus coordinates as a dataframe. If 
-	'keep_output' is set to True, a file named coords.csv is generated in the directory of input file.'''
-	# TODO: clean up and test the below copy-pasta'd logic
-	#dssFileLoc = runDSS(dssFilePath, keep_output=True)
-	dssFileLoc = runDSS(dssFilePath)
-	x = runDssCommand('Export BusCoords "' + dssFileLoc + '/coords.csv"')
+def getCoords(dssFilePath):
+	'''Takes in an OpenDSS circuit definition file and outputs the bus coordinates as a dataframe.'''
+	dssFileLoc = os.path.dirname(dssFilePath)
+	runDSS(dssFilePath)
+	runDssCommand(f'export buscoords "{dssFileLoc}/coords.csv"')
 	coords = pd.read_csv(dssFileLoc + '/coords.csv', header=None)
-	if not keep_output:
-		os.remove(x)
-	coords.columns = ['Element', 'X', 'Y', 'radius'] # most everything renames 'Element' to 'Bus'. currentPlot() and capacityPlot() change it to 'Index' for their own reasons.
+	coords.columns = ['Element', 'X', 'Y', 'radius']
 	hyp = []
 	for index, row in coords.iterrows():
 		hyp.append(math.sqrt(row['X']**2 + row['Y']**2))
@@ -495,8 +479,8 @@ def get_subtree_obs(line, tree):
 def voltagePlot(filePath, PU=True):
 	''' Voltage plotting routine. Creates 'voltages.csv' and 'Voltage [PU|V].png' in directory of input file.'''
 	dssFileLoc = os.path.dirname(os.path.abspath(filePath))
-	volt_coord = runDSS(filePath)
-	runDssCommand('Export voltages "' + dssFileLoc + '/volts.csv"')
+	runDSS(filePath)
+	runDssCommand(f'export voltages "{dssFileLoc}/volts.csv"')
 	voltageDF = pd.read_csv(dssFileLoc + '/volts.csv')
 	plt.title('Voltage Profile')
 	plt.ylabel('Count')
@@ -546,8 +530,8 @@ def get_bus_phasing_map(path_to_dss):
 def currentPlot(filePath):
 	''' Current plotting function.'''
 	dssFileLoc = os.path.dirname(os.path.abspath(filePath))
-	curr_coord = runDSS(filePath)
-	runDssCommand('Export currents "' + dssFileLoc + '/currents.csv"')
+	runDSS(filePath)
+	runDssCommand(f'export currents "{dssFileLoc}/currents.csv"')
 	currentDF = pd.read_csv(dssFileLoc + '/currents.csv')
 	plt.xlabel('Current [A]')
 	plt.ylabel('Count')
@@ -564,8 +548,9 @@ def networkPlot(filePath, figsize=(20,20), output_name='networkPlot.png', show_l
 	''' Plot the physical topology of the circuit.
 	Returns a networkx graph of the circuit as a bonus. '''
 	dssFileLoc = os.path.dirname(os.path.abspath(filePath))
-	coords = runDSS(filePath)
-	runDssCommand('Export voltages "' + dssFileLoc + '/volts.csv"')
+	runDSS(filePath)
+	coords = getCoords(filePath)
+	runDssCommand(f'export voltages "{dssFileLoc}/volts.csv"')
 	volts = pd.read_csv(dssFileLoc + '/volts.csv')
 	coords.columns = ['Bus', 'X', 'Y', 'radius']
 	G = nx.Graph()
@@ -617,7 +602,7 @@ def networkPlot(filePath, figsize=(20,20), output_name='networkPlot.png', show_l
 def THD(filePath):
 	''' Calculate and plot total harmonic distortion. '''
 	dssFileLoc = os.path.dirname(os.path.abspath(filePath))
-	bus_coords = runDSS(filePath)
+	bus_coords = getCoords(filePath)
 	runDssCommand('Solve mode=harmonics')
 	runDssCommand('Export voltages "' + dssFileLoc + '/voltharmonics.csv"')
 	# Clean up temp file.
@@ -689,7 +674,7 @@ def faultPlot(filePath, faultCommand):
 def capacityPlot(filePath):
 	''' Plot power vs. distance '''
 	dssFileLoc = os.path.dirname(os.path.abspath(filePath))
-	coords = runDSS(filePath)
+	runDSS(filePath)
 	runDssCommand('Export Capacity "' + dssFileLoc + '/capacity.csv"')
 	capacityDF = pd.read_csv(dssFileLoc + '/capacity.csv')
 	plt.title('Transformer Loading')
@@ -848,7 +833,7 @@ def getVoltages(dssFilePath, keep_output=False, outdir='', output_filename='volt
 	file's directory as 'voltages.csv',	or specify a filename for the output through the 
 	'output_filename' parameter (i.e. '*.csv').'''
 	dssFileLoc = os.path.dirname(os.path.abspath(dssFilePath))
-	coords = runDSS(os.path.abspath(dssFilePath), keep_output=False)
+	runDSS(os.path.abspath(dssFilePath), keep_output=False)
 	if outdir!='':
 		outdir = outdir + '/'
 	voltfile = dssFileLoc + '/' + outdir + output_filename
@@ -917,6 +902,7 @@ def removeCnxns(tree):
 	return tree
 
 def reduceCircuit(tree):
+	''' Apply all 3 circuit reduction functions. '''
 	tree = mergeContigLines(tree)
 	tree = rollUpTriplex(tree)
 	tree = rollUpLoadTransformer(tree)
@@ -1276,29 +1262,34 @@ def rollUpLoadTransformer(tree, combine_loads=True):
 	return tree
 
 def _tests():
-	from omf.solvers.opendss.dssConvert import dssToTree, distNetViz, evilDssTreeToGldTree, treeToDss, evilGldTreeToDssTree
 	fpath = ['ieee37.clean.dss','ieee123_solarRamp.clean.dss','iowa240.clean.dss','ieeeLVTestCase.clean.dss','ieee8500-unbal_no_fuses.clean.dss']
-
 	for fname in fpath:
-		outdir = omf.omfDir + '/solvers/opendss/voltageCompare_' + fname[:-4]
 		ckt = omf.omfDir + '/solvers/opendss/' + fname
 		print('!!!!!!!!!!!!!! ',ckt,' !!!!!!!!!!!!!!')
 		# Test for reduceCircuit, voltageCompare, getVoltages, and runDSS.
-		tree = dssToTree(ckt)
+		tree = dssConvert.dssToTree(ckt)
 		#voltagePlot(ckt,PU=False)
-		#gldtree = evilDssTreeToGldTree(tree) # DEBUG
+		#gldtree = dssConvert.evilDssTreeToGldTree(tree) # DEBUG
 		#distNetViz.viz_mem(gldtree, open_file=True, forceLayout=True) # DEBUG
 		oldsz = len(tree)
 		tree = reduceCircuit(tree)
 		newsz = len(tree)
-		#gldtree = evilDssTreeToGldTree(tree) # DEBUG
+		#gldtree = dssConvert.evilDssTreeToGldTree(tree) # DEBUG
 		#distNetViz.viz_mem(gldtree, open_file=True, forceLayout=True) # DEBUG
-		#tree = evilGldTreeToDssTree(gldtree) # DEBUG
+		#tree = dssConvert.evilGldTreeToDssTree(gldtree) # DEBUG
 		# outckt_loc = ckt[:-4] + '_reduced.dss'
-		treeToDss(tree, ckt+'out.dss')
+		dssConvert.treeToDss(tree, ckt+'out.dss')
+		runDSS(ckt+'out.dss')
+		# outdir = omf.omfDir + '/solvers/opendss/voltageCompare_' + fname[:-4]
 		#voltagePlot(outckt_loc,PU=False)
 		# if not os.path.exists(outdir):
 		# 	os.mkdir(outdir)
+		#currentPlot(ckt)
+		#networkPlot(ckt)
+		#THD(ckt)
+		#dynamicPlot(ckt, 1, 10)
+		#faultPlot(ckt)
+		#capacityPlot(ckt)
 		# involts_loc = ckt[:-4] + '_volts.dss'
 		# involts = getVoltages(ckt, keep_output=True, outdir=outdir, output_filename=involts_loc)
 		# outvolts_loc = outckt_loc[:-4] + '_volts.dss'
@@ -1318,36 +1309,6 @@ def _tests():
 		#print('Objects removed: %s (of %s).\nPercent reduction: %s%%\nMax RMSPE for voltage magnitude: %s%%\nMax RMSPE for voltage angle: %s%%\nMax RMSE for voltage magnitude: %s\nMax RMSE for voltage angle: %s\n'%(oldsz-newsz, oldsz, (oldsz-newsz)*100/oldsz, maxPerrM, maxPerrA, maxDerrM, maxDerrA)) # DEBUG
 		# errlim = 0.30 # threshold of 30% error between reduced files. 
 		# assert maxPerrM <= errlim*100, 'The voltage magnitude error between the compared files exceeds the allowable limit of %s%%.'%(errlim*100)
-		
-def _runTest():
-	# runDSS('nreca1824.dss', keep_output=False)
-	runDSS(omf.omfDir + '/iowa240.clean.dss', keep_output=False)
-
-	# Make core output
-	#FPATH = 'iowa240.clean.dss'
-	#FPATH = 'ieeeLVTestCase.dss'
-	#FPATH = 'ieee37.clean.reduced.dss'
-	#dssConvert.evilGldTreeToDssTree(tree)
-	#dssConvert.treeToDss(tree, 'ieeeLVTestCaseNorthAmerican_reduced.dss')
-
-	# Just run DSS
-	#runDSS(FPATH)
-	# Generate plots, note output is in FPATH dir.
-	#voltagePlot(FPATH) # 
-	#currentPlot(FPATH)
-	#networkPlot(FPATH)
-	#THD(FPATH)
-	#dynamicPlot(FPATH, 1, 10)
-	#faultPlot(FPATH)
-	#capacityPlot(FPATH)
-
-	#froots = ['ieee37.clean.dss','ieee123_solarRamp.clean.dss','iowa240.clean.dss','ieeeLVTestCase.clean.dss','ieee8500-unbal_no_fuses.clean.dss']
-	#for froot in froots:
-	#	froot = froot[:-4]
-	#	involts = froot + '_volts.dss'
-	#	outvolts = froot + '_mergecontiglines_volts.dss'
-	#	rsumm_P, rsumm_D = voltageCompare(involts, outvolts, keep_output=True)
 
 if __name__ == "__main__":
 	_tests()
-	# _runTest()
