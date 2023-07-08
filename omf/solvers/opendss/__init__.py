@@ -27,18 +27,11 @@ def runDssCommand(dsscmd):
 		raise Exception('OpenDSS Error:', latest_error)
 
 def runDSS(dssFilePath):
-	''' Run DSS circuit definition file and set export path. Generates file named coords.csv in directory of input file.
-	To avoid generating this file, set the 'keep_output' parameter to False.'''
+	''' Run DSS circuit definition file and set export path, solve powerflow.'''
 	# Check for valid .dss file
 	assert '.dss' in dssFilePath.lower(), 'The input file must be an OpenDSS circuit definition file.'
-	# Get paths because openDss doesn't like relative paths.
 	fullPath = os.path.abspath(dssFilePath)
 	dssFileLoc = os.path.dirname(fullPath)
-	try:
-		with open(fullPath):
-			pass
-	except Exception as ex:
-		print('While accessing the file located at %s, the following exception occured: %s'%(dssFileLoc, ex))
 	runDssCommand('clear')
 	runDssCommand(f'redirect "{fullPath}"')
 	runDssCommand(f'set datapath="{dssFileLoc}"')
