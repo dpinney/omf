@@ -1056,7 +1056,7 @@ def _dssCoordTest():
 	outFilePath = pJoin(omfDir, "static", "testFiles", "iowa_240", "iowa240_cleanCoords.csv")
 	getDssCoordinates(omdFilePath, outFilePath)
 
-def _tests():
+def _testsFull():
 	from omf.solvers.opendss import getVoltages, voltageCompare
 	import pandas as pd
 	FNAMES =  ['ieee37.clean.dss', 'ieee123_solarRamp.clean.dss', 'iowa240.clean.dss', 'ieeeLVTestCase.clean.dss', 'ieee8500-unbal_no_fuses.clean.dss']
