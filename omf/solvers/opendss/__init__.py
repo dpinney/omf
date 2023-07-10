@@ -24,7 +24,8 @@ def runDssCommand(dsscmd):
 	run_command(dsscmd)
 	latest_error = Error.Description()
 	if latest_error != '':
-		raise Exception('OpenDSS Error:', latest_error)
+		print('WARNING: OpenDSS Error:', latest_error)
+		# raise Exception('OpenDSS Error:', latest_error)
 
 def runDSS(dssFilePath):
 	''' Run DSS circuit definition file and set export path, solve powerflow.'''
