@@ -164,7 +164,7 @@ def work(modelDir, inputDict):
 			criticalLoad = totalCriticalLoad
 		else:
 			load = loadShape[:,i]
-			print(type(load), load[0], load )
+			# print(type(load), load[0], load )
 			load = [float(x) for x in load]
 			totalLoad = np.add(totalLoad, load)
 
@@ -276,8 +276,6 @@ def work(modelDir, inputDict):
 			scenario['Scenario']['Site']['Generator']['emissions_factor_lb_CO2_per_gal'] = dieselCO2Factor
 			scenario['Scenario']['Site']['Generator']['om_cost_us_dollars_per_kw'] = dieselOMCostKw
 			scenario['Scenario']['Site']['Generator']['om_cost_us_dollars_per_kwh'] = dieselOMCostKwh
-
-
 			# use userCriticalLoadShape only if True, else model defaults to criticalLoadFactor
 			if userCriticalLoadShape == True:
 				scenario['Scenario']['Site']['LoadProfile']['critical_loads_kw'] = jsonifiableCriticalLoad
@@ -429,22 +427,17 @@ def work(modelDir, inputDict):
 		outData['powerDiesel' + indexString] = resultsSubset['Generator']['year_one_power_production_series_kw']
 		outData['powerDieselToBattery' + indexString] = resultsSubset['Generator']['year_one_to_battery_series_kw']
 		outData['powerDieselToLoad' + indexString] = resultsSubset['Generator']['year_one_to_load_series_kw']
-
 		# output resilience stats if resilienceRun was successful
-		if 'resilience_by_timestep' in resultsResilience:
-			outData['resilience' + indexString] = resultsResilience['resilience_by_timestep']
-			outData['minOutage' + indexString] = resultsResilience['resilience_hours_min']
-			outData['maxOutage' + indexString] = resultsResilience['resilience_hours_max']
-			outData['avgOutage' + indexString] = resultsResilience['resilience_hours_avg']
-			outData['survivalProbX' + indexString] = resultsResilience['outage_durations']
-			outData['survivalProbY' + indexString] = resultsResilience['probs_of_surviving']
-			outData['avoidedOutageCosts' + indexString] = resultsResilience['avoided_outage_costs_us_dollars']
-
+		if 'outage_sim_results' in resultsResilience:
+			outData['resilience' + indexString] = resultsResilience['outage_sim_results']['resilience_by_timestep']
+			outData['minOutage' + indexString] = resultsResilience['outage_sim_results']['resilience_hours_min']
+			outData['maxOutage' + indexString] = resultsResilience['outage_sim_results']['resilience_hours_max']
+			outData['avgOutage' + indexString] = resultsResilience['outage_sim_results']['resilience_hours_avg']
+			outData['survivalProbX' + indexString] = resultsResilience['outage_sim_results']['outage_durations']
+			outData['survivalProbY' + indexString] = resultsResilience['outage_sim_results']['probs_of_surviving']
+			outData['avoidedOutageCosts' + indexString] = resultsResilience['outage_sim_results']['avoided_outage_costs_us_dollars']
 		outData['runID' + indexString] = runID
 		outData['apiKey' + indexString] = 'WhEzm6QQQrks1hcsdN0Vrd56ZJmUyXJxTJFg6pn9'
-
-
-
 		#Set plotly layout ---------------------------------------------------------------
 		plotlyLayout = go.Layout(
 			width=1000,
@@ -454,9 +447,7 @@ def work(modelDir, inputDict):
 				y=1.25,
 				orientation="h")
 			)
-		
 		x = list(range(len(outData['powerGridToLoad' + indexString])))
-
 		plotData = []
 		powerGridToLoad = go.Scatter(
 			x=pd.to_datetime(x, unit = 'h', origin = pd.Timestamp(f'{year}-01-01')),

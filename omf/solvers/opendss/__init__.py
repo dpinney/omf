@@ -419,7 +419,9 @@ def voltagePlot(filePath, PU=True):
 
 def get_bus_kv_mappings(path_to_dss):
 	''' Returns a map {bus_name:base_kv} where base_kv is the line-to-neutral voltage.'''
-	voltagePlot(path_to_dss)
+	# voltagePlot(path_to_dss)
+	runDSS(path_to_dss)
+	runDssCommand('export voltages volts.csv')
 	file_loc = os.path.dirname(os.path.abspath(path_to_dss))
 	volt_file_loc = f'{file_loc}/volts.csv'
 	volt_df = pd.read_csv(volt_file_loc)
