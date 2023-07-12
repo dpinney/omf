@@ -685,10 +685,8 @@ def work(modelDir, inputDict):
 			plotlyLayout['xaxis'].update(title='Time')
 			outData["batteryChargeData" + indexString] = json.dumps(plotData, cls=plotly.utils.PlotlyJSONEncoder)
 			outData["batteryChargeLayout" + indexString] = json.dumps(plotlyLayout, cls=plotly.utils.PlotlyJSONEncoder)
-		
-
 		# plot resilience stats if resilienceRun was successful
-		if 'resilience_by_timestep' in resultsResilience:
+		if 'resilience_by_timestep' in resultsResilience['outage_sim_results']:
 			plotData = []
 			resilience = go.Scatter(
 				x=x,
@@ -700,7 +698,6 @@ def work(modelDir, inputDict):
 			plotlyLayout['xaxis'].update(title='Start Hour')
 			outData["resilienceData" + indexString] = json.dumps(plotData, cls=plotly.utils.PlotlyJSONEncoder)
 			outData["resilienceLayout" + indexString] = json.dumps(plotlyLayout, cls=plotly.utils.PlotlyJSONEncoder)
-			
 			plotData = []
 			survivalProb = go.Scatter(
 				x=outData['survivalProbX' + indexString],
@@ -712,7 +709,6 @@ def work(modelDir, inputDict):
 			plotlyLayout['xaxis'].update(title='Outage Length (Hours)')
 			outData["resilienceProbData" + indexString] = json.dumps(plotData, cls=plotly.utils.PlotlyJSONEncoder)
 			outData["resilienceProbLayout"  + indexString] = json.dumps(plotlyLayout, cls=plotly.utils.PlotlyJSONEncoder)
-
 		if numCols == 1:
 			break # if we only have a single load, don't run an additional combined load shape run.
 	#print("Wind kw from resultsSubset:", resultsSubset['Wind']['size_kw'])
