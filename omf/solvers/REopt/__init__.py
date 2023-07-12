@@ -1,16 +1,19 @@
 import json
 import requests
+import random
 from omf.solvers.REopt import logger
 from omf.solvers.REopt import results_poller
 
 
 def run(inJSONPath, outputPath):
-	API_KEY = 'WhEzm6QQQrks1hcsdN0Vrd56ZJmUyXJxTJFg6pn9'  # OMF KEY. REPLACE WITH YOUR API KEY
-	# API_KEY = 'Y8GMAFsqcPtxhjIa1qfNj5ILxN5DH5cjV3i6BeNE'
-	# API_KEY = 'etg8hytwTYRf4CD0c4Vl9U7ACEQnQg6HV2Jf4E5W'
-	# API_KEY = 'BNFaSCCwz5WkauwJe89Bn8FZldkcyda7bNwDK1ic'		 
-	# API_KEY = 'L2e5lfH2VDvEm2WOh0dJmzQaehORDT8CfCotaOcf'
-	# API_KEY = '08USmh2H2cOeAuQ3sCCLgzd30giHjfkhvsicUPPf'
+	api_keys = (
+		'WhEzm6QQQrks1hcsdN0Vrd56ZJmUyXJxTJFg6pn9', # OMF KEY. REPLACE WITH YOUR API KEY
+		'Y8GMAFsqcPtxhjIa1qfNj5ILxN5DH5cjV3i6BeNE',
+		'etg8hytwTYRf4CD0c4Vl9U7ACEQnQg6HV2Jf4E5W',
+		'BNFaSCCwz5WkauwJe89Bn8FZldkcyda7bNwDK1ic',
+		'L2e5lfH2VDvEm2WOh0dJmzQaehORDT8CfCotaOcf',
+		'08USmh2H2cOeAuQ3sCCLgzd30giHjfkhvsicUPPf')
+	API_KEY = random.choice(api_keys)
 	root_url = 'https://developer.nrel.gov/api/reopt'
 	post_url = root_url + '/v2/job/?api_key=' + API_KEY
 	results_url = root_url + '/v2/job/<run_uuid>/results/?api_key=' + API_KEY
@@ -30,18 +33,20 @@ def run(inJSONPath, outputPath):
 
 
 def runResilience(runID, outputPath):
-	API_KEY = 'WhEzm6QQQrks1hcsdN0Vrd56ZJmUyXJxTJFg6pn9'  # OMF KEY. REPLACE WITH YOUR API KEY
-	# API_KEY = 'Y8GMAFsqcPtxhjIa1qfNj5ILxN5DH5cjV3i6BeNE'
-	# API_KEY = 'etg8hytwTYRf4CD0c4Vl9U7ACEQnQg6HV2Jf4E5W'
-	# API_KEY = 'BNFaSCCwz5WkauwJe89Bn8FZldkcyda7bNwDK1ic'
-	# API_KEY = 'L2e5lfH2VDvEm2WOh0dJmzQaehORDT8CfCotaOcf'
-	# API_KEY = '08USmh2H2cOeAuQ3sCCLgzd30giHjfkhvsicUPPf'
+	api_keys = (
+		'WhEzm6QQQrks1hcsdN0Vrd56ZJmUyXJxTJFg6pn9', # OMF KEY. REPLACE WITH YOUR API KEY
+		'Y8GMAFsqcPtxhjIa1qfNj5ILxN5DH5cjV3i6BeNE',
+		'etg8hytwTYRf4CD0c4Vl9U7ACEQnQg6HV2Jf4E5W',
+		'BNFaSCCwz5WkauwJe89Bn8FZldkcyda7bNwDK1ic',
+		'L2e5lfH2VDvEm2WOh0dJmzQaehORDT8CfCotaOcf',
+		'08USmh2H2cOeAuQ3sCCLgzd30giHjfkhvsicUPPf')
+	API_KEY = random.choice(api_keys)
 	root_url = 'https://developer.nrel.gov/api/reopt'
 	post_url = root_url + '/v2/outagesimjob/?api_key=' + API_KEY
 	results_url = root_url + '/v2/job/<RUN_ID>/resilience_stats/?api_key=' + API_KEY
 	response = requests.post(post_url, json={'run_uuid': runID, 'bau': False})
 	raise_if_unsuccessful(response, outputPath)
-	#logger.log.info(f'Status code: {resp.status_code} - url: {post_url}')
+	#logger.log.info(f'Status code: {response.status_code} - url: {post_url}')
 	run_id = json.loads(response.text)['run_uuid']
 	response = results_poller.rez_poller(url=results_url.replace('<RUN_ID>', run_id))
 	response_json = json.loads(response.text)
@@ -83,8 +88,7 @@ def raise_if_unsuccessful(response, outputPath):
 
 
 def _test():
-	#run('Scenario_POST40.json', 'results_S40.json')
-	run('/Users/austinchang/Downloads/CONWAY_30MAY23_SOLARBATTERY/Scenario_test_POST-modified.json', 'results_S40.json')
+	run('Scenario_POST40.json', 'results_S40.json')
 	with open('results_S40.json') as jsonFile:
 		results = json.load(jsonFile)
 	test_ID = results['outputs']['Scenario']['run_uuid']
