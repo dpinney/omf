@@ -267,7 +267,7 @@ def hosting_capacity_single_bus(FILE_PATH:str, kwSTEPS:int, kwValue:float, BUS_N
 		volt_violation = False
 		therm_violation = False
 		new_tree = deepcopy(tree)
-        # Insert generator.
+		# Insert generator.
 		new_gen = {
 			'!CMD': 'new',
 			'object': f'generator.hostcap_{BUS_NAME}',
@@ -280,7 +280,7 @@ def hosting_capacity_single_bus(FILE_PATH:str, kwSTEPS:int, kwValue:float, BUS_N
 			'model': '1' }
 		# Make DSS and run.
 		new_tree.insert(insertion_index, new_gen)
-		treeToDss(new_tree, 'HOSTCAP.dss')
+		dssConvert.treeToDss(new_tree, 'HOSTCAP.dss')
 		runDSS('HOSTCAP.dss')
 		# Calc max voltages.
 		runDssCommand(f'export voltages "{filedir}/volts.csv"')
@@ -309,6 +309,7 @@ def hosting_capacity_all(FNAME:str, kwSTEPS:int, kwValue:float, BUS_LIST:list = 
 	else:
 		gen_buses = BUS_LIST
 	all_output = []
+	print('GEN_BUSES', gen_buses)
 	for bus in gen_buses:
 		try:
 			single_output = hosting_capacity_single_bus(FNAME, kwSTEPS, kwValue, bus, DEFAULT_KV=DEFAULT_KV)
@@ -516,22 +517,22 @@ def get_bus_phasing_map(path_to_dss):
 	return results
 
 def get_meter_buses(dss_file):
-    ''' return all bus names which have loads attached (i.e. meter buses.)'''
-    tree = dssConvert.dssToTree(dss_file)
-    meters = [x for x in tree if x.get('object','N/A').startswith('load.')]
-    bus_names = [x['bus1'] for x in meters if 'bus1' in x]
-    just_name_no_conn = [x.split('.')[0] for x in bus_names]
-    return just_name_no_conn
+	''' return all bus names which have loads attached (i.e. meter buses.)'''
+	tree = dssConvert.dssToTree(dss_file)
+	meters = [x for x in tree if x.get('object','N/A').startswith('load.')]
+	bus_names = [x['bus1'] for x in meters if 'bus1' in x]
+	just_name_no_conn = [x.split('.')[0] for x in bus_names]
+	return just_name_no_conn
 
 def get_all_buses( DSS_FILE ):
-    ''' return all bus names in a .dss file '''
-    tree = dssConvert.dssToTree( DSS_FILE )
-    bus_list = []
-    for item in tree:
-        for key in item:
-            if key == 'bus':
-                bus_list.append( item[key])
-    return bus_list
+	''' return all bus names in a .dss file '''
+	tree = dssConvert.dssToTree( DSS_FILE )
+	bus_list = []
+	for item in tree:
+		for key in item:
+			if key == 'bus':
+				bus_list.append( item[key])
+	return bus_list
 
 def currentPlot(filePath):
 	''' Current plotting function.'''
