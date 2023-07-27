@@ -1289,8 +1289,8 @@ def _tests():
 		# Example of hosting capacity for all buses with loads, i.e. metered buses.
 		# fname = 'iowa240clean.dss'
 		### Hosting Capacity Section
-		meter_buses = get_meter_buses(ckt)
-		hosting_capacity_all(ckt, 10, 10.0, BUS_LIST=meter_buses)
+		# meter_buses = get_meter_buses(ckt)
+		# hosting_capacity_all(ckt, 10, 10.0, BUS_LIST=meter_buses)
 		# outdir = omf.omfDir + '/solvers/opendss/voltageCompare_' + fname[:-4]
 		#voltagePlot(outckt_loc,PU=False)
 		# if not os.path.exists(outdir):
