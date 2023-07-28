@@ -70,7 +70,7 @@ def work(modelDir, inputDict):
       # once we take the omd file and convert it to a tree, we can loop through the objects to find all the 'bus' objects, that can be our second input
       # then there are option inputs for the step and kw for the user to put in? idk
       # print( os.path.abspath(feederName) ) why is this in the omf directory and not the modelDir?
-      traditionalHCResults = omf.solvers.opendss.hosting_capacity_verbose(pJoin(modelDir, feederName), modelDir, ['701', '730', '703', '724'], int( inputDict["traditionalHCSteps"] ), int( inputDict["traditionalHCkW"] ))
+      traditionalHCResults = omf.solvers.opendss.hosting_capacity(pJoin(modelDir, feederName), modelDir, ['701', '730', '703', '724'], int( inputDict["traditionalHCSteps"] ), int( inputDict["traditionalHCkW"] ))
       tradHCDF = traditionalHCResults[0]
       print( tradHCDF )
 

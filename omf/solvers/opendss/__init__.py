@@ -247,6 +247,95 @@ def newQstsPlot(filePath, stepSizeInMinutes, numberOfSteps, keepAllFiles=False, 
 		all_load_df['V3(PU)'] = all_load_df['V3'].astype(float) / (all_load_df['kv'].astype(float) * 1000.0)
 		all_load_df.to_csv(f'{dssFileLoc}/{filePrefix}_load.csv', index=False)
 
+def get_all_buses( DSS_FILE ):
+    ''' return all bus names in a .dss file '''
+    tree = dssConvert.dssToTree( DSS_FILE )
+    bus_list = []
+    for item in tree:
+        for key in item:
+            if key == 'bus':
+                bus_list.append( item[key])
+    return bus_list
+
+def get_meter_buses(dss_file):
+    ''' return all bus names which have loads attached (i.e. meter buses.)'''
+    tree = dssConvert.dssToTree(dss_file)
+    meters = [x for x in tree if x.get('object','N/A').startswith('load.')]
+    bus_names = [x['bus1'] for x in meters if 'bus1' in x]
+    just_name_no_conn = [x.split('.')[0] for x in bus_names]
+    return just_name_no_conn
+
+def hosting_capacity_single_bus(FILE_PATH:str, kwSTEPS:int, kwValue:float, BUS_NAME:str, DEFAULT_KV:float = 2.14):
+	''' Identify maximum amount of generation that can be added at BUS_NAME before ANSI A Band voltage levels are exceeded. '''
+	fullpath = os.path.abspath(FILE_PATH)
+	filedir = os.path.dirname(fullpath)
+	ansi_a_max_pu = 1.05 #	ansi_b_max_pu = 1.058
+	# Find the insertion kv level.
+	kv_mappings = get_bus_kv_mappings(fullpath)
+	# Error cleanly on invalid bus.
+	if BUS_NAME not in kv_mappings:
+		raise Exception(f'BUS_NAME {BUS_NAME} not found in circuit.')
+	# Get insertion bus; should always be safe to insert above makebuslist.
+	tree = dssConvert.dssToTree(fullpath)
+	for i, ob in enumerate(tree):
+		if ob.get('!CMD', None) == 'makebuslist':
+			insertion_index = i
+	# Step through generator sizes, add to circuit, measure voltages.
+	for step in range(1, kwSTEPS + 1):
+		volt_violation = False
+		therm_violation = False
+		new_tree = deepcopy(tree)
+        # Insert generator.
+		new_gen = {
+			'!CMD': 'new',
+			'object': f'generator.hostcap_{BUS_NAME}',
+			'bus1': f'{BUS_NAME}.1.2.3',
+			'kw': kwValue * step,
+			'pf': '1.0',
+			'conn': 'wye',
+			'phases': '3',
+			'kv': kv_mappings[BUS_NAME],
+			'model': '1' }
+		# Make DSS and run.
+		new_tree.insert(insertion_index, new_gen)
+		dssConvert.treeToDss(new_tree, 'HOSTCAP.dss')
+		runDSS('HOSTCAP.dss')
+		# Calc max voltages.
+		runDssCommand(f'export voltages "{filedir}/volts.csv"')
+		volt_df = pd.read_csv(f'{filedir}/volts.csv')
+		v_max_pu1, v_max_pu2, v_max_pu3 =  volt_df[' pu1'].max(), volt_df[' pu2'].max(), volt_df[' pu2'].max()
+		v_max_pu_all = float(max(v_max_pu1, v_max_pu2, v_max_pu3))
+		if np.greater(v_max_pu_all, ansi_a_max_pu):
+			volt_violation = True
+		# Calc number of thermal violations.
+		runDssCommand(f'export overloads "overloads.csv"')
+		over_df = pd.read_csv(f'overloads.csv')
+		number_overloads = len(over_df)
+		if number_overloads > 0:
+			therm_violation = True
+		# Return details when hitting violation.
+		if volt_violation or therm_violation:
+			return {'bus':BUS_NAME, 'max_kw':kwValue * step, 'reached_max':True, 'thermal_violation':therm_violation, 'voltage_violation':volt_violation}
+	# didn't hit violation, so report that.
+	return {'bus':BUS_NAME, 'max_kw':kwValue * step, 'reached_max':False, 'thermal_violation':therm_violation, 'voltage_violation':volt_violation}
+
+def hosting_capacity_all(FNAME:str, kwSTEPS:int, kwValue:float, BUS_LIST:list = None, DEFAULT_KV:float = 2.14):
+	''' Generate hosting capacity results for all_buses. '''
+	fullpath = os.path.abspath(FNAME)
+	if not BUS_LIST:
+		gen_buses = get_all_buses(fullpath)
+	else:
+		gen_buses = BUS_LIST
+	all_output = []
+	for bus in gen_buses:
+		try:
+			single_output = hosting_capacity_single_bus(FNAME, kwSTEPS, kwValue, bus, DEFAULT_KV=DEFAULT_KV)
+			all_output.append(single_output)
+		except:
+			print(f'Could not solve hosting capacity for BUS_NAME={bus}')
+	return all_output
+
+
 def hosting_capacity(FNAME:str, GEN_BUSES:list, STEPS:int, KW:float):
 	''' Using DSS circuit at FNAME, add KW sized generators at each of the GEN_BUSES up to STEPS times.
 		Returns two values:

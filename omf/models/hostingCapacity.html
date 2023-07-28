@@ -59,14 +59,16 @@
 			</div>
 			<hr>
 			<div class="shortInput">
-				<label class="tooltip"> Apply traditional hosting capacity</label>
+				<label class="tooltip">Apply traditional hosting capacity</label>
 				<select id="optionalCircuitFile" name="optionalCircuitFile" value="{{allInputDataDict.optionalCircuitFile}}" required>
 					<option value="off" {% if allInputDataDict.optionalCircuitFile == 'off' %}selected{% endif %}>Off</option>
 					<option value="on" {% if allInputDataDict.optionalCircuitFile == 'on' %}selected{% endif %}>On</option>
 				</select>
 			</div>
 			<div class="shortInput">
-				<label>Circuit</label>
+				<label class="tooltip">Circuit
+					<span class="classic">An OpenDSS Circuit file with a .dss file type. See Wiki page for more information</span>
+				</label>
 				<button id="feederButton" type="button" onclick="javascript:editFeeder(allInputData.modelName,1);" style="display:block;width:125px;">Open Editor</button>
 				<input type="text" id="feederName1" name="feederName1" value="{{allInputDataDict.feederName1}}" style="display:none">
 			</div>
