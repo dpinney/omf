@@ -309,7 +309,7 @@ def hosting_capacity_all(FNAME:str, kwSTEPS:int, kwValue:float, BUS_LIST:list = 
 	else:
 		gen_buses = BUS_LIST
 	all_output = []
-	print('GEN_BUSES', gen_buses)
+	# print('GEN_BUSES', gen_buses)
 	for bus in gen_buses:
 		try:
 			single_output = hosting_capacity_single_bus(FNAME, kwSTEPS, kwValue, bus, DEFAULT_KV=DEFAULT_KV)
