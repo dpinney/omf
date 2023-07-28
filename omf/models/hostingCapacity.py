@@ -1,5 +1,4 @@
 ''' Calculate hosting capacity using traditional and/or AMI-based methods. '''
-import base64
 import shutil
 from os.path import join as pJoin
 import plotly as py
@@ -22,6 +21,7 @@ hidden = False
 
 def work(modelDir, inputDict):
 	outData = {}
+	# mohca data-driven hosting capacity
 	import mohca_cl
 	with open(pJoin(modelDir,inputDict['inputDataFileName']),'w', newline='') as pv_stream:
 		pv_stream.write(inputDict['inputDataFileContent'])
@@ -42,14 +42,8 @@ def work(modelDir, inputDict):
 	barChartDF['thermal_cap'] = [1]
 	barChartDF['max_cap_kW'] = np.minimum( barChartDF['voltage_cap_kW'], barChartDF['thermal_cap'])
 	mohcaBarChartFigure = px.bar(barChartDF, x='busname', y=['voltage_cap_kW', 'thermal_cap', 'max_cap_kW'], barmode='group', color_discrete_sequence=["green", "lightblue", "MediumPurple"], template="simple_white" ) 
-	# mohcaBarChartFigure.update_layout()
-	# Line graph of the data
-	# timeSeriesFigure = px.line( mohcaResults.sort_values( by="kW_hostable", ascending=False, ignore_index=True ), x='busname', y='kW_hostable', markers=True, color_discrete_sequence=['purple', "blue", "green"])
-	# timeSeriesFigure.update_yaxes(rangemode="tozero") # This line sets the base of the y axis to be 0.
-	# traditional hosting capacity
-	# if they uploaded an omd circuit file
+	# traditional hosting capacity if they uploaded an omd circuit file and chose to use it.
 	circuitFileStatus = inputDict.get('optionalCircuitFile', 0)
-	print('STATUS!', circuitFileStatus, inputDict.get('optionalCircuitFile', 0))
 	if ( circuitFileStatus == 'on' ):
 		feederName = [x for x in os.listdir(modelDir) if x.endswith('.omd')][0]
 		inputDict['feederName1'] = feederName
@@ -57,7 +51,6 @@ def work(modelDir, inputDict):
 		opendss.dssConvert.treeToDss(tree, pJoin(modelDir, 'circuit.dss'))
 		traditionalHCResults = opendss.hosting_capacity_all(pJoin(modelDir, 'circuit.dss'), int(inputDict["traditionalHCSteps"]), int(inputDict["traditionalHCkW"]))
 		tradHCDF = pd.DataFrame(traditionalHCResults)
-		print('TRADREZ', traditionalHCResults)
 		omf.geo.map_omd(pJoin(modelDir, feederName), modelDir, open_browser=False )
 		outData['traditionalHCMap'] = open( pJoin( modelDir, "geoJson_offline.html"), 'r' ).read()		
 		traditionalHCFigure = make_subplots(specs=[[{"secondary_y": True }]])
@@ -65,28 +58,11 @@ def work(modelDir, inputDict):
 			go.Scatter( x = tradHCDF.index, y = tradHCDF["max_kw"], name= "max_kw"),
 			secondary_y=False
 		)
-		# traditionalHCFigure.add_trace(
-		# 	go.Scatter( x = tradHCDF.index, y = tradHCDF["v_max_pu1"], name= "v_max_pu1"),
-		# 	secondary_y=True
-		# )
-		# traditionalHCFigure.add_trace(
-		# 	go.Scatter( x = tradHCDF.index, y = tradHCDF["v_max_pu2"], name= "v_max_pu2"),
-		# 	secondary_y=True
-		# )
-		# traditionalHCFigure.add_trace(
-		# 	go.Scatter( x = tradHCDF.index, y = tradHCDF["v_max_pu3"], name= "v_max_pu3"),
-		# 	secondary_y=True
-		# )
-		# traditionalHCFigure.add_trace(
-		# 	go.Scatter( x = tradHCDF.index, y = tradHCDF["v_max_all_pu"], name= "v_max_all_pu"),
-		# 	secondary_y=True
-		# )
-		# traditionalHCFigure.update_yaxes( title_text="<b>Voltage ( PU )</b>", secondary_y = False)
 		traditionalHCFigure.update_yaxes( title_text="<b>Total Additional Generation Added ( kW ) </b>", secondary_y = True)
 		outData['traditionalGraphData'] = json.dumps( traditionalHCFigure, cls=py.utils.PlotlyJSONEncoder )
-		# outData['traditionalHCTableHeadings'] = traditionalHCResults[0].columns.values.tolist()
-		# outData['traditionalHCTableValues'] = ( list( traditionalHCResults[0].itertuples(index=False, name=None)))
-	# Stdout/stderr.
+		outData['traditionalHCTableHeadings'] = tradHCDF.columns.values.tolist()
+		outData['traditionalHCTableValues'] = ( list( tradHCDF.itertuples(index=False, name=None)))
+	# write final outputs
 	outData['stdout'] = "Success"
 	outData['stderr'] = ""
 	outData['mohcaHistogramFigure'] = json.dumps( mohcaHistogramFigure, cls=py.utils.PlotlyJSONEncoder )
