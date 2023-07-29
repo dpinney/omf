@@ -1,4 +1,3 @@
-# voltDump.csv run at 2000-01-01 00:00:00 PST on 1010 nodes,,,,,,,,,,
 node_name,voltA_real,voltA_imag,voltB_real,voltB_imag,voltC_real,voltC_imag,voltA_mag,voltB_mag,voltC_mag,max_volt_mag
 BURLINGTON,7200,0,-3600,-6235.382907,-3600,6235.382907,7200,7199.99999978526,7199.99999978526,7200
 62463027798,-59.968195,-103.961411,-59.968195,-103.961411,0,0,120.017329534817,120.017329534817,0,120.017329534817
