@@ -1,0 +1,99 @@
+<head>
+	{{ omfHeaders }}
+	<script src="{{pathPrefix}}/static/highcharts4.src.js"></script>
+	{% macro insert_file_upload_block(fileName, dataVariableName) -%}
+		<input id="{{dataVariableName}}Handler" type="file" style="display:none" onchange="handle_files(this.files,'{{dataVariableName}}','{{fileName}}')">
+		<input id="{{dataVariableName}}" name="{{dataVariableName}}" value="{{allInputDataDict[dataVariableName]}}" type="hidden">
+		<div>
+			<label for="{{dataVariableName}}Handler" class="fileButton">Choose File</label>
+			<input id="{{fileName}}" name="{{fileName}}" value="{{allInputDataDict[fileName]}}" readonly class="uploadFileName">    
+		</div>
+	{%- endmacro %}
+</head>
+<body>
+	{{ omfModelTitle }}
+	<p class="reportTitle">Model Input</p>
+	<div id="input" class="content">
+		<form name="inputForm" action="/runModel/" onsubmit="event.preventDefault(); return isFormValid();" method="post">
+			<div class="shortInput">
+				<label>Model Type <a href="https://github.com/dpinney/omf/wiki/Models-~-cyberInverters" target="blank">Help?</a></label>
+				<input type="text" id="modelType" name="modelType" value="{{allInputDataDict.modelType}}" readonly/>
+			</div>
+			<div class="shortInput">
+				<label>Model Name</label>
+				<input type="text" id="modelName" name="modelName" value="{{allInputDataDict.modelName}}" required="required" pattern="^[\w\s]+$"/></td>
+			</div>
+			<div class="shortInput">
+				<label>Created</label>
+				<input type="text" id="created" name="created" value="{{allInputDataDict.created}}" readonly/></td>
+			</div>
+			<div class="shortInput">
+				<label>User</label>
+				<input type="text" id="user" name="user" value="{{allInputDataDict.user}}" readonly/></td>
+			</div>
+			{% if modelStatus == 'finished' %} 
+			<div class="shortInput">
+				<label>Run Time</label>
+				<input type="text" id="runTime" name="runTime" value="{{allInputDataDict.runTime}}" readonly/></td>
+			</div>
+			{% endif %}
+			<div class="wideInput">
+				<p class="inputSectionHeader">System Specifications</p>
+			</div>
+			<hr>
+			<div class="shortInput">
+				<label>Date Input (YYYY-MM-DDTHH:mm:SSZ)</label>
+				<input type="text" id="date" name="date" value="{{allInputDataDict.date}}" required="required" pattern="^\d\d\d\d-\d\d-\d\dT\d\d:\d\d:\d\d(Z|(\+|-)\d\d:\d\d)$"/>
+			</div>
+			<div class="shortInput">
+				<label class="tooltip">Circuit Editor<span class="classic">Use a visual interface to upload, view, and manipulate a .dss circuit file.</span></label>
+				<button id="feederButton" type="button" onclick="editFeeder('{{allInputDataDict.modelName}}',1)" style="display:block;width:125px;">Open Editor</button>
+			</div>
+			<div class="shortInput" style="display:none">
+				<input type="text" id="feederName1" name="feederName1" value="{{allInputDataDict.feederName1}}">
+			</div>
+			<div class="shortInput">
+				<label class="tooltip">Example File Input<span class="classic">Import a [format extension] file that describes [insert content]</span></label>
+				<div>{{ insert_file_upload_block('exampleFileName','exampleFileContent') }}</div>
+			</div>
+			
+			
+			<div class="wideInput">
+				<p class="inputSectionHeader">[Other] Specifications</p>
+			</div>
+			<hr>
+			<div class="shortInput">
+				<label class="tooltip">Generic Numerical Input 1<span class="classic">An example of numerical input.</span></label>
+				<input type="number" id="number1" name="number1"  value="{{allInputDataDict.number1}}"/>
+			</div>
+			<div class="shortInput">
+				<label class="tooltip">Generic Numerical Input 2<span class="classic">An example of numerical input.</span></label>
+				<input type="number" id="number2" name="number2"  value="{{allInputDataDict.number2}}"/>
+			</div>
+			{{ omfModelButtons }}
+		</form>
+	</div>
+	{{ omfRunDebugBlock }}
+	{% if modelStatus == 'finished' %}
+	<div id="output">
+		<!-- Insert visualizations here (for examples, see other models such as cyberinverters) -->
+		<!-- Integer Sum Table -->
+		<p class="reportTitle">Example Output</p>
+		<div id="analysisSummary" class="content">
+			<div class="shortInput">
+				<strong>Input 1</strong>
+				<p id="input1Out">{{allInputDataDict.number1}}</p>
+			</div>
+			<div class="shortInput">
+				<strong>Input 2</strong>
+				<p id="input2Out">{{allInputDataDict.number2}}</p>
+			</div>
+			<div class="shortInput">
+				<strong>Sum of Input 1 and Input 2</strong>
+				<p id="sumOut">{{allOutputDataDict.output}}</p>
+			</div>
+		</div>
+		{{rawOutputFiles}}
+	</div>
+	{% endif %}
+</body>
