@@ -446,13 +446,13 @@ def work(modelDir, inputDict):
 def new(modelDir):
 	''' Create a new instance of this model. Returns true on success, false on failure. '''
 	# default model files:
-	ckt_dir = "dl"
+	ckt_dir = "ieee37busdata"
 	omd_fn = "ieee37_LBL"
 	dss_fn = "ieee37_LBL.dss"
-	pv_fn = "ts.csv"
-	bp_fn = "bp.csv"
-	misc_fn = "misc.csv"
-	dvc_fn = "dev.txt"
+	pv_fn = "load_solar_data.csv"
+	bp_fn = "breakpoints.csv"
+	misc_fn = "misc_inputs.csv"
+	dvc_fn = "device_inputs.txt"
 
 
 	with open(pJoin(omf.omfDir, "static", "testFiles", "pyCIGAR", ckt_dir, pv_fn)) as pv_stream:
