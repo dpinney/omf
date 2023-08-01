@@ -50,7 +50,7 @@ def work(modelDir, inputDict):
 
 def new(modelDir):
 	''' Create a new instance of this model. Returns true on success, false on failure. '''
-	omd_fn = "ieee240.dss"
+	omd_fn = "iowa240c1.clean.dss"
 	ex_fn = "example.csv" # example file input
 
 	with open(pJoin(omf.omfDir, "static", "testFiles", "restoration", ex_fn)) as ex_stream:
