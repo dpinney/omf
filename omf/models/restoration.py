@@ -50,7 +50,7 @@ def work(modelDir, inputDict):
 
 def new(modelDir):
 	''' Create a new instance of this model. Returns true on success, false on failure. '''
-	omd_fn = "ieee240.dss.omd"
+	omd_fn = "ieee240.dss"
 	ex_fn = "example.csv" # example file input
 
 	with open(pJoin(omf.omfDir, "static", "testFiles", "restoration", ex_fn)) as ex_stream:
@@ -65,7 +65,13 @@ def new(modelDir):
 		"exampleFileName": ex_fn,
 		"exampleFileContent": ex_ins,
 	}
-	return __neoMetaModel__.new(modelDir, defaultInputs)
+
+	creationCode = __neoMetaModel__.new(modelDir, defaultInputs)
+	try:
+		shutil.copyfile(pJoin(__neoMetaModel__._omfDir, 'static', 'publicFeeders', defaultInputs['feederName1']+'.omd'), pJoin(modelDir, defaultInputs['feederName1']+'.omd'))
+	except:
+		return False
+	return creationCode
 
 @neoMetaModel_test_setup
 def _debugging():
