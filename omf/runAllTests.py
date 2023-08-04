@@ -42,8 +42,8 @@ def run_tests_on_module(mod_name):
 
 def _print_header(header):
 	print('\n+------------------------+')
-	print(f'\n{header.upper()}')
-	print('\n+------------------------+')
+	print(f'{header.upper()}')
+	print('+------------------------+\n')
 
 def run_all_tests():
 	''' Run every test in the OMF and return results.'''
