@@ -51,9 +51,6 @@ def work(modelDir, inputDict):
 		opendss.dssConvert.treeToDss(tree, pJoin(modelDir, 'circuit.dss'))
 		traditionalHCResults = opendss.hosting_capacity_all(pJoin(modelDir, 'circuit.dss'), int(inputDict["traditionalHCSteps"]), int(inputDict["traditionalHCkW"]))
 		tradHCDF = pd.DataFrame(traditionalHCResults)
-
-		print( tradHCDF )
-
 		omf.geo.map_omd(pJoin(modelDir, feederName), modelDir, open_browser=False )
 		outData['traditionalHCMap'] = open( pJoin( modelDir, "geoJson_offline.html"), 'r' ).read()		
 		#outData['traditionalGraphData'] = json.dumps( traditionalHCFigure, cls=py.utils.PlotlyJSONEncoder )
