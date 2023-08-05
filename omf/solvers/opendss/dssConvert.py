@@ -1,16 +1,10 @@
 # Prereq: `pip install 'git+https://github.com/NREL/ditto.git@master#egg=ditto[all]'`
 import os
-from os.path import join as pJoin
-import subprocess
 import json
 import warnings
-import traceback
 from omf import feeder, distNetViz
 import random
 import math
-from time import time
-import re
-import shutil
 import tempfile
 import networkx as nx
 import omf
@@ -174,11 +168,6 @@ def dssToTree(pathToDssOrString, is_path=True):
 					if splitlen==3:
 						print('OMF does not support OpenDSS\'s \'file=\' syntax for defining property values.')
 						k,v,f = contents[i][j].split('=')
-						# replaceFileSyntax() # DEBUG
-						## replaceFileSyntax  should do the following:
-						  # parse the filename (contained in v)
-						  # read in the file and parse as array
-						  # v = file content array, cast as a string
 					else:
 						k,v = contents[i][j].split('=')
 					# TODO: Should we pull the multiwinding transformer handling out of here and put it into dssFilePrep()?
@@ -191,7 +180,6 @@ def dssToTree(pathToDssOrString, is_path=True):
 						xistngVals = []
 						if k in ob: # indicates 2nd winding, existing value is a string (in the case of %r, this indicates 3rd winding as well!)
 							if (type(ob[k]) != tuple) or (type(ob[k]) != list): # pluralized values can be defined as either
-							#if iter(type(ob[k])):
 								xistngVals.append(ob[k])
 								del ob[k]
 						if plurlk in ob: # indicates 3rd+ winding; existing values are tuples
@@ -203,16 +191,7 @@ def dssToTree(pathToDssOrString, is_path=True):
 						ob[k] = v
 		except:
 			raise Exception(f'\nError encountered in group (space delimited) #{jpos+1} of line {i + 1}: {line}')
-			# raise Exception("Temp fix but error in loop at line 76")
 		contents[i] = ob
-	# Print to file
-	#with open('dssTreeRepresentation.csv', 'w') as outFile:
-	#	ii = 1
-	#	for k,v in contents.items():
-	#		outFile.write(str(k) + '\n')
-	#		ii = ii + 1
-	#		for k2,v2 in v.items():
-	#			outFile.write(',' + str(k2) + ',' + str(v2) + '\n')
 	return list(contents.values())
 
 def treeToDss(treeObject, outputPath):
@@ -603,218 +582,6 @@ def getDssCoordinates(omdFilePath, outFilePath):
 			lineStr = "setbusxy bus=" + bus + " x=" + busLon + " y=" + busLat + "\n"
 			coordinateListFile.write(lineStr)
 
-def _conversionTests():
-	# pass
-	glmList = set()
-	mdbList = set()
-	cleanGlmList = set()
-	cleanMdbList = set()
-	brokenGlmList = {}
-	brokenMdbList = {}
-
-	#set to True if you want to test all the glm files, otherwise it will just read the file paths from the previously saved workingGlmList.csv
-	shouldTestGlm = False
-
-	curDir = os.getcwd()
-	os.chdir('../..')
-	omfDir = os.getcwd()
-
-	def fillFileLists():
-		for root, dirs, files in os.walk(omfDir):
-			for f in files:
-				if f.endswith(".glm"):
-					glmList.add(os.path.join(root, f))
-				if f.endswith(".mdb"):
-					mdbList.add(os.path.join(root, f))
-		#print("***********glmList = " + ", ".join(glmList))
-		#print("***********mdbList = " + ", ".join(mdbList))
-
-	def testAllGlm():
-		for f in glmList:
-			fPathShort = f
-			if f.startswith(omfDir):
-				fPathShort = f[len(omfDir):]
-			if fPathShort.startswith('/'):
-				fPathShort = fPathShort[1:]
-			#run gridlabd
-			try:
-				result = subprocess.run(["gridlabd", f], shell=True, check=True)
-				# result = subprocess.run(["gridlabd", f], shell=True, check=True) #cwd=path.get_folder(f)
-				cleanGlmList.add(fPathShort)
-			except subprocess.CalledProcessError as e:
-				# print("Error with ", fPathShort, ": ", e.output)
-				brokenGlmList[fPathShort] = e.output
-		#save list of working glms to csv file
-		with open(pJoin(omfDir, "scratch", "dittoTestOutput", "workingGlmList.csv"),"w") as workingGlmListFile:
-			csv_writer = csv.writer(workingGlmListFile)
-			for x in cleanGlmList:
-				csv_writer.writerow([x])
-		#save list of broken glms to csv file
-		with open(pJoin(omfDir, "scratch", "dittoTestOutput", "brokenGlmList.csv"),"w") as brokenGlmListFile:
-			csv_writer2 = csv.writer(brokenGlmListFile)
-			for x in brokenGlmList.keys():
-				errorMsg = brokenGlmList[x].replace("\n","\t*\t")
-				csv_writer2.writerow([x, errorMsg])
-		# print("***********cleanGlmList = " + ", ".join(cleanGlmList))
-		# print("***********brokenGlmList = " + ", ".join(brokenGlmList))
-
-	def testAllCyme():
-		for f in mdbList:
-			#run gridlabd
-			fShort = f[len(omfDir):]
-			try:
-				result = subprocess.run(["", f], shell=True, check=True)
-				cleanMdbList.add(fShort)
-			except subprocess.CalledProcessError as e:
-				brokenMdbList[fShort] = e.output
-		# print("***********cleanMdbList = " + ", ".join(cleanMdbList))
-		# print("***********brokenMdbList = " + ", ".join(brokenMdbList))
-	# all_glm_files = os.system('find ../.. -name *.glm')
-	# inputs = get urls for the input files. OMF_GITHUB_URL + extension.
-	fillFileLists()
-	
-	if shouldTestGlm:
-		testAllGlm()
-	else:
-		with open(pJoin(omfDir, "scratch", "dittoTestOutput", "workingGlmList.csv"),"r") as workingGlmListFile:
-			#read the names of the working files into cleanGlmList
-			csv_reader = csv.reader(workingGlmListFile)
-			for row in csv_reader:
-				print(row[0])
-				cleanGlmList.add(row[0])
-		with open(pJoin(omfDir, "scratch", "dittoTestOutput", "brokenGlmList.csv"),"r") as brokenGlmListFile:
-			#read the names of the working files into cleanGlmList
-			csv_reader2 = csv.reader(brokenGlmListFile)
-			for row in csv_reader2:
-				filePath = row[0]
-				errMsg = row[1]
-				brokenGlmList[filePath] = errMsg
-
-	brokenDittoList = {}
-	cleanDittoList = {}
-	# working_dir = './TEMP_CONV/'
-	try:
-		os.mkdir(pJoin(omfDir, "scratch", "dittoTestOutput"))
-	except FileExistsError:
-		print("dittoTestOutput folder already exists!")
-		pass
-	except:
-		print("Error occurred creating dittoTestOutput folder")
-
-
-	for fname in cleanGlmList:
-		fLong = pJoin(omfDir, fname)
-		fShort = fname
-		if '/' in fname:
-			fShort = fname.rsplit('/',1)[1]
-		try:
-			convFilePath = pJoin(omfDir, "scratch", "dittoTestOutput", fShort + '_conv.dss')
-			t0 = time()
-			gridLabToDSS(fLong, convFilePath)
-			t1 = time()
-			cleanDittoList[fname] = {}
-			cleanDittoList[fname]["convPath"] = convFilePath
-			cleanDittoList[fname]["convTime"] = t1-t0
-		except:
-			errorMsg = traceback.format_exc()
-			brokenDittoList[fname] = {}
-			brokenDittoList[fname]["fullPath"] = fLong
-			brokenDittoList[fname]["errMsg"] = errorMsg.replace("\n","\t*\t")
-			pass
-
-	# TECHNIQUES FOR HANDLING GLM INCLUDES
-	# glm_str = open('glm_path.glm').read()
-	# if '#include' in glm_str:
-	# 	if quick_and_easy_flag:
-	# 		pass #skip test, until we can work out includes.
-	# 	else:
-	# 		include_file = open('path to the include')
-	# 		glm_str.replace('#include name.glm', include_file)
-
-	# for key in brokenDittoList.keys():
-	# 	print(key + ": " + brokenDittoList[key])
-
-	#create a new file to save the broken ditto runs to
-	with open(pJoin(omfDir, "scratch", "dittoTestOutput", "brokenDittoList.csv"),"w") as brokenDittoFile:
-		writer = csv.writer(brokenDittoFile)
-		# writer.writerows(brokenDittoList.items())
-		for fname in brokenDittoList.keys():
-			writer.writerow((fname, brokenDittoList[fname]["fullPath"], brokenDittoList[fname]["errMsg"]))
-
-	def createFullReport():
-		with open(pJoin(omfDir, "scratch", "dittoTestOutput", "fullDittoReport.csv"),"w") as fullReportFile:
-			fieldnames = ['filePath', 'gridlabdResult', 'dittoResult', 'conversionTime', 'originalFileSize', 'convertedFileSize', 'sizeDifference', 'powerflowResutls']
-			writer = csv.DictWriter(fullReportFile, fieldnames=fieldnames)
-
-			#write the column headers
-			writer.writeheader()
-			# add information from broken gridlab-d files
-			for x in brokenGlmList.keys():
-				writer.writerow({'filePath': x, 'gridlabdResult': brokenGlmList[x], 'dittoResult': 'N/A', 'conversionTime': 'N/A', 'originalFileSize': 'N/A', 'convertedFileSize': 'N/A', 'sizeDifference': 'N/A', 'powerflowResutls': 'N/A'})
-			# add information from working gridlab-d files that break in ditto
-			for x in brokenDittoList.keys():
-				writer.writerow({'filePath': x, 'gridlabdResult': 'SUCCESS', 'dittoResult': brokenDittoList[x]["errMsg"], 'conversionTime': 'N/A', 'originalFileSize': 'N/A', 'convertedFileSize': 'N/A', 'sizeDifference': 'N/A', 'powerflowResutls': 'N/A'})
-			# add information from working gridlab-d files that ditto converts
-			for x in cleanDittoList.keys():
-				# TODO: fill out 'originalFileSize', 'convertedFileSize', 'sizeDifference', 'powerflowResutls'
-				writer.writerow({'filePath': x, 'gridlabdResult': 'SUCCESS', 'dittoResult': cleanDittoList[x]["convPath"], 'conversionTime': cleanDittoList[x]["convTime"], 'originalFileSize': 'N/A', 'convertedFileSize': 'N/A', 'sizeDifference': 'N/A', 'powerflowResutls': 'N/A'})
-
-	createFullReport()
-	# print(brokenDittoList.keys())
-	# zip up all inputs, outputs, exceptions + send to nrel
-	# Deprecated tests section
-	#dssToGridLab('ieee37.dss', 'Model.glm') # this kind of works
-	# gridLabToDSS('ieee13.glm', 'ieee13_conv.dss') # this fails miserably
-	#cymeToDss(...) # first need to define function.
-	#distNetViz.insert_coordinates(evil_glm)
-
-def _randomTest():
-	curDir = os.getcwd()
-	os.chdir('../..')
-	omfDir = os.getcwd()
-	s1 = "/this is a string"
-	s2 = "something/file.ext"
-	s3 = "/Users/ryanmahoney/omf/omf/someLocation/anotherLocation/file.ext"
-	testSet = [s1, s2, s3]
-	for f in testSet:
-		fPathShort = f
-		fName = f
-		if f.startswith(omfDir):
-			fPathShort = f[len(omfDir):]
-		if '/' in fPathShort:
-			fName = fPathShort.rsplit('/',1)[1]
-		if fPathShort.startswith('/'):
-			fPathShort = fPathShort[1:]
-		print(f," -> ", fPathShort, " , ", fName)
-	with open(pJoin(omfDir, "scratch", "dittoTestOutput", "workingGlmList.csv"),"w") as workingGlmListFile:
-		csv_writer = csv.writer(workingGlmListFile)
-		for x in testSet:
-			csv_writer.writerow([x])
-
-def _dssToOmdTest():
-	omfDir = omf.omfDir
-	# dssFileName = 'ieee37.clean.dss'
-	# dssFilePath = pJoin(curDir, dssFileName)
-	dssFileName = 'nreca1824_dwp.dss'
-	# dssFileName = 'Master3.dss'
-	dssFilePath = pJoin(omfDir, 'static', 'testFiles', dssFileName)
-	# dssFilePath = pJoin(omfDir, 'static', 'testFiles', 'Delete', dssFileName)
-	# dssCleanLists(dssFilePath)
-	# dssFileName = 'Master3_cleanLists.dss'
-	# dssFilePath = pJoin(omfDir, 'static', 'testFiles', 'Delete', dssFileName)
-	# omdFileName = dssFileName + '.omd'
-	omdFileName = dssFileName + '.omd'
-	omdFilePath = pJoin(omfDir, 'static', 'testFiles', omdFileName)
-	# omdFilePath = pJoin(omfDir, 'static', 'testFiles', 'Delete', omdFileName)
-	# omdFilePath = pJoin(omfDir, 'static', 'publicFeeders', omdFileName)
-	dssToOmd(dssFilePath, omdFilePath, RADIUS=0.0002, write_out=True)
-
-def _dssCoordTest():
-	omfDir = omf.omfDir
-	omdFilePath = pJoin(omfDir, "scratch", "MapTestOutput", "iowa240c2_fixed_coords2.clean.omd")
-	outFilePath = pJoin(omfDir, "static", "testFiles", "iowa_240", "iowa240_cleanCoords.csv")
-	getDssCoordinates(omdFilePath, outFilePath)
-
 def _testsFull():
 	from omf.solvers.opendss import getVoltages, voltageCompare
 	import pandas as pd
@@ -842,20 +609,18 @@ def _testsFull():
 		treeToDss(dsstreeout2, outpath)
 		endvolts = getVoltages(outpath, keep_output=False)
 		os.remove(outpath)
+		# SOME DISABLED TESTS.
+		# getDssCoordinates(omdFilePath, outFilePath)
+		# dssToOmd(dssFilePath, omdFilePath, RADIUS=0.0002, write_out=True)
 		# percSumm, diffSumm = voltageCompare(startvolts, endvolts, saveascsv=False, with_plots=False)
 		# maxPerrM = [percSumm.loc['RMSPE',c] for c in percSumm.columns if c.lower().startswith(' magnitude')]
 		# maxPerrM = pd.Series(maxPerrM).max()
 		#print(maxPerrM) # DEBUG
 		# assert abs(maxPerrM) < errorLimit*100, 'The average percent error in voltage magnitude is %s, which exceeeds the threshold of %s%%.'%(maxPerrM,errorLimit*100)
-
 	#TODO: make parser accept keyless items with new !keyless_n key? Or is this just horrible syntax?
 	#TODO: refactor in to well-defined bijections between object types?
 	#TODO: a little help on the frontend to hide invalid commands.
 
 if __name__ == '__main__':
-	# _tests()
-	# _randomTest()
-	# _conversionTests()
-	# _dssToOmdTest()
-	#_dssCoordTest()
+	# _testsFull()
 	pass
