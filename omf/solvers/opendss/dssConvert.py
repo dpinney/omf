@@ -1,16 +1,10 @@
 # Prereq: `pip install 'git+https://github.com/NREL/ditto.git@master#egg=ditto[all]'`
 import os
-from os.path import join as pJoin
-import subprocess
 import json
 import warnings
-import traceback
 from omf import feeder, distNetViz
 import random
 import math
-from time import time
-import re
-import shutil
 import tempfile
 import networkx as nx
 import omf
@@ -57,7 +51,6 @@ def dss_to_clean_via_save(dss_file, clean_out_path, add_pf_syntax=True, clean_up
 	'''Updated function for OpenDSS v1.7.4 which does everything differently from earlier versions...
 	Converts raw OpenDSS circuit definition files to the *.clean.dss syntax required by OMF.
 	This version uses the opendss save functionality to better preserve dss syntax.'''
-	#TODO: Detect missing makebuslist, since windmil and others leave it out.
 	#TODO: Fix repeated wdg= keys!?!?!?
 	# Execute opendss's save command reliably on a circuit. opendssdirect fails at this.
 	import os, re, shutil, subprocess
@@ -127,123 +120,6 @@ def dss_to_clean_via_save(dss_file, clean_out_path, add_pf_syntax=True, clean_up
 	with open(clean_out_path, 'w') as out_file:
 		out_file.write(clean_out)
 
-def _old_dss_to_clean_via_save(dss_file, clean_out_path, add_pf_syntax=True, clean_up=False):
-	'''Works with OpenDSS versions<1.7.4.
-	Converts raw OpenDSS circuit definition files to the *.clean.dss syntax required by OMF.
-	This version uses the opendss save functionality to better preserve dss syntax.'''
-	#TODO: Detect missing makebuslist, since windmil and others leave it out.
-	#TODO: Fix repeated wdg= keys!?!?!?
-	# Execute opendss's save command reliably on a circuit. opendssdirect fails at this.
-	dirname = os.path.dirname(dss_file)
-	shutil.rmtree(f'{dirname}/SAVED_DSS', ignore_errors=True)
-	# Make a dss file that can reliably save a dang circuit.
-	contents = open(dss_file,'r').read()
-	contents += '\nsave circuit dir=SAVED_DSS'
-	with open(f'{dirname}/saver.dss','w') as saver_file:
-		saver_file.write(contents)
-	# Run that saver file.
-	subprocess.run(['opendsscmd', 'saver.dss'], cwd=dirname)
-	dss_folder_path = f'{dirname}/SAVED_DSS'
-	# Get master file.
-	master = open(f'{dss_folder_path}/Master.dss').readlines()
-	master = [x for x in master if x != '\n']
-	# Get the object files.
-	ob_files = os.listdir(f'{dss_folder_path}')
-	ob_files = sorted(ob_files)
-	ob_files.remove('Master.dss')
-	# Clean each of the object files.
-	clean_copies = {}
-	print('OB_FILES!',ob_files)
-	for fname in ob_files:
-		if os.path.isfile(f'{dss_folder_path}/{fname}'):
-			with open(f'{dss_folder_path}/{fname}', 'r') as ob_file:
-				ob_data = ob_file.read().lower() # lowercase everything
-				ob_data = ob_data.replace('"', '') # remove quote characters
-				ob_data = ob_data.replace('\t', ' ') # tabs to spaces
-				ob_data = re.sub(r' +', r' ', ob_data) # remove consecutive spaces
-				ob_data = re.sub(r'(^ +| +$)', r'', ob_data) # remove leading and trailing whitespace
-				ob_data = ob_data.replace('\n~', '') # remove tildes
-				ob_data = re.sub(r' *, *', r',', ob_data) # remove spaces around commas
-				ob_data = re.sub(r', *(\]|\))', r'\1', ob_data) # remove empty final list items
-				ob_data = re.sub(r' +\| +', '|', ob_data) # remove spaces around bar characters
-				ob_data = re.sub(r'(\[|\() *', r'\1', ob_data) # remove spaces after list start
-				ob_data = re.sub(r' *(\]|\))', r'\1', ob_data) # remove spaces before list end
-				ob_data = re.sub(r'(new|edit) ', r'\1 object=', ob_data) # add object= key
-				ob_data = re.sub(r'(\d) +(\d|\-)', r'\1,\2', ob_data) # replace space-separated lists with comma-separated
-				ob_data = re.sub(r'(\d) +(\d|\-)', r'\1,\2', ob_data) # HACK: second space-sep replacement to make sure it works
-				ob_data = re.sub(r'zipv=([\d\.\-,]+)', r'zipv=(\1)', ob_data) # HACK: fix zipv with missing parens
-				clean_copies[fname.lower()] = ob_data
-	# Special handline for buscoords
-	if 'buscoords.dss' in clean_copies:
-		bus_data = clean_copies['buscoords.dss']
-		nice_buses = re.sub(r'([\w_\-\.]+),([\w_\-\.]+),([\w_\-\.]+)', r'setbusxy bus=\1 x=\2 y=\3', bus_data)
-		clean_copies['buscoords.dss'] = nice_buses
-	# Construct the clean single file output.
-	clean_out = ''
-	for line in master:
-		ob_file_name = re.findall(r'\w+\.[dD][sS][sS]', line)
-		if ob_file_name == []:
-			if line.startswith('New Circuit.'):
-				line = 'new object=circuit.' + line[12:]
-			clean_out += line
-		else:
-			clean_out += f'\n!{line}'
-			clean_out += clean_copies[ob_file_name[0].lower()]
-	clean_out = clean_out.lower()
-	# Optional: include a slug of code to run powerflow
-	if add_pf_syntax:
-		powerflow_slug = '\n\n!powerflow code\nset maxiterations=1000\nset maxcontroliter=1000\ncalcv\nsolve\nshow quantity=voltage'
-		clean_out = clean_out + powerflow_slug
-	# Optional: remove intermediate files and write a single clean file.
-	if clean_up:
-		shutil.rmtree(dss_folder_path, ignore_errors=True)
-	with open(clean_out_path, 'w') as out_file:
-		out_file.write(clean_out)
-
-def dssCleanLists(pathToDss):
-	'''Helper function to go through dss file and reformat lists (rmatrix, xmatrix, 
-	mult, buses, conns, kvs, kvas) with commas and no spaces'''
-	with open(pathToDss, 'r') as dssFile:
-		contents = dssFile.readlines()
-	fixedContents = []
-	for line in contents:
-		lineItems = line.split()
-		openedList = False
-		lineString = ""
-		for item in lineItems:
-			if lineString == "":
-				#first item in line
-				lineString = lineString + item
-			else:
-				listOpeners = [ '(' , '[' , '{' ]
-				listClosers = [ ')' , ']' , '}' ]
-				hasOpener = [x for x in listOpeners if(x in item)]
-				hasCloser = [x for x in listClosers if(x in item)]
-				noCommas = [ '(' , '[' , '{' , ',' , '|' ]
-				if '=' in item:
-					lineString = lineString + " " + item
-					if hasCloser:
-						openedList = False
-					elif hasOpener:
-						openedList = True
-				elif openedList:
-					if (lineString[-1] in noCommas) or (item[0] in listClosers) or (item[0] == '|'):
-						lineString = lineString + item
-					else:
-						lineString = lineString + ',' + item
-					if hasCloser:
-						openedList = False
-				else:
-					lineString = lineString + " " + item
-					if hasOpener and not hasCloser:
-						openedList = True
-		fixedContents.append(lineString)
-	outPath = pathToDss[:-4] + "_cleanLists.dss"
-	with open(outPath, 'w') as outFile:
-		for fixedLine in fixedContents:
-			outFile.write(f'{fixedLine}\n')
-
-
 def dssToTree(pathToDssOrString, is_path=True):
 	''' Convert a .dss file to an in-memory, OMF-compatible 'tree' object.
 	Note that we only support a VERY specifically-formatted DSS file.'''
@@ -277,7 +153,6 @@ def dssToTree(pathToDssOrString, is_path=True):
 	# Lex it
 	convTbl = {'bus':'buses', 'conn':'conns', 'kv':'kvs', 'kva':'kvas', '%r':'%r'}
 	# convTbl = {'bus':'buses', 'conn':'conns', 'kv':'kvs', 'kva':'kvas', '%r':'%rs'} # TODO at some point this will need to happen; need to check what is affected i.e. viz, etc
-
 	from collections import OrderedDict 
 	for i, line in contents.items():
 		jpos = 0
@@ -293,11 +168,6 @@ def dssToTree(pathToDssOrString, is_path=True):
 					if splitlen==3:
 						print('OMF does not support OpenDSS\'s \'file=\' syntax for defining property values.')
 						k,v,f = contents[i][j].split('=')
-						# replaceFileSyntax() # DEBUG
-						## replaceFileSyntax  should do the following:
-						  # parse the filename (contained in v)
-						  # read in the file and parse as array
-						  # v = file content array, cast as a string
 					else:
 						k,v = contents[i][j].split('=')
 					# TODO: Should we pull the multiwinding transformer handling out of here and put it into dssFilePrep()?
@@ -310,7 +180,6 @@ def dssToTree(pathToDssOrString, is_path=True):
 						xistngVals = []
 						if k in ob: # indicates 2nd winding, existing value is a string (in the case of %r, this indicates 3rd winding as well!)
 							if (type(ob[k]) != tuple) or (type(ob[k]) != list): # pluralized values can be defined as either
-							#if iter(type(ob[k])):
 								xistngVals.append(ob[k])
 								del ob[k]
 						if plurlk in ob: # indicates 3rd+ winding; existing values are tuples
@@ -322,16 +191,7 @@ def dssToTree(pathToDssOrString, is_path=True):
 						ob[k] = v
 		except:
 			raise Exception(f'\nError encountered in group (space delimited) #{jpos+1} of line {i + 1}: {line}')
-			# raise Exception("Temp fix but error in loop at line 76")
 		contents[i] = ob
-	# Print to file
-	#with open('dssTreeRepresentation.csv', 'w') as outFile:
-	#	ii = 1
-	#	for k,v in contents.items():
-	#		outFile.write(str(k) + '\n')
-	#		ii = ii + 1
-	#		for k2,v2 in v.items():
-	#			outFile.write(',' + str(k2) + ',' + str(v2) + '\n')
 	return list(contents.values())
 
 def treeToDss(treeObject, outputPath):
@@ -345,128 +205,6 @@ def treeToDss(treeObject, outputPath):
 				line = f"{line} {ob['!TEST']}"
 		outFile.write(line + '\n')
 	outFile.close()
-
-def _dssFilePrep(fpath):
-	'''***DO NOT USE*** 
-	**There are no future plans to widen dss parsing rules beyond the specifically-formatted
-	.dss files that are expected by omf (described in OMF docs). This function is only left here in 
-	case an OMF developer wants to generate some new test files from something that is badly 
-	formatted to begin with.**
-	Prepares an OpenDSS circuit definition file (.dss) for consumption by the 
-	OMF. The expected input is the path to a .dss master file that redirects to or
-	compiles from other .dss files within the same directory. The path can also 
-	indicate a single .dss file that does not contain redirect or compile commands.'''
-	
-	import opendssdirect as dss
-	import pandas as pd
-	import tempfile as tf
-	from omf.solvers.opendss import runDssCommand
-
-	# Note that tmpdir is not automatically cleaned up on premature exit; This is expected to be addressed by user action. 
-	with tf.TemporaryDirectory() as tempDir:
-		dssFilePath = os.path.realpath(fpath)
-		dssDirPath, dssFileName = os.path.split(dssFilePath)
-		try:
-			with open(dssFilePath):
-				pass
-		except Exception as ex:
-			print('While accessing the file located at %s, the following exception occured: %s'%(dssDirPath, ex))
-		runDssCommand('Clear')
-		x = runDssCommand('Redirect "' + dssFilePath + '"')
-		x = runDssCommand('Solve')
-		# TODO: If runDSS() is changed to return dssFileLoc, replace the above lines of code with this:
-		#  dssDirPath = self.runDSS(fpath, keep_output=False) # will require moving the function or changing the definition to reference 'self".
-	
-		exptDirPath = tempDir + '/' + 'OmfCktExport'
-		runDssCommand('Save Circuit ' + 'purposelessFileName.dss "' + exptDirPath + '"')
-		# Manipulate buscoords file to create commands that generate bus list
-		coords = pd.read_csv(exptDirPath + '/BusCoords.dss', header=None, dtype=str, names=['Element', 'X', 'Y'])
-		coordscmds = []
-		for i,x in coords.iterrows():
-			elmt = x['Element']
-			xcoord = x['X']
-			ycoord = x['Y']
-			coordscmds.append('SetBusXY bus=' + str(elmt) + ' X=' + str(xcoord) + ' Y=' + str(ycoord) + '\n') # save commands for later usage
-		# Get Master.DSS from exported files and insert content from other files
-		outfilepath = dssDirPath + '/' + dssFileName[:-4] + '_expd.dss'
-		with open(exptDirPath + '/Master.DSS', 'r') as ogMaster, open(outfilepath, 'a') as catMaster:
-			catMaster.truncate(0)
-			for line in ogMaster:
-				# wherever there is a redirect or a compile, get the code from that file and insert into catMaster
-				try:
-					if line.lower().startswith('redirect') or line.lower().startswith('compile'):
-						catMaster.write('! ' + line)
-						addnFilename = line.split(' ')[1] # get path of file to insert (accounts for inline comments following the command)
-						addnFilename = ' '.join(addnFilename.splitlines()) # removes newline characters
-						with open(exptDirPath + '/' + addnFilename, 'r') as addn: # will error if file is not located in same directory as Master.dss
-							addn = addn.read()
-							z = catMaster.write(addn)
-					elif line.lower().startswith('buscoords'):
-						catMaster.write('! ' + line)
-						catMaster.writelines(coordscmds)
-					else:
-						catMaster.write(line)
-				except Exception as ex:
-					print(ex)
-			catMaster.flush() # really shouldn't have to do this, but addresses an apparent delay (due to buffering) if this file is read immediately after this fnxn returns
-			respath = _applyRegex(catMaster.name)
-		os.remove(outfilepath)
-		return os.path.abspath(respath) # still might not be clean. Round trip through treetoDss(dssToTree(respath), respath) to fix problems with transformer winding definitions
-
-def _applyRegex(fpath):
-	'''***DO NOT USE***
-	**There are no future plans to widen dss parsing rules beyond the specifically-formatted
-	.dss files that are expected by omf (described in OMF docs). This function is only left here in 
-	case an OMF developer wants to generate some new test files from something that is badly 
-	formatted to begin with. Meant to be called on files that end with '_expd.dss' **'''
-
-	import re
-	with open(fpath, 'r') as inFile, open(fpath[:-9]+'_clean.dss', 'w') as outFile:
-		# apply all dat ugly regex
-		# The ^ (begins with) regex syntax does not work here.
-		contents = inFile.read()
-		contents = re.sub('New (?!object=)', 'New object=', contents)
-		contents = re.sub('Edit (?!object=)', 'Edit object=', contents)
-		contents = re.sub('\)', ']', contents)
-		contents = re.sub('\(', '[', contents)
-		contents = re.sub('(?<=\d)(\s)+(?=\d)', ',', contents)
-		contents = re.sub('(?<=\d)(\s)+(?=-\d)', ',', contents)
-		contents = re.sub('(\s)+\|(\s)+', '|', contents)
-		contents = re.sub('\[(\s)*', '[', contents)
-		contents = re.sub('(\s)*\]', ']', contents)
-		contents = re.sub('"', '', contents)
-		contents = re.sub('(?<=\w)(\s)*,(\s)+(?=\w)', ',', contents)
-		contents = re.sub('(?<=\w)(\s)*,(\s)+(?=-\w)', ',', contents)
-		contents = re.sub('(?<=\w)(\s)+,(\s)*(?=\w)', ',', contents)
-		contents = re.sub('(?<=\w)(\s)+,(\s)*(?=-\w)', ',', contents)
-		contents = re.sub(',(\s)*(?=\])', '', contents)
-		# The following are best applied by hand because busnames are so varied
-		#contents = re.sub('(?<=buses=\[\w*),', '.1.2.3,', contents)
-		#contents = re.sub('(?<=buses=\[\w*(\.\d)*,\w*)\]', '.1.2.3]', contents)
-		#contents = re.sub('(?<=buses=\[\w*(\.\d)*,\w*),', '.1.2.3,', contents)
-		#contents = re.sub('(?<=bus(\w?)=\w*) ', '.1.2.3 ', contents) #'bus(\w?)' captures bus, bus1, bus2
-		#contents = re.sub('(?<=bus(\w?)=\w*-\w*) ', '.1.2.3 ', contents) #'bus(\w?)' captures bus, bus1, bus2 with hyphen within
-		#contents = re.sub('rdcohms=.* ','',contents) # removes rdcohms=stuff
-		#contents = re.sub('wdg=.* ','',contents) # removes wdg=stuff
-		#contents = re.sub('%r=.* ','',contents) # removes %R=stuff
-		#contents = re.sub('(?<=taps=\[\d,\d,\d\] ).*(?=taps=)','',contents) # handles repeated stuff between 'taps' and 'taps'
-		outFile.write(contents)
-		return outFile.name
-
-def _dfToListOfDicts(dfin, objtype):
-	'''Converts the contents of a data frame into a list of dictionaries, where each
-		dictionary represents a single row, with keys corresponding to the column names.'''
-		#TODO: mapping for attribute renaming dss<->tree (use objtype for this)
-	#print(dfin.head(1))
-	dictlst = []
-	dfin.rename(columns={'Name':'Object'}, inplace=True)
-	#TODO add any other attribute name conversions
-	#TODO: change any lists to tuples?
-	for name, obj in dfin.iterrows(): #TODO refactor for performance (very slow to iterate over rows. vectorize?)
-		obj['Object'] = objtype + '.' + str(name)
-		obj_dict = dict(zip(obj.index,obj))
-		dictlst.append(obj_dict)
-	return dictlst
 
 def _extend_with_exc(from_d, to_d, exclude_list):
 	''' Add all items in from_d to to_d that aren't in exclude_list. '''
@@ -844,218 +582,6 @@ def getDssCoordinates(omdFilePath, outFilePath):
 			lineStr = "setbusxy bus=" + bus + " x=" + busLon + " y=" + busLat + "\n"
 			coordinateListFile.write(lineStr)
 
-def _conversionTests():
-	# pass
-	glmList = set()
-	mdbList = set()
-	cleanGlmList = set()
-	cleanMdbList = set()
-	brokenGlmList = {}
-	brokenMdbList = {}
-
-	#set to True if you want to test all the glm files, otherwise it will just read the file paths from the previously saved workingGlmList.csv
-	shouldTestGlm = False
-
-	curDir = os.getcwd()
-	os.chdir('../..')
-	omfDir = os.getcwd()
-
-	def fillFileLists():
-		for root, dirs, files in os.walk(omfDir):
-			for f in files:
-				if f.endswith(".glm"):
-					glmList.add(os.path.join(root, f))
-				if f.endswith(".mdb"):
-					mdbList.add(os.path.join(root, f))
-		#print("***********glmList = " + ", ".join(glmList))
-		#print("***********mdbList = " + ", ".join(mdbList))
-
-	def testAllGlm():
-		for f in glmList:
-			fPathShort = f
-			if f.startswith(omfDir):
-				fPathShort = f[len(omfDir):]
-			if fPathShort.startswith('/'):
-				fPathShort = fPathShort[1:]
-			#run gridlabd
-			try:
-				result = subprocess.run(["gridlabd", f], shell=True, check=True)
-				# result = subprocess.run(["gridlabd", f], shell=True, check=True) #cwd=path.get_folder(f)
-				cleanGlmList.add(fPathShort)
-			except subprocess.CalledProcessError as e:
-				# print("Error with ", fPathShort, ": ", e.output)
-				brokenGlmList[fPathShort] = e.output
-		#save list of working glms to csv file
-		with open(pJoin(omfDir, "scratch", "dittoTestOutput", "workingGlmList.csv"),"w") as workingGlmListFile:
-			csv_writer = csv.writer(workingGlmListFile)
-			for x in cleanGlmList:
-				csv_writer.writerow([x])
-		#save list of broken glms to csv file
-		with open(pJoin(omfDir, "scratch", "dittoTestOutput", "brokenGlmList.csv"),"w") as brokenGlmListFile:
-			csv_writer2 = csv.writer(brokenGlmListFile)
-			for x in brokenGlmList.keys():
-				errorMsg = brokenGlmList[x].replace("\n","\t*\t")
-				csv_writer2.writerow([x, errorMsg])
-		# print("***********cleanGlmList = " + ", ".join(cleanGlmList))
-		# print("***********brokenGlmList = " + ", ".join(brokenGlmList))
-
-	def testAllCyme():
-		for f in mdbList:
-			#run gridlabd
-			fShort = f[len(omfDir):]
-			try:
-				result = subprocess.run(["", f], shell=True, check=True)
-				cleanMdbList.add(fShort)
-			except subprocess.CalledProcessError as e:
-				brokenMdbList[fShort] = e.output
-		# print("***********cleanMdbList = " + ", ".join(cleanMdbList))
-		# print("***********brokenMdbList = " + ", ".join(brokenMdbList))
-	# all_glm_files = os.system('find ../.. -name *.glm')
-	# inputs = get urls for the input files. OMF_GITHUB_URL + extension.
-	fillFileLists()
-	
-	if shouldTestGlm:
-		testAllGlm()
-	else:
-		with open(pJoin(omfDir, "scratch", "dittoTestOutput", "workingGlmList.csv"),"r") as workingGlmListFile:
-			#read the names of the working files into cleanGlmList
-			csv_reader = csv.reader(workingGlmListFile)
-			for row in csv_reader:
-				print(row[0])
-				cleanGlmList.add(row[0])
-		with open(pJoin(omfDir, "scratch", "dittoTestOutput", "brokenGlmList.csv"),"r") as brokenGlmListFile:
-			#read the names of the working files into cleanGlmList
-			csv_reader2 = csv.reader(brokenGlmListFile)
-			for row in csv_reader2:
-				filePath = row[0]
-				errMsg = row[1]
-				brokenGlmList[filePath] = errMsg
-
-	brokenDittoList = {}
-	cleanDittoList = {}
-	# working_dir = './TEMP_CONV/'
-	try:
-		os.mkdir(pJoin(omfDir, "scratch", "dittoTestOutput"))
-	except FileExistsError:
-		print("dittoTestOutput folder already exists!")
-		pass
-	except:
-		print("Error occurred creating dittoTestOutput folder")
-
-
-	for fname in cleanGlmList:
-		fLong = pJoin(omfDir, fname)
-		fShort = fname
-		if '/' in fname:
-			fShort = fname.rsplit('/',1)[1]
-		try:
-			convFilePath = pJoin(omfDir, "scratch", "dittoTestOutput", fShort + '_conv.dss')
-			t0 = time()
-			gridLabToDSS(fLong, convFilePath)
-			t1 = time()
-			cleanDittoList[fname] = {}
-			cleanDittoList[fname]["convPath"] = convFilePath
-			cleanDittoList[fname]["convTime"] = t1-t0
-		except:
-			errorMsg = traceback.format_exc()
-			brokenDittoList[fname] = {}
-			brokenDittoList[fname]["fullPath"] = fLong
-			brokenDittoList[fname]["errMsg"] = errorMsg.replace("\n","\t*\t")
-			pass
-
-	# TECHNIQUES FOR HANDLING GLM INCLUDES
-	# glm_str = open('glm_path.glm').read()
-	# if '#include' in glm_str:
-	# 	if quick_and_easy_flag:
-	# 		pass #skip test, until we can work out includes.
-	# 	else:
-	# 		include_file = open('path to the include')
-	# 		glm_str.replace('#include name.glm', include_file)
-
-	# for key in brokenDittoList.keys():
-	# 	print(key + ": " + brokenDittoList[key])
-
-	#create a new file to save the broken ditto runs to
-	with open(pJoin(omfDir, "scratch", "dittoTestOutput", "brokenDittoList.csv"),"w") as brokenDittoFile:
-		writer = csv.writer(brokenDittoFile)
-		# writer.writerows(brokenDittoList.items())
-		for fname in brokenDittoList.keys():
-			writer.writerow((fname, brokenDittoList[fname]["fullPath"], brokenDittoList[fname]["errMsg"]))
-
-	def createFullReport():
-		with open(pJoin(omfDir, "scratch", "dittoTestOutput", "fullDittoReport.csv"),"w") as fullReportFile:
-			fieldnames = ['filePath', 'gridlabdResult', 'dittoResult', 'conversionTime', 'originalFileSize', 'convertedFileSize', 'sizeDifference', 'powerflowResutls']
-			writer = csv.DictWriter(fullReportFile, fieldnames=fieldnames)
-
-			#write the column headers
-			writer.writeheader()
-			# add information from broken gridlab-d files
-			for x in brokenGlmList.keys():
-				writer.writerow({'filePath': x, 'gridlabdResult': brokenGlmList[x], 'dittoResult': 'N/A', 'conversionTime': 'N/A', 'originalFileSize': 'N/A', 'convertedFileSize': 'N/A', 'sizeDifference': 'N/A', 'powerflowResutls': 'N/A'})
-			# add information from working gridlab-d files that break in ditto
-			for x in brokenDittoList.keys():
-				writer.writerow({'filePath': x, 'gridlabdResult': 'SUCCESS', 'dittoResult': brokenDittoList[x]["errMsg"], 'conversionTime': 'N/A', 'originalFileSize': 'N/A', 'convertedFileSize': 'N/A', 'sizeDifference': 'N/A', 'powerflowResutls': 'N/A'})
-			# add information from working gridlab-d files that ditto converts
-			for x in cleanDittoList.keys():
-				# TODO: fill out 'originalFileSize', 'convertedFileSize', 'sizeDifference', 'powerflowResutls'
-				writer.writerow({'filePath': x, 'gridlabdResult': 'SUCCESS', 'dittoResult': cleanDittoList[x]["convPath"], 'conversionTime': cleanDittoList[x]["convTime"], 'originalFileSize': 'N/A', 'convertedFileSize': 'N/A', 'sizeDifference': 'N/A', 'powerflowResutls': 'N/A'})
-
-	createFullReport()
-	# print(brokenDittoList.keys())
-	# zip up all inputs, outputs, exceptions + send to nrel
-	# Deprecated tests section
-	#dssToGridLab('ieee37.dss', 'Model.glm') # this kind of works
-	# gridLabToDSS('ieee13.glm', 'ieee13_conv.dss') # this fails miserably
-	#cymeToDss(...) # first need to define function.
-	#distNetViz.insert_coordinates(evil_glm)
-
-def _randomTest():
-	curDir = os.getcwd()
-	os.chdir('../..')
-	omfDir = os.getcwd()
-	s1 = "/this is a string"
-	s2 = "something/file.ext"
-	s3 = "/Users/ryanmahoney/omf/omf/someLocation/anotherLocation/file.ext"
-	testSet = [s1, s2, s3]
-	for f in testSet:
-		fPathShort = f
-		fName = f
-		if f.startswith(omfDir):
-			fPathShort = f[len(omfDir):]
-		if '/' in fPathShort:
-			fName = fPathShort.rsplit('/',1)[1]
-		if fPathShort.startswith('/'):
-			fPathShort = fPathShort[1:]
-		print(f," -> ", fPathShort, " , ", fName)
-	with open(pJoin(omfDir, "scratch", "dittoTestOutput", "workingGlmList.csv"),"w") as workingGlmListFile:
-		csv_writer = csv.writer(workingGlmListFile)
-		for x in testSet:
-			csv_writer.writerow([x])
-
-def _dssToOmdTest():
-	omfDir = omf.omfDir
-	# dssFileName = 'ieee37.clean.dss'
-	# dssFilePath = pJoin(curDir, dssFileName)
-	dssFileName = 'nreca1824_dwp.dss'
-	# dssFileName = 'Master3.dss'
-	dssFilePath = pJoin(omfDir, 'static', 'testFiles', dssFileName)
-	# dssFilePath = pJoin(omfDir, 'static', 'testFiles', 'Delete', dssFileName)
-	# dssCleanLists(dssFilePath)
-	# dssFileName = 'Master3_cleanLists.dss'
-	# dssFilePath = pJoin(omfDir, 'static', 'testFiles', 'Delete', dssFileName)
-	# omdFileName = dssFileName + '.omd'
-	omdFileName = dssFileName + '.omd'
-	omdFilePath = pJoin(omfDir, 'static', 'testFiles', omdFileName)
-	# omdFilePath = pJoin(omfDir, 'static', 'testFiles', 'Delete', omdFileName)
-	# omdFilePath = pJoin(omfDir, 'static', 'publicFeeders', omdFileName)
-	dssToOmd(dssFilePath, omdFilePath, RADIUS=0.0002, write_out=True)
-
-def _dssCoordTest():
-	omfDir = omf.omfDir
-	omdFilePath = pJoin(omfDir, "scratch", "MapTestOutput", "iowa240c2_fixed_coords2.clean.omd")
-	outFilePath = pJoin(omfDir, "static", "testFiles", "iowa_240", "iowa240_cleanCoords.csv")
-	getDssCoordinates(omdFilePath, outFilePath)
-
 def _testsFull():
 	from omf.solvers.opendss import getVoltages, voltageCompare
 	import pandas as pd
@@ -1083,20 +609,18 @@ def _testsFull():
 		treeToDss(dsstreeout2, outpath)
 		endvolts = getVoltages(outpath, keep_output=False)
 		os.remove(outpath)
+		# SOME DISABLED TESTS.
+		# getDssCoordinates(omdFilePath, outFilePath)
+		# dssToOmd(dssFilePath, omdFilePath, RADIUS=0.0002, write_out=True)
 		# percSumm, diffSumm = voltageCompare(startvolts, endvolts, saveascsv=False, with_plots=False)
 		# maxPerrM = [percSumm.loc['RMSPE',c] for c in percSumm.columns if c.lower().startswith(' magnitude')]
 		# maxPerrM = pd.Series(maxPerrM).max()
 		#print(maxPerrM) # DEBUG
 		# assert abs(maxPerrM) < errorLimit*100, 'The average percent error in voltage magnitude is %s, which exceeeds the threshold of %s%%.'%(maxPerrM,errorLimit*100)
-
 	#TODO: make parser accept keyless items with new !keyless_n key? Or is this just horrible syntax?
 	#TODO: refactor in to well-defined bijections between object types?
 	#TODO: a little help on the frontend to hide invalid commands.
 
 if __name__ == '__main__':
-	# _tests()
-	# _randomTest()
-	# _conversionTests()
-	# _dssToOmdTest()
-	#_dssCoordTest()
+	# _testsFull()
 	pass

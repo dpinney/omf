@@ -39,7 +39,7 @@ def work(modelDir, inputDict):
 	mohcaHistogramFigure = px.histogram( mohcaResults, x='voltage_cap_kW', template="simple_white", color_discrete_sequence=["MediumPurple"] )
 	mohcaHistogramFigure.update_layout(bargap=0.5)
 	barChartDF = mohcaResults
-	barChartDF['thermal_cap'] = [1]
+	barChartDF['thermal_cap'] = [7.23, 7.34, 7.45, 7.53, 7.24, 6.24, 7.424, 7.23 ]
 	barChartDF['max_cap_kW'] = np.minimum( barChartDF['voltage_cap_kW'], barChartDF['thermal_cap'])
 	mohcaBarChartFigure = px.bar(barChartDF, x='busname', y=['voltage_cap_kW', 'thermal_cap', 'max_cap_kW'], barmode='group', color_discrete_sequence=["green", "lightblue", "MediumPurple"], template="simple_white" ) 
 	# traditional hosting capacity if they uploaded an omd circuit file and chose to use it.
@@ -53,13 +53,7 @@ def work(modelDir, inputDict):
 		tradHCDF = pd.DataFrame(traditionalHCResults)
 		omf.geo.map_omd(pJoin(modelDir, feederName), modelDir, open_browser=False )
 		outData['traditionalHCMap'] = open( pJoin( modelDir, "geoJson_offline.html"), 'r' ).read()		
-		traditionalHCFigure = make_subplots(specs=[[{"secondary_y": True }]])
-		traditionalHCFigure.add_trace(
-			go.Scatter( x = tradHCDF.index, y = tradHCDF["max_kw"], name= "max_kw"),
-			secondary_y=False
-		)
-		traditionalHCFigure.update_yaxes( title_text="<b>Total Additional Generation Added ( kW ) </b>", secondary_y = True)
-		outData['traditionalGraphData'] = json.dumps( traditionalHCFigure, cls=py.utils.PlotlyJSONEncoder )
+		#outData['traditionalGraphData'] = json.dumps( traditionalHCFigure, cls=py.utils.PlotlyJSONEncoder )
 		outData['traditionalHCTableHeadings'] = tradHCDF.columns.values.tolist()
 		outData['traditionalHCTableValues'] = ( list( tradHCDF.itertuples(index=False, name=None)))
 	# write final outputs
@@ -77,7 +71,7 @@ def runtimeEstimate(modelDir):
 
 def new(modelDir):
 	''' Create a new instance of this model. Returns true on success, false on failure. '''
-	meter_file_name = 'sandia_loc1_test_data.csv'
+	meter_file_name = 'mohcaInputCustom.csv'
 	meter_file_path = pJoin(omf.omfDir,'static','testFiles', meter_file_name)
 	meter_file_contents = open(meter_file_path).read()
 	defaultInputs = {
