@@ -12,7 +12,6 @@ from omf.models.__neoMetaModel__ import *
 modelName, template = __neoMetaModel__.metadata(__file__)
 tooltip = "This is a stub for the creation of new models. Update this description to match your model's purpose."
 hidden = True # Change to False to make visible in the omf's "new model" list
-hidden = False
 
 def castAddInputs(val1,val2):
 	''' Casts string inputs to appropriate type and returns their sum. 
