@@ -19,6 +19,33 @@ tooltip = "Calculate hosting capacity using traditional and/or AMI-based methods
 modelName, template = __neoMetaModel__.metadata(__file__)
 hidden = False
 
+def bar_chart_coloring( row ):
+  return 'orange' if row['thermal_violation'] and not row['voltage_violation'] else (
+  'green' if not row['thermal_violation'] and row['voltage_violation'] else 'red')
+
+def colorby( hc_color_dict ):
+	''' generate a colorby CSV/JSON that works with omf.geo map interface.
+	To use, set omd['attachments'] = function JSON output'''
+	attachments_keys = {
+		"coloringFiles": {
+			"microgridColoring.csv": {
+				"csv": "<content>",
+				"colorOnLoadColumnIndex": "1" # color by default
+			}
+		}
+	}
+	hc_keys = hc_color_dict.keys()
+	color_step = float(1/len(hc_keys))
+	output_csv = 'bus,color\n'
+	for i, hc_key in enumerate(hc_color_dict):
+		my_color = i * color_step
+		hc_ob = hc_color_dict[hc_key]
+		all_items = hc_ob['loads'] + hc_ob['gen_obs_existing'] + [hc_ob['gen_bus']]
+		for item in all_items:
+			output_csv += item + ',' + str(my_color) + '\n'
+	attachments_keys['coloringFiles']['hostingCapColoring.csv']['csv'] = output_csv
+	return attachments_keys
+
 def work(modelDir, inputDict):
 	outData = {}
 	# mohca data-driven hosting capacity
@@ -51,9 +78,19 @@ def work(modelDir, inputDict):
 		opendss.dssConvert.treeToDss(tree, pJoin(modelDir, 'circuit.dss'))
 		traditionalHCResults = opendss.hosting_capacity_all(pJoin(modelDir, 'circuit.dss'), int(inputDict["traditionalHCSteps"]), int(inputDict["traditionalHCkW"]))
 		tradHCDF = pd.DataFrame(traditionalHCResults)
+		tradHCDF['plot_color'] = tradHCDF.apply ( lambda row: bar_chart_coloring(row), axis=1 )
+		traditionalHCFigure = px.bar( tradHCDF, x='bus', y='max_kw', barmode='group', color='plot_color', color_discrete_map={ 'red': 'red', 'orange': 'orange', 'green': 'green'}, template='simple_white' )
+		traditionalHCFigure.update_xaxes(categoryorder='array', categoryarray=tradHCDF.bus.values)
+		colorToKey = {'orange':'thermal_violation', 'green': 'voltage_violation', 'red': 'both_violation'}
+		traditionalHCFigure.for_each_trace(lambda t: t.update(name = colorToKey[t.name],
+                                      legendgroup = colorToKey[t.name],
+                                      hovertemplate = t.hovertemplate.replace(t.name, colorToKey[t.name])
+                                     )
+                  )
+		tradHCDF.drop(tradHCDF.columns[len(tradHCDF.columns)-1], axis=1, inplace=True)
 		omf.geo.map_omd(pJoin(modelDir, feederName), modelDir, open_browser=False )
-		outData['traditionalHCMap'] = open( pJoin( modelDir, "geoJson_offline.html"), 'r' ).read()		
-		#outData['traditionalGraphData'] = json.dumps( traditionalHCFigure, cls=py.utils.PlotlyJSONEncoder )
+		outData['traditionalHCMap'] = open( pJoin( modelDir, "geoJson_offline.html"), 'r' ).read()
+		outData['traditionalGraphData'] = json.dumps( traditionalHCFigure, cls=py.utils.PlotlyJSONEncoder )
 		outData['traditionalHCTableHeadings'] = tradHCDF.columns.values.tolist()
 		outData['traditionalHCTableValues'] = ( list( tradHCDF.itertuples(index=False, name=None)))
 	# write final outputs

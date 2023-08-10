@@ -91,6 +91,7 @@
 	<!--<div id="copyrightNotice" style="width:1000px; margin:-25px auto 10px auto; padding-left:5px; color:gray">PVWatts &copy; was developed by the <a href="http://pvwatts.nrel.gov/">National Renewable Energy Lab</a></div>-->
 	{{ omfRunDebugBlock }}
 	{% if modelStatus == 'finished' %}
+	<style>td, th {padding:7 0 5 20;text-align: left;font-size:0.8em; border: 1px solid #cccccc;} </style>
 	<div id="output">
 		<p class="reportTitle">Mohca Hosting Capacity Distribution</p>
 		<div id="mohcaHistogramChart" class="tightContent">
@@ -108,7 +109,7 @@
 		</div>
 		<p class="reportTitle">Mohca Full Hosting Capacity Data Table</p>
 		<div id="mohcaHostingCapacityTable" class="tightContent">
-			<table style="width:100%">
+			<table style='margin:5px;width:990px'>
 				<tr>
 				{% for header in allOutputDataDict["mohcaHCTableHeadings"] %}
 					<th>{{ header }}</th>
@@ -143,7 +144,7 @@
 			</script>
 		</div>
 		<p class="reportTitle">Traditional Hosting Capacity Full Data Table</p>
-		<div id="traditionalHostingCapacityTable" class="tightContent">
+		<div id="traditionalHostingCapacityTable" class="tightContent" style="height:300px; overflow-y: scroll;">
 			<table style="width:100%">
 				<tr>
 						{% for header in allOutputDataDict["traditionalHCTableHeadings"] %}
