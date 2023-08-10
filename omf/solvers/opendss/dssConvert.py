@@ -8,6 +8,7 @@ import math
 import tempfile
 import networkx as nx
 import omf
+from collections import OrderedDict
 
 def cyme_to_dss(cyme_dir, out_path, inter_dir=None):
 	''' Converts cyme txt files into an opendss file with nrel/ditto.
@@ -151,46 +152,23 @@ def dssToTree(pathToDssOrString, is_path=True):
 	# Capture original line numbers and drop blanks
 	contents = dict([(c,x) for (c, x) in enumerate(contents) if x != ''])
 	# Lex it
-	convTbl = {'bus':'buses', 'conn':'conns', 'kv':'kvs', 'kva':'kvas', '%r':'%r'}
-	# convTbl = {'bus':'buses', 'conn':'conns', 'kv':'kvs', 'kva':'kvas', '%r':'%rs'} # TODO at some point this will need to happen; need to check what is affected i.e. viz, etc
-	from collections import OrderedDict 
 	for i, line in contents.items():
 		jpos = 0
 		try:
+			#HACK: only support white space separation of attributes.
 			contents[i] = line.split()
+			#HACK: only support = assignment of values.
+			from collections import OrderedDict 
 			ob = OrderedDict() 
 			ob['!CMD'] = contents[i][0]
 			if len(contents[i]) > 1:
 				for j in range(1, len(contents[i])):
 					jpos = j
-					splitlen = len(contents[i][j].split('='))
-					k,v=('','',)
-					if splitlen==3:
-						print('OMF does not support OpenDSS\'s \'file=\' syntax for defining property values.')
-						k,v,f = contents[i][j].split('=')
-					else:
-						k,v = contents[i][j].split('=')
-					# TODO: Should we pull the multiwinding transformer handling out of here and put it into dssFilePrep()?
-					if k == 'wdg':
-						continue
-					if (k in ob.keys()) or (convTbl.get(k,k) in ob.keys()): # if the single key already exists in the object, then this is the second pass. If pluralized key exists, then this is the 2+nth pass
-						# pluralize the key if needed, get the existing values, add the incoming value, place into ob, remove singular key
-						plurlk = convTbl.get(k, None) # use conversion table to pluralize the key or keep same key
-						incmngVal = v
-						xistngVals = []
-						if k in ob: # indicates 2nd winding, existing value is a string (in the case of %r, this indicates 3rd winding as well!)
-							if (type(ob[k]) != tuple) or (type(ob[k]) != list): # pluralized values can be defined as either
-								xistngVals.append(ob[k])
-								del ob[k]
-						if plurlk in ob: # indicates 3rd+ winding; existing values are tuples
-								for item in ob[plurlk]:
-									xistngVals.append(item)
-						xistngVals.append(incmngVal) # concatenate incoming value with the existing values
-						ob[plurlk] =  tuple(xistngVals) # convert all to tuple
-					else: # if single key has not already been added, add it
-						ob[k] = v
+					k,v = contents[i][j].split('=')
+					ob[k] = v
+			contents[i] = ob
 		except:
-			raise Exception(f'\nError encountered in group (space delimited) #{jpos+1} of line {i + 1}: {line}')
+			raise Exception(f'Error encountered in group (space delimited) #{jpos+1} of line {i + 1}: {line}')
 		contents[i] = ob
 	return list(contents.values())
 
@@ -622,5 +600,4 @@ def _testsFull():
 	#TODO: a little help on the frontend to hide invalid commands.
 
 if __name__ == '__main__':
-	# _testsFull()
-	pass
+	_testsFull()

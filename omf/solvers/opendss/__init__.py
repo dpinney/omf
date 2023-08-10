@@ -840,7 +840,7 @@ def getVoltages(dssFilePath, keep_output=False, outdir='', output_filename='volt
 	file's directory as 'voltages.csv',	or specify a filename for the output through the 
 	'output_filename' parameter (i.e. '*.csv').'''
 	dssFileLoc = os.path.dirname(os.path.abspath(dssFilePath))
-	runDSS(os.path.abspath(dssFilePath), keep_output=False)
+	runDSS(os.path.abspath(dssFilePath))
 	if outdir!='':
 		outdir = outdir + '/'
 	voltfile = dssFileLoc + '/' + outdir + output_filename
