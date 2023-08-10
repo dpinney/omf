@@ -116,7 +116,7 @@ def new(modelDir):
 		"mohcaAlgorithm": 'sandia1',
 		"inputDataFileName": meter_file_name,
 		"inputDataFileContent": meter_file_contents,
-		"feederName1": 'ieee37_LBL',
+		"feederName1": 'ieee37.dss',
 		"traditionalHCSteps": 10,
 		"optionalCircuitFile": 'on',
 		"traditionalHCkW": 1
@@ -124,7 +124,7 @@ def new(modelDir):
 	creationCode = __neoMetaModel__.new(modelDir, defaultInputs)
 	try:
 		shutil.copyfile(
-			pJoin(__neoMetaModel__._omfDir, "static", "hostingcapacityfiles", defaultInputs["feederName1"]+'.omd'),
+			pJoin(__neoMetaModel__._omfDir, "static", "publicFeeders", defaultInputs["feederName1"]+'.omd'),
 			pJoin(modelDir, defaultInputs["feederName1"]+'.omd'))
 	except:
 		return False
