@@ -20,8 +20,16 @@ modelName, template = __neoMetaModel__.metadata(__file__)
 hidden = False
 
 def bar_chart_coloring( row ):
-  return 'orange' if row['thermal_violation'] and not row['voltage_violation'] else (
-  'green' if not row['thermal_violation'] and row['voltage_violation'] else 'red')
+  color = 'black'
+  if row['thermal_violation'] and not row['voltage_violation']:
+    color = 'orange'
+  elif not row['thermal_violation'] and row['voltage_violation']:
+    color = 'yellow'
+  elif not row['thermal_violation'] and not row['voltage_violation']:
+    color = 'green'
+  else:
+    color = 'red'
+  return color
 
 def colorby( hc_color_dict ):
 	''' generate a colorby CSV/JSON that works with omf.geo map interface.
