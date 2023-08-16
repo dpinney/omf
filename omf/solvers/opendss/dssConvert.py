@@ -307,16 +307,16 @@ def evilDssTreeToGldTree(dssTree):
 					'!CONNCODE': '.' + connCode
 				}
 				_extend_with_exc(ob, gldTree[str(g_id)], ['object','bus1'])
-			elif ob['!CMD']=='edit':
+			elif ob['!CMD'] in ['edit','open','close']:
 				#TODO: handle edited objects? maybe just extend the 'new' block (excluding vsource) because the functionality is basically the same.
 				warnings.warn(f"Ignored 'edit' command: {ob}")
-			elif ob['!CMD'] not in ['new', 'setbusxy', 'edit']: # what about 'set', 
+			elif ob['!CMD'] not in ['new', 'setbusxy', 'edit']:
 				#command-like objects.
 				gldTree[str(g_id)] = {
 					'object': '!CMD',
 					'name': ob['!CMD']
 				}
-				_extend_with_exc(ob, gldTree[str(g_id)], ['!CMD'])
+				_extend_with_exc(ob, gldTree[str(g_id)], ['!CMD', 'object', 'name'])
 			else:
 				warnings.warn(f"Ignored {ob}")
 			g_id += 1
