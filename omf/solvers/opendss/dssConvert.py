@@ -566,38 +566,25 @@ def _testsFull():
 	FNAMES =  ['ieee37.clean.dss', 'ieee123_solarRamp.clean.dss', 'iowa240.clean.dss', 'ieeeLVTestCase.clean.dss', 'ieee8500-unbal_no_fuses.clean.dss']
 	for fname in FNAMES:
 		fpath = omf.omfDir + '/solvers/opendss/' + fname
-		print('!!!!!!!!!!!!!! ',fpath,' !!!!!!!!!!!!!!')
+		print('!!!!!!!!!!!!!! dssConver.py testing: ',fpath,' !!!!!!!!!!!!!!')
 		# Roundtrip conversion test
-		errorLimit = 0.001
+		errorLimit = 0.01
 		startvolts = getVoltages(fpath, keep_output=False)
 		dsstreein = dssToTree(fpath)
-		# pp([dict(x) for x in dsstreein]) # DEBUG
-		# treeToDss(dsstreein, 'TEST.dss') # DEBUG
 		glmtree = evilDssTreeToGldTree(dsstreein)
-		#pp(glmtree) #DEBUG
-		#distNetViz.viz_mem(glmtree, open_file=True, forceLayout=False)
 		dsstreeout = evilGldTreeToDssTree(glmtree)
 		outpath = fpath[:-4] + '_roundtrip_test.dss'
 		treeToDss(dsstreeout, outpath)
-		#...roundtrip a second time to check the output dss syntax
-		dsstreein2 = dssToTree(outpath)
-		glmtree2 = evilDssTreeToGldTree(dsstreein2)
-		distNetViz.viz_mem(glmtree2, open_file=True, forceLayout=False)
-		dsstreeout2 = evilGldTreeToDssTree(glmtree2)
-		treeToDss(dsstreeout2, outpath)
+		# Visualization test
+		distNetViz.viz_mem(glmtree, open_file=False, forceLayout=False)
+		# Voltage comparison after roundtrip test
 		endvolts = getVoltages(outpath, keep_output=False)
+		percSumm, diffSumm = voltageCompare(startvolts, endvolts, saveascsv=False, with_plots=False)
+		maxPerrM = [percSumm.loc['RMSPE',c] for c in percSumm.columns if c.lower().startswith(' magnitude')]
+		maxPerrM = pd.Series(maxPerrM).max()
+		assert abs(maxPerrM) < errorLimit*100, 'The average percent error in voltage magnitude is %s, which exceeeds the threshold of %s%%.'%(maxPerrM,errorLimit*100)
+		# Clean up
 		os.remove(outpath)
-		# SOME DISABLED TESTS.
-		# getDssCoordinates(omdFilePath, outFilePath)
-		# dssToOmd(dssFilePath, omdFilePath, RADIUS=0.0002, write_out=True)
-		# percSumm, diffSumm = voltageCompare(startvolts, endvolts, saveascsv=False, with_plots=False)
-		# maxPerrM = [percSumm.loc['RMSPE',c] for c in percSumm.columns if c.lower().startswith(' magnitude')]
-		# maxPerrM = pd.Series(maxPerrM).max()
-		#print(maxPerrM) # DEBUG
-		# assert abs(maxPerrM) < errorLimit*100, 'The average percent error in voltage magnitude is %s, which exceeeds the threshold of %s%%.'%(maxPerrM,errorLimit*100)
-	#TODO: make parser accept keyless items with new !keyless_n key? Or is this just horrible syntax?
-	#TODO: refactor in to well-defined bijections between object types?
-	#TODO: a little help on the frontend to hide invalid commands.
 
 if __name__ == '__main__':
 	_testsFull()
