@@ -59,6 +59,9 @@ elif major_platform == "Darwin": # MacOS
 	os.system(f"sudo hdiutil attach {source_dir}/omf/static/gridlabd-4.0_RC1.dmg")
 	os.system('sudo installer -package "/Volumes/GridLAB-D 4.0.0/gridlabd.mpkg" -target /')
 	os.system('sudo hdiutil detach "/Volumes/GridLAB-D 4.0.0"')
+	opener = urllib.request.build_opener()
+	opener.addheaders = [('User-agent', 'Mozilla/5.0')]
+	urllib.request.install_opener(opener)
 	wget('https://www.qsl.net/kd2bd/splat-1.4.2-osx.tgz', './splat-1.4.2-osx.tgz')
 	os.system("sudo tar -xvzf splat-1.4.2-osx.tgz")
 	os.system('''

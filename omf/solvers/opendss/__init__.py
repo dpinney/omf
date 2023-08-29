@@ -20,15 +20,18 @@ except:
 from omf.solvers.opendss import dssConvert
 import omf
 
-def runDssCommand(dsscmd):
+def runDssCommand(dsscmd, strict=False):
+	'''Execute a single opendsscmd in the current context.'''
 	run_command(dsscmd)
 	latest_error = Error.Description()
 	if latest_error != '':
-		print('WARNING: OpenDSS Error:', latest_error)
-		# raise Exception('OpenDSS Error:', latest_error)
+		if strict:
+			raise Exception('OpenDSS Error:', latest_error)
+		else:
+			print('WARNING: OpenDSS Error:', latest_error)
 
 def runDSS(dssFilePath):
-	''' Run DSS circuit definition file and set export path, solve powerflow.'''
+	'''Run DSS circuit definition file, set export/data paths, solve powerflow.'''
 	# Check for valid .dss file
 	assert '.dss' in dssFilePath.lower(), 'The input file must be an OpenDSS circuit definition file.'
 	fullPath = os.path.abspath(dssFilePath)
@@ -53,7 +56,7 @@ def getCoords(dssFilePath):
 	return coords
 
 def _getByName(tree, name):
-	''' Return first object with name in tree as an OrderedDict. '''
+	'''Return first object with name in tree as an OrderedDict.'''
 	matches =[]
 	for x in tree:
 		if x.get('object',''):
@@ -62,7 +65,7 @@ def _getByName(tree, name):
 	return matches[0]
 
 def newQstsPlot(filePath, stepSizeInMinutes, numberOfSteps, keepAllFiles=False, actions={}, filePrefix='timeseries'):
-	''' QSTS with native opendsscmd binary to avoid segfaults in opendssdirect. '''
+	'''QSTS with native opendsscmd binary to avoid segfaults in opendssdirect.'''
 	dssFileLoc = os.path.dirname(os.path.abspath(filePath))
 	dss_run_file = ''
 	dss_run_file += f'redirect "{filePath}"\n'
@@ -382,7 +385,6 @@ def hosting_capacity_max(FNAME, GEN_BUSES, STEPS, KW):
 				return df, max_kw
 		df = pd.DataFrame(results[1:], columns=results[0])
 		return df, max_kw
-
 	results = {}
 	prev_max = 0
 	DEFAULT_KV = 2.14
@@ -454,7 +456,7 @@ def get_obj_by_name(name, tree, cmd=None):
 		raise Exception(err)
 
 def get_subtree_obs(line, tree):
-	''' Get all objects down-line from the affected line. '''
+	'''Get all objects down-line from the affected line.'''
 	aff_ob = get_obj_by_name(line, tree, cmd='new')
 	aff_bus = aff_ob.get('bus2').split('.')[0]
 	net = dssConvert.dss_to_networkx(None, tree=tree)
@@ -464,7 +466,7 @@ def get_subtree_obs(line, tree):
 	return sub_obs
 
 def voltagePlot(filePath, PU=True):
-	''' Voltage plotting routine. Creates 'voltages.csv' and 'Voltage [PU|V].png' in directory of input file.'''
+	'''Voltage plotting routine. Creates 'voltages.csv' and 'Voltage [PU|V].png' in directory of input file.'''
 	dssFileLoc = os.path.dirname(os.path.abspath(filePath))
 	runDSS(filePath)
 	runDssCommand(f'export voltages "{dssFileLoc}/volts.csv"')
