@@ -800,7 +800,7 @@ def new(modelDir):
 		"solarCanCurtail": True,
 		"solarCanExport": True,
 		"dieselOnlyRunsDuringOutage": True,
-		"api_key": "WhEzm6QQQrks1hcsdN0Vrd56ZJmUyXJxTJFg6pn9"
+		"api_key": REopt.REOPT_API_KEYS[0]
 	}
 	creationCode = __neoMetaModel__.new(modelDir, defaultInputs)
 	try:
