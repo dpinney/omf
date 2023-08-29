@@ -6,7 +6,7 @@ import requests
 from omf.solvers.REopt import logger
 
 
-def poller(url, poll_interval=5):
+def poller(url, poll_interval=10):
     """
     Function for polling the REopt API Economic results URL until status is not "Optimizing..."
 
@@ -38,7 +38,7 @@ def poller(url, poll_interval=5):
     return response
 
 
-def rez_poller(url, poll_interval=5):
+def rez_poller(url, poll_interval=10):
     """
     Function for polling the REopt Resilience API results URL until status is not "Optimizing..."
 

@@ -4,19 +4,19 @@ import random
 from omf.solvers.REopt import logger
 from omf.solvers.REopt import results_poller
 
+REOPT_API_KEYS = (
+    'WhEzm6QQQrks1hcsdN0Vrd56ZJmUyXJxTJFg6pn9', # OMF KEY. REPLACE WITH YOUR API KEY
+    'Y8GMAFsqcPtxhjIa1qfNj5ILxN5DH5cjV3i6BeNE',
+    'etg8hytwTYRf4CD0c4Vl9U7ACEQnQg6HV2Jf4E5W',
+    'BNFaSCCwz5WkauwJe89Bn8FZldkcyda7bNwDK1ic',
+    'L2e5lfH2VDvEm2WOh0dJmzQaehORDT8CfCotaOcf',
+    '08USmh2H2cOeAuQ3sCCLgzd30giHjfkhvsicUPPf'
+)
 
-def run(inJSONPath, outputPath):
-	api_keys = (
-		'WhEzm6QQQrks1hcsdN0Vrd56ZJmUyXJxTJFg6pn9', # OMF KEY. REPLACE WITH YOUR API KEY
-		'Y8GMAFsqcPtxhjIa1qfNj5ILxN5DH5cjV3i6BeNE',
-		'etg8hytwTYRf4CD0c4Vl9U7ACEQnQg6HV2Jf4E5W',
-		'BNFaSCCwz5WkauwJe89Bn8FZldkcyda7bNwDK1ic',
-		'L2e5lfH2VDvEm2WOh0dJmzQaehORDT8CfCotaOcf',
-		'08USmh2H2cOeAuQ3sCCLgzd30giHjfkhvsicUPPf')
-	API_KEY = random.choice(api_keys)
+def run(inJSONPath, outputPath, api_key):
 	root_url = 'https://developer.nrel.gov/api/reopt'
-	post_url = root_url + '/v2/job/?api_key=' + API_KEY
-	results_url = root_url + '/v2/job/<run_uuid>/results/?api_key=' + API_KEY
+	post_url = root_url + '/v2/job/?api_key=' + api_key
+	results_url = root_url + '/v2/job/<run_uuid>/results/?api_key=' + api_key
 	with open(inJSONPath) as f:
 		post = json.load(f)
 	response = requests.post(post_url, json=post)
@@ -26,31 +26,23 @@ def run(inJSONPath, outputPath):
 	response = results_poller.poller(url=results_url.replace('<run_uuid>', run_id))
 	raise_if_unsuccessful(response, outputPath)
 	response_json = json.loads(response.text)
-	response_json['api_key'] = API_KEY
+	response_json['api_key'] = api_key
 	with open(outputPath, 'w') as f:
 		json.dump(response_json, f, indent=4)
 	#logger.log.info("Saved results to {}".format(outputPath))
 
 
-def runResilience(runID, outputPath):
-	api_keys = (
-		'WhEzm6QQQrks1hcsdN0Vrd56ZJmUyXJxTJFg6pn9', # OMF KEY. REPLACE WITH YOUR API KEY
-		'Y8GMAFsqcPtxhjIa1qfNj5ILxN5DH5cjV3i6BeNE',
-		'etg8hytwTYRf4CD0c4Vl9U7ACEQnQg6HV2Jf4E5W',
-		'BNFaSCCwz5WkauwJe89Bn8FZldkcyda7bNwDK1ic',
-		'L2e5lfH2VDvEm2WOh0dJmzQaehORDT8CfCotaOcf',
-		'08USmh2H2cOeAuQ3sCCLgzd30giHjfkhvsicUPPf')
-	API_KEY = random.choice(api_keys)
+def runResilience(runID, outputPath, api_key):
 	root_url = 'https://developer.nrel.gov/api/reopt'
-	post_url = root_url + '/v2/outagesimjob/?api_key=' + API_KEY
-	results_url = root_url + '/v2/job/<RUN_ID>/resilience_stats/?api_key=' + API_KEY
+	post_url = root_url + '/v2/outagesimjob/?api_key=' + api_key
+	results_url = root_url + '/v2/job/<RUN_ID>/resilience_stats/?api_key=' + api_key
 	response = requests.post(post_url, json={'run_uuid': runID, 'bau': False})
 	raise_if_unsuccessful(response, outputPath)
 	#logger.log.info(f'Status code: {response.status_code} - url: {post_url}')
 	run_id = json.loads(response.text)['run_uuid']
 	response = results_poller.rez_poller(url=results_url.replace('<RUN_ID>', run_id))
 	response_json = json.loads(response.text)
-	response_json['api_key'] = API_KEY
+	response_json['api_key'] = api_key
 	raise_if_unsuccessful(response, outputPath)
 	with open(outputPath, 'w') as f:
 		json.dump(response_json, f, indent=4)
@@ -69,26 +61,28 @@ def raise_if_unsuccessful(response, outputPath):
 	if response_json.get('messages') is not None and response_json.get('messages').get('error') is not None:
 		if response_json['messages'].get('input_errors') is not None:
 			#logger.log.error(f'Status code: {response.status_code} - url: {response.url}')
-			#logger.log.warning((f'Warning: unsuccessful response from {response.url} did not start a scenario. This is probably because the submitted inputs were invaild.'))
+			#logger.log.error(f'Warning: unsuccessful response from {response.url}')
+			#logger.log.error(f'{response_json["messages"]["error"]}: {response_json["messages"]["input_errors"]}')
 			with open(outputPath, 'w') as f:
 				json.dump(response_json, f, indent=4)
 			raise Exception(f'{response_json["messages"]["error"]}: {response_json["messages"]["input_errors"]}')
 		else:
 			#logger.log.error(f'Status code: {response.status_code} - url: {response.url}')
-			#logger.log.warning((f'Warning: response from {response.url} did not start a scenario. This is probably because the submitted inputs were invaild.'))
+			#logger.log.error(f'Warning: unsuccessful response from {response.url}')
+			#logger.log.error(f'{response_json["messages"]["error"]}')
 			with open(outputPath, 'w') as f:
 				json.dump(response_json, f, indent=4)
 			raise Exception(f'{response_json["messages"]["error"]}')
 	if not response.ok:
 		#logger.log.error(f'Status code: {response.status_code} - url: {response.url}')
-		#logger.log.warning((f'Warning: response from {response.url} did not start a scenario. This is probably because the submitted inputs were invaild.'))
+		#logger.log.error(f'Warning: unsuccessful response from {response.url}')
 		with open(outputPath, 'w') as f:
 			json.dump(response_json, f, indent=4)
 		raise Exception(response_json)
 
 
 def _test():
-	run('Scenario_POST40.json', 'results_S40.json')
+	run('Scenario_POST40.json', 'results_S40.json', random.choice(REOPT_API_KEYS))
 	with open('results_S40.json') as jsonFile:
 		results = json.load(jsonFile)
 	test_ID = results['outputs']['Scenario']['run_uuid']

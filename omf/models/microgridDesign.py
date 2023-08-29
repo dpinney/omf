@@ -301,12 +301,12 @@ def work(modelDir, inputDict):
 			json.dump(scenario, jsonFile)
 
 		# Run REopt API script
-		REopt.run(pJoin(modelDir, 'Scenario_test_POST.json'), pJoin(modelDir, 'results.json'))
+		REopt.run(pJoin(modelDir, 'Scenario_test_POST.json'), pJoin(modelDir, 'results.json'), inputDict['api_key'])
 		with open(pJoin(modelDir, 'results.json')) as jsonFile:
 			results = json.load(jsonFile)
 		
 		runID = results['outputs']['Scenario']['run_uuid']
-		REopt.runResilience(runID, pJoin(modelDir, 'resultsResilience.json'))
+		REopt.runResilience(runID, pJoin(modelDir, 'resultsResilience.json'), inputDict['api_key'])
 		with open(pJoin(modelDir, 'resultsResilience.json')) as jsonFile:
 			resultsResilience = json.load(jsonFile)
 
@@ -799,7 +799,8 @@ def new(modelDir):
 		"value_of_lost_load": "100",
 		"solarCanCurtail": True,
 		"solarCanExport": True,
-		"dieselOnlyRunsDuringOutage": True
+		"dieselOnlyRunsDuringOutage": True,
+		"api_key": "WhEzm6QQQrks1hcsdN0Vrd56ZJmUyXJxTJFg6pn9"
 	}
 	creationCode = __neoMetaModel__.new(modelDir, defaultInputs)
 	try:
