@@ -7,11 +7,13 @@ import { Modal } from './modal.js';
 // - Use voltDumpOlinBarre.csv, currDumpOlinBarre.csv and Olin Barre Fault.omd as examples
 
 class ColorModal { // implements ModalInterface, ObserverInterface
-    #colorFiles;    // - Object of ColorFiles
-    #controller;    // - ControllerInterface instance
-    #modal;         // - Modal instance
-    #observables;   // - An array of ObservableInterface instances
-    #removed;       // - Whether this ColorModal instance has already been deleted
+    #colorFiles;            // - Object of ColorFiles
+    #selectedColorFilename; // - The name of the file that contains the information for the currently applied coloring
+    #selectedColorMapIndex; // - The 0-based index of the column in the color file for the currently applied coloring
+    #controller;            // - ControllerInterface instance
+    #modal;                 // - Modal instance
+    #observables;           // - An array of ObservableInterface instances
+    #removed;               // - Whether this ColorModal instance has already been deleted
 
     /**
      * @param {Array} observables - an array of ObservableInterface instances
@@ -25,6 +27,8 @@ class ColorModal { // implements ModalInterface, ObserverInterface
             throw Error('"controller" argument must be instanceof FeatureController.');
         }
         this.#colorFiles = {};
+        this.#selectedColorFilename = null;
+        this.#selectedColorMapIndex = null;
         this.#controller = controller;
         this.#modal = null;
         this.#observables = observables;
@@ -193,22 +197,28 @@ class ColorModal { // implements ModalInterface, ObserverInterface
             let span = document.createElement('span');
             span.textContent = 'Color';
             colorButton.appendChild(span);
-            colorButton.addEventListener('click', () => this.#applyColorMap(colorFile, colorFile.getColorMaps()[select.value]));
+            colorButton.addEventListener('click', () => {
+                const colorMap = colorFile.getColorMaps()[select.value];
+                this.#applyColorMap(colorFile, colorMap);
+                this.#selectedColorFilename = colorFile.getFilename();
+                this.#selectedColorMapIndex = colorMap.getColumnIndex();
+            });
             const removeButton = document.createElement('button');
             removeButton.classList.add('horizontalFlex', 'centerMainAxisFlex', 'centerCrossAxisFlex', 'fullWidth', 'delete');
             span = document.createElement('span');
             span.textContent = 'Remove';
             removeButton.appendChild(span);
-            const that = this;
-            removeButton.addEventListener('click', function() {
+            removeButton.addEventListener('click', () => {
                 if (attachments.hasOwnProperty('coloringFiles')) {
                     const filename = colorFile.getFilename();
                     delete attachments.coloringFiles[filename];
-                    delete that.#colorFiles[filename];
-                    that.refreshContent();
+                    delete this.#colorFiles[filename];
+                    this.refreshContent();
                     if (Object.keys(attachments.coloringFiles).length === 0) {
                         delete attachments.coloringFiles;
                     }
+                    this.#selectedColorFilename = null;
+                    this.#selectedColorMapIndex = null;
                 }
             });
             fileListModal.insertTBodyRow([colorFile.getFilename(), select, checkbox, colorButton, removeButton])
@@ -305,10 +315,20 @@ class ColorModal { // implements ModalInterface, ObserverInterface
                     // - This if-statement is just in case the colorOnLoadColumnIndex value is invalid for some reason
                     if (colorMap instanceof ColorMap) {
                         this.#applyColorMap(colorFile, colorMap);
+                        this.#selectedColorFilename = colorFile.getFilename();
+                        this.#selectedColorMapIndex = colorMap.getColumnIndex();
                     }
                 }
             }
         }
+        // - Add map event listener to re-apply coloring after hide and show
+        LeafletLayer.map.on('overlayadd', (layerControlEvent) => {
+            if (this.#selectedColorFilename !== null && this.#selectedColorMapIndex !== null) {
+                const colorFile = this.#colorFiles[this.#selectedColorFilename];
+                const colorMap = this.#colorFiles[this.#selectedColorFilename].getColorMaps()[this.#selectedColorMapIndex];
+                this.#applyColorMap(colorFile, colorMap);
+            }
+        });
     }
 
     // ********************
@@ -427,6 +447,8 @@ class ColorModal { // implements ModalInterface, ObserverInterface
                 }
             });
         });
+        this.#selectedColorFilename = null;
+        this.#selectedColorMapIndex = null;
     }
 }
 
@@ -458,7 +480,7 @@ class ColorFile {
         const headerRow = results.data[0];
         // - i = 1 because the first column contains names, not numeric values
         for (let i = 1; i < headerRow.length; i++) {
-            const cm = new ColorMap(headerRow[i].toString());
+            const cm = new ColorMap(headerRow[i].toString(), i);
             this.#colorMaps[i] = cm;
         }
         for (let i = 1; i < results.data.length; i++) {
@@ -488,18 +510,23 @@ class ColorFile {
 class ColorMap {
 
     #columnName;
+    #columnIndex;
     #nameToValue;
     static viridisColors = ['#440154', '#482173', '#433e85', '#38588c', '#2d708e', '#25858e', '#1e9b8a', '#2ab07f', '#52c569', '#86d549', '#c2df23', '#fde725'];
 
     /**
      * @param {string} columnName
      */
-    constructor(columnName) {
+    constructor(columnName, columnIndex) {
         if (typeof columnName !== 'string') {
             throw TypeError('"columnName" argument must be typeof string.');
         }
+        if (typeof columnIndex !== 'number') {
+            throw TypeError('"columnIndex" argument must be typeof number.');
+        }
         this.#columnName = columnName;
         this.#nameToValue = {};
+        this.#columnIndex = columnIndex;
     }
 
     // ********************
@@ -597,6 +624,10 @@ class ColorMap {
 
     getColumnName() {
         return this.#columnName;
+    }
+
+    getColumnIndex() {
+        return this.#columnIndex;
     }
 
     /**
