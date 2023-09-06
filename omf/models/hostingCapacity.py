@@ -124,7 +124,7 @@ def new(modelDir):
 		"mohcaAlgorithm": 'sandia1',
 		"inputDataFileName": meter_file_name,
 		"inputDataFileContent": meter_file_contents,
-		"feederName1": 'ieee37.dss',
+		"feederName1": 'iowa240c1.clean.dss',
 		"traditionalHCSteps": 10,
 		"optionalCircuitFile": 'on',
 		"traditionalHCkW": 1
