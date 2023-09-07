@@ -4,7 +4,7 @@ from os.path import join as pJoin
 import plotly as py
 import plotly.express as px
 import plotly.graph_objects as go
-from plotly.subplots import make_subplots
+# from plotly.subplots import make_subplots
 import pandas as pd
 import numpy as np
 
@@ -13,6 +13,7 @@ import omf
 from omf.models import __neoMetaModel__
 from omf.models.__neoMetaModel__ import *
 from omf.solvers import opendss
+from omf.solvers import mohca_cl
 
 # Model metadata:
 tooltip = "Calculate hosting capacity using traditional and/or AMI-based methods."
@@ -20,21 +21,20 @@ modelName, template = __neoMetaModel__.metadata(__file__)
 hidden = False
 
 def bar_chart_coloring( row ):
-  color = 'black'
-  if row['thermal_violation'] and not row['voltage_violation']:
-    color = 'orange'
-  elif not row['thermal_violation'] and row['voltage_violation']:
-    color = 'yellow'
-  elif not row['thermal_violation'] and not row['voltage_violation']:
-    color = 'green'
-  else:
-    color = 'red'
-  return color
+	color = 'black'
+	if row['thermal_violation'] and not row['voltage_violation']:
+		color = 'orange'
+	elif not row['thermal_violation'] and row['voltage_violation']:
+		color = 'yellow'
+	elif not row['thermal_violation'] and not row['voltage_violation']:
+		color = 'green'
+	else:
+		color = 'red'
+	return color
 
 def work(modelDir, inputDict):
 	outData = {}
 	# mohca data-driven hosting capacity
-	import mohca_cl
 	with open(pJoin(modelDir,inputDict['inputDataFileName']),'w', newline='') as pv_stream:
 		pv_stream.write(inputDict['inputDataFileContent'])
 	inputPath = pJoin(modelDir, inputDict['inputDataFileName'])
@@ -67,11 +67,13 @@ def work(modelDir, inputDict):
 		traditionalHCFigure = px.bar( tradHCDF, x='bus', y='max_kw', barmode='group', color='plot_color', color_discrete_map={ 'red': 'red', 'orange': 'orange', 'green': 'green', 'yellow': 'yellow'}, template='simple_white' )
 		traditionalHCFigure.update_xaxes(categoryorder='array', categoryarray=tradHCDF.bus.values)
 		colorToKey = {'orange':'thermal_violation', 'yellow': 'voltage_violation', 'red': 'both_violation', 'green': 'no_violation'}
-		traditionalHCFigure.for_each_trace(lambda t: t.update(name = colorToKey[t.name],
-                                      legendgroup = colorToKey[t.name],
-                                      hovertemplate = t.hovertemplate.replace(t.name, colorToKey[t.name])
-                                     )
-                  )
+		traditionalHCFigure.for_each_trace(
+			lambda t: t.update(
+				name = colorToKey[t.name],
+				legendgroup = colorToKey[t.name],
+				hovertemplate = t.hovertemplate.replace(t.name, colorToKey[t.name])
+				)
+			)
 		tradHCDF.drop(tradHCDF.columns[len(tradHCDF.columns)-1], axis=1, inplace=True)
 		omf.geo.map_omd(pJoin(modelDir, feederName), modelDir, open_browser=False )
 		outData['traditionalHCMap'] = open( pJoin( modelDir, "geoJson_offline.html"), 'r' ).read()
@@ -89,7 +91,7 @@ def work(modelDir, inputDict):
 
 def runtimeEstimate(modelDir):
 	''' Estimated runtime of model in minutes. '''
-	return 0.5
+	return 1.0
 
 def new(modelDir):
 	''' Create a new instance of this model. Returns true on success, false on failure. '''
