@@ -4,7 +4,7 @@ from os.path import join as pJoin
 import plotly as py
 import plotly.express as px
 import plotly.graph_objects as go
-from plotly.subplots import make_subplots
+# from plotly.subplots import make_subplots
 import pandas as pd
 import numpy as np
 
@@ -13,6 +13,7 @@ import omf
 from omf.models import __neoMetaModel__
 from omf.models.__neoMetaModel__ import *
 from omf.solvers import opendss
+from omf.solvers import mohca_cl
 
 # Model metadata:
 tooltip = "Calculate hosting capacity using traditional and/or AMI-based methods."
@@ -57,7 +58,6 @@ def colorby( hc_color_dict ):
 def work(modelDir, inputDict):
 	outData = {}
 	# mohca data-driven hosting capacity
-	import mohca_cl
 	with open(pJoin(modelDir,inputDict['inputDataFileName']),'w', newline='') as pv_stream:
 		pv_stream.write(inputDict['inputDataFileContent'])
 	inputPath = pJoin(modelDir, inputDict['inputDataFileName'])
