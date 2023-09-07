@@ -44,3 +44,4 @@ OpenDSSDirect.py[extras]
 seaborn
 pandapower==2.10.1
 matpowercaseframes
+fire
