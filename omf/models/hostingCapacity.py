@@ -31,29 +31,6 @@ def bar_chart_coloring( row ):
     color = 'red'
   return color
 
-def colorby( hc_color_dict ):
-	''' generate a colorby CSV/JSON that works with omf.geo map interface.
-	To use, set omd['attachments'] = function JSON output'''
-	attachments_keys = {
-		"coloringFiles": {
-			"microgridColoring.csv": {
-				"csv": "<content>",
-				"colorOnLoadColumnIndex": "1" # color by default
-			}
-		}
-	}
-	hc_keys = hc_color_dict.keys()
-	color_step = float(1/len(hc_keys))
-	output_csv = 'bus,color\n'
-	for i, hc_key in enumerate(hc_color_dict):
-		my_color = i * color_step
-		hc_ob = hc_color_dict[hc_key]
-		all_items = hc_ob['loads'] + hc_ob['gen_obs_existing'] + [hc_ob['gen_bus']]
-		for item in all_items:
-			output_csv += item + ',' + str(my_color) + '\n'
-	attachments_keys['coloringFiles']['hostingCapColoring.csv']['csv'] = output_csv
-	return attachments_keys
-
 def work(modelDir, inputDict):
 	outData = {}
 	# mohca data-driven hosting capacity
@@ -124,7 +101,7 @@ def new(modelDir):
 		"mohcaAlgorithm": 'sandia1',
 		"inputDataFileName": meter_file_name,
 		"inputDataFileContent": meter_file_contents,
-		"feederName1": 'iowa240c1.clean.dss',
+		"feederName1": 'ieee37.dss',
 		"traditionalHCSteps": 10,
 		"optionalCircuitFile": 'on',
 		"traditionalHCkW": 1
