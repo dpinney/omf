@@ -9,6 +9,7 @@ import tempfile
 import networkx as nx
 import omf
 from collections import OrderedDict
+from collections import defaultdict
 
 def cyme_to_dss(cyme_dir, out_path, inter_dir=None):
 	''' Converts cyme txt files into an opendss file with nrel/ditto.
@@ -48,11 +49,31 @@ def dss_to_gld(opendss_path, out_path, inter_dir=None):
 	os.system(cmd)
 	dss_to_clean_via_save(f'{tdir}/Master.dss', out_path)
 
-def dss_to_clean_via_save(dss_file, clean_out_path, add_pf_syntax=True, clean_up=False):
+def fix_repeated_keys(line_str):
+	''' Take a DSS transformer line and merge the repeated keys.'''
+	line = line_str.split(' ')
+	verb = line[0]
+	pairs = line[1:]
+	pair_pairs = [p.split('=') for p in pairs]
+	d = defaultdict(list)
+	for k, v in pair_pairs:
+		d[k].append(v)
+	out_str = f'{verb} '
+	for k,v in d.items():
+		if len(v) == 1:
+			out_str = out_str + f'{k}={v[0]} '
+		elif len(v)	> 1:
+			if k == 'wdg':
+				continue #drop wdg keys
+			if k == '%r':
+				k = '%rs'
+			out_str = out_str + f'{k}=[{",".join(v)}] '
+	return out_str
+
+def dss_to_clean_via_save(dss_file, clean_out_path, add_pf_syntax=True, clean_up=False, fix_rptd_keys=False):
 	'''Updated function for OpenDSS v1.7.4 which does everything differently from earlier versions...
 	Converts raw OpenDSS circuit definition files to the *.clean.dss syntax required by OMF.
 	This version uses the opendss save functionality to better preserve dss syntax.'''
-	#TODO: Fix repeated wdg= keys!?!?!?
 	# Execute opendss's save command reliably on a circuit. opendssdirect fails at this.
 	import os, re, shutil, subprocess
 	dirname = os.path.dirname(dss_file)
@@ -115,6 +136,14 @@ def dss_to_clean_via_save(dss_file, clean_out_path, add_pf_syntax=True, clean_up
 	if add_pf_syntax:
 		powerflow_slug = '\n\n!powerflow code\nset maxiterations=1000\nset maxcontroliter=1000\ncalcv\nsolve\nshow quantity=voltage'
 		clean_out = clean_out + powerflow_slug
+	# Optional: Fix repeated wdg=X keys
+	if fix_rptd_keys:
+		cleaner_out = ''
+		for line in clean_out.split('\n'):
+			if 'transformer' in line:
+				line = fix_repeated_keys(line)
+			cleaner_out += line + '\n'
+		clean_out = cleaner_out
 	# Optional: remove intermediate files and write a single clean file.
 	if clean_up:
 		shutil.rmtree(dss_folder_path, ignore_errors=True)
@@ -158,7 +187,6 @@ def dssToTree(pathToDssOrString, is_path=True):
 			#HACK: only support white space separation of attributes.
 			contents[i] = line.split()
 			#HACK: only support = assignment of values.
-			from collections import OrderedDict 
 			ob = OrderedDict() 
 			ob['!CMD'] = contents[i][0]
 			if len(contents[i]) > 1:
@@ -563,10 +591,16 @@ def getDssCoordinates(omdFilePath, outFilePath):
 def _testsFull():
 	from omf.solvers.opendss import getVoltages, voltageCompare
 	import pandas as pd
+	rpt_key_lines = [
+		'new object=transformer.t86066_a phases=1 windings=2 xhl=2 buses=[pc-59734.1.0,t86066.1.0] conns=[wye,wye] kvs=[7.2,0.12] kvas=[15,15] taps=[1,1] wdg=1 %r=0 rdcohms=0 wdg=2 %r=0 rdcohms=0',
+		'new object=transformer.reg570190_c phases=1 windings=2 xhl=1e-6 buses=[rb133.3,reg570190.3] conns=[wye,wye] kvs=[7.2,7.2] kvas=[4723.2,4723.2] taps=[1,1] wdg=1 %r=1e-6 rdcohms=9.329269e-8 wdg=2 %r=1e-6 rdcohms=9.329269e-8 numtaps=1000 maxtap=1.1 mintap=0.9'
+	]
+	for line_str in rpt_key_lines:
+		out_str = fix_repeated_keys(line_str)
 	FNAMES =  ['ieee37.clean.dss', 'ieee123_solarRamp.clean.dss', 'iowa240.clean.dss', 'ieeeLVTestCase.clean.dss', 'ieee8500-unbal_no_fuses.clean.dss']
 	for fname in FNAMES:
 		fpath = omf.omfDir + '/solvers/opendss/' + fname
-		print('!!!!!!!!!!!!!! dssConver.py testing: ',fpath,' !!!!!!!!!!!!!!')
+		print('!!!!!!!!!!!!!! dssConvert.py testing: ',fpath,' !!!!!!!!!!!!!!')
 		# Roundtrip conversion test
 		errorLimit = 0.01
 		startvolts = getVoltages(fpath, keep_output=False)
