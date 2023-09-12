@@ -93,21 +93,21 @@
 	{% if modelStatus == 'finished' %}
 	<style>td, th {padding:7 0 5 20;text-align: left;font-size:0.8em; border: 1px solid #cccccc;} </style>
 	<div id="output">
-		<p class="reportTitle">Mohca Hosting Capacity Distribution</p>
+		<p class="reportTitle">AMI-Based Hosting Capacity Distribution</p>
 		<div id="mohcaHistogramChart" class="tightContent">
 			<div id="mohcaHistogramChart" style="width:1000px"></div>
 			<script type="text/javascript">
 				Plotly.newPlot("mohcaHistogramChart", JSON.parse( allOutputData["mohcaHistogramFigure"]) )
 			</script>
 		</div>
-		<p class="reportTitle">Mohca Hosting Capacity By Bus</p>
+		<p class="reportTitle">AMI-Based Hosting Capacity By Bus</p>
 		<div id="mohcaBarChart" class="tightContent">
 			<div id="mohcaBarChart" style="width:1000px"></div>
 			<script type="text/javascript">
 				Plotly.newPlot("mohcaBarChart", JSON.parse( allOutputData["mohcaBarChartFigure"]) )
 			</script>
 		</div>
-		<p class="reportTitle">Mohca Full Hosting Capacity Data Table</p>
+		<p class="reportTitle">AMI-Based Full Hosting Capacity Data Table</p>
 		<div id="mohcaHostingCapacityTable" class="tightContent">
 			<table style='margin:5px;width:990px'>
 				<tr>

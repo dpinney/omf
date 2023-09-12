@@ -38,6 +38,11 @@ def work(modelDir, inputDict):
 	with open(pJoin(modelDir,inputDict['inputDataFileName']),'w', newline='') as pv_stream:
 		pv_stream.write(inputDict['inputDataFileContent'])
 	inputPath = pJoin(modelDir, inputDict['inputDataFileName'])
+	try:
+		csvValidateAndLoad(file_input=inputPath, modelDir=modelDir, header=0, nrows=None, ncols=1, dtypes=[], return_type='df', ignore_nans=False, save_file=None, ignore_errors=False )
+	except:
+		errorMessage = "AMI-Data CSV file is incorrect format. Please see valid format definition at <a target='_blank' href='https://github.com/dpinney/omf/wiki/Models-~-hostingCapacity#meter-data-input-csv-file-format'>OMF Wiki hostingCapacity</a>"
+		raise Exception(errorMessage)
 	outputPath = pJoin(modelDir, 'mohcaOutput.csv')
 	mohcaOutput = []
 	if inputDict[ "mohcaAlgorithm" ] == "sandia1":
