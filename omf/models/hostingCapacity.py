@@ -7,6 +7,7 @@ import plotly.graph_objects as go
 # from plotly.subplots import make_subplots
 import pandas as pd
 import numpy as np
+import pathlib
 
 # OMF imports
 import omf
@@ -31,6 +32,10 @@ def bar_chart_coloring( row ):
 	else:
 		color = 'red'
 	return color
+
+def createColorCSV( df ):
+	new_df = df[['bus','max_kw']]
+	new_df.to_csv('color_by.csv', index=False)
 
 def work(modelDir, inputDict):
 	outData = {}
@@ -64,7 +69,8 @@ def work(modelDir, inputDict):
 	if ( circuitFileStatus == 'on' ):
 		feederName = [x for x in os.listdir(modelDir) if x.endswith('.omd')][0]
 		inputDict['feederName1'] = feederName
-		tree = opendss.dssConvert.omdToTree(pJoin(modelDir, feederName))
+		path_to_omd = pJoin(modelDir, feederName)
+		tree = opendss.dssConvert.omdToTree(path_to_omd)
 		opendss.dssConvert.treeToDss(tree, pJoin(modelDir, 'circuit.dss'))
 		traditionalHCResults = opendss.hosting_capacity_all(pJoin(modelDir, 'circuit.dss'), int(inputDict["traditionalHCSteps"]), int(inputDict["traditionalHCkW"]))
 		tradHCDF = pd.DataFrame(traditionalHCResults)
@@ -80,7 +86,23 @@ def work(modelDir, inputDict):
 				)
 			)
 		tradHCDF.drop(tradHCDF.columns[len(tradHCDF.columns)-1], axis=1, inplace=True)
-		omf.geo.map_omd(pJoin(modelDir, feederName), modelDir, open_browser=False )
+		createColorCSV(tradHCDF)
+		attachment_keys = {
+		"coloringFiles": {
+			"color_by.csv": {
+				"csv": "<content>",
+				"colorOnLoadColumnIndex": "1"
+			}
+		}
+		}
+		data = pathlib.Path( pJoin(modelDir,'color_by.csv') ).read_text()
+		attachment_keys['coloringFiles']['color_by.csv']['csv'] = data
+		omd = json.load(open(path_to_omd))
+		new_path = './color_test.omd'
+		omd['attachments'] = attachment_keys
+		with open(new_path, 'w+') as out_file:
+				json.dump(omd, out_file, indent=4)
+		omf.geo.map_omd(new_path, modelDir, open_browser=False )
 		outData['traditionalHCMap'] = open( pJoin( modelDir, "geoJson_offline.html"), 'r' ).read()
 		outData['traditionalGraphData'] = json.dumps( traditionalHCFigure, cls=py.utils.PlotlyJSONEncoder )
 		outData['traditionalHCTableHeadings'] = tradHCDF.columns.values.tolist()
