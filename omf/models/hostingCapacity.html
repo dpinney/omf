@@ -130,7 +130,7 @@
 		<script>
 			var mapContent = allOutputData["traditionalHCMap"]
 			var iframe = document.createElement('iframe');
-			iframe.style = 'width:1000px; height:800px'
+			iframe.style = 'width:1000px; height:800px; border-radius:8px;'
 			document.getElementById('traditionalHCMap').appendChild(iframe);
 			iframe.contentWindow.document.open();
 			iframe.contentWindow.document.write(mapContent);
