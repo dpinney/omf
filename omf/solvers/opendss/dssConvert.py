@@ -70,7 +70,7 @@ def fix_repeated_keys(line_str):
 			out_str = out_str + f'{k}=[{",".join(v)}] '
 	return out_str
 
-def dss_to_clean_via_save(dss_file, clean_out_path, add_pf_syntax=True, clean_up=False, fix_rptd_keys=False):
+def dss_to_clean_via_save(dss_file, clean_out_path, add_pf_syntax=True, clean_up=False, fix_rptd_keys=True):
 	'''Updated function for OpenDSS v1.7.4 which does everything differently from earlier versions...
 	Converts raw OpenDSS circuit definition files to the *.clean.dss syntax required by OMF.
 	This version uses the opendss save functionality to better preserve dss syntax.'''
