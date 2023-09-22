@@ -25,7 +25,7 @@
 	<div id="input" class="content">
 		<form name="inputForm" action="/runModel/" onsubmit="event.preventDefault(); return isFormValid();" method="post">
 			<div class="shortInput">
-				<label>Model Type <a href="https://github.com/dpinney/omf/wiki/Models-~-cyberInverters" target="blank">Help?</a></label>
+				<label>Model Type <a href="https://github.com/dpinney/omf/wiki/Models-~-restoration" target="blank">Help?</a></label>
 				<input type="text" id="modelType" name="modelType" value="{{allInputDataDict.modelType}}" readonly/>
 			</div>
 			<div class="shortInput">
@@ -50,7 +50,7 @@
 				<p class="inputSectionHeader">System Specifications</p>
 			</div>
 			<hr>
-			<div class="shortInput">
+			<div class="shortInput" style="display:none">
 				<label>Date Input (YYYY-MM-DDTHH:mm:SSZ)</label>
 				<input type="text" id="date" name="date" value="{{allInputDataDict.date}}" required="required" pattern="^\d\d\d\d-\d\d-\d\dT\d\d:\d\d:\d\d(Z|(\+|-)\d\d:\d\d)$"/>
 			</div>
@@ -62,9 +62,37 @@
 				<input type="text" id="feederName1" name="feederName1" value="{{allInputDataDict.feederName1}}">
 			</div>
 			<div class="shortInput">
-				<label class="tooltip">Example File Input<span class="classic">Import a [format extension] file that describes [insert content]</span></label>
+				<label class="tooltip">Outage File Input<span class="classic">Import a .csv file that describes [insert content]</span></label>
 				<div>{{ insert_file_upload_block('exampleFileName','exampleFileContent') }}</div>
+			</div class="shortInput">
+			<div>
 			</div>
+			<div class="shortInput">
+				<label>Simulate outage data instead of using data from <u>Example File Input</u>?</label>
+				<input type="checkbox"  id="simOutageBool" name="simOutageBool" {% if allInputDataDict.simOutageBool %}checked{% endif %}/>
+			</div>
+			<div class="shortInput">
+				<label class="tooltip">Simulation Troubled Equipment<span class="classic">Downline load outages are simulated through probabilistic equipment failure in selected equipment types</span></label>
+				<br>
+				<input type="checkbox"  id="simLinesBool" name="simLinesBool" {% if allInputDataDict.simLinesBool %}checked{% endif %}/>
+				<label for="simLinesBool"> Lines</label>
+				<br>
+				<input type="checkbox"  id="simTransformersBool" name="simTransformersBool" {% if allInputDataDict.simTransformersBool %}checked{% endif %}/>
+				<label for="simTransformersBool"> Transformers</label>
+			</div>
+			<div class="shortInput">
+				<label class="tooltip">Simulation Random Seed<span class="classic">If "None" is selected, the simulation will be different each run. If a number is selected, all simlations on a particular circuit with that seed and the same <u>Simulation Troubled Equipment</u> will be the same</span></label>
+				<select id="simRandomSeed" name="simRandomSeed">
+					<option value="None" {% if allInputDataDict.simRandomSeed == 'None' %}selected{% endif %}>None</option>
+					<option value="1" {% if allInputDataDict.simRandomSeed == '1' %}selected{% endif %}>1</option>
+					<option value="2" {% if allInputDataDict.simRandomSeed == '2' %}selected{% endif %}>2</option>
+					<option value="3" {% if allInputDataDict.simRandomSeed == '3' %}selected{% endif %}>3</option>
+					<option value="4" {% if allInputDataDict.simRandomSeed == '4' %}selected{% endif %}>4</option>
+					<option value="5" {% if allInputDataDict.simRandomSeed == '5' %}selected{% endif %}>5</option>
+				</select>
+			</div>
+
+
 			
 			
 			<div class="wideInput">
@@ -72,7 +100,7 @@
 			</div>
 			<hr>
 			<div class="shortInput">
-				<label class="tooltip">Disruption Speed Interval in TimeSteps<span class="classic">Disruption Speed is calculated as the difference between Outage Incidence at the current time and this number of timesteps prior, divided by the time between them. If too high a value is provided, the maximum number of timesteps-1 is used. </span></label>
+				<label class="tooltip">Disruption Speed Lookback Interval in TimeSteps<span class="classic">Disruption Speed is calculated as the difference between Outage Incidence at the current time and this number of timesteps prior, divided by the time between them. If too high a value is provided, the maximum number of timesteps-1 is used. </span></label>
 				<input type="number" id="timeStepsInInterval" name="timeStepsInInterval" step="1" min="1" value="{{allInputDataDict.timeStepsInInterval}}"/>
 			</div>
 			{{ omfModelButtons }}
@@ -159,7 +187,7 @@
 					"marker":{"enabled":true},
 					"color":"blue",
 					"data":disruptionSpeed,
-					"name":"Disruption Speed With No Intervention ("+dSpeedInterval+" min interval)",
+					"name":"Disruption Speed With No Intervention ("+dSpeedInterval+" min lookback interval)",
 					"visible":true
 				}
 				var localHighChart = JSON.parse(JSON.stringify(highChartsTemplate))
