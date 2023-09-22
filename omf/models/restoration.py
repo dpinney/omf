@@ -14,7 +14,7 @@ from omf.comms import createGraph
 modelName, template = __neoMetaModel__.metadata(__file__)
 tooltip = "This is a stub for the creation of new models. Update this description to match your model's purpose."
 hidden = True # Change to False to make visible in the omf's "new model" list
-hidden = False
+#hidden = False
 
 def obDictToDf(propertyName, obTypes, obDict):
 	''' Returns a dataframe constructed by concatenating together series 
