@@ -44,11 +44,11 @@ def rez_poller(url, poll_interval=10):
 
     :param url: results url to poll
     :param poll_interval: seconds
-        420 seconds / 5 seconds = 84 attempts
+        420 seconds / 10 seconds = 42 attempts
     :return: dictionary response (once status is not "Optimizing...")
     """
     key_error_count = 0
-    key_error_threshold = 84
+    key_error_threshold = 42
     status = ""
     #logger.log.info("Polling {} for results with interval of {}s...".format(url, poll_interval))
     while True:
