@@ -68,7 +68,7 @@ class FeatureGraph {
      */
     getObservableExportData(func=null) {
         if (func !== null && typeof func !== 'function') {
-            throw TypeError('"func" argument must be null or a function');
+            throw TypeError('The "func" argument must be null or a typeof "function".');
         }
         if (func === null) {
             func = function(f) {
@@ -201,7 +201,7 @@ class FeatureGraph {
     handleDeletedObservable(observable) {
         // - The function signature above is part of the ObserverInterface API. The implementation below is not
         if (!(observable instanceof Feature)) {
-            throw TypeError('"observable" argument must be instanceof Feature.');
+            throw TypeError('The "observable" argument must be instanceof Feature.');
         }
         const observableKey = observable.getProperty('treeKey', 'meta');
         this.#graph.setNodeAttribute(observableKey, 'visited', true);

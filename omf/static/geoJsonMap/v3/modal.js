@@ -45,10 +45,10 @@ class Modal {
         } else if (banner instanceof Node) {
             this.#bannerElement.replaceChildren(banner);
         } else {
-            throw TypeError('"banner" argument must be a string or Node.');
+            throw TypeError('The "banner" argument must be a string or Node.');
         }
         if (!(styles instanceof Array) && styles !== null) {
-            throw TypeError('"styles" argumet must be an array or null.');
+            throw TypeError('The "styles" argumet must be an array or null.');
         }
         if (styles !== null) {
             this.#bannerElement.classList.value = `div--modalBanner ${styles.join(' ')}`;
@@ -79,10 +79,10 @@ class Modal {
         } else if (title instanceof Node) {
             this.#titleElement.replaceChildren(title);
         } else {
-            throw TypeError('"title" argument must be a string or Node.');
+            throw TypeError('The "title" argument must be a string or Node.');
         }
         if (!(styles instanceof Array) && styles !== null) {
-            throw TypeError('"styles" argument must be an array or null.');
+            throw TypeError('The "styles" argument must be an array or null.');
         }
         if (styles !== null) {
             this.#titleElement.classList.add(...styles);
@@ -94,12 +94,12 @@ class Modal {
     /**
      * @param {Array} elements - an array of elements that should occupy a table body row. null elements just append empty <td>/<td> elements
      * @param {string} [position='append'] - the location to insert the tBody row. Can be "prepend", "beforeEnd", or "append"
-     * @param {Array} [styles=null] - any styles that should be applied to the row
+     * @param {(Array|null)} [styles=null] - any styles that should be applied to the row
      * @returns {undefined}
      */
     insertTBodyRow(elements, position='append', styles=null) {
         if (!(styles instanceof Array) && styles !== null) {
-            throw TypeError('"styles" argumet must be an array or null.');
+            throw TypeError('The "styles" argument must be an array or null.');
         }
         if (this.#tableElement === null) {
             this.#createTableElement();    
@@ -145,7 +145,7 @@ class Modal {
      */
     insertTHeadRow(elements, position='append', styles=null) {
         if (!(styles instanceof Array) && styles !== null) {
-            throw TypeError('"styles" argumet must be an array or null.');
+            throw TypeError('The "styles" argumet must be an array or null.');
         }
         if (this.#tableElement === null) {
             this.#createTableElement();
@@ -190,10 +190,10 @@ class Modal {
      */
     addStyleClasses(styles, elementName) {
         if (!(styles instanceof Array)) {
-            throw TypeError('"styles" argument must be an array.');
+            throw TypeError('The "styles" argument must be an array.');
         }
         if (typeof elementName !== 'string') {
-            throw TypeError('"elementName" argument must be a string.');
+            throw TypeError('The "elementName" argument must be a string.');
         }
         switch (elementName) {
             case 'divElement':
@@ -222,7 +222,7 @@ class Modal {
                 }
                 break;
             default:
-                throw Error('"elementName" argument must be "divElement", "bannerElement", "containerElement", "tableElement", or "titleElement".');
+                throw Error('The "elementName" argument must be "divElement", "bannerElement", "containerElement", "tableElement", or "titleElement".');
         }
     }
 
@@ -233,10 +233,10 @@ class Modal {
      */
     removeStyleClass(styles, elementName) {
         if (!(styles instanceof Array)) {
-            throw TypeError('"styles" argument must be an array.');
+            throw TypeError('The "styles" argument must be an array.');
         }
         if (typeof elementName !== 'string') {
-            throw TypeError('"elementName" argument must be a string.');
+            throw TypeError('The "elementName" argument must be a string.');
         }
         switch (elementName) {
             case 'divElement':
@@ -265,7 +265,7 @@ class Modal {
                 }
                 break;
             default:
-                throw Error('"elementName" argument must be "divElement", "bannerElement", "containerElement", "tableElement", or "titleElement".');
+                throw Error('The "elementName" argument must be "divElement", "bannerElement", "containerElement", "tableElement", or "titleElement".');
         }
     }
 
@@ -280,7 +280,7 @@ class Modal {
             throw TypeError('"e" argument must be instanceof Node');
         }
         if (!(styles instanceof Array) && styles !== null) {
-            throw TypeError('"styles" argumet must be an array or null.');
+            throw TypeError('The "styles" argumet must be an array or null.');
         }
         if (styles !== null) {
             e.classList.add(...styles);
@@ -309,13 +309,13 @@ class Modal {
      */
     showProgress(showSpinner=true, bannerText=null, styles=null) {
         if (typeof showSpinner !== 'boolean') {
-            throw TypeError('"showSpinner" argument must be a boolean.');
+            throw TypeError('The "showSpinner" argument must be a boolean.');
         }
         if (typeof bannerText !== 'string' && bannerText !== null) {
-            throw TypeError('"bannerText" argument must be a string or null.');
+            throw TypeError('The "bannerText" argument must be a string or null.');
         }
         if (!(styles instanceof Array) && styles !== null) {
-            throw TypeError('"styles" argument must be an Array or null.');
+            throw TypeError('The "styles" argument must be an Array or null.');
         }
         const outerDiv = document.createElement('div');
         if (showSpinner) {

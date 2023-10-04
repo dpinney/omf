@@ -4,6 +4,8 @@ import { FeatureController } from './featureController.js';
 import { LeafletLayer } from './leafletLayer.js';
 import { Modal } from './modal.js';
 
+// - Test data can be found at omf/scratch/CIGAR/geoJsonLeaflet
+
 class GeojsonModal { // implements ModalInterface, ObserverInterface
     #controller;            // - ControllerInterface instance
     #filenameToLayerGroup;  // - Container for LayerGroups

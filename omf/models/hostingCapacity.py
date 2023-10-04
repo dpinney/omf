@@ -74,6 +74,7 @@ def work(modelDir, inputDict):
 		opendss.dssConvert.treeToDss(tree, pJoin(modelDir, 'circuit.dss'))
 		traditionalHCResults = opendss.hosting_capacity_all(pJoin(modelDir, 'circuit.dss'), int(inputDict["traditionalHCSteps"]), int(inputDict["traditionalHCkW"]))
 		tradHCDF = pd.DataFrame(traditionalHCResults)
+		print(tradHCDF)
 		tradHCDF['plot_color'] = tradHCDF.apply ( lambda row: bar_chart_coloring(row), axis=1 )
 		traditionalHCFigure = px.bar( tradHCDF, x='bus', y='max_kw', barmode='group', color='plot_color', color_discrete_map={ 'red': 'red', 'orange': 'orange', 'green': 'green', 'yellow': 'yellow'}, template='simple_white' )
 		traditionalHCFigure.update_xaxes(categoryorder='array', categoryarray=tradHCDF.bus.values)
@@ -130,10 +131,10 @@ def new(modelDir):
 		"mohcaAlgorithm": 'sandia1',
 		"inputDataFileName": meter_file_name,
 		"inputDataFileContent": meter_file_contents,
-		"feederName1": 'ieee37.dss',
+		"feederName1": 'iowa240.clean.dss',
 		"traditionalHCSteps": 10,
 		"optionalCircuitFile": 'on',
-		"traditionalHCkW": 1
+		"traditionalHCkW": 10
 	}
 	creationCode = __neoMetaModel__.new(modelDir, defaultInputs)
 	try:

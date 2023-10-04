@@ -308,7 +308,7 @@ def hosting_capacity_all(FNAME:str, kwSTEPS:int, kwValue:float, BUS_LIST:list = 
 	''' Generate hosting capacity results for all_buses. '''
 	fullpath = os.path.abspath(FNAME)
 	if not BUS_LIST:
-		gen_buses = get_all_buses(fullpath)
+		gen_buses = get_meter_buses(fullpath)
 	else:
 		gen_buses = BUS_LIST
 	all_output = []
