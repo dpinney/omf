@@ -22,7 +22,7 @@ def work(modelDir, inputDict):
 	# Delete output file every run if it exists
 	outData = {}		
 	# Model operations goes here.
-	outData["output"] = output
+	outData["output"] = "none"
 	# Model operations typically ends here.
 	# Stdout/stderr.
 	outData["stdout"] = "Success"
