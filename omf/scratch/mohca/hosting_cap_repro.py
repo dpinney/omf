@@ -11,6 +11,7 @@ def list_of_dicts_to_dataframe(list_of_dicts):
 modelDir = pathlib.PurePath(omf.omfDir, 'scratch', 'mohca')
 
 # Example of hosting capacity for all buses with loads, i.e. metered buses.
+# fnameDSS = pathlib.PurePath(omf.omfDir, 'data', 'Model', 'admin', 'good work', 'circuit.dss')
 fnameDSS = pathlib.PurePath(omf.omfDir, 'solvers', 'opendss', 'iowa240.clean.dss')
 meter_buses = opendss.get_meter_buses(fnameDSS)
 iowa_hosting_dss = opendss.hosting_capacity_all(fnameDSS, kwSTEPS=10, kwValue=10.0)
