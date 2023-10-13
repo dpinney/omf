@@ -352,6 +352,26 @@ class ColorModal { // implements ModalInterface, ObserverInterface
             throw TypeError('"colorMap" must be instanceof ColorMap.');
         }
         const notFound = [];
+        // - Color everything gray to get rid of default colors
+        for (const ob of this.#controller.observableGraph.getObservables()) {
+            ob.getObservers().filter(ob => ob instanceof LeafletLayer).forEach(ll => {
+                // - Color nodes gray
+                if (Object.values(ll.getLayer()._layers)[0].hasOwnProperty('_icon')) {
+                    const svg = Object.values(ll.getLayer()._layers)[0]._icon.children[0];
+                    this.#colorSvg(svg, {_rgb: [128, 128, 128, 1]});
+                // - Color lines gray
+                } else {
+                    const options = Object.values(ll.getLayer()._layers)[0].options;
+                    if (options.color !== 'gray') {
+                        options.originalColor = options.color;
+                    }
+                    options.color = 'gray';
+                }
+            });
+        }
+        // - Force refresh the map so that the lines change color
+        LeafletLayer.map.setZoom(LeafletLayer.map.getZoom());
+        // - Actually apply colors from color map (only nodes supported right now, I don't have a CSV with lines to color)
         for (const [name, obj] of Object.entries(colorMap.getColorMapping())) {
             try {
                 const key = this.#controller.observableGraph.getKeyForComponent(name);
@@ -439,16 +459,25 @@ class ColorModal { // implements ModalInterface, ObserverInterface
     #resetColors() {
         this.#controller.observableGraph.getObservables().forEach(observable => {
             observable.getObservers().filter(ob => ob instanceof LeafletLayer).forEach(ll => {
-                // - Only nodes have marker HTMLDivElements
-                const markerDiv = Object.values(ll.getLayer()._layers)[0]._icon;
-                if (markerDiv !== undefined) {
-                    const svg = markerDiv.children[0];
+                // - Un-color nodes
+                if (Object.values(ll.getLayer()._layers)[0].hasOwnProperty('_icon')) {
+                    const svg = Object.values(ll.getLayer()._layers)[0]._icon.children[0];
                     svg.style.removeProperty('fill');
+                // - Un-color lines
+                } else {
+                    const options = Object.values(ll.getLayer()._layers)[0].options;
+                    if (options.hasOwnProperty('originalColor')) {
+                        options.color = options.originalColor;
+                    } else {
+                        options.color = 'gray';
+                    }
                 }
             });
         });
         this.#selectedColorFilename = null;
         this.#selectedColorMapIndex = null;
+        // - Force refresh the map so that the lines change color
+        LeafletLayer.map.setZoom(LeafletLayer.map.getZoom());
     }
 }
 
