@@ -118,6 +118,8 @@ class Feature {
                     clone.properties.treeProps.name = clone.properties.treeProps.CMD_command;
                     delete clone.properties.treeProps.CMD_command;
                 }
+                // - geo_py_validation_status should never be written back to any file
+                delete clone.properties.treeProps['geo_py_validation_status'];
             }
         }
         return clone;
