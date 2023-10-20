@@ -1,4 +1,4 @@
-import __init__ 
+from omf.solvers.reopt_jl import __init__ 
 
 #for graphs
 import matplotlib.pyplot as plt

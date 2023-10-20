@@ -2,7 +2,7 @@ module REoptSolver
 
 export run
 
-using REopt, JuMP, JSON, HiGHS #SCIP, Cbc
+using REopt, JuMP, JSON, HiGHS #SCIP #, Cbc
 #Ipopt, ECOS, Clp, GLPK
 
 

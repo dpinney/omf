@@ -2,12 +2,10 @@ import json, time
 import os, platform
 
 #html output visuals
-import test_outputs
+#import test_outputs
+from omf.solvers.reopt_jl import test_outputs
 
 thisDir = os.path.abspath(os.path.dirname(__file__))
-
-##########################
-# (todo: move files to /omf/solvers )
 
 #not currently working : REopt dependency (ArchGDAL) unable to precompile
 #def build_julia_image():
@@ -17,7 +15,7 @@ thisDir = os.path.abspath(os.path.dirname(__file__))
 #            PackageCompiler.precompile("REoptSolver")
 #            ' ''')
 
-# note: list of todos included in PONM source code => consider doing as well
+
 #potential add: boolean to determine if you want to check your install 
 # => improve runtime if running multiple times in a row
 def install_reopt_jl(system : list = platform.system()):
@@ -246,7 +244,7 @@ def get_file_names(path, inputFile, default, convert, outages, solver, solver_in
 #todo: add options to set output path (and outage output path) ?
 #potential optional inputs (for solver): ratio_gap, threads, max_solutions, verbosity
 def run_reopt_jl(path, inputFile="", default=False, convert=True, outages=False, microgrid_only=False,
-                 solver="SCIP", solver_in_filename=True, max_runtime_s=None):
+                 solver="HiGHS", solver_in_filename=True, max_runtime_s=None):
     
     if inputFile == "" and not default:
         print("Invalid inputs: inputFile needed if default=False")
@@ -305,7 +303,7 @@ def runAllSolvers(path, testName, fileName="", default=False, convert=True, outa
  
     return(test_results)
 
-#in order to include this in github automated testing: change _test to _tests
+
 def _test():
     all_tests = []
     all_solvers = [ "HiGHS" ] # "Ipopt", "ECOS", "Clp", "GLPK", "SCIP", "Cbc"
@@ -335,7 +333,6 @@ def _test():
     all_tests.extend(default_tests)
 
     test_outputs.html_comparison(all_tests) # => test_outputs.py (work in progress)
-
 
 if __name__ == "__main__":
     _test()

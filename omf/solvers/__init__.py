@@ -15,3 +15,4 @@ from omf.solvers import saxSequitur
 from omf.solvers import SteinmetzController
 from omf.solvers import VB
 from omf.solvers import mohca_cl
+from omf.solvers import reopt_jl
