@@ -7,8 +7,7 @@ import plotly.graph_objects as go
 # from plotly.subplots import make_subplots
 import pandas as pd
 import numpy as np
-import pathlib
-
+from pathlib import Path
 # OMF imports
 import omf
 from omf.models import __neoMetaModel__
@@ -61,9 +60,9 @@ def work(modelDir, inputDict):
 	mohcaHistogramFigure = px.histogram( mohcaResults, x='voltage_cap_kW', template="simple_white", color_discrete_sequence=["MediumPurple"] )
 	mohcaHistogramFigure.update_layout(bargap=0.5)
 	barChartDF = mohcaResults
-	barChartDF['thermal_cap'] = [7.23, 7.34, 7.45, 7.53, 7.24, 6.24, 7.424, 7.23 ]
-	barChartDF['max_cap_kW'] = np.minimum( barChartDF['voltage_cap_kW'], barChartDF['thermal_cap'])
-	mohcaBarChartFigure = px.bar(barChartDF, x='busname', y=['voltage_cap_kW', 'thermal_cap', 'max_cap_kW'], barmode='group', color_discrete_sequence=["green", "lightblue", "MediumPurple"], template="simple_white" )
+	barChartDF['thermal_cap_kW'] = [7.23, 7.34, 7.45, 7.53, 7.24, 6.24, 7.424, 7.23 ]
+	barChartDF['max_cap_allowed_kW'] = np.minimum( barChartDF['voltage_cap_kW'], barChartDF['thermal_cap_kW'])
+	mohcaBarChartFigure = px.bar(barChartDF, x='busname', y=['voltage_cap_kW', 'thermal_cap_kW', 'max_cap_allowed_kW'], barmode='group', color_discrete_sequence=["green", "lightblue", "MediumPurple"], template="simple_white" )
 	# traditional hosting capacity if they uploaded an omd circuit file and chose to use it.
 	circuitFileStatus = inputDict.get('optionalCircuitFile', 0)
 	if ( circuitFileStatus == 'on' ):
@@ -74,7 +73,6 @@ def work(modelDir, inputDict):
 		opendss.dssConvert.treeToDss(tree, pJoin(modelDir, 'circuit.dss'))
 		traditionalHCResults = opendss.hosting_capacity_all(pJoin(modelDir, 'circuit.dss'), int(inputDict["traditionalHCSteps"]), int(inputDict["traditionalHCkW"]))
 		tradHCDF = pd.DataFrame(traditionalHCResults)
-		print(tradHCDF)
 		tradHCDF['plot_color'] = tradHCDF.apply ( lambda row: bar_chart_coloring(row), axis=1 )
 		traditionalHCFigure = px.bar( tradHCDF, x='bus', y='max_kw', barmode='group', color='plot_color', color_discrete_map={ 'red': 'red', 'orange': 'orange', 'green': 'green', 'yellow': 'yellow'}, template='simple_white' )
 		traditionalHCFigure.update_xaxes(categoryorder='array', categoryarray=tradHCDF.bus.values)
@@ -96,7 +94,7 @@ def work(modelDir, inputDict):
 			}
 		}
 		}
-		data = pathlib.Path( pJoin(modelDir,'color_by.csv') ).read_text()
+		data = Path( modelDir,'color_by.csv' ).read_text()
 		attachment_keys['coloringFiles']['color_by.csv']['csv'] = data
 		omd = json.load(open(path_to_omd))
 		new_path = './color_test.omd'
@@ -124,7 +122,7 @@ def runtimeEstimate(modelDir):
 def new(modelDir):
 	''' Create a new instance of this model. Returns true on success, false on failure. '''
 	meter_file_name = 'mohcaInputCustom.csv'
-	meter_file_path = pJoin(omf.omfDir,'static','testFiles', meter_file_name)
+	meter_file_path = Path(omf.omfDir,'static','testFiles', meter_file_name)
 	meter_file_contents = open(meter_file_path).read()
 	defaultInputs = {
 		"modelType": modelName,
