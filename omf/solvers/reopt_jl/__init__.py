@@ -3,7 +3,7 @@ import os, platform
 
 #html output visuals
 #import test_outputs
-from omf.solvers.reopt_jl import test_outputs
+#from omf.solvers.reopt_jl import test_outputs
 
 thisDir = os.path.abspath(os.path.dirname(__file__))
 
@@ -332,7 +332,7 @@ def _test():
                                   get_cached=False)
     all_tests.extend(default_tests)
 
-    test_outputs.html_comparison(all_tests) # => test_outputs.py (work in progress)
+    #test_outputs.html_comparison(all_tests) # => test_outputs.py (work in progress)
 
 if __name__ == "__main__":
     _test()

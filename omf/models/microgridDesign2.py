@@ -81,10 +81,10 @@ def work(modelDir, inputDict):
 	analysisYears = int(inputDict['analysisYears'])
 	discountRate = float(inputDict['discountRate'])
 	criticalLoadFactor = float(inputDict['criticalLoadFactor'])
-	solarMacrsOptionYears = float(inputDict['solarMacrsOptionYears'])
-	windMacrsOptionYears = float(inputDict['windMacrsOptionYears'])
-	batteryMacrsOptionYears = float(inputDict['batteryMacrsOptionYears'])
-	dieselMacrsOptionYears = float(inputDict['dieselMacrsOptionYears'])
+	solarMacrsOptionYears = int(inputDict['solarMacrsOptionYears'])
+	windMacrsOptionYears = int(inputDict['windMacrsOptionYears'])
+	batteryMacrsOptionYears = int(inputDict['batteryMacrsOptionYears'])
+	dieselMacrsOptionYears = int(inputDict['dieselMacrsOptionYears'])
 	solarItcPercent = float(inputDict['solarItcPercent'])
 	windItcPercent = float(inputDict['windItcPercent'])
 	batteryItcPercent = float(inputDict['batteryItcPercent'])
@@ -109,8 +109,8 @@ def work(modelDir, inputDict):
 	fuelAvailable = float(inputDict['fuelAvailable'])
 	genExisting = float(inputDict['genExisting'])
 	minGenLoading = float(inputDict['minGenLoading'])
-	outage_start_hour = float(inputDict['outage_start_hour'])
-	outage_end_hour = outage_start_hour + float(inputDict['outageDuration'])
+	outage_start_hour = int(inputDict['outage_start_hour'])
+	outage_end_hour = outage_start_hour + int(inputDict['outageDuration'])
 	if outage_end_hour > 8759:
 		outage_end_hour = 8760
 	value_of_lost_load = float(inputDict['value_of_lost_load'])
@@ -181,59 +181,74 @@ def work(modelDir, inputDict):
 		# Create the input JSON file for REopt
 		# TODO: To use energyCostMonthly, comment out demandCost and energyCost lines in the Scenario JSON
 		scenario = {
-			"Scenario": {
-				"optimality_tolerance_bau": float(inputDict['solverTolerance']),
-				"optimality_tolerance_techs": float(inputDict['solverTolerance']),
+			#"Scenario": {
+				#"optimality_tolerance_bau": float(inputDict['solverTolerance']),
+				#"optimality_tolerance_techs": float(inputDict['solverTolerance']),
 				"Site": {
 					"latitude": latitude,
-					"longitude": longitude,
-					"ElectricTariff": {
-						"wholesale_rate_us_dollars_per_kwh": wholesaleCost,
-						"wholesale_rate_above_site_load_us_dollars_per_kwh": wholesaleCost
-					},
-					"LoadProfile": {
-						"loads_kw": jsonifiableLoad,
-						"year": year
-					},
-					"Financial": {
-						"value_of_lost_load_us_dollars_per_kwh": value_of_lost_load,
-						"analysis_years": analysisYears,
-						"om_cost_escalation_pct": omCostEscalator,
-						"offtaker_discount_pct": discountRate
-					},
-					"PV": {
-						"installed_cost_us_dollars_per_kw": solarCost,
-						"min_kw": solarMin,
-						"can_export_beyond_site_load": solarCanExport,
-						"can_curtail": solarCanCurtail,
-						"macrs_option_years": solarMacrsOptionYears,
-						"federal_itc_pct": solarItcPercent
-					},
-					"Storage": {
-						"installed_cost_us_dollars_per_kw": batteryPowerCost,
-						"installed_cost_us_dollars_per_kwh": batteryCapacityCost,
-						"replace_cost_us_dollars_per_kw": batteryPowerCostReplace,
-						"replace_cost_us_dollars_per_kwh": batteryCapacityCostReplace,
-						"inverter_replacement_year": batteryPowerReplaceYear,
-						"battery_replacement_year": batteryCapacityReplaceYear,
-						"min_kw": batteryPowerMin,
-						"min_kwh": batteryCapacityMin,
-						"macrs_option_years": batteryMacrsOptionYears,
-						"total_itc_percent": batteryItcPercent
-					},
-					"Wind": {
-						"installed_cost_us_dollars_per_kw": windCost,
-						"min_kw": windMin,
-						"macrs_option_years": windMacrsOptionYears,
-						"federal_itc_pct": windItcPercent
-					},
-					"Generator": {
-						"installed_cost_us_dollars_per_kw": dieselGenCost,
-						"generator_only_runs_during_grid_outage": dieselOnlyRunsDuringOutage,
-						"macrs_option_years": dieselMacrsOptionYears
-					}
+					"longitude": longitude
+				},
+				"ElectricTariff": {
+					"wholesale_rate": wholesaleCost
+					#"wholesale_rate_us_dollars_per_kwh": wholesaleCost,
+					#"wholesale_rate_above_site_load_us_dollars_per_kwh": wholesaleCost
+				},
+				"ElectricLoad": { #"LoadProfile": {
+					"loads_kw": jsonifiableLoad,
+					"year": year
+				},
+				"Financial": {
+					"value_of_lost_load_per_kwh": value_of_lost_load,
+					#"value_of_lost_load_us_dollars_per_kwh": value_of_lost_load,
+					"analysis_years": analysisYears,
+					"om_cost_escalation_rate_fraction": omCostEscalator,
+					#"om_cost_escalation_pct": omCostEscalator,
+					"offtaker_discount_rate_fraction": discountRate
+					#"offtaker_discount_pct": discountRate
+				},
+				"PV": {
+					"installed_cost_per_kw": solarCost,
+					#"installed_cost_us_dollars_per_kw": solarCost,
+					"min_kw": solarMin,
+					"can_export_beyond_nem_limit": solarCanExport,
+					#"can_export_beyond_site_load": solarCanExport,
+					"can_curtail": solarCanCurtail,
+					"macrs_option_years": solarMacrsOptionYears,
+					"federal_itc_fraction": solarItcPercent
+					#"federal_itc_pct": solarItcPercent
+				},
+				"ElectricStorage": { #"Storage": {
+					"installed_cost_per_kwh": batteryPowerCost,
+					#"installed_cost_us_dollars_per_kw": batteryPowerCost,
+					"installed_cost_per_kwh": batteryCapacityCost,
+					#"installed_cost_us_dollars_per_kwh": batteryCapacityCost,
+					"replace_cost_per_kw": batteryPowerCostReplace,
+					#"replace_cost_us_dollars_per_kw": batteryPowerCostReplace,
+					"replace_cost_per_kwh": batteryCapacityCostReplace,
+					#"replace_cost_us_dollars_per_kwh": batteryCapacityCostReplace,
+					"inverter_replacement_year": batteryPowerReplaceYear,
+					"battery_replacement_year": batteryCapacityReplaceYear,
+					"min_kw": batteryPowerMin,
+					"min_kwh": batteryCapacityMin,
+					"macrs_option_years": batteryMacrsOptionYears,
+					"total_itc_fraction": batteryItcPercent
+					#"total_itc_percent": batteryItcPercent
+				},
+				"Wind": {
+					"installed_cost_per_kw": windCost,
+					#"installed_cost_us_dollars_per_kw": windCost,
+					"min_kw": windMin,
+					"macrs_option_years": windMacrsOptionYears,
+					"federal_itc_fraction": windItcPercent
+					#"federal_itc_pct": windItcPercent
+				},
+				"Generator": {
+					"installed_cost_per_kw": dieselGenCost,
+					#"installed_cost_us_dollars_per_kw": dieselGenCost,
+					"only_runs_during_grid_outage": dieselOnlyRunsDuringOutage,
+					#"generator_only_runs_during_grid_outage": dieselOnlyRunsDuringOutage,
+					"macrs_option_years": dieselMacrsOptionYears
 				}
-			}
 		}
 
 		# TODO: Enable all instances of 'annualCostSwitch', 'energyCostMonthly', 'demandCostMonthly' in mgDesign.py once a suitable way to enter a list of 12 monthly rates is found for mgDesign.html
@@ -246,57 +261,69 @@ def work(modelDir, inputDict):
 		# 	scenario['Scenario']['Site']['ElectricTariff']['blended_monthly_demand_charges_us_dollars_per_kw'] = demandCostMonthly
 		# solar and battery have default 'max_kw' == 1000000000; Wind has default 'max_kw' == 0 and thus must be set explicitly; Check https://developer.nrel.gov/docs/energy-optimization/reopt-v1 for updates
 		if solar == 'off':
-			scenario['Scenario']['Site']['PV']['max_kw'] = 0
+			scenario['PV']['max_kw'] = 0
 		elif solar == 'on':
-			scenario['Scenario']['Site']['PV']['max_kw'] = solarMax
-			scenario['Scenario']['Site']['PV']['existing_kw'] = solarExisting
-			scenario['Scenario']['Site']['LoadProfile']['loads_kw_is_net'] = False
+			scenario['PV']['max_kw'] = solarMax
+			scenario['PV']['existing_kw'] = solarExisting
+			scenario['ElectricLoad']['loads_kw_is_net'] = False
 			# To turn off energy export/net-metering, set wholesaleCost to "0" and excess PV gen will be curtailed
 			if solarCanExport == False:
-				scenario['Scenario']['Site']['ElectricTariff']["wholesale_rate_above_site_load_us_dollars_per_kwh"] = 0
-				scenario['Scenario']['Site']['ElectricTariff']["wholesale_rate_us_dollars_per_kwh"] = 0
+				#scenario['Scenario']['ElectricTariff']["wholesale_rate_above_site_load_us_dollars_per_kwh"] = 0
+				scenario['ElectricTariff']['wholesale_rate'] = 0
+				#["wholesale_rate_us_dollars_per_kwh"] = 0
 		if wind == 'off':
-			scenario['Scenario']['Site']['Wind']['max_kw'] = 0
+			scenario['Wind']['max_kw'] = 0
 		elif wind == 'on':
-			scenario['Scenario']['Site']['Wind']['max_kw'] = windMax
+			scenario['Wind']['max_kw'] = windMax
 		if battery == 'off':
-			scenario['Scenario']['Site']['Storage']['max_kw'] = 0
-			scenario['Scenario']['Site']['Storage']['max_kwh'] = 0 #May not be a needed constraint, even though it is stated as such in the NREL docs
+			scenario['ElectricStorage']['max_kw'] = 0
+			scenario['ElectricStorage']['max_kwh'] = 0 #May not be a needed constraint, even though it is stated as such in the NREL docs
 		elif battery == 'on':
-			scenario['Scenario']['Site']['Storage']['max_kw'] = batteryPowerMax
-			scenario['Scenario']['Site']['Storage']['max_kwh'] = batteryCapacityMax
+			scenario['ElectricStorage']['max_kw'] = batteryPowerMax
+			scenario['ElectricStorage']['max_kwh'] = batteryCapacityMax
 		# if outage_start_hour is > 0, a resiliency optimization that includes diesel is triggered
 		if outage_start_hour != 0:
-			scenario['Scenario']['Site']['LoadProfile']['outage_is_major_event'] = True
-			scenario['Scenario']['Site']['LoadProfile']['critical_load_pct'] = criticalLoadFactor
-			scenario['Scenario']['Site']['LoadProfile']['outage_start_time_step'] = outage_start_hour
-			scenario['Scenario']['Site']['LoadProfile']['outage_end_time_step'] = outage_end_hour
-			scenario['Scenario']['Site']['Generator']['fuel_avail_gal'] = fuelAvailable
-			scenario['Scenario']['Site']['Generator']['min_turn_down_pct'] = minGenLoading
-			scenario['Scenario']['Site']['Generator']['existing_kw'] = genExisting
-			scenario['Scenario']['Site']['Generator']['diesel_fuel_cost_us_dollars_per_gallon'] = dieselFuelCostGal
-			scenario['Scenario']['Site']['Generator']['emissions_factor_lb_CO2_per_gal'] = dieselCO2Factor
-			scenario['Scenario']['Site']['Generator']['om_cost_us_dollars_per_kw'] = dieselOMCostKw
-			scenario['Scenario']['Site']['Generator']['om_cost_us_dollars_per_kwh'] = dieselOMCostKwh
+			#scenario['Scenario']['LoadProfile']['outage_is_major_event'] = True
+			scenario['ElectricLoad']['critical_load_fraction'] = criticalLoadFactor
+			#['LoadProfile']['critical_load_pct'] = criticalLoadFactor
+			scenario['ElectricUtility'] = {}
+			scenario['ElectricUtility']['outage_start_time_step'] = outage_start_hour
+			#['LoadProfile']['outage_start_time_step'] = outage_start_hour
+			scenario['ElectricUtility']['outage_end_time_step'] = outage_end_hour
+			#['LoadProfile']['outage_end_time_step'] = outage_end_hour
+			scenario['Generator']['fuel_avail_gal'] = fuelAvailable
+			scenario['Generator']['min_turn_down_fraction'] = minGenLoading
+			#['min_turn_down_pct'] = minGenLoading
+			scenario['Generator']['existing_kw'] = genExisting
+			scenario['Generator']['fuel_cost_per_gallon'] = dieselFuelCostGal
+			#['diesel_fuel_cost_us_dollars_per_gallon'] = dieselFuelCostGal
+			scenario['Generator']['emissions_factor_lb_CO2_per_gal'] = dieselCO2Factor
+			scenario['Generator']['om_cost_per_kw'] = dieselOMCostKw
+			#['om_cost_us_dollars_per_kw'] = dieselOMCostKw
+			scenario['Generator']['om_cost_per_kwh'] = dieselOMCostKwh
+			#['om_cost_us_dollars_per_kwh'] = dieselOMCostKwh
 			# use userCriticalLoadShape only if True, else model defaults to criticalLoadFactor
 			if userCriticalLoadShape == True:
-				scenario['Scenario']['Site']['LoadProfile']['critical_loads_kw'] = jsonifiableCriticalLoad
+				scenario['ElectricLoad']['critical_loads_kw'] = jsonifiableCriticalLoad
 			# diesel has a quirk in how it gets inputted to REopt such that when strictly specified, allOutputData["sizeDiesel1"] = allInputData['dieselMax'] + allInputData['genExisting']
+			#todo: check if still true for reopt.jl
 			if dieselMax - genExisting > 0:
-				scenario['Scenario']['Site']['Generator']['max_kw'] = dieselMax - genExisting
+				scenario['Generator']['max_kw'] = dieselMax - genExisting
 			else:
-				scenario['Scenario']['Site']['Generator']['max_kw'] = 0
+				scenario['Generator']['max_kw'] = 0
 			if dieselMin - genExisting > 0:
-				scenario['Scenario']['Site']['Generator']['min_kw'] = dieselMin - genExisting
+				scenario['Generator']['min_kw'] = dieselMin - genExisting
 			else:
-				scenario['Scenario']['Site']['Generator']['min_kw'] = 0
+				scenario['Generator']['min_kw'] = 0
 
 		# set rates
 		if urdbLabelSwitch == 'off':
-			scenario['Scenario']['Site']['ElectricTariff']['blended_annual_rates_us_dollars_per_kwh'] = energyCost
-			scenario['Scenario']['Site']['ElectricTariff']['blended_annual_demand_charges_us_dollars_per_kw'] = demandCost
+			scenario['ElectricTariff']['blended_annual_energy_rate'] = energyCost
+			#['blended_annual_rates_us_dollars_per_kwh'] = energyCost
+			scenario['ElectricTariff']['blended_annual_demand_rate'] = demandCost
+			#['blended_annual_demand_charges_us_dollars_per_kw'] = demandCost
 		elif urdbLabelSwitch == 'on':
-			scenario['Scenario']['Site']['ElectricTariff']['urdb_label'] = urdbLabel
+			scenario['ElectricTariff']['urdb_label'] = urdbLabel
 
 
 		with open(pJoin(modelDir, "Scenario_test_POST.json"), "w") as jsonFile:
@@ -306,7 +333,8 @@ def work(modelDir, inputDict):
 		###########todo: replace with reopt_jl call
 		#REopt.run(pJoin(modelDir, 'Scenario_test_POST.json'), pJoin(modelDir, 'results.json'), inputDict['api_key'])
 		run_outages = True if outage_start_hour != 0 else False
-		reopt_jl.run_reopt_jl(modelDir, "Scenario_test_POST.json", solver_in_filename=False, outages=run_outages)
+		reopt_jl.run_reopt_jl(modelDir, "Scenario_test_POST.json", convert=False, solver_in_filename=False, 
+						outages=run_outages)
 		with open(pJoin(modelDir, 'out_Scenario_test_POST.json')) as jsonFile:
 		#with open(pJoin(modelDir, 'results.json')) as jsonFile:
 			results = json.load(jsonFile)
