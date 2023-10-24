@@ -4,11 +4,22 @@ Solver for Julia verison of REopt.
 
 # Dependencies:
 - python@3.11 (other versions of python3 may work)
-- packages in install_reopt_jl(system) <- runs automatically within run_reopt_jl 
+- packages installed in install_reopt_jl()  ( runs automatically within run_reopt_jl ) and within REoptSolver/Project.toml
+
+Building REoptSolver Julia module:
+* Project.toml & Mainfest.toml are included in /REoptSolver directory but can be modified with the following:
+```
+~/omf/omf/solvers/reopt_jl % julia
+julia> ]
+(@v1.9) pkg> activate REoptSolver
+(REoptSolver) pkg> update/rm <package_name>
+(REoptSolver) pkg> instantiate
+(REoptSolver) pkg> build
+```
 
 # Usage:
 
-__init__.py:
+__init __.py:
 - run_reopt_jl(path, inputFile="", default=False, convert=True, outages=False, microgrid_only=False,
                  solver="HiGHS", solver_in_filename=True, max_runtime_s=None)
 
@@ -21,30 +32,29 @@ General paramters:
 - outages: if True, runs outage simulation, otherwise doesn't
 - microgrid_only: if True runs without grid, otherwise runs as normal
     *only used within REopt.jl currently (not API)
-- max_runtime_s: default is None, otherwise times at after given number of seconds and returns local optimal value (may not be the global optimum)
+- max_runtime_s: default is None, otherwise times out after given number of seconds and returns local optimal value (may not be the global optimum)
 
 Testing parameters:
 - solver: set to HiGHS (best runtime performance) ; other available options: SCIP
 - solver_in_filename: puts solver in filename if True
 
 Examples:
-
->>> run_reopt_jl(currentDir, inputFile="path/to/inputFile.json")
+``` >>> run_reopt_jl(currentDir, inputFile="path/to/inputFile.json") ```
 writes ouput file from REopt.jl to "currentDir/out_HiGHS_inputFile.json"
 
->>> run_reopt_jl(currentDir, default=True)
+``` >>> run_reopt_jl(currentDir, default=True) ```
 uses julia_default.json as input and writes ouput file from REopt.jl to "currentDir/out_julia_default.json" 
 
->>> run_reopt_jl(currentDir, inputFile="path/to/inputFile.json", solver_in_filename=False)
+``` >>> run_reopt_jl(currentDir, inputFile="path/to/inputFile.json", solver_in_filename=False) ```
 writes output file from REopt.jl to "currentDir/out_inputFile.json"
 
->>> run_reopt_jl(currentDir, inputFile="path/to/inputFile.json", outages=True)
+``` >>> run_reopt_jl(currentDir, inputFile="path/to/inputFile.json", outages=True) ```
 writes ouput file from REopt.jl to "currentDir/out_HiGHS_inputFile.json" and
 writes outage output fie to "currentDir/outages_HiGHS_inputFile.json"
 
 Testing usage (work in progress):
 
-- __init__.py: 
+- __ init__.py: 
     - runAllSolvers(path, testName, fileName="", default=False, convert=True, outages=True, 
                   solvers=["SCIP","HiGHS"], solver_in_filename=True, max_runtime_s=None,
                   get_cached=True )
