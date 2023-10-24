@@ -67,7 +67,7 @@ def work(modelDir, inputDict):
 	circuitFileStatus = inputDict.get('optionalCircuitFile', 0)
 	if ( circuitFileStatus == 'on' ):
 		feederName = [x for x in os.listdir(modelDir) if x.endswith('.omd')][0]
-		inputDict['feederName1'] = feederName
+		inputDict['feederName1'] = feederName[:-4]
 		path_to_omd = pJoin(modelDir, feederName)
 		tree = opendss.dssConvert.omdToTree(path_to_omd)
 		opendss.dssConvert.treeToDss(tree, pJoin(modelDir, 'circuit.dss'))
