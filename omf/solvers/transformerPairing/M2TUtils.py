@@ -622,7 +622,7 @@ def PlotNumFlaggedTrans_ThresholdSweep(thresholdValues,allNumFlagged,transLabels
     plt.xticks(fontsize=13,fontweight='bold')
     plt.yticks(fontsize=13,fontweight='bold')
     fig.tight_layout()
-    plt.show()
+    # plt.show()
     # Save figure to specified path
     today = datetime.datetime.now()
     timeStr = today.strftime("%Y-%m-%d_%H-%M-%S")
