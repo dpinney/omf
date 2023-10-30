@@ -26,7 +26,7 @@ from omf.solvers import PowerModelsONM
 # Model metadata:
 tooltip = 'Calculate load, generator and switching controls to maximize power restoration for a circuit with multiple networked microgrids.'
 modelName, template = __neoMetaModel__.metadata(__file__)
-hidden = False
+hidden = True
 
 def coordsFromString(entry):
 	'helper function to take a location string to two integer values'
@@ -958,11 +958,12 @@ def work(modelDir, inputDict):
 	with open(f'{modelDir}/{feederName}.omd', 'r') as omdFile:
 		omd = json.load(omdFile)
 	tree = omd['tree']
+
 	# Output a .dss file, which will be needed for ONM.
 	niceDss = dssConvert.evilGldTreeToDssTree(tree)
 	dssConvert.treeToDss(niceDss, f'{modelDir}/circuit.dss')
 	dssConvert.treeToDss(niceDss, f'{modelDir}/circuitOmfCompatible.dss') # for querying loadshapes
-	dssConvert.dssCleanLists(f'{modelDir}/circuitOmfCompatible.dss') # for querying loadshapes
+	dssConvert.dss_to_clean_via_save(f'{modelDir}/circuitOmfCompatible.dss', f'{modelDir}/circuitOmfCompatible_cleanLists.dss')
 
 	# Remove syntax that ONM doesn't like.
 	with open(f'{modelDir}/circuit.dss','r') as dss_file:
@@ -1093,7 +1094,7 @@ def new(modelDir):
 	microgridTagging_file_path = ['']
 	microgridTagging_file_data = None
 	# ====== Iowa240 Test Case
-	feeder_file_path= [__neoMetaModel__._omfDir,'static','testFiles','iowa240_dwp_22.dss.omd']
+	feeder_file_path= [__neoMetaModel__._omfDir,'static','testFiles','iowa240_dwp_22_no_show_voltage.dss.omd']
 	event_file_path = [__neoMetaModel__._omfDir,'static','testFiles','iowa240_dwp_22.events.json']
 	settings_file_path = [__neoMetaModel__._omfDir,'static','testFiles','iowa240_dwp_22.settings.json']
 	output_file_path = [__neoMetaModel__._omfDir,'static','testFiles','iowa240_dwp_22.output.json']

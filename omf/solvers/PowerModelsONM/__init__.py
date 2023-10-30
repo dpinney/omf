@@ -47,6 +47,30 @@ def install_onm(target : list = platform.system()):
 			'''julia -e 'import Pkg; Pkg.add(Pkg.PackageSpec(;name="PowerModelsDistribution", version="0.14.1"));’ ''',
 			'''julia -e 'import Pkg; Pkg.add(Pkg.PackageSpec(;name="PowerModelsONM", version="2.1.1"));' ''',
 			f'touch {thisDir}/instantiated.txt'
+		],
+		'Windows' : [
+			# thisDir isn't actually the directory from which os.system is executing these commands, which is why cd {thisDir} prepends various lines
+			# IMPORTANT!: Environment variables need to be set manually through your windows gui
+			# 	PATH= %PATH%;{thisDir}\julia-1.7.0\bin;{thisDir}\gurobi912\win64\bin
+			#	GUROBI_HOME= {thisDir}\gurobi912\win64
+			#	LD_LIBRARY_PATH= {thisDir}\gurobi912\win64\lib;%PATH%
+			f'cd {thisDir} & del julia-1.7.0-win64.zip',
+			f'cd {thisDir} & curl -o julia-1.7.0-win64.zip https://julialang-s3.julialang.org/bin/winnt/x64/1.7/julia-1.7.0-win64.zip',
+			f'cd {thisDir} & tar -x -f "julia-1.7.0-win64.zip',
+			#f'set PATH="%PATH%;{thisDir}\julia-1.7.0\\bin"', #path set for just this session with set. setx is permanent but truncates the path which is very bad
+			'del Gurobi-9.1.2-win64.msi',
+			'curl -o Gurobi-9.1.2-win64.msi --url https://packages.gurobi.com/9.1/Gurobi-9.1.2-win64.msi',
+			# Next line brings up install wizard GUI with the correct installdir already set. Requires human interaction
+			f'msiexec /i "Gurobi-9.1.2-win64.msi" INSTALLDIR={thisDir}\gurobi912 /norestart /l {thisDir}\gurobi-install-log.log', 
+			#f'set GUROBI_HOME="{thisDir}\gurobi912\win64"',
+			#f'set PATH="%PATH%;{thisDir}\gurobi912\win64\\bin"',
+			#f'set LD_LIBRARY_PATH="{thisDir}\gurobi912\win64\lib;%PATH%"',
+			# Despite adding Julia to the path, it wasn't finding it when run from within vscode, hence the cd {thisDir}\julia-1.7.0\bin prepending the lines
+			f'cd {thisDir}\julia-1.7.0\\bin & julia -e "import Pkg; Pkg.add(\\"Gurobi\\")"',
+			f'cd {thisDir}\julia-1.7.0\\bin & julia -e "import Pkg; Pkg.build(\\"Gurobi\\")"',
+			f'cd {thisDir}\julia-1.7.0\\bin & julia -e "import Pkg; Pkg.add(Pkg.PackageSpec(;name=\\"PowerModelsDistribution\\", version=\\"0.14.1\\"));"',
+			f'cd {thisDir}\julia-1.7.0\\bin & julia -e "import Pkg; Pkg.add(Pkg.PackageSpec(;name=\\"PowerModelsONM\\", version=\\"3.4.0\\"));"',
+			f'copy nul {thisDir}\instantiated.txt'
 		]
 	}
 	runCommands(installCmd.get(target,'Linux'))
