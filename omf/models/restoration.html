@@ -1,23 +1,43 @@
 <head>
 	{{ omfHeaders }}
-
+	<script src="{{pathPrefix}}/static/sorttable.js"></script>
+	<style>
+	<!-- /*Styles here*/ -->
+		table {
+			border-collapse: collapse;
+			width: 100%;
+		}
+		table, th, td {
+			border: 1px solid black;
+			text-align: center;
+			padding-top: 10px;
+			padding-bottom: 10px;
+		}
+		table.sortable th:not(.sorttable_sorted):not(.sorttable_sorted_reverse):not(.sorttable_nosort):after {
+		    content: " \25B4\25BE" 	
+		 }
+		th {
+			background-color: #8c8c8c;
+		}
+		tr:nth-child(even) {
+			background-color: #e6e6e6;
+		}
+	</style>
 	<script src="{{pathPrefix}}/static/highcharts4.src.js"></script>
-	<script type="text/javascript">
-		// Code to make the toggles work:
-		$(document).ready(function(){
-			$(".toggle").click(function(){
-					$(this).parent().next().toggle(500)
-			})
-		})
-	</script>
-	{% macro insert_file_upload_block(fileName, dataVariableName) -%}
-		<input id="{{dataVariableName}}Handler" type="file" style="display:none" onchange="handle_files(this.files,'{{dataVariableName}}','{{fileName}}')">
-		<input id="{{dataVariableName}}" name="{{dataVariableName}}" value="{{allInputDataDict[dataVariableName]}}" type="hidden">
-		<div>
-			<label for="{{dataVariableName}}Handler" class="fileButton">Choose File</label>
-			<input id="{{fileName}}" name="{{fileName}}" value="{{allInputDataDict[fileName]}}" readonly class="uploadFileName">    
-		</div>
-	{%- endmacro %}
+	<script src="https://cdn.plot.ly/plotly-1.50.1.min.js"></script>
+	<!-- Leaflet -->
+	<link rel="stylesheet" href="https://unpkg.com/leaflet@1.5.1/dist/leaflet.css"	integrity="sha512-xwE/Az9zrjBIphAcBb3F6JVqxf46+CDLwfLMHloNu6KEQCAWi6HcDUbeOfBIptF7tcCzusKFjFw2yuvEpDL9wQ=="	crossorigin=""/>
+	<script src="https://unpkg.com/leaflet@1.5.1/dist/leaflet.js" integrity="sha512-GffPMF3RvMeYyc1LWMHtK8EbPv0iNZ8/oTtHPx9/cc2ILxQ+u905qIwdpULaqDkyBKgOaB57QTMg7ztg8Jm2Og==" crossorigin=""></script>
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/noUiSlider/8.5.1/nouislider.min.css" />
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/noUiSlider/8.5.1/nouislider.min.js"></script>
+	<style>#map{
+		position: relative;
+		width: 100.0%;
+		height: 100.0%;
+		left: 0.0%;
+		top: 0.0%;
+		}
+	</style>
 </head>
 <body>
 	{{ omfModelTitle }}
@@ -25,83 +45,132 @@
 	<div id="input" class="content">
 		<form name="inputForm" action="/runModel/" onsubmit="event.preventDefault(); return isFormValid();" method="post">
 			<div class="shortInput">
-				<label>Model Type <a href="https://github.com/dpinney/omf/wiki/Models-~-restoration" target="blank">Help?</a></label>
-				<input type="text" id="modelType" name="modelType" value="{{allInputDataDict.modelType}}" readonly/>
+				<label>Model Type <a href="https://github.com/dpinney/omf/wiki/Models-~-microgridControl" target="blank">Help?</a></label>
+				<input type="text" id="modelType" name="modelType" value="{{allInputDataDict.modelType}}" value="{{modelName}}" readonly/>
 			</div>
 			<div class="shortInput">
 				<label>Model Name</label>
-				<input type="text" id="modelName" name="modelName" value="{{allInputDataDict.modelName}}" required="required" pattern="^[\w\s]+$"/></td>
-			</div>
-			<div class="shortInput">
-				<label>Created</label>
-				<input type="text" id="created" name="created" value="{{allInputDataDict.created}}" readonly/></td>
+				<input type="text" id="modelName" name="modelName" value="{{allInputDataDict.modelName}}" pattern="^[\w\s\d\.-]+$" required="required">
 			</div>
 			<div class="shortInput">
 				<label>User</label>
-				<input type="text" id="user" name="user" value="{{allInputDataDict.user}}" readonly/></td>
+				<input type="text" id="user" name="user" value="{{allInputDataDict.user}}" readonly/>
 			</div>
-			{% if modelStatus == 'finished' %} 
+			<div class="shortInput ">
+				<label>Created</label>
+				<input type="text" id="created" name="created" value="{{allInputDataDict.created}}" readonly/>
+			</div>
 			<div class="shortInput">
 				<label>Run Time</label>
-				<input type="text" id="runTime" name="runTime" value="{{allInputDataDict.runTime}}" readonly/></td>
+				<input type="text" id="runTime" name="runTime" value="{{allInputDataDict.runTime}}" readonly/>
 			</div>
-			{% endif %}
 			<div class="wideInput">
-				<p class="inputSectionHeader">System Specifications</p>
+				<p class="inputSectionHeader">Model Specifications</p>
 			</div>
 			<hr>
-			<div class="shortInput" style="display:none">
-				<label>Date Input (YYYY-MM-DDTHH:mm:SSZ)</label>
-				<input type="text" id="date" name="date" value="{{allInputDataDict.date}}" required="required" pattern="^\d\d\d\d-\d\d-\d\dT\d\d:\d\d:\d\d(Z|(\+|-)\d\d:\d\d)$"/>
+			<div class="shortInput">
+				<label>Feeder</label>
+				<script type="text/javascript">
+				function editFeeder(modelName, feederNum) {
+					console.log("modelName:",modelName)
+					studyUser = allInputData.user
+					window.open("/feeder/" + studyUser + "/" + modelName + "/" + feederNum,  "_blank")
+				}
+				</script>
+				<button id="feederButton" type="button" onclick="javascript:editFeeder(allInputData.modelName,1);" style="display:block;width:125px;">Open Editor</button>
+				<input type="text" id="feederName1" name="feederName1" value="{{allInputDataDict.feederName1}}" style="display:none">
 			</div>
 			<div class="shortInput">
-				<label class="tooltip">Circuit Editor<span class="classic">Use a visual interface to upload, view, and manipulate a .dss circuit file.</span></label>
-				<button id="feederButton" type="button" onclick="editFeeder('{{allInputDataDict.modelName}}',1)" style="display:block;width:125px;">Open Editor</button>
-			</div>
-			<div class="shortInput" style="display:none">
-				<input type="text" id="feederName1" name="feederName1" value="{{allInputDataDict.feederName1}}">
-			</div>
-			<div class="shortInput">
-				<label class="tooltip">Outage File Input<span class="classic">Import a .csv file that describes [insert content]</span></label>
-				<div>{{ insert_file_upload_block('exampleFileName','exampleFileContent') }}</div>
-			</div class="shortInput">
-			<div>
+				<label class="tooltip">Event Information (.json file)<span class="classic">Please see the documentation at the help link for the required format</span></label>
+				<input id="eventFile" type="file" style="display:none" onchange="handle_files(this.files,'eventData','eventFileName')">
+				<input id="eventData" name="eventData" value="{{allInputDataDict.eventData}}" type="hidden">
+				<div>
+					<label for="eventFile" class="fileButton">Choose File</label>
+					<input id="eventFileName" name="eventFileName" value="{{allInputDataDict.eventFileName}}" value='' readonly class="uploadFileName">
+				</div>
 			</div>
 			<div class="shortInput">
-				<label>Simulate outage data instead of using data from <u>Example File Input</u>?</label>
-				<input type="checkbox"  id="simOutageBool" name="simOutageBool" {% if allInputDataDict.simOutageBool %}checked{% endif %}/>
-			</div>
-			<div class="shortInput">
-				<label class="tooltip">Simulation Troubled Equipment<span class="classic">Downline load outages are simulated through probabilistic equipment failure in selected equipment types</span></label>
-				<br>
-				<input type="checkbox"  id="simLinesBool" name="simLinesBool" {% if allInputDataDict.simLinesBool %}checked{% endif %}/>
-				<label for="simLinesBool"> Lines</label>
-				<br>
-				<input type="checkbox"  id="simTransformersBool" name="simTransformersBool" {% if allInputDataDict.simTransformersBool %}checked{% endif %}/>
-				<label for="simTransformersBool"> Transformers</label>
-			</div>
-			<div class="shortInput">
-				<label class="tooltip">Simulation Random Seed<span class="classic">If "None" is selected, the simulation will be different each run. If a number is selected, all simlations on a particular circuit with that seed and the same <u>Simulation Troubled Equipment</u> will be the same</span></label>
-				<select id="simRandomSeed" name="simRandomSeed">
-					<option value="None" {% if allInputDataDict.simRandomSeed == 'None' %}selected{% endif %}>None</option>
-					<option value="1" {% if allInputDataDict.simRandomSeed == '1' %}selected{% endif %}>1</option>
-					<option value="2" {% if allInputDataDict.simRandomSeed == '2' %}selected{% endif %}>2</option>
-					<option value="3" {% if allInputDataDict.simRandomSeed == '3' %}selected{% endif %}>3</option>
-					<option value="4" {% if allInputDataDict.simRandomSeed == '4' %}selected{% endif %}>4</option>
-					<option value="5" {% if allInputDataDict.simRandomSeed == '5' %}selected{% endif %}>5</option>
+				<label class="tooltip">Solution Fidelity<span class="classic">Select an option for the level of fidelity of the results.</span></label>
+				<select id="solFidelity" name="solFidelity" value="{{allInputDataDict.solFidelity}}" />
+					<option value='0.10' {% if allInputDataDict.solFidelity == '0.10%' %}selected{% endif %}>Low</option>
+					<option value='0.05' {% if allInputDataDict.solFidelity == '0.05%' %}selected{% endif %}>Medium</option>
+					<option value='0.02' {% if allInputDataDict.solFidelity == '0.02%' %}selected{% endif %}>High</option>
 				</select>
 			</div>
-
-
-			
-			
+			<div class="shortInput">
+				<label class="tooltip">Generate Default Settings?<span class="classic">If yes, a default settings file will be generated; if no, the user must upload a settings file.</span></label>
+				<select id="genSettings" name="genSettings" value="{{allInputDataDict.genSettings}}" />
+					<option value='True' {% if allInputDataDict.genSettings == 'True' %}selected{% endif %}>Yes</option>
+					<option value='False' {% if allInputDataDict.genSettings == 'False' %}selected{% endif %}>No</option>
+				</select>
+			</div>
+			<div class="shortInput">
+				<label class="tooltip">Settings (.json file)<span class="classic">Please see the documentation at the help link for the required format. You can also select "Yes" for the "Generate Default Settings?" field to run using a generated default settings file.</span></label>
+				<input id="settingsFile" type="file" style="display:none" onchange="handle_files(this.files,'settingsData','settingsFileName')">
+				<input id="settingsData" name="settingsData" value="{{allInputDataDict.settingsData}}" type="hidden">
+				<div>
+					<label for="settingsFile" class="fileButton">Choose File</label>
+					<input id="settingsFileName" name="settingsFileName" value="{{allInputDataDict.settingsFileName}}" value='' readonly class="uploadFileName">
+				</div>
+			</div>
+			<div class="shortInput">
+				<label class="tooltip">Load Priorities (.json file)<span class="classic">Please see the documentation at the help link for the required format of custom load priority file input.</span></label>
+				<input id="loadPriorityFile" type="file" style="display:none" onchange="handle_files(this.files,'loadPriorityData','loadPriorityFileName')">
+				<input id="loadPriorityData" name="loadPriorityData" value="{{allInputDataDict.loadPriorityData}}" type="hidden">
+				<div>
+					<label for="loadPriorityFile" class="fileButton">Choose File</label>
+					<input id="loadPriorityFileName" name="loadPriorityFileName" value="{{allInputDataDict.loadPriorityFileName}}" value='' readonly class="uploadFileName">
+				</div>
+			</div>
+			<div class="shortInput">
+				<label class="tooltip">Cached Output?<span class="classic">If yes, use the Cached Output provided; if no, use the events.json to run the feeder system through ONM.</span></label>
+				<select id="useCache" name="useCache" value="{{allInputDataDict.useCache}}" />
+					<option value='True' {% if allInputDataDict.useCache == 'True' %}selected{% endif %}>Yes</option>
+					<option value='False' {% if allInputDataDict.useCache == 'False' %}selected{% endif %}>No</option>
+				</select>
+			</div>
+			<div class="shortInput">
+				<label class="tooltip">Cached Output (.json file)<span class="classic">Please see the documentation at the help link for the required format</span></label>
+				<input id="outputFile" type="file" style="display:none" onchange="handle_files(this.files,'outputData','outputFileName')">
+				<input id="outputData" name="outputData" value="{{allInputDataDict.outputData}}" type="hidden">
+				<div>
+					<label for="outputFile" class="fileButton">Choose File</label>
+					<input id="outputFileName" name="outputFileName" value="{{allInputDataDict.outputFileName}}" value='' readonly class="uploadFileName">
+				</div>
+			</div>
+			<div class="shortInput">
+				<label class="tooltip">Microgrid Tagging (.csv file)<span class="classic">Please see the documentation at the help link for the required format custom microgrid tagging file input.</span></label>
+				<input id="microgridTaggingFile" type="file" style="display:none" onchange="handle_files(this.files,'microgridTaggingData','microgridTaggingFileName')">
+				<input id="microgridTaggingData" name="microgridTaggingData" value="{{allInputDataDict.microgridTaggingData}}" type="hidden">
+				<div>
+					<label for="microgridTaggingFile" class="fileButton">Choose File</label>
+					<input id="microgridTaggingFileName" name="microgridTaggingFileName" value="{{allInputDataDict.microgridTaggingFileName}}" value='' readonly class="uploadFileName">
+				</div>
+			</div>
 			<div class="wideInput">
-				<p class="inputSectionHeader">[Other] Specifications</p>
+				<p class="inputSectionHeader">Outage Cost Parameters</p>
 			</div>
 			<hr>
 			<div class="shortInput">
-				<label class="tooltip">Disruption Speed Lookback Interval in TimeSteps<span class="classic">Disruption Speed is calculated as the difference between Outage Incidence at the current time and this number of timesteps prior, divided by the time between them. If too high a value is provided, the maximum number of timesteps-1 is used. </span></label>
-				<input type="number" id="timeStepsInInterval" name="timeStepsInInterval" step="1" min="1" value="{{allInputDataDict.timeStepsInInterval}}"/>
+				<label class="tooltip">Customer Information (.csv file)<span class="classic">Please see the documentation at the help link for the required format</span></label>
+				<input id="customerFile" type="file" style="display:none" onchange="handle_files(this.files,'customerData','customerFileName')">
+				<input id="customerData" name="customerData" value="{{allInputDataDict.customerData}}" type="hidden">
+				<div>
+					<label for="customerFile" class="fileButton">Choose File</label>
+					<input id="customerFileName" name="customerFileName" value="{{allInputDataDict.customerFileName}}" value='' readonly class="uploadFileName">
+				</div>
+			</div>
+			<div class="shortInput">
+				<label class="tooltip">Restoration Cost ($/hr)<span class="classic">Restoration cost parameter for calculating outage costs.</span></label>
+				<input type="text" id="restoration_cost" name="restoration_cost" value="{{allInputDataDict.restoration_cost}}" pattern="^\d+\.?\d*$" required="required">
+			</div>
+			<div class="shortInput">
+				<label class="tooltip">Hardware Cost ($)<span class="classic">Hardware cost parameter for calculating outage costs.</span></label>
+				<input type="text" id="hardware_cost" name="hardware_cost" value="{{allInputDataDict.hardware_cost}}" pattern="^\d+\.?\d*$" required="required">
+			</div>
+			<div class="shortInput">
+				<label class="tooltip">Energy Sales Margin<span class="classic">Decimal representing the percentage of profit on energy sales.</span></label>
+				<input type="text" id="profit_on_energy_sales" name="profit_on_energy_sales" value="{{allInputDataDict.profit_on_energy_sales}}" pattern="^\d{1,3}(\.\d*?)?$" required="required">
 			</div>
 			{{ omfModelButtons }}
 		</form>
@@ -109,130 +178,245 @@
 	{{ omfRunDebugBlock }}
 	{% if modelStatus == 'finished' %}
 	<div id="output">
-		<!-- Insert visualizations here (for examples, see other models such as cyberinverters) -->
-		
-		<script>
-			// Global setting of Highcharts
-			Highcharts.setOptions({global: {useUTC: true}})
-			// Clean up the non-ISO date strings we get.
-			function dateOb(inStr) {return Date.parse(inStr.replace(/-/g,"/"))}
-			highChartsTemplate = {
-				"chart":{"renderTo":"", "marginRight":30, "marginBottom":50, "zoomType":"x", "width":1000, "height":150},
-				"title":{"text":null},
-				"legend":{"layout":"horizontal", "align":"top", "verticalAlign":"top", "x":50, "y":-10, "borderWidth":0},
-				"credits":{"enabled":false},
-				"xAxis":{"showEmpty": false, "type":"integer","maxZoom":1000, "tickColor":"gray","lineColor":"gray"},
-				"yAxis":{"showEmpty": false, "title":{"text":null, "style":{"color":"gray"}}},
-				"plotOptions":{"line":{"marker":{"enabled":false}}, "series":{"shadow":false, "pointInterval":15, "pointStart":0}},
-				"tooltip":{"valueDecimals":1},
-				"series":[]}
-		</script>
-		
-		<!--Outage Incidence Graph-->
-		<p class="reportTitle">Outage Incidence <a target="_self" class="toggle">Hide / Show</a></p>
-		<div id="outageIncidenceReport" class="tightContent">
-			<div id="outageIncidenceTimeSeries"></div>
+		<p class="reportTitle">Generator Profiles</p>
+		<div id="fig1" class="tightContent">
+			<div id="fig1Chart" style="width:1000px"></div>
 			<script type="text/javascript">
-				outageIncidence = {{allOutputDataDict.outageIncidence}}
-				timeStep = {{allOutputDataDict.timeStep}}
-				startTime = {{allOutputDataDict.startTime}}
-				endTime = {{allOutputDataDict.endTime}}
-				var outageIncidenceSeries = {
-					"marker":{"enabled":true},
-					"color":"blue",
-					"data":outageIncidence,
-					"name":"Outage Incidence With No Intervention",
-					"visible":true
-				}
-				var localHighChart = JSON.parse(JSON.stringify(highChartsTemplate))
-				localHighChart["chart"]["renderTo"] = "outageIncidenceTimeSeries"
-				localHighChart["chart"]["type"] = "line"
-				localHighChart["chart"]["height"] = 250
-				localHighChart["series"] = [outageIncidenceSeries]
-				localHighChart["tooltip"]["valueDecimals"] = 3
-				localHighChart["tooltip"]["valueSuffix"] = " %"
-				localHighChart["yAxis"]= [{
-					"title":{"text": "Outage Incidence"},
-					"min": 0,
-					"max": 100,
-					//"tickPositions": [0,1],
-					"startOnTick": true,
-					"endOnTick": true,
-					"tickInterval":20,
-					"labels":{"format":"{value}%"}
-				}]
-				localHighChart["xAxis"]= [{
-					"title":{"text": "Time Since Event Start (min)"},
-					"min": startTime,
-					"max": endTime,
-					"startOnTick":true,
-					"endOnTick":true,
-					"tickInterval": timeStep
-				}]
-				new Highcharts.Chart(localHighChart);
+				Plotly.newPlot("fig1Chart", JSON.parse(allOutputData["fig1Data"]), JSON.parse(allOutputData["fig1Layout"]) || {})
 			</script>
 		</div>
-
-		<!--Disruption Speed Graph-->
-		<p class="reportTitle">Disruption Speed <a target="_self" class="toggle">Hide / Show</a></p>
-		<div id="disruptionSpeedReport" class="tightContent">
-			<div id="disruptionSpeedTimeSeries"></div>
+		<p class="reportTitle">Voltages</p>
+		<div id="fig2" class="tightContent">
+			<div id="fig2Chart" style="width:1000px"></div>
 			<script type="text/javascript">
-				disruptionSpeed = {{allOutputDataDict.disruptionSpeed}}
-				dSpeedInterval = {{allOutputDataDict.dSpeedInterval}}
-				timeStep = {{allOutputDataDict.timeStep}}
-				startTime = {{allOutputDataDict.startTime}}
-				endTime = {{allOutputDataDict.endTime}}
-				var disruptionSpeedSeries = {
-					"marker":{"enabled":true},
-					"color":"blue",
-					"data":disruptionSpeed,
-					"name":"Disruption Speed With No Intervention ("+dSpeedInterval+" min lookback interval)",
-					"visible":true
-				}
-				var localHighChart = JSON.parse(JSON.stringify(highChartsTemplate))
-				localHighChart["chart"]["renderTo"] = "disruptionSpeedTimeSeries"
-				localHighChart["chart"]["type"] = "line"
-				localHighChart["chart"]["height"] = 250
-				localHighChart["series"] = [disruptionSpeedSeries]
-				localHighChart["tooltip"]["valueDecimals"] = 3
-				localHighChart["tooltip"]["valueSuffix"] = " %/min"
-				localHighChart["yAxis"]= [{
-					"title":{"text": "Change in Outage Incidence/Time"},
-					"softMin": 0.0,
-					"softMax": 1.0,
-					//"tickPositions": [0,1],
-					//"startOnTick": true,
-					//"endOnTick": true,
-					"tickInterval":0.2,
-					"labels":{"format":"{value}%/min"},
-					"plotLines": [{
-						"width":2,
-						"value":0,
-						"color": "#808080"
-					}]
-				}]
-				localHighChart["xAxis"]= [{
-					"title":{"text": "Time Since Event Start (min)"},
-					"min": startTime,
-					"max": endTime,
-					"startOnTick":true,
-					"endOnTick":true,
-					"tickInterval": timeStep
-				}]
-				new Highcharts.Chart(localHighChart);
+				Plotly.newPlot("fig2Chart", JSON.parse(allOutputData["fig2Data"]), JSON.parse(allOutputData["fig2Layout"]) || {})
 			</script>
 		</div>
-
-		<!-- Integer Sum Table -->
-		<p class="reportTitle">Example Output</p>
-		<div id="analysisSummary" class="content">
-			<div class="shortInput">
-				<strong>Example Text</strong>
-				<p id="input1Out">This sure is example text!</p>
+		<p class="reportTitle">Loads Served</p>
+		<div id="fig3" class="tightContent">
+			<div id="fig3Chart" style="width:1000px"></div>
+			<script type="text/javascript">
+				Plotly.newPlot("fig3Chart", JSON.parse(allOutputData["fig3Data"]), JSON.parse(allOutputData["fig3Layout"]) || {})
+			</script>
+		</div>
+		<p class="reportTitle">Customer Outage Plots (wrt duration)</p>
+		<div id="fig4" class="tightContent">
+			<div id="fig4Chart" style="width:1000px"></div>
+			<script type="text/javascript">
+				Plotly.newPlot("fig4Chart", JSON.parse(allOutputData["fig4Data"]), JSON.parse(allOutputData["fig4Layout"]) || {})
+			</script>
+		</div>
+		<p class="reportTitle" style="page-break-before:always">Customer Outage Cost</p>
+		<div id="customerOutageCostCalc" class="tightContent" style="max-height:500px; overflow-y:scroll">
+			{{ allOutputDataDict['customerOutageHtml'] }}
+		</div>
+		<p class="reportTitle">Customer Outage Histogram</p>
+		<div id="fig5" class="tightContent">
+			<div id="fig5Chart" style="width:1000px"></div>
+			<script type="text/javascript">
+				Plotly.newPlot("fig5Chart", JSON.parse(allOutputData["fig5Data"]), JSON.parse(allOutputData["fig5Layout"]) || {})
+			</script>
+		</div>
+		<p class="reportTitle" style="page-break-before:always">Utility Outage Cost</p>
+		<div id="utilityOutageCostCalc" class="tightContent">
+			{{ allOutputDataDict['utilityOutageHtml'] }}
+		</div>
+		<p class="reportTitle" style="page-break-before:always">Timeline</p>
+		<div id="outageCostCalc" class="tightContent sorttable" style="max-height:500px; overflow-y:scroll">
+			{{ allOutputDataDict['timelineStatsHtml'] }}
+		</div>
+		<!-- Leaflet map directly inline with model-->
+		<p class="reportTitle">Outage Map and Time Slider</p>
+		<div class="tightContent" style="margin-bottom:-1px">
+			<div style="display: inline-block; width: inherit;">
+				<div style="display: inline-block; width: 8%; margin-top: 5px; margin-bottom: 5px; margin-right: 2%; float: left">
+					<input type="number" min='1' max='23' id="input-number-min" style="width: 100%; background-color:white">
+				</div>
+				<div id="slider" style="display: inline-block; top: 0px; right: 1px; margin: 10px 0px; width: 80%;"></div>
+				<div style="display: inline-block; width: 8%; margin-top: 5px; margin-bottom: 5px; margin-left: 2%; float: right">
+					<input type="number" min='2' max='24' id="input-number-max" style="width: 100%; background-color:white">
+				</div>
 			</div>
 		</div>
-		{{rawOutputFiles}}
+		<div id="mapInsert" style="width: 1000px; margin-left: auto; margin-right: auto;"></div>
+		<script type="text/javascript">
+		//Hack to stop leaflet from loading before geojson data loads 
+		if(modelStatus === "finished"){
+		mapHtml = '<div id="map"></div>';
+		gebi('mapInsert').innerHTML = mapHtml;
+		//Parse geojson dict (instead of reading from geojson.js - doesn't really matter if you want to load from geojson.js, was just quicker to prototype) 
+		var geojson = JSON.parse(allOutputData['geoDict']);
+		console.log(geojson);
+
+		function onEachFeature(feature, layer) {
+			var popup = '';
+			if (feature.properties['popupContent']) {
+				//popup += feature.properties['name']
+				popup += feature.properties['popupContent'];
+				layer.bindPopup(popup);
+			}
+		}
+
+		function pointToLayerNode(feature, latlng) {
+			let fillColorValue = 'gray';
+			let rad = 3;
+			return L.circleMarker(latlng, {
+				radius: rad,
+				fillColor: fillColorValue,
+				color: "#000",
+				weight: 1,
+				opacity: 1,
+				fillOpacity: 1,//0.8
+			});
+		}
+
+		function pointToEvent(feature, latlng) {
+			if (feature.properties['pointColor']){
+				let fillColorValue = feature.properties['pointColor'];
+				let rad = 6;
+			
+				return L.circleMarker(latlng, {
+					radius: rad,
+					fillColor: fillColorValue,
+					color: "#000",
+					weight: 1,
+					opacity: 1,
+					fillOpacity: 1,//0.8,
+					time: feature.properties['time'],
+					tempFillColor: fillColorValue
+				});
+			}
+		}
+
+		function lineStyle(feature){
+			if (feature.geometry['type'] == 'LineString'){
+				if (feature.properties.edgeColor){
+					return {
+						"color": feature.properties.edgeColor,
+						"time": feature.properties.time,
+						"colorTemp": feature.properties.edgeColor
+					}
+				}
+				else{
+					return {
+						"color": "black"
+					}
+				}
+			}
+			else if (feature.geometry['type'] == 'Polygon'){
+				return {
+					"color": "blue"
+				}
+			}
+		}
+
+		geojsonLayer = L.geoJSON(false, {
+					pointToLayer: pointToLayerNode,
+					onEachFeature: onEachFeature,
+				});
+		eventLayer = L.geoJSON(false, {
+					pointToLayer:
+						pointToEvent,
+					onEachFeature:
+						onEachFeature,
+					style: lineStyle
+				});
+
+		geojson.features.forEach(function(feature){
+			if (feature.geometry['type'] == 'Point'){
+				geojsonLayer.addData(feature);
+				eventLayer.addData(
+					feature);
+			}
+			else if (feature.geometry['type'] == 'LineString'){
+				eventLayer.addData(
+					feature);
+			}
+			else if (feature.geometry['type'] == 'Polygon'){
+				geojsonLayer.addData(feature);
+			}
+
+		});
+
+		var bounds = geojsonLayer.getBounds();
+		// var map = L.map('map').fitBounds(bounds);
+		var map = L.map('map', { renderer: L.canvas() }).fitBounds(bounds);
+		
+		mapLink = '<a href="http://openstreetmap.org">OpenStreetMap</a>';
+		L.tileLayer(
+			'http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+			attribution: '&copy; ' + mapLink + ' Contributors',
+			maxZoom: 18,
+			}).addTo(map);
+		L.control.scale().addTo(map);
+		geojsonLayer.addTo(map);
+		eventLayer.addTo(map);
+		
+		// var stepSizeVal = parseFloat(allInputData.stepSize)
+		var stepSizeVal = parseFloat(allOutputData['stepSize']) //This should be the value of the stepsize
+		// var maxTimeVal = parseFloat(allInputData.maxTime)
+		var maxTimeVal = parseFloat(allOutputData['numTimeSteps']) //This should be the value of the runtime
+		document.getElementById('input-number-min').setAttribute("min", 0);
+		document.getElementById('input-number-min').setAttribute("max", maxTimeVal-stepSizeVal*2);
+		document.getElementById('input-number-max').setAttribute("min", stepSizeVal);
+		document.getElementById('input-number-max').setAttribute("max", maxTimeVal-stepSizeVal);
+		// var runtimeVal = allInputData.runTime
+		var numSteps = maxTimeVal/stepSizeVal
+		var slidervar = document.getElementById('slider');
+		noUiSlider.create(slidervar, {
+			connect: true,
+			step: stepSizeVal,
+			start: [ 0, maxTimeVal-stepSizeVal ],
+			range: {
+				min: 0,
+				max: maxTimeVal-stepSizeVal
+			}
+		});
+		// document.getElementById('input-number-min').setAttribute("value", 1);
+		// document.getElementById('input-number-max').setAttribute("value", 24);
+		document.getElementById('input-number-min').setAttribute("value", 0);
+		document.getElementById('input-number-max').setAttribute("value", maxTimeVal-stepSizeVal);
+
+		var inputNumberMin = document.getElementById('input-number-min');
+		var inputNumberMax = document.getElementById('input-number-max');
+		inputNumberMin.addEventListener('change', function(){
+			slidervar.noUiSlider.set([this.value, null]);
+		});
+		inputNumberMax.addEventListener('change', function(){
+			slidervar.noUiSlider.set([null, this.value]);
+		});
+
+		slidervar.noUiSlider.on('update', function( values, handle ) {
+			//handle = 0 if min-slider is moved and handle = 1 if max slider is moved
+			if (handle==0){
+				document.getElementById('input-number-min').value = values[0];
+			} else {
+				document.getElementById('input-number-max').value =  values[1];
+			}
+			rangeMin = document.getElementById('input-number-min').value;
+			rangeMax = document.getElementById('input-number-max').value;
+			eventLayer.eachLayer(function(layer){
+				if (((parseInt(layer.options.time) <= rangeMax) && (parseInt(layer.options.time) >= rangeMin)) || layer.options.colorTemp == 'red'){
+					layer.setStyle({
+						radius: 6,
+						fillColor: layer.options.tempFillColor,
+						"color": layer.options.colorTemp
+					});
+					layer.bringToFront()
+				}
+				else{
+					layer.setStyle({
+						radius: 1,
+						fillColor: 'black',
+						"color": 'black'
+					});
+					layer.bringToBack()
+				}
+			});
+		})
+	}
+	</script>
+	{{ rawOutputFiles }}
 	</div>
 	{% endif %}
 </body>
