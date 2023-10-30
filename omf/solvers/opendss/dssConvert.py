@@ -136,11 +136,11 @@ def dss_to_clean_via_save(dss_file, clean_out_path, add_pf_syntax=True, clean_up
 	if add_pf_syntax:
 		powerflow_slug = '\n\n!powerflow code\nset maxiterations=1000\nset maxcontroliter=1000\ncalcv\nsolve\nshow quantity=voltage'
 		clean_out = clean_out + powerflow_slug
-	# Optional: Fix repeated wdg=X keys
+	# Optional: Fix repeated wdg=X keys, where x=2
 	if fix_rptd_keys:
 		cleaner_out = ''
 		for line in clean_out.split('\n'):
-			if 'transformer' in line:
+			if '\"transformer' in line:
 				line = fix_repeated_keys(line)
 			cleaner_out += line + '\n'
 		clean_out = cleaner_out

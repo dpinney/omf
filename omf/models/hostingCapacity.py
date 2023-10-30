@@ -32,12 +32,21 @@ def bar_chart_coloring( row ):
 		color = 'red'
 	return color
 
-def createColorCSV( df ):
+def createColorCSV(modelDir, df):
 	new_df = df[['bus','max_kw']]
-	new_df.to_csv('color_by.csv', index=False)
+	new_df.to_csv(pJoin(modelDir, 'color_by.csv'), index=False)
 
 def work(modelDir, inputDict):
 	outData = {}
+	if inputDict['runAmiAlgorithm'] == 'on':
+		run_ami_algorithm(modelDir, inputDict, outData)
+	if inputDict.get('optionalCircuitFile', outData) == 'on':
+		run_traditional_algorithm(modelDir, inputDict, outData)
+	outData['stdout'] = "Success"
+	outData['stderr'] = ""
+	return outData
+
+def run_ami_algorithm(modelDir, inputDict, outData):
 	# mohca data-driven hosting capacity
 	with open(pJoin(modelDir,inputDict['inputDataFileName']),'w', newline='') as pv_stream:
 		pv_stream.write(inputDict['inputDataFileContent'])
@@ -63,57 +72,56 @@ def work(modelDir, inputDict):
 	barChartDF['thermal_cap_kW'] = [7.23, 7.34, 7.45, 7.53, 7.24, 6.24, 7.424, 7.23 ]
 	barChartDF['max_cap_allowed_kW'] = np.minimum( barChartDF['voltage_cap_kW'], barChartDF['thermal_cap_kW'])
 	mohcaBarChartFigure = px.bar(barChartDF, x='busname', y=['voltage_cap_kW', 'thermal_cap_kW', 'max_cap_allowed_kW'], barmode='group', color_discrete_sequence=["green", "lightblue", "MediumPurple"], template="simple_white" )
-	# traditional hosting capacity if they uploaded an omd circuit file and chose to use it.
-	circuitFileStatus = inputDict.get('optionalCircuitFile', 0)
-	if ( circuitFileStatus == 'on' ):
-		feederName = [x for x in os.listdir(modelDir) if x.endswith('.omd')][0]
-		inputDict['feederName1'] = feederName
-		path_to_omd = pJoin(modelDir, feederName)
-		tree = opendss.dssConvert.omdToTree(path_to_omd)
-		opendss.dssConvert.treeToDss(tree, pJoin(modelDir, 'circuit.dss'))
-		traditionalHCResults = opendss.hosting_capacity_all(pJoin(modelDir, 'circuit.dss'), int(inputDict["traditionalHCSteps"]), int(inputDict["traditionalHCkW"]))
-		tradHCDF = pd.DataFrame(traditionalHCResults)
-		tradHCDF['plot_color'] = tradHCDF.apply ( lambda row: bar_chart_coloring(row), axis=1 )
-		traditionalHCFigure = px.bar( tradHCDF, x='bus', y='max_kw', barmode='group', color='plot_color', color_discrete_map={ 'red': 'red', 'orange': 'orange', 'green': 'green', 'yellow': 'yellow'}, template='simple_white' )
-		traditionalHCFigure.update_xaxes(categoryorder='array', categoryarray=tradHCDF.bus.values)
-		colorToKey = {'orange':'thermal_violation', 'yellow': 'voltage_violation', 'red': 'both_violation', 'green': 'no_violation'}
-		traditionalHCFigure.for_each_trace(
-			lambda t: t.update(
-				name = colorToKey[t.name],
-				legendgroup = colorToKey[t.name],
-				hovertemplate = t.hovertemplate.replace(t.name, colorToKey[t.name])
-				)
-			)
-		tradHCDF.drop(tradHCDF.columns[len(tradHCDF.columns)-1], axis=1, inplace=True)
-		createColorCSV(tradHCDF)
-		attachment_keys = {
-		"coloringFiles": {
-			"color_by.csv": {
-				"csv": "<content>",
-				"colorOnLoadColumnIndex": "1"
-			}
-		}
-		}
-		data = Path( modelDir,'color_by.csv' ).read_text()
-		attachment_keys['coloringFiles']['color_by.csv']['csv'] = data
-		omd = json.load(open(path_to_omd))
-		new_path = './color_test.omd'
-		omd['attachments'] = attachment_keys
-		with open(new_path, 'w+') as out_file:
-				json.dump(omd, out_file, indent=4)
-		omf.geo.map_omd(new_path, modelDir, open_browser=False )
-		outData['traditionalHCMap'] = open( pJoin( modelDir, "geoJson_offline.html"), 'r' ).read()
-		outData['traditionalGraphData'] = json.dumps( traditionalHCFigure, cls=py.utils.PlotlyJSONEncoder )
-		outData['traditionalHCTableHeadings'] = tradHCDF.columns.values.tolist()
-		outData['traditionalHCTableValues'] = ( list( tradHCDF.itertuples(index=False, name=None)))
-	# write final outputs
-	outData['stdout'] = "Success"
-	outData['stderr'] = ""
 	outData['mohcaHistogramFigure'] = json.dumps( mohcaHistogramFigure, cls=py.utils.PlotlyJSONEncoder )
 	outData['mohcaBarChartFigure'] = json.dumps( mohcaBarChartFigure, cls=py.utils.PlotlyJSONEncoder )
 	outData['mohcaHCTableHeadings'] = mohcaResults.columns.values.tolist()
 	outData['mohcaHCTableValues'] = ( list(mohcaResults.sort_values( by="voltage_cap_kW", ascending=False, ignore_index=True ).itertuples(index=False, name=None)) ) #NOTE: kW_hostable
-	return outData
+
+def run_traditional_algorithm(modelDir, inputDict, outData):
+	# traditional hosting capacity if they uploaded an omd circuit file and chose to use it.
+	feederName = [x for x in os.listdir(modelDir) if x.endswith('.omd')][0]
+	inputDict['feederName1'] = feederName[:-4]
+	path_to_omd = pJoin(modelDir, feederName)
+	tree = opendss.dssConvert.omdToTree(path_to_omd)
+	opendss.dssConvert.treeToDss(tree, pJoin(modelDir, 'circuit.dss'))
+	curr_dir = os.getcwd()
+	traditionalHCResults = opendss.hosting_capacity_all(pJoin(modelDir, 'circuit.dss'), int(inputDict["traditionalHCSteps"]), int(inputDict["traditionalHCkW"]))
+    # - opendss.hosting_capacity_all() changes the cwd, so change it back so other code isn't affected
+	os.chdir(curr_dir)
+	tradHCDF = pd.DataFrame(traditionalHCResults)
+	tradHCDF['plot_color'] = tradHCDF.apply ( lambda row: bar_chart_coloring(row), axis=1 )
+	traditionalHCFigure = px.bar( tradHCDF, x='bus', y='max_kw', barmode='group', color='plot_color', color_discrete_map={ 'red': 'red', 'orange': 'orange', 'green': 'green', 'yellow': 'yellow'}, template='simple_white' )
+	traditionalHCFigure.update_xaxes(categoryorder='array', categoryarray=tradHCDF.bus.values)
+	colorToKey = {'orange':'thermal_violation', 'yellow': 'voltage_violation', 'red': 'both_violation', 'green': 'no_violation'}
+	traditionalHCFigure.for_each_trace(
+		lambda t: t.update(
+			name = colorToKey[t.name],
+			legendgroup = colorToKey[t.name],
+			hovertemplate = t.hovertemplate.replace(t.name, colorToKey[t.name])
+			)
+		)
+	tradHCDF.drop(tradHCDF.columns[len(tradHCDF.columns)-1], axis=1, inplace=True)
+	createColorCSV(modelDir, tradHCDF)
+	attachment_keys = {
+	"coloringFiles": {
+		"color_by.csv": {
+			"csv": "<content>",
+			"colorOnLoadColumnIndex": "1"
+		}
+	}
+	}
+	data = Path(modelDir, 'color_by.csv').read_text()
+	attachment_keys['coloringFiles']['color_by.csv']['csv'] = data
+	omd = json.load(open(path_to_omd))
+	new_path = Path(modelDir, 'color_test.omd')
+	omd['attachments'] = attachment_keys
+	with open(new_path, 'w+') as out_file:
+		json.dump(omd, out_file, indent=4)
+	omf.geo.map_omd(new_path, modelDir, open_browser=False )
+	outData['traditionalHCMap'] = open(pJoin(modelDir, "geoJson_offline.html"), 'r' ).read()
+	outData['traditionalGraphData'] = json.dumps(traditionalHCFigure, cls=py.utils.PlotlyJSONEncoder )
+	outData['traditionalHCTableHeadings'] = tradHCDF.columns.values.tolist()
+	outData['traditionalHCTableValues'] = (list(tradHCDF.itertuples(index=False, name=None)))
 
 def runtimeEstimate(modelDir):
 	''' Estimated runtime of model in minutes. '''
@@ -132,7 +140,8 @@ def new(modelDir):
 		"feederName1": 'iowa240.clean.dss',
 		"traditionalHCSteps": 10,
 		"optionalCircuitFile": 'on',
-		"traditionalHCkW": 10
+		"traditionalHCkW": 10,
+		"runAmiAlgorithm": 'on'
 	}
 	creationCode = __neoMetaModel__.new(modelDir, defaultInputs)
 	try:
