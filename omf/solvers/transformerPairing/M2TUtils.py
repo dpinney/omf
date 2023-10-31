@@ -153,7 +153,7 @@ def CC_EnsMedian(voltage,windowSize,custID):
                     were removed from all windows
             """    
         
-    print('Starting Correlation Coefficient calculation')
+    # print('Starting Correlation Coefficient calculation')
     ensTotal = int(np.floor(voltage.shape[0] / windowSize))
     ccMatrixAll = np.zeros((voltage.shape[1],voltage.shape[1],ensTotal),dtype=float)
     ccMatrix = np.zeros((voltage.shape[1],voltage.shape[1]),dtype=float)
@@ -375,8 +375,8 @@ def ParamEst_LinearRegression(voltage,pAvg,qAvg,saveFlag=True,savePath=-1):
     # Walk through each customer pairing and do the regression, note that the 
     #resulting matrices are mirrored across the diagonal
     for custCtr in range(0,voltage.shape[1]):
-        if np.mod(custCtr,20)==0:
-            print('Customer ' + str(custCtr) + '/' + str(voltage.shape[1]))
+        #if np.mod(custCtr,20)==0:
+        #    print('Customer ' + str(custCtr) + '/' + str(voltage.shape[1]))
         ctr = custCtr + 1
         while ctr < voltage.shape[1]:
             #print(str(custCtr) + ' / ' + str(ctr))
@@ -691,7 +691,7 @@ def FindMinMSE(mseMatrix,additiveFactor):
     mseNo0 = deepcopy(mseMatrix)
     mseNo0[mseNo0==0] = 1000
     minMSE = np.min(np.min(mseNo0))
-    print('minMSE value =  ' + str(minMSE))
+    # print('minMSE value =  ' + str(minMSE))
     mseThreshold = minMSE + additiveFactor
     return minMSE, mseThreshold
 # End of FindMinMSE
