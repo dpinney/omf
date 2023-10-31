@@ -69,6 +69,32 @@
 	<style>td, th {padding:7 0 5 20;text-align: left;font-size:0.8em; border: 1px solid #cccccc;} </style>
 	<div id="output">
 		<p class="reportTitle">Meter to Transformer Pairing Algorithm Results</p>
+		<p class="reportTitle">Customers Whose Transformer Labels/Groupings Have Changed</p>
+		<div id="customersChangedTable" class="tightContent">
+			<table style='margin:5px;width:990px'>
+				<caption></caption>
+				<tr>
+				{% for header in allOutputDataDict["customerTableHeadings"] %}
+					<th>{{ header }}</th>
+					{% endfor %}
+				</tr>
+				{% for values in allOutputDataDict["customerTableValues"] %}
+				<tr>
+					{% for val in values %}
+					<td>{{ val }}</td>
+					{% endfor %}
+				</tr>
+				{% endfor %}
+			</table> 
+		</div>
+		{% if allOutputDataDict['useTrueLabels'] == True %}
+			<pre style="text-align: center;">
+				There were originally {{ allOutputDataDict['incorrectTransOrg'] }} incorrect transformer groupings with the interjected incorrect labels
+				After running the algorithm, there are {{ allOutputDataDict['incorrectTransPostAlgo'] }} incorrect transformer groupings
+				{{ allOutputDataDict['improvementNum'] }} transformer groupings were corrected
+				Improvement rate: {{ allOutputDataDict['improvementPercentage'] }}
+			</pre>
+		{% endif %}
 		{{ rawOutputFiles }}
 	</div>
 	{% endif %}

@@ -72,6 +72,8 @@ def work(modelDir, inputDict):
 	''' Run the model in its directory. '''
 
 	useTrueLabels = True # specifies whether to load and use ground truth transformer labels, this will be true when using the provided sample data
+	outData = {}
+	outData['useTrueLabels'] = useTrueLabels
 
 	with open(Path(modelDir,inputDict['voltageInputDataFileName']),'w', newline='') as pv_stream:
 		pv_stream.write(inputDict['voltageInputDataFileContent'])
@@ -148,7 +150,7 @@ def work(modelDir, inputDict):
 	#
 
 	# Calculate the pairwise linear regression
-	print('Starting regression calculation')
+	# print('Starting regression calculation')
 	r2Affinity,rDist,xDist,regRDistIndiv,regXDistIndiv,mseMatrix = transformerPairing.M2TUtils.ParamEst_LinearRegression(voltageInput,pDataInput,qDataInput,savePath=saveResultsPath)
 
 	additiveFactor = 0.02
@@ -177,8 +179,7 @@ def work(modelDir, inputDict):
 	# In the sample data customer_4 was injected with an incorrect label and should now be grouped with customer_5 and customer_6
 	# customer_53 was also injected with an incorrect label and should now be grouped with customer_54 and customer_55
 
-	transformerPairing.M2TUtils.PrettyPrintChangedCustomers(predictedTransLabels,transLabelsErrors,custIDInput)
-
+	#transformerPairing.M2TUtils.PrettyPrintChangedCustomers(predictedTransLabels,transLabelsErrors,custIDInput)
 
 	# This function calculates two transformer level metrics of accuracy that we have been using
 	# incorrectTrans is a list of incorrect transformers where incorrect means customers added or omitted to the correct grouping
@@ -190,14 +191,13 @@ def work(modelDir, inputDict):
 			incorrectTransOrg,incorrectPairedIndicesOrg, incorrectPairedIDsOrg= transformerPairing.M2TUtils.CalcTransPredErrors(transLabelsErrors,transLabelsTrue,custIDInput, singleCustMarker=-999)
 			improvementNum = (len(incorrectTransOrg) - len(incorrectTrans))
 			improvementPercent = np.round(((improvementNum  / len(incorrectTransOrg)) * 100),decimals=2)
-			print('')
-			print('There were originally ' + str(len(incorrectTransOrg)) + ' incorrect transformer groupings with the injected incorrect labels')
-			print('After running algorithm there are ' + str(len(incorrectTrans)) + ' incorrect transformer groupings')
-			print(str(improvementNum) + ' transformer groupings were corrected, which is an improvement of ' + str(improvementPercent) + '%')
+			outData['incorrectTransOrg'] = str(len(incorrectTransOrg))
+			outData['incorrectTransPostAlgo'] = str(len(incorrectTrans))
+			outData['improvementNum'] = str(improvementNum)
+			outData['improvementPercentage'] = str(improvementPercent) + '%'
 			# In the sample data, these will be empty because all customers were correctly grouped together by their service transformer.  
 
 	# Write output to a csv file
-	print('')
 	if useTrueLabels:
 			df = pd.DataFrame()
 			df['customer ID'] = custIDInput
@@ -211,30 +211,28 @@ def work(modelDir, inputDict):
 			df['Original Transformer Labels (with errors)'] = transLabelsErrors[0,:]
 			df['Predicted Transformer Labels'] = predictedTransLabels[0,:]
 			df.to_csv(Path(saveResultsPath,'outputs_PredictedTransformerLabels.csv'))
-	print('Predicted transformer labels written to outputs_PredictedTransformerLabels.csv')
+	# print('Predicted transformer labels written to outputs_PredictedTransformerLabels.csv')
 
 	df = pd.DataFrame()
 	df['Ranked Flagged Transformers'] = flaggedTrans
 	df.to_csv(Path(saveResultsPath,'outputs_RankedFlaggedTransformers.csv'))
-	print('Flagged and ranked transformers written to outputs_RankedFlaggedTransformers.csv')
+	# print('Flagged and ranked transformers written to outputs_RankedFlaggedTransformers.csv')
 
 	changedIndices = np.where(predictedTransLabels != transLabelsErrors)[1]
-	df = pd.DataFrame()
-	df['customer ID'] = list(np.array(custIDInput)[changedIndices])
-	df['Original Transformer Labels (with Errors)'] = transLabelsErrors[0,changedIndices]
-	df['Predicted Transformer Labels'] = predictedTransLabels[0,changedIndices]
+	changedCustomersDF = pd.DataFrame()
+	changedCustomersDF['customer ID'] = list(np.array(custIDInput)[changedIndices])
+	changedCustomersDF['Original Transformer Labels (with Errors)'] = transLabelsErrors[0,changedIndices]
+	changedCustomersDF['Predicted Transformer Labels'] = predictedTransLabels[0,changedIndices]
 	filename = 'ChangedCustomers_M2T.csv'
-	df.to_csv(Path(saveResultsPath,filename))
-	print('All customers with changed transformer labels written to ChangedCustomers_M2T.csv')
+	changedCustomersDF.to_csv(Path(saveResultsPath,filename))
+	# print('All customers with changed transformer labels written to ChangedCustomers_M2T.csv')
 
-	# Delete output file every run if it exists
-	outData = {}		
-	# Model operations goes here.
-	outData["output"] = "none"
-	# Model operations typically ends here.
-	# Stdout/stderr.
-	outData["stdout"] = "Success"
-	outData["stderr"] = ""
+	# Delete output file every run if it exists	
+	outData['minMSEValue'] = minMSE
+	outData['customerTableHeadings'] = changedCustomersDF.columns.values.tolist()
+	outData['customerTableValues'] = ( list(changedCustomersDF.sort_values( by="customer ID", ascending=True, ignore_index=True ).itertuples(index=False, name=None)))
+	outData['stdout'] = "Success"
+	outData['stderr'] = ""
 	return outData
 
 def runtimeEstimate(modelDir):
