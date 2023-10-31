@@ -72,10 +72,11 @@ def run_ami_algorithm(modelDir, inputDict, outData):
 	barChartDF['thermal_cap_kW'] = [7.23, 7.34, 7.45, 7.53, 7.24, 6.24, 7.424, 7.23 ]
 	barChartDF['max_cap_allowed_kW'] = np.minimum( barChartDF['voltage_cap_kW'], barChartDF['thermal_cap_kW'])
 	mohcaBarChartFigure = px.bar(barChartDF, x='busname', y=['voltage_cap_kW', 'thermal_cap_kW', 'max_cap_allowed_kW'], barmode='group', color_discrete_sequence=["green", "lightblue", "MediumPurple"], template="simple_white" )
+	mohcaBarChartFigure.add_traces( list(px.line(barChartDF, x='busname', y='max_cap_allowed_kW', markers=True).select_traces()) )
 	outData['mohcaHistogramFigure'] = json.dumps( mohcaHistogramFigure, cls=py.utils.PlotlyJSONEncoder )
 	outData['mohcaBarChartFigure'] = json.dumps( mohcaBarChartFigure, cls=py.utils.PlotlyJSONEncoder )
 	outData['mohcaHCTableHeadings'] = mohcaResults.columns.values.tolist()
-	outData['mohcaHCTableValues'] = ( list(mohcaResults.sort_values( by="voltage_cap_kW", ascending=False, ignore_index=True ).itertuples(index=False, name=None)) ) #NOTE: kW_hostable
+	outData['mohcaHCTableValues'] = ( list(mohcaResults.sort_values( by="max_cap_allowed_kW", ascending=False, ignore_index=True ).itertuples(index=False, name=None)) )
 
 def run_traditional_algorithm(modelDir, inputDict, outData):
 	# traditional hosting capacity if they uploaded an omd circuit file and chose to use it.
