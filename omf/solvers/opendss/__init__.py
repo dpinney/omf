@@ -1,5 +1,4 @@
 ''' Run OpenDSS and plot the results for arbitrary circuits. '''
-from shutil import rmtree
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
@@ -13,7 +12,6 @@ from copy import deepcopy
 import opendssdirect as dss
 from opendssdirect import run_command, Error
 from omf.solvers.opendss import dssConvert
-import omf
 
 def runDssCommand(dsscmd, strict=False):
 	'''Execute a single opendsscmd in the current context.'''
@@ -414,7 +412,7 @@ def hosting_capacity_max(FNAME, GEN_BUSES, STEPS, KW):
 		# Individual caps left.
 		cap_left = {}
 		for bus in GEN_BUSES:
-			df, ind_max_kw = hosting_capacity(FNAME, [bus], STEPS, KW)
+			df, ind_max_kw = hosting_capacity_with_return(FNAME, [bus], STEPS, KW)
 			cap_left[bus] = ind_max_kw
 		# print(cap_left)
 		# Drop zeroes and lowest
@@ -1266,6 +1264,7 @@ def rollUpLoadTransformer(tree, combine_loads=True):
 	return tree
 
 def _tests():
+	import omf
 	fpath = ['ieee37.clean.dss','ieee123_solarRamp.clean.dss','iowa240.clean.dss','ieeeLVTestCase.clean.dss','ieee8500-unbal_no_fuses.clean.dss']
 	for fname in fpath:
 		ckt = omf.omfDir + '/solvers/opendss/' + fname
@@ -1312,6 +1311,7 @@ def _tests():
 		# maxDerrA = pd.Series(maxDerrA).max()
 		# maxDerrM = [rsumm_D.loc['RMSE',c] for c in rsumm_D.columns if c.lower().startswith(' magnitude')]
 		# maxDerrM = pd.Series(maxDerrM).max()
+		# from shutil import rmtree
 		# os.remove(outckt_loc)
 		# rmtree(outdir)
 		#print('Objects removed: %s (of %s).\nPercent reduction: %s%%\nMax RMSPE for voltage magnitude: %s%%\nMax RMSPE for voltage angle: %s%%\nMax RMSE for voltage magnitude: %s\nMax RMSE for voltage angle: %s\n'%(oldsz-newsz, oldsz, (oldsz-newsz)*100/oldsz, maxPerrM, maxPerrA, maxDerrM, maxDerrA)) # DEBUG

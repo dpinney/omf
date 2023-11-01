@@ -2,12 +2,10 @@
 import os
 import json
 import warnings
-from omf import distNetViz
 import random
 import math
 import tempfile
 import networkx as nx
-import omf
 from collections import OrderedDict, defaultdict
 
 # Wireframe for new OMD objects:
@@ -601,6 +599,8 @@ def getDssCoordinates(omdFilePath, outFilePath):
 def _testsFull():
 	from omf.solvers.opendss import getVoltages, voltageCompare
 	import pandas as pd
+	from omf import distNetViz
+	import omf
 	rpt_key_lines = [
 		'new object=transformer.t86066_a phases=1 windings=2 xhl=2 buses=[pc-59734.1.0,t86066.1.0] conns=[wye,wye] kvs=[7.2,0.12] kvas=[15,15] taps=[1,1] wdg=1 %r=0 rdcohms=0 wdg=2 %r=0 rdcohms=0',
 		'new object=transformer.reg570190_c phases=1 windings=2 xhl=1e-6 buses=[rb133.3,reg570190.3] conns=[wye,wye] kvs=[7.2,7.2] kvas=[4723.2,4723.2] taps=[1,1] wdg=1 %r=1e-6 rdcohms=9.329269e-8 wdg=2 %r=1e-6 rdcohms=9.329269e-8 numtaps=1000 maxtap=1.1 mintap=0.9'
