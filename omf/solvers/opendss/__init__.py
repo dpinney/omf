@@ -1,6 +1,5 @@
 ''' Run OpenDSS and plot the results for arbitrary circuits. '''
-
-import shutil
+from shutil import rmtree
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
@@ -8,15 +7,11 @@ import networkx as nx
 from networkx.algorithms.traversal.depth_first_search import dfs_tree
 import math
 import os
-from os.path import join as pJoin
 import warnings
 import subprocess
 from copy import deepcopy
-try:
-	import opendssdirect as dss
-	from opendssdirect import run_command, Error
-except:
-	warnings.warn('opendssdirect not installed; opendss functionality disabled.')
+import opendssdirect as dss
+from opendssdirect import run_command, Error
 from omf.solvers.opendss import dssConvert
 import omf
 
@@ -1317,7 +1312,6 @@ def _tests():
 		# maxDerrA = pd.Series(maxDerrA).max()
 		# maxDerrM = [rsumm_D.loc['RMSE',c] for c in rsumm_D.columns if c.lower().startswith(' magnitude')]
 		# maxDerrM = pd.Series(maxDerrM).max()
-		# from shutil import rmtree
 		# os.remove(outckt_loc)
 		# rmtree(outdir)
 		#print('Objects removed: %s (of %s).\nPercent reduction: %s%%\nMax RMSPE for voltage magnitude: %s%%\nMax RMSPE for voltage angle: %s%%\nMax RMSE for voltage magnitude: %s\nMax RMSE for voltage angle: %s\n'%(oldsz-newsz, oldsz, (oldsz-newsz)*100/oldsz, maxPerrM, maxPerrA, maxDerrM, maxDerrA)) # DEBUG

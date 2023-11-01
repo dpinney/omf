@@ -8,8 +8,7 @@ import math
 import tempfile
 import networkx as nx
 import omf
-from collections import OrderedDict
-from collections import defaultdict
+from collections import OrderedDict, defaultdict
 
 def cyme_to_dss(cyme_dir, out_path, inter_dir=None):
 	''' Converts cyme txt files into an opendss file with nrel/ditto.
