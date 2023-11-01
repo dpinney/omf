@@ -167,7 +167,7 @@ def dssToTree(pathToDssOrString, is_path=True):
 		# Remove whitespace.
 		contents[i] = line.strip()
 		# Comment removal
-		bangLoc = line.find('!')
+		bangLoc = line.find('!') #NOTE: we don't remove // style quotes, which is a BUG but is also a feature if it's a single line comment and it's still structured as a valid DSS object in our style.
 		if bangLoc != -1:
 			contents[i] = line[:bangLoc]
 		# Join using the tilde (~) syntax
