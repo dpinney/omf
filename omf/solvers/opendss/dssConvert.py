@@ -2,13 +2,24 @@
 import os
 import json
 import warnings
-from omf import feeder, distNetViz
+from omf import distNetViz
 import random
 import math
 import tempfile
 import networkx as nx
 import omf
 from collections import OrderedDict, defaultdict
+
+# Wireframe for new OMD objects:
+newFeederWireframe = {
+	"links":[],
+	"hiddenLinks":[],
+	"nodes":[],
+	"hiddenNodes":[],
+	"layoutVars":{"theta":"0.8","gravity":"0.01","friction":"0.9","linkStrength":"5","linkDistance":"5","charge":"-5"},
+	"tree": {},
+	"attachments":{}
+}
 
 def cyme_to_dss(cyme_dir, out_path, inter_dir=None):
 	''' Converts cyme txt files into an opendss file with nrel/ditto.
@@ -473,7 +484,7 @@ def evilGldTreeToDssTree(evil_gld_tree):
 	return dssTree
 
 def evilToOmd(evilTree, outPath):
-	omdStruct = dict(feeder.newFeederWireframe)
+	omdStruct = dict(newFeederWireframe)
 	omdStruct['syntax'] = 'DSS'
 	omdStruct['tree'] = evilTree
 	with open(outPath, 'w') as outFile:
