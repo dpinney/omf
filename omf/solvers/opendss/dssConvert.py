@@ -98,9 +98,9 @@ def dss_to_clean_via_save(dss_file, clean_out_path, add_pf_syntax=True, clean_up
 	ob_files = os.listdir(f'{dss_folder_path}')
 	oops_folders = [x for x in ob_files if os.path.isdir(f'{dss_folder_path}/{x}')]
 	# HACK: Handle subfolders
-	for i, folder in enumerate(oops_folders):
-		ob_files.remove(folder)
+	for folder in oops_folders:
 		ob_files.extend([f'{folder}/{x}' for x in os.listdir(f'{dss_folder_path}/{folder}')])
+		ob_files.remove(folder)
 	# Generate clean each of the object files.
 	clean_copies = {}
 	print('All files detected:', ob_files)
@@ -121,23 +121,26 @@ def dss_to_clean_via_save(dss_file, clean_out_path, add_pf_syntax=True, clean_up
 			ob_data = re.sub(r'(\d) +(\d|\-)', r'\1,\2', ob_data) # replace space-separated lists with comma-separated
 			ob_data = re.sub(r'(\d) +(\d|\-)', r'\1,\2', ob_data) # HACK: second space-sep replacement to make sure it works
 			ob_data = re.sub(r'zipv=([\d\.\-,]+)', r'zipv=(\1)', ob_data) # HACK: fix zipv with missing parens
-			ob_data = re.sub(r'(redirect |buscoords |giscoords |makebuslist)', r'!\1', ob_data) # remove troublesome Master.dss redirects.
+			ob_data = re.sub(r'(redirect |buscoords |giscoords |makebuslist)', r'! \1', ob_data) # remove troublesome Master.dss redirects.
 			clean_copies[fname.lower()] = ob_data
 	# Move subfolder data into main folder content list
 	for fname in clean_copies:
 		if '/' in fname:
 			folder, sub_fname = fname.split('/')
 			if sub_fname in clean_copies:
-				print(f'WARNING! Clobbering main folder data with subfolder data from {sub_fname}')
-			clean_copies[sub_fname] = clean_copies[fname]
+				print(f'WARNING! Combining {sub_fname} with other subfolder data')
+				clean_copies[sub_fname] += '\n\n\n' + clean_copies[fname]
+			else:
+				clean_copies[sub_fname] = clean_copies[fname]
 			del clean_copies[fname]
+	print('CLEAN COPIES AFTER MERGE:', clean_copies.keys())
 	# Special handling for buscoords
 	if 'buscoords.dss' in clean_copies:
 		bus_data = clean_copies['buscoords.dss']
 		nice_buses = re.sub(r'([\w_\-\.]+),([\w_\-\.]+),([\w_\-\.]+)', r'setbusxy bus=\1 x=\2 y=\3', bus_data)
 		clean_copies['buscoords.dss'] = 'makebuslist\n' + nice_buses
 	#HACK: This is the order in which things need to be inserted or opendss errors out. Lame! Also note that pluralized things are from subfolders.
-	CANONICAL_DSS_ORDER = ['master.dss', 'loadshape.dss', 'vsource.dss', 'transformer.dss', 'reactor.dss', 'regcontrol.dss', 'cndata.dss', 'wiredata.dss', 'linegeometry.dss', 'linecode.dss', 'spectrum.dss', 'swtcontrol.dss', 'tcc_curve.dss', 'capacitor.dss', 'capacitors.dss', 'growthshape.dss', 'line.dss', 'branches.dss', 'capcontrol.dss', 'generator.dss', 'pvsystem.dss', 'load.dss', 'loads.dss', 'energymeter.dss', 'monitor.dss', 'buscoords.dss', 'busvoltagebases.dss']
+	CANONICAL_DSS_ORDER = ['master.dss', 'loadshape.dss', 'vsource.dss', 'transformer.dss', 'transformers.dss', 'reactor.dss', 'regcontrol.dss', 'cndata.dss', 'wiredata.dss', 'linegeometry.dss', 'linecode.dss', 'spectrum.dss', 'swtcontrol.dss', 'tcc_curve.dss', 'capacitor.dss', 'capacitors.dss', 'growthshape.dss', 'line.dss', 'branches.dss', 'capcontrol.dss', 'generator.dss', 'pvsystem.dss', 'load.dss', 'loads.dss', 'energymeter.dss', 'monitor.dss', 'buscoords.dss', 'busvoltagebases.dss']
 	# Note files we got that aren't in canonical files:
 	for fname in clean_copies:
 		if fname not in CANONICAL_DSS_ORDER:
