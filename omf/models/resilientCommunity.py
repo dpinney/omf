@@ -39,7 +39,7 @@ from omf.models.__neoMetaModel__ import *
 
 # Model metadata:
 modelName, template = __neoMetaModel__.metadata(__file__)
-hidden = False
+hidden = True
 
   
 # Retrieves necessary data from ZIP File and exports to geojson
