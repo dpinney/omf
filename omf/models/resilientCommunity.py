@@ -510,5 +510,5 @@ def tests():
 	__neoMetaModel__.renderAndShow(modelLoc)
 
 if __name__ == '__main__':
-     #_disabled_tests()
-      #test()
+	#_disabled_tests()
+	#test()
