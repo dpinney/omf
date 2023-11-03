@@ -9,21 +9,21 @@ from os.path import join as pJoin
 import webbrowser
 import requests
 import zipfile
-import shapefile
+#import shapefile
 import io
 from io import BytesIO
 import numpy as np
 import json
 import math
 import pandas as pd
-from shapely.geometry import Polygon
-from shapely.geometry import Point
-from pyproj import Transformer
-import geopandas as gpd
-import matplotlib.colorbar as colorbar
-import matplotlib.colors as clr
+#from shapely.geometry import Polygon
+#from shapely.geometry import Point
+#from pyproj import Transformer
+#import geopandas as gpd
+#import matplotlib.colorbar as colorbar
+#import matplotlib.colors as clr
 import matplotlib.pyplot as plt
-import base64
+#import base64
 
 
 # OMF imports
