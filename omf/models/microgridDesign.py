@@ -703,7 +703,7 @@ def work(modelDir, inputDict):
 				x=outData['survivalProbX' + indexString],
 				y=outData['survivalProbY' + indexString],
 				line=dict( color=('red') ),
-				name="Load met by Battery")
+				name="Probability of Surviving Outage of a Given Duration")
 			plotData.append(survivalProb)
 			plotlyLayout['yaxis'].update(title='Probability of meeting critical Load')
 			plotlyLayout['xaxis'].update(title='Outage Length (Hours)')

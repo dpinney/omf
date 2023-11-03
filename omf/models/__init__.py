@@ -47,4 +47,6 @@ from omf.models import faultAnalysis
 from omf.models import vbatStacked
 from omf.models import disaggregation
 from omf.models import restoration
-from omf.models import socialBurden
+from omf.models import resilientCommunity
+from omf.models import microgridDesign2
+from omf.models import transformerPairing

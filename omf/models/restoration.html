@@ -83,7 +83,7 @@
 			<div class="shortInput">
 				<label class="tooltip">Event Information (.json file)<span class="classic">Please see the documentation at the help link for the required format</span></label>
 				<input id="eventFile" type="file" style="display:none" onchange="handle_files(this.files,'eventData','eventFileName')">
-				<input id="eventData" name="eventData" value="{{allInputDataDict.eventData}}" type="hidden">
+				<input id="eventData" name="eventData" value='{{allInputDataDict.eventData}}' type="hidden">
 				<div>
 					<label for="eventFile" class="fileButton">Choose File</label>
 					<input id="eventFileName" name="eventFileName" value="{{allInputDataDict.eventFileName}}" value='' readonly class="uploadFileName">
@@ -107,7 +107,7 @@
 			<div class="shortInput">
 				<label class="tooltip">Settings (.json file)<span class="classic">Please see the documentation at the help link for the required format. You can also select "Yes" for the "Generate Default Settings?" field to run using a generated default settings file.</span></label>
 				<input id="settingsFile" type="file" style="display:none" onchange="handle_files(this.files,'settingsData','settingsFileName')">
-				<input id="settingsData" name="settingsData" value="{{allInputDataDict.settingsData}}" type="hidden">
+				<input id="settingsData" name="settingsData" value='{{allInputDataDict.settingsData}}' type="hidden">
 				<div>
 					<label for="settingsFile" class="fileButton">Choose File</label>
 					<input id="settingsFileName" name="settingsFileName" value="{{allInputDataDict.settingsFileName}}" value='' readonly class="uploadFileName">
@@ -116,7 +116,7 @@
 			<div class="shortInput">
 				<label class="tooltip">Load Priorities (.json file)<span class="classic">Please see the documentation at the help link for the required format of custom load priority file input.</span></label>
 				<input id="loadPriorityFile" type="file" style="display:none" onchange="handle_files(this.files,'loadPriorityData','loadPriorityFileName')">
-				<input id="loadPriorityData" name="loadPriorityData" value="{{allInputDataDict.loadPriorityData}}" type="hidden">
+				<input id="loadPriorityData" name="loadPriorityData" value='{{allInputDataDict.loadPriorityData}}' type="hidden">
 				<div>
 					<label for="loadPriorityFile" class="fileButton">Choose File</label>
 					<input id="loadPriorityFileName" name="loadPriorityFileName" value="{{allInputDataDict.loadPriorityFileName}}" value='' readonly class="uploadFileName">
@@ -132,7 +132,7 @@
 			<div class="shortInput">
 				<label class="tooltip">Cached Output (.json file)<span class="classic">Please see the documentation at the help link for the required format</span></label>
 				<input id="outputFile" type="file" style="display:none" onchange="handle_files(this.files,'outputData','outputFileName')">
-				<input id="outputData" name="outputData" value="{{allInputDataDict.outputData}}" type="hidden">
+				<input id="outputData" name="outputData" value='{{allInputDataDict.outputData}}' type="hidden">
 				<div>
 					<label for="outputFile" class="fileButton">Choose File</label>
 					<input id="outputFileName" name="outputFileName" value="{{allInputDataDict.outputFileName}}" value='' readonly class="uploadFileName">
@@ -141,7 +141,7 @@
 			<div class="shortInput">
 				<label class="tooltip">Microgrid Tagging (.csv file)<span class="classic">Please see the documentation at the help link for the required format custom microgrid tagging file input.</span></label>
 				<input id="microgridTaggingFile" type="file" style="display:none" onchange="handle_files(this.files,'microgridTaggingData','microgridTaggingFileName')">
-				<input id="microgridTaggingData" name="microgridTaggingData" value="{{allInputDataDict.microgridTaggingData}}" type="hidden">
+				<input id="microgridTaggingData" name="microgridTaggingData" value='{{allInputDataDict.microgridTaggingData}}' type="hidden">
 				<div>
 					<label for="microgridTaggingFile" class="fileButton">Choose File</label>
 					<input id="microgridTaggingFileName" name="microgridTaggingFileName" value="{{allInputDataDict.microgridTaggingFileName}}" value='' readonly class="uploadFileName">
@@ -154,7 +154,7 @@
 			<div class="shortInput">
 				<label class="tooltip">Customer Information (.csv file)<span class="classic">Please see the documentation at the help link for the required format</span></label>
 				<input id="customerFile" type="file" style="display:none" onchange="handle_files(this.files,'customerData','customerFileName')">
-				<input id="customerData" name="customerData" value="{{allInputDataDict.customerData}}" type="hidden">
+				<input id="customerData" name="customerData" value='{{allInputDataDict.customerData}}' type="hidden">
 				<div>
 					<label for="customerFile" class="fileButton">Choose File</label>
 					<input id="customerFileName" name="customerFileName" value="{{allInputDataDict.customerFileName}}" value='' readonly class="uploadFileName">

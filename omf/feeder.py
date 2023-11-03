@@ -3,7 +3,7 @@
 import datetime, copy, os, re, warnings, json, platform
 from functools import reduce
 import networkx as nx
-
+from omf.solvers.opendss import dssConvert
 import matplotlib
 if platform.system() == 'Darwin':
 	matplotlib.use('TkAgg')
@@ -11,16 +11,8 @@ else:
 	matplotlib.use('Agg')
 from matplotlib import pyplot as plt
 
-# Wireframe for new feeder objects:
-newFeederWireframe = {
-	"links":[],
-	"hiddenLinks":[],
-	"nodes":[],
-	"hiddenNodes":[],
-	"layoutVars":{"theta":"0.8","gravity":"0.01","friction":"0.9","linkStrength":"5","linkDistance":"5","charge":"-5"},
-	"tree": {},
-	"attachments":{}
-}
+# Wireframe for new OMD objects:
+newFeederWireframe = dssConvert.newFeederWireframe
 
 def load(inPath, attachPaths=[]):
 	'''Load a .omd or .glm file in to an in-memory feeder object.

@@ -1,0 +1,76 @@
+<head>
+	{{ omfHeaders }}
+	<script src="{{pathPrefix}}/static/highcharts4.src.js"></script>
+	<script src="https://cdn.plot.ly/plotly-1.50.1.min.js"></script>
+	{% macro insert_file_upload_block(fileName, dataVariableName) -%}
+		<input id="{{dataVariableName}}Handler" type="file" style="display:none" onchange="handle_files(this.files,'{{dataVariableName}}','{{fileName}}')">
+		<input id="{{dataVariableName}}" name="{{dataVariableName}}" value="{{allInputDataDict[dataVariableName]}}" type="hidden">
+		<div>
+			<label for="{{dataVariableName}}Handler" class="fileButton">Choose File</label>
+			<input id="{{fileName}}" name="{{fileName}}" value="{{allInputDataDict[fileName]}}" readonly class="uploadFileName">    
+		</div>
+	{%- endmacro %}
+</head>
+<body>
+	{{ omfModelTitle }}
+	<p class="reportTitle">Model Input</p>
+	<div id="input" class="content">
+		<form name="inputForm" action="/runModel/" onsubmit="event.preventDefault(); return isFormValid();" method="post">
+			<!-- Required Inputs -->
+			<div class="shortInput">
+				<label>Model Type <a href="https://github.com/dpinney/omf/wiki/Models:-socialBurden" target="blank">Help?</a></label>
+				<input type="text" id="modelType" name="modelType" value="{{modelName}}" readonly/>
+			</div>
+			<div class="shortInput">
+				<label>Model Name</label>
+				<input type="text" id="modelName" name="modelName" value="{{allInputDataDict.modelName}}"pattern="^[\w\s\d\.-]+$" required="required">
+			</div>
+			<div class="shortInput">
+				<label>User</label>
+				<input type="text" id="user" name="user" value="{{allInputDataDict.user}}"readonly/>
+			</div>
+			<div class="shortInput">
+				<label>Created</label>
+				<input type="text" id="created" name="created" value="{{allInputDataDict.created}}"readonly/>
+			</div>
+			<div class="shortInput">
+				<label>Run Time</label>
+				<input type="text" id="runTime" name="runTime" value="{{allInputDataDict.runTime}}"readonly/>
+			</div>
+			<!-- Model Specific Inputs -->
+			<div class="wideInput">
+				<p class="inputSectionHeader">System Parameters</p>
+			</div>
+			<hr>
+			<div class="shortInput">
+				<label class="tooltip">Circuit Data Input File <span class="classic">Import a omd file to map</span></label>
+				<div>{{ insert_file_upload_block('inputDataFileName','inputDataFileContent') }}</div>
+			</div>
+			{{ omfModelButtons }}
+		</form>
+	</div>
+	{{ omfRunDebugBlock }}
+	{% if modelStatus == 'finished' %}
+	<style>td, th {padding:7 0 5 20;text-align: left;font-size:0.8em; border: 1px solid #cccccc;} </style>
+		<!-- Output tables, graphs, etc -->
+		<p class="reportTitle" style="page-break-before:always">Resilient Community Map</p>
+		<div id="resilienceMap" class="tightContent"></div>
+		<script>
+			var mapContent = allOutputData["resilienceMap"]
+			var iframe = document.createElement('iframe');
+			iframe.style = 'width:1000px; height:800px'
+
+			//const myImage = new Image(100, 200);
+			//myImage.src = '/Users/davidarmah/Documents/OMF/omf/omf/static/testFiles/legend.png';
+			//document.getElementById('resilienceMap').appendChild(myImage)
+			document.getElementById('resilienceMap').innerHTML = '<img src="/Users/davidarmah/Documents/OMF/omf/omf/static/testFiles/legend.png">';
+			document.getElementById('resilienceMap').appendChild(iframe);
+			iframe.contentWindow.document.open();
+			iframe.contentWindow.document.write(mapContent);
+			//iframe.contentWindow.document.write(img)
+			iframe.contentWindow.document.close();
+		</script>
+			{{ rawOutputFiles }}
+		</div>
+	{% endif %}
+</body>

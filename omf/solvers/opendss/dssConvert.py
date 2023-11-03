@@ -2,14 +2,22 @@
 import os
 import json
 import warnings
-from omf import feeder, distNetViz
 import random
 import math
 import tempfile
 import networkx as nx
-import omf
-from collections import OrderedDict
-from collections import defaultdict
+from collections import OrderedDict, defaultdict
+
+# Wireframe for new OMD objects:
+newFeederWireframe = {
+	"links":[],
+	"hiddenLinks":[],
+	"nodes":[],
+	"hiddenNodes":[],
+	"layoutVars":{"theta":"0.8","gravity":"0.01","friction":"0.9","linkStrength":"5","linkDistance":"5","charge":"-5"},
+	"tree": {},
+	"attachments":{}
+}
 
 def cyme_to_dss(cyme_dir, out_path, inter_dir=None):
 	''' Converts cyme txt files into an opendss file with nrel/ditto.
@@ -86,39 +94,53 @@ def dss_to_clean_via_save(dss_file, clean_out_path, add_pf_syntax=True, clean_up
 	# Run that saver file.
 	subprocess.run(['opendsscmd', 'saver.dss'], cwd=dirname)
 	dss_folder_path = f'{dirname}/SAVED_DSS'
-	# Get the object files.
+	# Get the object file paths
 	ob_files = os.listdir(f'{dss_folder_path}')
-	ob_files = sorted(ob_files)
+	oops_folders = [x for x in ob_files if os.path.isdir(f'{dss_folder_path}/{x}')]
+	# HACK: Handle subfolders
+	for folder in oops_folders:
+		ob_files.extend([f'{folder}/{x}' for x in os.listdir(f'{dss_folder_path}/{folder}')])
+		ob_files.remove(folder)
 	# Generate clean each of the object files.
 	clean_copies = {}
-	print('All files detected:',ob_files)
+	print('All files detected:', ob_files)
 	for fname in ob_files:
-		if os.path.isfile(f'{dss_folder_path}/{fname}'):
-			with open(f'{dss_folder_path}/{fname}', 'r') as ob_file:
-				ob_data = ob_file.read().lower() # lowercase everything
-				ob_data = ob_data.replace('"', '') # remove quote characters
-				ob_data = ob_data.replace('\t', ' ') # tabs to spaces
-				ob_data = re.sub(r' +', r' ', ob_data) # remove consecutive spaces
-				ob_data = re.sub(r'(^ +| +$)', r'', ob_data) # remove leading and trailing whitespace
-				ob_data = ob_data.replace('\n~', '') # remove tildes
-				ob_data = re.sub(r' *, *', r',', ob_data) # remove spaces around commas
-				ob_data = re.sub(r', *(\]|\))', r'\1', ob_data) # remove empty final list items
-				ob_data = re.sub(r' +\| +', '|', ob_data) # remove spaces around bar characters
-				ob_data = re.sub(r'(\[|\() *', r'\1', ob_data) # remove spaces after list start
-				ob_data = re.sub(r' *(\]|\))', r'\1', ob_data) # remove spaces before list end
-				ob_data = re.sub(r'(new|edit) ', r'\1 object=', ob_data) # add object= key
-				ob_data = re.sub(r'(\d) +(\d|\-)', r'\1,\2', ob_data) # replace space-separated lists with comma-separated
-				ob_data = re.sub(r'(\d) +(\d|\-)', r'\1,\2', ob_data) # HACK: second space-sep replacement to make sure it works
-				ob_data = re.sub(r'zipv=([\d\.\-,]+)', r'zipv=(\1)', ob_data) # HACK: fix zipv with missing parens
-				ob_data = re.sub(r'(redirect |buscoords |giscoords |makebuslist)', r'!\1', ob_data) # remove troublesome Master.dss redirects.
-				clean_copies[fname.lower()] = ob_data
+		with open(f'{dss_folder_path}/{fname}', 'r') as ob_file:
+			ob_data = ob_file.read().lower() # lowercase everything
+			ob_data = ob_data.replace('"', '') # remove quote characters
+			ob_data = ob_data.replace('\t', ' ') # tabs to spaces
+			ob_data = re.sub(r' +', r' ', ob_data) # remove consecutive spaces
+			ob_data = re.sub(r'(^ +| +$)', r'', ob_data) # remove leading and trailing whitespace
+			ob_data = ob_data.replace('\n~', '') # remove tildes
+			ob_data = re.sub(r' *, *', r',', ob_data) # remove spaces around commas
+			ob_data = re.sub(r', *(\]|\))', r'\1', ob_data) # remove empty final list items
+			ob_data = re.sub(r' +\| +', '|', ob_data) # remove spaces around bar characters
+			ob_data = re.sub(r'(\[|\() *', r'\1', ob_data) # remove spaces after list start
+			ob_data = re.sub(r' *(\]|\))', r'\1', ob_data) # remove spaces before list end
+			ob_data = re.sub(r'(new|edit) ', r'\1 object=', ob_data) # add object= key
+			ob_data = re.sub(r'(\d) +(\d|\-)', r'\1,\2', ob_data) # replace space-separated lists with comma-separated
+			ob_data = re.sub(r'(\d) +(\d|\-)', r'\1,\2', ob_data) # HACK: second space-sep replacement to make sure it works
+			ob_data = re.sub(r'zipv=([\d\.\-,]+)', r'zipv=(\1)', ob_data) # HACK: fix zipv with missing parens
+			ob_data = re.sub(r'(redirect |buscoords |giscoords |makebuslist)', r'! \1', ob_data) # remove troublesome Master.dss redirects.
+			clean_copies[fname.lower()] = ob_data
+	# Move subfolder data into main folder content list
+	for fname in clean_copies:
+		if '/' in fname:
+			folder, sub_fname = fname.split('/')
+			if sub_fname in clean_copies:
+				print(f'WARNING! Combining {sub_fname} with other subfolder data')
+				clean_copies[sub_fname] += '\n\n\n' + clean_copies[fname]
+			else:
+				clean_copies[sub_fname] = clean_copies[fname]
+			del clean_copies[fname]
+	print('CLEAN COPIES AFTER MERGE:', clean_copies.keys())
 	# Special handling for buscoords
 	if 'buscoords.dss' in clean_copies:
 		bus_data = clean_copies['buscoords.dss']
 		nice_buses = re.sub(r'([\w_\-\.]+),([\w_\-\.]+),([\w_\-\.]+)', r'setbusxy bus=\1 x=\2 y=\3', bus_data)
 		clean_copies['buscoords.dss'] = 'makebuslist\n' + nice_buses
-	#HACK: This is the order in which things need to be inserted or opendss errors out. Lame!
-	CANONICAL_DSS_ORDER = ['master.dss', 'loadshape.dss', 'vsource.dss', 'transformer.dss', 'reactor.dss', 'regcontrol.dss', 'cndata.dss', 'wiredata.dss', 'linegeometry.dss', 'linecode.dss', 'spectrum.dss', 'swtcontrol.dss', 'tcc_curve.dss', 'capacitor.dss', 'growthshape.dss', 'line.dss', 'generator.dss', 'load.dss', 'energymeter.dss', 'buscoords.dss', 'busvoltagebases.dss']
+	#HACK: This is the order in which things need to be inserted or opendss errors out. Lame! Also note that pluralized things are from subfolders.
+	CANONICAL_DSS_ORDER = ['master.dss', 'loadshape.dss', 'vsource.dss', 'transformer.dss', 'transformers.dss', 'reactor.dss', 'regcontrol.dss', 'cndata.dss', 'wiredata.dss', 'linegeometry.dss', 'linecode.dss', 'spectrum.dss', 'swtcontrol.dss', 'tcc_curve.dss', 'capacitor.dss', 'capacitors.dss', 'growthshape.dss', 'line.dss', 'branches.dss', 'capcontrol.dss', 'generator.dss', 'pvsystem.dss', 'load.dss', 'loads.dss', 'energymeter.dss', 'monitor.dss', 'buscoords.dss', 'busvoltagebases.dss']
 	# Note files we got that aren't in canonical files:
 	for fname in clean_copies:
 		if fname not in CANONICAL_DSS_ORDER:
@@ -147,6 +169,10 @@ def dss_to_clean_via_save(dss_file, clean_out_path, add_pf_syntax=True, clean_up
 	# Optional: remove intermediate files and write a single clean file.
 	if clean_up:
 		shutil.rmtree(dss_folder_path, ignore_errors=True)
+		try:
+			os.remove(f'{dirname}/saver.dss')
+		except:
+			pass
 	with open(clean_out_path, 'w') as out_file:
 		out_file.write(clean_out)
 
@@ -167,7 +193,7 @@ def dssToTree(pathToDssOrString, is_path=True):
 		# Remove whitespace.
 		contents[i] = line.strip()
 		# Comment removal
-		bangLoc = line.find('!')
+		bangLoc = line.find('!') #NOTE: we don't remove // style quotes, which is a BUG but is also a feature if it's a single line comment and it's still structured as a valid DSS object in our style.
 		if bangLoc != -1:
 			contents[i] = line[:bangLoc]
 		# Join using the tilde (~) syntax
@@ -474,7 +500,7 @@ def evilGldTreeToDssTree(evil_gld_tree):
 	return dssTree
 
 def evilToOmd(evilTree, outPath):
-	omdStruct = dict(feeder.newFeederWireframe)
+	omdStruct = dict(newFeederWireframe)
 	omdStruct['syntax'] = 'DSS'
 	omdStruct['tree'] = evilTree
 	with open(outPath, 'w') as outFile:
@@ -591,6 +617,8 @@ def getDssCoordinates(omdFilePath, outFilePath):
 def _testsFull():
 	from omf.solvers.opendss import getVoltages, voltageCompare
 	import pandas as pd
+	from omf import distNetViz
+	import omf
 	rpt_key_lines = [
 		'new object=transformer.t86066_a phases=1 windings=2 xhl=2 buses=[pc-59734.1.0,t86066.1.0] conns=[wye,wye] kvs=[7.2,0.12] kvas=[15,15] taps=[1,1] wdg=1 %r=0 rdcohms=0 wdg=2 %r=0 rdcohms=0',
 		'new object=transformer.reg570190_c phases=1 windings=2 xhl=1e-6 buses=[rb133.3,reg570190.3] conns=[wye,wye] kvs=[7.2,7.2] kvas=[4723.2,4723.2] taps=[1,1] wdg=1 %r=1e-6 rdcohms=9.329269e-8 wdg=2 %r=1e-6 rdcohms=9.329269e-8 numtaps=1000 maxtap=1.1 mintap=0.9'

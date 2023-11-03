@@ -19,7 +19,7 @@ from shutil import copyfile, copytree
 
 modelName, template = __neoMetaModel__.metadata(__file__)
 tooltip = "The cyberInverters model shows the impacts of inverter hacks on a feeder including system voltages, regulator actions, and capacitor responses."
-hidden = False
+hidden = True
 
 def work(modelDir, inputDict):
 	''' Run the model in its directory.'''
