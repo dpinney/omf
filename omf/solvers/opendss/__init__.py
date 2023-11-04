@@ -1,6 +1,4 @@
 ''' Run OpenDSS and plot the results for arbitrary circuits. '''
-
-import shutil
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
@@ -8,17 +6,12 @@ import networkx as nx
 from networkx.algorithms.traversal.depth_first_search import dfs_tree
 import math
 import os
-from os.path import join as pJoin
 import warnings
 import subprocess
 from copy import deepcopy
-try:
-	import opendssdirect as dss
-	from opendssdirect import run_command, Error
-except:
-	warnings.warn('opendssdirect not installed; opendss functionality disabled.')
+import opendssdirect as dss
+from opendssdirect import run_command, Error
 from omf.solvers.opendss import dssConvert
-import omf
 
 def runDssCommand(dsscmd, strict=False):
 	'''Execute a single opendsscmd in the current context.'''
@@ -419,7 +412,7 @@ def hosting_capacity_max(FNAME, GEN_BUSES, STEPS, KW):
 		# Individual caps left.
 		cap_left = {}
 		for bus in GEN_BUSES:
-			df, ind_max_kw = hosting_capacity(FNAME, [bus], STEPS, KW)
+			df, ind_max_kw = hosting_capacity_with_return(FNAME, [bus], STEPS, KW)
 			cap_left[bus] = ind_max_kw
 		# print(cap_left)
 		# Drop zeroes and lowest
@@ -1271,6 +1264,7 @@ def rollUpLoadTransformer(tree, combine_loads=True):
 	return tree
 
 def _tests():
+	import omf
 	fpath = ['ieee37.clean.dss','ieee123_solarRamp.clean.dss','iowa240.clean.dss','ieeeLVTestCase.clean.dss','ieee8500-unbal_no_fuses.clean.dss']
 	for fname in fpath:
 		ckt = omf.omfDir + '/solvers/opendss/' + fname
