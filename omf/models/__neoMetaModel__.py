@@ -1,6 +1,6 @@
 """ Common functions for all models """
 
-import json, os, tempfile, webbrowser, math, shutil, datetime, multiprocessing, traceback, hashlib, re
+import json, os, tempfile, webbrowser, math, shutil, datetime, multiprocessing, traceback, hashlib, re, pathlib
 from os.path import join as pJoin
 from os.path import split as pSplit
 from functools import wraps
@@ -253,43 +253,31 @@ def renderAndShow(modelDir, datastoreNames={}):
 		temp.flush()
 		webbrowser.open("file://" + temp.name)
 
-def renderTemplateToFile(modelDir, datastoreNames={}):
+def renderTemplateToFile(model_dir, datastoreNames={}):
 	''' Render and open a template (blank or with output) in a local browser. '''
-	with tempfile.NamedTemporaryFile('w+', suffix=".html", delete=False) as baseTemplate:
-		baseTemplate.write(renderTemplate(modelDir, absolutePaths=False))
-		baseTemplate.flush()
-		baseTemplate.seek(0)
-		with web.locked_open(pJoin(modelDir,'inlineTemplate.html'), 'w', encoding='utf-8') as inlineTemplate:
-			for line in baseTemplate:
-				#add backslash to regex between signle and double quote
-				matchObj = re.match( r"(.*)/static(.+?)(['\"])(.+?)", line, re.M|re.I)
-				scriptTags = re.match( r"(.*)<script(.*)static/(.*)</script>", line, re.M|re.I)
-				styleTags = re.match( r"(.*)<link(.*)stylesheet", line, re.M|re.I)
-				if scriptTags:
-					with open(_omfDir + "/static"+ matchObj.group(2)) as f:
-						sourceFile = f.read() 
-					with open(_omfDir + "/static"+ matchObj.group(2), 'r', encoding='utf-8') as yFile:
-						ttempfile = yFile.readlines()
-					tmp = '<script>'+sourceFile+'</script>'
-					inlineTemplate.write('<script>')
-					for i in ttempfile:
-						try:
-							inlineTemplate.write(i)
-						except (UnicodeEncodeError):
-							print(i)
-					inlineTemplate.write('</script>')
-				elif styleTags:
-					with open(_omfDir + "/static"+ matchObj.group(2), 'r', encoding='utf-8') as yFile:
-						ttempfile = yFile.readlines()
-					inlineTemplate.write('<style>')
-					for i in ttempfile:
-						try:
-							inlineTemplate.write(i)
-						except (UnicodeEncodeError):
-							print(i)
-					inlineTemplate.write('</style>')
-				else:
-					inlineTemplate.write(str(line))
+	html = omf.models.__neoMetaModel__.renderTemplate(model_dir, absolutePaths=False)
+	ptrn = r'<(?:\w+) (.*)(?:href=|src=)(?:\'|\")(\/static[^\'\"]*)(?:\'|\")'
+	lines = html.splitlines()
+	for idx, line in enumerate(lines):
+		mo = re.search(ptrn, line)
+		if mo:
+			attrs = mo.group(1)
+			path = mo.group(2).lstrip('/')
+			if path[-4:] == '.css':
+				with (pathlib.Path(omf.omfDir) / path).resolve(True).open() as f:
+					content = f.read()
+				lines[idx] = f'<style>\n{content}\n</style>'
+			elif path[-3:] == '.js':
+				with (pathlib.Path(omf.omfDir) / path).resolve(True).open() as f:
+					content = f.read()
+				lines[idx] = f'<script>\n{content}\n</script>'
+			elif path[-5:] == '.html':
+				with (pathlib.Path(omf.omfDir) / path).resolve(True).open() as f:
+					content = f.read()
+				lines[idx] = f'<iframe {attrs}>\n{content}\n</iframe>'
+	with open(f'{model_dir}/inlineTemplate.html', 'w') as f:
+		for line in lines:
+			f.write(line + '\n')
 
 def getStatus(modelDir):
 	''' Is the model stopped, running or finished? '''
