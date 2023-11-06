@@ -21,7 +21,7 @@ function get_model(solver::String, max_runtime_s::Union{Nothing,Int})
 		return m
 	elseif solver == "HiGHS"
 		m = Model(HiGHS.Optimizer)
-		#set_attribute(m,"threads",8)
+		set_attribute(m,"threads",4)
         if max_runtime_s != nothing
             set_attribute(m,"time_limit", float(max_runtime_s))
         end
