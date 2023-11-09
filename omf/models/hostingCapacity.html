@@ -94,6 +94,7 @@
 	{% if modelStatus == 'finished' %}
 	<style>td, th {padding:7 0 5 20;text-align: left;font-size:0.8em; border: 1px solid #cccccc;} </style>
 	<div id="output">
+        {% if allInputDataDict['runAmiAlgorithm'] == 'on' %}
 		<p class="reportTitle">AMI-Based Hosting Capacity Distribution</p>
 		<div id="mohcaHistogramChart" class="tightContent">
 			<div id="mohcaHistogramChart" style="width:1000px"></div>
@@ -125,6 +126,7 @@
 				{% endfor %}
 			</table> 
 		</div>
+        {% endif %}
 		{% if allInputDataDict['optionalCircuitFile'] == 'on' %}
 		<p class="reportTitle" style="page-break-before:always">Traditional Hosting Capacity Map</p>
 		<div id="traditionalHCMap" class="tightContent"></div>
