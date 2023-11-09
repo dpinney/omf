@@ -68,11 +68,10 @@ def run_ami_algorithm(modelDir, inputDict, outData):
 	mohcaResults = mohcaOutput[0].rename(columns={'kW_hostable': 'voltage_cap_kW'})
 	mohcaHistogramFigure = px.histogram( mohcaResults, x='voltage_cap_kW', template="simple_white", color_discrete_sequence=["MediumPurple"] )
 	mohcaHistogramFigure.update_layout(bargap=0.5)
-	barChartDF = mohcaResults
-	barChartDF['thermal_cap_kW'] = [7.23, 7.34, 7.45, 7.53, 7.24, 6.24, 7.424, 7.23 ]
-	barChartDF['max_cap_allowed_kW'] = np.minimum( barChartDF['voltage_cap_kW'], barChartDF['thermal_cap_kW'])
-	mohcaBarChartFigure = px.bar(barChartDF, x='busname', y=['voltage_cap_kW', 'thermal_cap_kW', 'max_cap_allowed_kW'], barmode='group', color_discrete_sequence=["green", "lightblue", "MediumPurple"], template="simple_white" )
-	mohcaBarChartFigure.add_traces( list(px.line(barChartDF, x='busname', y='max_cap_allowed_kW', markers=True).select_traces()) )
+	mohcaResults['thermal_cap_kW'] = [7.23, 7.34, 7.45, 7.53, 7.24, 6.24, 7.424, 7.23 ]
+	mohcaResults['max_cap_allowed_kW'] = np.minimum( mohcaResults['voltage_cap_kW'], mohcaResults['thermal_cap_kW'])
+	mohcaBarChartFigure = px.bar(mohcaResults, x='busname', y=['voltage_cap_kW', 'thermal_cap_kW', 'max_cap_allowed_kW'], barmode='group', color_discrete_sequence=["green", "lightblue", "MediumPurple"], template="simple_white" )
+	mohcaBarChartFigure.add_traces( list(px.line(mohcaResults, x='busname', y='max_cap_allowed_kW', markers=True).select_traces()) )
 	outData['mohcaHistogramFigure'] = json.dumps( mohcaHistogramFigure, cls=py.utils.PlotlyJSONEncoder )
 	outData['mohcaBarChartFigure'] = json.dumps( mohcaBarChartFigure, cls=py.utils.PlotlyJSONEncoder )
 	outData['mohcaHCTableHeadings'] = mohcaResults.columns.values.tolist()
@@ -91,9 +90,12 @@ def run_traditional_algorithm(modelDir, inputDict, outData):
 	os.chdir(curr_dir)
 	tradHCDF = pd.DataFrame(traditionalHCResults)
 	tradHCDF['plot_color'] = tradHCDF.apply ( lambda row: bar_chart_coloring(row), axis=1 )
+	# Plotly has its own colors - need to map the "name" of given colors to theirs
 	traditionalHCFigure = px.bar( tradHCDF, x='bus', y='max_kw', barmode='group', color='plot_color', color_discrete_map={ 'red': 'red', 'orange': 'orange', 'green': 'green', 'yellow': 'yellow'}, template='simple_white' )
 	traditionalHCFigure.update_xaxes(categoryorder='array', categoryarray=tradHCDF.bus.values)
+	# Map color to violation type to update key/legend
 	colorToKey = {'orange':'thermal_violation', 'yellow': 'voltage_violation', 'red': 'both_violation', 'green': 'no_violation'}
+	# Changes the hover mode, key, and legend to show the violation type rather than the color
 	traditionalHCFigure.for_each_trace(
 		lambda t: t.update(
 			name = colorToKey[t.name],
@@ -101,6 +103,7 @@ def run_traditional_algorithm(modelDir, inputDict, outData):
 			hovertemplate = t.hovertemplate.replace(t.name, colorToKey[t.name])
 			)
 		)
+	# We don't need the plot_color stuff for anything else, so drop it
 	tradHCDF.drop(tradHCDF.columns[len(tradHCDF.columns)-1], axis=1, inplace=True)
 	createColorCSV(modelDir, tradHCDF)
 	attachment_keys = {
