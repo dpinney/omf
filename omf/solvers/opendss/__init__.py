@@ -308,7 +308,7 @@ def hosting_capacity_all(FNAME:str, kwSTEPS:int, kwValue:float, BUS_LIST:list = 
 	# print('GEN_BUSES', gen_buses)
 	for bus in gen_buses:
 		try:
-			single_output = hosting_capacity_single_bus(FNAME, kwSTEPS, kwValue, bus, DEFAULT_KV=DEFAULT_KV)
+			single_output = hosting_capacity_single_bus(fullpath, kwSTEPS, kwValue, bus, DEFAULT_KV=DEFAULT_KV)
 			all_output.append(single_output)
 		except:
 			print(f'Could not solve hosting capacity for BUS_NAME={bus}')
