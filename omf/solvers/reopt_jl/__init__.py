@@ -16,7 +16,7 @@ thisDir = os.path.abspath(os.path.dirname(__file__))
 #            ' ''')
 
 
-#potential add: boolean to determine if you want to check your install 
+#potential add: boolean to determine if you want to check your install
 # => improve runtime if running multiple times in a row
 def install_reopt_jl(system : list = platform.system()):
     if os.path.isfile(f'{thisDir}/instantiated.txt'):
@@ -229,13 +229,15 @@ def get_file_names(path, inputFile, default, convert, outages, solver, solver_in
     #path given to julia solver
     jlInPath = f'{path}/converted_{inputFile}' if convert and not default else inputPath
 
+    REoptInputsPath = f'{path}/REoptInputs.json'
+
     outFile = f'{solver}_{inFile}' if solver_in_filename else inFile
     #path for output file
     outputPath = f'{path}/out_{outFile}'
     #path for output outage file if simulating outages
     outagePath = f'{path}/outages_{outFile}' if outages else None 
 
-    return (inputPath, jlInPath, outputPath, outagePath)
+    return (inputPath, jlInPath, REoptInputsPath, outputPath, outagePath)
 
 ##########################################################################
 # run_reopt_jl : calls 'run' function through run_reopt.jl (Julia file)
@@ -253,7 +255,7 @@ def run_reopt_jl(path, inputFile="", default=False, convert=True, outages=False,
     install_reopt_jl()
 
     file_info = (path, inputFile, default, convert, outages, solver, solver_in_filename)
-    (inPath, jlInPath, outPath, outagePath) = get_file_names( *file_info )
+    (inPath, jlInPath, REoptInputsPath, outPath, outagePath) = get_file_names( *file_info )
 
     try:
         if convert and not default: #default file is already converted
@@ -267,7 +269,7 @@ def run_reopt_jl(path, inputFile="", default=False, convert=True, outages=False,
         Pkg.activate(f'{thisDir}/REoptSolver')
         from julia import REoptSolver
 
-        REoptSolver.run(jlInPath, outPath, outagePath, solver, microgrid_only, max_runtime_s)
+        REoptSolver.run(jlInPath, REoptInputsPath, outPath, outagePath, solver, microgrid_only, max_runtime_s)
         #Main.include(f'{thisDir}/REoptSolver/src/REoptSolver.jl')
         #Main.run(jlInPath, outPath, outagePath, solver, microgrid_only, max_runtime_s)
         #todo: return output & outage path(s)? (decide on usage within models)

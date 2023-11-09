@@ -42,18 +42,21 @@ end
 
 
 #currently available solvers: SCIP, HiGHS
-function run(json_path::String, output_path::String, outage_path::Union{Nothing,String}=nothing, 
+function run(json_path::String, reopt_inputs_path::String, output_path::String, outage_path::Union{Nothing,String}=nothing, 
     solver::String="SCIP", microgrid_only::Bool=false, max_runtime_s::Union{Nothing,Int}=nothing)
 
 	m = get_model(solver, max_runtime_s)
 	m2 = get_model(solver, max_runtime_s)
+
+	#writing REoptInputs to JSON for easier access of default values in microgridDesign
+	reopt_inputs = REoptInputs(json_path)
+	results_to_json(reopt_inputs,reopt_inputs_path)
 
 	results = run_reopt([m,m2],json_path)
 
 	results_to_json(results, output_path)
 
 	if outage_path != nothing
-		reopt_inputs = REoptInputs(json_path)
 		outage_results = simulate_outages(results, reopt_inputs; microgrid_only=microgrid_only)
 
 		results_to_json(outage_results,outage_path)

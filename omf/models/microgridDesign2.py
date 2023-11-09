@@ -341,6 +341,10 @@ def work(modelDir, inputDict):
 		with open(pJoin(modelDir, 'out_Scenario_test_POST.json')) as jsonFile:
 		#with open(pJoin(modelDir, 'results.json')) as jsonFile:
 			results = json.load(jsonFile)
+
+		#getting REoptInputs to access default input values more easily 
+		with open(pJoin(modelDir, 'REoptInputs.json')) as jsonFile:
+			reopt_inputs = json.load(jsonFile)
 		
 		#runID = results['outputs']['Scenario']['run_uuid']
 		#REopt.runResilience(runID, pJoin(modelDir, 'resultsResilience.json'), inputDict['api_key'])
@@ -407,15 +411,15 @@ def work(modelDir, inputDict):
 		outData['yearOneEmissionsTons' + indexString] = round(y1_emissions)#['year_one_emissions_tCO2'])
 		outData['yearOneEmissionsReducedTons' + indexString] = round(y1_emissions_bau - y1_emissions)
 		#['year_one_emissions_tCO2_bau'] - resultsSubset['year_one_emissions_tCO2'])
-		outData['yearOneEmissionsReducedFraction' + indexString] = round((y1_emissions_bau - y1_emissions)/y1_emissions_bau*100,0)
+		outData['yearOneEmissionsReducedPercent' + indexString] = round((y1_emissions_bau - y1_emissions)/y1_emissions_bau*100,0)
 		#(resultsSubset['year_one_emissions_tCO2_bau'] - resultsSubset['year_one_emissions_tCO2'])/resultsSubset['year_one_emissions_tCO2_bau']*100,0)
-		outData['yearOnePercentRenewableFraction' + indexString] = round(results['Site']['renewable_electricity_fraction']*100,0)
+		outData['yearOnePercentRenewable' + indexString] = round(results['Site']['renewable_electricity_fraction']*100,0)
 		#['annual_renewable_electricity_pct']*100,0)
 		outData['yearOneOMCostsBeforeTax' + indexString] = round(results['Financial']['year_one_om_costs_before_tax'])
 		#['year_one_om_costs_before_tax_us_dollars'],0)
 		
 		#getting extra data for reopt.jl proforma analysis
-		outData['irrFraction' + indexString] = results['Financial']['internal_rate_of_return']
+		outData['irr' + indexString] = results['Financial']['internal_rate_of_return']
 		outData['paybackYears' + indexString] = results['Financial']['simple_payback_years']
 
 		yearOneBill = results['ElectricTariff']['year_one_bill_before_tax']
@@ -424,7 +428,7 @@ def work(modelDir, inputDict):
 		outData['yearOneExportBenefitBAU' + indexString] = results['ElectricTariff']['year_one_export_benefit_before_tax_bau']
 		outData['yearOneBill' + indexString] = yearOneBill
 		outData['yearOneExportBenefit' + indexString] = results['ElectricTariff']['year_one_export_benefit_before_tax']
-		outData['totalEnergyProduced' + indexString] = 0
+		outData['totalElectricityProduced' + indexString] = 0
 
 		outData['totalRenewableEnergyProduced' + indexString] = results['Site']['annual_renewable_electricity_kwh']
 		outData['reductionElectricBillFraction' + indexString] = (yearOneBillBAU - yearOneBill) / yearOneBillBAU * 100
@@ -434,12 +438,17 @@ def work(modelDir, inputDict):
 		outData['yearOneEmissionsFromFuelburnTons' + indexString] = results['Site']['annual_emissions_from_fuelburn_tonnes_CO2']
 		outData['yearOneEmissionsFromFuelburnTonsBAU' + indexString] = results['Site']['annual_emissions_from_fuelburn_tonnes_CO2_bau']
 
-		outData['omCostEscalatorFraction' + indexString] = omCostEscalator * 100
-		outData['elecCostEscalatorFraction' + indexString] = 0.017 * 100 #default input
-		outData['discountRateFraction' + indexString] = discountRate * 100
-		outData['federalITCFraction' + indexString] = 0.0638 * 100
+		outData['omCostEscalator' + indexString] = omCostEscalator * 100
+		outData['elecCostEscalator' + indexString] = reopt_inputs['s']['financial']['elec_cost_escalation_rate_fraction'] * 100
+		outData['discountRate' + indexString] = discountRate * 100
+		outData['federalITCFraction' + indexString] = reopt_inputs['s']['financial']['offtaker_tax_rate_fraction'] * 100
 
 		outData['totalInstalledCost' + indexString] = results['Financial']['initial_capital_costs']
+		outData['freeCashFlows' + indexString] = results['Financial']['offtaker_annual_free_cashflows']
+
+		#getting extra data from reopt.jl inputs (default values) to include in analysis results
+		outData['macrsFiveYear' + indexString] = reopt_inputs['s']['financial']['macrs_five_year']
+		outData['macrsSevenYear' + indexString] = reopt_inputs['s']['financial']['macrs_seven_year']
 
 		if solar == 'on':
 			outData['sizePV' + indexString] = results['PV']['size_kw']
@@ -454,17 +463,34 @@ def work(modelDir, inputDict):
 			outData['solarCost' + indexString] = float(inputDict['solarCost'])
 			#adding for proforma analysis (solar)
 			outData['sizePVPurchased' + indexString] = results['PV']['size_kw'] - solarExisting
-			outData['degradationRatePVFraction' + indexString] = 0.05 #default input for reopt.jl (find better way to do this) <- add to inputDict?
+			outData['degradationRatePVFraction' + indexString] = reopt_inputs['s']['pvs'][0]['degradation_fraction']
 			outData['lcoePV' + indexString] = results['PV']['lcoe_per_kwh']
 			outData['pvYearOneEnergyProducedBAU' + indexString] = 0
 			if solarExisting != 0:
 				outData['pvYearOneEnergyProducedBAU' + indexString] = results['PV']['year_one_energy_produced_kwh_bau']
 			outData['pvYearOneEnergyProduced' + indexString] = results['PV']['year_one_energy_produced_kwh']
-			outData['totalEnergyProduced' + indexString] += results['PV']['year_one_energy_produced_kwh']
+			outData['totalElectricityProduced' + indexString] += results['PV']['year_one_energy_produced_kwh']
 			outData['pvAnnualEnergyProduced' + indexString] = results['PV']['annual_energy_produced_kwh']
-			outData['pvOMCosts' + indexString] = 18.0 #default input
+			outData['pvOMCosts' + indexString] = reopt_inputs['s']['pvs'][0]['om_cost_per_kw']
 			outData['pvITCFraction' + indexString] = solarItcPercent
 			outData['costPVInstalled' + indexString] = outData['sizePVPurchased' + indexString] * solarCost
+
+			#getting extra data from reopt.jl inputs (default values) to include in analysis results
+			outData['pvMacrsBonusFraction' + indexString] = reopt_inputs['s']['pvs'][0]['macrs_bonus_fraction']
+			outData['pvStateIbiFraction' + indexString] = reopt_inputs['s']['pvs'][0]['state_ibi_fraction']
+			outData['pvStateIbiMax' + indexString] = reopt_inputs['s']['pvs'][0]['state_ibi_max']
+			outData['pvUtilityIbiFraction' + indexString] = reopt_inputs['s']['pvs'][0]['utility_ibi_fraction']
+			outData['pvUtilityIbiMax' + indexString] = reopt_inputs['s']['pvs'][0]['utility_ibi_max']
+			outData['pvFederalCbi' + indexString] = reopt_inputs['s']['pvs'][0]['federal_rebate_per_kw']
+			outData['pvStateCbi' + indexString] = reopt_inputs['s']['pvs'][0]['state_rebate_per_kw']
+			outData['pvStateCbiMax' + indexString] = reopt_inputs['s']['pvs'][0]['state_rebate_max']
+			outData['pvUtilityCbi' + indexString] = reopt_inputs['s']['pvs'][0]['utility_rebate_per_kw']
+			outData['pvUtilityCbiMax' + indexString] = reopt_inputs['s']['pvs'][0]['utility_rebate_max']
+			outData['pvPbi' + indexString] = reopt_inputs['s']['pvs'][0]['production_incentive_per_kwh']
+			outData['pvPbiMax' + indexString] = reopt_inputs['s']['pvs'][0]['production_incentive_max_benefit']
+			outData['pvPbiYears' + indexString] = reopt_inputs['s']['pvs'][0]['production_incentive_years']
+			outData['pvPbiMaxKw' + indexString] = reopt_inputs['s']['pvs'][0]['production_incentive_max_kw']
+
 
 		else:
 			outData['sizePV' + indexString] = 0
@@ -506,6 +532,14 @@ def work(modelDir, inputDict):
 
 			outData['batteryInstalledCost' + indexString] = powerBatteryInstalledCost + capacityBatteryInstalledCost
 
+			#getting extra data from reopt.jl inputs (default values) to include in analysis results
+			outData['batteryMacrsBonusFraction' + indexString] = reopt_inputs['s']['storage']['attr']['ElectricStorage']['macrs_bonus_fraction']
+			outData['degradationRateBatteryFraction' + indexString] = 0 #default: model_degradation == False for battery
+			#reopt_inputs['s']['storage']['attr']['ElectricStorage']['degradation_fraction']
+			outData['batteryItcFraction' + indexString]  = reopt_inputs['s']['storage']['attr']['ElectricStorage']['total_itc_fraction']
+			outData['batteryCbiKw' + indexString]  = reopt_inputs['s']['storage']['attr']['ElectricStorage']['total_rebate_per_kw']
+			outData['batteryCbiKwh' + indexString]  = reopt_inputs['s']['storage']['attr']['ElectricStorage']['total_rebate_per_kwh']
+
 		else:
 			outData['powerBattery' + indexString] = 0
 			outData['capacityBattery' + indexString] = 0
@@ -524,7 +558,7 @@ def work(modelDir, inputDict):
 			#adding for proforma analysis (wind)
 			outData['lcoeWind' + indexString] = results['Wind']['lcoe_per_kwh']
 			outData['windAnnualEnergyProduced' + indexString] = results['Wind']['annual_energy_produced_kwh']
-			outData['totalEnergyProduced' + indexString] += results['Wind']['year_one_energy_produced_kwh']
+			outData['totalElectricityProduced' + indexString] += results['Wind']['year_one_energy_produced_kwh']
 			outData['windOMCosts' + indexString] = 36.0 #default input for REopt.jl
 
 			# windExisting is a pass through variables used in microgridUp project
@@ -533,6 +567,23 @@ def work(modelDir, inputDict):
 			outData['windPurchased' + indexString] = outData['sizeWind' + indexString] - windExisting
 
 			outData['windInstalledCost' + indexString] = outData['windPurchased' + indexString] * windCost
+
+			#getting extra data from reopt.jl inputs (default values) to include in analysis results
+			outData['windMacrsBonusFraction' + indexString] = reopt_inputs['s']['wind']['macrs_bonus_fraction']
+			outData['windStateIbiFraction' + indexString] = reopt_inputs['s']['wind']['state_ibi_fraction']
+			outData['windStateIbiMax' + indexString] = reopt_inputs['s']['wind']['state_ibi_max']
+			outData['windUtilityIbiFraction' + indexString] = reopt_inputs['s']['wind']['utility_ibi_fraction']
+			outData['windUtilityIbiMax' + indexString] = reopt_inputs['s']['wind']['utility_ibi_max']
+			outData['degradationRateWindFraction' + indexString] = reopt_inputs['s']['wind']['degradation_fraction']
+			outData['windFederalCbi' + indexString] = reopt_inputs['s']['wind']['federal_rebate_per_kw'] 
+			outData['windStateCbi' + indexString] = reopt_inputs['s']['wind']['state_rebate_per_kw']
+			outData['windStateCbiMax' + indexString] = reopt_inputs['s']['wind']['state_rebate_max']
+			outData['windUtilityCbi' + indexString] = reopt_inputs['s']['wind']['utility_rebate_per_kw']
+			outData['windUtilityCbiMax' + indexString] = reopt_inputs['s']['wind']['utility_rebate_max']
+			outData['windPbi' + indexString] = reopt_inputs['s']['wind']['production_incentive_per_kwh']
+			outData['windPbiMax' + indexString] = reopt_inputs['s']['wind']['production_incentive_max_benefit']
+			outData['windPbiYears' + indexString] = reopt_inputs['s']['wind']['production_incentive_years']
+			outData['windPbiMaxKw' + indexString] = reopt_inputs['s']['wind']['production_incentive_max_kw']
 
 
 		else:
@@ -562,7 +613,7 @@ def work(modelDir, inputDict):
 
 		#adding for proforma analysis (generator)
 		outData['dieselAnnualEnergyProduced' + indexString] = results['Generator']['annual_energy_produced_kwh']
-		outData['totalEnergyProduced' + indexString] += results['Generator']['annual_energy_produced_kwh'] #year_one_energy_produced_kwh?
+		outData['totalElectricityProduced' + indexString] += results['Generator']['annual_energy_produced_kwh'] #year_one_energy_produced_kwh?
 		outData['dieselInstalledCost' + indexString] = outData['sizeDieselPurchased' + indexString] * dieselGenCost
 		outData['fuelUsedDieselCost' + indexString] = outData['fuelUsedDiesel' + indexString] * dieselFuelCostGal
 		outData['fuelUsedDieselCostBAU' + indexString] = 0 
@@ -592,7 +643,7 @@ def work(modelDir, inputDict):
 			#	outData['']
 
 		#todo: decide on ProForma output type (excel, html, or both)
-		import xlwt #xlsxwriter, openpyxl #move to top
+		import xlwt #move to top
 
 		workbook = xlwt.Workbook()
 		worksheet = workbook.add_sheet("Results Summary and Inputs")
@@ -600,36 +651,35 @@ def work(modelDir, inputDict):
 		style_header = xlwt.easyxf('pattern: pattern solid, fore_color gray25; borders: left thin, right thin, top thin, bottom thin; font: bold on')
 		style_cell = xlwt.easyxf('borders: left thin, right thin, top thin, bottom thin')
 
-		maximum_col_width = 0
 		excel_row = 0
 		excel_col = 0
 		results_row = 3
 		results_col = 3
 
 		#todo: move out of main function 
-		def write_table(table, name, start_row, start_col, max_col_width):
+		def write_table(table, name, start_row, start_col):
 			rows = len(table)
 			if rows == 0: 
 				return 0
 			cols = len(table[0])
 			if cols == 0:
-				return 
-			worksheet.write_merge(start_row, start_row, start_col, start_col+1, name, style_header)
-			for i in range (rows):
+				return
+			#writing single header if name given
+			if name:
+				worksheet.write_merge(start_row, start_row, start_col, start_col+cols-1, name, style_header)
+			for i in range(rows):
 				for j in range(cols):
+					if j >= len(table[i]):
+						continue
+					style = style_header if (i == 0 and not name) else style_cell
 					table_val = table[i][j]
-					x = start_row + i + 1
+					x = start_row + i + 1 if name else start_row + i
 					y = start_col + j
-					worksheet.write(x,y,table_val,style_cell)
-				#todo: get max column width for whole spreadsheet (not just table)
-				# => adjust after writing all tables - save max width of first col?
-					if j == 0 and len(str(table_val)) > max_col_width:
-						max_col_width = len(str(table_val))
-			return max_col_width
+					worksheet.write(x,y,table_val,style)
+					if worksheet.col(j).width < len(str(table_val)) * 256:
+						worksheet.col(j).width = len(str(table_val)) * 256
 
 		#potential idea: dictionary mapping proforma row name to outdata variable (wouldn't be that much more efficient)
-
-		#todo: change to 'get' to account for cases where PV, Generator, or Battery are off
 		proforma_system_design = [
 			['PV Nameplate capacity (kW), purchased', outData.get('sizePVPurchased' + indexString,0)],
 			['PV Nameplate capacity (kW), existing', outData.get('sizePVExisting' + indexString,0)],
@@ -643,7 +693,7 @@ def work(modelDir, inputDict):
 			['Battery capacity (kWh)', outData.get('capacityBattery' + indexString,0)]
 		]
 
-		maximum_col_width = write_table(proforma_system_design,"OPTIMAL SYSTEM DESIGN (with existing)",excel_row,excel_col,maximum_col_width)
+		write_table(proforma_system_design,"OPTIMAL SYSTEM DESIGN (with existing)",excel_row,excel_col)
 		excel_row += results_row
 		excel_col += results_col
 
@@ -651,11 +701,11 @@ def work(modelDir, inputDict):
 			['Business as usual LCC, $', outData.get('totalCostBAU' + indexString,0)],
 			['Optimal LCC, $', outData.get('totalCost' + indexString,0)],
 			['NPV, $', outData.get('savings' + indexString,0)],
-			['IRR, %', outData.get('irrFraction' + indexString,0)],
+			['IRR, %', outData.get('irr' + indexString,0)],
 			['Simple Payback Period, years', outData.get('paybackYears' + indexString,0)]
 		]
 
-		results_col_width = write_table(proforma_results,"RESULTS",excel_row,excel_col, maximum_col_width)
+		write_table(proforma_results,"RESULTS",excel_row,excel_col)
 		excel_row += len(proforma_system_design) - results_row + 2
 		excel_col -= results_col
 
@@ -668,8 +718,8 @@ def work(modelDir, inputDict):
 			['Total PV optimal electricity produced (kWh), Year 1', outData.get('pvYearOneEnergyProduced' + indexString,0)],
 			['Nominal annual optimal wind electricity produced (kWh/year)', outData.get('windAnnualEnergyProduced' + indexString,0)],
 			['Nominal annual optimal backup generator electricity produced (kWh/year)', outData.get('dieselAnnualEnergyProduced' + indexString,0)],
-			['Total optimal electricity produced (kWh/year)', outData.get('totalEnergyProduced' + indexString,0)],
-			['Percent electricity from on-site renewable resources', outData.get('yearOnePercentRenewableFraction' + indexString,0)],
+			['Total optimal electricity produced (kWh/year)', outData.get('totalElectricityProduced' + indexString,0)],
+			['Percent electricity from on-site renewable resources', outData.get('yearOnePercentRenewable' + indexString,0)],
 			['Percent reduction in annual electricity bill', outData.get('reductionElectricBillFraction' + indexString,0)],
 			['Year one total site carbon dioxide emissions (ton CO2)', outData.get('yearOneEmissionsTons' + indexString,0)],
 			['Year one total site carbon dioxide emissions BAU (ton CO2)', outData.get('yearOneEmissionsTonsBAU' + indexString,0)],
@@ -679,18 +729,18 @@ def work(modelDir, inputDict):
 			['Year one total carbon dioxide emissions from on-site fuel burn BAU (ton CO2)', outData.get('yearOneEmissionsFromFuelburnTonsBAU' + indexString,0)]
 		]
 
-		maximum_col_width = write_table(proforma_annual_results,"ANNUAL RESULTS",excel_row,excel_col, maximum_col_width)
+		write_table(proforma_annual_results,"ANNUAL RESULTS",excel_row,excel_col)
 		excel_row += len(proforma_annual_results) + 2
 
 		proforma_system_costs = [
 			['Total Installed Cost ($)', outData.get('totalInstalledCost' + indexString,0)],
 			['PV Installed Cost ($)', outData.get('costPVInstalled' + indexString,0)],
 			['Wind Installed Cost ($)', outData.get('windInstalledCost' + indexString,0)],
-			['Backup generator Installed Cost ($)', outData.get('' + indexString,0)],
+			['Backup generator Installed Cost ($)', outData.get('dieselInstalledCost' + indexString,0)],
 			['Battery Installed Cost ($)', outData.get('batteryInstalledCost' + indexString,0)]
 		]
 
-		maximum_col_width = write_table(proforma_system_costs, "SYSTEM COSTS",excel_row,excel_col, maximum_col_width)
+		write_table(proforma_system_costs, "SYSTEM COSTS",excel_row,excel_col)
 		excel_row += len(proforma_system_costs) + 1
 
 		proforma_om = [
@@ -706,28 +756,174 @@ def work(modelDir, inputDict):
 			['Battery kWh replacement year', outData.get('batteryCapacityReplaceYear' + indexString,0)]
 		]
 
-		maximum_col_width = write_table(proforma_om, "Operation and Maintenance (O&M)",excel_row,excel_col, maximum_col_width)
+		write_table(proforma_om, "Operation and Maintenance (O&M)",excel_row,excel_col)
 		excel_row += len(proforma_om) + 2
 
 		proforma_analysis_parameters = [
 			['Analysis period (years)', outData.get('analysisYears' + indexString,0)],
-			['Nominal O&M cost escalation rate (%/year)', outData.get('omCostEscalatorFraction' + indexString,0)],
-			['Nominal electric utility cost escalation rate (%/year)', outData.get('elecCostEscalatorFraction' + indexString,0)],
-			['Nominal discount rate (%/year)', outData.get('discountRateFraction' + indexString,0)]
+			['Nominal O&M cost escalation rate (%/year)', outData.get('omCostEscalator' + indexString,0)],
+			['Nominal electric utility cost escalation rate (%/year)', outData.get('elecCostEscalator' + indexString,0)],
+			['Nominal discount rate (%/year)', outData.get('discountRate' + indexString,0)]
 		]
 
-		maximum_col_width = write_table(proforma_analysis_parameters, "ANALYSIS PARAMETERS",excel_row,excel_col, maximum_col_width)
+		write_table(proforma_analysis_parameters, "ANALYSIS PARAMETERS",excel_row,excel_col)
 		excel_row += len(proforma_analysis_parameters) + 2
 
 		proforma_tax_insurance = [
 			['Federal income tax rate (%)', outData.get('federalITCFraction' + indexString,0)]
 		]
-		maximum_col_width = write_table(proforma_tax_insurance, "ANALYSIS PARAMETERS",excel_row,excel_col, maximum_col_width)
+		write_table(proforma_tax_insurance, "TAX AND INSURANCE PARAMETERS",excel_row,excel_col)
 		excel_row += len(proforma_tax_insurance) + 2
 
-		#adjusting first column to show entire row name
-		worksheet.col(excel_col).width = 256 * (maximum_col_width + 1)
-		worksheet.col(results_col).width = 256 * (results_col_width + 1)
+		if solar == "on":
+			proforma_tax_credits = [
+				#note: removing values from table that are not included in reopt.jl calculations
+				['Investment tax credit (ITC)', '' ],
+                ['As percentage', '%' ],
+                ['Federal', solarItcPercent ]
+			]
+			write_table(proforma_tax_credits, 'PV TAX CREDITS', excel_row, excel_col)
+			excel_row += len(proforma_tax_credits) + 2
+
+			proforma_cash_incentives = [
+				['Investment based incentive (IBI)', '', '' ],
+				['As percentage', '%', 'Maximum ($)'],
+				['State (% of total installed cost)', outData['pvStateIbiFraction' + indexString], 
+	 				outData['pvStateIbiMax' + indexString]], 
+				['Utility (% of total installed cost)', outData['pvUtilityIbiFraction' + indexString], 
+	 				outData['pvUtilityIbiMax' + indexString]],
+				['Capacity based incentive (CBI)', 'Amount ($/W)', 'Maximum ($)'],
+				['Federal ($/W)', outData['pvFederalCbi' + indexString], '' ],
+				['State  ($/W)', outData['pvStateCbi' + indexString], outData['pvStateCbiMax' + indexString]],
+				['Utility  ($/W)', outData['pvUtilityCbi' + indexString], outData['pvUtilityCbiMax' + indexString]],
+				['Production based incentive (PBI)', 'Amount ($/kWh)', 'Maximum ($/year)', 'Term (years)', 
+	 				'System Size Limit (kW)'],
+				['Combined ($/kWh)', outData['pvPbi' + indexString], outData['pvPbiMax' + indexString], 
+	 				outData['pvPbiYears' + indexString], outData['pvPbiMaxKw' + indexString] ]
+			]
+			write_table(proforma_cash_incentives, 'PV DIRECT CASH INCENTIVES',excel_row,excel_col)
+			excel_row += len(proforma_cash_incentives) + 2
+		
+		if wind == "on":
+			proforma_tax_credits = [
+				['Investment tax credit (ITC)', '' ],
+                ['As percentage', '%' ],
+                ['Federal', windItcPercent ]
+			]
+			write_table(proforma_tax_credits, 'WIND TAX CREDITS', excel_row, excel_col)
+			excel_row += len(proforma_tax_credits) + 2
+
+			proforma_cash_incentives = [
+				['Investment based incentive (IBI)', '', ''],
+				['As percentage', '%', 'Maximum ($)'],
+				['State (% of total installed cost)',  outData['windStateIbiFraction' + indexString], outData['windStateIbiMax' + indexString]],
+				['Utility (% of total installed cost)', outData['windUtilityIbiFraction' + indexString], outData['windUtilityIbiMax' + indexString]],
+				['Capacity based incentive (CBI)', 'Amount ($/W)', 'Maximum ($)'],
+				['Federal ($/W)', outData['windFederalCbi' + indexString], outData['windFederalCbiMax' + indexString] ],
+				['State  ($/W)', outData['windStateCbi' + indexString], outData['windStateCbiMax' + indexString] ],
+				['Utility  ($/W)', outData['windUtilityCbi' + indexString], outData['windUtilityCbiMax' + indexString]],
+				['Production based incentive (PBI)', 'Amount ($/kWh)', 'Maximum ($/year)', 'Term (years)', 'System Size Limit (kW)'],
+				['Combined ($/kWh)', outData['windPbi' + indexString], outData['windPbiMax' + indexString], 
+	 				outData['windPbiYears' + indexString], outData['windPbiMaxKw' + indexString]]
+			]
+			write_table(proforma_cash_incentives, 'WIND DIRECT CASH INCENTIVES',excel_row,excel_col)
+			excel_row += len(proforma_cash_incentives) + 2
+
+		if battery == "on":
+			proforma_tax_credits = [
+				['Investment tax credit (ITC)', '' ],
+                ['As percentage', '%' ],
+                ['Federal', batteryItcPercent ]
+			]
+			write_table(proforma_tax_credits, 'BATTERY TAX CREDITS', excel_row, excel_col)
+			excel_row += len(proforma_tax_credits) + 2
+
+			proforma_cash_incentives = [
+				['Capacity based incentive (CBI)', 'Amount'],
+				['Total ($/W)', outData['batteryCbiKw' + indexString] ],
+				['Total  ($/Wh)', outData['batteryCbiKwh' + indexString] ]
+			]
+			write_table(proforma_cash_incentives, 'BATTERY DIRECT CASH INCENTIVES',excel_row,excel_col)
+			excel_row += len(proforma_cash_incentives) + 2
+			
+		
+		depreciation_proforma = [
+			['DEPRECIATION'],
+            ['Federal (years)'],
+            ['Federal bonus fraction']
+        ]
+
+		def add_to_depreciation_proforma(der_type, years, bonus_fraction):
+			depreciation_proforma[0].append(der_type)
+			depreciation_proforma[1].append(years)
+			depreciation_proforma[2].append(bonus_fraction)
+		
+		if solar == "on":
+			pv_bonus_fraction = outData['pvMacrsBonusFraction' + indexString]
+			add_to_depreciation_proforma("PV",str(solarMacrsOptionYears), pv_bonus_fraction)
+			
+		if battery == "on":
+			battery_bonus_fraction = outData['batteryMacrsBonusFraction' + indexString]
+			add_to_depreciation_proforma("BATTERY",str(batteryMacrsOptionYears), battery_bonus_fraction)
+			
+		if wind == "on":
+			wind_bonus_fraction = outData['windMacrsBonusFraction' + indexString]
+			add_to_depreciation_proforma("WIND", str(windMacrsOptionYears), wind_bonus_fraction)
+			
+		write_table(depreciation_proforma, "",excel_row,excel_col)
+		excel_col += len(depreciation_proforma[0]) + 1
+		
+		macrs_proforma = [
+			["Year"] + [str(i) for i in range(1,9)],
+			["5-Year"] + outData['macrsFiveYear' + indexString], 
+			["7-Year"] + outData['macrsSevenYear' + indexString]
+		]
+
+		write_table(macrs_proforma,"MACRS SCHEDULES (INFORMATIONAL ONLY)",excel_row,excel_col)
+		excel_row += len(macrs_proforma) + 2
+		excel_col = 0
+
+		annual_values_proforma = [
+			['ANNUAL VALUES'],
+			['PV Annual electricity (kWh)'],
+			['Existing PV Annual electricity (kWh)'],
+			['Wind Annual electricity (kWh)'],
+			['Backup Generator Annual electricity (kWh)'],
+			['PV Federal depreciation percentages (fraction)'],
+			['Wind Federal depreciation percentages (fraction)'],
+			['Battery Federal depreciation percentages (fraction)'],
+			['Free Cash Flow'],
+			['Cumulative Free Cash Flow']
+		]
+
+		def get_macrs(i, macrs):
+			if i > macrs or i == 0:
+				return "0"
+			elif macrs == 5:
+				return macrs_proforma[1][i]
+			elif macrs == 7:
+				return macrs_proforma[2][i]
+			else:
+				return "0"
+			
+		def get_energy_produced(energy_type, degradation_type, i):
+			return str(outData.get(energy_type + indexString,0) * pow(1 - outData.get(degradation_type + indexString,0),i))
+
+		for i in range(analysisYears):
+			annual_values_proforma[0].append(str(i))
+			annual_values_proforma[1].append(get_energy_produced('pvYearOneEnergyProduced','degradationRatePVFraction',i))
+			annual_values_proforma[2].append(get_energy_produced('pvYearOneEnergyProducedBAU','degradationRatePVFraction',i))
+			annual_values_proforma[3].append(get_energy_produced('windAnnualEnergyProduced','degradationRateWindFraction',i))
+			annual_values_proforma[4].append(get_energy_produced('dieselAnnualEnergyProduced','degradationRateBatteryFraction',i))
+			annual_values_proforma[5].append(get_macrs(i, solarMacrsOptionYears))
+			annual_values_proforma[6].append(get_macrs(i, windMacrsOptionYears))
+			annual_values_proforma[7].append(get_macrs(i, batteryMacrsOptionYears))
+
+		annual_values_proforma[8].extend(outData['freeCashFlows' + indexString])
+		annual_values_proforma[9].extend(np.cumsum(outData['freeCashFlows' + indexString]))
+
+		write_table(annual_values_proforma,"",excel_row,excel_col)
+		excel_row += len(annual_values_proforma) + 1
 
 		workbook.save(f'{modelDir}/ProForma.xlsx')
 
@@ -772,6 +968,7 @@ def work(modelDir, inputDict):
 			plotData.append(powerBatteryToLoad)
 
 		if wind == 'on':
+			powerWindToLoad = makeGridLine(x_values,outData['powerWindToLoad' + indexString],'purple','Load met by Wind')
 			plotData.append(powerWindToLoad)
 
 		if results['Generator']['size_kw'] > 0:
@@ -902,8 +1099,6 @@ def work(modelDir, inputDict):
 			outData["resilienceProbLayout"  + indexString] = json.dumps(plotlyLayout, cls=plotly.utils.PlotlyJSONEncoder)
 		if numCols == 1:
 			break # if we only have a single load, don't run an additional combined load shape run.
-	
-	#todo: create proforma output
 
 	return outData
 
