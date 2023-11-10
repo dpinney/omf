@@ -3,6 +3,7 @@ import warnings, csv, json
 from os.path import join as pJoin
 import numpy as np
 import pandas as pd
+import xlwt 
 import plotly
 import plotly.graph_objs as go
 import omf
@@ -332,14 +333,11 @@ def work(modelDir, inputDict):
 		with open(pJoin(modelDir, "Scenario_test_POST.json"), "w") as jsonFile:
 			json.dump(scenario, jsonFile)
 
-		# Run REopt API script
-		###########todo: replace with reopt_jl call
+		# Run REopt API script *** => switched to REopt.jl
 		#REopt.run(pJoin(modelDir, 'Scenario_test_POST.json'), pJoin(modelDir, 'results.json'), inputDict['api_key'])
 		run_outages = True if outage_start_hour != 0 else False
-		reopt_jl.run_reopt_jl(modelDir, "Scenario_test_POST.json", convert=False, solver_in_filename=False, 
-						outages=run_outages, max_runtime_s = 1000 )
-		with open(pJoin(modelDir, 'out_Scenario_test_POST.json')) as jsonFile:
-		#with open(pJoin(modelDir, 'results.json')) as jsonFile:
+		reopt_jl.run_reopt_jl(modelDir, "Scenario_test_POST.json", outages=run_outages, max_runtime_s = 1000 )
+		with open(pJoin(modelDir, 'results.json')) as jsonFile:
 			results = json.load(jsonFile)
 
 		#getting REoptInputs to access default input values more easily 
@@ -348,9 +346,8 @@ def work(modelDir, inputDict):
 		
 		#runID = results['outputs']['Scenario']['run_uuid']
 		#REopt.runResilience(runID, pJoin(modelDir, 'resultsResilience.json'), inputDict['api_key'])
-		#with open(pJoin(modelDir, 'resultsResilience.json')) as jsonFile:
 		if run_outages:
-			with open(pJoin(modelDir, 'outages_Scenario_test_POST.json')) as jsonFile:
+			with open(pJoin(modelDir, 'resultsResilience.json')) as jsonFile:
 				resultsResilience = json.load(jsonFile)
 
 		#potential nested function: define each outData variable as results key concatentation and add to outData 
@@ -368,8 +365,9 @@ def work(modelDir, inputDict):
 		#resultsSubset = results['outputs']['Scenario']['Site']
 		outData['demandCostBAU' + indexString] = results['ElectricTariff']['lifecycle_demand_cost_after_tax_bau']#['total_demand_cost_bau_us_dollars']
 		if outData['demandCostBAU' + indexString] is None:
-			errMsg = results['messages'].get('error','API currently unavailable please try again later')
-			raise Exception('The REopt data analysis API by NREL had the following error: ' + errMsg) 
+			#errMsg = results['messages'].get('error','API currently unavailable please try again later')
+			#raise Exception('The REopt data analysis API by NREL had the following error: ' + errMsg) 
+			raise Exception('Error: results not received')
 	
 		outData['demandCost' + indexString] = results['ElectricTariff']['lifecycle_demand_cost_after_tax']#['total_demand_cost_us_dollars']
 		outData['demandCostDiff' + indexString] = round(outData['demandCostBAU' + indexString] - outData['demandCost' + indexString],2)
@@ -643,7 +641,6 @@ def work(modelDir, inputDict):
 			#	outData['']
 
 		#todo: decide on ProForma output type (excel, html, or both)
-		import xlwt #move to top
 
 		workbook = xlwt.Workbook()
 		worksheet = workbook.add_sheet("Results Summary and Inputs")
@@ -1098,6 +1095,7 @@ def work(modelDir, inputDict):
 			outData["resilienceProbData" + indexString] = json.dumps(plotData, cls=plotly.utils.PlotlyJSONEncoder)
 			outData["resilienceProbLayout"  + indexString] = json.dumps(plotlyLayout, cls=plotly.utils.PlotlyJSONEncoder)
 		if numCols == 1:
+			#todo: test reopt.jl updates with multiple loads
 			break # if we only have a single load, don't run an additional combined load shape run.
 
 	return outData

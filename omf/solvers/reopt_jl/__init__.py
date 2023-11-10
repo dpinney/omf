@@ -1,23 +1,15 @@
 import json, time
 import os, platform
 
-#html output visuals
-#import test_outputs
-#from omf.solvers.reopt_jl import test_outputs
-
 thisDir = os.path.abspath(os.path.dirname(__file__))
 
-#not currently working : REopt dependency (ArchGDAL) unable to precompile
-#def build_julia_image():
-#    os.system(f'''julia --project={thisDir}/REoptSolver -e '
-#            import Pkg; Pkg.add("PackageCompiler");
-#            using PackageCompiler; include("{thisDir}/REoptSolver/src/REoptSolver.jl");
-#            PackageCompiler.precompile("REoptSolver")
-#            ' ''')
-
+def build_julia_image():
+    os.system(f'''julia --project={thisDir}/REoptSolver -e '
+            import Pkg; import REoptSolver; using PackageCompiler; 
+            PackageCompiler.create_sysimage(["REoptSolver"]; sysimage_path="{thisDir}/reopt_jl.so")
+            ' ''')
 
 #potential add: boolean to determine if you want to check your install
-# => improve runtime if running multiple times in a row
 def install_reopt_jl(system : list = platform.system()):
     if os.path.isfile(f'{thisDir}/instantiated.txt'):
         print("REopt.jl dependencies installed - to reinstall remove file: instantiated.txt")
@@ -45,7 +37,7 @@ def install_reopt_jl(system : list = platform.system()):
     
     for command in commands:
         os.system(command)
-    #build_julia_image()
+    build_julia_image()
 
 ########################################################
 #functions for converting REopt input to REopt.jl input
@@ -208,8 +200,7 @@ def convert_to_jl(reopt_json):
         print(e)
     return new_jl_json
 
-# for accessing & setting names of input/output json files
-
+# for reading and writing input/output json files
 def get_json(inputPath):
     with open(inputPath) as j:
         inputJson = json.load(j)
@@ -221,32 +212,13 @@ def write_json(outputPath, jsonData):
     with open(outputPath, "w") as j:
         json.dump(jsonData, j)
 
-#input and output file names used with reopt_jl solver
-def get_file_names(path, inputFile, default, convert, outages, solver, solver_in_filename):
-    inFile = inputFile if not default else "julia_default.json"
-    #input path to file chosen by user : default file found in current directory
-    inputPath = f'{path}/{inFile}' if not default else f'{thisDir}/{inFile}'
-    #path given to julia solver
-    jlInPath = f'{path}/converted_{inputFile}' if convert and not default else inputPath
-
-    REoptInputsPath = f'{path}/REoptInputs.json'
-
-    outFile = f'{solver}_{inFile}' if solver_in_filename else inFile
-    #path for output file
-    outputPath = f'{path}/out_{outFile}'
-    #path for output outage file if simulating outages
-    outagePath = f'{path}/outages_{outFile}' if outages else None 
-
-    return (inputPath, jlInPath, REoptInputsPath, outputPath, outagePath)
-
 ##########################################################################
 # run_reopt_jl : calls 'run' function through run_reopt.jl (Julia file)
 ##########################################################################
 
-#todo: add options to set output path (and outage output path) ?
 #potential optional inputs (for solver): ratio_gap, threads, max_solutions, verbosity
-def run_reopt_jl(path, inputFile="", default=False, convert=True, outages=False, microgrid_only=False,
-                 solver="HiGHS", solver_in_filename=True, max_runtime_s=None):
+def run_reopt_jl(path, inputFile="", default=False, convert=False, outages=False, microgrid_only=False,
+                 solver="HiGHS", max_runtime_s=None):
     
     if inputFile == "" and not default:
         print("Invalid inputs: inputFile needed if default=False")
@@ -254,25 +226,30 @@ def run_reopt_jl(path, inputFile="", default=False, convert=True, outages=False,
 
     install_reopt_jl()
 
-    file_info = (path, inputFile, default, convert, outages, solver, solver_in_filename)
-    (inPath, jlInPath, REoptInputsPath, outPath, outagePath) = get_file_names( *file_info )
+    constant_file = "Scenario_test_POST.json"
+    constant_path = f'{path}/{constant_file}'
+
+    if inputFile != constant_file:
+        inputPath = f'{path}/{inputFile}'
+        if default == True:
+            inputPath = f'{thisDir}/julia_default.json'
+        input_json = get_json(inputPath)
+        write_json(constant_path, input_json)
 
     try:
         if convert and not default: #default file is already converted
-            input_json = get_json(inPath)
+            input_json = get_json(constant_path)
             reopt_jl_input_json = convert_to_jl(input_json)
-            write_json(jlInPath, reopt_jl_input_json)
+            write_json(constant_path, reopt_jl_input_json)
 
-        from julia import Pkg #Julia, Main
-        #Julia(runtime=f'{thisDir}/reopt_jl.so') 
-        #from julia import REoptSolver
-        Pkg.activate(f'{thisDir}/REoptSolver')
-        from julia import REoptSolver
+        microgrid_only_conv = "false" if not microgrid_only else "true"
+        outages_conv = "false" if not outages else "true"
+        max_runtime_s_conv = "nothing" if max_runtime_s == None else max_runtime_s
 
-        REoptSolver.run(jlInPath, REoptInputsPath, outPath, outagePath, solver, microgrid_only, max_runtime_s)
-        #Main.include(f'{thisDir}/REoptSolver/src/REoptSolver.jl')
-        #Main.run(jlInPath, outPath, outagePath, solver, microgrid_only, max_runtime_s)
-        #todo: return output & outage path(s)? (decide on usage within models)
+        os.system(f'''julia --sysimage={f'{thisDir}/reopt_jl.so'} -e '
+                  using .REoptSolver; 
+                  REoptSolver.run("{path}", {outages_conv}, "{solver}", {microgrid_only_conv}, {max_runtime_s_conv})
+                  ' ''')
     except Exception as e:
         print(e)
 
@@ -280,61 +257,37 @@ def run_reopt_jl(path, inputFile="", default=False, convert=True, outages=False,
 # comparing REopt.jl outputs for different test cases / solvers
 ###########################################################################
 
-def runAllSolvers(path, testName, fileName="", default=False, convert=True, outages=True, 
-                  solvers=["SCIP","HiGHS"], solver_in_filename=True, max_runtime_s=None,
-                  get_cached=True ):
-    test_results = []
+def runAllSolvers(path, testName, fileName="", default=False, convert=True, outages=True, solvers=["SCIP","HiGHS"], max_runtime_s=None):
 
     for solver in solvers:
         print(f'########## Running {solver} test: {testName}')
         start = time.time()
 
-        file_info = (path, fileName, default, convert, outages, solver, solver_in_filename)
-        (_, _, outPath, outagePath) = get_file_names( *file_info )
-
-        if get_cached and os.path.isfile(outPath):
-            print("this test was already run: loading cached results")
-        else:
-            run_reopt_jl(path, inputFile=fileName, default=default, solver=solver, outages=outages,
-                         max_runtime_s=max_runtime_s)
+        run_reopt_jl(path, inputFile=fileName, default=default, convert=convert, solver=solver, outages=outages, max_runtime_s=max_runtime_s)
 
         end = time.time()
         runtime = end - start
-        test_results.append((outPath, outagePath, testName, runtime, solver, outages, get_cached))
-        print(f'########## Completed {solver} test: {testName}')
- 
-    return(test_results)
+        print(f'########## Completed {solver} test: {testName} in {runtime} seconds')
 
 
 def _test():
-    all_tests = []
     all_solvers = [ "HiGHS" ] # "Ipopt", "ECOS", "Clp", "GLPK", "SCIP", "Cbc"
     path = f'{thisDir}/testFiles'
 
     ########### CONWAY_MG_MAX: 
     # CONWAY_MG.json copied from CONWAY_MG_MAX/Scenario_test_POST.json
-    CONWAY_tests = runAllSolvers(path, "CONWAY_MG_MAX", fileName="CONWAY_MG.json", solvers=all_solvers,
-                                 get_cached=False)
-    all_tests.extend(CONWAY_tests)
+    #runAllSolvers(path, "CONWAY_MG_MAX", fileName="CONWAY_MG.json", solvers=all_solvers)
     
     ############### CE test case
     # CE.json copied from CE Test Case/Scenario_test_POST.json
-    CE_tests = runAllSolvers(path, "CE Test Case", fileName="CE.json", solvers=all_solvers,
-                             get_cached=False, max_runtime_s=240)
-    all_tests.extend(CE_tests)
+    #runAllSolvers(path, "CE Test Case", fileName="CE.json", solvers=all_solvers, max_runtime_s=240)
 
     ############## CONWAY_30MAY23_SOLARBATTERY
     # CONWAY_SB.json copied from CONWAY_30MAY23_SOLARBATTERY/Scenario_test_POST.json
-    CONWAY_SB_tests = runAllSolvers(path, "CONWAY_30MAY23_SOLARBATTERY", fileName="CONWAY_SB.json",
-                                   solvers=all_solvers, get_cached=False)
-    all_tests.extend(CONWAY_SB_tests)
+    #runAllSolvers(path, "CONWAY_30MAY23_SOLARBATTERY", fileName="CONWAY_SB.json", solvers=all_solvers)
 
     ####### default julia json (default values from microgridDesign)
-    default_tests = runAllSolvers(path, "Julia Default", default=True, solvers=all_solvers, 
-                                  get_cached=False)
-    all_tests.extend(default_tests)
-
-    #test_outputs.html_comparison(all_tests) # => test_outputs.py (work in progress)
+    #runAllSolvers(path, "Julia Default", default=True, solvers=all_solvers)
 
 if __name__ == "__main__":
     _test()
