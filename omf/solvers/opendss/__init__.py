@@ -304,6 +304,7 @@ def hosting_capacity_all(FNAME:str, kwSTEPS:int, kwValue:float, BUS_LIST:list = 
 		gen_buses = get_meter_buses(fullpath)
 	else:
 		gen_buses = BUS_LIST
+	gen_buses = list(set(gen_buses))
 	all_output = []
 	# print('GEN_BUSES', gen_buses)
 	for bus in gen_buses:
