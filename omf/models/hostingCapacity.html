@@ -44,6 +44,13 @@
 			</div>
 			<hr>
 			<div class="shortInput">
+				<label class="tooltip">Apply AMI-Based hosting capacity</label>
+				<select id="runAmiAlgorithm" name="runAmiAlgorithm" value="{{allInputDataDict.runAmiAlgorithm}}" required>
+					<option value="off" {% if allInputDataDict.runAmiAlgorithm == 'off' %}selected{% endif %}>Off</option>
+					<option value="on" {% if allInputDataDict.runAmiAlgorithm == 'on' %}selected{% endif %}>On</option>
+				</select>
+			</div>
+			<div class="shortInput">
 				<label class="tooltip">Meter Data Input File <span class="classic">Import a .csv file that includes the meter data. Format for input columns: busname, datetime, v_reading, kw_reading, kvar_reading. Optional input columns: latitude, longitude, service_tx_name, phase_count (1, 3)</span></label>
 				<div>{{ insert_file_upload_block('inputDataFileName','inputDataFileContent') }}</div>
 			</div>
