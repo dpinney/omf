@@ -11,10 +11,6 @@
 				int_data = parseFloat(data); //parseInt(data);
 				if (!isNaN(int_data)) {
 					list[i].innerHTML = int_data.toLocaleString();
-					//added % if value is a percentage (also added 'Fraction' to applicable variable names => maybe change back)
-					if (id.includes("Fraction")) {
-						list[i].innerHTML += "%";
-					}
 				} else {
 					list[i].innerHTML = data;
 				}
@@ -200,7 +196,7 @@
 							'</tr>'+
 							'<tr>'+
                 				'<th>IRR, %</th>'+
-								'<td id="irrFraction' + indexString + '"></td>'+
+								'<td id="irr' + indexString + '"></td>'+
 							'</tr>'+
 							'<tr>'+
                 				'<th>Simple Payback Period, years</th>'+
@@ -301,12 +297,12 @@
 							//skipping CHP, steam turbine
 							'<tr>'+
 								'<th>Total optimal electricity produced (kWh/year)</th>'+
-								'<td id="totalEnergyProduced' + indexString + '"></td>'+ 
+								'<td id="totalElectricityProduced' + indexString + '"></td>'+ 
 							'</tr>'+
 							//skipping boiler, CHP, steam turbine
 							'<tr>'+
 								'<th>Percent electricity from on-site renewable resources</th>'+
-								'<td id="yearOnePercentRenewableFraction' + indexString + '"></td>'+
+								'<td id="yearOnePercentRenewable' + indexString + '"></td>'+
 							'</tr>'+
 							'<tr>'+
 								'<th>Percent reduction in annual electricity bill</th>'+
@@ -424,16 +420,16 @@
 							'</tr>'+
 							'<tr>'+
 								'<th>Nominal O&M cost escalation rate (%/year)</th>'+
-								'<td id="omCostEscalatorFraction' + indexString + '"></td>'+
+								'<td id="omCostEscalator' + indexString + '"></td>'+
 							'</tr>'+
 							'<tr>'+
 								'<th>Nominal electric utility cost escalation rate (%/year)</th>'+
-								'<td id="elecCostEscalatorFraction' + indexString + '"></td>'+
+								'<td id="elecCostEscalator' + indexString + '"></td>'+
 							'</tr>'+
 							//skipping boiler & CHP
 							'<tr>'+
 								'<th>Nominal discount rate (%/year)</th>'+
-								'<td id="discountRateFraction' + indexString + '"></td>'+
+								'<td id="discountRate' + indexString + '"></td>'+
 							'</tr>'+
 						'</table>'+
 					'</div>'+

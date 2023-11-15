@@ -1,0 +1,70 @@
+<head>
+	{{ omfHeaders }}
+	<script src="{{pathPrefix}}/static/highcharts4.src.js"></script>
+</head>
+<body>
+	{{ omfModelTitle }}
+	<p class="reportTitle">Model Input</p>
+	<div id="input" class="content">
+		<form name="inputForm" action="/runModel/" onsubmit="event.preventDefault(); return isFormValid();" method="post">
+			<!-- Required Inputs -->
+			<div class="shortInput">
+				<label>Model Type <a href="https://github.com/dpinney/omf/wiki/Models:-derConsumer" target="blank">Help?</a></label>
+				<input type="text" id="modelType" name="modelType" value="{{modelName}}" readonly/>
+			</div>
+			<div class="shortInput">
+				<label>Model Name</label>
+				<input type="text" id="modelName" name="modelName" value="{{allInputDataDict.modelName}}"pattern="^[\w\s\d\.-]+$" required="required">
+			</div>
+			<div class="shortInput">
+				<label>User</label>
+				<input type="text" id="user" name="user" value="{{allInputDataDict.user}}"readonly/>
+			</div>
+			<div class="shortInput">
+				<label>Created</label>
+				<input type="text" id="created" name="created" value="{{allInputDataDict.created}}"readonly/>
+			</div>
+			<div class="shortInput">
+				<label>Run Time</label>
+				<input type="text" id="runTime" name="runTime" value="{{allInputDataDict.runTime}}"readonly/>
+			</div>
+			<!-- Model Specific Inputs -->
+			<div class="wideInput">
+				<p class="inputSectionHeader">System Parameters</p>
+			</div>
+			<hr>
+			<div class="shortInput">
+				<label class="tooltip">Input 1<span class="classic">Enter an input of any kind.</span></label>
+				<input type="text" id="input1" name="input1" value="{{allInputDataDict.input1}}"required="required" placeholder="abc1 Easy as..."/>
+			</div>
+			<div class="shortInput">
+				<label class="tooltip">Input 2<span class="classic">Enter an input of another kind.</span></label>
+				<input type="text" id="input2" name="input2" value="{{allInputDataDict.input2}}"required="required" placeholder="123 Or Simple as.."/>
+			</div>
+			{{ omfModelButtons }}
+		</form>
+	</div>
+	{{ omfRunDebugBlock }}
+	{% if modelStatus == 'finished' %}
+	<!-- Output tables, graphs, etc -->
+	<div id="output">
+		<!-- Integer Sum Table -->
+		<p class="reportTitle">Model Skeleton Integer Sum</p>
+		<div id="analysisSummary" class="content">
+			<div class="shortInput">
+				<strong>Input 1</strong>
+				<p id="input1Out">{{allInputDataDict.input1}}</p>
+			</div>
+			<div class="shortInput">
+				<strong>Input 2</strong>
+				<p id="input2Out">{{allInputDataDict.input2}}</p>
+			</div>
+			<div class="shortInput">
+				<strong>Output</strong>
+				<p id="sumOut">{{allOutputDataDict.output}}</p>
+			</div>
+		</div>
+		{{ rawOutputFiles }}
+	</div>
+	{% endif %}
+</body>
