@@ -49,3 +49,5 @@ from omf.models import disaggregation
 from omf.models import restoration
 from omf.models import resilientCommunity
 from omf.models import transformerPairing
+from omf.models import derConsumer
+from omf.models import derUtilityCost

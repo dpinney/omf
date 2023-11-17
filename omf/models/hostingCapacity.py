@@ -79,7 +79,7 @@ def run_ami_algorithm(modelDir, inputDict, outData):
 
 def run_traditional_algorithm(modelDir, inputDict, outData):
 	# traditional hosting capacity if they uploaded an omd circuit file and chose to use it.
-	feederName = [x for x in os.listdir(modelDir) if x.endswith('.omd')][0]
+	feederName = [x for x in os.listdir(modelDir) if x.endswith('.omd') and x[:-4] == inputDict['feederName1'] ][0]
 	inputDict['feederName1'] = feederName[:-4]
 	path_to_omd = pJoin(modelDir, feederName)
 	tree = opendss.dssConvert.omdToTree(path_to_omd)
