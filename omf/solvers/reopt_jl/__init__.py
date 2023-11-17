@@ -4,49 +4,63 @@ import os, platform
 thisDir = os.path.abspath(os.path.dirname(__file__))
 
 def build_julia_image():
+    ''' Creates REoptSolver sysimage -> reopt_jl.so '''
+
     os.system(f'''julia --project={thisDir}/REoptSolver -e '
             import Pkg; import REoptSolver; using PackageCompiler; 
-            PackageCompiler.create_sysimage(["REoptSolver"]; sysimage_path="{thisDir}/reopt_jl.so")
+            PackageCompiler.create_sysimage(["REoptSolver"]; sysimage_path="{thisDir}/reopt_jl.so", 
+            precompile_execution_file="{thisDir}/precompile_reopt.jl")
             ' ''')
 
 #potential add: boolean to determine if you want to check your install
 def install_reopt_jl(system : list = platform.system()):
+    ''' Installs dependencies necessary for running REoptSolver and creates sysimage to reduce precompile time '''
+ 
     if os.path.isfile(f'{thisDir}/instantiated.txt'):
-        print("REopt.jl dependencies installed - to reinstall remove file: instantiated.txt")
+        print("reopt_jl dependencies installed - to reinstall remove file: instantiated.txt")
+        if not os.path.isfile(f'{thisDir}/reopt_jl.so'):
+            print("error: reopt_jl sysimage not found - remove instantiated.txt to build")
         return
     
-    if system == "Darwin":
-        commands = [
-            'HOMEBREW_NO_AUTO_UPDATE=1 brew list julia 1>/dev/null 2>/dev/null || brew install julia@1.9.3'
-        ]
-    elif system == "Linux":
-        commands = [
-            'rm "julia-1.9.3-linux-x86_64.tar.gz"',
-			'wget "https://julialang-s3.julialang.org/bin/linux/x64/1.9/julia-1.9.3-linux-x86_64.tar.gz"',
-			'tar -x -f "julia-1.9.3-linux-x86_64.tar.gz" -C /usr/local --strip-components 1'
-        ]
-    else:
-        print(f'No installation script available yet for {system}')
-        return
-    
-    commands += [
-            '''pip3 show julia 1>/dev/null 2>/dev/null || 
-            { pip3 install julia; python3 -c 'import julia; julia.install()'; }''',
-            f'touch {thisDir}/instantiated.txt'
+    try: 
+        if system == "Darwin":
+            commands = [
+                'HOMEBREW_NO_AUTO_UPDATE=1 brew list julia 1>/dev/null 2>/dev/null || brew install julia@1.9.3'
             ]
+        elif system == "Linux":
+            print("running installation for Linux: work in progress")
+            commands = [
+                'rm "julia-1.9.3-linux-x86_64.tar.gz"',
+			    'wget "https://julialang-s3.julialang.org/bin/linux/x64/1.9/julia-1.9.3-linux-x86_64.tar.gz"',
+			    'tar -x -f "julia-1.9.3-linux-x86_64.tar.gz" -C /usr/local --strip-components 1'
+            ]
+        else:
+            print(f'No installation script available yet for {system}')
+            return
     
-    for command in commands:
-        os.system(command)
-    build_julia_image()
+        commands += [
+            '''pip3 show julia 1>/dev/null 2>/dev/null || 
+            { pip3 install julia; python3 -c 'import julia; julia.install()'; }'''
+        ]
+    
+        for command in commands:
+            os.system(command)
+        build_julia_image()
+        os.system(f'touch {thisDir}/instantiated.txt')
+
+    except Exception as e:
+        print(e)
+        return 
+
+    print("reopt_jl installation completed successfully")
 
 ########################################################
 #functions for converting REopt input to REopt.jl input
 ########################################################
 
-#dictionary mapping REopt variable name to REopt.jl variable name 
-#  plus necessary information on parent section & data type
-    # ( translated variable name , section(s)(/none) , datatype(None if multiple types) )
 def init_reopt_to_julia_dict():
+    ''' dictionary mapping REopt variable name to REopt.jl variable name, plus necessary information on parent section & data type
+        ( translated variable name , section(s)(/none) , datatype(None if multiple types) )'''
     to_jl_dict = { "Site":("Site", {None}, dict),
               "latitude":("latitude",{"Site"},float),
               "longitude":("longitude",{"Site"},float),
@@ -132,8 +146,8 @@ class SectionLookupError(Exception):
         super().__init__(f"No sections found for key: {key} in API -> Julia JSON translator")
         self.key = key
 
-#checks if variable name is used in REopt.jl
 def check_key(key, to_jl_dict, not_included_in_jl):
+    ''' checks if variable name is used in REopt.jl '''
     if key in not_included_in_jl:
         return False
     elif key not in to_jl_dict:
@@ -141,8 +155,9 @@ def check_key(key, to_jl_dict, not_included_in_jl):
     else:
         return True
     
-#returns data value if it is the correct data type or converts if feasible 
+# 
 def check_input(key,var,to_jl_dict):
+    ''' returns data value if it is the correct data type or converts if feasible '''
     if key in to_jl_dict:
         var_type = to_jl_dict[key][2]
         if var_type == type(var) or var_type == None:
@@ -154,8 +169,8 @@ def check_input(key,var,to_jl_dict):
     else:
         raise(KeyNotRecognizedError)
 
-#returns converted section name if used in REopt.jl
 def get_section(key,section,to_jl_dict):
+    ''' returns converted section name if used in REopt.jl '''
     section_to_jl = to_jl_dict[section][0]
     new_sections = to_jl_dict[key][1]
     if section_to_jl in new_sections:
@@ -165,8 +180,8 @@ def get_section(key,section,to_jl_dict):
     else:
         raise(SectionLookupError)
 
-#converts variable into REopt.jl version of variable and adds to json
 def add_variable(section,key,value,jl_json,to_jl_dict):
+    ''' converts variable into REopt.jl version of variable and adds to json '''
     new_section = get_section(key,section,to_jl_dict)
     new_var_name = to_jl_dict[key][0]
     if not new_section in jl_json:
@@ -174,12 +189,10 @@ def add_variable(section,key,value,jl_json,to_jl_dict):
     jl_json[new_section][new_var_name] = check_input(key,value,to_jl_dict)
     return jl_json
 
-
-#converts an input json for REopt to the equivalent version for REopt.jl
-
-#REopt json: {Scenario: { Site: {lat, lon, ElectricTariff:{}, LoadProfile:{}, etc. }}}
-#REopt.jl json: { Site: { lat, lon }, ElectricTariff:{}, LoadProfile:{}, etc. }
 def convert_to_jl(reopt_json):
+    ''' converts an input json for REopt to the equivalent version for REopt.jl
+            REopt json: {Scenario: { Site: {lat, lon, ElectricTariff:{}, LoadProfile:{}, etc. }}}
+            REopt.jl json: { Site: { lat, lon }, ElectricTariff:{}, LoadProfile:{}, etc. } '''
     (to_jl_dict,not_included_in_jl) = init_reopt_to_julia_dict()
     new_jl_json = {}
     try:
@@ -200,25 +213,26 @@ def convert_to_jl(reopt_json):
         print(e)
     return new_jl_json
 
-# for reading and writing input/output json files
 def get_json(inputPath):
+    ''' for reading input/output json files '''
     with open(inputPath) as j:
         inputJson = json.load(j)
     return inputJson
 
 def write_json(outputPath, jsonData):
+    ''' for writing input/output json files '''
     if os.path.exists(outputPath):
         print(f'File {outputPath} already exists: overwriting')
     with open(outputPath, "w") as j:
         json.dump(jsonData, j)
 
 ##########################################################################
-# run_reopt_jl : calls 'run' function through run_reopt.jl (Julia file)
+# run_reopt_jl 
 ##########################################################################
 
 #potential optional inputs (for solver): ratio_gap, threads, max_solutions, verbosity
-def run_reopt_jl(path, inputFile="", default=False, convert=False, outages=False, microgrid_only=False,
-                 solver="HiGHS", max_runtime_s=None):
+def run_reopt_jl(path, inputFile="", default=False, convert=False, outages=False, microgrid_only=False, max_runtime_s=None):
+    ''' calls 'run' function through run_reopt.jl (Julia file) '''
     
     if inputFile == "" and not default:
         print("Invalid inputs: inputFile needed if default=False")
@@ -242,13 +256,13 @@ def run_reopt_jl(path, inputFile="", default=False, convert=False, outages=False
             reopt_jl_input_json = convert_to_jl(input_json)
             write_json(constant_path, reopt_jl_input_json)
 
-        microgrid_only_conv = "false" if not microgrid_only else "true"
-        outages_conv = "false" if not outages else "true"
-        max_runtime_s_conv = "nothing" if max_runtime_s == None else max_runtime_s
+        microgrid_only_jl = "false" if not microgrid_only else "true"
+        outages_jl = "false" if not outages else "true"
+        max_runtime_s_jl = "nothing" if max_runtime_s == None else max_runtime_s
 
         os.system(f'''julia --sysimage={f'{thisDir}/reopt_jl.so'} -e '
                   using .REoptSolver; 
-                  REoptSolver.run("{path}", {outages_conv}, "{solver}", {microgrid_only_conv}, {max_runtime_s_conv})
+                  REoptSolver.run("{path}", {outages_jl}, {microgrid_only_jl}, {max_runtime_s_jl})
                   ' ''')
     except Exception as e:
         print(e)
@@ -257,18 +271,17 @@ def run_reopt_jl(path, inputFile="", default=False, convert=False, outages=False
 # comparing REopt.jl outputs for different test cases / solvers
 ###########################################################################
 
-def runAllSolvers(path, testName, fileName="", default=False, convert=True, outages=True, solvers=["SCIP","HiGHS"], max_runtime_s=None):
+def runAllSolvers(path, testName, fileName="", default=False, convert=True, outages=True, solvers=["HiGHS"], max_runtime_s=None):
 
     for solver in solvers:
         print(f'########## Running {solver} test: {testName}')
         start = time.time()
 
-        run_reopt_jl(path, inputFile=fileName, default=default, convert=convert, solver=solver, outages=outages, max_runtime_s=max_runtime_s)
+        run_reopt_jl(path, inputFile=fileName, default=default, convert=convert, outages=outages, max_runtime_s=max_runtime_s)
 
         end = time.time()
         runtime = end - start
         print(f'########## Completed {solver} test: {testName} in {runtime} seconds')
-
 
 def _test():
     all_solvers = [ "HiGHS" ] # "Ipopt", "ECOS", "Clp", "GLPK", "SCIP", "Cbc"
@@ -280,7 +293,7 @@ def _test():
     
     ############### CE test case
     # CE.json copied from CE Test Case/Scenario_test_POST.json
-    #runAllSolvers(path, "CE Test Case", fileName="CE.json", solvers=all_solvers, max_runtime_s=240)
+    runAllSolvers(path, "CE Test Case", fileName="CE.json", solvers=all_solvers) #, max_runtime_s=240)
 
     ############## CONWAY_30MAY23_SOLARBATTERY
     # CONWAY_SB.json copied from CONWAY_30MAY23_SOLARBATTERY/Scenario_test_POST.json
