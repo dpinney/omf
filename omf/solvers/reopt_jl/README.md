@@ -32,23 +32,21 @@ julia> ]
 # Usage:
 ```
 __init__.py:
--> run_reopt_jl(path, inputFile="", default=False, convert=True, outages=False, microgrid_only=False, solver="HiGHS", max_runtime_s=None)
+-> run_reopt_jl(path, inputFile="", default=False, convert=True, outages=False, microgrid_only=False, max_runtime_s=None)
 ```
 
 General paramters:
 - path: directory containing inputFile ; output files written here as well
 - inputFile: json file containing REopt API input information
-    - if this file is already converted for REopt.jl -> set convert=False
-- default: if True, sets inputFile to default values, uses given inputFile otherwise
-- convert: if True, converts variables names to those used in REopt.jl, no conversion otherwise
+    - if this file is not converted for REopt.jl -> set convert=True
 - outages: if True, runs outage simulation, otherwise doesn't
 - microgrid_only: if True runs without grid, otherwise runs as normal
     *only used within REopt.jl currently (not API)
 - max_runtime_s: default is None, otherwise times out after given number of seconds and returns local optimal value (may not be the global optimum)
 
 Testing parameters:
-- solver: set to HiGHS (best runtime performance) ; other working options (tested but not currently installed): SCIP, Cbc
-    (add SCIP package to project [instructions above] & update REoptSolver.jl in order to utilize)
+- default: if True, sets inputFile to default values found in julia_default.json, uses given inputFile otherwise
+- convert: if True, converts variables names to those used in REopt.jl, no conversion otherwise
 
 Examples:
 ``` 

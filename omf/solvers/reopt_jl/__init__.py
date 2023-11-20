@@ -7,7 +7,8 @@ def build_julia_image():
     ''' Creates REoptSolver sysimage -> reopt_jl.so '''
 
     os.system(f'''julia --project={thisDir}/REoptSolver -e '
-            import Pkg; import REoptSolver; using PackageCompiler; 
+            import Pkg; Pkg.instantiate();
+            import REoptSolver; using PackageCompiler; 
             PackageCompiler.create_sysimage(["REoptSolver"]; sysimage_path="{thisDir}/reopt_jl.so", 
             precompile_execution_file="{thisDir}/precompile_reopt.jl")
             ' ''')
@@ -24,8 +25,10 @@ def install_reopt_jl(system : list = platform.system()):
     
     try: 
         if system == "Darwin":
-            commands = [
-                'HOMEBREW_NO_AUTO_UPDATE=1 brew list julia 1>/dev/null 2>/dev/null || brew install julia@1.9.3'
+            commands = [ '''
+                HOMEBREW_NO_AUTO_UPDATE=1 brew list julia 1>/dev/null 2>/dev/null || 
+                { brew tap homebrew/core; brew install julia; }
+                '''
             ]
         elif system == "Linux":
             print("running installation for Linux: work in progress")
