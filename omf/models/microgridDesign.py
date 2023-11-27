@@ -541,8 +541,7 @@ def work(modelDir, inputDict):
 			#adding for proforma analysis (wind)
 			outData['lcoeWind' + indexString] = results['Wind']['lcoe_per_kwh']
 			outData['windAnnualEnergyProduced' + indexString] = results['Wind']['annual_energy_produced_kwh']
-			outData['totalElectricityProduced' + indexString] += results['Wind']['year_one_energy_produced_kwh']
-			outData['windOMCosts' + indexString] = 36.0 #default input for REopt.jl
+			outData['totalElectricityProduced' + indexString] += results['Wind']['annual_energy_produced_kwh']
 
 			# windExisting is a pass through variables used in microgridUp project
 			windExisting = float(inputDict.get('windExisting',0))
@@ -552,12 +551,13 @@ def work(modelDir, inputDict):
 			outData['windInstalledCost' + indexString] = outData['windPurchased' + indexString] * windCost
 
 			#getting extra data from reopt.jl inputs (default values) to include in analysis results
+			outData['windOMCosts' + indexString] = reopt_inputs['s']['wind']['om_cost_per_kw']
 			outData['windMacrsBonusFraction' + indexString] = reopt_inputs['s']['wind']['macrs_bonus_fraction']
 			outData['windStateIbiFraction' + indexString] = reopt_inputs['s']['wind']['state_ibi_fraction']
 			outData['windStateIbiMax' + indexString] = reopt_inputs['s']['wind']['state_ibi_max']
 			outData['windUtilityIbiFraction' + indexString] = reopt_inputs['s']['wind']['utility_ibi_fraction']
 			outData['windUtilityIbiMax' + indexString] = reopt_inputs['s']['wind']['utility_ibi_max']
-			outData['degradationRateWindFraction' + indexString] = reopt_inputs['s']['wind']['degradation_fraction']
+			outData['degradationRateWindFraction' + indexString] = 0 #degradation not modeled for Wind
 			outData['windFederalCbi' + indexString] = reopt_inputs['s']['wind']['federal_rebate_per_kw'] 
 			outData['windStateCbi' + indexString] = reopt_inputs['s']['wind']['state_rebate_per_kw']
 			outData['windStateCbiMax' + indexString] = reopt_inputs['s']['wind']['state_rebate_max']
@@ -800,7 +800,7 @@ def work(modelDir, inputDict):
 				['State (% of total installed cost)',  outData['windStateIbiFraction' + indexString], outData['windStateIbiMax' + indexString]],
 				['Utility (% of total installed cost)', outData['windUtilityIbiFraction' + indexString], outData['windUtilityIbiMax' + indexString]],
 				['Capacity based incentive (CBI)', 'Amount ($/W)', 'Maximum ($)'],
-				['Federal ($/W)', outData['windFederalCbi' + indexString], outData['windFederalCbiMax' + indexString] ],
+				['Federal ($/W)', outData['windFederalCbi' + indexString] ],
 				['State  ($/W)', outData['windStateCbi' + indexString], outData['windStateCbiMax' + indexString] ],
 				['Utility  ($/W)', outData['windUtilityCbi' + indexString], outData['windUtilityCbiMax' + indexString]],
 				['Production based incentive (PBI)', 'Amount ($/kWh)', 'Maximum ($/year)', 'Term (years)', 'System Size Limit (kW)'],
@@ -1101,7 +1101,7 @@ def new(modelDir):
 		"loadShape" : load_shape,
 		"criticalLoadShape" : crit_load_shape,
 		"solar" : "on",
-		"wind" : "off", #was: "off"
+		"wind" : "off",
 		"battery" : "on",
 		"fileName" : fName,
 		"criticalFileName" : cfName,
