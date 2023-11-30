@@ -5,7 +5,7 @@ Solver for Julia verison of REopt.
 # Dependencies:
 - python@3.11 (other versions of python3 may work)
 - packages installed in install_reopt_jl()  ( runs automatically within run_reopt_jl )
-    - julia@1.9.3
+    - julia (1.9.4)
     - PyJulia (0.6.1)
 - packages within REoptSolver/Project.toml ( should be installed by Project.toml & Manifest.tomnl )
     - REopt@0.32.7

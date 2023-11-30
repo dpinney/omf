@@ -33,29 +33,32 @@ def install_reopt_jl(system : list = platform.system()):
         elif system == "Linux":
             print("running installation for Linux: work in progress")
             commands = [
-                'rm "julia-1.9.3-linux-x86_64.tar.gz"',
-			    'wget "https://julialang-s3.julialang.org/bin/linux/x64/1.9/julia-1.9.3-linux-x86_64.tar.gz"',
-			    'tar -x -f "julia-1.9.3-linux-x86_64.tar.gz" -C /usr/local --strip-components 1'
+                'sudo apt-get install wget',
+                'wget https://julialang-s3.julialang.org/bin/linux/x64/1.9/julia-1.9.4-linux-x86_64.tar.gz ',
+                #'''python3 -c 'from urllib.request import urlretrieve as wget; wget("https://julialang-s3.julialang.org/bin/linux/x64/1.9/julia-1.9.4-linux-x86_64.tar.gz", "./julia-1.9.4-linux-x86_64.tar.gz") ' ''',
+			    'tar -x -f "julia-1.9.4-linux-x86_64.tar.gz" -C /usr/local --strip-components 1'
             ]
         else:
             print(f'No installation script available yet for {system}')
             return
     
         commands += [
-            '''pip3 show julia 1>/dev/null 2>/dev/null || 
-            { pip3 install julia; python3 -c 'import julia; julia.install()'; }'''
+            'pip3 show julia 1>/dev/null 2>/dev/null || pip3 install julia ',
+            '''python3 -c 'import julia; julia.install()' '''
         ]
     
         for command in commands:
             os.system(command)
         build_julia_image()
-        os.system(f'touch {thisDir}/instantiated.txt')
+        if os.path.isfile(f'{thisDir}/reopt_jl.so'):
+            os.system(f'touch {thisDir}/instantiated.txt')
+            print("reopt_jl installation completed successfully")
+        else:
+            print("error: reopt_jl.so not found")
 
     except Exception as e:
         print(e)
         return 
-
-    print("reopt_jl installation completed successfully")
 
 ########################################################
 #functions for converting REopt input to REopt.jl input
@@ -296,14 +299,14 @@ def _test():
     
     ############### CE test case
     # CE.json copied from CE Test Case/Scenario_test_POST.json
-    runAllSolvers(path, "CE Test Case", fileName="CE.json", solvers=all_solvers) #, max_runtime_s=240)
+    #runAllSolvers(path, "CE Test Case", fileName="CE.json", solvers=all_solvers) #, max_runtime_s=240)
 
     ############## CONWAY_30MAY23_SOLARBATTERY
     # CONWAY_SB.json copied from CONWAY_30MAY23_SOLARBATTERY/Scenario_test_POST.json
     #runAllSolvers(path, "CONWAY_30MAY23_SOLARBATTERY", fileName="CONWAY_SB.json", solvers=all_solvers)
 
     ####### default julia json (default values from microgridDesign)
-    #runAllSolvers(path, "Julia Default", default=True, solvers=all_solvers)
+    runAllSolvers(path, "Julia Default", default=True, solvers=all_solvers)
 
 if __name__ == "__main__":
     _test()
