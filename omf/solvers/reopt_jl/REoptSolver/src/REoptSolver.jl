@@ -9,7 +9,7 @@ using REopt, JuMP, JSON, HiGHS #SCIP #, Cbc
 
 function get_model(path::String, max_runtime_s::Union{Nothing,Int}) 
 	m = Model(HiGHS.Optimizer)
-	set_attribute(m,"threads",0)
+	set_attribute(m,"threads",20)
     if max_runtime_s != nothing
         set_attribute(m,"time_limit", float(max_runtime_s))
     end
