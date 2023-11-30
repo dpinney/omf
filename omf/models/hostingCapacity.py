@@ -85,8 +85,8 @@ def run_traditional_algorithm(modelDir, inputDict, outData):
 	tree = opendss.dssConvert.omdToTree(path_to_omd)
 	opendss.dssConvert.treeToDss(tree, pJoin(modelDir, 'circuit.dss'))
 	curr_dir = os.getcwd()
-	traditionalHCResults = opendss.hosting_capacity_all(pJoin(modelDir, 'circuit.dss'), int(inputDict["traditionalHCSteps"]), int(inputDict["traditionalHCkW"]))
-    # - opendss.hosting_capacity_all() changes the cwd, so change it back so other code isn't affected
+	traditionalHCResults = opendss.hosting_capacity_all(pJoin(modelDir, 'circuit.dss'), int(inputDict["traditionalHCMaxTestkw"]))
+	# - opendss.hosting_capacity_all() changes the cwd, so change it back so other code isn't affected
 	os.chdir(curr_dir)
 	tradHCDF = pd.DataFrame(traditionalHCResults)
 	tradHCDF['plot_color'] = tradHCDF.apply ( lambda row: bar_chart_coloring(row), axis=1 )
@@ -142,9 +142,8 @@ def new(modelDir):
 		"inputDataFileName": meter_file_name,
 		"inputDataFileContent": meter_file_contents,
 		"feederName1": 'iowa240.clean.dss',
-		"traditionalHCSteps": 10,
 		"optionalCircuitFile": 'on',
-		"traditionalHCkW": 10,
+		"traditionalHCMaxTestkw": 50000,
 		"runAmiAlgorithm": 'on'
 	}
 	creationCode = __neoMetaModel__.new(modelDir, defaultInputs)

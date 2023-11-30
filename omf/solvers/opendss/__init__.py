@@ -243,8 +243,99 @@ def newQstsPlot(filePath, stepSizeInMinutes, numberOfSteps, keepAllFiles=False, 
 		all_load_df['V3(PU)'] = all_load_df['V3'].astype(float) / (all_load_df['kv'].astype(float) * 1000.0)
 		all_load_df.to_csv(f'{dssFileLoc}/{filePrefix}_load.csv', index=False)
 
+def get_hosting_capacity_of_single_bus(FILE_PATH:str, BUS_NAME:str, max_test_kw:float):
+	'''
+	- Return the maximum hosting capacity at a single bus that is possible before a thermal violation or voltage violation is reached
+		- E.g. if a violation occurs at 4 kW, then this function will return 3.5 kW with thermal_violation == False and voltage_violation == False
+	- Special case: if a single bus experiences a violation at 1 kW, then this function will return 1 kW with thermal_violation == True and/or
+		voltage_violation == True. In this case, the hosting capacity isn't known. We only know it's < 1 kW
+	'''
+	# - Get lower and upper bounds for the hosting capacity of a single bus
+	thermal_violation = False
+	voltage_violation = False
+	lower_kw_bound = 1
+	upper_kw_bound = 1
+	while True:
+		results = check_hosting_capacity_of_single_bus(FILE_PATH, BUS_NAME, upper_kw_bound)
+		thermal_violation = results['thermal_violation']
+		voltage_violation = results['voltage_violation']
+		if thermal_violation or voltage_violation or upper_kw_bound == max_test_kw:
+			break
+		lower_kw_bound = upper_kw_bound
+		upper_kw_bound = lower_kw_bound * 2
+		if upper_kw_bound > max_test_kw:
+			upper_kw_bound = max_test_kw
+	# - If no violations were found at the max_test_kw, then just report the hosting capacity to be the max_test_kw even though the actual hosting
+	#   capacity is higher
+	if not thermal_violation and not voltage_violation and upper_kw_bound == max_test_kw:
+		return {'bus': BUS_NAME, 'max_kw': max_test_kw, 'reached_max': False, 'thermal_violation': thermal_violation, 'voltage_violation': voltage_violation}
+	# - Use the bounds to compute the hosting capacity of a single bus
+	kw_step = (upper_kw_bound - lower_kw_bound) / 2
+	kw = lower_kw_bound + kw_step
+	# - The reported valid hosting capacity (i.e. lower_kw_bound) will be equal to the hosting capacity that causes a thermal or voltage violation
+	#   minus a value that is less than 1 kW
+    #   - E.g. a reported hosting capacity of 139.5 kW means that a violation probably occurred at 140 kW
+	while not kw_step < .5:
+		results = check_hosting_capacity_of_single_bus(FILE_PATH, BUS_NAME, kw)
+		thermal_violation = results['thermal_violation']
+		voltage_violation = results['voltage_violation']
+		if not thermal_violation and not voltage_violation:
+			lower_kw_bound = kw
+		else:
+			upper_kw_bound = kw
+			thermal_violation = False
+			voltage_violation = False
+		kw_step = (upper_kw_bound - lower_kw_bound) / 2
+		kw = lower_kw_bound + kw_step
+	return {'bus': BUS_NAME, 'max_kw': lower_kw_bound, 'reached_max': True, 'thermal_violation': thermal_violation, 'voltage_violation': voltage_violation}
+
+def check_hosting_capacity_of_single_bus(FILE_PATH:str, BUS_NAME:str, kwValue: float):
+	''' Identify if an amount of generation that is added at BUS_NAME exceeds ANSI A Band voltage levels. '''
+	fullpath = os.path.abspath(FILE_PATH)
+	filedir = os.path.dirname(fullpath)
+	ansi_a_max_pu = 1.05 #	ansi_b_max_pu = 1.058
+	# Find the insertion kv level.
+	kv_mappings = get_bus_kv_mappings(fullpath)
+	# Error cleanly on invalid bus.
+	if BUS_NAME not in kv_mappings:
+		raise Exception(f'BUS_NAME {BUS_NAME} not found in circuit.')
+	# Get insertion bus; should always be safe to insert above makebuslist.
+	tree = dssConvert.dssToTree(fullpath)
+	for i, ob in enumerate(tree):
+		if ob.get('!CMD', None) == 'makebuslist':
+			insertion_index = i
+	# Step through generator sizes, add to circuit, measure voltages.
+	new_tree = deepcopy(tree)
+	# Insert generator.
+	new_gen = {
+		'!CMD': 'new',
+		'object': f'generator.hostcap_{BUS_NAME}',
+		'bus1': f'{BUS_NAME}.1.2.3',
+		'kw': kwValue,
+		'pf': '1.0',
+		'conn': 'wye',
+		'phases': '3',
+		'kv': kv_mappings[BUS_NAME],
+		'model': '1' }
+	# Make DSS and run.
+	new_tree.insert(insertion_index, new_gen)
+	dssConvert.treeToDss(new_tree, 'HOSTCAP.dss')
+	runDSS('HOSTCAP.dss')
+	# Calc max voltages.
+	runDssCommand(f'export voltages "{filedir}/volts.csv"')
+	volt_df = pd.read_csv(f'{filedir}/volts.csv')
+	v_max_pu1, v_max_pu2, v_max_pu3 =  volt_df[' pu1'].max(), volt_df[' pu2'].max(), volt_df[' pu2'].max()
+	v_max_pu_all = float(max(v_max_pu1, v_max_pu2, v_max_pu3))
+	volt_violation = True if np.greater(v_max_pu_all, ansi_a_max_pu) else False
+	# Calc number of thermal violations.
+	runDssCommand(f'export overloads "overloads.csv"')
+	over_df = pd.read_csv(f'overloads.csv')
+	therm_violation = True if len(over_df) > 0 else False
+	return {'bus':BUS_NAME, 'thermal_violation':therm_violation, 'voltage_violation':volt_violation}
+
+# DEPRECATED
 def hosting_capacity_single_bus(FILE_PATH:str, kwSTEPS:int, kwValue:float, BUS_NAME:str, DEFAULT_KV:float = 2.14):
-	''' Identify maximum amount of generation that can be added at BUS_NAME before ANSI A Band voltage levels are exceeded. '''
+	''' Identify maximum amount of generation that can be added at BUS_NAME before ANSI A Band voltage levels are exceeded. (DEPRECATED) '''
 	fullpath = os.path.abspath(FILE_PATH)
 	filedir = os.path.dirname(fullpath)
 	ansi_a_max_pu = 1.05 #	ansi_b_max_pu = 1.058
@@ -297,7 +388,7 @@ def hosting_capacity_single_bus(FILE_PATH:str, kwSTEPS:int, kwValue:float, BUS_N
 	# didn't hit violation, so report that.
 	return {'bus':BUS_NAME, 'max_kw':kwValue * step, 'reached_max':False, 'thermal_violation':therm_violation, 'voltage_violation':volt_violation}
 
-def hosting_capacity_all(FNAME:str, kwSTEPS:int, kwValue:float, BUS_LIST:list = None, DEFAULT_KV:float = 2.14):
+def hosting_capacity_all(FNAME:str, max_test_kw:float=50000, BUS_LIST:list = None):
 	''' Generate hosting capacity results for all_buses. '''
 	fullpath = os.path.abspath(FNAME)
 	if not BUS_LIST:
@@ -309,7 +400,7 @@ def hosting_capacity_all(FNAME:str, kwSTEPS:int, kwValue:float, BUS_LIST:list = 
 	# print('GEN_BUSES', gen_buses)
 	for bus in gen_buses:
 		try:
-			single_output = hosting_capacity_single_bus(fullpath, kwSTEPS, kwValue, bus, DEFAULT_KV=DEFAULT_KV)
+			single_output = get_hosting_capacity_of_single_bus(fullpath, bus, max_test_kw)
 			all_output.append(single_output)
 		except:
 			print(f'Could not solve hosting capacity for BUS_NAME={bus}')
