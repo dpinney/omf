@@ -1,5 +1,6 @@
 import os, platform, json
 from pathlib import Path
+from os.path import join as pJoin
 
 thisDir = os.path.abspath(os.path.dirname(__file__))
 
@@ -168,31 +169,34 @@ def build_events_file(circuitPath='circuit.dss', eventsPath="events.json", custo
 
 def run_onm(circuitPath='circuit.dss', settingsPath='settings.json', outputPath="onm_out.json", eventsPath="events.json", faultsPath='', gurobi='true', verbose='true', fixSmallNumbers='true', applySwitchScores='true', skipList='["faults","stability"]', prettyPrint='true', optSwitchFormulation="lindistflow", optSwitchSolver="mip_solver", optSwitchAlgorithm="global", optSwitchProblem="block", optDispFormulation="lindistflow", optDispSolver="mip_solver", mip_solver_gap=0.05):
 	#TODO: allow arguments to function for the ones hardcoded!
-	cmd_string = f'''julia -e '
-		import Gurobi;
-		using PowerModelsONM;
-		args = Dict{{String,Any}}(
-			"network"=>"{circuitPath}",
-			"settings"=>"{settingsPath}",
-			"events"=>"{eventsPath}",
-			"faults"=>"{faultsPath}",
-			"output"=>"{outputPath}",
-			"verbose"=>{verbose},
-			"skip"=>{skipList},
-			"fix-small-numbers"=>{fixSmallNumbers},
-			"apply-switch-scores" => {applySwitchScores},
-			"pretty-print" => {prettyPrint},
-			"gurobi"=>{gurobi},
-			"opt-switch-formulation" => "{optSwitchFormulation}",
-			"opt-switch-solver" => "{optSwitchSolver}",
-			"opt-switch-algorithm" => "{optSwitchAlgorithm}",
-			"opt-switch-problem" => "{optSwitchProblem}",
-			"opt-disp-formulation" => "{optDispFormulation}",
-			"opt-disp-solver" => "{optDispSolver}",
-			"mip_solver_gap" => {mip_solver_gap} #0.02 = slow, 0.05 = default, 0.10 = fast
-		);
-		entrypoint(args);
-	' '''
+	juliaFileContents = f'''using PowerModelsONM; 
+		args = Dict{{String,Any}}( 
+			"network"=>"{circuitPath}", 
+			"settings"=>"{settingsPath}", 
+			"events"=>"{eventsPath}", 
+			"faults"=>"{faultsPath}", 
+			"output"=>"{outputPath}", 
+			"verbose"=>{verbose}, 
+			"skip"=>{skipList}, 
+			"fix-small-numbers"=>{fixSmallNumbers}, 
+			"apply-switch-scores" => {applySwitchScores}, 
+			"pretty-print" => {prettyPrint}, 
+			"gurobi" => false, 
+			"opt-switch-formulation" => "{optSwitchFormulation}", 
+			"opt-switch-solver" => "{optSwitchSolver}", 
+			"opt-switch-algorithm" => "{optSwitchAlgorithm}", 
+			"opt-switch-problem" => "{optSwitchProblem}", 
+			"opt-disp-formulation" => "{optDispFormulation}", 
+			"opt-disp-solver" => "{optDispSolver}", 
+			"mip_solver_gap" => {mip_solver_gap} #0.02 = slow, 0.05 = default, 0.10 = fast 
+		); 
+		entrypoint(args); '''
+	juliaFileContents = juliaFileContents.replace('\\','/')
+	juliaFileLocation = pJoin(thisDir, 'run_onm_julia_script.jl')
+	with open(juliaFileLocation, 'w') as juliaFile:
+		juliaFile.write(juliaFileContents)
+	#Writing the julia code to a .jl file and running that file from the command line is far less prone to formatting snafus than writing the julia code in the cmd commands directly
+	cmd_string = f'julia {juliaFileLocation}'
 	runCommands([cmd_string])
 
 

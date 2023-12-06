@@ -221,6 +221,13 @@
 		<div id="utilityOutageCostCalc" class="tightContent">
 			{{ allOutputDataDict['utilityOutageHtml'] }}
 		</div>
+		<p class="reportTitle">Outage Incidence</p>
+		<div id="fig6" class="tightContent">
+			<div id="fig6Chart" style="width:1000px"></div>
+			<script type="text/javascript">
+				Plotly.newPlot("fig6Chart", JSON.parse(allOutputData["fig6Data"]), JSON.parse(allOutputData["fig6Layout"]) || {})
+			</script>
+		</div>
 		<p class="reportTitle" style="page-break-before:always">Timeline</p>
 		<div id="outageCostCalc" class="tightContent sorttable" style="max-height:500px; overflow-y:scroll">
 			{{ allOutputDataDict['timelineStatsHtml'] }}
