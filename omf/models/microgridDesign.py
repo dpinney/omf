@@ -436,11 +436,14 @@ def work(modelDir, inputDict):
 		if solar == 'on':
 			outData['sizePV' + indexString] = results['PV']['size_kw']
 			outData['sizePVRounded' + indexString] = round(results['PV']['size_kw'],1)
-			#outData['powerPV' + indexString] = resultsSubset['PV']['year_one_power_production_series_kw']
 			outData['powerPVToBattery' + indexString] = results['PV']['electric_to_storage_series_kw']#['year_one_to_battery_series_kw']
 			outData['powerPVToLoad' + indexString] = results['PV']['electric_to_load_series_kw']#['year_one_to_load_series_kw']
 			outData['powerPVCurtailed' + indexString] = results['PV']['electric_curtailed_series_kw']#['year_one_curtailed_production_series_kw']
 			outData['powerPVToGrid' + indexString] = results['PV']['electric_to_grid_series_kw']#['year_one_to_grid_series_kw']
+			powerPVProductionValues = (outData['powerPVToBattery' + indexString], outData['powerPVToLoad' + indexString],
+							  outData['powerPVCurtailed' + indexString], outData['powerPVToGrid' + indexString])
+			outData['powerPV' + indexString] = [sum(x) for x in zip(*powerPVProductionValues)]
+			#resultsSubset['PV']['year_one_power_production_series_kw']
 			outData['sizePVExisting' + indexString] = solarExisting
 			#results['inputs']['Scenario']['Site']['PV']['existing_kw']
 			outData['solarCost' + indexString] = float(inputDict['solarCost'])
@@ -532,11 +535,17 @@ def work(modelDir, inputDict):
 		if wind == 'on':
 			outData['sizeWind' + indexString] = results['Wind']['size_kw']
 			outData['sizeWindRounded' + indexString] = round(results['Wind']['size_kw'],1)
-			#outData['powerWind' + indexString] = resultsSubset['Wind']['year_one_power_production_series_kw']
 			outData['powerWindToBattery' + indexString] = results['Wind']['electric_to_storage_series_kw']
 			#['year_one_to_battery_series_kw']
 			outData['powerWindToLoad' + indexString] = results['Wind']['electric_to_load_series_kw']
 			#['year_one_to_load_series_kw']
+			#adding powerWindToGrid and powerWindCurtailed to ensure accuracy of total wind production series (powerWind)
+			outData['powerWindToGrid' + indexString] = results['Wind']['electric_to_grid_series_kw']
+			outData['powerWindCurtailed' + indexString] = results['Wind']['electric_curtailed_series_kw']
+			powerWindProductionValues = (outData['powerWindToBattery' + indexString], outData['powerWindToLoad' + indexString],
+								outData['powerWindToGrid' + indexString], outData['powerWindCurtailed' + indexString])
+			outData['powerWind' + indexString] = [sum(x) for x in zip(*powerWindProductionValues)]
+			#resultsSubset['Wind']['year_one_power_production_series_kw']
 			outData['windCost' + indexString] = windCost
 			#adding for proforma analysis (wind)
 			outData['lcoeWind' + indexString] = results['Wind']['lcoe_per_kwh']
@@ -558,7 +567,7 @@ def work(modelDir, inputDict):
 			outData['windUtilityIbiFraction' + indexString] = reopt_inputs['s']['wind']['utility_ibi_fraction']
 			outData['windUtilityIbiMax' + indexString] = reopt_inputs['s']['wind']['utility_ibi_max']
 			outData['degradationRateWindFraction' + indexString] = 0 #degradation not modeled for Wind
-			outData['windFederalCbi' + indexString] = reopt_inputs['s']['wind']['federal_rebate_per_kw'] 
+			outData['windFederalCbi' + indexString] = reopt_inputs['s']['wind']['federal_rebate_per_kw']
 			outData['windStateCbi' + indexString] = reopt_inputs['s']['wind']['state_rebate_per_kw']
 			outData['windStateCbiMax' + indexString] = reopt_inputs['s']['wind']['state_rebate_max']
 			outData['windUtilityCbi' + indexString] = reopt_inputs['s']['wind']['utility_rebate_per_kw']
@@ -588,11 +597,16 @@ def work(modelDir, inputDict):
 		outData['sizeDieselExisting' + indexString] = genExisting #float(inputDict['genExisting'])
 		outData['sizeDieselPurchased' + indexString] = outData['sizeDiesel' + indexString] - genExisting #outData['sizeDieselExisting' + indexString]
 		#results['inputs']['Scenario']['Site']['Generator']['existing_kw']
-		#outData['powerDiesel' + indexString] = resultsSubset['Generator']['year_one_power_production_series_kw']
 		outData['powerDieselToBattery' + indexString] = results['Generator']['electric_to_storage_series_kw']
 		#['year_one_to_battery_series_kw']
 		outData['powerDieselToLoad' + indexString] = results['Generator']['electric_to_load_series_kw']
 		#['year_one_to_load_series_kw']
+		#adding powerDieselToGrid to ensure accuracy of total diesel production series (powerDiesel)
+		outData['powerDieselToGrid' + indexString] = results['Generator']['electric_to_grid_series_kw']
+		powerDieselProductionValues = (outData['powerDieselToBattery' + indexString], outData['powerDieselToLoad' + indexString],
+								 outData['powerDieselToGrid' + indexString])
+		outData['powerDiesel' + indexString] = [sum(x) for x in zip(*powerDieselProductionValues)]
+		#resultsSubset['Generator']['year_one_power_production_series_kw']
 
 		#adding for proforma analysis (generator)
 		outData['dieselAnnualEnergyProduced' + indexString] = results['Generator']['annual_energy_produced_kwh']
