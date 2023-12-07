@@ -274,7 +274,7 @@ def get_hosting_capacity_of_single_bus(FILE_PATH:str, BUS_NAME:str, max_test_kw:
 	kw = lower_kw_bound + kw_step
 	# - The reported valid hosting capacity (i.e. lower_kw_bound) will be equal to the hosting capacity that causes a thermal or voltage violation
 	#   minus a value that is less than 1 kW
-    #   - E.g. a reported hosting capacity of 139.5 kW means that a violation probably occurred at 140 kW
+	#   - E.g. a reported hosting capacity of 139.5 kW means that a violation probably occurred at 140 kW
 	while not kw_step < .5:
 		results = check_hosting_capacity_of_single_bus(FILE_PATH, BUS_NAME, kw)
 		thermal_violation = results['thermal_violation']
@@ -331,7 +331,7 @@ def check_hosting_capacity_of_single_bus(FILE_PATH:str, BUS_NAME:str, kwValue: f
 	runDssCommand(f'export overloads "overloads.csv"')
 	over_df = pd.read_csv(f'overloads.csv')
 	therm_violation = True if len(over_df) > 0 else False
-	return {'bus':BUS_NAME, 'thermal_violation':therm_violation, 'voltage_violation':volt_violation}
+	return {'thermal_violation':therm_violation, 'voltage_violation':volt_violation}
 
 # DEPRECATED
 def hosting_capacity_single_bus(FILE_PATH:str, kwSTEPS:int, kwValue:float, BUS_NAME:str, DEFAULT_KV:float = 2.14):
