@@ -498,7 +498,7 @@ def avg(inList):
 def hdmAgg(series, func, level):
 	''' Simple hour/day/month aggregation for Gridlab. '''
 	if level in ['days','months']:
-		return aggSeries(stamps, series, func, level)
+		return aggSeries(series, func, level)
 	else:
 		return series
 
