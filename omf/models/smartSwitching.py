@@ -8,12 +8,7 @@ import plotly as py
 import plotly.graph_objs as go
 from plotly.tools import make_subplots
 import networkx as nx
-
 import matplotlib
-if platform.system() == 'Darwin':
-	matplotlib.use('TkAgg')
-else:
-	matplotlib.use('Agg')
 from matplotlib import pyplot as plt
 
 # dateutil imports

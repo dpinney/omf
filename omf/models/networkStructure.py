@@ -1,24 +1,13 @@
 ''' Reconstruct distribution network structure from meter data. '''
-import json, os, tempfile, shutil, csv, math, re, base64, platform
+import json, os, tempfile, shutil, csv, math, re, base64
 from os.path import join as pJoin
 import pandas as pd
 import networkx as nx
 from sklearn import svm
 from sklearn import metrics
 from numpy import array
-
-import matplotlib
-if platform.system() == 'Darwin':
-	matplotlib.use('TkAgg')
-else:
-	matplotlib.use('Agg')
 from matplotlib import pyplot as plt
-
-# dateutil imports
-from dateutil import parser
 from dateutil.relativedelta import *
-
-# OMF imports
 import omf
 from omf import feeder, geo
 from omf.models import __neoMetaModel__

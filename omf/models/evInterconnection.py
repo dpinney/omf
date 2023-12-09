@@ -6,10 +6,6 @@ from random import randint, uniform
 import numpy as np
 
 import matplotlib
-if platform.system() == 'Darwin':
-	matplotlib.use('TkAgg')
-else:
-	matplotlib.use('Agg')
 from matplotlib import pyplot as plt
 #plt.style.use('seaborn')
 

@@ -1,19 +1,12 @@
 ''' Run micot-GFM, micot-RDT, and GridLAB-D to determine an optimal distribution resiliency investment. '''
 
-import json, os, shutil, subprocess, datetime, re, random, copy, warnings, base64, platform
+import json, os, shutil, subprocess, datetime, random, copy, base64, platform
 import os.path
 from os.path import join as pJoin
 import numpy as np
 import networkx as nx
-
 import matplotlib
-if platform.system() == 'Darwin':
-	matplotlib.use('TkAgg')
-else:
-	matplotlib.use('Agg')
 from matplotlib import pyplot as plt
-
-# OMF imports
 import omf
 from omf import feeder, weather, distNetViz
 from omf.models import __neoMetaModel__
@@ -128,7 +121,7 @@ class HazardField(object):
 		self.hazardObj["cellsize"] = cellSize
 
 	def mapValue(self, value, fromMin, fromMax, toMin=.7, toMax=1):
-		newValue = float(value - fromMind) / float(fromMax-fromMin)
+		newValue = float(value - fromMin) / float(fromMax-fromMin)
 		return toMin + (newValue * (toMax-toMin))
 
 	def mapRanges(self, values, fromMin, fromMax):

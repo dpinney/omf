@@ -3,10 +3,6 @@ import csv, datetime as dt, json, tempfile, os, random, platform
 from os.path import join as pJoin
 import numpy as np
 import matplotlib
-if platform.system() == 'Darwin':
-	matplotlib.use('TkAgg')
-else:
-	matplotlib.use('Agg')
 from matplotlib import pyplot as plt
 from omf import feeder
 from omf.solvers import gridlabd

@@ -1,23 +1,10 @@
 ''' Calculate FLISR, fault location isolation and restoration. '''
-import random, re, datetime, json, os, tempfile, shutil, csv, math, platform, base64
+import re, json, os, tempfile, shutil
 from os.path import join as pJoin
 import pandas as pd
-import numpy as np
-import scipy
-from scipy import spatial
-import scipy.stats as st
-from sklearn.preprocessing import LabelEncoder
-import plotly as py
-import plotly.graph_objs as go
-import matplotlib
-if platform.system() == 'Darwin':
-	matplotlib.use('TkAgg')
-else:
-	matplotlib.use('Agg')
-from matplotlib import pyplot as plt
 import networkx as nx
 # OMF imports
-from omf import feeder, geo, distNetViz
+from omf import feeder, geo
 import omf
 import omf.feeder
 import omf.geo
