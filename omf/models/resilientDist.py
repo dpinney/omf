@@ -120,11 +120,10 @@ class HazardField(object):
 		''' Scale the cell size in image plot. '''
 		self.hazardObj["cellsize"] = cellSize
 
-	def mapValue(self, value, fromMin, fromMax, toMin=.7, toMax=1):
-		newValue = float(value - fromMin) / float(fromMax-fromMin)
-		return toMin + (newValue * (toMax-toMin))
-
 	def mapRanges(self, values, fromMin, fromMax):
+		def mapValue(self, value, fromMin, fromMax, toMin=.7, toMax=1):
+			newValue = float(value - fromMin) / float(fromMax-fromMin)
+			return toMin + (newValue * (toMax-toMin))
 		newValues = []
 		for value in values:
 			newValues.append(mapValue(value, fromMin, fromMax))
