@@ -258,7 +258,7 @@ def prim(graph):
 
 def testingSimple(testPath, pathToCsv, workDir, useDist, useVolt):
 	'visualize the different MSTs based on distance data, voltage data, and actual connectivity'
-	
+
 	# generate date
 	nodes, volt, tree, workDir, inputDataDist, inputDataVolt, outputData = generateData(testPath, pathToCsv, workDir, useDist, useVolt)
 	
@@ -281,7 +281,7 @@ def testingSimple(testPath, pathToCsv, workDir, useDist, useVolt):
 	for val in expectedDist:
 		distMST[val[0]][val[1]] = 1
 	for val in expectedVolt:
-	 	voltMST[val[0]][val[1]] = 1
+		voltMST[val[0]][val[1]] = 1
 	for val in actual:
 		actualMST[val[0]][val[1]] = 1
 
@@ -443,7 +443,7 @@ def createTrainingData(trainPath, pathToCsv, workDir, X_train, y_train, useDist,
 		distMST[val[0]][val[1]] = 1
 
 	for val in expectedVolt:
-	 	voltMST[val[0]][val[1]] = 1
+		voltMST[val[0]][val[1]] = 1
 
 	for val in actual:
 		actualMST[val[0]][val[1]] = 1
