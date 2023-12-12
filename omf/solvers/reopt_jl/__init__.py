@@ -10,7 +10,7 @@ def build_julia_image():
             import Pkg; Pkg.instantiate();
             import REoptSolver; using PackageCompiler; 
             PackageCompiler.create_sysimage(["REoptSolver"]; sysimage_path="{thisDir}/reopt_jl.so", 
-            precompile_execution_file="{thisDir}/precompile_reopt.jl")
+            precompile_execution_file="{thisDir}/precompile_reopt.jl", cpu_target="generic;sandybridge,-xsaveopt,clone_all;haswell,-rdrnd,base(1)")
             ' ''')
 
 #potential add: boolean to determine if you want to check your install
@@ -267,7 +267,7 @@ def run_reopt_jl(path, inputFile="", default=False, convert=False, outages=False
         max_runtime_s_jl = "nothing" if max_runtime_s == None else max_runtime_s
 
         os.system(f'''julia --sysimage={f'{thisDir}/reopt_jl.so'} -e '
-                  using .REoptSolver; 
+                  using .REoptSolver;
                   REoptSolver.run("{path}", {outages_jl}, {microgrid_only_jl}, {max_runtime_s_jl})
                   ' ''')
     except Exception as e:
