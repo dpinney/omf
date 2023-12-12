@@ -6,6 +6,7 @@ export run
 using REopt, JuMP, JSON, HiGHS #SCIP #, Cbc
 #Ipopt, ECOS, Clp, GLPK
 
+ENV["NREL_DEVELOPER_API_KEY"]="WhEzm6QQQrks1hcsdN0Vrd56ZJmUyXJxTJFg6pn9"
 
 function get_model(path::String, max_runtime_s::Union{Nothing,Int}) 
 	m = Model(HiGHS.Optimizer)
