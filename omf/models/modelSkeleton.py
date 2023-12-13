@@ -4,7 +4,7 @@ import warnings
 # warnings.filterwarnings("ignore")
 
 import shutil, datetime
-from os.path import join as pJoin
+from pathlib import Path
 
 # OMF imports
 from omf import feeder
@@ -12,7 +12,7 @@ from omf.models.voltageDrop import drawPlot
 from omf.models import __neoMetaModel__
 from omf.models.__neoMetaModel__ import *
 
-# Model metadata:
+# Model metadata
 modelName, template = __neoMetaModel__.metadata(__file__)
 hidden = True
 
@@ -65,7 +65,7 @@ def new(modelDir):
 @neoMetaModel_test_setup
 def _tests():
 	# Location
-	modelLoc = pJoin(__neoMetaModel__._omfDir,"data","Model","admin","Automated Testing of " + modelName)
+	modelLoc = Path(__neoMetaModel__._omfDir,"data","Model","admin","Automated Testing of " + modelName)
 	# Blow away old test results if necessary.
 	try:
 		shutil.rmtree(modelLoc)
