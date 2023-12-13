@@ -34,7 +34,7 @@ def bar_chart_coloring( row ):
 
 def createColorCSV(modelDir, df):
 	new_df = df[['bus','max_kw']]
-	new_df.to_csv(pJoin(modelDir, 'color_by.csv'), index=False)
+	new_df.to_csv(Path(modelDir, 'color_by.csv'), index=False)
 
 def work(modelDir, inputDict):
 	outData = {}
@@ -48,15 +48,15 @@ def work(modelDir, inputDict):
 
 def run_ami_algorithm(modelDir, inputDict, outData):
 	# mohca data-driven hosting capacity
-	with open(pJoin(modelDir,inputDict['inputDataFileName']),'w', newline='') as pv_stream:
+	with open(Path(modelDir,inputDict['inputDataFileName']),'w', newline='') as pv_stream:
 		pv_stream.write(inputDict['inputDataFileContent'])
-	inputPath = pJoin(modelDir, inputDict['inputDataFileName'])
+	inputPath = Path(modelDir, inputDict['inputDataFileName'])
 	try:
 		csvValidateAndLoad(inputDict['inputDataFileContent'], modelDir=modelDir, header=0, nrows=None, ncols=5, dtypes=[str, pd.to_datetime, float, float, float], return_type='df', ignore_nans=False, save_file=None, ignore_errors=False )
 	except:
 		errorMessage = "AMI-Data CSV file is incorrect format. Please see valid format definition at <a target='_blank' href='https://github.com/dpinney/omf/wiki/Models-~-hostingCapacity#meter-data-input-csv-file-format'>OMF Wiki hostingCapacity</a>"
 		raise Exception(errorMessage)
-	outputPath = pJoin(modelDir, 'mohcaOutput.csv')
+	outputPath = Path(modelDir, 'mohcaOutput.csv')
 	mohcaOutput = []
 	if inputDict[ "mohcaAlgorithm" ] == "sandia1":
 		mohcaOutput = mohca_cl.sandia1( inputPath, outputPath )
@@ -68,6 +68,7 @@ def run_ami_algorithm(modelDir, inputDict, outData):
 	mohcaResults = mohcaOutput[0].rename(columns={'kW_hostable': 'voltage_cap_kW'})
 	mohcaHistogramFigure = px.histogram( mohcaResults, x='voltage_cap_kW', template="simple_white", color_discrete_sequence=["MediumPurple"] )
 	mohcaHistogramFigure.update_layout(bargap=0.5)
+	# TBD - Needs to be modified when the MoHCA algorithm supports calculating thermal hosting capacity
 	mohcaResults['thermal_cap_kW'] = [7.23, 7.34, 7.45, 7.53, 7.24, 6.24, 7.424, 7.23 ]
 	mohcaResults['max_cap_allowed_kW'] = np.minimum( mohcaResults['voltage_cap_kW'], mohcaResults['thermal_cap_kW'])
 	mohcaBarChartFigure = px.bar(mohcaResults, x='busname', y=['voltage_cap_kW', 'thermal_cap_kW', 'max_cap_allowed_kW'], barmode='group', color_discrete_sequence=["green", "lightblue", "MediumPurple"], template="simple_white" )
@@ -81,11 +82,11 @@ def run_traditional_algorithm(modelDir, inputDict, outData):
 	# traditional hosting capacity if they uploaded an omd circuit file and chose to use it.
 	feederName = [x for x in os.listdir(modelDir) if x.endswith('.omd') and x[:-4] == inputDict['feederName1'] ][0]
 	inputDict['feederName1'] = feederName[:-4]
-	path_to_omd = pJoin(modelDir, feederName)
+	path_to_omd = Path(modelDir, feederName)
 	tree = opendss.dssConvert.omdToTree(path_to_omd)
-	opendss.dssConvert.treeToDss(tree, pJoin(modelDir, 'circuit.dss'))
+	opendss.dssConvert.treeToDss(tree, Path(modelDir, 'circuit.dss'))
 	curr_dir = os.getcwd()
-	traditionalHCResults = opendss.hosting_capacity_all(pJoin(modelDir, 'circuit.dss'), int(inputDict["traditionalHCMaxTestkw"]))
+	traditionalHCResults = opendss.hosting_capacity_all(Path(modelDir, 'circuit.dss'), int(inputDict["traditionalHCMaxTestkw"]))
 	# - opendss.hosting_capacity_all() changes the cwd, so change it back so other code isn't affected
 	os.chdir(curr_dir)
 	tradHCDF = pd.DataFrame(traditionalHCResults)
@@ -122,7 +123,7 @@ def run_traditional_algorithm(modelDir, inputDict, outData):
 	with open(new_path, 'w+') as out_file:
 		json.dump(omd, out_file, indent=4)
 	omf.geo.map_omd(new_path, modelDir, open_browser=False )
-	outData['traditionalHCMap'] = open(pJoin(modelDir, "geoJson_offline.html"), 'r' ).read()
+	outData['traditionalHCMap'] = open(Path(modelDir, "geoJson_offline.html"), 'r' ).read()
 	outData['traditionalGraphData'] = json.dumps(traditionalHCFigure, cls=py.utils.PlotlyJSONEncoder )
 	outData['traditionalHCTableHeadings'] = tradHCDF.columns.values.tolist()
 	outData['traditionalHCTableValues'] = (list(tradHCDF.itertuples(index=False, name=None)))
@@ -149,8 +150,8 @@ def new(modelDir):
 	creationCode = __neoMetaModel__.new(modelDir, defaultInputs)
 	try:
 		shutil.copyfile(
-			pJoin(__neoMetaModel__._omfDir, "static", "publicFeeders", defaultInputs["feederName1"]+'.omd'),
-			pJoin(modelDir, defaultInputs["feederName1"]+'.omd'))
+			Path(__neoMetaModel__._omfDir, "static", "publicFeeders", defaultInputs["feederName1"]+'.omd'),
+			Path(modelDir, defaultInputs["feederName1"]+'.omd'))
 	except:
 		return False
 	return creationCode
@@ -158,7 +159,7 @@ def new(modelDir):
 @neoMetaModel_test_setup
 def _disabled_tests():
 	# Location
-	modelLoc = pJoin(__neoMetaModel__._omfDir,"data","Model","admin","Automated Testing of " + modelName)
+	modelLoc = Path(__neoMetaModel__._omfDir,"data","Model","admin","Automated Testing of " + modelName)
 	# Blow away old test results if necessary.
 	try:
 		shutil.rmtree(modelLoc)
