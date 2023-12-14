@@ -121,8 +121,7 @@ def newQstsPlot(filePath, stepSizeInMinutes, numberOfSteps, keepAllFiles=False, 
 	with open(f'{dssFileLoc}/dss_run_file.dss', 'w') as run_file:
 		run_file.write(dss_run_file)
 	# Run in the right directory and suppress the output
-	subprocess.run('opendsscmd dss_run_file.dss', cwd=dssFileLoc, shell=True, check=True, stdout=subprocess.DEVNULL)
-	# runDSS('dss_run_file.dss')
+	runDSS('dss_run_file.dss')
 	# Aggregate monitors
 	all_gen_df = pd.DataFrame()
 	all_load_df = pd.DataFrame()
