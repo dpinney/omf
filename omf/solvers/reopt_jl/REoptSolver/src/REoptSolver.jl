@@ -25,7 +25,10 @@ function results_to_json(results, output_path)
 	end
 end
 
-function run(path::String, outages::Bool=false, microgrid_only::Bool=false, max_runtime_s::Union{Nothing,Int}=nothing)
+function run(path::String, outages::Bool=false, microgrid_only::Bool=false, max_runtime_s::Union{Nothing,Int}=nothing,
+	api_key::String="WhEzm6QQQrks1hcsdN0Vrd56ZJmUyXJxTJFg6pn9")
+
+	ENV["NREL_DEVELOPER_API_KEY"]=api_key
 
 	m = get_model(path, max_runtime_s)
 	m2 = get_model(path, max_runtime_s)
