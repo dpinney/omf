@@ -44,19 +44,19 @@
 				<p class="inputSectionHeader">Meter to Transformer Pairing Algorithm Inputs</p>
 			</div>
 			<div class="shortInput">
-				<label class="tooltip">Voltage AMI - Data Input File <span class="classic">File type: .npy</span></label>
+				<label class="tooltip">Voltage AMI - Data Input File <span class="classic">File type: .csv</span></label>
 				<div>{{ insert_file_upload_block('voltageInputDataFileName','voltageInputDataFileContent') }}</div>
 			</div>
 			<div class="shortInput">
-				<label class="tooltip">Real Power - AMI Data Input File <span class="classic">File type: .npy</span></label>
+				<label class="tooltip">Real Power - AMI Data Input File <span class="classic">File type: .csv</span></label>
 				<div>{{ insert_file_upload_block('realPowerInputDataFileName','realPowerInputDataFileContent') }}</div>
 			</div>
 			<div class="shortInput">
-				<label class="tooltip">Reactive Power - AMI Data Input File <span class="classic">File type: .npy</span></label>
+				<label class="tooltip">Reactive Power - AMI Data Input File <span class="classic">File type: .csv</span></label>
 				<div>{{ insert_file_upload_block('reactivePowerInputDataFileName','reactivePowerInputDataFileContent') }}</div>
 			</div>
 			<div class="shortInput">
-				<label class="tooltip">Customer IDs - AMI Data Input File <span class="classic">File type: .npy</span></label>
+				<label class="tooltip">Customer IDs - AMI Data Input File <span class="classic">File type: .csv</span></label>
 				<div>{{ insert_file_upload_block('customerIDInputDataFileName','customerIDInputDataFileContent') }}</div>
 			</div>
 			<hr>
@@ -69,6 +69,9 @@
 	<style>td, th {padding:7 0 5 20;text-align: left;font-size:0.8em; border: 1px solid #cccccc;} </style>
 	<div id="output">
 		<p class="reportTitle">Meter to Transformer Pairing Algorithm Results</p>
+		<div id="correlationCoefficient" class="tightContent">
+			<img id="correlationCoefficientPNG" style="width:1000px;" src="data:image/png;base64,{{allOutputDataDict.correlationCoefficientPic}}" style="border-radius:8px" />
+		</div>
 		<p class="reportTitle">Customers Whose Transformer Labels/Groupings Have Changed</p>
 		<div id="customersChangedTable" class="tightContent">
 			<table style='margin:5px;width:990px'>
@@ -88,14 +91,25 @@
 			</table> 
 		</div>
 		{% if allOutputDataDict['useTrueLabels'] == True %}
-			<pre style="text-align: center;">
-				There were originally {{ allOutputDataDict['incorrectTransOrg'] }} incorrect transformer groupings with the interjected incorrect labels
-				After running the algorithm, there are {{ allOutputDataDict['incorrectTransPostAlgo'] }} incorrect transformer groupings
-				{{ allOutputDataDict['improvementNum'] }} transformer groupings were corrected
-				Improvement rate: {{ allOutputDataDict['improvementPercentage'] }}
-			</pre>
+			<p class="reportTitle">Improvement Stats</p>
+			<div id="improvementTable" class="tightContent">
+				<table style='margin:5px;width:990px'>
+					<caption></caption>
+					<tr>
+					{% for header in allOutputDataDict["improvementTableHeadings"] %}
+						<th>{{ header }}</th>
+						{% endfor %}
+					</tr>
+					{% for values in allOutputDataDict["improvementTableValues"] %}
+					<tr>
+						{% for val in values %}
+						<td>{{ val }}</td>
+						{% endfor %}
+					</tr>
+					{% endfor %}
+				</table> 
+			</div>
 		{% endif %}
-		{{ rawOutputFiles }}
 	</div>
 	{% endif %}
 </body>
