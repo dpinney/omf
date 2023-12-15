@@ -11,12 +11,14 @@ from omf import feeder
 from omf.models.voltageDrop import drawPlot
 from omf.models import __neoMetaModel__
 from omf.models.__neoMetaModel__ import *
+from omf.models import vbatDispatch as VB
 from omf.solvers import reopt_jl as RE
-
-
 
 # Model metadata:
 modelName, template = __neoMetaModel__.metadata(__file__)
+tooltip = ('The derUtilityCost model evaluates the financial costs of controlling behind-the-meter '
+	'distributed energy resources (DERs) using the NREL renewable energy optimization tool (REopt) and '
+	'the OMF virtual battery dispatch module (vbatDispatch).')
 hidden = True
 
 def castAddInputs(val1,val2):
@@ -41,13 +43,16 @@ def castAddInputs(val1,val2):
 
 def work(modelDir, inputDict):
 	''' Run the model in its directory. '''
+	
 	# Delete output file every run if it exists
 	outData = {}		
+	
 	# Model operations goes here.
 	inputOne = inputDict.get("input1", 123)
 	inputTwo = inputDict.get("input2", 867)
 	output = str(castAddInputs(inputOne,inputTwo))
 	outData["output"] = output
+	
 	# Model operations typically ends here.
 	# Stdout/stderr.
 	outData["stdout"] = "Success"
