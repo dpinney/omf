@@ -106,18 +106,21 @@ def findCensusTract(lat, lon):
 # Input: censusJson -> geoJson data
 # Input: tractList -> list of tracts
 # return geomData, soviData -> list of geometrys and social vulnerability for tracts found in list
-def getSoviData(nrigeoJson, tractList):
-    soviData = []
+def getCensusNRIData(nrigeoJson, tractList):
+    nriData = []
     geomData = []
     headers = list(nrigeoJson['features'][0]['properties'].keys())
     for i in nrigeoJson['features']:
         tractID = i['properties']['TRACTFIPS']
         if tractID in tractList:
-            soviData.append([i['properties']['TRACTFIPS'],i['properties']['SOVI_SCORE'],i['properties']['SOVI_RATNG'], i['properties']['SOVI_SPCTL']])
+            properties = []
+            for i in i['properties']:
+                properties.append(i)
             geom = i['geometry']['coordinates'][0]
             geomData.append(geom)
+            nriData.append(properties)
 
-    return geomData, soviData, headers
+    return geomData, nriData, headers
 
 # Gets Census Tract data from a specified state
 # input: nrigeoJson -> nri geojson
@@ -129,12 +132,16 @@ def getTractDatabyState(nrigeoJson,stateName):
     for i in nrigeoJson['features']:
         state = i['properties']['STATE']
         if state == stateName:
-            data.append
             properties = []
             for k in i['properties']:
                 properties.append(i['properties'][k])
-            data.append(properties)
-            geom.append(i['geometry']['coordinates'][0])
+            if (i['geometry']['type'] == 'MultiPolygon'):
+                for j in i['geometry']['coordinates']:
+                    geom.append(j)
+                    data.append(properties)
+            else:
+                geom.append(i['geometry']['coordinates'][0])
+                data.append(properties)
     return geom, data, headers
 
 
