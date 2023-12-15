@@ -453,7 +453,67 @@ def run_correlationTesting(listOfCoops, stateName, nrigeoJson, coopGeoJson):
     corr2 = corr[~mask]
                                   
                                   
-    return corr, corr2      
+    return corr, corr2
+
+# 
+#
+#
+def normalized_coopandcensusnri(nriGeoDF, coopGeoDF):
+    overlayDF = nriGeoDF.overlay(coopGeoDF, how='intersection')
+    overlayDF['intersected_area'] = overlayDF.area
+    
+    overlayDF[['BUILDVALUE','AGRIVALUE','EAL_VALT','EAL_VALB','EAL_VALP',
+               'EAL_VALA','SOVI_SCORE','RESL_VALUE','AVLN_AFREQ',
+               'CFLD_AFREQ','CWAV_AFREQ','DRGT_AFREQ','ERQK_AFREQ','HAIL_AFREQ','HWAV_AFREQ',
+               'HRCN_AFREQ','ISTM_AFREQ','LNDS_AFREQ','LTNG_AFREQ','RFLD_AFREQ','SWND_AFREQ',
+               'TRND_AFREQ','TSUN_AFREQ','VLCN_AFREQ','WFIR_AFREQ','WNTW_AFREQ']] = overlayDF[['BUILDVALUE','AGRIVALUE','EAL_VALT','EAL_VALB','EAL_VALP',
+               'EAL_VALA','SOVI_SCORE','RESL_VALUE','AVLN_AFREQ',
+               'CFLD_AFREQ','CWAV_AFREQ','DRGT_AFREQ','ERQK_AFREQ','HAIL_AFREQ','HWAV_AFREQ',
+               'HRCN_AFREQ','ISTM_AFREQ','LNDS_AFREQ','LTNG_AFREQ','RFLD_AFREQ','SWND_AFREQ',
+               'TRND_AFREQ','TSUN_AFREQ','VLCN_AFREQ','WFIR_AFREQ','WNTW_AFREQ']].div(overlayDF.intersected_area, axis=0)
+    
+    dissolved = overlayDF.dissolve(by='Cooperative',aggfunc={'intersected_area':"sum",
+                                                         'Shape_Area_2':'max',
+                                                         'BUILDVALUE':'sum',
+                                                         'AGRIVALUE':'sum',
+                                                         'EAL_VALT':'sum',
+                                                         'EAL_VALB':'sum',
+                                                         'EAL_VALP':'sum',
+                                                         'EAL_VALA':'sum',
+                                                         'SOVI_SCORE':'sum',
+                                                         'RESL_VALUE':'sum',
+                                                         'AVLN_AFREQ':'sum',
+                                                         'CFLD_AFREQ':'sum',
+                                                         'CWAV_AFREQ':'sum',
+                                                         'DRGT_AFREQ':'sum',
+                                                         'ERQK_AFREQ':'sum',
+                                                         'HAIL_AFREQ':'sum',
+                                                         'HWAV_AFREQ':'sum',
+                                                         'HRCN_AFREQ':'sum',
+                                                         'ISTM_AFREQ':'sum',
+                                                         'LNDS_AFREQ':'sum',
+                                                         'LTNG_AFREQ':'sum',
+                                                         'RFLD_AFREQ':'sum',
+                                                         'SWND_AFREQ':'sum',
+                                                         'TRND_AFREQ':'sum',
+                                                         'TSUN_AFREQ':'sum',
+                                                         'VLCN_AFREQ':'sum',
+                                                         'WFIR_AFREQ':'sum',
+                                                         'WNTW_AFREQ':'sum'
+                                                        })
+    
+    dissolved[['BUILDVALUE','AGRIVALUE','EAL_VALT','EAL_VALB','EAL_VALP',
+               'EAL_VALA','SOVI_SCORE','RESL_VALUE','AVLN_AFREQ',
+               'CFLD_AFREQ','CWAV_AFREQ','DRGT_AFREQ','ERQK_AFREQ','HAIL_AFREQ','HWAV_AFREQ',
+               'HRCN_AFREQ','ISTM_AFREQ','LNDS_AFREQ','LTNG_AFREQ','RFLD_AFREQ','SWND_AFREQ',
+               'TRND_AFREQ','TSUN_AFREQ','VLCN_AFREQ','WFIR_AFREQ','WNTW_AFREQ']] = dissolved[['BUILDVALUE','AGRIVALUE','EAL_VALT','EAL_VALB','EAL_VALP',
+               'EAL_VALA','SOVI_SCORE','RESL_VALUE','AVLN_AFREQ',
+               'CFLD_AFREQ','CWAV_AFREQ','DRGT_AFREQ','ERQK_AFREQ','HAIL_AFREQ','HWAV_AFREQ',
+               'HRCN_AFREQ','ISTM_AFREQ','LNDS_AFREQ','LTNG_AFREQ','RFLD_AFREQ','SWND_AFREQ',
+               'TRND_AFREQ','TSUN_AFREQ','VLCN_AFREQ','WFIR_AFREQ','WNTW_AFREQ']].div(dissolved.Shape_Area_2, axis=0)
+    
+    return dissolved
+    
                                  
 def work(modelDir, inputDict):
     ''' Run the model in its directory. '''
