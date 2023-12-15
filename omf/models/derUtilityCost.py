@@ -1,4 +1,4 @@
-''' A model skeleton for future models: Calculates the sum of two integers. '''
+''' Evaluates the financial costs of controlling behind-the-meter distributed energy resources (DERs).'''
 
 import warnings
 # warnings.filterwarnings("ignore")
@@ -11,6 +11,7 @@ from omf import feeder
 from omf.models.voltageDrop import drawPlot
 from omf.models import __neoMetaModel__
 from omf.models.__neoMetaModel__ import *
+from omf.solvers import reopt_jl
 
 # Model metadata:
 modelName, template = __neoMetaModel__.metadata(__file__)
