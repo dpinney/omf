@@ -48,23 +48,24 @@ hidden = True
 def retrieveCensusNRI():
     
     try:
-        
+        #headers
         hdr = {'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.11 (KHTML, like Gecko)  Chrome/23.0.1271.64 Safari/537.11',
        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
        'Accept-Charset': 'ISO-8859-1,utf-8;q=0.7,*;q=0.3',
        'Accept-Encoding': 'none',
        'Accept-Language': 'en-US,en;q=0.8',
        'Connection': 'keep-alive'}
-        
+        # Fema NRI data url
         nridataURL = "https://hazards.fema.gov/nri/Content/StaticDocuments/DataDownload//NRI_Shapefile_CensusTracts/NRI_Shapefile_CensusTracts.zip"
         r = requests.get(nridataURL, headers=hdr)
         z = zipfile.ZipFile(BytesIO(r.content))
         
-		# get file names needed to build geoJSON
+	# get file names needed to build geoJSON
         shpPath = [x for x in z.namelist() if x.endswith('.shp')][0]
         dbfPath = [x for x in z.namelist() if x.endswith('.dbf')][0]
         prjPath = [x for x in z.namelist() if x.endswith('.prj')][0]
-        
+
+	# Create geojson from retrieved data files 
         with shapefile.Reader(shp=BytesIO(z.read(shpPath)), 
                       dbf=BytesIO(z.read(dbfPath)), 
                       prj=BytesIO(z.read(prjPath))) as shp:
@@ -86,14 +87,17 @@ def retrieveCensusNRI():
 # return censusTract ->  census Tract found at location
 def findCensusTract(lat, lon):
     try:
+	# Census Tract API URL
         request_url = "https://geo.fcc.gov/api/census/block/find?latitude="+str(lat)+"&longitude="+str(lon)+ "&censusYear=2020&format=json"
         opener = urllib.request.build_opener()
         opener.addheaders = [('User-agent', 'Mozilla/5.0')]
         resp = opener.open(request_url)
         censusJson = json.loads(resp.read())
+	# Remove last 4 digits from Block code to retrieve Tract Information
         censusTract = censusJson['Block']['FIPS'][:-4]   
         return  censusTract
     except Exception as e:
+	# need to look into api limit errors
         print("Error trying to retrieve tract information from Census API")
         print(e)
 
