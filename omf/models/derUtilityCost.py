@@ -11,7 +11,9 @@ from omf import feeder
 from omf.models.voltageDrop import drawPlot
 from omf.models import __neoMetaModel__
 from omf.models.__neoMetaModel__ import *
-from omf.solvers import reopt_jl
+from omf.solvers import reopt_jl as RE
+
+
 
 # Model metadata:
 modelName, template = __neoMetaModel__.metadata(__file__)
