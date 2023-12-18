@@ -15,10 +15,10 @@ from omf.models import vbatDispatch as VB
 from omf.solvers import reopt_jl as RE
 
 # Model metadata:
-modelName, template = __neoMetaModel__.metadata(__file__)
 tooltip = ('The derUtilityCost model evaluates the financial costs of controlling behind-the-meter '
 	'distributed energy resources (DERs) using the NREL renewable energy optimization tool (REopt) and '
 	'the OMF virtual battery dispatch module (vbatDispatch).')
+modelName, template = __neoMetaModel__.metadata(__file__)
 hidden = True
 
 def castAddInputs(val1,val2):
