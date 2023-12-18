@@ -1,9 +1,10 @@
-''' Evaluates the financial costs of controlling behind-the-meter distributed energy resources (DERs).'''
+''' Performs a cost-benefit analysis for a utility or cooperative member interested in 
+controlling behind-the-meter distributed energy resources (DERs).'''
 
 import warnings
 # warnings.filterwarnings("ignore")
 
-import shutil, datetime
+import shutil, datetime, csv
 from os.path import join as pJoin
 
 # OMF imports
@@ -48,11 +49,31 @@ def work(modelDir, inputDict):
 	outData = {}		
 	
 	# Model operations goes here.
-	inputOne = inputDict.get("input1", 123)
-	inputTwo = inputDict.get("input2", 867)
-	output = str(castAddInputs(inputOne,inputTwo))
-	outData["output"] = output
+	#inputOne = inputDict.get("Demand Curve", 123)
+	#inputTwo = inputDict.get("input2", 867)
+	#output = str(castAddInputs(inputOne,inputTwo))
+	#outData["output"] = output
+
+	## Gather inputs, including demand file (hourly kWh)
+	with open(pJoin(modelDir, 'demand.csv'), 'w') as f:
+		f.write(inputDict['demandCurve'].replace('\r', ''))
+	with open(pJoin(modelDir, 'demand.csv'), newline='') as f:
+		demand = [float(r[0]) for r in csv.reader(f)]
+		assert len(demand) == 8760
+
+	with open(pJoin(modelDir, 'temp.csv'), 'w') as f:
+		lines = inputDict['tempCurve'].split('\n')
+		outData["tempData"] = [float(x) if x != '999.0' else float(inputDict['setpoint']) for x in lines if x != '']
+		correctData = [x+'\n' if x != '999.0' else inputDict['setpoint']+'\n' for x in lines if x != '']
+		f.write(''.join(correctData))
+	assert len(correctData) == 8760
 	
+	outage = True if inputDict["Outage"] == "on" else False
+
+	## Run REopt and gather outputs
+	#RE.run_reopt_jl(path,inputFile,outages)
+	RE.run_reopt_jl(path="/Users/astronobri/Documents/CIDER/reopt/inputs/", inputFile="UP_PV_outage_1hr.json", outages=True) # UP coop PV 
+
 	# Model operations typically ends here.
 	# Stdout/stderr.
 	outData["stdout"] = "Success"
@@ -61,11 +82,18 @@ def work(modelDir, inputDict):
 
 def new(modelDir):
 	''' Create a new instance of this model. Returns true on success, false on failure. '''
+	with open(pJoin(__neoMetaModel__._omfDir,"static","testFiles","Texas_1yr_Load.csv")) as f:
+		demand_curve = f.read()
+	with open(pJoin(__neoMetaModel__._omfDir,"static","testFiles","Texas_1yr_Temp.csv")) as f:
+		temp_curve = f.read()
 	defaultInputs = {
 		"user" : "admin",
 		"modelType": modelName,
-		"input1": "abc1 Easy as...",
-		"input2": "123 Or Simple as...",
+		"demandCurve": demand_curve,
+		"tempCurve": temp_curve,
+		"fileName": "Texas_1yr_Load.csv",
+		"tempFileName": "Texas_1yr_Temp.csv",
+		"Outage": False,
 		"created":str(datetime.datetime.now())
 	}
 	return __neoMetaModel__.new(modelDir, defaultInputs)
@@ -90,5 +118,5 @@ def _tests():
 	__neoMetaModel__.renderAndShow(modelLoc)
 
 if __name__ == '__main__':
-	#_tests()
-	pass
+	_tests()
+	#pass
