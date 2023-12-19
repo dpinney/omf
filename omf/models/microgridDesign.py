@@ -965,7 +965,7 @@ def work(modelDir, inputDict):
 			powerWindToLoad = makeGridLine(x_values,outData['powerWindToLoad' + indexString],'purple','Load met by Wind')
 			plotData.append(powerWindToLoad)
 
-		if results['Generator']['size_kw'] > 0:
+		if 'Generator' in results and results['Generator']['size_kw'] > 0:
 			powerDieselToLoad = makeGridLine(x_values,outData['powerDieselToLoad' + indexString],'brown','Load met by Fossil Gen')
 			plotData.append(powerDieselToLoad)			
 
@@ -1018,7 +1018,7 @@ def work(modelDir, inputDict):
 		outData["windData"  + indexString] = json.dumps(plotData, cls=plotly.utils.PlotlyJSONEncoder)
 
 		plotData = []
-		if results['Generator']['size_kw'] > 0:
+		if 'Generator' in results and results['Generator']['size_kw'] > 0:
 			powerDieselToLoad = makeGridLine(x_values,outData['powerDieselToLoad' + indexString],'brown','Fossil Gen used to meet Load')
 			plotData.append(powerDieselToLoad)
 
@@ -1048,7 +1048,7 @@ def work(modelDir, inputDict):
 				powerWindToBattery = makeGridLine(x_values,outData['powerWindToBattery' + indexString],'purple','Wind')
 				plotData.append(powerWindToBattery)
 
-			if results['Generator']['size_kw'] > 0:
+			if 'Generator' in results and results['Generator']['size_kw'] > 0:
 				powerDieselToBattery = makeGridLine(x_values,outData['powerDieselToBattery' + indexString],'brown','Fossil Gen')
 				plotData.append(powerDieselToBattery)
 
