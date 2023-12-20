@@ -22,39 +22,23 @@ tooltip = ('The derUtilityCost model evaluates the financial costs of controllin
 modelName, template = __neoMetaModel__.metadata(__file__)
 hidden = True
 
-def castAddInputs(val1,val2):
-	''' Casts string inputs to appropriate type and returns their sum. 
-		If inputs are cast to floats, rounds their sum to avoid float subtraction errors.'''
-	try:
-		cast1 = int(val1)
-		cast2 = int(val2)
-		return cast1+cast2
-	except ValueError:
-		try:
-			cast1 = float(val1)
-			cast2 = float(val2)
-            #Find longest decimal place of the numbers and round their sum to that place to avoid float arithmetic errors
-			decPl1 = val1.strip()[::-1].find('.')
-			decPl2 = val2.strip()[::-1].find('.')  
-            #valX.strip() used instead of str(castX) because str(castX) may return scientific notation
-			roundedSum = round(cast1+cast2,max(decPl1,decPl2,1))     
-			return roundedSum
-		except ValueError:
-			return val1+val2
-
 def work(modelDir, inputDict):
 	''' Run the model in its directory. '''
 	
 	# Delete output file every run if it exists
 	outData = {}		
-	
-	# Model operations goes here.
-	#inputOne = inputDict.get("Demand Curve", 123)
-	#inputTwo = inputDict.get("input2", 867)
-	#output = str(castAddInputs(inputOne,inputTwo))
-	#outData["output"] = output
+	solar = inputDict['solar'] 
+	generator = inputDict['generator']
+	battery = inputDict['battery']
+	outData['solar'] = inputDict['solar']
+	outData['generator'] = inputDict['generator'] ## TODO: make generator switch on only during outage?
+	outData['battery'] = inputDict['battery']
+	outData['year'] = inputDict['year']
 
-	## Gather inputs, including demand file (hourly kWh)
+	latitude = float(inputDict['latitude'])
+	longitude = float(inputDict['longitude'])
+
+	## Setting up the demand file (hourly kWh) and temperature file
 	with open(pJoin(modelDir, 'demand.csv'), 'w') as f:
 		f.write(inputDict['demandCurve'].replace('\r', ''))
 	with open(pJoin(modelDir, 'demand.csv'), newline='') as f:
@@ -68,11 +52,26 @@ def work(modelDir, inputDict):
 		f.write(''.join(correctData))
 	assert len(correctData) == 8760
 	
-	outage = True if inputDict["Outage"] == "on" else False
+	outage = True if inputDict["outage"] == "on" else False
 
-	## Run REopt and gather outputs
-	#RE.run_reopt_jl(path,inputFile,outages)
-	RE.run_reopt_jl(path="/Users/astronobri/Documents/CIDER/reopt/inputs/", inputFile="UP_PV_outage_1hr.json", outages=True) # UP coop PV 
+	## Run REopt and gather outputs for vbatDispath
+	## TODO: Create a function that will gather the urdb label from a user provided location (city,state)
+	#RE.run_reopt_jl(modelDir,inputFile,outages)
+	RE.run_reopt_jl(path="/Users/astronobri/Documents/CIDER/reopt/inputs/", inputFile="UP_PV_outage_1hr.json", outages=outage) # UP coop PV 
+
+	with open(pJoin(modelDir, 'results.json')) as jsonFile:
+		results = json.load(jsonFile)
+
+	#getting REoptInputs to access default input values more easily 
+	with open(pJoin(modelDir, 'REoptInputs.json')) as jsonFile:
+		reopt_inputs = json.load(jsonFile)
+
+	if (outage):
+		with open(pJoin(modelDir, 'resultsResilience.json')) as jsonFile:
+			resultsResilience = json.load(jsonFile)
+	
+	## Run vbatDispatch with outputs from REopt
+	VB
 
 	# Model operations typically ends here.
 	# Stdout/stderr.
@@ -89,11 +88,19 @@ def new(modelDir):
 	defaultInputs = {
 		"user" : "admin",
 		"modelType": modelName,
+		"latitude" : '39.7392358',
+		"longitude" : '-104.990251',
+		"year" : '2018',
+		"analysis_years" : 25,
+		"urdbLabel" : '612ff9c15457a3ec18a5f7d3',
 		"demandCurve": demand_curve,
 		"tempCurve": temp_curve,
 		"fileName": "Texas_1yr_Load.csv",
 		"tempFileName": "Texas_1yr_Temp.csv",
-		"Outage": False,
+		"outage": False,
+		"solar" : "on",
+		"battery" : "on",
+		"generator" : "off",
 		"created":str(datetime.datetime.now())
 	}
 	return __neoMetaModel__.new(modelDir, defaultInputs)
