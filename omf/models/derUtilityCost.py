@@ -12,7 +12,7 @@ from omf import feeder
 from omf.models.voltageDrop import drawPlot
 from omf.models import __neoMetaModel__
 from omf.models.__neoMetaModel__ import *
-from omf.models import vbatDispatch as VB
+from omf.models import vbatDispatch as vb
 from omf.solvers import reopt_jl as RE
 
 # Model metadata:
@@ -59,19 +59,25 @@ def work(modelDir, inputDict):
 	#RE.run_reopt_jl(modelDir,inputFile,outages)
 	RE.run_reopt_jl(path="/Users/astronobri/Documents/CIDER/reopt/inputs/", inputFile="UP_PV_outage_1hr.json", outages=outage) # UP coop PV 
 
-	with open(pJoin(modelDir, 'results.json')) as jsonFile:
-		results = json.load(jsonFile)
+	#with open(pJoin(modelDir, 'results.json')) as jsonFile:
+#		results = json.load(jsonFile)
 
 	#getting REoptInputs to access default input values more easily 
-	with open(pJoin(modelDir, 'REoptInputs.json')) as jsonFile:
-		reopt_inputs = json.load(jsonFile)
+#	with open(pJoin(modelDir, 'REoptInputs.json')) as jsonFile:
+#		reopt_inputs = json.load(jsonFile)
 
 	if (outage):
 		with open(pJoin(modelDir, 'resultsResilience.json')) as jsonFile:
 			resultsResilience = json.load(jsonFile)
 	
 	## Run vbatDispatch with outputs from REopt
-	VB
+	#VB.new(modelDir)
+	#modelDir = "/Users/astronobri/Documents/CIDER/omf/omf/data/Model/admin/meowtest"
+
+	test = vb.work(modelDir,inputDict)
+	print(test)
+	#print(modDirvbatt)
+	#vbattWork_out = vb.work(modelDir,vbattNew_out[1])
 
 	# Model operations typically ends here.
 	# Stdout/stderr.
@@ -95,13 +101,28 @@ def new(modelDir):
 		"urdbLabel" : '612ff9c15457a3ec18a5f7d3',
 		"demandCurve": demand_curve,
 		"tempCurve": temp_curve,
-		"fileName": "Texas_1yr_Load.csv",
-		"tempFileName": "Texas_1yr_Temp.csv",
 		"outage": False,
 		"solar" : "on",
 		"battery" : "on",
 		"generator" : "off",
-		"created":str(datetime.datetime.now())
+		"created":str(datetime.datetime.now()),
+		"load_type": "1",
+		"number_devices": "2000",
+		"power": "5.6",
+		"capacitance": "2",
+		"resistance": "2",
+		"cop": "2.5",
+		"setpoint": "22.5",
+		"deadband": "0.625",
+		"demandChargeCost":"25",
+		"electricityCost":"0.06",
+		"projectionLength":"15",
+		"discountRate":"2",
+		"unitDeviceCost":"150",
+		"unitUpkeepCost":"5",
+		"fileName": "Texas_1yr_Load.csv",
+		"tempFileName": "Texas_1yr_Temp.csv",
+		"modelType": modelName,
 	}
 	return __neoMetaModel__.new(modelDir, defaultInputs)
 
@@ -126,6 +147,14 @@ def _debugging():
 	__neoMetaModel__.renderAndShow(modelLoc)
 
 if __name__ == '__main__':
+<<<<<<< HEAD
 	_debugging()
 	#_tests()
 	#pass
+
+
+"""import omf.models.vbatDispatch as vb
+
+modelDir = "C:\\Users\\lisam\\Desktop\\Repositories\\omf\\omf\\data\\Model\\admin\testVbatt_CIDER"
+[modDirvbatt, inputdict] = vb.new(modelDir)
+vbattWork_out = vb.work(modelDir,vbattNew_out[1])"""
