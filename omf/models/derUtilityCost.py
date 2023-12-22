@@ -147,7 +147,6 @@ def _debugging():
 	__neoMetaModel__.renderAndShow(modelLoc)
 
 if __name__ == '__main__':
-<<<<<<< HEAD
 	_debugging()
 	#_tests()
 	#pass
