@@ -160,6 +160,13 @@ def create_REopt_jl_jsonFile(modelDir, inputDict):
 		},
 	}
 
+	## Outages
+	if inputDict["outage"] == True:
+		scenario['ElectricUtility'] = {
+			'outage_start_time_step': int(inputDict['outage_start_hour']),
+			'outage_end_time_step': int(inputDict['outage_start_hour'])+int(inputDict['outage_duration'])
+		}
+
 	with open(pJoin(modelDir, "Scenario_test.json"), "w") as jsonFile:
 		json.dump(scenario, jsonFile)
 
@@ -184,14 +191,14 @@ def work(modelDir, inputDict):
 		correctData = [x+'\n' if x != '999.0' else inputDict['setpoint']+'\n' for x in lines if x != '']
 		f.write(''.join(correctData))
 	assert len(correctData) == 8760
-	
-	outage = True if inputDict["outage"] == "on" else False
+
 
 	## Create REopt input file
 	create_REopt_jl_jsonFile(modelDir, inputDict)
 
 	## Run REopt.jl
-	reopt_jl.run_reopt_jl(modelDir, "Scenario_test.json")
+	outage_flag = inputDict['outage']
+	reopt_jl.run_reopt_jl(modelDir, "Scenario_test.json", outages=outage_flag)
 	with open(pJoin(modelDir, 'results.json')) as jsonFile:
 		results = json.load(jsonFile)
 		
@@ -219,9 +226,10 @@ def work(modelDir, inputDict):
 	#with open(pJoin(modelDir, 'REoptInputs.json')) as jsonFile:
 		#reopt_inputs = json.load(jsonFile)
 
-	if (outage):
+	if (inputDict['outage']):
 		with open(pJoin(modelDir, 'resultsResilience.json')) as jsonFile:
 			resultsResilience = json.load(jsonFile)
+		out.update(resultsResilience) ## Update out file with resilience results
 	
 	## Run vbatDispatch with outputs from REopt
 	#VB.new(modelDir)
@@ -230,9 +238,7 @@ def work(modelDir, inputDict):
 	vbatResults = vb.work(modelDir,inputDict)
 	with open(pJoin(modelDir, 'vbatResults.json'), 'w') as jsonFile:
 		json.dump(vbatResults, jsonFile)
-
-	## Merge vbatResults dictionary with the out dictionary
-	out.update(vbatResults)
+	out.update(vbatResults) ## Update out file with vbat results
 
 	## vbatDispatch out data
 	
@@ -262,16 +268,17 @@ def new(modelDir):
 		#"latitude" :  '39.532165', ## Rivesville, WV
 		#"longitude" : '-80.120618',
 		"year" : '2018',
-		"analysis_years" : 25, 
+		"analysis_years" : '25', 
 		#"urdbLabel" : '612ff9c15457a3ec18a5f7d3', ## Brighton, CO - United Power 
 		"urdbLabel" : '643476222faee2f0f800d8b1', ## Rivesville, WV - Monongahela Power
 		"demandCurve": demand_curve,
 		"tempCurve": temp_curve,
-		"outage": False,
+		"outage": True,
+		"outage_start_hour": '2100',
+		"outage_duration": '3',
 		"solar" : "on",
 		"battery" : "on",
 		"generator" : "off",
-		"created":str(datetime.datetime.now()),
 		"load_type": "2",
 		"number_devices": "1",
 		"power": "5.6",
@@ -288,6 +295,7 @@ def new(modelDir):
 		"unitUpkeepCost":"5",
 		"fileName": "Texas_1yr_Load.csv",
 		"tempFileName": "Texas_1yr_Temp.csv",
+		"created":str(datetime.datetime.now()),
 		#"fileName": "/Users/astronobri/Documents/CIDER/reopt/inputs/residential_PV_load.csv", 
 		#"fileName": "/Users/astronobri/Documents/CIDER/UP-slide18/3reopt-web-residential-load-profile.csv",
 		#"tempFileName": "/Users/astronobri/Desktop/extended_temperature_data.csv",
