@@ -227,10 +227,16 @@ def work(modelDir, inputDict):
 	#VB.new(modelDir)
 	#modelDir = "/Users/astronobri/Documents/CIDER/omf/omf/data/Model/admin/meowtest"
 
-	test = vb.work(modelDir,inputDict)
-	with open('/Users/astronobri/Documents/CIDER/jsontestfile.json', "w") as fp:
-		json.dump(test, fp) 
+	vbatResults = vb.work(modelDir,inputDict)
+	with open(pJoin(modelDir, 'vbatResults.json'), 'w') as jsonFile:
+		json.dump(vbatResults, jsonFile)
 
+	## Merge vbatResults dictionary with the out dictionary
+	out.update(vbatResults)
+
+	## vbatDispatch out data
+	
+		
 	#outData['stdout'] = test
 	#print(modDirvbatt)
 	#vbattWork_out = vb.work(modelDir,vbattNew_out[1])
@@ -280,11 +286,11 @@ def new(modelDir):
 		"discountRate":"2",
 		"unitDeviceCost":"150",
 		"unitUpkeepCost":"5",
-		#"fileName": "Texas_1yr_Load.csv",
-		#"tempFileName": "Texas_1yr_Temp.csv",
+		"fileName": "Texas_1yr_Load.csv",
+		"tempFileName": "Texas_1yr_Temp.csv",
 		#"fileName": "/Users/astronobri/Documents/CIDER/reopt/inputs/residential_PV_load.csv", 
-		"fileName": "/Users/astronobri/Documents/CIDER/UP-slide18/3reopt-web-residential-load-profile.csv",
-		"tempFileName": "/Users/astronobri/Desktop/extended_temperature_data.csv",
+		#"fileName": "/Users/astronobri/Documents/CIDER/UP-slide18/3reopt-web-residential-load-profile.csv",
+		#"tempFileName": "/Users/astronobri/Desktop/extended_temperature_data.csv",
 		"modelType": modelName
 	}
 	return __neoMetaModel__.new(modelDir, defaultInputs)
@@ -302,11 +308,11 @@ def _tests():
 	## Create New.
 	new(modelLoc)
 	## Pre-run.
-	#__neoMetaModel__.renderAndShow(modelLoc)
+	__neoMetaModel__.renderAndShow(modelLoc)
 	## Run the model.
 	__neoMetaModel__.runForeground(modelLoc)
 	## Show the output.
-	#__neoMetaModel__.renderAndShow(modelLoc)
+	__neoMetaModel__.renderAndShow(modelLoc)
 
 if __name__ == '__main__':
 	_tests()
