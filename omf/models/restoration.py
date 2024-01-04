@@ -26,7 +26,7 @@ from omf.solvers import PowerModelsONM
 # Model metadata:
 tooltip = 'Calculate load, generator and switching controls to maximize power restoration for a circuit with multiple networked microgrids.'
 modelName, template = __neoMetaModel__.metadata(__file__)
-hidden = False
+hidden = True
 
 def coordsFromString(entry):
 	'helper function to take a location string to two integer values'
