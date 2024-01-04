@@ -847,10 +847,7 @@ def graphMicrogrid(pathToOmd, pathToJson, pathToCsv, outputFile, settingsFile, u
 	try:
 		customerOutageData = pd.read_csv(pathToCsv)
 	except:
-<<<<<<< HEAD
 		# TODO: Needs to be updated to provide info for all loads, not just shed loads. Outage Incidence plot is dependent on all loads
-=======
->>>>>>> f9e2220aec562c162c42d26421b2721c11b42af6
 		deviceTimeline = data["Device action timeline"]
 		loadsShed = []
 		for line in deviceTimeline:
