@@ -409,7 +409,7 @@ def validateSettingsFile(settingsFile):
 	else:
 		return 'Corrupted Settings file input, generating default settings'
 
-def outageIncidenceGraph(tree, customerOutageData, outputTimeline, startTime, numTimeSteps):
+def outageIncidenceGraph(tree, customerOutageData, outputTimeline, startTime, numTimeSteps, loadPriorityFilePath):
 	# TODO: Rename function and write docstring
 	
 	# generate a list of all loads
@@ -442,30 +442,45 @@ def outageIncidenceGraph(tree, customerOutageData, outputTimeline, startTime, nu
 	outageIncidence = dfStatus.sum(axis=1,).map(lambda x:100*(1.0-(x/dfStatus.shape[1]))).round(3).values.tolist()
 	print("Unweighted outage incidence: ",outageIncidence)
 
-	# Calculate weighted outage incidence based on 'Business Type'
-	typeWeights = {'residential': 1, 'retail':1e1, 'agriculture':1e2}
-	leftoverCustomers = set(loadList)
-	Sum_wc_nc = np.zeros(len(outageIncidence))
-	Sum_wc_Nc = 0
-	for customerType in typeWeights.keys():
-		customersOfType = customerOutageData[customerOutageData['Business Type'].str.contains(customerType)]['Customer Name'].values.tolist()
-		dfStatusOfType = dfStatus[customersOfType]
-		Nc = dfStatusOfType.shape[1]
-		Sum_wc_Nc += typeWeights[customerType]*Nc
-		nc = dfStatusOfType.sum(axis=1,).map(lambda x: Nc-x).to_numpy()
-		Sum_wc_nc = np.add(Sum_wc_nc,typeWeights[customerType]*nc) 
-		leftoverCustomers = leftoverCustomers - set(customersOfType)
-	dfStatusOfLeftovers = dfStatus[list(leftoverCustomers)]
-	Nc = dfStatusOfLeftovers.shape[1]
-	Sum_wc_Nc += 1*Nc
-	nc = dfStatusOfLeftovers.sum(axis=1,).map(lambda x: Nc-x).to_numpy()
-	Sum_wc_nc = np.add(Sum_wc_nc,1*nc) 
-	weightedOutageIncidence = np.around((100*Sum_wc_nc/Sum_wc_Nc), 3).tolist()
-	print("Weighted Outage Incidence: ", weightedOutageIncidence)
+	#Calculate weighted outage incidence based on 'Business Type'
+	includeGroupWeights = False
+	if includeGroupWeights:
+		typeWeights = {'residential': 64, 'retail':32, 'agriculture':16, 'public':8, 'services':4, 'manufacturing':2}
+		leftoverCustomers = set(loadList)
+		Sum_wc_nc = np.zeros(len(outageIncidence))
+		Sum_wc_Nc = 0
+		for customerType in typeWeights.keys():
+			customersOfType = customerOutageData[customerOutageData['Business Type'].str.contains(customerType)]['Customer Name'].values.tolist()
+			dfStatusOfType = dfStatus[customersOfType]
+			Nc = dfStatusOfType.shape[1]
+			Sum_wc_Nc += typeWeights[customerType]*Nc
+			nc = dfStatusOfType.sum(axis=1,).map(lambda x: Nc-x).to_numpy()
+			Sum_wc_nc = np.add(Sum_wc_nc,typeWeights[customerType]*nc) 
+			leftoverCustomers = leftoverCustomers - set(customersOfType)
+		dfStatusOfLeftovers = dfStatus[list(leftoverCustomers)]
+		Nc = dfStatusOfLeftovers.shape[1]
+		Sum_wc_Nc += 1*Nc
+		nc = dfStatusOfLeftovers.sum(axis=1,).map(lambda x: Nc-x).to_numpy()
+		Sum_wc_nc = np.add(Sum_wc_nc,1*nc) 
+		weightedOutageIncidence = np.around((100*Sum_wc_nc/Sum_wc_Nc), 3).tolist()
+		print("Group-Weighted Outage Incidence: ", weightedOutageIncidence)
 	###################################################################################################################################################################
 	# TODO: Clean this up to make it more readable. For now though, functionality is the focus.
 	###################################################################################################################################################################
 
+	# Calculate weighted outage incidence based on individually assigned weights
+	with open(loadPriorityFilePath) as inFile:
+		loadWeights = json.load(inFile)
+		Sum_wc_nc = np.zeros(len(outageIncidence))
+		Sum_wc_Nc = 0
+		for load in loadList:
+			dfStatusOfCustomer = dfStatus[load]
+			Nc = 1
+			Sum_wc_Nc += loadWeights.get(load,1)*Nc
+			nc = dfStatusOfCustomer.map(lambda x: 1-x).to_numpy()
+			Sum_wc_nc = np.add(Sum_wc_nc,loadWeights.get(load,1)*nc)
+		individuallyWeightedOutageIncidence = np.around((100*Sum_wc_nc/Sum_wc_Nc),3).tolist()
+	print("Priority-Weighted Outage Incidence: ", individuallyWeightedOutageIncidence)
 	
 	outageIncidenceFigure = go.Figure()
 	outageIncidenceFigure.add_trace(go.Scatter(
@@ -476,19 +491,28 @@ def outageIncidenceGraph(tree, customerOutageData, outputTimeline, startTime, nu
 		hovertemplate=
 		'<b>Time Step</b>: %{x}<br>' +
 		'<b>Unweighted Outage Incidence</b>: %{y:.3f}%'))
+	if includeGroupWeights:
+		outageIncidenceFigure.add_trace(go.Scatter(
+			x=timeList,
+			y=weightedOutageIncidence,
+			mode='lines',
+			name='Group-Weighted Outage Incidence',
+			hovertemplate=
+			'<b>Time Step</b>: %{x}<br>' +
+			'<b>Group-Weighted Outage Incidence</b>: %{y:.3f}%'))
 	outageIncidenceFigure.add_trace(go.Scatter(
 		x=timeList,
-		y=weightedOutageIncidence,
+		y=individuallyWeightedOutageIncidence,
 		mode='lines',
-		name='Weighted Outage Incidence',
+		name='Priority-Weighted Outage Incidence',
 		hovertemplate=
 		'<b>Time Step</b>: %{x}<br>' +
-		'<b>Weighted Outage Incidence</b>: %{y:.3f}%'))
+		'<b>Priority-Weighted Outage Incidence</b>: %{y:.3f}%'))
 	# Edit the layout
 	outageIncidenceFigure.update_layout(
 		xaxis_title='Before Hour X',
 		yaxis_title='Load Outage %',
-		yaxis_range=[-5,100],
+		yaxis_range=[-5,105],
 		legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1))
 
 	return outageIncidenceFigure
@@ -525,7 +549,7 @@ def graphMicrogrid(pathToOmd, pathToJson, pathToCsv, outputFile, settingsFile, u
 	if genSettings == 'False' and settingsFile != None:
 		correctSettings = validateSettingsFile(settingsFile)
 		if correctSettings == 'True':
-			# Scenario 1: The user chose to upload their own setttings file and it is formatted correctly
+			# Scenario 1: The user chose to upload their own settings file and it is formatted correctly
 			shutil.copyfile(settingsFile, f'{workDir}/settings.json')
 		else:
 			# Scenario 2: The user chose to upload their own setttings file and it is formatted incorrectly
@@ -821,20 +845,20 @@ def graphMicrogrid(pathToOmd, pathToJson, pathToCsv, outputFile, settingsFile, u
 		json.dump(feederMap, outFile, indent=4)
 	# Generate customer outage outputs
 	try:
- 		customerOutageData = pd.read_csv(pathToCsv)
+		customerOutageData = pd.read_csv(pathToCsv)
 	except:
 		# TODO: Needs to be updated to provide info for all loads, not just shed loads. Outage Incidence plot is dependent on all loads
- 		deviceTimeline = data["Device action timeline"]
- 		loadsShed = []
- 		for line in deviceTimeline:
- 			loadsShed.append(line["Shedded loads"])
- 		customerOutageData = pd.DataFrame(columns=['Customer Name','Season','Business Type','Load Name'])
- 		for elementDict in tree.values():
- 			if elementDict['object'] == 'load' and float(elementDict['kw'])>.1 and elementDict['name'] in loadsShed[0]:
- 				loadName = elementDict['name']
- 				avgLoad = float(elementDict['kw'])/2.5
- 				busType = 'residential'*(avgLoad<=10) + 'retail'*(avgLoad>10)*(avgLoad<=20) + 'agriculture'*(avgLoad>20)*(avgLoad<=39) + 'public'*(avgLoad>39)*(avgLoad<=50) + 'services'*(avgLoad>50)*(avgLoad<=100) + 'manufacturing'*(avgLoad>100)
- 				customerOutageData.loc[len(customerOutageData.index)] =[loadName,'summer',busType,loadName]
+		deviceTimeline = data["Device action timeline"]
+		loadsShed = []
+		for line in deviceTimeline:
+			loadsShed.append(line["Shedded loads"])
+		customerOutageData = pd.DataFrame(columns=['Customer Name','Season','Business Type','Load Name'])
+		for elementDict in tree.values():
+			if elementDict['object'] == 'load' and float(elementDict['kw'])>.1 and elementDict['name'] in loadsShed[0]:
+				loadName = elementDict['name']
+				avgLoad = float(elementDict['kw'])/2.5
+				busType = 'residential'*(avgLoad<=10) + 'retail'*(avgLoad>10)*(avgLoad<=20) + 'agriculture'*(avgLoad>20)*(avgLoad<=39) + 'public'*(avgLoad>39)*(avgLoad<=50) + 'services'*(avgLoad>50)*(avgLoad<=100) + 'manufacturing'*(avgLoad>100)
+				customerOutageData.loc[len(customerOutageData.index)] =[loadName,'summer',busType,loadName]
 	numberRows = max(math.ceil(customerOutageData.shape[0]/2),1)
 	fig, axs = plt.subplots(numberRows, 2)
 	row = 0
@@ -850,48 +874,48 @@ def graphMicrogrid(pathToOmd, pathToJson, pathToCsv, outputFile, settingsFile, u
 	loadShapeMeanMultiplier = {}
 	loadShapeMeanActual = {}
 	for dssLine in dssTree:
- 		if 'object' in dssLine and dssLine['object'].split('.')[0] == 'loadshape':
- 			shape = dssLine['mult'].replace('[','').replace('(','').replace(']','').replace(')','').split(',')
- 			shape = [float(y) for y in shape]
- 			if 'useactual' in dssLine and dssLine['useactual'] == 'yes': loadShapeMeanActual[dssLine['object'].split('.')[1]] = np.mean(shape)
- 			else: loadShapeMeanMultiplier[dssLine['object'].split('.')[1]] = np.mean(shape)/np.max(shape)
+		if 'object' in dssLine and dssLine['object'].split('.')[0] == 'loadshape':
+			shape = dssLine['mult'].replace('[','').replace('(','').replace(']','').replace(')','').split(',')
+			shape = [float(y) for y in shape]
+			if 'useactual' in dssLine and dssLine['useactual'] == 'yes': loadShapeMeanActual[dssLine['object'].split('.')[1]] = np.mean(shape)
+			else: loadShapeMeanMultiplier[dssLine['object'].split('.')[1]] = np.mean(shape)/np.max(shape)
 	while row < customerOutageData.shape[0]:
- 		customerName = str(customerOutageData.loc[row, 'Customer Name'])
- 		loadName = str(customerOutageData.loc[row, 'Load Name'])
- 		businessType = str(customerOutageData.loc[row, 'Business Type'])
- 		duration = str(0)
- 		averagekWperhr = str(0)
- 		for elementDict in dssTree:
- 			if 'object' in elementDict and elementDict['object'].split('.')[0] == 'load' and elementDict['object'].split('.')[1] == loadName:
- 				if 'daily' in elementDict: averagekWperhr = float(loadShapeMeanMultiplier.get(elementDict['daily'],0)) * float(elementDict['kw']) + float(loadShapeMeanActual.get(elementDict['daily'],0))
- 				else: averagekWperhr = float(elementDict['kw'])/2
- 				duration = str(cumulativeLoadsShed.count(loadName) * stepSize)
- 		if float(duration) >= .1 and float(averagekWperhr) >= .1:
- 			durationColumn.append(duration)
- 			avgkWColumn.append(float(averagekWperhr))
- 			season = str(customerOutageData.loc[row, 'Season'])
- 			customerOutageCost, kWperhrEstimate, times, localMax = customerCost1(duration, season, averagekWperhr, businessType)
- 			average_lost_kwh.append(float(averagekWperhr))
- 			outageCost.append(customerOutageCost)
- 			outageCostsByType[businessType].append(customerOutageCost)
- 			if localMax > globalMax:
- 				globalMax = localMax
- 			# creating series
- 			timesSeries = pd.Series(times)
- 			kWperhrSeries = pd.Series(kWperhrEstimate)
- 			trace = py.graph_objs.Scatter(
- 				x = timesSeries,
- 				y = kWperhrSeries,
- 				name = customerName,
- 				hoverlabel = dict(namelength = -1),
- 				hovertemplate = 
- 				'<b>Duration</b>: %{x} h<br>' +
- 				'<b>Cost</b>: $%{y:.2f}')
- 			fig.add_trace(trace)
- 			row += 1
- 		else:
- 			customerOutageData = customerOutageData.drop(index=row)
- 			customerOutageData = customerOutageData.reset_index(drop=True)
+		customerName = str(customerOutageData.loc[row, 'Customer Name'])
+		loadName = str(customerOutageData.loc[row, 'Load Name'])
+		businessType = str(customerOutageData.loc[row, 'Business Type'])
+		duration = str(0)
+		averagekWperhr = str(0)
+		for elementDict in dssTree:
+			if 'object' in elementDict and elementDict['object'].split('.')[0] == 'load' and elementDict['object'].split('.')[1] == loadName:
+				if 'daily' in elementDict: averagekWperhr = float(loadShapeMeanMultiplier.get(elementDict['daily'],0)) * float(elementDict['kw']) + float(loadShapeMeanActual.get(elementDict['daily'],0))
+				else: averagekWperhr = float(elementDict['kw'])/2
+				duration = str(cumulativeLoadsShed.count(loadName) * stepSize)
+		if float(duration) >= .1 and float(averagekWperhr) >= .1:
+			durationColumn.append(duration)
+			avgkWColumn.append(float(averagekWperhr))
+			season = str(customerOutageData.loc[row, 'Season'])
+			customerOutageCost, kWperhrEstimate, times, localMax = customerCost1(duration, season, averagekWperhr, businessType)
+			average_lost_kwh.append(float(averagekWperhr))
+			outageCost.append(customerOutageCost)
+			outageCostsByType[businessType].append(customerOutageCost)
+			if localMax > globalMax:
+				globalMax = localMax
+			# creating series
+			timesSeries = pd.Series(times)
+			kWperhrSeries = pd.Series(kWperhrEstimate)
+			trace = py.graph_objs.Scatter(
+				x = timesSeries,
+				y = kWperhrSeries,
+				name = customerName,
+				hoverlabel = dict(namelength = -1),
+				hovertemplate = 
+				'<b>Duration</b>: %{x} h<br>' +
+				'<b>Cost</b>: $%{y:.2f}')
+			fig.add_trace(trace)
+			row += 1
+		else:
+			customerOutageData = customerOutageData.drop(index=row)
+			customerOutageData = customerOutageData.reset_index(drop=True)
 	customerOutageData.insert(1, "Duration", durationColumn, True)
 	customerOutageData.insert(3, "Average kW/hr", avgkWColumn, True)
 	durations = customerOutageData.get('Duration',['0'])
@@ -979,7 +1003,7 @@ def graphMicrogrid(pathToOmd, pathToJson, pathToCsv, outputFile, settingsFile, u
 	)
 
 	####################### EXPERIMENTATION ############################################################################################
-	outageIncidenceFig = outageIncidenceGraph(tree, customerOutageData, outputTimeline, startTime, numTimeSteps)
+	outageIncidenceFig = outageIncidenceGraph(tree, customerOutageData, outputTimeline, startTime, numTimeSteps, loadPriorityFilePath)
 	####################### EXPERIMENTATION ############################################################################################
 
 	customerOutageHtml = customerOutageTable(customerOutageData, outageCost, workDir)
@@ -1078,7 +1102,7 @@ def work(modelDir, inputDict):
 				f5.write(inputDict['microgridTaggingData'])
 		except:
 			pathToData5 = None
-			print("ERROR - Unable to read microgrid tagging file: " + str(inputDict['microgridTaggingFileName']))
+			raise Exception("ERROR - Unable to read microgrid tagging file: " + str(inputDict['microgridTaggingFileName']))
 	else:
 		pathToData5 = None
 
@@ -1089,7 +1113,7 @@ def work(modelDir, inputDict):
 				f4.write(inputDict['loadPriorityData'])
 		except:
 			pathToData4 = None
-			print("ERROR - Unable to read load priority file: " + str(inputDict['loadPriorityFileName']))
+			raise Exception("ERROR - Unable to read load priority file: " + str(inputDict['loadPriorityFileName']))
 	else:
 		pathToData4 = None
 
@@ -1100,7 +1124,7 @@ def work(modelDir, inputDict):
 				f3.write(inputDict['settingsData'])
 		except:
 			pathToData3 = None
-			print("ERROR - Unable to read Settings file: " + str(inputDict['settingsFileName']))
+			raise Exception("ERROR - Unable to read Settings file: " + str(inputDict['settingsFileName']))
 	else:
 		pathToData3 = None
 
@@ -1111,7 +1135,7 @@ def work(modelDir, inputDict):
 				f2.write(inputDict['outputData'])
 		except:
 			pathToData2 = None
-			print("ERROR - Unable to read Cached output file: " + str(inputDict['outputFileName']))
+			raise Exception("ERROR - Unable to read Cached output file: " + str(inputDict['outputFileName']))
 	else:
 		pathToData2 = None
 
@@ -1269,4 +1293,5 @@ def _debugging():
 	__neoMetaModel__.renderAndShow(modelLoc)
 
 if __name__ == '__main__':
-	_debugging()
+	#_debugging()
+	potato='baked'
