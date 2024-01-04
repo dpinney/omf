@@ -306,7 +306,7 @@ def new(modelDir):
 @neoMetaModel_test_setup
 def _tests():
 	## Location
-	modelLoc = pJoin(__neoMetaModel__._omfDir,"data","Model","admin","Automated_Testing_of_" + modelName)
+	modelLoc = pJoin(__neoMetaModel__._omfDir,"data","Model","admin","Automated Testing of " + modelName)
 	## Blow away old test results if necessary.
 	try:
 		shutil.rmtree(modelLoc)
