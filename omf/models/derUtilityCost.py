@@ -22,7 +22,7 @@ tooltip = ('The derUtilityCost model evaluates the financial costs of controllin
 modelName, template = __neoMetaModel__.metadata(__file__)
 hidden = True
 
-def create_REopt_jl_jsonFile(inputDict):
+def create_REopt_jl_jsonFile(modelDir, inputDict):
 
 	## Site parameters
 	latitude = float(inputDict['latitude'])
@@ -35,6 +35,7 @@ def create_REopt_jl_jsonFile(inputDict):
 	generator = inputDict['generator']
 	battery = inputDict['battery']
 
+	"""
 	## Financial and Load parameters
 	energyCost = float(inputDict['energyCost'])
 	demandCost = float(inputDict['demandCost'])
@@ -133,8 +134,24 @@ def create_REopt_jl_jsonFile(inputDict):
 			"macrs_option_years": dieselMacrsOptionYears
 		}
 	}
+	"""
 
-	return jsonFile
+	scenario = {
+		"Site": {
+			"latitude": latitude,
+			"longitude": longitude
+		},
+		"ElectricTariff": {
+			"urdb_label": urdbLabel
+		},
+		"PV": {
+		},
+	}
+
+	with open(pJoin(modelDir, "Scenario_test.json"), "w") as jsonFile:
+		json.dump(scenario, jsonFile)
+
+	return scenario
 
 def work(modelDir, inputDict):
 	''' Run the model in its directory. '''
@@ -158,12 +175,23 @@ def work(modelDir, inputDict):
 	
 	outage = True if inputDict["outage"] == "on" else False
 
+	## Create REopt input file
+	create_REopt_jl_jsonFile(modelDir, inputDict)
 
-
+	## Run REopt.jl
+	reopt_jl.run_reopt_jl(modelDir, "Scenario_test.json")
+	with open(pJoin(modelDir, 'results.json')) as jsonFile:
+		results = json.load(jsonFile)
+		
+	## Output data
 	out['solar'] = inputDict['solar']
 	out['generator'] = inputDict['generator'] ## TODO: make generator switch on only during outage?
 	out['battery'] = inputDict['battery']
 	out['year'] = inputDict['year']
+	out['urdbLabel'] = inputDict['urdbLabel']
+	out['demandCost'] = results['ElectricTariff']['lifecycle_demand_cost_after_tax']
+	out['powerPVToGrid'] = results['PV']['electric_to_grid_series_kw']#['year_one_to_grid_series_kw']
+
 
 	## Run REopt and gather outputs for vbatDispath
 	## TODO: Create a function that will gather the urdb label from a user provided location (city,state)
@@ -173,11 +201,11 @@ def work(modelDir, inputDict):
 	#RE.run_reopt_jl(path="/Users/astronobri/Documents/CIDER/reopt/inputs/", inputFile="residential_input.json", outages=True) # UP coop PV 
 
 	#with open(pJoin(modelDir, 'results.json')) as jsonFile:
-#		results = json.load(jsonFile)
+		#results = json.load(jsonFile)
 
 	#getting REoptInputs to access default input values more easily 
-#	with open(pJoin(modelDir, 'REoptInputs.json')) as jsonFile:
-#		reopt_inputs = json.load(jsonFile)
+	#with open(pJoin(modelDir, 'REoptInputs.json')) as jsonFile:
+		#reopt_inputs = json.load(jsonFile)
 
 	if (outage):
 		with open(pJoin(modelDir, 'resultsResilience.json')) as jsonFile:
@@ -188,7 +216,6 @@ def work(modelDir, inputDict):
 	#modelDir = "/Users/astronobri/Documents/CIDER/omf/omf/data/Model/admin/meowtest"
 
 	test = vb.work(modelDir,inputDict)
-	
 	with open('/Users/astronobri/Documents/CIDER/jsontestfile.json', "w") as fp:
 		json.dump(test, fp) 
 
@@ -252,22 +279,22 @@ def new(modelDir):
 
 @neoMetaModel_test_setup
 def _tests():
-	# Location
+	## Location
 	modelLoc = pJoin(__neoMetaModel__._omfDir,"data","Model","admin","Automated_Testing_of_" + modelName)
-	# Blow away old test results if necessary.
+	## Blow away old test results if necessary.
 	try:
 		shutil.rmtree(modelLoc)
 	except:
-		# No previous test results.
+		## No previous test results.
 		pass
-	# Create New.
+	## Create New.
 	new(modelLoc)
-	# Pre-run.
-	#__neoMetaModel__.renderAndShow(modelLoc)
-	# Run the model.
-	# __neoMetaModel__.runForeground(modelLoc)
-	# Show the output.
-	#__neoMetaModel__.renderAndShow(modelLoc)
+	## Pre-run.
+	__neoMetaModel__.renderAndShow(modelLoc)
+	## Run the model.
+	__neoMetaModel__.runForeground(modelLoc)
+	## Show the output.
+	__neoMetaModel__.renderAndShow(modelLoc)
 
 if __name__ == '__main__':
 	_tests()
