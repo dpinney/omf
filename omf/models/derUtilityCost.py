@@ -6,6 +6,8 @@ import warnings
 
 import shutil, datetime, csv, json
 from os.path import join as pJoin
+import numpy as np
+import pandas as pd
 
 # OMF imports
 from omf import feeder
@@ -34,6 +36,12 @@ def create_REopt_jl_jsonFile(modelDir, inputDict):
 	solar = inputDict['solar'] 
 	generator = inputDict['generator']
 	battery = inputDict['battery']
+
+	## Load demand file and make it JSON ready
+	with open(pJoin(modelDir, "demand.csv")) as loadFile:
+		load = pd.read_csv(loadFile, header=None)
+		load = load[0].values.tolist()
+		
 
 	"""
 	## Financial and Load parameters
@@ -143,6 +151,10 @@ def create_REopt_jl_jsonFile(modelDir, inputDict):
 		},
 		"ElectricTariff": {
 			"urdb_label": urdbLabel
+		},
+		"ElectricLoad": {
+			"loads_kw": load,
+			"year": year
 		},
 		"PV": {
 		},
@@ -290,11 +302,11 @@ def _tests():
 	## Create New.
 	new(modelLoc)
 	## Pre-run.
-	__neoMetaModel__.renderAndShow(modelLoc)
+	#__neoMetaModel__.renderAndShow(modelLoc)
 	## Run the model.
 	__neoMetaModel__.runForeground(modelLoc)
 	## Show the output.
-	__neoMetaModel__.renderAndShow(modelLoc)
+	#__neoMetaModel__.renderAndShow(modelLoc)
 
 if __name__ == '__main__':
 	_tests()
