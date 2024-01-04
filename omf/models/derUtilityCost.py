@@ -318,7 +318,7 @@ def _tests():
 	## Pre-run.
 	__neoMetaModel__.renderAndShow(modelLoc)
 	## Run the model.
-	__neoMetaModel__.runForeground(modelLoc)
+	#__neoMetaModel__.runForeground(modelLoc)
 	## Show the output.
 	__neoMetaModel__.renderAndShow(modelLoc)
 
