@@ -18,17 +18,8 @@ import csv, random, math, copy, subprocess, locale, warnings, os, json, tracebac
 from os.path import join as pJoin
 import numpy as np
 from numpy.linalg import inv
-
-import matplotlib
-if platform.system() == 'Darwin':
-	matplotlib.use('TkAgg')
-else:
-	matplotlib.use('Agg')
-from matplotlib import pyplot as plt
-
 from omf import feeder
 from omf.solvers import gridlabd
-
 
 m2ft = 1.0 / 0.3048  # Conversion factor for meters to feet
 
@@ -3466,6 +3457,7 @@ def _tests(keepFiles=True):
 			# Draw the GLM.
 			myGraph = feeder.treeToNxGraph(cyme_base)
 			feeder.latLonNxGraph(myGraph, neatoLayout=False)
+			from matplotlib import pyplot as plt
 			plt.savefig(outputDir + testFilename + ".png")
 			with open(pJoin(outputDir, "convResults.txt"), "a") as resultsFile:
 				resultsFile.write("DREW GLM FOR " + testFilename + "\n")

@@ -5,10 +5,6 @@ from copy import copy
 from os.path import join as pJoin
 
 import matplotlib
-if platform.system() == 'Darwin':
-	matplotlib.use('TkAgg')
-else:
-	matplotlib.use('Agg')
 from matplotlib import pyplot as plt
 
 # OMF imports

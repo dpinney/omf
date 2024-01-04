@@ -1,17 +1,9 @@
 ''' Determine impacts of distribution faults. '''
 
-import json, os, shutil, csv, warnings, base64, platform
+import json, os, shutil, csv, base64
 from os.path import join as pJoin
 
-import matplotlib
-if platform.system() == 'Darwin':
-	matplotlib.use('TkAgg')
-else:
-	matplotlib.use('Agg')
-from matplotlib import pyplot as plt
-
 # dateutil imports
-from dateutil import parser
 from dateutil.relativedelta import *
 
 # OMF imports

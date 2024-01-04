@@ -40,9 +40,16 @@
 			</div>
 			{% endif %}
 			<div class="wideInput">
-				<p class="inputSectionHeader">AMI-Based Hosting Capacity</p>
+				<p class="inputSectionHeader">AMI-Based or "MoHCa" Hosting Capacity</p>
 			</div>
 			<hr>
+			<div class="shortInput">
+				<label class="tooltip">Apply AMI-Based Hosting Capacity</label>
+				<select id="runAmiAlgorithm" name="runAmiAlgorithm" value="{{allInputDataDict.runAmiAlgorithm}}" required>
+					<option value="off" {% if allInputDataDict.runAmiAlgorithm == 'off' %}selected{% endif %}>Off</option>
+					<option value="on" {% if allInputDataDict.runAmiAlgorithm == 'on' %}selected{% endif %}>On</option>
+				</select>
+			</div>
 			<div class="shortInput">
 				<label class="tooltip">Meter Data Input File <span class="classic">Import a .csv file that includes the meter data. Format for input columns: busname, datetime, v_reading, kw_reading, kvar_reading. Optional input columns: latitude, longitude, service_tx_name, phase_count (1, 3)</span></label>
 				<div>{{ insert_file_upload_block('inputDataFileName','inputDataFileContent') }}</div>
@@ -55,11 +62,11 @@
 				</select>
 			</div>
 			<div class="wideInput">
-				<p class="inputSectionHeader">Traditional Hosting Capacity</p>
+				<p class="inputSectionHeader">Model-Based or "Traditional" Hosting Capacity</p>
 			</div>
 			<hr>
 			<div class="shortInput">
-				<label class="tooltip">Apply traditional hosting capacity</label>
+				<label class="tooltip">Apply Model-Based Hosting Capacity</label>
 				<select id="optionalCircuitFile" name="optionalCircuitFile" value="{{allInputDataDict.optionalCircuitFile}}" required>
 					<option value="off" {% if allInputDataDict.optionalCircuitFile == 'off' %}selected{% endif %}>Off</option>
 					<option value="on" {% if allInputDataDict.optionalCircuitFile == 'on' %}selected{% endif %}>On</option>
@@ -73,19 +80,11 @@
 				<input type="text" id="feederName1" name="feederName1" value="{{allInputDataDict.feederName1}}" style="display:none">
 			</div>
 			<div class="shortInput">
-				<label class="tooltip">Traditional Hosting Capacity Steps
-					<span class="classic">How many times the specified kW is added to determine max hosting capacity</span>
+				<label class="tooltip">Maximum kW Tested
+					<span class="classic">The maximum threshhold of KW added to determine max hosting capacity</span>
 				</label>
-				<input type="text" id="traditionalHCSteps" name="traditionalHCSteps" value="{{allInputDataDict.traditionalHCSteps}}" pattern="^[0-9]*$"/>
+				<input type="text" id="traditionalHCMaxTestkw" name="traditionalHCMaxTestkw" value="{{allInputDataDict.traditionalHCMaxTestkw}}" pattern="^[0-9]*$"/>
 			</div>
-			
-			<div class="shortInput">
-				<label class="tooltip">Traditional Hosting Capacity kW
-					<span class="classic">How much kW is added to each step to determine hostingCapacity</span>
-				</label>
-				<input type="text" id="traditionalHCkW" name="traditionalHCkW" value="{{allInputDataDict.traditionalHCkW}}">
-			</div>
-			<input type="hidden" name="runAmiAlgorithm" value="{{allInputDataDict.runAmiAlgorithm}}"/>
 			{{ omfModelButtons }}
 		</form>
 	</div>
@@ -94,6 +93,7 @@
 	{% if modelStatus == 'finished' %}
 	<style>td, th {padding:7 0 5 20;text-align: left;font-size:0.8em; border: 1px solid #cccccc;} </style>
 	<div id="output">
+        {% if allInputDataDict['runAmiAlgorithm'] == 'on' %}
 		<p class="reportTitle">AMI-Based Hosting Capacity Distribution</p>
 		<div id="mohcaHistogramChart" class="tightContent">
 			<div id="mohcaHistogramChart" style="width:1000px"></div>
@@ -125,6 +125,7 @@
 				{% endfor %}
 			</table> 
 		</div>
+        {% endif %}
 		{% if allInputDataDict['optionalCircuitFile'] == 'on' %}
 		<p class="reportTitle" style="page-break-before:always">Traditional Hosting Capacity Map</p>
 		<div id="traditionalHCMap" class="tightContent"></div>

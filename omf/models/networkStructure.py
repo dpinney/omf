@@ -1,24 +1,13 @@
 ''' Reconstruct distribution network structure from meter data. '''
-import json, os, tempfile, shutil, csv, math, re, base64, platform
+import json, os, tempfile, shutil, csv, math, re, base64
 from os.path import join as pJoin
 import pandas as pd
 import networkx as nx
 from sklearn import svm
 from sklearn import metrics
 from numpy import array
-
-import matplotlib
-if platform.system() == 'Darwin':
-	matplotlib.use('TkAgg')
-else:
-	matplotlib.use('Agg')
 from matplotlib import pyplot as plt
-
-# dateutil imports
-from dateutil import parser
 from dateutil.relativedelta import *
-
-# OMF imports
 import omf
 from omf import feeder, geo
 from omf.models import __neoMetaModel__
@@ -269,7 +258,7 @@ def prim(graph):
 
 def testingSimple(testPath, pathToCsv, workDir, useDist, useVolt):
 	'visualize the different MSTs based on distance data, voltage data, and actual connectivity'
-	
+
 	# generate date
 	nodes, volt, tree, workDir, inputDataDist, inputDataVolt, outputData = generateData(testPath, pathToCsv, workDir, useDist, useVolt)
 	
@@ -292,7 +281,7 @@ def testingSimple(testPath, pathToCsv, workDir, useDist, useVolt):
 	for val in expectedDist:
 		distMST[val[0]][val[1]] = 1
 	for val in expectedVolt:
-	 	voltMST[val[0]][val[1]] = 1
+		voltMST[val[0]][val[1]] = 1
 	for val in actual:
 		actualMST[val[0]][val[1]] = 1
 
@@ -454,7 +443,7 @@ def createTrainingData(trainPath, pathToCsv, workDir, X_train, y_train, useDist,
 		distMST[val[0]][val[1]] = 1
 
 	for val in expectedVolt:
-	 	voltMST[val[0]][val[1]] = 1
+		voltMST[val[0]][val[1]] = 1
 
 	for val in actual:
 		actualMST[val[0]][val[1]] = 1

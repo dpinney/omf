@@ -48,23 +48,24 @@ hidden = True
 def retrieveCensusNRI():
     
     try:
-        
+        #headers
         hdr = {'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.11 (KHTML, like Gecko)  Chrome/23.0.1271.64 Safari/537.11',
        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
        'Accept-Charset': 'ISO-8859-1,utf-8;q=0.7,*;q=0.3',
        'Accept-Encoding': 'none',
        'Accept-Language': 'en-US,en;q=0.8',
        'Connection': 'keep-alive'}
-        
+        # Fema NRI data url
         nridataURL = "https://hazards.fema.gov/nri/Content/StaticDocuments/DataDownload//NRI_Shapefile_CensusTracts/NRI_Shapefile_CensusTracts.zip"
         r = requests.get(nridataURL, headers=hdr)
         z = zipfile.ZipFile(BytesIO(r.content))
         
-		# get file names needed to build geoJSON
+	# get file names needed to build geoJSON
         shpPath = [x for x in z.namelist() if x.endswith('.shp')][0]
         dbfPath = [x for x in z.namelist() if x.endswith('.dbf')][0]
         prjPath = [x for x in z.namelist() if x.endswith('.prj')][0]
-        
+
+	# Create geojson from retrieved data files 
         with shapefile.Reader(shp=BytesIO(z.read(shpPath)), 
                       dbf=BytesIO(z.read(dbfPath)), 
                       prj=BytesIO(z.read(prjPath))) as shp:
@@ -86,14 +87,17 @@ def retrieveCensusNRI():
 # return censusTract ->  census Tract found at location
 def findCensusTract(lat, lon):
     try:
+	# Census Tract API URL
         request_url = "https://geo.fcc.gov/api/census/block/find?latitude="+str(lat)+"&longitude="+str(lon)+ "&censusYear=2020&format=json"
         opener = urllib.request.build_opener()
         opener.addheaders = [('User-agent', 'Mozilla/5.0')]
         resp = opener.open(request_url)
         censusJson = json.loads(resp.read())
+	# Remove last 4 digits from Block code to retrieve Tract Information
         censusTract = censusJson['Block']['FIPS'][:-4]   
         return  censusTract
     except Exception as e:
+	# need to look into api limit errors
         print("Error trying to retrieve tract information from Census API")
         print(e)
 
@@ -102,18 +106,21 @@ def findCensusTract(lat, lon):
 # Input: censusJson -> geoJson data
 # Input: tractList -> list of tracts
 # return geomData, soviData -> list of geometrys and social vulnerability for tracts found in list
-def getSoviData(nrigeoJson, tractList):
-    soviData = []
+def getCensusNRIData(nrigeoJson, tractList):
+    nriData = []
     geomData = []
     headers = list(nrigeoJson['features'][0]['properties'].keys())
     for i in nrigeoJson['features']:
         tractID = i['properties']['TRACTFIPS']
         if tractID in tractList:
-            soviData.append([i['properties']['TRACTFIPS'],i['properties']['SOVI_SCORE'],i['properties']['SOVI_RATNG'], i['properties']['SOVI_SPCTL']])
+            properties = []
+            for i in i['properties']:
+                properties.append(i)
             geom = i['geometry']['coordinates'][0]
             geomData.append(geom)
+            nriData.append(properties)
 
-    return geomData, soviData, headers
+    return geomData, nriData, headers
 
 # Gets Census Tract data from a specified state
 # input: nrigeoJson -> nri geojson
@@ -125,12 +132,16 @@ def getTractDatabyState(nrigeoJson,stateName):
     for i in nrigeoJson['features']:
         state = i['properties']['STATE']
         if state == stateName:
-            data.append
             properties = []
             for k in i['properties']:
                 properties.append(i['properties'][k])
-            data.append(properties)
-            geom.append(i['geometry']['coordinates'][0])
+            if (i['geometry']['type'] == 'MultiPolygon'):
+                for j in i['geometry']['coordinates']:
+                    geom.append(j)
+                    data.append(properties)
+            else:
+                geom.append(i['geometry']['coordinates'][0])
+                data.append(properties)
     return geom, data, headers
 
 
@@ -442,7 +453,67 @@ def run_correlationTesting(listOfCoops, stateName, nrigeoJson, coopGeoJson):
     corr2 = corr[~mask]
                                   
                                   
-    return corr, corr2      
+    return corr, corr2
+
+# 
+#
+#
+def normalized_coopandcensusnri(nriGeoDF, coopGeoDF):
+    overlayDF = nriGeoDF.overlay(coopGeoDF, how='intersection')
+    overlayDF['intersected_area'] = overlayDF.area
+    
+    overlayDF[['BUILDVALUE','AGRIVALUE','EAL_VALT','EAL_VALB','EAL_VALP',
+               'EAL_VALA','SOVI_SCORE','RESL_VALUE','AVLN_AFREQ',
+               'CFLD_AFREQ','CWAV_AFREQ','DRGT_AFREQ','ERQK_AFREQ','HAIL_AFREQ','HWAV_AFREQ',
+               'HRCN_AFREQ','ISTM_AFREQ','LNDS_AFREQ','LTNG_AFREQ','RFLD_AFREQ','SWND_AFREQ',
+               'TRND_AFREQ','TSUN_AFREQ','VLCN_AFREQ','WFIR_AFREQ','WNTW_AFREQ']] = overlayDF[['BUILDVALUE','AGRIVALUE','EAL_VALT','EAL_VALB','EAL_VALP',
+               'EAL_VALA','SOVI_SCORE','RESL_VALUE','AVLN_AFREQ',
+               'CFLD_AFREQ','CWAV_AFREQ','DRGT_AFREQ','ERQK_AFREQ','HAIL_AFREQ','HWAV_AFREQ',
+               'HRCN_AFREQ','ISTM_AFREQ','LNDS_AFREQ','LTNG_AFREQ','RFLD_AFREQ','SWND_AFREQ',
+               'TRND_AFREQ','TSUN_AFREQ','VLCN_AFREQ','WFIR_AFREQ','WNTW_AFREQ']].div(overlayDF.intersected_area, axis=0)
+    
+    dissolved = overlayDF.dissolve(by='Cooperative',aggfunc={'intersected_area':"sum",
+                                                         'Shape_Area_2':'max',
+                                                         'BUILDVALUE':'sum',
+                                                         'AGRIVALUE':'sum',
+                                                         'EAL_VALT':'sum',
+                                                         'EAL_VALB':'sum',
+                                                         'EAL_VALP':'sum',
+                                                         'EAL_VALA':'sum',
+                                                         'SOVI_SCORE':'sum',
+                                                         'RESL_VALUE':'sum',
+                                                         'AVLN_AFREQ':'sum',
+                                                         'CFLD_AFREQ':'sum',
+                                                         'CWAV_AFREQ':'sum',
+                                                         'DRGT_AFREQ':'sum',
+                                                         'ERQK_AFREQ':'sum',
+                                                         'HAIL_AFREQ':'sum',
+                                                         'HWAV_AFREQ':'sum',
+                                                         'HRCN_AFREQ':'sum',
+                                                         'ISTM_AFREQ':'sum',
+                                                         'LNDS_AFREQ':'sum',
+                                                         'LTNG_AFREQ':'sum',
+                                                         'RFLD_AFREQ':'sum',
+                                                         'SWND_AFREQ':'sum',
+                                                         'TRND_AFREQ':'sum',
+                                                         'TSUN_AFREQ':'sum',
+                                                         'VLCN_AFREQ':'sum',
+                                                         'WFIR_AFREQ':'sum',
+                                                         'WNTW_AFREQ':'sum'
+                                                        })
+    
+    dissolved[['BUILDVALUE','AGRIVALUE','EAL_VALT','EAL_VALB','EAL_VALP',
+               'EAL_VALA','SOVI_SCORE','RESL_VALUE','AVLN_AFREQ',
+               'CFLD_AFREQ','CWAV_AFREQ','DRGT_AFREQ','ERQK_AFREQ','HAIL_AFREQ','HWAV_AFREQ',
+               'HRCN_AFREQ','ISTM_AFREQ','LNDS_AFREQ','LTNG_AFREQ','RFLD_AFREQ','SWND_AFREQ',
+               'TRND_AFREQ','TSUN_AFREQ','VLCN_AFREQ','WFIR_AFREQ','WNTW_AFREQ']] = dissolved[['BUILDVALUE','AGRIVALUE','EAL_VALT','EAL_VALB','EAL_VALP',
+               'EAL_VALA','SOVI_SCORE','RESL_VALUE','AVLN_AFREQ',
+               'CFLD_AFREQ','CWAV_AFREQ','DRGT_AFREQ','ERQK_AFREQ','HAIL_AFREQ','HWAV_AFREQ',
+               'HRCN_AFREQ','ISTM_AFREQ','LNDS_AFREQ','LTNG_AFREQ','RFLD_AFREQ','SWND_AFREQ',
+               'TRND_AFREQ','TSUN_AFREQ','VLCN_AFREQ','WFIR_AFREQ','WNTW_AFREQ']].div(dissolved.Shape_Area_2, axis=0)
+    
+    return dissolved
+    
                                  
 def work(modelDir, inputDict):
     ''' Run the model in its directory. '''

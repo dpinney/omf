@@ -60,17 +60,33 @@
 			var iframe = document.createElement('iframe');
 			iframe.style = 'width:1000px; height:800px'
 
-			//const myImage = new Image(100, 200);
-			//myImage.src = '/Users/davidarmah/Documents/OMF/omf/omf/static/testFiles/legend.png';
-			//document.getElementById('resilienceMap').appendChild(myImage)
-			document.getElementById('resilienceMap').innerHTML = '<img src="/Users/davidarmah/Documents/OMF/omf/omf/static/testFiles/legend.png">';
+
+			document.getElementById('resilienceMap').innerHTML = '<div class="img-div" style="position:relative;right:-390px;bottom:-795px;"><img style="position:relative" src="/Users/davidarmah/Documents/omf/omf/static/testFiles/resilientCommunity/legend.png"></div>';
 			document.getElementById('resilienceMap').appendChild(iframe);
 			iframe.contentWindow.document.open();
 			iframe.contentWindow.document.write(mapContent);
 			//iframe.contentWindow.document.write(img)
 			iframe.contentWindow.document.close();
 		</script>
+<p class="reportTitle">Loads Data Table</p>
+<div id="traditionalHostingCapacityTable" class="tightContent" style="height:300px; overflow-y: scroll;">
+	<table style="width:100%">
+		<tr>
+				{% for header in allOutputDataDict["loadTableHeadings"] %}
+				<th>{{ header }}</th>
+				{% endfor %}
+		</tr>
+		{% for values in allOutputDataDict["loadTableValues"] %}
+		<tr>
+				{% for val in values %}
+				<td>{{ val }}</td>
+				{% endfor %}
+		</tr>
+		{% endfor %}
+</table>
+</div>
 			{{ rawOutputFiles }}
 		</div>
 	{% endif %}
 </body>
+

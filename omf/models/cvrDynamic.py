@@ -1,16 +1,9 @@
 ''' Calculate CVR impacts using a targetted set of dynamic loadflows. '''
 
-import json, os, shutil, math, calendar, platform
+import json, os, shutil, math, calendar
 from datetime import datetime as dt, timedelta
 from os.path import join as pJoin
-
-import matplotlib
-if platform.system() == 'Darwin':
-	matplotlib.use('TkAgg')
-else:
-	matplotlib.use('Agg')
 from matplotlib import pyplot as plt
-
 # OMF feeder
 from omf import feeder
 from omf.solvers import gridlabd

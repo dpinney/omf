@@ -40,12 +40,11 @@ def run_julia_script(juliaStr : str, cleanFileFormatting = True):
 	
 def install_onm(target : list = platform.system()):
 	''' WARNING, WIP. TODO: Linux support, license check, tests. '''
-	#TODO: replace wget with `python -c "from urllib.request import urlretrieve as wget; wget(URL, OUT_FILE_PATH)"`
 	installCmd = {
 		'Darwin' : [
 			'sudo cat /Library/gurobi/gurobi.lic',
 			'HOMEBREW_NO_AUTO_UPDATE=1 brew install julia',
-			'wget "https://packages.gurobi.com/9.1/gurobi9.1.2_mac64.pkg"',
+			'''python3 -c 'from urllib.request import urlretrieve as wget; wget("https://packages.gurobi.com/9.1/gurobi9.1.2_mac64.pkg","./gurobi9.1.2_mac64.pkg")' ''',
 			'sudo installer -pkg gurobi9.1.2_mac64.pkg -target /',
 			'echo "export GUROBI_HOME=/Library/gurobi912/mac64" >> ~/.zshrc',
 			'echo "export PATH=/Library/gurobi912/mac64/bin:$PATH" >> ~/.zshrc',

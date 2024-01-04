@@ -3,18 +3,12 @@ Requirements: GNU octave
 Tested on Linux and macOS.
 '''
 
-import json, os, shutil, subprocess, math, platform, base64
+import json, os, shutil, platform, base64
 from os.path import join as pJoin
-
 import matplotlib
-if platform.system() == 'Darwin':
-	matplotlib.use('TkAgg')
-else:
-	matplotlib.use('Agg')
 from matplotlib import pyplot as plt
 import matplotlib.cm as cm
 import pandapower as ppow
-
 from omf import transmission as network
 from omf.models import __neoMetaModel__
 from omf.models.__neoMetaModel__ import *

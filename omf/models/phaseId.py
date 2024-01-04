@@ -1,5 +1,5 @@
 ''' Identify phasing from meter data.'''
-import json, datetime, csv, os, shutil, re, warnings, itertools, base64, platform
+import datetime, csv, os, shutil, re, itertools, base64, platform
 from os.path import join as pJoin
 from base64 import b64decode
 from zipfile import ZipFile
@@ -11,14 +11,7 @@ import plotly.offline
 from scipy.stats import linregress
 from sklearn import preprocessing
 from sklearn.metrics import confusion_matrix
-
-import matplotlib
-if platform.system() == 'Darwin':
-	matplotlib.use('TkAgg')
-else:
-	matplotlib.use('Agg')
 from matplotlib import pyplot as plt
-
 from omf.models import __neoMetaModel__
 from omf.models.__neoMetaModel__ import *
 from omf.solvers import sandia_ami_phase_id

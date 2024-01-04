@@ -1,21 +1,11 @@
 ''' perform analysis pertaining to the addition of a DER interconnection on a feeder. '''
-import glob, json, os, tempfile, shutil, csv, math, warnings, random, copy, base64, platform
+import glob, json, os, tempfile, shutil, csv, math, random, copy, base64
 from os.path import join as pJoin
 import networkx as nx
-
-# Hack: Agg backend doesn't work for interactivity. Switch to something we can use:
 import matplotlib
-if platform.system() == 'Darwin':
-	matplotlib.use('TkAgg')
-else:
-	matplotlib.use('Agg')
 from matplotlib import pyplot as plt
-
-# dateutil imports
 from dateutil import parser
 from dateutil.relativedelta import *
-
-# OMF imports 
 from omf import feeder
 from omf.solvers import gridlabd
 from omf.models import __neoMetaModel__

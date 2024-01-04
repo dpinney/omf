@@ -197,12 +197,12 @@ def customerOutageTable(customerOutageData, outageCost, workDir):
 
 	# print business information and estimated customer outage costs
 	try:
- 		customerOutageHtml = customerOutageStats(
- 			customerOutageData = customerOutageData,
- 			outageCost = outageCost)
+		customerOutageHtml = customerOutageStats(
+			customerOutageData = customerOutageData,
+			outageCost = outageCost)
 	except:
- 		customerOutageHtml = ''
- 		 #HACKCOBB: work aroun.
+		customerOutageHtml = ''
+		 #HACKCOBB: work aroun.
 	with open(pJoin(workDir, 'customerOutageTable.html'), 'w') as customerOutageFile:
 		customerOutageFile.write(customerOutageHtml)
 	return customerOutageHtml
@@ -847,7 +847,10 @@ def graphMicrogrid(pathToOmd, pathToJson, pathToCsv, outputFile, settingsFile, u
 	try:
 		customerOutageData = pd.read_csv(pathToCsv)
 	except:
+<<<<<<< HEAD
 		# TODO: Needs to be updated to provide info for all loads, not just shed loads. Outage Incidence plot is dependent on all loads
+=======
+>>>>>>> f9e2220aec562c162c42d26421b2721c11b42af6
 		deviceTimeline = data["Device action timeline"]
 		loadsShed = []
 		for line in deviceTimeline:
@@ -944,12 +947,12 @@ def graphMicrogrid(pathToOmd, pathToJson, pathToCsv, outputFile, settingsFile, u
 	busColors = {'residential':'#0000ff', 'manufacturing':'#ff0000', 'mining':'#708090', 'construction':'#ff8c00', 'agriculture':'#008000', 'finance':'#d6b600', 'retail':'#ff69b4', 'services':'#191970', 'utilities':'#8b4513', 'public':'#9932cc'}
 	custHist = go.Figure()
 	# custHist.add_trace(go.Histogram(
-	# 	x=outageCost,
-	# 	xbins=dict(
-	# 		start=minCustomerCost,
-	# 		end=maxCustomerCost+binSize,
-	# 		size=binSize
-	# 	)
+	#	x=outageCost,
+	#	xbins=dict(
+	#		start=minCustomerCost,
+	#		end=maxCustomerCost+binSize,
+	#		size=binSize
+	#	)
 	# ))
 	for busType in businessTypes:
 		custHist.add_trace(go.Histogram(
@@ -971,12 +974,12 @@ def graphMicrogrid(pathToOmd, pathToJson, pathToCsv, outputFile, settingsFile, u
 	)
 	meanCustomerCostStr = "Mean Outage Cost: $"+"{:.2f}".format(meanCustomerCost)
 	# custHist.add_vline(
-	# 	x=meanCustomerCost,
-	# 	line_width=3, 
-	# 	line_dash="dash",
-	# 	line_color="black",
-	# 	annotation_text=meanCustomerCostStr, 
-	# 	annotation_position="top right"
+	#	x=meanCustomerCost,
+	#	line_width=3, 
+	#	line_dash="dash",
+	#	line_color="black",
+	#	annotation_text=meanCustomerCostStr, 
+	#	annotation_position="top right"
 	# )
 	custHist.add_shape(
 		type="line",
@@ -1017,56 +1020,56 @@ def graphMicrogrid(pathToOmd, pathToJson, pathToCsv, outputFile, settingsFile, u
 	return {'utilityOutageHtml': utilityOutageHtml, 'customerOutageHtml': customerOutageHtml, 'timelineStatsHtml': timelineStatsHtml, 'outageIncidenceFig': outageIncidenceFig, 'gens': gens, 'loads': loads, 'volts': volts, 'fig': fig, 'customerOutageCost': customerOutageCost, 'numTimeSteps': numTimeSteps, 'stepSize': stepSize, 'custHist': custHist}
 
 def buildCustomEvents(eventsCSV='', feeder='', customEvents='customEvents.json', defaultDispatchable = 'true'):
-    def outageSwitchState(outList): return ('open'*(outList[3] == 'closed') + 'closed'*(outList[3]=='open'))
-    def eventJson(dispatchable, state, timestep, affected_asset):
-        return {
-            "event_data": {
-                "status": 1,
-                "dispatchable": dispatchable,
-                "type": "breaker",
-                "state": state
-            },
-            "timestep": timestep,
-            "affected_asset": ("line." + affected_asset),
-            "event_type": "switch"
-        }
-    if eventsCSV == '': # Find largest switch, flip it and set to non-dispatchable at timestep 1.
-        with open(feeder, 'a') as f:
-            f.write('Export Currents')
-        with open(feeder, 'r') as f:
-            f.read()
-    elif ',' in eventsCSV:
-        outageReader = csv.reader(io.StringIO(eventsCSV))
-    else:
-        outageReader = csv.reader(open(eventsCSV))
-    if feeder.endswith('.omd'):
-        with open(feeder) as omdFile:
-            tree = json.load(omdFile)['tree']
-        niceDss = dssConvert.evilGldTreeToDssTree(tree)
-        dssConvert.treeToDss(niceDss, 'circuitOmfCompatible.dss')
-        dssTree = dssConvert.dssToTree('circuitOmfCompatible.dss')
-    else: return('Error: Feeder must be an OMD file.')
-    outageAssets = [] # formerly row[0] for row in outageReader
-    customEventList = []
-    for row in outageReader:
-        outageAssets.append(row[0])
-        try:
-            customEventList.append(eventJson('false',outageSwitchState(row),int(row[1]),row[0]))
-            if int(row[2])>0:
-                customEventList.append(eventJson(row[4],row[3],int(row[2]),row[0]))
-        except: pass
-    unaffectedOpenAssets = [dssLine['object'].split('.')[1] for dssLine in dssTree if dssLine['!CMD'] == 'open']
-    unaffectedClosedAssets = [dssLine['object'].split('.')[1] for dssLine in dssTree if dssLine.get('!CMD') == 'new' \
-        and dssLine['object'].split('.')[0] == 'line' \
-        and 'switch' in [key for key in dssLine] \
-    #   and dssLine['switch'] == 'y'] # \
-        and (dssLine['object'].split('.')[1] not in (unaffectedOpenAssets + outageAssets))]
-    customEventList += [eventJson(defaultDispatchable,'open',1,asset) for asset in unaffectedOpenAssets] 
-    customEventList += [eventJson(defaultDispatchable,'closed',1,asset) for asset in unaffectedClosedAssets]
-    customEventList += [eventJson('false',outageSwitchState(row),int(row[1]),row[0]) for row in outageReader]
-    customEventList += [eventJson(row.get('dispatchable'),row.get('defaultState',int(row.get('timestep'))),row.get('asset')) for row in outageReader if int(row[2])>0]
-    with open(customEvents,'w') as eventsFile:
-        json.dump(customEventList, eventsFile)
+	def outageSwitchState(outList): return ('open'*(outList[3] == 'closed') + 'closed'*(outList[3]=='open'))
+	def eventJson(dispatchable, state, timestep, affected_asset):
+		return {
+			"event_data": {
+				"status": 1,
+				"dispatchable": dispatchable,
+				"type": "breaker",
+				"state": state
+			},
+			"timestep": timestep,
+			"affected_asset": ("line." + affected_asset),
+			"event_type": "switch"
+		}
+	if eventsCSV == '': # Find largest switch, flip it and set to non-dispatchable at timestep 1.
+		with open(feeder, 'a') as f:
+			f.write('Export Currents')
+		with open(feeder, 'r') as f:
+			f.read()
+	elif ',' in eventsCSV:
+		outageReader = csv.reader(io.StringIO(eventsCSV))
+	else:
+		outageReader = csv.reader(open(eventsCSV))
+	if feeder.endswith('.omd'):
+		with open(feeder) as omdFile:
+			tree = json.load(omdFile)['tree']
+		niceDss = dssConvert.evilGldTreeToDssTree(tree)
+		dssConvert.treeToDss(niceDss, 'circuitOmfCompatible.dss')
+		dssTree = dssConvert.dssToTree('circuitOmfCompatible.dss')
+	else: return('Error: Feeder must be an OMD file.')
+	outageAssets = [] # formerly row[0] for row in outageReader
+	customEventList = []
+	for row in outageReader:
+		outageAssets.append(row[0])
+		try:
+			customEventList.append(eventJson('false',outageSwitchState(row),int(row[1]),row[0]))
+			if int(row[2])>0:
+				customEventList.append(eventJson(row[4],row[3],int(row[2]),row[0]))
+		except: pass
+	unaffectedOpenAssets = [dssLine['object'].split('.')[1] for dssLine in dssTree if dssLine['!CMD'] == 'open']
+	unaffectedClosedAssets = [dssLine['object'].split('.')[1] for dssLine in dssTree if dssLine.get('!CMD') == 'new' \
+		and dssLine['object'].split('.')[0] == 'line' \
+		and 'switch' in [key for key in dssLine] \
+	#   and dssLine['switch'] == 'y'] # \
+		and (dssLine['object'].split('.')[1] not in (unaffectedOpenAssets + outageAssets))]
+	customEventList += [eventJson(defaultDispatchable,'open',1,asset) for asset in unaffectedOpenAssets] 
+	customEventList += [eventJson(defaultDispatchable,'closed',1,asset) for asset in unaffectedClosedAssets]
+	customEventList += [eventJson('false',outageSwitchState(row),int(row[1]),row[0]) for row in outageReader]
+	customEventList += [eventJson(row.get('dispatchable'),row.get('defaultState',int(row.get('timestep'))),row.get('asset')) for row in outageReader if int(row[2])>0]
+	with open(customEvents,'w') as eventsFile:
+		json.dump(customEventList, eventsFile)
 
 def work(modelDir, inputDict):
 	# Copy specific climate data into model directory
@@ -1185,7 +1188,7 @@ def work(modelDir, inputDict):
 	outData['outageIncidenceHtml'] = plotOuts.get('outageIncidenceHtml')
 	# Image outputs.
 	# with open(pJoin(modelDir,'customerCostFig.png'),'rb') as inFile:
-	# 	outData['customerCostFig.png'] = base64.standard_b64encode(inFile.read()).decode()
+	#	outData['customerCostFig.png'] = base64.standard_b64encode(inFile.read()).decode()
 	# Plotly outputs.
 	layoutOb = go.Layout()
 	outData['fig1Data'] = json.dumps(plotOuts.get('gens',{}), cls=py.utils.PlotlyJSONEncoder)

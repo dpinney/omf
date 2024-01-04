@@ -1,16 +1,8 @@
 ''' Calculate solar costs and benefits for consumers. '''
 
-import shutil, datetime, platform
+import shutil, datetime
 from os.path import join as pJoin
-
-import matplotlib
-if platform.system() == 'Darwin':
-	matplotlib.use('TkAgg')
-else:
-	matplotlib.use('Agg')
 from matplotlib import pyplot as plt
-
-# OMF imports
 from omf import weather
 from omf.solvers import nrelsam2013
 from omf.models import __neoMetaModel__

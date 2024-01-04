@@ -5,10 +5,6 @@ from functools import reduce
 import networkx as nx
 from omf.solvers.opendss import dssConvert
 import matplotlib
-if platform.system() == 'Darwin':
-	matplotlib.use('TkAgg')
-else:
-	matplotlib.use('Agg')
 from matplotlib import pyplot as plt
 
 # Wireframe for new OMD objects:

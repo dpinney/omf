@@ -6,8 +6,9 @@
 		function populateTables() {
 			var list = document.getElementsByTagName("td");
 			for (var i = 0; i < list.length; i++) {
-				let data = allOutputData[list[i].id];
-				int_data = parseInt(data);
+				let id = list[i].id;
+				let data = allOutputData[id];
+				int_data = parseFloat(data); //parseInt(data);
 				if (!isNaN(int_data)) {
 					list[i].innerHTML = int_data.toLocaleString();
 				} else {
@@ -116,7 +117,7 @@
 
 				content += ''+
 					'<p class="reportTitle" style="page-break-before:always">Microgrid Lifetime Financial Performance '+
-						'<a id="performa' + indexString + '">(Click here to download detailed ProForma analysis)</a>'+
+						//'<a id="performa' + indexString + '">(Click here to download detailed ProForma analysis)</a>'+
 					'</p>'+
 					'<div id="" class="tightContent">'+
 						'<table>'+
@@ -172,6 +173,278 @@
 					'<p class="reportTitle" style="page-break-before:always">Outage Survival Probability</p>'+
 					'<div id="resilienceProbPlotly' + indexString + '" class="tightContent"></div>	'+
 
+					//adding in proforma tables
+					'<p class="reportTitle" style="page-break-before:always">ProForma Analysis'+
+					'</p>'+
+					'<div id="" class="tightContent">'+
+						'<table>'+
+							'<tr>'+
+                				'<th colspan="2">RESULTS</th>'+
+							'</tr>'+
+							'<tr>'+
+                				'<th>Business as usual LCC, $</th>'+
+								'<td id="totalCostBAU' + indexString + '"></td>'+
+							'</tr>'+
+							'<tr>'+
+                				'<th>Optimal LCC, $</th>'+
+								'<td id="totalCost' + indexString + '"></td>'+
+							'</tr>'+
+							'<tr>'+
+                				'<th>NPV, $</th>'+
+								'<td id="savings' + indexString + '"></td>'+
+							'</tr>'+
+							'<tr>'+
+                				'<th>IRR, %</th>'+
+								'<td id="irr' + indexString + '"></td>'+
+							'</tr>'+
+							'<tr>'+
+                				'<th>Simple Payback Period, years</th>'+
+								'<td id="paybackYears' + indexString + '"></td>'+
+							'</tr>'+
+						'</table>'+
+					'</div>'+
+
+					'<div id="" class="tightContent">'+
+						'<table>'+
+							'<tr>'+
+								'<th colspan="2">OPTIMAL SYSTEM DESIGN (with existing)</th>'+
+							'</tr>'+
+							'<tr>'+
+								'<th>PV Nameplate capacity (kW), purchased</th>'+
+								'<td id="sizePVPurchased' + indexString + '"></td>'+
+							'</tr>'+
+							'<tr>'+
+								'<th>PV Nameplate capacity (kW), existing</th>'+
+								'<td id="sizePVExisting' + indexString + '"></td>'+
+							'</tr>'+
+							'<tr>'+
+								'<th>PV degradation rate (%/year)</th>'+
+								'<td id="degradationRatePVFraction' + indexString + '"></td>'+
+							'</tr>'+
+							'<tr>'+
+								'<th>PV LCOE of New Capacity ($/kWh), nominal</th>'+
+								'<td id="lcoePV' + indexString + '"></td>'+
+							'</tr>'+
+							'<tr>'+
+								'<th>Wind Nameplate capacity (kW), purchased</th>'+
+								'<td id="windPurchased' + indexString + '"></td>'+
+							'</tr>'+
+							'<tr>'+
+								'<th>Wind LCOE ($/kWh), nominal</th>'+
+								'<td id="lcoeWind' + indexString + '"></td>'+
+							'</tr>'+
+							'<tr>'+ 
+								'<th>Backup Generator Nameplate capacity (kW), purchased</th>'+
+								'<td id="sizeDieselPurchased' + indexString + '"></td>'+
+							'</tr>'+
+							'<tr>'+
+								'<th>Backup Generator Nameplate capacity (kW), existing</th>'+
+								'<td id="sizeDieselExisting' + indexString + '"></td>'+
+							'</tr>'+
+							'<tr>'+
+								'<th>Battery power (kW)</th>'+
+								'<td id="powerBattery' + indexString + '"></td>'+
+							'</tr>'+
+							'<tr>'+
+								'<th>Battery capacity (kWh)</th>'+
+								'<td id="capacityBattery' + indexString + '"></td>'+
+							'</tr>'+
+						'</table>'+
+					'</div>'+
+
+					'<div id="" class="tightContent">'+
+						'<table>'+
+							'<tr>'+
+								'<th colspan="2">ANNUAL RESULTS</th>'+
+							'</tr>'+
+							'<tr>'+
+								'<th>Present value of annual Business as Usual electric utility bill ($/year)</th>'+
+								'<td id="yearOneBillBAU' + indexString + '"></td>'+
+							'</tr>'+
+							'<tr>'+
+								'<th>Present value of annual Business as Usual export credits ($/year)</th>'+
+								'<td id="yearOneExportBenefitBAU' + indexString + '"></td>'+
+							'</tr>'+
+							'<tr>'+
+								'<th>Present value of annual Optimal electric utility bill($/year)</th>'+
+								'<td id="yearOneBill' + indexString + '"></td>'+
+							'</tr>'+
+							'<tr>'+
+								'<th>Present value of annual Optimal export credits ($/year)</th>'+
+								'<td id="yearOneExportBenefit' + indexString + '"></td>'+
+							'</tr>'+
+							'<tr>'+
+								'<th>Existing PV electricity produced (kWh), Year 1</th>'+
+								'<td id="pvYearOneEnergyProducedBAU' + indexString + '"></td>'+ 
+							'</tr>'+
+							'<tr>'+
+								'<th>Total PV optimal electricity produced (kWh), Year 1</th>'+
+								'<td id="pvYearOneEnergyProduced' + indexString + '"></td>'+
+							'</tr>'+
+							'<tr>'+
+								'<th>PV optimal electricity produced (kWh), Annual Average</th>'+
+								'<td id="pvAnnualEnergyProduced' + indexString + '"></td>'+
+							'</tr>'+
+							'<tr>'+
+								'<th>Nominal annual optimal wind electricity produced (kWh/year)</th>'+
+								'<td id="windAnnualEnergyProduced' + indexString + '"></td>'+
+							'</tr>'+
+							'<tr>'+
+								'<th>Nominal annual optimal backup generator electricity produced (kWh/year)</th>'+
+								'<td id="dieselAnnualEnergyProduced' + indexString + '"></td>'+
+							'</tr>'+
+							//skipping CHP, steam turbine
+							'<tr>'+
+								'<th>Total optimal electricity produced (kWh/year)</th>'+
+								'<td id="totalElectricityProduced' + indexString + '"></td>'+ 
+							'</tr>'+
+							//skipping boiler, CHP, steam turbine
+							'<tr>'+
+								'<th>Percent electricity from on-site renewable resources</th>'+
+								'<td id="yearOnePercentRenewable' + indexString + '"></td>'+
+							'</tr>'+
+							'<tr>'+
+								'<th>Percent reduction in annual electricity bill</th>'+
+								'<td id="reductionElectricBillFraction' + indexString + '"></td>'+ 
+							'</tr>'+
+							//skipping fuels bill (summation of boiler & chp bills)
+							'<tr>'+
+								'<th>Year one total site carbon dioxide emissions (ton CO2)</th>'+
+								'<td id="yearOneEmissionsTons' + indexString + '"></td>'+
+							'</tr>'+
+							'<tr>'+
+								'<th>Year one total site carbon dioxide emissions BAU (ton CO2)</th>'+
+								'<td id="yearOneEmissionsTonsBAU' + indexString + '"></td>'+
+							'</tr>'+
+							'<tr>'+
+								'<th>Year one total carbon dioxide emissions from electric utility purchases (ton CO2)</th>'+
+								'<td id="utilityYearOneEmissionsTons' + indexString + '"></td>'+
+							'</tr>'+
+							'<tr>'+
+								'<th>Year one total carbon dioxide emissions from electric utility purchases BAU (ton CO2)</th>'+
+								'<td id="utilityYearOneEmissionsTonsBAU' + indexString + '"></td>'+
+							'</tr>'+
+							'<tr>'+
+								'<th>Year one total carbon dioxide emissions from on-site fuel burn (ton CO2)</th>'+
+								'<td id="yearOneEmissionsFromFuelburnTons' + indexString + '"></td>'+
+							'</tr>'+
+							'<tr>'+
+								'<th>Year one total carbon dioxide emissions from on-site fuel burn BAU (ton CO2)</th>'+
+								'<td id="yearOneEmissionsFromFuelburnTonsBAU' + indexString + '"></td>'+
+							'</tr>'+
+						'</table>'+
+					'</div>'+
+
+					'<div id="" class="tightContent">'+
+						'<table>'+
+							'<tr>'+
+								'<th colspan="2">SYSTEM COSTS</th>'+
+							'</tr>'+
+							'<tr>'+
+								'<th>Total Installed Cost ($)</th>'+
+								'<td id="totalInstalledCost' + indexString + '"></td>'+
+							'</tr>'+
+							'<tr>'+
+								'<th>PV Installed Cost ($)</th>'+ 
+								'<td id="costPVInstalled' + indexString + '"></td>'+
+							'</tr>'+
+							'<tr>'+
+								'<th>Wind Installed Cost ($)</th>'+
+								'<td id="windInstalledCost' + indexString + '"></td>'+
+							'</tr>'+
+							'<tr>'+
+								'<th>Backup generator Installed Cost ($)</th>'+
+								'<td id="dieselInstalledCost' + indexString + '"></td>'+
+							'</tr>'+
+							'<tr>'+
+								'<th>Battery Installed Cost ($)</th>'+
+								'<td id="batteryInstalledCost' + indexString + '"></td>'+
+							'</tr>'+
+							//skipping CHP, absorption chiller, hot/chilled water TES, steam turbine, GHP
+							'<tr>'+
+								'<th colspan="2">Operation and Maintenance (O&M)</th>'+
+							'</tr>'+
+							'<tr>'+
+								'<th>Fixed PV O&M ($/kW-yr)</th>'+
+								'<td id="pvOMCosts' + indexString + '"></td>'+
+							'</tr>'+
+							'<tr>'+
+								'<th>Fixed Wind O&M ($/kW-yr)</th>'+
+								'<td id="windOMCosts' + indexString + '"></td>'+
+							'</tr>'+
+							'<tr>'+
+								'<th>Fixed Backup Generator O&M ($/kW-yr)</th>'+
+								'<td id="dieselOMCostKw' + indexString + '"></td>'+
+							'</tr>'+
+							'<tr>'+
+								'<th>Variable Backup Generator O&M ($/kWh)</th>'+
+								'<td id="dieselOMCostKwh' + indexString + '"></td>'+
+							'</tr>'+
+							'<tr>'+
+								'<th>Diesel fuel used cost ($)</th>'+
+								'<td id="fuelUsedDieselCost' + indexString + '"></td>'+ 
+							'</tr>'+
+							'<tr>'+
+								'<th>Diesel BAU fuel used cost ($)</th>'+
+								'<td id="fuelUsedDieselCostBAU' + indexString + '"></td>'+ 
+							'</tr>'+
+							'<tr>'+
+								'<th>Battery replacement cost ($/kW)</th>'+
+								'<td id="batteryPowerCostReplace' + indexString + '"></td>'+
+							'</tr>'+
+							'<tr>'+
+								'<th>Battery kW replacement year</th>'+
+								'<td id="batteryPowerReplaceYear' + indexString + '"></td>'+
+							'</tr>'+
+							'<tr>'+
+								'<th>Battery replacement cost ($/kWh)</th>'+
+								'<td id="batteryCapacityCostReplace' + indexString + '"></td>'+ 
+							'</tr>'+
+							'<tr>'+
+								'<th>Battery kWh replacement year</th>'+
+								'<td id="batteryCapacityReplaceYear' + indexString + '"></td>'+
+							'</tr>'+
+							//skipping CHP, absorption chiller, chilled/hot water TES, steam turbine, GHP
+						'</table>'+
+					'</div>'+
+
+					'<div id="" class="tightContent">'+
+						'<table>'+
+							'<tr>'+
+								'<th colspan="2">ANALYSIS PARAMETERS</th>'+
+							'</tr>'+
+							'<tr>'+
+								'<th>Analysis period (years)</th>'+
+								'<td id="analysisYears' + indexString + '"></td>'+
+							'</tr>'+
+							'<tr>'+
+								'<th>Nominal O&M cost escalation rate (%/year)</th>'+
+								'<td id="omCostEscalator' + indexString + '"></td>'+
+							'</tr>'+
+							'<tr>'+
+								'<th>Nominal electric utility cost escalation rate (%/year)</th>'+
+								'<td id="elecCostEscalator' + indexString + '"></td>'+
+							'</tr>'+
+							//skipping boiler & CHP
+							'<tr>'+
+								'<th>Nominal discount rate (%/year)</th>'+
+								'<td id="discountRate' + indexString + '"></td>'+
+							'</tr>'+
+						'</table>'+
+					'</div>'+
+
+					'<div id="" class="tightContent">'+
+						'<table>'+
+							'<tr>'+
+								'<th colspan="2">TAX AND INSURANCE PARAMETERS</th>'+
+							'</tr>'+
+							'<tr>'+
+								'<th>Federal income tax rate (%)</th>'+
+								'<td id="federalITCFraction' + indexString + '"></td>'+
+							'</tr>'+
+						'</table>'+
+					'</div>'+
+
 				'</div>';
 				
 			}
@@ -184,9 +457,9 @@
 
 				indexString = '' + (i+1);
 
-				var link = "https://developer.nrel.gov/api/reopt/v2/job/" + allOutputData['runID' + indexString] + '/proforma?api_key=' + allOutputData['apiKey' + indexString];
-				a = gebi('performa' + indexString);
-				a.href = link;
+				//var link = "https://developer.nrel.gov/api/reopt/v2/job/" + allOutputData['runID' + indexString] + '/proforma?api_key=' + allOutputData['apiKey' + indexString];
+				//#a = gebi('performa' + indexString);
+				//a.href = link;
 				
 				Plotly.newPlot('powerGenerationPlotly' + indexString, JSON.parse(allOutputData['powerGenerationData' + indexString]), JSON.parse(allOutputData['plotlyLayout']) || {});
 				Plotly.newPlot('solarPlotly' + indexString, JSON.parse(allOutputData['solarData' + indexString]), JSON.parse(allOutputData['plotlyLayout']) || {});
@@ -272,7 +545,7 @@
 	<div id="input" class="content">
 		<form name="inputForm" action="/runModel/" onsubmit="event.preventDefault(); return isFormValid();" method="post">
 			<div class="shortInput">
-				<label>Model Type <a href="https://github.com/dpinney/omf/wiki/Models-~-microgridDesign" target="blank">Help?</a></label>
+				<label>Model Type <a href="https://github.com/dpinney/omf/wiki/Models-~-microgridDesign2" target="blank">Help?</a></label>
 				<input type="text" id="modelType" name="modelType" value="{{allInputDataDict.modelType}}" value="{{modelName}}" readonly/>
 			</div>
 			<div class="shortInput">
