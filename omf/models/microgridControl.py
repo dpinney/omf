@@ -197,12 +197,12 @@ def customerOutageTable(customerOutageData, outageCost, workDir):
 
 	# print business information and estimated customer outage costs
 	try:
- 		customerOutageHtml = customerOutageStats(
- 			customerOutageData = customerOutageData,
- 			outageCost = outageCost)
+		customerOutageHtml = customerOutageStats(
+			customerOutageData = customerOutageData,
+			outageCost = outageCost)
 	except:
- 		customerOutageHtml = ''
- 		 #HACKCOBB: work aroun.
+		customerOutageHtml = ''
+		 #HACKCOBB: work aroun.
 	with open(pJoin(workDir, 'customerOutageTable.html'), 'w') as customerOutageFile:
 		customerOutageFile.write(customerOutageHtml)
 	return customerOutageHtml
@@ -731,19 +731,19 @@ def graphMicrogrid(pathToOmd, pathToJson, pathToCsv, outputFile, settingsFile, u
 		json.dump(feederMap, outFile, indent=4)
 	# Generate customer outage outputs
 	try:
- 		customerOutageData = pd.read_csv(pathToCsv)
+		customerOutageData = pd.read_csv(pathToCsv)
 	except:
- 		deviceTimeline = data["Device action timeline"]
- 		loadsShed = []
- 		for line in deviceTimeline:
- 			loadsShed.append(line["Shedded loads"])
- 		customerOutageData = pd.DataFrame(columns=['Customer Name','Season','Business Type','Load Name'])
- 		for elementDict in tree.values():
- 			if elementDict['object'] == 'load' and float(elementDict['kw'])>.1 and elementDict['name'] in loadsShed[0]:
- 				loadName = elementDict['name']
- 				avgLoad = float(elementDict['kw'])/2.5
- 				busType = 'residential'*(avgLoad<=10) + 'retail'*(avgLoad>10)*(avgLoad<=20) + 'agriculture'*(avgLoad>20)*(avgLoad<=39) + 'public'*(avgLoad>39)*(avgLoad<=50) + 'services'*(avgLoad>50)*(avgLoad<=100) + 'manufacturing'*(avgLoad>100)
- 				customerOutageData.loc[len(customerOutageData.index)] =[loadName,'summer',busType,loadName]
+		deviceTimeline = data["Device action timeline"]
+		loadsShed = []
+		for line in deviceTimeline:
+			loadsShed.append(line["Shedded loads"])
+		customerOutageData = pd.DataFrame(columns=['Customer Name','Season','Business Type','Load Name'])
+		for elementDict in tree.values():
+			if elementDict['object'] == 'load' and float(elementDict['kw'])>.1 and elementDict['name'] in loadsShed[0]:
+				loadName = elementDict['name']
+				avgLoad = float(elementDict['kw'])/2.5
+				busType = 'residential'*(avgLoad<=10) + 'retail'*(avgLoad>10)*(avgLoad<=20) + 'agriculture'*(avgLoad>20)*(avgLoad<=39) + 'public'*(avgLoad>39)*(avgLoad<=50) + 'services'*(avgLoad>50)*(avgLoad<=100) + 'manufacturing'*(avgLoad>100)
+				customerOutageData.loc[len(customerOutageData.index)] =[loadName,'summer',busType,loadName]
 	numberRows = max(math.ceil(customerOutageData.shape[0]/2),1)
 	fig, axs = plt.subplots(numberRows, 2)
 	row = 0
@@ -759,48 +759,48 @@ def graphMicrogrid(pathToOmd, pathToJson, pathToCsv, outputFile, settingsFile, u
 	loadShapeMeanMultiplier = {}
 	loadShapeMeanActual = {}
 	for dssLine in dssTree:
- 		if 'object' in dssLine and dssLine['object'].split('.')[0] == 'loadshape':
- 			shape = dssLine['mult'].replace('[','').replace('(','').replace(']','').replace(')','').split(',')
- 			shape = [float(y) for y in shape]
- 			if 'useactual' in dssLine and dssLine['useactual'] == 'yes': loadShapeMeanActual[dssLine['object'].split('.')[1]] = np.mean(shape)
- 			else: loadShapeMeanMultiplier[dssLine['object'].split('.')[1]] = np.mean(shape)/np.max(shape)
+		if 'object' in dssLine and dssLine['object'].split('.')[0] == 'loadshape':
+			shape = dssLine['mult'].replace('[','').replace('(','').replace(']','').replace(')','').split(',')
+			shape = [float(y) for y in shape]
+			if 'useactual' in dssLine and dssLine['useactual'] == 'yes': loadShapeMeanActual[dssLine['object'].split('.')[1]] = np.mean(shape)
+			else: loadShapeMeanMultiplier[dssLine['object'].split('.')[1]] = np.mean(shape)/np.max(shape)
 	while row < customerOutageData.shape[0]:
- 		customerName = str(customerOutageData.loc[row, 'Customer Name'])
- 		loadName = str(customerOutageData.loc[row, 'Load Name'])
- 		businessType = str(customerOutageData.loc[row, 'Business Type'])
- 		duration = str(0)
- 		averagekWperhr = str(0)
- 		for elementDict in dssTree:
- 			if 'object' in elementDict and elementDict['object'].split('.')[0] == 'load' and elementDict['object'].split('.')[1] == loadName:
- 				if 'daily' in elementDict: averagekWperhr = float(loadShapeMeanMultiplier.get(elementDict['daily'],0)) * float(elementDict['kw']) + float(loadShapeMeanActual.get(elementDict['daily'],0))
- 				else: averagekWperhr = float(elementDict['kw'])/2
- 				duration = str(cumulativeLoadsShed.count(loadName) * stepSize)
- 		if float(duration) >= .1 and float(averagekWperhr) >= .1:
- 			durationColumn.append(duration)
- 			avgkWColumn.append(float(averagekWperhr))
- 			season = str(customerOutageData.loc[row, 'Season'])
- 			customerOutageCost, kWperhrEstimate, times, localMax = customerCost1(duration, season, averagekWperhr, businessType)
- 			average_lost_kwh.append(float(averagekWperhr))
- 			outageCost.append(customerOutageCost)
- 			outageCostsByType[businessType].append(customerOutageCost)
- 			if localMax > globalMax:
- 				globalMax = localMax
- 			# creating series
- 			timesSeries = pd.Series(times)
- 			kWperhrSeries = pd.Series(kWperhrEstimate)
- 			trace = py.graph_objs.Scatter(
- 				x = timesSeries,
- 				y = kWperhrSeries,
- 				name = customerName,
- 				hoverlabel = dict(namelength = -1),
- 				hovertemplate = 
- 				'<b>Duration</b>: %{x} h<br>' +
- 				'<b>Cost</b>: $%{y:.2f}')
- 			fig.add_trace(trace)
- 			row += 1
- 		else:
- 			customerOutageData = customerOutageData.drop(index=row)
- 			customerOutageData = customerOutageData.reset_index(drop=True)
+		customerName = str(customerOutageData.loc[row, 'Customer Name'])
+		loadName = str(customerOutageData.loc[row, 'Load Name'])
+		businessType = str(customerOutageData.loc[row, 'Business Type'])
+		duration = str(0)
+		averagekWperhr = str(0)
+		for elementDict in dssTree:
+			if 'object' in elementDict and elementDict['object'].split('.')[0] == 'load' and elementDict['object'].split('.')[1] == loadName:
+				if 'daily' in elementDict: averagekWperhr = float(loadShapeMeanMultiplier.get(elementDict['daily'],0)) * float(elementDict['kw']) + float(loadShapeMeanActual.get(elementDict['daily'],0))
+				else: averagekWperhr = float(elementDict['kw'])/2
+				duration = str(cumulativeLoadsShed.count(loadName) * stepSize)
+		if float(duration) >= .1 and float(averagekWperhr) >= .1:
+			durationColumn.append(duration)
+			avgkWColumn.append(float(averagekWperhr))
+			season = str(customerOutageData.loc[row, 'Season'])
+			customerOutageCost, kWperhrEstimate, times, localMax = customerCost1(duration, season, averagekWperhr, businessType)
+			average_lost_kwh.append(float(averagekWperhr))
+			outageCost.append(customerOutageCost)
+			outageCostsByType[businessType].append(customerOutageCost)
+			if localMax > globalMax:
+				globalMax = localMax
+			# creating series
+			timesSeries = pd.Series(times)
+			kWperhrSeries = pd.Series(kWperhrEstimate)
+			trace = py.graph_objs.Scatter(
+				x = timesSeries,
+				y = kWperhrSeries,
+				name = customerName,
+				hoverlabel = dict(namelength = -1),
+				hovertemplate = 
+				'<b>Duration</b>: %{x} h<br>' +
+				'<b>Cost</b>: $%{y:.2f}')
+			fig.add_trace(trace)
+			row += 1
+		else:
+			customerOutageData = customerOutageData.drop(index=row)
+			customerOutageData = customerOutageData.reset_index(drop=True)
 	customerOutageData.insert(1, "Duration", durationColumn, True)
 	customerOutageData.insert(3, "Average kW/hr", avgkWColumn, True)
 	durations = customerOutageData.get('Duration',['0'])
@@ -829,12 +829,12 @@ def graphMicrogrid(pathToOmd, pathToJson, pathToCsv, outputFile, settingsFile, u
 	busColors = {'residential':'#0000ff', 'manufacturing':'#ff0000', 'mining':'#708090', 'construction':'#ff8c00', 'agriculture':'#008000', 'finance':'#d6b600', 'retail':'#ff69b4', 'services':'#191970', 'utilities':'#8b4513', 'public':'#9932cc'}
 	custHist = go.Figure()
 	# custHist.add_trace(go.Histogram(
-	# 	x=outageCost,
-	# 	xbins=dict(
-	# 		start=minCustomerCost,
-	# 		end=maxCustomerCost+binSize,
-	# 		size=binSize
-	# 	)
+	#	x=outageCost,
+	#	xbins=dict(
+	#		start=minCustomerCost,
+	#		end=maxCustomerCost+binSize,
+	#		size=binSize
+	#	)
 	# ))
 	for busType in businessTypes:
 		custHist.add_trace(go.Histogram(
@@ -856,12 +856,12 @@ def graphMicrogrid(pathToOmd, pathToJson, pathToCsv, outputFile, settingsFile, u
 	)
 	meanCustomerCostStr = "Mean Outage Cost: $"+"{:.2f}".format(meanCustomerCost)
 	# custHist.add_vline(
-	# 	x=meanCustomerCost,
-	# 	line_width=3, 
-	# 	line_dash="dash",
-	# 	line_color="black",
-	# 	annotation_text=meanCustomerCostStr, 
-	# 	annotation_position="top right"
+	#	x=meanCustomerCost,
+	#	line_width=3, 
+	#	line_dash="dash",
+	#	line_color="black",
+	#	annotation_text=meanCustomerCostStr, 
+	#	annotation_position="top right"
 	# )
 	custHist.add_shape(
 		type="line",
@@ -898,56 +898,56 @@ def graphMicrogrid(pathToOmd, pathToJson, pathToCsv, outputFile, settingsFile, u
 	return {'utilityOutageHtml': utilityOutageHtml, 'customerOutageHtml': customerOutageHtml, 'timelineStatsHtml': timelineStatsHtml, 'gens': gens, 'loads': loads, 'volts': volts, 'fig': fig, 'customerOutageCost': customerOutageCost, 'numTimeSteps': numTimeSteps, 'stepSize': stepSize, 'custHist': custHist}
 
 def buildCustomEvents(eventsCSV='', feeder='', customEvents='customEvents.json', defaultDispatchable = 'true'):
-    def outageSwitchState(outList): return ('open'*(outList[3] == 'closed') + 'closed'*(outList[3]=='open'))
-    def eventJson(dispatchable, state, timestep, affected_asset):
-        return {
-            "event_data": {
-                "status": 1,
-                "dispatchable": dispatchable,
-                "type": "breaker",
-                "state": state
-            },
-            "timestep": timestep,
-            "affected_asset": ("line." + affected_asset),
-            "event_type": "switch"
-        }
-    if eventsCSV == '': # Find largest switch, flip it and set to non-dispatchable at timestep 1.
-        with open(feeder, 'a') as f:
-            f.write('Export Currents')
-        with open(feeder, 'r') as f:
-            f.read()
-    elif ',' in eventsCSV:
-        outageReader = csv.reader(io.StringIO(eventsCSV))
-    else:
-        outageReader = csv.reader(open(eventsCSV))
-    if feeder.endswith('.omd'):
-        with open(feeder) as omdFile:
-            tree = json.load(omdFile)['tree']
-        niceDss = dssConvert.evilGldTreeToDssTree(tree)
-        dssConvert.treeToDss(niceDss, 'circuitOmfCompatible.dss')
-        dssTree = dssConvert.dssToTree('circuitOmfCompatible.dss')
-    else: return('Error: Feeder must be an OMD file.')
-    outageAssets = [] # formerly row[0] for row in outageReader
-    customEventList = []
-    for row in outageReader:
-        outageAssets.append(row[0])
-        try:
-            customEventList.append(eventJson('false',outageSwitchState(row),int(row[1]),row[0]))
-            if int(row[2])>0:
-                customEventList.append(eventJson(row[4],row[3],int(row[2]),row[0]))
-        except: pass
-    unaffectedOpenAssets = [dssLine['object'].split('.')[1] for dssLine in dssTree if dssLine['!CMD'] == 'open']
-    unaffectedClosedAssets = [dssLine['object'].split('.')[1] for dssLine in dssTree if dssLine.get('!CMD') == 'new' \
-        and dssLine['object'].split('.')[0] == 'line' \
-        and 'switch' in [key for key in dssLine] \
-    #   and dssLine['switch'] == 'y'] # \
-        and (dssLine['object'].split('.')[1] not in (unaffectedOpenAssets + outageAssets))]
-    customEventList += [eventJson(defaultDispatchable,'open',1,asset) for asset in unaffectedOpenAssets] 
-    customEventList += [eventJson(defaultDispatchable,'closed',1,asset) for asset in unaffectedClosedAssets]
-    customEventList += [eventJson('false',outageSwitchState(row),int(row[1]),row[0]) for row in outageReader]
-    customEventList += [eventJson(row.get('dispatchable'),row.get('defaultState',int(row.get('timestep'))),row.get('asset')) for row in outageReader if int(row[2])>0]
-    with open(customEvents,'w') as eventsFile:
-        json.dump(customEventList, eventsFile)
+	def outageSwitchState(outList): return ('open'*(outList[3] == 'closed') + 'closed'*(outList[3]=='open'))
+	def eventJson(dispatchable, state, timestep, affected_asset):
+		return {
+			"event_data": {
+				"status": 1,
+				"dispatchable": dispatchable,
+				"type": "breaker",
+				"state": state
+			},
+			"timestep": timestep,
+			"affected_asset": ("line." + affected_asset),
+			"event_type": "switch"
+		}
+	if eventsCSV == '': # Find largest switch, flip it and set to non-dispatchable at timestep 1.
+		with open(feeder, 'a') as f:
+			f.write('Export Currents')
+		with open(feeder, 'r') as f:
+			f.read()
+	elif ',' in eventsCSV:
+		outageReader = csv.reader(io.StringIO(eventsCSV))
+	else:
+		outageReader = csv.reader(open(eventsCSV))
+	if feeder.endswith('.omd'):
+		with open(feeder) as omdFile:
+			tree = json.load(omdFile)['tree']
+		niceDss = dssConvert.evilGldTreeToDssTree(tree)
+		dssConvert.treeToDss(niceDss, 'circuitOmfCompatible.dss')
+		dssTree = dssConvert.dssToTree('circuitOmfCompatible.dss')
+	else: return('Error: Feeder must be an OMD file.')
+	outageAssets = [] # formerly row[0] for row in outageReader
+	customEventList = []
+	for row in outageReader:
+		outageAssets.append(row[0])
+		try:
+			customEventList.append(eventJson('false',outageSwitchState(row),int(row[1]),row[0]))
+			if int(row[2])>0:
+				customEventList.append(eventJson(row[4],row[3],int(row[2]),row[0]))
+		except: pass
+	unaffectedOpenAssets = [dssLine['object'].split('.')[1] for dssLine in dssTree if dssLine['!CMD'] == 'open']
+	unaffectedClosedAssets = [dssLine['object'].split('.')[1] for dssLine in dssTree if dssLine.get('!CMD') == 'new' \
+		and dssLine['object'].split('.')[0] == 'line' \
+		and 'switch' in [key for key in dssLine] \
+	#   and dssLine['switch'] == 'y'] # \
+		and (dssLine['object'].split('.')[1] not in (unaffectedOpenAssets + outageAssets))]
+	customEventList += [eventJson(defaultDispatchable,'open',1,asset) for asset in unaffectedOpenAssets] 
+	customEventList += [eventJson(defaultDispatchable,'closed',1,asset) for asset in unaffectedClosedAssets]
+	customEventList += [eventJson('false',outageSwitchState(row),int(row[1]),row[0]) for row in outageReader]
+	customEventList += [eventJson(row.get('dispatchable'),row.get('defaultState',int(row.get('timestep'))),row.get('asset')) for row in outageReader if int(row[2])>0]
+	with open(customEvents,'w') as eventsFile:
+		json.dump(customEventList, eventsFile)
 
 def work(modelDir, inputDict):
 	# Copy specific climate data into model directory
@@ -1063,7 +1063,7 @@ def work(modelDir, inputDict):
 		outData['geoDict'] = inFile.read().decode()
 	# Image outputs.
 	# with open(pJoin(modelDir,'customerCostFig.png'),'rb') as inFile:
-	# 	outData['customerCostFig.png'] = base64.standard_b64encode(inFile.read()).decode()
+	#	outData['customerCostFig.png'] = base64.standard_b64encode(inFile.read()).decode()
 	# Plotly outputs.
 	layoutOb = go.Layout()
 	outData['fig1Data'] = json.dumps(plotOuts.get('gens',{}), cls=py.utils.PlotlyJSONEncoder)
