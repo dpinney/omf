@@ -348,6 +348,10 @@ def work(modelDir, inputDict):
 
 		end_time = time.time()
 		print(f'reopt_jl solver runtime: {end_time - start_time} seconds')
+		
+		outData['solverStatus' + indexString] = results['status']
+		outData['hitTimeout' + indexString] = True if results['status'] == "timed-out" else False
+		outData['solverSeconds' + indexString] = results['solver_seconds']
 
 		#resultsSubset = results['outputs']['Scenario']['Site']
 		outData['demandCostBAU' + indexString] = results['ElectricTariff']['lifecycle_demand_cost_after_tax_bau']#['total_demand_cost_bau_us_dollars']
@@ -922,7 +926,7 @@ def work(modelDir, inputDict):
 		write_table(annual_values_proforma,"",excel_row,excel_col)
 		excel_row += len(annual_values_proforma) + 1
 
-		workbook.save(f'{modelDir}/ProForma.xlsx')
+		workbook.save(os.path.join(modelDir,"ProForma.xlsx"))
 
 		#helper function for generating output graphs
 		def makeGridLine(x,y,color,name):
