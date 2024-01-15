@@ -1,6 +1,9 @@
 ''' Performs a cost-benefit analysis for a utility or cooperative member interested in 
 controlling behind-the-meter distributed energy resources (DERs).'''
 
+## TODO: check out gridlabMulti.py, cvrDynamic.py, demandResponse.py, 
+## vbatDispatch.py, solarEngineering.py for potential display and plot feautures 
+
 import warnings
 # warnings.filterwarnings("ignore")
 
@@ -304,7 +307,7 @@ def new(modelDir):
 	return __neoMetaModel__.new(modelDir, defaultInputs)
 
 @neoMetaModel_test_setup
-def _tests():
+def _debugging():
 	## Location
 	modelLoc = pJoin(__neoMetaModel__._omfDir,"data","Model","admin","Automated Testing of " + modelName)
 	## Blow away old test results if necessary.
@@ -316,13 +319,13 @@ def _tests():
 	## Create New.
 	new(modelLoc)
 	## Pre-run.
-	__neoMetaModel__.renderAndShow(modelLoc)
+	#__neoMetaModel__.renderAndShow(modelLoc)
 	## Run the model.
-	#__neoMetaModel__.runForeground(modelLoc)
+	__neoMetaModel__.runForeground(modelLoc)
 	## Show the output.
 	__neoMetaModel__.renderAndShow(modelLoc)
 
 if __name__ == '__main__':
-	_tests()
+	_debugging()
 	#pass
 
