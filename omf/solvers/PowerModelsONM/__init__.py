@@ -1,5 +1,6 @@
 import os, platform, json
 from pathlib import Path
+from os.path import join as pJoin
 
 thisDir = os.path.abspath(os.path.dirname(__file__))
 
@@ -12,14 +13,38 @@ def runCommands(commandList : list):
 		print(f'Running {x}')
 		os.system(x)
 
+def run_julia_script(juliaStr : str, cleanFileFormatting = True):
+	''' Creates a Julia File containing the script in juliaStr, cleans up file location formatting (optional), runs it from the command line, then deletes it.
+		Leads to far fewer permissions and formatting issues than running a julia script directly in a commandline command
+	'''
+	if cleanFileFormatting:
+		juliaStr = juliaStr.replace('\\','/')
+	juliaFileLocation = pJoin(thisDir, 'temp_julia_script.jl')
+	with open(juliaFileLocation, 'w') as juliaFile:
+		juliaFile.write(juliaStr)
+	#Writing the julia code to a .jl file and running that file from the command line is far less prone to formatting snafus than writing the julia code in the cmd commands directly
+	cmdString = f'julia {juliaFileLocation}'
+
+	# TODO: Test this on Darwin and Linux
+	OSName = platform.system()
+	if OSName in ['Darwin','Linux']:
+		delCommand = f'rm "{juliaFileLocation}"'
+	elif OSName == 'Windows':
+		delCommand = f'del {juliaFileLocation}'
+	else:
+		raise Exception("Operating System is not Darwin, Linux, or Windows")
+	
+	print(f'Saving script to temp_julia_script.jl:\n{juliaStr}')
+	runCommands([cmdString,delCommand])
+
+	
 def install_onm(target : list = platform.system()):
 	''' WARNING, WIP. TODO: Linux support, license check, tests. '''
-	#TODO: replace wget with `python -c "from urllib.request import urlretrieve as wget; wget(URL, OUT_FILE_PATH)"`
 	installCmd = {
 		'Darwin' : [
 			'sudo cat /Library/gurobi/gurobi.lic',
 			'HOMEBREW_NO_AUTO_UPDATE=1 brew install julia',
-			'wget "https://packages.gurobi.com/9.1/gurobi9.1.2_mac64.pkg"',
+			'''python3 -c 'from urllib.request import urlretrieve as wget; wget("https://packages.gurobi.com/9.1/gurobi9.1.2_mac64.pkg","./gurobi9.1.2_mac64.pkg")' ''',
 			'sudo installer -pkg gurobi9.1.2_mac64.pkg -target /',
 			'echo "export GUROBI_HOME=/Library/gurobi912/mac64" >> ~/.zshrc',
 			'echo "export PATH=/Library/gurobi912/mac64/bin:$PATH" >> ~/.zshrc',
@@ -52,22 +77,12 @@ def install_onm(target : list = platform.system()):
 			# thisDir isn't actually the directory from which os.system is executing these commands, which is why cd {thisDir} prepends various lines
 			# IMPORTANT!: Environment variables need to be set manually through your windows gui
 			# 	PATH= %PATH%;{thisDir}\julia-1.7.0\bin;{thisDir}\gurobi912\win64\bin
-			#	GUROBI_HOME= {thisDir}\gurobi912\win64
 			#	LD_LIBRARY_PATH= {thisDir}\gurobi912\win64\lib;%PATH%
 			f'cd {thisDir} & del julia-1.7.0-win64.zip',
 			f'cd {thisDir} & curl -o julia-1.7.0-win64.zip https://julialang-s3.julialang.org/bin/winnt/x64/1.7/julia-1.7.0-win64.zip',
 			f'cd {thisDir} & tar -x -f "julia-1.7.0-win64.zip',
 			#f'set PATH="%PATH%;{thisDir}\julia-1.7.0\\bin"', #path set for just this session with set. setx is permanent but truncates the path which is very bad
-			'del Gurobi-9.1.2-win64.msi',
-			'curl -o Gurobi-9.1.2-win64.msi --url https://packages.gurobi.com/9.1/Gurobi-9.1.2-win64.msi',
-			# Next line brings up install wizard GUI with the correct installdir already set. Requires human interaction
-			f'msiexec /i "Gurobi-9.1.2-win64.msi" INSTALLDIR={thisDir}\gurobi912 /norestart /l {thisDir}\gurobi-install-log.log', 
-			#f'set GUROBI_HOME="{thisDir}\gurobi912\win64"',
-			#f'set PATH="%PATH%;{thisDir}\gurobi912\win64\\bin"',
-			#f'set LD_LIBRARY_PATH="{thisDir}\gurobi912\win64\lib;%PATH%"',
 			# Despite adding Julia to the path, it wasn't finding it when run from within vscode, hence the cd {thisDir}\julia-1.7.0\bin prepending the lines
-			f'cd {thisDir}\julia-1.7.0\\bin & julia -e "import Pkg; Pkg.add(\\"Gurobi\\")"',
-			f'cd {thisDir}\julia-1.7.0\\bin & julia -e "import Pkg; Pkg.build(\\"Gurobi\\")"',
 			f'cd {thisDir}\julia-1.7.0\\bin & julia -e "import Pkg; Pkg.add(Pkg.PackageSpec(;name=\\"PowerModelsDistribution\\", version=\\"0.14.1\\"));"',
 			f'cd {thisDir}\julia-1.7.0\\bin & julia -e "import Pkg; Pkg.add(Pkg.PackageSpec(;name=\\"PowerModelsONM\\", version=\\"3.4.0\\"));"',
 			f'copy nul {thisDir}\instantiated.txt'
@@ -95,7 +110,7 @@ def build_settings_file(circuitPath='circuit.dss',settingsPath='settings.json', 
 		priorityDictBuilder = ''
 
 	#Check for microgrid tagging input
-	if microgridTaggingFile: 
+	if False: 
 		with open(microgridTaggingFile) as microgridTaggingJson:
 			microgridTags = json.load(microgridTaggingJson)
 		mgTaggingFormatted = ''
@@ -123,8 +138,7 @@ def build_settings_file(circuitPath='circuit.dss',settingsPath='settings.json', 
 		customSettingsDictBuilder = ''
 		customSettingsSwitch = ''
 
-	cmd_string = f'''julia -e '
-		using PowerModelsONM;
+	juliaFileContents = f'''using PowerModelsONM;
 		{customSettingsDictBuilder}
 		build_settings_file(
 			"{circuitPath}",
@@ -136,9 +150,8 @@ def build_settings_file(circuitPath='circuit.dss',settingsPath='settings.json', 
 			sbase_default={sbase_default}, # between 1k and 100k
 			line_limit_mult={line_limit_mult},
 			vad_deg={vad_deg}
-		)
-	' '''
-	runCommands([cmd_string])
+		)'''
+	run_julia_script(juliaFileContents)
 
 def build_events_file(circuitPath='circuit.dss', eventsPath="events.json", custom_events='', default_switch_state='PMD.OPEN', default_switch_dispatchable='PMD.NO', default_switch_status='PMD.ENABLED'):
 	# For now, custom_events follows the already established schema in Julia Vector or Dicts format
@@ -152,8 +165,7 @@ def build_events_file(circuitPath='circuit.dss', eventsPath="events.json", custo
 		customEventsDictBuilder = ''
 		customEventsSwitch = ''
 
-	cmd_string = f'''julia -e '
-		using PowerModelsONM;
+	juliaFileContents = f'''using PowerModelsONM;
 		{customEventsDictBuilder}
 		build_events_file(
 			"{circuitPath}",
@@ -163,37 +175,36 @@ def build_events_file(circuitPath='circuit.dss', eventsPath="events.json", custo
 			default_switch_dispatchable={default_switch_dispatchable},
 			default_switch_status={default_switch_status}
 		)
-	' '''
-	runCommands([cmd_string])
+	'''
+	run_julia_script(juliaFileContents)
+	# TODO: Print out juliaFileContents within run_julia_script
 
-def run_onm(circuitPath='circuit.dss', settingsPath='settings.json', outputPath="onm_out.json", eventsPath="events.json", faultsPath='', gurobi='true', verbose='true', fixSmallNumbers='true', applySwitchScores='true', skipList='["faults","stability"]', prettyPrint='true', optSwitchFormulation="lindistflow", optSwitchSolver="mip_solver", optSwitchAlgorithm="global", optSwitchProblem="block", optDispFormulation="lindistflow", optDispSolver="mip_solver", mip_solver_gap=0.05):
+def run_onm(circuitPath='circuit.dss', settingsPath='settings.json', outputPath="onm_out.json", eventsPath="events.json", faultsPath='', gurobi='false', verbose='true', fixSmallNumbers='true', applySwitchScores='true', skipList='["faults","stability"]', prettyPrint='true', optSwitchFormulation="lindistflow", optSwitchSolver="mip_solver", optSwitchAlgorithm="global", optSwitchProblem="block", optDispFormulation="lindistflow", optDispSolver="mip_solver", mip_solver_gap=0.05):
 	#TODO: allow arguments to function for the ones hardcoded!
-	cmd_string = f'''julia -e '
-		import Gurobi;
-		using PowerModelsONM;
-		args = Dict{{String,Any}}(
-			"network"=>"{circuitPath}",
-			"settings"=>"{settingsPath}",
-			"events"=>"{eventsPath}",
-			"faults"=>"{faultsPath}",
-			"output"=>"{outputPath}",
-			"verbose"=>{verbose},
-			"skip"=>{skipList},
-			"fix-small-numbers"=>{fixSmallNumbers},
-			"apply-switch-scores" => {applySwitchScores},
-			"pretty-print" => {prettyPrint},
-			"gurobi"=>{gurobi},
-			"opt-switch-formulation" => "{optSwitchFormulation}",
-			"opt-switch-solver" => "{optSwitchSolver}",
-			"opt-switch-algorithm" => "{optSwitchAlgorithm}",
-			"opt-switch-problem" => "{optSwitchProblem}",
-			"opt-disp-formulation" => "{optDispFormulation}",
-			"opt-disp-solver" => "{optDispSolver}",
-			"mip_solver_gap" => {mip_solver_gap} #0.02 = slow, 0.05 = default, 0.10 = fast
-		);
-		entrypoint(args);
-	' '''
-	runCommands([cmd_string])
+	juliaFileContents = f'''using PowerModelsONM; 
+		args = Dict{{String,Any}}( 
+			"network"=>"{circuitPath}", 
+			"settings"=>"{settingsPath}", 
+			"events"=>"{eventsPath}", 
+			"faults"=>"{faultsPath}", 
+			"output"=>"{outputPath}", 
+			"verbose"=>{verbose}, 
+			"skip"=>{skipList}, 
+			"fix-small-numbers"=>{fixSmallNumbers}, 
+			"apply-switch-scores" => {applySwitchScores}, 
+			"pretty-print" => {prettyPrint}, 
+			"gurobi" => false, 
+			"opt-switch-formulation" => "{optSwitchFormulation}", 
+			"opt-switch-solver" => "{optSwitchSolver}", 
+			"opt-switch-algorithm" => "{optSwitchAlgorithm}", 
+			"opt-switch-problem" => "{optSwitchProblem}", 
+			"opt-disp-formulation" => "{optDispFormulation}", 
+			"opt-disp-solver" => "{optDispSolver}", 
+			"mip_solver_gap" => {mip_solver_gap} #0.02 = slow, 0.05 = default, 0.10 = fast 
+		); 
+		entrypoint(args); '''
+	run_julia_script(juliaFileContents)
+
 
 
 if __name__ == '__main__':

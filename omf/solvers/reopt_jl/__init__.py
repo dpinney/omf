@@ -1,5 +1,6 @@
 import json, time
 import os, platform
+import random
 
 thisDir = os.path.abspath(os.path.dirname(__file__))
 
@@ -8,7 +9,7 @@ def build_julia_image():
 
     os.system(f'''julia --project={thisDir}/REoptSolver -e '
             import Pkg; Pkg.instantiate();
-            import REoptSolver; using PackageCompiler; 
+            import REoptSolver; using PackageCompiler;
             PackageCompiler.create_sysimage(["REoptSolver"]; sysimage_path="{thisDir}/reopt_jl.so", 
             precompile_execution_file="{thisDir}/precompile_reopt.jl", cpu_target="generic;sandybridge,-xsaveopt,clone_all;haswell,-rdrnd,base(1)")
             ' ''')
@@ -236,6 +237,19 @@ def write_json(outputPath, jsonData):
 # run_reopt_jl 
 ##########################################################################
 
+def get_randomized_api_key():
+    '''returns a random API key'''
+    REOPT_API_KEYS = [
+    'WhEzm6QQQrks1hcsdN0Vrd56ZJmUyXJxTJFg6pn9',
+    'Y8GMAFsqcPtxhjIa1qfNj5ILxN5DH5cjV3i6BeNE',
+    'etg8hytwTYRf4CD0c4Vl9U7ACEQnQg6HV2Jf4E5W',
+    'BNFaSCCwz5WkauwJe89Bn8FZldkcyda7bNwDK1ic',
+    'L2e5lfH2VDvEm2WOh0dJmzQaehORDT8CfCotaOcf',
+    '08USmh2H2cOeAuQ3sCCLgzd30giHjfkhvsicUPPf'
+    ]
+    key_index = random.randint(0,5)
+    return REOPT_API_KEYS[key_index]
+
 #potential optional inputs (for solver): ratio_gap, threads, max_solutions, verbosity
 def run_reopt_jl(path, inputFile="", default=False, convert=False, outages=False, microgrid_only=False, max_runtime_s=None):
     ''' calls 'run' function through run_reopt.jl (Julia file) '''
@@ -266,9 +280,12 @@ def run_reopt_jl(path, inputFile="", default=False, convert=False, outages=False
         outages_jl = "false" if not outages else "true"
         max_runtime_s_jl = "nothing" if max_runtime_s == None else max_runtime_s
 
+        api_key = get_randomized_api_key()
+
         os.system(f'''julia --sysimage={f'{thisDir}/reopt_jl.so'} -e '
                   using .REoptSolver;
-                  REoptSolver.run("{path}", {outages_jl}, {microgrid_only_jl}, {max_runtime_s_jl})
+                  ENV["NREL_DEVELOPER_API_KEY"]="{api_key}";
+                  REoptSolver.run("{path}", {outages_jl}, {microgrid_only_jl}, {max_runtime_s_jl}, "{api_key}")
                   ' ''')
     except Exception as e:
         print(e)
@@ -299,7 +316,7 @@ def _test():
     
     ############### CE test case
     # CE.json copied from CE Test Case/Scenario_test_POST.json
-    #runAllSolvers(path, "CE Test Case", fileName="CE.json", solvers=all_solvers) #, max_runtime_s=240)
+    #runAllSolvers(path, "CE Test Case", fileName="CE.json", solvers=all_solvers, max_runtime_s=240)
 
     ############## CONWAY_30MAY23_SOLARBATTERY
     # CONWAY_SB.json copied from CONWAY_30MAY23_SOLARBATTERY/Scenario_test_POST.json

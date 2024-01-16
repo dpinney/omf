@@ -283,7 +283,8 @@ def work(modelDir, inputDict):
 			scenario['ElectricStorage']['max_kw'] = batteryPowerMax
 			scenario['ElectricStorage']['max_kwh'] = batteryCapacityMax
 		# if outage_start_hour is > 0, a resiliency optimization that includes diesel is triggered
-		if outage_start_hour != 0:
+		run_outages = True if outage_start_hour != 0 else False
+		if run_outages:
 			#scenario['Scenario']['LoadProfile']['outage_is_major_event'] = True
 			scenario['ElectricLoad']['critical_load_fraction'] = criticalLoadFactor
 			#['LoadProfile']['critical_load_pct'] = criticalLoadFactor
@@ -333,7 +334,6 @@ def work(modelDir, inputDict):
 			json.dump(scenario, jsonFile)
 
 		# Run REopt API script *** => switched to REopt.jl
-		run_outages = True if outage_start_hour != 0 else False
 		reopt_jl.run_reopt_jl(modelDir, "Scenario_test_POST.json", outages=run_outages, max_runtime_s = 1000 )
 		with open(pJoin(modelDir, 'results.json')) as jsonFile:
 			results = json.load(jsonFile)
@@ -348,6 +348,10 @@ def work(modelDir, inputDict):
 
 		end_time = time.time()
 		print(f'reopt_jl solver runtime: {end_time - start_time} seconds')
+		
+		outData['solverStatus' + indexString] = results['status']
+		outData['hitTimeout' + indexString] = True if results['status'] == "timed-out" else False
+		outData['solverSeconds' + indexString] = results['solver_seconds']
 
 		#resultsSubset = results['outputs']['Scenario']['Site']
 		outData['demandCostBAU' + indexString] = results['ElectricTariff']['lifecycle_demand_cost_after_tax_bau']#['total_demand_cost_bau_us_dollars']
@@ -583,41 +587,43 @@ def work(modelDir, inputDict):
 			outData['sizeWindRounded' + indexString] = 0
 
 		# diesel generator does not follow on/off convention, as it is not turned on by user, but rather is automatically turned on when an outage is specified
-		outData['sizeDiesel' + indexString] = results['Generator']['size_kw']
-		outData['sizeDieselRounded' + indexString] = round(results['Generator']['size_kw'],1)
-		outData['dieselGenCost' + indexString] = dieselGenCost #float(inputDict['dieselGenCost'])
-		outData['dieselOnlyRunsDuringOutage' + indexString] = dieselOnlyRunsDuringOutage #bool(inputDict['dieselOnlyRunsDuringOutage'])
-		outData['dieselOMCostKw' + indexString] = dieselOMCostKw 
-		outData['dieselOMCostKwh' + indexString] = dieselOMCostKwh #float(inputDict['dieselOMCostKwh'])
-		if results['Generator']['size_kw'] == 0:
-			outData['sizeDieselRounded' + indexString] = 0
-		outData['fuelUsedDiesel' + indexString] = results['Generator']['annual_fuel_consumption_gal']#['fuel_used_gal']
-		outData['fuelUsedDieselRounded' + indexString] = round(results['Generator']['annual_fuel_consumption_gal'], 0)
-		#['fuel_used_gal'],0)
-		outData['sizeDieselExisting' + indexString] = genExisting #float(inputDict['genExisting'])
-		outData['sizeDieselPurchased' + indexString] = outData['sizeDiesel' + indexString] - genExisting #outData['sizeDieselExisting' + indexString]
-		#results['inputs']['Scenario']['Site']['Generator']['existing_kw']
-		outData['powerDieselToBattery' + indexString] = results['Generator']['electric_to_storage_series_kw']
-		#['year_one_to_battery_series_kw']
-		outData['powerDieselToLoad' + indexString] = results['Generator']['electric_to_load_series_kw']
-		#['year_one_to_load_series_kw']
-		#adding powerDieselToGrid to ensure accuracy of total diesel production series (powerDiesel)
-		outData['powerDieselToGrid' + indexString] = results['Generator']['electric_to_grid_series_kw']
-		powerDieselProductionValues = (outData['powerDieselToBattery' + indexString], outData['powerDieselToLoad' + indexString],
-								 outData['powerDieselToGrid' + indexString])
-		outData['powerDiesel' + indexString] = [sum(x) for x in zip(*powerDieselProductionValues)]
-		#resultsSubset['Generator']['year_one_power_production_series_kw']
+		#adding check to ensure 'Generator' key exists
+		if 'Generator' in results:
+			outData['sizeDiesel' + indexString] = results['Generator']['size_kw']
+			outData['sizeDieselRounded' + indexString] = round(results['Generator']['size_kw'],1)
+			outData['dieselGenCost' + indexString] = dieselGenCost #float(inputDict['dieselGenCost'])
+			outData['dieselOnlyRunsDuringOutage' + indexString] = dieselOnlyRunsDuringOutage #bool(inputDict['dieselOnlyRunsDuringOutage'])
+			outData['dieselOMCostKw' + indexString] = dieselOMCostKw 
+			outData['dieselOMCostKwh' + indexString] = dieselOMCostKwh #float(inputDict['dieselOMCostKwh'])
+			if results['Generator']['size_kw'] == 0:
+				outData['sizeDieselRounded' + indexString] = 0
+			outData['fuelUsedDiesel' + indexString] = results['Generator']['annual_fuel_consumption_gal']#['fuel_used_gal']
+			outData['fuelUsedDieselRounded' + indexString] = round(results['Generator']['annual_fuel_consumption_gal'], 0)
+			#['fuel_used_gal'],0)
+			outData['sizeDieselExisting' + indexString] = genExisting #float(inputDict['genExisting'])
+			outData['sizeDieselPurchased' + indexString] = outData['sizeDiesel' + indexString] - genExisting #outData['sizeDieselExisting' + indexString]
+			#results['inputs']['Scenario']['Site']['Generator']['existing_kw']
+			outData['powerDieselToBattery' + indexString] = results['Generator']['electric_to_storage_series_kw']
+			#['year_one_to_battery_series_kw']
+			outData['powerDieselToLoad' + indexString] = results['Generator']['electric_to_load_series_kw']
+			#['year_one_to_load_series_kw']
+			#adding powerDieselToGrid to ensure accuracy of total diesel production series (powerDiesel)
+			outData['powerDieselToGrid' + indexString] = results['Generator']['electric_to_grid_series_kw']
+			powerDieselProductionValues = (outData['powerDieselToBattery' + indexString], outData['powerDieselToLoad' + indexString],
+								  outData['powerDieselToGrid' + indexString])
+			outData['powerDiesel' + indexString] = [sum(x) for x in zip(*powerDieselProductionValues)]
+			#resultsSubset['Generator']['year_one_power_production_series_kw']
 
-		#adding for proforma analysis (generator)
-		outData['dieselAnnualEnergyProduced' + indexString] = results['Generator']['annual_energy_produced_kwh']
-		outData['totalElectricityProduced' + indexString] += results['Generator']['annual_energy_produced_kwh'] #year_one_energy_produced_kwh?
-		outData['dieselInstalledCost' + indexString] = outData['sizeDieselPurchased' + indexString] * dieselGenCost
-		outData['fuelUsedDieselCost' + indexString] = outData['fuelUsedDiesel' + indexString] * dieselFuelCostGal
-		outData['fuelUsedDieselCostBAU' + indexString] = 0 
-		if genExisting > 0:
-			outData['fuelUsedDieselCostBAU' + indexString] = results['Generator']['annual_fuel_consumption_gal_bau'] * dieselFuelCostGal
+			#adding for proforma analysis (generator)
+			outData['dieselAnnualEnergyProduced' + indexString] = results['Generator']['annual_energy_produced_kwh']
+			outData['totalElectricityProduced' + indexString] += results['Generator']['annual_energy_produced_kwh'] #year_one_energy_produced_kwh?
+			outData['dieselInstalledCost' + indexString] = outData['sizeDieselPurchased' + indexString] * dieselGenCost
+			outData['fuelUsedDieselCost' + indexString] = outData['fuelUsedDiesel' + indexString] * dieselFuelCostGal
+			outData['fuelUsedDieselCostBAU' + indexString] = 0 
+			if genExisting > 0:
+				outData['fuelUsedDieselCostBAU' + indexString] = results['Generator']['annual_fuel_consumption_gal_bau'] * dieselFuelCostGal
 
-		# output resilience stats if resilienceRun was successful
+			# output resilience stats if resilienceRun was successful
 		if run_outages: #'outage_sim_results' in resultsResilience:
 			outData['resilience' + indexString] = resultsResilience['resilience_by_time_step']#['outage_durations'] <- not working?
 			#['outage_sim_results']['resilience_by_timestep']
@@ -920,7 +926,7 @@ def work(modelDir, inputDict):
 		write_table(annual_values_proforma,"",excel_row,excel_col)
 		excel_row += len(annual_values_proforma) + 1
 
-		workbook.save(f'{modelDir}/ProForma.xlsx')
+		workbook.save(os.path.join(modelDir,"ProForma.xlsx"))
 
 		#helper function for generating output graphs
 		def makeGridLine(x,y,color,name):
@@ -963,7 +969,7 @@ def work(modelDir, inputDict):
 			powerWindToLoad = makeGridLine(x_values,outData['powerWindToLoad' + indexString],'purple','Load met by Wind')
 			plotData.append(powerWindToLoad)
 
-		if results['Generator']['size_kw'] > 0:
+		if 'Generator' in results and results['Generator']['size_kw'] > 0:
 			powerDieselToLoad = makeGridLine(x_values,outData['powerDieselToLoad' + indexString],'brown','Load met by Fossil Gen')
 			plotData.append(powerDieselToLoad)			
 
@@ -1016,7 +1022,7 @@ def work(modelDir, inputDict):
 		outData["windData"  + indexString] = json.dumps(plotData, cls=plotly.utils.PlotlyJSONEncoder)
 
 		plotData = []
-		if results['Generator']['size_kw'] > 0:
+		if 'Generator' in results and results['Generator']['size_kw'] > 0:
 			powerDieselToLoad = makeGridLine(x_values,outData['powerDieselToLoad' + indexString],'brown','Fossil Gen used to meet Load')
 			plotData.append(powerDieselToLoad)
 
@@ -1046,7 +1052,7 @@ def work(modelDir, inputDict):
 				powerWindToBattery = makeGridLine(x_values,outData['powerWindToBattery' + indexString],'purple','Wind')
 				plotData.append(powerWindToBattery)
 
-			if results['Generator']['size_kw'] > 0:
+			if 'Generator' in results and results['Generator']['size_kw'] > 0:
 				powerDieselToBattery = makeGridLine(x_values,outData['powerDieselToBattery' + indexString],'brown','Fossil Gen')
 				plotData.append(powerDieselToBattery)
 
@@ -1167,7 +1173,7 @@ def new(modelDir):
 		"outage_start_hour": "500",
 		"outageDuration": "24",
 		"fuelAvailable": "20000",
-		"genExisting": 10, #was 0
+		"genExisting": 0,
 		"minGenLoading": "0.3",
 		"dieselFuelCostGal": "3", # default value for diesel
 		"dieselCO2Factor": 22.4, # default value for diesel
@@ -1179,7 +1185,7 @@ def new(modelDir):
 		"value_of_lost_load": "100",
 		"solarCanCurtail": True,
 		"solarCanExport": True,
-		"dieselOnlyRunsDuringOutage": True #was: True
+		"dieselOnlyRunsDuringOutage": True
 	}
 	creationCode = __neoMetaModel__.new(modelDir, defaultInputs)
 	try:

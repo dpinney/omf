@@ -6,8 +6,6 @@ export run
 using REopt, JuMP, JSON, HiGHS #SCIP #, Cbc
 #Ipopt, ECOS, Clp, GLPK
 
-ENV["NREL_DEVELOPER_API_KEY"]="WhEzm6QQQrks1hcsdN0Vrd56ZJmUyXJxTJFg6pn9"
-
 function get_model(path::String, max_runtime_s::Union{Nothing,Int}) 
 	m = Model(HiGHS.Optimizer)
 	set_attribute(m,"threads",20)
@@ -25,7 +23,10 @@ function results_to_json(results, output_path)
 	end
 end
 
-function run(path::String, outages::Bool=false, microgrid_only::Bool=false, max_runtime_s::Union{Nothing,Int}=nothing)
+function run(path::String, outages::Bool=false, microgrid_only::Bool=false, max_runtime_s::Union{Nothing,Int}=nothing,
+	api_key::String="WhEzm6QQQrks1hcsdN0Vrd56ZJmUyXJxTJFg6pn9")
+
+	ENV["NREL_DEVELOPER_API_KEY"]=api_key
 
 	m = get_model(path, max_runtime_s)
 	m2 = get_model(path, max_runtime_s)

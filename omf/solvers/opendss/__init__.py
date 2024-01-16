@@ -121,8 +121,7 @@ def newQstsPlot(filePath, stepSizeInMinutes, numberOfSteps, keepAllFiles=False, 
 	with open(f'{dssFileLoc}/dss_run_file.dss', 'w') as run_file:
 		run_file.write(dss_run_file)
 	# Run in the right directory and suppress the output
-	subprocess.run('opendsscmd dss_run_file.dss', cwd=dssFileLoc, shell=True, check=True, stdout=subprocess.DEVNULL)
-	# runDSS('dss_run_file.dss')
+	runDSS('dss_run_file.dss')
 	# Aggregate monitors
 	all_gen_df = pd.DataFrame()
 	all_load_df = pd.DataFrame()
@@ -143,16 +142,16 @@ def newQstsPlot(filePath, stepSizeInMinutes, numberOfSteps, keepAllFiles=False, 
 			# print("phase_ids:", phase_ids)
 			# print("headings list:", df.columns)
 			if phase_ids == ['1']:
-				df[[' V2']] = np.NaN
-				df[[' V3']] = np.NaN
+				df[['V2']] = np.NaN
+				df[['V3']] = np.NaN
 			elif phase_ids == ['2']:
-				df[[' V2']] = df[[' V1']]
-				df[[' V1']] = np.NaN
-				df[[' V3']] = np.NaN
+				df[['V2']] = df[['V1']]
+				df[['V1']] = np.NaN
+				df[['V3']] = np.NaN
 			elif phase_ids == ['3']:
-				df[[' V3']] = df[[' V1']]
-				df[[' V1']] = np.NaN
-				df[[' V2']] = np.NaN
+				df[['V3']] = df[['V1']]
+				df[['V1']] = np.NaN
+				df[['V2']] = np.NaN
 			# # print("df after phase reassignment:")
 			# # print(df.head(10))
 			df['Name'] = name
@@ -171,16 +170,16 @@ def newQstsPlot(filePath, stepSizeInMinutes, numberOfSteps, keepAllFiles=False, 
 			# print("phase_ids:", phase_ids)
 			# print("headings list:", df.columns)
 			if phase_ids == ['1']:
-				df[[' P2 (kW)']] = np.NaN
-				df[[' P3 (kW)']] = np.NaN
+				df[['P2 (kW)']] = np.NaN
+				df[['P3 (kW)']] = np.NaN
 			elif phase_ids == ['2']:
-				df[[' P2 (kW)']] = df[[' P1 (kW)']]
-				df[[' P1 (kW)']] = np.NaN
-				df[[' P3 (kW)']] = np.NaN
+				df[['P2 (kW)']] = df[['P1 (kW)']]
+				df[['P1 (kW)']] = np.NaN
+				df[['P3 (kW)']] = np.NaN
 			elif phase_ids == ['3']:
-				df[[' P3 (kW)']] = df[[' P1 (kW)']]
-				df[[' P1 (kW)']] = np.NaN
-				df[[' P2 (kW)']] = np.NaN
+				df[['P3 (kW)']] = df[['P1 (kW)']]
+				df[['P1 (kW)']] = np.NaN
+				df[['P2 (kW)']] = np.NaN
 			# # print("df after phase reassignment:")
 			# # print(df.head(10))
 			df['Name'] = name
