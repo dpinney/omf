@@ -1,9 +1,3 @@
-#
-# Changes exclusive to the OMF
-#
-# added index=False to the CSV outputs at the end for easier display of outputs
-#
-
 # -*- coding: utf-8 -*-
 """
 BSD 3-Clause License
