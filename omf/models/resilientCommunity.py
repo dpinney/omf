@@ -9,21 +9,22 @@ from os.path import join as pJoin
 import webbrowser
 import requests
 import zipfile
-#import shapefile
+import shapefile
 import io
 from io import BytesIO
 import numpy as np
 import json
 import math
 import pandas as pd
-#from shapely.geometry import Polygon
+from shapely.geometry import Polygon
 #from shapely.geometry import Point
 #from pyproj import Transformer
-#import geopandas as gpd
-#import matplotlib.colorbar as colorbar
-#import matplotlib.colors as clr
+import geopandas as gpd
+import matplotlib.colorbar as colorbar
+import matplotlib.colors as clr
 import matplotlib.pyplot as plt
 #import base64
+import networkx as nx
 
 
 # OMF imports
@@ -31,6 +32,11 @@ from omf import feeder, geo
 from omf.models.voltageDrop import drawPlot
 from omf.models import __neoMetaModel__
 from omf.models.__neoMetaModel__ import *
+
+from omf.solvers.opendss import *
+from omf.comms import *
+from omf.solvers.opendss.dssConvert import *
+
 
 
 # GEO py imports
@@ -46,6 +52,7 @@ hidden = True
 # Input: dataURL -> URL to retrieve data from
 # returns geojson of census NRI data
 def retrieveCensusNRI():
+    ''' '''
     
     try:
         #headers
@@ -55,20 +62,20 @@ def retrieveCensusNRI():
        'Accept-Encoding': 'none',
        'Accept-Language': 'en-US,en;q=0.8',
        'Connection': 'keep-alive'}
-        # Fema NRI data url
+        #FEMA nri data url
         nridataURL = "https://hazards.fema.gov/nri/Content/StaticDocuments/DataDownload//NRI_Shapefile_CensusTracts/NRI_Shapefile_CensusTracts.zip"
         r = requests.get(nridataURL, headers=hdr)
         z = zipfile.ZipFile(BytesIO(r.content))
-        
-	# get file names needed to build geoJSON
+        print('Hello')
+		# get file names needed to build geoJSON
         shpPath = [x for x in z.namelist() if x.endswith('.shp')][0]
         dbfPath = [x for x in z.namelist() if x.endswith('.dbf')][0]
         prjPath = [x for x in z.namelist() if x.endswith('.prj')][0]
-
-	# Create geojson from retrieved data files 
+        # create geojson from datafiles
         with shapefile.Reader(shp=BytesIO(z.read(shpPath)), 
                       dbf=BytesIO(z.read(dbfPath)), 
                       prj=BytesIO(z.read(prjPath))) as shp:
+               
                geojson_data = shp.__geo_interface__
                prefix = list(pathlib.Path(__file__).parts)
                prefix[7] = 'static'
@@ -78,7 +85,7 @@ def retrieveCensusNRI():
                      json.dump(geojson_data, f,indent=4)
                return outfile
     except Exception as e:
-        print("Error trying to retrieve Census Data as GeoJson")
+        print("Error trying to retrieve FEMA NRI Census Data in GeoJson format")
         print(e)
 
 # Finds Census Tract at a given lon / lat
@@ -86,18 +93,18 @@ def retrieveCensusNRI():
 # Input: lon -> specified longitude value
 # return censusTract ->  census Tract found at location
 def findCensusTract(lat, lon):
+    ''' '''
     try:
-	# Census Tract API URL
-        request_url = "https://geo.fcc.gov/api/census/block/find?latitude="+str(lat)+"&longitude="+str(lon)+ "&censusYear=2020&format=json"
+        # Requested for API Key to bypass api load limits
+
+        request_url = "https://geo.fcc.gov/api/census/block/find?latitude="+str(lat)+"&longitude="+str(lon)+ "&censusYear=2020&format=json&key=bc86c8cfc930e7c10b81d6683c6a316f5fcb857b"
         opener = urllib.request.build_opener()
         opener.addheaders = [('User-agent', 'Mozilla/5.0')]
-        resp = opener.open(request_url)
+        resp = opener.open(request_url, timeout=50)
         censusJson = json.loads(resp.read())
-	# Remove last 4 digits from Block code to retrieve Tract Information
         censusTract = censusJson['Block']['FIPS'][:-4]   
         return  censusTract
     except Exception as e:
-	# need to look into api limit errors
         print("Error trying to retrieve tract information from Census API")
         print(e)
 
@@ -107,6 +114,7 @@ def findCensusTract(lat, lon):
 # Input: tractList -> list of tracts
 # return geomData, soviData -> list of geometrys and social vulnerability for tracts found in list
 def getCensusNRIData(nrigeoJson, tractList):
+    ''' '''
     nriData = []
     geomData = []
     headers = list(nrigeoJson['features'][0]['properties'].keys())
@@ -126,6 +134,7 @@ def getCensusNRIData(nrigeoJson, tractList):
 # input: nrigeoJson -> nri geojson
 # input stateName -> Specified state name
 def getTractDatabyState(nrigeoJson,stateName):
+    ''' '''
     data = []
     geom = []
     headers = list(nrigeoJson['features'][0]['properties'].keys())
@@ -144,11 +153,11 @@ def getTractDatabyState(nrigeoJson,stateName):
                 data.append(properties)
     return geom, data, headers
 
-
 # find census located at specified circuit nodes
 # Input:pathToOmd -> path to circuit file
 # return censusTracts -> census tract
 def getCircuitNRI(pathToOmd):
+    '''' '''
     censusTracts = []
     with open(pathToOmd) as inFile:
         fullFile = json.load(inFile)
@@ -164,6 +173,7 @@ def getCircuitNRI(pathToOmd):
 # Input: coordList -> list of coordinates (geometry)
 # return coordList -> transformed coordinates
 def transform(coordList):
+    ''' '''
     for idx, i in enumerate(coordList):
         lat,lon = i[0], i[1]
         x = (lat * 180) / 20037508.34
@@ -177,6 +187,7 @@ def transform(coordList):
 # Input: geos -> list of geometry
 #return geoTransformed -> transofrmed list of geometries
 def runTransformation(geos):
+    ''' '''
     geoTransformed = []
     for i in geos:
         if (isinstance(i[0][0], float)):
@@ -185,12 +196,12 @@ def runTransformation(geos):
             geoTransformed.append(transform(i[0]))
     return geoTransformed
 
-
 # Creates Pandas DF from list of data containing GeoData 
 # input: tractData -> Data associated with data
 # input: columns -> columns for data
 # input: geoTransformed -> EPSG:4326 transformed geometry
 def createDF(tractData, columns, geoTransformed):
+    ''' '''
     data = pd.DataFrame(tractData, columns = columns)
     data['geometry'] = geoTransformed
     return data
@@ -199,12 +210,14 @@ def createDF(tractData, columns, geoTransformed):
 # input: df -> pandas df
 # return geo -> geodataframe
 def createGeoDF(df):
+    ''' '''
     df['geometry'] = df['geometry'].apply(Polygon)
     geo = gpd.GeoDataFrame(df, geometry=df["geometry"], crs="EPSG:4326")
     return geo
 
 # creates legend to overlay with map_omd map
 def createLegend():
+    ''' '''
     colors = ["blue", "lightblue", "lightgreen", "yellow", "gray", "black"]
     labels = ['Very High', 'Rel. High', 'Rel. Moderate', 'Rel. Low', 'Very Low', "Data Unavailable"]
     num_colors = len(colors)
@@ -216,7 +229,7 @@ def createLegend():
     plt.title("Social Vulnerability Legend")
     cb.set_ticks(range(num_colors))
     cb.ax.set_xticklabels(labels)
-    path = pJoin(omf.omfDir,'static','testFiles', 'legend.png')
+    path = pJoin(omf.omfDir,'static','testFiles','resilientCommunity', 'legend.png')
 
     plt.savefig(path,bbox_inches='tight')
 
@@ -225,17 +238,17 @@ def createLegend():
 # Re-runs methods and Updates data 
 # input: omd_file -> omd circuit file
 def updateData(omd_file):
-     
+     ''' '''
      nrigeoJson = retrieveCensusNRI()
      with open(nrigeoJson) as json_file:
         geoJson = json.load(json_file)
      censusTracts = getCircuitNRI(omd_file)
-     geometry, soviData = getSoviData(geoJson, censusTracts)
+     geometry, soviData = getCensusNRIData(geoJson, censusTracts)
      transformedGeo = runTransformation(geometry)
      censusDF = createDF(soviData, transformedGeo)
      censusGeoDF = createGeoDF(censusDF)
      censusGeoDF.to_file('./out.geojson', driver='GeoJSON')
-     #legend_path = createLegend()
+     legend_path = createLegend()
                
 # Cooperative Methods
 
@@ -243,6 +256,7 @@ def updateData(omd_file):
 # coopDF -> cooperative Dataframe
 # tractList -> list of tracts corresponding to the outer borders of cooperative
 def findallTracts(nriDF, coopDF, tractlist):
+    ''' '''
     for idx, row in coopDF.iterrows():
         tracts2 = []
         coopPoly = row['geometry']
@@ -258,6 +272,7 @@ def findallTracts(nriDF, coopDF, tractlist):
 # df is the coop dataframe
 # returns census tracts
 def getCoopCensusTracts(coopDF):
+    ''' '''
     censusTracts1 = []
     censusTracts2 = []
     for i in coopDF['geometry']:
@@ -291,6 +306,7 @@ def getCoopCensusTracts(coopDF):
 # coopgeoJson -> cooperative geojson
 # returns coop information and geometry
 def getCoopData(coopgeoJson):
+    ''' '''
     data = []
     geom = []
     for i in coopgeoJson['features']:
@@ -311,6 +327,7 @@ def getCoopData(coopgeoJson):
 # coopgeoJson -> Coop data 
 # listOfCoops -> list of cooperatives interested
 def getCoopFromList(coopgeoJson, listOfCoops):
+    ''' '''
     coopData, coopGeo, columns = getCoopData(coopgeoJson)
     coopDF = createDF(coopData,  columns, coopGeo)
     geocoopDF = createGeoDF(coopDF[coopDF['Member_Class'] == 'Distribution'] )
@@ -321,6 +338,7 @@ def getCoopFromList(coopgeoJson, listOfCoops):
 # coopDF -> cooperative datafrme
 # geonriDF -> nri dataframe
 def coopvcensusDF(coopDF, geonriDF):
+    ''' '''
     values = []
     geom = []
     columns = ['Cooperative_Name', 'BUILDVALUE','AGRIVALUE','EAL_VALT','EAL_VALB','EAL_VALP',
@@ -428,6 +446,7 @@ def coopvcensusDF(coopDF, geonriDF):
 # run correlation tests
 # return corr, corr2 -> correlation matrix and correlation matrix >.7
 def run_correlationTesting(listOfCoops, stateName, nrigeoJson, coopGeoJson):
+    ''' '''
     coopData, coopGeo, columns = getCoopData(coopGeoJson)
     coopDF = createDF(coopData,  columns, coopGeo)
     geocoopDF = createGeoDF(coopDF[coopDF['Member_Class'] == 'Distribution'] )
@@ -453,77 +472,335 @@ def run_correlationTesting(listOfCoops, stateName, nrigeoJson, coopGeoJson):
     corr2 = corr[~mask]
                                   
                                   
-    return corr, corr2
+    return corr, corr2      
+
+#
+#
+#
+def getDownLineLoads(pathToOmd,nriGeoJson):
+    omd = json.load(open(pathToOmd))
+    obDict = {}
+    loads = {}
+    tracts = {}
+    #loadServedVals = []
+    for ob in omd.get('tree', {}).values():
+        obType = ob['object']
+        obName = ob['name']
+        key = obType + '.' + obName
+        obDict[key] = ob
+        # save load information
+        
+        if (obType == 'load'):
+            loads[key] = {
+                        'people_served':None}#None,'percentile':None}
+            kw = float(ob['kw'])
+            kvar = float(ob['kvar'])
+            kv = float(ob['kv'])
+            # For each load, estimate the number of persons served. 
+            #Use the following equation sqrt(kw^2 + kvar^2)/5 kva = # of homes served by that load
+            # assume household is 4   
+            loads[key]['people_served']= ((math.sqrt((kw * kw) + (kvar * kvar) ))/ (5)) * 4
+
+            lat = float(ob['latitude'])
+            long = float(ob['longitude'])
+
+            tract = findCensusTract(lat, long)
+
+            ## CHECKS IF WE HAVE ALREADY LOOKED FOR THE TRACT IN QUESTION
+
+            
+            while tract == None:
+                tract = findCensusTract(lat, long)
+
+            if tract in tracts:
+                svi_score = float(tracts.get(tract)['SOVI_SCORE'])
+                loads[key]['SOVI_SCORE'] = svi_score
+                loads[key]['community_criticality_score'] = (((math.sqrt((kw * kw) + (kvar * kvar) ))/ (5)) * 4) *  svi_score
+            
+            else:
+                for i in nriGeoJson['features']:
+                    tractID = i['properties']['TRACTFIPS']
+
+                    if tractID == tract:
+                        svi_score = float(i['properties']['SOVI_SCORE'])
+                        loads[key]['SOVI_SCORE'] = svi_score
+                        loads[key]['community_criticality_score'] = (((math.sqrt((kw * kw) + (kvar * kvar) ))/ (5)) * 4) *  svi_score
+
+                        tracts[tractID] = i['properties']
+                        break
+
+            
+    getPercentile(loads, 'people_served')
+    getPercentile(loads, 'community_criticality_score')
+    
+            
+
+
+    #loadServedVals.append((math.sqrt((kw * kw) + (kvar * kvar) ))/ (5))
+                
+            
+
+    
+
+    
+
+
+    
+    del omd
+
+    digraph = createGraph(pathToOmd)
+    nodes = digraph.nodes()
+
+    namesToKeys = {v.get('name'):k for k,v in obDict.items()}
+    
+    
+    for obKey, ob in obDict.items():
+        obType = ob['object']
+
+        obName = ob['name']
+
+        obTo = ob.get('to')
+
+        if obName in nodes:
+
+            startingPoint = obName
+
+        elif obTo in nodes:
+
+            startingPoint = obTo
+
+        else:
+
+            continue
+
+        successors = nx.dfs_successors(digraph, startingPoint).values()
+
+        ob['downlineObs'] = []
+
+        ob['downlineLoads'] = []
+
+        for listofVals in successors:
+
+            for element in listofVals:
+
+                elementKey = namesToKeys.get(element)
+
+                elementType = elementKey.split('.')[0]
+
+
+
+                if elementKey not in ob['downlineObs']:
+
+                    ob['downlineObs'].append(elementKey)
+
+                if elementKey not in ob['downlineLoads'] and elementType == 'load':
+
+                    ob['downlineLoads'].append(elementKey)
+
+    return obDict, loads
+
+
+
+
+# Gets percentile of specified column
+# loads -> dictionary
+# columnName -> specified column name
+def getPercentile(loads, columnName):
+    
+    
+    loadServedVals = [v.get(columnName) for k,v in loads.items()]
+
+    # calculate percentile for each load
+    pairs = list(zip(loadServedVals, range(len(loadServedVals))))
+
+    pairs.sort(key=lambda p: p[0])
+    result = [0 for i in range(len(loadServedVals))]
+    for rank in range(len(loadServedVals)):
+        original_index = pairs[rank][1]
+        result[original_index] = rank * 100.0 / (len(loadServedVals)-1)
+    new_str = columnName + '_percentile'
+    for i, (k,v) in enumerate(loads.items()):
+        loads[k][new_str] = round(result[i],2)
+
+
 
 # 
 #
 #
-def normalized_coopandcensusnri(nriGeoDF, coopGeoDF):
-    overlayDF = nriGeoDF.overlay(coopGeoDF, how='intersection')
-    overlayDF['intersected_area'] = overlayDF.area
+def getDownLineLoadsEquipment(pathToOmd, equipmentList):
+    omd = json.load(open(pathToOmd))
+    obDict = {}
+    loads = {}
+    tracts = {}
+    #loadServedVals = []
+    for ob in omd.get('tree', {}).values():
+        obType = ob['object']
+        obName = ob['name']
+        key = obType + '.' + obName
+        obDict[key] = ob
+        # save load information
+        
+        if (obType == 'load'):
+            loads[key] = {
+                        'people_served':None}#None,'percentile':None}
+            kw = float(ob['kw'])
+            kvar = float(ob['kvar'])
+            kv = float(ob['kv'])
+            # For each load, estimate the number of persons served. 
+            #Use the following equation sqrt(kw^2 + kvar^2)/5 kva = # of homes served by that load
+            # assume household is 4   
+            loads[key]['people_served']= ((math.sqrt((kw * kw) + (kvar * kvar) ))/ (5)) * 4
+
+
+            str1 = '''
+            lat = float(ob['latitude'])
+            long = float(ob['longitude'])
+            
+            tract = findCensusTract(lat, long)
+
+            ## CHECKS IF WE HAVE ALREADY LOOKED FOR THE TRACT IN QUESTION
+
+            if tract in tracts:
+                svi_score = float(tracts.get(tract)['SOVI_SCORE'])
+                loads[key]['SOVI_SCORE'] = svi_score
+                loads[key]['community_criticality'] = (((math.sqrt((kw * kw) + (kvar * kvar) ))/ (5)) * 4) *  svi_score
+            
+            else:
+                for i in nriGeoJson['features']:
+                    tractID = i['properties']['TRACTFIPS']
+
+                    if tractID == tract:
+                        svi_score = float(i['properties']['SOVI_SCORE'])
+                        loads[key]['SOVI_SCORE'] = svi_score
+                        loads[key]['community_criticality'] = (((math.sqrt((kw * kw) + (kvar * kvar) ))/ (5)) * 4) *  svi_score
+
+                        tracts[tractID] = i['properties']
+                        break
+            '''
+
+            
+    getPercentile(loads, 'people_served')
+    #getPercentile(loads, 'community_criticality')
+            
+
+
+            #loadServedVals.append((math.sqrt((kw * kw) + (kvar * kvar) ))/ (5))
+                
+            
+
     
-    overlayDF[['BUILDVALUE','AGRIVALUE','EAL_VALT','EAL_VALB','EAL_VALP',
-               'EAL_VALA','SOVI_SCORE','RESL_VALUE','AVLN_AFREQ',
-               'CFLD_AFREQ','CWAV_AFREQ','DRGT_AFREQ','ERQK_AFREQ','HAIL_AFREQ','HWAV_AFREQ',
-               'HRCN_AFREQ','ISTM_AFREQ','LNDS_AFREQ','LTNG_AFREQ','RFLD_AFREQ','SWND_AFREQ',
-               'TRND_AFREQ','TSUN_AFREQ','VLCN_AFREQ','WFIR_AFREQ','WNTW_AFREQ']] = overlayDF[['BUILDVALUE','AGRIVALUE','EAL_VALT','EAL_VALB','EAL_VALP',
-               'EAL_VALA','SOVI_SCORE','RESL_VALUE','AVLN_AFREQ',
-               'CFLD_AFREQ','CWAV_AFREQ','DRGT_AFREQ','ERQK_AFREQ','HAIL_AFREQ','HWAV_AFREQ',
-               'HRCN_AFREQ','ISTM_AFREQ','LNDS_AFREQ','LTNG_AFREQ','RFLD_AFREQ','SWND_AFREQ',
-               'TRND_AFREQ','TSUN_AFREQ','VLCN_AFREQ','WFIR_AFREQ','WNTW_AFREQ']].div(overlayDF.intersected_area, axis=0)
     
-    dissolved = overlayDF.dissolve(by='Cooperative',aggfunc={'intersected_area':"sum",
-                                                         'Shape_Area_2':'max',
-                                                         'BUILDVALUE':'sum',
-                                                         'AGRIVALUE':'sum',
-                                                         'EAL_VALT':'sum',
-                                                         'EAL_VALB':'sum',
-                                                         'EAL_VALP':'sum',
-                                                         'EAL_VALA':'sum',
-                                                         'SOVI_SCORE':'sum',
-                                                         'RESL_VALUE':'sum',
-                                                         'AVLN_AFREQ':'sum',
-                                                         'CFLD_AFREQ':'sum',
-                                                         'CWAV_AFREQ':'sum',
-                                                         'DRGT_AFREQ':'sum',
-                                                         'ERQK_AFREQ':'sum',
-                                                         'HAIL_AFREQ':'sum',
-                                                         'HWAV_AFREQ':'sum',
-                                                         'HRCN_AFREQ':'sum',
-                                                         'ISTM_AFREQ':'sum',
-                                                         'LNDS_AFREQ':'sum',
-                                                         'LTNG_AFREQ':'sum',
-                                                         'RFLD_AFREQ':'sum',
-                                                         'SWND_AFREQ':'sum',
-                                                         'TRND_AFREQ':'sum',
-                                                         'TSUN_AFREQ':'sum',
-                                                         'VLCN_AFREQ':'sum',
-                                                         'WFIR_AFREQ':'sum',
-                                                         'WNTW_AFREQ':'sum'
-                                                        })
+    del omd
+
+    digraph = createGraph(pathToOmd)
+    nodes = digraph.nodes()
+
+    namesToKeys = {v.get('name'):k for k,v in obDict.items()}
     
-    dissolved[['BUILDVALUE','AGRIVALUE','EAL_VALT','EAL_VALB','EAL_VALP',
-               'EAL_VALA','SOVI_SCORE','RESL_VALUE','AVLN_AFREQ',
-               'CFLD_AFREQ','CWAV_AFREQ','DRGT_AFREQ','ERQK_AFREQ','HAIL_AFREQ','HWAV_AFREQ',
-               'HRCN_AFREQ','ISTM_AFREQ','LNDS_AFREQ','LTNG_AFREQ','RFLD_AFREQ','SWND_AFREQ',
-               'TRND_AFREQ','TSUN_AFREQ','VLCN_AFREQ','WFIR_AFREQ','WNTW_AFREQ']] = dissolved[['BUILDVALUE','AGRIVALUE','EAL_VALT','EAL_VALB','EAL_VALP',
-               'EAL_VALA','SOVI_SCORE','RESL_VALUE','AVLN_AFREQ',
-               'CFLD_AFREQ','CWAV_AFREQ','DRGT_AFREQ','ERQK_AFREQ','HAIL_AFREQ','HWAV_AFREQ',
-               'HRCN_AFREQ','ISTM_AFREQ','LNDS_AFREQ','LTNG_AFREQ','RFLD_AFREQ','SWND_AFREQ',
-               'TRND_AFREQ','TSUN_AFREQ','VLCN_AFREQ','WFIR_AFREQ','WNTW_AFREQ']].div(dissolved.Shape_Area_2, axis=0)
     
-    return dissolved
+    for obKey, ob in obDict.items():
+        obType = ob['object']
+
+        obName = ob['name']
+
+        obTo = ob.get('to')
+
+        if obName in nodes:
+
+            startingPoint = obName
+
+        elif obTo in nodes:
+
+            startingPoint = obTo
+
+        else:
+
+            continue
+
+        successors = nx.dfs_successors(digraph, startingPoint).values()
+
+        ob['downlineObs'] = []
+
+        ob['downlineLoads'] = []
+
+        if obType in equipmentList:
+
+            for listofVals in successors:
+
+                for element in listofVals:
+
+                    elementKey = namesToKeys.get(element)
+
+                    elementType = elementKey.split('.')[0]
+
+                    if elementKey not in ob['downlineObs']:
+
+                        ob['downlineObs'].append(elementKey)
+
+                    if elementKey not in ob['downlineLoads'] and elementType == 'load':
+
+                        ob['downlineLoads'].append(elementKey)
+
+
+    filteredObDict = {k:v  for k,v in obDict.items() if v.get('object') in equipmentList}
+
+    for k,v in filteredObDict.items():
+        people_served = 0
+        for i in v['downlineLoads']:
+            currLoad = loads.get(i)
+            people_served+=currLoad['people_served']
+        v['people_served'] = people_served
+
     
-                                 
+    
+    getPercentile(filteredObDict, 'people_served')
+
+
+    return filteredObDict
+            
+#
+#
+#
+def baseCriticallityWeightedAvg(loadsDict):
+    sum=0
+    weights = 0
+    for obKey, ob in loadsDict.items():
+        weights+=ob['SOVI_SCORE']
+        sum+=ob['community_criticality_score'] * ob['SOVI_SCORE']
+
+    return sum /weights
+
+
+
+        
+#
+#
 def work(modelDir, inputDict):
     ''' Run the model in its directory. '''
     outData = {}
     omd_file_path = pJoin(omf.omfDir,'static','publicFeeders', inputDict['inputDataFileName'])
+    load_file_path = pJoin(omf.omfDir,'static','testFiles', 'resilientCommunity', 'loads.json')
+    #equipment_file_path = load_file_path = pJoin(omf.omfDir,'static','testFiles', 'resilientCommunity', 'equipmentDict.json')
     #geo.map_omd(inputDict['InputFilePath'], modelDir, open_browser=False )
     geo.map_omd(omd_file_path, modelDir, open_browser=False)
     outData['resilienceMap'] = open( pJoin( modelDir, "geoJson_offline.html"), 'r' ).read()
     #geojson = pJoin(omf.omfDir,'static','publicFeeders', omdfileName)
-    outData['soviData'] = json.dumps('/Users/davidarmah/Documents/Python/Testing /out.geojson')
+    outData['soviData'] = json.dumps('/Users/davidarmah/Documents/Python Code/PCCEC/out.geojson')
+
+    #loads = '/Users/davidarmah/Documents/omf/omf/static/testFiles/resilientCommunity/loads.json'
+
+
+    fullFile = json.load(open(load_file_path))
+
+    headers = ['Load Name', 'Homes served', 'Base Criticallity']
+    load_names = list(fullFile.keys())
+    people_served_vals = [value.get('people_served') for key, value in fullFile.items()]  
+    percentile_vals = [value.get('percentile') for key, value in fullFile.items()]  
+
+
+    outData['loadTableHeadings'] = headers
+    outData['loadTableValues'] = list(zip(load_names, people_served_vals, percentile_vals))
+
 
   
 
@@ -532,14 +809,69 @@ def work(modelDir, inputDict):
    
 
 
-#def test():
- #   createLegend()
-     #omd_file_path = pJoin(omf.omfDir,'static','publicFeeders')
-     #print(omd_file_path)
+def test():
+    #omdPath = '/Users/davidarmah/Downloads/cleandssout.omd'
+    #dssPath = '/Users/davidarmah/Downloads/flat_Master_clean.DSS'
+    mergedOmdPath = '/Users/davidarmah/Documents/omf/omf/static/testFiles/resilientCommunity/mergedGreensboro.omd'
+    loads = '/Users/davidarmah/Documents/omf/omf/static/testFiles/resilientCommunity/loads.json'
+    nrijsonPath = '/Users/davidarmah/Documents/Python Code/PCCEC/CensusNRI.json'
+    #equipmentPath = '/Users/davidarmah/Documents/omf/omf/static/testFiles/resilientCommunity/equipmentDict.csv'
+    newomdPath = '/Users/davidarmah/Documents/omf/omf/static/testFiles/iowa240_dwp_22.dss.omd'
+
+
+   # geo.map_omd(mergedOmdPath, './', open_browser=True)
+    
+
+
+    #with open(loads) as file:
+    #    loadsDict = json.load(file)
+
+    
+    #print(baseCriticallityWeightedAvg(loadsDict))
+
+
+
+    
+
+    with open(nrijsonPath ) as inFile:
+        nrigeoJson = json.load(inFile)
+
+    obs, loads = getDownLineLoads(newomdPath, nrigeoJson)
+
+
+
+    #obs, loads = getDownLineLoads(mergedOmdPath, nrigeoJson)
+
+
+    
+
+    #loads = list(fullFile.keys())
+
+    #equipmentDict = getDownLineLoadsEquiptment(mergedOmdPath, ['line'])
+
+    #headers = ['Equipment Name', 'Equipment Type', 'Base Criticality']
+    #equipmentData = [(k, v.get('object'), v.get('people_served_percentile'))  for k,v in equipmentDict.items() ]
+    #df = pd.DataFrame(equipmentData, columns=headers)
+    #df.to_csv(equipmentPath)
+
+
+
+    with open('/Users/davidarmah/Documents/omf/omf/static/testFiles/resilientCommunity/loads2.json', 'w') as jsonfile:
+        json.dump(loads, jsonfile, indent=3)
+
+    with open('/Users/davidarmah/Documents/omf/omf/static/testFiles/resilientCommunity/objects2.json', 'w') as jsonfile:
+        json.dump(obs, jsonfile, indent=3)
+
+
+
+
      
 def new(modelDir):
     omdfileName = 'greensboro_NC_rural'
-    omd_file_path = pJoin(omf.omfDir,'static','publicFeeders', omdfileName) 
+    #mergedOmdPath = '/Users/davidarmah/Documents/omf/omf/static/testFiles/resilientCommunity/mergedGreensboro.omd'
+    omd_file_path = pJoin(omf.omfDir, 'static', 'testFiles','resilientCommunity', 'mergedGreensboro')
+    #omd_file_path = pJoin(omf.omfDir,'static','publicFeeders', omdfileName) 
+    
     #omdFile = '/Users/davidarmah/Documents/OMF/omf/omf/static/publicFeeders/greensboro_NC_rural.omd'
 
     #with open(f'{modelDir}/omdfileName + '.omd', 'r') as omdFile:
@@ -581,5 +913,7 @@ def tests():
 	__neoMetaModel__.renderAndShow(modelLoc)
 
 if __name__ == '__main__':
-	print("test")
-	#test()
+
+    print("test")
+    #test()
+	#tests()
