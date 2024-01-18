@@ -632,6 +632,10 @@
                 <label class="tooltip">Solver Tolerance<span class="classic">Please enter a number 0.0001 - 0.05 for the REopt optimality tolerance. A higher number increases the probability that the REopt financial scenario will successfully complete. A lower number ensures that slightly less optimal solutions will not be returned</span></label>
                 <input type="number" id="solverTolerance" name="solverTolerance" value="{{allInputDataDict.solverTolerance}}" step="0.0001" min="0.0001" max="0.05" required/>
             </div>
+			<div class="shortInput">
+                <label class="tooltip">Maximum Solver Runtime (seconds)<span class="classic">Please enter a number above 0 for REopt's maximum runtime in seconds. REopt will run to completion or terminate at this time and return a suboptimal solution.</span></label>
+                <input type="number" id="maxRuntimeSeconds" name="maxRuntimeSeconds" value="{{allInputDataDict.maxRuntimeSeconds}}" required/>
+            </div>
 			<div class="wideInput">
 				<p class="inputSectionHeader">Generation Technologies</p>
 			</div>
