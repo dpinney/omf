@@ -30,7 +30,51 @@ tooltip = 'Calculate load, generator and switching controls to maximize power re
 modelName, template = __neoMetaModel__.metadata(__file__)
 hidden = True
 
+def makeCicuitTraversalDict(pathToOmd):
+	''' Note: comment out line 99 in comms.py: "nxG = graphValidator(pathToOmdFile, nxG)" as a quick fix for the purpose of this funct
+	
+		Returns a dictionary of circuit objects and their properties from a given omd file
+		with a set of downline loads and a set of downline objects (including loads) 
+		added to their properties with the keys 'downlineLoads' and 'downlineObs'.
+		
+		The specific return format is a dictionary with keys representing circuit objects
+		in the format of 'obType.obName' (e.g. load.load_2060) which correspond to values that are 
+		dictionaries of circuit object properties such as:
+		'name':'load_2060', 'object':'load', 'downlineLoads':{load.load_1002, load.load_1003, ...}, 'downlineObs':{...}, etc.
+		'''	
+	# TODO: remove first line in docstring once graphValidator is cleaned up
+	with open(pathToOmd) as inFile:
+		omd = json.load(inFile)
+	obDict = {}
+	for ob in omd.get('tree',{}).values():
+		obType = ob['object']
+		obName = ob['name']
+		key = f'{obType}.{obName}'
+		obDict[key] = ob
 
+	digraph = createGraph(pathToOmd)
+	nodes = digraph.nodes()
+	namesToKeys = {v.get('name'):k for k,v in obDict.items()}
+	for obKey, ob in obDict.items():
+		obType = ob['object']
+		obName = ob['name']
+		obTo = ob.get('to')
+		if obName in nodes:
+			startingPoint = obName
+		elif obTo in nodes:
+			startingPoint = obTo
+		else:
+			continue 
+		descendants = nx.descendants(digraph, startingPoint)
+		ob['downlineObs'] = set()
+		ob['downlineLoads'] = set()
+		for circOb in descendants:
+			circObKey = namesToKeys.get(circOb)
+			circObType = circObKey.split('.')[0]
+			ob['downlineObs'].add(circObKey)
+			if circObType == 'load':
+				ob['downlineLoads'].add(circObKey)
+	return obDict
 
 def coordsFromString(entry):
 	'helper function to take a location string to two integer values'
