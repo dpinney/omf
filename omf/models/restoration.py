@@ -13,6 +13,7 @@ import plotly as py
 import plotly.graph_objs as go
 from plotly.tools import make_subplots
 import platform
+import networkx as nx
 # from statistics import quantiles
 
 # OMF imports
@@ -22,11 +23,14 @@ from omf.models import __neoMetaModel__
 from omf.models.__neoMetaModel__ import *
 from omf.solvers.opendss import dssConvert
 from omf.solvers import PowerModelsONM
+from omf.comms import createGraph
 
 # Model metadata:
 tooltip = 'Calculate load, generator and switching controls to maximize power restoration for a circuit with multiple networked microgrids.'
 modelName, template = __neoMetaModel__.metadata(__file__)
 hidden = True
+
+
 
 def coordsFromString(entry):
 	'helper function to take a location string to two integer values'
@@ -417,7 +421,6 @@ def outageIncidenceGraph(tree, customerOutageData, outputTimeline, startTime, nu
 	for key in tree.keys():
 		if tree[key].get('object','') == 'load':
 			loadList.append(tree[key]['name'])
-	# TODO: update the following to use all loads named in loadNames, assuming anything that ISN'T in outputTimeline always has power
 	df = outputTimeline.copy(deep=True)
 	df = df[df['device'].str.contains('load')]
 	df['time'] = df['time'].astype(int)
@@ -517,6 +520,35 @@ def outageIncidenceGraph(tree, customerOutageData, outputTimeline, startTime, nu
 
 	return outageIncidenceFigure
 
+def makeMicrogridLoadsCSV(pathToOmd, workDir):
+	'''	Creates a csv of loads in each microgrid by finding what microgrid each load's parent bus is designated as having. 
+		Microgrid assignments to busses are taken from settings.json so that we can see what microgrid assignments the 
+		code is working with, not just what they are intended to be via the microgrid tagging input file
+
+		Also returns a touple of the dictionaries (loadMicrogridDict, busMicrogridDict) for use if that data is needed
+	'''
+
+	with open(pJoin(workDir,'settings.json')) as inFile:
+		settingsData = json.load(inFile)
+	busMicrogridDict = {}
+	for busName,v in settingsData['bus'].items():	
+		busMicrogridDict[busName] = v.get('microgrid_id', 'no microgrid')
+	
+	with open(pathToOmd) as inFile:
+		omd = json.load(inFile)
+	loadMicrogridDict = {}
+	for ob in omd.get('tree',{}).values():
+		if ob['object'] == 'load':
+			loadMicrogridDict[ob['name']] = busMicrogridDict[ob['parent']]
+	
+	with open(pJoin(workDir,'microgridAssignments.csv'), 'w', newline='') as file:
+		writer = csv.writer(file)
+		writer.writerow(['load name','microgrid_id'])
+		for loadName,mg_id in loadMicrogridDict.items():
+			writer.writerow([loadName,mg_id])
+
+	return (loadMicrogridDict, busMicrogridDict)
+        
 def graphMicrogrid(pathToOmd, pathToJson, pathToCsv, outputFile, settingsFile, useCache, workDir, profit_on_energy_sales, restoration_cost, hardware_cost, eventsFilename, genSettings, solFidelity, loadPriorityFile, microgridTaggingFile):
 	''' Run full microgrid control process. '''
 	# Setup ONM if it hasn't been done already.
@@ -1004,6 +1036,7 @@ def graphMicrogrid(pathToOmd, pathToJson, pathToCsv, outputFile, settingsFile, u
 
 	####################### EXPERIMENTATION ############################################################################################
 	outageIncidenceFig = outageIncidenceGraph(tree, customerOutageData, outputTimeline, startTime, numTimeSteps, loadPriorityFilePath)
+	makeMicrogridLoadsCSV(pathToOmd, workDir)
 	####################### EXPERIMENTATION ############################################################################################
 
 	customerOutageHtml = customerOutageTable(customerOutageData, outageCost, workDir)
