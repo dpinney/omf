@@ -1,7 +1,6 @@
 ''' mohca_cl, command line interface to the Model-Free Hosting Capacity Algorithm. '''
 import fire
 from . import sandia
-from . import ISU_PINNbasedHCA
 import os
 from pathlib import Path
 
@@ -25,11 +24,6 @@ def sandia2(in_path, out_path):
 
 def gatech(in_path, out_path):
   return 'stub for GA tech algo'
-
-def iastate(in_path, out_path):
-  ''' Execute Sandia hosting capacity algorithm on in_path CSV with output written as CSV to out_path. '''
-  ret_value = ISU_PINNbasedHCA.PINN_HC(in_path, out_path)
-  return ret_value
 
 def run_all_tests():
   ''' Run all tests in the project. '''
