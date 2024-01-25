@@ -487,7 +487,6 @@ def outageIncidenceGraph(tree, customerOutageData, outputTimeline, startTime, nu
 	
 	# Calculate unweighted outage incidence
 	outageIncidence = dfStatus.sum(axis=1,).map(lambda x:100*(1.0-(x/dfStatus.shape[1]))).round(3).values.tolist()
-	print("Unweighted outage incidence: ",outageIncidence)
 
 	#Calculate weighted outage incidence based on 'Business Type'
 	includeGroupWeights = False
@@ -510,7 +509,6 @@ def outageIncidenceGraph(tree, customerOutageData, outputTimeline, startTime, nu
 		nc = dfStatusOfLeftovers.sum(axis=1,).map(lambda x: Nc-x).to_numpy()
 		Sum_wc_nc = np.add(Sum_wc_nc,1*nc) 
 		weightedOutageIncidence = np.around((100*Sum_wc_nc/Sum_wc_Nc), 3).tolist()
-		print("Group-Weighted Outage Incidence: ", weightedOutageIncidence)
 	###################################################################################################################################################################
 	# TODO: Clean this up to make it more readable. For now though, functionality is the focus.
 	###################################################################################################################################################################
@@ -527,7 +525,6 @@ def outageIncidenceGraph(tree, customerOutageData, outputTimeline, startTime, nu
 			nc = dfStatusOfCustomer.map(lambda x: 1-x).to_numpy()
 			Sum_wc_nc = np.add(Sum_wc_nc,loadWeights.get(load,1)*nc)
 		individuallyWeightedOutageIncidence = np.around((100*Sum_wc_nc/Sum_wc_Nc),3).tolist()
-	print("Priority-Weighted Outage Incidence: ", individuallyWeightedOutageIncidence)
 	
 	outageIncidenceFigure = go.Figure()
 	outageIncidenceFigure.add_trace(go.Scatter(

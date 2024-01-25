@@ -110,7 +110,7 @@ def build_settings_file(circuitPath='circuit.dss',settingsPath='settings.json', 
 		priorityDictBuilder = ''
 
 	#Check for microgrid tagging input
-	if False: 
+	if microgridTaggingFile: 
 		with open(microgridTaggingFile) as microgridTaggingJson:
 			microgridTags = json.load(microgridTaggingJson)
 		mgTaggingFormatted = ''
