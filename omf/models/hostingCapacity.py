@@ -145,7 +145,7 @@ def runtimeEstimate(modelDir):
 def new(modelDir):
 	''' Create a new instance of this model. Returns true on success, false on failure. '''
 	meter_file_name = 'mohcaInputCustom.csv'
-	meter_file_path = Path(omf.omfDir,'static','testFiles', meter_file_name)
+	meter_file_path = Path(omf.omfDir,'static','testFiles', 'hostingCapacity', meter_file_name)
 	meter_file_contents = open(meter_file_path).read()
 	defaultInputs = {
 		"modelType": modelName,
