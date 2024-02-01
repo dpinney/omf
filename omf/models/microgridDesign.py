@@ -1,6 +1,7 @@
 ''' Design microgrid with optimal generation mix for economics and/or reliability. '''
 import warnings, csv, json
-from os.path import join as pJoin
+from io import StringIO
+from pathlib import Path
 import numpy as np
 import pandas as pd
 import xlwt
@@ -31,40 +32,18 @@ def work(modelDir, inputDict):
 	outData['battery'] = inputDict['battery']
 	outData['year'] = inputDict['year']
 	outData['urdbLabelSwitch'] = inputDict['urdbLabelSwitch']
-
-	# Setting up the loadShape file.
-	with open(pJoin(modelDir,"loadShape.csv"),"w") as loadShapeFile:
-		loadShapeFile.write(inputDict['loadShape'])
-
-	try:
-		loadShape = []
-		with open(pJoin(modelDir,"loadShape.csv"), newline='') as inFile:
-			reader = csv.reader(inFile)
-			for row in reader:
-				loadShape.append(row) 
-			if len(loadShape)!=8760: raise Exception
-	except:
-		errorMessage = "Loadshape CSV file is incorrect format. Please see valid format definition at <a target='_blank' href='https://github.com/dpinney/omf/wiki/Models-~-demandResponse#walkthrough'>OMF Wiki demandResponse</a>"
-		raise Exception(errorMessage)
-
-	# Setting up the criticalLoadShape file.
-	# ToDo: make a condition to make criticalLoadShape file optional, and not needed in default
-	# make a switch for "User supplying critical loadshape?"
-	# if "User supplying critical loadshape?" = True:
-	with open(pJoin(modelDir,"criticalLoadShape.csv"),"w") as criticalLoadShapeFile:
-		criticalLoadShapeFile.write(inputDict['criticalLoadShape'])
-
-	try:
-		criticalLoadShape = []
-		with open(pJoin(modelDir,"criticalLoadShape.csv"), newline='') as inFile:
-			reader = csv.reader(inFile)
-			for row in reader:
-				criticalLoadShape.append(row) 
-			if len(criticalLoadShape)!=8760: raise Exception
-	except:
-		errorMessage = "Critical Loadshape CSV file is incorrect format. Please see valid format definition at <a target='_blank' href='https://github.com/dpinney/omf/wiki/Models-~-demandResponse#walkthrough'>OMF Wiki demandResponse</a>"
-		raise Exception(errorMessage)
-
+    # - Write loadShape.csv
+	load_df = pd.read_csv(StringIO(inputDict['loadShape']), header=None)
+	if load_df.shape[0] != 8760:
+		raise Exception("Loadshape CSV file is incorrect format. Please see valid format definition at <a target='_blank' href='https://github.com/dpinney/omf/wiki/Models-~-demandResponse#walkthrough'>OMF Wiki demandResponse</a>")
+	with (Path(modelDir).resolve(True) / 'loadShape.csv').open('w') as f:
+		f.write(inputDict['loadShape'])
+    # - Write criticalLoadShape.csv
+	critical_load_df = pd.read_csv(StringIO(inputDict['criticalLoadShape']), header=None)
+	if critical_load_df.shape[0] != 8760:
+		raise Exception("Critical Loadshape CSV file is incorrect format. Please see valid format definition at <a target='_blank' href='https://github.com/dpinney/omf/wiki/Models-~-demandResponse#walkthrough'>OMF Wiki demandResponse</a>")
+	with (Path(modelDir).resolve(True) / 'criticalLoadShape.csv').open('w') as f:
+		f.write(inputDict['criticalLoadShape'])
 	latitude = float(inputDict['latitude'])
 	longitude = float(inputDict['longitude'])
 	energyCost = float(inputDict['energyCost'])
@@ -80,7 +59,6 @@ def work(modelDir, inputDict):
 	year = int(inputDict['year'])
 	analysisYears = int(inputDict['analysisYears'])
 	discountRate = float(inputDict['discountRate'])
-	criticalLoadFactor = float(inputDict['criticalLoadFactor'])
 	solarMacrsOptionYears = int(inputDict['solarMacrsOptionYears'])
 	windMacrsOptionYears = int(inputDict['windMacrsOptionYears'])
 	batteryMacrsOptionYears = int(inputDict['batteryMacrsOptionYears'])
@@ -126,11 +104,6 @@ def work(modelDir, inputDict):
 		solarCanCurtail = True
 	elif inputDict['solarCanCurtail'] == "false":
 		solarCanCurtail = False
-	userCriticalLoadShape = bool(inputDict['userCriticalLoadShape'])
-	if inputDict['userCriticalLoadShape'] == "true":
-		userCriticalLoadShape = True
-	elif inputDict['userCriticalLoadShape'] == "false":
-		userCriticalLoadShape = False
 	dieselMax = float(inputDict['dieselMax'])
 	dieselMin = float(inputDict['dieselMin'])
 	dieselFuelCostGal = float(inputDict['dieselFuelCostGal'])
@@ -138,30 +111,15 @@ def work(modelDir, inputDict):
 	dieselOMCostKw = float(inputDict['dieselOMCostKw'])
 	dieselOMCostKwh = float(inputDict['dieselOMCostKwh'])
 	dieselOnlyRunsDuringOutage = bool(inputDict['dieselOnlyRunsDuringOutage'])
-	if inputDict['dieselOnlyRunsDuringOutage'] == "true":
-		dieselOnlyRunsDuringOutage = True
-	elif inputDict['dieselOnlyRunsDuringOutage'] == "false":
-		dieselOnlyRunsDuringOutage = False
-
-	#outageStart = int(inputDict['outageStart'])
-	#outageEnd = outageStart + indexStringnt(inputDict['outageDuration'])
-	#if outageEnd > 8759:
-		#outageEnd = 8759
-	#singleOutage = True
-	#if str(inputDict['outageType']) == 'annual':
-		#singleOutage = False
-	
-	loadShape = np.array(loadShape)
-	criticalLoadShape = np.array(criticalLoadShape)
+	loadShape = np.array(load_df)
+	criticalLoadShape = np.array(critical_load_df)
 	numRows = loadShape.shape[0]
 	numCols = loadShape.shape[1]
 	outData['numScenarios'] = numCols+1
-
 	totalLoad = np.zeros(numRows)
 	totalCriticalLoad = np.zeros(numRows)
 	for i in range(0,1+numCols):
 		indexString = str(i+1)
-
 		if i == numCols:
 			load = totalLoad
 			criticalLoad = totalCriticalLoad
@@ -170,12 +128,10 @@ def work(modelDir, inputDict):
 			# print(type(load), load[0], load )
 			load = [float(x) for x in load]
 			totalLoad = np.add(totalLoad, load)
-
 			criticalLoad = criticalLoadShape[:,i]
 			# print(type(load), load[0], load )
 			criticalLoad = [float(x) for x in criticalLoad]
 			totalCriticalLoad = np.add(totalCriticalLoad, criticalLoad)
-
 		jsonifiableLoad = list(load)
 		jsonifiableCriticalLoad = list(criticalLoad)
 
@@ -261,64 +217,54 @@ def work(modelDir, inputDict):
 		# 	scenario['Scenario']['Site']['ElectricTariff']['blended_monthly_rates_us_dollars_per_kwh'] = energyCostMonthly
 		# 	scenario['Scenario']['Site']['ElectricTariff']['blended_monthly_demand_charges_us_dollars_per_kw'] = demandCostMonthly
 		# solar and battery have default 'max_kw' == 1000000000; Wind has default 'max_kw' == 0 and thus must be set explicitly; Check https://developer.nrel.gov/docs/energy-optimization/reopt-v1 for updates
+		scenario['PV']['existing_kw'] = solarExisting
 		if solar == 'off':
 			scenario['PV']['max_kw'] = 0
 		elif solar == 'on':
 			scenario['PV']['max_kw'] = solarMax
-			scenario['PV']['existing_kw'] = solarExisting
 			scenario['ElectricLoad']['loads_kw_is_net'] = False
 			# To turn off energy export/net-metering, set wholesaleCost to "0" and excess PV gen will be curtailed
 			if solarCanExport == False:
 				#scenario['Scenario']['ElectricTariff']["wholesale_rate_above_site_load_us_dollars_per_kwh"] = 0
 				scenario['ElectricTariff']['wholesale_rate'] = 0
 				#["wholesale_rate_us_dollars_per_kwh"] = 0
-		if wind == 'off':
-			scenario['Wind']['max_kw'] = 0
-		elif wind == 'on':
-			scenario['Wind']['max_kw'] = windMax
-		if battery == 'off':
-			scenario['ElectricStorage']['max_kw'] = 0
-			scenario['ElectricStorage']['max_kwh'] = 0 #May not be a needed constraint, even though it is stated as such in the NREL docs
-		elif battery == 'on':
-			scenario['ElectricStorage']['max_kw'] = batteryPowerMax
-			scenario['ElectricStorage']['max_kwh'] = batteryCapacityMax
+		scenario['Wind']['max_kw'] = windMax
+		scenario['ElectricStorage']['max_kw'] = batteryPowerMax
+		scenario['ElectricStorage']['max_kwh'] = batteryCapacityMax
 		# if outage_start_hour is > 0, a resiliency optimization that includes diesel is triggered
 		run_outages = True if outage_start_hour != 0 else False
-		if run_outages:
-			#scenario['Scenario']['LoadProfile']['outage_is_major_event'] = True
-			scenario['ElectricLoad']['critical_load_fraction'] = criticalLoadFactor
-			#['LoadProfile']['critical_load_pct'] = criticalLoadFactor
-			scenario['ElectricUtility'] = {}
-			scenario['ElectricUtility']['outage_start_time_step'] = outage_start_hour
-			#['LoadProfile']['outage_start_time_step'] = outage_start_hour
-			scenario['ElectricUtility']['outage_end_time_step'] = outage_end_hour
-			#['LoadProfile']['outage_end_time_step'] = outage_end_hour
-			scenario['Generator']['fuel_avail_gal'] = fuelAvailable
-			scenario['Generator']['min_turn_down_fraction'] = minGenLoading
-			#['min_turn_down_pct'] = minGenLoading
-			scenario['Generator']['existing_kw'] = genExisting
-			scenario['Generator']['fuel_cost_per_gallon'] = dieselFuelCostGal
-			#['diesel_fuel_cost_us_dollars_per_gallon'] = dieselFuelCostGal
-			scenario['Generator']['emissions_factor_lb_CO2_per_gal'] = dieselCO2Factor
-			scenario['Generator']['om_cost_per_kw'] = dieselOMCostKw
-			#['om_cost_us_dollars_per_kw'] = dieselOMCostKw
-			scenario['Generator']['om_cost_per_kwh'] = dieselOMCostKwh
-			#['om_cost_us_dollars_per_kwh'] = dieselOMCostKwh
-			# use userCriticalLoadShape only if True, else model defaults to criticalLoadFactor
-			if userCriticalLoadShape == True:
-				scenario['ElectricLoad']['critical_loads_kw'] = jsonifiableCriticalLoad
-			# diesel has a quirk in how it gets inputted to REopt such that when strictly specified, allOutputData["sizeDiesel1"] = allInputData['dieselMax'] + allInputData['genExisting']
-			#todo: check if still true for reopt.jl
-			if dieselMax - genExisting > 0:
-				scenario['Generator']['max_kw'] = dieselMax - genExisting
-			else:
-				scenario['Generator']['max_kw'] = 0
-			if dieselMin - genExisting > 0:
-				scenario['Generator']['min_kw'] = dieselMin - genExisting
-			else:
-				scenario['Generator']['min_kw'] = 0
-			#adding outage results (REopt.jl)
-			#scenario['ElectricUtility']['outage_durations'] = [ outage_duration ] #not sure if correct
+		if outage_start_hour == 0:
+			outage_end_hour = 0
+		#scenario['Scenario']['LoadProfile']['outage_is_major_event'] = True
+		scenario['ElectricUtility'] = {}
+		scenario['ElectricUtility']['outage_start_time_step'] = outage_start_hour
+		#['LoadProfile']['outage_start_time_step'] = outage_start_hour
+		scenario['ElectricUtility']['outage_end_time_step'] = outage_end_hour
+		#['LoadProfile']['outage_end_time_step'] = outage_end_hour
+		scenario['Generator']['fuel_avail_gal'] = fuelAvailable
+		scenario['Generator']['min_turn_down_fraction'] = minGenLoading
+		#['min_turn_down_pct'] = minGenLoading
+		scenario['Generator']['existing_kw'] = genExisting
+		scenario['Generator']['fuel_cost_per_gallon'] = dieselFuelCostGal
+		#['diesel_fuel_cost_us_dollars_per_gallon'] = dieselFuelCostGal
+		scenario['Generator']['emissions_factor_lb_CO2_per_gal'] = dieselCO2Factor
+		scenario['Generator']['om_cost_per_kw'] = dieselOMCostKw
+		#['om_cost_us_dollars_per_kw'] = dieselOMCostKw
+		scenario['Generator']['om_cost_per_kwh'] = dieselOMCostKwh
+		#['om_cost_us_dollars_per_kwh'] = dieselOMCostKwh
+		scenario['ElectricLoad']['critical_loads_kw'] = jsonifiableCriticalLoad
+		# diesel has a quirk in how it gets inputted to REopt such that when strictly specified, allOutputData["sizeDiesel1"] = allInputData['dieselMax'] + allInputData['genExisting']
+		#todo: check if still true for reopt.jl
+		if dieselMax - genExisting > 0:
+			scenario['Generator']['max_kw'] = dieselMax - genExisting
+		else:
+			scenario['Generator']['max_kw'] = 0
+		if dieselMin - genExisting > 0:
+			scenario['Generator']['min_kw'] = dieselMin - genExisting
+		else:
+			scenario['Generator']['min_kw'] = 0
+		#adding outage results (REopt.jl)
+		#scenario['ElectricUtility']['outage_durations'] = [ outage_duration ] #not sure if correct
 
 		# set rates
 		if urdbLabelSwitch == 'off':
@@ -334,7 +280,7 @@ def work(modelDir, inputDict):
 			json.dump(scenario, jsonFile)
 
 		# Run REopt API script *** => switched to REopt.jl
-		reopt_jl.run_reopt_jl(modelDir, "Scenario_test_POST.json", outages=run_outages, max_runtime_s = 1000 )
+		reopt_jl.run_reopt_jl(modelDir, "Scenario_test_POST.json", outages=run_outages, max_runtime_s = 1000)
 		with open(pJoin(modelDir, 'results.json')) as jsonFile:
 			results = json.load(jsonFile)
 
@@ -433,7 +379,7 @@ def work(modelDir, inputDict):
 		outData['macrsFiveYear' + indexString] = reopt_inputs['s']['financial']['macrs_five_year']
 		outData['macrsSevenYear' + indexString] = reopt_inputs['s']['financial']['macrs_seven_year']
 
-		if solar == 'on':
+		if 'PV' in results:
 			outData['sizePV' + indexString] = results['PV']['size_kw']
 			outData['sizePVRounded' + indexString] = round(results['PV']['size_kw'],1)
 			outData['powerPVToBattery' + indexString] = results['PV']['electric_to_storage_series_kw']#['year_one_to_battery_series_kw']
@@ -481,8 +427,8 @@ def work(modelDir, inputDict):
 		else:
 			outData['sizePV' + indexString] = 0
 			outData['sizePVRounded' + indexString] = 0
-		
-		if battery == 'on':
+
+		if 'ElectricStorage' in results:
 			outData['powerBattery' + indexString] = results['ElectricStorage']['size_kw']
 			#['Storage']['size_kw']
 			outData['powerBatteryRounded' + indexString] = round(results['ElectricStorage']['size_kw'],1)
@@ -531,8 +477,8 @@ def work(modelDir, inputDict):
 			outData['capacityBattery' + indexString] = 0
 			outData['powerBatteryRounded' + indexString] = 0
 			outData['capacityBatteryRounded' + indexString] = 0
-		
-		if wind == 'on':
+
+		if 'Wind' in results:
 			outData['sizeWind' + indexString] = results['Wind']['size_kw']
 			outData['sizeWindRounded' + indexString] = round(results['Wind']['size_kw'],1)
 			outData['powerWindToBattery' + indexString] = results['Wind']['electric_to_storage_series_kw']
@@ -772,7 +718,7 @@ def work(modelDir, inputDict):
 		write_table(proforma_tax_insurance, "TAX AND INSURANCE PARAMETERS",excel_row,excel_col)
 		excel_row += len(proforma_tax_insurance) + 2
 
-		if solar == "on":
+		if 'PV' in results:
 			proforma_tax_credits = [
 				#note: removing values from table that are not included in reopt.jl calculations
 				['Investment tax credit (ITC)', '' ],
@@ -801,7 +747,7 @@ def work(modelDir, inputDict):
 			write_table(proforma_cash_incentives, 'PV DIRECT CASH INCENTIVES',excel_row,excel_col)
 			excel_row += len(proforma_cash_incentives) + 2
 		
-		if wind == "on":
+		if 'Wind' in results:
 			proforma_tax_credits = [
 				['Investment tax credit (ITC)', '' ],
                 ['As percentage', '%' ],
@@ -826,7 +772,7 @@ def work(modelDir, inputDict):
 			write_table(proforma_cash_incentives, 'WIND DIRECT CASH INCENTIVES',excel_row,excel_col)
 			excel_row += len(proforma_cash_incentives) + 2
 
-		if battery == "on":
+		if 'ElectricStorage' in results:
 			proforma_tax_credits = [
 				['Investment tax credit (ITC)', '' ],
                 ['As percentage', '%' ],
@@ -855,15 +801,15 @@ def work(modelDir, inputDict):
 			depreciation_proforma[1].append(years)
 			depreciation_proforma[2].append(bonus_fraction)
 		
-		if solar == "on":
+		if 'PV' in results:
 			pv_bonus_fraction = outData['pvMacrsBonusFraction' + indexString]
 			add_to_depreciation_proforma("PV",str(solarMacrsOptionYears), pv_bonus_fraction)
 			
-		if battery == "on":
+		if 'ElectricStorage' in results:
 			battery_bonus_fraction = outData['batteryMacrsBonusFraction' + indexString]
 			add_to_depreciation_proforma("BATTERY",str(batteryMacrsOptionYears), battery_bonus_fraction)
 			
-		if wind == "on":
+		if 'Wind' in results:
 			wind_bonus_fraction = outData['windMacrsBonusFraction' + indexString]
 			add_to_depreciation_proforma("WIND", str(windMacrsOptionYears), wind_bonus_fraction)
 			
@@ -953,15 +899,15 @@ def work(modelDir, inputDict):
 		powerGridToLoad = makeGridLine(x_values,outData['powerGridToLoad' + indexString],'blue','Load met by Grid')
 		plotData.append(powerGridToLoad)
 
-		if solar == 'on':
+		if 'PV' in results:
 			powerPVToLoad = makeGridLine(x_values,outData['powerPVToLoad' + indexString],'yellow','Load met by Solar')
 			plotData.append(powerPVToLoad)
 
-		if battery == 'on':
+		if 'ElectricStorage' in results:
 			powerBatteryToLoad = makeGridLine(x_values,outData['powerBatteryToLoad' + indexString],'gray','Load met by Battery')
 			plotData.append(powerBatteryToLoad)
 
-		if wind == 'on':
+		if 'Wind' in results:
 			powerWindToLoad = makeGridLine(x_values,outData['powerWindToLoad' + indexString],'purple','Load met by Wind')
 			plotData.append(powerWindToLoad)
 
@@ -975,7 +921,7 @@ def work(modelDir, inputDict):
 		outData["plotlyLayout"] = json.dumps(plotlyLayout, cls=plotly.utils.PlotlyJSONEncoder)
 
 		plotData = []
-		if solar == 'on':
+		if 'PV' in results:
 			powerPVToLoad = makeGridLine(x_values,outData['powerPVToLoad' + indexString],'yellow','Solar used to meet Load')
 			plotData.append(powerPVToLoad)
 
@@ -985,7 +931,7 @@ def work(modelDir, inputDict):
 			powerPVCurtailed = makeGridLine(x_values,outData['powerPVCurtailed' + indexString],'red','Solar power curtailed')
 			plotData.append(powerPVCurtailed)
 
-			if battery == 'on':
+			if 'ElectricStorage' in results:
 				powerPVToBattery = makeGridLine(x_values,outData['powerPVToBattery' + indexString],'gray','Solar used to charge Battery')
 				plotData.append(powerPVToBattery)
 
@@ -1000,11 +946,11 @@ def work(modelDir, inputDict):
 
 			
 		plotData = []
-		if wind == 'on':
+		if 'Wind' in results:
 			powerWindToLoad = makeGridLine(x_values,outData['powerWindToLoad' + indexString],'purple','Wind used to meet Load')
 			plotData.append(powerWindToLoad)
 
-			if battery == 'on':
+			if 'ElectricStorage' in results:
 				powerWindToBattery = makeGridLine(x_values,outData['powerWindToBattery' + indexString],'gray','Wind used to charge Battery')
 				plotData.append(powerWindToBattery)
 
@@ -1022,7 +968,7 @@ def work(modelDir, inputDict):
 			powerDieselToLoad = makeGridLine(x_values,outData['powerDieselToLoad' + indexString],'brown','Fossil Gen used to meet Load')
 			plotData.append(powerDieselToLoad)
 
-			if battery == 'on':
+			if 'ElectricStorage' in results:
 				powerDieselToBattery = makeGridLine(x_values,outData['powerDieselToBattery' + indexString],'gray','Fossil Gen used to charge Battery')
 				plotData.append(powerDieselToBattery)
 
@@ -1036,15 +982,15 @@ def work(modelDir, inputDict):
 		outData["dieselData"  + indexString] = json.dumps(plotData, cls=plotly.utils.PlotlyJSONEncoder)
 
 		plotData = []
-		if battery == 'on':
+		if 'ElectricStorage' in results:
 			powerGridToBattery = makeGridLine(x_values,outData['powerGridToBattery' + indexString],'blue','Grid')
 			plotData.append(powerGridToBattery)
 
-			if solar == 'on':
+			if 'PV' in results:
 				powerPVToBattery = makeGridLine(x_values,outData['powerPVToBattery' + indexString],'yellow','Solar')
 				plotData.append(powerPVToBattery)
 
-			if wind == 'on':
+			if 'Wind' in results:
 				powerWindToBattery = makeGridLine(x_values,outData['powerWindToBattery' + indexString],'purple','Wind')
 				plotData.append(powerWindToBattery)
 
@@ -1056,7 +1002,7 @@ def work(modelDir, inputDict):
 		outData["batteryData" + indexString] = json.dumps(plotData, cls=plotly.utils.PlotlyJSONEncoder)
 			
 		plotData = []
-		if battery == 'on':
+		if 'ElectricStorage' in results:
 			chargeLevelBattery = go.Scatter(
 				x=pd.to_datetime(x, unit = 'h', origin = pd.Timestamp(f'{year}-01-01')),
 				y=outData['chargeLevelBattery' + indexString],
@@ -1107,7 +1053,6 @@ def new(modelDir):
 	fName = "input - 200 Employee Office, Springfield Illinois, 2001.csv"
 	with open(pJoin(omf.omfDir, "static", "testFiles", fName)) as f:
 		load_shape = f.read()
-
 	cfName = "critical_load_test.csv"
 	with open(pJoin(omf.omfDir, "static", "testFiles", cfName)) as f:
 		crit_load_shape = f.read()
@@ -1164,8 +1109,6 @@ def new(modelDir):
 		"batteryCapacityMax": "1000000",
 		"dieselMax": "100000",
 		"solarExisting": 0,
-		"userCriticalLoadShape": False,
-		"criticalLoadFactor": ".5",
 		"outage_start_hour": "500",
 		"outageDuration": "24",
 		"fuelAvailable": "20000",
