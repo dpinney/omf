@@ -8,6 +8,8 @@ import plotly.graph_objects as go
 import pandas as pd
 import numpy as np
 from pathlib import Path
+import time
+
 # OMF imports
 import omf
 from omf.models import __neoMetaModel__
@@ -58,6 +60,7 @@ def run_ami_algorithm(modelDir, inputDict, outData):
 		raise Exception(errorMessage)
 	outputPath = Path(modelDir, 'mohcaOutput.csv')
 	mohcaOutput = []
+	mohca_start_time = time.time()
 	if inputDict[ "mohcaAlgorithm" ] == "sandia1":
 		mohcaOutput = mohca_cl.sandia1( inputPath, outputPath )
 	elif inputDict[ "mohcaAlgorithm" ] == "sandia2":
@@ -65,6 +68,7 @@ def run_ami_algorithm(modelDir, inputDict, outData):
 	else:
 		errorMessage = "Algorithm name error"
 		raise Exception(errorMessage)
+	mohca_end_time = time.time()
 	mohcaResults = mohcaOutput[0].rename(columns={'kW_hostable': 'voltage_cap_kW'})
 	mohcaHistogramFigure = px.histogram( mohcaResults, x='voltage_cap_kW', template="simple_white", color_discrete_sequence=["MediumPurple"] )
 	mohcaHistogramFigure.update_layout(bargap=0.5)
@@ -77,6 +81,8 @@ def run_ami_algorithm(modelDir, inputDict, outData):
 	outData['mohcaBarChartFigure'] = json.dumps( mohcaBarChartFigure, cls=py.utils.PlotlyJSONEncoder )
 	outData['mohcaHCTableHeadings'] = mohcaResults.columns.values.tolist()
 	outData['mohcaHCTableValues'] = ( list(mohcaResults.sort_values( by="max_cap_allowed_kW", ascending=False, ignore_index=True ).itertuples(index=False, name=None)) )
+	outData['mohcaRuntime'] = mohca_end_time - mohca_start_time
+
 
 def run_traditional_algorithm(modelDir, inputDict, outData):
 	# traditional hosting capacity if they uploaded an omd circuit file and chose to use it.
@@ -86,7 +92,9 @@ def run_traditional_algorithm(modelDir, inputDict, outData):
 	tree = opendss.dssConvert.omdToTree(path_to_omd)
 	opendss.dssConvert.treeToDss(tree, Path(modelDir, 'circuit.dss'))
 	curr_dir = os.getcwd()
+	traditional_start_time = time.time()
 	traditionalHCResults = opendss.hosting_capacity_all(Path(modelDir, 'circuit.dss'), int(inputDict["traditionalHCMaxTestkw"]))
+	traditional_end_time = time.time()
 	# - opendss.hosting_capacity_all() changes the cwd, so change it back so other code isn't affected
 	os.chdir(curr_dir)
 	tradHCDF = pd.DataFrame(traditionalHCResults)
@@ -127,6 +135,8 @@ def run_traditional_algorithm(modelDir, inputDict, outData):
 	outData['traditionalGraphData'] = json.dumps(traditionalHCFigure, cls=py.utils.PlotlyJSONEncoder )
 	outData['traditionalHCTableHeadings'] = tradHCDF.columns.values.tolist()
 	outData['traditionalHCTableValues'] = (list(tradHCDF.itertuples(index=False, name=None)))
+	outData['traditionalRuntime'] = traditional_end_time - traditional_start_time
+
 
 def runtimeEstimate(modelDir):
 	''' Estimated runtime of model in minutes. '''
@@ -135,7 +145,7 @@ def runtimeEstimate(modelDir):
 def new(modelDir):
 	''' Create a new instance of this model. Returns true on success, false on failure. '''
 	meter_file_name = 'mohcaInputCustom.csv'
-	meter_file_path = Path(omf.omfDir,'static','testFiles', meter_file_name)
+	meter_file_path = Path(omf.omfDir,'static','testFiles', 'hostingCapacity', meter_file_name)
 	meter_file_contents = open(meter_file_path).read()
 	defaultInputs = {
 		"modelType": modelName,

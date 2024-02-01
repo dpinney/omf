@@ -59,6 +59,7 @@ def work(modelDir, inputDict):
 	year = int(inputDict['year'])
 	analysisYears = int(inputDict['analysisYears'])
 	discountRate = float(inputDict['discountRate'])
+	max_runtime = int(inputDict['maxRuntimeSeconds'])
 	solarMacrsOptionYears = int(inputDict['solarMacrsOptionYears'])
 	windMacrsOptionYears = int(inputDict['windMacrsOptionYears'])
 	batteryMacrsOptionYears = int(inputDict['batteryMacrsOptionYears'])
@@ -280,7 +281,7 @@ def work(modelDir, inputDict):
 			json.dump(scenario, jsonFile)
 
 		# Run REopt API script *** => switched to REopt.jl
-		reopt_jl.run_reopt_jl(modelDir, "Scenario_test_POST.json", outages=run_outages, max_runtime_s = 1000)
+		reopt_jl.run_reopt_jl(modelDir, "Scenario_test_POST.json", outages=run_outages, max_runtime_s = max_runtime )
 		with open(pJoin(modelDir, 'results.json')) as jsonFile:
 			results = json.load(jsonFile)
 
@@ -294,6 +295,10 @@ def work(modelDir, inputDict):
 
 		end_time = time.time()
 		print(f'reopt_jl solver runtime: {end_time - start_time} seconds')
+		
+		outData['solverStatus' + indexString] = results['status']
+		outData['hitTimeout' + indexString] = True if results['status'] == "timed-out" else False
+		outData['solverSeconds' + indexString] = results['solver_seconds']
 
 		#resultsSubset = results['outputs']['Scenario']['Site']
 		outData['demandCostBAU' + indexString] = results['ElectricTariff']['lifecycle_demand_cost_after_tax_bau']#['total_demand_cost_bau_us_dollars']
@@ -868,7 +873,7 @@ def work(modelDir, inputDict):
 		write_table(annual_values_proforma,"",excel_row,excel_col)
 		excel_row += len(annual_values_proforma) + 1
 
-		workbook.save(f'{modelDir}/ProForma.xlsx')
+		workbook.save(os.path.join(modelDir,"ProForma.xlsx"))
 
 		#helper function for generating output graphs
 		def makeGridLine(x,y,color,name):
@@ -1072,6 +1077,7 @@ def new(modelDir):
 		"analysisYears" : '25',
 		"discountRate" : '0.083', # Nominal energy offtaker discount rate. In single ownership model the offtaker is also the generation owner
         "solverTolerance": "0.05", # The threshold for the difference between the solution's objective value and the best possible value at which the solver terminates
+		"maxRuntimeSeconds": "240",
 		"energyCost" : "0.1",
 		"demandCost" : '20',
 		"urdbLabelSwitch": "off",

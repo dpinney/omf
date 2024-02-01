@@ -1,12 +1,3 @@
-#
-# Changes exclusive to the OMF
-#
-# In PlotNumFlaggedTrans_ThresholdSweep():
-#   commented out the plt.show()
-#   removed adding the timestamp to the correlation coefficient image name
-# In ImprovementAnalysis():
-# added index=False to the CSV outputs at the end for easier display of outputs
-
 # -*- coding: utf-8 -*-
 """
 BSD 3-Clause License

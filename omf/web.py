@@ -459,6 +459,11 @@ def runModel():
 	modelName = pData["modelName"]
 	del pData["modelName"]
 	modelDir = os.path.join(_omfDir, "data", "Model", user, modelName)
+	# File upload handling
+	# print('REGULAR DATA', pData)
+	# print('FILEZ?', len(request.files), request.files)
+	# if len(request.files) > 0:
+	# 	print('JENNY CODE')
 	# Get existing model viewers and add them to pData if they exist, then write pData to update allInputData.json
 	filepath = os.path.join(modelDir, "allInputData.json")
 	with locked_open(filepath, 'r+') as f:
