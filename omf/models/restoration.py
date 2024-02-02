@@ -458,8 +458,19 @@ def validateSettingsFile(settingsFile):
 		return 'Corrupted Settings file input, generating default settings'
 
 def outageIncidenceGraph(tree, customerOutageData, outputTimeline, startTime, numTimeSteps, loadPriorityFilePath):
-	# TODO: Rename function and write docstring
-	
+	'''	Returns a plotly figure displaying a graph of outage incidences over the course of the event data.
+		Unweighted outage incidence at each timestep is calculated as (num loads experiencing outage)/(num loads).
+		A load is considered to be "experiencing an outage" at a particular timestep if its "loadBefore" value 
+		in outputTimeline is "offline". The last x-value on the graph is the exception, with its value corresponding
+		to the "loadAfter" values on the same timestep as the x-value.
+		E.g. loadBefore 0, loadBefore 1, ... , loadBefore 23, loadAfter 23
+
+		Weighted outage incidence is calculated similarly, but with loads being weighted in the calculation based
+		on their priority given in the Load Priorities JSON file that can be provided as input to the model.
+		If a load does not have a priority assigned to it, it is assigned a default priority of 1. 
+	'''
+	# TODO: Rename function
+
 	# generate a list of all loads
 	loadList = []
 	for key in tree.keys():
@@ -476,11 +487,14 @@ def outageIncidenceGraph(tree, customerOutageData, outputTimeline, startTime, nu
 	for loadName in loadList:
 		dfMini = df[df['device'] == loadName].set_index('time')
 		lastRecordedTimeStep = 0
+		recordedTimeStepReached = False
+		#lastRecordedTimestep and recordedTimeStepReached are separate variables instead of lastRecordedTimeStep starting = -1 and testing for that so that the function still works with strange starting times like -1
 		for timeStep in timeList:
 			if timeStep in dfMini.index:
 				dfStatus.at[timeStep,loadName] = statusMapping.get(dfMini.at[timeStep,'loadBefore'])
 				lastRecordedTimeStep = timeStep
-			elif timeStep != timeList[0] and not dfMini.empty:
+				recordedTimeStepReached = True
+			elif recordedTimeStepReached and not dfMini.empty:
 				dfStatus.at[timeStep,loadName] = statusMapping.get(dfMini.at[lastRecordedTimeStep,'loadAfter'])
 			else:
 				dfStatus.at[timeStep,loadName] = statusMapping.get('online')
@@ -582,7 +596,7 @@ def makeMicrogridLoadsCSV(pathToOmd, workDir):
 		if ob['object'] == 'load':
 			loadMicrogridDict[ob['name']] = busMicrogridDict[ob['parent']]
 	
-	with open(pJoin(workDir,'microgridAssignments.csv'), 'w', newline='') as file:
+	with open(pJoin(workDir,'microgridAssignmentOutputs.csv'), 'w', newline='') as file:
 		writer = csv.writer(file)
 		writer.writerow(['load name','microgrid_id'])
 		for loadName,mg_id in loadMicrogridDict.items():
