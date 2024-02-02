@@ -1,0 +1,21 @@
+[
+    {
+        "event_data": {
+            "status": 1,
+            "dispatchable": false,
+            "type": "breaker",
+            "state": "open"
+        },
+        "timestep": 1,
+        "affected_asset": "line.cb_201",
+        "event_type": "switch"
+    },
+    {
+        "event_data": {
+            "dispatchable": true
+        },
+        "timestep": 12,
+        "affected_asset": "line.cb_201",
+        "event_type": "switch"
+    }
+]
