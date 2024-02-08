@@ -32,17 +32,15 @@ def work(modelDir, inputDict):
 
 	voltageInputPathCSV = Path( modelDir, inputDict['voltageDataFileName'])
 	realPowerInputPathCSV = Path( modelDir, inputDict['realPowerDataFileName'])
-	reactivePowerInputPathCSV = Path( modelDir, inputDict['reactivePowerDataFileName'])
 	custIDInputPathCSV = Path( modelDir, inputDict['customerIDDataFileName'])
+	reactivePowerInputPathCSV = Path( modelDir, inputDict['reactivePowerDataFileName'])
+	custLatLongInputPathCSV = Path( modelDir, inputDict['customerLatLongDataFileName'])
 
 	if voltageInputPathCSV.exists() == False:
 		voltageInputPathCSV = Path( test_data_file_path, inputDict['voltageDataFileName'])
 
 	if realPowerInputPathCSV.exists() == False:
 		realPowerInputPathCSV = Path( test_data_file_path, inputDict['realPowerDataFileName'])
-
-	if reactivePowerInputPathCSV.exists() == False:
-			reactivePowerInputPathCSV = Path( test_data_file_path, inputDict['reactivePowerDataFileName'])
 
 	if custIDInputPathCSV.exists() == False:
 		custIDInputPathCSV = Path( test_data_file_path, inputDict['customerIDDataFileName'])
@@ -56,8 +54,22 @@ def work(modelDir, inputDict):
 
 	saveResultsPath = modelDir
 
-	sdsmc.MeterTransformerPairing.TransformerPairing.run( voltageInputPathCSV, realPowerInputPathCSV, reactivePowerInputPathCSV, custIDInputPathCSV, transformerLabelsErrorsPathCSV, transformerLabelsTruePath, saveResultsPath, useTrueLabels )
-	
+	if inputDict['algorithm'] == 'reactivePower':
+		if reactivePowerInputPathCSV.exists() == False:
+			reactivePowerInputPathCSV = Path( test_data_file_path, inputDict['reactivePowerDataFileName'])
+		sdsmc.MeterTransformerPairing.TransformerPairing.run( voltageInputPathCSV, realPowerInputPathCSV, reactivePowerInputPathCSV, custIDInputPathCSV, transformerLabelsErrorsPathCSV, transformerLabelsTruePath, saveResultsPath, useTrueLabels )
+
+	elif inputDict['algorithm'] == 'customerLatLong':
+		if custLatLongInputPathCSV.exists() == False:
+			custLatLongInputPathCSV = Path( test_data_file_path, inputDict['customerLatLongDataFileName'])
+		sdsmc.MeterTransformerPairing.TransformerPairingWithDist.run( voltageInputPathCSV, realPowerInputPathCSV, custIDInputPathCSV, transformerLabelsErrorsPathCSV, custLatLongInputPathCSV, transformerLabelsTruePath, saveResultsPath, useTrueLabels )
+
+	else:
+		errorMessage = "Algorithm Choice Error"
+		raise Exception(errorMessage)
+
+	# The outputs for the customerLatLong version have _NoQ at the end of the output files. I removed it for outputs_ChangedCustomers_M2T
+
 	changedCustomersDF = pd.read_csv( Path(modelDir, "outputs_ChangedCustomers_M2T.csv") )
 	outData['customerTableHeadings'] = changedCustomersDF.columns.values.tolist()
 	outData['customerTableValues'] = ( list(changedCustomersDF.sort_values( by="customer ID", ascending=True, ignore_index=True ).itertuples(index=False, name=None)))
@@ -83,16 +95,23 @@ def new(modelDir):
 
 	# Default file names from static/testFiles/
 	voltage_file_name = 'voltageData_AMI.csv'
-	reactive_power_file_name = 'reactivePowerData_AMI.csv'
 	real_power_file_name = 'realPowerData_AMI.csv'
 	customer_ids_file_name = 'CustomerIDs_AMI.csv'
 
+	reactive_power_file_name = 'reactivePowerData_AMI.csv'
+	customer_latlong_file_name = 'CustomerLatLon.csv'
+
+	# Default options: reactivePower, customerLatLong
+	defaultAlgorithm = "reactivePower"
+
 	defaultInputs = {
 		"modelType": modelName,
+		"algorithm": defaultAlgorithm,
 		"voltageDataFileName": voltage_file_name,
 		"realPowerDataFileName": real_power_file_name,
-		"reactivePowerDataFileName": reactive_power_file_name,
 		"customerIDDataFileName": customer_ids_file_name,
+		"reactivePowerDataFileName": reactive_power_file_name,
+		"customerLatLongDataFileName": customer_latlong_file_name
 	}
 
 	creationCode = __neoMetaModel__.new(modelDir, defaultInputs)

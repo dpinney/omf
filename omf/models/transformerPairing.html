@@ -3,11 +3,32 @@
 	<!-- Library Imports -->
 	<script src="{{pathPrefix}}/static/highcharts4.src.js"></script>
 	<script src="https://cdn.plot.ly/plotly-1.50.1.min.js"></script>
+
+	<style>
+		#customerLatLong { display: none; }
+	</style>
+
+	<script>
+		function toggleFileInput() {
+			var algorithm = document.getElementById("algorithm").value;
+			
+			if (algorithm === "customerLatLong") {
+					document.getElementById("customerLatLong").style.display = "block";
+					document.getElementById("reactivePower").style.display = "none";
+			}
+			else if (algorithm === "reactivePower") {
+					document.getElementById("reactivePower").style.display = "block";
+					document.getElementById("customerLatLong").style.display = "none";
+			}
+		}	
+	</script>
+
 	{% macro file_upload(fileInputID, displayNameID) -%}
 		<input type="file" id="{{fileInputID}}" name="{{fileInputID}}" accept=".csv" class="fileButton" onchange="updateFileNameDisplay('{{fileInputID}}', '{{displayNameID}}')" style="display:none"><br>
 		<label for="{{fileInputID}}" class="fileButton">Choose File</label>
 		<input id="{{displayNameID}}" name="{{displayNameID}}" value="{{ allInputDataDict[displayNameID] }}" readonly class="uploadFileName">
 	{%- endmacro %}
+
 </style>
 </head>
 <body>
@@ -48,13 +69,26 @@
 				<div>{{ file_upload('realPowerDataFile','realPowerDataFileName') }}</div>
 			</div>
 			<div class="shortInput"> 
-					<label class="tooltip">Reactive Power - AMI Data Input File <span class="classic">File type: .csv</span></label>
-					<div>{{ file_upload('reactivePowerDataFile','reactivePowerDataFileName') }}</div>
+				<label class="tooltip">Customer ID Data - AMI Data Input File <span class="classic">File type: .csv</span></label>
+				<div>{{ file_upload('customerIDDataFile','customerIDDataFileName') }}</div>
 			</div>
-			<div class="shortInput"> 
-					<label class="tooltip">Customer ID Data - AMI Data Input File <span class="classic">File type: .csv</span></label>
-					<div>{{ file_upload('customerIDDataFile','customerIDDataFileName') }}</div>
+			<br>
+			<div class="shortInput">
+				<label class="tooltip">Choose Algorithm: Customer Distance Based or Reactive Power Based/label>
+				<select id="algorithm" name="algorithm" value="{{allInputDataDict.algorithm}}" required onchange="toggleFileInput()">
+					<option value="reactivePower" {% if allInputDataDict.algorithm == 'reactivePower' %}selected{% endif %}>Reactive Power</option>
+					<option value="customerLatLong" {% if allInputDataDict.algorithm == 'customerLatLong' %}selected{% endif %}>Customer LatLong</option>
+				</select>
 			</div>
+			<br>
+			<div class="shortInput" id="customerLatLong"> 
+				<label class="tooltip">Customer Latitude & Longitutde - AMI Data Input File <span class="classic">File type: .csv</span></label>
+				<div>{{ file_upload('customerLatLongDataFile','customerLatLongDataFileName') }}</div>
+			</div>
+			<div class="shortInput" id="reactivePower"> 
+				<label class="tooltip">Reactive Power - AMI Data Input File <span class="classic">File type: .csv</span></label>
+				<div>{{ file_upload('reactivePowerDataFile','reactivePowerDataFileName') }}</div>
+			</div>	
 			<hr>
 			{{ omfModelButtons }}
 		</form>
