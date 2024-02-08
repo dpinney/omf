@@ -61,9 +61,9 @@ def run_ami_algorithm(modelDir, inputDict, outData):
 	outputPath = Path(modelDir, 'mohcaOutput.csv')
 	mohcaOutput = []
 	mohca_start_time = time.time()
-	if inputDict[ "mohcaAlgorithm" ] == "sandia1":
+	if inputDict[ "algorithm" ] == "sandia1":
 		mohcaOutput = mohca_cl.sandia1( inputPath, outputPath )
-	elif inputDict[ "mohcaAlgorithm" ] == "sandia2":
+	elif inputDict[ "algorithm" ] == "sandia2":
 		mohcaOutput = mohca_cl.sandia2( inputPath, outputPath )
 	else:
 		errorMessage = "Algorithm name error"
@@ -149,7 +149,7 @@ def new(modelDir):
 	meter_file_contents = open(meter_file_path).read()
 	defaultInputs = {
 		"modelType": modelName,
-		"mohcaAlgorithm": 'sandia1',
+		"algorithm": 'sandia1',
 		"inputDataFileName": meter_file_name,
 		"inputDataFileContent": meter_file_contents,
 		"feederName1": 'iowa240.clean.dss',

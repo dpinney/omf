@@ -56,9 +56,9 @@
 			</div>
 			<div class="shortInput">
 				<label>Algorithm</label>
-				<select id="mohcaAlgorithm" name="mohcaAlgorithm" value="{{allInputDataDict.mohcaAlgorithm}}" required>
-					<option value="sandia1" {% if allInputDataDict.mohcaAlgorithm == 'sandia1' %}selected{% endif %}>sandia1</option>
-					<option value="sandia2" {% if allInputDataDict.mohcaAlgorithm == 'sandia2' %}selected{% endif %}>sandia2</option>
+				<select id="algorithm" name="algorithm" value="{{allInputDataDict.algorithm}}" required>
+					<option value="sandia1" {% if allInputDataDict.algorithm == 'sandia1' %}selected{% endif %}>sandia1</option>
+					<option value="iastate" {% if allInputDataDict.algorithm == 'iastate' %}selected{% endif %}>iastate</option>
 				</select>
 			</div>
 			<div class="wideInput">
