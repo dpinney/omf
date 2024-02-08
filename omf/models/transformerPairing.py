@@ -28,23 +28,24 @@ def work(modelDir, inputDict):
 	useTrueLabels = True
 	outData["useTrueLabels"] = useTrueLabels
 
-	with open(Path(modelDir,inputDict['voltageInputDataFileName']),'w', newline='') as pv_stream:
-		pv_stream.write(inputDict['voltageInputDataFileContent'])
-	voltageInputPathCSV = Path(modelDir, inputDict['voltageInputDataFileName'])
-
-	with open(Path(modelDir,inputDict['realPowerInputDataFileName']),'w', newline='') as pv_stream:
-		pv_stream.write(inputDict['realPowerInputDataFileContent'])
-	realPowerInputPathCSV = Path(modelDir, inputDict['realPowerInputDataFileName'])
-
-	with open(Path(modelDir,inputDict['reactivePowerInputDataFileName']),'w', newline='') as pv_stream:
-		pv_stream.write(inputDict['reactivePowerInputDataFileContent'])
-	reactivePowerInputPathCSV = Path(modelDir, inputDict['reactivePowerInputDataFileName'])
-
-	with open(Path(modelDir,inputDict['customerIDInputDataFileName']),'w', newline='') as pv_stream:
-		pv_stream.write(inputDict['customerIDInputDataFileContent'])
-	custIDInputPathCSV = Path(modelDir, inputDict['customerIDInputDataFileName'])
-
 	test_data_file_path = Path(omf.omfDir,'static','testFiles', 'transformerPairing')
+
+	voltageInputPathCSV = Path( modelDir, inputDict['voltageDataFileName'])
+	realPowerInputPathCSV = Path( modelDir, inputDict['realPowerDataFileName'])
+	reactivePowerInputPathCSV = Path( modelDir, inputDict['reactivePowerDataFileName'])
+	custIDInputPathCSV = Path( modelDir, inputDict['customerIDDataFileName'])
+
+	if voltageInputPathCSV.exists() == False:
+		voltageInputPathCSV = Path( test_data_file_path, inputDict['voltageDataFileName'])
+
+	if realPowerInputPathCSV.exists() == False:
+		realPowerInputPathCSV = Path( test_data_file_path, inputDict['realPowerDataFileName'])
+
+	if reactivePowerInputPathCSV.exists() == False:
+			reactivePowerInputPathCSV = Path( test_data_file_path, inputDict['reactivePowerDataFileName'])
+
+	if custIDInputPathCSV.exists() == False:
+		custIDInputPathCSV = Path( test_data_file_path, inputDict['customerIDDataFileName'])
 
 	transformer_labels_errors_file_name = 'TransformerLabelsErrors_AMI.csv'
 	transformerLabelsErrorsPathCSV = Path( test_data_file_path, transformer_labels_errors_file_name )
@@ -79,34 +80,19 @@ def runtimeEstimate(modelDir):
 
 def new(modelDir):
 	''' Create a new instance of this model. Returns true on success, false on failure. '''
-	test_data_file_path = Path(omf.omfDir,'static','testFiles', 'transformerPairing')
 
+	# Default file names from static/testFiles/
 	voltage_file_name = 'voltageData_AMI.csv'
-	voltage_file_path = Path( test_data_file_path, voltage_file_name )
-	voltage_file_contents = open( voltage_file_path).read()
-
 	reactive_power_file_name = 'reactivePowerData_AMI.csv'
-	reactive_power_file_path = Path( test_data_file_path, reactive_power_file_name )
-	reactive_power_file_contents = open(reactive_power_file_path).read()
-
 	real_power_file_name = 'realPowerData_AMI.csv'
-	real_power_file_path = Path( test_data_file_path, real_power_file_name )
-	real_power_file_contents = open(real_power_file_path).read()
-
 	customer_ids_file_name = 'CustomerIDs_AMI.csv'
-	customer_ids_file_path = Path( test_data_file_path, customer_ids_file_name )
-	customer_ids_file_contents = open(customer_ids_file_path).read()
 
 	defaultInputs = {
 		"modelType": modelName,
-		"voltageInputDataFileName": voltage_file_name,
-		"voltageInputDataFileContent": voltage_file_contents,
-		"realPowerInputDataFileName": real_power_file_name,
-		"realPowerInputDataFileContent": real_power_file_contents,
-		"reactivePowerInputDataFileName": reactive_power_file_name,
-		"reactivePowerInputDataFileContent": reactive_power_file_contents,
-		"customerIDInputDataFileName": customer_ids_file_name,
-		"customerIDInputDataFileContent": customer_ids_file_contents
+		"voltageDataFileName": voltage_file_name,
+		"realPowerDataFileName": real_power_file_name,
+		"reactivePowerDataFileName": reactive_power_file_name,
+		"customerIDDataFileName": customer_ids_file_name,
 	}
 
 	creationCode = __neoMetaModel__.new(modelDir, defaultInputs)

@@ -3,6 +3,11 @@
 	<!-- Library Imports -->
 	<script src="{{pathPrefix}}/static/highcharts4.src.js"></script>
 	<script src="https://cdn.plot.ly/plotly-1.50.1.min.js"></script>
+	{% macro file_upload(fileInputID, displayNameID) -%}
+		<input type="file" id="{{fileInputID}}" name="{{fileInputID}}" accept=".csv" class="fileButton" onchange="updateFileNameDisplay('{{fileInputID}}', '{{displayNameID}}')" style="display:none"><br>
+		<label for="{{fileInputID}}" class="fileButton">Choose File</label>
+		<input id="{{displayNameID}}" name="{{displayNameID}}" value="{{ allInputDataDict[displayNameID] }}" readonly class="uploadFileName">
+	{%- endmacro %}
 </style>
 </head>
 <body>
@@ -34,33 +39,27 @@
 			{% endif %}
 			<!-- Model Specific Inputs -->
 			<br>
-			<div class="shortInput", id="voltageData">
-					<label class="tooltip">Voltage AMI - Data Input File <span class="classic">File type: .csv</span></label>
-					<input type="file" id="voltageInputDataFileName" name="voltageInputDataFileName" accept=".csv"><br>
-					<input id="voltageDataDefault" name="voltageInputDataFileName" value="{{ allInputDataDict.voltageInputDataFileName }}" readonly class="uploadFileName">
+			<div class="shortInput">
+				<label class="tooltip">Voltage AMI - Data Input File <span class="classic">File type: .csv</span></label>
+				<div>{{ file_upload('voltageDataFile','voltageDataFileName') }}</div>
 			</div>
-			<br>
-			<div class="shortInput", id="realData">
-					<label class="tooltip">Real Power - AMI Data Input File <span class="classic">File type: .csv</span></label>
-					<input type="file" id="realPowerInputDataFileName" name="realPowerInputDataFileName" accept=".csv"><br>
-					<input id="realDataDefault" name="realPowerInputDataFileName" value="{{ allInputDataDict.realPowerInputDataFileName }}" readonly class="uploadFileName"> 
+			<div class="shortInput">
+				<label class="tooltip">Real Power - AMI Data Input File <span class="classic">File type: .csv</span></label>
+				<div>{{ file_upload('realPowerDataFile','realPowerDataFileName') }}</div>
 			</div>
-			<br>
-			<div class="shortInput", id="reactiveData"> 
+			<div class="shortInput"> 
 					<label class="tooltip">Reactive Power - AMI Data Input File <span class="classic">File type: .csv</span></label>
-					<input type="file" id="reactivePowerInputDataFileName" name="reactivePowerInputDataFileName" accept=".csv"><br>
-					<input id="reactiveDataDefault" name="reactivePowerInputDataFileName" value="{{ allInputDataDict.reactivePowerInputDataFileName }}" readonly class="uploadFileName"> 
+					<div>{{ file_upload('reactivePowerDataFile','reactivePowerDataFileName') }}</div>
 			</div>
-			<div class="shortInput", id="customerIDData"> 
+			<div class="shortInput"> 
 					<label class="tooltip">Customer ID Data - AMI Data Input File <span class="classic">File type: .csv</span></label>
-					<input type="file" id="customerIDInputDataFileName" name="customerIDInputDataFileName" accept=".csv"><br>
-					<input id="customerIDDataDefault" name="customerIDInputDataFileName" value="{{ allInputDataDict.customerIDInputDataFileName }}" readonly class="uploadFileName"> 
+					<div>{{ file_upload('customerIDDataFile','customerIDDataFileName') }}</div>
 			</div>
 			<hr>
 			{{ omfModelButtons }}
 		</form>
 	</div>
-	<!--<div id="copyrightNotice" style="width:1000px; margin:-25px auto 10px auto; padding-left:5px; color:gray">PVWatts &copy; was developed by the <a href="http://pvwatts.nrel.gov/">National Renewable Energy Lab</a></div>-->
+	<div id="copyrightNotice" style="width:1000px; margin:-25px auto 10px auto; padding-left:5px; color:gray">TransformerPairing &copy; was developed by the <a href="https://www.sandia.gov/">National Renewable Energy Lab</a></div>
 	{{ omfRunDebugBlock }}
 	{% if modelStatus == 'finished' %}
 	<style>td, th {padding:7 0 5 20;text-align: left;font-size:0.8em; border: 1px solid #cccccc;} </style>
