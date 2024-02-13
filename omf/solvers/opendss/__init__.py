@@ -275,7 +275,7 @@ def get_hosting_capacity_of_single_bus(FILE_PATH:str, BUS_NAME:str, max_test_kw:
 	# - The reported valid hosting capacity (i.e. lower_kw_bound) will be equal to the hosting capacity that causes a thermal or voltage violation
 	#   minus a value that is less than 1 kW
 	#   - E.g. a reported hosting capacity of 139.5 kW means that a violation probably occurred at 140 kW
-	while not kw_step < .5:
+	while not kw_step < .1:
 		results = check_hosting_capacity_of_single_bus(FILE_PATH, BUS_NAME, kw)
 		thermal_violation = results['thermal_violation']
 		voltage_violation = results['voltage_violation']
