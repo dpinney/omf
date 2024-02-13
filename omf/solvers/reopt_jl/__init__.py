@@ -52,7 +52,7 @@ def install_reopt_jl(system : list = platform.system()):
             os.system(command)
         build_julia_image()
         if os.path.isfile(f'{thisDir}/reopt_jl.so'):
-            os.system(f'touch {thisDir}/instantiated.txt')
+            os.system(f'touch "{thisDir}/instantiated.txt"')
             print("reopt_jl installation completed successfully")
         else:
             print("error: reopt_jl.so not found")
