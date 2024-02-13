@@ -136,6 +136,7 @@ def run_traditional_algorithm(modelDir, inputDict, outData):
 	outData['traditionalHCTableHeadings'] = tradHCDF.columns.values.tolist()
 	outData['traditionalHCTableValues'] = (list(tradHCDF.itertuples(index=False, name=None)))
 	outData['traditionalRuntime'] = traditional_end_time - traditional_start_time
+	outData['traditionalHCResults'] = traditionalHCResults
 
 
 def runtimeEstimate(modelDir):
