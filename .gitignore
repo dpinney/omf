@@ -59,3 +59,8 @@ omf/scratch/disaggDataGeneration/regression/workingDir/*
 __pycache__/
 .vscode/
 *.code-workspace
+omf/solvers/reopt_jl/testFiles/Scenario_test_POST.json
+omf/solvers/reopt_jl/testFiles/resultsResilience.json
+omf/solvers/reopt_jl/testFiles/results.json
+omf/solvers/reopt_jl/testFiles/REoptInputs.json
+omf/solvers/reopt_jl/reopt_jl.so

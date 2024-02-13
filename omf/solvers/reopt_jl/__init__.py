@@ -7,7 +7,7 @@ thisDir = os.path.abspath(os.path.dirname(__file__))
 def build_julia_image():
     ''' Creates REoptSolver sysimage -> reopt_jl.so '''
 
-    os.system(f'''julia --project={thisDir}/REoptSolver -e '
+    os.system(f'''julia --project="{thisDir}/REoptSolver" -e '
             import Pkg; Pkg.instantiate();
             import REoptSolver; using PackageCompiler;
             PackageCompiler.create_sysimage(["REoptSolver"]; sysimage_path="{thisDir}/reopt_jl.so", 
