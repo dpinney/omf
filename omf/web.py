@@ -461,11 +461,11 @@ def runModel():
 	# File upload handling
 	# print('FILES?', len(request.files), request.files)
 	if len( request.files ) > 0:
-		for file_name, file in request.files.items():
+		for file_field, file in request.files.items():
 			if file.filename != '':
-				file.save(os.path.join(modelDir, file.filename))
+				file.save(os.path.join(modelDir, file_field))
 			else:
-				print( "File not found: ", file.filename)
+				print( "File not found: ", file_field, "file info: ", file)
 	# Get existing model viewers and add them to pData if they exist, then write pData to update allInputData.json
 	filepath = os.path.join(modelDir, "allInputData.json")
 	with locked_open(filepath, 'r+') as f:
