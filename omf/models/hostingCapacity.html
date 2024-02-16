@@ -40,7 +40,7 @@
 			</div>
 			{% endif %}
 			<div class="wideInput">
-				<p class="inputSectionHeader">AMI-Based or "MoHCa" Hosting Capacity</p>
+				<p class="inputSectionHeader">AMI-Based Hosting Capacity</p>
 			</div>
 			<hr>
 			<div class="shortInput">
@@ -94,33 +94,33 @@
 	<style>td, th {padding:7 0 5 20;text-align: left;font-size:0.8em; border: 1px solid #cccccc;} </style>
 	<div id="output">
     {% if allInputDataDict['runAmiAlgorithm'] == 'on' %}
-			<p class="reportTitle">AMI-Based "MoHCA" Hosting Capacity Runtime </p>
-			<div id="mohcaRunTime" class="tightContent">
-				<span style="border: 1px solid grey; padding: 3px;"> {{ allOutputDataDict['mohcaRuntime']}} </span>  
+			<p class="reportTitle">AMI-Based Hosting Capacity Runtime </p>
+			<div id="AMI_runtime" class="tightContent">
+				<span style="border: 1px solid grey; padding: 3px;"> {{ allOutputDataDict['AMI_runtime']}} </span>  
 			</div>
 			<p class="reportTitle">AMI-Based Hosting Capacity Distribution</p>
-			<div id="mohcaHistogramChart" class="tightContent">
-				<div id="mohcaHistogramChart" style="width:1000px"></div>
+			<div id="histogramFigure" class="tightContent">
+				<div id="histogramFigure" style="width:1000px"></div>
 				<script type="text/javascript">
-					Plotly.newPlot("mohcaHistogramChart", JSON.parse( allOutputData["mohcaHistogramFigure"]) )
+					Plotly.newPlot("histogramFigure", JSON.parse( allOutputData["histogramFigure"]) )
 				</script>
 			</div>
 			<p class="reportTitle">AMI-Based Hosting Capacity By Bus</p>
-			<div id="mohcaBarChart" class="tightContent">
-				<div id="mohcaBarChart" style="width:1000px"></div>
+			<div id="barChartFigure" class="tightContent">
+				<div id="barChartFigure" style="width:1000px"></div>
 				<script type="text/javascript">
-					Plotly.newPlot("mohcaBarChart", JSON.parse( allOutputData["mohcaBarChartFigure"]) )
+					Plotly.newPlot("barChartFigure", JSON.parse( allOutputData["barChartFigure"]) )
 				</script>
 			</div>
 			<p class="reportTitle">AMI-Based Full Hosting Capacity Data Table</p>
-			<div id="mohcaHostingCapacityTable" class="tightContent">
+			<div id="AMIhostingCapacityTable" class="tightContent">
 				<table style='margin:5px;width:990px'>
 					<tr>
-					{% for header in allOutputDataDict["mohcaHCTableHeadings"] %}
+					{% for header in allOutputDataDict["AMI_tableHeadings"] %}
 						<th>{{ header }}</th>
 						{% endfor %}
 					</tr>
-					{% for values in allOutputDataDict["mohcaHCTableValues"] %}
+					{% for values in allOutputDataDict["AMI_tableValues"] %}
 					<tr>
 						{% for val in values %}
 						<td>{{ val }}</td>
@@ -132,7 +132,7 @@
     {% endif %}
 		{% if allInputDataDict['optionalCircuitFile'] == 'on' %}
 			<p class="reportTitle">Traditional/Model-Based Hosting Capacity Runtime</p>
-			<div id="mohcaRunTime" class="tightContent">
+			<div id="traditionalRunTime" class="tightContent">
 				<span style="border: 1px solid grey; padding: 3px;"> {{ allOutputDataDict['traditionalRuntime'] }} </span>
 			</div>
 			<p class="reportTitle" style="page-break-before:always">Traditional Hosting Capacity Map</p>

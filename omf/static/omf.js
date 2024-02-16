@@ -16,8 +16,8 @@ function post_to_url(path, params, method) {
 	form.submit()
 }
 
-function updateFileNameDisplay(fileInputID, displayID) {
-	// the displayID has to be = the allInputDataDict value
+function updateFileNameDisplay(fileInputID, displayID, fileNameID) {
+	// the fileNameID has to be = the allInputDataDict value
 	var fileInput = document.getElementById(fileInputID);
 	var displayInput = document.getElementById(displayID);
 
@@ -25,7 +25,7 @@ function updateFileNameDisplay(fileInputID, displayID) {
 			displayInput.value = fileInput.files[0].name;
 	}
 	else {
-			displayInput.value = "{{ allInputDataDict[displayID] }}";
+			displayInput.value = "{{ allInputDataDict[fileNameID] }}";
 	}
 }
 

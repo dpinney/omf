@@ -4,30 +4,19 @@
 	<script src="{{pathPrefix}}/static/highcharts4.src.js"></script>
 	<script src="https://cdn.plot.ly/plotly-1.50.1.min.js"></script>
 
-	<style>
-		#customerLatLong { display: none; }
-	</style>
+	<!-- 
+		file_upload('voltageDataFile', 'userInputVoltage', 'voltageDataFileName')
+		input for the actual file
+		the name of the file the user is using/inputting in
+		allInputDataDict[voltageDataFileName] = .csv name
 
-	<script>
-		function toggleFileInput() {
-			var algorithm = document.getElementById("algorithm").value;
-			
-			if (algorithm === "customerLatLong") {
-					document.getElementById("customerLatLong").style.display = "block";
-					document.getElementById("reactivePower").style.display = "none";
-			}
-			else if (algorithm === "reactivePower") {
-					document.getElementById("reactivePower").style.display = "block";
-					document.getElementById("customerLatLong").style.display = "none";
-			}
-		}	
-	</script>
-
-	{% macro file_upload(fileInputID, displayNameID) -%}
-		<input type="file" id="{{fileInputID}}" name="{{fileInputID}}" accept=".csv" class="fileButton" onchange="updateFileNameDisplay('{{fileInputID}}', '{{displayNameID}}')" style="display:none"><br>
-		<label for="{{fileInputID}}" class="fileButton">Choose File</label>
-		<input id="{{displayNameID}}" name="{{displayNameID}}" value="{{ allInputDataDict[displayNameID] }}" readonly class="uploadFileName">
-	{%- endmacro %}
+	-->
+	{% macro file_upload(fileInputID, displayNameID, fileNameID) -%}
+    <input type="file" id="{{fileInputID}}" name="{{ allInputDataDict[fileNameID] }}" accept=".csv" class="fileButton" onchange="updateFileNameDisplay('{{fileInputID}}', '{{displayNameID}}', '{{fileNameID}}')" style="display:none"><br>
+    <label for="{{fileInputID}}" class="fileButton">Choose File</label>
+    <input id="{{displayNameID}}" name="{{displayNameID}}" value="{{ allInputDataDict[fileNameID] }}" readonly class="uploadFileName">
+    <input id="{{fileNameID}}" name= {{fileNameID}} type="hidden" value="{{ allInputDataDict[fileNameID] }}">
+	{% endmacro %}
 
 </style>
 </head>
@@ -62,20 +51,20 @@
 			<br>
 			<div class="shortInput">
 				<label class="tooltip">Voltage AMI - Data Input File <span class="classic">File type: .csv</span></label>
-				<div>{{ file_upload('voltageDataFile','voltageDataFileName') }}</div>
+				<div>{{ file_upload('voltageDataFile', 'userInputVoltage', 'voltageDataFileName' )}}</div>
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Real Power - AMI Data Input File <span class="classic">File type: .csv</span></label>
-				<div>{{ file_upload('realPowerDataFile','realPowerDataFileName') }}</div>
+				<div>{{ file_upload('realPowerDataFile', 'userInputReal', 'realPowerDataFileName') }}</div>
 			</div>
 			<div class="shortInput"> 
 				<label class="tooltip">Customer ID Data - AMI Data Input File <span class="classic">File type: .csv</span></label>
-				<div>{{ file_upload('customerIDDataFile','customerIDDataFileName') }}</div>
+				<div>{{ file_upload('customerIDDataFile', 'userInputCustID', 'customerIDDataFileName') }}</div>
 			</div>
 			<br>
 			<div class="shortInput">
 				<label class="tooltip">Choose Algorithm: Customer Distance Based or Reactive Power Based</label>
-				<select id="algorithm" name="algorithm" value="{{allInputDataDict.algorithm}}" required onchange="toggleFileInput()">
+				<select id="algorithm" name="algorithm" value="{{allInputDataDict.algorithm}}" required>
 					<option value="reactivePower" {% if allInputDataDict.algorithm == 'reactivePower' %}selected{% endif %}>Reactive Power</option>
 					<option value="customerLatLong" {% if allInputDataDict.algorithm == 'customerLatLong' %}selected{% endif %}>Customer LatLong</option>
 				</select>
@@ -83,11 +72,11 @@
 			<br>
 			<div class="shortInput" id="customerLatLong"> 
 				<label class="tooltip">Customer Latitude & Longitutde - AMI Data Input File <span class="classic">File type: .csv</span></label>
-				<div>{{ file_upload('customerLatLongDataFile','customerLatLongDataFileName') }}</div>
+				<div>{{ file_upload('customerLatLongDataFile', 'userInputCustLatLong', 'customerLatLongDataFileName') }}</div>
 			</div>
 			<div class="shortInput" id="reactivePower"> 
 				<label class="tooltip">Reactive Power - AMI Data Input File <span class="classic">File type: .csv</span></label>
-				<div>{{ file_upload('reactivePowerDataFile','reactivePowerDataFileName') }}</div>
+				<div>{{ file_upload('reactivePowerDataFile', 'userInputReactive', 'reactivePowerDataFileName') }}</div>
 			</div>	
 			<hr>
 			{{ omfModelButtons }}
