@@ -2,6 +2,7 @@ module REoptSolver
 
 export run
 
+using Base.Filesystem
 #all solvers except for HiGHS are currently removed in order to improve precompile and load time
 using REopt, JuMP, JSON, HiGHS #SCIP #, Cbc
 #Ipopt, ECOS, Clp, GLPK
@@ -30,9 +31,9 @@ function run(path::String, outages::Bool=false, microgrid_only::Bool=false, max_
 
 	m = get_model(path, max_runtime_s)
 	m2 = get_model(path, max_runtime_s)
-	input_path = path * "/Scenario_test_POST.json"
-	reopt_inputs_path = path * "/REoptInputs.json"
-	output_path = path * "/results.json"
+	input_path = normpath(joinpath(path, "Scenario_test_POST.json"))
+	reopt_inputs_path = normpath(joinpath(path,"REoptInputs.json"))
+	output_path = normpath(joinpath(path,"results.json"))
 
 	#writing REoptInputs to JSON for easier access of default values in microgridDesign
 	reopt_inputs = REoptInputs(input_path)
@@ -43,7 +44,7 @@ function run(path::String, outages::Bool=false, microgrid_only::Bool=false, max_
 	results_to_json(results, output_path)
 
 	if outages != false
-		outage_path = path * "/resultsResilience.json"
+		outage_path = normpath(joinpath(path,"resultsResilience.json"))
 		outage_results = simulate_outages(results, reopt_inputs; microgrid_only=microgrid_only)
 
 		results_to_json(outage_results,outage_path)
