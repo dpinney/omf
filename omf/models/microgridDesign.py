@@ -176,7 +176,7 @@ def work(modelDir, inputDict):
 					#"federal_itc_pct": solarItcPercent
 				},
 				"ElectricStorage": { #"Storage": {
-					"installed_cost_per_kwh": batteryPowerCost,
+					"installed_cost_per_kw": batteryPowerCost,
 					#"installed_cost_us_dollars_per_kw": batteryPowerCost,
 					"installed_cost_per_kwh": batteryCapacityCost,
 					#"installed_cost_us_dollars_per_kwh": batteryCapacityCost,
@@ -256,14 +256,14 @@ def work(modelDir, inputDict):
 		scenario['ElectricLoad']['critical_loads_kw'] = jsonifiableCriticalLoad
 		# diesel has a quirk in how it gets inputted to REopt such that when strictly specified, allOutputData["sizeDiesel1"] = allInputData['dieselMax'] + allInputData['genExisting']
 		#todo: check if still true for reopt.jl
-		if dieselMax - genExisting > 0:
-			scenario['Generator']['max_kw'] = dieselMax - genExisting
-		else:
-			scenario['Generator']['max_kw'] = 0
-		if dieselMin - genExisting > 0:
-			scenario['Generator']['min_kw'] = dieselMin - genExisting
-		else:
-			scenario['Generator']['min_kw'] = 0
+		#if dieselMax - genExisting > 0:
+		#	scenario['Generator']['max_kw'] = dieselMax - genExisting
+		#else:
+		#	scenario['Generator']['max_kw'] = 0
+		#if dieselMin - genExisting > 0:
+		#	scenario['Generator']['min_kw'] = dieselMin - genExisting
+		#else:
+		#	scenario['Generator']['min_kw'] = 0
 		#adding outage results (REopt.jl)
 		#scenario['ElectricUtility']['outage_durations'] = [ outage_duration ] #not sure if correct
 
