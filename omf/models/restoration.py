@@ -645,6 +645,7 @@ def graphMicrogrid(pathToOmd, pathToJson, pathToCsv, outputFile, settingsFile, u
 	else:
 		# Scenario 3: The user wants to generate a settings file
 		PowerModelsONM.build_settings_file(circuitPath=f'{workDir}/circuit.dss', settingsPath=f'{workDir}/settings.json', loadPrioritiesFile=loadPriorityFilePath, microgridTaggingFile=microgridTaggingFilePath)
+	
 	# Run ONM.
 	if  useCache == 'True' and outputFile != None:
 		shutil.copyfile(outputFile, f'{workDir}/output.json')
@@ -866,12 +867,7 @@ def graphMicrogrid(pathToOmd, pathToJson, pathToCsv, outputFile, settingsFile, u
 	with open(pathToOmd) as inFile:
 		tree = json.load(inFile)['tree']
 	feederMap = geo.omdGeoJson(pathToOmd, conversion = False)
-	# generate a list of substations
-	busNodes = []
-	for key in tree.keys():
-		if tree[key].get('bustype','') == 'SWING':
-			busNodes.append(tree[key]['name'])
-	# TODO: Pretty sure busNodes never gets used... make sure and then delete it
+	
 	row = 0
 	row_count_timeline = outputTimeline.shape[0]
 	
@@ -932,6 +928,7 @@ def graphMicrogrid(pathToOmd, pathToJson, pathToCsv, outputFile, settingsFile, u
 		json.dump(feederMap, outFile, indent=4)
 	# Generate customer outage outputs
 	try:
+		# TODO: this should not be customerOutageData... this is the input of customer info. It's later turned into customerOutageData by adding more info, but this same variable should NOT be used for the same thing
 		customerOutageData = pd.read_csv(pathToCsv)
 	except:
 		# TODO: Needs to be updated to provide info for all loads, not just shed loads. Outage Incidence plot is dependent on all loads
