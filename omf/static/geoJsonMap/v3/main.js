@@ -67,6 +67,7 @@ function main() {
     };
     const overlayMaps = {
         'Nodes': LeafletLayer.nodeLayers,
+        'Child Nodes': LeafletLayer.childNodeLayers,
         'Lines': LeafletLayer.lineLayers,
         'Parent-Child Lines': LeafletLayer.parentChildLineLayers,
     }
@@ -75,7 +76,7 @@ function main() {
         // - This zoom level sensibly displays all circuits to start, even the ones with weird one-off players that skew where the center is
         zoom: 14,
         // - Provide the layers that the map should start with
-        layers: [esri_satellite_layer, LeafletLayer.nodeLayers, LeafletLayer.lineLayers, LeafletLayer.parentChildLineLayers],
+        layers: [esri_satellite_layer, LeafletLayer.nodeLayers, LeafletLayer.lineLayers],
         // - Better performance for large datasets
         renderer: L.canvas()
     });
