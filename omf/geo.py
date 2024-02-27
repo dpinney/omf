@@ -136,96 +136,6 @@ def omdGeoJson(pathToOmdFile, conversion=False):
 		})
 	return geoJsonDict
 
-def mapOmd_DEPRECATED(pathToOmdFile, outputPath, fileFormat, openBrowser=False, conversion=False, all_mg_elements=None):
-	'''
-	Draw an omd on a map.
-	
-	fileFormat options: html or png
-	Use html option to create a geojson file to be displayed with an interactive leaflet map.
-	Use the png file format to create a static png image.
-	By default the file(s) is saved to the outputPath, but setting openBrowser to True with open in a new browser window.
-	'''
-	if fileFormat == 'html':
-		if not conversion:
-			geoJsonDict = omdGeoJson(pathToOmdFile)
-		else:
-			geoJsonDict = omdGeoJson(pathToOmdFile, conversion=True)
-		if not os.path.exists(outputPath):
-			os.makedirs(outputPath)
-		# Render html
-		with open(omf.omfDir + '/templates/geoJsonMap_offline.html','r') as file:
-			offline_template = file.read()	
-		# offline_template = open(omf.omfDir + '/templates/geoJsonMap_offline.html','r').read()
-		rendered = Template(offline_template).render(geojson=geoJsonDict, all_mg_elements=all_mg_elements, components=get_components_featurecollection())
-		with open(os.path.join(outputPath,'geoJsonMap_offline.html'),'w') as outFile:
-			outFile.write(rendered)
-		# Deprecated js include method.
-		# shutil.copy(omf.omfDir + '/templates/geoJsonMap_offline.html', outputPath)
-		# with open(pJoin(outputPath,'geoJsonFeatures.js'),"w") as outFile:
-		# 	outFile.write("var geojson =")
-		# 	json.dump(geoJsonDict, outFile, indent=4)
-		if openBrowser:
-			openInBrowser(pJoin(outputPath,'geoJsonMap_offline.html'))
-	elif fileFormat == 'png':
-		if not conversion:
-			with open(pathToOmdFile) as inFile:
-				tree = json.load(inFile)['tree']
-			nxG = feeder.treeToNxGraph(tree)
-			nxG = graphValidator(pathToOmdFile, nxG)
-		#use conversion for testing other feeders
-		if conversion:
-			nxG = convertOmd(pathToOmdFile)
-		latitude_min = min([nxG.nodes[nodewithPosition]['pos'][0] for nodewithPosition in nx.get_node_attributes(nxG, 'pos')])
-		longitude_min = min([nxG.nodes[nodewithPosition]['pos'][1] for nodewithPosition in nx.get_node_attributes(nxG, 'pos')])
-		latitude_max = max([nxG.nodes[nodewithPosition]['pos'][0] for nodewithPosition in nx.get_node_attributes(nxG, 'pos')])
-		longitude_max = max([nxG.nodes[nodewithPosition]['pos'][1] for nodewithPosition in nx.get_node_attributes(nxG, 'pos')])
-		#Set the plot settings
-		plt.switch_backend('Agg')
-		fig = plt.figure(frameon=False, figsize=[10,10])
-		ax = fig.add_axes([0, 0, 1, 1])
-		ax.axis('off')
-		#map latlon to projection
-		epsg3857 = Proj(init='epsg:3857')
-		wgs84 = Proj(init='EPSG:4326')
-		node_positions = {nodewithPosition: nxG.nodes[nodewithPosition]['pos'] for nodewithPosition in nx.get_node_attributes(nxG, 'pos')}
-		for point in node_positions:
-			node_positions[point] = transform(wgs84, epsg3857, node_positions[point][1], node_positions[point][0])
-		for zoomLevel in range(18,19):
-			numberofTiles = numTiles(zoomLevel)
-			#Get bounding tiles and their lat/lon edges
-			upperRightTile = tileXY(latitude_max, longitude_max, zoomLevel)
-			lowerLeftTile = tileXY(latitude_min, longitude_min, zoomLevel)
-			firstTileEdges = tileEdges(upperRightTile[0], upperRightTile[1], zoomLevel)
-			lastTileEdges = tileEdges(lowerLeftTile[0], lowerLeftTile[1], zoomLevel)
-			#Get N S E W boundaries for outer tiles in mercator projection x/y
-			mainsouthWest = transform(wgs84,epsg3857,lastTileEdges[1], lastTileEdges[0])
-			mainnorthEast = transform(wgs84,epsg3857,firstTileEdges[3], firstTileEdges[2])
-			nx.draw_networkx(nxG, pos=node_positions, nodelist=list(node_positions.keys()), with_labels=False, node_size=2, edge_size=1)
-			for tileX in range(lowerLeftTile[0], upperRightTile[0]+1):
-				for tileY in range(upperRightTile[1], lowerLeftTile[1]+1):
-					#Get section of tree that covers this tile
-					currentTileEdges = tileEdges(tileX, tileY, zoomLevel)
-					southWest = transform(wgs84,epsg3857,currentTileEdges[1], currentTileEdges[0])
-					northEast = transform(wgs84,epsg3857,currentTileEdges[3], currentTileEdges[2])
-					#Get map background from tile
-					url = 'https://a.tile.openstreetmap.org/%s/%s/%s.png' % (zoomLevel, tileX, tileY)
-					# Spoof the User-Agent so we don't get 429
-					response = requests.request('GET', url, stream=True, headers={
-						'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10.13; rv:71.0) Gecko/20100101 Firefox/71.0'
-					})
-					with tempfile.NamedTemporaryFile() as f:
-						f.write(response.raw.read())
-						img = plt.imread(f)
-					plt.imshow(img, extent=(southWest[0], northEast[0],southWest[1], northEast[1]))
-			plt.ylim(top=mainnorthEast[1], bottom=mainsouthWest[1])
-			plt.xlim(mainsouthWest[0], mainnorthEast[0])
-			if not os.path.exists(outputPath):
-				os.makedirs(outputPath)
-			plt.savefig(pJoin(outputPath,'graphOnMap.png'),frameon=False, pad_inches=0, bbox='tight')
-			if openBrowser:
-				openInBrowser(pJoin(outputPath,'graphOnMap.png'))
-
-
 def simplifiedOmdShape(pathToOmdFile, conversion=False):
 	'''Use kmeans clustering to create simplified geojson object with convex hull and connected clusters from an omd.'''
 	if not conversion:
@@ -1357,42 +1267,6 @@ def _validate_transform_wgs84_coordinates_arguments(center, vertical_translation
         rotation = None
     return (center, vertical_translation, horizontal_translation, rotation)
 
-
-# - Get rid of these two functions once mapOmd is deprecated
-def get_components_featurecollection():
-    '''
-    - Currently, there are 536 node components, 39 children components, and 7 line components
-    '''
-    featureCollection = {
-        'type': 'FeatureCollection',
-        'features': []
-    }
-    for k, v in json.loads(distNetViz.get_components()).items():
-        featureCollection['features'].append(_convert_component_to_geojson_feature(k, v))
-    return featureCollection
-def _convert_component_to_geojson_feature(component_name, component_properties):
-    if 'name' not in component_properties:
-        # - Use the filename of the component if necessary to identify it
-        component_properties['name'] = component_name
-    feature = {
-        'type': 'Feature',
-        'geometry': {},
-        'properties': component_properties
-    }
-    if 'from' in component_properties or 'to' in component_properties:
-        if 'from' in component_properties and 'to' in component_properties:
-            feature['geometry']['type'] = 'LineString'
-            feature['geometry']['coordinates'] = [[None, None], [None, None]]
-        else:
-            # - This exception should never be raised. If it is, there's a typo in a component file
-            raise Exception(f'The component {component_name} doesn\'t have both the "from" and "to" keys, but has one of them')
-    else:
-        feature['geometry']['type'] = 'Point'
-        feature['geometry']['coordinates'] = [None, None]
-    return feature
-
-
-# - Keep and rename this function. This is what the new editor uses
 def get_component_featurecollection():
     feature_collection = {'type': 'FeatureCollection', 'features': []}
     # - This isn't an actual tree key, but it's needed to insert components into a FeatureMap in the front-end
@@ -1463,8 +1337,6 @@ def _tests():
 	# e2, n2 = latLonToStatePlane(lat, lon, epsg=2205)
 	# print (e2, n2) # (249.24197527189972, 1186.1488466408398)
 	prefix = pathlib.Path(__file__).parent
-	# mapOmd(prefix / 'static/publicFeeders/Olin Barre LatLon.omd', 'testOutput', 'png', openBrowser=True, conversion=False)
-	# mapOmd(prefix / 'static/publicFeeders/Olin Barre LatLon.omd', './', 'html', openBrowser=True, conversion=False)
 	map_omd(prefix / 'static/publicFeeders/Olin Barre LatLon.omd', './', open_browser=True)
 	# showOnMap(hullOfOmd(prefix / 'static/publicFeeders/Olin Barre LatLon.omd', conversion=False))
 	# showOnMap(simplifiedOmdShape(prefix / 'static/publicFeeders/Olin Barre LatLon.omd', conversion=False))
@@ -1478,20 +1350,15 @@ def _tests():
 	# Server tests.
 	# rasterTilesFromOmd(prefix / 'static/publicFeeders/Olin Barre LatLon.omd', prefix / 'scratch/omdTests/tiles', conversion=False)
 	# serveTiles(prefix / 'scratch/omdTests/tiles') # Need to launch in correct directory
-	# Testing larger feeder using temporary conversion method for valid lat/lons from sources/targets. This takes FOREVER to run (30+ minutes? but it works?)
-	# mapOmd(prefix / 'static/publicFeeders/Autocli Alberich Calibrated.omd', prefix / 'testOutput', 'png', openBrowser=True, conversion=True)
-	# ABEC Frank LO Houses works with conversion on or off
-	# mapOmd(prefix / 'static/publicFeeders/Autocli Alberich Calibrated.omd', prefix / 'testOutput', 'html', openBrowser=True, conversion=False)
-	# mapOmd(prefix / 'static/publicFeeders/ABEC Frank LO Houses.omd', prefix / 'testOutput', 'html', openBrowser=True, conversion=False)
+	# Testing larger feeder
+	#map_omd(prefix / 'static/publicFeeders/Autocli Alberich Calibrated.omd', './', open_browser=True)
+	#map_omd(prefix / 'static/publicFeeders/ABEC Frank LO Houses.omd', './', open_browser=True)
 	# showOnMap(hullOfOmd(prefix / 'static/publicFeeders/Autocli Alberich Calibrated.omd', conversion=True))
 	# showOnMap(simplifiedOmdShape(prefix / 'static/publicFeeders/ABEC Frank LO Houses.omd', conversion=False))
 	# showOnMap(omdGeoJson(prefix / 'static/publicFeeders/ABEC Frank LO Houses.omd', conversion=False))
 	# rasterTilesFromOmd(prefix / 'static/publicFeeders/Autocli Alberich Calibrated.omd', prefix / 'scratch/omdTests/autoclitiles', conversion=True)
 	# print(convertOmd(prefix / 'static/publicFeeders/Autocli Alberich Calibrated.omd'))
-	# mapOmd(pJoin(__neoMetaModel__._omfDir, 'static', 'publicFeeders', 'iowa240c2_working_coords.clean.omd'), pJoin(__neoMetaModel__._omfDir, 'scratch', 'MapTestOutput'), 'html', openBrowser=True, conversion=False)
 	# fixMissingNodes(pJoin(__neoMetaModel__._omfDir, 'static', 'publicFeeders', 'iowa240c2_working_coords.clean.omd'), pJoin(__neoMetaModel__._omfDir, 'static', 'publicFeeders', 'iowa240c1.clean.dss.omd'), pJoin(__neoMetaModel__._omfDir, 'scratch', 'MapTestOutput', 'iowa240c2_fixed_coords2.clean.omd'))
-	# mapOmd(pJoin(__neoMetaModel__._omfDir, 'scratch', 'MapTestOutput', 'iowa240c2_fixed_coords2.clean.omd'), pJoin(__neoMetaModel__._omfDir, 'scratch', 'MapTestOutput'), 'html', openBrowser=True, conversion=False)
-	# mapOmd(pJoin(__neoMetaModel__._omfDir, 'scratch', 'RONM', 'ieee8500-unbal_no_fuses.clean_reduced.good_coords2.dss.omd'), pJoin(__neoMetaModel__._omfDir, 'scratch', 'RONM'), 'html', openBrowser=True, conversion=False)
 
 if __name__ == '__main__':
 	_tests()
