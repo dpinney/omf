@@ -1007,7 +1007,7 @@ function zoom(observables) {
         const layer = Object.values(observable.getObservers().filter(ob => ob instanceof LeafletLayer)[0].getLayer()._layers)[0];
         if (observable.isNode()) {
             const [lon, lat] = structuredClone(observable.getCoordinates());
-            // - This is the max zoom without losing the map
+            // - The max zoom level without losing the map is 19
             LeafletLayer.map.flyTo([lat, lon], 19, {duration: .3});
             if (!layer.isPopupOpen()) {
                 layer.openPopup();

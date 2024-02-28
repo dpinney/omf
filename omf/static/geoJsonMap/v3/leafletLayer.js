@@ -12,11 +12,11 @@ class LeafletLayer { // implements ObserverInterface
     #controller;    // ControllerInterface instance
     #layer;         // - Leaflet layer
     #observable;    // - ObservableInterface instance
-    static lineLayers = L.featureGroup();
     static map;
+    static control;
     static nodeLayers = L.featureGroup();
+    static lineLayers = L.featureGroup();
     static parentChildLineLayers = L.featureGroup();
-    static childNodeLayers = L.featureGroup();
 
     /**
      * @param {Feature} observable - an ObservableInterface instance
@@ -90,11 +90,7 @@ class LeafletLayer { // implements ObserverInterface
         layer.remove();
         // - Need to explicitly remove the underlying layer from its LayerGroup
         if (observable.isNode()) {
-            if (observable.isChild()) {
-                LeafletLayer.childNodeLayers.removeLayer(this.#layer);
-            } else {
-                LeafletLayer.nodeLayers.removeLayer(this.#layer);
-            }
+            LeafletLayer.nodeLayers.removeLayer(this.#layer);
         } else if (observable.isLine()) {
             if (observable.isParentChildLine()) {
                 LeafletLayer.parentChildLineLayers.removeLayer(this.#layer);
@@ -177,11 +173,7 @@ class LeafletLayer { // implements ObserverInterface
         }
         const ll = new LeafletLayer(observable, controller);
         if (observable.isNode()) {
-            if (observable.isChild()) {
-                LeafletLayer.childNodeLayers.addLayer(ll.getLayer());
-            } else {
-                LeafletLayer.nodeLayers.addLayer(ll.getLayer());
-            }
+            LeafletLayer.nodeLayers.addLayer(ll.getLayer());
         } else if (observable.isLine()) {
             if (observable.isParentChildLine()) {
                 LeafletLayer.parentChildLineLayers.addLayer(ll.getLayer());

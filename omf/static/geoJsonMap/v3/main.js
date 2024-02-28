@@ -43,7 +43,7 @@ function main() {
     /* Setup layers */
     /****************/
 
-    const maxZoom = 30;
+    const maxZoom = 32;
     var esri_satellite_layer = L.esri.basemapLayer('Imagery', {
         maxZoom: maxZoom
     });
@@ -67,23 +67,23 @@ function main() {
     };
     const overlayMaps = {
         'Nodes': LeafletLayer.nodeLayers,
-        'Child Nodes': LeafletLayer.childNodeLayers,
         'Lines': LeafletLayer.lineLayers,
         'Parent-Child Lines': LeafletLayer.parentChildLineLayers,
     }
-    const map = L.map('map', {
+    LeafletLayer.map = L.map('map', {
         center: LeafletLayer.nodeLayers.getBounds().getCenter(),
         // - This zoom level sensibly displays all circuits to start, even the ones with weird one-off players that skew where the center is
         zoom: 14,
         // - Provide the layers that the map should start with
-        layers: [esri_satellite_layer, LeafletLayer.nodeLayers, LeafletLayer.lineLayers],
+        layers: [esri_satellite_layer, LeafletLayer.nodeLayers, LeafletLayer.lineLayers, LeafletLayer.parentChildLineLayers],
         // - Better performance for large datasets
         renderer: L.canvas()
     });
-    LeafletLayer.map = map;
     LeafletLayer.map.fitBounds(LeafletLayer.nodeLayers.getBounds());
     addZoomToFitButon();
-    L.control.layers(baseMaps, overlayMaps, { position: 'topleft', collapsed: false }).addTo(map);
+    addClusterButton();
+    LeafletLayer.control = L.control.layers(baseMaps, overlayMaps, { position: 'topleft', collapsed: false });
+    LeafletLayer.control.addTo(LeafletLayer.map);
     // - Disable the following annoying default Leaflet keyboard shortcuts:
     //  - TODO: do a better job and stop the event(s) from propagating in text inputs instead
     document.getElementById('map').onkeydown = function(e) {
@@ -329,6 +329,33 @@ function addZoomToFitButon() {
     button.textContent = 'Zoom to fit';
     button.addEventListener('click', function() {
         LeafletLayer.map.fitBounds(LeafletLayer.nodeLayers.getBounds());
+    });
+    div.appendChild(button);
+    leafletHookDiv.appendChild(div);
+}
+
+/**
+ * @returns {undefined}
+ */
+function addClusterButton() {
+    const leafletHookDiv = document.querySelector('div.leaflet-top.leaflet-left');
+    const div = document.createElement('div');
+    div.classList.add('leaflet-control', 'leaflet-touch', 'leaflet-control-layers', 'leaflet-bar');
+    const button = document.createElement('button');
+    button.classList.add('leaflet-custom-control-button');
+    button.textContent = 'Toggle Node Grouping';
+    button.addEventListener('click', function() {
+        LeafletLayer.map.removeLayer(LeafletLayer.nodeLayers);
+        LeafletLayer.control.removeLayer(LeafletLayer.nodeLayers);
+        if (LeafletLayer.nodeLayers instanceof L.MarkerClusterGroup) {
+            LeafletLayer.nodeLayers = L.featureGroup(LeafletLayer.nodeLayers.getLayers());
+        } else {
+            const nodeLayers = LeafletLayer.nodeLayers.getLayers();
+            LeafletLayer.nodeLayers = L.markerClusterGroup();
+            nodeLayers.forEach(l => LeafletLayer.nodeLayers.addLayer(l));
+        }
+        LeafletLayer.control.addOverlay(LeafletLayer.nodeLayers, 'Nodes');
+        LeafletLayer.map.addLayer(LeafletLayer.nodeLayers);
     });
     div.appendChild(button);
     leafletHookDiv.appendChild(div);
