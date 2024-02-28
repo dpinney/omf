@@ -603,60 +603,80 @@ def makeMicrogridLoadsCSV(pathToOmd, workDir):
 			writer.writerow([loadName,mg_id])
 
 	return (loadMicrogridDict, busMicrogridDict)
-        
-def graphMicrogrid(pathToOmd, pathToJson, pathToCsv, outputFile, settingsFile, useCache, workDir, profit_on_energy_sales, restoration_cost, hardware_cost, eventsFilename, genSettings, solFidelity, loadPriorityFile, microgridTaggingFile):
-	''' Run full microgrid control process. '''
+
+def runMicrogridControlSim(outputFile, settingsFile, useCache, workDir, eventsFilename, genSettings, solFidelity, loadPriorityFile, microgridTaggingFile):
+	'''	If useCache is true and a file of cached output is provided, copys that cached output to an output file called output.json in the working directory.
+	
+		If useCache is false, runs a microgrid control simulation using PowerModelsONM to determine optimal control actions during a configured outage event.
+		Once the simulation is run, the results are stored in an output file called output.json in the working directory. 
+		If a settings file is provided and genSettings is false, the simulation is run using a provided settings file.
+		Otherwise, a settings file is generated using the feeder file, a load priorities file, and a microgrid tagging file. 
+	'''
+
 	# Setup ONM if it hasn't been done already.
 	if not PowerModelsONM.check_instantiated():
 		PowerModelsONM.install_onm()
-	if not workDir:
+	if not workDir: 	 
 		workDir = tempfile.mkdtemp()
 		print('@@@@@@', workDir)
-	# get mip_solver_gap info (solFidelity)
-	solFidelityVal = 0.05 #default to medium fidelity
-	if solFidelity == '0.10':
-		solFidelityVal = 0.10
-	elif solFidelity == '0.02':
-		solFidelityVal = 0.02
 
-	# check custom load priorities file input
-	if loadPriorityFile != None:
-		loadPriorityFilePath = f'{workDir}/loadPriorities.json'
-		shutil.copyfile(loadPriorityFile, loadPriorityFilePath)
-	else:
-		loadPriorityFilePath = ''
-	# check custom microgrid tagging file input
-	if microgridTaggingFile != None:
-		microgridTaggingFilePath = f'{workDir}/microgridTagging.json'
-		shutil.copyfile(microgridTaggingFile, microgridTaggingFilePath)
-	else:
-		microgridTaggingFilePath = ''
-
-	# Handle Settings file generation or upload
-	if genSettings == 'False' and settingsFile != None:
-		correctSettings = validateSettingsFile(settingsFile)
-		if correctSettings == 'True':
-			# Scenario 1: The user chose to upload their own settings file and it is formatted correctly
-			shutil.copyfile(settingsFile, f'{workDir}/settings.json')
-		else:
-			# Scenario 2: The user chose to upload their own setttings file and it is formatted incorrectly
-			print("Warning: " + correctSettings)
-			PowerModelsONM.build_settings_file(circuitPath=f'{workDir}/circuit.dss', settingsPath=f'{workDir}/settings.json', loadPrioritiesFile=loadPriorityFilePath, microgridTaggingFile=microgridTaggingFilePath)
-	else:
-		# Scenario 3: The user wants to generate a settings file
-		PowerModelsONM.build_settings_file(circuitPath=f'{workDir}/circuit.dss', settingsPath=f'{workDir}/settings.json', loadPrioritiesFile=loadPriorityFilePath, microgridTaggingFile=microgridTaggingFilePath)
-	
-	# Run ONM.
 	if  useCache == 'True' and outputFile != None:
 		shutil.copyfile(outputFile, f'{workDir}/output.json')
 	else:
+		# check custom load priorities file input
+		# TODO: Verify with Lisa: What's the point of this? Is it to create output files that store the data from the input files for users to see? If taken out, basically just need to check for a load priority file and if none is provided, set the variable to ''
+		if loadPriorityFile != None:
+			loadPriorityFilePath = f'{workDir}/loadPriorities.json'
+			shutil.copyfile(loadPriorityFile, loadPriorityFilePath)
+		else:
+			loadPriorityFilePath = ''
+
+		# check custom microgrid tagging file input
+		if microgridTaggingFile != None:
+			microgridTaggingFilePath = f'{workDir}/microgridTagging.json'
+			shutil.copyfile(microgridTaggingFile, microgridTaggingFilePath)
+		else:
+			microgridTaggingFilePath = ''
+
+		# Handle Settings file generation or upload
+		if genSettings == 'False' and settingsFile != None:
+			correctSettings = validateSettingsFile(settingsFile)
+			if correctSettings == 'True':
+				# Scenario 1: The user chose to upload their own settings file and it is formatted correctly
+				shutil.copyfile(settingsFile, f'{workDir}/settings.json')
+			else:
+				# Scenario 2: The user chose to upload their own setttings file and it is formatted incorrectly
+				print("Warning: " + correctSettings)
+				PowerModelsONM.build_settings_file(
+					circuitPath=f'{workDir}/circuit.dss', 
+					settingsPath=f'{workDir}/settings.json', 
+					loadPrioritiesFile=loadPriorityFilePath, 
+					microgridTaggingFile=microgridTaggingFilePath)
+		else:
+			# Scenario 3: The user wants to generate a settings file
+			PowerModelsONM.build_settings_file(
+				circuitPath=f'{workDir}/circuit.dss', 
+				settingsPath=f'{workDir}/settings.json', 
+				loadPrioritiesFile=loadPriorityFilePath, 
+				microgridTaggingFile=microgridTaggingFilePath)
+		
+		# get mip_solver_gap info (solFidelity)
+		solFidelityVal = 0.05 #default to medium fidelity
+		if solFidelity == '0.10':
+			solFidelityVal = 0.10
+		elif solFidelity == '0.02':
+			solFidelityVal = 0.02
+		
 		PowerModelsONM.run_onm(
 			circuitPath=pJoin(workDir,'circuit.dss'),
 			settingsPath=pJoin(workDir,'settings.json'),
 			outputPath=pJoin(workDir,'output.json'),
 			eventsPath=pJoin(workDir,eventsFilename),
 			mip_solver_gap=solFidelityVal
-		)
+		)	
+
+def graphMicrogrid(pathToOmd, pathToJson, pathToCsv, workDir, profit_on_energy_sales, restoration_cost, hardware_cost, loadPriorityFile):
+	''' Run full microgrid control process. '''
 	# Gather output data.
 	with open(pJoin(workDir,'output.json')) as inFile:
 		data = json.load(inFile)
@@ -1087,7 +1107,7 @@ def graphMicrogrid(pathToOmd, pathToJson, pathToCsv, outputFile, settingsFile, u
 	)
 
 	####################### EXPERIMENTATION ############################################################################################
-	outageIncidenceFig = outageIncidenceGraph(tree, customerOutageData, outputTimeline, startTime, numTimeSteps, loadPriorityFilePath)
+	outageIncidenceFig = outageIncidenceGraph(tree, customerOutageData, outputTimeline, startTime, numTimeSteps, loadPriorityFile)
 	makeMicrogridLoadsCSV(pathToOmd, workDir)
 	####################### EXPERIMENTATION ############################################################################################
 
@@ -1237,22 +1257,26 @@ def work(modelDir, inputDict):
 		pathToData = f.name
 		f.write(inputDict['eventData'])
 
+	runMicrogridControlSim(
+		outputFile				= pathToData2,
+		settingsFile			= pathToData3,
+		useCache				= inputDict['useCache'],
+		workDir					= modelDir, #Work directory
+		eventsFilename			= inputDict['eventFileName'],
+		genSettings				= inputDict['genSettings'],
+		solFidelity				= inputDict['solFidelity'],
+		loadPriorityFile		= pathToData4,
+		microgridTaggingFile	= pathToData5
+	)
 	plotOuts = graphMicrogrid(
-		modelDir + '/' + feederName + '.omd', #OMD Path
-		pathToData,
-		pathToData1,
-		pathToData2,
-		pathToData3,
-		inputDict['useCache'],
-		modelDir, #Work directory
-		inputDict['profit_on_energy_sales'],
-		inputDict['restoration_cost'],
-		inputDict['hardware_cost'],
-		inputDict['eventFileName'],
-		inputDict['genSettings'],
-		inputDict['solFidelity'],
-		pathToData4,
-		pathToData5
+		pathToOmd				= modelDir + '/' + feederName + '.omd', #OMD Path
+		pathToJson				= pathToData,
+		pathToCsv				= pathToData1,
+		workDir					= modelDir, #Work directory
+		profit_on_energy_sales	= inputDict['profit_on_energy_sales'],
+		restoration_cost		= inputDict['restoration_cost'],
+		hardware_cost			= inputDict['hardware_cost'],
+		loadPriorityFile		= pathToData4
 		)
 	# Textual outputs of outage timeline
 	with open(pJoin(modelDir,'timelineStats.html')) as inFile:
