@@ -5,20 +5,18 @@
 	<script src="https://cdn.plot.ly/plotly-1.50.1.min.js"></script>
 
 	<!-- 
-		file_upload('voltageDataFile', 'userInputVoltage', 'voltageDataFileName')
-		input for the actual file
-		the name of the file the user is using/inputting in
-		allInputDataDict[voltageDataFileName] = .csv name
-
-	-->
-	{% macro file_upload(fileInputID, displayNameID, fileNameID) -%}
-    <input type="file" id="{{fileInputID}}" name="{{ allInputDataDict[fileNameID] }}" accept=".csv" class="fileButton" onchange="updateFileNameDisplay('{{fileInputID}}', '{{displayNameID}}', '{{fileNameID}}')" style="display:none"><br>
+			file_upload('fileInputID', 'userInputVoltage', 'voltageDataFileName')
+			<input> line 1: input for the actual file.
+			the name of the file the user is using/inputting in. We wanna save this for display. Originally it's set as the default.
+			This is hidden. This is the name of the file we want always = .csv name <- default naming convention 
+		-->
+	{% macro file_upload(fileInputID, userFileDisplayNameID, dataFileNameID) -%}
+    <input type="file" id="{{fileInputID}}" name="{{ allInputDataDict[dataFileNameID] }}" accept=".csv" class="fileButton" onchange="updateFileNameDisplay('{{fileInputID}}', '{{userFileDisplayNameID}}', '{{dataFileNameID}}')" style="display:none"><br>
     <label for="{{fileInputID}}" class="fileButton">Choose File</label>
-    <input id="{{displayNameID}}" name="{{displayNameID}}" value="{{ allInputDataDict[fileNameID] }}" readonly class="uploadFileName">
-    <input id="{{fileNameID}}" name= {{fileNameID}} type="hidden" value="{{ allInputDataDict[fileNameID] }}">
+    <input id="{{userFileDisplayNameID}}" name="{{userFileDisplayNameID}}" value="{{ allInputDataDict[userFileDisplayNameID] }}" readonly class="uploadFileName">
+    <input id="{{dataFileNameID}}" name= {{dataFileNameID}} type="hidden" value="{{ allInputDataDict[dataFileNameID] }}">
 	{% endmacro %}
 
-</style>
 </head>
 <body>
 	{{ omfModelTitle }}
@@ -51,15 +49,15 @@
 			<br>
 			<div class="shortInput">
 				<label class="tooltip">Voltage AMI - Data Input File <span class="classic">File type: .csv</span></label>
-				<div>{{ file_upload('voltageDataFile', 'userInputVoltage', 'voltageDataFileName' )}}</div>
+				<div>{{ file_upload('voltageDataFile', 'userInputVoltageDisplayName', 'voltageDataFileName' )}}</div>
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Real Power - AMI Data Input File <span class="classic">File type: .csv</span></label>
-				<div>{{ file_upload('realPowerDataFile', 'userInputReal', 'realPowerDataFileName') }}</div>
+				<div>{{ file_upload('realPowerDataFile', 'userInputRealDisplayName', 'realPowerDataFileName') }}</div>
 			</div>
 			<div class="shortInput"> 
 				<label class="tooltip">Customer ID Data - AMI Data Input File <span class="classic">File type: .csv</span></label>
-				<div>{{ file_upload('customerIDDataFile', 'userInputCustID', 'customerIDDataFileName') }}</div>
+				<div>{{ file_upload('customerIDDataFile', 'userInputCustIDDisplayName', 'customerIDDataFileName') }}</div>
 			</div>
 			<br>
 			<div class="shortInput">
@@ -72,11 +70,11 @@
 			<br>
 			<div class="shortInput" id="customerLatLong"> 
 				<label class="tooltip">Customer Latitude & Longitutde - AMI Data Input File <span class="classic">File type: .csv</span></label>
-				<div>{{ file_upload('customerLatLongDataFile', 'userInputCustLatLong', 'customerLatLongDataFileName') }}</div>
+				<div>{{ file_upload('customerLatLongDataFile', 'userInputCustLatLongDisplayName', 'customerLatLongDataFileName') }}</div>
 			</div>
 			<div class="shortInput" id="reactivePower"> 
 				<label class="tooltip">Reactive Power - AMI Data Input File <span class="classic">File type: .csv</span></label>
-				<div>{{ file_upload('reactivePowerDataFile', 'userInputReactive', 'reactivePowerDataFileName') }}</div>
+				<div>{{ file_upload('reactivePowerDataFile', 'userInputReactiveDisplayName', 'reactivePowerDataFileName') }}</div>
 			</div>	
 			<hr>
 			{{ omfModelButtons }}

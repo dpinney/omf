@@ -36,32 +36,20 @@ def work(modelDir, inputDict):
 	reactivePowerInputPathCSV = Path( modelDir, inputDict['reactivePowerDataFileName'])
 	custLatLongInputPathCSV = Path( modelDir, inputDict['customerLatLongDataFileName'])
 
-	if voltageInputPathCSV.exists() == False:
-		voltageInputPathCSV = Path( test_data_file_path, inputDict['voltageDataFileName'])
-
-	if realPowerInputPathCSV.exists() == False:
-		realPowerInputPathCSV = Path( test_data_file_path, inputDict['realPowerDataFileName'])
-
-	if custIDInputPathCSV.exists() == False:
-		custIDInputPathCSV = Path( test_data_file_path, inputDict['customerIDDataFileName'])
-
 	transformer_labels_errors_file_name = 'TransformerLabelsErrors_AMI.csv'
-	transformerLabelsErrorsPathCSV = Path( test_data_file_path, transformer_labels_errors_file_name )
+	transformerLabelsErrorsPathCSV = Path( modelDir, transformer_labels_errors_file_name )
 
 	if useTrueLabels:
 		transformer_labels_true_file_name = 'TransformerLabelsTrue_AMI.csv'
-		transformerLabelsTruePath = Path( test_data_file_path, transformer_labels_true_file_name )
+		shutil.copyfile( Path( test_data_file_path, transformer_labels_true_file_name ), Path(modelDir, transformer_labels_true_file_name) )
+		transformerLabelsTruePath = Path(modelDir, transformer_labels_true_file_name)
 
 	saveResultsPath = modelDir
 
 	if inputDict['algorithm'] == 'reactivePower':
-		if reactivePowerInputPathCSV.exists() == False:
-			reactivePowerInputPathCSV = Path( test_data_file_path, inputDict['reactivePowerDataFileName'])
 		sdsmc.MeterTransformerPairing.TransformerPairing.run( voltageInputPathCSV, realPowerInputPathCSV, reactivePowerInputPathCSV, custIDInputPathCSV, transformerLabelsErrorsPathCSV, transformerLabelsTruePath, saveResultsPath, useTrueLabels )
 
 	elif inputDict['algorithm'] == 'customerLatLong':
-		if custLatLongInputPathCSV.exists() == False:
-			custLatLongInputPathCSV = Path( test_data_file_path, inputDict['customerLatLongDataFileName'])
 		sdsmc.MeterTransformerPairing.TransformerPairingWithDist.run( voltageInputPathCSV, realPowerInputPathCSV, custIDInputPathCSV, transformerLabelsErrorsPathCSV, custLatLongInputPathCSV, transformerLabelsTruePath, saveResultsPath, useTrueLabels )
 
 	else:
@@ -93,13 +81,16 @@ def runtimeEstimate(modelDir):
 def new(modelDir):
 	''' Create a new instance of this model. Returns true on success, false on failure. '''
 
+	test_data_file_path = Path(omf.omfDir,'static','testFiles', 'transformerPairing')
+
 	# Default file names from static/testFiles/
 	voltage_file_name = 'voltageData_AMI.csv'
 	real_power_file_name = 'realPowerData_AMI.csv'
 	customer_ids_file_name = 'CustomerIDs_AMI.csv'
-
-	reactive_power_file_name = 'reactivePowerData_AMI.csv'
 	customer_latlong_file_name = 'CustomerLatLon.csv'
+	reactive_power_file_name = 'reactivePowerData_AMI.csv'
+
+	transformer_labels_errors_file_name = 'TransformerLabelsErrors_AMI.csv'
 
 	# Default options: reactivePower, customerLatLong
 	defaultAlgorithm = "reactivePower"
@@ -107,15 +98,28 @@ def new(modelDir):
 	defaultInputs = {
 		"modelType": modelName,
 		"algorithm": defaultAlgorithm,
+		"userInputVoltageDisplayName": voltage_file_name,
 		"voltageDataFileName": voltage_file_name,
+		"userInputRealDisplayName": real_power_file_name,
 		"realPowerDataFileName": real_power_file_name,
+		"userInputCustIDDisplayName": customer_ids_file_name,
 		"customerIDDataFileName": customer_ids_file_name,
-		"reactivePowerDataFileName": reactive_power_file_name,
-		"customerLatLongDataFileName": customer_latlong_file_name
+		"userInputCustLatLongDisplayName": customer_latlong_file_name,
+		"customerLatLongDataFileName": customer_latlong_file_name,
+		"userInputReactiveDisplayName": reactive_power_file_name,
+		"reactivePowerDataFileName": reactive_power_file_name
 	}
 
 	creationCode = __neoMetaModel__.new(modelDir, defaultInputs)
-
+	try:
+		shutil.copyfile( Path( test_data_file_path, voltage_file_name), Path(modelDir, voltage_file_name))
+		shutil.copyfile( Path( test_data_file_path, real_power_file_name), Path(modelDir, real_power_file_name))
+		shutil.copyfile( Path( test_data_file_path, customer_ids_file_name), Path(modelDir, customer_ids_file_name))
+		shutil.copyfile( Path( test_data_file_path, customer_latlong_file_name), Path(modelDir, customer_latlong_file_name))
+		shutil.copyfile( Path( test_data_file_path, reactive_power_file_name), Path(modelDir, reactive_power_file_name))
+		shutil.copyfile( Path( test_data_file_path, transformer_labels_errors_file_name ), Path(modelDir, transformer_labels_errors_file_name) )
+	except:
+		return False
 	return creationCode
 
 @neoMetaModel_test_setup
