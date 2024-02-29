@@ -16,16 +16,12 @@ function post_to_url(path, params, method) {
 	form.submit()
 }
 
-function updateFileNameDisplay(fileInputID, displayID, fileNameID) {
-	// the fileNameID has to be = the allInputDataDict value
+function updateFileNameDisplay(fileInputID, userFileDisplayNameID, dataFileNameID) {
 	var fileInput = document.getElementById(fileInputID);
-	var displayInput = document.getElementById(displayID);
+	var displayInput = document.getElementById(userFileDisplayNameID);
 
 	if ( fileInput.files.length > 0 ) {
 			displayInput.value = fileInput.files[0].name;
-	}
-	else {
-			displayInput.value = "{{ allInputDataDict[fileNameID] }}";
 	}
 }
 

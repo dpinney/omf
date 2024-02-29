@@ -3,20 +3,27 @@
 	<!-- Library Imports -->
 	<script src="{{pathPrefix}}/static/highcharts4.src.js"></script>
 	<script src="https://cdn.plot.ly/plotly-1.50.1.min.js"></script>
-	{% macro insert_file_upload_block(fileName, dataVariableName) -%}
-		<input id="{{dataVariableName}}Handler" type="file" style="display:none" onchange="handle_files(this.files,'{{dataVariableName}}','{{fileName}}')">
-		<input id="{{dataVariableName}}" name="{{dataVariableName}}" value="{{allInputDataDict[dataVariableName]}}" type="hidden">
-		<div>
-			<label for="{{dataVariableName}}Handler" class="fileButton">Choose File</label>
-			<input id="{{fileName}}" name="{{fileName}}" value="{{allInputDataDict[fileName]}}" readonly class="uploadFileName">    
-		</div>
-	{%- endmacro %}
+
+	<!-- 
+			file_upload('fileInputID', 'userInputVoltage', 'voltageDataFileName')
+			line 1: input for the actual file. There should be no value in inputDict that matches this one.
+			line 2: button for file upload, that's it.
+			line 3: the name of the file the user is using/inputting in. We wanna save this for display. Originally it's set as the default.
+			line 4: This is hidden. This is the name of the file we want always = .csv name <- default naming convention 
+		-->
+		{% macro file_upload(fileInputID, userFileDisplayNameID, dataFileNameID) -%}
+    <input type="file" id="{{fileInputID}}" name="{{ allInputDataDict[dataFileNameID] }}" accept=".csv" class="fileButton" onchange="updateFileNameDisplay('{{fileInputID}}', '{{userFileDisplayNameID}}', '{{dataFileNameID}}')" style="display:none"><br>
+    <label for="{{fileInputID}}" class="fileButton">Choose File</label>
+    <input id="{{userFileDisplayNameID}}" name="{{userFileDisplayNameID}}" value="{{ allInputDataDict[userFileDisplayNameID] }}" readonly class="uploadFileName">
+    <input id="{{dataFileNameID}}" name= {{dataFileNameID}} type="hidden" value="{{ allInputDataDict[dataFileNameID] }}">
+	{% endmacro %}
+
 </head>
 <body>
 	{{ omfModelTitle }}
 	<p class="reportTitle">Model Input</p>
 	<div id="input" class="content">
-		<form name="inputForm" action="/runModel/" onsubmit="event.preventDefault(); return isFormValid();" method="post">
+		<form name="inputForm" action="/runModel/" onsubmit="event.preventDefault(); return isFormValid();" method="post" enctype="multipart/form-data">
 			<div class="shortInput">
 				<label>Model Type <a href="https://github.com/dpinney/omf/wiki/Models-~-hostingCapacity" target="blank">Help?</a></label>
 				<input type="text" id="modelType" name="modelType" value="{{modelName}}" readonly/>
@@ -52,7 +59,7 @@
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Meter Data Input File <span class="classic">Import a .csv file that includes the meter data. Format for input columns: busname, datetime, v_reading, kw_reading, kvar_reading. Optional input columns: latitude, longitude, service_tx_name, phase_count (1, 3)</span></label>
-				<div>{{ insert_file_upload_block('inputDataFileName','inputDataFileContent') }}</div>
+				<div>{{ file_upload('AMIDataFile', 'userAMIDisplayFileName', 'AMIDataFileName') }}</div>
 			</div>
 			<div class="shortInput">
 				<label>Algorithm</label>

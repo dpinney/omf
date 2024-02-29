@@ -49,11 +49,10 @@ def work(modelDir, inputDict):
 
 def run_ami_algorithm(modelDir, inputDict, outData):
 	# mohca data-driven hosting capacity
-	with open(Path(modelDir,inputDict['inputDataFileName']),'w', newline='') as pv_stream:
-		pv_stream.write(inputDict['inputDataFileContent'])
-	inputPath = Path(modelDir, inputDict['inputDataFileName'])
+	inputPath = Path(modelDir, inputDict['AMIDataFileName'])
+	inputAsString = inputPath.read_text()
 	try:
-		csvValidateAndLoad(inputDict['inputDataFileContent'], modelDir=modelDir, header=0, nrows=None, ncols=5, dtypes=[str, pd.to_datetime, float, float, float], return_type='df', ignore_nans=False, save_file=None, ignore_errors=False )
+		csvValidateAndLoad(inputAsString, modelDir=modelDir, header=0, nrows=None, ncols=5, dtypes=[str, pd.to_datetime, float, float, float], return_type='df', ignore_nans=False, save_file=None, ignore_errors=False )
 	except:
 		errorMessage = "AMI-Data CSV file is incorrect format. Please see valid format definition at <a target='_blank' href='https://github.com/dpinney/omf/wiki/Models-~-hostingCapacity#meter-data-input-csv-file-format'>OMF Wiki hostingCapacity</a>"
 		raise Exception(errorMessage)
@@ -148,12 +147,12 @@ def new(modelDir):
 	''' Create a new instance of this model. Returns true on success, false on failure. '''
 	meter_file_name = 'mohcaInputCustom.csv'
 	meter_file_path = Path(omf.omfDir,'static','testFiles', 'hostingCapacity', meter_file_name)
-	meter_file_contents = open(meter_file_path).read()
+	# meter_file_contents = open(meter_file_path).read()
 	defaultInputs = {
 		"modelType": modelName,
 		"algorithm": 'sandia1',
-		"inputDataFileName": meter_file_name,
-		"inputDataFileContent": meter_file_contents,
+		"AMIDataFileName": meter_file_name,
+		"userAMIDisplayFileName": meter_file_name,
 		"feederName1": 'iowa240.clean.dss',
 		"optionalCircuitFile": 'on',
 		"traditionalHCMaxTestkw": 50000,
@@ -164,6 +163,7 @@ def new(modelDir):
 		shutil.copyfile(
 			Path(__neoMetaModel__._omfDir, "static", "publicFeeders", defaultInputs["feederName1"]+'.omd'),
 			Path(modelDir, defaultInputs["feederName1"]+'.omd'))
+		shutil.copyfile( meter_file_path, Path(modelDir, meter_file_name) )
 	except:
 		return False
 	return creationCode
