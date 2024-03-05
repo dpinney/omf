@@ -1,6 +1,5 @@
 ''' Calculate hosting capacity using traditional and/or AMI-based methods. '''
 import shutil
-from os.path import join as pJoin
 import plotly as py
 import plotly.express as px
 import plotly.graph_objects as go
@@ -50,38 +49,39 @@ def work(modelDir, inputDict):
 
 def run_ami_algorithm(modelDir, inputDict, outData):
 	# mohca data-driven hosting capacity
-	with open(Path(modelDir,inputDict['inputDataFileName']),'w', newline='') as pv_stream:
-		pv_stream.write(inputDict['inputDataFileContent'])
-	inputPath = Path(modelDir, inputDict['inputDataFileName'])
+	inputPath = Path(modelDir, inputDict['AMIDataFileName'])
+	inputAsString = inputPath.read_text()
 	try:
-		csvValidateAndLoad(inputDict['inputDataFileContent'], modelDir=modelDir, header=0, nrows=None, ncols=5, dtypes=[str, pd.to_datetime, float, float, float], return_type='df', ignore_nans=False, save_file=None, ignore_errors=False )
+		csvValidateAndLoad(inputAsString, modelDir=modelDir, header=0, nrows=None, ncols=5, dtypes=[str, pd.to_datetime, float, float, float], return_type='df', ignore_nans=False, save_file=None, ignore_errors=False )
 	except:
 		errorMessage = "AMI-Data CSV file is incorrect format. Please see valid format definition at <a target='_blank' href='https://github.com/dpinney/omf/wiki/Models-~-hostingCapacity#meter-data-input-csv-file-format'>OMF Wiki hostingCapacity</a>"
 		raise Exception(errorMessage)
-	outputPath = Path(modelDir, 'mohcaOutput.csv')
-	mohcaOutput = []
-	mohca_start_time = time.time()
-	if inputDict[ "mohcaAlgorithm" ] == "sandia1":
-		mohcaOutput = mohca_cl.sandia1( inputPath, outputPath )
-	elif inputDict[ "mohcaAlgorithm" ] == "sandia2":
-		mohcaOutput = mohca_cl.sandia2( inputPath, outputPath )
+	outputPath = Path(modelDir, 'AMI_output.csv')
+	AMI_output = []
+	AMI_start_time = time.time()
+	if inputDict[ "algorithm" ] == "sandia1":
+		AMI_output = mohca_cl.sandia1( inputPath, outputPath )
+	elif inputDict[ "algorithm" ] == "iastate":
+		AMI_output = mohca_cl.iastate( inputPath, outputPath )
 	else:
 		errorMessage = "Algorithm name error"
 		raise Exception(errorMessage)
-	mohca_end_time = time.time()
-	mohcaResults = mohcaOutput[0].rename(columns={'kW_hostable': 'voltage_cap_kW'})
-	mohcaHistogramFigure = px.histogram( mohcaResults, x='voltage_cap_kW', template="simple_white", color_discrete_sequence=["MediumPurple"] )
-	mohcaHistogramFigure.update_layout(bargap=0.5)
+	AMI_end_time = time.time()
+	AMI_results = AMI_output[0].rename(columns={'kW_hostable': 'voltage_cap_kW'})
+	histogramFigure = px.histogram( AMI_results, x='voltage_cap_kW', template="simple_white", color_discrete_sequence=["MediumPurple"] )
+	histogramFigure.update_layout(bargap=0.5)
 	# TBD - Needs to be modified when the MoHCA algorithm supports calculating thermal hosting capacity
-	mohcaResults['thermal_cap_kW'] = [7.23, 7.34, 7.45, 7.53, 7.24, 6.24, 7.424, 7.23 ]
-	mohcaResults['max_cap_allowed_kW'] = np.minimum( mohcaResults['voltage_cap_kW'], mohcaResults['thermal_cap_kW'])
-	mohcaBarChartFigure = px.bar(mohcaResults, x='busname', y=['voltage_cap_kW', 'thermal_cap_kW', 'max_cap_allowed_kW'], barmode='group', color_discrete_sequence=["green", "lightblue", "MediumPurple"], template="simple_white" )
-	mohcaBarChartFigure.add_traces( list(px.line(mohcaResults, x='busname', y='max_cap_allowed_kW', markers=True).select_traces()) )
-	outData['mohcaHistogramFigure'] = json.dumps( mohcaHistogramFigure, cls=py.utils.PlotlyJSONEncoder )
-	outData['mohcaBarChartFigure'] = json.dumps( mohcaBarChartFigure, cls=py.utils.PlotlyJSONEncoder )
-	outData['mohcaHCTableHeadings'] = mohcaResults.columns.values.tolist()
-	outData['mohcaHCTableValues'] = ( list(mohcaResults.sort_values( by="max_cap_allowed_kW", ascending=False, ignore_index=True ).itertuples(index=False, name=None)) )
-	outData['mohcaRuntime'] = mohca_end_time - mohca_start_time
+	min_value = 5
+	max_value = 8
+	AMI_results['thermal_cap_kW']  = np.random.randint(min_value, max_value + 1, size=len(AMI_results))
+	AMI_results['max_cap_allowed_kW'] = np.minimum( AMI_results['voltage_cap_kW'], AMI_results['thermal_cap_kW'])
+	barChartFigure = px.bar(AMI_results, x='busname', y=['voltage_cap_kW', 'thermal_cap_kW', 'max_cap_allowed_kW'], barmode='group', color_discrete_sequence=["green", "lightblue", "MediumPurple"], template="simple_white" )
+	barChartFigure.add_traces( list(px.line(AMI_results, x='busname', y='max_cap_allowed_kW', markers=True).select_traces()) )
+	outData['histogramFigure'] = json.dumps( histogramFigure, cls=py.utils.PlotlyJSONEncoder )
+	outData['barChartFigure'] = json.dumps( barChartFigure, cls=py.utils.PlotlyJSONEncoder )
+	outData['AMI_tableHeadings'] = AMI_results.columns.values.tolist()
+	outData['AMI_tableValues'] = ( list(AMI_results.sort_values( by="max_cap_allowed_kW", ascending=False, ignore_index=True ).itertuples(index=False, name=None)) )
+	outData['AMI_runtime'] = AMI_end_time - AMI_start_time
 
 
 def run_traditional_algorithm(modelDir, inputDict, outData):
@@ -136,6 +136,7 @@ def run_traditional_algorithm(modelDir, inputDict, outData):
 	outData['traditionalHCTableHeadings'] = tradHCDF.columns.values.tolist()
 	outData['traditionalHCTableValues'] = (list(tradHCDF.itertuples(index=False, name=None)))
 	outData['traditionalRuntime'] = traditional_end_time - traditional_start_time
+	outData['traditionalHCResults'] = traditionalHCResults
 
 
 def runtimeEstimate(modelDir):
@@ -145,13 +146,13 @@ def runtimeEstimate(modelDir):
 def new(modelDir):
 	''' Create a new instance of this model. Returns true on success, false on failure. '''
 	meter_file_name = 'mohcaInputCustom.csv'
-	meter_file_path = Path(omf.omfDir,'static','testFiles', meter_file_name)
-	meter_file_contents = open(meter_file_path).read()
+	meter_file_path = Path(omf.omfDir,'static','testFiles', 'hostingCapacity', meter_file_name)
+	# meter_file_contents = open(meter_file_path).read()
 	defaultInputs = {
 		"modelType": modelName,
-		"mohcaAlgorithm": 'sandia1',
-		"inputDataFileName": meter_file_name,
-		"inputDataFileContent": meter_file_contents,
+		"algorithm": 'sandia1',
+		"AMIDataFileName": meter_file_name,
+		"userAMIDisplayFileName": meter_file_name,
 		"feederName1": 'iowa240.clean.dss',
 		"optionalCircuitFile": 'on',
 		"traditionalHCMaxTestkw": 50000,
@@ -162,6 +163,7 @@ def new(modelDir):
 		shutil.copyfile(
 			Path(__neoMetaModel__._omfDir, "static", "publicFeeders", defaultInputs["feederName1"]+'.omd'),
 			Path(modelDir, defaultInputs["feederName1"]+'.omd'))
+		shutil.copyfile( meter_file_path, Path(modelDir, meter_file_name) )
 	except:
 		return False
 	return creationCode

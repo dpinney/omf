@@ -12,9 +12,10 @@ class LeafletLayer { // implements ObserverInterface
     #controller;    // ControllerInterface instance
     #layer;         // - Leaflet layer
     #observable;    // - ObservableInterface instance
-    static lineLayers = L.featureGroup();
     static map;
+    static control;
     static nodeLayers = L.featureGroup();
+    static lineLayers = L.featureGroup();
     static parentChildLineLayers = L.featureGroup();
 
     /**

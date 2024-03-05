@@ -390,7 +390,7 @@ uuid = "87dc4568-4c63-4d18-b0c0-bb2238e4078b"
 version = "1.7.5"
 
 [[deps.HiGHS_jll]]
-deps = ["Artifacts", "CompilerSupportLibraries_jll", "JLLWrappers", "Libdl"]
+deps = ["Artifacts", "CompilerSupportLibraries_jll", "JLLWrappers", "Libdl", "Zlib_jll"]
 git-tree-sha1 = "10bf0ecdf70f643bfc1948a6af0a98be3950a3fc"
 uuid = "8fd58aa0-07eb-5a78-9b36-339c94fd15ea"
 version = "1.6.0+0"
@@ -811,9 +811,9 @@ uuid = "9abbd945-dff8-562f-b5e8-e1ebf5ef1b79"
 
 [[deps.PyCall]]
 deps = ["Conda", "Dates", "Libdl", "LinearAlgebra", "MacroTools", "Serialization", "VersionParsing"]
-git-tree-sha1 = "c9932f1c60d2e653df4f06d76108af8fde2200c0"
+git-tree-sha1 = "9816a3826b0ebf49ab4926e2b18842ad8b5c8f04"
 uuid = "438e738f-606a-5dbb-bf0a-cddfbfd45ab0"
-version = "1.96.3"
+version = "1.96.4"
 
 [[deps.REPL]]
 deps = ["InteractiveUtils", "Markdown", "Sockets", "Unicode"]

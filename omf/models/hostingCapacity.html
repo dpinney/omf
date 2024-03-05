@@ -3,20 +3,27 @@
 	<!-- Library Imports -->
 	<script src="{{pathPrefix}}/static/highcharts4.src.js"></script>
 	<script src="https://cdn.plot.ly/plotly-1.50.1.min.js"></script>
-	{% macro insert_file_upload_block(fileName, dataVariableName) -%}
-		<input id="{{dataVariableName}}Handler" type="file" style="display:none" onchange="handle_files(this.files,'{{dataVariableName}}','{{fileName}}')">
-		<input id="{{dataVariableName}}" name="{{dataVariableName}}" value="{{allInputDataDict[dataVariableName]}}" type="hidden">
-		<div>
-			<label for="{{dataVariableName}}Handler" class="fileButton">Choose File</label>
-			<input id="{{fileName}}" name="{{fileName}}" value="{{allInputDataDict[fileName]}}" readonly class="uploadFileName">    
-		</div>
-	{%- endmacro %}
+
+	<!-- 
+			file_upload('fileInputID', 'userInputVoltage', 'voltageDataFileName')
+			line 1: input for the actual file. There should be no value in inputDict that matches this one.
+			line 2: button for file upload, that's it.
+			line 3: the name of the file the user is using/inputting in. We wanna save this for display. Originally it's set as the default.
+			line 4: This is hidden. This is the name of the file we want always = .csv name <- default naming convention 
+		-->
+		{% macro file_upload(fileInputID, userFileDisplayNameID, dataFileNameID) -%}
+    <input type="file" id="{{fileInputID}}" name="{{ allInputDataDict[dataFileNameID] }}" accept=".csv" class="fileButton" onchange="updateFileNameDisplay('{{fileInputID}}', '{{userFileDisplayNameID}}', '{{dataFileNameID}}')" style="display:none"><br>
+    <label for="{{fileInputID}}" class="fileButton">Choose File</label>
+    <input id="{{userFileDisplayNameID}}" name="{{userFileDisplayNameID}}" value="{{ allInputDataDict[userFileDisplayNameID] }}" readonly class="uploadFileName">
+    <input id="{{dataFileNameID}}" name= {{dataFileNameID}} type="hidden" value="{{ allInputDataDict[dataFileNameID] }}">
+	{% endmacro %}
+
 </head>
 <body>
 	{{ omfModelTitle }}
 	<p class="reportTitle">Model Input</p>
 	<div id="input" class="content">
-		<form name="inputForm" action="/runModel/" onsubmit="event.preventDefault(); return isFormValid();" method="post">
+		<form name="inputForm" action="/runModel/" onsubmit="event.preventDefault(); return isFormValid();" method="post" enctype="multipart/form-data">
 			<div class="shortInput">
 				<label>Model Type <a href="https://github.com/dpinney/omf/wiki/Models-~-hostingCapacity" target="blank">Help?</a></label>
 				<input type="text" id="modelType" name="modelType" value="{{modelName}}" readonly/>
@@ -40,7 +47,7 @@
 			</div>
 			{% endif %}
 			<div class="wideInput">
-				<p class="inputSectionHeader">AMI-Based or "MoHCa" Hosting Capacity</p>
+				<p class="inputSectionHeader">AMI-Based Hosting Capacity</p>
 			</div>
 			<hr>
 			<div class="shortInput">
@@ -52,13 +59,13 @@
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Meter Data Input File <span class="classic">Import a .csv file that includes the meter data. Format for input columns: busname, datetime, v_reading, kw_reading, kvar_reading. Optional input columns: latitude, longitude, service_tx_name, phase_count (1, 3)</span></label>
-				<div>{{ insert_file_upload_block('inputDataFileName','inputDataFileContent') }}</div>
+				<div>{{ file_upload('AMIDataFile', 'userAMIDisplayFileName', 'AMIDataFileName') }}</div>
 			</div>
 			<div class="shortInput">
 				<label>Algorithm</label>
-				<select id="mohcaAlgorithm" name="mohcaAlgorithm" value="{{allInputDataDict.mohcaAlgorithm}}" required>
-					<option value="sandia1" {% if allInputDataDict.mohcaAlgorithm == 'sandia1' %}selected{% endif %}>sandia1</option>
-					<option value="sandia2" {% if allInputDataDict.mohcaAlgorithm == 'sandia2' %}selected{% endif %}>sandia2</option>
+				<select id="algorithm" name="algorithm" value="{{allInputDataDict.algorithm}}" required>
+					<option value="sandia1" {% if allInputDataDict.algorithm == 'sandia1' %}selected{% endif %}>sandia1</option>
+					<option value="iastate" {% if allInputDataDict.algorithm == 'iastate' %}selected{% endif %}>iastate</option>
 				</select>
 			</div>
 			<div class="wideInput">
@@ -94,33 +101,33 @@
 	<style>td, th {padding:7 0 5 20;text-align: left;font-size:0.8em; border: 1px solid #cccccc;} </style>
 	<div id="output">
     {% if allInputDataDict['runAmiAlgorithm'] == 'on' %}
-			<p class="reportTitle">AMI-Based "MoHCA" Hosting Capacity Runtime </p>
-			<div id="mohcaRunTime" class="tightContent">
-				<span style="border: 1px solid grey; padding: 3px;"> {{ allOutputDataDict['mohcaRuntime']}} </span>  
+			<p class="reportTitle">AMI-Based Hosting Capacity Runtime </p>
+			<div id="AMI_runtime" class="tightContent">
+				<span style="border: 1px solid grey; padding: 3px;"> {{ allOutputDataDict['AMI_runtime']}} </span>  
 			</div>
 			<p class="reportTitle">AMI-Based Hosting Capacity Distribution</p>
-			<div id="mohcaHistogramChart" class="tightContent">
-				<div id="mohcaHistogramChart" style="width:1000px"></div>
+			<div id="histogramFigure" class="tightContent">
+				<div id="histogramFigure" style="width:1000px"></div>
 				<script type="text/javascript">
-					Plotly.newPlot("mohcaHistogramChart", JSON.parse( allOutputData["mohcaHistogramFigure"]) )
+					Plotly.newPlot("histogramFigure", JSON.parse( allOutputData["histogramFigure"]) )
 				</script>
 			</div>
 			<p class="reportTitle">AMI-Based Hosting Capacity By Bus</p>
-			<div id="mohcaBarChart" class="tightContent">
-				<div id="mohcaBarChart" style="width:1000px"></div>
+			<div id="barChartFigure" class="tightContent">
+				<div id="barChartFigure" style="width:1000px"></div>
 				<script type="text/javascript">
-					Plotly.newPlot("mohcaBarChart", JSON.parse( allOutputData["mohcaBarChartFigure"]) )
+					Plotly.newPlot("barChartFigure", JSON.parse( allOutputData["barChartFigure"]) )
 				</script>
 			</div>
 			<p class="reportTitle">AMI-Based Full Hosting Capacity Data Table</p>
-			<div id="mohcaHostingCapacityTable" class="tightContent">
+			<div id="AMIhostingCapacityTable" class="tightContent">
 				<table style='margin:5px;width:990px'>
 					<tr>
-					{% for header in allOutputDataDict["mohcaHCTableHeadings"] %}
+					{% for header in allOutputDataDict["AMI_tableHeadings"] %}
 						<th>{{ header }}</th>
 						{% endfor %}
 					</tr>
-					{% for values in allOutputDataDict["mohcaHCTableValues"] %}
+					{% for values in allOutputDataDict["AMI_tableValues"] %}
 					<tr>
 						{% for val in values %}
 						<td>{{ val }}</td>
@@ -132,7 +139,7 @@
     {% endif %}
 		{% if allInputDataDict['optionalCircuitFile'] == 'on' %}
 			<p class="reportTitle">Traditional/Model-Based Hosting Capacity Runtime</p>
-			<div id="mohcaRunTime" class="tightContent">
+			<div id="traditionalRunTime" class="tightContent">
 				<span style="border: 1px solid grey; padding: 3px;"> {{ allOutputDataDict['traditionalRuntime'] }} </span>
 			</div>
 			<p class="reportTitle" style="page-break-before:always">Traditional Hosting Capacity Map</p>

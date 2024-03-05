@@ -514,8 +514,8 @@ def ParamEst_LinearRegression_NoQ(voltage,p,savePath=-1):
     # Walk through each customer pairing and do the regression, note that the 
     #resulting matrices are mirrored across the diagonal
     for custCtr in range(0,voltage.shape[1]):
-        if np.mod(custCtr,20) == 0:
-            print('Customer ' + str(custCtr) + '/' + str(voltage.shape[1]))
+        #if np.mod(custCtr,20) == 0:
+            # print('Customer ' + str(custCtr) + '/' + str(voltage.shape[1]))
         ctr = custCtr + 1
         while ctr < voltage.shape[1]:
             #print(str(custCtr) + ' / ' + str(ctr))

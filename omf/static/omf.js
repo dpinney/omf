@@ -16,6 +16,15 @@ function post_to_url(path, params, method) {
 	form.submit()
 }
 
+function updateFileNameDisplay(fileInputID, userFileDisplayNameID, dataFileNameID) {
+	var fileInput = document.getElementById(fileInputID);
+	var displayInput = document.getElementById(userFileDisplayNameID);
+
+	if ( fileInput.files.length > 0 ) {
+			displayInput.value = fileInput.files[0].name;
+	}
+}
+
 function handle_files(files, contentsId, nameId) {
 	// Helper function to pull file contents in to an allInputData data structure.
 	// Read the file

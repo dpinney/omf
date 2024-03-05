@@ -28,7 +28,12 @@ class FeatureEditModal { // implements ObserverInterface, ModalInterface
         this.#observables = observables;
         this.#observables.forEach(ob => ob.registerObserver(this));
         this.#removed = false;
-        this.renderContent();
+        // - In order to allow users to view non-OMD GeoJSON features in a table, I added this if-statement
+        if (this.#observables.every(ob => ob.hasProperty('treeKey', 'meta'))) {
+            this.renderContent();
+        } else {
+            this.#renderReadOnlyModal();
+        }
     }
 
     // *******************************
@@ -125,7 +130,6 @@ class FeatureEditModal { // implements ObserverInterface, ModalInterface
     isRemoved() {
         return this.#removed;
     }
-
 
     // - Here's how refreshing content could work:
     //  - The FeatureEditModal maintains an internal map of property keys to table rows (<tr> elements)
@@ -239,26 +243,13 @@ class FeatureEditModal { // implements ObserverInterface, ModalInterface
         const keyToValues = this.#getKeyToValuesMapping();
         for (const [key, ary] of Object.entries(keyToValues.meta)) {
             const keySpan = document.createElement('span');
-            if (key === 'treeKey') {
-                keySpan.textContent = 'ID';
-                keySpan.dataset.propertyKey = 'treeKey';
-                keySpan.dataset.propertyNamespace = 'meta';
-                if (ary.length === 1) {
-                    modal.insertTHeadRow([null, keySpan, ary[0].toString()], 'prepend');
-                } else {
-                    modal.insertTHeadRow([null, keySpan, '<Multiple IDs>'], 'prepend');
-                }
-                continue;
-            }
-            if (key === 'FID') {
-                keySpan.textContent = 'FID';
-                keySpan.dataset.propertyKey = 'FID';
-                keySpan.dataset.propertyNamespace = 'meta';
-                if (ary.length === 1) {
-                    modal.insertTHeadRow([null, keySpan, ary[0].toString()], 'prepend');
-                } else {
-                    modal.insertTHeadRow([null, keySpan, '<Multiple FIDs>'], 'prepend');
-                }
+            keySpan.textContent = 'ID';
+            keySpan.dataset.propertyKey = 'treeKey';
+            keySpan.dataset.propertyNamespace = 'meta';
+            if (ary.length === 1) {
+                modal.insertTHeadRow([null, keySpan, ary[0].toString()], 'prepend');
+            } else {
+                modal.insertTHeadRow([null, keySpan, '<Multiple IDs>'], 'prepend');
             }
         }
         for (const [key, ary] of Object.entries(keyToValues.treeProps)) {
@@ -529,22 +520,11 @@ class FeatureEditModal { // implements ObserverInterface, ModalInterface
             coordinates: {}
         };
         this.#observables.forEach(ob => {
-            // - Let non-OMD-tree features display a table
-            if (ob.hasProperty('treeKey', 'meta')) {
-                const treeKey = ob.getProperty('treeKey', 'meta');
-                if (!keyToValues.meta.hasOwnProperty('treeKey')) {
-                    keyToValues.meta.treeKey = [treeKey];
-                } else if (!keyToValues.meta.treeKey.includes(treeKey)) {
-                    keyToValues.meta.treeKey.push(treeKey);
-                }
-            }
-            if (ob.hasProperty('FID', 'meta')) {
-                const fid = ob.getProperty('FID', 'meta');
-                if (!keyToValues.meta.hasOwnProperty('FID')) {
-                    keyToValues.meta.FID = [fid];
-                } else if (!keyToValues.meta.FID.includes(fid)) {
-                    keyToValues.meta.FID.push(fid);
-                }
+            const treeKey = ob.getProperty('treeKey', 'meta');
+            if (!keyToValues.meta.hasOwnProperty('treeKey')) {
+                keyToValues.meta.treeKey = [treeKey];
+            } else if (!keyToValues.meta.treeKey.includes(treeKey)) {
+                keyToValues.meta.treeKey.push(treeKey);
             }
             if (ob.hasProperty('treeProps', 'meta')) {
                 for (const [k, v] of Object.entries(ob.getProperties('treeProps'))) {
@@ -768,6 +748,35 @@ class FeatureEditModal { // implements ObserverInterface, ModalInterface
             return false;
         }
         return true;
+    }
+
+    /**
+     * - A render a static, read-only table for arbitrary GeoJSON objects. Does not support editing data in any way
+     */
+    #renderReadOnlyModal() {
+        if (this.#observables.length > 1) {
+            throw Error('ReadOnlyModal does not support viewing multiple GeoJSON features');
+        }
+        const modal = new Modal();
+        modal.addStyleClasses(['featureEditModal'], 'divElement');
+        for (const [key, val] of Object.entries(this.#observables[0].getProperties('meta'))) {
+            const keySpan = document.createElement('span');
+            keySpan.textContent = key;
+            keySpan.dataset.propertyKey = key;
+            keySpan.dataset.propertyNamespace = 'meta';
+            const valueSpan = document.createElement('span');
+            valueSpan.textContent = val;
+            modal.insertTBodyRow([keySpan, valueSpan]);
+        }
+        modal.addStyleClasses(['centeredTable', 'plainTable'], 'tableElement');
+        modal.addStyleClasses(['verticalFlex', 'centerMainAxisFlex', 'centerCrossAxisFlex'], 'containerElement');
+        if (this.#modal === null) {
+            this.#modal = modal;
+        }
+        if (document.body.contains(this.#modal.divElement)) {
+            this.#modal.divElement.replaceWith(modal.divElement);
+            this.#modal = modal;
+        }
     }
     
     /**
@@ -998,7 +1007,7 @@ function zoom(observables) {
         const layer = Object.values(observable.getObservers().filter(ob => ob instanceof LeafletLayer)[0].getLayer()._layers)[0];
         if (observable.isNode()) {
             const [lon, lat] = structuredClone(observable.getCoordinates());
-            // - This is the max zoom without losing the map
+            // - The max zoom level without losing the map is 19
             LeafletLayer.map.flyTo([lat, lon], 19, {duration: .3});
             if (!layer.isPopupOpen()) {
                 layer.openPopup();

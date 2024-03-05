@@ -439,7 +439,6 @@ def newModel(modelType, modelName):
 	thisModel.new(modelDir)
 	return redirect("/model/" + User.cu() + "/" + modelName)
 
-
 @app.route("/runModel/", methods=["POST"])
 @flask_login.login_required
 @write_permission_function
@@ -459,6 +458,14 @@ def runModel():
 	modelName = pData["modelName"]
 	del pData["modelName"]
 	modelDir = os.path.join(_omfDir, "data", "Model", user, modelName)
+	# File upload handling
+	# print('FILES?', len(request.files), request.files)
+	if len( request.files ) > 0:
+		for file_field, file in request.files.items():
+			if file.filename != '':
+				file.save(os.path.join(modelDir, file_field))
+			else:
+				print( "File not found: ", file_field, "file info: ", file)
 	# Get existing model viewers and add them to pData if they exist, then write pData to update allInputData.json
 	filepath = os.path.join(modelDir, "allInputData.json")
 	with locked_open(filepath, 'r+') as f:

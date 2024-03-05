@@ -2,67 +2,91 @@ import json, time
 import os, platform
 import random
 
-thisDir = os.path.abspath(os.path.dirname(__file__))
+thisDir = str(os.path.abspath(os.path.dirname(__file__)))
 
-def build_julia_image():
-    ''' Creates REoptSolver sysimage -> reopt_jl.so '''
-
-    os.system(f'''julia --project={thisDir}/REoptSolver -e '
-            import Pkg; Pkg.instantiate();
-            import REoptSolver; using PackageCompiler;
-            PackageCompiler.create_sysimage(["REoptSolver"]; sysimage_path="{thisDir}/reopt_jl.so", 
-            precompile_execution_file="{thisDir}/precompile_reopt.jl", cpu_target="generic;sandybridge,-xsaveopt,clone_all;haswell,-rdrnd,base(1)")
-            ' ''')
-
-#potential add: boolean to determine if you want to check your install
-def install_reopt_jl(system : list = platform.system()):
+def install_reopt_jl(system : list = platform.system(), build_sysimage=True):
     ''' Installs dependencies necessary for running REoptSolver and creates sysimage to reduce precompile time '''
- 
-    if os.path.isfile(f'{thisDir}/instantiated.txt'):
+    instantiated_path = str(os.path.normpath(os.path.join(thisDir,"instantiated.txt")))
+    project_path = str(os.path.normpath(os.path.join(thisDir,"REoptSolver")))
+    sysimage_path = str(os.path.normpath(os.path.join(thisDir,"reopt_jl.so")))
+    precompile_path = str(os.path.normpath(os.path.join(thisDir,"precompile_reopt.jl")))
+
+    if os.path.isfile(instantiated_path):
         print("reopt_jl dependencies installed - to reinstall remove file: instantiated.txt")
-        if not os.path.isfile(f'{thisDir}/reopt_jl.so'):
+        if not os.path.isfile(sysimage_path) and build_sysimage:
             print("error: reopt_jl sysimage not found - remove instantiated.txt to build")
         return
     
-    try: 
+    try:
+        install_pyjulia = [
+                'pip3 show julia 1>/dev/null 2>/dev/null || pip3 install julia ',
+                '''python3 -c 'import julia; julia.install()' '''
+        ]
+        #adding abilty to use pre-made sysimage (not instantiated)
+        if os.path.exists(sysimage_path) and build_sysimage:
+            print("pre-built reopt_jl.so sysimage found")
+            build_julia_image = [
+                f'chmod +x "{sysimage_path}"'
+            ]
+        elif build_sysimage:
+            build_julia_image = [
+                f'''julia --project="{project_path}" -e '
+                import Pkg; Pkg.instantiate();
+                import REoptSolver; using PackageCompiler;
+                PackageCompiler.create_sysimage(["REoptSolver"]; sysimage_path="{sysimage_path}", 
+                precompile_execution_file="{precompile_path}", cpu_target="generic;sandybridge,-xsaveopt,clone_all;haswell,-rdrnd,base(1)")
+                ' '''
+            ]
+        else:
+            build_julia_image = []
         if system == "Darwin":
             commands = [ '''
                 HOMEBREW_NO_AUTO_UPDATE=1 brew list julia 1>/dev/null 2>/dev/null || 
                 { brew tap homebrew/core; brew install julia; }
                 '''
             ]
+            commands += install_pyjulia
+            commands += build_julia_image
+            commands += [ f'touch "{instantiated_path}"' ]
         elif system == "Linux":
-            print("running installation for Linux: work in progress")
             commands = [
                 'sudo apt-get install wget',
                 'wget https://julialang-s3.julialang.org/bin/linux/x64/1.9/julia-1.9.4-linux-x86_64.tar.gz ',
                 #'''python3 -c 'from urllib.request import urlretrieve as wget; wget("https://julialang-s3.julialang.org/bin/linux/x64/1.9/julia-1.9.4-linux-x86_64.tar.gz", "./julia-1.9.4-linux-x86_64.tar.gz") ' ''',
-			    'tar -x -f "julia-1.9.4-linux-x86_64.tar.gz" -C /usr/local --strip-components 1'
+			    'sudo tar -xvzf "julia-1.9.4-linux-x86_64.tar.gz" -C /usr/local --strip-components 1'
             ]
+            commands += install_pyjulia
+            commands += build_julia_image
+            commands += [ f'touch "{instantiated_path}"' ]
+        elif system == "Windows":
+            commands = [
+                f'cd "{thisDir}" & del julia-1.9.4-win64.zip',
+			    f'cd "{thisDir}" & curl -o julia-1.9.4-win64.zip https://julialang-s3.julialang.org/bin/winnt/x64/1.9/julia-1.9.4-win64.zip',
+			    f'cd "{thisDir}" & tar -x -f "julia-1.9.4-win64.zip' ]
+            commands += install_pyjulia
+            if build_sysimage:
+                commands += [
+                    f'''cd "{thisDir}\\julia-1.9.4\\bin" & julia --project="{project_path}" -e '
+                    import Pkg; Pkg.instantiate();
+                    import REoptSolver; using PackageCompiler;
+                    PackageCompiler.create_sysimage(["REoptSolver"]; sysimage_path="{sysimage_path}", 
+                    precompile_execution_file="{precompile_path}", cpu_target="generic;sandybridge,-xsaveopt,clone_all;haswell,-rdrnd,base(1)")
+                    ' '''
+			        f'copy nul "{instantiated_path}"'
+                ]
         else:
-            print(f'No installation script available yet for {system}')
-            return
-    
-        commands += [
-            'pip3 show julia 1>/dev/null 2>/dev/null || pip3 install julia ',
-            '''python3 -c 'import julia; julia.install()' '''
-        ]
+            raise ValueError(f'No installation script available yet for {system}')
     
         for command in commands:
             os.system(command)
-        build_julia_image()
-        if os.path.isfile(f'{thisDir}/reopt_jl.so'):
-            os.system(f'touch {thisDir}/instantiated.txt')
-            print("reopt_jl installation completed successfully")
-        else:
-            print("error: reopt_jl.so not found")
 
     except Exception as e:
         print(e)
         return 
-
+    
 ########################################################
-#functions for converting REopt input to REopt.jl input
+#functions for converting REopt input to REopt.jl input 
+#    -> used for integration testing purposes
 ########################################################
 
 def init_reopt_to_julia_dict():
@@ -142,23 +166,12 @@ def init_reopt_to_julia_dict():
 
     return (to_jl_dict, not_included_in_jl)
 
-
-class KeyNotRecognizedError(Exception):
-    def __init__(self, key):
-        super().__init__(f"Key not found in API -> Julia JSON translator: {key}")
-        self.key = key
-
-class SectionLookupError(Exception):
-    def __init__(self, key):
-        super().__init__(f"No sections found for key: {key} in API -> Julia JSON translator")
-        self.key = key
-
 def check_key(key, to_jl_dict, not_included_in_jl):
     ''' checks if variable name is used in REopt.jl '''
     if key in not_included_in_jl:
         return False
     elif key not in to_jl_dict:
-        raise(KeyNotRecognizedError)
+        raise ValueError(f"Key not found in API -> Julia JSON translator: {key}")
     else:
         return True
     
@@ -174,7 +187,7 @@ def check_input(key,var,to_jl_dict):
         elif var_type == float:
             return float(var)
     else:
-        raise(KeyNotRecognizedError)
+        raise ValueError(f"Key not found in API -> Julia JSON translator: {key}")
 
 def get_section(key,section,to_jl_dict):
     ''' returns converted section name if used in REopt.jl '''
@@ -185,7 +198,7 @@ def get_section(key,section,to_jl_dict):
     elif len(new_sections) == 1:
         return list(new_sections)[0]
     else:
-        raise(SectionLookupError)
+        raise ValueError(f"No sections found for key: {key} in API -> Julia JSON translator")
 
 def add_variable(section,key,value,jl_json,to_jl_dict):
     ''' converts variable into REopt.jl version of variable and adds to json '''
@@ -220,19 +233,6 @@ def convert_to_jl(reopt_json):
         print(e)
     return new_jl_json
 
-def get_json(inputPath):
-    ''' for reading input/output json files '''
-    with open(inputPath) as j:
-        inputJson = json.load(j)
-    return inputJson
-
-def write_json(outputPath, jsonData):
-    ''' for writing input/output json files '''
-    if os.path.exists(outputPath):
-        print(f'File {outputPath} already exists: overwriting')
-    with open(outputPath, "w") as j:
-        json.dump(jsonData, j)
-
 ##########################################################################
 # run_reopt_jl 
 ##########################################################################
@@ -251,79 +251,61 @@ def get_randomized_api_key():
     return REOPT_API_KEYS[key_index]
 
 #potential optional inputs (for solver): ratio_gap, threads, max_solutions, verbosity
-def run_reopt_jl(path, inputFile="", default=False, convert=False, outages=False, microgrid_only=False, max_runtime_s=None):
+#potential other inputs (ease of use): load csv file path ("path_to_csv") => check if "loads_kw" already exists
+def run_reopt_jl(path, inputFile="", loadFile="", default=False, outages=False, microgrid_only=False, max_runtime_s=None, 
+                 run_with_sysimage=True, tolerance=0.05 ):
     ''' calls 'run' function through run_reopt.jl (Julia file) '''
     
     if inputFile == "" and not default:
         print("Invalid inputs: inputFile needed if default=False")
         return
 
-    install_reopt_jl()
+    install_reopt_jl(build_sysimage=run_with_sysimage)
 
     constant_file = "Scenario_test_POST.json"
-    constant_path = f'{path}/{constant_file}'
+    constant_path = os.path.normpath(os.path.join(path,constant_file))
 
     if inputFile != constant_file:
-        inputPath = f'{path}/{inputFile}'
+        inputPath = os.path.normpath(os.path.join(path,inputFile))
         if default == True:
-            inputPath = f'{thisDir}/julia_default.json'
-        input_json = get_json(inputPath)
-        write_json(constant_path, input_json)
+            inputPath = os.path.normpath(os.path.join(thisDir,"testFiles","julia_default.json"))
+        with open(inputPath) as j:
+            input_json = json.load(j)
+            if default == True:
+                input_json["ElectricLoad"]["path_to_csv"] = os.path.normpath(os.path.join(thisDir,"testFiles","loadShape.csv"))
+            elif loadFile != "":
+                input_json["ElectricLoad"]["path_to_csv"] = os.path.normpath(os.path.join(path,loadFile))
+            with open(constant_path, "w") as j:
+                json.dump(input_json, j)
 
     try:
-        if convert and not default: #default file is already converted
-            input_json = get_json(constant_path)
-            reopt_jl_input_json = convert_to_jl(input_json)
-            write_json(constant_path, reopt_jl_input_json)
-
         microgrid_only_jl = "false" if not microgrid_only else "true"
         outages_jl = "false" if not outages else "true"
         max_runtime_s_jl = "nothing" if max_runtime_s == None else max_runtime_s
 
         api_key = get_randomized_api_key()
 
-        os.system(f'''julia --sysimage={f'{thisDir}/reopt_jl.so'} -e '
-                  using .REoptSolver;
-                  ENV["NREL_DEVELOPER_API_KEY"]="{api_key}";
-                  REoptSolver.run("{path}", {outages_jl}, {microgrid_only_jl}, {max_runtime_s_jl}, "{api_key}")
-                  ' ''')
+        if run_with_sysimage:
+            sysimage_path = os.path.normpath(os.path.join(thisDir,"reopt_jl.so"))
+            os.system(f'''julia --sysimage="{sysimage_path}" -e '
+                      using .REoptSolver;
+                      ENV["NREL_DEVELOPER_API_KEY"]="{api_key}";
+                      REoptSolver.run("{path}", {outages_jl}, {microgrid_only_jl}, {max_runtime_s_jl}, "{api_key}", {tolerance})
+                      ' ''')
+        else:
+            project_path = os.path.normpath(os.path.join(thisDir,"REoptSolver"))
+            os.system(f'''julia --project="{project_path}" -e '
+                      using Pkg; Pkg.instantiate();
+                      import REoptSolver;
+                      ENV["NREL_DEVELOPER_API_KEY"]="{api_key}";
+                      REoptSolver.run("{path}", {outages_jl}, {microgrid_only_jl}, {max_runtime_s_jl}, "{api_key}", {tolerance})
+                      ' ''')
     except Exception as e:
         print(e)
 
-###########################################################################
-# comparing REopt.jl outputs for different test cases / solvers
-###########################################################################
-
-def runAllSolvers(path, testName, fileName="", default=False, convert=True, outages=True, solvers=["HiGHS"], max_runtime_s=None):
-
-    for solver in solvers:
-        print(f'########## Running {solver} test: {testName}')
-        start = time.time()
-
-        run_reopt_jl(path, inputFile=fileName, default=default, convert=convert, outages=outages, max_runtime_s=max_runtime_s)
-
-        end = time.time()
-        runtime = end - start
-        print(f'########## Completed {solver} test: {testName} in {runtime} seconds')
 
 def _test():
-    all_solvers = [ "HiGHS" ] # "Ipopt", "ECOS", "Clp", "GLPK", "SCIP", "Cbc"
-    path = f'{thisDir}/testFiles'
-
-    ########### CONWAY_MG_MAX: 
-    # CONWAY_MG.json copied from CONWAY_MG_MAX/Scenario_test_POST.json
-    #runAllSolvers(path, "CONWAY_MG_MAX", fileName="CONWAY_MG.json", solvers=all_solvers)
-    
-    ############### CE test case
-    # CE.json copied from CE Test Case/Scenario_test_POST.json
-    #runAllSolvers(path, "CE Test Case", fileName="CE.json", solvers=all_solvers, max_runtime_s=240)
-
-    ############## CONWAY_30MAY23_SOLARBATTERY
-    # CONWAY_SB.json copied from CONWAY_30MAY23_SOLARBATTERY/Scenario_test_POST.json
-    #runAllSolvers(path, "CONWAY_30MAY23_SOLARBATTERY", fileName="CONWAY_SB.json", solvers=all_solvers)
-
-    ####### default julia json (default values from microgridDesign)
-    runAllSolvers(path, "Julia Default", default=True, solvers=all_solvers)
+    run_reopt_jl(os.path.normpath(os.path.join(thisDir,"testFiles")), default=True)
 
 if __name__ == "__main__":
     _test()

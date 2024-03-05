@@ -207,19 +207,17 @@ def run( voltageData_AMI: str, realPowerData_AMI: str, customerIDs_AMI: str, tra
         df.to_csv(Path(saveResultsPath,filename), index=False) # Modified
         # print('Predicted Transformer labels written to outputsAll_M2T_NoQ.csv')
 
-
     df = pd.DataFrame()
     df['Ranked Flagged Transformers'] = flaggedTrans
     df.to_csv(Path(saveResultsPath,'outputs_RankedFlaggedTransformers.csv'))
     # print('Flagged and ranked transformers written to outputs_RankedFlaggedTransformers.csv')
-
 
     changedIndices = np.where(predictedTransLabels != transLabelsErrors)[1]
     df = pd.DataFrame()
     df['customer ID'] = list(np.array(custIDInput)[changedIndices])
     df['Original Transformer Labels (with Errors)'] = transLabelsErrors[0,changedIndices]
     df['Predicted Transformer Labels'] = predictedTransLabels[0,changedIndices]
-    filename = 'outputs_ChangedCustomers_M2T_NoQ.csv'
+    filename = 'outputs_ChangedCustomers_M2T.csv'
     df.to_csv(Path(saveResultsPath,filename), index=False) # Modified
     # print('All customers with changed transformer labels written to ChangedCustomers_M2T_NoQ.csv')
 
