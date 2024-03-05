@@ -112,6 +112,7 @@ def work(modelDir, inputDict):
 	dieselOMCostKw = float(inputDict['dieselOMCostKw'])
 	dieselOMCostKwh = float(inputDict['dieselOMCostKwh'])
 	dieselOnlyRunsDuringOutage = bool(inputDict['dieselOnlyRunsDuringOutage'])
+	tolerance = float(inputDict['solverTolerance'])
 	loadShape = np.array(load_df)
 	criticalLoadShape = np.array(critical_load_df)
 	numRows = loadShape.shape[0]
@@ -281,7 +282,7 @@ def work(modelDir, inputDict):
 			json.dump(scenario, jsonFile)
 
 		# Run REopt API script *** => switched to REopt.jl
-		reopt_jl.run_reopt_jl(modelDir, "Scenario_test_POST.json", outages=run_outages, max_runtime_s = max_runtime )
+		reopt_jl.run_reopt_jl(modelDir, "Scenario_test_POST.json", outages=run_outages, max_runtime_s = max_runtime, tolerance = tolerance)
 		with open(pJoin(modelDir, 'results.json')) as jsonFile:
 			results = json.load(jsonFile)
 
