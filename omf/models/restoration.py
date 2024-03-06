@@ -28,7 +28,7 @@ from omf.comms import createGraph
 # Model metadata:
 tooltip = 'Calculate load, generator and switching controls to maximize power restoration for a circuit with multiple networked microgrids.'
 modelName, template = __neoMetaModel__.metadata(__file__)
-hidden = True
+hidden = False
 
 def makeCicuitTraversalDict(pathToOmd):
 	''' Note: comment out line 99 in comms.py: "nxG = graphValidator(pathToOmdFile, nxG)" as a quick fix for the purpose of this funct
@@ -647,7 +647,7 @@ def runMicrogridControlSim(modelDir, useCache, genSettings, solFidelity, eventsF
 			mip_solver_gap=solFidelityVal
 		)	
 
-def graphMicrogrid(modelDir, pathToOmd, profit_on_energy_sales, restoration_cost, hardware_cost, pathToJson, pathToCsv, loadPriorityFile):
+def graphMicrogrid(modelDir, pathToOmd, profit_on_energy_sales, restoration_cost, hardware_cost, pathToJson, pathToCsv, loadPriorityFile, loadMicrogridDict):
 	''' Run full microgrid control process. '''
 	# Gather output data.
 	with open(pJoin(modelDir,'output.json')) as inFile:
@@ -883,17 +883,43 @@ def graphMicrogrid(modelDir, pathToOmd, profit_on_energy_sales, restoration_cost
 		dev_dict = {}
 		try:
 			if len(coordLis) == 2:
-				dev_dict['geometry'] = {'type': 'Point', 'coordinates': [coordLis[0], coordLis[1]]}
-				dev_dict['type'] = 'Feature'
-				dev_dict['properties'] = {
-					'device': device, 
-					'time': time,
-					'action': action,
-					'loadBefore': loadBefore,
-					'loadAfter': loadAfter,
-					'pointColor': '#' + str(colormap(action)), 
-					'popupContent': 'Location: <b>' + coordStrFormatter(str(coordStr)) + '</b><br>Device: <b>' + str(device) + '</b><br>Time: <b>' + str(time) + '</b><br>Action: <b>' + str(action) + '</b><br>Before: <b>' + str(loadBefore) + '</b><br>After: <b>' + str(loadAfter) + '</b>.' }
-				feederMap['features'].append(dev_dict)
+				if loadMicrogridDict != None and str(device).split('_')[0] == 'load':
+					microgridID = loadMicrogridDict.get(str(device),'none')
+					dev_dict['geometry'] = {'type': 'Point', 'coordinates': [coordLis[0], coordLis[1]]}
+					dev_dict['type'] = 'Feature'
+					dev_dict['properties'] = {
+						'device': device, 
+						'time': time,
+						'microgrid_id': microgridID,
+						'action': action,
+						'loadBefore': loadBefore,
+						'loadAfter': loadAfter,
+						'pointColor': '#' + str(colormap(action)), 
+						'popupContent': f'''Location: <b>{coordStrFormatter(str(coordStr))}</b><br>
+											Device: <b>{str(device)}</b><br>
+											Microgrid ID: <b>{microgridID}</b><br>
+											Time: <b>{str(time)}</b><br>
+											Action: <b>{str(action)}</b><br>
+											Before: <b>{str(loadBefore)}</b><br>
+											After: <b>{str(loadAfter)}</b>.''' }
+					feederMap['features'].append(dev_dict)
+				else:
+					dev_dict['geometry'] = {'type': 'Point', 'coordinates': [coordLis[0], coordLis[1]]}
+					dev_dict['type'] = 'Feature'
+					dev_dict['properties'] = {
+						'device': device, 
+						'time': time,
+						'action': action,
+						'loadBefore': loadBefore,
+						'loadAfter': loadAfter,
+						'pointColor': '#' + str(colormap(action)), 
+						'popupContent': f'''Location: <b>{coordStrFormatter(str(coordStr))}</b><br>
+											Device: <b>{str(device)}</b><br>
+											Time: <b>{str(time)}</b><br>
+											Action: <b>{str(action)}</b><br>
+											Before: <b>{str(loadBefore)}</b><br>
+											After: <b>{str(loadAfter)}</b>.''' }
+					feederMap['features'].append(dev_dict)
 			else:
 				dev_dict['geometry'] = {'type': 'LineString', 'coordinates': [[coordLis[0], coordLis[1]], [coordLis[2], coordLis[3]]]}
 				dev_dict['type'] = 'Feature'
@@ -904,7 +930,12 @@ def graphMicrogrid(modelDir, pathToOmd, profit_on_energy_sales, restoration_cost
 					'loadBefore': loadBefore,
 					'loadAfter': loadAfter,
 					'edgeColor': '#' + str(colormap(action)),
-					'popupContent': 'Location: <b>' + coordStrFormatter(str(coordStr)) + '</b><br>Device: <b>' + str(device) + '</b><br>Time: <b>' + str(time) + '</b><br>Action: <b>' + str(action) + '</b><br>Before: <b>' + str(loadBefore) + '</b><br>After: <b>' + str(loadAfter) + '</b>.' }
+					'popupContent': f'''Location: <b>{coordStrFormatter(str(coordStr))}</b><br>
+										Device: <b>{str(device)}</b><br>
+										Time: <b>{str(time)}</b><br>
+										Action: <b>{str(action)}</b><br>
+										Before: <b>{str(loadBefore)}</b><br>
+										After: <b>{str(loadAfter)}</b>.''' }
 				feederMap['features'].append(dev_dict)
 		except:
 			print('MESSED UP MAPPING on', device, full_data)
@@ -1247,22 +1278,26 @@ def work(modelDir, inputDict):
 		loadPriorityFile		= pathToLocalFile['loadPriority'],
 		microgridTaggingFile	= pathToLocalFile['mgTagging']
 	)
+	if inputDict['useCache'] == 'False':
+		loadMicrogridDict = makeMicrogridLoadsCSV(
+			modelDir			= modelDir, #Work directory
+			pathToOmd			= f'{modelDir}/{feederName}.omd', #OMD Path
+			settingsFile		= f'{modelDir}/settings.json' # After runMicrogridControlSim, this contains either a copy of the input settings file or a newly generated settings file
+		)[0]
+	else:
+		loadMicrogridDict = None
 	plotOuts = graphMicrogrid(
 		modelDir				= modelDir, #Work directory
-		pathToOmd				= modelDir + '/' + feederName + '.omd', #OMD Path
+		pathToOmd				= f'{modelDir}/{feederName}.omd', #OMD Path
 		profit_on_energy_sales	= inputDict['profit_on_energy_sales'],
 		restoration_cost		= inputDict['restoration_cost'],
 		hardware_cost			= inputDict['hardware_cost'],
 		pathToJson				= pathToLocalFile['event'],
 		pathToCsv				= pathToLocalFile['customerInfo'],
-		loadPriorityFile		= pathToLocalFile['loadPriority']
+		loadPriorityFile		= pathToLocalFile['loadPriority'],
+		loadMicrogridDict		= loadMicrogridDict
 	)
-	if pathToLocalFile['settings'] != None:
-		makeMicrogridLoadsCSV(
-			modelDir			= modelDir, #Work directory
-			pathToOmd			= modelDir + '/' + feederName + '.omd', #OMD Path
-			settingsFile		= pathToLocalFile['settings']
-		)
+	
 
 
 	# Textual outputs of outage timeline
