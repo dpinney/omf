@@ -64,3 +64,4 @@ omf/solvers/reopt_jl/testFiles/resultsResilience.json
 omf/solvers/reopt_jl/testFiles/results.json
 omf/solvers/reopt_jl/testFiles/REoptInputs.json
 omf/solvers/reopt_jl/reopt_jl.so
+omf/solvers/reopt_jl/instantiated.txt
