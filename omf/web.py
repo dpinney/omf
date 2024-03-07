@@ -464,8 +464,8 @@ def runModel():
 		for file_field, file in request.files.items():
 			if file.filename != '':
 				file.save(os.path.join(modelDir, file_field))
-			else:
-				print( "File not found: ", file_field, "file info: ", file)
+			#else:
+			#	print( "File not found: ", file_field, "file info: ", file)
 	# Get existing model viewers and add them to pData if they exist, then write pData to update allInputData.json
 	filepath = os.path.join(modelDir, "allInputData.json")
 	with locked_open(filepath, 'r+') as f:
@@ -478,6 +478,7 @@ def runModel():
 		json.dump(pData, f, indent=4)
 	# Start a background process and return.
 	modelModule.run(modelDir)
+	time.sleep(2)
 	return redirect("/model/" + user + "/" + modelName)
 
 

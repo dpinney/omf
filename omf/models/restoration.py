@@ -1,5 +1,5 @@
 ''' Calculate optimal restoration scheme for distribution system with multiple microgrids. '''
-import random, re, datetime, json, os, tempfile, shutil, csv, math, base64, io
+import random, re, datetime, json, os, shutil, csv, math, base64, io
 from os.path import join as pJoin
 import subprocess
 import pandas as pd
@@ -174,12 +174,8 @@ def colormap(action):
 		color = 'E0FFFF'
 	return color
 
-def microgridTimeline(outputTimeline, workDir):
+def microgridTimeline(outputTimeline, modelDir):
 	'generate timeline of microgrid events'
-	# check to see if work directory is specified; otherwise, create a temporary directory
-	if not workDir:
-		workDir = tempfile.mkdtemp()
-		print('@@@@@@', workDir)
 	# TODO: update table after calculating outage stats
 	def timelineStats(outputTimeline):
 		new_html_str = """
@@ -210,16 +206,12 @@ def microgridTimeline(outputTimeline, workDir):
 	# print all intermediate and final costs
 	timelineStatsHtml = timelineStats(
 		outputTimeline = outputTimeline)
-	with open(pJoin(workDir, 'timelineStats.html'), 'w') as timelineFile:
+	with open(pJoin(modelDir, 'timelineStats.html'), 'w') as timelineFile:
 		timelineFile.write(timelineStatsHtml)
 	return timelineStatsHtml
 
-def customerOutageTable(customerOutageData, outageCost, workDir):
+def customerOutageTable(customerOutageData, outageCost, modelDir):
 	'generate html table of customer outages'
-	# check to see if work directory is specified; otherwise, create a temporary directory
-	if not workDir:
-		workDir = tempfile.mkdtemp()
-		print('@@@@@@', workDir)
 	# TODO: update table after calculating outage stats
 	def customerOutageStats(customerOutageData, outageCost):
 		new_html_str = """
@@ -251,16 +243,11 @@ def customerOutageTable(customerOutageData, outageCost, workDir):
 	except:
 		customerOutageHtml = ''
 		 #HACKCOBB: work aroun.
-	with open(pJoin(workDir, 'customerOutageTable.html'), 'w') as customerOutageFile:
+	with open(pJoin(modelDir, 'customerOutageTable.html'), 'w') as customerOutageFile:
 		customerOutageFile.write(customerOutageHtml)
 	return customerOutageHtml
 
-def utilityOutageTable(average_lost_kwh, profit_on_energy_sales, restoration_cost, hardware_cost, outageDuration, workDir):
-	# check to see if work directory is specified; otherwise, create a temporary directory
-	if not workDir:
-		workDir = tempfile.mkdtemp()
-		print('@@@@@@', workDir)
-	
+def utilityOutageTable(average_lost_kwh, profit_on_energy_sales, restoration_cost, hardware_cost, outageDuration, modelDir):
 	# TODO: update table after calculating outage stats
 	def utilityOutageStats(average_lost_kwh, profit_on_energy_sales, restoration_cost, hardware_cost, outageDuration):
 		new_html_str = """
@@ -288,7 +275,7 @@ def utilityOutageTable(average_lost_kwh, profit_on_energy_sales, restoration_cos
 		restoration_cost = restoration_cost,
 		hardware_cost = hardware_cost,
 		outageDuration = outageDuration)
-	with open(pJoin(workDir, 'utilityOutageTable.html'), 'w') as utilityOutageFile:
+	with open(pJoin(modelDir, 'utilityOutageTable.html'), 'w') as utilityOutageFile:
 		utilityOutageFile.write(utilityOutageHtml)
 	return utilityOutageHtml
 
@@ -458,8 +445,19 @@ def validateSettingsFile(settingsFile):
 		return 'Corrupted Settings file input, generating default settings'
 
 def outageIncidenceGraph(tree, customerOutageData, outputTimeline, startTime, numTimeSteps, loadPriorityFilePath):
-	# TODO: Rename function and write docstring
-	
+	'''	Returns a plotly figure displaying a graph of outage incidences over the course of the event data.
+		Unweighted outage incidence at each timestep is calculated as (num loads experiencing outage)/(num loads).
+		A load is considered to be "experiencing an outage" at a particular timestep if its "loadBefore" value 
+		in outputTimeline is "offline". The last x-value on the graph is the exception, with its value corresponding
+		to the "loadAfter" values on the same timestep as the x-value.
+		E.g. loadBefore 0, loadBefore 1, ... , loadBefore 23, loadAfter 23
+
+		Weighted outage incidence is calculated similarly, but with loads being weighted in the calculation based
+		on their priority given in the Load Priorities JSON file that can be provided as input to the model.
+		If a load does not have a priority assigned to it, it is assigned a default priority of 1. 
+	'''
+	# TODO: Rename function
+
 	# generate a list of all loads
 	loadList = []
 	for key in tree.keys():
@@ -476,11 +474,14 @@ def outageIncidenceGraph(tree, customerOutageData, outputTimeline, startTime, nu
 	for loadName in loadList:
 		dfMini = df[df['device'] == loadName].set_index('time')
 		lastRecordedTimeStep = 0
+		recordedTimeStepReached = False
+		#lastRecordedTimestep and recordedTimeStepReached are separate variables instead of lastRecordedTimeStep starting = -1 and testing for that so that the function still works with strange starting times like -1
 		for timeStep in timeList:
 			if timeStep in dfMini.index:
 				dfStatus.at[timeStep,loadName] = statusMapping.get(dfMini.at[timeStep,'loadBefore'])
 				lastRecordedTimeStep = timeStep
-			elif timeStep != timeList[0] and not dfMini.empty:
+				recordedTimeStepReached = True
+			elif recordedTimeStepReached and not dfMini.empty:
 				dfStatus.at[timeStep,loadName] = statusMapping.get(dfMini.at[lastRecordedTimeStep,'loadAfter'])
 			else:
 				dfStatus.at[timeStep,loadName] = statusMapping.get('online')
@@ -561,7 +562,7 @@ def outageIncidenceGraph(tree, customerOutageData, outputTimeline, startTime, nu
 
 	return outageIncidenceFigure
 
-def makeMicrogridLoadsCSV(pathToOmd, workDir):
+def makeMicrogridLoadsCSV(modelDir, pathToOmd, settingsFile):
 	'''	Creates a csv of loads in each microgrid by finding what microgrid each load's parent bus is designated as having. 
 		Microgrid assignments to busses are taken from settings.json so that we can see what microgrid assignments the 
 		code is working with, not just what they are intended to be via the microgrid tagging input file
@@ -569,7 +570,7 @@ def makeMicrogridLoadsCSV(pathToOmd, workDir):
 		Also returns a touple of the dictionaries (loadMicrogridDict, busMicrogridDict) for use if that data is needed
 	'''
 
-	with open(pJoin(workDir,'settings.json')) as inFile:
+	with open(settingsFile) as inFile:
 		settingsData = json.load(inFile)
 	busMicrogridDict = {}
 	for busName,v in settingsData['bus'].items():	
@@ -582,68 +583,74 @@ def makeMicrogridLoadsCSV(pathToOmd, workDir):
 		if ob['object'] == 'load':
 			loadMicrogridDict[ob['name']] = busMicrogridDict[ob['parent']]
 	
-	with open(pJoin(workDir,'microgridAssignments.csv'), 'w', newline='') as file:
+	with open(pJoin(modelDir,'microgridAssignmentOutputs.csv'), 'w', newline='') as file:
 		writer = csv.writer(file)
 		writer.writerow(['load name','microgrid_id'])
 		for loadName,mg_id in loadMicrogridDict.items():
 			writer.writerow([loadName,mg_id])
 
 	return (loadMicrogridDict, busMicrogridDict)
-        
-def graphMicrogrid(pathToOmd, pathToJson, pathToCsv, outputFile, settingsFile, useCache, workDir, profit_on_energy_sales, restoration_cost, hardware_cost, eventsFilename, genSettings, solFidelity, loadPriorityFile, microgridTaggingFile):
-	''' Run full microgrid control process. '''
+
+def runMicrogridControlSim(modelDir, useCache, genSettings, solFidelity, eventsFilename, outputFile, settingsFile, loadPriorityFile, microgridTaggingFile):
+	'''	If useCache is true and a file of cached output is provided, copys that cached output to an output file called output.json in the working directory.
+	
+		If useCache is false, runs a microgrid control simulation using PowerModelsONM to determine optimal control actions during a configured outage event.
+		Once the simulation is run, the results are stored in an output file called output.json in the working directory. 
+		If a settings file is provided and genSettings is false, the simulation is run using a provided settings file.
+		Otherwise, a settings file is generated using the feeder file, a load priorities file, and a microgrid tagging file. 
+	'''
+
 	# Setup ONM if it hasn't been done already.
 	if not PowerModelsONM.check_instantiated():
 		PowerModelsONM.install_onm()
-	if not workDir:
-		workDir = tempfile.mkdtemp()
-		print('@@@@@@', workDir)
-	# get mip_solver_gap info (solFidelity)
-	solFidelityVal = 0.05 #default to medium fidelity
-	if solFidelity == '0.10':
-		solFidelityVal = 0.10
-	elif solFidelity == '0.02':
-		solFidelityVal = 0.02
 
-	# check custom load priorities file input
-	if loadPriorityFile != None:
-		loadPriorityFilePath = f'{workDir}/loadPriorities.json'
-		shutil.copyfile(loadPriorityFile, loadPriorityFilePath)
-	else:
-		loadPriorityFilePath = ''
-	# check custom microgrid tagging file input
-	if microgridTaggingFile != None:
-		microgridTaggingFilePath = f'{workDir}/microgridTagging.json'
-		shutil.copyfile(microgridTaggingFile, microgridTaggingFilePath)
-	else:
-		microgridTaggingFilePath = ''
-
-	# Handle Settings file generation or upload
-	if genSettings == 'False' and settingsFile != None:
-		correctSettings = validateSettingsFile(settingsFile)
-		if correctSettings == 'True':
-			# Scenario 1: The user chose to upload their own settings file and it is formatted correctly
-			shutil.copyfile(settingsFile, f'{workDir}/settings.json')
-		else:
-			# Scenario 2: The user chose to upload their own setttings file and it is formatted incorrectly
-			print("Warning: " + correctSettings)
-			PowerModelsONM.build_settings_file(circuitPath=f'{workDir}/circuit.dss', settingsPath=f'{workDir}/settings.json', loadPrioritiesFile=loadPriorityFilePath, microgridTaggingFile=microgridTaggingFilePath)
-	else:
-		# Scenario 3: The user wants to generate a settings file
-		PowerModelsONM.build_settings_file(circuitPath=f'{workDir}/circuit.dss', settingsPath=f'{workDir}/settings.json', loadPrioritiesFile=loadPriorityFilePath, microgridTaggingFile=microgridTaggingFilePath)
-	# Run ONM.
 	if  useCache == 'True' and outputFile != None:
-		shutil.copyfile(outputFile, f'{workDir}/output.json')
+		shutil.copyfile(outputFile, f'{modelDir}/output.json')
 	else:
+		lpFile = loadPriorityFile if loadPriorityFile != None else ''
+		mgFile = microgridTaggingFile if microgridTaggingFile != None else ''
+
+		# Handle Settings file generation or upload
+		if genSettings == 'False' and settingsFile != None:
+			correctSettings = validateSettingsFile(settingsFile)
+			if correctSettings == 'True':
+				# Scenario 1: The user chose to upload their own settings file and it is formatted correctly
+				shutil.copyfile(settingsFile, f'{modelDir}/settings.json')
+			else:
+				# Scenario 2: The user chose to upload their own setttings file and it is formatted incorrectly
+				print("Warning: " + correctSettings)
+				PowerModelsONM.build_settings_file(
+					circuitPath=f'{modelDir}/circuit.dss', 
+					settingsPath=f'{modelDir}/settings.json', 
+					loadPrioritiesFile=lpFile, 
+					microgridTaggingFile=mgFile)
+		else:
+			# Scenario 3: The user wants to generate a settings file
+			PowerModelsONM.build_settings_file(
+				circuitPath=f'{modelDir}/circuit.dss', 
+				settingsPath=f'{modelDir}/settings.json', 
+				loadPrioritiesFile=lpFile, 
+				microgridTaggingFile=mgFile)
+		
+		# get mip_solver_gap info (solFidelity)
+		solFidelityVal = 0.05 #default to medium fidelity
+		if solFidelity == '0.10':
+			solFidelityVal = 0.10
+		elif solFidelity == '0.02':
+			solFidelityVal = 0.02
+		
 		PowerModelsONM.run_onm(
-			circuitPath=pJoin(workDir,'circuit.dss'),
-			settingsPath=pJoin(workDir,'settings.json'),
-			outputPath=pJoin(workDir,'output.json'),
-			eventsPath=pJoin(workDir,eventsFilename),
+			circuitPath=pJoin(modelDir,'circuit.dss'),
+			settingsPath=pJoin(modelDir,'settings.json'),
+			outputPath=pJoin(modelDir,'output.json'),
+			eventsPath=pJoin(modelDir,eventsFilename),
 			mip_solver_gap=solFidelityVal
-		)
+		)	
+
+def graphMicrogrid(modelDir, pathToOmd, profit_on_energy_sales, restoration_cost, hardware_cost, pathToJson, pathToCsv, loadPriorityFile):
+	''' Run full microgrid control process. '''
 	# Gather output data.
-	with open(pJoin(workDir,'output.json')) as inFile:
+	with open(pJoin(modelDir,'output.json')) as inFile:
 		data = json.load(inFile)
 		genProfiles = data['Generator profiles']
 		simTimeSteps = []
@@ -780,10 +787,10 @@ def graphMicrogrid(pathToOmd, pathToJson, pathToCsv, outputFile, settingsFile, u
 		x=simTimeSteps,
 		y=genProfiles['Grid mix (kW)'],
 		mode='lines',
-		name='Grid Mix',
+		name='Grid',
 		hovertemplate=
 		'<b>Time Step</b>: %{x}<br>' +
-		'<b>Grid Mix</b>: %{y:.3f}kW'))
+		'<b>Grid</b>: %{y:.3f}kW'))
 	# Edit the layout
 	gens.update_layout(
 		xaxis_title='Hours',
@@ -848,16 +855,11 @@ def graphMicrogrid(pathToOmd, pathToJson, pathToCsv, outputFile, settingsFile, u
 		xaxis_title='Hours',
 		yaxis_title='Load (%)',
 		legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1))
-	timelineStatsHtml = microgridTimeline(outputTimeline, workDir)
+	timelineStatsHtml = microgridTimeline(outputTimeline, modelDir)
 	with open(pathToOmd) as inFile:
 		tree = json.load(inFile)['tree']
 	feederMap = geo.omdGeoJson(pathToOmd, conversion = False)
-	# generate a list of substations
-	busNodes = []
-	for key in tree.keys():
-		if tree[key].get('bustype','') == 'SWING':
-			busNodes.append(tree[key]['name'])
-	# TODO: Pretty sure busNodes never gets used... make sure and then delete it
+	
 	row = 0
 	row_count_timeline = outputTimeline.shape[0]
 	
@@ -907,17 +909,18 @@ def graphMicrogrid(pathToOmd, pathToJson, pathToCsv, outputFile, settingsFile, u
 		except:
 			print('MESSED UP MAPPING on', device, full_data)
 		row += 1
-	if not os.path.exists(workDir):
-		os.makedirs(workDir)
-	shutil.copy(omf.omfDir + '/templates/geoJsonMap.html', workDir)
-	with open(pJoin(workDir,'geoJsonFeatures.js'),'w') as outFile:
+	if not os.path.exists(modelDir):
+		os.makedirs(modelDir)
+	shutil.copy(omf.omfDir + '/templates/geoJsonMap.html', modelDir)
+	with open(pJoin(modelDir,'geoJsonFeatures.js'),'w') as outFile:
 		outFile.write('var geojson =')
 		json.dump(feederMap, outFile, indent=4)
 	# Save geojson dict to then read into outdata in work function below
-	with open(pJoin(workDir,'geoDict.js'),'w') as outFile:
+	with open(pJoin(modelDir,'geoDict.js'),'w') as outFile:
 		json.dump(feederMap, outFile, indent=4)
 	# Generate customer outage outputs
 	try:
+		# TODO: this should not be customerOutageData... this is the input of customer info. It's later turned into customerOutageData by adding more info, but this same variable should NOT be used for the same thing
 		customerOutageData = pd.read_csv(pathToCsv)
 	except:
 		# TODO: Needs to be updated to provide info for all loads, not just shed loads. Outage Incidence plot is dependent on all loads
@@ -943,7 +946,7 @@ def graphMicrogrid(pathToOmd, pathToJson, pathToCsv, outputFile, settingsFile, u
 	outageCostsByType = {busType: [] for busType in businessTypes}
 	avgkWColumn = []
 	durationColumn = []
-	dssTree = dssConvert.dssToTree(f'{workDir}/circuitOmfCompatible_cleanLists.dss')
+	dssTree = dssConvert.dssToTree(f'{modelDir}/circuitOmfCompatible_cleanLists.dss')
 	loadShapeMeanMultiplier = {}
 	loadShapeMeanActual = {}
 	for dssLine in dssTree:
@@ -1075,17 +1078,13 @@ def graphMicrogrid(pathToOmd, pathToJson, pathToCsv, outputFile, settingsFile, u
 		showarrow=False
 	)
 
-	####################### EXPERIMENTATION ############################################################################################
-	outageIncidenceFig = outageIncidenceGraph(tree, customerOutageData, outputTimeline, startTime, numTimeSteps, loadPriorityFilePath)
-	makeMicrogridLoadsCSV(pathToOmd, workDir)
-	####################### EXPERIMENTATION ############################################################################################
-
-	customerOutageHtml = customerOutageTable(customerOutageData, outageCost, workDir)
+	outageIncidenceFig = outageIncidenceGraph(tree, customerOutageData, outputTimeline, startTime, numTimeSteps, loadPriorityFile)
+	customerOutageHtml = customerOutageTable(customerOutageData, outageCost, modelDir)
 	profit_on_energy_sales = float(profit_on_energy_sales)
 	restoration_cost = int(restoration_cost)
 	hardware_cost = int(hardware_cost)
 	outageDuration = int(outageDuration)
-	utilityOutageHtml = utilityOutageTable(average_lost_kwh, profit_on_energy_sales, restoration_cost, hardware_cost, outageDuration, workDir)
+	utilityOutageHtml = utilityOutageTable(average_lost_kwh, profit_on_energy_sales, restoration_cost, hardware_cost, outageDuration, modelDir)
 	try: customerOutageCost = customerOutageCost
 	except: customerOutageCost = 0
 	return {'utilityOutageHtml': utilityOutageHtml, 'customerOutageHtml': customerOutageHtml, 'timelineStatsHtml': timelineStatsHtml, 'outageIncidenceFig': outageIncidenceFig, 'gens': gens, 'loads': loads, 'volts': volts, 'fig': fig, 'customerOutageCost': customerOutageCost, 'numTimeSteps': numTimeSteps, 'stepSize': stepSize, 'custHist': custHist}
@@ -1142,6 +1141,72 @@ def buildCustomEvents(eventsCSV='', feeder='', customEvents='customEvents.json',
 	with open(customEvents,'w') as eventsFile:
 		json.dump(customEventList, eventsFile)
 
+def copyInputFilesToModelDir(modelDir, inputDict):
+	''' Creates local copies of input files in the model directory modelDir.
+		Returns a dictionary of paths to the local copies with the following keys:
+
+		'mgTagging', 'loadPriority', 'settings', 'cachedOutput', 'customerInfo', 'event'
+	'''
+	pathToLocalFile = {}
+	if inputDict['microgridTaggingFileName'] != '':
+		try:
+			with open(pJoin(modelDir, inputDict['microgridTaggingFileName']), 'w') as mgtFile:
+				pathToLocalFile['mgTagging'] = mgtFile.name
+				mgtFile.write(inputDict['microgridTaggingData'])
+		except:
+			pathToLocalFile['mgTagging'] = None
+			raise Exception("ERROR - Unable to write microgrid tagging file: " + str(inputDict['microgridTaggingFileName']))
+	else:
+		pathToLocalFile['mgTagging'] = None
+
+	if inputDict['loadPriorityFileName'] != '':
+		try:
+			with open(pJoin(modelDir, inputDict['loadPriorityFileName']), 'w') as lpFile:
+				pathToLocalFile['loadPriority'] = lpFile.name
+				lpFile.write(inputDict['loadPriorityData'])
+		except:
+			pathToLocalFile['loadPriority'] = None
+			raise Exception("ERROR - Unable to write load priority file: " + str(inputDict['loadPriorityFileName']))
+	else:
+		pathToLocalFile['loadPriority'] = None
+
+	if inputDict['genSettings'] == 'False':
+		try:
+			with open(pJoin(modelDir, inputDict['settingsFileName']), 'w') as sFile:
+				pathToLocalFile['settings'] = sFile.name
+				sFile.write(inputDict['settingsData'])
+		except:
+			pathToLocalFile['settings'] = None
+			raise Exception("ERROR - Unable to write Settings file: " + str(inputDict['settingsFileName']))
+	else:
+		pathToLocalFile['settings'] = None
+
+	if inputDict['useCache'] == 'True':
+		try:
+			with open(pJoin(modelDir, inputDict['outputFileName']), 'w') as coFile:
+				pathToLocalFile['cachedOutput'] = coFile.name
+				coFile.write(inputDict['outputData'])
+		except:
+			pathToLocalFile['cachedOutput'] = None
+			raise Exception("ERROR - Unable to write Cached output file: " + str(inputDict['outputFileName']))
+	else:
+		pathToLocalFile['cachedOutput'] = None
+
+	if inputDict['customerFileName']:
+		with open(pJoin(modelDir, inputDict['customerFileName']), 'w') as ciFile:
+			pathToLocalFile['customerInfo'] = ciFile.name
+			ciFile.write(inputDict['customerData'])
+	else: 
+		with open(pJoin(modelDir, 'customerInfo.csv'), 'w') as ciFile:
+			pathToLocalFile['customerInfo'] = ciFile.name
+			ciFile.write(inputDict['customerData'])
+
+	with open(pJoin(modelDir, inputDict['eventFileName']), 'w') as eFile:
+		pathToLocalFile['event'] = eFile.name
+		eFile.write(inputDict['eventData'])
+	
+	return pathToLocalFile
+
 def work(modelDir, inputDict):
 	# Copy specific climate data into model directory
 	outData = {}
@@ -1168,81 +1233,38 @@ def work(modelDir, inputDict):
 		content = re.sub(r'object=', r'', content) #drop object=
 	with open(f'{modelDir}/circuit.dss','w') as dss_file_2:
 		dss_file_2.write(content)
-	# Run the main functions of the program
-	if inputDict['microgridTaggingFileName'] != '':
-		try:
-			with open(pJoin(modelDir, inputDict['microgridTaggingFileName']), 'w') as f5:
-				pathToData5 = f5.name
-				f5.write(inputDict['microgridTaggingData'])
-		except:
-			pathToData5 = None
-			raise Exception("ERROR - Unable to read microgrid tagging file: " + str(inputDict['microgridTaggingFileName']))
-	else:
-		pathToData5 = None
 
-	if inputDict['loadPriorityFileName'] != '':
-		try:
-			with open(pJoin(modelDir, inputDict['loadPriorityFileName']), 'w') as f4:
-				pathToData4 = f4.name
-				f4.write(inputDict['loadPriorityData'])
-		except:
-			pathToData4 = None
-			raise Exception("ERROR - Unable to read load priority file: " + str(inputDict['loadPriorityFileName']))
-	else:
-		pathToData4 = None
+	pathToLocalFile = copyInputFilesToModelDir(modelDir, inputDict)
 
-	if inputDict['genSettings'] == 'False':
-		try:
-			with open(pJoin(modelDir, inputDict['settingsFileName']), 'w') as f3:
-				pathToData3 = f3.name
-				f3.write(inputDict['settingsData'])
-		except:
-			pathToData3 = None
-			raise Exception("ERROR - Unable to read Settings file: " + str(inputDict['settingsFileName']))
-	else:
-		pathToData3 = None
-
-	if inputDict['useCache'] == 'True':
-		try:
-			with open(pJoin(modelDir, inputDict['outputFileName']), 'w') as f2:
-				pathToData2 = f2.name
-				f2.write(inputDict['outputData'])
-		except:
-			pathToData2 = None
-			raise Exception("ERROR - Unable to read Cached output file: " + str(inputDict['outputFileName']))
-	else:
-		pathToData2 = None
-
-	if inputDict['customerFileName']:
-		with open(pJoin(modelDir, inputDict['customerFileName']), 'w') as f1:
-			pathToData1 = f1.name
-			f1.write(inputDict['customerData'])
-	else: 
-		with open(pJoin(modelDir, 'customerInfo.csv'), 'w') as f1:
-			pathToData1 = f1.name
-			f1.write(inputDict['customerData'])
-
-	with open(pJoin(modelDir, inputDict['eventFileName']), 'w') as f:
-		pathToData = f.name
-		f.write(inputDict['eventData'])
-
+	runMicrogridControlSim(
+		modelDir				= modelDir, #Work directory
+		useCache				= inputDict['useCache'],
+		genSettings				= inputDict['genSettings'],
+		solFidelity				= inputDict['solFidelity'],
+		eventsFilename			= inputDict['eventFileName'],
+		outputFile				= pathToLocalFile['cachedOutput'],
+		settingsFile			= pathToLocalFile['settings'],
+		loadPriorityFile		= pathToLocalFile['loadPriority'],
+		microgridTaggingFile	= pathToLocalFile['mgTagging']
+	)
 	plotOuts = graphMicrogrid(
-		modelDir + '/' + feederName + '.omd', #OMD Path
-		pathToData,
-		pathToData1,
-		pathToData2,
-		pathToData3,
-		inputDict['useCache'],
-		modelDir, #Work directory
-		inputDict['profit_on_energy_sales'],
-		inputDict['restoration_cost'],
-		inputDict['hardware_cost'],
-		inputDict['eventFileName'],
-		inputDict['genSettings'],
-		inputDict['solFidelity'],
-		pathToData4,
-		pathToData5
+		modelDir				= modelDir, #Work directory
+		pathToOmd				= modelDir + '/' + feederName + '.omd', #OMD Path
+		profit_on_energy_sales	= inputDict['profit_on_energy_sales'],
+		restoration_cost		= inputDict['restoration_cost'],
+		hardware_cost			= inputDict['hardware_cost'],
+		pathToJson				= pathToLocalFile['event'],
+		pathToCsv				= pathToLocalFile['customerInfo'],
+		loadPriorityFile		= pathToLocalFile['loadPriority']
+	)
+	if pathToLocalFile['settings'] != None:
+		makeMicrogridLoadsCSV(
+			modelDir			= modelDir, #Work directory
+			pathToOmd			= modelDir + '/' + feederName + '.omd', #OMD Path
+			settingsFile		= pathToLocalFile['settings']
 		)
+
+
 	# Textual outputs of outage timeline
 	with open(pJoin(modelDir,'timelineStats.html')) as inFile:
 		outData['timelineStatsHtml'] = inFile.read()

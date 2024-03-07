@@ -23,10 +23,6 @@ function main() {
         const parentChildLineFeature = featureGraph.getParentChildLineFeature(parentKey, childKey);
         featureGraph.insertObservable(parentChildLineFeature);
     });
-    // debug
-    window.gFeatures = features;
-    window.gFeatureGraph = featureGraph;
-    // debug
     const controller = new FeatureController(featureGraph);
     featureGraph.getObservables().forEach(ob => {
         if (!ob.isConfigurationObject()) {

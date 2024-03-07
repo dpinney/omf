@@ -253,7 +253,7 @@ def get_randomized_api_key():
 #potential optional inputs (for solver): ratio_gap, threads, max_solutions, verbosity
 #potential other inputs (ease of use): load csv file path ("path_to_csv") => check if "loads_kw" already exists
 def run_reopt_jl(path, inputFile="", loadFile="", default=False, outages=False, microgrid_only=False, max_runtime_s=None, 
-                 run_with_sysimage=True ):
+                 run_with_sysimage=True, tolerance=0.05 ):
     ''' calls 'run' function through run_reopt.jl (Julia file) '''
     
     if inputFile == "" and not default:
@@ -290,7 +290,7 @@ def run_reopt_jl(path, inputFile="", loadFile="", default=False, outages=False, 
             os.system(f'''julia --sysimage="{sysimage_path}" -e '
                       using .REoptSolver;
                       ENV["NREL_DEVELOPER_API_KEY"]="{api_key}";
-                      REoptSolver.run("{path}", {outages_jl}, {microgrid_only_jl}, {max_runtime_s_jl}, "{api_key}")
+                      REoptSolver.run("{path}", {outages_jl}, {microgrid_only_jl}, {max_runtime_s_jl}, "{api_key}", {tolerance})
                       ' ''')
         else:
             project_path = os.path.normpath(os.path.join(thisDir,"REoptSolver"))
@@ -298,7 +298,7 @@ def run_reopt_jl(path, inputFile="", loadFile="", default=False, outages=False, 
                       using Pkg; Pkg.instantiate();
                       import REoptSolver;
                       ENV["NREL_DEVELOPER_API_KEY"]="{api_key}";
-                      REoptSolver.run("{path}", {outages_jl}, {microgrid_only_jl}, {max_runtime_s_jl}, "{api_key}")
+                      REoptSolver.run("{path}", {outages_jl}, {microgrid_only_jl}, {max_runtime_s_jl}, "{api_key}", {tolerance})
                       ' ''')
     except Exception as e:
         print(e)
