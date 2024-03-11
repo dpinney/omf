@@ -28,7 +28,7 @@ from omf.comms import createGraph
 # Model metadata:
 tooltip = 'Calculate load, generator and switching controls to maximize power restoration for a circuit with multiple networked microgrids.'
 modelName, template = __neoMetaModel__.metadata(__file__)
-hidden = False
+hidden = True
 
 def makeCicuitTraversalDict(pathToOmd):
 	''' Note: comment out line 99 in comms.py: "nxG = graphValidator(pathToOmdFile, nxG)" as a quick fix for the purpose of this funct
@@ -444,7 +444,7 @@ def validateSettingsFile(settingsFile):
 	else:
 		return 'Corrupted Settings file input, generating default settings'
 
-def outageIncidenceGraph(tree, customerOutageData, outputTimeline, startTime, numTimeSteps, loadPriorityFilePath):
+def outageIncidenceGraph(customerOutageData, outputTimeline, startTime, numTimeSteps, loadPriorityFilePath, loadMicrogridDict):
 	'''	Returns a plotly figure displaying a graph of outage incidences over the course of the event data.
 		Unweighted outage incidence at each timestep is calculated as (num loads experiencing outage)/(num loads).
 		A load is considered to be "experiencing an outage" at a particular timestep if its "loadBefore" value 
@@ -458,31 +458,33 @@ def outageIncidenceGraph(tree, customerOutageData, outputTimeline, startTime, nu
 	'''
 	# TODO: Rename function
 
-	# generate a list of all loads
-	loadList = []
-	for key in tree.keys():
-		if tree[key].get('object','') == 'load':
-			loadList.append(tree[key]['name'])
-	df = outputTimeline.copy(deep=True)
-	df = df[df['device'].str.contains('load')]
-	df['time'] = df['time'].astype(int)
-	df = df.sort_values(by=['device','time'])
+	loadList = list(loadMicrogridDict.keys())
+	mgTags = set(loadMicrogridDict.values())
 	timeList = [*range(startTime, numTimeSteps+1)] # The +1 is because we want the 'before' for each timestep + the 'after' for the last timestep
+
+	# Create a copy of outputTimeline containing only load devices sorted by device name and then time. 
+	dfLoadTimeln = outputTimeline.copy(deep=True)
+	dfLoadTimeln = dfLoadTimeln[dfLoadTimeln['device'].str.contains('load')]
+	dfLoadTimeln['time'] = dfLoadTimeln['time'].astype(int)
+	dfLoadTimeln = dfLoadTimeln.sort_values(by=['device','time'])
+	
 	# Create dataframe of load status before each timestep and after the last timestep
 	dfStatus = pd.DataFrame(np.ones((len(timeList),len(loadList))), dtype=int, index=timeList, columns=loadList)
 	statusMapping = {'offline':0, 'online':1}
 	for loadName in loadList:
-		dfMini = df[df['device'] == loadName].set_index('time')
-		lastRecordedTimeStep = 0
-		recordedTimeStepReached = False
-		#lastRecordedTimestep and recordedTimeStepReached are separate variables instead of lastRecordedTimeStep starting = -1 and testing for that so that the function still works with strange starting times like -1
+		# Create a copy of dfLoadTimeln containing only a single load device, with rows indexed by time
+		dfSoloLoadTimeln = dfLoadTimeln[dfLoadTimeln['device'] == loadName].set_index('time')
+		# Track reaching timesteps recorded in dfSoloLoadTimeln
+		lastRecTimeStep = 0
+		recTimeStepReached = False
+		#lastRecTimestep and recTimeStepReached are separate variables instead of lastRecTimeStep starting = -1 and testing for that so that the function still works with strange starting times like -1
 		for timeStep in timeList:
-			if timeStep in dfMini.index:
-				dfStatus.at[timeStep,loadName] = statusMapping.get(dfMini.at[timeStep,'loadBefore'])
-				lastRecordedTimeStep = timeStep
-				recordedTimeStepReached = True
-			elif recordedTimeStepReached and not dfMini.empty:
-				dfStatus.at[timeStep,loadName] = statusMapping.get(dfMini.at[lastRecordedTimeStep,'loadAfter'])
+			if timeStep in dfSoloLoadTimeln.index:
+				dfStatus.at[timeStep,loadName] = statusMapping.get(dfSoloLoadTimeln.at[timeStep,'loadBefore'])
+				lastRecTimeStep = timeStep
+				recTimeStepReached = True
+			elif recTimeStepReached and not dfSoloLoadTimeln.empty:
+				dfStatus.at[timeStep,loadName] = statusMapping.get(dfSoloLoadTimeln.at[lastRecTimeStep,'loadAfter'])
 			else:
 				dfStatus.at[timeStep,loadName] = statusMapping.get('online')
 	
@@ -514,18 +516,34 @@ def outageIncidenceGraph(tree, customerOutageData, outputTimeline, startTime, nu
 	# TODO: Clean this up to make it more readable. For now though, functionality is the focus.
 	###################################################################################################################################################################
 
+	def calcWeightedOI(loadWeights):
+		''' Individually weighted outage incidence calculated as
+			
+			(Sum from i=1 to N of w_i*n_i)/(Sum from i=1 to N of w_i)
+
+			N = number of loads total,
+			
+			ni = (1-status) of load i,
+			
+			wi = weight of load i 
+		'''
+		Sum_wi_ni = np.zeros(len(outageIncidence)) #one entry for each timestep
+		Sum_wi = 0
+		for load_i in loadList:
+			wi = loadWeights.get(load_i,1)
+			ni = dfStatus[load_i].map(lambda x: 1-x).to_numpy()
+			wi_ni = wi * ni
+			Sum_wi += wi
+			Sum_wi_ni = np.add(Sum_wi_ni, wi_ni)
+		indivWeightedOI = np.around((100*Sum_wi_ni/Sum_wi),3).tolist()
+		return indivWeightedOI
+	
 	# Calculate weighted outage incidence based on individually assigned weights
 	with open(loadPriorityFilePath) as inFile:
 		loadWeights = json.load(inFile)
-		Sum_wc_nc = np.zeros(len(outageIncidence))
-		Sum_wc_Nc = 0
-		for load in loadList:
-			dfStatusOfCustomer = dfStatus[load]
-			Nc = 1
-			Sum_wc_Nc += loadWeights.get(load,1)*Nc
-			nc = dfStatusOfCustomer.map(lambda x: 1-x).to_numpy()
-			Sum_wc_nc = np.add(Sum_wc_nc,loadWeights.get(load,1)*nc)
-		individuallyWeightedOutageIncidence = np.around((100*Sum_wc_nc/Sum_wc_Nc),3).tolist()
+	individuallyWeightedOutageIncidence = calcWeightedOI(loadWeights)
+
+	# TODO: Run calcWeightedOI with various microgrid masks (1 for loads in microgrid, 0 otherwise. For unweighted, use mask as weight. For weighted, multiply mask element-wise by weight)
 	
 	outageIncidenceFigure = go.Figure()
 	outageIncidenceFigure.add_trace(go.Scatter(
@@ -567,8 +585,9 @@ def makeMicrogridLoadsCSV(modelDir, pathToOmd, settingsFile):
 		Microgrid assignments to busses are taken from settings.json so that we can see what microgrid assignments the 
 		code is working with, not just what they are intended to be via the microgrid tagging input file
 
-		Also returns a touple of the dictionaries (loadMicrogridDict, busMicrogridDict) for use if that data is needed
-	'''
+		Returns a touple of (loadMicrogridDict, busMicrogridDict, microgridLabels)
+		loadMicrogridDict and busMicrogridDict are dictionaries mapping load and bus names to microgrid labels.
+		microgridLabels is a set of the unique microgrid labels derived from the values of busMicrogridDict.	'''
 
 	with open(settingsFile) as inFile:
 		settingsData = json.load(inFile)
@@ -589,7 +608,9 @@ def makeMicrogridLoadsCSV(modelDir, pathToOmd, settingsFile):
 		for loadName,mg_id in loadMicrogridDict.items():
 			writer.writerow([loadName,mg_id])
 
-	return (loadMicrogridDict, busMicrogridDict)
+	microgridLabels = set(busMicrogridDict.values())
+
+	return loadMicrogridDict, busMicrogridDict, microgridLabels
 
 def runMicrogridControlSim(modelDir, useCache, genSettings, solFidelity, eventsFilename, outputFile, settingsFile, loadPriorityFile, microgridTaggingFile):
 	'''	If useCache is true and a file of cached output is provided, copys that cached output to an output file called output.json in the working directory.
@@ -882,61 +903,30 @@ def graphMicrogrid(modelDir, pathToOmd, profit_on_energy_sales, restoration_cost
 		device, coordLis, coordStr, time, action, loadBefore, loadAfter = full_data
 		dev_dict = {}
 		try:
-			if len(coordLis) == 2:
-				if loadMicrogridDict != None and str(device).split('_')[0] == 'load':
-					microgridID = loadMicrogridDict.get(str(device),'none')
-					dev_dict['geometry'] = {'type': 'Point', 'coordinates': [coordLis[0], coordLis[1]]}
-					dev_dict['type'] = 'Feature'
-					dev_dict['properties'] = {
-						'device': device, 
-						'time': time,
-						'microgrid_id': microgridID,
-						'action': action,
-						'loadBefore': loadBefore,
-						'loadAfter': loadAfter,
-						'pointColor': '#' + str(colormap(action)), 
-						'popupContent': f'''Location: <b>{coordStrFormatter(str(coordStr))}</b><br>
-											Device: <b>{str(device)}</b><br>
-											Microgrid ID: <b>{microgridID}</b><br>
-											Time: <b>{str(time)}</b><br>
-											Action: <b>{str(action)}</b><br>
-											Before: <b>{str(loadBefore)}</b><br>
-											After: <b>{str(loadAfter)}</b>.''' }
-					feederMap['features'].append(dev_dict)
-				else:
-					dev_dict['geometry'] = {'type': 'Point', 'coordinates': [coordLis[0], coordLis[1]]}
-					dev_dict['type'] = 'Feature'
-					dev_dict['properties'] = {
-						'device': device, 
-						'time': time,
-						'action': action,
-						'loadBefore': loadBefore,
-						'loadAfter': loadAfter,
-						'pointColor': '#' + str(colormap(action)), 
-						'popupContent': f'''Location: <b>{coordStrFormatter(str(coordStr))}</b><br>
-											Device: <b>{str(device)}</b><br>
-											Time: <b>{str(time)}</b><br>
-											Action: <b>{str(action)}</b><br>
-											Before: <b>{str(loadBefore)}</b><br>
-											After: <b>{str(loadAfter)}</b>.''' }
-					feederMap['features'].append(dev_dict)
-			else:
+			dev_dict['type'] = 'Feature'
+			dev_dict['properties'] = {
+				'device': device, 
+				'time': time,
+				'action': action,
+				'loadBefore': loadBefore,
+				'loadAfter': loadAfter,
+				'popupContent': f'''Location: <b>{coordStrFormatter(str(coordStr))}</b><br>
+									Device: <b>{str(device)}</b><br>
+									Time: <b>{str(time)}</b><br>
+									Action: <b>{str(action)}</b><br>
+									Before: <b>{str(loadBefore)}</b><br>
+									After: <b>{str(loadAfter)}</b>.''' }
+			if len(coordLis) != 2:
 				dev_dict['geometry'] = {'type': 'LineString', 'coordinates': [[coordLis[0], coordLis[1]], [coordLis[2], coordLis[3]]]}
-				dev_dict['type'] = 'Feature'
-				dev_dict['properties'] = {
-					'device': device, 
-					'time': time,
-					'action': action,
-					'loadBefore': loadBefore,
-					'loadAfter': loadAfter,
-					'edgeColor': '#' + str(colormap(action)),
-					'popupContent': f'''Location: <b>{coordStrFormatter(str(coordStr))}</b><br>
-										Device: <b>{str(device)}</b><br>
-										Time: <b>{str(time)}</b><br>
-										Action: <b>{str(action)}</b><br>
-										Before: <b>{str(loadBefore)}</b><br>
-										After: <b>{str(loadAfter)}</b>.''' }
-				feederMap['features'].append(dev_dict)
+				dev_dict['properties']['edgeColor'] = f'#{str(colormap(action))}'
+			else:
+				dev_dict['geometry'] = {'type': 'Point', 'coordinates': [coordLis[0], coordLis[1]]}
+				dev_dict['properties']['pointColor'] = f'#{str(colormap(action))}'
+				if loadMicrogridDict != None and str(device).split('_')[0] == 'load':
+					mgID = loadMicrogridDict.get(str(device),'no microgrid label')
+					dev_dict['properties']['microgrid_id'] = mgID
+					dev_dict['properties']['popupContent'] += f'<br>Microgrid ID: <b>{mgID}</b>'
+			feederMap['features'].append(dev_dict)
 		except:
 			print('MESSED UP MAPPING on', device, full_data)
 		row += 1
@@ -1109,7 +1099,8 @@ def graphMicrogrid(modelDir, pathToOmd, profit_on_energy_sales, restoration_cost
 		showarrow=False
 	)
 
-	outageIncidenceFig = outageIncidenceGraph(tree, customerOutageData, outputTimeline, startTime, numTimeSteps, loadPriorityFile)
+	outageIncidenceFig = outageIncidenceGraph(customerOutageData, outputTimeline, startTime, numTimeSteps, loadPriorityFile, loadMicrogridDict)
+	
 	customerOutageHtml = customerOutageTable(customerOutageData, outageCost, modelDir)
 	profit_on_energy_sales = float(profit_on_energy_sales)
 	restoration_cost = int(restoration_cost)
@@ -1254,6 +1245,7 @@ def work(modelDir, inputDict):
 	dssConvert.treeToDss(niceDss, f'{modelDir}/circuitOmfCompatible.dss') # for querying loadshapes
 	dssConvert.dss_to_clean_via_save(f'{modelDir}/circuitOmfCompatible.dss', f'{modelDir}/circuitOmfCompatible_cleanLists.dss')
 
+	# TODO: Get rid of this. Should be happening in dss_to_clean_via_save(). Check to make sure it still works
 	# Remove syntax that ONM doesn't like.
 	with open(f'{modelDir}/circuit.dss','r') as dss_file:
 		content = dss_file.read()
@@ -1279,13 +1271,13 @@ def work(modelDir, inputDict):
 		microgridTaggingFile	= pathToLocalFile['mgTagging']
 	)
 	if inputDict['useCache'] == 'False':
-		loadMicrogridDict = makeMicrogridLoadsCSV(
+		microgridInfo = makeMicrogridLoadsCSV(
 			modelDir			= modelDir, #Work directory
 			pathToOmd			= f'{modelDir}/{feederName}.omd', #OMD Path
-			settingsFile		= f'{modelDir}/settings.json' # After runMicrogridControlSim, this contains either a copy of the input settings file or a newly generated settings file
-		)[0]
+			settingsFile		= f'{modelDir}/settings.json', # After runMicrogridControlSim, this contains either a copy of the input settings file or a newly generated settings file
+		)
 	else:
-		loadMicrogridDict = None
+		microgridInfo = [None, None, None]
 	plotOuts = graphMicrogrid(
 		modelDir				= modelDir, #Work directory
 		pathToOmd				= f'{modelDir}/{feederName}.omd', #OMD Path
@@ -1295,7 +1287,7 @@ def work(modelDir, inputDict):
 		pathToJson				= pathToLocalFile['event'],
 		pathToCsv				= pathToLocalFile['customerInfo'],
 		loadPriorityFile		= pathToLocalFile['loadPriority'],
-		loadMicrogridDict		= loadMicrogridDict
+		loadMicrogridDict		= microgridInfo[0]
 	)
 	
 
