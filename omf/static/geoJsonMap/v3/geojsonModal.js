@@ -174,8 +174,8 @@ class GeojsonModal { // implements ModalInterface, ObserverInterface
             removeButton.addEventListener('click', function() {
                 if (attachments.hasOwnProperty('geojsonFiles')) {
                     delete attachments.geojsonFiles[filename];
-                    that.#filenameToLayerGroup[filename].layerGroup.remove();
-                    that.#filenameToLayerGroup[filename].layerControl.remove();
+                    LeafletLayer.map.removeLayer(that.#filenameToLayerGroup[filename].layerGroup);
+                    LeafletLayer.control.removeLayer(that.#filenameToLayerGroup[filename].layerGroup);
                     delete that.#filenameToLayerGroup[filename];
                     if (Object.keys(attachments.geojsonFiles).length === 0) {
                         delete attachments.geojsonFiles;
@@ -296,16 +296,14 @@ class GeojsonModal { // implements ModalInterface, ObserverInterface
                     const featureCollection = JSON.parse(obj.json);
                     const layerGroup = L.featureGroup();
                     featureCollection.features.map(f => new Feature(f)).map(f => new LeafletLayer(f, that.#controller)).forEach(ll => layerGroup.addLayer(ll.getLayer()));
-                    const layerControl = L.control.layers(null, {[filename]: layerGroup}, { position: 'topleft', collapsed: false });
                     if (this.#filenameToLayerGroup.hasOwnProperty(filename)) {
-                        this.#filenameToLayerGroup[filename].layerGroup.remove();
-                        this.#filenameToLayerGroup[filename].layerControl.remove();
+                        LeafletLayer.map.removeLayer(that.#filenameToLayerGroup[filename].layerGroup);
+                        LeafletLayer.control.removeLayer(that.#filenameToLayerGroup[filename].layerGroup);
                     }
                     this.#filenameToLayerGroup[filename] = {
                         layerGroup: layerGroup,
-                        layerControl: layerControl
                     };
-                    layerControl.addTo(LeafletLayer.map);
+                    LeafletLayer.control.addOverlay(layerGroup, filename);
                     if (renderContent) {
                         if (obj.displayOnLoad) {
                             layerGroup.addTo(LeafletLayer.map);
