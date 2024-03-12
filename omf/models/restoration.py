@@ -570,37 +570,43 @@ def outageIncidenceGraph(customerOutageData, outputTimeline, startTime, numTimeS
 
 	return outageIncidenceFigure
 
-def makeMicrogridLoadsCSV(modelDir, pathToOmd, settingsFile):
-	'''	Creates a csv of loads in each microgrid by finding what microgrid each load's parent bus is designated as having. 
+def getMicrogridInfo(modelDir, pathToOmd, settingsFile, makeCSV = True):
+	'''	Gathers microgrid info including loads in each microgrid by finding what microgrid each load's parent bus is designated as having. 
 		Microgrid assignments to buses are taken from settingsFile so that we can see what microgrid assignments the 
 		code is working with, not just what they are intended to be via the microgrid tagging input file
 
-		Returns a touple of (loadMicrogridDict, busMicrogridDict, microgridLabels)
-		loadMicrogridDict and busMicrogridDict are dictionaries mapping load and bus names to microgrid labels.
-		microgridLabels is a set of the unique microgrid labels derived from the values of busMicrogridDict.	'''
+		Returns a dictionary with keys loadMgDict, busMgDict, and mgLabels
+
+		loadMgDict and busMgDict correspond to dictionaries mapping load and bus names to microgrid labels.
+		mgLabels corresponds to a set of the unique microgrid labels derived from the values of busMgDict.	
+		
+		If makeCSV is True, which is default, creates a file called microgridAssignmentOutputs.csv containing 
+		the information from loadMgDict for inspection by users.
+	'''
 
 	with open(settingsFile) as inFile:
 		settingsData = json.load(inFile)
-	busMicrogridDict = {}
+	busMgDict = {}
 	for busName,v in settingsData['bus'].items():	
-		busMicrogridDict[busName] = v.get('microgrid_id', 'no microgrid')
+		busMgDict[busName] = v.get('microgrid_id', 'no microgrid')
 	
 	with open(pathToOmd) as inFile:
 		omd = json.load(inFile)
-	loadMicrogridDict = {}
+	loadMgDict = {}
 	for ob in omd.get('tree',{}).values():
 		if ob['object'] == 'load':
-			loadMicrogridDict[ob['name']] = busMicrogridDict[ob['parent']]
+			loadMgDict[ob['name']] = busMgDict[ob['parent']]
 	
-	with open(pJoin(modelDir,'microgridAssignmentOutputs.csv'), 'w', newline='') as file:
-		writer = csv.writer(file)
-		writer.writerow(['load name','microgrid_id'])
-		for loadName,mg_id in loadMicrogridDict.items():
-			writer.writerow([loadName,mg_id])
+	if makeCSV:
+		with open(pJoin(modelDir,'microgridAssignmentOutputs.csv'), 'w', newline='') as file:
+			writer = csv.writer(file)
+			writer.writerow(['load name','microgrid_id'])
+			for loadName,mg_id in loadMgDict.items():
+				writer.writerow([loadName,mg_id])
 
-	microgridLabels = set(busMicrogridDict.values())
+	mgLabels = set(busMgDict.values())
 
-	return loadMicrogridDict, busMicrogridDict, microgridLabels
+	return {'loadMgDict':loadMgDict, 'busMgDict':busMgDict, 'mgLabels':mgLabels}
 
 def runMicrogridControlSim(modelDir, solFidelity, eventsFilename, loadPriorityFile, microgridTaggingFile):
 	''' Runs a microgrid control simulation using PowerModelsONM to determine optimal control actions during a configured outage event.
@@ -1190,18 +1196,6 @@ def work(modelDir, inputDict):
 	dssConvert.treeToDss(niceDss, f'{modelDir}/circuitOmfCompatible.dss') # for querying loadshapes
 	dssConvert.dss_to_clean_via_save(f'{modelDir}/circuitOmfCompatible.dss', f'{modelDir}/circuitOmfCompatible_cleanLists.dss')
 
-	# TODO: Get rid of this. Should be happening in dss_to_clean_via_save(). Check to make sure it still works
-	# Remove syntax that ONM doesn't like.
-	with open(f'{modelDir}/circuit.dss','r') as dss_file:
-		content = dss_file.read()
-		content = re.sub(r'(\d),(\d|\-)', r'\1 \2', content) #space sep lists
-		content = re.sub(r'(\d),(\d|\-)', r'\1 \2', content) #hack: no really, space sep
-		# content = re.sub(r',,', r',0\.0,', content) #hack: replace null entries in matrices with zeros.
-		content = re.sub(r'.*spectrum.*', r'', content) #drop spectrum
-		content = re.sub(r'object=', r'', content) #drop object=
-	with open(f'{modelDir}/circuit.dss','w') as dss_file_2:
-		dss_file_2.write(content)
-
 	pathToLocalFile = copyInputFilesToModelDir(modelDir, inputDict)
 
 	runMicrogridControlSim(
@@ -1211,7 +1205,7 @@ def work(modelDir, inputDict):
 		loadPriorityFile		= pathToLocalFile['loadPriority'],
 		microgridTaggingFile	= pathToLocalFile['mgTagging']
 	)
-	microgridInfo = makeMicrogridLoadsCSV(
+	microgridInfo = getMicrogridInfo(
 		modelDir			= modelDir, 
 		pathToOmd			= f'{modelDir}/{feederName}.omd', 
 		settingsFile		= f'{modelDir}/settings.json'
@@ -1225,9 +1219,8 @@ def work(modelDir, inputDict):
 		pathToJson				= pathToLocalFile['event'],
 		pathToCsv				= pathToLocalFile['customerInfo'],
 		loadPriorityFile		= pathToLocalFile['loadPriority'],
-		loadMicrogridDict		= microgridInfo[0]
+		loadMicrogridDict		= microgridInfo['loadMgDict']
 	)
-	
 
 
 	# Textual outputs of outage timeline
