@@ -2,6 +2,7 @@ export { LeafletLayer };
 import { Feature } from './feature.js';
 import { FeatureController } from "./featureController.js";
 import { FeatureEditModal } from './featureEditModal.js';
+import { TestModal } from './extensions/testModal.js';
 
 /**
  * - Each LeafletLayer instance is a view in the MVC pattern. Each observes an ObservableInterface instance, which is part of the model in the MVC
@@ -62,12 +63,20 @@ class LeafletLayer { // implements ObserverInterface
         });
         if (this.#observable.isNode() || this.#observable.isLine() || this.#observable.isPolygon() || this.#observable.isMultiPolygon()) {
             const layer = Object.values(this.#layer._layers)[0];
-            let featureEditModal;
+            let modal;
             layer.bindPopup(() => {
-                featureEditModal = new FeatureEditModal([this.#observable], controller);
-                return featureEditModal.getDOMElement();
+                // - This is the entrypoint to add new kinds of modals
+                if (this.#observable.hasProperty('treeKey', 'meta')) {
+                    // - Show a modal for OMD objects
+                    modal = new FeatureEditModal([this.#observable], controller);
+                    return modal.getDOMElement();
+                } else {
+                    // - Show a modal for arbitrary GeoJSON features
+                    modal = new TestModal([this.#observable], controller);
+                    return modal.getDOMElement();
+                }
             });
-            this.#layer.addEventListener('popupclose', () => this.#observable.removeObserver(featureEditModal));
+            this.#layer.addEventListener('popupclose', () => this.#observable.removeObserver(modal));
         }
     }
 

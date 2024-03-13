@@ -10,6 +10,7 @@ import numpy as np
 import pandas as pd
 import os
 import random
+from pathlib import Path
 
 def PINN_HC(input_csv_path, output_csv_path, nodes_selected=0 ):
 
@@ -307,7 +308,9 @@ def PINN_HC(input_csv_path, output_csv_path, nodes_selected=0 ):
         # print('| Epoch:{} | Sum_Loss:{:.5f} | Reg:{:5.2f} | Loss:{:5.2f} |'.format(i+1, loss_view, running_regular, loss_view-running_regular))
         Epoch_loss_record.append(loss_view)
     
-    filepath = 'Pysical_Model.pt'
+    # Modified
+    modelDir = output_csv_path.parent
+    filepath =  Path(modelDir, 'Pysical_Model.pt')
     torch.save(model.state_dict(), filepath)  
     
     

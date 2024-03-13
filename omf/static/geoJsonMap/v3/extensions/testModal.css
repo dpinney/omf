@@ -1,0 +1,14 @@
+/* Support for renderReadOnlyModal */
+div.leaflet-popup-content div.js-div--modal.featureEditModal {
+    border-radius: 0px;
+}
+table.plainTable td, table.plainTable th {
+    border: 1px solid black;
+}
+div.js-div--modal.featureEditModal table.table--modal.plainTable td:nth-child(2) {
+    max-width: initial;
+    width: initial;
+}
+table.table--modal.plainTable td, table.table--modal.plainTable th {
+    padding: .25rem;
+}

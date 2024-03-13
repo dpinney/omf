@@ -23,10 +23,6 @@ function main() {
         const parentChildLineFeature = featureGraph.getParentChildLineFeature(parentKey, childKey);
         featureGraph.insertObservable(parentChildLineFeature);
     });
-    // debug
-    window.gFeatures = features;
-    window.gFeatureGraph = featureGraph;
-    // debug
     const controller = new FeatureController(featureGraph);
     featureGraph.getObservables().forEach(ob => {
         if (!ob.isConfigurationObject()) {
@@ -80,10 +76,11 @@ function main() {
         renderer: L.canvas()
     });
     LeafletLayer.map.fitBounds(LeafletLayer.nodeLayers.getBounds());
-    addZoomToFitButon();
-    addClusterButton();
     LeafletLayer.control = L.control.layers(baseMaps, overlayMaps, { position: 'topleft', collapsed: false });
     LeafletLayer.control.addTo(LeafletLayer.map);
+    addZoomToFitButon();
+    addClusterButton();
+    addGeocoding();
     // - Disable the following annoying default Leaflet keyboard shortcuts:
     //  - TODO: do a better job and stop the event(s) from propagating in text inputs instead
     document.getElementById('map').onkeydown = function(e) {
@@ -346,7 +343,13 @@ function addClusterButton() {
     button.textContent = 'Toggle Node Grouping';
     button.addEventListener('click', function() {
         LeafletLayer.map.removeLayer(LeafletLayer.nodeLayers);
-        LeafletLayer.control.removeLayer(LeafletLayer.nodeLayers);
+        const overlayMap = [];
+        for (const layer of LeafletLayer.control._layers) {
+            if (layer.overlay === true) {
+                overlayMap.push(layer);
+            }
+        }
+        overlayMap.forEach(layer => LeafletLayer.control.removeLayer(layer.layer));
         if (LeafletLayer.nodeLayers instanceof L.MarkerClusterGroup) {
             LeafletLayer.nodeLayers = L.featureGroup(LeafletLayer.nodeLayers.getLayers());
         } else {
@@ -354,11 +357,30 @@ function addClusterButton() {
             LeafletLayer.nodeLayers = L.markerClusterGroup();
             nodeLayers.forEach(l => LeafletLayer.nodeLayers.addLayer(l));
         }
-        LeafletLayer.control.addOverlay(LeafletLayer.nodeLayers, 'Nodes');
+        const nodeLayerIndex = overlayMap.findIndex(layer => layer.name === 'Nodes');
+        overlayMap[nodeLayerIndex] = {layer: LeafletLayer.nodeLayers, name: 'Nodes'};
+        for (const layer of overlayMap) {
+            LeafletLayer.control.addOverlay(layer.layer, layer.name);
+        }
         LeafletLayer.map.addLayer(LeafletLayer.nodeLayers);
     });
     div.appendChild(button);
     leafletHookDiv.appendChild(div);
+}
+
+function addGeocoding() {
+    const provider = new GeoSearch.OpenStreetMapProvider();
+    const search = new GeoSearch.GeoSearchControl({
+        provider: provider,
+        position: 'topleft',
+        updateMap: false // - don't update the map because we don't like the default zoom level
+    });
+    // - Custom zoom behavior
+    LeafletLayer.map.on('geosearch/showlocation', function(e) {
+        // - The max zoom level without losing the map is 19
+        LeafletLayer.map.flyTo([e.location.y, e.location.x], 19, {duration: .3});
+    });
+    LeafletLayer.map.addControl(search);
 }
 
 (function loadInterface() {

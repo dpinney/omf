@@ -28,12 +28,7 @@ class FeatureEditModal { // implements ObserverInterface, ModalInterface
         this.#observables = observables;
         this.#observables.forEach(ob => ob.registerObserver(this));
         this.#removed = false;
-        // - In order to allow users to view non-OMD GeoJSON features in a table, I added this if-statement
-        if (this.#observables.every(ob => ob.hasProperty('treeKey', 'meta'))) {
-            this.renderContent();
-        } else {
-            this.#renderReadOnlyModal();
-        }
+        this.renderContent();
     }
 
     // *******************************
@@ -750,34 +745,6 @@ class FeatureEditModal { // implements ObserverInterface, ModalInterface
         return true;
     }
 
-    /**
-     * - A render a static, read-only table for arbitrary GeoJSON objects. Does not support editing data in any way
-     */
-    #renderReadOnlyModal() {
-        if (this.#observables.length > 1) {
-            throw Error('ReadOnlyModal does not support viewing multiple GeoJSON features');
-        }
-        const modal = new Modal();
-        modal.addStyleClasses(['featureEditModal'], 'divElement');
-        for (const [key, val] of Object.entries(this.#observables[0].getProperties('meta'))) {
-            const keySpan = document.createElement('span');
-            keySpan.textContent = key;
-            keySpan.dataset.propertyKey = key;
-            keySpan.dataset.propertyNamespace = 'meta';
-            const valueSpan = document.createElement('span');
-            valueSpan.textContent = val;
-            modal.insertTBodyRow([keySpan, valueSpan]);
-        }
-        modal.addStyleClasses(['centeredTable', 'plainTable'], 'tableElement');
-        modal.addStyleClasses(['verticalFlex', 'centerMainAxisFlex', 'centerCrossAxisFlex'], 'containerElement');
-        if (this.#modal === null) {
-            this.#modal = modal;
-        }
-        if (document.body.contains(this.#modal.divElement)) {
-            this.#modal.divElement.replaceWith(modal.divElement);
-            this.#modal = modal;
-        }
-    }
     
     /**
      * @param {string} propertyKey
