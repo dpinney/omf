@@ -21,6 +21,16 @@ tooltip = "Calculate hosting capacity using traditional and/or AMI-based methods
 modelName, template = __neoMetaModel__.metadata(__file__)
 hidden = False
 
+def convert_seconds_to_hms_ms( seconds ):
+    milliseconds = seconds * 1000
+    
+    # Calculate hours, minutes, seconds, and milliseconds
+    hours, remainder = divmod(milliseconds, 3600000)
+    minutes, remainder = divmod(remainder, 60000)
+    seconds, milliseconds = divmod(remainder, 1000)
+    
+    return "{:02d}:{:02d}:{:02d}.{:03d}".format(int(hours), int(minutes), int(seconds), int(milliseconds))
+
 def bar_chart_coloring( row ):
 	color = 'black'
 	if row['thermal_violation'] and not row['voltage_violation']:
@@ -81,7 +91,7 @@ def run_ami_algorithm(modelDir, inputDict, outData):
 	outData['barChartFigure'] = json.dumps( barChartFigure, cls=py.utils.PlotlyJSONEncoder )
 	outData['AMI_tableHeadings'] = AMI_results.columns.values.tolist()
 	outData['AMI_tableValues'] = ( list(AMI_results.sort_values( by="max_cap_allowed_kW", ascending=False, ignore_index=True ).itertuples(index=False, name=None)) )
-	outData['AMI_runtime'] = AMI_end_time - AMI_start_time
+	outData['AMI_runtime'] = convert_seconds_to_hms_ms( AMI_end_time - AMI_start_time )
 
 
 def run_traditional_algorithm(modelDir, inputDict, outData):
@@ -135,9 +145,8 @@ def run_traditional_algorithm(modelDir, inputDict, outData):
 	outData['traditionalGraphData'] = json.dumps(traditionalHCFigure, cls=py.utils.PlotlyJSONEncoder )
 	outData['traditionalHCTableHeadings'] = tradHCDF.columns.values.tolist()
 	outData['traditionalHCTableValues'] = (list(tradHCDF.itertuples(index=False, name=None)))
-	outData['traditionalRuntime'] = traditional_end_time - traditional_start_time
+	outData['traditionalRuntime'] = convert_seconds_to_hms_ms( traditional_end_time - traditional_start_time )
 	outData['traditionalHCResults'] = traditionalHCResults
-
 
 def runtimeEstimate(modelDir):
 	''' Estimated runtime of model in minutes. '''

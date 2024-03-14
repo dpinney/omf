@@ -47,17 +47,19 @@ def chrome_test( url, username, password ):
   password_field = driver.find_element(by=By.ID, value='password')
   username_field.send_keys(username)
   password_field.send_keys(password)
-
+  time.sleep(2)
   password_field.send_keys(Keys.RETURN)
 
   # Create transformerPairing Model
   driver.find_element(by=By.ID, value="newModelButton").click()
+  time.sleep(2)
 
   ## find transformerPairing Model using xpath 
   #transformerPairingModelButton = driver.find_element(by=By.XPATH, value="//a[contains(@href, 'transformerPairing')]" )
   # transformerPairingModelButton.click()
   #driver.execute_script("arguments[0].click();", transformerPairingModelButton)
   driver.find_element(by=By.XPATH, value="//a[contains(@href, 'transformerPairing')]" ).click()
+  time.sleep(2)
 
   wait = WebDriverWait(driver, 2)
   alert = wait.until(expected_conditions.alert_is_present())
