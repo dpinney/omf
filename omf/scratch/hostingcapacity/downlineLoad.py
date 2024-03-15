@@ -72,7 +72,8 @@ if __name__ == '__main__':
 
   tree = opendss.dssConvert.omdToTree(beginning_test_file.resolve()) # this tree is a list
 
-  graph = my_networkPlot( os.path.join( modelDir, circuit_file) )
-  print( graph.nodes() )
+  graph = opendss.networkPlot( os.path.join( modelDir, circuit_file) )
+  print( graph )
+  # print( graph.nodes )
   #print( nx.descendants(graph, "EQ_SOURCE_BUS") )
 
