@@ -26,9 +26,10 @@ def work(modelDir, inputDict):
 
 	outData = {}
 	useTrueLabels = True
-	outData["useTrueLabels"] = useTrueLabels
-
+	saveResultsPath = modelDir
 	test_data_file_path = Path(omf.omfDir,'static','testFiles', 'transformerPairing')
+
+	outData["useTrueLabels"] = useTrueLabels	
 
 	voltageInputPathCSV = Path( modelDir, inputDict['voltageDataFileName'])
 	realPowerInputPathCSV = Path( modelDir, inputDict['realPowerDataFileName'])
@@ -43,8 +44,6 @@ def work(modelDir, inputDict):
 		transformer_labels_true_file_name = 'TransformerLabelsTrue_AMI.csv'
 		shutil.copyfile( Path( test_data_file_path, transformer_labels_true_file_name ), Path(modelDir, transformer_labels_true_file_name) )
 		transformerLabelsTruePath = Path(modelDir, transformer_labels_true_file_name)
-
-	saveResultsPath = modelDir
 
 	if inputDict['algorithm'] == 'reactivePower':
 		sdsmc.MeterTransformerPairing.TransformerPairing.run( voltageInputPathCSV, realPowerInputPathCSV, reactivePowerInputPathCSV, custIDInputPathCSV, transformerLabelsErrorsPathCSV, transformerLabelsTruePath, saveResultsPath, useTrueLabels )
