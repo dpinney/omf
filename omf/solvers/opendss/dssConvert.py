@@ -574,11 +574,12 @@ def omdToTree(omdFilePath):
 	dss_tree = evilGldTreeToDssTree(evil_tree)
 	return dss_tree
 
-def dss_to_networkx(dssFilePath, tree=None):
+def dss_to_networkx(dssFilePath, tree=None, omd=None):
 	''' Return a networkx directed graph from a dss file. If tree is provided, build graph from that instead of the file. '''
 	if tree == None:
 		tree = dssToTree(dssFilePath)
-	omd = evilDssTreeToGldTree(tree)
+	if omd == None:
+		omd = evilDssTreeToGldTree(tree)
 	# Gather edges, leave out source and circuit objects
 	edges = [(ob['from'],ob['to']) for ob in omd.values() if 'from' in ob and 'to' in ob]
 	edges_sub = [
