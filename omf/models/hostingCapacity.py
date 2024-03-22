@@ -21,6 +21,16 @@ tooltip = "Calculate hosting capacity using traditional and/or AMI-based methods
 modelName, template = __neoMetaModel__.metadata(__file__)
 hidden = False
 
+def convert_seconds_to_hms_ms( seconds ):
+    milliseconds = seconds * 1000
+    
+    # Calculate hours, minutes, seconds, and milliseconds
+    hours, remainder = divmod(milliseconds, 3600000)
+    minutes, remainder = divmod(remainder, 60000)
+    seconds, milliseconds = divmod(remainder, 1000)
+    
+    return "{:02d}:{:02d}:{:02d}.{:03d}".format(int(hours), int(minutes), int(seconds), int(milliseconds))
+
 def bar_chart_coloring( row ):
 	color = 'black'
 	if row['thermal_violation'] and not row['voltage_violation']:
@@ -39,6 +49,7 @@ def createColorCSV(modelDir, df):
 
 def work(modelDir, inputDict):
 	outData = {}
+	
 	if inputDict['runAmiAlgorithm'] == 'on':
 		run_ami_algorithm(modelDir, inputDict, outData)
 	if inputDict.get('optionalCircuitFile', outData) == 'on':
@@ -51,13 +62,16 @@ def run_ami_algorithm(modelDir, inputDict, outData):
 	# mohca data-driven hosting capacity
 	inputPath = Path(modelDir, inputDict['AMIDataFileName'])
 	inputAsString = inputPath.read_text()
+
+	outputPath = Path(modelDir, 'AMI_output.csv')
+	AMI_output = []
+
 	try:
 		csvValidateAndLoad(inputAsString, modelDir=modelDir, header=0, nrows=None, ncols=5, dtypes=[str, pd.to_datetime, float, float, float], return_type='df', ignore_nans=False, save_file=None, ignore_errors=False )
 	except:
 		errorMessage = "AMI-Data CSV file is incorrect format. Please see valid format definition at <a target='_blank' href='https://github.com/dpinney/omf/wiki/Models-~-hostingCapacity#meter-data-input-csv-file-format'>OMF Wiki hostingCapacity</a>"
 		raise Exception(errorMessage)
-	outputPath = Path(modelDir, 'AMI_output.csv')
-	AMI_output = []
+	
 	AMI_start_time = time.time()
 	if inputDict[ "algorithm" ] == "sandia1":
 		AMI_output = mohca_cl.sandia1( inputPath, outputPath )
@@ -67,6 +81,7 @@ def run_ami_algorithm(modelDir, inputDict, outData):
 		errorMessage = "Algorithm name error"
 		raise Exception(errorMessage)
 	AMI_end_time = time.time()
+
 	AMI_results = AMI_output[0].rename(columns={'kW_hostable': 'voltage_cap_kW'})
 	histogramFigure = px.histogram( AMI_results, x='voltage_cap_kW', template="simple_white", color_discrete_sequence=["MediumPurple"] )
 	histogramFigure.update_layout(bargap=0.5)
@@ -74,6 +89,7 @@ def run_ami_algorithm(modelDir, inputDict, outData):
 	min_value = 5
 	max_value = 8
 	AMI_results['thermal_cap_kW']  = np.random.randint(min_value, max_value + 1, size=len(AMI_results))
+
 	AMI_results['max_cap_allowed_kW'] = np.minimum( AMI_results['voltage_cap_kW'], AMI_results['thermal_cap_kW'])
 	barChartFigure = px.bar(AMI_results, x='busname', y=['voltage_cap_kW', 'thermal_cap_kW', 'max_cap_allowed_kW'], barmode='group', color_discrete_sequence=["green", "lightblue", "MediumPurple"], template="simple_white" )
 	barChartFigure.add_traces( list(px.line(AMI_results, x='busname', y='max_cap_allowed_kW', markers=True).select_traces()) )
@@ -81,7 +97,7 @@ def run_ami_algorithm(modelDir, inputDict, outData):
 	outData['barChartFigure'] = json.dumps( barChartFigure, cls=py.utils.PlotlyJSONEncoder )
 	outData['AMI_tableHeadings'] = AMI_results.columns.values.tolist()
 	outData['AMI_tableValues'] = ( list(AMI_results.sort_values( by="max_cap_allowed_kW", ascending=False, ignore_index=True ).itertuples(index=False, name=None)) )
-	outData['AMI_runtime'] = AMI_end_time - AMI_start_time
+	outData['AMI_runtime'] = convert_seconds_to_hms_ms( AMI_end_time - AMI_start_time )
 
 
 def run_traditional_algorithm(modelDir, inputDict, outData):
@@ -135,9 +151,8 @@ def run_traditional_algorithm(modelDir, inputDict, outData):
 	outData['traditionalGraphData'] = json.dumps(traditionalHCFigure, cls=py.utils.PlotlyJSONEncoder )
 	outData['traditionalHCTableHeadings'] = tradHCDF.columns.values.tolist()
 	outData['traditionalHCTableValues'] = (list(tradHCDF.itertuples(index=False, name=None)))
-	outData['traditionalRuntime'] = traditional_end_time - traditional_start_time
+	outData['traditionalRuntime'] = convert_seconds_to_hms_ms( traditional_end_time - traditional_start_time )
 	outData['traditionalHCResults'] = traditionalHCResults
-
 
 def runtimeEstimate(modelDir):
 	''' Estimated runtime of model in minutes. '''

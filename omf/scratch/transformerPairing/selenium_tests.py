@@ -47,7 +47,6 @@ def chrome_test( url, username, password ):
   password_field = driver.find_element(by=By.ID, value='password')
   username_field.send_keys(username)
   password_field.send_keys(password)
-
   password_field.send_keys(Keys.RETURN)
 
   # Create transformerPairing Model
@@ -59,7 +58,6 @@ def chrome_test( url, username, password ):
   #driver.execute_script("arguments[0].click();", transformerPairingModelButton)
   driver.find_element(by=By.XPATH, value="//a[contains(@href, 'transformerPairing')]" ).click()
 
-  wait = WebDriverWait(driver, 2)
   alert = wait.until(expected_conditions.alert_is_present())
 
   alert.send_keys(test_name)
@@ -70,17 +68,13 @@ def chrome_test( url, username, password ):
 
   voltage_file_input = driver.find_element(by=By.ID, value="voltageDataFile")
   # Input must be of type string and be the absolute path to the file
-  voltage_file_input.send_keys( str( Path(voltageTestFile1).resolve() ) )
-
-  # Should I wait one second? idk.  
-
-  time.sleep(2)
+  voltage_file_input.send_keys( str( Path(voltageTestFile1).resolve() ) )\
 
   driver.find_element(by=By.ID, value="runButton").click()
 
   # Wait?
 
-  time.sleep(10)
+  time.sleep(5)
 
   userInputVoltageDisplayName = driver.find_element(by=By.ID, value="userInputVoltageDisplayName")
   newFileUploadedName = userInputVoltageDisplayName.get_attribute('value')
@@ -119,31 +113,8 @@ def chrome_test( url, username, password ):
       print( "Actual: " + str(firstValue) + " Expected: " + str(voltageTestFile1Value) )
       retVal = False
 
-  #Check the allInputData.json file
-  #ATM - not working. Maybe a lock thing like the issue with before. Maybe save for the end..? If at all?
-  '''
-  try:
-    with open( Path(modelDir, "allInputData.json"), 'r' ) as jsonFile:
-      file_contents = jsonFile.read()
-      try:
-        assert file_contents['userInputVoltageDisplayName'] == voltageTestFile1
-      except AssertionError:
-        print("Assertion failed for ['userInputVoltageDisplayName'] in allInputData.json")
-        print("Actual: " + file_contents['userInputVoltageDisplayName'] + " Expected: " + voltageTestFile1)
-
-      try:
-        assert file_contents['voltageDataFileName'] == defaultVoltageFileName
-      except AssertionError:
-        print("Assertion failed for ['voltageDataFileName'] in allInputData.json")
-        print("Actual: " + file_contents['voltageDataFileName'] + " Expected: " + defaultVoltageFileName)
-  except:
-    print( "allInputData.json not found or empty")
-    retVal = False
-  '''
-
   # TODO: Check outputs - p vague idea
-
-  time.sleep(4)
+  WebDriverWait(driver, 600).until(expected_conditions.presence_of_element_located((By.ID, 'rawOutput')))
 
   driver.quit()
   return retVal
