@@ -28,7 +28,7 @@ from omf.comms import createGraph
 # Model metadata:
 tooltip = 'Calculate load, generator and switching controls to maximize power restoration for a circuit with multiple networked microgrids.'
 modelName, template = __neoMetaModel__.metadata(__file__)
-hidden = True
+hidden = False
 
 def makeCicuitTraversalDict(pathToOmd):
 	''' Note: comment out line 99 in comms.py: "nxG = graphValidator(pathToOmdFile, nxG)" as a quick fix for the purpose of this funct
@@ -435,7 +435,7 @@ def customerCost1(duration, season, averagekWperhr, businessType):
 	return outageCost, kWperhrEstimate, times, localMax
 
 def outageIncidenceGraph(customerOutageData, outputTimeline, startTime, numTimeSteps, loadPriorityFilePath, loadMicrogridDict):
-	'''	Returns a plotly figure displaying a graph of outage incidences over the course of the event data.
+	'''	Returns plotly figures displaying graphs of outage incidences over the course of the event data.
 		Unweighted outage incidence at each timestep is calculated as (num loads experiencing outage)/(num loads).
 		A load is considered to be "experiencing an outage" at a particular timestep if its "loadBefore" value 
 		in outputTimeline is "offline". The last x-value on the graph is the exception, with its value corresponding
@@ -449,7 +449,7 @@ def outageIncidenceGraph(customerOutageData, outputTimeline, startTime, numTimeS
 	# TODO: Rename function
 
 	loadList = list(loadMicrogridDict.keys())
-	mgTags = set(loadMicrogridDict.values())
+	mgIDs = set(loadMicrogridDict.values())
 	timeList = [*range(startTime, numTimeSteps+1)] # The +1 is because we want the 'before' for each timestep + the 'after' for the last timestep
 
 	# Create a copy of outputTimeline containing only load devices sorted by device name and then time. 
@@ -531,10 +531,40 @@ def outageIncidenceGraph(customerOutageData, outputTimeline, startTime, numTimeS
 	# Calculate weighted outage incidence based on individually assigned weights
 	with open(loadPriorityFilePath) as inFile:
 		loadWeights = json.load(inFile)
-	individuallyWeightedOutageIncidence = calcWeightedOI(loadWeights)
+	indivWeightedOI = calcWeightedOI(loadWeights)
 
 	# TODO: Run calcWeightedOI with various microgrid masks (1 for loads in microgrid, 0 otherwise. For unweighted, use mask as weight. For weighted, multiply mask element-wise by weight)
 	
+	
+	mgOIFigures = {}
+	for targetID in mgIDs:
+		mgLoadMask = {load:(1 if id == targetID else 0) for (load,id) in loadMicrogridDict.items()}
+		mgLoadWeights = {load:(val*loadWeights.get(load,1)) for (load,val) in mgLoadMask.items()}
+		mgOI = calcWeightedOI(mgLoadMask)
+		mgOIWeighted = calcWeightedOI(mgLoadWeights)
+		mgOIFigures[targetID] = go.Figure()
+		mgOIFigures[targetID].add_trace(go.Scatter(
+			x=timeList,
+			y=mgOI,
+			mode='lines',
+			name=f'Unweighted OI for Microgrid {targetID}',
+			hovertemplate=
+			'<b>Time Step</b>: %{x}<br>' +
+			f'<b>Unweighted OI for Microgrid {targetID}</b>: %{{y:.3f}}%'))
+		mgOIFigures[targetID].add_trace(go.Scatter(
+			x=timeList,
+			y=mgOIWeighted,
+			mode='lines',
+			name=f'Priority-Weighted OI for Microgrid {targetID}',
+			hovertemplate=
+			'<b>Time Step</b>: %{x}<br>' +
+			f'<b>Priority-Weighted OI for Microgrid {targetID}</b>: %{{y:.3f}}%'))
+		mgOIFigures[targetID].update_layout(
+			xaxis_title='Before Hour X',
+			yaxis_title='Load Outage %',
+			yaxis_range=[-5,105],
+			legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1))
+
 	outageIncidenceFigure = go.Figure()
 	outageIncidenceFigure.add_trace(go.Scatter(
 		x=timeList,
@@ -555,7 +585,7 @@ def outageIncidenceGraph(customerOutageData, outputTimeline, startTime, numTimeS
 			'<b>Group-Weighted Outage Incidence</b>: %{y:.3f}%'))
 	outageIncidenceFigure.add_trace(go.Scatter(
 		x=timeList,
-		y=individuallyWeightedOutageIncidence,
+		y=indivWeightedOI,
 		mode='lines',
 		name='Priority-Weighted Outage Incidence',
 		hovertemplate=
@@ -568,7 +598,7 @@ def outageIncidenceGraph(customerOutageData, outputTimeline, startTime, numTimeS
 		yaxis_range=[-5,105],
 		legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1))
 
-	return outageIncidenceFigure
+	return outageIncidenceFigure, mgOIFigures
 
 def getMicrogridInfo(modelDir, pathToOmd, settingsFile, makeCSV = True):
 	'''	Gathers microgrid info including loads in each microgrid by finding what microgrid each load's parent bus is designated as having. 
@@ -619,6 +649,7 @@ def runMicrogridControlSim(modelDir, solFidelity, eventsFilename, loadPriorityFi
 
 	lpFile = loadPriorityFile if loadPriorityFile != None else ''
 	mgFile = microgridTaggingFile if microgridTaggingFile != None else ''
+
 
 	PowerModelsONM.build_settings_file(
 		circuitPath=pJoin(modelDir,'circuit.dss'),
@@ -1072,7 +1103,7 @@ def graphMicrogrid(modelDir, pathToOmd, profit_on_energy_sales, restoration_cost
 		showarrow=False
 	)
 
-	outageIncidenceFig = outageIncidenceGraph(customerOutageData, outputTimeline, startTime, numTimeSteps, loadPriorityFile, loadMicrogridDict)
+	outageIncidenceFig, mgOIFigs = outageIncidenceGraph(customerOutageData, outputTimeline, startTime, numTimeSteps, loadPriorityFile, loadMicrogridDict)
 	
 	customerOutageHtml = customerOutageTable(customerOutageData, outageCost, modelDir)
 	profit_on_energy_sales = float(profit_on_energy_sales)
@@ -1082,7 +1113,7 @@ def graphMicrogrid(modelDir, pathToOmd, profit_on_energy_sales, restoration_cost
 	utilityOutageHtml = utilityOutageTable(average_lost_kwh, profit_on_energy_sales, restoration_cost, hardware_cost, outageDuration, modelDir)
 	try: customerOutageCost = customerOutageCost
 	except: customerOutageCost = 0
-	return {'utilityOutageHtml': utilityOutageHtml, 'customerOutageHtml': customerOutageHtml, 'timelineStatsHtml': timelineStatsHtml, 'outageIncidenceFig': outageIncidenceFig, 'gens': gens, 'loads': loads, 'volts': volts, 'fig': fig, 'customerOutageCost': customerOutageCost, 'numTimeSteps': numTimeSteps, 'stepSize': stepSize, 'custHist': custHist}
+	return {'utilityOutageHtml': utilityOutageHtml, 'customerOutageHtml': customerOutageHtml, 'timelineStatsHtml': timelineStatsHtml, 'outageIncidenceFig': outageIncidenceFig, 'mgOIFigs':mgOIFigs, 'gens': gens, 'loads': loads, 'volts': volts, 'fig': fig, 'customerOutageCost': customerOutageCost, 'numTimeSteps': numTimeSteps, 'stepSize': stepSize, 'custHist': custHist}
 
 def buildCustomEvents(eventsCSV='', feeder='', customEvents='customEvents.json', defaultDispatchable = 'true'):
 	def outageSwitchState(outList): return ('open'*(outList[3] == 'closed') + 'closed'*(outList[3]=='open'))
@@ -1197,7 +1228,7 @@ def work(modelDir, inputDict):
 	dssConvert.dss_to_clean_via_save(f'{modelDir}/circuitOmfCompatible.dss', f'{modelDir}/circuitOmfCompatible_cleanLists.dss')
 
 	pathToLocalFile = copyInputFilesToModelDir(modelDir, inputDict)
-
+	
 	runMicrogridControlSim(
 		modelDir				= modelDir, 
 		solFidelity				= inputDict['solFidelity'],
@@ -1254,6 +1285,8 @@ def work(modelDir, inputDict):
 	outData['fig5Layout'] = json.dumps(layoutOb, cls=py.utils.PlotlyJSONEncoder)
 	outData['fig6Data'] = json.dumps(plotOuts.get('outageIncidenceFig',{}), cls=py.utils.PlotlyJSONEncoder)
 	outData['fig6Layout'] = json.dumps(layoutOb, cls=py.utils.PlotlyJSONEncoder)
+	outData['mgOIFigsData'] = json.dumps(plotOuts.get('mgOIFigs',{}), cls=py.utils.PlotlyJSONEncoder)
+	outData['mgOIFigsLayout'] = json.dumps(layoutOb, cls=py.utils.PlotlyJSONEncoder)
 	# Stdout/stderr.
 	outData['stdout'] = 'Success'
 	outData['stderr'] = ''

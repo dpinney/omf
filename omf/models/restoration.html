@@ -189,11 +189,22 @@
 		<div id="utilityOutageCostCalc" class="tightContent">
 			{{ allOutputDataDict['utilityOutageHtml'] }}
 		</div>
-		<p class="reportTitle"><label class="tooltip">Outage Incidence <span class="classic">The "Before" status of loads at each timestep as seen in the Timeline below is used to calculate Outage Incidence. The final timestep represents values using the "After" status for the last time in the Timeline. E.g. The Load Outage % value at Before Hour X=5 is the % of loads experiencing an outage calculated with the "Before" value of each load in the Timeline at Time 5. </span></label></p>
+		<p class="reportTitle"><label class="tooltip">Outage Incidence for Full System<span class="classic">The "Before" status of loads at each timestep as seen in the Timeline below is used to calculate Outage Incidence. The final timestep represents values using the "After" status for the last time in the Timeline. E.g. The Load Outage % value at Before Hour X=5 is the % of loads experiencing an outage calculated with the "Before" value of each load in the Timeline at Time 5. </span></label></p>
 		<div id="fig6" class="tightContent">
 			<div id="fig6Chart" style="width:1000px"></div>
 			<script type="text/javascript">
 				Plotly.newPlot("fig6Chart", JSON.parse(allOutputData["fig6Data"]), JSON.parse(allOutputData["fig6Layout"]) || {})
+			</script>
+		</div>
+		<p class="reportTitle"><label class="tooltip">Outage Incidence for Microgrids<span class="classic">The "Before" status of loads at each timestep as seen in the Timeline below is used to calculate Outage Incidence. The final timestep represents values using the "After" status for the last time in the Timeline. E.g. The Load Outage % value at Before Hour X=5 is the % of loads experiencing an outage calculated with the "Before" value of each load in the Timeline at Time 5. </span></label></p>
+		<div id="outageIncidenceFigures" class="tightContent" style="max-height:450px; overflow-y: scroll;">
+			<script type="text/javascript">			
+			for (let [mgID,figData] of Object.entries(JSON.parse(allOutputData['mgOIFigsData']))) {
+				$("<div/>").appendTo("#outageIncidenceFigures")
+					.attr("id", "fig_mg_"+mgID)
+					.attr("style","width:1000px")
+				Plotly.newPlot("fig_mg_"+mgID, figData, JSON.parse(allOutputData["mgOIFigsLayout"]))
+			}
 			</script>
 		</div>
 		<p class="reportTitle" style="page-break-before:always">Timeline</p>
