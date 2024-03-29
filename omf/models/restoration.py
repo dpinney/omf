@@ -1,18 +1,11 @@
 ''' Calculate optimal restoration scheme for distribution system with multiple microgrids. '''
-import random, re, datetime, json, os, shutil, csv, math, base64, io
+import re, json, os, shutil, csv, math, io
 from os.path import join as pJoin
-import subprocess
 import pandas as pd
 import numpy as np
-import scipy
-from scipy import spatial
-import scipy.stats as st
-from sklearn.preprocessing import LabelEncoder
 import matplotlib.pyplot as plt
 import plotly as py
 import plotly.graph_objs as go
-from plotly.tools import make_subplots
-import platform
 import networkx as nx
 # from statistics import quantiles
 
@@ -28,7 +21,7 @@ from omf.comms import createGraph
 # Model metadata:
 tooltip = 'Calculate load, generator and switching controls to maximize power restoration for a circuit with multiple networked microgrids.'
 modelName, template = __neoMetaModel__.metadata(__file__)
-hidden = False
+hidden = True
 
 def makeCicuitTraversalDict(pathToOmd):
 	''' Note: comment out line 99 in comms.py: "nxG = graphValidator(pathToOmdFile, nxG)" as a quick fix for the purpose of this funct
@@ -157,22 +150,6 @@ def pullDataForGraph(tree, feederMap, outputTimeline, row):
 	loadBefore = outputTimeline.loc[row, 'loadBefore']
 	loadAfter = outputTimeline.loc[row, 'loadAfter']
 	return device, coordLis, coordStr, time, action, loadBefore, loadAfter
-
-def colormap(action):
-	'color map for drawing the map nodes'
-	if action == 'Load Shed':
-		color = '0000FF'
-	elif action == 'Load Pickup':
-		color = '00C957'
-	elif action == 'Switch Opening':
-		color = 'FF8000'
-	elif action == 'Switch Closing':
-		color = '9370DB'
-	elif action == 'Battery Control':
-		color = 'FFFF00'
-	elif action == 'Generator Control':
-		color = 'E0FFFF'
-	return color
 
 def microgridTimeline(outputTimeline, modelDir):
 	'generate timeline of microgrid events'
@@ -902,6 +879,14 @@ def graphMicrogrid(modelDir, pathToOmd, profit_on_energy_sales, restoration_cost
 			count = count+1
 		return newCoordString
 
+	colormap = {
+		'Load Shed':'0000FF',
+		'Load Pickup':'00C957',
+		'Switch Opening':'FF8000',
+		'Switch Closing':'9370DB',
+		'Battery Control':'FFFF00',
+		'Generator Control':'E0FFFF',
+	}
 	while row < row_count_timeline:
 		full_data = pullDataForGraph(tree, feederMap, outputTimeline, row)
 		device, coordLis, coordStr, time, action, loadBefore, loadAfter = full_data
@@ -922,10 +907,10 @@ def graphMicrogrid(modelDir, pathToOmd, profit_on_energy_sales, restoration_cost
 									After: <b>{str(loadAfter)}</b>.''' }
 			if len(coordLis) != 2:
 				dev_dict['geometry'] = {'type': 'LineString', 'coordinates': [[coordLis[0], coordLis[1]], [coordLis[2], coordLis[3]]]}
-				dev_dict['properties']['edgeColor'] = f'#{str(colormap(action))}'
+				dev_dict['properties']['edgeColor'] = f'#{colormap[action]}'
 			else:
 				dev_dict['geometry'] = {'type': 'Point', 'coordinates': [coordLis[0], coordLis[1]]}
-				dev_dict['properties']['pointColor'] = f'#{str(colormap(action))}'
+				dev_dict['properties']['pointColor'] = f'#{colormap[action]}'
 				if loadMicrogridDict != None and str(device).split('_')[0] == 'load':
 					mgID = loadMicrogridDict.get(str(device),'no microgrid label')
 					dev_dict['properties']['microgrid_id'] = mgID
