@@ -80,6 +80,7 @@ function main() {
     LeafletLayer.control.addTo(LeafletLayer.map);
     addZoomToFitButon();
     addClusterButton();
+    addRuler();
     addGeocoding();
     // - Disable the following annoying default Leaflet keyboard shortcuts:
     //  - TODO: do a better job and stop the event(s) from propagating in text inputs instead
@@ -381,6 +382,25 @@ function addGeocoding() {
         LeafletLayer.map.flyTo([e.location.y, e.location.x], 19, {duration: .3});
     });
     LeafletLayer.map.addControl(search);
+}
+
+function addRuler() {
+    var options = {
+        position: 'topleft',
+        lengthUnit: {
+            display: 'm',
+            decimal: 3,
+            factor: 1000,
+            label: 'Distance (m):'
+          },
+          angleUnit: {
+            display: '&deg;',
+            decimal: 3,
+            factor: null,
+            label: 'Angle:'
+          }
+      };
+    L.control.ruler(options).addTo(LeafletLayer.map);
 }
 
 (function loadInterface() {
