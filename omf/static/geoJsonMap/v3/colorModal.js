@@ -357,8 +357,12 @@ class ColorModal { // implements ModalInterface, ObserverInterface
             ob.getObservers().filter(ob => ob instanceof LeafletLayer).forEach(ll => {
                 // - Color nodes gray
                 if (Object.values(ll.getLayer()._layers)[0].hasOwnProperty('_icon')) {
-                    const svg = Object.values(ll.getLayer()._layers)[0]._icon.children[0];
-                    this.#colorSvg(svg, {_rgb: [128, 128, 128, 1]});
+                    let svg = Object.values(ll.getLayer()._layers)[0];
+                    // - Can be null when node clustering is active
+                    if (svg._icon !== null) {
+                        svg = svg._icon.children[0];
+                        this.#colorSvg(svg, {_rgb: [128, 128, 128, 1]});
+                    }
                 // - Color lines gray
                 } else {
                     const options = Object.values(ll.getLayer()._layers)[0].options;
