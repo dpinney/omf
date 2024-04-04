@@ -92,6 +92,17 @@
 				</label>
 				<input type="text" id="traditionalHCMaxTestkw" name="traditionalHCMaxTestkw" value="{{allInputDataDict.traditionalHCMaxTestkw}}" pattern="^[0-9]*$"/>
 			</div>
+			<div class="wideInput">
+				<p class="inputSectionHeader">Downline Load Hosting Capacity</p>
+			</div>
+			<hr>
+			<div class="shortInput">
+				<label class="tooltip">Apply Downline Hosting Capacity Algorithm with above circuit.</label>
+				<select id="runDownlineAlgorithm" name="runDownlineAlgorithm" value="{{allInputDataDict.runDownlineAlgorithm}}" required>
+					<option value="off" {% if allInputDataDict.runDownlineAlgorithm == 'off' %}selected{% endif %}>Off</option>
+					<option value="on" {% if allInputDataDict.runDownlineAlgorithm == 'on' %}selected{% endif %}>On</option>
+				</select>
+			</div>
 			{{ omfModelButtons }}
 		</form>
 	</div>
@@ -178,6 +189,29 @@
 			</table>
 			</div>
 		{% endif %}
+		{% if allInputDataDict['runDownlineAlgorithm'] == 'on' %}
+		<p class="reportTitle">Downline Load Hosting Capacity Runtime ( H:M:S:MS )</p>
+			<div id="traditionalRunTime" class="tightContent">
+				<span style="border: 1px solid grey; padding: 3px;"> {{ allOutputDataDict['downline_runtime'] }} </span>
+			</div>
+		<p class="reportTitle">Downline Load Hosting Capacity Full Data Table</p>
+			<div id="downlineHostingCapacityTable" class="tightContent" style="height:300px; overflow-y: scroll;">
+				<table style="width:100%">
+					<tr>
+							{% for header in allOutputDataDict["downline_tableHeadings"] %}
+							<th>{{ header }}</th>
+							{% endfor %}
+					</tr>
+					{% for values in allOutputDataDict["downline_tableValues"] %}
+					<tr>
+							{% for val in values %}
+							<td>{{ val }}</td>
+							{% endfor %}
+					</tr>
+					{% endfor %}
+			</table>
+			</div>
+			{% endif %}
 		{{ rawOutputFiles }}
 	</div>
 	{% endif %}
