@@ -146,11 +146,22 @@
 	{{ omfRunDebugBlock }}
 	{% if modelStatus == 'finished' %}
 	<div id="output">
-		<p class="reportTitle">Generator Profiles</p>
+		<p class="reportTitle">Generator Profiles for Whole System</p>
 		<div id="fig1" class="tightContent">
 			<div id="fig1Chart" style="width:1000px"></div>
 			<script type="text/javascript">
 				Plotly.newPlot("fig1Chart", JSON.parse(allOutputData["fig1Data"]), JSON.parse(allOutputData["fig1Layout"]) || {})
+			</script>
+		</div>
+		<p class="reportTitle">Generator Profiles for Microgrids</p>
+		<div id="gensFigures" class="tightContent" style="max-height:450px; overflow-y: scroll;">
+			<script type="text/javascript">			
+			for (let [mgID,figData] of Object.entries(JSON.parse(allOutputData['mgGensFigsData']))) {
+				$("<div/>").appendTo("#gensFigures")
+					.attr("id", "gens_fig_mg_"+mgID)
+					.attr("style","width:1000px")
+				Plotly.newPlot("gens_fig_mg_"+mgID, figData, JSON.parse(allOutputData["mgGensFigsLayout"]))
+			}
 			</script>
 		</div>
 		<p class="reportTitle">Voltages</p>
@@ -201,9 +212,9 @@
 			<script type="text/javascript">			
 			for (let [mgID,figData] of Object.entries(JSON.parse(allOutputData['mgOIFigsData']))) {
 				$("<div/>").appendTo("#outageIncidenceFigures")
-					.attr("id", "fig_mg_"+mgID)
+					.attr("id", "OI_fig_mg_"+mgID)
 					.attr("style","width:1000px")
-				Plotly.newPlot("fig_mg_"+mgID, figData, JSON.parse(allOutputData["mgOIFigsLayout"]))
+				Plotly.newPlot("OI_fig_mg_"+mgID, figData, JSON.parse(allOutputData["mgOIFigsLayout"]))
 			}
 			</script>
 		</div>

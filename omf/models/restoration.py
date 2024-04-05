@@ -411,7 +411,7 @@ def customerCost1(duration, season, averagekWperhr, businessType):
 		row+=1
 	return outageCost, kWperhrEstimate, times, localMax
 
-def outageIncidenceGraph(customerOutageData, outputTimeline, startTime, numTimeSteps, loadPriorityFilePath, loadMicrogridDict):
+def outageIncidenceGraph(customerOutageData, outputTimeline, startTime, numTimeSteps, loadPriorityFilePath, loadMgDict):
 	'''	Returns plotly figures displaying graphs of outage incidences over the course of the event data.
 		Unweighted outage incidence at each timestep is calculated as (num loads experiencing outage)/(num loads).
 		A load is considered to be "experiencing an outage" at a particular timestep if its "loadBefore" value 
@@ -425,8 +425,8 @@ def outageIncidenceGraph(customerOutageData, outputTimeline, startTime, numTimeS
 	'''
 	# TODO: Rename function
 
-	loadList = list(loadMicrogridDict.keys())
-	mgIDs = set(loadMicrogridDict.values())
+	loadList = list(loadMgDict.keys())
+	mgIDs = set(loadMgDict.values())
 	timeList = [*range(startTime, numTimeSteps+1)] # The +1 is because we want the 'before' for each timestep + the 'after' for the last timestep
 
 	# Create a copy of outputTimeline containing only load devices sorted by device name and then time. 
@@ -515,7 +515,7 @@ def outageIncidenceGraph(customerOutageData, outputTimeline, startTime, numTimeS
 	
 	mgOIFigures = {}
 	for targetID in mgIDs:
-		mgLoadMask = {load:(1 if id == targetID else 0) for (load,id) in loadMicrogridDict.items()}
+		mgLoadMask = {load:(1 if id == targetID else 0) for (load,id) in loadMgDict.items()}
 		mgLoadWeights = {load:(val*loadWeights.get(load,1)) for (load,val) in mgLoadMask.items()}
 		mgOI = calcWeightedOI(mgLoadMask)
 		mgOIWeighted = calcWeightedOI(mgLoadWeights)
@@ -524,7 +524,7 @@ def outageIncidenceGraph(customerOutageData, outputTimeline, startTime, numTimeS
 			x=timeList,
 			y=mgOI,
 			mode='lines',
-			name=f'Unweighted OI for Microgrid {targetID}',
+			name='Unweighted OI',
 			hovertemplate=
 			'<b>Time Step</b>: %{x}<br>' +
 			f'<b>Unweighted OI for Microgrid {targetID}</b>: %{{y:.3f}}%'))
@@ -532,7 +532,7 @@ def outageIncidenceGraph(customerOutageData, outputTimeline, startTime, numTimeS
 			x=timeList,
 			y=mgOIWeighted,
 			mode='lines',
-			name=f'Priority-Weighted OI for Microgrid {targetID}',
+			name='Priority-Weighted OI',
 			hovertemplate=
 			'<b>Time Step</b>: %{x}<br>' +
 			f'<b>Priority-Weighted OI for Microgrid {targetID}</b>: %{{y:.3f}}%'))
@@ -540,6 +540,7 @@ def outageIncidenceGraph(customerOutageData, outputTimeline, startTime, numTimeS
 			xaxis_title='Before Hour X',
 			yaxis_title='Load Outage %',
 			yaxis_range=[-5,105],
+			title=f'Microgrid {targetID}',
 			legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1))
 
 	outageIncidenceFigure = go.Figure()
@@ -578,14 +579,14 @@ def outageIncidenceGraph(customerOutageData, outputTimeline, startTime, numTimeS
 	return outageIncidenceFigure, mgOIFigures
 
 def getMicrogridInfo(modelDir, pathToOmd, settingsFile, makeCSV = True):
-	'''	Gathers microgrid info including loads in each microgrid by finding what microgrid each load's parent bus is designated as having. 
+	'''	Gathers microgrid info including loads and other circuit objects in each microgrid by finding what microgrid each load's parent bus is designated as having. 
 		Microgrid assignments to buses are taken from settingsFile so that we can see what microgrid assignments the 
 		code is working with, not just what they are intended to be via the microgrid tagging input file
 
-		Returns a dictionary with keys loadMgDict, busMgDict, and mgLabels
+		Returns a dictionary with keys loadMgDict, busMgDict, obMgDict, and mgIDs
 
-		loadMgDict and busMgDict correspond to dictionaries mapping load and bus names to microgrid labels.
-		mgLabels corresponds to a set of the unique microgrid labels derived from the values of busMgDict.	
+		loadMgDict, busMgDict, and obMgDict correspond to dictionaries mapping circuit object names to microgrid labels.
+		mgIDs corresponds to a set of the unique microgrid labels derived from the values of busMgDict.	
 		
 		If makeCSV is True, which is default, creates a file called microgridAssignmentOutputs.csv containing 
 		the information from loadMgDict for inspection by users.
@@ -595,14 +596,17 @@ def getMicrogridInfo(modelDir, pathToOmd, settingsFile, makeCSV = True):
 		settingsData = json.load(inFile)
 	busMgDict = {}
 	for busName,v in settingsData['bus'].items():	
-		busMgDict[busName] = v.get('microgrid_id', 'no microgrid')
+		busMgDict[busName] = v.get('microgrid_id', 'no MG')
 	
 	with open(pathToOmd) as inFile:
 		omd = json.load(inFile)
 	loadMgDict = {}
+	obMgDict = {}
 	for ob in omd.get('tree',{}).values():
 		if ob['object'] == 'load':
 			loadMgDict[ob['name']] = busMgDict[ob['parent']]
+		if 'parent' in ob.keys():
+			obMgDict[ob['name']] = busMgDict.get(ob['parent'],'no MG')
 	
 	if makeCSV:
 		with open(pJoin(modelDir,'microgridAssignmentOutputs.csv'), 'w', newline='') as file:
@@ -610,10 +614,14 @@ def getMicrogridInfo(modelDir, pathToOmd, settingsFile, makeCSV = True):
 			writer.writerow(['load name','microgrid_id'])
 			for loadName,mg_id in loadMgDict.items():
 				writer.writerow([loadName,mg_id])
+			for busName,mg_id in busMgDict.items():
+				writer.writerow([busName,mg_id])
+			for obName,mg_id in obMgDict.items():
+				writer.writerow([obName,mg_id])
 
-	mgLabels = set(busMgDict.values())
+	mgIDs = set(busMgDict.values())
 
-	return {'loadMgDict':loadMgDict, 'busMgDict':busMgDict, 'mgLabels':mgLabels}
+	return {'loadMgDict':loadMgDict, 'busMgDict':busMgDict, 'obMgDict':obMgDict, 'mgIDs':mgIDs}
 
 def runMicrogridControlSim(modelDir, solFidelity, eventsFilename, loadPriorityFile, microgridTaggingFile):
 	''' Runs a microgrid control simulation using PowerModelsONM to determine optimal control actions during a configured outage event.
@@ -649,7 +657,81 @@ def runMicrogridControlSim(modelDir, solFidelity, eventsFilename, loadPriorityFi
 		mip_solver_gap=solFidelityVal
 	)	
 
-def graphMicrogrid(modelDir, pathToOmd, profit_on_energy_sales, restoration_cost, hardware_cost, pathToJson, pathToCsv, loadPriorityFile, loadMicrogridDict):
+def genProfilesByMicrogrid(mgIDs, obMgDict, powerflow):
+	# TODO: make an informative docstring
+
+	timesteps = range(len(powerflow))
+	#Conversion to list and sort is conducted so that they are ordered the same on every run. Otherwise, they take on different colors in the graph between runs
+	pfTypes = list(set(powerflow[0].keys())-{'switch','bus'})
+	pfTypes.sort()
+	pfDataAggregated = {mgID:pd.DataFrame(0, index=timesteps, columns=pfTypes) for mgID in mgIDs.union({'no MG'})}
+	pfDataSystemwide = pd.DataFrame(0, index=timesteps, columns=pfTypes)
+	
+	for timestep in timesteps:
+		for pfType in pfTypes:
+			for obName, obData in powerflow[timestep][pfType].items():
+				obPf = sum(obData['real power setpoint (kW)'])
+				obPf *= -1 if pfType == "storage" else 1
+				obMg = obMgDict.get(obName, 'no MG')
+				pfDataAggregated[obMg].at[timestep,pfType] += obPf
+				pfDataSystemwide.at[timestep,pfType] += obPf
+
+	minVal = float('inf')
+	maxVal = float('-inf')
+	for df in pfDataAggregated.values():
+		minVal = min(minVal, df.min().min())
+		maxVal = max(maxVal, df.max().max())
+	axisPadding = 0.05*(maxVal-minVal)
+	graphMin = minVal-axisPadding
+	graphMax = maxVal+axisPadding
+	
+	pfTypeNameMap = {
+		'voltage_source':'Grid',
+		'solar':'Solar DG',
+		'storage':'Energy Storage',
+		'generator':'Diesel DG'
+	}
+	gensFigure = go.Figure()
+	for pfType in pfTypes:
+		pfTypeRenamed = pfTypeNameMap.get(pfType,pfType)
+		gensFigure.add_trace(go.Scatter(
+			x=list(timesteps),
+			y=pfDataSystemwide[pfType].to_list(),
+			mode='lines',
+			name=pfTypeRenamed,
+			hovertemplate=
+			'<b>Time Step</b>: %{x}<br>' +
+			f'<b>{pfTypeRenamed}</b>: %{{y:.3f}}%'))
+	gensFigure.update_layout(
+		xaxis_title='Hours',
+		yaxis_title='Power (kW)',
+		yaxis_range=[graphMin, graphMax],
+		legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1))
+
+	mgGensFigures = {}
+	for mgID in mgIDs:
+		mgGensFigures[mgID] = go.Figure()
+		for pfType in pfTypes:
+			pfTypeRenamed = pfTypeNameMap.get(pfType,pfType)
+			mgGensFigures[mgID].add_trace(go.Scatter(
+				x=list(timesteps),
+				y=pfDataAggregated[mgID][pfType].to_list(),
+				mode='lines',
+				name=pfTypeRenamed,
+				hovertemplate=
+				'<b>Time Step</b>: %{x}<br>' +
+				f'<b>{pfTypeRenamed} for Microgrid {mgID}</b>: %{{y:.3f}}%'))
+		mgGensFigures[mgID].update_layout(
+			xaxis_title='Hours',
+			yaxis_title='Power (kW)',
+			yaxis_range=[graphMin, graphMax],
+			title=f'Microgrid {mgID}',
+			legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1))
+
+	return gensFigure, mgGensFigures
+
+
+def graphMicrogrid(modelDir, pathToOmd, profit_on_energy_sales, restoration_cost, hardware_cost, pathToJson, pathToCsv, loadPriorityFile, loadMgDict, obMgDict, mgIDs):
 	''' Run full microgrid control process. '''
 	# Gather output data.
 	with open(pJoin(modelDir,'output.json')) as inFile:
@@ -759,104 +841,50 @@ def graphMicrogrid(modelDir, pathToOmd, profit_on_energy_sales, restoration_cost
 		'loadAfter': actionLoadAfter}
 	outputTime = pd.DataFrame(line, columns = ['time','device','action','loadBefore','loadAfter'])
 	outputTimeline = outputTime.sort_values('time')
+	
 	# Create traces
-	gens = go.Figure()
-	gens.add_trace(go.Scatter(
-		x=simTimeSteps,
-		y=genProfiles['Diesel DG (kW)'],
-		mode='lines',
-		name='Diesel DG',
-		hovertemplate=
-		'<b>Time Step</b>: %{x}<br>' +
-		'<b>Diesel DG</b>: %{y:.3f}kW'))
-	gens.add_trace(go.Scatter(
-		x=simTimeSteps,
-		y=genProfiles['Energy storage (kW)'],
-		mode='lines',
-		name='Energy Storage',
-		hovertemplate=
-		'<b>Time Step</b>: %{x}<br>' +
-		'<b>Energy Storage</b>: %{y:.3f}kW'))
-	gens.add_trace(go.Scatter(
-		x=simTimeSteps,
-		y=genProfiles['Solar DG (kW)'],
-		mode='lines',
-		name='Solar DG',
-		hovertemplate=
-		'<b>Time Step</b>: %{x}<br>' +
-		'<b>Solar DG</b>: %{y:.3f}kW'))
-	gens.add_trace(go.Scatter(
-		x=simTimeSteps,
-		y=genProfiles['Grid mix (kW)'],
-		mode='lines',
-		name='Grid',
-		hovertemplate=
-		'<b>Time Step</b>: %{x}<br>' +
-		'<b>Grid</b>: %{y:.3f}kW'))
-	# Edit the layout
-	gens.update_layout(
-		xaxis_title='Hours',
-		yaxis_title='Power (kW)',
-		legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1))
+	gens, mgGensFigs = genProfilesByMicrogrid(mgIDs, obMgDict, powerflow)
+
 	volts = go.Figure()
-	volts.add_trace(go.Scatter(
-		x=simTimeSteps,
-		y=voltages['Min voltage (p.u.)'],
-		mode='lines',
-		name='Minimum Voltage',
-		hovertemplate=
-		'<b>Time Step</b>: %{x}<br>' +
-		'<b>Minimum Voltage</b>: %{y:.4f}'))
-	volts.add_trace(go.Scatter(
-		x=simTimeSteps, y=voltages['Max voltage (p.u.)'],
-		mode='lines',
-		name='Maximum Voltage',
-		hovertemplate=
-		'<b>Time Step</b>: %{x}<br>' +
-		'<b>Maximum Voltage</b>: %{y:.4f}'))
-	volts.add_trace(go.Scatter(
-		x=simTimeSteps,
-		y=voltages['Mean voltage (p.u.)'],
-		mode='lines',
-		name='Mean Voltage',
-		hovertemplate=
-		'<b>Time Step</b>: %{x}<br>' +
-		'<b>Mean Voltage</b>: %{y:.4f}'))
+	voltsKeysAndNames = [
+		('Min voltage (p.u.)','Minimum Voltage'),
+		('Max voltage (p.u.)','Maximum Voltage'),
+		('Mean voltage (p.u.)','Mean Voltage')]
+	for key, name in voltsKeysAndNames:
+		volts.add_trace(go.Scatter(
+			x=simTimeSteps,
+			y=voltages[key],
+			mode='lines',
+			name=name,
+			hovertemplate=
+			'<b>Time Step</b>: %{x}<br>' +
+			f'<b>{name}</b>: %{{y:.4f}}'))
 	# Edit the layout
 	volts.update_layout(
 		xaxis_title='Hours',
 		yaxis_title='Power (p.u.)',
 		legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1))
+	
 	loads = go.Figure()
-	loads.add_trace(go.Scatter(
-		x=simTimeSteps,
-		y=loadServed['Feeder load (%)'],
-		mode='lines',
-		name='Feeder Load',
-		hovertemplate=
-		'<b>Time Step</b>: %{x}<br>' +
-		'<b>Feeder Load</b>: %{y:.2f}%'))
-	loads.add_trace(go.Scatter(
-		x=simTimeSteps,
-		y=loadServed['Microgrid load (%)'],
-		mode='lines',
-		name='Microgrid Load',
-		hovertemplate=
-		'<b>Time Step</b>: %{x}<br>' +
-		'<b>Microgrid Load</b>: %{y:.2f}%'))
-	loads.add_trace(go.Scatter(
-		x=simTimeSteps,
-		y=loadServed['Bonus load via microgrid (%)'],
-		mode='lines',
-		name='Bonus Load via Microgrid',
-		hovertemplate=
-		'<b>Time Step</b>: %{x}<br>' +
-		'<b>Bonus Load via Microgrid</b>: %{y:.2f}%'))
+	loadsKeysAndNames = [
+		('Feeder load (%)','Feeder Load'),
+		('Microgrid load (%)','Microgrid Load'),
+		('Bonus load via microgrid (%)','Bonus Load via Microgrid')]
+	for key,name in loadsKeysAndNames:
+		loads.add_trace(go.Scatter(
+			x=simTimeSteps,
+			y=loadServed[key],
+			mode='lines',
+			name=name,
+			hovertemplate=
+			'<b>Time Step</b>: %{x}<br>' +
+			f'<b>{name}</b>: %{{y:.2f}}'))
 	# Edit the layout
 	loads.update_layout(
 		xaxis_title='Hours',
 		yaxis_title='Load (%)',
 		legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1))
+	
 	timelineStatsHtml = microgridTimeline(outputTimeline, modelDir)
 	with open(pathToOmd) as inFile:
 		tree = json.load(inFile)['tree']
@@ -911,8 +939,8 @@ def graphMicrogrid(modelDir, pathToOmd, profit_on_energy_sales, restoration_cost
 			else:
 				dev_dict['geometry'] = {'type': 'Point', 'coordinates': [coordLis[0], coordLis[1]]}
 				dev_dict['properties']['pointColor'] = f'#{colormap[action]}'
-				if loadMicrogridDict != None and str(device).split('_')[0] == 'load':
-					mgID = loadMicrogridDict.get(str(device),'no microgrid label')
+				if loadMgDict != None and str(device).split('_')[0] == 'load':
+					mgID = loadMgDict.get(str(device),'no MG ID')
 					dev_dict['properties']['microgrid_id'] = mgID
 					dev_dict['properties']['popupContent'] += f'<br>Microgrid ID: <b>{mgID}</b>'
 			feederMap['features'].append(dev_dict)
@@ -1088,7 +1116,7 @@ def graphMicrogrid(modelDir, pathToOmd, profit_on_energy_sales, restoration_cost
 		showarrow=False
 	)
 
-	outageIncidenceFig, mgOIFigs = outageIncidenceGraph(customerOutageData, outputTimeline, startTime, numTimeSteps, loadPriorityFile, loadMicrogridDict)
+	outageIncidenceFig, mgOIFigs = outageIncidenceGraph(customerOutageData, outputTimeline, startTime, numTimeSteps, loadPriorityFile, loadMgDict)
 	
 	customerOutageHtml = customerOutageTable(customerOutageData, outageCost, modelDir)
 	profit_on_energy_sales = float(profit_on_energy_sales)
@@ -1098,7 +1126,7 @@ def graphMicrogrid(modelDir, pathToOmd, profit_on_energy_sales, restoration_cost
 	utilityOutageHtml = utilityOutageTable(average_lost_kwh, profit_on_energy_sales, restoration_cost, hardware_cost, outageDuration, modelDir)
 	try: customerOutageCost = customerOutageCost
 	except: customerOutageCost = 0
-	return {'utilityOutageHtml': utilityOutageHtml, 'customerOutageHtml': customerOutageHtml, 'timelineStatsHtml': timelineStatsHtml, 'outageIncidenceFig': outageIncidenceFig, 'mgOIFigs':mgOIFigs, 'gens': gens, 'loads': loads, 'volts': volts, 'fig': fig, 'customerOutageCost': customerOutageCost, 'numTimeSteps': numTimeSteps, 'stepSize': stepSize, 'custHist': custHist}
+	return {'utilityOutageHtml': utilityOutageHtml, 'customerOutageHtml': customerOutageHtml, 'timelineStatsHtml': timelineStatsHtml, 'outageIncidenceFig': outageIncidenceFig, 'mgOIFigs':mgOIFigs, 'mgGensFigs':mgGensFigs, 'gens': gens, 'loads': loads, 'volts': volts, 'fig': fig, 'customerOutageCost': customerOutageCost, 'numTimeSteps': numTimeSteps, 'stepSize': stepSize, 'custHist': custHist}
 
 def buildCustomEvents(eventsCSV='', feeder='', customEvents='customEvents.json', defaultDispatchable = 'true'):
 	def outageSwitchState(outList): return ('open'*(outList[3] == 'closed') + 'closed'*(outList[3]=='open'))
@@ -1235,7 +1263,9 @@ def work(modelDir, inputDict):
 		pathToJson				= pathToLocalFile['event'],
 		pathToCsv				= pathToLocalFile['customerInfo'],
 		loadPriorityFile		= pathToLocalFile['loadPriority'],
-		loadMicrogridDict		= microgridInfo['loadMgDict']
+		loadMgDict				= microgridInfo['loadMgDict'],
+		obMgDict 				= microgridInfo['obMgDict'],
+		mgIDs					= microgridInfo['mgIDs']
 	)
 
 
@@ -1258,6 +1288,8 @@ def work(modelDir, inputDict):
 	#	outData['customerCostFig.png'] = base64.standard_b64encode(inFile.read()).decode()
 	# Plotly outputs.
 	layoutOb = go.Layout()
+	outData['mgGensFigsData'] = json.dumps(plotOuts.get('mgGensFigs',{}), cls=py.utils.PlotlyJSONEncoder)
+	outData['mgGensFigsLayout'] = json.dumps(layoutOb, cls=py.utils.PlotlyJSONEncoder)
 	outData['fig1Data'] = json.dumps(plotOuts.get('gens',{}), cls=py.utils.PlotlyJSONEncoder)
 	outData['fig1Layout'] = json.dumps(layoutOb, cls=py.utils.PlotlyJSONEncoder)
 	outData['fig2Data'] = json.dumps(plotOuts.get('volts',{}), cls=py.utils.PlotlyJSONEncoder)
