@@ -1,0 +1,35 @@
+clear
+
+Compile ieee34Mod2_Relays.dss
+New Energymeter.M1  Line.Sw1 1
+
+Transformer.reg1a.wdg=2 Tap=(0.00625  12  * 1 +)   ! Tap 12
+Transformer.reg1b.wdg=2 Tap=(0.00625   5 * 1 +)    ! Tap 5
+Transformer.reg1c.wdg=2 Tap=(0.00625   5  * 1 +)   ! Tap 5
+Transformer.reg2a.wdg=2 Tap=(0.00625  13 * 1 +)    ! Tap 13
+Transformer.reg2b.wdg=2 Tap=(0.00625  11 * 1 +)    ! Tap 11
+Transformer.reg2c.wdg=2 Tap=(0.00625  12 * 1 +)    ! Tap 12
+
+Set Controlmode=OFF  ! prevents further tap changes
+
+
+
+New Relay.Relay1 monitoredObj=line.Sw1
+New Relay.Relay2A monitoredObj=line.Sw2a
+New Relay.Relay2B monitoredObj=line.Sw2b
+New Relay.Relay3 monitoredObj=line.Sw3
+New Relay.Relay4 monitoredObj=line.Sw4
+New Relay.Relay5 monitoredObj=line.Sw5
+New Relay.Relay6 monitoredObj=line.Sw6
+
+
+Buscoords IEEE34_BusXY.csv
+solve
+
+
+Set MarkTransformers=yes
+Interpolate    ! requires an energyMeter
+!plot circuit Power max=2000 y y C1=$00FF0000
+
+
+!Plot profile phases=all
