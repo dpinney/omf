@@ -831,8 +831,8 @@ def BaseCriticallityWeightedAvg(obsDict, loadsDict):
     newDict = {}
     for k,v in obsDict.items():
         weights=0
-        sum=0
-        sum2 = 0
+        comm_crit_sum=0
+        base_crit_sum = 0
 
         
         if(len(v['downlineLoads']) > 0):
