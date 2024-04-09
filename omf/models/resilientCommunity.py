@@ -882,7 +882,7 @@ def addLoadInfoToOmd(loadsDict, omdDict):
     return omdDict
 
 
-def addEquipmentInfoToOmd(obDict, omdDict, equipList):
+def addEquipmentInfoToOmd(obDict, omdDict):
     '''
     adds criticality values to omd file for all objects
     loadsDict -> dict of loads
