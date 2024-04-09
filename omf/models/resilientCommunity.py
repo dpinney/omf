@@ -882,7 +882,7 @@ def addLoadInfoToOmd(loadsDict, omdDict):
     return omdDict
 
 
-def addEquipmentInfoToOmd(obDict, omdDict):
+def addEquipmentInfoToOmd(obDict, omdDict, equipList):
     '''
     adds criticality values to omd file for all objects
     loadsDict -> dict of loads
@@ -890,18 +890,20 @@ def addEquipmentInfoToOmd(obDict, omdDict):
     returns new dict of omd objects
     '''
     for ob in omdDict.get('tree', {}).values():
-        obType = ob['object']
-        obName = ob['name']
-        k = obType + '.' + obName
-
-        bcs_score = obDict[k]['base crit score']
-        ccs_score = obDict[k]['community crit score']
-        bcs_index = obDict[k]['base crit score']
-        ccs_index = obDict[k]['community crit index']
-        ob['base crit score'] = bcs_score
-        ob['community crit score'] = ccs_score
-        ob['community crit index'] = ccs_index
-        ob['base crit index'] = bcs_index
+        if (ob['object'] in equipList):
+            obType = ob['object']
+            obName = ob['name']
+            k = obType + '.' + obName
+            bcs_score = obDict[k]['base crit score']
+            ccs_score = obDict[k]['community crit score']
+            bcs_index = obDict[k]['base crit score']
+            ccs_index = obDict[k]['community crit index']
+            ob['base crit score'] = bcs_score
+            ob['community crit score'] = ccs_score
+            ob['community crit index'] = ccs_index
+            ob['base crit index'] = bcs_index
+        else:
+            continue
     return omdDict
 
 
