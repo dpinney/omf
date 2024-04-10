@@ -50,46 +50,49 @@
 				<label>Choose Equipment</label>
 				<br>
 				<label>Lines</label>
-				<select name="equipment" id="equipment">
+				<select name="lines" id="lines">
 					<option value="yes" {% if allInputDataDict.lines | lower == "yes" %}selected{% endif %} >Yes</option>
 					<option value="no" {% if allInputDataDict.lines | lower != "yes" %}selected{% endif %}>No</option>
 				</select>
 			</div>
 			<div class="shortInput">
 			<label>Transformers</label>
-			<select name="equipment" id="equipment">
+			<select name="transformers" id="transformers">
 				<option value="yes" {% if allInputDataDict.transformers | lower == "yes" %}selected{% endif %}>Yes</option>
 				<option value="no" {% if allInputDataDict.transformers | lower != "yes" %}selected{% endif %}>No</option>
 			</select>
 			</div>
 			<div class="shortInput">
 			<label> Buses</label>
-			<select name="equipment" id="equipment">
+			<select name="buses" id="buses">
 				<option value="yes" {% if allInputDataDict.buses | lower == "yes" %}selected{% endif %}>Yes</option>
 				<option value="no" {% if allInputDataDict.buses | lower != "yes" %}selected{% endif %}>No</option>
 			</select>
 			</div>
 			<div class="shortInput">
 			<label>Fuses</label>
-			<select name="equipment" id="equipment">
+			<select name="fuses" id="fuses">
 				<option value="yes" {% if allInputDataDict.fuses | lower == "yes" %}selected{% endif %}>Yes</option>
 				<option value="no" {% if allInputDataDict.fuses | lower != "yes" %}selected{% endif %}>No</option>
 			</select>
-		</div>
-				
-					<!-- option value="lines" {% if "lines" in allInputDataDict.equipment  %}selected{% endif %}>Lines</option>
-					<option value="transformers" {% if "transformers" in  allInputDataDict.equipment %}selected{% endif %}>Transformers</option>
-					<option value="buses" {% if "buses" in allInputDataDict.equipment %}selected{% endif %}>Buses</option>
-					<option value="fuses" {% if "fuses" in allInputDataDict.equipment %}selected{% endif %}>Fuses</option---->
+			</div>
+			
+			<div class="shortInput">
+			<label>Data Refresh</label>
+			<select name="refresh" id="refresh">
+				<option value="True" {% if allInputDataDict.refresh == True %}selected{% endif %}>Yes</option>
+				<option value="False" {% if allInputDataDict.refresh == False %}selected{% endif %}>No</option>
+			</select>
+			</div>
 		
 			<div class="shortInput">
 				<label class="tooltip">Loads Coloring By<span class="classic">Select the simulation output value that will be used to color the loads in the circuit.</span></label>
-				<select id="loadCol" name="nodeCol">
+				<select id="loadCol" name="loadCol">
 					<option value="Base Criticality Score" {% if allInputDataDict.loadCol == "Base Criticality Score" %}selected{% endif %}>Base Criticality Score </option>
 					<option value="Community Criticality Score" {% if allInputDataDict.loadCol == "Community Criticality Score" %}selected{% endif %}>Community Criticality Score</option>
 					<option value="Base Criticality Index" {% if allInputDataDict.loadCol == "Base Criticality Index" %}selected{% endif %}>Base Criticality Index</option>
 					<option value="Community Criticality Index" {% if allInputDataDict.loadCol == "Community Criticality Index" %}selected{% endif %}>Community Criticality Index</option>
-					<option value="None" {% if allInputDataDict.nodeCol == "None" %}selected{% endif %}>No Node Coloring</option>
+					<option value="None" {% if allInputDataDict.loadCol == "None" %}selected{% endif %}>No Node Coloring</option>
 				</select>
 			</div>
 			
@@ -114,7 +117,7 @@
 			var mapContent = allOutputData["resilienceMap"]
 			var iframe = document.createElement('iframe');
 			iframe.style = 'width:1000px; height:800px; border-radius:8px;'
-			document.getElementById('resilienceMap').innerHTML = '<div class="img-div" style="position:relative;left:0;bottom:-800px;"><img style="position:relative" src="legend.png"></div>';
+			document.getElementById('resilienceMap').innerHTML = '<div class="img-div" style="position:relative;left:0;bottom:-800px;"><img style="position:relative" src="/Users/davidarmah/Documents/omf/omf/static/testFiles/resilientCommunity/legend.png"></div>';
 			document.getElementById('resilienceMap').appendChild(iframe);
 			iframe.contentWindow.document.open();
 			iframe.contentWindow.document.write(mapContent);
