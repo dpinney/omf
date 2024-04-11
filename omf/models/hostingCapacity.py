@@ -119,11 +119,13 @@ def omd_to_nx( dssFilePath, tree=None ):
 	labels = {}
 	for load_name, load_transformer in zip(load_names, load_transformer_name):
     # Add edge from bus to load, with transformer name as an attribute
-		bus = bus_to_transformer_pairs[load_transformer]
-		G.add_edge(bus, load_name, transformer=load_transformer)
+		if load_transformer in bus_to_transformer_pairs:
+			bus = bus_to_transformer_pairs[load_transformer]
+			G.add_edge(bus, load_name, transformer=load_transformer)
+		else:
+			G.add_edge(load_transformer, load_name )
 		pos[load_name] = pos[load_transformer]
 		labels[load_name] = load_name
-		labels[ bus ] = bus
 	
 	# TEMP: Remove transformer nodes added from coordinates. Transformer data is edges, not nodes.
 	for transformer_name in load_transformer_name:
@@ -183,6 +185,7 @@ def run_downline_load_algorithm( modelDir, inputDict, outData):
 	outData['downline_tableHeadings'] = downline_output.columns.values.tolist()
 	outData['downline_tableValues'] = (list(sorted_downlineDF.itertuples(index=False, name=None)))
 	outData['downline_runtime'] = convert_seconds_to_hms_ms( downline_end_time - downline_start_time )
+	return sorted_downlineDF
 
 def run_ami_algorithm(modelDir, inputDict, outData):
 	# mohca data-driven hosting capacity
@@ -217,12 +220,15 @@ def run_ami_algorithm(modelDir, inputDict, outData):
 	AMI_results['thermal_cap_kW']  = np.random.randint(min_value, max_value + 1, size=len(AMI_results))
 
 	AMI_results['max_cap_allowed_kW'] = np.minimum( AMI_results['voltage_cap_kW'], AMI_results['thermal_cap_kW'])
-	barChartFigure = px.bar(AMI_results, x='busname', y=['voltage_cap_kW', 'thermal_cap_kW', 'max_cap_allowed_kW'], barmode='group', color_discrete_sequence=["green", "lightblue", "MediumPurple"], template="simple_white" )
-	barChartFigure.add_traces( list(px.line(AMI_results, x='busname', y='max_cap_allowed_kW', markers=True).select_traces()) )
+
+	sorted_results = AMI_results.sort_values(by='busname')
+
+	barChartFigure = px.bar(sorted_results, x='busname', y=['voltage_cap_kW', 'thermal_cap_kW', 'max_cap_allowed_kW'], barmode='group', color_discrete_sequence=["green", "lightblue", "MediumPurple"], template="simple_white" )
+	barChartFigure.add_traces( list(px.line(sorted_results, x='busname', y='max_cap_allowed_kW', markers=True).select_traces()) )
 	outData['histogramFigure'] = json.dumps( histogramFigure, cls=py.utils.PlotlyJSONEncoder )
 	outData['barChartFigure'] = json.dumps( barChartFigure, cls=py.utils.PlotlyJSONEncoder )
-	outData['AMI_tableHeadings'] = AMI_results.columns.values.tolist()
-	outData['AMI_tableValues'] = ( list(AMI_results.sort_values( by="max_cap_allowed_kW", ascending=False, ignore_index=True ).itertuples(index=False, name=None)) )
+	outData['AMI_tableHeadings'] = sorted_results.columns.values.tolist()
+	outData['AMI_tableValues'] = ( list(sorted_results.itertuples(index=False, name=None)) )
 	outData['AMI_runtime'] = convert_seconds_to_hms_ms( AMI_end_time - AMI_start_time )
 
 def run_traditional_algorithm(modelDir, inputDict, outData):
@@ -237,10 +243,11 @@ def run_traditional_algorithm(modelDir, inputDict, outData):
 	traditional_end_time = time.time()
 	# - opendss.hosting_capacity_all() changes the cwd, so change it back so other code isn't affected
 	tradHCDF = pd.DataFrame(traditionalHCResults)
-	tradHCDF['plot_color'] = tradHCDF.apply ( lambda row: bar_chart_coloring(row), axis=1 )
+	sorted_tradHCDF = tradHCDF.sort_values(by='bus')
+	sorted_tradHCDF['plot_color'] = sorted_tradHCDF.apply ( lambda row: bar_chart_coloring(row), axis=1 )
 	# Plotly has its own colors - need to map the "name" of given colors to theirs
-	traditionalHCFigure = px.bar( tradHCDF, x='bus', y='max_kw', barmode='group', color='plot_color', color_discrete_map={ 'red': 'red', 'orange': 'orange', 'green': 'green', 'yellow': 'yellow'}, template='simple_white' )
-	traditionalHCFigure.update_xaxes(categoryorder='array', categoryarray=tradHCDF.bus.values)
+	traditionalHCFigure = px.bar( sorted_tradHCDF, x='bus', y='max_kw', barmode='group', color='plot_color', color_discrete_map={ 'red': 'red', 'orange': 'orange', 'green': 'green', 'yellow': 'yellow'}, template='simple_white' )
+	traditionalHCFigure.update_xaxes(categoryorder='array', categoryarray=sorted_tradHCDF.bus.values)
 	# Map color to violation type to update key/legend
 	colorToKey = {'orange':'thermal_violation', 'yellow': 'voltage_violation', 'red': 'both_violation', 'green': 'no_violation'}
 	# Changes the hover mode, key, and legend to show the violation type rather than the color
@@ -252,8 +259,8 @@ def run_traditional_algorithm(modelDir, inputDict, outData):
 			)
 		)
 	# We don't need the plot_color stuff for anything else, so drop it
-	tradHCDF.drop(tradHCDF.columns[len(tradHCDF.columns)-1], axis=1, inplace=True)
-	createColorCSV(modelDir, tradHCDF)
+	sorted_tradHCDF.drop(sorted_tradHCDF.columns[len(sorted_tradHCDF.columns)-1], axis=1, inplace=True)
+	createColorCSV(modelDir, sorted_tradHCDF)
 	attachment_keys = {
 	"coloringFiles": {
 		"color_by.csv": {
@@ -271,11 +278,10 @@ def run_traditional_algorithm(modelDir, inputDict, outData):
 		json.dump(omd, out_file, indent=4)
 	omf.geo.map_omd(new_path, modelDir, open_browser=False )
 
-	sorted_tradHCDF = tradHCDF.sort_values(by='bus')
 
 	outData['traditionalHCMap'] = open(Path(modelDir, "geoJson_offline.html"), 'r' ).read()
 	outData['traditionalGraphData'] = json.dumps(traditionalHCFigure, cls=py.utils.PlotlyJSONEncoder )
-	outData['traditionalHCTableHeadings'] = tradHCDF.columns.values.tolist()
+	outData['traditionalHCTableHeadings'] = sorted_tradHCDF.columns.values.tolist()
 	outData['traditionalHCTableValues'] = (list(sorted_tradHCDF.itertuples(index=False, name=None)))
 	outData['traditionalRuntime'] = convert_seconds_to_hms_ms( traditional_end_time - traditional_start_time )
 	outData['traditionalHCResults'] = traditionalHCResults
