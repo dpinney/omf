@@ -1,12 +1,28 @@
-import os, json
+import os, sys, json, platform
 from dss import DSS as dssObj
+
+thisDir = os.path.abspath(os.path.dirname(__file__))
+
+def install_pso(system : list = platform.system()):
+    ''' installs dependency for protsetopt'''
+    instantiated_path = os.path.normpath(os.path.join(thisDir,"instantiated.txt"))
+    if not os.path.isfile(instantiated_path):
+        os.system(f"{sys.executable} -m pip install -e git+https://github.com/lilycatolson/Protection-settings-optimizer.git#egg=RSO_pack")
+        if system == "Windows":
+            os.system(f'copy nul {instantiated_path}')
+        else:
+            os.system(f'touch "{instantiated_path}"')
+        print(f'protsetopt dependency installed - to reinstall remove file: {thisDir}/instantiated.txt')
 
 try:
     import RSO_pack
 except ImportError:
-    from . import RSO_pack 
-
-thisDir = os.path.abspath(os.path.dirname(__file__))
+    print("protsetopt is not installed - installing now")
+    install_pso()
+    try:
+        import RSO_pack
+    except ImportError:
+        from . import RSO_pack 
 
 # helper functions: modified from ProtectionSettingsOptimizer OpenDSS example 
 
@@ -67,6 +83,8 @@ def writeSettingsAndInfo(testPath, settings, old_info):
 
 def run(testPath, testFile):
     ''' runs setting optimization on the given opendss file, given constant program setting inputs '''
+    install_pso()
+
     #fault resistances to test
     Fres = ['0.001','1']
     #supported fault types
