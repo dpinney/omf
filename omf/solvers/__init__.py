@@ -17,4 +17,5 @@ from omf.solvers import VB
 from omf.solvers import mohca_cl
 from omf.solvers import sdsmc
 from omf.solvers import reopt_jl
-from omf.solvers import protsetopt
+#from omf.solvers import protsetopt
+from omf.solvers import der_cam

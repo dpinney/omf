@@ -47,3 +47,5 @@ pandapower==2.10.1
 matpowercaseframes
 fire
 haversine
+keyring
+openpyxl
