@@ -1,16 +1,22 @@
-''' A model skeleton for future models: Calculates the sum of two integers. '''
+''' Performs cost-benefit analysis for a member-consumer with distributed 
+energy resource (DER) technologies. '''
 
 import warnings
 # warnings.filterwarnings("ignore")
 
+# Python imports
 import shutil, datetime
 from os.path import join as pJoin
+import numpy as np
+import pandas as pd
 
 # OMF imports
 from omf import feeder
 from omf.models.voltageDrop import drawPlot
 from omf.models import __neoMetaModel__
 from omf.models.__neoMetaModel__ import *
+from omf.models import vbatDispatch as vb
+from omf.solvers import reopt_jl
 
 # Model metadata:
 modelName, template = __neoMetaModel__.metadata(__file__)
@@ -39,31 +45,91 @@ def castAddInputs(val1,val2):
 def work(modelDir, inputDict):
 	''' Run the model in its directory. '''
 	# Delete output file every run if it exists
-	outData = {}		
+	outData = {}	
+
+	## Read in a static REopt test file
+	with open(pJoin(__neoMetaModel__._omfDir,"static","testFiles","residential_REopt_results.json")) as f:
+		results = json.load(f)
+		print('Successfully read in REopt test file. \n')
+		
 	# Model operations goes here.
-	inputOne = inputDict.get("input1", 123)
-	inputTwo = inputDict.get("input2", 867)
-	output = str(castAddInputs(inputOne,inputTwo))
-	outData["output"] = output
+	
+	
 	# Model operations typically ends here.
 	# Stdout/stderr.
+	outData['PV'] = results['outputs']['PV']
 	outData["stdout"] = "Success"
 	outData["stderr"] = ""
 	return outData
 
 def new(modelDir):
 	''' Create a new instance of this model. Returns true on success, false on failure. '''
+	with open(pJoin(__neoMetaModel__._omfDir,"static","testFiles","residential_PV_load.csv")) as f:
+		demand_curve = f.read()
+	with open(pJoin(__neoMetaModel__._omfDir,"static","testFiles","residential_extended_temperature_data.csv")) as f:
+		temp_curve = f.read()
+	
 	defaultInputs = {
-		"user" : "admin",
+		## OMF inputs:
+		"user": "admin",
 		"modelType": modelName,
-		"input1": "abc1 Easy as...",
-		"input2": "123 Or Simple as...",
-		"created":str(datetime.datetime.now())
+		"created": str(datetime.datetime.now()),
+		"user": "admin",
+		"modelType": modelName,
+
+		## REopt inputs:
+		"latitude":  '39.532165', ## Rivesville, WV
+		"longitude": '-80.120618', ## TODO: Should these be strings or floats?
+		"year": 2018,
+		"analysisYears": 25, 
+		"urdbLabel": '643476222faee2f0f800d8b1', ## Rivesville, WV - Monongahela Power
+		"fileName": "residential_PV_load.csv",
+		"tempFileName": "residential_extended_temperature_data.csv",
+		"demandCurve": demand_curve,
+		"tempCurve": temp_curve,
+		"outage": False,
+		"PV": "Yes",
+		"BESS": "No",
+		"generator": "No",
+
+		## vbatDispatch inputs:
+		"load_type": 2, ## Heat Pump
+		"number_devices": 1,
+		"power": 5.6,
+		"capacitance": 2,
+		"resistance": 2,
+		"cop": 2.5,
+		"setpoint": 19.5,
+		"deadband": 0.625,
+		"demandChargeCost": 25,
+		"electricityCost": 0.16,
+		"projectionLength": 25,
+		"discountRate": 2,
+		"unitDeviceCost": 150,
+		"unitUpkeepCost": 5,
 	}
 	return __neoMetaModel__.new(modelDir, defaultInputs)
 
 @neoMetaModel_test_setup
 def _tests():
+	# Location
+	modelLoc = pJoin(__neoMetaModel__._omfDir,"data","Model","admin","Automated Testing of " + modelName)
+	# Blow away old test results if necessary.
+	try:
+		shutil.rmtree(modelLoc)
+	except:
+		# No previous test results.
+		pass
+	# Create New.
+	new(modelLoc)
+	# Pre-run.
+	__neoMetaModel__.renderAndShow(modelLoc) ## Why is there a pre-run?
+	# Run the model.
+	__neoMetaModel__.runForeground(modelLoc)
+	# Show the output.
+	__neoMetaModel__.renderAndShow(modelLoc)
+
+def _debugging():
 	# Location
 	modelLoc = pJoin(__neoMetaModel__._omfDir,"data","Model","admin","Automated Testing of " + modelName)
 	# Blow away old test results if necessary.
@@ -83,4 +149,5 @@ def _tests():
 
 if __name__ == '__main__':
 	#_tests()
+	_debugging() ## This is only used to bypass the runAllTests errors due to this model's incompletion. It is just a copy of _tests() function.
 	pass
