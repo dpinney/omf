@@ -50,10 +50,16 @@ def work(modelDir, inputDict):
 	## Read in a static REopt test file
 	with open(pJoin(__neoMetaModel__._omfDir,"static","testFiles","residential_REopt_results.json")) as f:
 		results = json.load(f)
-		print('Successfully read in REopt test file. \n')
+		print('Successfully loaded REopt test file. \n')
 		
 	# Model operations goes here.
+
+	## Run vbatDispatch
+	vbatResults = vb.work(modelDir,inputDict)
 	
+	with open(pJoin(modelDir, 'vbatResults.json'), 'w') as jsonFile:
+		json.dump(vbatResults, jsonFile)
+	outData.update(vbatResults) ## Update output file with vbat results
 	
 	# Model operations typically ends here.
 	# Stdout/stderr.
@@ -80,8 +86,8 @@ def new(modelDir):
 		## REopt inputs:
 		"latitude":  '39.532165', ## Rivesville, WV
 		"longitude": '-80.120618', ## TODO: Should these be strings or floats?
-		"year": 2018,
-		"analysisYears": 25, 
+		"year": '2018',
+		"analysisYears": '25', 
 		"urdbLabel": '643476222faee2f0f800d8b1', ## Rivesville, WV - Monongahela Power
 		"fileName": "residential_PV_load.csv",
 		"tempFileName": "residential_extended_temperature_data.csv",
@@ -93,20 +99,20 @@ def new(modelDir):
 		"generator": "No",
 
 		## vbatDispatch inputs:
-		"load_type": 2, ## Heat Pump
-		"number_devices": 1,
-		"power": 5.6,
-		"capacitance": 2,
-		"resistance": 2,
-		"cop": 2.5,
-		"setpoint": 19.5,
-		"deadband": 0.625,
-		"demandChargeCost": 25,
-		"electricityCost": 0.16,
-		"projectionLength": 25,
-		"discountRate": 2,
-		"unitDeviceCost": 150,
-		"unitUpkeepCost": 5,
+		"load_type": '2', ## Heat Pump
+		"number_devices": '1',
+		"power": '5.6',
+		"capacitance": '2',
+		"resistance": '2',
+		"cop": '2.5',
+		"setpoint": '19.5',
+		"deadband": '0.625',
+		"demandChargeCost": '25',
+		"electricityCost": '0.16',
+		"projectionLength": '25',
+		"discountRate": '2',
+		"unitDeviceCost": '150',
+		"unitUpkeepCost": '5',
 	}
 	return __neoMetaModel__.new(modelDir, defaultInputs)
 
