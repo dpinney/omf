@@ -117,7 +117,7 @@
 			var mapContent = allOutputData["resilienceMap"]
 			var iframe = document.createElement('iframe');
 			iframe.style = 'width:1000px; height:800px; border-radius:8px;'
-			document.getElementById('resilienceMap').innerHTML = '<div class="img-div" style="position:relative;left:0;bottom:-800px;"><img style="position:relative" src="/Users/davidarmah/Documents/omf/omf/static/testFiles/resilientCommunity/legend.png"></div>';
+			document.getElementById('resilienceMap').innerHTML = '<div class="img-div" style="position:relative;left:0;bottom:-800px;"><img style="position:relative" src="{{allOutputDataDict["legend_path"]}}""></div>';
 			document.getElementById('resilienceMap').appendChild(iframe);
 			iframe.contentWindow.document.open();
 			iframe.contentWindow.document.write(mapContent);
