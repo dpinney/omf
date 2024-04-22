@@ -210,7 +210,6 @@ def work(modelDir, inputDict):
 	with open(pJoin(__neoMetaModel__._omfDir,"static","testFiles","residential_REopt_results.json")) as f:
 		results = json.load(f)
 		print('Successfully read in REopt test file. \n')
-		# Assuming results is a list of dictionaries
 
 	out['PV'] = results['outputs']['PV']
 
@@ -251,7 +250,6 @@ def work(modelDir, inputDict):
 
 	vbat = 'Disabled' ## Temporary flag to disable vbat code
 	if vbat == 'Enabled':
-		print('hello &*************** \n')
 		vbatResults = vb.work(modelDir,inputDict)
 		with open(pJoin(modelDir, 'vbatResults.json'), 'w') as jsonFile:
 			json.dump(vbatResults, jsonFile)
