@@ -238,8 +238,8 @@ def createLegend():
     plt.title("Social Vulnerability Legend")
     cb.set_ticks(range(num_colors))
     cb.ax.set_xticklabels(labels)
-    path = pJoin(omf.omfDir,'static','testFiles','resilientCommunity', 'legend.png')
 
+    path = modelDir + '.png'
     plt.savefig(path,bbox_inches='tight')
 
     return path
@@ -933,11 +933,13 @@ def work(modelDir, inputDict):
     # check if we want to refresh the nri data
     #import sys as sys
     # sys.stdout.write(inputDict)
+    #print(inputDict)
+    
     if not os.path.exists(census_nri_path):
         retrieveCensusNRI()
-    elif inputDict['refresh'] == True:
+    elif inputDict['refresh']:
         retrieveCensusNRI()
-        createLegend()
+        
     
     
     # check what equipment we want to look for
@@ -1007,7 +1009,10 @@ def work(modelDir, inputDict):
 
     newOmdJson = addLoadInfoToOmd(loads, init_omdJson)
 
-    omdJson = addEquipmentInfoToOmd(obDict, newOmdJson)
+    omdJson = addEquipmentInfoToOmd(obDict, newOmdJson, equipmentList)
+
+
+    outData['legend_path'] = createLegend(modelDir)
 
 
 
@@ -1084,7 +1089,6 @@ def work(modelDir, inputDict):
 
 
     return outData
-
 
 def test():
     #omdPath = '/Users/davidarmah/Downloads/cleandssout.omd'
