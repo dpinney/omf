@@ -49,19 +49,8 @@ def bar_chart_coloring( row ):
 def createColorCSV(modelDir, df):
 	new_df = df[['bus','max_kw']]
 	new_df.to_csv(Path(modelDir, 'color_by.csv'), index=False)
-
-def my_GetCoords(dssFilePath):
-	'''Takes in an OpenDSS circuit definition file and outputs the bus coordinates as a dataframe.'''
-	dssFileLoc = os.path.dirname(dssFilePath)
-	curr_dir = os.getcwd()
-	opendss.runDSS(dssFilePath)
-	opendss.runDssCommand(f'export buscoords "{curr_dir}/coords.csv"')
-	coords = pd.read_csv(curr_dir + '/coords.csv', header=None)
-	# JENNY - Deleted Radius and everything after.
-	coords.columns = ['Element', 'X', 'Y']
-	return coords
 	
-def omd_to_nx( dssFilePath, tree=None ):
+def omd_to_nx_fulldata( dssFilePath, tree=None ):
 	''' Combines dss_to_networkX and opendss.networkPlot together.
 
 	Creates a networkx directed graph from a dss files. If a tree is provided, build graph from that instead of the file.
@@ -139,19 +128,6 @@ def omd_to_nx( dssFilePath, tree=None ):
 	
 	return [G, pos, labels]
 
-def work(modelDir, inputDict):
-	outData = {}
-	
-	if inputDict['runAmiAlgorithm'] == 'on':
-		run_ami_algorithm(modelDir, inputDict, outData)
-	if inputDict.get('optionalCircuitFile', outData) == 'on':
-		run_traditional_algorithm(modelDir, inputDict, outData)
-	if inputDict.get('runDownlineAlgorithm') == 'on':
-		run_downline_load_algorithm( modelDir, inputDict, outData)
-	outData['stdout'] = "Success"
-	outData['stderr'] = ""
-	return outData
-
 def run_downline_load_algorithm( modelDir, inputDict, outData):
 	feederName = [x for x in os.listdir(modelDir) if x.endswith('.omd') and x[:-4] == inputDict['feederName1'] ][0]
 	inputDict['feederName1'] = feederName[:-4]
@@ -159,7 +135,7 @@ def run_downline_load_algorithm( modelDir, inputDict, outData):
 	tree = opendss.dssConvert.omdToTree(path_to_omd)
 	opendss.dssConvert.treeToDss(tree, Path(modelDir, 'downlineLoad.dss'))
 	downline_start_time = time.time()
-	graphData = omd_to_nx( os.path.join( modelDir, 'downlineLoad.dss') )
+	graphData = omd_to_nx_fulldata( os.path.join( modelDir, 'downlineLoad.dss') )
 	graph = graphData[0]
 	buses = opendss.get_all_buses( os.path.join( modelDir, 'downlineLoad.dss') )
 	buses_output = {}
@@ -289,6 +265,19 @@ def run_traditional_algorithm(modelDir, inputDict, outData):
 def runtimeEstimate(modelDir):
 	''' Estimated runtime of model in minutes. '''
 	return 1.0
+
+def work(modelDir, inputDict):
+	outData = {}
+	
+	if inputDict['runAmiAlgorithm'] == 'on':
+		run_ami_algorithm(modelDir, inputDict, outData)
+	if inputDict.get('optionalCircuitFile', outData) == 'on':
+		run_traditional_algorithm(modelDir, inputDict, outData)
+	if inputDict.get('runDownlineAlgorithm') == 'on':
+		run_downline_load_algorithm( modelDir, inputDict, outData)
+	outData['stdout'] = "Success"
+	outData['stderr'] = ""
+	return outData
 
 def new(modelDir):
 	''' Create a new instance of this model. Returns true on success, false on failure. '''
