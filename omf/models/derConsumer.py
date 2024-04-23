@@ -9,6 +9,8 @@ import shutil, datetime
 from os.path import join as pJoin
 import numpy as np
 import pandas as pd
+import plotly.graph_objs as go
+import plotly.utils
 
 # OMF imports
 from omf import feeder
@@ -61,11 +63,33 @@ def work(modelDir, inputDict):
 		json.dump(vbatResults, jsonFile)
 	outData.update(vbatResults) ## Update output file with vbat results
 	
+
+	## Test plot
+	plotData = []
+	testPlot = go.Scatter(x=np.asarray(outData['tempData']), 
+					 y=np.asarray(outData['tempData']), 
+					 mode='lines+markers',
+					 line=dict(color='blue'),  
+					 marker=dict(color='blue')
+	)
+	layout = go.Layout(
+    	title='Plotly Test Plot',
+    	xaxis=dict(title='X Axis Title'),
+    	yaxis=dict(title='Y Axis Title')
+	)
+	plotData.append(testPlot)
+	outData['plotDemand'] = json.dumps(plotData, cls=plotly.utils.PlotlyJSONEncoder)
+	outData['plotlyLayout'] = json.dumps(layout, cls=plotly.utils.PlotlyJSONEncoder)
+
+
 	# Model operations typically ends here.
 	# Stdout/stderr.
 	outData['PV'] = results['outputs']['PV']
 	outData["stdout"] = "Success"
 	outData["stderr"] = ""
+
+	print(outData.keys())
+
 	return outData
 
 def new(modelDir):
@@ -129,7 +153,7 @@ def _tests():
 	# Create New.
 	new(modelLoc)
 	# Pre-run.
-	__neoMetaModel__.renderAndShow(modelLoc) ## Why is there a pre-run?
+	#__neoMetaModel__.renderAndShow(modelLoc) ## Why is there a pre-run?
 	# Run the model.
 	__neoMetaModel__.runForeground(modelLoc)
 	# Show the output.
