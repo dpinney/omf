@@ -2,7 +2,7 @@
 /* IDs */
 /*******/
 
-#legendInsert {
+#legendInsert, #multiselectInsert {
     bottom: 0px;
     position: absolute;
     right: 0px;

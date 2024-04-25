@@ -13,6 +13,7 @@ class LeafletLayer { // implements ObserverInterface
     #controller;    // ControllerInterface instance
     #layer;         // - Leaflet layer
     #observable;    // - ObservableInterface instance
+    #modal;
     static map;
     static control;
     static nodeLayers = L.featureGroup();
@@ -59,24 +60,13 @@ class LeafletLayer { // implements ObserverInterface
         //  - Access the underlying layer(s) with <GeoJSON>._layers, which is a map (i.e. object) that maps layer ids to actual layer objects
         this.#layer = L.geoJSON(feature, {
             pointToLayer: this.#pointToLayer.bind(this), 
-            style: this.#styleNonPointFeatures.bind(this)
+            style: this.#style.bind(this),
         });
-        if (this.#observable.isNode() || this.#observable.isLine() || this.#observable.isPolygon() || this.#observable.isMultiPolygon()) {
-            const layer = Object.values(this.#layer._layers)[0];
-            let modal;
-            layer.bindPopup(() => {
-                // - This is the entrypoint to add new kinds of modals
-                if (this.#observable.hasProperty('treeKey', 'meta')) {
-                    // - Show a modal for OMD objects
-                    modal = new FeatureEditModal([this.#observable], controller);
-                    return modal.getDOMElement();
-                } else {
-                    // - Show a modal for arbitrary GeoJSON features
-                    modal = new TestModal([this.#observable], controller);
-                    return modal.getDOMElement();
-                }
-            });
-            this.#layer.addEventListener('popupclose', () => this.#observable.removeObserver(modal));
+        this.#layer.addEventListener('popupclose', () => {
+            this.#observable.removeObserver(this.#modal);
+        });
+        if (this.#observable.isLine() || this.#observable.isPolygon() || this.#observable.isMultiPolygon()) {
+            this.bindPopup();
         }
     }
 
@@ -167,6 +157,25 @@ class LeafletLayer { // implements ObserverInterface
     // ** Public methods **
     // ********************
 
+    bindPopup() {
+        const layer = Object.values(this.#layer._layers)[0];
+        layer.bindPopup(() => {
+            if (this.#observable.hasProperty('treeKey', 'meta')) {
+                // - Show a modal for OMD objects
+                this.#modal = new FeatureEditModal([this.#observable], this.#controller);
+                return this.#modal.getDOMElement();
+            } else {
+                // - Show a modal for arbitrary GeoJSON features
+                this.#modal = new TestModal([this.#observable], this.#controller);
+                return this.#modal.getDOMElement();
+            }
+        });
+    }
+
+    unbindPopup() {
+        Object.values(this.#layer._layers)[0].unbindPopup();
+    }
+
     /**
      * - Creating a LeafletLayer with the constructor does not automatically add the underlying layer to a layer group by design. This function must
      *   be called explicitly, or LayerGroups must be managed outside of this function
@@ -175,10 +184,10 @@ class LeafletLayer { // implements ObserverInterface
      */
     static createAndGroupLayer(observable, controller) {
         if (!(observable instanceof Feature)) {
-            throw TypeError('"observable" argument must be instanceof Feature.');
+            throw TypeError('The "observable" argument must be instanceof Feature.');
         }
         if (!(controller instanceof FeatureController)) {
-            throw TypeError('"controller" argument must be instanceof FeatureController.');
+            throw TypeError('The "controller" argument must be instanceof FeatureController.');
         }
         const ll = new LeafletLayer(observable, controller);
         if (observable.isNode()) {
@@ -213,81 +222,90 @@ class LeafletLayer { // implements ObserverInterface
     // ** Private methods ** 
     // *********************
 
-    #pointToLayer() {
-        let svgClass = 'gray';
-        // - TODO: verify pointColor works
-        if (this.#observable.hasProperty('pointColor')) {
-            svgClass = this.#observable.getProperty('pointColor');
-        } else if (this.#observable.hasProperty('object')) {
-            const object = this.#observable.getProperty('object');
-            if (object === 'capacitor') {
-                svgClass = 'purple';
-            }
-            if (object === 'generator') {
-                svgClass = 'red';
-            }
-            if (object == 'load') {
-                svgClass = 'blue';
-            }
-        }
-        const svgIcon = L.divIcon({
-            html: `<svg width="16" height="16" viewBox="-2 -2 20 20">
-                <circle cx="8" cy="8" r="8" stroke="black"/>
-                </svg>`,
-            className: `svg--icon-${svgClass}`,
-            iconSize: [16, 16],
-          });
-        // - TODO: fix uneven panning speed
-        const coordinates = this.#observable.getCoordinates();
-        const marker = L.marker(
-            [coordinates[1], coordinates[0]], {
-            autoPan: true,
-            draggable: true,
-            icon: svgIcon 
+    #pointToLayer(feature, latlng) {
+        const marker = L.circleMarker(latlng);
+        // - Make circle marker draggable
+        const trackCursor = (e) => {
+            this.#controller.setCoordinates([this.#observable], [e.latlng.lng, e.latlng.lat]);
+        };
+        const mousedownPoint = {
+            lat: null,
+            lng: null
+        };
+        marker.on('mousedown', (e) => {
+            this.bindPopup();
+            mousedownPoint.lat = e.latlng.lat;
+            mousedownPoint.lng = e.latlng.lng;
+            LeafletLayer.map.dragging.disable();
+            LeafletLayer.map.on('mousemove', trackCursor);
         });
-        const that = this;
-        marker.on('drag', function(e) {
-            const {lat, lng} = e.target.getLatLng();
-            that.#controller.setCoordinates([that.#observable], [lng, lat]);
+        marker.on('mouseup', (e) => {
+            LeafletLayer.map.dragging.enable();
+            LeafletLayer.map.off('mousemove', trackCursor)
+            if (e.latlng.lat !== mousedownPoint.lat || e.latlng.lng !== mousedownPoint.lng) {
+                this.unbindPopup();
+            }
+            mousedownPoint.lat = null;
+            mousedownPoint.lng = null;
         });
         return marker;
     }
 
-    #styleNonPointFeatures() {
-        if (this.#observable.isLine()) {
-            if (this.#observable.hasProperty('edgeColor')) {
-                return {
-                    color: this.#observable.getProperty('edgeColor')
+    #style() {
+        if (this.#observable.isNode()) {
+            let fillColor = 'gray';
+            if (this.#observable.hasProperty('pointColor')) {
+                fillColor = this.#observable.getProperty('pointColor');
+            } else if (this.#observable.hasProperty('object')) {
+                const object = this.#observable.getProperty('object');
+                if (object === 'capacitor') {
+                    fillColor = 'purple';
                 }
-            } else if (this.#observable.hasProperty('object') && this.#observable.getProperty('object') === 'transformer') {
-                return {
-                    color: 'orange'
+                if (object === 'generator') {
+                    fillColor = 'red';
                 }
-            } else if (this.#observable.hasProperty('object') && this.#observable.getProperty('object') === 'regulator') {
-                return {
-                    color: 'red'
-                }
-            } else if (this.#observable.hasProperty('object') && this.#observable.getProperty('object') === 'underground_line') {
-                return {
-                    color: 'gray'
-                }
-            } else if (this.#observable.isParentChildLine()) {
-                return {
-                    color: 'black',
-                    // - Dashed lines are only useful if the child is reasonably far from the parent, so I need other differences in style
-                    dashArray: '.5 10',
-                    lineCap: 'square',
-                    weight: '3'
-                }
-            } else {
-                return {
-                    color: 'black'
+                if (object == 'load') {
+                    fillColor = 'blue';
                 }
             }
-        } else {
             return {
-                color: 'blue'
+                color: 'black',
+                fillColor: fillColor,
+                fillOpacity: .8,
+                radius: 6.5,
+                weight: 1
             }
+        }
+        if (this.#observable.isParentChildLine()) {
+            return {
+                color: 'black',
+                // - Dashed lines are only useful if the child is reasonably far from the parent, so I need other differences in style
+                dashArray: '.5 10',
+                lineCap: 'square',
+                weight: '3'
+            }
+        }
+        if (this.#observable.isLine()) {
+            let color = 'black';
+            if (this.#observable.hasProperty('edgeColor')) {
+                color = this.#observable.getProperty('edgeColor')
+            } else if (this.#observable.hasProperty('object')) {
+                const object = this.#observable.getProperty('object');
+                if (object === 'transformer') {
+                    color = 'orange';
+                } else if (object === 'regulator') {
+                    color = 'red';
+                } else if (object === 'underground_line') {
+                    color = 'gray';
+                }
+
+            }
+            return {
+                color: color
+            }
+        }
+        return {
+            color: 'blue'
         }
     }
 }

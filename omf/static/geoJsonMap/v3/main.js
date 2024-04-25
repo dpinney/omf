@@ -8,6 +8,7 @@ import { LeafletLayer } from './leafletLayer.js';
 import { Nav } from './nav.js';
 import { SearchModal } from './searchModal.js';
 import { TopTab } from './topTab.js';
+import { MultiselectControlClass } from './multiselectControl.js';
 
 function main() {
     const features = gFeatureCollection.features.map(f => new Feature(f));
@@ -24,12 +25,6 @@ function main() {
         featureGraph.insertObservable(parentChildLineFeature);
     });
     const controller = new FeatureController(featureGraph);
-    featureGraph.getObservables().forEach(ob => {
-        if (!ob.isConfigurationObject()) {
-            // - Here, the first observer is added to every visible feature
-            LeafletLayer.createAndGroupLayer(ob, controller);
-        }
-    });
     const nav = new Nav();
     setupNav(controller, nav);
     const topTab = new TopTab();
@@ -67,20 +62,31 @@ function main() {
         'Parent-Child Lines': LeafletLayer.parentChildLineLayers,
     }
     LeafletLayer.map = L.map('map', {
-        center: LeafletLayer.nodeLayers.getBounds().getCenter(),
         // - This zoom level sensibly displays all circuits to start, even the ones with weird one-off players that skew where the center is
         zoom: 14,
         // - Provide the layers that the map should start with
-        layers: [esri_satellite_layer, LeafletLayer.nodeLayers, LeafletLayer.lineLayers, LeafletLayer.parentChildLineLayers],
+        layers: [esri_satellite_layer, LeafletLayer.parentChildLineLayers, LeafletLayer.lineLayers, LeafletLayer.nodeLayers],
         // - Better performance for large datasets
         renderer: L.canvas()
     });
+    featureGraph.getObservables().forEach(ob => {
+        if (!ob.isConfigurationObject()) {
+            // - Here, the first observer is added to every visible feature
+            LeafletLayer.createAndGroupLayer(ob, controller);
+        }
+    });
+    // - Keep nodes on top of lines
+    LeafletLayer.map.on('overlayadd', () => LeafletLayer.nodeLayers.bringToFront());
     LeafletLayer.map.fitBounds(LeafletLayer.nodeLayers.getBounds());
-    LeafletLayer.control = L.control.layers(baseMaps, overlayMaps, { position: 'topleft', collapsed: false });
+    LeafletLayer.control = L.control.layers(baseMaps, overlayMaps, {
+        position: 'topleft',
+        collapsed: false,
+    });
     LeafletLayer.control.addTo(LeafletLayer.map);
     addZoomToFitButon();
     addClusterButton();
     addRuler();
+    addMultiselectControl(controller);
     addGeocoding();
     // - Disable the following annoying default Leaflet keyboard shortcuts:
     //  - TODO: do a better job and stop the event(s) from propagating in text inputs instead
@@ -225,6 +231,10 @@ function createSearchModal(controller, nav, topTab) {
     const legendInsert = document.createElement('div');
     legendInsert.id = 'legendInsert';
     document.getElementsByTagName('main')[0].appendChild(legendInsert);
+    // - Add multiselect insert
+    const multiselectInsert = document.createElement('div');
+    multiselectInsert.id = 'multiselectInsert';
+    document.getElementsByTagName('main')[0].appendChild(multiselectInsert);
 }
 
 function createHelpMenu() {
@@ -367,6 +377,11 @@ function addClusterButton() {
     });
     div.appendChild(button);
     leafletHookDiv.appendChild(div);
+}
+
+function addMultiselectControl(controller) {
+    const multiselectControl = new MultiselectControlClass(controller);
+    LeafletLayer.map.addControl(multiselectControl);
 }
 
 function addGeocoding() {
