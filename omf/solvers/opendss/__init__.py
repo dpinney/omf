@@ -721,8 +721,10 @@ def omd_to_nx_fulldata( dssFilePath, tree=None ):
 	y_coords = [x['y'] for x in setbusxyList if 'y' in x]
 	bus_names = [x['bus'] for x in setbusxyList if 'bus' in x]
 	for bus, x, y in zip( bus_names, x_coords, y_coords):
-		G.add_node(bus, pos=(x, y))
-		pos[bus] = (x, y)
+		float_x = float(x)
+		float_y = float(y)
+		G.add_node(bus, pos=(float_x, float_y))
+		pos[bus] = (float_x, float_y)
 
 	lines = [x for x in tree if x.get('object', 'N/A').startswith('line.')]
 	bus1_lines = [x.split('.')[0] for x in [x['bus1'] for x in lines if 'bus1' in x]]
@@ -763,9 +765,18 @@ def omd_to_nx_fulldata( dssFilePath, tree=None ):
 			G.remove_node( transformer_name )
 			pos.pop( transformer_name )
 	
+	# Attributes for all loads
+	load_phases = [x['phases'] for x in loads if 'phases' in x]
+	load_conn = [x['conn'] for x in loads if 'conn' in x]
+	load_kv = [x['kv'] for x in loads if 'kv' in x]
 	load_kw = [x['kw'] for x in loads if 'kw' in x]
-	for load, kw in zip( load_names, load_kw ):
+	load_kvar = [x['kvar'] for x in loads if 'kvar' in x]
+	for load, phases, conn, kv, kw, kvar in zip( load_names, load_phases, load_conn, load_kv, load_kw, load_kvar):
+		G.nodes[load]['phases'] = phases
+		G.nodes[load]['conn'] = conn
+		G.nodes[load]['kv'] = kv
 		G.nodes[load]['kw'] = kw
+		G.nodes[load]['kvar'] = kvar	
 	
 	return G
 
