@@ -5,6 +5,8 @@ import math
 import warnings
 import matplotlib.pyplot as plt
 import matplotlib.colors as mcolors
+import matplotlib.cm as cm
+from matplotlib.colors import Normalize
 import numpy as np
 import json
 
@@ -55,6 +57,16 @@ def myConvertOMD(pathToOmdFile):
 		nxG.nodes[nodeToChange]['pos'] = omf.geo.statePlaneToLatLon(nxG.nodes[nodeToChange]['pos'][1], nxG.nodes[nodeToChange]['pos'][0])
 	return nxG
 
+def my_GetCoords(dssFilePath):
+	'''Takes in an OpenDSS circuit definition file and outputs the bus coordinates as a dataframe.'''
+	dssFileLoc = os.path.dirname(dssFilePath)
+	opendss.runDSS(dssFilePath)
+	opendss.runDssCommand(f'export buscoords "{dssFileLoc}/coords.csv"')
+	coords = pd.read_csv(dssFileLoc + '/coords.csv', header=None)
+	# JENNY - Deleted Radius and everything after.
+	coords.columns = ['Element', 'X', 'Y']
+	return coords
+
 def my_NetworkPlot(filePath, figsize=(20,20), output_name='networkPlot.png', show_labels=True, node_size=300, font_size=8):
 	''' Plot the physical topology of the circuit.
 	Returns a networkx graph of the circuit as a bonus. '''
@@ -76,6 +88,10 @@ def my_NetworkPlot(filePath, figsize=(20,20), output_name='networkPlot.png', sho
 			bus_name = row['Bus']
 		G.add_node(bus_name, pos=(float(row['X']), float(row['Y'])))
 		pos[bus_name] = (float(row['X']), float(row['Y']))
+
+	for key in pos.keys():
+		print( "type(key): in networkplot: ", type(key) )
+		break
 
 	# Get the connecting edges using Pandas.
 	lines = opendss.dss.utils.lines_to_dataframe()
@@ -147,8 +163,10 @@ def omd_to_nx_fulldata( dssFilePath, tree=None ):
 	y_coords = [x['y'] for x in setbusxyList if 'y' in x]
 	bus_names = [x['bus'] for x in setbusxyList if 'bus' in x]
 	for bus, x, y in zip( bus_names, x_coords, y_coords):
-		G.add_node(bus, pos=(x, y))
-		pos[bus] = (x, y)
+		float_x = float(x)
+		float_y = float(y)
+		G.add_node(bus, pos=(float_x, float_y))
+		pos[bus] = (float_x, float_y)
 
 	lines = [x for x in tree if x.get('object', 'N/A').startswith('line.')]
 	bus1_lines = [x.split('.')[0] for x in [x['bus1'] for x in lines if 'bus1' in x]]
@@ -174,7 +192,6 @@ def omd_to_nx_fulldata( dssFilePath, tree=None ):
 	load_transformer_name = [x.split('.')[0] for x in [x['bus1'] for x in loads if 'bus1' in x]]
 
 	# Connects loads to buses via transformers
-	labels = {}
 	for load_name, load_transformer in zip(load_names, load_transformer_name):
     # Add edge from bus to load, with transformer name as an attribute
 		if load_transformer in bus_to_transformer_pairs:
@@ -184,30 +201,29 @@ def omd_to_nx_fulldata( dssFilePath, tree=None ):
 			G.add_edge(load_transformer, load_name )
 		pos[load_name] = pos[load_transformer]
 		# print(f"load_name: {load_name}, pos[load_name]: { pos[load_name]}")
-		labels[load_name] = load_name
-	# TEMP: Remove transformer nodes added from coordinates. Transformer data is edges, not nodes.
+	# TEMP: Remove transformer nodes added from setxy coords. Transformer data is edges, not nodes.
 	for transformer_name in load_transformer_name:
 		if transformer_name in G.nodes:
 			G.remove_node( transformer_name )
 			pos.pop( transformer_name )
-
-	# print( pos.keys() )
 	
 	load_kw = [x['kw'] for x in loads if 'kw' in x]
 	for load, kw in zip( load_names, load_kw ):
 		G.nodes[load]['kw'] = kw
 	
-	return [G, pos, labels]
+	return [G, pos]
 
-def drawNXGraph(G, pos, outputPath, labels: list=[], colorCode: list=[], figSize=(20,20), nodeSize: int=300 , fontSize: int=8):
-
+def drawNXGraph(G, pos, outputPath, colorCode, labels: list=[], figSize=(20,20), nodeSize: int=300 , fontSize: int=8):
 	# Start drawing.
 	plt.figure(figsize=figSize) 
-	nodes = nx.draw_networkx_nodes(G, pos, node_size=nodeSize)
-	edges = nx.draw_networkx_edges(G, pos)
+	ax = plt.gca() # Get the current axes
+	nodes = nx.draw_networkx_nodes(G, pos, node_color=colorCode, node_size=nodeSize, cmap=plt.get_cmap('viridis'), ax=ax)
+	edges = nx.draw_networkx_edges(G, pos, ax=ax)
 	if len(labels) > 0:
-		nx.draw_networkx_labels(G, pos, labels, font_size=fontSize)
-	plt.colorbar(nodes)
+		nx.draw_networkx_labels(G, pos, labels, font_size=fontSize, ax=ax)
+		# nx.draw_networkx_labels(G, pos, labels, font_size=fontSize, bbox=dict(facecolor='white', edgecolor='black', boxstyle='round,pad=0.1'), ax=ax)
+
+	plt.colorbar( label='Node Values', ax=ax)
 	plt.legend()
 	plt.title('Network Voltage Layout')
 	plt.tight_layout()
@@ -340,12 +356,27 @@ if __name__ == '__main__':
 	graphList = omd_to_nx_fulldata( Path(modelDir, 'downlineLoad.dss') )
 	graph = graphList[0]
 	pos = graphList[1] # <- keys are str, not nodes
-	posFromGraph = nx.get_node_attributes(graph, 'pos')
 
-	print( pos.keys() )
-	print( "posFromGraph['bus1002']: ", posFromGraph['bus1002'] )
+	labels = {}
+	for node in graph.nodes:
+		labels[node] = node
 
-	print("posFromGraph['load_1003']: ", posFromGraph['load_1003'] )
+	kwFromGraph = nx.get_node_attributes(graph, 'kw') # Dict 
+	kwFromGraph = {key: float(value) for key, value in kwFromGraph.items()} # sets all keys in dict to floats
+	
+	# Create a new list for color codes with default values for nodes without a kw
+	colorCode = []
+	for node in graph.nodes():
+			if node in kwFromGraph:
+					colorCode.append(kwFromGraph[node])
+			else:
+					colorCode.append(0) # Use 0 for nodes without a kw, which will be mapped to grey
+
+	# Normalize the colorCode values to the range [0, 1] for the colormap
+	colorCode = np.array(colorCode)
+	colorCode = (colorCode - colorCode.min()) / (colorCode.max() - colorCode.min())
+
+	drawNXGraph( G=graph, pos=pos, outputPath=Path( modelDir, "myplot.png"), colorCode=colorCode, labels=labels )
 
 
-	drawNXGraph( graph, posFromGraph, Path( modelDir, "myplot.png"), graphList[2] )
+	
