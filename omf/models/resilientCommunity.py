@@ -920,7 +920,7 @@ def createColorCSV(modelDir, loadsDict):
 
 
 def work(modelDir, inputDict):
-   '' Run the model in its directory. '''
+   ''' Run the model in its directory. '''
     outData = {}
 
     # files
