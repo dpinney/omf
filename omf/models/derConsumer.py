@@ -73,13 +73,13 @@ def work(modelDir, inputDict):
 	
 
 	## Test plot
-	"""
+
 	plotData = []
-	testPlot = go.Scatter(x=np.asarray(outData['tempData']), 
-					 y=np.asarray(outData['tempData']), 
-					 mode='lines+markers',
-					 line=dict(color='blue'),  
-					 marker=dict(color='blue')
+	testPlot = go.Scatter(x=timestamps, 
+					 y=temperatures, 
+					 mode='lines',
+					 line=dict(color='red',width=1),
+					name='Average Temperature'
 	)
 	layout = go.Layout(
     	title='Plotly Test Plot',
@@ -89,29 +89,6 @@ def work(modelDir, inputDict):
 	plotData.append(testPlot)
 	outData['plotlyPlot'] = json.dumps(plotData, cls=plotly.utils.PlotlyJSONEncoder)
 	outData['plotlyLayout'] = json.dumps(layout, cls=plotly.utils.PlotlyJSONEncoder)
-
-	"""
-
-	## Residential REopt plot
-	trace1 = go.Scatter(x=timestamps,
-							y=temperatures,
-							yaxis='y1',
-							mode='lines',
-							name='Average Temperature',
-							line=dict(color='red',
-									width=1)
-							)
-
-	layout = {
-		'title': 'Plotly Test Plot',
-		'xaxis': {'title': 'X Axis Title'},
-		'yaxis': {'title': 'Y Axis Title'}
-	}
-
-	# Serialize data and layout
-	outData['plotlyLayout'] = json.dumps(layout, cls=plotly.utils.PlotlyJSONEncoder)
-	outData['plotlyPlot'] = json.dumps(trace1, cls=plotly.utils.PlotlyJSONEncoder)
-
 
 	# Model operations typically ends here.
 	# Stdout/stderr.
