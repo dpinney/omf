@@ -62,6 +62,7 @@ def work(modelDir, inputDict):
 
 	## Convert temperature data from str to float
 	temperatures = [float(value) for value in inputDict['tempCurve'].split('\n') if value.strip()]
+	demand = np.asarray([float(value) for value in inputDict['demandCurve'].split('\n') if value.strip()])
 
 
 	## Run vbatDispatch
@@ -73,26 +74,40 @@ def work(modelDir, inputDict):
 	
 
 	## Test plot
-
 	plotData = []
-	testPlot = go.Scatter(x=timestamps, 
-					 y=temperatures, 
-					 mode='lines',
-					 line=dict(color='red',width=1),
-					name='Average Temperature'
-	)
+	
 	layout = go.Layout(
-    	title='Plotly Test Plot',
-    	xaxis=dict(title='X Axis Title'),
-    	yaxis=dict(title='Y Axis Title')
+    	title='Residential Data',
+    	xaxis=dict(title='Timestamp'),
+    	yaxis=dict(title='Energy (kW)')
 	)
-	plotData.append(testPlot)
+	
+	## Temperature curve
+	trace1 = go.Scatter(x=timestamps, 
+					   y=temperatures,
+					   mode='lines',
+					   line=dict(color='red',width=1),
+					   name='Average Temperature'
+	)
+
+	plotData.append(trace1) ## Add to plotData collection
+
+	## Demand curve
+	trace2 = go.Scatter(x=timestamps, 
+					 y=demand,
+					 mode='lines',
+					 line=dict(color='black'),
+					 name='Demand'
+	)
+	plotData.append(trace2)
+	print(plotData)
+
+	## Encode plot data as JSON for showing in the HTML side
 	outData['plotlyPlot'] = json.dumps(plotData, cls=plotly.utils.PlotlyJSONEncoder)
 	outData['plotlyLayout'] = json.dumps(layout, cls=plotly.utils.PlotlyJSONEncoder)
 
 	# Model operations typically ends here.
 	# Stdout/stderr.
-	outData['PV'] = results['outputs.PV.electric_to_load_series_kw'].tolist()
 	outData["stdout"] = "Success"
 	outData["stderr"] = ""
 
