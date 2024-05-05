@@ -11,10 +11,9 @@ import numpy as np
 import pandas as pd
 import plotly.graph_objs as go
 import plotly.utils
+import matplotlib.pyplot as plt
 
 # OMF imports
-from omf import feeder
-from omf.models.voltageDrop import drawPlot
 from omf.models import __neoMetaModel__
 from omf.models.__neoMetaModel__ import *
 from omf.models import vbatDispatch as vb
@@ -22,7 +21,7 @@ from omf.solvers import reopt_jl
 
 # Model metadata:
 modelName, template = __neoMetaModel__.metadata(__file__)
-hidden = True
+hidden = False
 
 def castAddInputs(val1,val2):
 	''' Casts string inputs to appropriate type and returns their sum. 
@@ -51,10 +50,19 @@ def work(modelDir, inputDict):
 
 	## Read in a static REopt test file
 	with open(pJoin(__neoMetaModel__._omfDir,"static","testFiles","residential_REopt_results.json")) as f:
-		results = json.load(f)
+		results = pd.json_normalize(json.load(f))
 		print('Successfully loaded REopt test file. \n')
-		
+
 	# Model operations goes here.
+
+	## Create timestamp array from REopt input information
+	year = results['inputs.ElectricLoad.year'][0]
+	arr_size = np.size(results['outputs.ElectricUtility.electric_to_load_series_kw'][0])
+	timestamps = pd.date_range(start=f'{year}-01-01', end=f'{year}-12-31 23:00:00', periods=arr_size)
+
+	## Convert temperature data from str to float
+	temperatures = [float(value) for value in inputDict['tempCurve'].split('\n') if value.strip()]
+
 
 	## Run vbatDispatch
 	vbatResults = vb.work(modelDir,inputDict)
@@ -65,6 +73,7 @@ def work(modelDir, inputDict):
 	
 
 	## Test plot
+	"""
 	plotData = []
 	testPlot = go.Scatter(x=np.asarray(outData['tempData']), 
 					 y=np.asarray(outData['tempData']), 
@@ -78,17 +87,37 @@ def work(modelDir, inputDict):
     	yaxis=dict(title='Y Axis Title')
 	)
 	plotData.append(testPlot)
-	outData['plotDemand'] = json.dumps(plotData, cls=plotly.utils.PlotlyJSONEncoder)
+	outData['plotlyPlot'] = json.dumps(plotData, cls=plotly.utils.PlotlyJSONEncoder)
 	outData['plotlyLayout'] = json.dumps(layout, cls=plotly.utils.PlotlyJSONEncoder)
+
+	"""
+
+	## Residential REopt plot
+	trace1 = go.Scatter(x=timestamps,
+							y=temperatures,
+							yaxis='y1',
+							mode='lines',
+							name='Average Temperature',
+							line=dict(color='red',
+									width=1)
+							)
+
+	layout = {
+		'title': 'Plotly Test Plot',
+		'xaxis': {'title': 'X Axis Title'},
+		'yaxis': {'title': 'Y Axis Title'}
+	}
+
+	# Serialize data and layout
+	outData['plotlyLayout'] = json.dumps(layout, cls=plotly.utils.PlotlyJSONEncoder)
+	outData['plotlyPlot'] = json.dumps(trace1, cls=plotly.utils.PlotlyJSONEncoder)
 
 
 	# Model operations typically ends here.
 	# Stdout/stderr.
-	outData['PV'] = results['outputs']['PV']
+	outData['PV'] = results['outputs.PV.electric_to_load_series_kw'].tolist()
 	outData["stdout"] = "Success"
 	outData["stderr"] = ""
-
-	print(outData.keys())
 
 	return outData
 
@@ -153,7 +182,7 @@ def _tests():
 	# Create New.
 	new(modelLoc)
 	# Pre-run.
-	#__neoMetaModel__.renderAndShow(modelLoc) ## Why is there a pre-run?
+	__neoMetaModel__.renderAndShow(modelLoc) ## Why is there a pre-run?
 	# Run the model.
 	__neoMetaModel__.runForeground(modelLoc)
 	# Show the output.
