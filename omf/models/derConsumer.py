@@ -50,14 +50,14 @@ def work(modelDir, inputDict):
 
 	## Read in a static REopt test file
 	with open(pJoin(__neoMetaModel__._omfDir,"static","testFiles","residential_REopt_results.json")) as f:
-		results = pd.json_normalize(json.load(f))
+		reoptResults = pd.json_normalize(json.load(f))
 		print('Successfully loaded REopt test file. \n')
 
 	# Model operations goes here.
 
 	## Create timestamp array from REopt input information
-	year = results['inputs.ElectricLoad.year'][0]
-	arr_size = np.size(results['outputs.ElectricUtility.electric_to_load_series_kw'][0])
+	year = reoptResults['inputs.ElectricLoad.year'][0]
+	arr_size = np.size(reoptResults['outputs.ElectricUtility.electric_to_load_series_kw'][0])
 	timestamps = pd.date_range(start=f'{year}-01-01', end=f'{year}-12-31 23:00:00', periods=arr_size)
 
 	## Convert temperature data from str to float
@@ -76,34 +76,114 @@ def work(modelDir, inputDict):
 	## Test plot
 	plotData = []
 	
+	showlegend = False
+
 	layout = go.Layout(
     	title='Residential Data',
     	xaxis=dict(title='Timestamp'),
-    	yaxis=dict(title='Energy (kW)')
+    	yaxis=dict(title="Energy (kW)"),
+    	yaxis2=dict(title='degrees Celsius',
+                overlaying='y',
+                side='right'
+				),
+		legend=dict(
+			orientation='h',
+			yanchor="bottom",
+			y=1.02,
+			xanchor="right",
+			x=1
+			)
 	)
+
+	PV = reoptResults['outputs.PV.electric_to_load_series_kw'][0]
+	BESS = reoptResults['outputs.ElectricStorage.storage_to_load_series_kw'][0]
+	vbpower_series = pd.Series(vbatResults['VBpower'][0])
+	vbat_discharge = vbpower_series.where(vbpower_series < 0, 0) #negative values
+	vbat_charge = vbpower_series.where(vbpower_series > 0, 0) ## positive values; part of the New Load?
+	vbat_discharge_flipsign = vbat_discharge.mul(-1) ## flip sign of vbat discharge for plotting purposes
+	grid_to_load = reoptResults['outputs.ElectricUtility.electric_to_load_series_kw'][0]
+	grid_charging_BESS = reoptResults['outputs.ElectricUtility.electric_to_storage_series_kw'][0]
+
+
+	fig = go.Figure()
+	fig.add_trace(go.Scatter(x=timestamps,
+                         y=np.asarray(BESS) + np.asarray(demand) + np.asarray(vbat_discharge_flipsign),
+						 yaxis='y1',
+                         mode='none',
+                         fill='tozeroy',
+                         name='BESS Serving Load (kW)',
+                         fillcolor='rgba(0,137,83,1)',
+						 showlegend=showlegend))
+	fig.update_traces(fillpattern_shape='/', selector=dict(name='BESS Serving Load (kW)'))
+
+	fig.add_trace(go.Scatter(x=timestamps,
+							y=np.asarray(vbat_discharge_flipsign)+np.asarray(demand),
+							mode='none',
+							fill='tozeroy',
+							fillcolor='rgba(127,0,255,1)',
+							name='vbat Serving Load (kW)',
+							showlegend=showlegend))
+	fig.update_traces(fillpattern_shape='/', selector=dict(name='vbat Serving Load (kW)'))
+
+	fig.add_trace(go.Scatter(x=timestamps,
+                         y=np.asarray(demand)-np.asarray(BESS)-np.asarray(vbat_discharge_flipsign),
+                         mode='none',
+                         name='Original Load (kW)',
+                         fill='tozeroy',
+                         fillcolor='rgba(100,200,210,1)',
+						 showlegend=showlegend))
+
+	fig.add_trace(go.Scatter(x=timestamps,
+					 y=PV,
+					 yaxis='y1',
+					 mode='none',
+					 fill='tozeroy',
+					 name='PV Serving Load (kW)',
+					 fillcolor='rgba(255,246,0,1)',
+					 showlegend=showlegend
+					 ))
 	
-	## Temperature curve
-	trace1 = go.Scatter(x=timestamps, 
+	fig.add_trace(go.Scatter(x=timestamps,
+                         y=np.asarray(demand) + np.asarray(reoptResults['outputs.ElectricUtility.electric_to_storage_series_kw'][0]) + np.asarray(vbat_charge),
+                         mode='none',
+                         name='Additional Load (Charging BESS and vbat)',
+                         fill='tonexty',
+                         fillcolor='rgba(175,0,42,0)',
+						 showlegend=showlegend))
+	fig.update_traces(fillpattern_shape='.', selector=dict(name='Additional Load (Charging BESS and vbat)'))
+
+
+	grid_serving_new_load = np.asarray(grid_to_load) + np.asarray(grid_charging_BESS)+ np.asarray(vbat_charge) - np.asarray(vbat_discharge_flipsign) + np.asarray(PV)
+	fig.add_trace(go.Scatter(x=timestamps,
+                         y=grid_serving_new_load,
+                         mode='none',
+                         fill='tozeroy',
+                         name='Grid Serving Load (kW)',
+                         fillcolor='rgba(192,192,192,0.5)',
+						 showlegend=showlegend))
+	
+	fig.add_trace(go.Scatter(x=timestamps, 
 					   y=temperatures,
+					   yaxis='y2',
 					   mode='lines',
 					   line=dict(color='red',width=1),
-					   name='Average Temperature'
-	)
+					   name='Average Temperature',
+					   showlegend=showlegend #temporarily disable the legend toggle
+	))
 
-	plotData.append(trace1) ## Add to plotData collection
-
-	## Demand curve
-	trace2 = go.Scatter(x=timestamps, 
+	fig.add_trace(go.Scatter(x=timestamps, 
 					 y=demand,
+					 yaxis='y1',
 					 mode='lines',
 					 line=dict(color='black'),
-					 name='Demand'
-	)
-	plotData.append(trace2)
-	print(plotData)
+					 name='Demand',
+					 showlegend=showlegend
+					))
+	fig.update_traces(legendgroup='Demand', visible='legendonly', selector=dict(name='Original Load (kW)')) ## Make demand hidden on plot by default
+
 
 	## Encode plot data as JSON for showing in the HTML side
-	outData['plotlyPlot'] = json.dumps(plotData, cls=plotly.utils.PlotlyJSONEncoder)
+	outData['plotlyPlot'] = json.dumps(fig.data, cls=plotly.utils.PlotlyJSONEncoder)
 	outData['plotlyLayout'] = json.dumps(layout, cls=plotly.utils.PlotlyJSONEncoder)
 
 	# Model operations typically ends here.
@@ -130,7 +210,7 @@ def new(modelDir):
 
 		## REopt inputs:
 		"latitude":  '39.532165', ## Rivesville, WV
-		"longitude": '-80.120618', ## TODO: Should these be strings or floats?
+		"longitude": '-80.120618', ## TODO: Should these be strings or floats? Update - strings.
 		"year": '2018',
 		"analysisYears": '25', 
 		"urdbLabel": '643476222faee2f0f800d8b1', ## Rivesville, WV - Monongahela Power
