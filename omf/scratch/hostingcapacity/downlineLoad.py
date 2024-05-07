@@ -5,27 +5,20 @@ import math
 import warnings
 import matplotlib.pyplot as plt
 import matplotlib.colors as mcolors
+import matplotlib.cm as cm
+from matplotlib.colors import Normalize
 import numpy as np
 import json
 
 import omf
 from omf.solvers import opendss
 import os
+from omf.models import hostingCapacity
 
-'''
-Simply adds up all load further away from the substation than the given bus to estimate rough hosting capacity.
-with open(Path(modelDir, 'treefile.txt'), "w") as file:
-        for item in tree:
-            file.write(f"{item}\n")
-
-voltagePlot 
-	getVoltages
-'''
-
-def convertOmd(pathToOmdFile):
+def myConvertOMD(pathToOmdFile):
 	with open(pathToOmdFile) as inFile:
 		tree = json.load(inFile)['tree']
-	nxG = nx.Graph()
+	nxG = nx.DiGraph()
 	for key in tree:
 		#Account for nodes that are missing names when creating edges
 		item = tree[key]
@@ -64,42 +57,15 @@ def convertOmd(pathToOmdFile):
 		nxG.nodes[nodeToChange]['pos'] = omf.geo.statePlaneToLatLon(nxG.nodes[nodeToChange]['pos'][1], nxG.nodes[nodeToChange]['pos'][0])
 	return nxG
 
-def dss_to_networkx(dssFilePath, tree=None, omd=None):
-	''' Return a networkx directed graph from a dss file. If tree is provided, build graph from that instead of the file. '''
-	if tree == None:
-		tree = opendss.dssConvert.dssToTree(dssFilePath)
-	if omd == None:
-		omd = opendss.dssConvert.evilDssTreeToGldTree(tree)
-
-	dssFileLoc = os.path.dirname(os.path.abspath(dssFilePath))
-
-	# Gather edges, leave out source and circuit objects
-	edges = [(ob['from'],ob['to']) for ob in omd.values() if 'from' in ob and 'to' in ob]
-	edges_sub = [
-		(ob['parent'],ob['name']) for ob in omd.values()
-		if 'name' in ob and 'parent' in ob and ob.get('object') not in ['circuit', 'vsource']
-	]
-	full_edges = edges + edges_sub
-	G = nx.DiGraph(full_edges)
-	pos = {}
-	for ob in omd.values():
-		if 'latitude' in ob and 'longitude' in ob:
-			G.add_node(ob['name'], pos=(float(ob['longitude']), float(ob['latitude'])))
-			pos[ob['name']] = ( float(ob['longitude']), float(ob['longitude']) )
-		else:
-			G.add_node(ob['name'])
-
-	# Start drawing.
-	plt.figure(figsize=(20,20)) 
-	nodes = nx.draw_networkx_nodes(G, pos,  node_size=300)
-	edges = nx.draw_networkx_edges(G, pos)
-	plt.colorbar(nodes)
-	plt.legend()
-	plt.title('Network Voltage Layout')
-	plt.tight_layout()
-	plt.savefig(dssFileLoc + '/' + 'directedDssConvert.png')
-	plt.clf()
-	return G
+def my_GetCoords(dssFilePath):
+	'''Takes in an OpenDSS circuit definition file and outputs the bus coordinates as a dataframe.'''
+	dssFileLoc = os.path.dirname(dssFilePath)
+	opendss.runDSS(dssFilePath)
+	opendss.runDssCommand(f'export buscoords "{dssFileLoc}/coords.csv"')
+	coords = pd.read_csv(dssFileLoc + '/coords.csv', header=None)
+	# JENNY - Deleted Radius and everything after.
+	coords.columns = ['Element', 'X', 'Y']
+	return coords
 
 def my_NetworkPlot(filePath, figsize=(20,20), output_name='networkPlot.png', show_labels=True, node_size=300, font_size=8):
 	''' Plot the physical topology of the circuit.
@@ -122,6 +88,10 @@ def my_NetworkPlot(filePath, figsize=(20,20), output_name='networkPlot.png', sho
 			bus_name = row['Bus']
 		G.add_node(bus_name, pos=(float(row['X']), float(row['Y'])))
 		pos[bus_name] = (float(row['X']), float(row['Y']))
+
+	for key in pos.keys():
+		print( "type(key): in networkplot: ", type(key) )
+		break
 
 	# Get the connecting edges using Pandas.
 	lines = opendss.dss.utils.lines_to_dataframe()
@@ -165,8 +135,23 @@ def my_NetworkPlot(filePath, figsize=(20,20), output_name='networkPlot.png', sho
 	plt.clf()
 	return G
 
-def dss_to_nx(dssFilePath, tree=None ):
-	''' Return a networkx directed graph from a dss file. If tree is provided, build graph from that instead of the file. '''
+def omd_to_nx_fulldata( dssFilePath, tree=None ):
+	''' Combines dss_to_networkX and opendss.networkPlot together.
+
+	Creates a networkx directed graph from a dss files. If a tree is provided, build graph from that instead of the file.
+	Creates a .png picture of the graph.
+	Adds data to certain DSS node types ( loads )
+	
+	args:
+		filepath (str of file name):- dss file path
+		tree (list): None - tree representation of dss file
+		output_name (str):- name of png
+		show_labels (bool): true - show node label names
+		node_size (int): 300 - size of node circles in png
+		font_size (int): 8 - font size for png labels
+	return:
+		A networkx graph of the circuit 
+	'''
 	if tree == None:
 		tree = opendss.dssConvert.dssToTree( dssFilePath )
 
@@ -178,8 +163,10 @@ def dss_to_nx(dssFilePath, tree=None ):
 	y_coords = [x['y'] for x in setbusxyList if 'y' in x]
 	bus_names = [x['bus'] for x in setbusxyList if 'bus' in x]
 	for bus, x, y in zip( bus_names, x_coords, y_coords):
-		G.add_node(bus, pos=(x, y))
-		pos[bus] = (x, y)
+		float_x = float(x)
+		float_y = float(y)
+		G.add_node(bus, pos=(float_x, float_y))
+		pos[bus] = (float_x, float_y)
 
 	lines = [x for x in tree if x.get('object', 'N/A').startswith('line.')]
 	bus1_lines = [x.split('.')[0] for x in [x['bus1'] for x in lines if 'bus1' in x]]
@@ -205,16 +192,16 @@ def dss_to_nx(dssFilePath, tree=None ):
 	load_transformer_name = [x.split('.')[0] for x in [x['bus1'] for x in loads if 'bus1' in x]]
 
 	# Connects loads to buses via transformers
-	labels = {}
 	for load_name, load_transformer in zip(load_names, load_transformer_name):
     # Add edge from bus to load, with transformer name as an attribute
-		bus = bus_to_transformer_pairs[load_transformer]
-		G.add_edge(bus, load_name, transformer=load_transformer)
+		if load_transformer in bus_to_transformer_pairs:
+			bus = bus_to_transformer_pairs[load_transformer]
+			G.add_edge(bus, load_name, transformer=load_transformer)
+		else:
+			G.add_edge(load_transformer, load_name )
 		pos[load_name] = pos[load_transformer]
-		labels[load_name] = load_name
-		labels[ bus ] = bus
-	
-	# TEMP: Remove transformer nodes added from coordinates. Transformer data is edges, not nodes.
+		# print(f"load_name: {load_name}, pos[load_name]: { pos[load_name]}")
+	# TEMP: Remove transformer nodes added from setxy coords. Transformer data is edges, not nodes.
 	for transformer_name in load_transformer_name:
 		if transformer_name in G.nodes:
 			G.remove_node( transformer_name )
@@ -224,42 +211,62 @@ def dss_to_nx(dssFilePath, tree=None ):
 	for load, kw in zip( load_names, load_kw ):
 		G.nodes[load]['kw'] = kw
 	
-	return [G, pos, labels]
+	return [G, pos]
 
-def drawNXGraph(G, pos, outputPath, labels: list=[], colorCode: list=[], figSize=(20,20), nodeSize: int=300 , fontSize: int=8):
-	print( "inside..")
+def drawNXGraph(G, pos, outputPath, colorCode, labels: list=[], figSize=(20,20), nodeSize: int=300 , fontSize: int=8):
 	# Start drawing.
 	plt.figure(figsize=figSize) 
-	nodes = nx.draw_networkx_nodes(G, pos, node_size=nodeSize)
-	edges = nx.draw_networkx_edges(G, pos)
-	if ( len(labels) != 0 ):
-		nx.draw_networkx_labels(G, pos, labels, font_size=fontSize)
-	#plt.colorbar(nodes)
+	ax = plt.gca() # Get the current axes
+	nodes = nx.draw_networkx_nodes(G, pos, node_color=colorCode, node_size=nodeSize, cmap=plt.get_cmap('viridis'), ax=ax)
+	edges = nx.draw_networkx_edges(G, pos, ax=ax)
+	if len(labels) > 0:
+		nx.draw_networkx_labels(G, pos, labels, font_size=fontSize, ax=ax)
+		# nx.draw_networkx_labels(G, pos, labels, font_size=fontSize, bbox=dict(facecolor='white', edgecolor='black', boxstyle='round,pad=0.1'), ax=ax)
+
+	plt.colorbar( label='Node Values', ax=ax)
 	plt.legend()
 	plt.title('Network Voltage Layout')
 	plt.tight_layout()
-	plt.savefig( outputPath )
+	plt.savefig(outputPath)
 	plt.clf()
-	plt.show()
 
 if __name__ == '__main__':
-	modelDir = Path(omf.omfDir, 'scratch', 'hostingcapacity')
-	beginning_test_file = Path( omf.omfDir, 'static', 'publicFeeders', 'iowa240.clean.dss.omd')
-	circuit_file = 'omdToDSScircuit.dss'
+	'''
+	Wants: 
+	- Directed graph
+	-> Can have it be optional.
+	- Buses, loads as nodes
+	- Transformers not as nodes, but as edges
+	- Data for loads/transformers/buses be attributes
+
+	Sanity Checks:
+	Test descendents of bus1002 
+
+	['bus1003', 'bus1004', 'bus1005', 'bus1006', 'bus1007', 'bus1008', 'bus1009', 'bus1010',
+	'bus1011', 'bus1012', 'bus1013', 'bus1014', 'bus1015', 'bus1016', 'bus1017',
+	'load_1003', 'load_1004', 'load_1005', 'load_1006', 'load_1007', 'load_1008', 'load_1009', 'load_1010',
+	'load_1011' 'load_1012', 'load_1013', 'load_1014', 'load_1015', 'load_1016', 'load_1017']
+	'''
 
 	'''
-	# NOT USABLE - Geo.py function convertOMD
-	# 1 Issue of the start - creates an undirected graph. I think we want directed for this. 
-	#
-	# This func takes the "links" part of the tree from the OMD file
-	# Which, for iowa240.clean.dss.omd, there's nothing in links -> FAILS
-	#
-	# Then, I tried making my own that gets the "tree" part out of the OMF file -> FAILS
-	# {'object': '!CMD', 'name': 'clear'}
-	# Traceback (most recent call last):
-	#   File "/home/jenny/nreca/omf/omf/scratch/hostingcapacity/again.py", line 17, in convertOmd
-	#     sourceEdge = item['source']['name']
-	# KeyError: 'source'
+	#################################################### 
+	Func 1: convertOmd(pathToOmdFile) in geo.py
+	Issue 1: Not directed.
+	Issue 2: Function gets tree from "links" key. for iowa240.clean.dss.omd, there's nothing in links -> FAILS
+
+	Test:
+		coGraph = omf.geo.convertOmd ( starting_omd_test_file )
+	Output:
+		Graph with 0 nodes and 0 edges
+	
+	Attempted fixes: 
+	- Making it directed and using the "tree" key
+
+	Test: myConvertOMD( starting_omd_test_file )
+	Output: 	
+		File "/home/jenny/nreca/omf/omf/scratch/hostingcapacity/downlineLoad.py", line 39, in myConvertOMD
+			sourceEdge = str(item['source']) + ' Missing Name'
+		KeyError: 'source'
 
 	# During handling of the above exception, another exception occurred:
 
@@ -268,124 +275,108 @@ if __name__ == '__main__':
 	#     sourceEdge = str(item['target']['name']) + ' Source'
 	# KeyError: 'target'
 
-	# Fails because of the other lines.. its not designed to deal with them.
-
-	# graph = convertOmd( beginning_test_file.resolve() )
-	# print( "graph nodes frmo convertOmd function: ", graph.nodes )
+	# Summary: Fails because of the other lines.. its not designed to deal with them. Would need to be modified but is used in other places
+	####################################################
 
 	####################################################
-	# Feeder.py function treeToNxGraph
-	# Has nodes that shouldn't be there, no descendents, no edges?
+	# Func 1: treeToNxGraph in Feeder.py
+	# Issue 1: Has nodes that shouldn't be there
+	# graph nodes from omf.feeder.treeToNxGraph function:  ['clear', '240_node_test_system', 'source', 'eq_source_bus', 'oh_3p_type1', 'oh_2p_type2', 'oh_1p_type2', 'oh_3p_type5', 'oh_1p_type5', 'ug_3p_type1', 'ug_3p_type2', 'ug_1p_type2' .. 'reg_contr_a', 'reg_contr_b', 'reg_contr_c', 'cap_201', 'cap_301', 'makebuslist', 'set']
+	# Issue 2: no descendents, no edges? Even though I specified a directed graph?
 	#
-	# tree = omf.feeder.parse(beginning_test_file.resolve())
-	# tree = opendss.dssConvert.omdToTree( beginning_test_file.resolve() )
-	# with open(beginning_test_file) as f:
-	# 	feederJson = json.load(f)
-	# tree = feederJson.get("tree",{})
-	# g2 = omf.feeder.treeToNxGraph( tree, digraph=True )
-	# print( "graph nodes from omf.feeder.treeToNxGraph function: ", g2.nodes )
-	# Has data that doesn't need to be in here but its ok. but idk what the edges are..
-	# test_descendents_bus_list = sorted(nx.descendants(g2, 't_bus1004_l'))
-	# Even though I specified a digraph - this bus has no descendants even though it should.
-	# print( g2.get_edge_data('t_bus1004_l', 'load_1004') ) - THIS PRINTS NONE... that's awkward...
+	tree = omf.feeder.parse(beginning_test_file.resolve())
+	tree = opendss.dssConvert.omdToTree( beginning_test_file.resolve() )
+	with open(beginning_test_file) as f:
+		feederJson = json.load(f)
+	tree = feederJson.get("tree",{})
+	g2 = omf.feeder.treeToNxGraph( tree, digraph=True )
+	print( "graph nodes from omf.feeder.treeToNxGraph function: ", g2.nodes )
+	Has data that doesn't need to be in here but its ok. but idk what the edges are..
+	test_descendents_bus_list = sorted(nx.descendants(g2, 't_bus1004_l'))
+	Even though I specified a digraph - this bus has no descendants even though it should.
+	print( g2.get_edge_data('t_bus1004_l', 'load_1004') ) - THIS PRINTS NONE... that's awkward...
 
+	Summary: Also failed. Would need to be modified but is used in other places
+	####################################################
+
+	####################################################
+	# Func 3: dss_to_networkx in dssConvert
 	tree = opendss.dssConvert.omdToTree( beginning_test_file.resolve() ) # this tree is a list
 	opendss.dssConvert.treeToDss(tree, Path(modelDir, circuit_file))
 
 	# This graph is directed
 	# But this has a lot of other stuff. The other one is just buses which I think we want...
 	# Copied and pasted here to get physical drawing - it is SO OFF!!!!!
+	# dss_to_nx.png <- ????
 	# dssConvert_graph = dss_to_networkx( os.path.join( modelDir, circuit_file), tree )
 	# print( "info about graph made from dss_to_networkx: ", dssConvert_graph )
 	# test_descendents_bus_list = sorted(nx.descendants(dssConvert_graph, 't_bus1004_l'))
 	# print( dssConvert_graph.get_edge_data('t_bus1004_l', 'load_1004') ) #PRINTS NONE -- THATS TOUGH
 	# Doesn't have the loads or edges for them, same issue as networkPlot
-	# but also, this visually for some reason is SO OFF? NetworkPlot isn't - I might as well just keep that one.
+	# but also, this visually for some reason is SO OFF? NetworkPlot isn't
 
-	# Test bus info
-	# t_bus1004_l - should have other desendents and its loads
+	Only reference is function: get_subtree_obs - and this function isn't used anywhere.
+	I feel like... it should be deleted to reduce confusion in the future.
 
-	# opendss __init__
-	# networkx.py
-	# my_NetworkPlot and my_GetCoords both changes to remove radius
+	####################################################
+	# Funct 4: networkPlot in __init__ in solvers/opendss
+	#  Issue 1: Undirected
+	# Issue 2: my_NetworkPlot and my_GetCoords both need to be changed to remove radius
+
 	my_NP_graph = my_NetworkPlot( os.path.join( modelDir, circuit_file) )
 	print( "info about graph made from networkplot: ", my_NP_graph )
-	# networkPlot.py - looks like how I want it to look. This is a good sign
-	# but its undirected.
-	# - NOPE NETWORKPLOT IS THE BEST ONE!!!
+	# networkPlot.png - looks like how I want it to look. This is a good sign
+
 	# Gotta make it directed.
-	# Gotta add loads/load data.
+	# Gotta add loads/load data instead of transformers
+	Lets build up from here
+	Isn't used anywhere but has the best picture so don't want to delete
+
+	# Simply changed it to directed doesn't work.
+	# Issue 1: 
+	# netPlotDirected - WHAT HAPPENED?
+	# Issue 2: Dependents aren't there still.
+
+	another major issue: myCoords and openDSS cmds don't work for me
+	because of the linux capital directory issue.
 	'''
 
-	# my_NP_graph = my_NetworkPlot( os.path.join( modelDir, circuit_file), output_name='networkPlotDirected.png' )
-	# print( "info about graph made from networkplot: ", my_NP_graph )
-	# print( my_NP_graph.edges() )
-	# test_descendents_bus_list = sorted(nx.descendants(my_NP_graph, 'T_BUS1003_L'))
-	# print( my_NP_graph.get_edge_data('T_BUS1003_L', 'BUS1003') )
-	# Changing it to directed is not at easy fix. The bus still doesn't have descendants when I know it does.
-	# print( test_descendents_bus_list )
+	'''
+	Planning new function from what I have now: omd_to_nx
+	- Want to have the drawing like the original networkX
+	- Want hosting capacity coloring
+	- Want attributes for nodes/edges ( optional? )
+	- Get rid of volt stuff
+	'''
 
-	# Got rid of the volts stuff.
-	# A) David mentioned that we don't need any powerflow calculations
-	# Take the color stuff out, and color it based on the kw. 
-	graphData = dss_to_nx( os.path.join( modelDir, circuit_file) )
-	graph = graphData[0]
-	print( "info about graph made from temp_func_name_nx: ", graph )
-	buses = opendss.get_all_buses( os.path.join( modelDir, circuit_file) )
-	buses_output = {}
-	kwFromGraph = nx.get_node_attributes(graph, 'kw')
-	# print(kwFromGraph)
-	for bus in buses:
-		#print( 'bus: ', bus)
-		if bus in graph.nodes:
-			kwSum = 0
-			get_dependents = sorted(nx.descendants(graph, bus))
-			#print( "get_dependents of bus: ", bus)
-			#print( "\n", get_dependents)
-			for dependent in get_dependents:
-				#print( "dependent 1: ", dependent )
-				if dependent in kwFromGraph.keys():
-					#print( "dependent: ", dependent )
-					kwSum += float(kwFromGraph[dependent])
-			buses_output[bus] = kwSum
-	downline_output = pd.DataFrame(list(buses_output.items()), columns=['busname', 'kw'] )
-	norm = mcolors.Normalize(vmin=min(buses_output.values()), vmax=max(buses_output.values()))
-	cmap = plt.get_cmap('viridis')
-	node_colors = [cmap(norm(value)) for value in buses_output.values()]
-	drawNXGraph( G=graph, pos=graphData[1], outputPath=os.path.join( modelDir, "dssToPng.png"), labels=graphData[2], colorCode=node_colors)
+	modelDir = Path(omf.omfDir, 'scratch', 'hostingcapacity')
+	starting_omd_test_file = Path( omf.omfDir, 'static', 'publicFeeders', 'iowa240.clean.dss.omd')
+	tree = opendss.dssConvert.omdToTree( starting_omd_test_file )
+	opendss.dssConvert.treeToDss(tree, Path(modelDir, 'downlineLoad.dss'))
+	graphList = omd_to_nx_fulldata( Path(modelDir, 'downlineLoad.dss') )
+	graph = graphList[0]
+	pos = graphList[1] # <- keys are str, not nodes
+
+	labels = {}
+	for node in graph.nodes:
+		labels[node] = node
+
+	kwFromGraph = nx.get_node_attributes(graph, 'kw') # Dict 
+	kwFromGraph = {key: float(value) for key, value in kwFromGraph.items()} # sets all keys in dict to floats
 	
-	# print( temp_func_graph.edges() )
+	# Create a new list for color codes with default values for nodes without a kw
+	colorCode = []
+	for node in graph.nodes():
+			if node in kwFromGraph:
+					colorCode.append(kwFromGraph[node])
+			else:
+					colorCode.append(0) # Use 0 for nodes without a kw, which will be mapped to grey
+
+	# Normalize the colorCode values to the range [0, 1] for the colormap
+	colorCode = np.array(colorCode)
+	colorCode = (colorCode - colorCode.min()) / (colorCode.max() - colorCode.min())
+
+	drawNXGraph( G=graph, pos=pos, outputPath=Path( modelDir, "myplot.png"), colorCode=colorCode, labels=labels )
+
+
 	
-
-	# buses = opendss.get_meter_buses(circuit_file )
-	# kwSum = 0
-	# data = []
-	# # only load nodes would have these attributes
-	# kwFromGraph = nx.get_node_attributes(dssConvert_graph, 'kw')
-	# busToLoad = nx.get_node_attributes( dssConvert_graph, 'bus')
-	# test_descendents_bus_list = sorted(nx.descendants(dssConvert_graph, 't_bus2060_l'))
-	# print( "test_descendents_bus_list: ", test_descendents_bus_list )
-	# for bus in buses:
-	# 	if bus == "bus2033":
-	# 		test_descendents_bus_list = sorted(nx.descendants(dssConvert_graph, 't_bus2060_l'))
-	# 		print( "\ntest_descendents_bus_list FROM LOOP: ", test_descendents_bus_list )
-	# for bus in buses:
-	# 	kwSum = 0
-	# 	descendents_bus_list = sorted(nx.descendants(g2, bus))
-	# 	# Can be loads or buses
-	# 	for descendent in descendents_bus_list:
-	# 		if descendent in kwFromGraph:
-	# 			kwSum += kwFromGraph[descendent]
-	# 	data.append([busToLoad[descendent], kwSum])
-	# downlineOutputDF = pd.DataFrame(data, columns=['busName', 'kw'])
-	# print( downlineOutputDF.head )
-
-	# print( "kwFromGraph: ", kwFromGraph)
-	# print( "kw of t_bus3056_l: ",  kwFromGraph['t_bus3056_l'] )
-	# test_descendents_bus_list = sorted(nx.descendants(g2, 'bus2033'))
-	# print( "descendants: ", test_descendents_bus_list )
-	# kwSum = 0
-	# for node in test_descendents_bus_list:
-	# 	if node in buses:
-	# 		kwSum += kwFromGraph[node]
-	# print( "kwSum: ", kwSum)

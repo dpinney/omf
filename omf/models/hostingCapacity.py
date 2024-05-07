@@ -50,107 +50,6 @@ def createColorCSV(modelDir, df):
 	new_df = df[['bus','max_kw']]
 	new_df.to_csv(Path(modelDir, 'color_by.csv'), index=False)
 
-def my_GetCoords(dssFilePath):
-	'''Takes in an OpenDSS circuit definition file and outputs the bus coordinates as a dataframe.'''
-	dssFileLoc = os.path.dirname(dssFilePath)
-	curr_dir = os.getcwd()
-	opendss.runDSS(dssFilePath)
-	opendss.runDssCommand(f'export buscoords "{curr_dir}/coords.csv"')
-	coords = pd.read_csv(curr_dir + '/coords.csv', header=None)
-	# JENNY - Deleted Radius and everything after.
-	coords.columns = ['Element', 'X', 'Y']
-	return coords
-	
-def omd_to_nx( dssFilePath, tree=None ):
-	''' Combines dss_to_networkX and opendss.networkPlot together.
-
-	Creates a networkx directed graph from a dss files. If a tree is provided, build graph from that instead of the file.
-	Creates a .png picture of the graph.
-	Adds data to certain DSS node types ( loads )
-	
-	args:
-		filepath (str of file name):- dss file path
-		tree (list): None - tree representation of dss file
-		output_name (str):- name of png
-		show_labels (bool): true - show node label names
-		node_size (int): 300 - size of node circles in png
-		font_size (int): 8 - font size for png labels
-	return:
-		A networkx graph of the circuit 
-	'''
-	if tree == None:
-		tree = opendss.dssConvert.dssToTree( dssFilePath )
-
-	G = nx.DiGraph()
-	pos = {}
-
-	setbusxyList = [x for x in tree if '!CMD' in x and x['!CMD'] == 'setbusxy']
-	x_coords = [x['x'] for x in setbusxyList if 'x' in x]
-	y_coords = [x['y'] for x in setbusxyList if 'y' in x]
-	bus_names = [x['bus'] for x in setbusxyList if 'bus' in x]
-	for bus, x, y in zip( bus_names, x_coords, y_coords):
-		G.add_node(bus, pos=(x, y))
-		pos[bus] = (x, y)
-
-	lines = [x for x in tree if x.get('object', 'N/A').startswith('line.')]
-	bus1_lines = [x.split('.')[0] for x in [x['bus1'] for x in lines if 'bus1' in x]]
-	bus2_lines = [x.split('.')[0] for x in [x['bus2'] for x in lines if 'bus2' in x]]
-	edges = []
-	for bus1, bus2 in zip( bus1_lines, bus2_lines):
-		edges.append( (bus1, bus2) )
-	G.add_edges_from(edges)
-
-	# Need edges from bus --- trasnformr info ---> load
-	transformers = [x for x in tree if x.get('object', 'N/A').startswith('transformer.')]
-	transformer_bus_names = [x['buses'] for x in transformers if 'buses' in x]
-	bus_to_transformer_pairs = {}
-	for transformer_bus in transformer_bus_names:
-		strip_paren = transformer_bus.strip('[]')
-		split_buses = strip_paren.split(',')
-		bus = split_buses[0].split('.')[0]
-		transformer_name = split_buses[1].split('.')[0]
-		bus_to_transformer_pairs[transformer_name] = bus
-	
-	loads = [x for x in tree if x.get('object', 'N/A').startswith('load.')] # This is an orderedDict
-	load_names = [x['object'].split('.')[1] for x in loads if 'object' in x and x['object'].startswith('load.')]
-	load_transformer_name = [x.split('.')[0] for x in [x['bus1'] for x in loads if 'bus1' in x]]
-
-	# Connects loads to buses via transformers
-	labels = {}
-	for load_name, load_transformer in zip(load_names, load_transformer_name):
-    # Add edge from bus to load, with transformer name as an attribute
-		if load_transformer in bus_to_transformer_pairs:
-			bus = bus_to_transformer_pairs[load_transformer]
-			G.add_edge(bus, load_name, transformer=load_transformer)
-		else:
-			G.add_edge(load_transformer, load_name )
-		pos[load_name] = pos[load_transformer]
-		labels[load_name] = load_name
-	
-	# TEMP: Remove transformer nodes added from coordinates. Transformer data is edges, not nodes.
-	for transformer_name in load_transformer_name:
-		if transformer_name in G.nodes:
-			G.remove_node( transformer_name )
-			pos.pop( transformer_name )
-	
-	load_kw = [x['kw'] for x in loads if 'kw' in x]
-	for load, kw in zip( load_names, load_kw ):
-		G.nodes[load]['kw'] = kw
-	
-	return [G, pos, labels]
-
-def work(modelDir, inputDict):
-	outData = {}
-	
-	if inputDict['runAmiAlgorithm'] == 'on':
-		run_ami_algorithm(modelDir, inputDict, outData)
-	if inputDict.get('optionalCircuitFile', outData) == 'on':
-		run_traditional_algorithm(modelDir, inputDict, outData)
-	if inputDict.get('runDownlineAlgorithm') == 'on':
-		run_downline_load_algorithm( modelDir, inputDict, outData)
-	outData['stdout'] = "Success"
-	outData['stderr'] = ""
-	return outData
 
 def run_downline_load_algorithm( modelDir, inputDict, outData):
 	feederName = [x for x in os.listdir(modelDir) if x.endswith('.omd') and x[:-4] == inputDict['feederName1'] ][0]
@@ -159,8 +58,7 @@ def run_downline_load_algorithm( modelDir, inputDict, outData):
 	tree = opendss.dssConvert.omdToTree(path_to_omd)
 	opendss.dssConvert.treeToDss(tree, Path(modelDir, 'downlineLoad.dss'))
 	downline_start_time = time.time()
-	graphData = omd_to_nx( os.path.join( modelDir, 'downlineLoad.dss') )
-	graph = graphData[0]
+	graph = opendss.omd_to_nx_fulldata( os.path.join( modelDir, 'downlineLoad.dss') )
 	buses = opendss.get_all_buses( os.path.join( modelDir, 'downlineLoad.dss') )
 	buses_output = {}
 	kwFromGraph = nx.get_node_attributes(graph, 'kw')
@@ -289,6 +187,19 @@ def run_traditional_algorithm(modelDir, inputDict, outData):
 def runtimeEstimate(modelDir):
 	''' Estimated runtime of model in minutes. '''
 	return 1.0
+
+def work(modelDir, inputDict):
+	outData = {}
+	
+	if inputDict['runAmiAlgorithm'] == 'on':
+		run_ami_algorithm(modelDir, inputDict, outData)
+	if inputDict.get('optionalCircuitFile', outData) == 'on':
+		run_traditional_algorithm(modelDir, inputDict, outData)
+	if inputDict.get('runDownlineAlgorithm') == 'on':
+		run_downline_load_algorithm( modelDir, inputDict, outData)
+	outData['stdout'] = "Success"
+	outData['stderr'] = ""
+	return outData
 
 def new(modelDir):
 	''' Create a new instance of this model. Returns true on success, false on failure. '''

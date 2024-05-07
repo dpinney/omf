@@ -259,6 +259,29 @@ class LeafletLayer {            // implements ObserverInterface
     }
 
     #style() {
+        // - Extension styling
+        if (this.#observable.hasProperty('SOVI_RATNG', 'meta') && this.#observable.getProperty('SOVI_RATNG', 'meta') === 'Very High') {
+            return {
+                color: 'blue'
+            }
+        } else if (this.#observable.hasProperty('SOVI_RATNG', 'meta') && this.#observable.getProperty('SOVI_RATNG', 'meta') === 'Relatively High') {
+            return {
+                color: 'lightblue'
+            }
+        } else if (this.#observable.hasProperty('SOVI_RATNG', 'meta') && this.#observable.getProperty('SOVI_RATNG', 'meta') === 'Relatively Moderate') {
+            return {
+                color: 'lightgreen'
+            }
+        } else if (this.#observable.hasProperty('SOVI_RATNG', 'meta') && this.#observable.getProperty('SOVI_RATNG', 'meta') === 'Relatively Low') {
+            return {
+                color: 'yellow'
+            }
+        } else if (this.#observable.hasProperty('SOVI_RATNG', 'meta') && this.#observable.getProperty('SOVI_RATNG', 'meta') === 'Very Low') {
+            return {
+                color: 'grey'
+            }
+        }
+        // - Default OMF editor styling
         if (this.#observable.isNode()) {
             let fillColor = 'gray';
             if (this.#observable.hasProperty('pointColor')) {

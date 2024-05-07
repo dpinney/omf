@@ -238,8 +238,8 @@ def createLegend():
     plt.title("Social Vulnerability Legend")
     cb.set_ticks(range(num_colors))
     cb.ax.set_xticklabels(labels)
-    path = pJoin(omf.omfDir,'static','testFiles','resilientCommunity', 'legend.png')
 
+    path = modelDir + '.png'
     plt.savefig(path,bbox_inches='tight')
 
     return path
@@ -696,8 +696,10 @@ def getDownLineLoadsEquipment(pathToOmd,nriGeoJson, equipmentList):
             
             tract = findCensusTract(lat, long)
 
-            ## CHECKS IF WE HAVE ALREADY LOOKED FOR THE TRACT IN QUESTION
-
+            # if api call failed. repeat it
+            while tract == None:
+                tract = findCensusTract(lat, long)
+            # CHECKS IF WE HAVE ALREADY LOOKED FOR THE TRACT IN QUESTIO
             if tract in tracts:
                 svi_score = round(float(tracts.get(tract)['SOVI_SCORE']),2)
                 #loads[key] = tracts.get(tract)
@@ -748,7 +750,6 @@ def getDownLineLoadsEquipment(pathToOmd,nriGeoJson, equipmentList):
     df = createDF(tractData, cols, transformedGeos)
     geoDF = createGeoDF(df)
     
-    #geoDF.to_file('/Users/davidarmah/Documents/omf/omf/static/testFiles/resilientCommunity/geoShapes.geojson', driver="GeoJSON")
             
         
     del omd
@@ -924,25 +925,22 @@ def work(modelDir, inputDict):
 
     # files
     omd_file_path = pJoin(omf.omfDir,'static','testFiles','resilientCommunity', inputDict['inputDataFileName'])
-    #census_nri_path = pJoin(omf.omfDir,'static','testFiles','census_and_NRI_database_MAR2023.json')
-    census_nri_path = '/Users/davidarmah/Documents/Python Code/PCCEC/CensusNRI.json'
+    census_nri_path = pJoin(omf.omfDir,'static','testFiles','census_and_NRI_database_MAR2023.json')
     loads_file_path = pJoin(omf.omfDir,'static','testFiles','resilientCommunity', 'loads2.json')
     obs_file_path = pJoin(omf.omfDir,'static','testFiles','resilientCommunity', 'objects3.json')
     geoJson_shapes_file = pJoin(omf.omfDir,'static','testFiles','resilientCommunity', 'geoshapes.geojson')
-    
-    # check if we want to refresh the nri data
-    #import sys as sys
-    # sys.stdout.write(inputDict)
+
+
+    # check if censujs data json is donwloaded
+    # if not download
+    # make sure computer has 8.59 GB Space for download
     if not os.path.exists(census_nri_path):
         retrieveCensusNRI()
-    elif inputDict['refresh'] == True:
+    elif inputDict['refresh']:
         retrieveCensusNRI()
-        createLegend()
-    
     
     # check what equipment we want to look for
-
-    equipmentList = []
+    equipmentList = ['bus']
 
     if (inputDict['lines'].lower() == 'yes' ):
         equipmentList.append('line')
@@ -950,8 +948,8 @@ def work(modelDir, inputDict):
         equipmentList.append('transformer')
     if (inputDict['fuses'].lower() == 'yes' ):
         equipmentList.append('fuse')
-    if (inputDict['buses'].lower() == 'yes' ):
-        equipmentList.append('bus')
+    #if (inputDict['buses'].lower() == 'yes' ):
+    #    equipmentList.append('bus')
     
 
     #load census data
@@ -967,7 +965,6 @@ def work(modelDir, inputDict):
     
     createColorCSV(modelDir, loads)
     
-
     if(inputDict['loadCol'] == 'Base Criticality Score'):
         colVal = "1"
     elif (inputDict['loadCol'] == 'Community Criticality Score'):
@@ -982,6 +979,7 @@ def work(modelDir, inputDict):
     # Load Geojson file more efficiently
 
     geoDF.to_file(geoJson_shapes_file, driver="GeoJSON")
+
     with open(geoJson_shapes_file) as f1:
         geoshapes =  json.load(f1)
     attachment_keys = {
@@ -1007,20 +1005,15 @@ def work(modelDir, inputDict):
 
     newOmdJson = addLoadInfoToOmd(loads, init_omdJson)
 
-    omdJson = addEquipmentInfoToOmd(obDict, newOmdJson)
-
-
-
-
-
+    omdJson = addEquipmentInfoToOmd(obDict, newOmdJson, equipmentList) 
     #omdJson = addToOmd1(newDict, init_omdJson, equipmentList)
+    
     data = Path(modelDir, 'color_by.csv').read_text()
 
-    # TO DO
+    
 
     attachment_keys['coloringFiles']['color_by.csv']['csv'] = data
     
-    omd = json.load(open(omd_file_path))
     
     new_path = Path(modelDir, 'color_test.omd')
 	
@@ -1028,8 +1021,6 @@ def work(modelDir, inputDict):
 
     with open(new_path, 'w+') as out_file:
         json.dump(omdJson, out_file, indent=4)
-
-
 
     #outData['nri_data'] = json.dumps(nricensusJson)
 
@@ -1061,30 +1052,9 @@ def work(modelDir, inputDict):
     outData['loadTableHeadings2'] = headers2
     outData['loadTableValues2'] = list(zip(object_names, base_criticality_score_vals2, base_criticity_index_vals2,community_criticality_score_vals2,community_criticity_index_vals ))
 
-    str1 = '''
-    loads_file_path = pJoin(omf.omfDir,'static','testFiles', 'resilientCommunity', 'loads2.json')
-    geo.map_omd(omd_file_path, modelDir, open_browser=False )
-    #geo.map_omd(omd_file_path, modelDir, open_browser=False)
-    outData['resilienceMap'] = open( pJoin( modelDir, "geoJson_offline.html"), 'r' ).read()
-    #outData['geoshapes'] = open(geoshapes_geoPath, 'r').read()
-
-    fullFile = json.load(open(loads_file_path))
-
-    headers = ['Load Name', 'People Served', 'Base Criticallity']
-    load_names = list(fullFile.keys())
-    people_served_vals = [value.get('base_criticality_score') for key, value in fullFile.items()]
-    percentile_vals = [value.get('base_criticality_score_index') for key, value in fullFile.items()]
-
-
-    outData['loadTableHeadings'] = headers
-    outData['loadTableValues'] = list(zip(load_names, people_served_vals, percentile_vals))
-    
-
-    '''
 
 
     return outData
-
 
 def test():
     #omdPath = '/Users/davidarmah/Downloads/cleandssout.omd'
