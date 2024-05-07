@@ -82,9 +82,10 @@ class FeatureController { // implements ControllerInterface
         if (!(observables instanceof Array)) {
             throw TypeError('"observables" argument must be instanceof Array.');
         }
-        observables.forEach(ob => {
+        const observablesCopy = [...observables];
+        for (const ob of observablesCopy) {
             ob.deleteObservable();
-        });
+        }
         // - I shouldn't have to do this because all visited nodes are deleted
         //this.observableGraph.markNodesAsUnvisited();
         // - Currently, this function is a convenience function that views could do themselves because nothing else needs to be done besides calling

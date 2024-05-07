@@ -9,11 +9,12 @@ import { TestModal } from './extensions/testModal.js';
  *   pattern. An ObservableInterface instance does NOT observe a LeafletLayer instance. Instead, a LeafletLayer instance uses the controller to pass
  *   its own changes to the underlying ObservableInterface instance
  */
-class LeafletLayer { // implements ObserverInterface
-    #controller;    // ControllerInterface instance
-    #layer;         // - Leaflet layer
-    #observable;    // - ObservableInterface instance
+class LeafletLayer {            // implements ObserverInterface
+    #controller;                // ControllerInterface instance
+    #layer;                     // - Leaflet layer
+    #observable;                // - ObservableInterface instance
     #modal;
+    static trackCursor = null;  // - HACK: the currently active trackCusor function. This is needed to get rid of sticky markers when the map gets a mouseup event
     static map;
     static control;
     static nodeLayers = L.featureGroup();
@@ -233,15 +234,21 @@ class LeafletLayer { // implements ObserverInterface
             lng: null
         };
         marker.on('mousedown', (e) => {
+            // - Don't let the map get the mousedown event. This matters for multiselectControl.js
+            L.DomEvent.stopPropagation(e);
             this.bindPopup();
             mousedownPoint.lat = e.latlng.lat;
             mousedownPoint.lng = e.latlng.lng;
             LeafletLayer.map.dragging.disable();
             LeafletLayer.map.on('mousemove', trackCursor);
+            LeafletLayer.trackCursor = trackCursor;
         });
         marker.on('mouseup', (e) => {
+            // - Don't let the map get the mouseup event. This matters for multiselectControl.js
+            L.DomEvent.stopPropagation(e);
             LeafletLayer.map.dragging.enable();
             LeafletLayer.map.off('mousemove', trackCursor)
+            LeafletLayer.trackCursor = null;
             if (e.latlng.lat !== mousedownPoint.lat || e.latlng.lng !== mousedownPoint.lng) {
                 this.unbindPopup();
             }

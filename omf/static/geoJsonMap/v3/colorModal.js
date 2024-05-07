@@ -357,8 +357,8 @@ class ColorModal { // implements ModalInterface, ObserverInterface
             observable.getObservers().filter(observer => observer instanceof LeafletLayer).forEach(ll => {
                 const path = Object.values(ll.getLayer()._layers)[0];
                 if (observable.isNode()) {
-                    if (!path.options.hasOwnProperty('originalColor')) {
-                        path.options.originalColor = path.options.fillColor;
+                    if (!path.options.hasOwnProperty('originalFillColor')) {
+                        path.options.originalFillColor = path.options.fillColor;
                     }
                     path.setStyle({
                         fillColor: 'gray'
@@ -367,9 +367,17 @@ class ColorModal { // implements ModalInterface, ObserverInterface
                     if (!path.options.hasOwnProperty('originalColor')) {
                         path.options.originalColor = path.options.color;
                     }
-                    path.setStyle({
-                        color: 'gray'
-                    });
+                    if (!path.options.hasOwnProperty('colorModalColor')) {
+                        path.options.colorModalColor = 'gray';
+                    }
+                    // - The line is highlighted
+                    if (path.options.color === '#7FFF00') {
+                        // - pass
+                    } else {
+                        path.setStyle({
+                            color: 'gray'
+                        });
+                    }
                 }
             });
         }
@@ -386,6 +394,12 @@ class ColorModal { // implements ModalInterface, ObserverInterface
                     if (observable.isNode()) {
                         path.setStyle({
                             fillColor: hex
+                        });
+                    }
+                    if (observable.isLine()) {
+                        observable.options.colorModalColor = hex;
+                        path.setStyle({
+                            color: hex
                         });
                     }
                 });
@@ -453,12 +467,18 @@ class ColorModal { // implements ModalInterface, ObserverInterface
                 const path = Object.values(ll.getLayer()._layers)[0];
                 if (observable.isNode()) {
                     path.setStyle({
-                        fillColor: path.options.originalColor
+                        fillColor: path.options.originalFillColor
                     });
                 } else if (observable.isLine()) {
-                    path.setStyle({
-                        color: path.options.originalColor
-                    });
+                    delete path.options.colorModalColor;
+                    // - The line is highlighted
+                    if (path.options.color === '#7FFF00') {
+                        // - pass
+                    } else {
+                        path.setStyle({
+                            color: path.options.originalColor
+                        });
+                    }
                 }
             });
         });
@@ -625,7 +645,8 @@ class ColorMap {
         buttonDiv.appendChild(button);
         modal.insertElement(buttonDiv);
         document.getElementById('legendInsert').replaceChildren(modal.divElement);
-        $(modal.divElement).draggable();
+        const draggable = new L.Draggable(modal.divElement)
+        draggable.enable()
     }
 
     /**

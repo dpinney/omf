@@ -57,7 +57,7 @@ class FeatureEditModal { // implements ObserverInterface, ModalInterface
             if (this.#observables.length === 0) {
                 this.remove();
             } else {
-                this.renderContent();
+                this.refreshContent();
             }
         }
     }
@@ -157,6 +157,18 @@ class FeatureEditModal { // implements ObserverInterface, ModalInterface
             // - First, compare the observables' state to the table state. If the observables' state has a property that is not in the table state,
             //   add a row to the table
             if (!tableKeys.includes(key)) {
+                // - Don't let unintended properties show up when a FeatureEditModal refreshes due to a marker being dragged
+                if (['from', 'to'].includes(key)) {
+                    if (!this.#observables.every(ob => ob.isLine() && !ob.isParentChildLine())) {
+                        continue;
+                    }
+                }
+                if (key === 'type' && !this.#observables.every(ob => ob.isParentChildLine())) {
+                    continue;
+                }
+                if (key === 'parent' && !this.#observables.every(ob => ob.isChild())) {
+                    continue;
+                }
                 const keySpan = document.createElement('span');
                 keySpan.textContent = key;
                 keySpan.dataset.propertyKey = key;
@@ -219,7 +231,8 @@ class FeatureEditModal { // implements ObserverInterface, ModalInterface
             if (ary.length === 1) {
                 modal.insertTHeadRow([null, keySpan, ary[0].toString()], 'prepend');
             } else {
-                modal.insertTHeadRow([null, keySpan, '<Multiple IDs>'], 'prepend');
+                //modal.insertTHeadRow([null, keySpan, '<Multiple IDs>'], 'prepend');
+                modal.insertTHeadRow([null, keySpan, ary.join(',')], 'prepend');
             }
         }
         for (const [key, ary] of Object.entries(keyToValues.treeProps)) {
@@ -231,7 +244,8 @@ class FeatureEditModal { // implements ObserverInterface, ModalInterface
                 if (ary.length === 1) {
                     modal.insertTHeadRow([null, keySpan, ary[0].toString()])
                 } else {
-                    modal.insertTHeadRow([null, keySpan, `<Multiple "${key}" values>`]);
+                    //modal.insertTHeadRow([null, keySpan, `<Multiple "${key}" values>`]);
+                    modal.insertTHeadRow([null, keySpan, ary.join(', ')]);
                 }
                 continue;
             }
@@ -590,13 +604,17 @@ class FeatureEditModal { // implements ObserverInterface, ModalInterface
             throw TypeError('"propertyValues" argument must be instanceof Array or null.');
         }
         const input = document.createElement('input');
+        input.addEventListener('mousedown', (e) => {
+            e.stopPropagation(e);
+        });
         if (propertyValues === null) {
             //- Do nothing. A new property was just added so the value text input should be blank
         } else if (propertyValues.length === 1) {
             // - This works even if propertyValues = [""], which it can be sometimes
             input.value = propertyValues[0];
         } else {
-            input.value = `<Multiple "${propertyKey}" values>`;
+            //input.value = `<Multiple "${propertyKey}" values>`;
+            input.value = propertyValues.join(', ');
         }
         let originalValue = input.value;
         const that = this;
@@ -900,8 +918,8 @@ function getTrashCanSvg() {
     const svg = document.createElementNS('http://www.w3.org/2000/svg','svg');
     svg.setAttribute('width', '22px');
     svg.setAttribute('height', '22px');
-    svg.setAttribute('viewBox', '0 0 24 24'); 
-    svg.setAttribute('fill', 'none'); 
+    svg.setAttribute('viewBox', '0 0 24 24');
+    svg.setAttribute('fill', 'none');
     const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
     path.setAttribute('d', 'M10 10V16M14 10V16M4 6H20M15 6V5C15 3.89543 14.1046 3 13 3H11C9.89543 3 9 3.89543 9 5V6M18 6V14M18 18C18 19.1046 17.1046 20 16 20H8C6.89543 20 6 19.1046 6 18V13M6 9V6');
     path.setAttribute('stroke', '#FFFFFF');
@@ -968,42 +986,45 @@ function zoom(observables) {
                 leafletLayer.openPopup();
             }
         } else {
-            let coordinates;
-            if (observable.isPolygon()) {
-                coordinates = observable.getCoordinates().flat(1);
-            } else if (observable.isMultiPolygon()) {
-                coordinates = observable.getCoordinates().flat(2);
-            } else {
-                return;
-            }
-            const lons = [];
-            const lats = [];
-            coordinates.forEach(ary => { lons.push(ary[0]); lats.push(ary[1]); });
-            LeafletLayer.map.flyToBounds([
-                [Math.min.apply(null, lats), Math.min.apply(null, lons)],
-                [Math.max.apply(null, lats), Math.max.apply(null, lons)]],
-                {duration: .3});
-            if (!leafletLayer.isPopupOpen()) {
-                leafletLayer.openPopup();
-            }
+            throw Error('Zoom button is only supported for nodes and lines.');
+            //let coordinates;
+            //if (observable.isPolygon()) {
+            //    coordinates = observable.getCoordinates().flat(1);
+            //} else if (observable.isMultiPolygon()) {
+            //    coordinates = observable.getCoordinates().flat(2);
+            //} else {
+            //    return;
+            //}
+            //const lons = [];
+            //const lats = [];
+            //coordinates.forEach(ary => { lons.push(ary[0]); lats.push(ary[1]); });
+            //LeafletLayer.map.flyToBounds([
+            //    [Math.min.apply(null, lats), Math.min.apply(null, lons)],
+            //    [Math.max.apply(null, lats), Math.max.apply(null, lons)]],
+            //    {duration: .3});
+            //if (!leafletLayer.isPopupOpen()) {
+            //    leafletLayer.openPopup();
+            //}
         }
     } else {
         const lons = [];
         const lats = [];
         observables.forEach(ob => {
             if (ob.isNode()) {
-                const [lon, lat] = structuredClone(ob.getCoordinates());
+                const [lon, lat] = ob.getCoordinates();
                 lons.push(lon);
                 lats.push(lat);
             } else if (ob.isLine()) {
-                const [[lon1, lat1], [lon2, lat2]] = structuredClone(ob.getCoordinates());
+                const [[lon1, lat1], [lon2, lat2]] = ob.getCoordinates();
                 lons.push(...[lon1, lon2]);
                 lats.push(...[lat1, lat2]);
             }
         });
         LeafletLayer.map.flyToBounds([
-            [Math.min.apply(null, lons), Math.min.apply(null, lats)],
-            [Math.max.apply(null, lons), Math.max.apply(null, lats)],
+            [Math.min.apply(null, lats), Math.min.apply(null, lons)],
+            [Math.max.apply(null, lats), Math.max.apply(null, lons)],
+            19,
+            {duration: .3}
         ]);
     }
 }

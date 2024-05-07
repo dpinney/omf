@@ -43,6 +43,7 @@
       onAdd: function(map) {
         this._map = map;
         this._container = L.DomUtil.create('div', 'leaflet-bar');
+        this._container.title = '- The ruler tool allows you to draw paths on the map\n- Click this button to enable\n- Press escape once or double click once to finish drawing the current path\n- Click this button or press escape again to disable';
         this._container.classList.add('leaflet-ruler');
         L.DomEvent.disableClickPropagation(this._container);
         L.DomEvent.on(this._container, 'click', this._toggleMeasure, this);

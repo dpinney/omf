@@ -8,7 +8,9 @@ import { LeafletLayer } from './leafletLayer.js';
 import { Nav } from './nav.js';
 import { SearchModal } from './searchModal.js';
 import { TopTab } from './topTab.js';
+import { ClusterControlClass } from './clusterControl.js';
 import { MultiselectControlClass } from './multiselectControl.js';
+import { ZoomControlClass } from './zoomControl.js';
 
 function main() {
     const features = gFeatureCollection.features.map(f => new Feature(f));
@@ -29,11 +31,22 @@ function main() {
     setupNav(controller, nav);
     const topTab = new TopTab();
     createSearchModal(controller, nav, topTab);
+    setupMap(controller);
+    setupControls(controller);
+    const modalInsert = document.getElementById('modalInsert');
+    modalInsert.addEventListener('click', hideModalInsert);
+    createHelpMenu();
+    createEditMenu(controller, nav, topTab);
+    if (gIsOnline && gShowFileMenu) {
+        createFileMenu(controller);
+    }
+    addMenuEventHandlers();
+}
 
-    /****************/
-    /* Setup layers */
-    /****************/
-
+function setupMap(controller) {
+    if (!(controller instanceof FeatureController)) {
+        throw Error('The "controller" argument must be instanceof controller.');
+    }
     const maxZoom = 32;
     var esri_satellite_layer = L.esri.basemapLayer('Imagery', {
         maxZoom: maxZoom
@@ -50,6 +63,36 @@ function main() {
     const blank_layer = L.tileLayer('', {
         maxZoom: maxZoom
     });
+    LeafletLayer.map = L.map('map', {
+        // - This zoom level sensibly displays all circuits to start, even the ones with weird one-off players that skew where the center is
+        zoom: 14,
+        // - Provide the layers that the map should start with
+        layers: [esri_satellite_layer, LeafletLayer.parentChildLineLayers, LeafletLayer.lineLayers, LeafletLayer.nodeLayers],
+        // - Better performance for large datasets
+        renderer: L.canvas(),
+        // - Disable box zoom shortcut because we use the shift key for multiselection
+        boxZoom: false
+    });
+    // - Whenever there is a mouseup event on the map, it's possible that a marker was being dragged. To prevent the marker from "sticking" to the
+    //   cursor, just turn off the active trackCursor function
+    LeafletLayer.map.on('mouseup', (e) => {
+        if (LeafletLayer.trackCursor !== null) {
+            LeafletLayer.map.off('mousemove', LeafletLayer.trackCursor);
+        }
+    });
+    // - Prevent all leaflet popup "x" buttons from triggering a "mouseup" event on the map
+    LeafletLayer.map.on('popupopen', (e) => {
+        for (const btn of [...document.getElementsByClassName('leaflet-popup-close-button')]) {
+            btn.addEventListener('mouseup', (e) => {
+                e.stopPropagation();
+            });
+        }
+    });
+    // - This stops mouseup events from propagating from this pane to the map because otherwise clicking on a popup modal will highlight objects if
+    //   multiselection is enabled
+    L.DomEvent.on(LeafletLayer.map.getPane('popupPane'), 'mouseup', (e) => {
+        e.stopPropagation();
+    });
     const baseMaps = {
         'Satellite': esri_satellite_layer,
         'Streets': mapbox_layer,
@@ -61,15 +104,12 @@ function main() {
         'Lines': LeafletLayer.lineLayers,
         'Parent-Child Lines': LeafletLayer.parentChildLineLayers,
     }
-    LeafletLayer.map = L.map('map', {
-        // - This zoom level sensibly displays all circuits to start, even the ones with weird one-off players that skew where the center is
-        zoom: 14,
-        // - Provide the layers that the map should start with
-        layers: [esri_satellite_layer, LeafletLayer.parentChildLineLayers, LeafletLayer.lineLayers, LeafletLayer.nodeLayers],
-        // - Better performance for large datasets
-        renderer: L.canvas()
+    LeafletLayer.control = L.control.layers(baseMaps, overlayMaps, {
+        position: 'topleft',
+        collapsed: false,
     });
-    featureGraph.getObservables().forEach(ob => {
+    LeafletLayer.control.addTo(LeafletLayer.map);
+    controller.observableGraph.getObservables().forEach(ob => {
         if (!ob.isConfigurationObject()) {
             // - Here, the first observer is added to every visible feature
             LeafletLayer.createAndGroupLayer(ob, controller);
@@ -78,16 +118,6 @@ function main() {
     // - Keep nodes on top of lines
     LeafletLayer.map.on('overlayadd', () => LeafletLayer.nodeLayers.bringToFront());
     LeafletLayer.map.fitBounds(LeafletLayer.nodeLayers.getBounds());
-    LeafletLayer.control = L.control.layers(baseMaps, overlayMaps, {
-        position: 'topleft',
-        collapsed: false,
-    });
-    LeafletLayer.control.addTo(LeafletLayer.map);
-    addZoomToFitButon();
-    addClusterButton();
-    addRuler();
-    addMultiselectControl(controller);
-    addGeocoding();
     // - Disable the following annoying default Leaflet keyboard shortcuts:
     //  - TODO: do a better job and stop the event(s) from propagating in text inputs instead
     document.getElementById('map').onkeydown = function(e) {
@@ -99,16 +129,33 @@ function main() {
         ].includes(e.key)) {
             e.stopPropagation();
         }
-        //console.log(e.key);
 	};
-    const modalInsert = document.getElementById('modalInsert');
-    modalInsert.addEventListener('click', hideModalInsert);
-    createHelpMenu();
-    createEditMenu(controller, nav, topTab);
-    if (gIsOnline && gShowFileMenu) {
-        createFileMenu(controller);
+}
+
+/**
+ * - Set up the controls in the top left hand corner of the screen
+ */
+function setupControls(controller) {
+    if (!(controller instanceof FeatureController)) {
+        throw Error('The "controller" argument must be instanceof controller.');
     }
-    addMenuEventHandlers();
+    addZoomControl(controller);
+    addMultiselectControl(controller);
+    addClusterControl(controller);
+    addRuler();
+    addGeocoding();
+    // - Prevent mouse events from propagating from controls to the map
+    for (const div of [...document.getElementsByClassName('leaflet-control')]) {
+        L.DomEvent.on(div, 'mousedown', function (e) {
+            L.DomEvent.stopPropagation(e);
+        });
+        L.DomEvent.on(div, 'mouseup', function (e) {
+            L.DomEvent.stopPropagation(e);
+        });
+        L.DomEvent.on(div, 'click', function (e) {
+            L.DomEvent.stopPropagation(e);
+        });
+    }
 }
 
 /**
@@ -325,61 +372,26 @@ function hideModalInsert() {
     modalInsert.classList.remove('visible');
 }
 
-/**
- * @returns {undefined}
- */
-function addZoomToFitButon() {
-    const leafletHookDiv = document.querySelector('div.leaflet-top.leaflet-left');
-    const div = document.createElement('div');
-    div.classList.add('leaflet-control', 'leaflet-touch', 'leaflet-control-layers', 'leaflet-bar');
-    const button = document.createElement('button');
-    button.classList.add('leaflet-custom-control-button');
-    button.textContent = 'Zoom to fit';
-    button.addEventListener('click', function() {
-        LeafletLayer.map.fitBounds(LeafletLayer.nodeLayers.getBounds());
-    });
-    div.appendChild(button);
-    leafletHookDiv.appendChild(div);
+function addZoomControl(controller) {
+    if (!(controller instanceof FeatureController)) {
+        throw Error('The "controller" argument must be instanceof controller.');
+    }
+    const zoomControl = new ZoomControlClass(controller);
+    LeafletLayer.map.addControl(zoomControl);
 }
 
-/**
- * @returns {undefined}
- */
-function addClusterButton() {
-    const leafletHookDiv = document.querySelector('div.leaflet-top.leaflet-left');
-    const div = document.createElement('div');
-    div.classList.add('leaflet-control', 'leaflet-touch', 'leaflet-control-layers', 'leaflet-bar');
-    const button = document.createElement('button');
-    button.classList.add('leaflet-custom-control-button');
-    button.textContent = 'Toggle Node Grouping';
-    button.addEventListener('click', function() {
-        LeafletLayer.map.removeLayer(LeafletLayer.nodeLayers);
-        const overlayMap = [];
-        for (const layer of LeafletLayer.control._layers) {
-            if (layer.overlay === true) {
-                overlayMap.push(layer);
-            }
-        }
-        overlayMap.forEach(layer => LeafletLayer.control.removeLayer(layer.layer));
-        if (LeafletLayer.nodeLayers instanceof L.MarkerClusterGroup) {
-            LeafletLayer.nodeLayers = L.featureGroup(LeafletLayer.nodeLayers.getLayers());
-        } else {
-            const nodeLayers = LeafletLayer.nodeLayers.getLayers();
-            LeafletLayer.nodeLayers = L.markerClusterGroup();
-            nodeLayers.forEach(l => LeafletLayer.nodeLayers.addLayer(l));
-        }
-        const nodeLayerIndex = overlayMap.findIndex(layer => layer.name === 'Nodes');
-        overlayMap[nodeLayerIndex] = {layer: LeafletLayer.nodeLayers, name: 'Nodes'};
-        for (const layer of overlayMap) {
-            LeafletLayer.control.addOverlay(layer.layer, layer.name);
-        }
-        LeafletLayer.map.addLayer(LeafletLayer.nodeLayers);
-    });
-    div.appendChild(button);
-    leafletHookDiv.appendChild(div);
+function addClusterControl(controller) {
+    if (!(controller instanceof FeatureController)) {
+        throw Error('The "controller" argument must be instanceof controller.');
+    }
+    const clusterControl = new ClusterControlClass(controller);
+    LeafletLayer.map.addControl(clusterControl);
 }
 
 function addMultiselectControl(controller) {
+    if (!(controller instanceof FeatureController)) {
+        throw Error('The "controller" argument must be instanceof controller.');
+    }
     const multiselectControl = new MultiselectControlClass(controller);
     LeafletLayer.map.addControl(multiselectControl);
 }
