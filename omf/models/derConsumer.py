@@ -20,6 +20,9 @@ from omf.models import vbatDispatch as vb
 from omf.solvers import reopt_jl
 
 # Model metadata:
+tooltip = ('The derConsumer model evaluates the financial costs of controlling behind-the-meter \
+           distributed energy resources (DERs) at the residential level using the NREL renewable \
+		   energy optimization tool (REopt) and the OMF virtual battery dispatch module (vbatDispatch).')
 modelName, template = __neoMetaModel__.metadata(__file__)
 hidden = False
 
@@ -174,12 +177,29 @@ def work(modelDir, inputDict):
 					 fillcolor='rgba(255,246,0,1)',
 					 showlegend=showlegend
 					 ))
+	
+	fig.update_layout(
+    	title='Residential Data',
+    	xaxis=dict(title='Timestamp'),
+    	yaxis=dict(title="Energy (kW)"),
+    	yaxis2=dict(title='degrees Celsius',
+                overlaying='y',
+                side='right'
+                ),
+    	legend=dict(
+			orientation='h',
+			yanchor="bottom",
+			y=1.02,
+			xanchor="right",
+			x=1
+			)
+	)
 
 	fig.show()
 
 	## Encode plot data as JSON for showing in the HTML side
 	outData['plotlyPlot'] = json.dumps(fig.data, cls=plotly.utils.PlotlyJSONEncoder)
-	outData['plotlyLayout'] = json.dumps(layout, cls=plotly.utils.PlotlyJSONEncoder)
+	outData['plotlyLayout'] = json.dumps(fig.layout, cls=plotly.utils.PlotlyJSONEncoder)
 
 	# Model operations typically ends here.
 	# Stdout/stderr.
