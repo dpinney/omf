@@ -50,7 +50,8 @@ def work(modelDir, inputDict):
 	#outage_flag = inputDict['outage'] #TODO: Add outage option to HTML
 	#reopt_jl.run_reopt_jl(modelDir, scenario, outages=outage_flag)
 	
-	## Read in a static REopt test file (NOTE: This code is temporary)
+	## NOTE: This code is temporary
+	## Read in a static REopt test file 
 	with open(pJoin(__neoMetaModel__._omfDir,"static","testFiles","residential_REopt_results.json")) as f:
 		reoptResults = pd.json_normalize(json.load(f))
 		print('Successfully loaded REopt test file. \n')
@@ -226,8 +227,6 @@ def new(modelDir):
 		"user": "admin",
 		"modelType": modelName,
 		"created": str(datetime.datetime.now()),
-		"user": "admin",
-		"modelType": modelName,
 
 		## REopt inputs:
 		"latitude":  '39.532165', ## Rivesville, WV
