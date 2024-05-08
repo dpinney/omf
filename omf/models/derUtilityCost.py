@@ -36,9 +36,9 @@ def create_REopt_jl_jsonFile(modelDir, inputDict):
 	year = int(inputDict['year'])
 
 	## Energy technologies
-	solar = inputDict['solar'] 
-	generator = inputDict['generator']
-	battery = inputDict['battery']
+	#solar = inputDict['solar'] 
+	#generator = inputDict['generator']
+	#battery = inputDict['battery']
 
 	## Load demand file and make it JSON ready
 	with open(pJoin(modelDir, "demand.csv")) as loadFile:
@@ -179,7 +179,7 @@ def work(modelDir, inputDict):
 	''' Run the model in its directory. '''
 	
 	# Delete output file every run if it exists
-	out = {}
+	outData = {}
 
 	## Setting up the demand file (hourly kWh) and temperature file
 	with open(pJoin(modelDir, 'demand.csv'), 'w') as f:
@@ -190,36 +190,38 @@ def work(modelDir, inputDict):
 
 	with open(pJoin(modelDir, 'temp.csv'), 'w') as f:
 		lines = inputDict['tempCurve'].split('\n')
-		out["tempData"] = [float(x) if x != '999.0' else float(inputDict['setpoint']) for x in lines if x != '']
+		outData["tempData"] = [float(x) if x != '999.0' else float(inputDict['setpoint']) for x in lines if x != '']
 		correctData = [x+'\n' if x != '999.0' else inputDict['setpoint']+'\n' for x in lines if x != '']
 		f.write(''.join(correctData))
 	assert len(correctData) == 8760
 
 
 	## Create REopt input file
-	#scenario = create_REopt_jl_jsonFile(modelDir, inputDict)
+	scenario = create_REopt_jl_jsonFile(modelDir, inputDict)
 
-	## Run REopt.jl
-	outage_flag = inputDict['outage']
+	## NOTE: This code will be used once reopt_jl is working
+	## Run REopt.jl 
+	#outage_flag = inputDict['outage'] #TODO: Add outage option to HTML
 	#reopt_jl.run_reopt_jl(modelDir, scenario, outages=outage_flag)
 
 	#with open(pJoin(modelDir, 'results.json')) as jsonFile:
 	#	results = json.load(jsonFile)
 
+	## NOTE: This code is temporary
 	## Read in a static REopt test file
-	with open(pJoin(__neoMetaModel__._omfDir,"static","testFiles","residential_REopt_results.json")) as f:
+	with open(pJoin(__neoMetaModel__._omfDir,"static","testFiles","utility_reopt_results.json")) as f:
 		results = json.load(f)
 		print('Successfully read in REopt test file. \n')
 
-	out['PV'] = results['outputs']['PV']
+	#outData['PV'] = results['outputs']['PV']
 
 
 	## Output data
-	out['solar'] = inputDict['solar']
-	out['generator'] = inputDict['generator'] ## TODO: make generator switch on only during outage?
-	out['battery'] = inputDict['battery']
-	out['year'] = inputDict['year']
-	out['urdbLabel'] = inputDict['urdbLabel']
+	#outData['solar'] = inputDict['solar']
+	#outData['generator'] = inputDict['generator'] ## TODO: make generator switch on only during outage?
+	#outData['battery'] = inputDict['battery']
+	#outData['year'] = inputDict['year']
+	#outData['urdbLabel'] = inputDict['urdbLabel']
 	#out['demandCost'] = results['ElectricTariff']['lifecycle_demand_cost_after_tax']
 	#out['powerPVToGrid'] = results['PV']['electric_to_grid_series_kw']#['year_one_to_grid_series_kw']
 
@@ -238,11 +240,11 @@ def work(modelDir, inputDict):
 	#with open(pJoin(modelDir, 'REoptInputs.json')) as jsonFile:
 		#reopt_inputs = json.load(jsonFile)
 
-	inputDict['outage'] = False ## Temporary line to disable the following outage resilience code
+	inputDict['outage'] = False ##NOTE: Temporary line to disable the following outage resilience code
 	if (inputDict['outage']):
 		with open(pJoin(modelDir, 'resultsResilience.json')) as jsonFile:
 			resultsResilience = json.load(jsonFile)
-		out.update(resultsResilience) ## Update out file with resilience results
+		outData.update(resultsResilience) ## Update out file with resilience results
 	
 	## Run vbatDispatch with outputs from REopt
 	#VB.new(modelDir)
@@ -253,7 +255,7 @@ def work(modelDir, inputDict):
 		vbatResults = vb.work(modelDir,inputDict)
 		with open(pJoin(modelDir, 'vbatResults.json'), 'w') as jsonFile:
 			json.dump(vbatResults, jsonFile)
-		out.update(vbatResults) ## Update out file with vbat results
+		outData.update(vbatResults) ## Update out file with vbat results
 
 	## vbatDispatch out data
 	
@@ -264,28 +266,29 @@ def work(modelDir, inputDict):
 
 	# Model operations typically ends here.
 	# Stdout/stderr.
-	out["stdout"] = "Success"
-	out["stderr"] = ""
-	return out
+	outData["stdout"] = "Success"
+	outData["stderr"] = ""
+	return outData
 
 def new(modelDir):
 	''' Create a new instance of this model. Returns true on success, false on failure. '''
-	with open(pJoin(__neoMetaModel__._omfDir,"static","testFiles","residential_PV_load.csv")) as f:
+	with open(pJoin(__neoMetaModel__._omfDir,"static","testFiles","utility_2018_kW_load.csv")) as f:
 		demand_curve = f.read()
-	with open(pJoin(__neoMetaModel__._omfDir,"static","testFiles","residential_extended_temperature_data.csv")) as f:
+	with open(pJoin(__neoMetaModel__._omfDir,"static","testFiles","utility_CO_2018_temperatures.csv")) as f:
 		temp_curve = f.read()
 
 	defaultInputs = {
+		## OMF inputs:
 		"user" : "admin",
 		"modelType": modelName,
+		"created":str(datetime.datetime.now()),
+
+		## REopt inputs:
 		"latitude" : '39.7392358', 
 		"longitude" : '-104.990251',
-		#"latitude" :  '39.532165', ## Rivesville, WV
-		#"longitude" : '-80.120618',
 		"year" : '2018',
 		"analysis_years" : '25', 
-		#"urdbLabel" : '612ff9c15457a3ec18a5f7d3', ## Brighton, CO - United Power 
-		"urdbLabel" : '643476222faee2f0f800d8b1', ## Rivesville, WV - Monongahela Power
+		"urdbLabel" : '612ff9c15457a3ec18a5f7d3', ## Brighton, CO - United Power 
 		"demandCurve": demand_curve,
 		"tempCurve": temp_curve,
 		"outage": True,
@@ -294,6 +297,8 @@ def new(modelDir):
 		"solar" : "on",
 		"battery" : "on",
 		"generator" : "off",
+
+		## vbatDispatch inputs:
 		"load_type": "2",
 		"number_devices": "1",
 		"power": "5.6",
@@ -308,13 +313,8 @@ def new(modelDir):
 		"discountRate":"2",
 		"unitDeviceCost":"150",
 		"unitUpkeepCost":"5",
-		"fileName": "Texas_1yr_Load.csv",
-		"tempFileName": "Texas_1yr_Temp.csv",
-		"created":str(datetime.datetime.now()),
-		#"fileName": "/Users/astronobri/Documents/CIDER/reopt/inputs/residential_PV_load.csv", 
-		#"fileName": "/Users/astronobri/Documents/CIDER/UP-slide18/3reopt-web-residential-load-profile.csv",
-		#"tempFileName": "/Users/astronobri/Desktop/extended_temperature_data.csv",
-		"modelType": modelName
+		"fileName": "utility_2018_kW_load.csv",
+		"tempFileName": "utility_CO_2018_temperatures.csv",
 	}
 	return __neoMetaModel__.new(modelDir, defaultInputs)
 
@@ -331,7 +331,7 @@ def _debugging():
 	## Create New.
 	new(modelLoc)
 	## Pre-run.
-	#__neoMetaModel__.renderAndShow(modelLoc)
+	__neoMetaModel__.renderAndShow(modelLoc)
 	## Run the model.
 	__neoMetaModel__.runForeground(modelLoc)
 	## Show the output.
@@ -339,5 +339,5 @@ def _debugging():
 
 if __name__ == '__main__':
 	_debugging()
-	#pass
+	pass
 
