@@ -167,8 +167,7 @@ def microgridTimeline(outputTimeline, modelDir):
 					</tr>
 				</thead>
 				<tbody>"""
-		row = 0
-		while row < len(outputTimeline):
+		for row in range(len(outputTimeline)):
 			loadBeforeStr = outputTimeline.loc[row, 'loadBefore']
 			loadAfterStr = outputTimeline.loc[row, 'loadAfter']
 			loadStringDict = ["open", "closed", "online", "offline"]
@@ -177,12 +176,10 @@ def microgridTimeline(outputTimeline, modelDir):
 			if str(loadAfterStr) not in loadStringDict:
 				loadAfterStr = '{0:.3f}'.format(float(loadAfterStr))
 			new_html_str += '<tr><td>' + str(outputTimeline.loc[row, 'device']) + '</td><td>' + str(outputTimeline.loc[row, 'time']) + '</td><td>' + str(outputTimeline.loc[row, 'action']) + '</td><td>' + loadBeforeStr + '</td><td>' + loadAfterStr + '</td></tr>'
-			row += 1
 		new_html_str +="""</tbody></table>"""
 		return new_html_str
 	# print all intermediate and final costs
-	timelineStatsHtml = timelineStats(
-		outputTimeline = outputTimeline)
+	timelineStatsHtml = timelineStats(outputTimeline = outputTimeline)
 	with open(pJoin(modelDir, 'timelineStats.html'), 'w') as timelineFile:
 		timelineFile.write(timelineStatsHtml)
 	return timelineStatsHtml
@@ -192,7 +189,7 @@ def customerOutageTable(customerOutageData, outageCost, modelDir):
 	# TODO: update table after calculating outage stats
 	def customerOutageStats(customerOutageData, outageCost):
 		new_html_str = """
-			<table cellpadding="0" cellspacing="0">
+			<table class="sortable" cellpadding="0" cellspacing="0">
 				<thead>
 					<tr>
 						<th>Customer Name</th>
@@ -415,10 +412,8 @@ def customerCost1(duration, season, averagekWperhr, businessType):
 def outageIncidenceGraph(customerOutageData, outputTimeline, startTime, numTimeSteps, loadPriorityFilePath, loadMgDict):
 	'''	Returns plotly figures displaying graphs of outage incidences over the course of the event data.
 		Unweighted outage incidence at each timestep is calculated as (num loads experiencing outage)/(num loads).
-		A load is considered to be "experiencing an outage" at a particular timestep if its "loadBefore" value 
-		in outputTimeline is "offline". The last x-value on the graph is the exception, with its value corresponding
-		to the "loadAfter" values on the same timestep as the x-value.
-		E.g. loadBefore 0, loadBefore 1, ... , loadBefore 23, loadAfter 23
+		A load is considered to be "experiencing an outage" at a particular timestep if its "loadAfter" value 
+		in outputTimeline is "offline".
 
 		Weighted outage incidence is calculated similarly, but with loads being weighted in the calculation based
 		on their priority given in the Load Priorities JSON file that can be provided as input to the model.
@@ -428,7 +423,7 @@ def outageIncidenceGraph(customerOutageData, outputTimeline, startTime, numTimeS
 
 	loadList = list(loadMgDict.keys())
 	mgIDs = set(loadMgDict.values())
-	timeList = [*range(startTime, numTimeSteps+1)] # The +1 is because we want the 'before' for each timestep + the 'after' for the last timestep
+	timeList = [*range(startTime, numTimeSteps+startTime)]
 
 	# Create a copy of outputTimeline containing only load devices sorted by device name and then time. 
 	dfLoadTimeln = outputTimeline.copy(deep=True)
@@ -436,26 +431,18 @@ def outageIncidenceGraph(customerOutageData, outputTimeline, startTime, numTimeS
 	dfLoadTimeln['time'] = dfLoadTimeln['time'].astype(int)
 	dfLoadTimeln = dfLoadTimeln.sort_values(by=['device','time'])
 	
-	# Create dataframe of load status before each timestep and after the last timestep
+	# Create dataframe of load status after each timestep
 	dfStatus = pd.DataFrame(np.ones((len(timeList),len(loadList))), dtype=int, index=timeList, columns=loadList)
 	statusMapping = {'offline':0, 'online':1}
 	for loadName in loadList:
 		# Create a copy of dfLoadTimeln containing only a single load device, with rows indexed by time
 		dfSoloLoadTimeln = dfLoadTimeln[dfLoadTimeln['device'] == loadName].set_index('time')
-		# Track reaching timesteps recorded in dfSoloLoadTimeln
-		lastRecTimeStep = 0
-		recTimeStepReached = False
-		#lastRecTimestep and recTimeStepReached are separate variables instead of lastRecTimeStep starting = -1 and testing for that so that the function still works with strange starting times like -1
+		currentStatus = statusMapping.get('online')
 		for timeStep in timeList:
 			if timeStep in dfSoloLoadTimeln.index:
-				dfStatus.at[timeStep,loadName] = statusMapping.get(dfSoloLoadTimeln.at[timeStep,'loadBefore'])
-				lastRecTimeStep = timeStep
-				recTimeStepReached = True
-			elif recTimeStepReached and not dfSoloLoadTimeln.empty:
-				dfStatus.at[timeStep,loadName] = statusMapping.get(dfSoloLoadTimeln.at[lastRecTimeStep,'loadAfter'])
-			else:
-				dfStatus.at[timeStep,loadName] = statusMapping.get('online')
-	
+				currentStatus = statusMapping.get(dfSoloLoadTimeln.at[timeStep,'loadAfter'])
+			dfStatus.at[timeStep,loadName] = currentStatus
+
 	# Calculate unweighted outage incidence
 	outageIncidence = dfStatus.sum(axis=1,).map(lambda x:100*(1.0-(x/dfStatus.shape[1]))).round(3).values.tolist()
 
@@ -535,8 +522,13 @@ def outageIncidenceGraph(customerOutageData, outputTimeline, startTime, numTimeS
 			'<b>Time Step</b>: %{x}<br>' +
 			f'<b>Priority-Weighted OI for Microgrid {targetID}</b>: %{{y:.3f}}%'))
 		mgOIFigures[targetID].update_layout(
-			xaxis_title='Before Hour X',
-			yaxis_title='Load Outage %',
+			xaxis_title='Time (Hours)',
+			xaxis_range=[timeList[0],timeList[-1]],
+			xaxis={
+				'tickmode':'linear',
+				'dtick':timeList[1]-timeList[0]
+			},
+			yaxis_title='Outage Incidence (%)',
 			yaxis_range=[-5,105],
 			title=f'Microgrid {targetID}',
 			legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1))
@@ -567,10 +559,15 @@ def outageIncidenceGraph(customerOutageData, outputTimeline, startTime, numTimeS
 		hovertemplate=
 		'<b>Time Step</b>: %{x}<br>' +
 		'<b>Priority-Weighted Outage Incidence</b>: %{y:.3f}%'))
-	# Edit the layout
+	# Edit the layout 
 	outageIncidenceFigure.update_layout(
-		xaxis_title='Before Hour X',
-		yaxis_title='Load Outage %',
+		xaxis_title='Time (Hours)',
+		xaxis_range=[timeList[0],timeList[-1]],
+		xaxis={
+			'tickmode':'linear',
+			'dtick':timeList[1]-timeList[0]
+		},
+		yaxis_title='Outage Incidence (%)',
 		yaxis_range=[-5,105],
 		legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1))
 
@@ -650,6 +647,11 @@ def runMicrogridControlSim(modelDir, solFidelity, eventsFilename, loadPriorityFi
 	elif solFidelity == '0.02':
 		solFidelityVal = 0.02
 	
+	# If there's already an ouput file in memory, remove it so that if there's a problem with run_onm and a new output file isn't created, the code doesn't proceed with an old ouput file
+	outputFile = pJoin(modelDir,'output.json')
+	if os.path.exists(outputFile):
+		os.remove(outputFile)
+
 	PowerModelsONM.run_onm(
 		circuitPath=pJoin(modelDir,'circuit.dss'),
 		settingsPath=pJoin(modelDir,'settings.json'),
@@ -658,7 +660,7 @@ def runMicrogridControlSim(modelDir, solFidelity, eventsFilename, loadPriorityFi
 		mip_solver_gap=solFidelityVal
 	)	
 
-def genProfilesByMicrogrid(mgIDs, obMgDict, powerflow):
+def genProfilesByMicrogrid(mgIDs, obMgDict, powerflow, simTimeSteps, startTime):
 	''' Aggregates powerflow data by powerflow circuit object type to create generation profiles.
 		Aggregated powerflow data is separated based on the microgrid in which each pf circuit object is located.
 		Generation profiles for the entire system are also calculated alongside gen profiles for each microgrid. 
@@ -670,21 +672,20 @@ def genProfilesByMicrogrid(mgIDs, obMgDict, powerflow):
 		mgGensFigures is a dictionary with strings containing microgrid IDs as the keys and plotly figures visualizing corresponding generation profiles as values. 
 	'''
 
-	timesteps = range(len(powerflow))
 	#Conversion to list and sort is conducted so that they are ordered the same on every run. Otherwise, they take on different colors in the graph between runs
 	pfTypes = list(set(powerflow[0].keys())-{'switch','bus'})
 	pfTypes.sort()
-	pfDataAggregated = {mgID:pd.DataFrame(0, index=timesteps, columns=pfTypes) for mgID in mgIDs.union({'no MG'})}
-	pfDataSystemwide = pd.DataFrame(0, index=timesteps, columns=pfTypes)
+	pfDataAggregated = {mgID:pd.DataFrame(0, index=simTimeSteps, columns=pfTypes) for mgID in mgIDs.union({'no MG'})}
+	pfDataSystemwide = pd.DataFrame(0, index=simTimeSteps, columns=pfTypes)
 	
-	for timestep in timesteps:
+	for timestepIndex in range(len(powerflow)):
 		for pfType in pfTypes:
-			for obName, obData in powerflow[timestep][pfType].items():
+			for obName, obData in powerflow[timestepIndex][pfType].items():
 				obPf = sum(obData['real power setpoint (kW)'])
 				obPf *= -1 if pfType == "storage" else 1
 				obMg = obMgDict.get(obName, 'no MG')
-				pfDataAggregated[obMg].at[timestep,pfType] += obPf
-				pfDataSystemwide.at[timestep,pfType] += obPf
+				pfDataAggregated[obMg].at[simTimeSteps[timestepIndex],pfType] += obPf
+				pfDataSystemwide.at[simTimeSteps[timestepIndex],pfType] += obPf
 
 	minVal = float('inf')
 	maxVal = float('-inf')
@@ -705,7 +706,7 @@ def genProfilesByMicrogrid(mgIDs, obMgDict, powerflow):
 	for pfType in pfTypes:
 		pfTypeRenamed = pfTypeNameMap.get(pfType,pfType)
 		gensFigure.add_trace(go.Scatter(
-			x=list(timesteps),
+			x=simTimeSteps,
 			y=pfDataSystemwide[pfType].to_list(),
 			mode='lines',
 			name=pfTypeRenamed,
@@ -713,7 +714,12 @@ def genProfilesByMicrogrid(mgIDs, obMgDict, powerflow):
 			'<b>Time Step</b>: %{x}<br>' +
 			f'<b>{pfTypeRenamed}</b>: %{{y:.3f}}%'))
 	gensFigure.update_layout(
-		xaxis_title='Hours',
+		xaxis_title='Time (Hours)',
+		xaxis_range=[simTimeSteps[0],simTimeSteps[-1]],
+		xaxis={
+			'tickmode':'linear',
+			'dtick':simTimeSteps[1]-simTimeSteps[0]
+		},
 		yaxis_title='Power (kW)',
 		yaxis_range=[graphMin, graphMax],
 		legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1))
@@ -724,7 +730,7 @@ def genProfilesByMicrogrid(mgIDs, obMgDict, powerflow):
 		for pfType in pfTypes:
 			pfTypeRenamed = pfTypeNameMap.get(pfType,pfType)
 			mgGensFigures[mgID].add_trace(go.Scatter(
-				x=list(timesteps),
+				x=simTimeSteps,
 				y=pfDataAggregated[mgID][pfType].to_list(),
 				mode='lines',
 				name=pfTypeRenamed,
@@ -732,7 +738,12 @@ def genProfilesByMicrogrid(mgIDs, obMgDict, powerflow):
 				'<b>Time Step</b>: %{x}<br>' +
 				f'<b>{pfTypeRenamed} for Microgrid {mgID}</b>: %{{y:.3f}}%'))
 		mgGensFigures[mgID].update_layout(
-			xaxis_title='Hours',
+			xaxis_title='Time (Hours)',
+			xaxis_range=[simTimeSteps[0],simTimeSteps[-1]],
+		xaxis={
+			'tickmode':'linear',
+			'dtick':simTimeSteps[1]-simTimeSteps[0]
+		},
 			yaxis_title='Power (kW)',
 			yaxis_range=[graphMin, graphMax],
 			title=f'Microgrid {mgID}',
@@ -746,11 +757,9 @@ def graphMicrogrid(modelDir, pathToOmd, profit_on_energy_sales, restoration_cost
 	with open(pJoin(modelDir,'output.json')) as inFile:
 		data = json.load(inFile)
 		genProfiles = data['Generator profiles']
-		simTimeSteps = []
-		for i in data['Simulation time steps']:
-			simTimeSteps.append(float(i))
-		numTimeSteps = len(simTimeSteps)
-		stepSize = simTimeSteps[1]-simTimeSteps[0]
+		simTimeStepsRaw = data['Simulation time steps']
+		numTimeSteps = len(simTimeStepsRaw)
+		stepSize = simTimeStepsRaw[1]-simTimeStepsRaw[0]
 		voltages = data['Voltages']
 		outageDuration = stepSize * numTimeSteps
 		loadServed = data['Load served']
@@ -764,7 +773,8 @@ def graphMicrogrid(modelDir, pathToOmd, profit_on_energy_sales, restoration_cost
 	actionLoadAfter = []
 	loadsShed = []
 	cumulativeLoadsShed = []
-	startTime = 0
+	startTime = 1
+	simTimeSteps = [float(i)+startTime for i in simTimeStepsRaw]
 	timestep = startTime
 	# timestep = 0
 	# timestep = 1 #TODO: switch back to this value if timestep should start at 1, not zero | nevermind. see above fix using startTime
@@ -805,13 +815,13 @@ def graphMicrogrid(modelDir, pathToOmd, profit_on_energy_sales, restoration_cost
 					actionLoadAfter.append('online')
 					loadsShed.remove(entry)
 		timestep += 1
-	timestep = 0
+	timestep = startTime
 	# while timestep < 24:
-	while timestep < numTimeSteps:
-		if timestep == 0:
-			powerflowOld = powerflow[timestep]
+	while timestep < numTimeSteps+startTime:
+		if timestep == startTime:
+			powerflowOld = powerflow[timestep-startTime]
 		else:
-			powerflowNew = powerflow[timestep]
+			powerflowNew = powerflow[timestep-startTime]
 			for generator in list(powerflowNew['generator'].keys()):
 				entryNew = powerflowNew['generator'][generator]['real power setpoint (kW)'][0]
 				if generator in list(powerflowOld['generator'].keys()):
@@ -840,7 +850,7 @@ def graphMicrogrid(modelDir, pathToOmd, profit_on_energy_sales, restoration_cost
 					actionAction.append('Battery Control')
 					actionLoadBefore.append(str(entryOld))
 					actionLoadAfter.append(str(entryNew))
-			powerflowOld = powerflow[timestep]
+			powerflowOld = powerflow[timestep-startTime]
 		timestep += 1
 	line = {
 		'time': actionTime,
@@ -852,7 +862,7 @@ def graphMicrogrid(modelDir, pathToOmd, profit_on_energy_sales, restoration_cost
 	outputTimeline = outputTime.sort_values('time')
 	
 	# Create traces
-	gens, mgGensFigs = genProfilesByMicrogrid(mgIDs, obMgDict, powerflow)
+	gens, mgGensFigs = genProfilesByMicrogrid(mgIDs, obMgDict, powerflow, simTimeSteps, startTime)
 
 	volts = go.Figure()
 	voltsKeysAndNames = [
@@ -870,7 +880,12 @@ def graphMicrogrid(modelDir, pathToOmd, profit_on_energy_sales, restoration_cost
 			f'<b>{name}</b>: %{{y:.4f}}'))
 	# Edit the layout
 	volts.update_layout(
-		xaxis_title='Hours',
+		xaxis_title='Time (Hours)',
+		xaxis_range=[simTimeSteps[0],simTimeSteps[-1]],
+		xaxis={
+			'tickmode':'linear',
+			'dtick':stepSize
+		},
 		yaxis_title='Power (p.u.)',
 		legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1))
 	
@@ -890,7 +905,12 @@ def graphMicrogrid(modelDir, pathToOmd, profit_on_energy_sales, restoration_cost
 			f'<b>{name}</b>: %{{y:.2f}}'))
 	# Edit the layout
 	loads.update_layout(
-		xaxis_title='Hours',
+		xaxis_title='Time (Hours)',
+		xaxis_range=[simTimeSteps[0],simTimeSteps[-1]],
+		xaxis={
+			'tickmode':'linear',
+			'dtick':stepSize
+		},
 		yaxis_title='Load (%)',
 		legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1))
 	
@@ -1151,7 +1171,21 @@ def graphMicrogrid(modelDir, pathToOmd, profit_on_energy_sales, restoration_cost
 	utilityOutageHtml = utilityOutageTable(average_lost_kwh, profit_on_energy_sales, restoration_cost, hardware_cost, outageDuration, modelDir)
 	try: customerOutageCost = customerOutageCost
 	except: customerOutageCost = 0
-	return {'utilityOutageHtml': utilityOutageHtml, 'customerOutageHtml': customerOutageHtml, 'timelineStatsHtml': timelineStatsHtml, 'outageIncidenceFig': outageIncidenceFig, 'mgOIFigs':mgOIFigs, 'mgGensFigs':mgGensFigs, 'gens': gens, 'loads': loads, 'volts': volts, 'fig': fig, 'customerOutageCost': customerOutageCost, 'numTimeSteps': numTimeSteps, 'stepSize': stepSize, 'custHist': custHist}
+	return {'utilityOutageHtml': 	utilityOutageHtml, 
+			'customerOutageHtml': 	customerOutageHtml, 
+			'timelineStatsHtml': 	timelineStatsHtml, 
+			'outageIncidenceFig': 	outageIncidenceFig, 
+			'mgOIFigs':				mgOIFigs, 
+			'mgGensFigs':			mgGensFigs, 
+			'gens': 				gens, 
+			'loads': 				loads, 
+			'volts': 				volts, 
+			'fig': 					fig, 
+			'customerOutageCost': 	customerOutageCost, 
+			'endTime': 				simTimeSteps[-1], 
+			'stepSize': 			stepSize, 
+			'startTime': 			startTime,
+			'custHist': 			custHist}
 
 def buildCustomEvents(eventsCSV='', feeder='', customEvents='customEvents.json', defaultDispatchable = 'true'):
 	''' Builds an events json file for use by restoration.py based on an events CSV input.'''
@@ -1276,9 +1310,9 @@ def work(modelDir, inputDict):
 		microgridTaggingFile	= pathToLocalFile['mgTagging']
 	)
 	microgridInfo = getMicrogridInfo(
-		modelDir			= modelDir, 
-		pathToOmd			= f'{modelDir}/{feederName}.omd', 
-		settingsFile		= f'{modelDir}/settings.json'
+		modelDir				= modelDir, 
+		pathToOmd				= f'{modelDir}/{feederName}.omd', 
+		settingsFile			= f'{modelDir}/settings.json'
 	)
 	plotOuts = graphMicrogrid(
 		modelDir				= modelDir, 
@@ -1334,8 +1368,9 @@ def work(modelDir, inputDict):
 	# Stdout/stderr.
 	outData['stdout'] = 'Success'
 	outData['stderr'] = ''
-	outData['numTimeSteps'] = plotOuts.get('numTimeSteps', 24)
+	outData['endTime'] = plotOuts.get('endTime', 24)
 	outData['stepSize'] = plotOuts.get('stepSize', 1)
+	outData['startTime'] = plotOuts.get('startTime',1)
 	return outData
 
 def new(modelDir):
