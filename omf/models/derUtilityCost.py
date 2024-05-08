@@ -197,38 +197,48 @@ def work(modelDir, inputDict):
 
 
 	## Create REopt input file
-	create_REopt_jl_jsonFile(modelDir, inputDict)
+	#scenario = create_REopt_jl_jsonFile(modelDir, inputDict)
 
 	## Run REopt.jl
 	outage_flag = inputDict['outage']
-	reopt_jl.run_reopt_jl(modelDir, "Scenario_test.json", outages=outage_flag)
-	with open(pJoin(modelDir, 'results.json')) as jsonFile:
-		results = json.load(jsonFile)
-		
+	#reopt_jl.run_reopt_jl(modelDir, scenario, outages=outage_flag)
+
+	#with open(pJoin(modelDir, 'results.json')) as jsonFile:
+	#	results = json.load(jsonFile)
+
+	## Read in a static REopt test file
+	with open(pJoin(__neoMetaModel__._omfDir,"static","testFiles","residential_REopt_results.json")) as f:
+		results = json.load(f)
+		print('Successfully read in REopt test file. \n')
+
+	out['PV'] = results['outputs']['PV']
+
+
 	## Output data
 	out['solar'] = inputDict['solar']
 	out['generator'] = inputDict['generator'] ## TODO: make generator switch on only during outage?
 	out['battery'] = inputDict['battery']
 	out['year'] = inputDict['year']
 	out['urdbLabel'] = inputDict['urdbLabel']
-	out['demandCost'] = results['ElectricTariff']['lifecycle_demand_cost_after_tax']
-	out['powerPVToGrid'] = results['PV']['electric_to_grid_series_kw']#['year_one_to_grid_series_kw']
+	#out['demandCost'] = results['ElectricTariff']['lifecycle_demand_cost_after_tax']
+	#out['powerPVToGrid'] = results['PV']['electric_to_grid_series_kw']#['year_one_to_grid_series_kw']
 
 
 	## Run REopt and gather outputs for vbatDispath
 	## TODO: Create a function that will gather the urdb label from a user provided location (city,state)
 	#RE.run_reopt_jl(modelDir,inputFile,outages)
 
-	#RE.run_reopt_jl(path="/Users/astronobri/Documents/CIDER/reopt/inputs/", inputFile="UP_PV_outage_1hr.json", outages=outage) # UP coop PV 
-	#RE.run_reopt_jl(path="/Users/astronobri/Documents/CIDER/reopt/inputs/", inputFile="residential_input.json", outages=True) # UP coop PV 
+	#reopt_jl.run_reopt_jl(path="/Users/astronobri/Documents/CIDER/reopt/inputs/", inputFile="UP_PV_outage_1hr.json", outages=outage) # UP coop PV 
+	#reopt_jl.run_reopt_jl(path="/Users/astronobri/Documents/CIDER/reopt/inputs/", inputFile=pJoin(__neoMetaModel__._omfDir,"static","testFiles","residential_input.json"), outages=True) # residential PV 
 
 	#with open(pJoin(modelDir, 'results.json')) as jsonFile:
-		#results = json.load(jsonFile)
+	#	results = json.load(jsonFile)
 
 	#getting REoptInputs to access default input values more easily 
 	#with open(pJoin(modelDir, 'REoptInputs.json')) as jsonFile:
 		#reopt_inputs = json.load(jsonFile)
 
+	inputDict['outage'] = False ## Temporary line to disable the following outage resilience code
 	if (inputDict['outage']):
 		with open(pJoin(modelDir, 'resultsResilience.json')) as jsonFile:
 			resultsResilience = json.load(jsonFile)
@@ -238,10 +248,12 @@ def work(modelDir, inputDict):
 	#VB.new(modelDir)
 	#modelDir = "/Users/astronobri/Documents/CIDER/omf/omf/data/Model/admin/meowtest"
 
-	vbatResults = vb.work(modelDir,inputDict)
-	with open(pJoin(modelDir, 'vbatResults.json'), 'w') as jsonFile:
-		json.dump(vbatResults, jsonFile)
-	out.update(vbatResults) ## Update out file with vbat results
+	vbat = 'Disabled' ## Temporary flag to disable vbat code
+	if vbat == 'Enabled':
+		vbatResults = vb.work(modelDir,inputDict)
+		with open(pJoin(modelDir, 'vbatResults.json'), 'w') as jsonFile:
+			json.dump(vbatResults, jsonFile)
+		out.update(vbatResults) ## Update out file with vbat results
 
 	## vbatDispatch out data
 	
@@ -258,9 +270,9 @@ def work(modelDir, inputDict):
 
 def new(modelDir):
 	''' Create a new instance of this model. Returns true on success, false on failure. '''
-	with open(pJoin(__neoMetaModel__._omfDir,"static","testFiles","Texas_1yr_Load.csv")) as f:
+	with open(pJoin(__neoMetaModel__._omfDir,"static","testFiles","residential_PV_load.csv")) as f:
 		demand_curve = f.read()
-	with open(pJoin(__neoMetaModel__._omfDir,"static","testFiles","Texas_1yr_Temp.csv")) as f:
+	with open(pJoin(__neoMetaModel__._omfDir,"static","testFiles","residential_extended_temperature_data.csv")) as f:
 		temp_curve = f.read()
 
 	defaultInputs = {

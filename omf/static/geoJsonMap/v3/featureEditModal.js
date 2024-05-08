@@ -57,7 +57,7 @@ class FeatureEditModal { // implements ObserverInterface, ModalInterface
             if (this.#observables.length === 0) {
                 this.remove();
             } else {
-                this.renderContent();
+                this.refreshContent();
             }
         }
     }
@@ -126,31 +126,6 @@ class FeatureEditModal { // implements ObserverInterface, ModalInterface
         return this.#removed;
     }
 
-    // - Here's how refreshing content could work:
-    //  - The FeatureEditModal maintains an internal map of property keys to table rows (<tr> elements)
-    //  - A property is deleted from an object
-    //      - Currently, the entire table just re-renders
-    //      - Now, the FeatureEditModal will look-up the property in its internal map. If the property exists, then remove the row from the table and
-    //        remove the key from the map. If the property was only deleted from one object, but other objects still have the property, then replace
-    //        the value text input after scanning all of the existing objects for that property value. If none of the other objects have the property,
-    //        then delete the row on the multi-feature table.
-    //  - A property is added to an object
-    //      - Currently, the entire table just re-renders
-    //      - Now, the FeatureEditModal will look-up the property in its internal map. If the property doesn't exist, then insert a new row into the
-    //        table and insert the new key into the map. Note that the table that the user was editing will already have the new property inserted
-    //        into the map and the new row inserted into the table as soon as the "change" event fires. Other tables that are observing the same
-    //        feature won't have the property in their internal map, so they'll have the property added and the new row added when
-    //        handleUpdatedProperty() fires. Checking for the existence of the property in the internal map is the key to not adding the same row
-    //        twice to the same table. If the property was only added to one object, whether to add a new row to a multi-feature table or just update
-    //        the value text input depends on the results of scanning the other objects for the same property
-    //  - A property is changed on an object
-    //      - Currently, the entire table just re-renders
-    //      - Now, the FeatureEditModal won't have to do anything for a single object. The value text input will already reflect the current state of
-    //        the object. Actually no, what about other FeatureEditModals that have the old value of the property in their value text input? I'll have
-    //        to replace the old value text input with a new value text input, even in the FeatureEditModal that was changed. This is because the
-    //        "original value" of the input, which is stored in the event handler, needs to be set to the new value, and the easiest way to do that is
-    //        to just get a new value text input. In the case of multiple objects, I'll have to scan all of them and get a new value text input.
-
     /**
      * - Refresh aspects of the modal so that I don't have to re-render the whole thing
      * @returns {undefined}
@@ -182,6 +157,18 @@ class FeatureEditModal { // implements ObserverInterface, ModalInterface
             // - First, compare the observables' state to the table state. If the observables' state has a property that is not in the table state,
             //   add a row to the table
             if (!tableKeys.includes(key)) {
+                // - Don't let unintended properties show up when a FeatureEditModal refreshes due to a marker being dragged
+                if (['from', 'to'].includes(key)) {
+                    if (!this.#observables.every(ob => ob.isLine() && !ob.isParentChildLine())) {
+                        continue;
+                    }
+                }
+                if (key === 'type' && !this.#observables.every(ob => ob.isParentChildLine())) {
+                    continue;
+                }
+                if (key === 'parent' && !this.#observables.every(ob => ob.isChild())) {
+                    continue;
+                }
                 const keySpan = document.createElement('span');
                 keySpan.textContent = key;
                 keySpan.dataset.propertyKey = key;
@@ -244,25 +231,33 @@ class FeatureEditModal { // implements ObserverInterface, ModalInterface
             if (ary.length === 1) {
                 modal.insertTHeadRow([null, keySpan, ary[0].toString()], 'prepend');
             } else {
-                modal.insertTHeadRow([null, keySpan, '<Multiple IDs>'], 'prepend');
+                //modal.insertTHeadRow([null, keySpan, '<Multiple IDs>'], 'prepend');
+                modal.insertTHeadRow([null, keySpan, ary.join(',')], 'prepend');
             }
         }
         for (const [key, ary] of Object.entries(keyToValues.treeProps)) {
             const keySpan = document.createElement('span');
-            // - I don't create a value text input, so I have to decide whether to display the value of "object" or a string here 
-            if (key === 'object') {
-                keySpan.textContent = 'Object';
-                keySpan.dataset.propertyKey = 'object';
+            if (['object'].includes(key)) {
+                keySpan.textContent = key;
+                keySpan.dataset.propertyKey = key;
                 keySpan.dataset.propertyNamespace = 'treeProps';
                 if (ary.length === 1) {
                     modal.insertTHeadRow([null, keySpan, ary[0].toString()])
                 } else {
-                    modal.insertTHeadRow([null, keySpan, '<Multiple "Object" Values>']);
+                    //modal.insertTHeadRow([null, keySpan, `<Multiple "${key}" values>`]);
+                    modal.insertTHeadRow([null, keySpan, ary.join(', ')]);
                 }
                 continue;
             }
-            // - Don't allow the "from", "to", or "type" properties of parent-child lines to be edited
-            if (['from', 'to', 'type'].includes(key) && this.#observables.some(ob => ob.isParentChildLine())) {
+            if (['from', 'to'].includes(key)) {
+                if (!this.#observables.every(ob => ob.isLine() && !ob.isParentChildLine())) {
+                    continue;
+                }
+            }
+            if (key === 'type' && !this.#observables.every(ob => ob.isParentChildLine())) {
+                continue;
+            }
+            if (key === 'parent' && !this.#observables.every(ob => ob.isChild())) {
                 continue;
             }
             keySpan.textContent = key;
@@ -274,25 +269,28 @@ class FeatureEditModal { // implements ObserverInterface, ModalInterface
             }
             modal.insertTBodyRow([deleteButton, keySpan, this.#getValueTextInput(key, ary)]);
         }
-        for (const [key, ary] of Object.entries(keyToValues.coordinates)) {
-            const keySpan = document.createElement('span');
-            if (['latitude', 'longitude'].includes(key)) {
-                if (this.#observables.some(ob => ob.isConfigurationObject() || ob.isLine())) {
-                    continue;
-                } else {
-                    keySpan.textContent = key;
-                    keySpan.dataset.propertyKey = key;
-                    // - longitude and latitude aren't in any property namespace
-                    modal.insertTBodyRow([null, keySpan, this.#getValueTextInput(key, ary)], 'prepend');
+        // - We don't allow the coordinates of multiple objects to be changed with multiselect
+        if (this.#observables.length === 1) {
+            for (const [key, ary] of Object.entries(keyToValues.coordinates)) {
+                const keySpan = document.createElement('span');
+                if (['latitude', 'longitude'].includes(key)) {
+                    if (!this.#observables.every(ob => ob.isNode() && !ob.isConfigurationObject())) {
+                        continue;
+                    } else {
+                        keySpan.textContent = key;
+                        keySpan.dataset.propertyKey = key;
+                        // - longitude and latitude aren't in any property namespace
+                        modal.insertTBodyRow([null, keySpan, this.#getValueTextInput(key, ary)], 'prepend');
+                    }
                 }
             }
         }
         modal.insertTBodyRow([this.#getAddPropertyButton(), null, null], 'append', ['absolute']);
         modal.addStyleClasses(['centeredTable'], 'tableElement');
         // - Add buttons for regular features
-        if (!this.#observables.some(ob => ob.isComponentFeature())) {
+        if (this.#observables.every(ob => !ob.isComponentFeature())) {
             modal.insertElement(this.#getDeleteFeatureDiv());
-            if (!this.#observables.some(ob => ob.isConfigurationObject())) {
+            if (this.#observables.every(ob => !ob.isConfigurationObject())) {
                 modal.insertElement(this.#getZoomDiv(), 'prepend');
             }
         // - Add buttons for components
@@ -327,7 +325,6 @@ class FeatureEditModal { // implements ObserverInterface, ModalInterface
     // *********************
     // ** Private methods ** 
     // *********************
-
 
     /**
      * @returns {boolean}
@@ -607,13 +604,17 @@ class FeatureEditModal { // implements ObserverInterface, ModalInterface
             throw TypeError('"propertyValues" argument must be instanceof Array or null.');
         }
         const input = document.createElement('input');
+        input.addEventListener('mousedown', (e) => {
+            e.stopPropagation(e);
+        });
         if (propertyValues === null) {
             //- Do nothing. A new property was just added so the value text input should be blank
         } else if (propertyValues.length === 1) {
             // - This works even if propertyValues = [""], which it can be sometimes
             input.value = propertyValues[0];
         } else {
-            input.value = `<Multiple "${propertyKey}" Values>`;
+            //input.value = `<Multiple "${propertyKey}" values>`;
+            input.value = propertyValues.join(', ');
         }
         let originalValue = input.value;
         const that = this;
@@ -713,10 +714,6 @@ class FeatureEditModal { // implements ObserverInterface, ModalInterface
                 }
                 parentElement.remove();
                 that.#controller.setProperty(that.#observables, inputValue, '', 'treeProps');
-                //this.replaceWith(document.createTextNode(inputValue));
-                //transitionalDeleteButton.replaceWith(that.#getDeletePropertyButton(inputValue));
-                //valueInputPlaceholder.replaceWith(that.#getValueTextInput(inputValue));
-                //originalValue = inputValue;
             } else {
                 input.value = originalValue;
             }
@@ -745,7 +742,6 @@ class FeatureEditModal { // implements ObserverInterface, ModalInterface
         return true;
     }
 
-    
     /**
      * @param {string} propertyKey
      * @param {string} inputValue
@@ -754,10 +750,9 @@ class FeatureEditModal { // implements ObserverInterface, ModalInterface
     #toFromParentObjectIsValid(propertyKey, inputValue) {
         let observableKey;
         try {
-            if(this.#observables.some(ob => ob.isComponentFeature())) {
-                // - Components and non-components will never be together in an array of observables
+            if (this.#observables.every(ob => ob.isComponentFeature())) {
                 observableKey = this.#controller.observableGraph.getKeyForComponent(inputValue);
-            } else {
+            } else if (this.#observables.every(ob => !ob.isComponentFeature())) {
                 observableKey = this.#controller.observableGraph.getKey(inputValue, this.#observables[0].getProperty('treeKey', 'meta'));
                 // - This is commented out because it's fine if different objects in the search selection will return different keys. If there are
                 //   different keys for the same name, the FeatureGraph should just return the correct key for each object. Actually it's not. What if a
@@ -769,6 +764,8 @@ class FeatureEditModal { // implements ObserverInterface, ModalInterface
                         "name" property of other object(s) to ensure the name is unique.`);
                     return false;
                 }
+            } else {
+                throw Error('Components and non-components should never be together in this.#observables');
             }
         } catch {
             alert(`No object has the value "${inputValue}" for the "name" property. Ensure that the value for the "${propertyKey}" property matches an existing name.`);
@@ -786,6 +783,7 @@ class FeatureEditModal { // implements ObserverInterface, ModalInterface
         // - Components are not in the graph, so the observable cannot be a component feature
         return true;
     } 
+
     /**
      * - Validate the just-inputed value for a value text input
      * @param {string} propertyKey
@@ -877,7 +875,7 @@ class FeatureEditModal { // implements ObserverInterface, ModalInterface
                     }
                     return false;
                 }
-                if (isNaN(+inputValue)) {
+                if (inputValue === '' || isNaN(+inputValue)) {
                     alert(`The value "${inputValue}" is not a valid number. A value for the "${propertyKey}" property must be a valid number.`);
                     return false;
                 }
@@ -920,8 +918,8 @@ function getTrashCanSvg() {
     const svg = document.createElementNS('http://www.w3.org/2000/svg','svg');
     svg.setAttribute('width', '22px');
     svg.setAttribute('height', '22px');
-    svg.setAttribute('viewBox', '0 0 24 24'); 
-    svg.setAttribute('fill', 'none'); 
+    svg.setAttribute('viewBox', '0 0 24 24');
+    svg.setAttribute('fill', 'none');
     const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
     path.setAttribute('d', 'M10 10V16M14 10V16M4 6H20M15 6V5C15 3.89543 14.1046 3 13 3H11C9.89543 3 9 3.89543 9 5V6M18 6V14M18 18C18 19.1046 17.1046 20 16 20H8C6.89543 20 6 19.1046 6 18V13M6 9V6');
     path.setAttribute('stroke', '#FFFFFF');
@@ -971,57 +969,62 @@ function zoom(observables) {
     }
     if (observables.length === 1) {
         const observable = observables[0];
-        const layer = Object.values(observable.getObservers().filter(ob => ob instanceof LeafletLayer)[0].getLayer()._layers)[0];
+        const layer = observable.getObservers().filter(ob => ob instanceof LeafletLayer)[0];
+        const leafletLayer = Object.values(layer.getLayer()._layers)[0];
         if (observable.isNode()) {
             const [lon, lat] = structuredClone(observable.getCoordinates());
             // - The max zoom level without losing the map is 19
             LeafletLayer.map.flyTo([lat, lon], 19, {duration: .3});
-            if (!layer.isPopupOpen()) {
-                layer.openPopup();
+            layer.bindPopup();
+            if (!leafletLayer.isPopupOpen()) {
+                leafletLayer.openPopup();
             }
         } else if (observable.isLine()) {
             const [[lon1, lat1], [lon2, lat2]] = observable.getCoordinates();
-            LeafletLayer.map.flyToBounds([[lat1, lon1], [lat2, lon2]], {duration: .3});
-            if (!layer.isPopupOpen()) {
-                layer.openPopup();
+            LeafletLayer.map.flyTo([(lat1 + lat2) / 2, (lon1 + lon2) / 2], 19, {duration: .3});
+            if (!leafletLayer.isPopupOpen()) {
+                leafletLayer.openPopup();
             }
         } else {
-            let coordinates;
-            if (observable.isPolygon()) {
-                coordinates = observable.getCoordinates().flat(1);
-            } else if (observable.isMultiPolygon()) {
-                coordinates = observable.getCoordinates().flat(2);
-            } else {
-                return;
-            }
-            const lons = [];
-            const lats = [];
-            coordinates.forEach(ary => { lons.push(ary[0]); lats.push(ary[1]); });
-            LeafletLayer.map.flyToBounds([
-                [Math.min.apply(null, lats), Math.min.apply(null, lons)],
-                [Math.max.apply(null, lats), Math.max.apply(null, lons)]],
-                {duration: .3});
-            if (!layer.isPopupOpen()) {
-                layer.openPopup();
-            }
+            throw Error('Zoom button is only supported for nodes and lines.');
+            //let coordinates;
+            //if (observable.isPolygon()) {
+            //    coordinates = observable.getCoordinates().flat(1);
+            //} else if (observable.isMultiPolygon()) {
+            //    coordinates = observable.getCoordinates().flat(2);
+            //} else {
+            //    return;
+            //}
+            //const lons = [];
+            //const lats = [];
+            //coordinates.forEach(ary => { lons.push(ary[0]); lats.push(ary[1]); });
+            //LeafletLayer.map.flyToBounds([
+            //    [Math.min.apply(null, lats), Math.min.apply(null, lons)],
+            //    [Math.max.apply(null, lats), Math.max.apply(null, lons)]],
+            //    {duration: .3});
+            //if (!leafletLayer.isPopupOpen()) {
+            //    leafletLayer.openPopup();
+            //}
         }
     } else {
         const lons = [];
         const lats = [];
         observables.forEach(ob => {
             if (ob.isNode()) {
-                const [lon, lat] = structuredClone(ob.getCoordinates());
+                const [lon, lat] = ob.getCoordinates();
                 lons.push(lon);
                 lats.push(lat);
             } else if (ob.isLine()) {
-                const [[lon1, lat1], [lon2, lat2]] = structuredClone(ob.getCoordinates());
+                const [[lon1, lat1], [lon2, lat2]] = ob.getCoordinates();
                 lons.push(...[lon1, lon2]);
                 lats.push(...[lat1, lat2]);
             }
         });
         LeafletLayer.map.flyToBounds([
-            [Math.min.apply(null, lons), Math.min.apply(null, lats)],
-            [Math.max.apply(null, lons), Math.max.apply(null, lats)],
+            [Math.min.apply(null, lats), Math.min.apply(null, lons)],
+            [Math.max.apply(null, lats), Math.max.apply(null, lons)],
+            19,
+            {duration: .3}
         ]);
     }
 }

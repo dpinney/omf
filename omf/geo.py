@@ -695,6 +695,9 @@ def map_omd(omd_path, output_dir, open_browser=False):
         currentUser=None, showFileMenu=json.dumps(False), isOnline=json.dumps(False), css=css, js=js)
     output_dir = pathlib.Path(output_dir)
     output_dir.mkdir(parents=True, exist_ok=True)
+    # - Copy PNGs
+    for filepath in (pathlib.Path(omf.omfDir).resolve(True) / 'static' / 'geoJsonMap' / 'v3').glob('**/*.png'):
+        shutil.copy2(filepath, output_dir)
     with open(output_dir / 'geoJson_offline.html', 'w') as f:
         f.write(rendered)
     if open_browser:

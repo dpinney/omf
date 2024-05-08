@@ -34,11 +34,15 @@ class FeatureController { // implements ControllerInterface
             if (!ob.isConfigurationObject()) {
                 LeafletLayer.createAndGroupLayer(ob, this);
             }
+            if (ob.isLine()) {
+                ob.getObservers().filter(ob => ob instanceof LeafletLayer)[0].getLayer().bringToBack();
+            }
             if (ob.isChild()) {
                 const parentKey = this.observableGraph.getKey(ob.getProperty('parent'), ob.getProperty('treeKey', 'meta'));
                 const parentChildLineFeature = this.observableGraph.getParentChildLineFeature(parentKey, key);
                 this.observableGraph.insertObservable(parentChildLineFeature);
                 LeafletLayer.createAndGroupLayer(parentChildLineFeature, this);
+                parentChildLineFeature.getObservers().filter(ob => ob instanceof LeafletLayer)[0].getLayer().bringToBack();
             }
         });
     }
@@ -78,9 +82,10 @@ class FeatureController { // implements ControllerInterface
         if (!(observables instanceof Array)) {
             throw TypeError('"observables" argument must be instanceof Array.');
         }
-        observables.forEach(ob => {
+        const observablesCopy = [...observables];
+        for (const ob of observablesCopy) {
             ob.deleteObservable();
-        });
+        }
         // - I shouldn't have to do this because all visited nodes are deleted
         //this.observableGraph.markNodesAsUnvisited();
         // - Currently, this function is a convenience function that views could do themselves because nothing else needs to be done besides calling

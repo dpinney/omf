@@ -693,6 +693,93 @@ def networkPlot(filePath, figsize=(20,20), output_name='networkPlot.png', show_l
 	plt.clf()
 	return G
 
+def omd_to_nx_fulldata( dssFilePath, tree=None ):
+	''' Combines dss_to_networkX and opendss.networkPlot together.
+
+	Creates a networkx directed graph from a dss files. If a tree is provided, build graph from that instead of the file.
+	Creates a .png picture of the graph.
+	Adds data to certain DSS node types ( loads )
+	
+	args:
+		filepath (str of file name):- dss file path
+		tree (list): None - tree representation of dss file
+		output_name (str):- name of png
+		show_labels (bool): true - show node label names
+		node_size (int): 300 - size of node circles in png
+		font_size (int): 8 - font size for png labels
+	return:
+		A networkx graph of the circuit 
+	'''
+	if tree == None:
+		tree = dssConvert.dssToTree( dssFilePath )
+
+	G = nx.DiGraph()
+	pos = {}
+
+	setbusxyList = [x for x in tree if '!CMD' in x and x['!CMD'] == 'setbusxy']
+	x_coords = [x['x'] for x in setbusxyList if 'x' in x]
+	y_coords = [x['y'] for x in setbusxyList if 'y' in x]
+	bus_names = [x['bus'] for x in setbusxyList if 'bus' in x]
+	for bus, x, y in zip( bus_names, x_coords, y_coords):
+		float_x = float(x)
+		float_y = float(y)
+		G.add_node(bus, pos=(float_x, float_y))
+		pos[bus] = (float_x, float_y)
+
+	lines = [x for x in tree if x.get('object', 'N/A').startswith('line.')]
+	bus1_lines = [x.split('.')[0] for x in [x['bus1'] for x in lines if 'bus1' in x]]
+	bus2_lines = [x.split('.')[0] for x in [x['bus2'] for x in lines if 'bus2' in x]]
+	edges = []
+	for bus1, bus2 in zip( bus1_lines, bus2_lines):
+		edges.append( (bus1, bus2) )
+	G.add_edges_from(edges)
+
+	# Need edges from bus --- trasnformr info ---> load
+	transformers = [x for x in tree if x.get('object', 'N/A').startswith('transformer.')]
+	transformer_bus_names = [x['buses'] for x in transformers if 'buses' in x]
+	bus_to_transformer_pairs = {}
+	for transformer_bus in transformer_bus_names:
+		strip_paren = transformer_bus.strip('[]')
+		split_buses = strip_paren.split(',')
+		bus = split_buses[0].split('.')[0]
+		transformer_name = split_buses[1].split('.')[0]
+		bus_to_transformer_pairs[transformer_name] = bus
+	
+	loads = [x for x in tree if x.get('object', 'N/A').startswith('load.')] # This is an orderedDict
+	load_names = [x['object'].split('.')[1] for x in loads if 'object' in x and x['object'].startswith('load.')]
+	load_transformer_name = [x.split('.')[0] for x in [x['bus1'] for x in loads if 'bus1' in x]]
+
+	# Connects loads to buses via transformers
+	for load_name, load_transformer in zip(load_names, load_transformer_name):
+    # Add edge from bus to load, with transformer name as an attribute
+		if load_transformer in bus_to_transformer_pairs:
+			bus = bus_to_transformer_pairs[load_transformer]
+			G.add_edge(bus, load_name, transformer=load_transformer)
+		else:
+			G.add_edge(load_transformer, load_name )
+		pos[load_name] = pos[load_transformer]
+	
+	# TEMP: Remove transformer nodes added from coordinates. Transformer data is edges, not nodes.
+	for transformer_name in load_transformer_name:
+		if transformer_name in G.nodes:
+			G.remove_node( transformer_name )
+			pos.pop( transformer_name )
+	
+	# Attributes for all loads
+	load_phases = [x['phases'] for x in loads if 'phases' in x]
+	load_conn = [x['conn'] for x in loads if 'conn' in x]
+	load_kv = [x['kv'] for x in loads if 'kv' in x]
+	load_kw = [x['kw'] for x in loads if 'kw' in x]
+	load_kvar = [x['kvar'] for x in loads if 'kvar' in x]
+	for load, phases, conn, kv, kw, kvar in zip( load_names, load_phases, load_conn, load_kv, load_kw, load_kvar):
+		G.nodes[load]['phases'] = phases
+		G.nodes[load]['conn'] = conn
+		G.nodes[load]['kv'] = kv
+		G.nodes[load]['kw'] = kw
+		G.nodes[load]['kvar'] = kvar	
+	
+	return G
+
 def THD(filePath):
 	''' Calculate and plot total harmonic distortion. '''
 	dssFileLoc = os.path.dirname(os.path.abspath(filePath))

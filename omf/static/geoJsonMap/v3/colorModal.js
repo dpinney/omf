@@ -346,26 +346,38 @@ class ColorModal { // implements ModalInterface, ObserverInterface
      */
     #applyColorMap(colorFile, colorMap) {
         if (!(colorFile instanceof ColorFile)) {
-            throw TypeError('"colorFile" must be instanceof ColorFile.');
+            throw TypeError('The "colorFile" argument must be instanceof ColorFile.');
         }
         if (!(colorMap instanceof ColorMap)) {
-            throw TypeError('"colorMap" must be instanceof ColorMap.');
+            throw TypeError('The "colorMap" argument must be instanceof ColorMap.');
         }
         const notFound = [];
         // - Color everything gray to get rid of default colors
-        for (const ob of this.#controller.observableGraph.getObservables()) {
-            ob.getObservers().filter(ob => ob instanceof LeafletLayer).forEach(ll => {
-                // - Color nodes gray
-                if (Object.values(ll.getLayer()._layers)[0].hasOwnProperty('_icon')) {
-                    const svg = Object.values(ll.getLayer()._layers)[0]._icon.children[0];
-                    this.#colorSvg(svg, {_rgb: [128, 128, 128, 1]});
-                // - Color lines gray
-                } else {
-                    const options = Object.values(ll.getLayer()._layers)[0].options;
-                    if (options.color !== 'gray') {
-                        options.originalColor = options.color;
+        for (const observable of this.#controller.observableGraph.getObservables()) {
+            observable.getObservers().filter(observer => observer instanceof LeafletLayer).forEach(ll => {
+                const path = Object.values(ll.getLayer()._layers)[0];
+                if (observable.isNode()) {
+                    if (!path.options.hasOwnProperty('originalFillColor')) {
+                        path.options.originalFillColor = path.options.fillColor;
                     }
-                    options.color = 'gray';
+                    path.setStyle({
+                        fillColor: 'gray'
+                    });
+                } else if (observable.isLine()) {
+                    if (!path.options.hasOwnProperty('originalColor')) {
+                        path.options.originalColor = path.options.color;
+                    }
+                    if (!path.options.hasOwnProperty('colorModalColor')) {
+                        path.options.colorModalColor = 'gray';
+                    }
+                    // - The line is highlighted
+                    if (path.options.color === '#7FFF00') {
+                        // - pass
+                    } else {
+                        path.setStyle({
+                            color: 'gray'
+                        });
+                    }
                 }
             });
         }
@@ -377,8 +389,19 @@ class ColorModal { // implements ModalInterface, ObserverInterface
                 const key = this.#controller.observableGraph.getKeyForComponent(name);
                 const observable = this.#controller.observableGraph.getObservable(key);
                 observable.getObservers().filter(ob => ob instanceof LeafletLayer).forEach(ll => {
-                    const svg = Object.values(ll.getLayer()._layers)[0]._icon.children[0];
-                    this.#colorSvg(svg, obj.color);
+                    const path = Object.values(ll.getLayer()._layers)[0];
+                    const hex = ColorModal.rgbToHex(obj.color._rgb[0], obj.color._rgb[1], obj.color._rgb[2]);
+                    if (observable.isNode()) {
+                        path.setStyle({
+                            fillColor: hex
+                        });
+                    }
+                    if (observable.isLine()) {
+                        observable.options.colorModalColor = hex;
+                        path.setStyle({
+                            color: hex
+                        });
+                    }
                 });
             } catch (e) {
                 notFound.push(name);
@@ -387,24 +410,6 @@ class ColorModal { // implements ModalInterface, ObserverInterface
         console.log(`The following names in the CSV did not match any visible object in the circuit: ${notFound}`);
         // - Display legend
         colorMap.displayLegend(colorFile.getFilename());
-    }
-
-    /**
-     * @param {SVGElement} svg
-     * @param {Object} color - an object containing {_rgb: [<r>, <g>, <b>, <a>]}
-     * @returns {undefined}
-     */
-    #colorSvg(svg, color) {
-        if (!(svg instanceof SVGElement)) {
-            throw TypeError('"svg" argument must be instanceof SVGElement.');
-        }
-        if (typeof color !== 'object') {
-            throw TypeError('"color" argument must be typeof object.');
-        }
-        if (!color.hasOwnProperty('_rgb')) {
-            throw Error('"color" argument must have "_rgb" property.');
-        }
-        svg.style.fill = `rgba(${color._rgb[0]}, ${color._rgb[1]}, ${color._rgb[2]}, ${color._rgb[3]})`;
     }
 
     /**
@@ -458,18 +463,21 @@ class ColorModal { // implements ModalInterface, ObserverInterface
      */
     #resetColors() {
         this.#controller.observableGraph.getObservables().forEach(observable => {
-            observable.getObservers().filter(ob => ob instanceof LeafletLayer).forEach(ll => {
-                // - Un-color nodes
-                if (Object.values(ll.getLayer()._layers)[0].hasOwnProperty('_icon')) {
-                    const svg = Object.values(ll.getLayer()._layers)[0]._icon.children[0];
-                    svg.style.removeProperty('fill');
-                // - Un-color lines
-                } else {
-                    const options = Object.values(ll.getLayer()._layers)[0].options;
-                    if (options.hasOwnProperty('originalColor')) {
-                        options.color = options.originalColor;
+            observable.getObservers().filter(observer => observer instanceof LeafletLayer).forEach(ll => {
+                const path = Object.values(ll.getLayer()._layers)[0];
+                if (observable.isNode()) {
+                    path.setStyle({
+                        fillColor: path.options.originalFillColor
+                    });
+                } else if (observable.isLine()) {
+                    delete path.options.colorModalColor;
+                    // - The line is highlighted
+                    if (path.options.color === '#7FFF00') {
+                        // - pass
                     } else {
-                        options.color = 'gray';
+                        path.setStyle({
+                            color: path.options.originalColor
+                        });
                     }
                 }
             });
@@ -478,6 +486,13 @@ class ColorModal { // implements ModalInterface, ObserverInterface
         this.#selectedColorMapIndex = null;
         // - Force refresh the map so that the lines change color
         LeafletLayer.map.setZoom(LeafletLayer.map.getZoom());
+    }
+
+    static rgbToHex(r, g, b) {
+        return '#' + [r, g, b].map(x => {
+            const hex = x.toString(16)
+            return hex.length === 1 ? '0' + hex : hex
+        }).join('');
     }
 }
 
@@ -630,7 +645,8 @@ class ColorMap {
         buttonDiv.appendChild(button);
         modal.insertElement(buttonDiv);
         document.getElementById('legendInsert').replaceChildren(modal.divElement);
-        $(modal.divElement).draggable();
+        const draggable = new L.Draggable(modal.divElement)
+        draggable.enable()
     }
 
     /**
@@ -644,6 +660,8 @@ class ColorMap {
         const func = chroma.scale(ColorMap.viridisColors).domain([min, max]);
         Object.values(this.#nameToValue).forEach(obj => {
             obj.color = func(obj.float);
+            // - I round because later on I need to convert the integer values into a hex string
+            obj.color._rgb = obj.color._rgb.map(float => Math.round(float));
         });
     }
 

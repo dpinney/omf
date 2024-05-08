@@ -204,8 +204,8 @@ class FeatureGraph {
             throw TypeError('The "observable" argument must be instanceof Feature.');
         }
         const observableKey = observable.getProperty('treeKey', 'meta');
-        this.#graph.setNodeAttribute(observableKey, 'visited', true);
         if (this.#graph.hasNode(observableKey)) {
+            this.#graph.setNodeAttribute(observableKey, 'visited', true);
             // - If a node is deleted, all of its attached lines need to be deleted too
             if (observable.isNode()) {
                 this.#graph.edges(observableKey).forEach(edgeKey => {
@@ -247,7 +247,8 @@ class FeatureGraph {
             this.#removeObservableFromKeytoFeature(observable);
             this.#observers.forEach(ob => ob.handleDeletedObservable(observable));
         } else {
-            throw new FeatureNotFoundError(key);
+            // - No need to throw error. It's probably the case that a parent child line has already been deleted and the code is trying to delete it again
+            //throw new FeatureNotFoundError(observableKey);
         }
     }
 

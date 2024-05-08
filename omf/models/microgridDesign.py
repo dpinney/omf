@@ -256,13 +256,13 @@ def work(modelDir, inputDict):
 		#['om_cost_us_dollars_per_kwh'] = dieselOMCostKwh
 		scenario['ElectricLoad']['critical_loads_kw'] = jsonifiableCriticalLoad
 		# diesel has a quirk in how it gets inputted to REopt such that when strictly specified, allOutputData["sizeDiesel1"] = allInputData['dieselMax'] + allInputData['genExisting']
-		#todo: check if still true for reopt.jl
+		#todo: check if still true for reopt.jl => doesn't seem to be
 		#if dieselMax - genExisting > 0:
-		#	scenario['Generator']['max_kw'] = dieselMax - genExisting
+		scenario['Generator']['max_kw'] = dieselMax # - genExisting
 		#else:
 		#	scenario['Generator']['max_kw'] = 0
 		#if dieselMin - genExisting > 0:
-		#	scenario['Generator']['min_kw'] = dieselMin - genExisting
+		scenario['Generator']['min_kw'] = dieselMin # - genExisting
 		#else:
 		#	scenario['Generator']['min_kw'] = 0
 		#adding outage results (REopt.jl)
