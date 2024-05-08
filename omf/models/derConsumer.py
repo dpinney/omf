@@ -23,25 +23,18 @@ from omf.solvers import reopt_jl
 modelName, template = __neoMetaModel__.metadata(__file__)
 hidden = False
 
-def castAddInputs(val1,val2):
-	''' Casts string inputs to appropriate type and returns their sum. 
-		If inputs are cast to floats, rounds their sum to avoid float subtraction errors.'''
-	try:
-		cast1 = int(val1)
-		cast2 = int(val2)
-		return cast1+cast2
-	except ValueError:
-		try:
-			cast1 = float(val1)
-			cast2 = float(val2)
-            #Find longest decimal place of the numbers and round their sum to that place to avoid float arithmetic errors
-			decPl1 = val1.strip()[::-1].find('.')
-			decPl2 = val2.strip()[::-1].find('.')  
-            #valX.strip() used instead of str(castX) because str(castX) may return scientific notation
-			roundedSum = round(cast1+cast2,max(decPl1,decPl2,1))     
-			return roundedSum
-		except ValueError:
-			return val1+val2
+def create_timestamps(start_time='2017-01-01',end_time='2017-12-31 23:00:00',arr_size=8760):
+	''' Creates an array of timestamps given a start time, stop time, and array size.
+	Inputs:
+		start_time (str) Beginning of the timestamp array in 'year-month-day hh:mm:ss format'
+		end_time (str) End of the timestamp array in 'year-month-day hh:mm:ss format'
+		arr_size (int) Size of the timestamp array (default=8760 for one year in hourly increments)
+	Outputs:
+		timestamps (arr) Of size arr_size from start_time to end_time
+
+ 	'''
+	timestamps = pd.date_range(start=start_time, end=end_time, periods=arr_size)
+	return timestamps
 
 def work(modelDir, inputDict):
 	''' Run the model in its directory. '''
@@ -58,7 +51,7 @@ def work(modelDir, inputDict):
 	## Create timestamp array from REopt input information
 	year = reoptResults['inputs.ElectricLoad.year'][0]
 	arr_size = np.size(reoptResults['outputs.ElectricUtility.electric_to_load_series_kw'][0])
-	timestamps = pd.date_range(start=f'{year}-01-01', end=f'{year}-12-31 23:00:00', periods=arr_size)
+	timestamps = create_timestamps(start_time=f'{year}-01-01', end_time=f'{year}-12-31 23:00:00', arr_size=arr_size)
 
 	## Convert temperature data from str to float
 	temperatures = [float(value) for value in inputDict['tempCurve'].split('\n') if value.strip()]
@@ -74,9 +67,7 @@ def work(modelDir, inputDict):
 	
 
 	## Test plot
-	plotData = []
-	
-	showlegend = False
+	showlegend = False #temporarily disable the legend toggle
 
 	layout = go.Layout(
     	title='Residential Data',
@@ -85,8 +76,8 @@ def work(modelDir, inputDict):
     	yaxis2=dict(title='degrees Celsius',
                 overlaying='y',
                 side='right'
-				),
-		legend=dict(
+                ),
+    	legend=dict(
 			orientation='h',
 			yanchor="bottom",
 			y=1.02,
@@ -118,6 +109,7 @@ def work(modelDir, inputDict):
 
 	fig.add_trace(go.Scatter(x=timestamps,
 							y=np.asarray(vbat_discharge_flipsign)+np.asarray(demand),
+							yaxis='y1',
 							mode='none',
 							fill='tozeroy',
 							fillcolor='rgba(127,0,255,1)',
@@ -127,11 +119,51 @@ def work(modelDir, inputDict):
 
 	fig.add_trace(go.Scatter(x=timestamps,
                          y=np.asarray(demand)-np.asarray(BESS)-np.asarray(vbat_discharge_flipsign),
+						 yaxis='y1',
                          mode='none',
                          name='Original Load (kW)',
                          fill='tozeroy',
                          fillcolor='rgba(100,200,210,1)',
 						 showlegend=showlegend))
+
+	fig.add_trace(go.Scatter(x=timestamps,
+                         y=np.asarray(demand) + np.asarray(reoptResults['outputs.ElectricUtility.electric_to_storage_series_kw'][0]) + np.asarray(vbat_charge),
+						 yaxis='y1',
+                         mode='none',
+                         name='Additional Load (Charging BESS and vbat)',
+                         fill='tonexty',
+                         fillcolor='rgba(175,0,42,0)',
+						 showlegend=showlegend))
+	fig.update_traces(fillpattern_shape='.', selector=dict(name='Additional Load (Charging BESS and vbat)'))
+	
+
+	grid_serving_new_load = np.asarray(grid_to_load) + np.asarray(grid_charging_BESS)+ np.asarray(vbat_charge) - np.asarray(vbat_discharge_flipsign) + np.asarray(PV)
+	fig.add_trace(go.Scatter(x=timestamps,
+                         y=grid_serving_new_load,
+						 yaxis='y1',
+                         mode='none',
+                         fill='tozeroy',
+                         name='Grid Serving Load (kW)',
+                         fillcolor='rgba(192,192,192,1)',
+						 showlegend=showlegend))
+	
+	fig.add_trace(go.Scatter(x=timestamps,
+						  y=temperatures,
+						  yaxis='y2',
+						  mode='lines',
+						  line=dict(color='red',width=1),
+						  name='Average Temperature',
+						  showlegend=showlegend 
+						  ))
+
+	#fig.add_trace(go.Scatter(x=timestamps, 
+	#				 y=demand,
+	#				 yaxis='y1',
+	#				 mode='lines',
+	#				 line=dict(color='black'),
+	#				 name='Demand',
+	#				 showlegend=showlegend))
+	#fig.update_traces(legendgroup='Demand', visible='legendonly', selector=dict(name='Original Load (kW)')) ## Make demand hidden on plot by default
 
 	fig.add_trace(go.Scatter(x=timestamps,
 					 y=PV,
@@ -142,45 +174,8 @@ def work(modelDir, inputDict):
 					 fillcolor='rgba(255,246,0,1)',
 					 showlegend=showlegend
 					 ))
-	
-	fig.add_trace(go.Scatter(x=timestamps,
-                         y=np.asarray(demand) + np.asarray(reoptResults['outputs.ElectricUtility.electric_to_storage_series_kw'][0]) + np.asarray(vbat_charge),
-                         mode='none',
-                         name='Additional Load (Charging BESS and vbat)',
-                         fill='tonexty',
-                         fillcolor='rgba(175,0,42,0)',
-						 showlegend=showlegend))
-	fig.update_traces(fillpattern_shape='.', selector=dict(name='Additional Load (Charging BESS and vbat)'))
 
-
-	grid_serving_new_load = np.asarray(grid_to_load) + np.asarray(grid_charging_BESS)+ np.asarray(vbat_charge) - np.asarray(vbat_discharge_flipsign) + np.asarray(PV)
-	fig.add_trace(go.Scatter(x=timestamps,
-                         y=grid_serving_new_load,
-                         mode='none',
-                         fill='tozeroy',
-                         name='Grid Serving Load (kW)',
-                         fillcolor='rgba(192,192,192,0.5)',
-						 showlegend=showlegend))
-	
-	fig.add_trace(go.Scatter(x=timestamps, 
-					   y=temperatures,
-					   yaxis='y2',
-					   mode='lines',
-					   line=dict(color='red',width=1),
-					   name='Average Temperature',
-					   showlegend=showlegend #temporarily disable the legend toggle
-	))
-
-	fig.add_trace(go.Scatter(x=timestamps, 
-					 y=demand,
-					 yaxis='y1',
-					 mode='lines',
-					 line=dict(color='black'),
-					 name='Demand',
-					 showlegend=showlegend
-					))
-	fig.update_traces(legendgroup='Demand', visible='legendonly', selector=dict(name='Original Load (kW)')) ## Make demand hidden on plot by default
-
+	fig.show()
 
 	## Encode plot data as JSON for showing in the HTML side
 	outData['plotlyPlot'] = json.dumps(fig.data, cls=plotly.utils.PlotlyJSONEncoder)

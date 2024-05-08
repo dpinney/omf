@@ -205,31 +205,11 @@
 		</form>
 	
 	
-	
-	
-	
-	
 	</div>
 	{{ omfRunDebugBlock }}
 	{% if modelStatus == 'finished' %}
 	<!-- Output tables, graphs, etc -->
 	<div id="output">
-		<!-- Integer Sum Table -->
-		<p class="reportTitle">Model Skeleton Integer Sum</p>
-		<div id="analysisSummary" class="content">
-			<div class="shortInput">
-				<strong>Input 1</strong>
-				<p id="input1Out">{{allInputDataDict.input1}}</p>
-			</div>
-			<div class="shortInput">
-				<strong>Input 2</strong>
-				<p id="input2Out">{{allInputDataDict.input2}}</p>
-			</div>
-			<div class="shortInput">
-				<strong>Output</strong>
-				<p id="sumOut">{{allOutputDataDict.output}}</p>
-			</div>
-		</div>
 		{{ rawOutputFiles }}
 	</div>
 
