@@ -1,10 +1,11 @@
 ''' Performs cost-benefit analysis for a member-consumer with distributed 
 energy resource (DER) technologies. '''
 
-import warnings
-# warnings.filterwarnings("ignore")
+
 
 # Python imports
+import warnings
+# warnings.filterwarnings("ignore")
 import shutil, datetime
 from os.path import join as pJoin
 import numpy as np
