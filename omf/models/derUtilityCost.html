@@ -4,6 +4,11 @@
 	<script src="{{pathPrefix}}/static/highcharts4.src.js"></script>
 	<!-- Include Plotly -->
 	<script src="https://cdn.plot.ly/plotly-1.50.1.min.js"></script>
+	<script type="text/javascript">
+		$(window).on('pageshow',function(){
+			Plotly.newPlot('plotlyPlot', JSON.parse(allOutputData['plotlyPlot']),JSON.parse(allOutputData['plotlyLayout']));
+		});
+	</script>
 </head>
 <body>
 	{{ omfModelTitle }}
@@ -220,23 +225,11 @@
 	{{ omfRunDebugBlock }}
 	{% if modelStatus == 'finished' %}
 	<!-- Output tables, graphs, etc -->
+
+	<p class="reportTitle" style="page-break-before:always">Plotly Test Plot</p>
+	<div id="plotlyPlot" class="tightContent" style="width: 1000px; height: 600px;"></div>
+	
 	<div id="output">
-		<!-- Integer Sum Table -->
-		<p class="reportTitle">Model Skeleton Integer Sum</p>
-		<div id="analysisSummary" class="content">
-			<div class="shortInput">
-				<strong>Input 1</strong>
-				<p id="input1Out">{{allInputDataDict.input1}}</p>
-			</div>
-			<div class="shortInput">
-				<strong>Input 2</strong>
-				<p id="input2Out">{{allInputDataDict.input2}}</p>
-			</div>
-			<div class="shortInput">
-				<strong>Output</strong>
-				<p id="sumOut">{{allOutputDataDict.output}}</p>
-			</div>
-		</div>
 		{{ rawOutputFiles }}
 	</div>
 	{% endif %}
