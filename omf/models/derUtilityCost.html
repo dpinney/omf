@@ -72,7 +72,7 @@
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Analysis Period (years)<span class="classic">Specify the length of financial analysis in years.</span></label>
-				<input type="number" id="analysisYears" name="analysisYears" value="{{allInputDataDict.analysisYears}}" step="1" min="2" max="75"  required="required"/>
+				<input type="number" id="analysis_years" name="analysis_years" value="{{allInputDataDict.analysis_years}}" step="1" min="2" max="75"  required="required"/>
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Solar<span class="classic">Include solar?</span></label>
@@ -102,9 +102,9 @@
 			<!-- TODO: Create switch for outages (if outage, display outage options, otherwise dont)-->
 			<div class="shortInput">
 				<label>Simulate Outage</label>
-				<select id="Outage" name="Outage" value="{{allInputDataDict.Outage}}">
-					<option value="on" {{ 'selected' if allInputDataDict.Outage == 'on' }}>On</option>
-					<option value="off" {{ 'selected' if allInputDataDict.Outage == 'off' }}>Off</option>
+				<select id="outage" name="outage" value="{{allInputDataDict.outage}}">
+					<option value="on" {{ 'selected' if allInputDataDict.outage == 'on' }}>On</option>
+					<option value="off" {{ 'selected' if allInputDataDict.outage == 'off' }}>Off</option>
 				</select>
 			</div>
 			<div class="shortInput">
@@ -114,6 +114,105 @@
 			<div class="shortInput">
 				<label class="tooltip">Outage Duration (hours)<span class="classic">The added major outage is given this duration.</span></label>
 				<input type="number" id="outageDuration" name="outageDuration" value="{{allInputDataDict.outageDuration}}" min="1" max="8760" required="required"/>
+			</div>
+			<div class="wideInput"> <!-- vbatDispatch Specific Inputs -->
+				<p class="inputSectionHeader">Specific vbatDispatch Model Inputs</p>
+			</div>
+			<hr style="border-style: solid; border-color: #196b12; margin-top: 10px;">
+			<div class="shortInput">
+				<label class="tooltip">Load Type<span class="classic">Device to be used in calculations</span></label>
+				<select id="load_type" onchange="loadDefaultParameters()" name="load_type">
+				<script type="text/javascript">
+					function loadDefaultParameters(){
+						var x = gebi('load_type').value;
+						if (x == 1){ //AC
+							gebi('capacitance').value = '2';
+							gebi('resistance').value = '2';
+							gebi('power').value = '5.6';
+							gebi('cop').value = '2.5';
+							gebi('deadband').value = '0.625';
+							gebi('setpoint').value = '22.5';
+						} else if (x == 2){ //HP
+							gebi('capacitance').value = '2';
+							gebi('resistance').value = '2';
+							gebi('power').value = '5.6';
+							gebi('cop').value = '3.5';
+							gebi('deadband').value = '0.625';
+							gebi('setpoint').value = '19.5';
+						} else if (x == 3) { //RG
+							gebi('capacitance').value = '0.6';
+							gebi('resistance').value = '90';
+							gebi('power').value = '0.3';
+							gebi('cop').value = '2';
+							gebi('deadband').value = '1.5';
+							gebi('setpoint').value = '2.5';
+						} else { //WH
+							gebi('capacitance').value = '0.4';
+							gebi('resistance').value = '120';
+							gebi('power').value = '4.5';
+							gebi('cop').value = '1';
+							gebi('deadband').value = '3';
+							gebi('setpoint').value = '48.5';
+						}
+					}
+				</script>
+					<option value="1" {{ 'selected' if allInputDataDict.load_type == '1' }}>Air Conditioner</option>
+					<option value="2" {{ 'selected' if allInputDataDict.load_type == '2' }}>Heat Pump</option>
+					<option value="3" {{ 'selected' if allInputDataDict.load_type == '3' }}>Refrigerator</option>
+					<option value="4" {{ 'selected' if allInputDataDict.load_type == '4' }}>Water Heater</option>
+				</select>
+			</div>
+			<div class="shortInput">
+				<label class="tooltip">Number of Devices<span class="classic">Total number of devices to simulate.</span></label>
+				<input type="text" id="number_devices" name="number_devices" value="{{allInputDataDict.number_devices}}" required="required">
+			</div>
+			<div class="shortInput">
+				<label class="tooltip">Rated Power (kW)<span class="classic">Max power per device. Must be a positive rational number between 0.1 and 7.2.</span></label>
+				<input type="text" id="power" name="power" value="{{allInputDataDict.power}}" pattern="^\d+\.?\d*?$" required="required">
+			</div>
+			<div class="shortInput">
+				<label class="tooltip">Thermal Capacitance (kWh/&degC)<span class="classic">Capacitance of each device. Must be between 0.2 and 2.5 with exactly one decimal digit.</span></label>
+				<input type="text" id="capacitance" name="capacitance" value="{{allInputDataDict.capacitance}}" pattern="^\d+\.?\d*?$" required="required">
+			</div>
+			<div class="shortInput">
+				<label class="tooltip">Thermal Resistance (&degC/kW)<span class="classic">Resistance of each device. Must be between 1.5 and 140.</span></label>
+				<input type="text" id="resistance" name="resistance" value="{{allInputDataDict.resistance}}" pattern="^\d+\.?\d*?$" required="required">
+			</div>			
+			<div class="shortInput">
+				<label class="tooltip">COP<span class="classic">Coefficient of power of each device. Must be between 1 and 3.5</span></label>
+				<input type="text" id="cop" name="cop" value="{{allInputDataDict.cop}}" pattern="^\d+\.?\d*?$" required="required">
+			</div>
+			<div class="shortInput">
+				<label class="tooltip">Temperature Setpoint (&degC)<span class="classic">Setpoint for each device. Must be between 1.7 and 54.</span></label>
+				<input type="text" id="setpoint" name="setpoint" value="{{allInputDataDict.setpoint}}" pattern="^\d+\.?\d*?$" required="required">
+			</div>
+			<div class="shortInput">
+				<label class="tooltip">Temperature Deadband (&degC)<span class="classic">Deadband for each device. Must be between 0.125 and 2.</span></label>
+				<input type="text" id="deadband" name="deadband" value="{{allInputDataDict.deadband}}" pattern="^\d+\.?\d*?$" required="required">
+			</div>
+			<div class="shortInput">
+				<label class="tooltip">Unit Cost ($/unit)<span class="classic">Cost per device for equipping it to respond to load control signals. E.g. for a direct load control program, this would be the cost of a load control switch, typically about $100.</span></label>
+				<input type="text" id="unitDeviceCost" name="unitDeviceCost" value="{{allInputDataDict.unitDeviceCost}}" pattern="^\d+\.?\d*?$" required="required">
+			</div>
+			<div class="shortInput">
+				<label class="tooltip">Upkeep Cost ($/unit/year)<span class="classic">Maintenance cost each year per device for replacing or repairing defective load control equipment.</span></label>
+				<input type="text" id="unitUpkeepCost" name="unitUpkeepCost" value="{{allInputDataDict.unitUpkeepCost}}" pattern="^\d+\.?\d*?$" required="required">
+			</div>
+			<div class="shortInput">
+				<label class="tooltip">Demand Charge Cost ($/kW)<span class="classic">Demand charge utility pays for peak demand events. Assumed to be calculated based on monthly single highest peak.</span></label>
+				<input type="text" id="demandChargeCost" name="demandChargeCost" value="{{allInputDataDict.demandChargeCost}}" pattern="^\d+\.?\d*?$" required="required">
+			</div>
+			<div class="shortInput">
+				<label class="tooltip">Energy Cost ($/kWh)<span class="classic">Cost of energy bought by the utility. I.e. wholesale (not retail) cost.</span></label>
+				<input type="text" id="electricityCost" name="electricityCost" value="{{allInputDataDict.electricityCost}}" pattern="^\d+\.?\d*?$" required="required">
+			</div>
+			<div class="shortInput">
+				<label class="tooltip">Financial Projection Length (years)<span class="classic">Number of years to project out estimated savings.</span></label>
+				<input type="text" id="projectionLength" name="projectionLength" value="{{allInputDataDict.projectionLength}}" pattern="^\d+\.?\d*?$" required="required">
+			</div>
+			<div class="shortInput">
+				<label class="tooltip">Discount Rate (%)<span class="classic">Discount rate used in financial analysis.</span></label>
+				<input type="text" id="discountRate" name="discountRate" value="{{allInputDataDict.discountRate}}" pattern="[1-9][0-9]{0,2}" required="required">
 			</div>
 			{{ omfModelButtons }}
 		</form>
