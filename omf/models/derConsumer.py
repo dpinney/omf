@@ -39,18 +39,171 @@ def create_timestamps(start_time='2017-01-01',end_time='2017-12-31 23:00:00',arr
 	timestamps = pd.date_range(start=start_time, end=end_time, periods=arr_size)
 	return timestamps
 
+def create_REopt_jl_jsonFile(modelDir, inputDict):
+
+	## Site parameters
+	latitude = float(inputDict['latitude'])
+	longitude = float(inputDict['longitude'])
+	urdbLabel = str(inputDict['urdbLabel'])
+	year = int(inputDict['year'])
+	#outage = inputDict['outage']
+	demand = np.asarray([float(value) for value in inputDict['demandCurve'].split('\n') if value.strip()])
+
+	demand = demand.tolist() if isinstance(demand, np.ndarray) else demand
+
+	## Energy technologies
+	#solar = inputDict['solar'] 
+	#generator = inputDict['generator']
+	#battery = inputDict['battery']
+
+	## Load demand file and make it JSON ready
+	#with open(pJoin(modelDir, "demand.csv")) as loadFile:
+	#	load = pd.read_csv(loadFile, header=None)
+	#	load = load[0].values.tolist()
+		
+
+	"""
+	## Financial and Load parameters
+	energyCost = float(inputDict['energyCost'])
+	demandCost = float(inputDict['demandCost'])
+	wholesaleCost = float(inputDict['wholesaleCost'])
+	lostLoadValue = float(inputDict['value_of_lost_load'])
+	analysisYears = int(inputDict['analysisYears'])
+	omCostEscalator = float(inputDict['omCostEscalator'])
+	discountRate = float(inputDict['discountRate'])
+	criticalLoadFactor = float(inputDict['criticalLoadFactor'])
+	userCriticalLoadShape = True if inputDict['userCriticalLoadShape'] == "True" else False
+
+	## Solar parameters
+	solarCost = float(inputDict['solarCost'])
+	solarMin = float(inputDict['solarMin'])
+	if solar == 'off':
+		solarMax = 0
+	elif solar == 'on':
+		solarMax = float(inputDict['solarMax'])
+		solarExisting = float(inputDict['solarExisting'])
+
+	solarCanExport = True if inputDict['solarCanExport'] == "True" else False
+	solarCanCurtail = True if inputDict['solarCanCurtail'] == "True" else False
+	solarMacrsOptionYears = int(inputDict['solarMacrsOptionYears'])
+	solarItcpercent = float(inputDict['solarItcPercent'])
+
+	## BESS parameters
+	batteryPowerCost = float(inputDict['batteryPowerCost'])
+	batteryCapacityCost = float(inputDict['batteryCapacityCost'])
+	batteryPowerCostReplace = float(inputDict['batteryPowerCostReplace'])
+	batteryCapacityCostReplace = float(inputDict['batteryCapacityCostReplace'])
+	batteryPowerReplaceYear = float(inputDict['batteryPowerReplaceYear'])
+	batteryCapacityReplaceYear = float(inputDict['batteryCapacityReplaceYear'])
+	batteryPowerMin = float(inputDict['batteryPowerMin'])
+	batteryCapacityMin = float(inputDict['batteryCapacityMin'])
+	batteryMacrsOptionYears = int(inputDict['batteryMacrsOptionYears'])
+	batteryItcPercent = float(inputDict['batteryItcPercent'])
+
+	## Diesel Generator paramters
+	dieselGenCost = float(inputDict['dieselGenCost'])
+	dieselMacrsOptionYears = int(inputDict['dieselMacrsOptionYears'])
+	dieselMax = float(inputDict['dieselMax'])
+	dieselMin = float(inputDict['dieselMin'])
+	dieselFuelCostGal = float(inputDict['dieselFuelCostGal'])
+	dieselCO2Factor = float(inputDict['dieselCO2Factor'])
+	dieselOMCostKw = float(inputDict['dieselOMCostKw'])
+	dieselOMCostKwh = float(inputDict['dieselOMCostKwh'])
+	dieselOnlyRunsDuringOutage = True if inputDict['dieselOnlyRunsDuringOutage'] == "True" else False
+
+	## Outage/resilience paramters
+	outage_start_hour = int(inputDict['outage_start_hour'])
+	outage_duration = int(inputDict['outageDuration'])
+	outage_end_hour = outage_start_hour + outage_duration
+
+	scenario = {
+		"Site": {
+			"latitude": latitude,
+			"longitude": longitude
+		},
+		"ElectricTariff": {
+			"wholesale_rate": wholesaleCost
+		},
+		"ElectricLoad": {
+			"loads_kw": jsonifiableLoad,
+			"year": year
+		},
+		"Financial": {
+			"value_of_lost_load_per_kwh": value_of_lost_load,
+			"analysis_years": analysisYears,
+			"om_cost_escalation_rate_fraction": omCostEscalator,
+			"offtaker_discount_rate_fraction": discountRate
+		},
+		"PV": {
+			"installed_cost_per_kw": solarCost,
+			"min_kw": solarMin,
+			"max_kw": solarMax,
+			"can_export_beyond_nem_limit": solarCanExport,
+			"can_curtail": solarCanCurtail,
+			"macrs_option_years": solarMacrsOptionYears,
+			"federal_itc_fraction": solarItcPercent
+		},
+		"ElectricStorage": {
+			"installed_cost_per_kwh": batteryPowerCost,
+			"installed_cost_per_kwh": batteryCapacityCost,
+			"replace_cost_per_kw": batteryPowerCostReplace,
+			"replace_cost_per_kwh": batteryCapacityCostReplace,
+			"inverter_replacement_year": batteryPowerReplaceYear,
+			"battery_replacement_year": batteryCapacityReplaceYear,
+			"min_kw": batteryPowerMin,
+			"min_kwh": batteryCapacityMin,
+			"macrs_option_years": batteryMacrsOptionYears,
+			"total_itc_fraction": batteryItcPercent
+		},
+		"Generator": {
+			"installed_cost_per_kw": dieselGenCost,
+			"only_runs_during_grid_outage": dieselOnlyRunsDuringOutage,
+			"macrs_option_years": dieselMacrsOptionYears
+		}
+	}
+	"""
+
+	scenario = {
+		"Site": {
+			"latitude": latitude,
+			"longitude": longitude
+		},
+		"ElectricTariff": {
+			"urdb_label": urdbLabel
+		},
+		"ElectricLoad": {
+			"loads_kw": demand,
+			"year": year
+		},
+		"PV": {
+		},
+	}
+
+	## Outages
+	"""
+	if (inputDict['outage']):
+		scenario['ElectricUtility'] = {
+			'outage_start_time_step': int(inputDict['outage_start_hour']),
+			'outage_end_time_step': int(inputDict['outage_start_hour'])+int(inputDict['outage_duration'])
+		}
+	"""
+
+	## Save scenario file
+	with open(pJoin(modelDir, "reopt_scenario_input.json"), "w") as jsonFile:
+		json.dump(scenario, jsonFile)
+	return scenario
+
 def work(modelDir, inputDict):
 	''' Run the model in its directory. '''
+
 	# Delete output file every run if it exists
 	outData = {}	
-
-
-	## NOTE: This code will be used once reopt_jl is working
-	## Run REopt.jl 
-	#outage_flag = inputDict['outage'] #TODO: Add outage option to HTML
-	#reopt_jl.run_reopt_jl(modelDir, scenario, outages=outage_flag)
 	
-	## NOTE: This code is temporary
+	## NOTE: This code will be used once reopt_jl is working
+	## Create REopt input file
+	#reopt_input_scenario = create_REopt_jl_jsonFile(modelDir, inputDict)
+	
+	## NOTE: This code is used temporarily until reopt_jl is working
 	## Read in a static REopt test file 
 	with open(pJoin(__neoMetaModel__._omfDir,"static","testFiles","residential_REopt_results.json")) as f:
 		reoptResults = pd.json_normalize(json.load(f))
@@ -58,6 +211,11 @@ def work(modelDir, inputDict):
 
 	# Model operations goes here.
 
+	## NOTE: This code will be used once reopt_jl is working
+	## Run REopt.jl 
+	#outage_flag = inputDict['outage'] #TODO: Add outage option to HTML
+	#reopt_jl.run_reopt_jl(modelDir, scenario, outages=outage_flag)
+		
 	## Create timestamp array from REopt input information
 	year = reoptResults['inputs.ElectricLoad.year'][0]
 	arr_size = np.size(reoptResults['outputs.ElectricUtility.electric_to_load_series_kw'][0])
