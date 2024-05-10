@@ -43,39 +43,36 @@
 				<button id="feederButton" type="button" onclick="javascript:editFeeder(allInputData.modelName,1);" style="display:block;width:125px;">Open Editor</button>
 				<input type="text" id="feederName1" name="feederName1" value="{{allInputDataDict.feederName1}}" style="display:none">
 			</div>
-
+		
 			<div class="shortInput">
-				<label class="tooltip">Equipment of Interest<span class="classic">Select Equipment of Interest </span></label>
-				<br>
-				<label>Choose Equipment</label>
-				<br>
-				<label>Lines</label>
+
+				<label class="tooltip">Lines<span class="classic">Select Yes if you would like to include Lines in the analysis </span></label>
 				<select name="lines" id="lines">
 					<option value="yes" {% if allInputDataDict.lines | lower == "yes" %}selected{% endif %} >Yes</option>
 					<option value="no" {% if allInputDataDict.lines | lower != "yes" %}selected{% endif %}>No</option>
 				</select>
 			</div>
 			<div class="shortInput">
-			<label>Transformers</label>
-			<select name="transformers" id="transformers">
-				<option value="yes" {% if allInputDataDict.transformers | lower == "yes" %}selected{% endif %}>Yes</option>
-				<option value="no" {% if allInputDataDict.transformers | lower != "yes" %}selected{% endif %}>No</option>
-			</select>
+				<label class="tooltip">Transformers<span class="classic">Select Yes if you would like to include Transformers in the analysis </span></label>
+				<select name="transformers" id="transformers">
+					<option value="yes" {% if allInputDataDict.transformers | lower == "yes" %}selected{% endif %}>Yes</option>
+					<option value="no" {% if allInputDataDict.transformers | lower != "yes" %}selected{% endif %}>No</option>
+				</select>
 			</div>
 			<div class="shortInput">
-			<label>Fuses</label>
-			<select name="fuses" id="fuses">
-				<option value="yes" {% if allInputDataDict.fuses | lower == "yes" %}selected{% endif %}>Yes</option>
-				<option value="no" {% if allInputDataDict.fuses | lower != "yes" %}selected{% endif %}>No</option>
-			</select>
+				<label class="tooltip">Fuses <span class="classic">Select Yes if you would like to include Fuses in the analysis </span></label>
+				<select name="fuses" id="fuses">
+					<option value="yes" {% if allInputDataDict.fuses | lower == "yes" %}selected{% endif %}>Yes</option>
+					<option value="no" {% if allInputDataDict.fuses | lower != "yes" %}selected{% endif %}>No</option>
+				</select>
 			</div>
 			
 			<div class="shortInput">
-			<label>Data Refresh</label>
-			<select name="refresh" id="refresh">
-				<option value="True" {% if allInputDataDict.refresh == True %}selected{% endif %}>Yes</option>
-				<option value="False" {% if allInputDataDict.refresh == False %}selected{% endif %}>No</option>
-			</select>
+				<label class="tooltip">Data Refresh<span class="classic">Select Yes if you would like to include Fuses in the analysis. Note this process may take longer </span></label>
+				<select name="refresh" id="refresh">
+					<option value="True" {% if allInputDataDict.refresh == True %}selected{% endif %}>Yes</option>
+					<option value="False" {% if allInputDataDict.refresh == False %}selected{% endif %}>No</option>
+				</select>
 			</div>
 		
 			<div class="shortInput">
@@ -105,21 +102,19 @@
 	{% if modelStatus == 'finished' %}
 		<!-- Output tables, graphs, etc -->
 		<p class="reportTitle" style="page-break-before:always">Resilient Community Map</p>
-		<div id="resilienceMap" class="tightContent"></div>
+	<div id="resilienceMap" class="tightContent">
 		<script>
 			var mapContent = allOutputData["resilienceMap"]
 			var iframe = document.createElement('iframe');
-			iframe.style = 'width:1000px; height:800px; border-radius:8px;'
+			iframe.style = 'width:1000px; height:1000px; border-radius:8px;'
 			//document.getElementById('resilienceMap').innerHTML = '<div class="img-div" style="position:relative;left:0;bottom:-800px;"><img style="position:relative" src="{{allOutputDataDict["legend_path"]}}"></div>';
-			//document.getElementById('resilienceMap').innerHTML = '<ul class="legend" style="position:relative;left:0;bottom:-800px;"> <li style="float: left; margin-right: 10px;"><span class="veryhigh" style="background-color: #ff00ff;"></span>Very High</li><li><span class="relativelyhigh" style="background-color: #00ffff;""></span> Relatively High</li><li><span class="relativelymoderate" style="background-color: #0000ff;"></span> Relatively Moderate</li><li><span class="relativelylow" style="background-color: #000000;"></span> Relatively Low</li><li><span class="verylow"></span> Very Low</li><li><span class="dataunavailable"></span> Data Unavailable</li></ul>'
-			document.getElementById('resilienceMap').innerHTML = "<div class='my-legend' style='position:relative;left:0;bottom:-800px;'><div class='legend-title' style='position:relative'>Social Vulnerability Legend</div> <div class='legend-scale'> <ul class='legend-labels'> <li><span style='background:#0000FF;'></span>Very High</li> <li><span style='background:#ADD8E6;'></span>Rel. High</li> <li><span style='background:#90EE90;'></span>Rel. Moderate</li> <li><span style='background:#FFFF00;'></span>Rel. Low</li> <li><span style='background:#808080;'></span>Very Low</li> <li><span style='background:#000000;'></span>Data Unavailable </li> </ul> </div> <style type='text/css'> .my-legend .legend-title { text-align: left; margin-bottom: 8px; font-weight: bold; font-size: 90%; } .my-legend .legend-scale ul { margin: 0; padding: 0; float: left; list-style: none; } .my-legend .legend-scale ul li { display: block; float: left; width: 50px; margin-bottom: 6px; text-align: center; font-size: 70%; list-style: none; } .my-legend ul.legend-labels li span { display: block; float: left; height: 15px; width: 50px; } .my-legend .legend-source { font-size: 70%; color: #999; clear: both; } .my-legend a { color: #777; } </style> "
+			document.getElementById('resilienceMap').innerHTML = "<div class='my-legend' style='position:relative;left:0;bottom:-1000px;'><div class='legend-title' style='position:relative'>Social Vulnerability Legend</div> <div class='legend-scale'> <ul class='legend-labels'> <li><span style='background:#0000FF;'></span>Very High</li> <li><span style='background:#ADD8E6;'></span>Rel. High</li> <li><span style='background:#90EE90;'></span>Rel. Moderate</li> <li><span style='background:#FFFF00;'></span>Rel. Low</li> <li><span style='background:#808080;'></span>Very Low</li> <li><span style='background:#000000;'></span>Data Unavailable </li> </ul> </div> <style type='text/css'> .my-legend .legend-title { text-align: left; margin-bottom: 8px; font-weight: bold; font-size: 90%; } .my-legend .legend-scale ul { margin: 0; padding: 0; float: left; list-style: none; } .my-legend .legend-scale ul li { display: block; float: left; width: 50px; margin-bottom: 6px; text-align: center; font-size: 70%; list-style: none; } .my-legend ul.legend-labels li span { display: block; float: left; height: 15px; width: 50px; } .my-legend .legend-source { font-size: 70%; color: #999; clear: both; } .my-legend a { color: #777; } </style> "
 			document.getElementById('resilienceMap').appendChild(iframe);
 			iframe.contentWindow.document.open();
 			iframe.contentWindow.document.write(mapContent);
 			iframe.contentWindow.document.close();
 		</script>
-</div>
-
+	</div>
 
 <p class="reportTitle">Objects Data Table</p>
 <div id="traditionalObjectsTable" class="tightContent" style="height:300px; overflow-y: scroll;">
@@ -143,3 +138,4 @@
 		</div>
 	{% endif %}
 </body>
+
