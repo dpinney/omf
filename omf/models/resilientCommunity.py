@@ -44,10 +44,9 @@ from omf.solvers.opendss.dssConvert import *
 
 
 # Model metadata:
+tooltip = "Provides insight and determines the most vulnerable areas and pieces of equipment within a circuit  "
 modelName, template = __neoMetaModel__.metadata(__file__)
 hidden = True
-
-  
 
 def retrieveCensusNRI():
     '''
@@ -70,10 +69,7 @@ def retrieveCensusNRI():
         # create geojson from datafiles
         with shapefile.Reader(shp=BytesIO(z.read(shpPath)), dbf=BytesIO(z.read(dbfPath)), prj=BytesIO(z.read(prjPath))) as shp:
             geojson_data = shp.__geo_interface__
-            prefix = list(pathlib.Path(__file__).parts)
-            prefix[7] = 'static'
-            prefix[8] = 'testFiles'
-            outfile = pathlib.Path(*prefix) / 'census_and_NRI_database_MAR2023.json'
+            outfile = pJoin(omf.omfDir,'static','testFiles','census_and_NRI_database_MAR2023.json')
             with open(outfile, 'w') as f:
                 json.dump(geojson_data, f,indent=4)
                 return outfile
@@ -224,7 +220,7 @@ def createGeoDF(df):
     return geo
 
 
-def createLegend():
+def createLegend(modelDir):
     '''
     creates legend for social vulnerability pologons to overlay with map_omd map
     '''
@@ -562,7 +558,6 @@ def getDownLineLoads(pathToOmd,nriGeoJson):
     df = createDF(tractData, ['census_tract', "SOVI_SCORE", "SOVI_RATNG"], transformedGeos)
     geoDF = createGeoDF(df)
     
-    #geoDF.to_file('/Users/davidarmah/Documents/omf/omf/static/testFiles/resilientCommunity/geoShapes.geojson', driver="GeoJSON")
             
 
 
@@ -918,6 +913,8 @@ def createColorCSV(modelDir, loadsDict):
     new_df = pd.DataFrame.from_dict(new, orient='index')
     new_df.to_csv(Path(modelDir, 'color_by.csv'), index=True)
 
+    
+
 
 def work(modelDir, inputDict):
     ''' Run the model in its directory. '''
@@ -992,7 +989,8 @@ def work(modelDir, inputDict):
     ,
     "geojsonFiles":{
         "geoshapes.geojson": {
-            "json": json.dumps(geoshapes)
+            "json": json.dumps(geoshapes),
+            "displayOnLoad": 'true'
         }
 
     }
@@ -1056,6 +1054,7 @@ def work(modelDir, inputDict):
 
     return outData
 
+
 def test():
     #omdPath = '/Users/davidarmah/Downloads/cleandssout.omd'
     #dssPath = '/Users/davidarmah/Downloads/flat_Master_clean.DSS'
@@ -1080,7 +1079,6 @@ def new(modelDir):
         "feederName1": omdfileName,
         "lines":'Yes',
         "transformers":'Yes',
-        "buses":'Yes',
         "fuses":'Yes',
         "loadCol": "Base Criticality Index",
         "refresh": False,
@@ -1090,7 +1088,9 @@ def new(modelDir):
 	}
     creationCode = __neoMetaModel__.new(modelDir, defaultInputs)
     try:
-        shutil.copyfile(pJoin(__neoMetaModel__._omfDir, "static", "publicFeeders", defaultInputs["feederName1"]+'.omd'), pJoin(modelDir, defaultInputs["feederName1"]+'.omd'))
+        #shutil.copyfile(pJoin(__neoMetaModel__._omfDir, "static", "publicFeeders", defaultInputs["feederName1"]+'.omd'), pJoin(modelDir, defaultInputs["feederName1"]+'.omd'))
+
+        shutil.copyfile(pJoin(__neoMetaModel__._omfDir, "static", "testFiles","resilientCommunity", defaultInputs["feederName1"]+'.omd'), pJoin(modelDir, defaultInputs["feederName1"]+'.omd'))
     except:
         return False
     return creationCode
@@ -1114,6 +1114,6 @@ def tests():
 	__neoMetaModel__.renderAndShow(modelLoc)
 
 if __name__ == '__main__':
-	print("test")
+    print("test")
     #test()
 	#tests()
