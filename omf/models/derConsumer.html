@@ -7,6 +7,9 @@
 	<script type="text/javascript">
 		$(window).on('pageshow',function(){
 			Plotly.newPlot('plotlyPlot', JSON.parse(allOutputData['plotlyPlot']),JSON.parse(allOutputData['plotlyLayout']));
+			Plotly.newPlot('resiliencePlotly', JSON.parse(allOutputData['resilienceData']), JSON.parse(allOutputData['resilienceLayout']) || {});
+			Plotly.newPlot('resilienceProbPlotly', JSON.parse(allOutputData['resilienceProbData']), JSON.parse(allOutputData['resilienceProbLayout']) || {});
+
 		});
 	</script>
 </head>
@@ -103,6 +106,22 @@
 					<option value="Yes" {{ 'selected' if allInputDataDict.generator == 'Yes' }}>Yes</option>
 					<option value="No" {{ 'selected' if allInputDataDict.generator == 'No' }}>No</option>
 				</select>
+			</div>
+			<!-- TODO: Create switch for outages (if outage, display outage options, otherwise dont)-->
+			<div class="shortInput">
+				<label>Simulate Outage</label>
+				<select id="outage" name="outage" value="{{allInputDataDict.outage}}">
+					<option value="True" {{ 'selected' if allInputDataDict.outage == 'True' }}>On</option>
+					<option value="False" {{ 'selected' if allInputDataDict.outage == 'False' }}>Off</option>
+				</select>
+			</div>
+			<div class="shortInput">
+				<label class="tooltip">Outage Start Hour<span class="classic">The starting hour of the outage. Specify an hour greater than 0 but less than 8760 to trigger optimization for resilience. If 0 is entered, the model will run an economic optimization without fossil generation.</span></label>
+				<input type="number" id="outage_start_hour" name="outage_start_hour" value="{{allInputDataDict.outage_start_hour}}" min="0" max="8760" required="required"/>
+			</div>
+			<div class="shortInput">
+				<label class="tooltip">Outage Duration (hours)<span class="classic">The duration (in hours) of the outage. Specify a number between 1 - 8760 hours. </span></label>
+				<input type="number" id="outage_duration" name="outage_duration" value="{{allInputDataDict.outage_duration}}" min="1" max="8760" required="required"/>
 			</div>
 			<div class="wideInput"> <!-- vbatDispatch Specific Inputs -->
 				<p class="inputSectionHeader">Specific vbatDispatch Model Inputs</p>
@@ -214,6 +233,12 @@
 
 	<p class="reportTitle" style="page-break-before:always">Plotly Test Plot</p>
 	<div id="plotlyPlot" class="tightContent" style="width: 1000px; height: 600px;"></div>
+
+	<p class="reportTitle" style="page-break-before:always">Resilience Overview</p>
+	<div id="resiliencePlotly" class="tightContent"></div>
+				
+	<p class="reportTitle" style="page-break-before:always">Outage Survival Probability</p>
+	<div id="resilienceProbPlotly" class="tightContent"></div>
 
 	<div id="output">
 		{{ rawOutputFiles }}

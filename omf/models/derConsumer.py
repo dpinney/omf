@@ -47,7 +47,7 @@ def create_REopt_jl_jsonFile(modelDir, inputDict):
 	longitude = float(inputDict['longitude'])
 	urdbLabel = str(inputDict['urdbLabel'])
 	year = int(inputDict['year'])
-	#outage = inputDict['outage']
+	outage = inputDict['outage']
 	demand = np.asarray([float(value) for value in inputDict['demandCurve'].split('\n') if value.strip()])
 
 	demand = demand.tolist() if isinstance(demand, np.ndarray) else demand
@@ -178,19 +178,20 @@ def create_REopt_jl_jsonFile(modelDir, inputDict):
 		},
 		"PV": {
 		},
+		"ElectricStorage": {
+
+		},
 	}
 
 	## Outages
-	"""
 	if (inputDict['outage']):
 		scenario['ElectricUtility'] = {
 			'outage_start_time_step': int(inputDict['outage_start_hour']),
 			'outage_end_time_step': int(inputDict['outage_start_hour'])+int(inputDict['outage_duration'])
 		}
-	"""
 
 	## Save scenario file
-	with open(pJoin(modelDir, "reopt_scenario_input.json"), "w") as jsonFile:
+	with open(pJoin(modelDir, "reopt_input_scenario.json"), "w") as jsonFile:
 		json.dump(scenario, jsonFile)
 	return scenario
 
@@ -202,30 +203,42 @@ def work(modelDir, inputDict):
 	
 	## NOTE: This code will be used once reopt_jl is working
 	## Create REopt input file
-	#reopt_input_scenario = create_REopt_jl_jsonFile(modelDir, inputDict)
+	create_REopt_jl_jsonFile(modelDir, inputDict)
 	
 	## NOTE: This code is used temporarily until reopt_jl is working
 	## Read in a static REopt test file 
-	with open(pJoin(__neoMetaModel__._omfDir,"static","testFiles","residential_REopt_results.json")) as f:
-		reoptResults = pd.json_normalize(json.load(f))
-		print('Successfully loaded REopt test file. \n')
+	#with open(pJoin(__neoMetaModel__._omfDir,"static","testFiles","residential_REopt_results.json")) as f:
+	#	reoptResults = pd.json_normalize(json.load(f))
+	#	print('Successfully loaded REopt test file. \n')
 
 	# Model operations goes here.
 
 	## NOTE: This code will be used once reopt_jl is working
 	## Run REopt.jl 
-	#outage_flag = inputDict['outage'] #TODO: Add outage option to HTML
-	#reopt_jl.run_reopt_jl(modelDir, scenario, outages=outage_flag)
-		
+	outage_flag = inputDict['outage']
+	
+	reopt_jl.run_reopt_jl(modelDir, "reopt_input_scenario.json", outages=outage_flag)
+	with open(pJoin(modelDir, 'results.json')) as jsonFile:
+		reoptResults = json.load(jsonFile)
+
 	## Create timestamp array from REopt input information
-	year = reoptResults['inputs.ElectricLoad.year'][0]
-	arr_size = np.size(reoptResults['outputs.ElectricUtility.electric_to_load_series_kw'][0])
+	try:
+		year = reoptResults['ElectricLoad.year'][0]
+	except KeyError:
+		year = inputDict['year'] # Use the user provided year if none found in reoptResults
+
+	arr_size = np.size(reoptResults['ElectricUtility']['electric_to_load_series_kw'])
 	timestamps = create_timestamps(start_time=f'{year}-01-01', end_time=f'{year}-12-31 23:00:00', arr_size=arr_size)
 
 	## Convert temperature data from str to float
 	temperatures = [float(value) for value in inputDict['tempCurve'].split('\n') if value.strip()]
 	demand = np.asarray([float(value) for value in inputDict['demandCurve'].split('\n') if value.strip()])
 
+	## If outage is specified, load the resilience results
+	if (inputDict['outage']):
+		with open(pJoin(modelDir, 'resultsResilience.json')) as jsonFile:
+			reoptResultsResilience = json.load(jsonFile)
+			print(reoptResultsResilience)
 
 	## Run vbatDispatch
 	vbatResults = vb.work(modelDir,inputDict)
@@ -238,31 +251,14 @@ def work(modelDir, inputDict):
 	## Test plot
 	showlegend = False #temporarily disable the legend toggle
 
-	layout = go.Layout(
-    	title='Residential Data',
-    	xaxis=dict(title='Timestamp'),
-    	yaxis=dict(title="Energy (kW)"),
-    	yaxis2=dict(title='degrees Celsius',
-                overlaying='y',
-                side='right'
-                ),
-    	legend=dict(
-			orientation='h',
-			yanchor="bottom",
-			y=1.02,
-			xanchor="right",
-			x=1
-			)
-	)
-
-	PV = reoptResults['outputs.PV.electric_to_load_series_kw'][0]
-	BESS = reoptResults['outputs.ElectricStorage.storage_to_load_series_kw'][0]
+	PV = reoptResults['PV']['electric_to_load_series_kw']
+	BESS = reoptResults['ElectricStorage']['storage_to_load_series_kw']
 	vbpower_series = pd.Series(vbatResults['VBpower'][0])
 	vbat_discharge = vbpower_series.where(vbpower_series < 0, 0) #negative values
 	vbat_charge = vbpower_series.where(vbpower_series > 0, 0) ## positive values; part of the New Load?
 	vbat_discharge_flipsign = vbat_discharge.mul(-1) ## flip sign of vbat discharge for plotting purposes
-	grid_to_load = reoptResults['outputs.ElectricUtility.electric_to_load_series_kw'][0]
-	grid_charging_BESS = reoptResults['outputs.ElectricUtility.electric_to_storage_series_kw'][0]
+	grid_to_load = reoptResults['ElectricUtility']['electric_to_load_series_kw']
+	grid_charging_BESS = reoptResults['ElectricUtility']['electric_to_storage_series_kw']
 
 
 	fig = go.Figure()
@@ -296,7 +292,7 @@ def work(modelDir, inputDict):
 						 showlegend=showlegend))
 
 	fig.add_trace(go.Scatter(x=timestamps,
-                         y=np.asarray(demand) + np.asarray(reoptResults['outputs.ElectricUtility.electric_to_storage_series_kw'][0]) + np.asarray(vbat_charge),
+                         y=np.asarray(demand) + np.asarray(reoptResults['ElectricUtility']['electric_to_storage_series_kw'][0]) + np.asarray(vbat_charge),
 						 yaxis='y1',
                          mode='none',
                          name='Additional Load (Charging BESS and vbat)',
@@ -347,7 +343,7 @@ def work(modelDir, inputDict):
 	fig.update_layout(
     	title='Residential Data',
     	xaxis=dict(title='Timestamp'),
-    	yaxis=dict(title="Energy (kW)"),
+    	yaxis=dict(title="Power (kW)"),
     	yaxis2=dict(title='degrees Celsius',
                 overlaying='y',
                 side='right'
@@ -362,6 +358,69 @@ def work(modelDir, inputDict):
 	)
 
 	fig.show()
+
+	## Add REopt resilience plot (copied from microgridDesign.py)
+
+	#helper function for generating output graphs
+	def makeGridLine(x,y,color,name):
+		plotLine = go.Scatter(
+			x = x, 
+			y = y,
+			line = dict( color=(color)),
+			name = name,
+			hoverlabel = dict(namelength = -1),
+			showlegend=True,
+			stackgroup='one',
+			mode='none'
+		)
+		return plotLine
+	#Set plotly layout ---------------------------------------------------------------
+	plotlyLayout = go.Layout(
+		width=1000,
+		height=375,
+		legend=dict(
+			x=0,
+			y=1.25,
+			orientation="h")
+		)
+	x = list(range(len(reoptResults['ElectricUtility']['electric_to_load_series_kw'])))
+	plotData = []
+	#x_values = pd.to_datetime(x, unit = 'h', origin = pd.Timestamp(f'{year}-01-01'))
+	x_values = timestamps
+	powerGridToLoad = makeGridLine(x_values,reoptResults['ElectricUtility']['electric_to_load_series_kw'],'blue','Load met by Grid')
+	plotData.append(powerGridToLoad)
+	
+	if (inputDict['outage']): 
+		outData['resilience'] = reoptResultsResilience['resilience_by_time_step']
+		outData['minOutage'] = reoptResultsResilience['resilience_hours_min']
+		outData['maxOutage'] = reoptResultsResilience['resilience_hours_max']
+		outData['avgOutage'] = reoptResultsResilience['resilience_hours_avg']
+		outData['survivalProbX'] = reoptResultsResilience['outage_durations']
+		outData['survivalProbY'] = reoptResultsResilience['probs_of_surviving']
+
+		plotData = []
+		resilience = go.Scatter(
+			x=x,
+			y=outData['resilience'],
+			line=dict( color=('red') ),
+		)
+		plotData.append(resilience)
+		plotlyLayout['yaxis'].update(title='Longest Outage survived (Hours)')
+		plotlyLayout['xaxis'].update(title='Start Hour')
+		outData["resilienceData"] = json.dumps(plotData, cls=plotly.utils.PlotlyJSONEncoder)
+		outData["resilienceLayout"] = json.dumps(plotlyLayout, cls=plotly.utils.PlotlyJSONEncoder)
+
+		plotData = []
+		survivalProb = go.Scatter(
+			x=outData['survivalProbX'],
+			y=outData['survivalProbY'],
+			line=dict( color=('red') ),
+			name="Probability of Surviving Outage of a Given Duration")
+		plotData.append(survivalProb)
+		plotlyLayout['yaxis'].update(title='Probability of meeting critical Load')
+		plotlyLayout['xaxis'].update(title='Outage Length (Hours)')
+		outData["resilienceProbData" ] = json.dumps(plotData, cls=plotly.utils.PlotlyJSONEncoder)
+		outData["resilienceProbLayout"] = json.dumps(plotlyLayout, cls=plotly.utils.PlotlyJSONEncoder)
 
 	## Encode plot data as JSON for showing in the HTML side
 	outData['plotlyPlot'] = json.dumps(fig.data, cls=plotly.utils.PlotlyJSONEncoder)
@@ -397,10 +456,12 @@ def new(modelDir):
 		"tempFileName": "residential_extended_temperature_data.csv",
 		"demandCurve": demand_curve,
 		"tempCurve": temp_curve,
-		"outage": False,
 		"PV": "Yes",
 		"BESS": "No",
 		"generator": "No",
+		"outage": True,
+		"outage_start_hour": "2100",
+		"outage_duration": "3",
 
 		## vbatDispatch inputs:
 		"load_type": '2', ## Heat Pump
