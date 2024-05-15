@@ -50,7 +50,6 @@ def createColorCSV(modelDir, df):
 	new_df = df[['bus','max_kw']]
 	new_df.to_csv(Path(modelDir, 'color_by.csv'), index=False)
 
-
 def run_downline_load_algorithm( modelDir, inputDict, outData):
 	feederName = [x for x in os.listdir(modelDir) if x.endswith('.omd') and x[:-4] == inputDict['feederName1'] ][0]
 	inputDict['feederName1'] = feederName[:-4]
@@ -58,7 +57,7 @@ def run_downline_load_algorithm( modelDir, inputDict, outData):
 	tree = opendss.dssConvert.omdToTree(path_to_omd)
 	opendss.dssConvert.treeToDss(tree, Path(modelDir, 'downlineLoad.dss'))
 	downline_start_time = time.time()
-	graph = opendss.omd_to_nx_fulldata( os.path.join( modelDir, 'downlineLoad.dss') )
+	graph = opendss.dss_to_nx_fulldata( os.path.join( modelDir, 'downlineLoad.dss') )
 	buses = opendss.get_all_buses( os.path.join( modelDir, 'downlineLoad.dss') )
 	buses_output = {}
 	kwFromGraph = nx.get_node_attributes(graph, 'kw')
@@ -137,7 +136,7 @@ def run_traditional_algorithm(modelDir, inputDict, outData):
 	tree = opendss.dssConvert.omdToTree(path_to_omd)
 	opendss.dssConvert.treeToDss(tree, Path(modelDir, 'circuit.dss'))
 	traditional_start_time = time.time()
-	traditionalHCResults = opendss.hosting_capacity_all(Path(modelDir, 'circuit.dss'), int(inputDict["traditionalHCMaxTestkw"]))
+	traditionalHCResults = opendss.hosting_capacity_all( FNAME = Path(modelDir, 'circuit.dss'), max_test_kw=int(inputDict["traditionalHCMaxTestkw"]), multiprocess=True)
 	traditional_end_time = time.time()
 	# - opendss.hosting_capacity_all() changes the cwd, so change it back so other code isn't affected
 	tradHCDF = pd.DataFrame(traditionalHCResults)
@@ -160,12 +159,12 @@ def run_traditional_algorithm(modelDir, inputDict, outData):
 	sorted_tradHCDF.drop(sorted_tradHCDF.columns[len(sorted_tradHCDF.columns)-1], axis=1, inplace=True)
 	createColorCSV(modelDir, sorted_tradHCDF)
 	attachment_keys = {
-	"coloringFiles": {
-		"color_by.csv": {
-			"csv": "<content>",
-			"colorOnLoadColumnIndex": "1"
+		"coloringFiles": {
+			"color_by.csv": {
+				"csv": "<content>",
+				"colorOnLoadColumnIndex": "1"
+			}
 		}
-	}
 	}
 	data = Path(modelDir, 'color_by.csv').read_text()
 	attachment_keys['coloringFiles']['color_by.csv']['csv'] = data
@@ -175,7 +174,6 @@ def run_traditional_algorithm(modelDir, inputDict, outData):
 	with open(new_path, 'w+') as out_file:
 		json.dump(omd, out_file, indent=4)
 	omf.geo.map_omd(new_path, modelDir, open_browser=False )
-
 
 	outData['traditionalHCMap'] = open(Path(modelDir, "geoJson_offline.html"), 'r' ).read()
 	outData['traditionalGraphData'] = json.dumps(traditionalHCFigure, cls=py.utils.PlotlyJSONEncoder )
