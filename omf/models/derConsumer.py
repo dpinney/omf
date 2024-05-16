@@ -12,7 +12,7 @@ import numpy as np
 import pandas as pd
 import plotly.graph_objs as go
 import plotly.utils
-import matplotlib.pyplot as plt
+from numpy_financial import npv
 
 # OMF imports
 from omf.models import __neoMetaModel__
@@ -220,6 +220,7 @@ def work(modelDir, inputDict):
 	reopt_jl.run_reopt_jl(modelDir, "reopt_input_scenario.json", outages=outage_flag)
 	with open(pJoin(modelDir, 'results.json')) as jsonFile:
 		reoptResults = json.load(jsonFile)
+	outData.update(reoptResults) ## Update output file with reopt results
 
 	## Create timestamp array from REopt input information
 	try:
@@ -238,7 +239,8 @@ def work(modelDir, inputDict):
 	if (inputDict['outage']):
 		with open(pJoin(modelDir, 'resultsResilience.json')) as jsonFile:
 			reoptResultsResilience = json.load(jsonFile)
-			print(reoptResultsResilience)
+			#print(reoptResultsResilience)
+		outData.update(reoptResultsResilience) ## Update output file with reopt resilience results
 
 	## Run vbatDispatch
 	vbatResults = vb.work(modelDir,inputDict)
@@ -246,9 +248,9 @@ def work(modelDir, inputDict):
 	with open(pJoin(modelDir, 'vbatResults.json'), 'w') as jsonFile:
 		json.dump(vbatResults, jsonFile)
 	outData.update(vbatResults) ## Update output file with vbat results
-	
 
-	## Test plot
+
+	## DER Overview plot
 	showlegend = False #temporarily disable the legend toggle
 
 	PV = reoptResults['PV']['electric_to_load_series_kw']
@@ -259,7 +261,6 @@ def work(modelDir, inputDict):
 	vbat_discharge_flipsign = vbat_discharge.mul(-1) ## flip sign of vbat discharge for plotting purposes
 	grid_to_load = reoptResults['ElectricUtility']['electric_to_load_series_kw']
 	grid_charging_BESS = reoptResults['ElectricUtility']['electric_to_storage_series_kw']
-
 
 	fig = go.Figure()
 	fig.add_trace(go.Scatter(x=timestamps,
@@ -301,7 +302,6 @@ def work(modelDir, inputDict):
 						 showlegend=showlegend))
 	fig.update_traces(fillpattern_shape='.', selector=dict(name='Additional Load (Charging BESS and vbat)'))
 	
-
 	grid_serving_new_load = np.asarray(grid_to_load) + np.asarray(grid_charging_BESS)+ np.asarray(vbat_charge) - np.asarray(vbat_discharge_flipsign) + np.asarray(PV)
 	fig.add_trace(go.Scatter(x=timestamps,
                          y=grid_serving_new_load,
@@ -341,7 +341,7 @@ def work(modelDir, inputDict):
 					 ))
 	
 	fig.update_layout(
-    	title='Residential Data',
+    	#title='Residential Data',
     	xaxis=dict(title='Timestamp'),
     	yaxis=dict(title="Power (kW)"),
     	yaxis2=dict(title='degrees Celsius',
@@ -357,10 +357,12 @@ def work(modelDir, inputDict):
 			)
 	)
 
-	fig.show()
+	fig.show() ## This opens a window that displays the correct figure with the appropriate patterns
+	## Encode plot data as JSON for showing in the HTML side
+	outData['derOverviewData'] = json.dumps(fig.data, cls=plotly.utils.PlotlyJSONEncoder)
+	outData['derOverviewLayout'] = json.dumps(fig.layout, cls=plotly.utils.PlotlyJSONEncoder)
 
-	## Add REopt resilience plot (copied from microgridDesign.py)
-
+	## Add REopt resilience plot (adapted from omf/models/microgridDesign.py)
 	#helper function for generating output graphs
 	def makeGridLine(x,y,color,name):
 		plotLine = go.Scatter(
@@ -422,9 +424,74 @@ def work(modelDir, inputDict):
 		outData["resilienceProbData" ] = json.dumps(plotData, cls=plotly.utils.PlotlyJSONEncoder)
 		outData["resilienceProbLayout"] = json.dumps(plotlyLayout, cls=plotly.utils.PlotlyJSONEncoder)
 
+
+	## Exported Power Plot
+	PVcurtailed = reoptResults['PV']['electric_curtailed_series_kw']
+	electric_to_grid = reoptResults['PV']['electric_to_grid_series_kw']
+
+	fig = go.Figure()
+
+	## Power used to charge BESS (electric_to_storage_series_kw)
+	fig.add_trace(go.Scatter(x=timestamps,
+                         y=np.asarray(grid_charging_BESS),
+                         mode='none',
+                         fill='tozeroy',
+                         name='Power Used to Charge BESS',
+                         fillcolor='rgba(75,137,83,1)',
+						 showlegend=True))
+	
+	## Power used to charge vbat (vbat_charging)
+	fig.add_trace(go.Scatter(x=timestamps,
+						y=np.asarray(vbat_charge),
+						mode='none',
+						fill='tozeroy',
+						name='Power Used to Charge VBAT',
+						fillcolor='rgba(155,148,225,1)',
+						showlegend=True))
+	
+	## PV curtailed (electric_curtailed_series_kw)
+	fig.add_trace(go.Scatter(x=timestamps,
+						y=np.asarray(PVcurtailed),
+						mode='none',
+						fill='tozeroy',
+						name='PV Curtailed',
+						fillcolor='rgba(0,137,83,1)',
+						showlegend=True))
+	
+	## Power used to meet load (NOTE: Does this mean grid to load?)
+	fig.add_trace(go.Scatter(x=timestamps,
+					y=np.asarray(grid_to_load),
+					mode='none',
+					fill='tozeroy',
+					name='Grid Serving Load',
+					fillcolor='rgba(100,131,130,1)',
+					showlegend=True))
+	
+	## Power exported to grid (electric_to_grid_series_kw)
+	fig.add_trace(go.Scatter(x=timestamps,
+					y=np.asarray(electric_to_grid),
+					mode='none',
+					fill='tozeroy',
+					name='Power Exported to Grid',
+					fillcolor='rgba(33,78,154,1)',
+					showlegend=True))
+
+
+	fig.update_layout(
+    	xaxis=dict(title='Timestamp'),
+    	yaxis=dict(title="Power (kW)"),
+    	legend=dict(
+			orientation='h',
+			yanchor="bottom",
+			y=1.02,
+			xanchor="right",
+			x=1
+			)
+	)
+	
 	## Encode plot data as JSON for showing in the HTML side
-	outData['plotlyPlot'] = json.dumps(fig.data, cls=plotly.utils.PlotlyJSONEncoder)
-	outData['plotlyLayout'] = json.dumps(fig.layout, cls=plotly.utils.PlotlyJSONEncoder)
+	outData['exportedPowerData'] = json.dumps(fig.data, cls=plotly.utils.PlotlyJSONEncoder)
+	outData['exportedPowerLayout'] = json.dumps(fig.layout, cls=plotly.utils.PlotlyJSONEncoder)
 
 	# Model operations typically ends here.
 	# Stdout/stderr.
@@ -500,25 +567,6 @@ def _tests_disabled():
 	# Show the output.
 	__neoMetaModel__.renderAndShow(modelLoc)
 
-def _debugging():
-	# Location
-	modelLoc = pJoin(__neoMetaModel__._omfDir,"data","Model","admin","Automated Testing of " + modelName)
-	# Blow away old test results if necessary.
-	try:
-		shutil.rmtree(modelLoc)
-	except:
-		# No previous test results.
-		pass
-	# Create New.
-	new(modelLoc)
-	# Pre-run.
-	__neoMetaModel__.renderAndShow(modelLoc)
-	# Run the model.
-	__neoMetaModel__.runForeground(modelLoc)
-	# Show the output.
-	__neoMetaModel__.renderAndShow(modelLoc)
-
 if __name__ == '__main__':
-	#_tests()
-	_debugging() ## This is only used to bypass the runAllTests errors due to this model's incompletion. It is just a copy of _tests() function.
+	_tests_disabled() ## NOTE: Workaround for failing test. When model is ready, change back to just _tests()
 	pass
