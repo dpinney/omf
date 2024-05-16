@@ -1,6 +1,7 @@
 import json, time
 import os, platform
 import random
+import subprocess
 
 thisDir = str(os.path.abspath(os.path.dirname(__file__)))
 
@@ -287,19 +288,28 @@ def run_reopt_jl(path, inputFile="", loadFile="", default=False, outages=False, 
 
         if run_with_sysimage:
             sysimage_path = os.path.normpath(os.path.join(thisDir,"reopt_jl.so"))
-            os.system(f'''julia --sysimage="{sysimage_path}" -e '
-                      using .REoptSolver;
-                      ENV["NREL_DEVELOPER_API_KEY"]="{api_key}";
-                      REoptSolver.run("{path}", {outages_jl}, {microgrid_only_jl}, {max_runtime_s_jl}, "{api_key}", {tolerance})
-                      ' ''')
+            command = f'''julia --sysimage="{sysimage_path}" -e '
+            using .REoptSolver;
+            ENV["NREL_DEVELOPER_API_KEY"]="{api_key}";
+            REoptSolver.run("{path}", {outages_jl}, {microgrid_only_jl}, {max_runtime_s_jl}, "{api_key}", {tolerance})'
+            '''
         else:
             project_path = os.path.normpath(os.path.join(thisDir,"REoptSolver"))
-            os.system(f'''julia --project="{project_path}" -e '
+            command = f'''julia --project="{project_path}" -e '
                       using Pkg; Pkg.instantiate();
                       import REoptSolver;
                       ENV["NREL_DEVELOPER_API_KEY"]="{api_key}";
                       REoptSolver.run("{path}", {outages_jl}, {microgrid_only_jl}, {max_runtime_s_jl}, "{api_key}", {tolerance})
-                      ' ''')
+                      ' '''
+        
+        # As each line becomes available, print to terminal and append to return variable.
+        output = []
+        process = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, universal_newlines=True)
+        for line in process.stdout:
+            print(line, end="")
+            output.append(line)
+        return ''.join(output)
+    
     except Exception as e:
         print(e)
 

@@ -282,9 +282,12 @@ def work(modelDir, inputDict):
 			json.dump(scenario, jsonFile)
 
 		# Run REopt API script *** => switched to REopt.jl
-		reopt_jl.run_reopt_jl(modelDir, "Scenario_test_POST.json", outages=run_outages, max_runtime_s = max_runtime, tolerance = tolerance)
-		with open(pJoin(modelDir, 'results.json')) as jsonFile:
-			results = json.load(jsonFile)
+		try:
+			output = reopt_jl.run_reopt_jl(modelDir, "Scenario_test_POST.json", outages=run_outages, max_runtime_s = max_runtime, tolerance = tolerance)
+			with open(pJoin(modelDir, 'results.json')) as jsonFile:
+				results = json.load(jsonFile)
+		except FileNotFoundError:
+			raise RuntimeError(f"results.json file not found. Output: {output}")
 
 		#getting REoptInputs to access default input values more easily 
 		with open(pJoin(modelDir, 'REoptInputs.json')) as jsonFile:
