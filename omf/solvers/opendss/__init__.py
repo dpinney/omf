@@ -841,65 +841,86 @@ def dss_to_nx_fulldata( dssFilePath, tree=None, fullData = True ):
 	# new object=line.645646 bus1=645.2 bus2=646.2 phases=1 linecode=mtx603 length=300 units=ft
 	# line.x <- is this the name?
 	lines = [x for x in tree if x.get('object', 'N/A').startswith('line.')]
-	print( lines[0] )
 	lines_bus1 = [x.split('.')[0] for x in [x['bus1'] for x in lines if 'bus1' in x]]
 	lines_bus2 = [x.split('.')[0] for x in [x['bus2'] for x in lines if 'bus2' in x]]
+	lines_name = [x.split('.')[1] for x in [x['object'] for x in lines if 'object' in x]]
 	edges = []
-	for bus1, bus2 in zip( lines_bus1, lines_bus2 ):
+	for bus1, bus2 in zip(lines_bus1, lines_bus2 ):
 		edges.append( (bus1, bus2, {'color': 'blue'}) )
-	G.add_edges_from(edges)
+	G.add_edges_from( edges )
 
-	if fullData:
-		line_phases = [x['phases'] for x in lines if 'phases' in x]
-		line_linecode = [x['linecode'] for x in lines if 'linecode' in x]
-		line_length = [x['length'] for x in lines if 'length' in x]
-		line_units = [x['units'] for x in lines if 'units' in x]
-		edges_with_attributes = {}
-		for edge, phase, linecode, length, unit in zip(edges, line_phases, line_linecode, line_length, line_units):
-				print( "edge: ", edge )
-				edge_nodes = (edge[0], edge[1])
-				edges_with_attributes[edge_nodes] = {"phases": phase, "linecode": linecode, "length": float(length), "units": unit}
-		nx.set_edge_attributes( G, edges_with_attributes )
-
-
-	# Need edges from bus --- trasnformr info ---> load
-	transformers = [x for x in tree if x.get('object', 'N/A').startswith('transformer.')]
-	transformer_bus_names = [x['buses'] for x in transformers if 'buses' in x]
-	bus_to_transformer_pairs = {}
-	for transformer_bus in transformer_bus_names:
-		strip_paren = transformer_bus.strip('[]')
-		split_buses = strip_paren.split(',')
-		bus = split_buses[0].split('.')[0]
-		transformer_name = split_buses[1].split('.')[0]
-		bus_to_transformer_pairs[transformer_name] = bus
+	# Need to add data for lines
+	# some lines have "switch"
+	# How to add data when sometimes there sometimes not
 	
 	# If there is a transformer tied to a load, we get it from here.
 	loads = [x for x in tree if x.get('object', 'N/A').startswith('load.')] # This is an orderedDict
 	load_names = [x['object'].split('.')[1] for x in loads if 'object' in x and x['object'].startswith('load.')]
-	load_transformer_name = [x.split('.')[0] for x in [x['bus1'] for x in loads if 'bus1' in x]]
+	load_bus = [x.split('.')[0] for x in [x['bus1'] for x in loads if 'bus1' in x]]
+	for load, bus in zip(load_names, load_bus):
+		pos_tuple_of_bus = pos[bus]
+		G.add_node(load, pos=pos_tuple_of_bus)
+		G.add_edge( bus, load )
+		pos[load] = pos_tuple_of_bus
 
-	# Connects loads to buses via transformers
-	for load_name, load_transformer in zip(load_names, load_transformer_name):
-    # Add edge from bus to load, with transformer name as an attribute
-		if load_transformer in bus_to_transformer_pairs:
-			bus = bus_to_transformer_pairs[load_transformer]
-			G.add_edge(bus, load_name, transformer=load_transformer)
-		else:
-			G.add_edge(load_transformer, load_name )
-		pos[load_name] = pos[load_transformer]
+	if fullData:	
+		# Attributes for all loads
+		load_phases = [x['phases'] for x in loads if 'phases' in x]
+		load_conn = [x['conn'] for x in loads if 'conn' in x]
+		load_kv = [x['kv'] for x in loads if 'kv' in x]
+		load_kw = [x['kw'] for x in loads if 'kw' in x]
+		load_kvar = [x['kvar'] for x in loads if 'kvar' in x]
+		for load, phases, conn, kv, kw, kvar in zip( load_names, load_phases, load_conn, load_kv, load_kw, load_kvar):
+			G.nodes[load]['phases'] = phases
+			G.nodes[load]['conn'] = conn
+			G.nodes[load]['kv'] = kv
+			G.nodes[load]['kw'] = kw
+			G.nodes[load]['kvar'] = kvar
+
+	# need lines between buses and loads
+	# print( G.nodes )
+
+	# Need edges from bus --- transformer info ---> bus
+	# How to put transformers in with the same u and v buses
+	# new object=transformer.reg1 buses=[650.1,rg60.1] phases=1 bank=reg1 xhl=0.01 kvas=[1666,1666] kvs=[2.4,2.4] %loadloss=0.01
+	# new object=transformer.reg1 buses=[650.1,rg60.1] phases=1 bank=reg1 xhl=0.01 kvas=[1666,1666] kvs=[2.4,2.4] %loadloss=0.01
+	# new object=transformer.reg3 buses=[650.3,rg60.3] phases=1 bank=reg1 xhl=0.01 kvas=[1666,1666] kvs=[2.4,2.4] %loadloss=0.01
+	transformers = [x for x in tree if x.get('object', 'N/A').startswith('transformer.')]
+	transformer_buses = [x['buses'] for x in transformers if 'buses' in x]
+	transformer_buses_names_split = [[prefix.split('.')[0].strip() for prefix in sublist.strip('[]').split(',')] for sublist in transformer_buses]
+	transformer_name = [x.split('.')[1] for x in [x['object'] for x in transformers if 'object' in x]]
+	transformer_edges = []
+	for bus_pair, t_name in zip(transformer_buses_names_split, transformer_name):
+		if bus_pair[0] and bus_pair[1] in G.nodes:
+			transformer_edges.append ( (bus_pair[0], bus_pair[1], {'key': t_name}) )
+	G.add_edges_from(transformer_edges)
+
+	# Need to add data for transformers
+	# Some have windings.
 	
-	# Attributes for all loads
-	load_phases = [x['phases'] for x in loads if 'phases' in x]
-	load_conn = [x['conn'] for x in loads if 'conn' in x]
-	load_kv = [x['kv'] for x in loads if 'kv' in x]
-	load_kw = [x['kw'] for x in loads if 'kw' in x]
-	load_kvar = [x['kvar'] for x in loads if 'kvar' in x]
-	for load, phases, conn, kv, kw, kvar in zip( load_names, load_phases, load_conn, load_kv, load_kw, load_kvar):
-		G.nodes[load]['phases'] = phases
-		G.nodes[load]['conn'] = conn
-		G.nodes[load]['kv'] = kv
-		G.nodes[load]['kw'] = kw
-		G.nodes[load]['kvar'] = kvar
+	# if fullData:
+	# 	#  %loadloss=0.01
+	# 	transformer_edges_with_attributes = {}
+	# 	transformer_phases = [x['phases'] for x in lines if 'phases' in x]
+	# 	transformer_bank = [x['bank'] for x in lines if 'bank' in x]
+	# 	transformer_xhl = [x['xhl'] for x in lines if 'xhl' in x]
+	# 	transformer_kvas = [x['kvas'] for x in lines if 'kvas' in x]
+	# 	transformer_kvs = [x['kvs'] for x in lines if 'kvs' in x]
+	# 	transformer_loadloss = [x['loadloss'] for x in lines if 'loadloss' in x]
+	# 	for t_edge, phase, bank, xhl_val, kvas_val, kvs_val, loadloss_val in zip(transformer_edges, transformer_phases, transformer_bank, transformer_xhl, transformer_kvas, transformer_kvs, transformer_loadloss):
+	# 			t_edge_nodes = (t_edge[0], t_edge[1])
+	# 			transformer_edges_with_attributes[t_edge_nodes] = { "phases": phase, "bank": bank, "xhl": xhl_val, "kvas": kvas_val, "kvs": kvs_val, "loadloss": loadloss_val }
+	# 			print( '{ "phases": phase, "bank": bank, "xhl": xhl_val, "kvas": kvas_val, "kvs": kvs_val, "loadloss": loadloss_val } ')
+	# 			print( "t_edge_nodes: ", t_edge_nodes )
+	# 	nx.set_edge_attributes( G, transformer_edges_with_attributes )
+
+	# 	# buses=[650.2,rg60.2] phases=1 bank=reg1 xhl=0.01 kvas=[1666,1666] kvs=[2.4,2.4] %loadloss=0.01
+	# 	print( G[ "633"]["634"]["phases"] )
+	# 	print( G[ "633"]["634"]["bank"] )
+	# 	print( G[ "633"]["634"]["xhl"] )
+	# 	print( G[ "633"]["634"]["kvas"] )
+	# 	print( G[ "633"]["634"]["kvs"] )
+	# 	print( G[ "633"]["634"]["loadloss"] )
 
 	# Are there generators? If so, find them and add them as nodes. Their location is the same as buses.
   # Generators have generator.<x> like solar_634 <- should i save this?
@@ -922,14 +943,7 @@ def dss_to_nx_fulldata( dssFilePath, tree=None, fullData = True ):
 		G.nodes[gen]['kw'] = kw
 		G.nodes[gen]['pf'] = pf
 		G.nodes[gen]['yearly'] = yearly
-
-	# TEMP: Remove transformer nodes added from coordinates. Transformer data is edges, not nodes.
-	for transformer_name in load_transformer_name:
-		if transformer_name in G.nodes:
-			G.remove_node( transformer_name )
-			pos.pop( transformer_name )
-
-	return G
+	return G, pos
 
 def THD(filePath):
 	''' Calculate and plot total harmonic distortion. '''

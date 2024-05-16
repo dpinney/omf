@@ -57,7 +57,8 @@ def run_downline_load_algorithm( modelDir, inputDict, outData):
 	tree = opendss.dssConvert.omdToTree(path_to_omd)
 	opendss.dssConvert.treeToDss(tree, Path(modelDir, 'downlineLoad.dss'))
 	downline_start_time = time.time()
-	graph = opendss.dss_to_nx_fulldata( os.path.join( modelDir, 'downlineLoad.dss') )
+	nx_data = opendss.dss_to_nx_fulldata( os.path.join( modelDir, 'downlineLoad.dss') )
+	graph = nx_data[0]
 	buses = opendss.get_all_buses( os.path.join( modelDir, 'downlineLoad.dss') )
 	buses_output = {}
 	kwFromGraph = nx.get_node_attributes(graph, 'kw')
