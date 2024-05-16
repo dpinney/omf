@@ -25,7 +25,7 @@ tooltip = ('The derConsumer model evaluates the financial costs of controlling b
            distributed energy resources (DERs) at the residential level using the NREL renewable \
 		   energy optimization tool (REopt) and the OMF virtual battery dispatch module (vbatDispatch).')
 modelName, template = __neoMetaModel__.metadata(__file__)
-hidden = False
+hidden = True
 
 def create_timestamps(start_time='2017-01-01',end_time='2017-12-31 23:00:00',arr_size=8760):
 	''' Creates an array of timestamps given a start time, stop time, and array size.
