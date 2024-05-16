@@ -276,31 +276,13 @@ def _tests_disabled():
 	# Create New.
 	new(modelLoc)
 	# Pre-run.
-	__neoMetaModel__.renderAndShow(modelLoc) ## Why is there a pre-run?
+	__neoMetaModel__.renderAndShow(modelLoc) ## NOTE: Why is there a pre-run?
 	# Run the model.
 	__neoMetaModel__.runForeground(modelLoc)
 	# Show the output.
 	__neoMetaModel__.renderAndShow(modelLoc)
 
-def _debugging():
-	## Location
-	modelLoc = pJoin(__neoMetaModel__._omfDir,"data","Model","admin","Automated Testing of " + modelName)
-	## Blow away old test results if necessary.
-	try:
-		shutil.rmtree(modelLoc)
-	except:
-		## No previous test results.
-		pass
-	## Create New.
-	new(modelLoc)
-	## Pre-run.
-	__neoMetaModel__.renderAndShow(modelLoc)
-	## Run the model.
-	__neoMetaModel__.runForeground(modelLoc)
-	## Show the output.
-	__neoMetaModel__.renderAndShow(modelLoc)
-
 if __name__ == '__main__':
-	_debugging()
+	_tests_disabled() ## NOTE: Workaround for failing test. When model is ready, change back to just _tests()
 	pass
 
