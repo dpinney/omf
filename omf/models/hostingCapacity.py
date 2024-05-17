@@ -62,6 +62,7 @@ def run_downline_load_algorithm( modelDir, inputDict, outData):
 	buses = opendss.get_all_buses( os.path.join( modelDir, 'downlineLoad.dss') )
 	buses_output = {}
 	kwFromGraph = nx.get_node_attributes(graph, 'kw')
+	# Check if they are buses
 	for bus in buses:
 		if bus in graph.nodes:
 			kwSum = 0
@@ -137,7 +138,7 @@ def run_traditional_algorithm(modelDir, inputDict, outData):
 	tree = opendss.dssConvert.omdToTree(path_to_omd)
 	opendss.dssConvert.treeToDss(tree, Path(modelDir, 'circuit.dss'))
 	traditional_start_time = time.time()
-	traditionalHCResults = opendss.hosting_capacity_all( FNAME = Path(modelDir, 'circuit.dss'), max_test_kw=int(inputDict["traditionalHCMaxTestkw"]), multiprocess=True)
+	traditionalHCResults = opendss.hosting_capacity_all( FNAME = Path(modelDir, 'circuit.dss'), max_test_kw=int(inputDict["traditionalHCMaxTestkw"]), multiprocess=False)
 	traditional_end_time = time.time()
 	# - opendss.hosting_capacity_all() changes the cwd, so change it back so other code isn't affected
 	tradHCDF = pd.DataFrame(traditionalHCResults)
