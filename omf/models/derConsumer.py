@@ -237,14 +237,17 @@ def work(modelDir, inputDict):
 
 	## If outage is specified, load the resilience results
 	if (inputDict['outage']):
-		with open(pJoin(modelDir, 'resultsResilience.json')) as jsonFile:
-			reoptResultsResilience = json.load(jsonFile)
-			#print(reoptResultsResilience)
-		outData.update(reoptResultsResilience) ## Update output file with reopt resilience results
+		try:
+			with open(pJoin(modelDir, 'resultsResilience.json')) as jsonFile:
+				reoptResultsResilience = json.load(jsonFile)
+				outData.update(reoptResultsResilience) ## Update out file with resilience results
+		except FileNotFoundError:
+			results_file = pJoin(modelDir, 'resultsResilience.json')
+			print(f"File '{results_file}' not found. REopt may not have simulated the outage.")
+			raise
 
 	## Run vbatDispatch
 	vbatResults = vb.work(modelDir,inputDict)
-	
 	with open(pJoin(modelDir, 'vbatResults.json'), 'w') as jsonFile:
 		json.dump(vbatResults, jsonFile)
 	outData.update(vbatResults) ## Update output file with vbat results
