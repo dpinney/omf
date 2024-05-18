@@ -40,8 +40,12 @@ def work(modelDir, inputDict):
 
 	## NOTE: This code will be used once reopt_jl is working
 	## Run REopt.jl 
-	#outage_flag = inputDict['outage'] #TODO: Add outage option to HTML
-	#reopt_jl.run_reopt_jl(modelDir, reopt_input_scenario, outages=outage_flag)
+	outage_flag = inputDict['outage']
+	
+	reopt_jl.run_reopt_jl(modelDir, "reopt_input_scenario.json", outages=outage_flag)
+	with open(pJoin(modelDir, 'results.json')) as jsonFile:
+		reoptResults = json.load(jsonFile)
+	outData.update(reoptResults) ## Update output file with reopt results
 
 	## NOTE: This code is temporary
 	## Read in a static REopt test file
@@ -50,14 +54,29 @@ def work(modelDir, inputDict):
 		print('Successfully read in REopt test file. \n')
 
 	## Create timestamp array from REopt input information
-	year = reoptResults['inputs.ElectricLoad.year'][0]
-	arr_size = np.size(reoptResults['outputs.ElectricUtility.electric_to_load_series_kw'][0])
+	try:
+		year = reoptResults['ElectricLoad.year'][0]
+	except KeyError:
+		year = inputDict['year'] # Use the user provided year if none found in reoptResults
+	
+	arr_size = np.size(reoptResults['ElectricUtility']['electric_to_load_series_kw'])
 	timestamps = derConsumer.create_timestamps(start_time=f'{year}-01-01', end_time=f'{year}-12-31 23:00:00', arr_size=arr_size)
 
 	## Convert temperature data from str to float
 	temperatures = [float(value) for value in inputDict['tempCurve'].split('\n') if value.strip()]
 	demand = np.asarray([float(value) for value in inputDict['demandCurve'].split('\n') if value.strip()])
 
+	## If outage is specified, load the resilience results
+	if (inputDict['outage']):
+		try:
+			with open(pJoin(modelDir, 'resultsResilience.json')) as jsonFile:
+				reoptResultsResilience = json.load(jsonFile)
+				outData.update(reoptResultsResilience) ## Update out file with resilience results
+		except FileNotFoundError:
+			results_file = pJoin(modelDir, 'resultsResilience.json')
+			print(f"File '{results_file}' not found. REopt may not have simulated the outage.")
+			raise
+	
 	## Run vbatDispatch
 	vbatResults = vb.work(modelDir,inputDict)
 	with open(pJoin(modelDir, 'vbatResults.json'), 'w') as jsonFile:
@@ -80,18 +99,6 @@ def work(modelDir, inputDict):
 
 	#reopt_jl.run_reopt_jl(path="/Users/astronobri/Documents/CIDER/reopt/inputs/", inputFile="UP_PV_outage_1hr.json", outages=outage) # UP coop PV 
 	#reopt_jl.run_reopt_jl(path="/Users/astronobri/Documents/CIDER/reopt/inputs/", inputFile=pJoin(__neoMetaModel__._omfDir,"static","testFiles","residential_input.json"), outages=True) # residential PV 
-
-	
-	inputDict['outage'] = False ##NOTE: Temporary line to disable the following outage resilience code
-	if (inputDict['outage']):
-		try:
-			with open(pJoin(modelDir, 'resultsResilience.json')) as jsonFile:
-				resultsResilience = json.load(jsonFile)
-				outData.update(resultsResilience) ## Update out file with resilience results
-		except FileNotFoundError:
-			results_file = pJoin(modelDir, 'resultsResilience.json')
-			print(f"File '{results_file}' not found.")
-			raise
 	
 	## Test plot
 	showlegend = False #temporarily disable the legend toggle
@@ -208,7 +215,6 @@ def work(modelDir, inputDict):
 	outData['plotlyPlot'] = json.dumps(fig.data, cls=plotly.utils.PlotlyJSONEncoder)
 	outData['plotlyLayout'] = json.dumps(fig.layout, cls=plotly.utils.PlotlyJSONEncoder)
 
-
 	# Model operations typically ends here.
 	# Stdout/stderr.
 	outData["stdout"] = "Success"
@@ -230,23 +236,23 @@ def new(modelDir):
 
 		## REopt inputs:
 		"latitude" : '39.7392358', 
-		"longitude" : '-104.990251',
+		"longitude" : '-104.990251', ## Brighton, CO
 		"year" : '2018',
 		"analysis_years" : '25', 
-		"urdbLabel" : '612ff9c15457a3ec18a5f7d3', ## Brighton, CO - United Power 
+		"urdbLabel" : '612ff9c15457a3ec18a5f7d3', ## Brighton, CO
 		"fileName": "utility_2018_kW_load.csv",
 		"tempFileName": "utility_CO_2018_temperatures.csv",
 		"demandCurve": demand_curve,
 		"tempCurve": temp_curve,
+		"PV": "Yes",
+		"BESS": "No",
+		"generator": "No",
 		"outage": True,
 		"outage_start_hour": '2100',
-		"outageDuration": '3',
-		"solar" : "on",
-		"battery" : "on",
-		"generator" : "off",
+		"outage_duration": '3',
 
 		## vbatDispatch inputs:
-		"load_type": "2",
+		"load_type": "2", ## Heat Pump
 		"number_devices": "1",
 		"power": "5.6",
 		"capacitance": "2",
