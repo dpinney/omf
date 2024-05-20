@@ -1134,7 +1134,8 @@ def new(modelDir):
 		"value_of_lost_load": "100",
 		"solarCanCurtail": True,
 		"solarCanExport": True,
-		"dieselOnlyRunsDuringOutage": True
+		"dieselOnlyRunsDuringOutage": True,
+		"criticalLoadFactor": "0.5"
 	}
 	creationCode = __neoMetaModel__.new(modelDir, defaultInputs)
 	try:
