@@ -1,4 +1,5 @@
-import os, time, json, platform
+import os, time, json
+import shutil
 import pandas, openpyxl
 import requests as req
 import keyring
@@ -10,15 +11,20 @@ lock_file = "lock_file.txt"
 
 thisDir = os.path.abspath(os.path.dirname(__file__))
 
+def set_credentials(apiKey=""):
+    '''sets current user's API key using keyring'''
+    if apiKey != "":
+        userKey = apiKey
+    else:
+        userKey = input("Enter your API key for the DER-CAM API ( sign up found here: https://dercam-app.lbl.gov/u/api ): ")
+    keyring.set_password("my_program", "user", userKey)
+    return userKey
+
 def get_credentials():
     '''returns API key for current user from keyring'''
     userKey = keyring.get_password("my_program", "user")
-    return userKey
-
-def set_credentials():
-    '''sets current user's API key using keyring'''
-    userKey = input("Enter your API key for the DER-CAM API ( sign up found here: https://dercam-app.lbl.gov/u/api ): ")
-    keyring.set_password("my_program", "user", userKey)
+    if userKey == None:
+        userKey = set_credentials()
     return userKey
 
 def testfile_path(fileName):
@@ -30,24 +36,96 @@ def check_for_existing_file( der_cam_file ):
     if os.path.exists( der_cam_file ):
         os.remove( der_cam_file )
 
-def build_input_spreadsheet(path, reopt_input_file, der_cam_file_name ):
+def generate_load_template( path, reopt_file_path ):
+    ''' work in progress: generates file with week/weekend/peak loads for der-cam input file '''
+    with open(reopt_file_path) as j:
+        input_json = json.load(j)
+
+    el = input_json.get("ElectricLoad",None)
+    year = el.get("year",0)
+    critical_load_fraction = el.get("critical_load_fraction", 0)
+    loads = el.get("loads_kw",[])
+
+    #generating load sheets
+    load_template_file = testfile_path("der-cam-data-processing-template.xlsx")
+    load_template_workbook = openpyxl.load_workbook(load_template_file) #used for writing excel sheets
+    load_template = load_template_workbook["1h_TS"]
+
+    #todo: if loads_kw not given => pull in data from load_path
+    percentileCol = openpyxl.utils.column_index_from_string('M')
+    loadsCol = openpyxl.utils.column_index_from_string('G')
+
+    load_template.cell(row=6, column=1).value = f"{year}-01-01"
+    load_template.cell(row=3, column=percentileCol).value = round(critical_load_fraction,2)
+
+    #inputting loads_kw data into template excel sheet
+    for i in range(3,load_template.max_row):
+        load_template.cell(row=i, column=loadsCol).value = round(float(loads[i-3]),2)
+
+    load_template.cell(row=8, column=1).value = load_template.cell(row=8, column=1).value
+
+    #attempting to make results calculate in sheet 
+    '''
+    for col in range(startCol, endCol+1):
+        for row in range(7,19):
+            load_template.cell(row=row,column=col).value = load_template.cell(row=row,column=col).value
+        for row in range(22,34):
+            load_template.cell(row=row,column=col).value = load_template.cell(row=row,column=col).value
+        for row in range(37,49):
+            load_template.cell(row=row,column=col).value = load_template.cell(row=row,column=col).value
+    '''
+
+    #writing to new template results excel sheet
+    template_result_path = os.path.normpath(os.path.join(path,"template_results.xlsx"))
+    load_template_workbook.save(template_result_path)
+
+def pull_loads( template_result_path ):
+    ''' work in progress: pulls week/weekly/peak loads from pre-populated load template sheet '''
+    load_results_workbook = openpyxl.load_workbook(template_result_path, read_only=True)
+    load_results = load_results_workbook["1h_TS"]
+    
+    startCol = openpyxl.utils.column_index_from_string('J')
+    endCol = openpyxl.utils.column_index_from_string('AG')
+    #note: not working currently unless Excel file was manually opened => python libraries unable to compute formulas
+    peak_profile = []
+    for row in range(7,19):
+        new_row = []
+        for col in range(startCol, endCol+1):
+            new_row.append(load_results.cell(row=row,column=col).value)
+        peak_profile.append(new_row)
+    #print(f'peak profile: {peak_profile}')
+    week_profile = []
+    for row in range(22,34):
+        new_row = []
+        for col in range(startCol,endCol+1):
+            new_row.append(load_results.cell(row=row,column=col).value)
+        week_profile.append(new_row)
+    #print(f'week profile: {week_profile}')
+    weekend_profile = []
+    for row in range(37,49):
+        new_row = []
+        for col in range(startCol,endCol+1):
+            new_row.append(load_results.cell(row=row,column=col).value)
+        weekend_profile.append(new_row)
+    #print(f'weekend profile: {weekend_profile}')
+    return peak_profile, week_profile, weekend_profile
+
+
+def build_input_spreadsheet(path, reopt_input_file, der_cam_file_name, loadTemplate=""):
     ### work in progress
     '''builds file input for der-cam api given REopt input json'''
 
     reopt_file_path = os.path.normpath(os.path.join(path,reopt_input_file))
     der_cam_file_path = os.path.normpath(os.path.join(path,der_cam_file_name))
 
-    #load reopt input file (reopt_input_file -> input_json)
-    with open(reopt_file_path) as j:
-        input_json = json.load(j)
-
     #load default der-cam excel input (test.xlsx)
-    base_file = testfile_path("test.xlsx")
+    base_file = testfile_path("test2.xlsx") #was test.xlsx
     xls = pandas.ExcelFile(base_file)
     sheets = xls.sheet_names
 
-    check_for_existing_file(der_cam_file_path)
-    create_new_file = True
+    #load reopt input file (reopt_input_file -> input_json)
+    with open(reopt_file_path) as j:
+        input_json = json.load(j)
 
     financial = input_json.get("Financial",None)
     pv = input_json.get("PV",None)
@@ -55,6 +133,15 @@ def build_input_spreadsheet(path, reopt_input_file, der_cam_file_name ):
     es = input_json.get("ElectricStorage",None)
     generator = input_json.get("Generator",None)
 
+    if loadTemplate != "":
+        #template_result_path = generate_load_template(path, reopt_file_path) 
+        template_result_path = os.path.normpath(os.path.join(path,"template_results.xlsx"))
+        peak_profile, week_profile, weekend_profile = pull_loads(template_result_path)
+
+    check_for_existing_file(der_cam_file_path)
+    create_new_file = True
+
+    #sets relevant DER capacities based on reopt inputs 
     def set_invest(df, tech, min, existing, max):
         #for min_kw <= max_kw & existing_kw <= max_kw (todo: input checking for user interface portion)
         if existing > 0:
@@ -68,7 +155,8 @@ def build_input_spreadsheet(path, reopt_input_file, der_cam_file_name ):
             df.at[tech,"FixedInvest"] = 0
         return df
 
-    #save each sheet (some with replacements) to new der-cam excel input file (der_cam_file_name)
+    #save each sheet to new der-cam excel input file (der_cam_file_name)
+    #with replacements based on relevant reopt input values
     for sheet in sheets:
         hasIndex = True
         hasHeader = False
@@ -151,6 +239,19 @@ def build_input_spreadsheet(path, reopt_input_file, der_cam_file_name ):
             df.at["node1","SolarInvest"] = int(pv != None)
             df.at["node1","StorageInvest"] = int(es != None)
             df.at["node1","WindInvest"] = int(wind != None)
+
+        if sheet == "LoadInput_N1_P":
+            df = pandas.read_excel(base_file, sheet_name=sheet)
+            hasIndex = False
+            hasHeader = True
+            start_col = openpyxl.utils.column_index_from_string('D') - 1
+            end_col = openpyxl.utils.column_index_from_string('AA') - 1
+            if loadTemplate != "":
+                df.iloc[0:12, start_col:end_col] = week_profile.values
+                df.iloc[12:24, start_col:end_col] = peak_profile.values
+                df.iloc[24:36, start_col:end_col] = weekend_profile.values
+            df.iloc[36:216, start_col:end_col] = 0 #setting all other loads (refrigeration, cooling, etc) to 0
+
         else:
             df = pandas.read_excel(base_file, sheet_name=sheet, header=None)
             hasIndex = False
@@ -216,15 +317,15 @@ def get_model_results( modelKey, userKey, modelHasResults ):
         print(f"error: model results for key {modelKey} were not posted")
 
 #todo: remove any print statements that aren't useful to the user
-def solve_model(path, modelFile, timeout=0): 
+def solve_model(path, modelFile, apiKey="", timeout=0): 
     ''' 
-    posts the model file to the DER-CAM API, waits to receive results, 
-    saves results to testFiles/results.csv and testFiles/results_nodes.csv,
-    and ensures total runtime of at least 30 seconds per call (to meet API limits)
+    posts model file to DER-CAM API, waits to receive results, saves results 
+    to {path}/results.csv, and ensures minimum runtime of 30 seconds per call (API limit)
     '''
-    userKey = get_credentials()
-    if userKey == None:
-        userKey = set_credentials()
+    if apiKey != "":
+        userKey = set_credentials(apiKey=apiKey)
+    else:
+        userKey = get_credentials()
 
     modelFilePath = os.path.normpath(os.path.join(path, modelFile))
     files = {'modelFile': ('model.xlsx', open(modelFilePath, 'rb'), fileMimeType, {'Expires': '0'})}
@@ -241,7 +342,7 @@ def solve_model(path, modelFile, timeout=0):
         #posts model to API
         response = req.post(url=urlRequest, data=data, files=files)
         start_time = time.time()
-        print(f"response.status_code: {response.status_code}, response.reason: {response.reason}")
+        #print(f"response.status_code: {response.status_code}, response.reason: {response.reason}")
         modelResponse = response.json()['model']
         #acquires key for given model
         modelKey = modelResponse['model_key']
@@ -272,25 +373,35 @@ def solve_model(path, modelFile, timeout=0):
         with open(os.path.normpath(os.path.join(path,"results.csv")), 'w') as f:
             f.write(solvedModel['results'])
             
-        with open(os.path.normpath(os.path.join(path,"results_nodes.csv")), 'w') as f:
-            f.write(solvedModel['resultsNodes'])
+        #with open(os.path.normpath(os.path.join(path,"results_nodes.csv")), 'w') as f:
+        #    f.write(solvedModel['resultsNodes'])
 
-        print(f'model competed: results saved to {path}/results.csv and {path}/resultsNodes.csv')
+        print(f'model competed: results saved to {path}/results.csv') #and {path}/resultsNodes.csv')
         
         release_lock(start_time, lock_path)
+    return modelKey
 
-def print_existing_models(userKey):
+def print_existing_models():
     ''' prints all existing models saved to the account associated with the specified API key '''
+    userKey = get_credentials()
     response = req.get(f'{urlBase}/{userKey}/model')
     myModels = response.json()['models']
     print("existing models: ")
     print(myModels)
 
 
-#def print_model( modelKey ):
-#    ''' prints results from the model with the given API key if it exists in the users account '''
+def print_model( modelKey ):
+    ''' prints results from the model with the given model API key if it exists in the users account '''
+    userKey = get_credentials()
+    modelHasResults, modelStatus, modelMsg = check_model_status( modelKey, userKey )
+    print(f'(for testing) results = {modelHasResults}, status = {modelStatus}, msg = {modelMsg}')
+    if modelHasResults != 1:
+        print(f'error: modelStatus = {modelStatus} : modelMsg = {modelMsg}')
+    else:
+        solvedModel = get_model_results( modelKey, userKey, modelHasResults )
+        print(f'solvedModel => {solvedModel}')
 
-def run(path, modelFile="", reoptFile="", timeout=0):
+def run(path, modelFile="", reoptFile="", apiKey="", loadTemplate="", timeout=0):
     ''' 
     if reoptFile provided (json) : translates to der-cam input sheet and solves model 
     if modelFile provided (xlsx) : solves given modelFile
@@ -298,15 +409,15 @@ def run(path, modelFile="", reoptFile="", timeout=0):
     if modelFile == "" and reoptFile == "":
         return "error: enter modelFile and/or reoptFile to translate into modelFile"
     elif modelFile == "":
-        build_input_spreadsheet(path, reoptFile, "der_cam_inputs.xlsx")
+        build_input_spreadsheet(path, reoptFile, "der_cam_inputs.xlsx", loadTemplate=loadTemplate)
         modelFile = "der_cam_inputs.xlsx"
-    solve_model(path, modelFile, timeout=timeout)
+    modelKey = solve_model(path, modelFile, apiKey=apiKey, timeout=timeout)
+    return modelKey
 
 
 def _test():
-    run(os.path.normpath(os.path.join(thisDir,"testFiles")), modelFile="test.xlsx")
-
-    #print_existing_models()
+    modelKey = run(os.path.normpath(os.path.join(thisDir,"testFiles")), modelFile="test.xlsx")
+    print_model( modelKey )
 
 if __name__ == "__main__":
     _test()
