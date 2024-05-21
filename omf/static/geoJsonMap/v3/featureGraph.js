@@ -51,7 +51,7 @@ class FeatureGraph {
      */
     getObservable(key) {
         if (typeof key !== 'string') {
-            throw TypeError('"key" argument must be a string.');
+            throw TypeError('The "key" argument must be a string.');
         }
         if (!this.#keyToFeature.hasOwnProperty(key)) {
             throw new FeatureNotFoundError(key);
@@ -127,7 +127,7 @@ class FeatureGraph {
      */
     notifyObserversOfNewObservable(observable) {
         if (!(observable instanceof Feature)) {
-            throw TypeError('"observable" argument must be an instance of my Feature class.');
+            throw TypeError('The "observable" argument must be an instance of my Feature class.');
         }
         this.#observers.forEach(ob => ob.handleNewObservable(observable));
     }
@@ -271,7 +271,7 @@ class FeatureGraph {
     handleUpdatedCoordinates(observable, oldCoordinates) {
         // - The function signature above is part of the ObserverInterface API. The implementation below is not
         if (!(oldCoordinates instanceof Array)) {
-            throw TypeError('"oldCoordinates" argument must be an array.')
+            throw TypeError('The "oldCoordinates" argument must be an array.')
         }
         const observableKey = observable.getProperty('treeKey', 'meta');
         // - Mark this node as visited to prevent infinite recursion
@@ -308,10 +308,10 @@ class FeatureGraph {
     handleUpdatedProperty(observable, propertyKey, oldPropertyValue, namespace='treeProps') {
         // - The function signature above is part of the ObserverInterface API. The implementation below is not
         if (typeof propertyKey !== 'string') {
-            throw TypeError('"propertyKey" argument must be a string.');
+            throw TypeError('The "propertyKey" argument must be a string.');
         }
         if (typeof namespace !== 'string') {
-            throw TypeError('"namespace" argument must be a string.');
+            throw TypeError('The "namespace" argument must be a string.');
         }
         const observableKey = observable.getProperty('treeKey', 'meta');
         // - I don't think I need to mark nodes as visited since there's no recursion
@@ -389,10 +389,10 @@ class FeatureGraph {
      */
     getKey(name, featureKey) {
         if (typeof name !== 'string') {
-            throw TypeError('"name" argument must be typeof string.');
+            throw TypeError('The "name" argument must be typeof string.');
         }
         if (typeof featureKey !== 'string') {
-            throw TypeError('"feature" argument must be typeof string.');
+            throw TypeError('The "feature" argument must be typeof string.');
         }
         const feature = this.getObservable(featureKey);
         const keys = this.#nameToKey[name];
@@ -437,7 +437,7 @@ class FeatureGraph {
      */
     getKeyForComponent(name) {
         if (typeof name !== 'string') {
-            throw TypeError('"name" argument must be a string.');
+            throw TypeError('The "name" argument must be a string.');
         }
         const keys = this.#nameToKey[name];
         if (keys === undefined) {
@@ -579,7 +579,7 @@ class FeatureGraph {
      */
     insertObservable(observable) {
         if (!(observable instanceof Feature)) {
-            throw TypeError('"observable" argument must be an instance of Feature class.');
+            throw TypeError('The "observable" argument must be an instance of Feature class.');
         }
         this.#insertObservableIntoKeyToFeature(observable);
         const observableKey = observable.getProperty('treeKey', 'meta');
@@ -728,10 +728,10 @@ class FeatureGraph {
      */
     #removeObservableFromNameToKey(observable, oldName) {
         if (!(observable instanceof Feature)) {
-            throw TypeError('"observable" argument must be an instanceof Feature');
+            throw TypeError('The "observable" argument must be an instanceof Feature');
         }
         if (typeof oldName !== 'string') {
-            throw TypeError('"oldName" argument must be a string.');
+            throw TypeError('The "oldName" argument must be a string.');
         }
         const key = observable.getProperty('treeKey', 'meta');
         // - The "name" property cannot be deleted from ObservableInterface instances, so I shouldn't have to deal with a situation where an

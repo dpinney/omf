@@ -20,7 +20,13 @@ const ZoomControlClass = L.Control.extend({
         this._div.title = '- The focus button pans the map to show the circuit';
         // - Attach listeners
         this._div.addEventListener('click', () => {
-            LeafletLayer.map.fitBounds(LeafletLayer.nodeLayers.getBounds());
+            if (LeafletLayer.nodeClusterLayers.getLayers().length > 0) {
+                LeafletLayer.map.fitBounds(LeafletLayer.nodeClusterLayers.getBounds());
+            } else if (LeafletLayer.nodeLayers.getLayers().length > 0) {
+                LeafletLayer.map.fitBounds(LeafletLayer.nodeLayers.getBounds());
+            } else {
+                LeafletLayer.map.fitBounds(LeafletLayer.lineLayers.getBounds());
+            }
         });
         if (options !== null) {
             L.setOptions(this, options);
