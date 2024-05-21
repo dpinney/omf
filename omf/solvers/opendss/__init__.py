@@ -12,6 +12,8 @@ from copy import deepcopy
 import opendssdirect as dss
 from opendssdirect import run_command, Error
 from omf.solvers.opendss import dssConvert
+import multiprocessing
+from functools import partial
 
 def runDssCommand(dsscmd, strict=False):
 	'''Execute a single opendsscmd in the current context.'''
@@ -333,6 +335,99 @@ def check_hosting_capacity_of_single_bus(FILE_PATH:str, BUS_NAME:str, kwValue: f
 	therm_violation = True if len(over_df) > 0 else False
 	return {'thermal_violation':therm_violation, 'voltage_violation':volt_violation}
 
+def get_hosting_capacity_of_single_bus_multiprocessing(FILE_PATH:str, BUS_NAME:str, max_test_kw:float, lock):
+	'''
+	- Return the maximum hosting capacity at a single bus that is possible before a thermal violation or voltage violation is reached
+		- E.g. if a violation occurs at 4 kW, then this function will return 3.5 kW with thermal_violation == False and voltage_violation == False
+	- Special case: if a single bus experiences a violation at 1 kW, then this function will return 1 kW with thermal_violation == True and/or
+		voltage_violation == True. In this case, the hosting capacity isn't known. We only know it's < 1 kW
+	'''
+	# - Get lower and upper bounds for the hosting capacity of a single bus
+	thermal_violation = False
+	voltage_violation = False
+	lower_kw_bound = 1
+	upper_kw_bound = 1
+	while True:
+		results = check_hosting_capacity_of_single_bus(FILE_PATH, BUS_NAME, upper_kw_bound, lock)
+		thermal_violation = results['thermal_violation']
+		voltage_violation = results['voltage_violation']
+		if thermal_violation or voltage_violation or upper_kw_bound == max_test_kw:
+			break
+		lower_kw_bound = upper_kw_bound
+		upper_kw_bound = lower_kw_bound * 2
+		if upper_kw_bound > max_test_kw:
+			upper_kw_bound = max_test_kw
+	# - If no violations were found at the max_test_kw, then just report the hosting capacity to be the max_test_kw even though the actual hosting
+	#   capacity is higher
+	if not thermal_violation and not voltage_violation and upper_kw_bound == max_test_kw:
+		return {'bus': BUS_NAME, 'max_kw': max_test_kw, 'reached_max': False, 'thermal_violation': thermal_violation, 'voltage_violation': voltage_violation}
+	# - Use the bounds to compute the hosting capacity of a single bus
+	kw_step = (upper_kw_bound - lower_kw_bound) / 2
+	kw = lower_kw_bound + kw_step
+	# - The reported valid hosting capacity (i.e. lower_kw_bound) will be equal to the hosting capacity that causes a thermal or voltage violation
+	#   minus a value that is less than 1 kW
+	#   - E.g. a reported hosting capacity of 139.5 kW means that a violation probably occurred at 140 kW
+	while not kw_step < .1:
+		results = check_hosting_capacity_of_single_bus(FILE_PATH, BUS_NAME, kw, lock)
+		thermal_violation = results['thermal_violation']
+		voltage_violation = results['voltage_violation']
+		if not thermal_violation and not voltage_violation:
+			lower_kw_bound = kw
+		else:
+			upper_kw_bound = kw
+			thermal_violation = False
+			voltage_violation = False
+		kw_step = (upper_kw_bound - lower_kw_bound) / 2
+		kw = lower_kw_bound + kw_step
+	return {'bus': BUS_NAME, 'max_kw': lower_kw_bound, 'reached_max': True, 'thermal_violation': thermal_violation, 'voltage_violation': voltage_violation}
+
+
+def check_hosting_capacity_of_single_bus_multiprocessing(FILE_PATH:str, BUS_NAME:str, kwValue: float, lock):
+	''' Identify if an amount of generation that is added at BUS_NAME exceeds ANSI A Band voltage levels. '''
+	fullpath = os.path.abspath(FILE_PATH)
+	filedir = os.path.dirname(fullpath)
+	ansi_a_max_pu = 1.05 #	ansi_b_max_pu = 1.058
+	# Find the insertion kv level.
+	kv_mappings = get_bus_kv_mappings(fullpath)
+	# Error cleanly on invalid bus.
+	if BUS_NAME not in kv_mappings:
+		raise Exception(f'BUS_NAME {BUS_NAME} not found in circuit.')
+	# Get insertion bus; should always be safe to insert above makebuslist.
+	tree = dssConvert.dssToTree(fullpath)
+	for i, ob in enumerate(tree):
+		if ob.get('!CMD', None) == 'makebuslist':
+			insertion_index = i
+	lock.acquire()
+	# Step through generator sizes, add to circuit, measure voltages.
+	new_tree = deepcopy(tree)
+	# Insert generator.
+	new_gen = {
+		'!CMD': 'new',
+		'object': f'generator.hostcap_{BUS_NAME}',
+		'bus1': f'{BUS_NAME}.1.2.3',
+		'kw': kwValue,
+		'pf': '1.0',
+		'conn': 'wye',
+		'phases': '3',
+		'kv': kv_mappings[BUS_NAME],
+		'model': '1' }
+	# Make DSS and run.
+	new_tree.insert(insertion_index, new_gen)
+	dssConvert.treeToDss(new_tree, 'HOSTCAP.dss')
+	runDSS('HOSTCAP.dss')
+	# Calc max voltages.
+	runDssCommand(f'export voltages "{filedir}/volts.csv"')
+	volt_df = pd.read_csv(f'{filedir}/volts.csv')
+	lock.release()
+	v_max_pu1, v_max_pu2, v_max_pu3 =  volt_df[' pu1'].max(), volt_df[' pu2'].max(), volt_df[' pu2'].max()
+	v_max_pu_all = float(max(v_max_pu1, v_max_pu2, v_max_pu3))
+	volt_violation = True if np.greater(v_max_pu_all, ansi_a_max_pu) else False
+	# Calc number of thermal violations.
+	runDssCommand(f'export overloads "overloads.csv"')
+	over_df = pd.read_csv(f'overloads.csv')
+	therm_violation = True if len(over_df) > 0 else False
+	return {'thermal_violation':therm_violation, 'voltage_violation':volt_violation}
+
 # DEPRECATED
 def hosting_capacity_single_bus(FILE_PATH:str, kwSTEPS:int, kwValue:float, BUS_NAME:str, DEFAULT_KV:float = 2.14):
 	''' Identify maximum amount of generation that can be added at BUS_NAME before ANSI A Band voltage levels are exceeded. (DEPRECATED) '''
@@ -388,7 +483,17 @@ def hosting_capacity_single_bus(FILE_PATH:str, kwSTEPS:int, kwValue:float, BUS_N
 	# didn't hit violation, so report that.
 	return {'bus':BUS_NAME, 'max_kw':kwValue * step, 'reached_max':False, 'thermal_violation':therm_violation, 'voltage_violation':volt_violation}
 
-def hosting_capacity_all(FNAME:str, max_test_kw:float=50000, BUS_LIST:list = None):
+def multiprocessor_function( FILE_PATH, max_test_kw, lock, BUS_NAME):
+	print( "inside multiprocessor function" )
+	try:
+		single_output = get_hosting_capacity_of_single_bus_multiprocessing( FILE_PATH, BUS_NAME, max_test_kw, lock)
+		return single_output
+	except:
+		print(f'Could not solve hosting capacity for BUS_NAME={BUS_NAME}')
+
+	
+#Jenny
+def hosting_capacity_all(FNAME:str, max_test_kw:float=50000, BUS_LIST:list = None, multiprocess=False, cores: int=8):
 	''' Generate hosting capacity results for all_buses. '''
 	fullpath = os.path.abspath(FNAME)
 	if not BUS_LIST:
@@ -398,12 +503,22 @@ def hosting_capacity_all(FNAME:str, max_test_kw:float=50000, BUS_LIST:list = Non
 	gen_buses = list(set(gen_buses))
 	all_output = []
 	# print('GEN_BUSES', gen_buses)
-	for bus in gen_buses:
-		try:
-			single_output = get_hosting_capacity_of_single_bus(fullpath, bus, max_test_kw)
-			all_output.append(single_output)
-		except:
-			print(f'Could not solve hosting capacity for BUS_NAME={bus}')
+	if multiprocess == True:
+		lock = multiprocessing.Lock()
+		pool = multiprocessing.Pool( processes=cores )
+		print(f'Running multiprocessor {len(gen_buses)} times with {cores} cores')
+		# Executes parallel_hc_func in parallel for each item in gen_buses
+		all_output.extend(pool.starmap(multiprocessor_function, [(fullpath, max_test_kw, lock, bus) for bus in gen_buses]))
+		print( "multiprocess all output: ", all_output)
+	elif multiprocess == False:
+		for bus in gen_buses:
+			try:
+				single_output = get_hosting_capacity_of_single_bus(fullpath, bus, max_test_kw)
+				print( "multiprocessor false single output: ", single_output )
+				all_output.append(single_output)
+			except:
+				print(f'Could not solve hosting capacity for BUS_NAME={bus}')
+	print( "multiprocessor false all_output: ", all_output )
 	return all_output
 
 def hosting_capacity_max(FNAME, GEN_BUSES, STEPS, KW):
@@ -693,20 +808,15 @@ def networkPlot(filePath, figsize=(20,20), output_name='networkPlot.png', show_l
 	plt.clf()
 	return G
 
-def omd_to_nx_fulldata( dssFilePath, tree=None ):
+def dss_to_nx_fulldata( dssFilePath, tree=None, fullData = True ):
 	''' Combines dss_to_networkX and opendss.networkPlot together.
 
 	Creates a networkx directed graph from a dss files. If a tree is provided, build graph from that instead of the file.
-	Creates a .png picture of the graph.
 	Adds data to certain DSS node types ( loads )
 	
 	args:
 		filepath (str of file name):- dss file path
 		tree (list): None - tree representation of dss file
-		output_name (str):- name of png
-		show_labels (bool): true - show node label names
-		node_size (int): 300 - size of node circles in png
-		font_size (int): 8 - font size for png labels
 	return:
 		A networkx graph of the circuit 
 	'''
@@ -716,6 +826,7 @@ def omd_to_nx_fulldata( dssFilePath, tree=None ):
 	G = nx.DiGraph()
 	pos = {}
 
+	# Add nodes for buses
 	setbusxyList = [x for x in tree if '!CMD' in x and x['!CMD'] == 'setbusxy']
 	x_coords = [x['x'] for x in setbusxyList if 'x' in x]
 	y_coords = [x['y'] for x in setbusxyList if 'y' in x]
@@ -726,59 +837,113 @@ def omd_to_nx_fulldata( dssFilePath, tree=None ):
 		G.add_node(bus, pos=(float_x, float_y))
 		pos[bus] = (float_x, float_y)
 
+	# Add edges from lines
+	# new object=line.645646 bus1=645.2 bus2=646.2 phases=1 linecode=mtx603 length=300 units=ft
+	# line.x <- is this the name?
 	lines = [x for x in tree if x.get('object', 'N/A').startswith('line.')]
-	bus1_lines = [x.split('.')[0] for x in [x['bus1'] for x in lines if 'bus1' in x]]
-	bus2_lines = [x.split('.')[0] for x in [x['bus2'] for x in lines if 'bus2' in x]]
+	lines_bus1 = [x.split('.')[0] for x in [x['bus1'] for x in lines if 'bus1' in x]]
+	lines_bus2 = [x.split('.')[0] for x in [x['bus2'] for x in lines if 'bus2' in x]]
+	lines_name = [x.split('.')[1] for x in [x['object'] for x in lines if 'object' in x]]
 	edges = []
-	for bus1, bus2 in zip( bus1_lines, bus2_lines):
-		edges.append( (bus1, bus2) )
-	G.add_edges_from(edges)
+	for bus1, bus2 in zip(lines_bus1, lines_bus2 ):
+		edges.append( (bus1, bus2, {'color': 'blue'}) )
+	G.add_edges_from( edges )
 
-	# Need edges from bus --- trasnformr info ---> load
-	transformers = [x for x in tree if x.get('object', 'N/A').startswith('transformer.')]
-	transformer_bus_names = [x['buses'] for x in transformers if 'buses' in x]
-	bus_to_transformer_pairs = {}
-	for transformer_bus in transformer_bus_names:
-		strip_paren = transformer_bus.strip('[]')
-		split_buses = strip_paren.split(',')
-		bus = split_buses[0].split('.')[0]
-		transformer_name = split_buses[1].split('.')[0]
-		bus_to_transformer_pairs[transformer_name] = bus
+	# Need to add data for lines
+	# some lines have "switch"
+	# How to add data when sometimes there sometimes not
 	
+	# If there is a transformer tied to a load, we get it from here.
 	loads = [x for x in tree if x.get('object', 'N/A').startswith('load.')] # This is an orderedDict
 	load_names = [x['object'].split('.')[1] for x in loads if 'object' in x and x['object'].startswith('load.')]
-	load_transformer_name = [x.split('.')[0] for x in [x['bus1'] for x in loads if 'bus1' in x]]
+	load_bus = [x.split('.')[0] for x in [x['bus1'] for x in loads if 'bus1' in x]]
+	for load, bus in zip(load_names, load_bus):
+		pos_tuple_of_bus = pos[bus]
+		G.add_node(load, pos=pos_tuple_of_bus)
+		G.add_edge( bus, load )
+		pos[load] = pos_tuple_of_bus
 
-	# Connects loads to buses via transformers
-	for load_name, load_transformer in zip(load_names, load_transformer_name):
-    # Add edge from bus to load, with transformer name as an attribute
-		if load_transformer in bus_to_transformer_pairs:
-			bus = bus_to_transformer_pairs[load_transformer]
-			G.add_edge(bus, load_name, transformer=load_transformer)
-		else:
-			G.add_edge(load_transformer, load_name )
-		pos[load_name] = pos[load_transformer]
+	if fullData:	
+		# Attributes for all loads
+		load_phases = [x['phases'] for x in loads if 'phases' in x]
+		load_conn = [x['conn'] for x in loads if 'conn' in x]
+		load_kv = [x['kv'] for x in loads if 'kv' in x]
+		load_kw = [x['kw'] for x in loads if 'kw' in x]
+		load_kvar = [x['kvar'] for x in loads if 'kvar' in x]
+		for load, phases, conn, kv, kw, kvar in zip( load_names, load_phases, load_conn, load_kv, load_kw, load_kvar):
+			G.nodes[load]['phases'] = phases
+			G.nodes[load]['conn'] = conn
+			G.nodes[load]['kv'] = kv
+			G.nodes[load]['kw'] = kw
+			G.nodes[load]['kvar'] = kvar
+
+	# need lines between buses and loads
+	# print( G.nodes )
+
+	# Need edges from bus --- transformer info ---> bus
+	# How to put transformers in with the same u and v buses
+	# new object=transformer.reg1 buses=[650.1,rg60.1] phases=1 bank=reg1 xhl=0.01 kvas=[1666,1666] kvs=[2.4,2.4] %loadloss=0.01
+	# new object=transformer.reg1 buses=[650.1,rg60.1] phases=1 bank=reg1 xhl=0.01 kvas=[1666,1666] kvs=[2.4,2.4] %loadloss=0.01
+	# new object=transformer.reg3 buses=[650.3,rg60.3] phases=1 bank=reg1 xhl=0.01 kvas=[1666,1666] kvs=[2.4,2.4] %loadloss=0.01
+	transformers = [x for x in tree if x.get('object', 'N/A').startswith('transformer.')]
+	transformer_buses = [x['buses'] for x in transformers if 'buses' in x]
+	transformer_buses_names_split = [[prefix.split('.')[0].strip() for prefix in sublist.strip('[]').split(',')] for sublist in transformer_buses]
+	transformer_name = [x.split('.')[1] for x in [x['object'] for x in transformers if 'object' in x]]
+	transformer_edges = []
+	for bus_pair, t_name in zip(transformer_buses_names_split, transformer_name):
+		if bus_pair[0] and bus_pair[1] in G.nodes:
+			transformer_edges.append ( (bus_pair[0], bus_pair[1], {'key': t_name}) )
+	G.add_edges_from(transformer_edges)
+
+	# Need to add data for transformers
+	# Some have windings.
 	
-	# TEMP: Remove transformer nodes added from coordinates. Transformer data is edges, not nodes.
-	for transformer_name in load_transformer_name:
-		if transformer_name in G.nodes:
-			G.remove_node( transformer_name )
-			pos.pop( transformer_name )
-	
-	# Attributes for all loads
-	load_phases = [x['phases'] for x in loads if 'phases' in x]
-	load_conn = [x['conn'] for x in loads if 'conn' in x]
-	load_kv = [x['kv'] for x in loads if 'kv' in x]
-	load_kw = [x['kw'] for x in loads if 'kw' in x]
-	load_kvar = [x['kvar'] for x in loads if 'kvar' in x]
-	for load, phases, conn, kv, kw, kvar in zip( load_names, load_phases, load_conn, load_kv, load_kw, load_kvar):
-		G.nodes[load]['phases'] = phases
-		G.nodes[load]['conn'] = conn
-		G.nodes[load]['kv'] = kv
-		G.nodes[load]['kw'] = kw
-		G.nodes[load]['kvar'] = kvar	
-	
-	return G
+	# if fullData:
+	# 	#  %loadloss=0.01
+	# 	transformer_edges_with_attributes = {}
+	# 	transformer_phases = [x['phases'] for x in lines if 'phases' in x]
+	# 	transformer_bank = [x['bank'] for x in lines if 'bank' in x]
+	# 	transformer_xhl = [x['xhl'] for x in lines if 'xhl' in x]
+	# 	transformer_kvas = [x['kvas'] for x in lines if 'kvas' in x]
+	# 	transformer_kvs = [x['kvs'] for x in lines if 'kvs' in x]
+	# 	transformer_loadloss = [x['loadloss'] for x in lines if 'loadloss' in x]
+	# 	for t_edge, phase, bank, xhl_val, kvas_val, kvs_val, loadloss_val in zip(transformer_edges, transformer_phases, transformer_bank, transformer_xhl, transformer_kvas, transformer_kvs, transformer_loadloss):
+	# 			t_edge_nodes = (t_edge[0], t_edge[1])
+	# 			transformer_edges_with_attributes[t_edge_nodes] = { "phases": phase, "bank": bank, "xhl": xhl_val, "kvas": kvas_val, "kvs": kvs_val, "loadloss": loadloss_val }
+	# 			print( '{ "phases": phase, "bank": bank, "xhl": xhl_val, "kvas": kvas_val, "kvs": kvs_val, "loadloss": loadloss_val } ')
+	# 			print( "t_edge_nodes: ", t_edge_nodes )
+	# 	nx.set_edge_attributes( G, transformer_edges_with_attributes )
+
+	# 	# buses=[650.2,rg60.2] phases=1 bank=reg1 xhl=0.01 kvas=[1666,1666] kvs=[2.4,2.4] %loadloss=0.01
+	# 	print( G[ "633"]["634"]["phases"] )
+	# 	print( G[ "633"]["634"]["bank"] )
+	# 	print( G[ "633"]["634"]["xhl"] )
+	# 	print( G[ "633"]["634"]["kvas"] )
+	# 	print( G[ "633"]["634"]["kvs"] )
+	# 	print( G[ "633"]["634"]["loadloss"] )
+
+	# Are there generators? If so, find them and add them as nodes. Their location is the same as buses.
+  # Generators have generator.<x> like solar_634 <- should i save this?
+	# loadshape?
+	generators = [x for x in tree if x.get('object', 'N/A').startswith('generator.')]
+	gen_bus1 = [x.split('.')[0] for x in [x['bus1'] for x in lines if 'bus1' in x]]
+	gen_names = [x['object'].split('.')[1] for x in generators if 'object' in x and x['object'].startswith('generator.')]
+	gen_phases = [x['phases'] for x in generators if 'phases' in x]
+	gen_kv = [x['kv'] for x in generators if 'kv' in x]
+	gen_kw = [x['kw'] for x in generators if 'kw' in x]
+	gen_pf = [x['pf'] for x in generators if 'pf' in x]
+	gen_yearly = [x['yearly'] for x in generators if 'yearly' in x]
+
+	for gen, bus_for_positioning, phases, kv, kw, pf, yearly in zip( gen_names, gen_bus1, gen_phases, gen_kv, gen_kw, gen_pf, gen_yearly ):
+		G.add_node( gen, pos=pos[bus_for_positioning] )
+		# Need to add gen betwen bus and node.
+		# but if what is between them is a transformer, then it'll get removed. then there would be an edge between a deleted node and the generator node.. it has to between the bus.. now im confused.
+		G.nodes[gen]['phases'] = phases
+		G.nodes[gen]['kv'] = kv
+		G.nodes[gen]['kw'] = kw
+		G.nodes[gen]['pf'] = pf
+		G.nodes[gen]['yearly'] = yearly
+	return G, pos
 
 def THD(filePath):
 	''' Calculate and plot total harmonic distortion. '''
