@@ -843,7 +843,7 @@ def dss_to_nx_fulldata( dssFilePath, tree=None, fullData = True ):
 	lines = [x for x in tree if x.get('object', 'N/A').startswith('line.')]
 	lines_bus1 = [x.split('.')[0] for x in [x['bus1'] for x in lines if 'bus1' in x]]
 	lines_bus2 = [x.split('.')[0] for x in [x['bus2'] for x in lines if 'bus2' in x]]
-	lines_name = [x.split('.')[1] for x in [x['object'] for x in lines if 'object' in x]]
+	# lines_name = [x.split('.')[1] for x in [x['object'] for x in lines if 'object' in x]]
 	edges = []
 	for bus1, bus2 in zip(lines_bus1, lines_bus2 ):
 		edges.append( (bus1, bus2, {'color': 'blue'}) )
@@ -853,7 +853,6 @@ def dss_to_nx_fulldata( dssFilePath, tree=None, fullData = True ):
 	# some lines have "switch"
 	# How to add data when sometimes there sometimes not
 	
-	# If there is a transformer tied to a load, we get it from here.
 	loads = [x for x in tree if x.get('object', 'N/A').startswith('load.')] # This is an orderedDict
 	load_names = [x['object'].split('.')[1] for x in loads if 'object' in x and x['object'].startswith('load.')]
 	load_bus = [x.split('.')[0] for x in [x['bus1'] for x in loads if 'bus1' in x]]
@@ -891,9 +890,12 @@ def dss_to_nx_fulldata( dssFilePath, tree=None, fullData = True ):
 	transformer_name = [x.split('.')[1] for x in [x['object'] for x in transformers if 'object' in x]]
 	transformer_edges = []
 	for bus_pair, t_name in zip(transformer_buses_names_split, transformer_name):
-		if bus_pair[0] and bus_pair[1] in G.nodes:
-			transformer_edges.append ( (bus_pair[0], bus_pair[1], {'key': t_name}) )
+		if bus_pair[0] and bus_pair[1] in G.nodes: # If both buses exist
+			transformer_edges.append ( (bus_pair[0], bus_pair[1]) )
 	G.add_edges_from(transformer_edges)
+
+	# Check if there exists a line - would a transformer exist on an already existing line?
+	# Check if both buses exist
 
 	# Need to add data for transformers
 	# Some have windings.
