@@ -13,7 +13,7 @@ class FeatureController { // implements ControllerInterface
      */
     constructor(observableGraph) {
         if (!(observableGraph instanceof FeatureGraph)) {
-            throw TypeError('"observableGraph" argument must be instanceof FeatureGraph.')
+            throw TypeError('The "observableGraph" argument must be instanceof FeatureGraph.')
         }
         this.observableGraph = observableGraph;
     }
@@ -56,13 +56,13 @@ class FeatureController { // implements ControllerInterface
      */
     deleteProperty(observables, propertyKey, namespace='treeProps') {
         if (!(observables instanceof Array)) {
-            throw TypeError('"observables" argument must be instanceof Array.');
+            throw TypeError('The "observables" argument must be instanceof Array.');
         }
         if (typeof propertyKey !== 'string') {
-            throw TypeError('"propertyKey" argument must be a string.');
+            throw TypeError('The "propertyKey" argument must be a string.');
         }
         if (typeof namespace !== 'string') {
-            throw TypeError('"namespace" argument must be a string.');
+            throw TypeError('The "namespace" argument must be a string.');
         }
         observables.forEach(ob => {
             if (ob.hasProperty(propertyKey, namespace)) {
@@ -80,7 +80,7 @@ class FeatureController { // implements ControllerInterface
      */
     deleteObservables(observables) {
         if (!(observables instanceof Array)) {
-            throw TypeError('"observables" argument must be instanceof Array.');
+            throw TypeError('The "observables" argument must be instanceof Array.');
         }
         const observablesCopy = [...observables];
         for (const ob of observablesCopy) {
@@ -100,10 +100,10 @@ class FeatureController { // implements ControllerInterface
      */
     setCoordinates(observables, coordinates) {
         if (!(observables instanceof Array)) {
-            throw TypeError('"observables" argument must be instanceof Array.');
+            throw TypeError('The "observables" argument must be instanceof Array.');
         }
         if (!(coordinates instanceof Array)) {
-            throw TypeError('"coordinates" argument must be instanceof Array.');
+            throw TypeError('The "coordinates" argument must be instanceof Array.');
         }
         observables.forEach(ob => {
             ob.setCoordinates(coordinates);
@@ -125,13 +125,13 @@ class FeatureController { // implements ControllerInterface
      */
     setProperty(observables, propertyKey, propertyValue, namespace='treeProps') {
         if (!(observables instanceof Array)) {
-            throw TypeError('"observables" argument must be instanceof Array.');
+            throw TypeError('The "observables" argument must be instanceof Array.');
         }
         if (typeof propertyKey !== 'string') {
-            throw TypeError('"propertyKey" argument must be a string.');
+            throw TypeError('The "propertyKey" argument must be a string.');
         }
         if (typeof namespace !== 'string') {
-            throw TypeError('"namespace" argument must be a string.');
+            throw TypeError('The "namespace" argument must be a string.');
         }
         observables.forEach(ob => {
             ob.setProperty(propertyKey, propertyValue, namespace); 
@@ -180,13 +180,13 @@ class FeatureController { // implements ControllerInterface
             throw TypeError('"observable" argument must be instanceof Feature.');
         }
         if (!(modal instanceof Modal)) {
-            throw TypeError('"modal" argument must be instanceof Modal.');
+            throw TypeError('The "modal" argument must be instanceof Modal.');
         }
         if (!(submitButton instanceof HTMLButtonElement) && !(submitButton === null)) {
-            throw TypeError('"submitButton" argument must be instanceof HTMLButtonElement or null');
+            throw TypeError('The "submitButton" argument must be instanceof HTMLButtonElement or null');
         }
         if (typeof reload !== 'boolean') {
-            throw TypeError('"reload" argument must be a boolean.');
+            throw TypeError('The "reload" argument must be a boolean.');
         }
         if (submitButton !== null) {
             submitButton.disabled = true;

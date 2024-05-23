@@ -348,7 +348,7 @@ def get_hosting_capacity_of_single_bus_multiprocessing(FILE_PATH:str, BUS_NAME:s
 	lower_kw_bound = 1
 	upper_kw_bound = 1
 	while True:
-		results = check_hosting_capacity_of_single_bus(FILE_PATH, BUS_NAME, upper_kw_bound, lock)
+		results = check_hosting_capacity_of_single_bus(FILE_PATH, BUS_NAME, upper_kw_bound)
 		thermal_violation = results['thermal_violation']
 		voltage_violation = results['voltage_violation']
 		if thermal_violation or voltage_violation or upper_kw_bound == max_test_kw:
@@ -484,14 +484,15 @@ def hosting_capacity_single_bus(FILE_PATH:str, kwSTEPS:int, kwValue:float, BUS_N
 	return {'bus':BUS_NAME, 'max_kw':kwValue * step, 'reached_max':False, 'thermal_violation':therm_violation, 'voltage_violation':volt_violation}
 
 def multiprocessor_function( FILE_PATH, max_test_kw, lock, BUS_NAME):
-	print( "inside multiprocessor function" )
-	try:
-		single_output = get_hosting_capacity_of_single_bus_multiprocessing( FILE_PATH, BUS_NAME, max_test_kw, lock)
-		return single_output
-	except:
-		print(f'Could not solve hosting capacity for BUS_NAME={BUS_NAME}')
+	with lock:
+		print( "inside multiprocessor function" )
+		try:
+			single_output = get_hosting_capacity_of_single_bus_multiprocessing( FILE_PATH, BUS_NAME, max_test_kw, lock)
+			return single_output
+		except:
+			print(f'Could not solve hosting capacity for BUS_NAME={BUS_NAME}')
 
-	
+ 
 #Jenny
 def hosting_capacity_all(FNAME:str, max_test_kw:float=50000, BUS_LIST:list = None, multiprocess=False, cores: int=8):
 	''' Generate hosting capacity results for all_buses. '''
@@ -504,12 +505,12 @@ def hosting_capacity_all(FNAME:str, max_test_kw:float=50000, BUS_LIST:list = Non
 	all_output = []
 	# print('GEN_BUSES', gen_buses)
 	if multiprocess == True:
-		lock = multiprocessing.Lock()
-		pool = multiprocessing.Pool( processes=cores )
-		print(f'Running multiprocessor {len(gen_buses)} times with {cores} cores')
-		# Executes parallel_hc_func in parallel for each item in gen_buses
-		all_output.extend(pool.starmap(multiprocessor_function, [(fullpath, max_test_kw, lock, bus) for bus in gen_buses]))
-		print( "multiprocess all output: ", all_output)
+		with multiprocessing.Manager() as manager:
+			lock = manager.Lock()
+			pool = multiprocessing.Pool( processes=cores )
+			print(f'Running multiprocessor {len(gen_buses)} times with {cores} cores')
+			all_output.extend(pool.starmap(multiprocessor_function, [(fullpath, max_test_kw, lock, bus) for bus in gen_buses]))
+			print( "multiprocess all output: ", all_output)
 	elif multiprocess == False:
 		for bus in gen_buses:
 			try:

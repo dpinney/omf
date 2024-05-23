@@ -92,17 +92,17 @@ function _getAnonymizationModal(observable, controller) {
     const horizontalTranslationInput = document.createElement('input');
     horizontalTranslationInput.name = 'translateRight';
     horizontalTranslationInput.placeholder = '(+/-)meters';
-    horizontalTranslationInput.pattern = '[-+]?\\d+';
+    horizontalTranslationInput.pattern = '[\\-+]?\\d+';
     //  - Vertical translation input
     const verticalTranslationInput = document.createElement('input');
     verticalTranslationInput.name = 'translateUp'
     verticalTranslationInput.placeholder = '(+/-)meters';
-    verticalTranslationInput.pattern = '[-+]?\\d+';
+    verticalTranslationInput.pattern = '[\\-+]?\\d+';
     //  - Rotation input
     const rotationInput = document.createElement('input');
     rotationInput.name = 'rotate';
     rotationInput.placeholder = '(+/-)angle°';
-    rotationInput.pattern = '[-+]?\\d+(\\.\\d+)?'
+    rotationInput.pattern = '[\\-+]?\\d+(\\.\\d+)?'
     //  - Scale input
     const scaleInput = document.createElement('input');
     scaleInput.name = 'scale';
@@ -533,10 +533,10 @@ function getRawDataDiv(controller) {
  */
 function _getRenameModal(observable, controller) {
     if (!(observable instanceof Feature)) {
-        throw TypeError('"observable" argument must be instanceof Feature.');
+        throw TypeError('The "observable" argument must be instanceof Feature.');
     }
     if (!(controller instanceof FeatureController)) {
-        throw TypeError('"controller" argument must be instanceof FeatureController.');
+        throw TypeError('The "controller" argument must be instanceof FeatureController.');
     }
     // - Input
     const input = _getNameInput(observable, function(newName) {
@@ -1955,7 +1955,7 @@ function _getMenuDiv(text) {
  */
 function _getNameInput(observable, func) {
     const input = document.createElement('input');
-    input.pattern = '(?:[\\w-]+\\s{0,1})+';
+    input.pattern = '(?:\\w+-?\\s?)+';
     input.placeholder = 'New name';
     input.required = true;
     input.title = 'The new name must have one or more alphanumeric characters. Single spaces, hyphens, and underscores are allowed.';

@@ -5,7 +5,6 @@ class Feature {
     #feature;
     #graph;
     #observers;
-    #originalFeature;
 
     /**
      * @param {Object} feature - a standard GeoJSON feature
@@ -16,7 +15,6 @@ class Feature {
         this.#feature = feature;
         this.#graph = null
         this.#observers = [];
-        this.#originalFeature = structuredClone(feature);
     }
     
     // *********************************
@@ -34,10 +32,10 @@ class Feature {
     deleteProperty(propertyKey, namespace='treeProps') {
         // - The function signature above is part of the ObservableInterface API. The implementation below is not
         if (typeof propertyKey !== 'string') {
-            throw TypeError('"propertyKey" argument must be a string.');
+            throw TypeError('The "propertyKey" argument must be a string.');
         }
         if (typeof namespace !== 'string') {
-            throw TypeError('"namespace" argument must be a string.');
+            throw TypeError('The "namespace" argument must be a string.');
         }
         if (['treeProps', 'formProps', 'urlProps'].includes(namespace)) {
             if (this.#feature.properties.hasOwnProperty(namespace)) {
@@ -146,7 +144,7 @@ class Feature {
     getProperties(namespace) {
         // - The function signature above is part of the ObservableInterface API. The implementation below is not
         if (typeof namespace !== 'string') {
-            throw TypeError('"namespace" argument must be a string');
+            throw TypeError('The "namespace" argument must be a string');
         }
         if (['treeProps', 'formProps', 'urlProps'].includes(namespace)) {
             if (this.#feature.properties.hasOwnProperty(namespace)) {
@@ -172,10 +170,10 @@ class Feature {
     getProperty(propertyKey, namespace='treeProps') {
         // - The function signature above is part of the ObservableInterface API. The implementation below is not
         if (typeof propertyKey !== 'string') {
-            throw TypeError('"propertyKey" argument must be a string.');
+            throw TypeError('The "propertyKey" argument must be a string.');
         }
         if (typeof namespace !== 'string') {
-            throw TypeError('"namespace" argument must be a string.');
+            throw TypeError('The "namespace" argument must be a string.');
         }
         if (['treeProps', 'formProps', 'urlProps'].includes(namespace)) {
             if (this.#feature.properties.hasOwnProperty(namespace)) {
@@ -234,10 +232,10 @@ class Feature {
     hasProperty(propertyKey, namespace='treeProps') {
         // - The function signature above is part of the ObservableInterface API. The implementation below is not
         if (typeof propertyKey !== 'string') {
-            throw TypeError('"propertyKey" argument must be a string.');
+            throw TypeError('The "propertyKey" argument must be a string.');
         }
         if (typeof namespace !== 'string') {
-            throw TypeError('"namespace" argument must be a string.');
+            throw TypeError('The "namespace" argument must be a string.');
         }
         if (['treeProps', 'formProps', 'urlProps'].includes(namespace)) {
             if (this.#feature.properties.hasOwnProperty(namespace)) {
@@ -299,7 +297,7 @@ class Feature {
     setCoordinates(coordinates) {
         // - The function signature above is part of the ObservableInterface API. The implementation below is not
         if (!(coordinates instanceof Array)) {
-            throw TypeError('"coordinates" argument must be instanceof Array.');
+            throw TypeError('The "coordinates" argument must be instanceof Array.');
         }
         // - Check that all coordinate values are valid numbers
         const flatCoordinates = coordinates.flat(3);
@@ -376,10 +374,10 @@ class Feature {
     setProperty(propertyKey, propertyValue, namespace='treeProps') {
         // - The function signature above is part of the ObservableInterface API. The implementation below is not
         if (typeof propertyKey !== 'string') {
-            throw TypeError('"propertyKey" argument must be a string.');
+            throw TypeError('The "propertyKey" argument must be a string.');
         }
         if (typeof namespace !== 'string') {
-            throw TypeError('"namespace" argument must be a string.');
+            throw TypeError('The "namespace" argument must be a string.');
         }
         if (['treeProps', 'formProps', 'urlProps'].includes(namespace)) {
             if (this.#feature.properties.hasOwnProperty(namespace)) {
@@ -431,10 +429,10 @@ class Feature {
     updatePropertyOfObservers(propertyKey, oldPropertyValue, namespace='treeProps') {
         // - The function signature above is part of the ObservableInterface API. The implementation below is not
         if (typeof propertyKey !== 'string') {
-            throw TypeError('"propertyKey" argument must be typeof string.');
+            throw TypeError('The "propertyKey" argument must be typeof string.');
         }
         if (typeof namespace !== 'string') {
-            throw TypeError('"namespace" argument must be typeof string.');
+            throw TypeError('The "namespace" argument must be typeof string.');
         }
         this.#observers.forEach(ob => ob.handleUpdatedProperty(this, propertyKey, oldPropertyValue, namespace));
         if (this.#graph instanceof FeatureGraph) {
@@ -473,7 +471,7 @@ class Feature {
     handleUpdatedCoordinates(observable, oldCoordinates) {
         // - The function signature above is part of the ObserverInterface API. The implementation below is not
         if (!(oldCoordinates instanceof Array)) {
-            throw TypeError('"oldCoordinates" argument must be an array.');
+            throw TypeError('The "oldCoordinates" argument must be an array.');
         }
         const observableName = observable.getProperty('name');
         const thisName = this.getProperty('name');
@@ -511,10 +509,10 @@ class Feature {
     handleUpdatedProperty(observable, propertyKey, oldPropertyValue, namespace='treeProps') {
         // - The function signature above is part of the ObserverInterface API. The implementation below is not
         if (typeof propertyKey !== 'string') {
-            throw TypeError('"propertyKey" argument must be a string.');
+            throw TypeError('The "propertyKey" argument must be a string.');
         }
         if (typeof namespace !== 'string') {
-            throw TypeError('"namespace" argument must be a string.');
+            throw TypeError('The "namespace" argument must be a string.');
         }
         if (propertyKey === 'name') {
             ['from', 'to', 'parent'].forEach(k => {
@@ -600,31 +598,6 @@ class Feature {
 
     isPolygon() {
         return this.#feature.geometry.type === 'Polygon' && !this.isConfigurationObject();
-    }
-
-    /**
-     * - Reset this Feature's coordinates and properties to how they were when the page was loaded
-     * @returns {undefined}
-     */
-    resetState() {
-        this.setCoordinates(structuredClone(this.#originalFeature.geometry.coordinates));
-        for (const [key, val] of Object.entries(this.#feature.properties)) {
-            if (!this.#originalFeature.properties.hasOwnProperty(key)) {
-                this.deleteProperty(key, 'meta');
-            } else {
-                this.setProperty(key, this.#originalFeature.properties[key], 'meta');
-            }
-            if (key === 'treeProps') {
-                for (const [tKey, tVal] of Object.entries(this.#feature.properties.treeProps)) {
-                    if (!this.#originalFeature.properties.treeProps.hasOwnProperty(tKey)) {
-                        this.deleteProperty(tKey);
-                    } else {
-                        this.setProperty(tKey, this.#originalFeature.properties.treeProps[tKey]);
-                    }
-                }
-            }
-            // - Modal features can't be edited by the user, so I don't need to deal with formProps or urlProps
-        }
     }
 }
 

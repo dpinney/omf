@@ -16,6 +16,7 @@ const ClusterControlClass = L.Control.extend({
             throw TypeError('The "controller" argument must be instanceof FeatureController.');
         } 
         this._controller = controller;
+        this._on = false;
         // - Create div
         this._div = L.DomUtil.create('div', 'leaflet-bar');
         this._div.classList.add('leaflet-customControlDiv');
@@ -24,33 +25,31 @@ const ClusterControlClass = L.Control.extend({
         // - Add a tooltip
         this._div.title = '- The node grouping tool allows you to group nodes into a cluster\n- Click this button to enable\n- Click this button to disable'
         // - Attach listeners
-        this._on = false;
         this._div.addEventListener('click', () => {
-            LeafletLayer.map.removeLayer(LeafletLayer.nodeLayers);
-            const overlayMap = [];
-            for (const layer of LeafletLayer.control._layers) {
-                if (layer.overlay === true) {
-                    overlayMap.push(layer);
-                }
-            }
-            overlayMap.forEach(layer => LeafletLayer.control.removeLayer(layer.layer));
-            if (LeafletLayer.nodeLayers instanceof L.MarkerClusterGroup) {
+            // - Clustering was enabled, so disable it
+            if (this._on) {
                 this._div.style.removeProperty('border');
                 this._div.replaceChildren(this._getExpandSvg());
-                LeafletLayer.nodeLayers = L.featureGroup(LeafletLayer.nodeLayers.getLayers());
+                for (const node of LeafletLayer.nodeClusterLayers.getLayers()) {
+                    LeafletLayer.nodeLayers.addLayer(node);
+                }
+                LeafletLayer.nodeClusterLayers.clearLayers();
+                this._on = false;
+            // - Clustering was disabled, so enable it
             } else {
                 this._div.style.border = '2px solid #7FFF00';
                 this._div.replaceChildren(this._getCompressSvg());
-                const nodeLayers = LeafletLayer.nodeLayers.getLayers();
-                LeafletLayer.nodeLayers = L.markerClusterGroup();
-                nodeLayers.forEach(l => LeafletLayer.nodeLayers.addLayer(l));
+                for (const node of LeafletLayer.nodeLayers.getLayers()) {
+                    LeafletLayer.nodeClusterLayers.addLayer(node);
+                }
+                LeafletLayer.nodeLayers.clearLayers();
+                this._on = true;
             }
-            const nodeLayerIndex = overlayMap.findIndex(layer => layer.name === 'Nodes');
-            overlayMap[nodeLayerIndex] = {layer: LeafletLayer.nodeLayers, name: 'Nodes'};
-            for (const layer of overlayMap) {
-                LeafletLayer.control.addOverlay(layer.layer, layer.name);
+            // - Force redraw
+            for (const layer of [LeafletLayer.nodeLayers, LeafletLayer.nodeClusterLayers]) {
+                LeafletLayer.map.removeLayer(layer);
+                LeafletLayer.map.addLayer(layer);
             }
-            LeafletLayer.map.addLayer(LeafletLayer.nodeLayers);
         });
         if (options !== null) {
             L.setOptions(this, options);
