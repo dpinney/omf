@@ -22,10 +22,11 @@ from omf.solvers import reopt_jl
 
 # Model metadata:
 tooltip = ('The derConsumer model evaluates the financial costs of controlling behind-the-meter \
-           distributed energy resources (DERs) at the residential level using the NREL renewable \
-		   energy optimization tool (REopt) and the OMF virtual battery dispatch module (vbatDispatch).')
+           distributed energy resources (DERs) at the residential level using the National Renewable Energy \
+		   Laboratory (NREL) Renewable Energy Optimization Tool (REopt) and the OMF virtual battery dispatch \
+		   module (vbatDispatch).')
 modelName, template = __neoMetaModel__.metadata(__file__)
-hidden = True
+hidden = True ## Keep the model hidden during active development
 
 def create_timestamps(start_time='2017-01-01',end_time='2017-12-31 23:00:00',arr_size=8760):
 	''' Creates an array of timestamps given a start time, stop time, and array size.
@@ -175,16 +176,23 @@ def create_REopt_jl_jsonFile(modelDir, inputDict):
 		"ElectricLoad": {
 			"loads_kw": demand,
 			"year": year
-		},
-		"PV": {
-		},
-		"ElectricStorage": {
-
-		},
+		}
 	}
 
-	## Outages
-	if (inputDict['outage']):
+	## PV section
+	if inputDict['PV'] == 'Yes':
+		scenario['PV'] = {
+			##TODO: Add options here, if needed
+		}
+	
+	## BESS section
+	if inputDict['BESS'] == 'Yes':
+		scenario['ElectricStorage'] = {
+			##TODO: Add options here, if needed
+		}
+	
+	## Outage section
+	if inputDict['outage'] == 'Yes':
 		scenario['ElectricUtility'] = {
 			'outage_start_time_step': int(inputDict['outage_start_hour']),
 			'outage_end_time_step': int(inputDict['outage_start_hour'])+int(inputDict['outage_duration'])
@@ -222,18 +230,18 @@ def work(modelDir, inputDict):
 		reoptResults = json.load(jsonFile)
 	outData.update(reoptResults) ## Update output file with reopt results
 
+	## Convert data from str to float
+	temperatures = [float(value) for value in inputDict['tempCurve'].split('\n') if value.strip()]
+	demand = np.asarray([float(value) for value in inputDict['demandCurve'].split('\n') if value.strip()])
+
 	## Create timestamp array from REopt input information
 	try:
 		year = reoptResults['ElectricLoad.year'][0]
 	except KeyError:
 		year = inputDict['year'] # Use the user provided year if none found in reoptResults
 
-	arr_size = np.size(reoptResults['ElectricUtility']['electric_to_load_series_kw'])
+	arr_size = np.size(demand)
 	timestamps = create_timestamps(start_time=f'{year}-01-01', end_time=f'{year}-12-31 23:00:00', arr_size=arr_size)
-
-	## Convert temperature data from str to float
-	temperatures = [float(value) for value in inputDict['tempCurve'].split('\n') if value.strip()]
-	demand = np.asarray([float(value) for value in inputDict['demandCurve'].split('\n') if value.strip()])
 
 	## If outage is specified, load the resilience results
 	if (inputDict['outage']):
@@ -247,36 +255,42 @@ def work(modelDir, inputDict):
 			raise
 
 	## Run vbatDispatch
-	vbatResults = vb.work(modelDir,inputDict)
-	with open(pJoin(modelDir, 'vbatResults.json'), 'w') as jsonFile:
-		json.dump(vbatResults, jsonFile)
-	outData.update(vbatResults) ## Update output file with vbat results
+	if inputDict['load_type'] != '0': ## Load type 0 corresponds to "None" option, which turns off vbatDispatch functions
+		vbatResults = vb.work(modelDir,inputDict)
+		with open(pJoin(modelDir, 'vbatResults.json'), 'w') as jsonFile:
+			json.dump(vbatResults, jsonFile)
+		outData.update(vbatResults) ## Update output file with vbat results
+
+		## vbatDispatch variables
+		vbpower_series = pd.Series(vbatResults['VBpower'][0])
+		vbat_charge = vbpower_series.where(vbpower_series > 0, 0) ##positive values = charging
+		vbat_discharge = vbpower_series.where(vbpower_series < 0, 0) #negative values = discharging
+		vbat_discharge_flipsign = vbat_discharge.mul(-1) ## flip sign of vbat discharge for plotting purposes
 
 
 	## DER Overview plot
-	showlegend = False #temporarily disable the legend toggle
-
-	PV = reoptResults['PV']['electric_to_load_series_kw']
-	BESS = reoptResults['ElectricStorage']['storage_to_load_series_kw']
-	vbpower_series = pd.Series(vbatResults['VBpower'][0])
-	vbat_discharge = vbpower_series.where(vbpower_series < 0, 0) #negative values
-	vbat_charge = vbpower_series.where(vbpower_series > 0, 0) ## positive values; part of the New Load?
-	vbat_discharge_flipsign = vbat_discharge.mul(-1) ## flip sign of vbat discharge for plotting purposes
+	showlegend = True #temporarily disable the legend toggle
 	grid_to_load = reoptResults['ElectricUtility']['electric_to_load_series_kw']
-	grid_charging_BESS = reoptResults['ElectricUtility']['electric_to_storage_series_kw']
 
+	if inputDict['PV'] == 'Yes': ## PV
+		PV = reoptResults['PV']['electric_to_load_series_kw']
+	else:
+		PV = np.zeros_like(demand)
+	
+	if inputDict['BESS'] == 'Yes': ## BESS
+		BESS = reoptResults['ElectricStorage']['storage_to_load_series_kw']
+		grid_charging_BESS = reoptResults['ElectricUtility']['electric_to_storage_series_kw']
+	else:
+		BESS = np.zeros_like(demand)
+		grid_charging_BESS = np.zeros_like(demand)
+
+	## Create plot object
 	fig = go.Figure()
-	fig.add_trace(go.Scatter(x=timestamps,
-                         y=np.asarray(BESS) + np.asarray(demand) + np.asarray(vbat_discharge_flipsign),
-						 yaxis='y1',
-                         mode='none',
-                         fill='tozeroy',
-                         name='BESS Serving Load (kW)',
-                         fillcolor='rgba(0,137,83,1)',
-						 showlegend=showlegend))
-	fig.update_traces(fillpattern_shape='/', selector=dict(name='BESS Serving Load (kW)'))
 
-	fig.add_trace(go.Scatter(x=timestamps,
+	if inputDict['load_type'] != '0': ## Load type 0 corresponds to "None" option, which turns off vbatDispatch functions
+		vbat_discharge_component = np.asarray(vbat_discharge_flipsign)
+		vbat_charge_component = np.asarray(vbat_charge)
+		fig.add_trace(go.Scatter(x=timestamps,
 							y=np.asarray(vbat_discharge_flipsign)+np.asarray(demand),
 							yaxis='y1',
 							mode='none',
@@ -284,19 +298,33 @@ def work(modelDir, inputDict):
 							fillcolor='rgba(127,0,255,1)',
 							name='vbat Serving Load (kW)',
 							showlegend=showlegend))
-	fig.update_traces(fillpattern_shape='/', selector=dict(name='vbat Serving Load (kW)'))
+		fig.update_traces(fillpattern_shape='/', selector=dict(name='vbat Serving Load (kW)'))
+	else:
+		vbat_discharge_component = np.zeros_like(demand)
+		vbat_charge_component = np.zeros_like(demand)
+
+	if (inputDict['BESS'] == 'Yes'):
+		fig.add_trace(go.Scatter(x=timestamps,
+							y=np.asarray(BESS) + np.asarray(demand) + vbat_discharge_component,
+							yaxis='y1',
+							mode='none',
+							fill='tozeroy',
+							name='BESS Serving Load (kW)',
+							fillcolor='rgba(0,137,83,1)',
+							showlegend=showlegend))
+		fig.update_traces(fillpattern_shape='/', selector=dict(name='BESS Serving Load (kW)'))
 
 	fig.add_trace(go.Scatter(x=timestamps,
-                         y=np.asarray(demand)-np.asarray(BESS)-np.asarray(vbat_discharge_flipsign),
-						 yaxis='y1',
-                         mode='none',
-                         name='Original Load (kW)',
-                         fill='tozeroy',
-                         fillcolor='rgba(100,200,210,1)',
-						 showlegend=showlegend))
+						y=np.asarray(demand)-np.asarray(BESS)-vbat_discharge_component,
+						yaxis='y1',
+						mode='none',
+						name='Original Load (kW)',
+						fill='tozeroy',
+						fillcolor='rgba(100,200,210,1)',
+						showlegend=showlegend))
 
 	fig.add_trace(go.Scatter(x=timestamps,
-                         y=np.asarray(demand) + np.asarray(reoptResults['ElectricUtility']['electric_to_storage_series_kw'][0]) + np.asarray(vbat_charge),
+                         y=np.asarray(demand) + np.asarray(grid_charging_BESS) + vbat_charge_component,
 						 yaxis='y1',
                          mode='none',
                          name='Additional Load (Charging BESS and vbat)',
@@ -305,7 +333,7 @@ def work(modelDir, inputDict):
 						 showlegend=showlegend))
 	fig.update_traces(fillpattern_shape='.', selector=dict(name='Additional Load (Charging BESS and vbat)'))
 	
-	grid_serving_new_load = np.asarray(grid_to_load) + np.asarray(grid_charging_BESS)+ np.asarray(vbat_charge) - np.asarray(vbat_discharge_flipsign) + np.asarray(PV)
+	grid_serving_new_load = np.asarray(grid_to_load) + np.asarray(grid_charging_BESS)+ vbat_charge_component - vbat_discharge_component + np.asarray(PV)
 	fig.add_trace(go.Scatter(x=timestamps,
                          y=grid_serving_new_load,
 						 yaxis='y1',
@@ -333,15 +361,16 @@ def work(modelDir, inputDict):
 	#				 showlegend=showlegend))
 	#fig.update_traces(legendgroup='Demand', visible='legendonly', selector=dict(name='Original Load (kW)')) ## Make demand hidden on plot by default
 
-	fig.add_trace(go.Scatter(x=timestamps,
-					 y=PV,
-					 yaxis='y1',
-					 mode='none',
-					 fill='tozeroy',
-					 name='PV Serving Load (kW)',
-					 fillcolor='rgba(255,246,0,1)',
-					 showlegend=showlegend
-					 ))
+	if (inputDict['PV'] == 'Yes'):
+		fig.add_trace(go.Scatter(x=timestamps,
+						y=PV,
+						yaxis='y1',
+						mode='none',
+						fill='tozeroy',
+						name='PV Serving Load (kW)',
+						fillcolor='rgba(255,246,0,1)',
+						showlegend=showlegend
+						))
 	
 	fig.update_layout(
     	#title='Residential Data',
@@ -361,6 +390,7 @@ def work(modelDir, inputDict):
 	)
 
 	fig.show() ## This opens a window that displays the correct figure with the appropriate patterns
+
 	## Encode plot data as JSON for showing in the HTML side
 	outData['derOverviewData'] = json.dumps(fig.data, cls=plotly.utils.PlotlyJSONEncoder)
 	outData['derOverviewLayout'] = json.dumps(fig.layout, cls=plotly.utils.PlotlyJSONEncoder)
@@ -429,38 +459,51 @@ def work(modelDir, inputDict):
 
 
 	## Exported Power Plot
-	PVcurtailed = reoptResults['PV']['electric_curtailed_series_kw']
-	electric_to_grid = reoptResults['PV']['electric_to_grid_series_kw']
-
 	fig = go.Figure()
-
+	
 	## Power used to charge BESS (electric_to_storage_series_kw)
-	fig.add_trace(go.Scatter(x=timestamps,
-                         y=np.asarray(grid_charging_BESS),
-                         mode='none',
-                         fill='tozeroy',
-                         name='Power Used to Charge BESS',
-                         fillcolor='rgba(75,137,83,1)',
-						 showlegend=True))
+	if inputDict['BESS'] == 'Yes':
+		fig.add_trace(go.Scatter(x=timestamps,
+							y=np.asarray(grid_charging_BESS),
+							mode='none',
+							fill='tozeroy',
+							name='Power Used to Charge BESS',
+							fillcolor='rgba(75,137,83,1)',
+							showlegend=True))
 	
 	## Power used to charge vbat (vbat_charging)
-	fig.add_trace(go.Scatter(x=timestamps,
-						y=np.asarray(vbat_charge),
-						mode='none',
-						fill='tozeroy',
-						name='Power Used to Charge VBAT',
-						fillcolor='rgba(155,148,225,1)',
-						showlegend=True))
+	if inputDict['load_type'] != '0':
+		fig.add_trace(go.Scatter(x=timestamps,
+							y=np.asarray(vbat_charge),
+							mode='none',
+							fill='tozeroy',
+							name='Power Used to Charge VBAT',
+							fillcolor='rgba(155,148,225,1)',
+							showlegend=True))
 	
-	## PV curtailed (electric_curtailed_series_kw)
-	fig.add_trace(go.Scatter(x=timestamps,
-						y=np.asarray(PVcurtailed),
-						mode='none',
-						fill='tozeroy',
-						name='PV Curtailed',
-						fillcolor='rgba(0,137,83,1)',
-						showlegend=True))
-	
+
+	if inputDict['PV'] == 'Yes':
+		PVcurtailed = reoptResults['PV']['electric_curtailed_series_kw']
+		electric_to_grid = reoptResults['PV']['electric_to_grid_series_kw']
+
+		## PV curtailed (electric_curtailed_series_kw)
+		fig.add_trace(go.Scatter(x=timestamps,
+							y=np.asarray(PVcurtailed),
+							mode='none',
+							fill='tozeroy',
+							name='PV Curtailed',
+							fillcolor='rgba(0,137,83,1)',
+							showlegend=True))
+		
+		## PV exported to grid (electric_to_grid_series_kw)
+		fig.add_trace(go.Scatter(x=timestamps,
+					y=np.asarray(electric_to_grid),
+					mode='none',
+					fill='tozeroy',
+					name='Power Exported to Grid',
+					fillcolor='rgba(33,78,154,1)',
+					showlegend=True))
+		
 	## Power used to meet load (NOTE: Does this mean grid to load?)
 	fig.add_trace(go.Scatter(x=timestamps,
 					y=np.asarray(grid_to_load),
@@ -469,16 +512,6 @@ def work(modelDir, inputDict):
 					name='Grid Serving Load',
 					fillcolor='rgba(100,131,130,1)',
 					showlegend=True))
-	
-	## Power exported to grid (electric_to_grid_series_kw)
-	fig.add_trace(go.Scatter(x=timestamps,
-					y=np.asarray(electric_to_grid),
-					mode='none',
-					fill='tozeroy',
-					name='Power Exported to Grid',
-					fillcolor='rgba(33,78,154,1)',
-					showlegend=True))
-
 
 	fig.update_layout(
     	xaxis=dict(title='Timestamp'),
@@ -534,7 +567,7 @@ def new(modelDir):
 		"outage_duration": "3",
 
 		## vbatDispatch inputs:
-		"load_type": '2', ## Heat Pump
+		"load_type": '2', ## Heat Pump = #2
 		"number_devices": '1',
 		"power": '5.6',
 		"capacitance": '2',

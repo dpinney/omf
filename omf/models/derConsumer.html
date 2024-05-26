@@ -20,7 +20,7 @@
 		<form name="inputForm" action="/runModel/" onsubmit="event.preventDefault(); return isFormValid();" method="post">
 			<!-- Required Inputs -->
 			<div class="shortInput">
-				<label>Model Type <a href="https://github.com/dpinney/omf/wiki/Models:-derConsumer" target="blank">Help?</a></label>
+				<label>Model Type <a href="https://github.com/dpinney/omf/wiki/Models-~-derConsumer" target="blank">Help?</a></label>
 				<input type="text" id="modelType" name="modelType" value="{{modelName}}" readonly/>
 			</div>
 			<div class="shortInput">
@@ -41,7 +41,7 @@
 			</div>
 			<!-- Model Specific Inputs -->
 			<div class="wideInput">
-				<p class="inputSectionHeader">Specific REopt Model Inputs</p>
+				<p class="inputSectionHeader">General Model Inputs</p>
 			</div>
 			<hr style="border-style: solid; border-color: #196b12; margin-top: 10px;">
 			<div class="shortInput">
@@ -82,10 +82,6 @@
 				<label class="tooltip">Analysis Period (years)<span class="classic">Specify the length of financial analysis in years.</span></label>
 				<input type="number" id="analysisYears" name="analysisYears" value="{{allInputDataDict.analysisYears}}" step="1" min="2" max="75"  required="required"/>
 			</div>
-			<hr>
-			<div class="wideInput"> <!-- REopt technologies-->
-				<p class="inputSectionHeader" style="font-size: medium;">Model DER technologies</p>
-			</div>
 			<div class="shortInput">
 				<label class="tooltip">PV<span class="classic">Include PV in DER analysis.</span></label>
 				<select id="PV" name="PV" value="{{allInputDataDict.PV}}"/>
@@ -95,7 +91,7 @@
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Battery<span class="classic">Include battery energy storage in DER analysis.</span></label>
-				<select id="battery" name="battery" value="{{allInputDataDict.BESS}}"/>
+				<select id="BESS" name="BESS" value="{{allInputDataDict.BESS}}"/>
 					<option value="Yes" {{ 'selected' if allInputDataDict.BESS == 'Yes' }}>Yes</option>
 					<option value="No" {{ 'selected' if allInputDataDict.BESS == 'No' }}>No</option>
 				</select>
@@ -111,8 +107,8 @@
 			<div class="shortInput">
 				<label>Simulate Outage</label>
 				<select id="outage" name="outage" value="{{allInputDataDict.outage}}">
-					<option value="True" {{ 'selected' if allInputDataDict.outage == 'True' }}>On</option>
-					<option value="False" {{ 'selected' if allInputDataDict.outage == 'False' }}>Off</option>
+					<option value="True" {{ 'selected' if allInputDataDict.outage == 'Yes' }}>Yes</option>
+					<option value="False" {{ 'selected' if allInputDataDict.outage == 'No' }}>No</option>
 				</select>
 			</div>
 			<div class="shortInput">
@@ -124,7 +120,7 @@
 				<input type="number" id="outage_duration" name="outage_duration" value="{{allInputDataDict.outage_duration}}" min="1" max="8760" required="required"/>
 			</div>
 			<div class="wideInput"> <!-- vbatDispatch Specific Inputs -->
-				<p class="inputSectionHeader">Specific vbatDispatch Model Inputs</p>
+				<p class="inputSectionHeader"> Thermal Model Inputs</p>
 			</div>
 			<hr style="border-style: solid; border-color: #196b12; margin-top: 10px;">
 			<div class="shortInput">
@@ -164,6 +160,7 @@
 						}
 					}
 				</script>
+					<option value="0" {{ 'selected' if allInputDataDict.load_type == '1' }}>None</option>
 					<option value="1" {{ 'selected' if allInputDataDict.load_type == '1' }}>Air Conditioner</option>
 					<option value="2" {{ 'selected' if allInputDataDict.load_type == '2' }}>Heat Pump</option>
 					<option value="3" {{ 'selected' if allInputDataDict.load_type == '3' }}>Refrigerator</option>
@@ -313,6 +310,8 @@
 			</script>
 		</div>
 	</div>
+
+	<!-- Raw Input and Output Files -->
 	{{ rawOutputFiles }}
 	{% endif %}
 </body>
