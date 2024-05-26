@@ -26,7 +26,7 @@ tooltip = ('The derConsumer model evaluates the financial costs of controlling b
 		   Laboratory (NREL) Renewable Energy Optimization Tool (REopt) and the OMF virtual battery dispatch \
 		   module (vbatDispatch).')
 modelName, template = __neoMetaModel__.metadata(__file__)
-hidden = True ## Keep the model hidden during active development
+hidden = False ## Keep the model hidden during active development
 
 def create_timestamps(start_time='2017-01-01',end_time='2017-12-31 23:00:00',arr_size=8760):
 	''' Creates an array of timestamps given a start time, stop time, and array size.
@@ -42,16 +42,15 @@ def create_timestamps(start_time='2017-01-01',end_time='2017-12-31 23:00:00',arr
 	return timestamps
 
 def create_REopt_jl_jsonFile(modelDir, inputDict):
+	## TODO: Insert function explanation here
 
 	## Site parameters
 	latitude = float(inputDict['latitude'])
 	longitude = float(inputDict['longitude'])
 	urdbLabel = str(inputDict['urdbLabel'])
 	year = int(inputDict['year'])
-	outage = inputDict['outage']
 	demand = np.asarray([float(value) for value in inputDict['demandCurve'].split('\n') if value.strip()])
-
-	demand = demand.tolist() if isinstance(demand, np.ndarray) else demand
+	demand = demand.tolist() if isinstance(demand, np.ndarray) else demand ## make demand into a list
 
 	## Energy technologies
 	#solar = inputDict['solar'] 
@@ -209,19 +208,15 @@ def work(modelDir, inputDict):
 	# Delete output file every run if it exists
 	outData = {}	
 	
-	## NOTE: This code will be used once reopt_jl is working
 	## Create REopt input file
 	create_REopt_jl_jsonFile(modelDir, inputDict)
 	
-	## NOTE: This code is used temporarily until reopt_jl is working
+	## NOTE: This code is used temporarily until reopt_jl is working.
 	## Read in a static REopt test file 
 	#with open(pJoin(__neoMetaModel__._omfDir,"static","testFiles","residential_REopt_results.json")) as f:
 	#	reoptResults = pd.json_normalize(json.load(f))
 	#	print('Successfully loaded REopt test file. \n')
 
-	# Model operations goes here.
-
-	## NOTE: This code will be used once reopt_jl is working
 	## Run REopt.jl 
 	outage_flag = inputDict['outage']
 	

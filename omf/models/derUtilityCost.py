@@ -26,7 +26,7 @@ tooltip = ('The derUtilityCost model evaluates the financial costs of controllin
 	'distributed energy resources (DERs) using the NREL renewable energy optimization tool (REopt) and '
 	'the OMF virtual battery dispatch module (vbatDispatch).')
 modelName, template = __neoMetaModel__.metadata(__file__)
-hidden = True
+hidden = True ## Keep the model hidden during active development
 
 
 def work(modelDir, inputDict):
@@ -36,9 +36,14 @@ def work(modelDir, inputDict):
 	outData = {}
 
 	## Create REopt input file
-	reopt_input_scenario = derConsumer.create_REopt_jl_jsonFile(modelDir, inputDict)
+	derConsumer.create_REopt_jl_jsonFile(modelDir, inputDict)
 
-	## NOTE: This code will be used once reopt_jl is working
+	## NOTE: This code is temporary
+	## Read in a static REopt test file
+	#with open(pJoin(__neoMetaModel__._omfDir,"static","testFiles","utility_reopt_results.json")) as f:
+	#	reoptResults = pd.json_normalize(json.load(f))
+	#	print('Successfully read in REopt test file. \n')
+
 	## Run REopt.jl 
 	outage_flag = inputDict['outage']
 	
@@ -47,11 +52,9 @@ def work(modelDir, inputDict):
 		reoptResults = json.load(jsonFile)
 	outData.update(reoptResults) ## Update output file with reopt results
 
-	## NOTE: This code is temporary
-	## Read in a static REopt test file
-	with open(pJoin(__neoMetaModel__._omfDir,"static","testFiles","utility_reopt_results.json")) as f:
-		reoptResults = pd.json_normalize(json.load(f))
-		print('Successfully read in REopt test file. \n')
+	## Convert temperature data from str to float
+	temperatures = [float(value) for value in inputDict['tempCurve'].split('\n') if value.strip()]
+	demand = np.asarray([float(value) for value in inputDict['demandCurve'].split('\n') if value.strip()])
 
 	## Create timestamp array from REopt input information
 	try:
@@ -59,12 +62,8 @@ def work(modelDir, inputDict):
 	except KeyError:
 		year = inputDict['year'] # Use the user provided year if none found in reoptResults
 	
-	arr_size = np.size(reoptResults['ElectricUtility']['electric_to_load_series_kw'])
+	arr_size = np.size(demand)
 	timestamps = derConsumer.create_timestamps(start_time=f'{year}-01-01', end_time=f'{year}-12-31 23:00:00', arr_size=arr_size)
-
-	## Convert temperature data from str to float
-	temperatures = [float(value) for value in inputDict['tempCurve'].split('\n') if value.strip()]
-	demand = np.asarray([float(value) for value in inputDict['demandCurve'].split('\n') if value.strip()])
 
 	## If outage is specified, load the resilience results
 	if (inputDict['outage']):
@@ -78,20 +77,17 @@ def work(modelDir, inputDict):
 			raise
 	
 	## Run vbatDispatch
-	vbatResults = vb.work(modelDir,inputDict)
-	with open(pJoin(modelDir, 'vbatResults.json'), 'w') as jsonFile:
-		json.dump(vbatResults, jsonFile)
-	outData.update(vbatResults) ## Update output file with vbat results
+	if inputDict['load_type'] != '0': ## Load type 0 corresponds to "None" option, which turns off vbatDispatch functions
+		vbatResults = vb.work(modelDir,inputDict)
+		with open(pJoin(modelDir, 'vbatResults.json'), 'w') as jsonFile:
+			json.dump(vbatResults, jsonFile)
+		outData.update(vbatResults) ## Update output file with vbat results
 
-
-	## Output data
-	#outData['solar'] = inputDict['solar']
-	#outData['generator'] = inputDict['generator'] ## TODO: make generator switch on only during outage?
-	#outData['battery'] = inputDict['battery']
-	#outData['year'] = inputDict['year']
-	#outData['urdbLabel'] = inputDict['urdbLabel']
-	#out['demandCost'] = results['ElectricTariff']['lifecycle_demand_cost_after_tax']
-	#out['powerPVToGrid'] = results['PV']['electric_to_grid_series_kw']#['year_one_to_grid_series_kw']
+		## vbatDispatch variables
+		vbpower_series = pd.Series(vbatResults['VBpower'])
+		vbat_charge = vbpower_series.where(vbpower_series > 0, 0) ##positive values = charging
+		vbat_discharge = vbpower_series.where(vbpower_series < 0, 0) #negative values = discharging
+		vbat_discharge_flipsign = vbat_discharge.mul(-1) ## flip sign of vbat discharge for plotting purposes
 
 	## Run REopt and gather outputs for vbatDispath
 	## TODO: Create a function that will gather the urdb label from a user provided location (city,state)
@@ -99,32 +95,37 @@ def work(modelDir, inputDict):
 
 	#reopt_jl.run_reopt_jl(path="/Users/astronobri/Documents/CIDER/reopt/inputs/", inputFile="UP_PV_outage_1hr.json", outages=outage) # UP coop PV 
 	#reopt_jl.run_reopt_jl(path="/Users/astronobri/Documents/CIDER/reopt/inputs/", inputFile=pJoin(__neoMetaModel__._omfDir,"static","testFiles","residential_input.json"), outages=True) # residential PV 
+
+	## DER Overview plot
+	showlegend = True #temporarily disable the legend toggle
+	grid_to_load = reoptResults['ElectricUtility']['electric_to_load_series_kw']
+
+	if inputDict['PV'] == 'Yes': ## PV
+		PV = reoptResults['PV']['electric_to_load_series_kw']
+	else:
+		PV = np.zeros_like(demand)
 	
-	## Test plot
-	showlegend = False #temporarily disable the legend toggle
+	if inputDict['BESS'] == 'Yes': ## BESS
+		#BESS = reoptResults['ElectricStorage']['storage_to_load_series_kw']
+		BESS = np.ones_like(demand) ## Ad-hoc line used because BESS is not being built in REopt for some reason. Currently debugging 5/2024
+		grid_charging_BESS = reoptResults['ElectricUtility']['electric_to_storage_series_kw']
+		#outData['chargeLevelBattery'] = reoptResults['ElectricStorage']['soc_series_fraction']
 
-	PV = reoptResults['outputs.PV.electric_to_load_series_kw'][0]
-	BESS = reoptResults['outputs.ElectricStorage.storage_to_load_series_kw'][0]
-	vbpower_series = pd.Series(vbatResults['VBpower'][0])
-	vbat_discharge = vbpower_series.where(vbpower_series < 0, 0) #negative values
-	vbat_charge = vbpower_series.where(vbpower_series > 0, 0) ## positive values; part of the New Load?
-	vbat_discharge_flipsign = vbat_discharge.mul(-1) ## flip sign of vbat discharge for plotting purposes
-	grid_to_load = reoptResults['outputs.ElectricUtility.electric_to_load_series_kw'][0]
-	grid_charging_BESS = reoptResults['outputs.ElectricUtility.electric_to_storage_series_kw'][0]
+		## NOTE: The following 3 lines of code are temporary. 
+		## It read the SOC info from a static reopt test file until the issue with REopt producing BESS results is resolved.
+		with open(pJoin(__neoMetaModel__._omfDir,"static","testFiles","utility_reopt_results.json")) as f:
+			static_reopt_results = json.load(f)
+		outData['chargeLevelBattery'] = static_reopt_results['outputs']['ElectricStorage']['soc_series_fraction']
+	else:
+		BESS = np.zeros_like(demand)
+		grid_charging_BESS = np.zeros_like(demand)
 
-
+	## Create plot object
 	fig = go.Figure()
-	fig.add_trace(go.Scatter(x=timestamps,
-                         y=np.asarray(BESS) + np.asarray(demand) + np.asarray(vbat_discharge_flipsign),
-						 yaxis='y1',
-                         mode='none',
-                         fill='tozeroy',
-                         name='BESS Serving Load (kW)',
-                         fillcolor='rgba(0,137,83,1)',
-						 showlegend=showlegend))
-	fig.update_traces(fillpattern_shape='/', selector=dict(name='BESS Serving Load (kW)'))
-
-	fig.add_trace(go.Scatter(x=timestamps,
+	if inputDict['load_type'] != '0': ## Load type 0 corresponds to "None" option, which turns off vbatDispatch functions
+		vbat_discharge_component = np.asarray(vbat_discharge_flipsign)
+		vbat_charge_component = np.asarray(vbat_charge)
+		fig.add_trace(go.Scatter(x=timestamps,
 							y=np.asarray(vbat_discharge_flipsign)+np.asarray(demand),
 							yaxis='y1',
 							mode='none',
@@ -132,19 +133,33 @@ def work(modelDir, inputDict):
 							fillcolor='rgba(127,0,255,1)',
 							name='vbat Serving Load (kW)',
 							showlegend=showlegend))
-	fig.update_traces(fillpattern_shape='/', selector=dict(name='vbat Serving Load (kW)'))
+		fig.update_traces(fillpattern_shape='/', selector=dict(name='vbat Serving Load (kW)'))
+	else:
+		vbat_discharge_component = np.zeros_like(demand)
+		vbat_charge_component = np.zeros_like(demand)
+
+	if (inputDict['BESS'] == 'Yes'):
+		fig.add_trace(go.Scatter(x=timestamps,
+							y=np.asarray(BESS) + np.asarray(demand) + vbat_discharge_component,
+							yaxis='y1',
+							mode='none',
+							fill='tozeroy',
+							name='BESS Serving Load (kW)',
+							fillcolor='rgba(0,137,83,1)',
+							showlegend=showlegend))
+		fig.update_traces(fillpattern_shape='/', selector=dict(name='BESS Serving Load (kW)'))
 
 	fig.add_trace(go.Scatter(x=timestamps,
-                         y=np.asarray(demand)-np.asarray(BESS)-np.asarray(vbat_discharge_flipsign),
-						 yaxis='y1',
-                         mode='none',
-                         name='Original Load (kW)',
-                         fill='tozeroy',
-                         fillcolor='rgba(100,200,210,1)',
-						 showlegend=showlegend))
+						y=np.asarray(demand)-np.asarray(BESS)-vbat_discharge_component,
+						yaxis='y1',
+						mode='none',
+						name='Original Load (kW)',
+						fill='tozeroy',
+						fillcolor='rgba(100,200,210,1)',
+						showlegend=showlegend))
 
 	fig.add_trace(go.Scatter(x=timestamps,
-                         y=np.asarray(demand) + np.asarray(reoptResults['outputs.ElectricUtility.electric_to_storage_series_kw'][0]) + np.asarray(vbat_charge),
+                         y=np.asarray(demand) + np.asarray(grid_charging_BESS) + vbat_charge_component,
 						 yaxis='y1',
                          mode='none',
                          name='Additional Load (Charging BESS and vbat)',
@@ -153,8 +168,7 @@ def work(modelDir, inputDict):
 						 showlegend=showlegend))
 	fig.update_traces(fillpattern_shape='.', selector=dict(name='Additional Load (Charging BESS and vbat)'))
 	
-
-	grid_serving_new_load = np.asarray(grid_to_load) + np.asarray(grid_charging_BESS)+ np.asarray(vbat_charge) - np.asarray(vbat_discharge_flipsign) + np.asarray(PV)
+	grid_serving_new_load = np.asarray(grid_to_load) + np.asarray(grid_charging_BESS)+ vbat_charge_component - vbat_discharge_component + np.asarray(PV)
 	fig.add_trace(go.Scatter(x=timestamps,
                          y=grid_serving_new_load,
 						 yaxis='y1',
@@ -182,20 +196,21 @@ def work(modelDir, inputDict):
 	#				 showlegend=showlegend))
 	#fig.update_traces(legendgroup='Demand', visible='legendonly', selector=dict(name='Original Load (kW)')) ## Make demand hidden on plot by default
 
-	fig.add_trace(go.Scatter(x=timestamps,
-					 y=PV,
-					 yaxis='y1',
-					 mode='none',
-					 fill='tozeroy',
-					 name='PV Serving Load (kW)',
-					 fillcolor='rgba(255,246,0,1)',
-					 showlegend=showlegend
-					 ))
+	if (inputDict['PV'] == 'Yes'):
+		fig.add_trace(go.Scatter(x=timestamps,
+						y=PV,
+						yaxis='y1',
+						mode='none',
+						fill='tozeroy',
+						name='PV Serving Load (kW)',
+						fillcolor='rgba(255,246,0,1)',
+						showlegend=showlegend
+						))
 	
 	fig.update_layout(
     	title='Utility Data Test',
     	xaxis=dict(title='Timestamp'),
-    	yaxis=dict(title="Energy (kW)"),
+    	yaxis=dict(title="Power (kW)"),
     	yaxis2=dict(title='degrees Celsius',
                 overlaying='y',
                 side='right'
@@ -212,8 +227,102 @@ def work(modelDir, inputDict):
 	fig.show()
 
 	## Encode plot data as JSON for showing in the HTML 
-	outData['plotlyPlot'] = json.dumps(fig.data, cls=plotly.utils.PlotlyJSONEncoder)
-	outData['plotlyLayout'] = json.dumps(fig.layout, cls=plotly.utils.PlotlyJSONEncoder)
+	outData['derOverviewData'] = json.dumps(fig.data, cls=plotly.utils.PlotlyJSONEncoder)
+	outData['derOverviewLayout'] = json.dumps(fig.layout, cls=plotly.utils.PlotlyJSONEncoder)
+
+	## Exported Power Plot
+	PVcurtailed = reoptResults['PV']['electric_curtailed_series_kw']
+	electric_to_grid = reoptResults['PV']['electric_to_grid_series_kw']
+
+	fig = go.Figure()
+
+	## Power used to charge BESS (electric_to_storage_series_kw)
+	if inputDict['BESS'] == 'Yes':
+		fig.add_trace(go.Scatter(x=timestamps,
+							y=np.asarray(grid_charging_BESS),
+							mode='none',
+							fill='tozeroy',
+							name='Power Used to Charge BESS',
+							fillcolor='rgba(75,137,83,1)',
+							showlegend=True))
+	
+	## Power used to charge vbat (vbat_charging)
+	if inputDict['load_type'] != '0':
+		fig.add_trace(go.Scatter(x=timestamps,
+							y=np.asarray(vbat_charge),
+							mode='none',
+							fill='tozeroy',
+							name='Power Used to Charge VBAT',
+							fillcolor='rgba(155,148,225,1)',
+							showlegend=True))
+	
+
+	if inputDict['PV'] == 'Yes':
+		PVcurtailed = reoptResults['PV']['electric_curtailed_series_kw']
+		electric_to_grid = reoptResults['PV']['electric_to_grid_series_kw']
+
+		## PV curtailed (electric_curtailed_series_kw)
+		fig.add_trace(go.Scatter(x=timestamps,
+							y=np.asarray(PVcurtailed),
+							mode='none',
+							fill='tozeroy',
+							name='PV Curtailed',
+							fillcolor='rgba(0,137,83,1)',
+							showlegend=True))
+		
+		## PV exported to grid (electric_to_grid_series_kw)
+		fig.add_trace(go.Scatter(x=timestamps,
+					y=np.asarray(electric_to_grid),
+					mode='none',
+					fill='tozeroy',
+					name='Power Exported to Grid',
+					fillcolor='rgba(33,78,154,1)',
+					showlegend=True))
+		
+	## Power used to meet load (NOTE: Does this mean grid to load?)
+	fig.add_trace(go.Scatter(x=timestamps,
+					y=np.asarray(grid_to_load),
+					mode='none',
+					fill='tozeroy',
+					name='Grid Serving Load',
+					fillcolor='rgba(100,131,130,1)',
+					showlegend=True))
+
+
+	fig.update_layout(
+    	xaxis=dict(title='Timestamp'),
+    	yaxis=dict(title="Power (kW)"),
+    	legend=dict(
+			orientation='h',
+			yanchor="bottom",
+			y=1.02,
+			xanchor="right",
+			x=1
+			)
+	)
+	
+	## Encode plot data as JSON for showing in the HTML side
+	outData['exportedPowerData'] = json.dumps(fig.data, cls=plotly.utils.PlotlyJSONEncoder)
+	outData['exportedPowerLayout'] = json.dumps(fig.layout, cls=plotly.utils.PlotlyJSONEncoder)
+
+	## Battery State of Charge plot
+	if inputDict['BESS'] == 'Yes':
+		fig = go.Figure()
+
+		fig.add_trace(go.Scatter(x=timestamps,
+							y=outData['chargeLevelBattery'],
+							mode='none',
+							fill='tozeroy',
+							fillcolor='red',
+							name='Battery Charge Level',
+							showlegend=True))
+		fig.update_layout(
+			xaxis=dict(title='Timestamp'),
+			yaxis=dict(title="Charge (%)")
+		)
+
+		outData['batteryChargeData'] = json.dumps(fig.data, cls=plotly.utils.PlotlyJSONEncoder)
+		outData['batteryChargeLayout'] = json.dumps(fig.layout, cls=plotly.utils.PlotlyJSONEncoder)
 
 	# Model operations typically ends here.
 	# Stdout/stderr.
@@ -245,7 +354,7 @@ def new(modelDir):
 		"demandCurve": demand_curve,
 		"tempCurve": temp_curve,
 		"PV": "Yes",
-		"BESS": "No",
+		"BESS": "Yes",
 		"generator": "No",
 		"outage": True,
 		"outage_start_hour": '2100',
