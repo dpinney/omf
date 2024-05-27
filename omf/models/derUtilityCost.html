@@ -81,14 +81,14 @@
 				<input type="number" id="analysis_years" name="analysis_years" value="{{allInputDataDict.analysis_years}}" step="1" min="2" max="75"  required="required"/>
 			</div>
 			<div class="shortInput">
-				<label class="tooltip">PV<span class="classic">Include PV in DER analysis.</span></label>
+				<label class="tooltip">Photovoltaic<span class="classic">Include PV in DER analysis?</span></label>
 				<select id="PV" name="PV" value="{{allInputDataDict.PV}}"/>
 					<option value="Yes" {{ 'selected' if allInputDataDict.solar == 'Yes' }}>Yes</option>
 					<option value="No" {{ 'selected' if allInputDataDict.solar == 'No' }}>No</option>
 				</select>
 			</div>
 			<div class="shortInput">
-				<label class="tooltip">Battery<span class="classic">Include battery energy storage in DER analysis.</span></label>
+				<label class="tooltip">Battery Energy Storage<span class="classic">Include battery energy storage in DER analysis?</span></label>
 				<select id="BESS" name="BESS" value="{{allInputDataDict.BESS}}"/>
 					<option value="Yes" {{ 'selected' if allInputDataDict.BESS == 'Yes' }}>Yes</option>
 					<option value="No" {{ 'selected' if allInputDataDict.BESS == 'No' }}>No</option>
@@ -159,7 +159,7 @@
 						}
 					}
 				</script>
-					<option value="0" {{ 'selected' if allInputDataDict.load_type == '1' }}>None</option>
+					<option value="0" {{ 'selected' if allInputDataDict.load_type == '0' }}>None</option>
 					<option value="1" {{ 'selected' if allInputDataDict.load_type == '1' }}>Air Conditioner</option>
 					<option value="2" {{ 'selected' if allInputDataDict.load_type == '2' }}>Heat Pump</option>
 					<option value="3" {{ 'selected' if allInputDataDict.load_type == '3' }}>Refrigerator</option>
