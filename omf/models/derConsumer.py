@@ -26,7 +26,7 @@ tooltip = ('The derConsumer model evaluates the financial costs of controlling b
 		   Laboratory (NREL) Renewable Energy Optimization Tool (REopt) and the OMF virtual battery dispatch \
 		   module (vbatDispatch).')
 modelName, template = __neoMetaModel__.metadata(__file__)
-hidden = False ## Keep the model hidden=True during active development
+hidden = True ## Keep the model hidden=True during active development
 
 def create_timestamps(start_time='2017-01-01',end_time='2017-12-31 23:00:00',arr_size=8760):
 	''' 
