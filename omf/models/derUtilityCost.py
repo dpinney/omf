@@ -277,8 +277,8 @@ def new(modelDir):
 		'created': str(datetime.datetime.now()),
 
 		## REopt inputs:
-		'latitude' : '39.7392358', 
-		'longitude' : '-104.990251', ## Brighton, CO
+		'latitude' : '39.986771 ', 
+		'longitude' : '-104.812599', ## Brighton, CO
 		'year' : '2018',
 		'analysis_years' : '25', 
 		'urdbLabel' : '612ff9c15457a3ec18a5f7d3', ## Brighton, CO

@@ -224,10 +224,10 @@
 			</div>
 			<hr style="border-style: solid; border-color: #196b12; margin-top: 10px;">
 			<div class="shortInput">
-				<label>Consider Utility DER program?</label>
+				<label>Consider utility DER sharing program?</label>
 				<select id="utilityProgram" name="utilityProgram" value="{{allInputDataDict.utilityProgram}}">
-					<option value="True" {{ 'selected' if allInputDataDict.outage == 'Yes' }}>Yes</option>
-					<option value="False" {{ 'selected' if allInputDataDict.outage == 'No' }}>No</option>
+					<option value="True" {{ 'selected' if allInputDataDict.utilityProgram == 'Yes' }}>Yes</option>
+					<option value="False" {{ 'selected' if allInputDataDict.utilityProgram == 'No' }}>No</option>
 				</select>
 			</div>
 			<div class="shortInput">
