@@ -19,10 +19,10 @@ class GeojsonModal { // implements ModalInterface, ObserverInterface
      */
     constructor(observables, controller) {
         if (!(observables instanceof Array)) {
-            throw TypeError('"observables" argumnet must be an Array.');
+            throw TypeError('The "observables" argumnet must be instanceof Array.');
         }
         if (!(controller instanceof FeatureController)) {
-            throw Error('"controller" argument must be instanceof FeatureController.');
+            throw Error('The "controller" argument must be instanceof FeatureController.');
         }
         this.#controller = controller;
         this.#filenameToLayerGroup = {};
@@ -47,7 +47,7 @@ class GeojsonModal { // implements ModalInterface, ObserverInterface
     handleDeletedObservable(observable) {
         // - The function signature above is part of the ObserverInterface API. The implementation below is not
         if (!(observable instanceof Feature)) {
-            throw TypeError('"observable" argument must be instanceof Feature.');
+            throw TypeError('The "observable" argument must be instanceof Feature.');
         }
         if (!this.#removed) {
             observable.removeObserver(this);
@@ -84,10 +84,10 @@ class GeojsonModal { // implements ModalInterface, ObserverInterface
     handleUpdatedCoordinates(observable, oldCoordinates) {
         // - The function signature above is part of the ObserverInterface API. The implementation below is not
         if (!(observable instanceof Feature)) {
-            throw TypeError('"observable" argument must be instanceof Feature.');
+            throw TypeError('The "observable" argument must be instanceof Feature.');
         }
         if (!(oldCoordinates instanceof Array)) {
-            throw TypeError('"oldCoordinates" argument must be an array.');
+            throw TypeError('The "oldCoordinates" argument must be an array.');
         }
         this.#updateLayerGroups();
         this.refreshContent();
@@ -105,13 +105,13 @@ class GeojsonModal { // implements ModalInterface, ObserverInterface
     handleUpdatedProperty(observable, propertyKey, oldPropertyValue, namespace='treeProps') {
         // - The function signature above is part of the ObserverInterface API. The implementation below is not
         if (!(observable instanceof Feature)) {
-            throw TypeError('"observable" argument must be instanceof Feature.');
+            throw TypeError('The "observable" argument must be instanceof Feature.');
         }
         if (typeof propertyKey !== 'string') {
-            throw TypeError('"propertyKey" argument must be a string.');
+            throw TypeError('The "propertyKey" argument must be a string.');
         }
         if (typeof namespace !== 'string') {
-            throw TypeError('"namespace" argument must be a string.');
+            throw TypeError('The "namespace" argument must be a string.');
         }
         this.#updateLayerGroups();
         this.refreshContent();

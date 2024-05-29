@@ -348,7 +348,7 @@ def get_hosting_capacity_of_single_bus_multiprocessing(FILE_PATH:str, BUS_NAME:s
 	lower_kw_bound = 1
 	upper_kw_bound = 1
 	while True:
-		results = check_hosting_capacity_of_single_bus(FILE_PATH, BUS_NAME, upper_kw_bound, lock)
+		results = check_hosting_capacity_of_single_bus(FILE_PATH, BUS_NAME, upper_kw_bound)
 		thermal_violation = results['thermal_violation']
 		voltage_violation = results['voltage_violation']
 		if thermal_violation or voltage_violation or upper_kw_bound == max_test_kw:
@@ -484,14 +484,15 @@ def hosting_capacity_single_bus(FILE_PATH:str, kwSTEPS:int, kwValue:float, BUS_N
 	return {'bus':BUS_NAME, 'max_kw':kwValue * step, 'reached_max':False, 'thermal_violation':therm_violation, 'voltage_violation':volt_violation}
 
 def multiprocessor_function( FILE_PATH, max_test_kw, lock, BUS_NAME):
-	print( "inside multiprocessor function" )
-	try:
-		single_output = get_hosting_capacity_of_single_bus_multiprocessing( FILE_PATH, BUS_NAME, max_test_kw, lock)
-		return single_output
-	except:
-		print(f'Could not solve hosting capacity for BUS_NAME={BUS_NAME}')
+	with lock:
+		# print( "inside multiprocessor function" )
+		try:
+			single_output = get_hosting_capacity_of_single_bus_multiprocessing( FILE_PATH, BUS_NAME, max_test_kw, lock)
+			return single_output
+		except:
+			print(f'Could not solve hosting capacity for BUS_NAME={BUS_NAME}')
 
-	
+ 
 #Jenny
 def hosting_capacity_all(FNAME:str, max_test_kw:float=50000, BUS_LIST:list = None, multiprocess=False, cores: int=8):
 	''' Generate hosting capacity results for all_buses. '''
@@ -504,12 +505,12 @@ def hosting_capacity_all(FNAME:str, max_test_kw:float=50000, BUS_LIST:list = Non
 	all_output = []
 	# print('GEN_BUSES', gen_buses)
 	if multiprocess == True:
-		lock = multiprocessing.Lock()
-		pool = multiprocessing.Pool( processes=cores )
-		print(f'Running multiprocessor {len(gen_buses)} times with {cores} cores')
-		# Executes parallel_hc_func in parallel for each item in gen_buses
-		all_output.extend(pool.starmap(multiprocessor_function, [(fullpath, max_test_kw, lock, bus) for bus in gen_buses]))
-		print( "multiprocess all output: ", all_output)
+		with multiprocessing.Manager() as manager:
+			lock = manager.Lock()
+			pool = multiprocessing.Pool( processes=cores )
+			print(f'Running multiprocessor {len(gen_buses)} times with {cores} cores')
+			all_output.extend(pool.starmap(multiprocessor_function, [(fullpath, max_test_kw, lock, bus) for bus in gen_buses]))
+			print( "multiprocess all output: ", all_output)
 	elif multiprocess == False:
 		for bus in gen_buses:
 			try:
@@ -843,7 +844,7 @@ def dss_to_nx_fulldata( dssFilePath, tree=None, fullData = True ):
 	lines = [x for x in tree if x.get('object', 'N/A').startswith('line.')]
 	lines_bus1 = [x.split('.')[0] for x in [x['bus1'] for x in lines if 'bus1' in x]]
 	lines_bus2 = [x.split('.')[0] for x in [x['bus2'] for x in lines if 'bus2' in x]]
-	lines_name = [x.split('.')[1] for x in [x['object'] for x in lines if 'object' in x]]
+	# lines_name = [x.split('.')[1] for x in [x['object'] for x in lines if 'object' in x]]
 	edges = []
 	for bus1, bus2 in zip(lines_bus1, lines_bus2 ):
 		edges.append( (bus1, bus2, {'color': 'blue'}) )
@@ -853,7 +854,6 @@ def dss_to_nx_fulldata( dssFilePath, tree=None, fullData = True ):
 	# some lines have "switch"
 	# How to add data when sometimes there sometimes not
 	
-	# If there is a transformer tied to a load, we get it from here.
 	loads = [x for x in tree if x.get('object', 'N/A').startswith('load.')] # This is an orderedDict
 	load_names = [x['object'].split('.')[1] for x in loads if 'object' in x and x['object'].startswith('load.')]
 	load_bus = [x.split('.')[0] for x in [x['bus1'] for x in loads if 'bus1' in x]]
@@ -891,9 +891,12 @@ def dss_to_nx_fulldata( dssFilePath, tree=None, fullData = True ):
 	transformer_name = [x.split('.')[1] for x in [x['object'] for x in transformers if 'object' in x]]
 	transformer_edges = []
 	for bus_pair, t_name in zip(transformer_buses_names_split, transformer_name):
-		if bus_pair[0] and bus_pair[1] in G.nodes:
-			transformer_edges.append ( (bus_pair[0], bus_pair[1], {'key': t_name}) )
+		if bus_pair[0] and bus_pair[1] in G.nodes: # If both buses exist
+			transformer_edges.append ( (bus_pair[0], bus_pair[1]) )
 	G.add_edges_from(transformer_edges)
+
+	# Check if there exists a line - would a transformer exist on an already existing line?
+	# Check if both buses exist
 
 	# Need to add data for transformers
 	# Some have windings.

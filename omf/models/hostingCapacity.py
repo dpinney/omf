@@ -50,7 +50,7 @@ def createColorCSV(modelDir, df):
 	new_df = df[['bus','max_kw']]
 	new_df.to_csv(Path(modelDir, 'color_by.csv'), index=False)
 
-def run_downline_load_algorithm( modelDir, inputDict, outData):
+def run_downline_load_algorithm( modelDir, inputDict, outData ):	
 	feederName = [x for x in os.listdir(modelDir) if x.endswith('.omd') and x[:-4] == inputDict['feederName1'] ][0]
 	inputDict['feederName1'] = feederName[:-4]
 	path_to_omd = Path(modelDir, feederName)
@@ -86,7 +86,7 @@ def run_downline_load_algorithm( modelDir, inputDict, outData):
 	outData['downline_runtime'] = convert_seconds_to_hms_ms( downline_end_time - downline_start_time )
 	return sorted_downlineDF
 
-def run_ami_algorithm(modelDir, inputDict, outData):
+def run_ami_algorithm( modelDir, inputDict, outData ):
 	# mohca data-driven hosting capacity
 	inputPath = Path(modelDir, inputDict['AMIDataFileName'])
 	inputAsString = inputPath.read_text()
@@ -130,8 +130,10 @@ def run_ami_algorithm(modelDir, inputDict, outData):
 	outData['AMI_tableValues'] = ( list(sorted_results.itertuples(index=False, name=None)) )
 	outData['AMI_runtime'] = convert_seconds_to_hms_ms( AMI_end_time - AMI_start_time )
 
-def run_traditional_algorithm(modelDir, inputDict, outData):
+def run_traditional_algorithm( modelDir, inputDict, outData ):
 	# traditional hosting capacity if they uploaded an omd circuit file and chose to use it.
+
+	# Check if the file was upploaded and checks to make sure the name matches
 	feederName = [x for x in os.listdir(modelDir) if x.endswith('.omd') and x[:-4] == inputDict['feederName1'] ][0]
 	inputDict['feederName1'] = feederName[:-4]
 	path_to_omd = Path(modelDir, feederName)
@@ -141,7 +143,7 @@ def run_traditional_algorithm(modelDir, inputDict, outData):
 	traditionalHCResults = opendss.hosting_capacity_all( FNAME = Path(modelDir, 'circuit.dss'), max_test_kw=int(inputDict["traditionalHCMaxTestkw"]), multiprocess=False)
 	traditional_end_time = time.time()
 	# - opendss.hosting_capacity_all() changes the cwd, so change it back so other code isn't affected
-	tradHCDF = pd.DataFrame(traditionalHCResults)
+	tradHCDF = pd.DataFrame( traditionalHCResults )
 	sorted_tradHCDF = tradHCDF.sort_values(by='bus')
 	sorted_tradHCDF['plot_color'] = sorted_tradHCDF.apply ( lambda row: bar_chart_coloring(row), axis=1 )
 	# Plotly has its own colors - need to map the "name" of given colors to theirs
