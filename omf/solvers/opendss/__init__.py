@@ -485,7 +485,7 @@ def hosting_capacity_single_bus(FILE_PATH:str, kwSTEPS:int, kwValue:float, BUS_N
 
 def multiprocessor_function( FILE_PATH, max_test_kw, lock, BUS_NAME):
 	with lock:
-		print( "inside multiprocessor function" )
+		# print( "inside multiprocessor function" )
 		try:
 			single_output = get_hosting_capacity_of_single_bus_multiprocessing( FILE_PATH, BUS_NAME, max_test_kw, lock)
 			return single_output
