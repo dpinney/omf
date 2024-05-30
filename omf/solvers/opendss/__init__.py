@@ -835,7 +835,7 @@ def dss_to_nx_fulldata( dssFilePath, tree=None, fullData = True ):
 	for bus, x, y in zip( bus_names, x_coords, y_coords):
 		float_x = float(x)
 		float_y = float(y)
-		G.add_node(bus, pos=(float_x, float_y))
+		G.add_node(bus, pos=(float_x, float_y), object='bus')
 		pos[bus] = (float_x, float_y)
 
 	
@@ -853,7 +853,7 @@ def dss_to_nx_fulldata( dssFilePath, tree=None, fullData = True ):
 
 	edges = []
 	for bus1, bus2, name in zip( lines_bus1, lines_bus2, lines_name ):
-		edges.append( (bus1, bus2, {'color': 'blue', 'line_name': name}) )
+		edges.append( (bus1, bus2, {'color': 'blue', 'object': 'line', 'line_name': name}) )
 	G.add_edges_from( edges )
 
 	# new object=transformer.reg1 buses=[650.1,rg60.1] phases=1 bank=reg1 xhl=0.01 kvas=[1666,1666] kvs=[2.4,2.4] %loadloss=0.01
@@ -873,7 +873,7 @@ def dss_to_nx_fulldata( dssFilePath, tree=None, fullData = True ):
 				transformer_edges.append ( (buses[0], buses[2], {'transformer_name': t_name}) )
 		elif len(buses) == 2:
 			if buses[0] and buses[1] in G.nodes: # If both buses exist
-				transformer_edges.append ( (buses[0], buses[1], {'transformer_name': t_name}) )
+				transformer_edges.append ( (buses[0], buses[1], {'object': 'transformer', 'transformer_name': t_name}) )
 	G.add_edges_from(transformer_edges)
 	
 	loads = [x for x in tree if x.get('object', 'N/A').startswith('load.')] # This is an orderedDict
@@ -881,7 +881,8 @@ def dss_to_nx_fulldata( dssFilePath, tree=None, fullData = True ):
 	load_bus = [x.split('.')[0] for x in [x['bus1'] for x in loads if 'bus1' in x]]
 	for load, bus in zip(load_names, load_bus):
 		pos_tuple_of_bus = pos[bus]
-		G.add_node(load, pos=pos_tuple_of_bus)
+		G.add_node(load, pos=pos_tuple_of_bus, object='load' )
+		# Lines between buses and loads
 		G.add_edge( bus, load )
 		pos[load] = pos_tuple_of_bus
 
@@ -899,9 +900,6 @@ def dss_to_nx_fulldata( dssFilePath, tree=None, fullData = True ):
 			G.nodes[load]['kv'] = kv
 			G.nodes[load]['kw'] = kw
 			G.nodes[load]['kvar'] = kvar
-
-	# need lines between buses and loads
-	# print( G.nodes )
 
 	# Check if there exists a line - would a transformer exist on an already existing line?
 	# Check if both buses exist
@@ -937,7 +935,7 @@ def dss_to_nx_fulldata( dssFilePath, tree=None, fullData = True ):
   # Generators have generator.<x> like solar_634 <- should i save this?
 	# loadshape?
 	generators = [x for x in tree if x.get('object', 'N/A').startswith('generator.')]
-	gen_bus1 = [x.split('.')[0] for x in [x['bus1'] for x in lines if 'bus1' in x]]
+	gen_bus1 = [x.split('.')[0] for x in [x['bus1'] for x in generators if 'bus1' in x]]
 	gen_names = [x['object'].split('.')[1] for x in generators if 'object' in x and x['object'].startswith('generator.')]
 	gen_phases = [x['phases'] for x in generators if 'phases' in x]
 	gen_kv = [x['kv'] for x in generators if 'kv' in x]
@@ -946,7 +944,9 @@ def dss_to_nx_fulldata( dssFilePath, tree=None, fullData = True ):
 	gen_yearly = [x['yearly'] for x in generators if 'yearly' in x]
 
 	for gen, bus_for_positioning, phases, kv, kw, pf, yearly in zip( gen_names, gen_bus1, gen_phases, gen_kv, gen_kw, gen_pf, gen_yearly ):
-		G.add_node( gen, pos=pos[bus_for_positioning] )
+		G.add_node( gen, pos=pos[bus_for_positioning], object='generator' )
+		pos[gen] = pos[bus_for_positioning]
+		G.add_edge( bus_for_positioning, gen )
 		# Need to add gen betwen bus and node.
 		# but if what is between them is a transformer, then it'll get removed. then there would be an edge between a deleted node and the generator node.. it has to between the bus.. now im confused.
 		G.nodes[gen]['phases'] = phases
