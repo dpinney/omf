@@ -931,12 +931,11 @@ def dss_to_nx_fulldata( dssFilePath, tree=None, fullData = True ):
 	# 	print( G[ "633"]["634"]["kvs"] )
 	# 	print( G[ "633"]["634"]["loadloss"] )
 
-	# Are there generators? If so, find them and add them as nodes. Their location is the same as buses.
-  # Generators have generator.<x> like solar_634 <- should i save this?
-	# loadshape?
+	# Are there generators? If so, find them and add them as nodes. Their location is the same as their bus.
 	generators = [x for x in tree if x.get('object', 'N/A').startswith('generator.')]
-	gen_bus1 = [x.split('.')[0] for x in [x['bus1'] for x in generators if 'bus1' in x]]
 	gen_names = [x['object'].split('.')[1] for x in generators if 'object' in x and x['object'].startswith('generator.')]
+	gen_bus1 = [x.split('.')[0] for x in [x['bus1'] for x in generators if 'bus1' in x]]
+
 	gen_phases = [x['phases'] for x in generators if 'phases' in x]
 	gen_kv = [x['kv'] for x in generators if 'kv' in x]
 	gen_kw = [x['kw'] for x in generators if 'kw' in x]
@@ -944,16 +943,24 @@ def dss_to_nx_fulldata( dssFilePath, tree=None, fullData = True ):
 	gen_yearly = [x['yearly'] for x in generators if 'yearly' in x]
 
 	for gen, bus_for_positioning, phases, kv, kw, pf, yearly in zip( gen_names, gen_bus1, gen_phases, gen_kv, gen_kw, gen_pf, gen_yearly ):
-		G.add_node( gen, pos=pos[bus_for_positioning], object='generator' )
+		G.add_node( gen, pos=pos[bus_for_positioning], object='generator')
 		pos[gen] = pos[bus_for_positioning]
 		G.add_edge( bus_for_positioning, gen )
 		# Need to add gen betwen bus and node.
 		# but if what is between them is a transformer, then it'll get removed. then there would be an edge between a deleted node and the generator node.. it has to between the bus.. now im confused.
-		G.nodes[gen]['phases'] = phases
-		G.nodes[gen]['kv'] = kv
-		G.nodes[gen]['kw'] = kw
-		G.nodes[gen]['pf'] = pf
-		G.nodes[gen]['yearly'] = yearly
+		if fullData:
+			G.nodes[gen]['phases'] = phases
+			G.nodes[gen]['kv'] = kv
+			G.nodes[gen]['kw'] = kw
+			G.nodes[gen]['pf'] = pf
+			G.nodes[gen]['yearly'] = yearly
+
+	#new object=storage.battery_675 bus1=675.1.2.3 phases=3 kv=2.4017771198288433 kwrated=156.90958113076195 dispmode=follow kwhstored=347.59187092080566 kwhrated=347.59187092080566 %charge=100 %discharge=100 %effcharge=96 %effdischarge=96 %idlingkw=0 yearly=battery_675_shape
+	# Are there storage objects? If so, find them adn add them as nodes. Their location is the same as their bus.
+	storage = [x for x in tree if x.get('object', 'N/A').startswith('storage.')]
+	storage_names = [x['object'].split('.')[1] for x in storage if 'object' in x and x['object'].startswith('storage.')]
+	storage_bus1 = [x.split('.')[0] for x in [x['bus1'] for x in storage if 'bus1' in x]]
+
 	return G, pos
 
 def THD(filePath):

@@ -71,6 +71,8 @@ def run_downline_load_algorithm( modelDir, inputDict, outData ):
 			for dependent in get_dependents:
 				if dependent in kwFromGraph.keys() and objectTypesFromGraph[dependent] == 'load':
 					kwSum += float(kwFromGraph[dependent])
+				elif dependent in kwFromGraph.keys() and objectTypesFromGraph[dependent] == 'generator':
+					kwSum -= float(kwFromGraph[dependent])
 			buses_output[bus] = kwSum
 	downline_output = pd.DataFrame(list(buses_output.items()), columns=['busname', 'kw'] )
 	downline_end_time = time.time()
