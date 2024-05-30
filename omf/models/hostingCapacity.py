@@ -62,13 +62,14 @@ def run_downline_load_algorithm( modelDir, inputDict, outData ):
 	buses = opendss.get_all_buses( os.path.join( modelDir, 'downlineLoad.dss') )
 	buses_output = {}
 	kwFromGraph = nx.get_node_attributes(graph, 'kw')
+	objectTypesFromGraph = nx.get_node_attributes(graph, 'object')
 	# Check if they are buses
 	for bus in buses:
 		if bus in graph.nodes:
 			kwSum = 0
 			get_dependents = sorted(nx.descendants(graph, bus))
 			for dependent in get_dependents:
-				if dependent in kwFromGraph.keys():
+				if dependent in kwFromGraph.keys() and objectTypesFromGraph[dependent] == 'load':
 					kwSum += float(kwFromGraph[dependent])
 			buses_output[bus] = kwSum
 	downline_output = pd.DataFrame(list(buses_output.items()), columns=['busname', 'kw'] )
