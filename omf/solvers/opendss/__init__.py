@@ -381,7 +381,6 @@ def get_hosting_capacity_of_single_bus_multiprocessing(FILE_PATH:str, BUS_NAME:s
 		kw = lower_kw_bound + kw_step
 	return {'bus': BUS_NAME, 'max_kw': lower_kw_bound, 'reached_max': True, 'thermal_violation': thermal_violation, 'voltage_violation': voltage_violation}
 
-
 def check_hosting_capacity_of_single_bus_multiprocessing(FILE_PATH:str, BUS_NAME:str, kwValue: float, lock):
 	''' Identify if an amount of generation that is added at BUS_NAME exceeds ANSI A Band voltage levels. '''
 	fullpath = os.path.abspath(FILE_PATH)
@@ -427,6 +426,43 @@ def check_hosting_capacity_of_single_bus_multiprocessing(FILE_PATH:str, BUS_NAME
 	over_df = pd.read_csv(f'overloads.csv')
 	therm_violation = True if len(over_df) > 0 else False
 	return {'thermal_violation':therm_violation, 'voltage_violation':volt_violation}
+
+def multiprocessor_function( FILE_PATH, max_test_kw, lock, BUS_NAME):
+	with lock:
+		# print( "inside multiprocessor function" )
+		try:
+			single_output = get_hosting_capacity_of_single_bus_multiprocessing( FILE_PATH, BUS_NAME, max_test_kw, lock)
+			return single_output
+		except:
+			print(f'Could not solve hosting capacity for BUS_NAME={BUS_NAME}')
+
+def hosting_capacity_all(FNAME:str, max_test_kw:float=50000, BUS_LIST:list = None, multiprocess=False, cores: int=8):
+	''' Generate hosting capacity results for all_buses. '''
+	fullpath = os.path.abspath(FNAME)
+	if not BUS_LIST:
+		gen_buses = get_meter_buses(fullpath)
+	else:
+		gen_buses = BUS_LIST
+	gen_buses = list(set(gen_buses))
+	all_output = []
+	# print('GEN_BUSES', gen_buses)
+	if multiprocess == True:
+		with multiprocessing.Manager() as manager:
+			lock = manager.Lock()
+			pool = multiprocessing.Pool( processes=cores )
+			print(f'Running multiprocessor {len(gen_buses)} times with {cores} cores')
+			all_output.extend(pool.starmap(multiprocessor_function, [(fullpath, max_test_kw, lock, bus) for bus in gen_buses]))
+			print( "multiprocess all output: ", all_output)
+	elif multiprocess == False:
+		for bus in gen_buses:
+			try:
+				single_output = get_hosting_capacity_of_single_bus(fullpath, bus, max_test_kw)
+				print( "multiprocessor false single output: ", single_output )
+				all_output.append(single_output)
+			except:
+				print(f'Could not solve hosting capacity for BUS_NAME={bus}')
+	print( "multiprocessor false all_output: ", all_output )
+	return all_output
 
 # DEPRECATED
 def hosting_capacity_single_bus(FILE_PATH:str, kwSTEPS:int, kwValue:float, BUS_NAME:str, DEFAULT_KV:float = 2.14):
@@ -482,45 +518,6 @@ def hosting_capacity_single_bus(FILE_PATH:str, kwSTEPS:int, kwValue:float, BUS_N
 			return {'bus':BUS_NAME, 'max_kw':kwValue * step, 'reached_max':True, 'thermal_violation':therm_violation, 'voltage_violation':volt_violation}
 	# didn't hit violation, so report that.
 	return {'bus':BUS_NAME, 'max_kw':kwValue * step, 'reached_max':False, 'thermal_violation':therm_violation, 'voltage_violation':volt_violation}
-
-def multiprocessor_function( FILE_PATH, max_test_kw, lock, BUS_NAME):
-	with lock:
-		# print( "inside multiprocessor function" )
-		try:
-			single_output = get_hosting_capacity_of_single_bus_multiprocessing( FILE_PATH, BUS_NAME, max_test_kw, lock)
-			return single_output
-		except:
-			print(f'Could not solve hosting capacity for BUS_NAME={BUS_NAME}')
-
- 
-#Jenny
-def hosting_capacity_all(FNAME:str, max_test_kw:float=50000, BUS_LIST:list = None, multiprocess=False, cores: int=8):
-	''' Generate hosting capacity results for all_buses. '''
-	fullpath = os.path.abspath(FNAME)
-	if not BUS_LIST:
-		gen_buses = get_meter_buses(fullpath)
-	else:
-		gen_buses = BUS_LIST
-	gen_buses = list(set(gen_buses))
-	all_output = []
-	# print('GEN_BUSES', gen_buses)
-	if multiprocess == True:
-		with multiprocessing.Manager() as manager:
-			lock = manager.Lock()
-			pool = multiprocessing.Pool( processes=cores )
-			print(f'Running multiprocessor {len(gen_buses)} times with {cores} cores')
-			all_output.extend(pool.starmap(multiprocessor_function, [(fullpath, max_test_kw, lock, bus) for bus in gen_buses]))
-			print( "multiprocess all output: ", all_output)
-	elif multiprocess == False:
-		for bus in gen_buses:
-			try:
-				single_output = get_hosting_capacity_of_single_bus(fullpath, bus, max_test_kw)
-				print( "multiprocessor false single output: ", single_output )
-				all_output.append(single_output)
-			except:
-				print(f'Could not solve hosting capacity for BUS_NAME={bus}')
-	print( "multiprocessor false all_output: ", all_output )
-	return all_output
 
 def hosting_capacity_max(FNAME, GEN_BUSES, STEPS, KW):
 	''' Keep calculating hosting capacity, uniformly distributing generation, dropping the lowest capacity bus each time.
@@ -813,10 +810,13 @@ def dss_to_nx_fulldata( dssFilePath, tree=None, fullData = True ):
 	''' Combines dss_to_networkX and opendss.networkPlot together.
 
 	Creates a networkx directed graph from a dss files. If a tree is provided, build graph from that instead of the file.
-	Adds data to certain DSS node types ( loads )
+	Adds data to certain DSS node types
+
+	Load data
+	- bus1, phases, conn, kv, kw, kvar
 	
 	args:
-		filepath (str of file name):- dss file path
+		filepath ( PathLib path ):- dss file path
 		tree (list): None - tree representation of dss file
 	return:
 		A networkx graph of the circuit 
@@ -838,21 +838,43 @@ def dss_to_nx_fulldata( dssFilePath, tree=None, fullData = True ):
 		G.add_node(bus, pos=(float_x, float_y))
 		pos[bus] = (float_x, float_y)
 
-	# Add edges from lines
-	# new object=line.645646 bus1=645.2 bus2=646.2 phases=1 linecode=mtx603 length=300 units=ft
+	
 	# line.x <- is this the name?
+	# new object=line.l_1001_1002 bus1=bus1001.1.2.3 bus2=bus1002.1.2.3 phases=3 length=x units=ft linecode=x seasons=1 ratings=[400] normamps=400 emergamps=600
+	# new object=line.cb_101 bus1=bus1.1.2.3 bus2=bus1001.1.2.3 phases=3 switch=true r1=0.0001 r0=0.0001 x1=0 x0=0 c1=0 c0=0
+
+	# Add edges from lines
 	lines = [x for x in tree if x.get('object', 'N/A').startswith('line.')]
 	lines_bus1 = [x.split('.')[0] for x in [x['bus1'] for x in lines if 'bus1' in x]]
 	lines_bus2 = [x.split('.')[0] for x in [x['bus2'] for x in lines if 'bus2' in x]]
-	# lines_name = [x.split('.')[1] for x in [x['object'] for x in lines if 'object' in x]]
+	lines_name = [x.split('.')[1] for x in [x['object'] for x in lines if 'object' in x]]
+
+	# FullData of Lines
+
 	edges = []
-	for bus1, bus2 in zip(lines_bus1, lines_bus2 ):
-		edges.append( (bus1, bus2, {'color': 'blue'}) )
+	for bus1, bus2, name in zip( lines_bus1, lines_bus2, lines_name ):
+		edges.append( (bus1, bus2, {'color': 'blue', 'line_name': name}) )
 	G.add_edges_from( edges )
 
-	# Need to add data for lines
-	# some lines have "switch"
-	# How to add data when sometimes there sometimes not
+	# new object=transformer.reg1 buses=[650.1,rg60.1] phases=1 bank=reg1 xhl=0.01 kvas=[1666,1666] kvs=[2.4,2.4] %loadloss=0.01
+	transformers = [x for x in tree if x.get('object', 'N/A').startswith('transformer.')]
+	transformer_buses = [x['buses'] for x in transformers if 'buses' in x]
+	transformer_buses_names_split = [[prefix.split('.')[0].strip() for prefix in sublist.strip('[]').split(',')] for sublist in transformer_buses]
+	transformer_name = [x.split('.')[1] for x in [x['object'] for x in transformers if 'object' in x]]
+	transformer_edges = []
+	for buses, t_name in zip(transformer_buses_names_split, transformer_name):
+			# new object=transformer.t_3160 windings=3 buses=[bus3160.3.0,t_bus3160_l.1.0,t_bus3160_l.0.2] phases=1 xhl=2.76 xht=2.76 xlt=1.84 conns=[wye,wye,wye] kvs=[7.9677,0.12,0.12] kvas=[25,25,25] taps=[1,1,1] %rs=[0.7,1.4,1.4]
+			# [bus3160.3.0,t_bus3160_l.1.0,t_bus3160_l.0.2]
+		if len(buses) == 3:
+			pair1 = (buses[0], buses[1])
+			pair1 = (buses[0], buses[2])
+			if buses[0] and buses[1] and buses[2] in G.nodes:
+				transformer_edges.append ( (buses[0], buses[1], {'transformer_name': t_name}) )
+				transformer_edges.append ( (buses[0], buses[2], {'transformer_name': t_name}) )
+		elif len(buses) == 2:
+			if buses[0] and buses[1] in G.nodes: # If both buses exist
+				transformer_edges.append ( (buses[0], buses[1], {'transformer_name': t_name}) )
+	G.add_edges_from(transformer_edges)
 	
 	loads = [x for x in tree if x.get('object', 'N/A').startswith('load.')] # This is an orderedDict
 	load_names = [x['object'].split('.')[1] for x in loads if 'object' in x and x['object'].startswith('load.')]
@@ -863,14 +885,15 @@ def dss_to_nx_fulldata( dssFilePath, tree=None, fullData = True ):
 		G.add_edge( bus, load )
 		pos[load] = pos_tuple_of_bus
 
-	if fullData:	
+	if fullData:
 		# Attributes for all loads
 		load_phases = [x['phases'] for x in loads if 'phases' in x]
 		load_conn = [x['conn'] for x in loads if 'conn' in x]
 		load_kv = [x['kv'] for x in loads if 'kv' in x]
 		load_kw = [x['kw'] for x in loads if 'kw' in x]
 		load_kvar = [x['kvar'] for x in loads if 'kvar' in x]
-		for load, phases, conn, kv, kw, kvar in zip( load_names, load_phases, load_conn, load_kv, load_kw, load_kvar):
+		for load, bus, phases, conn, kv, kw, kvar in zip( load_names, load_bus, load_phases, load_conn, load_kv, load_kw, load_kvar):
+			G.nodes[load]['bus1'] = bus
 			G.nodes[load]['phases'] = phases
 			G.nodes[load]['conn'] = conn
 			G.nodes[load]['kv'] = kv
@@ -879,21 +902,6 @@ def dss_to_nx_fulldata( dssFilePath, tree=None, fullData = True ):
 
 	# need lines between buses and loads
 	# print( G.nodes )
-
-	# Need edges from bus --- transformer info ---> bus
-	# How to put transformers in with the same u and v buses
-	# new object=transformer.reg1 buses=[650.1,rg60.1] phases=1 bank=reg1 xhl=0.01 kvas=[1666,1666] kvs=[2.4,2.4] %loadloss=0.01
-	# new object=transformer.reg1 buses=[650.1,rg60.1] phases=1 bank=reg1 xhl=0.01 kvas=[1666,1666] kvs=[2.4,2.4] %loadloss=0.01
-	# new object=transformer.reg3 buses=[650.3,rg60.3] phases=1 bank=reg1 xhl=0.01 kvas=[1666,1666] kvs=[2.4,2.4] %loadloss=0.01
-	transformers = [x for x in tree if x.get('object', 'N/A').startswith('transformer.')]
-	transformer_buses = [x['buses'] for x in transformers if 'buses' in x]
-	transformer_buses_names_split = [[prefix.split('.')[0].strip() for prefix in sublist.strip('[]').split(',')] for sublist in transformer_buses]
-	transformer_name = [x.split('.')[1] for x in [x['object'] for x in transformers if 'object' in x]]
-	transformer_edges = []
-	for bus_pair, t_name in zip(transformer_buses_names_split, transformer_name):
-		if bus_pair[0] and bus_pair[1] in G.nodes: # If both buses exist
-			transformer_edges.append ( (bus_pair[0], bus_pair[1]) )
-	G.add_edges_from(transformer_edges)
 
 	# Check if there exists a line - would a transformer exist on an already existing line?
 	# Check if both buses exist
