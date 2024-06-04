@@ -201,7 +201,7 @@ def create_REopt_jl_jsonFile(modelDir, inputDict):
 			}
 	
 	## Add an Outage section if enabled
-	if inputDict['outage'] == 'Yes':
+	if inputDict['outage'] == True:
 		scenario['ElectricUtility'] = {
 			'outage_start_time_step': int(inputDict['outage_start_hour']),
 			'outage_end_time_step': int(inputDict['outage_start_hour'])+int(inputDict['outage_duration'])
@@ -410,6 +410,7 @@ def work(modelDir, inputDict):
 
 	## Run REopt.jl 
 	reopt_jl.run_reopt_jl(modelDir, 'reopt_input_scenario.json', outages=inputDict['outage'])
+	#reopt_jl.run_reopt_jl(modelDir, '/Users/astronobri/Documents/CIDER/scratch/reopt_input_scenario_26may2024_0258.json', outages=inputDict['outage'])
 	with open(pJoin(modelDir, 'results.json')) as jsonFile:
 		reoptResults = json.load(jsonFile)
 	outData.update(reoptResults) ## Update output file outData with REopt results data
@@ -462,15 +463,15 @@ def work(modelDir, inputDict):
 		PV = np.zeros_like(demand)
 	
 	if inputDict['BESS'] == 'Yes': ## BESS
-		#BESS = reoptResults['ElectricStorage']['storage_to_load_series_kw']
-		BESS = np.ones_like(demand) ## NOTE: Ad-hoc line used because BESS is not being built in REopt for some reason. Currently debugging 5/2024
+		BESS = reoptResults['ElectricStorage']['storage_to_load_series_kw']
 		grid_charging_BESS = reoptResults['ElectricUtility']['electric_to_storage_series_kw']
+		outData['chargeLevelBattery'] = reoptResults['ElectricStorage']['soc_series_fraction']
 
-		## NOTE: The following 3 lines of code are temporary; it reads in the SOC info from a static reopt test file 
-		## For some reason REopt is not producing BESS results so this is a workaround
-		with open(pJoin(__neoMetaModel__._omfDir,'static','testFiles','residential_reopt_results.json')) as f:
-			static_reopt_results = json.load(f)
-		outData['chargeLevelBattery'] = static_reopt_results['outputs']['ElectricStorage']['soc_series_fraction']
+		## NOTE: The following 3 lines of code read in the SOC info from a static reopt test file 
+		#with open(pJoin(__neoMetaModel__._omfDir,'static','testFiles','residential_reopt_results.json')) as f:
+		#	static_reopt_results = json.load(f)
+		#outData['chargeLevelBattery'] = static_reopt_results['outputs']['ElectricStorage']['soc_series_fraction']
+
 	else:
 		BESS = np.zeros_like(demand)
 		grid_charging_BESS = np.zeros_like(demand)
@@ -739,6 +740,11 @@ def work(modelDir, inputDict):
 	if (inputDict['utilityProgram']):
 		print('Considering utility DER sharing program \n')
 		
+		## Gather DERs from REopt and vbatDispatch
+		PVcost = float(inputDict['rateCompensation']) * np.sum(PV)
+		print('PV compensation: ', PVcost)
+
+
 		## Gather TOU rates
 		#latitude = float(inputDict['latitude'])
 		#longitude = float(inputDict['longitude'])
@@ -747,21 +753,21 @@ def work(modelDir, inputDict):
 		inputDict['longitude'] = -104.812599 ## Brighton, CO
 		rate_info = get_tou_rates(modelDir, inputDict)
 
-		## Extract "name" keys containing "TOU" or "time of use"
-		filtered_names = [item['name'] for item in rate_info['items'] if 'TOU' in item['name'] or 'time-of-use' in item['name'] or 'Time of Use' in item['name']]
+		## Look at all the "name" keys containing "TOU" or "time of use"
+		#filtered_names = [item['name'] for item in rate_info['items'] if 'TOU' in item['name'] or 'time-of-use' in item['name'] or 'Time of Use' in item['name']]
 		#for name in filtered_names: 
 		#	print(name)	## Print the filtered names
 
+		## Select one of the name keys (in this case, the residential TOU)
 		TOUdata = []
 		TOUname = 'Residential Time of Use'
-
 		for item in rate_info['items']:
 			if item['name'] == TOUname:
 				TOUdata.append(item)
 
-		#print(TOUdata)
+		print(TOUdata)
 
-		## NOTE: until the above section is working, use ad-hoc TOU rates
+		## NOTE: ad-hoc TOU rates were used when the rate_info was not working.
 		#tou_rates = get_tou_rates_adhoc()
 		#print(TOUdata[0])
 		
@@ -800,36 +806,15 @@ def work(modelDir, inputDict):
 		(2880, 3624), (3624, 4344), (4344, 5088), (5088, 5832), 
 		(5832, 6552), (6552, 7296), (7296, 8016), (8016, 8760)]
 		dayHours = generate_day_hours(monthHours) ## Generate (start, stop) hours for each day
-		dispatch_schedule = create_dispatch_schedule(temperatures, dayHours)
 
-		## Plot dispatch schedule
-		import matplotlib.pyplot as plt
-		def plot_dispatch_schedule(dispatch_schedule):
-			plt.figure(figsize=(12, 4))
-			plt.plot(dispatch_schedule)
-			plt.xlabel("Hour of the Year")
-			plt.ylabel("Dispatch")
-			plt.title("Dispatch Schedule")
-			plt.grid(True)
-			plt.show()
-		plot_dispatch_schedule(dispatch_schedule)
 
 		########## Determine area under the curve ##########
 		## Typical on-peak and off-peak hours during hotter months (March to August)
 		on_peak_hours = range(14, 20)  ## On-peak hours typically from 2:00 PM to 8:00 PM
 		off_peak_hours = list(range(0, 6)) + list(range(22, 24))  ## Off-peak hours typically from 10:00 PM to 6:00 AM
-
-		#print("Typical On-Peak Hours (24-hour format):", list(on_peak_hours))
-		#print("Typical Off-Peak Hours (24-hour format):", off_peak_hours)
 		
-		## Get solar demand 
-		solarDemand = solar_demand(PV, dispatch_schedule, on_peak_hours, off_peak_hours)
-		#print(solarDemand)
 		
 		########## Apply rate compensations to DERs deployed ##########
-		## NOTE: the rateCompensation, fixedCompensation, and fixedCompensationFrequency variables are not used yet
-		total_cost = total_solar_cost(solarDemand, tou_rates)  ## Calculate the total solar cost
-		print("Total cost for solar demand based on TOU rates: ${:.2f}".format(total_cost))
 
 		########## Plot the peak shave schedule? ##########
 
@@ -887,10 +872,9 @@ def new(modelDir):
 		'unitUpkeepCost': '5',
 
 		## DER Program Design inputs:
-		'utilityProgram': 'Yes', ## unit: $/kWh
-		'rateCompensation': '0', ## unit: $
-		'fixedCompensation': '0', ## unit: $
-		'fixedCompensationFrequency': '0', ## 0=one-time only, 1=yearly
+		'utilityProgram': 'Yes',
+		'rateCompensation': '0.1', ## unit: $/kWh
+		'maxBESSDischarge': '80', ## unit: % (Percent of total BESS)
 	}
 	return __neoMetaModel__.new(modelDir, defaultInputs)
 
