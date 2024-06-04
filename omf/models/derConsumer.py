@@ -215,7 +215,7 @@ def create_REopt_jl_jsonFile(modelDir, inputDict):
 	return scenario
 
 
-def get_tou_rates(modelDir, lat, lon): ## TODO: change lat,lon to inputDict once model is working
+def get_tou_rates(modelDir, inputDict): 
 	'''
 	Function that pulls rate information from the OEDI utility rate database via API functionality.
 
@@ -236,10 +236,11 @@ def get_tou_rates(modelDir, lat, lon): ## TODO: change lat,lon to inputDict once
 	params = {
 		'version': '3',
 		'format': 'json',
-		'lat': lat,
-		'lon': lon,
+		'lat': inputDict['latitude'],
+		'lon': inputDict['longitude'],
 		'api_key': api_key,
-		'getpage': '5b311c595457a3496d8367be',
+		'detail': 'full',
+		#'getpage': '5b311c595457a3496d8367be', ## Residential TOU
 		}
 	
 	try:
@@ -741,28 +742,41 @@ def work(modelDir, inputDict):
 		## Gather TOU rates
 		#latitude = float(inputDict['latitude'])
 		#longitude = float(inputDict['longitude'])
-		## NOTE: Temporarily use the lat/lon for a utility that has TOU rates specifically
-		latitude = 39.986771 
-		longitude = -104.812599 ## Brighton, CO
-		rate_info = get_tou_rates(modelDir, latitude, longitude) ## NOTE: lan/lon will be replaced by inputDict
+		## NOTE: Temporarily override lat/lon for a utility that has TOU rates specifically
+		inputDict['latitude'] = 39.986771 
+		inputDict['longitude'] = -104.812599 ## Brighton, CO
+		rate_info = get_tou_rates(modelDir, inputDict)
 
 		## Extract "name" keys containing "TOU" or "time of use"
 		filtered_names = [item['name'] for item in rate_info['items'] if 'TOU' in item['name'] or 'time-of-use' in item['name'] or 'Time of Use' in item['name']]
-		for name in filtered_names: ## Print the filtered names
-			print(name)	
+		#for name in filtered_names: 
+		#	print(name)	## Print the filtered names
 
 		TOUdata = []
 		TOUname = 'Residential Time of Use'
-		TOUlabel = '5b311c595457a3496d8367be'
 
 		for item in rate_info['items']:
 			if item['name'] == TOUname:
 				TOUdata.append(item)
 
-		print(TOUdata)
+		#print(TOUdata)
 
 		## NOTE: until the above section is working, use ad-hoc TOU rates
-		tou_rates = get_tou_rates_adhoc()
+		#tou_rates = get_tou_rates_adhoc()
+		#print(TOUdata[0])
+		
+		## Tiered Energy Usage Charge Structure. Each element in the top-level array corresponds to one period 
+			#(see energyweekdayschedule and energyweekendschedule) and each array element within a period corresponds 
+			#to one tier. Indices are zero-based to correspond with energyweekdayschedule and energyweekendschedule entries: 
+			#[[{"max":(Decimal),"unit":(Enumeration),"rate":(Decimal),"adj":(Decimal),"sell":(Decimal)},...],...]
+		energyRateStructure = TOUdata[0]['energyratestructure']
+		
+		## Tiered Energy Usage Charge Structure Weekday Schedule. Value is an array of arrays. The 12 top-level arrays correspond 
+			#to a month of the year. Each month array contains one integer per hour of the weekday from 12am to 11pm, and the
+			#integer corresponds to the index of a period in energyratestructure.
+		energyWeekdaySchedule = TOUdata[0]['energyweekdayschedule']
+		energyWeekendSchedule = TOUdata[0]['energyweekendschedule']
+		
 
 		'''
 		## NOTE: The following dict is not being used because the the API is not returning these variables yet
@@ -839,8 +853,9 @@ def new(modelDir):
 		'created': str(datetime.datetime.now()),
 
 		## REopt inputs:
+		## NOTE: Variables are strings as dictated by the html input options
 		'latitude':  '39.532165', ## Rivesville, WV
-		'longitude': '-80.120618', ## TODO: Should these be strings or floats? Update - strings.
+		'longitude': '-80.120618', 
 		'year' : '2018',
 		'analysis_years' : '25', 
 		'urdbLabel': '643476222faee2f0f800d8b1', ## Rivesville, WV - Monongahela Power
