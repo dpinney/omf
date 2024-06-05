@@ -13,6 +13,7 @@ import pandas as pd
 import plotly.graph_objs as go
 import plotly.utils
 import requests
+import matplotlib.pyplot as plt
 
 # OMF imports
 from omf.models import __neoMetaModel__
@@ -26,7 +27,7 @@ tooltip = ('The derConsumer model evaluates the financial costs of controlling b
 		   Laboratory (NREL) Renewable Energy Optimization Tool (REopt) and the OMF virtual battery dispatch \
 		   module (vbatDispatch).')
 modelName, template = __neoMetaModel__.metadata(__file__)
-hidden = True ## Keep the model hidden=True during active development
+hidden = False ## Keep the model hidden=True during active development
 
 def create_timestamps(start_time='2017-01-01',end_time='2017-12-31 23:00:00',arr_size=8760):
 	''' 
@@ -192,11 +193,13 @@ def create_REopt_jl_jsonFile(modelDir, inputDict):
 	if inputDict['BESS'] == 'Yes':
 		scenario['ElectricStorage'] = {
 			##TODO: Add options here, if needed
+			#scenario['ElectricStorage']['size_kw'] = 2
 			}
+		
 
 	## Add a Diesel Generator section if enabled
 	if inputDict['generator'] == 'Yes':
-		scenario['generator'] = {
+		scenario['Generator'] = {
 			##TODO: Add options here, if needed
 			}
 	
@@ -276,119 +279,6 @@ def get_tou_rates_adhoc():
 	}
 	return tou_rates
 
-def generate_day_hours(monthHours):
-	'''
-	Create an array of start and stop hours for each day if given an array of start/stop hours for each month.
-
-	** Inputs
-	monthHours: (list) List of (start, stop) hours for each month in a year's worth of hourly data (length 8760)
-	
-	** Outputs
-	dayHours: (list) List of (start, stop) hours for each day
-	'''
-
-	dayHours = []
-	for start_hour, end_hour in monthHours:
-		for day_start in range(start_hour, end_hour, 24):
-			day_end = min(day_start + 24, end_hour)
-			dayHours.append((day_start, day_end))
-	return dayHours
-
-def create_dispatch_schedule(temperature_array, dayHours):
-	'''
-	Create a dispatch schedule for solar, battery, and grid technologies for the span of a year. \
-	The max temperature is determined every day during hotter months (March-August) and solar is \
-	dispatched for two hours starting on the start hour. For the rest of the colder months, the \
-	same is done but for the min temperature for that day. NOTE: normally, there would be 2 minimum \
-	peak temperatures in the winter months where DERs would be dispatched, but only 1 is modeled \
-	here for simplicity. The function returns a list of strings of either 'Grid', 'Battery', or 'Solar' \
-	to signify what technology is dispatched at that hour.
-
-	** Inputs
-	temperature_array: (arr; length 8760) Hourly temperature data for a year
-	dayHours: (list) List of (start, stop) times for each hour in a year
-
-	** Outputs
-	dispatch_schedule (list): List of strings that say either 'Grid', 'Battery', or 'Solar' to \
-		signify which technology is dispatched at that start hour. The duration of dispatch is \
-		at least 2 hours.
-
-	'''
-	## Initialize a dispatch schedule with "Grid" for all hours
-	dispatch_schedule = ["Grid"] * len(temperature_array)  
-
-	## Assign hourly dispatch according to the max temp in hotter months and min temp in colder months
-	for start_hour, end_hour in dayHours:
-		day_temperatures = temperature_array[start_hour:end_hour]
-		max_temp = max(day_temperatures)
-		min_temp = min(day_temperatures)
-
-		## March to August (hotter months)
-		if start_hour in range(1416, 5832):  
-			for i in range(start_hour, end_hour):
-				if temperature_array[i] == max_temp: ## max temperature peak for dispatch
-					for j in range(i, min(i + 2, end_hour)): ## Duration of dispatch >2hrs
-						dispatch_schedule[j] = "Solar"
-		
-		## Other months (colder months)
-		else:  
-			for i in range(start_hour, end_hour):
-				if temperature_array[i] == min_temp: ## min temperature peak for dispatch
-					for j in range(i, min(i + 2, end_hour)): ## Duration of dispatch >2hrs
-						dispatch_schedule[j] = "Battery"
-
-	return dispatch_schedule
-
-def solar_demand(PV, hourDispatch, on_peak_hours, off_peak_hours):
-	'''
-	Extract solar demand while keeping track of on-peak or off-peak hours.
-
-	** Inputs
-	PV: (list) List of PV dispatch values (from REopt).
-	hour_types: (list) List indicating the type of each hour, where 'Solar' signifies solar demand.
-	on_peak_hours: (range) Range representing on-peak hours.
-	off_peak_hours: (list) List representing off-peak hours.
-
-	** Output
-	solar_demand: (list) List of tuples containing (PV value, hour_of_year, peak_type).
-	'''
-
-	solar_demand = []
-
-	for i, dispatchType in enumerate(hourDispatch):
-		if dispatchType == 'Solar':
-			## Determine the peak type (on-peak or off-peak)
-			peak_type = 'On-Peak' if i % 24 in on_peak_hours else 'Off-Peak'
-
-			## Append to the solar_demand list as a tuple
-			solar_demand.append((PV[i], i, peak_type))
-			#print(PV[i])
-
-	return solar_demand
-
-def total_solar_cost(solar_demand, tou_rates):
-	'''
-	Calculate the total cost for solar demand based on the TOU rates.
-
-	** Inputs
-	solar_demand: (list) List of tuples containing (demand_value, hour_of_year, peak_type).
-	tou_rates: (dict) Dictionary containing the TOU rates for summer_on_peak and summer_off_peak hours.
-
-	** Output
-	total_cost: (float) Total cost for solar demand based on TOU rates.
-	'''
-
-	## Initialize total cost
-	total_cost = 0.0
-
-	## Loop through each tuple in solar_demand
-	for demand_value, hour_of_year, peak_type in solar_demand:
-		## Determine the rate based on the peak type
-		rate = tou_rates['summer_on_peak'] if peak_type == 'On-Peak' else tou_rates['summer_off_peak']
-		## Add the cost for this hour
-		total_cost += demand_value * rate
-
-	return total_cost
 
 def work(modelDir, inputDict):
 	''' Run the model in its directory. '''
@@ -456,12 +346,15 @@ def work(modelDir, inputDict):
 	## DER Overview plot
 	showlegend = True # either enable or disable the legend toggle in the plot
 	grid_to_load = reoptResults['ElectricUtility']['electric_to_load_series_kw']
+	if 'Generator' in reoptResults:
+		generator = reoptResults['Generator']['electric_to_load_series_kw']
 
 	if inputDict['PV'] == 'Yes': ## PV
 		PV = reoptResults['PV']['electric_to_load_series_kw']
 	else:
 		PV = np.zeros_like(demand)
 	
+	## TODO: Change this to instead check for BESS in the output file, rather than input
 	if inputDict['BESS'] == 'Yes': ## BESS
 		BESS = reoptResults['ElectricStorage']['storage_to_load_series_kw']
 		grid_charging_BESS = reoptResults['ElectricUtility']['electric_to_storage_series_kw']
@@ -503,6 +396,18 @@ def work(modelDir, inputDict):
 							mode='none',
 							fill='tozeroy',
 							name='BESS Serving Load (kW)',
+							fillcolor='rgba(0,137,83,1)',
+							showlegend=showlegend))
+		fig.update_traces(fillpattern_shape='/', selector=dict(name='BESS Serving Load (kW)'))
+
+	## Generator serving load piece
+	if (inputDict['generator'] == 'Yes'):
+		fig.add_trace(go.Scatter(x=timestamps,
+							y=np.asarray(generator),
+							yaxis='y1',
+							mode='none',
+							fill='tozeroy',
+							name='Generator Serving Load (kW)',
 							fillcolor='rgba(0,137,83,1)',
 							showlegend=showlegend))
 		fig.update_traces(fillpattern_shape='/', selector=dict(name='BESS Serving Load (kW)'))
@@ -741,9 +646,8 @@ def work(modelDir, inputDict):
 		print('Considering utility DER sharing program \n')
 		
 		## Gather DERs from REopt and vbatDispatch
-		PVcost = float(inputDict['rateCompensation']) * np.sum(PV)
-		print('PV compensation: ', PVcost)
-
+		#PVcost = float(inputDict['rateCompensation']) * np.sum(PV)
+		#print('PV compensation: ', PVcost)
 
 		## Gather TOU rates
 		#latitude = float(inputDict['latitude'])
@@ -775,43 +679,196 @@ def work(modelDir, inputDict):
 			#(see energyweekdayschedule and energyweekendschedule) and each array element within a period corresponds 
 			#to one tier. Indices are zero-based to correspond with energyweekdayschedule and energyweekendschedule entries: 
 			#[[{"max":(Decimal),"unit":(Enumeration),"rate":(Decimal),"adj":(Decimal),"sell":(Decimal)},...],...]
-		energyRateStructure = TOUdata[0]['energyratestructure']
-		
-		## Tiered Energy Usage Charge Structure Weekday Schedule. Value is an array of arrays. The 12 top-level arrays correspond 
-			#to a month of the year. Each month array contains one integer per hour of the weekday from 12am to 11pm, and the
-			#integer corresponds to the index of a period in energyratestructure.
-		energyWeekdaySchedule = TOUdata[0]['energyweekdayschedule']
-		energyWeekendSchedule = TOUdata[0]['energyweekendschedule']
-		
+		#energyRateStructure = TOUdata[0]['energyratestructure']
+		#energyWeekdaySchedule = TOUdata[0]['energyweekdayschedule']
+		#energyWeekendSchedule = TOUdata[0]['energyweekendschedule']
 
-		'''
-		## NOTE: The following dict is not being used because the the API is not returning these variables yet
-		rate_info = {
-			'rate_name': data['items'][0]['name'], ## Rate name
-			'fixed_monthly_charge': data['items'][0]['fixedmonthlycharge'], ## Fixed monthly charge ($)
-			'demand_rate_unit': data['items'][0]['demandrateunit'], ## Time of Use Rate Units
-			'demand_rate_structure': data['items'][0]['demandratestructure'], ## Time of Use Demand Charge Structure
-			'demand_weekday_schedule': data['items'][0]['demandweekdayschedule'],
-			'demand_weekend_schedule': data['items'][0]['demandweekendschedule'],
-			'flat_demand_structure': data['items'][0]['flatdemandstructure'],
-			'flat_demand_months': data['items'][0]['flatdemandmonths'],
-			'flat_demand_unit': data['items'][0]['flatdemandunit']
-		}
-		'''
 
-		########## Generate peak shave schedule ##########
+		PV_series = pd.Series(PV, index=timestamps)
+		demand_series = pd.Series(demand, index=timestamps)
+		temperature_series = pd.Series(temperatures, index=timestamps)
+		BESS_series = pd.Series(BESS, index=timestamps)
+		grid_serving_load_series = pd.Series(grid_to_load, index=timestamps)
 
-		## List of (start, stop) hours for each month in a year
-		monthHours = [(0, 744), (744, 1416), (1416, 2160), (2160, 2880), 
-		(2880, 3624), (3624, 4344), (4344, 5088), (5088, 5832), 
-		(5832, 6552), (6552, 7296), (7296, 8016), (8016, 8760)]
-		dayHours = generate_day_hours(monthHours) ## Generate (start, stop) hours for each day
+		## Function to model PV generation based on temperature
+		def model_pv_generation(temperature, pv_capacity):
+			temperature_coefficient = -0.004  ## temperature coefficient for PV efficiency
+			standard_temp = 25  ## Some arbitrary standard test temperature in Celsius
+			efficiency_factor = 1 + temperature_coefficient * (temperature - standard_temp)
+			return pv_capacity * efficiency_factor * np.maximum(0, np.sin(np.linspace(0, np.pi, len(temperature))))
+
+		## Function to create TOU schedule based on the given OEDI utility energy schedule
+		def create_tou_schedule(energy_schedule):
+			tou_schedule = []
+			for month in range(12):
+				for hour in range(24):
+					tou_schedule.append({
+						'Month': month + 1,
+						'Hour': hour,
+						'TOU Period': energy_schedule[month][hour]
+					})
+			return pd.DataFrame(tou_schedule)
+
+		## Function to get TOU rate based on TOU schedule
+		def calc_tou_rate(timestamp, tou_schedules, tou_structure):
+			month = timestamp.month
+			hour = timestamp.hour
+			day_of_week = timestamp.weekday()
+
+			## Weekdays
+			if day_of_week < 5: 
+				tou_period = tou_schedules['weekday'].loc[(tou_schedules['weekday']['Month'] == month) & (tou_schedules['weekday']['Hour'] == hour), 'TOU Period'].values[0]
+			
+			## Weekends
+			else:
+				tou_period = tou_schedules['weekend'].loc[(tou_schedules['weekend']['Month'] == month) & (tou_schedules['weekend']['Hour'] == hour), 'TOU Period'].values[0]
+
+			tou_rate = tou_structure[tou_period][0]['rate']
+			return tou_rate, tou_period
+
+		## Create weekday and weekend TOU schedules
+		weekday_tou_schedule = create_tou_schedule(TOUdata[0]['energyweekdayschedule'])
+		weekend_tou_schedule = create_tou_schedule(TOUdata[0]['energyweekendschedule'])
+
+		## Combine the weekday and weekend schedules
+		tou_schedules = {'weekday': weekday_tou_schedule, 'weekend': weekend_tou_schedule}
+		tou_structure = TOUdata[0]['energyratestructure']
+		demand_rate = TOUdata[0]['energyratestructure'][0][0]['rate']
+		fixed_monthly_charge = TOUdata[0]['fixedmonthlycharge']
+		der_compensation_rate = float(inputDict['rateCompensation'])
+
+		## Model PV generation
+		#PV_series = model_pv_generation(temperature_series, PV_capacity)
+		#PV_series = pd.Series(PV_series, index=timestamps)
+		## NOTE: just use REopt's suggested PV for now?
+
+		## Create dataframe to store the schedule
+		schedule = pd.DataFrame({
+			'Solar Generation (kW)': PV_series,
+			'Household Demand (kW)': demand_series,
+			'Grid Serving Load (kW)': np.zeros(len(timestamps)),  ## Placeholder; will get updated in the loop
+			'Battery State of Charge (kWh)': np.zeros(len(timestamps)),  ## Placeholder
+		}, index=timestamps)
+
+		## BESS parameters
+		## TODO: Make these inputs on the HTML side if keeping
+		battery_soc = 0  ## Initial battery state of charge
+		battery_capacity = reoptResults['ElectricStorage']['size_kwh'] 
+		max_utility_usage_percentage = float(inputDict['maxBESSDischarge'])  ## Up to80% of the total battery charge
+		max_utility_usage = battery_capacity * max_utility_usage_percentage
+		battery_max_charge_rate = 2  ## kW
+		battery_max_discharge_rate = 2  ## kW
+
+		## Initial parameters to be updated in loop
+		total_economic_benefit = 0 
+		max_demand = 0 
+		total_energy_cost = 0  
+		total_der_compensation = 0 
+
+		for i in range(1, len(timestamps)):
+			timestamp = timestamps[i]
+			tou_rate, tou_period = calc_tou_rate(timestamp, tou_schedules, tou_structure)
+
+			## Calculate the net load that needs to be served by the grid or BESS
+			net_load = demand_series[i] - PV_series[i]
+
+			## On-peak hours
+			if tou_period == 1: ##NOTE: is this always true for all rates?
+				if net_load > 0:
+					## Discharge BESS during peak times to avoid high grid costs
+					discharge = min(battery_max_discharge_rate, net_load, max_utility_usage)
+					battery_soc = max(0, battery_soc - discharge)
+					utility_usage = net_load - discharge
+					economic_benefit = discharge * tou_rate
+					der_compensation = discharge * der_compensation_rate  
+				else:
+					## Store any excess solar in the BESS
+					excess_solar = -net_load
+					charge = min(battery_max_charge_rate, excess_solar)
+					battery_soc = min(battery_capacity, battery_soc + charge)
+					utility_usage = excess_solar - charge
+					economic_benefit = 0  ## Charging
+					der_compensation = 0  ## Charging
+			
+			## Off-peak 
+			else:  
+				if net_load > 0:
+					## Buy energy from the grid at a lower cost
+					utility_usage = net_load
+					economic_benefit = 0  ## Buying from grid
+					der_compensation = 0  ## Not using DERs
+				else:
+					## Store any excess solar in the BESS or sell to the grid
+					excess_solar = -net_load
+					charge = min(battery_max_charge_rate, excess_solar)
+					battery_soc = min(battery_capacity, battery_soc + charge)
+					utility_usage = excess_solar - charge
+					economic_benefit = charge * tou_rate  ## Benefit from charging during off-peak
+					der_compensation = charge * der_compensation_rate 
+
+			## Update total economic benefit, total energy cost, total DER compensation, and max demand
+			total_economic_benefit += economic_benefit
+			total_energy_cost += utility_usage * tou_rate
+			total_der_compensation += der_compensation
+			max_demand = max(max_demand, demand_series[i] + utility_usage)
+
+			## Update battery state of charge and grid serving load placeholders
+			schedule.loc[timestamp, 'Battery State of Charge (kWh)'] = battery_soc
+			schedule.loc[timestamp, 'Grid Serving Load (kW)'] = utility_usage
+
+		## Calculate demand cost including fixed monthly charge
+		demand_cost = max_demand * demand_rate + fixed_monthly_charge
+
+		## Calculate total compensation
+		total_compensation = total_economic_benefit - demand_cost + total_der_compensation
+
+		## Plot Solar Generation and Household Consumption
+		plt.figure(figsize=(10, 6))
+		plt.plot(schedule.index, schedule['Solar Generation (kW)'], label='Solar Generation')
+		plt.plot(schedule.index, schedule['Household Demand (kW)'], label='Household Demand')
+		plt.xlabel('Time')
+		plt.ylabel('Power (kW)')
+		plt.title('Solar Generation vs Household Consumption')
+		plt.legend()
+		plt.grid(True)
+		#plt.show()
+
+		## Plot Battery State of Charge
+		plt.figure(figsize=(10, 6))
+		plt.plot(schedule.index, schedule['Battery State of Charge (kWh)'])
+		plt.xlabel('Time')
+		plt.ylabel('Battery State of Charge (kWh)')
+		plt.title('Battery State of Charge over Time')
+		plt.grid(True)
+		#plt.show()
+
+		## Plot Grid Serving Load
+		plt.figure(figsize=(10, 6))
+		plt.plot(schedule.index, schedule['Grid Serving Load (kW)'])
+		plt.xlabel('Time')
+		plt.ylabel('Grid Serving Load (kW)')
+		plt.title('Grid Serving Load over Time')
+		plt.grid(True)
+		#plt.show()
+
+		## Plot Total Compensation
+		plt.figure(figsize=(8, 5))
+		plt.bar(['Total'], [total_compensation], color='blue')
+		plt.xlabel('Total Compensation')
+		plt.ylabel('Amount ($)')
+		plt.title('Total Compensation for DER Contribution')
+		plt.grid(True)
+		#plt.show()
+
+		print(f"Total Energy Cost: ${total_energy_cost:.2f}")
+		print(f"Total DER Compensation: ${total_der_compensation:.2f}")
+		print(f"Total Compensation: ${total_compensation:.2f}")
+
+
+
 
 
 		########## Determine area under the curve ##########
-		## Typical on-peak and off-peak hours during hotter months (March to August)
-		on_peak_hours = range(14, 20)  ## On-peak hours typically from 2:00 PM to 8:00 PM
-		off_peak_hours = list(range(0, 6)) + list(range(22, 24))  ## Off-peak hours typically from 10:00 PM to 6:00 AM
 		
 		
 		########## Apply rate compensations to DERs deployed ##########
@@ -853,7 +910,7 @@ def new(modelDir):
 		'generator': 'No',
 		'outage': True,
 		'outage_start_hour': '4637',
-		'outage_duration': '3',
+		'outage_duration': '23',
 
 		## vbatDispatch inputs:
 		'load_type': '2', ## Heat Pump
@@ -874,7 +931,7 @@ def new(modelDir):
 		## DER Program Design inputs:
 		'utilityProgram': 'Yes',
 		'rateCompensation': '0.1', ## unit: $/kWh
-		'maxBESSDischarge': '80', ## unit: % (Percent of total BESS)
+		'maxBESSDischarge': '0.80', ## Between 0 and 1 (Percent of total BESS capacity) #TODO: Fix the HTML input for this
 	}
 	return __neoMetaModel__.new(modelDir, defaultInputs)
 

@@ -236,7 +236,7 @@
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Maximum BESS discharge (%)<span class="classic">The maximum percentage of BESS total charge used for discharging. Most programs designate up to 80% of total charge, leaving the member with at least 20% charge.</span></label>
-				<input type="text" id="maxBESSDischarge" name="maxBESSDischarge" value="{{allInputDataDict.maxBESSDischarge}}" pattern="^\d+\.?\d*?$" min="0" required="required"/>
+				<input type="text" id="maxBESSDischarge" name="maxBESSDischarge" value="{{allInputDataDict.maxBESSDischarge}}" pattern="^\d+\.?\d*?$" min="0" max="1" required="required"/>
 			</div>
 			
 
