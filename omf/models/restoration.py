@@ -492,18 +492,27 @@ def outageIncidenceGraph(customerOutageData, outputTimeline, startTime, numTimeS
 			Sum_wi_ni = np.add(Sum_wi_ni, wi_ni)
 		indivWeightedOI = np.around((100*Sum_wi_ni/Sum_wi),3).tolist()
 		return indivWeightedOI
-	
+	def startAt0(inList):
+		''' If a list doesn't start at 0, insert a 0 at the 0th position.
+			Modifies the original input list and also returns it.'''
+		if startTime != 0:
+			inList.insert(0,0)
+		return inList
+
 	# Calculate weighted outage incidence based on individually assigned weights
 	with open(loadPriorityFilePath) as inFile:
-		loadWeights = json.load(inFile)
+		loadWeights = {k:float(v) for k,v in json.load(inFile).items()}
+
 	indivWeightedOI = calcWeightedOI(loadWeights)
-	
+
+
+	startAt0(timeList)
 	mgOIFigures = {}
 	for targetID in mgIDs:
-		mgLoadMask = {load:(1 if id == targetID else 0) for (load,id) in loadMgDict.items()}
+		mgLoadMask = 	{load:(1 if id == targetID else 0) for (load,id) in loadMgDict.items()}
 		mgLoadWeights = {load:(val*loadWeights.get(load,1)) for (load,val) in mgLoadMask.items()}
-		mgOI = calcWeightedOI(mgLoadMask)
-		mgOIWeighted = calcWeightedOI(mgLoadWeights)
+		mgOI = 			startAt0(calcWeightedOI(mgLoadMask))
+		mgOIWeighted = 	startAt0(calcWeightedOI(mgLoadWeights))
 		mgOIFigures[targetID] = go.Figure()
 		mgOIFigures[targetID].add_trace(go.Scatter(
 			x=timeList,
@@ -533,6 +542,9 @@ def outageIncidenceGraph(customerOutageData, outputTimeline, startTime, numTimeS
 			title=f'Microgrid {targetID}',
 			legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1))
 
+	#If start is not at time 0, show that outage incidence at time 0 would be 0%
+	startAt0(outageIncidence)
+	startAt0(indivWeightedOI)
 	outageIncidenceFigure = go.Figure()
 	outageIncidenceFigure.add_trace(go.Scatter(
 		x=timeList,
@@ -632,7 +644,6 @@ def runMicrogridControlSim(modelDir, solFidelity, eventsFilename, loadPriorityFi
 
 	lpFile = loadPriorityFile if loadPriorityFile != None else ''
 	mgFile = microgridTaggingFile if microgridTaggingFile != None else ''
-
 
 	PowerModelsONM.build_settings_file(
 		circuitPath=pJoin(modelDir,'circuit.dss'),
@@ -774,6 +785,8 @@ def graphMicrogrid(modelDir, pathToOmd, profit_on_energy_sales, restoration_cost
 	loadsShed = []
 	cumulativeLoadsShed = []
 	startTime = 1
+	if type(simTimeStepsRaw[0]) == str:
+		raise Exception("ERROR - Simulation timesteps are datetime strings in output.json. They need to be floats representing hours")
 	simTimeSteps = [float(i)+startTime for i in simTimeStepsRaw]
 	timestep = startTime
 	# timestep = 0
@@ -822,7 +835,7 @@ def graphMicrogrid(modelDir, pathToOmd, profit_on_energy_sales, restoration_cost
 			powerflowOld = powerflow[timestep-startTime]
 		else:
 			powerflowNew = powerflow[timestep-startTime]
-			for generator in list(powerflowNew['generator'].keys()):
+			for generator in list(powerflowNew.get('generator',{}).keys()):
 				entryNew = powerflowNew['generator'][generator]['real power setpoint (kW)'][0]
 				if generator in list(powerflowOld['generator'].keys()):
 					entryOld = powerflowOld['generator'][generator]['real power setpoint (kW)'][0]
