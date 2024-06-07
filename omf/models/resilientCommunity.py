@@ -651,6 +651,26 @@ def getPercentile(loads, columnName):
     for i, (k,v) in enumerate(loads.items()):
         loads[k][new_str] = round(result[i],2)
 
+def coordCheck(long, lat, latlonList):
+    point = Point(long, lat)
+
+    for k,v in latlonList.items():
+        coords, geoType = v[0], v[1]
+
+        ## Need to figure out when we are dealing with a multipolygon or polygon list
+
+        if geoType == 'Polygon':
+            poly = Polygon(coords)
+            
+            if poly.intersects(point):
+                return k
+        else:
+            for i in coords:
+                if poly.intersects(point):
+                    return k
+
+    return ''
+
 def getDownLineLoadsEquipment(pathToOmd,nriGeoJson, equipmentList):
 
     '''
@@ -665,6 +685,7 @@ def getDownLineLoadsEquipment(pathToOmd,nriGeoJson, equipmentList):
     tracts = {}
     tractData = []
     geos = []
+    lon_lat = {}
     cols = ['TRACT','BUILDVALUE','AGRIVALUE','EAL_VALT','EAL_VALB','EAL_VALP','EAL_VALA','SOVI_SCORE','SOVI_RATNG','RESL_RATNG','RESL_VALUE','AVLN_AFREQ','CFLD_AFREQ','CWAV_AFREQ','DRGT_AFREQ','ERQK_AFREQ','HAIL_AFREQ','HWAV_AFREQ','HRCN_AFREQ','ISTM_AFREQ','LNDS_AFREQ','LTNG_AFREQ','RFLD_AFREQ','SWND_AFREQ','TRND_AFREQ','TSUN_AFREQ','VLCN_AFREQ','WFIR_AFREQ','WNTW_AFREQ']
     for ob in omd.get('tree', {}).values():
         obType = ob['object']
@@ -685,11 +706,20 @@ def getDownLineLoadsEquipment(pathToOmd,nriGeoJson, equipmentList):
             loads[key]["base crit score"]= ((math.sqrt((kw * kw) + (kvar * kvar) ))/ (5)) * 4
 
 
-            
-            lat = float(ob['latitude'])
             long = float(ob['longitude'])
-            
-            tract = findCensusTract(lat, long)
+            lat = float(ob['latitude'])
+
+            if lon_lat:
+                check = coordCheck(long,lat, lon_lat)
+                if check:
+                    svi_score = round(float(tracts.get(tract)['SOVI_SCORE']),2)
+                    loads[key]["community crit score"] = round((((math.sqrt((kw * kw) + (kvar * kvar) ))/ (5)) * 4) *  svi_score,2)
+                    loads[key]['SOVI_SCORE'] = svi_score
+                    continue
+                else:
+                    tract = findCensusTract(lat,long)
+            else:
+                tract = findCensusTract(lat, long)
 
             # if api call failed. repeat it
             while tract == None:
@@ -725,12 +755,20 @@ def getDownLineLoadsEquipment(pathToOmd,nriGeoJson, equipmentList):
                         tracts[tractID] = i['properties']
 
                         if (i['geometry']['type'] == 'MultiPolygon'):
+                            lon_lat_list = []
                             for j in i['geometry']['coordinates']:
+                                ## changes values so make copy
+                                lon_lat_list.append(transform(j.copy()))
                                 geos.append(j)
                                 tractData.append(vals)
+                            lon_lat[tract] = (lon_lat_list,'MultiPolygon')
                         else:
+                            # changes values so make copy
+                            lon_lat[tract] = (transform(i['geometry']['coordinates'][0].copy()), 'Polygon')
                             geos.append(i['geometry']['coordinates'][0])
                             tractData.append(vals)
+
+                        
 
                         break
 

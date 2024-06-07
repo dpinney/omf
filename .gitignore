@@ -35,7 +35,6 @@ omf/solvers/PowerModelsONM/PowerModelsONM*
 omf/solvers/PowerModelsONM/Manifest.toml
 omf/solvers/PowerModelsONM/Project.toml
 omf/solvers/PowerModelsONM/build/*
-omf/solvers/PowerModelsONM/instantiated.txt
 gridlabd.dmg
 omf/omf.error.log
 omf/omf.access.log
@@ -65,4 +64,4 @@ omf/solvers/reopt_jl/testFiles/resultsResilience.json
 omf/solvers/reopt_jl/testFiles/results.json
 omf/solvers/reopt_jl/testFiles/REoptInputs.json
 omf/solvers/reopt_jl/reopt_jl.so
-omf/solvers/reopt_jl/instantiated.txt
+instantiated.txt

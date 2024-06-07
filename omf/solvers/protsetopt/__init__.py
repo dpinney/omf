@@ -81,26 +81,14 @@ def writeSettingsAndInfo(testPath, settings, old_info):
         j = json.dumps(old_info, default=str)
         f.write(j)
 
-def run(testPath, testFile):
+def run(testPath, testFile, Fres=['0.001','1'], Fts=['3ph','SLG','LL'], Force_NOIBR = 1, enableIT = 0, CTI = 0.25, OTmax = 10,
+        type_select = False, Fault_Res = ['R0_001','R1'], Min_Ip = [0.1,0.1], Substation_bus = 'sourcebus'):
     ''' runs setting optimization on the given opendss file, given constant program setting inputs '''
     install_pso()
 
-    #fault resistances to test
-    Fres = ['0.001','1']
-    #supported fault types
-    Fts = ['3ph','SLG','LL']
-
     # program settings
-    Force_NOIBR = 1
     #DOC = 0
-    enableIT = 0
-    CTI = 0.25
-    OTmax = 10
     Sho_Plots=1
-    type_select = False
-    Fault_Res = ['R0_001','R1']
-    Min_Ip = [0.1,0.1]
-    Substation_bus = 'sourcebus'
     initpop = None
     SetDir=False
 

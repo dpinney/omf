@@ -135,29 +135,31 @@ def my_NetworkPlot(filePath, figsize=(20,20), output_name='networkPlot.png', sho
 	plt.clf()
 	return G
 
-def omd_to_nx_fulldata( dssFilePath, tree=None ):
+def dss_to_nx_fulldata( dssFilePath, tree=None, fullData = True ):
 	''' Combines dss_to_networkX and opendss.networkPlot together.
 
 	Creates a networkx directed graph from a dss files. If a tree is provided, build graph from that instead of the file.
-	Creates a .png picture of the graph.
 	Adds data to certain DSS node types ( loads )
 	
 	args:
 		filepath (str of file name):- dss file path
 		tree (list): None - tree representation of dss file
-		output_name (str):- name of png
-		show_labels (bool): true - show node label names
-		node_size (int): 300 - size of node circles in png
-		font_size (int): 8 - font size for png labels
 	return:
 		A networkx graph of the circuit 
 	'''
 	if tree == None:
-		tree = opendss.dssConvert.dssToTree( dssFilePath )
+		tree = dssConvert.dssToTree( dssFilePath )
 
-	G = nx.DiGraph()
+	G = nx.MultiDiGraph()
+
+	# A MultiDiGraph allows for multiple edges between the same nodes
+	# Chosen because of multiple transformers between 2 of the same nodes.
+	# Edges have a u, v, and key value. u, v = node1, node2. Key is a unique identifier.
+	# line.x, transformer.y <- x and y are the unique key values, their "names" so to speak.
+
 	pos = {}
 
+	# Add nodes for buses
 	setbusxyList = [x for x in tree if '!CMD' in x and x['!CMD'] == 'setbusxy']
 	x_coords = [x['x'] for x in setbusxyList if 'x' in x]
 	y_coords = [x['y'] for x in setbusxyList if 'y' in x]
@@ -168,62 +170,127 @@ def omd_to_nx_fulldata( dssFilePath, tree=None ):
 		G.add_node(bus, pos=(float_x, float_y))
 		pos[bus] = (float_x, float_y)
 
+	# Add edges from lines
+	# new object=line.645646 bus1=645.2 bus2=646.2 phases=1 linecode=mtx603 length=300 units=ft
+	# line.x <- is this the name?
 	lines = [x for x in tree if x.get('object', 'N/A').startswith('line.')]
-	bus1_lines = [x.split('.')[0] for x in [x['bus1'] for x in lines if 'bus1' in x]]
-	bus2_lines = [x.split('.')[0] for x in [x['bus2'] for x in lines if 'bus2' in x]]
+	lines_bus1 = [x.split('.')[0] for x in [x['bus1'] for x in lines if 'bus1' in x]]
+	lines_bus2 = [x.split('.')[0] for x in [x['bus2'] for x in lines if 'bus2' in x]]
+	lines_name = [x.split('.')[1] for x in [x['object'] for x in lines if 'object' in x]]
 	edges = []
-	for bus1, bus2 in zip( bus1_lines, bus2_lines):
-		edges.append( (bus1, bus2) )
-	G.add_edges_from(edges)
+	for bus1, bus2, name in zip(lines_bus1, lines_bus2, lines_name ):
+		edges.append( (bus1, bus2, {'key': name}) )
+	G.add_edges_from( edges )
 
-	# Need edges from bus --- trasnformr info ---> load
-	transformers = [x for x in tree if x.get('object', 'N/A').startswith('transformer.')]
-	transformer_bus_names = [x['buses'] for x in transformers if 'buses' in x]
-	bus_to_transformer_pairs = {}
-	for transformer_bus in transformer_bus_names:
-		strip_paren = transformer_bus.strip('[]')
-		split_buses = strip_paren.split(',')
-		bus = split_buses[0].split('.')[0]
-		transformer_name = split_buses[1].split('.')[0]
-		bus_to_transformer_pairs[transformer_name] = bus
+	# Need to add data for lines
+	# some lines have "switch"
+	# How to add data when sometimes there sometimes not
+	# print( "G.edges: ", G.edges(data=True) )
+	# G.edges:  [('rg60', '632', {'key': '650632'})
 	
+	# If there is a transformer tied to a load, we get it from here.
 	loads = [x for x in tree if x.get('object', 'N/A').startswith('load.')] # This is an orderedDict
 	load_names = [x['object'].split('.')[1] for x in loads if 'object' in x and x['object'].startswith('load.')]
-	load_transformer_name = [x.split('.')[0] for x in [x['bus1'] for x in loads if 'bus1' in x]]
+	load_bus = [x.split('.')[0] for x in [x['bus1'] for x in loads if 'bus1' in x]]
+	for load, bus in zip(load_names, load_bus):
+		pos_tuple_of_bus = pos[bus]
+		G.add_node(load, pos=pos_tuple_of_bus)
+		pos[load] = pos_tuple_of_bus
 
-	# Connects loads to buses via transformers
-	for load_name, load_transformer in zip(load_names, load_transformer_name):
-    # Add edge from bus to load, with transformer name as an attribute
-		if load_transformer in bus_to_transformer_pairs:
-			bus = bus_to_transformer_pairs[load_transformer]
-			G.add_edge(bus, load_name, transformer=load_transformer)
-		else:
-			G.add_edge(load_transformer, load_name )
-		pos[load_name] = pos[load_transformer]
-		# print(f"load_name: {load_name}, pos[load_name]: { pos[load_name]}")
-	# TEMP: Remove transformer nodes added from setxy coords. Transformer data is edges, not nodes.
-	for transformer_name in load_transformer_name:
-		if transformer_name in G.nodes:
-			G.remove_node( transformer_name )
-			pos.pop( transformer_name )
-	
-	load_kw = [x['kw'] for x in loads if 'kw' in x]
-	for load, kw in zip( load_names, load_kw ):
-		G.nodes[load]['kw'] = kw
-	
-	return [G, pos]
+	if fullData:	
+		# Attributes for all loads
+		load_phases = [x['phases'] for x in loads if 'phases' in x]
+		load_conn = [x['conn'] for x in loads if 'conn' in x]
+		load_kv = [x['kv'] for x in loads if 'kv' in x]
+		load_kw = [x['kw'] for x in loads if 'kw' in x]
+		load_kvar = [x['kvar'] for x in loads if 'kvar' in x]
+		for load, phases, conn, kv, kw, kvar in zip( load_names, load_phases, load_conn, load_kv, load_kw, load_kvar):
+			G.nodes[load]['phases'] = phases
+			G.nodes[load]['conn'] = conn
+			G.nodes[load]['kv'] = kv
+			G.nodes[load]['kw'] = kw
+			G.nodes[load]['kvar'] = kvar
 
-def drawNXGraph(G, pos, outputPath, colorCode, labels: list=[], figSize=(20,20), nodeSize: int=300 , fontSize: int=8):
+	print( G.nodes )
+
+		# Need edges from bus --- transformer info ---> bus
+	transformers = [x for x in tree if x.get('object', 'N/A').startswith('transformer.')]
+	transformer_buses = [x['buses'] for x in transformers if 'buses' in x]
+	print( "transformer_buses: ", transformer_buses )
+	transformer_buses_names_split = [[prefix.split('.')[0].strip() for prefix in sublist.strip('[]').split(',')] for sublist in transformer_buses]
+	print( "transformer_buses_names_split: ", transformer_buses_names_split)
+	transformer_name = [x.split('.')[1] for x in [x['object'] for x in transformers if 'object' in x]]
+	print( "transformer_name: ", transformer_name)
+	transformer_edges = []
+	for bus_pair, t_name in zip(transformer_buses_names_split, transformer_name):
+		if bus_pair[0] and bus_pair[1] in G.nodes:
+			transformer_edges.append ( (bus_pair[0], bus_pair[1], {'key': t_name}) )
+	G.add_edges_from(transformer_edges)
+
+	# Need to add data for transformers
+	# Some have windings.
+	
+	# if fullData:
+	# 	#  %loadloss=0.01
+	# 	transformer_edges_with_attributes = {}
+	# 	transformer_phases = [x['phases'] for x in lines if 'phases' in x]
+	# 	transformer_bank = [x['bank'] for x in lines if 'bank' in x]
+	# 	transformer_xhl = [x['xhl'] for x in lines if 'xhl' in x]
+	# 	transformer_kvas = [x['kvas'] for x in lines if 'kvas' in x]
+	# 	transformer_kvs = [x['kvs'] for x in lines if 'kvs' in x]
+	# 	transformer_loadloss = [x['loadloss'] for x in lines if 'loadloss' in x]
+	# 	for t_edge, phase, bank, xhl_val, kvas_val, kvs_val, loadloss_val in zip(transformer_edges, transformer_phases, transformer_bank, transformer_xhl, transformer_kvas, transformer_kvs, transformer_loadloss):
+	# 			t_edge_nodes = (t_edge[0], t_edge[1])
+	# 			transformer_edges_with_attributes[t_edge_nodes] = { "phases": phase, "bank": bank, "xhl": xhl_val, "kvas": kvas_val, "kvs": kvs_val, "loadloss": loadloss_val }
+	# 			print( '{ "phases": phase, "bank": bank, "xhl": xhl_val, "kvas": kvas_val, "kvs": kvs_val, "loadloss": loadloss_val } ')
+	# 			print( "t_edge_nodes: ", t_edge_nodes )
+	# 	nx.set_edge_attributes( G, transformer_edges_with_attributes )
+
+	# 	# buses=[650.2,rg60.2] phases=1 bank=reg1 xhl=0.01 kvas=[1666,1666] kvs=[2.4,2.4] %loadloss=0.01
+	# 	print( G[ "633"]["634"]["phases"] )
+	# 	print( G[ "633"]["634"]["bank"] )
+	# 	print( G[ "633"]["634"]["xhl"] )
+	# 	print( G[ "633"]["634"]["kvas"] )
+	# 	print( G[ "633"]["634"]["kvs"] )
+	# 	print( G[ "633"]["634"]["loadloss"] )
+
+	# Are there generators? If so, find them and add them as nodes. Their location is the same as buses.
+  # Generators have generator.<x> like solar_634 <- should i save this?
+	# loadshape?
+	generators = [x for x in tree if x.get('object', 'N/A').startswith('generator.')]
+	gen_bus1 = [x.split('.')[0] for x in [x['bus1'] for x in lines if 'bus1' in x]]
+	gen_names = [x['object'].split('.')[1] for x in generators if 'object' in x and x['object'].startswith('generator.')]
+	gen_phases = [x['phases'] for x in generators if 'phases' in x]
+	gen_kv = [x['kv'] for x in generators if 'kv' in x]
+	gen_kw = [x['kw'] for x in generators if 'kw' in x]
+	gen_pf = [x['pf'] for x in generators if 'pf' in x]
+	gen_yearly = [x['yearly'] for x in generators if 'yearly' in x]
+
+	for gen, bus_for_positioning, phases, kv, kw, pf, yearly in zip( gen_names, gen_bus1, gen_phases, gen_kv, gen_kw, gen_pf, gen_yearly ):
+		G.add_node( gen, pos=pos[bus_for_positioning] )
+		# Need to add gen betwen bus and node.
+		# but if what is between them is a transformer, then it'll get removed. then there would be an edge between a deleted node and the generator node.. it has to between the bus.. now im confused.
+		G.nodes[gen]['phases'] = phases
+		G.nodes[gen]['kv'] = kv
+		G.nodes[gen]['kw'] = kw
+		G.nodes[gen]['pf'] = pf
+		G.nodes[gen]['yearly'] = yearly
+	return G
+
+def drawNXGraph(G, pos, outputPath, colorCode = [], labels: list=[], figSize=(20,20), nodeSize: int=300 , fontSize: int=8):
 	# Start drawing.
 	plt.figure(figsize=figSize) 
 	ax = plt.gca() # Get the current axes
-	nodes = nx.draw_networkx_nodes(G, pos, node_color=colorCode, node_size=nodeSize, cmap=plt.get_cmap('viridis'), ax=ax)
+	if len(colorCode) != 0:
+		nodes = nx.draw_networkx_nodes(G, pos, node_color=colorCode, node_size=nodeSize, cmap=plt.get_cmap('viridis'), ax=ax)
+		plt.colorbar( label='Node Values', ax=ax)
+	else:
+		nodes = nx.draw_networkx_nodes(G, pos, node_size=nodeSize, ax=ax)
 	edges = nx.draw_networkx_edges(G, pos, ax=ax)
 	if len(labels) > 0:
 		nx.draw_networkx_labels(G, pos, labels, font_size=fontSize, ax=ax)
 		# nx.draw_networkx_labels(G, pos, labels, font_size=fontSize, bbox=dict(facecolor='white', edgecolor='black', boxstyle='round,pad=0.1'), ax=ax)
 
-	plt.colorbar( label='Node Values', ax=ax)
 	plt.legend()
 	plt.title('Network Voltage Layout')
 	plt.tight_layout()
@@ -353,30 +420,123 @@ if __name__ == '__main__':
 	starting_omd_test_file = Path( omf.omfDir, 'static', 'publicFeeders', 'iowa240.clean.dss.omd')
 	tree = opendss.dssConvert.omdToTree( starting_omd_test_file )
 	opendss.dssConvert.treeToDss(tree, Path(modelDir, 'downlineLoad.dss'))
-	graphList = omd_to_nx_fulldata( Path(modelDir, 'downlineLoad.dss') )
-	graph = graphList[0]
-	pos = graphList[1] # <- keys are str, not nodes
-
+	nx_data = opendss.dss_to_nx_fulldata( Path(modelDir, 'downlineLoad.dss') )
+	iowa240Graph = nx_data[0]
+	iowa240Pos = nx_data[1]
 	labels = {}
-	for node in graph.nodes:
+	for node in iowa240Graph.nodes:
 		labels[node] = node
-
-	kwFromGraph = nx.get_node_attributes(graph, 'kw') # Dict 
-	kwFromGraph = {key: float(value) for key, value in kwFromGraph.items()} # sets all keys in dict to floats
+	# drawNXGraph(iowa240Graph, iowa240Pos, Path(modelDir, "iowa.png"), labels=labels)
 	
-	# Create a new list for color codes with default values for nodes without a kw
-	colorCode = []
-	for node in graph.nodes():
-			if node in kwFromGraph:
-					colorCode.append(kwFromGraph[node])
-			else:
-					colorCode.append(0) # Use 0 for nodes without a kw, which will be mapped to grey
+	# print( "Descendents for bus1002 in iowa240: ", sorted(nx.descendants(iowa240Graph, "bus1002")) )
 
-	# Normalize the colorCode values to the range [0, 1] for the colormap
-	colorCode = np.array(colorCode)
-	colorCode = (colorCode - colorCode.min()) / (colorCode.max() - colorCode.min())
+	buses = opendss.get_all_buses( os.path.join( modelDir, 'downlineLoad.dss') )
+	buses_output = {}
+	iowa_kw = nx.get_node_attributes(iowa240Graph, 'kw')
+	iowa_objects = nx.get_node_attributes(iowa240Graph, 'object')
+	# Check if they are buses
+	for bus in buses:
+		if bus in iowa240Graph.nodes:
+			kwSum = 0
+			get_dependents = sorted(nx.descendants(iowa240Graph, bus))
+			for dependent in get_dependents:
+				if dependent in iowa_kw.keys() and iowa_objects[dependent] == 'load':
+					kwSum += float(iowa_kw[dependent])
+			buses_output[bus] = kwSum
+	# print( "\n buses output for kw from iowa240: ", buses_output )
 
-	drawNXGraph( G=graph, pos=pos, outputPath=Path( modelDir, "myplot.png"), colorCode=colorCode, labels=labels )
+	# Test Load Data
+	# new object=load.load_1006 bus1=t_bus1006_l.1.2 phases=1 conn=delta kv=0.208 kw=5.04 kvar=2.29629183968801
+	bus1_iowa240 = nx.get_node_attributes(iowa240Graph, 'bus1')
+	phases_iowa240 = nx.get_node_attributes(iowa240Graph, 'phases')
+	conn_iowa240 = nx.get_node_attributes(iowa240Graph, 'conn')
+	kv_iowa240 = nx.get_node_attributes(iowa240Graph, 'kv')
+	kw_iowa240 = nx.get_node_attributes(iowa240Graph, 'kw')
+	kvar_iowa240 = nx.get_node_attributes(iowa240Graph, 'kvar')
+
+	# print( "Data for iowa240 load_1006: \nbus1:  %s\nphases: %s\nconn: %s\nkv: %s\nkw: %s\nkvar: %s" %
+	# 		  (bus1_iowa240['load_1006'], phases_iowa240['load_1006'], conn_iowa240['load_1006'],
+	# 			kv_iowa240['load_1006'], kw_iowa240['load_1006'], kvar_iowa240['load_1006']) )
+
+	# Test Line Data
+	# new object=line.cb_101 bus1=bus1.1.2.3 bus2=bus1001.1.2.3 phases=3 switch=true r1=0.0001 r0=0.0001 x1=0 x0=0 c1=0 c0=0
+	# new object=line.l_3161_3162 bus1=bus3161.3 bus2=bus3162.3 phases=1 length=176 units=ft linecode=ug_1p_type2 seasons=1 ratings=[400] normamps=400 emergamps=600
+	line_name_iowa240 = nx.get_edge_attributes(iowa240Graph, 'line_name')
+	phases_iowa240 = nx.get_edge_attributes(iowa240Graph, 'phases')
+
+	# switch_iowa240 = nx.get_edge_attributes(iowa240Graph, 'switch')
+	# print( "\nswitch_iowa240: ", switch_iowa240)
+	# length_iowa240 = nx.get_edge_attributes(iowa240Graph, 'length')
+	# print( "\nlength_iowa240: ", length_iowa240)
+
+	# length_test = ( 'bus3161', 'bus3162' )
+	# if length_test in length_iowa240:
+	# 	print( "correct length line in length edge results")
+
+	# switch_test = ('bus1', 'bus1001')
+	# if switch_test in switch_iowa240:
+	# 	print( "correct switch line in switch edge results")
+
+	# if switch_test not in length_iowa240:
+	# 	print( "switch line is not in length line")
+
+	# Test Transformer Data
+	transformer_name_iowa240 = nx.get_edge_attributes( iowa240Graph, 'transformer_name')
+	# print( "\n transformer_name: ", transformer_name_iowa240 )
+
+
+
+	# This is for multiDigraph that didn't work
+	# for item in graph.successors( "bus1002"):
+	# 	print( item ) 
+
+	lehigh_file = Path( omf.omfDir, 'scratch', 'hostingcapacity', 'lehigh4mgs.dss.omd')
+	lehigh_tree = opendss.dssConvert.omdToTree( lehigh_file )
+	opendss.dssConvert.treeToDss(lehigh_tree, Path(modelDir, 'lehighOmdToDss.dss'))
+	lehigh_data = opendss.dss_to_nx_fulldata( Path(modelDir, 'lehighOmdToDss.dss') )
+	lehigh_graph = lehigh_data[0]
+	# drawNXGraph(lehigh_graph, lehigh_data[1], Path(modelDir, "lehigh.png"))
+
+	# new object=generator.solar_634_existing bus1=634.1 phases=1 kv=0.277 kw=440 pf=1 yearly=solar_634_existing_shap
+
+	# print( "Descendents for bus 634 in lehigh4: ", sorted(nx.descendants(lehigh_graph, "634")) )
+	buses = opendss.get_all_buses( os.path.join( modelDir, 'lehighOmdToDss.dss') )
+	buses_output = {}
+	lehigh_kw = nx.get_node_attributes(lehigh_graph, 'kw')
+	# print( "\nlehigh_kw: ", lehigh_kw)
+	lehigh_objects = nx.get_node_attributes(lehigh_graph, 'object')
+	# print( "\nlehigh_objects: ", lehigh_objects )
+	# Check if they are buses
+	for bus in buses:
+		if bus in lehigh_graph.nodes:
+			kwSum = 0
+			get_dependents = sorted(nx.descendants(lehigh_graph, bus))
+			for dependent in get_dependents:
+				if dependent in lehigh_kw.keys() and lehigh_objects[dependent] == 'load':
+					kwSum += float(lehigh_kw[dependent])
+				elif dependent in lehigh_kw.keys() and lehigh_objects[dependent] == 'generator':
+					kwSum -= float(lehigh_kw[dependent])
+			buses_output[bus] = kwSum
+
+	print( "\ndownline kw load output for lehigh: ", buses_output )
+
+	############################ Drawing stuff.
+	# kwFromGraph = nx.get_node_attributes(graph, 'kw') # Dict 
+	# kwFromGraph = {key: float(value) for key, value in kwFromGraph.items()} # sets all keys in dict to floats
+	
+	# # Create a new list for color codes with default values for nodes without a kw
+	# colorCode = []
+	# for node in graph.nodes():
+	# 		if node in kwFromGraph:
+	# 				colorCode.append(kwFromGraph[node])
+	# 		else:
+	# 				colorCode.append(0) # Use 0 for nodes without a kw, which will be mapped to grey
+
+	# # Normalize the colorCode values to the range [0, 1] for the colormap
+	# colorCode = np.array(colorCode)
+	# colorCode = (colorCode - colorCode.min()) / (colorCode.max() - colorCode.min())
+
+	# drawNXGraph( G=graph, pos=pos, outputPath=Path( modelDir, "myplot.png"), colorCode=colorCode, labels=labels )
 
 
 	

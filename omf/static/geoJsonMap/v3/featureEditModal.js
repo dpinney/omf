@@ -132,27 +132,32 @@ class FeatureEditModal { // implements ObserverInterface, ModalInterface
      */
     refreshContent() {
         const tableState = {};
+        // - Don't grab a row that was added with the "+" button, if it exists
         [...this.#modal.divElement.getElementsByTagName('tr')].filter(tr => tr.querySelector('span[data-property-key]') !== null).forEach(tr => {
             const span = tr.getElementsByTagName('span')[0];
             let namespace = span.dataset.propertyNamespace;
+            // - latitude and longitude don't exist in any property namespace
             if (namespace === undefined) {
                 namespace = null;
-            }
-            let valueInput = tr.getElementsByTagName('input');
-            if (valueInput.length === 0) {
-                valueInput = null;
-            } else {
-                valueInput = valueInput[0];
             }
             tableState[span.dataset.propertyKey] = {
                 propertyNamespace: namespace,
                 propertyTableRow: tr,
-                propertyValueInput: valueInput
+                // - This is either an input or a span
+                propertyValueElement: tr.children[2].children[0].children[0]
             }
         });
         const tableKeys = Object.keys(tableState);
         const observablesState = this.#getKeyToValuesMapping();
-        // - I don't need to iterate over the meta namespace because IDs are never added, removed, or changed
+        for (const [key, ary] of Object.entries(observablesState.meta)) {
+            const valueElement = tableState[key].propertyValueElement;
+            if (valueElement instanceof HTMLSpanElement) {
+                valueElement.textContent = ary.join(',');
+            } else {
+                // - Only the treeKey should be in the meta namespace and the treeKey only ever displays with a span
+                throw Error()
+            }
+        }
         for (const [key, ary] of Object.entries(observablesState.treeProps)) {
             // - First, compare the observables' state to the table state. If the observables' state has a property that is not in the table state,
             //   add a row to the table
@@ -175,29 +180,32 @@ class FeatureEditModal { // implements ObserverInterface, ModalInterface
                 keySpan.dataset.propertyNamespace = 'treeProps';
                 this.#modal.insertTBodyRow([this.#getDeletePropertyButton(key), keySpan, this.#getValueTextInput(key, ary)], 'beforeEnd');
             } else {
-                const valueInput = tableState[key].propertyValueInput;
-                if (valueInput !== null) {
-                    valueInput.replaceWith(this.#getValueTextInput(key, ary));
+                // - If the table has the key, update the display of the values for that key
+                const valueElement = tableState[key].propertyValueElement;
+                if (valueElement instanceof HTMLInputElement) {
+                    valueElement.replaceWith(this.#getValueTextInput(key, ary));
+                } else if (valueElement instanceof HTMLSpanElement) {
+                    valueElement.textContent = ary.join(', ');
                 }
             }
         }
         for (const [key, ary] of Object.entries(observablesState.coordinates)) {
             // - Don't add latitude or longitude rows to tables that didn't already have those rows, just update the existing inputs
             if (tableKeys.includes(key)) {
-                const valueInput = tableState[key].propertyValueInput;
-                if (valueInput !== null) {
-                    valueInput.replaceWith(this.#getValueTextInput(key, ary));
+                const valueElement = tableState[key].propertyValueElement;
+                if (valueElement instanceof HTMLInputElement) {
+                    valueElement.replaceWith(this.#getValueTextInput(key, ary));
                 }
             }
         }
-        const observablesKeys = [];
+        // - Now compare the table's state to the observables' state. If the table's state has a property that is not in the observables' state,
+        //   remove the row from the table
+        const observablesKeysFromAllNamespaces = [];
         for (const obj of Object.values(observablesState)) {
-            observablesKeys.push(...Object.keys(obj))
+            observablesKeysFromAllNamespaces.push(...Object.keys(obj))
         }
         for (const [key, obj] of Object.entries(tableState)) {
-            // - Second, compare the observables' state to the table state. If the observables' state lacks a property that is in the table state,
-            //   remove the corresponding row from the table
-            if (!observablesKeys.includes(key)) {
+            if (!observablesKeysFromAllNamespaces.includes(key)) {
                 obj.propertyTableRow.remove();
             }
         }
@@ -231,7 +239,6 @@ class FeatureEditModal { // implements ObserverInterface, ModalInterface
             if (ary.length === 1) {
                 modal.insertTHeadRow([null, keySpan, ary[0].toString()], 'prepend');
             } else {
-                //modal.insertTHeadRow([null, keySpan, '<Multiple IDs>'], 'prepend');
                 modal.insertTHeadRow([null, keySpan, ary.join(',')], 'prepend');
             }
         }

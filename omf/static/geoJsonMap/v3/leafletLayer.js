@@ -3,23 +3,26 @@ import { Feature } from './feature.js';
 import { FeatureController } from "./featureController.js";
 import { FeatureEditModal } from './featureEditModal.js';
 import { TestModal } from './extensions/testModal.js';
+import { ClusterControlClass } from './clusterControl.js';
 
 /**
  * - Each LeafletLayer instance is a view in the MVC pattern. Each observes an ObservableInterface instance, which is part of the model in the MVC
  *   pattern. An ObservableInterface instance does NOT observe a LeafletLayer instance. Instead, a LeafletLayer instance uses the controller to pass
  *   its own changes to the underlying ObservableInterface instance
  */
-class LeafletLayer {            // implements ObserverInterface
-    #controller;                // ControllerInterface instance
-    #layer;                     // - Leaflet layer
-    #observable;                // - ObservableInterface instance
+class LeafletLayer {    // implements ObserverInterface
+    #controller;        // ControllerInterface instance
+    #layer;             // - Leaflet layer
+    #observable;        // - ObservableInterface instance
     #modal;
     static trackCursor = null;  // - HACK: the currently active trackCusor function. This is needed to get rid of sticky markers when the map gets a mouseup event
-    static map;
-    static control;
+    static map = null;
+    static control = null;
     static nodeLayers = L.featureGroup();
     static lineLayers = L.featureGroup();
     static parentChildLineLayers = L.featureGroup();
+    static nodeClusterLayers = L.markerClusterGroup();
+    static clusterControl = null;
 
     /**
      * @param {Feature} observable - an ObservableInterface instance
@@ -28,10 +31,10 @@ class LeafletLayer {            // implements ObserverInterface
      */
     constructor(observable, controller) {
         if (!(observable instanceof Feature)) {
-            throw TypeError('"observable" argument must be instance of Feature.');
+            throw TypeError('The "observable" argument must be instance of Feature.');
         }
         if (!(controller instanceof FeatureController)) {
-            throw Error('"controller" argument must be an instance of FeatureController.');
+            throw Error('The "controller" argument must be an instance of FeatureController.');
         }
         this.#controller = controller;
         this.#observable = observable;
@@ -83,6 +86,9 @@ class LeafletLayer {            // implements ObserverInterface
      * @returns {undefined}
      */
     handleDeletedObservable(observable) {
+        if (!(observable instanceof Feature)) {
+            throw TypeError('The "observable" argument must be instance of Feature.');
+        }
         // - The function signature above is part of the ObserverInterface API. The implementation below is not
         observable.removeObserver(this);
         const layer = Object.values(this.#layer._layers)[0]; 
@@ -91,6 +97,7 @@ class LeafletLayer {            // implements ObserverInterface
         // - Need to explicitly remove the underlying layer from its LayerGroup
         if (observable.isNode()) {
             LeafletLayer.nodeLayers.removeLayer(this.#layer);
+            LeafletLayer.nodeClusterLayers.removeLayer(this.#layer);
         } else if (observable.isLine()) {
             if (observable.isParentChildLine()) {
                 LeafletLayer.parentChildLineLayers.removeLayer(this.#layer);
@@ -122,8 +129,11 @@ class LeafletLayer {            // implements ObserverInterface
      */
     handleUpdatedCoordinates(observable, oldCoordinates) {
         // - The function signature above is part of the ObserverInterface API. The implementation below is not
+        if (!(observable instanceof Feature)) {
+            throw TypeError('The "observable" argument must be instance of Feature.');
+        }
         if (!(oldCoordinates instanceof Array)) {
-            throw TypeError('"oldCoordinates" argument must be an array.')
+            throw TypeError('The "oldCoordinates" argument must be an array.')
         }
         const coordinates = observable.getCoordinates();
         if (observable.isNode()) {
@@ -146,12 +156,16 @@ class LeafletLayer {            // implements ObserverInterface
      */
     handleUpdatedProperty(observable, propertyKey, oldPropertyValue, namespace='treeProps') {
         // - The function signature above is part of the ObserverInterface API. The implementation below is not
+        if (!(observable instanceof Feature)) {
+            throw TypeError('The "observable" argument must be instance of Feature.');
+        }
         if (typeof propertyKey !== 'string') {
             throw TypeError('"propertyKey" argument must be a string.');
         }
         if (typeof namespace !== 'string') {
             throw TypeError('"namespace" argument must be a string.');
         }
+        // - Currently, we don't need to do anything like change the color of a node in response to a property change, but we could
     }
 
     // ********************
@@ -192,7 +206,13 @@ class LeafletLayer {            // implements ObserverInterface
         }
         const ll = new LeafletLayer(observable, controller);
         if (observable.isNode()) {
-            LeafletLayer.nodeLayers.addLayer(ll.getLayer());
+            // - If clustering is active and a component is added, then the layer of the component should go into the nodeClusterLayers group (very
+            //   rare case but it's good to cover it)
+            if (LeafletLayer.clusterControl._on) {
+                LeafletLayer.nodeClusterLayers.addLayer(ll.getLayer());
+            } else {
+                LeafletLayer.nodeLayers.addLayer(ll.getLayer());
+            }
         } else if (observable.isLine()) {
             if (observable.isParentChildLine()) {
                 LeafletLayer.parentChildLineLayers.addLayer(ll.getLayer());
@@ -217,6 +237,39 @@ class LeafletLayer {            // implements ObserverInterface
      */
     getLayer() {
         return this.#layer;
+    }
+
+    /**
+     * - Iterate through all observables and put every visible overvable back into its proper layer group
+     * - This has to be static because it shouldn't need to be called off of any particular instance
+     * @returns {undefined}
+     */
+    static resetLayerGroups(controller) {
+        if (!(controller instanceof FeatureController)) {
+            throw TypeError('The "controller" argument must be instanceof FeatureController.');
+        }
+        for (const observable of controller.observableGraph.getObservables()) {
+            if (observable.isNode() && !observable.isConfigurationObject()) {
+                const ll = observable.getObservers().filter(observer => observer instanceof LeafletLayer)[0];
+                if (LeafletLayer.clusterControl._on) {
+                    LeafletLayer.nodeClusterLayers.addLayer(ll.getLayer());
+                } else {
+                    LeafletLayer.nodeLayers.addLayer(ll.getLayer());
+                }
+            } else if (observable.isLine()) {
+                const ll = observable.getObservers().filter(observer => observer instanceof LeafletLayer)[0];
+                if (observable.isParentChildLine()) {
+                    LeafletLayer.parentChildLineLayers.addLayer(ll.getLayer());
+                } else {
+                    LeafletLayer.lineLayers.addLayer(ll.getLayer());
+                }
+            }
+        }
+        // - Force redraw
+        for (const layer of [LeafletLayer.parentChildLineLayers, LeafletLayer.lineLayers, LeafletLayer.nodeLayers, LeafletLayer.nodeClusterLayers]) {
+            LeafletLayer.map.removeLayer(layer);
+            LeafletLayer.map.addLayer(layer);
+        }
     }
 
     // *********************
