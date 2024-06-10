@@ -782,7 +782,7 @@ def graphMicrogrid(modelDir, pathToOmd, profit_on_energy_sales, restoration_cost
 	actionAction = []
 	actionLoadBefore = []
 	actionLoadAfter = []
-	loadsShed = []
+	prevLoadsShed = []
 	cumulativeLoadsShed = []
 	startTime = 1
 	if type(simTimeStepsRaw[0]) == str:
@@ -810,23 +810,22 @@ def graphMicrogrid(modelDir, pathToOmd, profit_on_energy_sales, restoration_cost
 					actionLoadAfter.append(switchActionsNew[entry])
 			switchActionsOld = key['Switch configurations']
 		loadShed = key['Shedded loads']
-		if len(loadShed) != 0:
-			for entry in loadShed:
-				cumulativeLoadsShed.append(entry)
-				if entry not in loadsShed:
-					actionDevice.append(entry)
-					actionTime.append(str(timestep))
-					actionAction.append('Load Shed')
-					actionLoadBefore.append('online')
-					actionLoadAfter.append('offline')
-					loadsShed.append(entry)
-				else:
-					actionDevice.append(entry)
-					actionTime.append(str(timestep))
-					actionAction.append('Load Pickup')
-					actionLoadBefore.append('offline')
-					actionLoadAfter.append('online')
-					loadsShed.remove(entry)
+		loadsPickedUp = [load for load in prevLoadsShed if load not in loadShed]
+		newShed = [load for load in loadShed if load not in prevLoadsShed]
+		for entry in newShed:
+			cumulativeLoadsShed.append(entry)
+			actionDevice.append(entry)
+			actionTime.append(str(timestep))
+			actionAction.append('Load Shed')
+			actionLoadBefore.append('online')
+			actionLoadAfter.append('offline')
+		for entry in loadsPickedUp:
+			actionDevice.append(entry)
+			actionTime.append(str(timestep))
+			actionAction.append('Load Pickup')
+			actionLoadBefore.append('offline')
+			actionLoadAfter.append('online')
+		prevLoadsShed = loadShed
 		timestep += 1
 	timestep = startTime
 	# while timestep < 24:
