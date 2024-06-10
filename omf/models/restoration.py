@@ -409,6 +409,99 @@ def customerCost1(duration, season, averagekWperhr, businessType):
 		row+=1
 	return outageCost, kWperhrEstimate, times, localMax
 
+def makeLoadOutTimelnAndStatusMap(outputTimeline, loadList, timeList):
+	''' Helper function to create 2 dataframes:
+	
+		A deep copy of outputTimeline with only the loads in loadList, sorted by device name and then time
+
+		A dataframe of load statuses at each timestep with 0 being offline and 1 being online	
+	'''
+	# Create a copy of outputTimeline containing only load devices in loadList sorted by device name and then time. 
+	dfLoadTimeln = outputTimeline.copy(deep=True)
+	dfLoadTimeln = dfLoadTimeln[dfLoadTimeln['device'].isin(loadList)]
+	dfLoadTimeln['time'] = dfLoadTimeln['time'].astype(int)
+	dfLoadTimeln = dfLoadTimeln.sort_values(by=['device','time'])
+
+	# Create dataframe of load status after each timestep
+	dfStatus = pd.DataFrame(np.ones((len(timeList),len(loadList))), dtype=int, index=timeList, columns=loadList)
+	statusMapping = {'offline':0, 'online':1}
+	for loadName in loadList:
+		# Create a copy of dfLoadTimeln containing only a single load device, with rows indexed by time
+		dfSoloLoadTimeln = dfLoadTimeln[dfLoadTimeln['device'] == loadName].set_index('time')
+		currentStatus = statusMapping.get('online')
+		for timeStep in timeList:
+			if timeStep in dfSoloLoadTimeln.index:
+				currentStatus = statusMapping.get(dfSoloLoadTimeln.at[timeStep,'loadAfter'])
+			dfStatus.at[timeStep,loadName] = currentStatus
+	
+	return dfLoadTimeln, dfStatus
+
+def tradMetricsByMgTable(outputTimeline, loadMgDict, startTime, numTimeSteps, modelDir):
+	'''
+	Generate table of SAIDI, SAIFI, CAIDI, and CAIFI during the outage simulation period, both for the whole system and broken down by microgrid. 
+	'''
+	def calcTradMetrics(outputTimeline, loadList, startTime, numTimeSteps):
+		''' Calculates SAIDI, SAIFI, CAIDI, CAIFI, CI, CMI, CS, and DCI over the course of the simulation for the loads in the given loadList which should have only unique entries.
+			CI = # Customer Interruptions
+			CMI = # Customer Minute Interruptions 
+			CS = # Customers Served
+			DCI = # Distinct Customers Interrupted
+			SAIDI = CMI/CS
+			SAIFI = CI/CS
+			CAIDI = CMI/CI = SAIDI/SAIFI
+			CAIFI = CI/DCI
+			'''
+		dfLoadTimeln, dfStatus = makeLoadOutTimelnAndStatusMap(outputTimeline, loadList, [*range(startTime, numTimeSteps+startTime)])
+		
+		CS = len(set(loadList))
+		# CI = How many total load shed actions have occurred over the event
+		CI = dfLoadTimeln[dfLoadTimeln['action'] == 'Load Shed'].shape[0]
+		# CMI = The total number of timesteps (hr) each load is offline * 60 min/hr 
+		CMI = dfStatus.applymap(lambda x:1.0-x).to_numpy().sum()*60
+		# DCI = The number of distinct loads that have been offline at some point
+		DCI = len(dfStatus.columns[dfStatus.isin([0]).any()])
+		SAIDI = CMI/CS
+		SAIFI = CI/CS
+		CAIDI = CMI/CI
+		CAIFI = CI/DCI
+		return {"SAIDI":SAIDI,
+				"SAIFI":SAIFI,
+				"CAIDI":CAIDI,
+				"CAIFI":CAIFI,
+				"CS":	CS,
+				"CI":	CI,
+				"CMI":	CMI,
+				"DCI":	DCI}
+
+	loadsPerMg = {}
+	for load,mg in loadMgDict.items():
+		loadsPerMg[mg] = loadsPerMg.get(mg,[])+[load]
+
+	systemwideMetrics = calcTradMetrics(outputTimeline, loadMgDict.keys(), startTime, numTimeSteps)
+	metricsPerMg = {}
+	for mg, mgLoadList in loadsPerMg.items():
+		metricsPerMg[mg] = calcTradMetrics(outputTimeline, mgLoadList, startTime, numTimeSteps)
+
+	new_html_str = """
+		<table class="sortable" cellpadding="0" cellspacing="0">
+			<thead>
+				<tr>
+					<th>Microgrid</th>
+					<th>Event SAIDI</th>
+					<th>Event SAIFI</th>
+					<th>Event CAIDI</th>
+					<th>Event CAIFI</th>
+				</tr>
+			</thead>
+			<tbody>"""
+	new_html_str += f'<tr><td>Whole System</td><td>{ systemwideMetrics["SAIDI"] }</td><td>{ systemwideMetrics["SAIFI"] }</td><td>{ systemwideMetrics["CAIDI"] }</td><td>{ systemwideMetrics["CAIFI"] }</td></tr>'
+	for mg, metrics in metricsPerMg.items():
+		new_html_str += f'<tr><td>Microgrid ID: {mg}</td><td>{ metrics["SAIDI"] }</td><td>{ metrics["SAIFI"] }</td><td>{ metrics["CAIDI"] }</td><td>{ metrics["CAIFI"] }</td></tr>'
+	new_html_str +="""</tbody></table>"""
+	with open(pJoin(modelDir, 'tradMetricsTable.html'), 'w') as customerOutageFile:
+		customerOutageFile.write(new_html_str)
+	return new_html_str
+
 def outageIncidenceGraph(customerOutageData, outputTimeline, startTime, numTimeSteps, loadPriorityFilePath, loadMgDict):
 	'''	Returns plotly figures displaying graphs of outage incidences over the course of the event data.
 		Unweighted outage incidence at each timestep is calculated as (num loads experiencing outage)/(num loads).
@@ -424,24 +517,7 @@ def outageIncidenceGraph(customerOutageData, outputTimeline, startTime, numTimeS
 	loadList = list(loadMgDict.keys())
 	mgIDs = set(loadMgDict.values())
 	timeList = [*range(startTime, numTimeSteps+startTime)]
-
-	# Create a copy of outputTimeline containing only load devices sorted by device name and then time. 
-	dfLoadTimeln = outputTimeline.copy(deep=True)
-	dfLoadTimeln = dfLoadTimeln[dfLoadTimeln['device'].isin(loadList)]
-	dfLoadTimeln['time'] = dfLoadTimeln['time'].astype(int)
-	dfLoadTimeln = dfLoadTimeln.sort_values(by=['device','time'])
-	
-	# Create dataframe of load status after each timestep
-	dfStatus = pd.DataFrame(np.ones((len(timeList),len(loadList))), dtype=int, index=timeList, columns=loadList)
-	statusMapping = {'offline':0, 'online':1}
-	for loadName in loadList:
-		# Create a copy of dfLoadTimeln containing only a single load device, with rows indexed by time
-		dfSoloLoadTimeln = dfLoadTimeln[dfLoadTimeln['device'] == loadName].set_index('time')
-		currentStatus = statusMapping.get('online')
-		for timeStep in timeList:
-			if timeStep in dfSoloLoadTimeln.index:
-				currentStatus = statusMapping.get(dfSoloLoadTimeln.at[timeStep,'loadAfter'])
-			dfStatus.at[timeStep,loadName] = currentStatus
+	dfLoadTimeln, dfStatus = makeLoadOutTimelnAndStatusMap(outputTimeline, loadList, timeList)
 
 	# Calculate unweighted outage incidence
 	outageIncidence = dfStatus.sum(axis=1,).map(lambda x:100*(1.0-(x/dfStatus.shape[1]))).round(3).values.tolist()
@@ -1174,6 +1250,7 @@ def graphMicrogrid(modelDir, pathToOmd, profit_on_energy_sales, restoration_cost
 	)
 
 	outageIncidenceFig, mgOIFigs = outageIncidenceGraph(customerOutageData, outputTimeline, startTime, numTimeSteps, loadPriorityFile, loadMgDict)
+	tradMetricsHtml = tradMetricsByMgTable(outputTimeline, loadMgDict, startTime, numTimeSteps, modelDir)
 	
 	customerOutageHtml = customerOutageTable(customerOutageData, outageCost, modelDir)
 	profit_on_energy_sales = float(profit_on_energy_sales)
@@ -1185,7 +1262,8 @@ def graphMicrogrid(modelDir, pathToOmd, profit_on_energy_sales, restoration_cost
 	except: customerOutageCost = 0
 	return {'utilityOutageHtml': 	utilityOutageHtml, 
 			'customerOutageHtml': 	customerOutageHtml, 
-			'timelineStatsHtml': 	timelineStatsHtml, 
+			'timelineStatsHtml': 	timelineStatsHtml,
+			'tradMetricsHtml':		tradMetricsHtml,
 			'outageIncidenceFig': 	outageIncidenceFig, 
 			'mgOIFigs':				mgOIFigs, 
 			'mgGensFigs':			mgGensFigs, 
@@ -1351,6 +1429,9 @@ def work(modelDir, inputDict):
 	# Textual outputs of utility cost statistic
 	with open(pJoin(modelDir,'utilityOutageTable.html')) as inFile:
 		outData['utilityOutageHtml'] = inFile.read()
+	# Textual outputs of traditional metrics table
+	with open(pJoin(modelDir,'tradMetricsTable.html')) as inFile:
+		outData['tradMetricsHtml'] = inFile.read()
 	#The geojson dictionary to load into the outageCost.py template
 	with open(pJoin(modelDir,'geoDict.js'),'rb') as inFile:
 		outData['geoDict'] = inFile.read().decode()
