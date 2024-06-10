@@ -923,7 +923,7 @@ def graphMicrogrid(modelDir, pathToOmd, profit_on_energy_sales, restoration_cost
 			'tickmode':'linear',
 			'dtick':stepSize
 		},
-		yaxis_title='Load (%)',
+		yaxis_title='Load Served (% kW)',
 		legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1))
 	
 	timelineStatsHtml = microgridTimeline(outputTimeline, modelDir)
