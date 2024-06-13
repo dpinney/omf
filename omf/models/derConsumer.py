@@ -224,9 +224,7 @@ def get_tou_rates(modelDir, inputDict):
 
 	** Inputs
 	modelDir: (str) Currently model directory
-	lat: (float) Latitude of the utility
-	lon: (float) Longitude of the utility
-	##inputDict: (dict) Input dictionary containing latitude and longitude information (NOTE: this will replace lat and lon
+	inputDict: (dict) Input dictionary containing latitude and longitude information 
 
 	** Outputs
 	data: (JSON file) Ouput JSON file containing the API response fields \
