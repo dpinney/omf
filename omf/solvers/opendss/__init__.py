@@ -858,23 +858,31 @@ def dss_to_nx_fulldata( dssFilePath, tree=None, fullData = True ):
 
 	# new object=transformer.reg1 buses=[650.1,rg60.1] phases=1 bank=reg1 xhl=0.01 kvas=[1666,1666] kvs=[2.4,2.4] %loadloss=0.01
 	transformers = [x for x in tree if x.get('object', 'N/A').startswith('transformer.')]
-	transformer_buses = [x['buses'] for x in transformers if 'buses' in x]
-	transformer_buses_names_split = [[prefix.split('.')[0].strip() for prefix in sublist.strip('[]').split(',')] for sublist in transformer_buses]
 	transformer_name = [x.split('.')[1] for x in [x['object'] for x in transformers if 'object' in x]]
+	transformer_buses_string = [x['buses'] for x in transformers if 'buses' in x] #['x.y,x.y,x.y']
+	transformer_bus_names_full_conn = [ x.strip('[]').split(',') for x in transformer_buses_string] #['x.y', 'x.y', 'x.y']
+	transformer_buses_names_only = [[prefix.split('.')[0].strip() for prefix in sublist.strip('[]').split(',')] for sublist in transformer_buses_string] #['x', 'x', 'x']
 	transformer_edges = []
-	for buses, t_name in zip(transformer_buses_names_split, transformer_name):
-			# new object=transformer.t_3160 windings=3 buses=[bus3160.3.0,t_bus3160_l.1.0,t_bus3160_l.0.2] phases=1 xhl=2.76 xht=2.76 xlt=1.84 conns=[wye,wye,wye] kvs=[7.9677,0.12,0.12] kvas=[25,25,25] taps=[1,1,1] %rs=[0.7,1.4,1.4]
-			# [bus3160.3.0,t_bus3160_l.1.0,t_bus3160_l.0.2]
-		if len(buses) == 3:
-			pair1 = (buses[0], buses[1])
-			pair1 = (buses[0], buses[2])
-			if buses[0] and buses[1] and buses[2] in G.nodes:
-				transformer_edges.append ( (buses[0], buses[1], {'transformer_name': t_name}) )
-				transformer_edges.append ( (buses[0], buses[2], {'transformer_name': t_name}) )
-		elif len(buses) == 2:
-			if buses[0] and buses[1] in G.nodes: # If both buses exist
-				transformer_edges.append ( (buses[0], buses[1], {'object': 'transformer', 'transformer_name': t_name}) )
-	G.add_edges_from(transformer_edges)
+	for buses_full_conn, buses_name_only, transformer_name in zip(transformer_bus_names_full_conn, transformer_buses_names_only, transformer_name ):
+		# new object=transformer.t_3160 windings=3 buses=[bus3160.3.0,t_bus3160_l.1.0,t_bus3160_l.0.2] phases=1 xhl=2.76 xht=2.76 xlt=1.84 conns=[wye,wye,wye] kvs=[7.9677,0.12,0.12] kvas=[25,25,25] taps=[1,1,1] %rs=[0.7,1.4,1.4]
+		# [bus3160.3.0,t_bus3160_l.1.0,t_bus3160_l.0.2]
+		# [bus3160, t_bus3160_l]
+		if len(buses_name_only) == 2:
+			bus0 = buses_name_only[0]
+			bus1 = buses_name_only[1]
+			bus1_full_conn_name = buses_full_conn[1]
+			transformer_edges.append ( (bus0, bus1, {'object': 'transformer', 'transformer_name': transformer_name, 'transformer_1': bus1_full_conn_name }) )
+		elif len(buses_name_only) == 3:
+			bus0 = buses_name_only[0]
+			bus1 = buses_name_only[1]
+			bus1_full_conn_name = buses_full_conn[1]
+			bus2_full_conn_name = buses_full_conn[2]
+			transformer_edges.append ( (bus0, bus1, {'object': 'transformer', 'transformer_name': transformer_name,
+																						'transformer_1': bus2_full_conn_name,
+																						'transformer_2': bus2_full_conn_name}) )
+		# Need to make this bullet proof for any number of transformers
+
+	G.add_edges_from( transformer_edges )
 	
 	loads = [x for x in tree if x.get('object', 'N/A').startswith('load.')] # This is an orderedDict
 	load_names = [x['object'].split('.')[1] for x in loads if 'object' in x and x['object'].startswith('load.')]
@@ -907,15 +915,15 @@ def dss_to_nx_fulldata( dssFilePath, tree=None, fullData = True ):
 	# Need to add data for transformers
 	# Some have windings.
 	
-	# if fullData:
-	# 	#  %loadloss=0.01
-	# 	transformer_edges_with_attributes = {}
-	# 	transformer_phases = [x['phases'] for x in lines if 'phases' in x]
-	# 	transformer_bank = [x['bank'] for x in lines if 'bank' in x]
-	# 	transformer_xhl = [x['xhl'] for x in lines if 'xhl' in x]
-	# 	transformer_kvas = [x['kvas'] for x in lines if 'kvas' in x]
-	# 	transformer_kvs = [x['kvs'] for x in lines if 'kvs' in x]
-	# 	transformer_loadloss = [x['loadloss'] for x in lines if 'loadloss' in x]
+	if fullData:
+		#  %loadloss=0.01
+		transformer_edges_with_attributes = {}
+		transformer_phases = [x['phases'] for x in transformers if 'phases' in x]
+		transformer_bank = [x['bank'] for x in transformers if 'bank' in x]
+		transformer_xhl = [x['xhl'] for x in transformers if 'xhl' in x]
+		transformer_kvas = [x['kvas'] for x in transformers if 'kvas' in x]
+		transformer_kvs = [x['kvs'] for x in transformers if 'kvs' in x]
+		transformer_loadloss = [x['loadloss'] for x in transformers if 'loadloss' in x]
 	# 	for t_edge, phase, bank, xhl_val, kvas_val, kvs_val, loadloss_val in zip(transformer_edges, transformer_phases, transformer_bank, transformer_xhl, transformer_kvas, transformer_kvs, transformer_loadloss):
 	# 			t_edge_nodes = (t_edge[0], t_edge[1])
 	# 			transformer_edges_with_attributes[t_edge_nodes] = { "phases": phase, "bank": bank, "xhl": xhl_val, "kvas": kvas_val, "kvs": kvs_val, "loadloss": loadloss_val }
@@ -949,6 +957,7 @@ def dss_to_nx_fulldata( dssFilePath, tree=None, fullData = True ):
 		# Need to add gen betwen bus and node.
 		# but if what is between them is a transformer, then it'll get removed. then there would be an edge between a deleted node and the generator node.. it has to between the bus.. now im confused.
 		if fullData:
+			G.nodes[gen]['bus1'] = bus_for_positioning
 			G.nodes[gen]['phases'] = phases
 			G.nodes[gen]['kv'] = kv
 			G.nodes[gen]['kw'] = kw
@@ -960,6 +969,53 @@ def dss_to_nx_fulldata( dssFilePath, tree=None, fullData = True ):
 	storage = [x for x in tree if x.get('object', 'N/A').startswith('storage.')]
 	storage_names = [x['object'].split('.')[1] for x in storage if 'object' in x and x['object'].startswith('storage.')]
 	storage_bus1 = [x.split('.')[0] for x in [x['bus1'] for x in storage if 'bus1' in x]]
+
+	storage_phases = [x['phases'] for x in storage if 'phases' in x]
+	storage_kv = [x['kv'] for x in storage if 'kv' in x]
+	storage_kwrated = [x['kwrated'] for x in storage if 'kwrated' in x]
+	storage_dispmode = [x['dispmode'] for x in storage if 'dispmode' in x]
+	storage_kwhstored = [x['kwhstored '] for x in storage if 'kwhstored ' in x]
+	storage_kwhrated = [x['kwhrated'] for x in storage if 'kwhrated' in x]
+	
+	for stor_name, bus, phase, kv, kwr, dispmode, kwhs, kwhr in zip( storage_names, storage_bus1, storage_phases, storage_kv, storage_kwrated, storage_dispmode, storage_kwhstored, storage_kwhrated):
+		G.add_node( stor_name, pos=pos[bus], object='storage')
+		pos[stor_name] = pos[bus]
+		G.add_edge( bus, stor_name)
+
+		if fullData:
+			G.nodes[stor_name]['bus1'] = bus
+			G.nodes[stor_name]['phases'] = phase
+			G.nodes[stor_name]['kv'] = kv
+			G.nodes[stor_name]['kwrated'] = kwr
+			G.nodes[stor_name]['dispmode'] = dispmode
+			G.nodes[stor_name]['kwhstored'] = kwhs
+			G.nodes[stor_name]['kwhrated'] = kwhr
+
+	# new object=pvsystem.b_existing7 phases=1 bus1=x_b4870_cust1-b.2 kv=0.24 kva=11 irradiance=1 pmpp=10 pf=1 %cutin=0.1 %cutout=0.1
+	pvsystem = [x for x in tree if x.get('object', 'N/A').startswith('pvsystem.')]
+	pvsystem_names = [x['object'].split('.')[1] for x in pvsystem if 'object' in x and x['object'].startswith('pvsystem.')]
+	pvsystem_bus1 = [x.split('.')[0] for x in [x['bus1'] for x in pvsystem if 'bus1' in x]]
+
+	pvsystem_phases = [x['phases'] for x in pvsystem if 'phases' in x]
+	pvsystem_kv = [x['kv'] for x in pvsystem if 'kv' in x]
+	pvsystem_kva = [x['kva'] for x in pvsystem if 'kva' in x]
+	pvsystem_irradiance = [x['irradiance'] for x in pvsystem if 'irradiance' in x]
+	pvsystem_pmpp = [x['pmpp'] for x in pvsystem if 'pmpp' in x]
+	pvsystem_pf = [x['pf'] for x in pvsystem if 'pf' in x]
+
+	for pvs_name, bus, phase, kv, kva, irra, pmpp, pf in zip( pvsystem_names, pvsystem_bus1, pvsystem_phases, pvsystem_kv, pvsystem_kva, pvsystem_irradiance, pvsystem_pmpp, pvsystem_pf):
+		G.add_node( pvs_name, pos=pos[bus], object='pvsystem')
+		pos[pvs_name] = pos[bus]
+		G.add_edge( bus, pvs_name )
+
+		if fullData:
+			G.nodes[pvs_name]['bus1'] = bus
+			G.nodes[pvs_name]['phases'] = phase
+			G.nodes[pvs_name]['kv'] = kv
+			G.nodes[pvs_name]['kva'] = kva
+			G.nodes[pvs_name]['irradiance'] = irra
+			G.nodes[pvs_name]['pmpp'] = pmpp
+			G.nodes[pvs_name]['pf'] = pf
 
 	return G, pos
 

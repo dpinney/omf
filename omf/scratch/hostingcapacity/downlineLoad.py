@@ -148,7 +148,7 @@ def dss_to_nx_fulldata( dssFilePath, tree=None, fullData = True ):
 		A networkx graph of the circuit 
 	'''
 	if tree == None:
-		tree = dssConvert.dssToTree( dssFilePath )
+		tree = opendss.dssConvert.dssToTree( dssFilePath )
 
 	G = nx.MultiDiGraph()
 
@@ -298,7 +298,7 @@ def drawNXGraph(G, pos, outputPath, colorCode = [], labels: list=[], figSize=(20
 	plt.clf()
 
 if __name__ == '__main__':
-	'''
+	''' Sanity Checks
 	Wants: 
 	- Directed graph
 	-> Can have it be optional.
@@ -315,7 +315,7 @@ if __name__ == '__main__':
 	'load_1011' 'load_1012', 'load_1013', 'load_1014', 'load_1015', 'load_1016', 'load_1017']
 	'''
 
-	'''
+	''' Going through old functions
 	#################################################### 
 	Func 1: convertOmd(pathToOmdFile) in geo.py
 	Issue 1: Not directed.
@@ -408,14 +408,16 @@ if __name__ == '__main__':
 	because of the linux capital directory issue.
 	'''
 
-	'''
-	Planning new function from what I have now: omd_to_nx
+	''' Planning new function from what I have now: omd_to_nx
 	- Want to have the drawing like the original networkX
 	- Want hosting capacity coloring
 	- Want attributes for nodes/edges ( optional? )
 	- Get rid of volt stuff
 	'''
 
+	########## IOWA ##########
+
+	########## Creating Iowa Graph - Iowa240
 	modelDir = Path(omf.omfDir, 'scratch', 'hostingcapacity')
 	starting_omd_test_file = Path( omf.omfDir, 'static', 'publicFeeders', 'iowa240.clean.dss.omd')
 	tree = opendss.dssConvert.omdToTree( starting_omd_test_file )
@@ -426,10 +428,11 @@ if __name__ == '__main__':
 	labels = {}
 	for node in iowa240Graph.nodes:
 		labels[node] = node
-	# drawNXGraph(iowa240Graph, iowa240Pos, Path(modelDir, "iowa.png"), labels=labels)
+	drawNXGraph(iowa240Graph, iowa240Pos, Path(modelDir, "iowa.png"), labels=labels)
 	
-	# print( "Descendents for bus1002 in iowa240: ", sorted(nx.descendants(iowa240Graph, "bus1002")) )
+	print( "Descendents for bus1002 in iowa240: ", sorted(nx.descendants(iowa240Graph, "bus1002")) )
 
+	########## Downline Load of Iowa - Iowa240
 	buses = opendss.get_all_buses( os.path.join( modelDir, 'downlineLoad.dss') )
 	buses_output = {}
 	iowa_kw = nx.get_node_attributes(iowa240Graph, 'kw')
@@ -445,7 +448,7 @@ if __name__ == '__main__':
 			buses_output[bus] = kwSum
 	# print( "\n buses output for kw from iowa240: ", buses_output )
 
-	# Test Load Data
+	########## Test Load Data - Iowa240
 	# new object=load.load_1006 bus1=t_bus1006_l.1.2 phases=1 conn=delta kv=0.208 kw=5.04 kvar=2.29629183968801
 	bus1_iowa240 = nx.get_node_attributes(iowa240Graph, 'bus1')
 	phases_iowa240 = nx.get_node_attributes(iowa240Graph, 'phases')
@@ -458,11 +461,16 @@ if __name__ == '__main__':
 	# 		  (bus1_iowa240['load_1006'], phases_iowa240['load_1006'], conn_iowa240['load_1006'],
 	# 			kv_iowa240['load_1006'], kw_iowa240['load_1006'], kvar_iowa240['load_1006']) )
 
-	# Test Line Data
+	########## Test Line Data - Iowa240
 	# new object=line.cb_101 bus1=bus1.1.2.3 bus2=bus1001.1.2.3 phases=3 switch=true r1=0.0001 r0=0.0001 x1=0 x0=0 c1=0 c0=0
 	# new object=line.l_3161_3162 bus1=bus3161.3 bus2=bus3162.3 phases=1 length=176 units=ft linecode=ug_1p_type2 seasons=1 ratings=[400] normamps=400 emergamps=600
 	line_name_iowa240 = nx.get_edge_attributes(iowa240Graph, 'line_name')
 	phases_iowa240 = nx.get_edge_attributes(iowa240Graph, 'phases')
+
+	transformer_1_iowa240 = nx.get_edge_attributes(iowa240Graph, 'transformer_1')
+	# print( transformer_1_iowa240 )
+
+	# print( iowa240Graph.edges('bus3160') )
 
 	# switch_iowa240 = nx.get_edge_attributes(iowa240Graph, 'switch')
 	# print( "\nswitch_iowa240: ", switch_iowa240)
@@ -480,29 +488,37 @@ if __name__ == '__main__':
 	# if switch_test not in length_iowa240:
 	# 	print( "switch line is not in length line")
 
-	# Test Transformer Data
-	transformer_name_iowa240 = nx.get_edge_attributes( iowa240Graph, 'transformer_name')
+	########## Test Transformer Data
+	# new object=transformer.t_2014 windings=3 buses=[bus2014.2.0,t_bus2014_l.1.0,t_bus2014_l.0.2] phases=1 xhl=3.24 xht=3.24 xlt=2.16 conns=[wye,wye,wye] kvs=[7.9677,0.12,0.12] kvas=[37.5,37.5,37.5] taps=[1,1,1] %rs=[1.8,3.6,3.6]
+
+	# transformer_name_iowa240 = nx.get_edge_attributes( iowa240Graph, 'transformer_name')
 	# print( "\n transformer_name: ", transformer_name_iowa240 )
-
-
 
 	# This is for multiDigraph that didn't work
 	# for item in graph.successors( "bus1002"):
 	# 	print( item ) 
+
+	########## LEHIGH TESTING ##########
 
 	lehigh_file = Path( omf.omfDir, 'scratch', 'hostingcapacity', 'lehigh4mgs.dss.omd')
 	lehigh_tree = opendss.dssConvert.omdToTree( lehigh_file )
 	opendss.dssConvert.treeToDss(lehigh_tree, Path(modelDir, 'lehighOmdToDss.dss'))
 	lehigh_data = opendss.dss_to_nx_fulldata( Path(modelDir, 'lehighOmdToDss.dss') )
 	lehigh_graph = lehigh_data[0]
-	# drawNXGraph(lehigh_graph, lehigh_data[1], Path(modelDir, "lehigh.png"))
+	lehigh_labels = {}
+	for node in lehigh_graph.nodes:
+		lehigh_labels[node] = node
+	drawNXGraph(lehigh_graph, lehigh_data[1], Path(modelDir, "lehigh.png"), labels=lehigh_labels)
 
 	# new object=generator.solar_634_existing bus1=634.1 phases=1 kv=0.277 kw=440 pf=1 yearly=solar_634_existing_shap
 
+	########## Lehigh Downline Load
 	# print( "Descendents for bus 634 in lehigh4: ", sorted(nx.descendants(lehigh_graph, "634")) )
 	buses = opendss.get_all_buses( os.path.join( modelDir, 'lehighOmdToDss.dss') )
 	buses_output = {}
 	lehigh_kw = nx.get_node_attributes(lehigh_graph, 'kw')
+	lehigh_kwRated = nx.get_node_attributes( lehigh_graph, 'kwrated') # Storage attribute
+	lehigh_kvFromGraph = nx.get_node_attributes( lehigh_graph, 'kv' )
 	# print( "\nlehigh_kw: ", lehigh_kw)
 	lehigh_objects = nx.get_node_attributes(lehigh_graph, 'object')
 	# print( "\nlehigh_objects: ", lehigh_objects )
@@ -516,9 +532,57 @@ if __name__ == '__main__':
 					kwSum += float(lehigh_kw[dependent])
 				elif dependent in lehigh_kw.keys() and lehigh_objects[dependent] == 'generator':
 					kwSum -= float(lehigh_kw[dependent])
+				elif dependent in lehigh_kwRated.keys() and lehigh_objects[dependent] == 'storage':
+					kwSum -= float(lehigh_kwRated[dependent])
+				elif dependent in lehigh_kvFromGraph.keys() and lehigh_objects[dependent] == 'pvsystem':
+					pfFromGraph = nx.get_node_attributes(lehigh_graph, 'pf')
+					# pvsystem has kv, not kw
+					kwForPVSys = lehigh_kvFromGraph[dependent] * pfFromGraph[dependent]
+					kwSum -= kwForPVSys
 			buses_output[bus] = kwSum
 
-	print( "\ndownline kw load output for lehigh: ", buses_output )
+	print( "\ndownline kw load output for lehigh with generator and storage: ", buses_output )
+	
+
+	''' EPRI-J1.clean.dss - this has pvsystem
+	# EPRI-J1.clean.dss - this has pvsystem
+	EPRI_J1_file = Path( omf.omfDir, 'solvers', 'opendss', 'EPRI-J1.clean.dss')
+	EPRI_J1_data = opendss.dss_to_nx_fulldata( EPRI_J1_file )
+	EPRI_J1_graph = EPRI_J1_data[0]
+
+	buses = opendss.get_all_buses( os.path.join( omf.omfDir, 'solvers', 'opendss', 'EPRI-J1.clean.dss' ) )
+	buses_output = {}
+	EPRI_J1_kwFromGraph = nx.get_node_attributes(EPRI_J1_graph, 'kw')
+	EPRI_J1_kwRatedFromGraph = nx.get_node_attributes( EPRI_J1_graph, 'kwrated') # Storage attribute
+	EPRI_J1_kvFromGraph = nx.get_node_attributes( EPRI_J1_graph, 'kv' )
+	EPRI_J1_objects = nx.get_node_attributes(EPRI_J1_graph, 'object')
+	EPRI_J1_labels = {}
+	for node in EPRI_J1_graph.nodes:
+		EPRI_J1_labels[node] = node
+	drawNXGraph(EPRI_J1_graph, EPRI_J1_data[1], Path(modelDir, "EPRI_J1.png"), labels=EPRI_J1_labels)
+	# Check if they are buses
+	for bus in buses:
+		if bus in EPRI_J1_graph.nodes:
+			kwSum = 0
+			get_dependents = sorted(nx.descendants(EPRI_J1_graph, bus))
+			for dependent in get_dependents:
+				if dependent in EPRI_J1_kwFromGraph.keys() and EPRI_J1_objects[dependent] == 'load':
+					kwSum += float(EPRI_J1_kwFromGraph[dependent])
+				elif dependent in EPRI_J1_kwFromGraph.keys() and EPRI_J1_objects[dependent] == 'generator':
+					kwSum -= float(EPRI_J1_kwFromGraph[dependent])
+				elif dependent in EPRI_J1_kwRatedFromGraph.keys() and EPRI_J1_objects[dependent] == 'storage':
+					kwSum -= float(EPRI_J1_kwRatedFromGraph[dependent])
+				elif dependent in EPRI_J1_kvFromGraph.keys() and EPRI_J1_objects[dependent] == 'pvsystem':
+					pfFromGraph = nx.get_node_attributes(EPRI_J1_graph, 'pf')
+					# pvsystem has kv, not kw
+					kwForPVSys = EPRI_J1_kvFromGraph[dependent] * pfFromGraph[dependent]
+					kwSum -= kwForPVSys
+			buses_output[bus] = kwSum
+
+	print( "\ndownline kw load output for EPRI_J1 with pvsystem ", buses_output )
+	'''
+
+	
 
 	############################ Drawing stuff.
 	# kwFromGraph = nx.get_node_attributes(graph, 'kw') # Dict 
