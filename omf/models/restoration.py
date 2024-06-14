@@ -436,7 +436,7 @@ def makeLoadOutTimelnAndStatusMap(outputTimeline, loadList, timeList):
 	
 	return dfLoadTimeln, dfStatus
 
-def tradMetricsByMgTable(outputTimeline, loadMgDict, startTime, numTimeSteps, modelDir):
+def tradMetricsByMgTable(outputTimeline, loadMgDict, startTime, numTimeSteps, modelDir, stepSize):
 	'''
 	Generate table of SAIDI, SAIFI, CAIDI, and CAIFI during the outage simulation period, both for the whole system and broken down by microgrid. 
 	'''
@@ -452,7 +452,6 @@ def tradMetricsByMgTable(outputTimeline, loadMgDict, startTime, numTimeSteps, mo
 			CAIFI = CI/DCI
 			'''
 		dfLoadTimeln, dfStatus = makeLoadOutTimelnAndStatusMap(outputTimeline, loadList, [*range(startTime, numTimeSteps+startTime)])
-		
 		CS = len(set(loadList))
 		# CI = How many total load shed actions have occurred over the event
 		CI = dfLoadTimeln[dfLoadTimeln['action'] == 'Load Shed'].shape[0]
@@ -660,6 +659,71 @@ def outageIncidenceGraph(customerOutageData, outputTimeline, startTime, numTimeS
 		legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1))
 
 	return outageIncidenceFigure, mgOIFigures
+
+def makeTaifiAndTaidiHist(outputTimeline, startTime, numTimeSteps, loadList, stepSize):
+	''' Generate histogram of TAIFI and TAIDI for each load.
+
+		TAIFI = 1/Average period length where a period is defined as the time from one load shed to the next load shed. 
+
+		TAIDI = Number of minutes interrupted for a load over the total duartion of the simulation.  
+	'''
+	endTime = numTimeSteps+startTime
+	dfLoadTimeln, dfStatus = makeLoadOutTimelnAndStatusMap(outputTimeline, loadList, [*range(startTime, endTime)])
+	dfStatus = dfStatus.applymap(lambda x:1.0-x)
+	TAIFI = {}
+	TAIDI = {}
+	for loadName in loadList:
+		dfLoadSheds = dfLoadTimeln[(dfLoadTimeln['device'] == loadName)][(dfLoadTimeln['action'] == 'Load Shed')]
+		numLoadSheds = dfLoadSheds.shape[0]
+		timeOfFirstLoadShed = dfLoadSheds['time'].min()
+		timeOfLastLoadShed = dfLoadSheds['time'].max()
+		TAIFI[loadName] = numLoadSheds/((timeOfLastLoadShed-timeOfFirstLoadShed)*60)
+		TAIDI[loadName] = dfStatus[loadName].sum()/numTimeSteps
+		#TODO: Replace 60 with resolution of step size if it's ever possible not to have a resolution of 60 min
+ 
+	minVals = (min(list(TAIFI.values())), min(list(TAIDI.values())))
+	maxVals = (max(list(TAIFI.values())), max(list(TAIDI.values())))
+	numBins = 45
+	binSizes = ((maxVals[0]-minVals[0])/numBins, (maxVals[1]-minVals[1])/numBins)
+
+	taifiHist = go.Figure()
+	taifiHist.add_trace(go.Histogram(
+		x=list(TAIFI.values()),
+		name='TAIFI', # name used in legend and hover labels
+		xbins=dict(
+			start=minVals[0],
+			end=maxVals[0]+binSizes[0],
+			size=binSizes[0]
+		),
+		bingroup=1,
+		marker_color='#0000ff'
+	))
+	taifiHist.update_layout(
+		xaxis_title_text='TAIFI Values', # xaxis label
+		yaxis_title_text='Load Count', # yaxis label
+		barmode='overlay',
+		bargap=0.1 # gap between bars of adjacent location coordinates
+	)
+
+	taidiHist = go.Figure()
+	taidiHist.add_trace(go.Histogram(
+		x=list(TAIDI.values()),
+		name='TAIDI', # name used in legend and hover labels
+		xbins=dict(
+			start=minVals[1],
+			end=maxVals[1]+binSizes[1],
+			size=binSizes[1]
+		),
+		bingroup=1,
+		marker_color='#ff0000'
+	))
+	taidiHist.update_layout(
+		xaxis_title_text='TAIDI Values', # xaxis label
+		yaxis_title_text='Load Count', # yaxis label
+		barmode='overlay',
+		bargap=0.1 # gap between bars of adjacent location coordinates
+	)
+	return taifiHist, taidiHist
 
 def getMicrogridInfo(modelDir, pathToOmd, settingsFile, makeCSV = True):
 	'''	Gathers microgrid info including loads and other circuit objects in each microgrid by finding what microgrid each load's parent bus is designated as having. 
@@ -1250,8 +1314,9 @@ def graphMicrogrid(modelDir, pathToOmd, profit_on_energy_sales, restoration_cost
 	)
 
 	outageIncidenceFig, mgOIFigs = outageIncidenceGraph(customerOutageData, outputTimeline, startTime, numTimeSteps, loadPriorityFile, loadMgDict)
-	tradMetricsHtml = tradMetricsByMgTable(outputTimeline, loadMgDict, startTime, numTimeSteps, modelDir)
-	
+	tradMetricsHtml = tradMetricsByMgTable(outputTimeline, loadMgDict, startTime, numTimeSteps, modelDir, stepSize)
+	taifiHist, taidiHist = makeTaifiAndTaidiHist(outputTimeline, startTime, numTimeSteps, list(loadMgDict.keys()), stepSize)
+
 	customerOutageHtml = customerOutageTable(customerOutageData, outageCost, modelDir)
 	profit_on_energy_sales = float(profit_on_energy_sales)
 	restoration_cost = int(restoration_cost)
@@ -1275,7 +1340,9 @@ def graphMicrogrid(modelDir, pathToOmd, profit_on_energy_sales, restoration_cost
 			'endTime': 				simTimeSteps[-1], 
 			'stepSize': 			stepSize, 
 			'startTime': 			startTime,
-			'custHist': 			custHist}
+			'custHist': 			custHist,
+			'taifiHist':			taifiHist,
+			'taidiHist':			taidiHist}
 
 def buildCustomEvents(eventsCSV='', feeder='', customEvents='customEvents.json', defaultDispatchable = 'true'):
 	''' Builds an events json file for use by restoration.py based on an events CSV input.'''
@@ -1458,6 +1525,12 @@ def work(modelDir, inputDict):
 	outData['fig6Layout'] = json.dumps(layoutOb, cls=py.utils.PlotlyJSONEncoder)
 	outData['mgOIFigsData'] = json.dumps(plotOuts.get('mgOIFigs',{}), cls=py.utils.PlotlyJSONEncoder)
 	outData['mgOIFigsLayout'] = json.dumps(layoutOb, cls=py.utils.PlotlyJSONEncoder)
+	outData['taifiHistData'] = json.dumps(plotOuts.get('taifiHist',{}), cls=py.utils.PlotlyJSONEncoder)
+	outData['taifiHistLayout'] = json.dumps(layoutOb, cls=py.utils.PlotlyJSONEncoder)
+	outData['taidiHistData'] = json.dumps(plotOuts.get('taidiHist',{}), cls=py.utils.PlotlyJSONEncoder)
+	outData['taidiHistLayout'] = json.dumps(layoutOb, cls=py.utils.PlotlyJSONEncoder)
+
+
 	# Stdout/stderr.
 	outData['stdout'] = 'Success'
 	outData['stderr'] = ''

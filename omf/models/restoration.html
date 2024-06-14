@@ -197,6 +197,20 @@
 				Plotly.newPlot("fig5Chart", JSON.parse(allOutputData["fig5Data"]), JSON.parse(allOutputData["fig5Layout"]) || {})
 			</script>
 		</div>
+		<p class="reportTitle">TAIFI Histogram</p>
+		<div id="taifiHist" class="tightContent">
+			<div id="taifiHistChart" style="width:1000px"></div>
+			<script type="text/javascript">
+				Plotly.newPlot("taifiHistChart", JSON.parse(allOutputData["taifiHistData"]), JSON.parse(allOutputData["taifiHistLayout"]) || {})
+			</script>
+		</div>
+		<p class="reportTitle">TAIDI Histogram</p>
+		<div id="taidiHist" class="tightContent">
+			<div id="taidiHistChart" style="width:1000px"></div>
+			<script type="text/javascript">
+				Plotly.newPlot("taidiHistChart", JSON.parse(allOutputData["taidiHistData"]), JSON.parse(allOutputData["taidiHistLayout"]) || {})
+			</script>
+		</div>
 		<p class="reportTitle" style="page-break-before:always">Utility Outage Cost</p>
 		<div id="utilityOutageCostCalc" class="tightContent">
 			{{ allOutputDataDict['utilityOutageHtml'] }}
