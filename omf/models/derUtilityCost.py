@@ -26,7 +26,7 @@ tooltip = ('The derUtilityCost model evaluates the financial costs of controllin
 	'distributed energy resources (DERs) using the NREL Renewable Energy Optimization Tool (REopt) and '
 	'the OMF virtual battery dispatch module (vbatDispatch).')
 modelName, template = __neoMetaModel__.metadata(__file__)
-hidden = True ## Keep the model hidden=True during active development
+hidden = False ## Keep the model hidden=True during active development
 
 
 def work(modelDir, inputDict):
@@ -277,7 +277,7 @@ def new(modelDir):
 		'created': str(datetime.datetime.now()),
 
 		## REopt inputs:
-		'latitude' : '39.986771 ', 
+		'latitude' : '39.986771', 
 		'longitude' : '-104.812599', ## Brighton, CO
 		'year' : '2018',
 		'analysis_years' : '25', 

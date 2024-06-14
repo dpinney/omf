@@ -224,9 +224,7 @@ def get_tou_rates(modelDir, inputDict):
 
 	** Inputs
 	modelDir: (str) Currently model directory
-	lat: (float) Latitude of the utility
-	lon: (float) Longitude of the utility
-	##inputDict: (dict) Input dictionary containing latitude and longitude information (NOTE: this will replace lat and lon
+	inputDict: (dict) Input dictionary containing latitude and longitude information 
 
 	** Outputs
 	data: (JSON file) Ouput JSON file containing the API response fields \
@@ -278,6 +276,35 @@ def get_tou_rates_adhoc():
 		'winter_off_peak': 0.12
 	}
 	return tou_rates
+
+## Function to create TOU schedule based on the given OEDI utility energy schedule
+def create_tou_schedule(energy_schedule):
+	tou_schedule = []
+	for month in range(12):
+		for hour in range(24):
+			tou_schedule.append({
+				'Month': month + 1,
+				'Hour': hour,
+				'TOU Period': energy_schedule[month][hour]
+			})
+	return pd.DataFrame(tou_schedule)
+
+## Function to get the TOU rate based on the TOU schedule
+def calc_tou_rate(timestamp, tou_schedules, tou_structure):
+	month = timestamp.month
+	hour = timestamp.hour
+	day_of_week = timestamp.weekday()
+
+	## Weekdays
+	if day_of_week < 5: 
+		tou_period = tou_schedules['weekday'].loc[(tou_schedules['weekday']['Month'] == month) & (tou_schedules['weekday']['Hour'] == hour), 'TOU Period'].values[0]
+	
+	## Weekends
+	else:
+		tou_period = tou_schedules['weekend'].loc[(tou_schedules['weekend']['Month'] == month) & (tou_schedules['weekend']['Hour'] == hour), 'TOU Period'].values[0]
+
+	tou_rate = tou_structure[tou_period][0]['rate']
+	return tou_rate, tou_period
 
 
 def work(modelDir, inputDict):
@@ -344,7 +371,7 @@ def work(modelDir, inputDict):
 
 
 	## DER Overview plot
-	showlegend = True # either enable or disable the legend toggle in the plot
+
 	grid_to_load = reoptResults['ElectricUtility']['electric_to_load_series_kw']
 	if 'Generator' in reoptResults:
 		generator = reoptResults['Generator']['electric_to_load_series_kw']
@@ -354,24 +381,208 @@ def work(modelDir, inputDict):
 	else:
 		PV = np.zeros_like(demand)
 	
+	## NOTE: This section for BESS uses REopt's BESS, which we are finding is inconsistent and tends to not work
+	## unless an outage is specified (or when we specify a generator). We are instead going to try to use our own BESS model.
+	## Currently, the BESS model is only being run when considering a DER utility program is enabled.
 	## TODO: Change this to instead check for BESS in the output file, rather than input
-	if inputDict['BESS'] == 'Yes': ## BESS
-		BESS = reoptResults['ElectricStorage']['storage_to_load_series_kw']
-		grid_charging_BESS = reoptResults['ElectricUtility']['electric_to_storage_series_kw']
-		outData['chargeLevelBattery'] = reoptResults['ElectricStorage']['soc_series_fraction']
+	#if inputDict['BESS'] == 'Yes': ## BESS
+		#BESS = reoptResults['ElectricStorage']['storage_to_load_series_kw']
+		#grid_charging_BESS = reoptResults['ElectricUtility']['electric_to_storage_series_kw']
+		#outData['chargeLevelBattery'] = reoptResults['ElectricStorage']['soc_series_fraction']
 
 		## NOTE: The following 3 lines of code read in the SOC info from a static reopt test file 
 		#with open(pJoin(__neoMetaModel__._omfDir,'static','testFiles','residential_reopt_results.json')) as f:
 		#	static_reopt_results = json.load(f)
 		#outData['chargeLevelBattery'] = static_reopt_results['outputs']['ElectricStorage']['soc_series_fraction']
 
-	else:
-		BESS = np.zeros_like(demand)
-		grid_charging_BESS = np.zeros_like(demand)
+	#else:
+		#BESS = np.zeros_like(demand)
+		#grid_charging_BESS = np.zeros_like(demand)
+	BESS = np.zeros_like(demand)
+	grid_charging_BESS = np.zeros_like(demand)
 
-	## Create DER overview plot object
+	########## DER Sharing Program options ######################################################################################################################################################
+	if (inputDict['utilityProgram']):
+		print('Considering utility DER sharing program \n')
+
+		## Gather TOU rates
+		#latitude = float(inputDict['latitude'])
+		#longitude = float(inputDict['longitude'])
+		## TODO: To make this more modular, require user to input specific urdb label and use the getpage variable in get_tou_rates() function
+		## NOTE: Temporarily override lat/lon for a utility that has TOU rates specifically
+		inputDict['latitude'] = 39.986771 
+		inputDict['longitude'] = -104.812599 ## Brighton, CO
+		rate_info = get_tou_rates(modelDir, inputDict)
+
+		## Look at all the "name" keys containing "TOU" or "time of use"
+		#filtered_names = [item['name'] for item in rate_info['items'] if 'TOU' in item['name'] or 'time-of-use' in item['name'] or 'Time of Use' in item['name']]
+		#for name in filtered_names: 
+		#	print(name)	## Print the filtered names
+
+		## Select one of the name keys (in this case, the residential TOU)
+		TOUdata = []
+		TOUname = 'Residential Time of Use'
+		for item in rate_info['items']:
+			if item['name'] == TOUname:
+				TOUdata.append(item)
+
+		print(TOUdata)
+
+		## NOTE: ad-hoc TOU rates were used when the rate_info was not working.
+		#tou_rates = get_tou_rates_adhoc()
+
+		PV_series = pd.Series(PV, index=timestamps)
+		demand_series = pd.Series(demand, index=timestamps)
+		temperature_series = pd.Series(temperatures, index=timestamps)
+		BESS_series = pd.Series(BESS, index=timestamps)
+		#grid_serving_load_series = pd.Series(grid_to_load, index=timestamps) 
+		## NOTE: REopt gives grid_to_load, but for now I'm just prioritizing DERs serving the load and buying grid if needed.
+		## If we don't want to prioritize DERs serving the load before buying from grid, then need to integrate REopt's grid_to_load
+		## into the code loop below.
+
+		## Create weekday and weekend TOU schedules
+		weekday_tou_schedule = create_tou_schedule(TOUdata[0]['energyweekdayschedule'])
+		weekend_tou_schedule = create_tou_schedule(TOUdata[0]['energyweekendschedule'])
+
+		## Combine the weekday and weekend schedules
+		tou_schedules = {'weekday': weekday_tou_schedule, 'weekend': weekend_tou_schedule}
+		tou_structure = TOUdata[0]['energyratestructure']
+		fixed_monthly_charge = TOUdata[0]['fixedmonthlycharge']
+		compensation_rate = float(inputDict['rateCompensation'])
+		subsidy_amount = float(inputDict['subsidy'])
+
+		## Identify the on- and off-peak periods
+		on_peak_periods = []
+		off_peak_periods = []
+		for period, rate in enumerate(tou_structure):
+			if rate[0]['rate'] == max(tou_structure, key=lambda x: x[0]['rate'])[0]['rate']:
+				on_peak_periods.append(period)
+			if rate[0]['rate'] == min(tou_structure, key=lambda x: x[0]['rate'])[0]['rate']:
+				off_peak_periods.append(period)
+
+		## Create dataframe to store the schedule
+		schedule = pd.DataFrame({
+			'Solar Generation (kW)': PV_series,
+			'Household Demand (kW)': demand_series,
+			'Grid Serving Load (kW)': np.zeros(len(timestamps)),  ## Placeholder; will get updated in the loop
+			'Battery State of Charge': np.zeros(len(timestamps)),  ## Placeholder 
+		}, index=timestamps)
+
+		## BESS physical parameters
+		## TODO: Make these inputs on the HTML side if keeping this battery model
+		battery_energy_capacity = 13.5 ## kWh; Tesla Powerwall?
+		battery_max_charge_rate = 5  ## kW
+		battery_max_discharge_rate = 3.68  ## kW
+		#battery_efficiency = 0.9  # Efficiency of the battery ## NOTE: maybe add this in later?
+		battery_soc = 0  ## Initial battery state of charge
+		battery_soc_min = 0.2 * battery_energy_capacity  ## Min= 20% of battery capacity
+
+		## BESS allowed for utility use
+		## NOTE: I just realized that this code is set up to only use 80% of the battery to do peak shaving, rather than
+		## giving/selling the 80% to the utility. TODO: how do we modify this? Lisa and I are thinking of ways to do (and plot) this
+		max_utility_usage_percentage = float(inputDict['maxBESSDischarge'])  ## Up to 80% of the total battery charge
+		max_utility_usage = battery_energy_capacity * max_utility_usage_percentage
+
+		## Initial variables to be updated in the loop
+		economic_benefit = 0  ## Economic benefit of storing excess solar. NOTE: Is this useful?
+		total_economic_benefit = 0
+		total_energy_cost = 0  ## The total cost of energy 
+		total_der_compensation = 0  ## The total DER compensation amount (when DERs are discharged)
+		max_demand_periods = {period: 0 for period in range(len(tou_structure))}  ## The max demand during each period (for calculating the demand cost)
+
+		for i in range(1, len(timestamps)):
+			timestamp = timestamps[i] ## Grab the hour timestamp
+			tou_rate, tou_period = calc_tou_rate(timestamp, tou_schedules, tou_structure) ## Grab the specific TOU info for that hour
+
+			net_load = demand_series[i] - PV_series[i] ## Net load after PV is accounted for
+
+			if net_load > 0:
+				## Discharge the battery during on-peak hours; update BESS and economic variables
+				if tou_period in on_peak_periods:
+					discharge = min(battery_max_discharge_rate, net_load, battery_soc - battery_soc_min)
+					battery_soc -= discharge
+					#print('battery soc in onpeak: \n',battery_soc)
+					net_load -= discharge
+					der_compensation = discharge * compensation_rate
+
+					## If battery cannot meet all of the demand, then buy energy from the grid
+					if net_load > 0:
+						utility_usage = net_load ## utility_usage is how much energy needs to be bought from the grid
+						total_energy_cost += utility_usage * tou_rate
+					else:
+						utility_usage = 0
+				else:
+					## If off-peak period, use grid if necessary
+					battery_soc = min(battery_energy_capacity, battery_soc + battery_max_charge_rate)
+					#print('battery soc in offpeak 1: \n',battery_soc)
+					utility_usage = net_load
+					total_energy_cost += utility_usage * tou_rate
+					der_compensation = 0
+			else: ## If net_load <= 0 (PV has served all load)
+				## Store any excess PV in the BESS during off-peak periods
+				if tou_period in off_peak_periods:
+					excess_solar = -net_load
+					charge = min(battery_max_charge_rate, excess_solar)
+					battery_soc = min(battery_energy_capacity, battery_soc + charge)
+					#print('battery soc in offpeak 2: \n',battery_soc)
+					utility_usage = 0  ## No energy being bought from the grid
+					economic_benefit = charge * compensation_rate  ## Economic benefit from storing excess solar.
+					der_compensation = 0  ## No DER compensation for charging
+				else:
+					## If not off-peak, sell excess solar to the grid
+					utility_usage = -net_load
+					total_energy_cost -= utility_usage * tou_rate
+					economic_benefit = 0
+					der_compensation = 0
+
+			## Update the total economic benefit and DER compensation variables
+			total_economic_benefit += economic_benefit
+			total_der_compensation += der_compensation
+
+			## Track the maximum demand for the current TOU period
+			max_demand_periods[tou_period] = max(max_demand_periods[tou_period], demand_series[i] + utility_usage)
+
+			## Update the DER schedule
+			schedule.loc[timestamp, 'Grid Serving Load (kW)'] = utility_usage
+			schedule.loc[timestamp, 'Battery State of Charge'] = battery_soc
+
+		## Calculate total demand cost (including fixed monthly charge)
+		demand_cost = sum(max_demand_periods[period] * tou_structure[period][0]['rate'] for period in max_demand_periods) + fixed_monthly_charge
+
+		## Calculate total DER compensation amount (including any subsidies)
+		total_compensation = total_economic_benefit + total_der_compensation - total_energy_cost + subsidy_amount - demand_cost
+		
+		print(f"Total Energy Cost: ${total_energy_cost:.2f}")
+		print(f"Total DER Compensation: ${total_der_compensation:.2f}")
+		print(f"Total Compensation: ${total_compensation:.2f}")
+
+		## Plots
+		fig, ax1 = plt.subplots(figsize=(14, 7))
+		ax1.plot(schedule.index, schedule['Solar Generation (kW)'], label='Solar Generation (kW)')
+		ax1.plot(schedule.index, schedule['Household Demand (kW)'], label='Household Demand (kW)')
+		ax1.plot(schedule.index, schedule['Grid Serving Load (kW)'], label='Grid Serving Load (kW)')
+		ax1.plot(schedule.index, schedule['Battery State of Charge'], label='Battery State of State of Charge (kW)', color='k')
+		ax1.set_xlabel('Time')
+		ax1.set_ylabel('Power (kW)')
+		ax1.legend(loc='upper left')
+		ax1.grid(True)
+		ax1.set_title('DER Dispatch Schedule')
+
+		## Create secondary y-axis for Battery SOC
+		## TODO: add battery kWh to ax1
+		#ax2 = ax1.twinx()
+		#ax2.plot(schedule.index, schedule['Battery State of Charge'] / battery_energy_capacity, label='Battery State of Charge (SOC)', color='r')
+		#ax2.set_ylabel('Battery State of Charge (SOC)')
+		#ax2.set_ylim(0, 1)
+
+		ax1.legend(loc='upper right')
+
+		plt.show()
+
+
+	## Create DER overview plot object ######################################################################################################################################################
 	fig = go.Figure()
-
+	showlegend = True # either enable or disable the legend toggle in the plot
 	if inputDict['load_type'] != '0': ## Load type 0 corresponds to the "None" option, which disables this vbatDispatch function
 		vbat_discharge_component = np.asarray(vbat_discharge_flipsign)
 		vbat_charge_component = np.asarray(vbat_charge)
@@ -507,7 +718,7 @@ def work(modelDir, inputDict):
 	outData['derOverviewData'] = json.dumps(fig.data, cls=plotly.utils.PlotlyJSONEncoder)
 	outData['derOverviewLayout'] = json.dumps(fig.layout, cls=plotly.utils.PlotlyJSONEncoder)
 
-	## Add REopt resilience plot (adapted from omf/models/microgridDesign.py)
+	## Add REopt resilience plot (adapted from omf/models/microgridDesign.py) ########################################################################################################################
 	#helper function for generating output graphs
 	def makeGridLine(x,y,color,name):
 		plotLine = go.Scatter(
@@ -570,7 +781,7 @@ def work(modelDir, inputDict):
 		outData['resilienceProbLayout'] = json.dumps(plotlyLayout, cls=plotly.utils.PlotlyJSONEncoder)
 
 
-	## Create Exported Power plot object
+	## Create Exported Power plot object ######################################################################################################################################################
 	fig = go.Figure()
 	
 	## Power used to charge BESS (electric_to_storage_series_kw)
@@ -640,233 +851,6 @@ def work(modelDir, inputDict):
 	## Encode plot data as JSON for showing in the HTML side
 	outData['exportedPowerData'] = json.dumps(fig.data, cls=plotly.utils.PlotlyJSONEncoder)
 	outData['exportedPowerLayout'] = json.dumps(fig.layout, cls=plotly.utils.PlotlyJSONEncoder)
-
-	########## DER Sharing Program options ##########
-	if (inputDict['utilityProgram']):
-		print('Considering utility DER sharing program \n')
-		
-		## Gather DERs from REopt and vbatDispatch
-
-		## Gather TOU rates
-		#latitude = float(inputDict['latitude'])
-		#longitude = float(inputDict['longitude'])
-		## TODO: To make this more modular, require user to input specific urdb label and use the getpage variable in get_tou_rates() function
-		## NOTE: Temporarily override lat/lon for a utility that has TOU rates specifically
-		inputDict['latitude'] = 39.986771 
-		inputDict['longitude'] = -104.812599 ## Brighton, CO
-		rate_info = get_tou_rates(modelDir, inputDict)
-
-		## Look at all the "name" keys containing "TOU" or "time of use"
-		#filtered_names = [item['name'] for item in rate_info['items'] if 'TOU' in item['name'] or 'time-of-use' in item['name'] or 'Time of Use' in item['name']]
-		#for name in filtered_names: 
-		#	print(name)	## Print the filtered names
-
-		## Select one of the name keys (in this case, the residential TOU)
-		TOUdata = []
-		TOUname = 'Residential Time of Use'
-		for item in rate_info['items']:
-			if item['name'] == TOUname:
-				TOUdata.append(item)
-
-		print(TOUdata)
-
-		## NOTE: ad-hoc TOU rates were used when the rate_info was not working.
-		#tou_rates = get_tou_rates_adhoc()
-		#print(TOUdata[0])
-		
-		## Tiered Energy Usage Charge Structure. Each element in the top-level array corresponds to one period 
-			#(see energyweekdayschedule and energyweekendschedule) and each array element within a period corresponds 
-			#to one tier. Indices are zero-based to correspond with energyweekdayschedule and energyweekendschedule entries: 
-			#[[{"max":(Decimal),"unit":(Enumeration),"rate":(Decimal),"adj":(Decimal),"sell":(Decimal)},...],...]
-		#energyRateStructure = TOUdata[0]['energyratestructure']
-		#energyWeekdaySchedule = TOUdata[0]['energyweekdayschedule']
-		#energyWeekendSchedule = TOUdata[0]['energyweekendschedule']
-
-		PV_series = pd.Series(PV, index=timestamps)
-		demand_series = pd.Series(demand, index=timestamps)
-		temperature_series = pd.Series(temperatures, index=timestamps)
-		BESS_series = pd.Series(BESS, index=timestamps)
-		#grid_serving_load_series = pd.Series(grid_to_load, index=timestamps) 
-		## NOTE: REopt gives grid_to_load, but for now I'm just prioritizing DERs serving the load and buying grid if needed.
-		## If we don't want to prioritize DERs serving the load before buying from grid, then need to integrate REopt's grid_to_load
-		## into the code loop below.
-
-		## Function to create TOU schedule based on the given OEDI utility energy schedule
-		def create_tou_schedule(energy_schedule):
-			tou_schedule = []
-			for month in range(12):
-				for hour in range(24):
-					tou_schedule.append({
-						'Month': month + 1,
-						'Hour': hour,
-						'TOU Period': energy_schedule[month][hour]
-					})
-			return pd.DataFrame(tou_schedule)
-
-		## Function to get the TOU rate based on the TOU schedule
-		def calc_tou_rate(timestamp, tou_schedules, tou_structure):
-			month = timestamp.month
-			hour = timestamp.hour
-			day_of_week = timestamp.weekday()
-
-			## Weekdays
-			if day_of_week < 5: 
-				tou_period = tou_schedules['weekday'].loc[(tou_schedules['weekday']['Month'] == month) & (tou_schedules['weekday']['Hour'] == hour), 'TOU Period'].values[0]
-			
-			## Weekends
-			else:
-				tou_period = tou_schedules['weekend'].loc[(tou_schedules['weekend']['Month'] == month) & (tou_schedules['weekend']['Hour'] == hour), 'TOU Period'].values[0]
-
-			tou_rate = tou_structure[tou_period][0]['rate']
-			return tou_rate, tou_period
-
-		## Create weekday and weekend TOU schedules
-		weekday_tou_schedule = create_tou_schedule(TOUdata[0]['energyweekdayschedule'])
-		weekend_tou_schedule = create_tou_schedule(TOUdata[0]['energyweekendschedule'])
-
-		## Combine the weekday and weekend schedules
-		tou_schedules = {'weekday': weekday_tou_schedule, 'weekend': weekend_tou_schedule}
-		tou_structure = TOUdata[0]['energyratestructure']
-		fixed_monthly_charge = TOUdata[0]['fixedmonthlycharge']
-		compensation_rate = float(inputDict['rateCompensation'])
-		subsidy_amount = float(inputDict['subsidy'])
-
-		## Identify the on- and off-peak periods
-		on_peak_periods = []
-		off_peak_periods = []
-		for period, rate in enumerate(tou_structure):
-			if rate[0]['rate'] == max(tou_structure, key=lambda x: x[0]['rate'])[0]['rate']:
-				on_peak_periods.append(period)
-			if rate[0]['rate'] == min(tou_structure, key=lambda x: x[0]['rate'])[0]['rate']:
-				off_peak_periods.append(period)
-
-		## Create dataframe to store the schedule
-		schedule = pd.DataFrame({
-			'Solar Generation (kW)': PV_series,
-			'Household Demand (kW)': demand_series,
-			'Grid Serving Load (kW)': np.zeros(len(timestamps)),  ## Placeholder; will get updated in the loop
-			'Battery State of Charge': np.zeros(len(timestamps)),  ## Placeholder 
-		}, index=timestamps)
-
-		## BESS physical parameters
-		## TODO: Make these inputs on the HTML side if keeping this battery model
-		battery_energy_capacity = 13.5 ## kWh; Tesla Powerwall?
-		battery_max_charge_rate = 5  ## kW
-		battery_max_discharge_rate = 3.68  ## kW
-		#battery_efficiency = 0.9  # Efficiency of the battery ## NOTE: maybe add this in later?
-		battery_soc = 0  ## Initial battery state of charge
-		battery_soc_min = 0.2 * battery_energy_capacity  ## Min= 20% of battery capacity
-
-		## BESS allowed for utility use
-		## NOTE: I just realized that this code is set up to only use 80% of the battery to do peak shaving, rather than
-		## giving/selling the 80% to the utility. TODO: how do we modify this? Lisa and I are thinking of ways to do (and plot) this
-		max_utility_usage_percentage = float(inputDict['maxBESSDischarge'])  ## Up to 80% of the total battery charge
-		max_utility_usage = battery_energy_capacity * max_utility_usage_percentage
-
-		## Initial variables to be updated in the loop
-		economic_benefit = 0  ## Economic benefit of storing excess solar. NOTE: Is this useful?
-		total_economic_benefit = 0
-		total_energy_cost = 0  ## The total cost of energy 
-		total_der_compensation = 0  ## The total DER compensation amount (when DERs are discharged)
-		max_demand_periods = {period: 0 for period in range(len(tou_structure))}  ## The max demand during each period (for calculating the demand cost)
-
-		for i in range(1, len(timestamps)):
-			timestamp = timestamps[i] ## Grab the hour timestamp
-			tou_rate, tou_period = calc_tou_rate(timestamp, tou_schedules, tou_structure) ## Grab the specific TOU info for that hour
-
-			net_load = demand_series[i] - PV_series[i] ## Net load after PV is accounted for
-
-			if net_load > 0:
-				## Discharge the battery during on-peak hours; update BESS and economic variables
-				if tou_period in on_peak_periods:
-					discharge = min(battery_max_discharge_rate, net_load, battery_soc - battery_soc_min)
-					battery_soc -= discharge
-					#print('battery soc in onpeak: \n',battery_soc)
-					net_load -= discharge
-					der_compensation = discharge * compensation_rate
-
-					## If battery cannot meet all of the demand, then buy energy from the grid
-					if net_load > 0:
-						utility_usage = net_load ## utility_usage is how much energy needs to be bought from the grid
-						total_energy_cost += utility_usage * tou_rate
-					else:
-						utility_usage = 0
-				else:
-					## If off-peak period, use grid if necessary
-					battery_soc = min(battery_energy_capacity, battery_soc + battery_max_charge_rate)
-					#print('battery soc in offpeak 1: \n',battery_soc)
-					utility_usage = net_load
-					total_energy_cost += utility_usage * tou_rate
-					der_compensation = 0
-			else: ## If net_load <= 0 (PV has served all load)
-				## Store any excess PV in the BESS during off-peak periods
-				if tou_period in off_peak_periods:
-					excess_solar = -net_load
-					charge = min(battery_max_charge_rate, excess_solar)
-					battery_soc = min(battery_energy_capacity, battery_soc + charge)
-					#print('battery soc in offpeak 2: \n',battery_soc)
-					utility_usage = 0  ## No energy being bought from the grid
-					economic_benefit = charge * compensation_rate  ## Economic benefit from storing excess solar.
-					der_compensation = 0  ## No DER compensation for charging
-				else:
-					## If not off-peak, sell excess solar to the grid
-					utility_usage = -net_load
-					total_energy_cost -= utility_usage * tou_rate
-					economic_benefit = 0
-					der_compensation = 0
-
-			## Update the total economic benefit and DER compensation variables
-			total_economic_benefit += economic_benefit
-			total_der_compensation += der_compensation
-
-			## Track the maximum demand for the current TOU period
-			max_demand_periods[tou_period] = max(max_demand_periods[tou_period], demand_series[i] + utility_usage)
-
-			## Update the DER schedule
-			schedule.loc[timestamp, 'Grid Serving Load (kW)'] = utility_usage
-			schedule.loc[timestamp, 'Battery State of Charge'] = battery_soc
-
-		## Calculate total demand cost (including fixed monthly charge)
-		demand_cost = sum(max_demand_periods[period] * tou_structure[period][0]['rate'] for period in max_demand_periods) + fixed_monthly_charge
-
-		## Calculate total DER compensation amount (including any subsidies)
-		total_compensation = total_economic_benefit + total_der_compensation - total_energy_cost + subsidy_amount - demand_cost
-		
-		print(f"Total Energy Cost: ${total_energy_cost:.2f}")
-		print(f"Total DER Compensation: ${total_der_compensation:.2f}")
-		print(f"Total Compensation: ${total_compensation:.2f}")
-
-		## Plots
-		fig, ax1 = plt.subplots(figsize=(14, 7))
-		ax1.plot(schedule.index, schedule['Solar Generation (kW)'], label='Solar Generation (kW)')
-		ax1.plot(schedule.index, schedule['Household Demand (kW)'], label='Household Demand (kW)')
-		ax1.plot(schedule.index, schedule['Grid Serving Load (kW)'], label='Grid Serving Load (kW)')
-		ax1.set_xlabel('Time')
-		ax1.set_ylabel('Power (kW)')
-		ax1.legend(loc='upper left')
-		ax1.grid(True)
-		ax1.set_title('DER Dispatch Schedule')
-
-		## Create secondary y-axis for Battery SOC
-		## TODO: add battery kWh to ax1
-		ax2 = ax1.twinx()
-		ax2.plot(schedule.index, schedule['Battery State of Charge'] / battery_energy_capacity, label='Battery State of Charge (SOC)', color='r')
-		ax2.set_ylabel('Battery State of Charge (SOC)')
-		ax2.set_ylim(0, 1)
-
-		lines, labels = ax1.get_legend_handles_labels()
-		lines2, labels2 = ax2.get_legend_handles_labels()
-		ax1.legend(lines + lines2, labels + labels2, loc='upper right')
-
-		plt.show()
-
-
-		########## Determine area under the curve ##########
-		
-		
-		########## Apply rate compensations to DERs deployed ##########
-
-		########## Plot the peak shave schedule? ##########
 
 	# Stdout/stderr.
 	outData['stdout'] = 'Success'
