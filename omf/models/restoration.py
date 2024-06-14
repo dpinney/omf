@@ -409,6 +409,98 @@ def customerCost1(duration, season, averagekWperhr, businessType):
 		row+=1
 	return outageCost, kWperhrEstimate, times, localMax
 
+def makeLoadOutTimelnAndStatusMap(outputTimeline, loadList, timeList):
+	''' Helper function to create 2 dataframes:
+	
+		A deep copy of outputTimeline with only the loads in loadList, sorted by device name and then time
+
+		A dataframe of load statuses at each timestep with 0 being offline and 1 being online	
+	'''
+	# Create a copy of outputTimeline containing only load devices in loadList sorted by device name and then time. 
+	dfLoadTimeln = outputTimeline.copy(deep=True)
+	dfLoadTimeln = dfLoadTimeln[dfLoadTimeln['device'].isin(loadList)]
+	dfLoadTimeln['time'] = dfLoadTimeln['time'].astype(int)
+	dfLoadTimeln = dfLoadTimeln.sort_values(by=['device','time'])
+
+	# Create dataframe of load status after each timestep
+	dfStatus = pd.DataFrame(np.ones((len(timeList),len(loadList))), dtype=int, index=timeList, columns=loadList)
+	statusMapping = {'offline':0, 'online':1}
+	for loadName in loadList:
+		# Create a copy of dfLoadTimeln containing only a single load device, with rows indexed by time
+		dfSoloLoadTimeln = dfLoadTimeln[dfLoadTimeln['device'] == loadName].set_index('time')
+		currentStatus = statusMapping.get('online')
+		for timeStep in timeList:
+			if timeStep in dfSoloLoadTimeln.index:
+				currentStatus = statusMapping.get(dfSoloLoadTimeln.at[timeStep,'loadAfter'])
+			dfStatus.at[timeStep,loadName] = currentStatus
+	
+	return dfLoadTimeln, dfStatus
+
+def tradMetricsByMgTable(outputTimeline, loadMgDict, startTime, numTimeSteps, modelDir, stepSize):
+	'''
+	Generate table of SAIDI, SAIFI, CAIDI, and CAIFI during the outage simulation period, both for the whole system and broken down by microgrid. 
+	'''
+	def calcTradMetrics(outputTimeline, loadList, startTime, numTimeSteps):
+		''' Calculates SAIDI, SAIFI, CAIDI, CAIFI, CI, CMI, CS, and DCI over the course of the simulation for the loads in the given loadList which should have only unique entries.
+			CI = # Customer Interruptions
+			CMI = # Customer Minute Interruptions 
+			CS = # Customers Served
+			DCI = # Distinct Customers Interrupted
+			SAIDI = CMI/CS
+			SAIFI = CI/CS
+			CAIDI = CMI/CI = SAIDI/SAIFI
+			CAIFI = CI/DCI
+			'''
+		dfLoadTimeln, dfStatus = makeLoadOutTimelnAndStatusMap(outputTimeline, loadList, [*range(startTime, numTimeSteps+startTime)])
+		CS = len(set(loadList))
+		# CI = How many total load shed actions have occurred over the event
+		CI = dfLoadTimeln[dfLoadTimeln['action'] == 'Load Shed'].shape[0]
+		# CMI = The total number of timesteps (hr) each load is offline * 60 min/hr 
+		CMI = dfStatus.applymap(lambda x:1.0-x).to_numpy().sum()*60
+		# DCI = The number of distinct loads that have been offline at some point
+		DCI = len(dfStatus.columns[dfStatus.isin([0]).any()])
+		SAIDI = CMI/CS
+		SAIFI = CI/CS
+		CAIDI = CMI/CI
+		CAIFI = CI/DCI
+		return {"SAIDI":SAIDI,
+				"SAIFI":SAIFI,
+				"CAIDI":CAIDI,
+				"CAIFI":CAIFI,
+				"CS":	CS,
+				"CI":	CI,
+				"CMI":	CMI,
+				"DCI":	DCI}
+
+	loadsPerMg = {}
+	for load,mg in loadMgDict.items():
+		loadsPerMg[mg] = loadsPerMg.get(mg,[])+[load]
+
+	systemwideMetrics = calcTradMetrics(outputTimeline, loadMgDict.keys(), startTime, numTimeSteps)
+	metricsPerMg = {}
+	for mg, mgLoadList in loadsPerMg.items():
+		metricsPerMg[mg] = calcTradMetrics(outputTimeline, mgLoadList, startTime, numTimeSteps)
+
+	new_html_str = """
+		<table class="sortable" cellpadding="0" cellspacing="0">
+			<thead>
+				<tr>
+					<th>Microgrid</th>
+					<th>Event SAIDI</th>
+					<th>Event SAIFI</th>
+					<th>Event CAIDI</th>
+					<th>Event CAIFI</th>
+				</tr>
+			</thead>
+			<tbody>"""
+	new_html_str += f'<tr><td>Whole System</td><td>{ systemwideMetrics["SAIDI"] }</td><td>{ systemwideMetrics["SAIFI"] }</td><td>{ systemwideMetrics["CAIDI"] }</td><td>{ systemwideMetrics["CAIFI"] }</td></tr>'
+	for mg, metrics in metricsPerMg.items():
+		new_html_str += f'<tr><td>Microgrid ID: {mg}</td><td>{ metrics["SAIDI"] }</td><td>{ metrics["SAIFI"] }</td><td>{ metrics["CAIDI"] }</td><td>{ metrics["CAIFI"] }</td></tr>'
+	new_html_str +="""</tbody></table>"""
+	with open(pJoin(modelDir, 'tradMetricsTable.html'), 'w') as customerOutageFile:
+		customerOutageFile.write(new_html_str)
+	return new_html_str
+
 def outageIncidenceGraph(customerOutageData, outputTimeline, startTime, numTimeSteps, loadPriorityFilePath, loadMgDict):
 	'''	Returns plotly figures displaying graphs of outage incidences over the course of the event data.
 		Unweighted outage incidence at each timestep is calculated as (num loads experiencing outage)/(num loads).
@@ -424,24 +516,7 @@ def outageIncidenceGraph(customerOutageData, outputTimeline, startTime, numTimeS
 	loadList = list(loadMgDict.keys())
 	mgIDs = set(loadMgDict.values())
 	timeList = [*range(startTime, numTimeSteps+startTime)]
-
-	# Create a copy of outputTimeline containing only load devices sorted by device name and then time. 
-	dfLoadTimeln = outputTimeline.copy(deep=True)
-	dfLoadTimeln = dfLoadTimeln[dfLoadTimeln['device'].isin(loadList)]
-	dfLoadTimeln['time'] = dfLoadTimeln['time'].astype(int)
-	dfLoadTimeln = dfLoadTimeln.sort_values(by=['device','time'])
-	
-	# Create dataframe of load status after each timestep
-	dfStatus = pd.DataFrame(np.ones((len(timeList),len(loadList))), dtype=int, index=timeList, columns=loadList)
-	statusMapping = {'offline':0, 'online':1}
-	for loadName in loadList:
-		# Create a copy of dfLoadTimeln containing only a single load device, with rows indexed by time
-		dfSoloLoadTimeln = dfLoadTimeln[dfLoadTimeln['device'] == loadName].set_index('time')
-		currentStatus = statusMapping.get('online')
-		for timeStep in timeList:
-			if timeStep in dfSoloLoadTimeln.index:
-				currentStatus = statusMapping.get(dfSoloLoadTimeln.at[timeStep,'loadAfter'])
-			dfStatus.at[timeStep,loadName] = currentStatus
+	dfLoadTimeln, dfStatus = makeLoadOutTimelnAndStatusMap(outputTimeline, loadList, timeList)
 
 	# Calculate unweighted outage incidence
 	outageIncidence = dfStatus.sum(axis=1,).map(lambda x:100*(1.0-(x/dfStatus.shape[1]))).round(3).values.tolist()
@@ -492,18 +567,27 @@ def outageIncidenceGraph(customerOutageData, outputTimeline, startTime, numTimeS
 			Sum_wi_ni = np.add(Sum_wi_ni, wi_ni)
 		indivWeightedOI = np.around((100*Sum_wi_ni/Sum_wi),3).tolist()
 		return indivWeightedOI
-	
+	def startAt0(inList):
+		''' If a list doesn't start at 0, insert a 0 at the 0th position.
+			Modifies the original input list and also returns it.'''
+		if startTime != 0:
+			inList.insert(0,0)
+		return inList
+
 	# Calculate weighted outage incidence based on individually assigned weights
 	with open(loadPriorityFilePath) as inFile:
-		loadWeights = json.load(inFile)
+		loadWeights = {k:float(v) for k,v in json.load(inFile).items()}
+
 	indivWeightedOI = calcWeightedOI(loadWeights)
-	
+
+
+	startAt0(timeList)
 	mgOIFigures = {}
 	for targetID in mgIDs:
-		mgLoadMask = {load:(1 if id == targetID else 0) for (load,id) in loadMgDict.items()}
+		mgLoadMask = 	{load:(1 if id == targetID else 0) for (load,id) in loadMgDict.items()}
 		mgLoadWeights = {load:(val*loadWeights.get(load,1)) for (load,val) in mgLoadMask.items()}
-		mgOI = calcWeightedOI(mgLoadMask)
-		mgOIWeighted = calcWeightedOI(mgLoadWeights)
+		mgOI = 			startAt0(calcWeightedOI(mgLoadMask))
+		mgOIWeighted = 	startAt0(calcWeightedOI(mgLoadWeights))
 		mgOIFigures[targetID] = go.Figure()
 		mgOIFigures[targetID].add_trace(go.Scatter(
 			x=timeList,
@@ -533,6 +617,9 @@ def outageIncidenceGraph(customerOutageData, outputTimeline, startTime, numTimeS
 			title=f'Microgrid {targetID}',
 			legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1))
 
+	#If start is not at time 0, show that outage incidence at time 0 would be 0%
+	startAt0(outageIncidence)
+	startAt0(indivWeightedOI)
 	outageIncidenceFigure = go.Figure()
 	outageIncidenceFigure.add_trace(go.Scatter(
 		x=timeList,
@@ -572,6 +659,71 @@ def outageIncidenceGraph(customerOutageData, outputTimeline, startTime, numTimeS
 		legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1))
 
 	return outageIncidenceFigure, mgOIFigures
+
+def makeTaifiAndTaidiHist(outputTimeline, startTime, numTimeSteps, loadList, stepSize):
+	''' Generate histogram of TAIFI and TAIDI for each load.
+
+		TAIFI = 1/Average period length where a period is defined as the time from one load shed to the next load shed. 
+
+		TAIDI = Number of minutes interrupted for a load over the total duartion of the simulation.  
+	'''
+	endTime = numTimeSteps+startTime
+	dfLoadTimeln, dfStatus = makeLoadOutTimelnAndStatusMap(outputTimeline, loadList, [*range(startTime, endTime)])
+	dfStatus = dfStatus.applymap(lambda x:1.0-x)
+	TAIFI = {}
+	TAIDI = {}
+	for loadName in loadList:
+		dfLoadSheds = dfLoadTimeln[(dfLoadTimeln['device'] == loadName)][(dfLoadTimeln['action'] == 'Load Shed')]
+		numLoadSheds = dfLoadSheds.shape[0]
+		timeOfFirstLoadShed = dfLoadSheds['time'].min()
+		timeOfLastLoadShed = dfLoadSheds['time'].max()
+		TAIFI[loadName] = numLoadSheds/((timeOfLastLoadShed-timeOfFirstLoadShed)*60)
+		TAIDI[loadName] = dfStatus[loadName].sum()/numTimeSteps
+		#TODO: Replace 60 with resolution of step size if it's ever possible not to have a resolution of 60 min
+ 
+	minVals = (min(list(TAIFI.values())), min(list(TAIDI.values())))
+	maxVals = (max(list(TAIFI.values())), max(list(TAIDI.values())))
+	numBins = 45
+	binSizes = ((maxVals[0]-minVals[0])/numBins, (maxVals[1]-minVals[1])/numBins)
+
+	taifiHist = go.Figure()
+	taifiHist.add_trace(go.Histogram(
+		x=list(TAIFI.values()),
+		name='TAIFI', # name used in legend and hover labels
+		xbins=dict(
+			start=minVals[0],
+			end=maxVals[0]+binSizes[0],
+			size=binSizes[0]
+		),
+		bingroup=1,
+		marker_color='#0000ff'
+	))
+	taifiHist.update_layout(
+		xaxis_title_text='TAIFI Values', # xaxis label
+		yaxis_title_text='Load Count', # yaxis label
+		barmode='overlay',
+		bargap=0.1 # gap between bars of adjacent location coordinates
+	)
+
+	taidiHist = go.Figure()
+	taidiHist.add_trace(go.Histogram(
+		x=list(TAIDI.values()),
+		name='TAIDI', # name used in legend and hover labels
+		xbins=dict(
+			start=minVals[1],
+			end=maxVals[1]+binSizes[1],
+			size=binSizes[1]
+		),
+		bingroup=1,
+		marker_color='#ff0000'
+	))
+	taidiHist.update_layout(
+		xaxis_title_text='TAIDI Values', # xaxis label
+		yaxis_title_text='Load Count', # yaxis label
+		barmode='overlay',
+		bargap=0.1 # gap between bars of adjacent location coordinates
+	)
+	return taifiHist, taidiHist
 
 def getMicrogridInfo(modelDir, pathToOmd, settingsFile, makeCSV = True):
 	'''	Gathers microgrid info including loads and other circuit objects in each microgrid by finding what microgrid each load's parent bus is designated as having. 
@@ -632,7 +784,6 @@ def runMicrogridControlSim(modelDir, solFidelity, eventsFilename, loadPriorityFi
 
 	lpFile = loadPriorityFile if loadPriorityFile != None else ''
 	mgFile = microgridTaggingFile if microgridTaggingFile != None else ''
-
 
 	PowerModelsONM.build_settings_file(
 		circuitPath=pJoin(modelDir,'circuit.dss'),
@@ -771,9 +922,11 @@ def graphMicrogrid(modelDir, pathToOmd, profit_on_energy_sales, restoration_cost
 	actionAction = []
 	actionLoadBefore = []
 	actionLoadAfter = []
-	loadsShed = []
+	prevLoadsShed = []
 	cumulativeLoadsShed = []
 	startTime = 1
+	if type(simTimeStepsRaw[0]) == str:
+		raise Exception("ERROR - Simulation timesteps are datetime strings in output.json. They need to be floats representing hours")
 	simTimeSteps = [float(i)+startTime for i in simTimeStepsRaw]
 	timestep = startTime
 	# timestep = 0
@@ -797,23 +950,22 @@ def graphMicrogrid(modelDir, pathToOmd, profit_on_energy_sales, restoration_cost
 					actionLoadAfter.append(switchActionsNew[entry])
 			switchActionsOld = key['Switch configurations']
 		loadShed = key['Shedded loads']
-		if len(loadShed) != 0:
-			for entry in loadShed:
-				cumulativeLoadsShed.append(entry)
-				if entry not in loadsShed:
-					actionDevice.append(entry)
-					actionTime.append(str(timestep))
-					actionAction.append('Load Shed')
-					actionLoadBefore.append('online')
-					actionLoadAfter.append('offline')
-					loadsShed.append(entry)
-				else:
-					actionDevice.append(entry)
-					actionTime.append(str(timestep))
-					actionAction.append('Load Pickup')
-					actionLoadBefore.append('offline')
-					actionLoadAfter.append('online')
-					loadsShed.remove(entry)
+		loadsPickedUp = [load for load in prevLoadsShed if load not in loadShed]
+		newShed = [load for load in loadShed if load not in prevLoadsShed]
+		for entry in newShed:
+			cumulativeLoadsShed.append(entry)
+			actionDevice.append(entry)
+			actionTime.append(str(timestep))
+			actionAction.append('Load Shed')
+			actionLoadBefore.append('online')
+			actionLoadAfter.append('offline')
+		for entry in loadsPickedUp:
+			actionDevice.append(entry)
+			actionTime.append(str(timestep))
+			actionAction.append('Load Pickup')
+			actionLoadBefore.append('offline')
+			actionLoadAfter.append('online')
+		prevLoadsShed = loadShed
 		timestep += 1
 	timestep = startTime
 	# while timestep < 24:
@@ -822,7 +974,7 @@ def graphMicrogrid(modelDir, pathToOmd, profit_on_energy_sales, restoration_cost
 			powerflowOld = powerflow[timestep-startTime]
 		else:
 			powerflowNew = powerflow[timestep-startTime]
-			for generator in list(powerflowNew['generator'].keys()):
+			for generator in list(powerflowNew.get('generator',{}).keys()):
 				entryNew = powerflowNew['generator'][generator]['real power setpoint (kW)'][0]
 				if generator in list(powerflowOld['generator'].keys()):
 					entryOld = powerflowOld['generator'][generator]['real power setpoint (kW)'][0]
@@ -911,7 +1063,7 @@ def graphMicrogrid(modelDir, pathToOmd, profit_on_energy_sales, restoration_cost
 			'tickmode':'linear',
 			'dtick':stepSize
 		},
-		yaxis_title='Load (%)',
+		yaxis_title='Load Served (% kW)',
 		legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1))
 	
 	timelineStatsHtml = microgridTimeline(outputTimeline, modelDir)
@@ -1162,7 +1314,9 @@ def graphMicrogrid(modelDir, pathToOmd, profit_on_energy_sales, restoration_cost
 	)
 
 	outageIncidenceFig, mgOIFigs = outageIncidenceGraph(customerOutageData, outputTimeline, startTime, numTimeSteps, loadPriorityFile, loadMgDict)
-	
+	tradMetricsHtml = tradMetricsByMgTable(outputTimeline, loadMgDict, startTime, numTimeSteps, modelDir, stepSize)
+	taifiHist, taidiHist = makeTaifiAndTaidiHist(outputTimeline, startTime, numTimeSteps, list(loadMgDict.keys()), stepSize)
+
 	customerOutageHtml = customerOutageTable(customerOutageData, outageCost, modelDir)
 	profit_on_energy_sales = float(profit_on_energy_sales)
 	restoration_cost = int(restoration_cost)
@@ -1173,7 +1327,8 @@ def graphMicrogrid(modelDir, pathToOmd, profit_on_energy_sales, restoration_cost
 	except: customerOutageCost = 0
 	return {'utilityOutageHtml': 	utilityOutageHtml, 
 			'customerOutageHtml': 	customerOutageHtml, 
-			'timelineStatsHtml': 	timelineStatsHtml, 
+			'timelineStatsHtml': 	timelineStatsHtml,
+			'tradMetricsHtml':		tradMetricsHtml,
 			'outageIncidenceFig': 	outageIncidenceFig, 
 			'mgOIFigs':				mgOIFigs, 
 			'mgGensFigs':			mgGensFigs, 
@@ -1185,7 +1340,9 @@ def graphMicrogrid(modelDir, pathToOmd, profit_on_energy_sales, restoration_cost
 			'endTime': 				simTimeSteps[-1], 
 			'stepSize': 			stepSize, 
 			'startTime': 			startTime,
-			'custHist': 			custHist}
+			'custHist': 			custHist,
+			'taifiHist':			taifiHist,
+			'taidiHist':			taidiHist}
 
 def buildCustomEvents(eventsCSV='', feeder='', customEvents='customEvents.json', defaultDispatchable = 'true'):
 	''' Builds an events json file for use by restoration.py based on an events CSV input.'''
@@ -1339,6 +1496,9 @@ def work(modelDir, inputDict):
 	# Textual outputs of utility cost statistic
 	with open(pJoin(modelDir,'utilityOutageTable.html')) as inFile:
 		outData['utilityOutageHtml'] = inFile.read()
+	# Textual outputs of traditional metrics table
+	with open(pJoin(modelDir,'tradMetricsTable.html')) as inFile:
+		outData['tradMetricsHtml'] = inFile.read()
 	#The geojson dictionary to load into the outageCost.py template
 	with open(pJoin(modelDir,'geoDict.js'),'rb') as inFile:
 		outData['geoDict'] = inFile.read().decode()
@@ -1365,6 +1525,12 @@ def work(modelDir, inputDict):
 	outData['fig6Layout'] = json.dumps(layoutOb, cls=py.utils.PlotlyJSONEncoder)
 	outData['mgOIFigsData'] = json.dumps(plotOuts.get('mgOIFigs',{}), cls=py.utils.PlotlyJSONEncoder)
 	outData['mgOIFigsLayout'] = json.dumps(layoutOb, cls=py.utils.PlotlyJSONEncoder)
+	outData['taifiHistData'] = json.dumps(plotOuts.get('taifiHist',{}), cls=py.utils.PlotlyJSONEncoder)
+	outData['taifiHistLayout'] = json.dumps(layoutOb, cls=py.utils.PlotlyJSONEncoder)
+	outData['taidiHistData'] = json.dumps(plotOuts.get('taidiHist',{}), cls=py.utils.PlotlyJSONEncoder)
+	outData['taidiHistLayout'] = json.dumps(layoutOb, cls=py.utils.PlotlyJSONEncoder)
+
+
 	# Stdout/stderr.
 	outData['stdout'] = 'Success'
 	outData['stderr'] = ''
