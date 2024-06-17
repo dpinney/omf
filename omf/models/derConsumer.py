@@ -470,9 +470,9 @@ def work(modelDir, inputDict):
 
 		## BESS physical parameters
 		## TODO: Make these inputs on the HTML side if keeping this battery model
-		battery_energy_capacity = 13.5 ## kWh; Tesla Powerwall?
-		battery_max_charge_rate = 5  ## kW
-		battery_max_discharge_rate = 3.68  ## kW
+		battery_energy_capacity = 13.5 ## kWh; Tesla Powerwall 2
+		battery_max_charge_rate = 3.3  ## kW
+		battery_max_discharge_rate = 3.3  ## kW
 		#battery_efficiency = 0.9  # Efficiency of the battery ## NOTE: maybe add this in later?
 		battery_soc = 0  ## Initial battery state of charge
 		battery_soc_min = 0.2 * battery_energy_capacity  ## Min= 20% of battery capacity
@@ -490,8 +490,14 @@ def work(modelDir, inputDict):
 		total_der_compensation = 0  ## The total DER compensation amount (when DERs are discharged)
 		max_demand_periods = {period: 0 for period in range(len(tou_structure))}  ## The max demand during each period (for calculating the demand cost)
 
+		## Initial monthly cost tracking variables
+		monthly_energy_cost = [0] * 12
+		monthly_der_compensation = [0] * 12
+		monthly_economic_benefit = [0] * 12
+
 		for i in range(1, len(timestamps)):
 			timestamp = timestamps[i] ## Grab the hour timestamp
+			month = timestamp.month - 1 ## grab month information for cost savings analysis (Index 0=Jan, 11=Dec)
 			tou_rate, tou_period = calc_tou_rate(timestamp, tou_schedules, tou_structure) ## Grab the specific TOU info for that hour
 
 			net_load = demand_series[i] - PV_series[i] ## Net load after PV is accounted for
@@ -499,51 +505,57 @@ def work(modelDir, inputDict):
 			if net_load > 0:
 				## Discharge the battery during on-peak hours; update BESS and economic variables
 				if tou_period in on_peak_periods:
+					## Discharge BESS to household first
 					discharge = min(battery_max_discharge_rate, net_load, battery_soc - battery_soc_min)
 					battery_soc -= discharge
-					#print('battery soc in onpeak: \n',battery_soc)
 					net_load -= discharge
-					der_compensation = discharge * compensation_rate
 
-					## If battery cannot meet all of the demand, then buy energy from the grid
-					if net_load > 0:
-						utility_usage = net_load ## utility_usage is how much energy needs to be bought from the grid
-						total_energy_cost += utility_usage * tou_rate
-					else:
-						utility_usage = 0
-				else:
-					## If off-peak period, use grid if necessary
+					## If BESS > 20% after serving household load, then utility can use it
+					if battery_soc > battery_soc_min:
+						utility_discharge = min(battery_max_discharge_rate, battery_soc - battery_soc_min, max_utility_usage)
+						battery_soc -= utility_discharge
+						der_compensation += utility_discharge * compensation_rate
+						monthly_der_compensation[month] += utility_discharge * compensation_rate
+						max_utility_usage -= utility_discharge  # Reduce the remaining utility usage allowance
+
+					else: ## buy from the grid
+						grid_usage = net_load ## grid_usage is how much energy needs to be bought from the grid
+						total_energy_cost += grid_usage * tou_rate
+						monthly_energy_cost[month] += grid_usage * tou_rate
+				
+				else: ## If off-peak period, use grid if necessary
 					battery_soc = min(battery_energy_capacity, battery_soc + battery_max_charge_rate)
-					#print('battery soc in offpeak 1: \n',battery_soc)
-					utility_usage = net_load
-					total_energy_cost += utility_usage * tou_rate
+					grid_usage = net_load
+					total_energy_cost += grid_usage * tou_rate
+					monthly_energy_cost[month] += grid_usage * tou_rate
 					der_compensation = 0
+
 			else: ## If net_load <= 0 (PV has served all load)
+				excess_solar = -net_load
 				## Store any excess PV in the BESS during off-peak periods
 				if tou_period in off_peak_periods:
-					excess_solar = -net_load
+
 					charge = min(battery_max_charge_rate, excess_solar)
 					battery_soc = min(battery_energy_capacity, battery_soc + charge)
 					#print('battery soc in offpeak 2: \n',battery_soc)
-					utility_usage = 0  ## No energy being bought from the grid
+					grid_usage = 0  ## No energy being bought from the grid
 					economic_benefit = charge * compensation_rate  ## Economic benefit from storing excess solar.
+					monthly_economic_benefit[month] += charge * compensation_rate
 					der_compensation = 0  ## No DER compensation for charging
 				else:
 					## If not off-peak, sell excess solar to the grid
-					utility_usage = -net_load
-					total_energy_cost -= utility_usage * tou_rate
-					economic_benefit = 0
-					der_compensation = 0
+					der_compensation = excess_solar * compensation_rate
+					monthly_der_compensation[month] += excess_solar * compensation_rate
 
 			## Update the total economic benefit and DER compensation variables
 			total_economic_benefit += economic_benefit
 			total_der_compensation += der_compensation
 
 			## Track the maximum demand for the current TOU period
-			max_demand_periods[tou_period] = max(max_demand_periods[tou_period], demand_series[i] + utility_usage)
+			max_demand_periods[tou_period] = max(max_demand_periods[tou_period], demand_series[i] + grid_usage)
 
 			## Update the DER schedule
-			schedule.loc[timestamp, 'Grid Serving Load (kW)'] = utility_usage
+			schedule.loc[timestamp, 'Grid Serving Load (kW)'] = grid_usage
 			schedule.loc[timestamp, 'Battery State of Charge'] = battery_soc
 
 		## Calculate total demand cost (including fixed monthly charge)
@@ -556,28 +568,80 @@ def work(modelDir, inputDict):
 		print(f"Total DER Compensation: ${total_der_compensation:.2f}")
 		print(f"Total Compensation: ${total_compensation:.2f}")
 
+		## Add variables to outData
+		outData['energyCost'] = list(np.asarray(outData['energyCost']) + monthly_energy_cost)
+		outData['monthlyDERcompensation'] = monthly_der_compensation
+		outData['monthlyEconomicBenefit'] = monthly_economic_benefit
+
+		print(monthly_der_compensation)
+
 		## Plots
-		fig, ax1 = plt.subplots(figsize=(14, 7))
-		ax1.plot(schedule.index, schedule['Solar Generation (kW)'], label='Solar Generation (kW)')
-		ax1.plot(schedule.index, schedule['Household Demand (kW)'], label='Household Demand (kW)')
-		ax1.plot(schedule.index, schedule['Grid Serving Load (kW)'], label='Grid Serving Load (kW)')
-		ax1.plot(schedule.index, schedule['Battery State of Charge'], label='Battery State of State of Charge (kW)', color='k')
-		ax1.set_xlabel('Time')
-		ax1.set_ylabel('Power (kW)')
-		ax1.legend(loc='upper left')
-		ax1.grid(True)
-		ax1.set_title('DER Dispatch Schedule')
+		fig = go.Figure()
+		fig.add_trace(go.Scatter(x=schedule.index,
+					y=schedule['Solar Generation (kW)'],
+					yaxis='y1',
+					mode='none',
+					fill='tozeroy',
+					fillcolor='yellow',
+					name='Solar Generation (kW)'))
+		fig.add_trace(go.Scatter(x=schedule.index,
+			y=schedule['Household Demand (kW)'],
+			yaxis='y1',
+			mode='none',
+			fill='tozeroy',
+			fillcolor='black',
+			name='Household Demand (kW)'))		
+		fig.add_trace(go.Scatter(x=schedule.index,
+			y=schedule['Grid Serving Load (kW)'],
+			yaxis='y1',
+			mode='none',
+			fill='tozeroy',
+			fillcolor='gray',
+			name='Grid Serving Load (kW)'))
+		fig.add_trace(go.Scatter(x=schedule.index,
+			y= battery_energy_capacity - schedule['Battery State of Charge'],
+			yaxis='y1',
+			mode='none',
+			fill='tozeroy',
+			fillcolor='green',
+			name='Battery Discharge (kW)'))
+		fig.add_trace(go.Scatter(
+			x=schedule.index,
+			y=(schedule['Battery State of Charge'] / battery_energy_capacity) * 100,
+			yaxis='y2',
+			mode='none',  
+			fill='tozeroy',
+			fillcolor='rgba(0, 0, 255, 0.3)', 
+			name='Battery State of Charge (%)',
+			visible='legendonly'  ## Initially hide this trace
+		))
+		
+		## Plot layout
+		fig.update_layout(
+			xaxis=dict(title='Timestamp'),
+			yaxis=dict(
+				title='Power (kW)',
+				range=[0, battery_energy_capacity]  # Set range for y1 axis
+			),
+			yaxis2=dict(
+				title='Battery State of Charge (%)',
+				overlaying='y',
+				side='right'
+			),
+			legend=dict(
+				orientation='h',
+				yanchor='bottom',
+				y=1.02,
+				xanchor='right',
+				x=1
+			)
+		)
 
-		## Create secondary y-axis for Battery SOC
-		## TODO: add battery kWh to ax1
-		#ax2 = ax1.twinx()
-		#ax2.plot(schedule.index, schedule['Battery State of Charge'] / battery_energy_capacity, label='Battery State of Charge (SOC)', color='r')
-		#ax2.set_ylabel('Battery State of Charge (SOC)')
-		#ax2.set_ylim(0, 1)
+		#fig.show()
 
-		ax1.legend(loc='upper right')
-
-		plt.show()
+		## Encode plot data as JSON for showing in the HTML side
+		outData['derBESSplot'] = json.dumps(fig.data, cls=plotly.utils.PlotlyJSONEncoder)
+		outData['derBESSplotLayout'] = json.dumps(fig.layout, cls=plotly.utils.PlotlyJSONEncoder)
 
 
 	## Create DER overview plot object ######################################################################################################################################################
