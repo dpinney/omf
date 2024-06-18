@@ -364,7 +364,7 @@ def work(modelDir, inputDict):
 		outData.update(vbatResults) ## Update output file with vbat results
 
 		## vbatDispatch variables
-		vbpower_series = pd.Series(vbatResults['VBpower'][0])
+		vbpower_series = pd.Series(vbatResults['VBpower'])
 		vbat_charge = vbpower_series.where(vbpower_series > 0, 0) ##positive values = charging
 		vbat_discharge = vbpower_series.where(vbpower_series < 0, 0) #negative values = discharging
 		vbat_discharge_flipsign = vbat_discharge.mul(-1) ## flip sign of vbat discharge for plotting purposes
@@ -425,8 +425,7 @@ def work(modelDir, inputDict):
 		for item in rate_info['items']:
 			if item['name'] == TOUname:
 				TOUdata.append(item)
-
-		print(TOUdata)
+		#print(TOUdata)
 
 		## NOTE: ad-hoc TOU rates were used when the rate_info was not working.
 		#tou_rates = get_tou_rates_adhoc()
@@ -573,8 +572,6 @@ def work(modelDir, inputDict):
 		outData['monthlyDERcompensation'] = monthly_der_compensation
 		outData['monthlyEconomicBenefit'] = monthly_economic_benefit
 
-		print(monthly_der_compensation)
-
 		## Plots
 		fig = go.Figure()
 		fig.add_trace(go.Scatter(x=schedule.index,
@@ -615,6 +612,16 @@ def work(modelDir, inputDict):
 			name='Battery State of Charge (%)',
 			visible='legendonly'  ## Initially hide this trace
 		))
+		fig.add_trace(go.Scatter(
+			x=schedule.index,
+			y=np.asarray(vbat_discharge_flipsign),
+			yaxis='y1',
+			mode='none',  
+			fill='tozeroy',
+			fillcolor='rgba(128, 0, 128, 1)', 
+			name='Thermal BESS'
+		))
+
 		
 		## Plot layout
 		fig.update_layout(
@@ -775,8 +782,8 @@ def work(modelDir, inputDict):
 
 	## NOTE: This opens a window that displays the correct figure with the appropriate patterns.
 	## For some reason, the slash-mark patterns are not showing up on the OMF page otherwise.
-	## Eventually we will delete this part.
-	fig.show() 
+	## Eventually we want to delete this part.
+	#fig.show() 
 
 	## Encode plot data as JSON for showing in the HTML side
 	outData['derOverviewData'] = json.dumps(fig.data, cls=plotly.utils.PlotlyJSONEncoder)
@@ -839,7 +846,7 @@ def work(modelDir, inputDict):
 			line=dict( color=('red') ),
 			name='Probability of Surviving Outage of a Given Duration')
 		plotData.append(survivalProb)
-		plotlyLayout['yaxis'].update(title='Probability of meeting critical Load')
+		plotlyLayout['yaxis'].update(title='Probability of Meeting Critical Load')
 		plotlyLayout['xaxis'].update(title='Outage Length (Hours)')
 		outData['resilienceProbData' ] = json.dumps(plotData, cls=plotly.utils.PlotlyJSONEncoder)
 		outData['resilienceProbLayout'] = json.dumps(plotlyLayout, cls=plotly.utils.PlotlyJSONEncoder)
