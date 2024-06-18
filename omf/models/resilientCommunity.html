@@ -37,7 +37,17 @@
 				<label>Run Time</label>
 				<input type="text" id="runTime" name="runTime" value="{{allInputDataDict.runTime}}"readonly/>
 			</div>
+			<hr>
 			<!-- NEW ADDITIONS -->
+			<!-- Model Specific Inputs -->
+			<div class="wideInput">
+				<p class="inputSectionHeader">System Parameters</p>
+			</div>
+			<div class="shortInput">
+				<label class="tooltip">Circuit Data Input File <span class="classic">Import a omd file to map</span></label>
+				<div>{{ insert_file_upload_block('inputDataFileName','inputDataFileContent') }}</div>
+			</div>
+
 			<div class="shortInput">
 				<label>Feeder</label>
 				<button id="feederButton" type="button" onclick="javascript:editFeeder(allInputData.modelName,1);" style="display:block;width:125px;">Open Editor</button>
@@ -47,34 +57,26 @@
 			<div class="shortInput">
 
 				<label class="tooltip">Lines<span class="classic">Select Yes if you would like to include Lines in the analysis </span></label>
-				<select name="lines" id="lines">
+				<select name="lines" id="lines" value="{{allInputDataDict.lines}}">
 					<option value="yes" {% if allInputDataDict.lines | lower == "yes" %}selected{% endif %} >Yes</option>
 					<option value="no" {% if allInputDataDict.lines | lower != "yes" %}selected{% endif %}>No</option>
 				</select>
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Transformers<span class="classic">Select Yes if you would like to include Transformers in the analysis </span></label>
-				<select name="transformers" id="transformers">
+				<select name="transformers" id="transformers" value="{{allInputDataDict.transformers}}">
 					<option value="yes" {% if allInputDataDict.transformers | lower == "yes" %}selected{% endif %}>Yes</option>
 					<option value="no" {% if allInputDataDict.transformers | lower != "yes" %}selected{% endif %}>No</option>
 				</select>
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Fuses <span class="classic">Select Yes if you would like to include Fuses in the analysis </span></label>
-				<select name="fuses" id="fuses">
+				<select name="fuses" id="fuses" value="{{allInputDataDict.fuses}}">
 					<option value="yes" {% if allInputDataDict.fuses | lower == "yes" %}selected{% endif %}>Yes</option>
 					<option value="no" {% if allInputDataDict.fuses | lower != "yes" %}selected{% endif %}>No</option>
 				</select>
 			</div>
-			
-			<div class="shortInput">
-				<label class="tooltip">Data Refresh<span class="classic">Select Yes if you would like to include Fuses in the analysis. Note this process may take longer </span></label>
-				<select name="refresh" id="refresh">
-					<option value="True" {% if allInputDataDict.refresh == True %}selected{% endif %}>Yes</option>
-					<option value="False" {% if allInputDataDict.refresh == False %}selected{% endif %}>No</option>
-				</select>
-			</div>
-		
+				
 			<div class="shortInput">
 				<label class="tooltip">Loads Coloring By<span class="classic">Select the simulation output value that will be used to color the loads in the circuit.</span></label>
 				<select id="loadCol" name="loadCol">
@@ -85,16 +87,6 @@
 					<option value="None" {% if allInputDataDict.loadCol == "None" %}selected{% endif %}>No Node Coloring</option>
 				</select>
 			</div>
-			
-			<!-- Model Specific Inputs -->
-			<div class="wideInput">
-				<p class="inputSectionHeader">System Parameters</p>
-			</div>
-			
-			<div class="shortInput">
-				<label class="tooltip">Circuit Data Input File <span class="classic">Import a omd file to map</span></label>
-				<div>{{ insert_file_upload_block('inputDataFileName','inputDataFileContent') }}</div>
-			</div>
 			{{ omfModelButtons }}
 		</form>
 	</div>
@@ -104,18 +96,158 @@
 		<p class="reportTitle" style="page-break-before:always">Resilient Community Map</p>
 	<div id="resilienceMap" class="tightContent">
 		<script>
-			var mapContent = allOutputData["resilienceMap"]
+			var mapContent = allOutputData["resilienceMap"];
 			var iframe = document.createElement('iframe');
-			iframe.style = 'width:1000px; height:1000px; border-radius:8px;'
-			//document.getElementById('resilienceMap').innerHTML = '<div class="img-div" style="position:relative;left:0;bottom:-800px;"><img style="position:relative" src="{{allOutputDataDict["legend_path"]}}"></div>';
-			//document.getElementById('resilienceMap').innerHTML = "<div class='my-legend' style='position:relative;left:0;bottom:-1000px;'><div class='legend-title' style='position:relative'>Social Vulnerability Legend</div> <div class='legend-scale'> <ul class='legend-labels'> <li><span style='background:#0000FF;'></span>Very High</li> <li><span style='background:#ADD8E6;'></span>Rel. High</li> <li><span style='background:#90EE90;'></span>Rel. Moderate</li> <li><span style='background:#FFFF00;'></span>Rel. Low</li> <li><span style='background:#808080;'></span>Very Low</li> <li><span style='background:#000000;'></span>Data Unavailable </li> </ul> </div> <style type='text/css'> .my-legend .legend-title { text-align: left; margin-bottom: 8px; font-weight: bold; font-size: 90%; } .my-legend .legend-scale ul { margin: 0; padding: 0; float: left; list-style: none; } .my-legend .legend-scale ul li { display: block; float: left; width: 50px; margin-bottom: 6px; text-align: center; font-size: 70%; list-style: none; } .my-legend ul.legend-labels li span { display: block; float: left; height: 15px; width: 50px; } .my-legend .legend-source { font-size: 70%; color: #999; clear: both; } .my-legend a { color: #777; } </style> "
-			document.getElementById('resilienceMap').innerHTML = "<div class='my-legend' style='position:relative;left:0;bottom:-1000px;'><div class='legend-title' style='position:relative'><p style='color:black; text-shadow: 0 0 1px white, 0 0 1px white, 0 0 1px white, 0 0 1px white;'>Social Vulnerability Legend</p></div> <div class='legend-scale'> <ul class='legend-labels'> <li><span style='background:#0000FF;'></span><p style='color:black; text-shadow: 0 0 1px white, 0 0 1px white, 0 0 1px white, 0 0 1px white;'>Very High</p></li> <li><span style='background:#ADD8E6;'></span><p style='color:black; text-shadow: 0 0 1px white, 0 0 1px white, 0 0 1px white, 0 0 1px white;'>Rel. High</p></li> <li><span style='background:#90EE90;'></span><p style='color:black; text-shadow: 0 0 1px white, 0 0 1px white, 0 0 1px white, 0 0 1px white;'>Rel. Moderate</p></li> <li><span style='background:#FFFF00;'></span><p style='color:black; text-shadow: 0 0 1px white, 0 0 1px white, 0 0 1px white, 0 0 1px white;'>Rel. Low</p></li> <li><span style='background:#808080;'></span><p style='color:black; text-shadow: 0 0 1px white, 0 0 1px white, 0 0 1px white, 0 0 1px white;'>Very Low</p></li> <li><span style='background:#000000;'></span><p style='color:black; text-shadow: 0 0 1px white, 0 0 1px white, 0 0 1px white, 0 0 1px white;'>Data Unavailable</p> </li> </ul> </div> <style type='text/css'> .my-legend .legend-title { text-align: left; margin-bottom: 8px; font-weight: bold; font-size: 90%; } .my-legend .legend-scale ul { margin: 0; padding: 0; float: left; list-style: none; } .my-legend .legend-scale ul li { display: block; float: left; width: 50px; margin-bottom: 6px; text-align: center; font-size: 70%; list-style: none; } .my-legend ul.legend-labels li span { display: block; float: left; height: 15px; width: 50px; } .my-legend .legend-source { font-size: 70%; color: #999; clear: both; } .my-legend a { color: #777; } </style> "
+			iframe.style.width = '1000px';
+			iframe.style.height = '1000px';
+			iframe.style.borderRadius = '8px';
+			iframe.style.border = 'none';
+		
+			const htmlContent = `
+				<!DOCTYPE html>
+				<html lang="en">
+				<head>
+					<meta charset="UTF-8">
+					<title>Map and Legend</title>
+					<style type="text/css">
+						.my-legend .legend-title {
+							text-align: left;
+							margin-bottom: 8px;
+							font-weight: bold;
+							font-size: 90%;
+						}
+		
+						.my-legend .legend-scale ul {
+							margin: 0;
+							padding: 0;
+							float: left;
+							list-style: none;
+						}
+		
+						.my-legend .legend-scale ul li {
+							display: block;
+							float: left;
+							width: 50px;
+							margin-bottom: 6px;
+							text-align: center;
+							font-size: 70%;
+							list-style: none;
+						}
+		
+						.my-legend ul.legend-labels li span {
+							display: block;
+							float: left;
+							height: 15px;
+							width: 50px;
+						}
+		
+						.my-legend .legend-source {
+							font-size: 70%;
+							color: #999;
+							clear: both;
+						}
+		
+						.my-legend a {
+							color: #777;
+						}
+		
+						.map-container {
+							width: 100%;
+							height: 90%;
+						}
+		
+						.legend-container {
+							width: 100%;
+							height: 10%;
+							position: absolute;
+							bottom: 0;
+						}
+					</style>
+				</head>
+				<body>
+					<div class="map-container">
+						${mapContent}
+					</div>
+					<div class="legend-container">
+						<div class="my-legend">
+							<div class="legend-title">
+								<p style="color:black; text-shadow: 0 0 1px white, 0 0 1px white, 0 0 1px white, 0 0 1px white;">
+									Social Vulnerability Legend
+								</p>
+							</div>
+							<div class="legend-scale">
+								<ul class="legend-labels">
+									<li>
+										<span style="background:#0000FF;"></span>
+										<p style="color:black; text-shadow: 0 0 1px white, 0 0 1px white, 0 0 1px white, 0 0 1px white;">
+											Very High
+										</p>
+									</li>
+									<li>
+										<span style="background:#ADD8E6;"></span>
+										<p style="color:black; text-shadow: 0 0 1px white, 0 0 1px white, 0 0 1px white, 0 0 1px white;">
+											Rel. High
+										</p>
+									</li>
+									<li>
+										<span style="background:#90EE90;"></span>
+										<p style="color:black; text-shadow: 0 0 1px white, 0 0 1px white, 0 0 1px white, 0 0 1px white;">
+											Rel. Moderate
+										</p>
+									</li>
+									<li>
+										<span style="background:#FFFF00;"></span>
+										<p style="color:black; text-shadow: 0 0 1px white, 0 0 1px white, 0 0 1px white, 0 0 1px white;">
+											Rel. Low
+										</p>
+									</li>
+									<li>
+										<span style="background:#808080;"></span>
+										<p style="color:black; text-shadow: 0 0 1px white, 0 0 1px white, 0 0 1px white, 0 0 1px white;">
+											Very Low
+										</p>
+									</li>
+									<li>
+										<span style="background:#000000;"></span>
+										<p style="color:black; text-shadow: 0 0 1px white, 0 0 1px white, 0 0 1px white, 0 0 1px white;">
+											Data Unavailable
+										</p>
+									</li>
+								</ul>
+							</div>
+						</div>
+					</div>
+				</body>
+				</html>
+			`;
+		
 			document.getElementById('resilienceMap').appendChild(iframe);
+		
 			iframe.contentWindow.document.open();
-			iframe.contentWindow.document.write(mapContent);
+			iframe.contentWindow.document.write(htmlContent);
 			iframe.contentWindow.document.close();
 		</script>
+		
+		
 	</div>
+
+<p class="reportTitle">Loads Data Table</p>
+<div id="traditionalLoadsTable" class="tightContent" style="height:300px; overflow-y: scroll;">
+	<table style="width:100%">
+		<tr>
+				{% for header in allOutputDataDict["loadTableHeadings"] %}
+				<th>{{ header }}</th>
+				{% endfor %}
+		</tr>
+		{% for values in allOutputDataDict["loadTableValues"] %}
+		<tr>
+				{% for val in values %}
+				<td>{{ val }}</td>
+				{% endfor %}
+		</tr>
+		{% endfor %}
+</table>
+</div>
 
 <p class="reportTitle">Objects Data Table</p>
 <div id="traditionalObjectsTable" class="tightContent" style="height:300px; overflow-y: scroll;">
