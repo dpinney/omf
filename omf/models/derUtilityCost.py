@@ -50,7 +50,7 @@ def work(modelDir, inputDict):
 	reopt_jl.run_reopt_jl(modelDir, "reopt_input_scenario.json", outages=inputDict['outage'])
 	with open(pJoin(modelDir, 'results.json')) as jsonFile:
 		reoptResults = json.load(jsonFile)
-	outData.update(reoptResults) ## Update output file with reopt results
+	#outData.update(reoptResults) ## Update output file with reopt results
 
 	## Convert user provided demand and temp data from str to float
 	temperatures = [float(value) for value in inputDict['tempCurve'].split('\n') if value.strip()]
@@ -100,15 +100,19 @@ def work(modelDir, inputDict):
 	
 	if inputDict['BESS'] == 'Yes': ## BESS
 		#BESS = reoptResults['ElectricStorage']['storage_to_load_series_kw']
-		BESS = np.ones_like(demand) ## Ad-hoc line used because BESS is not being built in REopt for some reason. Currently debugging 5/2024
-		grid_charging_BESS = reoptResults['ElectricUtility']['electric_to_storage_series_kw']
+		#print(BESS)
+		#BESS = np.ones_like(demand) ## Ad-hoc line used because BESS is not being built in REopt for some reason. Currently debugging 5/2024
+		#grid_charging_BESS = reoptResults['ElectricUtility']['electric_to_storage_series_kw']
 		#outData['chargeLevelBattery'] = reoptResults['ElectricStorage']['soc_series_fraction']
 
 		## NOTE: The following 3 lines of code are temporary; it reads in the SOC info from a static reopt test file 
 		## For some reason REopt is not producing BESS results so this is a workaround
 		with open(pJoin(__neoMetaModel__._omfDir,'static','testFiles','utility_reopt_results.json')) as f:
 			static_reopt_results = json.load(f)
+		BESS = static_reopt_results['outputs']['ElectricStorage']['storage_to_load_series_kw']
+		grid_charging_BESS = static_reopt_results['outputs']['ElectricUtility']['electric_to_storage_series_kw']
 		outData['chargeLevelBattery'] = static_reopt_results['outputs']['ElectricStorage']['soc_series_fraction']
+		outData.update(static_reopt_results['outputs'])
 	else:
 		BESS = np.zeros_like(demand)
 		grid_charging_BESS = np.zeros_like(demand)
@@ -118,15 +122,7 @@ def work(modelDir, inputDict):
 	if inputDict['load_type'] != '0': ## Load type 0 corresponds to the "None" option, which disables this vbatDispatch function
 		vbat_discharge_component = np.asarray(vbat_discharge_flipsign)
 		vbat_charge_component = np.asarray(vbat_charge)
-		fig.add_trace(go.Scatter(x=timestamps,
-							y=np.asarray(vbat_discharge_flipsign)+np.asarray(demand),
-							yaxis='y1',
-							mode='none',
-							fill='tozeroy',
-							fillcolor='rgba(127,0,255,1)',
-							name='vbat Serving Load (kW)',
-							showlegend=showlegend))
-		fig.update_traces(fillpattern_shape='/', selector=dict(name='vbat Serving Load (kW)'))
+
 	else:
 		vbat_discharge_component = np.zeros_like(demand)
 		vbat_charge_component = np.zeros_like(demand)
@@ -210,7 +206,15 @@ def work(modelDir, inputDict):
 						fillcolor='rgba(255,246,0,1)',
 						showlegend=showlegend
 						))
-	
+	fig.add_trace(go.Scatter(x=timestamps,
+							y=np.asarray(vbat_discharge_flipsign),
+							yaxis='y1',
+							mode='none',
+							fill='tozeroy',
+							fillcolor='rgba(127,0,255,1)',
+							name='vbat Serving Load (kW)',
+							showlegend=showlegend))
+	fig.update_traces(fillpattern_shape='/', selector=dict(name='vbat Serving Load (kW)'))
 	## Plot layout
 	fig.update_layout(
     	title='Utility Data Test',
