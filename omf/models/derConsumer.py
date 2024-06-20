@@ -382,24 +382,30 @@ def work(modelDir, inputDict):
 		PV = np.zeros_like(demand)
 	
 	## NOTE: This section for BESS uses REopt's BESS, which we are finding is inconsistent and tends to not work
-	## unless an outage is specified (or when we specify a generator). We are instead going to try to use our own BESS model.
+	## unless an outage is specified and no generator is enabled (if we specify a generator, REopt will not build a BESS). 
+	## We are instead going to try to use our own BESS model.
 	## Currently, the BESS model is only being run when considering a DER utility program is enabled.
 	## TODO: Change this to instead check for BESS in the output file, rather than input
-	#if inputDict['BESS'] == 'Yes': ## BESS
-		#BESS = reoptResults['ElectricStorage']['storage_to_load_series_kw']
-		#grid_charging_BESS = reoptResults['ElectricUtility']['electric_to_storage_series_kw']
-		#outData['chargeLevelBattery'] = reoptResults['ElectricStorage']['soc_series_fraction']
-
-		## NOTE: The following 3 lines of code read in the SOC info from a static reopt test file 
-		#with open(pJoin(__neoMetaModel__._omfDir,'static','testFiles','residential_reopt_results.json')) as f:
-		#	static_reopt_results = json.load(f)
-		#outData['chargeLevelBattery'] = static_reopt_results['outputs']['ElectricStorage']['soc_series_fraction']
-
+	#if 'ElectricStorage' in reoptResults and any(reoptResults['ElectricStorage']['storage_to_load_series_kw']): ## BESS
+	#	print("Using REopt's BESS output. \n")
+	#	BESS = reoptResults['ElectricStorage']['storage_to_load_series_kw']
+	#	grid_charging_BESS = reoptResults['ElectricUtility']['electric_to_storage_series_kw']
+	#	outData['chargeLevelBattery'] = reoptResults['ElectricStorage']['soc_series_fraction']
 	#else:
-		#BESS = np.zeros_like(demand)
-		#grid_charging_BESS = np.zeros_like(demand)
+	#	print('No BESS found in REopt: Setting BESS data to 0. \n')
+	#	BESS = np.zeros_like(demand)
+	#	grid_charging_BESS = np.zeros_like(demand)
+	#	outData['chargeLevelBattery'] = np.zeros_like(demand)
+		
 	BESS = np.zeros_like(demand)
 	grid_charging_BESS = np.zeros_like(demand)
+	outData['chargeLevelBattery'] = list(np.zeros_like(demand))
+
+	## NOTE: The following 3 lines of code read in the SOC info from a static reopt test file 
+	#with open(pJoin(__neoMetaModel__._omfDir,'static','testFiles','residential_reopt_results.json')) as f:
+	#	static_reopt_results = json.load(f)
+	#outData['chargeLevelBattery'] = static_reopt_results['outputs']['ElectricStorage']['soc_series_fraction']
+
 
 	########## DER Sharing Program options ######################################################################################################################################################
 	if (inputDict['utilityProgram']):
@@ -572,7 +578,7 @@ def work(modelDir, inputDict):
 		outData['monthlyDERcompensation'] = monthly_der_compensation
 		outData['monthlyEconomicBenefit'] = monthly_economic_benefit
 
-		## Plots
+		## DER Dispatch Plot ######################################################################################################################################################
 		fig = go.Figure()
 		fig.add_trace(go.Scatter(x=schedule.index,
 					y=schedule['Solar Generation (kW)'],
@@ -657,15 +663,6 @@ def work(modelDir, inputDict):
 	if inputDict['load_type'] != '0': ## Load type 0 corresponds to the "None" option, which disables this vbatDispatch function
 		vbat_discharge_component = np.asarray(vbat_discharge_flipsign)
 		vbat_charge_component = np.asarray(vbat_charge)
-		fig.add_trace(go.Scatter(x=timestamps,
-							y=np.asarray(vbat_discharge_flipsign)+np.asarray(demand),
-							yaxis='y1',
-							mode='none',
-							fill='tozeroy',
-							fillcolor='rgba(127,0,255,1)',
-							name='vbat Serving Load (kW)',
-							showlegend=showlegend))
-		fig.update_traces(fillpattern_shape='/', selector=dict(name='vbat Serving Load (kW)'))
 	else:
 		vbat_discharge_component = np.zeros_like(demand)
 		vbat_charge_component = np.zeros_like(demand)
@@ -761,7 +758,16 @@ def work(modelDir, inputDict):
 						fillcolor='rgba(255,246,0,1)',
 						showlegend=showlegend
 						))
-	
+	fig.add_trace(go.Scatter(x=timestamps,
+						y=np.asarray(vbat_discharge_flipsign),
+						yaxis='y1',
+						mode='none',
+						fill='tozeroy',
+						fillcolor='rgba(127,0,255,1)',
+						name='vbat Serving Load (kW)',
+						showlegend=showlegend))
+	fig.update_traces(fillpattern_shape='/', selector=dict(name='vbat Serving Load (kW)'))
+
 	## Plot layout
 	fig.update_layout(
     	#title='Residential Data',

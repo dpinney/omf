@@ -197,14 +197,14 @@
 				Plotly.newPlot("fig5Chart", JSON.parse(allOutputData["fig5Data"]), JSON.parse(allOutputData["fig5Layout"]) || {})
 			</script>
 		</div>
-		<p class="reportTitle">TAIFI Histogram</p>
+		<p class="reportTitle"><label class="tooltip">TAIFI Histogram<span class="classic">Time Average Interruption Frequency Index (TAIFI) is calculated as 1/(the average period between the onset of interruptions in minutes) for a given load. A lower TAIFI value indicates more time between interruptions on average for a load.</span></label></p>
 		<div id="taifiHist" class="tightContent">
 			<div id="taifiHistChart" style="width:1000px"></div>
 			<script type="text/javascript">
 				Plotly.newPlot("taifiHistChart", JSON.parse(allOutputData["taifiHistData"]), JSON.parse(allOutputData["taifiHistLayout"]) || {})
 			</script>
 		</div>
-		<p class="reportTitle">TAIDI Histogram</p>
+		<p class="reportTitle"><label class="tooltip">TAIDI Histogram<span class="classic">Time Average Interruption Duration Index (TAIDI) is the percent of the total simulation time during which a particular load is experiencing an interruption. E.g. If load_x experiences a 1 hour interruption, regains power for an hour, and then experiences a 2 hour interruption during a 24 hour simulation, the TAIDI for load_x would be 3/24 = 12.5%</span></label></p>
 		<div id="taidiHist" class="tightContent">
 			<div id="taidiHistChart" style="width:1000px"></div>
 			<script type="text/javascript">

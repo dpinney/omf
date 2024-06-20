@@ -476,10 +476,14 @@ def tradMetricsByMgTable(outputTimeline, loadMgDict, startTime, numTimeSteps, mo
 	for load,mg in loadMgDict.items():
 		loadsPerMg[mg] = loadsPerMg.get(mg,[])+[load]
 
-	systemwideMetrics = calcTradMetrics(outputTimeline, loadMgDict.keys(), startTime, numTimeSteps)
+	systemwideMetrics = {k:round(v,2) for k,v in calcTradMetrics(outputTimeline, loadMgDict.keys(), startTime, numTimeSteps).items()}
+
 	metricsPerMg = {}
 	for mg, mgLoadList in loadsPerMg.items():
-		metricsPerMg[mg] = calcTradMetrics(outputTimeline, mgLoadList, startTime, numTimeSteps)
+		metricsPerMg[mg] = {k:round(v,2) for k,v in calcTradMetrics(outputTimeline, mgLoadList, startTime, numTimeSteps).items()}
+
+	for k,v in systemwideMetrics.items():
+		systemwideMetrics[k]
 
 	new_html_str = """
 		<table class="sortable" cellpadding="0" cellspacing="0">
@@ -863,7 +867,7 @@ def genProfilesByMicrogrid(mgIDs, obMgDict, powerflow, simTimeSteps, startTime):
 			name=pfTypeRenamed,
 			hovertemplate=
 			'<b>Time Step</b>: %{x}<br>' +
-			f'<b>{pfTypeRenamed}</b>: %{{y:.3f}}%'))
+			f'<b>{pfTypeRenamed}</b>: %{{y:.3f}}kW'))
 	gensFigure.update_layout(
 		xaxis_title='Time (Hours)',
 		xaxis_range=[simTimeSteps[0],simTimeSteps[-1]],
@@ -887,7 +891,7 @@ def genProfilesByMicrogrid(mgIDs, obMgDict, powerflow, simTimeSteps, startTime):
 				name=pfTypeRenamed,
 				hovertemplate=
 				'<b>Time Step</b>: %{x}<br>' +
-				f'<b>{pfTypeRenamed} for Microgrid {mgID}</b>: %{{y:.3f}}%'))
+				f'<b>{pfTypeRenamed} for Microgrid {mgID}</b>: %{{y:.3f}}kW'))
 		mgGensFigures[mgID].update_layout(
 			xaxis_title='Time (Hours)',
 			xaxis_range=[simTimeSteps[0],simTimeSteps[-1]],
@@ -1043,6 +1047,7 @@ def graphMicrogrid(modelDir, pathToOmd, profit_on_energy_sales, restoration_cost
 	
 	loads = go.Figure()
 	loadsKeysAndNames = [
+		('Total load (%)', 'Total load'),
 		('Feeder load (%)','Feeder Load'),
 		('Microgrid load (%)','Microgrid Load'),
 		('Bonus load via microgrid (%)','Bonus Load via Microgrid')]
@@ -1054,7 +1059,7 @@ def graphMicrogrid(modelDir, pathToOmd, profit_on_energy_sales, restoration_cost
 			name=name,
 			hovertemplate=
 			'<b>Time Step</b>: %{x}<br>' +
-			f'<b>{name}</b>: %{{y:.2f}}'))
+			f'<b>{name}</b>: %{{y:.2f}}% kW'))
 	# Edit the layout
 	loads.update_layout(
 		xaxis_title='Time (Hours)',
