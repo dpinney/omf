@@ -46,11 +46,9 @@ def bar_chart_coloring( row ):
 		color = 'red'
 	return color
 
-def createColorCSV(modelDir, df):
-	new_df = df[['bus','max_kw']]
-	new_df.to_csv(Path(modelDir, 'color_by.csv'), index=False)
+def run_downline_load_algorithm( modelDir, inputDict, outData ):
+	# This uses the circuit - so the tradition needs to be on to do this. 
 
-def run_downline_load_algorithm( modelDir, inputDict, outData ):	
 	feederName = [x for x in os.listdir(modelDir) if x.endswith('.omd') and x[:-4] == inputDict['feederName1'] ][0]
 	inputDict['feederName1'] = feederName[:-4]
 	path_to_omd = Path(modelDir, feederName)
@@ -61,8 +59,11 @@ def run_downline_load_algorithm( modelDir, inputDict, outData ):
 	graph = nx_data[0]
 	buses = opendss.get_all_buses( os.path.join( modelDir, 'downlineLoad.dss') )
 	buses_output = {}
-	kwFromGraph = nx.get_node_attributes(graph, 'kw')
 	objectTypesFromGraph = nx.get_node_attributes(graph, 'object')
+
+	kwFromGraph = nx.get_node_attributes(graph, 'kw') #Load, generator attribute
+	kwRatedFromGraph = nx.get_node_attributes( graph, 'kwrated') # Storage attribute
+	kvFromGraph = nx.get_node_attributes( graph, 'kv' )
 	# Check if they are buses
 	for bus in buses:
 		if bus in graph.nodes:
@@ -70,20 +71,49 @@ def run_downline_load_algorithm( modelDir, inputDict, outData ):
 			get_dependents = sorted(nx.descendants(graph, bus))
 			for dependent in get_dependents:
 				if dependent in kwFromGraph.keys() and objectTypesFromGraph[dependent] == 'load':
-					kwSum += float(kwFromGraph[dependent])
+					kwSum += float( kwFromGraph[dependent] )
 				elif dependent in kwFromGraph.keys() and objectTypesFromGraph[dependent] == 'generator':
-					kwSum -= float(kwFromGraph[dependent])
+					kwSum -= float( kwFromGraph[dependent] )
+				elif dependent in kwRatedFromGraph.keys() and objectTypesFromGraph[dependent] == 'storage':
+					kwSum -= float( kwRatedFromGraph[dependent] )
+				elif dependent in kvFromGraph.keys() and objectTypesFromGraph[dependent] == 'pvsystem':
+					pfFromGraph = nx.get_node_attributes(graph, 'pf')
+					# pvsystem has kv, not kw
+					kwForPVSys = kvFromGraph[dependent] * pfFromGraph[dependent]
+					kwSum -= kwForPVSys
 			buses_output[bus] = kwSum
-	downline_output = pd.DataFrame(list(buses_output.items()), columns=['busname', 'kw'] )
+	downline_output = pd.DataFrame(list(buses_output.items()), columns=['bus', 'kw'] )
 	downline_end_time = time.time()
-	sorted_downlineDF = downline_output.sort_values(by='busname')
+	sorted_downlineDF = downline_output.sort_values(by='bus')
 
 	buses_to_remove = ['eq_source_bus', 'bus_xfmr']
 	indexes = []
 	for bus in buses_to_remove:
-		indexes.append( sorted_downlineDF[sorted_downlineDF['busname'] == bus].index )
+		indexes.append( sorted_downlineDF[sorted_downlineDF['bus'] == bus].index )
 	for i in indexes:
 		sorted_downlineDF = sorted_downlineDF.drop(i)
+
+	sorted_downlineDF.to_csv(Path(modelDir, 'downline_load.csv'), index=False)
+	
+	downline_color_data = Path(modelDir, 'downline_load.csv').read_text()
+	downline_color = {
+    "downline_load.csv": {
+        "csv": "<content>",
+        "colorOnLoadColumnIndex": "0"
+    }
+	}
+
+	original_file = Path(modelDir, 'color_test.omd') #This should have already been made
+	original_file_data = json.load( open(original_file) )
+
+	original_file_data['attachments']['coloringFiles'].update(downline_color)
+	original_file_data['attachments']['coloringFiles']['downline_load.csv']['csv'] = downline_color_data
+
+	with open(original_file, 'w+') as out_file:
+		json.dump(original_file_data, out_file, indent=4)
+	omf.geo.map_omd(original_file, modelDir, open_browser=False )
+
+	outData['traditionalHCMap'] = open(Path(modelDir, "geoJson_offline.html"), 'r' ).read()
 	outData['downline_tableHeadings'] = downline_output.columns.values.tolist()
 	outData['downline_tableValues'] = (list(sorted_downlineDF.itertuples(index=False, name=None)))
 	outData['downline_runtime'] = convert_seconds_to_hms_ms( downline_end_time - downline_start_time )
@@ -136,7 +166,7 @@ def run_ami_algorithm( modelDir, inputDict, outData ):
 def run_traditional_algorithm( modelDir, inputDict, outData ):
 	# traditional hosting capacity if they uploaded an omd circuit file and chose to use it.
 
-	# Check if the file was upploaded and checks to make sure the name matches
+	# Check if the file was uploaded and checks to make sure the name matches
 	feederName = [x for x in os.listdir(modelDir) if x.endswith('.omd') and x[:-4] == inputDict['feederName1'] ][0]
 	inputDict['feederName1'] = feederName[:-4]
 	path_to_omd = Path(modelDir, feederName)
@@ -164,17 +194,18 @@ def run_traditional_algorithm( modelDir, inputDict, outData ):
 		)
 	# We don't need the plot_color stuff for anything else, so drop it
 	sorted_tradHCDF.drop(sorted_tradHCDF.columns[len(sorted_tradHCDF.columns)-1], axis=1, inplace=True)
-	createColorCSV(modelDir, sorted_tradHCDF)
+	color_df = sorted_tradHCDF[['bus','max_kw']]
+	color_df.to_csv(Path(modelDir, 'color_by_traditional.csv'), index=False)
 	attachment_keys = {
 		"coloringFiles": {
-			"color_by.csv": {
+			"color_by_traditional.csv": {
 				"csv": "<content>",
 				"colorOnLoadColumnIndex": "1"
-			}
+			},
 		}
 	}
-	data = Path(modelDir, 'color_by.csv').read_text()
-	attachment_keys['coloringFiles']['color_by.csv']['csv'] = data
+	data = Path(modelDir, 'color_by_traditional.csv').read_text()
+	attachment_keys['coloringFiles']['color_by_traditional.csv']['csv'] = data
 	omd = json.load(open(path_to_omd))
 	new_path = Path(modelDir, 'color_test.omd')
 	omd['attachments'] = attachment_keys
