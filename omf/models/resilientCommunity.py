@@ -826,7 +826,7 @@ def getDownLineLoadsEquipment1(pathToOmd, equipmentList):
             kvar = float(ob['kvar'])
             kv = float(ob['kv'])
 
-            loadsDict[key]["base crit score"]= ((math.sqrt((kw * kw) + (kvar * kvar) ))/ (5)) * 4
+            loadsDict[key]["base crit score"]= round(((math.sqrt((kw * kw) + (kvar * kvar) ))/ (5)) * 4,2)
 
             long = float(ob['longitude'])
             lat = float(ob['latitude'])
