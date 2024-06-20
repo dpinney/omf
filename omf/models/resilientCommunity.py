@@ -180,7 +180,8 @@ def createDF(tractData, columns, geoTransformed):
     input: geoTransformed -> EPSG:4326 transformed geometry
     '''
     data = pd.DataFrame(tractData, columns = columns)
-    data['geometry'] = geoTransformed
+    if (geoTransformed):
+        data['geometry'] = geoTransformed
     return data
 
 def createGeoDF(df):
@@ -414,7 +415,7 @@ def run_correlationTesting(listOfCoops, stateName, nrigeoJson, coopGeoJson):
     return corr, corr2
 
 def all_vals(obj):
-    ''' retrieves all values in nested dictionary'''
+    ''' helper method that retrieves all values in nested dictionary'''
     if isinstance(obj, dict):
         for v in obj.values():
             yield from all_vals(v)
@@ -1365,7 +1366,7 @@ def buildSVI(tractFIPS):
 
 def buildSVIRating(row):
     '''computes SVI Rating for SVI_SCORE columns'''
-    
+
     if row['SOVI_SCORE'] <= .2:
         return 'Very Low'
     elif row['SOVI_SCORE'] > .2 and row['SOVI_SCORE'] <= .4:
@@ -1377,6 +1378,50 @@ def buildSVIRating(row):
     else:
         return 'Very High'
 
+
+def runCalculations(pathToOmd,modelDir, equipmentList):
+    '''
+    Runs computations on circuit for different loads and equipment
+
+    pathToOmd -> file path to omd
+    modelDir -> modelDirectory to store csv
+    equipmentList -> specify list of equipment to use in analysis: example : ['line', 'fuse', 'transformer]
+    
+    '''
+
+    obDict, loads, geoDF = getDownLineLoadsEquipment1(pathToOmd, equipmentList)
+
+    cols = ['Object Name', 'Type', 'Base Criticality Score', 'Base Criticality Index',
+            'Community Criticality Score', 'Community Criticality Index']
+    
+    object_names = list(obDict.keys())
+    load_names = list(loads.keys())
+
+
+    base_criticality_score_vals1 = [value.get('base crit score') for key, value in loads.items()]
+    base_criticity_index_vals1 = [value.get('base crit index') for key, value in loads.items()]
+    community_criticality_score_vals1 = [value.get('community crit score') for key, value in loads.items()]
+    community_criticity_index_vals1 = [value.get('community crit index') for key, value in loads.items()]
+    type1 = ['load' for i in range(len(base_criticality_score_vals1))]
+    
+
+    loadsList = list(zip(load_names,type1,base_criticality_score_vals1,base_criticity_index_vals1,community_criticality_score_vals1,community_criticity_index_vals1))
+    
+
+    base_criticality_score_vals2 = [value.get('base crit score') for key, value in obDict.items()]
+    base_criticity_index_vals2 = [value.get('base crit index') for key, value in obDict.items()]
+    community_criticality_score_vals2 = [value.get('community crit score') for key, value in obDict.items()]
+    community_criticity_index_vals2 = [value.get('community crit index') for key, value in obDict.items()]
+    type2 = ['equipment' for i in range(len(base_criticality_score_vals1))]
+
+    equipList = list(zip(object_names,type2,base_criticality_score_vals2,base_criticity_index_vals2,community_criticality_score_vals2,community_criticity_index_vals2))
+
+    finList = loadsList + equipList
+
+    newDF = createDF(finList, cols, [])
+
+    newDF.to_csv(pJoin(modelDir, 'resilientCommunityOutput.csv'))
+    
 def work(modelDir, inputDict):
     ''' Run the model in its directory. '''
     outData = {}
@@ -1412,7 +1457,7 @@ def work(modelDir, inputDict):
 
     
     # check downline loads
-    obDict, loads, geoDF = getDownLineLoadsEquipment1(omd_file_path, equipmentList)
+    obDict, loads, geoDF, sviDF = getDownLineLoadsEquipment1(omd_file_path, equipmentList)
 
     # color vals based on selected column
     
@@ -1432,6 +1477,7 @@ def work(modelDir, inputDict):
     # Load Geojson file more efficiently
 
     geoDF.to_file(geoJson_shapes_file, driver="GeoJSON")
+
 
     with open(geoJson_shapes_file) as f1:
         geoshapes =  json.load(f1)
@@ -1489,7 +1535,7 @@ def work(modelDir, inputDict):
     outData['loadTableValues'] = list(zip(load_names, base_criticality_score_vals1, base_criticity_index_vals1))
 
 
-    headers2 = ['Object Name', 'Base Criticality Score', 'Base Criticallity Index', 'Community Criticality Score', 'Community Criticality Index']
+    headers2 = ['Equipment Name', 'Base Criticality Score', 'Base Criticallity Index', 'Community Criticality Score', 'Community Criticality Index']
     object_names = list(obDict.keys())
     base_criticality_score_vals2 = [value.get('base crit score') for key, value in obDict.items()]
     base_criticity_index_vals2 = [value.get('base crit index') for key, value in obDict.items()]
@@ -1506,8 +1552,8 @@ def work(modelDir, inputDict):
 
 def test():
     pathToOmd ='/Users/davidarmah/Documents/omf/omf/static/testFiles/resilientCommunity/iowa240_in_Florida_copy2.omd'
-    
-    getDownLineLoadsEquipment1(pathToOmd, ['bus'])
+    outputPath = '/Users/davidarmah/Documents/svi.csv'
+    runCalculations(pathToOmd,outputPath, ['line', 'transformer', 'fuse'])
 
 def new(modelDir):
     omdfileName = 'iowa240_in_Florida_copy2'
