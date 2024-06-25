@@ -48,9 +48,7 @@ def bar_chart_coloring( row ):
 
 def run_downline_load_algorithm( modelDir, inputDict, outData ):
 	# This uses the circuit - so the tradition needs to be on to do this. 
-
-	feederName = [x for x in os.listdir(modelDir) if x.endswith('.omd') and x[:-4] == inputDict['feederName1'] ][0]
-	inputDict['feederName1'] = feederName[:-4]
+	feederName = [x for x in os.listdir(modelDir) if x.endswith('.omd')][0]
 	path_to_omd = Path(modelDir, feederName)
 	tree = opendss.dssConvert.omdToTree(path_to_omd)
 	opendss.dssConvert.treeToDss(tree, Path(modelDir, 'downlineLoad.dss'))
@@ -165,10 +163,8 @@ def run_ami_algorithm( modelDir, inputDict, outData ):
 
 def run_traditional_algorithm( modelDir, inputDict, outData ):
 	# traditional hosting capacity if they uploaded an omd circuit file and chose to use it.
-
 	# Check if the file was uploaded and checks to make sure the name matches
-	feederName = [x for x in os.listdir(modelDir) if x.endswith('.omd') and x[:-4] == inputDict['feederName1'] ][0]
-	inputDict['feederName1'] = feederName[:-4]
+	feederName = [x for x in os.listdir(modelDir) if x.endswith('.omd')][0]
 	path_to_omd = Path(modelDir, feederName)
 	tree = opendss.dssConvert.omdToTree(path_to_omd)
 	opendss.dssConvert.treeToDss(tree, Path(modelDir, 'circuit.dss'))
