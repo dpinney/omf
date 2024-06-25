@@ -97,7 +97,9 @@
 			</div>
 			<hr>
 			<div class="shortInput">
-				<label class="tooltip">Apply Downline Hosting Capacity Algorithm with above circuit.</label>
+				<label class="tooltip">Apply Downline Hosting Capacity Algorithm
+					<span class="classic">Calculate approximately how much load is downline of every bus on the system which gives a rough estimate of hosting capacity. Useful as a sanity check for other methods.</span>
+				</label>
 				<select id="runDownlineAlgorithm" name="runDownlineAlgorithm" value="{{allInputDataDict.runDownlineAlgorithm}}" required>
 					<option value="off" {% if allInputDataDict.runDownlineAlgorithm == 'off' %}selected{% endif %}>Off</option>
 					<option value="on" {% if allInputDataDict.runDownlineAlgorithm == 'on' %}selected{% endif %}>On</option>
