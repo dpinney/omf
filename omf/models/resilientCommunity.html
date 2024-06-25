@@ -79,7 +79,7 @@
 				
 			<div class="shortInput">
 				<label class="tooltip">Loads Coloring By<span class="classic">Select the simulation output value that will be used to color the loads in the circuit.</span></label>
-				<select id="loadCol" name="loadCol">
+				<select id="loadCol" name="loadCol" value="{{allInputDataDict.loadCol}}">
 					<option value="Base Criticality Score" {% if allInputDataDict.loadCol == "Base Criticality Score" %}selected{% endif %}>Base Criticality Score </option>
 					<option value="Community Criticality Score" {% if allInputDataDict.loadCol == "Community Criticality Score" %}selected{% endif %}>Community Criticality Score</option>
 					<option value="Base Criticality Index" {% if allInputDataDict.loadCol == "Base Criticality Index" %}selected{% endif %}>Base Criticality Index</option>
@@ -249,7 +249,7 @@
 </table>
 </div>
 
-<p class="reportTitle">Objects Data Table</p>
+<p class="reportTitle">Equipment Data Table</p>
 <div id="traditionalObjectsTable" class="tightContent" style="height:300px; overflow-y: scroll;">
 	<table style="width:100%">
 		<tr>

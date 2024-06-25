@@ -61,20 +61,19 @@ def install_reopt_jl(system : list = platform.system(), build_sysimage=True):
             commands += [ f'touch "{instantiated_path}"' ]
         elif system == "Windows":
             commands = [
-                f'cd "{thisDir}" & del julia-1.9.4-win64.zip',
-			    f'cd "{thisDir}" & curl -o julia-1.9.4-win64.zip https://julialang-s3.julialang.org/bin/winnt/x64/1.9/julia-1.9.4-win64.zip',
-			    f'cd "{thisDir}" & tar -x -f "julia-1.9.4-win64.zip' ]
+                f'cd {thisDir} & del julia-1.9.4-win64.zip',
+			    f'cd {thisDir} & curl -o julia-1.9.4-win64.zip https://julialang-s3.julialang.org/bin/winnt/x64/1.9/julia-1.9.4-win64.zip',
+			    f'cd {thisDir} & tar -x -f julia-1.9.4-win64.zip' ]
             commands += install_pyjulia
             if build_sysimage:
                 commands += [
-                    f'''cd "{thisDir}\\julia-1.9.4\\bin" & julia --project="{project_path}" -e '
+                    f'''cd {thisDir}\\julia-1.9.4\\bin & julia --project="{project_path}" -e '
                     import Pkg; Pkg.instantiate();
                     import REoptSolver; using PackageCompiler;
                     PackageCompiler.create_sysimage(["REoptSolver"]; sysimage_path="{sysimage_path}", 
                     precompile_execution_file="{precompile_path}", cpu_target="generic;sandybridge,-xsaveopt,clone_all;haswell,-rdrnd,base(1)")
-                    ' '''
-			        f'copy nul "{instantiated_path}"'
-                ]
+                    ' ''']
+            commands += [ f'copy nul {instantiated_path}' ]
         else:
             raise ValueError(f'No installation script available yet for {system}')
     
