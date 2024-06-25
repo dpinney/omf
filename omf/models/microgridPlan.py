@@ -5,6 +5,8 @@ import warnings
 import csv
 import shutil, datetime
 from pathlib import Path
+import plotly
+import plotly.graph_objs as go
 
 # OMF imports
 #from omf import feeder
@@ -38,14 +40,12 @@ def work(modelDir, inputDict):
 
 	### reopt_jl
 	if run_reopt:
-		print("testing (remove): running reopt_jl")
 		reoptInputs = inputDict.get("reopt_jl")
 		reoptOutData = microgridDesign.work(modelDir,reoptInputs)
 		outData["reoptOutData"] = reoptOutData 
 	
 	### der_cam	
 	if run_dercam:
-		print("testing (remove): running der_cam")
 		dercamInputs = inputDict.get("dercam")
 		apiKey = dercamInputs["api_key"]
 		hasModelFile = dercamInputs["hasModelFile"]
@@ -54,19 +54,37 @@ def work(modelDir, inputDict):
 			dercam.run(modelDir, modelFile=modelFile, apiKey=apiKey)
 		else:
 			dercam.run(modelDir, reoptFile="Scenario_Test_POST.json", apiKey=apiKey)
-		dercamOutData = dict()
+		dercamOutData = {}
+		currentHeader = ""
+		currentDict = {}
 		with open(pJoin(modelDir,"results.csv")) as f:
 			dercam_csv = csv.reader(f)
 			for row in dercam_csv:
-				if len(row) > 1: #row[0][0] != "+" and
-					val = row[0].replace(" ","_")
-					dercamOutData[val] = row[1]
+				# checks for header rows 
+				if len(row) >= 1 and len(row[0]) > 1 and '+' in row[0]:
+					if currentHeader != "" and currentDict != {}:
+						dercamOutData[currentHeader] = currentDict
+					currentHeader = row[0]
+					remove_chars = '+ '
+					for char in remove_chars:
+						currentHeader = currentHeader.replace(char, '')
+					currentDict = {}
+				# adds key-value pair to currentDict otherwise
+				elif len(row) > 1:
+					val = row[0]
+					val = val.replace(" ","")
+					if len(row) == 2 or (len(row) == 3 and (row[2] == "NA" or row[1] == row[2])):
+						currentDict[val] = row[1]
+					else:
+						currentDict[val] = row[1:]
 
 		outData["dercamOutData"] = dercamOutData
+		#plots/graphs to make:
+
+	#to figure out: what data from reopt/dercam goes into pmonm?
 
 	### PowerModelsONM
 	if run_pmonm:
-		print("testing (remove): running pmONM")
 		pmonmInputs = inputDict.get("pmonm")
 		if not pmonm.check_instantiated():
 			pmonm.install_onm()
@@ -94,11 +112,14 @@ def work(modelDir, inputDict):
 		with open(pmonmOut) as j:
 			pmonmOutData = json.load(j)
 		outData["pmonmOutData"] = pmonmOutData
-	
+		#plots/graphs to make
+		#
+
+	#to figure out: how to parse pmonm "Protection Settings" output into pso 
+	# => convert to dss file somehow? not needed?
 	
 	### ProtectionSettingsOptimizer
 	if run_pso:
-		print("testing (remove): running pso")
 		psoInputs = inputDict.get("pso")
 		del psoInputs["circuitFile"]
 		psoInputs["testPath"] = psoInputs["circuitPath"]
@@ -115,7 +136,89 @@ def work(modelDir, inputDict):
 
 	#to figure out : which solvers can run in different threads/subprocesses?
 
-	#todo: generate output tables / graphs for der-cam, pmonm, pso 
+	#making PowerModelsONM output graphs :
+	#todo: outData["Protection settings"]["settings"] should contain key output (not showing anything with current test files)
+	def makeGridLine(x,y,color,name):
+			plotLine = go.Scatter(
+				x = x, 
+				y = y,
+				line = dict( color=(color)),
+				name = name,
+				hoverlabel = dict(namelength = -1),
+				showlegend=True
+			)
+			return plotLine
+	
+	plotlyLayout = go.Layout(
+			width=1000,
+			height=375,
+			legend=dict(
+				x=0,
+				y=1.25,
+				orientation="h")
+			)
+	
+	x = outData['pmonmOutData']['Simulation time steps']
+	plotData = []
+	pmonm_voltages = outData["pmonmOutData"]["Voltages"]
+	min_voltage = makeGridLine(x, pmonm_voltages["Min voltage (p.u.)"],'blue','Min. Voltage')
+	plotData.append(min_voltage)
+	max_voltage = makeGridLine(x, pmonm_voltages["Max voltage (p.u.)"],'red','Max. Voltage')
+	plotData.append(max_voltage)
+	mean_voltage = makeGridLine(x, pmonm_voltages["Mean voltage (p.u.)"],'green','Mean Voltage')
+	plotData.append(mean_voltage)
+	plotlyLayout['yaxis'].update(title='Voltage (p.u.)')
+	plotlyLayout['xaxis'].update(title='Simulation Time Steps')
+	outData["pmonmVoltageData"] = json.dumps(plotData, cls=plotly.utils.PlotlyJSONEncoder)
+	outData["pmonmVoltageLayout"] = json.dumps(plotlyLayout, cls=plotly.utils.PlotlyJSONEncoder)
+
+	plotData = []
+	storage_soc = makeGridLine(x, outData['pmonmOutData']['Storage SOC (%)'],'red','Storage SOC')
+	plotData.append(storage_soc)
+	plotlyLayout['yaxis'].update(title='SOC (%)')
+	plotlyLayout['xaxis'].update(title='Simulation Time Steps')
+	outData["pmonmStorageSOCData"] = json.dumps(plotData, cls=plotly.utils.PlotlyJSONEncoder)
+	outData["pmonmStorageSOCLayout"] = json.dumps(plotlyLayout, cls=plotly.utils.PlotlyJSONEncoder)
+
+	pmonm_load_served = outData['pmonmOutData']['Load served']
+	plotData = []
+	microgridCustomers = makeGridLine(x,pmonm_load_served['Microgrid customers (%)'],'blue','Microgrid customers')
+	plotData.append(microgridCustomers)
+	totalLoad = makeGridLine(x,pmonm_load_served['Total load (%)'],'purple','Total load')
+	plotData.append(totalLoad)
+	bonusLoadViaMicrogrid = makeGridLine(x,pmonm_load_served['Bonus load via microgrid (%)'],'brown','Bonus load via microgrid')
+	plotData.append(bonusLoadViaMicrogrid)
+	feederCustomers = makeGridLine(x,pmonm_load_served['Feeder customers (%)'],'yellow','Feeder customers')
+	plotData.append(feederCustomers)
+	feederLoad = makeGridLine(x,pmonm_load_served['Feeder load (%)'],'red','Feeder load')
+	plotData.append(feederLoad)
+	totalCustomers = makeGridLine(x,pmonm_load_served['Total customers (%)'],'green','Total customers')
+	plotData.append(totalCustomers)
+	microgridLoad = makeGridLine(x,pmonm_load_served['Microgrid load (%)'],'gray','Microgrid load')
+	plotData.append(microgridLoad)
+	bonusCustomersViaMicrogrid = makeGridLine(x,pmonm_load_served['Bonus customers via microgrid (%)'],'orange','Bonus customers via microgrid (%)')
+	plotData.append(bonusCustomersViaMicrogrid)
+	plotlyLayout['yaxis'].update(title='Load Served (%)')
+	plotlyLayout['xaxis'].update(title='Simulation Time Steps')
+	outData["pmonmLoadServedData"] = json.dumps(plotData, cls=plotly.utils.PlotlyJSONEncoder)
+	outData["pmonmLoadServedLayout"] = json.dumps(plotlyLayout, cls=plotly.utils.PlotlyJSONEncoder)
+
+	pmonm_generator_profiles = outData['pmonmOutData']["Generator profiles"]
+	plotData = []
+	diesel_dg = makeGridLine(x,pmonm_generator_profiles['Diesel DG (kW)'],'red','Diesel DG')
+	plotData.append(diesel_dg)
+	energy_storage = makeGridLine(x,pmonm_generator_profiles['Energy storage (kW)'],'green','Energy storage')
+	plotData.append(energy_storage)
+	solar_dg = makeGridLine(x,pmonm_generator_profiles['Solar DG (kW)'],'orange','Solar DG')
+	plotData.append(solar_dg)
+	grid_mix = makeGridLine(x,pmonm_generator_profiles['Grid mix (kW)'],'blue','Grid mix')
+	plotData.append(grid_mix)
+	plotlyLayout['yaxis'].update(title='(kW)')
+	plotlyLayout['xaxis'].update(title='Simulation Time Steps')
+	outData["pmonmGeneratorProfilesData"] = json.dumps(plotData, cls=plotly.utils.PlotlyJSONEncoder)
+	outData["pmonmGeneratorProfilesLayout"] = json.dumps(plotlyLayout, cls=plotly.utils.PlotlyJSONEncoder)
+
+	#to potentially add: "Device action timeline"
 
 	#outData["output"] = 
 	# Model operations typically ends here.
@@ -130,8 +233,9 @@ def new(modelDir):
 		"user" : "admin",
 		"modelType": modelName,
 		"created":str(datetime.datetime.now()),
-		"run_reopt": False,
-		"run_dercam": False,
+		#"use_cache": True,
+		"run_reopt": True,
+		"run_dercam": True,
 		"run_pmonm": True,
 		"run_pso": True
 	}
@@ -239,10 +343,11 @@ def new(modelDir):
 			"default_switch_status": 'PMD.ENABLED'
 	}
 	#temporary test files
+	#defaultPath = pJoin(__neoMetaModel__._omfDir, "static", "testFiles","lehigh4mgs")
 	defaultPath = pJoin(__neoMetaModel__._omfDir, "static", "testFiles")
-	defaultCircuitFile = "iowa240_dwp_22.dss"
-	defaultSettingsFile = "iowa240_dwp_22.settings.json"
-	defaultEventsFile = "iowa240_dwp_22.events.json"
+	defaultCircuitFile = "iowa240_dwp_22.dss" #"circuit_plus_mgAll_relays.dss"
+	defaultSettingsFile = "iowa240_dwp_22.settings.json" #"circuit_plus_mgAll_relays.settings.json"
+	defaultEventsFile = "iowa240_dwp_22.events.json" #"circuit_plus_mgAll_relays.events_prev.json"
 	pmonmDefaultInputs = {
 		"circuitFile": pJoin(defaultPath,defaultCircuitFile), #circuitFile,
 		"circuitFileName": defaultCircuitFile, #circuitFileName
@@ -285,8 +390,12 @@ def new(modelDir):
 
 	return __neoMetaModel__.new(modelDir, defaultInputs)
 
+def display_prev_results():
+	modelLoc = Path(__neoMetaModel__._omfDir,"data","Model","admin","Automated Testing of " + modelName)
+	__neoMetaModel__.renderAndShow(modelLoc)
+
 @neoMetaModel_test_setup
-def _debugging(): #_test():
+def _debugging():
 	# Location
 	modelLoc = Path(__neoMetaModel__._omfDir,"data","Model","admin","Automated Testing of " + modelName)
 	# Blow away old test results if necessary.
@@ -306,4 +415,4 @@ def _debugging(): #_test():
 
 if __name__ == '__main__':
 	_debugging()
-	#_test()
+	#display_prev_results()
