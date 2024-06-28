@@ -156,11 +156,11 @@ def work(modelDir, inputDict):
                          y=np.asarray(demand) + np.asarray(grid_charging_BESS) + vbat_charge_component,
 						 yaxis='y1',
                          mode='none',
-                         name='Additional Load (Charging BESS and vbat)',
+                         name='Additional Load (Charging BESS and TESS)',
                          fill='tonexty',
                          fillcolor='rgba(175,0,42,0)',
 						 showlegend=showlegend))
-	fig.update_traces(fillpattern_shape='.', selector=dict(name='Additional Load (Charging BESS and vbat)'))
+	fig.update_traces(fillpattern_shape='.', selector=dict(name='Additional Load (Charging BESS and TESS)'))
 	
 	## Grid serving new load
 	## TODO: Should PV really be in this?
@@ -212,9 +212,9 @@ def work(modelDir, inputDict):
 							mode='none',
 							fill='tozeroy',
 							fillcolor='rgba(127,0,255,1)',
-							name='vbat Serving Load (kW)',
+							name='TESS Serving Load (kW)',
 							showlegend=showlegend))
-	fig.update_traces(fillpattern_shape='/', selector=dict(name='vbat Serving Load (kW)'))
+	fig.update_traces(fillpattern_shape='/', selector=dict(name='TESS Serving Load (kW)'))
 	## Plot layout
 	fig.update_layout(
     	title='Utility Data Test',

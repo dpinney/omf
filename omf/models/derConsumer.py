@@ -877,7 +877,7 @@ def work(modelDir, inputDict):
 							y=np.asarray(vbat_charge),
 							mode='none',
 							fill='tozeroy',
-							name='Power Used to Charge VBAT',
+							name='Power Used to Charge TESS',
 							fillcolor='rgba(155,148,225,1)',
 							showlegend=True))
 	
