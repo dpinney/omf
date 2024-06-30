@@ -1006,7 +1006,7 @@ def getDownLineLoadsEquipment(pathToOmd,nriGeoJson, equipmentList):
             # For each load, estimate the number of persons served.
             #Use the following equation sqrt(kw^2 + kvar^2)/5 kva = # of homes served by that load
             # assume household is 4
-            loads[key]["base crit score"]= ((math.sqrt((kw * kw) + (kvar * kvar) ))/ (5)) * 4
+            loads[key]["base crit score"]= round(((math.sqrt((kw * kw) + (kvar * kvar) ))/ (5)) * 4, 2)
 
 
             long = float(ob['longitude'])
@@ -1317,7 +1317,7 @@ def buildSVI(tractFIPS):
     
 
     # build url to use api
-    acs_request_url = "https://api.census.gov/data/2022/acs/acs5?get="+",".join(acs_svi_vars)+"&for=tract:"+str(tractID)+"&in=state:"+str(stateID)+"%20county:"+ str(countyID) + "&key=bc86c8cfc930e7c10b81d6683c6a316f5fcb857b" 
+    acs_request_url = "https://api.census.gov/data/2022/acs/acs5?get="+",".join(acs_svi_vars)+"&for=tract:"+str(tractID)+"&in=state:"+str(stateID)+"%20county:"+ str(countyID) + "&key=bc86c8cfc930e7c10b81d6683c6a316f5fcb857b"
     pdb_request_url = "https://api.census.gov/data/2022/pdb/tract?get="+ ",".join(pdb_svi_vars)+ "&for=tract:"+str(tractID)+"&in=state:"+str(stateID)+"%20county:"+ str(countyID) + "&key=bc86c8cfc930e7c10b81d6683c6a316f5fcb857b"
 
 
@@ -1377,7 +1377,6 @@ def buildSVIRating(row):
         return 'Relatively High'
     else:
         return 'Very High'
-
 
 def runCalculations(pathToOmd,modelDir, equipmentList):
     '''
@@ -1457,7 +1456,7 @@ def work(modelDir, inputDict):
 
     
     # check downline loads
-    obDict, loads, geoDF, sviDF = getDownLineLoadsEquipment1(omd_file_path, equipmentList)
+    obDict, loads, geoDF = getDownLineLoadsEquipment1(omd_file_path, equipmentList)
 
     # color vals based on selected column
     
