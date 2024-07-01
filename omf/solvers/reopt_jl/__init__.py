@@ -13,10 +13,12 @@ def install_reopt_jl(system : list = platform.system(), build_sysimage=True):
     precompile_path = str(os.path.normpath(os.path.join(thisDir,"precompile_reopt.jl")))
 
     if os.path.isfile(instantiated_path):
-        print("reopt_jl dependencies installed - to reinstall remove file: instantiated.txt")
         if not os.path.isfile(sysimage_path) and build_sysimage:
-            print("error: reopt_jl sysimage not found - remove instantiated.txt to build")
-        return
+            print("error: reopt_jl.so not found - remove instantiated.txt to build \n attempting to run without sysimage... ")
+            return False
+        else:
+            print("reopt_jl dependencies installed - to reinstall remove instantiated.txt")
+            return build_sysimage
     
     try:
         install_pyjulia = [
@@ -76,10 +78,20 @@ def install_reopt_jl(system : list = platform.system(), build_sysimage=True):
             commands += [ f'copy nul {instantiated_path}' ]
         else:
             raise ValueError(f'No installation script available yet for {system}')
-    
+
         for command in commands:
             os.system(command)
 
+        return build_sysimage
+
+    except (ImportError, OSError) as e:
+        if build_sysimage:
+            print(f"error while building reopt_jl.so: {e} \n attempting install again without building sysimage... ")
+            return install_reopt_jl(build_sysimage=False)
+        else:
+            print(e)
+            return
+        
     except Exception as e:
         print(e)
         return 
@@ -260,7 +272,8 @@ def run_reopt_jl(path, inputFile="", loadFile="", default=False, outages=False, 
         print("Invalid inputs: inputFile needed if default=False")
         return
 
-    install_reopt_jl(build_sysimage=run_with_sysimage)
+    #runs reopt differently based on success of sysimage build
+    built_sysimage = install_reopt_jl(build_sysimage=run_with_sysimage)
 
     constant_file = "Scenario_test_POST.json"
     constant_path = os.path.normpath(os.path.join(path,constant_file))
@@ -285,7 +298,7 @@ def run_reopt_jl(path, inputFile="", loadFile="", default=False, outages=False, 
 
         api_key = get_randomized_api_key()
 
-        if run_with_sysimage:
+        if built_sysimage:
             sysimage_path = os.path.normpath(os.path.join(thisDir,"reopt_jl.so"))
             command = f'''julia --sysimage="{sysimage_path}" -e '
             using .REoptSolver;
