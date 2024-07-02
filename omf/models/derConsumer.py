@@ -1,8 +1,6 @@
 ''' Performs cost-benefit analysis for a member-consumer with distributed 
 energy resource (DER) technologies. '''
 
-
-
 # Python imports
 import warnings
 # warnings.filterwarnings("ignore")
@@ -28,21 +26,6 @@ tooltip = ('The derConsumer model evaluates the financial costs of controlling b
 		   module (vbatDispatch).')
 modelName, template = __neoMetaModel__.metadata(__file__)
 hidden = False ## Keep the model hidden=True during active development
-
-def create_timestamps(start_time='2017-01-01',end_time='2017-12-31 23:00:00',arr_size=8760):
-	''' 
-	Creates an array of timestamps (using pandas package) given a start time, stop time, and array size.
-	** Inputs
-		start_time: (str) Beginning of the timestamp array in 'year-month-day hh:mm:ss format'
-		end_time: (str) End of the timestamp array in 'year-month-day hh:mm:ss format'
-		arr_size: (int) Size of the timestamp array (default=8760 for one year in hourly increments)
-	** Outputs
-		timestamps: (arr) Of size arr_size from start_time to end_time
-	** Required packages
-		import pandas as pd
- 	'''
-	timestamps = pd.date_range(start=start_time, end=end_time, periods=arr_size)
-	return timestamps
 
 def create_REopt_jl_jsonFile(modelDir, inputDict):
 	'''
@@ -212,7 +195,7 @@ def create_REopt_jl_jsonFile(modelDir, inputDict):
 
 	## Save the scenario file
 	## NOTE: reopt_jl currently requires a path for the input file, so the file must be saved to a location
-	## preferrably in the modelDir 
+	## preferrably in the modelDir directory
 	with open(pJoin(modelDir, 'reopt_input_scenario.json'), 'w') as jsonFile:
 		json.dump(scenario, jsonFile)
 	return scenario
@@ -264,8 +247,8 @@ def get_tou_rates(modelDir, inputDict):
 def get_tou_rates_adhoc():
 	'''
 	Ad-hoc function that arbitrarily assigns TOU rates for summer/winter on- and 0ff-peaks.
-	NOTE: This function is temporarily used in place of get_tou_rates() due to issues with API \
-	not returning rate data at this time.
+	NOTE: This function was temporarily used in place of get_tou_rates() due to issues with API \
+	not returning rate data. Issue was solved by specifying 'detail: full' in the API request.
 	'''
 
 	tou_rates = {
@@ -279,6 +262,19 @@ def get_tou_rates_adhoc():
 
 ## Function to create TOU schedule based on the given OEDI utility energy schedule
 def create_tou_schedule(energy_schedule):
+	'''
+	Function that sorts through the OEDI's provided energy rate schedule to create a Time of Use (TOU) schedule.
+
+	** Inputs
+	energy_schedule: (array of arrays) Corresponds to the demandweekdayschedule or demandweekendschedule provided by the OEDI API request. \
+		Time of Use Demand Charge Structure Weekday or Weekend Schedule. Value is an array of arrays. \
+		The 12 top-level arrays correspond to a month of the year. Each month array contains one integer per hour of the weekday \
+		from 12am to 11pm, and the integer corresponds to the index of a period in demandratestructure. 
+
+	** Outputs
+	tou_schedule: (DataFrame) Consisting of the Month, Hour, and TOU Period (an integer corresponding to the index \
+		of a period in demandratestructure)
+	'''
 	tou_schedule = []
 	for month in range(12):
 		for hour in range(24):
@@ -291,6 +287,19 @@ def create_tou_schedule(energy_schedule):
 
 ## Function to get the TOU rate based on the TOU schedule
 def calc_tou_rate(timestamp, tou_schedules, tou_structure):
+	'''
+	Function that identifies the Time of Use (TOU) rate given the TOU schedule and structure.
+	
+	** Inputs
+	timestamp: (array) Hourly timestamps for a given year, length 8760.
+	tou_schedules: (DataFrame) Consisting of the Month, Hour, and TOU Period (an integer corresponding to the index \
+		of a period in demandratestructure)
+	tou_structure: (array) Corresponds to the energyratestructure provided by the OEDI API response request.
+
+	** Outputs
+	tou_rate: (float) The TOU rate ($) for the specified period.
+	tou_period: (int) An integer number corresponding to the index of a period in demandratestructure provided by the OEDI API response request.
+	'''
 	month = timestamp.month
 	hour = timestamp.hour
 	day_of_week = timestamp.weekday()
@@ -310,17 +319,17 @@ def calc_tou_rate(timestamp, tou_schedules, tou_structure):
 def work(modelDir, inputDict):
 	''' Run the model in its directory. '''
 
-	# Delete output file every run if it exists
+	## Delete output file every run if it exists
 	outData = {}	
 	
 	## Create REopt input file
 	create_REopt_jl_jsonFile(modelDir, inputDict)
 	
+	## Read in a static REopt test file
 	## NOTE: The single commented code below is used temporarily if reopt_jl is not working or for other debugging purposes.
 	## Also NOTE: If this is used, you typically have to add a ['outputs'] key before the variable of interest.
 	## For example, instead of reoptResults['ElectricStorage']['storage_to_load_series_kw'], it would have to be
 	## reoptResults['outputs']['ElectricStorage']['storage_to_load_series_kw'] when using the static reopt file below.
-	## Read in a static REopt test file 
 	#with open(pJoin(__neoMetaModel__._omfDir,"static","testFiles","residential_reopt_results.json")) as f:
 	#	reoptResults = pd.json_normalize(json.load(f))
 	#	print('Successfully loaded REopt test file. \n')
@@ -340,10 +349,8 @@ def work(modelDir, inputDict):
 	try:
 		year = reoptResults['ElectricLoad.year'][0]
 	except KeyError:
-		year = inputDict['year'] # Use the user provided year if none found in reoptResults
-
-	arr_size = np.size(demand) # desired array size of the timestamp array
-	timestamps = create_timestamps(start_time=f'{year}-01-01', end_time=f'{year}-12-31 23:00:00', arr_size=arr_size)
+		year = inputDict['year'] ## Use the user provided year if none found in reoptResults
+	timestamps = pd.date_range(start=f'{year}-01-01', end=f'{year}-12-31 23:00:00', periods=np.size(demand))
 
 	## If outage is specified in the inputs, load the resilience results
 	if (inputDict['outage']):
@@ -357,6 +364,7 @@ def work(modelDir, inputDict):
 			raise
 
 	## Run vbatDispatch, unless it is disabled
+	## TODO: Check that the rest of the code functions if the vbat (TESS) load type is None
 	if inputDict['load_type'] != '0': ## Load type 0 corresponds to the "None" option, which disables this vbatDispatch function
 		vbatResults = vb.work(modelDir,inputDict)
 		with open(pJoin(modelDir, 'vbatResults.json'), 'w') as jsonFile:
@@ -370,13 +378,12 @@ def work(modelDir, inputDict):
 		vbat_discharge_flipsign = vbat_discharge.mul(-1) ## flip sign of vbat discharge for plotting purposes
 
 
-	## DER Overview plot
-
+	## DER Overview plot ###################################################################################################################################################################
 	grid_to_load = reoptResults['ElectricUtility']['electric_to_load_series_kw']
 	if 'Generator' in reoptResults:
 		generator = reoptResults['Generator']['electric_to_load_series_kw']
 
-	if inputDict['PV'] == 'Yes': ## PV
+	if 'PV' in reoptResults: ## PV
 		PV = reoptResults['PV']['electric_to_load_series_kw']
 	else:
 		PV = np.zeros_like(demand)
