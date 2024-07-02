@@ -25,7 +25,7 @@ tooltip = ('The derConsumer model evaluates the financial costs of controlling b
 		   Laboratory (NREL) Renewable Energy Optimization Tool (REopt) and the OMF virtual battery dispatch \
 		   module (vbatDispatch).')
 modelName, template = __neoMetaModel__.metadata(__file__)
-hidden = True ## Keep the model hidden=True during active development
+hidden = False ## Keep the model hidden=True during active development
 
 def create_REopt_jl_jsonFile(modelDir, inputDict):
 	'''
@@ -481,7 +481,7 @@ def work(modelDir, inputDict):
 		}, index=timestamps)
 
 		## BESS physical parameters
-		## TODO: Make these inputs on the HTML side if keeping this battery model
+		## TODO: Create user inputs on the HTML side if keeping this battery model
 		battery_energy_capacity = 13.5 ## kWh; Tesla Powerwall 2
 		battery_max_charge_rate = 3.3  ## kW
 		battery_max_discharge_rate = 3.3  ## kW
@@ -513,16 +513,15 @@ def work(modelDir, inputDict):
 			tou_rate, tou_period = calc_tou_rate(timestamp, tou_schedules, tou_structure) ## Grab the specific TOU info for that hour
 
 			net_load = demand_series[i] - PV_series[i] ## Net load after PV is accounted for
-
-			if net_load > 0:
+			if net_load > 0: ## If the PV did not serve all of the load, then:
 				## Discharge the battery during on-peak hours; update BESS and economic variables
 				if tou_period in on_peak_periods:
 					## Discharge BESS to household first
-					discharge = min(battery_max_discharge_rate, net_load, battery_soc - battery_soc_min)
+					discharge = min(battery_max_discharge_rate, net_load, battery_soc - battery_soc_min, net_load) ## NOTE: this doesn't keep track of which variable is being used though
 					battery_soc -= discharge
 					net_load -= discharge
 
-					## If BESS > 20% after serving household load, then utility can use it
+					## If BESS > 20% battery energy capacity after serving household load, then utility can use it
 					if battery_soc > battery_soc_min:
 						utility_discharge = min(battery_max_discharge_rate, battery_soc - battery_soc_min, max_utility_usage)
 						battery_soc -= utility_discharge
@@ -546,7 +545,6 @@ def work(modelDir, inputDict):
 				excess_solar = -net_load
 				## Store any excess PV in the BESS during off-peak periods
 				if tou_period in off_peak_periods:
-
 					charge = min(battery_max_charge_rate, excess_solar)
 					battery_soc = min(battery_energy_capacity, battery_soc + charge)
 					#print('battery soc in offpeak 2: \n',battery_soc)
