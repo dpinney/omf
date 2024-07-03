@@ -1,0 +1,7 @@
+New Line.MDV_SUB_1_HSB bus1=bussource bus2=MDV_SUB_1_HSB length=0.001 linecode=BUSBAR  units=m enabled=True phases=3
+
+New Transformer.SubXfmr phases=3 windings=2 %Noloadloss=0.0 wdg=1 conn=delta kV=46.0 kva=7500.0 %R=0.16029975038989405 bus=MDV_SUB_1_HSB wdg=2 conn=wye kV=12.47 kva=7500.0 %R=0.16029975038989405 bus=feederheadBus XHL=6.411990015595762 Sub=yes
+
+New RegControl.LTC_SubXfmr_A transformer=SubXfmr winding=2 band=3.0 vreg=124.0 Ptphase=1
+
+New Line.SSswitch bus1=feederheadBus bus2=BusPrim1 length=1 linecode=BUSBAR units=m enabled=True phases=3 normamps=1500

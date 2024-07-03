@@ -1,0 +1,195 @@
+New Line.Line1 bus1=BusPrim1 bus2=BusPrim2  length=100 phases=3 units=m linecode=OH-3X_477AAC_4/0AAACN enabled=TRUE 
+New Line.Line2 bus1=BusPrim2 bus2=BusPrim3  length=100 phases=3 units=m linecode=OH-3X_477AAC_4/0AAACN enabled=TRUE 
+New Line.Line3 bus1=BusPrim3 bus2=BusPrim4  length=100 phases=3 units=m linecode=OH-3X_477AAC_4/0AAACN enabled=TRUE 
+New Line.Line4 bus1=BusPrim4 bus2=BusPrim5  length=100 phases=3 units=m linecode=OH-3X_477AAC_4/0AAACN enabled=TRUE 
+New Line.Line5 bus1=BusPrim5 bus2=BusPrim6  length=100 phases=3 units=m linecode=OH-3X_477AAC_4/0AAACN enabled=TRUE 
+New Line.Line6 bus1=BusPrim6 bus2=BusPrim7  length=100 phases=3 units=m linecode=OH-3X_477AAC_4/0AAACN enabled=TRUE 
+New Line.Line7 bus1=BusPrim7 bus2=BusPrim8  length=100 phases=3 units=m linecode=OH-3X_477AAC_4/0AAACN enabled=TRUE 
+New Line.Line8 bus1=BusPrim8 bus2=BusPrim9  length=100 phases=3 units=m linecode=OH-3X_477AAC_4/0AAACN enabled=TRUE 
+New Line.Line9 bus1=BusPrim9 bus2=BusPrim10 length=100 phases=3 units=m linecode=OH-3X_477AAC_4/0AAACN enabled=TRUE 
+New Line.Line10 bus1=BusPrim10 bus2=BusPrim11 length=100 phases=3 units=m linecode=OH-3X_477AAC_4/0AAACN enabled=TRUE
+New Line.Line11 bus1=BusPrim11 bus2=BusPrim12 length=100 phases=3 units=m linecode=OH-3X_477AAC_4/0AAACN enabled=TRUE
+
+! Secondary circuit 1: 1 MV/LV transformer and 5 loads each connected to the transformer with own service line
+! 1-phase equivalent of the split-phase transformer with percent short-circuit impedance: r+jx=1.18+j1.44
+New Transformer.Trafo1 phases=1 wdg=1 bus=BusPrim1.1 kV=7.199557856794634 kVA=50 wdg=2 bus=BusTrafo1LV.1 kV=0.24 kVA=50 Xhl=1.44 %Rs=(0.59 0.59) ppm_antifloat=0
+
+New Line.LineSec1_1 bus1=BusTrafo1LV.1 bus2=BusSec1_1.1 length=70 phases=1 units=ft linecode=Triplex1PhEquivalent4 enabled=TRUE 
+New Line.LineSec1_2 bus1=BusTrafo1LV.1 bus2=BusSec1_2.1 length=85 phases=1 units=ft linecode=Triplex1PhEquivalent4 enabled=TRUE 
+New Line.LineSec1_3 bus1=BusTrafo1LV.1 bus2=BusSec1_3.1 length=95 phases=1 units=ft linecode=Triplex1PhEquivalent4 enabled=TRUE 
+New Line.LineSec1_4 bus1=BusTrafo1LV.1 bus2=BusSec1_4.1 length=85 phases=1 units=ft linecode=Triplex1PhEquivalent4 enabled=TRUE 
+New Line.LineSec1_5 bus1=BusTrafo1LV.1 bus2=BusSec1_5.1 length=70 phases=1 units=ft linecode=Triplex1PhEquivalent4 enabled=TRUE 
+New Load.Load1_1 phases=1 Conn=Wye bus=BusSec1_1.1 kV=0.24 Model=1 kW=7 kVAR=2 Vminpu=0.7 Vmaxpu=1.4 duty=Load1_1
+New Load.Load1_2 phases=1 Conn=Wye bus=BusSec1_2.1 kV=0.24 Model=1 kW=7 kVAR=2 Vminpu=0.7 Vmaxpu=1.4 duty=Load1_2
+New Load.Load1_3 phases=1 Conn=Wye bus=BusSec1_3.1 kV=0.24 Model=1 kW=7 kVAR=2 Vminpu=0.7 Vmaxpu=1.4 duty=Load1_3
+New Load.Load1_4 phases=1 Conn=Wye bus=BusSec1_4.1 kV=0.24 Model=1 kW=7 kVAR=2 Vminpu=0.7 Vmaxpu=1.4 duty=Load1_4
+New Load.Load1_5 phases=1 Conn=Wye bus=BusSec1_5.1 kV=0.24 Model=1 kW=7 kVAR=2 Vminpu=0.7 Vmaxpu=1.4 duty=Load1_5
+
+! Secondary circuit 2: 1 MV/LV transformer and 1 large load connected to the transformer with a service line
+New Transformer.Trafo2 phases=1 wdg=1 bus=BusPrim2.2 kV=7.199557856794634 kVA=50 wdg=2 bus=BusTrafo2LV.2 kV=0.24 kVA=50 Xhl=1.44 %Rs=(0.59 0.59) ppm_antifloat=0
+
+New Line.LineSec2_1 bus1=BusTrafo2LV.2 bus2=BusSec2_1.2 length=125 phases=1 units=ft linecode=Triplex1PhEquivalent1/0 enabled=TRUE 
+New Load.Load2 phases=1 Conn=Wye bus=BusSec2_1.2 kV=0.24 Model=1 kW=40 kVAR=5 Vminpu=0.7 Vmaxpu=1.4 duty=Load2
+
+
+! Secondary circuit 3: 1 MV/LV transformer and 5 loads connected over a serial service drop
+New Transformer.Trafo3 phases=1 wdg=1 bus=BusPrim3.3 kV=7.199557856794634 kVA=50 wdg=2 bus=BusTrafo3LV.3 kV=0.24 kVA=50 Xhl=1.44 %Rs=(0.59 0.59) ppm_antifloat=0
+
+New Line.LineSec3_1 bus1=BusTrafo3LV.3 bus2=BusSec3_1.3 length=60 phases=1 units=ft linecode=Triplex1PhEquivalent1/0 enabled=TRUE 
+New Line.LineSec3_2 bus1=BusSec3_1.3 bus2=BusSec3_2.3 length=60 phases=1 units=ft linecode=Triplex1PhEquivalent1/0 enabled=TRUE 
+New Line.LineSec3_3 bus1=BusSec3_2.3 bus2=BusSec3_3.3 length=60 phases=1 units=ft linecode=Triplex1PhEquivalent1/0 enabled=TRUE 
+New Line.LineSec3_4 bus1=BusSec3_3.3 bus2=BusSec3_4.3 length=60 phases=1 units=ft linecode=Triplex1PhEquivalent1/0 enabled=TRUE 
+New Line.LineSec3_5 bus1=BusSec3_4.3 bus2=BusSec3_5.3 length=60 phases=1 units=ft linecode=Triplex1PhEquivalent1/0 enabled=TRUE 
+
+New Load.Load3_1 phases=1 Conn=Wye bus=BusSec3_1.3 kV=0.24 Model=1 kW=7 kVAR=2 Vminpu=0.7 Vmaxpu=1.4 duty=Load3_1
+New Load.Load3_2 phases=1 Conn=Wye bus=BusSec3_2.3 kV=0.24 Model=1 kW=7 kVAR=2 Vminpu=0.7 Vmaxpu=1.4 duty=Load3_2
+New Load.Load3_3 phases=1 Conn=Wye bus=BusSec3_3.3 kV=0.24 Model=1 kW=7 kVAR=2 Vminpu=0.7 Vmaxpu=1.4 duty=Load3_3
+New Load.Load3_4 phases=1 Conn=Wye bus=BusSec3_4.3 kV=0.24 Model=1 kW=7 kVAR=2 Vminpu=0.7 Vmaxpu=1.4 duty=Load3_4
+New Load.Load3_5 phases=1 Conn=Wye bus=BusSec3_5.3 kV=0.24 Model=1 kW=7 kVAR=2 Vminpu=0.7 Vmaxpu=1.4 duty=Load3_5
+
+! Secondary circuit 4: 1 MV/LV transformer and 5 loads connected on a pedestal
+New Transformer.Trafo4 phases=1 wdg=1 bus=BusPrim4.1 kV=7.199557856794634 kVA=50 wdg=2 bus=BusTrafo4LV.1 kV=0.24 kVA=50 Xhl=1.44 %Rs=(0.59 0.59) ppm_antifloat=0
+
+New Line.LineSec4_0 bus1=BusTrafo4LV.1 bus2=BusSec4_0.1 length=55 phases=1 linecode=Triplex1PhEquivalent1/0 units=m enabled=TRUE 
+New Line.LineSec4_1 bus1=BusSec4_0.1 bus2=BusSec4_1.1 length=45 phases=1 units=ft linecode=Triplex1PhEquivalent1/0 enabled=TRUE 
+New Line.LineSec4_2 bus1=BusSec4_0.1 bus2=BusSec4_2.1 length=45 phases=1 units=ft linecode=Triplex1PhEquivalent1/0 enabled=TRUE 
+New Line.LineSec4_3 bus1=BusSec4_0.1 bus2=BusSec4_3.1 length=45 phases=1 units=ft linecode=Triplex1PhEquivalent1/0 enabled=TRUE 
+New Line.LineSec4_4 bus1=BusSec4_0.1 bus2=BusSec4_4.1 length=65 phases=1 units=ft linecode=Triplex1PhEquivalent1/0 enabled=TRUE 
+New Line.LineSec4_5 bus1=BusSec4_0.1 bus2=BusSec4_5.1 length=45 phases=1 units=ft linecode=Triplex1PhEquivalent1/0 enabled=TRUE 
+New Load.Load4_1 phases=1 Conn=Wye bus=BusSec4_1.1 kV=0.24 Model=1 kW=7 kVAR=2 Vminpu=0.7 Vmaxpu=1.4 duty=Load4_1
+New Load.Load4_2 phases=1 Conn=Wye bus=BusSec4_2.1 kV=0.24 Model=1 kW=7 kVAR=2 Vminpu=0.7 Vmaxpu=1.4 duty=Load4_2
+New Load.Load4_3 phases=1 Conn=Wye bus=BusSec4_3.1 kV=0.24 Model=1 kW=7 kVAR=2 Vminpu=0.7 Vmaxpu=1.4 duty=Load4_3
+New Load.Load4_4 phases=1 Conn=Wye bus=BusSec4_4.1 kV=0.24 Model=1 kW=7 kVAR=2 Vminpu=0.7 Vmaxpu=1.4 duty=Load4_4
+New Load.Load4_5 phases=1 Conn=Wye bus=BusSec4_5.1 kV=0.24 Model=1 kW=7 kVAR=2 Vminpu=0.7 Vmaxpu=1.4 duty=Load4_5
+
+
+! Secondary circuit 5: 1 MV/LV transformer, 2 loads at the transformer and 2 loads each connected over a service line to a pedestal
+New Transformer.Trafo5 phases=1 wdg=1 bus=BusPrim5.3 kV=7.199557856794634 kVA=50 wdg=2 bus=BusTrafo5LV.3 kV=0.24 kVA=50 Xhl=1.44 %Rs=(0.59 0.59) ppm_antifloat=0
+
+New Line.LineSec5_0 bus1=BusTrafo5LV.3 bus2=BusSec5_0.3 length=225 phases=1 units=ft linecode=Triplex1PhEquivalent1/0 enabled=TRUE 
+New Line.LineSec5_1 bus1=BusSec5_0.3 bus2=BusSec5_1.3 length=60 phases=1 units=ft linecode=Triplex1PhEquivalent1/0 enabled=TRUE 
+New Line.LineSec5_2 bus1=BusSec5_0.3 bus2=BusSec5_2.3 length=60 phases=1 units=ft linecode=Triplex1PhEquivalent1/0 enabled=TRUE 
+New Line.LineSec5_3 bus1=BusTrafo5LV.3 bus2=BusSec5_3.3 length=70 phases=1 units=ft linecode=Triplex1PhEquivalent4 enabled=TRUE 
+New Line.LineSec5_4 bus1=BusTrafo5LV.3 bus2=BusSec5_4.3 length=70 phases=1 units=ft linecode=Triplex1PhEquivalent4 enabled=TRUE 
+New Load.Load5_1 phases=1 Conn=Wye bus=BusSec5_1.3 kV=0.24 Model=1 kW=10 kVAR=3 Vminpu=0.7 Vmaxpu=1.4 duty=Load5_1
+New Load.Load5_2 phases=1 Conn=Wye bus=BusSec5_2.3 kV=0.24 Model=1 kW=10 kVAR=3 Vminpu=0.7 Vmaxpu=1.4 duty=Load5_2
+New Load.Load5_3 phases=1 Conn=Wye bus=BusSec5_3.3 kV=0.24 Model=1 kW=10 kVAR=3 Vminpu=0.7 Vmaxpu=1.4 duty=Load5_3
+New Load.Load5_4 phases=1 Conn=Wye bus=BusSec5_4.3 kV=0.24 Model=1 kW=10 kVAR=3 Vminpu=0.7 Vmaxpu=1.4 duty=Load5_4
+
+! Secondary circuit 6: 1 MV/LV transformer, 2 service line each with 1 pedestals with two loads
+New Transformer.Trafo6 phases=1 wdg=1 bus=BusPrim6.3 kV=7.199557856794634 kVA=50 wdg=2 bus=BusTrafo6LV.3 kV=0.24 kVA=50 Xhl=1.44 %Rs=(0.59 0.59) ppm_antifloat=0
+
+New Line.LineSec6_01 bus1=BusTrafo6LV.3 bus2=BusSec6_01.3 length=200 phases=1 units=ft linecode=Triplex1PhEquivalent1/0 enabled=TRUE 
+New Line.LineSec6_02 bus1=BusTrafo6LV.3 bus2=BusSec6_02.3 length=200 phases=1 units=ft linecode=Triplex1PhEquivalent1/0 enabled=TRUE 
+New Line.LineSec6_1 bus1=BusSec6_01.3 bus2=BusSec6_1.3 length=65 phases=1 units=ft linecode=Triplex1PhEquivalent1/0 enabled=TRUE 
+New Line.LineSec6_2 bus1=BusSec6_01.3 bus2=BusSec6_2.3 length=65 phases=1 units=ft linecode=Triplex1PhEquivalent1/0 enabled=TRUE 
+New Line.LineSec6_3 bus1=BusSec6_02.3 bus2=BusSec6_3.3 length=65 phases=1 units=ft linecode=Triplex1PhEquivalent1/0 enabled=TRUE 
+New Line.LineSec6_4 bus1=BusSec6_02.3 bus2=BusSec6_4.3 length=65 phases=1 units=ft linecode=Triplex1PhEquivalent1/0 enabled=TRUE 
+New Load.Load6_1 phases=1 Conn=Wye bus=BusSec6_1.3 kV=0.24 Model=1 kW=10 kVAR=3 Vminpu=0.7 Vmaxpu=1.4 duty=Load6_1
+New Load.Load6_2 phases=1 Conn=Wye bus=BusSec6_2.3 kV=0.24 Model=1 kW=10 kVAR=3 Vminpu=0.7 Vmaxpu=1.4 duty=Load6_2
+New Load.Load6_3 phases=1 Conn=Wye bus=BusSec6_3.3 kV=0.24 Model=1 kW=10 kVAR=3 Vminpu=0.7 Vmaxpu=1.4 duty=Load6_3
+New Load.Load6_4 phases=1 Conn=Wye bus=BusSec6_4.3 kV=0.24 Model=1 kW=10 kVAR=3 Vminpu=0.7 Vmaxpu=1.4 duty=Load6_4
+
+
+! Secondary circuit 7: 1 MV/LV transformer, 1 service line with two pedestals each with two loads 
+New Transformer.Trafo7 phases=1 wdg=1 bus=BusPrim7.1 kV=7.199557856794634 kVA=50 wdg=2 bus=BusTrafo7LV.1 kV=0.24 kVA=50 Xhl=1.44 %Rs=(0.59 0.59) ppm_antifloat=0
+
+New Line.LineSec7_01 bus1=BusTrafo7LV.1 bus2=BusSec7_01.1 length=100 phases=1 units=ft linecode=Triplex1PhEquivalent1/0 enabled=TRUE 
+New Line.LineSec7_02 bus1=BusSec7_01.1 bus2=BusSec7_02.1 length=50 phases=1 units=ft linecode=Triplex1PhEquivalent1/0 enabled=TRUE 
+New Line.LineSec7_1 bus1=BusSec7_01.1 bus2=BusSec7_1.1 length=60 phases=1 units=ft linecode=Triplex1PhEquivalent1/0 enabled=TRUE 
+New Line.LineSec7_2 bus1=BusSec7_01.1 bus2=BusSec7_2.1 length=60 phases=1 units=ft linecode=Triplex1PhEquivalent1/0 enabled=TRUE 
+New Line.LineSec7_3 bus1=BusSec7_02.1 bus2=BusSec7_3.1 length=60 phases=1 units=ft linecode=Triplex1PhEquivalent1/0 enabled=TRUE 
+New Line.LineSec7_4 bus1=BusSec7_02.1 bus2=BusSec7_4.1 length=60 phases=1 units=ft linecode=Triplex1PhEquivalent1/0 enabled=TRUE 
+New Load.Load7_1 phases=1 Conn=Wye bus=BusSec7_1.1 kV=0.24 Model=1 kW=10 kVAR=5 Vminpu=0.7 Vmaxpu=1.4 duty=Load7_1
+New Load.Load7_2 phases=1 Conn=Wye bus=BusSec7_2.1 kV=0.24 Model=1 kW=10 kVAR=5 Vminpu=0.7 Vmaxpu=1.4 duty=Load7_2
+New Load.Load7_3 phases=1 Conn=Wye bus=BusSec7_3.1 kV=0.24 Model=1 kW=10 kVAR=5 Vminpu=0.7 Vmaxpu=1.4 duty=Load7_3
+New Load.Load7_4 phases=1 Conn=Wye bus=BusSec7_4.1 kV=0.24 Model=1 kW=10 kVAR=5 Vminpu=0.7 Vmaxpu=1.4 duty=Load7_4
+
+
+! Secondary circuit 8: 1MV/LV transformer, 	1 service line with 2 pedestals, first with one load, second with 3 loads
+New Transformer.Trafo8 phases=1 wdg=1 bus=BusPrim8.2 kV=7.199557856794634 kVA=50 wdg=2 bus=BusTrafo8LV.2 kV=0.24 kVA=50 Xhl=1.44 %Rs=(0.59 0.59) ppm_antifloat=0
+
+New Line.LineSec8_01 bus1=BusTrafo8LV.2 bus2=BusSec8_01.2 length=60 phases=1 units=ft linecode=Triplex1PhEquivalent1/0 enabled=TRUE 
+New Line.LineSec8_02 bus1=BusSec8_01.2 bus2=BusSec8_02.2 length=40 phases=1 units=ft linecode=Triplex1PhEquivalent1/0 enabled=TRUE 
+New Line.LineSec8_1 bus1=BusSec8_01.2 bus2=BusSec8_1.2 length=40 phases=1 units=ft linecode=Triplex1PhEquivalent1/0 enabled=TRUE 
+New Line.LineSec8_2 bus1=BusSec8_02.2 bus2=BusSec8_2.2 length=60 phases=1 units=ft linecode=Triplex1PhEquivalent1/0 enabled=TRUE 
+New Line.LineSec8_3 bus1=BusSec8_02.2 bus2=BusSec8_3.2 length=60 phases=1 units=ft linecode=Triplex1PhEquivalent1/0 enabled=TRUE 
+New Line.LineSec8_4 bus1=BusSec8_02.2 bus2=BusSec8_4.2 length=60 phases=1 units=ft linecode=Triplex1PhEquivalent1/0 enabled=TRUE 
+New Load.Load8_1 phases=1 Conn=Wye bus=BusSec8_1.2 kV=0.24 Model=1 kW=10 kVAR=5 Vminpu=0.7 Vmaxpu=1.4 duty=Load8_1
+New Load.Load8_2 phases=1 Conn=Wye bus=BusSec8_2.2 kV=0.24 Model=1 kW=10 kVAR=5 Vminpu=0.7 Vmaxpu=1.4 duty=Load8_2
+New Load.Load8_3 phases=1 Conn=Wye bus=BusSec8_3.2 kV=0.24 Model=1 kW=10 kVAR=5 Vminpu=0.7 Vmaxpu=1.4 duty=Load8_3
+New Load.Load8_4 phases=1 Conn=Wye bus=BusSec8_4.2 kV=0.24 Model=1 kW=10 kVAR=5 Vminpu=0.7 Vmaxpu=1.4 duty=Load8_4
+
+
+! Secondary circuit 9: 1MV/LV transformer, 1 service line with one pedestal with two loads
+New Transformer.Trafo9 phases=1 wdg=1 bus=BusPrim9.3 kV=7.199557856794634 kVA=50 wdg=2 bus=BusTrafo9LV.3 kV=0.24 kVA=50 Xhl=1.44 %Rs=(0.59 0.59) ppm_antifloat=0
+
+New Line.LineSec9_0 bus1=BusTrafo9LV.3 bus2=BusSec9_0.3 length=75 phases=1 units=ft linecode=Triplex1PhEquivalent1/0 enabled=TRUE 
+New Line.LineSec9_1 bus1=BusSec9_0.3   bus2=BusSec9_1.3 length=60 phases=1 units=ft linecode=Triplex1PhEquivalent1/0 enabled=TRUE 
+New Line.LineSec9_2 bus1=BusSec9_0.3   bus2=BusSec9_2.3 length=60 phases=1 units=ft linecode=Triplex1PhEquivalent1/0 enabled=TRUE 
+New Load.Load9_1 phases=1 Conn=Wye bus=BusSec9_1.3 kV=0.24 Model=1 kW=20 kVAR=5 Vminpu=0.7 Vmaxpu=1.4 duty=Load9_1
+New Load.Load9_2 phases=1 Conn=Wye bus=BusSec9_2.3 kV=0.24 Model=1 kW=20 kVAR=5 Vminpu=0.7 Vmaxpu=1.4 duty=Load9_2
+
+
+! Secondary circuit 10: 1MV/LV transformer, 1 load at the transformer, 1 load over a service line with one pedestal
+New Transformer.Trafo10 phases=1 wdg=1 bus=BusPrim10.2 kV=7.199557856794634 kVA=50 wdg=2 bus=BusTrafo10LV.2 kV=0.24 kVA=50 Xhl=1.44 %Rs=(0.59 0.59) ppm_antifloat=0
+
+New Line.LineSec10_0 bus1=BusTrafo10LV.2 bus2=BusSec10_0.2 length=175 phases=1 units=ft linecode=Triplex1PhEquivalent1/0 enabled=TRUE 
+New Line.LineSec10_1 bus1=BusTrafo10LV.2 bus2=BusSec10_1.2 length=95 phases=1 units=ft linecode=Triplex1PhEquivalent1/0 enabled=TRUE 
+New Line.LineSec10_2 bus1=BusSec10_0.2 bus2=BusSec10_2.2 length=50 phases=1 units=ft linecode=Triplex1PhEquivalent1/0 enabled=TRUE 
+New Load.Load10_1 phases=1 Conn=Wye bus=BusSec10_1.2 kV=0.24 Model=1 kW=20 kVAR=5 Vminpu=0.7 Vmaxpu=1.4 duty=Load10_1
+New Load.Load10_2 phases=1 Conn=Wye bus=BusSec10_2.2 kV=0.24 Model=1 kW=20 kVAR=5 Vminpu=0.7 Vmaxpu=1.4 duty=Load10_2
+
+
+
+! Secondary circuit 11: 1-phase equivalent of the split-phase transformer with percent short-circuit impedance: r+jx=1.18+j1.44
+New Transformer.Trafo11 phases=1 wdg=1 bus=BusPrim11.2 kV=7.199557856794634 kVA=50 wdg=2 bus=BusTrafo11LV.2 kV=0.24 kVA=50 Xhl=1.44 %Rs=(0.59 0.59) ppm_antifloat=0
+
+! The 1-phase equivalents of the triplex cables
+New Line.LineSec11_1 bus1=BusTrafo11LV.2 bus2=BusSec11_1.2 linecode=Triplex1PhEquivalent4 length=122 units=ft 
+New Line.LineSec11_2 bus1=BusTrafo11LV.2 bus2=BusSec11_2.2 linecode=Triplex1PhEquivalent4 length=167 units=ft
+! Loads without loadshapes
+New Load.Load11_1 kV=0.24 phases=1 bus1=BusSec11_1.2 model=1 conn=wye kW=10 kvar=2 Vminpu=0.6 Vmaxpu=2.0 duty=Load1_2
+New Load.Load11_2 kV=0.24 phases=1 bus1=BusSec11_2.2 model=1 conn=wye kW=12 kvar=4 Vminpu=0.6 Vmaxpu=2.0 duty=Load1_1
+
+
+! Secondary circuit 12: 1-phase equivalent of the split-phase transformer with percent short-circuit impedance: r+jx=1.18+j1.44
+New Transformer.Trafo12 phases=1 wdg=1 bus=BusPrim12.1 kV=7.199557856794634 kVA=75 wdg=2 bus=XfmrLV.1 kV=0.24 kVA=50 Xhl=1.44 %Rs=(0.59 0.59) ppm_antifloat=0
+
+! The 1-phase equivalents of the triplex cables
+New Line.Triplex1 bus1=XfmrLV.1 bus2=BusLV1.1 length=106 units=ft linecode=Triplex1PhEquivalent1/0
+New Line.Triplex2 bus1=BusLV1.1 bus2=BusLV2.1 length=206 units=ft linecode=Triplex1PhEquivalent3/0
+New Line.Triplex3 bus1=XfmrLV.1 bus2=BusLV3.1 length=187 units=ft linecode=Triplex1PhEquivalent4/0
+New Line.Triplex4 bus1=BusLV3.1 bus2=BusLV4.1 length=161 units=ft linecode=Triplex1PhEquivalent4/0
+New Line.Triplex5 bus1=BusLV3.1 bus2=BusLV5.1 length=103 units=ft linecode=Triplex1PhEquivalent4/0
+New Line.TriplexLoad1 bus1=BusLV2.1 bus2=BusLoad1.1 length=10 units=ft linecode=Triplex1PhEquivalent3/0
+New Line.TriplexLoad2 bus1=BusLV2.1 bus2=BusLoad2.1 length=11 units=ft linecode=Triplex1PhEquivalent3/0
+New Line.TriplexLoad3 bus1=BusLV1.1 bus2=BusLoad3.1 length=13 units=ft linecode=Triplex1PhEquivalent1/0
+New Line.TriplexLoad4 bus1=BusLV1.1 bus2=BusLoad4.1 length=61 units=ft linecode=Triplex1PhEquivalent1/0
+New Line.TriplexLoad5 bus1=BusLV4.1 bus2=BusLoad5.1 length=286 units=ft linecode=Triplex1PhEquivalent4/0
+New Line.TriplexLoad6 bus1=BusLV4.1 bus2=BusLoad6.1 length=116 units=ft linecode=Triplex1PhEquivalent4/0
+New Line.TriplexLoad7 bus1=BusLV5.1 bus2=BusLoad7.1 length=42 units=ft linecode=Triplex1PhEquivalent4/0
+New Line.TriplexLoad8 bus1=BusLV5.1 bus2=BusLoad8.1 length=23 units=ft linecode=Triplex1PhEquivalent4/0
+
+! Loads without loadshapes, kvar calculated from pf=0.854
+New Load.Load12_1 kV=0.24 phases=1 bus1=BusLoad1.1 Vminpu=0.6 Vmaxpu=2.0 model=1 conn=wye kW=1.6 kvar=1.0 duty=Load1_3
+New Load.Load12_2 kV=0.24 phases=1 bus1=BusLoad2.1 Vminpu=0.6 Vmaxpu=2.0 model=1 conn=wye kW=1.2 kvar=0.7 duty=Load1_4
+New Load.Load12_3 kV=0.24 phases=1 bus1=BusLoad3.1 Vminpu=0.6 Vmaxpu=2.0 model=1 conn=wye kW=5.2 kvar=3.2 duty=Load1_5
+New Load.Load12_4 kV=0.24 phases=1 bus1=BusLoad4.1 Vminpu=0.6 Vmaxpu=2.0 model=1 conn=wye kW=8.3 kvar=5.1 duty=Load3_1
+New Load.Load12_5 kV=0.24 phases=1 bus1=BusLoad5.1 Vminpu=0.6 Vmaxpu=2.0 model=1 conn=wye kW=2.6 kvar=1.6 duty=Load3_2
+New Load.Load12_6 kV=0.24 phases=1 bus1=BusLoad6.1 Vminpu=0.6 Vmaxpu=2.0 model=1 conn=wye kW=8.4 kvar=5.1 duty=Load3_3
+New Load.Load12_7 kV=0.24 phases=1 bus1=BusLoad7.1 Vminpu=0.6 Vmaxpu=2.0 model=1 conn=wye kW=1.8 kvar=1.1 duty=Load4_1
+New Load.Load12_8 kV=0.24 phases=1 bus1=BusLoad8.1 Vminpu=0.6 Vmaxpu=2.0 model=1 conn=wye kW=5.7 kvar=3.5 duty=Load4_2
+
+
+
+
+
+
+
+
+
+
+
+
+
