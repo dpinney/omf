@@ -91,9 +91,9 @@ def run_downline_load_algorithm( modelDir, inputDict, outData ):
 	for i in indexes:
 		sorted_downlineDF = sorted_downlineDF.drop(i)
 
-	sorted_downlineDF.to_csv(Path(modelDir, 'downline_load.csv'), index=False)
+	sorted_downlineDF.to_csv(Path(modelDir, 'output_downline_load.csv'), index=False)
 	
-	downline_color_data = Path(modelDir, 'downline_load.csv').read_text()
+	downline_color_data = Path(modelDir, 'output_downline_load.csv').read_text()
 	downline_color = {
     "downline_load.csv": {
         "csv": "<content>",
@@ -122,7 +122,7 @@ def run_ami_algorithm( modelDir, inputDict, outData ):
 	inputPath = Path(modelDir, inputDict['AMIDataFileName'])
 	inputAsString = inputPath.read_text()
 
-	outputPath = Path(modelDir, 'AMI_output.csv')
+	outputPath = Path(modelDir, 'output_MoCHa.csv')
 	AMI_output = []
 
 	try:
@@ -235,7 +235,7 @@ def work(modelDir, inputDict):
 
 def new(modelDir):
 	''' Create a new instance of this model. Returns true on success, false on failure. '''
-	meter_file_name = 'mohcaInputCustom.csv'
+	meter_file_name = 'input_mohcaCustom.csv'
 	meter_file_path = Path(omf.omfDir,'static','testFiles', 'hostingCapacity', meter_file_name)
 	# meter_file_contents = open(meter_file_path).read()
 	defaultInputs = {

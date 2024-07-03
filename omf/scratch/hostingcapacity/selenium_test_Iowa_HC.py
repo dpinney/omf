@@ -44,8 +44,8 @@ def chrome_test_iowa_state_algo( url, username, password ):
   test_name = "Selenium Test for Hosting Capacity Iowa State Algorithm"
   modelDir = Path( omf.omfDir, "data", "Model", username, test_name )
 
-  iowa_state_input = 'isu_testInputData.csv'
-  default_name = 'mohcaInputCustom.csv'
+  iowa_state_input = 'input_ISUTestData.csv'
+  default_name = 'input_mohcaCustom.csv'
 
   # TODO: Do I want to check if the automated test exists already and if so, delete it?
 
