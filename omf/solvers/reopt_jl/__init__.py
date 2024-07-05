@@ -49,8 +49,8 @@ def install_reopt_jl(system : list = platform.system(), build_sysimage=True):
 				'''
 			]
 			commands += install_pyjulia
-			commands += build_julia_image
 			commands += [ f'touch "{instantiated_path}"' ]
+			commands += build_julia_image
 		elif system == "Linux":
 			commands = [
 				'sudo apt-get install wget',
@@ -59,14 +59,15 @@ def install_reopt_jl(system : list = platform.system(), build_sysimage=True):
 				'sudo tar -xvzf "julia-1.9.4-linux-x86_64.tar.gz" -C /usr/local --strip-components 1'
 			]
 			commands += install_pyjulia
-			commands += build_julia_image
 			commands += [ f'touch "{instantiated_path}"' ]
+			commands += build_julia_image
 		elif system == "Windows":
 			commands = [
 				f'cd {thisDir} & del julia-1.9.4-win64.zip',
 				f'cd {thisDir} & curl -o julia-1.9.4-win64.zip https://julialang-s3.julialang.org/bin/winnt/x64/1.9/julia-1.9.4-win64.zip',
 				f'cd {thisDir} & tar -x -f julia-1.9.4-win64.zip' ]
 			commands += install_pyjulia
+			commands += [ f'copy nul {instantiated_path}' ]
 			if build_sysimage:
 				commands += [
 					f'''cd {thisDir}\\julia-1.9.4\\bin & julia --project="{project_path}" -e '
@@ -75,7 +76,6 @@ def install_reopt_jl(system : list = platform.system(), build_sysimage=True):
 					PackageCompiler.create_sysimage(["REoptSolver"]; sysimage_path="{sysimage_path}", 
 					precompile_execution_file="{precompile_path}", cpu_target="generic;sandybridge,-xsaveopt,clone_all;haswell,-rdrnd,base(1)")
 					' ''']
-			commands += [ f'copy nul {instantiated_path}' ]
 		else:
 			raise ValueError(f'No installation script available yet for {system}')
 
@@ -84,7 +84,7 @@ def install_reopt_jl(system : list = platform.system(), build_sysimage=True):
 
 		return build_sysimage
 
-	except (ImportError, OSError) as e:
+	except (ImportError, OSError, SystemError) as e:
 		if build_sysimage:
 			print(f"error while building reopt_jl.so: {e} \n attempting install again without building sysimage... ")
 			return install_reopt_jl(build_sysimage=False)
