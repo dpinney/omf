@@ -1,10 +1,9 @@
 ''' Geospatial analysis of circuit models.'''
-import json, os, shutil, math, tempfile, random, webbrowser, platform, re
+import json, os, shutil, math, tempfile, random, webbrowser, re
 import pathlib
 from os.path import join as pJoin
 from pyproj import Proj, transform, Transformer # Remove this import when deprecating other functions
 import pyproj
-import requests
 import networkx as nx
 import numpy as np
 from scipy.spatial import ConvexHull
@@ -14,7 +13,7 @@ from flask import Flask, send_file, render_template
 from matplotlib import pyplot as plt
 
 import omf
-from omf import distNetViz
+from omf.solvers import opendss
 from omf import feeder
 from omf.models import __neoMetaModel__
 from omf.models.__neoMetaModel__ import *
@@ -655,656 +654,677 @@ def showOnMap(geoJson):
 
 
 def map_omd(omd_path, output_dir, open_browser=False):
-    '''
-    Create an HTML page of the GeoJSON circuit editor without Flask
-    '''
-    # - Load feeder data
-    with open(omd_path) as f:
-        omd = json.load(f)
-    omf.geo.insert_missing_nodes(omd)
-    omf.geo.insert_wgs84_coordinates(omd)
-    feature_collection = omf.geo.convert_omd_to_featurecollection(omd)
-    featureCollection = json.dumps(feature_collection)
-    components_collection = omf.geo.get_component_featurecollection()
-    componentsCollection = json.dumps(components_collection)
-    # - Load JavaScript
-    main_js_filepath = (pathlib.Path(omf.omfDir).resolve(True) / 'static' / 'geoJsonMap' / 'v3' / 'main.js').resolve(True)
-    all_js_filepaths = list((pathlib.Path(omf.omfDir).resolve(True) / 'static' / 'geoJsonMap' / 'v3').glob('**/*.js'))
-    all_js_filepaths.remove(main_js_filepath)
-    all_js_filepaths.append(main_js_filepath)
-    all_js_file_content = []
-    for filepath in all_js_filepaths:
-        with pathlib.Path(filepath).open() as f:
-            file_content = ''.join(list(filter(lambda line: not re.match(r'^\s*(?:import\s+|export\s+)', line), f.readlines())))
-            file_content = f'<script>\n"use strict";\n{file_content}\n</script>\n'
-            all_js_file_content.append(file_content)
-    js = ''.join(all_js_file_content)
-    # - Load CSS
-    all_css_file_content = []
-    for filepath in (pathlib.Path(omf.omfDir).resolve(True) / 'static' / 'geoJsonMap' / 'v3').glob('**/*.css'):
-        with pathlib.Path(filepath).open() as f:
-            file_content = ''.join(f.readlines())
-            file_content = f'<style>\n{file_content}\n</style>\n'
-            all_css_file_content.append(file_content)
-    css = ''.join(all_css_file_content)
-    # - Write template
-    with (pathlib.Path(omf.omfDir).resolve(True) / 'templates' / 'geoJson_offline.html').open() as f:
-        template = f.read()
-    rendered = Template(template).render(featureCollection=featureCollection, componentsCollection=componentsCollection, thisOwner=None,
-        thisModelName=None, thisFeederName=None, thisFeederNum=None, publicFeeders=None, userFeeders=None,
-        currentUser=None, showFileMenu=json.dumps(False), isOnline=json.dumps(False), css=css, js=js)
-    output_dir = pathlib.Path(output_dir)
-    output_dir.mkdir(parents=True, exist_ok=True)
-    # - Copy PNGs
-    for filepath in (pathlib.Path(omf.omfDir).resolve(True) / 'static' / 'geoJsonMap' / 'v3').glob('**/*.png'):
-        shutil.copy2(filepath, output_dir)
-    with open(output_dir / 'geoJson_offline.html', 'w') as f:
-        f.write(rendered)
-    if open_browser:
-        openInBrowser(str(output_dir / 'geoJson_offline.html'))
+	'''
+	Create an HTML page of the GeoJSON circuit editor without Flask
+	'''
+	# - Load feeder data
+	with open(omd_path) as f:
+		omd = json.load(f)
+	omf.geo.insert_missing_nodes(omd)
+	omf.geo.insert_wgs84_coordinates(omd)
+	feature_collection = omf.geo.convert_omd_to_featurecollection(omd)
+	featureCollection = json.dumps(feature_collection)
+	components_collection = omf.geo.get_component_featurecollection()
+	componentsCollection = json.dumps(components_collection)
+	# - Load JavaScript
+	main_js_filepath = (pathlib.Path(omf.omfDir).resolve(True) / 'static' / 'geoJsonMap' / 'v3' / 'main.js').resolve(True)
+	all_js_filepaths = list((pathlib.Path(omf.omfDir).resolve(True) / 'static' / 'geoJsonMap' / 'v3').glob('**/*.js'))
+	all_js_filepaths.remove(main_js_filepath)
+	all_js_filepaths.append(main_js_filepath)
+	all_js_file_content = []
+	for filepath in all_js_filepaths:
+		with pathlib.Path(filepath).open() as f:
+			file_content = ''.join(list(filter(lambda line: not re.match(r'^\s*(?:import\s+|export\s+)', line), f.readlines())))
+			file_content = f'<script>\n"use strict";\n{file_content}\n</script>\n'
+			all_js_file_content.append(file_content)
+	js = ''.join(all_js_file_content)
+	# - Load CSS
+	all_css_file_content = []
+	for filepath in (pathlib.Path(omf.omfDir).resolve(True) / 'static' / 'geoJsonMap' / 'v3').glob('**/*.css'):
+		with pathlib.Path(filepath).open() as f:
+			file_content = ''.join(f.readlines())
+			file_content = f'<style>\n{file_content}\n</style>\n'
+			all_css_file_content.append(file_content)
+	css = ''.join(all_css_file_content)
+	# - Write template
+	with (pathlib.Path(omf.omfDir).resolve(True) / 'templates' / 'geoJson_offline.html').open() as f:
+		template = f.read()
+	rendered = Template(template).render(featureCollection=featureCollection, componentsCollection=componentsCollection, thisOwner=None,
+		thisModelName=None, thisFeederName=None, thisFeederNum=None, publicFeeders=None, userFeeders=None,
+		currentUser=None, showFileMenu=json.dumps(False), isOnline=json.dumps(False), css=css, js=js)
+	output_dir = pathlib.Path(output_dir)
+	output_dir.mkdir(parents=True, exist_ok=True)
+	# - Copy PNGs
+	for filepath in (pathlib.Path(omf.omfDir).resolve(True) / 'static' / 'geoJsonMap' / 'v3').glob('**/*.png'):
+		shutil.copy2(filepath, output_dir)
+	with open(output_dir / 'geoJson_offline.html', 'w') as f:
+		f.write(rendered)
+	if open_browser:
+		openInBrowser(str(output_dir / 'geoJson_offline.html'))
+
+def viz(path_to_file, output_path=None, open_browser=True):
+	''' Directly visualize arbitrary .dss or .glm (or .omd). '''
+	# Set up temp directory for the files.
+	if output_path is None:
+		out_dir = tempfile.mkdtemp()
+	else:
+		out_dir = os.path.abspath(output_path)
+	omd_path = pJoin(out_dir,'circuit.omd')
+	# write a test file to the out_dir
+	with open(pJoin(out_dir,'test.txt'), 'w') as f:
+		f.write('test')
+	# Convert the feeder.
+	if path_to_file.endswith('.omd'):
+		omd_path = path_to_file
+	elif path_to_file.endswith('.glm'):
+		feeder.glmToOmd(path_to_file, pJoin(out_dir,'circuit.omd'))
+	elif path_to_file.endswith('.dss'):
+		opendss.dssConvert.dssToOmd(path_to_file, omd_path, RADIUS=0.0002, write_out=True)
+	# Run visualization
+	map_omd(omd_path, out_dir, open_browser=open_browser)
 
 def convert_omd_to_featurecollection(omd):
-    '''
-    Convert an OMD dict into a FeatureCollection dict
-        This is an alternative to using omf.feeder.treeToNxGraph(). This function does not handle missing/duplicate nodes or missing coordinates.
-        Missing/duplicate nodes are handled by calling insert_missing_nodes() and missing/corrupt coordinates are handled by calling
-        insert_coordinates()
+	'''
+	Convert an OMD dict into a FeatureCollection dict
+		This is an alternative to using omf.feeder.treeToNxGraph(). This function does not handle missing/duplicate nodes or missing coordinates.
+		Missing/duplicate nodes are handled by calling insert_missing_nodes() and missing/corrupt coordinates are handled by calling
+		insert_coordinates()
 
-    :param omd: an OMD
-    :type omd: dict
-    :return: a GeoJSON FeatureCollection
-    :rtype: dict
-    '''
-    feature_collection = {'type': 'FeatureCollection', 'features': []}
-    # - The meta_feature contains non-tree data like "attachments"
-    meta_feature = {'type': 'Feature', 'geometry': {'coordinates': [None, None], 'type': 'Point'}, 'properties': {'treeKey': 'omd'}}
-    feature_collection['features'].append(meta_feature)
-    # - Add non-tree data
-    for k, v in omd.items():
-        if k != 'tree':
-            meta_feature['properties'][k] = v
-    # - Add tree data
-    name_to_treekey = NameToTreeKeyMap(omd)
-    for k, v in omd['tree'].items():
-        # - Existing code base is used to dealing with strings of ints so I'm doing that
-        feature = {'type': 'Feature', 'properties': {'treeKey': str(k)}}
-        # - The "geo_py_validation_status" property should be kept in the "treeProps" namespace so that the user can delete the property in the
-        #   front-end if they want. It's NOT a meta-property
-        feature['properties']['treeProps'] = v
-        if 'from' in v and 'to' in v:
-            src_key = name_to_treekey.get_key(v['from'], v)
-            src_lon = float(omd['tree'][src_key]['longitude'])
-            src_lat = float(omd['tree'][src_key]['latitude'])
-            dst_key = name_to_treekey.get_key(v['to'], v)
-            dst_lon = float(omd['tree'][dst_key]['longitude'])
-            dst_lat = float(omd['tree'][dst_key]['latitude'])
-            feature['geometry'] = {'coordinates': [[src_lon, src_lat], [dst_lon, dst_lat]], 'type': 'LineString'}
-        else:
-            if _is_configuration_or_special_node(v):
-                coordinates = [None, None]
-            else:
-                coordinates = [float(v['longitude']), float(v['latitude'])]
-            feature['geometry'] = {'coordinates': coordinates, 'type': 'Point'}
-        feature_collection['features'].append(feature)
-    # - I iterate again at the end to remove "latitude" and "longitude" because a line may need to get coordinates from a node before I remove the
-    #   node's coordinates
-    for k, v in omd['tree'].items():
-        for prop in ['latitude', 'longitude']:
-            if prop in v:
-                del v[prop]
-    return feature_collection
+	:param omd: an OMD
+	:type omd: dict
+	:return: a GeoJSON FeatureCollection
+	:rtype: dict
+	'''
+	feature_collection = {'type': 'FeatureCollection', 'features': []}
+	# - The meta_feature contains non-tree data like "attachments"
+	meta_feature = {'type': 'Feature', 'geometry': {'coordinates': [None, None], 'type': 'Point'}, 'properties': {'treeKey': 'omd'}}
+	feature_collection['features'].append(meta_feature)
+	# - Add non-tree data
+	for k, v in omd.items():
+		if k != 'tree':
+			meta_feature['properties'][k] = v
+	# - Add tree data
+	name_to_treekey = NameToTreeKeyMap(omd)
+	for k, v in omd['tree'].items():
+		# - Existing code base is used to dealing with strings of ints so I'm doing that
+		feature = {'type': 'Feature', 'properties': {'treeKey': str(k)}}
+		# - The "geo_py_validation_status" property should be kept in the "treeProps" namespace so that the user can delete the property in the
+		#   front-end if they want. It's NOT a meta-property
+		feature['properties']['treeProps'] = v
+		if 'from' in v and 'to' in v:
+			src_key = name_to_treekey.get_key(v['from'], v)
+			src_lon = float(omd['tree'][src_key]['longitude'])
+			src_lat = float(omd['tree'][src_key]['latitude'])
+			dst_key = name_to_treekey.get_key(v['to'], v)
+			dst_lon = float(omd['tree'][dst_key]['longitude'])
+			dst_lat = float(omd['tree'][dst_key]['latitude'])
+			feature['geometry'] = {'coordinates': [[src_lon, src_lat], [dst_lon, dst_lat]], 'type': 'LineString'}
+		else:
+			if _is_configuration_or_special_node(v):
+				coordinates = [None, None]
+			else:
+				coordinates = [float(v['longitude']), float(v['latitude'])]
+			feature['geometry'] = {'coordinates': coordinates, 'type': 'Point'}
+		feature_collection['features'].append(feature)
+	# - I iterate again at the end to remove "latitude" and "longitude" because a line may need to get coordinates from a node before I remove the
+	#   node's coordinates
+	for k, v in omd['tree'].items():
+		for prop in ['latitude', 'longitude']:
+			if prop in v:
+				del v[prop]
+	return feature_collection
 
 
 def convert_featurecollection_to_omd(feature_collection):
-    '''
-    Convert a GeoJSON FeatureCollection dict into an OMD dict
+	'''
+	Convert a GeoJSON FeatureCollection dict into an OMD dict
 
-    :param feature_collection: a GeoJSON feature collection
-    :type feature_collection: dict
-    :return: an OMD
-    :rtype: dict
-    '''
-    omd = {'tree': {}}
-    for f in feature_collection['features']:
-        # - Add non-tree keys
-        if f['properties']['treeKey'] == 'omd':
-            for k, v in f['properties'].items():
-                if k != 'treeKey':
-                    omd[k] = v
-        # - Remove parent-child lines entirely in case they still exist
-        elif f['properties']['treeProps'].get('type') == 'parentChild':
-            continue
-        else:
-            # - Ignore 'latitude' and 'longitude' properties present in the <Feature>['properties]['treeProps'] dict
-            for p in ['latitude', 'longitude']:
-                if p in f['properties']['treeProps']:
-                    del f['properties']['treeProps'][p]
-            # - Add coordinates if we should
-            if f['geometry']['type'] == 'Point':
-                if not _is_configuration_or_special_node(f['properties']['treeProps']):
-                    f['properties']['treeProps']['latitude'] = float(f['geometry']['coordinates'][1])
-                    f['properties']['treeProps']['longitude'] = float(f['geometry']['coordinates'][0])
-            omd['tree'][str(f['properties']['treeKey'])] = f['properties']['treeProps']
-    return omd
+	:param feature_collection: a GeoJSON feature collection
+	:type feature_collection: dict
+	:return: an OMD
+	:rtype: dict
+	'''
+	omd = {'tree': {}}
+	for f in feature_collection['features']:
+		# - Add non-tree keys
+		if f['properties']['treeKey'] == 'omd':
+			for k, v in f['properties'].items():
+				if k != 'treeKey':
+					omd[k] = v
+		# - Remove parent-child lines entirely in case they still exist
+		elif f['properties']['treeProps'].get('type') == 'parentChild':
+			continue
+		else:
+			# - Ignore 'latitude' and 'longitude' properties present in the <Feature>['properties]['treeProps'] dict
+			for p in ['latitude', 'longitude']:
+				if p in f['properties']['treeProps']:
+					del f['properties']['treeProps'][p]
+			# - Add coordinates if we should
+			if f['geometry']['type'] == 'Point':
+				if not _is_configuration_or_special_node(f['properties']['treeProps']):
+					f['properties']['treeProps']['latitude'] = float(f['geometry']['coordinates'][1])
+					f['properties']['treeProps']['longitude'] = float(f['geometry']['coordinates'][0])
+			omd['tree'][str(f['properties']['treeKey'])] = f['properties']['treeProps']
+	return omd
 
 
 class NameToTreeKeyMap:
-    '''
-    This class encapsulates a dictionary that maps the "name" property of objects and lines to tree keys. A simple Python dictionary is not sufficient
-    because multiple tree objects can share the same name. As a result, the correct tree key that should be returned for a given name depends on which
-    object is requesting the tree key
-        E.g. if a linecode and bus share a name, and a child node uses that name as its parent reference, then the tree key of the bus should be
-        returned, but that's only because a child node was requesting a tree key.
-        In the case of unresolvable name collisions (e.g. two buses share a name and a child node uses that name as its parent reference, and we don't
-        know which bus to return), we raise an exception
-    '''
+	'''
+	This class encapsulates a dictionary that maps the "name" property of objects and lines to tree keys. A simple Python dictionary is not sufficient
+	because multiple tree objects can share the same name. As a result, the correct tree key that should be returned for a given name depends on which
+	object is requesting the tree key
+		E.g. if a linecode and bus share a name, and a child node uses that name as its parent reference, then the tree key of the bus should be
+		returned, but that's only because a child node was requesting a tree key.
+		In the case of unresolvable name collisions (e.g. two buses share a name and a child node uses that name as its parent reference, and we don't
+		know which bus to return), we raise an exception
+	'''
 
-    def __init__(self, omd):
-        '''
-        :param omd: an OMD
-        :type omd: dict
-        :rtype: None
-        '''
-        self._omd = omd
-        self._map = {}
-        for k, v in omd['tree'].items():
-            name = v.get('name')
-            if name is not None:
-                if name not in self._map:
-                    self._map[name] = [k]
-                else:
-                    self._map[name].append(k)
+	def __init__(self, omd):
+		'''
+		:param omd: an OMD
+		:type omd: dict
+		:rtype: None
+		'''
+		self._omd = omd
+		self._map = {}
+		for k, v in omd['tree'].items():
+			name = v.get('name')
+			if name is not None:
+				if name not in self._map:
+					self._map[name] = [k]
+				else:
+					self._map[name].append(k)
 
-    def get_key(self, name, treeProps):
-        '''
-        Return a key for the given name, or None if a key cannot be found. Raise an exception if the key can't unambiguously selected from multiple
-        possible keys
+	def get_key(self, name, treeProps):
+		'''
+		Return a key for the given name, or None if a key cannot be found. Raise an exception if the key can't unambiguously selected from multiple
+		possible keys
 
-        :param name: the name of a tree object
-        :type name: str
-        :param treeProps: a tree object (e.g. a child object or line object) that is requesting the tree object with the given name Nodes and lines
-            can be parents.
-        :type treeProps: dict
-        :return: the key of the object with the provided name
-        :rtype: str
-        '''
-        keys = self._map.get(name)
-        if keys is None:
-            return None
-        elif len(keys) == 1:
-            return keys[0]
-        # - For recorders, return the first line with the given name. Is this right?
-        objects_with_line_parents = ['recorder']
-        if treeProps['object'] in objects_with_line_parents:
-            line_keys = list(filter(lambda k: 'from' in self._omd['tree'][k] and 'to' in  self._omd['tree'][k], keys))
-            if len(line_keys) == 1:
-                return line_keys[0]
-            else:
-                raise ValueError(f'The NameToTreeKeyMap could not unambiguously find a line for the object named "{treeProps["name"]}"')
-        else:
-            node_keys = list(filter(lambda k: 'from' not in self._omd['tree'][k] and 'to' not in self._omd['tree'][k] and not _is_configuration_or_special_node(self._omd['tree'][k]), keys))
-            if len(node_keys) == 1:
-                return node_keys[0]
-            else:
-                #raise ValueError(f'The NameToTreeKeyMap could not unambiguously find a node for the object named "{treeProps["name"]}"')
-                # - HACK (David): How to deal with circuit vs. bus object with same name, or duplicate bus objects with same name?
-                #   - Always assume that the line or child wants the "bus" object, not the "circuit" object
-                #   - If two buses have identical names, just choose the first bus arbitrarily
-                bus_keys = list(filter(lambda k: self._omd['tree'][k].get('object') == 'bus', node_keys))
-                if len(bus_keys) > 0:
-                    return bus_keys[0]
-                else:
-                    # - In really weird situations, such as a case of multiple circuit objects with the same name, just return the first object
-                    return node_keys[0]
+		:param name: the name of a tree object
+		:type name: str
+		:param treeProps: a tree object (e.g. a child object or line object) that is requesting the tree object with the given name Nodes and lines
+			can be parents.
+		:type treeProps: dict
+		:return: the key of the object with the provided name
+		:rtype: str
+		'''
+		keys = self._map.get(name)
+		if keys is None:
+			return None
+		elif len(keys) == 1:
+			return keys[0]
+		# - For recorders, return the first line with the given name. Is this right?
+		objects_with_line_parents = ['recorder']
+		if treeProps['object'] in objects_with_line_parents:
+			line_keys = list(filter(lambda k: 'from' in self._omd['tree'][k] and 'to' in  self._omd['tree'][k], keys))
+			if len(line_keys) == 1:
+				return line_keys[0]
+			else:
+				raise ValueError(f'The NameToTreeKeyMap could not unambiguously find a line for the object named "{treeProps["name"]}"')
+		else:
+			node_keys = list(filter(lambda k: 'from' not in self._omd['tree'][k] and 'to' not in self._omd['tree'][k] and not _is_configuration_or_special_node(self._omd['tree'][k]), keys))
+			if len(node_keys) == 1:
+				return node_keys[0]
+			else:
+				#raise ValueError(f'The NameToTreeKeyMap could not unambiguously find a node for the object named "{treeProps["name"]}"')
+				# - HACK (David): How to deal with circuit vs. bus object with same name, or duplicate bus objects with same name?
+				#   - Always assume that the line or child wants the "bus" object, not the "circuit" object
+				#   - If two buses have identical names, just choose the first bus arbitrarily
+				bus_keys = list(filter(lambda k: self._omd['tree'][k].get('object') == 'bus', node_keys))
+				if len(bus_keys) > 0:
+					return bus_keys[0]
+				else:
+					# - In really weird situations, such as a case of multiple circuit objects with the same name, just return the first object
+					return node_keys[0]
 
 
 def _is_configuration_or_special_node(tree_properties):
-    '''
-    :param tree_properties: a dict of an OMD object's properties
-    :type tree_properties: dict
-    :return: whether the tree_properties describe a node that isn't supposed to be visually displayed in the front-end map (i.e. a "configuration
-        object" or "special object"). A configuration/special node is converted into a feature that has None latitude and longitude values
-    :rtype: bool
-    '''
-    # - The "circuit" object needs to be vsource object, so it's NOT a configuration node
-    #   - The exception with "trilby" is therefore correct. I need to ask David how to resolve that problem
-    # - The "energymeter" object is NOT a configuration node
-    #   - iowa240c2_working_coords.clean.tie_bus2058_bus3155.omd assigns a parent to it
-    # - The "regcontrol" object is NOT a configuration node
-    #   - iowa240c1.clean.dss.omd assigns latitude and longitude values to it. So does pvrea_trilby.omd
-    # - The "player" object is NOT a configuration node
-    #   - ABEC Frank Calibrated With Voltage gives one such object a "parent" attribute
-    CONFIGURATION_OBJECTS = (
-        'auction',
-        '!CMD',
-        #'circuit',
-        'climate',
-        'cndata',
-        'csv_reader',
-        'currdump',
-        #'energymeter',
-        'group_recorder',
-        'growthshape',
-        'line_configuration',
-        'line_spacing',
-        'linecode',
-        'loadshape',
-        'overhead_line_conductor',
-        #'player',
-        #'regcontrol',
-        'regulator_configuration',
-        'schedule',
-        'spectrum',
-        'swtcontrol',
-        'tcc_curve',
-        'triplex_line_conductor',
-        'transformer_configuration',
-        'triplex_line_configuration',
-        'underground_line_conductor',
-        'volt_var_control',
-        'voltdump',
-        'wiredata')
-    # - These OMD objects lack the "object" property entirely
-    SPECIAL_OBJECTS = ('clock', 'omftype', 'module', 'class')
-    return ((tree_properties.get('object') is None and len(set(tree_properties.keys()) & set(SPECIAL_OBJECTS)) > 0) or
-        re.match(r'($|:)|'.join(CONFIGURATION_OBJECTS) + r'($|:)', tree_properties['object']))
+	'''
+	:param tree_properties: a dict of an OMD object's properties
+	:type tree_properties: dict
+	:return: whether the tree_properties describe a node that isn't supposed to be visually displayed in the front-end map (i.e. a "configuration
+		object" or "special object"). A configuration/special node is converted into a feature that has None latitude and longitude values
+	:rtype: bool
+	'''
+	# - The "circuit" object needs to be vsource object, so it's NOT a configuration node
+	#   - The exception with "trilby" is therefore correct. I need to ask David how to resolve that problem
+	# - The "energymeter" object is NOT a configuration node
+	#   - iowa240c2_working_coords.clean.tie_bus2058_bus3155.omd assigns a parent to it
+	# - The "regcontrol" object is NOT a configuration node
+	#   - iowa240c1.clean.dss.omd assigns latitude and longitude values to it. So does pvrea_trilby.omd
+	# - The "player" object is NOT a configuration node
+	#   - ABEC Frank Calibrated With Voltage gives one such object a "parent" attribute
+	CONFIGURATION_OBJECTS = (
+		'auction',
+		'!CMD',
+		#'circuit',
+		'climate',
+		'cndata',
+		'csv_reader',
+		'currdump',
+		#'energymeter',
+		'group_recorder',
+		'growthshape',
+		'line_configuration',
+		'line_spacing',
+		'linecode',
+		'loadshape',
+		'overhead_line_conductor',
+		#'player',
+		#'regcontrol',
+		'regulator_configuration',
+		'schedule',
+		'spectrum',
+		'swtcontrol',
+		'tcc_curve',
+		'triplex_line_conductor',
+		'transformer_configuration',
+		'triplex_line_configuration',
+		'underground_line_conductor',
+		'volt_var_control',
+		'voltdump',
+		'wiredata')
+	# - These OMD objects lack the "object" property entirely
+	SPECIAL_OBJECTS = ('clock', 'omftype', 'module', 'class')
+	return ((tree_properties.get('object') is None and len(set(tree_properties.keys()) & set(SPECIAL_OBJECTS)) > 0) or
+		re.match(r'($|:)|'.join(CONFIGURATION_OBJECTS) + r'($|:)', tree_properties['object']))
 
 
 def insert_missing_nodes(omd):
-    '''
-    Iterate through an OMD's tree and add any missing "parent" nodes, "from" nodes, or "to" nodes
-        TODO: add missing configuration nodes???
+	'''
+	Iterate through an OMD's tree and add any missing "parent" nodes, "from" nodes, or "to" nodes
+		TODO: add missing configuration nodes???
 
-    :param omd: an OMD
-    :type omd: dict
-    :rtype: None
-    '''
-    name_to_treekey = NameToTreeKeyMap(omd)
-    max_tree_key = max([int(k) for k in omd['tree'].keys()], default=0)
-    new_tree = {}
-    for k, v in omd['tree'].items():
-        # - Deal with lines that have missing/identical nodes
-        if 'from' in v and 'to' in v:
-            if v['from'] == v['to']:
-                v['geo_py_validation_status'] = 'looped'
-            src_key = name_to_treekey.get_key(v['from'], v)
-            if src_key is None: 
-                max_tree_key += 1
-                # - I grepped through all the files and no OMD tree object used "geo_py_validation_status" as a key
-                new_tree[max_tree_key] = {'name': v['from'], 'object': 'bus', 'geo_py_validation_status': 'missing'}
-                name_to_treekey._map[v['from']] = [max_tree_key]
-            dst_key = name_to_treekey.get_key(v['to'], v)
-            if dst_key is None:
-                max_tree_key += 1
-                new_tree[max_tree_key] = {'name': v['to'], 'object': 'bus', 'geo_py_validation_status': 'missing'}
-                name_to_treekey._map[v['to']] = [max_tree_key]
-        else:
-            # - Deal with child nodes that have missing parents
-            if 'parent' in v:
-                parent_key = name_to_treekey.get_key(v['parent'], v)
-                if parent_key is None:
-                    max_tree_key += 1
-                    new_tree[max_tree_key] = {'name': v['parent'], 'object': 'bus', 'geo_py_validation_status': 'missing'}
-                    name_to_treekey._map[v['parent']] = [max_tree_key]
-                    #print(f'omf.geo.insert_missing_nodes() created a placeholder bus node for the missing node named {v["parent"]}')
-    for k in new_tree.keys():
-        omd['tree'][str(k)] = new_tree[k]
+	:param omd: an OMD
+	:type omd: dict
+	:rtype: None
+	'''
+	name_to_treekey = NameToTreeKeyMap(omd)
+	max_tree_key = max([int(k) for k in omd['tree'].keys()], default=0)
+	new_tree = {}
+	for k, v in omd['tree'].items():
+		# - Deal with lines that have missing/identical nodes
+		if 'from' in v and 'to' in v:
+			if v['from'] == v['to']:
+				v['geo_py_validation_status'] = 'looped'
+			src_key = name_to_treekey.get_key(v['from'], v)
+			if src_key is None: 
+				max_tree_key += 1
+				# - I grepped through all the files and no OMD tree object used "geo_py_validation_status" as a key
+				new_tree[max_tree_key] = {'name': v['from'], 'object': 'bus', 'geo_py_validation_status': 'missing'}
+				name_to_treekey._map[v['from']] = [max_tree_key]
+			dst_key = name_to_treekey.get_key(v['to'], v)
+			if dst_key is None:
+				max_tree_key += 1
+				new_tree[max_tree_key] = {'name': v['to'], 'object': 'bus', 'geo_py_validation_status': 'missing'}
+				name_to_treekey._map[v['to']] = [max_tree_key]
+		else:
+			# - Deal with child nodes that have missing parents
+			if 'parent' in v:
+				parent_key = name_to_treekey.get_key(v['parent'], v)
+				if parent_key is None:
+					max_tree_key += 1
+					new_tree[max_tree_key] = {'name': v['parent'], 'object': 'bus', 'geo_py_validation_status': 'missing'}
+					name_to_treekey._map[v['parent']] = [max_tree_key]
+					#print(f'omf.geo.insert_missing_nodes() created a placeholder bus node for the missing node named {v["parent"]}')
+	for k in new_tree.keys():
+		omd['tree'][str(k)] = new_tree[k]
 
 
 def insert_wgs84_coordinates(omd, center=(38.92720, -94.95520), spcs_epsg=None, force_layout=False, scale=.01):
-    '''
-    - Iterate over an OMD's tree in-place and insert WGS 84 "latitude" and "longitude" property values in decimal degrees.
-        - If a node is missing latitude or longitude properties, or has non-numeric latitude or longitude properties, or has non-state-plane
-          out-of-bounds coordinates, create new WGS 84 coordinates with a layout algorithm.
-        - If a node has state plane coordinates, convert them into WGS 84 coordinates.
-            - If an EPSG code is given, perform a proper transformation of state plane coordinates into WGS 84 coordinates.
-            - If an EPSG code is not given, convert every state plane coordinate into a WGS 84 coordiante, subtract the minimum latitude from all
-              latitudes and subtract the minimum longitude from all longitudes to convert the WGS 84 coordinates into offset values, then add the
-              "center" latitude to every latitude and the "center" longitude to every longitude to shift the coordinates to the desired location.
-    - This function assumes there are no missing nodes. Run the OMD through insert_missing_nodes() first.
-    
-    :param omd: an OMD
-    :type omd: dict
-    :param center: a WGS 84 coordinate pair which will serve as the bottom left corner of the circuit coordinates. If force_layout=True, all nodes
-        will be centered around these coordinates according to some layout algorithm. If no nodes have coordinates, then all nodes will be centered
-        around these coordinates with a layout algorithm regardless of force_layout. If some, but not all, nodes have coordinates and
-        force_layout=False, center is ignored and the existing coordinates will be used to determine coordinates for nodes that lack coordinates.
-    :type center: tuple
-    :param spcs_espg: a state plane coordinate system European Petroleum Survey Group code that should be used to transform the given state plane
-        coordinates. E.g. EPSG:26978 is the European Petroleum Survey Group code for the "Kansas South" state plane with the "NAD 83" datum, which
-        also has a USA FIPS identifier of 1502. http://gsp.humboldt.edu/olm/Lessons/GIS/03%20Projections/Images2/StatePlane.png. If this argument is
-        provided, then the coordinates will be converted, even if they weren't actually state plane coordinates.
-    :type spcs_epg: str
-    :param force_layout: whether to insert new coordinates using a layout algorithm regardless of existing coordinates. 
-    :type force_layout: bool
-    :rtype: None
-    '''
-    # - Iterate the first time to find the min/max latitude/longitude to detect state plane coordinates
-    min_lat, max_lat, min_lon, max_lon = _get_min_max_lat_lon(omd)
-    if max_lat is not None and max_lon is not None:
-        # - If we have huge coordinate values, or the user says we have state plane coordinates, convert existing state plane coordinates into WGS 84
-        #   coordinates
-        if spcs_epsg is not None or max_lat > 72 or max_lon > -66:
-            # - The user knows their EPSG state plane code, so do a proper conversion
-            if spcs_epsg is not None:
-                in_proj = Proj(init=spcs_epsg, preserve_units=True)
-            # - The user did not know their EPSG state plane code, so preserve relative distances between nodes
-            else:
-                # - Convert from "Kansas South NAD 83 State Plane Coordinate System" to the World Geodetic System 1984. It doesn't really matter which
-                #   state plane we use. They should preserve distances between nodes roughly equally
-                #in_proj = Proj(init='EPSG:26978') # - This "Kansas South NAD 83 State Plane Coordinate System" projection uses meters. Nodes will be spaced further apart
-                in_proj = Proj(init='EPSG:3420', preserve_units=True) # - This "Kansas South NAD 83 State Plane Coordinate System" projection uses the US survey foot. Nodes will be closer together
-            out_proj = Proj(init='EPSG:4326')
-            transformer = pyproj.Transformer.from_proj(in_proj, out_proj, always_xy=True)
-            x_subtrahend, y_subtrahend = transformer.transform(min_lon, min_lat)
-            for d in omd['tree'].values():
-                try:
-                    easting = float(d['longitude'])
-                    northing = float(d['latitude'])
-                    x, y = transformer.transform(easting, northing)
-                    if spcs_epsg is None:
-                        x = (x - x_subtrahend) + center[1]
-                        y = (y - y_subtrahend) + center[0]
-                    d['longitude'] = x
-                    d['latitude'] = y
-                except (KeyError, ValueError) as e:
-                    pass
-    name_to_treekey = NameToTreeKeyMap(omd)
-    graph = nx.Graph()
-    # - Iterate a second time to build the graph for the layout algorithm and determine how a node will get new coordinates if it needs them
-    for k, v in omd['tree'].items():
-        if 'from' in v and 'to' in v:
-            try:
-                weight = float(v['length'])
-            except (KeyError, ValueError) as e:
-                # - Ignore non-numeric values like "1 mile" for the purposes of graph layout
-                weight = 1
-            graph.add_edge(name_to_treekey.get_key(v['from'], v), name_to_treekey.get_key(v['to'], v), weight=weight)
-        else:
-            if not _is_configuration_or_special_node(v):
-                if 'parent' in v:
-                    parent_key = name_to_treekey.get_key(v['parent'], v)
-                    parent = omd['tree'][parent_key]
-                    graph.add_edge(parent_key, k, weight=1)
-                    graph.add_node(k, coordinate_source='parent')
-                else:
-                    graph.add_node(k)
-    # - Run the layout algorithm to generate coordinates
-    try:
-        scale = float(scale)
-    except:
-        scale = .01
-    if force_layout:
-        # This is really slow. The user must specify force_layout to do this.
-        pos = nx.kamada_kawai_layout(graph, scale=scale)
-    else:
-        pos = nx.circular_layout(graph, scale=scale) # Fast, but ugly!
-    # - Is there a fast tree layout somewhere???? They only work with directed graphs, so we could build a directed graph
-    #pos = nx.spectral_layout(graph) # Too slow
-    #pos = nx.nx_pydot.pydot_layout(graph, prog='neato', root=None) # Requires pydot. Fast, but default looks horrible
-    #pos = nx.nx_pydot.graphviz_layout(graph, prog='neato', root=None) # Requires pydot. Fast, but default looks horrible
-    #pos = nx.shell_layout(graph, scale=0.1) # Could this work?
-    #pos = nx.spring_layout(graph, scale=0.1)
-    #pos = nx.planar_layout(graph, scale=0.1)
+	'''
+	- Iterate over an OMD's tree in-place and insert WGS 84 "latitude" and "longitude" property values in decimal degrees.
+		- If a node is missing latitude or longitude properties, or has non-numeric latitude or longitude properties, or has non-state-plane
+		  out-of-bounds coordinates, create new WGS 84 coordinates with a layout algorithm.
+		- If a node has state plane coordinates, convert them into WGS 84 coordinates.
+			- If an EPSG code is given, perform a proper transformation of state plane coordinates into WGS 84 coordinates.
+			- If an EPSG code is not given, convert every state plane coordinate into a WGS 84 coordiante, subtract the minimum latitude from all
+			  latitudes and subtract the minimum longitude from all longitudes to convert the WGS 84 coordinates into offset values, then add the
+			  "center" latitude to every latitude and the "center" longitude to every longitude to shift the coordinates to the desired location.
+	- This function assumes there are no missing nodes. Run the OMD through insert_missing_nodes() first.
+	
+	:param omd: an OMD
+	:type omd: dict
+	:param center: a WGS 84 coordinate pair which will serve as the bottom left corner of the circuit coordinates. If force_layout=True, all nodes
+		will be centered around these coordinates according to some layout algorithm. If no nodes have coordinates, then all nodes will be centered
+		around these coordinates with a layout algorithm regardless of force_layout. If some, but not all, nodes have coordinates and
+		force_layout=False, center is ignored and the existing coordinates will be used to determine coordinates for nodes that lack coordinates.
+	:type center: tuple
+	:param spcs_espg: a state plane coordinate system European Petroleum Survey Group code that should be used to transform the given state plane
+		coordinates. E.g. EPSG:26978 is the European Petroleum Survey Group code for the "Kansas South" state plane with the "NAD 83" datum, which
+		also has a USA FIPS identifier of 1502. http://gsp.humboldt.edu/olm/Lessons/GIS/03%20Projections/Images2/StatePlane.png. If this argument is
+		provided, then the coordinates will be converted, even if they weren't actually state plane coordinates.
+	:type spcs_epg: str
+	:param force_layout: whether to insert new coordinates using a layout algorithm regardless of existing coordinates. 
+	:type force_layout: bool
+	:rtype: None
+	'''
+	# - Iterate the first time to find the min/max latitude/longitude to detect state plane coordinates
+	min_lat, max_lat, min_lon, max_lon = _get_min_max_lat_lon(omd)
+	if max_lat is not None and max_lon is not None:
+		# - If we have huge coordinate values, or the user says we have state plane coordinates, convert existing state plane coordinates into WGS 84
+		#   coordinates
+		if spcs_epsg is not None or max_lat > 72 or max_lon > -66:
+			# - The user knows their EPSG state plane code, so do a proper conversion
+			if spcs_epsg is not None:
+				in_proj = Proj(init=spcs_epsg, preserve_units=True)
+			# - The user did not know their EPSG state plane code, so preserve relative distances between nodes
+			else:
+				# - Convert from "Kansas South NAD 83 State Plane Coordinate System" to the World Geodetic System 1984. It doesn't really matter which
+				#   state plane we use. They should preserve distances between nodes roughly equally
+				#in_proj = Proj(init='EPSG:26978') # - This "Kansas South NAD 83 State Plane Coordinate System" projection uses meters. Nodes will be spaced further apart
+				in_proj = Proj(init='EPSG:3420', preserve_units=True) # - This "Kansas South NAD 83 State Plane Coordinate System" projection uses the US survey foot. Nodes will be closer together
+			out_proj = Proj(init='EPSG:4326')
+			transformer = pyproj.Transformer.from_proj(in_proj, out_proj, always_xy=True)
+			x_subtrahend, y_subtrahend = transformer.transform(min_lon, min_lat)
+			for d in omd['tree'].values():
+				try:
+					easting = float(d['longitude'])
+					northing = float(d['latitude'])
+					x, y = transformer.transform(easting, northing)
+					if spcs_epsg is None:
+						x = (x - x_subtrahend) + center[1]
+						y = (y - y_subtrahend) + center[0]
+					d['longitude'] = x
+					d['latitude'] = y
+				except (KeyError, ValueError) as e:
+					pass
+	name_to_treekey = NameToTreeKeyMap(omd)
+	graph = nx.Graph()
+	# - Iterate a second time to build the graph for the layout algorithm and determine how a node will get new coordinates if it needs them
+	for k, v in omd['tree'].items():
+		if 'from' in v and 'to' in v:
+			try:
+				weight = float(v['length'])
+			except (KeyError, ValueError) as e:
+				# - Ignore non-numeric values like "1 mile" for the purposes of graph layout
+				weight = 1
+			graph.add_edge(name_to_treekey.get_key(v['from'], v), name_to_treekey.get_key(v['to'], v), weight=weight)
+		else:
+			if not _is_configuration_or_special_node(v):
+				if 'parent' in v:
+					parent_key = name_to_treekey.get_key(v['parent'], v)
+					parent = omd['tree'][parent_key]
+					graph.add_edge(parent_key, k, weight=1)
+					graph.add_node(k, coordinate_source='parent')
+				else:
+					graph.add_node(k)
+	# - Run the layout algorithm to generate coordinates
+	try:
+		scale = float(scale)
+	except:
+		scale = .01
+	if force_layout:
+		# This is really slow. The user must specify force_layout to do this.
+		pos = nx.kamada_kawai_layout(graph, scale=scale)
+	else:
+		pos = nx.circular_layout(graph, scale=scale) # Fast, but ugly!
+	# - Is there a fast tree layout somewhere???? They only work with directed graphs, so we could build a directed graph
+	#pos = nx.spectral_layout(graph) # Too slow
+	#pos = nx.nx_pydot.pydot_layout(graph, prog='neato', root=None) # Requires pydot. Fast, but default looks horrible
+	#pos = nx.nx_pydot.graphviz_layout(graph, prog='neato', root=None) # Requires pydot. Fast, but default looks horrible
+	#pos = nx.shell_layout(graph, scale=0.1) # Could this work?
+	#pos = nx.spring_layout(graph, scale=0.1)
+	#pos = nx.planar_layout(graph, scale=0.1)
 
-    # - Iterate a third time to find the valid min/max lat/lon to determine if we need to use the "center" parameter or not
-    min_lat, max_lat, min_lon, max_lon = _get_min_max_lat_lon(omd, min_lat=18, max_lat=72, min_lon=-172, max_lon=-66)
-    avg_lat = center[0]
-    if min_lat is not None and max_lat is not None:
-        avg_lat = (max_lat + min_lat) / 2
-    avg_lon = center[1]
-    if min_lon is not None and max_lon is not None:
-        avg_lon = (max_lon + min_lon) / 2
-    # - Iterate a fourth time to give coordinates to all nodes that need them
-    for k in pos:
-        obj = omd['tree'][k]
-        # - Mark nodes that are disconnected from the rest of the circuit as "isolated". This can be commented out because I don't which
-        #   non-configuration nodes are allowed to be isolated vs. which nodes should never be isolated
-        if graph.degree[k] == 0 and not _is_configuration_or_special_node(obj):
-            if obj.get('geo_py_validation_status') is None:
-                obj['geo_py_validation_status'] = 'isolated'
-            else:
-                obj['geo_py_validation_status'] += ' & isolated'
-        if 'from' not in obj and 'to' not in obj and not _is_configuration_or_special_node(obj):
-            if force_layout:
-                omd['tree'][k]['latitude'] = float(pos[k][0]) + center[0]
-                omd['tree'][k]['longitude'] = float(pos[k][1]) + center[1]
-            else:
-                if graph.nodes[k].get('coordinate_source') == 'parent':
-                    parent_key = name_to_treekey.get_key(obj['parent'], obj)
-                    parent = omd['tree'][parent_key]
-                try:
-                    lat = float(obj['latitude'])
-                    if not (18 <= lat <= 72):
-                        raise ValueError
-                except (KeyError, ValueError) as e:
-                    if graph.nodes[k].get('coordinate_source') == 'parent':
-                        try:
-                            parent_lat = float(parent['latitude'])
-                            if not (18 <= parent_lat <= 72):
-                                raise ValueError
-                        except (KeyError, ValueError) as e:
-                            parent_lat = float(pos[parent_key][0]) + avg_lat
-                            # - Lines that are parents can have coordinates for the sake of their children, but they can't have coordinates themselves
-                            if 'from' not in obj and 'to' not in obj:
-                                parent['latitude'] = parent_lat
-                        obj['latitude'] = parent_lat + round(random.uniform(-.003, .003), 4)
-                    else:
-                        obj['latitude'] = float(pos[k][0]) + avg_lat
-                try:
-                    lon = float(obj['longitude'])
-                    if not (-172 <= lon <= -66):
-                        raise ValueError
-                except (KeyError, ValueError) as e:
-                    if graph.nodes[k].get('coordinate_source') == 'parent':
-                        try:
-                            parent_lon = float(parent['longitude'])
-                            if not (-172 <= parent_lon <= -66):
-                                raise ValueError
-                        except (KeyError, ValueError) as e:
-                            parent_lon = float(pos[parent_key][1]) + avg_lon
-                            # - Lines that are parents can have coordinates for the sake of their children, but they can't have coordinates themselves
-                            if 'from' not in obj and 'to' not in obj:
-                                parent['longitude'] = parent_lon
-                        obj['longitude'] = parent_lon + round(random.uniform(-.003, .003), 4)
-                    else:
-                        obj['longitude'] = float(pos[k][1]) + avg_lon
+	# - Iterate a third time to find the valid min/max lat/lon to determine if we need to use the "center" parameter or not
+	min_lat, max_lat, min_lon, max_lon = _get_min_max_lat_lon(omd, min_lat=18, max_lat=72, min_lon=-172, max_lon=-66)
+	avg_lat = center[0]
+	if min_lat is not None and max_lat is not None:
+		avg_lat = (max_lat + min_lat) / 2
+	avg_lon = center[1]
+	if min_lon is not None and max_lon is not None:
+		avg_lon = (max_lon + min_lon) / 2
+	# - Iterate a fourth time to give coordinates to all nodes that need them
+	for k in pos:
+		obj = omd['tree'][k]
+		# - Mark nodes that are disconnected from the rest of the circuit as "isolated". This can be commented out because I don't which
+		#   non-configuration nodes are allowed to be isolated vs. which nodes should never be isolated
+		if graph.degree[k] == 0 and not _is_configuration_or_special_node(obj):
+			if obj.get('geo_py_validation_status') is None:
+				obj['geo_py_validation_status'] = 'isolated'
+			else:
+				obj['geo_py_validation_status'] += ' & isolated'
+		if 'from' not in obj and 'to' not in obj and not _is_configuration_or_special_node(obj):
+			if force_layout:
+				omd['tree'][k]['latitude'] = float(pos[k][0]) + center[0]
+				omd['tree'][k]['longitude'] = float(pos[k][1]) + center[1]
+			else:
+				if graph.nodes[k].get('coordinate_source') == 'parent':
+					parent_key = name_to_treekey.get_key(obj['parent'], obj)
+					parent = omd['tree'][parent_key]
+				try:
+					lat = float(obj['latitude'])
+					if not (18 <= lat <= 72):
+						raise ValueError
+				except (KeyError, ValueError) as e:
+					if graph.nodes[k].get('coordinate_source') == 'parent':
+						try:
+							parent_lat = float(parent['latitude'])
+							if not (18 <= parent_lat <= 72):
+								raise ValueError
+						except (KeyError, ValueError) as e:
+							parent_lat = float(pos[parent_key][0]) + avg_lat
+							# - Lines that are parents can have coordinates for the sake of their children, but they can't have coordinates themselves
+							if 'from' not in obj and 'to' not in obj:
+								parent['latitude'] = parent_lat
+						obj['latitude'] = parent_lat + round(random.uniform(-.003, .003), 4)
+					else:
+						obj['latitude'] = float(pos[k][0]) + avg_lat
+				try:
+					lon = float(obj['longitude'])
+					if not (-172 <= lon <= -66):
+						raise ValueError
+				except (KeyError, ValueError) as e:
+					if graph.nodes[k].get('coordinate_source') == 'parent':
+						try:
+							parent_lon = float(parent['longitude'])
+							if not (-172 <= parent_lon <= -66):
+								raise ValueError
+						except (KeyError, ValueError) as e:
+							parent_lon = float(pos[parent_key][1]) + avg_lon
+							# - Lines that are parents can have coordinates for the sake of their children, but they can't have coordinates themselves
+							if 'from' not in obj and 'to' not in obj:
+								parent['longitude'] = parent_lon
+						obj['longitude'] = parent_lon + round(random.uniform(-.003, .003), 4)
+					else:
+						obj['longitude'] = float(pos[k][1]) + avg_lon
 
 
 def _get_min_max_lat_lon(omd, min_lat=None, max_lat=None, min_lon=None, max_lon=None):
-    '''
-    - Return the valid minimum latitude, maximum latitude, minimum longitude, and maximum longitude found across all nodes in the omd
-    - This helper function is needed twice in insert_coordinates(). It's used the first time to get the actual min/max lat/lons for detecting state
-      plane coordinates. It's used the second time to get valid min/max lat/lons for assigning coordinates to nodes without valid lat/lons
-        - Lats outside the range of 18 <= <lat> <= 72 are invalid. Lons outside the range of -172 <= <lon> <= -66 are invalid. Those min/maxes form a
-          bounding box around most of the USA
+	'''
+	- Return the valid minimum latitude, maximum latitude, minimum longitude, and maximum longitude found across all nodes in the omd
+	- This helper function is needed twice in insert_coordinates(). It's used the first time to get the actual min/max lat/lons for detecting state
+	  plane coordinates. It's used the second time to get valid min/max lat/lons for assigning coordinates to nodes without valid lat/lons
+		- Lats outside the range of 18 <= <lat> <= 72 are invalid. Lons outside the range of -172 <= <lon> <= -66 are invalid. Those min/maxes form a
+		  bounding box around most of the USA
 
-    :param omd: an OMD
-    :type omd: dict
-    :param min_lat: the minimum (inclusive) bound of valid latitude values. Latitude values that are less than this are ignored
-    :type min_lat: float
-    :param max_lat: the maximum (inclusive) bound of valid latitude values. Latitude values that are greater than this are ignored
-    :type max_lat: float
-    :param min_lon: the minimum (inclusive) bound of valid longitude values. Longitude values that are less than this are ignored
-    :type: min_lon: float
-    :param max_lon: the maximum (inclusive) bound of valid longitude values. Longitude values that are greater than this are ignored
-    :type max_lon: float
-    :return: a tuple of (<min lat>, <max lat>, <min lon>, <max lon>)
-    :rtype: tuple
-    '''
-    lats = []
-    lons = []
-    for d in omd['tree'].values():
-        try:
-            lat = float(d['latitude'])
-            if min_lat is not None:
-                if lat >= min_lat:
-                    if max_lat is not None:
-                        if lat <= max_lat:
-                            lats.append(lat)
-                    else:
-                        lats.append(lat)
-            else:
-                if max_lat is not None:
-                    if lat <= max_lat:
-                        lats.append(lat)
-                else:
-                    lats.append(lat)
-        except (KeyError, ValueError) as e:
-            pass
-        try:
-            lon = float(d['longitude'])
-            if min_lon is not None:
-                if lon >= min_lon:
-                    if max_lon is not None:
-                        if lon <= max_lon:
-                            lons.append(lon)
-                    else:
-                        lons.append(lon)
-            else:
-                if max_lon is not None:
-                    if lon <= max_lon:
-                        lons.append(lon)
-                else:
-                    lons.append(lon)
-        except (KeyError, ValueError) as e:
-            pass
-    min_lat = min(lats, default=None)
-    max_lat = max(lats, default=None)
-    min_lon = min(lons, default=None)
-    max_lon = max(lons, default=None)
-    return (min_lat, max_lat, min_lon, max_lon)
+	:param omd: an OMD
+	:type omd: dict
+	:param min_lat: the minimum (inclusive) bound of valid latitude values. Latitude values that are less than this are ignored
+	:type min_lat: float
+	:param max_lat: the maximum (inclusive) bound of valid latitude values. Latitude values that are greater than this are ignored
+	:type max_lat: float
+	:param min_lon: the minimum (inclusive) bound of valid longitude values. Longitude values that are less than this are ignored
+	:type: min_lon: float
+	:param max_lon: the maximum (inclusive) bound of valid longitude values. Longitude values that are greater than this are ignored
+	:type max_lon: float
+	:return: a tuple of (<min lat>, <max lat>, <min lon>, <max lon>)
+	:rtype: tuple
+	'''
+	lats = []
+	lons = []
+	for d in omd['tree'].values():
+		try:
+			lat = float(d['latitude'])
+			if min_lat is not None:
+				if lat >= min_lat:
+					if max_lat is not None:
+						if lat <= max_lat:
+							lats.append(lat)
+					else:
+						lats.append(lat)
+			else:
+				if max_lat is not None:
+					if lat <= max_lat:
+						lats.append(lat)
+				else:
+					lats.append(lat)
+		except (KeyError, ValueError) as e:
+			pass
+		try:
+			lon = float(d['longitude'])
+			if min_lon is not None:
+				if lon >= min_lon:
+					if max_lon is not None:
+						if lon <= max_lon:
+							lons.append(lon)
+					else:
+						lons.append(lon)
+			else:
+				if max_lon is not None:
+					if lon <= max_lon:
+						lons.append(lon)
+				else:
+					lons.append(lon)
+		except (KeyError, ValueError) as e:
+			pass
+	min_lat = min(lats, default=None)
+	max_lat = max(lats, default=None)
+	min_lon = min(lons, default=None)
+	max_lon = max(lons, default=None)
+	return (min_lat, max_lat, min_lon, max_lon)
 
 
 def transform_wgs84_coordinates(omd, center=None, vertical_translation=None, horizontal_translation=None, rotation=None):
-    '''
-    - Perform a transformation on the coordinates of an OMD. This function assumes the omd has entirely valid WGS 84 coordinates (floats or strings)
-      in decimal degrees that are bounded within the USA (contiguous and non-contiguous). Run the omd through insert_wgs84_coordinates() first.
-      Centering is done first, followed by vertical translation, followed by horizontal translation, followed by rotation.
+	'''
+	- Perform a transformation on the coordinates of an OMD. This function assumes the omd has entirely valid WGS 84 coordinates (floats or strings)
+	  in decimal degrees that are bounded within the USA (contiguous and non-contiguous). Run the omd through insert_wgs84_coordinates() first.
+	  Centering is done first, followed by vertical translation, followed by horizontal translation, followed by rotation.
 
-    :param omd: an OMD
-    :type omd: dict
-    :param center: a new center for all of the coordinates in (<lat>, <lon>) decimal degrees. If it is provided, calculate the existing center of the
-        coordinates, calculate the offset from the existing center to the new specified center, then shift all coordinates by that offset amount
+	:param omd: an OMD
+	:type omd: dict
+	:param center: a new center for all of the coordinates in (<lat>, <lon>) decimal degrees. If it is provided, calculate the existing center of the
+		coordinates, calculate the offset from the existing center to the new specified center, then shift all coordinates by that offset amount
 	:type center: tuple
-    :param vertical_translation: a distance, in meters, that the user wants to move the coordinates upwards by. If it is provided, shift all
-        coordinates straight upwards by that many meters
-    :type vertical_translation: float
-    :param horizontal_translation: a distance, in meters, that the user wants to move the coordinates rightwards. If it is provided, shift all
-        coordinates straight rightwards by that many meters
-    :type horizontal_translation: an amount, in degrees (not radians!), to rotate the coordinates counterclockwise around their midpoint by
-    :param rotation: float
-    '''
-    center, vertical_translation, horizontal_translation, rotation = _validate_transform_wgs84_coordinates_arguments(center, vertical_translation, horizontal_translation, rotation)
-    if center is not None:
-        # - If a center was provided, the user wants to translate the entire graph to a new position. First step is to determine the relative center of
-        #   the graph
-        min_lat, max_lat, min_lon, max_lon = _get_min_max_lat_lon(omd, min_lat=18, max_lat=72, min_lon=-172, max_lon=-66)
-        avg_coords = ((max_lat + min_lat) / 2, (max_lon + min_lon) / 2)
-        # - Next step is to compute the vertical distance between the existing center and the new center and the horizontal distance between the
-        #   existing center and the new center
-        coords_diff = (center[0] - avg_coords[0], center[1] - avg_coords[1])
-    # - The distance that 1 degree of latitude represents is the same everywhere on earth. Assume the earth has a radius of 6,378 km
-    there_are_this_many_meters_in_one_degree_of_latitude = (6378000 * (math.pi / 2)) / 90
-    for v in omd['tree'].values():
-        if v.get('latitude') is not None:
-            if center is not None:
-                v['latitude'] = float(v['latitude']) + coords_diff[0]
-            if vertical_translation is not None:
-                v['latitude'] = float(v['latitude']) + (1 / there_are_this_many_meters_in_one_degree_of_latitude) * vertical_translation
-        if v.get('longitude') is not None:
-            if center is not None:
-                v['longitude'] = float(v['longitude']) + coords_diff[1]
-            if horizontal_translation is not None:
-                # - The distance that 1 degree of longitude represents depends on the given latitude. Assume the earth has a radius of 6,378 km
-                #   - Distance of 1 degree of longitude = cos(<given latitude>) * distance of 1 degree of latitude
-                #   - Distance of 1 degree of longitude = cos(<given latitude>) * ((6,378,000 m * (pi / 2)) / 90)
-                v['longitude'] = float(v['longitude']) + (1 / (math.cos(math.radians(float(v['latitude']))) * there_are_this_many_meters_in_one_degree_of_latitude)) * horizontal_translation
-    if rotation is not None:
-        # - Need to get the bounds again just in case anything was shifted
-        min_lat, max_lat, min_lon, max_lon = _get_min_max_lat_lon(omd, min_lat=18, max_lat=72, min_lon=-172, max_lon=-66)
-        mid_lat = (max_lat + min_lat) / 2
-        mid_lon = (max_lon + min_lon) / 2
-        # - Convert from degrees to radians
-        rotation = math.radians(float(rotation))
-        # - If you rotate point (px, py) around point (ox, oy) by angle theta you'll get:
-        #   - p'y = sin(theta) * (px-ox) + cos(theta) * (py-oy) + oy
-        #   - p'x = cos(theta) * (px-ox) - sin(theta) * (py-oy) + ox
-        for v in omd['tree'].values():
-            if v.get('latitude') is not None and v.get('longitude') is not None:
-                y = float(v['latitude'])
-                x = float(v['longitude'])
-                v['latitude'] = (math.sin(rotation) * (x - mid_lon)) + (math.cos(rotation) * (y - mid_lat)) + mid_lat
-                v['longitude'] = (math.cos(rotation) * (x - mid_lon)) - (math.sin(rotation) * (y - mid_lat)) + mid_lon
+	:param vertical_translation: a distance, in meters, that the user wants to move the coordinates upwards by. If it is provided, shift all
+		coordinates straight upwards by that many meters
+	:type vertical_translation: float
+	:param horizontal_translation: a distance, in meters, that the user wants to move the coordinates rightwards. If it is provided, shift all
+		coordinates straight rightwards by that many meters
+	:type horizontal_translation: an amount, in degrees (not radians!), to rotate the coordinates counterclockwise around their midpoint by
+	:param rotation: float
+	'''
+	center, vertical_translation, horizontal_translation, rotation = _validate_transform_wgs84_coordinates_arguments(center, vertical_translation, horizontal_translation, rotation)
+	if center is not None:
+		# - If a center was provided, the user wants to translate the entire graph to a new position. First step is to determine the relative center of
+		#   the graph
+		min_lat, max_lat, min_lon, max_lon = _get_min_max_lat_lon(omd, min_lat=18, max_lat=72, min_lon=-172, max_lon=-66)
+		avg_coords = ((max_lat + min_lat) / 2, (max_lon + min_lon) / 2)
+		# - Next step is to compute the vertical distance between the existing center and the new center and the horizontal distance between the
+		#   existing center and the new center
+		coords_diff = (center[0] - avg_coords[0], center[1] - avg_coords[1])
+	# - The distance that 1 degree of latitude represents is the same everywhere on earth. Assume the earth has a radius of 6,378 km
+	there_are_this_many_meters_in_one_degree_of_latitude = (6378000 * (math.pi / 2)) / 90
+	for v in omd['tree'].values():
+		if v.get('latitude') is not None:
+			if center is not None:
+				v['latitude'] = float(v['latitude']) + coords_diff[0]
+			if vertical_translation is not None:
+				v['latitude'] = float(v['latitude']) + (1 / there_are_this_many_meters_in_one_degree_of_latitude) * vertical_translation
+		if v.get('longitude') is not None:
+			if center is not None:
+				v['longitude'] = float(v['longitude']) + coords_diff[1]
+			if horizontal_translation is not None:
+				# - The distance that 1 degree of longitude represents depends on the given latitude. Assume the earth has a radius of 6,378 km
+				#   - Distance of 1 degree of longitude = cos(<given latitude>) * distance of 1 degree of latitude
+				#   - Distance of 1 degree of longitude = cos(<given latitude>) * ((6,378,000 m * (pi / 2)) / 90)
+				v['longitude'] = float(v['longitude']) + (1 / (math.cos(math.radians(float(v['latitude']))) * there_are_this_many_meters_in_one_degree_of_latitude)) * horizontal_translation
+	if rotation is not None:
+		# - Need to get the bounds again just in case anything was shifted
+		min_lat, max_lat, min_lon, max_lon = _get_min_max_lat_lon(omd, min_lat=18, max_lat=72, min_lon=-172, max_lon=-66)
+		mid_lat = (max_lat + min_lat) / 2
+		mid_lon = (max_lon + min_lon) / 2
+		# - Convert from degrees to radians
+		rotation = math.radians(float(rotation))
+		# - If you rotate point (px, py) around point (ox, oy) by angle theta you'll get:
+		#   - p'y = sin(theta) * (px-ox) + cos(theta) * (py-oy) + oy
+		#   - p'x = cos(theta) * (px-ox) - sin(theta) * (py-oy) + ox
+		for v in omd['tree'].values():
+			if v.get('latitude') is not None and v.get('longitude') is not None:
+				y = float(v['latitude'])
+				x = float(v['longitude'])
+				v['latitude'] = (math.sin(rotation) * (x - mid_lon)) + (math.cos(rotation) * (y - mid_lat)) + mid_lat
+				v['longitude'] = (math.cos(rotation) * (x - mid_lon)) - (math.sin(rotation) * (y - mid_lat)) + mid_lon
 
 
 def _validate_transform_wgs84_coordinates_arguments(center, vertical_translation, horizontal_translation, rotation):
-    '''
-    - Temporary hack for dealing with annoying input from the front-end
-    '''
-    if isinstance(center, str):
-        try:
-            center = center.replace('(', '')
-            center = center.replace(')', '')
-            center = center.replace(',', ' ')
-            center = center.split()
-            assert len(center) == 2
-        except:
-            center = None
-    try:
-        center[0] = float(center[0])
-        center[1] = float(center[1])
-    except:
-        center = None
-    try:
-        vertical_translation = float(vertical_translation)
-    except:
-        vertical_translation = None
-    try:
-        horizontal_translation = float(horizontal_translation)
-    except:
-        horizontal_translation = None
-    try:
-        rotation = float(rotation)
-    except:
-        rotation = None
-    return (center, vertical_translation, horizontal_translation, rotation)
+	'''
+	- Temporary hack for dealing with annoying input from the front-end
+	'''
+	if isinstance(center, str):
+		try:
+			center = center.replace('(', '')
+			center = center.replace(')', '')
+			center = center.replace(',', ' ')
+			center = center.split()
+			assert len(center) == 2
+		except:
+			center = None
+	try:
+		center[0] = float(center[0])
+		center[1] = float(center[1])
+	except:
+		center = None
+	try:
+		vertical_translation = float(vertical_translation)
+	except:
+		vertical_translation = None
+	try:
+		horizontal_translation = float(horizontal_translation)
+	except:
+		horizontal_translation = None
+	try:
+		rotation = float(rotation)
+	except:
+		rotation = None
+	return (center, vertical_translation, horizontal_translation, rotation)
 
 def get_component_featurecollection():
-    feature_collection = {'type': 'FeatureCollection', 'features': []}
-    # - This isn't an actual tree key, but it's needed to insert components into a FeatureMap in the front-end
-    tree_key = 1
-    for p in (pathlib.Path(omf.omfDir).resolve(True) / 'data').glob('Component*/*.json'):
-        # - Does having non-numeric tree keys for components break anything?
-        feature = {'type': 'Feature', 'properties': {'treeKey': 'component:' + str(tree_key)}}
-        if p.parent.name == 'ComponentDss':
-            feature['properties']['componentType'] = 'opendss'
-        else:
-            feature['properties']['componentType'] = 'gridlabd'
-        with p.open() as f:
-            tree_props = json.load(f)
-            # - Use the filename of the component if necessary to identify it
-            if 'name' not in tree_props:
-                tree_props['name'] = p.stem
-        feature['properties']['treeProps'] = tree_props
-        if 'from' in tree_props or 'to' in tree_props:
-            if 'from' in tree_props and 'to' in tree_props:
-                feature['geometry'] = {'coordinates': [[0, 0], [0, 0]], 'type': 'LineString'}
-            else:
-                # - This exception should never be raised. If it is, there's a typo in a component file
-                raise Exception(f'The component {tree_props["name"]} doesn\'t have both the "from" and "to" keys, but has one of them')
-        else:
-            if _is_configuration_or_special_node(tree_props):
-                coordinates = [None, None]
-            else:
-                coordinates = [0, 0]
-            feature['geometry'] = {'coordinates': coordinates, 'type': 'Point'}
-        for prop in ['latitude', 'longitude']:
-            if prop in tree_props:
-                del tree_props[prop]
-        feature_collection['features'].append(feature)
-        tree_key += 1
-    return feature_collection
+	feature_collection = {'type': 'FeatureCollection', 'features': []}
+	# - This isn't an actual tree key, but it's needed to insert components into a FeatureMap in the front-end
+	tree_key = 1
+	for p in (pathlib.Path(omf.omfDir).resolve(True) / 'data').glob('Component*/*.json'):
+		# - Does having non-numeric tree keys for components break anything?
+		feature = {'type': 'Feature', 'properties': {'treeKey': 'component:' + str(tree_key)}}
+		if p.parent.name == 'ComponentDss':
+			feature['properties']['componentType'] = 'opendss'
+		else:
+			feature['properties']['componentType'] = 'gridlabd'
+		with p.open() as f:
+			tree_props = json.load(f)
+			# - Use the filename of the component if necessary to identify it
+			if 'name' not in tree_props:
+				tree_props['name'] = p.stem
+		feature['properties']['treeProps'] = tree_props
+		if 'from' in tree_props or 'to' in tree_props:
+			if 'from' in tree_props and 'to' in tree_props:
+				feature['geometry'] = {'coordinates': [[0, 0], [0, 0]], 'type': 'LineString'}
+			else:
+				# - This exception should never be raised. If it is, there's a typo in a component file
+				raise Exception(f'The component {tree_props["name"]} doesn\'t have both the "from" and "to" keys, but has one of them')
+		else:
+			if _is_configuration_or_special_node(tree_props):
+				coordinates = [None, None]
+			else:
+				coordinates = [0, 0]
+			feature['geometry'] = {'coordinates': coordinates, 'type': 'Point'}
+		for prop in ['latitude', 'longitude']:
+			if prop in tree_props:
+				del tree_props[prop]
+		feature_collection['features'].append(feature)
+		tree_key += 1
+	return feature_collection
 
 
 def _testFixedLatLonOmd():
@@ -1329,7 +1349,7 @@ def _testLatLonfix():
 	print("Number of bad nodes: " + str(len(badNodes)))
 	fixedCoords = fixCorruptedLatLons(omdPath, badNodes, exceptNodes)
 	createFixedLatLonOmd(omdPath, fixedCoords, newOmdPath, False)
-	mapOmd(newOmdPath, pJoin(__neoMetaModel__._omfDir, 'scratch', 'RONM'), 'html', openBrowser=True, conversion=False)
+	map_omd(newOmdPath, pJoin(__neoMetaModel__._omfDir, 'scratch', 'RONM'), 'html', openBrowser=True, conversion=False)
 
 
 def _tests():
@@ -1341,6 +1361,8 @@ def _tests():
 	# print (e2, n2) # (249.24197527189972, 1186.1488466408398)
 	prefix = pathlib.Path(__file__).parent
 	map_omd(prefix / 'static/publicFeeders/Olin Barre LatLon.omd', './', open_browser=True)
+	# viz(str(prefix / 'static/publicFeeders/Olin Barre LatLon.omd'))
+	# viz(str(prefix / 'solvers/opendss/iowa240.clean.dss'))
 	# showOnMap(hullOfOmd(prefix / 'static/publicFeeders/Olin Barre LatLon.omd', conversion=False))
 	# showOnMap(simplifiedOmdShape(prefix / 'static/publicFeeders/Olin Barre LatLon.omd', conversion=False))
 	# x = omdGeoJson(prefix / 'static/publicFeeders/Olin Barre LatLon.omd', conversion=False)
