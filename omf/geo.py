@@ -911,7 +911,7 @@ def _is_configuration_or_special_node(tree_properties):
 		'loadshape',
 		'overhead_line_conductor',
 		#'player',
-		#'regcontrol',
+		'regcontrol',
 		'regulator_configuration',
 		'schedule',
 		'spectrum',
