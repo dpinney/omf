@@ -17,6 +17,7 @@ from omf.models.__neoMetaModel__ import *
 from omf.solvers.opendss import dssConvert
 from omf.solvers import PowerModelsONM
 from omf.comms import createGraph
+from omf.models.resilientCommunity import runCalculations as makeResComOutputCsv
 
 # Model metadata:
 tooltip = 'Calculate load, generator and switching controls to maximize power restoration for a circuit with multiple networked microgrids.'
@@ -584,14 +585,19 @@ def outageIncidenceGraph(customerOutageData, outputTimeline, startTime, numTimeS
 
 	indivWeightedOI = calcWeightedOI(loadWeights)
 
+	listMean = lambda lst: sum(lst)/len(lst)
 
 	startAt0(timeList)
 	mgOIFigures = {}
 	for targetID in mgIDs:
 		mgLoadMask = 	{load:(1 if id == targetID else 0) for (load,id) in loadMgDict.items()}
 		mgLoadWeights = {load:(val*loadWeights.get(load,1)) for (load,val) in mgLoadMask.items()}
-		mgOI = 			startAt0(calcWeightedOI(mgLoadMask))
-		mgOIWeighted = 	startAt0(calcWeightedOI(mgLoadWeights))
+		mgOI = 			calcWeightedOI(mgLoadMask)
+		mgOIWeighted = 	calcWeightedOI(mgLoadWeights)
+		meanMgOI = 		listMean(mgOI)
+		meanMgOIWeighted = listMean(mgOIWeighted)
+		startAt0(mgOI)
+		startAt0(mgOIWeighted)
 		mgOIFigures[targetID] = go.Figure()
 		mgOIFigures[targetID].add_trace(go.Scatter(
 			x=timeList,
@@ -605,10 +611,10 @@ def outageIncidenceGraph(customerOutageData, outputTimeline, startTime, numTimeS
 			x=timeList,
 			y=mgOIWeighted,
 			mode='lines',
-			name='Priority-Weighted OI',
+			name='Weighted OI',
 			hovertemplate=
 			'<b>Time Step</b>: %{x}<br>' +
-			f'<b>Priority-Weighted OI for Microgrid {targetID}</b>: %{{y:.3f}}%'))
+			f'<b>Weighted OI for Microgrid {targetID}</b>: %{{y:.3f}}%'))
 		mgOIFigures[targetID].update_layout(
 			xaxis_title='Time (Hours)',
 			xaxis_range=[timeList[0],timeList[-1]],
@@ -620,7 +626,57 @@ def outageIncidenceGraph(customerOutageData, outputTimeline, startTime, numTimeS
 			yaxis_range=[-5,105],
 			title=f'Microgrid {targetID}',
 			legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1))
+		# Add mean lines
+		mgOIFigures[targetID].add_shape(
+			type="line",
+			xref="paper", 
+			yref="y", 
+			x0=0, 
+			y0=meanMgOI, 
+			x1=1.0,
+			y1=meanMgOI, 
+			line=dict(
+				color="blue",
+				#width=3,
+				dash="dash"
+			)
+		)
+		mgOIFigures[targetID].add_annotation(
+			xref="x",
+			yref="y",
+			x=0.5,
+			y=meanMgOI+5.0,
+			xanchor="left",
+			text=f'Mean Unweighted OI: {round(meanMgOI,2)}%',
+			showarrow=False
+		)
+		mgOIFigures[targetID].add_shape(
+			type="line",
+			xref="paper", 
+			yref="y", 
+			x0=0, 
+			y0=meanMgOIWeighted, 
+			x1=1.0,
+			y1=meanMgOIWeighted, 
+			line=dict(
+				color="red",
+				#width=3,
+				dash="dash"
+			)
+		)
+		mgOIFigures[targetID].add_annotation(
+			xref="x",
+			yref="y",
+			x=6.5,
+			y=meanMgOIWeighted-5.0,
+			xanchor="left",
+			text=f'Mean Weighted OI: {round(meanMgOIWeighted,2)}%',
+			showarrow=False
+		)
 
+	#Take means before potentially adding 0 to the beginning of the lists
+	meanOI = listMean(outageIncidence)
+	meanWOI = listMean(indivWeightedOI)
 	#If start is not at time 0, show that outage incidence at time 0 would be 0%
 	startAt0(outageIncidence)
 	startAt0(indivWeightedOI)
@@ -646,10 +702,57 @@ def outageIncidenceGraph(customerOutageData, outputTimeline, startTime, numTimeS
 		x=timeList,
 		y=indivWeightedOI,
 		mode='lines',
-		name='Priority-Weighted Outage Incidence',
+		name='Weighted Outage Incidence',
 		hovertemplate=
 		'<b>Time Step</b>: %{x}<br>' +
-		'<b>Priority-Weighted Outage Incidence</b>: %{y:.3f}%'))
+		'<b>Weighted Outage Incidence</b>: %{y:.3f}%'))
+	# Add mean lines
+	outageIncidenceFigure.add_shape(
+		type="line",
+		xref="paper", 
+		yref="y", 
+		x0=0, 
+		y0=meanOI, 
+		x1=1.0,
+		y1=meanOI, 
+		line=dict(
+			color="blue",
+			#width=3,
+			dash="dash"
+		)
+	)
+	outageIncidenceFigure.add_annotation(
+		xref="x",
+		yref="y",
+		x=0.5,
+		y=meanOI+5.0,
+		xanchor="left",
+		text=f'Mean Unweighted OI: {round(meanOI,2)}%',
+		showarrow=False
+	)
+	outageIncidenceFigure.add_shape(
+		type="line",
+		xref="paper", 
+		yref="y", 
+		x0=0, 
+		y0=meanWOI, 
+		x1=1.0,
+		y1=meanWOI, 
+		line=dict(
+			color="red",
+			#width=3,
+			dash="dash"
+		)
+	)
+	outageIncidenceFigure.add_annotation(
+		xref="x",
+		yref="y",
+		x=6.5,
+		y=meanWOI-5.0,
+		xanchor="left",
+		text=f'Mean Weighted OI: {round(meanWOI,2)}%',
+		showarrow=False
+	)
 	# Edit the layout 
 	outageIncidenceFigure.update_layout(
 		xaxis_title='Time (Hours)',
@@ -776,6 +879,41 @@ def getMicrogridInfo(modelDir, pathToOmd, settingsFile, makeCSV = True):
 	mgIDs = set(busMgDict.values())
 
 	return {'loadMgDict':loadMgDict, 'busMgDict':busMgDict, 'obMgDict':obMgDict, 'mgIDs':mgIDs}
+
+def combineLoadPriorityWithCCI(modelDir, pathToOmd, loadPriorityFilePath, cciImpact):
+	'''
+	Creates a JSON file in the format of a load priority file with user-input load priorities combines with cci values via RMS.
+	If an empty JSON file is provided for loadPriorityFilePath, just returns a JSON file with cci values for each load in the format of a load priority file.
+	'''
+	cciImpact = float(cciImpact)
+	if cciImpact == 0.0:
+		return loadPriorityFilePath
+
+	makeResComOutputCsv(pathToOmd, modelDir, ['line', 'transformer', 'fuse'])
+	resComDf = pd.read_csv(pJoin(modelDir, 'resilientCommunityOutput.csv'))
+	with open(loadPriorityFilePath) as inFile:
+		loadWeights = {k:float(v) for k,v in json.load(inFile).items()}
+
+	# If-statement outside of the function definition so it isn't checked every time the function is called
+	if loadWeights:
+		mergeCciAndWeights = lambda cci,weights : ((cciImpact*cci**2 + weights**2)/(1+cciImpact))**0.5
+	else:
+		mergeCciAndWeights = lambda cci,weights : max(1,cci*cciImpact)
+	
+	mergedLoadWeights = {}
+	for index, row in resComDf.iterrows():
+		obType, obName = row['Object Name'].split('.')
+		obCci = float(row['Community Criticality Index'])
+		if obType == "load":
+			# Loads defaulting to weight 1 is done to reflect that choice within PowerModelsONM 
+			loadWeight = loadWeights.get(obName,1)
+			# Multiply by a large scalar to drown out the weight of each bus in PowerModelsONM
+			mergedLoadWeights[obName] = mergeCciAndWeights(obCci,loadWeight)
+			
+	with open(pJoin(modelDir, 'mergedLoadWeights.json'), 'w') as outfile:
+		json.dump(mergedLoadWeights, outfile)
+	
+	return pJoin(modelDir, 'mergedLoadWeights.json')
 
 def runMicrogridControlSim(modelDir, solFidelity, eventsFilename, loadPriorityFile, microgridTaggingFile):
 	''' Runs a microgrid control simulation using PowerModelsONM to determine optimal control actions during a configured outage event.
@@ -1464,11 +1602,17 @@ def work(modelDir, inputDict):
 
 	pathToLocalFile = copyInputFilesToModelDir(modelDir, inputDict)
 	
+	pathToMergedPriorities = combineLoadPriorityWithCCI(
+		modelDir				= modelDir,
+		pathToOmd				= f'{modelDir}/{feederName}.omd',
+		loadPriorityFilePath	= pathToLocalFile['loadPriority'],
+		cciImpact				= inputDict['cciImpact']
+	)
 	runMicrogridControlSim(
 		modelDir				= modelDir, 
 		solFidelity				= inputDict['solFidelity'],
 		eventsFilename			= inputDict['eventFileName'],
-		loadPriorityFile		= pathToLocalFile['loadPriority'],
+		loadPriorityFile		= pathToMergedPriorities,
 		microgridTaggingFile	= pathToLocalFile['mgTagging']
 	)
 	microgridInfo = getMicrogridInfo(
@@ -1484,7 +1628,7 @@ def work(modelDir, inputDict):
 		hardware_cost			= inputDict['hardware_cost'],
 		pathToJson				= pathToLocalFile['event'],
 		pathToCsv				= pathToLocalFile['customerInfo'],
-		loadPriorityFile		= pathToLocalFile['loadPriority'],
+		loadPriorityFile		= pathToMergedPriorities,
 		loadMgDict				= microgridInfo['loadMgDict'],
 		obMgDict 				= microgridInfo['obMgDict'],
 		busMgDict				= microgridInfo['busMgDict'],
@@ -1554,7 +1698,9 @@ def new(modelDir):
 	microgridTagging_file_path = ['']
 	microgridTagging_file_data = None
 	# ====== Iowa240 Test Case
-	feeder_file_path= [__neoMetaModel__._omfDir,'static','testFiles','iowa240_dwp_22_no_show_voltage.dss.omd']
+	# feeder_file_path= [__neoMetaModel__._omfDir,'static','testFiles','iowa240_dwp_22_no_show_voltage.dss.omd']
+	feeder_file_path= [__neoMetaModel__._omfDir,'static','testFiles','iowa240_in_Florida_copy2_no_show_voltage.dss.omd']
+
 	event_file_path = [__neoMetaModel__._omfDir,'static','testFiles','iowa240_dwp_22.events.json']
 	loadPriority_file_path = [__neoMetaModel__._omfDir,'static','testFiles','iowa240_dwp_22.loadPriority.basic.json']
 	loadPriority_file_data = open(pJoin(*loadPriority_file_path)).read()
