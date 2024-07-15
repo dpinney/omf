@@ -452,16 +452,16 @@ def hosting_capacity_all(FNAME:str, max_test_kw:float=50000, BUS_LIST:list = Non
 			pool = multiprocessing.Pool( processes=cores )
 			print(f'Running multiprocessor {len(gen_buses)} times with {cores} cores')
 			all_output.extend(pool.starmap(multiprocessor_function, [(fullpath, max_test_kw, lock, bus) for bus in gen_buses]))
-			print( "multiprocess all output: ", all_output)
+			# print( "multiprocess all output: ", all_output)
 	elif multiprocess == False:
 		for bus in gen_buses:
 			try:
 				single_output = get_hosting_capacity_of_single_bus(fullpath, bus, max_test_kw)
-				print( "multiprocessor false single output: ", single_output )
+				# print( "multiprocessor false single output: ", single_output )
 				all_output.append(single_output)
 			except:
 				print(f'Could not solve hosting capacity for BUS_NAME={bus}')
-	print( "multiprocessor false all_output: ", all_output )
+	# print( "multiprocessor false all_output: ", all_output )
 	return all_output
 
 # DEPRECATED
