@@ -14,7 +14,7 @@ new object=linecode.triplex1phequivalent1/0 nphases=1 units=kft rmatrix=[0.3674]
 new object=linecode.triplex1phequivalent3/0 nphases=1 units=kft rmatrix=[0.2314] xmatrix=[0.0873] cmatrix=[0] normamps=375 emergamps=480 rg=0 xg=0 
 
 !from epri ckt4 dss files edited 6-15 cmm
-new object=linecode.triplex1phequivalent4/0 nphases=1 rmatrix=[0.18333334] xmatrix=[0.07840812] cmatrix=[15] units=kft normamps=299 {299 1.25 *}
+new object=linecode.triplex1phequivalent4/0 nphases=1 rmatrix=[0.18333334] xmatrix=[0.07840812] cmatrix=[15] units=kft normamps=299
 
 new object=line.mdv_sub_1_hsb bus1=bussource bus2=mdv_sub_1_hsb length=0.001 linecode=busbar units=m enabled=true phases=3
 
@@ -38,7 +38,7 @@ new object=line.line11 bus1=busprim11 bus2=busprim12 length=100 phases=3 units=m
 
 ! secondary circuit 1: 1 mv/lv transformer and 5 loads each connected to the transformer with own service line
 ! 1-phase equivalent of the split-phase transformer with percent short-circuit impedance: r+jx=1.18+j1.44
-new object=transformer.trafo1 phases=1 wdg=1 bus=busprim1.1 kv=7.199557856794634 kva=50 wdg=2 bus=bustrafo1lv.1 kv=0.24 kva=50 xhl=1.44 %rs=(0.59 0.59) ppm_antifloat=0
+new object=transformer.trafo1 phases=1 wdg=1 bus=busprim1.1 kv=7.199557856794634 kva=50 wdg=2 bus=bustrafo1lv.1 kv=0.24 kva=50 xhl=1.44 %rs=[0.59,0.59] ppm_antifloat=0
 
 new object=line.linesec1_1 bus1=bustrafo1lv.1 bus2=bussec1_1.1 length=70 phases=1 units=ft linecode=triplex1phequivalent4 enabled=true 
 new object=line.linesec1_2 bus1=bustrafo1lv.1 bus2=bussec1_2.1 length=85 phases=1 units=ft linecode=triplex1phequivalent4 enabled=true 
@@ -52,14 +52,14 @@ new object=load.load1_4 phases=1 conn=wye bus=bussec1_4.1 kv=0.24 model=1 kw=7 k
 new object=load.load1_5 phases=1 conn=wye bus=bussec1_5.1 kv=0.24 model=1 kw=7 kvar=2 vminpu=0.7 vmaxpu=1.4
 
 ! secondary circuit 2: 1 mv/lv transformer and 1 large load connected to the transformer with a service line
-new object=transformer.trafo2 phases=1 wdg=1 bus=busprim2.2 kv=7.199557856794634 kva=50 wdg=2 bus=bustrafo2lv.2 kv=0.24 kva=50 xhl=1.44 %rs=(0.59 0.59) ppm_antifloat=0
+new object=transformer.trafo2 phases=1 wdg=1 bus=busprim2.2 kv=7.199557856794634 kva=50 wdg=2 bus=bustrafo2lv.2 kv=0.24 kva=50 xhl=1.44 %rs=[0.59,0.59] ppm_antifloat=0
 
 new object=line.linesec2_1 bus1=bustrafo2lv.2 bus2=bussec2_1.2 length=125 phases=1 units=ft linecode=triplex1phequivalent1/0 enabled=true 
 new object=load.load2 phases=1 conn=wye bus=bussec2_1.2 kv=0.24 model=1 kw=40 kvar=5 vminpu=0.7 vmaxpu=1.4
 
 
 ! secondary circuit 3: 1 mv/lv transformer and 5 loads connected over a serial service drop
-new object=transformer.trafo3 phases=1 wdg=1 bus=busprim3.3 kv=7.199557856794634 kva=50 wdg=2 bus=bustrafo3lv.3 kv=0.24 kva=50 xhl=1.44 %rs=(0.59 0.59) ppm_antifloat=0
+new object=transformer.trafo3 phases=1 wdg=1 bus=busprim3.3 kv=7.199557856794634 kva=50 wdg=2 bus=bustrafo3lv.3 kv=0.24 kva=50 xhl=1.44 %rs=[0.59,0.59] ppm_antifloat=0
 
 new object=line.linesec3_1 bus1=bustrafo3lv.3 bus2=bussec3_1.3 length=60 phases=1 units=ft linecode=triplex1phequivalent1/0 enabled=true 
 new object=line.linesec3_2 bus1=bussec3_1.3 bus2=bussec3_2.3 length=60 phases=1 units=ft linecode=triplex1phequivalent1/0 enabled=true 
@@ -74,7 +74,7 @@ new object=load.load3_4 phases=1 conn=wye bus=bussec3_4.3 kv=0.24 model=1 kw=7 k
 new object=load.load3_5 phases=1 conn=wye bus=bussec3_5.3 kv=0.24 model=1 kw=7 kvar=2 vminpu=0.7 vmaxpu=1.4
 
 ! secondary circuit 4: 1 mv/lv transformer and 5 loads connected on a pedestal
-new object=transformer.trafo4 phases=1 wdg=1 bus=busprim4.1 kv=7.199557856794634 kva=50 wdg=2 bus=bustrafo4lv.1 kv=0.24 kva=50 xhl=1.44 %rs=(0.59 0.59) ppm_antifloat=0
+new object=transformer.trafo4 phases=1 wdg=1 bus=busprim4.1 kv=7.199557856794634 kva=50 wdg=2 bus=bustrafo4lv.1 kv=0.24 kva=50 xhl=1.44 %rs=[0.59,0.59] ppm_antifloat=0
 
 new object=line.linesec4_0 bus1=bustrafo4lv.1 bus2=bussec4_0.1 length=55 phases=1 linecode=triplex1phequivalent1/0 units=m enabled=true 
 new object=line.linesec4_1 bus1=bussec4_0.1 bus2=bussec4_1.1 length=45 phases=1 units=ft linecode=triplex1phequivalent1/0 enabled=true 
@@ -90,7 +90,7 @@ new object=load.load4_5 phases=1 conn=wye bus=bussec4_5.1 kv=0.24 model=1 kw=7 k
 
 
 ! secondary circuit 5: 1 mv/lv transformer, 2 loads at the transformer and 2 loads each connected over a service line to a pedestal
-new object=transformer.trafo5 phases=1 wdg=1 bus=busprim5.3 kv=7.199557856794634 kva=50 wdg=2 bus=bustrafo5lv.3 kv=0.24 kva=50 xhl=1.44 %rs=(0.59 0.59) ppm_antifloat=0
+new object=transformer.trafo5 phases=1 wdg=1 bus=busprim5.3 kv=7.199557856794634 kva=50 wdg=2 bus=bustrafo5lv.3 kv=0.24 kva=50 xhl=1.44 %rs=[0.59,0.59] ppm_antifloat=0
 
 new object=line.linesec5_0 bus1=bustrafo5lv.3 bus2=bussec5_0.3 length=225 phases=1 units=ft linecode=triplex1phequivalent1/0 enabled=true 
 new object=line.linesec5_1 bus1=bussec5_0.3 bus2=bussec5_1.3 length=60 phases=1 units=ft linecode=triplex1phequivalent1/0 enabled=true 
@@ -103,7 +103,7 @@ new object=load.load5_3 phases=1 conn=wye bus=bussec5_3.3 kv=0.24 model=1 kw=10 
 new object=load.load5_4 phases=1 conn=wye bus=bussec5_4.3 kv=0.24 model=1 kw=10 kvar=3 vminpu=0.7 vmaxpu=1.4
 
 ! secondary circuit 6: 1 mv/lv transformer, 2 service line each with 1 pedestals with two loads
-new object=transformer.trafo6 phases=1 wdg=1 bus=busprim6.3 kv=7.199557856794634 kva=50 wdg=2 bus=bustrafo6lv.3 kv=0.24 kva=50 xhl=1.44 %rs=(0.59 0.59) ppm_antifloat=0
+new object=transformer.trafo6 phases=1 wdg=1 bus=busprim6.3 kv=7.199557856794634 kva=50 wdg=2 bus=bustrafo6lv.3 kv=0.24 kva=50 xhl=1.44 %rs=[0.59,0.59] ppm_antifloat=0
 
 new object=line.linesec6_01 bus1=bustrafo6lv.3 bus2=bussec6_01.3 length=200 phases=1 units=ft linecode=triplex1phequivalent1/0 enabled=true 
 new object=line.linesec6_02 bus1=bustrafo6lv.3 bus2=bussec6_02.3 length=200 phases=1 units=ft linecode=triplex1phequivalent1/0 enabled=true 
@@ -118,7 +118,7 @@ new object=load.load6_4 phases=1 conn=wye bus=bussec6_4.3 kv=0.24 model=1 kw=10 
 
 
 ! secondary circuit 7: 1 mv/lv transformer, 1 service line with two pedestals each with two loads 
-new object=transformer.trafo7 phases=1 wdg=1 bus=busprim7.1 kv=7.199557856794634 kva=50 wdg=2 bus=bustrafo7lv.1 kv=0.24 kva=50 xhl=1.44 %rs=(0.59 0.59) ppm_antifloat=0
+new object=transformer.trafo7 phases=1 wdg=1 bus=busprim7.1 kv=7.199557856794634 kva=50 wdg=2 bus=bustrafo7lv.1 kv=0.24 kva=50 xhl=1.44 %rs=[0.59,0.59] ppm_antifloat=0
 
 new object=line.linesec7_01 bus1=bustrafo7lv.1 bus2=bussec7_01.1 length=100 phases=1 units=ft linecode=triplex1phequivalent1/0 enabled=true 
 new object=line.linesec7_02 bus1=bussec7_01.1 bus2=bussec7_02.1 length=50 phases=1 units=ft linecode=triplex1phequivalent1/0 enabled=true 
@@ -133,7 +133,7 @@ new object=load.load7_4 phases=1 conn=wye bus=bussec7_4.1 kv=0.24 model=1 kw=10 
 
 
 ! secondary circuit 8: 1mv/lv transformer, 	1 service line with 2 pedestals, first with one load, second with 3 loads
-new object=transformer.trafo8 phases=1 wdg=1 bus=busprim8.2 kv=7.199557856794634 kva=50 wdg=2 bus=bustrafo8lv.2 kv=0.24 kva=50 xhl=1.44 %rs=(0.59 0.59) ppm_antifloat=0
+new object=transformer.trafo8 phases=1 wdg=1 bus=busprim8.2 kv=7.199557856794634 kva=50 wdg=2 bus=bustrafo8lv.2 kv=0.24 kva=50 xhl=1.44 %rs=[0.59,0.59] ppm_antifloat=0
 
 new object=line.linesec8_01 bus1=bustrafo8lv.2 bus2=bussec8_01.2 length=60 phases=1 units=ft linecode=triplex1phequivalent1/0 enabled=true 
 new object=line.linesec8_02 bus1=bussec8_01.2 bus2=bussec8_02.2 length=40 phases=1 units=ft linecode=triplex1phequivalent1/0 enabled=true 
@@ -148,7 +148,7 @@ new object=load.load8_4 phases=1 conn=wye bus=bussec8_4.2 kv=0.24 model=1 kw=10 
 
 
 ! secondary circuit 9: 1mv/lv transformer, 1 service line with one pedestal with two loads
-new object=transformer.trafo9 phases=1 wdg=1 bus=busprim9.3 kv=7.199557856794634 kva=50 wdg=2 bus=bustrafo9lv.3 kv=0.24 kva=50 xhl=1.44 %rs=(0.59 0.59) ppm_antifloat=0
+new object=transformer.trafo9 phases=1 wdg=1 bus=busprim9.3 kv=7.199557856794634 kva=50 wdg=2 bus=bustrafo9lv.3 kv=0.24 kva=50 xhl=1.44 %rs=[0.59,0.59] ppm_antifloat=0
 
 new object=line.linesec9_0 bus1=bustrafo9lv.3 bus2=bussec9_0.3 length=75 phases=1 units=ft linecode=triplex1phequivalent1/0 enabled=true 
 new object=line.linesec9_1 bus1=bussec9_0.3  bus2=bussec9_1.3 length=60 phases=1 units=ft linecode=triplex1phequivalent1/0 enabled=true 
@@ -158,7 +158,7 @@ new object=load.load9_2 phases=1 conn=wye bus=bussec9_2.3 kv=0.24 model=1 kw=20 
 
 
 ! secondary circuit 10: 1mv/lv transformer, 1 load at the transformer, 1 load over a service line with one pedestal
-new object=transformer.trafo10 phases=1 wdg=1 bus=busprim10.2 kv=7.199557856794634 kva=50 wdg=2 bus=bustrafo10lv.2 kv=0.24 kva=50 xhl=1.44 %rs=(0.59,0.59) ppm_antifloat=0
+new object=transformer.trafo10 phases=1 wdg=1 bus=busprim10.2 kv=7.199557856794634 kva=50 wdg=2 bus=bustrafo10lv.2 kv=0.24 kva=50 xhl=1.44 %rs=[0.59,0.59] ppm_antifloat=0
 
 new object=line.linesec10_0 bus1=bustrafo10lv.2 bus2=bussec10_0.2 length=175 phases=1 units=ft linecode=triplex1phequivalent1/0 enabled=true 
 new object=line.linesec10_1 bus1=bustrafo10lv.2 bus2=bussec10_1.2 length=95 phases=1 units=ft linecode=triplex1phequivalent1/0 enabled=true 
@@ -167,7 +167,7 @@ new object=load.load10_1 phases=1 conn=wye bus=bussec10_1.2 kv=0.24 model=1 kw=2
 new object=load.load10_2 phases=1 conn=wye bus=bussec10_2.2 kv=0.24 model=1 kw=20 kvar=5 vminpu=0.7 vmaxpu=1.4
 
 ! secondary circuit 11: 1-phase equivalent of the split-phase transformer with percent short-circuit impedance: r+jx=1.18+j1.44
-new object=transformer.trafo11 phases=1 wdg=1 bus=busprim11.2 kv=7.199557856794634 kva=50 wdg=2 bus=bustrafo11lv.2 kv=0.24 kva=50 xhl=1.44 %rs=(0.59,0.59) ppm_antifloat=0
+new object=transformer.trafo11 phases=1 wdg=1 bus=busprim11.2 kv=7.199557856794634 kva=50 wdg=2 bus=bustrafo11lv.2 kv=0.24 kva=50 xhl=1.44 %rs=[0.59,0.59] ppm_antifloat=0
 
 ! the 1-phase equivalents of the triplex cables
 new object=line.linesec11_1 bus1=bustrafo11lv.2 bus2=bussec11_1.2 linecode=triplex1phequivalent4 length=122 units=ft 
@@ -178,7 +178,7 @@ new object=load.load11_2 kv=0.24 phases=1 bus1=bussec11_2.2 model=1 conn=wye kw=
 
 
 ! secondary circuit 12: 1-phase equivalent of the split-phase transformer with percent short-circuit impedance: r+jx=1.18+j1.44
-new object=transformer.trafo12 phases=1 wdg=1 bus=busprim12.1 kv=7.199557856794634 kva=75 wdg=2 bus=xfmrlv.1 kv=0.24 kva=50 xhl=1.44 %rs=(0.59,0.59) ppm_antifloat=0
+new object=transformer.trafo12 phases=1 wdg=1 bus=busprim12.1 kv=7.199557856794634 kva=75 wdg=2 bus=xfmrlv.1 kv=0.24 kva=50 xhl=1.44 %rs=[0.59,0.59] ppm_antifloat=0
 
 ! the 1-phase equivalents of the triplex cables
 new object=line.triplex1 bus1=xfmrlv.1 bus2=buslv1.1 length=106 units=ft linecode=triplex1phequivalent1/0
@@ -297,7 +297,6 @@ setbusxy bus=busload8 x=1.00 y=0.34
 
 set voltagebases=(46,12.47,0.41569219)
 calcvoltagebases
-buscoords buscoords.dss
 
 new object=energymeter.feeder element=line.mdv_sub_1_hsb terminal=1 
 
