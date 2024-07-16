@@ -25,14 +25,14 @@ modelName, template = __neoMetaModel__.metadata(__file__)
 hidden = False
 
 def convert_seconds_to_hms_ms( seconds ):
-    milliseconds = seconds * 1000
-    
-    # Calculate hours, minutes, seconds, and milliseconds
-    hours, remainder = divmod(milliseconds, 3600000)
-    minutes, remainder = divmod(remainder, 60000)
-    seconds, milliseconds = divmod(remainder, 1000)
-    
-    return "{:02d}:{:02d}:{:02d}.{:03d}".format(int(hours), int(minutes), int(seconds), int(milliseconds))
+	milliseconds = seconds * 1000
+	
+	# Calculate hours, minutes, seconds, and milliseconds
+	hours, remainder = divmod(milliseconds, 3600000)
+	minutes, remainder = divmod(remainder, 60000)
+	seconds, milliseconds = divmod(remainder, 1000)
+	
+	return "{:02d}:{:02d}:{:02d}.{:03d}".format(int(hours), int(minutes), int(seconds), int(milliseconds))
 
 def bar_chart_coloring( row ):
 	color = 'black'
@@ -95,10 +95,10 @@ def run_downline_load_algorithm( modelDir, inputDict, outData ):
 	
 	downline_color_data = Path(modelDir, 'output_downline_load.csv').read_text()
 	downline_color = {
-    "downline_load.csv": {
-        "csv": "<content>",
-        "colorOnLoadColumnIndex": "0"
-    }
+		"downline_load.csv": {
+			"csv": "<content>",
+			"colorOnLoadColumnIndex": "0"
+		}
 	}
 
 	original_file = Path(modelDir, 'color_test.omd') #This should have already been made
