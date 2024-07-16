@@ -1,0 +1,173 @@
+Clear
+ClearAll
+
+New Circuit.SecondaryTestCircuit pu=1.0 bus1=bussource basekV=46.0 R1=1.036 X1=10.1433 R0=5.462 X0=34.1897
+
+Redirect loadshapes_varysubv.dss
+edit vsource.source duty=SubVoltage
+
+Redirect loadshapes.dss
+Redirect linecodes.dss
+
+Redirect substation.dss
+Redirect linestrafosloads.dss
+
+MakeBusList
+Set Voltagebases=(46, 12.47, 0.41569219)
+CalcVoltagebases
+export voltages "volts.csv"
+Buscoords buscoords.dss
+
+New "EnergyMeter.feeder" element=line.MDV_SUB_1_HSB terminal=1 
+
+! set mode=snap controlmode=static maxcontroliter=50 maxiterations=25 miniterations=1
+! solve
+new object=monitor.monitor-load-load4_2 element=Loadshape.load4_2 terminal=1 mode=6
+new object=monitor.monitor-load-load10_2 element=Loadshape.load10_2 terminal=1 mode=6
+new object=monitor.monitor-load-load3_3 element=Loadshape.load3_3 terminal=1 mode=6
+new object=monitor.monitor-load-load9_1 element=Loadshape.load9_1 terminal=1 mode=6
+new object=monitor.monitor-load-load8_1 element=Loadshape.load8_1 terminal=1 mode=6
+new object=monitor.monitor-load-load8_3 element=Loadshape.load8_3 terminal=1 mode=6
+new object=monitor.monitor-load-load8_1 element=Loadshape.load8_1 terminal=1 mode=6
+new object=monitor.monitor-load-load5_3 element=Loadshape.load5_3 terminal=1 mode=6
+new object=monitor.monitor-load-load1_2 element=Loadshape.load1_2 terminal=1 mode=6
+new object=monitor.monitor-load-load9_2 element=Loadshape.load9_2 terminal=1 mode=6
+new object=monitor.monitor-load-load10_2 element=Loadshape.load10_2 terminal=1 mode=6
+new object=monitor.monitor-load-load1_1 element=Loadshape.load1_1 terminal=1 mode=6
+new object=monitor.monitor-load-load6_3 element=Loadshape.load6_3 terminal=1 mode=6
+new object=monitor.monitor-load-load6_1 element=Loadshape.load6_1 terminal=1 mode=6
+new object=monitor.monitor-load-load3_2 element=Loadshape.load3_2 terminal=1 mode=6
+new object=monitor.monitor-load-load3_2 element=Loadshape.load3_2 terminal=1 mode=6
+new object=monitor.monitor-load-load7_1 element=Loadshape.load7_1 terminal=1 mode=6
+new object=monitor.monitor-load-load4_5 element=Loadshape.load4_5 terminal=1 mode=6
+new object=monitor.monitor-load-load3_5 element=Loadshape.load3_5 terminal=1 mode=6
+new object=monitor.monitor-load-load3_3 element=Loadshape.load3_3 terminal=1 mode=6
+new object=monitor.monitor-load-load6_1 element=Loadshape.load6_1 terminal=1 mode=6
+new object=monitor.monitor-load-load4_3 element=Loadshape.load4_3 terminal=1 mode=6
+new object=monitor.monitor-load-load5_2 element=Loadshape.load5_2 terminal=1 mode=6
+new object=monitor.monitor-load-load6_2 element=Loadshape.load6_2 terminal=1 mode=6
+new object=monitor.monitor-load-Source_V element=Loadshape.Source_V terminal=1 mode=6
+new object=monitor.monitor-load-load7_2 element=Loadshape.load7_2 terminal=1 mode=6
+new object=monitor.monitor-load-load5_1 element=Loadshape.load5_1 terminal=1 mode=6
+new object=monitor.monitor-load-load3_4 element=Loadshape.load3_4 terminal=1 mode=6
+new object=monitor.monitor-load-load8_4 element=Loadshape.load8_4 terminal=1 mode=6
+new object=monitor.monitor-load-load1_5 element=Loadshape.load1_5 terminal=1 mode=6
+new object=monitor.monitor-load-load7_1 element=Loadshape.load7_1 terminal=1 mode=6
+new object=monitor.monitor-load-load2 element=Loadshape.load2 terminal=1 mode=6
+new object=monitor.monitor-load-load2 element=Loadshape.load2 terminal=1 mode=6
+new object=monitor.monitor-load-load7_3 element=Loadshape.load7_3 terminal=1 mode=6
+new object=monitor.monitor-load-load4_1 element=Loadshape.load4_1 terminal=1 mode=6
+new object=monitor.monitor-load-load9_1 element=Loadshape.load9_1 terminal=1 mode=6
+new object=monitor.monitor-load-load5_2 element=Loadshape.load5_2 terminal=1 mode=6
+new object=monitor.monitor-load-load7_2 element=Loadshape.load7_2 terminal=1 mode=6
+new object=monitor.monitor-load-load8_3 element=Loadshape.load8_3 terminal=1 mode=6
+new object=monitor.monitor-load-load7_4 element=Loadshape.load7_4 terminal=1 mode=6
+new object=monitor.monitor-load-load5_4 element=Loadshape.load5_4 terminal=1 mode=6
+new object=monitor.monitor-load-load4_4 element=Loadshape.load4_4 terminal=1 mode=6
+new object=monitor.monitor-load-load10_1 element=Loadshape.load10_1 terminal=1 mode=6
+new object=monitor.monitor-load-load5_4 element=Loadshape.load5_4 terminal=1 mode=6
+new object=monitor.monitor-load-load1_4 element=Loadshape.load1_4 terminal=1 mode=6
+new object=monitor.monitor-load-load3_5 element=Loadshape.load3_5 terminal=1 mode=6
+new object=monitor.monitor-load-load3_4 element=Loadshape.load3_4 terminal=1 mode=6
+new object=monitor.monitor-load-load8_4 element=Loadshape.load8_4 terminal=1 mode=6
+new object=monitor.monitor-load-load4_5 element=Loadshape.load4_5 terminal=1 mode=6
+new object=monitor.monitor-load-load3_1 element=Loadshape.load3_1 terminal=1 mode=6
+new object=monitor.monitor-load-load1_3 element=Loadshape.load1_3 terminal=1 mode=6
+new object=monitor.monitor-load-load1_4 element=Loadshape.load1_4 terminal=1 mode=6
+new object=monitor.monitor-load-load6_2 element=Loadshape.load6_2 terminal=1 mode=6
+new object=monitor.monitor-load-load6_4 element=Loadshape.load6_4 terminal=1 mode=6
+new object=monitor.monitor-load-load4_1 element=Loadshape.load4_1 terminal=1 mode=6
+new object=monitor.monitor-load-load10_1 element=Loadshape.load10_1 terminal=1 mode=6
+new object=monitor.monitor-load-load4_3 element=Loadshape.load4_3 terminal=1 mode=6
+new object=monitor.monitor-load-load1_5 element=Loadshape.load1_5 terminal=1 mode=6
+new object=monitor.monitor-load-load7_3 element=Loadshape.load7_3 terminal=1 mode=6
+new object=monitor.monitor-load-load8_2 element=Loadshape.load8_2 terminal=1 mode=6
+new object=monitor.monitor-load-load6_4 element=Loadshape.load6_4 terminal=1 mode=6
+new object=monitor.monitor-load-load7_4 element=Loadshape.load7_4 terminal=1 mode=6
+new object=monitor.monitor-load-load9_2 element=Loadshape.load9_2 terminal=1 mode=6
+new object=monitor.monitor-load-load5_3 element=Loadshape.load5_3 terminal=1 mode=6
+new object=monitor.monitor-load-load4_4 element=Loadshape.load4_4 terminal=1 mode=6
+new object=monitor.monitor-load-load8_2 element=Loadshape.load8_2 terminal=1 mode=6
+new object=monitor.monitor-load-load1_3 element=Loadshape.load1_3 terminal=1 mode=6
+new object=monitor.monitor-load-load1_2 element=Loadshape.load1_2 terminal=1 mode=6
+new object=monitor.monitor-load-load5_1 element=Loadshape.load5_1 terminal=1 mode=6
+new object=monitor.monitor-load-load1_1 element=Loadshape.load1_1 terminal=1 mode=6
+new object=monitor.monitor-load-load6_3 element=Loadshape.load6_3 terminal=1 mode=6
+new object=monitor.monitor-load-load3_1 element=Loadshape.load3_1 terminal=1 mode=6
+new object=monitor.monitor-load-load4_2 element=Loadshape.load4_2 terminal=1 mode=6
+set mode=yearly stepsize=15m
+set number=1
+solve
+export monitors monitorname=monitor-load-load4_2
+export monitors monitorname=monitor-load-load10_2
+export monitors monitorname=monitor-load-load3_3
+export monitors monitorname=monitor-load-load9_1
+export monitors monitorname=monitor-load-load8_1
+export monitors monitorname=monitor-load-load8_3
+export monitors monitorname=monitor-load-load8_1
+export monitors monitorname=monitor-load-load5_3
+export monitors monitorname=monitor-load-load1_2
+export monitors monitorname=monitor-load-load9_2
+export monitors monitorname=monitor-load-load10_2
+export monitors monitorname=monitor-load-load1_1
+export monitors monitorname=monitor-load-load6_3
+export monitors monitorname=monitor-load-load6_1
+export monitors monitorname=monitor-load-load3_2
+export monitors monitorname=monitor-load-load3_2
+export monitors monitorname=monitor-load-load7_1
+export monitors monitorname=monitor-load-load4_5
+export monitors monitorname=monitor-load-load3_5
+export monitors monitorname=monitor-load-load3_3
+export monitors monitorname=monitor-load-load6_1
+export monitors monitorname=monitor-load-load4_3
+export monitors monitorname=monitor-load-load5_2
+export monitors monitorname=monitor-load-load6_2
+export monitors monitorname=monitor-load-Source_V
+export monitors monitorname=monitor-load-load7_2
+export monitors monitorname=monitor-load-load5_1
+export monitors monitorname=monitor-load-load3_4
+export monitors monitorname=monitor-load-load8_4
+export monitors monitorname=monitor-load-load1_5
+export monitors monitorname=monitor-load-load7_1
+export monitors monitorname=monitor-load-load2
+export monitors monitorname=monitor-load-load2
+export monitors monitorname=monitor-load-load7_3
+export monitors monitorname=monitor-load-load4_1
+export monitors monitorname=monitor-load-load9_1
+export monitors monitorname=monitor-load-load5_2
+export monitors monitorname=monitor-load-load7_2
+export monitors monitorname=monitor-load-load8_3
+export monitors monitorname=monitor-load-load7_4
+export monitors monitorname=monitor-load-load5_4
+export monitors monitorname=monitor-load-load4_4
+export monitors monitorname=monitor-load-load10_1
+export monitors monitorname=monitor-load-load5_4
+export monitors monitorname=monitor-load-load1_4
+export monitors monitorname=monitor-load-load3_5
+export monitors monitorname=monitor-load-load3_4
+export monitors monitorname=monitor-load-load8_4
+export monitors monitorname=monitor-load-load4_5
+export monitors monitorname=monitor-load-load3_1
+export monitors monitorname=monitor-load-load1_3
+export monitors monitorname=monitor-load-load1_4
+export monitors monitorname=monitor-load-load6_2
+export monitors monitorname=monitor-load-load6_4
+export monitors monitorname=monitor-load-load4_1
+export monitors monitorname=monitor-load-load10_1
+export monitors monitorname=monitor-load-load4_3
+export monitors monitorname=monitor-load-load1_5
+export monitors monitorname=monitor-load-load7_3
+export monitors monitorname=monitor-load-load8_2
+export monitors monitorname=monitor-load-load6_4
+export monitors monitorname=monitor-load-load7_4
+export monitors monitorname=monitor-load-load9_2
+export monitors monitorname=monitor-load-load5_3
+export monitors monitorname=monitor-load-load4_4
+export monitors monitorname=monitor-load-load8_2
+export monitors monitorname=monitor-load-load1_3
+export monitors monitorname=monitor-load-load1_2
+export monitors monitorname=monitor-load-load5_1
+export monitors monitorname=monitor-load-load1_1
+export monitors monitorname=monitor-load-load6_3
+export monitors monitorname=monitor-load-load3_1
+export monitors monitorname=monitor-load-load4_2
