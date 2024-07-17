@@ -128,9 +128,9 @@ def viz(pathToOmdOrGlm, forceLayout=False, outputPath=None, outputName='viewer.h
 	# Grab the library we need.
 	with open(omf.omfDir + '/static/svg-pan-zoom.js','r') as pzFile:
 		pzData = pzFile.read()
-	with open(omf.omfDir + '/static/chroma.min.js','r') as chromaFile:
+	with open(omf.omfDir + '/static/geoJsonMap/v3/lib/chroma.js','r') as chromaFile:
 		chromaData = chromaFile.read()
-	with open(omf.omfDir + '/static/papaparse.min.js','r') as papaFile:
+	with open(omf.omfDir + '/static/geoJsonMap/v3/lib/papaparse.js','r') as papaFile:
 		papaData = papaFile.read()
 	with open(omf.omfDir + '/static/jquery.js', 'r') as jquery_file:
 		jquery_data = jquery_file.read()
@@ -164,9 +164,9 @@ def viz(pathToOmdOrGlm, forceLayout=False, outputPath=None, outputName='viewer.h
 				print("")
 			elif line.lstrip().startswith('<script type="text/javascript" src="/static/svg-pan-zoom.js"></script>'):
 				print("")
-			elif line.lstrip().startswith('<script type="text/javascript" src="/static/chroma.min.js"></script>'):
+			elif line.lstrip().startswith('<script type="text/javascript" src="/static/geoJsonMap/v3/lib/chroma.js"></script>'):
 				print("")
-			elif line.lstrip().startswith('<script type="text/javascript" src="/static/papaparse.min.js"></script>'):
+			elif line.lstrip().startswith('<script type="text/javascript" src="/static/geoJsonMap/v3/lib/papaparse.js"></script>'):
 				print("")
 			elif line.lstrip().startswith('<link rel="shortcut icon" href="/static/favicon.ico"/>'):
 				print('<link rel="shortcut icon" href="data:image/x-icon;base64,AAABAAEAEBAQAAAAAAAoAQAAFgAAACgAAAAQAAAAIAAAAAEABAAAAAAAgAAAAAAAAAAAAAAAEAAAAAAAAAAAAAAAioqKAGlpaQDU1NQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAIiIiIiIiIAAgACAAIAAgACAzIzMjMyMwIDAgMCAwIDAiIiIiIiIgMCAwEDAgMCAwIDMTMyMzIzAgMBAwIDAgMCIiIiIiIiAwIDAQMCAwIDAgMxMzIzMjMCAwEDAgMCAwIiIiIiIiIDAAMAAwADAAMAAzMzMzMzMwAAAAAAAAAAAABwAAd3cAAEABAABVVQAAAAUAAFVVAABAAQAAVVUAAAAFAABVVQAAQAEAAFVVAAAABQAA3d0AAMABAAD//wAA"/>')
