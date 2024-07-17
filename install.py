@@ -17,11 +17,12 @@ if major_platform == "Linux" and "ubuntu" in linux_distro:
 	os.system("sudo ACCEPT_EULA=Y apt-get -yq install mssql-tools msodbcsql mdbtools") # workaround for the package EULA, which otherwise breaks upgrade!!
 	os.system("sudo apt-get -y update")# && sudo apt-get -y upgrade") # Make sure apt-get is updated to prevent any weird package installation issues
 	os.system("sudo apt-get -y install language-pack-en") # Install English locale 
-	os.system("sudo DEBIAN_FRONTEND=noninteractive apt-get -y install git python3-pip python3-dev python3-numpy unixodbc-dev libfreetype6-dev pkg-config alien python3-pydot python3-tk libblas-dev liblapack-dev libatlas-base-dev gfortran splat python3-testresources")
+	os.system("sudo DEBIAN_FRONTEND=noninteractive apt-get -y install git python3-pip python3-dev python3-numpy unixodbc-dev libfreetype6-dev pkg-config alien python3-pydot python3-tk libblas-dev liblapack-dev libatlas-base-dev gfortran splat")
 	os.system("sudo apt-get -y install ffmpeg python3-cairocffi") # Separate from above to better support debian.
 	os.system(f"sudo alien -i {source_dir}/omf/static/gridlabd-4.0.0-1.el6.x86_64.rpm")
 	os.system("sudo apt-get install -f")
 	os.system(f"{sys.executable} -m pip install --upgrade pip setuptools")
+	os.system(f"{sys.executable} -m pip install 'Flask-Login<0.3'")
 	os.system(f"{sys.executable} -m pip install -r {source_dir}/requirements.txt")
 	os.system(f"{sys.executable} -m pip install -e {source_dir}")
 	os.system(f'sudo chmod 755 {source_dir}/omf/solvers/opendss/opendsscmd-1.7.4-linux-x64-installer.run && sudo {source_dir}/omf/solvers/opendss/opendsscmd-1.7.4-linux-x64-installer.run --mode unattended')
