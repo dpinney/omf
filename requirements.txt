@@ -1,5 +1,5 @@
 wheel
-numpy
+numpy>=1.20
 numpy-financial
 cython
 Flask
