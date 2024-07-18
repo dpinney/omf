@@ -220,7 +220,7 @@ def __keen_method(INPUTS_TBD):
 	cnf_matrix = confusion_matrix(y_true, y_pred, labels=['A', 'B','C', 'ABC'])
 	np.set_printoptions(precision=2)
 	plt.figure(dpi=200, figsize=(10,5))
-	plt.grid(b=False)
+	plt.grid(False)
 	plot_confusion_matrix(cnf_matrix, classes=['A', 'B', 'C','ABC'])
 	plt.savefig(pJoin(modelDir,'output-conf-matrix.png'))
 	# Offline Plotly plot
@@ -340,7 +340,7 @@ def work(modelDir, inputDict):
 	cnf_matrix = confusion_matrix(y_true, y_pred, labels=classes)
 	np.set_printoptions(precision=2)
 	plt.figure(dpi=200, figsize=(10,5))
-	plt.grid(b=False)
+	plt.grid(False)
 	plot_confusion_matrix(cnf_matrix, classes=classes)
 	plt.savefig(pJoin(modelDir,'output-conf-matrix.png'))
 	# write our outData
