@@ -881,9 +881,16 @@ def getMicrogridInfo(modelDir, pathToOmd, settingsFile, makeCSV = True):
 	return {'loadMgDict':loadMgDict, 'busMgDict':busMgDict, 'obMgDict':obMgDict, 'mgIDs':mgIDs}
 
 def combineLoadPriorityWithCCI(modelDir, pathToOmd, loadPriorityFilePath, cciImpact):
-	'''
-	Creates a JSON file in the format of a load priority file with user-input load priorities combines with cci values via RMS.
-	If an empty JSON file is provided for loadPriorityFilePath, just returns a JSON file with cci values for each load in the format of a load priority file.
+	'''	Creates a JSON file called mergedLoadWeights.json containing user-input load priorities combined with CCI values via RMS and weighted by cciImpact.
+
+		If an empty JSON file is provided for loadPriorityFilePath, just returns a JSON file with max(1,cci*cciImpact) for each load.
+
+		If cciImpact == 0, just returns loadPriorityFilePath
+	
+		Once load priorities and CCI values are merged, they are transformed by the formula (rawMergedWeight-(10.0/loadsOnBus))*100.0 to account for the way load weights are considered in PowerModelsONM.
+		The transformed merged load weights are what are stored in the output file. 
+
+		Returns a string containing the path to the JSON file created.
 	'''
 	cciImpact = float(cciImpact)
 	if cciImpact == 0.0:
@@ -892,7 +899,15 @@ def combineLoadPriorityWithCCI(modelDir, pathToOmd, loadPriorityFilePath, cciImp
 	makeResComOutputCsv(pathToOmd, modelDir, ['line', 'transformer', 'fuse'])
 	resComDf = pd.read_csv(pJoin(modelDir, 'resilientCommunityOutput.csv'))
 	with open(loadPriorityFilePath) as inFile:
-		loadWeights = {k:float(v) for k,v in json.load(inFile).items()}
+		loadWeights = {}
+		outOfBoundsLW = {}
+		for load,weight in json.load(inFile).items():
+			weight = float(weight)
+			loadWeights[load] = weight
+			if weight < 0.0 or weight > 100.0:
+				outOfBoundsLW[load] = weight
+		if outOfBoundsLW:
+			raise Exception(f"ERROR - Load priorities must be between 0 and 100 inclusive. The uploaded load priorities include: {outOfBoundsLW}")
 
 	# If-statement outside of the function definition so it isn't checked every time the function is called
 	if loadWeights:
@@ -900,6 +915,7 @@ def combineLoadPriorityWithCCI(modelDir, pathToOmd, loadPriorityFilePath, cciImp
 	else:
 		mergeCciAndWeights = lambda cci,weights : max(1,cci*cciImpact)
 	
+	circuitTraversalDict = makeCicuitTraversalDict(pathToOmd)
 	mergedLoadWeights = {}
 	for index, row in resComDf.iterrows():
 		obType, obName = row['Object Name'].split('.')
@@ -907,9 +923,15 @@ def combineLoadPriorityWithCCI(modelDir, pathToOmd, loadPriorityFilePath, cciImp
 		if obType == "load":
 			# Loads defaulting to weight 1 is done to reflect that choice within PowerModelsONM 
 			loadWeight = loadWeights.get(obName,1)
-			# Multiply by a large scalar to drown out the weight of each bus in PowerModelsONM
-			mergedLoadWeights[obName] = mergeCciAndWeights(obCci,loadWeight)
-			
+			rawMergedWeight = mergeCciAndWeights(obCci,loadWeight)
+			# In PowerModelsONM, the weight given to each bus that has loads on it is 10 and the weight of each load is the input weight / 100
+			# Effectively, the weight of a bus and the loads on it = 10+SUM_n(w_n/100)
+			# We are inverting that by setting w_n = (weight-10/n)*100 where n is the number of loads on a particular bus. 
+			# So the weight of a bus and its loads = 10+SUM_n((weight-10/n)*100/100) = 10+SUM_n(weight-10/n) = 10+SUM_n(weight)-10 = SUM_n(weight)
+			parentBus = circuitTraversalDict[f'load.{obName}']['parent']
+			loadsOnBus = float(len(circuitTraversalDict[f'bus.{parentBus}']['downlineLoads']))
+			mergedLoadWeights[obName] = (rawMergedWeight-(10.0/loadsOnBus))*100.0
+
 	with open(pJoin(modelDir, 'mergedLoadWeights.json'), 'w') as outfile:
 		json.dump(mergedLoadWeights, outfile)
 	
