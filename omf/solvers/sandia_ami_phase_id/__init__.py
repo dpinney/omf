@@ -72,8 +72,8 @@ def SPClustering_Precomp(aggWM,kFinal):
 	return clusterLabels
 
 def CAEnsemble(voltage,kVector,kFinal,custID,windowSize,lowWindowsThresh=4,printLowWinWarningFlag=True):
-	""" This function implements the ensemble of Spectral Clustering  for the
-		task of phase identification task.  The ensemble size is determined by
+	""" This function implements the ensemble of Spectral Clustering for the
+		task of phase identification.  The ensemble size is determined by
 		the number of sliding windows available given the windowSize parameter.
 		In each window the cluster labels are returned by the spectral clustering
 		algorithm and that clustering is then used to update a co-association matrix
@@ -167,7 +167,7 @@ def CAEnsemble(voltage,kVector,kFinal,custID,windowSize,lowWindowsThresh=4,print
 			k = kVector[kCtr]
 			#Check if the cleaning reduced the number of available customers to less than the number of clusters
 			if (currentDistances.shape[0] <= k):
-				 continue
+					continue
 			#Do the clustering
 			clusterLabels = SPClustering(currentDistances,k)
 			#Update the weight matrix
@@ -175,7 +175,9 @@ def CAEnsemble(voltage,kVector,kFinal,custID,windowSize,lowWindowsThresh=4,print
 			#Update Cluster Sizes List
 			clusterCounts=np.squeeze(CountClusterSizes(clusterLabels))
 			for kCtr2 in range(0,k):
-				allClusterCounts.append(clusterCounts[kCtr2])
+				# Check to make sure kCtr2 is not out of range
+				if kCtr2 < clusterCounts.size:
+					allClusterCounts.append(clusterCounts[kCtr2])
 	print('sandia_ami_phase_id completed processing ensembles')
 	#Split customers into customers who had at least one window of data and those that did not
 	# If a customer had missing data in all windows then they are not included in the algorithm results
@@ -1166,6 +1168,8 @@ def Calculate_ModifiedSilhouetteCoefficients(caMatrix,clusteredIDs,finalClusterL
 
 	aggWMDist = 1 - caMatrix   
 	allSC = []
+	# Ensures that there is no issue with s being undefined
+	s = None
 	# Loop through each customer to calculate individual silhouette coefficients
 	for custCtr in range(0,len(clusteredIDs)):
 		currCluster = finalClusterLabels[custCtr]
