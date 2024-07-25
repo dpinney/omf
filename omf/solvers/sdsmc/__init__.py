@@ -1,3 +1,8 @@
+'''
+Adapted from Sandia National Laboratory cade from https://github.com/sandialabs/distribution-system-model-calibration
+Original code under a BSD 3-Clause at https://github.com/sandialabs/distribution-system-model-calibration/blob/main/LICENSE
+'''
+
 if __package__ in [None, '']:
     import MeterTransformerPairing
 else:
