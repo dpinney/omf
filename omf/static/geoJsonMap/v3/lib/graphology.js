@@ -5561,4 +5561,3 @@
   return Graph;
 
 }));
-//# sourceMappingURL=graphology.umd.js.map

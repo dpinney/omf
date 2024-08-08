@@ -22,21 +22,18 @@ def run_julia_script(juliaStr : str, cleanFileFormatting = True):
 	juliaFileLocation = pJoin(thisDir, 'temp_julia_script.jl')
 	with open(juliaFileLocation, 'w') as juliaFile:
 		juliaFile.write(juliaStr)
-	#Writing the julia code to a .jl file and running that file from the command line is far less prone to formatting snafus than writing the julia code in the cmd commands directly
-	cmdString = f'julia {juliaFileLocation}'
-
+	# Writing the julia code to a .jl file and running that file from the command line is far less prone to formatting snafus than writing the julia code in the cmd commands directly
+	cmdString = f'julia "{juliaFileLocation}"'
 	# TODO: Test this on Darwin and Linux
 	OSName = platform.system()
 	if OSName in ['Darwin','Linux']:
 		delCommand = f'rm "{juliaFileLocation}"'
 	elif OSName == 'Windows':
-		delCommand = f'del {juliaFileLocation}'
+		delCommand = f'del "{juliaFileLocation}"'
 	else:
 		raise Exception("Operating System is not Darwin, Linux, or Windows")
-	
 	print(f'Saving script to temp_julia_script.jl:\n{juliaStr}')
 	runCommands([cmdString,delCommand])
-
 	
 def install_onm(target : list = platform.system()):
 	''' WARNING, WIP. TODO: Linux support, license check, tests. '''
@@ -54,7 +51,7 @@ def install_onm(target : list = platform.system()):
 			'''julia -e 'import Pkg; Pkg.build("Gurobi")' ''',
 			'''julia -e 'import Pkg; Pkg.add(Pkg.PackageSpec(;name="PowerModelsDistribution", version="0.14.1"));' ''',
 			'''julia -e 'import Pkg; Pkg.add(Pkg.PackageSpec(;name="PowerModelsONM", version="3.0.1"));' ''',
-			f'touch {thisDir}/instantiated.txt'
+			f'touch "{thisDir}/instantiated.txt"'
 		],
 		'Linux' : [
 			'rm "julia-1.7.0-linux-x86_64.tar.gz"',
@@ -204,8 +201,6 @@ def run_onm(circuitPath='circuit.dss', settingsPath='settings.json', outputPath=
 		); 
 		entrypoint(args); '''
 	run_julia_script(juliaFileContents)
-
-
 
 if __name__ == '__main__':
 	# Basic Tests
