@@ -26,7 +26,7 @@ tooltip = ('The derUtilityCost model evaluates the financial costs of controllin
 	'distributed energy resources (DERs) using the NREL Renewable Energy Optimization Tool (REopt) and '
 	'the OMF virtual battery dispatch module (vbatDispatch).')
 modelName, template = __neoMetaModel__.metadata(__file__)
-hidden = True ## Keep the model hidden=True during active development
+hidden = False ## Keep the model hidden=True during active development
 
 
 def work(modelDir, inputDict):
@@ -62,8 +62,7 @@ def work(modelDir, inputDict):
 	except KeyError:
 		year = inputDict['year'] # Use the user provided year if none found in reoptResults
 	
-	arr_size = np.size(demand) # desired array size of the timestamp array
-	timestamps = derConsumer.create_timestamps(start_time=f'{year}-01-01', end_time=f'{year}-12-31 23:00:00', arr_size=arr_size)
+	timestamps = pd.date_range(start=f'{year}-01-01', end=f'{year}-12-31 23:00:00', periods=np.size(demand))
 
 	## If outage is specified, load the resilience results
 	if (inputDict['outage']):
