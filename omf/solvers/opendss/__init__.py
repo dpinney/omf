@@ -32,8 +32,8 @@ def runDSS(dssFilePath):
 	fullPath = os.path.abspath(dssFilePath)
 	dssFileLoc = os.path.dirname(fullPath)
 	runDssCommand('clear')
-	runDssCommand(f'redirect "{fullPath}"')
 	runDssCommand(f'set datapath="{dssFileLoc}"')
+	runDssCommand(f'redirect "{fullPath}"')
 	runDssCommand('calcvoltagebases')
 	runDssCommand('solve')
 

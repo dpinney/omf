@@ -531,7 +531,9 @@ class Feature {
      * @returns {boolean} whether this ObservableInterface instance (i.e. a node) is a child of another node or line
      */
     isChild() {
-        return this.hasProperty('parent');
+        // - regcontrol objects used to NOT be configuration objects, but then David made them into configuration objects again. They have a "parent"
+        //   property, so they are child nodes, but they still shouldn't be displayed
+        return this.hasProperty('parent') && !this.isConfigurationObject();
     }
 
     /**
