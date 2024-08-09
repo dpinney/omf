@@ -121,7 +121,7 @@
 				<input type="number" id="outage_duration" name="outage_duration" value="{{allInputDataDict.outage_duration}}" min="1" max="8760" required="required"/>
 			</div>
 			<div class="wideInput"> <!-- vbatDispatch Specific Inputs -->
-				<p class="inputSectionHeader"> Thermal Energy Storage Inputs</p>
+				<p class="inputSectionHeader"> Thermal Device Inputs</p>
 			</div>
 			<hr style="border-style: solid; border-color: #196b12; margin-top: 10px;">
 			<div class="shortInput">
@@ -239,10 +239,12 @@
 				<label class="tooltip">Subsidy Amount ($)<span class="classic">The total subsidy amount ($) for the duration of the whole analysis.</span></label>
 				<input type="text" id="subsidy" name="subsidy" value="{{allInputDataDict.subsidy}}" pattern="^\d+\.?\d*?$" required="required"/>
 			</div>
+			<!-- 
 			<div class="shortInput">
 				<label class="tooltip">Maximum BESS Power Capacity Discharge<span class="classic">The maximum percentage of the Battery Energy Storage System's total power discharge allowed for the utility's control. Must be a percent fraction between 0 and 1. Most programs designate up to 80% (0.80) of total power capacity, leaving the member with at least 20% (0.20) charge.</span></label>
 				<input type="text" id="maxBESSDischarge" name="maxBESSDischarge" value="{{allInputDataDict.maxBESSDischarge}}" pattern="^\d+\.?\d*?$" min="0" max="1" required="required"/>
 			</div>
+			-->
 			
 
 			{{ omfModelButtons }}
