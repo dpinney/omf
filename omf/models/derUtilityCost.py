@@ -283,7 +283,6 @@ def new(modelDir):
 		'latitude' : '39.986771', 
 		'longitude' : '-104.812599', ## Brighton, CO
 		'year' : '2018',
-		'analysis_years' : '25', 
 		'urdbLabel' : '612ff9c15457a3ec18a5f7d3', ## Brighton, CO
 		## TODO: Create a function that will gather the urdb label from a user provided location (city,state), rather than requiring the URDB label
 		'fileName': 'utility_2018_kW_load.csv',
@@ -297,6 +296,11 @@ def new(modelDir):
 		'outage_start_hour': '2100',
 		'outage_duration': '3',
 
+		## Financial Inputs
+		'demandChargeURDB': 'Yes',
+		'demandChargeCost': '0.05',
+		'projectionLength': '10',
+
 		## vbatDispatch inputs:
 		'load_type': '2', ## Heat Pump
 		'number_devices': '1',
@@ -306,9 +310,7 @@ def new(modelDir):
 		'cop': '2.5',
 		'setpoint': '19.5',
 		'deadband': '0.625',
-		'demandChargeCost': '25',
 		'electricityCost': '0.16',
-		'projectionLength': '25',
 		'discountRate': '2',
 		'unitDeviceCost': '150',
 		'unitUpkeepCost': '5',
