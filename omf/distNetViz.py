@@ -134,9 +134,9 @@ def viz(pathToOmdOrGlm, forceLayout=False, outputPath=None, outputName='viewer.h
 		papaData = papaFile.read()
 	with open(omf.omfDir + '/static/jquery.js', 'r') as jquery_file:
 		jquery_data = jquery_file.read()
-	with open(omf.omfDir + '/static/jquery-ui.min.js', 'r') as jquery_ui_file:
+	with open(omf.omfDir + '/static/jquery-ui.js', 'r') as jquery_ui_file:
 		jquery_ui_data = jquery_ui_file.read()
-	with open(omf.omfDir + '/static/jquery-ui.min.css', 'r') as jquery_css_file:
+	with open(omf.omfDir + '/static/jquery-ui.css', 'r') as jquery_css_file:
 		jquery_css_data = jquery_css_file.read()
 	# TEMPLATE HACKING
 	with open(omf.omfDir + '/templates/distNetViz.html') as f:
@@ -156,11 +156,11 @@ def viz(pathToOmdOrGlm, forceLayout=False, outputPath=None, outputName='viewer.h
 	# of exactly the same length.
 	with fileinput.input(tempDir + '/' + outputName, inplace=1) as f:
 		for line in f:
-			if line.lstrip().startswith('<link rel="stylesheet" href="/static/jquery-ui.min.css">'):
+			if line.lstrip().startswith('<link rel="stylesheet" href="/static/jquery-ui.css">'):
 				print("")
 			elif line.lstrip().startswith('<script type="text/javascript" src="/static/jquery.js"></script>'):
 				print("")
-			elif line.lstrip().startswith('<script type="text/javascript" src="/static/jquery-ui.min.js"></script>'):
+			elif line.lstrip().startswith('<script type="text/javascript" src="/static/jquery-ui.js"></script>'):
 				print("")
 			elif line.lstrip().startswith('<script type="text/javascript" src="/static/svg-pan-zoom.js"></script>'):
 				print("")

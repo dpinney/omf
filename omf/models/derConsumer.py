@@ -44,6 +44,7 @@ def create_REopt_jl_jsonFile(modelDir, inputDict):
 	longitude = float(inputDict['longitude'])
 	urdbLabel = str(inputDict['urdbLabel'])
 	year = int(inputDict['year'])
+	projectionLength = int(inputDict['projectionLength'])
 	demand = np.asarray([float(value) for value in inputDict['demandCurve'].split('\n') if value.strip()])
 	demand = demand.tolist() if isinstance(demand, np.ndarray) else demand ## make demand into a list	
 
@@ -163,6 +164,9 @@ def create_REopt_jl_jsonFile(modelDir, inputDict):
 		'ElectricLoad': {
 			'loads_kw': demand,
 			'year': year
+		},
+		'Financial': {
+			"analysis_years": projectionLength
 		}
 	}
 
@@ -220,12 +224,17 @@ def get_tou_rates(modelDir, inputDict):
 	params = {
 		'version': '3',
 		'format': 'json',
-		'lat': inputDict['latitude'],
-		'lon': inputDict['longitude'],
 		'api_key': api_key,
 		'detail': 'full',
-		#'getpage': '5b311c595457a3496d8367be', ## Residential TOU
+		'lat': inputDict['latitude'],
+		'lon': inputDict['longitude']
 		}
+	
+	#if inputDict['demandChargeURDB'] == 'Yes':
+	#	params['getpage'] = str(inputDict['urdbLabel']) ## Residential TOU example: 5b311c595457a3496d8367be
+	#else:
+	#	params['lat'] = inputDict['latitude'],
+	#	params['lon'] = inputDict['longitude']
 	
 	try:
 		response = requests.get(api_url, params=params)
@@ -413,7 +422,6 @@ def work(modelDir, inputDict):
 	#	static_reopt_results = json.load(f)
 	#outData['chargeLevelBattery'] = static_reopt_results['outputs']['ElectricStorage']['soc_series_fraction']
 
-
 	########## DER Sharing Program options ######################################################################################################################################################
 	if (inputDict['utilityProgram']):
 		print('Considering utility DER sharing program \n')
@@ -492,7 +500,7 @@ def work(modelDir, inputDict):
 		## BESS allowed for utility use
 		## NOTE: I just realized that this code is set up to only use 80% of the battery to do peak shaving, rather than
 		## giving/selling the 80% to the utility. TODO: how do we modify this? Lisa and I are thinking of ways to do (and plot) this
-		max_utility_usage_percentage = float(inputDict['maxBESSDischarge'])  ## Up to 80% of the total battery charge
+		max_utility_usage_percentage = 1 #float(inputDict['maxBESSDischarge'])  ## Up to 80% of the total battery charge
 		max_utility_usage = battery_energy_capacity * max_utility_usage_percentage
 
 		## Initial variables to be updated in the loop
@@ -958,7 +966,6 @@ def new(modelDir):
 		'latitude':  '39.532165', ## Rivesville, WV
 		'longitude': '-80.120618', 
 		'year' : '2018',
-		'analysis_years' : '25', 
 		'urdbLabel': '643476222faee2f0f800d8b1', ## Rivesville, WV - Monongahela Power
 		'fileName': 'residential_PV_load.csv',
 		'tempFileName': 'residential_extended_temperature_data.csv',
@@ -971,6 +978,11 @@ def new(modelDir):
 		'outage_start_hour': '4637',
 		'outage_duration': '23',
 
+		## Financial Inputs
+		'demandChargeURDB': 'Yes',
+		'demandChargeCost': '25',
+		'projectionLength': '25',
+
 		## vbatDispatch inputs:
 		'load_type': '2', ## Heat Pump
 		'number_devices': '1',
@@ -980,17 +992,15 @@ def new(modelDir):
 		'cop': '2.5',
 		'setpoint': '19.5',
 		'deadband': '0.625',
-		'demandChargeCost': '25',
 		'electricityCost': '0.16',
-		'projectionLength': '25',
 		'discountRate': '2',
 		'unitDeviceCost': '150',
 		'unitUpkeepCost': '5',
 
 		## DER Program Design inputs:
-		'utilityProgram': 'Yes',
+		'utilityProgram': 'No',
 		'rateCompensation': '0.1', ## unit: $/kWh
-		'maxBESSDischarge': '0.80', ## Between 0 and 1 (Percent of total BESS capacity) #TODO: Fix the HTML input for this
+		#'maxBESSDischarge': '0.80', ## Between 0 and 1 (Percent of total BESS capacity) #TODO: Fix the HTML input for this
 		'subsidy': '50',
 	}
 	return __neoMetaModel__.new(modelDir, defaultInputs)

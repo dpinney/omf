@@ -26,7 +26,7 @@ tooltip = ('The derUtilityCost model evaluates the financial costs of controllin
 	'distributed energy resources (DERs) using the NREL Renewable Energy Optimization Tool (REopt) and '
 	'the OMF virtual battery dispatch module (vbatDispatch).')
 modelName, template = __neoMetaModel__.metadata(__file__)
-hidden = True ## Keep the model hidden=True during active development
+hidden = False ## Keep the model hidden=True during active development
 
 
 def work(modelDir, inputDict):
@@ -62,8 +62,7 @@ def work(modelDir, inputDict):
 	except KeyError:
 		year = inputDict['year'] # Use the user provided year if none found in reoptResults
 	
-	arr_size = np.size(demand) # desired array size of the timestamp array
-	timestamps = derConsumer.create_timestamps(start_time=f'{year}-01-01', end_time=f'{year}-12-31 23:00:00', arr_size=arr_size)
+	timestamps = pd.date_range(start=f'{year}-01-01', end=f'{year}-12-31 23:00:00', periods=np.size(demand))
 
 	## If outage is specified, load the resilience results
 	if (inputDict['outage']):
@@ -284,7 +283,6 @@ def new(modelDir):
 		'latitude' : '39.986771', 
 		'longitude' : '-104.812599', ## Brighton, CO
 		'year' : '2018',
-		'analysis_years' : '25', 
 		'urdbLabel' : '612ff9c15457a3ec18a5f7d3', ## Brighton, CO
 		## TODO: Create a function that will gather the urdb label from a user provided location (city,state), rather than requiring the URDB label
 		'fileName': 'utility_2018_kW_load.csv',
@@ -298,6 +296,11 @@ def new(modelDir):
 		'outage_start_hour': '2100',
 		'outage_duration': '3',
 
+		## Financial Inputs
+		'demandChargeURDB': 'Yes',
+		'demandChargeCost': '0.05',
+		'projectionLength': '10',
+
 		## vbatDispatch inputs:
 		'load_type': '2', ## Heat Pump
 		'number_devices': '1',
@@ -307,9 +310,7 @@ def new(modelDir):
 		'cop': '2.5',
 		'setpoint': '19.5',
 		'deadband': '0.625',
-		'demandChargeCost': '25',
 		'electricityCost': '0.16',
-		'projectionLength': '25',
 		'discountRate': '2',
 		'unitDeviceCost': '150',
 		'unitUpkeepCost': '5',
