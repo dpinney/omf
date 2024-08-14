@@ -49,7 +49,7 @@ def _split(csvPath, newDir):
 		clean = subset.rename(index=str, columns={name + '.csv-V_A':'V_A', name + '.csv-V_B':'V_B', name + '.csv-V_C':'V_C'})
 		clean.to_csv(newDir + '/' + name + '.csv', index=False)
 
-def _file_transform_gld(METER_DIR, SUB_METER_FILE):
+def _file_transform_gld(METER_DIR, SUB_METER_FILE, modelDir):
 	''' This function transform the original Meter and substation voltage files from GridLAB-D to
 	... more neat form. More specifically, change all polar or rectangular
 	... form of voltage to magnitude'''
@@ -102,7 +102,7 @@ def _file_transform_gld(METER_DIR, SUB_METER_FILE):
 			pass
 		df_v.to_csv(file_path, header=True, index=False, sep=',', mode='w')
 
-def __keen_method(INPUTS_TBD):
+def __keen_method(modelDir, inputDict):
 	''' Deprecated classical method comparing SCADA-AMI correlation.
 	New method performs better with DERs and downline regulators. '''
 	INPUT_TYPE = 'Single' # 'Zip', 'GLD' 
@@ -364,7 +364,7 @@ def work(modelDir, inputDict):
 
 def new(modelDir):
 	""" Create a new instance of this model. Returns true on success, false on failure. """
-	with open(pJoin(__neoMetaModel__._omfDir, "solvers", "sandia_ami_phase_id", "sandia_test_data_2k_readings.csv")) as f:
+	with open(pJoin(__neoMetaModel__._omfDir, "static", "testFiles", "phaseID", "sandia_test_data_2k_readings.csv")) as f:
 		ami_meter_data = f.read()
 	defaultInputs = {
 		"user": "admin",
