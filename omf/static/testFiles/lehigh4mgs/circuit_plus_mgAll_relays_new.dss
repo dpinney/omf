@@ -1,0 +1,196 @@
+
+
+!!!master.dss
+clear
+new object=circuit.lehigh
+
+
+! redirect vsource.dss
+! makebuslist
+! redirect busvoltagebases.dss ! set voltage bases
+! buscoords buscoords.dss
+! giscoords giscoords.dss
+
+
+!!!loadshape.dss
+new object=loadshape.default npts=24 interval=1 mult=(0.677,0.6256,0.6087,0.5833,0.58028,0.6025,0.657,0.7477,0.832,0.88,0.94,0.989,0.985,0.98,0.9898,0.999,1,0.958,0.936,0.913,0.876,0.876,0.828,0.756)
+new object=loadshape.solar_634_shape npts=24 interval=1 useactual=yes mult=(0,0,0,0,0,0,0,0,15.5733,36.2542,49.9305,57.4574,60.416,58.1799,51.5283,40.0098,21.6754,1.44788,0,0,0,0,0,0)
+new object=loadshape.fossil_634_shape npts=24 interval=1 useactual=yes mult=(81.531,85.858,87.176,87.704,93.363,92.704,119.137,120.956,54.408,0,0,0,0,0,0,0,75.99,155.389,162.812,152.83,142.582,125.448,80.042,100.848)
+new object=loadshape.fossil_684_existing_shape npts=24 interval=1 useactual=yes mult=(40.2771,40.8351,40.4548,40.3867,42.469,43.2711,52.0608,52.6097,24.4373,0,0,0,0,0,0,0,11.6321,50.5736,55.1301,55.2977,53.7493,52.4801,46.7858,42.5513)
+new object=loadshape.solar_675_existing_shape npts=24 interval=1 useactual=yes mult=(0,0,0,0,0,0,0,0,114.524,266.607,367.181,422.533,444.29,427.846,378.931,294.226,159.397,10.6476,0,0,0,0,0,0)
+new object=loadshape.battery_634_existing_shape npts=24 interval=1 useactual=yes mult=(0,0,0,0,0,0,0,0,0.375063,-1.00021,-0.112911,0,0,0,0,0,0,0,0,0,0,0,0,0)
+new object=loadshape.solar_634_existing_shape npts=24 interval=1 useactual=yes mult=(0,0,0,0,0,0,0,0,62.9877,146.634,201.949,232.393,244.359,235.315,208.412,161.824,87.6686,5.85612,0,0,0,0,0,0)
+new object=loadshape.670c_residential2_shape npts=24 interval=1 useactual=yes mult=(18.9786,17.358,17.0129,16.8929,18.9571,23.3462,28.408,25.8309,22.8559,20.2264,17.3431,17.4373,17.2939,16.8653,16.718,18.0157,25.2135,35.2849,40.7148,39.7665,39.3628,34.3439,28.3907,23.494)
+new object=loadshape.670b_residential2_shape npts=24 interval=1 useactual=yes mult=(9.94119,9.09226,8.91154,8.84868,9.92991,12.229,14.8804,13.5305,11.9721,10.5948,9.0845,9.13384,9.05873,8.83418,8.75707,9.43678,13.2071,18.4826,21.3268,20.8301,20.6186,17.9897,14.8713,12.3064)
+new object=loadshape.670a_residential2_shape npts=24 interval=1 useactual=yes mult=(2.71123,2.47971,2.43042,2.41328,2.70816,3.33517,4.05828,3.69013,3.26513,2.88949,2.47759,2.49105,2.47056,2.40932,2.38829,2.57367,3.60193,5.04071,5.81639,5.68093,5.62326,4.90627,4.05582,3.35628)
+new object=loadshape.652_residential_shape npts=24 interval=1 useactual=yes mult=(20.7861,19.0111,18.6332,18.5018,20.7625,25.5697,31.1135,28.291,25.0326,22.1527,18.9949,19.098,18.941,18.4715,18.3102,19.7315,27.6148,38.6454,44.5923,43.5538,43.1117,37.6148,31.0946,25.7315)
+new object=loadshape.611_runway_shape npts=24 interval=1 useactual=yes mult=(48.6043,51.5761,44.9639,43.6071,44.024,47.6691,71.636,76.4684,105.664,90.7579,64.129,60.1023,59.8953,59.9901,59.8244,59.4878,62.3736,75.4322,103.572,108.728,114.741,111.467,85.6734,54.9892)
+new object=loadshape.675c_residential1_shape npts=24 interval=1 useactual=yes mult=(43.3798,39.6753,38.8867,38.6124,43.3305,53.3628,64.9325,59.042,52.242,46.2318,39.6414,39.8568,39.529,38.5491,38.2127,41.1787,57.6309,80.6513,93.0623,90.8948,89.9722,78.5004,64.8931,53.7005)
+new object=loadshape.675b_residential1_shape npts=24 interval=1 useactual=yes mult=(10.8449,9.91883,9.72168,9.65311,10.8326,13.3407,16.2331,14.7605,13.0605,11.5579,9.91036,9.96419,9.88225,9.63729,9.55316,10.2947,14.4077,20.1628,23.2656,22.7237,22.493,19.6251,16.2233,13.4251)
+new object=loadshape.675a_hospital_shape npts=24 interval=1 useactual=yes mult=(159.024,160.919,162.946,163.436,171.473,170.58,194.716,196.133,214.333,212.152,214.014,214.859,213.65,211.497,212.1,212.252,205.971,194.442,184.272,182.821,172.782,171.72,163.176,163.283)
+new object=loadshape.692_warehouse2_shape npts=24 interval=1 useactual=yes mult=(33.699,32.8923,32.8923,32.8923,32.8923,32.8923,32.8923,13.1,9.14167,9.14167,9.14167,9.14167,9.14167,9.14167,9.14167,9.14167,9.14167,21.017,32.8923,32.8923,32.8923,32.9283,34.4123,35.1907)
+new object=loadshape.646_office_shape npts=24 interval=1 useactual=yes mult=(29.1183,29.1183,29.1183,29.1183,29.1183,29.1183,29.1183,17.7783,15.5104,15.5104,15.5104,15.5104,15.5104,15.5104,15.5104,15.5104,15.5104,22.3142,29.1183,29.1183,29.1183,29.1183,29.1183,29.1183)
+new object=loadshape.645_hangar_shape npts=24 interval=1 useactual=yes mult=(33.699,32.8923,32.8923,32.8923,32.8923,32.8923,32.8923,13.1,9.14167,9.14167,9.14167,9.14167,9.14167,9.14167,9.14167,9.14167,9.14167,21.017,32.8923,32.8923,32.8923,32.9283,34.4123,35.1907)
+new object=loadshape.634c_atc_tower_shape npts=24 interval=1 useactual=yes mult=(12.9168,13.5918,13.7974,13.8798,14.7624,14.6597,18.7831,19.0669,22.3276,20.1202,24.9608,27.5053,30.364,30.3903,29.7371,29.3001,29.1096,25.5777,25.5962,24.0391,22.4404,19.7677,12.6846,15.9301)
+new object=loadshape.634b_radar_shape npts=24 interval=1 useactual=yes mult=(31.1351,32.7622,33.2579,33.4564,35.584,35.3363,45.2756,45.9596,53.8193,48.4986,60.1665,66.3,73.1906,73.2541,71.6796,70.6262,70.1669,61.6535,61.6982,57.9449,54.0914,47.6488,30.5754,38.3986)
+new object=loadshape.634a_data_center_shape npts=24 interval=1 useactual=yes mult=(38.7503,40.7753,41.3923,41.6393,44.2873,43.979,56.3493,57.2007,66.9827,60.3607,74.8823,82.516,91.092,91.171,89.2113,87.9003,87.3287,76.733,76.7887,72.1173,67.3213,59.303,38.0537,47.7903)
+new object=loadshape.684_command_center_shape npts=24 interval=1 useactual=yes mult=(295.858,299.385,303.155,304.067,319.019,317.358,362.262,364.899,398.759,394.702,398.166,399.737,397.489,393.483,394.605,394.888,383.201,361.753,342.832,340.133,321.454,319.48,303.584,303.782)
+new object=loadshape.solar_675_shape npts=24 interval=1 useactual=yes mult=(0,0,0,0,0,0,0,0,81.2864,189.232,260.617,299.905,315.347,303.676,268.957,208.835,113.136,7.55743,0,0,0,0,0,0)
+new object=loadshape.fossil_675_shape npts=24 interval=1 useactual=yes mult=(246.947,243.406,244.447,244.594,258.528,270.176,308.774,283.036,50.834,0,0,0,0,0,0,0,14.617,298.068,333.492,329.332,318.139,302.774,278.705,265.599)
+new object=loadshape.battery_675_shape npts=24 interval=1 useactual=yes mult=(0,0,0,0,0,0,0,0,0.56783,-1.00004,-0.685135,0,0,0,0,0,0,0,0,0,0,0,0,0)
+new object=loadshape.solar_684_shape npts=24 interval=1 useactual=yes mult=(0,0,0,0,0,0,0,0,251.795,586.17,807.295,928.993,976.828,940.675,833.128,646.894,350.455,23.41,0,0,0,0,0,0)
+new object=loadshape.fossil_684_shape npts=24 interval=1 useactual=yes mult=(300.716,304.882,302.042,301.534,317.081,323.07,388.695,392.793,182.453,0,0,0,0,0,0,0,86.8469,377.591,411.611,412.862,401.302,391.826,349.311,317.696)
+new object=loadshape.battery_684_shape npts=24 interval=1 useactual=yes mult=(0,0,0,0,0,0,0,0,0.375008,-0.63332,-0.479595,0,0,0,0,0,0,0,0,0,0,0,0,0)
+new object=loadshape.solar_646_shape npts=24 interval=1 useactual=yes mult=(0,0,0,0,0,0,0,0,82.928,193.053,265.879,305.96,321.715,309.808,274.388,213.052,115.421,7.71,0,0,0,0,0,0)
+new object=loadshape.fossil_646_shape npts=24 interval=1 useactual=yes mult=(62.817,62.011,62.011,62.011,62.011,62.011,62.011,5.998,0,0,0,0,0,0,0,0,0,35.621,62.011,62.011,62.011,62.047,63.531,64.309)
+new object=loadshape.battery_646_shape npts=24 interval=1 useactual=yes mult=(0,0,0,0,0,0,0,0.545516,-1.00007,-0.618834,0,0,0,0,0,0,0,0,0,0,0,0,0,0)
+
+
+!!!vsource.dss
+edit object=vsource.source phases=3 angle=30 mvasc3=1.3225e8 mvasc1=1.3225e8 basekv=115 bus1=sourcebus.1.2.3 pu=1.00 r1=0 x1=0.0001 r0=0 x0=0.0001
+new object=vsource.secondsource basekv=4.16 bus1=680.1.2.3 pu=1.00 r1=0 x1=0.0001 r0=0 x0=0.0001
+
+
+!!!transformer.dss
+new object=transformer.sub phases=3 windings=2 xhl=0.008 buses=[sourcebus.1.2.3,650.1.2.3] conns=[delta,wye] kvs=[115,4.16] kvas=[5000,5000] %rs=[0.0005,0.0005]
+new object=transformer.reg1 phases=1 bank=reg1 xhl=0.01 kvas=[1666,1666] buses=[650.1,rg60.1] kvs=[2.4,2.4] %loadloss=0.01
+new object=transformer.reg2 phases=1 bank=reg1 xhl=0.01 kvas=[1666,1666] buses=[650.2,rg60.2] kvs=[2.4,2.4] %loadloss=0.01
+new object=transformer.reg3 phases=1 bank=reg1 xhl=0.01 kvas=[1666,1666] buses=[650.3,rg60.3] kvs=[2.4,2.4] %loadloss=0.01
+new object=transformer.xfm1 phases=3 windings=2 xhl=2 buses=[633.1.2.3,634.1.2.3] conns=[wye,wye] kvs=[4.16,0.48] kvas=[500,500] %rs=[0.55,0.55] xht=1 xlt=1
+
+
+!!!regcontrol.dss
+new object=regcontrol.reg1 transformer=reg1 winding=2 tapwinding=2 vreg=121 band=2 ptratio=20 ctprim=700 r=3 x=9
+new object=regcontrol.reg2 transformer=reg2 winding=2 tapwinding=2 vreg=121 band=2 ptratio=20 ctprim=700 r=3 x=9
+new object=regcontrol.reg3 transformer=reg3 winding=2 tapwinding=2 vreg=121 band=2 ptratio=20 ctprim=700 r=3 x=9
+
+
+!!!linecode.dss
+new object=linecode.mtx601 nphases=3 basefreq=60 rmatrix=[0.34650000,0.15600000,0.15800000|0.15600000,0.33750000,0.15350000|0.15800000,0.15350000,0.34140000] xmatrix=[1.01790000,0.50170000,0.42360000|0.50170000,1.04780000,0.38490000|0.42360000,0.38490000,1.03480000] units=mi
+new object=linecode.mtx602 nphases=3 basefreq=60 rmatrix=[0.75260000,0.15800000,0.15600000|0.15800000,0.74750000,0.15350000|0.15600000,0.15350000,0.74360000] xmatrix=[1.18140000,0.42360000,0.50170000|0.42360000,1.19830000,0.38490000|0.50170000,0.38490000,1.21120000] units=mi
+new object=linecode.mtx603 nphases=2 basefreq=60 rmatrix=[1.32380000,0.20660000|0.20660000,1.32940000] xmatrix=[1.35690000,0.45910000|0.45910000,1.34710000] units=mi
+new object=linecode.mtx604 nphases=2 basefreq=60 rmatrix=[1.32380000,0.20660000|0.20660000,1.32940000] xmatrix=[1.35690000,0.45910000|0.45910000,1.34710000] units=mi
+new object=linecode.mtx605 nphases=1 basefreq=60 rmatrix=[1.32920000] xmatrix=[1.34750000] units=mi
+new object=linecode.mtx606 nphases=3 units=mi rmatrix=[0.79172100,0.31847600,0.28345000|0.31847600,0.78164900,0.31847600|0.28345000,0.31847600,0.79172100] xmatrix=[0.43835200,0.02768380,-0.01842040|0.02768380,0.39669700,0.02768380|-0.01842040,0.02768380,0.43835200] cmatrix=[383.94800000,0.00000000,0.00000000|0.00000000,383.94800000,0.00000000|0.00000000,0.00000000,383.94800000]
+new object=linecode.mtx607 nphases=1 basefreq=60 rmatrix=[1.34250000] xmatrix=[0.51240000] cmatrix=[236.00000000] units=mi
+
+
+!!!spectrum.dss
+new object=spectrum.default numharm=7 harmonic=(1,3,5,7,9,11,13) %mag=(100,33,20,14.000000000000002,11,9,7.0000000000000009) angle=(0,0,0,0,0,0,0)
+new object=spectrum.defaultload numharm=7 harmonic=(1,3,5,7,9,11,13) %mag=(100,1.5,20,14.000000000000002,1,9,7.0000000000000009) angle=(0,180,180,180,180,180,180)
+new object=spectrum.defaultgen numharm=7 harmonic=(1,3,5,7,9,11,13) %mag=(100,5,3,1.5,1,0.69999999999999996,0.5) angle=(0,0,0,0,0,0,0)
+new object=spectrum.defaultvsource numharm=1 harmonic=(1) %mag=(100) angle=(0)
+new object=spectrum.linear numharm=1 harmonic=(1) %mag=(100) angle=(0)
+new object=spectrum.pwm6 numharm=13 harmonic=(1,3,5,7,9,11,13,15,17,19,21,23,25) %mag=(100,4.4000000000000004,76.5,62.700000000000003,2.8999999999999999,24.800000000000001,12.699999999999999,0.5,7.0999999999999996,8.4000000000000004,0.90000000000000013,4.4000000000000004,3.3000000000000003) angle=(-103,-5,28,-180,-33,-59,79,36,-253,-124,3,-30,86)
+new object=spectrum.dc6 numharm=10 harmonic=(1,3,5,7,9,11,13,15,17,19) %mag=(100,1.2,33.600000000000001,1.6000000000000001,0.40000000000000002,8.6999999999999993,1.2,0.29999999999999999,4.5,1.3) angle=(-75,28,156,29,-91,49,54,148,-57,-46)
+
+
+!!!tcc_curve.dss
+new object=tcc_curve.a npts=5 c_array=[1,2.5,4.5,8,14] t_array=[0.15,0.07,0.05,0.045,0.045]
+new object=tcc_curve.d npts=5 c_array=[1,2.5,4.5,8,14] t_array=[6,0.7,0.2,0.06,0.02]
+new object=tcc_curve.tlink npts=7 c_array=[2,2.1,3,4,6,22,50] t_array=[300,100,10.1,4,1.4,0.1,0.02]
+new object=tcc_curve.klink npts=6 c_array=[2,2.2,3,4,6,30] t_array=[300,20,4,1.3,0.41,0.02]
+new object=tcc_curve.uv1547 npts=2 c_array=[0.5,0.9] t_array=[0.166,2]
+new object=tcc_curve.ov1547 npts=2 c_array=[1.1,1.2] t_array=[2,0.166]
+new object=tcc_curve.mod_inv npts=15 c_array=[1.1,1.3,1.5,2,3,4,5,6,7,8,9,10,20,50,100] t_array=[27.1053,9.9029,6.439,3.8032,2.4322,1.9458,1.6883,1.5255,1.4117,1.3267,1.2604,1.2068,0.9481,0.7468,0.6478]
+new object=tcc_curve.very_inv npts=15 c_array=[1.1,1.3,1.5,2,3,4,5,6,7,8,9,10,20,50,100] t_array=[93.872,28.9113,16.179,7.0277,2.9423,1.7983,1.3081,1.0513,0.8995,0.8023,0.7361,0.6891,0.5401,0.4988,0.493]
+new object=tcc_curve.ext_inv npts=15 c_array=[1.1,1.3,1.5,2,3,4,5,6,7,8,9,10,20,50,100] t_array=[134.407,40.9913,22.6817,9.5217,3.6467,2.0017,1.2967,0.9274,0.7092,0.5693,0.4742,0.4065,0.1924,0.133,0.1245]
+new object=tcc_curve.definite npts=3 c_array=[1,1.001,100] t_array=[300,1,1]
+
+
+!!!capacitor.dss
+new object=capacitor.cap1 bus1=675 phases=3 kvar=[600] kv=2.3999999999999999
+new object=capacitor.cap2 bus1=611.3 phases=1 kvar=[100] kv=2.3999999999999999
+
+
+!!!growthshape.dss
+new object=growthshape.default npts=2 year=(1,20) mult=(1.0249999999999999,1.0249999999999999)
+
+
+!!!line.dss
+new object=line.670671 phases=3 bus1=670.1.2.3 bus2=671.1.2.3 linecode=mtx601 seasons=1 ratings=[400] normamps=400 emergamps=600 length=1333 units=ft
+new object=line.645646 phases=2 bus1=645.2 bus2=646.2 linecode=mtx603 seasons=1 ratings=[400] normamps=400 emergamps=600 length=300 units=ft
+new object=line.692675 phases=3 bus1=692.1.2.3 bus2=675.1.2.3 linecode=mtx606 seasons=1 ratings=[400] normamps=400 emergamps=600 length=500 units=ft
+new object=line.684611 phases=1 bus1=684.3 bus2=611.3 linecode=mtx605 seasons=1 ratings=[400] normamps=400 emergamps=600 length=300 units=ft
+new object=line.684652 phases=1 bus1=684.3 bus2=652.3 linecode=mtx607 seasons=1 ratings=[400] normamps=400 emergamps=600 length=800 units=ft
+new object=line.671692 phases=3 bus1=671.1.2.3 bus2=692.1.2.3 switch=true r1=0.0001 r0=0.0001 x1=0 x0=0 c1=0 c0=0
+new object=line.632633 phases=3 bus1=632.1 bus2=633.1 switch=true linecode=mtx602 seasons=1 ratings=[400] normamps=400 emergamps=600 length=500 units=ft
+new object=line.671684 phases=2 bus1=671.3 bus2=684.3 switch=true linecode=mtx604 seasons=1 ratings=[400] normamps=400 emergamps=600 length=300 units=ft
+new object=line.632645 phases=2 bus1=632.2 bus2=645.2 switch=true linecode=mtx603 seasons=1 ratings=[400] normamps=400 emergamps=600 length=500 units=ft
+new object=line.632670 phases=3 bus1=632.1.2.3 bus2=670.1.2.3 switch=true linecode=mtx601 seasons=1 ratings=[400] normamps=400 emergamps=600 length=667 units=ft
+new object=line.650632 phases=3 bus1=rg60.1.2.3 bus2=632.1.2.3 switch=true linecode=mtx601 seasons=1 ratings=[400] normamps=400 emergamps=600 length=2000 units=ft
+new object=line.671680 phases=3 bus1=671.1.2.3 bus2=680.1.2.3 switch=true linecode=mtx601 seasons=1 ratings=[400] normamps=400 emergamps=600 length=1000 units=ft
+
+!!!relay.dss
+new object=relay.relay1 monitoredobj=line.671692
+new object=relay.relay2 monitoredobj=line.632633
+new object=relay.relay3 monitoredobj=line.671684
+new object=relay.relay4 monitoredobj=line.632645
+new object=relay.relay5 monitoredobj=line.632670
+new object=relay.relay6 monitoredobj=line.650632
+new object=relay.relay7 monitoredobj=line.671680
+
+
+!!!generator.dss
+new object=generator.solar_634_existing bus1=634.1 phases=1 kv=0.277 kw=330.179 pf=1 daily=solar_634_existing_shape
+new object=generator.solar_675_existing bus1=675.1.2.3 phases=3 kv=2.4 kw=600.326 pf=1 daily=solar_675_existing_shape
+new object=generator.fossil_684_existing bus1=684.3 phases=1 kw=81.0004 pf=1 kv=2.4 xdp=0.27 xdpp=0.2 h=2 daily=fossil_684_existing_shape
+new object=generator.fossil_634 bus1=634.1 phases=1 kv=0.277128 kw=226.196 xdp=0.27 xdpp=0.2 h=2 daily=fossil_634_shape
+new object=generator.solar_634 bus1=634.1 phases=1 kv=0.277128 kw=81.6343 pf=1 daily=solar_634_shape
+new object=generator.fossil_675 bus1=675.1.2.3 phases=3 kv=2.40178 kw=525.853 xdp=0.27 xdpp=0.2 h=2 daily=fossil_675_shape
+new object=generator.solar_675 bus1=675.1.2.3 phases=3 kv=2.40178 kw=426.098 pf=1 daily=solar_675_shape
+new object=generator.fossil_684 bus1=684.3 phases=1 kv=2.40178 kw=604.763 xdp=0.27 xdpp=0.2 h=2 daily=fossil_684_shape
+new object=generator.solar_684 bus1=684.3 phases=1 kv=2.40178 kw=1319.89 pf=1 daily=solar_684_shape
+new object=generator.fossil_646 bus1=646.2 phases=1 kv=2.40178 kw=305.593 xdp=0.27 xdpp=0.2 h=2 daily=fossil_646_shape
+new object=generator.solar_646 bus1=646.2 phases=1 kv=2.40178 kw=434.702 pf=1 daily=solar_646_shape
+
+
+!!!load.dss
+new object=load.684_command_center bus1=684.3 phases=1 conn=wye model=1 kv=2.3999999999999999 kw=800.89700000000005 kvar=0 daily=684_command_center_shape
+new object=load.634a_data_center bus1=634.1 phases=1 conn=wye model=1 kv=0.27700000000000002 kw=143.1273333 kvar=0 daily=634a_data_center_shape
+new object=load.634b_radar bus1=634.1 phases=1 conn=wye model=1 kv=0.27700000000000002 kw=115 kvar=0 daily=634b_radar_shape
+new object=load.634c_atc_tower bus1=634.1 phases=1 conn=wye model=1 kv=0.27700000000000002 kw=47.709111110000002 kvar=0 daily=634c_atc_tower_shape
+new object=load.645_hangar bus1=645.2 phases=1 conn=wye model=1 kv=2.3999999999999999 kw=159.91533329999999 kvar=0 daily=645_hangar_shape
+new object=load.646_office bus1=646.2 phases=1 conn=wye model=2 kv=2.3999999999999999 kw=225 kvar=0 daily=646_office_shape
+new object=load.692_warehouse2 bus1=692.1.2.3 phases=3 conn=delta model=5 kv=2.3999999999999999 kw=159.91533329999999 kvar=0 daily=692_warehouse2_shape
+new object=load.675a_hospital bus1=675.1.2.3 phases=3 conn=wye model=1 kv=2.3999999999999999 kw=430.48213750000002 kvar=0 daily=675a_hospital_shape
+new object=load.675b_residential1 bus1=675.1.2.3 phases=3 conn=wye model=1 kv=2.3999999999999999 kw=60 kvar=0 daily=675b_residential1_shape
+new object=load.675c_residential1 bus1=675.1.2.3 phases=3 conn=wye model=1 kv=2.3999999999999999 kw=240 kvar=0 daily=675c_residential1_shape
+new object=load.611_runway bus1=611.3 phases=1 conn=wye model=5 kv=2.3999999999999999 kw=165 kvar=0 daily=611_runway_shape
+new object=load.652_residential bus1=652.3 phases=1 conn=wye model=2 kv=2.3999999999999999 kw=115 kvar=0 daily=652_residential_shape
+new object=load.670a_residential2 bus1=670.1 phases=1 conn=wye model=1 kv=2.3999999999999999 kw=15 kvar=0 daily=670a_residential2_shape
+new object=load.670b_residential2 bus1=670.2 phases=1 conn=wye model=1 kv=2.3999999999999999 kw=55 kvar=0 daily=670b_residential2_shape
+new object=load.670c_residential2 bus1=670.3 phases=1 conn=wye model=1 kv=2.3999999999999999 kw=105 kvar=0 daily=670c_residential2_shape
+
+
+!!!buscoords.dss
+makebuslist
+setbusxy bus=sourcebus x=-84.071493000000004 y=30.285012999999999
+setbusxy bus=680 x=-84.075492999999994 y=30.285012999999999
+setbusxy bus=650 x=-84.071993000000006 y=30.285012999999999
+setbusxy bus=rg60 x=-84.072492999999994 y=30.285012999999999
+setbusxy bus=633 x=-84.072992999999997 y=30.286512999999999
+setbusxy bus=634 x=-84.072992999999997 y=30.287013000000002
+setbusxy bus=684 x=-84.074493000000004 y=30.284013000000002
+setbusxy bus=645 x=-84.072992999999997 y=30.284013000000002
+setbusxy bus=646 x=-84.072992999999997 y=30.283013
+setbusxy bus=692 x=-84.074493000000004 y=30.285513000000002
+setbusxy bus=675 x=-84.074493000000004 y=30.287013000000002
+setbusxy bus=611 x=-84.074493000000004 y=30.283013
+setbusxy bus=652 x=-84.075492999999994 y=30.284013000000002
+setbusxy bus=670 x=-84.073492999999999 y=30.285012999999999
+setbusxy bus=671 x=-84.074493000000004 y=30.285012999999999
+setbusxy bus=632 x=-84.072992999999997 y=30.285012999999999
+
+
+!!!busvoltagebases.dss
+set voltagebases=(115,4.1600000000000001,0.47999999999999998)
+calcvoltagebases
+
+
+!powerflow code
+set maxiterations=1000
+set maxcontroliter=1000
+calcv
+solve
+show quantity=voltage

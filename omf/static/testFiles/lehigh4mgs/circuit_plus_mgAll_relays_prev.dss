@@ -121,6 +121,15 @@ new object=line.632670 phases=3 bus1=632.1.2.3 bus2=670.1.2.3 switch=true lineco
 new object=line.650632 phases=3 bus1=rg60.1.2.3 bus2=632.1.2.3 switch=true linecode=mtx601 seasons=1 ratings=[400] normamps=400 emergamps=600 length=2000 units=ft
 new object=line.671680 phases=3 bus1=671.1.2.3 bus2=680.1.2.3 switch=true linecode=mtx601 seasons=1 ratings=[400] normamps=400 emergamps=600 length=1000 units=ft
 
+!!!relay.dss
+new object=relay.relay1 monitoredobj=line.671692
+new object=relay.relay2 monitoredobj=line.632633
+new object=relay.relay3 monitoredobj=line.671684
+new object=relay.relay4 monitoredobj=line.632645
+new object=relay.relay5 monitoredobj=line.632670
+new object=relay.relay6 monitoredobj=line.650632
+new object=relay.relay7 monitoredobj=line.671680
+
 
 !!!generator.dss
 new object=generator.solar_634_existing bus1=634.1 phases=1 kv=0.277 kw=330.179 pf=1 yearly=solar_634_existing_shape

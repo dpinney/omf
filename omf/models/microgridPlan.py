@@ -234,8 +234,8 @@ def new(modelDir):
 		"created":str(datetime.datetime.now()),
 		"run_reopt": True,
 		"run_dercam": False,
-		"run_pmonm": False,
-		"run_pso": False
+		"run_pmonm": True,
+		"run_pso": True
 	}
 
 	#saving solvers' default inputs to sub-dictionaries in defaultInputs
@@ -284,40 +284,46 @@ def new(modelDir):
 			"default_switch_dispatchable": 'PMD.NO',
 			"default_switch_status": 'PMD.ENABLED'
 	}
-	defaultPath = pJoin(__neoMetaModel__._omfDir, "static", "testFiles","lehigh4mgs")
-	#defaultPath = pJoin(__neoMetaModel__._omfDir, "static", "testFiles")
-	defaultCircuitFile = "circuit_plus_mgAll_relays.dss" #"iowa240_dwp_22.dss"
-	defaultSettingsFile = "circuit_plus_mgAll_relays.settings.json" #"iowa240_dwp_22.settings.json"
-	defaultEventsFile = "circuit_plus_mgAll_relays.events.json" #"iowa240_dwp_22.events.json"
+	#defaults for pmonm - using while lehigh not working
+	defaultPath = pJoin(__neoMetaModel__._omfDir, "static", "testFiles")
+	defaultCircuitFile = "iowa240_dwp_22.dss"
+	defaultSettingsFile = "iowa240_dwp_22.settings.json"
+	defaultEventsFile = "iowa240_dwp_22.events.json"
+	#lehigh test files - working for pso but not pmonm currently
+	circuitPath = pJoin(__neoMetaModel__._omfDir, "static", "testFiles","lehigh4mgs")
+	#circuit_plus_mgAll_relays.dss -> 8760-element loadshapes
+	#circuit_plus_mgAll_relays_new.dss -> 24-element loadshapes
+	#circuit_plus_mgAll_relays_df.dss -> edits by david fobes - also 24-element loadshapes
+	circuitFile = "circuit_plus_mgAll_relays_new.dss" 
+	settingsFile =  "circuit_plus_mgAll_relays.settings.json"
+	eventsFile =  "circuit_plus_mgAll_relays.events.json"
 	pmonmDefaultInputs = {
-		"circuitFile": pJoin(defaultPath,defaultCircuitFile), #circuitFile,
-		"circuitFileName": defaultCircuitFile, #circuitFileName
-		"buildSettingsFile": False, #on switch (T/F) display settingsFile option (False) or settings file parameters (True)
+		"circuitFile": pJoin(defaultPath,defaultCircuitFile),
+		"circuitFileName": defaultCircuitFile,
+		#todo: on switch (T/F) display settings/eventsFile option (False) or settings/events file parameters (True)
+		"buildSettingsFile": False, 
 		"buildEventsFile": False,
 		"settingsFile": pJoin(defaultPath, defaultSettingsFile), #"",
 		"settingsFileName": defaultSettingsFile, #"",
 		"eventsFile": pJoin(defaultPath,defaultEventsFile),
 		"eventsFileName": defaultEventsFile,
-		#for building settings file (json)
 		"loadPrioritiesFileName": "",
 		"microgridTaggingFileName": "",
-		#settings file advanced options
 		"settingsInputs": settingsInputs,
-		#for building events file (json)
 		"custom_events_file_name": "",
-		#events file advanced options
 		"eventsInputs": eventsInputs
 	}
 	defaultInputs["pmonm"] = pmonmDefaultInputs 
 
 	### ProtectionSettingsOptimizer
-	psoPath = pJoin(__neoMetaModel__._omfDir,"solvers","protsetopt","testFiles")
+	defaultpsoPath = pJoin(__neoMetaModel__._omfDir,"solvers","protsetopt","testFiles")
+	defaultpsoFile = pJoin(defaultpsoPath,"IEEE34Test.dss")
+	defaultpsoFileName = "IEEE34Test.dss"
+	#above test paths/files not used since lehigh working for pso 
 	psoDefaultInputs = { 
-		"circuitPath": defaultPath, #psoPath,
-		"circuitFile": pJoin(defaultPath,defaultCircuitFile), #pJoin(psoPath,"IEEE34Test.dss"),
-		"circuitFileName": defaultCircuitFile #"IEEE34Test.dss",
-	} 
-	'''
+		"circuitPath": circuitPath,
+		"circuitFile": pJoin(circuitPath,circuitFile),
+		"circuitFileName": circuitFile,
 		"Fres": ['0.001','1'], #fault resistances to test
 		"Fts": ['3ph','SLG','LL'], #supported fault types
 		"Force_NOIBR": 1, 
@@ -328,7 +334,7 @@ def new(modelDir):
 		"Fault_Res": ['R0_001','R1'],
 		"Min_Ip": [0.1,0.1],
 		"Substation_bus": 'sourcebus'
-	'''
+	}
 	defaultInputs["pso"] = psoDefaultInputs 
 
 	return __neoMetaModel__.new(modelDir, defaultInputs)
