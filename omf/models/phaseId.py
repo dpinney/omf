@@ -6,6 +6,7 @@ from zipfile import ZipFile
 import numpy as np
 import pandas as pd
 import plotly.graph_objs as go
+from pathlib import Path
 #from plotly import tools
 import plotly.offline
 from scipy.stats import linregress
@@ -14,7 +15,7 @@ from sklearn.metrics import confusion_matrix
 from matplotlib import pyplot as plt
 from omf.models import __neoMetaModel__
 from omf.models.__neoMetaModel__ import *
-from omf.solvers import sandia_ami_phase_id
+from omf.solvers import sdsmc
 
 # Model metadata:
 modelName, template = __neoMetaModel__.metadata(__file__)
@@ -326,15 +327,21 @@ def work(modelDir, inputDict):
 	with open(pJoin(modelDir, inputDict["amiMeterDataName"]), "w") as amiFile:
 		amiFile.write(inputDict["amiMeterData"])
 	# run core algorithm
-	sandia_ami_phase_id.main_csv(
+	# Jenny
+	phaseLabelsTrueFile = Path(omf.omfDir, 'static', 'testFiles', 'phaseID', 'PhaseLabelsTrue_AMI.csv')
+	numPhasesFile = Path(omf.omfDir, 'static', 'testFiles', 'phaseID', 'NumPhases.csv')
+	outputPath = Path( modelDir, 'outputs_PI_CAEns.csv')
+	sdsmc.PhaseIdentification.PhaseIdentification_CAEnsemble.run(
 		pJoin(modelDir, inputDict["amiMeterDataName"]),
-		pJoin(modelDir, "output.csv"),
+		phaseLabelsTrue_csv = phaseLabelsTrueFile,
+		numPhases_csv = numPhasesFile,
+		saveResultsPath = outputPath,
 		kFinal=int(inputDict["kFinal"]),
 		windowSize=inputDict["windowSize"]
 	)
 	# generate "confusion matrix"
-	df_final = pd.read_csv(pJoin(modelDir, "output.csv"))
-	y_true = df_final['Original Phase Labels']
+	df_final = pd.read_csv( outputPath )
+	y_true = df_final['Original Phase Labels (with errors)']
 	y_pred = df_final['Predicted Phase Labels']
 	classes=[1,2,3]
 	cnf_matrix = confusion_matrix(y_true, y_pred, labels=classes)
@@ -344,15 +351,15 @@ def work(modelDir, inputDict):
 	plot_confusion_matrix(cnf_matrix, classes=classes)
 	plt.savefig(pJoin(modelDir,'output-conf-matrix.png'))
 	# write our outData
-	with open(pJoin(modelDir, "output.csv"), "r") as outFile:
+	with open( outputPath, "r") as outFile:
 		phasingResults = list(csv.reader(outFile))
 	outData["phasingResults"] = phasingResults
 	with open(pJoin(modelDir,"output-conf-matrix.png"),"rb") as inFile:
 		outData["confusionMatrixImg"] = base64.standard_b64encode(inFile.read()).decode()
 	with open(pJoin(modelDir,"ModifiedSC_HIST.png"),"rb") as inFile:
 		outData["confidenceHistogramImg"] = base64.standard_b64encode(inFile.read()).decode()
-	with open(pJoin(modelDir,"PercentagePlot.png"),"rb") as inFile:
-		outData["PercentagePlotImg"] = base64.standard_b64encode(inFile.read()).decode()
+	# with open(pJoin(modelDir,"PercentagePlot.png"),"rb") as inFile:
+	# 	outData["PercentagePlotImg"] = base64.standard_b64encode(inFile.read()).decode()
 	return outData
 
 def new(modelDir):
