@@ -340,7 +340,9 @@ def work(modelDir, inputDict):
 		numPhases_csv = numPhasesFile,
 		saveResultsPath = outputPath,
 		kFinal=int(inputDict["kFinal"]),
-		windowSize=inputDict["windowSize"]
+		windowSize=inputDict["windowSize"],
+		useTrueLabelsFlag=False,
+		useNumPhasesField=False
 	)
 	# generate "confusion matrix"
 	df_final = pd.read_csv( outputPath )
