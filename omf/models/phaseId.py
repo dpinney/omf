@@ -58,6 +58,7 @@ def _file_transform_gld(METER_DIR, SUB_METER_FILE, modelDir):
 		hour = (endTime - datetime.datetime(startyear, 1,1)).days*24
 		return hour
 	#TODO: handle arbitrary start/end dates.
+	import pdb
 	startTime = datetime.datetime(2014, 1, 1)
 	endTime = datetime.datetime(2015, 1, 1)
 	startHour = get_hour(startTime.year, startTime)
@@ -107,6 +108,8 @@ def __keen_method(modelDir, inputDict):
 	New method performs better with DERs and downline regulators. '''
 	INPUT_TYPE = 'Single' # 'Zip', 'GLD' 
 	METER_DIR = 'Temp Unzipped Data'
+	def unzip():
+		pass #todo: create correct .zip extractor function.
 	if INPUT_TYPE == 'GLD':
 		with open(pJoin(modelDir, "meters_transformed.zip"), "w") as meterZip:
 			meterZip.write(b64decode(inputDict["meterZip"]))
