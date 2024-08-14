@@ -174,6 +174,7 @@ def run_traditional_algorithm( modelDir, inputDict, outData ):
 	# - opendss.hosting_capacity_all() changes the cwd, so change it back so other code isn't affected
 	tradHCDF = pd.DataFrame( traditionalHCResults )
 	sorted_tradHCDF = tradHCDF.sort_values(by='bus')
+	sorted_tradHCDF.to_csv( "output_tradHC.csv")
 	sorted_tradHCDF['plot_color'] = sorted_tradHCDF.apply ( lambda row: bar_chart_coloring(row), axis=1 )
 	# Plotly has its own colors - need to map the "name" of given colors to theirs
 	traditionalHCFigure = px.bar( sorted_tradHCDF, x='bus', y='max_kw', barmode='group', color='plot_color', color_discrete_map={ 'red': 'red', 'orange': 'orange', 'green': 'green', 'yellow': 'yellow'}, template='simple_white' )
