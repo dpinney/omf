@@ -196,6 +196,7 @@
 		</div> -->
 		<!--  -->
 		<p class="reportTitle" style="page-break-before:always">VBAT Energy Available & Demand Impact</p>
+		<p class="reportTitle" style="font-size: 15"> Note: Hold down the shift key to pan around the plot.</p>
 		<div id="powerReport" class="tightContent">
 			<div id="powerChart"></div>
 			<script>
@@ -216,18 +217,21 @@
 						"type":"datetime",
 						"lineColor":"gray"
 					},
-					"yAxis":{
-						"title":{"text":"Unit","style":{"color":"gray"}},
-					},
+					"yAxis": [
+					{"title":{"text":"Unit","style":{"color":"gray"}}},
+					{"title":{"text":"Temperature (°C)","style":{"color":"red"}},"opposite":true},
+					],
+
 					"title":{"text": allOutputData.dataCheck, "verticalAlign":"bottom", "align":"right", "y":-400, "x":-150, "style":{"color":"gray", "fontSize":"36px"}},
 					"series":[
-						{"name":"Optimal dispatch (kW)","marker":{"enabled":false},"color":"red","data":allOutputData.VBpower,"pointPlacement": +0.1},
-						{"name":"VBAT state of charge (kWh)","marker":{"enabled":false},"color":"purple","data":allOutputData.VBenergy,"pointPlacement": -0.2},
+						{"name":"Optimal dispatch (kW)","marker":{"enabled":false},"color":"black","data":allOutputData.VBpower,"pointPlacement": +0.1},
+						{"name":"VBAT state of charge (kWh)","marker":{"enabled":false},"color":"orange","data":allOutputData.VBenergy,"pointPlacement": -0.2},
 						{"name":"Demand (kW)","marker":{"enabled":false},"color":"gray","data":allOutputData.demand},
 						{"name":"Demand after VBAT (kW)","marker":{"enabled":false},"color":"blue","data":allOutputData.demandAdjusted},
-						{"name":"Day-ahead Prediction","marker":{"enabled":false},"color":"orange","data":allOutputData.predictedLoad},
+						{"name":"Temperature (°C)","marker":{"enabled":false},"color":"red","data":allOutputData.tempData, yAxis:1},
+						//{"name":"Day-ahead Prediction","marker":{"enabled":false},"color":"orange","data":allOutputData.predictedLoad},
 					],
-					"chart":{"marginBottom":35,"zoomType":"x","renderTo":"powerChart","type":"line","marginRight":20, "height":500,"width":1000},
+					"chart":{"marginBottom":35,"zoomType":"x","renderTo":"powerChart","type":"line","marginRight":80, "height":500,"width":1000,"panning":{"enabled":true,"type":"xy"},"panKey":"shift"},
 					"tooltip":{"valueDecimals":1},
 					"legend":{"verticalAlign":"top","align":"top","borderWidth":0,"x":50,"y":-10,"layout":"horizontal"}})
 			</script>
@@ -269,7 +273,7 @@
 		<p class="reportTitle">Monthly Cost Comparison</p>
 		<div id="levelizedCostReport" class="tightContent">
 			<div id="levelizedCostTableDiv" style="display:inline-block; width:1000px">
-				<table id="monthlySummaryTable" style="margin:5px;width:990px">
+				<table id="monthlySummaryTable" style="margin:8px;width:995px">
 					<style>td, th {padding:7 0 5 20;text-align: left;font-size:0.7em;}</style>
 					<div id="tableHead">
 						<thead>

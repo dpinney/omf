@@ -98,20 +98,20 @@ def work(modelDir, inputDict):
 		PV = np.zeros_like(demand)
 	
 	if inputDict['BESS'] == 'Yes': ## BESS
-		#BESS = reoptResults['ElectricStorage']['storage_to_load_series_kw']
+		BESS = reoptResults['ElectricStorage']['storage_to_load_series_kw']
 		#print(BESS)
 		#BESS = np.ones_like(demand) ## Ad-hoc line used because BESS is not being built in REopt for some reason. Currently debugging 5/2024
-		#grid_charging_BESS = reoptResults['ElectricUtility']['electric_to_storage_series_kw']
-		#outData['chargeLevelBattery'] = reoptResults['ElectricStorage']['soc_series_fraction']
+		grid_charging_BESS = reoptResults['ElectricUtility']['electric_to_storage_series_kw']
+		outData['chargeLevelBattery'] = reoptResults['ElectricStorage']['soc_series_fraction']
 
 		## NOTE: The following 3 lines of code are temporary; it reads in the SOC info from a static reopt test file 
 		## For some reason REopt is not producing BESS results so this is a workaround
-		with open(pJoin(__neoMetaModel__._omfDir,'static','testFiles','utility_reopt_results.json')) as f:
-			static_reopt_results = json.load(f)
-		BESS = static_reopt_results['outputs']['ElectricStorage']['storage_to_load_series_kw']
-		grid_charging_BESS = static_reopt_results['outputs']['ElectricUtility']['electric_to_storage_series_kw']
-		outData['chargeLevelBattery'] = static_reopt_results['outputs']['ElectricStorage']['soc_series_fraction']
-		outData.update(static_reopt_results['outputs'])
+		#with open(pJoin(__neoMetaModel__._omfDir,'static','testFiles','utility_reopt_results.json')) as f:
+		#	static_reopt_results = json.load(f)
+		#BESS = static_reopt_results['outputs']['ElectricStorage']['storage_to_load_series_kw']
+		#grid_charging_BESS = static_reopt_results['outputs']['ElectricUtility']['electric_to_storage_series_kw']
+		#outData['chargeLevelBattery'] = static_reopt_results['outputs']['ElectricStorage']['soc_series_fraction']
+		#outData.update(static_reopt_results['outputs'])
 	else:
 		BESS = np.zeros_like(demand)
 		grid_charging_BESS = np.zeros_like(demand)
@@ -126,17 +126,6 @@ def work(modelDir, inputDict):
 		vbat_discharge_component = np.zeros_like(demand)
 		vbat_charge_component = np.zeros_like(demand)
 
-	## BESS serving load piece
-	if (inputDict['BESS'] == 'Yes'):
-		fig.add_trace(go.Scatter(x=timestamps,
-							y=np.asarray(BESS) + np.asarray(demand) + vbat_discharge_component,
-							yaxis='y1',
-							mode='none',
-							fill='tozeroy',
-							name='BESS Serving Load (kW)',
-							fillcolor='rgba(0,137,83,1)',
-							showlegend=showlegend))
-		fig.update_traces(fillpattern_shape='/', selector=dict(name='BESS Serving Load (kW)'))
 
 	## Original load piece (minus any vbat or BESS charging aka 'new/additional loads')
 	fig.add_trace(go.Scatter(x=timestamps,
@@ -194,6 +183,18 @@ def work(modelDir, inputDict):
 	#				 showlegend=showlegend))
 	#fig.update_traces(legendgroup='Demand', visible='legendonly', selector=dict(name='Original Load (kW)')) ## Make demand hidden on plot by default
 
+	## BESS serving load piece
+	if (inputDict['BESS'] == 'Yes'):
+		fig.add_trace(go.Scatter(x=timestamps,
+							y=np.asarray(BESS), # + np.asarray(demand) + vbat_discharge_component,
+							yaxis='y1',
+							mode='none',
+							fill='tozeroy',
+							name='BESS Serving Load (kW)',
+							fillcolor='rgba(0,137,83,1)',
+							showlegend=showlegend))
+		fig.update_traces(fillpattern_shape='/', selector=dict(name='BESS Serving Load (kW)'))
+
 	## PV piece, if enabled
 	if (inputDict['PV'] == 'Yes'):
 		fig.add_trace(go.Scatter(x=timestamps,
@@ -205,6 +206,9 @@ def work(modelDir, inputDict):
 						fillcolor='rgba(255,246,0,1)',
 						showlegend=showlegend
 						))
+		
+	##vbatDispatch (TESS) piece
+	#TODO: add enabling/disabling switch here
 	fig.add_trace(go.Scatter(x=timestamps,
 							y=np.asarray(vbat_discharge_flipsign),
 							yaxis='y1',
@@ -214,6 +218,7 @@ def work(modelDir, inputDict):
 							name='TESS Serving Load (kW)',
 							showlegend=showlegend))
 	fig.update_traces(fillpattern_shape='/', selector=dict(name='TESS Serving Load (kW)'))
+
 	## Plot layout
 	fig.update_layout(
     	title='Utility Data Test',
@@ -293,13 +298,13 @@ def new(modelDir):
 		'BESS': 'Yes',
 		'generator': 'No',
 		'outage': True,
-		'outage_start_hour': '2100',
-		'outage_duration': '3',
+		'outage_start_hour': '1836', #march 18, 2018, 2pm
+		'outage_duration': '4',
 
 		## Financial Inputs
 		'demandChargeURDB': 'Yes',
 		'demandChargeCost': '0.05',
-		'projectionLength': '10',
+		'projectionLength': '25',
 
 		## vbatDispatch inputs:
 		'load_type': '2', ## Heat Pump

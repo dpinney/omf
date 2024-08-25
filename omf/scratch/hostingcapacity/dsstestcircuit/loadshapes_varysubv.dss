@@ -1,2 +1,1 @@
-New Loadshape.SubVoltage npts=8739, minterval=60, Pmult=(sngfile=SubV_PhaseA_60minInst.sng) UseActual=False
-
+New Loadshape.SubVoltage npts=8739, minterval=60, Pmult=(sngfile=Profiles\SubV_PhaseA_60minInst.sng) UseActual=False

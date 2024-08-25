@@ -1556,10 +1556,10 @@ def work(modelDir, inputDict):
     outData = {}
 
     # files
-    omd_file_path = pJoin(omf.omfDir,'static','testFiles','resilientCommunity', inputDict['inputDataFileName'])
+    omd_file_path = pJoin(modelDir, inputDict['inputDataFileName'])
     # census_nri_path = pJoin(omf.omfDir,'static','testFiles','resilientCommunity', 'census_and_NRI_database_MAR2023.json')
-    loads_file_path = pJoin(omf.omfDir,'static','testFiles','resilientCommunity', 'loads2.json')
-    obs_file_path = pJoin(omf.omfDir,'static','testFiles','resilientCommunity', 'objects3.json')
+    #loads_file_path = pJoin(omf.omfDir,'static','testFiles','resilientCommunity', 'loads2.json')
+    #obs_file_path = pJoin(omf.omfDir,'static','testFiles','resilientCommunity', 'objects3.json')
     geoJson_shapes_file = pJoin(modelDir, 'geoshapes.geojson')
 
 
