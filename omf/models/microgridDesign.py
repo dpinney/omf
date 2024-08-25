@@ -22,10 +22,20 @@ hidden = False
 
 def work(modelDir, inputDict):
 	''' Run the model in its directory. '''
+	# - When this model is run though microgridup_gui.py, boolean parameters are stored as False and True.
+	# - When this model is run through web.py, boolean parameters are stored as "false" and true"
+	#   - Translate "false" into False and "true" into True
+	for k, v in inputDict.items():
+		if v == 'true':
+			inputDict[k] = True
+		elif v == 'false':
+			inputDict[k] = False
 	outData = {}
 	solar = inputDict['solar'] 
 	wind = inputDict['wind']
 	battery = inputDict['battery']
+	# - When coming from microgridup_gui.py, urdbLabelSwitch == False (good)
+	# - When coming from web.py, urdbLabelSwitch == 'false' (need to translate 'false' into False)
 	urdbLabelSwitch = inputDict['urdbLabelSwitch']
 	outData['solar'] = inputDict['solar']
 	outData['wind'] = inputDict['wind']
@@ -48,7 +58,7 @@ def work(modelDir, inputDict):
 	longitude = float(inputDict['longitude'])
 	energyCost = float(inputDict['energyCost'])
 	demandCost = float(inputDict['demandCost'])
-	if urdbLabelSwitch == 'on':
+	if urdbLabelSwitch:
 		urdbLabel = str(inputDict['urdbLabel'])
 	# TODO: Enable all instances of 'annualCostSwitch', 'energyCostMonthly', 'demandCostMonthly' in mgDesign.py once a suitable way to enter a list of 12 monthly rates is found for mgDesign.html
 	# annualCostSwitch = inputDict['annualCostSwitch']
@@ -94,16 +104,16 @@ def work(modelDir, inputDict):
 	if outage_end_hour > 8759:
 		outage_end_hour = 8760
 	value_of_lost_load = float(inputDict['value_of_lost_load'])
-	solarCanExport = bool(inputDict['solarCanExport'])
-	solarCanCurtail = bool(inputDict['solarCanCurtail'])
+	solarCanExport = inputDict['solarCanExport']
+	solarCanCurtail = inputDict['solarCanCurtail']
 	# explicitly convert string inputs from microgridDesign.html into usable boolean for REopt Scenario
-	if inputDict['solarCanExport'] == "true":
+	if inputDict['solarCanExport']:
 		solarCanExport = True
-	elif inputDict['solarCanExport'] == "false":
+	else:
 		solarCanExport = False
-	if inputDict['solarCanCurtail'] == "true":
+	if inputDict['solarCanCurtail']:
 		solarCanCurtail = True
-	elif inputDict['solarCanCurtail'] == "false":
+	else:
 		solarCanCurtail = False
 	dieselMax = float(inputDict['dieselMax'])
 	dieselMin = float(inputDict['dieselMin'])
@@ -111,7 +121,7 @@ def work(modelDir, inputDict):
 	dieselCO2Factor = float(inputDict['dieselCO2Factor'])
 	dieselOMCostKw = float(inputDict['dieselOMCostKw'])
 	dieselOMCostKwh = float(inputDict['dieselOMCostKwh'])
-	dieselOnlyRunsDuringOutage = bool(inputDict['dieselOnlyRunsDuringOutage'])
+	dieselOnlyRunsDuringOutage = inputDict['dieselOnlyRunsDuringOutage']
 	tolerance = float(inputDict['solverTolerance'])
 	loadShape = np.array(load_df)
 	criticalLoadShape = np.array(critical_load_df)
@@ -220,13 +230,13 @@ def work(modelDir, inputDict):
 		# 	scenario['Scenario']['Site']['ElectricTariff']['blended_monthly_demand_charges_us_dollars_per_kw'] = demandCostMonthly
 		# solar and battery have default 'max_kw' == 1000000000; Wind has default 'max_kw' == 0 and thus must be set explicitly; Check https://developer.nrel.gov/docs/energy-optimization/reopt-v1 for updates
 		scenario['PV']['existing_kw'] = solarExisting
-		if solar == 'off':
+		if not solar:
 			scenario['PV']['max_kw'] = 0
-		elif solar == 'on':
+		else:
 			scenario['PV']['max_kw'] = solarMax
 			scenario['ElectricLoad']['loads_kw_is_net'] = False
 			# To turn off energy export/net-metering, set wholesaleCost to "0" and excess PV gen will be curtailed
-			if solarCanExport == False:
+			if not solarCanExport:
 				#scenario['Scenario']['ElectricTariff']["wholesale_rate_above_site_load_us_dollars_per_kwh"] = 0
 				scenario['ElectricTariff']['wholesale_rate'] = 0
 				#["wholesale_rate_us_dollars_per_kwh"] = 0
@@ -269,12 +279,12 @@ def work(modelDir, inputDict):
 		#scenario['ElectricUtility']['outage_durations'] = [ outage_duration ] #not sure if correct
 
 		# set rates
-		if urdbLabelSwitch == 'off':
+		if not urdbLabelSwitch:
 			scenario['ElectricTariff']['blended_annual_energy_rate'] = energyCost
 			#['blended_annual_rates_us_dollars_per_kwh'] = energyCost
 			scenario['ElectricTariff']['blended_annual_demand_rate'] = demandCost
 			#['blended_annual_demand_charges_us_dollars_per_kw'] = demandCost
-		elif urdbLabelSwitch == 'on':
+		else:
 			scenario['ElectricTariff']['urdb_label'] = urdbLabel
 
 		start_time = time.time()
@@ -1070,9 +1080,9 @@ def new(modelDir):
 		"runTime": "",
 		"loadShape" : load_shape,
 		"criticalLoadShape" : crit_load_shape,
-		"solar" : "on",
-		"wind" : "off",
-		"battery" : "on",
+		"solar" : True,
+		"wind" : False,
+		"battery" : True,
 		"fileName" : fName,
 		"criticalFileName" : cfName,
 		"latitude" : '39.7817',
@@ -1084,7 +1094,7 @@ def new(modelDir):
 		"maxRuntimeSeconds": "240",
 		"energyCost" : "0.1",
 		"demandCost" : '20',
-		"urdbLabelSwitch": "off",
+		"urdbLabelSwitch": False,
 		"urdbLabel" : '5b75cfe95457a3454faf0aea',
 		# TODO: Enable all instances of 'annualCostSwitch', 'energyCostMonthly', 'demandCostMonthly' in mgDesign.py once a suitable way to enter a list of 12 monthly rates is found for mgDesign.html
 		# "annualCostSwitch": "off",

@@ -611,9 +611,9 @@
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Use URDB Rate?<span class="classic">Utilizing a rate from the Utility Rate Database overrides Cost of Energy and Cost of Demand rates above. See https://openei.org/services/<br>doc/rest/util_rates/</span></label>
-				<select id="urdbLabelSwitch" name="urdbLabelSwitch" value="{{allInputDataDict.urdbLabelSwitch}}"/>
-					<option value="on" {{ 'selected' if allInputDataDict.urdbLabelSwitch == 'on' }}>Yes</option>
-					<option value="off" {{ 'selected' if allInputDataDict.urdbLabelSwitch == 'off' }}>No</option>
+				<select id="urdbLabelSwitch" name="urdbLabelSwitch">
+					<option value="true" {{ 'selected' if allInputDataDict.urdbLabelSwitch == True }}>Yes</option>
+					<option value="false" {{ 'selected' if allInputDataDict.urdbLabelSwitch == False }}>No</option>
 				</select>
 			</div>
 			<div class="shortInput">
@@ -642,23 +642,23 @@
 			<hr>
 			<div class="shortInput">
 				<label class="tooltip">Solar<span class="classic">Include solar in the microgrid design?</span></label>
-				<select id="solar" name="solar" value="{{allInputDataDict.solar}}"/>
-					<option value="on" {{ 'selected' if allInputDataDict.solar == 'on' }}>Yes</option>
-					<option value="off" {{ 'selected' if allInputDataDict.solar == 'off' }}>No</option>
+				<select id="solar" name="solar">
+					<option value='true' {{ 'selected' if allInputDataDict.solar == True }}>Yes</option>
+					<option value='false' {{ 'selected' if allInputDataDict.solar == False }}>No</option>
 				</select>
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Wind<span class="classic">Include wind in the microgrid design?</span></label>
-				<select id="wind" name="wind" value="{{allInputDataDict.wind}}"/>
-					<option value="on" {{ 'selected' if allInputDataDict.wind == 'on' }}>Yes</option>
-					<option value="off" {{ 'selected' if allInputDataDict.wind == 'off' }}>No</option>
+				<select id="wind" name="wind">
+					<option value="true" {{ 'selected' if allInputDataDict.wind == True }}>Yes</option>
+					<option value="false" {{ 'selected' if allInputDataDict.wind == False }}>No</option>
 				</select>
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Battery<span class="classic">Include batteries in the microgrid design?</span></label>
-				<select id="battery" name="battery" value="{{allInputDataDict.battery}}"/>
-					<option value="on" {{ 'selected' if allInputDataDict.battery == 'on' }}>Yes</option>
-					<option value="off" {{ 'selected' if allInputDataDict.battery == 'off' }}>No</option>
+				<select id="battery" name="battery">
+					<option value="true" {{ 'selected' if allInputDataDict.battery == True }}>Yes</option>
+					<option value="false" {{ 'selected' if allInputDataDict.battery == False }}>No</option>
 				</select>
 			</div>
 			<div class="shortInput solarDisplayInput">
@@ -679,16 +679,16 @@
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Solar power can be curtailed?<span class="classic">Allows for excess solar power to be automatically curtailed.</span></label>
-				<select id="solarCanCurtail" name="solarCanCurtail" value="{{allInputDataDict.solarCanCurtail}}"/>
-					<option value=true {{ 'selected' if allInputDataDict.solarCanCurtail == 'true' }}>Yes</option>
-					<option value=false {{ 'selected' if allInputDataDict.solarCanCurtail == 'false' }}>No</option>
+				<select id="solarCanCurtail" name="solarCanCurtail">
+					<option value='true' {{ 'selected' if allInputDataDict.solarCanCurtail == True }}>Yes</option>
+					<option value='false' {{ 'selected' if allInputDataDict.solarCanCurtail == False }}>No</option>
 				</select>
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Solar power can be exported?<span class="classic">Allows for excess solar power to be sold back to the grid.</span></label>
-				<select id="solarCanExport" name="solarCanExport" value="{{allInputDataDict.solarCanExport}}"/>
-					<option value=true {{ 'selected' if allInputDataDict.solarCanExport == 'true' }}>Yes</option>
-					<option value=false {{ 'selected' if allInputDataDict.solarCanExport == 'false' }}>No</option>
+				<select id="solarCanExport" name="solarCanExport">
+					<option value='true' {{ 'selected' if allInputDataDict.solarCanExport == True }}>Yes</option>
+					<option value='false' {{ 'selected' if allInputDataDict.solarCanExport == False }}>No</option>
 				</select>
 			</div>
 			<div class="shortInput">
@@ -793,9 +793,9 @@
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">User-supplied Critical Load Shape (.csv)?<span class="classic">Check "Yes" if user uploads Optional Critical Load Shape (.csv). Else, indicate "Critical Load Factor"</span></label>
-				<select id="userCriticalLoadShape" name="userCriticalLoadShape" value="{{allInputDataDict.userCriticalLoadShape}}"/>
-					<option value=true {{ 'selected' if allInputDataDict.userCriticalLoadShape == 'true' }}>Yes</option>
-					<option value=false {{ 'selected' if allInputDataDict.userCriticalLoadShape == 'false' }}>No</option>
+				<select id="userCriticalLoadShape" name="userCriticalLoadShape">
+					<option value='true' {{ 'selected' if allInputDataDict.userCriticalLoadShape == True }}>Yes</option>
+					<option value='false' {{ 'selected' if allInputDataDict.userCriticalLoadShape == False }}>No</option>
 				</select>
 			</div>
 			<div class="shortInput">
@@ -853,9 +853,9 @@
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Fossil gen only runs during outage?<span class="classic">"No" signifies that fossil generator is enabled to run at any point in the year.</span></label>
-				<select id="dieselOnlyRunsDuringOutage" name="dieselOnlyRunsDuringOutage" value="{{allInputDataDict.dieselOnlyRunsDuringOutage}}"/>
-					<option value=true {{ 'selected' if allInputDataDict.dieselOnlyRunsDuringOutage == 'true' }}>Yes</option>
-					<option value=false {{ 'selected' if allInputDataDict.dieselOnlyRunsDuringOutage == 'false' }}>No</option>
+				<select id="dieselOnlyRunsDuringOutage" name="dieselOnlyRunsDuringOutage">
+					<option value='true' {{ 'selected' if allInputDataDict.dieselOnlyRunsDuringOutage == True }}>Yes</option>
+					<option value='false' {{ 'selected' if allInputDataDict.dieselOnlyRunsDuringOutage == False }}>No</option>
 				</select>
 			</div>
 			<div class="shortInput">
