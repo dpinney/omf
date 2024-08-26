@@ -181,6 +181,8 @@ def create_REopt_jl_jsonFile(modelDir, inputDict):
 		scenario['ElectricStorage'] = {
 			##TODO: Add options here, if needed
 			#scenario['ElectricStorage']['size_kw'] = 2
+			"min_kw": 2,
+			"min_kwh": 2,
 			}
 		
 
