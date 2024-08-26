@@ -14,6 +14,7 @@ from opendssdirect import run_command, Error
 from omf.solvers.opendss import dssConvert
 import multiprocessing
 from functools import partial
+from pathlib import Path
 
 def runDssCommand(dsscmd, strict=False):
 	'''Execute a single opendsscmd in the current context.'''
@@ -335,108 +336,104 @@ def check_hosting_capacity_of_single_bus(FILE_PATH:str, BUS_NAME:str, kwValue: f
 	therm_violation = True if len(over_df) > 0 else False
 	return {'thermal_violation':therm_violation, 'voltage_violation':volt_violation}
 
-def get_hosting_capacity_of_single_bus_multiprocessing(FILE_PATH:str, BUS_NAME:str, max_test_kw:float, lock):
-	'''
-	- Return the maximum hosting capacity at a single bus that is possible before a thermal violation or voltage violation is reached
-		- E.g. if a violation occurs at 4 kW, then this function will return 3.5 kW with thermal_violation == False and voltage_violation == False
-	- Special case: if a single bus experiences a violation at 1 kW, then this function will return 1 kW with thermal_violation == True and/or
-		voltage_violation == True. In this case, the hosting capacity isn't known. We only know it's < 1 kW
-	'''
-	# - Get lower and upper bounds for the hosting capacity of a single bus
-	thermal_violation = False
-	voltage_violation = False
-	lower_kw_bound = 1
-	upper_kw_bound = 1
-	while True:
-		results = check_hosting_capacity_of_single_bus(FILE_PATH, BUS_NAME, upper_kw_bound)
-		thermal_violation = results['thermal_violation']
-		voltage_violation = results['voltage_violation']
-		if thermal_violation or voltage_violation or upper_kw_bound == max_test_kw:
-			break
-		lower_kw_bound = upper_kw_bound
-		upper_kw_bound = lower_kw_bound * 2
-		if upper_kw_bound > max_test_kw:
-			upper_kw_bound = max_test_kw
-	# - If no violations were found at the max_test_kw, then just report the hosting capacity to be the max_test_kw even though the actual hosting
-	#   capacity is higher
-	if not thermal_violation and not voltage_violation and upper_kw_bound == max_test_kw:
-		return {'bus': BUS_NAME, 'max_kw': max_test_kw, 'reached_max': False, 'thermal_violation': thermal_violation, 'voltage_violation': voltage_violation}
-	# - Use the bounds to compute the hosting capacity of a single bus
-	kw_step = (upper_kw_bound - lower_kw_bound) / 2
-	kw = lower_kw_bound + kw_step
-	# - The reported valid hosting capacity (i.e. lower_kw_bound) will be equal to the hosting capacity that causes a thermal or voltage violation
-	#   minus a value that is less than 1 kW
-	#   - E.g. a reported hosting capacity of 139.5 kW means that a violation probably occurred at 140 kW
-	while not kw_step < .1:
-		results = check_hosting_capacity_of_single_bus(FILE_PATH, BUS_NAME, kw, lock)
-		thermal_violation = results['thermal_violation']
-		voltage_violation = results['voltage_violation']
-		if not thermal_violation and not voltage_violation:
-			lower_kw_bound = kw
-		else:
-			upper_kw_bound = kw
-			thermal_violation = False
-			voltage_violation = False
-		kw_step = (upper_kw_bound - lower_kw_bound) / 2
-		kw = lower_kw_bound + kw_step
-	return {'bus': BUS_NAME, 'max_kw': lower_kw_bound, 'reached_max': True, 'thermal_violation': thermal_violation, 'voltage_violation': voltage_violation}
+'''
+Hosting Capacity Multiprocessing Exploration - Unused
 
-def check_hosting_capacity_of_single_bus_multiprocessing(FILE_PATH:str, BUS_NAME:str, kwValue: float, lock):
-	''' Identify if an amount of generation that is added at BUS_NAME exceeds ANSI A Band voltage levels. '''
-	fullpath = os.path.abspath(FILE_PATH)
-	filedir = os.path.dirname(fullpath)
-	ansi_a_max_pu = 1.05 #	ansi_b_max_pu = 1.058
-	# Find the insertion kv level.
-	kv_mappings = get_bus_kv_mappings(fullpath)
-	# Error cleanly on invalid bus.
-	if BUS_NAME not in kv_mappings:
-		raise Exception(f'BUS_NAME {BUS_NAME} not found in circuit.')
-	# Get insertion bus; should always be safe to insert above makebuslist.
-	tree = dssConvert.dssToTree(fullpath)
-	for i, ob in enumerate(tree):
-		if ob.get('!CMD', None) == 'makebuslist':
-			insertion_index = i
-	lock.acquire()
-	# Step through generator sizes, add to circuit, measure voltages.
-	new_tree = deepcopy(tree)
-	# Insert generator.
-	new_gen = {
-		'!CMD': 'new',
-		'object': f'generator.hostcap_{BUS_NAME}',
-		'bus1': f'{BUS_NAME}.1.2.3',
-		'kw': kwValue,
-		'pf': '1.0',
-		'conn': 'wye',
-		'phases': '3',
-		'kv': kv_mappings[BUS_NAME],
-		'model': '1' }
-	# Make DSS and run.
-	new_tree.insert(insertion_index, new_gen)
-	dssConvert.treeToDss(new_tree, 'HOSTCAP.dss')
-	runDSS('HOSTCAP.dss')
-	# Calc max voltages.
-	runDssCommand(f'export voltages "{filedir}/volts.csv"')
-	volt_df = pd.read_csv(f'{filedir}/volts.csv')
-	lock.release()
-	v_max_pu1, v_max_pu2, v_max_pu3 =  volt_df[' pu1'].max(), volt_df[' pu2'].max(), volt_df[' pu2'].max()
-	v_max_pu_all = float(max(v_max_pu1, v_max_pu2, v_max_pu3))
-	volt_violation = True if np.greater(v_max_pu_all, ansi_a_max_pu) else False
-	# Calc number of thermal violations.
-	runDssCommand(f'export overloads "overloads.csv"')
-	over_df = pd.read_csv(f'overloads.csv')
-	therm_violation = True if len(over_df) > 0 else False
-	return {'thermal_violation':therm_violation, 'voltage_violation':volt_violation}
+get_hosting_capacity_of_single_bus_multiprocessing()
+check_hosting_capacity_of_single_bus_multiprocessing()
+multiprocessor_function()
 
-def multiprocessor_function( FILE_PATH, max_test_kw, lock, BUS_NAME):
-	with lock:
-		# print( "inside multiprocessor function" )
-		try:
-			single_output = get_hosting_capacity_of_single_bus_multiprocessing( FILE_PATH, BUS_NAME, max_test_kw, lock)
-			return single_output
-		except:
-			print(f'Could not solve hosting capacity for BUS_NAME={BUS_NAME}')
+- Exploration to modify hosting capacity with multiprocessing for each bus to run independently instead of locking a file
+- Each bus would have its own "hostcap", volts_, and overloads_ file and the results would be combined
+Issues - Instrinsic OpenDSS to volts.csv
+Works when running VSCode debugger, not when running regular
+'''
+# Unused
+def get_hosting_capacity_of_single_bus_multiprocessing(FILE_PATH: str, BUS_NAME: str, max_test_kw: float):
+    ''' Get the maximum hosting capacity at a single bus before any violations. '''
+    thermal_violation = False
+    voltage_violation = False
+    lower_kw_bound = 1
+    upper_kw_bound = 1
+    while True:
+        results = check_hosting_capacity_of_single_bus_multiprocessing(FILE_PATH, BUS_NAME, upper_kw_bound)
+        thermal_violation = results['thermal_violation']
+        voltage_violation = results['voltage_violation']
+        if thermal_violation or voltage_violation or upper_kw_bound == max_test_kw:
+            break
+        lower_kw_bound = upper_kw_bound
+        upper_kw_bound = lower_kw_bound * 2
+        if upper_kw_bound > max_test_kw:
+            upper_kw_bound = max_test_kw
+    if not thermal_violation and not voltage_violation and upper_kw_bound == max_test_kw:
+        return {'bus': BUS_NAME, 'max_kw': max_test_kw, 'reached_max': False, 'thermal_violation': thermal_violation, 'voltage_violation': voltage_violation}
+    kw_step = (upper_kw_bound - lower_kw_bound) / 2
+    kw = lower_kw_bound + kw_step
+    while kw_step >= 0.1:
+        results = check_hosting_capacity_of_single_bus_multiprocessing(FILE_PATH, BUS_NAME, kw)
+        thermal_violation = results['thermal_violation']
+        voltage_violation = results['voltage_violation']
+        if not thermal_violation and not voltage_violation:
+            lower_kw_bound = kw
+        else:
+            upper_kw_bound = kw
+            thermal_violation = False
+            voltage_violation = False
+        kw_step = (upper_kw_bound - lower_kw_bound) / 2
+        kw = lower_kw_bound + kw_step
+    return {'bus': BUS_NAME, 'max_kw': lower_kw_bound, 'reached_max': True, 'thermal_violation': thermal_violation, 'voltage_violation': voltage_violation}
 
-def hosting_capacity_all(FNAME:str, max_test_kw:float=50000, BUS_LIST:list = None, multiprocess=False, cores: int=8):
+# Unused
+def check_hosting_capacity_of_single_bus_multiprocessing(FILE_PATH: str, BUS_NAME: str, kwValue: float):
+    ''' Check if a generation value at a bus exceeds voltage levels or causes thermal violations. '''
+    fullpath = os.path.abspath(FILE_PATH)
+    filedir = os.path.dirname(fullpath)
+    dss_file = os.path.join(filedir, f'HOSTCAP_{BUS_NAME}.dss')
+    volts_file = os.path.join(filedir, f'volts_{BUS_NAME}.csv')
+    overloads_file = os.path.join(filedir, f'overloads_{BUS_NAME}.csv')
+    ansi_a_max_pu = 1.05
+    kv_mappings = get_bus_kv_mappings(fullpath)
+    if BUS_NAME not in kv_mappings:
+        raise Exception(f'BUS_NAME {BUS_NAME} not found in circuit.')
+    tree = dssConvert.dssToTree(fullpath)
+    for i, ob in enumerate(tree):
+        if ob.get('!CMD', None) == 'makebuslist':
+            insertion_index = i
+    new_tree = deepcopy(tree)
+    new_gen = {
+        '!CMD': 'new',
+        'object': f'generator.hostcap_{BUS_NAME}',
+        'bus1': f'{BUS_NAME}.1.2.3',
+        'kw': kwValue,
+        'pf': '1.0',
+        'conn': 'wye',
+        'phases': '3',
+        'kv': kv_mappings[BUS_NAME],
+        'model': '1'
+    }
+    new_tree.insert(insertion_index, new_gen)
+    dssConvert.treeToDss(new_tree, dss_file)
+    runDSS(dss_file)
+    runDssCommand(f'export voltages "{volts_file}"')
+    runDssCommand(f'export overloads "{overloads_file}"')
+    volt_df = pd.read_csv(volts_file)
+    v_max_pu1, v_max_pu2, v_max_pu3 = volt_df[' pu1'].max(), volt_df[' pu2'].max(), volt_df[' pu3'].max()
+    v_max_pu_all = float(max(v_max_pu1, v_max_pu2, v_max_pu3))
+    volt_violation = v_max_pu_all > ansi_a_max_pu
+    over_df = pd.read_csv(overloads_file)
+    therm_violation = len(over_df) > 0
+    return {'thermal_violation': therm_violation, 'voltage_violation': volt_violation}
+
+#Unused
+def multiprocessor_function(FILE_PATH: str, max_test_kw: float, BUS_NAME: str):
+    ''' Wrapper function for multiprocessing to handle each bus independently. '''
+    try:
+        return get_hosting_capacity_of_single_bus_multiprocessing(FILE_PATH, BUS_NAME, max_test_kw)
+    except Exception as e:
+        print(f'Error processing BUS_NAME={BUS_NAME} in multiprocessor_function: {e}')
+        return {'bus': BUS_NAME, 'max_kw': None, 'reached_max': False, 'thermal_violation': False, 'voltage_violation': False}
+
+def hosting_capacity_all(FNAME:str, max_test_kw:float=50000, BUS_LIST:list = None, multiprocess=False):
 	''' Generate hosting capacity results for all_buses. '''
 	fullpath = os.path.abspath(FNAME)
 	if not BUS_LIST:
@@ -447,17 +444,13 @@ def hosting_capacity_all(FNAME:str, max_test_kw:float=50000, BUS_LIST:list = Non
 	all_output = []
 	# print('GEN_BUSES', gen_buses)
 	if multiprocess == True:
-		with multiprocessing.Manager() as manager:
-			lock = manager.Lock()
-			pool = multiprocessing.Pool( processes=cores )
-			print(f'Running multiprocessor {len(gen_buses)} times with {cores} cores')
-			all_output.extend(pool.starmap(multiprocessor_function, [(fullpath, max_test_kw, lock, bus) for bus in gen_buses]))
-			# print( "multiprocess all output: ", all_output)
+		with multiprocessing.Pool() as pool:
+			all_output = pool.starmap(multiprocessor_function, [(fullpath, max_test_kw, bus) for bus in gen_buses])
+		print(f'Running multiprocessor {len(gen_buses)} times')
 	elif multiprocess == False:
 		for bus in gen_buses:
 			try:
 				single_output = get_hosting_capacity_of_single_bus(fullpath, bus, max_test_kw)
-				# print( "multiprocessor false single output: ", single_output )
 				all_output.append(single_output)
 			except:
 				print(f'Could not solve hosting capacity for BUS_NAME={bus}')
