@@ -323,6 +323,10 @@ def plot_confusion_matrix(
 	plt.xlabel('Predicted Label')
 	plt.tight_layout()
 
+def confidence_score_to_percentage( val ):
+    percentage = val * 100
+    return "{:.4g}%".format(percentage)
+
 def work(modelDir, inputDict):
 	""" Run the model in its directory."""
 	outData = {}
@@ -356,9 +360,9 @@ def work(modelDir, inputDict):
 	plot_confusion_matrix(cnf_matrix, classes=classes)
 	plt.savefig(pJoin(modelDir,'output-conf-matrix.png'))
 	# write our outData
-	with open( outputPath, "r") as outFile:
-		phasingResults = list(csv.reader(outFile))
-	outData["phasingResults"] = phasingResults
+	df_final['Confidence Score'] = df_final['Confidence Score'].apply(confidence_score_to_percentage)
+	outData["phasingResults"] = ( list(df_final.itertuples(index=False, name=None)) )
+	outData["phasingResultsTableHeadings"] = df_final.columns.values.tolist()
 	with open(pJoin(modelDir,"output-conf-matrix.png"),"rb") as inFile:
 		outData["confusionMatrixImg"] = base64.standard_b64encode(inFile.read()).decode()
 	with open(pJoin(modelDir,"ModifiedSC_HIST.png"),"rb") as inFile:

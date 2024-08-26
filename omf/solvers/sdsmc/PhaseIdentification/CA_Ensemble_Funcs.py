@@ -217,8 +217,6 @@ def CAEnsemble(voltage,kVector,kFinal,custID,windowSize,numPhases=-1,lowWindowsT
                     in the final prediction as they will not populate the 
                     co-association matrix properly.  
             """       
-    print( type(voltage.shape[0]) ) 
-    print( type( windowSize))
     ensTotal = int(np.floor(voltage.shape[0] / windowSize))  # This determines the total number of windows based on available data and window size
     ensPredictedPhases = np.zeros((1,len(custID)),dtype=int)
     aggWM = PIUtils.CreateAggWeightMatrix(custID) # This is the co-assocation matrix
@@ -261,9 +259,6 @@ def CAEnsemble(voltage,kVector,kFinal,custID,windowSize,numPhases=-1,lowWindowsT
     # Note that 2-phase and 3-phase datastreams must be adjacent in the indexing!
     custCtr = 0
     while custCtr < len(custID):
-        print( "custCtr: ", custCtr)
-        print( "len(custID): ", len(custID) )
-        print( "len(custID): ", numPhases.size )
         if numPhases[0,custCtr] == 2:
             aggWM[custCtr,(custCtr+1)] = 0
             aggWM[(custCtr+1),custCtr] = 0

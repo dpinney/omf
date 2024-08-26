@@ -82,6 +82,11 @@
 		<p class="reportTitle" style="page-break-before:always"><b>Predicted Phases (Phasing Errors in Red)</b></p>
 		<div id="predictedPhases" class="tightContent">
 			<table style="width:100%">
+				<tr>
+					{% for header in allOutputDataDict["phasingResultsTableHeadings"] %}
+					<th>{{ header }}</th>
+					{% endfor %}
+				</tr>
 				{% for row in allOutputDataDict['phasingResults'] %}
 				<tr style="{% if row[1] != row[2] and row[0] != 'customer ID' %}color:red{% endif %}">
 					{% for td in row %}
