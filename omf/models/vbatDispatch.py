@@ -118,7 +118,7 @@ def work(modelDir, inputDict):
 
 	peakDemand = [max(demand[s:f]) for s, f in monthHours] 
 	energyMonthly = [sum(demand[s:f]) for s, f in monthHours]
-	demandAdj = [d+p for d, p in zip(demand, out["VBpower"])]
+	demandAdj = [d-p for d, p in zip(demand, out["VBpower"])]
 	peakAdjustedDemand = [max(demandAdj[s:f]) for s, f in monthHours]
 	energyAdjustedMonthly = [sum(demandAdj[s:f]) for s, f in monthHours]
 
