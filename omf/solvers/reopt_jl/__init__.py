@@ -1,9 +1,36 @@
 import json, time
 import os, platform
+from os.path import join as pJoin
 import random
 import subprocess
 
 thisDir = str(os.path.abspath(os.path.dirname(__file__)))
+
+def make_julia_script_file(juliaStr : str, cleanFileFormatting = True):
+	''' Creates a Julia File containing the script in juliaStr, cleans up file location formatting (optional), and returns:
+    
+        A string containing the file location
+
+        A string containing a command to delete that file formatted depending on the operating system. 
+
+		Leads to far fewer permissions and formatting issues than running a julia script directly in a commandline command
+	'''
+	if cleanFileFormatting:
+		juliaStr = juliaStr.replace('\\','/')
+	# time.time() is added for the sake of uniqueness to avoid collisions between things running at the same time
+	juliaFileLocation = pJoin(thisDir, f'temp_julia_script_{time.time()}.jl')
+	with open(juliaFileLocation, 'w') as juliaFile:
+		juliaFile.write(juliaStr)
+
+	OSName = platform.system()
+	if OSName in ['Darwin','Linux']:
+		delCommand = f'rm "{juliaFileLocation}"'
+	elif OSName == 'Windows':
+		delCommand = f'del "{juliaFileLocation}"'
+	else:
+		raise Exception("Operating System is not Darwin, Linux, or Windows")
+	
+	return juliaFileLocation, delCommand
 
 def install_reopt_jl(system : list = platform.system(), build_sysimage=True):
     ''' Installs dependencies necessary for running REoptSolver and creates sysimage to reduce precompile time '''
@@ -20,6 +47,9 @@ def install_reopt_jl(system : list = platform.system(), build_sysimage=True):
     
     try:
         install_pyjulia = [
+                'pip show julia >null 2>&1 || pip install julia ',
+                'python -c "import julia; julia.install()" '
+        ] if system == 'Windows' else [
                 'pip3 show julia 1>/dev/null 2>/dev/null || pip3 install julia ',
                 '''python3 -c 'import julia; julia.install()' '''
         ]
@@ -63,17 +93,19 @@ def install_reopt_jl(system : list = platform.system(), build_sysimage=True):
             commands = [
                 f'cd "{thisDir}" & del julia-1.9.4-win64.zip',
 			    f'cd "{thisDir}" & curl -o julia-1.9.4-win64.zip https://julialang-s3.julialang.org/bin/winnt/x64/1.9/julia-1.9.4-win64.zip',
-			    f'cd "{thisDir}" & tar -x -f "julia-1.9.4-win64.zip' ]
+			    f'cd "{thisDir}" & tar -x -f julia-1.9.4-win64.zip' ]
             commands += install_pyjulia
             if build_sysimage:
-                commands += [
-                    f'''cd "{thisDir}\\julia-1.9.4\\bin" & julia --project="{project_path}" -e '
-                    import Pkg; Pkg.instantiate();
+                juliaStr = f'''import Pkg; Pkg.instantiate();
                     import REoptSolver; using PackageCompiler;
                     PackageCompiler.create_sysimage(["REoptSolver"]; sysimage_path="{sysimage_path}", 
                     precompile_execution_file="{precompile_path}", cpu_target="generic;sandybridge,-xsaveopt,clone_all;haswell,-rdrnd,base(1)")
-                    ' '''
-			        f'copy nul "{instantiated_path}"'
+                    '''
+                juliaFileLocation, delCommand = make_julia_script_file(juliaStr)
+                commands += [
+                    f'cd "{thisDir}\\julia-1.9.4\\bin" & julia --project="{project_path}" "{juliaFileLocation}"',
+                    delCommand,
+			        f'copy nul {instantiated_path}'
                 ]
         else:
             raise ValueError(f'No installation script available yet for {system}')
@@ -288,20 +320,32 @@ def run_reopt_jl(path, inputFile="", loadFile="", default=False, outages=False, 
 
         if run_with_sysimage:
             sysimage_path = os.path.normpath(os.path.join(thisDir,"reopt_jl.so"))
-            command = f'''julia --sysimage="{sysimage_path}" -e '
-            using .REoptSolver;
+
+            juliaStr = f'''using .REoptSolver;
             ENV["NREL_DEVELOPER_API_KEY"]="{api_key}";
-            REoptSolver.run("{path}", {outages_jl}, {microgrid_only_jl}, {max_runtime_s_jl}, "{api_key}", {tolerance})'
+            REoptSolver.run("{path}", {outages_jl}, {microgrid_only_jl}, {max_runtime_s_jl}, "{api_key}", {tolerance})
             '''
+            juliaFileLocation, delCommand = make_julia_script_file(juliaStr)
+            command = f'julia --sysimage="{sysimage_path}" "{juliaFileLocation}"'
         else:
             project_path = os.path.normpath(os.path.join(thisDir,"REoptSolver"))
-            command = f'''julia --project="{project_path}" -e '
-                      using Pkg; Pkg.instantiate();
+
+            juliaStr = f'''using Pkg; Pkg.instantiate();
                       import REoptSolver;
                       ENV["NREL_DEVELOPER_API_KEY"]="{api_key}";
                       REoptSolver.run("{path}", {outages_jl}, {microgrid_only_jl}, {max_runtime_s_jl}, "{api_key}", {tolerance})
-                      ' '''
-        
+                      '''
+            juliaFileLocation, delCommand = make_julia_script_file(juliaStr)  
+            command = f'julia --project="{project_path}" "{juliaFileLocation}"'
+
+        OSName = platform.system()
+        if OSName in ['Darwin','Linux']:
+            command += f' ; {delCommand}'
+        elif OSName == 'Windows':
+            command = f'cd "{thisDir}\\julia-1.9.4\\bin" & {command} & {delCommand}'
+        else:
+            raise Exception("Operating System is not Darwin, Linux, or Windows")
+
         # As each line becomes available, print to terminal and append to return variable.
         output = []
         process = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, universal_newlines=True)
