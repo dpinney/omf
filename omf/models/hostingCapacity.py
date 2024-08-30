@@ -25,14 +25,14 @@ modelName, template = __neoMetaModel__.metadata(__file__)
 hidden = False
 
 def convert_seconds_to_hms_ms( seconds ):
-    milliseconds = seconds * 1000
-    
-    # Calculate hours, minutes, seconds, and milliseconds
-    hours, remainder = divmod(milliseconds, 3600000)
-    minutes, remainder = divmod(remainder, 60000)
-    seconds, milliseconds = divmod(remainder, 1000)
-    
-    return "{:02d}:{:02d}:{:02d}.{:03d}".format(int(hours), int(minutes), int(seconds), int(milliseconds))
+	milliseconds = seconds * 1000
+	
+	# Calculate hours, minutes, seconds, and milliseconds
+	hours, remainder = divmod(milliseconds, 3600000)
+	minutes, remainder = divmod(remainder, 60000)
+	seconds, milliseconds = divmod(remainder, 1000)
+	
+	return "{:02d}:{:02d}:{:02d}.{:03d}".format(int(hours), int(minutes), int(seconds), int(milliseconds))
 
 def bar_chart_coloring( row ):
 	color = 'black'
@@ -48,9 +48,7 @@ def bar_chart_coloring( row ):
 
 def run_downline_load_algorithm( modelDir, inputDict, outData ):
 	# This uses the circuit - so the tradition needs to be on to do this. 
-
-	feederName = [x for x in os.listdir(modelDir) if x.endswith('.omd') and x[:-4] == inputDict['feederName1'] ][0]
-	inputDict['feederName1'] = feederName[:-4]
+	feederName = [x for x in os.listdir(modelDir) if x.endswith('.omd')][0]
 	path_to_omd = Path(modelDir, feederName)
 	tree = opendss.dssConvert.omdToTree(path_to_omd)
 	opendss.dssConvert.treeToDss(tree, Path(modelDir, 'downlineLoad.dss'))
@@ -93,14 +91,14 @@ def run_downline_load_algorithm( modelDir, inputDict, outData ):
 	for i in indexes:
 		sorted_downlineDF = sorted_downlineDF.drop(i)
 
-	sorted_downlineDF.to_csv(Path(modelDir, 'downline_load.csv'), index=False)
+	sorted_downlineDF.to_csv(Path(modelDir, 'output_downline_load.csv'), index=False)
 	
-	downline_color_data = Path(modelDir, 'downline_load.csv').read_text()
+	downline_color_data = Path(modelDir, 'output_downline_load.csv').read_text()
 	downline_color = {
-    "downline_load.csv": {
-        "csv": "<content>",
-        "colorOnLoadColumnIndex": "0"
-    }
+		"downline_load.csv": {
+			"csv": "<content>",
+			"colorOnLoadColumnIndex": "0"
+		}
 	}
 
 	original_file = Path(modelDir, 'color_test.omd') #This should have already been made
@@ -124,7 +122,7 @@ def run_ami_algorithm( modelDir, inputDict, outData ):
 	inputPath = Path(modelDir, inputDict['AMIDataFileName'])
 	inputAsString = inputPath.read_text()
 
-	outputPath = Path(modelDir, 'AMI_output.csv')
+	outputPath = Path(modelDir, 'output_MoCHa.csv')
 	AMI_output = []
 
 	try:
@@ -165,10 +163,8 @@ def run_ami_algorithm( modelDir, inputDict, outData ):
 
 def run_traditional_algorithm( modelDir, inputDict, outData ):
 	# traditional hosting capacity if they uploaded an omd circuit file and chose to use it.
-
 	# Check if the file was uploaded and checks to make sure the name matches
-	feederName = [x for x in os.listdir(modelDir) if x.endswith('.omd') and x[:-4] == inputDict['feederName1'] ][0]
-	inputDict['feederName1'] = feederName[:-4]
+	feederName = [x for x in os.listdir(modelDir) if x.endswith('.omd')][0]
 	path_to_omd = Path(modelDir, feederName)
 	tree = opendss.dssConvert.omdToTree(path_to_omd)
 	opendss.dssConvert.treeToDss(tree, Path(modelDir, 'circuit.dss'))
@@ -178,6 +174,7 @@ def run_traditional_algorithm( modelDir, inputDict, outData ):
 	# - opendss.hosting_capacity_all() changes the cwd, so change it back so other code isn't affected
 	tradHCDF = pd.DataFrame( traditionalHCResults )
 	sorted_tradHCDF = tradHCDF.sort_values(by='bus')
+	sorted_tradHCDF.to_csv( "output_tradHC.csv")
 	sorted_tradHCDF['plot_color'] = sorted_tradHCDF.apply ( lambda row: bar_chart_coloring(row), axis=1 )
 	# Plotly has its own colors - need to map the "name" of given colors to theirs
 	traditionalHCFigure = px.bar( sorted_tradHCDF, x='bus', y='max_kw', barmode='group', color='plot_color', color_discrete_map={ 'red': 'red', 'orange': 'orange', 'green': 'green', 'yellow': 'yellow'}, template='simple_white' )
@@ -239,7 +236,7 @@ def work(modelDir, inputDict):
 
 def new(modelDir):
 	''' Create a new instance of this model. Returns true on success, false on failure. '''
-	meter_file_name = 'mohcaInputCustom.csv'
+	meter_file_name = 'input_mohcaCustom.csv'
 	meter_file_path = Path(omf.omfDir,'static','testFiles', 'hostingCapacity', meter_file_name)
 	# meter_file_contents = open(meter_file_path).read()
 	defaultInputs = {

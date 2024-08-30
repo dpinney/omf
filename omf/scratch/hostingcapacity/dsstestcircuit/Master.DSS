@@ -1,0 +1,24 @@
+Clear
+ClearAll
+
+New Circuit.SecondaryTestCircuit pu=1.0 bus1=bussource basekV=46.0 R1=1.036 X1=10.1433 R0=5.462 X0=34.1897
+
+Redirect loadshapes_varysubv.dss
+edit vsource.source duty=SubVoltage
+
+Redirect loadshapes.dss
+Redirect linecodes.dss
+
+Redirect substation.dss
+Redirect linestrafosloads.dss
+
+MakeBusList
+Set Voltagebases=(46, 12.47, 0.41569219)
+CalcVoltagebases
+export voltages "volts.csv"
+Buscoords buscoords.dss
+
+New "EnergyMeter.feeder" element=line.MDV_SUB_1_HSB terminal=1 
+
+set mode=snap controlmode=static maxcontroliter=50 maxiterations=25 miniterations=1
+solve

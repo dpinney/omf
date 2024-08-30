@@ -50,7 +50,7 @@
 				</div>
 			</div>
 			<div class="shortInput">
-				<label class="tooltip">Clusters<span class="classic">Number of regions with similar voltage. 7 is a good default, or you can set this to 3 * number of regulators + 2 on the system. Somewhere between 3 and 25 clusters is recommended.</span></label>
+				<label class="tooltip">Clusters<span class="classic">Meters are assigned to clusters based on similar voltage.7 is a good default, or set to to 3 * number of regulators + 2 on the system. Between 3 and 25 clusters is recommended.</span></label>
 				<input type="text" id="kFinal" name="kFinal" value="{{allInputDataDict.kFinal}}"/>
 			</div>
 			<div class="shortInput">
@@ -74,16 +74,21 @@
 			<img id="confidenceHistogramImg" style="width:100%; border-radius:8px"/>
 			<script type="text/javascript">gebi("confidenceHistogramImg").src = "data:image/png;base64," + allOutputData.confidenceHistogramImg</script>
 		</div>
-		<p class="reportTitle"><b>Percentage of Meter Phasing That Changed</b></p>
+		<!-- <p class="reportTitle"><b>Percentage of Meter Phasing That Changed</b></p>
 		<div id="PercentagePlot" class="tightContent">
 			<img id="PercentagePlotImg" style="width:100%; border-radius:8px"/>
 			<script type="text/javascript">gebi("PercentagePlotImg").src = "data:image/png;base64," + allOutputData.PercentagePlotImg</script>
-		</div>
+		</div> -->
 		<p class="reportTitle" style="page-break-before:always"><b>Predicted Phases (Phasing Errors in Red)</b></p>
 		<div id="predictedPhases" class="tightContent">
 			<table style="width:100%">
+				<tr>
+					{% for header in allOutputDataDict["phasingResultsTableHeadings"] %}
+					<th>{{ header }}</th>
+					{% endfor %}
+				</tr>
 				{% for row in allOutputDataDict['phasingResults'] %}
-				<tr style="{% if row[1] != row[2] and row[0] != 'Meter ID' %}color:red{% endif %}">
+				<tr style="{% if row[1] != row[2] and row[0] != 'customer ID' %}color:red{% endif %}">
 					{% for td in row %}
 					<td>{{td}}</td>
 					{% endfor %}

@@ -128,15 +128,15 @@ def viz(pathToOmdOrGlm, forceLayout=False, outputPath=None, outputName='viewer.h
 	# Grab the library we need.
 	with open(omf.omfDir + '/static/svg-pan-zoom.js','r') as pzFile:
 		pzData = pzFile.read()
-	with open(omf.omfDir + '/static/chroma.min.js','r') as chromaFile:
+	with open(omf.omfDir + '/static/geoJsonMap/v3/lib/chroma.js','r') as chromaFile:
 		chromaData = chromaFile.read()
-	with open(omf.omfDir + '/static/papaparse.min.js','r') as papaFile:
+	with open(omf.omfDir + '/static/geoJsonMap/v3/lib/papaparse.js','r') as papaFile:
 		papaData = papaFile.read()
 	with open(omf.omfDir + '/static/jquery.js', 'r') as jquery_file:
 		jquery_data = jquery_file.read()
-	with open(omf.omfDir + '/static/jquery-ui.min.js', 'r') as jquery_ui_file:
+	with open(omf.omfDir + '/static/jquery-ui.js', 'r') as jquery_ui_file:
 		jquery_ui_data = jquery_ui_file.read()
-	with open(omf.omfDir + '/static/jquery-ui.min.css', 'r') as jquery_css_file:
+	with open(omf.omfDir + '/static/jquery-ui.css', 'r') as jquery_css_file:
 		jquery_css_data = jquery_css_file.read()
 	# TEMPLATE HACKING
 	with open(omf.omfDir + '/templates/distNetViz.html') as f:
@@ -156,17 +156,17 @@ def viz(pathToOmdOrGlm, forceLayout=False, outputPath=None, outputName='viewer.h
 	# of exactly the same length.
 	with fileinput.input(tempDir + '/' + outputName, inplace=1) as f:
 		for line in f:
-			if line.lstrip().startswith('<link rel="stylesheet" href="/static/jquery-ui.min.css">'):
+			if line.lstrip().startswith('<link rel="stylesheet" href="/static/jquery-ui.css">'):
 				print("")
 			elif line.lstrip().startswith('<script type="text/javascript" src="/static/jquery.js"></script>'):
 				print("")
-			elif line.lstrip().startswith('<script type="text/javascript" src="/static/jquery-ui.min.js"></script>'):
+			elif line.lstrip().startswith('<script type="text/javascript" src="/static/jquery-ui.js"></script>'):
 				print("")
 			elif line.lstrip().startswith('<script type="text/javascript" src="/static/svg-pan-zoom.js"></script>'):
 				print("")
-			elif line.lstrip().startswith('<script type="text/javascript" src="/static/chroma.min.js"></script>'):
+			elif line.lstrip().startswith('<script type="text/javascript" src="/static/geoJsonMap/v3/lib/chroma.js"></script>'):
 				print("")
-			elif line.lstrip().startswith('<script type="text/javascript" src="/static/papaparse.min.js"></script>'):
+			elif line.lstrip().startswith('<script type="text/javascript" src="/static/geoJsonMap/v3/lib/papaparse.js"></script>'):
 				print("")
 			elif line.lstrip().startswith('<link rel="shortcut icon" href="/static/favicon.ico"/>'):
 				print('<link rel="shortcut icon" href="data:image/x-icon;base64,AAABAAEAEBAQAAAAAAAoAQAAFgAAACgAAAAQAAAAIAAAAAEABAAAAAAAgAAAAAAAAAAAAAAAEAAAAAAAAAAAAAAAioqKAGlpaQDU1NQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAIiIiIiIiIAAgACAAIAAgACAzIzMjMyMwIDAgMCAwIDAiIiIiIiIgMCAwEDAgMCAwIDMTMyMzIzAgMBAwIDAgMCIiIiIiIiAwIDAQMCAwIDAgMxMzIzMjMCAwEDAgMCAwIiIiIiIiIDAAMAAwADAAMAAzMzMzMzMwAAAAAAAAAAAABwAAd3cAAEABAABVVQAAAAUAAFVVAABAAQAAVVUAAAAFAABVVQAAQAEAAFVVAAAABQAA3d0AAMABAAD//wAA"/>')

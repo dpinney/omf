@@ -335,50 +335,56 @@ def solve_model(path, modelFile, apiKey="", timeout=0):
     lock_path = os.path.normpath(os.path.join(thisDir,lock_file))
     check_lock(lock_path,timeout)
     
-    if not os.path.exists(lock_path):
-        with open(lock_path, 'w') as f:
-            f.write(str(os.getpid()))
-            print(f"lock acquired at: {lock_path}")
-        #posts model to API
-        response = req.post(url=urlRequest, data=data, files=files)
-        start_time = time.time()
-        #print(f"response.status_code: {response.status_code}, response.reason: {response.reason}")
-        modelResponse = response.json()['model']
-        #acquires key for given model
-        modelKey = modelResponse['model_key']
+    start_time = time.time()
+    modelKey = None
+    try:
+        if not os.path.exists(lock_path):
+            with open(lock_path, 'w') as f:
+                f.write(str(os.getpid()))
+                print(f"lock acquired at: {lock_path}")
+            #posts model to API
+            response = req.post(url=urlRequest, data=data, files=files)
+            
+            modelResponse = response.json()['model']
+            #acquires key for given model
+            modelKey = modelResponse['model_key']
 
-        modelHasResults, modelStatus, modelMsg = check_model_status( modelKey, userKey )
-        if modelStatus == "failed":
-            release_lock(start_time, lock_path)
-            print(f"error: {modelMsg}")
-            return 
-
-        #waits for model to solve
-        while modelHasResults != 1:
-            #add waiting period between checks? (doesn't seem to have limits on requests, only posting models)
             modelHasResults, modelStatus, modelMsg = check_model_status( modelKey, userKey )
             if modelStatus == "failed":
                 release_lock(start_time, lock_path)
                 print(f"error: {modelMsg}")
-                return
-            if check_timeout(start_time, timeout):
-                release_lock(start_time, lock_path)
-                print(f"error: timeout of {timeout} seconds reached while waiting for model results")
-                print(f"results available: {modelHasResults}, status: {modelStatus}, msg: {modelMsg}")
                 return 
 
-        solvedModel = get_model_results( modelKey, userKey, modelHasResults )
-        
-        #todo: add optional function inputs for output file names
-        with open(os.path.normpath(os.path.join(path,"results.csv")), 'w') as f:
-            f.write(solvedModel['results'])
-            
-        #with open(os.path.normpath(os.path.join(path,"results_nodes.csv")), 'w') as f:
-        #    f.write(solvedModel['resultsNodes'])
+            #waits for model to solve
+            while modelHasResults != 1:
+                #add waiting period between checks? (doesn't seem to have limits on requests, only posting models)
+                modelHasResults, modelStatus, modelMsg = check_model_status( modelKey, userKey )
+                if modelStatus == "failed":
+                    release_lock(start_time, lock_path)
+                    print(f"error: {modelMsg}")
+                    return
+                if check_timeout(start_time, timeout):
+                    release_lock(start_time, lock_path)
+                    print(f"error: timeout of {timeout} seconds reached while waiting for model results")
+                    print(f"results available: {modelHasResults}, status: {modelStatus}, msg: {modelMsg}")
+                    return 
 
-        print(f'model competed: results saved to {path}/results.csv') #and {path}/resultsNodes.csv')
+            solvedModel = get_model_results( modelKey, userKey, modelHasResults )
+            
+            #todo: add optional function inputs for output file names
+            with open(os.path.normpath(os.path.join(path,"results.csv")), 'w') as f:
+                f.write(solvedModel['results'])
+                
+            #with open(os.path.normpath(os.path.join(path,"results_nodes.csv")), 'w') as f:
+            #    f.write(solvedModel['resultsNodes'])
+
+            print(f'model competed: results saved to {path}/results.csv') #and {path}/resultsNodes.csv')
+            
+            release_lock(start_time, lock_path)
+    except Exception as e:
+        print(f'Exception occured during der_cam solve_model : {e}')
+        release_lock(start_time,lock_path)
         
-        release_lock(start_time, lock_path)
     return modelKey
 
 def print_existing_models():

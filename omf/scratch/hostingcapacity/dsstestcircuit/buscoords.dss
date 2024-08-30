@@ -1,0 +1,100 @@
+BusSource,0,0.5
+MDV_SUB_1_HSB, 0.04, 0.5
+feederheadBus, 0.05,0.5
+BusPrim1,0.1,0.5
+BusPrim2,0.2,0.5
+BusPrim3,0.3,0.5
+BusPrim4,0.4,0.5
+BusPrim5,0.5,0.5
+BusPrim6,0.6,0.5
+BusPrim7,0.7,0.5
+BusPrim8,0.8,0.5
+BusPrim9,0.9,0.5
+BusPrim10,1,0.5
+BusPrim11,1.1,0.5
+BusPrim12,1.2,0.5
+
+BusTrafo1LV,0.1,0.5
+BusSec1_1,0.15,0.525
+BusSec1_2,0.15,0.54
+BusSec1_3,0.15,0.56
+BusSec1_4,0.05,0.54
+BusSec1_5,0.05,0.525
+
+BusTrafo2LV,0.2,0.5
+BusSec2_1,0.2,0.45
+
+BusTrafo3LV,0.3,0.5
+BusSec3_1,0.3,0.52
+BusSec3_2,0.3,0.54
+BusSec3_3,0.3,0.56
+BusSec3_4,0.3,0.58
+BusSec3_5,0.3,0.6
+
+BusTrafo4LV,0.4,0.5
+BusSec4_0,0.4,0.47
+BusSec4_1,0.45,0.48
+BusSec4_2,0.45,0.46
+BusSec4_4,0.35,0.44
+BusSec4_5,0.35,0.46
+BusSec4_3,0.35,0.48
+
+BusTrafo5LV,0.5,0.5
+BusSec5_0,0.5,0.6
+BusSec5_1,0.45,0.6
+BusSec5_2,0.55,0.6
+BusSec5_3,0.45,0.525
+BusSec5_4,0.55,0.525
+
+BusTrafo6LV,0.6,0.5
+BusSec6_01,0.55,0.4
+BusSec6_02,0.65,0.4
+BusSec6_1,0.52,0.37
+BusSec6_2,0.58,0.37
+BusSec6_3,0.62,0.37
+BusSec6_4,0.68,0.37
+
+BusTrafo7LV,0.7,0.5
+BusSec7_01,0.7,0.54
+BusSec7_02,0.7,0.56
+BusSec7_1,0.65,0.54
+BusSec7_2,0.75,0.54
+BusSec7_3,0.65,0.56
+BusSec7_4,0.75,0.56
+
+BusTrafo8LV,0.8,0.5
+BusSec8_01,0.8,0.47
+BusSec8_02,0.8,0.45
+BusSec8_1,0.85,0.47
+BusSec8_2,0.75,0.43
+BusSec8_3,0.8,0.425
+BusSec8_4,0.85,0.43
+
+BusTrafo9LV,0.9,0.5
+BusSec9_0,0.9,0.55
+BusSec9_1,0.85,0.55
+BusSec9_2,0.95,0.55
+
+BusTrafo10LV,1,0.5
+BusSec10_0,1,0.4
+BusSec10_1,1.05,0.45
+BusSec10_2,0.95,0.4
+
+BusTrafo11LV,1.1,0.5
+BusSec11_1,1.08,0.52
+BusSec11_2,1.12,0.56
+
+XfmrLV,1.2,0.5
+BusLV1, 1.22, 0.455
+BusLV2, 1.28, 0.365
+BusLoad1, 1.28, 0.35
+BusLoad2, 1.33, 0.365
+BusLoad3, 1.28, 0.455
+BusLoad4, 1.305, 0.43
+BusLV3, 1.12, 0.38
+BusLV4, 1.12, 0.32
+BusLoad6, 1.27, 0.32
+BusLoad5, 0.82, 0.32
+BusLV5, 1.05, 0.34
+BusLoad7, 0.98, 0.35
+BusLoad8, 1.00, 0.34

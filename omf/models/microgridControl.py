@@ -1,18 +1,12 @@
 ''' Calculate optimal restoration scheme for distribution system with multiple microgrids. '''
-import random, re, datetime, json, os, tempfile, shutil, csv, math, base64, io
+import re, json, os, tempfile, shutil, csv, math, io
 from os.path import join as pJoin
-import subprocess
 import pandas as pd
 import numpy as np
-import scipy
-from scipy import spatial
-import scipy.stats as st
-from sklearn.preprocessing import LabelEncoder
 import matplotlib.pyplot as plt
 import plotly as py
 import plotly.graph_objs as go
 from plotly.tools import make_subplots
-import platform
 # from statistics import quantiles
 
 # OMF imports
@@ -26,7 +20,7 @@ from omf.solvers import PowerModelsONM
 # Model metadata:
 tooltip = 'Calculate load, generator and switching controls to maximize power restoration for a circuit with multiple networked microgrids.'
 modelName, template = __neoMetaModel__.metadata(__file__)
-hidden = False
+hidden = True
 
 def coordsFromString(entry):
 	'helper function to take a location string to two integer values'

@@ -1,0 +1,14 @@
+New Linecode.BUSBAR  nphases=3  r1=1e-4  x1=1e-4  r0=1e-4  x0=1e-4  c1=0  c0=0  units=km  baseFreq=60  normamps=2000  emergamps=2000  faultrate=0.1  pctperm=20  repair=3
+New Linecode.OH-3X_477AAC_4/0AAACN nphases=3 r1=0.12241009 x1=0.39494091 r0=0.33466485 x0=1.2742766 c1=11.1973 c0=4.8089 units=km baseFreq=60 normamps=732 emergamps=871
+
+! Linecodes for the 1-phase equivalents of the triplex cables
+New Linecode.Triplex1PhEquivalent4   nphases=1 units=kft rmatrix=[0.9290] xmatrix=[0.0891] cmatrix=[0] normamps=150 emergamps=195 Rg=0 Xg=0 
+New Linecode.Triplex1PhEquivalent1/0 nphases=1 units=kft rmatrix=[0.3674] xmatrix=[0.0856] cmatrix=[0] normamps=280 emergamps=350 Rg=0 Xg=0 
+New Linecode.Triplex1PhEquivalent3/0 nphases=1 units=kft rmatrix=[0.2314] xmatrix=[0.0873] cmatrix=[0] normamps=375 emergamps=480 Rg=0 Xg=0 
+
+!From EPRI ckt4 dss files Edited 6-15 CMM
+New Linecode.Triplex1PhEquivalent4/0 nphases=1 rmatrix=[ 0.18333334 ] 
+!ohms per 1000 ft
+~ xmatrix=[ 0.07840812 ]
+~ cmatrix=[15 ] units=kft
+~ Normamps=299  {299 1.25 *}

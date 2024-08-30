@@ -77,10 +77,6 @@
 				<input type="text" id="year" name="year" value="{{allInputDataDict.year}}" pattern="^\d{4}$" required="required"/>
 			</div>
 			<div class="shortInput">
-				<label class="tooltip">Analysis Period (years)<span class="classic">Specify the length of financial analysis in years.</span></label>
-				<input type="number" id="analysis_years" name="analysis_years" value="{{allInputDataDict.analysis_years}}" step="1" min="2" max="75"  required="required"/>
-			</div>
-			<div class="shortInput">
 				<label class="tooltip">Photovoltaic<span class="classic">Include PV in DER analysis?</span></label>
 				<select id="PV" name="PV" value="{{allInputDataDict.PV}}"/>
 					<option value="Yes" {{ 'selected' if allInputDataDict.solar == 'Yes' }}>Yes</option>
@@ -118,8 +114,31 @@
 				<label class="tooltip">Outage Duration (hours)<span class="classic">The duration (in hours) of the outage. Specify a number between 1 - 8760 hours. </span></label>
 				<input type="number" id="outage_duration" name="outage_duration" value="{{allInputDataDict.outage_duration}}" min="1" max="8760" required="required"/>
 			</div>
-			<div class="wideInput"> <!-- vbatDispatch Specific Inputs -->
-				<p class="inputSectionHeader">Thermal Model Inputs</p>
+
+			<!-- Financial Inputs -->
+			<div class="wideInput">
+				<p class="inputSectionHeader">Financial Inputs</p>
+			</div>
+			<hr style="border-style: solid; border-color: #196b12; margin-top: 10px;">
+			<div class="shortInput">
+				<label class="tooltip">Use URDB label to determine demand charge?<span class="classic">If yes, model will use the URDB label provided above to determine the demand charge rate. If no, specify the demand charge rate ($/kWh) below.</span></label>
+				<select id="demandChargeURDB" name="demandChargeURDB" value="{{allInputDataDict.demandChargeURDB}}">
+					<option value="True" {{ 'selected' if allInputDataDict.demandChargeURDB == 'Yes' }}>Yes</option> <!-- TODO: Make this dropdown menu cause Demand Charge Cost to appear and disappear 8/2024 -->
+					<option value="False" {{ 'selected' if allInputDataDict.demandChargeURDB == 'No' }}>No</option>
+				</select>
+			</div>
+			<div class="shortInput">
+				<label class="tooltip">Demand Charge Cost ($/kW)<span class="classic">User defined demand charge that the utility pays per kWh.</span></label>
+				<input type="text" id="demandChargeCost" name="demandChargeCost" value="{{allInputDataDict.demandChargeCost}}" pattern="^\d+\.?\d*?$" required="required">
+			</div>
+			<div class="shortInput">
+				<label class="tooltip">Financial Projection Length (years)<span class="classic">Number of years to project out estimated savings. Must be between 1 and 75 years.</span></label>
+				<input type="text" id="projectionLength" name="projectionLength" value="{{allInputDataDict.projectionLength}}" step="1" min="1" max="75" required="required">
+			</div>
+
+			<!-- vbatDispatch Specific Inputs -->
+			<div class="wideInput"> 
+				<p class="inputSectionHeader">Thermal Device Inputs</p>
 			</div>
 			<hr style="border-style: solid; border-color: #196b12; margin-top: 10px;">
 			<div class="shortInput">
@@ -203,16 +222,8 @@
 				<input type="text" id="unitUpkeepCost" name="unitUpkeepCost" value="{{allInputDataDict.unitUpkeepCost}}" pattern="^\d+\.?\d*?$" required="required">
 			</div>
 			<div class="shortInput">
-				<label class="tooltip">Demand Charge Cost ($/kW)<span class="classic">Demand charge utility pays for peak demand events. Assumed to be calculated based on monthly single highest peak.</span></label>
-				<input type="text" id="demandChargeCost" name="demandChargeCost" value="{{allInputDataDict.demandChargeCost}}" pattern="^\d+\.?\d*?$" required="required">
-			</div>
-			<div class="shortInput">
 				<label class="tooltip">Energy Cost ($/kWh)<span class="classic">Cost of energy bought by the utility. I.e. wholesale (not retail) cost.</span></label>
 				<input type="text" id="electricityCost" name="electricityCost" value="{{allInputDataDict.electricityCost}}" pattern="^\d+\.?\d*?$" required="required">
-			</div>
-			<div class="shortInput">
-				<label class="tooltip">Financial Projection Length (years)<span class="classic">Number of years to project out estimated savings.</span></label>
-				<input type="text" id="projectionLength" name="projectionLength" value="{{allInputDataDict.projectionLength}}" pattern="^\d+\.?\d*?$" required="required">
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Discount Rate (%)<span class="classic">Discount rate used in financial analysis.</span></label>
@@ -275,11 +286,11 @@
 					insertMetric("monthlySummaryTable","Energy (kWh)", allOutputData.energyMonthly)
 					insertMetric("monthlySummaryTable","Adjusted Energy (kWh)", allOutputData.energyAdjustedMonthly)
 					insertMetric("monthlySummaryTable","Energy Cost ($)", allOutputData.energyCost)
-					insertMetric("monthlySummaryTable","Energy Cost using VBAT ($)", allOutputData.energyCostAdjusted)
+					insertMetric("monthlySummaryTable","Adjusted Energy Cost ($)", allOutputData.energyCostAdjusted)
 					insertMetric("monthlySummaryTable","Demand Charge ($)", allOutputData.demandCharge)
-					insertMetric("monthlySummaryTable","Demand Charge using VBAT ($)", allOutputData.demandChargeAdjusted)
+					insertMetric("monthlySummaryTable","Adjusted Demand Charge ($)", allOutputData.demandChargeAdjusted)
 					insertMetric("monthlySummaryTable","Total Cost ($)", allOutputData.totalCost)
-					insertMetric("monthlySummaryTable","Total Cost using VBAT ($)", allOutputData.totalCostAdjusted)
+					insertMetric("monthlySummaryTable","Adjusted Total Cost ($)", allOutputData.totalCostAdjusted)
 					insertMetric("monthlySummaryTable","Savings ($)", allOutputData.savings)
 				</script>
 			</div>

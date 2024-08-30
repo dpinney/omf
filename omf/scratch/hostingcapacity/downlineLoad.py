@@ -6,13 +6,12 @@ import warnings
 import matplotlib.pyplot as plt
 import matplotlib.colors as mcolors
 import matplotlib.cm as cm
-from matplotlib.colors import Normalize
 import numpy as np
 import json
+import os
 
 import omf
 from omf.solvers import opendss
-import os
 from omf.models import hostingCapacity
 
 def myConvertOMD(pathToOmdFile):
@@ -430,8 +429,6 @@ if __name__ == '__main__':
 		labels[node] = node
 	drawNXGraph(iowa240Graph, iowa240Pos, Path(modelDir, "iowa.png"), labels=labels)
 	
-	print( "Descendents for bus1002 in iowa240: ", sorted(nx.descendants(iowa240Graph, "bus1002")) )
-
 	########## Downline Load of Iowa - Iowa240
 	buses = opendss.get_all_buses( os.path.join( modelDir, 'downlineLoad.dss') )
 	buses_output = {}
@@ -447,19 +444,6 @@ if __name__ == '__main__':
 					kwSum += float(iowa_kw[dependent])
 			buses_output[bus] = kwSum
 	# print( "\n buses output for kw from iowa240: ", buses_output )
-
-	########## Test Load Data - Iowa240
-	# new object=load.load_1006 bus1=t_bus1006_l.1.2 phases=1 conn=delta kv=0.208 kw=5.04 kvar=2.29629183968801
-	bus1_iowa240 = nx.get_node_attributes(iowa240Graph, 'bus1')
-	phases_iowa240 = nx.get_node_attributes(iowa240Graph, 'phases')
-	conn_iowa240 = nx.get_node_attributes(iowa240Graph, 'conn')
-	kv_iowa240 = nx.get_node_attributes(iowa240Graph, 'kv')
-	kw_iowa240 = nx.get_node_attributes(iowa240Graph, 'kw')
-	kvar_iowa240 = nx.get_node_attributes(iowa240Graph, 'kvar')
-
-	# print( "Data for iowa240 load_1006: \nbus1:  %s\nphases: %s\nconn: %s\nkv: %s\nkw: %s\nkvar: %s" %
-	# 		  (bus1_iowa240['load_1006'], phases_iowa240['load_1006'], conn_iowa240['load_1006'],
-	# 			kv_iowa240['load_1006'], kw_iowa240['load_1006'], kvar_iowa240['load_1006']) )
 
 	########## Test Line Data - Iowa240
 	# new object=line.cb_101 bus1=bus1.1.2.3 bus2=bus1001.1.2.3 phases=3 switch=true r1=0.0001 r0=0.0001 x1=0 x0=0 c1=0 c0=0
@@ -497,6 +481,14 @@ if __name__ == '__main__':
 	# This is for multiDigraph that didn't work
 	# for item in graph.successors( "bus1002"):
 	# 	print( item ) 
+
+	# 	# buses=[650.2,rg60.2] phases=1 bank=reg1 xhl=0.01 kvas=[1666,1666] kvs=[2.4,2.4] %loadloss=0.01
+	# 	print( G[ "633"]["634"]["phases"] )
+	# 	print( G[ "633"]["634"]["bank"] )
+	# 	print( G[ "633"]["634"]["xhl"] )
+	# 	print( G[ "633"]["634"]["kvas"] )
+	# 	print( G[ "633"]["634"]["kvs"] )
+	# 	print( G[ "633"]["634"]["loadloss"] )
 
 	########## LEHIGH TESTING ##########
 

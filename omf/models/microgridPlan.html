@@ -23,6 +23,7 @@
 				if (id) {
 					let tool = list[i].className;
 					let data = allOutputData[tool][id];
+					//note: took out part to parse integer values
 					int_data = parseFloat(data); //parseInt(data);
 					//if (!isNaN(int_data)) {
 					//	list[i].innerHTML = int_data.toLocaleString();
@@ -36,20 +37,15 @@
 		function openTab(evt, tabName) {
 		    
 		    var i, tabLinks;
-
-		    // Get all elements with class="tabContent" and hide them
 			$(".tabContent").hide();
 
-		    // Get all elements with class="tabLinks" and remove the class "active"
 		    tabLinks = document.getElementsByClassName("tabLinks");
 		    for (i = 0; i < tabLinks.length; i++) {
 		        tabLinks[i].className = tabLinks[i].className.replace(" active", "");
 		    }
 
-		    // Show the current tab, and add an "active" class to the button that opened the tab
 		    $("." + tabName).show();
 		    evt.currentTarget.className += " active";
-
 		}
 
 		function openToolTab(evt, toolTabName) {
@@ -223,42 +219,95 @@
 			}
 		}
 
+		function addRow( header, dataClass, dataId) {
+			//not currently used
+			newRow = '<tr>'+
+				'<th>' + header + '</th>'+
+				'<td class="' + dataClass + '" id="' + dataId + '"></td>'+
+			'</tr>'
+			return newRow
+		}
+
 		function loadDERCAMContent() {
 			dercamOutData = allOutputData["dercamOutData"]
+			let modelStatistics = dercamOutData["ModelStastistics"]
+			let dercamSummary = dercamOutData["Summary"]
 			var dercam_content = '<p class="reportTitle" style="page-break-before:always">DER-CAM Model Statistics</p>'
+
 			dercam_content += '<div id="" class="tightContent">'
 			dercam_content += '<table>'+
 				'<tr>'+
 					'<th>Model Solution Status</th>'+
-					'<td class="dercamOutData" id="Model_Solution_Status"></td>'+
-				'</tr>'+
-				'<tr>'+
 					'<th>Solver termination condition</th>'+
-					'<td class="dercamOutData" id="Solver_termination_condition"></td>'+
-				'</tr>'+
-				'<tr>'+
 					'<th>Number of Iterations</th>'+
-					'<td class="dercamOutData" id="Number_of_Iterations"></td>'+
-				'</tr>'+
-				'<tr>'+
 					'<th>Number of Variables</th>'+
-					'<td class="dercamOutData" id="Number_of_Variables"></td>'+
+					'<th>Number of discrete Variables</th>'+
+					'<th>Number of Equations</th>'+
+					'<th>Run time (s)</th>'+
 				'</tr>'+
 				'<tr>'+
-					'<th>Number of discrete Variables</th>'+
-					'<td class="dercamOutData" id="Number_of_discrete_Variables"></td>'+
+					'<td>' + modelStatistics["ModelSolutionStatus"] + '</td>'+
+					'<td>' + modelStatistics["Solverterminationcondition"] + '</td>'+
+					'<td>' + modelStatistics["NumberofIterations"] + '</td>'+
+					'<td>' + modelStatistics["NumberofVariables"] + '</td>'+
+					'<td>' + modelStatistics["NumberofdiscreteVariables"] + '</td>'+
+					'<td>' + modelStatistics["NumberofEquations"] + '</td>'+
+					'<td>' + modelStatistics["Runtime(s)"] + '</td>'+
 				'</tr>'+
-			'</table>'+
-			'</div>'
+			'</table><br>'+
+			'<table>'+
+				'<tr>'+
+					'<th>Relative Solver Precision</th>'+
+					'<th>objval ub</th>'+
+					'<th>objval lb</th>'+
+					'<th>cpu time</th>'+
+					'<th>bnry vars</th>'+
+					'<th>cont vars</th>'+
+					'<th>equations</th>'+
+					'<th>non zeros</th>'+
+				'</tr>'+
+				'<tr>'+
+					'<td>' + modelStatistics["RelativeSolverPrecision"] + '</td>'+
+					'<td>' + modelStatistics["objvalub="] + '</td>'+
+					'<td>' + modelStatistics["objvallb="] + '</td>'+
+					'<td>' + modelStatistics["cputime="] + '</td>'+
+					'<td>' + modelStatistics["bnryvars="] + '</td>'+
+					'<td>' + modelStatistics["contvars="] + '</td>'+
+					'<td>' + modelStatistics["equations="] + '</td>'+
+					'<td>' + modelStatistics["nonzeros="] + '</td>'+
+				'</tr>'+
+			'</table></div>'
+			dercam_content += '<p class="reportTitle">Summary & Annual Savings</p><div id="" class="tightContent">'+ //was: chartTitle
+			'<table>'+
+				'<tr>'+
+					'<th>Annual Costs and Emissions: </th>'+
+					'<th>Total Annual Energy Costs ($)</th>'+
+					'<th>Total Annual CO2 emissions (kg)</th>'+
+					'<th>OPEX: </th>'+
+					'<th>Basecase</th>'+
+					'<th>Optimization</th>'+
+					'<th>Saving (%)</th>'+
+				'</tr>'+
+				'<tr>'+
+					'<td></td>'+
+					'<td>' + dercamSummary["TotalAnnualEnergyCosts(incl.annualizedcapitalcostsandelectricitysales)($)"] + '</td>'+
+					'<td>' + dercamSummary["TotalAnnualCO2emissions(kg)"] + '</td>'+
+					'<td>' + '</td>'+
+					'<td>' + dercamSummary["Basecase"] + '</td>'+
+					'<td>' + dercamSummary["Optimization"] + '</td>'+
+					'<td>' + dercamSummary["Saving(%)"] + '</td>'+
+				'</tr>'+
+			'</table></div>'
+			dercam_content += '</div>'
 			return dercam_content
 		}
 
 		function parsePMONMResults(key, value){
-			//toadd: separate parsing based on key (ie: 'Protection settings') when data is more complex
+			//to add: separate parsing based on key (ie: 'Protection settings') when data is more complex
 			//checking if output section contains sub-dictionary
 			var tableData = ""
 			if (typeof value === 'object' && !Array.isArray(value)){
-				tableData += '<p class="reportTitle" style="page-break-before:always">' + key + '</p>'
+				tableData += '<p class="chartTitle">' + key + ': </p>'
 				tableData += '<table>'
 				for (const subkey in value){
 					if (typeof value[subkey] === 'object'){
@@ -297,39 +346,115 @@
 		function loadPMONMContent() {
 			let pmonmOutData = allOutputData["pmonmOutData"]
 
-			var pmonm_content = '<p class="reportTitle" style="page-break-before:always">PowerModelsONM Output</p>'
-			pmonm_content += '<div class="tightContent">' //
-			for (const key in pmonmOutData) {
+			//for (const key in pmonmOutData) {
 				//pmonm_content += key
-				pmonm_content += parsePMONMResults(key, pmonmOutData[key]);
-			}
-			pmonm_content += '</div>';
+			//	pmonm_content += parsePMONMResults(key, pmonmOutData[key]);
+			//}
+
+			var pmonm_content = '<p class="reportTitle" style="page-break-before:always">PowerModelsONM Outputs</p>'+
+			'<p class="reportTitle" style="page-break-before:always">Voltage</p>'+
+			'<div id="pmonmVoltagePlotly" class="tightContent"></div>'+
+			'<p class="reportTitle" style="page-break-before:always">Storage State of Charge</p>'+
+			'<div id="pmonmStorageSOCPlotly" class="tightContent"></div>'+
+			'<p class="reportTitle" style="page-break-before:always">Load Served</p>'+
+			'<div id="pmonmLoadServedPlotly" class="tightContent"></div>'+
+			'<p class="reportTitle" style="page-break-before:always">Generator Profiles</p>'+
+			'<div id="pmonmGeneratorProfilesPlotly" class="tightContent"></div>'
 			return pmonm_content;
 		}
 
+		function loadPMONMPlots() {
+			Plotly.newPlot('pmonmVoltagePlotly', JSON.parse(allOutputData['pmonmVoltageData']), JSON.parse(allOutputData['pmonmVoltageLayout']) || {});
+			Plotly.newPlot('pmonmStorageSOCPlotly', JSON.parse(allOutputData['pmonmStorageSOCData']), JSON.parse(allOutputData['pmonmStorageSOCLayout']) || {});
+			Plotly.newPlot('pmonmLoadServedPlotly', JSON.parse(allOutputData['pmonmLoadServedData']), JSON.parse(allOutputData['pmonmLoadServedLayout']) || {});
+			Plotly.newPlot('pmonmGeneratorProfilesPlotly', JSON.parse(allOutputData['pmonmGeneratorProfilesData']), JSON.parse(allOutputData['pmonmGeneratorProfilesLayout']) || {});
+		}
+
 		function parsePSOSettings(relay){
-			var relayData = '<p class="reportTitle" style="page-break-before:always">' + relay["Name"] + '</p>'
-			relayData += '<table>'
-			for (const key in relay){
-				if (key !== "name"){
-					relayData += '<tr>'+
-						'<th>' + key + '</th>'+
-						'<td>' + relay[key] + '</td>'+
-					'</tr>'
-				}
-			}
-			relayData += "</table>"
+			var relayData = '<div class="tightContent"><p class="chartTitle">' + relay["Name"] + ' :</p>'
+			relayData += '<table>'+
+				'<tr>'+
+					'<th></th>'+
+					'<th>From</th>'+
+					'<th>To</th>'+
+					'<th>Pickup I</th>'+
+					'<th>TDS</th>'+
+					'<th>TOC</th>'+
+					'<th>Pickup I0</th>'+
+					'<th>TDSg</th>'+
+					'<th>TOCg</th>'+
+					'<th>VR</th>'+
+					'<th>IT</th>'+
+					'<th>IT0</th>'+
+				'</tr>'+
+				'<tr>'+
+					'<td></td>'+
+					'<td>' + relay["From"] + '</td>'+
+					'<td>' + relay["To"] + '</td>'+
+					'<td>' + relay["PickupI"] + '</td>'+
+					'<td>' + relay["TDS"] + '</td>'+
+					'<td>' + relay["TOC"] + '</td>'+
+					'<td>' + relay["PickupI0"] + '</td>'+
+					'<td>' + relay["TDSg"] + '</td>'+
+					'<td>' + relay["TOCg"] + '</td>'+
+					'<td>' + relay["VR"] + '</td>'+
+					'<td>' + relay["IT"] + '</td>'+
+					'<td>' + relay["IT0"] + '</td>'+
+				'</tr>'
+			relayData += "</table></div>"
 			return relayData
+		}
+
+		function parsePSOOldInfo(){
+			let psoOldInfo = allOutputData["psoOldInfo"]
+			var psoOldInfoString = '<div class="tightContent"><table>'
+			psoOldInfoString += '</table></div>'
+			return psoOldInfoString
 		}
 
 		function loadPSOContent() {
 			let psoSettings = allOutputData["psoSettings"]
-			var pso_content = '<div class="tightContent">'
+			var pso_content = '<p class="reportTitle"> ProtectionSettingsOptimizer Results: New Settings </p>'
 			for (const relay in psoSettings){
 				pso_content += parsePSOSettings(psoSettings[relay]);
 			}
-			pso_content += '</div>'
+			//let psoOldInfo = allOutputData["psoOldInfo"]
+			//pso_content += '<p class="reportTitle"> ProtectionSettingsOptimizer Results: Previous Information </p>'
+			//pso_content += parsePSOOldInfo()
 			return pso_content;
+		}
+
+		function addToolTab(firstToolTab, toolClass, toolTitle){
+			var toolTabString = ""
+			if (firstToolTab) {
+				toolTabString += '<button class="toolTabLinks active" onclick="openToolTab(event,\'' + toolClass + '\' )">' + toolTitle + '</button>';
+			} else {
+				toolTabString += '<button class="toolTabLinks " onclick="openToolTab(event,\'' + toolClass + '\' )">' + toolTitle + '</button>';
+			}
+			return toolTabString
+		}
+
+		function addToolResults(firstToolTab, toolClass, toolType) {
+			var toolResultsString = ""
+			// todo: toolTypeDict = { "reopt": loadREoptContent, "dercam": loadDERCAMContent, 
+			// 						"pmonm": loadPMONMContent, "pso": loadPSOContent }
+			// check javascript types for dictionaries => able to put function as object?
+			if (firstToolTab) {
+				toolResultsString = '<div class="' + toolClass + ' firstToolTab toolTabContent">';
+			} else {
+				toolResultsString += '<div class="' + toolClass + ' toolTabContent">';
+			}
+			if (toolType === "reopt") {
+				toolResultsString += loadREoptContent();
+			} else if (toolType === "dercam") {
+				toolResultsString += loadDERCAMContent();
+			} else if (toolType === "pmonm") {
+				toolResultsString += loadPMONMContent();
+			} else if (toolType === "pso") {
+				toolResultsString += loadPSOContent();
+			}
+			toolResultsString += '</div>';
+			return toolResultsString;
 		}
 
 		function loadContent(){
@@ -341,65 +466,33 @@
 
 			var content = '<div class="toolTab">';
 			if (run_reopt) {
-				content += '<button class="toolTabLinks active" onclick="openToolTab(event,\'REoptResults\' )">REopt Results</button>';
+				content += addToolTab(firstToolTab, "REoptResults", "REopt Results");
 				firstToolTab = false;
 			} if (run_dercam) {
-				if (firstToolTab) {
-					content += '<button class="toolTabLinks active" onclick="openToolTab(event,\'DERCAMResults\' )">DER-CAM Results</button>';
-					firstToolTab = false;
-				} else {
-					content += '<button class="toolTabLinks " onclick="openToolTab(event,\'DERCAMResults\' )">DER-CAM Results</button>';
-				}
+				content += addToolTab(firstToolTab, "DERCAMResults", "DER-CAM Results");
+				firstToolTab = false;
 			} if (run_pmonm) {
-				if (firstToolTab) {
-					content += '<button class="toolTabLinks active" onclick="openToolTab(event,\'PMONMResults\' )">PMONM Results</button>';
-					firstToolTab = false;
-				} else {
-					content += '<button class="toolTabLinks " onclick="openToolTab(event,\'PMONMResults\' )">PMONM Results</button>';
-				}
+				content += addToolTab(firstToolTab, "PMONMResults", "PMONM Results");
+				firstToolTab = false;
 			} if (run_pso) {
-				if (firstToolTab) {
-					content += '<button class="toolTabLinks active" onclick="openToolTab(event,\'PSOResults\' )">PSO Results</button>';
-					firstToolTab = false;
-				} else {
-					content += '<button class="toolTabLinks " onclick="openToolTab(event,\'PSOResults\' )">PSO Results</button>';
-				}
+				content += addToolTab(firstToolTab, "PSOResults", "PSO Results");
+				firstToolTab = false;
 			}
 			content += '</div>';
 
 			firstToolTab = true;
 			if (run_reopt) {
-				content += '<div class="REoptResults firstToolTab toolTabContent">';
-				content += loadREoptContent();
-				content += '</div>'
+				content += addToolResults(firstToolTab, "REoptResults", "reopt");
 				firstToolTab = false;
 			} if (run_dercam) {
-				if (firstToolTab) {
-					content += '<div class="DERCAMResults firstToolTab toolTabContent">';
-					firstToolTab = false;
-				} else {
-					content += '<div class="DERCAMResults toolTabContent">';
-				}
-				content += loadDERCAMContent();
-				content += '</div>'
+				content += addToolResults(firstToolTab, "DERCAMResults", "dercam");
+				firstToolTab = false;
 			} if (run_pmonm) {
-				if (firstToolTab) {
-					content += '<div class="PMONMResults firstToolTab toolTabContent">';
-					firstToolTab = false;
-				} else {
-					content += '<div class="PMONMResults toolTabContent">';
-				}
-				content += loadPMONMContent();
-				content += '</div>'
+				content += addToolResults(firstToolTab, "PMONMResults", "pmonm");
+				firstToolTab = false;
 			} if (run_pso) {
-				if (firstToolTab) {
-					content += '<div class="PSOResults firstToolTab toolTabContent">';
-					firstToolTab = false;
-				} else {
-					content += '<div class="PSOResults toolTabContent">';
-				}
-				content += loadPSOContent();
-				content += '</div>'
+				content += addToolResults(firstToolTab, "PSOResults", "pso");
+				firstToolTab = false;
 			}
 
 			gebi('output').innerHTML = content;
@@ -409,6 +502,8 @@
 				loadREoptPlots();
 			} if (run_dercam) {
 				//populateTables("dercamOutData");
+			} if (run_pmonm){
+				loadPMONMPlots();
 			}
 			populateTables();
 		}
@@ -492,13 +587,12 @@
 			background-color: white;
 		}
 		.toolTab button.active {
-			background-color: seagreen;
+			background-color: #2e8b57;
 			color: white;
 		}
 		.toolTabContent {
 			display: none;
 		}
-
 
 		.nav {
 			position: sticky;
@@ -507,31 +601,118 @@
 			display: flex;
 			z-index: 1000;
 		}
+		.nav ul {
+			list-style-type: none;
+		}
 		.nav li {
 			display: inline-block;
 			flex: 1;
 			text-align: center;
-			padding: 18px;
-			background-color: white;
+			padding: 15px;
+			background-color: #246B43;
 			box-shadow:
-				0 0 0 1px seagreen,
-				0 0 0 3px white,
-				0 0 0 4px seagreen;
+				0 0 0 1px #194D30,
+				0 0 0 2px #194D30;
 		}
-		.toolCheckboxes {
+		.nav li:hover:not(.active) {
+			background-color: #37A96A;
+			box-shadow:
+				0 0 0 1px #329A61,
+				0 0 0 2px #329A61,
+		}
+		.nav li.active {
+			background-color: #33995F;
+			box-shadow:
+				0 0 0 1px #33995F,
+				0 0 0 2px #33995F,
+				0 0 0 3px white;
+		}
+		.nav li a {
+			color: white;
+		}
+		.nav li a.visited {
+			color: white;
+		}
+
+		.navHeader {
+			align-items: center;
+		}
+
+		.inputSectionSubHeader {
+			margin-top: 15px;
+			font-size: 13pt;
+			font-style: italic;
+			margin-bottom: -3px;
+		}
+
+		.toolSelection {
 			display: inline-block;
-			margin-bottom: 10px;
-			margin-right: 40px;
+			display: flex;
+			align-items: center; 
 		}
+		.designSections {
+			display: flex;
+			flex-direction: column; 
+			align-items: center; 
+		}
+		.sectionCircle {
+			width: 240px;
+			height: 80px;
+			padding-left: 5px;
+			border-radius: 50%;
+			background-color: #A8DADC;
+			color: black;
+			box-shadow:
+				0 0 0 1px #8ACED0,
+				0 0 0 2px #8ACED0,
+				0 0 0 3px white;
+			display: flex;
+			justify-content: center;
+			align-items: center;
+			position: relative;
+			flex-direction: column;
+			margin-left: 30px;
+			margin-right: 30px;
+		}
+		.circleLabel {
+			margin-top: 7px;
+			margin-bottom: 7px;
+			font-size: medium;
+			font-weight: bold;
+		}
+		.toolButtons{
+			display: flex;
+			flex-direction: column;
+			align-items: left;
+		}
+		.toolOption {
+			margin-top: 5px;
+			margin-bottom: 5px;
+		}
+		.arrow {
+			border: solid black;
+			border-width: 0 3px 3px 0;
+			display: inline-block;
+			padding: 12px;
+			transform: rotate(-45deg);
+			-webkit-transform: rotate(-45deg);
+			margin-top: 15px;
+		}
+
 		.advancedOptionsButton {
 			content:'\2212';
-			background-color:rgba(220,220,220,1);
+			background-color: #A8DADC;
 			padding: 10px;
 			margin: 10px;
-			width: 500px;
+			width: 920px; /* 500 -> 920 */
 			display: block;
 			cursor: pointer;
-			border-radius: 8px;
+			padding-bottom: 10px;
+			border-radius: 6px; /* 8px */
+			box-shadow:
+				0 0 0 1px #8ACED0,
+				0 0 0 2px #8ACED0,
+				0 0 0 3px white;
 		}
 		.advancedOptions {
 			display: none;
@@ -543,21 +724,33 @@
 		}
 		.plus::after {
 			font-size: large;
-			font-weight: bold;
+			font-weight: 500;
         	content: "+";
-			margin-right: 10px;
+			margin-right: 13px;
     	}
     	.minus::after {
-			font-size: large;
+			font-size: medium;
 			font-weight: bold;
         	content: '\2014';
-			margin-right: 8px
+			margin-right: 7px;
+			font-weight: bold;
     	}
+
 		.smallerInput {
 			font-size: smaller;
 			width: 230px;
 			display: inline-block;
 			margin-bottom: 10px;
+		}
+		.chartTitle {
+			font-size: 18px;
+			margin-left: 10px;
+			margin-top: 15px; 
+			margin-bottom: 15px;
+		}
+
+		hr.green {
+			border-top: 2px dashed #38A86B;
 		}
 	</style>
 </head>
@@ -591,28 +784,35 @@
 
 			<!-- Model Specific Inputs -->
 			<div class="wideInput">
-				<p class="inputSectionHeader" id="tool-selection">Choose Tools</p>
+				<p class="inputSectionHeader navHeader" id="tool-selection">Tool Selection</p>
 			</div>
 			<hr>
-			<div class="toolCheckboxes"> <!-- id="toolSelection" class="toolSelection" -->
-				<input id="run_reopt" name="run_reopt" type="checkbox" value="{{allInputDataDict.run_reopt}}">
-				<label class="tooltip">REopt<span class="classic">Check this box in order to include REopt while running this model</span></label>
-			</div>
-			<div class="toolCheckboxes">
-				<input id="run_dercam" name="run_dercam" type="checkbox" value="{{allInputDataDict.run_dercam}}">
-				<label class="tooltip">DER-CAM<span class="classic">Check this box in order to include DER-CAM while running this model</span></label>
-			</div>
-			<div class="toolCheckboxes">
-				<input id="run_pmonm" name="run_pmonm" type="checkbox" value="{{allInputDataDict.run_pmonm}}">
-				<label class="tooltip">PowerModelsONM<span class="classic">Check this box in order to include PowerModelsONM while running this model</span></label>
-			</div>
-			<div class="toolCheckboxes">
-				<input id="run_pso" name="run_pso" type="checkbox" value="{{allInputDataDict.run_pso}}">
-				<label class="tooltip">ProtectionSettingsOptimizer<span class="classic">Check this box in order to include ProtectionSettingsOptimizer while running this model</span></label>
+			<div class="toolSelection">
+				<div class ="designSections">
+					<div class="circleLabel">Generation Design</div>
+					<div class="sectionCircle"><div class="toolButtons">
+						<label class="toolOption"><input type="radio" name="run_reopt" id="run_reopt" value="{{allInputDataDict.run_reopt}}"> REopt</label>
+						<label class="toolOption"><input type="radio" name="run_dercam" id="run_dercam" value="{{allInputDataDict.run_dercam}}"> DER-CAM</label>
+					</div></div>
+				</div>
+				<div class="arrow"></div>
+				<div class="designSections">
+					<div class="circleLabel">Control Design</div>
+					<div class="sectionCircle" id="control_design">
+						<label class="toolOption"><input type="radio" name="run_pmonm" id="run_pmonm" value="{{allInputDataDict.run_pmonm}}"> Power Models ONM</label>
+					</div>
+				</div>
+				<div class="arrow"></div>
+				<div class="designSections">
+					<div class="circleLabel">Protection Design</div>
+					<div class="sectionCircle" id="protection_design">
+						<label class="toolOption"><input type="radio" name="run_pso" id="run_pso" value="{{allInputDataDict.run_pmonm}}"> Protection Settings Optimizer</label>
+					</div>
+				</div>
 			</div>
 
 			<div class="wideInput">
-				<p class="inputSectionHeader">Navigation</p>
+				<p class="inputSectionHeader navHeader">Navigation</p>
 			</div>
 			<hr>
 			<ul class="nav">
@@ -627,11 +827,18 @@
 			<div class="wideInput">
 				<p class="inputSectionHeader">REopt Parameters</p>
 			</div>
-			<hr>
+			<div class="shortInput">
+                <label class="tooltip">Solver Tolerance<span class="classic">Please enter a number 0.0001 - 0.05 for the REopt optimality tolerance. A higher number increases the probability that the REopt financial scenario will successfully complete. A lower number ensures that slightly less optimal solutions will not be returned</span></label>
+                <input type="number" id="solverTolerance" name="solverTolerance" value="{{allInputDataDict.reopt_jl.solverTolerance}}" step="0.0001" min="0.0001" max="0.05" required/>
+            </div>
+			<div class="shortInput">
+                <label class="tooltip">Maximum Solver Runtime (seconds)<span class="classic">Please enter a number above 0 for REopt's maximum runtime in seconds. REopt will run to completion or terminate at this time and return a suboptimal solution.</span></label>
+                <input type="number" id="maxRuntimeSeconds" name="maxRuntimeSeconds" value="{{allInputDataDict.reopt_jl.maxRuntimeSeconds}}" required/>
+            </div>
 			<div class="wideInput">
-				<p class="inputSectionHeader">Grid Parameters</p>
+				<p class="inputSectionSubHeader">Grid Parameters</p>
 			</div>
-			<hr>
+			<hr class="green">
 			<div class="shortInput">
 				<label class="tooltip">Hourly Load Shape (.csv file)<span class="classic">Please enter the name of a .csv file representing the hourly load shape.</span></label>
 				<input id="loadShapeFile" type="file" style="display:none" onchange="handle_files(this.files,'loadShape','fileName')">
@@ -692,19 +899,11 @@
 				<label class="tooltip">Discount Rate (% per year)<span class="classic">Please enter a number 0-1 for the Nominal energy offtaker discount rate. In single ownership model the offtaker is also the generation owner. Format 0.XXX</span></label>
 				<input type="number" id="discountRate" name="discountRate" value="{{allInputDataDict.reopt_jl.discountRate}}" step="0.001" min="0.0" max="1.0" required="required"/>
 			</div>
-            <div class="shortInput">
-                <label class="tooltip">Solver Tolerance<span class="classic">Please enter a number 0.0001 - 0.05 for the REopt optimality tolerance. A higher number increases the probability that the REopt financial scenario will successfully complete. A lower number ensures that slightly less optimal solutions will not be returned</span></label>
-                <input type="number" id="solverTolerance" name="solverTolerance" value="{{allInputDataDict.reopt_jl.solverTolerance}}" step="0.0001" min="0.0001" max="0.05" required/>
-            </div>
-			<div class="shortInput">
-                <label class="tooltip">Maximum Solver Runtime (seconds)<span class="classic">Please enter a number above 0 for REopt's maximum runtime in seconds. REopt will run to completion or terminate at this time and return a suboptimal solution.</span></label>
-                <input type="number" id="maxRuntimeSeconds" name="maxRuntimeSeconds" value="{{allInputDataDict.reopt_jl.maxRuntimeSeconds}}" required/>
-            </div>
 
 			<div class="wideInput">
-				<p class="inputSectionHeader">Solar</p>
+				<p class="inputSectionSubHeader">Solar</p>
 			</div>
-			<hr>
+			<hr class="green">
 			<div class="shortInput">
 				<label class="tooltip">Include Solar<span class="classic">Include solar in the microgrid design?</span></label>
 				<select id="solar" name="solar" value="{{allInputDataDict.reopt_jl.solar}}"/>
@@ -712,53 +911,56 @@
 					<option value="off" {{ 'selected' if allInputDataDict.solar == 'off' }}>No</option>
 				</select>
 			</div>
-			<div class="shortInput solarDisplayInput">
-				<label class="tooltip">Solar Cost ($/kW)<span class="classic">Specify the cost in $/kW.</span></label>
-				<input type="text" id="solarCost" name="solarCost" value="{{allInputDataDict.reopt_jl.solarCost}}" pattern="^\d+\.?\d*?$" required="required"/>
-			</div>
-			<div class="shortInput solarDisplayInput">
-				<label class="tooltip">Solar Minimum Power (kW)<span class="classic">Specify the minimum desired generation in kW.</span></label>
-				<input type="text" id="solarMin" name="solarMin" value="{{allInputDataDict.reopt_jl.solarMin}}" required="required"/>
-			</div>
-			<div class="shortInput solarDisplayInput">
-				<label class="tooltip">Solar Maximum Power (kW)<span class="classic">Specify the maximum desired generation in kW. Leave at default for full optimization on solar power.</span></label>
-				<input type="text" id="solarMax" name="solarMax" value="{{allInputDataDict.reopt_jl.solarMax}}" required="required"/>
-			</div>
-			<div class="shortInput solarDisplayInput">
-				<label class="tooltip">Pre-existing Solar Size (kW)<span class="classic">Specify the total capacity of any pre-existing solar arrays in kW. The outputted "Total Solar" will be inclusive of existing solar.</span></label>
-				<input type="text" id="solarExisting" name="solarExisting" value="{{allInputDataDict.reopt_jl.solarExisting}}" required="required"/>
-			</div>
-			<div class="shortInput">
-				<label class="tooltip">Solar power can be curtailed?<span class="classic">Allows for excess solar power to be automatically curtailed.</span></label>
-				<select id="solarCanCurtail" name="solarCanCurtail" value="{{allInputDataDict.reopt_jl.solarCanCurtail}}"/>
-					<option value=true {{ 'selected' if allInputDataDict.solarCanCurtail == 'true' }}>Yes</option>
-					<option value=false {{ 'selected' if allInputDataDict.solarCanCurtail == 'false' }}>No</option>
-				</select>
-			</div>
-			<div class="shortInput">
-				<label class="tooltip">Solar power can be exported?<span class="classic">Allows for excess solar power to be sold back to the grid.</span></label>
-				<select id="solarCanExport" name="solarCanExport" value="{{allInputDataDict.reopt_jl.solarCanExport}}"/>
-					<option value=true {{ 'selected' if allInputDataDict.solarCanExport == 'true' }}>Yes</option>
-					<option value=false {{ 'selected' if allInputDataDict.solarCanExport == 'false' }}>No</option>
-				</select>
-			</div>
-			<div class="shortInput">
-				<label class="tooltip">Solar MACRS Years<span class="classic">MACRS schedule for financial analysis. Possible inputs are 0, 5 and 7 years. Set to zero to disable accelerated depreciation accounting for solar.</span></label>
-				<select id="solarMacrsOptionYears" name="solarMacrsOptionYears" value="{{allInputDataDict.reopt_jl.solarMacrsOptionYears}}"/>
-					<option value="0" {{ 'selected' if allInputDataDict.solarMacrsOptionYears == '0' }}>0</option>
-					<option value="5" {{ 'selected' if allInputDataDict.solarMacrsOptionYears == '5' }}>5</option>
-					<option value="7" {{ 'selected' if allInputDataDict.solarMacrsOptionYears == '7' }}>7</option>
-				</select>
-			</div>
-			<div class="shortInput">
-				<label class="tooltip">Solar ITC (%)<span class="classic">Please enter a number 0-1 for the solar investment tax credit. Format 0.XX</span></label>
-				<input type="number" id="solarItcPercent" name="solarItcPercent" value="{{allInputDataDict.reopt_jl.solarItcPercent}}" step="0.01" min="0.0" max="1.0" required="required"/>
+			<span class="advancedOptionsButton" onclick="toggleAdvancedOptions('solarOptions','solarOptionsButton')"><span class="plus" id="solarOptionsButton"></span>Solar Inputs</span>
+			<div class="advancedOptions" id="solarOptions">
+				<div class="smallerInput solarDisplayInput">
+					<label class="tooltip">Solar Cost ($/kW)<span class="classic">Specify the cost in $/kW.</span></label>
+					<input type="text" id="solarCost" name="solarCost" value="{{allInputDataDict.reopt_jl.solarCost}}" pattern="^\d+\.?\d*?$" required="required"/>
+				</div>
+				<div class="smallerInput solarDisplayInput">
+					<label class="tooltip">Solar Minimum Power (kW)<span class="classic">Specify the minimum desired generation in kW.</span></label>
+					<input type="text" id="solarMin" name="solarMin" value="{{allInputDataDict.reopt_jl.solarMin}}" required="required"/>
+				</div>
+				<div class="smallerInput solarDisplayInput">
+					<label class="tooltip">Solar Maximum Power (kW)<span class="classic">Specify the maximum desired generation in kW. Leave at default for full optimization on solar power.</span></label>
+					<input type="text" id="solarMax" name="solarMax" value="{{allInputDataDict.reopt_jl.solarMax}}" required="required"/>
+				</div>
+				<div class="smallerInput solarDisplayInput">
+					<label class="tooltip">Pre-existing Solar Size (kW)<span class="classic">Specify the total capacity of any pre-existing solar arrays in kW. The outputted "Total Solar" will be inclusive of existing solar.</span></label>
+					<input type="text" id="solarExisting" name="solarExisting" value="{{allInputDataDict.reopt_jl.solarExisting}}" required="required"/>
+				</div>
+				<div class="smallerInput">
+					<label class="tooltip">Solar power can be curtailed?<span class="classic">Allows for excess solar power to be automatically curtailed.</span></label>
+					<select id="solarCanCurtail" name="solarCanCurtail" value="{{allInputDataDict.reopt_jl.solarCanCurtail}}"/>
+						<option value=true {{ 'selected' if allInputDataDict.solarCanCurtail == 'true' }}>Yes</option>
+						<option value=false {{ 'selected' if allInputDataDict.solarCanCurtail == 'false' }}>No</option>
+					</select>
+				</div>
+				<div class="smallerInput">
+					<label class="tooltip">Solar power can be exported?<span class="classic">Allows for excess solar power to be sold back to the grid.</span></label>
+					<select id="solarCanExport" name="solarCanExport" value="{{allInputDataDict.reopt_jl.solarCanExport}}"/>
+						<option value=true {{ 'selected' if allInputDataDict.solarCanExport == 'true' }}>Yes</option>
+						<option value=false {{ 'selected' if allInputDataDict.solarCanExport == 'false' }}>No</option>
+					</select>
+				</div>
+				<div class="smallerInput">
+					<label class="tooltip">Solar MACRS Years<span class="classic">MACRS schedule for financial analysis. Possible inputs are 0, 5 and 7 years. Set to zero to disable accelerated depreciation accounting for solar.</span></label>
+					<select id="solarMacrsOptionYears" name="solarMacrsOptionYears" value="{{allInputDataDict.reopt_jl.solarMacrsOptionYears}}"/>
+						<option value="0" {{ 'selected' if allInputDataDict.solarMacrsOptionYears == '0' }}>0</option>
+						<option value="5" {{ 'selected' if allInputDataDict.solarMacrsOptionYears == '5' }}>5</option>
+						<option value="7" {{ 'selected' if allInputDataDict.solarMacrsOptionYears == '7' }}>7</option>
+					</select>
+				</div>
+				<div class="smallerInput">
+					<label class="tooltip">Solar ITC (%)<span class="classic">Please enter a number 0-1 for the solar investment tax credit. Format 0.XX</span></label>
+					<input type="number" id="solarItcPercent" name="solarItcPercent" value="{{allInputDataDict.reopt_jl.solarItcPercent}}" step="0.01" min="0.0" max="1.0" required="required"/>
+				</div>
 			</div>
 
 			<div class="wideInput">
-				<p class="inputSectionHeader">Wind</p>
+				<p class="inputSectionSubHeader">Wind</p>
 			</div>
-			<hr>
+			<hr class="green">
 			<div class="shortInput">
 				<label class="tooltip">Include Wind<span class="classic">Include wind in the microgrid design?</span></label>
 				<select id="wind" name="wind" value="{{allInputDataDict.reopt_jl.wind}}"/>
@@ -766,35 +968,38 @@
 					<option value="off" {{ 'selected' if allInputDataDict.wind == 'off' }}>No</option>
 				</select>
 			</div>
-			<div class="shortInput windDisplayInput">
-				<label class="tooltip">Wind Cost ($/kW)<span class="classic">Specify the cost in $/kW.</span></label>
-				<input type="text" id="windCost" name="windCost" value="{{allInputDataDict.reopt_jl.windCost}}" pattern="^\d+\.?\d*?$" required="required"/>
-			</div>
-			<div class="shortInput windDisplayInput">
-				<label class="tooltip">Wind Minimum Power (kW)<span class="classic">Specify the minimum desired generation in kW.</span></label>
-				<input type="text" id="windMin" name="windMin" value="{{allInputDataDict.reopt_jl.windMin}}" required="required"/>
-			</div>
-			<div class="shortInput windDisplayInput">
-				<label class="tooltip">Wind Maximum Power (kW)<span class="classic">Specify the maximum desired generation in kW. Leave at default for full optimization on wind power.</span></label>
-				<input type="text" id="windMax" name="windMax" value="{{allInputDataDict.reopt_jl.windMax}}" required="required"/>
-			</div>
-			<div class="shortInput">
-				<label class="tooltip">Wind MACRS Years<span class="classic">MACRS schedule for financial analysis. Possible inputs are 0, 5 and 7 years. Set to zero to disable accelerated depreciation accounting for solar.</span></label>
-				<select id="windMacrsOptionYears" name="windMacrsOptionYears" value="{{allInputDataDict.reopt_jl.windMacrsOptionYears}}"/>
-					<option value="0" {{ 'selected' if allInputDataDict.windMacrsOptionYears == '0' }}>0</option>
-					<option value="5" {{ 'selected' if allInputDataDict.windMacrsOptionYears == '5' }}>5</option>
-					<option value="7" {{ 'selected' if allInputDataDict.windMacrsOptionYears == '7' }}>7</option>
-				</select>
-			</div>
-			<div class="shortInput">
-				<label class="tooltip">Wind ITC (%)<span class="classic">Please enter a number 0-1 for the wind investment tax credit. Format 0.XX</span></label>
-				<input type="number" id="windItcPercent" name="windItcPercent" value="{{allInputDataDict.reopt_jl.windItcPercent}}" step="0.01" min="0.0" max="1.0" required="required"/>
+			<span class="advancedOptionsButton" onclick="toggleAdvancedOptions('windOptions','windOptionsButton')"><span class="plus" id="windOptionsButton"></span>Wind Inputs</span>
+			<div class="advancedOptions" id="windOptions">
+				<div class="smallerInput windDisplayInput">
+					<label class="tooltip">Wind Cost ($/kW)<span class="classic">Specify the cost in $/kW.</span></label>
+					<input type="text" id="windCost" name="windCost" value="{{allInputDataDict.reopt_jl.windCost}}" pattern="^\d+\.?\d*?$" required="required"/>
+				</div>
+				<div class="smallerInput windDisplayInput">
+					<label class="tooltip">Wind Minimum Power (kW)<span class="classic">Specify the minimum desired generation in kW.</span></label>
+					<input type="text" id="windMin" name="windMin" value="{{allInputDataDict.reopt_jl.windMin}}" required="required"/>
+				</div>
+				<div class="smallerInput windDisplayInput">
+					<label class="tooltip">Wind Maximum Power (kW)<span class="classic">Specify the maximum desired generation in kW. Leave at default for full optimization on wind power.</span></label>
+					<input type="text" id="windMax" name="windMax" value="{{allInputDataDict.reopt_jl.windMax}}" required="required"/>
+				</div>
+				<div class="smallerInput">
+					<label class="tooltip">Wind MACRS Years<span class="classic">MACRS schedule for financial analysis. Possible inputs are 0, 5 and 7 years. Set to zero to disable accelerated depreciation accounting for solar.</span></label>
+					<select id="windMacrsOptionYears" name="windMacrsOptionYears" value="{{allInputDataDict.reopt_jl.windMacrsOptionYears}}"/>
+						<option value="0" {{ 'selected' if allInputDataDict.windMacrsOptionYears == '0' }}>0</option>
+						<option value="5" {{ 'selected' if allInputDataDict.windMacrsOptionYears == '5' }}>5</option>
+						<option value="7" {{ 'selected' if allInputDataDict.windMacrsOptionYears == '7' }}>7</option>
+					</select>
+				</div>
+				<div class="smallerInput">
+					<label class="tooltip">Wind ITC (%)<span class="classic">Please enter a number 0-1 for the wind investment tax credit. Format 0.XX</span></label>
+					<input type="number" id="windItcPercent" name="windItcPercent" value="{{allInputDataDict.reopt_jl.windItcPercent}}" step="0.01" min="0.0" max="1.0" required="required"/>
+				</div>
 			</div>
 
 			<div class="wideInput">
-				<p class="inputSectionHeader">Battery</p>
+				<p class="inputSectionSubHeader">Battery</p>
 			</div>
-			<hr>
+			<hr class="green">
 			<div class="shortInput">
 				<label class="tooltip">Include Battery<span class="classic">Include batteries in the microgrid design?</span></label>
 				<select id="battery" name="battery" value="{{allInputDataDict.reopt_jl.battery}}"/>
@@ -802,63 +1007,67 @@
 					<option value="off" {{ 'selected' if allInputDataDict.battery == 'off' }}>No</option>
 				</select>
 			</div>
-			<div class="shortInput batteryDisplayInput">
-				<label class="tooltip">Battery Power Cost ($/kW)<span class="classic">Specify the cost in $/kW.</span></label>
-				<input type="text" id="batteryPowerCost" name="batteryPowerCost" value="{{allInputDataDict.reopt_jl.batteryPowerCost}}" pattern="^\d+\.?\d*?$" required="required"/>
-			</div>
-			<div class="shortInput BatteryDisplayInput">
-				<label class="tooltip">Battery Minimum Power (kW)<span class="classic">Specify the minimum desired battery power in kW.</span></label>
-				<input type="text" id="batteryPowerMin" name="batteryPowerMin" value="{{allInputDataDict.reopt_jl.batteryPowerMin}}" required="required"/>
-			</div>
-			<div class="shortInput BatteryDisplayInput">
-				<label class="tooltip">Battery Maximum Power (kW)<span class="classic">Specify the maximum desired battery power in kW.</span></label>
-				<input type="text" id="batteryPowerMax" name="batteryPowerMax" value="{{allInputDataDict.reopt_jl.batteryPowerMax}}" required="required"/>
-			</div>
-			<div class="shortInput batteryDisplayInput">
-				<label class="tooltip">Battery Capacity Cost ($/kWh)<span class="classic">Specify the cost in $/kWh.</span></label>
-				<input type="text" id="batteryCapacityCost" name="batteryCapacityCost" value="{{allInputDataDict.reopt_jl.batteryCapacityCost}}" pattern="^\d+\.?\d*?$" required="required"/>
-			</div>
-			<div class="shortInput BatteryDisplayInput">
-				<label class="tooltip">Battery Minimum Capacity (kWh)<span class="classic">Specify the minimum desired battery capacity in kWh.</span></label>
-				<input type="text" id="batteryCapacityMin" name="batteryCapacityMin" value="{{allInputDataDict.reopt_jl.batteryCapacityMin}}" required="required"/>
-			</div>
-			<div class="shortInput BatteryDisplayInput">
-				<label class="tooltip">Battery Maximum Capacity (kWh)<span class="classic">Specify the maximum desired battery capacity in kWh.</span></label>
-				<input type="text" id="batteryCapacityMax" name="batteryCapacityMax" value="{{allInputDataDict.reopt_jl.batteryCapacityMax}}" required="required"/>
-			</div>
-			<div class="shortInput">
-				<label class="tooltip">Battery MACRS Years<span class="classic">MACRS schedule for financial analysis. Possible inputs are 0, 5 and 7 years. Set to zero to disable accelerated depreciation accounting for solar.</span></label>
-				<select id="batteryMacrsOptionYears" name="batteryMacrsOptionYears" value="{{allInputDataDict.reopt_jl.batteryMacrsOptionYears}}"/>
-					<option value="0" {{ 'selected' if allInputDataDict.batteryMacrsOptionYears == '0' }}>0</option>
-					<option value="5" {{ 'selected' if allInputDataDict.batteryMacrsOptionYears == '5' }}>5</option>
-					<option value="7" {{ 'selected' if allInputDataDict.batteryMacrsOptionYears == '7' }}>7</option>
-				</select>
-			</div>
-			<div class="shortInput">
-				<label class="tooltip">Battery ITC (%)<span class="classic">Please enter a number 0-1 for the battery investment tax credit. Format 0.XX</span></label>
-				<input type="number" id="batteryItcPercent" name="batteryItcPercent" value="{{allInputDataDict.reopt_jl.batteryItcPercent}}" step="0.01" min="0.0" max="1.0" required="required"/>
-			</div>
-			<div class="shortInput">
-				<label class="tooltip">Battery Replacement Power Cost ($/kW)<span class="classic">Specify the cost of replacing the battery inverter at the specified year in $/kW.</span></label>
-				<input type="text" id="batteryPowerCostReplace" name="batteryPowerCostReplace" value="{{allInputDataDict.reopt_jl.batteryPowerCostReplace}}" pattern="^\d+\.?\d*?$" required="required"/>
-			</div>
-			<div class="shortInput">
-				<label class="tooltip">Battery Replacement Capacity Cost ($/kWh)<span class="classic">Specify the cost of replacing the battery capacity at the specified year in $/kWh.</span></label>
-				<input type="text" id="batteryCapacityCostReplace" name="batteryCapacityCostReplace" value="{{allInputDataDict.reopt_jl.batteryCapacityCostReplace}}" pattern="^\d+\.?\d*?$" required="required"/>
-			</div>
-			<div class="shortInput">
-				<label class="tooltip">Battery Inverter Replacement (years)<span class="classic">Specify a year in which the battery inverter will be replaced at the cost specified in Battery Replacement Power Cost. Input is an integer less than or equal to the analysis period in years.</span></label>
-				<input type="text" id="batteryPowerReplaceYear" name="batteryPowerReplaceYear" value="{{allInputDataDict.reopt_jl.batteryPowerReplaceYear}}" required="required"/>
-			</div>
-				<div class="shortInput">
-				<label class="tooltip">Battery Replacement (years)<span class="classic">Specify a year in which the battery cells will be replaced at the cost specified in Battery Replacement Capacity Cost. Input is an integer less than or equal to the analysis period in years.</span></label>
-				<input type="text" id="batteryCapacityReplaceYear" name="batteryCapacityReplaceYear" value="{{allInputDataDict.reopt_jl.batteryCapacityReplaceYear}}" required="required"/>
+			<span class="advancedOptionsButton" onclick="toggleAdvancedOptions('batteryOptions','batteryOptionsButton')"><span class="plus" id="batteryOptionsButton"></span>Battery Inputs</span>
+			<div class="advancedOptions" id="batteryOptions">
+				<div class="smallerInput batteryDisplayInput">
+					<label class="tooltip">Battery Power Cost ($/kW)<span class="classic">Specify the cost in $/kW.</span></label>
+					<input type="text" id="batteryPowerCost" name="batteryPowerCost" value="{{allInputDataDict.reopt_jl.batteryPowerCost}}" pattern="^\d+\.?\d*?$" required="required"/>
+				</div>
+				<div class="smallerInput BatteryDisplayInput">
+					<label class="tooltip">Battery Minimum Power (kW)<span class="classic">Specify the minimum desired battery power in kW.</span></label>
+					<input type="text" id="batteryPowerMin" name="batteryPowerMin" value="{{allInputDataDict.reopt_jl.batteryPowerMin}}" required="required"/>
+				</div>
+				<div class="smallerInput BatteryDisplayInput">
+					<label class="tooltip">Battery Maximum Power (kW)<span class="classic">Specify the maximum desired battery power in kW.</span></label>
+					<input type="text" id="batteryPowerMax" name="batteryPowerMax" value="{{allInputDataDict.reopt_jl.batteryPowerMax}}" required="required"/>
+				</div>
+				<div class="smallerInput batteryDisplayInput">
+					<label class="tooltip">Battery Capacity Cost ($/kWh)<span class="classic">Specify the cost in $/kWh.</span></label>
+					<input type="text" id="batteryCapacityCost" name="batteryCapacityCost" value="{{allInputDataDict.reopt_jl.batteryCapacityCost}}" pattern="^\d+\.?\d*?$" required="required"/>
+				</div>
+				<div class="smallerInput BatteryDisplayInput">
+					<label class="tooltip">Battery Minimum Capacity (kWh)<span class="classic">Specify the minimum desired battery capacity in kWh.</span></label>
+					<input type="text" id="batteryCapacityMin" name="batteryCapacityMin" value="{{allInputDataDict.reopt_jl.batteryCapacityMin}}" required="required"/>
+				</div>
+				<div class="smallerInput BatteryDisplayInput">
+					<label class="tooltip">Battery Maximum Capacity (kWh)<span class="classic">Specify the maximum desired battery capacity in kWh.</span></label>
+					<input type="text" id="batteryCapacityMax" name="batteryCapacityMax" value="{{allInputDataDict.reopt_jl.batteryCapacityMax}}" required="required"/>
+				</div>
+				<div class="smallerInput">
+					<label class="tooltip">Battery MACRS Years<span class="classic">MACRS schedule for financial analysis. Possible inputs are 0, 5 and 7 years. Set to zero to disable accelerated depreciation accounting for solar.</span></label>
+					<select id="batteryMacrsOptionYears" name="batteryMacrsOptionYears" value="{{allInputDataDict.reopt_jl.batteryMacrsOptionYears}}"/>
+						<option value="0" {{ 'selected' if allInputDataDict.batteryMacrsOptionYears == '0' }}>0</option>
+						<option value="5" {{ 'selected' if allInputDataDict.batteryMacrsOptionYears == '5' }}>5</option>
+						<option value="7" {{ 'selected' if allInputDataDict.batteryMacrsOptionYears == '7' }}>7</option>
+					</select>
+				</div>
+				<div class="smallerInput">
+					<label class="tooltip">Battery ITC (%)<span class="classic">Please enter a number 0-1 for the battery investment tax credit. Format 0.XX</span></label>
+					<input type="number" id="batteryItcPercent" name="batteryItcPercent" value="{{allInputDataDict.reopt_jl.batteryItcPercent}}" step="0.01" min="0.0" max="1.0" required="required"/>
+				</div>
+				<div class="smallerInput">
+					<label class="tooltip">Battery Replacement Power Cost ($/kW)<span class="classic">Specify the cost of replacing the battery inverter at the specified year in $/kW.</span></label>
+					<input type="text" id="batteryPowerCostReplace" name="batteryPowerCostReplace" value="{{allInputDataDict.reopt_jl.batteryPowerCostReplace}}" pattern="^\d+\.?\d*?$" required="required"/>
+				</div>
+				<div class="smallerInput">
+					<label class="tooltip">Battery Replacement Capacity Cost ($/kWh)<span class="classic">Specify the cost of replacing the battery capacity at the specified year in $/kWh.</span></label>
+					<input type="text" id="batteryCapacityCostReplace" name="batteryCapacityCostReplace" value="{{allInputDataDict.reopt_jl.batteryCapacityCostReplace}}" pattern="^\d+\.?\d*?$" required="required"/>
+				</div>
+				<div class="smallerInput">
+					<label class="tooltip">Battery Inverter Replacement (years)<span class="classic">Specify a year in which the battery inverter will be replaced at the cost specified in Battery Replacement Power Cost. Input is an integer less than or equal to the analysis period in years.</span></label>
+					<input type="text" id="batteryPowerReplaceYear" name="batteryPowerReplaceYear" value="{{allInputDataDict.reopt_jl.batteryPowerReplaceYear}}" required="required"/>
+				</div>
+					<div class="smallerInput">
+					<label class="tooltip">Battery Replacement (years)<span class="classic">Specify a year in which the battery cells will be replaced at the cost specified in Battery Replacement Capacity Cost. Input is an integer less than or equal to the analysis period in years.</span></label>
+					<input type="text" id="batteryCapacityReplaceYear" name="batteryCapacityReplaceYear" value="{{allInputDataDict.reopt_jl.batteryCapacityReplaceYear}}" required="required"/>
+				</div>
 			</div>
 
 			<div class="wideInput">
-				<p class="inputSectionHeader">Resilience - To optimize for resilience, specify an Outage Start Hour greater than 0</p>
+				<p class="inputSectionSubHeader">Resilience - To optimize for resilience, specify an Outage Start Hour greater than 0</p>
 			</div>
-			<hr>
+			<hr class="green">
+			<!-- add checkbox for optimizing for resilience? more intuitive-->
 			<div class="shortInput">
 				<label class="tooltip">Outage Start Hour<span class="classic">A major outage is added starting at this hour. Specify an hour greater than 0 but less than 8760 to trigger optimization for resilience and include fossil generation. If 0 is entered, the model will run an economic optimization without fossil generation.</span></label>
 				<input type="number" id="outage_start_hour" name="outage_start_hour" value="{{allInputDataDict.reopt_jl.outage_start_hour}}" min="0" max="8760" required="required"/>
@@ -891,76 +1100,79 @@
 				<label class="tooltip">Pre-existing Fossil Generator Size (kW)<span class="classic">Specify the total capacity of any pre-existing generators in kW. The outputted "Total Fossil Gen" will be inclusive of existing fossil gen.</span></label>
 				<input type="text" id="genExisting" name="genExisting" value="{{allInputDataDict.reopt_jl.genExisting}}" required="required"/>
 			</div>
-			<div class="shortInput">
-				<label class="tooltip">Available Generator Fuel (gallons)<span class="classic">Specify the amount of fuel available for all new and pre-existing generators in gallons.</span></label>
-				<input type="text" id="fuelAvailable" name="fuelAvailable" value="{{allInputDataDict.reopt_jl.fuelAvailable}}" required="required"/>
-			</div>
-			<div class="shortInput">
-				<label class="tooltip">Minimum Generator Loading<span class="classic">Please enter a number 0-1 for the the minimum fraction of rated total kVA load that must be maintained by the generator. >/= 0.3 recommended for extended diesel operation. Set to 0 for highest likelihood of success in solving optimization. Format 0.XX</span></label>
-				<input type="number" id="minGenLoading" name="minGenLoading" value="{{allInputDataDict.reopt_jl.minGenLoading}}" step="0.01" min="0.0" max="1.0"  required="required"/>
-			</div>
-			<div class="shortInput">
-				<label class="tooltip">Fossil Generator Cost ($/kW)<span class="classic">Specify the cost in $/kWh.</span></label>
-				<input type="text" id="dieselGenCost" name="dieselGenCost" value="{{allInputDataDict.reopt_jl.dieselGenCost}}" pattern="^\d+\.?\d*?$" required="required"/>
-			</div>
-			<div class="shortInput">
-				<label class="tooltip">Fossil Generator Min (kW)<span class="classic">Specify minimum fossil generation in kW. Only specify if needed, as the optimization runs best if left unedited.</span></label>
-				<input type="text" id="dieselMin" name="dieselMin" value="{{allInputDataDict.reopt_jl.dieselMin}}" pattern="^\d+\.?\d*?$" required="required"/>
-			</div>
-			<div class="shortInput">
-				<label class="tooltip">Fossil Generator Max (kW)<span class="classic">Specify max fossil generation in kW. Only specify if needed, as the optimization runs best if left unedited.</span></label>
-				<input type="text" id="dieselMax" name="dieselMax" value="{{allInputDataDict.reopt_jl.dieselMax}}" pattern="^\d+\.?\d*?$" required="required"/>
-			</div>
-			<div class="shortInput">
-				<label class="tooltip">Fossil Fuel Cost (diesel gal equiv)<span class="classic">Specify cost of fuel in $ per gallon. To convert $/MMBTU of Natural gas to gallons of diesel, divide $/MMBTU market rate by 4.85 to account for 50% lower efficiency of natural gas reciprocating engines and lower fuel density as compared to diesel. Format X.XX</span></label>
-				<input type="text" id="dieselFuelCostGal" name="dieselFuelCostGal" value="{{allInputDataDict.reopt_jl.dieselFuelCostGal}}" pattern="^\d+\.?\d*?$" required="required"/>
-			</div>
-			<div class="shortInput">
-				<label class="tooltip">Fossil Emissions Factor (lb CO2/gal)<span class="classic">Specify fossil emissions factor in pounds of carbon dioxide per gallon. Default 22.4 is for diesel. Natural gas can be modeled using 24.1 </span></label>
-				<input type="text" id="dieselCO2Factor" name="dieselCO2Factor" value="{{allInputDataDict.reopt_jl.dieselCO2Factor}}" pattern="^\d+\.?\d*?$" required="required"/>
-			</div>
-			<div class="shortInput">
-				<label class="tooltip">Fossil O+M Cost ($/kW/year)<span class="classic">Specify annual operations and maintenance cost per kilowatt per year.</span></label>
-				<input type="text" id="dieselOMCostKw" name="dieselOMCostKw" value="{{allInputDataDict.reopt_jl.dieselOMCostKw}}" pattern="^\d+\.?\d*?$" required="required"/>
-			</div>
-			<div class="shortInput">
-				<label class="tooltip">Fossil O+M Cost ($/kWh/year)<span class="classic">Specify annual operations and maintenance cost per kilowatt-hour per year. Format "X.XX"</span></label>
-				<input type="text" id="dieselOMCostKwh" name="dieselOMCostKwh" value="{{allInputDataDict.reopt_jl.dieselOMCostKwh}}" pattern="^\d+\.?\d*?$" required="required"/>
-			</div>
-			<div class="shortInput">
-				<label class="tooltip">Fossil gen only runs during outage?<span class="classic">"No" signifies that fossil generator is enabled to run at any point in the year.</span></label>
-				<select id="dieselOnlyRunsDuringOutage" name="dieselOnlyRunsDuringOutage" value="{{allInputDataDict.reopt_jl.dieselOnlyRunsDuringOutage}}"/>
-					<option value=true {{ 'selected' if allInputDataDict.dieselOnlyRunsDuringOutage == 'true' }}>Yes</option>
-					<option value=false {{ 'selected' if allInputDataDict.dieselOnlyRunsDuringOutage == 'false' }}>No</option>
-				</select>
-			</div>
-			<div class="shortInput">
-				<label class="tooltip">Fossil MACRS Years<span class="classic">MACRS schedule for financial analysis. Possible inputs are 0, 5 and 7 years. Set to zero to disable accelerated depreciation accounting for solar.</span></label>
-				<select id="dieselMacrsOptionYears" name="dieselMacrsOptionYears" value="{{allInputDataDict.reopt_jl.dieselMacrsOptionYears}}"/>
-					<option value="0" {{ 'selected' if allInputDataDict.dieselMacrsOptionYears == '0' }}>0</option>
-					<option value="5" {{ 'selected' if allInputDataDict.dieselMacrsOptionYears == '5' }}>5</option>
-					<option value="7" {{ 'selected' if allInputDataDict.dieselMacrsOptionYears == '7' }}>7</option>
-				</select>
+			<span class="advancedOptionsButton" onclick="toggleAdvancedOptions('fossilOptions','fossilOptionsButton')"><span class="plus" id="fossilOptionsButton"></span>Fossil Generator Inputs</span>
+			<div class="advancedOptions" id="fossilOptions">
+				<div class="smallerInput">
+					<label class="tooltip">Available Generator Fuel (gallons)<span class="classic">Specify the amount of fuel available for all new and pre-existing generators in gallons.</span></label>
+					<input type="text" id="fuelAvailable" name="fuelAvailable" value="{{allInputDataDict.reopt_jl.fuelAvailable}}" required="required"/>
+				</div>
+				<div class="smallerInput">
+					<label class="tooltip">Minimum Generator Loading<span class="classic">Please enter a number 0-1 for the the minimum fraction of rated total kVA load that must be maintained by the generator. >/= 0.3 recommended for extended diesel operation. Set to 0 for highest likelihood of success in solving optimization. Format 0.XX</span></label>
+					<input type="number" id="minGenLoading" name="minGenLoading" value="{{allInputDataDict.reopt_jl.minGenLoading}}" step="0.01" min="0.0" max="1.0"  required="required"/>
+				</div>
+				<div class="smallerInput">
+					<label class="tooltip">Fossil Generator Cost ($/kW)<span class="classic">Specify the cost in $/kWh.</span></label>
+					<input type="text" id="dieselGenCost" name="dieselGenCost" value="{{allInputDataDict.reopt_jl.dieselGenCost}}" pattern="^\d+\.?\d*?$" required="required"/>
+				</div>
+				<div class="smallerInput">
+					<label class="tooltip">Fossil Generator Min (kW)<span class="classic">Specify minimum fossil generation in kW. Only specify if needed, as the optimization runs best if left unedited.</span></label>
+					<input type="text" id="dieselMin" name="dieselMin" value="{{allInputDataDict.reopt_jl.dieselMin}}" pattern="^\d+\.?\d*?$" required="required"/>
+				</div>
+				<div class="smallerInput">
+					<label class="tooltip">Fossil Generator Max (kW)<span class="classic">Specify max fossil generation in kW. Only specify if needed, as the optimization runs best if left unedited.</span></label>
+					<input type="text" id="dieselMax" name="dieselMax" value="{{allInputDataDict.reopt_jl.dieselMax}}" pattern="^\d+\.?\d*?$" required="required"/>
+				</div>
+				<div class="smallerInput">
+					<label class="tooltip">Fossil Fuel Cost (diesel gal equiv)<span class="classic">Specify cost of fuel in $ per gallon. To convert $/MMBTU of Natural gas to gallons of diesel, divide $/MMBTU market rate by 4.85 to account for 50% lower efficiency of natural gas reciprocating engines and lower fuel density as compared to diesel. Format X.XX</span></label>
+					<input type="text" id="dieselFuelCostGal" name="dieselFuelCostGal" value="{{allInputDataDict.reopt_jl.dieselFuelCostGal}}" pattern="^\d+\.?\d*?$" required="required"/>
+				</div>
+				<div class="smallerInput">
+					<label class="tooltip">Fossil Emissions Factor (lb CO2/gal)<span class="classic">Specify fossil emissions factor in pounds of carbon dioxide per gallon. Default 22.4 is for diesel. Natural gas can be modeled using 24.1 </span></label>
+					<input type="text" id="dieselCO2Factor" name="dieselCO2Factor" value="{{allInputDataDict.reopt_jl.dieselCO2Factor}}" pattern="^\d+\.?\d*?$" required="required"/>
+				</div>
+				<div class="smallerInput">
+					<label class="tooltip">Fossil O+M Cost ($/kW/year)<span class="classic">Specify annual operations and maintenance cost per kilowatt per year.</span></label>
+					<input type="text" id="dieselOMCostKw" name="dieselOMCostKw" value="{{allInputDataDict.reopt_jl.dieselOMCostKw}}" pattern="^\d+\.?\d*?$" required="required"/>
+				</div>
+				<div class="smallerInput">
+					<label class="tooltip">Fossil O+M Cost ($/kWh/year)<span class="classic">Specify annual operations and maintenance cost per kilowatt-hour per year. Format "X.XX"</span></label>
+					<input type="text" id="dieselOMCostKwh" name="dieselOMCostKwh" value="{{allInputDataDict.reopt_jl.dieselOMCostKwh}}" pattern="^\d+\.?\d*?$" required="required"/>
+				</div>
+				<div class="smallerInput">
+					<label class="tooltip">Fossil gen only runs during outage?<span class="classic">"No" signifies that fossil generator is enabled to run at any point in the year.</span></label>
+					<select id="dieselOnlyRunsDuringOutage" name="dieselOnlyRunsDuringOutage" value="{{allInputDataDict.reopt_jl.dieselOnlyRunsDuringOutage}}"/>
+						<option value=true {{ 'selected' if allInputDataDict.dieselOnlyRunsDuringOutage == 'true' }}>Yes</option>
+						<option value=false {{ 'selected' if allInputDataDict.dieselOnlyRunsDuringOutage == 'false' }}>No</option>
+					</select>
+				</div>
+				<div class="smallerInput">
+					<label class="tooltip">Fossil MACRS Years<span class="classic">MACRS schedule for financial analysis. Possible inputs are 0, 5 and 7 years. Set to zero to disable accelerated depreciation accounting for solar.</span></label>
+					<select id="dieselMacrsOptionYears" name="dieselMacrsOptionYears" value="{{allInputDataDict.reopt_jl.dieselMacrsOptionYears}}"/>
+						<option value="0" {{ 'selected' if allInputDataDict.dieselMacrsOptionYears == '0' }}>0</option>
+						<option value="5" {{ 'selected' if allInputDataDict.dieselMacrsOptionYears == '5' }}>5</option>
+						<option value="7" {{ 'selected' if allInputDataDict.dieselMacrsOptionYears == '7' }}>7</option>
+					</select>
+				</div>
 			</div>
 
 			<br id="der-cam-specific"><br><br>
 			<div class="wideInput">
-				<p class="inputSectionHeader">DER-CAM Parameters</p>
+				<p class="inputSectionHeader">DER-CAM Parameters (<a href="https://dercam-app.lbl.gov/u/api">API Key Sign-Up</a>)</p>
 			</div>
 			<hr>
 			<div class="shortInput">
-				<label class="tooltip">API Key<span class="classic">Enter your API key for the DER-CAM API. If you don't have one, you can sign up for one <a href="https://dercam-app.lbl.gov/u/api">here</a>.</span></label>
+				<label class="tooltip">API Key<span class="classic">Enter your API key for the DER-CAM API. If you don't have one, you can sign up for one through the link above.</span></label>
 				<input type="text" id="api_key" name="api_key" value="{{allInputDataDict.dercam.api_key}}" required="required"/>
 			</div>
 			<div class="shortInput">
-				<label class="tooltip">Attach model inputs? (.xlsx)<span class="classic">Choose Yes to attach a seperate DER-CAM Excel input file (required if not running REopt), otherwise choose No to run DER-CAM using the REopt inputs above</span></label>
+				<label class="tooltip">Attach model inputs?<span class="classic">Choose Yes to attach a seperate DER-CAM Excel input file (required if not running REopt), otherwise choose No to run DER-CAM using the REopt inputs above</span></label>
 				<select id="" name="default_switch_dispatchable" value="{{allInputDataDict.pmonm.default_switch_dispatchable}}"/>
 					<option value="true" {{ 'selected' if allInputDataDict.dercam.hasModelFile == 'true' }}>Yes</option>
 					<option value="false" {{ 'selected' if allInputDataDict.dercam.hasModelFile == 'false' }}>No</option>
 				</select>
 			</div>
 			<div class="shortInput">
-				<label class="tooltip"> Model Inputs ( .dss file )<span class="classic">Optional: Enter the name of a .dss file representing the circuit</span></label>
+				<label class="tooltip"> Model Inputs ( .xlsx file )<span class="classic">Optional: Enter the name of a .xlsx file containing the desired model inputs to run DER-CAM with</span></label>
 				<input id="modelFile" type="file" style="display:none" onchange="handle_files(this.files,'modelFileName')"> <!--'modelFile'-->
 				<div>
 					<label for="modelFile" class="fileButton">Choose File</label>
@@ -989,7 +1201,7 @@
 					<input id="settingsFileName" name="settingsFileName" value="{{allInputDataDict.pmonm.settingsFileName}}" readonly class="uploadFileName">	
 				</div>
 			</div>
-			<!-- optional inputs for building settings file => new sub-section? advanced options hidden menu?-->
+			<!-- optional inputs for building settings file -->
 			<span class="advancedOptionsButton" onclick="toggleAdvancedOptions('pmonmSettingsAdvancedOptions','pmonmSettingsButton')"><span class="plus" id="pmonmSettingsButton"></span> Advanced Options: Settings</span>
 			<div class="advancedOptions" id="pmonmSettingsAdvancedOptions">
 				<div class="smallerInput">
@@ -1093,37 +1305,37 @@
 			<div id="psoAdvancedOptions" class="advancedOptions">
 				<!-- todo: figure out best way to enter Fres/Fts (lists of strings) -->
 				<div class="smallerInput">
-					<label class="tooltip">Ignore distributed generation and non-directional output settings?<span class="classic">Optional: If Yes, force optimizer to ignore the distributed generation and nondirectional output settings (default); if No, calculate directional overcurrent settings </span></label>
+					<label class="tooltip">Ignore distributed generation and non-directional output settings?<span class="classic">Optional: If Yes (default), force optimizer to ignore the distributed generation and nondirectional output settings (Force_NOIBR); if No, calculate directional overcurrent settings </span></label>
 					<select id="Force_NOIBR" name="Force_NOIBR" value="{{allInputDataDict.pso.Force_NOIBR}}"/>
 						<option value="1" {{ 'selected' if allInputDataDict.pso.Force_NOIBR == '1' }}>Yes</option>
 						<option value="0" {{ 'selected' if allInputDataDict.pso.Force_NOIBR == '0' }}>No</option>
 					</select>
 				</div>
 				<div class="smallerInput">
-					<label class="tooltip">Enable instantaneous trip?<span class="classic">Optional: If Yes, allow instantaneous trip if applicable; if No, disable instantaneous trip (default) </span></label>
+					<label class="tooltip">Enable instantaneous trip?<span class="classic">Optional: If Yes, allow instantaneous trip (IT) if applicable; if No (default), disable instantaneous trip </span></label>
 					<select id="enableIT" name="enableIT" value="{{allInputDataDict.pso.enableIT}}"/>
 						<option value="1" {{ 'selected' if allInputDataDict.pso.enableIT == '1' }}>Yes</option>
 						<option value="0" {{ 'selected' if allInputDataDict.pso.enableIT == '0' }}>No</option>
 					</select>
 				</div>
 				<div class="smallerInput">
-					<label class="tooltip">Coordination time interval (seconds?)<span class="classic">Optional: Desired coordination time interval</span></label>
+					<label class="tooltip">Coordination time interval (seconds .)<span class="classic">Optional: Desired coordination time interval (CTI)</span></label>
 					<input type="number" id="CTI" name="CTI" value="{{allInputDataDict.pso.CTI}}" step="0.01" min="0.0"/>
 				</div>
 				<div class="smallerInput">
-					<label class="tooltip">Maximum allowable operating time (seconds)<span class="classic">Optional: Maximum allowable operating time in seconds</span></label>
+					<label class="tooltip">Maximum allowable operating time (seconds)<span class="classic">Optional: Maximum allowable operating time in seconds (OTmax)</span></label>
 					<input type="number" id="OTmax" name="OTmax" value="{{allInputDataDict.pso.OTmax}}" step="1" min="0"/>
 				</div>
 				<div class="smallerInput">
-					<label class="tooltip">Enable relay type selection?<span class="classic">Optional: Enable relay type selection</span></label>
+					<label class="tooltip">Enable relay type selection?<span class="classic">Optional: Enable relay type selection (type_select)</span></label>
 					<select id="type_select" name="type_select" value="{{allInputDataDict.pso.type_select}}"/>
 						<option value="true" {{ 'selected' if allInputDataDict.pso.enableIT == 'true' }}>Yes</option>
 						<option value="false" {{ 'selected' if allInputDataDict.pso.enableIT == 'false' }}>No</option>
 					</select>
 				</div>
-				<!-- todo: Fault_Res (similar to Fres) & Min_Ip (string list, float list)-->
+				<!-- todo: Fault_Res (similar to Fres?) & Min_Ip (string list, float list)-->
 				<div class="smallerInput">
-					<label class="tooltip">Substation bus<span class="classic">Optional: Main substation (used to determine the start of the system); (default is "sourcebus")</span></label>
+					<label class="tooltip">Substation bus<span class="classic">Optional: Main substation (used to determine the start of the system); (default : "sourcebus")</span></label>
 					<input type="text" id="Substation_bus" name="Substation_bus" value="{{allInputDataDict.pso.Substation_bus}}"/>
 				</div>
 			</div>

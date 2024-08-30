@@ -105,6 +105,10 @@ def work(modelDir, inputDict):
 	out["maxEnergySeries"] = E_UL
 	
 	VBpower, out["VBenergy"] = pulpFunc(inputDict, demand, P_lower, P_upper, E_UL, monthHours)
+	
+	## Flip sign of VBpower values (positive now = discharging and negative = charging)
+	VBpower = [i * -1. for i in VBpower]
+
 	out["VBpower"] = VBpower
 	out["dispatch_number"] = [len([p for p in VBpower[s:f] if p != 0]) for (s, f) in monthHours]
 

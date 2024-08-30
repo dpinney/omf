@@ -846,7 +846,8 @@ def getDownLineLoadsEquipment1(pathToOmd, equipmentList):
                 tract = findCensusTract(lat,long)
             
             loadsDict[key]['tract'] = tract
-            tractDict[tract] = buildSVI(tract)
+            # tractDict[tract] = buildSVI(tract)
+            tractDict[tract] = buildSVI1(tract)
             valList.append(list(all_vals(tractDict[tract])))
             geoms.append(tractDict[tract]['geometry'])
 
@@ -1006,7 +1007,7 @@ def getDownLineLoadsEquipment(pathToOmd,nriGeoJson, equipmentList):
             # For each load, estimate the number of persons served.
             #Use the following equation sqrt(kw^2 + kvar^2)/5 kva = # of homes served by that load
             # assume household is 4
-            loads[key]["base crit score"]= ((math.sqrt((kw * kw) + (kvar * kvar) ))/ (5)) * 4
+            loads[key]["base crit score"]= round(((math.sqrt((kw * kw) + (kvar * kvar) ))/ (5)) * 4, 2)
 
 
             long = float(ob['longitude'])
@@ -1255,6 +1256,7 @@ def createColorCSV(modelDir, loadsDict, objectsDict):
     
     new_df[['base crit score','tract','community crit score','SOVI_SCORE','base crit index','community crit index']].to_csv(pJoin(modelDir, 'color_by.csv'), index=True)
 
+
 def buildSVI(tractFIPS):
     '''
     Build SVI computation
@@ -1317,7 +1319,7 @@ def buildSVI(tractFIPS):
     
 
     # build url to use api
-    acs_request_url = "https://api.census.gov/data/2022/acs/acs5?get="+",".join(acs_svi_vars)+"&for=tract:"+str(tractID)+"&in=state:"+str(stateID)+"%20county:"+ str(countyID) + "&key=bc86c8cfc930e7c10b81d6683c6a316f5fcb857b" 
+    acs_request_url = "https://api.census.gov/data/2022/acs/acs5?get="+",".join(acs_svi_vars)+"&for=tract:"+str(tractID)+"&in=state:"+str(stateID)+"%20county:"+ str(countyID) + "&key=bc86c8cfc930e7c10b81d6683c6a316f5fcb857b"
     pdb_request_url = "https://api.census.gov/data/2022/pdb/tract?get="+ ",".join(pdb_svi_vars)+ "&for=tract:"+str(tractID)+"&in=state:"+str(stateID)+"%20county:"+ str(countyID) + "&key=bc86c8cfc930e7c10b81d6683c6a316f5fcb857b"
 
 
@@ -1364,6 +1366,134 @@ def buildSVI(tractFIPS):
 
     return svi_var_dict
 
+def buildSVI1(tractFIPS):
+    '''
+    Build SVI computation
+    tractFIPS -> tractFIPS code
+    
+    '''
+    # SVI Components
+    # Socioeconomic
+    # Household
+    # Housing Type
+
+    # SOCIOECONOMIC VARS
+    # Name of feature | Feature name (short): Variable name
+
+    # Percent Individuals Below Poverty Level | Poverty level: pct_Prs_Blw_Pov_Lev_ACS_16_20
+    # Percent Individuals 16+ Unemployyed | Unemployed: pct_Civ_emp_16p_ACS_16_20
+    # Per capita Income | Income: avg_Agg_HH_INC_ACS_16_20
+    # Percent non highschool grads | Highschool: pct_Not_HS_Grad_ACS_16_20
+
+    # HOUSEHOULD COMPOSITION / DISABILITY VARS
+
+    #Percent Age 65+ |Age 65+ : Percentage calculated by dividing Pop_65plus_ACS_16_20 by Tot_Population_ACS_16_20
+    # Noninstituionalized People under 19 | under19: Civ_noninst_pop_U19_ACS_16_20
+    # Non Instituionalized People | noninstitution: Civ_Noninst_Pop_ACS_16_20
+    # Percent population under 19 | under19 : Civ_noninst_pop_U19_ACS_16_20 / Civ_Noninst_Pop_ACS_16_20
+    #Percent population disabled | disabled: pct_Pop_Disabled_ACS_16_20
+    # <------------------> THESE VARS ARE IN ACS DATASET REST ARE IN PLANNING DATABASE DATASET <---------------->
+    # Estimate!!Total:!!6 to 17 years:!!Living with one parent: | singleparent6-17: B23008_021E
+    # Estimate!!Total:!!Under 6 years:!!Living with one parent: | singleparentu6: B23008_008E
+    # Total single parents with u18 child | singleparentu18: B23008_021E + B23008_008E
+    # Total familes | family: B23008_001E
+    # Percent of single parent families | singleparent: (B23008_021E + B23008_008E)/(B23008_001E)
+    #<------------------>^^^^ THESE VARS ARE IN ACS DATASET REST ARE IN PLANNING DATABASE DATASET^^^^ <---------------->
+
+    # HOUSING / TRANSPORTATION VARS
+
+    # Percent Multi-unitstructure | multi: pct_MLT_U10p_ACS_16_20
+    # Percent mobile home | mobile: pct_Mobile_Homes_ACS_16_20
+    # Percent crowding | crowd: pct_Crowd_Occp_U_ACS_16_20
+    # <------------------> THESE VARS ARE IN ACS DATASET REST ARE IN PLANNING DATABASE DATASET <---------------->
+    # People No vehicles | novehicle: B08014_002E
+    # Total People | people: B01001_001E
+    # Percent non vehicle | (B08014_002E) / (B01001_001E)
+    #<------------------>^^^^ THESE VARS ARE IN ACS DATASET REST ARE IN PLANNING DATABASE DATASET^^^^ <---------------->
+
+                #Socioeconomic, household composition, housing /transportation variables
+    pdb_svi_vars = ['pct_Prs_Blw_Pov_Lev_ACS_16_20', 'pct_Civ_emp_16p_ACS_16_20', 'avg_Agg_HH_INC_ACS_16_20','pct_Not_HS_Grad_ACS_16_20',
+                'Pop_65plus_ACS_16_20', 'Tot_Population_ACS_16_20', 'Civ_noninst_pop_U19_ACS_16_20', 'Civ_Noninst_Pop_ACS_16_20', 'pct_Pop_Disabled_ACS_16_20',
+                'pct_MLT_U10p_ACS_16_20', 'pct_Mobile_Homes_ACS_16_20', 'pct_Crowd_Occp_U_ACS_16_20']
+                # household composition / disability variables
+    acs_svi_vars = ['B23008_021E', 'B23008_008E', 'B23008_001E',
+                    'B08014_002E','B01001_001E']
+    
+    stateID = tractFIPS[:2] # state identifier
+    countyID = tractFIPS[2:5] # county identifier
+    tractID = tractFIPS[5:] # tract identifier
+
+    # SVI computation vals dictionary
+    
+    
+
+    # build url to use api
+    acs_request_url = "https://api.census.gov/data/2022/acs/acs5?get="+",".join(acs_svi_vars)+"&for=tract:"+str(tractID)+"&in=state:"+str(stateID)+"%20county:"+ str(countyID) + "&key=bc86c8cfc930e7c10b81d6683c6a316f5fcb857b"
+    pdb_request_url = "https://api.census.gov/data/2022/pdb/tract?get="+ ",".join(pdb_svi_vars)+ "&for=tract:"+str(tractID)+"&in=state:"+str(stateID)+"%20county:"+ str(countyID) + "&key=bc86c8cfc930e7c10b81d6683c6a316f5fcb857b"
+
+
+    #acs  data
+
+    opener = urllib.request.build_opener()
+    opener.addheaders = [('User-agent', 'Mozilla/5.0')]
+    resp = opener.open(acs_request_url, timeout=50)
+    acsJson = json.loads(resp.read())
+    acsDict = {k: 0 if v[0] is None else v[0]  for k, *v in zip(*acsJson)}
+
+    #pdb data
+    resp = opener.open(pdb_request_url, timeout=50)
+    pdbJson = json.loads(resp.read())
+    pdbDict = {k: 0 if v[0] is None else v[0]  for k, *v in zip(*pdbJson)}
+
+    combined_dict = {**acsDict, **pdbDict}
+    
+    
+    svi_var_dict = {
+        # socioeconomic vars
+        'pct_Prs_Blw_Pov_Lev_ACS_16_20': float(combined_dict['pct_Prs_Blw_Pov_Lev_ACS_16_20']),
+        'pct_Civ_emp_16p_ACS_16_20': float(combined_dict['pct_Civ_emp_16p_ACS_16_20']),
+        'avg_Agg_HH_INC_ACS_16_20': float(combined_dict['avg_Agg_HH_INC_ACS_16_20'].replace('$', '').replace(',','')),
+        'pct_Not_HS_Grad_ACS_16_20': float(combined_dict['pct_Not_HS_Grad_ACS_16_20']),
+        # household compisiton/ disability vars
+        'pct_Pop_65plus_ACS_16_20': float(combined_dict['Pop_65plus_ACS_16_20'])/float(combined_dict['Tot_Population_ACS_16_20']),
+        'pct_u19ACS_16_20': float(combined_dict['Civ_noninst_pop_U19_ACS_16_20'])/float(combined_dict['Civ_Noninst_Pop_ACS_16_20']),
+        'pct_Pop_Disabled_ACS_16_20': float(combined_dict['pct_Pop_Disabled_ACS_16_20']),
+        'pct_singlefamily_u18': (float(combined_dict['B23008_021E']) + float(combined_dict['B23008_008E']))/float(combined_dict['B23008_001E']),
+        #housing/transportation
+        'pct_MLT_U10p_ACS_16_20': float(combined_dict['pct_MLT_U10p_ACS_16_20']),
+        'pct_Mobile_Homes_ACS_16_20': float(combined_dict['pct_Mobile_Homes_ACS_16_20']),
+        'pct_Crowd_Occp_U_ACS_16_20': float(combined_dict['pct_Crowd_Occp_U_ACS_16_20']),
+        'pct_noVehicle': float(combined_dict['B08014_002E'])/float(combined_dict['B01001_001E'])
+    }
+
+    # Define the base URL for the TIGERweb REST Services
+    tigris_url = "https://tigerweb.geo.census.gov/arcgis/rest/services/TIGERweb/tigerWMS_ACS2021/MapServer/6/query"
+
+    params = {
+    'where': "STATE= '" + stateID +  "' AND COUNTY= '" + countyID + "' AND TRACT= '" + tractID + "'",  # Example: California state (06) and Alameda County (001)
+    'outFields': '*',
+    'returnGeometry': 'true',
+    'f': 'geojson',
+    'outSR': 4326  # Ensure we get geometries in WGS84 coordinate system
+    }
+    
+    tigrisResponse = requests.get(tigris_url, params=params)
+
+    tigrisData = tigrisResponse.json()
+    if (tigrisData['features'][0]['geometry']['type'] == 'Polygon'):
+        coordList = tigrisData['features'][0]['geometry']['coordinates'][0]
+    else:
+        coordList = []
+        for i in tigrisData['features'][0]['geometry']['coordinates']:
+            for j in i:
+                coordList.append(j)
+
+    
+    svi_var_dict['tractFIPS'] = str(tractFIPS)
+    svi_var_dict['geometry'] = coordList
+
+    return svi_var_dict
+
 def buildSVIRating(row):
     '''computes SVI Rating for SVI_SCORE columns'''
 
@@ -1377,7 +1507,6 @@ def buildSVIRating(row):
         return 'Relatively High'
     else:
         return 'Very High'
-
 
 def runCalculations(pathToOmd,modelDir, equipmentList):
     '''
@@ -1427,10 +1556,10 @@ def work(modelDir, inputDict):
     outData = {}
 
     # files
-    omd_file_path = pJoin(omf.omfDir,'static','testFiles','resilientCommunity', inputDict['inputDataFileName'])
+    omd_file_path = pJoin(modelDir, inputDict['inputDataFileName'])
     # census_nri_path = pJoin(omf.omfDir,'static','testFiles','resilientCommunity', 'census_and_NRI_database_MAR2023.json')
-    loads_file_path = pJoin(omf.omfDir,'static','testFiles','resilientCommunity', 'loads2.json')
-    obs_file_path = pJoin(omf.omfDir,'static','testFiles','resilientCommunity', 'objects3.json')
+    #loads_file_path = pJoin(omf.omfDir,'static','testFiles','resilientCommunity', 'loads2.json')
+    #obs_file_path = pJoin(omf.omfDir,'static','testFiles','resilientCommunity', 'objects3.json')
     geoJson_shapes_file = pJoin(modelDir, 'geoshapes.geojson')
 
 
@@ -1457,7 +1586,7 @@ def work(modelDir, inputDict):
 
     
     # check downline loads
-    obDict, loads, geoDF, sviDF = getDownLineLoadsEquipment1(omd_file_path, equipmentList)
+    obDict, loads, geoDF = getDownLineLoadsEquipment1(omd_file_path, equipmentList)
 
     # color vals based on selected column
     
@@ -1551,9 +1680,8 @@ def work(modelDir, inputDict):
     return outData
 
 def test():
-    pathToOmd ='/Users/davidarmah/Documents/omf/omf/static/testFiles/resilientCommunity/iowa240_in_Florida_copy2.omd'
-    outputPath = '/Users/davidarmah/Documents/svi.csv'
-    runCalculations(pathToOmd,outputPath, ['line', 'transformer', 'fuse'])
+    tractFIPS = '12007000400'
+    print(buildSVI1(tractFIPS))
 
 def new(modelDir):
     omdfileName = 'iowa240_in_Florida_copy2'
