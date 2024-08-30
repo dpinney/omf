@@ -19,7 +19,11 @@ tooltip = "Calculate the energy storage capacity for a collection of thermostati
 def pyVbat(modelDir, i):
 	vbType = i['load_type']
 	with open(pJoin(modelDir, 'temp.csv'), newline='') as f:
-		ambient = np.array([float(r[0]) for r in csv.reader(f)])
+		ambientList = []
+		for r in csv.reader(f):
+			if r:
+				ambientList.append(float(r[0]))
+		ambient = np.array(ambientList)
 	variables = [i['capacitance'], i['resistance'], i['power'], i['cop'], 
 		i['deadband'], float(i['setpoint']), i['number_devices']]
 	variables = [float(v) for v in variables]
