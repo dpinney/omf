@@ -85,7 +85,7 @@ def work(modelDir, inputDict):
 	with open(pJoin(modelDir, 'temp.csv'), 'w') as f:
 		lines = inputDict['tempCurve'].split('\n')
 		out["tempData"] = [float(x) if x != '999.0' else float(inputDict['setpoint']) for x in lines if x != '']
-		correctData = [x if x != '999.0' else inputDict['setpoint'] for x in lines if x != '']
+		correctData = [x+'\n' if x != '999.0' else inputDict['setpoint']+'\n' for x in lines if x != '']
 		f.write(''.join(correctData))
 	assert len(correctData) == 8760
 	
