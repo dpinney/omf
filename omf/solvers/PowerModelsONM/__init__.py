@@ -1,4 +1,4 @@
-import os, platform, json
+import os, platform, json, time
 from pathlib import Path
 from os.path import join as pJoin
 
@@ -19,7 +19,8 @@ def run_julia_script(juliaStr : str, cleanFileFormatting = True):
 	'''
 	if cleanFileFormatting:
 		juliaStr = juliaStr.replace('\\','/')
-	juliaFileLocation = pJoin(thisDir, 'temp_julia_script.jl')
+	# time.time() is added for the sake of uniqueness to avoid collisions between things running at the same time
+	juliaFileLocation = pJoin(thisDir, f'temp_julia_script_{time.time()}.jl')
 	with open(juliaFileLocation, 'w') as juliaFile:
 		juliaFile.write(juliaStr)
 	#Writing the julia code to a .jl file and running that file from the command line is far less prone to formatting snafus than writing the julia code in the cmd commands directly
@@ -204,9 +205,7 @@ def run_onm(circuitPath='circuit.dss', settingsPath='settings.json', outputPath=
 		); 
 		entrypoint(args); '''
 	run_julia_script(juliaFileContents)
-
-
-
+	
 if __name__ == '__main__':
 	# Basic Tests
 	thisDirPath = Path(thisDir)
