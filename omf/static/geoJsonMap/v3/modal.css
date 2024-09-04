@@ -227,7 +227,7 @@ table.table--modal thead {
 /****************************/
 
 div.js-div--modal.featureEditModal {
-    max-height: 70vh;
+    max-height: 33vh;
 }
 div.js-div--modal.featureEditModal table.table--modal td:nth-child(2) {
     max-width: 160px;
