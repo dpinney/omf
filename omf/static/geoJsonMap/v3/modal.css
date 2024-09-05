@@ -53,6 +53,12 @@ div.horizontalFlex {
 .centerCrossAxisFlex {
     align-items: center;
 }
+.rightAlignMainAxisFlex {
+    gap: 5px;
+    justify-content: right;
+    /* Make popup buttons align nicely with the table? */
+    /*margin-right: 12px;*/
+}
 .hoverable:hover {
     background-color: seagreen;
     color: white;
@@ -185,6 +191,7 @@ div.div--modalTitle span {
 div.div--modalTitle.caution {
     background-color: hsla(50, 100%, 70%, 1);
 }
+
 div.div--modalElementContainer {
     height: 100%;
     /* HACK: I should know how to subtract 100% of the height to get an actual height instead of guessing. This should be 92% default because that
@@ -192,7 +199,8 @@ div.div--modalElementContainer {
     a modal element container, so I can't just use 100%. 92% is actually fine. Use custom CSS for one-offs like the attachments modal. 89% works too.
     */
     max-height: calc(100% - 43px);
-    width: 100%;
+    /* Commenting this out helps with the new featureEditModal button alignment */
+    /*width: 100%;*/
 }
 table.table--modal {
     border-collapse: collapse;
@@ -229,9 +237,16 @@ table.table--modal thead {
 div.js-div--modal.featureEditModal {
     max-height: 33vh;
 }
-div.js-div--modal.featureEditModal table.table--modal td:nth-child(2) {
-    max-width: 160px;
-    width: 160px;
+div.js-div--modal.featureEditModal table.table--modal td:nth-child(2) span {
+    max-width: 100px;
+    /* Popups should no longer all be the same width. If a popup can be thinner, then let it be */
+    /*width: 160px;*/
+}
+/* Give inputs a width so they are never too squished */
+div.js-div--modal.featureEditModal table.table--modal td:nth-child(3) input {
+    /* Anything over 98px causes horizontal overflow, probably due to Leaflet's dynamic inline popup width calculation not working with how I set
+    table column widths */
+    width: 98px;
 }
 
 /***********************/
@@ -241,10 +256,14 @@ div.js-div--modal.featureEditModal table.table--modal td:nth-child(2) {
 div.js-div--modal.searchModal {
     border-radius: 0;
     box-shadow: inset -1px 0px darkgray;
-    max-height: 20vh;
+    max-height: 7vh;
 }
 div.js-div--modal.searchModal div.div--modalElementContainer {
     height: initial;
+}
+div.div--topTabContentContainer div.js-div--dropdown.sideNav div.div--modalElementContainer {
+    /* Help align featureEditModalButtons with table in search modal */
+    margin-right: 100px;
 }
 div.js-div--modal.searchModal select {
     width: 100%;

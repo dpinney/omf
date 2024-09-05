@@ -310,7 +310,8 @@ class FeatureEditModal { // implements ObserverInterface, ModalInterface
                 //   results, but mixing configuration and non-configuration objects isn't necessarily an error
             } else {
                 if (this.#observables.every(ob => ob.isNode())) {
-                    modal.insertElement(this.#getAddNodeWithCoordinatesDiv());
+                    // 2024-09-04: Don't append this button because it covers the "+" button with David's new styling request
+                    //modal.insertElement(this.#getAddNodeWithCoordinatesDiv());
                     modal.insertElement(this.#getAddNodeWithMapClickDiv());
                 } else if (this.#observables.every(ob => ob.isLine())) {
                     modal.insertElement(this.#getAddLineWithFromToDiv());
@@ -319,7 +320,9 @@ class FeatureEditModal { // implements ObserverInterface, ModalInterface
                 }
             }
         }
-        modal.addStyleClasses(['verticalFlex', 'centerMainAxisFlex', 'centerCrossAxisFlex'], 'containerElement');
+        // - 2024-09-04: Replaced 'verticalFlex' class with 'horizontalFlex' because buttons should stack horizontally now
+        // - 2024-09-04: Replaced 'centerMainAxisFlex' with 'rightAlignMainAxisFlex' because buttons should no longer be centered
+        modal.addStyleClasses(['horizontalFlex', 'rightAlignMainAxisFlex', 'centerCrossAxisFlex'], 'containerElement');
         if (this.#modal === null) {
             this.#modal = modal;
         } 
@@ -679,7 +682,8 @@ class FeatureEditModal { // implements ObserverInterface, ModalInterface
         div.classList.add('horizontalFlex');
         div.classList.add('centerMainAxisFlex');
         div.classList.add('centerCrossAxisFlex');
-        div.classList.add('halfWidth');
+        // - 2024-09-04: Buttons should no longer stretch to 50% of container width because we want buttons to be smaller now
+        //div.classList.add('halfWidth');
         return div;
     }
     

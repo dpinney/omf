@@ -62,7 +62,9 @@ main {
 /***********/
 
 .leaflet-popup-content {
-    width: 330px !important;
+    /* Don't make Leaflet popups the same width anymore. Actually, keep doing it because it prevents the annoying horizontal scrollbar from appearing
+    most of the time */
+    width: 260px !important;
     font-family: sans-serif;
 }
 .leaflet-custom-control-button {
