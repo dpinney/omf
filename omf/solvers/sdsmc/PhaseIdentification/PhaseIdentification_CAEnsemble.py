@@ -259,13 +259,9 @@ def run( mainInputData_AMI: str, phaseLabelsTrue_csv: str, numPhases_csv: str, s
         df['Actual Phase Labels'] = phaseLabelsTrue_FullList[0,:]
     df['Confidence Score'] = allSC_FullList
     df['Final Cluster Label'] = allFinalClusterLabels
-    df.to_csv(saveResultsPath, index=False)
+    df.to_csv(saveResultsPath)
     print('')
     print(f'Predicted phase labels written to {saveResultsPath}')
     
     
 # End of PhaseIdentification_CAEnsemble
-    
-    
-    
-    
