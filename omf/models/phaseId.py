@@ -371,10 +371,11 @@ def work(modelDir, inputDict):
 	plt.savefig(pJoin(modelDir,'output-conf-matrix.png'))
 	# write our outData
 	if check_phase_results( df=df_final ) == False:
-		outData["outputInformation"] = f" WARNING: over 95% of meters fall under a single phase. Could potentially be due to small or insufficient input file.\nIn order to determine correct phase, you need to look at what phase each meter is by looking at the clusters directly."
+		outData["outputInformation"] = f" WARNING: over 95% of meters fall under a single phase. Could potentially be due to small or insufficient input file.\nIn order to determine correct phase, you need to determine the real phase for 1 meter in each cluster and use that to determine the actual final phasing."
 	else:
 		outData["outputInformation"] = ""
 	df_final['Confidence Score'] = df_final['Confidence Score'].apply(confidence_score_to_percentage)
+	df_final = df_final.iloc[:, 1:]
 	outData["phasingResults"] = ( list(df_final.itertuples(index=False, name=None)) )
 	outData["phasingResultsTableHeadings"] = df_final.columns.values.tolist()
 	with open(pJoin(modelDir,"output-conf-matrix.png"),"rb") as inFile:
