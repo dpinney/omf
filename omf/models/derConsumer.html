@@ -125,6 +125,17 @@
 					<input id="criticalLoadFileName" name="criticalLoadFileName" value="{{allInputDataDict.criticalLoadFileName}}" value='' readonly class="uploadFileName">
 				</div>
 			</div>
+			<div class="shortInput">
+				<label class="tooltip">Use Critical Load Factor instead?<span class="classic">Select Yes to use Critical Load Factor instead of the provided Critical Load .csv file.</span></label>
+				<select id="criticalLoadSwitch" name="criticalLoadSwitch" value="{{allInputDataDict.criticalLoadSwitch}}">
+					<option value="True" {{ 'selected' if allInputDataDict.outage == 'Yes' }}>Yes</option>
+					<option value="False" {{ 'selected' if allInputDataDict.outage == 'No' }}>No</option>
+				</select>
+			</div>
+			<div class="shortInput">
+				<label class="tooltip">Critical Load Factor<span class="classic">The fractional percentage of the demand curve representing the critical load that must be met during an outage. Format 0.XX (e.g. 0.50 signifies 50% of the daily demand is the critical load).</span></label>
+				<input type="text" id="criticalLoadFactor" name="criticalLoadFactor" value="{{allInputDataDict.criticalLoadFactor}}" min="0" max="1" pattern="^\d+\.?\d*?$" required="required"/>
+			</div>
 			
 			<!-- Financial Inputs -->
 			<div class="wideInput">
