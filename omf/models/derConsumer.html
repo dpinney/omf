@@ -6,7 +6,7 @@
 	<script src="https://cdn.plot.ly/plotly-1.50.1.min.js"></script>		
 	<script type="text/javascript">
 		$(window).on('pageshow',function(){
-			Plotly.newPlot('derBESSplot', JSON.parse(allOutputData['derBESSplot']),JSON.parse(allOutputData['derBESSplotLayout']));
+			//Plotly.newPlot('derBESSplot', JSON.parse(allOutputData['derBESSplot']),JSON.parse(allOutputData['derBESSplotLayout']));
 			Plotly.newPlot('derOverviewData', JSON.parse(allOutputData['derOverviewData']),JSON.parse(allOutputData['derOverviewLayout']));
 			Plotly.newPlot('exportedPowerData', JSON.parse(allOutputData['exportedPowerData']),JSON.parse(allOutputData['exportedPowerLayout']));
 			Plotly.newPlot('resiliencePlotly', JSON.parse(allOutputData['resilienceData']), JSON.parse(allOutputData['resilienceLayout']) || {});
@@ -115,6 +115,15 @@
 			<div class="shortInput">
 				<label class="tooltip">Outage Duration (hours)<span class="classic">The duration (in hours) of the outage. Specify a number between 1 - 8760 hours. </span></label>
 				<input type="number" id="outage_duration" name="outage_duration" value="{{allInputDataDict.outage_duration}}" min="1" max="8760" required="required"/>
+			</div>
+			<div class="shortInput">
+				<label class="tooltip">Critical Load Curve (.csv file)<span class="classic">Critical load profile (.csv) to be used in the outage analysis. Length 8760 in kW units. If critical load factor is given, this file will not be used.</span></label>
+				<input id="criticalLoadFile" type="file" style="display:none" onchange="handle_files(this.files,'criticalLoad','criticalLoadFileName')">
+				<input id="criticalLoad" name="criticalLoad" value="{{allInputDataDict.criticalLoad}}" type="hidden">
+				<div>
+					<label for="criticalLoadFile" class="fileButton">Choose File</label>
+					<input id="criticalLoadFileName" name="criticalLoadFileName" value="{{allInputDataDict.criticalLoadFileName}}" value='' readonly class="uploadFileName">
+				</div>
 			</div>
 			
 			<!-- Financial Inputs -->
@@ -267,8 +276,10 @@
 	{% if modelStatus == 'finished' %}
 	<!-- Output tables, graphs, etc -->
 	<div id="output">
+		<!-- 
 		<p class="reportTitle" style="page-break-before:always">DER dispatch schedule with new BESS</p>
 		<div id="derBESSplot" class="tightContent" style="width: 1000px; height: 600px;"></div>
+		-->
 
 		<p class="reportTitle" style="page-break-before:always">DER Serving Load Overview (using REopt)</p>
 		<div id="derOverviewData" class="tightContent" style="width: 1000px; height: 600px;"></div>

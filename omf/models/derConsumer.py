@@ -45,8 +45,10 @@ def create_REopt_jl_jsonFile(modelDir, inputDict):
 	urdbLabel = str(inputDict['urdbLabel'])
 	year = int(inputDict['year'])
 	projectionLength = int(inputDict['projectionLength'])
-	demand = np.asarray([float(value) for value in inputDict['demandCurve'].split('\n') if value.strip()])
-	demand = demand.tolist() if isinstance(demand, np.ndarray) else demand ## make demand into a list	
+	demand = np.asarray([float(value) for value in inputDict['demandCurve'].split('\n') if value.strip()]) ## process input format into an array
+	demand = demand.tolist() if isinstance(demand, np.ndarray) else demand ## make demand array into a list	for REopt
+	criticalLoad = np.asarray([float(value) for value in inputDict['criticalLoad'].split('\n') if value.strip()]) ## process input format into an array
+	criticalLoad = criticalLoad.tolist() if isinstance(criticalLoad, np.ndarray) else criticalLoad ## make criticalLoad array into a list for REopt
 
 	"""
 	## NOTE: The following lines of code are optional parameters that may or may not be used in the future.
@@ -163,6 +165,7 @@ def create_REopt_jl_jsonFile(modelDir, inputDict):
 		},
 		'ElectricLoad': {
 			'loads_kw': demand,
+			#'critical_loads_kw': criticalLoad,
 			'year': year
 		},
 		'Financial': {
@@ -198,6 +201,8 @@ def create_REopt_jl_jsonFile(modelDir, inputDict):
 			'outage_start_time_step': int(inputDict['outage_start_hour']),
 			'outage_end_time_step': int(inputDict['outage_start_hour'])+int(inputDict['outage_duration'])
 			}
+
+
 
 	## Save the scenario file
 	## NOTE: reopt_jl currently requires a path for the input file, so the file must be saved to a location
@@ -747,7 +752,7 @@ def work(modelDir, inputDict):
 						  yaxis='y2',
 						  mode='lines',
 						  line=dict(color='red',width=1),
-						  name='Average Temperature',
+						  name='Average Air Temperature',
 						  showlegend=showlegend 
 						  ))
 
@@ -956,6 +961,8 @@ def new(modelDir):
 		demand_curve = f.read()
 	with open(pJoin(__neoMetaModel__._omfDir,'static','testFiles','residential_extended_temperature_data.csv')) as f:
 		temp_curve = f.read()
+	with open(pJoin(__neoMetaModel__._omfDir,'static','testFiles','residential_critical_load.csv')) as f:
+		criticalLoad_curve = f.read()
 	
 	defaultInputs = {
 		## OMF inputs:
@@ -971,14 +978,16 @@ def new(modelDir):
 		'urdbLabel': '643476222faee2f0f800d8b1', ## Rivesville, WV - Monongahela Power
 		'fileName': 'residential_PV_load.csv',
 		'tempFileName': 'residential_extended_temperature_data.csv',
+		'criticalLoadFileName': 'residential_critical_load.csv', ## critical load here = 50% of the daily demand
 		'demandCurve': demand_curve,
 		'tempCurve': temp_curve,
+		'criticalLoad': criticalLoad_curve,
 		'PV': 'Yes',
 		'BESS': 'Yes',
 		'generator': 'No',
 		'outage': True,
 		'outage_start_hour': '4637',
-		'outage_duration': '23',
+		'outage_duration': '3',
 
 		## Financial Inputs
 		'demandChargeURDB': 'Yes',

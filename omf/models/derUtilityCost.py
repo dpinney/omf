@@ -168,7 +168,7 @@ def work(modelDir, inputDict):
 						  yaxis='y2',
 						  mode='lines',
 						  line=dict(color='red',width=1),
-						  name='Average Temperature',
+						  name='Average Air Temperature',
 						  showlegend=showlegend 
 						  ))
 
@@ -298,7 +298,7 @@ def new(modelDir):
 		'BESS': 'Yes',
 		'generator': 'No',
 		'outage': True,
-		'outage_start_hour': '1836', #march 18, 2018, 2pm
+		'outage_start_hour': '1836', #Hour 1836 = March 17, 2018, 12pm
 		'outage_duration': '4',
 
 		## Financial Inputs
