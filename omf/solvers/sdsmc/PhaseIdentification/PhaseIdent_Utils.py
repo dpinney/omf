@@ -75,7 +75,7 @@ def ConvertToPerUnit_Voltage(timeseries):
         '''
     
     voltageMismatchThresh = .8
-    voltageLevels = np.array([120,240,7200])
+    voltageLevels = np.array([120, 208, 277, 240, 480, 7200])
     voltagePU = np.zeros((timeseries.shape),dtype=float)
     dataLength = timeseries.shape[0]
     
@@ -927,11 +927,11 @@ def Calculate_ModifiedSilhouetteCoefficients(caMatrix,clusteredIDs,finalClusterL
         allSC.append(s)
 
     return allSC
-# End of Calculate_ModifiedSilhouetteCoefficients Function
+# End of Calculate_ModifiedSilhouetteCoefficients Function   
+
 
 
 def Plot_ModifiedSilhouetteCoefficients(allSC,savePath=-1):
-    print( "inside plotting histogram" )
     """ This function takes the results from the 
         Calculate_ModifiedSilhouetteCoefficients function to plot and save
         a histogram of the Modified Silhouette Coefficients which act as a 

@@ -208,7 +208,9 @@ class SearchModal {
         modal.addStyleClasses(['centeredTable'], 'tableElement');
         modal.insertElement(this.#getSearchButton());
         modal.insertElement(this.#getResetButton());
-        modal.addStyleClasses(['verticalFlex', 'centerMainAxisFlex', 'centerCrossAxisFlex'], 'containerElement');
+        // - 2024-09-04: Replaced 'verticalFlex' class with 'horizontalFlex' because buttons should stack horizontally now
+        // - 2024-09-04: Replaced 'centerMainAxisFlex' with 'rightAlignMainAxisFlex' because buttons should no longer be centered
+        modal.addStyleClasses(['horizontalFlex', 'rightAlignMainAxisFlex', 'centerCrossAxisFlex'], 'containerElement');
         if (this.#modal === null) {
             this.#modal = modal;
         } 
@@ -609,7 +611,8 @@ class SearchModal {
         div.classList.add('horizontalFlex');
         div.classList.add('centerMainAxisFlex');
         div.classList.add('centerCrossAxisFlex');
-        div.classList.add('halfWidth');
+        // - 2024-09-04: Buttons should no longer stretch to 50% of container width because we want buttons to be smaller now
+        //div.classList.add('halfWidth');
         return div;
     }
 

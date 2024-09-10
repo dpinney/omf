@@ -51,7 +51,7 @@ def install_onm(target : list = platform.system()):
 			'''julia -e 'import Pkg; Pkg.add("Gurobi")' ''',
 			'''julia -e 'import Pkg; Pkg.build("Gurobi")' ''',
 			'''julia -e 'import Pkg; Pkg.add(Pkg.PackageSpec(;name="PowerModelsDistribution", version="0.14.1"));' ''',
-			'''julia -e 'import Pkg; Pkg.add(Pkg.PackageSpec(;name="PowerModelsONM", version="3.0.1"));' ''',
+			'''julia -e 'import Pkg; Pkg.add(Pkg.PackageSpec(;name="PowerModelsONM", version="3.5.0"));' ''',
 			f'touch "{thisDir}/instantiated.txt"'
 		],
 		'Linux' : [
@@ -68,7 +68,7 @@ def install_onm(target : list = platform.system()):
 			'''julia -e 'import Pkg; Pkg.add("Gurobi")' ''',
 			'''julia -e 'import Pkg; Pkg.build("Gurobi")' ''',
 			'''julia -e 'import Pkg; Pkg.add(Pkg.PackageSpec(;name="PowerModelsDistribution", version="0.14.1"));’ ''',
-			'''julia -e 'import Pkg; Pkg.add(Pkg.PackageSpec(;name="PowerModelsONM", version="2.1.1"));' ''',
+			'''julia -e 'import Pkg; Pkg.add(Pkg.PackageSpec(;name="PowerModelsONM", version="3.5.0"));' ''',
 			f'touch {thisDir}/instantiated.txt'
 		],
 		'Windows' : [
@@ -82,7 +82,7 @@ def install_onm(target : list = platform.system()):
 			#f'set PATH="%PATH%;{thisDir}\julia-1.7.0\\bin"', #path set for just this session with set. setx is permanent but truncates the path which is very bad
 			# Despite adding Julia to the path, it wasn't finding it when run from within vscode, hence the cd {thisDir}\julia-1.7.0\bin prepending the lines
 			f'cd {thisDir}\julia-1.7.0\\bin & julia -e "import Pkg; Pkg.add(Pkg.PackageSpec(;name=\\"PowerModelsDistribution\\", version=\\"0.14.1\\"));"',
-			f'cd {thisDir}\julia-1.7.0\\bin & julia -e "import Pkg; Pkg.add(Pkg.PackageSpec(;name=\\"PowerModelsONM\\", version=\\"3.4.0\\"));"',
+			f'cd {thisDir}\julia-1.7.0\\bin & julia -e "import Pkg; Pkg.add(Pkg.PackageSpec(;name=\\"PowerModelsONM\\", version=\\"3.5.0\\"));"',
 			f'copy nul {thisDir}\instantiated.txt'
 		]
 	}

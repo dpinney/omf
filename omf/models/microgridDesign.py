@@ -34,8 +34,6 @@ def work(modelDir, inputDict):
 	solar = inputDict['solar'] 
 	wind = inputDict['wind']
 	battery = inputDict['battery']
-	# - When coming from microgridup_gui.py, urdbLabelSwitch == False (good)
-	# - When coming from web.py, urdbLabelSwitch == 'false' (need to translate 'false' into False)
 	urdbLabelSwitch = inputDict['urdbLabelSwitch']
 	outData['solar'] = inputDict['solar']
 	outData['wind'] = inputDict['wind']

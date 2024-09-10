@@ -139,7 +139,8 @@ function setupMap(controller, nav) {
     LeafletLayer.control.addTo(LeafletLayer.map);
     // - I have to add the cluster control before LeafletLayer instances are created. I have no choice
     const clusterControl = new ClusterControlClass(controller);
-    LeafletLayer.map.addControl(clusterControl);
+    // - 2024-09-03: disabled the cluster control
+    //LeafletLayer.map.addControl(clusterControl);
     LeafletLayer.clusterControl = clusterControl;
     // - Create layers for all visible objects
     controller.observableGraph.getObservables().forEach(ob => {
@@ -238,7 +239,8 @@ function setupControls(controller) {
     }
     addCustomRadioControl(controller);
     addZoomControl(controller);
-    addMultiselectControl(controller);
+    // - 2024-09-03: disabled the multiselection control
+    //addMultiselectControl(controller);
     addRuler();
     addGeocoding();
     // - Prevent mouse events from propagating from controls to the map

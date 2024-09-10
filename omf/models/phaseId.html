@@ -50,7 +50,7 @@
 				</div>
 			</div>
 			<div class="shortInput">
-				<label class="tooltip">Clusters<span class="classic">Meters are assigned to clusters based on similar voltage.7 is a good default, or set to to 3 * number of regulators + 2 on the system. Between 3 and 25 clusters is recommended.</span></label>
+				<label class="tooltip">Clusters<span class="classic">Meters are assigned to clusters based on similar voltage. 7 is a good default, or set to to 3 * number of regulators + 2 on the system. Between 3 and 25 clusters is recommended.</span></label>
 				<input type="text" id="kFinal" name="kFinal" value="{{allInputDataDict.kFinal}}"/>
 			</div>
 			<div class="shortInput">
@@ -69,6 +69,11 @@
 			<img id="confusionMatrixImg" style="width:100%; border-radius:8px"/>
 			<script type="text/javascript">gebi("confusionMatrixImg").src = "data:image/png;base64," + allOutputData.confusionMatrixImg</script>
 		</div>
+		<p class="reportTitle" style="page-break-before:always"><b>Results Analysis</b></p>
+			<div id="outputInformation" class="tightContent">
+					<p style="font-size: 20px;">{{ allOutputDataDict['outputInformation'] }}</p>
+			</div>
+		</p>
 		<p class="reportTitle"><b>Confidence Scores Overview</b></p>
 		<div id="confidenceHistogram" class="tightContent">
 			<img id="confidenceHistogramImg" style="width:100%; border-radius:8px"/>
@@ -83,7 +88,7 @@
 		<div id="predictedPhases" class="tightContent">
 			<table style="width:100%">
 				<tr>
-					{% for header in allOutputDataDict["phasingResultsTableHeadings"] %}
+					{% for header in allOutputDataDict['phasingResultsTableHeadings'] %}
 					<th>{{ header }}</th>
 					{% endfor %}
 				</tr>

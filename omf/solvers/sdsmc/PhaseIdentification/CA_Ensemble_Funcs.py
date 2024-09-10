@@ -217,6 +217,7 @@ def CAEnsemble(voltage,kVector,kFinal,custID,windowSize,numPhases=-1,lowWindowsT
                     in the final prediction as they will not populate the 
                     co-association matrix properly.  
             """       
+    
     ensTotal = int(np.floor(voltage.shape[0] / windowSize))  # This determines the total number of windows based on available data and window size
     ensPredictedPhases = np.zeros((1,len(custID)),dtype=int)
     aggWM = PIUtils.CreateAggWeightMatrix(custID) # This is the co-assocation matrix
