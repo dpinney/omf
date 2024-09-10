@@ -462,8 +462,8 @@ def tradMetricsByMgTable(outputTimeline, loadMgDict, startTime, numTimeSteps, mo
 		DCI = len(dfStatus.columns[dfStatus.isin([0]).any()])
 		SAIDI = CMI/CS
 		SAIFI = CI/CS
-		CAIDI = CMI/CI
-		CAIFI = CI/DCI
+		CAIDI = CMI/CI if CI!=0 else 0
+		CAIFI = CI/DCI if DCI!=0 else 0
 		return {"SAIDI":SAIDI,
 				"SAIFI":SAIFI,
 				"CAIDI":CAIDI,
@@ -485,6 +485,7 @@ def tradMetricsByMgTable(outputTimeline, loadMgDict, startTime, numTimeSteps, mo
 
 	for k,v in systemwideMetrics.items():
 		systemwideMetrics[k]
+		# TODO: see if this has a reason for existing
 
 	new_html_str = """
 		<table class="sortable" cellpadding="0" cellspacing="0">
