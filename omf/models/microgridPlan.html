@@ -23,13 +23,12 @@
 				if (id) {
 					let tool = list[i].className;
 					let data = allOutputData[tool][id];
-					//note: took out part to parse integer values
-					int_data = parseInt(data); //parseFloat(data);
-					//if (!isNaN(int_data)) {
-					//	list[i].innerHTML = int_data.toLocaleString();
-					//} else {
-					list[i].innerHTML = data;
-					//}
+					int_data = parseFloat(data); 
+					if (!isNaN(int_data)) {
+						list[i].innerHTML = int_data.toLocaleString();
+					} else {
+						list[i].innerHTML = data;
+					}
 				}
 			}
 		}
@@ -582,33 +581,33 @@
 		.nav ul {
 			list-style-type: none;
 		}
-		.nav li {
-			display: inline-block;
+		.nav a {
 			flex: 1;
 			text-align: center;
 			padding: 15px;
+			color: white;
 			background-color: #246B43;
 			box-shadow:
 				0 0 0 1px #194D30,
 				0 0 0 2px #194D30;
 		}
-		.nav li:hover:not(.active) {
+		.nav li {
+			display: inline-block;
+		}
+		.nav a:hover:not(.active) {
 			background-color: #37A96A;
 			box-shadow:
 				0 0 0 1px #329A61,
 				0 0 0 2px #329A61,
 		}
-		.nav li.active {
+		.nav a.active {
 			background-color: #33995F;
 			box-shadow:
 				0 0 0 1px #33995F,
 				0 0 0 2px #33995F,
 				0 0 0 3px white;
 		}
-		.nav li a {
-			color: white;
-		}
-		.nav li a.visited {
+		.nav a.visited {
 			color: white;
 		}
 
@@ -795,10 +794,10 @@
 			<hr> 
 			<ul class="nav">
 				<!-- <li><a href="#tool-selection">Tool Selection</a></li> was Shared Inputs-->
-				<li><a href="#reopt-specific">REopt</a></li>
-				<li><a href="#der-cam-specific">DER-CAM</a></li>
-				<li><a href="#pmonm-specific">PowerModelsONM</a></li>
-				<li><a href="#pso-specific">ProtectionSettingsOptimizer</a></li>
+				<a href="#reopt-specific"><li>REopt</li></a>
+				<a href="#der-cam-specific"><li>DER-CAM</li></a>
+				<a href="#pmonm-specific"><li>PowerModelsONM</li></a>
+				<a href="#pso-specific"><li>ProtectionSettingsOptimizer</li></a>
 			</ul>
 
 			<br id="reopt-specific"><br><br>

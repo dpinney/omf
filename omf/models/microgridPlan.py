@@ -306,7 +306,7 @@ def new(modelDir):
 	#circuit_plus_mgAll_relays.dss -> 8760-element loadshapes
 	#circuit_plus_mgAll_relays_new.dss -> 24-element loadshapes
 	#circuit_plus_mgAll_relays_df.dss -> edits by david fobes - also 24-element loadshapes
-	circuitFile = "circuit_plus_mgAll_relays_new.dss" 
+	circuitFile = "circuit_plus_mgAll_relays_df.dss" 
 	settingsFile =  "circuit_plus_mgAll_relays.settings.json"
 	eventsFile =  "circuit_plus_mgAll_relays.events.json"
 	pmonmDefaultInputs = {
