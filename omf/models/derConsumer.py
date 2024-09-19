@@ -199,17 +199,17 @@ def create_REopt_jl_jsonFile(modelDir, inputDict):
 			'outage_end_time_step': int(inputDict['outage_start_hour'])+int(inputDict['outage_duration'])
 			}
 	
-	## Critical Load section
-	if inputDict['criticalLoadSwitch'] == 'No':
+	## Critical Load input section
+	if inputDict['criticalLoadSwitch'] == 'No': ## switch = No means the user wants to upload a critical load profile instead of using a critical load factor to determine the critical load
+		#TODO: This piece is not working. REopt gives an error that the resilience file is not being created. Unclear what the issue is 9/2024
 		criticalLoad = np.asarray([float(value) for value in inputDict['criticalLoad'].split('\n') if value.strip()]) ## process input format into an array
 		criticalLoad = criticalLoad.tolist() if isinstance(criticalLoad, np.ndarray) else criticalLoad ## make criticalLoad array into a list for REopt
-		#scenario['ElectricLoad']['critical_loads_kw'] = criticalLoad
+		#scenario['ElectricLoad']['critical_load_series_kw'] = criticalLoad
 	else:
-		criticalLoadFactor = float(inputDict['criticalLoadFactor'])
-		criticalLoad = demand_array*criticalLoadFactor
-		criticalLoad = criticalLoad.tolist() if isinstance(criticalLoad, np.ndarray) else criticalLoad ## make criticalLoad array into a list for REopt
-		#scenario['ElectricLoad']['critical_loads_kw'] = criticalLoad
-	
+		scenario['ElectricLoad']['critical_load_fraction'] = float(inputDict['criticalLoadFactor'])
+		#criticalLoad = demand_array*criticalLoadFactor
+		#criticalLoad = criticalLoad.tolist() if isinstance(criticalLoad, np.ndarray) else criticalLoad ## make criticalLoad array into a list for REopt
+		#scenario['ElectricLoad']['critical_load_series_kw'] = criticalLoad
 
 	## Save the scenario file
 	## NOTE: reopt_jl currently requires a path for the input file, so the file must be saved to a location
@@ -1028,7 +1028,7 @@ def new(modelDir):
 		'demandCurve': demand_curve,
 		'tempCurve': temp_curve,
 		'criticalLoad': criticalLoad_curve,
-		'criticalLoadSwitch': 'No',
+		'criticalLoadSwitch': 'Yes',
 		'criticalLoadFactor': '0.50',
 		'PV': 'Yes',
 		'BESS': 'Yes',
