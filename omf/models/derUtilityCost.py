@@ -168,7 +168,7 @@ def work(modelDir, inputDict):
 						  yaxis='y2',
 						  mode='lines',
 						  line=dict(color='red',width=1),
-						  name='Average Temperature',
+						  name='Average Air Temperature',
 						  showlegend=showlegend 
 						  ))
 
@@ -277,6 +277,9 @@ def new(modelDir):
 		demand_curve = f.read()
 	with open(pJoin(__neoMetaModel__._omfDir,'static','testFiles','utility_CO_2018_temperatures.csv')) as f:
 		temp_curve = f.read()
+	## TODO: Change the critical load to utility scale critical load instead of residential
+	with open(pJoin(__neoMetaModel__._omfDir,'static','testFiles','residential_critical_load.csv')) as f:
+		criticalLoad_curve = f.read()
 
 	defaultInputs = {
 		## OMF inputs:
@@ -294,11 +297,16 @@ def new(modelDir):
 		'tempFileName': 'utility_CO_2018_temperatures.csv',
 		'demandCurve': demand_curve,
 		'tempCurve': temp_curve,
+		## ODO: Change criticalLoadFileName to utility load instead of residential
+		'criticalLoadFileName': 'residential_critical_load.csv', ## critical load here = 50% of the daily demand
+		'criticalLoad': criticalLoad_curve,
+		'criticalLoadSwitch': 'Yes',
+		'criticalLoadFactor': '0.50',
 		'PV': 'Yes',
 		'BESS': 'Yes',
 		'generator': 'No',
 		'outage': True,
-		'outage_start_hour': '1836', #march 18, 2018, 2pm
+		'outage_start_hour': '1836', #Hour 1836 = March 17, 2018, 12pm
 		'outage_duration': '4',
 
 		## Financial Inputs

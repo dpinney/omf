@@ -7,6 +7,8 @@ import shutil, datetime
 from pathlib import Path
 import plotly
 import plotly.graph_objs as go
+import base64
+from base64 import b64decode
 
 # OMF imports
 #from omf import feeder
@@ -133,6 +135,10 @@ def work(modelDir, inputDict):
 			psoOldInfo = json.load(j)
 		outData["psoSettings"] = psoSettings
 		outData["psoOldInfo"] = psoOldInfo
+		with open(pJoin(psoInputs["testPath"],"pso_plot.png"),"rb") as inFile:
+			outData["psoPlotImg"] = base64.standard_b64encode(inFile.read()).decode()
+		with open(pJoin(psoInputs["testPath"],"fitness_plot.png"),"rb") as inFile:
+			outData["fitnessPlotImg"] = base64.standard_b64encode(inFile.read()).decode()
 
 	if run_pmonm:
 		#making PowerModelsONM output graphs :
@@ -181,26 +187,32 @@ def work(modelDir, inputDict):
 
 		pmonm_load_served = outData['pmonmOutData']['Load served']
 		plotData = []
-		microgridCustomers = makeGridLine(x,pmonm_load_served['Microgrid customers (%)'],'blue','Microgrid customers')
-		plotData.append(microgridCustomers)
 		totalLoad = makeGridLine(x,pmonm_load_served['Total load (%)'],'purple','Total load')
 		plotData.append(totalLoad)
 		bonusLoadViaMicrogrid = makeGridLine(x,pmonm_load_served['Bonus load via microgrid (%)'],'brown','Bonus load via microgrid')
 		plotData.append(bonusLoadViaMicrogrid)
-		feederCustomers = makeGridLine(x,pmonm_load_served['Feeder customers (%)'],'yellow','Feeder customers')
-		plotData.append(feederCustomers)
 		feederLoad = makeGridLine(x,pmonm_load_served['Feeder load (%)'],'red','Feeder load')
 		plotData.append(feederLoad)
-		totalCustomers = makeGridLine(x,pmonm_load_served['Total customers (%)'],'green','Total customers')
-		plotData.append(totalCustomers)
 		microgridLoad = makeGridLine(x,pmonm_load_served['Microgrid load (%)'],'gray','Microgrid load')
 		plotData.append(microgridLoad)
-		bonusCustomersViaMicrogrid = makeGridLine(x,pmonm_load_served['Bonus customers via microgrid (%)'],'orange','Bonus customers via microgrid (%)')
-		plotData.append(bonusCustomersViaMicrogrid)
 		plotlyLayout['yaxis'].update(title='Load Served (%)')
 		plotlyLayout['xaxis'].update(title='Simulation Time Steps')
 		outData["pmonmLoadServedData"] = json.dumps(plotData, cls=plotly.utils.PlotlyJSONEncoder)
 		outData["pmonmLoadServedLayout"] = json.dumps(plotlyLayout, cls=plotly.utils.PlotlyJSONEncoder)
+
+		plotData = []
+		microgridCustomers = makeGridLine(x,pmonm_load_served['Microgrid customers (%)'],'blue','Microgrid customers')
+		plotData.append(microgridCustomers)
+		feederCustomers = makeGridLine(x,pmonm_load_served['Feeder customers (%)'],'yellow','Feeder customers')
+		plotData.append(feederCustomers)
+		totalCustomers = makeGridLine(x,pmonm_load_served['Total customers (%)'],'green','Total customers')
+		plotData.append(totalCustomers)
+		bonusCustomersViaMicrogrid = makeGridLine(x,pmonm_load_served['Bonus customers via microgrid (%)'],'orange','Bonus customers via microgrid (%)')
+		plotData.append(bonusCustomersViaMicrogrid)
+		plotlyLayout['yaxis'].update(title='Customers (%)')
+		plotlyLayout['xaxis'].update(title='Simulation Time Steps')
+		outData["pmonmCustomersData"] = json.dumps(plotData, cls=plotly.utils.PlotlyJSONEncoder)
+		outData["pmonmCustomersLayout"] = json.dumps(plotlyLayout, cls=plotly.utils.PlotlyJSONEncoder)
 
 		pmonm_generator_profiles = outData['pmonmOutData']["Generator profiles"]
 		plotData = []
@@ -294,19 +306,19 @@ def new(modelDir):
 	#circuit_plus_mgAll_relays.dss -> 8760-element loadshapes
 	#circuit_plus_mgAll_relays_new.dss -> 24-element loadshapes
 	#circuit_plus_mgAll_relays_df.dss -> edits by david fobes - also 24-element loadshapes
-	circuitFile = "circuit_plus_mgAll_relays_new.dss" 
+	circuitFile = "circuit_plus_mgAll_relays_df.dss" 
 	settingsFile =  "circuit_plus_mgAll_relays.settings.json"
 	eventsFile =  "circuit_plus_mgAll_relays.events.json"
 	pmonmDefaultInputs = {
-		"circuitFile": pJoin(defaultPath,defaultCircuitFile),
-		"circuitFileName": defaultCircuitFile,
+		"circuitFile": pJoin(circuitPath,circuitFile),
+		"circuitFileName": circuitFile,
 		#todo: on switch (T/F) display settings/eventsFile option (False) or settings/events file parameters (True)
 		"buildSettingsFile": False, 
 		"buildEventsFile": False,
-		"settingsFile": pJoin(defaultPath, defaultSettingsFile), #"",
-		"settingsFileName": defaultSettingsFile, #"",
-		"eventsFile": pJoin(defaultPath,defaultEventsFile),
-		"eventsFileName": defaultEventsFile,
+		"settingsFile": pJoin(circuitPath, settingsFile), #"",
+		"settingsFileName": settingsFile, #"",
+		"eventsFile": pJoin(circuitPath,eventsFile),
+		"eventsFileName": eventsFile,
 		"loadPrioritiesFileName": "",
 		"microgridTaggingFileName": "",
 		"settingsInputs": settingsInputs,
