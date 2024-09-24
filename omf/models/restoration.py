@@ -22,7 +22,7 @@ from omf.models.resilientCommunity import runCalculations as makeResComOutputCsv
 # Model metadata:
 tooltip = 'Calculate load, generator and switching controls to maximize power restoration for a circuit with multiple networked microgrids.'
 modelName, template = __neoMetaModel__.metadata(__file__)
-hidden = False
+hidden = True
 
 def makeCicuitTraversalDict(pathToOmd):
 	''' Note: comment out line 99 in comms.py: "nxG = graphValidator(pathToOmdFile, nxG)" as a quick fix for the purpose of this funct
@@ -483,10 +483,6 @@ def tradMetricsByMgTable(outputTimeline, loadMgDict, startTime, numTimeSteps, mo
 	for mg, mgLoadList in loadsPerMg.items():
 		metricsPerMg[mg] = {k:round(v,2) for k,v in calcTradMetrics(outputTimeline, mgLoadList, startTime, numTimeSteps).items()}
 
-	for k,v in systemwideMetrics.items():
-		systemwideMetrics[k]
-		# TODO: see if this has a reason for existing
-
 	new_html_str = """
 		<table class="sortable" cellpadding="0" cellspacing="0">
 			<thead>
@@ -882,7 +878,7 @@ def getMicrogridInfo(modelDir, pathToOmd, settingsFile, makeCSV = True):
 	return {'loadMgDict':loadMgDict, 'busMgDict':busMgDict, 'obMgDict':obMgDict, 'mgIDs':mgIDs}
 
 def combineLoadPriorityWithCCI(modelDir, pathToOmd, loadPriorityFilePath, cciImpact):
-	'''	Creates a JSON file called mergedLoadWeights.json containing user-input load priorities combined with CCI values via RMS and weighted by cciImpact.
+	'''	Creates a JSON file called loadWeightsMerged.json containing user-input load priorities combined with CCI values via RMS and weighted by cciImpact.
 
 		If an empty JSON file is provided for loadPriorityFilePath, just returns a JSON file with max(1,cci*cciImpact) for each load.
 
@@ -917,7 +913,8 @@ def combineLoadPriorityWithCCI(modelDir, pathToOmd, loadPriorityFilePath, cciImp
 		mergeCciAndWeights = lambda cci,weights : max(1,cci*cciImpact)
 	
 	circuitTraversalDict = makeCicuitTraversalDict(pathToOmd)
-	mergedLoadWeights = {}
+	loadWeightsMerged = {}
+	loadWeightsTransformed = {}
 	for index, row in resComDf.iterrows():
 		obType, obName = row['Object Name'].split('.')
 		obCci = float(row['Community Criticality Index'])
@@ -925,18 +922,23 @@ def combineLoadPriorityWithCCI(modelDir, pathToOmd, loadPriorityFilePath, cciImp
 			# Loads defaulting to weight 1 is done to reflect that choice within PowerModelsONM 
 			loadWeight = loadWeights.get(obName,1)
 			rawMergedWeight = mergeCciAndWeights(obCci,loadWeight)
+			loadWeightsMerged[obName] = rawMergedWeight
 			# In PowerModelsONM, the weight given to each bus that has loads on it is 10 and the weight of each load is the input weight / 100
 			# Effectively, the weight of a bus and the loads on it = 10+SUM_n(w_n/100)
 			# We are inverting that by setting w_n = (weight-10/n)*100 where n is the number of loads on a particular bus. 
 			# So the weight of a bus and its loads = 10+SUM_n((weight-10/n)*100/100) = 10+SUM_n(weight-10/n) = 10+SUM_n(weight)-10 = SUM_n(weight)
 			parentBus = circuitTraversalDict[f'load.{obName}']['parent']
 			loadsOnBus = float(len(circuitTraversalDict[f'bus.{parentBus}']['downlineLoads']))
-			mergedLoadWeights[obName] = (rawMergedWeight-(10.0/loadsOnBus))*100.0
+			loadWeightsTransformed[obName] = (rawMergedWeight-(10.0/loadsOnBus))*100.0
 
-	with open(pJoin(modelDir, 'mergedLoadWeights.json'), 'w') as outfile:
-		json.dump(mergedLoadWeights, outfile)
-	
-	return pJoin(modelDir, 'mergedLoadWeights.json')
+	#Included for users to inspect
+	with open(pJoin(modelDir, 'loadWeightsMerged.json'), 'w') as outfile:
+		json.dump(loadWeightsMerged, outfile)
+
+	with open(pJoin(modelDir, 'loadWeightsTransformed.json'), 'w') as outfile:
+		json.dump(loadWeightsTransformed, outfile)
+
+	return pJoin(modelDir, 'loadWeightsTransformed.json')
 
 def runMicrogridControlSim(modelDir, solFidelity, eventsFilename, loadPriorityFile, microgridTaggingFile):
 	''' Runs a microgrid control simulation using PowerModelsONM to determine optimal control actions during a configured outage event.
@@ -1762,7 +1764,8 @@ def new(modelDir):
 	creationCode = __neoMetaModel__.new(modelDir, defaultInputs)
 	try:
 		shutil.copyfile(pJoin(*feeder_file_path), pJoin(modelDir, defaultInputs['feederName1']+'.omd'))
-	except:
+	except Exception as e:
+		print(e)
 		return False
 	return __neoMetaModel__.new(modelDir, defaultInputs)
 
