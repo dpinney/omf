@@ -256,8 +256,8 @@ def get_hosting_capacity_of_single_bus(FILE_PATH:str, BUS_NAME:str, max_test_kw:
 	# - Get lower and upper bounds for the hosting capacity of a single bus
 	thermally_limited = False
 	voltage_limited = False
-	thermally_limited_2 = False
-	voltage_limited = False
+	thermally_limited_precise = False
+	voltage_limited_precise = False
 	lower_kw_bound = 1
 	upper_kw_bound = 1
 	while True:
@@ -282,9 +282,9 @@ def get_hosting_capacity_of_single_bus(FILE_PATH:str, BUS_NAME:str, max_test_kw:
 	#   - E.g. a reported hosting capacity of 139.5 kW means that a violation probably occurred at 140 kW
 	while not kw_step < .1:
 		results = check_hosting_capacity_of_single_bus(FILE_PATH, BUS_NAME, kw)
-		thermally_limited_2 = results['thermally_limited']
-		voltage_limited_2 = results['voltage_limited']
-		if not thermally_limited_2 and not voltage_limited_2:
+		thermally_limited_precise = results['thermally_limited']
+		voltage_limited_precise = results['voltage_limited']
+		if not thermally_limited_precise and not voltage_limited_precise:
 			lower_kw_bound = kw
 		else:
 			upper_kw_bound = kw
@@ -294,7 +294,7 @@ def get_hosting_capacity_of_single_bus(FILE_PATH:str, BUS_NAME:str, max_test_kw:
 	# This should catch if both were true in the first check and we need to narrow it down to the right one.
 	if thermally_limited and voltage_limited:
 		# If in the second stage, it was a thermal violation, then make sure voltage violation is false and its not both.
-		if thermally_limited_2:
+		if thermally_limited_precise:
 			voltage_limited = False
 		# Else, the opposite
 		else:
