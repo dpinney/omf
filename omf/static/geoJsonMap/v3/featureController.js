@@ -3,7 +3,7 @@ import { Feature } from './feature.js';
 import { FeatureGraph } from './featureGraph.js';
 import { LeafletLayer } from './leafletLayer.js';
 import { hideModalInsert } from './main.js';
-import { Modal } from './modal.js';
+import { LoadingSpan } from '../v4/ui-components/loading-span/loading-span.js';
 
 class FeatureController { // implements ControllerInterface
     observableGraph; // - A FeatureGraph instance. It must be public so that views can query all of the data if they need to
@@ -169,18 +169,18 @@ class FeatureController { // implements ControllerInterface
     /**
      * - Send an AJAX request to the server
      * @param {Feature} observable - the ObservableInterface instance to submit
-     * @param {ModalFeatureModal} modal
+     * @param {LoadingSpan} loadingSpan
      * @param {HTMLButtonElement} submitButton - a button to enable/disable depending on the state of the operation
      * @param {boolean} reload - whether or not to reload the page. This is necessary when chaining multiple operations together (e.g. every rename
      * operation must be preceeded by a save operation)
      * @returns {undefined}
      */
-    async submitFeature(observable, modal, submitButton=null, reload=true) {
+    async submitFeature(observable, loadingSpan, submitButton=null, reload=true) {
         if (!(observable instanceof Feature)) {
             throw TypeError('"observable" argument must be instanceof Feature.');
         }
-        if (!(modal instanceof Modal)) {
-            throw TypeError('The "modal" argument must be instanceof Modal.');
+        if (!(loadingSpan instanceof LoadingSpan)) {
+            throw TypeError('The "loadingSpan" argument must be instanceof LoadingSpan.');
         }
         if (!(submitButton instanceof HTMLButtonElement) && !(submitButton === null)) {
             throw TypeError('The "submitButton" argument must be instanceof HTMLButtonElement or null');
@@ -206,7 +206,7 @@ class FeatureController { // implements ControllerInterface
                     case 'modal:cymdist':
                     case 'modal:gridlabd':
                         if (data.exists === true) {
-                            modal.showProgress(false, 'You already have a feeder with that name. Please choose a different name', ['caution']);
+                            loadingSpan.update({text: 'You already have a feeder with that name. Please choose a different name', showGif: false});
                             if (submitButton !== null) {
                                 submitButton.disabled = false;
                             }
@@ -217,12 +217,12 @@ class FeatureController { // implements ControllerInterface
                     case 'modal:loadFeeder':
                         // - I do this to assert that data.exists is equal to true, not that it is truthy. There's an important difference
                         if (data.exists === true) {
-                            modal.showProgress(true, 'Loading feeder from the server...', ['caution']);
+                            loadingSpan.update({text: 'Loading feeder from the server...', showGif: true});
                             break;
                         }
                     default:
                         if (data.exists !== true) {
-                            modal.showProgress(false, 'This feeder no longer exists on the server, so the operation failed. Please save and try again.', ['caution']);
+                            loadingSpan.update({text: 'This feeder no longer exists on the server, so the operation failed. Please save and try again.', showGif: false});
                             if (submitButton !== null) {
                                 submitButton.disabled = false;
                             }
@@ -230,7 +230,7 @@ class FeatureController { // implements ControllerInterface
                         }
                 }
             } catch {
-                modal.showProgress(false, 'The server raised an internal exception during the operation. Please save before trying again.', ['caution']); 
+                loadingSpan.update({text: 'The server raised an internal exception during the operation. Please save before trying again.', showGif: false});
                 if (submitButton !== null) {
                     submitButton.disabled = false;
                 }
@@ -253,7 +253,7 @@ class FeatureController { // implements ControllerInterface
                 contentType: false,
             });
         } catch {
-            modal.showProgress(false, 'The server raised an internal exception during the operation. Please save before trying again.', ['caution']); 
+            loadingSpan.update({text: 'The server raised an internal exception during the operation. Please save before trying again.', showGif: false});
             if (submitButton !== null) {
                 submitButton.disabled = false;
             }
@@ -264,12 +264,13 @@ class FeatureController { // implements ControllerInterface
         // - We don't want to poll the server. Just reload the page.
         if (!observable.hasProperty('pollUrl', 'urlProps')) {
             if (data === 'Failure') {
-                modal.showProgress(false, 'The server operation failed.', ['caution']);
+                loadingSpan.update({text: 'The server operation failed.', showGif: false});
                 if (submitButton !== null) {
                     submitButton.disabled = false;
                 }
                 modalInsert.addEventListener('click', hideModalInsert);
             } else {
+                // - There are two successful outcomes: either reload the page or remove the modal insert
                 if (reload) {
                     that.#reloadPage();
                 } else {
@@ -306,23 +307,23 @@ class FeatureController { // implements ControllerInterface
                         }
                         modalInsert.addEventListener('click', hideModalInsert);
                         if (data === 'milError') {
-                            modal.showProgress(false, 'The .std and .seq files used were incorrectly formatted. Please save before trying again.', ['caution']);
+                            loadingSpan.update({text: 'The .std and .seq files used were incorrectly formatted. Please save before trying again.', showGif: false});
                         } else if (data === 'dssError') {
-                            modal.showProgress(false, 'The .dss file used was incorrectly formatted. Please save before trying again.', ['caution']);
+                            loadingSpan.update({text: 'The .dss file used was incorrectly formatted. Please save before trying again.', showGif: false});
                         } else if (data === 'cymeError') {
-                            modal.showProgress(false, 'The .mdb file used was incorrectly formatted. Please save before trying again.', ['caution']);
+                            loadingSpan.update({text: 'The .mdb file used was incorrectly formatted. Please save before trying again.', showGif: false});
                         } else if (data === 'glmError') {
-                            modal.showProgress(false, 'The .glm file used was incorrectly formatted. Please save before trying again.', ['caution']);
+                            loadingSpan.update({text: 'The .glm file used was incorrectly formatted. Please save before trying again.', showGif: false});
                         } else if (data === 'amiError') {
-                            modal.showProgress(false, 'The AMI file used was incorrectly formatted. Please save before trying again.', ['caution']);
+                            loadingSpan.update({text: 'The AMI file used was incorrectly formatted. Please save before trying again.', showGif: false});
                         } else if (data === 'anonymizeError') {
-                            modal.showProgress(false, 'The anonymization process failed. Please save before trying again.', ['caution']);
+                            loadingSpan.update({text: 'The anonymization process failed. Please save before trying again.', showGif: false});
                         } else {
                             if (!data.endsWith('.')) {
                                 data += '.';
                             }
                             data += ' Please save before trying again.';
-                            modal.showProgress(false, data, ['caution']);
+                            loadingSpan.update({text: data, showGif: false});
                         }
                     // - The server process is ongoing, so let setInterval keep going
                     } else if (data.exists === true) {
@@ -336,7 +337,7 @@ class FeatureController { // implements ControllerInterface
                     }
                 } catch {
                     clearInterval(intervalId);
-                    modal.showProgress(false, 'The server raised an internal exception during the operation. Please save before trying again.', ['caution']);
+                    loadingSpan.update({text: 'The server raised an internal exception during the operation. Please save before trying again.', showGif: false});
                     if (submitButton !== null) {
                         submitButton.disabled = false;
                     }

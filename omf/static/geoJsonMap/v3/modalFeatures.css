@@ -1,0 +1,292 @@
+/*
+- The modalInsert div needs a height in order for inner divs to be able to use percentage values for max-height
+- z-index is is needed to cover the sideNav
+*/
+#modalInsert {
+    align-items: center;
+    background-color: rgba(0,0,0,0.4);
+    display: none;
+    height: 100%; /* DO NOT CHANGE THIS */
+    justify-content: center;
+    position: absolute;
+    /*top: calc(var(--headerHeight));*/
+    top: 0;
+    width: 100%;
+    z-index: 2;
+}
+
+#modalInsert.visible {
+    display: flex;
+}
+
+/*******************
+ * General styling *
+ *******************/
+
+/* Add padding between table cells */
+
+#modalInsert > .proptablediv .proptd {
+    padding: 0 .25rem;
+}
+
+/* Add padding between checkboxes and adjacent text cells */
+
+#modalInsert > .proptablediv .proptd input[type="checkbox"] {
+    margin: 0 .25rem;
+}
+
+/* 
+- Indent tables that are within a DropdownDiv
+*/
+
+#modalInsert > .proptablediv .dropdown-div .proptablediv {
+    padding-left: 2rem;
+}
+
+/*
+- Make table cells have regular font size
+*/
+
+#modalInsert > .proptablediv > .prop-table .proptd {
+    font-size: var(--regularFontSize);
+}
+
+/* Give all .propdiv elements within .proptd elements a min-height unless they contain a .dropdown-div child or a .loading-span child */
+
+#modalInsert > .proptablediv .proptd .propdiv:not( :has(.dropdown-div), :has(.loading-span), :has(.proptablediv)) {
+    min-height: var(--tableRowMinHeight);
+}
+
+/*
+- Vertically center content in all table rows
+*/
+
+#modalInsert > .proptablediv > .prop-table .propdiv {
+    align-items: center;
+    display: flex;
+}
+
+/*
+- Give inputs a border and padding
+- Give inputs side margin so that if they share a table cell with some text there is some separation
+*/
+
+#modalInsert > .proptablediv > .prop-table .propdiv input,
+#modalInsert > .proptablediv > .prop-table .propdiv select {
+    border: 1px solid black;
+    border-radius: var(--regularBorderRadius);
+    padding: .1rem;
+}
+
+/*
+- Make header text large and centered
+- Separate the heading from the tbody as much as the LoadingSpan is separated from the heading
+*/
+
+#modalInsert > .proptablediv > .prop-table .propth span {
+    font-size: 26px;
+    width: 100%;
+    margin-bottom: var(--regularPadding);
+}
+
+/***********************
+ * LoadingSpan styling *
+ ***********************/
+
+/* Center the loading span element since it has a max width */
+
+#modalInsert > .proptablediv > .prop-table .propdiv:has(.loading-span) {
+    justify-content: center;
+}
+
+/*
+- Give the PropTable and LoadingSpan a background color (needed for the save loading span)
+- Round the corners of the PropTable LoadingSpan
+- Give the PropTable and LoadingSpan a max width and height
+- Give the PropTable and LoadingSpan padding
+*/
+
+#modalInsert > .proptablediv,
+#modalInsert > .loading-span {
+    background-color: white;
+    border-radius: var(--regularBorderRadius);
+    max-height: 75vh;
+    max-width: 75vw;
+    padding: var(--regularPadding);
+}
+
+/*
+- Separate the LoadingSpan from the modal title by the same amount as the padding around the entire modal
+- Set a max-width so a long error message doesn't disrupt the formatting of the rest of the table
+*/
+
+#modalInsert > .proptablediv > .prop-table .propth span.loading-span {
+    border-radius: var(--regularBorderRadius);
+    margin-bottom: var(--regularPadding);
+    max-width: 275px;
+}
+
+/*
+- Make errors have smaller text
+- Don't bold the LoadingSpan text
+*/
+
+#modalInsert > .proptablediv > .prop-table .propth span.loading-span span {
+    font-weight: normal;
+    font-size: 13px;
+}
+
+/***************************
+ * IconLabelButton styling *
+ ***************************/
+
+/*
+- Round the corners of the button
+- Make the button taller than it is
+- Center the text in the button
+- Center the button in its row
+- Make the button wider than it is
+*/
+
+#modalInsert > .proptablediv .iconlabel-button {
+    border-radius: var(--regularBorderRadius);
+    height: var(--tableRowMinHeight);
+    justify-content: center;
+    margin: var(--regularPadding) auto 0 auto;
+    width: 50%;
+}
+
+/*
+- Don't let buttons get weirdly wide, except in the load feeder modal
+*/
+
+#modalInsert > .proptablediv:not(#loadFeederTable) .iconlabel-button {
+    max-width: 300px;
+}
+
+/***************************
+ * loadFeederTable styling *
+ ***************************/
+ 
+/* Make the loadFeederTable as wide as possible */
+
+#modalInsert > #loadFeederTable {
+    width: 100%;
+}
+
+/* Make the public feeders and user feeders columns equal in width */
+
+#modalInsert > #loadFeederTable > .prop-table > .proptbody > .proptr > .proptd {
+    width: 50%;
+}
+
+/* 
+- Make the .proptable take up the full width of the .proptablediv
+*/
+
+#modalInsert > #loadFeederTable .prop-table {
+    width: 100%;
+}
+
+/* 
+- Make the nested .proptablediv exactly 65vh in height (this is the only way to control the height of the inner tables)
+- Make the nested .proptablediv scrollable
+- Make the nested .proptablediv take up the full width of its column
+*/
+
+#modalInsert > #loadFeederTable .proptablediv {
+    height: 65vh;
+    overflow: auto;
+    width: 100%;
+}
+
+/*
+- Make the nested .prop-table thead sticky
+*/
+
+#modalInsert > #loadFeederTable .proptablediv thead {
+    background-color: white;
+    position: sticky;
+    top: 0;
+}
+
+/* Remove padding between table cells so cursor doesn't flicker */
+
+#modalInsert > #loadFeederTable .proptd {
+    padding: 0;
+}
+
+/*
+- Make buttons square
+- Left justify flex children
+- Remove margins
+- Add padding
+- Make button take up full width of row
+*/
+
+#modalInsert > #loadFeederTable .iconlabel-button {
+    border-radius: 0;
+    justify-content: start;
+    margin: 0;
+    padding: 1.5rem;
+    width: 100%;
+}
+
+/*
+- Make text left-aligned within divs
+*/
+
+#modalInsert > #loadFeederTable .iconlabel-button .label {
+    text-align: left;
+}
+
+/*
+- Apply special styling to hovered buttons
+*/
+
+#modalInsert > #loadFeederTable .iconlabel-button:hover {
+    border-radius: 5px;
+    background-color: seagreen;
+}
+
+#modalInsert > #loadFeederTable .iconlabel-button:hover .label {
+    color: white;
+}
+
+/* Make the feeder name bold */
+
+#modalInsert > #loadFeederTable .iconlabel-button .label > div > div:first-child {
+    font-weight: bold;
+}
+
+/****************************
+ * attachmentsTable styling *
+ ****************************/
+
+/*
+- Allow the attachmentsTable to scroll
+- Make the attachmentsTable always be at 100% of screen width (up to 75vw)
+*/
+#modalInsert > #attachmentsTable {
+    overflow: auto;
+    width: 100%;
+}
+
+/*
+- All nested tables and table divs need 100% width in order to fill the #attachmentsTable div
+*/
+
+#modalInsert > #attachmentsTable .proptablediv,
+#modalInsert > #attachmentsTable .prop-table {
+    width: 100%;
+}
+
+/*
+- Style the text areas
+*/
+
+#modalInsert > #attachmentsTable textarea {
+    font-size: var(--regularFontSize);
+    height: 50vh;
+    width: 100%;
+}

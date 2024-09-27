@@ -1,0 +1,127 @@
+/***************************************
+ * .iconlabel-button component styling *
+ ***************************************/
+
+/*
+- Firefox ships with default font size of 13px
+- darkgray is a good default color
+- Don't let text break onto a new line inside of a button
+*/
+
+.iconlabel-button {
+    align-items: center;
+    border: 0;
+    cursor: pointer;
+    display: flex;
+    font-size: 13px;
+    gap: .3rem;
+    padding: .1rem .3rem;
+    background-color: darkgray;
+    white-space: nowrap;
+}
+
+/* Set the font size on the button to determine how big the box shadow will be because em units are relative to the font size */
+
+.iconlabel-button:active {
+    box-shadow: inset 0px 0px .5em black;
+}
+
+/* Since the default color is darkgray, the hover color should be a darker version of that */
+
+.iconlabel-button:hover {
+    background-color: gray;
+}
+
+.iconlabel-button:disabled {
+    box-shadow: none !important;
+    background-color: darkgray !important;
+}
+
+/* .iconlabel-button component variant styling */
+
+.iconlabel-button.-blue {
+    background-color: mediumblue;;
+}
+.iconlabel-button.-blue:hover {
+    background-color: blue;
+}
+
+.iconlabel-button.-red {
+    background-color: crimson;
+}
+.iconlabel-button.-red:hover {
+    background-color: red;
+}
+
+.iconlabel-button.-green {
+    background-color: seagreen;
+}
+.iconlabel-button.-green:hover {
+    background-color: mediumseagreen;
+}
+
+.iconlabel-button.-white {
+    background-color: white;
+}
+
+.iconlabel-button.-clear {
+    background-color: transparent;
+}
+
+.iconlabel-button.-large {
+    gap: .5rem;
+    padding: .2rem .5rem;
+}
+.iconlabel-button.-large > .label {
+    font-size: 26px;
+}
+
+.iconlabel-button.-xlarge {
+    gap: .7rem;
+    padding: .3rem .7rem;
+}
+.iconlabel-button.-xlarge > .label {
+    font-size: 39px;
+}
+
+/* .icon element styling */
+
+.iconlabel-button > .icon {
+    /* It's better to let each svg determine its own fill */
+    /*fill: none;*/
+    transform: rotate(0deg);
+    transition: transform 0.25s ease;
+}
+.iconlabel-button > .icon > path, .iconlabel-button > .icon > circle {
+    /* Don't set fill */
+    /*fill: black;*/
+    stroke: black;
+    /* It's better to let each svg determine its own stroke-linecap*/
+    /*stroke-linecap: square;*/
+    stroke-width: 1.5;
+}
+
+/* .icon element variant styling */
+
+.iconlabel-button > .icon.-white > path, .iconlabel-button > .icon.-white > circle {
+    /* Don't set fill */
+    /*fill: white;*/
+    stroke: white;
+}
+
+.iconlabel-button > .icon.-rotated {
+    transform: rotate(90deg);
+    transition: transform 0.25s ease;
+}
+
+/* .label element styling */
+
+.iconlabel-button > .label {
+    color: black;
+}
+
+/* .label element variant styling */
+
+.iconlabel-button > .label.-white {
+    color: white;
+}

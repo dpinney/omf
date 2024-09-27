@@ -3,12 +3,13 @@
     font-family: Helvetica, Arial, Sans-Serif;
 }
 :root {
+    --regularBorderRadius: 5px;
     --headerHeight: 50px;
     --regularFontSize: 13px;
-    --regularFontPadding: .5rem;
-    --sideNavWidth: 485px;
+    --regularPadding: .85rem;
+    --sideNavWidth: 365px;
     --sideNavTransitionTime: 0.3s;
-    --tableRowMinHeight: 2rem;
+    --tableRowMinHeight: 1.8rem;
 }
 
 /*******/
@@ -19,13 +20,6 @@
     height: calc(100vh - var(--headerHeight));
     z-index: 0;
 }
-#menuInsert {
-    display: flex;
-    position: absolute;
-    right: 10px;
-    top: 5px;
-    z-index: 1;
-}
 
 /************/
 /* Elements */
@@ -35,21 +29,28 @@ a {
     text-decoration: none;
     color: #00b11a;
 }
+
 body {
     height: 100vh;
     margin: 0;
 }
+
+/*
+- Make the header black
+- Make the header taller than it is normally is
+- Push the edit and file menus to the edge of the screen
+- Position the element so the z-index has effect
+*/
+
 header {
     background: black;
     display: flex;
     height: var(--headerHeight);
-    /*justify-content: space-between;*/
-    /* If I don't make the header absolutely positioned, I can remove the margin from <main></main>*/
-    /*position: fixed;*/
-    /*top: 0;*/
-    width: 100%;
+    justify-content: space-between;
+    position: relative;
     z-index: 1;
 }
+
 main {
     /* This isn't needed anymore, but keep it in case */
     /*margin: var(--headerHeight) 0 0 0;*/
@@ -62,10 +63,9 @@ main {
 /***********/
 
 .leaflet-popup-content {
-    /* Don't make Leaflet popups the same width anymore. Actually, keep doing it because it prevents the annoying horizontal scrollbar from appearing
-    most of the time */
-    width: 260px !important;
     font-family: sans-serif;
+    /* Get rid of the default margin so it's easier to align the "x" button with the vertical scrollbar */
+    margin: 0;
 }
 .leaflet-custom-control-button {
     background-color: #FFFFFF;
@@ -74,4 +74,120 @@ main {
     color: black;
     cursor: pointer;
     padding: .25rem;
+}
+
+/* Hide the "x" button in the top right corner of a popup. Note that I still must have the "x" button there in order for a popup to follow a node when
+it is dragged */
+
+.leaflet-popup-close-button {
+    display: none;
+}
+
+/***********************************
+ * Edit menu and file menu styling *
+ ***********************************/
+
+/*
+- Center the help, file, and edit button in a horizontal flexbox
+- Use a right margin to prevent horizontal and vertical scrollbars from appearing when the rightmost menu is expanded
+*/
+
+#menuInsert {
+    align-items: center;
+    display: flex;
+    margin-right: 10px;
+}
+
+/*
+- Move the help button rightward
+- Give the help button a higher z-index than the edit menu so it can be clicked on
+- Give the help button the same padding as the file and edit buttons
+*/
+
+#menuInsert > .iconlabel-button {
+    margin-right: -50px;
+    padding: 13px 0;
+    z-index: 3;
+}
+
+/* Make the help button anchor match the color the button */
+
+#menuInsert > .iconlabel-button a {
+    color: inherit;
+}
+
+/* Fix the height of the edit and file menu buttons so the flexbox children stay in place when they expand */
+
+#menuInsert > .menu {
+    max-height: 25px;
+}
+
+/*
+- Give the edit menu a negative margin so it floats rightwards to overlap with the file menu, but only if it exists alongside the file menu
+- Give the edit menu a higher z-index than the file menu so it can be clicked on
+*/
+
+#menuInsert > .menu:nth-last-child(2) {
+    margin-right: -75px;
+    z-index: 2
+}
+
+/*
+- Give the menu a background color
+- Make the corners of the menu round
+*/
+
+#menuInsert > .menu > .contentdiv.-expanded {
+    background-color: #FFFFFF;
+    border-radius: var(--regularBorderRadius) 0px var(--regularBorderRadius) var(--regularBorderRadius);
+}
+
+/*
+- Make the button round
+- Make the button right-aligned while the menu text stays left-aligned
+- Give the edit and file menu buttons bottom padding so the menu expands at the same level as the header
+*/
+
+#menuInsert > .menu > .iconlabel-button {
+    border-radius: var(--regularBorderRadius) var(--regularBorderRadius) 0px 0px;
+    margin-left: auto;
+    padding-bottom: 13px;
+}
+
+/* Give the svgs a width */
+
+#menuInsert > .menu > .iconlabel-button > .icon {
+    width: 22px;
+    margin: 0 -3px;
+}
+
+/* Make the chevrons thinner */
+
+#menuInsert > .menu > .iconlabel-button > .icon path {
+    stroke-width: .1;
+}
+
+/* Set white fill because chevrons need it */
+
+#menuInsert > .menu > .iconlabel-button > .icon.-white path {
+    fill: white;
+}
+
+/* Make the buttons taller than they normally are */
+
+#menuInsert > .menu > .contentdiv > .iconlabel-button {
+    min-height: var(--tableRowMinHeight);
+    width: 100%;
+}
+
+/* Give the menu dropdown buttons special hover styling */
+
+#menuInsert > .menu > .contentdiv > .iconlabel-button:hover {
+    background-color: seagreen;
+}
+
+/* Give the menu dropdown buttons special hover styling */
+
+#menuInsert > .menu > .contentdiv > .iconlabel-button:hover .label {
+    color: white;
 }

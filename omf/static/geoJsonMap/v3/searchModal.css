@@ -1,0 +1,149 @@
+/* 
+- Set the desired font size
+- Set a max height
+- Set a margin so the buttons aren't squished up to the dropdowns
+- Set horizontal padding so the vertical scrollbar doesn't create a horizontal scrollbar
+*/
+
+.searchModal {
+    font-size: var(--regularFontSize);
+    max-height: 7vh;
+    margin: .2rem 0;
+    overflow: auto;
+    padding: 0 .2rem;
+}
+
+/* Center the table within the search modal initially when not all columns are displayed */
+
+.searchModal > .prop-table {
+    margin: auto;
+}
+
+/* Make buttons in tables have round corners */
+
+.searchModal > .prop-table .iconlabel-button {
+    border-radius: var(--regularBorderRadius);
+}
+
+/* 
+- Set the desired size of the svg in the button
+- Adjust the svg margins based on the svg size
+*/
+
+.searchModal > .prop-table .iconlabel-button > .icon {
+    width: 22px;
+    margin: 0 -3px;
+}
+
+/* 
+- Give inputs the same border in all browsers
+- Input elements don't inherit font-size from their parent
+- Give inputs the same padding in all browsers
+- Make input elements fit in their column
+*/
+
+.searchModal > .prop-table input {
+    border: 1px solid black;
+    border-radius: var(--regularBorderRadius);
+    font-size: var(--regularFontSize);
+    padding: .1rem;
+    width: 100%;
+}
+
+/*
+- Give selects the same border in all browsers
+- Give selects the same height in all browsers
+- Make select elements have smaller text
+- Make select elements fit in their column
+*/
+
+.searchModal > .prop-table select {
+    border: 1px solid black;
+    border-radius: var(--regularBorderRadius);
+    height: 1.2rem;
+    font-size: 10px;
+    width: 100%;
+}
+
+/* Style the div that contains the search and clear buttons */
+
+.searchModal > .prop-table .proptr:last-child .proptd .propdiv div {
+    display: flex;
+    gap: .5rem;
+    justify-content: right;
+    width: 100%;
+}
+
+/* Make the magnifying glass width the same as the other svgs */
+
+.searchModal > .prop-table .proptr:last-child .proptd .propdiv div .iconlabel-button:first-child path {
+    stroke-width: .01rem;
+}
+
+/* The and/or column should be exactly 48px wide. */
+
+.searchModal > .prop-table td:nth-child(2) .propdiv {
+    width: 48px;
+}
+
+/* The field column should be exactly 88px wide. */
+
+.searchModal > .prop-table td:nth-child(3) .propdiv {
+    width: 88px;
+}
+
+/* The operator column should be exactly 72px wide. */
+
+.searchModal > .prop-table td:nth-child(4) .propdiv {
+    width: 72px;
+}
+
+/* The input column should be exactly 100px wide. */
+
+.searchModal > .prop-table td:nth-child(5) .propdiv {
+    width: 100px;
+}
+
+/***************************************
+ * Apply styles to search results divs *
+ ***************************************/
+
+/*
+- Set a max-height that works on desktop and laptops
+- Hide overflow-x so the horizontal scrollbar doesn't flash in appearance
+- Set overflow-y so that the user can scroll through the search results
+*/
+.searchModal + div {
+    max-height: 83vh;
+    overflow-x: hidden;
+    overflow-y: auto;
+}
+
+/*
+- Give buttons a top border so they look like divs
+- Make buttons expand all the way across the div
+- Make arrows go all the way to the edge of the button
+*/
+
+.searchModal + div > .dropdown-div > .iconlabel-button {
+    border-top: 1px solid black;
+    justify-content: space-between;
+    width: 100%;
+}
+
+/* 
+- Set the desired size of the svg in the button
+- Adjust the svg margins based on the svg size
+*/
+
+.searchModal + div > .dropdown-div > .iconlabel-button > .icon {
+    width: 22px;
+    margin: 0 -3px;
+}
+
+/* Make the chevron really skinny */
+
+.searchModal + div > .dropdown-div > .iconlabel-button > .icon path {
+    stroke-width: .1;
+    fill: black;
+}

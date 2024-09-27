@@ -1,0 +1,106 @@
+/* 
+- Set the desired font size and margin 
+- Set a margin so the vertical scrollbar doesn't stick out of the modal
+- Set a max height
+- Set horizontal padding so the vertical scrollbar doesn't create a horizontal scrollbar
+- Don't set vertical padding so that the table content won't scroll above the sticky thead
+- Hide overlow-x so that the vertical scrollbar won't create a horizontal scrollbar on Chrome and Safari
+*/
+
+.featureEditModal {
+    font-size: var(--regularFontSize);
+    margin: var(--regularPadding) 0;
+    max-height: 33vh;
+    padding: 0 var(--regularPadding);
+    overflow-x: hidden;
+    overflow-y: auto;
+}
+
+/* 
+- Give inputs the same border in all browsers
+- Input elements don't inherit font-size from their parent
+- Give inputs the same padding in all browsers
+- Make input elements fit in their column
+*/
+
+.featureEditModal > .prop-table input {
+    border: 1px solid black;
+    border-radius: var(--regularBorderRadius);
+    font-size: var(--regularFontSize);
+    padding: .1rem;
+    width: 100%;
+}
+
+/* Make buttons in tables have round corners */
+
+.featureEditModal > .prop-table .iconlabel-button {
+    border-radius: var(--regularBorderRadius);
+}
+
+/* 
+- Set the desired size of the svg in the button
+- Adjust the svg margins based on the svg size
+*/
+
+.featureEditModal > .prop-table .iconlabel-button > .icon {
+    width: 22px;
+    margin: 0 -3px;
+}
+
+/* 
+- Make all divs into flexboxes to vertically center content 
+- Make all table rows have a minimum height
+*/
+
+.featureEditModal > .prop-table .propdiv {
+    align-items: center;
+    display: flex;
+    min-height: var(--tableRowMinHeight);
+}
+
+/* Style the div that contains the zoom and delete buttons */
+
+.featureEditModal > .prop-table .proptr:last-child .proptd:last-child .propdiv div {
+    display: flex;
+    gap: .5rem;
+    justify-content: right;
+    width: 100%;
+}
+
+/* Normally, a flex child won't narrow past the "implied width" of its text contents, so text will overflow unless I set this */
+
+.featureEditModal > .prop-table span {
+    min-width: 0;
+}
+
+/* The value column should be exactly 100px wide. IDK why setting the width directly on the th element doesn't work */
+
+.featureEditModal > .prop-table td:nth-child(3) .propdiv, .featureEditModal > .prop-table th:nth-child(3) .propdiv {
+    width: 100px;
+}
+
+/* The key column should be at most 100px wide, plus extra width for padding */
+
+.featureEditModal > .prop-table td:nth-child(2), .featureEditModal > .prop-table th:nth-child(2) {
+    max-width: calc(100px + 1rem);
+}
+
+/* By default, .proptd elements shouldn't have any padding */
+
+.featureEditModal > .prop-table .proptd {
+    padding: 0;
+}
+
+/* The second and third columns should have the same left padding */
+
+.featureEditModal > .prop-table td:not(:first-of-type), .featureEditModal > .prop-table th:not(:first-of-type) {
+    padding-left: .5rem;
+}
+
+/* Make the thead always visible even with vertical overflow */
+
+.featureEditModal > .prop-table thead {
+    background: white;
+    position: sticky;
+    top: 0;
+}

@@ -1,12 +1,14 @@
-export { FeatureEditModal, getCirclePlusSvg, getTrashCanSvg, zoom };
+export { FeatureEditModal, zoom };
 import { Feature, UnsupportedOperationError } from './feature.js';
-import { Modal } from './modal.js';
+import { PropTable } from '../v4/ui-components/prop-table/prop-table.js';
 import { FeatureController } from './featureController.js';
 import { LeafletLayer } from './leafletLayer.js';
+import { IconLabelButton } from '../v4/ui-components/iconlabel-button/iconlabel-button.js';
 
 class FeatureEditModal { // implements ObserverInterface, ModalInterface
+
     #controller;    // - ControllerInterface instance
-    #modal;         // - A single Modal instance
+    #propTable;     // - A PropTable instance
     #observables;   // - An array of ObservableInterface instances
     #removed;       // - Whether this FeatureEditModal instance has already been deleted
     static #nonDeletableProperties = ['name', 'object', 'from', 'to', 'parent', 'latitude', 'longitude', 'treeKey', 'CMD_command'];
@@ -24,7 +26,7 @@ class FeatureEditModal { // implements ObserverInterface, ModalInterface
             throw Error('"controller" argument must be instanceof FeatureController');
         }
         this.#controller = controller;
-        this.#modal = null;
+        this.#propTable = null;
         this.#observables = observables;
         this.#observables.forEach(ob => ob.registerObserver(this));
         this.#removed = false;
@@ -116,7 +118,7 @@ class FeatureEditModal { // implements ObserverInterface, ModalInterface
     // ****************************
 
     getDOMElement() {
-        return this.#modal.divElement;
+        return this.#propTable.div;
     }
 
     /**
@@ -133,7 +135,9 @@ class FeatureEditModal { // implements ObserverInterface, ModalInterface
     refreshContent() {
         const tableState = {};
         // - Don't grab a row that was added with the "+" button, if it exists
-        [...this.#modal.divElement.getElementsByTagName('tr')].filter(tr => tr.querySelector('span[data-property-key]') !== null).forEach(tr => {
+        //[...this.#modal.divElement.getElementsByTagName('tr')].filter(tr => tr.querySelector('span[data-property-key]') !== null).forEach(tr => {
+        [...this.#propTable.div.getElementsByTagName('tr')].filter(tr => tr.querySelector('span[data-property-key]') !== null).forEach(tr => {
+
             const span = tr.getElementsByTagName('span')[0];
             let namespace = span.dataset.propertyNamespace;
             // - latitude and longitude don't exist in any property namespace
@@ -178,7 +182,9 @@ class FeatureEditModal { // implements ObserverInterface, ModalInterface
                 keySpan.textContent = key;
                 keySpan.dataset.propertyKey = key;
                 keySpan.dataset.propertyNamespace = 'treeProps';
-                this.#modal.insertTBodyRow([this.#getDeletePropertyButton(key), keySpan, this.#getValueTextInput(key, ary)], 'beforeEnd');
+                //this.#modal.insertTBodyRow([this.#getDeletePropertyButton(key), keySpan, this.#getValueTextInput(key, ary)], 'beforeEnd');
+                this.#propTable.insertTBodyRow({elements: [this.#getDeletePropertyButton(key), keySpan, this.#getValueTextInput(key, ary)], position: 'beforeEnd'});
+
             } else {
                 // - If the table has the key, update the display of the values for that key
                 const valueElement = tableState[key].propertyValueElement;
@@ -218,7 +224,7 @@ class FeatureEditModal { // implements ObserverInterface, ModalInterface
         if (!this.#removed) {
             this.#observables.forEach(ob => ob.removeObserver(this));
             this.#observables = null;
-            this.#modal.divElement.remove();
+            this.#propTable.div.remove();
             this.#removed = true;
         }
     }
@@ -228,107 +234,23 @@ class FeatureEditModal { // implements ObserverInterface, ModalInterface
      * @returns {undefined}
      */
     renderContent() {
-        const modal = new Modal();
-        modal.addStyleClasses(['featureEditModal'], 'divElement');
-        const keyToValues = this.#getKeyToValuesMapping();
-        for (const [key, ary] of Object.entries(keyToValues.meta)) {
-            const keySpan = document.createElement('span');
-            keySpan.textContent = 'ID';
-            keySpan.dataset.propertyKey = 'treeKey';
-            keySpan.dataset.propertyNamespace = 'meta';
-            if (ary.length === 1) {
-                modal.insertTHeadRow([null, keySpan, ary[0].toString()], 'prepend');
-            } else {
-                modal.insertTHeadRow([null, keySpan, ary.join(',')], 'prepend');
-            }
-        }
-        for (const [key, ary] of Object.entries(keyToValues.treeProps)) {
-            const keySpan = document.createElement('span');
-            if (['object'].includes(key)) {
-                keySpan.textContent = key;
-                keySpan.dataset.propertyKey = key;
-                keySpan.dataset.propertyNamespace = 'treeProps';
-                if (ary.length === 1) {
-                    modal.insertTHeadRow([null, keySpan, ary[0].toString()])
-                } else {
-                    //modal.insertTHeadRow([null, keySpan, `<Multiple "${key}" values>`]);
-                    modal.insertTHeadRow([null, keySpan, ary.join(', ')]);
-                }
-                continue;
-            }
-            if (['from', 'to'].includes(key)) {
-                if (!this.#observables.every(ob => ob.isLine() && !ob.isParentChildLine())) {
-                    continue;
-                }
-            }
-            if (key === 'type' && !this.#observables.every(ob => ob.isParentChildLine())) {
-                continue;
-            }
-            if (key === 'parent' && !this.#observables.every(ob => ob.isChild())) {
-                continue;
-            }
-            keySpan.textContent = key;
-            keySpan.dataset.propertyKey = key;
-            keySpan.dataset.propertyNamespace = 'treeProps';
-            let deleteButton = null;
-            if (!FeatureEditModal.#nonDeletableProperties.includes(key)) {
-                deleteButton = this.#getDeletePropertyButton(key);
-            }
-            modal.insertTBodyRow([deleteButton, keySpan, this.#getValueTextInput(key, ary)]);
-        }
-        // - We don't allow the coordinates of multiple objects to be changed with multiselect
-        if (this.#observables.length === 1) {
-            for (const [key, ary] of Object.entries(keyToValues.coordinates)) {
-                const keySpan = document.createElement('span');
-                if (['latitude', 'longitude'].includes(key)) {
-                    if (!this.#observables.every(ob => ob.isNode() && !ob.isConfigurationObject())) {
-                        continue;
-                    } else {
-                        keySpan.textContent = key;
-                        keySpan.dataset.propertyKey = key;
-                        // - longitude and latitude aren't in any property namespace
-                        modal.insertTBodyRow([null, keySpan, this.#getValueTextInput(key, ary)], 'prepend');
-                    }
-                }
-            }
-        }
-        modal.insertTBodyRow([this.#getAddPropertyButton(), null, null], 'append', ['absolute']);
-        modal.addStyleClasses(['centeredTable'], 'tableElement');
-        // - Add buttons for regular features
-        if (this.#observables.every(ob => !ob.isComponentFeature())) {
-            modal.insertElement(this.#getDeleteFeatureDiv());
-            if (this.#observables.every(ob => !ob.isConfigurationObject())) {
-                modal.insertElement(this.#getZoomDiv(), 'prepend');
-            }
-        // - Add buttons for components
+        const propTable = new PropTable();
+        propTable.div.classList.add('featureEditModal');
+        if (this.#observables[0].hasProperty('treeKey', 'meta')) {
+            this.#renderOmfFeatures(propTable);
         } else {
-            if (this.#observables.every(ob => ob.isConfigurationObject())) {
-                modal.insertElement(this.#getAddConfigurationObjectDiv());
-            } else if (this.#observables.some(ob => ob.isConfigurationObject())) {
-                // - Don't add buttons. Configuration objects cannot be added because not every observable is a configuration object.
-                //   Non-configuration objects cannot be added because there is at least one configuration object. The user should refine their search
-                //   results, but mixing configuration and non-configuration objects isn't necessarily an error
-            } else {
-                if (this.#observables.every(ob => ob.isNode())) {
-                    // 2024-09-04: Don't append this button because it covers the "+" button with David's new styling request
-                    //modal.insertElement(this.#getAddNodeWithCoordinatesDiv());
-                    modal.insertElement(this.#getAddNodeWithMapClickDiv());
-                } else if (this.#observables.every(ob => ob.isLine())) {
-                    modal.insertElement(this.#getAddLineWithFromToDiv());
-                } else {
-                    // - Don't add buttons. The user's search returned both nodes and lines
-                }
-            }
+            this.#renderArbitraryFeatures(propTable);
         }
-        // - 2024-09-04: Replaced 'verticalFlex' class with 'horizontalFlex' because buttons should stack horizontally now
-        // - 2024-09-04: Replaced 'centerMainAxisFlex' with 'rightAlignMainAxisFlex' because buttons should no longer be centered
-        modal.addStyleClasses(['horizontalFlex', 'rightAlignMainAxisFlex', 'centerCrossAxisFlex'], 'containerElement');
-        if (this.#modal === null) {
-            this.#modal = modal;
-        } 
-        if (document.body.contains(this.#modal.divElement)) {
-            this.#modal.divElement.replaceWith(modal.divElement);
-            this.#modal = modal;
+        propTable.div.addEventListener('click', function(e) {
+            // - Don't let clicks on the table cause the popup to close
+            e.stopPropagation();
+        });
+        if (this.#propTable === null) {
+            this.#propTable = propTable;
+        }
+        if (document.body.contains(this.#propTable.div)) {
+            this.#propTable.div.replaceWith(propTable.div);
+            this.#propTable = propTable;
         }
     }
 
@@ -354,80 +276,73 @@ class FeatureEditModal { // implements ObserverInterface, ModalInterface
      * - Add a configuration object to the data. Components arrive with bad data. That's why I have to validate a component twice: once during any
      *   value input changes and once when the button is clicked. I assume that regular features arrive with valid data. That's why I only validate
      *   when an input changes
-     * @returns {HTMLDivElement}
+     * @returns {HTMLButtonElement}
      */
-    #getAddConfigurationObjectDiv() {
-        const btn = this.#getWideButton();
-        btn.classList.add('add');
-        btn.appendChild(getCirclePlusSvg());
-        const span = document.createElement('span');
-        span.textContent = 'Add config object';
-        btn.appendChild(span);
-        btn.addEventListener('click', () => {
+    #getAddConfigurationObjectButton() {
+        let button = new IconLabelButton({paths: IconLabelButton.getCirclePlusPaths(), viewBox: '0 0 24 24', text: 'Add config object'});
+        button.button.classList.add('-green');
+        button.button.getElementsByClassName('icon')[0].classList.add('-white');
+        button.button.getElementsByClassName('label')[0].classList.add('-white');
+        button = button.button;
+        button.addEventListener('click', () => {
             if (this.#componentsStateIsValid()) {
                 this.#controller.addObservables(this.#observables.map(ob => this.#getObservableFromComponent(ob)));
             }
         });
-        const div = this.#getWideButtonDiv();
-        div.appendChild(btn);
-        return div;
+        return button;
     }
 
     /**
      * - Add a line to the map by inputing "from" and "to" values and then clicking this button
-     * @returns {HTMLDivElement}
+     * @returns {HTMLButtonElement}
      */
-    #getAddLineWithFromToDiv() {
-        const btn = this.#getWideButton();
-        btn.classList.add('add');
-        btn.appendChild(getCirclePlusSvg());
-        const span = document.createElement('span');
-        span.textContent = 'Add line with from/to';
-        btn.appendChild(span);
-        btn.addEventListener('click', () => {
+    #getAddLineWithFromToButton() {
+        let button = new IconLabelButton({paths: IconLabelButton.getCirclePlusPaths(), viewBox: '0 0 24 24', text: 'Add line with from/to', tooltip: 'Add a new line by entering the name of a node for the "from" property and entering the name of another node in the "to" property'});
+        button.button.classList.add('-green');
+        button.button.getElementsByClassName('icon')[0].classList.add('-white');
+        button.button.getElementsByClassName('label')[0].classList.add('-white');
+        button = button.button;
+        button.addEventListener('click', () => {
             if (this.#componentsStateIsValid()) {
                 this.#controller.addObservables(this.#observables.map(ob => this.#getObservableFromComponent(ob)));
             }
         });
-        const div = this.#getWideButtonDiv();
-        div.appendChild(btn);
-        return div;
+        return button;
     }
 
     /**
      * - Add a node to the map by inputing coordinates and then clicking this button
      * @returns {HTMLDivElement}
      */
-    #getAddNodeWithCoordinatesDiv() {
-        const btn = this.#getWideButton();
-        btn.classList.add('add');
-        btn.appendChild(getCirclePlusSvg());
-        const span = document.createElement('span');
-        span.textContent = 'Add with coordinates';
-        btn.appendChild(span);
-        btn.addEventListener('click', () => {
-            if (this.#componentsStateIsValid()) {
-                this.#controller.addObservables(this.#observables.map(ob => this.#getObservableFromComponent(ob)));
-            }
-        });
-        const div = this.#getWideButtonDiv();
-        div.appendChild(btn);
-        return div;
-    }
+    //#getAddNodeWithCoordinatesDiv() {
+    //    const btn = this.#getWideButton();
+    //    btn.classList.add('add');
+    //    btn.appendChild(getCirclePlusSvg());
+    //    const span = document.createElement('span');
+    //    span.textContent = 'Add with coordinates';
+    //    btn.appendChild(span);
+    //    btn.addEventListener('click', () => {
+    //        if (this.#componentsStateIsValid()) {
+    //            this.#controller.addObservables(this.#observables.map(ob => this.#getObservableFromComponent(ob)));
+    //        }
+    //    });
+    //    const div = this.#getWideButtonDiv();
+    //    div.appendChild(btn);
+    //    return div;
+    //}
 
     /**
      * - Add a node to the map by clicking on the map
      * @returns {HTMLDivElement}
      */
-    #getAddNodeWithMapClickDiv() {
-        const btn = this.#getWideButton();
-        btn.classList.add('add');
-        btn.appendChild(getCirclePlusSvg());
-        const span = document.createElement('span');
-        span.textContent = 'Add with map click';
-        btn.appendChild(span);
+    #getAddNodeWithMapClickButton() {
+        let button = new IconLabelButton({paths: IconLabelButton.getCirclePlusPaths(), viewBox: '0 0 24 24', text: 'Add object with map click', tooltip: 'Click this button, then click on the map to create a new instance of this object'});
+        button.button.classList.add('-green');
+        button.button.getElementsByClassName('icon')[0].classList.add('-white');
+        button.button.getElementsByClassName('label')[0].classList.add('-white');
+        button = button.button;
         const that = this;
-        btn.addEventListener('click', () => {
+        button.addEventListener('click', () => {
             const mapDiv = document.getElementById('map');
             mapDiv.style.cursor = 'crosshair';
             LeafletLayer.map.on('click', function(e) {
@@ -438,48 +353,40 @@ class FeatureEditModal { // implements ObserverInterface, ModalInterface
                 }
             });
         });
-        const div = this.#getWideButtonDiv();
-        div.appendChild(btn);
-        return div;
+        return button;
     }
     
     /**
      * @returns {HTMLButtonElement}
      */
     #getAddPropertyButton() {
-        const btn = document.createElement('button');
-        btn.classList.add('add');
-        btn.classList.add('horizontalFlex');
-        btn.classList.add('centerMainAxisFlex');
-        btn.classList.add('centerCrossAxisFlex');
-        btn.appendChild(getCirclePlusSvg());
+        let button = new IconLabelButton({paths: IconLabelButton.getCirclePlusPaths(), viewBox: '0 0 24 24', tooltip: 'Add new property'});
+        button.button.classList.add('-green');
+        button.button.getElementsByClassName('icon')[0].classList.add('-white');
+        button = button.button;
         const that = this;
-        btn.addEventListener('click', function() {
+        button.addEventListener('click', function() {
             const deletePlaceholder = document.createElement('span');
             const keyInputPlaceholder = document.createElement('span');
             const valueInputPlaceholder = document.createElement('span');
-            that.#modal.insertTBodyRow([deletePlaceholder, keyInputPlaceholder, valueInputPlaceholder], 'beforeEnd');
+            that.#propTable.insertTBodyRow({elements: [deletePlaceholder, keyInputPlaceholder, valueInputPlaceholder], position: 'beforeEnd'});
             that.#insertKeyTextInput(deletePlaceholder, keyInputPlaceholder, valueInputPlaceholder);
         });
-        return btn;
+        return button;
     }
 
     /**
      * @returns {HTMLDivElement}
      */
-    #getDeleteFeatureDiv() {
-        const btn = this.#getWideButton();
-        btn.classList.add('delete');
-        btn.appendChild(getTrashCanSvg());
-        const span = document.createElement('span');
-        span.textContent = 'Delete';
-        btn.appendChild(span);
-        btn.addEventListener('click', () => {
+    #getDeleteFeatureButton() {
+        let button = new IconLabelButton({paths: IconLabelButton.getTrashCanPaths(), viewBox: '0 0 24 24', tooltip: 'Delete object'});
+        button.button.classList.add('-red');
+        button.button.getElementsByClassName('icon')[0].classList.add('-white');
+        button = button.button;
+        button.addEventListener('click', () => {
             this.#controller.deleteObservables(this.#observables);    
         });
-        const div = this.#getWideButtonDiv();
-        div.appendChild(btn);
-        return div;
+        return button;
     }
     
     /**
@@ -490,14 +397,12 @@ class FeatureEditModal { // implements ObserverInterface, ModalInterface
         if (typeof propertyKey !== 'string') {
             throw TypeError('"propertyKey" argument must be a string.');
         }
-        const btn = document.createElement('button');
-        btn.classList.add('delete');
-        btn.classList.add('horizontalFlex');
-        btn.classList.add('centerMainAxisFlex');
-        btn.classList.add('centerCrossAxisFlex');
-        btn.appendChild(getTrashCanSvg());
+        let button = new IconLabelButton({paths: IconLabelButton.getTrashCanPaths(), viewBox: '0 0 24 24', tooltip: 'Delete property'});
+        button.button.classList.add('-red');
+        button.button.getElementsByClassName('icon')[0].classList.add('-white');
+        button = button.button;
         const that = this;
-        btn.addEventListener('click', function(e) {
+        button.addEventListener('click', function(e) {
             that.#controller.deleteProperty(that.#observables, propertyKey);
             // - This is code is required for a transitionalDeleteButton to remove the row
             let parentElement = this.parentElement;
@@ -507,7 +412,7 @@ class FeatureEditModal { // implements ObserverInterface, ModalInterface
             parentElement.remove();
             e.stopPropagation();
         });
-        return btn;
+        return button;
     }
 
     /**
@@ -661,45 +566,17 @@ class FeatureEditModal { // implements ObserverInterface, ModalInterface
         });
         return input;
     }
-
+    
     /**
      * @returns {HTMLButtonElement}
      */
-    #getWideButton() {
-        const btn = document.createElement('button');
-        btn.classList.add('horizontalFlex');
-        btn.classList.add('centerMainAxisFlex');
-        btn.classList.add('centerCrossAxisFlex');
-        btn.classList.add('fullWidth');
-        return btn;
-    }
-
-    /**
-     * @returns {HTMLDivElement}
-     */
-    #getWideButtonDiv() {
-        const div = document.createElement('div');
-        div.classList.add('horizontalFlex');
-        div.classList.add('centerMainAxisFlex');
-        div.classList.add('centerCrossAxisFlex');
-        // - 2024-09-04: Buttons should no longer stretch to 50% of container width because we want buttons to be smaller now
-        //div.classList.add('halfWidth');
-        return div;
-    }
-    
-    /**
-     * @returns {HTMLDivElement}
-     */
-    #getZoomDiv() {
-        const btn = this.#getWideButton();
-        btn.appendChild(getPinSvg());
-        const span = document.createElement('span');
-        span.textContent = 'Zoom';
-        btn.appendChild(span);
-        btn.addEventListener('click', zoom.bind(null, this.#observables));
-        const div = this.#getWideButtonDiv();
-        div.appendChild(btn);
-        return div;
+    #getZoomButton() {
+        let button = new IconLabelButton({paths: IconLabelButton.getPinPaths(), viewBox: '0 0 24 24', tooltip: 'Zoom to object'});
+        button.button.classList.add('-blue');
+        button.button.getElementsByClassName('icon')[0].classList.add('-white');
+        button = button.button;
+        button.addEventListener('click', zoom.bind(null, this.#observables));
+        return button;
     }
 
     /**
@@ -751,6 +628,122 @@ class FeatureEditModal { // implements ObserverInterface, ModalInterface
             return false;
         }
         return true;
+    }
+
+    /**
+     * - Render normal features
+     */
+    #renderOmfFeatures(propTable) {
+        const keyToValues = this.#getKeyToValuesMapping();
+        for (const [key, ary] of Object.entries(keyToValues.meta)) {
+            const keySpan = document.createElement('span');
+            keySpan.textContent = 'ID';
+            keySpan.dataset.propertyKey = 'treeKey';
+            keySpan.dataset.propertyNamespace = 'meta';
+            if (ary.length === 1) {
+                propTable.insertTHeadRow({elements: [null, keySpan, ary[0].toString()], position: 'prepend'})
+            } else {
+                propTable.insertTHeadRow({elements: [null, keySpan, ary.join(',')], position: 'prepend'});
+            }
+        }
+        for (const [key, ary] of Object.entries(keyToValues.treeProps)) {
+            const keySpan = document.createElement('span');
+            if (['object'].includes(key)) {
+                keySpan.textContent = key;
+                keySpan.dataset.propertyKey = key;
+                keySpan.dataset.propertyNamespace = 'treeProps';
+                if (ary.length === 1) {
+                    propTable.insertTHeadRow({elements: [null, keySpan, ary[0].toString()]});
+                } else {
+                    propTable.insertTHeadRow({elements: [null, keySpan, ary.join(', ')]});
+                }
+                continue;
+            }
+            if (['from', 'to'].includes(key)) {
+                if (!this.#observables.every(ob => ob.isLine() && !ob.isParentChildLine())) {
+                    continue;
+                }
+            }
+            if (key === 'type' && !this.#observables.every(ob => ob.isParentChildLine())) {
+                continue;
+            }
+            if (key === 'parent' && !this.#observables.every(ob => ob.isChild())) {
+                continue;
+            }
+            keySpan.textContent = key;
+            keySpan.dataset.propertyKey = key;
+            keySpan.dataset.propertyNamespace = 'treeProps';
+            let deleteButton = null;
+            if (!FeatureEditModal.#nonDeletableProperties.includes(key)) {
+                deleteButton = this.#getDeletePropertyButton(key);
+            }
+            propTable.insertTBodyRow({elements: [deleteButton, keySpan, this.#getValueTextInput(key, ary)]});
+        }
+        // - We don't allow the coordinates of multiple objects to be changed with multiselect
+        if (this.#observables.length === 1) {
+            for (const [key, ary] of Object.entries(keyToValues.coordinates)) {
+                const keySpan = document.createElement('span');
+                if (['latitude', 'longitude'].includes(key)) {
+                    if (!this.#observables.every(ob => ob.isNode() && !ob.isConfigurationObject())) {
+                        continue;
+                    } else {
+                        keySpan.textContent = key;
+                        keySpan.dataset.propertyKey = key;
+                        // - longitude and latitude aren't in any property namespace
+                        propTable.insertTBodyRow({elements: [null, keySpan, this.#getValueTextInput(key, ary)], position: 'prepend'});
+                    }
+                }
+            }
+        }
+        // - I need this div to applying consistent CSS styling
+        const div = document.createElement('div');
+        if (this.#observables.every(ob => !ob.isComponentFeature()) && this.#observables.every(ob => !ob.isConfigurationObject())) {
+            const zoomButton = this.#getZoomButton();
+            const deleteButton = this.#getDeleteFeatureButton();
+            div.append(zoomButton);
+            div.append(deleteButton);
+            propTable.insertTBodyRow({elements: [this.#getAddPropertyButton(), null, div]});
+        } else if (this.#observables.every(ob => !ob.isComponentFeature())) {
+            div.append(this.#getDeleteFeatureButton());
+            propTable.insertTBodyRow({elements: [this.#getAddPropertyButton(), null, div]});
+        // - Add buttons for components
+        } else {
+            if (this.#observables.every(ob => ob.isConfigurationObject())) {
+                div.append(this.#getAddConfigurationObjectButton());
+                propTable.insertTBodyRow({elements: [div], colspans: [3]});
+            } else if (this.#observables.some(ob => ob.isConfigurationObject())) {
+                // - Don't add buttons. Configuration objects cannot be added because not every observable is a configuration object.
+                //   Non-configuration objects cannot be added because there is at least one configuration object. The user should refine their search
+                //   results, but mixing configuration and non-configuration objects isn't necessarily an error
+            } else {
+                if (this.#observables.every(ob => ob.isNode())) {
+                    div.append(this.#getAddNodeWithMapClickButton());
+                    propTable.insertTBodyRow({elements: [div], colspans: [3]});
+                } else if (this.#observables.every(ob => ob.isLine())) {
+                    div.append(this.#getAddLineWithFromToButton())
+                    propTable.insertTBodyRow({elements: [div], colspans: [3]});
+                } else {
+                    // - Don't add buttons. The user's search returned both nodes and lines
+                }
+            }
+        }
+    }
+
+    /**
+     * - Render arbitrary features
+     */
+    #renderArbitraryFeatures(propTable) {
+        for (const [key, val] of Object.entries(this.#observables[0].getProperties('meta'))) {
+            if (key === 'TRACT') {
+                propTable.insertTHeadRow({elements: [null, null, 'Census Tract', val.toString()], position: 'prepend'});
+            } else if (key === 'SOVI_SCORE') {
+                propTable.insertTBodyRow({elements: [null, null, 'Social Vulnerability Score', val.toString()]});
+            } else if (key === 'SOVI_RATNG') {
+                propTable.insertTBodyRow({elements: [null, null, 'Social Vulnerability Rating', val.toString()]});
+            } else {
+                propTable.insertTBodyRow({elements: [null, null, key, val.toString()]});
+            }
+        }
     }
 
     /**
@@ -895,78 +888,6 @@ class FeatureEditModal { // implements ObserverInterface, ModalInterface
                 return true;
         }
     }
-}
-
-function getCirclePlusSvg() {
-    const svg = document.createElementNS('http://www.w3.org/2000/svg','svg');
-    svg.setAttribute('width', '22px');
-    svg.setAttribute('height', '22px');
-    svg.setAttribute('viewBox', '0 0 24 24'); 
-    svg.setAttribute('fill', 'none'); 
-    let path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-    path.setAttribute('d', 'M9 12H15');
-    path.setAttribute('stroke', '#FFFFFF');
-    path.setAttribute('stroke-width', '2');
-    path.setAttribute('stroke-linecap', 'round');
-    path.setAttribute('stroke-linejoin', 'round');
-    svg.appendChild(path);
-    path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-    path.setAttribute('d', 'M12 9L12 15');
-    path.setAttribute('stroke', '#FFFFFF');
-    path.setAttribute('stroke-width', '2');
-    path.setAttribute('stroke-linecap', 'round');
-    path.setAttribute('stroke-linejoin', 'round');
-    svg.appendChild(path);
-    path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-    path.setAttribute('d', 'M21 12C21 16.9706 16.9706 21 12 21C7.02944 21 3 16.9706 3 12C3 7.02944 7.02944 3 12 3C16.9706 3 21 7.02944 21 12Z');
-    path.setAttribute('stroke', '#FFFFFF');
-    path.setAttribute('stroke-width', '2');
-    svg.appendChild(path);
-    return svg;
-}
-
-function getTrashCanSvg() {
-    const svg = document.createElementNS('http://www.w3.org/2000/svg','svg');
-    svg.setAttribute('width', '22px');
-    svg.setAttribute('height', '22px');
-    svg.setAttribute('viewBox', '0 0 24 24');
-    svg.setAttribute('fill', 'none');
-    const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-    path.setAttribute('d', 'M10 10V16M14 10V16M4 6H20M15 6V5C15 3.89543 14.1046 3 13 3H11C9.89543 3 9 3.89543 9 5V6M18 6V14M18 18C18 19.1046 17.1046 20 16 20H8C6.89543 20 6 19.1046 6 18V13M6 9V6');
-    path.setAttribute('stroke', '#FFFFFF');
-    path.setAttribute('stroke-width', '1.5');
-    path.setAttribute('stroke-width', '1.5');
-    path.setAttribute('stroke-linecap', 'round');
-    path.setAttribute('stroke-linejoin', 'round');
-    svg.appendChild(path);
-    return svg;
-}
-
-function getPinSvg() {
-    const svg = document.createElementNS('http://www.w3.org/2000/svg','svg');
-    svg.setAttribute('width', '22px');
-    svg.setAttribute('height', '22px');
-    svg.setAttribute('viewBox', '0 0 24 24'); 
-    svg.setAttribute('fill', 'none'); 
-    const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
-    circle.setAttribute('cx', '12');
-    circle.setAttribute('cy', '10');
-    circle.setAttribute('r', '3');
-    circle.setAttribute('stroke', '#FFFFFF');
-    circle.setAttribute('stroke-width', '1.5');
-    circle.setAttribute('stroke-width', '1.5');
-    circle.setAttribute('stroke-linecap', 'round');
-    circle.setAttribute('stroke-linejoin', 'round');
-    svg.appendChild(circle);
-    const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-    path.setAttribute('d', "M19 9.75C19 15.375 12 21 12 21C12 21 5 15.375 5 9.75C5 6.02208 8.13401 3 12 3C15.866 3 19 6.02208 19 9.75Z");
-    path.setAttribute('stroke', '#FFFFFF');
-    path.setAttribute('stroke-width', '1.5');
-    path.setAttribute('stroke-width', '1.5');
-    path.setAttribute('stroke-linecap', 'round');
-    path.setAttribute('stroke-linejoin', 'round');
-    svg.appendChild(path);
-    return svg;
 }
 
 /**

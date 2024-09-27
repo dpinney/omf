@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <link rel="stylesheet" href="prop-table.css">
+        <style>
+            /* Demo styling */
+            * {
+                box-sizing: border-box;
+            }
+            body {
+                margin: 0;
+            }
+            .demo-div {
+                margin: 1rem;
+            }
+        </style>
+    </head>
+    <body>
+        <!-- HTML exmaple-->
+        <div class="demo-div">
+            <div class="proptablediv">
+                <table class="prop-table">
+                    <thead class="propthead">
+                        <tr class="proptr">
+                            <!--All table cells must, at minimum, contain a div in order to control the height of the content inside-->
+                            <!--I think dealing with text is easier if I wrap it in a span, so text should always be wrapped in a span-->
+                            <th class="propth"></th>
+                            <th class="propth">
+                                <div class="propdiv">
+                                    <span class="propspan">Short header</span>
+                                </div>
+                            </th>
+                            <th class="propth">
+                                <div class="propdiv">
+                                    <span class="propspan">This is a really long header that contains a lot of information</span>
+                                </div>
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody class="proptbody">
+                        <tr class="propertr">
+                            <td class="proptd"></td>
+                            <td class="proptd">
+                                <div class="propdiv">
+                                    <span class="propspan">This is a really long property key</span>
+                                </div>
+                            </td>
+                            <td class="proptd">
+                                <div class="propdiv">
+                                    <span class="propspan">Property value</span>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr class="proptr">
+                            <td class="proptd">
+                                <div class="propdiv">
+                                    <button>Btn</button>
+                                </div>
+                            </td>
+                            <td class="proptd">
+                                <div class="propdiv">
+                                    <span class="propspan">Key</span>
+                                </div>
+                            </td>
+                            <td class="proptd">
+                                <div class="propdiv">
+                                    <input>
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <!-- Dynamic creation -->
+        <div class="demo-div"></div>
+    </body>
+    <script type="module">
+        import { PropTable } from '/prop-table.js';
+        const table = new PropTable();
+        table.insertTHeadRow({elements: [null, 'ID', '120720']});
+        table.insertTHeadRow({elements: [null, 'object', 'node'], colspans: [1, 1, 2]});
+        table.insertTBodyRow({elements: [document.createElement('button'), 'latitude', document.createElement('input'), 'errorElement']});
+        table.insertTBodyRow({elements: [document.createElement('button'), 'longitude', document.createElement('input')], colspans: [2, 1, 1]});
+        document.getElementsByClassName('demo-div')[1].append(table.div);
+    </script>
+</html>

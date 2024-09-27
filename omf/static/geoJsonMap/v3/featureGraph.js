@@ -243,7 +243,10 @@ class FeatureGraph {
                 });
             }
             this.#graph.dropNode(observableKey);
-            this.#removeObservableFromNameToKey(observable, observable.getProperty('name'));
+            // - Configuration objects don't have names sometimes
+            if (observable.hasProperty('name')) {
+                this.#removeObservableFromNameToKey(observable, observable.getProperty('name'));
+            }
             this.#removeObservableFromKeytoFeature(observable);
             this.#observers.forEach(ob => ob.handleDeletedObservable(observable));
         } else {

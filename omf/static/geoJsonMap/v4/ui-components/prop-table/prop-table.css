@@ -1,0 +1,59 @@
+/* .proptablediv element styling */
+
+/*.proptablediv {}*/
+
+/* .prop-table component styling */
+
+/* 
+- The .prop-table component doesn't have a lot of styling because of most of the styling is positional properties (e.g width, padding) that depend
+  on the context within which a .prop-table is being used, so the majority of the table CSS is elsewhere 
+*/
+
+
+.prop-table {
+    border-collapse: collapse;
+    /*
+    - Note that flexboxes inside of the table will inherit this rule but it won't have the desired effect. Set min-width: 0 directly on children of a
+      flex container to fix the issue
+    */
+    overflow-wrap: break-word;
+}
+
+/* .proptbody element styling */
+
+/*.prop-table > .proptbody {}*/
+
+/* .propthead element styling */
+
+/*.prop-table > .propthead {}*/
+
+/* .proptr element styling */
+
+/*.prop-table > .proptbody > .proptr, .prop-table > .propthead > .proptr {}*/
+
+/* .proptd element styling */
+
+.prop-table > .proptbody > .proptr > .proptd {
+    /* Don't set this because this specificity will override other stylesheets */
+    /*padding: 0;*/
+}
+
+/* .propth element styling */
+
+.prop-table > .propthead > .proptr > .propth {
+    /* Don't set this because this specificity will override other stylesheets */
+    /*padding: 0;*/
+}
+
+/*************************** 
+ *.propdiv element styling *
+ ***************************/
+
+/*.prop-table > .proptbody > .proptr > .proptd > .propdiv, .prop-table > .propthead > .proptr > .propth > .propdiv {}*/
+
+/*****************************
+ * .propspan element styling *
+ *****************************/
+
+/*.prop-table > .proptbody > .proptr > .proptd > .propdiv > .propspan, .prop-table > .propthead > .proptr > .propth > .propdiv > .propspan {}*/
+

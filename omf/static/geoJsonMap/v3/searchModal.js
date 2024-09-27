@@ -1,19 +1,20 @@
 export { SearchModal };
-import { DropdownDiv } from './dropdownDiv.js';
+import { DropdownDiv } from '../v4/ui-components/dropdown-div/dropdown-div.js';
 import { Feature } from './feature.js';
 import { FeatureController } from './featureController.js';
 import { FeatureDropdownDiv } from './featureDropdownDiv.js';
 import { FeatureGraph } from './featureGraph.js';
-import { getCirclePlusSvg, getTrashCanSvg } from './featureEditModal.js';
-import { Modal } from './modal.js';
+import { PropTable } from '../v4/ui-components/prop-table/prop-table.js';
+import { IconLabelButton } from '../v4/ui-components/iconlabel-button/iconlabel-button.js';
 import { LeafletLayer } from './leafletLayer.js';
 
 class SearchModal {
+
     #configDropdownDiv; // - A DropdownDiv instance
     #controller;        // - ControllerInterface instance for this SearchModal
     #keySelects;        // - An array of HTMLSelectElement instances
     #lineDropdownDiv;   // - A DropdownDiv instance
-    #modal;             // - A single Modal instance for this SearchModal
+    #propTable;         // - A PropTable instance
     #nodeDropdownDiv;   // - A DropdownDiv instance
     #observables;       // - An array of ObservableInterface instances (i.e. components) or an array containing a FeatureGraph
     #removed;           // - Whether this SearchModal instance has already been deleted
@@ -33,15 +34,9 @@ class SearchModal {
         if (!(observables instanceof Array) && observables !== null) {
             throw TypeError('The "observables" argument must be an array or null.');
         }
-        this.#configDropdownDiv = new DropdownDiv();
-        this.#configDropdownDiv.addStyleClasses(['sideNav', 'searchCategory'], 'divElement');
         this.#controller = controller;
         this.#keySelects = [];
-        this.#lineDropdownDiv = new DropdownDiv();
-        this.#lineDropdownDiv.addStyleClasses(['sideNav', 'searchCategory'], 'divElement');
-        this.#modal = null;
-        this.#nodeDropdownDiv = new DropdownDiv();
-        this.#nodeDropdownDiv.addStyleClasses(['sideNav', 'searchCategory'], 'divElement');
+        this.#propTable = null;
         if (observables === null) {
             this.#observables = [controller.observableGraph];
             this.#observables[0].registerObserver(this);
@@ -52,8 +47,13 @@ class SearchModal {
         this.#removed = false;
         this.#searchResults = [];
         this.renderContent();
+        this.#configDropdownDiv = new DropdownDiv();
+        this.#setupDropdownDiv(this.#configDropdownDiv, 'Configuration objects');
+        this.#nodeDropdownDiv = new DropdownDiv();
+        this.#setupDropdownDiv(this.#nodeDropdownDiv, 'Nodes');
+        this.#lineDropdownDiv = new DropdownDiv();
+        this.#setupDropdownDiv(this.#lineDropdownDiv, 'Lines');
         this.#search();
-        this.#attachDropdownDivEventHandlers();
     }
 
     // *******************************
@@ -75,13 +75,9 @@ class SearchModal {
         this.#searchResults = this.#searchResults.filter(ob => ob !== observable);
         this.refreshContent();
         const {configs, nodes, lines} = this.#getCategorizedSearchResults();
-        [
-            [this.#configDropdownDiv, configs, 'Configuration objects'],
-            [this.#nodeDropdownDiv, nodes, 'Nodes'],
-            [this.#lineDropdownDiv, lines, 'Lines']
-        ].forEach(ary => {
-            ary[0].setButton(`${ary[2]}: ${ary[1].length}`, true);
-        });
+        this.#configDropdownDiv.div.firstChild.getElementsByClassName('label')[0].textContent = `Configuration objects: ${configs.length}`;
+        this.#nodeDropdownDiv.div.firstChild.getElementsByClassName('label')[0].textContent = `Nodes: ${nodes.length}`;
+        this.#lineDropdownDiv.div.firstChild.getElementsByClassName('label')[0].textContent = `Lines: ${lines.length}`;
     }
 
     /**
@@ -148,7 +144,7 @@ class SearchModal {
      * @returns {HTMLDivElement}
      */
     getDOMElement() {
-        return this.#modal.divElement;
+        return this.#propTable.div;
     }
 
     /**
@@ -180,15 +176,15 @@ class SearchModal {
      */
     remove() {
         if (!this.#removed) {
-            this.#configDropdownDiv.divElement.remove();
+            this.#configDropdownDiv.div.remove();
             this.#configDropdownDiv = null;
             this.#controller = null;
             this.#keySelects = null;
-            this.#lineDropdownDiv.divElement.remove();
+            this.#lineDropdownDiv.div.remove();
             this.#lineDropdownDiv = null;
-            this.#modal.divElement.remove(); 
-            this.#modal = null;
-            this.#nodeDropdownDiv.divElement.remove();
+            this.#propTable.div.remove();
+            this.#propTable = null;
+            this.#nodeDropdownDiv.div.remove();
             this.#nodeDropdownDiv = null;
             this.#observables.forEach(ob => ob.removeObserver(this));
             this.#observables = null;
@@ -200,23 +196,23 @@ class SearchModal {
      * @returns {undefined}
      */
     renderContent() {
-        const modal = new Modal();
-        modal.addStyleClasses(['searchModal'], 'divElement');
+        const propTable = new PropTable();
+        propTable.div.classList.add('searchModal');
         const keySelect = this.#getKeySelect();
-        modal.insertTBodyRow([this.#getAddRowButton(), null, keySelect, this.#getOperatorSelect(), this.#getValueTextInput()], 'beforeEnd');
+        propTable.insertTBodyRow({elements: [this.#getAddRowButton(), null, keySelect, this.#getOperatorSelect(), this.#getValueTextInput()]});
         this.#handleKeySelectChange(keySelect);
-        modal.addStyleClasses(['centeredTable'], 'tableElement');
-        modal.insertElement(this.#getSearchButton());
-        modal.insertElement(this.#getResetButton());
-        // - 2024-09-04: Replaced 'verticalFlex' class with 'horizontalFlex' because buttons should stack horizontally now
-        // - 2024-09-04: Replaced 'centerMainAxisFlex' with 'rightAlignMainAxisFlex' because buttons should no longer be centered
-        modal.addStyleClasses(['horizontalFlex', 'rightAlignMainAxisFlex', 'centerCrossAxisFlex'], 'containerElement');
-        if (this.#modal === null) {
-            this.#modal = modal;
-        } 
-        if (document.body.contains(this.#modal.divElement)) {
-            this.#modal.divElement.replaceWith(modal.divElement);
-            this.#modal = modal;
+        const searchButton = this.#getSearchButton();
+        const resetButton = this.#getResetButton();
+        const div = document.createElement('div');
+        div.append(searchButton);
+        div.append(resetButton);
+        propTable.insertTBodyRow({elements: [div], colspans: [5]});
+        if (this.#propTable === null) {
+            this.#propTable = propTable;
+        }
+        if (document.body.contains(this.#propTable.div)) {
+            this.#propTable.div.replaceWith(propTable.div);
+            this.#propTable = propTable;
         }
     }
 
@@ -225,92 +221,97 @@ class SearchModal {
     // ********************
 
     /**
+     * - Filter the layer groups so that only the search results are shown
+     */
+    filterLayerGroups() {
+        LeafletLayer.nodeLayers.clearLayers();
+        LeafletLayer.nodeClusterLayers.clearLayers();
+        LeafletLayer.lineLayers.clearLayers();
+        LeafletLayer.parentChildLineLayers.clearLayers();
+        for (const observable of this.#searchResults) {
+            if (observable.isNode() && !observable.isConfigurationObject()) {
+                const ll = observable.getObservers().filter(observer => observer instanceof LeafletLayer)[0];
+                if (LeafletLayer.clusterControl._on) {
+                    LeafletLayer.nodeClusterLayers.addLayer(ll.getLayer());
+                } else {
+                    LeafletLayer.nodeLayers.addLayer(ll.getLayer());
+                }
+            } else if (observable.isLine()) {
+                const ll = observable.getObservers().filter(observer => observer instanceof LeafletLayer)[0];
+                if (observable.isParentChildLine()) {
+                    LeafletLayer.parentChildLineLayers.addLayer(ll.getLayer());
+                } else {
+                    LeafletLayer.lineLayers.addLayer(ll.getLayer());
+                }
+            }
+        }
+        // - Force redraw
+        for (const layer of [LeafletLayer.parentChildLineLayers, LeafletLayer.lineLayers, LeafletLayer.nodeLayers, LeafletLayer.nodeClusterLayers]) {
+            LeafletLayer.map.removeLayer(layer);
+            LeafletLayer.map.addLayer(layer);
+        }
+    }
+
+    /**
+     * - The search results should be able to be inserted anywhere in the DOM, not just directly below the search widget
      * @returns {HTMLDivElement}
      */
     getConfigSearchResultsDiv() {
-        return this.#configDropdownDiv.divElement;
+        return this.#configDropdownDiv.div;
     }
 
     /**
+     * - The search results should be able to be inserted anywhere in the DOM, not just directly below the search widget
      * @returns {HTMLDivElement}
      */
     getLineSearchResultsDiv() {
-        return this.#lineDropdownDiv.divElement;
+        return this.#lineDropdownDiv.div;
     }
 
     /**
+     * - The search results should be able to be inserted anywhere in the DOM, not just directly below the search widget
      * @returns {HTMLDivElement}
      */
     getNodeSearchResultsDiv() {
-        return this.#nodeDropdownDiv.divElement;
+        return this.#nodeDropdownDiv.div;
     }
-    
     // *********************
-    // ** Private methods ** 
+    // ** Private methods **
     // *********************
 
     /**
+     * - Create FeatureDropdownDivs and append them to the specified DropdownDiv
      * @param {DropdownDiv} dropdownDiv
      * @param {Array} observables
      * @returns {undefined}
      */
     #appendFeatureDropdownDivs(dropdownDiv, observables) {
         if (!(dropdownDiv instanceof DropdownDiv)) {
-            throw TypeError('The "dropdown" argument must be instanceof DropdownDiv');
+            throw TypeError('The "dropdownDiv" argument must be instanceof DropdownDiv.');
         }
         if (!(observables instanceof Array)) {
-            throw TypeError('The "observables" argument must be an Array');
+            throw TypeError('The "observables" argument must instanceof Array.');
         }
-        observables.forEach(ob => {
+        for (const ob of observables) {
             const featureDropdownDiv = new FeatureDropdownDiv(ob, this.#controller);
-            dropdownDiv.contentDivElement.appendChild(featureDropdownDiv.getDOMElement())
-        });
-    }
-
-    /**
-     * - The event handler must itself call this.#getCategorizedSearchResults() in order to get the current set of search results
-     * @returns {undefined}
-     */
-    #attachDropdownDivEventHandlers() {
-        [[this.#configDropdownDiv, 'Configuration objects'], [this.#nodeDropdownDiv, 'Nodes'], [this.#lineDropdownDiv, 'Lines']].forEach(ary => {
-            ary[0].buttonElement.addEventListener('click', () => {
-                if (ary[0].isExpanded() && ary[0].contentDivElement.children.length === 0) {
-                    ary[0].setButton('Loading search results...', true);
-                    setTimeout(() => {
-                        const {configs, nodes, lines} = this.#getCategorizedSearchResults();
-                        if (ary[1] === 'Configuration objects') {
-                            this.#appendFeatureDropdownDivs(ary[0], configs);
-                            ary[0].setButton(`${ary[1]}: ${configs.length}`, true);
-                        } else if (ary[1] === 'Nodes') {
-                            this.#appendFeatureDropdownDivs(ary[0], nodes);
-                            ary[0].setButton(`${ary[1]}: ${nodes.length}`, true);
-                        } else if (ary[1] === 'Lines') {
-                            this.#appendFeatureDropdownDivs(ary[0], lines);
-                            ary[0].setButton(`${ary[1]}: ${lines.length}`, true);
-                        }
-                    }, 1);
-                }
-            });
-        });
+            dropdownDiv.insertElement({element: featureDropdownDiv.getDOMElement()});
+        }
     }
 
     /**
      * @returns {HTMLButtonElement}
      */
     #getAddRowButton() {
-        const btn = document.createElement('button');
-        btn.classList.add('add');
-        btn.classList.add('horizontalFlex');
-        btn.classList.add('centerMainAxisFlex');
-        btn.classList.add('centerCrossAxisFlex');
-        btn.appendChild(getCirclePlusSvg());
-        const that = this;
-        btn.addEventListener('click', function() {
-            const keySelect = that.#getKeySelect();
-            that.#modal.insertTBodyRow([that.#getDeleteRowButton(), that.#getAndOrSelect(), keySelect, that.#getOperatorSelect(), that.#getValueTextInput()], 'append');
-            that.#handleKeySelectChange(keySelect);
+        let button = new IconLabelButton({paths: IconLabelButton.getCirclePlusPaths(), viewBox: '0 0 24 24', tooltip: 'Add search criterion'});
+        button.button.classList.add('-green');
+        button.button.getElementsByClassName('icon')[0].classList.add('-white');
+        button = button.button;
+        button.addEventListener('click', () => {
+            const keySelect = this.#getKeySelect();
+            this.#propTable.insertTBodyRow({elements: [this.#getDeleteRowButton(), this.#getAndOrSelect(), keySelect, this.#getOperatorSelect(), this.#getValueTextInput()], position: 'beforeEnd'});
+            this.#handleKeySelectChange(keySelect);
         });
-        return btn;
+        return button;
     }
 
     /**
@@ -353,25 +354,22 @@ class SearchModal {
             'lines': lines
         }
     }
-        
 
     /**
      * @returns {HTMLButtonElement}
      */
     #getDeleteRowButton() {
-        const btn = document.createElement('button');
-        btn.classList.add('delete');
+        let button = new IconLabelButton({paths: IconLabelButton.getTrashCanPaths(), viewBox: '0 0 24 24', tooltip: 'Delete search criterion'});
+        button.button.classList.add('-red');
+        button.button.getElementsByClassName('icon')[0].classList.add('-white');
+        button = button.button;
         if (this.#observables[0] instanceof FeatureGraph) {
-            btn.classList.add('searchModalDeleteButton');
+            button.classList.add('searchModalDeleteButton');
         } else {
-            btn.classList.add('componentModalDeleteButton');
+            button.classList.add('componentModalDeleteButton');
         }
-        btn.classList.add('horizontalFlex');
-        btn.classList.add('centerMainAxisFlex');
-        btn.classList.add('centerCrossAxisFlex');
-        btn.appendChild(getTrashCanSvg());
         const that = this;
-        btn.addEventListener('click', function(e) {
+        button.addEventListener('click', function(e) {
             let parentElement = this.parentElement;
             while (!(parentElement instanceof HTMLTableRowElement)) {
                 parentElement = parentElement.parentElement;
@@ -384,7 +382,7 @@ class SearchModal {
             parentElement.remove();
             e.stopPropagation();
         });
-        return btn;
+        return button;
     }
 
     /**
@@ -508,49 +506,37 @@ class SearchModal {
      * @returns {HTMLButtonElement}
      */
     #getResetButton() {
-        const btn = this.#getWideButton();
-        btn.appendChild(getResetSvg());
-        const span = document.createElement('span');
-        span.textContent = 'Clear'
-        btn.appendChild(span);
-        const that = this;
-        btn.addEventListener('click', () => {
+        let button = new IconLabelButton({paths: IconLabelButton.getCircularArrowPaths(), viewBox: '-4 -4 24 24', text: 'Clear', tooltip: 'Clear the search criteria'});
+        button.button.classList.add('-blue');
+        button.button.getElementsByClassName('icon')[0].classList.add('-white');
+        button.button.getElementsByClassName('label')[0].classList.add('-white');
+        button = button.button;
+        button.addEventListener('click', () => {
             if (this.#observables[0] instanceof FeatureGraph) {
-                const button = document.querySelector('button.searchModalDeleteButton');
-                if (button !== null) {
-                    button.click();
-                }
-                document.querySelector('input.searchModalValueInput').value = '';
+                document.querySelectorAll('button.searchModalDeleteButton').forEach(button => button.click());
+                document.querySelectorAll('input.searchModalValueInput').forEach(input => input.value = '');
             } else {
-                const button = document.querySelector('button.componentModalDeleteButton');
-                if (button !== null) {
-                    button.click();
-                }
-                document.querySelector('input.componentModalValueInput').value = '';
+                document.querySelectorAll('button.componentModalDeleteButton').forEach(button => button.click());
+                document.querySelectorAll('input.componentModalValueInput').forEach(input => input.value = '');
             }
             this.#search();
         });
-        const div = this.#getWideButtonDiv();
-        div.appendChild(btn);
-        return div;
+        return button;
     }
 
     /**
      * @returns {HTMLButtonElement}
      */
     #getSearchButton() {
-        const btn = this.#getWideButton();
-        btn.appendChild(getEyeGlassSvg());
-        const span = document.createElement('span');
-        span.textContent = 'Search'
-        btn.appendChild(span);
-        const that = this;
-        btn.addEventListener('click', function() {
-            that.#search();
+        let button = new IconLabelButton({paths: IconLabelButton.getMagnifyingGlassPaths(), viewBox: '0 0 24 24', text: 'Search', tooltip: 'Search objects'})
+        button.button.classList.add('-blue');
+        button.button.getElementsByClassName('icon')[0].classList.add('-white');
+        button.button.getElementsByClassName('label')[0].classList.add('-white');
+        button = button.button;
+        button.addEventListener('click', () => {
+            this.#search();
         });
-        const div = this.#getWideButtonDiv();
-        div.appendChild(btn);
-        return div;
+        return button;
     }
 
     /**
@@ -592,31 +578,6 @@ class SearchModal {
     }
 
     /**
-     * @returns {HTMLButtonElement}
-     */
-    #getWideButton() {
-        const btn = document.createElement('button');
-        btn.classList.add('horizontalFlex');
-        btn.classList.add('centerMainAxisFlex');
-        btn.classList.add('centerCrossAxisFlex');
-        btn.classList.add('fullWidth');
-        return btn;
-    }
-
-    /**
-     * @returns {HTMLDivElement}
-     */
-    #getWideButtonDiv() {
-        const div = document.createElement('div');
-        div.classList.add('horizontalFlex');
-        div.classList.add('centerMainAxisFlex');
-        div.classList.add('centerCrossAxisFlex');
-        // - 2024-09-04: Buttons should no longer stretch to 50% of container width because we want buttons to be smaller now
-        //div.classList.add('halfWidth');
-        return div;
-    }
-
-    /**
      * - This has to be a function because it's used as an event handler and it's called separately on page load to supply a correct operator select
      * @param {HTMLSelectElement} select
      * @returns {undefined}
@@ -655,7 +616,14 @@ class SearchModal {
     }
 
     /**
-     * - Set the contents of this.#searchResults
+     * - Perform the following actions:
+     *  1) Use the old/current search results to remove every FeatureDropdownDiv that is currently in the DOM
+     *  2) Reset the Leaflet layer groups
+     *  3) Set the new search results
+     *  4) If needed, filter the Leaflet layer groups
+     *  5) Set the text on the three main DropdownDivs to show the number of search results per category
+     *  6) If any of the three main DropdownDivs are already expanded when the search is run, then create new FeatureDropdownDivs based on the search
+     *     results and append them to the DOM for that cateogry
      * @returns {undefined}
      */
     #search() {
@@ -669,7 +637,7 @@ class SearchModal {
         }
         // - Clear the old search criteria and build new search criteria
         const searchCriteria = [];
-        for (const tr of this.#modal.divElement.getElementsByTagName('tr')) {
+        for (const tr of this.#propTable.div.getElementsByTagName('tr')) {
             const keySelect = tr.querySelector('[data-role="keySelect"]');
             // - I only care about rows that have a keySelect
             if (keySelect !== null) {
@@ -818,94 +786,72 @@ class SearchModal {
         }
         // - Don't attach event handlers here because then I'll be adding a new event handler after every search!
         const {configs, nodes, lines} = this.#getCategorizedSearchResults();
-        [
-            [this.#configDropdownDiv, configs, 'Configuration objects'],
-            [this.#nodeDropdownDiv, nodes, 'Nodes'],
-            [this.#lineDropdownDiv, lines, 'Lines']
-        ].forEach(ary => {
-            ary[0].setButton(`${ary[2]}: ${ary[1].length}`, true);
-            if (ary[0].isExpanded() && ary[0].contentDivElement.children.length === 0) {
-                this.#appendFeatureDropdownDivs(ary[0], ary[1]);
+        for (const [dropdown, features, buttonText] of [[this.#configDropdownDiv, configs, 'Configuration objects'], [this.#nodeDropdownDiv, nodes, 'Nodes'], [this.#lineDropdownDiv, lines, 'Lines']]) {
+            dropdown.div.firstChild.getElementsByClassName('label')[0].textContent = `${buttonText}: ${features.length}`
+            // - Only create FeatureDropdownDivs and append them to the DOM if 1) this search category DropdownDiv is expanded (which it always
+            //   initially is NOT on page load) and 2)
+            if (dropdown.isExpanded()) {
+                this.#appendFeatureDropdownDivs(dropdown, features);
             }
-        });
+        }
     }
 
     /**
-     * - Filter the layer groups so that only the search results are shown
+     * - Set up a vanilla DropdownDiv so that it can act as a search category
+     * @returns {undefined}
      */
-    filterLayerGroups() {
-        LeafletLayer.nodeLayers.clearLayers();
-        LeafletLayer.nodeClusterLayers.clearLayers();
-        LeafletLayer.lineLayers.clearLayers();
-        LeafletLayer.parentChildLineLayers.clearLayers();
-        for (const observable of this.#searchResults) {
-            if (observable.isNode() && !observable.isConfigurationObject()) {
-                const ll = observable.getObservers().filter(observer => observer instanceof LeafletLayer)[0];
-                if (LeafletLayer.clusterControl._on) {
-                    LeafletLayer.nodeClusterLayers.addLayer(ll.getLayer());
-                } else {
-                    LeafletLayer.nodeLayers.addLayer(ll.getLayer());
+    #setupDropdownDiv(dropdownDiv, buttonText) {
+        if (!(dropdownDiv instanceof DropdownDiv)) {
+            throw TypeError('The "dropdownDiv" argument must be instance of DropdownDiv.');
+        }
+        if (!['Configuration objects', 'Nodes', 'Lines'].includes(buttonText)) {
+            throw Error('');
+        }
+        const dropdownDivButton = new IconLabelButton({paths: IconLabelButton.getChevronPaths(), viewBox: '0 0 24 24', text: buttonText, textPosition: 'prepend'});
+        dropdownDivButton.button.classList.add('-clear');
+        const that = this;
+        const outerFunc = function(div) {
+            if (div.lastChild.classList.contains('-expanded')) {
+                div.firstChild.getElementsByClassName('icon')[0].classList.add('-rotated');
+                // - If the user clicked "search" while this category was already expanded, then this.#search() already removed all of the old
+                //   FeatureDropdownDivs and appended new FeatureDropdownDivs
+                // - If the user clicked "search" while this category was not expanded, then this.#search() already removed all of the old
+                //   FeatureDropdownDivs
+                // - Therefore, THIS function should only append new FeatureDropdownDivs if this category was just expanded as a result of clicking on
+                //   the category button AND there are no children
+                if (div.lastChild.children.length === 0) {
+                    div.firstChild.getElementsByClassName('label')[0].textContent = 'Loading search results...';
+                    setTimeout(() => {
+                        const {configs, nodes, lines} = that.#getCategorizedSearchResults();
+                        if (buttonText === 'Configuration objects') {
+                            that.#appendFeatureDropdownDivs(dropdownDiv, configs);
+                            div.firstChild.getElementsByClassName('label')[0].textContent = `Configuration objects: ${configs.length}`;
+                        } else if (buttonText === 'Nodes') {
+                            that.#appendFeatureDropdownDivs(dropdownDiv, nodes);
+                            div.firstChild.getElementsByClassName('label')[0].textContent = `Nodes: ${nodes.length}`;
+                        } else {
+                            that.#appendFeatureDropdownDivs(dropdownDiv, lines);
+                            div.firstChild.getElementsByClassName('label')[0].textContent = `Lines: ${lines.length}`;
+                        }
+                        // - Option to expand every nested DropdownDiv
+                        //for (const dropdownDiv of div.getElementsByClassName('dropdown-div')) {
+                        //    if (!dropdownDiv.lastChild.classList.contains('-expanded')) {
+                        //        dropdownDiv.firstChild.click();
+                        //    }
+                        //}
+                    });
                 }
-            } else if (observable.isLine()) {
-                const ll = observable.getObservers().filter(observer => observer instanceof LeafletLayer)[0];
-                if (observable.isParentChildLine()) {
-                    LeafletLayer.parentChildLineLayers.addLayer(ll.getLayer());
-                } else {
-                    LeafletLayer.lineLayers.addLayer(ll.getLayer());
+            } else {
+                div.firstChild.getElementsByClassName('icon')[0].classList.remove('-rotated');
+                // - Option to retract every nested DropdownDiv
+                for (const dropdownDiv of div.getElementsByClassName('dropdown-div')) {
+                    if (dropdownDiv.lastChild.classList.contains('-expanded')) {
+                        dropdownDiv.firstChild.click();
+                    }
                 }
             }
-        }
-        // - Force redraw
-        for (const layer of [LeafletLayer.parentChildLineLayers, LeafletLayer.lineLayers, LeafletLayer.nodeLayers, LeafletLayer.nodeClusterLayers]) {
-            LeafletLayer.map.removeLayer(layer);
-            LeafletLayer.map.addLayer(layer);
-        }
+        };
+        dropdownDivButton.button.addEventListener('click', dropdownDiv.getToggleFunction({outerFunc: outerFunc}));
+        dropdownDiv.div.prepend(dropdownDivButton.button);
     }
-}
-
-/**
- * - https://www.svgrepo.com
- */
-function getEyeGlassSvg() {
-    const svg = document.createElementNS('http://www.w3.org/2000/svg','svg');
-    svg.setAttribute('width', '22px');
-    svg.setAttribute('height', '22px');
-    svg.setAttribute('viewBox', '0 0 24 24');
-    svg.setAttribute('fill', 'none'); 
-    const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-    path.setAttribute('d', "M4 11C4 7.13401 7.13401 4 11 4C14.866 4 18 7.13401 18 11C18 14.866 14.866 18 11 18C7.13401 18 4 14.866 4 11ZM11 2C6.02944 2 2 6.02944 2 11C2 15.9706 6.02944 20 11 20C13.125 20 15.078 19.2635 16.6177 18.0319L20.2929 21.7071C20.6834 22.0976 21.3166 22.0976 21.7071 21.7071C22.0976 21.3166 22.0976 20.6834 21.7071 20.2929L18.0319 16.6177C19.2635 15.078 20 13.125 20 11C20 6.02944 15.9706 2 11 2Z");
-    path.setAttribute('fill-rule', 'evenodd');
-    path.setAttribute('clip-rule', 'evenodd');
-    path.setAttribute('fill', '#FFFFFF');
-    path.setAttribute('stroke-width', '1.5');
-    path.setAttribute('stroke-width', '1.5');
-    path.setAttribute('stroke-linecap', 'round');
-    path.setAttribute('stroke-linejoin', 'round');
-    svg.appendChild(path);
-    return svg
-}
-
-function getResetSvg() {
-    const svg = document.createElementNS('http://www.w3.org/2000/svg','svg');
-    svg.setAttribute('width', '22px');
-    svg.setAttribute('height', '22px');
-    svg.setAttribute('viewBox', '-4 -4 24 24');
-    svg.setAttribute('fill', 'none');
-    let path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-    path.setAttribute('d', 'm4.5 1.5c-2.4138473 1.37729434-4 4.02194088-4 7 0 4.418278 3.581722 8 8 8s8-3.581722 8-8-3.581722-8-8-8');
-    path.setAttribute('stroke', '#FFFFFF');
-    path.setAttribute('stroke-width', '2');
-    path.setAttribute('stroke-width', '2');
-    path.setAttribute('stroke-linecap', 'round');
-    path.setAttribute('stroke-linejoin', 'round');
-    svg.appendChild(path)
-    path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-    path.setAttribute('d', 'm4.5 5.5v-4h-4');
-    path.setAttribute('stroke', '#FFFFFF');
-    path.setAttribute('stroke-width', '2');
-    path.setAttribute('stroke-width', '2');
-    path.setAttribute('stroke-linecap', 'round');
-    path.setAttribute('stroke-linejoin', 'round');
-    svg.appendChild(path);
-    return svg;
 }

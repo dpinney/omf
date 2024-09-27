@@ -1,0 +1,54 @@
+/*
+- Give buttons a top border so they look like divs
+- Make buttons expand all the way across the div
+- Make arrows go all the way to the edge of the button
+*/
+
+.featureDropdownDiv > .iconlabel-button {
+    border-top: 1px solid black;
+    justify-content: space-between;
+    width: 100%;
+} 
+
+/* 
+- Make text wrap within the div
+- Pad .labels for indentation
+- Left align text
+- white-space: normal; is required in addition to overflow-wrap: break-word;
+*/
+
+.featureDropdownDiv > .iconlabel-button > .label {
+    overflow-wrap: break-word;
+    padding-left: 1rem;
+    text-align: left;
+    width: 310px;
+    white-space: normal;
+}
+
+/* Make the "object" text bold, but not the "name" text */
+
+.featureDropdownDiv > .iconlabel-button > .label > div > div:first-child {
+    font-weight: bold;
+}
+
+/* Center tables within FeatureDropdownDivs */
+
+.featureDropdownDiv > .contentdiv > .proptablediv > .prop-table {
+    margin: auto;
+}
+
+/* 
+- Set the desired size of the svg in the button
+- Adjust the svg margins based on the svg size
+*/
+
+.featureDropdownDiv > .iconlabel-button > .icon {
+    width: 22px;
+    margin: 0 -3px;
+}
+
+/* Make the chevron really skinny */
+
+.featureDropdownDiv > .iconlabel-button > .icon path {
+    stroke-width: .01rem;    
+}

@@ -1,6 +1,8 @@
 <!DOCTYPE html>
 <html lang="en">
   <head>
+    <meta charset="utf-8">
+    <title>OMF GeoJSON Editor</title>
     <!-- Load Leaflet from CDN -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.3/dist/leaflet.css" integrity="sha256-kLaT2GOSpHechhsozzB+flnD+zUyjE2LlfWPgU04xyI=" crossorigin=""/>
     <script src="https://unpkg.com/leaflet@1.9.3/dist/leaflet.js" integrity="sha256-WBkoXOwTeyKclOHuWtc+i2uENFpDZ9YPdf5Hf+D7ewM=" crossorigin=""> </script> 
@@ -31,16 +33,21 @@
     <!-- Color scale -->
     <script type="text/javascript" src="/static/geoJsonMap/v3/lib/chroma.js"></script>
     <!-- Local --> 
-    <link rel="stylesheet" href="/static/geoJsonMap/v3/dropdownDiv.css"> 
     <link rel="stylesheet" href="/static/geoJsonMap/v3/main.css">
-    <link rel="stylesheet" href="/static/geoJsonMap/v3/modal.css"> 
     <link rel="stylesheet" href="/static/geoJsonMap/v3/sideNav.css"> 
     <link rel="stylesheet" href="/static/geoJsonMap/v3/topNav.css"> 
     <link rel="stylesheet" href="/static/geoJsonMap/v3/topTab.css"> 
     <link rel="stylesheet" href="/static/geoJsonMap/v3/multiselectControl.css">
-    <link rel="stylesheet" href="/static/geoJsonMap/v3/extensions/testModal.css">
-    <meta charset="utf-8">
-    <title>OMF GeoJSON Editor</title>
+    <link rel="stylesheet" href="/static/geoJsonMap/v3/featureEditModal.css">
+    <link rel="stylesheet" href="/static/geoJsonMap/v3/searchModal.css">
+    <link rel="stylesheet" href="/static/geoJsonMap/v3/featureDropdownDiv.css">
+    <link rel="stylesheet" href="/static/geoJsonMap/v3/modalFeatures.css">
+    <link rel="stylesheet" href="/static/geoJsonMap/v3/colorModal.css">
+    <link rel="stylesheet" href="/static/geoJsonMap/v3/geojsonModal.css">
+    <link rel="stylesheet" href="/static/geoJsonMap/v4/ui-components/iconlabel-button/iconlabel-button.css">
+    <link rel="stylesheet" href="/static/geoJsonMap/v4/ui-components/prop-table/prop-table.css">
+    <link rel="stylesheet" href="/static/geoJsonMap/v4/ui-components/dropdown-div/dropdown-div.css">
+    <link rel="stylesheet" href="/static/geoJsonMap/v4/ui-components/loading-span/loading-span.css">
   </head>
   <body>
     <header>

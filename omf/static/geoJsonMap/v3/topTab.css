@@ -18,7 +18,7 @@ div.div--topTabTabContainer > div {
 }
 div.div--topTabTabContainer > div.selected {
     display: block;
-    padding: 14px;
+    padding: .5rem;
     z-index: 1;
 }
 div.div--topTabTabContainer > div.selected > button {
@@ -28,8 +28,8 @@ div.div--topTabTabContainer > div.selected > button {
     cursor: pointer;
     height: 24px;
     position: absolute;
-    right: 0;
-    top: 0;
+    right: -4px;
+    top: -4px;
     width: 24px;
 }
 div.div--topTabTabContainer > div.selected > span {
@@ -63,7 +63,7 @@ div.div--topTabTabContainer > div > span::before {
 }
 div.div--topTabContentContainer {
     background: #FFFFFF; /* This is the background of the tab content */
-    box-shadow: inset -1px 0px darkgray;
+    /*box-shadow: inset -1px 0px darkgray;*/
     height: 100%;
     position: relative;
     /*box-shadow: inset 0 1px 0 0 black;*/
