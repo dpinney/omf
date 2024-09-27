@@ -23,13 +23,12 @@
 				if (id) {
 					let tool = list[i].className;
 					let data = allOutputData[tool][id];
-					//note: took out part to parse integer values
-					int_data = parseFloat(data); //parseInt(data);
-					//if (!isNaN(int_data)) {
-					//	list[i].innerHTML = int_data.toLocaleString();
-					//} else {
-					list[i].innerHTML = data;
-					//}
+					int_data = parseFloat(data); 
+					if (!isNaN(int_data)) {
+						list[i].innerHTML = int_data.toLocaleString();
+					} else {
+						list[i].innerHTML = data;
+					}
 				}
 			}
 		}
@@ -84,79 +83,41 @@
 						'<th>Fossil Fuel consumed during specified Outage (diesel gal equiv)</th>'+
 					'</tr>';
 
-			for (var i = 0; i < numCols ; i++) {
+			indexString = '1'; // '' + (i+1);
+			reopt_content += '<tr>'+
+				'<th>Single-site scenario</th>'+
+				'<td class="reoptOutData" id="savings' + indexString + '"></td>'+
+				'<td class="reoptOutData" id="avgLoad' + indexString + '"></td>'+
+				'<td class="reoptOutData" id="sizePVRounded' + indexString + '"></td>'+
+				'<td class="reoptOutData" id="sizeWindRounded' + indexString + '"></td>'+
+				'<td class="reoptOutData" id="powerBatteryRounded' + indexString + '"></td>'+
+				'<td class="reoptOutData" id="capacityBatteryRounded' + indexString + '"></td>'+
+				'<td class="reoptOutData" id="sizeDieselRounded' + indexString + '"></td>'+
+				'<td class="reoptOutData" id="avgOutage' + indexString + '"></td>'+
+				'<td class="reoptOutData" id="fuelUsedDieselRounded' + indexString + '"></td>'+
+			'</tr>';
 
-				indexString = '' + (i+1);
+			reopt_content += '</table></div>';
 
-				row = '<tr >';
-				if (indexString == numCols) {
-					row += '<th>Single-site scenario</th>';
-				} else {
-					row += '<th>Building ' + indexString + '</th>';
-				}
-				
-				row += '<td class="reoptOutData" id="savings' + indexString + '"></td>'+
-					'<td class="reoptOutData" id="avgLoad' + indexString + '"></td>'+
-					'<td class="reoptOutData" id="sizePVRounded' + indexString + '"></td>'+
-					'<td class="reoptOutData" id="sizeWindRounded' + indexString + '"></td>'+
-					'<td class="reoptOutData" id="powerBatteryRounded' + indexString + '"></td>'+
-					'<td class="reoptOutData" id="capacityBatteryRounded' + indexString + '"></td>'+
-					'<td class="reoptOutData" id="sizeDieselRounded' + indexString + '"></td>'+
-					'<td class="reoptOutData" id="avgOutage' + indexString + '"></td>'+
-					'<td class="reoptOutData" id="fuelUsedDieselRounded' + indexString + '"></td>'+
-					'</tr>';
-
-					reopt_content += row;
-			}
-
-			reopt_content += '</table></div>'+
-				'<div class="tab">';
-
-			for (var i = 0; i < numCols ; i++) {
-
-				indexString = '' + (i+1);
-
-				if (i==0) {
-					reopt_content += '<button class="tabLinks active" onclick="openTab(event, \'building' + indexString + '\')">Building ' + indexString + '</button>';
-				} else if (i == numCols-1) {
-					reopt_content += '<button class="tabLinks " onclick="openTab(event, \'building' + indexString + '\')">Single-site scenario</button>';
-				} else {
-					reopt_content += '<button class="tabLinks" onclick="openTab(event, \'building' + indexString + '\')">Building ' + indexString + '</button>';
-				}
-			}
-
-			reopt_content += '</div>';
-
-			for (var i = 0; i < numCols ; i++) {
-
-				indexString = '' + (i+1)
-				if (i==0) {
-					reopt_content += '<div class="building' + indexString + ' firstTab tabContent ">';
-				} else if (i == numCols-1) {
-					reopt_content += '<div class="building' + indexString + ' tabContent ">';
-				} else {
-					reopt_content += '<div class="building' + indexString + ' tabContent ">';
-				}
-
-				reopt_content += ''+
-					'<p class="reportTitle" style="page-break-before:always">Microgrid Lifetime Financial Performance '+
-					'</p>'+
-					'<div id="" class="tightContent">'+
-						'<table>'+
-							'<tr>'+
-								'<th></th>'+
-								'<th>Business as Usual</th>'+
-								'<th>Microgrid</th>'+
-								'<th>Difference</th>'+
-							'</tr>'+
-							'<tr>'+
-								'<th>Demand Cost</th>'+
-								'<td class="reoptOutData" id="demandCostBAU' + indexString + '"></td>'+
-								'<td class="reoptOutData" id="demandCost' + indexString + '"></td>'+
-								'<td class="reoptOutData" id="demandCostDiff' + indexString + '"></td>'+
-							'</tr>'+
-							'<tr>'+
-								'<th>Energy Cost</th>'+
+			reopt_content += ''+
+				'<p class="reportTitle" style="page-break-before:always">Microgrid Lifetime Financial Performance '+
+				'</p>'+
+				'<div id="" class="tightContent">'+
+					'<table>'+
+						'<tr>'+
+							'<th></th>'+
+							'<th>Business as Usual</th>'+
+							'<th>Microgrid</th>'+
+							'<th>Difference</th>'+
+						'</tr>'+
+						'<tr>'+
+							'<th>Demand Cost</th>'+
+							'<td class="reoptOutData" id="demandCostBAU' + indexString + '"></td>'+
+							'<td class="reoptOutData" id="demandCost' + indexString + '"></td>'+
+							'<td class="reoptOutData" id="demandCostDiff' + indexString + '"></td>'+
+						'</tr>'+
+						'<tr>'+
+							'<th>Energy Cost</th>'+
 							'<td class="reoptOutData" id="energyCostBAU' + indexString + '"></td>'+
 							'<td class="reoptOutData" id="energyCost' + indexString + '"></td>'+
 							'<td class="reoptOutData" id="energyCostDiff' + indexString + '"></td>'+
@@ -193,11 +154,8 @@
 				'<div id="resiliencePlotly' + indexString + '" class="tightContent"></div>'+
 				
 				'<p class="reportTitle" style="page-break-before:always">Outage Survival Probability</p>'+
-				'<div id="resilienceProbPlotly' + indexString + '" class="tightContent"></div>	'+
-			
-				'</div>';
+				'<div id="resilienceProbPlotly' + indexString + '" class="tightContent"></div>	';
 				
-			}
 			return reopt_content
 		}
 
@@ -358,6 +316,8 @@
 			'<div id="pmonmStorageSOCPlotly" class="tightContent"></div>'+
 			'<p class="reportTitle" style="page-break-before:always">Load Served</p>'+
 			'<div id="pmonmLoadServedPlotly" class="tightContent"></div>'+
+			'<p class="reportTitle" style="page-break-before:always">Customers</p>'+
+			'<div id="pmonmCustomersPlotly" class="tightContent"></div>'+
 			'<p class="reportTitle" style="page-break-before:always">Generator Profiles</p>'+
 			'<div id="pmonmGeneratorProfilesPlotly" class="tightContent"></div>'
 			return pmonm_content;
@@ -367,28 +327,13 @@
 			Plotly.newPlot('pmonmVoltagePlotly', JSON.parse(allOutputData['pmonmVoltageData']), JSON.parse(allOutputData['pmonmVoltageLayout']) || {});
 			Plotly.newPlot('pmonmStorageSOCPlotly', JSON.parse(allOutputData['pmonmStorageSOCData']), JSON.parse(allOutputData['pmonmStorageSOCLayout']) || {});
 			Plotly.newPlot('pmonmLoadServedPlotly', JSON.parse(allOutputData['pmonmLoadServedData']), JSON.parse(allOutputData['pmonmLoadServedLayout']) || {});
+			Plotly.newPlot('pmonmCustomersPlotly', JSON.parse(allOutputData['pmonmCustomersData']), JSON.parse(allOutputData['pmonmCustomersLayout']) || {});
 			Plotly.newPlot('pmonmGeneratorProfilesPlotly', JSON.parse(allOutputData['pmonmGeneratorProfilesData']), JSON.parse(allOutputData['pmonmGeneratorProfilesLayout']) || {});
 		}
 
 		function parsePSOSettings(relay){
-			var relayData = '<div class="tightContent"><p class="chartTitle">' + relay["Name"] + ' :</p>'
-			relayData += '<table>'+
-				'<tr>'+
-					'<th></th>'+
-					'<th>From</th>'+
-					'<th>To</th>'+
-					'<th>Pickup I</th>'+
-					'<th>TDS</th>'+
-					'<th>TOC</th>'+
-					'<th>Pickup I0</th>'+
-					'<th>TDSg</th>'+
-					'<th>TOCg</th>'+
-					'<th>VR</th>'+
-					'<th>IT</th>'+
-					'<th>IT0</th>'+
-				'</tr>'+
-				'<tr>'+
-					'<td></td>'+
+			relayData = '<tr>'+
+					'<td>' + relay["Name"] + '</td>'+
 					'<td>' + relay["From"] + '</td>'+
 					'<td>' + relay["To"] + '</td>'+
 					'<td>' + relay["PickupI"] + '</td>'+
@@ -400,8 +345,7 @@
 					'<td>' + relay["VR"] + '</td>'+
 					'<td>' + relay["IT"] + '</td>'+
 					'<td>' + relay["IT0"] + '</td>'+
-				'</tr>'
-			relayData += "</table></div>"
+				'</tr>';
 			return relayData
 		}
 
@@ -414,14 +358,45 @@
 
 		function loadPSOContent() {
 			let psoSettings = allOutputData["psoSettings"]
-			var pso_content = '<p class="reportTitle"> ProtectionSettingsOptimizer Results: New Settings </p>'
+			var pso_content = '<p class="reportTitle"> Optimized Protection Settings : </p>'+
+			'<div class="tightContent">'+
+			'<table>'+
+				'<tr>'+
+					'<th>Relay</th>'+
+					'<th>From</th>'+
+					'<th>To</th>'+
+					'<th>Pickup I</th>'+
+					'<th>TDS</th>'+
+					'<th>TOC</th>'+
+					'<th>Pickup I0</th>'+
+					'<th>TDSg</th>'+
+					'<th>TOCg</th>'+
+					'<th>VR</th>'+
+					'<th>IT</th>'+
+					'<th>IT0</th>'+
+				'</tr>';
 			for (const relay in psoSettings){
 				pso_content += parsePSOSettings(psoSettings[relay]);
 			}
+			pso_content += '</table></div>';
 			//let psoOldInfo = allOutputData["psoOldInfo"]
 			//pso_content += '<p class="reportTitle"> ProtectionSettingsOptimizer Results: Previous Information </p>'
 			//pso_content += parsePSOOldInfo()
+
+			pso_content += '<p class="reportTitle" style="page-break-before:always">Fitness Results : </p>'+
+			'<div class="tightContent">'+
+				'<img id="fitnessPlotImg" style="width:60%; border-radius:8px; margin-left:auto; margin-right:auto; display: block;"/>'+
+			'</div>'+
+			'<p class="reportTitle" style="page-break-before:always">Circuit Diagram :</p>'+
+			'<div class="tightContent">'+
+				'<img id="psoPlotImg" style="width:60%; border-radius:8px; margin-left:auto; margin-right:auto; display: block;"/>'+
+			'</div>';
 			return pso_content;
+		}
+
+		function loadPSOPlots(){
+			gebi("psoPlotImg").src = "data:image/png;base64," + allOutputData["psoPlotImg"]
+			gebi("fitnessPlotImg").src = "data:image/png;base64," + allOutputData["fitnessPlotImg"]
 		}
 
 		function addToolTab(firstToolTab, toolClass, toolTitle){
@@ -504,6 +479,8 @@
 				//populateTables("dercamOutData");
 			} if (run_pmonm){
 				loadPMONMPlots();
+			} if (run_pso) {
+				loadPSOPlots();
 			}
 			populateTables();
 		}
@@ -604,33 +581,33 @@
 		.nav ul {
 			list-style-type: none;
 		}
-		.nav li {
-			display: inline-block;
+		.nav a {
 			flex: 1;
 			text-align: center;
 			padding: 15px;
+			color: white;
 			background-color: #246B43;
 			box-shadow:
 				0 0 0 1px #194D30,
 				0 0 0 2px #194D30;
 		}
-		.nav li:hover:not(.active) {
+		.nav li {
+			display: inline-block;
+		}
+		.nav a:hover:not(.active) {
 			background-color: #37A96A;
 			box-shadow:
 				0 0 0 1px #329A61,
 				0 0 0 2px #329A61,
 		}
-		.nav li.active {
+		.nav a.active {
 			background-color: #33995F;
 			box-shadow:
 				0 0 0 1px #33995F,
 				0 0 0 2px #33995F,
 				0 0 0 3px white;
 		}
-		.nav li a {
-			color: white;
-		}
-		.nav li a.visited {
+		.nav a.visited {
 			color: white;
 		}
 
@@ -749,8 +726,8 @@
 			margin-bottom: 15px;
 		}
 
-		hr.green {
-			border-top: 2px dashed #38A86B;
+		hr.small {
+			border-top: 1px dashed grey;
 		}
 	</style>
 </head>
@@ -814,19 +791,20 @@
 			<div class="wideInput">
 				<p class="inputSectionHeader navHeader">Navigation</p>
 			</div>
-			<hr>
+			<hr> 
 			<ul class="nav">
 				<!-- <li><a href="#tool-selection">Tool Selection</a></li> was Shared Inputs-->
-				<li><a href="#reopt-specific">REopt</a></li>
-				<li><a href="#der-cam-specific">DER-CAM</a></li>
-				<li><a href="#pmonm-specific">PowerModelsONM</a></li>
-				<li><a href="#pso-specific">ProtectionSettingsOptimizer</a></li>
+				<a href="#reopt-specific"><li>REopt</li></a>
+				<a href="#der-cam-specific"><li>DER-CAM</li></a>
+				<a href="#pmonm-specific"><li>PowerModelsONM</li></a>
+				<a href="#pso-specific"><li>ProtectionSettingsOptimizer</li></a>
 			</ul>
 
 			<br id="reopt-specific"><br><br>
 			<div class="wideInput">
 				<p class="inputSectionHeader">REopt Parameters</p>
 			</div>
+			<hr>
 			<div class="shortInput">
                 <label class="tooltip">Solver Tolerance<span class="classic">Please enter a number 0.0001 - 0.05 for the REopt optimality tolerance. A higher number increases the probability that the REopt financial scenario will successfully complete. A lower number ensures that slightly less optimal solutions will not be returned</span></label>
                 <input type="number" id="solverTolerance" name="solverTolerance" value="{{allInputDataDict.reopt_jl.solverTolerance}}" step="0.0001" min="0.0001" max="0.05" required/>
@@ -838,7 +816,7 @@
 			<div class="wideInput">
 				<p class="inputSectionSubHeader">Grid Parameters</p>
 			</div>
-			<hr class="green">
+			<hr class="small">
 			<div class="shortInput">
 				<label class="tooltip">Hourly Load Shape (.csv file)<span class="classic">Please enter the name of a .csv file representing the hourly load shape.</span></label>
 				<input id="loadShapeFile" type="file" style="display:none" onchange="handle_files(this.files,'loadShape','fileName')">
@@ -903,7 +881,7 @@
 			<div class="wideInput">
 				<p class="inputSectionSubHeader">Solar</p>
 			</div>
-			<hr class="green">
+			<hr class="small">
 			<div class="shortInput">
 				<label class="tooltip">Include Solar<span class="classic">Include solar in the microgrid design?</span></label>
 				<select id="solar" name="solar" value="{{allInputDataDict.reopt_jl.solar}}"/>
@@ -960,7 +938,7 @@
 			<div class="wideInput">
 				<p class="inputSectionSubHeader">Wind</p>
 			</div>
-			<hr class="green">
+			<hr class="small">
 			<div class="shortInput">
 				<label class="tooltip">Include Wind<span class="classic">Include wind in the microgrid design?</span></label>
 				<select id="wind" name="wind" value="{{allInputDataDict.reopt_jl.wind}}"/>
@@ -999,7 +977,7 @@
 			<div class="wideInput">
 				<p class="inputSectionSubHeader">Battery</p>
 			</div>
-			<hr class="green">
+			<hr class="small">
 			<div class="shortInput">
 				<label class="tooltip">Include Battery<span class="classic">Include batteries in the microgrid design?</span></label>
 				<select id="battery" name="battery" value="{{allInputDataDict.reopt_jl.battery}}"/>
@@ -1066,7 +1044,7 @@
 			<div class="wideInput">
 				<p class="inputSectionSubHeader">Resilience - To optimize for resilience, specify an Outage Start Hour greater than 0</p>
 			</div>
-			<hr class="green">
+			<hr class="small">
 			<!-- add checkbox for optimizing for resilience? more intuitive-->
 			<div class="shortInput">
 				<label class="tooltip">Outage Start Hour<span class="classic">A major outage is added starting at this hour. Specify an hour greater than 0 but less than 8760 to trigger optimization for resilience and include fossil generation. If 0 is entered, the model will run an economic optimization without fossil generation.</span></label>

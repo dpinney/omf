@@ -199,17 +199,17 @@ def create_REopt_jl_jsonFile(modelDir, inputDict):
 			'outage_end_time_step': int(inputDict['outage_start_hour'])+int(inputDict['outage_duration'])
 			}
 	
-	## Critical Load section
-	if inputDict['criticalLoadSwitch'] == 'No':
+	## Critical Load input section
+	if inputDict['criticalLoadSwitch'] == 'No': ## switch = No means the user wants to upload a critical load profile instead of using a critical load factor to determine the critical load
+		#TODO: This piece is not working. REopt gives an error that the resilience file is not being created. Unclear what the issue is 9/2024
 		criticalLoad = np.asarray([float(value) for value in inputDict['criticalLoad'].split('\n') if value.strip()]) ## process input format into an array
 		criticalLoad = criticalLoad.tolist() if isinstance(criticalLoad, np.ndarray) else criticalLoad ## make criticalLoad array into a list for REopt
-		#scenario['ElectricLoad']['critical_loads_kw'] = criticalLoad
+		#scenario['ElectricLoad']['critical_load_series_kw'] = criticalLoad
 	else:
-		criticalLoadFactor = float(inputDict['criticalLoadFactor'])
-		criticalLoad = demand_array*criticalLoadFactor
-		criticalLoad = criticalLoad.tolist() if isinstance(criticalLoad, np.ndarray) else criticalLoad ## make criticalLoad array into a list for REopt
-		#scenario['ElectricLoad']['critical_loads_kw'] = criticalLoad
-	
+		scenario['ElectricLoad']['critical_load_fraction'] = float(inputDict['criticalLoadFactor'])
+		#criticalLoad = demand_array*criticalLoadFactor
+		#criticalLoad = criticalLoad.tolist() if isinstance(criticalLoad, np.ndarray) else criticalLoad ## make criticalLoad array into a list for REopt
+		#scenario['ElectricLoad']['critical_load_series_kw'] = criticalLoad
 
 	## Save the scenario file
 	## NOTE: reopt_jl currently requires a path for the input file, so the file must be saved to a location
@@ -956,44 +956,95 @@ def work(modelDir, inputDict):
 	outData['exportedPowerData'] = json.dumps(fig.data, cls=plotly.utils.PlotlyJSONEncoder)
 	outData['exportedPowerLayout'] = json.dumps(fig.layout, cls=plotly.utils.PlotlyJSONEncoder)
 
+
 	## Create Thermal Device Temperature plot object ######################################################################################################################################################
-	fig = go.Figure()
+	if inputDict['load_type'] != '0': ## If vbatDispatch is called in the analysis:
+		
+		## Add another plot above exported power overview named something similar to but better than “Device Interior Thermal Behavior”. 
+		## Include series: interior temperature, setpoint, deadband-upper bound, and deadband-lower bound.
 	
-	fig.add_trace(go.Scatter(x=timestamps,
-						y=temperatures,
-						yaxis='y2',
-						mode='lines',
-						line=dict(color='red',width=1),
-						name='Average Air Temperature',
-						showlegend=showlegend 
-						))
+		fig = go.Figure()
 	
-	## Power used to charge vbat (vbat_charging)
-	if inputDict['load_type'] != '0':
+		#if inputDict['load_type'] == '4': ## Water Heater (the only option that evolves interior temperature over time)
+
+			# Interior Temperature
+			#interior_temp = theta.mean(axis=0) 
+
+			#interior temp 
+			#theta_s_wh #temperature setpoint (interior)
+			#theta_s_wh +/- deadband 
+
+		fig.add_trace(go.Scatter(x=timestamps,
+							y=temperatures,
+							yaxis='y2',
+							mode='lines',
+							line=dict(color='red',width=1),
+							name='Average Air Temperature',
+							showlegend=showlegend 
+							))
+		
+		#fig.add_hline(y=inputDict['setpoint'],col='black',yref='y2',name='Setpoint',showlegend=True) ## interior temperature is fixed
+		
+		upper_bound = [float(inputDict['setpoint']) + float(inputDict['deadband'])/2] 
+		lower_bound = [float(inputDict['setpoint']) - float(inputDict['deadband'])/2]
+
+		fig.add_trace(go.Scatter(
+			x=timestamps,  # Concatenate x values for fill between
+			y=upper_bound + lower_bound[::-1],  # Upper and lower bound for fill
+			yaxis='y2',
+			fill='toself',  # Fill between upper and lower bounds
+			fillcolor='rgba(0, 100, 200, 0.2)',  # Shade color with some transparency
+			line=dict(color='rgba(255,255,255,0)'),  # No border line for the fill
+			name='Deadband',
+			showlegend=True
+		))
+
+		fig.add_trace(go.Scatter(
+			x=timestamps,  # Concatenate x values for fill between
+			y=upper_bound + lower_bound[::-1],  # Upper and lower bound for fill
+			yaxis='y2',
+			fill='toself',  # Fill between upper and lower bounds
+			fillcolor='rgba(0, 100, 200, 0.2)',  # Shade color with some transparency
+			line=dict(color='rgba(255,255,255,0)'),  # No border line for the fill
+			name='Deadband',
+			showlegend=True
+		))
+
+		
+		## Power used to charge vbat (vbat_charging)
+
 		fig.add_trace(go.Scatter(x=timestamps,
 							y=np.asarray(vbat_charge),
+							yaxis='y1',
 							mode='none',
 							fill='tozeroy',
 							name='Power Used to Charge TESS',
 							fillcolor='rgba(155,148,225,1)',
 							showlegend=True))
-	
 
-	fig.update_layout(
-    	xaxis=dict(title='Timestamp'),
-    	yaxis=dict(title='Temperature (C)'),
-    	legend=dict(
-			orientation='h',
-			yanchor='bottom',
-			y=1.02,
-			xanchor='right',
-			x=1
-			)
-	)
-	
-	## Encode plot data as JSON for showing in the HTML side
-	outData['thermalDevicePlotData'] = json.dumps(fig.data, cls=plotly.utils.PlotlyJSONEncoder)
-	outData['thermalDevicePlotPowerLayout'] = json.dumps(fig.layout, cls=plotly.utils.PlotlyJSONEncoder)
+		## Plot layout
+		fig.update_layout(
+			#title='Residential Data',
+			xaxis=dict(title='Timestamp'),
+			yaxis=dict(title='Power (kW)'),
+			yaxis2=dict(title='degrees Celsius',
+					overlaying='y',
+					side='right'
+					),
+			legend=dict(
+				orientation='h',
+				yanchor='bottom',
+				y=1.02,
+				xanchor='right',
+				x=1
+				)
+		)
+
+		#fig.show()
+		
+		## Encode plot data as JSON for showing in the HTML side
+		outData['thermalDevicePlotData'] = json.dumps(fig.data, cls=plotly.utils.PlotlyJSONEncoder)
+		outData['thermalDevicePlotLayout'] = json.dumps(fig.layout, cls=plotly.utils.PlotlyJSONEncoder)
 
 	# Stdout/stderr.
 	outData['stdout'] = 'Success'
@@ -1028,7 +1079,7 @@ def new(modelDir):
 		'demandCurve': demand_curve,
 		'tempCurve': temp_curve,
 		'criticalLoad': criticalLoad_curve,
-		'criticalLoadSwitch': 'No',
+		'criticalLoadSwitch': 'Yes',
 		'criticalLoadFactor': '0.50',
 		'PV': 'Yes',
 		'BESS': 'Yes',

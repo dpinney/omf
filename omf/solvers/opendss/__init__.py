@@ -249,20 +249,22 @@ def newQstsPlot(filePath, stepSizeInMinutes, numberOfSteps, keepAllFiles=False, 
 def get_hosting_capacity_of_single_bus(FILE_PATH:str, BUS_NAME:str, max_test_kw:float):
 	'''
 	- Return the maximum hosting capacity at a single bus that is possible before a thermal violation or voltage violation is reached
-		- E.g. if a violation occurs at 4 kW, then this function will return 3.5 kW with thermal_violation == False and voltage_violation == False
-	- Special case: if a single bus experiences a violation at 1 kW, then this function will return 1 kW with thermal_violation == True and/or
-		voltage_violation == True. In this case, the hosting capacity isn't known. We only know it's < 1 kW
+		- E.g. if a violation occurs at 4 kW, then this function will return 3.5 kW with thermally_limited == False and voltage_limited == False
+	- Special case: if a single bus experiences a violation at 1 kW, then this function will return 1 kW with thermally_limited == True and/or
+		voltage_limited == True. In this case, the hosting capacity isn't known. We only know it's < 1 kW
 	'''
 	# - Get lower and upper bounds for the hosting capacity of a single bus
-	thermal_violation = False
-	voltage_violation = False
+	thermally_limited = False
+	voltage_limited = False
+	thermally_limited_precise = False
+	voltage_limited_precise = False
 	lower_kw_bound = 1
 	upper_kw_bound = 1
 	while True:
 		results = check_hosting_capacity_of_single_bus(FILE_PATH, BUS_NAME, upper_kw_bound)
-		thermal_violation = results['thermal_violation']
-		voltage_violation = results['voltage_violation']
-		if thermal_violation or voltage_violation or upper_kw_bound == max_test_kw:
+		thermally_limited = results['thermally_limited']
+		voltage_limited = results['voltage_limited']
+		if thermally_limited or voltage_limited or upper_kw_bound == max_test_kw:
 			break
 		lower_kw_bound = upper_kw_bound
 		upper_kw_bound = lower_kw_bound * 2
@@ -270,8 +272,8 @@ def get_hosting_capacity_of_single_bus(FILE_PATH:str, BUS_NAME:str, max_test_kw:
 			upper_kw_bound = max_test_kw
 	# - If no violations were found at the max_test_kw, then just report the hosting capacity to be the max_test_kw even though the actual hosting
 	#   capacity is higher
-	if not thermal_violation and not voltage_violation and upper_kw_bound == max_test_kw:
-		return {'bus': BUS_NAME, 'max_kw': max_test_kw, 'reached_max': False, 'thermal_violation': thermal_violation, 'voltage_violation': voltage_violation}
+	if not thermally_limited and not voltage_limited and upper_kw_bound == max_test_kw:
+		return {'bus': BUS_NAME, 'max_kw': max_test_kw, 'reached_max': False, 'thermally_limited': thermally_limited, 'voltage_limited': voltage_limited}
 	# - Use the bounds to compute the hosting capacity of a single bus
 	kw_step = (upper_kw_bound - lower_kw_bound) / 2
 	kw = lower_kw_bound + kw_step
@@ -280,17 +282,24 @@ def get_hosting_capacity_of_single_bus(FILE_PATH:str, BUS_NAME:str, max_test_kw:
 	#   - E.g. a reported hosting capacity of 139.5 kW means that a violation probably occurred at 140 kW
 	while not kw_step < .1:
 		results = check_hosting_capacity_of_single_bus(FILE_PATH, BUS_NAME, kw)
-		thermal_violation = results['thermal_violation']
-		voltage_violation = results['voltage_violation']
-		if not thermal_violation and not voltage_violation:
+		thermally_limited_precise = results['thermally_limited']
+		voltage_limited_precise = results['voltage_limited']
+		if not thermally_limited_precise and not voltage_limited_precise:
 			lower_kw_bound = kw
 		else:
 			upper_kw_bound = kw
-			thermal_violation = False
-			voltage_violation = False
 		kw_step = (upper_kw_bound - lower_kw_bound) / 2
 		kw = lower_kw_bound + kw_step
-	return {'bus': BUS_NAME, 'max_kw': lower_kw_bound, 'reached_max': True, 'thermal_violation': thermal_violation, 'voltage_violation': voltage_violation}
+
+	# This should catch if both were true in the first check and we need to narrow it down to the right one.
+	if thermally_limited and voltage_limited:
+		# If in the second stage, it was a thermal violation, then make sure voltage violation is false and its not both.
+		if thermally_limited_precise:
+			voltage_limited = False
+		# Else, the opposite
+		else:
+			thermally_limited = False
+	return {'bus': BUS_NAME, 'max_kw': lower_kw_bound, 'reached_max': True, 'thermally_limited': thermally_limited, 'voltage_limited': voltage_limited}
 
 def check_hosting_capacity_of_single_bus(FILE_PATH:str, BUS_NAME:str, kwValue: float):
 	''' Identify if an amount of generation that is added at BUS_NAME exceeds ANSI A Band voltage levels. '''
@@ -334,7 +343,7 @@ def check_hosting_capacity_of_single_bus(FILE_PATH:str, BUS_NAME:str, kwValue: f
 	runDssCommand(f'export overloads "overloads.csv"')
 	over_df = pd.read_csv(f'overloads.csv')
 	therm_violation = True if len(over_df) > 0 else False
-	return {'thermal_violation':therm_violation, 'voltage_violation':volt_violation}
+	return {'thermally_limited':therm_violation, 'voltage_limited':volt_violation}
 
 '''
 Hosting Capacity Multiprocessing Exploration - Unused
@@ -351,37 +360,37 @@ Works when running VSCode debugger, not when running regular
 # Unused
 def get_hosting_capacity_of_single_bus_multiprocessing(FILE_PATH: str, BUS_NAME: str, max_test_kw: float):
     ''' Get the maximum hosting capacity at a single bus before any violations. '''
-    thermal_violation = False
-    voltage_violation = False
+    thermally_limited = False
+    voltage_limited = False
     lower_kw_bound = 1
     upper_kw_bound = 1
     while True:
         results = check_hosting_capacity_of_single_bus_multiprocessing(FILE_PATH, BUS_NAME, upper_kw_bound)
-        thermal_violation = results['thermal_violation']
-        voltage_violation = results['voltage_violation']
-        if thermal_violation or voltage_violation or upper_kw_bound == max_test_kw:
+        thermally_limited = results['thermally_limited']
+        voltage_limited = results['voltage_limited']
+        if thermally_limited or voltage_limited or upper_kw_bound == max_test_kw:
             break
         lower_kw_bound = upper_kw_bound
         upper_kw_bound = lower_kw_bound * 2
         if upper_kw_bound > max_test_kw:
             upper_kw_bound = max_test_kw
-    if not thermal_violation and not voltage_violation and upper_kw_bound == max_test_kw:
-        return {'bus': BUS_NAME, 'max_kw': max_test_kw, 'reached_max': False, 'thermal_violation': thermal_violation, 'voltage_violation': voltage_violation}
+    if not thermally_limited and not voltage_limited and upper_kw_bound == max_test_kw:
+        return {'bus': BUS_NAME, 'max_kw': max_test_kw, 'reached_max': False, 'thermally_limited': thermally_limited, 'voltage_limited': voltage_limited}
     kw_step = (upper_kw_bound - lower_kw_bound) / 2
     kw = lower_kw_bound + kw_step
     while kw_step >= 0.1:
         results = check_hosting_capacity_of_single_bus_multiprocessing(FILE_PATH, BUS_NAME, kw)
-        thermal_violation = results['thermal_violation']
-        voltage_violation = results['voltage_violation']
-        if not thermal_violation and not voltage_violation:
+        thermally_limited = results['thermally_limited']
+        voltage_limited = results['voltage_limited']
+        if not thermally_limited and not voltage_limited:
             lower_kw_bound = kw
         else:
             upper_kw_bound = kw
-            thermal_violation = False
-            voltage_violation = False
+            thermally_limited = False
+            voltage_limited = False
         kw_step = (upper_kw_bound - lower_kw_bound) / 2
         kw = lower_kw_bound + kw_step
-    return {'bus': BUS_NAME, 'max_kw': lower_kw_bound, 'reached_max': True, 'thermal_violation': thermal_violation, 'voltage_violation': voltage_violation}
+    return {'bus': BUS_NAME, 'max_kw': lower_kw_bound, 'reached_max': True, 'thermally_limited': thermally_limited, 'voltage_limited': voltage_limited}
 
 # Unused
 def check_hosting_capacity_of_single_bus_multiprocessing(FILE_PATH: str, BUS_NAME: str, kwValue: float):
@@ -422,7 +431,7 @@ def check_hosting_capacity_of_single_bus_multiprocessing(FILE_PATH: str, BUS_NAM
     volt_violation = v_max_pu_all > ansi_a_max_pu
     over_df = pd.read_csv(overloads_file)
     therm_violation = len(over_df) > 0
-    return {'thermal_violation': therm_violation, 'voltage_violation': volt_violation}
+    return {'thermally_limited': therm_violation, 'voltage_limited': volt_violation}
 
 #Unused
 def multiprocessor_function(FILE_PATH: str, max_test_kw: float, BUS_NAME: str):
@@ -431,7 +440,7 @@ def multiprocessor_function(FILE_PATH: str, max_test_kw: float, BUS_NAME: str):
         return get_hosting_capacity_of_single_bus_multiprocessing(FILE_PATH, BUS_NAME, max_test_kw)
     except Exception as e:
         print(f'Error processing BUS_NAME={BUS_NAME} in multiprocessor_function: {e}')
-        return {'bus': BUS_NAME, 'max_kw': None, 'reached_max': False, 'thermal_violation': False, 'voltage_violation': False}
+        return {'bus': BUS_NAME, 'max_kw': None, 'reached_max': False, 'thermally_limited': False, 'voltage_limited': False}
 
 def hosting_capacity_all(FNAME:str, max_test_kw:float=50000, BUS_LIST:list = None, multiprocess=False):
 	''' Generate hosting capacity results for all_buses. '''
@@ -508,9 +517,9 @@ def hosting_capacity_single_bus(FILE_PATH:str, kwSTEPS:int, kwValue:float, BUS_N
 			therm_violation = True
 		# Return details when hitting violation.
 		if volt_violation or therm_violation:
-			return {'bus':BUS_NAME, 'max_kw':kwValue * step, 'reached_max':True, 'thermal_violation':therm_violation, 'voltage_violation':volt_violation}
+			return {'bus':BUS_NAME, 'max_kw':kwValue * step, 'reached_max':True, 'thermally_limited':therm_violation, 'voltage_limited':volt_violation}
 	# didn't hit violation, so report that.
-	return {'bus':BUS_NAME, 'max_kw':kwValue * step, 'reached_max':False, 'thermal_violation':therm_violation, 'voltage_violation':volt_violation}
+	return {'bus':BUS_NAME, 'max_kw':kwValue * step, 'reached_max':False, 'thermally_limited':therm_violation, 'voltage_limited':volt_violation}
 
 def hosting_capacity_max(FNAME, GEN_BUSES, STEPS, KW):
 	''' Keep calculating hosting capacity, uniformly distributing generation, dropping the lowest capacity bus each time.

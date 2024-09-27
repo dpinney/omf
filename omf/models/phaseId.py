@@ -328,14 +328,17 @@ def confidence_score_to_percentage( val ):
     return "{:.4g}%".format(percentage)
 
 def check_phase_results( df ):
+	retVal = True
 	values = df['Predicted Phase Labels'].value_counts()
 	highest_phase_val = values.iloc[0]
 	total_meters = len(df)
-	percentage = (highest_phase_val / total_meters) * 100
-	if percentage >= 80:
-		return False
-	else:
-		return True
+	highest_percentage = (highest_phase_val / total_meters) * 100
+	percentages_total = ( values / total_meters ) * 100
+	if (percentages_total < 5).any():
+		retVal = False
+	if highest_percentage >= 80:
+		retVal = False
+	return retVal
 
 def work(modelDir, inputDict):
 	""" Run the model in its directory."""
@@ -371,7 +374,7 @@ def work(modelDir, inputDict):
 	plt.savefig(pJoin(modelDir,'output-conf-matrix.png'))
 	# write our outData
 	if check_phase_results( df=df_final ) == False:
-		outData["outputInformation"] = f" WARNING: over 95% of meters fall under a single phase. Could potentially be due to small or insufficient input file.\nIn order to determine correct phase, you need to determine the real phase for 1 meter in each cluster and use that to determine the actual final phasing."
+		outData["outputInformation"] = f" WARNING: Meter distribution is resulting in over 80% of meters falling under a single phase and/or a phase has less than 5% of all total meters. Could potentially be due to small or insufficient input file.\nIn order to determine correct phase, you need to determine the real phase for 1 meter in each cluster and use that to determine the actual final phasing."
 	else:
 		outData["outputInformation"] = ""
 	df_final['Confidence Score'] = df_final['Confidence Score'].apply(confidence_score_to_percentage)
