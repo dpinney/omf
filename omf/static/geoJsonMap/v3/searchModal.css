@@ -109,12 +109,12 @@
  ***************************************/
 
 /*
-- Set a max-height that works on desktop and laptops
+- Set a max-height that works on desktop and laptops AND our microgridup iframe (81vh)
 - Hide overflow-x so the horizontal scrollbar doesn't flash in appearance
 - Set overflow-y so that the user can scroll through the search results
 */
 .searchModal + div {
-    max-height: 83vh;
+    max-height: 81vh;
     overflow-x: hidden;
     overflow-y: auto;
 }
