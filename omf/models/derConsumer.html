@@ -11,6 +11,7 @@
 			Plotly.newPlot('exportedPowerData', JSON.parse(allOutputData['exportedPowerData']),JSON.parse(allOutputData['exportedPowerLayout']));
 			Plotly.newPlot('resiliencePlotly', JSON.parse(allOutputData['resilienceData']), JSON.parse(allOutputData['resilienceLayout']) || {});
 			Plotly.newPlot('resilienceProbPlotly', JSON.parse(allOutputData['resilienceProbData']), JSON.parse(allOutputData['resilienceProbLayout']) || {});
+			Plotly.newPlot('thermalDevicePlotData', JSON.parse(allOutputData['thermalDevicePlotData']), JSON.parse(allOutputData['thermalDevicePlotLayout']) || {});
 		});
 	</script>
 </head>
@@ -291,6 +292,8 @@
 		<p class="reportTitle" style="page-break-before:always">DER dispatch schedule with new BESS</p>
 		<div id="derBESSplot" class="tightContent" style="width: 1000px; height: 600px;"></div>
 		-->
+		<p class="reportTitle" style="page-break-before:always">Thermal Device Temperature Profile</p>
+		<div id="thermalDevicePlotData" class="tightContent" style="width: 1000px; height: 600px;"></div>
 
 		<p class="reportTitle" style="page-break-before:always">DER Serving Load Overview (using REopt)</p>
 		<div id="derOverviewData" class="tightContent" style="width: 1000px; height: 600px;"></div>
