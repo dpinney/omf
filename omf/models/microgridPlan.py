@@ -9,6 +9,8 @@ import plotly
 import plotly.graph_objs as go
 import base64
 from base64 import b64decode
+import matplotlib
+import matplotlib.pyplot as plt
 
 # OMF imports
 #from omf import feeder
@@ -122,6 +124,8 @@ def work(modelDir, inputDict):
 	
 	### ProtectionSettingsOptimizer
 	if run_pso:
+		matplotlib.use('Agg')
+		plt.ioff()
 		psoInputs = inputDict.get("pso")
 		del psoInputs["circuitFile"]
 		psoInputs["testPath"] = psoInputs["circuitPath"]
@@ -140,8 +144,8 @@ def work(modelDir, inputDict):
 		with open(pJoin(psoInputs["testPath"],"fitness_plot.png"),"rb") as inFile:
 			outData["fitnessPlotImg"] = base64.standard_b64encode(inFile.read()).decode()
 
+	#making PowerModelsONM output graphs
 	if run_pmonm:
-		#making PowerModelsONM output graphs :
 		#todo: outData["Protection settings"]["settings"] should contain key output (not showing anything with current test files)
 		def makeGridLine(x,y,color,name):
 				plotLine = go.Scatter(
@@ -164,71 +168,42 @@ def work(modelDir, inputDict):
 				)
 		
 		x = outData['pmonmOutData']['Simulation time steps']
-		plotData = []
-		pmonm_voltages = outData["pmonmOutData"]["Voltages"]
-		min_voltage = makeGridLine(x, pmonm_voltages["Min voltage (p.u.)"],'blue','Min. Voltage')
-		plotData.append(min_voltage)
-		max_voltage = makeGridLine(x, pmonm_voltages["Max voltage (p.u.)"],'red','Max. Voltage')
-		plotData.append(max_voltage)
-		mean_voltage = makeGridLine(x, pmonm_voltages["Mean voltage (p.u.)"],'green','Mean Voltage')
-		plotData.append(mean_voltage)
-		plotlyLayout['yaxis'].update(title='Voltage (p.u.)')
-		plotlyLayout['xaxis'].update(title='Simulation Time Steps')
-		outData["pmonmVoltageData"] = json.dumps(plotData, cls=plotly.utils.PlotlyJSONEncoder)
-		outData["pmonmVoltageLayout"] = json.dumps(plotlyLayout, cls=plotly.utils.PlotlyJSONEncoder)
+		xTitle = 'Simulation Time Steps'
+		
+		def makePlot(outIndex, lineVals, yTitle, dataIndex, layoutIndex, x=x, xTitle=xTitle, layout=plotlyLayout):
+			if outIndex != "":
+				outValues = outData["pmonmOutData"][outIndex] #1
+			else:
+				outValues = outData["pmonmOutData"]
+			plotData = []
+			for (i, color, title) in lineVals : #2
+				line = makeGridLine(x, outValues[i], color, title)
+				plotData.append(line)
+			layout['yaxis'].update(title=yTitle) #3
+			layout['xaxis'].update(title=xTitle)
+			outData[dataIndex] = json.dumps(plotData, cls=plotly.utils.PlotlyJSONEncoder) #4
+			outData[layoutIndex] = json.dumps(layout, cls=plotly.utils.PlotlyJSONEncoder) #5
+		
 
-		plotData = []
-		storage_soc = makeGridLine(x, outData['pmonmOutData']['Storage SOC (%)'],'red','Storage SOC')
-		plotData.append(storage_soc)
-		plotlyLayout['yaxis'].update(title='SOC (%)')
-		plotlyLayout['xaxis'].update(title='Simulation Time Steps')
-		outData["pmonmStorageSOCData"] = json.dumps(plotData, cls=plotly.utils.PlotlyJSONEncoder)
-		outData["pmonmStorageSOCLayout"] = json.dumps(plotlyLayout, cls=plotly.utils.PlotlyJSONEncoder)
+		voltageVals = [("Min voltage (p.u.)", 'blue', 'Min. Voltage'), ("Max voltage (p.u.)", 'red', 'Max. Voltage'), 
+					 ("Mean voltage (p.u.)", 'green','Mean Voltage')]
+		makePlot("Voltages", voltageVals, 'Voltage (p.u.)' , "pmonmVoltageData", "pmonmVoltageLayout")
 
-		pmonm_load_served = outData['pmonmOutData']['Load served']
-		plotData = []
-		totalLoad = makeGridLine(x,pmonm_load_served['Total load (%)'],'purple','Total load')
-		plotData.append(totalLoad)
-		bonusLoadViaMicrogrid = makeGridLine(x,pmonm_load_served['Bonus load via microgrid (%)'],'brown','Bonus load via microgrid')
-		plotData.append(bonusLoadViaMicrogrid)
-		feederLoad = makeGridLine(x,pmonm_load_served['Feeder load (%)'],'red','Feeder load')
-		plotData.append(feederLoad)
-		microgridLoad = makeGridLine(x,pmonm_load_served['Microgrid load (%)'],'gray','Microgrid load')
-		plotData.append(microgridLoad)
-		plotlyLayout['yaxis'].update(title='Load Served (%)')
-		plotlyLayout['xaxis'].update(title='Simulation Time Steps')
-		outData["pmonmLoadServedData"] = json.dumps(plotData, cls=plotly.utils.PlotlyJSONEncoder)
-		outData["pmonmLoadServedLayout"] = json.dumps(plotlyLayout, cls=plotly.utils.PlotlyJSONEncoder)
+		storageVals = [('Storage SOC (%)','red','Storage SOC')]
+		makePlot("", storageVals, 'SOC (%)', "pmonmStorageSOCData", "pmonmStorageSOCLayout")
 
-		plotData = []
-		microgridCustomers = makeGridLine(x,pmonm_load_served['Microgrid customers (%)'],'blue','Microgrid customers')
-		plotData.append(microgridCustomers)
-		feederCustomers = makeGridLine(x,pmonm_load_served['Feeder customers (%)'],'yellow','Feeder customers')
-		plotData.append(feederCustomers)
-		totalCustomers = makeGridLine(x,pmonm_load_served['Total customers (%)'],'green','Total customers')
-		plotData.append(totalCustomers)
-		bonusCustomersViaMicrogrid = makeGridLine(x,pmonm_load_served['Bonus customers via microgrid (%)'],'orange','Bonus customers via microgrid (%)')
-		plotData.append(bonusCustomersViaMicrogrid)
-		plotlyLayout['yaxis'].update(title='Customers (%)')
-		plotlyLayout['xaxis'].update(title='Simulation Time Steps')
-		outData["pmonmCustomersData"] = json.dumps(plotData, cls=plotly.utils.PlotlyJSONEncoder)
-		outData["pmonmCustomersLayout"] = json.dumps(plotlyLayout, cls=plotly.utils.PlotlyJSONEncoder)
+		loadVals = [('Total load (%)','purple','Total load'), ('Bonus load via microgrid (%)','brown','Bonus load via microgrid'),
+			  ('Feeder load (%)','red','Feeder load'), ('Microgrid load (%)','gray','Microgrid load')]
+		makePlot('Load served', loadVals, 'Load Served (%)', "pmonmLoadServedData", "pmonmLoadServedLayout")
 
-		pmonm_generator_profiles = outData['pmonmOutData']["Generator profiles"]
-		plotData = []
-		diesel_dg = makeGridLine(x,pmonm_generator_profiles['Diesel DG (kW)'],'red','Diesel DG')
-		plotData.append(diesel_dg)
-		energy_storage = makeGridLine(x,pmonm_generator_profiles['Energy storage (kW)'],'green','Energy storage')
-		plotData.append(energy_storage)
-		solar_dg = makeGridLine(x,pmonm_generator_profiles['Solar DG (kW)'],'orange','Solar DG')
-		plotData.append(solar_dg)
-		grid_mix = makeGridLine(x,pmonm_generator_profiles['Grid mix (kW)'],'blue','Grid mix')
-		plotData.append(grid_mix)
-		plotlyLayout['yaxis'].update(title='kW')
-		plotlyLayout['xaxis'].update(title='Simulation Time Steps')
-		outData["pmonmGeneratorProfilesData"] = json.dumps(plotData, cls=plotly.utils.PlotlyJSONEncoder)
-		outData["pmonmGeneratorProfilesLayout"] = json.dumps(plotlyLayout, cls=plotly.utils.PlotlyJSONEncoder)
+		customerVals = [('Microgrid customers (%)','blue','Microgrid customers'), ('Feeder customers (%)','yellow','Feeder customers'),
+				  ('Total customers (%)','green','Total customers'), ('Bonus customers via microgrid (%)','orange','Bonus customers via microgrid (%)')]
+		makePlot('Load served', customerVals, 'Customers (%)', "pmonmCustomersData", "pmonmCustomersLayout")
 
+		generatorVals = [('Diesel DG (kW)','red','Diesel DG'), ('Energy storage (kW)','green','Energy storage'), ('Solar DG (kW)','orange','Solar DG'),
+				   ('Grid mix (kW)','blue','Grid mix')]
+		makePlot("Generator profiles", generatorVals, 'kW', "pmonmGeneratorProfilesData", "pmonmGeneratorProfilesLayout")
+		
 		#to potentially add: "Device action timeline"
 
 	#outData["output"] = 
