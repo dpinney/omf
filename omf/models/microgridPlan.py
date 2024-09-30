@@ -125,24 +125,24 @@ def work(modelDir, inputDict):
 	### ProtectionSettingsOptimizer
 	if run_pso:
 		matplotlib.use('Agg')
-		plt.ioff()
-		psoInputs = inputDict.get("pso")
-		del psoInputs["circuitFile"]
-		psoInputs["testPath"] = psoInputs["circuitPath"]
-		psoInputs["testFile"] = psoInputs["circuitFileName"]
-		del psoInputs["circuitPath"]
-		del psoInputs["circuitFileName"]
-		pso.run_pso(**psoInputs)
-		with open(pJoin(psoInputs["testPath"],"settings_rso_out.json")) as j:
-			psoSettings = json.load(j)
-		with open(pJoin(psoInputs["testPath"],"old_info_rso_out.json")) as j:
-			psoOldInfo = json.load(j)
-		outData["psoSettings"] = psoSettings
-		outData["psoOldInfo"] = psoOldInfo
-		with open(pJoin(psoInputs["testPath"],"pso_plot.png"),"rb") as inFile:
-			outData["psoPlotImg"] = base64.standard_b64encode(inFile.read()).decode()
-		with open(pJoin(psoInputs["testPath"],"fitness_plot.png"),"rb") as inFile:
-			outData["fitnessPlotImg"] = base64.standard_b64encode(inFile.read()).decode()
+		with plt.ioff(): # suppress plot windows which protsetopt insists on. they block execution.
+			psoInputs = inputDict.get("pso")
+			del psoInputs["circuitFile"]
+			psoInputs["testPath"] = psoInputs["circuitPath"]
+			psoInputs["testFile"] = psoInputs["circuitFileName"]
+			del psoInputs["circuitPath"]
+			del psoInputs["circuitFileName"]
+			pso.run_pso(**psoInputs)
+			with open(pJoin(psoInputs["testPath"],"settings_rso_out.json")) as j:
+				psoSettings = json.load(j)
+			with open(pJoin(psoInputs["testPath"],"old_info_rso_out.json")) as j:
+				psoOldInfo = json.load(j)
+			outData["psoSettings"] = psoSettings
+			outData["psoOldInfo"] = psoOldInfo
+			with open(pJoin(psoInputs["testPath"],"pso_plot.png"),"rb") as inFile:
+				outData["psoPlotImg"] = base64.standard_b64encode(inFile.read()).decode()
+			with open(pJoin(psoInputs["testPath"],"fitness_plot.png"),"rb") as inFile:
+				outData["fitnessPlotImg"] = base64.standard_b64encode(inFile.read()).decode()
 
 	#making PowerModelsONM output graphs
 	if run_pmonm:
