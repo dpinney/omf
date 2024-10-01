@@ -959,18 +959,16 @@ def work(modelDir, inputDict):
 
 	## Create Thermal Device Temperature plot object ######################################################################################################################################################
 	if inputDict['load_type'] != '0': ## If vbatDispatch is called in the analysis:
-		
-		## Add another plot above exported power overview named something similar to but better than “Device Interior Thermal Behavior”. 
-		## Include series: interior temperature, setpoint, deadband-upper bound, and deadband-lower bound.
 	
 		fig = go.Figure()
 	
-		#if inputDict['load_type'] == '4': ## Water Heater (the only option that evolves interior temperature over time)
+		## It seems like the setpoint (interior temp) is fixed for devices except the water heater.
+		## TODO: If desired, could code this up to extract the interior temperature from the water heater code.
+		## It does not currently seem to output the changing interior temp.
 
+		#if inputDict['load_type'] == '4': ## Water Heater (the only option that evolves interior temperature over time)
 			# Interior Temperature
 			#interior_temp = theta.mean(axis=0) 
-
-			#interior temp 
 			#theta_s_wh #temperature setpoint (interior)
 			#theta_s_wh +/- deadband 
 
@@ -983,44 +981,42 @@ def work(modelDir, inputDict):
 							showlegend=showlegend 
 							))
 		
-		#fig.add_hline(y=inputDict['setpoint'],col='black',yref='y2',name='Setpoint',showlegend=True) ## interior temperature is fixed
-		
-		upper_bound = [float(inputDict['setpoint']) + float(inputDict['deadband'])/2] 
-		lower_bound = [float(inputDict['setpoint']) - float(inputDict['deadband'])/2]
+		upper_bound = np.full_like(demand,float(inputDict['setpoint']) + float(inputDict['deadband'])/2)
+		lower_bound = np.full_like(demand,float(inputDict['setpoint']) - float(inputDict['deadband'])/2)
+		setpoint = np.full_like(demand, float(inputDict['setpoint'])) ## the setpoint is currently a fixed number
 
+		## Plot deadband upper bound
 		fig.add_trace(go.Scatter(
-			x=timestamps,  # Concatenate x values for fill between
-			y=upper_bound + lower_bound[::-1],  # Upper and lower bound for fill
+			x=timestamps,  
+			y=upper_bound, 
 			yaxis='y2',
-			fill='toself',  # Fill between upper and lower bounds
-			fillcolor='rgba(0, 100, 200, 0.2)',  # Shade color with some transparency
-			line=dict(color='rgba(255,255,255,0)'),  # No border line for the fill
-			name='Deadband',
+			line=dict(color='rgba(0,0,0,1)'), ## color black
+			name='Deadband upper bound',
 			showlegend=True
 		))
 
+		## Plot deadband lower bound
 		fig.add_trace(go.Scatter(
-			x=timestamps,  # Concatenate x values for fill between
-			y=upper_bound + lower_bound[::-1],  # Upper and lower bound for fill
+			x=timestamps, 
+			y=lower_bound,  
 			yaxis='y2',
-			fill='toself',  # Fill between upper and lower bounds
-			fillcolor='rgba(0, 100, 200, 0.2)',  # Shade color with some transparency
-			line=dict(color='rgba(255,255,255,0)'),  # No border line for the fill
-			name='Deadband',
+			mode='lines',
+			line=dict(color='rgba(0,0,0,0.5)'),  ## color black but half opacity = gray color
+			name='Deadband lower bound',
 			showlegend=True
 		))
 
-		
-		## Power used to charge vbat (vbat_charging)
+		## Plot the setpoint (interior temperature)
+		fig.add_trace(go.Scatter(
+			x=timestamps, 
+			y=setpoint,  
+			yaxis='y2',
+			mode='lines',
+			line=dict(color='rgba(0, 27, 255, 1)'),  ## color blue
+			name='Setpoint',
+			showlegend=True
+		))
 
-		fig.add_trace(go.Scatter(x=timestamps,
-							y=np.asarray(vbat_charge),
-							yaxis='y1',
-							mode='none',
-							fill='tozeroy',
-							name='Power Used to Charge TESS',
-							fillcolor='rgba(155,148,225,1)',
-							showlegend=True))
 
 		## Plot layout
 		fig.update_layout(
