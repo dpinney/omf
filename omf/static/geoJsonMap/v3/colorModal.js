@@ -407,7 +407,9 @@ class ColorModal { // implements ModalInterface, ObserverInterface
                 notFound.push(name);
             }
         }
-        console.log(`The following names in the CSV did not match any visible object in the circuit: ${notFound}`);
+        if (notFound.length > 0) {
+            console.log(`The following names in the CSV did not match any visible object in the circuit: ${notFound}.`);
+        }
         // - Display legend
         colorMap.displayLegend(colorFile.getFilename());
     }
@@ -446,10 +448,7 @@ class ColorModal { // implements ModalInterface, ObserverInterface
                 // - Fill the ColorFile with actual data
                 try {
                     colorFile.createColorMaps(obj.csv);
-
-                    //this.#modal.setBanner('', ['hidden']);
                     this.#loadingSpan.update({text: '', show: false});
-
                 } catch (e) {
                     // - Papa Parse did parse the file and didn't find any errors, but I still couldn't create a good ColorFile object, so tell the
                     //   user to remove or fix the file
@@ -523,7 +522,7 @@ class ColorFile {
      */
     createColorMaps(text) {
         if (typeof text !== 'string') {
-            throw TypeError('"text" argument must be typeof string.');
+            throw TypeError('The "text" argument must be typeof string.');
         }
         const results = Papa.parse(text, {dynamicTyping: true});
         const headerRow = results.data[0];
@@ -562,16 +561,17 @@ class ColorMap {
     #columnIndex;
     #nameToValue;
     static viridisColors = ['#440154', '#482173', '#433e85', '#38588c', '#2d708e', '#25858e', '#1e9b8a', '#2ab07f', '#52c569', '#86d549', '#c2df23', '#fde725'];
+    static tab20Colors = ['#1f77b4', '#d62728', '#2ca02c', '#bcbd22', '#9467bd', '#ff7f0e', '#8c564b', '#17becf', '#e377c2', '#aec7e8', '#ff9896', '#98df8a', '#dbdb8d', '#c5b0d5', '#ffbb78', '#c49c94', '#9edae5', '#f7b6d2', '#7f7f7f', '#c7c7c7'];
 
     /**
      * @param {string} columnName
      */
     constructor(columnName, columnIndex) {
         if (typeof columnName !== 'string') {
-            throw TypeError('"columnName" argument must be typeof string.');
+            throw TypeError('The "columnName" argument must be typeof string.');
         }
         if (typeof columnIndex !== 'number') {
-            throw TypeError('"columnIndex" argument must be typeof number.');
+            throw TypeError('The "columnIndex" argument must be typeof number.');
         }
         this.#columnName = columnName;
         this.#nameToValue = {};
@@ -597,26 +597,55 @@ class ColorMap {
         legendDiv.classList.add('legenddiv');
         const legendGradient = document.createElement('div');
         legendGradient.classList.add('legendgradient');
-        legendGradient.style.background = `linear-gradient(0deg, ${ColorMap.viridisColors.join(',')})`;
         legendDiv.append(legendGradient);
         const legendLabels = document.createElement('div');
         legendLabels.classList.add('legendlabels');
-        const floats = Object.values(this.#nameToValue).map(obj => obj.float);
-        const min = Math.min.apply(null, floats);
-        let span = document.createElement('span');
-        span.textContent = min.toFixed(2);
-        legendLabels.appendChild(span);
-        const max = Math.max.apply(null, floats);
-        const step = (max - min) / 6;
-        for (let i = 1; i < 6; i++) {
-            const span = document.createElement('span');
-            span.textContent = `${ (min + (step * i)).toFixed(2)}`;
-            legendLabels.prepend(span);
-        }
-        span = document.createElement('span');
-        span.textContent = max.toFixed(2);
-        legendLabels.prepend(span);
         legendDiv.append(legendLabels);
+        const values = Object.values(this.#nameToValue).map(obj => obj.float.toString());
+        const uniqueValues = [...new Set(values)];
+        uniqueValues.sort((a, b) => a.localeCompare(b, 'en', {numeric: true}));
+        if (uniqueValues.length > 20) {
+            legendLabels.style.justifyContent = 'space-between';
+            legendGradient.style.background = `linear-gradient(0deg, ${ColorMap.viridisColors.join(',')})`;
+            const numLabels = 5;
+            const min = Math.min.apply(null, uniqueValues);
+            let span = document.createElement('span');
+            // - David wants two decimal points of precision
+            span.textContent = min.toFixed(2);
+            legendLabels.appendChild(span);
+            const max = Math.max.apply(null, uniqueValues);
+            const step = (max - min) / numLabels;
+            for (let i = 1; i < numLabels; i++) {
+                const span = document.createElement('span');
+                span.textContent = `${ (min + (step * i)).toFixed(2)}`;
+                legendLabels.prepend(span);
+            }
+            span = document.createElement('span');
+            span.textContent = max.toFixed(2);
+            legendLabels.prepend(span);
+            // - Set 60px per label along the gradient since it's harder to differentiate values than the color blocks
+            legendGradient.style.height = `${numLabels * 70}px`;
+        } else {
+            // - Set each label in the middle of its color
+            legendLabels.style.justifyContent = 'space-around';
+            const selectedColors = ColorMap.tab20Colors.slice(0, uniqueValues.length);
+            const gradientStopIncrement = (100 / selectedColors.length).toFixed(2);
+            let gradientString = 'linear-gradient(0deg, ';
+            for (let i = 0; i < selectedColors.length; i++) {
+                const span = document.createElement('span');
+                span.textContent = uniqueValues[i];
+                legendLabels.prepend(span);
+                gradientString += `${selectedColors[i]} ${i * gradientStopIncrement}% ${(i + 1) * gradientStopIncrement}%`;
+                if (i < selectedColors.length - 1) {
+                    gradientString += ', ';
+                } else {
+                    gradientString += ')';
+                }
+            }
+            legendGradient.style.background = gradientString;
+            // - Set 30px per color block along the gradient
+            legendGradient.style.height = `${selectedColors.length * 30}px`;
+        }
         propTable.insertTBodyRow({elements: [legendDiv]});
         const button = new IconLabelButton({text: 'Close'});
         button.button.classList.add('-red');
@@ -632,18 +661,33 @@ class ColorMap {
 
     /**
      * - After all names have been mapped to numeric values, iterate through the colorMap again and generate color objects
+     *  - this.#nameToValue[<name>]: { color: null, float: <value> }
      * @returns {undefined}
      */
     generateColorsFromFloats() {
-        const floats = Object.values(this.#nameToValue).map(obj => obj.float);
-        const min = Math.min.apply(null, floats);
-        const max = Math.max.apply(null, floats);
-        const func = chroma.scale(ColorMap.viridisColors).domain([min, max]);
-        Object.values(this.#nameToValue).forEach(obj => {
-            obj.color = func(obj.float);
-            // - I round because later on I need to convert the integer values into a hex string
-            obj.color._rgb = obj.color._rgb.map(float => Math.round(float));
-        });
+        const values = Object.values(this.#nameToValue).map(obj => obj.float.toString());
+        const uniqueValues = [...new Set(values)];
+        uniqueValues.sort((a, b) => a.localeCompare(b, 'en', {numeric: true}));
+        // - If there are greater than 20 unique values, assume those values are numeric and use the viridis color map
+        if (uniqueValues.length > 20) {
+            const min = Math.min.apply(null, uniqueValues);
+            const max = Math.max.apply(null, uniqueValues);
+            const func = chroma.scale(ColorMap.viridisColors).domain([min, max]);
+            for (const obj of Object.values(this.#nameToValue)) {
+                obj.color = func(obj.float);
+                // - I round because later on I need to convert the integer values into a hex string
+                obj.color._rgb = obj.color._rgb.map(float => Math.round(float));
+            };
+        // - If there are 20 or fewer unique values, use the tab20 color map
+        } else {
+            const nameToIndexMap = {};
+            for (let i = 0; i < uniqueValues.length; i++) {
+                nameToIndexMap[uniqueValues[i]] = i;
+            }
+            for (const obj of Object.values(this.#nameToValue)) {
+                obj.color = chroma(ColorMap.tab20Colors[nameToIndexMap[obj.float]])
+            };
+        }
     }
 
     getColorMapping() {
@@ -659,23 +703,23 @@ class ColorMap {
     }
 
     /**
-     * @param {string} name - the name of an object to color (e.g. a node name)
-     * @param {string|Object} value - when iterating over a CSV for the first time, the only floats are known. Once a Chroma scale has been generated,
-     *      then colors are also mapped
+     * @param {string} name - The name of an object to color (e.g. a node name)
+     * @param {string|Object} value - When iterating over a CSV for the first time, only floats are known. Once a Chroma scale has been generated,
+     *  then colors are also mapped
      * @returns {undefined}
      */
     mapNameToValue(name, value) {
         if (typeof name !== 'string') {
-            throw TypeError('"name" argument must be typeof string.');
+            throw TypeError('The "name" argument must be typeof string.');
         }
         if (typeof value !== 'object') {
-            throw TypeError('"value" argument must be typeof object.');
+            throw TypeError('The "value" argument must be typeof object.');
         }
         if (!value.hasOwnProperty('color')) {
-            throw TypeError('"value" argument must have a "color" property.');
+            throw TypeError('The "value" argument must have a "color" property.');
         }
         if (!value.hasOwnProperty('float')) {
-            throw TypeError('"value" argument must have a "float" property.');
+            throw TypeError('The "value" argument must have a "float" property.');
         }
         if (this.#nameToValue[name] === undefined) {
             this.#nameToValue[name] = {};

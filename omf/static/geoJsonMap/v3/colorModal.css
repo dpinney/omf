@@ -31,15 +31,35 @@
 }
 
 /*
-- Style the legend div
+- Make the legend div have a white background
+- Round the corners
+- Set a consistent font size
+- Limit the width of the legend in case of really long column names
+- Limit the height of the legend and allow it to scroll
+- Add a consistent padding
 */
 
 #legendInsert > .proptablediv {
     background-color: white;
     border-radius: var(--regularBorderRadius);
     font-size: var(--regularFontSize);
-    max-width: 50vw;
+    max-width: 75vw;
+    max-height: 75vh;
+    overflow-x: hidden;
+    overflow-y: auto;
     padding: var(--regularPadding);
+}
+
+/*
+- Make the filename header and column name header very narrow so the legend doesn't take up that much space
+- Let the text of the filename header and column header wrap
+- Set spacing of the filename header and column header
+- The height of the legend depends on the number of labels
+*/
+#legendInsert > .proptablediv > .prop-table > .propthead > .proptr > .propth > .propdiv {
+    width: 100px;
+    overflow-wrap: anywhere;
+    margin: 0 auto var(--regularPadding) auto;
 }
 
 /*
@@ -56,20 +76,20 @@
 
 /*
 - Make the legend labels display along even vertical intervals
+- justify-content needs to be set by JavaScipt
 */
 
 #legendInsert .legendlabels {
     display: flex;
     flex-direction: column;
-    justify-content: space-between;
 }
 
 /*
-- Set a reasonable size for the color gradient
+- Set a reasonable width for the legend gradient
+- The height of the legend depends on the number of labels
 */
 
 #legendInsert .legendgradient {
-    height: 400px;
     width: 30px;
 }
 
@@ -100,11 +120,4 @@
     align-items: center;
     display: flex;
     justify-content: center;
-}
-
-/* Format the filename and column name */
-
-#legendInsert > .proptablediv > .prop-table .propth .propdiv {
-    font-size: 13px;
-    margin-bottom: var(--regularPadding);
 }

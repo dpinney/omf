@@ -350,7 +350,7 @@ class LeafletLayer {    // implements ObserverInterface
             return {
                 color: 'black',
                 fillColor: fillColor,
-                fillOpacity: .8,
+                fillOpacity: .9,
                 radius: 6.5,
                 weight: 1
             }

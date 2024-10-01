@@ -103,6 +103,7 @@
 - Give the PropTable and LoadingSpan a background color (needed for the save loading span)
 - Round the corners of the PropTable LoadingSpan
 - Give the PropTable and LoadingSpan a max width and height
+- Let modals scroll if the screen size is small
 - Give the PropTable and LoadingSpan padding
 */
 
@@ -112,6 +113,7 @@
     border-radius: var(--regularBorderRadius);
     max-height: 75vh;
     max-width: 75vw;
+    overflow: auto;
     padding: var(--regularPadding);
 }
 
