@@ -31,6 +31,7 @@ tooltip = "Determines the most vulnerable areas and pieces of equipment within a
 modelName, template = __neoMetaModel__.metadata(__file__)
 hidden = True
 
+
 def retrieveCensusNRI():
     '''
     Retrieves necessary data from ZIP File and exports to geojson
@@ -58,6 +59,26 @@ def retrieveCensusNRI():
                 return outfile
     except Exception as e:
         print("Error trying to retrieve FEMA NRI Census Data in GeoJson format")
+        print(e)
+
+def findCensusBlockGroup(lat,lon):
+    '''
+    Finds Census Block at a given lon / lat incorporates US Census Geolocator API
+    Input: lat -> specified latitude value
+    Input: lon -> specified longitude value
+    return censusTract ->  census Tract found at location
+    '''
+    try:
+        # Requested for API Key to bypass api load limits
+        request_url = "https://geo.fcc.gov/api/census/block/find?latitude="+str(lat)+"&longitude="+str(lon)+ "&censusYear=2020&format=json&key=bc86c8cfc930e7c10b81d6683c6a316f5fcb857b"
+        opener = urllib.request.build_opener()
+        opener.addheaders = [('User-agent', 'Mozilla/5.0')]
+        resp = opener.open(request_url, timeout=50)
+        censusJson = json.loads(resp.read())
+        censusTract = censusJson['Block']['FIPS'][:-3]
+        return  censusTract
+    except Exception as e:
+        print("Error trying to retrieve tract information from Census API")
         print(e)
 
 def findCensusTract(lat, lon):
@@ -422,7 +443,160 @@ def all_vals(obj):
     else:
         yield obj
 
-def getDownLineLoads1(pathToOmd):
+
+def getDownLineLoadsBlockGroup(pathToOmd):
+    '''
+    Retrieves downline loads for a circuit and retrieves nri data for each of the loads within the circuit
+    pathToOmd -> path to the omdfile
+    '''
+
+    omd = json.load(open(pathToOmd))
+    blockgroupDict = {}
+    loadsDict = {}
+    valList = []
+    geoms = []
+    obDict = {}
+
+    # Retrieve data to compute SVI
+    for ob in omd.get('tree', {}).values():
+        obType = ob['object']
+        obName = ob['name']
+        key = obType + '.' + obName
+        obDict[key] = ob
+        if (obType == 'load'):
+            loadsDict[key] = {
+                        "base crit score":None}
+
+            kw = float(ob['kw'])
+            kvar = float(ob['kvar'])
+            kv = float(ob['kv'])
+
+            loadsDict[key]["base crit score"]= ((math.sqrt((kw * kw) + (kvar * kvar) ))/ (5)) * 4
+
+            long = float(ob['longitude'])
+            lat = float(ob['latitude'])
+
+            if blockgroupDict:
+                check = coordCheck(long, lat, blockgroupDict)
+
+                if check:
+                    loadsDict[key]['blockgroup'] = check
+                    continue
+                else:
+                    blockgroup = findCensusBlockGroup(lat,long)
+
+            else:
+                blockgroup = findCensusBlockGroup(lat,long)
+            while blockgroup is None:
+                blockgroup = findCensusBlockGroup(lat,long)
+            
+            loadsDict[key]['blockgroup'] = blockgroup
+            blockgroupDict[blockgroup] = buildsviBlockGroup(blockgroup)
+            valList.append(list(all_vals(blockgroupDict[blockgroup])))
+            geoms.append(blockgroupDict[blockgroup]['geometry'])
+
+
+    # compute SVI
+
+
+
+    # DO NOT CHANGE ORDER -> matches order of dictionary in buildSVI(blockgroupFIPS)
+    cols = ['pct_Prs_Blw_Pov_Lev_ACS_16_20','avg_Agg_HH_INC_ACS_16_20','pct_Not_HS_Grad_ACS_16_20',
+            'pct_Pop_65plus_ACS_16_20','pct_u19ACS_16_20','pct_singlefamily_u18','pct_MLT_U10p_ACS_16_20',
+            'pct_Mobile_Homes_ACS_16_20','pct_Crowd_Occp_U_ACS_16_20','pct_noVehicle','blockgroupFIPS', 'geometry']
+        
+    sviDF = createDF(valList,cols, geoms)
+    
+    pctile_list = ['pct_Prs_Blw_Pov_Lev_ACS_16_20','avg_Agg_HH_INC_ACS_16_20','pct_Not_HS_Grad_ACS_16_20',
+            'pct_Pop_65plus_ACS_16_20','pct_u19ACS_16_20','pct_singlefamily_u18','pct_MLT_U10p_ACS_16_20',
+            'pct_Mobile_Homes_ACS_16_20','pct_Crowd_Occp_U_ACS_16_20','pct_noVehicle']
+    for i in cols:
+        if i not in ['blockgroupFIPS', 'geometry']:
+            new_str = i + '_pct_rank'
+            sviDF[new_str] = sviDF[i].rank(pct=True)
+            pctile_list.append(new_str)
+    
+    sviDF['SOVI_TOTAL']= sviDF[pctile_list].sum(axis=1)
+    sviDF['SOVI_SCORE'] = sviDF['SOVI_TOTAL'].rank(pct=True)
+    #sviDF['SOVI_SCORE'] = sviDF[pctile_list].sum(axis=1).rank(pct=True)
+    sviDF['SOVI_RATNG'] = sviDF.apply(buildSVIRating, axis=1)
+
+    
+    #sviDF.to_csv('outSVI.csv', index=False)
+
+    sviGeoDF = createGeoDF(sviDF)
+
+
+    # put all
+
+    for ob in omd.get('tree', {}).values():
+        obType = ob['object']
+        obName = ob['name']
+        key = obType + '.' + obName
+        if (obType == 'load'):
+            
+            
+            currBlockGroup = loadsDict[key]['blockgroup']
+            svi_score = sviDF[sviDF['blockgroupFIPS'] == currBlockGroup]['SOVI_SCORE'].values[0]
+
+            loadsDict[key]["community crit score"] = round((((math.sqrt((kw * kw) + (kvar * kvar) ))/ (5)) * 4) *  svi_score,2)
+            loadsDict[key]['SOVI_SCORE'] = svi_score
+
+
+
+    getPercentile(loadsDict, "base crit score")
+    getPercentile(loadsDict, 'community crit score')
+
+
+    del omd
+
+    digraph = createGraph(pathToOmd)
+    nodes = digraph.nodes()
+
+    namesToKeys = {v.get('name'):k for k,v in obDict.items()}
+    
+    
+    for obKey, ob in obDict.items():
+        obType = ob['object']
+
+        obName = ob['name']
+
+        obTo = ob.get('to')
+
+        if obName in nodes:
+
+            startingPoint = obName
+
+        elif obTo in nodes:
+
+            startingPoint = obTo
+
+        else:
+
+            continue
+
+        successors = nx.dfs_successors(digraph, startingPoint).values()
+
+        ob['downlineObs'] = []
+
+        ob['downlineLoads'] = []
+
+        for listofVals in successors:
+            
+            for element in listofVals:
+                elementKey = namesToKeys.get(element)
+
+                elementType = elementKey.split('.')[0]
+
+                if elementKey not in ob['downlineObs']:
+                    ob['downlineObs'].append(elementKey)
+
+                if elementKey not in ob['downlineLoads'] and elementType == 'load':
+                    ob['downlineLoads'].append(elementKey)
+    
+    return obDict,loadsDict, sviGeoDF
+
+def getDownLineLoadsTract(pathToOmd):
     '''
     Retrieves downline loads for a circuit and retrieves nri data for each of the loads within the circuit
     pathToOmd -> path to the omdfile
@@ -455,7 +629,7 @@ def getDownLineLoads1(pathToOmd):
             lat = float(ob['latitude'])
 
             if tractDict:
-                check = coordCheck1(long, lat, tractDict)
+                check = coordCheck(long, lat, tractDict)
 
                 if check:
                     loadsDict[key]['tract'] = check
@@ -469,7 +643,7 @@ def getDownLineLoads1(pathToOmd):
                 tract = findCensusTract(lat,long)
             
             loadsDict[key]['tract'] = tract
-            tractDict[tract] = buildSVI(tract)
+            tractDict[tract] = buildsviTract(tract)
             valList.append(list(all_vals(tractDict[tract])))
             geoms.append(tractDict[tract]['geometry'])
 
@@ -574,7 +748,7 @@ def getDownLineLoads1(pathToOmd):
     
     return obDict,loadsDict, sviGeoDF
 
-def getDownLineLoads(pathToOmd,nriGeoJson):
+def __getDownLineLoads__depreciated(pathToOmd,nriGeoJson):
     '''
     Retrieves downline loads for a circuit and retrieves nri data for each of the loads within the circuit
     pathToOmd -> path to the omdfile
@@ -755,7 +929,7 @@ def getPercentile(loads, columnName):
     for i, (k,v) in enumerate(loads.items()):
         loads[k][new_str] = round(result[i],2)
 
-def coordCheck(long, lat, latlonList):
+def __coordCheck__depreciated(long, lat, latlonList):
     point = Point(long, lat)
 
     for k,v in latlonList.items():
@@ -776,10 +950,10 @@ def coordCheck(long, lat, latlonList):
 
     return ''
 
-def coordCheck1(long, lat, tractList):
+def coordCheck(long, lat, geoList):
     point = Point(long, lat)
 
-    for k,v in tractList.items():
+    for k,v in geoList.items():
         if (len(v['geometry']) == 1):
             coords = v['geometry'][0]
         else:
@@ -795,7 +969,188 @@ def coordCheck1(long, lat, tractList):
 
     return ''
 
-def getDownLineLoadsEquipment1(pathToOmd, equipmentList):
+def getDownLineLoadsEquipmentBlockGroup(pathToOmd, equipmentList):
+    '''
+    Retrieves downline loads for specific set of equipment and retrieve nri data for each of the equipment
+    pathToOmd -> path to the omdfile
+    equipmentList -> list of equipment of interest
+
+    '''
+    # iterate throughout circuit
+    #store census information
+
+    omd = json.load(open(pathToOmd))
+    blockgroupDict = {}
+    loadsDict = {}
+    valList = []
+    geoms = []
+    obDict = {}
+
+    # Retrieve data to compute SVI
+    for ob in omd.get('tree', {}).values():
+        obType = ob['object']
+        obName = ob['name']
+        key = obType + '.' + obName
+        obDict[key] = ob
+        if (obType == 'load'):
+            loadsDict[key] = {
+                        "base crit score":None}
+
+            kw = float(ob['kw'])
+            kvar = float(ob['kvar'])
+            kv = float(ob['kv'])
+
+            loadsDict[key]["base crit score"]= round(((math.sqrt((kw * kw) + (kvar * kvar) ))/ (5)) * 4,2)
+
+            long = float(ob['longitude'])
+            lat = float(ob['latitude'])
+
+            if blockgroupDict:
+                check = coordCheck(long, lat, blockgroupDict)
+
+                if check:
+                    loadsDict[key]['blockgroup'] = check
+                    continue
+                else:
+                    blockgroup = findCensusBlockGroup(lat,long)
+
+            else:
+                blockgroup = findCensusBlockGroup(lat,long)
+            while blockgroup is None:
+                blockgroup = findCensusBlockGroup(lat,long)
+            
+            loadsDict[key]['blockgroup'] = blockgroup
+            blockgroupDict[blockgroup] = buildsviBlockGroup(blockgroup)
+            valList.append(list(all_vals(blockgroupDict[blockgroup])))
+            geoms.append(blockgroupDict[blockgroup]['geometry'])
+
+
+
+
+    # compute SVI
+
+
+
+    # DO NOT CHANGE ORDER -> matches order of dictionary in buildSVI(TractFIPS)
+      
+    cols = ['pct_Prs_Blw_Pov_Lev_ACS_16_20','avg_Agg_HH_INC_ACS_16_20','pct_Not_HS_Grad_ACS_16_20',
+            'pct_Pop_65plus_ACS_16_20','pct_singlefamily_u18','pct_MLT_U10p_ACS_16_20',
+            'pct_Mobile_Homes_ACS_16_20','pct_Crowd_Occp_U_ACS_16_20','pct_noVehicle','blockgroupFIPS', 'geometry']
+        
+    sviDF = createDF(valList,cols, geoms)
+    
+    pctile_list = ['pct_Prs_Blw_Pov_Lev_ACS_16_20','avg_Agg_HH_INC_ACS_16_20','pct_Not_HS_Grad_ACS_16_20',
+            'pct_Pop_65plus_ACS_16_20','pct_singlefamily_u18','pct_MLT_U10p_ACS_16_20',
+            'pct_Mobile_Homes_ACS_16_20','pct_Crowd_Occp_U_ACS_16_20','pct_noVehicle']
+    for i in cols:
+        if i not in ['blockgroupFIPS', 'geometry']:
+            new_str = i + '_pct_rank'
+            sviDF[new_str] = sviDF[i].rank(pct=True)
+            pctile_list.append(new_str)
+    
+    sviDF['SOVI_TOTAL']= sviDF[pctile_list].sum(axis=1)
+    sviDF['SOVI_SCORE'] = sviDF['SOVI_TOTAL'].rank(pct=True)
+    #sviDF['SOVI_SCORE'] = sviDF[pctile_list].sum(axis=1).rank(pct=True)
+    sviDF['SOVI_RATNG'] = sviDF.apply(buildSVIRating, axis=1)
+
+    
+    #sviDF.to_csv('outSVI.csv', index=False)
+
+    sviGeoDF = createGeoDF(sviDF)
+
+
+    # put all
+
+    for ob in omd.get('tree', {}).values():
+        obType = ob['object']
+        obName = ob['name']
+        key = obType + '.' + obName
+        if (obType == 'load'):
+            
+            
+            currBlockGroup = loadsDict[key]['blockgroup']
+            svi_score = sviDF[sviDF['blockgroupFIPS'] == currBlockGroup]['SOVI_SCORE'].values[0]
+
+            loadsDict[key]["community crit score"] = round((((math.sqrt((kw * kw) + (kvar * kvar) ))/ (5)) * 4) *  svi_score,2)
+            loadsDict[key]['SOVI_SCORE'] = svi_score
+
+
+
+    getPercentile(loadsDict, "base crit score")
+    getPercentile(loadsDict, 'community crit score')
+
+
+    del omd
+
+    digraph = createGraph(pathToOmd)
+    nodes = digraph.nodes()
+
+    namesToKeys = {v.get('name'):k for k,v in obDict.items()}
+    
+    
+    for obKey, ob in obDict.items():
+        obType = ob['object']
+
+        obName = ob['name']
+
+        obTo = ob.get('to')
+
+        if obName in nodes:
+
+            startingPoint = obName
+
+        elif obTo in nodes:
+
+            startingPoint = obTo
+
+        else:
+
+            continue
+
+        successors = nx.dfs_successors(digraph, startingPoint).values()
+
+        ob['downlineObs'] = []
+
+        ob['downlineLoads'] = []
+
+        if obType in equipmentList:
+
+            for listofVals in successors:
+
+                for element in listofVals:
+
+                    elementKey = namesToKeys.get(element)
+
+                    elementType = elementKey.split('.')[0]
+
+                    if elementKey not in ob['downlineObs']:
+
+                        ob['downlineObs'].append(elementKey)
+
+                    if elementKey not in ob['downlineLoads'] and elementType == 'load':
+
+                        ob['downlineLoads'].append(elementKey)
+
+
+    filteredObDict = {k:v  for k,v in obDict.items() if v.get('object') in equipmentList}
+
+
+
+    # perform weighted avg base criticality for equipment
+
+    newObsDict = BaseCriticallityWeightedAvg(filteredObDict, loadsDict)
+
+
+
+    # perform weighted avg community criticality for equipment
+
+    getPercentile(newObsDict, 'base crit score')
+    getPercentile(newObsDict, 'community crit score')
+
+
+    return newObsDict,loadsDict, sviGeoDF
+
+def getDownLineLoadsEquipmentTract(pathToOmd, equipmentList):
     '''
     Retrieves downline loads for specific set of equipment and retrieve nri data for each of the equipment
     pathToOmd -> path to the omdfile
@@ -832,7 +1187,7 @@ def getDownLineLoadsEquipment1(pathToOmd, equipmentList):
             lat = float(ob['latitude'])
 
             if tractDict:
-                check = coordCheck1(long, lat, tractDict)
+                check = coordCheck(long, lat, tractDict)
 
                 if check:
                     loadsDict[key]['tract'] = check
@@ -847,7 +1202,7 @@ def getDownLineLoadsEquipment1(pathToOmd, equipmentList):
             
             loadsDict[key]['tract'] = tract
             # tractDict[tract] = buildSVI(tract)
-            tractDict[tract] = buildSVI1(tract)
+            tractDict[tract] = buildsviTract(tract)
             valList.append(list(all_vals(tractDict[tract])))
             geoms.append(tractDict[tract]['geometry'])
 
@@ -976,7 +1331,7 @@ def getDownLineLoadsEquipment1(pathToOmd, equipmentList):
 
     return newObsDict,loadsDict, sviGeoDF
 
-def getDownLineLoadsEquipment(pathToOmd,nriGeoJson, equipmentList):
+def __getDownLineLoadsEquipment__depreciated(pathToOmd,nriGeoJson, equipmentList):
     '''
     Retrieves downline loads for specific set of equipment and retrieve nri data for each of the equipment
     pathToOmd -> path to the omdfile
@@ -1241,7 +1596,7 @@ def addEquipmentInfoToOmd(obDict, omdDict, equipList):
             continue
     return omdDict
 
-def createColorCSV(modelDir, loadsDict, objectsDict):
+def createColorCSVTract(modelDir, loadsDict, objectsDict):
     '''
     Creates colorby CSV to color loads within the circuit
     modelDir -> model directory
@@ -1256,8 +1611,23 @@ def createColorCSV(modelDir, loadsDict, objectsDict):
     
     new_df[['base crit score','tract','community crit score','SOVI_SCORE','base crit index','community crit index']].to_csv(pJoin(modelDir, 'color_by.csv'), index=True)
 
+def createColorCSVBlockGroup(modelDir, loadsDict, objectsDict):
+    '''
+    Creates colorby CSV to color loads within the circuit
+    modelDir -> model directory
+    loadsDict -> dict of loads
+    '''
+    newloadsDict = {k.split('load.')[1]:v for k,v in loadsDict.items()}
+    newobjectsDict = {k.split('.')[1]:v for k,v in objectsDict.items()}
 
-def buildSVI(tractFIPS):
+    combined_dict = {**newloadsDict, **newobjectsDict}
+
+    new_df = pd.DataFrame.from_dict(combined_dict, orient='index')
+    
+    new_df[['base crit score','blockgroup','community crit score','SOVI_SCORE','base crit index','community crit index']].to_csv(pJoin(modelDir, 'color_by.csv'), index=True)
+
+def __buildSVI__depreciated(tractFIPS):
+    import pygris
     '''
     Build SVI computation
     tractFIPS -> tractFIPS code
@@ -1366,7 +1736,135 @@ def buildSVI(tractFIPS):
 
     return svi_var_dict
 
-def buildSVI1(tractFIPS):
+def buildsviBlockGroup(blockgroupFIPS):
+    '''
+    Build SVI computation
+    block -> blockFIPS code
+    '''
+
+    # SVI Components
+    # Socioeconomic
+    # Household
+    # Housing Type
+
+    # SOCIOECONOMIC VARS
+    # Name of feature | Feature name (short): Variable name
+
+    # Percent Individuals Below Poverty Level | Poverty level: pct_Prs_Blw_Pov_Lev_ACS_16_20
+    # Percent Individuals 16+ Unemployyed | Unemployed: pct_Civ_emp_16p_ACS_16_20
+    # Per capita Income | Income: avg_Agg_HH_INC_ACS_16_20
+    # Percent non highschool grads | Highschool: pct_Not_HS_Grad_ACS_16_20
+
+    # HOUSEHOULD COMPOSITION / DISABILITY VARS
+
+    #Percent Age 65+ |Age 65+ : Percentage calculated by dividing Pop_65plus_ACS_16_20 by Tot_Population_ACS_16_20
+    # Noninstituionalized People under 19 | under19: Civ_noninst_pop_U19_ACS_16_20
+    # Non Instituionalized People | noninstitution: Civ_Noninst_Pop_ACS_16_20
+    # Percent population under 19 | under19 : Civ_noninst_pop_U19_ACS_16_20 / Civ_Noninst_Pop_ACS_16_20
+    #Percent population disabled | disabled: pct_Pop_Disabled_ACS_16_20
+    # <------------------> THESE VARS ARE IN ACS DATASET REST ARE IN PLANNING DATABASE DATASET <---------------->
+    # Estimate!!Total:!!6 to 17 years:!!Living with one parent: | singleparent6-17: B23008_021E
+    # Estimate!!Total:!!Under 6 years:!!Living with one parent: | singleparentu6: B23008_008E
+    # Total single parents with u18 child | singleparentu18: B23008_021E + B23008_008E
+    # Total familes | family: B23008_001E
+    # Percent of single parent families | singleparent: (B23008_021E + B23008_008E)/(B23008_001E)
+    #<------------------>^^^^ THESE VARS ARE IN ACS DATASET REST ARE IN PLANNING DATABASE DATASET^^^^ <---------------->
+
+    # HOUSING / TRANSPORTATION VARS
+
+    # Percent Multi-unitstructure | multi: pct_MLT_U10p_ACS_16_20
+    # Percent mobile home | mobile: pct_Mobile_Homes_ACS_16_20
+    # Percent crowding | crowd: pct_Crowd_Occp_U_ACS_16_20
+    # <------------------> THESE VARS ARE IN ACS DATASET REST ARE IN PLANNING DATABASE DATASET <---------------->
+    # People No vehicles | novehicle: B08014_002E
+    # Total People | people: B01001_001E
+    # Percent non vehicle | (B08014_002E) / (B01001_001E)
+    #<------------------>^^^^ THESE VARS ARE IN ACS DATASET REST ARE IN PLANNING DATABASE DATASET^^^^ <---------------->
+    
+                    #Socioeconomic, household composition, housing /transportation variables
+    pdb_svi_vars = ['pct_Prs_Blw_Pov_Lev_ACS_16_20', 'avg_Agg_HH_INC_ACS_16_20','pct_Not_HS_Grad_ACS_16_20',
+                'Pop_65plus_ACS_16_20', 'Tot_Population_ACS_16_20',
+                'pct_MLT_U10p_ACS_16_20', 'pct_Mobile_Homes_ACS_16_20', 'pct_Crowd_Occp_U_ACS_16_20']
+                # household composition / disability variables
+    acs_svi_vars = ['B23008_021E', 'B23008_008E', 'B23008_001E',
+                    'B08014_002E','B01001_001E']
+    
+    stateID = blockgroupFIPS[:2] # state identifier
+    countyID = blockgroupFIPS[2:5] # county identifier
+    tractID = blockgroupFIPS[5:11] # tract identifier
+    blockID = blockgroupFIPS[11:12] # block identifier
+
+    # SVI computation vals dictionary
+    
+    
+
+    # build url to use api
+    acs_request_url = "https://api.census.gov/data/2022/acs/acs5?get=" + ",".join(acs_svi_vars) + "&for=block%20group:" + str(blockID) + "&in=state:"+str(stateID)+"%20county:" +  str(countyID) + "%20tract:" + str(tractID)+"&key=bc86c8cfc930e7c10b81d6683c6a316f5fcb857b"
+    pdb_request_url = "https://api.census.gov/data/2022/pdb/blockgroup?get="+ ",".join(pdb_svi_vars) + "&for=block%20group:" + str(blockID) + "&in=state:"+str(stateID)+"%20county:" +  str(countyID) + "%20tract:" + str(tractID)+"&key=bc86c8cfc930e7c10b81d6683c6a316f5fcb857b"
+
+
+    #acs  data
+
+    opener = urllib.request.build_opener()
+    opener.addheaders = [('User-agent', 'Mozilla/5.0')]
+    resp = opener.open(acs_request_url, timeout=50)
+    acsJson = json.loads(resp.read())
+    acsDict = {k: 0 if v[0] is None else v[0]  for k, *v in zip(*acsJson)}
+
+    #pdb data
+    resp = opener.open(pdb_request_url, timeout=50)
+    pdbJson = json.loads(resp.read())
+    pdbDict = {k: 0 if v[0] is None else v[0]  for k, *v in zip(*pdbJson)}
+
+    combined_dict = {**acsDict, **pdbDict}
+    
+    
+    svi_var_dict = {
+        # socioeconomic vars
+        'pct_Prs_Blw_Pov_Lev_ACS_16_20': float(combined_dict['pct_Prs_Blw_Pov_Lev_ACS_16_20']),
+        'avg_Agg_HH_INC_ACS_16_20': float(combined_dict['avg_Agg_HH_INC_ACS_16_20'].replace('$', '').replace(',','')),
+        'pct_Not_HS_Grad_ACS_16_20': float(combined_dict['pct_Not_HS_Grad_ACS_16_20']),
+        # household compisiton/ disability vars
+        'pct_Pop_65plus_ACS_16_20': float(combined_dict['Pop_65plus_ACS_16_20'])/float(combined_dict['Tot_Population_ACS_16_20']),
+        'pct_singlefamily_u18': (float(combined_dict['B23008_021E']) + float(combined_dict['B23008_008E']))/float(combined_dict['B23008_001E']),
+        #housing/transportation
+        'pct_MLT_U10p_ACS_16_20': float(combined_dict['pct_MLT_U10p_ACS_16_20']),
+        'pct_Mobile_Homes_ACS_16_20': float(combined_dict['pct_Mobile_Homes_ACS_16_20']),
+        'pct_Crowd_Occp_U_ACS_16_20': float(combined_dict['pct_Crowd_Occp_U_ACS_16_20']),
+        'pct_noVehicle': float(combined_dict['B08014_002E'])/float(combined_dict['B01001_001E'])
+    }
+
+    # Define the base URL for the TIGERweb REST Services
+    tigris_url = "https://tigerweb.geo.census.gov/arcgis/rest/services/TIGERweb/tigerWMS_ACS2021/MapServer/8/query"
+    
+    params = {
+    'where': "STATE= '" + stateID +  "' AND COUNTY= '" + countyID + "' AND TRACT= '" + tractID + "' AND BLKGRP= '" + blockID +  "'",
+    'outFields': '*',
+    'returnGeometry': 'true',
+    'f': 'geojson',
+    'outSR': 4326  # Ensure we get geometries in WGS84 coordinate system
+    }
+
+    
+    tigrisResponse = requests.get(tigris_url, params=params)
+
+    tigrisData = tigrisResponse.json()
+
+    if (tigrisData['features'][0]['geometry']['type'] == 'Polygon'):
+        coordList = tigrisData['features'][0]['geometry']['coordinates'][0]
+    else:
+        coordList = []
+        for i in tigrisData['features'][0]['geometry']['coordinates']:
+            for j in i:
+                coordList.append(j)
+
+    
+    svi_var_dict['blockgroupFIPS'] = str(blockgroupFIPS)
+    svi_var_dict['geometry'] = coordList
+
+    return svi_var_dict
+
+def buildsviTract(tractFIPS):
     '''
     Build SVI computation
     tractFIPS -> tractFIPS code
@@ -1415,9 +1913,9 @@ def buildSVI1(tractFIPS):
     pdb_svi_vars = ['pct_Prs_Blw_Pov_Lev_ACS_16_20', 'pct_Civ_emp_16p_ACS_16_20', 'avg_Agg_HH_INC_ACS_16_20','pct_Not_HS_Grad_ACS_16_20',
                 'Pop_65plus_ACS_16_20', 'Tot_Population_ACS_16_20', 'Civ_noninst_pop_U19_ACS_16_20', 'Civ_Noninst_Pop_ACS_16_20', 'pct_Pop_Disabled_ACS_16_20',
                 'pct_MLT_U10p_ACS_16_20', 'pct_Mobile_Homes_ACS_16_20', 'pct_Crowd_Occp_U_ACS_16_20']
+
                 # household composition / disability variables
-    acs_svi_vars = ['B23008_021E', 'B23008_008E', 'B23008_001E',
-                    'B08014_002E','B01001_001E']
+    acs_svi_vars = ['B23008_021E', 'B23008_008E', 'B23008_001E','B08014_002E','B01001_001E']
     
     stateID = tractFIPS[:2] # state identifier
     countyID = tractFIPS[2:5] # county identifier
@@ -1518,7 +2016,7 @@ def runCalculations(pathToOmd,modelDir, equipmentList):
     
     '''
 
-    obDict, loads, geoDF = getDownLineLoadsEquipment1(pathToOmd, equipmentList)
+    obDict, loads, geoDF = getDownLineLoadsEquipmentTract(pathToOmd, equipmentList)
 
     cols = ['Object Name', 'Type', 'Base Criticality Score', 'Base Criticality Index',
             'Community Criticality Score', 'Community Criticality Index']
@@ -1550,7 +2048,7 @@ def runCalculations(pathToOmd,modelDir, equipmentList):
     newDF = createDF(finList, cols, [])
 
     newDF.to_csv(pJoin(modelDir, 'resilientCommunityOutput.csv'))
-    
+
 def work(modelDir, inputDict):
     ''' Run the model in its directory. '''
     outData = {}
@@ -1586,11 +2084,11 @@ def work(modelDir, inputDict):
 
     
     # check downline loads
-    obDict, loads, geoDF = getDownLineLoadsEquipment1(omd_file_path, equipmentList)
+    obDict, loads, geoDF = getDownLineLoadsEquipmentBlockGroup(omd_file_path, equipmentList)
 
     # color vals based on selected column
     
-    createColorCSV(modelDir, loads, obDict)
+    createColorCSVBlockGroup(modelDir, loads, obDict)
     
     if(inputDict['loadCol'] == 'Base Criticality Score'):
         colVal = "1"
@@ -1681,7 +2179,7 @@ def work(modelDir, inputDict):
 
 def test():
     tractFIPS = '12007000400'
-    print(buildSVI1(tractFIPS))
+    #print(buildSVI(tractFIPS))
 
 def new(modelDir):
     omdfileName = 'iowa240_in_Florida_copy2'

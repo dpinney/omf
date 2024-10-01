@@ -246,7 +246,93 @@ def work(modelDir, inputDict):
 	outData['derOverviewData'] = json.dumps(fig.data, cls=plotly.utils.PlotlyJSONEncoder)
 	outData['derOverviewLayout'] = json.dumps(fig.layout, cls=plotly.utils.PlotlyJSONEncoder)
 
-	## Battery State of Charge plot
+	## Create Thermal Device Temperature plot object ######################################################################################################################################################
+	if inputDict['load_type'] != '0': ## If vbatDispatch is called in the analysis:
+	
+		fig = go.Figure()
+	
+		## It seems like the setpoint (interior temp) is fixed for devices except the water heater.
+		## TODO: If desired, could code this up to extract the interior temperature from the water heater code.
+		## It does not currently seem to output the changing interior temp.
+
+		#if inputDict['load_type'] == '4': ## Water Heater (the only option that evolves interior temperature over time)
+			# Interior Temperature
+			#interior_temp = theta.mean(axis=0) 
+			#theta_s_wh #temperature setpoint (interior)
+			#theta_s_wh +/- deadband 
+
+		fig.add_trace(go.Scatter(x=timestamps,
+							y=temperatures,
+							yaxis='y2',
+							mode='lines',
+							line=dict(color='red',width=1),
+							name='Average Air Temperature',
+							showlegend=showlegend 
+							))
+		
+		upper_bound = np.full_like(demand,float(inputDict['setpoint']) + float(inputDict['deadband'])/2)
+		lower_bound = np.full_like(demand,float(inputDict['setpoint']) - float(inputDict['deadband'])/2)
+		setpoint = np.full_like(demand, float(inputDict['setpoint'])) ## the setpoint is currently a fixed number
+
+		## Plot deadband upper bound
+		fig.add_trace(go.Scatter(
+			x=timestamps,  
+			y=upper_bound, 
+			yaxis='y2',
+			line=dict(color='rgba(0,0,0,1)'), ## color black
+			name='Deadband upper bound',
+			showlegend=True
+		))
+
+		## Plot deadband lower bound
+		fig.add_trace(go.Scatter(
+			x=timestamps, 
+			y=lower_bound,  
+			yaxis='y2',
+			mode='lines',
+			line=dict(color='rgba(0,0,0,0.5)'),  ## color black but half opacity = gray color
+			name='Deadband lower bound',
+			showlegend=True
+		))
+
+		## Plot the setpoint (interior temperature)
+		fig.add_trace(go.Scatter(
+			x=timestamps, 
+			y=setpoint,  
+			yaxis='y2',
+			mode='lines',
+			line=dict(color='rgba(0, 27, 255, 1)'),  ## color blue
+			name='Setpoint',
+			showlegend=True
+		))
+
+
+		## Plot layout
+		fig.update_layout(
+			#title='Residential Data',
+			xaxis=dict(title='Timestamp'),
+			yaxis=dict(title='Power (kW)'),
+			yaxis2=dict(title='degrees Celsius',
+					overlaying='y',
+					side='right'
+					),
+			legend=dict(
+				orientation='h',
+				yanchor='bottom',
+				y=1.02,
+				xanchor='right',
+				x=1
+				)
+		)
+
+		#fig.show()
+		
+		## Encode plot data as JSON for showing in the HTML side
+		outData['thermalDevicePlotData'] = json.dumps(fig.data, cls=plotly.utils.PlotlyJSONEncoder)
+		outData['thermalDevicePlotLayout'] = json.dumps(fig.layout, cls=plotly.utils.PlotlyJSONEncoder)
+
+
+	## Create Battery State of Charge plot object ######################################################################################################################################################
 	if inputDict['BESS'] == 'Yes':
 		fig = go.Figure()
 
