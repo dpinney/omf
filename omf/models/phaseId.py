@@ -323,21 +323,30 @@ def plot_confusion_matrix(
 	plt.xlabel('Predicted Label')
 	plt.tight_layout()
 
-def confidence_score_to_percentage( val ):
+def _to_percentage( val ):
     percentage = val * 100
     return "{:.4g}%".format(percentage)
 
-def check_phase_results( df ):
-	retVal = True
+def predicted_phase_labels_warning( df ):
+	''' Returns a list whether a warning present and if so, which predicted meter label(s) caused the warning.
+
+	If the first value is False, there is no warning.
+	If the first value is True, second value contains information regarding which phase label and its percentage.
+	'''
+	retVal = [False]
 	values = df['Predicted Phase Labels'].value_counts()
-	highest_phase_val = values.iloc[0]
+	for val in values.index:
+		if val < 0: # One of the outputs has a meter that's -99
+			values = values.drop(labels=[val])
 	total_meters = len(df)
-	highest_percentage = (highest_phase_val / total_meters) * 100
 	percentages_total = ( values / total_meters ) * 100
 	if (percentages_total < 5).any():
-		retVal = False
-	if highest_percentage >= 80:
-		retVal = False
+		percentages_total.to_dict()
+		# These are int64, need to convert to python standard int/float
+		filtered_values = { int(key): round( float(value), 2) for key, value in percentages_total.items() if value < 5}
+		retVal = [True, filtered_values]
+	if percentages_total.iloc[0] >= 80:
+		retVal = [True, { int(percentages_total.index[0]): round( float(percentages_total.iloc[0]), 2) }]
 	return retVal
 
 def work(modelDir, inputDict):
@@ -373,11 +382,15 @@ def work(modelDir, inputDict):
 	plot_confusion_matrix(cnf_matrix, classes=classes)
 	plt.savefig(pJoin(modelDir,'output-conf-matrix.png'))
 	# write our outData
-	if check_phase_results( df=df_final ) == False:
-		outData["outputInformation"] = f" WARNING: Meter distribution is resulting in over 80% of meters falling under a single phase and/or a phase has less than 5% of all total meters. Could potentially be due to small or insufficient input file.\nIn order to determine correct phase, you need to determine the real phase for 1 meter in each cluster and use that to determine the actual final phasing."
+	warning = predicted_phase_labels_warning( df=df_final )
+	if warning[0] == False:
+		outData['warningFlag'] = warning[0]
 	else:
-		outData["outputInformation"] = ""
-	df_final['Confidence Score'] = df_final['Confidence Score'].apply(confidence_score_to_percentage)
+		outData['warningFlag'] = warning[0]
+		outData['warningData'] = warning[1]
+		outData['warningInfo'] = f" Meter distribution is resulting in over 80% of meters falling under a single phase and/or a phase has less than 5% of all total meters. Could potentially be due to small or insufficient input file.\nIn order to determine correct phase, you need to determine the real phase for 1 meter in each cluster and use that to determine the actual final phasing."
+
+	df_final['Confidence Score'] = df_final['Confidence Score'].apply(_to_percentage)
 	df_final = df_final.iloc[:, 1:]
 	outData["phasingResults"] = ( list(df_final.itertuples(index=False, name=None)) )
 	outData["phasingResultsTableHeadings"] = df_final.columns.values.tolist()
