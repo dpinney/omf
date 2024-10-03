@@ -416,20 +416,23 @@ def work(modelDir, inputDict):
 	## We are instead going to try to use our own BESS model.
 	## Currently, the BESS model is only being run when considering a DER utility program is enabled.
 	## TODO: Change this to instead check for BESS in the output file, rather than input
-	#if 'ElectricStorage' in reoptResults and any(reoptResults['ElectricStorage']['storage_to_load_series_kw']): ## BESS
-	#	print("Using REopt's BESS output. \n")
-	#	BESS = reoptResults['ElectricStorage']['storage_to_load_series_kw']
-	#	grid_charging_BESS = reoptResults['ElectricUtility']['electric_to_storage_series_kw']
-	#	outData['chargeLevelBattery'] = reoptResults['ElectricStorage']['soc_series_fraction']
-	#else:
-	#	print('No BESS found in REopt: Setting BESS data to 0. \n')
-	#	BESS = np.zeros_like(demand)
-	#	grid_charging_BESS = np.zeros_like(demand)
-	#	outData['chargeLevelBattery'] = np.zeros_like(demand)
+	if 'ElectricStorage' in reoptResults and any(reoptResults['ElectricStorage']['storage_to_load_series_kw']): ## BESS
+		print("Using REopt's BESS output. \n")
+		BESS = reoptResults['ElectricStorage']['storage_to_load_series_kw']
+		grid_charging_BESS = np.asarray(reoptResults['ElectricUtility']['electric_to_storage_series_kw'])
+		if 'PV' in reoptResults:
+			grid_charging_BESS += np.asarray(reoptResults['PV']['electric_to_storage_series_kw'])
+			print(grid_charging_BESS)
+		outData['chargeLevelBattery'] = reoptResults['ElectricStorage']['soc_series_fraction']
+	else:
+		print('No BESS found in REopt: Setting BESS data to 0. \n')
+		BESS = np.zeros_like(demand)
+		grid_charging_BESS = np.zeros_like(demand)
+		outData['chargeLevelBattery'] = np.zeros_like(demand)
 		
-	BESS = np.zeros_like(demand)
-	grid_charging_BESS = np.zeros_like(demand)
-	outData['chargeLevelBattery'] = list(np.zeros_like(demand))
+	#BESS = np.zeros_like(demand)
+	#grid_charging_BESS = np.zeros_like(demand)
+	#outData['chargeLevelBattery'] = list(np.zeros_like(demand))
 
 	## NOTE: The following 3 lines of code read in the SOC info from a static reopt test file 
 	#with open(pJoin(__neoMetaModel__._omfDir,'static','testFiles','residential_reopt_results.json')) as f:
@@ -697,7 +700,7 @@ def work(modelDir, inputDict):
 	## BESS serving load piece
 	if (inputDict['BESS'] == 'Yes'):
 		fig.add_trace(go.Scatter(x=timestamps,
-							y=np.asarray(BESS),
+							y=np.asarray(BESS) + np.asarray(demand) + vbat_discharge_component,
 							yaxis='y1',
 							mode='none',
 							fill='tozeroy',
@@ -706,17 +709,25 @@ def work(modelDir, inputDict):
 							showlegend=showlegend))
 		fig.update_traces(fillpattern_shape='/', selector=dict(name='BESS Serving Load (kW)'))
 
-	## Generator serving load piece
-	if (inputDict['generator'] == 'Yes'):
-		fig.add_trace(go.Scatter(x=timestamps,
-							y=np.asarray(generator),
-							yaxis='y1',
-							mode='none',
-							fill='tozeroy',
-							name='Generator Serving Load (kW)',
-							fillcolor='rgba(0,137,83,1)',
-							showlegend=showlegend))
-		fig.update_traces(fillpattern_shape='/', selector=dict(name='BESS Serving Load (kW)'))
+	## Temperature line on a secondary y-axis (defined in the plot layout)
+	fig.add_trace(go.Scatter(x=timestamps,
+						  y=temperatures,
+						  yaxis='y2',
+						  mode='lines',
+						  line=dict(color='red',width=1),
+						  name='Average Air Temperature',
+						  showlegend=showlegend 
+						  ))
+	
+	fig.add_trace(go.Scatter(x=timestamps,
+						y=vbat_discharge_component + np.asarray(demand),
+						yaxis='y1',
+						mode='none',
+						fill='tozeroy',
+						fillcolor='rgba(127,0,255,1)',
+						name='vbat Serving Load (kW)',
+						showlegend=showlegend))
+	fig.update_traces(fillpattern_shape='/', selector=dict(name='vbat Serving Load (kW)'))
 
 	## Original load piece (minus any vbat or BESS charging aka 'new/additional loads')
 	fig.add_trace(go.Scatter(x=timestamps,
@@ -727,7 +738,7 @@ def work(modelDir, inputDict):
 						fill='tozeroy',
 						fillcolor='rgba(100,200,210,1)',
 						showlegend=showlegend))
-
+	
 	## Additional load (Charging BESS and vbat)
 	## NOTE: demand is added here for plotting purposes, so that the additional load shows up above the demand curve.
 	## How or if this should be done is still being discussed
@@ -740,28 +751,18 @@ def work(modelDir, inputDict):
                          fillcolor='rgba(175,0,42,0)',
 						 showlegend=showlegend))
 	fig.update_traces(fillpattern_shape='.', selector=dict(name='Additional Load (Charging BESS and vbat)'))
-	
+
 	## Grid serving new load
 	## TODO: Should PV really be in this?
-	grid_serving_new_load = np.asarray(grid_to_load) + np.asarray(grid_charging_BESS)+ vbat_charge_component - vbat_discharge_component + np.asarray(PV)
+	grid_serving_new_load = np.asarray(grid_to_load) + np.asarray(grid_charging_BESS) + vbat_charge_component - vbat_discharge_component + np.asarray(PV)
 	fig.add_trace(go.Scatter(x=timestamps,
                          y=grid_serving_new_load,
 						 yaxis='y1',
                          mode='none',
                          fill='tozeroy',
-                         name='Grid Serving Load (kW)',
+                         name='Grid Serving New Load (kW)',
                          fillcolor='rgba(192,192,192,1)',
 						 showlegend=showlegend))
-	
-	## Temperature line on a secondary y-axis (defined in the plot layout)
-	fig.add_trace(go.Scatter(x=timestamps,
-						  y=temperatures,
-						  yaxis='y2',
-						  mode='lines',
-						  line=dict(color='red',width=1),
-						  name='Average Air Temperature',
-						  showlegend=showlegend 
-						  ))
 
 	## NOTE: This code hides the demand curve initially when the plot is made, but it can be 
 	## toggled back on by the user by clicking it in the plot legend
@@ -785,15 +786,18 @@ def work(modelDir, inputDict):
 						fillcolor='rgba(255,246,0,1)',
 						showlegend=showlegend
 						))
-	fig.add_trace(go.Scatter(x=timestamps,
-						y=np.asarray(vbat_discharge_flipsign),
-						yaxis='y1',
-						mode='none',
-						fill='tozeroy',
-						fillcolor='rgba(127,0,255,1)',
-						name='vbat Serving Load (kW)',
-						showlegend=showlegend))
-	fig.update_traces(fillpattern_shape='/', selector=dict(name='vbat Serving Load (kW)'))
+
+	## Generator serving load piece
+	if (inputDict['generator'] == 'Yes'):
+		fig.add_trace(go.Scatter(x=timestamps,
+							y=np.asarray(generator),
+							yaxis='y1',
+							mode='none',
+							fill='tozeroy',
+							name='Generator Serving Load (kW)',
+							fillcolor='rgba(0,137,83,1)',
+							showlegend=showlegend))
+		fig.update_traces(fillpattern_shape='/', selector=dict(name='BESS Serving Load (kW)'))
 
 	## Plot layout
 	fig.update_layout(
@@ -816,7 +820,7 @@ def work(modelDir, inputDict):
 	## NOTE: This opens a window that displays the correct figure with the appropriate patterns.
 	## For some reason, the slash-mark patterns are not showing up on the OMF page otherwise.
 	## Eventually we want to delete this part.
-	#fig.show() 
+	fig.show() 
 
 	## Encode plot data as JSON for showing in the HTML side
 	outData['derOverviewData'] = json.dumps(fig.data, cls=plotly.utils.PlotlyJSONEncoder)
