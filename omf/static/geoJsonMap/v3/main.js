@@ -415,21 +415,26 @@ function createEditMenu(controller, nav, topTab) {
     };
     button.button.addEventListener('click', dropdownDiv.getToggleFunction({outerFunc: outerFunc}));
     dropdownDiv.div.prepend(button.button);
-
     dropdownDiv.insertElement({element: getSearchButton(nav, topTab)});
-    dropdownDiv.insertElement({element: getAddComponentsButton(nav, topTab)});
+    if (gShowAddNewObjectsButton) {
+        dropdownDiv.insertElement({element: getAddComponentsButton(nav, topTab)});
+    }
     if (gIsOnline) {
         dropdownDiv.insertElement({element: getAmiButton(controller)});
         dropdownDiv.insertElement({element: getAnonymizationButton(controller)});
     }
-    dropdownDiv.insertElement({element: getAttachmentsButton(controller)});
+    if (gShowAttachmentsButton) {
+        dropdownDiv.insertElement({element: getAttachmentsButton(controller)});
+    }
     dropdownDiv.insertElement({element: getRawDataButton(controller)});
     if (gIsOnline) {
         dropdownDiv.insertElement({element: getClimateButton(controller)});
         dropdownDiv.insertElement({element: getScadaButton(controller)});
     }
     dropdownDiv.insertElement({element: getColorButton(controller)});
-    dropdownDiv.insertElement({element: getGeojsonButton(controller)});
+    if (gShowAddGeojsonButton) {
+        dropdownDiv.insertElement({element: getGeojsonButton(controller)});
+    }
     document.getElementById('menuInsert').append(dropdownDiv.div);
 }
 

@@ -653,10 +653,11 @@ def showOnMap(geoJson):
 	webbrowser.open('file://' + pJoin(tempDir,'geoJsonMap.html'))
 
 
-def map_omd(omd_path, output_dir, open_browser=False):
+def map_omd(omd_path, output_dir, open_browser=False, showAddNewObjectsButton=True, showAttachmentsButton=True, showAddGeojsonButton=True):
 	'''
 	Create an HTML page of the GeoJSON circuit editor without Flask
 	'''
+
 	# - Load feeder data
 	with open(omd_path) as f:
 		omd = json.load(f)
@@ -689,9 +690,23 @@ def map_omd(omd_path, output_dir, open_browser=False):
 	# - Write template
 	with (pathlib.Path(omf.omfDir).resolve(True) / 'templates' / 'geoJson_offline.html').open() as f:
 		template = f.read()
-	rendered = Template(template).render(featureCollection=featureCollection, componentsCollection=componentsCollection, thisOwner=None,
-		thisModelName=None, thisFeederName=None, thisFeederNum=None, publicFeeders=None, userFeeders=None,
-		currentUser=None, showFileMenu=json.dumps(False), isOnline=json.dumps(False), css=css, js=js)
+	rendered = Template(template).render(
+		featureCollection=featureCollection,
+		componentsCollection=componentsCollection,
+		thisOwner=None,
+		thisModelName=None,
+		thisFeederName=None,
+		thisFeederNum=None,
+		publicFeeders=None,
+		userFeeders=None,
+		currentUser=None,
+		showFileMenu=json.dumps(False),
+		isOnline=json.dumps(False),
+		showAddNewObjectsButton=json.dumps(showAddNewObjectsButton),
+		showAttachmentsButton=json.dumps(showAttachmentsButton),
+		showAddGeojsonButton=json.dumps(showAddGeojsonButton),
+		css=css,
+		js=js)
 	output_dir = pathlib.Path(output_dir)
 	output_dir.mkdir(parents=True, exist_ok=True)
 	# - Copy PNGs
@@ -895,6 +910,7 @@ def _is_configuration_or_special_node(tree_properties):
 	#   - iowa240c2_working_coords.clean.tie_bus2058_bus3155.omd assigns a parent to it
 	# - The "regcontrol" object is NOT a configuration node
 	#   - iowa240c1.clean.dss.omd assigns latitude and longitude values to it. So does pvrea_trilby.omd
+	#   - 2024-07-05: it is now a configuration object anyway
 	# - The "player" object is NOT a configuration node
 	#   - ABEC Frank Calibrated With Voltage gives one such object a "parent" attribute
 	CONFIGURATION_OBJECTS = (

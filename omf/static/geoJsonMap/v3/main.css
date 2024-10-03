@@ -133,6 +133,13 @@ it is dragged */
 }
 
 /*
+- Make the edit menu a consistent width (i.e. its width with all buttons enabled) so that it looks the same in all offline and online modes
+*/
+#editMenu {
+    width: 136px;
+}
+
+/*
 - Give the menu a background color
 - Make the corners of the menu round
 */

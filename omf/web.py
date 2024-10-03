@@ -1902,9 +1902,22 @@ def displayOmdMap(owner, modelName, feederNum):
 		dictionary['name'] = str(dictionary['name'])
 	public_feeders = all_data['publicFeeders']
 	show_file_menu = User.cu() == owner or User.cu() == 'admin'
-	return render_template('geoJson.html', featureCollection=featureCollection, componentsCollection=componentsCollection, thisOwner=owner,
-		thisModelName=modelName, thisFeederName=feeder_name, thisFeederNum=feederNum, publicFeeders=public_feeders, userFeeders=user_feeders,
-		currentUser=User.cu(), showFileMenu=json.dumps(show_file_menu), isOnline=json.dumps(True))
+	return render_template(
+		'geoJson.html',
+		featureCollection=featureCollection,
+		componentsCollection=componentsCollection,
+		thisOwner=owner,
+		thisModelName=modelName,
+		thisFeederName=feeder_name,
+		thisFeederNum=feederNum,
+		publicFeeders=public_feeders,
+		userFeeders=user_feeders,
+		currentUser=User.cu(),
+		showFileMenu=json.dumps(show_file_menu),
+		isOnline=json.dumps(True),
+		showAddNewObjectsButton=json.dumps(True),
+		showAttachmentsButton=json.dumps(True),
+		showAddGeojsonButton=json.dumps(True))
 
 
 def omdToGeoJson(feederName, modelDir):
