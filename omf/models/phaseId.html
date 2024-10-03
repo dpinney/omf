@@ -64,17 +64,31 @@
 	{{ omfRunDebugBlock }}
 	{% if modelStatus == 'finished' %}
 	<div id="output">
+		{% if allOutputDataDict['warningFlag'] == True %}
+			<p class="reportTitle" style="page-break-before:always"><b>Results Analysis</b></p>
+				<div id="warningInformation" class="tightContent">
+						<p style="font-size: 20px; padding: 8px;"><span style="color: red; font-weight: bold;">WARNING: </span> {{ allOutputDataDict['warningInfo'] }} </p>
+					<table>
+						<tr>
+							<th> Predicted Phase </th>
+							<th> Percentage of Total Meters Under Predicted Phase </th>
+						</tr>
+						<tr>
+							{% for key, value in allOutputDataDict['warningData'].items() %}
+								<td> {{ key }} </td>
+								<td> {{ value }} </td>
+							{% endfor %}
+						</tr>
+					</table>
+				</div>
+			</p>
+		{% endif %}
 		<p class="reportTitle" style="page-break-before:always"><b>Meter Phase Identification Overview</b></p>
 		<div id="confusionMatrix" class="tightContent">
 			<img id="confusionMatrixImg" style="width:100%; border-radius:8px"/>
 			<script type="text/javascript">gebi("confusionMatrixImg").src = "data:image/png;base64," + allOutputData.confusionMatrixImg</script>
 		</div>
-		<p class="reportTitle" style="page-break-before:always"><b>Results Analysis</b></p>
-			<div id="outputInformation" class="tightContent">
-					<p style="font-size: 20px;">{{ allOutputDataDict['outputInformation'] }}</p>
-			</div>
-		</p>
-		<p class="reportTitle"><b>Confidence Scores Overview</b></p>
+				<p class="reportTitle"><b>Confidence Scores Overview</b></p>
 		<div id="confidenceHistogram" class="tightContent">
 			<img id="confidenceHistogramImg" style="width:100%; border-radius:8px"/>
 			<script type="text/javascript">gebi("confidenceHistogramImg").src = "data:image/png;base64," + allOutputData.confidenceHistogramImg</script>
