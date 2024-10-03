@@ -1,5 +1,15 @@
 <head>
 	{{ omfHeaders }}
+	<style>
+		th {
+			position: sticky;
+			top: 0;
+			background-color: white;
+		}
+		table {
+			position: relative;
+		}
+	</style>
 	<!-- Library Imports -->
 	<script src="{{pathPrefix}}/static/highcharts4.src.js"></script>
 	<script src="https://cdn.plot.ly/plotly-1.50.1.min.js"></script>
@@ -97,7 +107,7 @@
 			</div>
 			<hr>
 			<div class="shortInput">
-				<label class="tooltip">Apply Downline Hosting Capacity Algorithm
+				<label class="tooltip">Apply Downline Hosting Capacity Algorithm (Cannot be run without Model-Based)
 					<span class="classic">Calculate approximately how much load is downline of every bus on the system which gives a rough estimate of hosting capacity. Useful as a sanity check for other methods.</span>
 				</label>
 				<select id="runDownlineAlgorithm" name="runDownlineAlgorithm" value="{{allInputDataDict.runDownlineAlgorithm}}" required>
@@ -116,7 +126,7 @@
     {% if allInputDataDict['runAmiAlgorithm'] == 'on' %}
 			<p class="reportTitle">AMI-Based Hosting Capacity Runtime ( H:M:S:MS ) </p>
 			<div id="AMI_runtime" class="tightContent">
-				<span style="border: 1px solid grey; padding: 3px;"> {{ allOutputDataDict['AMI_runtime']}} </span>  
+				<p style="padding: 4px; align-items: center;"> {{ allOutputDataDict['AMI_runtime']}} </p>  
 			</div>
 			<p class="reportTitle">AMI-Based Hosting Capacity Distribution</p>
 			<div id="histogramFigure" class="tightContent">
@@ -134,7 +144,7 @@
 			</div>
 			<p class="reportTitle">AMI-Based Full Hosting Capacity Data Table</p>
 			<div id="AMIhostingCapacityTable" class="tightContent">
-				<table style='margin:5px;width:990px'>
+				<table style='margin:5px;width:990px;'>
 					<tr>
 					{% for header in allOutputDataDict["AMI_tableHeadings"] %}
 						<th>{{ header }}</th>
@@ -153,7 +163,7 @@
 		{% if allInputDataDict['optionalCircuitFile'] == 'on' %}
 			<p class="reportTitle">Traditional/Model-Based Hosting Capacity Runtime ( H:M:S:MS )</p>
 			<div id="traditionalRunTime" class="tightContent">
-				<span style="border: 1px solid grey; padding: 3px;"> {{ allOutputDataDict['traditionalRuntime'] }} </span>
+				<p style="padding: 4px; align-items: center;"> {{ allOutputDataDict['traditionalRuntime'] }} </p>
 			</div>
 			<p class="reportTitle" style="page-break-before:always">Traditional Hosting Capacity Map</p>
 			<div id="traditionalHCMap" class="tightContent"></div>
@@ -175,7 +185,7 @@
 			</div>
 			<p class="reportTitle">Traditional/Model-Based Hosting Capacity Full Data Table</p>
 			<div id="traditionalHostingCapacityTable" class="tightContent" style="height:300px; overflow-y: scroll;">
-				<table style="width:100%">
+				<table style="width:100%;">
 					<tr>
 							{% for header in allOutputDataDict["traditionalHCTableHeadings"] %}
 							<th>{{ header }}</th>
@@ -194,12 +204,12 @@
 		{% if allInputDataDict['runDownlineAlgorithm'] == 'on' %}
 		<p class="reportTitle">Downline Load Hosting Capacity Runtime ( H:M:S:MS )</p>
 			<div id="traditionalRunTime" class="tightContent">
-				<span style="border: 1px solid grey; padding: 3px;"> {{ allOutputDataDict['downline_runtime'] }} </span>
+				<p style="padding: 4px; align-items: center;";> {{ allOutputDataDict['downline_runtime'] }} </p>
 			</div>
 		<p class="reportTitle">Downline Load Hosting Capacity Full Data Table</p>
-		<p style="font-size: 11pt; width: 980px; margin: 0px auto 0px auto;"> DownLine Load = Load - generator - storage - pvsystem </p>
+		<p style="font-size: 11pt; width: 980px; margin: 0px auto 0px auto;"> Load = generation - storage - pvsystem </p>
 			<div id="downlineHostingCapacityTable" class="tightContent" style="height:300px; overflow-y: scroll;">
-				<table style="width:100%">
+				<table style="width:100%;">
 					<tr>
 							{% for header in allOutputDataDict["downline_tableHeadings"] %}
 							<th>{{ header }}</th>
