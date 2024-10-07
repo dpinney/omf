@@ -3,7 +3,8 @@ clear
 
 new object=circuit.secondarytestcircuit pu=1.0 bus1=bussource basekv=46.0 r1=1.036 x1=10.1433 r0=5.462 x0=34.1897
 
-edit object=vsource.source
+! commented out blank command
+! edit object=vsource.source
 
 new object=linecode.busbar nphases=3 r1=1e-4 x1=1e-4 r0=1e-4 x0=1e-4 c1=0 c0=0 units=km basefreq=60 normamps=2000 emergamps=2000 faultrate=0.1 pctperm=20 repair=3
 new object=linecode.oh-3x_477aac_4/0aaacn nphases=3 r1=0.12241009 x1=0.39494091 r0=0.33466485 x0=1.2742766 c1=11.1973 c0=4.8089 units=km basefreq=60 normamps=732 emergamps=871
@@ -16,25 +17,28 @@ new object=linecode.triplex1phequivalent3/0 nphases=1 units=kft rmatrix=[0.2314]
 !from epri ckt4 dss files edited 6-15 cmm
 new object=linecode.triplex1phequivalent4/0 nphases=1 rmatrix=[0.18333334] xmatrix=[0.07840812] cmatrix=[15] units=kft normamps=299
 
-new object=line.mdv_sub_1_hsb bus1=bussource bus2=mdv_sub_1_hsb length=0.001 linecode=busbar units=m enabled=true phases=3
+! fix: added connectivity codes to the buses
+new object=line.mdv_sub_1_hsb bus1=bussource.1.2.3 bus2=mdv_sub_1_hsb.1.2.3 length=0.001 linecode=busbar units=m enabled=true phases=3
 
-new object=transformer.subxfmr phases=3 windings=2 %noloadloss=0.0 wdg=1 conn=delta kv=46.0 kva=7500.0 %r=0.16029975038989405 bus=mdv_sub_1_hsb wdg=2 conn=wye kv=12.47 kva=7500.0 %r=0.16029975038989405 bus=feederheadbus xhl=6.411990015595762 sub=yes
+! fix: added connectivity codes to the buses, reformatted to array-style notation.
+new object=transformer.subxfmr phases=3 windings=2 %noloadloss=0.0 buses=[mdv_sub_1_hsb.1.2.3,feederheadbus.1.2.3] conns=[delta,wye] kvs=[46.0,12.47] kvas=[7500.0,7500.0] %rs=[0.16029975038989405,0.16029975038989405] xhl=6.411990015595762 sub=yes 
 
 new object=regcontrol.ltc_subxfmr_a transformer=subxfmr winding=2 band=3.0 vreg=124.0 ptphase=1
 
-new object=line.ssswitch bus1=feederheadbus bus2=busprim1 length=1 linecode=busbar units=m enabled=true phases=3 normamps=1500
+new object=line.ssswitch bus1=feederheadbus.1.2.3 bus2=busprim1.1.2.3 length=1 linecode=busbar units=m enabled=true phases=3 normamps=1500
 
-new object=line.line1 bus1=busprim1 bus2=busprim2 length=100 phases=3 units=m linecode=oh-3x_477aac_4/0aaacn enabled=true 
-new object=line.line2 bus1=busprim2 bus2=busprim3 length=100 phases=3 units=m linecode=oh-3x_477aac_4/0aaacn enabled=true 
-new object=line.line3 bus1=busprim3 bus2=busprim4 length=100 phases=3 units=m linecode=oh-3x_477aac_4/0aaacn enabled=true 
-new object=line.line4 bus1=busprim4 bus2=busprim5 length=100 phases=3 units=m linecode=oh-3x_477aac_4/0aaacn enabled=true 
-new object=line.line5 bus1=busprim5 bus2=busprim6 length=100 phases=3 units=m linecode=oh-3x_477aac_4/0aaacn enabled=true 
-new object=line.line6 bus1=busprim6 bus2=busprim7 length=100 phases=3 units=m linecode=oh-3x_477aac_4/0aaacn enabled=true 
-new object=line.line7 bus1=busprim7 bus2=busprim8 length=100 phases=3 units=m linecode=oh-3x_477aac_4/0aaacn enabled=true 
-new object=line.line8 bus1=busprim8 bus2=busprim9 length=100 phases=3 units=m linecode=oh-3x_477aac_4/0aaacn enabled=true 
-new object=line.line9 bus1=busprim9 bus2=busprim10 length=100 phases=3 units=m linecode=oh-3x_477aac_4/0aaacn enabled=true 
-new object=line.line10 bus1=busprim10 bus2=busprim11 length=100 phases=3 units=m linecode=oh-3x_477aac_4/0aaacn enabled=true
-new object=line.line11 bus1=busprim11 bus2=busprim12 length=100 phases=3 units=m linecode=oh-3x_477aac_4/0aaacn enabled=true
+! fix: added connectivity codes to the buses.
+new object=line.line1 bus1=busprim1.1.2.3 bus2=busprim2.1.2.3 length=100 phases=3 units=m linecode=oh-3x_477aac_4/0aaacn enabled=true 
+new object=line.line2 bus1=busprim2.1.2.3 bus2=busprim3.1.2.3 length=100 phases=3 units=m linecode=oh-3x_477aac_4/0aaacn enabled=true 
+new object=line.line3 bus1=busprim3.1.2.3 bus2=busprim4.1.2.3 length=100 phases=3 units=m linecode=oh-3x_477aac_4/0aaacn enabled=true 
+new object=line.line4 bus1=busprim4.1.2.3 bus2=busprim5.1.2.3 length=100 phases=3 units=m linecode=oh-3x_477aac_4/0aaacn enabled=true 
+new object=line.line5 bus1=busprim5.1.2.3 bus2=busprim6.1.2.3 length=100 phases=3 units=m linecode=oh-3x_477aac_4/0aaacn enabled=true 
+new object=line.line6 bus1=busprim6.1.2.3 bus2=busprim7.1.2.3 length=100 phases=3 units=m linecode=oh-3x_477aac_4/0aaacn enabled=true 
+new object=line.line7 bus1=busprim7.1.2.3 bus2=busprim8.1.2.3 length=100 phases=3 units=m linecode=oh-3x_477aac_4/0aaacn enabled=true 
+new object=line.line8 bus1=busprim8.1.2.3 bus2=busprim9.1.2.3 length=100 phases=3 units=m linecode=oh-3x_477aac_4/0aaacn enabled=true 
+new object=line.line9 bus1=busprim9.1.2.3 bus2=busprim10.1.2.3 length=100 phases=3 units=m linecode=oh-3x_477aac_4/0aaacn enabled=true 
+new object=line.line10 bus1=busprim10.1.2.3 bus2=busprim11.1.2.3 length=100 phases=3 units=m linecode=oh-3x_477aac_4/0aaacn enabled=true
+new object=line.line11 bus1=busprim11.1.2.3 bus2=busprim12.1.2.3 length=100 phases=3 units=m linecode=oh-3x_477aac_4/0aaacn enabled=true
 
 ! secondary circuit 1: 1 mv/lv transformer and 5 loads each connected to the transformer with own service line
 ! 1-phase equivalent of the split-phase transformer with percent short-circuit impedance: r+jx=1.18+j1.44
