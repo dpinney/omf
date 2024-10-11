@@ -37,7 +37,7 @@ class FeatureController { // implements ControllerInterface
                 let name = observable.getProperty('name');
                 let key = treeKey;
                 while (this.observableGraph.getObservables(ob => ob.hasProperty('name') && ob.getProperty('name') === name).length > 0) {
-                    name = `${name}:${key}`;
+                    name = `${name}_${key}`;
                     key += 1;
                 }
                 observable.setProperty('name', name);
