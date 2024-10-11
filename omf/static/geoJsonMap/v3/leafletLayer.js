@@ -175,7 +175,7 @@ class LeafletLayer {    // implements ObserverInterface
         const layer = Object.values(this.#layer._layers)[0];
         layer.bindPopup(
             () => {
-                this.#modal = new FeatureEditModal([this.#observable], this.#controller);
+                this.#modal = new FeatureEditModal(this.#observable, this.#controller);
                 return this.#modal.getDOMElement();
             },
             // - I CANNOT set this option because then the popup won't follow a node around when it is dragged!

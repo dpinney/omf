@@ -506,7 +506,7 @@ class SearchModal {
      * @returns {HTMLButtonElement}
      */
     #getResetButton() {
-        let button = new IconLabelButton({paths: IconLabelButton.getCircularArrowPaths(), viewBox: '-4 -4 24 24', text: 'Clear', tooltip: 'Clear the search criteria'});
+        let button = new IconLabelButton({paths: IconLabelButton.getCircularArrowPaths(), viewBox: '-4 -4 24 24', text: 'Clear', tooltip: 'Clear the search criteria. Also unloads search results which makes the interface faster.'});
         button.button.classList.add('-blue');
         button.button.getElementsByClassName('icon')[0].classList.add('-white');
         button.button.getElementsByClassName('label')[0].classList.add('-white');

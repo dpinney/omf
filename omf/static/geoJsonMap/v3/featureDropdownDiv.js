@@ -163,7 +163,7 @@ class FeatureDropdownDiv {
         const outerFunc = function(div) {
             if (div.lastChild.classList.contains('-expanded')) {
                 div.firstChild.getElementsByClassName('icon')[0].classList.add('-rotated');
-                that.#featureEditModal = new FeatureEditModal([that.#observable], that.#controller);
+                that.#featureEditModal = new FeatureEditModal(that.#observable, that.#controller);
                 div.lastChild.append(that.#featureEditModal.getDOMElement());
             } else {
                 div.firstChild.getElementsByClassName('icon')[0].classList.remove('-rotated');

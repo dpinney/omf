@@ -67,3 +67,4 @@ omf/solvers/reopt_jl/reopt_jl.so
 omf/solvers/reopt_jl/julia-1.9.4/*
 instantiated.txt
 omf/solvers/protsetopt/testFiles/
+.vite/
