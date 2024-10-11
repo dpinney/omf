@@ -390,113 +390,116 @@ def evilGldTreeToDssTree(evil_gld_tree):
 	objs_in_order = [y[1] for y in sorted(all_objs, key=lambda x:int(x[0]))]
 	# Process each object.
 	for ob in objs_in_order:
-		if ob.get('object') == 'bus':
-			new_ob = {
-				'!CMD':'setbusxy',
-				'bus':ob['name'],
-				'x': ob['longitude'],
-				'y': ob['latitude']
-			}
-			dssTree.append(new_ob)
-		elif ob.get('object') == 'line':
-			new_ob = {
-				'!CMD': 'new',
-				'object': ob['object'] + '.' + ob['name'],
-				'bus1': ob['from'] + ob.get('!FROCODE',''),
-				'bus2': ob['to']+ ob.get('!TOCODE',''),
-			}
-			_extend_with_exc(ob, new_ob, ['!CMD','from','to','name','object','latitude','longitude','!FROCODE', '!TOCODE'])
-			dssTree.append(new_ob)
-		elif ob.get('object') == 'transformer':
-			buses = f"[{ob['from']}{ob.get('!FROCODE','')},{ob['to']}{ob.get('!TOCODE','')}]" # for 2-winding xfrmrs
-			exclist = ['!CMD','from','to','to2','name','object','latitude','longitude','!FROCODE','!TOCODE','windings']
-			if ob.get('to2'): # for 3-winding xfrmrs
-				exclist.extend(['to2','!TO2CODE'])
-				buses = f"[{ob['from']}{ob.get('!FROCODE','')},{ob['to']}{ob.get('!TOCODE','')},{ob['to2']}{ob.get('!TO2CODE','')}]"
-			#if ob.get('to3'): # for 4-winding xfrmrs (rare)
-			#	exclist.extend(['to3','!TO3CODE'])
-			#	buses = f"[{ob['from']}{ob.get('!FROCODE','')},{ob['to']}{ob.get('!TOCODE','')},{ob['to2']}{ob.get('!TO2CODE','')},{ob['to3']}{ob.get('!TO3CODE','')}]"
-			new_ob = {
-				'!CMD': 'new',
-				'object': ob['object'] + '.' + ob['name'],
-			}
-			if ob.get('windings','NWP')!='NWP':
-				new_ob['windings'] = ob['windings'] # This is required to ensure correct order (because the 'windings' property triggers memory allocation and resets everything to default values)
-			new_ob['buses'] = buses # 'buses' must come after 'windings', if existing.
-			_extend_with_exc(ob, new_ob, exclist)
-			dssTree.append(new_ob)
-		elif ob.get('object') == 'reactor':
-			#TODO: this block of code is same as for 'line' above. Consider combining.
-			new_ob = {
-				'!CMD': 'new',
-				'object': ob['object'] + '.' + ob['name'],
-				'bus1': ob['from'] + ob.get('!FROCODE',''),
-				'bus2': ob['to']+ ob.get('!TOCODE',''),
-			}
-			_extend_with_exc(ob, new_ob, ['!CMD','from','to','name','object','latitude','longitude','!FROCODE', '!TOCODE'])
-			dssTree.append(new_ob)
-		elif ob.get('object') == 'regcontrol':
-			new_ob = {
-				'!CMD': 'new',
-				'object': ob['object'] + '.' + ob.get('name',''),
-			}
-			if ob.get('parent','NP')!='NP':
-				if ob.get('!CONNCODE','NCC')=='NCC':
-					new_ob['!CONNCODE'] = '.1' # If no node info is specified, then it defaults to one-phase.
-				new_ob['bus'] = ob['parent'] + ob['!CONNCODE']
-			_extend_with_exc(ob, new_ob, ['parent','name','object','latitude','longitude','!CONNCODE'])
-			dssTree.append(new_ob)
-		elif ob.get('object') == 'capcontrol':
-			new_ob = {
-				'!CMD': 'new',
-				'object': ob['object'] + '.' + ob.get('name',''),
-				'element': ob['parent'] + ob.get('!CONNCODE', '')
-			}
-			_extend_with_exc(ob, new_ob, ['parent','name','object','latitude','longitude','!CONNCODE'])
-			dssTree.append(new_ob)
-		elif ob.get('object') == 'energymeter':
-			#TODO this block of code is the same as 'capcontrol' above. Consider combining.
-			new_ob = {
-				'!CMD': 'new',
-				'object': ob['object'] + '.' + ob.get('name',''),
-				'element': ob['parent'] + ob.get('!CONNCODE', '')
-			}
-			_extend_with_exc(ob, new_ob, ['parent','name','object','latitude','longitude','!CONNCODE'])
-			dssTree.append(new_ob)
-		elif ob.get('object') == 'monitor':
-			#TODO this block of code is the same as 'capcontrol' above. Consider combining.
-			new_ob = {
-				'!CMD': 'new',
-				'object': ob['object'] + '.' + ob.get('name',''),
-				'element': ob['parent'] + ob.get('!CONNCODE', '')
-			}
-			_extend_with_exc(ob, new_ob, ['parent','name','object','latitude','longitude','!CONNCODE'])
-			dssTree.append(new_ob)
-		elif 'parent' in ob:
-			new_ob = {
-				'!CMD': 'new',
-				'object': ob['object'] + '.' + ob.get('name',''),
-				'bus1': ob['parent'] + ob.get('!CONNCODE', '')
-			}
-			_extend_with_exc(ob, new_ob, ['parent','name','object','latitude','longitude','!CONNCODE'])
-			dssTree.append(new_ob)
-		elif 'bus' not in ob and 'bus1' not in ob and 'bus2' not in ob and 'buses' not in ob and ob.get('object') != '!CMD':
-			# floating config type object.
-			new_ob = {
-				'!CMD': 'new',
-				'object': ob['object'] + '.' + ob['name'],
-			}
-			_extend_with_exc(ob, new_ob, ['!CMD','name','object','latitude','longitude'])
-			dssTree.append(new_ob)
-		elif ob.get('object') == '!CMD':
-			new_ob = {
-				'!CMD': ob['name'],
-			}
-			_extend_with_exc(ob, new_ob, ['!CMD', 'name', 'object','latitude','longitude'])
-			dssTree.append(new_ob)
-		else:
-			print(f"Unprocessed object: {ob}")
-			# warnings.warn(f"Unprocessed object: {ob}")
+		try:
+			if ob.get('object') == 'bus':
+				new_ob = {
+					'!CMD':'setbusxy',
+					'bus':ob['name'],
+					'x': ob['longitude'],
+					'y': ob['latitude']
+				}
+				dssTree.append(new_ob)
+			elif ob.get('object') == 'line':
+				new_ob = {
+					'!CMD': 'new',
+					'object': ob['object'] + '.' + ob['name'],
+					'bus1': ob['from'] + ob.get('!FROCODE',''),
+					'bus2': ob['to']+ ob.get('!TOCODE',''),
+				}
+				_extend_with_exc(ob, new_ob, ['!CMD','from','to','name','object','latitude','longitude','!FROCODE', '!TOCODE'])
+				dssTree.append(new_ob)
+			elif ob.get('object') == 'transformer':
+				buses = f"[{ob['from']}{ob.get('!FROCODE','')},{ob['to']}{ob.get('!TOCODE','')}]" # for 2-winding xfrmrs
+				exclist = ['!CMD','from','to','to2','name','object','latitude','longitude','!FROCODE','!TOCODE','windings']
+				if ob.get('to2'): # for 3-winding xfrmrs
+					exclist.extend(['to2','!TO2CODE'])
+					buses = f"[{ob['from']}{ob.get('!FROCODE','')},{ob['to']}{ob.get('!TOCODE','')},{ob['to2']}{ob.get('!TO2CODE','')}]"
+				#if ob.get('to3'): # for 4-winding xfrmrs (rare)
+				#	exclist.extend(['to3','!TO3CODE'])
+				#	buses = f"[{ob['from']}{ob.get('!FROCODE','')},{ob['to']}{ob.get('!TOCODE','')},{ob['to2']}{ob.get('!TO2CODE','')},{ob['to3']}{ob.get('!TO3CODE','')}]"
+				new_ob = {
+					'!CMD': 'new',
+					'object': ob['object'] + '.' + ob['name'],
+				}
+				if ob.get('windings','NWP')!='NWP':
+					new_ob['windings'] = ob['windings'] # This is required to ensure correct order (because the 'windings' property triggers memory allocation and resets everything to default values)
+				new_ob['buses'] = buses # 'buses' must come after 'windings', if existing.
+				_extend_with_exc(ob, new_ob, exclist)
+				dssTree.append(new_ob)
+			elif ob.get('object') == 'reactor':
+				#TODO: this block of code is same as for 'line' above. Consider combining.
+				new_ob = {
+					'!CMD': 'new',
+					'object': ob['object'] + '.' + ob['name'],
+					'bus1': ob['from'] + ob.get('!FROCODE',''),
+					'bus2': ob['to']+ ob.get('!TOCODE',''),
+				}
+				_extend_with_exc(ob, new_ob, ['!CMD','from','to','name','object','latitude','longitude','!FROCODE', '!TOCODE'])
+				dssTree.append(new_ob)
+			elif ob.get('object') == 'regcontrol':
+				new_ob = {
+					'!CMD': 'new',
+					'object': ob['object'] + '.' + ob.get('name',''),
+				}
+				if ob.get('parent','NP')!='NP':
+					if ob.get('!CONNCODE','NCC')=='NCC':
+						new_ob['!CONNCODE'] = '.1' # If no node info is specified, then it defaults to one-phase.
+					new_ob['bus'] = ob['parent'] + ob['!CONNCODE']
+				_extend_with_exc(ob, new_ob, ['parent','name','object','latitude','longitude','!CONNCODE'])
+				dssTree.append(new_ob)
+			elif ob.get('object') == 'capcontrol':
+				new_ob = {
+					'!CMD': 'new',
+					'object': ob['object'] + '.' + ob.get('name',''),
+					'element': ob['parent'] + ob.get('!CONNCODE', '')
+				}
+				_extend_with_exc(ob, new_ob, ['parent','name','object','latitude','longitude','!CONNCODE'])
+				dssTree.append(new_ob)
+			elif ob.get('object') == 'energymeter':
+				#TODO this block of code is the same as 'capcontrol' above. Consider combining.
+				new_ob = {
+					'!CMD': 'new',
+					'object': ob['object'] + '.' + ob.get('name',''),
+					'element': ob['parent'] + ob.get('!CONNCODE', '')
+				}
+				_extend_with_exc(ob, new_ob, ['parent','name','object','latitude','longitude','!CONNCODE'])
+				dssTree.append(new_ob)
+			elif ob.get('object') == 'monitor':
+				#TODO this block of code is the same as 'capcontrol' above. Consider combining.
+				new_ob = {
+					'!CMD': 'new',
+					'object': ob['object'] + '.' + ob.get('name',''),
+					'element': ob['parent'] + ob.get('!CONNCODE', '')
+				}
+				_extend_with_exc(ob, new_ob, ['parent','name','object','latitude','longitude','!CONNCODE'])
+				dssTree.append(new_ob)
+			elif 'parent' in ob:
+				new_ob = {
+					'!CMD': 'new',
+					'object': ob['object'] + '.' + ob.get('name',''),
+					'bus1': ob['parent'] + ob.get('!CONNCODE', '')
+				}
+				_extend_with_exc(ob, new_ob, ['parent','name','object','latitude','longitude','!CONNCODE'])
+				dssTree.append(new_ob)
+			elif 'bus' not in ob and 'bus1' not in ob and 'bus2' not in ob and 'buses' not in ob and ob.get('object') != '!CMD':
+				# floating config type object.
+				new_ob = {
+					'!CMD': 'new',
+					'object': ob['object'] + '.' + ob['name'],
+				}
+				_extend_with_exc(ob, new_ob, ['!CMD','name','object','latitude','longitude'])
+				dssTree.append(new_ob)
+			elif ob.get('object') == '!CMD':
+				new_ob = {
+					'!CMD': ob['name'],
+				}
+				_extend_with_exc(ob, new_ob, ['!CMD', 'name', 'object','latitude','longitude'])
+				dssTree.append(new_ob)
+			else:
+				print(f"Unprocessed object: {ob}")
+				# warnings.warn(f"Unprocessed object: {ob}")
+		except:
+			raise Exception(f"\n\nError encountered on parsing object {ob}\n")
 	return dssTree
 
 def evilToOmd(evilTree, outPath):
