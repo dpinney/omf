@@ -397,22 +397,22 @@ def new(modelDir):
 
 		## Financial Inputs
 		'demandChargeURDB': 'Yes',
-		'demandChargeCost': '0.05',
+		'demandChargeCost': '25',
 		'projectionLength': '25',
 
 		## vbatDispatch inputs:
 		'load_type': '2', ## Heat Pump
-		'number_devices': '1',
+		'number_devices': '1000',
 		'power': '5.6',
 		'capacitance': '2',
 		'resistance': '2',
 		'cop': '2.5',
 		'setpoint': '19.5',
 		'deadband': '0.625',
-		'electricityCost': '0.16',
+		'electricityCost': '0.05',
 		'discountRate': '2',
-		'unitDeviceCost': '150',
-		'unitUpkeepCost': '5',
+		'unitDeviceCost': '0',
+		'unitUpkeepCost': '0',
 	}
 	return __neoMetaModel__.new(modelDir, defaultInputs)
 
