@@ -27,24 +27,36 @@ class FeatureController { // implements ControllerInterface
      * @returns {undefined}
      */
     addObservables(observables) {
-        observables.forEach(ob => {
-            const key = (this.observableGraph.getMaxKey() + 1).toString();
-            ob.setProperty('treeKey', key, 'meta');
-            this.observableGraph.insertObservable(ob);
-            if (!ob.isConfigurationObject()) {
-                LeafletLayer.createAndGroupLayer(ob, this);
+        for (const observable of observables) {
+            const treeKey = (this.observableGraph.getMaxKey() + 1).toString();
+            observable.setProperty('treeKey', treeKey, 'meta');
+            // - When a component is added, the easiest way to ensure a unique, descriptive name is to use its treeKey. Since the treeKey must be set
+            //   here, it also makes sense to set the name here, even, potentially, for mass add
+            // - All components have a name due to line 1327 of geo.py
+            if (observable.hasProperty('name')) {
+                let name = observable.getProperty('name');
+                let key = treeKey;
+                while (this.observableGraph.getObservables(ob => ob.hasProperty('name') && ob.getProperty('name') === name).length > 0) {
+                    name = `${name}_${key}`;
+                    key += 1;
+                }
+                observable.setProperty('name', name);
             }
-            if (ob.isLine()) {
-                ob.getObservers().filter(ob => ob instanceof LeafletLayer)[0].getLayer().bringToBack();
+            this.observableGraph.insertObservable(observable);
+            if (!observable.isConfigurationObject()) {
+                LeafletLayer.createAndGroupLayer(observable, this);
             }
-            if (ob.isChild()) {
-                const parentKey = this.observableGraph.getKey(ob.getProperty('parent'), ob.getProperty('treeKey', 'meta'));
-                const parentChildLineFeature = this.observableGraph.getParentChildLineFeature(parentKey, key);
+            if (observable.isLine()) {
+                observable.getObservers().filter(ob => ob instanceof LeafletLayer)[0].getLayer().bringToBack();
+            }
+            if (observable.isChild()) {
+                const parentKey = this.observableGraph.getKey(observable.getProperty('parent'), observable.getProperty('treeKey', 'meta'));
+                const parentChildLineFeature = this.observableGraph.getParentChildLineFeature(parentKey, treeKey);
                 this.observableGraph.insertObservable(parentChildLineFeature);
                 LeafletLayer.createAndGroupLayer(parentChildLineFeature, this);
                 parentChildLineFeature.getObservers().filter(ob => ob instanceof LeafletLayer)[0].getLayer().bringToBack();
             }
-        });
+        }
     }
 
     /**

@@ -657,7 +657,6 @@ def map_omd(omd_path, output_dir, open_browser=False, showAddNewObjectsButton=Tr
 	'''
 	Create an HTML page of the GeoJSON circuit editor without Flask
 	'''
-
 	# - Load feeder data
 	with open(omd_path) as f:
 		omd = json.load(f)
@@ -670,6 +669,8 @@ def map_omd(omd_path, output_dir, open_browser=False, showAddNewObjectsButton=Tr
 	# - Load JavaScript
 	main_js_filepath = (pathlib.Path(omf.omfDir).resolve(True) / 'static' / 'geoJsonMap' / 'v3' / 'main.js').resolve(True)
 	all_js_filepaths = list((pathlib.Path(omf.omfDir).resolve(True) / 'static' / 'geoJsonMap').glob('**/*.js'))
+	# - Filter out .test.js files
+	all_js_filepaths = list(filter(lambda p: not str(p).endswith('.test.js'), all_js_filepaths))
 	all_js_filepaths.remove(main_js_filepath)
 	all_js_filepaths.append(main_js_filepath)
 	all_js_file_content = []
