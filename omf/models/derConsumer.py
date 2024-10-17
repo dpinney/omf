@@ -181,8 +181,17 @@ def create_REopt_jl_jsonFile(modelDir, inputDict):
 		scenario['ElectricStorage'] = {
 			##TODO: Add options here, if needed
 			#scenario['ElectricStorage']['size_kw'] = 2
-			"min_kw": 2,
-			"min_kwh": 2,
+			#"min_kw": 2,
+			#"min_kwh": 8,
+			"total_rebate_per_kw": 100.0,
+			"macrs_option_years": 15,
+			#"can_grid_charge": 'true',
+			"macrs_bonus_fraction": 0.4,
+			"replace_cost_per_kw": 460.0,
+			"replace_cost_per_kwh": 230.0,
+			"installed_cost_per_kw": 500.0,
+			"installed_cost_per_kwh": 80.0,
+			"total_itc_fraction": 0.0
 			}
 		
 
