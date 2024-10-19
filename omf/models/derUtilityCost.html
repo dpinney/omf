@@ -8,7 +8,7 @@
 		$(window).on('pageshow',function(){
 			Plotly.newPlot('derOverviewData', JSON.parse(allOutputData['derOverviewData']),JSON.parse(allOutputData['derOverviewLayout']));
 			Plotly.newPlot('batteryChargePlotly', JSON.parse(allOutputData['batteryChargeData']), JSON.parse(allOutputData['batteryChargeLayout']));
-			Plotly.newPlot('thermalDevicePlotData', JSON.parse(allOutputData['thermalDevicePlotData']), JSON.parse(allOutputData['thermalDevicePlotLayout']) || {});
+			//Plotly.newPlot('thermalDevicePlotData', JSON.parse(allOutputData['thermalDevicePlotData']), JSON.parse(allOutputData['thermalDevicePlotLayout']) || {});
 		});
 	</script>
 </head>
@@ -68,10 +68,6 @@
 			<div class="shortInput">
 				<label class="tooltip">Longitude<span class="classic">Specify the longitude of the load/grid.</span></label>
 				<input type="text" id="longitude" name="longitude" value="{{allInputDataDict.longitude}}" pattern="^\-?\d+\.?\d*?$" required="required"/>
-			</div>
-			<div class="shortInput">
-				<label class="tooltip">URDB Label<span class="classic">Input the string found at the end of the URDB Rate URL, For example https://openei.org/apps/<br>IURDB/rate/view/<br> 5b75cfe95457a3454faf0aea <br> would yield "5b75cfe95457a3454faf0aea"</span></label>
-				<input type="text" id="urdbLabel" name="urdbLabel" value="{{allInputDataDict.urdbLabel}}" required="required"/>
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Year<span class="classic">Specify the year to which the load shape values corresond.</span></label>
@@ -142,6 +138,10 @@
 			</div>
 			<hr style="border-style: solid; border-color: #196b12; margin-top: 10px;">
 			<div class="shortInput">
+				<label class="tooltip">URDB Label<span class="classic">Input the string found at the end of the URDB Rate URL, For example https://openei.org/apps/<br>IURDB/rate/view/<br> 5b75cfe95457a3454faf0aea <br> would yield "5b75cfe95457a3454faf0aea"</span></label>
+				<input type="text" id="urdbLabel" name="urdbLabel" value="{{allInputDataDict.urdbLabel}}" required="required"/>
+			</div>
+			<div class="shortInput">
 				<label class="tooltip">Use URDB label to determine demand charge?<span class="classic">If yes, model will use the URDB label provided above to determine the demand charge rate. If no, specify the demand charge rate ($/kWh) below.</span></label>
 				<select id="demandChargeURDB" name="demandChargeURDB" value="{{allInputDataDict.demandChargeURDB}}">
 					<option value="True" {{ 'selected' if allInputDataDict.demandChargeURDB == 'Yes' }}>Yes</option> <!-- TODO: Make this dropdown menu cause Demand Charge Cost to appear and disappear 8/2024 -->
@@ -155,6 +155,14 @@
 			<div class="shortInput">
 				<label class="tooltip">Financial Projection Length (years)<span class="classic">Number of years to project out estimated savings. Must be between 1 and 75 years.</span></label>
 				<input type="text" id="projectionLength" name="projectionLength" value="{{allInputDataDict.projectionLength}}" step="1" min="1" max="75" required="required">
+			</div>
+			<div class="shortInput">
+				<label class="tooltip">Energy Compensation Rate ($/kWh)<span class="classic">The dollar amount per kWh compensated to the member-consumer.</span></label>
+				<input type="text" id="rateCompensation" name="rateCompensation" value="{{allInputDataDict.rateCompensation}}" pattern="^\d+\.?\d*?$" min="0" required="required"/>
+			</div>
+			<div class="shortInput">
+				<label class="tooltip">Subsidy Amount ($)<span class="classic">The total subsidy amount ($) for the entire analysis duration.</span></label>
+				<input type="text" id="subsidy" name="subsidy" value="{{allInputDataDict.subsidy}}" pattern="^\d+\.?\d*?$" required="required"/>
 			</div>
 
 			<!-- vbatDispatch Specific Inputs -->
@@ -257,14 +265,15 @@
 	{% if modelStatus == 'finished' %}
 
 	<!-- Output tables, graphs, etc -->
-
 	<div id="output">
 
 		<p class="reportTitle" style="page-break-before:always">DER Serving Load Overview</p>
 		<div id="derOverviewData" class="tightContent" style="width: 1000px; height: 600px;"></div>
 
+		<!--
 		<p class="reportTitle" style="page-break-before:always">Thermal Device Temperature Profile</p>
 		<div id="thermalDevicePlotData" class="tightContent" style="width: 1000px; height: 600px;"></div>
+		-->
 
 		<p class="reportTitle" style="page-break-before:always">Battery Charge Percentage</p>
 		<div id="batteryChargePlotly" class="tightContent" style="width: 1000px; height: 600px;"></div>
@@ -315,7 +324,7 @@
 					insertMetric("monthlySummaryTable","Adjusted Demand Charge ($)", allOutputData.demandChargeAdjusted)
 					insertMetric("monthlySummaryTable","Total Cost ($)", allOutputData.totalCost)
 					insertMetric("monthlySummaryTable","Adjusted Total Cost ($)", allOutputData.totalCostAdjusted)
-					insertMetric("monthlySummaryTable","Savings ($)", allOutputData.savings)
+					insertMetric("monthlySummaryTable","Utility Savings ($)", allOutputData.savings)
 				</script>
 			</div>
 		</div>

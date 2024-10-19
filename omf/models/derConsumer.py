@@ -175,14 +175,22 @@ def create_REopt_jl_jsonFile(modelDir, inputDict):
 		scenario['PV'] = {
 			##TODO: Add options here, if needed
 			}
-	
+
 	## Add a Battery Energy Storage System (BESS) section if enabled 
 	if inputDict['BESS'] == 'Yes':
 		scenario['ElectricStorage'] = {
 			##TODO: Add options here, if needed
 			#scenario['ElectricStorage']['size_kw'] = 2
-			"min_kw": 2,
-			"min_kwh": 2,
+			#"min_kw": 2,
+			#"min_kwh": 8,
+			'total_rebate_per_kw': float(inputDict['total_rebate_per_kw']),
+			'macrs_option_years': float(inputDict['macrs_option_years']),
+			'macrs_bonus_fraction': float(inputDict['macrs_bonus_fraction']),
+			'replace_cost_per_kw': float(inputDict['replace_cost_per_kw']),
+			'replace_cost_per_kwh': float(inputDict['replace_cost_per_kwh']),
+			'installed_cost_per_kw': float(inputDict['installed_cost_per_kw']),
+			'installed_cost_per_kwh': float(inputDict['installed_cost_per_kwh']),
+			'total_itc_fraction': float(inputDict['total_itc_fraction']),
 			}
 		
 
@@ -345,6 +353,20 @@ def work(modelDir, inputDict):
 	## Delete output file every run if it exists
 	outData = {}	
 	
+	## Add REopt BESS inputs to inputDict
+	## NOTE: These inputs are being added directly to inputDict because they are not specified by user input
+	## If they become user inputs, then they can be placed directly into the defaultInputs under the new() function below
+	inputDict.update({
+		'total_rebate_per_kw': '10.0',
+		'macrs_option_years': '25',
+		'macrs_bonus_fraction': '0.4',
+		'replace_cost_per_kw': '460.0',
+		'replace_cost_per_kwh': '230.0',
+		'installed_cost_per_kw': '500.0', 
+		'installed_cost_per_kwh': '80.0', 
+		'total_itc_fraction': '0.0',
+	})
+
 	## Create REopt input file
 	create_REopt_jl_jsonFile(modelDir, inputDict)
 	
@@ -422,7 +444,6 @@ def work(modelDir, inputDict):
 		grid_charging_BESS = np.asarray(reoptResults['ElectricUtility']['electric_to_storage_series_kw'])
 		if 'PV' in reoptResults:
 			grid_charging_BESS += np.asarray(reoptResults['PV']['electric_to_storage_series_kw'])
-			print(grid_charging_BESS)
 		outData['chargeLevelBattery'] = reoptResults['ElectricStorage']['soc_series_fraction']
 	else:
 		print('No BESS found in REopt: Setting BESS data to 0. \n')

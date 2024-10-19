@@ -35,6 +35,20 @@ def work(modelDir, inputDict):
 	# Delete output file every run if it exists
 	outData = {}
 
+	## Add REopt BESS inputs to inputDict
+	## NOTE: These inputs are being added directly to inputDict because they are not specified by user input
+	## If they become user inputs, then they can be placed directly into the defaultInputs under the new() function below
+	inputDict.update({
+		'total_rebate_per_kw': '10.0',
+		'macrs_option_years': '25',
+		'macrs_bonus_fraction': '0.4',
+		'replace_cost_per_kw': '10.0', 
+		'replace_cost_per_kwh': '5.0', 
+		'installed_cost_per_kw': '10.0',
+		'installed_cost_per_kwh': '5.0',
+		'total_itc_fraction': '0.0',
+	})
+
 	## Create REopt input file
 	derConsumer.create_REopt_jl_jsonFile(modelDir, inputDict)
 
@@ -50,7 +64,7 @@ def work(modelDir, inputDict):
 	reopt_jl.run_reopt_jl(modelDir, "reopt_input_scenario.json", outages=inputDict['outage'])
 	with open(pJoin(modelDir, 'results.json')) as jsonFile:
 		reoptResults = json.load(jsonFile)
-	#outData.update(reoptResults) ## Update output file with reopt results
+	outData.update(reoptResults) ## Update output file with reopt results
 
 	## Convert user provided demand and temp data from str to float
 	temperatures = [float(value) for value in inputDict['tempCurve'].split('\n') if value.strip()]
@@ -88,7 +102,7 @@ def work(modelDir, inputDict):
 		vbat_discharge = vbpower_series.where(vbpower_series < 0, 0) #negative values = discharging
 		vbat_discharge_flipsign = vbat_discharge.mul(-1) ## flip sign of vbat discharge for plotting purposes
 
-	## DER Overview plot
+	## DER Overview plot ###################################################################################################################################################################
 	showlegend = True # either enable or disable the legend toggle in the plot
 	grid_to_load = reoptResults['ElectricUtility']['electric_to_load_series_kw']
 
@@ -99,7 +113,6 @@ def work(modelDir, inputDict):
 	
 	if inputDict['BESS'] == 'Yes': ## BESS
 		BESS = reoptResults['ElectricStorage']['storage_to_load_series_kw']
-		#print(BESS)
 		#BESS = np.ones_like(demand) ## Ad-hoc line used because BESS is not being built in REopt for some reason. Currently debugging 5/2024
 		grid_charging_BESS = reoptResults['ElectricUtility']['electric_to_storage_series_kw']
 		outData['chargeLevelBattery'] = reoptResults['ElectricStorage']['soc_series_fraction']
@@ -126,6 +139,9 @@ def work(modelDir, inputDict):
 		vbat_discharge_component = np.zeros_like(demand)
 		vbat_charge_component = np.zeros_like(demand)
 
+	## Define additional load and avoided load
+	additional_load = np.asarray(demand) + np.asarray(grid_charging_BESS) + vbat_charge_component
+	#avoided_load = np.asarray(BESS) + vbat_discharge_component
 
 	## Original load piece (minus any vbat or BESS charging aka 'new/additional loads')
 	fig.add_trace(go.Scatter(x=timestamps,
@@ -141,7 +157,7 @@ def work(modelDir, inputDict):
 	## NOTE: demand is added here for plotting purposes, so that the additional load shows up above the demand curve.
 	## How or if this should be done is still being discussed
 	fig.add_trace(go.Scatter(x=timestamps,
-                         y=np.asarray(demand) + np.asarray(grid_charging_BESS) + vbat_charge_component,
+                         y=additional_load,
 						 yaxis='y1',
                          mode='none',
                          name='Additional Load (Charging BESS and TESS)',
@@ -221,7 +237,7 @@ def work(modelDir, inputDict):
 
 	## Plot layout
 	fig.update_layout(
-    	title='Utility Data Test',
+    	title='DER Overview for Utility',
     	xaxis=dict(title='Timestamp'),
     	yaxis=dict(title="Power (kW)"),
     	yaxis2=dict(title='degrees Celsius',
@@ -351,6 +367,21 @@ def work(modelDir, inputDict):
 		outData['batteryChargeData'] = json.dumps(fig.data, cls=plotly.utils.PlotlyJSONEncoder)
 		outData['batteryChargeLayout'] = json.dumps(fig.layout, cls=plotly.utils.PlotlyJSONEncoder)
 
+
+
+	## Compensation rate to member-consumer
+	compensation_rate = float(inputDict['rateCompensation'])
+	subsidy = float(inputDict['subsidy'])
+
+	if inputDict['BESS'] == 'Yes': ## BESS
+		BESS = reoptResults['ElectricStorage']['storage_to_load_series_kw']
+		BESS_compensated_to_consumer = np.sum(BESS)*compensation_rate+subsidy
+		print('Compensation rate for BESS: ${:,.2f}'.format(BESS_compensated_to_consumer))
+		BESS_bought_from_grid = np.sum(BESS)*float(inputDict['electricityCost'])
+		print('BESS energy if bought from grid: ${:,.2f}'.format(BESS_bought_from_grid))
+		print('Difference (electricity cost - compensated cost): ${:,.2f}'.format(BESS_bought_from_grid-BESS_compensated_to_consumer))
+
+
 	# Model operations typically ends here.
 	# Stdout/stderr.
 	outData['stdout'] = 'Success'
@@ -397,22 +428,24 @@ def new(modelDir):
 
 		## Financial Inputs
 		'demandChargeURDB': 'Yes',
-		'demandChargeCost': '0.05',
+		'demandChargeCost': '25',
 		'projectionLength': '25',
+		'rateCompensation': '0.02', ## unit: $/kWh
+		'subsidy': '1.0',
 
 		## vbatDispatch inputs:
 		'load_type': '2', ## Heat Pump
-		'number_devices': '1',
+		'number_devices': '2000',
 		'power': '5.6',
 		'capacitance': '2',
 		'resistance': '2',
 		'cop': '2.5',
-		'setpoint': '19.5',
+		'setpoint': '22.5',
 		'deadband': '0.625',
-		'electricityCost': '0.16',
+		'electricityCost': '0.04',
 		'discountRate': '2',
-		'unitDeviceCost': '150',
-		'unitUpkeepCost': '5',
+		'unitDeviceCost': '0',
+		'unitUpkeepCost': '0',
 	}
 	return __neoMetaModel__.new(modelDir, defaultInputs)
 
