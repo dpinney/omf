@@ -8,7 +8,9 @@
 		$(window).on('pageshow',function(){
 			Plotly.newPlot('derOverviewData', JSON.parse(allOutputData['derOverviewData']),JSON.parse(allOutputData['derOverviewLayout']));
 			Plotly.newPlot('batteryChargePlotly', JSON.parse(allOutputData['batteryChargeData']), JSON.parse(allOutputData['batteryChargeLayout']));
-			//Plotly.newPlot('thermalDevicePlotData', JSON.parse(allOutputData['thermalDevicePlotData']), JSON.parse(allOutputData['thermalDevicePlotLayout']) || {});
+			Plotly.newPlot('thermalDevicePlotData', JSON.parse(allOutputData['thermalDevicePlotData']), JSON.parse(allOutputData['thermalDevicePlotLayout']) || {});
+			Plotly.newPlot('thermalBatEnergyPlot', JSON.parse(allOutputData['thermalBatEnergyPlot']), JSON.parse(allOutputData['thermalBatEnergyPlotLayout']) || {});
+			Plotly.newPlot('thermalBatPowerPlot', JSON.parse(allOutputData['thermalBatPowerPlot']), JSON.parse(allOutputData['thermalBatPowerPlotLayout']) || {});
 		});
 	</script>
 </head>
@@ -270,10 +272,14 @@
 		<p class="reportTitle" style="page-break-before:always">DER Serving Load Overview</p>
 		<div id="derOverviewData" class="tightContent" style="width: 1000px; height: 600px;"></div>
 
-		<!--
+		<p class="reportTitle" style="page-break-before:always">Thermal Battery Energy Profile</p>
+		<div id="thermalBatEnergyPlot" class="tightContent" style="width: 1000px; height: 600px;"></div>
+		
+		<p class="reportTitle" style="page-break-before:always">Thermal Battery Power Profile</p>
+		<div id="thermalBatPowerPlot" class="tightContent" style="width: 1000px; height: 600px;"></div>
+
 		<p class="reportTitle" style="page-break-before:always">Thermal Device Temperature Profile</p>
 		<div id="thermalDevicePlotData" class="tightContent" style="width: 1000px; height: 600px;"></div>
-		-->
 
 		<p class="reportTitle" style="page-break-before:always">Battery Charge Percentage</p>
 		<div id="batteryChargePlotly" class="tightContent" style="width: 1000px; height: 600px;"></div>

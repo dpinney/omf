@@ -101,6 +101,12 @@ def work(modelDir, inputDict):
 		vbat_charge = vbpower_series.where(vbpower_series > 0, 0) ##positive values = charging
 		vbat_discharge = vbpower_series.where(vbpower_series < 0, 0) #negative values = discharging
 		vbat_discharge_flipsign = vbat_discharge.mul(-1) ## flip sign of vbat discharge for plotting purposes
+		vbatMinEnergyCapacity = pd.Series(vbatResults['minEnergySeries'])
+		vbatMaxEnergyCapacity = pd.Series(vbatResults['maxEnergySeries'])
+		vbatEnergy = pd.Series(vbatResults['VBenergy'])
+		vbatMinPowerCapacity = pd.Series(vbatResults['minPowerSeries'])
+		vbatMaxPowerCapacity = pd.Series(vbatResults['maxPowerSeries'])
+		vbatPower = vbpower_series
 
 	## DER Overview plot ###################################################################################################################################################################
 	showlegend = True # either enable or disable the legend toggle in the plot
@@ -256,7 +262,9 @@ def work(modelDir, inputDict):
 	## NOTE: This opens a window that displays the correct figure with the appropriate patterns.
 	## For some reason, the slash-mark patterns are not showing up on the OMF page otherwise.
 	## Eventually we will delete this part.
-	fig.show()
+	#fig.show()
+	#outData['derOverviewHtml'] = fig.to_html(full_html=False)
+	fig.write_html(pJoin(modelDir, "Plot_DerServingLoadOverview.html"))
 
 	## Encode plot data as JSON for showing in the HTML 
 	outData['derOverviewData'] = json.dumps(fig.data, cls=plotly.utils.PlotlyJSONEncoder)
@@ -348,6 +356,103 @@ def work(modelDir, inputDict):
 		outData['thermalDevicePlotLayout'] = json.dumps(fig.layout, cls=plotly.utils.PlotlyJSONEncoder)
 
 
+	## Create Thermal Battery Energy plot object ######################################################################################################################################################
+	if inputDict['load_type'] != '0': ## If vbatDispatch is called in the analysis:
+		fig = go.Figure()
+		fig.add_trace(go.Scatter(
+			x=timestamps,
+			y=vbatMinEnergyCapacity,
+			yaxis='y1',
+			mode='lines',
+			line=dict(color='green', width=1),
+			name='Minimum Energy Capacity',
+			showlegend=True 
+			))
+		fig.add_trace(go.Scatter(
+			x=timestamps, 
+			y=vbatMaxEnergyCapacity,  
+			yaxis='y1',
+			mode='lines',
+			line=dict(color='blue', width=1),
+			name='Maximum Energy Capacity',
+			showlegend=True
+		))
+		fig.add_trace(go.Scatter(
+			x=timestamps, 
+			y=vbatEnergy,  
+			yaxis='y1',
+			mode='lines',
+			line=dict(color='black', width=1),
+			name='Actual Energy Capacity',
+			showlegend=True
+		))
+
+		## Plot layout
+		fig.update_layout(
+			xaxis=dict(title='Timestamp'),
+			yaxis=dict(title='Energy (kWh)'),
+			legend=dict(
+				orientation='h',
+				yanchor='bottom',
+				y=1.02,
+				xanchor='right',
+				x=1
+				)
+		)
+		
+		## Encode plot data as JSON for showing in the HTML side
+		outData['thermalBatEnergyPlot'] = json.dumps(fig.data, cls=plotly.utils.PlotlyJSONEncoder)
+		outData['thermalBatEnergyPlotLayout'] = json.dumps(fig.layout, cls=plotly.utils.PlotlyJSONEncoder)
+	
+	## Create Thermal Battery Power plot object ######################################################################################################################################################
+	if inputDict['load_type'] != '0': ## If vbatDispatch is called in the analysis:
+		fig = go.Figure()
+		fig.add_trace(go.Scatter(
+			x=timestamps,
+			y=vbatMinPowerCapacity,
+			yaxis='y1',
+			mode='lines',
+			line=dict(color='green', width=1),
+			name='Minimum Power Capacity',
+			showlegend=True 
+			))
+		fig.add_trace(go.Scatter(
+			x=timestamps, 
+			y=vbatMaxPowerCapacity,  
+			yaxis='y1',
+			mode='lines',
+			line=dict(color='blue', width=1),
+			name='Maximum Power Capacity',
+			showlegend=True
+		))
+		fig.add_trace(go.Scatter(
+			x=timestamps, 
+			y=vbatPower,  
+			yaxis='y1',
+			mode='lines',
+			line=dict(color='black', width=1),
+			name='Actual Power',
+			showlegend=True
+		))
+
+		## Plot layout
+		fig.update_layout(
+			xaxis=dict(title='Timestamp'),
+			yaxis=dict(title='Power (kW)'),
+			legend=dict(
+				orientation='h',
+				yanchor='bottom',
+				y=1.02,
+				xanchor='right',
+				x=1
+				)
+		)
+		
+		## Encode plot data as JSON for showing in the HTML side
+		outData['thermalBatPowerPlot'] = json.dumps(fig.data, cls=plotly.utils.PlotlyJSONEncoder)
+		outData['thermalBatPowerPlotLayout'] = json.dumps(fig.layout, cls=plotly.utils.PlotlyJSONEncoder)	
+	
+
 	## Create Battery State of Charge plot object ######################################################################################################################################################
 	if inputDict['BESS'] == 'Yes':
 		fig = go.Figure()
@@ -431,7 +536,7 @@ def new(modelDir):
 		'demandChargeCost': '25',
 		'projectionLength': '25',
 		'rateCompensation': '0.02', ## unit: $/kWh
-		'subsidy': '1.0',
+		'subsidy': '100.0',
 
 		## vbatDispatch inputs:
 		'load_type': '2', ## Heat Pump
