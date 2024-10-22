@@ -108,6 +108,98 @@ def work(modelDir, inputDict):
 		vbatMaxPowerCapacity = pd.Series(vbatResults['maxPowerSeries'])
 		vbatPower = vbpower_series
 
+	## Scale down the utility demand to create an ad-hoc small consumer load (1 kW average) and large consumer load (10 kW average)
+	utilityLoadAverage = np.average(demand)
+	smallConsumerTargetAverage = 1.0 #Unit: kW
+	largeConsumerTargetAverage = 10.0 #Unit: kW
+	smallConsumerLoadScaleFactor = smallConsumerTargetAverage / utilityLoadAverage 
+	largeConsumerLoadScaleFactor = largeConsumerTargetAverage / utilityLoadAverage 
+	smallConsumerLoad = demand * smallConsumerLoadScaleFactor
+	largeConsumerLoad = demand * largeConsumerLoadScaleFactor
+
+	## Convert small and large consumer load arrays into strings and pass it back to derConsumer
+	## TODO: Ideally this model wouldn't handle data in string format, it feels like extra work - consider changing that input format type later to floats
+	smallConsumerLoadString = '\n'.join([str(value) for value in smallConsumerLoad])
+	largeConsumerLoadString = '\n'.join([str(value) for value in largeConsumerLoad])
+
+	## Create a new derConsumer model directory to store the results for both small and large consumers
+	newDir_smallderConsumer = pJoin(modelDir,'smallderConsumer')
+	newDir_largederConsumer = pJoin(modelDir,'largederConsumer')
+	os.makedirs(newDir_smallderConsumer, exist_ok=True)
+	os.makedirs(newDir_largederConsumer, exist_ok=True)
+	os.chdir(newDir_smallderConsumer)
+	print("Current Directory:", os.getcwd())
+
+	## Set up model inputs for derConsumer and pass the small and large consumer loads to omf/models/derConsumer
+	with open(pJoin(__neoMetaModel__._omfDir,'static','testFiles','residential_critical_load.csv')) as f:
+		criticalLoad_curve = f.read()
+	
+	derConsumerInputDict = {
+		## OMF inputs:
+		'user' : 'admin',
+		'modelType': modelName,
+		'created': str(datetime.datetime.now()),
+
+		## REopt inputs:
+		## NOTE: Variables are strings as dictated by the html input options
+		'latitude':  inputDict['latitude'], ## use utility's lat and lon 
+		'longitude': inputDict['longitude'], 
+		'year' : '2018',
+		'urdbLabel': inputDict['urdbLabel'],
+		'fileName': 'residential_PV_load.csv',
+		'tempFileName': 'residential_extended_temperature_data.csv',
+		'criticalLoadFileName': 'residential_critical_load.csv', ## critical load here = 50% of the daily demand
+		'demandCurve': smallConsumerLoadString,
+		'tempCurve': inputDict['tempCurve'],
+		'criticalLoad': criticalLoad_curve,
+		'criticalLoadSwitch': 'Yes',
+		'criticalLoadFactor': '0.50',
+		'PV': 'Yes',
+		'BESS': 'Yes',
+		'generator': 'No',
+		'outage': True,
+		'outage_start_hour': '4637',
+		'outage_duration': '3',
+
+		## Financial Inputs
+		'demandChargeURDB': 'Yes',
+		'demandChargeCost': '25',
+		'projectionLength': '25',
+
+		## vbatDispatch inputs:
+		'load_type': '2', ## Heat Pump
+		'number_devices': '1',
+		'power': '5.6',
+		'capacitance': '2',
+		'resistance': '2',
+		'cop': '2.5',
+		'setpoint': '19.5',
+		'deadband': '0.625',
+		'electricityCost': '0.16',
+		'discountRate': '2',
+		'unitDeviceCost': '150',
+		'unitUpkeepCost': '5',
+
+		## DER Program Design inputs:
+		'utilityProgram': 'No',
+		'rateCompensation': '0.1', ## unit: $/kWh
+		#'maxBESSDischarge': '0.80', ## Between 0 and 1 (Percent of total BESS capacity) #TODO: Fix the HTML input for this
+		'subsidy': '55',
+	}
+	smallConsumerOutput = derConsumer.work(newDir_smallderConsumer,derConsumerInputDict)
+
+	## Change directory to large derConsumer and run that case
+	os.chdir(newDir_largederConsumer)
+	derConsumerInputDict['demandCurve'] = largeConsumerLoadString
+	largeConsumerOutput = derConsumer.work(newDir_largederConsumer,derConsumerInputDict)
+
+	## Change directory back to derUtilityCost
+	os.chdir(modelDir)
+	outData.update({
+		'savingsSmallConsumer': smallConsumerOutput['savings'],
+		'savingsLargeConsumer': largeConsumerOutput['savings']
+	})
+
 	## DER Overview plot ###################################################################################################################################################################
 	showlegend = True # either enable or disable the legend toggle in the plot
 	grid_to_load = reoptResults['ElectricUtility']['electric_to_load_series_kw']

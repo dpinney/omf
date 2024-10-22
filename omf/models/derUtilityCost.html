@@ -288,7 +288,7 @@
 		<div id="levelizedCostReport" class="tightContent">
 			<div id="levelizedCostTableDiv" style="display:inline-block; width:1000px">
 				<table id="monthlySummaryTable" style="margin:5px;width:990px">
-					<style>td, th {padding:7 0 5 20;text-align: left;font-size:0.7em;}</style>
+					<style>td, th {padding:7 -5 5 20;text-align: left;font-size:0.7em;}</style>
 					<div id="tableHead">
 						<thead>
 							<th></th>
@@ -331,6 +331,8 @@
 					insertMetric("monthlySummaryTable","Total Cost ($)", allOutputData.totalCost)
 					insertMetric("monthlySummaryTable","Adjusted Total Cost ($)", allOutputData.totalCostAdjusted)
 					insertMetric("monthlySummaryTable","Utility Savings ($)", allOutputData.savings)
+					insertMetric("monthlySummaryTable","Average 1kW Consumer Savings ($)", allOutputData.savingsSmallConsumer)
+					insertMetric("monthlySummaryTable","Average 10kW Consumer Savings ($)", allOutputData.savingsLargeConsumer)
 				</script>
 			</div>
 		</div>
