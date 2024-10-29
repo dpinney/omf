@@ -1,5 +1,6 @@
 export { FeatureDropdownDiv };
-import { DropdownDiv } from './dropdownDiv.js';
+import { IconLabelButton } from '../v4/ui-components/iconlabel-button/iconlabel-button.js';
+import { DropdownDiv } from '../v4/ui-components/dropdown-div/dropdown-div.js';
 import { Feature, UnsupportedOperationError } from './feature.js';
 import { FeatureController } from './featureController.js';
 import { FeatureEditModal } from './featureEditModal.js';
@@ -40,7 +41,7 @@ class FeatureDropdownDiv {
     handleDeletedObservable(observable) {
         // - The function signature above is part of the ObserverInterface API. The implementation below is not
         if (!(observable instanceof Feature)) {
-            throw TypeError('"observable" argument must be instanceof Feature.');
+            throw TypeError('The "observable" argument must be instanceof Feature.');
         }
         this.remove();
     }
@@ -99,7 +100,7 @@ class FeatureDropdownDiv {
     // ****************************
 
     getDOMElement() {
-        return this.#dropdownDiv.divElement;
+        return this.#dropdownDiv.div;
     }
 
     /**
@@ -112,9 +113,7 @@ class FeatureDropdownDiv {
     /**
      * @returns {undefined}
      */
-    refreshContent() {
-
-    }
+    //refreshContent() {}
 
     /**
      * @returns {undefined}
@@ -127,7 +126,7 @@ class FeatureDropdownDiv {
                 this.#featureEditModal.remove();
                 this.#featureEditModal = null;
             }
-            this.#dropdownDiv.divElement.remove();
+            this.#dropdownDiv.div.remove();
             this.#dropdownDiv = null;
             this.#observable.removeObserver(this);
             this.#observable = null;
@@ -141,40 +140,43 @@ class FeatureDropdownDiv {
      */
     renderContent() {
         const dropdownDiv = new DropdownDiv();
-        dropdownDiv.addStyleClasses(['sideNav'], 'divElement');
-        const buttonTextSpan = document.createElement('span');
-        buttonTextSpan.classList.add('indent2');
+        dropdownDiv.div.classList.add('featureDropdownDiv');
+        const buttonTextDiv = document.createElement('div');
         if (this.#observable.hasProperty('object')) {
-            if (this.#observable.hasProperty('name')) {
-                let div = document.createElement('div');
-                div.textContent = this.#observable.getProperty('object');
-                buttonTextSpan.appendChild(div);
-                div = document.createElement('div');
-                div.textContent = this.#observable.getProperty('name');
-                buttonTextSpan.appendChild(div);
-            } else {
-                buttonTextSpan.textContent = this.#observable.getProperty('object');
-            }
-        } else if (this.#observable.hasProperty('name')) {
-            buttonTextSpan.textContent = this.#observable.getProperty('name');
-        } else {
-            buttonTextSpan.textContent = this.#observable.getProperty('treeKey', 'meta');
+            const objectDiv = document.createElement('div');
+            objectDiv.textContent = this.#observable.getProperty('object');
+            buttonTextDiv.append(objectDiv);
         }
-        dropdownDiv.setButton(buttonTextSpan, true);
+        if (this.#observable.hasProperty('name')) {
+            const nameDiv = document.createElement('div');
+            nameDiv.textContent = this.#observable.getProperty('name');
+            buttonTextDiv.append(nameDiv);
+        }
+        if (!this.#observable.hasProperty('object') && !this.#observable.hasProperty('name')) {
+            const keyDiv = document.createElement('div');
+            keyDiv.textContent = this.#observable.getProperty('treeKey', 'meta');
+            buttonTextDiv.append(keyDiv);
+        }
+        const button = new IconLabelButton({paths: IconLabelButton.getChevronPaths(), viewBox: '0 0 24 24', text: buttonTextDiv, textPosition: 'prepend'});
+        button.button.classList.add('-clear');
         const that = this;
-        dropdownDiv.buttonElement.addEventListener('click', function() {
-            if (dropdownDiv.contentDivElement.classList.contains('expanded')) {
-                that.#featureEditModal = new FeatureEditModal([that.#observable], that.#controller);
-                dropdownDiv.insertElement(that.#featureEditModal.getDOMElement());
+        const outerFunc = function(div) {
+            if (div.lastChild.classList.contains('-expanded')) {
+                div.firstChild.getElementsByClassName('icon')[0].classList.add('-rotated');
+                that.#featureEditModal = new FeatureEditModal(that.#observable, that.#controller);
+                div.lastChild.append(that.#featureEditModal.getDOMElement());
             } else {
+                div.firstChild.getElementsByClassName('icon')[0].classList.remove('-rotated');
                 that.#featureEditModal.remove();
             }
-        });
+        };
+        button.button.addEventListener('click', dropdownDiv.getToggleFunction({outerFunc: outerFunc}));
+        dropdownDiv.div.prepend(button.button);
         if (this.#dropdownDiv === null) {
             this.#dropdownDiv = dropdownDiv;
         }
-        if (document.body.contains(this.#dropdownDiv.divElement)) {
-            this.#dropdownDiv.divElement.replaceWith(dropdownDiv.divElement);
+        if (document.body.contains(this.#dropdownDiv.div)) {
+            this.#dropdownDiv.div.replaceWith(dropdownDiv.div);
             this.#dropdownDiv = dropdownDiv;
         }
     }

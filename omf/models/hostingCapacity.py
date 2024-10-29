@@ -32,13 +32,14 @@ def convert_seconds_to_hms_ms( seconds ):
 	
 	return "{:02d}:{:02d}:{:02d}.{:03d}".format(int(hours), int(minutes), int(seconds), int(milliseconds))
 
+# Deprecated
 def bar_chart_coloring( row ):
 	color = 'black'
-	if row['thermal_violation'] and not row['voltage_violation']:
+	if row['thermally_limited'] and not row['voltage_limited']:
 		color = 'orange'
-	elif not row['thermal_violation'] and row['voltage_violation']:
+	elif not row['thermally_limited'] and row['voltage_limited']:
 		color = 'yellow'
-	elif not row['thermal_violation'] and not row['voltage_violation']:
+	elif not row['thermally_limited'] and not row['voltage_limited']:
 		color = 'green'
 	else:
 		color = 'red'
@@ -173,12 +174,16 @@ def run_traditional_algorithm( modelDir, inputDict, outData ):
 	tradHCDF = pd.DataFrame( traditionalHCResults )
 	sorted_tradHCDF = tradHCDF.sort_values(by='bus')
 	sorted_tradHCDF.to_csv( "output_tradHC.csv")
-	sorted_tradHCDF['plot_color'] = sorted_tradHCDF.apply ( lambda row: bar_chart_coloring(row), axis=1 )
+	# Don't color bars anymore..
+	# sorted_tradHCDF['plot_color'] = sorted_tradHCDF.apply ( lambda row: bar_chart_coloring(row), axis=1 )
 	# Plotly has its own colors - need to map the "name" of given colors to theirs
-	traditionalHCFigure = px.bar( sorted_tradHCDF, x='bus', y='max_kw', barmode='group', color='plot_color', color_discrete_map={ 'red': 'red', 'orange': 'orange', 'green': 'green', 'yellow': 'yellow'}, template='simple_white' )
+	traditionalHCFigure = px.bar( sorted_tradHCDF, x='bus', y='max_kw', barmode='group', template='simple_white', color_discrete_sequence=["green"] )
 	traditionalHCFigure.update_xaxes(categoryorder='array', categoryarray=sorted_tradHCDF.bus.values)
+	
+	'''
+	Other code for bar coloring so there are names when you hover.
 	# Map color to violation type to update key/legend
-	colorToKey = {'orange':'thermal_violation', 'yellow': 'voltage_violation', 'red': 'both_violation', 'green': 'no_violation'}
+	# colorToKey = {'orange':'thermally_limited', 'yellow': 'voltage_limited', 'red': 'both_violation', 'green': 'no_violation'}
 	# Changes the hover mode, key, and legend to show the violation type rather than the color
 	traditionalHCFigure.for_each_trace(
 		lambda t: t.update(
@@ -189,6 +194,7 @@ def run_traditional_algorithm( modelDir, inputDict, outData ):
 		)
 	# We don't need the plot_color stuff for anything else, so drop it
 	sorted_tradHCDF.drop(sorted_tradHCDF.columns[len(sorted_tradHCDF.columns)-1], axis=1, inplace=True)
+	'''
 	color_df = sorted_tradHCDF[['bus','max_kw']]
 	color_df.to_csv(Path(modelDir, 'color_by_traditional.csv'), index=False)
 	attachment_keys = {

@@ -9,7 +9,7 @@ article.js-article--sideNavArticle.compressed {
 }
 nav.js-nav--sideNav {
     background-color: #FFFFFF;
-    box-shadow: inset -1px 0px darkgray;
+    /*box-shadow: inset -1px 0px darkgray;*/
     font-family: sans-serif;
     height: 100%;
     /*overflow-y: auto;*/

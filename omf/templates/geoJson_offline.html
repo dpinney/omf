@@ -44,6 +44,9 @@
         const gCurrentUser = "{% if currentUser %}{{ currentUser | safe }}{% else %}null{% endif %}";
         const gShowFileMenu = {% if showFileMenu %}{{ showFileMenu | safe }}{% else %}null{% endif %};
         const gIsOnline = {% if isOnline %}{{ isOnline | safe }}{% else %}null{% endif %};
+        const gShowAddNewObjectsButton = {% if showAddNewObjectsButton %}{{ showAddNewObjectsButton | safe }}{% else %}null{% endif %};
+        const gShowAttachmentsButton = {% if showAttachmentsButton %}{{ showAttachmentsButton | safe }}{% else %}null{% endif %};
+        const gShowAddGeojsonButton = {% if showAddGeojsonButton %}{{ showAddGeojsonButton | safe }}{% else %}null{% endif %};
     </script>
     {{ js }}
   </body>

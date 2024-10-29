@@ -1,0 +1,56 @@
+/* .loading-span component styling */
+
+.loading-span {
+    display: inline-block;
+    padding: .3rem;
+    text-align: center;
+}
+
+/* .loading-span component variant styling */
+
+.loading-span.-large {
+    padding: 1rem;
+}
+
+.loading-span.-yellow {
+    background-color: hsla(50, 100%, 70%, 1);
+}
+
+.loading-span.-hidden {
+    display: none;
+}
+
+/* .label element styling */
+
+.loading-span > .label {
+    font-size: 13px;
+}
+
+/* .label element variant styling */
+
+.loading-span.-large > .label {
+    font-size: 26px;
+}
+
+/* .gif element styling */
+
+/* 
+- Make the img take up its own line
+- Center the img
+*/
+
+.loading-span > .gif {
+    display: block;
+    margin: auto;
+    padding-bottom: .3rem;
+}
+
+/* .gif element variant styling */
+
+.loading-span > .gif.-hidden {
+    display: none;
+}
+
+.loading-span.-large > .gif {
+    padding-bottom: 1rem;
+}

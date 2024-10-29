@@ -2,14 +2,16 @@ export { GeojsonModal };
 import { Feature, UnsupportedOperationError } from './feature.js';
 import { FeatureController } from './featureController.js';
 import { LeafletLayer } from './leafletLayer.js';
-import { Modal } from './modal.js';
+import { PropTable } from '../v4/ui-components/prop-table/prop-table.js';
+import { IconLabelButton } from '../v4/ui-components/iconlabel-button/iconlabel-button.js';
+import { LoadingSpan } from '../v4/ui-components/loading-span/loading-span.js';
 
 // - Test data can be found at omf/scratch/CIGAR/geoJsonLeaflet
 
 class GeojsonModal { // implements ModalInterface, ObserverInterface
     #controller;            // - ControllerInterface instance
     #filenameToLayerGroup;  // - Container for LayerGroups
-    #modal;                 // - Modal instance
+    #propTable;             // - PropTable instance
     #observables;           // - An array of ObservableInterface instances
     #removed;               // - Whether this ColorModal instance has already been deleted
 
@@ -26,7 +28,7 @@ class GeojsonModal { // implements ModalInterface, ObserverInterface
         }
         this.#controller = controller;
         this.#filenameToLayerGroup = {};
-        this.#modal = null;
+        this.#propTable = null;
         this.#observables = observables;
         this.#observables.forEach(ob => ob.registerObserver(this));
         this.#removed = false;
@@ -122,7 +124,7 @@ class GeojsonModal { // implements ModalInterface, ObserverInterface
     // ****************************
 
     getDOMElement() {
-        return this.#modal.divElement;
+        return this.#propTable.div;
     }
 
     /**
@@ -138,11 +140,10 @@ class GeojsonModal { // implements ModalInterface, ObserverInterface
      * @returns {undefined}
      */
     refreshContent() {
-        const fileListModal = new Modal();
-        fileListModal.addStyleClasses(['colorModal'], 'divElement');
+        const fileListTable = new PropTable();
+        fileListTable.div.classList.add('fileListTable');
         if (Object.values(this.#filenameToLayerGroup).length > 0) {
-            fileListModal.insertTHeadRow(['Filename', 'Show GeoJSON on Page Load']);
-            fileListModal.addStyleClasses(['centeredTable'], 'tableElement');
+            fileListTable.insertTBodyRow({elements: ['Filename', 'Show GeoJSON on page load']});
         }
         const that = this;
         const attachments = this.#controller.observableGraph.getObservable('omd').getProperty('attachments', 'meta');
@@ -166,12 +167,10 @@ class GeojsonModal { // implements ModalInterface, ObserverInterface
             if (attachments.geojsonFiles[filename].displayOnLoad) {
                 checkbox.checked = true;
             }
-            const removeButton = document.createElement('button');
-            removeButton.classList.add('horizontalFlex', 'centerMainAxisFlex', 'centerCrossAxisFlex', 'fullWidth', 'delete');
-            const span = document.createElement('span');
-            span.textContent = 'Remove';
-            removeButton.appendChild(span);
-            removeButton.addEventListener('click', function() {
+            const removeButton = new IconLabelButton({text: 'Remove'});
+            removeButton.button.classList.add('-red');
+            removeButton.button.getElementsByClassName('label')[0].classList.add('-white');
+            removeButton.button.addEventListener('click', () => {
                 if (attachments.hasOwnProperty('geojsonFiles')) {
                     delete attachments.geojsonFiles[filename];
                     LeafletLayer.map.removeLayer(that.#filenameToLayerGroup[filename].layerGroup);
@@ -183,14 +182,15 @@ class GeojsonModal { // implements ModalInterface, ObserverInterface
                     that.refreshContent();
                 }
             });
-            fileListModal.insertTBodyRow([filename, checkbox, removeButton]);
+            fileListTable.insertTBodyRow({elements: [filename, checkbox, removeButton.button]});
         }
-        const containerElement = this.#modal.divElement.getElementsByClassName('div--modalElementContainer')[0];
-        const oldModal = containerElement.getElementsByClassName('js-div--modal');
-        if (oldModal.length === 0) {
-            containerElement.prepend(fileListModal.divElement);
+        const existingRow = this.#propTable.div.getElementsByClassName('proptablediv');
+        // - There was NOT already a fileListTable in place, so insert this fileListTable
+        if (existingRow.length === 0) {
+            this.#propTable.insertTBodyRow({elements: [fileListTable.div], colspans: [2]});
+        // - There was already a fileListTable in place. Replace it with this fileListTable
         } else {
-            oldModal[0].replaceWith(fileListModal.divElement);
+            existingRow[0].replaceWith(fileListTable.div);
         }
     }
 
@@ -201,7 +201,7 @@ class GeojsonModal { // implements ModalInterface, ObserverInterface
         if (!this.#removed) {
             this.#observables.forEach(ob => ob.removeObserver(this));
             this.#observables = null;
-            this.#modal.divElement.remove();
+            this.#propTable.div.remove();
             this.#removed = true;
         }
     }
@@ -211,16 +211,21 @@ class GeojsonModal { // implements ModalInterface, ObserverInterface
      * @returns {undefined}
      */
     renderContent() {
-        const modal = new Modal();
-        modal.addStyleClasses(['outerModal', 'fitContent'], 'divElement');
-        modal.setTitle('Add GeoJSON');
-        modal.addStyleClasses(['horizontalFlex', 'centerMainAxisFlex', 'centerCrossAxisFlex'], 'titleElement');
+        const propTable = new PropTable();
+        propTable.div.id = 'geojsonModal';
+        propTable.div.addEventListener('click', function(e) {
+            e.stopPropagation();
+        });
+        propTable.insertTHeadRow({elements: ['Add GeoJson'], colspans: [2]});
         const geojsonInput = document.createElement('input');
         geojsonInput.type = 'file';
         geojsonInput.accept = '.geojson';
         geojsonInput.required = true;
         geojsonInput.id = 'geojsonInput';
         const that = this;
+        const loadingSpan = new LoadingSpan();
+        loadingSpan.span.classList.add('-yellow', '-hidden');
+        propTable.insertTHeadRow({elements: [loadingSpan.span], position: 'prepend', colspans: [2]})
         const attachments = this.#controller.observableGraph.getObservable('omd').getProperty('attachments', 'meta');
         geojsonInput.addEventListener('change', async function() {
             const file = this.files[0];
@@ -228,7 +233,7 @@ class GeojsonModal { // implements ModalInterface, ObserverInterface
             let featureCollection;
             try {
                 featureCollection = JSON.parse(text);
-                that.#modal.setBanner('', ['hidden']);
+                loadingSpan.update({text: '', show: false});
                 if (!attachments.hasOwnProperty('geojsonFiles')) {
                     attachments.geojsonFiles = {};
                 }
@@ -238,23 +243,19 @@ class GeojsonModal { // implements ModalInterface, ObserverInterface
                 that.#updateLayerGroups();
                 that.refreshContent();
             } catch (e) {
-                that.#modal.showProgress(false, `There was an error "${e.message}" when parsing the JSON file "${file.name}". Please double-check the JSON formatting.`, ['caution']);
+                loadingSpan.update({text: `There was an error "${e.message}" when parsing the JSON file "${file.name}". Please double-check the JSON formatting.`, show: true, showGif: false});
             }
         });
         const geojsonLabel = document.createElement('label');
         geojsonLabel.htmlFor = 'geojsonInput';
         geojsonLabel.innerHTML = 'Add a file containing a GeoJSON feature collection (.geojson)';
-        modal.insertTBodyRow([geojsonLabel, geojsonInput]);
-        modal.addStyleClasses(['centeredTable'], 'tableElement');
-        // - Append an empty div so the containerElement isn't null
-        const submitDiv = document.createElement('div');
-        modal.insertElement(submitDiv);
-        if (this.#modal === null) {
-            this.#modal = modal;
+        propTable.insertTBodyRow({elements: [geojsonLabel, geojsonInput]});
+        if (this.#propTable === null) {
+            this.#propTable = propTable;
         }
-        if (document.body.contains(this.#modal.divElement)) {
-            this.#modal.divElement.replaceWith(modal.divElement);
-            this.#modal = modal;
+        if (document.body.contains(this.#propTable.div)) {
+            this.#propTable.div.replaceWith(propTable.div);
+            this.#propTable = propTable;
         }
         this.#updateLayerGroups(true);
     }

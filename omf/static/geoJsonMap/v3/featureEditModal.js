@@ -1,32 +1,35 @@
-export { FeatureEditModal, getCirclePlusSvg, getTrashCanSvg, zoom };
+export { FeatureEditModal, zoom };
 import { Feature, UnsupportedOperationError } from './feature.js';
-import { Modal } from './modal.js';
+import { PropTable } from '../v4/ui-components/prop-table/prop-table.js';
 import { FeatureController } from './featureController.js';
 import { LeafletLayer } from './leafletLayer.js';
+import { IconLabelButton } from '../v4/ui-components/iconlabel-button/iconlabel-button.js';
+import { Validity } from '../v4/mvc/models/validity/validity.js';
 
 class FeatureEditModal { // implements ObserverInterface, ModalInterface
+
     #controller;    // - ControllerInterface instance
-    #modal;         // - A single Modal instance
-    #observables;   // - An array of ObservableInterface instances
+    #propTable;     // - A PropTable instance
+    #observable;    // - A single ObservableInterface instance
     #removed;       // - Whether this FeatureEditModal instance has already been deleted
     static #nonDeletableProperties = ['name', 'object', 'from', 'to', 'parent', 'latitude', 'longitude', 'treeKey', 'CMD_command'];
 
     /**
-     * @param {Array} observables - an array of ObservableInterface instances
+     * @param {Feature} observable - a single ObservableInterface instance
      * @param {FeatureController} controller - a ControllerInterface instance
      * @returns {undefined}
      */
-    constructor(observables, controller) {
-        if (!(observables instanceof Array)) {
-            throw TypeError('"observables" argumnet must be an Array.');
+    constructor(observable, controller) {
+        if (!(observable instanceof Feature)) {
+            throw TypeError('The "observable" argumnet must be instanceof Feature.');
         }
         if (!(controller instanceof FeatureController)) {
-            throw Error('"controller" argument must be instanceof FeatureController');
+            throw Error('The "controller" argument must be instanceof FeatureController.');
         }
         this.#controller = controller;
-        this.#modal = null;
-        this.#observables = observables;
-        this.#observables.forEach(ob => ob.registerObserver(this));
+        this.#propTable = null;
+        this.#observable = observable;
+        this.#observable.registerObserver(this);
         this.#removed = false;
         this.renderContent();
     }
@@ -44,21 +47,10 @@ class FeatureEditModal { // implements ObserverInterface, ModalInterface
     handleDeletedObservable(observable) {
         // - The function signature above is part of the ObserverInterface API. The implementation below is not
         if (!(observable instanceof Feature)) {
-            throw TypeError('"observable" argument must be instanceof Feature.');
+            throw TypeError('The "observable" argument must be instanceof Feature.');
         }
         if (!this.#removed) {
-            observable.removeObserver(this);
-            const index = this.#observables.indexOf(observable);
-            if (index > -1) {
-                this.#observables.splice(index, 1);
-            } else {
-                throw Error('The observable was not found in this.#observables.');
-            }
-            if (this.#observables.length === 0) {
-                this.remove();
-            } else {
-                this.refreshContent();
-            }
+            this.remove();
         }
     }
 
@@ -80,10 +72,10 @@ class FeatureEditModal { // implements ObserverInterface, ModalInterface
     handleUpdatedCoordinates(observable, oldCoordinates) {
         // - The function signature above is part of the ObserverInterface API. The implementation below is not
         if (!(observable instanceof Feature)) {
-            throw TypeError('"observable" argument must be instanceof Feature.');
+            throw TypeError('The "observable" argument must be instanceof Feature.');
         }
         if (!(oldCoordinates instanceof Array)) {
-            throw TypeError('"oldCoordinates" argument must be an array.');
+            throw TypeError('The "oldCoordinates" argument must be an array.');
         }
         this.refreshContent();
     }
@@ -100,13 +92,13 @@ class FeatureEditModal { // implements ObserverInterface, ModalInterface
     handleUpdatedProperty(observable, propertyKey, oldPropertyValue, namespace='treeProps') {
         // - The function signature above is part of the ObserverInterface API. The implementation below is not
         if (!(observable instanceof Feature)) {
-            throw TypeError('"observable" argument must be instanceof Feature.');
+            throw TypeError('The "observable" argument must be instanceof Feature.');
         }
         if (typeof propertyKey !== 'string') {
-            throw TypeError('"propertyKey" argument must be a string.');
+            throw TypeError('The "propertyKey" argument must be a string.');
         }
         if (typeof namespace !== 'string') {
-            throw TypeError('"namespace" argument must be a string.');
+            throw TypeError('The "namespace" argument must be a string.');
         }
         this.refreshContent();
     }
@@ -116,7 +108,7 @@ class FeatureEditModal { // implements ObserverInterface, ModalInterface
     // ****************************
 
     getDOMElement() {
-        return this.#modal.divElement;
+        return this.#propTable.div;
     }
 
     /**
@@ -133,7 +125,7 @@ class FeatureEditModal { // implements ObserverInterface, ModalInterface
     refreshContent() {
         const tableState = {};
         // - Don't grab a row that was added with the "+" button, if it exists
-        [...this.#modal.divElement.getElementsByTagName('tr')].filter(tr => tr.querySelector('span[data-property-key]') !== null).forEach(tr => {
+        [...this.#propTable.div.getElementsByTagName('tr')].filter(tr => tr.querySelector('span[data-property-key]') !== null).forEach(tr => {
             const span = tr.getElementsByTagName('span')[0];
             let namespace = span.dataset.propertyNamespace;
             // - latitude and longitude don't exist in any property namespace
@@ -148,64 +140,51 @@ class FeatureEditModal { // implements ObserverInterface, ModalInterface
             }
         });
         const tableKeys = Object.keys(tableState);
-        const observablesState = this.#getKeyToValuesMapping();
-        for (const [key, ary] of Object.entries(observablesState.meta)) {
-            const valueElement = tableState[key].propertyValueElement;
-            if (valueElement instanceof HTMLSpanElement) {
-                valueElement.textContent = ary.join(',');
-            } else {
-                // - Only the treeKey should be in the meta namespace and the treeKey only ever displays with a span
-                throw Error()
-            }
-        }
-        for (const [key, ary] of Object.entries(observablesState.treeProps)) {
-            // - First, compare the observables' state to the table state. If the observables' state has a property that is not in the table state,
+        // - Don't worry about inserting a new property into the table in sorted order. It will be sorted the next time that the table is rendered
+        for (const [key, val] of Object.entries(this.#observable.getProperties('treeProps'))) {
+            // - First, compare the observable's state to the table state. If the observable's state has a property that is not in the table state,
             //   add a row to the table
             if (!tableKeys.includes(key)) {
-                // - Don't let unintended properties show up when a FeatureEditModal refreshes due to a marker being dragged
-                if (['from', 'to'].includes(key)) {
-                    if (!this.#observables.every(ob => ob.isLine() && !ob.isParentChildLine())) {
-                        continue;
-                    }
-                }
-                if (key === 'type' && !this.#observables.every(ob => ob.isParentChildLine())) {
-                    continue;
-                }
-                if (key === 'parent' && !this.#observables.every(ob => ob.isChild())) {
+                // - Don't display "from", "to", or "type" for parent-child lines
+                if (['from', 'to', 'type'].includes(key) && this.#observable.isParentChildLine()) {
                     continue;
                 }
                 const keySpan = document.createElement('span');
                 keySpan.textContent = key;
                 keySpan.dataset.propertyKey = key;
                 keySpan.dataset.propertyNamespace = 'treeProps';
-                this.#modal.insertTBodyRow([this.#getDeletePropertyButton(key), keySpan, this.#getValueTextInput(key, ary)], 'beforeEnd');
+                this.#propTable.insertTBodyRow({elements: [this.#getDeletePropertyButton(key), keySpan, this.#getValueTextInput(key, val)], position: 'beforeEnd'});
+            // - Second, if the table has the already key, update the table
             } else {
-                // - If the table has the key, update the display of the values for that key
                 const valueElement = tableState[key].propertyValueElement;
                 if (valueElement instanceof HTMLInputElement) {
-                    valueElement.replaceWith(this.#getValueTextInput(key, ary));
+                    valueElement.value = val.toString();
                 } else if (valueElement instanceof HTMLSpanElement) {
-                    valueElement.textContent = ary.join(', ');
+                    valueElement.textContent = val.toString();
                 }
             }
         }
-        for (const [key, ary] of Object.entries(observablesState.coordinates)) {
-            // - Don't add latitude or longitude rows to tables that didn't already have those rows, just update the existing inputs
+        for (const key of ['latitude', 'longitude']) {
+            // - No lines or configuration objects should ever display "latitude" or "longitude" in their table to begin with
             if (tableKeys.includes(key)) {
+                const [lon, lat] = this.#observable.getCoordinates();
                 const valueElement = tableState[key].propertyValueElement;
                 if (valueElement instanceof HTMLInputElement) {
-                    valueElement.replaceWith(this.#getValueTextInput(key, ary));
+                    if (key === 'latitude') {
+                        valueElement.value = lat;
+                    } else {
+                        valueElement.value = lon;
+                    }
                 }
             }
         }
-        // - Now compare the table's state to the observables' state. If the table's state has a property that is not in the observables' state,
+        // - Now compare the table's state to the observable's state. If the table's state has a property that is not in the observable's state,
         //   remove the row from the table
-        const observablesKeysFromAllNamespaces = [];
-        for (const obj of Object.values(observablesState)) {
-            observablesKeysFromAllNamespaces.push(...Object.keys(obj))
-        }
         for (const [key, obj] of Object.entries(tableState)) {
-            if (!observablesKeysFromAllNamespaces.includes(key)) {
+            if (['latitude', 'longitude'].includes(key)) {
+                continue;
+            }
+            if (!this.#observable.hasProperty(key, obj.propertyNamespace)) {
                 obj.propertyTableRow.remove();
             }
         }
@@ -216,9 +195,9 @@ class FeatureEditModal { // implements ObserverInterface, ModalInterface
      */
     remove() {
         if (!this.#removed) {
-            this.#observables.forEach(ob => ob.removeObserver(this));
-            this.#observables = null;
-            this.#modal.divElement.remove();
+            this.#observable.removeObserver(this);
+            this.#observable = null;
+            this.#propTable.div.remove();
             this.#removed = true;
         }
     }
@@ -228,107 +207,23 @@ class FeatureEditModal { // implements ObserverInterface, ModalInterface
      * @returns {undefined}
      */
     renderContent() {
-        const modal = new Modal();
-        modal.addStyleClasses(['featureEditModal'], 'divElement');
-        const keyToValues = this.#getKeyToValuesMapping();
-        for (const [key, ary] of Object.entries(keyToValues.meta)) {
-            const keySpan = document.createElement('span');
-            keySpan.textContent = 'ID';
-            keySpan.dataset.propertyKey = 'treeKey';
-            keySpan.dataset.propertyNamespace = 'meta';
-            if (ary.length === 1) {
-                modal.insertTHeadRow([null, keySpan, ary[0].toString()], 'prepend');
-            } else {
-                modal.insertTHeadRow([null, keySpan, ary.join(',')], 'prepend');
-            }
-        }
-        for (const [key, ary] of Object.entries(keyToValues.treeProps)) {
-            const keySpan = document.createElement('span');
-            if (['object'].includes(key)) {
-                keySpan.textContent = key;
-                keySpan.dataset.propertyKey = key;
-                keySpan.dataset.propertyNamespace = 'treeProps';
-                if (ary.length === 1) {
-                    modal.insertTHeadRow([null, keySpan, ary[0].toString()])
-                } else {
-                    //modal.insertTHeadRow([null, keySpan, `<Multiple "${key}" values>`]);
-                    modal.insertTHeadRow([null, keySpan, ary.join(', ')]);
-                }
-                continue;
-            }
-            if (['from', 'to'].includes(key)) {
-                if (!this.#observables.every(ob => ob.isLine() && !ob.isParentChildLine())) {
-                    continue;
-                }
-            }
-            if (key === 'type' && !this.#observables.every(ob => ob.isParentChildLine())) {
-                continue;
-            }
-            if (key === 'parent' && !this.#observables.every(ob => ob.isChild())) {
-                continue;
-            }
-            keySpan.textContent = key;
-            keySpan.dataset.propertyKey = key;
-            keySpan.dataset.propertyNamespace = 'treeProps';
-            let deleteButton = null;
-            if (!FeatureEditModal.#nonDeletableProperties.includes(key)) {
-                deleteButton = this.#getDeletePropertyButton(key);
-            }
-            modal.insertTBodyRow([deleteButton, keySpan, this.#getValueTextInput(key, ary)]);
-        }
-        // - We don't allow the coordinates of multiple objects to be changed with multiselect
-        if (this.#observables.length === 1) {
-            for (const [key, ary] of Object.entries(keyToValues.coordinates)) {
-                const keySpan = document.createElement('span');
-                if (['latitude', 'longitude'].includes(key)) {
-                    if (!this.#observables.every(ob => ob.isNode() && !ob.isConfigurationObject())) {
-                        continue;
-                    } else {
-                        keySpan.textContent = key;
-                        keySpan.dataset.propertyKey = key;
-                        // - longitude and latitude aren't in any property namespace
-                        modal.insertTBodyRow([null, keySpan, this.#getValueTextInput(key, ary)], 'prepend');
-                    }
-                }
-            }
-        }
-        modal.insertTBodyRow([this.#getAddPropertyButton(), null, null], 'append', ['absolute']);
-        modal.addStyleClasses(['centeredTable'], 'tableElement');
-        // - Add buttons for regular features
-        if (this.#observables.every(ob => !ob.isComponentFeature())) {
-            modal.insertElement(this.#getDeleteFeatureDiv());
-            if (this.#observables.every(ob => !ob.isConfigurationObject())) {
-                modal.insertElement(this.#getZoomDiv(), 'prepend');
-            }
-        // - Add buttons for components
+        const propTable = new PropTable();
+        propTable.div.classList.add('featureEditModal');
+        if (this.#observable.hasProperty('treeKey', 'meta')) {
+            this.#renderOmfFeature(propTable);
         } else {
-            if (this.#observables.every(ob => ob.isConfigurationObject())) {
-                modal.insertElement(this.#getAddConfigurationObjectDiv());
-            } else if (this.#observables.some(ob => ob.isConfigurationObject())) {
-                // - Don't add buttons. Configuration objects cannot be added because not every observable is a configuration object.
-                //   Non-configuration objects cannot be added because there is at least one configuration object. The user should refine their search
-                //   results, but mixing configuration and non-configuration objects isn't necessarily an error
-            } else {
-                if (this.#observables.every(ob => ob.isNode())) {
-                    // 2024-09-04: Don't append this button because it covers the "+" button with David's new styling request
-                    //modal.insertElement(this.#getAddNodeWithCoordinatesDiv());
-                    modal.insertElement(this.#getAddNodeWithMapClickDiv());
-                } else if (this.#observables.every(ob => ob.isLine())) {
-                    modal.insertElement(this.#getAddLineWithFromToDiv());
-                } else {
-                    // - Don't add buttons. The user's search returned both nodes and lines
-                }
-            }
+            this.#renderArbitraryFeature(propTable);
         }
-        // - 2024-09-04: Replaced 'verticalFlex' class with 'horizontalFlex' because buttons should stack horizontally now
-        // - 2024-09-04: Replaced 'centerMainAxisFlex' with 'rightAlignMainAxisFlex' because buttons should no longer be centered
-        modal.addStyleClasses(['horizontalFlex', 'rightAlignMainAxisFlex', 'centerCrossAxisFlex'], 'containerElement');
-        if (this.#modal === null) {
-            this.#modal = modal;
-        } 
-        if (document.body.contains(this.#modal.divElement)) {
-            this.#modal.divElement.replaceWith(modal.divElement);
-            this.#modal = modal;
+        propTable.div.addEventListener('click', function(e) {
+            // - Don't let clicks on the table cause the popup to close
+            e.stopPropagation();
+        });
+        if (this.#propTable === null) {
+            this.#propTable = propTable;
+        }
+        if (document.body.contains(this.#propTable.div)) {
+            this.#propTable.div.replaceWith(propTable.div);
+            this.#propTable = propTable;
         }
     }
 
@@ -337,149 +232,122 @@ class FeatureEditModal { // implements ObserverInterface, ModalInterface
     // *********************
 
     /**
-     * @returns {boolean}
+     * @param {Event} event - a standard mouse click event
      */
-    #componentsStateIsValid() {
-        for (const ob of this.#observables) {
-            for (const [k, v] of Object.entries(ob.getProperties('treeProps'))) { 
-                if (!this.#valueTextInputIsValid(k, v)) {
-                    return false;
-                }
+    #addObservableWithClick(event) {
+        const mapDiv = document.getElementById('map');
+        mapDiv.style.cursor = 'crosshair';
+        LeafletLayer.map.on('click', (e) => {
+            // - If the user clicks on an "add" button multiple times or clicks on a node add button followed by a line add button, it's fine. This
+            //   event listener is only registered on each button once per button. As soon as the first button is clicked, that's the event handler
+            //   that will execute first on the map. Since this event handler also removes all "click" event handlers from the map, all subsequent add
+            //   operation event handlers will be removed before they exeucte
+            LeafletLayer.map.off('click');
+            mapDiv.style.removeProperty('cursor');
+            try {
+                const observable = this.#getObservableFromComponent(this.#observable, [e.latlng.lat, e.latlng.lng]);
+                this.#controller.addObservables([observable]);
+            } catch (e) {
+                alert(e.message);
             }
-        }
-        return true;
+        });
     }
 
     /**
-     * - Add a configuration object to the data. Components arrive with bad data. That's why I have to validate a component twice: once during any
-     *   value input changes and once when the button is clicked. I assume that regular features arrive with valid data. That's why I only validate
-     *   when an input changes
-     * @returns {HTMLDivElement}
+     * - Add a configuration object to the data
+     * @returns {HTMLButtonElement}
      */
-    #getAddConfigurationObjectDiv() {
-        const btn = this.#getWideButton();
-        btn.classList.add('add');
-        btn.appendChild(getCirclePlusSvg());
-        const span = document.createElement('span');
-        span.textContent = 'Add config object';
-        btn.appendChild(span);
-        btn.addEventListener('click', () => {
-            if (this.#componentsStateIsValid()) {
-                this.#controller.addObservables(this.#observables.map(ob => this.#getObservableFromComponent(ob)));
+    #getAddConfigurationObjectButton() {
+        let button = new IconLabelButton({paths: IconLabelButton.getCirclePlusPaths(), viewBox: '0 0 24 24', text: 'Add a config object'});
+        button.button.classList.add('-green');
+        button.button.getElementsByClassName('icon')[0].classList.add('-white');
+        button.button.getElementsByClassName('label')[0].classList.add('-white');
+        button = button.button;
+        button.addEventListener('click', () => {
+            try {
+                const observable = this.#getObservableFromComponent(this.#observable);
+                this.#controller.addObservables([observable]);
+            } catch (e) {
+                alert(e.message);
             }
         });
-        const div = this.#getWideButtonDiv();
-        div.appendChild(btn);
-        return div;
+        return button;
     }
 
     /**
-     * - Add a line to the map by inputing "from" and "to" values and then clicking this button
-     * @returns {HTMLDivElement}
+     * - Add a line. If the "from" and "to" values are valid, use them. If they aren't, grab the two closest nodes to the click on the map and connect
+     *   the line to those nodes
+     * @returns {HTMLButtonElement}
      */
-    #getAddLineWithFromToDiv() {
-        const btn = this.#getWideButton();
-        btn.classList.add('add');
-        btn.appendChild(getCirclePlusSvg());
-        const span = document.createElement('span');
-        span.textContent = 'Add line with from/to';
-        btn.appendChild(span);
-        btn.addEventListener('click', () => {
-            if (this.#componentsStateIsValid()) {
-                this.#controller.addObservables(this.#observables.map(ob => this.#getObservableFromComponent(ob)));
-            }
+    #getAddLineButton() {
+        let button = new IconLabelButton({
+            paths: IconLabelButton.getCirclePlusPaths(),
+            viewBox: '0 0 24 24',
+            text: 'Add a line',
+            tooltip: 'Add a new line to the data by clicking on this button then clicking on the map. If valid values for the "from" and "to"' +
+                ' properties are specified, the line will connect to those objects. Otherwise, the line will connect to the two nodes that were' +
+                ' closest to the map click.'
         });
-        const div = this.#getWideButtonDiv();
-        div.appendChild(btn);
-        return div;
-    }
-
-    /**
-     * - Add a node to the map by inputing coordinates and then clicking this button
-     * @returns {HTMLDivElement}
-     */
-    #getAddNodeWithCoordinatesDiv() {
-        const btn = this.#getWideButton();
-        btn.classList.add('add');
-        btn.appendChild(getCirclePlusSvg());
-        const span = document.createElement('span');
-        span.textContent = 'Add with coordinates';
-        btn.appendChild(span);
-        btn.addEventListener('click', () => {
-            if (this.#componentsStateIsValid()) {
-                this.#controller.addObservables(this.#observables.map(ob => this.#getObservableFromComponent(ob)));
-            }
-        });
-        const div = this.#getWideButtonDiv();
-        div.appendChild(btn);
-        return div;
+        button.button.classList.add('-green');
+        button.button.getElementsByClassName('icon')[0].classList.add('-white');
+        button.button.getElementsByClassName('label')[0].classList.add('-white');
+        button = button.button;
+        button.addEventListener('click', this.#addObservableWithClick.bind(this));
+        return button;
     }
 
     /**
      * - Add a node to the map by clicking on the map
      * @returns {HTMLDivElement}
      */
-    #getAddNodeWithMapClickDiv() {
-        const btn = this.#getWideButton();
-        btn.classList.add('add');
-        btn.appendChild(getCirclePlusSvg());
-        const span = document.createElement('span');
-        span.textContent = 'Add with map click';
-        btn.appendChild(span);
-        const that = this;
-        btn.addEventListener('click', () => {
-            const mapDiv = document.getElementById('map');
-            mapDiv.style.cursor = 'crosshair';
-            LeafletLayer.map.on('click', function(e) {
-                LeafletLayer.map.off('click');
-                mapDiv.style.removeProperty('cursor');
-                if (that.#componentsStateIsValid()) {
-                    that.#controller.addObservables(that.#observables.map(ob => that.#getObservableFromComponent(ob, [e.latlng.lat, e.latlng.lng])));
-                }
-            });
+    #getAddNodeButton() {
+        let button = new IconLabelButton({
+            paths: IconLabelButton.getCirclePlusPaths(),
+            viewBox: '0 0 24 24',
+            text: 'Add a node',
+            tooltip: 'Add a new node to the data by clicking on this button then clicking on the map. If the node is a child and a valid value for' +
+                ' the "parent" property is specified, the child will connect to that parent. Otherwise, the child will connect to parent that was' +
+                ' closest to the map click.'
         });
-        const div = this.#getWideButtonDiv();
-        div.appendChild(btn);
-        return div;
+        button.button.classList.add('-green');
+        button.button.getElementsByClassName('icon')[0].classList.add('-white');
+        button.button.getElementsByClassName('label')[0].classList.add('-white');
+        button = button.button;
+        button.addEventListener('click', this.#addObservableWithClick.bind(this));
+        return button;
     }
     
     /**
      * @returns {HTMLButtonElement}
      */
     #getAddPropertyButton() {
-        const btn = document.createElement('button');
-        btn.classList.add('add');
-        btn.classList.add('horizontalFlex');
-        btn.classList.add('centerMainAxisFlex');
-        btn.classList.add('centerCrossAxisFlex');
-        btn.appendChild(getCirclePlusSvg());
+        let button = new IconLabelButton({paths: IconLabelButton.getCirclePlusPaths(), viewBox: '0 0 24 24', tooltip: 'Add new property'});
+        button.button.classList.add('-green');
+        button.button.getElementsByClassName('icon')[0].classList.add('-white');
+        button = button.button;
         const that = this;
-        btn.addEventListener('click', function() {
+        button.addEventListener('click', function() {
             const deletePlaceholder = document.createElement('span');
             const keyInputPlaceholder = document.createElement('span');
             const valueInputPlaceholder = document.createElement('span');
-            that.#modal.insertTBodyRow([deletePlaceholder, keyInputPlaceholder, valueInputPlaceholder], 'beforeEnd');
+            that.#propTable.insertTBodyRow({elements: [deletePlaceholder, keyInputPlaceholder, valueInputPlaceholder], position: 'beforeEnd'});
             that.#insertKeyTextInput(deletePlaceholder, keyInputPlaceholder, valueInputPlaceholder);
         });
-        return btn;
+        return button;
     }
 
     /**
      * @returns {HTMLDivElement}
      */
-    #getDeleteFeatureDiv() {
-        const btn = this.#getWideButton();
-        btn.classList.add('delete');
-        btn.appendChild(getTrashCanSvg());
-        const span = document.createElement('span');
-        span.textContent = 'Delete';
-        btn.appendChild(span);
-        btn.addEventListener('click', () => {
-            this.#controller.deleteObservables(this.#observables);    
+    #getDeleteFeatureButton() {
+        let button = new IconLabelButton({paths: IconLabelButton.getTrashCanPaths(), viewBox: '0 0 24 24', tooltip: 'Delete object'});
+        button.button.classList.add('-red');
+        button.button.getElementsByClassName('icon')[0].classList.add('-white');
+        button = button.button;
+        button.addEventListener('click', () => {
+            this.#controller.deleteObservables([this.#observable]);
         });
-        const div = this.#getWideButtonDiv();
-        div.appendChild(btn);
-        return div;
+        return button;
     }
     
     /**
@@ -490,15 +358,13 @@ class FeatureEditModal { // implements ObserverInterface, ModalInterface
         if (typeof propertyKey !== 'string') {
             throw TypeError('"propertyKey" argument must be a string.');
         }
-        const btn = document.createElement('button');
-        btn.classList.add('delete');
-        btn.classList.add('horizontalFlex');
-        btn.classList.add('centerMainAxisFlex');
-        btn.classList.add('centerCrossAxisFlex');
-        btn.appendChild(getTrashCanSvg());
+        let button = new IconLabelButton({paths: IconLabelButton.getTrashCanPaths(), viewBox: '0 0 24 24', tooltip: 'Delete property'});
+        button.button.classList.add('-red');
+        button.button.getElementsByClassName('icon')[0].classList.add('-white');
+        button = button.button;
         const that = this;
-        btn.addEventListener('click', function(e) {
-            that.#controller.deleteProperty(that.#observables, propertyKey);
+        button.addEventListener('click', function(e) {
+            that.#controller.deleteProperty([that.#observable], propertyKey);
             // - This is code is required for a transitionalDeleteButton to remove the row
             let parentElement = this.parentElement;
             while (!(parentElement instanceof HTMLTableRowElement)) {
@@ -507,56 +373,7 @@ class FeatureEditModal { // implements ObserverInterface, ModalInterface
             parentElement.remove();
             e.stopPropagation();
         });
-        return btn;
-    }
-
-    /**
-     * - Iterate through all of the observables and map each property key to all unique values for that (treeProps) property key across all of the
-     *   observables. Also includes treeKey, longitude, and latitude values
-     * @returns {Object}
-     */
-    #getKeyToValuesMapping() {
-        const keyToValues = {
-            meta: {},
-            treeProps: {},
-            coordinates: {}
-        };
-        this.#observables.forEach(ob => {
-            const treeKey = ob.getProperty('treeKey', 'meta');
-            if (!keyToValues.meta.hasOwnProperty('treeKey')) {
-                keyToValues.meta.treeKey = [treeKey];
-            } else if (!keyToValues.meta.treeKey.includes(treeKey)) {
-                keyToValues.meta.treeKey.push(treeKey);
-            }
-            if (ob.hasProperty('treeProps', 'meta')) {
-                for (const [k, v] of Object.entries(ob.getProperties('treeProps'))) {
-                    if (!keyToValues.treeProps.hasOwnProperty(k)) {
-                        keyToValues.treeProps[k] = [v];
-                    } else if (!keyToValues.treeProps[k].includes(v)) {
-                        keyToValues.treeProps[k].push(v);
-                    }
-                }
-            }
-            let coordinatesArray = [];
-            if (ob.isNode()) {
-                const [lon, lat] = ob.getCoordinates();
-                coordinatesArray = [['longitude', +lon], ['latitude', +lat]];
-            }
-            if (ob.isLine()) {
-                const [[lon_1, lat_1], [lon_2, lat_2]] = ob.getCoordinates();
-                coordinatesArray = [['longitude', +lon_1], ['latitude', +lat_1], ['longitude', +lon_2], ['latitude', +lat_2]];
-            }
-            coordinatesArray.forEach(ary => {
-                const k = ary[0];
-                const v = ary[1];
-                if (!keyToValues.coordinates.hasOwnProperty(k)) {
-                    keyToValues.coordinates[k] = [v];
-                } else if (!keyToValues.coordinates[k].includes(v)) {
-                    keyToValues.coordinates[k].push(v);
-                }
-            });
-        });
-        return keyToValues;
+        return button;
     }
 
     /**
@@ -564,142 +381,200 @@ class FeatureEditModal { // implements ObserverInterface, ModalInterface
      *   button so this function can stay here.
      * @param {Feature} component - a component feature
      * @param {Array} [coordinates=null] - an array of coordinates in [<lat>, <lon>] format that the new feature should have instead of the
-     *      coordinates that were in the component 
+     *  coordinates that were in the component
+     * @throws an error if it isn't possible to get a valid feature from a component
      * @returns {Feature} a feature that can be added to the graph
      */
     #getObservableFromComponent(component, coordinates=null) {
         if (!(component instanceof Feature)) {
-            throw TypeError('"component" argument must be instanceof Feature.');
+            throw TypeError('The "component" argument must be instanceof Feature.');
         }
+        // 1) Clone the component to create an observable and correct errors that are possible to correct
         const geometry = {
-            type: 'Point'
+            type: component.getCoordinates()[0] instanceof Array ? 'LineString' : 'Point',
+            // - Node components come with [0, 0] coordinates from the back-end, line components come with [[0, 0], [0, 0]] coordinates from the
+            //   back-end and configuration object components come with [null, null] coordinates from the back-end. This is important for the
+            //   isNode(), isLine(), and isConfigurationObject() functions
+            coordinates: structuredClone(component.getCoordinates())
         };;
-        const observable = new Feature({
+        const feature = new Feature({
             geometry: geometry,
             properties: {
+                // - Components come with a treeKey in the from of "component:<number>" from the back-end. A cloned component feature is only given a
+                //   valid treeKey (and a valid name) by a FeatureController when it is inserted into the graph because that's the only way to ensure
+                //   that the next max number is being used
                 treeKey: component.getProperty('treeKey', 'meta'),
                 treeProps: structuredClone(component.getProperties('treeProps'))
             },
             type: 'Feature'
         });
-        // - Start with whatever coordinates were in the text inputs
-        let featureCoordinates = structuredClone(component.getCoordinates());
-        // - If coordinates were provided, use those instead
-        if (coordinates !== null) {
-            featureCoordinates = [coordinates[1], coordinates[0]];
+        // - If the feature is a line, get the coordinates of its nodes
+        if (feature.isLine()) {
+            // - If the feature has valid "from" and "to" properties, add the line between those nodes
+            const fromValidity = this.#controller.observableGraph.getLineConnectionNameValidity(feature, feature.getProperty('from'));
+            const toValidity = this.#controller.observableGraph.getLineConnectionNameValidity(feature, feature.getProperty('to'));
+            const fromToValidity = new Validity(false);
+            let fromKey;
+            let toKey;
+            if (fromValidity.isValid && toValidity.isValid) {
+                fromKey = this.#controller.observableGraph.getKeyForComponent(feature.getProperty('from'));
+                toKey = this.#controller.observableGraph.getKeyForComponent(feature.getProperty('to'));
+                if (fromKey !== toKey) {
+                    fromToValidity.isValid = true;
+                } else {
+                    throw Error('The line was not added because lines may not start and end at the same node.');
+                }
+            }
+            if (fromToValidity.isValid) {
+                const { sourceLat, sourceLon, targetLat, targetLon } = this.#controller.observableGraph.getLineLatLon(fromKey, toKey);
+                geometry.coordinates = [[sourceLon, sourceLat], [targetLon, targetLat]];
+            // - If the feature does not have valid "from" and "to" properties, add the line to the nodes that are closest to the coordinates
+            } else {
+                // - Lines can be connected to other lines, but I don't automatically do that
+                // - Lines can be connect to child nodes, but I don't automatically do that
+                const possibleNodes = this.#controller.observableGraph.getObservables(ob => ob.isNode() && !ob.hasProperty('parent'));
+                if (possibleNodes.length < 2) {
+                    throw Error('The line was not added because there are no valid nodes that this line could connect to.');
+                }
+                let [fromLon, fromLat] = possibleNodes[0].getCoordinates();
+                let fromNodeDistanceDiff = Math.abs(coordinates[1] - fromLon) + Math.abs(coordinates[0] - fromLat);
+                let fromName = possibleNodes[0].getProperty('name');
+                let [toLon, toLat] = possibleNodes[1].getCoordinates();
+                let toNodeDistanceDiff = Math.abs(coordinates[1] - toLon) + Math.abs(coordinates[0] - toLat);
+                let toName = possibleNodes[1].getProperty('name');
+                for (let i = 2; i < possibleNodes.length; i++) {
+                    const [lon, lat] = possibleNodes[i].getCoordinates();
+                    const distanceDiff = Math.abs(coordinates[1] - lon) + Math.abs(coordinates[0] - lat);
+                    if (distanceDiff < fromNodeDistanceDiff) {
+                        if (fromNodeDistanceDiff > toNodeDistanceDiff) {
+                            fromLon = lon;
+                            fromLat = lat;
+                            fromNodeDistanceDiff = distanceDiff;
+                            fromName = possibleNodes[i].getProperty('name');
+                            continue;
+                        } else {
+                            toLon = lon;
+                            toLat = lat;
+                            toNodeDistanceDiff = distanceDiff;
+                            toName = possibleNodes[i].getProperty('name');
+                            continue;
+                        }
+                    }
+                    if (distanceDiff < toNodeDistanceDiff) {
+                        if (toNodeDistanceDiff > fromNodeDistanceDiff) {
+                            toLon = lon;
+                            toLat = lat;
+                            toNodeDistanceDiff = distanceDiff;
+                            toName = possibleNodes[i].getProperty('name');
+                            continue;
+                        } else {
+                            fromLon = lon;
+                            fromLat = lat;
+                            fromNodeDistanceDiff = distanceDiff;
+                            fromName = possibleNodes[i].getProperty('name');
+                        }
+                    }
+                }
+                feature.setProperty('from', fromName);
+                feature.setProperty('to', toName);
+                geometry.coordinates = [[fromLon, fromLat], [toLon, toLat]];
+            }
+        } else if (feature.isNode()) {
+            // - If the feature is a node, use the coordinates from the map click
+            if (coordinates !== null) {
+                geometry.coordinates = [coordinates[1], coordinates[0]];
+            } else {
+                throw Error('Adding a node requires coordinates from a map click.');
+            }
+            if (feature.isChild()) {
+                const validity = this.#controller.observableGraph.getLineConnectionNameValidity(feature, feature.getProperty('parent'));
+                if (!validity.isValid) {
+                    const possibleParents = this.#controller.observableGraph.getObservables(ob => ob.isNode() && !ob.hasProperty('parent'));
+                    if (possibleParents.length < 1) {
+                        throw Error('The child was not added because there were no valid parents that this child could connect to.');
+                    }
+                    let [parentLon, parentLat] = possibleParents[0].getCoordinates();
+                    let parentDistanceDiff = Math.abs(coordinates[1] - parentLon) + Math.abs(coordinates[0] - parentLat);
+                    let parentName = possibleParents[0].getProperty('name');
+                    for (const parent of possibleParents) {
+                        const [lon, lat] = parent.getCoordinates();
+                        const distanceDiff = Math.abs(coordinates[1] - lon) + Math.abs(coordinates[0] - lat);
+                        if (distanceDiff < parentDistanceDiff) {
+                            parentDistanceDiff = distanceDiff;
+                            parentName = parent.getProperty('name');
+                        }
+                    }
+                    feature.setProperty('parent', parentName);
+                }
+            }
         }
-        // - If the component is a line, get the coordinates of its nodes
-        if (component.isLine()) {
-            geometry.type = 'LineString';
-            const fromKey = this.#controller.observableGraph.getKeyForComponent(observable.getProperty('from'));
-            const toKey = this.#controller.observableGraph.getKeyForComponent(observable.getProperty('to'));
-            const { sourceLat, sourceLon, targetLat, targetLon } = this.#controller.observableGraph.getLineLatLon(fromKey, toKey);
-            featureCoordinates = [[sourceLon, sourceLat], [targetLon, targetLat]];
+        // 2) Detect any invalid property values that I cannot fix and throw an exception
+        if (feature.hasProperty('type') && feature.getProperty('type').toLowerCase() === 'parentchild') {
+            throw Error('The "type" property may not have a value of "parentChild".');
         }
-        geometry.coordinates = featureCoordinates;
-        return observable;
+        if (feature.hasProperty('treeKey')) {
+            throw Error('An object may not have the property "treeKey".');
+        }
+        return feature;
     }
 
     /**
      * - Return a text input that can be viewed in a modal
      * @param {string} propertyKey
-     * @param {Array} [propertyValues=null]
-     * @returns {HTMLInputElement} a text input that can be edited on to change a property value in an ObservableInterface instance
+     * @param {} [propertyValue=null]
+     * @returns {HTMLInputElement} a text input that can be edited to change a property value in an ObservableInterface instance
      */
-    #getValueTextInput(propertyKey, propertyValues=null) {
+    #getValueTextInput(propertyKey, propertyValue=null) {
         if (typeof propertyKey !== 'string') {
-            throw TypeError('"propertyKey" argument must be typeof string.');
-        }
-        if (!(propertyValues instanceof Array) && propertyValues !== null) {
-            throw TypeError('"propertyValues" argument must be instanceof Array or null.');
+            throw TypeError('The "propertyKey" argument must be typeof string.');
         }
         const input = document.createElement('input');
-        input.addEventListener('mousedown', (e) => {
-            e.stopPropagation(e);
-        });
-        if (propertyValues === null) {
+        if (propertyValue === null) {
             //- Do nothing. A new property was just added so the value text input should be blank
-        } else if (propertyValues.length === 1) {
-            // - This works even if propertyValues = [""], which it can be sometimes
-            input.value = propertyValues[0];
         } else {
-            //input.value = `<Multiple "${propertyKey}" values>`;
-            input.value = propertyValues.join(', ');
+            input.value = propertyValue.toString();
         }
         let originalValue = input.value;
         const that = this;
         input.addEventListener('change', function() {
             const inputValue = this.value.trim();
-            if (that.#valueTextInputIsValid(propertyKey, inputValue)) {
-                that.#observables.forEach(ob => {
+            if (that.#observable.isComponentFeature()) {
+                // - Don't perform validation. Since latitude and longitude are no longer displayed in component tables, there's no way for the user
+                //   to fail validation and trigger an error
+                that.#controller.setProperty([that.#observable], propertyKey, inputValue);
+            } else {
+                if (that.#valueTextInputIsValid(propertyKey, inputValue)) {
                     if (['latitude', 'longitude'].includes(propertyKey)) {
-                        if (ob.isNode()) {
-                            const [lon, lat] = ob.getCoordinates();
+                        if (that.#observable.isNode()) {
+                            const [lon, lat] = that.#observable.getCoordinates();
                             if (propertyKey === 'latitude') {
-                                that.#controller.setCoordinates([ob], [lon, inputValue]);
+                                that.#controller.setCoordinates([that.#observable], [lon, inputValue]);
                             } else {
-                                that.#controller.setCoordinates([ob], [inputValue, lat]);
-                            }
-                        } else if (ob.isLine()) {
-                            const [[lon, lat], [lon_1, lat_1]] = ob.getCoordinates(); 
-                            if (propertyKey === 'latitude') {
-                                that.#controller.setCoordinates([ob], [[lon, inputValue], [lon_1, inputValue]]);
-                            } else {
-                                that.#controller.setCoordinates([ob], [[inputValue, lat], [inputValue, lat_1]]);
+                                that.#controller.setCoordinates([that.#observable], [inputValue, lat]);
                             }
                         }
-                    } else if (['from', 'to', 'parent'].includes(propertyKey)) {
-                        that.#controller.setProperty([ob], propertyKey, inputValue);
                     } else {
-                        that.#controller.setProperty([ob], propertyKey, inputValue);
+                        that.#controller.setProperty([that.#observable], propertyKey, inputValue);
                     }
-                });
-                originalValue = inputValue;
-            } else {
-                this.value = originalValue;
+                    originalValue = inputValue;
+                } else {
+                    this.value = originalValue;
+                }
             }
         });
         return input;
     }
-
+    
     /**
      * @returns {HTMLButtonElement}
      */
-    #getWideButton() {
-        const btn = document.createElement('button');
-        btn.classList.add('horizontalFlex');
-        btn.classList.add('centerMainAxisFlex');
-        btn.classList.add('centerCrossAxisFlex');
-        btn.classList.add('fullWidth');
-        return btn;
-    }
-
-    /**
-     * @returns {HTMLDivElement}
-     */
-    #getWideButtonDiv() {
-        const div = document.createElement('div');
-        div.classList.add('horizontalFlex');
-        div.classList.add('centerMainAxisFlex');
-        div.classList.add('centerCrossAxisFlex');
-        // - 2024-09-04: Buttons should no longer stretch to 50% of container width because we want buttons to be smaller now
-        //div.classList.add('halfWidth');
-        return div;
-    }
-    
-    /**
-     * @returns {HTMLDivElement}
-     */
-    #getZoomDiv() {
-        const btn = this.#getWideButton();
-        btn.appendChild(getPinSvg());
-        const span = document.createElement('span');
-        span.textContent = 'Zoom';
-        btn.appendChild(span);
-        btn.addEventListener('click', zoom.bind(null, this.#observables));
-        const div = this.#getWideButtonDiv();
-        div.appendChild(btn);
-        return div;
+    #getZoomButton() {
+        let button = new IconLabelButton({paths: IconLabelButton.getPinPaths(), viewBox: '0 0 24 24', tooltip: 'Zoom to object'});
+        button.button.classList.add('-blue');
+        button.button.getElementsByClassName('icon')[0].classList.add('-white');
+        button = button.button;
+        button.addEventListener('click', zoom.bind(null, [this.#observable]));
+        return button;
     }
 
     /**
@@ -715,7 +590,7 @@ class FeatureEditModal { // implements ObserverInterface, ModalInterface
         deletePlaceholder.replaceWith(transitionalDeleteButton);
         const that = this;
         let originalValue = input.value;
-        input.addEventListener('change', function () {
+        input.addEventListener('change', function() {
             const inputValue = this.value.trim();
             // - If the input value isn't valid, just don't create a text input for the value and don't update the feature's properties
             if (that.#keyTextInputIsValid(inputValue)) {
@@ -724,7 +599,7 @@ class FeatureEditModal { // implements ObserverInterface, ModalInterface
                     parentElement = parentElement.parentElement;
                 }
                 parentElement.remove();
-                that.#controller.setProperty(that.#observables, inputValue, '', 'treeProps');
+                that.#controller.setProperty([that.#observable], inputValue, '', 'treeProps');
             } else {
                 input.value = originalValue;
             }
@@ -742,73 +617,131 @@ class FeatureEditModal { // implements ObserverInterface, ModalInterface
             return false;
         } else if (inputValue === '') {
             return false;
-        } else if (this.#observables.some(ob => ob.hasProperty(inputValue))) {
-            if (this.#observables.length === 1) {
-                alert(`The property "${inputValue}" could not be added because this object already has this property.`);
-            } else {
-                alert(`The property "${inputValue}" could not be added because one or more objects already has this property.`);
-            }
+        } else if (this.#observable.hasProperty(inputValue)) {
+            alert(`The property "${inputValue}" could not be added because this object already has this property.`);
             return false;
         }
         return true;
     }
 
     /**
-     * @param {string} propertyKey
-     * @param {string} inputValue
-     * @returns {boolean}
+     * - Render normal features
+     * @returns {undefined}
      */
-    #toFromParentObjectIsValid(propertyKey, inputValue) {
-        let observableKey;
-        try {
-            if (this.#observables.every(ob => ob.isComponentFeature())) {
-                observableKey = this.#controller.observableGraph.getKeyForComponent(inputValue);
-            } else if (this.#observables.every(ob => !ob.isComponentFeature())) {
-                observableKey = this.#controller.observableGraph.getKey(inputValue, this.#observables[0].getProperty('treeKey', 'meta'));
-                // - This is commented out because it's fine if different objects in the search selection will return different keys. If there are
-                //   different keys for the same name, the FeatureGraph should just return the correct key for each object. Actually it's not. What if a
-                //   configuration object and a non-configuration object share a name? I could write logic that decides whether returning multiple keys is
-                //   okay (e.g. do both keys point to non-configuration objects?) but that would be annoying. Just return false if there are multiple keys
-                if (this.#observables.some(ob => this.#controller.observableGraph.getKey(inputValue, ob.getProperty('treeKey', 'meta')) !== observableKey)) {
-                    alert(`The value of the "${propertyKey}" property cannot be set to "${inputValue}" because multiple objects have that value for their
-                        "name" property. Either ensure that value for the "${propertyKey}" property is a unique name, or change the value of the
-                        "name" property of other object(s) to ensure the name is unique.`);
-                    return false;
-                }
-            } else {
-                throw Error('Components and non-components should never be together in this.#observables');
+    #renderOmfFeature(propTable) {
+        const sortedEntries = Object.entries(this.#observable.getProperties('treeProps'));
+        sortedEntries.sort((a, b) => a[0].localeCompare(b[0], 'en', {numeric: true}));
+        // - If the feature has the "object" property, add it to the top of the table
+        let i = 0;
+        while (i < sortedEntries.length) {
+            if (sortedEntries[i][0] === 'object') {
+                const keySpan = document.createElement('span');
+                keySpan.dataset.propertyKey = 'object';
+                keySpan.dataset.propertyNamespace = 'treeProps';
+                keySpan.textContent = 'object';
+                propTable.insertTHeadRow({elements: [null, keySpan, this.#observable.getProperty('object').toString()], position: 'prepend'})
+                break;
             }
-        } catch {
-            alert(`No object has the value "${inputValue}" for the "name" property. Ensure that the value for the "${propertyKey}" property matches an existing name.`);
-            return false;
+            i++;
         }
-        if (observableKey.startsWith('parentChild:')) {
-            alert(`The value "${inputValue}" is the name of a parent-child line. Parent-child line names cannot be used as a value for the "${propertyKey}" property.`);
-            return false;
+        if (i < sortedEntries.length) {
+            sortedEntries.splice(i, 1);
         }
-        const observable = this.#controller.observableGraph.getObservable(observableKey);
-        if (observable.isConfigurationObject()) {
-            alert(`The value "${inputValue}" is the name of a configuration object. Configuration object names cannot be used as a value for the "${propertyKey}" property.`);
-            return false;
+        // - Add the treeKey to the top of the table
+        const keySpan = document.createElement('span');
+        keySpan.textContent = 'ID';
+        keySpan.dataset.propertyKey = 'treeKey';
+        keySpan.dataset.propertyNamespace = 'meta';
+        propTable.insertTHeadRow({elements: [null, keySpan, this.#observable.getProperty('treeKey', 'meta').toString()], position: 'prepend'})
+        // - Add the rest of the properties to the table
+        for (const [key, val] of sortedEntries) {
+            if (['from', 'to', 'type'].includes(key) && this.#observable.isParentChildLine()) {
+                continue;
+            }
+            const keySpan = document.createElement('span');
+            keySpan.textContent = key;
+            keySpan.dataset.propertyKey = key;
+            keySpan.dataset.propertyNamespace = 'treeProps';
+            let deleteButton = null;
+            // - Users should never be able to delete properties from components
+            if (!FeatureEditModal.#nonDeletableProperties.includes(key) && !this.#observable.isComponentFeature()) {
+                deleteButton = this.#getDeletePropertyButton(key);
+            }
+            propTable.insertTBodyRow({elements: [deleteButton, keySpan, this.#getValueTextInput(key, val)]});
         }
-        // - Components are not in the graph, so the observable cannot be a component feature
-        return true;
-    } 
+        if (this.#observable.isNode() && !this.#observable.isComponentFeature()) {
+            const [lon, lat] = this.#observable.getCoordinates();
+            let keySpan = document.createElement('span');
+            keySpan.textContent = 'longitude';
+            keySpan.dataset.propertyKey = 'longitude';
+            // - longitude and latitude aren't in any property namespace
+            propTable.insertTBodyRow({elements: [null, keySpan, this.#getValueTextInput('longitude', lon)], position: 'prepend'});
+            keySpan = document.createElement('span');
+            keySpan.textContent = 'latitude';
+            keySpan.dataset.propertyKey = 'latitude';
+            propTable.insertTBodyRow({elements: [null, keySpan, this.#getValueTextInput('latitude', lat)], position: 'prepend'});
+        }
+        // - I need this div to applying consistent CSS styling
+        const div = document.createElement('div');
+        // - Add buttons for regular nodes and lines
+        if (!this.#observable.isComponentFeature() && !this.#observable.isConfigurationObject()) {
+            const zoomButton = this.#getZoomButton();
+            const deleteButton = this.#getDeleteFeatureButton();
+            div.append(zoomButton);
+            div.append(deleteButton);
+            propTable.insertTBodyRow({elements: [this.#getAddPropertyButton(), null, div]});
+        // - Add buttons for configuration objects
+        } else if (!this.#observable.isComponentFeature()) {
+            div.append(this.#getDeleteFeatureButton());
+            propTable.insertTBodyRow({elements: [this.#getAddPropertyButton(), null, div]});
+        } else {
+            // - Add buttons for component configuration objects
+            if (this.#observable.isConfigurationObject()) {
+                div.append(this.#getAddConfigurationObjectButton());
+                propTable.insertTBodyRow({elements: [div], colspans: [3]});
+            // - Add buttons for node configuration objects
+            } else if (this.#observable.isNode()) {
+                div.append(this.#getAddNodeButton());
+                propTable.insertTBodyRow({elements: [div], colspans: [3]});
+            } else if (this.#observable.isLine()) {
+                div.append(this.#getAddLineButton())
+                propTable.insertTBodyRow({elements: [div], colspans: [3]});
+            }
+        }
+    }
 
     /**
-     * - Validate the just-inputed value for a value text input
+     * - Render arbitrary features
+     */
+    #renderArbitraryFeature(propTable) {
+        for (const [key, val] of Object.entries(this.#observable.getProperties('meta'))) {
+            if (key === 'TRACT') {
+                propTable.insertTHeadRow({elements: [null, null, 'Census Tract', val.toString()], position: 'prepend'});
+            } else if (key === 'SOVI_SCORE') {
+                propTable.insertTBodyRow({elements: [null, null, 'Social Vulnerability Score', val.toString()]});
+            } else if (key === 'SOVI_RATNG') {
+                propTable.insertTBodyRow({elements: [null, null, 'Social Vulnerability Rating', val.toString()]});
+            } else {
+                propTable.insertTBodyRow({elements: [null, null, key, val.toString()]});
+            }
+        }
+    }
+
+    /**
+     * - Validate the just-inputed value for a value text input for an EXISTING feature
      * @param {string} propertyKey
      * @param {string} inputValue
      * @returns {boolean} whether the propertyKey and value are valid from a domain perspective
      */
     #valueTextInputIsValid(propertyKey, inputValue) {
         if (typeof propertyKey !== 'string') {
-            throw TypeError('"propertyKey" argument must be typeof string.');
+            throw TypeError('The "propertyKey" argument must be typeof string.');
         }
         if (typeof inputValue !== 'string') {
-            throw TypeError('"inputValue" argument must be typeof string.');
+            throw TypeError('The "inputValue" argument must be typeof string.');
         }
         // - I am no longer always converting to lowercase because names are case-sensitive and therefore other properties should be too
+        let validity;
         switch (propertyKey) {
             case 'type':
                 inputValue = inputValue.toLowerCase();
@@ -817,75 +750,41 @@ class FeatureEditModal { // implements ObserverInterface, ModalInterface
                     return false;
                 }
                 return true;
-            case 'treeKey':
-                alert('The "treeKey" property cannot be changed.');
-                return false;
             case 'name':
-                if (this.#observables.length > 1) {
-                    alert('The "name" property cannot be edited for multiple objects simultaneously.');
+                if (inputValue.trim() === '') {
+                    alert('The "name" property cannot be blank.');
                     return false;
-                } else {
-                    if (inputValue.trim() === '') {
-                        alert('The "name" property cannot be blank.');
-                        return false;
-                    }
-                    if (this.#controller.observableGraph.getObservables(ob => ob.hasProperty('name') && ob.getProperty('name') === inputValue).length > 0) {
-                        alert(`The "name" property must be unique for all objects. The name "${inputValue}" is already used by another object.`);
-                        return false;
-                    }
+                }
+                if (this.#controller.observableGraph.getObservables(ob => ob.hasProperty('name') && ob.getProperty('name') === inputValue).length > 0) {
+                    alert(`The "name" property must be unique for all objects. The name "${inputValue}" is already used by another object.`);
+                    return false;
                 }
                 return true;
             case 'from':
             case 'to':
-                // - Test. It works
-                //[...this.#modal.divElement.getElementsByTagName('tr')].forEach(tr => {
-                //    [...tr.getElementsByTagName('span')].forEach(span => {
-                //        if (span.textContent === propertyKey) {
-                //            tr.getElementsByTagName('input')[0].classList.add('invalid');
-                //        }
-                //    });
-                //});
-                // - Test
-                if (!this.#observables.every(ob => ob.isLine())) {
-                    alert(`The value of the "${propertyKey}" property cannot be edited for non-line objects. Ensure your search includes only line objects.`);
+                validity = this.#controller.observableGraph.getLineConnectionNameValidity(this.#observable, inputValue);
+                if (!validity.isValid) {
+                    alert(validity.reason);
                     return false;
                 }
-                if (!this.#toFromParentObjectIsValid(propertyKey, inputValue)) {
+                if (propertyKey === 'from' && this.#observable.getProperty('to') === inputValue) {
+                    alert(`This line already has the value "${inputValue}" for the property "to". Lines may not begin and end on the same object.`);
                     return false;
                 }
-                if (propertyKey === 'from' && this.#observables.some(ob => ob.getProperty('to') === inputValue)) {
-                    if (this.#observables.length === 1) {
-                        alert(`This line already has the value "${inputValue}" for the property "to". Lines may not begin and end on the same object.`);
-                    } else {
-                        alert(`One or more objects already has the value "${inputValue}" for the property "to". Lines may not begin and end on the same object.`);
-                    }
-                    return false;
-                }
-                if (propertyKey === 'to' && this.#observables.some(ob => ob.getProperty('from') === inputValue)) {
-                    if (this.#observables.length === 1) {
-                        alert(`This line already has the value "${inputValue}" for the property "from". Lines may not begin and end on the same object.`);
-                    } else {
-                        alert(`One or more objects already has the value "${inputValue}" for the property "from". Lines may not begin and end on the same object.`);
-                    }
+                if (propertyKey === 'to' && this.#observable.getProperty('from') === inputValue) {
+                    alert(`This line already has the value "${inputValue}" for the property "from". Lines may not begin and end on the same object.`);
                     return false;
                 }
                 return true;
             case 'parent':
-                if (!this.#observables.every(ob => ob.isChild())) {
-                    alert(`The value of the "${propertyKey}" property cannot be edited for non-child objects. Ensure your search includes only child objects.`);
+                validity = this.#controller.observableGraph.getLineConnectionNameValidity(this.#observable, inputValue);
+                if (!validity.isValid) {
+                    alert(validity.reason);
                     return false;
                 }
-                return this.#toFromParentObjectIsValid(propertyKey, inputValue);
+                return true;
             case 'latitude':
             case 'longitude':
-                if (this.#observables.some(ob => ob.isConfigurationObject())) {
-                    if (this.#observables.length === 1) {
-                        alert(`This object is a configuration object. The property "${propertyKey}" cannot be set for configuration objects because they aren't shown on the map.`);
-                    } else {
-                        alert(`One or more objects are configuration objects. The property "${propertyKey}" cannot be set for configuration objects because they aren't shown on the map.`);
-                    }
-                    return false;
-                }
                 if (inputValue === '' || isNaN(+inputValue)) {
                     alert(`The value "${inputValue}" is not a valid number. A value for the "${propertyKey}" property must be a valid number.`);
                     return false;
@@ -897,78 +796,6 @@ class FeatureEditModal { // implements ObserverInterface, ModalInterface
     }
 }
 
-function getCirclePlusSvg() {
-    const svg = document.createElementNS('http://www.w3.org/2000/svg','svg');
-    svg.setAttribute('width', '22px');
-    svg.setAttribute('height', '22px');
-    svg.setAttribute('viewBox', '0 0 24 24'); 
-    svg.setAttribute('fill', 'none'); 
-    let path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-    path.setAttribute('d', 'M9 12H15');
-    path.setAttribute('stroke', '#FFFFFF');
-    path.setAttribute('stroke-width', '2');
-    path.setAttribute('stroke-linecap', 'round');
-    path.setAttribute('stroke-linejoin', 'round');
-    svg.appendChild(path);
-    path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-    path.setAttribute('d', 'M12 9L12 15');
-    path.setAttribute('stroke', '#FFFFFF');
-    path.setAttribute('stroke-width', '2');
-    path.setAttribute('stroke-linecap', 'round');
-    path.setAttribute('stroke-linejoin', 'round');
-    svg.appendChild(path);
-    path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-    path.setAttribute('d', 'M21 12C21 16.9706 16.9706 21 12 21C7.02944 21 3 16.9706 3 12C3 7.02944 7.02944 3 12 3C16.9706 3 21 7.02944 21 12Z');
-    path.setAttribute('stroke', '#FFFFFF');
-    path.setAttribute('stroke-width', '2');
-    svg.appendChild(path);
-    return svg;
-}
-
-function getTrashCanSvg() {
-    const svg = document.createElementNS('http://www.w3.org/2000/svg','svg');
-    svg.setAttribute('width', '22px');
-    svg.setAttribute('height', '22px');
-    svg.setAttribute('viewBox', '0 0 24 24');
-    svg.setAttribute('fill', 'none');
-    const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-    path.setAttribute('d', 'M10 10V16M14 10V16M4 6H20M15 6V5C15 3.89543 14.1046 3 13 3H11C9.89543 3 9 3.89543 9 5V6M18 6V14M18 18C18 19.1046 17.1046 20 16 20H8C6.89543 20 6 19.1046 6 18V13M6 9V6');
-    path.setAttribute('stroke', '#FFFFFF');
-    path.setAttribute('stroke-width', '1.5');
-    path.setAttribute('stroke-width', '1.5');
-    path.setAttribute('stroke-linecap', 'round');
-    path.setAttribute('stroke-linejoin', 'round');
-    svg.appendChild(path);
-    return svg;
-}
-
-function getPinSvg() {
-    const svg = document.createElementNS('http://www.w3.org/2000/svg','svg');
-    svg.setAttribute('width', '22px');
-    svg.setAttribute('height', '22px');
-    svg.setAttribute('viewBox', '0 0 24 24'); 
-    svg.setAttribute('fill', 'none'); 
-    const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
-    circle.setAttribute('cx', '12');
-    circle.setAttribute('cy', '10');
-    circle.setAttribute('r', '3');
-    circle.setAttribute('stroke', '#FFFFFF');
-    circle.setAttribute('stroke-width', '1.5');
-    circle.setAttribute('stroke-width', '1.5');
-    circle.setAttribute('stroke-linecap', 'round');
-    circle.setAttribute('stroke-linejoin', 'round');
-    svg.appendChild(circle);
-    const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-    path.setAttribute('d', "M19 9.75C19 15.375 12 21 12 21C12 21 5 15.375 5 9.75C5 6.02208 8.13401 3 12 3C15.866 3 19 6.02208 19 9.75Z");
-    path.setAttribute('stroke', '#FFFFFF');
-    path.setAttribute('stroke-width', '1.5');
-    path.setAttribute('stroke-width', '1.5');
-    path.setAttribute('stroke-linecap', 'round');
-    path.setAttribute('stroke-linejoin', 'round');
-    svg.appendChild(path);
-    return svg;
-}
-
 /**
  * - There's no need to create a function that returns a function if I use Function.prototype.bind() propertly
  * @param {Array} observables - an array of ObservableInterface instances
@@ -976,7 +803,7 @@ function getPinSvg() {
  */
 function zoom(observables) {
     if (!(observables instanceof Array)) {
-        throw TypeError('"observables" argument must be instanceof Array.');
+        throw TypeError('The "observables" argument must be instanceof Array.');
     }
     if (observables.length === 1) {
         const observable = observables[0];

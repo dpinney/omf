@@ -1,0 +1,14 @@
+/* dropdown-div component styling */
+
+/* contentdiv element styling */
+
+.dropdown-div > .contentdiv {
+    max-height: 0;
+    overflow: hidden;
+}
+
+/* contentdiv element variant styling */
+
+.dropdown-div > .contentdiv.-expanded {
+    max-height: initial;
+}

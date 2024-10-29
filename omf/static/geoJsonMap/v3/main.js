@@ -1,9 +1,10 @@
 export { hideModalInsert };
-import { DropdownDiv } from './dropdownDiv.js';
+import { DropdownDiv } from '../v4/ui-components/dropdown-div/dropdown-div.js';
+import { IconLabelButton } from '../v4/ui-components/iconlabel-button/iconlabel-button.js';
 import { Feature } from  './feature.js';
 import { FeatureGraph } from  './featureGraph.js';
 import { FeatureController } from './featureController.js';
-import { getLoadingModal, getAnonymizationDiv, getSaveDiv, getRawDataDiv, getRenameDiv, getLoadFeederDiv, getBlankFeederDiv, getWindmilDiv, getGridlabdDiv, getCymdistDiv, getOpendssDiv, getAmiDiv, getAttachmentsDiv, getClimateDiv, getScadaDiv, getColorDiv, getGeojsonDiv, getSearchDiv, getAddComponentsDiv } from './modalFeatures.js';
+import { getLoadingSpan, getAnonymizationButton, getSaveButton, getRawDataButton, getRenameButton, getLoadFeederButton, getBlankFeederButton, getWindmilButton, getGridlabdButton, getCymdistButton, getOpendssButton, getAmiButton, getAttachmentsButton, getClimateButton, getScadaButton, getColorButton, getGeojsonButton, getSearchButton, getAddComponentsButton} from './modalFeatures.js';
 import { LeafletLayer } from './leafletLayer.js';
 import { Nav } from './nav.js';
 import { SearchModal } from './searchModal.js';
@@ -11,6 +12,7 @@ import { TopTab } from './topTab.js';
 import { ClusterControlClass } from './clusterControl.js';
 import { MultiselectControlClass } from './multiselectControl.js';
 import { ZoomControlClass } from './zoomControl.js';
+import { ColorModal } from './colorModal.js';
 
 function main() {
     const features = gFeatureCollection.features.map(f => new Feature(f));
@@ -40,7 +42,10 @@ function main() {
     if (gIsOnline && gShowFileMenu) {
         createFileMenu(controller);
     }
-    addMenuEventHandlers();
+    // - Save before rendering the interface to remove any previous error files, but only in "online mode"
+    if (gIsOnline) {
+        document.getElementById('saveDiv').click();
+    }
 }
 
 /**
@@ -354,23 +359,14 @@ function addGeocoding() {
 }
 
 function createHelpMenu() {
-    const div = document.createElement('div');
-    div.style.fontSize = '13px';
-    div.style.height = '39px';
-    div.style.width = '55px';
-    div.style.color = 'white';
-    const innerDiv = document.createElement('div');
-    div.appendChild(innerDiv);
-    innerDiv.style.display = 'flex';
-    innerDiv.style.alignItems = 'center';
-    innerDiv.style.height = '100%';
     const anchor = document.createElement('a');
-    anchor.style.color = 'white'
     anchor.href = 'https://github.com/dpinney/omf/wiki/Tools-~-gridEdit';
     anchor.textContent = 'Help';
     anchor.target = '_blank';
-    innerDiv.appendChild(anchor);
-    document.getElementById('menuInsert').appendChild(div);
+    const button = new IconLabelButton({text: anchor});
+    button.button.classList.add('-clear');
+    button.button.getElementsByClassName('label')[0].classList.add('-white');
+    document.getElementById('menuInsert').appendChild(button.button);
 }
 
 /**
@@ -390,59 +386,59 @@ function createEditMenu(controller, nav, topTab) {
         throw TypeError('"topTab" argument must be instanceof TopTab.');
     }
     const dropdownDiv = new DropdownDiv();
-    dropdownDiv.divElement.id = 'editMenu';
-    dropdownDiv.addStyleClasses(['menu'], 'divElement');
-    dropdownDiv.setButton('Edit', true);
-    document.getElementById('menuInsert').appendChild(dropdownDiv.divElement);
-    dropdownDiv.insertElement(getSearchDiv(nav, topTab));
-    dropdownDiv.insertElement(getAddComponentsDiv(nav, topTab));
-    if (gIsOnline) {
-        dropdownDiv.insertElement(getAmiDiv(controller));
-        dropdownDiv.insertElement(getAnonymizationDiv(controller));
-    }
-    dropdownDiv.insertElement(getAttachmentsDiv(controller));
-    dropdownDiv.insertElement(getRawDataDiv(controller));
-    if (gIsOnline) {
-        dropdownDiv.insertElement(getClimateDiv(controller));
-        dropdownDiv.insertElement(getScadaDiv(controller));
-    }
-    dropdownDiv.insertElement(getColorDiv(controller));
-    dropdownDiv.insertElement(getGeojsonDiv(controller));
-}
-
-/**
- * @returns {undefined}
- */
-function addMenuEventHandlers() {
-    // - Add event listeners to only allow either the file or edit menu to be open
-    const fileMenu = document.getElementById('fileMenu');
-    let fileButton = null;
-    if (fileMenu !== null) {
-        fileButton = fileMenu.getElementsByTagName('button')[0];
-        fileButton.addEventListener('click', function() {
-            if (this.classList.contains('expanded')) {
-                if (editButton !== null && editButton.classList.contains('expanded')) {
-                    editButton.click();
+    dropdownDiv.div.id = 'editMenu';
+    dropdownDiv.div.classList.add('menu');
+    const button = new IconLabelButton({paths: IconLabelButton.getChevronPaths(), viewBox: '0 0 24 24', text: 'Edit', textPosition: 'prepend'});
+    button.button.classList.add('-clear');
+    button.button.getElementsByClassName('label')[0].classList.add('-white');
+    button.button.getElementsByClassName('icon')[0].classList.add('-white');
+    const outerFunc = function(div) {
+        if (div.lastChild.classList.contains('-expanded')) {
+            div.firstChild.classList.remove('-clear');
+            div.firstChild.classList.add('-white');
+            div.firstChild.getElementsByClassName('icon')[0].classList.remove('-white');
+            div.firstChild.getElementsByClassName('label')[0].classList.remove('-white');
+            div.firstChild.getElementsByClassName('icon')[0].classList.add('-rotated');
+            const fileMenuDropdownDiv = document.getElementById('fileMenu');
+            if (fileMenuDropdownDiv !== null) {
+                const fileMenuButton = fileMenuDropdownDiv.firstChild;
+                if (fileMenuButton.getElementsByClassName('icon')[0].classList.contains('-rotated')) {
+                    fileMenuButton.click();
                 }
             }
-        });
+        } else {
+            div.firstChild.classList.remove('-white');
+            div.firstChild.classList.add('-clear');
+            div.firstChild.getElementsByClassName('icon')[0].classList.remove('-rotated');
+            div.firstChild.getElementsByClassName('icon')[0].classList.add('-white');
+            div.firstChild.getElementsByClassName('label')[0].classList.add('-white');
+        }
+    };
+    button.button.addEventListener('click', dropdownDiv.getToggleFunction({outerFunc: outerFunc}));
+    dropdownDiv.div.prepend(button.button);
+    dropdownDiv.insertElement({element: getSearchButton(nav, topTab)});
+    if (gShowAddNewObjectsButton) {
+        dropdownDiv.insertElement({element: getAddComponentsButton(nav, topTab)});
     }
-    const editMenu = document.getElementById('editMenu');
-    let editButton = null;
-    if (editMenu !== null) {
-        editButton = editMenu.getElementsByTagName('button')[0];
-        editButton.addEventListener('click', function() {
-            if (this.classList.contains('expanded')) {
-                if (fileButton !== null && fileButton.classList.contains('expanded')) {
-                    fileButton.click();
-                }
-            }
-        });
-    }
-    // - Save before rendering the interface to remove any previous error files, but only in "online mode"
     if (gIsOnline) {
-        document.getElementById('saveDiv').click();
+        dropdownDiv.insertElement({element: getAmiButton(controller)});
+        dropdownDiv.insertElement({element: getAnonymizationButton(controller)});
     }
+    if (gShowAttachmentsButton) {
+        dropdownDiv.insertElement({element: getAttachmentsButton(controller)});
+    }
+    // - ColorModal needs to be shared between the download data button and the color circuit button
+    const colorModal = new ColorModal([controller.observableGraph.getObservable('omd')], controller);
+    dropdownDiv.insertElement({element: getRawDataButton(controller, colorModal)});
+    if (gIsOnline) {
+        dropdownDiv.insertElement({element: getClimateButton(controller)});
+        dropdownDiv.insertElement({element: getScadaButton(controller)});
+    }
+    dropdownDiv.insertElement({element: getColorButton(controller, colorModal)});
+    if (gShowAddGeojsonButton) {
+        dropdownDiv.insertElement({element: getGeojsonButton(controller)});
+    }
+    document.getElementById('menuInsert').append(dropdownDiv.div);
 }
 
 /**
@@ -454,18 +450,43 @@ function createFileMenu(controller) {
         throw TypeError('"controller" argument must be instanceof FeatureController.');
     }
     const dropdownDiv = new DropdownDiv();
-    dropdownDiv.divElement.id = 'fileMenu';
-    dropdownDiv.addStyleClasses(['menu'], 'divElement');
-    dropdownDiv.setButton('File', true);
-    document.getElementById('menuInsert').appendChild(dropdownDiv.divElement);
-    dropdownDiv.insertElement(getSaveDiv(controller));
-    dropdownDiv.insertElement(getRenameDiv(controller));
-    dropdownDiv.insertElement(getLoadFeederDiv(controller));
-    dropdownDiv.insertElement(getBlankFeederDiv(controller));
-    dropdownDiv.insertElement(getWindmilDiv(controller));
-    dropdownDiv.insertElement(getGridlabdDiv(controller));
-    dropdownDiv.insertElement(getCymdistDiv(controller));
-    dropdownDiv.insertElement(getOpendssDiv(controller));
+    dropdownDiv.div.id = 'fileMenu';
+    dropdownDiv.div.classList.add('menu');
+    const button = new IconLabelButton({paths: IconLabelButton.getChevronPaths(), viewBox: '0 0 24 24', text: 'File', textPosition: 'prepend'});
+    button.button.classList.add('-clear');
+    button.button.getElementsByClassName('label')[0].classList.add('-white');
+    button.button.getElementsByClassName('icon')[0].classList.add('-white');
+    const outerFunc = function(div) {
+        if (div.lastChild.classList.contains('-expanded')) {
+            div.firstChild.classList.remove('-clear');
+            div.firstChild.classList.add('-white');
+            div.firstChild.getElementsByClassName('icon')[0].classList.remove('-white');
+            div.firstChild.getElementsByClassName('label')[0].classList.remove('-white');
+            div.firstChild.getElementsByClassName('icon')[0].classList.add('-rotated');
+            const editMenuDropdownDiv = document.getElementById('editMenu');
+            const editMenuButton = editMenuDropdownDiv.firstChild;
+            if (editMenuButton.getElementsByClassName('icon')[0].classList.contains('-rotated')) {
+                editMenuButton.click();
+            }
+        } else {
+            div.firstChild.classList.remove('-white');
+            div.firstChild.classList.add('-clear');
+            div.firstChild.getElementsByClassName('icon')[0].classList.remove('-rotated');
+            div.firstChild.getElementsByClassName('icon')[0].classList.add('-white');
+            div.firstChild.getElementsByClassName('label')[0].classList.add('-white');
+        }
+    };
+    button.button.addEventListener('click', dropdownDiv.getToggleFunction({outerFunc: outerFunc}));
+    dropdownDiv.div.prepend(button.button);
+    dropdownDiv.insertElement({element: getSaveButton(controller)});
+    dropdownDiv.insertElement({element: getRenameButton(controller)});
+    dropdownDiv.insertElement({element: getLoadFeederButton(controller)});
+    dropdownDiv.insertElement({element: getBlankFeederButton(controller)});
+    dropdownDiv.insertElement({element: getWindmilButton(controller)});
+    dropdownDiv.insertElement({element: getGridlabdButton(controller)});
+    dropdownDiv.insertElement({element: getCymdistButton(controller)});
+    dropdownDiv.insertElement({element: getOpendssButton(controller)});
+    document.getElementById('menuInsert').append(dropdownDiv.div);
 }
 
 /**
@@ -481,7 +502,7 @@ function hideModalInsert() {
     modalInsert.id = 'modalInsert';
     if (gIsOnline) {
         modalInsert.classList.add('visible');
-        modalInsert.replaceChildren(getLoadingModal().divElement);
+        modalInsert.replaceChildren(getLoadingSpan().span);
     }
     document.getElementsByTagName('main')[0].appendChild(modalInsert);
     setTimeout(() => main(), 1);

@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <link rel="stylesheet" href="dropdown-div.css">
+        <link rel="stylesheet" href="iconlabel-button.css">
+        <link rel="stylesheet" href="prop-table.css">
+        <style>
+            /* Demo styling */
+
+            * {
+                box-sizing: border-box;
+            }
+            body {
+                margin: 0;
+            }
+            .demo-div {
+                margin: 1rem;
+            }
+            .demo-div .iconlabel-button {
+                /*width: 100%;*/
+            }
+            .demo-div .iconlabel-button > .icon {
+                width: 22px;
+            }
+        </style>
+    </head>
+    <body>
+        <!-- Dynamic creation -->
+        <div class="demo-div"></div>
+        <div class="demo-div"></div>
+    </body>
+    <script type="module">
+        import { DropdownDiv } from '/dropdown-div.js';
+        import { IconLabelButton } from '/iconlabel-button.js';
+        import { PropTable } from '/prop-table.js';
+        
+        function outerFunc(div) {
+            // - This assumes the button is the first child of the outer dropdown-div
+            for (const icon of div.firstChild.getElementsByClassName('icon')) {
+                icon.classList.toggle('-rotated');
+            }
+        }
+        function innerCloseFunc(div) {
+            // - This assumes the button is the first child of the outer dropdown-div
+            for (const icon of div.firstChild.getElementsByClassName('icon')) {
+                icon.classList.remove('-rotated');
+            }
+        }
+
+        // - Example 1
+        const dropdownDiv = new DropdownDiv(); 
+        const button = new IconLabelButton({paths: IconLabelButton.getChevronPaths(), viewBox: '0 0 24 24', text: 'foo', tooltip: 'bar', textPosition: 'prepend'});
+        button.button.addEventListener('click', dropdownDiv.getToggleFunction({outerFunc: outerFunc, innerCloseFunc: innerCloseFunc}));
+        dropdownDiv.div.prepend(button.button);
+        const table = new PropTable();
+        table.insertTHeadRow({elements: ['Some', 'nice', 'headers']});
+        table.insertTBodyRow({elements: ['Some', 'text', 'content']});
+        dropdownDiv.insertElement({element: table.div});
+        document.getElementsByClassName('demo-div')[0].append(dropdownDiv.div);
+        // - Example 2
+        const dropdownDiv1 = new DropdownDiv(); 
+        const button1 = new IconLabelButton({paths: IconLabelButton.getChevronPaths(), viewBox: '0 0 24 24', text: 'foo', tooltip: 'bar', textPosition: 'prepend'});
+        button1.button.addEventListener('click', dropdownDiv1.getToggleFunction({outerFunc: outerFunc, innerCloseFunc: innerCloseFunc}));
+        dropdownDiv1.div.prepend(button1.button);
+        const table1 = new PropTable();
+        table1.insertTHeadRow({elements: ['Some1', 'nice1', 'headers1']});
+        table1.insertTBodyRow({elements: ['Some1', 'text1', 'content1']});
+        dropdownDiv1.insertElement({element: table1.div});
+
+        const dropdownDiv2 = new DropdownDiv(); 
+        const button2 = new IconLabelButton({paths: IconLabelButton.getChevronPaths(), viewBox: '0 0 24 24', text: 'foo', tooltip: 'bar', textPosition: 'prepend'});
+        button2.button.addEventListener('click', dropdownDiv2.getToggleFunction({outerFunc: outerFunc, innerCloseFunc: innerCloseFunc}));
+        dropdownDiv2.div.prepend(button2.button);
+        const table2 = new PropTable();
+        table2.insertTHeadRow({elements: ['Some2', 'nice2', 'headers2']});
+        table2.insertTBodyRow({elements: ['Some2', 'text2', 'content2']});
+        dropdownDiv2.insertElement({element: table2.div});
+        dropdownDiv1.insertElement({element: dropdownDiv2.div});
+        
+        document.getElementsByClassName('demo-div')[1].append(dropdownDiv1.div);
+        
+    </script>
+</html>

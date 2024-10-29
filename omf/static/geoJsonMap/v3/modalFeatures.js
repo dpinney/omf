@@ -1,39 +1,48 @@
-export { getLoadingModal, getAnonymizationDiv, getSaveDiv, getRawDataDiv, getRenameDiv, getLoadFeederDiv, getBlankFeederDiv, getWindmilDiv, getGridlabdDiv, getCymdistDiv, getOpendssDiv, getAmiDiv, getAttachmentsDiv, getClimateDiv, getScadaDiv, getColorDiv, getGeojsonDiv, getSearchDiv, getAddComponentsDiv };
+export { getLoadingSpan, getAnonymizationButton, getSaveButton, getRawDataButton, getRenameButton, getLoadFeederButton, getBlankFeederButton, getWindmilButton, getGridlabdButton, getCymdistButton, getOpendssButton, getAmiButton, getAttachmentsButton, getClimateButton, getScadaButton, getColorButton, getGeojsonButton, getSearchButton, getAddComponentsButton};
 import { ColorModal } from './colorModal.js';
 import { Feature } from  './feature.js';
 import { FeatureController } from './featureController.js';
 import { GeojsonModal } from './geojsonModal.js';
 import { hideModalInsert } from './main.js'
-import { Modal } from './modal.js';
 import { Nav } from './nav.js';
 import { TopTab } from './topTab.js';
+import { IconLabelButton } from '../v4/ui-components/iconlabel-button/iconlabel-button.js';
+import { PropTable } from '../v4/ui-components/prop-table/prop-table.js';
+import { LoadingSpan } from '../v4/ui-components/loading-span/loading-span.js';
+import { DropdownDiv } from '../v4/ui-components/dropdown-div/dropdown-div.js';
 
 /*
  * @returns {Modal}
  */
-function getLoadingModal() {
-    const modal = new Modal();
-    modal.showProgress(true, 'Loading Map...');
-    modal.addStyleClasses(['outerModal', 'fitContent'], 'divElement');
-    return modal;
+function getLoadingSpan() {
+    const loadingSpan = new LoadingSpan();
+    loadingSpan.update({text: 'Loading map...'});
+    return loadingSpan;
 }
 
 /**
  * @param {Feature} - an ObservableInterface instance
  * @param {FeatureController} controller - a ControllerInterface instance
- * @returns {Modal}
+ * @returns {PropTable}
  */
-function _getAnonymizationModal(observable, controller) {
+function _getAnonymizationTable(observable, controller) {
     if (!(observable instanceof Feature)) {
-        throw TypeError('"observable" argument must be instanceof Feature.');
+        throw TypeError('The "observable" argument must be instanceof Feature.');
     }
     if (!(controller instanceof FeatureController)) {
-        throw TypeError('"controller" argument must be instanceof FeatureController.');
+        throw TypeError('The "controller" argument must be instanceof FeatureController.');
     }
+    const propTable = new PropTable();
+    propTable.insertTHeadRow({elements: ['Anonymization'], colspans: [2]});
+    // - Don't close the modal when it is clicked on
+    propTable.div.addEventListener('click', function(e) {
+        e.stopPropagation();
+    });
+    propTable.insertTBodyRow({elements: ['Names and Labels'], colspans: [2]});
     // - namesAndLabelsSelect
     const namesAndLabelsSelect = document.createElement('select');
     namesAndLabelsSelect.name = 'anonymizeNameOption';
-    let option = document.createElement('option');    
+    let option = document.createElement('option');
     option.text = 'No Change';
     option.value = 'noChange';
     namesAndLabelsSelect.add(option);
@@ -45,20 +54,16 @@ function _getAnonymizationModal(observable, controller) {
     option.text = 'Randomize';
     option.value = 'randomize';
     namesAndLabelsSelect.add(option);
-    const namesAndLabelsSelectDiv = _getHorizontalFlexDiv();
-    namesAndLabelsSelectDiv.classList.add('centerCrossAxisFlex');
-    namesAndLabelsSelectDiv.classList.add('indent1');
-    namesAndLabelsSelectDiv.appendChild(namesAndLabelsSelect);
-    const namesAndLabelsHeading = document.createElement('span');
-    namesAndLabelsHeading.textContent = 'Names and Labels';
-    const namesAndLabelsHeadingDiv = _getHorizontalFlexDiv();
-    namesAndLabelsHeadingDiv.classList.add('centerCrossAxisFlex');
-    namesAndLabelsHeadingDiv.appendChild(namesAndLabelsHeading);
+    namesAndLabelsSelect.addEventListener('change', function() {
+        observable.setProperty(this.name, this.value, 'formProps');
+    });
+    propTable.insertTBodyRow({elements: [namesAndLabelsSelect], colspans: [2]});
+    propTable.insertTBodyRow({elements: ['Locations'], colspans: [2]});
     // - locationsSelect
     const locationsSelect = document.createElement('select');
     locationsSelect.name = 'anonymizeLocationOption';
     option = document.createElement('option');
-    option.text = 'No Change';
+    option.text = 'No change';
     option.value = 'noChange';
     locationsSelect.add(option);
     option = document.createElement('option');
@@ -66,156 +71,100 @@ function _getAnonymizationModal(observable, controller) {
     option.value = 'randomize';
     locationsSelect.add(option);
     option = document.createElement('option');
-    option.text = 'Force Layout';
+    option.text = 'Force layout';
     option.value = 'forceLayout';
     locationsSelect.add(option);
     option = document.createElement('option');
     option.text = 'Translate';
     option.value = 'translation';
     locationsSelect.add(option);
-    const locationsSelectDiv = _getHorizontalFlexDiv();
-    locationsSelectDiv.classList.add('centerCrossAxisFlex');
-    locationsSelectDiv.classList.add('indent1');
-    locationsSelectDiv.appendChild(locationsSelect);
-    const locationsHeading = document.createElement('span');
-    locationsHeading.textContent = 'Locations';
-    const locationsHeadingDiv = _getHorizontalFlexDiv();
-    locationsHeadingDiv.classList.add('centerCrossAxisFlex');
-    locationsHeadingDiv.appendChild(locationsHeading);
-    // - Locations inputs
-    //  - Coordinates input
+    propTable.insertTBodyRow({elements: [locationsSelect], colspans: [2]});
+    // - Scale input
+    const scaleInput = document.createElement('input');
+    scaleInput.name = 'scale';
+    scaleInput.value = '.01';
+    scaleInput.pattern = '(\\d+)?(\\.\\d+)?';
+    scaleInput.addEventListener('change', function() {
+        const value = this.value.trim();
+        observable.setProperty(this.name, value, 'formProps');
+    });
+    // - Scale dropdown
+    const forceLayoutDropdown = new DropdownDiv();
+    const forceLayoutTable = new PropTable();
+    let div = document.createElement('div');
+    let span = document.createElement('span');
+    span.textContent = 'Force layout with following scale factor: '
+    div.append(span);
+    div.append(scaleInput);
+    forceLayoutTable.insertTBodyRow({elements: [div]});
+    forceLayoutTable.insertTBodyRow({elements: ['Estimates: 0.001 = street-density, 0.01 = neighborhood-density, 0.1 = city-density, 1 = state-density'], colspans: [2]});
+    forceLayoutDropdown.insertElement({element: forceLayoutTable.div});
+    propTable.insertTBodyRow({elements: [forceLayoutDropdown.div], colspans: [2]});
+    // - Location inputs and dropdown
+    const translateDropdown = new DropdownDiv();
+    const translateTable = new PropTable();
     const coordinatesInput = document.createElement('input');
+    //  - Coordinates input
     coordinatesInput.name = 'new_center_coords';
     coordinatesInput.placeholder = 'lat°, lon°';
     coordinatesInput.pattern = '\\(?(-?\\d+(\\.\\d+)?),\\s*(-?\\d+(\\.\\d+)?)\\)?';
+    coordinatesInput.addEventListener('change', function() {
+        const value = this.value.trim();
+        observable.setProperty(this.name, value, 'formProps');
+    });
+    translateTable.insertTBodyRow({elements: ['Shift center to', coordinatesInput, 'coordinates within the contiguous/non-contiguous USA']});
     //  - Horizontal translation input
     const horizontalTranslationInput = document.createElement('input');
     horizontalTranslationInput.name = 'translateRight';
     horizontalTranslationInput.placeholder = '(+/-)meters';
     horizontalTranslationInput.pattern = '[\\-+]?\\d+';
+    horizontalTranslationInput.addEventListener('change', function() {
+        const value = this.value.trim();
+        observable.setProperty(this.name, value, 'formProps');
+    });
+    translateTable.insertTBodyRow({elements: ['Translate', horizontalTranslationInput, 'meters rightwards']});
     //  - Vertical translation input
     const verticalTranslationInput = document.createElement('input');
     verticalTranslationInput.name = 'translateUp'
     verticalTranslationInput.placeholder = '(+/-)meters';
     verticalTranslationInput.pattern = '[\\-+]?\\d+';
+    verticalTranslationInput.addEventListener('change', function() {
+        const value = this.value.trim();
+        observable.setProperty(this.name, value, 'formProps');
+    });
+    translateTable.insertTBodyRow({elements: ['Translate', verticalTranslationInput, 'meters upwards']});
     //  - Rotation input
     const rotationInput = document.createElement('input');
     rotationInput.name = 'rotate';
     rotationInput.placeholder = '(+/-)angle°';
     rotationInput.pattern = '[\\-+]?\\d+(\\.\\d+)?'
-    //  - Scale input
-    const scaleInput = document.createElement('input');
-    scaleInput.name = 'scale';
-    scaleInput.value = '.01';
-    scaleInput.pattern = '(\\d+)?(\\.\\d+)?';
-    const scaleTipDiv = document.createElement('div');
-    const scaleTipSpan = document.createElement('span');
-    scaleTipSpan.textContent = 'Estimates: 0.001 = street-density, 0.01 = neighborhood-density, 0.1 = city-density, 1 = state-density';
-    scaleTipDiv.appendChild(scaleTipSpan);
+    rotationInput.addEventListener('change', function() {
+        const value = this.value.trim();
+        observable.setProperty(this.name, value, 'formProps');
+    });
+    translateTable.insertTBodyRow({elements: ['Rotate', rotationInput, 'degrees counterclockwise']});
+    translateDropdown.insertElement({element: translateTable.div});
+    propTable.insertTBodyRow({elements: [translateDropdown.div], colspans: [2]});
+    locationsSelect.addEventListener('change', function() {
+        observable.setProperty(this.name, this.value, 'formProps');
+        if (this.value === 'translation') {
+            translateDropdown.div.getElementsByClassName('contentdiv')[0].classList.add('-expanded');
+        } else {
+            translateDropdown.div.getElementsByClassName('contentdiv')[0].classList.remove('-expanded');
+        }
+        if (this.value === 'forceLayout') {
+            forceLayoutDropdown.div.getElementsByClassName('contentdiv')[0].classList.add('-expanded');
+        } else {
+            forceLayoutDropdown.div.getElementsByClassName('contentdiv')[0].classList.remove('-expanded');
+        }
+    });
     // - Electrical properties
-    const electricalPropertiesHeading = document.createElement('span');
-    electricalPropertiesHeading.textContent = 'Electrical Properties';
-    const electricalPropertiesHeadingDiv = _getHorizontalFlexDiv();
-    electricalPropertiesHeadingDiv.appendChild(electricalPropertiesHeading);
-    electricalPropertiesHeadingDiv.classList.add('centerCrossAxisFlex');
+    propTable.insertTBodyRow({elements: ['Electrical properties'], colspans: [2]});
     // - conductorCheckbox
     const conductorCheckbox = document.createElement('input');
     conductorCheckbox.id = 'modifyLengthSize';
     conductorCheckbox.type = 'checkbox';
     conductorCheckbox.name = 'modifyLengthSize';
-    const conductorLabel = document.createElement('label');    
-    conductorLabel.htmlFor = 'modifyLengthSize';
-    conductorLabel.innerText = 'Modify Conductor Length and Cable Size';
-    // - smoothAMICheckbox
-    const smoothAMICheckbox = document.createElement('input');
-    smoothAMICheckbox.id = 'smoothLoadGen';
-    smoothAMICheckbox.type = 'checkbox';
-    smoothAMICheckbox.name = 'smoothLoadGen';
-    const smoothAMILabel = document.createElement('label');    
-    smoothAMILabel.htmlFor = 'smoothLoadGen';
-    smoothAMILabel.innerText = 'Smooth AMI Loadshapes';
-    // - shuffleLoadsCheckbox
-    const shuffleLoadsCheckbox = document.createElement('input');
-    shuffleLoadsCheckbox.id = 'shuffleLoadGen';
-    shuffleLoadsCheckbox.type = 'checkbox';
-    shuffleLoadsCheckbox.name = 'shuffleLoadGen';
-    const shuffleLoadsLabel = document.createElement('label');    
-    shuffleLoadsLabel.htmlFor = 'shuffleLoadGen';
-    shuffleLoadsLabel.innerText = ' Shuffle Loads and Generators';
-    const shuffleLoadsInput = document.createElement('input');
-    shuffleLoadsInput.name = 'shufflePerc';
-    shuffleLoadsInput.placeholder = '(1-100)'
-    shuffleLoadsInput.pattern = '(\\d+)?(\\.\\d+)?';
-    // - addNoiseCheckbox
-    const addNoiseCheckbox = document.createElement('input');
-    addNoiseCheckbox.id = 'addNoise';
-    addNoiseCheckbox.type = 'checkbox';
-    addNoiseCheckbox.name = 'addNoise';
-    const addNoiseLabel = document.createElement('label');    
-    addNoiseLabel.htmlFor = 'addNoise';
-    addNoiseLabel.innerText = 'Add Noise';
-    const addNoiseInput = document.createElement('input');
-    addNoiseInput.name = 'noisePerc';
-    addNoiseInput.placeholder = '(1-100)'
-    addNoiseInput.pattern = '(\\d+)?(\\.\\d+)?';
-    // - Submit button
-    const submitButton = _getSubmitButton();
-    const submitDiv = _getSubmitDiv(submitButton);
-    // - Event listeners
-    // - namesAndLabelsSelect
-    namesAndLabelsSelect.addEventListener('change', function() {
-        observable.setProperty(this.name, this.value, 'formProps');
-    });
-    // - locationsSelect
-    locationsSelect.addEventListener('change', function() {
-        observable.setProperty(this.name, this.value, 'formProps');
-        const translateModal = this.parentElement.nextElementSibling;
-        if (this.value === 'translation') {
-            translateModal.classList.remove('collapsed');
-            if (!translateModal.classList.contains('expanded')) {
-                translateModal.classList.add('expanded');
-            }
-        } else {
-            translateModal.classList.remove('expanded');
-            if (!translateModal.classList.contains('collapsed')) {
-                translateModal.classList.add('collapsed');
-            }
-        }
-        const scaleModal = this.parentElement.nextElementSibling.nextElementSibling;
-        if (this.value === 'forceLayout') {
-            scaleModal.classList.remove('collapsed');
-            if (!scaleModal.classList.contains('expanded')) {
-                scaleModal.classList.add('expanded');
-            }
-        } else {
-            scaleModal.classList.remove('expanded');
-            if (!scaleModal.classList.contains('collapsed')) {
-                scaleModal.classList.add('collapsed');
-            }
-        }
-    });
-    // - Locations inputs
-    coordinatesInput.addEventListener('change', function() {
-        const value = this.value.trim();
-        observable.setProperty(this.name, value, 'formProps');
-    });
-    horizontalTranslationInput.addEventListener('change', function() {
-        const value = this.value.trim();
-        observable.setProperty(this.name, value, 'formProps');
-    });
-    verticalTranslationInput.addEventListener('change', function() {
-        const value = this.value.trim();
-        observable.setProperty(this.name, value, 'formProps');
-    });
-    rotationInput.addEventListener('change', function() {
-        const value = this.value.trim();
-        observable.setProperty(this.name, value, 'formProps');
-    });
-    scaleInput.addEventListener('change', function() {
-        const value = this.value.trim();
-        observable.setProperty(this.name, value, 'formProps');
-    });
-    // - conductorCheckbox
     conductorCheckbox.addEventListener('change', function() {
         let value = '';
         if (this.checked) {
@@ -223,7 +172,17 @@ function _getAnonymizationModal(observable, controller) {
         }
         observable.setProperty(this.name, value, 'formProps');
     });
+    const conductorLabel = document.createElement('label');
+    conductorLabel.htmlFor = 'modifyLengthSize';
+    conductorLabel.innerText = 'Modify conductor length and cable size';
+    div = document.createElement('div');
+    div.append(conductorCheckbox, conductorLabel);
+    propTable.insertTBodyRow({elements: [div]});
     // - smoothAMICheckbox
+    const smoothAMICheckbox = document.createElement('input');
+    smoothAMICheckbox.id = 'smoothLoadGen';
+    smoothAMICheckbox.type = 'checkbox';
+    smoothAMICheckbox.name = 'smoothLoadGen';
     smoothAMICheckbox.addEventListener('change', function() {
         let value = '';
         if (this.checked) {
@@ -231,29 +190,37 @@ function _getAnonymizationModal(observable, controller) {
         }
         observable.setProperty(this.name, value, 'formProps');
     });
+    const smoothAMILabel = document.createElement('label');
+    smoothAMILabel.htmlFor = 'smoothLoadGen';
+    smoothAMILabel.innerText = 'Smooth AMI Loadshapes';
+    div = document.createElement('div');
+    div.append(smoothAMICheckbox, smoothAMILabel);
+    propTable.insertTBodyRow({elements: [div]});
     // - shuffleLoadsCheckbox
+    const shuffleDropdown = new DropdownDiv();
+    const shuffleLoadsCheckbox = document.createElement('input');
+    shuffleLoadsCheckbox.id = 'shuffleLoadGen';
+    shuffleLoadsCheckbox.type = 'checkbox';
+    shuffleLoadsCheckbox.name = 'shuffleLoadGen';
     shuffleLoadsCheckbox.addEventListener('change', function() {
         let value = '';
         if (this.checked) {
             value = 'shuffleLoadGen';
+            shuffleDropdown.div.getElementsByClassName('contentdiv')[0].classList.add('-expanded');
         } else {
             shuffleLoadsInput.setCustomValidity('');
             shuffleLoadsInput.value = '';
+            shuffleDropdown.div.getElementsByClassName('contentdiv')[0].classList.remove('-expanded');
         }
         observable.setProperty(this.name, value, 'formProps');
-        let parentElement = this.parentElement;
-        while (!parentElement.classList.contains('js-div--modal')) {
-            parentElement = parentElement.parentElement;
-        }
-        if (this.checked) {
-            parentElement.nextSibling.classList.remove('collapsed');
-            parentElement.nextSibling.classList.add('expanded');
-        } else {
-            if (!parentElement.nextSibling.classList.contains('collapsed')) {
-                parentElement.nextSibling.classList.add('collapsed');
-            }
-        }
     });
+    const shuffleLoadsLabel = document.createElement('label');
+    shuffleLoadsLabel.htmlFor = 'shuffleLoadGen';
+    shuffleLoadsLabel.innerText = 'Shuffle loads and generators';
+    const shuffleLoadsInput = document.createElement('input');
+    shuffleLoadsInput.name = 'shufflePerc';
+    shuffleLoadsInput.placeholder = '(1-100)'
+    shuffleLoadsInput.pattern = '(\\d+)?(\\.\\d+)?';
     shuffleLoadsInput.addEventListener('change', function() {
         this.setCustomValidity('');
         const value = +this.value.trim();
@@ -267,29 +234,38 @@ function _getAnonymizationModal(observable, controller) {
             observable.setProperty(this.name, value, 'formProps');
         }
     });
+    div = document.createElement('div');
+    div.append(shuffleLoadsCheckbox, shuffleLoadsLabel);
+    propTable.insertTBodyRow({elements: [div]});
+    const shuffleTable = new PropTable();
+    shuffleTable.insertTBodyRow({elements: ['Shuffle', shuffleLoadsInput, 'percent']});
+    shuffleDropdown.insertElement({element: shuffleTable.div});
+    propTable.insertTBodyRow({elements: [shuffleDropdown.div], colspans: [2]});
     // - addNoiseCheckbox
+    const addNoiseDropdown = new DropdownDiv();
+    const addNoiseCheckbox = document.createElement('input');
+    addNoiseCheckbox.id = 'addNoise';
+    addNoiseCheckbox.type = 'checkbox';
+    addNoiseCheckbox.name = 'addNoise';
     addNoiseCheckbox.addEventListener('change', function() {
         let value = '';
         if (this.checked) {
             value = 'addNoise';
+            addNoiseDropdown.div.getElementsByClassName('contentdiv')[0].classList.add('-expanded');
         } else {
             addNoiseInput.setCustomValidity('');
             addNoiseInput.value = '';
+            addNoiseDropdown.div.getElementsByClassName('contentdiv')[0].classList.remove('-expanded');
         }
         observable.setProperty(this.name, value, 'formProps');
-        let parentElement = this.parentElement;
-        while (!parentElement.classList.contains('js-div--modal')) {
-            parentElement = parentElement.parentElement;
-        }
-        if (this.checked) {
-            parentElement.nextSibling.classList.remove('collapsed');
-            parentElement.nextSibling.classList.add('expanded');
-        } else {
-            if (!parentElement.nextSibling.classList.contains('collapsed')) {
-                parentElement.nextSibling.classList.add('collapsed');
-            }
-        }
     });
+    const addNoiseLabel = document.createElement('label');
+    addNoiseLabel.htmlFor = 'addNoise';
+    addNoiseLabel.innerText = 'Add Noise';
+    const addNoiseInput = document.createElement('input');
+    addNoiseInput.name = 'noisePerc';
+    addNoiseInput.placeholder = '(1-100)'
+    addNoiseInput.pattern = '(\\d+)?(\\.\\d+)?';
     addNoiseInput.addEventListener('change', function() {
         this.setCustomValidity('');
         const value = +this.value.trim();
@@ -303,23 +279,35 @@ function _getAnonymizationModal(observable, controller) {
             observable.setProperty(this.name, value, 'formProps');
         }
     });
-    // - Modal
-    const mainModal = new Modal();
-    mainModal.addStyleClasses(['outerModal', 'fitContent'], 'divElement');
+    div = document.createElement('div');
+    div.append(addNoiseCheckbox, addNoiseLabel);
+    propTable.insertTBodyRow({elements: [div]});
+    const addNoiseTable = new PropTable();
+    addNoiseTable.insertTBodyRow({elements: ['Add', addNoiseInput, 'percent noise']});
+    addNoiseDropdown.insertElement({element: addNoiseTable.div});
+    propTable.insertTBodyRow({elements: [addNoiseDropdown.div], colspans: [2]});
+    // - Submit button
+    const button = new IconLabelButton({text: 'Submit'});
+    button.button.classList.add('-blue');
+    button.button.getElementsByClassName('label')[0].classList.add('-white');
+    // - LoadingSpan
+    const loadingSpan = new LoadingSpan();
+    loadingSpan.span.classList.add('-yellow', '-hidden');
+    propTable.insertTHeadRow({elements: [loadingSpan.span], position: 'prepend'})
     const modalInsert = document.getElementById('modalInsert');
-    submitButton.addEventListener('click', async function() {
+    button.button.addEventListener('click', async function() {
         if (coordinatesInput.checkValidity() && horizontalTranslationInput.checkValidity() && verticalTranslationInput.checkValidity() && rotationInput.checkValidity() && scaleInput.checkValidity() && shuffleLoadsInput.checkValidity() && addNoiseInput.checkValidity()) {
             modalInsert.removeEventListener('click', hideModalInsert);
             const saveFeature = _getSaveFeature();
             saveFeature.setProperty('feederObjectJson', JSON.stringify(controller.observableGraph.getObservableExportData()), 'formProps');
-            const saveModal = _getSaveModal(controller);
-            modalInsert.replaceChildren(saveModal.divElement);
-            await controller.submitFeature(saveFeature, saveModal, null, false);
+            const saveLoadingSpan = _getSaveLoadingSpan(controller);
+            modalInsert.replaceChildren(saveLoadingSpan.span);
+            await controller.submitFeature(saveFeature, saveLoadingSpan, null, false);
             modalInsert.removeEventListener('click', hideModalInsert);
             document.getElementById('modalInsert').classList.add('visible');
-            modalInsert.replaceChildren(mainModal.divElement);
-            mainModal.showProgress(true, 'Anonymization working...', ['caution']);
-            controller.submitFeature(observable, mainModal, submitButton);
+            modalInsert.replaceChildren(propTable.div);
+            loadingSpan.update({text: 'Anonymization working...'});
+            await controller.submitFeature(observable, loadingSpan, button.button);
         } else {
             coordinatesInput.reportValidity();
             horizontalTranslationInput.reportValidity();
@@ -330,59 +318,17 @@ function _getAnonymizationModal(observable, controller) {
             addNoiseInput.reportValidity();
         }
     });
-    mainModal.setTitle('Anonymization');
-    mainModal.addStyleClasses(['horizontalFlex', 'centerMainAxisFlex', 'centerCrossAxisFlex'], 'titleElement');
-    mainModal.insertElement(namesAndLabelsHeadingDiv);
-    mainModal.insertElement(namesAndLabelsSelectDiv);
-    mainModal.insertElement(locationsHeadingDiv);
-    mainModal.insertElement(locationsSelectDiv);
-    const translateModal = new Modal();
-    translateModal.insertTBodyRow(['Shift center to', coordinatesInput, 'coordinates within the contiguous/non-contiguous USA']);
-    translateModal.insertTBodyRow(['Translate', horizontalTranslationInput, 'meters rightwards']);
-    translateModal.insertTBodyRow(['Translate', verticalTranslationInput, 'meters upwards']);
-    translateModal.insertTBodyRow(['Rotate', rotationInput, 'degrees counterclockwise']);
-    translateModal.addStyleClasses(['collapsed', 'indent2'], 'divElement');
-    mainModal.insertElement(translateModal.divElement);
-    const scaleModal = new Modal();
-    scaleModal.insertTBodyRow(['Force layout with following scale factor', scaleInput]);
-    scaleModal.insertElement(scaleTipDiv);
-    scaleModal.addStyleClasses(['collapsed', 'indent2'], 'divElement');
-    mainModal.insertElement(scaleModal.divElement);
-    const electricalPropertiesHeadingModal = new Modal();
-    electricalPropertiesHeadingModal.insertElement(electricalPropertiesHeadingDiv);
-    mainModal.insertElement(electricalPropertiesHeadingModal.divElement);
-    const electricalPropertiesModal = new Modal();
-    electricalPropertiesModal.insertTBodyRow([conductorCheckbox, conductorLabel]);
-    electricalPropertiesModal.insertTBodyRow([smoothAMICheckbox, smoothAMILabel]);
-    electricalPropertiesModal.insertTBodyRow([shuffleLoadsCheckbox, shuffleLoadsLabel]);
-    electricalPropertiesModal.addStyleClasses(['indent1'], 'divElement');
-    mainModal.insertElement(electricalPropertiesModal.divElement);
-    const shuffleLoadsInputModal = new Modal();
-    shuffleLoadsInputModal.insertTBodyRow(['Shuffle', shuffleLoadsInput, 'percent']);
-    shuffleLoadsInputModal.addStyleClasses(['collapsed', 'indent2'], 'divElement');
-    mainModal.insertElement(shuffleLoadsInputModal.divElement);
-    const addNoiseCheckboxModal = new Modal();
-    addNoiseCheckboxModal.insertTBodyRow([addNoiseCheckbox, addNoiseLabel])
-    addNoiseCheckboxModal.addStyleClasses(['indent1'], 'divElement');
-    mainModal.insertElement(addNoiseCheckboxModal.divElement);
-    const addNoiseInputModal = new Modal();
-    addNoiseInputModal.insertTBodyRow(['Add', addNoiseInput, 'percent noise']);
-    addNoiseInputModal.addStyleClasses(['collapsed', 'indent2'], 'divElement');
-    mainModal.insertElement(addNoiseInputModal.divElement);
-    const submitDivModal = new Modal();
-    submitDivModal.insertElement(submitDiv);
-    submitDivModal.addStyleClasses(['horizontalFlex', 'centerMainAxisFlex', 'centerCrossAxisFlex'], 'containerElement');
-    mainModal.insertElement(submitDivModal.divElement);
-    return mainModal;
+    propTable.insertTBodyRow({elements: [button.button], colspans: [2]});
+    return propTable;
 }
 
 /**
  * @param {FeatureController} controller - a FeatureController instance
- * @returns {HTMLDivElement}
+ * @returns {HTMLButtonElement}
  */
-function getAnonymizationDiv(controller) {
+function getAnonymizationButton(controller) {
     if (!(controller instanceof FeatureController)) {
-        throw TypeError('"controller" argument must be instanceof FeatureController.');
+        throw TypeError('The "controller" argument must be instanceof FeatureController.');
     }
     const feature = new Feature({
         geometry: { 'coordinates': [null, null], 'type': 'Point' },
@@ -422,52 +368,53 @@ function getAnonymizationDiv(controller) {
         },
         type: 'Feature'
     });
-    const modal = _getAnonymizationModal(feature, controller);
+    const propTable = _getAnonymizationTable(feature, controller);
     const modalInsert = document.getElementById('modalInsert');
-    const div = _getMenuDiv('Anonymization...');
-    div.addEventListener('click', function() {
-        modalInsert.replaceChildren(modal.divElement);
+    const button = new IconLabelButton({text: 'Anonymization...'});
+    button.button.classList.add('-white');
+    button.button.addEventListener('click', function() {
+        modalInsert.replaceChildren(propTable.div);
         modalInsert.classList.add('visible');
     });
-    return div;
+    return button.button;
 }
 
 /**
  * @param {FeatureController} controller - a ControllerInterface instance
  * @returns {Modal}
  */
-function _getSaveModal(controller) {
+function _getSaveLoadingSpan(controller) {
     if (!(controller instanceof FeatureController)) {
-        throw TypeError('"controller" argument must be instanceof FeatureController.');
+        throw TypeError('The "controller" argument must be instanceof FeatureController.');
     }
-    const modal = new Modal();
-    modal.showProgress(true, 'Saving...');
-    modal.addStyleClasses(['outerModal', 'fitContent'], 'divElement');
-    return modal;
+    const loadingSpan = new LoadingSpan();
+    loadingSpan.update({text: 'Saving...'});
+    return loadingSpan;
 }
 
 /**
  * @param {FeatureController} controller - a ControllerInterface instance
- * @returns {HTMLDivElement}
+ * @returns {HTMLButtonElement}
  */
-function getSaveDiv(controller) {
+function getSaveButton(controller) {
     if (!(controller instanceof FeatureController)) {
-        throw TypeError('"controller" argument must be instanceof FeatureController.');
+        throw TypeError('The "controller" argument must be instanceof FeatureController.');
     }
     const saveFeature = _getSaveFeature();
-    const modal = _getSaveModal(controller);
-    const div = _getMenuDiv('Save');
-    div.id = 'saveDiv';
+    const loadingSpan = _getSaveLoadingSpan(controller);
+    const button = new IconLabelButton({text: 'Save'});
+    button.button.classList.add('-white');
+    button.button.id = 'saveDiv';
     const modalInsert = document.getElementById('modalInsert');
-    div.addEventListener('click', function() {
+    button.button.addEventListener('click', function() {
         modalInsert.removeEventListener('click', hideModalInsert);
-        modalInsert.replaceChildren(modal.divElement);
+        modalInsert.replaceChildren(loadingSpan.span);
         modalInsert.classList.add('visible');
         // - I only export features that were originally in the OMD (i.e. those features with numeric tree keys)
         saveFeature.setProperty('feederObjectJson', JSON.stringify(controller.observableGraph.getObservableExportData()), 'formProps')
-        controller.submitFeature(saveFeature, modal, null, false); 
+        controller.submitFeature(saveFeature, loadingSpan, null, false);
     });
-    return div;
+    return button.button;
 }
 
 /**
@@ -493,45 +440,98 @@ function _getSaveFeature() {
 
 /**
  * @param {FeatureController} controller - a ControllerInterface instance
- * @returns {Modal}
+ * @param {ColorModal} colorModal - a ColorModal instance
+ * @returns {PropTable}
  */
-function _getRawDataModal(controller) {
+function _getRawDataTable(controller, colorModal) {
     if (!(controller instanceof FeatureController)) {
-        throw TypeError('"controller" argument must be instanceof FeatureController.');
+        throw TypeError('The "controller" argument must be instanceof FeatureController.');
     }
-    const modal = new Modal();
-    modal.showProgress(true, 'Opening a window with JSON in it that you can save as a .json file...');
-    modal.addStyleClasses(['outerModal', 'fitContent'], 'divElement');
-    return modal;
+    if (!(colorModal instanceof ColorModal)) {
+        throw TypeError('The "colorModal" argument must be instanceof ColorModal.');
+    }
+    const propTable = new PropTable();
+    // - Don't close the modal when it is clicked on
+    propTable.div.addEventListener('click', function(e) {
+        e.stopPropagation();
+    });
+    propTable.insertTHeadRow({elements: ['Download GeoJSON file'], colspans: [2]});
+    const label = document.createElement('label');
+    label.htmlFor = 'addColoringProperties';
+    label.innerText = 'Add coloring CSVs properties to GeoJSON file';
+    const colorCheckbox = document.createElement('input');
+    colorCheckbox.type = 'checkbox';
+    colorCheckbox.id = 'addColoringProperties'
+    propTable.insertTBodyRow({elements: [label, colorCheckbox]});
+    const button = new IconLabelButton({text: 'Download'});
+    button.button.classList.add('-blue');
+    button.button.getElementsByClassName('label')[0].classList.add('-white');
+    button.button.addEventListener('click', function() {
+        const exportData = controller.observableGraph.getObservableExportData();
+        if (colorCheckbox.checked) {
+            for (const [filename, colorFile] of Object.entries(colorModal.getColorFiles())) {
+                for (const [columnIndex, colorMap] of Object.entries(colorFile.getColorMaps())) {
+                    const propertyName = colorMap.getColumnName();
+                    for (const feature of exportData.features) {
+                        if (feature.properties.hasOwnProperty('treeProps') && feature.properties.treeProps.hasOwnProperty('name')) {
+                            const name = feature.properties.treeProps.name;
+                            // - We don't handle the case where multiple features share the same name. In such a situation, both exported features
+                            //   will have the same coloring data inserted into them
+                            if (colorMap.getNameToValue().hasOwnProperty(name)) {
+                                // - If the feature already has the propertyName, that means that either one CSV has multiple columns with the same
+                                //   heading, or multiple CSVs have the same column heading. To deal with that, prefix the propertyName
+                                if (feature.properties.hasOwnProperty(propertyName)) {
+                                    feature.properties[`${filename}_${propertyName}`] = colorMap.getNameToValue()[name].value;
+                                } else {
+                                    feature.properties[propertyName] = colorMap.getNameToValue()[name].value;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        const a = document.createElement('a');
+        const blob = new Blob([JSON.stringify(exportData)], {type: 'application/json'});
+        const url = URL.createObjectURL(blob);
+        a.setAttribute('href', url);
+        a.setAttribute('download', 'geojson.json');
+        a.click();
+        URL.revokeObjectURL(url);
+    });
+    propTable.insertTBodyRow({elements: [button.button], colspans: [2]});
+    return propTable;
 }
 
 /**
  * @param {FeatureController} controller - a ControllerInterface instance
- * @returns {HTMLDivElement}
+ * @param {ColorModal} colorModal - a ColorModal instance
+ * @returns {HTMLButtonElement}
  */
-function getRawDataDiv(controller) {
+function getRawDataButton(controller, colorModal) {
     if (!(controller instanceof FeatureController)) {
-        throw TypeError('"controller" argument must be instanceof FeatureController.');
+        throw TypeError('The "controller" argument must be instanceof FeatureController.');
     }
-    const modal = _getRawDataModal(controller);
-    const div = _getMenuDiv('View raw data');
+    if (!(colorModal instanceof ColorModal)) {
+        throw TypeError('The "colorModal" argument must be instanceof ColorModal.');
+    }
+    const propTable = _getRawDataTable(controller, colorModal);
     const modalInsert = document.getElementById('modalInsert');
-    div.addEventListener('click', function() {
-        modalInsert.replaceChildren(modal.divElement);
+    const button = new IconLabelButton({text: 'Download data...'});
+    button.button.classList.add('-white');
+    button.button.addEventListener('click', function() {
+        modalInsert.replaceChildren(propTable.div);
         modalInsert.classList.add('visible');
-        const json = JSON.stringify(controller.observableGraph.getObservableExportData());
-        const win = window.open();
-        win.document.write(json);
     });
-    return div;
+    return button.button;
 }
 
 /**
  * @param {Feature} observable
  * @param {FeatureController} controller - a ControllerInterface instance
- * @returns {Modal}
+ * @returns {PropTable}
  */
-function _getRenameModal(observable, controller) {
+function _getRenameTable(observable, controller) {
     if (!(observable instanceof Feature)) {
         throw TypeError('The "observable" argument must be instanceof Feature.');
     }
@@ -551,46 +551,48 @@ function _getRenameModal(observable, controller) {
         }
         observable.setProperty('submitUrl', submitUrl, 'urlProps');
     });
-    // - Submit div
-    const submitButton = _getSubmitButton();
-    const submitDiv = _getSubmitDiv(submitButton);
-    // - Modal
-    const renameModal = new Modal();
-    renameModal.addStyleClasses(['outerModal', 'fitContent'], 'divElement');
+    const propTable = new PropTable();
+    // - Don't close the modal when it is clicked on
+    propTable.div.addEventListener('click', function(e) {
+        e.stopPropagation();
+    });
+    propTable.insertTHeadRow({elements: ['Rename feeder'], colspans: [2]});
+    propTable.insertTBodyRow({elements: ['New feeder name:', input]});
+    const button = new IconLabelButton({text: 'Rename'});
+    button.button.classList.add('-blue');
+    button.button.getElementsByClassName('label')[0].classList.add('-white');
+    const loadingSpan = new LoadingSpan();
+    loadingSpan.span.classList.add('-yellow', '-hidden');
+    propTable.insertTHeadRow({elements: [loadingSpan.span], colspans: [2], position: 'prepend'})
     const modalInsert = document.getElementById('modalInsert');
-    submitButton.addEventListener('click', async function() {
+    button.button.addEventListener('click', async function() {
         if (input.checkValidity()) {
             modalInsert.removeEventListener('click', hideModalInsert);
             const saveFeature = _getSaveFeature();
             saveFeature.setProperty('feederObjectJson', JSON.stringify(controller.observableGraph.getObservableExportData()), 'formProps')
-            const saveModal = _getSaveModal(controller);
-            modalInsert.replaceChildren(saveModal.divElement);
-            await controller.submitFeature(saveFeature, saveModal, null, false);
-            modalInsert.removeEventListener('click', hideModalInsert);
+            const saveLoadingSpan = _getSaveLoadingSpan(controller);
+            modalInsert.replaceChildren(saveLoadingSpan.span);
+            await controller.submitFeature(saveFeature, saveLoadingSpan, null, false);
             document.getElementById('modalInsert').classList.add('visible');
-            modalInsert.replaceChildren(renameModal.divElement);
-            renameModal.showProgress(true, 'Renaming feeder...', ['caution']);
-            controller.submitFeature(observable, renameModal, submitButton);
+            loadingSpan.update({text: 'Renaming feeder...'});
+            modalInsert.replaceChildren(propTable.div);
+            modalInsert.removeEventListener('click', hideModalInsert);
+            await controller.submitFeature(observable, loadingSpan, button.button);
         } else {
             input.reportValidity();
         }
     });
-    renameModal.setTitle('Rename Feeder');
-    renameModal.addStyleClasses(['horizontalFlex', 'centerMainAxisFlex', 'centerCrossAxisFlex'], 'titleElement');
-    renameModal.insertTBodyRow(['New feeder name:', input]);
-    renameModal.addStyleClasses(['centeredTable'], 'tableElement');
-    renameModal.insertElement(submitDiv);
-    renameModal.addStyleClasses(['verticalFlex', 'centerMainAxisFlex', 'centerCrossAxisFlex'], 'containerElement');
-    return renameModal;
+    propTable.insertTBodyRow({elements: [button.button], colspans: [2]});
+    return propTable;
 }
 
 /**
  * @param {FeatureController} controller - a ControllerInterface instance
- * @returns {HTMLDivElement}
+ * @returns {HTMLButtonElement}
  */
-function getRenameDiv(controller) {
+function getRenameButton(controller) {
     if (!(controller instanceof FeatureController)) {
-        throw TypeError('"controller" argument must be instanceof FeatureController.');
+        throw TypeError('The "controller" argument must be instanceof FeatureController.');
     }
     const feature = new Feature({
         geometry: { 'coordinates': [null, null], 'type': 'Point' },
@@ -609,45 +611,52 @@ function getRenameDiv(controller) {
         },
         type: 'Feature'
     });
-    const modal = _getRenameModal(feature, controller);
-    const div = _getMenuDiv('Rename...');
+    const propTable = _getRenameTable(feature, controller);
     const modalInsert = document.getElementById('modalInsert');
-    div.addEventListener('click', function() {
-        modalInsert.replaceChildren(modal.divElement);
+    const button = new IconLabelButton({text: 'Rename...'});
+    button.button.classList.add('-white');
+    button.button.addEventListener('click', function() {
+        modalInsert.replaceChildren(propTable.div);
         modalInsert.classList.add('visible');
     });
-    return div;
+    return button.button;
 }
 
 /**
  * @param {Feature} observable
  * @param {FeatureController} controller - a ControllerInterface instance
- * @returns {Modal}
+ * @returns {PropTable}
  */
-function _getLoadFeederModal(observable, controller) {
+function _getLoadFeederTable(observable, controller) {
     if (!(observable instanceof Feature)) {
-        throw TypeError('"observable" argument must be instanceof Feature.');
+        throw TypeError('The "observable" argument must be instanceof Feature.');
     }
     if (!(controller instanceof FeatureController)) {
-        throw TypeError('"controller" argument must be instanceof FeatureController.');
+        throw TypeError('The "controller" argument must be instanceof FeatureController.');
     }
-    // - Create list of public feeders
+    // - Create a list of public feeders
     let publicFeeders = [];
     if (gPublicFeeders !== null) {
         publicFeeders = [...gPublicFeeders];
         publicFeeders.sort((a, b) => a.name.localeCompare(b.name, 'en', {numeric: true}));
     }
-    const publicFeedersModal = new Modal();
+    const publicFeedersTable = new PropTable();
+    publicFeedersTable.insertTHeadRow({elements: ['Public feeders']});
+    const publicFeedersLoadingSpan = new LoadingSpan();
+    publicFeedersLoadingSpan.span.classList.add('-yellow', '-hidden');
+    publicFeedersTable.insertTHeadRow({elements: [publicFeedersLoadingSpan.span], position: 'prepend'});
     const modalInsert = document.getElementById('modalInsert');
     publicFeeders.map(obj => {
-        const outerDiv = document.createElement('div');
+        const buttonTextDiv = document.createElement('div');
         const nameDiv = document.createElement('div');
         nameDiv.textContent = obj.name;
-        outerDiv.appendChild(nameDiv);
+        buttonTextDiv.append(nameDiv);
         const modelDiv = document.createElement('div');
         modelDiv.textContent = `from "${obj.model}"`;
-        outerDiv.appendChild(modelDiv);
-        outerDiv.addEventListener('click', function() {
+        buttonTextDiv.append(modelDiv);
+        const button = new IconLabelButton({text: buttonTextDiv});
+        button.button.classList.add('-white');
+        button.button.addEventListener('click', async function() {
             modalInsert.removeEventListener('click', hideModalInsert);
             observable.setProperty('fileExistsUrl', {
                 method: 'GET', 
@@ -657,30 +666,32 @@ function _getLoadFeederModal(observable, controller) {
                 method: 'POST',
                 url: `/loadFeeder/${obj.name}/${obj.model}/${gThisModelName}/${gThisFeederNum}/public/${gThisOwner}`,
             }, 'urlProps');
-            controller.submitFeature(observable, publicFeedersModal); 
+            await controller.submitFeature(observable, publicFeedersLoadingSpan);
         });
-        outerDiv.classList.add('hoverable');
-        return outerDiv;
-    }).forEach(div => publicFeedersModal.insertTBodyRow([div]));
-    publicFeedersModal.setTitle('Public Feeders');
-    publicFeedersModal.addStyleClasses(['horizontalFlex', 'centerMainAxisFlex', 'centerCrossAxisFlex'], 'titleElement');
-    publicFeedersModal.addStyleClasses(['fullWidth'], 'tableElement');
+        return button.button;
+    }).forEach(button => publicFeedersTable.insertTBodyRow({elements: [button]}));
     // - Create list of user feeders
     let userFeeders = [];
     if (gUserFeeders !== null) {
         userFeeders = [...gUserFeeders];
         userFeeders.sort((a, b) => a.name.localeCompare(b.name, 'en', {numeric: true}));
     }
-    const userFeedersModal = new Modal();
+    const userFeedersTable = new PropTable();
+    userFeedersTable.insertTHeadRow({elements: ['User feeders']});
+    const userFeedersLoadingSpan = new LoadingSpan();
+    userFeedersLoadingSpan.span.classList.add('-yellow', '-hidden');
+    userFeedersTable.insertTHeadRow({elements: [userFeedersLoadingSpan.span], position: 'prepend'});
     userFeeders.map(obj => {
-        const outerDiv = document.createElement('div');
+        const buttonTextDiv = document.createElement('div');
         const nameDiv = document.createElement('div');
         nameDiv.textContent = obj.name;
-        outerDiv.appendChild(nameDiv);
+        buttonTextDiv.appendChild(nameDiv);
         const modelDiv = document.createElement('div');
         modelDiv.textContent = `from "${obj.model}"`;
-        outerDiv.appendChild(modelDiv);
-        outerDiv.addEventListener('click', function() {
+        buttonTextDiv.append(modelDiv);
+        const button = new IconLabelButton({text: buttonTextDiv});
+        button.button.classList.add('-white');
+        button.button.addEventListener('click', async function() {
             modalInsert.removeEventListener('click', hideModalInsert);
             observable.setProperty('fileExistsUrl', {
                 method: 'GET',
@@ -694,32 +705,27 @@ function _getLoadFeederModal(observable, controller) {
                 method: 'POST',
                 url: `/loadFeeder/${obj.name}/${obj.model}/${gThisModelName}/${gThisFeederNum}/${gCurrentUser}/${gThisOwner}`,
             }, 'urlProps');
-            controller.submitFeature(observable, userFeedersModal); 
+            await controller.submitFeature(observable, userFeedersLoadingSpan); 
         });
-        outerDiv.classList.add('hoverable');
-        return outerDiv;
-    }).forEach(div => userFeedersModal.insertTBodyRow([div]));
-    userFeedersModal.setTitle('User Feeders');
-    userFeedersModal.addStyleClasses(['horizontalFlex', 'centerMainAxisFlex', 'centerCrossAxisFlex'], 'titleElement');
-    userFeedersModal.addStyleClasses(['fullWidth'], 'tableElement');
-    // - Main modal
-    const mainModal = new Modal();
-    mainModal.addStyleClasses(['outerModal', 'loadFeederModal'], 'divElement');
-    mainModal.setTitle('Load Feeder');
-    mainModal.addStyleClasses(['horizontalFlex', 'centerMainAxisFlex', 'centerCrossAxisFlex'], 'titleElement');
-    mainModal.insertElement(publicFeedersModal.divElement);
-    mainModal.insertElement(userFeedersModal.divElement);
-    mainModal.addStyleClasses(['horizontalFlex'], 'containerElement');
-    return mainModal;
+        return button.button;
+    }).forEach(button => userFeedersTable.insertTBodyRow({elements: [button]}));
+    const propTable = new PropTable();
+    propTable.div.addEventListener('click', function(e) {
+        e.stopPropagation();
+    });
+    propTable.div.id = 'loadFeederTable';
+    propTable.insertTHeadRow({elements: ['Load feeder'], colspans: [2]});
+    propTable.insertTBodyRow({elements: [publicFeedersTable.div, userFeedersTable.div]});
+    return propTable;
 }
 
 /**
  * @param {FeatureController} controller - a ControllerInterface instance
- * @returns {HTMLDivElement}
+ * @returns {HTMLButtonElement}
  */
-function getLoadFeederDiv(controller) {
+function getLoadFeederButton(controller) {
     if (!(controller instanceof FeatureController)) {
-        throw TypeError('"controller" argument must be instanceof FeatureController.');
+        throw TypeError('The "controller" argument must be instanceof FeatureController.');
     }
     const feature = new Feature({
         geometry: { 'coordinates': [null, null], 'type': 'Point' },
@@ -732,64 +738,67 @@ function getLoadFeederDiv(controller) {
         },
         'type': 'Feature'
     });
-    const modal = _getLoadFeederModal(feature, controller);
-    const div = _getMenuDiv('Load from model...');
+    const propTable = _getLoadFeederTable(feature, controller);
+    const button = new IconLabelButton({text: 'Load from model...'});
+    button.button.classList.add('-white');
     const modalInsert = document.getElementById('modalInsert');
-    div.addEventListener('click', function() {
-        modalInsert.replaceChildren(modal.divElement);
+    button.button.addEventListener('click', function() {
+        modalInsert.replaceChildren(propTable.div);
         modalInsert.classList.add('visible');
     });
-    return div;
+    return button.button;
 }
 
 /**
  * @param {Feature} observable
  * @param {FeatureController} controller - a ControllerInterface instance
- * @returns {Modal}
+ * @returns {PropTable}
  */
-function _getBlankFeederModal(observable, controller) {
+function _getBlankFeederTable(observable, controller) {
     if (!(observable instanceof Feature)) {
-        throw TypeError('"observable" argument must be instanceof Feature.');
+        throw TypeError('The "observable" argument must be instanceof Feature.');
     }
     if (!(controller instanceof FeatureController)) {
-        throw TypeError('"controller" argument must be instanceof FeatureController.');
+        throw TypeError('The "controller" argument must be instanceof FeatureController.');
     }
     // - Input
     const input = _getNameInput(observable, function(newName) {
         observable.setProperty('feederNameNew', newName, 'formProps');
     });
-    // - Submit div
-    const submitButton = _getSubmitButton();
-    const submitDiv = _getSubmitDiv(submitButton);
-    // - Modal
-    const modal = new Modal();
-    modal.addStyleClasses(['outerModal', 'fitContent'], 'divElement');
+    const propTable = new PropTable();
+    // - Don't close the modal when it is clicked on
+    propTable.div.addEventListener('click', function(e) {
+        e.stopPropagation();
+    });
+    propTable.insertTHeadRow({elements: ['New blank feeder:'], colspans: [2]});
+    propTable.insertTBodyRow({elements: ['Blank feeder name', input]});
+    const button = new IconLabelButton({text: 'Submit'});
+    button.button.classList.add('-blue');
+    button.button.getElementsByClassName('label')[0].classList.add('-white');
+    const loadingSpan = new LoadingSpan();
+    loadingSpan.span.classList.add('-yellow', '-hidden');
+    propTable.insertTHeadRow({elements: [loadingSpan.span], colspans: [2], position: 'prepend'})
     const modalInsert = document.getElementById('modalInsert');
-    submitButton.addEventListener('click', function() {
+    button.button.addEventListener('click', async function() {
         if (input.checkValidity()) {
             modalInsert.removeEventListener('click', hideModalInsert);
-            modal.showProgress(true, 'Creating new blank feeder...', ['caution']);
-            controller.submitFeature(observable, modal, submitButton);
+            loadingSpan.update({text: 'Creating new blank feeder...'});
+            await controller.submitFeature(observable, loadingSpan, button.button);
         } else {
             input.reportValidity();
         }
     });
-    modal.setTitle('New Blank Feeder');
-    modal.addStyleClasses(['horizontalFlex', 'centerMainAxisFlex', 'centerCrossAxisFlex'], 'titleElement');
-    modal.insertTBodyRow(['Blank feeder name', input]);
-    modal.addStyleClasses(['centeredTable'], 'tableElement');
-    modal.insertElement(submitDiv);
-    modal.addStyleClasses(['verticalFlex', 'centerMainAxisFlex', 'centerCrossAxisFlex'], 'containerElement');
-    return modal;
+    propTable.insertTBodyRow({elements: [button.button], colspans: [2]});
+    return propTable;
 }
 
 /**
  * @param {FeatureController} controller - a ControllerInterface instance
- * @returns {HTMLDivElement}
+ * @returns {HTMLButtonElement}
  */
-function getBlankFeederDiv(controller) {
+function getBlankFeederButton(controller) {
     if (!(controller instanceof FeatureController)) {
-        throw TypeError('"controller" argument must be instanceof FeatureController.');
+        throw TypeError('The "controller" argument must be instanceof FeatureController.');
     }
     const feature = new Feature({
         geometry: { 'coordinates': [null, null], 'type': 'Point' },
@@ -810,27 +819,28 @@ function getBlankFeederDiv(controller) {
         },
         type: 'Feature'
     });
-    const modal = _getBlankFeederModal(feature, controller);
-    const div = _getMenuDiv('New blank feeder...');
+    const propTable = _getBlankFeederTable(feature, controller);
+    const button = new IconLabelButton({text: 'New blank feeder...'});
+    button.button.classList.add('-white');
     const modalInsert = document.getElementById('modalInsert');
-    div.addEventListener('click', function() {
-        modalInsert.replaceChildren(modal.divElement);
+    button.button.addEventListener('click', function() {
+        modalInsert.replaceChildren(propTable.div);
         modalInsert.classList.add('visible');
     });
-    return div;
+    return button.button;
 }
 
 /**
  * @param {Feature} observable
  * @param {FeatureController} controller - a ControllerInterface instance
- * @returns {Modal}
+ * @returns {PropTable}
  */
-function _getWindmilModal(observable, controller) {
+function _getWindmilTable(observable, controller) {
     if (!(observable instanceof Feature)) {
-        throw TypeError('"observable" argument must be instanceof Feature.');
+        throw TypeError('The "observable" argument must be instanceof Feature.');
     }
     if (!(controller instanceof FeatureController)) {
-        throw TypeError('"controller" argument must be instanceof FeatureController.');
+        throw TypeError('The "controller" argument must be instanceof FeatureController.');
     }
     // - Name input
     const nameInput = _getNameInput(observable, function(newName) {
@@ -851,6 +861,10 @@ function _getWindmilModal(observable, controller) {
     stdInput.accept = '.std';
     stdInput.required = true;
     stdInput.id = 'milsoftStdInput';
+    stdInput.addEventListener('change', function() {
+        const stdFile = this.files[0];
+        observable.setProperty('stdFile', stdFile, 'formProps');
+    });
     const stdLabel = document.createElement('label');
     stdLabel.htmlFor = 'milsoftStdInput';
     stdLabel.innerHTML = 'Data File (.std)';
@@ -860,53 +874,50 @@ function _getWindmilModal(observable, controller) {
     seqInput.accept = '.seq';
     seqInput.required = true;
     seqInput.id = 'milsoftSeqInput';
-    const seqLabel = document.createElement('label');
-    seqLabel.htmlFor = 'milsoftSeqInput';
-    seqLabel.innerText = 'Equipment File (.seq)';
-    // - Submit div
-    const submitButton = _getSubmitButton('Import');
-    const submitDiv = _getSubmitDiv(submitButton);
-    // - Event listeners
-    stdInput.addEventListener('change', function() {
-        const stdFile = this.files[0];
-        observable.setProperty('stdFile', stdFile, 'formProps');
-    });
     seqInput.addEventListener('change', function() {
         const seqFile = this.files[0];
         observable.setProperty('seqFile', seqFile, 'formProps');
     });
-    // - Modal
-    const modal = new Modal();
-    modal.addStyleClasses(['outerModal', 'fitContent'], 'divElement');
-    const modalInsert = document.getElementById('modalInsert');
-    submitButton.addEventListener('click', function() {
+    const seqLabel = document.createElement('label');
+    seqLabel.htmlFor = 'milsoftSeqInput';
+    seqLabel.innerText = 'Equipment File (.seq)';
+    const propTable = new PropTable();
+    // - Don't close the modal when it is clicked on
+    propTable.div.addEventListener('click', function(e) {
+        e.stopPropagation();
+    });
+    propTable.insertTHeadRow({elements: ['Milsoft conversion'], colspans: [2]});
+    propTable.insertTBodyRow({elements: [nameLabel, nameInput]});
+    propTable.insertTBodyRow({elements: [stdLabel, stdInput]});
+    propTable.insertTBodyRow({elements: [seqLabel, seqInput]});
+    const button = new IconLabelButton({text: 'Import'});
+    button.button.classList.add('-blue');
+    button.button.getElementsByClassName('label')[0].classList.add('-white');
+    const loadingSpan = new LoadingSpan();
+    loadingSpan.span.classList.add('-yellow', '-hidden');
+    propTable.insertTHeadRow({elements: [loadingSpan.span], colspans: [2], position: 'prepend'})
+    button.button.addEventListener('click', function() {
         if (nameInput.checkValidity() && stdInput.checkValidity() && seqInput.checkValidity()) {
             modalInsert.removeEventListener('click', hideModalInsert);
-            modal.showProgress(true, 'Importing file...', ['caution']);
-            controller.submitFeature(observable, modal, submitButton);
+            loadingSpan.update({text: 'Importing file...', show: true});
+            controller.submitFeature(observable, loadingSpan, button.button);
         } else {
             nameInput.reportValidity();
             stdInput.reportValidity();
             seqInput.reportValidity();
         }
     });
-    modal.setTitle('Milsoft Conversion');
-    modal.addStyleClasses(['horizontalFlex', 'centerMainAxisFlex', 'centerCrossAxisFlex'], 'titleElement');
-    modal.insertTBodyRow([nameLabel, nameInput]);
-    modal.insertTBodyRow([stdLabel, stdInput]);
-    modal.insertTBodyRow([seqLabel, seqInput]);
-    modal.insertElement(submitDiv);
-    modal.addStyleClasses(['verticalFlex', 'centerMainAxisFlex', 'centerCrossAxisFlex'], 'containerElement');
-    return modal;
+    propTable.insertTBodyRow({elements: [button.button], colspans: [2]});
+    return propTable;
 }
 
 /**
  * @param {FeatureController} controller - a ControllerInterface instance
- * @returns {HTMLDivElement}
+ * @returns {HTMLButtonElement}
  */
-function getWindmilDiv(controller) {
+function getWindmilButton(controller) {
     if (!(controller instanceof FeatureController)) {
-        throw TypeError('"controller" argument must be instanceof FeatureController.');
+        throw TypeError('The "controller" argument must be instanceof FeatureController.');
     }
     const feature = new Feature({
         geometry: { 'coordinates': [null, null], 'type': 'Point' },
@@ -936,27 +947,28 @@ function getWindmilDiv(controller) {
         },
         type: 'Feature'
     });
-    const modal = _getWindmilModal(feature, controller);
-    const div = _getMenuDiv('Windmil conversion...');
+    const propTable = _getWindmilTable(feature, controller);
+    const button = new IconLabelButton({text: 'Windmil conversion...'});
+    button.button.classList.add('-white');
     const modalInsert = document.getElementById('modalInsert');
-    div.addEventListener('click', function() {
-        modalInsert.replaceChildren(modal.divElement);
+    button.button.addEventListener('click', function() {
+        modalInsert.replaceChildren(propTable.div);
         modalInsert.classList.add('visible');
     });
-    return div;
+    return button.button;
 }
 
 /**
  * @param {Feature} observable
  * @param {FeatureController} controller - a ControllerInterface instance
- * @returns {Modal}
+ * @returns {PropTable}
  */
-function _getGridlabdModal(observable, controller) {
+function _getGridlabdTable(observable, controller) {
     if (!(observable instanceof Feature)) {
-        throw TypeError('"observable" argument must be instanceof Feature.');
+        throw TypeError('The "observable" argument must be instanceof Feature.');
     }
     if (!(controller instanceof FeatureController)) {
-        throw TypeError('"controller" argument must be instanceof FeatureController.');
+        throw TypeError('The "controller" argument must be instanceof FeatureController.');
     }
     // - Name input
     const nameInput = _getNameInput(observable, function(newName) {
@@ -977,45 +989,47 @@ function _getGridlabdModal(observable, controller) {
     glmInput.accept = '.glm';
     glmInput.required = true;
     glmInput.id = 'glmInput';
-    const glmLabel = document.createElement('label');
-    glmLabel.htmlFor = 'glmInput';
-    glmLabel.innerHTML = 'Data File (.glm)';
-    // - Submit div
-    const submitButton = _getSubmitButton('Import');
-    const submitDiv = _getSubmitDiv(submitButton);
-    // - Event listeners
     glmInput.addEventListener('change', function() {
         const glmFile = this.files[0];
         observable.setProperty('glmFile', glmFile, 'formProps');
     });
-    // - Modal
-    const modal = new Modal();
-    modal.addStyleClasses(['outerModal', 'fitContent'], 'divElement');
+    const glmLabel = document.createElement('label');
+    glmLabel.htmlFor = 'glmInput';
+    glmLabel.innerHTML = 'Data File (.glm)';
+    const propTable = new PropTable();
+    // - Don't close the modal when it is clicked on
+    propTable.div.addEventListener('click', function(e) {
+        e.stopPropagation();
+    });
+    propTable.insertTHeadRow({elements: ['GridLABD-D Conversion'], colspans: [2]});
+    propTable.insertTBodyRow({elements: [nameLabel, nameInput]});
+    propTable.insertTBodyRow({elements: [glmLabel, glmInput]});
+    const button = new IconLabelButton({text: 'Import'});
+    button.button.classList.add('-blue');
+    button.button.getElementsByClassName('label')[0].classList.add('-white');
+    const loadingSpan = new LoadingSpan();
+    loadingSpan.span.classList.add('-yellow', '-hidden');
+    propTable.insertTHeadRow({elements: [loadingSpan.span], colspans: [2], position: 'prepend'})
     const modalInsert = document.getElementById('modalInsert');
-    submitButton.addEventListener('click', function() {
+    button.button.addEventListener('click', function() {
         if (nameInput.checkValidity() && glmInput.checkValidity()) {
             modalInsert.removeEventListener('click', hideModalInsert);
-            modal.showProgress(true, 'Importing file...', ['caution']);
-            controller.submitFeature(observable, modal, submitButton);
+            loadingSpan.update({text: 'Importing file...', show: true});
+            controller.submitFeature(observable, loadingSpan, button.button);
         } else {
             nameInput.reportValidity();
             glmInput.reportValidity();
         }
     });
-    modal.setTitle('GridLABD-D Conversion');
-    modal.addStyleClasses(['horizontalFlex', 'centerMainAxisFlex', 'centerCrossAxisFlex'], 'titleElement');
-    modal.insertTBodyRow([nameLabel, nameInput]);
-    modal.insertTBodyRow([glmLabel, glmInput]);
-    modal.insertElement(submitDiv);
-    modal.addStyleClasses(['verticalFlex', 'centerMainAxisFlex', 'centerCrossAxisFlex'], 'containerElement');
-    return modal;
+    propTable.insertTBodyRow({elements: [button.button], colspans: [2]});
+    return propTable;
 }
 
 /**
  * @param {FeatureController} controller - a ControllerInterface instance
- * @returns {HTMLDivElement}
+ * @returns {HTMLButtonElement}
  */
-function getGridlabdDiv(controller) {
+function getGridlabdButton(controller) {
     if (!(controller instanceof FeatureController)) {
         throw TypeError('"controller" argument must be instanceof FeatureController.');
     }
@@ -1046,26 +1060,28 @@ function getGridlabdDiv(controller) {
         },
         type: 'Feature'
     });
-    const modal = _getGridlabdModal(feature, controller);
-    const div = _getMenuDiv('GridLAB-D conversion...');
+    const propTable = _getGridlabdTable(feature, controller);
+
+    const button = new IconLabelButton({text: 'GridLAB-D conversion...'});
+    button.button.classList.add('-white');
     const modalInsert = document.getElementById('modalInsert');
-    div.addEventListener('click', function() {
-        modalInsert.replaceChildren(modal.divElement);
+    button.button.addEventListener('click', function() {
+        modalInsert.replaceChildren(propTable.div);
         modalInsert.classList.add('visible');
     });
-    return div;
+    return button.button;
 }
 /**
  * @param {Feature} observable
  * @param {FeatureController} controller - a ControllerInterface instance
- * @returns {Modal}
+ * @returns {PropTable}
  */
-function _getCymdistModal(observable, controller) {
+function _getCymdistTable(observable, controller) {
     if (!(observable instanceof Feature)) {
-        throw TypeError('"observable" argument must be instanceof Feature.');
+        throw TypeError('The "observable" argument must be instanceof Feature.');
     }
     if (!(controller instanceof FeatureController)) {
-        throw TypeError('"controller" argument must be instanceof FeatureController.');
+        throw TypeError('The "controller" argument must be instanceof FeatureController.');
     }
     // - Name input
     const nameInput = _getNameInput(observable, function(newName) {
@@ -1086,47 +1102,48 @@ function _getCymdistModal(observable, controller) {
     mdbInput.accept = '.mdb';
     mdbInput.required = true;
     mdbInput.id = 'mdbInput';
-    const mdbLabel = document.createElement('label');
-    mdbLabel.htmlFor = 'mdbInput';
-    mdbLabel.innerHTML = 'Network File (.mdb)';
-    // - Submit div
-    const submitButton = _getSubmitButton('Import');
-    const submitDiv = _getSubmitDiv(submitButton);
-    // - Event listeners
     mdbInput.addEventListener('change', function() {
         const mdbFile = this.files[0];
         observable.setProperty('mdbNetFile', mdbFile, 'formProps');
     });
-    // - Modal
-    const modal = new Modal();
-    modal.addStyleClasses(['outerModal', 'fitContent'], 'divElement');
-    const modalInsert = document.getElementById('modalInsert');
-    submitButton.addEventListener('click', function() {
+    const mdbLabel = document.createElement('label');
+    mdbLabel.htmlFor = 'mdbInput';
+    mdbLabel.innerHTML = 'Network File (.mdb)';
+    const propTable = new PropTable();
+    // - Don't close the modal when it is clicked on
+    propTable.div.addEventListener('click', function(e) {
+        e.stopPropagation();
+    });
+    propTable.insertTHeadRow({elements: ['Cyme conversion'], colspans: [2]});
+    propTable.insertTBodyRow({elements: [nameLabel, nameInput]});
+    propTable.insertTBodyRow({elements: [mdbLabel, mdbInput]});
+    const button = new IconLabelButton({text: 'Import'});
+    button.button.classList.add('-blue');
+    button.button.getElementsByClassName('label')[0].classList.add('-white');
+    const loadingSpan = new LoadingSpan();
+    loadingSpan.span.classList.add('-yellow', '-hidden');
+    propTable.insertTHeadRow({elements: [loadingSpan.span], colspans: [2], position: 'prepend'})
+    button.button.addEventListener('click', function() {
         if (nameInput.checkValidity() && mdbInput.checkValidity()) {
             modalInsert.removeEventListener('click', hideModalInsert);
-            modal.showProgress(true, 'Importing file...', ['caution']);
-            controller.submitFeature(observable, modal, submitButton);
+            loadingSpan.update({text: 'Importing file...', show: true});
+            controller.submitFeature(observable, loadingSpan, button.button);
         } else {
             nameInput.reportValidity();
             mdbInput.reportValidity();
         }
     });
-    modal.setTitle('Cyme Conversion');
-    modal.addStyleClasses(['horizontalFlex', 'centerMainAxisFlex', 'centerCrossAxisFlex'], 'titleElement');
-    modal.insertTBodyRow([nameLabel, nameInput]);
-    modal.insertTBodyRow([mdbLabel, mdbInput]);
-    modal.insertElement(submitDiv);
-    modal.addStyleClasses(['verticalFlex', 'centerMainAxisFlex', 'centerCrossAxisFlex'], 'containerElement');
-    return modal;
+    propTable.insertTBodyRow({elements: [button.button], colspans: [2]});
+    return propTable;
 }
 
 /**
  * @param {FeatureController} controller - a ControllerInterface instance
- * @returns {HTMLDivElement}
+ * @returns {HTMLButtonElement}
  */
-function getCymdistDiv(controller) {
+function getCymdistButton(controller) {
     if (!(controller instanceof FeatureController)) {
-        throw TypeError('"controller" argument must be instanceof FeatureController.');
+        throw TypeError('The "controller" argument must be instanceof FeatureController.');
     }
     const feature = new Feature({
         geometry: { 'coordinates': [null, null], 'type': 'Point' },
@@ -1155,27 +1172,29 @@ function getCymdistDiv(controller) {
         },
         type: 'Feature'
     });
-    const modal = _getCymdistModal(feature, controller);
-    const div = _getMenuDiv('CYMDIST conversion...');
+    const propTable = _getCymdistTable(feature, controller);
+
+    const button = new IconLabelButton({text: 'CYMDIST conversion...'});
+    button.button.classList.add('-white');
     const modalInsert = document.getElementById('modalInsert');
-    div.addEventListener('click', function() {
-        modalInsert.replaceChildren(modal.divElement);
+    button.button.addEventListener('click', function() {
+        modalInsert.replaceChildren(propTable.div);
         modalInsert.classList.add('visible');
     });
-    return div;
+    return button.button;
 }
 
 /**
  * @param {Feature} observable
  * @param {FeatureController} controller - a ControllerInterface instance
- * @returns {Modal}
+ * @returns {PropTable}
  */
-function _getOpendssModal(observable, controller) {
+function _getOpendssTable(observable, controller) {
     if (!(observable instanceof Feature)) {
-        throw TypeError('"observable" argument must be instanceof Feature.');
+        throw TypeError('The "observable" argument must be instanceof Feature.');
     }
     if (!(controller instanceof FeatureController)) {
-        throw TypeError('"controller" argument must be instanceof FeatureController.');
+        throw TypeError('The "controller" argument must be instanceof FeatureController.');
     }
     // - Name input
     const nameInput = _getNameInput(observable, function(newName) {
@@ -1196,47 +1215,48 @@ function _getOpendssModal(observable, controller) {
     dssInput.accept = '.dss';
     dssInput.required = true;
     dssInput.id = 'dssInput';
-    const dssLabel = document.createElement('label');
-    dssLabel.htmlFor = 'dssInput';
-    dssLabel.innerHTML = 'Data File (.dss)';
-    // - Submit div
-    const submitButton = _getSubmitButton('Import');
-    const submitDiv = _getSubmitDiv(submitButton);
-    // - Event listeners 
     dssInput.addEventListener('change', function() {
         const dssFile = this.files[0];
         observable.setProperty('dssFile', dssFile, 'formProps');
     });
-    // - Modal
-    const modal = new Modal();
-    modal.addStyleClasses(['outerModal', 'fitContent'], 'divElement');
-    const modalInsert = document.getElementById('modalInsert');
-    submitButton.addEventListener('click', function() {
+    const dssLabel = document.createElement('label');
+    dssLabel.htmlFor = 'dssInput';
+    dssLabel.innerHTML = 'Data File (.dss)';
+    const propTable = new PropTable();
+    // - Don't close the modal when it is clicked on
+    propTable.div.addEventListener('click', function(e) {
+        e.stopPropagation();
+    });
+    propTable.insertTHeadRow({elements: ['OpenDSS Conversion'], colspans: [2]});
+    propTable.insertTBodyRow({elements: [nameLabel, nameInput]});
+    propTable.insertTBodyRow({elements: [dssLabel, dssInput]});
+    const button = new IconLabelButton({text: 'Import'});
+    button.button.classList.add('-blue');
+    button.button.getElementsByClassName('label')[0].classList.add('-white');
+    const loadingSpan = new LoadingSpan();
+    loadingSpan.span.classList.add('-yellow', '-hidden');
+    propTable.insertTHeadRow({elements: [loadingSpan.span], colspans: [2], position: 'prepend'})
+    button.button.addEventListener('click', function() {
         if (nameInput.checkValidity() && dssInput.checkValidity()) {
             modalInsert.removeEventListener('click', hideModalInsert);
-            modal.showProgress(true, 'Importing .dss file...', ['caution']);
-            controller.submitFeature(observable, modal, submitButton);
+            loadingSpan.update({text: 'Importing file...', show: true});
+            controller.submitFeature(observable, loadingSpan, button.button);
         } else {
             nameInput.reportValidity();
             dssInput.reportValidity();
         }
     });
-    modal.setTitle('OpenDSS Conversion');
-    modal.addStyleClasses(['horizontalFlex', 'centerMainAxisFlex', 'centerCrossAxisFlex'], 'titleElement');
-    modal.insertTBodyRow([nameLabel, nameInput]);
-    modal.insertTBodyRow([dssLabel, dssInput]);
-    modal.insertElement(submitDiv);
-    modal.addStyleClasses(['verticalFlex', 'centerMainAxisFlex', 'centerCrossAxisFlex'], 'containerElement');
-    return modal;
+    propTable.insertTBodyRow({elements: [button.button], colspans: [2]});
+    return propTable;
 }
 
 /**
  * @param {FeatureController} controller - a ControllerInterface instance
- * @returns {HTMLDivElement}
+ * @returns {HTMLButtonElement}
  */
-function getOpendssDiv(controller) {
+function getOpendssButton(controller) {
     if (!(controller instanceof FeatureController)) {
-        throw TypeError('"controller" argument must be instanceof FeatureController.');
+        throw TypeError('The "controller" argument must be instanceof FeatureController.');
     }
     const feature = new Feature({
         geometry: { 'coordinates': [null, null], 'type': 'Point' },
@@ -1265,27 +1285,29 @@ function getOpendssDiv(controller) {
         },
         type: 'Feature'
     });
-    const modal = _getOpendssModal(feature, controller);
-    const div = _getMenuDiv('OpenDSS conversion...');
+    const propTable = _getOpendssTable(feature, controller);
+
+    const button = new IconLabelButton({text: 'OpenDSS conversion...'});
+    button.button.classList.add('-white');
     const modalInsert = document.getElementById('modalInsert');
-    div.addEventListener('click', function() {
-        modalInsert.replaceChildren(modal.divElement);
+    button.button.addEventListener('click', function() {
+        modalInsert.replaceChildren(propTable.div);
         modalInsert.classList.add('visible');
     });
-    return div;
+    return button.button;
 }
 
 /**
  * @param {Feature} observable
  * @param {FeatureController} controller - a ControllerInterface instance
- * @returns {Modal}
+ * @returns {PropTable}
  */
-function _getAmiModal(observable, controller) {
+function _getAmiTable(observable, controller) {
     if (!(observable instanceof Feature)) {
-        throw TypeError('"observable" argument must be instanceof Feature.');
+        throw TypeError('The "observable" argument must be instanceof Feature.');
     }
     if (!(controller instanceof FeatureController)) {
-        throw TypeError('"controller" argument must be instanceof FeatureController.');
+        throw TypeError('The "controller" argument must be instanceof FeatureController.');
     }
     // - csv file input
     const amiInput = document.createElement('input');
@@ -1293,6 +1315,10 @@ function _getAmiModal(observable, controller) {
     amiInput.accept = '.csv';
     amiInput.required = true;
     amiInput.id = 'amiInput'; 
+    amiInput.addEventListener('change', function() {
+        const amiFile = this.files[0];
+        observable.setProperty('amiFile', amiFile, 'formProps');
+    });
     const amiLabel = document.createElement('label');
     amiLabel.htmlFor = 'amiInput';
     amiLabel.innerHTML = 'File containing AMI load data (.csv)';
@@ -1301,49 +1327,39 @@ function _getAmiModal(observable, controller) {
     anchor.href = 'https://github.com/dpinney/omf/wiki/Tools-~-gridEdit#ami-load-modeling';
     anchor.textContent = 'Format Help';
     anchor.target = '_blank';
-    // - Note div
-    const noteDiv = _getHorizontalFlexDiv();
-    noteDiv.classList.add('centerCrossAxisFlex');
-    noteDiv.style.alignSelf = 'start';
-    const span = document.createElement('span');
-    span.textContent = 'Note: model "Simulation Start Data" should lie within the AMI profile\'s dates';
-    noteDiv.appendChild(span);
-    // - Submit div
-    const submitButton = _getSubmitButton('Import');
-    const submitDiv = _getSubmitDiv(submitButton);
-    // - Event listeners
-    amiInput.addEventListener('change', function() {
-        const amiFile = this.files[0];
-        observable.setProperty('amiFile', amiFile, 'formProps');
+    const propTable = new PropTable();
+    // - Don't close the modal when it is clicked on
+    propTable.div.addEventListener('click', function(e) {
+        e.stopPropagation();
     });
-    // - Modal
-    const modal = new Modal();
-    modal.addStyleClasses(['outerModal', 'fitContent'], 'divElement');
-    const modalInsert = document.getElementById('modalInsert');
-    submitButton.addEventListener('click', function() {
+    propTable.insertTHeadRow({elements: ['AMI Profiles'], colspans: [2]});
+    propTable.insertTBodyRow({elements: [anchor], colspans: [2]});
+    propTable.insertTBodyRow({elements: [amiLabel, amiInput]});
+    propTable.insertTBodyRow({elements: ['Note: model "Simulation Start Data" should lie within the AMI profile\'s dates'], colspans: [2]});
+    const button = new IconLabelButton({text: 'Import'});
+    button.button.classList.add('-blue');
+    button.button.getElementsByClassName('label')[0].classList.add('-white');
+    const loadingSpan = new LoadingSpan();
+    loadingSpan.span.classList.add('-yellow', '-hidden');
+    propTable.insertTHeadRow({elements: [loadingSpan.span], colspans: [2], position: 'prepend'})
+    button.button.addEventListener('click', function() {
         if (amiInput.checkValidity()) {
             modalInsert.removeEventListener('click', hideModalInsert);
-            modal.showProgress(true, 'Importing file...', ['caution']);
-            controller.submitFeature(observable, modal, submitButton);
+            loadingSpan.update({text: 'Importing file...', show: true});
+            controller.submitFeature(observable, loadingSpan, button.button);
         } else {
             amiInput.reportValidity();
         }
     });
-    modal.setTitle('AMI Profiles');
-    modal.addStyleClasses(['horizontalFlex', 'centerMainAxisFlex', 'centerCrossAxisFlex'], 'titleElement');
-    modal.insertTBodyRow([anchor]);
-    modal.insertTBodyRow([amiLabel, amiInput]);
-    modal.insertElement(noteDiv);
-    modal.insertElement(submitDiv);
-    modal.addStyleClasses(['verticalFlex', 'centerMainAxisFlex', 'centerCrossAxisFlex'], 'containerElement');
-    return modal;
+    propTable.insertTBodyRow({elements: [button.button], colspans: [2]});
+    return propTable;
 }
 
 /**
  * @param {FeatureController} controller - a ControllerInterface instance
  * @returns {HTMLDivElement}
  */
-function getAmiDiv(controller) {
+function getAmiButton(controller) {
     if (!(controller instanceof FeatureController)) {
         throw TypeError('"controller" argument must be instanceof FeatureController.');
     }
@@ -1372,90 +1388,86 @@ function getAmiDiv(controller) {
         },
         type: 'Feature'
     });
-    const modal = _getAmiModal(feature, controller);
-    const div = _getMenuDiv('Add AMI profiles...');
+    const propTable = _getAmiTable(feature, controller);
+    const button = new IconLabelButton({text: 'Add AMI profiles...'});
+    button.button.classList.add('-white');
     const modalInsert = document.getElementById('modalInsert');
-    div.addEventListener('click', function() {
-        modalInsert.replaceChildren(modal.divElement);
+    button.button.addEventListener('click', function() {
+        modalInsert.replaceChildren(propTable.div);
         modalInsert.classList.add('visible');
     });
-    return div;
+    return button.button;
 }
 
 /**
  * @param {FeatureController} controller - a ControllerInterface instance
- * @returns {Modal}
+ * @returns {PropTable}
  */
-function _getAttachmentsModal(controller) {
+function _getAttachmentsTable(controller) {
     if (!(controller instanceof FeatureController)) {
-        throw TypeError('"controller" argument must be instanceof FeatureController.');
+        throw TypeError('The "controller" argument must be instanceof FeatureController.');
     }
-    const mainModal = new Modal();
-    mainModal.addStyleClasses(['outerModal'], 'divElement');
-    mainModal.setTitle('Attachments');
-    mainModal.addStyleClasses(['horizontalFlex', 'centerMainAxisFlex', 'centerCrossAxisFlex'], 'titleElement');
+    const attachmentsPropTable = new PropTable();
+    attachmentsPropTable.div.id = 'attachmentsTable';
+    // - Don't close the modal when it is clicked on
+    attachmentsPropTable.div.addEventListener('click', function(e) {
+        e.stopPropagation();
+    });
+    attachmentsPropTable.insertTHeadRow({elements: ['Attachments'], colspans: [2]});
     const omdFeature = controller.observableGraph.getObservable('omd');
     const attachments = omdFeature.getProperty('attachments', 'meta');
     const textAreaModals = [];
     for (const [key, val] of Object.entries(attachments)) {
         if (typeof val === 'string') {
-            const modal = _getTextAreaModal(key, key, val, attachments, omdFeature);
+            const propTable = _getTextAreaTable(key, key, val, attachments, omdFeature);
             textAreaModals.push({
                 object: attachments,
                 propertyKey: key,
-                textArea: modal.divElement.querySelector('textarea'),
+                textArea: propTable.div.querySelector('textarea'),
                 feature: omdFeature,
                 text: val
             });
-            mainModal.insertElement(modal.divElement);
+            attachmentsPropTable.insertTBodyRow({elements: [propTable.div]});
         } else if (typeof val === 'object') {
             const nestedObjects = _getNestedObjects(val);
             nestedObjects.forEach(obj => {
                 for (const [innerKey, text] of Object.entries(obj.object)) {
                     if (typeof text === 'string') {
-                        const innerModal = _getTextAreaModal(`${obj.namespace} ${innerKey}`, innerKey, text, obj.object, omdFeature);
+                        const propTable = _getTextAreaTable(`${obj.namespace} ${innerKey}`, innerKey, text, obj.object, omdFeature);
                         textAreaModals.push({
                             object: obj.object,
                             propertyKey: innerKey,
-                            textArea: innerModal.divElement.querySelector('textarea'),
+                            textArea: propTable.div.querySelector('textarea'),
                             feature: omdFeature,
                             text: text
                         });
-                        mainModal.insertElement(innerModal.divElement);
+                        attachmentsPropTable.insertTBodyRow({elements: [propTable.div]});
                     }
                 }
             });
         }
     }
-    const saveButtonModal = new Modal();
-    saveButtonModal.addStyleClasses(['fitContent'], 'divElement');
-    saveButtonModal.divElement.style.padding = '16px 0px 0px 0px';
-    const saveButton = _getSubmitButton('Save');
-    saveButton.addEventListener('click', function() {
+    const saveButton = new IconLabelButton({text: 'Save'});
+    saveButton.button.classList.add('-blue');
+    saveButton.button.getElementsByClassName('label')[0].classList.add('-white');
+    saveButton.button.addEventListener('click', function() {
         textAreaModals.forEach(obj => {
             obj.object[obj.propertyKey] = obj.textArea.value;
             obj.feature.updatePropertyOfObservers('', '', '');
             obj.text = obj.textArea.value;
         });
     });
-    const saveDiv = _getSubmitDiv(saveButton);
-    saveButtonModal.insertElement(saveDiv);
-    const resetButton = _getSubmitButton('Reset to last save');
-    resetButton.classList.add('delete');
-    resetButton.addEventListener('click', function() {
+    attachmentsPropTable.insertTBodyRow({elements: [saveButton.button]});
+    const resetButton = new IconLabelButton({text: 'Reset to last save'});
+    resetButton.button.classList.add('-red');
+    resetButton.button.getElementsByClassName('label')[0].classList.add('-white');
+    resetButton.button.addEventListener('click', function() {
         textAreaModals.forEach(obj => {
             obj.textArea.value = obj.text;
         });
     });
-    const resetDiv = _getSubmitDiv(resetButton);
-    saveButtonModal.insertElement(resetDiv);
-    saveButtonModal.addStyleClasses(['verticalFlex', 'centerMainAxisFlex', 'centerCrossAxisFlex'], 'containerElement');
-    const nestedModals = mainModal.divElement.querySelectorAll('div.js-div--modal');
-    if (nestedModals.length > 0) {
-        const lastNestedModal = nestedModals.item(nestedModals.length - 1)
-        lastNestedModal.querySelector('div.div--modalElementContainer').append(saveButtonModal.divElement);
-    }
-    return mainModal;
+    attachmentsPropTable.insertTBodyRow({elements: [resetButton.button]});
+    return attachmentsPropTable;
 }
 
 /**
@@ -1492,69 +1504,70 @@ function _getNestedObjects(obj, namespace='') {
  * @param {string} text
  * @param {Object} object - the object that contains the key and value that created the text area
  * @param {Feature} feature - the Feature that will have updatePropertyOfObservers() called on it (i.e. the "omd" feature)
- * @returns {Modal}
+ * @returns {PropTable}
  */
-function _getTextAreaModal(title, propertyKey, text, object, feature) {
+function _getTextAreaTable(title, propertyKey, text, object, feature) {
     if (typeof title !== 'string') {
-        throw TypeError('"title" argument must be typeof string.');
+        throw TypeError('The "title" argument must be typeof string.');
     }
     if (typeof propertyKey !== 'string') {
-        throw TypeError('"propertyKey" argument must be typeof string.');
+        throw TypeError('The "propertyKey" argument must be typeof string.');
     }
     if (typeof text !== 'string') {
-        throw TypeError('"text" argument must be typeof string.');
+        throw TypeError('The "text" argument must be typeof string.');
     }
     if (typeof object !== 'object') {
-        throw TypeError('"object" argument must be typeof object.');
+        throw TypeError('The "object" argument must be typeof object.');
     }
-    const modal = new Modal();
-    const attachmentTitleDiv = _getHorizontalFlexDiv();
-    attachmentTitleDiv.classList.add('centerCrossAxisFlex');
-    const span = document.createElement('span');
-    span.textContent = title;
-    attachmentTitleDiv.appendChild(span);
-    modal.insertElement(attachmentTitleDiv);
-    modal.addStyleClasses(['horizontalFlex', 'centerCrossAxisFlex'], 'titleElement');
+    const propTable = new PropTable();
+    propTable.insertTBodyRow({elements: [title]});
     const textArea = document.createElement('textarea');
     textArea.value = text;
     //textArea.addEventListener('change', function() {
     //    object[propertyKey] = textArea.value;
     //    feature.updatePropertyOfObservers('', '', '');
     //});
-    modal.insertElement(textArea);
-    return modal;
+    propTable.insertTBodyRow({elements: [textArea]});
+    return propTable;
 }
 
 /**
  * @param {FeatureController} controller - a ControllerInterface instance
- * @returns {HTMLDivElement}
+ * @returns {HTMLButtonElement}
  */
-function getAttachmentsDiv(controller) {
+function getAttachmentsButton(controller) {
     if (!(controller instanceof FeatureController)) {
         throw TypeError('"controller" argument must be instanceof FeatureController.');
     }
-    const div = _getMenuDiv('Attachments...');
+    const button = new IconLabelButton({text: 'Attachments...'});
+    button.button.classList.add('-white');
     const modalInsert = document.getElementById('modalInsert');
-    div.addEventListener('click', function() {
-        const modal = _getAttachmentsModal(controller);
-        modalInsert.replaceChildren(modal.divElement);
+    button.button.addEventListener('click', function() {
+        const propTable = _getAttachmentsTable(controller);
+        modalInsert.replaceChildren(propTable.div);
         modalInsert.classList.add('visible');
     });
-    return div;
+    return button.button;
 }
 
 /**
  * @param {Feature} observable
  * @param {FeatureController} controller - a ControllerInterface instance
- * @returns {Modal}
+ * @returns {PropTable}
  */
-function _getClimateModal(observable, controller) {
+function _getClimateTable(observable, controller) {
     if (!(observable instanceof Feature)) {
-        throw TypeError('"observable" argument must be instanceof Feature.');
+        throw TypeError('The "observable" argument must be instanceof Feature.');
     }
     if (!(controller instanceof FeatureController)) {
-        throw TypeError('"controller" argument must be instanceof FeatureController.');
+        throw TypeError('The "controller" argument must be instanceof FeatureController.');
     }
+    const propTable = new PropTable();
+    // - Don't close the modal when it is clicked on
+    propTable.div.addEventListener('click', function(e) {
+        e.stopPropagation();
+    });
+    propTable.insertTHeadRow({elements: ['Climate change']});
     // - Climate import select
     const climateImportSelect = document.createElement('select');
     climateImportSelect.name = 'climateImportOption';
@@ -1566,6 +1579,11 @@ function _getClimateModal(observable, controller) {
     option.text = 'tmy import';
     option.value = 'tmyImport';
     climateImportSelect.add(option);
+    propTable.insertTBodyRow({elements: [climateImportSelect]});
+    // - USCRN dropdown
+    const uscrnDropdown = new DropdownDiv();
+    uscrnDropdown.div.getElementsByClassName('contentdiv')[0].classList.add('-expanded');
+    const uscrnTable = new PropTable();
     // - USCRN year select
     const uscrnYearSelect = document.createElement('select');
     uscrnYearSelect.id = 'uscrnYearSelect';
@@ -1576,6 +1594,10 @@ function _getClimateModal(observable, controller) {
         option.value = year;
         uscrnYearSelect.add(option);
     });
+    uscrnYearSelect.addEventListener('change', function() {
+        observable.setProperty('uscrnYear', this.value, 'formProps');
+    });
+    uscrnTable.insertTBodyRow({elements: ['Year', uscrnYearSelect]});
     // - USCRN station select
     const uscrnStationSelect = document.createElement('select');
     uscrnStationSelect.name = 'uscrnStation';
@@ -1604,72 +1626,64 @@ function _getClimateModal(observable, controller) {
         option.value = station;
         uscrnStationSelect.add(option); 
     });
+    uscrnStationSelect.addEventListener('change', function() {
+        observable.setProperty('uscrnStation', this.value, 'formProps');
+    });
+    uscrnTable.insertTBodyRow({elements: ['Station', uscrnStationSelect]});
+    uscrnDropdown.insertElement({element: uscrnTable.div});
+    propTable.insertTBodyRow({elements: [uscrnDropdown.div]});
+    // - tmy dropdown
+    const tmyDropdown = new DropdownDiv();
+    const tmyTable = new PropTable();
     // - tmy zip code input
     const tmyInput = document.createElement('input');
     tmyInput.id = 'tmyInput';
     tmyInput.name = 'tmyInput';
-    const tmyInputLabel = document.createElement('label');
-    tmyInputLabel.htmlFor = 'tmyInput';
-    tmyInputLabel.innerText = 'ZIP code';
-    // - Submit div
-    const submitButton = _getSubmitButton();
-    const submitDiv = _getSubmitDiv(submitButton);
-    // - Event listeners
-    uscrnYearSelect.addEventListener('change', function() {
-        observable.setProperty('uscrnYear', this.value, 'formProps');
-    });
-    uscrnStationSelect.addEventListener('change', function() {
-        observable.setProperty('uscrnStation', this.value, 'formProps');
-    });
     tmyInput.addEventListener('change', function() {
         const value = this.value.trim();
         observable.setProperty('zipCode', value, 'formProps');
     });
-    // - Modal
-    const mainModal = new Modal();
-    const modalInsert = document.getElementById('modalInsert');
-    submitButton.addEventListener('click', function() {
-        modalInsert.removeEventListener('click', hideModalInsert);
-        mainModal.showProgress(true, 'Adding climate data...', ['caution']);
-        controller.submitFeature(observable, mainModal, submitButton);
-    });
-    mainModal.addStyleClasses(['outerModal', 'fitContent'], 'divElement');
-    mainModal.setTitle('Climate Change');
-    mainModal.addStyleClasses(['horizontalFlex', 'centerMainAxisFlex', 'centerCrossAxisFlex'], 'titleElement');
-    mainModal.insertTBodyRow([climateImportSelect]);
-    const uscrnModal = new Modal();
-    uscrnModal.addStyleClasses(['indent1'], 'divElement');
-    uscrnModal.insertTBodyRow(['Year', uscrnYearSelect]);
-    uscrnModal.insertTBodyRow(['Station', uscrnStationSelect]);
-    mainModal.insertElement(uscrnModal.divElement);
-    const tmyModal = new Modal();
-    tmyModal.addStyleClasses(['indent1', 'collapsed'], 'divElement');
-    tmyModal.insertTBodyRow([tmyInputLabel, tmyInput]);
-    mainModal.insertElement(tmyModal.divElement);
+    const tmyInputLabel = document.createElement('label');
+    tmyInputLabel.htmlFor = 'tmyInput';
+    tmyInputLabel.innerText = 'ZIP code';
+    tmyTable.insertTBodyRow({elements: [tmyInputLabel, tmyInput]});
+    tmyDropdown.insertElement({element: tmyTable.div});
+    propTable.insertTBodyRow({elements: [tmyDropdown.div]});
     climateImportSelect.addEventListener('change', function() {
         observable.setProperty('climateImportOption', this.value, 'formProps');
         if (this.value === 'USCRNImport') {
-            uscrnModal.removeStyleClasses(['collapsed'], 'divElement');
-            tmyModal.addStyleClasses(['collapsed'], 'divElement');
+            uscrnDropdown.div.getElementsByClassName('contentdiv')[0].classList.add('-expanded');
+            tmyDropdown.div.getElementsByClassName('contentdiv')[0].classList.remove('-expanded');
         } else {
-            uscrnModal.addStyleClasses(['collapsed'], 'divElement');
-            tmyModal.removeStyleClasses(['collapsed'], 'divElement');
+            uscrnDropdown.div.getElementsByClassName('contentdiv')[0].classList.remove('-expanded');
+            tmyDropdown.div.getElementsByClassName('contentdiv')[0].classList.add('-expanded');
         }
     });
-    const submitDivModal = new Modal();
-    submitDivModal.insertElement(submitDiv);
-    submitDivModal.addStyleClasses(['horizontalFlex', 'centerMainAxisFlex', 'centerCrossAxisFlex'], 'containerElement');
-    mainModal.insertElement(submitDivModal.divElement);
-    return mainModal;
+    // - Submit button
+    const button = new IconLabelButton({text: 'Submit'});
+    button.button.classList.add('-blue');
+    button.button.getElementsByClassName('label')[0].classList.add('-white');
+    // - LoadingSpan
+    const loadingSpan = new LoadingSpan();
+    loadingSpan.span.classList.add('-yellow', '-hidden');
+    propTable.insertTHeadRow({elements: [loadingSpan.span], position: 'prepend'})
+    const modalInsert = document.getElementById('modalInsert');
+    button.button.addEventListener('click', async function() {
+        modalInsert.removeEventListener('click', hideModalInsert); 
+        loadingSpan.update({text: 'Adding climate data...', show: true});
+        await controller.submitFeature(observable, loadingSpan, button.button);
+    });
+    propTable.insertTBodyRow({elements: [button.button]});
+    return propTable;
 }
 
 /**
  * @param {FeatureController} controller - a ControllerInterface instance
- * @returns {HTMLDivElement}
+ * @returns {HTMLButtonElement}
  */
-function getClimateDiv(controller) {
+function getClimateButton(controller) {
     if (!(controller instanceof FeatureController)) {
-        throw TypeError('"controller" argument must be instanceof FeatureController.');
+        throw TypeError('The "controller" argument must be instanceof FeatureController.');
     }
     const feature = new Feature({
         geometry: { 'coordinates': [null, null], 'type': 'Point' },
@@ -1699,27 +1713,28 @@ function getClimateDiv(controller) {
         },
         type: 'Feature'
     });
-    const modal =_getClimateModal(feature, controller);
-    const div = _getMenuDiv('Climate...');
+    const propTable =_getClimateTable(feature, controller);
+    const button = new IconLabelButton({text: 'Climate...'});
+    button.button.classList.add('-white');
     const modalInsert = document.getElementById('modalInsert');
-    div.addEventListener('click', function() {
-        modalInsert.replaceChildren(modal.divElement);
+    button.button.addEventListener('click', function() {
+        modalInsert.replaceChildren(propTable.div);
         modalInsert.classList.add('visible');
     });
-    return div;
+    return button.button;
 }
 
 /**
  * @param {Feature} observable
  * @param {FeatureController} controller - a ControllerInterface instance
- * @returns {Modal}
+ * @returns {PropTable}
  */
-function _getScadaModal(observable, controller) {
+function _getScadaTable(observable, controller) {
     if (!(observable instanceof Feature)) {
-        throw TypeError('"observable" argument must be instanceof Feature.');
+        throw TypeError('The "observable" argument must be instanceof Feature.');
     }
     if (!(controller instanceof FeatureController)) {
-        throw TypeError('"controller" argument must be instanceof FeatureController.');
+        throw TypeError('The "controller" argument must be instanceof FeatureController.');
     }
     // - csv file input
     const scadaInput = document.createElement('input');
@@ -1727,6 +1742,10 @@ function _getScadaModal(observable, controller) {
     scadaInput.accept = '.csv';
     scadaInput.required = true;
     scadaInput.id = 'scadaInput'; 
+    scadaInput.addEventListener('change', function() {
+        const scadaFile = this.files[0];
+        observable.setProperty('scadaFile', scadaFile, 'formProps');
+    }); 
     const scadaLabel = document.createElement('label');
     scadaLabel.htmlFor = 'scadaInput';
     scadaLabel.innerHTML = 'File containing SCADA load data (.csv)';
@@ -1735,51 +1754,42 @@ function _getScadaModal(observable, controller) {
     anchor.href = 'https://github.com/dpinney/omf/wiki/Tools-~-gridEdit#scada-loadshapes';
     anchor.textContent = 'Format Help';
     anchor.target = '_blank';
-    // - Note div
-    const noteDiv = _getHorizontalFlexDiv();
-    noteDiv.classList.add('centerCrossAxisFlex');
-    noteDiv.style.alignSelf = 'start';
-    const span = document.createElement('span');
-    span.textContent = 'Note: model "Simulation Start Data" should lie within the SCADA load\'s dates.';
-    noteDiv.appendChild(span);
-    // - Submit div
-    const submitButton = _getSubmitButton('Import');
-    const submitDiv = _getSubmitDiv(submitButton);
-    // - Event listeners
-    scadaInput.addEventListener('change', function() {
-        const scadaFile = this.files[0];
-        observable.setProperty('scadaFile', scadaFile, 'formProps');
-    }); 
-    // - Modal
-    const modal = new Modal();
-    modal.addStyleClasses(['outerModal', 'fitContent'], 'divElement');
+    const propTable = new PropTable();
+    // - Don't close the modal when it is clicked on
+    propTable.div.addEventListener('click', function(e) {
+        e.stopPropagation();
+    });
+    propTable.insertTHeadRow({elements: ['SCADA loadshapes'], colspans: [2]});
+    propTable.insertTBodyRow({elements: [anchor]});
+    propTable.insertTBodyRow({elements: [scadaLabel, scadaInput]});
+    propTable.insertTBodyRow({elements: ['Note: model "Simulation Start Data" should lie within the SCADA load\'s dates.'], colspans: [2]});
+    const button = new IconLabelButton({text: 'Import'});
+    button.button.classList.add('-blue');
+    button.button.getElementsByClassName('label')[0].classList.add('-white');
+    const loadingSpan = new LoadingSpan();
+    loadingSpan.span.classList.add('-yellow', '-hidden');
+    propTable.insertTHeadRow({elements: [loadingSpan.span], colspans: [2], position: 'prepend'})
     const modalInsert = document.getElementById('modalInsert');
-    submitButton.addEventListener('click', function() {
+    button.button.addEventListener('click', function() {
         if (scadaInput.checkValidity()) {
             modalInsert.removeEventListener('click', hideModalInsert);
-            modal.showProgress(true, 'Importing file...', ['caution']);
-            controller.submitFeature(observable, modal, submitButton);
+            loadingSpan.update({text: 'Importing file...', show: true});
+            controller.submitFeature(observable, loadingSpan, button.button);
         } else {
             scadaInput.reportValidity();
         }
     });
-    modal.setTitle('SCADA Loadshapes');
-    modal.addStyleClasses(['horizontalFlex', 'centerMainAxisFlex', 'centerCrossAxisFlex'], 'titleElement');
-    modal.insertTBodyRow([anchor]);
-    modal.insertTBodyRow([scadaLabel, scadaInput]);
-    modal.insertElement(noteDiv);
-    modal.insertElement(submitDiv);
-    modal.addStyleClasses(['verticalFlex', 'centerMainAxisFlex', 'centerCrossAxisFlex'], 'containerElement');
-    return modal;
+    propTable.insertTBodyRow({elements: [button.button], colspans: [2]});
+    return propTable;
 }
 
 /**
  * @param {FeatureController} controller - a ControllerInterface instance
- * @returns {HTMLDivElement}
+ * @returns {HTMLButtonElement}
  */
-function getScadaDiv(controller) {
+function getScadaButton(controller) {
     if (!(controller instanceof FeatureController)) {
-        throw TypeError('"controller" argument must be instanceof FeatureController.');
+        throw TypeError('The "controller" argument must be instanceof FeatureController.');
     }
     const feature = new Feature({
         geometry: { 'coordinates': [null, null], 'type': 'Point' },
@@ -1806,68 +1816,75 @@ function getScadaDiv(controller) {
         },
         type: 'Feature'
     });
-    const modal = _getScadaModal(feature, controller);
-    const div = _getMenuDiv('SCADA loadshapes...');
+    const propTable = _getScadaTable(feature, controller);
+    const button = new IconLabelButton({text: 'SCADA loadshapes...'});
+    button.button.classList.add('-white');
     const modalInsert = document.getElementById('modalInsert');
-    div.addEventListener('click', function() {
-        modalInsert.replaceChildren(modal.divElement);
+    button.button.addEventListener('click', function() {
+        modalInsert.replaceChildren(propTable.div);
         modalInsert.classList.add('visible');
     });
-    return div; 
+    return button.button;
 }
 
 /**
  * @param {FeatureController} controller - a ControllerInterface instance
- * @returns {HTMLDivElement}
+ * @param {ColorModal} colorModal - a ColorModal instance
+ * @returns {HTMLButtonElement}
  */
-function getColorDiv(controller) {
+function getColorButton(controller, colorModal) {
     if (!(controller instanceof FeatureController)) {
-        throw TypeError('"controller" argument must be instanceof FeatureController.');
+        throw TypeError('The "controller" argument must be instanceof FeatureController.');
     }
-    const colorModal = new ColorModal([controller.observableGraph.getObservable('omd')], controller);
+    if (!(colorModal instanceof ColorModal)) {
+        throw TypeError('The "colorModal" argument must be instanceof ColorModal.');
+    }
     const divElement = colorModal.getDOMElement();
-    const div = _getMenuDiv('Color circuit...');
+    const button = new IconLabelButton({text: 'Color circuit...'});
+    button.button.classList.add('-white');
     const modalInsert = document.getElementById('modalInsert');
-    div.addEventListener('click', function() {
+    button.button.addEventListener('click', function() {
         modalInsert.replaceChildren(divElement);
         modalInsert.classList.add('visible');
     });
-    return div;
+    return button.button;
 }
 
 /**
  * @param {FeatureController} controller - a ControllerInterface instance
- * @returns {HTMLDivElement}
+ * @returns {HTMLButtonElement}
  */
-function getGeojsonDiv(controller) {
+function getGeojsonButton(controller) {
     if (!(controller instanceof FeatureController)) {
-        throw TypeError('"controller" argument must be instanceof FeatureController.');
+        throw TypeError('The "controller" argument must be instanceof FeatureController.');
     }
     const geojsonModal = new GeojsonModal([controller.observableGraph.getObservable('omd')], controller);
     const divElement = geojsonModal.getDOMElement();
-    const div = _getMenuDiv('Add GeoJSON data...');
+    const button = new IconLabelButton({text: 'Add GeoJSON data...'});
+    button.button.classList.add('-white');
     const modalInsert = document.getElementById('modalInsert');
-    div.addEventListener('click', function() {
+    button.button.addEventListener('click', function() {
         modalInsert.replaceChildren(divElement);
         modalInsert.classList.add('visible');
     });
-    return div;
+    return button.button;
 }
 
 /**
  * @param {Nav} nav - a Nav instance
  * @param {TopTab} topTab - a TopTab instance
- * @returns {undefined}
+ * @returns {HTMLButtonElement}
  */
-function getSearchDiv(nav, topTab) {
+function getSearchButton(nav, topTab) {
     if (!(nav instanceof Nav)) {
-        throw TypeError('"nav" argument must be instanceof Nav.');
+        throw TypeError('The "nav" argument must be instanceof Nav.');
     }
     if (!(topTab instanceof TopTab)) {
-        throw TypeError('"topTab" argument must be instanceof TopTab.');
+        throw TypeError('The "topTab" argument must be instanceof TopTab.');
     }
-    const div = _getMenuDiv('Search objects...');
-    div.addEventListener('click', function() {
+    const button = new IconLabelButton({text: 'Search objects...'});
+    button.button.classList.add('-white');
+    button.button.addEventListener('click', function() {
         if (nav.sideNavNavElement.classList.contains('open')) {
             if (topTab.getTab('Search Objects').tab.classList.contains('selected')) {
                 nav.sideNavNavElement.classList.remove('open');
@@ -1887,23 +1904,24 @@ function getSearchDiv(nav, topTab) {
         }
         document.getElementById('editMenu').getElementsByTagName('button')[0].click();
     });
-    return div;
+    return button.button;
 }
 
 /**
  * @param {Nav} nav - a Nav instance
  * @param {TopTab} topTab - a TopTab instance
- * @returns {undefined}
+ * @returns {HTMLButtonElement}
  */
-function getAddComponentsDiv(nav, topTab) {
+function getAddComponentsButton(nav, topTab) {
     if (!(nav instanceof Nav)) {
         throw TypeError('"nav" argument must be instanceof Nav.');
     }
     if (!(topTab instanceof TopTab)) {
         throw TypeError('"topTab" argument must be instanceof TopTab.');
     }
-    const div = _getMenuDiv('Add new objects...');
-    div.addEventListener('click', function() {
+    const button = new IconLabelButton({text: 'Add new objects'});
+    button.button.classList.add('-white');
+    button.button.addEventListener('click', function() {
         if (nav.sideNavNavElement.classList.contains('open')) {
             if (topTab.getTab('Add New Objects').tab.classList.contains('selected')) {
                 nav.sideNavNavElement.classList.remove('open');
@@ -1923,28 +1941,12 @@ function getAddComponentsDiv(nav, topTab) {
         }
         document.getElementById('editMenu').getElementsByTagName('button')[0].click();
     });
-    return div;
+    return button.button;
 }
 
 /*********************************/
 /* Private convenience functions */
 /*********************************/
-
-function _getHorizontalFlexDiv() {
-    const div = document.createElement('div');
-    div.classList.add('horizontalFlex');
-    return div;
-}
-
-function _getMenuDiv(text) {
-    if (typeof text !== 'string') {
-        throw TypeError('"text" argument must be a string.');
-    }
-    const div = document.createElement('div');
-    div.classList.add('hoverable', 'horizontalFlex', 'centerCrossAxisFlex');
-    div.textContent = text;
-    return div;
-}
 
 /**
  * - Firefox doesn't display the reportValidity() message correctly
@@ -1969,23 +1971,4 @@ function _getNameInput(observable, func) {
         }
     });
     return input
-}
-
-function _getSubmitButton(text='Submit') {
-    const submitButton = document.createElement('button');
-    let span = document.createElement('span');
-    span.textContent = text;
-    submitButton.appendChild(span);
-    submitButton.classList.add('horizontalFlex', 'centerMainAxisFlex', 'centerCrossAxisFlex', 'fullWidth');
-    return submitButton;
-}
-
-function _getSubmitDiv(button) {
-    if (!(button instanceof HTMLButtonElement)) {
-        throw TypeError('"button" argument must be instanceof HTMLButtonElement.');
-    }
-    const submitDiv = document.createElement('div');
-    submitDiv.classList.add('horizontalFlex', 'centerMainAxisFlex', 'centerCrossAxisFlex', 'halfWidth');
-    submitDiv.appendChild(button);
-    return submitDiv;
 }

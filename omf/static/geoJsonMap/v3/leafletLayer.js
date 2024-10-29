@@ -2,7 +2,6 @@ export { LeafletLayer };
 import { Feature } from './feature.js';
 import { FeatureController } from "./featureController.js";
 import { FeatureEditModal } from './featureEditModal.js';
-import { TestModal } from './extensions/testModal.js';
 import { ClusterControlClass } from './clusterControl.js';
 
 /**
@@ -174,17 +173,14 @@ class LeafletLayer {    // implements ObserverInterface
 
     bindPopup() {
         const layer = Object.values(this.#layer._layers)[0];
-        layer.bindPopup(() => {
-            if (this.#observable.hasProperty('treeKey', 'meta')) {
-                // - Show a modal for OMD objects
-                this.#modal = new FeatureEditModal([this.#observable], this.#controller);
+        layer.bindPopup(
+            () => {
+                this.#modal = new FeatureEditModal(this.#observable, this.#controller);
                 return this.#modal.getDOMElement();
-            } else {
-                // - Show a modal for arbitrary GeoJSON features
-                this.#modal = new TestModal([this.#observable], this.#controller);
-                return this.#modal.getDOMElement();
-            }
-        });
+            },
+            // - I CANNOT set this option because then the popup won't follow a node around when it is dragged!
+            //{ closeButton: false }
+        );
     }
 
     unbindPopup() {
@@ -240,7 +236,7 @@ class LeafletLayer {    // implements ObserverInterface
     }
 
     /**
-     * - Iterate through all observables and put every visible overvable back into its proper layer group
+     * - Iterate through all observables and put every visible observable back into its proper layer group
      * - This has to be static because it shouldn't need to be called off of any particular instance
      * @returns {undefined}
      */
@@ -354,7 +350,7 @@ class LeafletLayer {    // implements ObserverInterface
             return {
                 color: 'black',
                 fillColor: fillColor,
-                fillOpacity: .8,
+                fillOpacity: .9,
                 radius: 6.5,
                 weight: 1
             }

@@ -175,14 +175,22 @@ def create_REopt_jl_jsonFile(modelDir, inputDict):
 		scenario['PV'] = {
 			##TODO: Add options here, if needed
 			}
-	
+
 	## Add a Battery Energy Storage System (BESS) section if enabled 
 	if inputDict['BESS'] == 'Yes':
 		scenario['ElectricStorage'] = {
 			##TODO: Add options here, if needed
 			#scenario['ElectricStorage']['size_kw'] = 2
-			"min_kw": 2,
-			"min_kwh": 2,
+			#"min_kw": 2,
+			#"min_kwh": 8,
+			'total_rebate_per_kw': float(inputDict['total_rebate_per_kw']),
+			'macrs_option_years': float(inputDict['macrs_option_years']),
+			'macrs_bonus_fraction': float(inputDict['macrs_bonus_fraction']),
+			'replace_cost_per_kw': float(inputDict['replace_cost_per_kw']),
+			'replace_cost_per_kwh': float(inputDict['replace_cost_per_kwh']),
+			'installed_cost_per_kw': float(inputDict['installed_cost_per_kw']),
+			'installed_cost_per_kwh': float(inputDict['installed_cost_per_kwh']),
+			'total_itc_fraction': float(inputDict['total_itc_fraction']),
 			}
 		
 
@@ -345,6 +353,20 @@ def work(modelDir, inputDict):
 	## Delete output file every run if it exists
 	outData = {}	
 	
+	## Add REopt BESS inputs to inputDict
+	## NOTE: These inputs are being added directly to inputDict because they are not specified by user input
+	## If they become user inputs, then they can be placed directly into the defaultInputs under the new() function below
+	inputDict.update({
+		'total_rebate_per_kw': '10.0',
+		'macrs_option_years': '25',
+		'macrs_bonus_fraction': '0.4',
+		'replace_cost_per_kw': '460.0',
+		'replace_cost_per_kwh': '230.0',
+		'installed_cost_per_kw': '500.0', 
+		'installed_cost_per_kwh': '80.0', 
+		'total_itc_fraction': '0.0',
+	})
+
 	## Create REopt input file
 	create_REopt_jl_jsonFile(modelDir, inputDict)
 	
@@ -416,20 +438,22 @@ def work(modelDir, inputDict):
 	## We are instead going to try to use our own BESS model.
 	## Currently, the BESS model is only being run when considering a DER utility program is enabled.
 	## TODO: Change this to instead check for BESS in the output file, rather than input
-	#if 'ElectricStorage' in reoptResults and any(reoptResults['ElectricStorage']['storage_to_load_series_kw']): ## BESS
-	#	print("Using REopt's BESS output. \n")
-	#	BESS = reoptResults['ElectricStorage']['storage_to_load_series_kw']
-	#	grid_charging_BESS = reoptResults['ElectricUtility']['electric_to_storage_series_kw']
-	#	outData['chargeLevelBattery'] = reoptResults['ElectricStorage']['soc_series_fraction']
-	#else:
-	#	print('No BESS found in REopt: Setting BESS data to 0. \n')
-	#	BESS = np.zeros_like(demand)
-	#	grid_charging_BESS = np.zeros_like(demand)
-	#	outData['chargeLevelBattery'] = np.zeros_like(demand)
+	if 'ElectricStorage' in reoptResults and any(reoptResults['ElectricStorage']['storage_to_load_series_kw']): ## BESS
+		print("Using REopt's BESS output. \n")
+		BESS = reoptResults['ElectricStorage']['storage_to_load_series_kw']
+		grid_charging_BESS = np.asarray(reoptResults['ElectricUtility']['electric_to_storage_series_kw'])
+		if 'PV' in reoptResults:
+			grid_charging_BESS += np.asarray(reoptResults['PV']['electric_to_storage_series_kw'])
+		outData['chargeLevelBattery'] = reoptResults['ElectricStorage']['soc_series_fraction']
+	else:
+		print('No BESS found in REopt: Setting BESS data to 0. \n')
+		BESS = np.zeros_like(demand)
+		grid_charging_BESS = np.zeros_like(demand)
+		outData['chargeLevelBattery'] = np.zeros_like(demand)
 		
-	BESS = np.zeros_like(demand)
-	grid_charging_BESS = np.zeros_like(demand)
-	outData['chargeLevelBattery'] = list(np.zeros_like(demand))
+	#BESS = np.zeros_like(demand)
+	#grid_charging_BESS = np.zeros_like(demand)
+	#outData['chargeLevelBattery'] = list(np.zeros_like(demand))
 
 	## NOTE: The following 3 lines of code read in the SOC info from a static reopt test file 
 	#with open(pJoin(__neoMetaModel__._omfDir,'static','testFiles','residential_reopt_results.json')) as f:
@@ -596,9 +620,9 @@ def work(modelDir, inputDict):
 		## Calculate total DER compensation amount (including any subsidies)
 		total_compensation = total_economic_benefit + total_der_compensation - total_energy_cost + subsidy_amount - demand_cost
 		
-		print(f"Total Energy Cost: ${total_energy_cost:.2f}")
-		print(f"Total DER Compensation: ${total_der_compensation:.2f}")
-		print(f"Total Compensation: ${total_compensation:.2f}")
+		#print(f"Total Energy Cost: ${total_energy_cost:.2f}")
+		#print(f"Total DER Compensation: ${total_der_compensation:.2f}")
+		#print(f"Total Compensation: ${total_compensation:.2f}")
 
 		## Add variables to outData
 		outData['energyCost'] = list(np.asarray(outData['energyCost']) + monthly_energy_cost)
@@ -697,7 +721,7 @@ def work(modelDir, inputDict):
 	## BESS serving load piece
 	if (inputDict['BESS'] == 'Yes'):
 		fig.add_trace(go.Scatter(x=timestamps,
-							y=np.asarray(BESS),
+							y=np.asarray(BESS) + np.asarray(demand) + vbat_discharge_component,
 							yaxis='y1',
 							mode='none',
 							fill='tozeroy',
@@ -706,17 +730,25 @@ def work(modelDir, inputDict):
 							showlegend=showlegend))
 		fig.update_traces(fillpattern_shape='/', selector=dict(name='BESS Serving Load (kW)'))
 
-	## Generator serving load piece
-	if (inputDict['generator'] == 'Yes'):
-		fig.add_trace(go.Scatter(x=timestamps,
-							y=np.asarray(generator),
-							yaxis='y1',
-							mode='none',
-							fill='tozeroy',
-							name='Generator Serving Load (kW)',
-							fillcolor='rgba(0,137,83,1)',
-							showlegend=showlegend))
-		fig.update_traces(fillpattern_shape='/', selector=dict(name='BESS Serving Load (kW)'))
+	## Temperature line on a secondary y-axis (defined in the plot layout)
+	fig.add_trace(go.Scatter(x=timestamps,
+						  y=temperatures,
+						  yaxis='y2',
+						  mode='lines',
+						  line=dict(color='red',width=1),
+						  name='Average Air Temperature',
+						  showlegend=showlegend 
+						  ))
+	
+	fig.add_trace(go.Scatter(x=timestamps,
+						y=vbat_discharge_component + np.asarray(demand),
+						yaxis='y1',
+						mode='none',
+						fill='tozeroy',
+						fillcolor='rgba(127,0,255,1)',
+						name='vbat Serving Load (kW)',
+						showlegend=showlegend))
+	fig.update_traces(fillpattern_shape='/', selector=dict(name='vbat Serving Load (kW)'))
 
 	## Original load piece (minus any vbat or BESS charging aka 'new/additional loads')
 	fig.add_trace(go.Scatter(x=timestamps,
@@ -727,7 +759,7 @@ def work(modelDir, inputDict):
 						fill='tozeroy',
 						fillcolor='rgba(100,200,210,1)',
 						showlegend=showlegend))
-
+	
 	## Additional load (Charging BESS and vbat)
 	## NOTE: demand is added here for plotting purposes, so that the additional load shows up above the demand curve.
 	## How or if this should be done is still being discussed
@@ -740,28 +772,18 @@ def work(modelDir, inputDict):
                          fillcolor='rgba(175,0,42,0)',
 						 showlegend=showlegend))
 	fig.update_traces(fillpattern_shape='.', selector=dict(name='Additional Load (Charging BESS and vbat)'))
-	
+
 	## Grid serving new load
 	## TODO: Should PV really be in this?
-	grid_serving_new_load = np.asarray(grid_to_load) + np.asarray(grid_charging_BESS)+ vbat_charge_component - vbat_discharge_component + np.asarray(PV)
+	grid_serving_new_load = np.asarray(grid_to_load) + np.asarray(grid_charging_BESS) + vbat_charge_component - vbat_discharge_component + np.asarray(PV)
 	fig.add_trace(go.Scatter(x=timestamps,
                          y=grid_serving_new_load,
 						 yaxis='y1',
                          mode='none',
                          fill='tozeroy',
-                         name='Grid Serving Load (kW)',
+                         name='Grid Serving New Load (kW)',
                          fillcolor='rgba(192,192,192,1)',
 						 showlegend=showlegend))
-	
-	## Temperature line on a secondary y-axis (defined in the plot layout)
-	fig.add_trace(go.Scatter(x=timestamps,
-						  y=temperatures,
-						  yaxis='y2',
-						  mode='lines',
-						  line=dict(color='red',width=1),
-						  name='Average Air Temperature',
-						  showlegend=showlegend 
-						  ))
 
 	## NOTE: This code hides the demand curve initially when the plot is made, but it can be 
 	## toggled back on by the user by clicking it in the plot legend
@@ -785,15 +807,18 @@ def work(modelDir, inputDict):
 						fillcolor='rgba(255,246,0,1)',
 						showlegend=showlegend
 						))
-	fig.add_trace(go.Scatter(x=timestamps,
-						y=np.asarray(vbat_discharge_flipsign),
-						yaxis='y1',
-						mode='none',
-						fill='tozeroy',
-						fillcolor='rgba(127,0,255,1)',
-						name='vbat Serving Load (kW)',
-						showlegend=showlegend))
-	fig.update_traces(fillpattern_shape='/', selector=dict(name='vbat Serving Load (kW)'))
+
+	## Generator serving load piece
+	if (inputDict['generator'] == 'Yes'):
+		fig.add_trace(go.Scatter(x=timestamps,
+							y=np.asarray(generator),
+							yaxis='y1',
+							mode='none',
+							fill='tozeroy',
+							name='Generator Serving Load (kW)',
+							fillcolor='rgba(0,137,83,1)',
+							showlegend=showlegend))
+		fig.update_traces(fillpattern_shape='/', selector=dict(name='BESS Serving Load (kW)'))
 
 	## Plot layout
 	fig.update_layout(
@@ -816,7 +841,7 @@ def work(modelDir, inputDict):
 	## NOTE: This opens a window that displays the correct figure with the appropriate patterns.
 	## For some reason, the slash-mark patterns are not showing up on the OMF page otherwise.
 	## Eventually we want to delete this part.
-	#fig.show() 
+	fig.show() 
 
 	## Encode plot data as JSON for showing in the HTML side
 	outData['derOverviewData'] = json.dumps(fig.data, cls=plotly.utils.PlotlyJSONEncoder)
@@ -956,44 +981,91 @@ def work(modelDir, inputDict):
 	outData['exportedPowerData'] = json.dumps(fig.data, cls=plotly.utils.PlotlyJSONEncoder)
 	outData['exportedPowerLayout'] = json.dumps(fig.layout, cls=plotly.utils.PlotlyJSONEncoder)
 
-	## Create Thermal Device Temperature plot object ######################################################################################################################################################
-	fig = go.Figure()
-	
-	fig.add_trace(go.Scatter(x=timestamps,
-						y=temperatures,
-						yaxis='y2',
-						mode='lines',
-						line=dict(color='red',width=1),
-						name='Average Air Temperature',
-						showlegend=showlegend 
-						))
-	
-	## Power used to charge vbat (vbat_charging)
-	if inputDict['load_type'] != '0':
-		fig.add_trace(go.Scatter(x=timestamps,
-							y=np.asarray(vbat_charge),
-							mode='none',
-							fill='tozeroy',
-							name='Power Used to Charge TESS',
-							fillcolor='rgba(155,148,225,1)',
-							showlegend=True))
-	
 
-	fig.update_layout(
-    	xaxis=dict(title='Timestamp'),
-    	yaxis=dict(title='Temperature (C)'),
-    	legend=dict(
-			orientation='h',
-			yanchor='bottom',
-			y=1.02,
-			xanchor='right',
-			x=1
-			)
-	)
+	## Create Thermal Device Temperature plot object ######################################################################################################################################################
+	if inputDict['load_type'] != '0': ## If vbatDispatch is called in the analysis:
 	
-	## Encode plot data as JSON for showing in the HTML side
-	outData['thermalDevicePlotData'] = json.dumps(fig.data, cls=plotly.utils.PlotlyJSONEncoder)
-	outData['thermalDevicePlotPowerLayout'] = json.dumps(fig.layout, cls=plotly.utils.PlotlyJSONEncoder)
+		fig = go.Figure()
+	
+		## It seems like the setpoint (interior temp) is fixed for devices except the water heater.
+		## TODO: If desired, could code this up to extract the interior temperature from the water heater code.
+		## It does not currently seem to output the changing interior temp.
+
+		#if inputDict['load_type'] == '4': ## Water Heater (the only option that evolves interior temperature over time)
+			# Interior Temperature
+			#interior_temp = theta.mean(axis=0) 
+			#theta_s_wh #temperature setpoint (interior)
+			#theta_s_wh +/- deadband 
+
+		fig.add_trace(go.Scatter(x=timestamps,
+							y=temperatures,
+							yaxis='y2',
+							mode='lines',
+							line=dict(color='red',width=1),
+							name='Average Air Temperature',
+							showlegend=showlegend 
+							))
+		
+		upper_bound = np.full_like(demand,float(inputDict['setpoint']) + float(inputDict['deadband'])/2)
+		lower_bound = np.full_like(demand,float(inputDict['setpoint']) - float(inputDict['deadband'])/2)
+		setpoint = np.full_like(demand, float(inputDict['setpoint'])) ## the setpoint is currently a fixed number
+
+		## Plot deadband upper bound
+		fig.add_trace(go.Scatter(
+			x=timestamps,  
+			y=upper_bound, 
+			yaxis='y2',
+			line=dict(color='rgba(0,0,0,1)'), ## color black
+			name='Deadband upper bound',
+			showlegend=True
+		))
+
+		## Plot deadband lower bound
+		fig.add_trace(go.Scatter(
+			x=timestamps, 
+			y=lower_bound,  
+			yaxis='y2',
+			mode='lines',
+			line=dict(color='rgba(0,0,0,0.5)'),  ## color black but half opacity = gray color
+			name='Deadband lower bound',
+			showlegend=True
+		))
+
+		## Plot the setpoint (interior temperature)
+		fig.add_trace(go.Scatter(
+			x=timestamps, 
+			y=setpoint,  
+			yaxis='y2',
+			mode='lines',
+			line=dict(color='rgba(0, 27, 255, 1)'),  ## color blue
+			name='Setpoint',
+			showlegend=True
+		))
+
+
+		## Plot layout
+		fig.update_layout(
+			#title='Residential Data',
+			xaxis=dict(title='Timestamp'),
+			yaxis=dict(title='Power (kW)'),
+			yaxis2=dict(title='degrees Celsius',
+					overlaying='y',
+					side='right'
+					),
+			legend=dict(
+				orientation='h',
+				yanchor='bottom',
+				y=1.02,
+				xanchor='right',
+				x=1
+				)
+		)
+
+		#fig.show()
+		
+		## Encode plot data as JSON for showing in the HTML side
+		outData['thermalDevicePlotData'] = json.dumps(fig.data, cls=plotly.utils.PlotlyJSONEncoder)
+		outData['thermalDevicePlotLayout'] = json.dumps(fig.layout, cls=plotly.utils.PlotlyJSONEncoder)
 
 	# Stdout/stderr.
 	outData['stdout'] = 'Success'

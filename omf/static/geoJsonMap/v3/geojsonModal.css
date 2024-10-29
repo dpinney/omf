@@ -1,0 +1,21 @@
+/*
+- Give nested buttons a fixed width
+*/
+
+#modalInsert > #geojsonModal .fileListTable .iconlabel-button {
+    width: 100px;
+}
+
+/*
+- Center nested checkboxes
+*/
+
+#modalInsert > #geojsonModal .fileListTable input[type="checkbox"] {
+    margin: auto;
+}
+
+/* Bold the first row in the fileListTable */
+
+#modalInsert > #geojsonModal .fileListTable tr:first-of-type {
+    font-weight: bold;
+}

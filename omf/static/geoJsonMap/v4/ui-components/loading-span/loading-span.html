@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <link rel="stylesheet" href="loading-span.css">
+        <style>
+            * {
+                box-sizing: border-box;
+            }
+            body {
+                margin: 0;
+            }
+            .demo-div {
+                margin: 1rem;
+            }
+            .column {
+                background-color: aqua;
+                height: 500px;
+                margin-left: 100px;
+                text-align: center;
+                width: 200px;
+            }
+        </style>
+    </head>
+    <body>
+        <!-- HTML -->
+        <span class="loading-span">
+            <img class="gif" src='spinner.gif'>
+            <span class="label">Working really hard!</span>
+        </span> 
+        <div class="column">
+            <span class="loading-span -yellow">
+                <img class="gif" src='spinner.gif'>
+                <span class="label">foo!</span>
+            </span> 
+        </div>
+        <!-- Dynamic -->
+        <div class="demo-div"></div>
+        <script type="module">
+            import { LoadingSpan } from '/loading-span.js';
+            const loadingSpan = new LoadingSpan();
+            loadingSpan.update({text: 'Converting your AMI model, this might take a long time...', showGif: false});
+            loadingSpan.span.classList.add('-yellow', '-large', '-hidden');
+            document.getElementsByClassName('demo-div')[0].append(loadingSpan.span);
+            setTimeout(() => {
+                loadingSpan.update({show: true, showGif: false});
+            }, 3000);
+            setTimeout(() => {
+                loadingSpan.update({showGif: true});
+            }, 6000);
+        </script>
+    </body>
+</html>

@@ -1,0 +1,123 @@
+/*
+- Give nested buttons a fixed width
+*/
+
+#modalInsert > #colorModal .fileListTable .iconlabel-button {
+    width: 100px;
+}
+
+/*
+- Center nested checkboxes
+*/
+
+#modalInsert > #colorModal .fileListTable input[type="checkbox"] {
+    margin: auto;
+}
+
+/* Bold the first row in the fileListTable */
+
+#modalInsert > #colorModal .fileListTable tr:first-of-type {
+    font-weight: bold;
+}
+
+/******************
+ * Legend styling *
+ ******************/
+
+#legendInsert { /* #multiselectInsert */
+    bottom: 0px;
+    position: absolute;
+    right: 0px;
+}
+
+/*
+- Make the legend div have a white background
+- Round the corners
+- Set a consistent font size
+- Limit the width of the legend in case of really long column names
+- Limit the height of the legend and allow it to scroll
+- Add a consistent padding
+*/
+
+#legendInsert > .proptablediv {
+    background-color: white;
+    border-radius: var(--regularBorderRadius);
+    font-size: var(--regularFontSize);
+    max-width: 75vw;
+    max-height: 75vh;
+    overflow-x: hidden;
+    overflow-y: auto;
+    padding: var(--regularPadding);
+}
+
+/*
+- Make the filename header and column name header very narrow so the legend doesn't take up that much space
+- Let the text of the filename header and column header wrap
+- Set spacing of the filename header and column header
+- The height of the legend depends on the number of labels
+*/
+#legendInsert > .proptablediv > .prop-table > .propthead > .proptr > .propth > .propdiv {
+    width: 100px;
+    overflow-wrap: anywhere;
+    margin: 0 auto var(--regularPadding) auto;
+}
+
+/*
+- Make the legenddiv into a flex container so it can display the gradient alongside the labels
+- Put space between the graident and labels
+- Center the content
+*/
+
+#legendInsert .legenddiv {
+    display: flex;
+    gap: .5rem;
+    justify-content: center;
+}
+
+/*
+- Make the legend labels display along even vertical intervals
+- justify-content needs to be set by JavaScipt
+*/
+
+#legendInsert .legendlabels {
+    display: flex;
+    flex-direction: column;
+}
+
+/*
+- Set a reasonable width for the legend gradient
+- The height of the legend depends on the number of labels
+*/
+
+#legendInsert .legendgradient {
+    width: 30px;
+}
+
+/*
+- Round the corners of the button
+- Make the button taller than it is
+- Center the text in the button
+- Center the button in its row
+- Don't let the button become weirdly wide
+- Make the button wider than it is
+*/
+
+#legendInsert > .proptablediv .iconlabel-button {
+    border-radius: var(--regularBorderRadius);
+    height: var(--tableRowMinHeight);
+    justify-content: center;
+    margin: var(--regularPadding) auto 0 auto;
+    max-width: 300px;
+    width: 50%;
+}
+
+/*
+- Vertically center content in table rows
+- Horizontally center content in table rows
+*/
+
+#legendInsert > .proptablediv > .prop-table .propdiv {
+    align-items: center;
+    display: flex;
+    justify-content: center;
+}

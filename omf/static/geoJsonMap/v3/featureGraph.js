@@ -1,7 +1,9 @@
 export { FeatureGraph, FeatureNotFoundError };
 import { Feature, ObserverError, UnsupportedOperationError } from './feature.js';
+import { Validity } from '../v4/mvc/models/validity/validity.js';
 
 class FeatureGraph {
+
     #graph;         // - This points to the actual graph data structure. I'm using the Graphology library
     #keyToFeature;  // - Graphology graphs allow nodes and lines to have the same key. This is great for representing lines with children, but is annoying when trying to retrieve a feature by its key
     #nameToKey;     // - Names are not unique, so I potentially need to map one name to multiple keys
@@ -60,18 +62,18 @@ class FeatureGraph {
     }
 
     /**
-     * @param {Function} [func=null] - a function that filters features so that only the desired features are returned. The function should take a
-     * single argument (a feature), and should return a boolean depending on whether to include the feature in the array
+     * @param {Function} [filterFunc=null] - a function that filters features so that only the desired features are returned. The function should take
+     * a single argument (a feature), and should return a boolean depending on whether to include the feature in the array
      * - I could argue that the logic executed in Feature.getObservableExportData() could be provided via a function argument, as it is here, so while
      *   the different method signatures violate the interface, I could make both conform to it
      * @returns {Object} a GeoJSON FeatureCollection object
      */
-    getObservableExportData(func=null) {
-        if (func !== null && typeof func !== 'function') {
-            throw TypeError('The "func" argument must be null or a typeof "function".');
+    getObservableExportData(filterFunc=null) {
+        if (filterFunc !== null && typeof filterFunc !== 'function') {
+            throw TypeError('The "filterFunc" argument must be null or a typeof "function".');
         }
-        if (func === null) {
-            func = function(f) {
+        if (filterFunc === null) {
+            filterFunc = function(f) {
                 if (f.getProperty('treeKey', 'meta') === 'omd') {
                     return true;
                 } else {
@@ -81,7 +83,7 @@ class FeatureGraph {
         }
         return { 
             'type': 'FeatureCollection',
-            'features': this.getObservables(func).map(f => f.getObservableExportData())
+            'features': this.getObservables(filterFunc).map(f => f.getObservableExportData())
         };
     }
 
@@ -243,7 +245,10 @@ class FeatureGraph {
                 });
             }
             this.#graph.dropNode(observableKey);
-            this.#removeObservableFromNameToKey(observable, observable.getProperty('name'));
+            // - Configuration objects don't have names sometimes
+            if (observable.hasProperty('name')) {
+                this.#removeObservableFromNameToKey(observable, observable.getProperty('name'));
+            }
             this.#removeObservableFromKeytoFeature(observable);
             this.#observers.forEach(ob => ob.handleDeletedObservable(observable));
         } else {
@@ -385,14 +390,14 @@ class FeatureGraph {
      * @param {string} name - the name of the feature that I want to retrieve the key for
      * @param {string} featureKey - the key of an instance of my Feature class that is requesting the key
      * @returns {string} The correct tree key of the feature with the given name, depending on which object requested it, else throw an exception if
-     *      there is no matching tree key
+     *  there is no matching tree key
      */
     getKey(name, featureKey) {
         if (typeof name !== 'string') {
             throw TypeError('The "name" argument must be typeof string.');
         }
         if (typeof featureKey !== 'string') {
-            throw TypeError('The "feature" argument must be typeof string.');
+            throw TypeError('The "featureKey" argument must be typeof string.');
         }
         const feature = this.getObservable(featureKey);
         const keys = this.#nameToKey[name];
@@ -507,7 +512,7 @@ class FeatureGraph {
                 throw ReferenceError(`The key namespace "${namespace}" does not exist in this FeatureGraph. Leave the "namespace" argument empty to use the "default" key namespace.`);
             }
         }
-        // Math.max.apply(null, []) === -Infinity, so I start with 0
+        // - Math.max.apply(null, []) === -Infinity, so I start with 0
         if (keys.length === 0) {
             keys = [0];
         }
@@ -653,6 +658,45 @@ class FeatureGraph {
         });
     }
 
+    /**
+     * - Return whether a name value for the "to", "from", or "parent" property is valid as a connection point for a line
+     * @param {Feature} observable - an observable argument because I should use getKey() for regular features and getKeyForComponent() for
+     *  component features
+     * @param {string} name - the name of an object that the observable wants to connect to via the "to", "from", or "parent' property
+     * @returns {Validity}
+     */
+    getLineConnectionNameValidity(observable, name) {
+        let toFromParentKey;
+        const validity = new Validity(true);
+        try {
+            if (observable.isComponentFeature()) {
+                toFromParentKey = this.getKeyForComponent(name);
+            } else {
+                toFromParentKey = this.getKey(name, observable.getProperty('treeKey', 'meta'));
+            }
+        } catch (e) {
+            validity.isValid = false;
+            //validity.reason = e.message;
+            validity.reason = `No object has the value "${name}" for the "name" property. Ensure that the value for the "to", "from", or "parent" property matches an existing name.`
+            return validity;
+        }
+        if (observable.getProperty('treeKey', 'meta') === toFromParentKey) {
+            validity.isValid = false;
+            validity.reason = `An object cannot be a "to", "from", or "parent" of itself.`;
+        }
+        if (toFromParentKey.startsWith('parentChild:')) {
+            validity.isValid = false;
+            validity.reason = `The value "${name}" is the name of a parent-child line. Parent-child line names cannot be used as a value for the "to", "from", or "parent" properties.`;
+            return validity;
+        }
+        if (this.getObservable(toFromParentKey).isConfigurationObject()) {
+            validity.isValid = false;
+            validity.reason = `The value "${name}" is the name of a configuration object. Configuration object names cannot be used as a value for the "to", "from", or "parent" properties.`;
+            return validity;
+        }
+        return validity;
+    }
+
     // *********************
     // ** Private methods ** 
     // *********************
@@ -681,6 +725,9 @@ class FeatureGraph {
      * 
      */
     #insertObservableIntoKeyToFeature(observable) {
+        if (!observable.hasProperty('treeKey', 'meta')) {
+            throw Error('The observable does not have the "treeKey" property.');
+        }
         const observableKey = observable.getProperty('treeKey', 'meta');
         if (this.#keyToFeature.hasOwnProperty(observableKey)) {
             throw Error(`The key "${observableKey}" already exists in this.#keyToFeature.`);
@@ -769,7 +816,8 @@ class FeatureNameNotFoundError extends Error {
 
     constructor(name) {
         super();
-        this.message = `This FeatureGraph instance could not find a key for the object named "${name}".`;
+        //this.message = `This FeatureGraph instance could not find a key for the object named "${name}".`;
+        this.message = `No object was found with the name "${name}".`;
         this.name = 'FeatureNameNotFoundError';
     }
 }

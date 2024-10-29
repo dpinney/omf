@@ -2,7 +2,9 @@ export { ColorModal };
 import { Feature, UnsupportedOperationError } from './feature.js';
 import { FeatureController } from './featureController.js';
 import { LeafletLayer } from './leafletLayer.js';
-import { Modal } from './modal.js';
+import { PropTable } from '../v4/ui-components/prop-table/prop-table.js';
+import { IconLabelButton } from '../v4/ui-components/iconlabel-button/iconlabel-button.js';
+import { LoadingSpan } from '../v4/ui-components/loading-span/loading-span.js';
 
 // - Use voltDumpOlinBarre.csv, currDumpOlinBarre.csv and Olin Barre Fault.omd as examples
 
@@ -11,7 +13,8 @@ class ColorModal { // implements ModalInterface, ObserverInterface
     #selectedColorFilename; // - The name of the file that contains the information for the currently applied coloring
     #selectedColorMapIndex; // - The 0-based index of the column in the color file for the currently applied coloring
     #controller;            // - ControllerInterface instance
-    #modal;                 // - Modal instance
+    #propTable;             // - PropTable instance
+    #loadingSpan
     #observables;           // - An array of ObservableInterface instances
     #removed;               // - Whether this ColorModal instance has already been deleted
 
@@ -30,7 +33,7 @@ class ColorModal { // implements ModalInterface, ObserverInterface
         this.#selectedColorFilename = null;
         this.#selectedColorMapIndex = null;
         this.#controller = controller;
-        this.#modal = null;
+        this.#propTable = null;
         this.#observables = observables;
         this.#observables.forEach(ob => ob.registerObserver(this));
         this.#removed = false;
@@ -123,7 +126,7 @@ class ColorModal { // implements ModalInterface, ObserverInterface
     // ****************************
 
     getDOMElement() {
-        return this.#modal.divElement;
+        return this.#propTable.div;
     }
 
     /**
@@ -137,11 +140,10 @@ class ColorModal { // implements ModalInterface, ObserverInterface
      * @returns {undefined}
      */
     refreshContent() {
-        const fileListModal = new Modal();
-        fileListModal.addStyleClasses(['colorModal'], 'divElement');
+        const fileListTable = new PropTable();
+        fileListTable.div.classList.add('fileListTable');
         if (Object.values(this.#colorFiles).length > 0) {
-            fileListModal.insertTHeadRow(['Filename', 'Color-by Column', 'Apply Column Color on Page Load' ]);
-            fileListModal.addStyleClasses(['centeredTable'], 'tableElement');
+            fileListTable.insertTBodyRow({elements: ['Filename', 'Color-by column', 'Apply column color on page load' ]});
         }
         const attachments = this.#controller.observableGraph.getObservable('omd').getProperty('attachments', 'meta');
         for (const colorFile of Object.values(this.#colorFiles)) {
@@ -183,7 +185,7 @@ class ColorModal { // implements ModalInterface, ObserverInterface
                     } else {
                         if (this.checked) {
                             delete obj.colorOnLoadColumnIndex;
-                            for (const input of [...fileListModal.divElement.querySelectorAll('input[type="checkbox"][name="colorOnLoadColumnIndex"]')]) {
+                            for (const input of [...fileListTable.div.querySelectorAll('input[type="checkbox"][name="colorOnLoadColumnIndex"]')]) {
                                 if (input !== this) {
                                     input.checked = false;
                                 }
@@ -192,23 +194,19 @@ class ColorModal { // implements ModalInterface, ObserverInterface
                     }
                 }
             });
-            const colorButton = document.createElement('button');
-            colorButton.classList.add('horizontalFlex', 'centerMainAxisFlex', 'centerCrossAxisFlex', 'fullWidth');
-            let span = document.createElement('span');
-            span.textContent = 'Color';
-            colorButton.appendChild(span);
-            colorButton.addEventListener('click', () => {
+            const colorButton = new IconLabelButton({text: 'Color'});
+            colorButton.button.classList.add('-blue');
+            colorButton.button.getElementsByClassName('label')[0].classList.add('-white');
+            colorButton.button.addEventListener('click', () => {
                 const colorMap = colorFile.getColorMaps()[select.value];
                 this.#applyColorMap(colorFile, colorMap);
                 this.#selectedColorFilename = colorFile.getFilename();
                 this.#selectedColorMapIndex = colorMap.getColumnIndex();
             });
-            const removeButton = document.createElement('button');
-            removeButton.classList.add('horizontalFlex', 'centerMainAxisFlex', 'centerCrossAxisFlex', 'fullWidth', 'delete');
-            span = document.createElement('span');
-            span.textContent = 'Remove';
-            removeButton.appendChild(span);
-            removeButton.addEventListener('click', () => {
+            const removeButton = new IconLabelButton({text: 'Remove'});
+            removeButton.button.classList.add('-red');
+            removeButton.button.getElementsByClassName('label')[0].classList.add('-white');
+            removeButton.button.addEventListener('click', () => {
                 if (attachments.hasOwnProperty('coloringFiles')) {
                     const filename = colorFile.getFilename();
                     delete attachments.coloringFiles[filename];
@@ -221,14 +219,15 @@ class ColorModal { // implements ModalInterface, ObserverInterface
                     this.#selectedColorMapIndex = null;
                 }
             });
-            fileListModal.insertTBodyRow([colorFile.getFilename(), select, checkbox, colorButton, removeButton])
+            fileListTable.insertTBodyRow({elements: [colorFile.getFilename(), select, checkbox, colorButton.button, removeButton.button]});
         }
-        const containerElement = this.#modal.divElement.getElementsByClassName('div--modalElementContainer')[0];
-        const oldModal = containerElement.getElementsByClassName('js-div--modal');
-        if (oldModal.length === 0) {
-            containerElement.prepend(fileListModal.divElement);
+        const existingRow = this.#propTable.div.getElementsByClassName('proptablediv');
+        // - There was NOT already a fileListTable in place, so insert this fileListTable
+        if (existingRow.length === 0) {
+            this.#propTable.insertTBodyRow({elements: [fileListTable.div], colspans: [2], position: 'beforeEnd'});
+        // - There was already a fileListTable in place. Replace it with this fileListTable
         } else {
-            oldModal[0].replaceWith(fileListModal.divElement);
+            existingRow[0].replaceWith(fileListTable.div);
         }
     }
 
@@ -239,7 +238,7 @@ class ColorModal { // implements ModalInterface, ObserverInterface
         if (!this.#removed) {
             this.#observables.forEach(ob => ob.removeObserver(this));
             this.#observables = null;
-            this.#modal.divElement.remove();
+            this.#propTable.div.remove();
             this.#removed = true;
         }
     }
@@ -250,25 +249,30 @@ class ColorModal { // implements ModalInterface, ObserverInterface
      */
     renderContent() {
         // - Build the modal
-        const modal = new Modal();
-        modal.addStyleClasses(['outerModal', 'fitContent'], 'divElement');
-        modal.setTitle('Color Circuit');
-        modal.addStyleClasses(['horizontalFlex', 'centerMainAxisFlex', 'centerCrossAxisFlex'], 'titleElement');
+        const propTable = new PropTable();
+        propTable.div.id = 'colorModal';
+        propTable.div.addEventListener('click', function(e) {
+            e.stopPropagation();
+        });
+        propTable.insertTHeadRow({elements: ['Color circuit'], colspans: [2]});
         const colorInput = document.createElement('input');
         colorInput.type = 'file';
         colorInput.accept = '.csv';
         colorInput.required = true;
         colorInput.id = 'colorInput';
         const that = this;
+        const loadingSpan = new LoadingSpan();
+        loadingSpan.span.classList.add('-yellow', '-hidden');
+        propTable.insertTHeadRow({elements: [loadingSpan.span], position: 'prepend', colspans: [2]})
         colorInput.addEventListener('change', async function() {
             const file = this.files[0];
             const results = await that.#parseCsv(file);
             if (results.errors.length > 0) {
                 // - Papa Parse did parse the file, but there was some kind of small problem. Make the user fix it
-                that.#modal.showProgress(false, `There was an error "${results.errors[0].message}" when parsing the CSV file "${file.name}". Please double-check the CSV formatting.`, ['caution']);
+                loadingSpan.update({text: `There was an error "${results.errors[0].message}" when parsing the CSV file "${file.name}". Please double-check the CSV formatting.`, show: true, showGif: false});
                 return;
             } else {
-                that.#modal.setBanner('', ['hidden']);
+                loadingSpan.update({text: '', show: false});
             }
             if (!attachments.hasOwnProperty('coloringFiles')) {
                 attachments.coloringFiles = {};
@@ -284,25 +288,21 @@ class ColorModal { // implements ModalInterface, ObserverInterface
         const colorLabel = document.createElement('label');
         colorLabel.htmlFor = 'colorInput';
         colorLabel.innerHTML = 'Add a file containing bus names and electrical readings (.csv)';
-        modal.insertTBodyRow([colorLabel, colorInput]);
-        modal.addStyleClasses(['centeredTable'], 'tableElement');
-        const resetButton = document.createElement('button');
-        let span = document.createElement('span');
-        span.textContent = 'Reset Colors';
-        resetButton.appendChild(span);
-        resetButton.classList.add('horizontalFlex', 'centerMainAxisFlex', 'centerCrossAxisFlex', 'fullWidth');
-        resetButton.addEventListener('click', () => this.#resetColors());
-        const submitDiv = document.createElement('div');
-        submitDiv.classList.add('horizontalFlex', 'centerMainAxisFlex', 'centerCrossAxisFlex', 'halfWidth');
-        submitDiv.appendChild(resetButton);
-        modal.insertElement(submitDiv);
-        modal.addStyleClasses(['verticalFlex', 'centerMainAxisFlex', 'centerCrossAxisFlex'], 'containerElement');
-        if (this.#modal === null) {
-            this.#modal = modal;
+        propTable.insertTBodyRow({elements: [colorLabel, colorInput]});
+        const resetButton = new IconLabelButton({text: 'Reset colors'});
+        resetButton.button.classList.add('-blue');
+        resetButton.button.getElementsByClassName('label')[0].classList.add('-white');
+        resetButton.button.addEventListener('click', () => this.#resetColors());
+        propTable.insertTBodyRow({elements: [resetButton.button], colspans: [2]});
+        if (this.#propTable === null) {
+            this.#propTable = propTable;
+            this.#loadingSpan = loadingSpan;
         }
-        if (document.body.contains(this.#modal.divElement)) {
-            this.#modal.divElement.replaceWith(modal.divElement);
-            this.#modal = modal;
+        if (document.body.contains(this.#propTable.div)) {
+            this.#propTable.div.replaceWith(propTable.div);
+            this.#propTable = propTable;
+            this.#loadingSpan.span.replaceWith(loadingSpan.span);
+            this.#loadingSpan = loadingSpan;
         }
         // - Apply any colorOnLoad colorings
         this.#createColorFilesFromAttachments();
@@ -334,6 +334,10 @@ class ColorModal { // implements ModalInterface, ObserverInterface
     // ********************
     // ** Public methods **
     // ********************
+
+    getColorFiles() {
+        return this.#colorFiles;
+    }
 
     // *********************
     // ** Private methods **
@@ -407,7 +411,9 @@ class ColorModal { // implements ModalInterface, ObserverInterface
                 notFound.push(name);
             }
         }
-        console.log(`The following names in the CSV did not match any visible object in the circuit: ${notFound}`);
+        if (notFound.length > 0) {
+            console.log(`The following names in the CSV did not match any visible object in the circuit: ${notFound}.`);
+        }
         // - Display legend
         colorMap.displayLegend(colorFile.getFilename());
     }
@@ -446,11 +452,11 @@ class ColorModal { // implements ModalInterface, ObserverInterface
                 // - Fill the ColorFile with actual data
                 try {
                     colorFile.createColorMaps(obj.csv);
-                    this.#modal.setBanner('', ['hidden']);
+                    this.#loadingSpan.update({text: '', show: false});
                 } catch (e) {
                     // - Papa Parse did parse the file and didn't find any errors, but I still couldn't create a good ColorFile object, so tell the
                     //   user to remove or fix the file
-                    this.#modal.showProgress(false, `The CSV "${filename}" was parsed, but there was an error "${e.message}" when converting the CSV values into colors. Please double-check the CSV content.`, ['caution']);
+                    this.#loadingSpan.update({text: `The CSV "${filename}" was parsed, but there was an error "${e.message}" when converting the CSV values into colors. Please double-check the CSV content.`, showGif: false});
                 }
                 // - Save the colorFile so that refreshContent() can access it
                 this.#colorFiles[filename] = colorFile;
@@ -465,7 +471,7 @@ class ColorModal { // implements ModalInterface, ObserverInterface
         this.#controller.observableGraph.getObservables().forEach(observable => {
             observable.getObservers().filter(observer => observer instanceof LeafletLayer).forEach(ll => {
                 const path = Object.values(ll.getLayer()._layers)[0];
-                if (observable.isNode()) {
+                if (observable.isNode() && path.options.hasOwnProperty('originalFillColor')) {
                     path.setStyle({
                         fillColor: path.options.originalFillColor
                     });
@@ -475,9 +481,11 @@ class ColorModal { // implements ModalInterface, ObserverInterface
                     if (path.options.color === '#7FFF00') {
                         // - pass
                     } else {
-                        path.setStyle({
-                            color: path.options.originalColor
-                        });
+                        if (path.options.hasOwnProperty('originalColor')) {
+                            path.setStyle({
+                                color: path.options.originalColor
+                            });
+                        }
                     }
                 }
             });
@@ -518,7 +526,7 @@ class ColorFile {
      */
     createColorMaps(text) {
         if (typeof text !== 'string') {
-            throw TypeError('"text" argument must be typeof string.');
+            throw TypeError('The "text" argument must be typeof string.');
         }
         const results = Papa.parse(text, {dynamicTyping: true});
         const headerRow = results.data[0];
@@ -530,10 +538,10 @@ class ColorFile {
         for (let i = 1; i < results.data.length; i++) {
             const row = results.data[i];
             for (let j = 1; j < row.length; j++) {
-                this.#colorMaps[j].mapNameToValue(row[0].toString(), {color: null, float: row[j]});
+                this.#colorMaps[j].mapNameToValue(row[0].toString(), {color: null, value: row[j]});
             }
         }
-        Object.values(this.#colorMaps).forEach(cm => cm.generateColorsFromFloats());
+        Object.values(this.#colorMaps).forEach(cm => cm.generateColorsFromValues());
     }
 
     /**
@@ -557,16 +565,17 @@ class ColorMap {
     #columnIndex;
     #nameToValue;
     static viridisColors = ['#440154', '#482173', '#433e85', '#38588c', '#2d708e', '#25858e', '#1e9b8a', '#2ab07f', '#52c569', '#86d549', '#c2df23', '#fde725'];
+    static tab20Colors = ['#1f77b4', '#d62728', '#2ca02c', '#bcbd22', '#9467bd', '#ff7f0e', '#8c564b', '#17becf', '#e377c2', '#aec7e8', '#ff9896', '#98df8a', '#dbdb8d', '#c5b0d5', '#ffbb78', '#c49c94', '#9edae5', '#f7b6d2', '#7f7f7f', '#c7c7c7'];
 
     /**
      * @param {string} columnName
      */
     constructor(columnName, columnIndex) {
         if (typeof columnName !== 'string') {
-            throw TypeError('"columnName" argument must be typeof string.');
+            throw TypeError('The "columnName" argument must be typeof string.');
         }
         if (typeof columnIndex !== 'number') {
-            throw TypeError('"columnIndex" argument must be typeof number.');
+            throw TypeError('The "columnIndex" argument must be typeof number.');
         }
         this.#columnName = columnName;
         this.#nameToValue = {};
@@ -583,86 +592,106 @@ class ColorMap {
      */
     displayLegend(filename) {
         if (typeof filename !== 'string') {
-            throw TypeError('"filename" argument must be typeof string.');
+            throw TypeError('The "filename" argument must be typeof string.');
         }
-        const modal = new Modal();
-        modal.divElement.style.width = '300px';
-        // - Create titles
-        const fileColumnDiv = document.createElement('div');
-        fileColumnDiv.style.textAlign = 'center';
-        fileColumnDiv.style.wordBreak = 'break-word';
-        const filenameHeading = document.createElement('h2');
-        filenameHeading.style.width = '100%';
-        filenameHeading.textContent = filename;
-        fileColumnDiv.appendChild(filenameHeading);
-        const columnNameHeading = document.createElement('h3');
-        columnNameHeading.style.width = '100%';
-        columnNameHeading.textContent = this.#columnName;
-        fileColumnDiv.appendChild(columnNameHeading);
-        modal.setTitle(fileColumnDiv);
-        // - Create color gradient
+        const propTable = new PropTable();
+        propTable.insertTHeadRow({elements: [filename]});
+        propTable.insertTHeadRow({elements: [this.#columnName]});
         const legendDiv = document.createElement('div');
-        legendDiv.classList.add('horizontalFlex', 'centerMainAxisFlex', 'centerCrossAxisFlex');
+        legendDiv.classList.add('legenddiv');
         const legendGradient = document.createElement('div');
-        legendGradient.style.height = '400px';
-        legendGradient.style.width = '50px';
-        legendGradient.style.background = `linear-gradient(0deg, ${ColorMap.viridisColors.join(',')})`;
-        legendDiv.appendChild(legendGradient);
-        const legendValues = document.createElement('div');
-        legendValues.style.height = '400px';
-        const floats = Object.values(this.#nameToValue).map(obj => obj.float);
-        const min = Math.min.apply(null, floats);
-        let span = document.createElement('span');
-        span.textContent = min.toFixed(3);
-        legendValues.appendChild(span);
-        const max = Math.max.apply(null, floats);
-        const step = (max - min) / 6;
-        for (let i = 1; i < 6; i++) {
-            const span = document.createElement('span');
-            span.textContent = `${ (min + (step * i)).toFixed(3)}`;
-            legendValues.prepend(span);
+        legendGradient.classList.add('legendgradient');
+        legendDiv.append(legendGradient);
+        const legendLabels = document.createElement('div');
+        legendLabels.classList.add('legendlabels');
+        legendDiv.append(legendLabels);
+        const values = Object.values(this.#nameToValue).map(obj => obj.value.toString());
+        const uniqueValues = [...new Set(values)];
+        uniqueValues.sort((a, b) => a.localeCompare(b, 'en', {numeric: true}));
+        if (uniqueValues.length > 20) {
+            legendLabels.style.justifyContent = 'space-between';
+            legendGradient.style.background = `linear-gradient(0deg, ${ColorMap.viridisColors.join(',')})`;
+            const numLabels = 5;
+            const min = Math.min.apply(null, uniqueValues);
+            let span = document.createElement('span');
+            // - David wants two decimal points of precision
+            span.textContent = min.toFixed(2);
+            legendLabels.appendChild(span);
+            const max = Math.max.apply(null, uniqueValues);
+            const step = (max - min) / numLabels;
+            for (let i = 1; i < numLabels; i++) {
+                const span = document.createElement('span');
+                span.textContent = `${ (min + (step * i)).toFixed(2)}`;
+                legendLabels.prepend(span);
+            }
+            span = document.createElement('span');
+            span.textContent = max.toFixed(2);
+            legendLabels.prepend(span);
+            // - Set 60px per label along the gradient since it's harder to differentiate values than the color blocks
+            legendGradient.style.height = `${numLabels * 70}px`;
+        } else {
+            // - Set each label in the middle of its color
+            legendLabels.style.justifyContent = 'space-around';
+            const selectedColors = ColorMap.tab20Colors.slice(0, uniqueValues.length);
+            const gradientStopIncrement = (100 / selectedColors.length).toFixed(2);
+            let gradientString = 'linear-gradient(0deg, ';
+            for (let i = 0; i < selectedColors.length; i++) {
+                const span = document.createElement('span');
+                span.textContent = uniqueValues[i];
+                legendLabels.prepend(span);
+                gradientString += `${selectedColors[i]} ${i * gradientStopIncrement}% ${(i + 1) * gradientStopIncrement}%`;
+                if (i < selectedColors.length - 1) {
+                    gradientString += ', ';
+                } else {
+                    gradientString += ')';
+                }
+            }
+            legendGradient.style.background = gradientString;
+            // - Set 30px per color block along the gradient
+            legendGradient.style.height = `${selectedColors.length * 30}px`;
         }
-        span = document.createElement('span');
-        span.textContent = max.toFixed(3);
-        legendValues.prepend(span);
-        legendValues.classList.add('verticalFlex');
-        legendValues.style.justifyContent = 'space-between';
-        legendValues.style.paddingLeft = '5px';
-        legendDiv.appendChild(legendValues);
-        modal.insertElement(legendDiv);
-        modal.addStyleClasses(['verticalFlex', 'centerMainAxisFlex', 'centerCrossAxisFlex'], 'containerElement');
-        // - Create button
-        const button = document.createElement('button');
-        button.classList.add('horizontalFlex', 'centerMainAxisFlex', 'centerCrossAxisFlex', 'fullWidth');
-        button.addEventListener('click', function() {
+        propTable.insertTBodyRow({elements: [legendDiv]});
+        const button = new IconLabelButton({text: 'Close'});
+        button.button.classList.add('-red');
+        button.button.getElementsByClassName('label')[0].classList.add('-white');
+        button.button.addEventListener('click', function() {
             document.getElementById('legendInsert').replaceChildren();
         });
-        span = document.createElement('span');
-        span.textContent = 'Close';
-        button.appendChild(span);
-        const buttonDiv = document.createElement('div');
-        buttonDiv.classList.add('horizontalFlex', 'centerMainAxisFlex', 'centerCrossAxisFlex', 'halfWidth');
-        buttonDiv.appendChild(button);
-        modal.insertElement(buttonDiv);
-        document.getElementById('legendInsert').replaceChildren(modal.divElement);
-        const draggable = new L.Draggable(modal.divElement)
+        propTable.insertTBodyRow({elements: [button.button]});
+        document.getElementById('legendInsert').replaceChildren(propTable.div);
+        const draggable = new L.Draggable(propTable.div)
         draggable.enable()
     }
 
     /**
      * - After all names have been mapped to numeric values, iterate through the colorMap again and generate color objects
+     *  - this.#nameToValue[<name>]: { color: null, value: <value> }
      * @returns {undefined}
      */
-    generateColorsFromFloats() {
-        const floats = Object.values(this.#nameToValue).map(obj => obj.float);
-        const min = Math.min.apply(null, floats);
-        const max = Math.max.apply(null, floats);
-        const func = chroma.scale(ColorMap.viridisColors).domain([min, max]);
-        Object.values(this.#nameToValue).forEach(obj => {
-            obj.color = func(obj.float);
-            // - I round because later on I need to convert the integer values into a hex string
-            obj.color._rgb = obj.color._rgb.map(float => Math.round(float));
-        });
+    generateColorsFromValues() {
+        const values = Object.values(this.#nameToValue).map(obj => obj.value.toString());
+        const uniqueValues = [...new Set(values)];
+        uniqueValues.sort((a, b) => a.localeCompare(b, 'en', {numeric: true}));
+        // - If there are greater than 20 unique values, assume those values are numeric and use the viridis color map
+        if (uniqueValues.length > 20) {
+            const min = Math.min.apply(null, uniqueValues);
+            const max = Math.max.apply(null, uniqueValues);
+            const func = chroma.scale(ColorMap.viridisColors).domain([min, max]);
+            for (const obj of Object.values(this.#nameToValue)) {
+                obj.color = func(obj.value);
+                // - I round because later on I need to convert the integer values into a hex string
+                obj.color._rgb = obj.color._rgb.map(float => Math.round(float));
+            };
+        // - If there are 20 or fewer unique values, use the tab20 color map
+        } else {
+            const nameToIndexMap = {};
+            for (let i = 0; i < uniqueValues.length; i++) {
+                nameToIndexMap[uniqueValues[i]] = i;
+            }
+            for (const obj of Object.values(this.#nameToValue)) {
+                obj.color = chroma(ColorMap.tab20Colors[nameToIndexMap[obj.value]])
+            };
+        }
     }
 
     getColorMapping() {
@@ -677,24 +706,28 @@ class ColorMap {
         return this.#columnIndex;
     }
 
+    getNameToValue() {
+        return this.#nameToValue;
+    }
+
     /**
-     * @param {string} name - the name of an object to color (e.g. a node name)
-     * @param {string|Object} value - when iterating over a CSV for the first time, the only floats are known. Once a Chroma scale has been generated,
-     *      then colors are also mapped
+     * @param {string} name - The name of an object to color (e.g. a node name)
+     * @param {string|Object} value - When iterating over a CSV for the first time, only values are known. Once a Chroma scale has been generated,
+     *  then colors are also mapped
      * @returns {undefined}
      */
     mapNameToValue(name, value) {
         if (typeof name !== 'string') {
-            throw TypeError('"name" argument must be typeof string.');
+            throw TypeError('The "name" argument must be typeof string.');
         }
         if (typeof value !== 'object') {
-            throw TypeError('"value" argument must be typeof object.');
+            throw TypeError('The "value" argument must be typeof object.');
         }
         if (!value.hasOwnProperty('color')) {
-            throw TypeError('"value" argument must have a "color" property.');
+            throw TypeError('The "value" argument must have a "color" property.');
         }
-        if (!value.hasOwnProperty('float')) {
-            throw TypeError('"value" argument must have a "float" property.');
+        if (!value.hasOwnProperty('value')) {
+            throw TypeError('The "value" argument must have a "value" property.');
         }
         if (this.#nameToValue[name] === undefined) {
             this.#nameToValue[name] = {};
@@ -702,8 +735,8 @@ class ColorMap {
         if (value.hasOwnProperty('color')) {
             this.#nameToValue[name].color = value.color;
         }
-        if (value.hasOwnProperty('float')) {
-            this.#nameToValue[name].float = value.float;
+        if (value.hasOwnProperty('value')) {
+            this.#nameToValue[name].value = value.value;
         }
     }
 

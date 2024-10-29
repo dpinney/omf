@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <link rel="stylesheet" href="iconlabel-button.css">
+        <style>
+            /* Demo styling */
+
+            /*
+            - Remember that RSCSS recommends that all positional styling be done based on HTML structure. An .iconlabel-button SHOULD have zero width if it just
+            contains an svg by default, and it should look nice regardless of which positional rules I specify here in the demo
+            */
+
+            * {
+                box-sizing: border-box;
+            }
+            body {
+                margin: 0;
+            }
+            .demo-div {
+                margin: 1rem;
+            }
+            .demo-div > .iconlabel-button > .icon {
+                width: 22px;
+            }
+            .demo-div > .iconlabel-button.-large > .icon {
+                width: 32px;
+            }
+            .demo-div > .iconlabel-button.-xlarge > .icon {
+                width: 46px;
+            }
+        </style>
+    </head>
+    <body>
+        <!-- HTML exmaple-->
+        <div class="demo-div">
+            <button class="iconlabel-button -red">
+                <svg class="icon -black" viewBox="0 0 24 24" style="margin: 0 -2px;">
+                    <path d="M10 10V16M14 10V16M4 6H20M15 6V5C15 3.89543 14.1046 3 13 3H11C9.89543 3 9 3.89543 9 5V6M18 6V14M18 18C18 19.1046 17.1046
+                    20 16 20H8C6.89543 20 6 19.1046 6 18V13M6 9V6"></path>
+                </svg>
+            </button>
+        </div>
+        <!-- Dynamic creation -->
+        <div class="demo-div"></div>
+        <div class="demo-div"></div>
+        <div class="demo-div"></div>
+        <div class="demo-div"></div>
+    </body>
+    <script type="module">
+        import { IconLabelButton } from '/iconlabel-button.js';
+
+        const redIconLabelButton = new IconLabelButton({paths: IconLabelButton.getTrashCanPaths(), viewBox: '0 0 24 24', text: 'trash can', tooltip: 'no really, this is a trash can'});
+        redIconLabelButton.button.classList.add('-red');
+        // - svg margin adjustment depends on the size of the svg as determined by positional CSS rules
+        redIconLabelButton.button.getElementsByClassName('icon')[0].style.margin = '0 -2px';
+        document.getElementsByClassName('demo-div')[1].append(redIconLabelButton.button);
+
+        const blueIconLabelButton = new IconLabelButton({paths: IconLabelButton.getTrashCanPaths(), viewBox: '0 0 24 24', text: 'trash can'});
+        blueIconLabelButton.button.classList.add('-blue');
+        blueIconLabelButton.button.classList.add('-large');
+        // - svg margin adjustment depends on the size of the svg as determined by positional CSS rules
+        blueIconLabelButton.button.getElementsByClassName('icon')[0].style.margin = '0 -4px';
+        document.getElementsByClassName('demo-div')[2].append(blueIconLabelButton.button);
+
+        const div = document.createElement('div');
+        const upperText = document.createElement('div');
+        upperText.textContent = 'foo';
+        div.append(upperText);
+        const lowerText = document.createElement('div');
+        lowerText.textContent = 'bar';
+        div.append(lowerText);
+        const pinButton = new IconLabelButton({paths: IconLabelButton.getPinPaths(), viewBox: '0 0 24 24', text: div});
+        pinButton.button.classList.add('-xlarge');
+        // - Again, svg margin adjustment depends on the actual size of the svg
+        pinButton.button.getElementsByClassName('icon')[0].style.margin = '0 -8px';
+        document.getElementsByClassName('demo-div')[3].append(pinButton.button);
+        pinButton.button.addEventListener('click', function() { 
+            pinButton.button.getElementsByClassName('icon')[0].classList.toggle('-rotated');
+        });
+
+        const textIconLabelButton = new IconLabelButton({text: 'foobarbaz'});
+        textIconLabelButton.button.getElementsByTagName('span')[0].classList.add('-black');
+        document.getElementsByClassName('demo-div')[4].append(textIconLabelButton.button);
+    </script>
+</html>

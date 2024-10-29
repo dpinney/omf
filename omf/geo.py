@@ -653,7 +653,7 @@ def showOnMap(geoJson):
 	webbrowser.open('file://' + pJoin(tempDir,'geoJsonMap.html'))
 
 
-def map_omd(omd_path, output_dir, open_browser=False):
+def map_omd(omd_path, output_dir, open_browser=False, showAddNewObjectsButton=True, showAttachmentsButton=True, showAddGeojsonButton=True):
 	'''
 	Create an HTML page of the GeoJSON circuit editor without Flask
 	'''
@@ -668,7 +668,9 @@ def map_omd(omd_path, output_dir, open_browser=False):
 	componentsCollection = json.dumps(components_collection)
 	# - Load JavaScript
 	main_js_filepath = (pathlib.Path(omf.omfDir).resolve(True) / 'static' / 'geoJsonMap' / 'v3' / 'main.js').resolve(True)
-	all_js_filepaths = list((pathlib.Path(omf.omfDir).resolve(True) / 'static' / 'geoJsonMap' / 'v3').glob('**/*.js'))
+	all_js_filepaths = list((pathlib.Path(omf.omfDir).resolve(True) / 'static' / 'geoJsonMap').glob('**/*.js'))
+	# - Filter out .test.js files
+	all_js_filepaths = list(filter(lambda p: not str(p).endswith('.test.js'), all_js_filepaths))
 	all_js_filepaths.remove(main_js_filepath)
 	all_js_filepaths.append(main_js_filepath)
 	all_js_file_content = []
@@ -680,7 +682,7 @@ def map_omd(omd_path, output_dir, open_browser=False):
 	js = ''.join(all_js_file_content)
 	# - Load CSS
 	all_css_file_content = []
-	for filepath in (pathlib.Path(omf.omfDir).resolve(True) / 'static' / 'geoJsonMap' / 'v3').glob('**/*.css'):
+	for filepath in (pathlib.Path(omf.omfDir).resolve(True) / 'static' / 'geoJsonMap').glob('**/*.css'):
 		with pathlib.Path(filepath).open() as f:
 			file_content = ''.join(f.readlines())
 			file_content = f'<style>\n{file_content}\n</style>\n'
@@ -689,13 +691,30 @@ def map_omd(omd_path, output_dir, open_browser=False):
 	# - Write template
 	with (pathlib.Path(omf.omfDir).resolve(True) / 'templates' / 'geoJson_offline.html').open() as f:
 		template = f.read()
-	rendered = Template(template).render(featureCollection=featureCollection, componentsCollection=componentsCollection, thisOwner=None,
-		thisModelName=None, thisFeederName=None, thisFeederNum=None, publicFeeders=None, userFeeders=None,
-		currentUser=None, showFileMenu=json.dumps(False), isOnline=json.dumps(False), css=css, js=js)
+	rendered = Template(template).render(
+		featureCollection=featureCollection,
+		componentsCollection=componentsCollection,
+		thisOwner=None,
+		thisModelName=None,
+		thisFeederName=None,
+		thisFeederNum=None,
+		publicFeeders=None,
+		userFeeders=None,
+		currentUser=None,
+		showFileMenu=json.dumps(False),
+		isOnline=json.dumps(False),
+		showAddNewObjectsButton=json.dumps(showAddNewObjectsButton),
+		showAttachmentsButton=json.dumps(showAttachmentsButton),
+		showAddGeojsonButton=json.dumps(showAddGeojsonButton),
+		css=css,
+		js=js)
 	output_dir = pathlib.Path(output_dir)
 	output_dir.mkdir(parents=True, exist_ok=True)
 	# - Copy PNGs
-	for filepath in (pathlib.Path(omf.omfDir).resolve(True) / 'static' / 'geoJsonMap' / 'v3').glob('**/*.png'):
+	for filepath in (pathlib.Path(omf.omfDir).resolve(True) / 'static' / 'geoJsonMap').glob('**/*.png'):
+		shutil.copy2(filepath, output_dir)
+    # - Copy Gifs
+	for filepath in (pathlib.Path(omf.omfDir).resolve(True) / 'static' / 'geoJsonMap').glob('**/*.gif'):
 		shutil.copy2(filepath, output_dir)
 	with open(output_dir / 'geoJson_offline.html', 'w') as f:
 		f.write(rendered)
@@ -892,6 +911,7 @@ def _is_configuration_or_special_node(tree_properties):
 	#   - iowa240c2_working_coords.clean.tie_bus2058_bus3155.omd assigns a parent to it
 	# - The "regcontrol" object is NOT a configuration node
 	#   - iowa240c1.clean.dss.omd assigns latitude and longitude values to it. So does pvrea_trilby.omd
+	#   - 2024-07-05: it is now a configuration object anyway
 	# - The "player" object is NOT a configuration node
 	#   - ABEC Frank Calibrated With Voltage gives one such object a "parent" attribute
 	CONFIGURATION_OBJECTS = (
