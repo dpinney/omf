@@ -6,6 +6,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import plotly as py
 import plotly.graph_objs as go
+import plotly.express as px
 import networkx as nx
 # from statistics import quantiles
 
@@ -173,9 +174,9 @@ def microgridTimeline(outputTimeline, modelDir):
 			loadAfterStr = outputTimeline.loc[row, 'loadAfter']
 			loadStringDict = ["open", "closed", "online", "offline"]
 			if str(loadBeforeStr) not in loadStringDict:
-				loadBeforeStr = '{0:.3f}'.format(float(loadBeforeStr))
+				loadBeforeStr = '{0:.3f}'.format(float(loadBeforeStr))+' kW'
 			if str(loadAfterStr) not in loadStringDict:
-				loadAfterStr = '{0:.3f}'.format(float(loadAfterStr))
+				loadAfterStr = '{0:.3f}'.format(float(loadAfterStr))+' kW'
 			new_html_str += '<tr><td>' + str(outputTimeline.loc[row, 'device']) + '</td><td>' + str(outputTimeline.loc[row, 'time']) + '</td><td>' + str(outputTimeline.loc[row, 'action']) + '</td><td>' + loadBeforeStr + '</td><td>' + loadAfterStr + '</td></tr>'
 		new_html_str +="""</tbody></table>"""
 		return new_html_str
@@ -437,12 +438,17 @@ def makeLoadOutTimelnAndStatusMap(outputTimeline, loadList, timeList):
 	
 	return dfLoadTimeln, dfStatus
 
-def tradMetricsByMgTable(outputTimeline, loadMgDict, startTime, numTimeSteps, modelDir, stepSize):
+def tradMetricsByMgTable(outputTimeline, loadMgDict, startTime, numTimeSteps, modelDir, loadCciDict, loadBcsDict, taidiDict, mergedLoadPrioritiesFilePath):
 	'''
 	Generate table of SAIDI, SAIFI, CAIDI, and CAIFI during the outage simulation period, both for the whole system and broken down by microgrid. 
 	'''
+	# TODO: Update function name and docstring
+	with open(mergedLoadPrioritiesFilePath) as inFile:
+		mergedLoadWeights = {k:float(v) for k,v in json.load(inFile).items()}
+
 	def calcTradMetrics(outputTimeline, loadList, startTime, numTimeSteps):
 		''' Calculates SAIDI, SAIFI, CAIDI, CAIFI, CI, CMI, CS, and DCI over the course of the simulation for the loads in the given loadList which should have only unique entries.
+			Also calculates average CCI of the loads in loadList
 			CI = # Customer Interruptions
 			CMI = # Customer Minute Interruptions 
 			CS = # Customers Served
@@ -452,8 +458,11 @@ def tradMetricsByMgTable(outputTimeline, loadMgDict, startTime, numTimeSteps, mo
 			CAIDI = CMI/CI = SAIDI/SAIFI
 			CAIFI = CI/DCI
 			'''
+			
 		dfLoadTimeln, dfStatus = makeLoadOutTimelnAndStatusMap(outputTimeline, loadList, [*range(startTime, numTimeSteps+startTime)])
-		CS = len(set(loadList))
+		# Make sure loadList doesn't contain duplicates
+		loadList = set(loadList)
+		CS = len(loadList)
 		# CI = How many total load shed actions have occurred over the event
 		CI = dfLoadTimeln[dfLoadTimeln['action'] == 'Load Shed'].shape[0]
 		# CMI = The total number of timesteps (hr) each load is offline * 60 min/hr 
@@ -464,14 +473,45 @@ def tradMetricsByMgTable(outputTimeline, loadMgDict, startTime, numTimeSteps, mo
 		SAIFI = CI/CS
 		CAIDI = CMI/CI if CI!=0 else 0
 		CAIFI = CI/DCI if DCI!=0 else 0
-		return {"SAIDI":SAIDI,
-				"SAIFI":SAIFI,
-				"CAIDI":CAIDI,
-				"CAIFI":CAIFI,
-				"CS":	CS,
-				"CI":	CI,
-				"CMI":	CMI,
-				"DCI":	DCI}
+		sumBCS = sum([loadBcsDict[load] for load in loadList])
+		averageCCI = sum([loadCciDict[load] for load in loadList])/len(loadList)
+		averageCCIxPriorities = sum([mergedLoadWeights[load] for load in loadList])/len(loadList)
+		return {'SAIDI':SAIDI,
+				'SAIFI':SAIFI,
+				'CAIDI':CAIDI,
+				'CAIFI':CAIFI,
+				'CS':	CS,
+				'CI':	CI,
+				'CMI':	CMI,
+				'DCI':	DCI,
+				'Sum BCS': sumBCS,
+				'Average CCI': averageCCI,
+				'Average CCIxPriorities': averageCCIxPriorities}
+
+	# Can't just extract dictionary values because they have to be ordered the same corresponding to loads and we shouldn't rely on dicts staying ordered
+	orderedCciAndTaidi = [[],[]]
+	for load, cci in loadCciDict.items():
+		orderedCciAndTaidi[0].append(cci)
+		orderedCciAndTaidi[1].append(taidiDict[load])
+	cciTaidiCorr = round(np.corrcoef(orderedCciAndTaidi)[0][1],3)
+	sign = ' negative ' if cciTaidiCorr < 0 else ' '
+	corr = abs(cciTaidiCorr)
+	if corr == 0:
+		level = "No"
+	elif corr < 0.3:
+		level = 'Very low'
+	elif corr < 0.5:
+		level = 'Low'
+	elif corr < 0.7:
+		level = 'Moderate'
+	elif corr < 0.9:
+		level = 'High'
+	else:
+		level = 'Very high'
+	# Levels taken from https://www.andrews.edu/~calkins/math/edrm611/edrm05.htm#:~:text=Correlation%20coefficients%20whose%20magnitude%20are%20between%200.7%20and%200.9%20indicate,can%20be%20considered%20moderately%20correlated.
+	cciTaidiCorrReport = f'{cciTaidiCorr}\\n({level}{sign}correlation)'
+
+
 
 	loadsPerMg = {}
 	for load,mg in loadMgDict.items():
@@ -483,7 +523,7 @@ def tradMetricsByMgTable(outputTimeline, loadMgDict, startTime, numTimeSteps, mo
 	for mg, mgLoadList in loadsPerMg.items():
 		metricsPerMg[mg] = {k:round(v,2) for k,v in calcTradMetrics(outputTimeline, mgLoadList, startTime, numTimeSteps).items()}
 
-	new_html_str = """
+	mg_html_str = """
 		<table class="sortable" cellpadding="0" cellspacing="0">
 			<thead>
 				<tr>
@@ -492,16 +532,95 @@ def tradMetricsByMgTable(outputTimeline, loadMgDict, startTime, numTimeSteps, mo
 					<th>Event SAIFI</th>
 					<th>Event CAIDI</th>
 					<th>Event CAIFI</th>
+					<th>Loads Served</th>
+					<th>Est. People Served</th>
+					<th>Average CCI</th>
+					<th>Ave. CCI merged w/ Load Priorities</th>
+					<th>CCI & TAIDI\\nCorrelation</th>
 				</tr>
 			</thead>
 			<tbody>"""
-	new_html_str += f'<tr><td>Whole System</td><td>{ systemwideMetrics["SAIDI"] }</td><td>{ systemwideMetrics["SAIFI"] }</td><td>{ systemwideMetrics["CAIDI"] }</td><td>{ systemwideMetrics["CAIFI"] }</td></tr>'
+	mg_html_str += f"""
+					<tr>
+						<td>Whole System</td>
+						<td>{ systemwideMetrics["SAIDI"] }</td>
+						<td>{ systemwideMetrics["SAIFI"] }</td>
+						<td>{ systemwideMetrics["CAIDI"] }</td>
+						<td>{ systemwideMetrics["CAIFI"] }</td>
+						<td>{ systemwideMetrics["CS"] }</td>
+						<td>{ systemwideMetrics["Sum BCS"] }</td>
+						<td>{ systemwideMetrics["Average CCI"] }</td>
+						<td>{ systemwideMetrics["Average CCIxPriorities"] }</td>
+						<td>{ cciTaidiCorrReport }</td>
+					</tr>"""
 	for mg, metrics in metricsPerMg.items():
-		new_html_str += f'<tr><td>Microgrid ID: {mg}</td><td>{ metrics["SAIDI"] }</td><td>{ metrics["SAIFI"] }</td><td>{ metrics["CAIDI"] }</td><td>{ metrics["CAIFI"] }</td></tr>'
-	new_html_str +="""</tbody></table>"""
-	with open(pJoin(modelDir, 'tradMetricsTable.html'), 'w') as customerOutageFile:
-		customerOutageFile.write(new_html_str)
-	return new_html_str
+		mg_html_str += f"""
+						<tr>
+							<td>Microgrid ID: {mg}</td>
+							<td>{ metrics["SAIDI"] }</td>
+							<td>{ metrics["SAIFI"] }</td>
+							<td>{ metrics["CAIDI"] }</td>
+							<td>{ metrics["CAIFI"] }</td>
+							<td>{ metrics["CS"] }</td>
+							<td>{ metrics["Sum BCS"] }</td>
+							<td>{ metrics["Average CCI"] }</td>
+							<td>{ metrics["Average CCIxPriorities"] }</td>
+							<td>{ "N/A" }</td>
+						</tr>"""
+	mg_html_str +="""</tbody></table>"""
+	with open(pJoin(modelDir, 'mgTradMetricsTable.html'), 'w') as customerOutageFile:
+		customerOutageFile.write(mg_html_str)
+
+	loadsPerCciQuart = {'Low CCI':[], 'Low-Medium CCI':[], 'High-Medium CCI':[], 'High CCI':[]}
+	quart = np.percentile(list(loadCciDict.values()),[25,50,75])
+	for load,cci in loadCciDict.items():
+		if cci <= quart[0]:
+			loadsPerCciQuart['Low CCI'].append(load)
+		elif cci <= quart[1]:
+			loadsPerCciQuart['Low-Medium CCI'].append(load)
+		elif cci <= quart[2]:
+			loadsPerCciQuart['High-Medium CCI'].append(load)
+		else:
+			loadsPerCciQuart['High CCI'].append(load)
+
+	metricsPerCciQuart = {}
+	for cciQuart, quartLoadList in loadsPerCciQuart.items():
+		metricsPerCciQuart[cciQuart] = {k:round(v,2) for k,v in calcTradMetrics(outputTimeline, quartLoadList, startTime, numTimeSteps).items()}
+
+	cciQuart_html_str = """
+		<table class="sortable" cellpadding="0" cellspacing="0">
+			<thead>
+				<tr>
+					<th>Microgrid</th>
+					<th>Event SAIDI</th>
+					<th>Event SAIFI</th>
+					<th>Event CAIDI</th>
+					<th>Event CAIFI</th>
+					<th>Loads Served</th>
+					<th>Est. People Served</th>
+					<th>Average CCI</th>
+					<th>Ave. CCI merged w/ Load Priorities</th>
+				</tr>
+			</thead>
+			<tbody>"""
+	for cciQuart, metrics in metricsPerCciQuart.items():
+		cciQuart_html_str += f"""
+					<tr>
+						<td>{ cciQuart }</td>
+						<td>{ metrics["SAIDI"] }</td>
+						<td>{ metrics["SAIFI"] }</td>
+						<td>{ metrics["CAIDI"] }</td>
+						<td>{ metrics["CAIFI"] }</td>
+						<td>{ metrics["CS"] }</td>
+						<td>{ metrics["Sum BCS"] }</td>
+						<td>{ metrics["Average CCI"] }</td>
+						<td>{ metrics["Average CCIxPriorities"] }</td>
+					</tr>"""
+	cciQuart_html_str +="""</tbody></table>"""
+	with open(pJoin(modelDir, 'cciQuartTradMetricsTable.html'), 'w') as customerOutageFile:
+		customerOutageFile.write(cciQuart_html_str)
+
+	return mg_html_str, cciQuart_html_str
 
 def outageIncidenceGraph(customerOutageData, outputTimeline, startTime, numTimeSteps, loadPriorityFilePath, loadMgDict):
 	'''	Returns plotly figures displaying graphs of outage incidences over the course of the event data.
@@ -764,8 +883,10 @@ def outageIncidenceGraph(customerOutageData, outputTimeline, startTime, numTimeS
 
 	return outageIncidenceFigure, mgOIFigures
 
-def makeTaifiAndTaidiHist(outputTimeline, startTime, numTimeSteps, loadList, stepSize):
+def makeTaifiAndTaidiHist(outputTimeline, startTime, numTimeSteps, loadList):
 	''' Generate histogram of TAIFI and TAIDI for each load.
+		
+		Outputs: taifiHist, taidiHist, TAIFI, TAIDI
 
 		TAIFI = 1/Average period length where a period is defined as the time from one load shed to the next load shed. 
 
@@ -782,11 +903,10 @@ def makeTaifiAndTaidiHist(outputTimeline, startTime, numTimeSteps, loadList, ste
 		timeOfFirstLoadShed = dfLoadSheds['time'].min()
 		timeOfLastLoadShed = dfLoadSheds['time'].max()
 		TAIFI[loadName] = numLoadSheds/((timeOfLastLoadShed-timeOfFirstLoadShed)*60)
-		TAIDI[loadName] = dfStatus[loadName].sum()/numTimeSteps
+		TAIDI[loadName] = 100*dfStatus[loadName].sum()/numTimeSteps
 		#TODO: Replace 60 with resolution of step size if it's ever possible not to have a resolution of 60 min
- 
-	minVals = (min(list(TAIFI.values())), min(list(TAIDI.values())))
-	maxVals = (max(list(TAIFI.values())), max(list(TAIDI.values())))
+	minVals = (min(list(TAIFI.values())), 0)
+	maxVals = (max(list(TAIFI.values())), 100)
 	numBins = 45
 	binSizes = ((maxVals[0]-minVals[0])/numBins, (maxVals[1]-minVals[1])/numBins)
 
@@ -822,12 +942,37 @@ def makeTaifiAndTaidiHist(outputTimeline, startTime, numTimeSteps, loadList, ste
 		marker_color='#ff0000'
 	))
 	taidiHist.update_layout(
-		xaxis_title_text='TAIDI Values', # xaxis label
+		xaxis_title_text='TAIDI Values (%)', # xaxis label
 		yaxis_title_text='Load Count', # yaxis label
 		barmode='overlay',
 		bargap=0.1 # gap between bars of adjacent location coordinates
 	)
-	return taifiHist, taidiHist
+	return taifiHist, taidiHist, TAIFI, TAIDI
+
+def makeCciTaidiTaifiScatter(loadCciDict, TAIDI, TAIFI):
+	'''
+	'''
+	# TODO: make docstring
+	orderedVals = {'CCI':[], 'TAIDI':[], 'TAIFI':[]}
+	for load, cci in loadCciDict.items():
+		orderedVals['CCI'].append(cci)
+		orderedVals['TAIDI'].append(TAIDI[load])
+		orderedVals['TAIFI'].append(TAIFI[load])
+	orderedVals['TAIFI'] = np.nan_to_num(orderedVals['TAIFI'])
+	
+	cciTaidiScatter = px.scatter(
+		pd.DataFrame(orderedVals),
+		x='CCI',
+		y='TAIDI',
+		trendline="ols"
+	)
+	cciTaifiScatter = px.scatter(
+		pd.DataFrame(orderedVals),
+		x='CCI',
+		y='TAIFI',
+		trendline="ols"
+		)
+	return cciTaidiScatter, cciTaifiScatter
 
 def getMicrogridInfo(modelDir, pathToOmd, settingsFile, makeCSV = True):
 	'''	Gathers microgrid info including loads and other circuit objects in each microgrid by finding what microgrid each load's parent bus is designated as having. 
@@ -877,24 +1022,39 @@ def getMicrogridInfo(modelDir, pathToOmd, settingsFile, makeCSV = True):
 
 	return {'loadMgDict':loadMgDict, 'busMgDict':busMgDict, 'obMgDict':obMgDict, 'mgIDs':mgIDs}
 
-def combineLoadPriorityWithCCI(modelDir, pathToOmd, loadPriorityFilePath, cciImpact):
+def makeLoadCciDict(modelDir, pathToOmd):
+	''' Returns 2 dictionaries of loads and their CCI's & BCS's respectively in the following format:
+		
+		{loadName1:cci1, loadName2:cci2, loadName3:cci3, ...},
+
+		{loadName1:bcs1, loadName2:bcs2, loadName3:bcs3, ...}
+	'''
+	cciDict = {}
+	bcsDict = {}
+	makeResComOutputCsv(pathToOmd, modelDir, ['line', 'transformer', 'fuse'])
+	with open(pJoin(modelDir, 'resilientCommunityOutput.csv'), mode='r') as infile:
+		reader = csv.DictReader(infile)
+		for row in reader:
+			obType, obName = row['Object Name'].split('.')
+			obCci = float(row['Community Criticality Index'])
+			obBcs = float(row['Base Criticality Score'])
+			if obType == 'load':
+				cciDict[obName] = obCci
+				bcsDict[obName] = obBcs
+	return cciDict, bcsDict
+
+def combineLoadPriorityWithCCI(modelDir, pathToOmd, loadPriorityFilePath, loadCciDict, cciImpact):
 	'''	Creates a JSON file called loadWeightsMerged.json containing user-input load priorities combined with CCI values via RMS and weighted by cciImpact.
 
 		If an empty JSON file is provided for loadPriorityFilePath, just returns a JSON file with max(1,cci*cciImpact) for each load.
-
-		If cciImpact == 0, just returns loadPriorityFilePath
 	
-		Once load priorities and CCI values are merged, they are transformed by the formula (rawMergedWeight-(10.0/loadsOnBus))*100.0 to account for the way load weights are considered in PowerModelsONM.
+		Once load priorities and CCI values are merged, they are scaled so the highest value is 100 and then transformed by the formula (rawMergedWeight-(10.0/loadsOnBus))*100.0 to account for the way load weights are considered in PowerModelsONM.
 		The transformed merged load weights are what are stored in the output file. 
 
-		Returns a string containing the path to the JSON file created.
+		Returns a touple with (string containing path to merged values, string containing path to transformed values)
 	'''
 	cciImpact = float(cciImpact)
-	if cciImpact == 0.0:
-		return loadPriorityFilePath
 
-	makeResComOutputCsv(pathToOmd, modelDir, ['line', 'transformer', 'fuse'])
-	resComDf = pd.read_csv(pJoin(modelDir, 'resilientCommunityOutput.csv'))
 	with open(loadPriorityFilePath) as inFile:
 		loadWeights = {}
 		outOfBoundsLW = {}
@@ -915,30 +1075,34 @@ def combineLoadPriorityWithCCI(modelDir, pathToOmd, loadPriorityFilePath, cciImp
 	circuitTraversalDict = makeCicuitTraversalDict(pathToOmd)
 	loadWeightsMerged = {}
 	loadWeightsTransformed = {}
-	for index, row in resComDf.iterrows():
-		obType, obName = row['Object Name'].split('.')
-		obCci = float(row['Community Criticality Index'])
-		if obType == "load":
-			# Loads defaulting to weight 1 is done to reflect that choice within PowerModelsONM 
-			loadWeight = loadWeights.get(obName,1)
-			rawMergedWeight = mergeCciAndWeights(obCci,loadWeight)
-			loadWeightsMerged[obName] = rawMergedWeight
-			# In PowerModelsONM, the weight given to each bus that has loads on it is 10 and the weight of each load is the input weight / 100
-			# Effectively, the weight of a bus and the loads on it = 10+SUM_n(w_n/100)
-			# We are inverting that by setting w_n = (weight-10/n)*100 where n is the number of loads on a particular bus. 
-			# So the weight of a bus and its loads = 10+SUM_n((weight-10/n)*100/100) = 10+SUM_n(weight-10/n) = 10+SUM_n(weight)-10 = SUM_n(weight)
-			parentBus = circuitTraversalDict[f'load.{obName}']['parent']
-			loadsOnBus = float(len(circuitTraversalDict[f'bus.{parentBus}']['downlineLoads']))
-			loadWeightsTransformed[obName] = (rawMergedWeight-(10.0/loadsOnBus))*100.0
+	loadsOnParentBus = {}
+	for loadName, cci in loadCciDict.items():
+		# Loads defaulting to weight 1 is done to reflect that choice within PowerModelsONM 
+		loadWeight = loadWeights.get(loadName,1)
+		loadWeightsMerged[loadName] = mergeCciAndWeights(cci,loadWeight)
+		# Calculate loads on parent bus for each load for transformation below
+		parentBus = circuitTraversalDict[f'load.{loadName}']['parent']
+		loadsOnParentBus[loadName] = float(len(circuitTraversalDict[f'bus.{parentBus}']['downlineLoads']))
+	# Scale the max value in merged load weights to be 100 for the sake of how powerModelsONM processes things after our later transformation. Scaling is done after combining so that load priority and CCI are on the same scale
+	scaleValue = 100/max(loadWeightsMerged.values())
+	for load, weight in loadWeightsMerged.items():
+		scaledWeight = weight*scaleValue
+		# In PowerModelsONM, the weight given to each bus that has loads on it is 10 and the weight of each load is the input weight / 100
+		# Effectively, the weight of a bus and the loads on it = 10+SUM_n(w_n/100)
+		# We are inverting that by setting w_n = (weight-10/n)*100 where n is the number of loads on a particular bus. 
+		# So the weight of a bus and its loads = 10+SUM_n((weight-10/n)*100/100) = 10+SUM_n(weight-10/n) = 10+SUM_n(weight)-10 = SUM_n(weight)
+		loadWeightsTransformed[load] = (scaledWeight-(10.0/loadsOnParentBus[load]))*100.0
 
 	#Included for users to inspect
-	with open(pJoin(modelDir, 'loadWeightsMerged.json'), 'w') as outfile:
+	mergedLoadWeightsFile = pJoin(modelDir, 'loadWeightsMerged.json')
+	with open(mergedLoadWeightsFile, 'w') as outfile:
 		json.dump(loadWeightsMerged, outfile)
 
-	with open(pJoin(modelDir, 'loadWeightsTransformed.json'), 'w') as outfile:
+	transformedLoadWeightsFile = pJoin(modelDir, 'loadWeightsTransformed.json')
+	with open(transformedLoadWeightsFile, 'w') as outfile:
 		json.dump(loadWeightsTransformed, outfile)
 
-	return pJoin(modelDir, 'loadWeightsTransformed.json')
+	return mergedLoadWeightsFile, transformedLoadWeightsFile
 
 def runMicrogridControlSim(modelDir, solFidelity, eventsFilename, loadPriorityFile, microgridTaggingFile):
 	''' Runs a microgrid control simulation using PowerModelsONM to determine optimal control actions during a configured outage event.
@@ -1069,7 +1233,7 @@ def genProfilesByMicrogrid(mgIDs, obMgDict, powerflow, simTimeSteps, startTime):
 
 	return gensFigure, mgGensFigures
 
-def graphMicrogrid(modelDir, pathToOmd, profit_on_energy_sales, restoration_cost, hardware_cost, pathToJson, pathToCsv, loadPriorityFile, loadMgDict, obMgDict, busMgDict, mgIDs):
+def graphMicrogrid(modelDir, pathToOmd, profit_on_energy_sales, restoration_cost, hardware_cost, pathToJson, pathToCsv, loadPriorityFile, loadMgDict, obMgDict, busMgDict, mgIDs, loadCciDict, loadBcsDict):
 	''' Run full microgrid control process. '''
 	# Gather output data.
 	with open(pJoin(modelDir,'output.json')) as inFile:
@@ -1082,104 +1246,102 @@ def graphMicrogrid(modelDir, pathToOmd, profit_on_energy_sales, restoration_cost
 		outageDuration = stepSize * numTimeSteps
 		loadServed = data['Load served']
 		storageSOC = data['Storage SOC (%)']
-		switchLoadAction = data['Device action timeline']
+		deviceActionTimeline = data['Device action timeline']
 		powerflow = data['Powerflow output']
-	actionTime = []
-	actionDevice = []
-	actionAction = []
-	actionLoadBefore = []
-	actionLoadAfter = []
-	prevLoadsShed = []
-	cumulativeLoadsShed = []
+	
 	startTime = 1
+	timestep = startTime
+
 	if type(simTimeStepsRaw[0]) == str:
 		raise Exception("ERROR - Simulation timesteps are datetime strings in output.json. They need to be floats representing hours")
 	simTimeSteps = [float(i)+startTime for i in simTimeStepsRaw]
-	timestep = startTime
-	# timestep = 0
-	# timestep = 1 #TODO: switch back to this value if timestep should start at 1, not zero | nevermind. see above fix using startTime
-	for key in switchLoadAction:
-		# if timestep == 1: #TODO: switch back to this value if timestep should start at 1, not zero | nevermind. see above fix using startTime
-		# if timestep == 0:
-		if timestep == startTime:
-			switchActionsOld = key['Switch configurations']
-		else:
-			switchActionsNew = key['Switch configurations']
-			for entry in switchActionsNew:
-				if switchActionsNew[entry] != switchActionsOld[entry]:
-					actionDevice.append(entry)
-					actionTime.append(str(timestep))
-					if switchActionsNew[entry] == 'open':
-						actionAction.append('Switch Opening')
-					else:
-						actionAction.append('Switch Closing')
-					actionLoadBefore.append(switchActionsOld[entry])
-					actionLoadAfter.append(switchActionsNew[entry])
-			switchActionsOld = key['Switch configurations']
-		loadShed = key['Shedded loads']
-		loadsPickedUp = [load for load in prevLoadsShed if load not in loadShed]
-		newShed = [load for load in loadShed if load not in prevLoadsShed]
-		for entry in newShed:
-			cumulativeLoadsShed.append(entry)
-			actionDevice.append(entry)
-			actionTime.append(str(timestep))
-			actionAction.append('Load Shed')
-			actionLoadBefore.append('online')
-			actionLoadAfter.append('offline')
-		for entry in loadsPickedUp:
-			actionDevice.append(entry)
-			actionTime.append(str(timestep))
-			actionAction.append('Load Pickup')
-			actionLoadBefore.append('offline')
-			actionLoadAfter.append('online')
-		prevLoadsShed = loadShed
-		timestep += 1
-	timestep = startTime
-	# while timestep < 24:
-	while timestep < numTimeSteps+startTime:
-		if timestep == startTime:
-			powerflowOld = powerflow[timestep-startTime]
-		else:
-			powerflowNew = powerflow[timestep-startTime]
-			for generator in list(powerflowNew.get('generator',{}).keys()):
-				entryNew = powerflowNew['generator'][generator]['real power setpoint (kW)'][0]
-				if generator in list(powerflowOld['generator'].keys()):
-					entryOld = powerflowOld['generator'][generator]['real power setpoint (kW)'][0]
-				else:
-					entryOld = 0.0
-				if math.sqrt(((entryNew - entryOld)/(entryOld + 0.0000001))**2) > 0.5:
-					actionDevice.append(generator)
-					actionTime.append(str(timestep + startTime))
-					# actionTime.append(str(timestep))
-					# actionTime.append(str(timestep + 1)) #TODO: switch back to this value if timestep should start at 1, not zero | nevermind. see above fix using startTime
-					actionAction.append('Generator Control')
-					actionLoadBefore.append(str(entryOld))
-					actionLoadAfter.append(str(entryNew))
-			for battery in list(powerflowNew['storage'].keys()):
-				entryNew = powerflowNew['storage'][battery]['real power setpoint (kW)'][0]
-				if battery in list(powerflowOld['storage'].keys()):
-					entryOld = powerflowOld['storage'][battery]['real power setpoint (kW)'][0]
-				else:
-					entryOld = 0.0
-				if math.sqrt(((entryNew - entryOld)/(entryOld + 0.0000001))**2) > 0.5:
-					actionDevice.append(battery)
-					actionTime.append(str(timestep + startTime))
-					# actionTime.append(str(timestep))
-					# actionTime.append(str(timestep + 1)) #TODO: switch back to this value if timestep should start at 1, not zero | nevermind. see above fix using startTime
-					actionAction.append('Battery Control')
-					actionLoadBefore.append(str(entryOld))
-					actionLoadAfter.append(str(entryNew))
-			powerflowOld = powerflow[timestep-startTime]
-		timestep += 1
-	line = {
-		'time': actionTime,
-		'device': actionDevice,
-		'action': actionAction,
-		'loadBefore': actionLoadBefore,
-		'loadAfter': actionLoadAfter}
-	outputTime = pd.DataFrame(line, columns = ['time','device','action','loadBefore','loadAfter'])
-	outputTimeline = outputTime.sort_values('time')
 	
+	timelineActions = []
+	cumulativeLoadsShed = []
+	prevLoadsShed = []
+	powerflowOld = {}
+	switchConfigsOld = {switch:'closed' for switch in deviceActionTimeline[0]['Switch configurations'].keys()}
+
+	for deviceActions in deviceActionTimeline:
+		# Switch timeline actions
+		switchActions = []
+		switchConfigsNew = deviceActions['Switch configurations']
+		for switch in switchConfigsNew:
+			if switchConfigsNew[switch] != switchConfigsOld[switch]:
+				switchActions.append({
+					'device':		switch,
+					'time':			str(timestep),
+					'action':		'Switch Opening' if switchConfigsNew[switch] == 'open' else 'Switch Closing',
+					'loadBefore':	switchConfigsOld[switch],
+					'loadAfter':	switchConfigsNew[switch]
+				})
+		switchConfigsOld = deviceActions['Switch configurations']
+		
+		# Load timeline actions
+		loadActions = []
+		allShed = deviceActions['Shedded loads']
+		loadsPickedUp = [load for load in prevLoadsShed if load not in allShed]
+		newShed = [load for load in allShed if load not in prevLoadsShed]
+		for load in newShed:
+			cumulativeLoadsShed.append(load)
+			loadActions.append({
+					'device':		load,
+					'time':			str(timestep),
+					'action':		'Load Shed',
+					'loadBefore':	'online',
+					'loadAfter':	'offline'
+				})
+		for load in loadsPickedUp:
+			loadActions.append({
+					'device':		load,
+					'time':			str(timestep),
+					'action':		'Load Pickup',
+					'loadBefore':	'offline',
+					'loadAfter':	'online'
+				})
+		prevLoadsShed = allShed
+
+		# Generator timeline actions
+		genActions = []
+		powerflowNew = powerflow[timestep-startTime]
+		for generator in list(powerflowNew.get('generator',{}).keys()):
+			entryNew = powerflowNew['generator'][generator]['real power setpoint (kW)'][0]
+			if generator in list(powerflowOld.get('generator',{}).keys()):
+				entryOld = powerflowOld['generator'][generator]['real power setpoint (kW)'][0]
+			else:
+				entryOld = 0.0
+			if math.sqrt(((entryNew - entryOld)/(entryOld + 0.0000001))**2) > 0.5:
+				genActions.append({
+				'device':		generator,
+				'time':			str(timestep),
+				'action':		'Generator Control',
+				'loadBefore':	f'{entryOld}',
+				'loadAfter':	f'{entryNew}'
+				})
+
+		# Battery timeline actions
+		batActions = []		
+		for battery in list(powerflowNew.get('storage',{}).keys()):
+			entryNew = powerflowNew['storage'][battery]['real power setpoint (kW)'][0]
+			if battery in list(powerflowOld.get('storage',{}).keys()):
+				entryOld = powerflowOld['storage'][battery]['real power setpoint (kW)'][0]
+			else:
+				entryOld = 0.0
+			if math.sqrt(((entryNew - entryOld)/(entryOld + 0.0000001))**2) > 0.5:
+				batActions.append({
+				'device':		battery,
+				'time':			str(timestep),
+				'action':		'Battery Control',
+				'loadBefore':	f'{entryOld}',
+				'loadAfter':	f'{entryNew}'
+				})
+		powerflowOld = powerflowNew
+
+		# The order of addition is the order that actions will appear in each timestep on a table
+		timelineActions += switchActions + genActions + batActions + loadActions
+		timestep += 1
+	outputTimeline = pd.DataFrame(timelineActions, columns=['time','device','action','loadBefore','loadAfter']).sort_values('time')
+
 	# Create traces
 	gens, mgGensFigs = genProfilesByMicrogrid(mgIDs, obMgDict, powerflow, simTimeSteps, startTime)
 
@@ -1188,10 +1350,10 @@ def graphMicrogrid(modelDir, pathToOmd, profit_on_energy_sales, restoration_cost
 		('Min voltage (p.u.)','Minimum Voltage'),
 		('Max voltage (p.u.)','Maximum Voltage'),
 		('Mean voltage (p.u.)','Mean Voltage')]
-	for key, name in voltsKeysAndNames:
+	for deviceActions, name in voltsKeysAndNames:
 		volts.add_trace(go.Scatter(
 			x=simTimeSteps,
-			y=voltages[key],
+			y=voltages[deviceActions],
 			mode='lines',
 			name=name,
 			hovertemplate=
@@ -1214,10 +1376,10 @@ def graphMicrogrid(modelDir, pathToOmd, profit_on_energy_sales, restoration_cost
 		('Feeder load (%)','Feeder Load'),
 		('Microgrid load (%)','Microgrid Load'),
 		('Bonus load via microgrid (%)','Bonus Load via Microgrid')]
-	for key,name in loadsKeysAndNames:
+	for deviceActions,name in loadsKeysAndNames:
 		loads.add_trace(go.Scatter(
 			x=simTimeSteps,
-			y=loadServed[key],
+			y=loadServed[deviceActions],
 			mode='lines',
 			name=name,
 			hovertemplate=
@@ -1482,8 +1644,9 @@ def graphMicrogrid(modelDir, pathToOmd, profit_on_energy_sales, restoration_cost
 	)
 
 	outageIncidenceFig, mgOIFigs = outageIncidenceGraph(customerOutageData, outputTimeline, startTime, numTimeSteps, loadPriorityFile, loadMgDict)
-	tradMetricsHtml = tradMetricsByMgTable(outputTimeline, loadMgDict, startTime, numTimeSteps, modelDir, stepSize)
-	taifiHist, taidiHist = makeTaifiAndTaidiHist(outputTimeline, startTime, numTimeSteps, list(loadMgDict.keys()), stepSize)
+	taifiHist, taidiHist, TAIFI, TAIDI = makeTaifiAndTaidiHist(outputTimeline, startTime, numTimeSteps, list(loadMgDict.keys()))
+	cciTaidiScatter, cciTaifiScatter = makeCciTaidiTaifiScatter(loadCciDict, TAIDI, TAIFI)
+	tradMetricsHtml, cciQuartTradMetricsHtml = tradMetricsByMgTable(outputTimeline, loadMgDict, startTime, numTimeSteps, modelDir, loadCciDict, loadBcsDict, TAIDI, loadPriorityFile)
 
 	customerOutageHtml = customerOutageTable(customerOutageData, outageCost, modelDir)
 	profit_on_energy_sales = float(profit_on_energy_sales)
@@ -1497,6 +1660,7 @@ def graphMicrogrid(modelDir, pathToOmd, profit_on_energy_sales, restoration_cost
 			'customerOutageHtml': 	customerOutageHtml, 
 			'timelineStatsHtml': 	timelineStatsHtml,
 			'tradMetricsHtml':		tradMetricsHtml,
+			'cciQuartTradMetricsHtml': cciQuartTradMetricsHtml,
 			'outageIncidenceFig': 	outageIncidenceFig, 
 			'mgOIFigs':				mgOIFigs, 
 			'mgGensFigs':			mgGensFigs, 
@@ -1504,6 +1668,8 @@ def graphMicrogrid(modelDir, pathToOmd, profit_on_energy_sales, restoration_cost
 			'loads': 				loads, 
 			'volts': 				volts, 
 			'fig': 					fig, 
+			'cciTaidiScatter':		cciTaidiScatter,
+			'cciTaifiScatter':		cciTaifiScatter,
 			'customerOutageCost': 	customerOutageCost, 
 			'endTime': 				simTimeSteps[-1], 
 			'stepSize': 			stepSize, 
@@ -1627,17 +1793,23 @@ def work(modelDir, inputDict):
 
 	pathToLocalFile = copyInputFilesToModelDir(modelDir, inputDict)
 	
-	pathToMergedPriorities = combineLoadPriorityWithCCI(
+	loadCciDict, loadBcsDict = makeLoadCciDict(
+		modelDir 				= modelDir, 
+		pathToOmd				= f'{modelDir}/{feederName}.omd'
+	)
+	pathToMergedPriorities, pathToTransformedPriorities = combineLoadPriorityWithCCI(
 		modelDir				= modelDir,
 		pathToOmd				= f'{modelDir}/{feederName}.omd',
 		loadPriorityFilePath	= pathToLocalFile['loadPriority'],
+		loadCciDict				= loadCciDict,
 		cciImpact				= inputDict['cciImpact']
 	)
+	
 	runMicrogridControlSim(
 		modelDir				= modelDir, 
 		solFidelity				= inputDict['solFidelity'],
 		eventsFilename			= inputDict['eventFileName'],
-		loadPriorityFile		= pathToMergedPriorities,
+		loadPriorityFile		= pathToTransformedPriorities,
 		microgridTaggingFile	= pathToLocalFile['mgTagging']
 	)
 	microgridInfo = getMicrogridInfo(
@@ -1657,7 +1829,9 @@ def work(modelDir, inputDict):
 		loadMgDict				= microgridInfo['loadMgDict'],
 		obMgDict 				= microgridInfo['obMgDict'],
 		busMgDict				= microgridInfo['busMgDict'],
-		mgIDs					= microgridInfo['mgIDs']
+		mgIDs					= microgridInfo['mgIDs'],
+		loadCciDict				= loadCciDict,
+		loadBcsDict				= loadBcsDict
 	)
 
 
@@ -1673,6 +1847,9 @@ def work(modelDir, inputDict):
 	# Textual outputs of traditional metrics table
 	with open(pJoin(modelDir,'tradMetricsTable.html')) as inFile:
 		outData['tradMetricsHtml'] = inFile.read()
+	# Textual outputs of traditional metrics table for cciQuarts
+	with open(pJoin(modelDir,'cciQuartTradMetricsTable.html')) as inFile:
+		outData['cciQuartTradMetricsHtml'] = inFile.read()
 	#The geojson dictionary to load into the outageCost.py template
 	with open(pJoin(modelDir,'geoDict.js'),'rb') as inFile:
 		outData['geoDict'] = inFile.read().decode()
@@ -1703,6 +1880,8 @@ def work(modelDir, inputDict):
 	outData['taifiHistLayout'] = json.dumps(layoutOb, cls=py.utils.PlotlyJSONEncoder)
 	outData['taidiHistData'] = json.dumps(plotOuts.get('taidiHist',{}), cls=py.utils.PlotlyJSONEncoder)
 	outData['taidiHistLayout'] = json.dumps(layoutOb, cls=py.utils.PlotlyJSONEncoder)
+	outData['cciTaidiScatter'] = json.dumps(plotOuts.get('cciTaidiScatter',{}), cls=py.utils.PlotlyJSONEncoder)
+	outData['cciTaifiScatter'] = json.dumps(plotOuts.get('cciTaifiScatter',{}), cls=py.utils.PlotlyJSONEncoder)
 
 
 	# Stdout/stderr.
@@ -1725,6 +1904,7 @@ def new(modelDir):
 	# ====== Iowa240 Test Case
 	# feeder_file_path= [__neoMetaModel__._omfDir,'static','testFiles','iowa240_dwp_22_no_show_voltage.dss.omd']
 	feeder_file_path= [__neoMetaModel__._omfDir,'static','testFiles','iowa240_in_Florida_copy2_no_show_voltage.dss.omd']
+	# feeder_file_path= [__neoMetaModel__._omfDir,'static','testFiles','ieee8500.dss.omd']
 
 	event_file_path = [__neoMetaModel__._omfDir,'static','testFiles','iowa240_dwp_22.events.json']
 	loadPriority_file_path = [__neoMetaModel__._omfDir,'static','testFiles','iowa240_dwp_22.loadPriority.basic.json']

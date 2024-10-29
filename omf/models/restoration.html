@@ -220,6 +220,22 @@
 				Plotly.newPlot("taidiHistChart", JSON.parse(allOutputData["taidiHistData"]), JSON.parse(allOutputData["taidiHistLayout"]) || {})
 			</script>
 		</div>
+
+		<p class="reportTitle"><label class="tooltip">CCI vs TAIDI Scatter<span class="classic">Tooltip filler</span></label></p>
+		<div id="cciTaidiScatter" class="tightContent">
+			<div id="cciTaidiScatterChart" style="width:1000px"></div>
+			<script type="text/javascript">
+				Plotly.newPlot("cciTaidiScatterChart", JSON.parse(allOutputData["cciTaidiScatter"]), JSON.parse(allOutputData["taidiHistLayout"]) || {})
+			</script>
+		</div>
+		<p class="reportTitle"><label class="tooltip">CCI vs TAIFI Scatter<span class="classic">Tooltip filler</span></label></p>
+		<div id="cciTaifiScatter" class="tightContent">
+			<div id="cciTaifiScatterChart" style="width:1000px"></div>
+			<script type="text/javascript">
+				Plotly.newPlot("cciTaifiScatterChart", JSON.parse(allOutputData["cciTaifiScatter"]), JSON.parse(allOutputData["taidiHistLayout"]) || {})
+			</script>
+		</div>
+
 		<p class="reportTitle" style="page-break-before:always">Utility Outage Cost</p>
 		<div id="utilityOutageCostCalc" class="tightContent">
 			{{ allOutputDataDict['utilityOutageHtml'] }}
@@ -249,6 +265,10 @@
 		<p class="reportTitle" style="page-break-before:always">Simulation time-span SAIDI, SAIFI, CAIDI, and CAIFI</p>
 		<div id="tradMetricsCalc" class="tightContent sorttable" style="max-height:500px; overflow-y:scroll">
 			{{ allOutputDataDict['tradMetricsHtml'] }}
+		</div>
+		<p class="reportTitle" style="page-break-before:always">Metrics by CCI Quartiles</p>
+		<div id="cciQuartTradMetricsCalc" class="tightContent sorttable" style="max-height:500px; overflow-y:scroll">
+			{{ allOutputDataDict['cciQuartTradMetricsHtml'] }}
 		</div>
 		<!-- Leaflet map directly inline with model-->
 		<p class="reportTitle">Outage Map and Time Slider</p>
