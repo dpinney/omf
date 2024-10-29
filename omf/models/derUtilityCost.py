@@ -108,6 +108,99 @@ def work(modelDir, inputDict):
 		vbatMaxPowerCapacity = pd.Series(vbatResults['maxPowerSeries'])
 		vbatPower = vbpower_series
 
+	## Scale down the utility demand to create an ad-hoc small consumer load (1 kW average) and large consumer load (10 kW average)
+	utilityLoadAverage = np.average(demand)
+	smallConsumerTargetAverage = 1.0 #Unit: kW
+	largeConsumerTargetAverage = 10.0 #Unit: kW
+	smallConsumerLoadScaleFactor = smallConsumerTargetAverage / utilityLoadAverage 
+	largeConsumerLoadScaleFactor = largeConsumerTargetAverage / utilityLoadAverage 
+	smallConsumerLoad = demand * smallConsumerLoadScaleFactor
+	largeConsumerLoad = demand * largeConsumerLoadScaleFactor
+
+	## Convert small and large consumer load arrays into strings and pass it back to derConsumer
+	## TODO: Ideally this model wouldn't handle data in string format, it feels like extra work - consider changing that input format type later to floats
+	smallConsumerLoadString = '\n'.join([str(value) for value in smallConsumerLoad])
+	largeConsumerLoadString = '\n'.join([str(value) for value in largeConsumerLoad])
+
+	## Create a new derConsumer model directory to store the results for both small and large consumers
+	newDir_smallderConsumer = pJoin(modelDir,'smallderConsumer')
+	newDir_largederConsumer = pJoin(modelDir,'largederConsumer')
+	os.makedirs(newDir_smallderConsumer, exist_ok=True)
+	os.makedirs(newDir_largederConsumer, exist_ok=True)
+	os.chdir(newDir_smallderConsumer)
+	print("Current Directory:", os.getcwd())
+
+	## Set up model inputs for derConsumer and pass the small and large consumer loads to omf/models/derConsumer
+	with open(pJoin(__neoMetaModel__._omfDir,'static','testFiles','residential_critical_load.csv')) as f:
+		criticalLoad_curve = f.read()
+	
+	derConsumerInputDict = {
+		## OMF inputs:
+		'user' : 'admin',
+		'modelType': modelName,
+		'created': str(datetime.datetime.now()),
+
+		## REopt inputs:
+		## NOTE: Variables are strings as dictated by the html input options
+		'latitude':  inputDict['latitude'], ## use utility's lat and lon 
+		'longitude': inputDict['longitude'], 
+		'year' : '2018',
+		'urdbLabel': inputDict['urdbLabel'],
+		'fileName': 'residential_PV_load.csv',
+		'tempFileName': 'residential_extended_temperature_data.csv',
+		'criticalLoadFileName': 'residential_critical_load.csv', ## critical load here = 50% of the daily demand
+		'demandCurve': smallConsumerLoadString,
+		'tempCurve': inputDict['tempCurve'],
+		'criticalLoad': criticalLoad_curve,
+		'criticalLoadSwitch': 'Yes',
+		'criticalLoadFactor': '0.50',
+		'PV': 'Yes',
+		'BESS': 'Yes',
+		'generator': 'No',
+		'outage': True,
+		'outage_start_hour': '4637',
+		'outage_duration': '3',
+
+		## Financial Inputs
+		'demandChargeURDB': 'Yes',
+		'demandChargeCost': '25',
+		'projectionLength': '25',
+
+		## vbatDispatch inputs:
+		'load_type': '2', ## Heat Pump
+		'number_devices': '1',
+		'power': '5.6',
+		'capacitance': '2',
+		'resistance': '2',
+		'cop': '2.5',
+		'setpoint': '19.5',
+		'deadband': '0.625',
+		'electricityCost': '0.16',
+		'discountRate': '2',
+		'unitDeviceCost': '150',
+		'unitUpkeepCost': '5',
+
+		## DER Program Design inputs:
+		'utilityProgram': 'No',
+		'rateCompensation': '0.1', ## unit: $/kWh
+		#'maxBESSDischarge': '0.80', ## Between 0 and 1 (Percent of total BESS capacity) #TODO: Fix the HTML input for this
+		'subsidy': '55',
+	}
+	smallConsumerOutput = derConsumer.work(newDir_smallderConsumer,derConsumerInputDict)
+
+	## Change directory to large derConsumer and run that case
+	os.chdir(newDir_largederConsumer)
+	derConsumerInputDict['demandCurve'] = largeConsumerLoadString
+	derConsumerInputDict['number_devices'] = '2'
+	largeConsumerOutput = derConsumer.work(newDir_largederConsumer,derConsumerInputDict)
+
+	## Change directory back to derUtilityCost
+	os.chdir(modelDir)
+	outData.update({
+		'savingsSmallConsumer': smallConsumerOutput['savings'],
+		'savingsLargeConsumer': largeConsumerOutput['savings']
+	})
+
 	## DER Overview plot ###################################################################################################################################################################
 	showlegend = True # either enable or disable the legend toggle in the plot
 	grid_to_load = reoptResults['ElectricUtility']['electric_to_load_series_kw']
@@ -472,20 +565,105 @@ def work(modelDir, inputDict):
 		outData['batteryChargeData'] = json.dumps(fig.data, cls=plotly.utils.PlotlyJSONEncoder)
 		outData['batteryChargeLayout'] = json.dumps(fig.layout, cls=plotly.utils.PlotlyJSONEncoder)
 
+	## Add REopt resilience plot (adapted from omf/models/microgridDesign.py) ########################################################################################################################
+	#helper function for generating output graphs
+	def makeGridLine(x,y,color,name):
+		plotLine = go.Scatter(
+			x = x, 
+			y = y,
+			line = dict( color=(color)),
+			name = name,
+			hoverlabel = dict(namelength = -1),
+			showlegend=True,
+			stackgroup='one',
+			mode='none'
+		)
+		return plotLine
+	#Set plotly layout ---------------------------------------------------------------
+	plotlyLayout = go.Layout(
+		width=1000,
+		height=375,
+		legend=dict(
+			x=0,
+			y=1.25,
+			orientation="h")
+		)
+	x = list(range(len(reoptResults['ElectricUtility']['electric_to_load_series_kw'])))
+	plotData = []
+	#x_values = pd.to_datetime(x, unit = 'h', origin = pd.Timestamp(f'{year}-01-01'))
+	x_values = timestamps
+	powerGridToLoad = makeGridLine(x_values,reoptResults['ElectricUtility']['electric_to_load_series_kw'],'blue','Load met by Grid')
+	plotData.append(powerGridToLoad)
+	
+	if (inputDict['outage']): ## TODO: condense this code if possible
+		outData['resilience'] = reoptResultsResilience['resilience_by_time_step']
+		outData['minOutage'] = reoptResultsResilience['resilience_hours_min']
+		outData['maxOutage'] = reoptResultsResilience['resilience_hours_max']
+		outData['avgOutage'] = reoptResultsResilience['resilience_hours_avg']
+		outData['survivalProbX'] = reoptResultsResilience['outage_durations']
+		outData['survivalProbY'] = reoptResultsResilience['probs_of_surviving']
 
+		plotData = []
+		resilience = go.Scatter(
+			x=x,
+			y=outData['resilience'],
+			line=dict( color=('red') ),
+		)
+		plotData.append(resilience)
+		plotlyLayout['yaxis'].update(title='Longest Outage survived (Hours)')
+		plotlyLayout['xaxis'].update(title='Start Hour')
+		outData['resilienceData'] = json.dumps(plotData, cls=plotly.utils.PlotlyJSONEncoder)
+		outData['resilienceLayout'] = json.dumps(plotlyLayout, cls=plotly.utils.PlotlyJSONEncoder)
 
+		plotData = []
+		survivalProb = go.Scatter(
+			x=outData['survivalProbX'],
+			y=outData['survivalProbY'],
+			line=dict( color=('red') ),
+			name='Probability of Surviving Outage of a Given Duration')
+		plotData.append(survivalProb)
+		plotlyLayout['yaxis'].update(title='Probability of Meeting Critical Load')
+		plotlyLayout['xaxis'].update(title='Outage Length (Hours)')
+		outData['resilienceProbData' ] = json.dumps(plotData, cls=plotly.utils.PlotlyJSONEncoder)
+		outData['resilienceProbLayout'] = json.dumps(plotlyLayout, cls=plotly.utils.PlotlyJSONEncoder)
+
+	#####################################################################################################################################################################################################
 	## Compensation rate to member-consumer
-	compensation_rate = float(inputDict['rateCompensation'])
+	compensationRate = float(inputDict['rateCompensation'])
 	subsidy = float(inputDict['subsidy'])
+	electricityCost = float(inputDict['electricityCost'])
 
-	if inputDict['BESS'] == 'Yes': ## BESS
+	monthHours = [(0, 744), (744, 1416), (1416, 2160), (2160, 2880), 
+					(2880, 3624), (3624, 4344), (4344, 5088), (5088, 5832), 
+					(5832, 6552), (6552, 7296), (7296, 8016), (8016, 8760)]
+	
+	monthlyDemand_smallConsumer = np.asarray([sum(smallConsumerLoad[s:f]) for s, f in monthHours])
+	monthlyDemand_largeConsumer = np.asarray([sum(largeConsumerLoad[s:f]) for s, f in monthHours])
+	monthlyDemandCost_smallConsumer = monthlyDemand_smallConsumer * electricityCost
+	monthlyDemandCost_largeConsumer = monthlyDemand_largeConsumer * electricityCost
+
+
+	BESS_smallConsumer = smallConsumerOutput['ElectricStorage']['storage_to_load_series_kw']
+	BESS_largeConsumer = largeConsumerOutput['ElectricStorage']['storage_to_load_series_kw']
+	monthlyBESS_smallConsumer = np.asarray([sum(BESS_smallConsumer[s:f]) for s, f in monthHours])
+	monthlyBESS_largeConsumer = np.asarray([sum(BESS_largeConsumer[s:f]) for s, f in monthHours])
+	monthlyBESSCost_smallConsumer = monthlyBESS_smallConsumer * compensationRate
+	monthlyBESSCost_largeConsumer = monthlyBESS_largeConsumer * compensationRate
+
+	print('Small Consumer demand cost w/o BESS: ${:,.2f}'.format(np.sum(monthlyDemandCost_smallConsumer)))
+	print('Small Consumer savings with BESS: ${:,.2f} \n'.format(np.sum(monthlyBESSCost_smallConsumer)))	
+	print('Large Consumer demand cost w/o BESS: ${:,.2f}'.format(np.sum(monthlyDemandCost_largeConsumer)))
+	print('Large Consumer savings with BESS: ${:,.2f}'.format(np.sum(monthlyBESSCost_largeConsumer)))
+
+
+	if 'ElectricStorage' in reoptResults: ## BESS
 		BESS = reoptResults['ElectricStorage']['storage_to_load_series_kw']
-		BESS_compensated_to_consumer = np.sum(BESS)*compensation_rate+subsidy
-		print('Compensation rate for BESS: ${:,.2f}'.format(BESS_compensated_to_consumer))
-		BESS_bought_from_grid = np.sum(BESS)*float(inputDict['electricityCost'])
-		print('BESS energy if bought from grid: ${:,.2f}'.format(BESS_bought_from_grid))
+		BESS_compensated_to_consumer = np.sum(BESS)*compensationRate+subsidy
+		print('--------------------------------------------------------')
+		print('Utility"s total compensation rate for consumer BESS: ${:,.2f}'.format(BESS_compensated_to_consumer))
+		BESS_bought_from_grid = np.sum(BESS) * electricityCost
+		print('Electricity Cost of BESS: ${:,.2f}'.format(BESS_bought_from_grid))
 		print('Difference (electricity cost - compensated cost): ${:,.2f}'.format(BESS_bought_from_grid-BESS_compensated_to_consumer))
-
 
 	# Model operations typically ends here.
 	# Stdout/stderr.
@@ -499,8 +677,7 @@ def new(modelDir):
 		demand_curve = f.read()
 	with open(pJoin(__neoMetaModel__._omfDir,'static','testFiles','utility_CO_2018_temperatures.csv')) as f:
 		temp_curve = f.read()
-	## TODO: Change the critical load to utility scale critical load instead of residential
-	with open(pJoin(__neoMetaModel__._omfDir,'static','testFiles','residential_critical_load.csv')) as f:
+	with open(pJoin(__neoMetaModel__._omfDir,'static','testFiles','utility_2018_kW_critical_load.csv')) as f:
 		criticalLoad_curve = f.read()
 
 	defaultInputs = {
@@ -519,8 +696,7 @@ def new(modelDir):
 		'tempFileName': 'utility_CO_2018_temperatures.csv',
 		'demandCurve': demand_curve,
 		'tempCurve': temp_curve,
-		## ODO: Change criticalLoadFileName to utility load instead of residential
-		'criticalLoadFileName': 'residential_critical_load.csv', ## critical load here = 50% of the daily demand
+		'criticalLoadFileName': 'utility_2018_kW_critical_load.csv', ## critical load here = 50% of the daily demand
 		'criticalLoad': criticalLoad_curve,
 		'criticalLoadSwitch': 'Yes',
 		'criticalLoadFactor': '0.50',

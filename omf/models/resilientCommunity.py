@@ -201,6 +201,8 @@ def createDF(tractData, columns, geoTransformed):
     input: geoTransformed -> EPSG:4326 transformed geometry
     '''
     data = pd.DataFrame(tractData, columns = columns)
+    #print(data)
+    #print(data.T)
     if (geoTransformed):
         data['geometry'] = geoTransformed
     return data
@@ -1032,15 +1034,15 @@ def getDownLineLoadsEquipmentBlockGroup(pathToOmd, equipmentList):
 
 
     # DO NOT CHANGE ORDER -> matches order of dictionary in buildSVI(TractFIPS)
-      
-    cols = ['pct_Prs_Blw_Pov_Lev_ACS_16_20','avg_Agg_HH_INC_ACS_16_20','pct_Not_HS_Grad_ACS_16_20',
-            'pct_Pop_65plus_ACS_16_20','pct_singlefamily_u18','pct_MLT_U10p_ACS_16_20',
+
+    cols = ['pct_Prs_Blw_Pov_Lev_ACS_16_20','pct_Civ_emp_16p_ACS_16_20','avg_Agg_HH_INC_ACS_16_20','pct_Not_HS_Grad_ACS_16_20',
+            'pct_Pop_65plus_ACS_16_20','pct_u19ACS_16_20','pct_Pop_Disabled_ACS_16_20','pct_singlefamily_u18','pct_MLT_U10p_ACS_16_20',
             'pct_Mobile_Homes_ACS_16_20','pct_Crowd_Occp_U_ACS_16_20','pct_noVehicle','blockgroupFIPS', 'geometry']
         
     sviDF = createDF(valList,cols, geoms)
     
-    pctile_list = ['pct_Prs_Blw_Pov_Lev_ACS_16_20','avg_Agg_HH_INC_ACS_16_20','pct_Not_HS_Grad_ACS_16_20',
-            'pct_Pop_65plus_ACS_16_20','pct_singlefamily_u18','pct_MLT_U10p_ACS_16_20',
+    pctile_list = ['pct_Prs_Blw_Pov_Lev_ACS_16_20','pct_Civ_emp_16p_ACS_16_20','avg_Agg_HH_INC_ACS_16_20','pct_Not_HS_Grad_ACS_16_20',
+            'pct_Pop_65plus_ACS_16_20','pct_u19ACS_16_20','pct_Pop_Disabled_ACS_16_20','pct_singlefamily_u18','pct_MLT_U10p_ACS_16_20',
             'pct_Mobile_Homes_ACS_16_20','pct_Crowd_Occp_U_ACS_16_20','pct_noVehicle']
     for i in cols:
         if i not in ['blockgroupFIPS', 'geometry']:
@@ -1070,8 +1072,9 @@ def getDownLineLoadsEquipmentBlockGroup(pathToOmd, equipmentList):
             
             currBlockGroup = loadsDict[key]['blockgroup']
             svi_score = sviDF[sviDF['blockgroupFIPS'] == currBlockGroup]['SOVI_SCORE'].values[0]
-
+            
             loadsDict[key]["community crit score"] = round((((math.sqrt((kw * kw) + (kvar * kvar) ))/ (5)) * 4) *  svi_score,2)
+
             loadsDict[key]['SOVI_SCORE'] = svi_score
 
 
@@ -1252,7 +1255,7 @@ def getDownLineLoadsEquipmentTract(pathToOmd, equipmentList):
             currTract = loadsDict[key]['tract']
             svi_score = sviDF[sviDF['tractFIPS'] == currTract]['SOVI_SCORE'].values[0]
 
-            loadsDict[key]["community crit score"] = round((((math.sqrt((kw * kw) + (kvar * kvar) ))/ (5)) * 4) *  svi_score,2)
+            loadsDict[key]["community crit score"] = round(loadsDict[key]["base crit score"] *  svi_score,2)
             loadsDict[key]['SOVI_SCORE'] = svi_score
 
 
@@ -1802,6 +1805,17 @@ def buildsviBlockGroup(blockgroupFIPS):
     acs_request_url = "https://api.census.gov/data/2022/acs/acs5?get=" + ",".join(acs_svi_vars) + "&for=block%20group:" + str(blockID) + "&in=state:"+str(stateID)+"%20county:" +  str(countyID) + "%20tract:" + str(tractID)+"&key=bc86c8cfc930e7c10b81d6683c6a316f5fcb857b"
     pdb_request_url = "https://api.census.gov/data/2022/pdb/blockgroup?get="+ ",".join(pdb_svi_vars) + "&for=block%20group:" + str(blockID) + "&in=state:"+str(stateID)+"%20county:" +  str(countyID) + "%20tract:" + str(tractID)+"&key=bc86c8cfc930e7c10b81d6683c6a316f5fcb857b"
 
+    # add url for census tract to add variables that arent in blockgroup
+
+    tractVars = ['pct_Prs_Blw_Pov_Lev_ACS_16_20', 'pct_Civ_emp_16p_ACS_16_20', 'avg_Agg_HH_INC_ACS_16_20','pct_Not_HS_Grad_ACS_16_20',
+                'Pop_65plus_ACS_16_20', 'Tot_Population_ACS_16_20', 'Civ_noninst_pop_U19_ACS_16_20', 'Civ_Noninst_Pop_ACS_16_20', 'pct_Pop_Disabled_ACS_16_20',
+                'pct_MLT_U10p_ACS_16_20', 'pct_Mobile_Homes_ACS_16_20', 'pct_Crowd_Occp_U_ACS_16_20']
+
+    result = [item for item in tractVars if item not in pdb_svi_vars]
+
+    tractpdb_request_url = "https://api.census.gov/data/2022/pdb/tract?get="+ ",".join(result)+ "&for=tract:"+str(tractID)+"&in=state:"+str(stateID)+"%20county:"+ str(countyID) + "&key=bc86c8cfc930e7c10b81d6683c6a316f5fcb857b"
+
+
 
     #acs  data
 
@@ -1816,16 +1830,27 @@ def buildsviBlockGroup(blockgroupFIPS):
     pdbJson = json.loads(resp.read())
     pdbDict = {k: 0 if v[0] is None else v[0]  for k, *v in zip(*pdbJson)}
 
-    combined_dict = {**acsDict, **pdbDict}
+    # extra tract data
+    
+    resp = opener.open(tractpdb_request_url, timeout=50)
+    tractpdbJson = json.loads(resp.read())
+    tractpdbDict = {k: 0 if v[0] is None else v[0]  for k, *v in zip(*tractpdbJson)}
+
+
+    combined_dict = {**acsDict, **pdbDict,**tractpdbDict }
+
     
     
     svi_var_dict = {
         # socioeconomic vars
         'pct_Prs_Blw_Pov_Lev_ACS_16_20': float(combined_dict['pct_Prs_Blw_Pov_Lev_ACS_16_20']),
+        'pct_Civ_emp_16p_ACS_16_20': float(combined_dict['pct_Civ_emp_16p_ACS_16_20']),
         'avg_Agg_HH_INC_ACS_16_20': float(combined_dict['avg_Agg_HH_INC_ACS_16_20'].replace('$', '').replace(',','')),
         'pct_Not_HS_Grad_ACS_16_20': float(combined_dict['pct_Not_HS_Grad_ACS_16_20']),
         # household compisiton/ disability vars
         'pct_Pop_65plus_ACS_16_20': float(combined_dict['Pop_65plus_ACS_16_20'])/float(combined_dict['Tot_Population_ACS_16_20']),
+        'pct_u19ACS_16_20': float(combined_dict['Civ_noninst_pop_U19_ACS_16_20'])/float(combined_dict['Civ_Noninst_Pop_ACS_16_20']),
+        'pct_Pop_Disabled_ACS_16_20': float(combined_dict['pct_Pop_Disabled_ACS_16_20']),
         'pct_singlefamily_u18': (float(combined_dict['B23008_021E']) + float(combined_dict['B23008_008E']))/float(combined_dict['B23008_001E']),
         #housing/transportation
         'pct_MLT_U10p_ACS_16_20': float(combined_dict['pct_MLT_U10p_ACS_16_20']),
@@ -1833,6 +1858,7 @@ def buildsviBlockGroup(blockgroupFIPS):
         'pct_Crowd_Occp_U_ACS_16_20': float(combined_dict['pct_Crowd_Occp_U_ACS_16_20']),
         'pct_noVehicle': float(combined_dict['B08014_002E'])/float(combined_dict['B01001_001E'])
     }
+
 
     # Define the base URL for the TIGERweb REST Services
     tigris_url = "https://tigerweb.geo.census.gov/arcgis/rest/services/TIGERweb/tigerWMS_ACS2021/MapServer/8/query"
@@ -2018,6 +2044,11 @@ def runCalculations(pathToOmd,modelDir, equipmentList):
 
     obDict, loads, geoDF = getDownLineLoadsEquipmentTract(pathToOmd, equipmentList)
 
+
+    geoDF.to_file('/Users/davidarmah/Documents/omf/omf/static/testFiles/resilientCommunity/dataframe.geojson', driver='GeoJSON')  
+
+    
+
     cols = ['Object Name', 'Type', 'Base Criticality Score', 'Base Criticality Index',
             'Community Criticality Score', 'Community Criticality Index']
     
@@ -2031,6 +2062,14 @@ def runCalculations(pathToOmd,modelDir, equipmentList):
     community_criticity_index_vals1 = [value.get('community crit index') for key, value in loads.items()]
     type1 = ['load' for i in range(len(base_criticality_score_vals1))]
     
+    #print(len(load_names))
+    #print(len(type1))
+    #print(len(base_criticality_score_vals1))
+    #print(len(base_criticity_index_vals1))
+    #print(len(community_criticality_score_vals1))
+    #print(len(community_criticity_index_vals1))
+
+
 
     loadsList = list(zip(load_names,type1,base_criticality_score_vals1,base_criticity_index_vals1,community_criticality_score_vals1,community_criticity_index_vals1))
     
@@ -2039,7 +2078,14 @@ def runCalculations(pathToOmd,modelDir, equipmentList):
     base_criticity_index_vals2 = [value.get('base crit index') for key, value in obDict.items()]
     community_criticality_score_vals2 = [value.get('community crit score') for key, value in obDict.items()]
     community_criticity_index_vals2 = [value.get('community crit index') for key, value in obDict.items()]
-    type2 = ['equipment' for i in range(len(base_criticality_score_vals1))]
+    type2 = ['equipment' for i in range(len(base_criticality_score_vals2))]
+
+    #print(len(object_names))
+    #print(len(type2))
+    #print(len(base_criticality_score_vals2))
+    #print(len(base_criticity_index_vals2))
+    #print(len(community_criticality_score_vals2))
+    #print(len(community_criticity_index_vals2))
 
     equipList = list(zip(object_names,type2,base_criticality_score_vals2,base_criticity_index_vals2,community_criticality_score_vals2,community_criticity_index_vals2))
 
@@ -2084,11 +2130,15 @@ def work(modelDir, inputDict):
 
     
     # check downline loads
-    obDict, loads, geoDF = getDownLineLoadsEquipmentBlockGroup(omd_file_path, equipmentList)
+    
+    #obDict, loads, geoDF = getDownLineLoadsEquipmentBlockGroup(omd_file_path, equipmentList)
+
+    obDict, loads, geoDF = getDownLineLoadsEquipmentTract(omd_file_path, equipmentList)
 
     # color vals based on selected column
     
-    createColorCSVBlockGroup(modelDir, loads, obDict)
+    #createColorCSVBlockGroup(modelDir, loads, obDict)
+    createColorCSVTract(modelDir, loads,obDict)
     
     if(inputDict['loadCol'] == 'Base Criticality Score'):
         colVal = "1"
@@ -2178,11 +2228,15 @@ def work(modelDir, inputDict):
     return outData
 
 def test():
-    tractFIPS = '12007000400'
-    #print(buildSVI(tractFIPS))
+    pathToOmd = "omf/static/testFiles/resilientCommunity/iowa240_dwp_22_no_show_voltage.dss.omd"
+    pathToOmd2 = "/Users/davidarmah/Documents/omf/omf/static/testFiles/resilientCommunity/iowa240_in_Florida_copy2.omd"
+    modelDir = "omf/static/testFiles/resilientCommunity"
+    equipmentList = ['line']
+    obDict = runCalculations(pathToOmd2,modelDir, equipmentList)
 
 def new(modelDir):
     omdfileName = 'iowa240_in_Florida_copy2'
+    #omdfileName = 'iowa240_dwp_22_no_show_voltage.dss'
 
     defaultInputs = {
 		"modelType": modelName,

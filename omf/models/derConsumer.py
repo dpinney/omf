@@ -620,9 +620,9 @@ def work(modelDir, inputDict):
 		## Calculate total DER compensation amount (including any subsidies)
 		total_compensation = total_economic_benefit + total_der_compensation - total_energy_cost + subsidy_amount - demand_cost
 		
-		print(f"Total Energy Cost: ${total_energy_cost:.2f}")
-		print(f"Total DER Compensation: ${total_der_compensation:.2f}")
-		print(f"Total Compensation: ${total_compensation:.2f}")
+		#print(f"Total Energy Cost: ${total_energy_cost:.2f}")
+		#print(f"Total DER Compensation: ${total_der_compensation:.2f}")
+		#print(f"Total Compensation: ${total_compensation:.2f}")
 
 		## Add variables to outData
 		outData['energyCost'] = list(np.asarray(outData['energyCost']) + monthly_energy_cost)
