@@ -12,6 +12,7 @@ import { TopTab } from './topTab.js';
 import { ClusterControlClass } from './clusterControl.js';
 import { MultiselectControlClass } from './multiselectControl.js';
 import { ZoomControlClass } from './zoomControl.js';
+import { ColorModal } from './colorModal.js';
 
 function main() {
     const features = gFeatureCollection.features.map(f => new Feature(f));
@@ -426,12 +427,14 @@ function createEditMenu(controller, nav, topTab) {
     if (gShowAttachmentsButton) {
         dropdownDiv.insertElement({element: getAttachmentsButton(controller)});
     }
-    dropdownDiv.insertElement({element: getRawDataButton(controller)});
+    // - ColorModal needs to be shared between the download data button and the color circuit button
+    const colorModal = new ColorModal([controller.observableGraph.getObservable('omd')], controller);
+    dropdownDiv.insertElement({element: getRawDataButton(controller, colorModal)});
     if (gIsOnline) {
         dropdownDiv.insertElement({element: getClimateButton(controller)});
         dropdownDiv.insertElement({element: getScadaButton(controller)});
     }
-    dropdownDiv.insertElement({element: getColorButton(controller)});
+    dropdownDiv.insertElement({element: getColorButton(controller, colorModal)});
     if (gShowAddGeojsonButton) {
         dropdownDiv.insertElement({element: getGeojsonButton(controller)});
     }

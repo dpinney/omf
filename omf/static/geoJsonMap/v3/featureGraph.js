@@ -62,18 +62,18 @@ class FeatureGraph {
     }
 
     /**
-     * @param {Function} [func=null] - a function that filters features so that only the desired features are returned. The function should take a
-     * single argument (a feature), and should return a boolean depending on whether to include the feature in the array
+     * @param {Function} [filterFunc=null] - a function that filters features so that only the desired features are returned. The function should take
+     * a single argument (a feature), and should return a boolean depending on whether to include the feature in the array
      * - I could argue that the logic executed in Feature.getObservableExportData() could be provided via a function argument, as it is here, so while
      *   the different method signatures violate the interface, I could make both conform to it
      * @returns {Object} a GeoJSON FeatureCollection object
      */
-    getObservableExportData(func=null) {
-        if (func !== null && typeof func !== 'function') {
-            throw TypeError('The "func" argument must be null or a typeof "function".');
+    getObservableExportData(filterFunc=null) {
+        if (filterFunc !== null && typeof filterFunc !== 'function') {
+            throw TypeError('The "filterFunc" argument must be null or a typeof "function".');
         }
-        if (func === null) {
-            func = function(f) {
+        if (filterFunc === null) {
+            filterFunc = function(f) {
                 if (f.getProperty('treeKey', 'meta') === 'omd') {
                     return true;
                 } else {
@@ -83,7 +83,7 @@ class FeatureGraph {
         }
         return { 
             'type': 'FeatureCollection',
-            'features': this.getObservables(func).map(f => f.getObservableExportData())
+            'features': this.getObservables(filterFunc).map(f => f.getObservableExportData())
         };
     }
 

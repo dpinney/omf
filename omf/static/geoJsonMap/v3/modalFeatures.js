@@ -440,35 +440,88 @@ function _getSaveFeature() {
 
 /**
  * @param {FeatureController} controller - a ControllerInterface instance
- * @returns {LoadingSpan}
+ * @param {ColorModal} colorModal - a ColorModal instance
+ * @returns {PropTable}
  */
-function _getRawDataLoadingSpan(controller) {
+function _getRawDataTable(controller, colorModal) {
     if (!(controller instanceof FeatureController)) {
         throw TypeError('The "controller" argument must be instanceof FeatureController.');
     }
-    const loadingSpan = new LoadingSpan();
-    loadingSpan.update({text: 'Opening a window with JSON in it that you can save as a .json file...'});
-    return loadingSpan;
+    if (!(colorModal instanceof ColorModal)) {
+        throw TypeError('The "colorModal" argument must be instanceof ColorModal.');
+    }
+    const propTable = new PropTable();
+    // - Don't close the modal when it is clicked on
+    propTable.div.addEventListener('click', function(e) {
+        e.stopPropagation();
+    });
+    propTable.insertTHeadRow({elements: ['Download GeoJSON file'], colspans: [2]});
+    const label = document.createElement('label');
+    label.htmlFor = 'addColoringProperties';
+    label.innerText = 'Add coloring CSVs properties to GeoJSON file';
+    const colorCheckbox = document.createElement('input');
+    colorCheckbox.type = 'checkbox';
+    colorCheckbox.id = 'addColoringProperties'
+    propTable.insertTBodyRow({elements: [label, colorCheckbox]});
+    const button = new IconLabelButton({text: 'Download'});
+    button.button.classList.add('-blue');
+    button.button.getElementsByClassName('label')[0].classList.add('-white');
+    button.button.addEventListener('click', function() {
+        const exportData = controller.observableGraph.getObservableExportData();
+        if (colorCheckbox.checked) {
+            for (const [filename, colorFile] of Object.entries(colorModal.getColorFiles())) {
+                for (const [columnIndex, colorMap] of Object.entries(colorFile.getColorMaps())) {
+                    const propertyName = colorMap.getColumnName();
+                    for (const feature of exportData.features) {
+                        if (feature.properties.hasOwnProperty('treeProps') && feature.properties.treeProps.hasOwnProperty('name')) {
+                            const name = feature.properties.treeProps.name;
+                            // - We don't handle the case where multiple features share the same name. In such a situation, both exported features
+                            //   will have the same coloring data inserted into them
+                            if (colorMap.getNameToValue().hasOwnProperty(name)) {
+                                // - If the feature already has the propertyName, that means that either one CSV has multiple columns with the same
+                                //   heading, or multiple CSVs have the same column heading. To deal with that, prefix the propertyName
+                                if (feature.properties.hasOwnProperty(propertyName)) {
+                                    feature.properties[`${filename}_${propertyName}`] = colorMap.getNameToValue()[name].value;
+                                } else {
+                                    feature.properties[propertyName] = colorMap.getNameToValue()[name].value;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        const a = document.createElement('a');
+        const blob = new Blob([JSON.stringify(exportData)], {type: 'application/json'});
+        const url = URL.createObjectURL(blob);
+        a.setAttribute('href', url);
+        a.setAttribute('download', 'geojson.json');
+        a.click();
+        URL.revokeObjectURL(url);
+    });
+    propTable.insertTBodyRow({elements: [button.button], colspans: [2]});
+    return propTable;
 }
 
 /**
  * @param {FeatureController} controller - a ControllerInterface instance
+ * @param {ColorModal} colorModal - a ColorModal instance
  * @returns {HTMLButtonElement}
  */
-function getRawDataButton(controller) {
+function getRawDataButton(controller, colorModal) {
     if (!(controller instanceof FeatureController)) {
         throw TypeError('The "controller" argument must be instanceof FeatureController.');
     }
-    const loadingSpan = _getRawDataLoadingSpan(controller);
-    const button = new IconLabelButton({text: 'View raw data'});
-    button.button.classList.add('-white');
+    if (!(colorModal instanceof ColorModal)) {
+        throw TypeError('The "colorModal" argument must be instanceof ColorModal.');
+    }
+    const propTable = _getRawDataTable(controller, colorModal);
     const modalInsert = document.getElementById('modalInsert');
+    const button = new IconLabelButton({text: 'Download data...'});
+    button.button.classList.add('-white');
     button.button.addEventListener('click', function() {
-        modalInsert.replaceChildren(loadingSpan.span);
+        modalInsert.replaceChildren(propTable.div);
         modalInsert.classList.add('visible');
-        const json = JSON.stringify(controller.observableGraph.getObservableExportData());
-        const win = window.open();
-        win.document.write(json);
     });
     return button.button;
 }
@@ -1776,23 +1829,22 @@ function getScadaButton(controller) {
 
 /**
  * @param {FeatureController} controller - a ControllerInterface instance
+ * @param {ColorModal} colorModal - a ColorModal instance
  * @returns {HTMLButtonElement}
  */
-function getColorButton(controller) {
+function getColorButton(controller, colorModal) {
     if (!(controller instanceof FeatureController)) {
         throw TypeError('The "controller" argument must be instanceof FeatureController.');
     }
-
-    const colorModal = new ColorModal([controller.observableGraph.getObservable('omd')], controller);
+    if (!(colorModal instanceof ColorModal)) {
+        throw TypeError('The "colorModal" argument must be instanceof ColorModal.');
+    }
     const divElement = colorModal.getDOMElement();
-
     const button = new IconLabelButton({text: 'Color circuit...'});
     button.button.classList.add('-white');
     const modalInsert = document.getElementById('modalInsert');
     button.button.addEventListener('click', function() {
-
         modalInsert.replaceChildren(divElement);
-
         modalInsert.classList.add('visible');
     });
     return button.button;

@@ -335,6 +335,10 @@ class ColorModal { // implements ModalInterface, ObserverInterface
     // ** Public methods **
     // ********************
 
+    getColorFiles() {
+        return this.#colorFiles;
+    }
+
     // *********************
     // ** Private methods **
     // *********************
@@ -534,10 +538,10 @@ class ColorFile {
         for (let i = 1; i < results.data.length; i++) {
             const row = results.data[i];
             for (let j = 1; j < row.length; j++) {
-                this.#colorMaps[j].mapNameToValue(row[0].toString(), {color: null, float: row[j]});
+                this.#colorMaps[j].mapNameToValue(row[0].toString(), {color: null, value: row[j]});
             }
         }
-        Object.values(this.#colorMaps).forEach(cm => cm.generateColorsFromFloats());
+        Object.values(this.#colorMaps).forEach(cm => cm.generateColorsFromValues());
     }
 
     /**
@@ -601,7 +605,7 @@ class ColorMap {
         const legendLabels = document.createElement('div');
         legendLabels.classList.add('legendlabels');
         legendDiv.append(legendLabels);
-        const values = Object.values(this.#nameToValue).map(obj => obj.float.toString());
+        const values = Object.values(this.#nameToValue).map(obj => obj.value.toString());
         const uniqueValues = [...new Set(values)];
         uniqueValues.sort((a, b) => a.localeCompare(b, 'en', {numeric: true}));
         if (uniqueValues.length > 20) {
@@ -661,11 +665,11 @@ class ColorMap {
 
     /**
      * - After all names have been mapped to numeric values, iterate through the colorMap again and generate color objects
-     *  - this.#nameToValue[<name>]: { color: null, float: <value> }
+     *  - this.#nameToValue[<name>]: { color: null, value: <value> }
      * @returns {undefined}
      */
-    generateColorsFromFloats() {
-        const values = Object.values(this.#nameToValue).map(obj => obj.float.toString());
+    generateColorsFromValues() {
+        const values = Object.values(this.#nameToValue).map(obj => obj.value.toString());
         const uniqueValues = [...new Set(values)];
         uniqueValues.sort((a, b) => a.localeCompare(b, 'en', {numeric: true}));
         // - If there are greater than 20 unique values, assume those values are numeric and use the viridis color map
@@ -674,7 +678,7 @@ class ColorMap {
             const max = Math.max.apply(null, uniqueValues);
             const func = chroma.scale(ColorMap.viridisColors).domain([min, max]);
             for (const obj of Object.values(this.#nameToValue)) {
-                obj.color = func(obj.float);
+                obj.color = func(obj.value);
                 // - I round because later on I need to convert the integer values into a hex string
                 obj.color._rgb = obj.color._rgb.map(float => Math.round(float));
             };
@@ -685,7 +689,7 @@ class ColorMap {
                 nameToIndexMap[uniqueValues[i]] = i;
             }
             for (const obj of Object.values(this.#nameToValue)) {
-                obj.color = chroma(ColorMap.tab20Colors[nameToIndexMap[obj.float]])
+                obj.color = chroma(ColorMap.tab20Colors[nameToIndexMap[obj.value]])
             };
         }
     }
@@ -702,9 +706,13 @@ class ColorMap {
         return this.#columnIndex;
     }
 
+    getNameToValue() {
+        return this.#nameToValue;
+    }
+
     /**
      * @param {string} name - The name of an object to color (e.g. a node name)
-     * @param {string|Object} value - When iterating over a CSV for the first time, only floats are known. Once a Chroma scale has been generated,
+     * @param {string|Object} value - When iterating over a CSV for the first time, only values are known. Once a Chroma scale has been generated,
      *  then colors are also mapped
      * @returns {undefined}
      */
@@ -718,8 +726,8 @@ class ColorMap {
         if (!value.hasOwnProperty('color')) {
             throw TypeError('The "value" argument must have a "color" property.');
         }
-        if (!value.hasOwnProperty('float')) {
-            throw TypeError('The "value" argument must have a "float" property.');
+        if (!value.hasOwnProperty('value')) {
+            throw TypeError('The "value" argument must have a "value" property.');
         }
         if (this.#nameToValue[name] === undefined) {
             this.#nameToValue[name] = {};
@@ -727,8 +735,8 @@ class ColorMap {
         if (value.hasOwnProperty('color')) {
             this.#nameToValue[name].color = value.color;
         }
-        if (value.hasOwnProperty('float')) {
-            this.#nameToValue[name].float = value.float;
+        if (value.hasOwnProperty('value')) {
+            this.#nameToValue[name].value = value.value;
         }
     }
 

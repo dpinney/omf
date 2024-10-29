@@ -95,7 +95,7 @@ class Feature {
 
     /**
      * @returns {Object} a copy of the underlying data of this ObservableInterface instance
-     *  - E.g. a vanilla JavaSCript GeoJSON feature object
+     *  - I.e. a vanilla JavaScript GeoJSON feature object
      */
     getObservableExportData() {
         const clone = structuredClone(this.#feature);
