@@ -637,33 +637,31 @@ def work(modelDir, inputDict):
 					(2880, 3624), (3624, 4344), (4344, 5088), (5088, 5832), 
 					(5832, 6552), (6552, 7296), (7296, 8016), (8016, 8760)]
 	
-	monthlyDemand_smallConsumer = np.asarray([sum(smallConsumerLoad[s:f]) for s, f in monthHours])
-	monthlyDemand_largeConsumer = np.asarray([sum(largeConsumerLoad[s:f]) for s, f in monthHours])
-	monthlyDemandCost_smallConsumer = monthlyDemand_smallConsumer * electricityCost
-	monthlyDemandCost_largeConsumer = monthlyDemand_largeConsumer * electricityCost
-
-
-	BESS_smallConsumer = smallConsumerOutput['ElectricStorage']['storage_to_load_series_kw']
-	BESS_largeConsumer = largeConsumerOutput['ElectricStorage']['storage_to_load_series_kw']
-	monthlyBESS_smallConsumer = np.asarray([sum(BESS_smallConsumer[s:f]) for s, f in monthHours])
-	monthlyBESS_largeConsumer = np.asarray([sum(BESS_largeConsumer[s:f]) for s, f in monthHours])
-	monthlyBESSCost_smallConsumer = monthlyBESS_smallConsumer * compensationRate
-	monthlyBESSCost_largeConsumer = monthlyBESS_largeConsumer * compensationRate
-
-	print('Small Consumer demand cost w/o BESS: ${:,.2f}'.format(np.sum(monthlyDemandCost_smallConsumer)))
-	print('Small Consumer savings with BESS: ${:,.2f} \n'.format(np.sum(monthlyBESSCost_smallConsumer)))	
-	print('Large Consumer demand cost w/o BESS: ${:,.2f}'.format(np.sum(monthlyDemandCost_largeConsumer)))
-	print('Large Consumer savings with BESS: ${:,.2f}'.format(np.sum(monthlyBESSCost_largeConsumer)))
+	load_smallConsumer_monthly = np.asarray([sum(smallConsumerLoad[s:f]) for s, f in monthHours])
+	load_largeConsumer_monthly = np.asarray([sum(largeConsumerLoad[s:f]) for s, f in monthHours])
+	loadCost_smallConsumer_monthly = load_smallConsumer_monthly * electricityCost
+	loadCost_largeConsumer_monthly = load_largeConsumer_monthly * electricityCost
 
 
 	if 'ElectricStorage' in reoptResults: ## BESS
-		BESS = reoptResults['ElectricStorage']['storage_to_load_series_kw']
-		BESS_compensated_to_consumer = np.sum(BESS)*compensationRate+subsidy
+		BESS_utility = reoptResults['ElectricStorage']['storage_to_load_series_kw']
+		BESS_smallConsumer = smallConsumerOutput['ElectricStorage']['storage_to_load_series_kw']
+		BESS_largeConsumer = largeConsumerOutput['ElectricStorage']['storage_to_load_series_kw']
+		BESS_smallConsumer_monthly = np.asarray([sum(BESS_smallConsumer[s:f]) for s, f in monthHours])
+		BESS_largeConsumer_monthly = np.asarray([sum(BESS_largeConsumer[s:f]) for s, f in monthHours])
+		BESSCost_smallConsumer_monthly = BESS_smallConsumer_monthly * compensationRate
+		BESSCost_largeConsumer_monthly = BESS_largeConsumer_monthly * compensationRate
+
+		print('Small Consumer consumption cost (w/o BESS): ${:,.2f}'.format(np.sum(loadCost_smallConsumer_monthly)))
+		print('Small Consumer savings for BESS only: ${:,.2f} \n'.format(np.sum(BESSCost_smallConsumer_monthly)))	
+		print('Large Consumer consumption cost (w/o BESS): ${:,.2f}'.format(np.sum(loadCost_largeConsumer_monthly)))
+		print('Large Consumer savings for BESS only: ${:,.2f}'.format(np.sum(BESSCost_largeConsumer_monthly)))
+		BESS_compensated_to_consumer = np.sum(BESS_utility)*compensationRate+subsidy
 		print('--------------------------------------------------------')
-		print('Utility"s total compensation rate for consumer BESS: ${:,.2f}'.format(BESS_compensated_to_consumer))
-		BESS_bought_from_grid = np.sum(BESS) * electricityCost
-		print('Electricity Cost of BESS: ${:,.2f}'.format(BESS_bought_from_grid))
-		print('Difference (electricity cost - compensated cost): ${:,.2f}'.format(BESS_bought_from_grid-BESS_compensated_to_consumer))
+		print('Utility total compensation for consumer BESS ($ annually): ${:,.2f}'.format(BESS_compensated_to_consumer))
+		BESS_bought_from_grid = np.sum(BESS_utility) * electricityCost
+		print('Utility BESS savings (1 year BESS kWh x electricity cost): ${:,.2f}'.format(BESS_bought_from_grid))
+		print('Difference (Utility BESS savings - Compensation to consumers): ${:,.2f}'.format(BESS_bought_from_grid-BESS_compensated_to_consumer))
 
 	# Model operations typically ends here.
 	# Stdout/stderr.
