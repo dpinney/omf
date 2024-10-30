@@ -488,31 +488,6 @@ def tradMetricsByMgTable(outputTimeline, loadMgDict, startTime, numTimeSteps, mo
 				'Average CCI': averageCCI,
 				'Average CCIxPriorities': averageCCIxPriorities}
 
-	# Can't just extract dictionary values because they have to be ordered the same corresponding to loads and we shouldn't rely on dicts staying ordered
-	orderedCciAndTaidi = [[],[]]
-	for load, cci in loadCciDict.items():
-		orderedCciAndTaidi[0].append(cci)
-		orderedCciAndTaidi[1].append(taidiDict[load])
-	cciTaidiCorr = round(np.corrcoef(orderedCciAndTaidi)[0][1],3)
-	sign = ' negative ' if cciTaidiCorr < 0 else ' '
-	corr = abs(cciTaidiCorr)
-	if corr == 0:
-		level = "No"
-	elif corr < 0.3:
-		level = 'Very low'
-	elif corr < 0.5:
-		level = 'Low'
-	elif corr < 0.7:
-		level = 'Moderate'
-	elif corr < 0.9:
-		level = 'High'
-	else:
-		level = 'Very high'
-	# Levels taken from https://www.andrews.edu/~calkins/math/edrm611/edrm05.htm#:~:text=Correlation%20coefficients%20whose%20magnitude%20are%20between%200.7%20and%200.9%20indicate,can%20be%20considered%20moderately%20correlated.
-	cciTaidiCorrReport = f'{cciTaidiCorr}\\n({level}{sign}correlation)'
-
-
-
 	loadsPerMg = {}
 	for load,mg in loadMgDict.items():
 		loadsPerMg[mg] = loadsPerMg.get(mg,[])+[load]
@@ -536,7 +511,6 @@ def tradMetricsByMgTable(outputTimeline, loadMgDict, startTime, numTimeSteps, mo
 					<th>Est. People Served</th>
 					<th>Average CCI</th>
 					<th>Ave. CCI merged w/ Load Priorities</th>
-					<th>CCI & TAIDI\\nCorrelation</th>
 				</tr>
 			</thead>
 			<tbody>"""
@@ -551,7 +525,6 @@ def tradMetricsByMgTable(outputTimeline, loadMgDict, startTime, numTimeSteps, mo
 						<td>{ systemwideMetrics["Sum BCS"] }</td>
 						<td>{ systemwideMetrics["Average CCI"] }</td>
 						<td>{ systemwideMetrics["Average CCIxPriorities"] }</td>
-						<td>{ cciTaidiCorrReport }</td>
 					</tr>"""
 	for mg, metrics in metricsPerMg.items():
 		mg_html_str += f"""
@@ -565,7 +538,6 @@ def tradMetricsByMgTable(outputTimeline, loadMgDict, startTime, numTimeSteps, mo
 							<td>{ metrics["Sum BCS"] }</td>
 							<td>{ metrics["Average CCI"] }</td>
 							<td>{ metrics["Average CCIxPriorities"] }</td>
-							<td>{ "N/A" }</td>
 						</tr>"""
 	mg_html_str +="""</tbody></table>"""
 	with open(pJoin(modelDir, 'mgTradMetricsTable.html'), 'w') as customerOutageFile:
@@ -949,30 +921,55 @@ def makeTaifiAndTaidiHist(outputTimeline, startTime, numTimeSteps, loadList):
 	)
 	return taifiHist, taidiHist, TAIFI, TAIDI
 
-def makeCciTaidiTaifiScatter(loadCciDict, TAIDI, TAIFI):
-	'''
+def makeCciTaifiTaidiScatter(loadCciDict, TAIFI, TAIDI):
+	''' Returns scatter plots of TAIFI vs CCI and TAIDI vs CCI with accompanying correlation coefficient. 
 	'''
 	# TODO: make docstring
+	# Enforce standard ordering
 	orderedVals = {'CCI':[], 'TAIDI':[], 'TAIFI':[]}
 	for load, cci in loadCciDict.items():
 		orderedVals['CCI'].append(cci)
 		orderedVals['TAIDI'].append(TAIDI[load])
 		orderedVals['TAIFI'].append(TAIFI[load])
 	orderedVals['TAIFI'] = np.nan_to_num(orderedVals['TAIFI'])
+	dfOrderedVals = pd.DataFrame(orderedVals)
+
+	def makeCorrReport(var1,var2):
+		''' Takes two variable names as input and returns a string reporting the correlation and an interpretation of it.'''
+		corr = round(np.corrcoef(dfOrderedVals[var1],dfOrderedVals[var2])[0][1],3)
+		sign = ' negative ' if corr < 0 else ' '
+		absCorr = abs(corr)
+		if absCorr == 0:
+			level = "No"
+		elif absCorr < 0.3:
+			level = 'Very low'
+		elif absCorr < 0.5:
+			level = 'Low'
+		elif absCorr < 0.7:
+			level = 'Moderate'
+		elif absCorr < 0.9:
+			level = 'High'
+		else:
+			level = 'Very high'
+		# Levels taken from https://www.andrews.edu/~calkins/math/edrm611/edrm05.htm#:~:text=Correlation%20coefficients%20whose%20magnitude%20are%20between%200.7%20and%200.9%20indicate,can%20be%20considered%20moderately%20correlated.
+		return f'R = {corr} ({level}{sign}correlation)'
 	
 	cciTaidiScatter = px.scatter(
 		pd.DataFrame(orderedVals),
 		x='CCI',
 		y='TAIDI',
-		trendline="ols"
+		trendline="ols",
+		title = makeCorrReport('CCI','TAIDI'),
+		color_discrete_sequence=["red"]
 	)
 	cciTaifiScatter = px.scatter(
 		pd.DataFrame(orderedVals),
 		x='CCI',
 		y='TAIFI',
-		trendline="ols"
+		trendline="ols",
+		title = makeCorrReport('CCI','TAIFI'),
 		)
-	return cciTaidiScatter, cciTaifiScatter
+	return cciTaifiScatter, cciTaidiScatter
 
 def getMicrogridInfo(modelDir, pathToOmd, settingsFile, makeCSV = True):
 	'''	Gathers microgrid info including loads and other circuit objects in each microgrid by finding what microgrid each load's parent bus is designated as having. 
@@ -1645,7 +1642,7 @@ def graphMicrogrid(modelDir, pathToOmd, profit_on_energy_sales, restoration_cost
 
 	outageIncidenceFig, mgOIFigs = outageIncidenceGraph(customerOutageData, outputTimeline, startTime, numTimeSteps, loadPriorityFile, loadMgDict)
 	taifiHist, taidiHist, TAIFI, TAIDI = makeTaifiAndTaidiHist(outputTimeline, startTime, numTimeSteps, list(loadMgDict.keys()))
-	cciTaidiScatter, cciTaifiScatter = makeCciTaidiTaifiScatter(loadCciDict, TAIDI, TAIFI)
+	cciTaifiScatter, cciTaidiScatter = makeCciTaifiTaidiScatter(loadCciDict, TAIFI, TAIDI)
 	tradMetricsHtml, cciQuartTradMetricsHtml = tradMetricsByMgTable(outputTimeline, loadMgDict, startTime, numTimeSteps, modelDir, loadCciDict, loadBcsDict, TAIDI, loadPriorityFile)
 
 	customerOutageHtml = customerOutageTable(customerOutageData, outageCost, modelDir)

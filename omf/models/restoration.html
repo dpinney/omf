@@ -213,6 +213,13 @@
 				Plotly.newPlot("taifiHistChart", JSON.parse(allOutputData["taifiHistData"]), JSON.parse(allOutputData["taifiHistLayout"]) || {})
 			</script>
 		</div>
+		<p class="reportTitle"><label class="tooltip">TAIFI vs CCI<span class="classic">Hover over the trendline for its equation.</span></label></p>
+		<div id="cciTaifiScatter" class="tightContent">
+			<div id="cciTaifiScatterChart" style="width:1000px"></div>
+			<script type="text/javascript">
+				Plotly.newPlot("cciTaifiScatterChart", JSON.parse(allOutputData["cciTaifiScatter"]), {})
+			</script>
+		</div>
 		<p class="reportTitle"><label class="tooltip">TAIDI Histogram<span class="classic">Time Average Interruption Duration Index (TAIDI) is the percent of the total simulation time during which a particular load is experiencing an interruption. E.g. If load_x experiences a 1 hour interruption, regains power for an hour, and then experiences a 2 hour interruption during a 24 hour simulation, the TAIDI for load_x would be 3/24 = 12.5%</span></label></p>
 		<div id="taidiHist" class="tightContent">
 			<div id="taidiHistChart" style="width:1000px"></div>
@@ -220,22 +227,13 @@
 				Plotly.newPlot("taidiHistChart", JSON.parse(allOutputData["taidiHistData"]), JSON.parse(allOutputData["taidiHistLayout"]) || {})
 			</script>
 		</div>
-
-		<p class="reportTitle"><label class="tooltip">CCI vs TAIDI Scatter<span class="classic">Tooltip filler</span></label></p>
+		<p class="reportTitle"><label class="tooltip">TAIDI vs CCI<span class="classic">Hover over the trendline for its equation.</span></label></p>
 		<div id="cciTaidiScatter" class="tightContent">
 			<div id="cciTaidiScatterChart" style="width:1000px"></div>
 			<script type="text/javascript">
-				Plotly.newPlot("cciTaidiScatterChart", JSON.parse(allOutputData["cciTaidiScatter"]), JSON.parse(allOutputData["taidiHistLayout"]) || {})
+				Plotly.newPlot("cciTaidiScatterChart", JSON.parse(allOutputData["cciTaidiScatter"]), {})
 			</script>
 		</div>
-		<p class="reportTitle"><label class="tooltip">CCI vs TAIFI Scatter<span class="classic">Tooltip filler</span></label></p>
-		<div id="cciTaifiScatter" class="tightContent">
-			<div id="cciTaifiScatterChart" style="width:1000px"></div>
-			<script type="text/javascript">
-				Plotly.newPlot("cciTaifiScatterChart", JSON.parse(allOutputData["cciTaifiScatter"]), JSON.parse(allOutputData["taidiHistLayout"]) || {})
-			</script>
-		</div>
-
 		<p class="reportTitle" style="page-break-before:always">Utility Outage Cost</p>
 		<div id="utilityOutageCostCalc" class="tightContent">
 			{{ allOutputDataDict['utilityOutageHtml'] }}
