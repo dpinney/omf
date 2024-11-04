@@ -44,8 +44,8 @@ def work(modelDir, inputDict):
 		'macrs_bonus_fraction': '0.4',
 		'replace_cost_per_kw': '10.0', 
 		'replace_cost_per_kwh': '5.0', 
-		'installed_cost_per_kw': '10.0',
-		'installed_cost_per_kwh': '5.0',
+		'installed_cost_per_kw': '200.0', ## 300-700 per kW
+		'installed_cost_per_kwh': '200.0', ## 200-400 per kWh
 		'total_itc_fraction': '0.0',
 	})
 
@@ -184,7 +184,7 @@ def work(modelDir, inputDict):
 		'utilityProgram': 'No',
 		'rateCompensation': '0.1', ## unit: $/kWh
 		#'maxBESSDischarge': '0.80', ## Between 0 and 1 (Percent of total BESS capacity) #TODO: Fix the HTML input for this
-		'subsidy': '55',
+		'subsidy': '12',
 	}
 	smallConsumerOutput = derConsumer.work(newDir_smallderConsumer,derConsumerInputDict)
 
@@ -197,8 +197,8 @@ def work(modelDir, inputDict):
 	## Change directory back to derUtilityCost
 	os.chdir(modelDir)
 	outData.update({
-		'savingsSmallConsumer': smallConsumerOutput['savings'],
-		'savingsLargeConsumer': largeConsumerOutput['savings']
+		'TESSsavingsSmallConsumer': smallConsumerOutput['savings'],
+		'TESSsavingsLargeConsumer': largeConsumerOutput['savings']
 	})
 
 	## DER Overview plot ###################################################################################################################################################################
@@ -630,7 +630,7 @@ def work(modelDir, inputDict):
 	#####################################################################################################################################################################################################
 	## Compensation rate to member-consumer
 	compensationRate = float(inputDict['rateCompensation'])
-	subsidy = float(inputDict['subsidy'])
+	subsidy = float(inputDict['subsidy']) ## TODO: Amount for the entire analysis - should we divide this up by # of months and add to the monthly consumer savings?
 	electricityCost = float(inputDict['electricityCost'])
 
 	monthHours = [(0, 744), (744, 1416), (1416, 2160), (2160, 2880), 
@@ -642,16 +642,32 @@ def work(modelDir, inputDict):
 	loadCost_smallConsumer_monthly = load_smallConsumer_monthly * electricityCost
 	loadCost_largeConsumer_monthly = load_largeConsumer_monthly * electricityCost
 
-
-	if 'ElectricStorage' in reoptResults: ## BESS
-		BESS_utility = reoptResults['ElectricStorage']['storage_to_load_series_kw']
-		BESS_smallConsumer = smallConsumerOutput['ElectricStorage']['storage_to_load_series_kw']
-		BESS_largeConsumer = largeConsumerOutput['ElectricStorage']['storage_to_load_series_kw']
+	## Check if REopt results include a BESS output that is not an empty list
+	if 'ElectricStorage' in reoptResults and any(reoptResults['ElectricStorage']['storage_to_load_series_kw']):
+		BESS_utility = reoptResults['ElectricStorage']['storage_to_load_series_kw'] ## The BESS that is recommended for the utility
+		BESS_smallConsumer = smallConsumerOutput['ElectricStorage']['storage_to_load_series_kw'] ## A scaled down version of the utility's load to represent a small consumer (1 kWh average load)
+		BESS_largeConsumer = largeConsumerOutput['ElectricStorage']['storage_to_load_series_kw'] ## A scaled down version of the utility's load to represent a large consumer (10 kWh average load)
 		BESS_smallConsumer_monthly = np.asarray([sum(BESS_smallConsumer[s:f]) for s, f in monthHours])
 		BESS_largeConsumer_monthly = np.asarray([sum(BESS_largeConsumer[s:f]) for s, f in monthHours])
 		BESSCost_smallConsumer_monthly = BESS_smallConsumer_monthly * compensationRate
 		BESSCost_largeConsumer_monthly = BESS_largeConsumer_monthly * compensationRate
 
+		## Divide subsidy amount up into the monthly consumer savings
+		subsidy_monthly = np.full(12, subsidy/12)
+
+		## Add BESS + TESS + subsidy(divided by 12 months) = total savings
+		TESSCost_smallConsumer_monthly = np.asarray(outData['TESSsavingsSmallConsumer'])
+		TESSCost_largeConsumer_monthly = np.asarray(outData['TESSsavingsLargeConsumer'])
+		totalCost_smallConsumer_monthly = TESSCost_smallConsumer_monthly + BESSCost_smallConsumer_monthly + subsidy_monthly
+		totalCost_largeConsumer_monthly = TESSCost_largeConsumer_monthly + BESSCost_largeConsumer_monthly + subsidy_monthly
+
+		## Update the consumer savings output to represent both thermal BESS (vbatDispatch results) and REopt's BESS results
+		outData.update({
+			'totalSavingsSmallConsumer': list(totalCost_smallConsumer_monthly),
+			'totalSavingsLargeConsumer': list(totalCost_largeConsumer_monthly)
+		})
+
+		## Print some monthly costs/savings for analysis
 		print('Small Consumer consumption cost (w/o BESS): ${:,.2f}'.format(np.sum(loadCost_smallConsumer_monthly)))
 		print('Small Consumer savings for BESS only: ${:,.2f} \n'.format(np.sum(BESSCost_smallConsumer_monthly)))	
 		print('Large Consumer consumption cost (w/o BESS): ${:,.2f}'.format(np.sum(loadCost_largeConsumer_monthly)))
