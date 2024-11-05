@@ -809,5 +809,77 @@
 				})
 			}
 		})
+
+	/**
+	 * Take in two arrays as [A,B], return [[a1,b1],[a2,b2,],...]
+	 */
+	function zip(arrays) {
+		return arrays[0].map(function(_,i){
+			return arrays.map(function(array){return array[i]})
+		})
+	}
+
+	/**
+	 * Group inL as compared by eqRel. Make sure the eqRel is an equivalence relation, or your brain will hurt.
+	 */
+	function partition(inL, eqRel) {
+		if (inL.length == 0) {return inL}
+		if (inL.length == 1) {return [inL]}
+		accum = []
+		work = [inL[0]]
+		for (i=1;i<inL.length;i++) {
+			if (eqRel(inL[i], work[0])) {
+				work.push(inL[i])
+			}
+			else {
+				accum.push(work)
+				work = [inL[i]]
+			}
+		}
+		accum.push(work)
+		return accum
+	}
+
+	/**
+	 * Take [A1,A2,...An] and return an in-order list of the items in each Ai.
+	 */
+	function flatten1(matrix) {
+		accum = []
+		for (i=0;i<matrix.length;i++) {
+			if (typeof matrix[i] == 'object') {
+				for (j=0;j<matrix[i].length;j++) {
+					accum.push(matrix[i][j])
+				}
+			} else {
+				accum.push(matrix[i])
+			}
+		}
+		return accum
+	}
+
+	/**
+	 * Get max of an array 
+	 */
+	function arrMax(arr) {
+		return Math.max.apply(null,arr)
+	}
+
+	/**
+	 * Sum an array.
+	 */
+	function arrSum(arr) {
+		return arr.reduce(function(x,y){return x+y})
+	}
+
+	/**
+	 * Given an array of objects, return the first one where fun(arr[i]) is true.
+	 */
+	function indexFind(arr, fun) {
+		for (i=0;i<arr.length;i++) {
+			if (fun(arr[i])) {return i}
+		}
+		return -1
+	}
+
 	</script>
 </body>
