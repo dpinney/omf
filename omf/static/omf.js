@@ -25,27 +25,6 @@ function gebi(id) {
 	return document.getElementById(id)
 }
 
-function clone(obj) {
-	// Deep copy of a given obj.
-	// Todo: move into gridEdit.html, remove from here.
-	if (null == obj || "object" != typeof obj) return obj;
-	var copy = obj.constructor();
-	for (var attr in obj) {
-		if (obj.hasOwnProperty(attr)) copy[attr] = obj[attr];
-	}
-	return copy;
-}
-
-function tableClear(table) {
-	// Todo: move into gridEdit.html, remove from here.
-	try {
-		while (table.rows.length>0) table.deleteRow(table.rows.length-1)
-	}
-	catch (err) {
-		// Catch: we didn't have any rows.
-	}
-}
-
 function time(func) {
 	// How long does func take to execute?
 	// Todo: move into microgridPlan.html
@@ -58,93 +37,6 @@ function time(func) {
 function round(number,precision) {
 	// Simple rounding function used a couple different places.
 	return parseFloat(number.toPrecision(precision))
-}
-
-function randomGaussian() {
-	// Get a Gaussian from a uniform(0,1) via the Box-Muller transform.
-	// Todo: move into gridEdit.html, remove from here.
-	do {
-		x1 = 2 * Math.random() - 1
-		x2 = 2 * Math.random() - 1
-		rad = x1 * x1 + x2 * x2
-	} while (rad >= 1 || rad == 0)
-	c = Math.sqrt(-2 * Math.log(rad) / rad);
-	return x1 * c
-}
-
-function randomChoice(inList) {
-	// Todo: move into gridEdit.html, remove from here.
-	return inList[Math.floor(Math.random() * inList.length)]
-}
-
-function randomInt(min,max) {
-	// Todo: move into gridEdit.html, remove from here.
-	return Math.floor(Math.random()*(max - min + 1) + min)
-}
-
-function zip(arrays) {
-	// Take in two arrays as [A,B], return [[a1,b1],[a2,b2,],...]
-	// Todo: move into gridlabmulti, remove from here.
-	return arrays[0].map(function(_,i){
-		return arrays.map(function(array){return array[i]})
-	})
-}
-
-function partition(inL, eqRel) {
-	// Group inL as compared by eqRel. Make sure the eqRel is an equivalence relation, or your brain will hurt.
-	// Todo: move into gridlabmulti, remove from here.
-	if (inL.length == 0) {return inL}
-	if (inL.length == 1) {return [inL]}
-	accum = []
-	work = [inL[0]]
-	for (i=1;i<inL.length;i++) {
-		if (eqRel(inL[i], work[0])) {
-			work.push(inL[i])
-		}
-		else {
-			accum.push(work)
-			work = [inL[i]]
-		}
-	}
-	accum.push(work)
-	return accum
-}
-
-function flatten1(matrix) {
-	// Take [A1,A2,...An] and return an in-order list of the items in each Ai.
-	// Todo: move into gridlabmulti, remove from here.
-	accum = []
-	for (i=0;i<matrix.length;i++) {
-		if (typeof matrix[i] == 'object') {
-			for (j=0;j<matrix[i].length;j++) {
-				accum.push(matrix[i][j])
-			}
-		} else {
-			accum.push(matrix[i])
-		}
-	}
-	return accum
-}
-
-function arrMax(arr) {
-	// Get max of an array.
-	// Todo: move into gridlabmulti, remove from here.
-	return Math.max.apply(null,arr)
-}
-
-function arrSum(arr) {
-	// Sum an array.
-	// Todo: move into gridlabmulti, remove from here.
-	return arr.reduce(function(x,y){return x+y})
-}
-
-function indexFind(arr, fun) {
-	// Given an array of objects, return the first one where fun(arr[i]) is true.
-	// Todo: move into gridlabmulti, remove from here.
-	for (i=0;i<arr.length;i++) {
-		if (fun(arr[i])) {return i}
-	}
-	return -1
 }
 
 function dropPill(thisButton, name) {
