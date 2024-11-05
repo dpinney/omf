@@ -783,13 +783,18 @@ def stats(mc, sustainedOutageThresholdSeconds, numberOfCustomers):
 				customersAffectedMomentary += meter_count
 
 	mc.apply(parse_row, axis=1)
-
 	# Calc stats
-	SAIDI = round((customerInterruptionDurations / numberOfCustomers)/count_years, 5)
-	SAIFI = round((customersAffected / numberOfCustomers)/count_years, 5)
-	CAIDI = (0 if SAIDI == 0 else round(SAIDI / SAIFI, 5))
-	ASAI = round((numberOfCustomers * 8760 * count_years * 60 - customerInterruptionDurations) / (numberOfCustomers * count_years * 8760 * 60), 5)
-	MAIFI = round((customersAffectedMomentary / numberOfCustomers)/count_years, 5)
+	SAIDI = 0
+	SAIFI = 0
+	CAIDI = 0
+	ASAI = 0
+	MAIFI = 0
+	if count_years > 0:
+		SAIDI = round((customerInterruptionDurations / numberOfCustomers)/count_years, 5)
+		SAIFI = round((customersAffected / numberOfCustomers)/count_years, 5)
+		CAIDI = (0 if SAIDI == 0 else round(SAIDI / SAIFI, 5))
+		ASAI = round((numberOfCustomers * 8760 * count_years * 60 - customerInterruptionDurations) / (numberOfCustomers * count_years * 8760 * 60), 5)
+		MAIFI = round((customersAffectedMomentary / numberOfCustomers)/count_years, 5)
 	# And return
 	return SAIDI, SAIFI, CAIDI, ASAI, MAIFI
 
