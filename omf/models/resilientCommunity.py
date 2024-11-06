@@ -2045,7 +2045,6 @@ def runCalculations(pathToOmd,modelDir, equipmentList):
     obDict, loads, geoDF = getDownLineLoadsEquipmentTract(pathToOmd, equipmentList)
 
 
-    geoDF.to_file('/Users/davidarmah/Documents/omf/omf/static/testFiles/resilientCommunity/dataframe.geojson', driver='GeoJSON')  
 
     
 

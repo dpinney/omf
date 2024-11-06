@@ -235,7 +235,7 @@
 				<input type="text" id="resistance" name="resistance" value="{{allInputDataDict.resistance}}" pattern="^\d+\.?\d*?$" required="required">
 			</div>			
 			<div class="shortInput">
-				<label class="tooltip">COP<span class="classic">Coefficient of performance of each device. Must be between 1 and 3.5</span></label>
+				<label class="tooltip">Coefficient of Performance<span class="classic">Coefficient of performance of each device. Must be between 1 and 3.5</span></label>
 				<input type="text" id="cop" name="cop" value="{{allInputDataDict.cop}}" pattern="^\d+\.?\d*?$" required="required">
 			</div>
 			<div class="shortInput">
@@ -285,7 +285,7 @@
 		<div id="thermalDevicePlotData" class="tightContent" style="width: 1000px; height: 600px;"></div>
 		-->
 
-		<p class="reportTitle" style="page-break-before:always">Battery Charge Percentage</p>
+		<p class="reportTitle" style="page-break-before:always">Chemical BESS Charge Percentage</p>
 		<div id="batteryChargePlotly" class="tightContent" style="width: 1000px; height: 600px;"></div>
 
 		<p class="reportTitle" style="page-break-before:always">Resilience Overview</p>
@@ -341,8 +341,8 @@
 					insertMetric("monthlySummaryTable","Total Cost ($)", allOutputData.totalCost)
 					insertMetric("monthlySummaryTable","Adjusted Total Cost ($)", allOutputData.totalCostAdjusted)
 					insertMetric("monthlySummaryTable","Utility Savings ($)", allOutputData.savings)
-					insertMetric("monthlySummaryTable","1 kW Consumer Savings ($)", allOutputData.savingsSmallConsumer)
-					insertMetric("monthlySummaryTable","10 kW Consumer Savings ($)", allOutputData.savingsLargeConsumer)
+					insertMetric("monthlySummaryTable","1 kW Consumer Savings ($)", allOutputData.totalSavingsSmallConsumer)
+					insertMetric("monthlySummaryTable","10 kW Consumer Savings ($)", allOutputData.totalSavingsLargeConsumer)
 				</script>
 			</div>
 		</div>

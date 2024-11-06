@@ -433,11 +433,7 @@ def work(modelDir, inputDict):
 	else:
 		PV = np.zeros_like(demand)
 	
-	## NOTE: This section for BESS uses REopt's BESS, which we are finding is inconsistent and tends to not work
-	## unless an outage is specified and no generator is enabled (if we specify a generator, REopt will not build a BESS). 
-	## We are instead going to try to use our own BESS model.
-	## Currently, the BESS model is only being run when considering a DER utility program is enabled.
-	## TODO: Change this to instead check for BESS in the output file, rather than input
+	## Using REopt's Battery Energy Storage System (BESS) output
 	if 'ElectricStorage' in reoptResults and any(reoptResults['ElectricStorage']['storage_to_load_series_kw']): ## BESS
 		print("Using REopt's BESS output. \n")
 		BESS = reoptResults['ElectricStorage']['storage_to_load_series_kw']
@@ -445,267 +441,25 @@ def work(modelDir, inputDict):
 		if 'PV' in reoptResults:
 			grid_charging_BESS += np.asarray(reoptResults['PV']['electric_to_storage_series_kw'])
 		outData['chargeLevelBattery'] = reoptResults['ElectricStorage']['soc_series_fraction']
+
+		## Update the monthly consumer savings
+		## Add BESS compensation amount to vbatDispatch's thermal BESS savings
+		monthHours = [(0, 744), (744, 1416), (1416, 2160), (2160, 2880), 
+				(2880, 3624), (3624, 4344), (4344, 5088), (5088, 5832), 
+				(5832, 6552), (6552, 7296), (7296, 8016), (8016, 8760)]
+		BESS_compensation_monthly = np.asarray([sum(BESS[s:f]) for s, f in monthHours])
+		outData['savings'] = list(np.asarray(outData['savings'])+np.asarray(BESS_compensation_monthly)) ## NOTE: There is likely a better way to add two lists together, but this works for now
+
 	else:
 		print('No BESS found in REopt: Setting BESS data to 0. \n')
 		BESS = np.zeros_like(demand)
 		grid_charging_BESS = np.zeros_like(demand)
 		outData['chargeLevelBattery'] = np.zeros_like(demand)
-		
-	#BESS = np.zeros_like(demand)
-	#grid_charging_BESS = np.zeros_like(demand)
-	#outData['chargeLevelBattery'] = list(np.zeros_like(demand))
 
 	## NOTE: The following 3 lines of code read in the SOC info from a static reopt test file 
 	#with open(pJoin(__neoMetaModel__._omfDir,'static','testFiles','residential_reopt_results.json')) as f:
 	#	static_reopt_results = json.load(f)
 	#outData['chargeLevelBattery'] = static_reopt_results['outputs']['ElectricStorage']['soc_series_fraction']
-
-	########## DER Sharing Program options ######################################################################################################################################################
-	if (inputDict['utilityProgram']):
-		print('Considering utility DER sharing program \n')
-
-		## Gather TOU rates
-		#latitude = float(inputDict['latitude'])
-		#longitude = float(inputDict['longitude'])
-		## TODO: To make this more modular, require user to input specific urdb label and use the getpage variable in get_tou_rates() function
-		## NOTE: Temporarily override lat/lon for a utility that has TOU rates specifically
-		inputDict['latitude'] = 39.986771 
-		inputDict['longitude'] = -104.812599 ## Brighton, CO
-		rate_info = get_tou_rates(modelDir, inputDict)
-
-		## Look at all the "name" keys containing "TOU" or "time of use"
-		#filtered_names = [item['name'] for item in rate_info['items'] if 'TOU' in item['name'] or 'time-of-use' in item['name'] or 'Time of Use' in item['name']]
-		#for name in filtered_names: 
-		#	print(name)	## Print the filtered names
-
-		## Select one of the name keys (in this case, the residential TOU)
-		TOUdata = []
-		TOUname = 'Residential Time of Use'
-		for item in rate_info['items']:
-			if item['name'] == TOUname:
-				TOUdata.append(item)
-		#print(TOUdata)
-
-		## NOTE: ad-hoc TOU rates were used when the rate_info was not working.
-		#tou_rates = get_tou_rates_adhoc()
-
-		PV_series = pd.Series(PV, index=timestamps)
-		demand_series = pd.Series(demand, index=timestamps)
-		temperature_series = pd.Series(temperatures, index=timestamps)
-		BESS_series = pd.Series(BESS, index=timestamps)
-		#grid_serving_load_series = pd.Series(grid_to_load, index=timestamps) 
-		## NOTE: REopt gives grid_to_load, but for now I'm just prioritizing DERs serving the load and buying grid if needed.
-		## If we don't want to prioritize DERs serving the load before buying from grid, then need to integrate REopt's grid_to_load
-		## into the code loop below.
-
-		## Create weekday and weekend TOU schedules
-		weekday_tou_schedule = create_tou_schedule(TOUdata[0]['energyweekdayschedule'])
-		weekend_tou_schedule = create_tou_schedule(TOUdata[0]['energyweekendschedule'])
-
-		## Combine the weekday and weekend schedules
-		tou_schedules = {'weekday': weekday_tou_schedule, 'weekend': weekend_tou_schedule}
-		tou_structure = TOUdata[0]['energyratestructure']
-		fixed_monthly_charge = TOUdata[0]['fixedmonthlycharge']
-		compensation_rate = float(inputDict['rateCompensation'])
-		subsidy_amount = float(inputDict['subsidy'])
-
-		## Identify the on- and off-peak periods
-		on_peak_periods = []
-		off_peak_periods = []
-		for period, rate in enumerate(tou_structure):
-			if rate[0]['rate'] == max(tou_structure, key=lambda x: x[0]['rate'])[0]['rate']:
-				on_peak_periods.append(period)
-			if rate[0]['rate'] == min(tou_structure, key=lambda x: x[0]['rate'])[0]['rate']:
-				off_peak_periods.append(period)
-
-		## Create dataframe to store the schedule
-		schedule = pd.DataFrame({
-			'Solar Generation (kW)': PV_series,
-			'Household Demand (kW)': demand_series,
-			'Grid Serving Load (kW)': np.zeros(len(timestamps)),  ## Placeholder; will get updated in the loop
-			'Battery State of Charge': np.zeros(len(timestamps)),  ## Placeholder 
-		}, index=timestamps)
-
-		## BESS physical parameters
-		## TODO: Create user inputs on the HTML side if keeping this battery model
-		battery_energy_capacity = 13.5 ## kWh; Tesla Powerwall 2
-		battery_max_charge_rate = 3.3  ## kW
-		battery_max_discharge_rate = 3.3  ## kW
-		#battery_efficiency = 0.9  # Efficiency of the battery ## NOTE: maybe add this in later?
-		battery_soc = 0  ## Initial battery state of charge
-		battery_soc_min = 0.2 * battery_energy_capacity  ## Min= 20% of battery capacity
-
-		## BESS allowed for utility use
-		## NOTE: I just realized that this code is set up to only use 80% of the battery to do peak shaving, rather than
-		## giving/selling the 80% to the utility. TODO: how do we modify this? Lisa and I are thinking of ways to do (and plot) this
-		max_utility_usage_percentage = 1 #float(inputDict['maxBESSDischarge'])  ## Up to 80% of the total battery charge
-		max_utility_usage = battery_energy_capacity * max_utility_usage_percentage
-
-		## Initial variables to be updated in the loop
-		economic_benefit = 0  ## Economic benefit of storing excess solar. NOTE: Is this useful?
-		total_economic_benefit = 0
-		total_energy_cost = 0  ## The total cost of energy 
-		total_der_compensation = 0  ## The total DER compensation amount (when DERs are discharged)
-		max_demand_periods = {period: 0 for period in range(len(tou_structure))}  ## The max demand during each period (for calculating the demand cost)
-
-		## Initial monthly cost tracking variables
-		monthly_energy_cost = [0] * 12
-		monthly_der_compensation = [0] * 12
-		monthly_economic_benefit = [0] * 12
-
-		for i in range(1, len(timestamps)):
-			timestamp = timestamps[i] ## Grab the hour timestamp
-			month = timestamp.month - 1 ## grab month information for cost savings analysis (Index 0=Jan, 11=Dec)
-			tou_rate, tou_period = calc_tou_rate(timestamp, tou_schedules, tou_structure) ## Grab the specific TOU info for that hour
-
-			net_load = demand_series[i] - PV_series[i] ## Net load after PV is accounted for
-			if net_load > 0: ## If the PV did not serve all of the load, then:
-				## Discharge the battery during on-peak hours; update BESS and economic variables
-				if tou_period in on_peak_periods:
-					## Discharge BESS to household first
-					discharge = min(battery_max_discharge_rate, net_load, battery_soc - battery_soc_min, net_load) ## NOTE: this doesn't keep track of which variable is being used though
-					battery_soc -= discharge
-					net_load -= discharge
-
-					## If BESS > 20% battery energy capacity after serving household load, then utility can use it
-					if battery_soc > battery_soc_min:
-						utility_discharge = min(battery_max_discharge_rate, battery_soc - battery_soc_min, max_utility_usage)
-						battery_soc -= utility_discharge
-						der_compensation += utility_discharge * compensation_rate
-						monthly_der_compensation[month] += utility_discharge * compensation_rate
-						max_utility_usage -= utility_discharge  # Reduce the remaining utility usage allowance
-
-					else: ## buy from the grid
-						grid_usage = net_load ## grid_usage is how much energy needs to be bought from the grid
-						total_energy_cost += grid_usage * tou_rate
-						monthly_energy_cost[month] += grid_usage * tou_rate
-				
-				else: ## If off-peak period, use grid if necessary
-					battery_soc = min(battery_energy_capacity, battery_soc + battery_max_charge_rate)
-					grid_usage = net_load
-					total_energy_cost += grid_usage * tou_rate
-					monthly_energy_cost[month] += grid_usage * tou_rate
-					der_compensation = 0
-
-			else: ## If net_load <= 0 (PV has served all load)
-				excess_solar = -net_load
-				## Store any excess PV in the BESS during off-peak periods
-				if tou_period in off_peak_periods:
-					charge = min(battery_max_charge_rate, excess_solar)
-					battery_soc = min(battery_energy_capacity, battery_soc + charge)
-					#print('battery soc in offpeak 2: \n',battery_soc)
-					grid_usage = 0  ## No energy being bought from the grid
-					economic_benefit = charge * compensation_rate  ## Economic benefit from storing excess solar.
-					monthly_economic_benefit[month] += charge * compensation_rate
-					der_compensation = 0  ## No DER compensation for charging
-				else:
-					## If not off-peak, sell excess solar to the grid
-					der_compensation = excess_solar * compensation_rate
-					monthly_der_compensation[month] += excess_solar * compensation_rate
-
-			## Update the total economic benefit and DER compensation variables
-			total_economic_benefit += economic_benefit
-			total_der_compensation += der_compensation
-
-			## Track the maximum demand for the current TOU period
-			max_demand_periods[tou_period] = max(max_demand_periods[tou_period], demand_series[i] + grid_usage)
-
-			## Update the DER schedule
-			schedule.loc[timestamp, 'Grid Serving Load (kW)'] = grid_usage
-			schedule.loc[timestamp, 'Battery State of Charge'] = battery_soc
-
-		## Calculate total demand cost (including fixed monthly charge)
-		demand_cost = sum(max_demand_periods[period] * tou_structure[period][0]['rate'] for period in max_demand_periods) + fixed_monthly_charge
-
-		## Calculate total DER compensation amount (including any subsidies)
-		total_compensation = total_economic_benefit + total_der_compensation - total_energy_cost + subsidy_amount - demand_cost
-		
-		#print(f"Total Energy Cost: ${total_energy_cost:.2f}")
-		#print(f"Total DER Compensation: ${total_der_compensation:.2f}")
-		#print(f"Total Compensation: ${total_compensation:.2f}")
-
-		## Add variables to outData
-		outData['energyCost'] = list(np.asarray(outData['energyCost']) + monthly_energy_cost)
-		outData['monthlyDERcompensation'] = monthly_der_compensation
-		outData['monthlyEconomicBenefit'] = monthly_economic_benefit
-
-		## DER Dispatch Plot ######################################################################################################################################################
-		fig = go.Figure()
-		fig.add_trace(go.Scatter(x=schedule.index,
-					y=schedule['Solar Generation (kW)'],
-					yaxis='y1',
-					mode='none',
-					fill='tozeroy',
-					fillcolor='yellow',
-					name='Solar Generation (kW)'))
-		fig.add_trace(go.Scatter(x=schedule.index,
-			y=schedule['Household Demand (kW)'],
-			yaxis='y1',
-			mode='none',
-			fill='tozeroy',
-			fillcolor='black',
-			name='Household Demand (kW)'))		
-		fig.add_trace(go.Scatter(x=schedule.index,
-			y=schedule['Grid Serving Load (kW)'],
-			yaxis='y1',
-			mode='none',
-			fill='tozeroy',
-			fillcolor='gray',
-			name='Grid Serving Load (kW)'))
-		fig.add_trace(go.Scatter(x=schedule.index,
-			y= battery_energy_capacity - schedule['Battery State of Charge'],
-			yaxis='y1',
-			mode='none',
-			fill='tozeroy',
-			fillcolor='green',
-			name='Battery Discharge (kW)'))
-		fig.add_trace(go.Scatter(
-			x=schedule.index,
-			y=(schedule['Battery State of Charge'] / battery_energy_capacity) * 100,
-			yaxis='y2',
-			mode='none',  
-			fill='tozeroy',
-			fillcolor='rgba(0, 0, 255, 0.3)', 
-			name='Battery State of Charge (%)',
-			visible='legendonly'  ## Initially hide this trace
-		))
-		fig.add_trace(go.Scatter(
-			x=schedule.index,
-			y=np.asarray(vbat_discharge_flipsign),
-			yaxis='y1',
-			mode='none',  
-			fill='tozeroy',
-			fillcolor='rgba(128, 0, 128, 1)', 
-			name='Thermal BESS'
-		))
-
-		
-		## Plot layout
-		fig.update_layout(
-			xaxis=dict(title='Timestamp'),
-			yaxis=dict(
-				title='Power (kW)',
-				range=[0, battery_energy_capacity]  # Set range for y1 axis
-			),
-			yaxis2=dict(
-				title='Battery State of Charge (%)',
-				overlaying='y',
-				side='right'
-			),
-			legend=dict(
-				orientation='h',
-				yanchor='bottom',
-				y=1.02,
-				xanchor='right',
-				x=1
-			)
-		)
-
-		#fig.show()
-
-		## Encode plot data as JSON for showing in the HTML side
-		outData['derBESSplot'] = json.dumps(fig.data, cls=plotly.utils.PlotlyJSONEncoder)
-		outData['derBESSplotLayout'] = json.dumps(fig.layout, cls=plotly.utils.PlotlyJSONEncoder)
 
 
 	## Create DER overview plot object ######################################################################################################################################################
@@ -1111,7 +865,7 @@ def new(modelDir):
 
 		## Financial Inputs
 		'demandChargeURDB': 'Yes',
-		'demandChargeCost': '25',
+		'demandChargeCost': '0', ## Utility does not usually charge this for residential consumers (but could for commercial consumers)
 		'projectionLength': '25',
 
 		## vbatDispatch inputs:
