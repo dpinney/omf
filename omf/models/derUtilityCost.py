@@ -61,7 +61,7 @@ def work(modelDir, inputDict):
 	#	print('Successfully read in REopt test file. \n')
 
 	## Run REopt.jl 
-	reopt_jl.run_reopt_jl(modelDir, "reopt_input_scenario.json", outages=inputDict['outage'])
+	reopt_jl.run_reopt_jl(modelDir, "reopt_input_scenario.json")
 	with open(pJoin(modelDir, 'results.json')) as jsonFile:
 		reoptResults = json.load(jsonFile)
 	outData.update(reoptResults) ## Update output file with reopt results
@@ -77,17 +77,6 @@ def work(modelDir, inputDict):
 		year = inputDict['year'] # Use the user provided year if none found in reoptResults
 	
 	timestamps = pd.date_range(start=f'{year}-01-01', end=f'{year}-12-31 23:00:00', periods=np.size(demand))
-
-	## If outage is specified, load the resilience results
-	if (inputDict['outage']):
-		try:
-			with open(pJoin(modelDir, 'resultsResilience.json')) as jsonFile:
-				reoptResultsResilience = json.load(jsonFile)
-				outData.update(reoptResultsResilience) ## Update out file with resilience results
-		except FileNotFoundError:
-			results_file = pJoin(modelDir, 'resultsResilience.json')
-			print(f"File '{results_file}' not found. REopt may not have simulated the outage.")
-			raise
 	
 	## Run vbatDispatch, unless it is disabled
 	if inputDict['load_type'] != '0': ## Load type 0 corresponds to the "None" option, which disables this vbatDispatch function
@@ -108,6 +97,8 @@ def work(modelDir, inputDict):
 		vbatMaxPowerCapacity = pd.Series(vbatResults['maxPowerSeries'])
 		vbatPower = vbpower_series
 
+	## NOTE: temporarily comment out the two derConsumer runs to run the code quicker
+	"""
 	## Scale down the utility demand to create an ad-hoc small consumer load (1 kW average) and large consumer load (10 kW average)
 	utilityLoadAverage = np.average(demand)
 	smallConsumerTargetAverage = 1.0 #Unit: kW
@@ -200,6 +191,8 @@ def work(modelDir, inputDict):
 		'TESSsavingsSmallConsumer': smallConsumerOutput['savings'],
 		'TESSsavingsLargeConsumer': largeConsumerOutput['savings']
 	})
+
+	"""
 
 	## DER Overview plot ###################################################################################################################################################################
 	showlegend = True # either enable or disable the legend toggle in the plot
@@ -565,68 +558,7 @@ def work(modelDir, inputDict):
 		outData['batteryChargeData'] = json.dumps(fig.data, cls=plotly.utils.PlotlyJSONEncoder)
 		outData['batteryChargeLayout'] = json.dumps(fig.layout, cls=plotly.utils.PlotlyJSONEncoder)
 
-	## Add REopt resilience plot (adapted from omf/models/microgridDesign.py) ########################################################################################################################
-	#helper function for generating output graphs
-	def makeGridLine(x,y,color,name):
-		plotLine = go.Scatter(
-			x = x, 
-			y = y,
-			line = dict( color=(color)),
-			name = name,
-			hoverlabel = dict(namelength = -1),
-			showlegend=True,
-			stackgroup='one',
-			mode='none'
-		)
-		return plotLine
-	#Set plotly layout ---------------------------------------------------------------
-	plotlyLayout = go.Layout(
-		width=1000,
-		height=375,
-		legend=dict(
-			x=0,
-			y=1.25,
-			orientation="h")
-		)
-	x = list(range(len(reoptResults['ElectricUtility']['electric_to_load_series_kw'])))
-	plotData = []
-	#x_values = pd.to_datetime(x, unit = 'h', origin = pd.Timestamp(f'{year}-01-01'))
-	x_values = timestamps
-	powerGridToLoad = makeGridLine(x_values,reoptResults['ElectricUtility']['electric_to_load_series_kw'],'blue','Load met by Grid')
-	plotData.append(powerGridToLoad)
-	
-	if (inputDict['outage']): ## TODO: condense this code if possible
-		outData['resilience'] = reoptResultsResilience['resilience_by_time_step']
-		outData['minOutage'] = reoptResultsResilience['resilience_hours_min']
-		outData['maxOutage'] = reoptResultsResilience['resilience_hours_max']
-		outData['avgOutage'] = reoptResultsResilience['resilience_hours_avg']
-		outData['survivalProbX'] = reoptResultsResilience['outage_durations']
-		outData['survivalProbY'] = reoptResultsResilience['probs_of_surviving']
-
-		plotData = []
-		resilience = go.Scatter(
-			x=x,
-			y=outData['resilience'],
-			line=dict( color=('red') ),
-		)
-		plotData.append(resilience)
-		plotlyLayout['yaxis'].update(title='Longest Outage survived (Hours)')
-		plotlyLayout['xaxis'].update(title='Start Hour')
-		outData['resilienceData'] = json.dumps(plotData, cls=plotly.utils.PlotlyJSONEncoder)
-		outData['resilienceLayout'] = json.dumps(plotlyLayout, cls=plotly.utils.PlotlyJSONEncoder)
-
-		plotData = []
-		survivalProb = go.Scatter(
-			x=outData['survivalProbX'],
-			y=outData['survivalProbY'],
-			line=dict( color=('red') ),
-			name='Probability of Surviving Outage of a Given Duration')
-		plotData.append(survivalProb)
-		plotlyLayout['yaxis'].update(title='Probability of Meeting Critical Load')
-		plotlyLayout['xaxis'].update(title='Outage Length (Hours)')
-		outData['resilienceProbData' ] = json.dumps(plotData, cls=plotly.utils.PlotlyJSONEncoder)
-		outData['resilienceProbLayout'] = json.dumps(plotlyLayout, cls=plotly.utils.PlotlyJSONEncoder)
-
+	"""
 	#####################################################################################################################################################################################################
 	## Compensation rate to member-consumer
 	compensationRate = float(inputDict['rateCompensation'])
@@ -679,6 +611,8 @@ def work(modelDir, inputDict):
 		print('Utility BESS savings (1 year BESS kWh x electricity cost): ${:,.2f}'.format(BESS_bought_from_grid))
 		print('Difference (Utility BESS savings - Compensation to consumers): ${:,.2f}'.format(BESS_bought_from_grid-BESS_compensated_to_consumer))
 
+	"""
+
 	# Model operations typically ends here.
 	# Stdout/stderr.
 	outData['stdout'] = 'Success'
@@ -691,8 +625,6 @@ def new(modelDir):
 		demand_curve = f.read()
 	with open(pJoin(__neoMetaModel__._omfDir,'static','testFiles','utility_CO_2018_temperatures.csv')) as f:
 		temp_curve = f.read()
-	with open(pJoin(__neoMetaModel__._omfDir,'static','testFiles','utility_2018_kW_critical_load.csv')) as f:
-		criticalLoad_curve = f.read()
 
 	defaultInputs = {
 		## OMF inputs:
@@ -710,16 +642,9 @@ def new(modelDir):
 		'tempFileName': 'utility_CO_2018_temperatures.csv',
 		'demandCurve': demand_curve,
 		'tempCurve': temp_curve,
-		'criticalLoadFileName': 'utility_2018_kW_critical_load.csv', ## critical load here = 50% of the daily demand
-		'criticalLoad': criticalLoad_curve,
-		'criticalLoadSwitch': 'Yes',
-		'criticalLoadFactor': '0.50',
 		'PV': 'Yes',
 		'BESS': 'Yes',
 		'generator': 'No',
-		'outage': True,
-		'outage_start_hour': '1836', #Hour 1836 = March 17, 2018, 12pm
-		'outage_duration': '4',
 
 		## Financial Inputs
 		'demandChargeURDB': 'Yes',

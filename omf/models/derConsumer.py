@@ -181,8 +181,8 @@ def create_REopt_jl_jsonFile(modelDir, inputDict):
 		scenario['ElectricStorage'] = {
 			##TODO: Add options here, if needed
 			#scenario['ElectricStorage']['size_kw'] = 2
-			#"min_kw": 2,
-			#"min_kwh": 8,
+			"min_kw": 2,
+			"min_kwh": 8,
 			'total_rebate_per_kw': float(inputDict['total_rebate_per_kw']),
 			'macrs_option_years': float(inputDict['macrs_option_years']),
 			'macrs_bonus_fraction': float(inputDict['macrs_bonus_fraction']),
@@ -199,25 +199,6 @@ def create_REopt_jl_jsonFile(modelDir, inputDict):
 		scenario['Generator'] = {
 			##TODO: Add options here, if needed
 			}
-	
-	## Add an Outage section if enabled
-	if inputDict['outage'] == True:
-		scenario['ElectricUtility'] = {
-			'outage_start_time_step': int(inputDict['outage_start_hour']),
-			'outage_end_time_step': int(inputDict['outage_start_hour'])+int(inputDict['outage_duration'])
-			}
-	
-	## Critical Load input section
-	if inputDict['criticalLoadSwitch'] == 'No': ## switch = No means the user wants to upload a critical load profile instead of using a critical load factor to determine the critical load
-		#TODO: This piece is not working. REopt gives an error that the resilience file is not being created. Unclear what the issue is 9/2024
-		criticalLoad = np.asarray([float(value) for value in inputDict['criticalLoad'].split('\n') if value.strip()]) ## process input format into an array
-		criticalLoad = criticalLoad.tolist() if isinstance(criticalLoad, np.ndarray) else criticalLoad ## make criticalLoad array into a list for REopt
-		#scenario['ElectricLoad']['critical_load_series_kw'] = criticalLoad
-	else:
-		scenario['ElectricLoad']['critical_load_fraction'] = float(inputDict['criticalLoadFactor'])
-		#criticalLoad = demand_array*criticalLoadFactor
-		#criticalLoad = criticalLoad.tolist() if isinstance(criticalLoad, np.ndarray) else criticalLoad ## make criticalLoad array into a list for REopt
-		#scenario['ElectricLoad']['critical_load_series_kw'] = criticalLoad
 
 	## Save the scenario file
 	## NOTE: reopt_jl currently requires a path for the input file, so the file must be saved to a location
@@ -380,7 +361,7 @@ def work(modelDir, inputDict):
 	#	print('Successfully loaded REopt test file. \n')
 
 	## Run REopt.jl 
-	reopt_jl.run_reopt_jl(modelDir, 'reopt_input_scenario.json', outages=inputDict['outage'])
+	reopt_jl.run_reopt_jl(modelDir, 'reopt_input_scenario.json')
 	#reopt_jl.run_reopt_jl(modelDir, '/Users/astronobri/Documents/CIDER/scratch/reopt_input_scenario_26may2024_0258.json', outages=inputDict['outage'])
 	with open(pJoin(modelDir, 'results.json')) as jsonFile:
 		reoptResults = json.load(jsonFile)
@@ -396,17 +377,6 @@ def work(modelDir, inputDict):
 	except KeyError:
 		year = inputDict['year'] ## Use the user provided year if none found in reoptResults
 	timestamps = pd.date_range(start=f'{year}-01-01', end=f'{year}-12-31 23:00:00', periods=np.size(demand))
-
-	## If outage is specified in the inputs, load the resilience results
-	if (inputDict['outage']):
-		try:
-			with open(pJoin(modelDir, 'resultsResilience.json')) as jsonFile:
-				reoptResultsResilience = json.load(jsonFile)
-				outData.update(reoptResultsResilience) ## Update out file with resilience results
-		except FileNotFoundError:
-			results_file = pJoin(modelDir, 'resultsResilience.json')
-			print(f"File '{results_file}' not found. REopt may not have simulated the outage.")
-			raise
 
 	## Run vbatDispatch, unless it is disabled
 	## TODO: Check that the rest of the code functions if the vbat (TESS) load type is None
@@ -600,68 +570,6 @@ def work(modelDir, inputDict):
 	## Encode plot data as JSON for showing in the HTML side
 	outData['derOverviewData'] = json.dumps(fig.data, cls=plotly.utils.PlotlyJSONEncoder)
 	outData['derOverviewLayout'] = json.dumps(fig.layout, cls=plotly.utils.PlotlyJSONEncoder)
-
-	## Add REopt resilience plot (adapted from omf/models/microgridDesign.py) ########################################################################################################################
-	#helper function for generating output graphs
-	def makeGridLine(x,y,color,name):
-		plotLine = go.Scatter(
-			x = x, 
-			y = y,
-			line = dict( color=(color)),
-			name = name,
-			hoverlabel = dict(namelength = -1),
-			showlegend=True,
-			stackgroup='one',
-			mode='none'
-		)
-		return plotLine
-	#Set plotly layout ---------------------------------------------------------------
-	plotlyLayout = go.Layout(
-		width=1000,
-		height=375,
-		legend=dict(
-			x=0,
-			y=1.25,
-			orientation="h")
-		)
-	x = list(range(len(reoptResults['ElectricUtility']['electric_to_load_series_kw'])))
-	plotData = []
-	#x_values = pd.to_datetime(x, unit = 'h', origin = pd.Timestamp(f'{year}-01-01'))
-	x_values = timestamps
-	powerGridToLoad = makeGridLine(x_values,reoptResults['ElectricUtility']['electric_to_load_series_kw'],'blue','Load met by Grid')
-	plotData.append(powerGridToLoad)
-	
-	if (inputDict['outage']): ## TODO: condense this code if possible
-		outData['resilience'] = reoptResultsResilience['resilience_by_time_step']
-		outData['minOutage'] = reoptResultsResilience['resilience_hours_min']
-		outData['maxOutage'] = reoptResultsResilience['resilience_hours_max']
-		outData['avgOutage'] = reoptResultsResilience['resilience_hours_avg']
-		outData['survivalProbX'] = reoptResultsResilience['outage_durations']
-		outData['survivalProbY'] = reoptResultsResilience['probs_of_surviving']
-
-		plotData = []
-		resilience = go.Scatter(
-			x=x,
-			y=outData['resilience'],
-			line=dict( color=('red') ),
-		)
-		plotData.append(resilience)
-		plotlyLayout['yaxis'].update(title='Longest Outage survived (Hours)')
-		plotlyLayout['xaxis'].update(title='Start Hour')
-		outData['resilienceData'] = json.dumps(plotData, cls=plotly.utils.PlotlyJSONEncoder)
-		outData['resilienceLayout'] = json.dumps(plotlyLayout, cls=plotly.utils.PlotlyJSONEncoder)
-
-		plotData = []
-		survivalProb = go.Scatter(
-			x=outData['survivalProbX'],
-			y=outData['survivalProbY'],
-			line=dict( color=('red') ),
-			name='Probability of Surviving Outage of a Given Duration')
-		plotData.append(survivalProb)
-		plotlyLayout['yaxis'].update(title='Probability of Meeting Critical Load')
-		plotlyLayout['xaxis'].update(title='Outage Length (Hours)')
-		outData['resilienceProbData' ] = json.dumps(plotData, cls=plotly.utils.PlotlyJSONEncoder)
-		outData['resilienceProbLayout'] = json.dumps(plotlyLayout, cls=plotly.utils.PlotlyJSONEncoder)
 
 
 	## Create Exported Power plot object ######################################################################################################################################################
@@ -859,9 +767,6 @@ def new(modelDir):
 		'PV': 'Yes',
 		'BESS': 'Yes',
 		'generator': 'No',
-		'outage': True,
-		'outage_start_hour': '4637',
-		'outage_duration': '3',
 
 		## Financial Inputs
 		'demandChargeURDB': 'Yes',
