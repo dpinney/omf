@@ -85,13 +85,6 @@
 				</select>
 			</div>
 			<div class="shortInput">
-				<label class="tooltip">Battery Energy Storage<span class="classic">Include battery energy storage in DER analysis?</span></label>
-				<select id="BESS" name="BESS" value="{{allInputDataDict.BESS}}"/>
-					<option value="Yes" {{ 'selected' if allInputDataDict.BESS == 'Yes' }}>Yes</option>
-					<option value="No" {{ 'selected' if allInputDataDict.BESS == 'No' }}>No</option>
-				</select>
-			</div>
-			<div class="shortInput">
 				<label class="tooltip">Diesel Generator<span class="classic">Include diesel generator in DER analysis.</span></label>
 				<select id="generator" name="generator" value="{{allInputDataDict.generator}}"/>
 					<option value="Yes" {{ 'selected' if allInputDataDict.generator == 'Yes' }}>Yes</option>
@@ -124,6 +117,10 @@
 				<input type="text" id="projectionLength" name="projectionLength" value="{{allInputDataDict.projectionLength}}" step="1" min="1" max="75" required="required">
 			</div>
 			<div class="shortInput">
+				<label class="tooltip">Energy Cost ($/kWh)<span class="classic">Cost of energy bought by the utility. I.e. wholesale (not retail) cost.</span></label>
+				<input type="text" id="electricityCost" name="electricityCost" value="{{allInputDataDict.electricityCost}}" pattern="^\d+\.?\d*?$" required="required">
+			</div>
+			<div class="shortInput">
 				<label class="tooltip">Energy Compensation Rate ($/kWh)<span class="classic">The dollar amount per kWh compensated to the member-consumer.</span></label>
 				<input type="text" id="rateCompensation" name="rateCompensation" value="{{allInputDataDict.rateCompensation}}" pattern="^\d+\.?\d*?$" min="0" required="required"/>
 			</div>
@@ -131,6 +128,88 @@
 				<label class="tooltip">Subsidy Amount ($)<span class="classic">The total subsidy amount ($) for the entire analysis duration.</span></label>
 				<input type="text" id="subsidy" name="subsidy" value="{{allInputDataDict.subsidy}}" pattern="^\d+\.?\d*?$" required="required"/>
 			</div>
+
+			<!-- Chemical BESS Inputs -->
+			<div class="wideInput"> 
+				<p class="inputSectionHeader">Chemical Energy Storage Device Inputs</p>
+			</div>
+			<hr style="border-style: solid; border-color: #196b12; margin-top: 10px;">
+			<div class="shortInput">
+				<label class="tooltip">Existing Utility-Installed Battery Power Capacity (kW)<span class="classic">Specify the amount of existing battery power capacity (kW) of the utility.</span></label>
+				<input type="text" id="existing_kw" name="existing_kw" value="{{allInputDataDict.existing_kw}}" required="required"/>
+			</div>
+			<div class="shortInput">
+				<label class="tooltip">Existing Utility-Installed Battery Energy Capacity (kWh)<span class="classic">Specify the amount of existing battery energy capacity (kWh) of the utility.</span></label>
+				<input type="text" id="existing_kwh" name="existing_kwh" value="{{allInputDataDict.existing_kwh}}" required="required"/>
+			</div>
+			<div class="shortInput">
+				<label class="tooltip">Number of Home Chemical Batteries<span class="classic">Total number of residential chemical batteries to model.</span></label>
+				<input type="text" id="numberBESS" name="numberBESS" value="{{allInputDataDict.numberBESS}}" required="required">
+			</div>
+			<div class="shortInput">
+				<label class="tooltip">Can grid charge?<span class="classic">Select Yes if the battery can be charged from the grid, otherwise select No.</span></label>
+				<select id="chemBESS" name="chemBESS" value="{{allInputDataDict.chemBESSgridcharge}}"/>
+					<option value="Yes" {{ 'selected' if allInputDataDict.chemBESSgridcharge == 'Yes' }}>Yes</option>
+					<option value="No" {{ 'selected' if allInputDataDict.chemBESSgridcharge == 'No' }}>No</option>
+				</select>
+			</div>
+			<div class="shortInput">
+				<label class="tooltip">Installed Power Cost ($/kW)<span class="classic">Specify the installed cost per kW of the battery.</span></label>
+				<input type="text" id="installed_cost_per_kw" name="installed_cost_per_kw" value="{{allInputDataDict.installed_cost_per_kw}}" pattern="^\d+\.?\d*?$" required="required"/>
+			</div>
+			<div class="shortInput">
+				<label class="tooltip">Battery Minimum Power (kW)<span class="classic">Specify the minimum desired battery power in kW.</span></label>
+				<input type="text" id="min_kw" name="min_kw" value="{{allInputDataDict.min_kw}}" required="required"/>
+			</div>
+			<div class="shortInput">
+				<label class="tooltip">Battery Maximum Power (kW)<span class="classic">Specify the maximum desired battery power in kW.</span></label>
+				<input type="text" id="max_kw" name="max_kw" value="{{allInputDataDict.max_kw}}" required="required"/>
+			</div>
+			<div class="shortInput">
+				<label class="tooltip">Installed Capacity Cost ($/kWh)<span class="classic">Specify the cost in $/kWh.</span></label>
+				<input type="text" id="installed_cost_per_kwh" name="installed_cost_per_kwh" value="{{allInputDataDict.installed_cost_per_kwh}}" pattern="^\d+\.?\d*?$" required="required"/>
+			</div>
+			<div class="shortInput">
+				<label class="tooltip">Battery Minimum Capacity (kWh)<span class="classic">Specify the minimum desired battery capacity in kWh.</span></label>
+				<input type="text" id="min_kwh" name="min_kwh" value="{{allInputDataDict.min_kwh}}" required="required"/>
+			</div>
+			<div class="shortInput">
+				<label class="tooltip">Battery Maximum Capacity (kWh)<span class="classic">Specify the maximum desired battery capacity in kWh.</span></label>
+				<input type="text" id="max_kwh" name="max_kwh" value="{{allInputDataDict.max_kwh}}" required="required"/>
+			</div>
+			<div class="shortInput">
+				<label class="tooltip">Battery MACRS Years<span class="classic">MACRS schedule for financial analysis. Possible inputs are 0, 5 and 7 years.</span></label>
+				<select id="macrs_option_years" name="macrs_option_years" value="{{allInputDataDict.macrs_option_years}}"/>
+					<option value="0" {{ 'selected' if allInputDataDict.batteryMacrsOptionYears == '0' }}>0</option>
+					<option value="5" {{ 'selected' if allInputDataDict.batteryMacrsOptionYears == '5' }}>5</option>
+					<option value="7" {{ 'selected' if allInputDataDict.batteryMacrsOptionYears == '7' }}>7</option>
+				</select>
+			</div>
+			<div class="shortInput">
+				<label class="tooltip">Battery ITC (%)<span class="classic">Please enter a number 0-1 for the battery investment tax credit. Format 0.XX</span></label>
+				<input type="number" id="total_itc_fraction" name="total_itc_fraction" value="{{allInputDataDict.total_itc_fraction}}" step="0.01" min="0.0" max="1.0" required="required"/>
+			</div>
+			<div class="shortInput">
+				<label class="tooltip">Total Rebate ($/kW)<span class="classic"> Total rebate amount per kW of battery power capacity. </span></label>
+				<input type="text" id="total_rebate_per_kw" name="total_rebate_per_kw" value="{{allInputDataDict.total_rebate_per_kw}}" required="required"/>
+			</div>
+			<div class="shortInput">
+				<label class="tooltip">Battery Replacement Power Cost ($/kW)<span class="classic">Specify the cost of replacing the battery inverter at the specified year in $/kW.</span></label>
+				<input type="text" id="replace_cost_per_kw" name="replace_cost_per_kw" value="{{allInputDataDict.replace_cost_per_kw}}" pattern="^\d+\.?\d*?$" required="required"/>
+			</div>
+			<div class="shortInput">
+				<label class="tooltip">Battery Replacement Capacity Cost ($/kWh)<span class="classic">Specify the cost of replacing the battery capacity at the specified year in $/kWh.</span></label>
+				<input type="text" id="replace_cost_per_kwh" name="replace_cost_per_kwh" value="{{allInputDataDict.replace_cost_per_kwh}}" pattern="^\d+\.?\d*?$" required="required"/>
+			</div>
+			<div class="shortInput">
+				<label class="tooltip">Battery Inverter Replacement (years)<span class="classic">Specify a year in which the battery inverter will be replaced at the cost specified in Battery Replacement Power Cost. Input is an integer less than or equal to the analysis period in years.</span></label>
+				<input type="text" id="inverter_replacement_year" name="inverter_replacement_year" value="{{allInputDataDict.inverter_replacement_year}}" required="required"/>
+			</div>
+				<div class="shortInput">
+				<label class="tooltip">Battery Replacement (years)<span class="classic">Specify a year in which the battery cells will be replaced at the cost specified in Battery Replacement Capacity Cost. Input is an integer less than or equal to the analysis period in years.</span></label>
+				<input type="text" id="battery_replacement_year" name="battery_replacement_year" value="{{allInputDataDict.battery_replacement_year}}" required="required"/>
+			</div>
+
 
 			<!-- vbatDispatch Specific Inputs -->
 			<div class="wideInput"> 
@@ -216,10 +295,6 @@
 			<div class="shortInput">
 				<label class="tooltip">Upkeep Cost ($/unit/year)<span class="classic">Maintenance cost each year per device for replacing or repairing defective load control equipment.</span></label>
 				<input type="text" id="unitUpkeepCost" name="unitUpkeepCost" value="{{allInputDataDict.unitUpkeepCost}}" pattern="^\d+\.?\d*?$" required="required">
-			</div>
-			<div class="shortInput">
-				<label class="tooltip">Energy Cost ($/kWh)<span class="classic">Cost of energy bought by the utility. I.e. wholesale (not retail) cost.</span></label>
-				<input type="text" id="electricityCost" name="electricityCost" value="{{allInputDataDict.electricityCost}}" pattern="^\d+\.?\d*?$" required="required">
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Discount Rate (%)<span class="classic">Discount rate used in financial analysis.</span></label>

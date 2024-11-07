@@ -48,110 +48,6 @@ def create_REopt_jl_jsonFile(modelDir, inputDict):
 	demand_array = np.asarray([float(value) for value in inputDict['demandCurve'].split('\n') if value.strip()]) ## process input format into an array
 	demand = demand_array.tolist() if isinstance(demand_array, np.ndarray) else demand_array ## make demand array into a list	for REopt
 
-	"""
-	## NOTE: The following lines of code are optional parameters that may or may not be used in the future.
-	## Copied from omf.models.microgridDesign
-
-	## Financial and Load parameters
-	energyCost = float(inputDict['energyCost'])
-	demandCost = float(inputDict['demandCost'])
-	wholesaleCost = float(inputDict['wholesaleCost'])
-	lostLoadValue = float(inputDict['value_of_lost_load'])
-	analysisYears = int(inputDict['analysisYears'])
-	omCostEscalator = float(inputDict['omCostEscalator'])
-	discountRate = float(inputDict['discountRate'])
-	criticalLoadFactor = float(inputDict['criticalLoadFactor'])
-	userCriticalLoadShape = True if inputDict['userCriticalLoadShape'] == "True" else False
-
-	## Solar parameters
-	solarCost = float(inputDict['solarCost'])
-	solarMin = float(inputDict['solarMin'])
-	if solar == 'off':
-		solarMax = 0
-	elif solar == 'on':
-		solarMax = float(inputDict['solarMax'])
-		solarExisting = float(inputDict['solarExisting'])
-
-	solarCanExport = True if inputDict['solarCanExport'] == "True" else False
-	solarCanCurtail = True if inputDict['solarCanCurtail'] == "True" else False
-	solarMacrsOptionYears = int(inputDict['solarMacrsOptionYears'])
-	solarItcpercent = float(inputDict['solarItcPercent'])
-
-	## BESS parameters
-	batteryPowerCost = float(inputDict['batteryPowerCost'])
-	batteryCapacityCost = float(inputDict['batteryCapacityCost'])
-	batteryPowerCostReplace = float(inputDict['batteryPowerCostReplace'])
-	batteryCapacityCostReplace = float(inputDict['batteryCapacityCostReplace'])
-	batteryPowerReplaceYear = float(inputDict['batteryPowerReplaceYear'])
-	batteryCapacityReplaceYear = float(inputDict['batteryCapacityReplaceYear'])
-	batteryPowerMin = float(inputDict['batteryPowerMin'])
-	batteryCapacityMin = float(inputDict['batteryCapacityMin'])
-	batteryMacrsOptionYears = int(inputDict['batteryMacrsOptionYears'])
-	batteryItcPercent = float(inputDict['batteryItcPercent'])
-
-	## Diesel Generator paramters
-	dieselGenCost = float(inputDict['dieselGenCost'])
-	dieselMacrsOptionYears = int(inputDict['dieselMacrsOptionYears'])
-	dieselMax = float(inputDict['dieselMax'])
-	dieselMin = float(inputDict['dieselMin'])
-	dieselFuelCostGal = float(inputDict['dieselFuelCostGal'])
-	dieselCO2Factor = float(inputDict['dieselCO2Factor'])
-	dieselOMCostKw = float(inputDict['dieselOMCostKw'])
-	dieselOMCostKwh = float(inputDict['dieselOMCostKwh'])
-	dieselOnlyRunsDuringOutage = True if inputDict['dieselOnlyRunsDuringOutage'] == "True" else False
-
-	## Outage/resilience paramters
-	outage_start_hour = int(inputDict['outage_start_hour'])
-	outage_duration = int(inputDict['outageDuration'])
-	outage_end_hour = outage_start_hour + outage_duration
-
-	scenario = {
-		"Site": {
-			"latitude": latitude,
-			"longitude": longitude
-		},
-		"ElectricTariff": {
-			"wholesale_rate": wholesaleCost
-		},
-		"ElectricLoad": {
-			"loads_kw": jsonifiableLoad,
-			"year": year
-		},
-		"Financial": {
-			"value_of_lost_load_per_kwh": value_of_lost_load,
-			"analysis_years": analysisYears,
-			"om_cost_escalation_rate_fraction": omCostEscalator,
-			"offtaker_discount_rate_fraction": discountRate
-		},
-		"PV": {
-			"installed_cost_per_kw": solarCost,
-			"min_kw": solarMin,
-			"max_kw": solarMax,
-			"can_export_beyond_nem_limit": solarCanExport,
-			"can_curtail": solarCanCurtail,
-			"macrs_option_years": solarMacrsOptionYears,
-			"federal_itc_fraction": solarItcPercent
-		},
-		"ElectricStorage": {
-			"installed_cost_per_kwh": batteryPowerCost,
-			"installed_cost_per_kwh": batteryCapacityCost,
-			"replace_cost_per_kw": batteryPowerCostReplace,
-			"replace_cost_per_kwh": batteryCapacityCostReplace,
-			"inverter_replacement_year": batteryPowerReplaceYear,
-			"battery_replacement_year": batteryCapacityReplaceYear,
-			"min_kw": batteryPowerMin,
-			"min_kwh": batteryCapacityMin,
-			"macrs_option_years": batteryMacrsOptionYears,
-			"total_itc_fraction": batteryItcPercent
-		},
-		"Generator": {
-			"installed_cost_per_kw": dieselGenCost,
-			"only_runs_during_grid_outage": dieselOnlyRunsDuringOutage,
-			"macrs_option_years": dieselMacrsOptionYears
-		}
-	}
-	"""
-
 	## Begin the REopt input dictionary called 'scenario'
 	scenario = {
 		'Site': {
@@ -177,21 +73,30 @@ def create_REopt_jl_jsonFile(modelDir, inputDict):
 			}
 
 	## Add a Battery Energy Storage System (BESS) section if enabled 
-	if inputDict['BESS'] == 'Yes':
-		scenario['ElectricStorage'] = {
-			##TODO: Add options here, if needed
-			#scenario['ElectricStorage']['size_kw'] = 2
-			"min_kw": 2,
-			"min_kwh": 8,
-			'total_rebate_per_kw': float(inputDict['total_rebate_per_kw']),
-			'macrs_option_years': float(inputDict['macrs_option_years']),
-			'macrs_bonus_fraction': float(inputDict['macrs_bonus_fraction']),
-			'replace_cost_per_kw': float(inputDict['replace_cost_per_kw']),
-			'replace_cost_per_kwh': float(inputDict['replace_cost_per_kwh']),
-			'installed_cost_per_kw': float(inputDict['installed_cost_per_kw']),
-			'installed_cost_per_kwh': float(inputDict['installed_cost_per_kwh']),
-			'total_itc_fraction': float(inputDict['total_itc_fraction']),
-			}
+	if inputDict['chemBESSgridcharge'] == 'Yes':
+		can_grid_charge_bool = True
+	else:
+		can_grid_charge_bool = False
+
+	scenario['ElectricStorage'] = {
+		##TODO: Add options here, if needed
+		#scenario['ElectricStorage']['size_kw'] = 2
+		'min_kw': float(inputDict['min_kw']), ## Battery Power minimum 
+		'max_kw': float(inputDict['max_kw']), ## Battery Power maximum 
+		'min_kwh': float(inputDict['min_kwh']), ## Battery Energy Capacity minimum
+		'max_kwh': float(inputDict['max_kwh']), ## Battery Energy Capacity maximum
+		'can_grid_charge': can_grid_charge_bool,
+		'total_rebate_per_kw': float(inputDict['total_rebate_per_kw']),
+		'macrs_option_years': float(inputDict['macrs_option_years']),
+		'macrs_bonus_fraction': float(inputDict['macrs_bonus_fraction']),
+		'replace_cost_per_kw': float(inputDict['replace_cost_per_kw']),
+		'replace_cost_per_kwh': float(inputDict['replace_cost_per_kwh']),
+		'installed_cost_per_kw': float(inputDict['installed_cost_per_kw']),
+		'installed_cost_per_kwh': float(inputDict['installed_cost_per_kwh']),
+		'total_itc_fraction': float(inputDict['total_itc_fraction']),
+		'inverter_replacement_year': float(inputDict['inverter_replacement_year']),
+		'battery_replacement_year': float(inputDict['battery_replacement_year']),
+		}
 		
 
 	## Add a Diesel Generator section if enabled
@@ -332,21 +237,7 @@ def work(modelDir, inputDict):
 	''' Run the model in its directory. '''
 
 	## Delete output file every run if it exists
-	outData = {}	
-	
-	## Add REopt BESS inputs to inputDict
-	## NOTE: These inputs are being added directly to inputDict because they are not specified by user input
-	## If they become user inputs, then they can be placed directly into the defaultInputs under the new() function below
-	inputDict.update({
-		'total_rebate_per_kw': '10.0',
-		'macrs_option_years': '25',
-		'macrs_bonus_fraction': '0.4',
-		'replace_cost_per_kw': '460.0',
-		'replace_cost_per_kwh': '230.0',
-		'installed_cost_per_kw': '500.0', 
-		'installed_cost_per_kwh': '80.0', 
-		'total_itc_fraction': '0.0',
-	})
+	outData = {}
 
 	## Create REopt input file
 	create_REopt_jl_jsonFile(modelDir, inputDict)
@@ -443,16 +334,15 @@ def work(modelDir, inputDict):
 		vbat_charge_component = np.zeros_like(demand)
 
 	## BESS serving load piece
-	if (inputDict['BESS'] == 'Yes'):
-		fig.add_trace(go.Scatter(x=timestamps,
-							y=np.asarray(BESS) + np.asarray(demand) + vbat_discharge_component,
-							yaxis='y1',
-							mode='none',
-							fill='tozeroy',
-							name='BESS Serving Load (kW)',
-							fillcolor='rgba(0,137,83,1)',
-							showlegend=showlegend))
-		fig.update_traces(fillpattern_shape='/', selector=dict(name='BESS Serving Load (kW)'))
+	fig.add_trace(go.Scatter(x=timestamps,
+						y=np.asarray(BESS) + np.asarray(demand) + vbat_discharge_component,
+						yaxis='y1',
+						mode='none',
+						fill='tozeroy',
+						name='BESS Serving Load (kW)',
+						fillcolor='rgba(0,137,83,1)',
+						showlegend=showlegend))
+	fig.update_traces(fillpattern_shape='/', selector=dict(name='BESS Serving Load (kW)'))
 
 	## Temperature line on a secondary y-axis (defined in the plot layout)
 	fig.add_trace(go.Scatter(x=timestamps,
@@ -576,14 +466,13 @@ def work(modelDir, inputDict):
 	fig = go.Figure()
 	
 	## Power used to charge BESS (electric_to_storage_series_kw)
-	if inputDict['BESS'] == 'Yes':
-		fig.add_trace(go.Scatter(x=timestamps,
-							y=np.asarray(grid_charging_BESS),
-							mode='none',
-							fill='tozeroy',
-							name='Power Used to Charge BESS',
-							fillcolor='rgba(75,137,83,1)',
-							showlegend=True))
+	fig.add_trace(go.Scatter(x=timestamps,
+						y=np.asarray(grid_charging_BESS),
+						mode='none',
+						fill='tozeroy',
+						name='Power Used to Charge BESS',
+						fillcolor='rgba(75,137,83,1)',
+						showlegend=True))
 	
 	## Power used to charge vbat (vbat_charging)
 	if inputDict['load_type'] != '0':
@@ -752,8 +641,8 @@ def new(modelDir):
 
 		## REopt inputs:
 		## NOTE: Variables are strings as dictated by the html input options
-		'latitude':  '39.532165', ## Rivesville, WV
-		'longitude': '-80.120618', 
+		'latitude':  '39.5298059', ## Rivesville, WV
+		'longitude': '-80.1167417', 
 		'year' : '2018',
 		'urdbLabel': '643476222faee2f0f800d8b1', ## Rivesville, WV - Monongahela Power
 		'fileName': 'residential_PV_load.csv',
@@ -765,13 +654,30 @@ def new(modelDir):
 		'criticalLoadSwitch': 'Yes',
 		'criticalLoadFactor': '0.50',
 		'PV': 'Yes',
-		'BESS': 'Yes',
 		'generator': 'No',
 
 		## Financial Inputs
 		'demandChargeURDB': 'Yes',
-		'demandChargeCost': '0', ## Utility does not usually charge this for residential consumers (but could for commercial consumers)
+		'demandChargeCost': '0.0', ## Set to zero because a residential consumer would not pay this -- the utility would
 		'projectionLength': '25',
+
+		## Chemical Battery Inputs
+		'numberBESS': '100.0',
+		'chemBESSgridcharge': 'Yes', 
+		'min_kw': '5.0', ## Minimum continuous power, based on Powerwall’s specs
+		'max_kw': '5.0', ## Maximum continuous power 
+		'min_kwh': '13.5', ## Minimum energy capacity based on Powerwall’s full capacity
+		'max_kwh': '13.5', ## Maximum energy capacity to use the entire capacity
+		'total_rebate_per_kw': '10.0', ## Assuming $10/kW incentive
+		'macrs_option_years': '25', ## Depreciation years
+		'macrs_bonus_fraction': '0.4', ## 40% bonus depreciation fraction
+		'replace_cost_per_kw': '460.0', 
+		'replace_cost_per_kwh': '240.0', 
+		'installed_cost_per_kw': '480.0', ## Approximate cost per kW installed, based on total price range
+		'installed_cost_per_kwh': '480.0', ## Cost per kWh reflecting Powerwall’s installed cost
+		'total_itc_fraction': '0.0', ## No ITC included unless specified
+		'inverter_replacement_year': '10', 
+		'battery_replacement_year': '10',  
 
 		## vbatDispatch inputs:
 		'load_type': '2', ## Heat Pump

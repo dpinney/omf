@@ -203,23 +203,21 @@ def work(modelDir, inputDict):
 	else:
 		PV = np.zeros_like(demand)
 	
-	if inputDict['BESS'] == 'Yes': ## BESS
-		BESS = reoptResults['ElectricStorage']['storage_to_load_series_kw']
-		#BESS = np.ones_like(demand) ## Ad-hoc line used because BESS is not being built in REopt for some reason. Currently debugging 5/2024
-		grid_charging_BESS = reoptResults['ElectricUtility']['electric_to_storage_series_kw']
-		outData['chargeLevelBattery'] = reoptResults['ElectricStorage']['soc_series_fraction']
 
-		## NOTE: The following 3 lines of code are temporary; it reads in the SOC info from a static reopt test file 
-		## For some reason REopt is not producing BESS results so this is a workaround
-		#with open(pJoin(__neoMetaModel__._omfDir,'static','testFiles','utility_reopt_results.json')) as f:
-		#	static_reopt_results = json.load(f)
-		#BESS = static_reopt_results['outputs']['ElectricStorage']['storage_to_load_series_kw']
-		#grid_charging_BESS = static_reopt_results['outputs']['ElectricUtility']['electric_to_storage_series_kw']
-		#outData['chargeLevelBattery'] = static_reopt_results['outputs']['ElectricStorage']['soc_series_fraction']
-		#outData.update(static_reopt_results['outputs'])
-	else:
-		BESS = np.zeros_like(demand)
-		grid_charging_BESS = np.zeros_like(demand)
+	BESS = reoptResults['ElectricStorage']['storage_to_load_series_kw']
+	#BESS = np.ones_like(demand) ## Ad-hoc line used because BESS is not being built in REopt for some reason. Currently debugging 5/2024
+	grid_charging_BESS = reoptResults['ElectricUtility']['electric_to_storage_series_kw']
+	outData['chargeLevelBattery'] = reoptResults['ElectricStorage']['soc_series_fraction']
+
+	## NOTE: The following 3 lines of code are temporary; it reads in the SOC info from a static reopt test file 
+	## For some reason REopt is not producing BESS results so this is a workaround
+	#with open(pJoin(__neoMetaModel__._omfDir,'static','testFiles','utility_reopt_results.json')) as f:
+	#	static_reopt_results = json.load(f)
+	#BESS = static_reopt_results['outputs']['ElectricStorage']['storage_to_load_series_kw']
+	#grid_charging_BESS = static_reopt_results['outputs']['ElectricUtility']['electric_to_storage_series_kw']
+	#outData['chargeLevelBattery'] = static_reopt_results['outputs']['ElectricStorage']['soc_series_fraction']
+	#outData.update(static_reopt_results['outputs'])
+
 
 	## Create DER overview plot object
 	fig = go.Figure()
@@ -292,16 +290,15 @@ def work(modelDir, inputDict):
 	#fig.update_traces(legendgroup='Demand', visible='legendonly', selector=dict(name='Original Load (kW)')) ## Make demand hidden on plot by default
 
 	## BESS serving load piece
-	if (inputDict['BESS'] == 'Yes'):
-		fig.add_trace(go.Scatter(x=timestamps,
-							y=np.asarray(BESS), # + np.asarray(demand) + vbat_discharge_component,
-							yaxis='y1',
-							mode='none',
-							fill='tozeroy',
-							name='BESS Serving Load (kW)',
-							fillcolor='rgba(0,137,83,1)',
-							showlegend=showlegend))
-		fig.update_traces(fillpattern_shape='/', selector=dict(name='BESS Serving Load (kW)'))
+	fig.add_trace(go.Scatter(x=timestamps,
+						y=np.asarray(BESS), # + np.asarray(demand) + vbat_discharge_component,
+						yaxis='y1',
+						mode='none',
+						fill='tozeroy',
+						name='BESS Serving Load (kW)',
+						fillcolor='rgba(0,137,83,1)',
+						showlegend=showlegend))
+	fig.update_traces(fillpattern_shape='/', selector=dict(name='BESS Serving Load (kW)'))
 
 	## PV piece, if enabled
 	if (inputDict['PV'] == 'Yes'):
@@ -540,23 +537,20 @@ def work(modelDir, inputDict):
 	
 
 	## Create Battery State of Charge plot object ######################################################################################################################################################
-	if inputDict['BESS'] == 'Yes':
-		fig = go.Figure()
-
-		fig.add_trace(go.Scatter(x=timestamps,
-							y=outData['chargeLevelBattery'],
-							mode='none',
-							fill='tozeroy',
-							fillcolor='red',
-							name='Battery Charge Level',
-							showlegend=True))
-		fig.update_layout(
-			xaxis=dict(title='Timestamp'),
-			yaxis=dict(title='Charge (%)')
-		)
-
-		outData['batteryChargeData'] = json.dumps(fig.data, cls=plotly.utils.PlotlyJSONEncoder)
-		outData['batteryChargeLayout'] = json.dumps(fig.layout, cls=plotly.utils.PlotlyJSONEncoder)
+	fig = go.Figure()
+	fig.add_trace(go.Scatter(x=timestamps,
+						y=outData['chargeLevelBattery'],
+						mode='none',
+						fill='tozeroy',
+						fillcolor='red',
+						name='Battery Charge Level',
+						showlegend=True))
+	fig.update_layout(
+		xaxis=dict(title='Timestamp'),
+		yaxis=dict(title='Charge (%)')
+	)
+	outData['batteryChargeData'] = json.dumps(fig.data, cls=plotly.utils.PlotlyJSONEncoder)
+	outData['batteryChargeLayout'] = json.dumps(fig.layout, cls=plotly.utils.PlotlyJSONEncoder)
 
 	"""
 	#####################################################################################################################################################################################################
@@ -643,8 +637,27 @@ def new(modelDir):
 		'demandCurve': demand_curve,
 		'tempCurve': temp_curve,
 		'PV': 'Yes',
-		'BESS': 'Yes',
 		'generator': 'No',
+
+		## Chemical Battery Inputs
+		'numberBESS': '100.0', ## Number of residential Tesla Powerwall 2 batteries
+		'existing_kw': '19000.0',
+		'existing_kwh': '56000.0',
+		'chemBESSgridcharge': 'Yes', 
+		'min_kw': '5.0', ## Minimum continuous power, based on Powerwall’s specs
+		'max_kw': '5.0', ## Maximum continuous power 
+		'min_kwh': '13.5', ## Minimum energy capacity based on Powerwall’s full capacity
+		'max_kwh': '13.5', ## Maximum energy capacity to use the entire capacity
+		'total_rebate_per_kw': '10.0', ## Assuming $10/kW incentive
+		'macrs_option_years': '25', ## Depreciation years
+		'macrs_bonus_fraction': '0.4', ## 40% bonus depreciation fraction
+		'replace_cost_per_kw': '460.0', 
+		'replace_cost_per_kwh': '240.0', 
+		'installed_cost_per_kw': '480.0', ## Approximate cost per kW installed, based on total price range
+		'installed_cost_per_kwh': '480.0', ## Cost per kWh reflecting Powerwall’s installed cost
+		'total_itc_fraction': '0.0', ## No ITC included unless specified
+		'inverter_replacement_year': '10', 
+		'battery_replacement_year': '10', 
 
 		## Financial Inputs
 		'demandChargeURDB': 'Yes',
