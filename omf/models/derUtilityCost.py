@@ -36,8 +36,6 @@ def work(modelDir, inputDict):
 	# Delete output file every run if it exists
 	outData = {}
 
-
-	
 	## Update the REopt input file to include existing and proposed chemical battery capacity
 	min_kw_total_residential_bess = int(inputDict['numberBESS']) * float(inputDict['min_kw'])
 	max_kw_total_residential_bess = int(inputDict['numberBESS']) * float(inputDict['max_kw'])
@@ -218,14 +216,8 @@ def work(modelDir, inputDict):
 	showlegend = True # either enable or disable the legend toggle in the plot
 	grid_to_load = reoptResults['ElectricUtility']['electric_to_load_series_kw']
 
-	if inputDict['PV'] == 'Yes': ## PV
-		PV = reoptResults['PV']['electric_to_load_series_kw']
-	else:
-		PV = np.zeros_like(demand)
-	
-
+	PV = reoptResults['PV']['electric_to_load_series_kw']
 	BESS = reoptResults['ElectricStorage']['storage_to_load_series_kw']
-	#BESS = np.ones_like(demand) ## Ad-hoc line used because BESS is not being built in REopt for some reason. Currently debugging 5/2024
 	grid_charging_BESS = reoptResults['ElectricUtility']['electric_to_storage_series_kw']
 	outData['chargeLevelBattery'] = reoptResults['ElectricStorage']['soc_series_fraction']
 
@@ -320,20 +312,18 @@ def work(modelDir, inputDict):
 						showlegend=showlegend))
 	fig.update_traces(fillpattern_shape='/', selector=dict(name='BESS Serving Load (kW)'))
 
-	## PV piece, if enabled
-	if (inputDict['PV'] == 'Yes'):
-		fig.add_trace(go.Scatter(x=timestamps,
-						y=PV,
-						yaxis='y1',
-						mode='none',
-						fill='tozeroy',
-						name='PV Serving Load (kW)',
-						fillcolor='rgba(255,246,0,1)',
-						showlegend=showlegend
-						))
+	## PV piece
+	fig.add_trace(go.Scatter(x=timestamps,
+					y=PV,
+					yaxis='y1',
+					mode='none',
+					fill='tozeroy',
+					name='PV Serving Load (kW)',
+					fillcolor='rgba(255,246,0,1)',
+					showlegend=showlegend
+					))
 		
 	##vbatDispatch (TESS) piece
-	#TODO: add enabling/disabling switch here
 	fig.add_trace(go.Scatter(x=timestamps,
 							y=np.asarray(vbat_discharge_flipsign),
 							yaxis='y1',
