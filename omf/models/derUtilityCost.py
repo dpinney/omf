@@ -13,6 +13,7 @@ import numpy as np
 import pandas as pd
 import plotly.graph_objs as go
 import plotly.utils
+from itertools import accumulate
 
 # OMF imports
 from omf.models import __neoMetaModel__
@@ -35,30 +36,42 @@ def work(modelDir, inputDict):
 	# Delete output file every run if it exists
 	outData = {}
 
-	## Add REopt BESS inputs to inputDict
-	## NOTE: These inputs are being added directly to inputDict because they are not specified by user input
-	## If they become user inputs, then they can be placed directly into the defaultInputs under the new() function below
+
+	
+	## Update the REopt input file to include existing and proposed chemical battery capacity
+	min_kw_total_residential_bess = int(inputDict['numberBESS']) * float(inputDict['min_kw'])
+	max_kw_total_residential_bess = int(inputDict['numberBESS']) * float(inputDict['max_kw'])
+	min_kwh_total_residential_bess = int(inputDict['numberBESS']) * float(inputDict['min_kwh'])
+	max_kwh_total_residential_bess = int(inputDict['numberBESS']) * float(inputDict['max_kwh'])
+
 	inputDict.update({
-		'total_rebate_per_kw': '10.0',
-		'macrs_option_years': '25',
-		'macrs_bonus_fraction': '0.4',
-		'replace_cost_per_kw': '10.0', 
-		'replace_cost_per_kwh': '5.0', 
-		'installed_cost_per_kw': '200.0', ## 300-700 per kW
-		'installed_cost_per_kwh': '200.0', ## 200-400 per kWh
-		'total_itc_fraction': '0.0',
+		'min_kw': min_kw_total_residential_bess,
+		'max_kw': max_kw_total_residential_bess,
+		'min_kwh': min_kwh_total_residential_bess,
+		'max_kwh': max_kwh_total_residential_bess
 	})
 
+	## NOTE: The commented code below will be used for combining existing and proposed BESS.
+	## REopt currently does not have an option to distinguish existing BESS from proposed BESS.
+	"""
+	existing_utility_bess_kw = float(inputDict['existing_kw'])
+	existing_utility_bess_kwh = float(inputDict['existing_kwh'])
+
+	min_kw_total_existing_and_proposed = min_kw_total_residential_bess + existing_utility_bess_kw
+	max_kw_total_existing_and_proposed = max_kw_total_residential_bess + existing_utility_bess_kw
+	min_kwh_total_existing_and_proposed = min_kwh_total_residential_bess + existing_utility_bess_kwh
+	max_kwh_total_existing_and_proposed = max_kwh_total_residential_bess + existing_utility_bess_kwh
+
+	inputDict.update({
+		'min_kw': min_kw_total_existing_and_proposed,
+		'max_kw': max_kw_total_existing_and_proposed,
+		'min_kwh': min_kwh_total_existing_and_proposed,
+		'max_kwh': max_kwh_total_existing_and_proposed
+	})
+	"""
+	
 	## Create REopt input file
 	derConsumer.create_REopt_jl_jsonFile(modelDir, inputDict)
-
-	## NOTE: The single commented code below is used temporarily if reopt_jl is not working or for other debugging purposes.
-	## Also NOTE: If this is used, you typically have to add a ['outputs'] key before the variable of interest.
-	## For example, instead of reoptResults['ElectricStorage']['storage_to_load_series_kw'], it would have to be
-	## reoptResults['outputs']['ElectricStorage']['storage_to_load_series_kw'] when using the static reopt file below.
-	#with open(pJoin(__neoMetaModel__._omfDir,"static","testFiles","utility_reopt_results.json")) as f:
-	#	reoptResults = pd.json_normalize(json.load(f))
-	#	print('Successfully read in REopt test file. \n')
 
 	## Run REopt.jl 
 	reopt_jl.run_reopt_jl(modelDir, "reopt_input_scenario.json")
@@ -96,6 +109,13 @@ def work(modelDir, inputDict):
 		vbatMinPowerCapacity = pd.Series(vbatResults['minPowerSeries'])
 		vbatMaxPowerCapacity = pd.Series(vbatResults['maxPowerSeries'])
 		vbatPower = vbpower_series
+
+	## Update the financial cost ouput to include REopt BESS 
+	## TODO: combine these with the same variables from vbatDispatch. Currently this just replaces the vbatDispatch variables.
+	outData['NPV'] = reoptResults['Financial']['npv'] 
+	outData['SPP'] = reoptResults['Financial']['simple_payback_years'] ## TODO: combine these same variables from vbatDispatch as well
+	outData['cumulativeCashflow'] = reoptResults['Financial']['offtaker_annual_free_cashflows'] #list(accumulate(reoptResults['Financial']['offtaker_annual_free_cashflows']))
+	outData['netCashflow'] = reoptResults['Financial']['offtaker_annual_free_cashflows'] #list(accumulate(reoptResults['Financial']['offtaker_annual_free_cashflows'])) ## or alternatively: offtaker_annual_free_cashflows
 
 	## NOTE: temporarily comment out the two derConsumer runs to run the code quicker
 	"""
@@ -640,7 +660,7 @@ def new(modelDir):
 		'generator': 'No',
 
 		## Chemical Battery Inputs
-		'numberBESS': '100.0', ## Number of residential Tesla Powerwall 2 batteries
+		'numberBESS': '100', ## Number of residential Tesla Powerwall 2 batteries
 		'existing_kw': '19000.0',
 		'existing_kwh': '56000.0',
 		'chemBESSgridcharge': 'Yes', 
@@ -650,7 +670,7 @@ def new(modelDir):
 		'max_kwh': '13.5', ## Maximum energy capacity to use the entire capacity
 		'total_rebate_per_kw': '10.0', ## Assuming $10/kW incentive
 		'macrs_option_years': '25', ## Depreciation years
-		'macrs_bonus_fraction': '0.4', ## 40% bonus depreciation fraction
+		#'macrs_bonus_fraction': '0.4', ## 40% bonus depreciation fraction
 		'replace_cost_per_kw': '460.0', 
 		'replace_cost_per_kwh': '240.0', 
 		'installed_cost_per_kw': '480.0', ## Approximate cost per kW installed, based on total price range

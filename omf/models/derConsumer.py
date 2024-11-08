@@ -88,7 +88,7 @@ def create_REopt_jl_jsonFile(modelDir, inputDict):
 		'can_grid_charge': can_grid_charge_bool,
 		'total_rebate_per_kw': float(inputDict['total_rebate_per_kw']),
 		'macrs_option_years': float(inputDict['macrs_option_years']),
-		'macrs_bonus_fraction': float(inputDict['macrs_bonus_fraction']),
+		#'macrs_bonus_fraction': float(inputDict['macrs_bonus_fraction']),
 		'replace_cost_per_kw': float(inputDict['replace_cost_per_kw']),
 		'replace_cost_per_kwh': float(inputDict['replace_cost_per_kwh']),
 		'installed_cost_per_kw': float(inputDict['installed_cost_per_kw']),
