@@ -113,7 +113,25 @@ def work(modelDir, inputDict):
 	outData['NPV'] = reoptResults['Financial']['npv'] 
 	outData['SPP'] = reoptResults['Financial']['simple_payback_years'] ## TODO: combine these same variables from vbatDispatch as well
 	outData['cumulativeCashflow'] = reoptResults['Financial']['offtaker_annual_free_cashflows'] #list(accumulate(reoptResults['Financial']['offtaker_annual_free_cashflows']))
-	outData['netCashflow'] = reoptResults['Financial']['offtaker_annual_free_cashflows'] #list(accumulate(reoptResults['Financial']['offtaker_annual_free_cashflows'])) ## or alternatively: offtaker_annual_free_cashflows
+	outData['netCashflow'] = reoptResults['Financial']['offtaker_discounted_annual_free_cashflows'] #list(accumulate(reoptResults['Financial']['offtaker_annual_free_cashflows'])) ## or alternatively: offtaker_annual_free_cashflows
+
+	## Temporarily correct financial outputs for any existing BESS
+	## (Remove the installation cost of any existing BESS since we are including it in the aggregated BESS: existing utility BESS + proposed consumer BESS)
+	existing_utility_bess_kw = float(inputDict['existing_kw'])
+	existing_utility_bess_kwh = float(inputDict['existing_kwh'])
+	installed_cost_per_kw = float(inputDict['installed_cost_per_kw'])
+	installed_cost_per_kwh = float(inputDict['installed_cost_per_kwh'])
+	cost_existing_utility_bess_kw = existing_utility_bess_kw * installed_cost_per_kw
+	cost_existing_utility_bess_kwh = existing_utility_bess_kwh * installed_cost_per_kwh
+	totalcost_existing_utility_bess = cost_existing_utility_bess_kw + cost_existing_utility_bess_kwh
+	outData['NPV'] -= totalcost_existing_utility_bess
+	outData['cumulativeCashflow'] = [cashflow - totalcost_existing_utility_bess for cashflow in reoptResults['Financial']['offtaker_annual_free_cashflows']]
+	outData['netCashflow'] = [cashflow - totalcost_existing_utility_bess for cashflow in reoptResults['Financial']['offtaker_annual_free_cashflows']]
+
+	## Calculate adjusted initial investment and simply payback period (SPP)
+	adjusted_initial_investment = reoptResults['Financial']['initial_capital_costs'] - totalcost_existing_utility_bess
+	outData['SPP'] = adjusted_initial_investment / np.sum(outData['netCashflow'])
+
 
 	## NOTE: temporarily comment out the two derConsumer runs to run the code quicker
 	"""
@@ -322,7 +340,7 @@ def work(modelDir, inputDict):
 					fillcolor='rgba(255,246,0,1)',
 					showlegend=showlegend
 					))
-		
+	
 	##vbatDispatch (TESS) piece
 	fig.add_trace(go.Scatter(x=timestamps,
 							y=np.asarray(vbat_discharge_flipsign),
@@ -646,8 +664,6 @@ def new(modelDir):
 		'tempFileName': 'utility_CO_2018_temperatures.csv',
 		'demandCurve': demand_curve,
 		'tempCurve': temp_curve,
-		'PV': 'Yes',
-		'generator': 'No',
 
 		## Chemical Battery Inputs
 		'numberBESS': '100', ## Number of residential Tesla Powerwall 2 batteries
@@ -659,15 +675,26 @@ def new(modelDir):
 		'min_kwh': '13.5', ## Minimum energy capacity based on Powerwall’s full capacity
 		'max_kwh': '13.5', ## Maximum energy capacity to use the entire capacity
 		'total_rebate_per_kw': '10.0', ## Assuming $10/kW incentive
-		'macrs_option_years': '25', ## Depreciation years
+		'batteryMacrs_option_years': '25', ## Depreciation years
 		#'macrs_bonus_fraction': '0.4', ## 40% bonus depreciation fraction
 		'replace_cost_per_kw': '460.0', 
 		'replace_cost_per_kwh': '240.0', 
-		'installed_cost_per_kw': '480.0', ## Approximate cost per kW installed, based on total price range
-		'installed_cost_per_kwh': '480.0', ## Cost per kWh reflecting Powerwall’s installed cost
+		'installed_cost_per_kw': '300.0', ## (Residential: $1,000-$1,500 per kW, Utility: $300-$700 per kW)
+		'installed_cost_per_kwh': '480.0', ## Cost per kWh reflecting Powerwall’s installed cost (Residential: $400-$900 per kWh, Utility: $200-$400 per kWh)
 		'total_itc_fraction': '0.0', ## No ITC included unless specified
 		'inverter_replacement_year': '10', 
 		'battery_replacement_year': '10', 
+
+		## Photovoltaic Inputs
+		'existing_kw_PV': '29500.0',
+		'additional_kw_PV': '0.0',
+		'costPV': '0.0',
+		'min_kw_PV': '0',
+		'max_kw_PV': '29500.0',
+		'PVCanCurtail': 'Yes',
+		'PVCanExport': 'Yes',
+		'PVMacrsOptionYears': '25',
+		'PVItcPercent': '0.0',
 
 		## Financial Inputs
 		'demandChargeURDB': 'Yes',

@@ -77,13 +77,6 @@
 				<label class="tooltip">Year<span class="classic">Specify the year to which the load shape values corresond.</span></label>
 				<input type="text" id="year" name="year" value="{{allInputDataDict.year}}" pattern="^\d{4}$" required="required"/>
 			</div>
-			<div class="shortInput">
-				<label class="tooltip">Diesel Generator<span class="classic">Include diesel generator in DER analysis.</span></label>
-				<select id="generator" name="generator" value="{{allInputDataDict.generator}}"/>
-					<option value="Yes" {{ 'selected' if allInputDataDict.generator == 'Yes' }}>Yes</option>
-					<option value="No" {{ 'selected' if allInputDataDict.generator == 'No' }}>No</option>
-				</select>
-			</div>
 			
 			<!-- Financial Inputs -->
 			<div class="wideInput">
@@ -172,7 +165,7 @@
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Battery MACRS Years<span class="classic">MACRS schedule for financial analysis. Possible inputs are 0, 5 and 7 years.</span></label>
-				<select id="macrs_option_years" name="macrs_option_years" value="{{allInputDataDict.macrs_option_years}}"/>
+				<select id="batteryMacrs_option_years" name="batteryMacrs_option_years" value="{{allInputDataDict.batteryMacrs_option_years}}"/>
 					<option value="0" {{ 'selected' if allInputDataDict.batteryMacrsOptionYears == '0' }}>0</option>
 					<option value="5" {{ 'selected' if allInputDataDict.batteryMacrsOptionYears == '5' }}>5</option>
 					<option value="7" {{ 'selected' if allInputDataDict.batteryMacrsOptionYears == '7' }}>7</option>
@@ -203,6 +196,57 @@
 				<input type="text" id="battery_replacement_year" name="battery_replacement_year" value="{{allInputDataDict.battery_replacement_year}}" required="required"/>
 			</div>
 
+			<!-- Photovoltaic Inputs -->
+			<div class="wideInput"> 
+				<p class="inputSectionHeader">Photovoltaic Device Inputs</p>
+			</div>
+			<hr style="border-style: solid; border-color: #196b12; margin-top: 10px;">
+			<div class="shortInput solarDisplayInput">
+				<label class="tooltip">Existing photovoltaic size (kW)<span class="classic">Specify the total capacity of any pre-existing photovoltaic installation in kW.</span></label>
+				<input type="text" id="existing_kw_PV" name="existing_kw_PV" value="{{allInputDataDict.existing_kw_PV}}" required="required"/>
+			</div>
+			<div class="shortInput">
+				<label class="tooltip">Additional Utility-Installed PV Size (kW)<span class="classic">Specify the additional desired photovoltaic size amount in kW.</span></label>
+				<input type="text" id="additional_kw_PV" name="additional_kw_PV" value="{{allInputDataDict.additional_kw_PV}}" required="required"/>
+			</div>
+			<div class="shortInput">
+				<label class="tooltip">Photovoltaic Cost ($/kW)<span class="classic">Specify the cost in $/kW.</span></label>
+				<input type="text" id="costPV" name="costPV" value="{{allInputDataDict.costPV}}" pattern="^\d+\.?\d*?$" required="required"/>
+			</div>
+			<div class="shortInput">
+				<label class="tooltip">Photovoltaic Minimum Power (kW)<span class="classic">Specify the minimum desired photovoltaic generation in kW.</span></label>
+				<input type="text" id="min_kw_PV" name="min_kw_PV" value="{{allInputDataDict.min_kw_PV}}" required="required"/>
+			</div>
+			<div class="shortInput">
+				<label class="tooltip">Photovoltaic Maximum Power (kW)<span class="classic">Specify the maximum desired generation in kW. Leave at default for full optimization on solar power.</span></label>
+				<input type="text" id="max_kw_PV" name="max_kw_PV" value="{{allInputDataDict.max_kw_PV}}" required="required"/>
+			</div>
+			<div class="shortInput">
+				<label class="tooltip">Can photovoltaic be curtailed?<span class="classic">Allows for excess photovoltaic power to be automatically curtailed.</span></label>
+				<select id="PVCanCurtail" name="PVCanCurtail">
+					<option value='Yes' {{ 'selected' if allInputDataDict.PVCanCurtail == Yes }}>Yes</option>
+					<option value='No' {{ 'selected' if allInputDataDict.PVCanCurtail == No }}>No</option>
+				</select>
+			</div>
+			<div class="shortInput">
+				<label class="tooltip">Can photovoltaic be exported?<span class="classic">Allows for excess photovoltaic power to be sold back to the grid.</span></label>
+				<select id="PVCanExport" name="PVCanExport">
+					<option value='Yes' {{ 'selected' if allInputDataDict.PVCanExport == Yes }}>Yes</option>
+					<option value='No' {{ 'selected' if allInputDataDict.PVCanExport == No }}>No</option>
+				</select>
+			</div>
+			<div class="shortInput">
+				<label class="tooltip">Photovoltaic MACRS Years<span class="classic">MACRS schedule for financial analysis. Possible inputs are 0, 5 and 7 years.</span></label>
+				<select id="PVMacrsOptionYears" name="PVMacrsOptionYears" value="{{allInputDataDict.PVMacrsOptionYears}}"/>
+					<option value="0" {{ 'selected' if allInputDataDict.PVMacrsOptionYears == '0' }}>0</option>
+					<option value="5" {{ 'selected' if allInputDataDict.PVMacrsOptionYears == '5' }}>5</option>
+					<option value="7" {{ 'selected' if allInputDataDict.PVMacrsOptionYears == '7' }}>7</option>
+				</select>
+			</div>
+			<div class="shortInput">
+				<label class="tooltip">Photovoltaic ITC (%)<span class="classic">Please enter a number 0-1 for the photovoltaic investment tax credit. Format 0.XX</span></label>
+				<input type="number" id="PVItcPercent" name="PVItcPercent" value="{{allInputDataDict.PVItcPercent}}" step="0.01" min="0.0" max="1.0" required="required"/>
+			</div>
 
 			<!-- vbatDispatch Specific Inputs -->
 			<div class="wideInput"> 
