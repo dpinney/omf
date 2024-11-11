@@ -218,21 +218,21 @@
 				<input type="text" id="min_kw_PV" name="min_kw_PV" value="{{allInputDataDict.min_kw_PV}}" required="required"/>
 			</div>
 			<div class="shortInput">
-				<label class="tooltip">Photovoltaic Maximum Power (kW)<span class="classic">Specify the maximum desired generation in kW. Leave at default for full optimization on solar power.</span></label>
+				<label class="tooltip">Photovoltaic Maximum Power (kW)<span class="classic">Specify the maximum desired generation in kW.</span></label>
 				<input type="text" id="max_kw_PV" name="max_kw_PV" value="{{allInputDataDict.max_kw_PV}}" required="required"/>
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Can photovoltaic be curtailed?<span class="classic">Allows for excess photovoltaic power to be automatically curtailed.</span></label>
 				<select id="PVCanCurtail" name="PVCanCurtail">
-					<option value='Yes' {{ 'selected' if allInputDataDict.PVCanCurtail == Yes }}>Yes</option>
-					<option value='No' {{ 'selected' if allInputDataDict.PVCanCurtail == No }}>No</option>
+					<option value='true' {{ 'selected' if allInputDataDict.PVCanCurtail == True }}>Yes</option>
+					<option value='false' {{ 'selected' if allInputDataDict.PVCanCurtail == False }}>No</option>
 				</select>
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Can photovoltaic be exported?<span class="classic">Allows for excess photovoltaic power to be sold back to the grid.</span></label>
 				<select id="PVCanExport" name="PVCanExport">
-					<option value='Yes' {{ 'selected' if allInputDataDict.PVCanExport == Yes }}>Yes</option>
-					<option value='No' {{ 'selected' if allInputDataDict.PVCanExport == No }}>No</option>
+					<option value='true' {{ 'selected' if allInputDataDict.PVCanExport == True }}>Yes</option>
+					<option value='false' {{ 'selected' if allInputDataDict.PVCanExport == False }}>No</option>
 				</select>
 			</div>
 			<div class="shortInput">

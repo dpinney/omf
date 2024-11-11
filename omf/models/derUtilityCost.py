@@ -691,8 +691,8 @@ def new(modelDir):
 		'costPV': '0.0',
 		'min_kw_PV': '0',
 		'max_kw_PV': '29500.0',
-		'PVCanCurtail': 'Yes',
-		'PVCanExport': 'Yes',
+		'PVCanCurtail': True,
+		'PVCanExport': True,
 		'PVMacrsOptionYears': '25',
 		'PVItcPercent': '0.0',
 
@@ -704,7 +704,7 @@ def new(modelDir):
 		'subsidy': '100.0',
 
 		## vbatDispatch inputs:
-		'load_type': '2', ## Heat Pump
+		'load_type': '1', ## Air Conditioner
 		'number_devices': '2000',
 		'power': '5.6',
 		'capacitance': '2',

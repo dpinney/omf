@@ -67,7 +67,14 @@ def create_REopt_jl_jsonFile(modelDir, inputDict):
 	}
 
 	scenario['PV'] = {
-		##TODO: Add options here, if needed
+		'installed_cost_per_kw': float(inputDict['costPV']),
+		'existing_kw': float(inputDict['existing_kw_PV']),
+		'min_kw': float(inputDict['min_kw_PV']),
+		'max_kw': float(inputDict['max_kw_PV']),
+		'can_export_beyond_nem_limit': inputDict['PVCanExport'],
+		'can_curtail': inputDict['PVCanCurtail'],
+		'macrs_option_years': int(inputDict['PVMacrsOptionYears']),
+		'federal_itc_fraction': float(inputDict['PVItcPercent']),
 		}
 
 	## Add a Battery Energy Storage System (BESS) section if enabled 
@@ -654,6 +661,17 @@ def new(modelDir):
 		'total_itc_fraction': '0.0', ## No ITC included unless specified
 		'inverter_replacement_year': '10', 
 		'battery_replacement_year': '10',  
+
+		## Photovoltaic Inputs
+		'existing_kw_PV': '29500.0',
+		'additional_kw_PV': '0.0',
+		'costPV': '0.0',
+		'min_kw_PV': '0',
+		'max_kw_PV': '29500.0',
+		'PVCanCurtail': True,
+		'PVCanExport': True,
+		'PVMacrsOptionYears': '25',
+		'PVItcPercent': '0.0',
 
 		## vbatDispatch inputs:
 		'load_type': '2', ## Heat Pump
