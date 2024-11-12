@@ -221,6 +221,28 @@ class SearchModal {
     // ********************
 
     /**
+     * @returns {undefined}
+     */
+    addHighlights() {
+        for (const ob of this.#searchResults) {
+            if (ob.isNode()) {
+                const path = Object.values(ob.getObservers().filter(o => o instanceof LeafletLayer)[0].getLayer()._layers)[0];
+                path.setStyle({
+                    color: '#7FFF00'
+                });
+            } else if (ob.isLine()) {
+                const path = Object.values(ob.getObservers().filter(o => o instanceof LeafletLayer)[0].getLayer()._layers)[0];
+                if (!path.options.hasOwnProperty('originalColor')) {
+                    path.options.originalColor = path.options.color;
+                }
+                path.setStyle({
+                    color: '#7FFF00'
+                });
+            }
+        }
+    }
+
+    /**
      * - Filter the layer groups so that only the search results are shown
      */
     filterLayerGroups() {
@@ -275,6 +297,32 @@ class SearchModal {
     getNodeSearchResultsDiv() {
         return this.#nodeDropdownDiv.div;
     }
+
+    /**
+     * @returns {undefined}
+     */
+    removeHighlights() {
+        for (const ob of this.#observables[0].getObservables()) {
+            if (ob.isNode()) {
+                const path = Object.values(ob.getObservers().filter(o => o instanceof LeafletLayer)[0].getLayer()._layers)[0];
+                path.setStyle({
+                    color: 'black'
+                });
+            } else if (ob.isLine()) {
+                const path = Object.values(ob.getObservers().filter(o => o instanceof LeafletLayer)[0].getLayer()._layers)[0];
+                if (path.options.hasOwnProperty('colorModalColor')) {
+                    path.setStyle({
+                        color: path.options.colorModalColor
+                    });
+                } else if (path.options.hasOwnProperty('originalColor')) {
+                    path.setStyle({
+                        color: path.options.originalColor
+                    });
+                }
+            }
+        }
+    }
+
     // *********************
     // ** Private methods **
     // *********************
@@ -633,7 +681,9 @@ class SearchModal {
         // - Clear the old search results
         this.#searchResults = [];
         if (this.#observables[0] instanceof FeatureGraph) {
-            LeafletLayer.resetLayerGroups(this.#controller);
+            // - 2024-11-10: disabled show/hide search results and replaced it with highlight/un-highlight search results
+            //LeafletLayer.resetLayerGroups(this.#controller);
+            this.removeHighlights();
         }
         // - Clear the old search criteria and build new search criteria
         const searchCriteria = [];
@@ -782,7 +832,9 @@ class SearchModal {
             showSearchResults = showSearchResults.checked;
         }
         if (this.#observables[0] instanceof FeatureGraph && showSearchResults) {
-            this.filterLayerGroups();
+            // - 2024-11-10: disabled show/hide search results and replaced it with highlight/un-highlight search results
+            //this.filterLayerGroups();
+            this.addHighlights();
         }
         // - Don't attach event handlers here because then I'll be adding a new event handler after every search!
         const {configs, nodes, lines} = this.#getCategorizedSearchResults();

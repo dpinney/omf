@@ -352,7 +352,7 @@ class LeafletLayer {    // implements ObserverInterface
                 fillColor: fillColor,
                 fillOpacity: .9,
                 radius: 6.5,
-                weight: 1
+                weight: 2
             }
         }
         if (this.#observable.isParentChildLine()) {
