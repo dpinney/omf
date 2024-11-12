@@ -140,60 +140,28 @@
 				</select>
 			</div>
 			<div class="shortInput">
-				<label class="tooltip">Installed Power Cost ($/kW)<span class="classic">Specify the installed cost per kW of the battery.</span></label>
+				<label class="tooltip">Operational Power Capacity Cost ($/kW)<span class="classic">Specify the operational cost per kW of enrolling and controlling a member-consumer's battery (e.g. the API usage cost).</span></label>
 				<input type="text" id="installed_cost_per_kw" name="installed_cost_per_kw" value="{{allInputDataDict.installed_cost_per_kw}}" pattern="^\d+\.?\d*?$" required="required"/>
 			</div>
 			<div class="shortInput">
-				<label class="tooltip">Battery Minimum Power (kW)<span class="classic">Specify the minimum desired battery power in kW.</span></label>
-				<input type="text" id="min_kw" name="min_kw" value="{{allInputDataDict.min_kw}}" required="required"/>
-			</div>
-			<div class="shortInput">
-				<label class="tooltip">Battery Maximum Power (kW)<span class="classic">Specify the maximum desired battery power in kW.</span></label>
-				<input type="text" id="max_kw" name="max_kw" value="{{allInputDataDict.max_kw}}" required="required"/>
-			</div>
-			<div class="shortInput">
-				<label class="tooltip">Installed Capacity Cost ($/kWh)<span class="classic">Specify the cost in $/kWh.</span></label>
+				<label class="tooltip">Operational Energy Capacity Cost ($/kWh)<span class="classic">Specify the operational cost per kWh of enrolling and controlling a member-consumer's battery (e.g. the API usage cost)</span></label>
 				<input type="text" id="installed_cost_per_kwh" name="installed_cost_per_kwh" value="{{allInputDataDict.installed_cost_per_kwh}}" pattern="^\d+\.?\d*?$" required="required"/>
 			</div>
 			<div class="shortInput">
-				<label class="tooltip">Battery Minimum Capacity (kWh)<span class="classic">Specify the minimum desired battery capacity in kWh.</span></label>
-				<input type="text" id="min_kwh" name="min_kwh" value="{{allInputDataDict.min_kwh}}" required="required"/>
+				<label class="tooltip">Battery Power Capacity (kW)<span class="classic">Specify the battery power capacity in kW for each individual battery enrolled by a member-consumer.</span></label>
+				<input type="text" id="BESS_kw" name="BESS_kw" value="{{allInputDataDict.BESS_kw}}" required="required"/>
 			</div>
 			<div class="shortInput">
-				<label class="tooltip">Battery Maximum Capacity (kWh)<span class="classic">Specify the maximum desired battery capacity in kWh.</span></label>
-				<input type="text" id="max_kwh" name="max_kwh" value="{{allInputDataDict.max_kwh}}" required="required"/>
+				<label class="tooltip">Battery Energy Capacity (kWh)<span class="classic">Specify the battery energy capacity in kWh for each individual battery enrolled by a member-consumer.</span></label>
+				<input type="text" id="BESS_kwh" name="BESS_kwh" value="{{allInputDataDict.BESS_kwh}}" required="required"/>
 			</div>
 			<div class="shortInput">
-				<label class="tooltip">Battery MACRS Years<span class="classic">MACRS schedule for financial analysis. Possible inputs are 0, 5 and 7 years.</span></label>
-				<select id="batteryMacrs_option_years" name="batteryMacrs_option_years" value="{{allInputDataDict.batteryMacrs_option_years}}"/>
+				<label class="tooltip">Battery MACRS Years<span class="classic">Modified Accelerated Cost Recovery System (MACRS) is the current tax depreciation schedule. Possible inputs are 0, 5 and 7 years.</span></label>
+				<select id="batteryMacrsOptionYears" name="batteryMacrsOptionYears" value="{{allInputDataDict.batteryMacrsOptionYears}}"/>
 					<option value="0" {{ 'selected' if allInputDataDict.batteryMacrsOptionYears == '0' }}>0</option>
 					<option value="5" {{ 'selected' if allInputDataDict.batteryMacrsOptionYears == '5' }}>5</option>
 					<option value="7" {{ 'selected' if allInputDataDict.batteryMacrsOptionYears == '7' }}>7</option>
 				</select>
-			</div>
-			<div class="shortInput">
-				<label class="tooltip">Battery ITC (%)<span class="classic">Please enter a number 0-1 for the battery investment tax credit. Format 0.XX</span></label>
-				<input type="number" id="total_itc_fraction" name="total_itc_fraction" value="{{allInputDataDict.total_itc_fraction}}" step="0.01" min="0.0" max="1.0" required="required"/>
-			</div>
-			<div class="shortInput">
-				<label class="tooltip">Total Rebate ($/kW)<span class="classic"> Total rebate amount per kW of battery power capacity. </span></label>
-				<input type="text" id="total_rebate_per_kw" name="total_rebate_per_kw" value="{{allInputDataDict.total_rebate_per_kw}}" required="required"/>
-			</div>
-			<div class="shortInput">
-				<label class="tooltip">Battery Replacement Power Cost ($/kW)<span class="classic">Specify the cost of replacing the battery inverter at the specified year in $/kW.</span></label>
-				<input type="text" id="replace_cost_per_kw" name="replace_cost_per_kw" value="{{allInputDataDict.replace_cost_per_kw}}" pattern="^\d+\.?\d*?$" required="required"/>
-			</div>
-			<div class="shortInput">
-				<label class="tooltip">Battery Replacement Capacity Cost ($/kWh)<span class="classic">Specify the cost of replacing the battery capacity at the specified year in $/kWh.</span></label>
-				<input type="text" id="replace_cost_per_kwh" name="replace_cost_per_kwh" value="{{allInputDataDict.replace_cost_per_kwh}}" pattern="^\d+\.?\d*?$" required="required"/>
-			</div>
-			<div class="shortInput">
-				<label class="tooltip">Battery Inverter Replacement (years)<span class="classic">Specify a year in which the battery inverter will be replaced at the cost specified in Battery Replacement Power Cost. Input is an integer less than or equal to the analysis period in years.</span></label>
-				<input type="text" id="inverter_replacement_year" name="inverter_replacement_year" value="{{allInputDataDict.inverter_replacement_year}}" required="required"/>
-			</div>
-				<div class="shortInput">
-				<label class="tooltip">Battery Replacement (years)<span class="classic">Specify a year in which the battery cells will be replaced at the cost specified in Battery Replacement Capacity Cost. Input is an integer less than or equal to the analysis period in years.</span></label>
-				<input type="text" id="battery_replacement_year" name="battery_replacement_year" value="{{allInputDataDict.battery_replacement_year}}" required="required"/>
 			</div>
 
 			<!-- Photovoltaic Inputs -->
@@ -204,22 +172,6 @@
 			<div class="shortInput solarDisplayInput">
 				<label class="tooltip">Existing photovoltaic size (kW)<span class="classic">Specify the total capacity of any pre-existing photovoltaic installation in kW.</span></label>
 				<input type="text" id="existing_kw_PV" name="existing_kw_PV" value="{{allInputDataDict.existing_kw_PV}}" required="required"/>
-			</div>
-			<div class="shortInput">
-				<label class="tooltip">Additional Utility-Installed PV Size (kW)<span class="classic">Specify the additional desired photovoltaic size amount in kW.</span></label>
-				<input type="text" id="additional_kw_PV" name="additional_kw_PV" value="{{allInputDataDict.additional_kw_PV}}" required="required"/>
-			</div>
-			<div class="shortInput">
-				<label class="tooltip">Photovoltaic Cost ($/kW)<span class="classic">Specify the cost in $/kW.</span></label>
-				<input type="text" id="costPV" name="costPV" value="{{allInputDataDict.costPV}}" pattern="^\d+\.?\d*?$" required="required"/>
-			</div>
-			<div class="shortInput">
-				<label class="tooltip">Photovoltaic Minimum Power (kW)<span class="classic">Specify the minimum desired photovoltaic generation in kW.</span></label>
-				<input type="text" id="min_kw_PV" name="min_kw_PV" value="{{allInputDataDict.min_kw_PV}}" required="required"/>
-			</div>
-			<div class="shortInput">
-				<label class="tooltip">Photovoltaic Maximum Power (kW)<span class="classic">Specify the maximum desired generation in kW.</span></label>
-				<input type="text" id="max_kw_PV" name="max_kw_PV" value="{{allInputDataDict.max_kw_PV}}" required="required"/>
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Can photovoltaic be curtailed?<span class="classic">Allows for excess photovoltaic power to be automatically curtailed.</span></label>
@@ -234,18 +186,6 @@
 					<option value='true' {{ 'selected' if allInputDataDict.PVCanExport == True }}>Yes</option>
 					<option value='false' {{ 'selected' if allInputDataDict.PVCanExport == False }}>No</option>
 				</select>
-			</div>
-			<div class="shortInput">
-				<label class="tooltip">Photovoltaic MACRS Years<span class="classic">MACRS schedule for financial analysis. Possible inputs are 0, 5 and 7 years.</span></label>
-				<select id="PVMacrsOptionYears" name="PVMacrsOptionYears" value="{{allInputDataDict.PVMacrsOptionYears}}"/>
-					<option value="0" {{ 'selected' if allInputDataDict.PVMacrsOptionYears == '0' }}>0</option>
-					<option value="5" {{ 'selected' if allInputDataDict.PVMacrsOptionYears == '5' }}>5</option>
-					<option value="7" {{ 'selected' if allInputDataDict.PVMacrsOptionYears == '7' }}>7</option>
-				</select>
-			</div>
-			<div class="shortInput">
-				<label class="tooltip">Photovoltaic ITC (%)<span class="classic">Please enter a number 0-1 for the photovoltaic investment tax credit. Format 0.XX</span></label>
-				<input type="number" id="PVItcPercent" name="PVItcPercent" value="{{allInputDataDict.PVItcPercent}}" step="0.01" min="0.0" max="1.0" required="required"/>
 			</div>
 
 			<!-- vbatDispatch Specific Inputs -->

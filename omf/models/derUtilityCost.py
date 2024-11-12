@@ -35,44 +35,82 @@ def work(modelDir, inputDict):
 	
 	# Delete output file every run if it exists
 	outData = {}
-
-	## Update the REopt input file to include existing and proposed chemical battery capacity
-	min_kw_total_residential_bess = int(inputDict['numberBESS']) * float(inputDict['min_kw'])
-	max_kw_total_residential_bess = int(inputDict['numberBESS']) * float(inputDict['max_kw'])
-	min_kwh_total_residential_bess = int(inputDict['numberBESS']) * float(inputDict['min_kwh'])
-	max_kwh_total_residential_bess = int(inputDict['numberBESS']) * float(inputDict['max_kwh'])
-
-	inputDict.update({
-		'min_kw': min_kw_total_residential_bess,
-		'max_kw': max_kw_total_residential_bess,
-		'min_kwh': min_kwh_total_residential_bess,
-		'max_kwh': max_kwh_total_residential_bess
-	})
-
-	## NOTE: The commented code below will be used for combining existing and proposed BESS.
-	## REopt currently does not have an option to distinguish existing BESS from proposed BESS.
-	"""
-	existing_utility_bess_kw = float(inputDict['existing_kw'])
-	existing_utility_bess_kwh = float(inputDict['existing_kwh'])
-
-	min_kw_total_existing_and_proposed = min_kw_total_residential_bess + existing_utility_bess_kw
-	max_kw_total_existing_and_proposed = max_kw_total_residential_bess + existing_utility_bess_kw
-	min_kwh_total_existing_and_proposed = min_kwh_total_residential_bess + existing_utility_bess_kwh
-	max_kwh_total_existing_and_proposed = max_kwh_total_residential_bess + existing_utility_bess_kwh
-
-	inputDict.update({
-		'min_kw': min_kw_total_existing_and_proposed,
-		'max_kw': max_kw_total_existing_and_proposed,
-		'min_kwh': min_kwh_total_existing_and_proposed,
-		'max_kwh': max_kwh_total_existing_and_proposed
-	})
-	"""
 	
-	## Create REopt input file
-	derConsumer.create_REopt_jl_jsonFile(modelDir, inputDict)
+	## Update inputDict with derUtilityCost inputs	
+	## Site parameters
+	latitude = float(inputDict['latitude'])
+	longitude = float(inputDict['longitude'])
+	urdbLabel = str(inputDict['urdbLabel'])
+	year = int(inputDict['year'])
+	projectionLength = int(inputDict['projectionLength'])
+	demand_array = np.asarray([float(value) for value in inputDict['demandCurve'].split('\n') if value.strip()]) ## process input format into an array
+	demand = demand_array.tolist() if isinstance(demand_array, np.ndarray) else demand_array ## make demand array into a list	for REopt
 
-	## Run REopt.jl 
-	reopt_jl.run_reopt_jl(modelDir, "reopt_input_scenario.json")
+	## Begin the REopt input dictionary called 'scenario'
+	scenario = {
+		'Site': {
+			'latitude': latitude,
+			'longitude': longitude
+		},
+		'ElectricTariff': {
+			'urdb_label': urdbLabel
+		},
+		'ElectricLoad': {
+			'loads_kw': demand,
+			'year': year
+		},
+		'Financial': {
+			'analysis_years': projectionLength
+		}
+	}
+
+	scenario['PV'] = {
+		'installed_cost_per_kw': 0.0,
+		'existing_kw': float(inputDict['existing_kw_PV']),
+		'min_kw': 0.0,
+		'max_kw': 0.0,
+		'can_export_beyond_nem_limit': inputDict['PVCanExport'],
+		'can_curtail': inputDict['PVCanCurtail'],
+		'macrs_option_years': 0,
+		'federal_itc_fraction': 0,
+	}
+
+	## Add a Battery Energy Storage System (BESS) section if enabled 
+	if inputDict['chemBESSgridcharge'] == 'Yes':
+		can_grid_charge_bool = True
+	else:
+		can_grid_charge_bool = False
+
+	scenario['ElectricStorage'] = {
+		##TODO: Add options here, if needed
+		'min_kw': float(inputDict['BESS_kw'])+float(inputDict['existing_kw']),
+		'max_kw':  float(inputDict['BESS_kw'])+float(inputDict['existing_kw']),
+		'min_kwh':  float(inputDict['BESS_kwh'])+float(inputDict['existing_kwh']),
+		'max_kwh':  float(inputDict['BESS_kwh'])+float(inputDict['existing_kwh']),
+		'can_grid_charge': can_grid_charge_bool,
+		'total_rebate_per_kw': 0,
+		'macrs_option_years': 0,
+		'installed_cost_per_kw': float(inputDict['installed_cost_per_kw']),
+		'installed_cost_per_kwh': float(inputDict['installed_cost_per_kwh']),
+		'battery_replacement_year': 0,
+		'inverter_replacement_year': 0,
+		'replace_cost_per_kwh': 0.0,
+		'replace_cost_per_kw': 0.0,
+		'total_rebate_per_kw': 0.0,
+		'total_itc_fraction': 0.0,
+		}
+	
+	## Save the scenario file
+	## NOTE: reopt_jl currently requires a path for the input file, so the file must be saved to a location preferrably in the modelDir directory
+	with open(pJoin(modelDir, 'reopt_input_scenario.json'), 'w') as jsonFile:
+		json.dump(scenario, jsonFile)
+
+	## Create basic REopt input file
+	## NOTE: This function is disabled for now since the scenario dictionary above is hard coded and not relying on the derConsumer function to produce the REopt input file.
+	#derConsumer.create_REopt_jl_jsonFile(modelDir, inputDict)
+
+	## Run REopt.jl
+	reopt_jl.run_reopt_jl(modelDir, 'reopt_input_scenario.json')
 	with open(pJoin(modelDir, 'results.json')) as jsonFile:
 		reoptResults = json.load(jsonFile)
 	outData.update(reoptResults) ## Update output file with reopt results
@@ -90,7 +128,7 @@ def work(modelDir, inputDict):
 	timestamps = pd.date_range(start=f'{year}-01-01', end=f'{year}-12-31 23:00:00', periods=np.size(demand))
 	
 	## Run vbatDispatch, unless it is disabled
-	if inputDict['load_type'] != '0': ## Load type 0 corresponds to the "None" option, which disables this vbatDispatch function
+	if (inputDict['load_type'] != '0') and (int(inputDict['number_devices'])>0): ## Load type 0 corresponds to the "None" option, which disables this vbatDispatch function
 		vbatResults = vb.work(modelDir,inputDict)
 		with open(pJoin(modelDir, 'vbatResults.json'), 'w') as jsonFile:
 			json.dump(vbatResults, jsonFile)
@@ -251,7 +289,7 @@ def work(modelDir, inputDict):
 
 	## Create DER overview plot object
 	fig = go.Figure()
-	if inputDict['load_type'] != '0': ## Load type 0 corresponds to the "None" option, which disables this vbatDispatch function
+	if (inputDict['load_type'] != '0') and (int(inputDict['number_devices'])>0): ## Load type 0 corresponds to the "None" option, which disables this vbatDispatch function
 		vbat_discharge_component = np.asarray(vbat_discharge_flipsign)
 		vbat_charge_component = np.asarray(vbat_charge)
 
@@ -342,15 +380,16 @@ def work(modelDir, inputDict):
 					))
 	
 	##vbatDispatch (TESS) piece
-	fig.add_trace(go.Scatter(x=timestamps,
-							y=np.asarray(vbat_discharge_flipsign),
-							yaxis='y1',
-							mode='none',
-							fill='tozeroy',
-							fillcolor='rgba(127,0,255,1)',
-							name='TESS Serving Load (kW)',
-							showlegend=showlegend))
-	fig.update_traces(fillpattern_shape='/', selector=dict(name='TESS Serving Load (kW)'))
+	if (inputDict['load_type'] != '0') and (int(inputDict['number_devices'])>0): ## Load type 0 corresponds to the "None" option, which disables this vbatDispatch function
+		fig.add_trace(go.Scatter(x=timestamps,
+								y=np.asarray(vbat_discharge_flipsign),
+								yaxis='y1',
+								mode='none',
+								fill='tozeroy',
+								fillcolor='rgba(127,0,255,1)',
+								name='TESS Serving Load (kW)',
+								showlegend=showlegend))
+		fig.update_traces(fillpattern_shape='/', selector=dict(name='TESS Serving Load (kW)'))
 
 	## Plot layout
 	fig.update_layout(
@@ -382,7 +421,7 @@ def work(modelDir, inputDict):
 	outData['derOverviewLayout'] = json.dumps(fig.layout, cls=plotly.utils.PlotlyJSONEncoder)
 
 	## Create Thermal Device Temperature plot object ######################################################################################################################################################
-	if inputDict['load_type'] != '0': ## If vbatDispatch is called in the analysis:
+	if (inputDict['load_type'] != '0') and (int(inputDict['number_devices'])>0): ## If vbatDispatch is enabled:
 	
 		fig = go.Figure()
 	
@@ -441,7 +480,6 @@ def work(modelDir, inputDict):
 			showlegend=True
 		))
 
-
 		## Plot layout
 		fig.update_layout(
 			#title='Residential Data',
@@ -468,7 +506,7 @@ def work(modelDir, inputDict):
 
 
 	## Create Thermal Battery Energy plot object ######################################################################################################################################################
-	if inputDict['load_type'] != '0': ## If vbatDispatch is called in the analysis:
+	if (inputDict['load_type'] != '0') and (int(inputDict['number_devices'])>0): ## If vbatDispatch is enabled:		
 		fig = go.Figure()
 		fig.add_trace(go.Scatter(
 			x=timestamps,
@@ -516,7 +554,7 @@ def work(modelDir, inputDict):
 		outData['thermalBatEnergyPlotLayout'] = json.dumps(fig.layout, cls=plotly.utils.PlotlyJSONEncoder)
 	
 	## Create Thermal Battery Power plot object ######################################################################################################################################################
-	if inputDict['load_type'] != '0': ## If vbatDispatch is called in the analysis:
+	if (inputDict['load_type'] != '0') and (int(inputDict['number_devices'])>0): ## If vbatDispatch is enabled:		
 		fig = go.Figure()
 		fig.add_trace(go.Scatter(
 			x=timestamps,
@@ -635,6 +673,23 @@ def work(modelDir, inputDict):
 
 	"""
 
+	## Calculate total residential BESS capacity and compensation
+	total_kw_residential_BESS = int(inputDict['numberBESS']) * float(inputDict['BESS_kw'])
+	total_kwh_residential_BESS = int(inputDict['numberBESS']) * float(inputDict['BESS_kwh'])
+	rateCompensation = float(inputDict['rateCompensation'])
+	total_residential_BESS_compensation = rateCompensation * np.sum(total_kwh_residential_BESS)
+	total_kw_BESS = total_kw_residential_BESS + float(inputDict['existing_kw'])
+	total_kwh_BESS = total_kwh_residential_BESS + float(inputDict['existing_kwh'])
+	BESS = reoptResults['ElectricStorage']['storage_to_load_series_kw']
+
+	monthHours = [(0, 744), (744, 1416), (1416, 2160), (2160, 2880), 
+					(2880, 3624), (3624, 4344), (4344, 5088), (5088, 5832), 
+					(5832, 6552), (6552, 7296), (7296, 8016), (8016, 8760)]
+	
+	#total_kwh_residential_BESS_monthly = np.asarray([sum(total_kwh_residential_BESS[s:f]) for s, f in monthHours])
+	#total_compensation_residential_BESS_monthly = total_kwh_residential_BESS_monthly * rateCompensation
+	#print('Total amount paid to member-consumers ($/kWh): ', total_residential_BESS_compensation)
+
 	# Model operations typically ends here.
 	# Stdout/stderr.
 	outData['stdout'] = 'Success'
@@ -669,32 +724,16 @@ def new(modelDir):
 		'numberBESS': '100', ## Number of residential Tesla Powerwall 2 batteries
 		'existing_kw': '19000.0',
 		'existing_kwh': '56000.0',
-		'chemBESSgridcharge': 'Yes', 
-		'min_kw': '5.0', ## Minimum continuous power, based on Powerwall’s specs
-		'max_kw': '5.0', ## Maximum continuous power 
-		'min_kwh': '13.5', ## Minimum energy capacity based on Powerwall’s full capacity
-		'max_kwh': '13.5', ## Maximum energy capacity to use the entire capacity
-		'total_rebate_per_kw': '10.0', ## Assuming $10/kW incentive
-		'batteryMacrs_option_years': '25', ## Depreciation years
-		#'macrs_bonus_fraction': '0.4', ## 40% bonus depreciation fraction
-		'replace_cost_per_kw': '460.0', 
-		'replace_cost_per_kwh': '240.0', 
-		'installed_cost_per_kw': '300.0', ## (Residential: $1,000-$1,500 per kW, Utility: $300-$700 per kW)
-		'installed_cost_per_kwh': '480.0', ## Cost per kWh reflecting Powerwall’s installed cost (Residential: $400-$900 per kWh, Utility: $200-$400 per kWh)
-		'total_itc_fraction': '0.0', ## No ITC included unless specified
-		'inverter_replacement_year': '10', 
-		'battery_replacement_year': '10', 
+		'chemBESSgridcharge': 'Yes',  
+		'installed_cost_per_kw': '20.0', #'300.0', ## (Residential: $1,000-$1,500 per kW, Utility: $300-$700 per kW)
+		'installed_cost_per_kwh': '60.0', #'480.0', ## Cost per kWh reflecting Powerwall’s installed cost (Residential: $400-$900 per kWh, Utility: $200-$400 per kWh)
+		'BESS_kw': '5',
+		'BESS_kwh': '13.5',
 
 		## Photovoltaic Inputs
 		'existing_kw_PV': '29500.0',
-		'additional_kw_PV': '0.0',
-		'costPV': '0.0',
-		'min_kw_PV': '0',
-		'max_kw_PV': '29500.0',
 		'PVCanCurtail': True,
-		'PVCanExport': True,
-		'PVMacrsOptionYears': '25',
-		'PVItcPercent': '0.0',
+		'PVCanExport': False,
 
 		## Financial Inputs
 		'demandChargeURDB': 'Yes',
