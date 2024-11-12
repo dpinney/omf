@@ -69,8 +69,8 @@ def work(modelDir, inputDict):
 		'existing_kw': float(inputDict['existing_kw_PV']),
 		'min_kw': 0.0,
 		'max_kw': 0.0,
-		'can_export_beyond_nem_limit': inputDict['PVCanExport'],
-		'can_curtail': inputDict['PVCanCurtail'],
+		'can_export_beyond_nem_limit': bool(inputDict['PVCanExport']),
+		'can_curtail': bool(inputDict['PVCanCurtail']),
 		'macrs_option_years': 0,
 		'federal_itc_fraction': 0,
 	}
