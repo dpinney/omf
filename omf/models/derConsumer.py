@@ -66,11 +66,16 @@ def create_REopt_jl_jsonFile(modelDir, inputDict):
 		}
 	}
 
-	## Add a PV section if enabled 
-	if inputDict['PV'] == 'Yes':
-		scenario['PV'] = {
-			##TODO: Add options here, if needed
-			}
+	scenario['PV'] = {
+		'installed_cost_per_kw': float(inputDict['costPV']),
+		'existing_kw': float(inputDict['existing_kw_PV']),
+		'min_kw': float(inputDict['min_kw_PV']),
+		'max_kw': float(inputDict['max_kw_PV']),
+		'can_export_beyond_nem_limit': inputDict['PVCanExport'],
+		'can_curtail': inputDict['PVCanCurtail'],
+		'macrs_option_years': int(inputDict['PVMacrsOptionYears']),
+		'federal_itc_fraction': float(inputDict['PVItcPercent']),
+		}
 
 	## Add a Battery Energy Storage System (BESS) section if enabled 
 	if inputDict['chemBESSgridcharge'] == 'Yes':
@@ -87,7 +92,7 @@ def create_REopt_jl_jsonFile(modelDir, inputDict):
 		'max_kwh': float(inputDict['max_kwh']), ## Battery Energy Capacity maximum
 		'can_grid_charge': can_grid_charge_bool,
 		'total_rebate_per_kw': float(inputDict['total_rebate_per_kw']),
-		'macrs_option_years': float(inputDict['macrs_option_years']),
+		'macrs_option_years': float(inputDict['batteryMacrs_option_years']),
 		#'macrs_bonus_fraction': float(inputDict['macrs_bonus_fraction']),
 		'replace_cost_per_kw': float(inputDict['replace_cost_per_kw']),
 		'replace_cost_per_kwh': float(inputDict['replace_cost_per_kwh']),
@@ -97,13 +102,6 @@ def create_REopt_jl_jsonFile(modelDir, inputDict):
 		'inverter_replacement_year': float(inputDict['inverter_replacement_year']),
 		'battery_replacement_year': float(inputDict['battery_replacement_year']),
 		}
-		
-
-	## Add a Diesel Generator section if enabled
-	if inputDict['generator'] == 'Yes':
-		scenario['Generator'] = {
-			##TODO: Add options here, if needed
-			}
 
 	## Save the scenario file
 	## NOTE: reopt_jl currently requires a path for the input file, so the file must be saved to a location
@@ -286,8 +284,6 @@ def work(modelDir, inputDict):
 
 	## DER Overview plot ###################################################################################################################################################################
 	grid_to_load = reoptResults['ElectricUtility']['electric_to_load_series_kw']
-	if 'Generator' in reoptResults:
-		generator = reoptResults['Generator']['electric_to_load_series_kw']
 
 	if 'PV' in reoptResults: ## PV
 		PV = reoptResults['PV']['electric_to_load_series_kw']
@@ -421,18 +417,6 @@ def work(modelDir, inputDict):
 						fillcolor='rgba(255,246,0,1)',
 						showlegend=showlegend
 						))
-
-	## Generator serving load piece
-	if (inputDict['generator'] == 'Yes'):
-		fig.add_trace(go.Scatter(x=timestamps,
-							y=np.asarray(generator),
-							yaxis='y1',
-							mode='none',
-							fill='tozeroy',
-							name='Generator Serving Load (kW)',
-							fillcolor='rgba(0,137,83,1)',
-							showlegend=showlegend))
-		fig.update_traces(fillpattern_shape='/', selector=dict(name='BESS Serving Load (kW)'))
 
 	## Plot layout
 	fig.update_layout(
@@ -654,7 +638,6 @@ def new(modelDir):
 		'criticalLoadSwitch': 'Yes',
 		'criticalLoadFactor': '0.50',
 		'PV': 'Yes',
-		'generator': 'No',
 
 		## Financial Inputs
 		'demandChargeURDB': 'Yes',
@@ -669,7 +652,7 @@ def new(modelDir):
 		'min_kwh': '13.5', ## Minimum energy capacity based on Powerwall’s full capacity
 		'max_kwh': '13.5', ## Maximum energy capacity to use the entire capacity
 		'total_rebate_per_kw': '10.0', ## Assuming $10/kW incentive
-		'macrs_option_years': '25', ## Depreciation years
+		'batteryMacrs_option_years': '25', ## Depreciation years
 		'macrs_bonus_fraction': '0.4', ## 40% bonus depreciation fraction
 		'replace_cost_per_kw': '460.0', 
 		'replace_cost_per_kwh': '240.0', 
@@ -678,6 +661,17 @@ def new(modelDir):
 		'total_itc_fraction': '0.0', ## No ITC included unless specified
 		'inverter_replacement_year': '10', 
 		'battery_replacement_year': '10',  
+
+		## Photovoltaic Inputs
+		'existing_kw_PV': '29500.0',
+		'additional_kw_PV': '0.0',
+		'costPV': '0.0',
+		'min_kw_PV': '0',
+		'max_kw_PV': '29500.0',
+		'PVCanCurtail': True,
+		'PVCanExport': True,
+		'PVMacrsOptionYears': '25',
+		'PVItcPercent': '0.0',
 
 		## vbatDispatch inputs:
 		'load_type': '2', ## Heat Pump
