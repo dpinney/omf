@@ -470,7 +470,10 @@ def getDownLineLoadsBlockGroup(pathToOmd):
                         "base crit score":None}
 
             kw = float(ob['kw'])
-            kvar = float(ob['kvar'])
+            if (ob['kvar'] is None):
+                kvar = float(ob['kvar'])
+            else:
+                kvar = kw/5
             kv = float(ob['kv'])
 
             loadsDict[key]["base crit score"]= ((math.sqrt((kw * kw) + (kvar * kvar) ))/ (5)) * 4
@@ -622,7 +625,10 @@ def getDownLineLoadsTract(pathToOmd):
                         "base crit score":None}
 
             kw = float(ob['kw'])
-            kvar = float(ob['kvar'])
+            if (ob['kvar'] is None):
+                kvar = float(ob['kvar'])
+            else:
+                kvar = kw/5
             kv = float(ob['kv'])
 
             loadsDict[key]["base crit score"]= ((math.sqrt((kw * kw) + (kvar * kvar) ))/ (5)) * 4
@@ -776,7 +782,10 @@ def __getDownLineLoads__depreciated(pathToOmd,nriGeoJson):
             loads[obName] = {
                         'base crit score':None}#None,'percentile':None}
             kw = float(ob['kw'])
-            kvar = float(ob['kvar'])
+            if (ob['kvar'] is None):
+                kvar = float(ob['kvar'])
+            else:
+                kvar = kw/5
             kv = float(ob['kv'])
             # For each load, estimate the number of persons served. 
             #Use the following equation sqrt(kw^2 + kvar^2)/5 kva = # of homes served by that load
@@ -999,7 +1008,10 @@ def getDownLineLoadsEquipmentBlockGroup(pathToOmd, equipmentList):
                         "base crit score":None}
 
             kw = float(ob['kw'])
-            kvar = float(ob['kvar'])
+            if (ob['kvar'] is None):
+                kvar = float(ob['kvar'])
+            else:
+                kvar = kw/5
             kv = float(ob['kv'])
 
             loadsDict[key]["base crit score"]= round(((math.sqrt((kw * kw) + (kvar * kvar) ))/ (5)) * 4,2)
@@ -1181,7 +1193,10 @@ def getDownLineLoadsEquipmentTract(pathToOmd, equipmentList):
                         "base crit score":None}
 
             kw = float(ob['kw'])
-            kvar = float(ob['kvar'])
+            if (ob['kvar'] is None):
+                kvar = float(ob['kvar'])
+            else:
+                kvar = kw/5
             kv = float(ob['kv'])
 
             loadsDict[key]["base crit score"]= round(((math.sqrt((kw * kw) + (kvar * kvar) ))/ (5)) * 4,2)
@@ -1360,7 +1375,10 @@ def __getDownLineLoadsEquipment__depreciated(pathToOmd,nriGeoJson, equipmentList
             loads[key] = {
                         "base crit score":None}#None,'percentile':None}
             kw = float(ob['kw'])
-            kvar = float(ob['kvar'])
+            if (ob['kvar'] is None):
+                kvar = float(ob['kvar'])
+            else:
+                kvar = kw/5
             kv = float(ob['kv'])
             # For each load, estimate the number of persons served.
             #Use the following equation sqrt(kw^2 + kvar^2)/5 kva = # of homes served by that load
