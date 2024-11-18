@@ -72,10 +72,10 @@ def work(modelDir, inputDict):
 
 	scenario['ElectricStorage'] = {
 		##TODO: Add options here, if needed
-		'min_kw': float(inputDict['BESS_kw'])+float(inputDict['existing_kw']),
-		'max_kw':  float(inputDict['BESS_kw'])+float(inputDict['existing_kw']),
-		'min_kwh':  float(inputDict['BESS_kwh'])+float(inputDict['existing_kwh']),
-		'max_kwh':  float(inputDict['BESS_kwh'])+float(inputDict['existing_kwh']),
+		'min_kw': float(inputDict['BESS_kw']),
+		'max_kw':  float(inputDict['BESS_kw']),
+		'min_kwh':  float(inputDict['BESS_kwh']),
+		'max_kwh':  float(inputDict['BESS_kwh']),
 		'can_grid_charge': can_grid_charge_bool,
 		'total_rebate_per_kw': 0,
 		'macrs_option_years': 0,
@@ -142,23 +142,9 @@ def work(modelDir, inputDict):
 	outData['cumulativeCashflow'] = reoptResults['Financial']['offtaker_annual_free_cashflows'] #list(accumulate(reoptResults['Financial']['offtaker_annual_free_cashflows']))
 	outData['netCashflow'] = reoptResults['Financial']['offtaker_discounted_annual_free_cashflows'] #list(accumulate(reoptResults['Financial']['offtaker_annual_free_cashflows'])) ## or alternatively: offtaker_annual_free_cashflows
 
-	## Temporarily correct financial outputs for any existing BESS
-	## (Remove the installation cost of any existing BESS since we are including it in the aggregated BESS: existing utility BESS + proposed consumer BESS)
-	existing_utility_bess_kw = float(inputDict['existing_kw'])
-	existing_utility_bess_kwh = float(inputDict['existing_kwh'])
-	installed_cost_per_kw = float(inputDict['installed_cost_per_kw'])
-	installed_cost_per_kwh = float(inputDict['installed_cost_per_kwh'])
-	cost_existing_utility_bess_kw = existing_utility_bess_kw * installed_cost_per_kw
-	cost_existing_utility_bess_kwh = existing_utility_bess_kwh * installed_cost_per_kwh
-	totalcost_existing_utility_bess = cost_existing_utility_bess_kw + cost_existing_utility_bess_kwh
-	outData['NPV'] -= totalcost_existing_utility_bess
-	outData['cumulativeCashflow'] = [cashflow - totalcost_existing_utility_bess for cashflow in reoptResults['Financial']['offtaker_annual_free_cashflows']]
-	outData['netCashflow'] = [cashflow - totalcost_existing_utility_bess for cashflow in reoptResults['Financial']['offtaker_annual_free_cashflows']]
-
 	## Calculate adjusted initial investment and simply payback period (SPP)
-	adjusted_initial_investment = reoptResults['Financial']['initial_capital_costs'] - totalcost_existing_utility_bess
+	adjusted_initial_investment = reoptResults['Financial']['initial_capital_costs']
 	outData['SPP'] = adjusted_initial_investment / np.sum(outData['netCashflow'])
-
 
 	## NOTE: temporarily comment out the two derConsumer runs to run the code quicker
 	"""
@@ -396,139 +382,6 @@ def work(modelDir, inputDict):
 	outData['derOverviewData'] = json.dumps(fig.data, cls=plotly.utils.PlotlyJSONEncoder)
 	outData['derOverviewLayout'] = json.dumps(fig.layout, cls=plotly.utils.PlotlyJSONEncoder)
 
-	## Create Thermal Device Temperature plot object ######################################################################################################################################################
-	if (inputDict['load_type'] != '0') and (int(inputDict['number_devices'])>0): ## If vbatDispatch is enabled:
-	
-		fig = go.Figure()
-	
-		## It seems like the setpoint (interior temp) is fixed for devices except the water heater.
-		## TODO: If desired, could code this up to extract the interior temperature from the water heater code.
-		## It does not currently seem to output the changing interior temp.
-
-		#if inputDict['load_type'] == '4': ## Water Heater (the only option that evolves interior temperature over time)
-			# Interior Temperature
-			#interior_temp = theta.mean(axis=0) 
-			#theta_s_wh #temperature setpoint (interior)
-			#theta_s_wh +/- deadband 
-
-		fig.add_trace(go.Scatter(x=timestamps,
-							y=temperatures,
-							yaxis='y2',
-							mode='lines',
-							line=dict(color='red',width=1),
-							name='Average Air Temperature',
-							showlegend=showlegend 
-							))
-		
-		upper_bound = np.full_like(demand,float(inputDict['setpoint']) + float(inputDict['deadband'])/2)
-		lower_bound = np.full_like(demand,float(inputDict['setpoint']) - float(inputDict['deadband'])/2)
-		setpoint = np.full_like(demand, float(inputDict['setpoint'])) ## the setpoint is currently a fixed number
-
-		## Plot deadband upper bound
-		fig.add_trace(go.Scatter(
-			x=timestamps,  
-			y=upper_bound, 
-			yaxis='y2',
-			line=dict(color='rgba(0,0,0,1)'), ## color black
-			name='Deadband upper bound',
-			showlegend=True
-		))
-
-		## Plot deadband lower bound
-		fig.add_trace(go.Scatter(
-			x=timestamps, 
-			y=lower_bound,  
-			yaxis='y2',
-			mode='lines',
-			line=dict(color='rgba(0,0,0,0.5)'),  ## color black but half opacity = gray color
-			name='Deadband lower bound',
-			showlegend=True
-		))
-
-		## Plot the setpoint (interior temperature)
-		fig.add_trace(go.Scatter(
-			x=timestamps, 
-			y=setpoint,  
-			yaxis='y2',
-			mode='lines',
-			line=dict(color='rgba(0, 27, 255, 1)'),  ## color blue
-			name='Setpoint',
-			showlegend=True
-		))
-
-		## Plot layout
-		fig.update_layout(
-			#title='Residential Data',
-			xaxis=dict(title='Timestamp'),
-			yaxis=dict(title='Power (kW)'),
-			yaxis2=dict(title='degrees Celsius',
-					overlaying='y',
-					side='right'
-					),
-			legend=dict(
-				orientation='h',
-				yanchor='bottom',
-				y=1.02,
-				xanchor='right',
-				x=1
-				)
-		)
-
-		#fig.show()
-		
-		## Encode plot data as JSON for showing in the HTML side
-		outData['thermalDevicePlotData'] = json.dumps(fig.data, cls=plotly.utils.PlotlyJSONEncoder)
-		outData['thermalDevicePlotLayout'] = json.dumps(fig.layout, cls=plotly.utils.PlotlyJSONEncoder)
-
-
-	## Create Thermal Battery Energy plot object ######################################################################################################################################################
-	if (inputDict['load_type'] != '0') and (int(inputDict['number_devices'])>0): ## If vbatDispatch is enabled:		
-		fig = go.Figure()
-		fig.add_trace(go.Scatter(
-			x=timestamps,
-			y=vbatMinEnergyCapacity,
-			yaxis='y1',
-			mode='lines',
-			line=dict(color='green', width=1),
-			name='Minimum Energy Capacity',
-			showlegend=True 
-			))
-		fig.add_trace(go.Scatter(
-			x=timestamps, 
-			y=vbatMaxEnergyCapacity,  
-			yaxis='y1',
-			mode='lines',
-			line=dict(color='blue', width=1),
-			name='Maximum Energy Capacity',
-			showlegend=True
-		))
-		fig.add_trace(go.Scatter(
-			x=timestamps, 
-			y=vbatEnergy,  
-			yaxis='y1',
-			mode='lines',
-			line=dict(color='black', width=1),
-			name='Actual Energy Capacity',
-			showlegend=True
-		))
-
-		## Plot layout
-		fig.update_layout(
-			xaxis=dict(title='Timestamp'),
-			yaxis=dict(title='Energy (kWh)'),
-			legend=dict(
-				orientation='h',
-				yanchor='bottom',
-				y=1.02,
-				xanchor='right',
-				x=1
-				)
-		)
-		
-		## Encode plot data as JSON for showing in the HTML side
-		outData['thermalBatEnergyPlot'] = json.dumps(fig.data, cls=plotly.utils.PlotlyJSONEncoder)
-		outData['thermalBatEnergyPlotLayout'] = json.dumps(fig.layout, cls=plotly.utils.PlotlyJSONEncoder)
-	
 	## Create Thermal Battery Power plot object ######################################################################################################################################################
 	if (inputDict['load_type'] != '0') and (int(inputDict['number_devices'])>0): ## If vbatDispatch is enabled:		
 		fig = go.Figure()
@@ -654,17 +507,7 @@ def work(modelDir, inputDict):
 	total_kwh_residential_BESS = int(inputDict['numberBESS']) * float(inputDict['BESS_kwh'])
 	rateCompensation = float(inputDict['rateCompensation'])
 	total_residential_BESS_compensation = rateCompensation * np.sum(total_kwh_residential_BESS)
-	total_kw_BESS = total_kw_residential_BESS + float(inputDict['existing_kw'])
-	total_kwh_BESS = total_kwh_residential_BESS + float(inputDict['existing_kwh'])
 	BESS = reoptResults['ElectricStorage']['storage_to_load_series_kw']
-
-	monthHours = [(0, 744), (744, 1416), (1416, 2160), (2160, 2880), 
-					(2880, 3624), (3624, 4344), (4344, 5088), (5088, 5832), 
-					(5832, 6552), (6552, 7296), (7296, 8016), (8016, 8760)]
-	
-	#total_kwh_residential_BESS_monthly = np.asarray([sum(total_kwh_residential_BESS[s:f]) for s, f in monthHours])
-	#total_compensation_residential_BESS_monthly = total_kwh_residential_BESS_monthly * rateCompensation
-	#print('Total amount paid to member-consumers ($/kWh): ', total_residential_BESS_compensation)
 
 	# Model operations typically ends here.
 	# Stdout/stderr.
@@ -698,8 +541,6 @@ def new(modelDir):
 
 		## Chemical Battery Inputs
 		'numberBESS': '100', ## Number of residential Tesla Powerwall 2 batteries
-		'existing_kw': '19000.0',
-		'existing_kwh': '56000.0',
 		'chemBESSgridcharge': 'Yes',  
 		'installed_cost_per_kw': '20.0', #'300.0', ## (Residential: $1,000-$1,500 per kW, Utility: $300-$700 per kW)
 		'installed_cost_per_kwh': '60.0', #'480.0', ## Cost per kWh reflecting Powerwall’s installed cost (Residential: $400-$900 per kWh, Utility: $200-$400 per kWh)

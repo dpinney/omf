@@ -8,8 +8,6 @@
 		$(window).on('pageshow',function(){
 			Plotly.newPlot('derOverviewData', JSON.parse(allOutputData['derOverviewData']),JSON.parse(allOutputData['derOverviewLayout']));
 			Plotly.newPlot('batteryChargePlotly', JSON.parse(allOutputData['batteryChargeData']), JSON.parse(allOutputData['batteryChargeLayout']));
-			//Plotly.newPlot('thermalDevicePlotData', JSON.parse(allOutputData['thermalDevicePlotData']), JSON.parse(allOutputData['thermalDevicePlotLayout']) || {});
-			Plotly.newPlot('thermalBatEnergyPlot', JSON.parse(allOutputData['thermalBatEnergyPlot']), JSON.parse(allOutputData['thermalBatEnergyPlotLayout']) || {});
 			Plotly.newPlot('thermalBatPowerPlot', JSON.parse(allOutputData['thermalBatPowerPlot']), JSON.parse(allOutputData['thermalBatPowerPlotLayout']) || {});
 			Plotly.newPlot('resiliencePlotly', JSON.parse(allOutputData['resilienceData']), JSON.parse(allOutputData['resilienceLayout']) || {});
 			Plotly.newPlot('resilienceProbPlotly', JSON.parse(allOutputData['resilienceProbData']), JSON.parse(allOutputData['resilienceProbLayout']) || {});
@@ -120,14 +118,6 @@
 				<p class="inputSectionHeader">Chemical Energy Storage Device Inputs</p>
 			</div>
 			<hr style="border-style: solid; border-color: #196b12; margin-top: 10px;">
-			<div class="shortInput">
-				<label class="tooltip">Existing Utility-Installed Battery Power Capacity (kW)<span class="classic">Specify the amount of existing battery power capacity (kW) of the utility.</span></label>
-				<input type="text" id="existing_kw" name="existing_kw" value="{{allInputDataDict.existing_kw}}" required="required"/>
-			</div>
-			<div class="shortInput">
-				<label class="tooltip">Existing Utility-Installed Battery Energy Capacity (kWh)<span class="classic">Specify the amount of existing battery energy capacity (kWh) of the utility.</span></label>
-				<input type="text" id="existing_kwh" name="existing_kwh" value="{{allInputDataDict.existing_kwh}}" required="required"/>
-			</div>
 			<div class="shortInput">
 				<label class="tooltip">Number of Home Chemical Batteries<span class="classic">Total number of residential chemical batteries to model.</span></label>
 				<input type="text" id="numberBESS" name="numberBESS" value="{{allInputDataDict.numberBESS}}" required="required">
@@ -265,9 +255,6 @@
 		<p class="reportTitle" style="page-break-before:always">DER Serving Load Overview</p>
 		<div id="derOverviewData" class="tightContent" style="width: 1000px; height: 600px;"></div>
 
-		<p class="reportTitle" style="page-break-before:always">Thermal Battery Energy Profile</p>
-		<div id="thermalBatEnergyPlot" class="tightContent" style="width: 1000px; height: 600px;"></div>
-		
 		<p class="reportTitle" style="page-break-before:always">Thermal Battery Power Profile</p>
 		<div id="thermalBatPowerPlot" class="tightContent" style="width: 1000px; height: 600px;"></div>
 
