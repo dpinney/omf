@@ -64,17 +64,6 @@ def work(modelDir, inputDict):
 		}
 	}
 
-	scenario['PV'] = {
-		'installed_cost_per_kw': 0.0,
-		'existing_kw': float(inputDict['existing_kw_PV']),
-		'min_kw': 0.0,
-		'max_kw': 0.0,
-		'can_export_beyond_nem_limit': bool(inputDict['PVCanExport']),
-		'can_curtail': bool(inputDict['PVCanCurtail']),
-		'macrs_option_years': 0,
-		'federal_itc_fraction': 0,
-	}
-
 	## Add a Battery Energy Storage System (BESS) section if enabled 
 	if inputDict['chemBESSgridcharge'] == 'Yes':
 		can_grid_charge_bool = True
@@ -148,7 +137,7 @@ def work(modelDir, inputDict):
 
 	## Update the financial cost ouput to include REopt BESS 
 	## TODO: combine these with the same variables from vbatDispatch. Currently this just replaces the vbatDispatch variables.
-	outData['NPV'] = reoptResults['Financial']['npv'] 
+	outData['NPV'] = reoptResults['Financial']['npv'] ## Calculate this value ourselves
 	outData['SPP'] = reoptResults['Financial']['simple_payback_years'] ## TODO: combine these same variables from vbatDispatch as well
 	outData['cumulativeCashflow'] = reoptResults['Financial']['offtaker_annual_free_cashflows'] #list(accumulate(reoptResults['Financial']['offtaker_annual_free_cashflows']))
 	outData['netCashflow'] = reoptResults['Financial']['offtaker_discounted_annual_free_cashflows'] #list(accumulate(reoptResults['Financial']['offtaker_annual_free_cashflows'])) ## or alternatively: offtaker_annual_free_cashflows
@@ -272,7 +261,6 @@ def work(modelDir, inputDict):
 	showlegend = True # either enable or disable the legend toggle in the plot
 	grid_to_load = reoptResults['ElectricUtility']['electric_to_load_series_kw']
 
-	PV = reoptResults['PV']['electric_to_load_series_kw']
 	BESS = reoptResults['ElectricStorage']['storage_to_load_series_kw']
 	grid_charging_BESS = reoptResults['ElectricUtility']['electric_to_storage_series_kw']
 	outData['chargeLevelBattery'] = reoptResults['ElectricStorage']['soc_series_fraction']
@@ -325,8 +313,7 @@ def work(modelDir, inputDict):
 	fig.update_traces(fillpattern_shape='.', selector=dict(name='Additional Load (Charging BESS and TESS)'))
 	
 	## Grid serving new load
-	## TODO: Should PV really be in this?
-	grid_serving_new_load = np.asarray(grid_to_load) + np.asarray(grid_charging_BESS)+ vbat_charge_component - vbat_discharge_component + np.asarray(PV)
+	grid_serving_new_load = np.asarray(grid_to_load) + np.asarray(grid_charging_BESS)+ vbat_charge_component - vbat_discharge_component
 	fig.add_trace(go.Scatter(x=timestamps,
                          y=grid_serving_new_load,
 						 yaxis='y1',
@@ -367,17 +354,6 @@ def work(modelDir, inputDict):
 						fillcolor='rgba(0,137,83,1)',
 						showlegend=showlegend))
 	fig.update_traces(fillpattern_shape='/', selector=dict(name='BESS Serving Load (kW)'))
-
-	## PV piece
-	fig.add_trace(go.Scatter(x=timestamps,
-					y=PV,
-					yaxis='y1',
-					mode='none',
-					fill='tozeroy',
-					name='PV Serving Load (kW)',
-					fillcolor='rgba(255,246,0,1)',
-					showlegend=showlegend
-					))
 	
 	##vbatDispatch (TESS) piece
 	if (inputDict['load_type'] != '0') and (int(inputDict['number_devices'])>0): ## Load type 0 corresponds to the "None" option, which disables this vbatDispatch function
@@ -729,11 +705,6 @@ def new(modelDir):
 		'installed_cost_per_kwh': '60.0', #'480.0', ## Cost per kWh reflecting Powerwall’s installed cost (Residential: $400-$900 per kWh, Utility: $200-$400 per kWh)
 		'BESS_kw': '5',
 		'BESS_kwh': '13.5',
-
-		## Photovoltaic Inputs
-		'existing_kw_PV': '29500.0',
-		'PVCanCurtail': True,
-		'PVCanExport': False,
 
 		## Financial Inputs
 		'demandChargeURDB': 'Yes',
