@@ -124,7 +124,8 @@ def dss_to_clean_via_save(dss_file, clean_out_path, add_pf_syntax=True, clean_up
 			ob_data = re.sub(r'(redirect |buscoords |giscoords |makebuslist)', r'! \1', ob_data) # remove troublesome Master.dss redirects.
 			clean_copies[fname.lower()] = ob_data
 	# Move subfolder data into main folder content list
-	for fname in clean_copies:
+	# Need to loop through list(clean_copies.keys()), not clean_copies because otherwise you may change dict keys while iterating through that dict, causing an error
+	for fname in list(clean_copies.keys()):
 		if '/' in fname:
 			folder, sub_fname = fname.split('/')
 			if sub_fname in clean_copies:
