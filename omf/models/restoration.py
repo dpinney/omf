@@ -1114,7 +1114,7 @@ def runMicrogridControlSim(modelDir, solFidelity, eventsFilename, loadPriorityFi
 	mgFile = microgridTaggingFile if microgridTaggingFile != None else ''
 
 	PowerModelsONM.build_settings_file(
-		circuitPath=pJoin(modelDir,'circuit.dss'),
+		circuitPath=pJoin(modelDir,'circuit_clean.dss'),
 		settingsPath=pJoin(modelDir,'settings.json'), 
 		loadPrioritiesFile=lpFile, 
 		microgridTaggingFile=mgFile)
@@ -1260,6 +1260,9 @@ def graphMicrogrid(modelDir, pathToOmd, profit_on_energy_sales, restoration_cost
 	switchConfigsOld = {switch:'closed' for switch in deviceActionTimeline[0]['Switch configurations'].keys()}
 
 	for deviceActions in deviceActionTimeline:
+		# TODO: replace the stuff with incrementing timestep in the loop to just use the following:
+		#       for i, deviceActions in enumerate(deviceActionTimeline):
+		#       	timestep = i+startTime
 		# Switch timeline actions
 		switchActions = []
 		switchConfigsNew = deviceActions['Switch configurations']
@@ -1300,6 +1303,8 @@ def graphMicrogrid(modelDir, pathToOmd, profit_on_energy_sales, restoration_cost
 
 		# Generator timeline actions
 		genActions = []
+		if not powerflow:
+			raise Exception('PowerModelsONM returned output without powerflow information')
 		powerflowNew = powerflow[timestep-startTime]
 		for generator in list(powerflowNew.get('generator',{}).keys()):
 			entryNew = powerflowNew['generator'][generator]['real power setpoint (kW)'][0]
@@ -1508,7 +1513,7 @@ def graphMicrogrid(modelDir, pathToOmd, profit_on_energy_sales, restoration_cost
 	outageCostsByType = {busType: [] for busType in businessTypes}
 	avgkWColumn = []
 	durationColumn = []
-	dssTree = dssConvert.dssToTree(f'{modelDir}/circuitOmfCompatible_cleanLists.dss')
+	dssTree = dssConvert.dssToTree(f'{modelDir}/circuit_clean.dss')
 	loadShapeMeanMultiplier = {}
 	loadShapeMeanActual = {}
 	for dssLine in dssTree:
@@ -1675,8 +1680,9 @@ def graphMicrogrid(modelDir, pathToOmd, profit_on_energy_sales, restoration_cost
 			'taifiHist':			taifiHist,
 			'taidiHist':			taidiHist}
 
-def buildCustomEvents(eventsCSV='', feeder='', customEvents='customEvents.json', defaultDispatchable = 'true'):
+def __buildCustomEvents(eventsCSV='', feeder='', customEvents='customEvents.json', defaultDispatchable = 'true'):
 	''' Builds an events json file for use by restoration.py based on an events CSV input.'''
+	# TODO: refactor code to accept a csv from the user and convert it into the appropriate json using this function
 	def outageSwitchState(outList): return ('open'*(outList[3] == 'closed') + 'closed'*(outList[3]=='open'))
 	def eventJson(dispatchable, state, timestep, affected_asset):
 		return {
@@ -1785,23 +1791,24 @@ def work(modelDir, inputDict):
 	# Output a .dss file, which will be needed for ONM.
 	niceDss = dssConvert.evilGldTreeToDssTree(tree)
 	dssConvert.treeToDss(niceDss, f'{modelDir}/circuit.dss')
-	dssConvert.treeToDss(niceDss, f'{modelDir}/circuitOmfCompatible.dss') # for querying loadshapes
-	dssConvert.dss_to_clean_via_save(f'{modelDir}/circuitOmfCompatible.dss', f'{modelDir}/circuitOmfCompatible_cleanLists.dss')
-
+	# dssConvert.treeToDss(niceDss, f'{modelDir}/circuitOmfCompatible.dss') # for querying loadshapes
+	dssConvert.dss_to_clean_via_save(f'{modelDir}/circuit.dss', f'{modelDir}/circuit_clean.dss')
+	dssConvert.dssToOmd(f'{modelDir}/circuit_clean.dss', f'{modelDir}/circuit_clean.dss.omd')
+	omdFilePath = f'{modelDir}/circuit_clean.dss.omd'
+	
 	pathToLocalFile = copyInputFilesToModelDir(modelDir, inputDict)
 	
 	loadCciDict, loadBcsDict = makeLoadCciDict(
 		modelDir 				= modelDir, 
-		pathToOmd				= f'{modelDir}/{feederName}.omd'
+		pathToOmd				= omdFilePath
 	)
 	pathToMergedPriorities, pathToTransformedPriorities = combineLoadPriorityWithCCI(
 		modelDir				= modelDir,
-		pathToOmd				= f'{modelDir}/{feederName}.omd',
+		pathToOmd				= omdFilePath,
 		loadPriorityFilePath	= pathToLocalFile['loadPriority'],
 		loadCciDict				= loadCciDict,
 		cciImpact				= inputDict['cciImpact']
 	)
-	
 	runMicrogridControlSim(
 		modelDir				= modelDir, 
 		solFidelity				= inputDict['solFidelity'],
@@ -1811,12 +1818,12 @@ def work(modelDir, inputDict):
 	)
 	microgridInfo = getMicrogridInfo(
 		modelDir				= modelDir, 
-		pathToOmd				= f'{modelDir}/{feederName}.omd', 
+		pathToOmd				= omdFilePath, 
 		settingsFile			= f'{modelDir}/settings.json'
 	)
 	plotOuts = graphMicrogrid(
 		modelDir				= modelDir, 
-		pathToOmd				= f'{modelDir}/{feederName}.omd', 
+		pathToOmd				= omdFilePath, 
 		profit_on_energy_sales	= inputDict['profit_on_energy_sales'],
 		restoration_cost		= inputDict['restoration_cost'],
 		hardware_cost			= inputDict['hardware_cost'],
@@ -1831,7 +1838,6 @@ def work(modelDir, inputDict):
 		loadBcsDict				= loadBcsDict
 	)
 
-
 	# Textual outputs of outage timeline
 	with open(pJoin(modelDir,'timelineStats.html')) as inFile:
 		outData['timelineStatsHtml'] = inFile.read()
@@ -1842,7 +1848,7 @@ def work(modelDir, inputDict):
 	with open(pJoin(modelDir,'utilityOutageTable.html')) as inFile:
 		outData['utilityOutageHtml'] = inFile.read()
 	# Textual outputs of traditional metrics table
-	with open(pJoin(modelDir,'tradMetricsTable.html')) as inFile:
+	with open(pJoin(modelDir,'mgTradMetricsTable.html')) as inFile:
 		outData['tradMetricsHtml'] = inFile.read()
 	# Textual outputs of traditional metrics table for cciQuarts
 	with open(pJoin(modelDir,'cciQuartTradMetricsTable.html')) as inFile:
@@ -1901,7 +1907,8 @@ def new(modelDir):
 	# ====== Iowa240 Test Case
 	# feeder_file_path= [__neoMetaModel__._omfDir,'static','testFiles','iowa240_dwp_22_no_show_voltage.dss.omd']
 	feeder_file_path= [__neoMetaModel__._omfDir,'static','testFiles','iowa240_in_Florida_copy2_no_show_voltage.dss.omd']
-	# feeder_file_path= [__neoMetaModel__._omfDir,'static','testFiles','ieee8500.dss.omd']
+	# feeder_file_path= [__neoMetaModel__._omfDir,'static','testFiles','ieee8500_forced_layout.omd']
+	# feeder_file_path= [__neoMetaModel__._omfDir,'static','testFiles','ieee8500_forced_layout_using_dssToOmd.omd']
 
 	event_file_path = [__neoMetaModel__._omfDir,'static','testFiles','iowa240_dwp_22.events.json']
 	loadPriority_file_path = [__neoMetaModel__._omfDir,'static','testFiles','iowa240_dwp_22.loadPriority.basic.json']
