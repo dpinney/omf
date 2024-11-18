@@ -145,14 +145,6 @@
 				<label class="tooltip">Battery Energy Capacity (kWh)<span class="classic">Specify the battery energy capacity in kWh for each individual battery enrolled by a member-consumer.</span></label>
 				<input type="text" id="BESS_kwh" name="BESS_kwh" value="{{allInputDataDict.BESS_kwh}}" required="required"/>
 			</div>
-			<div class="shortInput">
-				<label class="tooltip">Battery MACRS Years<span class="classic">Modified Accelerated Cost Recovery System (MACRS) is the current tax depreciation schedule. Possible inputs are 0, 5 and 7 years.</span></label>
-				<select id="batteryMacrsOptionYears" name="batteryMacrsOptionYears" value="{{allInputDataDict.batteryMacrsOptionYears}}"/>
-					<option value="0" {{ 'selected' if allInputDataDict.batteryMacrsOptionYears == '0' }}>0</option>
-					<option value="5" {{ 'selected' if allInputDataDict.batteryMacrsOptionYears == '5' }}>5</option>
-					<option value="7" {{ 'selected' if allInputDataDict.batteryMacrsOptionYears == '7' }}>7</option>
-				</select>
-			</div>
 
 			<!-- vbatDispatch Specific Inputs -->
 			<div class="wideInput"> 
@@ -199,7 +191,6 @@
 					<option value="0" {{ 'selected' if allInputDataDict.load_type == '0' }}>None</option>
 					<option value="1" {{ 'selected' if allInputDataDict.load_type == '1' }}>Air Conditioner</option>
 					<option value="2" {{ 'selected' if allInputDataDict.load_type == '2' }}>Heat Pump</option>
-					<option value="3" {{ 'selected' if allInputDataDict.load_type == '3' }}>Refrigerator</option>
 					<option value="4" {{ 'selected' if allInputDataDict.load_type == '4' }}>Water Heater</option>
 				</select>
 			</div>
@@ -258,7 +249,7 @@
 		<p class="reportTitle" style="page-break-before:always">Thermal Battery Power Profile</p>
 		<div id="thermalBatPowerPlot" class="tightContent" style="width: 1000px; height: 600px;"></div>
 
-		<p class="reportTitle" style="page-break-before:always">Chemical BESS Charge Percentage</p>
+		<p class="reportTitle" style="page-break-before:always">Chemical BESS State of Charge</p>
 		<div id="batteryChargePlotly" class="tightContent" style="width: 1000px; height: 600px;"></div>
 
 		<p class="reportTitle">Monthly Cost Comparison</p>

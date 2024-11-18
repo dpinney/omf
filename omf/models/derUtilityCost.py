@@ -251,8 +251,9 @@ def work(modelDir, inputDict):
 	grid_charging_BESS = reoptResults['ElectricUtility']['electric_to_storage_series_kw']
 	outData['chargeLevelBattery'] = reoptResults['ElectricStorage']['soc_series_fraction']
 
-	## NOTE: The following 3 lines of code are temporary; it reads in the SOC info from a static reopt test file 
-	## For some reason REopt is not producing BESS results so this is a workaround
+	## NOTE: The following 6 lines of code are temporary; it reads in the SOC info from a static REopt test file (a previously completed REopt run) 
+	## This functionality was used when REopt did not produce BESS results, or the results were arrays of zeros.
+	
 	#with open(pJoin(__neoMetaModel__._omfDir,'static','testFiles','utility_reopt_results.json')) as f:
 	#	static_reopt_results = json.load(f)
 	#BESS = static_reopt_results['outputs']['ElectricStorage']['storage_to_load_series_kw']
@@ -260,20 +261,14 @@ def work(modelDir, inputDict):
 	#outData['chargeLevelBattery'] = static_reopt_results['outputs']['ElectricStorage']['soc_series_fraction']
 	#outData.update(static_reopt_results['outputs'])
 
-
 	## Create DER overview plot object
 	fig = go.Figure()
 	if (inputDict['load_type'] != '0') and (int(inputDict['number_devices'])>0): ## Load type 0 corresponds to the "None" option, which disables this vbatDispatch function
 		vbat_discharge_component = np.asarray(vbat_discharge_flipsign)
 		vbat_charge_component = np.asarray(vbat_charge)
-
 	else:
 		vbat_discharge_component = np.zeros_like(demand)
 		vbat_charge_component = np.zeros_like(demand)
-
-	## Define additional load and avoided load
-	additional_load = np.asarray(demand) + np.asarray(grid_charging_BESS) + vbat_charge_component
-	#avoided_load = np.asarray(BESS) + vbat_discharge_component
 
 	## Original load piece (minus any vbat or BESS charging aka 'new/additional loads')
 	fig.add_trace(go.Scatter(x=timestamps,
@@ -284,10 +279,13 @@ def work(modelDir, inputDict):
 						fill='tozeroy',
 						fillcolor='rgba(100,200,210,1)',
 						showlegend=showlegend))
+	## Make original load and its legend name hidden in the plot by default
+	fig.update_traces(legendgroup='Original Load (kW)', visible='legendonly', selector=dict(name='Original Load (kW)')) 
 
 	## Additional load (Charging BESS and vbat)
 	## NOTE: demand is added here for plotting purposes, so that the additional load shows up above the demand curve.
-	## How or if this should be done is still being discussed
+	## How or if this should be done is still being discussed - break out into a separate plot eventually
+	additional_load = np.asarray(demand) + np.asarray(grid_charging_BESS) + vbat_charge_component
 	fig.add_trace(go.Scatter(x=timestamps,
                          y=additional_load,
 						 yaxis='y1',
@@ -318,17 +316,9 @@ def work(modelDir, inputDict):
 						  name='Average Air Temperature',
 						  showlegend=showlegend 
 						  ))
+	## Make temperature and its legend name hidden in the plot by default
+	fig.update_traces(legendgroup='Average Air Temperature', visible='legendonly', selector=dict(name='Average Air Temperature')) 
 
-	## NOTE: This code hides the demand curve initially when the plot is made, but it can be 
-	## toggled back on by the user by clicking it in the plot legend
-	#fig.add_trace(go.Scatter(x=timestamps, 
-	#				 y=demand,
-	#				 yaxis='y1',
-	#				 mode='lines',
-	#				 line=dict(color='black'),
-	#				 name='Demand',
-	#				 showlegend=showlegend))
-	#fig.update_traces(legendgroup='Demand', visible='legendonly', selector=dict(name='Original Load (kW)')) ## Make demand hidden on plot by default
 
 	## BESS serving load piece
 	fig.add_trace(go.Scatter(x=timestamps,
@@ -431,18 +421,25 @@ def work(modelDir, inputDict):
 		outData['thermalBatPowerPlotLayout'] = json.dumps(fig.layout, cls=plotly.utils.PlotlyJSONEncoder)	
 	
 
-	## Create Battery State of Charge plot object ######################################################################################################################################################
+	## Create Chemical BESS State of Charge plot object ######################################################################################################################################################
 	fig = go.Figure()
 	fig.add_trace(go.Scatter(x=timestamps,
 						y=outData['chargeLevelBattery'],
 						mode='none',
 						fill='tozeroy',
 						fillcolor='red',
-						name='Battery Charge Level',
+						name='Battery SOC',
 						showlegend=True))
 	fig.update_layout(
 		xaxis=dict(title='Timestamp'),
-		yaxis=dict(title='Charge (%)')
+		yaxis=dict(title='Charge (%)'),
+		legend=dict(
+				orientation='h',
+				yanchor='bottom',
+				y=1.02,
+				xanchor='right',
+				x=1
+				)
 	)
 	outData['batteryChargeData'] = json.dumps(fig.data, cls=plotly.utils.PlotlyJSONEncoder)
 	outData['batteryChargeLayout'] = json.dumps(fig.layout, cls=plotly.utils.PlotlyJSONEncoder)
