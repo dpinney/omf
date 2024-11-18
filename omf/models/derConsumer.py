@@ -48,110 +48,6 @@ def create_REopt_jl_jsonFile(modelDir, inputDict):
 	demand_array = np.asarray([float(value) for value in inputDict['demandCurve'].split('\n') if value.strip()]) ## process input format into an array
 	demand = demand_array.tolist() if isinstance(demand_array, np.ndarray) else demand_array ## make demand array into a list	for REopt
 
-	"""
-	## NOTE: The following lines of code are optional parameters that may or may not be used in the future.
-	## Copied from omf.models.microgridDesign
-
-	## Financial and Load parameters
-	energyCost = float(inputDict['energyCost'])
-	demandCost = float(inputDict['demandCost'])
-	wholesaleCost = float(inputDict['wholesaleCost'])
-	lostLoadValue = float(inputDict['value_of_lost_load'])
-	analysisYears = int(inputDict['analysisYears'])
-	omCostEscalator = float(inputDict['omCostEscalator'])
-	discountRate = float(inputDict['discountRate'])
-	criticalLoadFactor = float(inputDict['criticalLoadFactor'])
-	userCriticalLoadShape = True if inputDict['userCriticalLoadShape'] == "True" else False
-
-	## Solar parameters
-	solarCost = float(inputDict['solarCost'])
-	solarMin = float(inputDict['solarMin'])
-	if solar == 'off':
-		solarMax = 0
-	elif solar == 'on':
-		solarMax = float(inputDict['solarMax'])
-		solarExisting = float(inputDict['solarExisting'])
-
-	solarCanExport = True if inputDict['solarCanExport'] == "True" else False
-	solarCanCurtail = True if inputDict['solarCanCurtail'] == "True" else False
-	solarMacrsOptionYears = int(inputDict['solarMacrsOptionYears'])
-	solarItcpercent = float(inputDict['solarItcPercent'])
-
-	## BESS parameters
-	batteryPowerCost = float(inputDict['batteryPowerCost'])
-	batteryCapacityCost = float(inputDict['batteryCapacityCost'])
-	batteryPowerCostReplace = float(inputDict['batteryPowerCostReplace'])
-	batteryCapacityCostReplace = float(inputDict['batteryCapacityCostReplace'])
-	batteryPowerReplaceYear = float(inputDict['batteryPowerReplaceYear'])
-	batteryCapacityReplaceYear = float(inputDict['batteryCapacityReplaceYear'])
-	batteryPowerMin = float(inputDict['batteryPowerMin'])
-	batteryCapacityMin = float(inputDict['batteryCapacityMin'])
-	batteryMacrsOptionYears = int(inputDict['batteryMacrsOptionYears'])
-	batteryItcPercent = float(inputDict['batteryItcPercent'])
-
-	## Diesel Generator paramters
-	dieselGenCost = float(inputDict['dieselGenCost'])
-	dieselMacrsOptionYears = int(inputDict['dieselMacrsOptionYears'])
-	dieselMax = float(inputDict['dieselMax'])
-	dieselMin = float(inputDict['dieselMin'])
-	dieselFuelCostGal = float(inputDict['dieselFuelCostGal'])
-	dieselCO2Factor = float(inputDict['dieselCO2Factor'])
-	dieselOMCostKw = float(inputDict['dieselOMCostKw'])
-	dieselOMCostKwh = float(inputDict['dieselOMCostKwh'])
-	dieselOnlyRunsDuringOutage = True if inputDict['dieselOnlyRunsDuringOutage'] == "True" else False
-
-	## Outage/resilience paramters
-	outage_start_hour = int(inputDict['outage_start_hour'])
-	outage_duration = int(inputDict['outageDuration'])
-	outage_end_hour = outage_start_hour + outage_duration
-
-	scenario = {
-		"Site": {
-			"latitude": latitude,
-			"longitude": longitude
-		},
-		"ElectricTariff": {
-			"wholesale_rate": wholesaleCost
-		},
-		"ElectricLoad": {
-			"loads_kw": jsonifiableLoad,
-			"year": year
-		},
-		"Financial": {
-			"value_of_lost_load_per_kwh": value_of_lost_load,
-			"analysis_years": analysisYears,
-			"om_cost_escalation_rate_fraction": omCostEscalator,
-			"offtaker_discount_rate_fraction": discountRate
-		},
-		"PV": {
-			"installed_cost_per_kw": solarCost,
-			"min_kw": solarMin,
-			"max_kw": solarMax,
-			"can_export_beyond_nem_limit": solarCanExport,
-			"can_curtail": solarCanCurtail,
-			"macrs_option_years": solarMacrsOptionYears,
-			"federal_itc_fraction": solarItcPercent
-		},
-		"ElectricStorage": {
-			"installed_cost_per_kwh": batteryPowerCost,
-			"installed_cost_per_kwh": batteryCapacityCost,
-			"replace_cost_per_kw": batteryPowerCostReplace,
-			"replace_cost_per_kwh": batteryCapacityCostReplace,
-			"inverter_replacement_year": batteryPowerReplaceYear,
-			"battery_replacement_year": batteryCapacityReplaceYear,
-			"min_kw": batteryPowerMin,
-			"min_kwh": batteryCapacityMin,
-			"macrs_option_years": batteryMacrsOptionYears,
-			"total_itc_fraction": batteryItcPercent
-		},
-		"Generator": {
-			"installed_cost_per_kw": dieselGenCost,
-			"only_runs_during_grid_outage": dieselOnlyRunsDuringOutage,
-			"macrs_option_years": dieselMacrsOptionYears
-		}
-	}
-	"""
-
 	## Begin the REopt input dictionary called 'scenario'
 	scenario = {
 		'Site': {
@@ -170,54 +66,42 @@ def create_REopt_jl_jsonFile(modelDir, inputDict):
 		}
 	}
 
-	## Add a PV section if enabled 
-	if inputDict['PV'] == 'Yes':
-		scenario['PV'] = {
-			##TODO: Add options here, if needed
-			}
+	scenario['PV'] = {
+		'installed_cost_per_kw': float(inputDict['costPV']),
+		'existing_kw': float(inputDict['existing_kw_PV']),
+		'min_kw': float(inputDict['min_kw_PV']),
+		'max_kw': float(inputDict['max_kw_PV']),
+		'can_export_beyond_nem_limit': inputDict['PVCanExport'],
+		'can_curtail': inputDict['PVCanCurtail'],
+		'macrs_option_years': int(inputDict['PVMacrsOptionYears']),
+		'federal_itc_fraction': float(inputDict['PVItcPercent']),
+		}
 
 	## Add a Battery Energy Storage System (BESS) section if enabled 
-	if inputDict['BESS'] == 'Yes':
-		scenario['ElectricStorage'] = {
-			##TODO: Add options here, if needed
-			#scenario['ElectricStorage']['size_kw'] = 2
-			#"min_kw": 2,
-			#"min_kwh": 8,
-			'total_rebate_per_kw': float(inputDict['total_rebate_per_kw']),
-			'macrs_option_years': float(inputDict['macrs_option_years']),
-			'macrs_bonus_fraction': float(inputDict['macrs_bonus_fraction']),
-			'replace_cost_per_kw': float(inputDict['replace_cost_per_kw']),
-			'replace_cost_per_kwh': float(inputDict['replace_cost_per_kwh']),
-			'installed_cost_per_kw': float(inputDict['installed_cost_per_kw']),
-			'installed_cost_per_kwh': float(inputDict['installed_cost_per_kwh']),
-			'total_itc_fraction': float(inputDict['total_itc_fraction']),
-			}
-		
-
-	## Add a Diesel Generator section if enabled
-	if inputDict['generator'] == 'Yes':
-		scenario['Generator'] = {
-			##TODO: Add options here, if needed
-			}
-	
-	## Add an Outage section if enabled
-	if inputDict['outage'] == True:
-		scenario['ElectricUtility'] = {
-			'outage_start_time_step': int(inputDict['outage_start_hour']),
-			'outage_end_time_step': int(inputDict['outage_start_hour'])+int(inputDict['outage_duration'])
-			}
-	
-	## Critical Load input section
-	if inputDict['criticalLoadSwitch'] == 'No': ## switch = No means the user wants to upload a critical load profile instead of using a critical load factor to determine the critical load
-		#TODO: This piece is not working. REopt gives an error that the resilience file is not being created. Unclear what the issue is 9/2024
-		criticalLoad = np.asarray([float(value) for value in inputDict['criticalLoad'].split('\n') if value.strip()]) ## process input format into an array
-		criticalLoad = criticalLoad.tolist() if isinstance(criticalLoad, np.ndarray) else criticalLoad ## make criticalLoad array into a list for REopt
-		#scenario['ElectricLoad']['critical_load_series_kw'] = criticalLoad
+	if inputDict['chemBESSgridcharge'] == 'Yes':
+		can_grid_charge_bool = True
 	else:
-		scenario['ElectricLoad']['critical_load_fraction'] = float(inputDict['criticalLoadFactor'])
-		#criticalLoad = demand_array*criticalLoadFactor
-		#criticalLoad = criticalLoad.tolist() if isinstance(criticalLoad, np.ndarray) else criticalLoad ## make criticalLoad array into a list for REopt
-		#scenario['ElectricLoad']['critical_load_series_kw'] = criticalLoad
+		can_grid_charge_bool = False
+
+	scenario['ElectricStorage'] = {
+		##TODO: Add options here, if needed
+		#scenario['ElectricStorage']['size_kw'] = 2
+		'min_kw': float(inputDict['min_kw']), ## Battery Power minimum 
+		'max_kw': float(inputDict['max_kw']), ## Battery Power maximum 
+		'min_kwh': float(inputDict['min_kwh']), ## Battery Energy Capacity minimum
+		'max_kwh': float(inputDict['max_kwh']), ## Battery Energy Capacity maximum
+		'can_grid_charge': can_grid_charge_bool,
+		'total_rebate_per_kw': float(inputDict['total_rebate_per_kw']),
+		'macrs_option_years': float(inputDict['batteryMacrs_option_years']),
+		#'macrs_bonus_fraction': float(inputDict['macrs_bonus_fraction']),
+		'replace_cost_per_kw': float(inputDict['replace_cost_per_kw']),
+		'replace_cost_per_kwh': float(inputDict['replace_cost_per_kwh']),
+		'installed_cost_per_kw': float(inputDict['installed_cost_per_kw']),
+		'installed_cost_per_kwh': float(inputDict['installed_cost_per_kwh']),
+		'total_itc_fraction': float(inputDict['total_itc_fraction']),
+		'inverter_replacement_year': float(inputDict['inverter_replacement_year']),
+		'battery_replacement_year': float(inputDict['battery_replacement_year']),
+		}
 
 	## Save the scenario file
 	## NOTE: reopt_jl currently requires a path for the input file, so the file must be saved to a location
@@ -351,21 +235,7 @@ def work(modelDir, inputDict):
 	''' Run the model in its directory. '''
 
 	## Delete output file every run if it exists
-	outData = {}	
-	
-	## Add REopt BESS inputs to inputDict
-	## NOTE: These inputs are being added directly to inputDict because they are not specified by user input
-	## If they become user inputs, then they can be placed directly into the defaultInputs under the new() function below
-	inputDict.update({
-		'total_rebate_per_kw': '10.0',
-		'macrs_option_years': '25',
-		'macrs_bonus_fraction': '0.4',
-		'replace_cost_per_kw': '460.0',
-		'replace_cost_per_kwh': '230.0',
-		'installed_cost_per_kw': '500.0', 
-		'installed_cost_per_kwh': '80.0', 
-		'total_itc_fraction': '0.0',
-	})
+	outData = {}
 
 	## Create REopt input file
 	create_REopt_jl_jsonFile(modelDir, inputDict)
@@ -380,7 +250,7 @@ def work(modelDir, inputDict):
 	#	print('Successfully loaded REopt test file. \n')
 
 	## Run REopt.jl 
-	reopt_jl.run_reopt_jl(modelDir, 'reopt_input_scenario.json', outages=inputDict['outage'])
+	reopt_jl.run_reopt_jl(modelDir, 'reopt_input_scenario.json')
 	#reopt_jl.run_reopt_jl(modelDir, '/Users/astronobri/Documents/CIDER/scratch/reopt_input_scenario_26may2024_0258.json', outages=inputDict['outage'])
 	with open(pJoin(modelDir, 'results.json')) as jsonFile:
 		reoptResults = json.load(jsonFile)
@@ -396,17 +266,6 @@ def work(modelDir, inputDict):
 	except KeyError:
 		year = inputDict['year'] ## Use the user provided year if none found in reoptResults
 	timestamps = pd.date_range(start=f'{year}-01-01', end=f'{year}-12-31 23:00:00', periods=np.size(demand))
-
-	## If outage is specified in the inputs, load the resilience results
-	if (inputDict['outage']):
-		try:
-			with open(pJoin(modelDir, 'resultsResilience.json')) as jsonFile:
-				reoptResultsResilience = json.load(jsonFile)
-				outData.update(reoptResultsResilience) ## Update out file with resilience results
-		except FileNotFoundError:
-			results_file = pJoin(modelDir, 'resultsResilience.json')
-			print(f"File '{results_file}' not found. REopt may not have simulated the outage.")
-			raise
 
 	## Run vbatDispatch, unless it is disabled
 	## TODO: Check that the rest of the code functions if the vbat (TESS) load type is None
@@ -425,19 +284,13 @@ def work(modelDir, inputDict):
 
 	## DER Overview plot ###################################################################################################################################################################
 	grid_to_load = reoptResults['ElectricUtility']['electric_to_load_series_kw']
-	if 'Generator' in reoptResults:
-		generator = reoptResults['Generator']['electric_to_load_series_kw']
 
 	if 'PV' in reoptResults: ## PV
 		PV = reoptResults['PV']['electric_to_load_series_kw']
 	else:
 		PV = np.zeros_like(demand)
 	
-	## NOTE: This section for BESS uses REopt's BESS, which we are finding is inconsistent and tends to not work
-	## unless an outage is specified and no generator is enabled (if we specify a generator, REopt will not build a BESS). 
-	## We are instead going to try to use our own BESS model.
-	## Currently, the BESS model is only being run when considering a DER utility program is enabled.
-	## TODO: Change this to instead check for BESS in the output file, rather than input
+	## Using REopt's Battery Energy Storage System (BESS) output
 	if 'ElectricStorage' in reoptResults and any(reoptResults['ElectricStorage']['storage_to_load_series_kw']): ## BESS
 		print("Using REopt's BESS output. \n")
 		BESS = reoptResults['ElectricStorage']['storage_to_load_series_kw']
@@ -445,267 +298,25 @@ def work(modelDir, inputDict):
 		if 'PV' in reoptResults:
 			grid_charging_BESS += np.asarray(reoptResults['PV']['electric_to_storage_series_kw'])
 		outData['chargeLevelBattery'] = reoptResults['ElectricStorage']['soc_series_fraction']
+
+		## Update the monthly consumer savings
+		## Add BESS compensation amount to vbatDispatch's thermal BESS savings
+		monthHours = [(0, 744), (744, 1416), (1416, 2160), (2160, 2880), 
+				(2880, 3624), (3624, 4344), (4344, 5088), (5088, 5832), 
+				(5832, 6552), (6552, 7296), (7296, 8016), (8016, 8760)]
+		BESS_compensation_monthly = np.asarray([sum(BESS[s:f]) for s, f in monthHours])
+		outData['savings'] = list(np.asarray(outData['savings'])+np.asarray(BESS_compensation_monthly)) ## NOTE: There is likely a better way to add two lists together, but this works for now
+
 	else:
 		print('No BESS found in REopt: Setting BESS data to 0. \n')
 		BESS = np.zeros_like(demand)
 		grid_charging_BESS = np.zeros_like(demand)
 		outData['chargeLevelBattery'] = np.zeros_like(demand)
-		
-	#BESS = np.zeros_like(demand)
-	#grid_charging_BESS = np.zeros_like(demand)
-	#outData['chargeLevelBattery'] = list(np.zeros_like(demand))
 
 	## NOTE: The following 3 lines of code read in the SOC info from a static reopt test file 
 	#with open(pJoin(__neoMetaModel__._omfDir,'static','testFiles','residential_reopt_results.json')) as f:
 	#	static_reopt_results = json.load(f)
 	#outData['chargeLevelBattery'] = static_reopt_results['outputs']['ElectricStorage']['soc_series_fraction']
-
-	########## DER Sharing Program options ######################################################################################################################################################
-	if (inputDict['utilityProgram']):
-		print('Considering utility DER sharing program \n')
-
-		## Gather TOU rates
-		#latitude = float(inputDict['latitude'])
-		#longitude = float(inputDict['longitude'])
-		## TODO: To make this more modular, require user to input specific urdb label and use the getpage variable in get_tou_rates() function
-		## NOTE: Temporarily override lat/lon for a utility that has TOU rates specifically
-		inputDict['latitude'] = 39.986771 
-		inputDict['longitude'] = -104.812599 ## Brighton, CO
-		rate_info = get_tou_rates(modelDir, inputDict)
-
-		## Look at all the "name" keys containing "TOU" or "time of use"
-		#filtered_names = [item['name'] for item in rate_info['items'] if 'TOU' in item['name'] or 'time-of-use' in item['name'] or 'Time of Use' in item['name']]
-		#for name in filtered_names: 
-		#	print(name)	## Print the filtered names
-
-		## Select one of the name keys (in this case, the residential TOU)
-		TOUdata = []
-		TOUname = 'Residential Time of Use'
-		for item in rate_info['items']:
-			if item['name'] == TOUname:
-				TOUdata.append(item)
-		#print(TOUdata)
-
-		## NOTE: ad-hoc TOU rates were used when the rate_info was not working.
-		#tou_rates = get_tou_rates_adhoc()
-
-		PV_series = pd.Series(PV, index=timestamps)
-		demand_series = pd.Series(demand, index=timestamps)
-		temperature_series = pd.Series(temperatures, index=timestamps)
-		BESS_series = pd.Series(BESS, index=timestamps)
-		#grid_serving_load_series = pd.Series(grid_to_load, index=timestamps) 
-		## NOTE: REopt gives grid_to_load, but for now I'm just prioritizing DERs serving the load and buying grid if needed.
-		## If we don't want to prioritize DERs serving the load before buying from grid, then need to integrate REopt's grid_to_load
-		## into the code loop below.
-
-		## Create weekday and weekend TOU schedules
-		weekday_tou_schedule = create_tou_schedule(TOUdata[0]['energyweekdayschedule'])
-		weekend_tou_schedule = create_tou_schedule(TOUdata[0]['energyweekendschedule'])
-
-		## Combine the weekday and weekend schedules
-		tou_schedules = {'weekday': weekday_tou_schedule, 'weekend': weekend_tou_schedule}
-		tou_structure = TOUdata[0]['energyratestructure']
-		fixed_monthly_charge = TOUdata[0]['fixedmonthlycharge']
-		compensation_rate = float(inputDict['rateCompensation'])
-		subsidy_amount = float(inputDict['subsidy'])
-
-		## Identify the on- and off-peak periods
-		on_peak_periods = []
-		off_peak_periods = []
-		for period, rate in enumerate(tou_structure):
-			if rate[0]['rate'] == max(tou_structure, key=lambda x: x[0]['rate'])[0]['rate']:
-				on_peak_periods.append(period)
-			if rate[0]['rate'] == min(tou_structure, key=lambda x: x[0]['rate'])[0]['rate']:
-				off_peak_periods.append(period)
-
-		## Create dataframe to store the schedule
-		schedule = pd.DataFrame({
-			'Solar Generation (kW)': PV_series,
-			'Household Demand (kW)': demand_series,
-			'Grid Serving Load (kW)': np.zeros(len(timestamps)),  ## Placeholder; will get updated in the loop
-			'Battery State of Charge': np.zeros(len(timestamps)),  ## Placeholder 
-		}, index=timestamps)
-
-		## BESS physical parameters
-		## TODO: Create user inputs on the HTML side if keeping this battery model
-		battery_energy_capacity = 13.5 ## kWh; Tesla Powerwall 2
-		battery_max_charge_rate = 3.3  ## kW
-		battery_max_discharge_rate = 3.3  ## kW
-		#battery_efficiency = 0.9  # Efficiency of the battery ## NOTE: maybe add this in later?
-		battery_soc = 0  ## Initial battery state of charge
-		battery_soc_min = 0.2 * battery_energy_capacity  ## Min= 20% of battery capacity
-
-		## BESS allowed for utility use
-		## NOTE: I just realized that this code is set up to only use 80% of the battery to do peak shaving, rather than
-		## giving/selling the 80% to the utility. TODO: how do we modify this? Lisa and I are thinking of ways to do (and plot) this
-		max_utility_usage_percentage = 1 #float(inputDict['maxBESSDischarge'])  ## Up to 80% of the total battery charge
-		max_utility_usage = battery_energy_capacity * max_utility_usage_percentage
-
-		## Initial variables to be updated in the loop
-		economic_benefit = 0  ## Economic benefit of storing excess solar. NOTE: Is this useful?
-		total_economic_benefit = 0
-		total_energy_cost = 0  ## The total cost of energy 
-		total_der_compensation = 0  ## The total DER compensation amount (when DERs are discharged)
-		max_demand_periods = {period: 0 for period in range(len(tou_structure))}  ## The max demand during each period (for calculating the demand cost)
-
-		## Initial monthly cost tracking variables
-		monthly_energy_cost = [0] * 12
-		monthly_der_compensation = [0] * 12
-		monthly_economic_benefit = [0] * 12
-
-		for i in range(1, len(timestamps)):
-			timestamp = timestamps[i] ## Grab the hour timestamp
-			month = timestamp.month - 1 ## grab month information for cost savings analysis (Index 0=Jan, 11=Dec)
-			tou_rate, tou_period = calc_tou_rate(timestamp, tou_schedules, tou_structure) ## Grab the specific TOU info for that hour
-
-			net_load = demand_series[i] - PV_series[i] ## Net load after PV is accounted for
-			if net_load > 0: ## If the PV did not serve all of the load, then:
-				## Discharge the battery during on-peak hours; update BESS and economic variables
-				if tou_period in on_peak_periods:
-					## Discharge BESS to household first
-					discharge = min(battery_max_discharge_rate, net_load, battery_soc - battery_soc_min, net_load) ## NOTE: this doesn't keep track of which variable is being used though
-					battery_soc -= discharge
-					net_load -= discharge
-
-					## If BESS > 20% battery energy capacity after serving household load, then utility can use it
-					if battery_soc > battery_soc_min:
-						utility_discharge = min(battery_max_discharge_rate, battery_soc - battery_soc_min, max_utility_usage)
-						battery_soc -= utility_discharge
-						der_compensation += utility_discharge * compensation_rate
-						monthly_der_compensation[month] += utility_discharge * compensation_rate
-						max_utility_usage -= utility_discharge  # Reduce the remaining utility usage allowance
-
-					else: ## buy from the grid
-						grid_usage = net_load ## grid_usage is how much energy needs to be bought from the grid
-						total_energy_cost += grid_usage * tou_rate
-						monthly_energy_cost[month] += grid_usage * tou_rate
-				
-				else: ## If off-peak period, use grid if necessary
-					battery_soc = min(battery_energy_capacity, battery_soc + battery_max_charge_rate)
-					grid_usage = net_load
-					total_energy_cost += grid_usage * tou_rate
-					monthly_energy_cost[month] += grid_usage * tou_rate
-					der_compensation = 0
-
-			else: ## If net_load <= 0 (PV has served all load)
-				excess_solar = -net_load
-				## Store any excess PV in the BESS during off-peak periods
-				if tou_period in off_peak_periods:
-					charge = min(battery_max_charge_rate, excess_solar)
-					battery_soc = min(battery_energy_capacity, battery_soc + charge)
-					#print('battery soc in offpeak 2: \n',battery_soc)
-					grid_usage = 0  ## No energy being bought from the grid
-					economic_benefit = charge * compensation_rate  ## Economic benefit from storing excess solar.
-					monthly_economic_benefit[month] += charge * compensation_rate
-					der_compensation = 0  ## No DER compensation for charging
-				else:
-					## If not off-peak, sell excess solar to the grid
-					der_compensation = excess_solar * compensation_rate
-					monthly_der_compensation[month] += excess_solar * compensation_rate
-
-			## Update the total economic benefit and DER compensation variables
-			total_economic_benefit += economic_benefit
-			total_der_compensation += der_compensation
-
-			## Track the maximum demand for the current TOU period
-			max_demand_periods[tou_period] = max(max_demand_periods[tou_period], demand_series[i] + grid_usage)
-
-			## Update the DER schedule
-			schedule.loc[timestamp, 'Grid Serving Load (kW)'] = grid_usage
-			schedule.loc[timestamp, 'Battery State of Charge'] = battery_soc
-
-		## Calculate total demand cost (including fixed monthly charge)
-		demand_cost = sum(max_demand_periods[period] * tou_structure[period][0]['rate'] for period in max_demand_periods) + fixed_monthly_charge
-
-		## Calculate total DER compensation amount (including any subsidies)
-		total_compensation = total_economic_benefit + total_der_compensation - total_energy_cost + subsidy_amount - demand_cost
-		
-		#print(f"Total Energy Cost: ${total_energy_cost:.2f}")
-		#print(f"Total DER Compensation: ${total_der_compensation:.2f}")
-		#print(f"Total Compensation: ${total_compensation:.2f}")
-
-		## Add variables to outData
-		outData['energyCost'] = list(np.asarray(outData['energyCost']) + monthly_energy_cost)
-		outData['monthlyDERcompensation'] = monthly_der_compensation
-		outData['monthlyEconomicBenefit'] = monthly_economic_benefit
-
-		## DER Dispatch Plot ######################################################################################################################################################
-		fig = go.Figure()
-		fig.add_trace(go.Scatter(x=schedule.index,
-					y=schedule['Solar Generation (kW)'],
-					yaxis='y1',
-					mode='none',
-					fill='tozeroy',
-					fillcolor='yellow',
-					name='Solar Generation (kW)'))
-		fig.add_trace(go.Scatter(x=schedule.index,
-			y=schedule['Household Demand (kW)'],
-			yaxis='y1',
-			mode='none',
-			fill='tozeroy',
-			fillcolor='black',
-			name='Household Demand (kW)'))		
-		fig.add_trace(go.Scatter(x=schedule.index,
-			y=schedule['Grid Serving Load (kW)'],
-			yaxis='y1',
-			mode='none',
-			fill='tozeroy',
-			fillcolor='gray',
-			name='Grid Serving Load (kW)'))
-		fig.add_trace(go.Scatter(x=schedule.index,
-			y= battery_energy_capacity - schedule['Battery State of Charge'],
-			yaxis='y1',
-			mode='none',
-			fill='tozeroy',
-			fillcolor='green',
-			name='Battery Discharge (kW)'))
-		fig.add_trace(go.Scatter(
-			x=schedule.index,
-			y=(schedule['Battery State of Charge'] / battery_energy_capacity) * 100,
-			yaxis='y2',
-			mode='none',  
-			fill='tozeroy',
-			fillcolor='rgba(0, 0, 255, 0.3)', 
-			name='Battery State of Charge (%)',
-			visible='legendonly'  ## Initially hide this trace
-		))
-		fig.add_trace(go.Scatter(
-			x=schedule.index,
-			y=np.asarray(vbat_discharge_flipsign),
-			yaxis='y1',
-			mode='none',  
-			fill='tozeroy',
-			fillcolor='rgba(128, 0, 128, 1)', 
-			name='Thermal BESS'
-		))
-
-		
-		## Plot layout
-		fig.update_layout(
-			xaxis=dict(title='Timestamp'),
-			yaxis=dict(
-				title='Power (kW)',
-				range=[0, battery_energy_capacity]  # Set range for y1 axis
-			),
-			yaxis2=dict(
-				title='Battery State of Charge (%)',
-				overlaying='y',
-				side='right'
-			),
-			legend=dict(
-				orientation='h',
-				yanchor='bottom',
-				y=1.02,
-				xanchor='right',
-				x=1
-			)
-		)
-
-		#fig.show()
-
-		## Encode plot data as JSON for showing in the HTML side
-		outData['derBESSplot'] = json.dumps(fig.data, cls=plotly.utils.PlotlyJSONEncoder)
-		outData['derBESSplotLayout'] = json.dumps(fig.layout, cls=plotly.utils.PlotlyJSONEncoder)
 
 
 	## Create DER overview plot object ######################################################################################################################################################
@@ -719,16 +330,15 @@ def work(modelDir, inputDict):
 		vbat_charge_component = np.zeros_like(demand)
 
 	## BESS serving load piece
-	if (inputDict['BESS'] == 'Yes'):
-		fig.add_trace(go.Scatter(x=timestamps,
-							y=np.asarray(BESS) + np.asarray(demand) + vbat_discharge_component,
-							yaxis='y1',
-							mode='none',
-							fill='tozeroy',
-							name='BESS Serving Load (kW)',
-							fillcolor='rgba(0,137,83,1)',
-							showlegend=showlegend))
-		fig.update_traces(fillpattern_shape='/', selector=dict(name='BESS Serving Load (kW)'))
+	fig.add_trace(go.Scatter(x=timestamps,
+						y=np.asarray(BESS) + np.asarray(demand) + vbat_discharge_component,
+						yaxis='y1',
+						mode='none',
+						fill='tozeroy',
+						name='BESS Serving Load (kW)',
+						fillcolor='rgba(0,137,83,1)',
+						showlegend=showlegend))
+	fig.update_traces(fillpattern_shape='/', selector=dict(name='BESS Serving Load (kW)'))
 
 	## Temperature line on a secondary y-axis (defined in the plot layout)
 	fig.add_trace(go.Scatter(x=timestamps,
@@ -808,18 +418,6 @@ def work(modelDir, inputDict):
 						showlegend=showlegend
 						))
 
-	## Generator serving load piece
-	if (inputDict['generator'] == 'Yes'):
-		fig.add_trace(go.Scatter(x=timestamps,
-							y=np.asarray(generator),
-							yaxis='y1',
-							mode='none',
-							fill='tozeroy',
-							name='Generator Serving Load (kW)',
-							fillcolor='rgba(0,137,83,1)',
-							showlegend=showlegend))
-		fig.update_traces(fillpattern_shape='/', selector=dict(name='BESS Serving Load (kW)'))
-
 	## Plot layout
 	fig.update_layout(
     	#title='Residential Data',
@@ -847,81 +445,18 @@ def work(modelDir, inputDict):
 	outData['derOverviewData'] = json.dumps(fig.data, cls=plotly.utils.PlotlyJSONEncoder)
 	outData['derOverviewLayout'] = json.dumps(fig.layout, cls=plotly.utils.PlotlyJSONEncoder)
 
-	## Add REopt resilience plot (adapted from omf/models/microgridDesign.py) ########################################################################################################################
-	#helper function for generating output graphs
-	def makeGridLine(x,y,color,name):
-		plotLine = go.Scatter(
-			x = x, 
-			y = y,
-			line = dict( color=(color)),
-			name = name,
-			hoverlabel = dict(namelength = -1),
-			showlegend=True,
-			stackgroup='one',
-			mode='none'
-		)
-		return plotLine
-	#Set plotly layout ---------------------------------------------------------------
-	plotlyLayout = go.Layout(
-		width=1000,
-		height=375,
-		legend=dict(
-			x=0,
-			y=1.25,
-			orientation="h")
-		)
-	x = list(range(len(reoptResults['ElectricUtility']['electric_to_load_series_kw'])))
-	plotData = []
-	#x_values = pd.to_datetime(x, unit = 'h', origin = pd.Timestamp(f'{year}-01-01'))
-	x_values = timestamps
-	powerGridToLoad = makeGridLine(x_values,reoptResults['ElectricUtility']['electric_to_load_series_kw'],'blue','Load met by Grid')
-	plotData.append(powerGridToLoad)
-	
-	if (inputDict['outage']): ## TODO: condense this code if possible
-		outData['resilience'] = reoptResultsResilience['resilience_by_time_step']
-		outData['minOutage'] = reoptResultsResilience['resilience_hours_min']
-		outData['maxOutage'] = reoptResultsResilience['resilience_hours_max']
-		outData['avgOutage'] = reoptResultsResilience['resilience_hours_avg']
-		outData['survivalProbX'] = reoptResultsResilience['outage_durations']
-		outData['survivalProbY'] = reoptResultsResilience['probs_of_surviving']
-
-		plotData = []
-		resilience = go.Scatter(
-			x=x,
-			y=outData['resilience'],
-			line=dict( color=('red') ),
-		)
-		plotData.append(resilience)
-		plotlyLayout['yaxis'].update(title='Longest Outage survived (Hours)')
-		plotlyLayout['xaxis'].update(title='Start Hour')
-		outData['resilienceData'] = json.dumps(plotData, cls=plotly.utils.PlotlyJSONEncoder)
-		outData['resilienceLayout'] = json.dumps(plotlyLayout, cls=plotly.utils.PlotlyJSONEncoder)
-
-		plotData = []
-		survivalProb = go.Scatter(
-			x=outData['survivalProbX'],
-			y=outData['survivalProbY'],
-			line=dict( color=('red') ),
-			name='Probability of Surviving Outage of a Given Duration')
-		plotData.append(survivalProb)
-		plotlyLayout['yaxis'].update(title='Probability of Meeting Critical Load')
-		plotlyLayout['xaxis'].update(title='Outage Length (Hours)')
-		outData['resilienceProbData' ] = json.dumps(plotData, cls=plotly.utils.PlotlyJSONEncoder)
-		outData['resilienceProbLayout'] = json.dumps(plotlyLayout, cls=plotly.utils.PlotlyJSONEncoder)
-
 
 	## Create Exported Power plot object ######################################################################################################################################################
 	fig = go.Figure()
 	
 	## Power used to charge BESS (electric_to_storage_series_kw)
-	if inputDict['BESS'] == 'Yes':
-		fig.add_trace(go.Scatter(x=timestamps,
-							y=np.asarray(grid_charging_BESS),
-							mode='none',
-							fill='tozeroy',
-							name='Power Used to Charge BESS',
-							fillcolor='rgba(75,137,83,1)',
-							showlegend=True))
+	fig.add_trace(go.Scatter(x=timestamps,
+						y=np.asarray(grid_charging_BESS),
+						mode='none',
+						fill='tozeroy',
+						name='Power Used to Charge BESS',
+						fillcolor='rgba(75,137,83,1)',
+						showlegend=True))
 	
 	## Power used to charge vbat (vbat_charging)
 	if inputDict['load_type'] != '0':
@@ -1090,8 +625,8 @@ def new(modelDir):
 
 		## REopt inputs:
 		## NOTE: Variables are strings as dictated by the html input options
-		'latitude':  '39.532165', ## Rivesville, WV
-		'longitude': '-80.120618', 
+		'latitude':  '39.5298059', ## Rivesville, WV
+		'longitude': '-80.1167417', 
 		'year' : '2018',
 		'urdbLabel': '643476222faee2f0f800d8b1', ## Rivesville, WV - Monongahela Power
 		'fileName': 'residential_PV_load.csv',
@@ -1103,16 +638,40 @@ def new(modelDir):
 		'criticalLoadSwitch': 'Yes',
 		'criticalLoadFactor': '0.50',
 		'PV': 'Yes',
-		'BESS': 'Yes',
-		'generator': 'No',
-		'outage': True,
-		'outage_start_hour': '4637',
-		'outage_duration': '3',
 
 		## Financial Inputs
 		'demandChargeURDB': 'Yes',
-		'demandChargeCost': '25',
+		'demandChargeCost': '0.0', ## Set to zero because a residential consumer would not pay this -- the utility would
 		'projectionLength': '25',
+
+		## Chemical Battery Inputs
+		'numberBESS': '100.0',
+		'chemBESSgridcharge': 'Yes', 
+		'min_kw': '5.0', ## Minimum continuous power, based on Powerwall’s specs
+		'max_kw': '5.0', ## Maximum continuous power 
+		'min_kwh': '13.5', ## Minimum energy capacity based on Powerwall’s full capacity
+		'max_kwh': '13.5', ## Maximum energy capacity to use the entire capacity
+		'total_rebate_per_kw': '10.0', ## Assuming $10/kW incentive
+		'batteryMacrs_option_years': '25', ## Depreciation years
+		'macrs_bonus_fraction': '0.4', ## 40% bonus depreciation fraction
+		'replace_cost_per_kw': '460.0', 
+		'replace_cost_per_kwh': '240.0', 
+		'installed_cost_per_kw': '480.0', ## Approximate cost per kW installed, based on total price range
+		'installed_cost_per_kwh': '480.0', ## Cost per kWh reflecting Powerwall’s installed cost
+		'total_itc_fraction': '0.0', ## No ITC included unless specified
+		'inverter_replacement_year': '10', 
+		'battery_replacement_year': '10',  
+
+		## Photovoltaic Inputs
+		'existing_kw_PV': '29500.0',
+		'additional_kw_PV': '0.0',
+		'costPV': '0.0',
+		'min_kw_PV': '0',
+		'max_kw_PV': '29500.0',
+		'PVCanCurtail': True,
+		'PVCanExport': True,
+		'PVMacrsOptionYears': '25',
+		'PVItcPercent': '0.0',
 
 		## vbatDispatch inputs:
 		'load_type': '2', ## Heat Pump

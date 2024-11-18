@@ -13,6 +13,7 @@ import numpy as np
 import pandas as pd
 import plotly.graph_objs as go
 import plotly.utils
+from itertools import accumulate
 
 # OMF imports
 from omf.models import __neoMetaModel__
@@ -34,34 +35,71 @@ def work(modelDir, inputDict):
 	
 	# Delete output file every run if it exists
 	outData = {}
+	
+	## Update inputDict with derUtilityCost inputs	
+	## Site parameters
+	latitude = float(inputDict['latitude'])
+	longitude = float(inputDict['longitude'])
+	urdbLabel = str(inputDict['urdbLabel'])
+	year = int(inputDict['year'])
+	projectionLength = int(inputDict['projectionLength'])
+	demand_array = np.asarray([float(value) for value in inputDict['demandCurve'].split('\n') if value.strip()]) ## process input format into an array
+	demand = demand_array.tolist() if isinstance(demand_array, np.ndarray) else demand_array ## make demand array into a list	for REopt
 
-	## Add REopt BESS inputs to inputDict
-	## NOTE: These inputs are being added directly to inputDict because they are not specified by user input
-	## If they become user inputs, then they can be placed directly into the defaultInputs under the new() function below
-	inputDict.update({
-		'total_rebate_per_kw': '10.0',
-		'macrs_option_years': '25',
-		'macrs_bonus_fraction': '0.4',
-		'replace_cost_per_kw': '10.0', 
-		'replace_cost_per_kwh': '5.0', 
-		'installed_cost_per_kw': '10.0',
-		'installed_cost_per_kwh': '5.0',
-		'total_itc_fraction': '0.0',
-	})
+	## Begin the REopt input dictionary called 'scenario'
+	scenario = {
+		'Site': {
+			'latitude': latitude,
+			'longitude': longitude
+		},
+		'ElectricTariff': {
+			'urdb_label': urdbLabel
+		},
+		'ElectricLoad': {
+			'loads_kw': demand,
+			'year': year
+		},
+		'Financial': {
+			'analysis_years': projectionLength
+		}
+	}
 
-	## Create REopt input file
-	derConsumer.create_REopt_jl_jsonFile(modelDir, inputDict)
+	## Add a Battery Energy Storage System (BESS) section if enabled 
+	if inputDict['chemBESSgridcharge'] == 'Yes':
+		can_grid_charge_bool = True
+	else:
+		can_grid_charge_bool = False
 
-	## NOTE: The single commented code below is used temporarily if reopt_jl is not working or for other debugging purposes.
-	## Also NOTE: If this is used, you typically have to add a ['outputs'] key before the variable of interest.
-	## For example, instead of reoptResults['ElectricStorage']['storage_to_load_series_kw'], it would have to be
-	## reoptResults['outputs']['ElectricStorage']['storage_to_load_series_kw'] when using the static reopt file below.
-	#with open(pJoin(__neoMetaModel__._omfDir,"static","testFiles","utility_reopt_results.json")) as f:
-	#	reoptResults = pd.json_normalize(json.load(f))
-	#	print('Successfully read in REopt test file. \n')
+	scenario['ElectricStorage'] = {
+		##TODO: Add options here, if needed
+		'min_kw': float(inputDict['BESS_kw']),
+		'max_kw':  float(inputDict['BESS_kw']),
+		'min_kwh':  float(inputDict['BESS_kwh']),
+		'max_kwh':  float(inputDict['BESS_kwh']),
+		'can_grid_charge': can_grid_charge_bool,
+		'total_rebate_per_kw': 0,
+		'macrs_option_years': 0,
+		'installed_cost_per_kw': float(inputDict['installed_cost_per_kw']),
+		'installed_cost_per_kwh': float(inputDict['installed_cost_per_kwh']),
+		'battery_replacement_year': 0,
+		'inverter_replacement_year': 0,
+		'replace_cost_per_kwh': 0.0,
+		'replace_cost_per_kw': 0.0,
+		'total_rebate_per_kw': 0.0,
+		'total_itc_fraction': 0.0,
+		}
+	
+	## Save the scenario file
+	## NOTE: reopt_jl currently requires a path for the input file, so the file must be saved to a location preferrably in the modelDir directory
+	with open(pJoin(modelDir, 'reopt_input_scenario.json'), 'w') as jsonFile:
+		json.dump(scenario, jsonFile)
 
-	## Run REopt.jl 
-	reopt_jl.run_reopt_jl(modelDir, "reopt_input_scenario.json", outages=inputDict['outage'])
+	## Create basic REopt input file
+	## NOTE: This function is disabled for now since the scenario dictionary above is hard coded and not relying on the derConsumer function to produce the REopt input file.
+	#derConsumer.create_REopt_jl_jsonFile(modelDir, inputDict)
+
+	## Run REopt.jl
+	reopt_jl.run_reopt_jl(modelDir, 'reopt_input_scenario.json')
 	with open(pJoin(modelDir, 'results.json')) as jsonFile:
 		reoptResults = json.load(jsonFile)
 	outData.update(reoptResults) ## Update output file with reopt results
@@ -77,20 +115,9 @@ def work(modelDir, inputDict):
 		year = inputDict['year'] # Use the user provided year if none found in reoptResults
 	
 	timestamps = pd.date_range(start=f'{year}-01-01', end=f'{year}-12-31 23:00:00', periods=np.size(demand))
-
-	## If outage is specified, load the resilience results
-	if (inputDict['outage']):
-		try:
-			with open(pJoin(modelDir, 'resultsResilience.json')) as jsonFile:
-				reoptResultsResilience = json.load(jsonFile)
-				outData.update(reoptResultsResilience) ## Update out file with resilience results
-		except FileNotFoundError:
-			results_file = pJoin(modelDir, 'resultsResilience.json')
-			print(f"File '{results_file}' not found. REopt may not have simulated the outage.")
-			raise
 	
 	## Run vbatDispatch, unless it is disabled
-	if inputDict['load_type'] != '0': ## Load type 0 corresponds to the "None" option, which disables this vbatDispatch function
+	if (inputDict['load_type'] != '0') and (int(inputDict['number_devices'])>0): ## Load type 0 corresponds to the "None" option, which disables this vbatDispatch function
 		vbatResults = vb.work(modelDir,inputDict)
 		with open(pJoin(modelDir, 'vbatResults.json'), 'w') as jsonFile:
 			json.dump(vbatResults, jsonFile)
@@ -108,6 +135,19 @@ def work(modelDir, inputDict):
 		vbatMaxPowerCapacity = pd.Series(vbatResults['maxPowerSeries'])
 		vbatPower = vbpower_series
 
+	## Update the financial cost ouput to include REopt BESS 
+	## TODO: combine these with the same variables from vbatDispatch. Currently this just replaces the vbatDispatch variables.
+	outData['NPV'] = reoptResults['Financial']['npv'] ## Calculate this value ourselves
+	outData['SPP'] = reoptResults['Financial']['simple_payback_years'] ## TODO: combine these same variables from vbatDispatch as well
+	outData['cumulativeCashflow'] = reoptResults['Financial']['offtaker_annual_free_cashflows'] #list(accumulate(reoptResults['Financial']['offtaker_annual_free_cashflows']))
+	outData['netCashflow'] = reoptResults['Financial']['offtaker_discounted_annual_free_cashflows'] #list(accumulate(reoptResults['Financial']['offtaker_annual_free_cashflows'])) ## or alternatively: offtaker_annual_free_cashflows
+
+	## Calculate adjusted initial investment and simply payback period (SPP)
+	adjusted_initial_investment = reoptResults['Financial']['initial_capital_costs']
+	outData['SPP'] = adjusted_initial_investment / np.sum(outData['netCashflow'])
+
+	## NOTE: temporarily comment out the two derConsumer runs to run the code quicker
+	"""
 	## Scale down the utility demand to create an ad-hoc small consumer load (1 kW average) and large consumer load (10 kW average)
 	utilityLoadAverage = np.average(demand)
 	smallConsumerTargetAverage = 1.0 #Unit: kW
@@ -184,7 +224,7 @@ def work(modelDir, inputDict):
 		'utilityProgram': 'No',
 		'rateCompensation': '0.1', ## unit: $/kWh
 		#'maxBESSDischarge': '0.80', ## Between 0 and 1 (Percent of total BESS capacity) #TODO: Fix the HTML input for this
-		'subsidy': '55',
+		'subsidy': '12',
 	}
 	smallConsumerOutput = derConsumer.work(newDir_smallderConsumer,derConsumerInputDict)
 
@@ -197,50 +237,38 @@ def work(modelDir, inputDict):
 	## Change directory back to derUtilityCost
 	os.chdir(modelDir)
 	outData.update({
-		'savingsSmallConsumer': smallConsumerOutput['savings'],
-		'savingsLargeConsumer': largeConsumerOutput['savings']
+		'TESSsavingsSmallConsumer': smallConsumerOutput['savings'],
+		'TESSsavingsLargeConsumer': largeConsumerOutput['savings']
 	})
+
+	"""
 
 	## DER Overview plot ###################################################################################################################################################################
 	showlegend = True # either enable or disable the legend toggle in the plot
 	grid_to_load = reoptResults['ElectricUtility']['electric_to_load_series_kw']
 
-	if inputDict['PV'] == 'Yes': ## PV
-		PV = reoptResults['PV']['electric_to_load_series_kw']
-	else:
-		PV = np.zeros_like(demand)
-	
-	if inputDict['BESS'] == 'Yes': ## BESS
-		BESS = reoptResults['ElectricStorage']['storage_to_load_series_kw']
-		#BESS = np.ones_like(demand) ## Ad-hoc line used because BESS is not being built in REopt for some reason. Currently debugging 5/2024
-		grid_charging_BESS = reoptResults['ElectricUtility']['electric_to_storage_series_kw']
-		outData['chargeLevelBattery'] = reoptResults['ElectricStorage']['soc_series_fraction']
+	BESS = reoptResults['ElectricStorage']['storage_to_load_series_kw']
+	grid_charging_BESS = reoptResults['ElectricUtility']['electric_to_storage_series_kw']
+	outData['chargeLevelBattery'] = reoptResults['ElectricStorage']['soc_series_fraction']
 
-		## NOTE: The following 3 lines of code are temporary; it reads in the SOC info from a static reopt test file 
-		## For some reason REopt is not producing BESS results so this is a workaround
-		#with open(pJoin(__neoMetaModel__._omfDir,'static','testFiles','utility_reopt_results.json')) as f:
-		#	static_reopt_results = json.load(f)
-		#BESS = static_reopt_results['outputs']['ElectricStorage']['storage_to_load_series_kw']
-		#grid_charging_BESS = static_reopt_results['outputs']['ElectricUtility']['electric_to_storage_series_kw']
-		#outData['chargeLevelBattery'] = static_reopt_results['outputs']['ElectricStorage']['soc_series_fraction']
-		#outData.update(static_reopt_results['outputs'])
-	else:
-		BESS = np.zeros_like(demand)
-		grid_charging_BESS = np.zeros_like(demand)
+	## NOTE: The following 6 lines of code are temporary; it reads in the SOC info from a static REopt test file (a previously completed REopt run) 
+	## This functionality was used when REopt did not produce BESS results, or the results were arrays of zeros.
+	
+	#with open(pJoin(__neoMetaModel__._omfDir,'static','testFiles','utility_reopt_results.json')) as f:
+	#	static_reopt_results = json.load(f)
+	#BESS = static_reopt_results['outputs']['ElectricStorage']['storage_to_load_series_kw']
+	#grid_charging_BESS = static_reopt_results['outputs']['ElectricUtility']['electric_to_storage_series_kw']
+	#outData['chargeLevelBattery'] = static_reopt_results['outputs']['ElectricStorage']['soc_series_fraction']
+	#outData.update(static_reopt_results['outputs'])
 
 	## Create DER overview plot object
 	fig = go.Figure()
-	if inputDict['load_type'] != '0': ## Load type 0 corresponds to the "None" option, which disables this vbatDispatch function
+	if (inputDict['load_type'] != '0') and (int(inputDict['number_devices'])>0): ## Load type 0 corresponds to the "None" option, which disables this vbatDispatch function
 		vbat_discharge_component = np.asarray(vbat_discharge_flipsign)
 		vbat_charge_component = np.asarray(vbat_charge)
-
 	else:
 		vbat_discharge_component = np.zeros_like(demand)
 		vbat_charge_component = np.zeros_like(demand)
-
-	## Define additional load and avoided load
-	additional_load = np.asarray(demand) + np.asarray(grid_charging_BESS) + vbat_charge_component
-	#avoided_load = np.asarray(BESS) + vbat_discharge_component
 
 	## Original load piece (minus any vbat or BESS charging aka 'new/additional loads')
 	fig.add_trace(go.Scatter(x=timestamps,
@@ -251,10 +279,13 @@ def work(modelDir, inputDict):
 						fill='tozeroy',
 						fillcolor='rgba(100,200,210,1)',
 						showlegend=showlegend))
+	## Make original load and its legend name hidden in the plot by default
+	fig.update_traces(legendgroup='Original Load (kW)', visible='legendonly', selector=dict(name='Original Load (kW)')) 
 
 	## Additional load (Charging BESS and vbat)
 	## NOTE: demand is added here for plotting purposes, so that the additional load shows up above the demand curve.
-	## How or if this should be done is still being discussed
+	## How or if this should be done is still being discussed - break out into a separate plot eventually
+	additional_load = np.asarray(demand) + np.asarray(grid_charging_BESS) + vbat_charge_component
 	fig.add_trace(go.Scatter(x=timestamps,
                          y=additional_load,
 						 yaxis='y1',
@@ -266,8 +297,7 @@ def work(modelDir, inputDict):
 	fig.update_traces(fillpattern_shape='.', selector=dict(name='Additional Load (Charging BESS and TESS)'))
 	
 	## Grid serving new load
-	## TODO: Should PV really be in this?
-	grid_serving_new_load = np.asarray(grid_to_load) + np.asarray(grid_charging_BESS)+ vbat_charge_component - vbat_discharge_component + np.asarray(PV)
+	grid_serving_new_load = np.asarray(grid_to_load) + np.asarray(grid_charging_BESS)+ vbat_charge_component - vbat_discharge_component
 	fig.add_trace(go.Scatter(x=timestamps,
                          y=grid_serving_new_load,
 						 yaxis='y1',
@@ -286,53 +316,32 @@ def work(modelDir, inputDict):
 						  name='Average Air Temperature',
 						  showlegend=showlegend 
 						  ))
+	## Make temperature and its legend name hidden in the plot by default
+	fig.update_traces(legendgroup='Average Air Temperature', visible='legendonly', selector=dict(name='Average Air Temperature')) 
 
-	## NOTE: This code hides the demand curve initially when the plot is made, but it can be 
-	## toggled back on by the user by clicking it in the plot legend
-	#fig.add_trace(go.Scatter(x=timestamps, 
-	#				 y=demand,
-	#				 yaxis='y1',
-	#				 mode='lines',
-	#				 line=dict(color='black'),
-	#				 name='Demand',
-	#				 showlegend=showlegend))
-	#fig.update_traces(legendgroup='Demand', visible='legendonly', selector=dict(name='Original Load (kW)')) ## Make demand hidden on plot by default
 
 	## BESS serving load piece
-	if (inputDict['BESS'] == 'Yes'):
-		fig.add_trace(go.Scatter(x=timestamps,
-							y=np.asarray(BESS), # + np.asarray(demand) + vbat_discharge_component,
-							yaxis='y1',
-							mode='none',
-							fill='tozeroy',
-							name='BESS Serving Load (kW)',
-							fillcolor='rgba(0,137,83,1)',
-							showlegend=showlegend))
-		fig.update_traces(fillpattern_shape='/', selector=dict(name='BESS Serving Load (kW)'))
-
-	## PV piece, if enabled
-	if (inputDict['PV'] == 'Yes'):
-		fig.add_trace(go.Scatter(x=timestamps,
-						y=PV,
+	fig.add_trace(go.Scatter(x=timestamps,
+						y=np.asarray(BESS), # + np.asarray(demand) + vbat_discharge_component,
 						yaxis='y1',
 						mode='none',
 						fill='tozeroy',
-						name='PV Serving Load (kW)',
-						fillcolor='rgba(255,246,0,1)',
-						showlegend=showlegend
-						))
-		
+						name='BESS Serving Load (kW)',
+						fillcolor='rgba(0,137,83,1)',
+						showlegend=showlegend))
+	fig.update_traces(fillpattern_shape='/', selector=dict(name='BESS Serving Load (kW)'))
+	
 	##vbatDispatch (TESS) piece
-	#TODO: add enabling/disabling switch here
-	fig.add_trace(go.Scatter(x=timestamps,
-							y=np.asarray(vbat_discharge_flipsign),
-							yaxis='y1',
-							mode='none',
-							fill='tozeroy',
-							fillcolor='rgba(127,0,255,1)',
-							name='TESS Serving Load (kW)',
-							showlegend=showlegend))
-	fig.update_traces(fillpattern_shape='/', selector=dict(name='TESS Serving Load (kW)'))
+	if (inputDict['load_type'] != '0') and (int(inputDict['number_devices'])>0): ## Load type 0 corresponds to the "None" option, which disables this vbatDispatch function
+		fig.add_trace(go.Scatter(x=timestamps,
+								y=np.asarray(vbat_discharge_flipsign),
+								yaxis='y1',
+								mode='none',
+								fill='tozeroy',
+								fillcolor='rgba(127,0,255,1)',
+								name='TESS Serving Load (kW)',
+								showlegend=showlegend))
+		fig.update_traces(fillpattern_shape='/', selector=dict(name='TESS Serving Load (kW)'))
 
 	## Plot layout
 	fig.update_layout(
@@ -363,142 +372,8 @@ def work(modelDir, inputDict):
 	outData['derOverviewData'] = json.dumps(fig.data, cls=plotly.utils.PlotlyJSONEncoder)
 	outData['derOverviewLayout'] = json.dumps(fig.layout, cls=plotly.utils.PlotlyJSONEncoder)
 
-	## Create Thermal Device Temperature plot object ######################################################################################################################################################
-	if inputDict['load_type'] != '0': ## If vbatDispatch is called in the analysis:
-	
-		fig = go.Figure()
-	
-		## It seems like the setpoint (interior temp) is fixed for devices except the water heater.
-		## TODO: If desired, could code this up to extract the interior temperature from the water heater code.
-		## It does not currently seem to output the changing interior temp.
-
-		#if inputDict['load_type'] == '4': ## Water Heater (the only option that evolves interior temperature over time)
-			# Interior Temperature
-			#interior_temp = theta.mean(axis=0) 
-			#theta_s_wh #temperature setpoint (interior)
-			#theta_s_wh +/- deadband 
-
-		fig.add_trace(go.Scatter(x=timestamps,
-							y=temperatures,
-							yaxis='y2',
-							mode='lines',
-							line=dict(color='red',width=1),
-							name='Average Air Temperature',
-							showlegend=showlegend 
-							))
-		
-		upper_bound = np.full_like(demand,float(inputDict['setpoint']) + float(inputDict['deadband'])/2)
-		lower_bound = np.full_like(demand,float(inputDict['setpoint']) - float(inputDict['deadband'])/2)
-		setpoint = np.full_like(demand, float(inputDict['setpoint'])) ## the setpoint is currently a fixed number
-
-		## Plot deadband upper bound
-		fig.add_trace(go.Scatter(
-			x=timestamps,  
-			y=upper_bound, 
-			yaxis='y2',
-			line=dict(color='rgba(0,0,0,1)'), ## color black
-			name='Deadband upper bound',
-			showlegend=True
-		))
-
-		## Plot deadband lower bound
-		fig.add_trace(go.Scatter(
-			x=timestamps, 
-			y=lower_bound,  
-			yaxis='y2',
-			mode='lines',
-			line=dict(color='rgba(0,0,0,0.5)'),  ## color black but half opacity = gray color
-			name='Deadband lower bound',
-			showlegend=True
-		))
-
-		## Plot the setpoint (interior temperature)
-		fig.add_trace(go.Scatter(
-			x=timestamps, 
-			y=setpoint,  
-			yaxis='y2',
-			mode='lines',
-			line=dict(color='rgba(0, 27, 255, 1)'),  ## color blue
-			name='Setpoint',
-			showlegend=True
-		))
-
-
-		## Plot layout
-		fig.update_layout(
-			#title='Residential Data',
-			xaxis=dict(title='Timestamp'),
-			yaxis=dict(title='Power (kW)'),
-			yaxis2=dict(title='degrees Celsius',
-					overlaying='y',
-					side='right'
-					),
-			legend=dict(
-				orientation='h',
-				yanchor='bottom',
-				y=1.02,
-				xanchor='right',
-				x=1
-				)
-		)
-
-		#fig.show()
-		
-		## Encode plot data as JSON for showing in the HTML side
-		outData['thermalDevicePlotData'] = json.dumps(fig.data, cls=plotly.utils.PlotlyJSONEncoder)
-		outData['thermalDevicePlotLayout'] = json.dumps(fig.layout, cls=plotly.utils.PlotlyJSONEncoder)
-
-
-	## Create Thermal Battery Energy plot object ######################################################################################################################################################
-	if inputDict['load_type'] != '0': ## If vbatDispatch is called in the analysis:
-		fig = go.Figure()
-		fig.add_trace(go.Scatter(
-			x=timestamps,
-			y=vbatMinEnergyCapacity,
-			yaxis='y1',
-			mode='lines',
-			line=dict(color='green', width=1),
-			name='Minimum Energy Capacity',
-			showlegend=True 
-			))
-		fig.add_trace(go.Scatter(
-			x=timestamps, 
-			y=vbatMaxEnergyCapacity,  
-			yaxis='y1',
-			mode='lines',
-			line=dict(color='blue', width=1),
-			name='Maximum Energy Capacity',
-			showlegend=True
-		))
-		fig.add_trace(go.Scatter(
-			x=timestamps, 
-			y=vbatEnergy,  
-			yaxis='y1',
-			mode='lines',
-			line=dict(color='black', width=1),
-			name='Actual Energy Capacity',
-			showlegend=True
-		))
-
-		## Plot layout
-		fig.update_layout(
-			xaxis=dict(title='Timestamp'),
-			yaxis=dict(title='Energy (kWh)'),
-			legend=dict(
-				orientation='h',
-				yanchor='bottom',
-				y=1.02,
-				xanchor='right',
-				x=1
-				)
-		)
-		
-		## Encode plot data as JSON for showing in the HTML side
-		outData['thermalBatEnergyPlot'] = json.dumps(fig.data, cls=plotly.utils.PlotlyJSONEncoder)
-		outData['thermalBatEnergyPlotLayout'] = json.dumps(fig.layout, cls=plotly.utils.PlotlyJSONEncoder)
-	
 	## Create Thermal Battery Power plot object ######################################################################################################################################################
-	if inputDict['load_type'] != '0': ## If vbatDispatch is called in the analysis:
+	if (inputDict['load_type'] != '0') and (int(inputDict['number_devices'])>0): ## If vbatDispatch is enabled:		
 		fig = go.Figure()
 		fig.add_trace(go.Scatter(
 			x=timestamps,
@@ -546,124 +421,90 @@ def work(modelDir, inputDict):
 		outData['thermalBatPowerPlotLayout'] = json.dumps(fig.layout, cls=plotly.utils.PlotlyJSONEncoder)	
 	
 
-	## Create Battery State of Charge plot object ######################################################################################################################################################
-	if inputDict['BESS'] == 'Yes':
-		fig = go.Figure()
-
-		fig.add_trace(go.Scatter(x=timestamps,
-							y=outData['chargeLevelBattery'],
-							mode='none',
-							fill='tozeroy',
-							fillcolor='red',
-							name='Battery Charge Level',
-							showlegend=True))
-		fig.update_layout(
-			xaxis=dict(title='Timestamp'),
-			yaxis=dict(title='Charge (%)')
-		)
-
-		outData['batteryChargeData'] = json.dumps(fig.data, cls=plotly.utils.PlotlyJSONEncoder)
-		outData['batteryChargeLayout'] = json.dumps(fig.layout, cls=plotly.utils.PlotlyJSONEncoder)
-
-	## Add REopt resilience plot (adapted from omf/models/microgridDesign.py) ########################################################################################################################
-	#helper function for generating output graphs
-	def makeGridLine(x,y,color,name):
-		plotLine = go.Scatter(
-			x = x, 
-			y = y,
-			line = dict( color=(color)),
-			name = name,
-			hoverlabel = dict(namelength = -1),
-			showlegend=True,
-			stackgroup='one',
-			mode='none'
-		)
-		return plotLine
-	#Set plotly layout ---------------------------------------------------------------
-	plotlyLayout = go.Layout(
-		width=1000,
-		height=375,
+	## Create Chemical BESS State of Charge plot object ######################################################################################################################################################
+	fig = go.Figure()
+	fig.add_trace(go.Scatter(x=timestamps,
+						y=outData['chargeLevelBattery'],
+						mode='none',
+						fill='tozeroy',
+						fillcolor='red',
+						name='Battery SOC',
+						showlegend=True))
+	fig.update_layout(
+		xaxis=dict(title='Timestamp'),
+		yaxis=dict(title='Charge (%)'),
 		legend=dict(
-			x=0,
-			y=1.25,
-			orientation="h")
-		)
-	x = list(range(len(reoptResults['ElectricUtility']['electric_to_load_series_kw'])))
-	plotData = []
-	#x_values = pd.to_datetime(x, unit = 'h', origin = pd.Timestamp(f'{year}-01-01'))
-	x_values = timestamps
-	powerGridToLoad = makeGridLine(x_values,reoptResults['ElectricUtility']['electric_to_load_series_kw'],'blue','Load met by Grid')
-	plotData.append(powerGridToLoad)
-	
-	if (inputDict['outage']): ## TODO: condense this code if possible
-		outData['resilience'] = reoptResultsResilience['resilience_by_time_step']
-		outData['minOutage'] = reoptResultsResilience['resilience_hours_min']
-		outData['maxOutage'] = reoptResultsResilience['resilience_hours_max']
-		outData['avgOutage'] = reoptResultsResilience['resilience_hours_avg']
-		outData['survivalProbX'] = reoptResultsResilience['outage_durations']
-		outData['survivalProbY'] = reoptResultsResilience['probs_of_surviving']
+				orientation='h',
+				yanchor='bottom',
+				y=1.02,
+				xanchor='right',
+				x=1
+				)
+	)
+	outData['batteryChargeData'] = json.dumps(fig.data, cls=plotly.utils.PlotlyJSONEncoder)
+	outData['batteryChargeLayout'] = json.dumps(fig.layout, cls=plotly.utils.PlotlyJSONEncoder)
 
-		plotData = []
-		resilience = go.Scatter(
-			x=x,
-			y=outData['resilience'],
-			line=dict( color=('red') ),
-		)
-		plotData.append(resilience)
-		plotlyLayout['yaxis'].update(title='Longest Outage survived (Hours)')
-		plotlyLayout['xaxis'].update(title='Start Hour')
-		outData['resilienceData'] = json.dumps(plotData, cls=plotly.utils.PlotlyJSONEncoder)
-		outData['resilienceLayout'] = json.dumps(plotlyLayout, cls=plotly.utils.PlotlyJSONEncoder)
-
-		plotData = []
-		survivalProb = go.Scatter(
-			x=outData['survivalProbX'],
-			y=outData['survivalProbY'],
-			line=dict( color=('red') ),
-			name='Probability of Surviving Outage of a Given Duration')
-		plotData.append(survivalProb)
-		plotlyLayout['yaxis'].update(title='Probability of Meeting Critical Load')
-		plotlyLayout['xaxis'].update(title='Outage Length (Hours)')
-		outData['resilienceProbData' ] = json.dumps(plotData, cls=plotly.utils.PlotlyJSONEncoder)
-		outData['resilienceProbLayout'] = json.dumps(plotlyLayout, cls=plotly.utils.PlotlyJSONEncoder)
-
+	"""
 	#####################################################################################################################################################################################################
 	## Compensation rate to member-consumer
 	compensationRate = float(inputDict['rateCompensation'])
-	subsidy = float(inputDict['subsidy'])
+	subsidy = float(inputDict['subsidy']) ## TODO: Amount for the entire analysis - should we divide this up by # of months and add to the monthly consumer savings?
 	electricityCost = float(inputDict['electricityCost'])
 
 	monthHours = [(0, 744), (744, 1416), (1416, 2160), (2160, 2880), 
 					(2880, 3624), (3624, 4344), (4344, 5088), (5088, 5832), 
 					(5832, 6552), (6552, 7296), (7296, 8016), (8016, 8760)]
 	
-	monthlyDemand_smallConsumer = np.asarray([sum(smallConsumerLoad[s:f]) for s, f in monthHours])
-	monthlyDemand_largeConsumer = np.asarray([sum(largeConsumerLoad[s:f]) for s, f in monthHours])
-	monthlyDemandCost_smallConsumer = monthlyDemand_smallConsumer * electricityCost
-	monthlyDemandCost_largeConsumer = monthlyDemand_largeConsumer * electricityCost
+	load_smallConsumer_monthly = np.asarray([sum(smallConsumerLoad[s:f]) for s, f in monthHours])
+	load_largeConsumer_monthly = np.asarray([sum(largeConsumerLoad[s:f]) for s, f in monthHours])
+	loadCost_smallConsumer_monthly = load_smallConsumer_monthly * electricityCost
+	loadCost_largeConsumer_monthly = load_largeConsumer_monthly * electricityCost
 
+	## Check if REopt results include a BESS output that is not an empty list
+	if 'ElectricStorage' in reoptResults and any(reoptResults['ElectricStorage']['storage_to_load_series_kw']):
+		BESS_utility = reoptResults['ElectricStorage']['storage_to_load_series_kw'] ## The BESS that is recommended for the utility
+		BESS_smallConsumer = smallConsumerOutput['ElectricStorage']['storage_to_load_series_kw'] ## A scaled down version of the utility's load to represent a small consumer (1 kWh average load)
+		BESS_largeConsumer = largeConsumerOutput['ElectricStorage']['storage_to_load_series_kw'] ## A scaled down version of the utility's load to represent a large consumer (10 kWh average load)
+		BESS_smallConsumer_monthly = np.asarray([sum(BESS_smallConsumer[s:f]) for s, f in monthHours])
+		BESS_largeConsumer_monthly = np.asarray([sum(BESS_largeConsumer[s:f]) for s, f in monthHours])
+		BESSCost_smallConsumer_monthly = BESS_smallConsumer_monthly * compensationRate
+		BESSCost_largeConsumer_monthly = BESS_largeConsumer_monthly * compensationRate
 
-	BESS_smallConsumer = smallConsumerOutput['ElectricStorage']['storage_to_load_series_kw']
-	BESS_largeConsumer = largeConsumerOutput['ElectricStorage']['storage_to_load_series_kw']
-	monthlyBESS_smallConsumer = np.asarray([sum(BESS_smallConsumer[s:f]) for s, f in monthHours])
-	monthlyBESS_largeConsumer = np.asarray([sum(BESS_largeConsumer[s:f]) for s, f in monthHours])
-	monthlyBESSCost_smallConsumer = monthlyBESS_smallConsumer * compensationRate
-	monthlyBESSCost_largeConsumer = monthlyBESS_largeConsumer * compensationRate
+		## Divide subsidy amount up into the monthly consumer savings
+		subsidy_monthly = np.full(12, subsidy/12)
 
-	print('Small Consumer demand cost w/o BESS: ${:,.2f}'.format(np.sum(monthlyDemandCost_smallConsumer)))
-	print('Small Consumer savings with BESS: ${:,.2f} \n'.format(np.sum(monthlyBESSCost_smallConsumer)))	
-	print('Large Consumer demand cost w/o BESS: ${:,.2f}'.format(np.sum(monthlyDemandCost_largeConsumer)))
-	print('Large Consumer savings with BESS: ${:,.2f}'.format(np.sum(monthlyBESSCost_largeConsumer)))
+		## Add BESS + TESS + subsidy(divided by 12 months) = total savings
+		TESSCost_smallConsumer_monthly = np.asarray(outData['TESSsavingsSmallConsumer'])
+		TESSCost_largeConsumer_monthly = np.asarray(outData['TESSsavingsLargeConsumer'])
+		totalCost_smallConsumer_monthly = TESSCost_smallConsumer_monthly + BESSCost_smallConsumer_monthly + subsidy_monthly
+		totalCost_largeConsumer_monthly = TESSCost_largeConsumer_monthly + BESSCost_largeConsumer_monthly + subsidy_monthly
 
+		## Update the consumer savings output to represent both thermal BESS (vbatDispatch results) and REopt's BESS results
+		outData.update({
+			'totalSavingsSmallConsumer': list(totalCost_smallConsumer_monthly),
+			'totalSavingsLargeConsumer': list(totalCost_largeConsumer_monthly)
+		})
 
-	if 'ElectricStorage' in reoptResults: ## BESS
-		BESS = reoptResults['ElectricStorage']['storage_to_load_series_kw']
-		BESS_compensated_to_consumer = np.sum(BESS)*compensationRate+subsidy
+		## Print some monthly costs/savings for analysis
+		print('Small Consumer consumption cost (w/o BESS): ${:,.2f}'.format(np.sum(loadCost_smallConsumer_monthly)))
+		print('Small Consumer savings for BESS only: ${:,.2f} \n'.format(np.sum(BESSCost_smallConsumer_monthly)))	
+		print('Large Consumer consumption cost (w/o BESS): ${:,.2f}'.format(np.sum(loadCost_largeConsumer_monthly)))
+		print('Large Consumer savings for BESS only: ${:,.2f}'.format(np.sum(BESSCost_largeConsumer_monthly)))
+		BESS_compensated_to_consumer = np.sum(BESS_utility)*compensationRate+subsidy
 		print('--------------------------------------------------------')
-		print('Utility"s total compensation rate for consumer BESS: ${:,.2f}'.format(BESS_compensated_to_consumer))
-		BESS_bought_from_grid = np.sum(BESS) * electricityCost
-		print('Electricity Cost of BESS: ${:,.2f}'.format(BESS_bought_from_grid))
-		print('Difference (electricity cost - compensated cost): ${:,.2f}'.format(BESS_bought_from_grid-BESS_compensated_to_consumer))
+		print('Utility total compensation for consumer BESS ($ annually): ${:,.2f}'.format(BESS_compensated_to_consumer))
+		BESS_bought_from_grid = np.sum(BESS_utility) * electricityCost
+		print('Utility BESS savings (1 year BESS kWh x electricity cost): ${:,.2f}'.format(BESS_bought_from_grid))
+		print('Difference (Utility BESS savings - Compensation to consumers): ${:,.2f}'.format(BESS_bought_from_grid-BESS_compensated_to_consumer))
+
+	"""
+
+	## Calculate total residential BESS capacity and compensation
+	total_kw_residential_BESS = int(inputDict['numberBESS']) * float(inputDict['BESS_kw'])
+	total_kwh_residential_BESS = int(inputDict['numberBESS']) * float(inputDict['BESS_kwh'])
+	rateCompensation = float(inputDict['rateCompensation'])
+	total_residential_BESS_compensation = rateCompensation * np.sum(total_kwh_residential_BESS)
+	BESS = reoptResults['ElectricStorage']['storage_to_load_series_kw']
 
 	# Model operations typically ends here.
 	# Stdout/stderr.
@@ -677,8 +518,6 @@ def new(modelDir):
 		demand_curve = f.read()
 	with open(pJoin(__neoMetaModel__._omfDir,'static','testFiles','utility_CO_2018_temperatures.csv')) as f:
 		temp_curve = f.read()
-	with open(pJoin(__neoMetaModel__._omfDir,'static','testFiles','utility_2018_kW_critical_load.csv')) as f:
-		criticalLoad_curve = f.read()
 
 	defaultInputs = {
 		## OMF inputs:
@@ -696,16 +535,14 @@ def new(modelDir):
 		'tempFileName': 'utility_CO_2018_temperatures.csv',
 		'demandCurve': demand_curve,
 		'tempCurve': temp_curve,
-		'criticalLoadFileName': 'utility_2018_kW_critical_load.csv', ## critical load here = 50% of the daily demand
-		'criticalLoad': criticalLoad_curve,
-		'criticalLoadSwitch': 'Yes',
-		'criticalLoadFactor': '0.50',
-		'PV': 'Yes',
-		'BESS': 'Yes',
-		'generator': 'No',
-		'outage': True,
-		'outage_start_hour': '1836', #Hour 1836 = March 17, 2018, 12pm
-		'outage_duration': '4',
+
+		## Chemical Battery Inputs
+		'numberBESS': '100', ## Number of residential Tesla Powerwall 2 batteries
+		'chemBESSgridcharge': 'Yes',  
+		'installed_cost_per_kw': '20.0', #'300.0', ## (Residential: $1,000-$1,500 per kW, Utility: $300-$700 per kW)
+		'installed_cost_per_kwh': '60.0', #'480.0', ## Cost per kWh reflecting Powerwall’s installed cost (Residential: $400-$900 per kWh, Utility: $200-$400 per kWh)
+		'BESS_kw': '5',
+		'BESS_kwh': '13.5',
 
 		## Financial Inputs
 		'demandChargeURDB': 'Yes',
@@ -715,7 +552,7 @@ def new(modelDir):
 		'subsidy': '100.0',
 
 		## vbatDispatch inputs:
-		'load_type': '2', ## Heat Pump
+		'load_type': '1', ## Air Conditioner
 		'number_devices': '2000',
 		'power': '5.6',
 		'capacitance': '2',

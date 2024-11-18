@@ -674,6 +674,20 @@ def get_subtree_obs(line, tree):
 	sub_obs = [x for x in tree if x.get('object','NO.NO').split('.')[1] in sub_names]
 	return sub_obs
 
+def get_subtree_lines(line, tree):
+	'''Get all lines down-line from the affected line.'''
+	aff_ob = get_obj_by_name(line, tree, cmd='new')
+	# - 2024-10-20: handle case where aff_ob is transformer instead of a line
+	if aff_ob.get('object').startswith('transformer.'):
+		aff_bus = aff_ob.get('buses').strip('[]').split(',')[1].split('.')[0]
+	else:
+		aff_bus = aff_ob.get('bus2').split('.')[0]
+	net = dssConvert.dss_to_networkx(None, tree=tree)
+	sub_tree = dfs_tree(net, aff_bus)
+	sub_names = [tup for tup in sub_tree.edges]
+	sub_lines = [x for x in tree if (x.get('bus1', '').split('.')[0], x.get('bus2', '').split('.')[0]) in sub_names]
+	return sub_lines
+
 def voltagePlot(filePath, PU=True):
 	'''Voltage plotting routine. Creates 'voltages.csv' and 'Voltage [PU|V].png' in directory of input file.'''
 	dssFileLoc = os.path.dirname(os.path.abspath(filePath))

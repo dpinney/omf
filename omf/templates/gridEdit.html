@@ -3148,5 +3148,54 @@ $(function () {
 		if (unsavedChanges) return confirmationMessage;
 	};
 {% endif %}
+
+// Jenny
+//**************************************************
+// Utility Functions from omf.js
+//**************************************************
+
+/**
+ * Deep copy of a given object
+ */
+
+function clone(obj) {
+	if (null == obj || "object" != typeof obj) return obj;
+	var copy = obj.constructor();
+	for (var attr in obj) {
+		if (obj.hasOwnProperty(attr)) copy[attr] = obj[attr];
+	}
+	return copy;
+}
+
+function tableClear(table) {
+	try {
+		while (table.rows.length>0) table.deleteRow(table.rows.length-1)
+	}
+	catch (err) {
+		// Catch: we didn't have any rows.
+	}
+}
+
+/**
+ * Get a Gaussian from a uniform(0,1) via the Box-Muller transform.
+ */
+function randomGaussian() {
+	do {
+		x1 = 2 * Math.random() - 1
+		x2 = 2 * Math.random() - 1
+		rad = x1 * x1 + x2 * x2
+	} while (rad >= 1 || rad == 0)
+	c = Math.sqrt(-2 * Math.log(rad) / rad);
+	return x1 * c
+}
+
+function randomChoice(inList) {
+	return inList[Math.floor(Math.random() * inList.length)]
+}
+
+function randomInt(min,max) {
+	return Math.floor(Math.random()*(max - min + 1) + min)
+}
+
 </script>
 </body>

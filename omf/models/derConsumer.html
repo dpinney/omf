@@ -101,42 +101,6 @@
 					<option value="No" {{ 'selected' if allInputDataDict.generator == 'No' }}>No</option>
 				</select>
 			</div>
-			<!-- TODO: Create switch for outages (if outage, display outage options, otherwise dont)-->
-			<div class="shortInput">
-				<label class="tooltip">Simulate Outage<span class="classic">Run an outage simulation with the following start hour and duration.</span></label>
-				<select id="outage" name="outage" value="{{allInputDataDict.outage}}">
-					<option value="True" {{ 'selected' if allInputDataDict.outage == 'Yes' }}>Yes</option>
-					<option value="False" {{ 'selected' if allInputDataDict.outage == 'No' }}>No</option>
-				</select>
-			</div>
-			<div class="shortInput">
-				<label class="tooltip">Outage Start Hour<span class="classic">The starting hour of the outage. Specify an hour greater than 0 but less than 8760 to trigger optimization for resilience.</span></label>
-				<input type="number" id="outage_start_hour" name="outage_start_hour" value="{{allInputDataDict.outage_start_hour}}" min="0" max="8760" required="required"/>
-			</div>
-			<div class="shortInput">
-				<label class="tooltip">Outage Duration (hours)<span class="classic">The duration (in hours) of the outage. Specify a number between 1 - 8760 hours. </span></label>
-				<input type="number" id="outage_duration" name="outage_duration" value="{{allInputDataDict.outage_duration}}" min="1" max="8760" required="required"/>
-			</div>
-			<div class="shortInput">
-				<label class="tooltip">Critical Load Curve (.csv file)<span class="classic">Critical load profile (.csv) to be used in the outage analysis. Length 8760 in kW units. If critical load factor is given, this file will not be used.</span></label>
-				<input id="criticalLoadFile" type="file" style="display:none" onchange="handle_files(this.files,'criticalLoad','criticalLoadFileName')">
-				<input id="criticalLoad" name="criticalLoad" value="{{allInputDataDict.criticalLoad}}" type="hidden">
-				<div>
-					<label for="criticalLoadFile" class="fileButton">Choose File</label>
-					<input id="criticalLoadFileName" name="criticalLoadFileName" value="{{allInputDataDict.criticalLoadFileName}}" value='' readonly class="uploadFileName">
-				</div>
-			</div>
-			<div class="shortInput">
-				<label class="tooltip">Use Critical Load Factor instead?<span class="classic">Select Yes to use Critical Load Factor instead of the provided Critical Load .csv file.</span></label>
-				<select id="criticalLoadSwitch" name="criticalLoadSwitch" value="{{allInputDataDict.criticalLoadSwitch}}">
-					<option value="True" {{ 'selected' if allInputDataDict.outage == 'Yes' }}>Yes</option>
-					<option value="False" {{ 'selected' if allInputDataDict.outage == 'No' }}>No</option>
-				</select>
-			</div>
-			<div class="shortInput">
-				<label class="tooltip">Critical Load Factor<span class="classic">The fractional percentage of the demand curve representing the critical load that must be met during an outage. Format 0.XX (e.g. 0.50 signifies 50% of the daily demand is the critical load).</span></label>
-				<input type="text" id="criticalLoadFactor" name="criticalLoadFactor" value="{{allInputDataDict.criticalLoadFactor}}" min="0" max="1" pattern="^\d+\.?\d*?$" required="required"/>
-			</div>
 			
 			<!-- Financial Inputs -->
 			<div class="wideInput">
@@ -151,12 +115,141 @@
 				</select>
 			</div>
 			<div class="shortInput">
-				<label class="tooltip">Demand Charge Cost ($/kW)<span class="classic">Demand charge utility pays for peak demand events. Assumed to be calculated based on monthly single highest peak.</span></label>
+				<label class="tooltip">Demand Charge Cost ($/kW)<span class="classic">User defined demand charge that the utility pays per kWh.</span></label>
 				<input type="text" id="demandChargeCost" name="demandChargeCost" value="{{allInputDataDict.demandChargeCost}}" pattern="^\d+\.?\d*?$" required="required">
+			</div>
+			<div class="shortInput">
+				<label class="tooltip">Energy Cost ($/kWh)<span class="classic">Cost of energy bought by the utility. I.e. wholesale (not retail) cost.</span></label>
+				<input type="text" id="electricityCost" name="electricityCost" value="{{allInputDataDict.electricityCost}}" pattern="^\d+\.?\d*?$" required="required">
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Financial Projection Length (years)<span class="classic">Number of years to project out estimated savings. Must be between 1 and 75 years.</span></label>
 				<input type="text" id="projectionLength" name="projectionLength" value="{{allInputDataDict.projectionLength}}" step="1" min="1" max="75" required="required">
+			</div>
+
+			<!-- Chemical BESS Inputs -->
+			<div class="wideInput"> 
+				<p class="inputSectionHeader">Chemical Energy Storage Device Inputs</p>
+			</div>
+			<hr style="border-style: solid; border-color: #196b12; margin-top: 10px;">
+			<div class="shortInput">
+				<label class="tooltip">Number of Home Chemical Batteries<span class="classic">Total number of residential chemical batteries to model.</span></label>
+				<input type="text" id="numberBESS" name="numberBESS" value="{{allInputDataDict.numberBESS}}" required="required">
+			</div>
+			<div class="shortInput">
+				<label class="tooltip">Can grid charge?<span class="classic">Select Yes if the battery can be charged from the grid, otherwise select No.</span></label>
+				<select id="chemBESS" name="chemBESS" value="{{allInputDataDict.chemBESSgridcharge}}"/>
+					<option value="Yes" {{ 'selected' if allInputDataDict.chemBESSgridcharge == 'Yes' }}>Yes</option>
+					<option value="No" {{ 'selected' if allInputDataDict.chemBESSgridcharge == 'No' }}>No</option>
+				</select>
+			</div>
+			<div class="shortInput">
+				<label class="tooltip">Installed Power Cost ($/kW)<span class="classic">Specify the installed cost per kW of the battery.</span></label>
+				<input type="text" id="installed_cost_per_kw" name="installed_cost_per_kw" value="{{allInputDataDict.installed_cost_per_kw}}" pattern="^\d+\.?\d*?$" required="required"/>
+			</div>
+			<div class="shortInput">
+				<label class="tooltip">Battery Minimum Power (kW)<span class="classic">Specify the minimum desired battery power in kW.</span></label>
+				<input type="text" id="min_kw" name="min_kw" value="{{allInputDataDict.min_kw}}" required="required"/>
+			</div>
+			<div class="shortInput">
+				<label class="tooltip">Battery Maximum Power (kW)<span class="classic">Specify the maximum desired battery power in kW.</span></label>
+				<input type="text" id="max_kw" name="max_kw" value="{{allInputDataDict.max_kw}}" required="required"/>
+			</div>
+			<div class="shortInput">
+				<label class="tooltip">Installed Capacity Cost ($/kWh)<span class="classic">Specify the cost in $/kWh.</span></label>
+				<input type="text" id="installed_cost_per_kwh" name="installed_cost_per_kwh" value="{{allInputDataDict.installed_cost_per_kwh}}" pattern="^\d+\.?\d*?$" required="required"/>
+			</div>
+			<div class="shortInput">
+				<label class="tooltip">Battery Minimum Capacity (kWh)<span class="classic">Specify the minimum desired battery capacity in kWh.</span></label>
+				<input type="text" id="min_kwh" name="min_kwh" value="{{allInputDataDict.min_kwh}}" required="required"/>
+			</div>
+			<div class="shortInput">
+				<label class="tooltip">Battery Maximum Capacity (kWh)<span class="classic">Specify the maximum desired battery capacity in kWh.</span></label>
+				<input type="text" id="max_kwh" name="max_kwh" value="{{allInputDataDict.max_kwh}}" required="required"/>
+			</div>
+			<div class="shortInput">
+				<label class="tooltip">Battery MACRS Years<span class="classic">MACRS schedule for financial analysis. Possible inputs are 0, 5 and 7 years.</span></label>
+				<select id="macrs_option_years" name="macrs_option_years" value="{{allInputDataDict.macrs_option_years}}"/>
+					<option value="0" {{ 'selected' if allInputDataDict.batteryMacrsOptionYears == '0' }}>0</option>
+					<option value="5" {{ 'selected' if allInputDataDict.batteryMacrsOptionYears == '5' }}>5</option>
+					<option value="7" {{ 'selected' if allInputDataDict.batteryMacrsOptionYears == '7' }}>7</option>
+				</select>
+			</div>
+			<div class="shortInput">
+				<label class="tooltip">Battery ITC (%)<span class="classic">Please enter a number 0-1 for the battery investment tax credit. Format 0.XX</span></label>
+				<input type="number" id="total_itc_fraction" name="total_itc_fraction" value="{{allInputDataDict.total_itc_fraction}}" step="0.01" min="0.0" max="1.0" required="required"/>
+			</div>
+			<div class="shortInput">
+				<label class="tooltip">Total Rebate ($/kW)<span class="classic"> Total rebate amount per kW of battery power capacity. </span></label>
+				<input type="text" id="total_rebate_per_kw" name="total_rebate_per_kw" value="{{allInputDataDict.total_rebate_per_kw}}" required="required"/>
+			</div>
+			<div class="shortInput">
+				<label class="tooltip">Battery Replacement Power Cost ($/kW)<span class="classic">Specify the cost of replacing the battery inverter at the specified year in $/kW.</span></label>
+				<input type="text" id="replace_cost_per_kw" name="replace_cost_per_kw" value="{{allInputDataDict.replace_cost_per_kw}}" pattern="^\d+\.?\d*?$" required="required"/>
+			</div>
+			<div class="shortInput">
+				<label class="tooltip">Battery Replacement Capacity Cost ($/kWh)<span class="classic">Specify the cost of replacing the battery capacity at the specified year in $/kWh.</span></label>
+				<input type="text" id="replace_cost_per_kwh" name="replace_cost_per_kwh" value="{{allInputDataDict.replace_cost_per_kwh}}" pattern="^\d+\.?\d*?$" required="required"/>
+			</div>
+			<div class="shortInput">
+				<label class="tooltip">Battery Inverter Replacement (years)<span class="classic">Specify a year in which the battery inverter will be replaced at the cost specified in Battery Replacement Power Cost. Input is an integer less than or equal to the analysis period in years.</span></label>
+				<input type="text" id="inverter_replacement_year" name="inverter_replacement_year" value="{{allInputDataDict.inverter_replacement_year}}" required="required"/>
+			</div>
+				<div class="shortInput">
+				<label class="tooltip">Battery Replacement (years)<span class="classic">Specify a year in which the battery cells will be replaced at the cost specified in Battery Replacement Capacity Cost. Input is an integer less than or equal to the analysis period in years.</span></label>
+				<input type="text" id="battery_replacement_year" name="battery_replacement_year" value="{{allInputDataDict.battery_replacement_year}}" required="required"/>
+			</div>
+
+			<!-- Photovoltaic Inputs -->
+			<div class="wideInput"> 
+				<p class="inputSectionHeader">Photovoltaic Device Inputs</p>
+			</div>
+			<hr style="border-style: solid; border-color: #196b12; margin-top: 10px;">
+			<div class="shortInput solarDisplayInput">
+				<label class="tooltip">Existing photovoltaic size (kW)<span class="classic">Specify the total capacity of any pre-existing photovoltaic installation in kW.</span></label>
+				<input type="text" id="existing_kw_PV" name="existing_kw_PV" value="{{allInputDataDict.existing_kw_PV}}" required="required"/>
+			</div>
+			<div class="shortInput">
+				<label class="tooltip">Additional Utility-Installed PV Size (kW)<span class="classic">Specify the additional desired photovoltaic size amount in kW.</span></label>
+				<input type="text" id="additional_kw_PV" name="additional_kw_PV" value="{{allInputDataDict.additional_kw_PV}}" required="required"/>
+			</div>
+			<div class="shortInput">
+				<label class="tooltip">Photovoltaic Cost ($/kW)<span class="classic">Specify the cost in $/kW.</span></label>
+				<input type="text" id="costPV" name="costPV" value="{{allInputDataDict.costPV}}" pattern="^\d+\.?\d*?$" required="required"/>
+			</div>
+			<div class="shortInput">
+				<label class="tooltip">Photovoltaic Minimum Power (kW)<span class="classic">Specify the minimum desired photovoltaic generation in kW.</span></label>
+				<input type="text" id="min_kw_PV" name="min_kw_PV" value="{{allInputDataDict.min_kw_PV}}" required="required"/>
+			</div>
+			<div class="shortInput">
+				<label class="tooltip">Photovoltaic Maximum Power (kW)<span class="classic">Specify the maximum desired generation in kW.</span></label>
+				<input type="text" id="max_kw_PV" name="max_kw_PV" value="{{allInputDataDict.max_kw_PV}}" required="required"/>
+			</div>
+			<div class="shortInput">
+				<label class="tooltip">Can photovoltaic be curtailed?<span class="classic">Allows for excess photovoltaic power to be automatically curtailed.</span></label>
+				<select id="PVCanCurtail" name="PVCanCurtail">
+					<option value='True' {{ 'selected' if allInputDataDict.PVCanCurtail == True }}>Yes</option>
+					<option value='False' {{ 'selected' if allInputDataDict.PVCanCurtail == False }}>No</option>
+				</select>
+			</div>
+			<div class="shortInput">
+				<label class="tooltip">Can photovoltaic be exported?<span class="classic">Allows for excess photovoltaic power to be sold back to the grid.</span></label>
+				<select id="PVCanExport" name="PVCanExport">
+					<option value='True' {{ 'selected' if allInputDataDict.PVCanExport == True }}>Yes</option>
+					<option value='False' {{ 'selected' if allInputDataDict.PVCanExport == False }}>No</option>
+				</select>
+			</div>
+			<div class="shortInput">
+				<label class="tooltip">Photovoltaic MACRS Years<span class="classic">MACRS schedule for financial analysis. Possible inputs are 0, 5 and 7 years.</span></label>
+				<select id="PVMacrsOptionYears" name="PVMacrsOptionYears" value="{{allInputDataDict.PVMacrsOptionYears}}"/>
+					<option value="0" {{ 'selected' if allInputDataDict.PVMacrsOptionYears == '0' }}>0</option>
+					<option value="5" {{ 'selected' if allInputDataDict.PVMacrsOptionYears == '5' }}>5</option>
+					<option value="7" {{ 'selected' if allInputDataDict.PVMacrsOptionYears == '7' }}>7</option>
+				</select>
+			</div>
+			<div class="shortInput">
+				<label class="tooltip">Photovoltaic ITC (%)<span class="classic">Please enter a number 0-1 for the photovoltaic investment tax credit. Format 0.XX</span></label>
+				<input type="number" id="PVItcPercent" name="PVItcPercent" value="{{allInputDataDict.PVItcPercent}}" step="0.01" min="0.0" max="1.0" required="required"/>
 			</div>
 
 			<!-- vbatDispatch Specific Inputs -->
@@ -245,10 +338,6 @@
 				<input type="text" id="unitUpkeepCost" name="unitUpkeepCost" value="{{allInputDataDict.unitUpkeepCost}}" pattern="^\d+\.?\d*?$" required="required">
 			</div>
 			<div class="shortInput">
-				<label class="tooltip">Energy Cost ($/kWh)<span class="classic">Cost of energy bought by the utility. I.e. wholesale (not retail) cost.</span></label>
-				<input type="text" id="electricityCost" name="electricityCost" value="{{allInputDataDict.electricityCost}}" pattern="^\d+\.?\d*?$" required="required">
-			</div>
-			<div class="shortInput">
 				<label class="tooltip">Discount Rate (%)<span class="classic">Discount rate used in financial analysis.</span></label>
 				<input type="text" id="discountRate" name="discountRate" value="{{allInputDataDict.discountRate}}" pattern="[1-9][0-9]{0,2}" required="required">
 			</div>
@@ -258,6 +347,7 @@
 				<p class="inputSectionHeader">Distributed Energy Resource (DER) Program Design Inputs</p>
 			</div>
 			<hr style="border-style: solid; border-color: #196b12; margin-top: 10px;">
+			<!-- 
 			<div class="shortInput">
 				<label class="tooltip">Enable DER sharing program<span class="classic">Enabling DER sharing program will perform a cost-benefit analysis of a utility's DER sharing program.</span></label>
 				<select id="utilityProgram" name="utilityProgram" value="{{allInputDataDict.utilityProgram}}">
@@ -265,6 +355,7 @@
 					<option value="False" {{ 'selected' if allInputDataDict.utilityProgram == 'No' }}>No</option>
 				</select>
 			</div>
+			-->
 			<div class="shortInput">
 				<label class="tooltip">Energy Compensation Rate ($/kWh)<span class="classic">The dollar amount per kWh compensated to the member-consumer.</span></label>
 				<input type="text" id="rateCompensation" name="rateCompensation" value="{{allInputDataDict.rateCompensation}}" pattern="^\d+\.?\d*?$" min="0" required="required"/>
@@ -302,12 +393,6 @@
 
 		<p class="reportTitle" style="page-break-before:always">Exported Power Overview (using REopt)</p>
 		<div id="exportedPowerData" class="tightContent" style="width: 1000px; height: 600px;"></div>
-
-		<p class="reportTitle" style="page-break-before:always">Resilience Overview</p>
-		<div id="resiliencePlotly" class="tightContent"></div>
-					
-		<p class="reportTitle" style="page-break-before:always">Outage Survival Probability</p>
-		<div id="resilienceProbPlotly" class="tightContent"></div>
 
 		<p class="reportTitle">Monthly Cost Comparison</p>
 		<div id="levelizedCostReport" class="tightContent">

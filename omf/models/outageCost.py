@@ -760,33 +760,41 @@ def stats(mc, sustainedOutageThresholdSeconds, numberOfCustomers):
 	''' calculate reliability metrics: SAIDI, SAIFI, CAIDI, MAIFI, ASAI. '''
 	customerInterruptionDurations = 0.0
 	numberOfCustomers = int(numberOfCustomers)
-	row = 0
-	row_count_mc = mc.shape[0]
 	customersAffected = 0
 	customersAffectedMomentary = 0.0	
-	parse_row_date = lambda row,col_name: datetime_to_float(datetime.datetime.strptime(mc.loc[row, col_name], '%Y-%m-%d %H:%M:%S'))
 	# number of years in dataset
 	years = set([x.year for x in pd.to_datetime(mc['Start']).dt.date])
 	count_years = len(years)
-	while row < row_count_mc:
-		out_end_time = parse_row_date(row, 'Finish')
-		out_start_time = parse_row_date(row, 'Start')
-		out_duration = out_end_time - out_start_time
-		entry = str(mc.loc[row, 'Meters Affected'])
-		meters = entry.split()
-		meter_count = len(meters)
-		if out_duration > int(sustainedOutageThresholdSeconds):
-			customerInterruptionDurations += (out_duration * meter_count) / 60
-			customersAffected += meter_count
-		else:
-			customersAffectedMomentary += meter_count
-		row += 1
+
+	def parse_row(series):
+		nonlocal customerInterruptionDurations
+		nonlocal customersAffected
+		nonlocal customersAffectedMomentary
+		end = pd.to_datetime(series['Finish'])
+		start = pd.to_datetime(series['Start'])
+		outage_duration = end - start
+		# - If the outage didn't affect any meters, then don't count it
+		if not pd.isna(series['Meters Affected']):
+			meter_count = len(series['Meters Affected'].split())
+			if outage_duration.total_seconds() > int(sustainedOutageThresholdSeconds):
+				customerInterruptionDurations += (outage_duration.total_seconds() * meter_count) / 60
+				customersAffected += meter_count
+			else:
+				customersAffectedMomentary += meter_count
+
+	mc.apply(parse_row, axis=1)
 	# Calc stats
-	SAIDI = round((customerInterruptionDurations / numberOfCustomers)/count_years, 5)
-	SAIFI = round((customersAffected / numberOfCustomers)/count_years, 5)
-	CAIDI = (0 if SAIDI == 0 else round(SAIDI / SAIFI, 5))
-	ASAI = round((numberOfCustomers * 8760 * count_years * 60 - customerInterruptionDurations) / (numberOfCustomers * count_years * 8760 * 60), 5)
-	MAIFI = round((customersAffectedMomentary / numberOfCustomers)/count_years, 5)
+	SAIDI = 0
+	SAIFI = 0
+	CAIDI = 0
+	ASAI = 0
+	MAIFI = 0
+	if count_years > 0:
+		SAIDI = round((customerInterruptionDurations / numberOfCustomers)/count_years, 5)
+		SAIFI = round((customersAffected / numberOfCustomers)/count_years, 5)
+		CAIDI = (0 if SAIDI == 0 else round(SAIDI / SAIFI, 5))
+		ASAI = round((numberOfCustomers * 8760 * count_years * 60 - customerInterruptionDurations) / (numberOfCustomers * count_years * 8760 * 60), 5)
+		MAIFI = round((customersAffectedMomentary / numberOfCustomers)/count_years, 5)
 	# And return
 	return SAIDI, SAIFI, CAIDI, ASAI, MAIFI
 

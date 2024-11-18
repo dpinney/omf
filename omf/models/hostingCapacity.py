@@ -140,7 +140,8 @@ def run_ami_algorithm( modelDir, inputDict, outData ):
 		raise Exception(errorMessage)
 	AMI_end_time = time.time()
 
-	AMI_results = AMI_output[0].rename(columns={'kW_hostable': 'voltage_cap_kW'})
+	AMI_results = pd.read_csv( outputPath )
+	AMI_results.rename(columns={'kw_hostable': 'voltage_cap_kW'}, inplace=True)
 	histogramFigure = px.histogram( AMI_results, x='voltage_cap_kW', template="simple_white", color_discrete_sequence=["MediumPurple"] )
 	histogramFigure.update_layout(bargap=0.5)
 	# TBD - Needs to be modified when the MoHCA algorithm supports calculating thermal hosting capacity

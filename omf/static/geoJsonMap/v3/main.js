@@ -284,7 +284,9 @@ function addCustomRadioControl(controller) {
     radio.checked = true;
     radio.value = 'displayCircuit';
     radio.addEventListener('change', function() {
-        LeafletLayer.resetLayerGroups(controller);
+        // - 2024-11-10: disabled show/hide search results and replaced it with highlight/un-highlight search results
+        //LeafletLayer.resetLayerGroups(controller);
+        SearchModal.searchModal.removeHighlights();
     });
     outerSpan.append(radio);
     let innerSpan = document.createElement('span');
@@ -300,11 +302,13 @@ function addCustomRadioControl(controller) {
     radio.name = 'circuitDisplay';
     radio.value = 'displaySearch';
     radio.addEventListener('change', function() {
-        SearchModal.searchModal.filterLayerGroups();
+        // - 2024-11-10: disabled show/hide search results and replaced it with highlight/un-highlight search results
+        //SearchModal.searchModal.filterLayerGroups();
+        SearchModal.searchModal.addHighlights();
     });
     outerSpan.append(radio);
     innerSpan = document.createElement('span');
-    innerSpan.textContent = 'Display search results'
+    innerSpan.textContent = 'Highlight search results'
     outerSpan.append(innerSpan);
 }
 
