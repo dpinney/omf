@@ -47,10 +47,8 @@ def hosting_cap(
         input_data[numeric_col] = pd.to_numeric(input_data[numeric_col])
 
     # ensure datetime column
+    # TODO: handle daylight savings from local time input
     input_data['datetime'] = pd.to_datetime(input_data['datetime'], utc=True)
-    # NOTE: There is a bug in pandas that provides error in the CI test for
-    # using astype
-    # 20241004 - unsure if the above note is still relavent.
 
     # Identify unique buses
     unique_buses = input_data['busname'].unique()  # list of buses/customers
@@ -74,9 +72,13 @@ def hosting_cap(
         # modify data for algorithm
         # sign convention: negative for load, positive for PV injections
         df_edit['datetime'] = single_bus['datetime']
-        df_edit['P'] = -1 * single_bus['kw_reading']
-        df_edit['Q'] = -1 * single_bus['kvar_reading']
         df_edit['V'] = single_bus['v_reading']
+        df_edit['P'] = -1 * single_bus['kw_reading']
+
+        # TODO account for no Q branch
+        # has_input_q = check_input_q(single_bus)
+        # if has_input_q:
+        df_edit['Q'] = -1 * single_bus['kvar_reading']
 
         # check for and correct inconsisent index
         try:
@@ -106,14 +108,14 @@ def hosting_cap(
         # check for held data
         held_mask = get_held_value_mask(df_edit)
 
-        # Identify v_base
-        v_mask = abs(df_edit['V'] - 120) < abs(df_edit['V'] - 240)
-        df_edit.loc[v_mask, 'v_base'] = 120
-        df_edit.loc[~v_mask, 'v_base'] = 240
-        # TODO voltage PU range +/- 0.2 only
-        # voltage mask = get_voltage_range_mask
+        # check voltage range
+        # NOTE: v_base and vpu stored in df_edit in case useful later
+        df_edit['v_base'] = get_v_base(df_edit)
+        df_edit['vpu'] = get_vpu(df_edit)
+        bad_voltage_mask = get_bad_voltage_mask(df_edit)
 
-        bad_data_mask = nan_mask | held_mask  # | voltage_range_mask
+        # combine bad data masks
+        bad_data_mask = nan_mask | held_mask | bad_voltage_mask
 
         # create error blocks (for length checks)
         error_blocks = get_error_blocks(bad_data_mask)
@@ -124,8 +126,10 @@ def hosting_cap(
             error_blocks
         )
 
-        single_fix_report['busname'] = bus_name
-        fix_reports.append(single_fix_report)
+        # ignore empty fix reports
+        if len(single_fix_report) > 0:
+            single_fix_report['busname'] = bus_name
+            fix_reports.append(single_fix_report)
 
         # count n of np.nan (for data quality check)
         remaining_bad_data_mask = get_nan_mask(fixed_data)
@@ -192,6 +196,7 @@ def hosting_cap(
             clean_df.p_diff < -abs(clean_df.p_diff).quantile(.25))
 
         # only large changes in PF (larger than 10th quantile)
+        # TODO: account for no q
         filter_2 = (
             clean_df.pf_diff > abs(clean_df.pf_diff).quantile(.10)) \
             | (
@@ -206,7 +211,7 @@ def hosting_cap(
             & filter_2
 
         # linear fit (bias term included)
-        filtered_pq = pd.concat(
+        filtered_powers = pd.concat(
             [
                 clean_df.p_diff[filter_3],
                 clean_df.q_diff[filter_3]
@@ -218,7 +223,7 @@ def hosting_cap(
         f_pq = linear_model.LinearRegression(fit_intercept=False)
 
         # linear fit (V = p00 + p10*P + p01*Q)
-        f_pq.fit(filtered_pq, filtered_v_dif)
+        f_pq.fit(filtered_powers, filtered_v_dif)
 
         # TODO: ensure the sigma_final coeefficient still reflects the
         # real power coeefficient after 'fit_intercept' was set to false.
@@ -252,20 +257,21 @@ def hosting_cap(
     # Output CSV File of Results
     hc_results.to_csv(output_csv_path, index=False)
 
-    # handle full fix report
-    fix_report_df = pd.concat(fix_reports, ignore_index=True)
-    fix_report_df = fix_report_df[[
-        'busname',
-        'start_ndx',
-        'duration',
-        'end_ndx',
-        'action'
-    ]]
-
-    # NOTE: printing report temporary solution
+    # NOTE: printing of fix report 'temporary' solution
     print('')
-    print('Data Fix Report')
-    print(fix_report_df)
+    if len(fix_reports) > 0:
+        fix_report_df = pd.concat(fix_reports, ignore_index=True)
+        fix_report_df = fix_report_df[[
+            'busname',
+            'start_ndx',
+            'duration',
+            'end_ndx',
+            'action'
+        ]]
+        print('* Data Fix Report')
+        print(fix_report_df)
+    else:
+        fix_report_df = '* No Data Fixes Executed'
 
     print(f"HC calculated for: {n_hc_est}\nSkipped: {n_skipped}")
 
@@ -377,6 +383,7 @@ def get_held_value_mask(
     """
     mask = pd.Series(data=False, index=df.index)
     columns_to_check = ['P', 'Q', 'V']
+    columns_to_check = [x for x in columns_to_check if x in df.columns]
 
     for column_name in columns_to_check:
         column_data = df[column_name]
@@ -440,6 +447,34 @@ def get_error_blocks(bad_data_mask):
     return error_blocks
 
 
+def get_v_base(df_edit):
+    """
+    identify voltage base as either 120 or 240
+    """
+    v_mask = abs(df_edit['V'] - 120) < abs(df_edit['V'] - 240)
+    df_edit.loc[v_mask, 'v_base'] = 120
+    df_edit.loc[~v_mask, 'v_base'] = 240
+    return df_edit['v_base']
+
+
+def get_vpu(df_edit):
+    """
+    Calculate per unit voltage based
+    """
+    df_edit['vpu'] = df_edit['V'] / df_edit['v_base']
+    return df_edit['vpu']
+
+
+def get_bad_voltage_mask(df_edit, pu_threshold=0.2):
+    """
+    return mask of voltages outside give per-unit threshold
+    """
+    high_voltage = df_edit['vpu'] >= (1 + pu_threshold)
+    low_voltage = df_edit['vpu'] <= (1 - pu_threshold)
+    bad_voltage_mask = high_voltage | low_voltage
+    return bad_voltage_mask
+
+
 def fix_by_interpolation(df, error_block, kind='linear'):
     """
     interpolate missing values based on known data
@@ -453,6 +488,7 @@ def fix_by_interpolation(df, error_block, kind='linear'):
 
     # only interpolate data columns
     columns_to_nan = ['P', 'Q', 'V']
+    columns_to_nan = [x for x in columns_to_nan if x in df.columns]
     for col in columns_to_nan:
         data_to_interpolate = df.loc[adj_start:end_ndx, col].copy()
         data_to_interpolate.loc[start_ndx:end_ndx-1] = np.nan
@@ -469,6 +505,7 @@ def replace_with_nan(df, error_block, replacement_data=np.nan):
     end_ndx = error_block['end_ndx'] - 1  # to accomodate for inclusive slice
 
     columns_to_nan = ['P', 'Q', 'V']
+    columns_to_nan = [x for x in columns_to_nan if x in df.columns]
     for col in columns_to_nan:
         df.loc[start_ndx:end_ndx, col] = replacement_data
 
