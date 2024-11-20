@@ -285,37 +285,41 @@ def work(modelDir, inputDict):
 	## Additional load (Charging BESS and vbat)
 	## NOTE: demand is added here for plotting purposes, so that the additional load shows up above the demand curve.
 	## How or if this should be done is still being discussed - break out into a separate plot eventually
-	additional_load = np.asarray(demand) + np.asarray(grid_charging_BESS) + vbat_charge_component
-	fig.add_trace(go.Scatter(x=timestamps,
-                         y=additional_load,
-						 yaxis='y1',
-                         mode='none',
-                         name='Additional Load (Charging BESS and TESS)',
-                         fill='tonexty',
-                         fillcolor='rgba(175,0,42,0)',
-						 showlegend=showlegend))
-	fig.update_traces(fillpattern_shape='.', selector=dict(name='Additional Load (Charging BESS and TESS)'))
 	
+	## Commented out the below because we are changing the "additional load" area fill to be instead reflected as "BESS Charging (additional load)" and "TESS Charging (additional load)"
+	#additional_load = np.asarray(demand) + np.asarray(grid_charging_BESS) + vbat_charge_component
+	#fig.add_trace(go.Scatter(x=timestamps,
+    #                     y=additional_load,
+	#					 yaxis='y1',
+    #                     mode='none',
+    #                     name='Additional Load (Charging BESS and TESS)',
+    #                     fill='tonexty',
+    #                     fillcolor='rgba(175,0,42,0)',
+	#					 showlegend=showlegend))
+	#fig.update_traces(fillpattern_shape='.', selector=dict(name='Additional Load (Charging BESS and TESS)'))
+	
+
 	## Grid serving new load
 	grid_serving_new_load = np.asarray(grid_to_load) + np.asarray(grid_charging_BESS)+ vbat_charge_component - vbat_discharge_component
 	fig.add_trace(go.Scatter(x=timestamps,
-                         y=grid_serving_new_load,
-						 yaxis='y1',
-                         mode='none',
-                         fill='tozeroy',
-                         name='Grid Serving Load (kW)',
-                         fillcolor='rgba(192,192,192,1)',
-						 showlegend=showlegend))
+                        y=grid_serving_new_load,
+						yaxis='y1',
+                        #mode='none',
+                        #fill='tozeroy',
+                        name='Grid Serving Load (kW)',
+                        line=dict(color='rgba(192,192,192,1)', width=1),
+						stackgroup='one',
+						showlegend=showlegend))
 	
 	## Temperature line on a secondary y-axis (defined in the plot layout)
 	fig.add_trace(go.Scatter(x=timestamps,
-						  y=temperatures,
-						  yaxis='y2',
-						  mode='lines',
-						  line=dict(color='red',width=1),
-						  name='Average Air Temperature',
-						  showlegend=showlegend 
-						  ))
+						y=temperatures,
+						yaxis='y2',
+						#mode='lines',
+						line=dict(color='red',width=1),
+						name='Average Air Temperature',
+						showlegend=showlegend 
+						))
 	## Make temperature and its legend name hidden in the plot by default
 	fig.update_traces(legendgroup='Average Air Temperature', visible='legendonly', selector=dict(name='Average Air Temperature')) 
 
@@ -324,24 +328,48 @@ def work(modelDir, inputDict):
 	fig.add_trace(go.Scatter(x=timestamps,
 						y=np.asarray(BESS), # + np.asarray(demand) + vbat_discharge_component,
 						yaxis='y1',
-						mode='none',
-						fill='tozeroy',
+						#mode='none',
+						#fill='tozeroy',
 						name='BESS Serving Load (kW)',
-						fillcolor='rgba(0,137,83,1)',
+						line=dict(color='rgba(0,137,83,1)', width=1),
+						stackgroup='one',
 						showlegend=showlegend))
-	fig.update_traces(fillpattern_shape='/', selector=dict(name='BESS Serving Load (kW)'))
+	fig.update_traces(selector=dict(name='BESS Serving Load (kW)'))
+
+	fig.add_trace(go.Scatter(x=timestamps,
+                        y=np.asarray(grid_charging_BESS),
+						yaxis='y1',
+                        #mode='none',
+                        name='Additional Load from BESS',
+                        #fill='tozeroy',
+                        line=dict(color='rgba(118,196,165,1)', width=1),
+						stackgroup='one',
+						showlegend=showlegend))
+	fig.update_traces(selector=dict(name='BESS Charging'))
 	
 	##vbatDispatch (TESS) piece
 	if (inputDict['load_type'] != '0') and (int(inputDict['number_devices'])>0): ## Load type 0 corresponds to the "None" option, which disables this vbatDispatch function
 		fig.add_trace(go.Scatter(x=timestamps,
-								y=np.asarray(vbat_discharge_flipsign),
-								yaxis='y1',
-								mode='none',
-								fill='tozeroy',
-								fillcolor='rgba(127,0,255,1)',
-								name='TESS Serving Load (kW)',
-								showlegend=showlegend))
-		fig.update_traces(fillpattern_shape='/', selector=dict(name='TESS Serving Load (kW)'))
+							y=np.asarray(vbat_discharge_flipsign),
+							yaxis='y1',
+							#mode='none',
+							#fill='tozeroy',
+							line=dict(color='rgba(127,0,255,1)', width=1),
+							name='TESS Serving Load (kW)',
+							stackgroup='one',
+							showlegend=showlegend))
+		fig.update_traces(selector=dict(name='TESS Serving Load (kW)'))
+
+		fig.add_trace(go.Scatter(x=timestamps,
+    	                    y=vbat_charge_component,
+							yaxis='y1',
+            	            #mode='none',
+                	        name='Additional load from TESS',
+                    	    #fill='tozeroy',
+                        	line=dict(color='rgba(207,158,255,1)', width=1),
+							stackgroup='one',
+							showlegend=showlegend))
+		fig.update_traces(selector=dict(name='TESS Charging'))
 
 	## Plot layout
 	fig.update_layout(
