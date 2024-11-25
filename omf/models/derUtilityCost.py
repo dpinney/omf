@@ -343,7 +343,6 @@ def work(modelDir, inputDict):
 	## Make temperature and its legend name hidden in the plot by default
 	fig.update_traces(legendgroup='Average Air Temperature', visible='legendonly', selector=dict(name='Average Air Temperature')) 
 
-
 	## BESS serving load piece
 	fig.add_trace(go.Scatter(x=timestamps,
 						y = BESS, # + np.asarray(demand) + vbat_discharge_component,
@@ -354,7 +353,6 @@ def work(modelDir, inputDict):
 						line=dict(color='rgba(0,137,83,1)', width=1),
 						stackgroup='one',
 						showlegend=showlegend))
-	fig.update_traces(selector=dict(name='BESS Serving Load (kW)'))
 
 	fig.add_trace(go.Scatter(x=timestamps,
                         y=np.asarray(grid_charging_BESS),
@@ -365,19 +363,29 @@ def work(modelDir, inputDict):
                         line=dict(color='rgba(118,196,165,1)', width=1),
 						stackgroup='one',
 						showlegend=showlegend))
-	fig.update_traces(selector=dict(name='BESS Charging'))
 	
 	##vbatDispatch (TESS) piece
 	if (inputDict['load_type'] != '0') and (int(inputDict['number_devices'])>0): ## Load type 0 corresponds to the "None" option, which disables this vbatDispatch function
 		fig.add_trace(go.Scatter(x=timestamps,
-								y = vbat_discharge_component,
-								yaxis='y1',
-								mode='none',
-								fill='tozeroy',
-								fillcolor='rgba(127,0,255,1)',
-								name='TESS Serving Load',
-								showlegend=showlegend))
-		fig.update_traces(fillpattern_shape='/', selector=dict(name='TESS Serving Load'))
+							y = vbat_discharge_component,
+							yaxis='y1',
+							#mode='none',
+							#fill='tozeroy',
+							fillcolor='rgba(127,0,255,1)',
+							name='TESS Serving Load',
+							line=dict(color='rgba(127,0,255,1)', width=1),
+							stackgroup='one',
+							showlegend=showlegend))
+		
+		fig.add_trace(go.Scatter(x=timestamps,
+    	                    y = vbat_charge_component,
+							yaxis='y1',
+            	            #mode='none',
+                	        name='Additional load from TESS',
+                    	    #fill='tozeroy',
+                        	line=dict(color='rgba(207,158,255,1)', width=1),
+							stackgroup='one',
+							showlegend=showlegend))
 
 	## Fossil Generator piece
 	if 'Generator' in reoptResults:
@@ -389,26 +397,6 @@ def work(modelDir, inputDict):
 						fillcolor='rgba(153,0,0,1)',
 						name='Fossil Generator Serving Load',
 						showlegend=showlegend))
-							y=np.asarray(vbat_discharge_flipsign),
-							yaxis='y1',
-							#mode='none',
-							#fill='tozeroy',
-							line=dict(color='rgba(127,0,255,1)', width=1),
-							name='TESS Serving Load (kW)',
-							stackgroup='one',
-							showlegend=showlegend))
-		fig.update_traces(selector=dict(name='TESS Serving Load (kW)'))
-
-		fig.add_trace(go.Scatter(x=timestamps,
-    	                    y=vbat_charge_component,
-							yaxis='y1',
-            	            #mode='none',
-                	        name='Additional load from TESS',
-                    	    #fill='tozeroy',
-                        	line=dict(color='rgba(207,158,255,1)', width=1),
-							stackgroup='one',
-							showlegend=showlegend))
-		fig.update_traces(selector=dict(name='TESS Charging'))
 
 	## Plot layout
 	fig.update_layout(
