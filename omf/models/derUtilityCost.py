@@ -73,7 +73,6 @@ def work(modelDir, inputDict):
 			'only_runs_during_grid_outage': False,
 		}
 
-
 	## Add a Battery Energy Storage System (BESS) section if enabled 
 	if inputDict['chemBESSgridcharge'] == 'Yes':
 		can_grid_charge_bool = True
@@ -82,10 +81,10 @@ def work(modelDir, inputDict):
 
 	scenario['ElectricStorage'] = {
 		##TODO: Add options here, if needed
-		'min_kw': float(inputDict['BESS_kw']),
-		'max_kw':  float(inputDict['BESS_kw']),
-		'min_kwh':  float(inputDict['BESS_kwh']),
-		'max_kwh':  float(inputDict['BESS_kwh']),
+		'min_kw': float(inputDict['BESS_kw'])*float(inputDict['numberBESS']),
+		'max_kw':  float(inputDict['BESS_kw'])*float(inputDict['numberBESS']),
+		'min_kwh':  float(inputDict['BESS_kwh'])*float(inputDict['numberBESS']),
+		'max_kwh':  float(inputDict['BESS_kwh'])*float(inputDict['numberBESS']),
 		'can_grid_charge': can_grid_charge_bool,
 		'total_rebate_per_kw': 0,
 		'macrs_option_years': 0,
@@ -145,16 +144,8 @@ def work(modelDir, inputDict):
 		vbatMaxPowerCapacity = pd.Series(vbatResults['maxPowerSeries'])
 		vbatPower = vbpower_series
 
-	## Update the financial cost ouput to include REopt BESS 
-	## TODO: combine these with the same variables from vbatDispatch. Currently this just replaces the vbatDispatch variables.
-	outData['NPV'] = reoptResults['Financial']['npv'] ## Calculate this value ourselves
-	outData['SPP'] = reoptResults['Financial']['simple_payback_years'] ## TODO: combine these same variables from vbatDispatch as well
-	outData['cumulativeCashflow'] = reoptResults['Financial']['offtaker_annual_free_cashflows'] #list(accumulate(reoptResults['Financial']['offtaker_annual_free_cashflows']))
-	outData['netCashflow'] = reoptResults['Financial']['offtaker_discounted_annual_free_cashflows'] #list(accumulate(reoptResults['Financial']['offtaker_annual_free_cashflows'])) ## or alternatively: offtaker_annual_free_cashflows
-
-	## Calculate adjusted initial investment and simply payback period (SPP)
-	adjusted_initial_investment = reoptResults['Financial']['initial_capital_costs']
-	outData['SPP'] = adjusted_initial_investment / np.sum(outData['netCashflow'])
+	subsidyUpfront = float(inputDict['subsidyUpfront'])
+	subsidyRecurring = float(inputDict['subsidyRecurring'])
 
 	## NOTE: temporarily comment out the two derConsumer runs to run the code quicker
 	"""
@@ -559,7 +550,6 @@ def work(modelDir, inputDict):
 	rateCompensation = float(inputDict['rateCompensation'])
 	total_residential_BESS_compensation = rateCompensation * np.sum(total_kwh_residential_BESS)
 
-
 	## Update utility savings to include BESS savings
 	## Currently, outData['savings'] is the vbatDispatch result savings only
 	BESS = reoptResults['ElectricStorage']['storage_to_load_series_kw']
@@ -567,9 +557,23 @@ def work(modelDir, inputDict):
 				(2880, 3624), (3624, 4344), (4344, 5088), (5088, 5832), 
 				(5832, 6552), (6552, 7296), (7296, 8016), (8016, 8760)]
 	electricityCost = float(inputDict['electricityCost'])
-	BESS_savings_monthly = np.asarray([sum(BESS[s:f])*electricityCost for s, f in monthHours])
-	outData['savings'] = list(np.asarray(outData['savings']) + BESS_savings_monthly) ## Now outData['savings'] includes BESS contribution
+	BESS_savings_monthly = np.array([sum(BESS[s:f])*electricityCost for s, f in monthHours])
+	savings_from_BESS_TESS = np.array(outData['savings']) + BESS_savings_monthly
+	outData['savings'] = list(savings_from_BESS_TESS)
 
+	## Update the financial cost ouput to include REopt BESS 
+	## TODO: combine these with the same variables from vbatDispatch. Currently this just replaces the vbatDispatch variables.
+	installed_cost_per_kw = float(inputDict['installed_cost_per_kw'])
+	installed_cost_per_kwh = float(inputDict['installed_cost_per_kwh'])
+	operational_costs_per_kw = installed_cost_per_kw * total_kw_residential_BESS
+	operational_costs_per_kwh = installed_cost_per_kwh * total_kwh_residential_BESS
+	#total_operational_costs = # can you add operational costs per kW + operational costs per kWh together?
+	netCashflow = np.sum(savings_from_BESS_TESS) - total_residential_BESS_compensation - operational_costs_per_kwh - subsidyUpfront - (subsidyRecurring*int(inputDict['projectionLength']))
+	#initialCosts = 1.
+	outData['NPV'] = netCashflow
+	#outData['SPP'] = initialCosts / netCashflow
+	outData['cumulativeCashflow'] = reoptResults['Financial']['offtaker_annual_free_cashflows'] #list(accumulate(reoptResults['Financial']['offtaker_annual_free_cashflows']))
+	outData['netCashflow'] = reoptResults['Financial']['offtaker_discounted_annual_free_cashflows'] #list(accumulate(reoptResults['Financial']['offtaker_annual_free_cashflows'])) ## or alternatively: offtaker_annual_free_cashflows
 
 	# Model operations typically ends here.
 	# Stdout/stderr.
@@ -585,6 +589,7 @@ def new(modelDir):
 		temp_curve = f.read()
 
 	defaultInputs = {
+		## TODO: incorporate float, int, bool types instead of only strings
 		## OMF inputs:
 		'user' : 'admin',
 		'modelType': modelName,
@@ -617,7 +622,8 @@ def new(modelDir):
 		'projectionLength': '25',
 		'electricityCost': '0.04',
 		'rateCompensation': '0.02', ## unit: $/kWh
-		'subsidy': '100.0',
+		'subsidyUpfront': '100.0',
+		'subsidyRecurring': '0',
 
 		## vbatDispatch inputs:
 		'load_type': '1', ## Air Conditioner
