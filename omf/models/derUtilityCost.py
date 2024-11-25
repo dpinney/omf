@@ -46,7 +46,7 @@ def work(modelDir, inputDict):
 	demand_array = np.asarray([float(value) for value in inputDict['demandCurve'].split('\n') if value.strip()]) ## process input format into an array
 	demand = demand_array.tolist() if isinstance(demand_array, np.ndarray) else demand_array ## make demand array into a list	for REopt
 
-	## Begin the REopt input dictionary called 'scenario'
+	## Begin the REopt input dictionary called 'scenario' that is required to run omf.solvers.reopt_jl
 	scenario = {
 		'Site': {
 			'latitude': latitude,
@@ -63,6 +63,16 @@ def work(modelDir, inputDict):
 			'analysis_years': projectionLength
 		}
 	}
+
+	## Add fossil fuel (diesel) generator to input scenario
+	if inputDict['fossilGenerator'] == 'Yes':
+		scenario['Generator'] = {
+			'existing_kw': float(inputDict['existing_gen_kw']),
+			'max_kw': 0,
+			'min_kw': 0,
+			'only_runs_during_grid_outage': False,
+		}
+
 
 	## Add a Battery Energy Storage System (BESS) section if enabled 
 	if inputDict['chemBESSgridcharge'] == 'Yes':
@@ -264,18 +274,28 @@ def work(modelDir, inputDict):
 	## Create DER overview plot object
 	fig = go.Figure()
 	if (inputDict['load_type'] != '0') and (int(inputDict['number_devices'])>0): ## Load type 0 corresponds to the "None" option, which disables this vbatDispatch function
-		vbat_discharge_component = np.asarray(vbat_discharge_flipsign)
-		vbat_charge_component = np.asarray(vbat_charge)
+		vbat_discharge_component = np.array(vbat_discharge_flipsign)
+		vbat_charge_component = np.array(vbat_charge)
 	else:
 		vbat_discharge_component = np.zeros_like(demand)
 		vbat_charge_component = np.zeros_like(demand)
 
+	## Convert all values from kW to Watts for plotting purposes only
+	grid_to_load = np.array(grid_to_load) * 1000.
+	BESS = np.array(BESS) * 1000.
+	grid_charging_BESS = np.array(grid_charging_BESS) * 1000.
+	vbat_discharge_component = vbat_discharge_component * 1000.
+	vbat_charge_component = vbat_charge_component * 1000.
+	demand = np.array(demand) * 1000.
+	if 'Generator' in reoptResults:
+		generator = np.array(reoptResults['Generator']['electric_to_load_series_kw']) * 1000.
+
 	## Original load piece (minus any vbat or BESS charging aka 'new/additional loads')
 	fig.add_trace(go.Scatter(x=timestamps,
-						y=np.asarray(demand)-np.asarray(BESS)-vbat_discharge_component,
+						y = demand - BESS - vbat_discharge_component,
 						yaxis='y1',
 						mode='none',
-						name='Original Load (kW)',
+						name='Original Load',
 						fill='tozeroy',
 						fillcolor='rgba(100,200,210,1)',
 						showlegend=showlegend))
@@ -287,7 +307,7 @@ def work(modelDir, inputDict):
 	## How or if this should be done is still being discussed - break out into a separate plot eventually
 	
 	## Commented out the below because we are changing the "additional load" area fill to be instead reflected as "BESS Charging (additional load)" and "TESS Charging (additional load)"
-	#additional_load = np.asarray(demand) + np.asarray(grid_charging_BESS) + vbat_charge_component
+	#additional_load = demand + grid_charging_BESS + vbat_charge_component
 	#fig.add_trace(go.Scatter(x=timestamps,
     #                     y=additional_load,
 	#					 yaxis='y1',
@@ -300,13 +320,13 @@ def work(modelDir, inputDict):
 	
 
 	## Grid serving new load
-	grid_serving_new_load = np.asarray(grid_to_load) + np.asarray(grid_charging_BESS)+ vbat_charge_component - vbat_discharge_component
+	grid_serving_new_load = grid_to_load + grid_charging_BESS + vbat_charge_component - vbat_discharge_component
 	fig.add_trace(go.Scatter(x=timestamps,
                         y=grid_serving_new_load,
 						yaxis='y1',
                         #mode='none',
                         #fill='tozeroy',
-                        name='Grid Serving Load (kW)',
+                        name='Grid Serving Load',
                         line=dict(color='rgba(192,192,192,1)', width=1),
 						stackgroup='one',
 						showlegend=showlegend))
@@ -326,11 +346,11 @@ def work(modelDir, inputDict):
 
 	## BESS serving load piece
 	fig.add_trace(go.Scatter(x=timestamps,
-						y=np.asarray(BESS), # + np.asarray(demand) + vbat_discharge_component,
+						y = BESS, # + np.asarray(demand) + vbat_discharge_component,
 						yaxis='y1',
 						#mode='none',
 						#fill='tozeroy',
-						name='BESS Serving Load (kW)',
+						name='BESS Serving Load',
 						line=dict(color='rgba(0,137,83,1)', width=1),
 						stackgroup='one',
 						showlegend=showlegend))
@@ -350,6 +370,25 @@ def work(modelDir, inputDict):
 	##vbatDispatch (TESS) piece
 	if (inputDict['load_type'] != '0') and (int(inputDict['number_devices'])>0): ## Load type 0 corresponds to the "None" option, which disables this vbatDispatch function
 		fig.add_trace(go.Scatter(x=timestamps,
+								y = vbat_discharge_component,
+								yaxis='y1',
+								mode='none',
+								fill='tozeroy',
+								fillcolor='rgba(127,0,255,1)',
+								name='TESS Serving Load',
+								showlegend=showlegend))
+		fig.update_traces(fillpattern_shape='/', selector=dict(name='TESS Serving Load'))
+
+	## Fossil Generator piece
+	if 'Generator' in reoptResults:
+		fig.add_trace(go.Scatter(x=timestamps,
+						y = generator,
+						yaxis='y1',
+						mode='none',
+						fill='tozeroy',
+						fillcolor='rgba(153,0,0,1)',
+						name='Fossil Generator Serving Load',
+						showlegend=showlegend))
 							y=np.asarray(vbat_discharge_flipsign),
 							yaxis='y1',
 							#mode='none',
@@ -373,9 +412,8 @@ def work(modelDir, inputDict):
 
 	## Plot layout
 	fig.update_layout(
-    	title='DER Overview for Utility',
     	xaxis=dict(title='Timestamp'),
-    	yaxis=dict(title="Power (kW)"),
+    	yaxis=dict(title="Power (W)"),
     	yaxis2=dict(title='degrees Celsius',
                 overlaying='y',
                 side='right'
@@ -532,7 +570,18 @@ def work(modelDir, inputDict):
 	total_kwh_residential_BESS = int(inputDict['numberBESS']) * float(inputDict['BESS_kwh'])
 	rateCompensation = float(inputDict['rateCompensation'])
 	total_residential_BESS_compensation = rateCompensation * np.sum(total_kwh_residential_BESS)
+
+
+	## Update utility savings to include BESS savings
+	## Currently, outData['savings'] is the vbatDispatch result savings only
 	BESS = reoptResults['ElectricStorage']['storage_to_load_series_kw']
+	monthHours = [(0, 744), (744, 1416), (1416, 2160), (2160, 2880), 
+				(2880, 3624), (3624, 4344), (4344, 5088), (5088, 5832), 
+				(5832, 6552), (6552, 7296), (7296, 8016), (8016, 8760)]
+	electricityCost = float(inputDict['electricityCost'])
+	BESS_savings_monthly = np.asarray([sum(BESS[s:f])*electricityCost for s, f in monthHours])
+	outData['savings'] = list(np.asarray(outData['savings']) + BESS_savings_monthly) ## Now outData['savings'] includes BESS contribution
+
 
 	# Model operations typically ends here.
 	# Stdout/stderr.
@@ -558,11 +607,14 @@ def new(modelDir):
 		'longitude' : '-104.812599', ## Brighton, CO
 		'year' : '2018',
 		'urdbLabel' : '612ff9c15457a3ec18a5f7d3', ## Brighton, CO
-		## TODO: Create a function that will gather the urdb label from a user provided location (city,state), rather than requiring the URDB label
 		'fileName': 'utility_2018_kW_load.csv',
 		'tempFileName': 'utility_CO_2018_temperatures.csv',
 		'demandCurve': demand_curve,
 		'tempCurve': temp_curve,
+
+		## Fossil Fuel Generator
+		'fossilGenerator': 'Yes',
+		'existing_gen_kw': '7000',
 
 		## Chemical Battery Inputs
 		'numberBESS': '100', ## Number of residential Tesla Powerwall 2 batteries
@@ -573,9 +625,9 @@ def new(modelDir):
 		'BESS_kwh': '13.5',
 
 		## Financial Inputs
-		'demandChargeURDB': 'Yes',
 		'demandChargeCost': '25',
 		'projectionLength': '25',
+		'electricityCost': '0.04',
 		'rateCompensation': '0.02', ## unit: $/kWh
 		'subsidy': '100.0',
 
@@ -588,7 +640,6 @@ def new(modelDir):
 		'cop': '2.5',
 		'setpoint': '22.5',
 		'deadband': '0.625',
-		'electricityCost': '0.04',
 		'discountRate': '2',
 		'unitDeviceCost': '0',
 		'unitUpkeepCost': '0',

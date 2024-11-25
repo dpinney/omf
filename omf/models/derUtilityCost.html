@@ -19,6 +19,7 @@
 	<p class="reportTitle">Model Input</p>
 	<div id="input" class="content">
 		<form name="inputForm" action="/runModel/" onsubmit="event.preventDefault(); return isFormValid();" method="post">
+			
 			<!-- Required Inputs -->
 			<div class="shortInput">
 				<label>Model Type <a href="https://github.com/dpinney/omf/wiki/Models-~-derUtilityCost" target="blank">Help?</a></label>
@@ -40,7 +41,8 @@
 				<label>Run Time</label>
 				<input type="text" id="runTime" name="runTime" value="{{allInputDataDict.runTime}}"readonly/>
 			</div>
-			<!-- Model Specific Inputs -->
+
+			<!-- General Model Inputs -->
 			<div class="wideInput">
 				<p class="inputSectionHeader">General Model Inputs</p>
 			</div>
@@ -86,13 +88,6 @@
 				<input type="text" id="urdbLabel" name="urdbLabel" value="{{allInputDataDict.urdbLabel}}" required="required"/>
 			</div>
 			<div class="shortInput">
-				<label class="tooltip">Use URDB label to determine demand charge?<span class="classic">If yes, model will use the URDB label provided above to determine the demand charge rate. If no, specify the demand charge rate ($/kWh) below.</span></label>
-				<select id="demandChargeURDB" name="demandChargeURDB" value="{{allInputDataDict.demandChargeURDB}}">
-					<option value="True" {{ 'selected' if allInputDataDict.demandChargeURDB == 'Yes' }}>Yes</option> <!-- TODO: Make this dropdown menu cause Demand Charge Cost to appear and disappear 8/2024 -->
-					<option value="False" {{ 'selected' if allInputDataDict.demandChargeURDB == 'No' }}>No</option>
-				</select>
-			</div>
-			<div class="shortInput">
 				<label class="tooltip">Demand Charge Cost ($/kW)<span class="classic">User defined demand charge that the utility pays per kWh.</span></label>
 				<input type="text" id="demandChargeCost" name="demandChargeCost" value="{{allInputDataDict.demandChargeCost}}" pattern="^\d+\.?\d*?$" required="required">
 			</div>
@@ -111,6 +106,23 @@
 			<div class="shortInput">
 				<label class="tooltip">Subsidy Amount ($)<span class="classic">The total subsidy amount ($) for the entire analysis duration.</span></label>
 				<input type="text" id="subsidy" name="subsidy" value="{{allInputDataDict.subsidy}}" pattern="^\d+\.?\d*?$" required="required"/>
+			</div>
+
+			<!-- Fossil Fuel Generator Inputs -->
+			<div class="wideInput"> 
+				<p class="inputSectionHeader">Fossil Fuel Generator Device Inputs</p>
+			</div>
+			<hr style="border-style: solid; border-color: #196b12; margin-top: 10px;">
+			<div class="shortInput">
+				<label class="tooltip">Enable Use of Fossil Fuel Generator?<span class="classic">If yes, model will run with a fossil fuel generator.</span></label>
+				<select id="fossilGenerator" name="fossilGenerator" value="{{allInputDataDict.fossilGenerator}}">
+					<option value='Yes' {{ 'selected' if allInputDataDict.fossilGenerator == 'Yes' }}>Yes</option>
+					<option value='No' {{ 'selected' if allInputDataDict.fossilGenerator == 'No' }}>No</option>
+				</select>
+			</div>
+			<div class="shortInput">
+				<label class="tooltip"> Existing Size (kW)<span class="classic">Specify the size (kW) of the existing fossil fuel generator owned by the utility.</span></label>
+				<input type="text" id="existing_gen_kw" name="existing_gen_kw" value="{{allInputDataDict.existing_gen_kw}}" required="required"/>
 			</div>
 
 			<!-- Chemical BESS Inputs -->
@@ -146,7 +158,7 @@
 				<input type="text" id="BESS_kwh" name="BESS_kwh" value="{{allInputDataDict.BESS_kwh}}" required="required"/>
 			</div>
 
-			<!-- vbatDispatch Specific Inputs -->
+			<!-- Thermal Storage (vbatDispatch) Inputs -->
 			<div class="wideInput"> 
 				<p class="inputSectionHeader">Thermal Energy Storage Device Inputs</p>
 			</div>
@@ -312,7 +324,7 @@
 				new Highcharts.Chart({"credits":{"enabled":false},
 					"plotOptions":{"column":{"stacking":'normal'},"series":{"animation":false,"shadow":false},"spline":{"animation":false,"shadow":false}},
 					"xAxis":{"title":{"text":"Year After Installation","style":{"color":"gray"}},"type":"linear","tickColor":"gray","tickInterval":1,"lineColor":"gray","minorTickColor":"gray", "minorTickInterval":5},
-					"title":{"text":"NPV:$" + allOutputData.NPV.toFixed(0) + " ;	SPP:" + allOutputData.SPP.toFixed(3), "verticalAlign":"bottom", "align":"right", "y":-50, "x":-10, "style":{"color":"#333333", "fontSize":"12px"}},
+					"title":{"text":"NPV:$" + allOutputData.NPV.toFixed(0) + " ;	SPP:" + allOutputData.SPP.toFixed(3), "verticalAlign":"top", "align":"right", "y":5, "x":-10, "style":{"color":"#333333", "fontSize":"12px"}},
 					//"title":{"text":""},
 					"series":[{"name":"Net Benefits", "data":allOutputData.netCashflow},
 						{"name":"Cumulative Return", "type":"spline", "data":allOutputData.cumulativeCashflow}
