@@ -439,7 +439,8 @@ def work(modelDir, inputDict):
 	## NOTE: This opens a window that displays the correct figure with the appropriate patterns.
 	## For some reason, the slash-mark patterns are not showing up on the OMF page otherwise.
 	## Eventually we want to delete this part.
-	fig.show() 
+	#fig.show()
+	fig.write_html(pJoin(modelDir, "Plot_DerServingLoadOverview.html"))
 
 	## Encode plot data as JSON for showing in the HTML side
 	outData['derOverviewData'] = json.dumps(fig.data, cls=plotly.utils.PlotlyJSONEncoder)
