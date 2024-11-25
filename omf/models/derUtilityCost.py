@@ -246,6 +246,8 @@ def work(modelDir, inputDict):
 
 	## DER Overview plot ###################################################################################################################################################################
 	showlegend = True # either enable or disable the legend toggle in the plot
+	#lineshape = 'linear'
+	lineshape = 'hv'
 	grid_to_load = reoptResults['ElectricUtility']['electric_to_load_series_kw']
 
 	BESS = reoptResults['ElectricStorage']['storage_to_load_series_kw']
@@ -319,6 +321,7 @@ def work(modelDir, inputDict):
                         #fill='tozeroy',
                         name='Grid Serving Load',
                         line=dict(color='rgba(192,192,192,1)', width=1),
+						line_shape=lineshape,
 						stackgroup='one',
 						showlegend=showlegend))
 	
@@ -342,6 +345,7 @@ def work(modelDir, inputDict):
 						#fill='tozeroy',
 						name='BESS Serving Load',
 						line=dict(color='rgba(0,137,83,1)', width=1),
+						line_shape=lineshape,
 						stackgroup='one',
 						showlegend=showlegend))
 
@@ -352,6 +356,7 @@ def work(modelDir, inputDict):
                         name='Additional Load from BESS',
                         #fill='tozeroy',
                         line=dict(color='rgba(118,196,165,1)', width=1),
+						line_shape=lineshape,
 						stackgroup='one',
 						showlegend=showlegend))
 	
@@ -365,6 +370,8 @@ def work(modelDir, inputDict):
 							fillcolor='rgba(127,0,255,1)',
 							name='TESS Serving Load',
 							line=dict(color='rgba(127,0,255,1)', width=1),
+							line_shape=lineshape,
+							name='TESS Serving Load (kW)',
 							stackgroup='one',
 							showlegend=showlegend))
 		
@@ -375,6 +382,7 @@ def work(modelDir, inputDict):
                 	        name='Additional load from TESS',
                     	    #fill='tozeroy',
                         	line=dict(color='rgba(207,158,255,1)', width=1),
+							line_shape=lineshape,
 							stackgroup='one',
 							showlegend=showlegend))
 
