@@ -371,7 +371,6 @@ def work(modelDir, inputDict):
 							name='TESS Serving Load',
 							line=dict(color='rgba(127,0,255,1)', width=1),
 							line_shape=lineshape,
-							name='TESS Serving Load (kW)',
 							stackgroup='one',
 							showlegend=showlegend))
 		
@@ -434,7 +433,7 @@ def work(modelDir, inputDict):
 			yaxis='y1',
 			mode='lines',
 			line=dict(color='green', width=1),
-			name='Minimum Power Capacity',
+			name='Minimum Calculated Power Capacity',
 			showlegend=True 
 			))
 		fig.add_trace(go.Scatter(
@@ -443,7 +442,7 @@ def work(modelDir, inputDict):
 			yaxis='y1',
 			mode='lines',
 			line=dict(color='blue', width=1),
-			name='Maximum Power Capacity',
+			name='Maximum Calculated Power Capacity',
 			showlegend=True
 		))
 		fig.add_trace(go.Scatter(
@@ -452,7 +451,7 @@ def work(modelDir, inputDict):
 			yaxis='y1',
 			mode='lines',
 			line=dict(color='black', width=1),
-			name='Actual Power',
+			name='Actual Power Utilized',
 			showlegend=True
 		))
 
