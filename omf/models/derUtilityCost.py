@@ -88,8 +88,8 @@ def work(modelDir, inputDict):
 		'can_grid_charge': can_grid_charge_bool,
 		'total_rebate_per_kw': 0,
 		'macrs_option_years': 0,
-		'installed_cost_per_kw': float(inputDict['installed_cost_per_kw']),
-		'installed_cost_per_kwh': float(inputDict['installed_cost_per_kwh']),
+		'installed_cost_per_kw': 0,
+		'installed_cost_per_kwh': 0,
 		'battery_replacement_year': 0,
 		'inverter_replacement_year': 0,
 		'replace_cost_per_kwh': 0.0,
@@ -145,7 +145,12 @@ def work(modelDir, inputDict):
 		vbatPower = vbpower_series
 
 	subsidyUpfront = float(inputDict['subsidyUpfront'])
-	subsidyRecurring = float(inputDict['subsidyRecurring'])
+	subsidyRecurring_1year_total = float(inputDict['subsidyRecurring'])
+	subsidyRecurring_1month_total = subsidyRecurring_1year_total / 12
+	subsidyRecurring_total = subsidyRecurring_1year_total * int(inputDict['projectionLength'])
+	total_subsidy_1year = subsidyUpfront + subsidyRecurring_1year_total
+	total_subsidy_1year_array = np.full(12, subsidyRecurring_1month_total)
+	total_subsidy_1year_array[0] += subsidyUpfront
 
 	## NOTE: temporarily comment out the two derConsumer runs to run the code quicker
 	"""
@@ -293,7 +298,7 @@ def work(modelDir, inputDict):
 						fillcolor='rgba(100,200,210,1)',
 						showlegend=showlegend))
 	## Make original load and its legend name hidden in the plot by default
-	fig.update_traces(legendgroup='Original Load (kW)', visible='legendonly', selector=dict(name='Original Load (kW)')) 
+	fig.update_traces(legendgroup='Original Load', visible='legendonly', selector=dict(name='Original Load')) 
 
 	## Additional load (Charging BESS and vbat)
 	## NOTE: demand is added here for plotting purposes, so that the additional load shows up above the demand curve.
@@ -557,30 +562,58 @@ def work(modelDir, inputDict):
 	rateCompensation = float(inputDict['rateCompensation'])
 	total_residential_BESS_compensation = rateCompensation * np.sum(total_kwh_residential_BESS)
 
-	## Update utility savings to include BESS savings
-	## Currently, outData['savings'] is the vbatDispatch result savings only
-	BESS = reoptResults['ElectricStorage']['storage_to_load_series_kw']
+	## Calculate monthly BESS costs and savings
 	monthHours = [(0, 744), (744, 1416), (1416, 2160), (2160, 2880), 
-				(2880, 3624), (3624, 4344), (4344, 5088), (5088, 5832), 
-				(5832, 6552), (6552, 7296), (7296, 8016), (8016, 8760)]
+		(2880, 3624), (3624, 4344), (4344, 5088), (5088, 5832), 
+		(5832, 6552), (6552, 7296), (7296, 8016), (8016, 8760)]
+	BESS = reoptResults['ElectricStorage']['storage_to_load_series_kw']
 	electricityCost = float(inputDict['electricityCost'])
-	BESS_savings_monthly = np.array([sum(BESS[s:f])*electricityCost for s, f in monthHours])
-	savings_from_BESS_TESS = np.array(outData['savings']) + BESS_savings_monthly
-	outData['savings'] = list(savings_from_BESS_TESS)
+	BESS_monthly_compensation_to_consumer = np.array([sum(BESS[s:f])*rateCompensation for s, f in monthHours])
+	BESS_monthly_if_bought_from_grid = np.array([sum(BESS[s:f])*electricityCost for s, f in monthHours])
+	utilitySavings_from_BESS_TESS = np.array(outData['savings']) + BESS_monthly_if_bought_from_grid
 
-	## Update the financial cost ouput to include REopt BESS 
-	## TODO: combine these with the same variables from vbatDispatch. Currently this just replaces the vbatDispatch variables.
-	installed_cost_per_kw = float(inputDict['installed_cost_per_kw'])
-	installed_cost_per_kwh = float(inputDict['installed_cost_per_kwh'])
-	operational_costs_per_kw = installed_cost_per_kw * total_kw_residential_BESS
-	operational_costs_per_kwh = installed_cost_per_kwh * total_kwh_residential_BESS
-	#total_operational_costs = # can you add operational costs per kW + operational costs per kWh together?
-	netCashflow = np.sum(savings_from_BESS_TESS) - total_residential_BESS_compensation - operational_costs_per_kwh - subsidyUpfront - (subsidyRecurring*int(inputDict['projectionLength']))
-	#initialCosts = 1.
-	outData['NPV'] = netCashflow
-	#outData['SPP'] = initialCosts / netCashflow
-	outData['cumulativeCashflow'] = reoptResults['Financial']['offtaker_annual_free_cashflows'] #list(accumulate(reoptResults['Financial']['offtaker_annual_free_cashflows']))
-	outData['netCashflow'] = reoptResults['Financial']['offtaker_discounted_annual_free_cashflows'] #list(accumulate(reoptResults['Financial']['offtaker_annual_free_cashflows'])) ## or alternatively: offtaker_annual_free_cashflows
+	####################################################################################
+	## Calculate the financial benefit from controlling member-consumer DERs
+	####################################################################################
+	
+	## Calculate residential BESS installation costs
+	installed_cost_per_kw = 20
+	installed_cost_per_kwh = 80
+	total_kw_installed_costs = installed_cost_per_kw * total_kw_residential_BESS
+	total_kwh_installed_costs = installed_cost_per_kwh * total_kwh_residential_BESS
+	#total_installed_costs = ## TODO: How do we deal with both costs per kw and kWh?
+
+	## Total operational costs (e.g. utility costs from API calls)
+	operationalCosts_ongoing = float(inputDict['operationalCosts_ongoing']) 
+	operationalCosts_onetime = float(inputDict['operationalCosts_onetime'])
+	total_operationalCosts_1year = operationalCosts_onetime + operationalCosts_ongoing*12
+	total_operationalCosts_1year_array = np.full(12, operationalCosts_ongoing)
+	total_operationalCosts_1year_array[0] += operationalCosts_onetime
+
+	## Calculating total utility costs
+	projectionLength = int(inputDict['projectionLength'])
+	utilityCosts_1year_total = total_operationalCosts_1year + operationalCosts_ongoing + total_subsidy_1year + total_residential_BESS_compensation
+	## NOTE: utilityCosts_allyears_total (below) assumes that the REopt BESS array will be the same for every year of the entire projectionLength (entire analysis)
+	utilityCosts_allyears_total = utilityCosts_1year_total + (operationalCosts_ongoing+subsidyRecurring_1year_total+total_residential_BESS_compensation)*(projectionLength-1) 
+	utilityCosts_1year_array = list(np.array(total_operationalCosts_1year_array) + np.array(total_subsidy_1year_array) + np.array(BESS_monthly_compensation_to_consumer))
+	
+	## Calculating total utility savings
+	utilitySavings_1year_total = np.sum(utilitySavings_from_BESS_TESS)
+	utilitySavings_1year_array = utilitySavings_from_BESS_TESS
+	utilitySavings_allyears_total = utilitySavings_1year_total*projectionLength
+
+	## Calculating total utility net savings (savings minus costs)
+	utilityNetSavings_1year = utilitySavings_1year_total - utilityCosts_1year_total
+	utilityNetSavings_1year_array = list(np.array(utilitySavings_1year_array) - np.array(utilityCosts_1year_array))
+	utilityNetSavings_allyears_total = utilitySavings_allyears_total - utilityCosts_allyears_total
+
+	## Update financial parameters to include BESS costs
+	outData['savings'] = utilityNetSavings_1year_array
+	outData['totalCost'] = list(np.array(outData['totalCost']) + np.array(utilityCosts_1year_array))
+	outData['NPV'] = utilityNetSavings_allyears_total
+	outData['SPP'] = utilityCosts_allyears_total / utilitySavings_1year_total
+	#outData['cumulativeCashflow'] = reoptResults['Financial']['offtaker_annual_free_cashflows'] #list(accumulate(reoptResults['Financial']['offtaker_annual_free_cashflows']))
+	#outData['netCashflow'] = reoptResults['Financial']['offtaker_discounted_annual_free_cashflows'] #list(accumulate(reoptResults['Financial']['offtaker_annual_free_cashflows'])) ## or alternatively: offtaker_annual_free_cashflows
 
 	# Model operations typically ends here.
 	# Stdout/stderr.
@@ -617,20 +650,20 @@ def new(modelDir):
 		'existing_gen_kw': '7000',
 
 		## Chemical Battery Inputs
-		'numberBESS': '100', ## Number of residential Tesla Powerwall 2 batteries
+		'numberBESS': '1000', ## Number of residential Tesla Powerwall 3 batteries
 		'chemBESSgridcharge': 'Yes',  
-		'installed_cost_per_kw': '20.0', #'300.0', ## (Residential: $1,000-$1,500 per kW, Utility: $300-$700 per kW)
-		'installed_cost_per_kwh': '60.0', #'480.0', ## Cost per kWh reflecting Powerwall’s installed cost (Residential: $400-$900 per kWh, Utility: $200-$400 per kWh)
+		'operationalCosts_ongoing': '20.0',
+		'operationalCosts_onetime': '1000', 
 		'BESS_kw': '5',
 		'BESS_kwh': '13.5',
 
 		## Financial Inputs
-		'demandChargeCost': '25',
+		'demandChargeCost': '25', ## used by vbatDispatch
 		'projectionLength': '25',
 		'electricityCost': '0.04',
 		'rateCompensation': '0.02', ## unit: $/kWh
 		'subsidyUpfront': '100.0',
-		'subsidyRecurring': '0',
+		'subsidyRecurring': '24.0',
 
 		## vbatDispatch inputs:
 		'load_type': '1', ## Air Conditioner

@@ -146,12 +146,12 @@
 				</select>
 			</div>
 			<div class="shortInput">
-				<label class="tooltip">Operational Power Capacity Cost ($/kW)<span class="classic">Specify the operational cost per kW of enrolling and controlling a member-consumer's battery (e.g. the API usage cost).</span></label>
-				<input type="text" id="installed_cost_per_kw" name="installed_cost_per_kw" value="{{allInputDataDict.installed_cost_per_kw}}" pattern="^\d+\.?\d*?$" required="required"/>
+				<label class="tooltip">Ongoing Operational Costs ($/month)<span class="classic">Specify the monthly ongoing operational costs of controlling all member-consumer batteries (e.g. the API usage cost per month).</span></label>
+				<input type="text" id="operationalCosts_ongoing" name="operationalCosts_ongoing" value="{{allInputDataDict.operationalCosts_ongoing}}" pattern="^\d+\.?\d*?$" required="required"/>
 			</div>
 			<div class="shortInput">
-				<label class="tooltip">Operational Energy Capacity Cost ($/kWh)<span class="classic">Specify the operational cost per kWh of enrolling and controlling a member-consumer's battery (e.g. the API usage cost)</span></label>
-				<input type="text" id="installed_cost_per_kwh" name="installed_cost_per_kwh" value="{{allInputDataDict.installed_cost_per_kwh}}" pattern="^\d+\.?\d*?$" required="required"/>
+				<label class="tooltip">One-time Operational Costs ($)<span class="classic">Specify the total one-time operational costs of controlling all member-consumer batteries (e.g. the contracting agreement with the device manufacturer).</span></label>
+				<input type="text" id="operationalCosts_onetime" name="operationalCosts_onetime" value="{{allInputDataDict.operationalCosts_onetime}}" pattern="^\d+\.?\d*?$" required="required"/>
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Battery Power Capacity (kW)<span class="classic">Specify the battery power capacity in kW for each individual battery enrolled by a member-consumer.</span></label>
@@ -328,7 +328,7 @@
 				new Highcharts.Chart({"credits":{"enabled":false},
 					"plotOptions":{"column":{"stacking":'normal'},"series":{"animation":false,"shadow":false},"spline":{"animation":false,"shadow":false}},
 					"xAxis":{"title":{"text":"Year After Installation","style":{"color":"gray"}},"type":"linear","tickColor":"gray","tickInterval":1,"lineColor":"gray","minorTickColor":"gray", "minorTickInterval":5},
-					"title":{"text":"NPV:$" + allOutputData.NPV.toFixed(0) + " ;	SPP:" + allOutputData.SPP.toFixed(3), "verticalAlign":"top", "align":"right", "y":5, "x":-10, "style":{"color":"#333333", "fontSize":"12px"}},
+					"title":{"text":"NPV:$" + allOutputData.NPV.toFixed(0) + ", SPP:" + allOutputData.SPP.toFixed(3), "verticalAlign":"top", "align":"right", "y":5, "x":-10, "style":{"color":"#333333", "fontSize":"12px"}},
 					//"title":{"text":""},
 					"series":[{"name":"Net Benefits", "data":allOutputData.netCashflow},
 						{"name":"Cumulative Return", "type":"spline", "data":allOutputData.cumulativeCashflow}
