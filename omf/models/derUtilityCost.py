@@ -71,6 +71,8 @@ def work(modelDir, inputDict):
 			'max_kw': 0,
 			'min_kw': 0,
 			'only_runs_during_grid_outage': False,
+			'fuel_avail_gal': float(inputDict['fuel_available_gal']),
+			'fuel_cost_per_gallon': float(inputDict['fuel_cost_per_gal'])
 		}
 
 	## Add a Battery Energy Storage System (BESS) section if enabled 
@@ -348,7 +350,7 @@ def work(modelDir, inputDict):
 						yaxis='y1',
 						#mode='none',
 						#fill='tozeroy',
-						name='BESS Serving Load',
+						name='Home BESS Serving Load',
 						line=dict(color='rgba(0,137,83,1)', width=1),
 						line_shape=lineshape,
 						stackgroup='one',
@@ -358,7 +360,7 @@ def work(modelDir, inputDict):
                         y=np.asarray(grid_charging_BESS),
 						yaxis='y1',
                         #mode='none',
-                        name='Additional Load from BESS',
+                        name='Additional Load from Home BESS',
                         #fill='tozeroy',
                         line=dict(color='rgba(118,196,165,1)', width=1),
 						line_shape=lineshape,
@@ -373,7 +375,7 @@ def work(modelDir, inputDict):
 							#mode='none',
 							#fill='tozeroy',
 							fillcolor='rgba(127,0,255,1)',
-							name='TESS Serving Load',
+							name='Home TESS Serving Load',
 							line=dict(color='rgba(127,0,255,1)', width=1),
 							line_shape=lineshape,
 							stackgroup='one',
@@ -383,7 +385,7 @@ def work(modelDir, inputDict):
     	                    y = vbat_charge_component,
 							yaxis='y1',
             	            #mode='none',
-                	        name='Additional load from TESS',
+                	        name='Additional load from Home TESS',
                     	    #fill='tozeroy',
                         	line=dict(color='rgba(207,158,255,1)', width=1),
 							line_shape=lineshape,
@@ -584,8 +586,8 @@ def work(modelDir, inputDict):
 	#total_installed_costs = ## TODO: How do we deal with both costs per kw and kWh?
 
 	## Total operational costs (e.g. utility costs from API calls)
-	operationalCosts_ongoing = float(inputDict['operationalCosts_ongoing']) 
-	operationalCosts_onetime = float(inputDict['operationalCosts_onetime'])
+	operationalCosts_ongoing = float(inputDict['BESS_operationalCosts_ongoing']) + float(inputDict['TESS_operationalCosts_ongoing'])
+	operationalCosts_onetime = float(inputDict['BESS_operationalCosts_onetime']) + float(inputDict['TESS_operationalCosts_onetime'])
 	total_operationalCosts_1year = operationalCosts_onetime + operationalCosts_ongoing*12
 	total_operationalCosts_1year_array = np.full(12, operationalCosts_ongoing)
 	total_operationalCosts_1year_array[0] += operationalCosts_onetime
@@ -594,7 +596,7 @@ def work(modelDir, inputDict):
 	projectionLength = int(inputDict['projectionLength'])
 	utilityCosts_1year_total = total_operationalCosts_1year + operationalCosts_ongoing + total_subsidy_1year + total_residential_BESS_compensation
 	## NOTE: utilityCosts_allyears_total (below) assumes that the REopt BESS array will be the same for every year of the entire projectionLength (entire analysis)
-	utilityCosts_allyears_total = utilityCosts_1year_total + (operationalCosts_ongoing+subsidyRecurring_1year_total+total_residential_BESS_compensation)*(projectionLength-1) 
+	utilityCosts_allyears_total = utilityCosts_1year_total + (projectionLength-1)*(operationalCosts_ongoing+subsidyRecurring_1year_total+total_residential_BESS_compensation)
 	utilityCosts_1year_array = list(np.array(total_operationalCosts_1year_array) + np.array(total_subsidy_1year_array) + np.array(BESS_monthly_compensation_to_consumer))
 	
 	## Calculating total utility savings
@@ -603,17 +605,36 @@ def work(modelDir, inputDict):
 	utilitySavings_allyears_total = utilitySavings_1year_total*projectionLength
 
 	## Calculating total utility net savings (savings minus costs)
-	utilityNetSavings_1year = utilitySavings_1year_total - utilityCosts_1year_total
+	utilityNetSavings_1year_total = utilitySavings_1year_total - utilityCosts_1year_total
 	utilityNetSavings_1year_array = list(np.array(utilitySavings_1year_array) - np.array(utilityCosts_1year_array))
 	utilityNetSavings_allyears_total = utilitySavings_allyears_total - utilityCosts_allyears_total
+	utilityNetSavings_allyears_array = np.full(projectionLength,utilityNetSavings_1year_total)
 
-	## Update financial parameters to include BESS costs
-	outData['savings'] = utilityNetSavings_1year_array
+	## Calculate the net savings and costs for each month
+	utilityNetSavings_1year_list = []
+	leftoverCosts = 0
+	for savings, costs in zip(utilitySavings_1year_array, utilityCosts_1year_array):
+		net = costs - savings
+
+		## Add leftover costs from previous months
+		net_with_leftover = net + leftoverCosts
+		
+		## If any leftover costs, then carry them over to the next month
+		if net_with_leftover > 0:
+			leftoverCosts = net_with_leftover 
+			utilityNetSavings_1year_list.append(0)  ## No net savings for this month
+		else:
+			leftoverCosts = 0  ## No leftover costs if net is covered
+			utilityNetSavings_1year_list.append(-net_with_leftover)  ## Record net savings (positive)
+
+	# Update financial parameters
+	outData['savings'] = utilityNetSavings_1year_list
+	#outData['savings'] = utilityNetSavings_1year_array
 	outData['totalCost'] = list(np.array(outData['totalCost']) + np.array(utilityCosts_1year_array))
 	outData['NPV'] = utilityNetSavings_allyears_total
 	outData['SPP'] = utilityCosts_allyears_total / utilitySavings_1year_total
-	#outData['cumulativeCashflow'] = reoptResults['Financial']['offtaker_annual_free_cashflows'] #list(accumulate(reoptResults['Financial']['offtaker_annual_free_cashflows']))
-	#outData['netCashflow'] = reoptResults['Financial']['offtaker_discounted_annual_free_cashflows'] #list(accumulate(reoptResults['Financial']['offtaker_annual_free_cashflows'])) ## or alternatively: offtaker_annual_free_cashflows
+	outData['netCashflow'] = list(utilityNetSavings_allyears_array)
+	outData['cumulativeCashflow'] = [sum(utilityNetSavings_allyears_array[:i+1]) for i in range(len(utilityNetSavings_allyears_array))]
 
 	# Model operations typically ends here.
 	# Stdout/stderr.
@@ -648,12 +669,14 @@ def new(modelDir):
 		## Fossil Fuel Generator
 		'fossilGenerator': 'Yes',
 		'existing_gen_kw': '7000',
+		'fuel_available_gal': '20000',
+		'fuel_cost_per_gal': '3.61',
 
 		## Chemical Battery Inputs
 		'numberBESS': '1000', ## Number of residential Tesla Powerwall 3 batteries
 		'chemBESSgridcharge': 'Yes',  
-		'operationalCosts_ongoing': '20.0',
-		'operationalCosts_onetime': '1000', 
+		'BESS_operationalCosts_ongoing': '20.0',
+		'BESS_operationalCosts_onetime': '1000', 
 		'BESS_kw': '5',
 		'BESS_kwh': '13.5',
 
@@ -664,6 +687,10 @@ def new(modelDir):
 		'rateCompensation': '0.02', ## unit: $/kWh
 		'subsidyUpfront': '100.0',
 		'subsidyRecurring': '24.0',
+
+		## Thermal Battery inputs
+		'TESS_operationalCosts_ongoing': '20.0',
+		'TESS_operationalCosts_onetime': '1000', 
 
 		## vbatDispatch inputs:
 		'load_type': '1', ## Air Conditioner
