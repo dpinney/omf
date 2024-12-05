@@ -75,10 +75,10 @@ def hosting_cap(
         df_edit['V'] = single_bus['v_reading']
         df_edit['P'] = -1 * single_bus['kw_reading']
 
-        # TODO account for no Q branch
-        # has_input_q = check_input_q(single_bus)
-        # if has_input_q:
-        df_edit['Q'] = -1 * single_bus['kvar_reading']
+        # account for no input Q
+        has_input_q = get_has_input_q(single_bus)
+        if has_input_q:
+            df_edit['Q'] = -1 * single_bus['kvar_reading']
 
         # check for and correct inconsisent index
         try:
@@ -157,36 +157,52 @@ def hosting_cap(
             n_skipped += 1
             continue
 
-        # handle derived variables
-        fixed_data['S'] = -1 * np.sqrt(
-            fixed_data['P']**2 + fixed_data['Q']**2
-            )
-        fixed_data['PF'] = fixed_data['P'] / fixed_data['S']
-
         # Calcualte deltas
         fixed_data['p_diff'] = fixed_data['P'].diff()
-        fixed_data['q_diff'] = fixed_data['Q'].diff()
         fixed_data['v_diff'] = fixed_data['V'].diff()
-        fixed_data['pf_diff'] = abs(fixed_data['PF'].diff())
+
+        # handle optional Q
+        has_static_pf = False
+        if has_input_q:
+            fixed_data['S'] = -1 * np.sqrt(
+                fixed_data['P']**2 + fixed_data['Q']**2
+                )
+            fixed_data['PF'] = fixed_data['P'] / fixed_data['S']
+            fixed_data['q_diff'] = fixed_data['Q'].diff()
+            fixed_data['pf_diff'] = abs(fixed_data['PF'].diff())
+
+            # ensure non-static power factor
+            # NOTE: arbitrary threshold selected
+            # TODO: allow this, but then process in ~has_input_q 'branch'
+            max_pf_dif = fixed_data['pf_diff'].max()
+
+            if max_pf_dif < 1e-3:
+                has_static_pf = True
+                # skip processing
+                warning_str = (
+                    f"Warning:  Skipped busname '{bus_name}' " +
+                    "- Power Factor too constant - " +
+                    f"maximum abs dif doesn't exceed {max_pf_dif}"
+                )
+                print(warning_str)
+                # TODO: remove skip once no q handled.
+                n_skipped += 1
+                continue
 
         remaining_bad_data_mask = get_nan_mask(fixed_data)
 
-        # ensure non-static power factor
-        # NOTE: arbitrary threshold selected
-        max_pf_dif = fixed_data['pf_diff'].max()
-        if max_pf_dif < 1e-3:
+        # fixed data may include nan - removing with this mask
+        clean_df = fixed_data[~remaining_bad_data_mask].copy()
+
+        # TODO : allow filters to accomodate for hax input Q
+        if ~has_input_q or has_static_pf:
             # skip processing
             warning_str = (
                 f"Warning:  Skipped busname '{bus_name}' " +
-                "- Power Factor too constant - " +
-                f"maximum abs dif doesn't exceed {max_pf_dif}"
+                "- Process for no input Q or static PF"
             )
             print(warning_str)
-            n_skipped += 1
             continue
-
-        # NOTE: temporary - so the above mess can be figured
-        clean_df = fixed_data[~remaining_bad_data_mask].copy()
 
         # Filter points to fit according to quantiles
         # only large changes in P (larger than 25 quantile)
@@ -196,7 +212,6 @@ def hosting_cap(
             clean_df.p_diff < -abs(clean_df.p_diff).quantile(.25))
 
         # only large changes in PF (larger than 10th quantile)
-        # TODO: account for no q
         filter_2 = (
             clean_df.pf_diff > abs(clean_df.pf_diff).quantile(.10)) \
             | (
@@ -404,6 +419,14 @@ def get_held_value_mask(
             mask[group_indices] = True
 
     return mask
+
+
+def get_has_input_q(input_data):
+    """
+    check if input data has q, return false if no q
+    assumes input column is empty.
+    """
+    return ~(len(input_data) == input_data['kvar_reading'].isna().sum())
 
 
 def compare_columns(ndx_a, ndx_b):
