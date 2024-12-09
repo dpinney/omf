@@ -596,9 +596,9 @@ def work(modelDir, inputDict):
 	operationalCosts_1year_total = operationalCosts_onetime + operationalCosts_ongoing*12
 	operationalCosts_1year_array = np.full(12, operationalCosts_ongoing)
 	operationalCosts_1year_array[0] += operationalCosts_onetime
-	operationalCosts_ongoing_allyears_array = np.full(projectionLength, operationalCosts_ongoing*12)
-	operationalCosts_onetime_allyears_array = np.full(projectionLength, 0)
-	operationalCosts_onetime_allyears_array[0] = operationalCosts_1year_total
+	operationalCosts_ongoing_allyears_array = np.full(projectionLength, operationalCosts_ongoing*12.0)
+	operationalCosts_onetime_allyears_array = np.full(projectionLength, 0.0)
+	operationalCosts_onetime_allyears_array[0] = operationalCosts_onetime
 
 	## Calculating total utility costs
 	utilityCosts_1year_total = operationalCosts_1year_total + operationalCosts_ongoing + total_subsidy_1year + total_residential_BESS_compensation
@@ -638,7 +638,7 @@ def work(modelDir, inputDict):
 
 	#outData['savings'] = utilityNetSavings_1year_list
 
-	# Update financial parameters
+	## Update financial parameters
 	outData['savings'] = utilityNetSavings_1year_array
 	outData['totalCost'] = list(np.array(outData['totalCost']) + np.array(utilityCosts_1year_array))
 	outData['NPV'] = utilityNetSavings_allyears_total
@@ -648,8 +648,8 @@ def work(modelDir, inputDict):
 	outData['savingsAllYears'] = list(utilitySavings_allyears_array)
 	outData['subsidies'] = list(total_subsidy_allyears_array)
 	outData['BESS_compensation_to_consumer_allyears'] = list(BESS_allyears_compensation_to_consumer_array)
-	#outData['operationalCosts_ongoing_allyears_total'] = list(operationalCosts_ongoing_allyears_array)
-	#outData['operationalCosts_onetime_allyears_total'] = list(operationalCosts_onetime_allyears_array)
+	outData['operationalCosts_ongoing_allyears_total'] = list(operationalCosts_ongoing_allyears_array)
+	outData['operationalCosts_onetime_allyears_total'] = list(operationalCosts_onetime_allyears_array)
 
 
 	# Model operations typically ends here.
