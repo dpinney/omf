@@ -613,10 +613,10 @@ def work(modelDir, inputDict):
 	utilitySavings_allyears_array = np.full(projectionLength, utilitySavings_1year_total)
 
 	## Calculating total utility net savings (savings minus costs)
-	utilityNetSavings_1year_total = utilityCosts_1year_total - utilitySavings_1year_total 
+	utilityNetSavings_1year_total =  utilitySavings_1year_total - utilityCosts_1year_total
 	utilityNetSavings_1year_array = list(np.array(utilitySavings_1year_array) - np.array(utilityCosts_1year_array))
 	utilityNetSavings_allyears_total = utilitySavings_allyears_total - utilityCosts_allyears_total
-	utilityNetSavings_allyears_array = np.full(projectionLength,utilityNetSavings_1year_total)
+	utilityNetSavings_allyears_array = np.full(projectionLength, utilityNetSavings_1year_total)
 
 	## Note: The following for-loop would display the net savings as positive. If there are negative savings (when costs are greater than savings), it will only show $0 savings, rather than the negative savings amount. This might not be a useful way to display it, so it is commented for now.
 	## Calculate the net savings and costs for each month
