@@ -146,13 +146,16 @@ def work(modelDir, inputDict):
 		vbatMaxPowerCapacity = pd.Series(vbatResults['maxPowerSeries'])
 		vbatPower = vbpower_series
 
+	projectionLength = int(inputDict['projectionLength'])
 	subsidyUpfront = float(inputDict['subsidyUpfront'])
 	subsidyRecurring_1year_total = float(inputDict['subsidyRecurring'])
 	subsidyRecurring_1month_total = subsidyRecurring_1year_total / 12
-	subsidyRecurring_total = subsidyRecurring_1year_total * int(inputDict['projectionLength'])
+	subsidyRecurring_total = subsidyRecurring_1year_total * projectionLength
 	total_subsidy_1year = subsidyUpfront + subsidyRecurring_1year_total
 	total_subsidy_1year_array = np.full(12, subsidyRecurring_1month_total)
 	total_subsidy_1year_array[0] += subsidyUpfront
+	total_subsidy_allyears_array = np.full(projectionLength, subsidyRecurring_1year_total)
+	total_subsidy_allyears_array[0] += subsidyUpfront
 
 	## NOTE: temporarily comment out the two derConsumer runs to run the code quicker
 	"""
@@ -571,6 +574,8 @@ def work(modelDir, inputDict):
 	BESS = reoptResults['ElectricStorage']['storage_to_load_series_kw']
 	electricityCost = float(inputDict['electricityCost'])
 	BESS_monthly_compensation_to_consumer = np.array([sum(BESS[s:f])*rateCompensation for s, f in monthHours])
+	BESS_yearly_compensation_to_consumer_total = np.sum(BESS_monthly_compensation_to_consumer)
+	BESS_allyears_compensation_to_consumer_array = np.full(projectionLength, BESS_yearly_compensation_to_consumer_total)
 	BESS_monthly_if_bought_from_grid = np.array([sum(BESS[s:f])*electricityCost for s, f in monthHours])
 	utilitySavings_from_BESS_TESS = np.array(outData['savings']) + BESS_monthly_if_bought_from_grid
 
@@ -588,53 +593,64 @@ def work(modelDir, inputDict):
 	## Total operational costs (e.g. utility costs from API calls)
 	operationalCosts_ongoing = float(inputDict['BESS_operationalCosts_ongoing']) + float(inputDict['TESS_operationalCosts_ongoing'])
 	operationalCosts_onetime = float(inputDict['BESS_operationalCosts_onetime']) + float(inputDict['TESS_operationalCosts_onetime'])
-	total_operationalCosts_1year = operationalCosts_onetime + operationalCosts_ongoing*12
-	total_operationalCosts_1year_array = np.full(12, operationalCosts_ongoing)
-	total_operationalCosts_1year_array[0] += operationalCosts_onetime
+	operationalCosts_1year_total = operationalCosts_onetime + operationalCosts_ongoing*12
+	operationalCosts_1year_array = np.full(12, operationalCosts_ongoing)
+	operationalCosts_1year_array[0] += operationalCosts_onetime
+	operationalCosts_ongoing_allyears_array = np.full(projectionLength, operationalCosts_ongoing*12)
+	operationalCosts_onetime_allyears_array = np.full(projectionLength, 0)
+	operationalCosts_onetime_allyears_array[0] = operationalCosts_1year_total
 
 	## Calculating total utility costs
-	projectionLength = int(inputDict['projectionLength'])
-	utilityCosts_1year_total = total_operationalCosts_1year + operationalCosts_ongoing + total_subsidy_1year + total_residential_BESS_compensation
+	utilityCosts_1year_total = operationalCosts_1year_total + operationalCosts_ongoing + total_subsidy_1year + total_residential_BESS_compensation
 	## NOTE: utilityCosts_allyears_total (below) assumes that the REopt BESS array will be the same for every year of the entire projectionLength (entire analysis)
 	utilityCosts_allyears_total = utilityCosts_1year_total + (projectionLength-1)*(operationalCosts_ongoing+subsidyRecurring_1year_total+total_residential_BESS_compensation)
-	utilityCosts_1year_array = list(np.array(total_operationalCosts_1year_array) + np.array(total_subsidy_1year_array) + np.array(BESS_monthly_compensation_to_consumer))
+	utilityCosts_1year_array = list(np.array(operationalCosts_1year_array) + np.array(total_subsidy_1year_array) + np.array(BESS_monthly_compensation_to_consumer))
 	
 	## Calculating total utility savings
 	utilitySavings_1year_total = np.sum(utilitySavings_from_BESS_TESS)
 	utilitySavings_1year_array = utilitySavings_from_BESS_TESS
 	utilitySavings_allyears_total = utilitySavings_1year_total*projectionLength
+	utilitySavings_allyears_array = np.full(projectionLength, utilitySavings_1year_total)
 
 	## Calculating total utility net savings (savings minus costs)
-	utilityNetSavings_1year_total = utilitySavings_1year_total - utilityCosts_1year_total
+	utilityNetSavings_1year_total = utilityCosts_1year_total - utilitySavings_1year_total 
 	utilityNetSavings_1year_array = list(np.array(utilitySavings_1year_array) - np.array(utilityCosts_1year_array))
 	utilityNetSavings_allyears_total = utilitySavings_allyears_total - utilityCosts_allyears_total
 	utilityNetSavings_allyears_array = np.full(projectionLength,utilityNetSavings_1year_total)
 
+	## Note: The following for-loop would display the net savings as positive. If there are negative savings (when costs are greater than savings), it will only show $0 savings, rather than the negative savings amount. This might not be a useful way to display it, so it is commented for now.
 	## Calculate the net savings and costs for each month
-	utilityNetSavings_1year_list = []
-	leftoverCosts = 0
-	for savings, costs in zip(utilitySavings_1year_array, utilityCosts_1year_array):
-		net = costs - savings
+	#utilityNetSavings_1year_list = []
+	#leftoverCosts = 0
+	#for savings, costs in zip(utilitySavings_1year_array, utilityCosts_1year_array):
+	#	net = costs - savings
 
-		## Add leftover costs from previous months
-		net_with_leftover = net + leftoverCosts
+	#	## Add leftover costs from previous months
+	#	net_with_leftover = net + leftoverCosts
 		
-		## If any leftover costs, then carry them over to the next month
-		if net_with_leftover > 0:
-			leftoverCosts = net_with_leftover 
-			utilityNetSavings_1year_list.append(0)  ## No net savings for this month
-		else:
-			leftoverCosts = 0  ## No leftover costs if net is covered
-			utilityNetSavings_1year_list.append(-net_with_leftover)  ## Record net savings (positive)
+	#	## If any leftover costs, then carry them over to the next month
+	#	if net_with_leftover > 0:
+	#		leftoverCosts = net_with_leftover 
+	#		utilityNetSavings_1year_list.append(0)  ## No net savings for this month
+	#	else:
+	#		leftoverCosts = 0  ## No leftover costs if net is covered
+	#		utilityNetSavings_1year_list.append(-net_with_leftover)  ## Record net savings (positive)
+
+	#outData['savings'] = utilityNetSavings_1year_list
 
 	# Update financial parameters
-	outData['savings'] = utilityNetSavings_1year_list
-	#outData['savings'] = utilityNetSavings_1year_array
+	outData['savings'] = utilityNetSavings_1year_array
 	outData['totalCost'] = list(np.array(outData['totalCost']) + np.array(utilityCosts_1year_array))
 	outData['NPV'] = utilityNetSavings_allyears_total
 	outData['SPP'] = utilityCosts_allyears_total / utilitySavings_1year_total
 	outData['netCashflow'] = list(utilityNetSavings_allyears_array)
 	outData['cumulativeCashflow'] = [sum(utilityNetSavings_allyears_array[:i+1]) for i in range(len(utilityNetSavings_allyears_array))]
+	outData['savingsAllYears'] = list(utilitySavings_allyears_array)
+	outData['subsidies'] = list(total_subsidy_allyears_array)
+	outData['BESS_compensation_to_consumer_allyears'] = list(BESS_allyears_compensation_to_consumer_array)
+	#outData['operationalCosts_ongoing_allyears_total'] = list(operationalCosts_ongoing_allyears_array)
+	#outData['operationalCosts_onetime_allyears_total'] = list(operationalCosts_onetime_allyears_array)
+
 
 	# Model operations typically ends here.
 	# Stdout/stderr.
