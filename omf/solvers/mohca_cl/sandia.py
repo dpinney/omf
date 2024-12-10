@@ -272,23 +272,23 @@ def hosting_cap(
     # Output CSV File of Results
     hc_results.to_csv(output_csv_path, index=False)
 
-    # NOTE: printing of fix report 'temporary' solution
-    print('')
-    if len(fix_reports) > 0:
-        fix_report_df = pd.concat(fix_reports, ignore_index=True)
-        fix_report_df = fix_report_df[[
-            'busname',
-            'start_ndx',
-            'duration',
-            'end_ndx',
-            'action'
-        ]]
-        print('* Data Fix Report')
-        print(fix_report_df)
-    else:
-        fix_report_df = '* No Data Fixes Executed'
+    # # NOTE: printing of fix report 'temporary' solution
+    # print('')
+    # if len(fix_reports) > 0:
+    #     fix_report_df = pd.concat(fix_reports, ignore_index=True)
+    #     fix_report_df = fix_report_df[[
+    #         'busname',
+    #         'start_ndx',
+    #         'duration',
+    #         'end_ndx',
+    #         'action'
+    #     ]]
+    #     print('* Data Fix Report')
+    #     print(fix_report_df)
+    # else:
+    #     fix_report_df = '* No Data Fixes Executed'
 
-    print(f"HC calculated for: {n_hc_est}\nSkipped: {n_skipped}")
+    # print(f"HC calculated for: {n_hc_est}\nSkipped: {n_skipped}")
 
     return hc_results
 
