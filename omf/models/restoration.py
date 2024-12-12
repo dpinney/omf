@@ -41,15 +41,16 @@ def makeCicuitTraversalDict(pathToOmd):
 	with open(pathToOmd) as inFile:
 		omd = json.load(inFile)
 	obDict = {}
+	namesToTypes = {}
 	for ob in omd.get('tree',{}).values():
 		obType = ob['object']
 		obName = ob['name']
 		key = f'{obType}.{obName}'
 		obDict[key] = ob
+		namesToTypes[obName] = obType
 
 	digraph = createGraph(pathToOmd)
 	nodes = digraph.nodes()
-	namesToKeys = {v.get('name'):k for k,v in obDict.items()}
 	for obKey, ob in obDict.items():
 		obType = ob['object']
 		obName = ob['name']
@@ -63,9 +64,11 @@ def makeCicuitTraversalDict(pathToOmd):
 		descendants = nx.descendants(digraph, startingPoint)
 		ob['downlineObs'] = set()
 		ob['downlineLoads'] = set()
-		for circOb in descendants:
-			circObKey = namesToKeys.get(circOb)
-			circObType = circObKey.split('.')[0]
+		for circObName in descendants:
+			circObType = namesToTypes.get(circObName)
+			circObKey = f'{circObType}.{circObName}'
+			if circObType == None:
+				raise Exception(f'ERROR: Element {circObName} referenced by another object does not have its own entry in the omd')
 			ob['downlineObs'].add(circObKey)
 			if circObType == 'load':
 				ob['downlineLoads'].add(circObKey)
@@ -1028,6 +1031,7 @@ def makeLoadCciDict(modelDir, pathToOmd):
 	'''
 	cciDict = {}
 	bcsDict = {}
+	# Uncomment to use resilientCommunity. 
 	makeResComOutputCsv(pathToOmd, modelDir, ['line', 'transformer', 'fuse'])
 	with open(pJoin(modelDir, 'resilientCommunityOutput.csv'), mode='r') as infile:
 		reader = csv.DictReader(infile)
@@ -1038,6 +1042,17 @@ def makeLoadCciDict(modelDir, pathToOmd):
 			if obType == 'load':
 				cciDict[obName] = obCci
 				bcsDict[obName] = obBcs
+	'''
+	# Uncomment to bypass calling resilientCommunity ##############
+	with open(pathToOmd,'r') as omdFile:
+		omd = json.load(omdFile)
+	for ob in omd.get('tree', {}).values():
+		if ob['object'] == 'load':
+			obName = ob['name']
+			cciDict[obName] = 1
+			bcsDict[obName] = 1
+	###############################################################'''
+
 	return cciDict, bcsDict
 
 def combineLoadPriorityWithCCI(modelDir, pathToOmd, loadPriorityFilePath, loadCciDict, cciImpact):
@@ -1132,7 +1147,7 @@ def runMicrogridControlSim(modelDir, solFidelity, eventsFilename, loadPriorityFi
 		os.remove(outputFile)
 
 	PowerModelsONM.run_onm(
-		circuitPath=pJoin(modelDir,'circuit.dss'),
+		circuitPath=pJoin(modelDir,'circuit_clean.dss'),
 		settingsPath=pJoin(modelDir,'settings.json'),
 		outputPath=pJoin(modelDir,'output.json'),
 		eventsPath=pJoin(modelDir,eventsFilename),
@@ -1261,8 +1276,8 @@ def graphMicrogrid(modelDir, pathToOmd, profit_on_energy_sales, restoration_cost
 
 	for deviceActions in deviceActionTimeline:
 		# TODO: replace the stuff with incrementing timestep in the loop to just use the following:
-		#       for i, deviceActions in enumerate(deviceActionTimeline):
-		#       	timestep = i+startTime
+		#		for i, deviceActions in enumerate(deviceActionTimeline):
+		#			timestep = i+startTime
 		# Switch timeline actions
 		switchActions = []
 		switchConfigsNew = deviceActions['Switch configurations']
@@ -1793,8 +1808,11 @@ def work(modelDir, inputDict):
 	dssConvert.treeToDss(niceDss, f'{modelDir}/circuit.dss')
 	# dssConvert.treeToDss(niceDss, f'{modelDir}/circuitOmfCompatible.dss') # for querying loadshapes
 	dssConvert.dss_to_clean_via_save(f'{modelDir}/circuit.dss', f'{modelDir}/circuit_clean.dss')
-	dssConvert.dssToOmd(f'{modelDir}/circuit_clean.dss', f'{modelDir}/circuit_clean.dss.omd')
-	omdFilePath = f'{modelDir}/circuit_clean.dss.omd'
+	
+	# dssConvert.dssToOmd(f'{modelDir}/circuit_clean.dss', f'{modelDir}/circuit_clean.dss.omd')
+	# omdFilePath = f'{modelDir}/circuit_clean.dss.omd'
+
+	omdFilePath = f'{modelDir}/{feederName}.omd'
 	
 	pathToLocalFile = copyInputFilesToModelDir(modelDir, inputDict)
 	
@@ -1907,8 +1925,8 @@ def new(modelDir):
 	# ====== Iowa240 Test Case
 	# feeder_file_path= [__neoMetaModel__._omfDir,'static','testFiles','iowa240_dwp_22_no_show_voltage.dss.omd']
 	feeder_file_path= [__neoMetaModel__._omfDir,'static','testFiles','iowa240_in_Florida_copy2_no_show_voltage.dss.omd']
-	# feeder_file_path= [__neoMetaModel__._omfDir,'static','testFiles','ieee8500_forced_layout.omd']
-	# feeder_file_path= [__neoMetaModel__._omfDir,'static','testFiles','ieee8500_forced_layout_using_dssToOmd.omd']
+	# feeder_file_path= [__neoMetaModel__._omfDir,'static','testFiles','ieee8500_forced_layout_converted_with_new_code.omd']
+	# feeder_file_path= [__neoMetaModel__._omfDir,'static','testFiles','3300_bus_feeder_added_conncodes.omd']
 
 	event_file_path = [__neoMetaModel__._omfDir,'static','testFiles','iowa240_dwp_22.events.json']
 	loadPriority_file_path = [__neoMetaModel__._omfDir,'static','testFiles','iowa240_dwp_22.loadPriority.basic.json']
