@@ -345,15 +345,14 @@
 					"plotOptions":{"column":{"stacking":'normal'},"series":{"animation":false,"shadow":false},"spline":{"animation":false,"shadow":false}},
 					"xAxis":{"title":{"text":"Year After Installation","style":{"color":"gray"}},"type":"linear","tickColor":"gray","tickInterval":1,"lineColor":"gray","minorTickColor":"gray", "minorTickInterval":5},
 					"title":{"text":"NPV:$" + allOutputData.NPV.toFixed(0) + ", SPP:" + allOutputData.SPP.toFixed(3), "verticalAlign":"top", "align":"right", "y":35, "x":-10, "style":{"color":"#333333", "fontSize":"12px"}},
-					//"title":{"text":""},
 					"series":[
-						{"name":"Net Benefits", "data": allOutputData.netCashflow},
-						{"name":"Utility Savings", "data": allOutputData.savingsAllYears},
-						{"name":"Subsidies", "data": allOutputData.subsidies},
-						{"name":"BESS Compensation to Member-consumers", "data": allOutputData.BESS_compensation_to_consumer_allyears},
-						{"name":"Ongoing Operational Costs", "data": allOutputData.operationalCosts_ongoing_allyears_total},
-						{"name":"One-time Operational Costs", "data": allOutputData.operationalCosts_onetime_allyears_total},
-						{"name":"Cumulative Return", "type":"spline", "data": allOutputData.cumulativeCashflow}
+						{"name":"Net Benefits", "data": allOutputData.netCashflow, "color": "rgb(102,102,255)"},
+						{"name":"Utility Savings", "data": allOutputData.savingsAllYears, "color": "green"},
+						{"name":"Subsidies", "data": allOutputData.subsidies, "color": "black"},
+						{"name":"Customer BESS Compensations", "data": allOutputData.BESS_compensation_to_consumer_allyears, "color": "rgb(255,102,102)"},
+						{"name":"Ongoing Operational Costs", "data": allOutputData.operationalCosts_ongoing_allyears_total, "color": "orange"},
+						{"name":"One-time Operational Costs", "data": allOutputData.operationalCosts_onetime_allyears_total, "color": "rgb(229,204,255)"},
+						{"name":"Cumulative Return", "type":"spline", "data": allOutputData.cumulativeCashflow, "color": "brown"}
 					],
 					"yAxis":{"title":{"text":"Income ($)","style":{"color":"gray"}}},
 					"chart":{"marginBottom":55,"zoomType":"x","renderTo":"cashFlowChartDiv","type":"column","marginRight":20, "height":250,"width":1000},
