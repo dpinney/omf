@@ -77,23 +77,17 @@ def create_REopt_jl_jsonFile(modelDir, inputDict):
 		'federal_itc_fraction': float(inputDict['PVItcPercent']),
 		}
 
-	## Add a Battery Energy Storage System (BESS) section if enabled 
-	if inputDict['chemBESSgridcharge'] == 'Yes':
-		can_grid_charge_bool = True
-	else:
-		can_grid_charge_bool = False
 
+	## Add a Battery Energy Storage System (BESS) section if enabled 
 	scenario['ElectricStorage'] = {
 		##TODO: Add options here, if needed
-		#scenario['ElectricStorage']['size_kw'] = 2
-		'min_kw': float(inputDict['min_kw']), ## Battery Power minimum 
-		'max_kw': float(inputDict['max_kw']), ## Battery Power maximum 
-		'min_kwh': float(inputDict['min_kwh']), ## Battery Energy Capacity minimum
-		'max_kwh': float(inputDict['max_kwh']), ## Battery Energy Capacity maximum
-		'can_grid_charge': can_grid_charge_bool,
+		'min_kw': float(inputDict['BESS_kw']), 
+		'max_kw': float(inputDict['BESS_kw']), 
+		'min_kwh': float(inputDict['BESS_kwh']), 
+		'max_kwh': float(inputDict['BESS_kwh']), 
+		'can_grid_charge': True,
 		'total_rebate_per_kw': float(inputDict['total_rebate_per_kw']),
-		'macrs_option_years': float(inputDict['batteryMacrs_option_years']),
-		#'macrs_bonus_fraction': float(inputDict['macrs_bonus_fraction']),
+		'macrs_option_years': 0.0,
 		'replace_cost_per_kw': float(inputDict['replace_cost_per_kw']),
 		'replace_cost_per_kwh': float(inputDict['replace_cost_per_kwh']),
 		'installed_cost_per_kw': float(inputDict['installed_cost_per_kw']),
@@ -102,12 +96,25 @@ def create_REopt_jl_jsonFile(modelDir, inputDict):
 		'inverter_replacement_year': float(inputDict['inverter_replacement_year']),
 		'battery_replacement_year': float(inputDict['battery_replacement_year']),
 		}
+	
+	## Add fossil fuel (diesel) generator to input scenario
+	if inputDict['fossilGenerator'] == 'Yes':
+		scenario['Generator'] = {
+			'existing_kw': float(inputDict['existing_gen_kw']),
+			'max_kw': 0,
+			'min_kw': 0,
+			'only_runs_during_grid_outage': False,
+			'fuel_avail_gal': float(inputDict['fuel_available_gal']),
+			'fuel_cost_per_gallon': float(inputDict['fuel_cost_per_gal'])
+		}
+
 
 	## Save the scenario file
 	## NOTE: reopt_jl currently requires a path for the input file, so the file must be saved to a location
 	## preferrably in the modelDir directory
 	with open(pJoin(modelDir, 'reopt_input_scenario.json'), 'w') as jsonFile:
 		json.dump(scenario, jsonFile)
+	
 	return scenario
 
 
@@ -251,7 +258,6 @@ def work(modelDir, inputDict):
 
 	## Run REopt.jl 
 	reopt_jl.run_reopt_jl(modelDir, 'reopt_input_scenario.json')
-	#reopt_jl.run_reopt_jl(modelDir, '/Users/astronobri/Documents/CIDER/scratch/reopt_input_scenario_26may2024_0258.json', outages=inputDict['outage'])
 	with open(pJoin(modelDir, 'results.json')) as jsonFile:
 		reoptResults = json.load(jsonFile)
 	outData.update(reoptResults) ## Update output file outData with REopt results data
@@ -284,6 +290,9 @@ def work(modelDir, inputDict):
 
 	## DER Overview plot ###################################################################################################################################################################
 	grid_to_load = reoptResults['ElectricUtility']['electric_to_load_series_kw']
+
+	if 'Generator' in reoptResults:
+		generator = np.array(reoptResults['Generator']['electric_to_load_series_kw']) * 1000.
 
 	if 'PV' in reoptResults: ## PV
 		PV = reoptResults['PV']['electric_to_load_series_kw']
@@ -329,13 +338,21 @@ def work(modelDir, inputDict):
 		vbat_discharge_component = np.zeros_like(demand)
 		vbat_charge_component = np.zeros_like(demand)
 
+	## Convert all values from kW to Watts for plotting purposes only
+	grid_to_load = np.array(grid_to_load) * 1000.
+	BESS = np.array(BESS) * 1000.
+	grid_charging_BESS = np.array(grid_charging_BESS) * 1000.
+	vbat_discharge_component = vbat_discharge_component * 1000.
+	vbat_charge_component = vbat_charge_component * 1000.
+	demand = np.array(demand) * 1000.
+
 	## BESS serving load piece
 	fig.add_trace(go.Scatter(x=timestamps,
 						y=np.asarray(BESS) + np.asarray(demand) + vbat_discharge_component,
 						yaxis='y1',
 						mode='none',
 						fill='tozeroy',
-						name='BESS Serving Load (kW)',
+						name='BESS Serving Load',
 						fillcolor='rgba(0,137,83,1)',
 						showlegend=showlegend))
 	fig.update_traces(fillpattern_shape='/', selector=dict(name='BESS Serving Load (kW)'))
@@ -356,7 +373,7 @@ def work(modelDir, inputDict):
 						mode='none',
 						fill='tozeroy',
 						fillcolor='rgba(127,0,255,1)',
-						name='vbat Serving Load (kW)',
+						name='vbat Serving Load',
 						showlegend=showlegend))
 	fig.update_traces(fillpattern_shape='/', selector=dict(name='vbat Serving Load (kW)'))
 
@@ -365,7 +382,7 @@ def work(modelDir, inputDict):
 						y=np.asarray(demand)-np.asarray(BESS)-vbat_discharge_component,
 						yaxis='y1',
 						mode='none',
-						name='Original Load (kW)',
+						name='Original Load',
 						fill='tozeroy',
 						fillcolor='rgba(100,200,210,1)',
 						showlegend=showlegend))
@@ -391,7 +408,7 @@ def work(modelDir, inputDict):
 						 yaxis='y1',
                          mode='none',
                          fill='tozeroy',
-                         name='Grid Serving New Load (kW)',
+                         name='Grid Serving New Load',
                          fillcolor='rgba(192,192,192,1)',
 						 showlegend=showlegend))
 
@@ -413,10 +430,21 @@ def work(modelDir, inputDict):
 						yaxis='y1',
 						mode='none',
 						fill='tozeroy',
-						name='PV Serving Load (kW)',
+						name='PV Serving Load',
 						fillcolor='rgba(255,246,0,1)',
 						showlegend=showlegend
 						))
+		
+	## Fossil Generator piece
+	if 'Generator' in reoptResults:
+		fig.add_trace(go.Scatter(x=timestamps,
+						y = generator,
+						yaxis='y1',
+						mode='none',
+						fill='tozeroy',
+						fillcolor='rgba(153,0,0,1)',
+						name='Fossil Generator Serving Load',
+						showlegend=showlegend))
 
 	## Plot layout
 	fig.update_layout(
@@ -646,15 +674,9 @@ def new(modelDir):
 		'projectionLength': '25',
 
 		## Chemical Battery Inputs
-		'numberBESS': '100.0',
-		'chemBESSgridcharge': 'Yes', 
-		'min_kw': '5.0', ## Minimum continuous power, based on Powerwall’s specs
-		'max_kw': '5.0', ## Maximum continuous power 
-		'min_kwh': '13.5', ## Minimum energy capacity based on Powerwall’s full capacity
-		'max_kwh': '13.5', ## Maximum energy capacity to use the entire capacity
+		'BESS_kw': '5',
+		'BESS_kwh': '13.5',
 		'total_rebate_per_kw': '10.0', ## Assuming $10/kW incentive
-		'batteryMacrs_option_years': '25', ## Depreciation years
-		'macrs_bonus_fraction': '0.4', ## 40% bonus depreciation fraction
 		'replace_cost_per_kw': '460.0', 
 		'replace_cost_per_kwh': '240.0', 
 		'installed_cost_per_kw': '480.0', ## Approximate cost per kW installed, based on total price range
@@ -662,6 +684,12 @@ def new(modelDir):
 		'total_itc_fraction': '0.0', ## No ITC included unless specified
 		'inverter_replacement_year': '10', 
 		'battery_replacement_year': '10',  
+
+		## Fossil Fuel Generator
+		'fossilGenerator': 'Yes',
+		'existing_gen_kw': '22', ## NOTE: Generac Guardian 22 kW model
+		'fuel_available_gal': '15.6', ## NOTE: For liquid propane: 3.56 gal/hr
+		'fuel_cost_per_gal': '3.61',
 
 		## Photovoltaic Inputs
 		'existing_kw_PV': '29500.0',

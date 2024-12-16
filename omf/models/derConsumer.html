@@ -80,27 +80,6 @@
 				<label class="tooltip">Year<span class="classic">Specify the year to which the Demand Curve values corresond.</span></label>
 				<input type="text" id="year" name="year" value="{{allInputDataDict.year}}" pattern="^\d{4}$" required="required"/>
 			</div>
-			<div class="shortInput">
-				<label class="tooltip">Photovoltaic (PV) Panels<span class="classic">Include PV in DER analysis?</span></label>
-				<select id="PV" name="PV" value="{{allInputDataDict.PV}}"/>
-					<option value="Yes" {{ 'selected' if allInputDataDict.solar == 'Yes' }}>Yes</option>
-					<option value="No" {{ 'selected' if allInputDataDict.solar == 'No' }}>No</option>
-				</select>
-			</div>
-			<div class="shortInput">
-				<label class="tooltip">Battery Energy Storage System<span class="classic">Include battery energy storage in DER analysis?</span></label>
-				<select id="BESS" name="BESS" value="{{allInputDataDict.BESS}}"/>
-					<option value="Yes" {{ 'selected' if allInputDataDict.BESS == 'Yes' }}>Yes</option>
-					<option value="No" {{ 'selected' if allInputDataDict.BESS == 'No' }}>No</option>
-				</select>
-			</div>
-			<div class="shortInput">
-				<label class="tooltip">Diesel Generator<span class="classic">Include diesel generator in DER analysis?</span></label>
-				<select id="generator" name="generator" value="{{allInputDataDict.generator}}"/>
-					<option value="Yes" {{ 'selected' if allInputDataDict.generator == 'Yes' }}>Yes</option>
-					<option value="No" {{ 'selected' if allInputDataDict.generator == 'No' }}>No</option>
-				</select>
-			</div>
 			
 			<!-- Financial Inputs -->
 			<div class="wideInput">
@@ -127,53 +106,51 @@
 				<input type="text" id="projectionLength" name="projectionLength" value="{{allInputDataDict.projectionLength}}" step="1" min="1" max="75" required="required">
 			</div>
 
+			<!-- Fossil Fuel Generator Inputs -->
+			<div class="wideInput"> 
+				<p class="inputSectionHeader">Fossil Fuel Generator Device Inputs</p>
+			</div>
+			<hr style="border-style: solid; border-color: #196b12; margin-top: 10px;">
+			<div class="shortInput">
+				<label class="tooltip">Enable Use of Fossil Fuel Generator?<span class="classic">If yes, model will run with a fossil fuel generator.</span></label>
+				<select id="fossilGenerator" name="fossilGenerator" value="{{allInputDataDict.fossilGenerator}}">
+					<option value='Yes' {{ 'selected' if allInputDataDict.fossilGenerator == 'Yes' }}>Yes</option>
+					<option value='No' {{ 'selected' if allInputDataDict.fossilGenerator == 'No' }}>No</option>
+				</select>
+			</div>
+			<div class="shortInput">
+				<label class="tooltip"> Existing Size (kW)<span class="classic">Specify the size (kW) of the existing fossil fuel generator.</span></label>
+				<input type="text" id="existing_gen_kw" name="existing_gen_kw" value="{{allInputDataDict.existing_gen_kw}}" required="required"/>
+			</div>
+			<div class="shortInput">
+				<label class="tooltip"> Available Fuel (gal)<span class="classic">Specify the amount of generator fuel available (gal).</span></label>
+				<input type="text" id="fuel_available_gal" name="fuel_available_gal" value="{{allInputDataDict.fuel_available_gal}}" required="required"/>
+			</div>
+			<div class="shortInput">
+				<label class="tooltip"> Fuel Cost ($/gal)<span class="classic">Specify the cost of fuel used for the generator ($/gal).</span></label>
+				<input type="text" id="fuel_cost_per_gal" name="fuel_cost_per_gal" value="{{allInputDataDict.fuel_cost_per_gal}}" required="required"/>
+			</div>
+
 			<!-- Chemical BESS Inputs -->
 			<div class="wideInput"> 
 				<p class="inputSectionHeader">Chemical Energy Storage Device Inputs</p>
 			</div>
 			<hr style="border-style: solid; border-color: #196b12; margin-top: 10px;">
 			<div class="shortInput">
-				<label class="tooltip">Number of Home Chemical Batteries<span class="classic">Total number of residential chemical batteries to model.</span></label>
-				<input type="text" id="numberBESS" name="numberBESS" value="{{allInputDataDict.numberBESS}}" required="required">
+				<label class="tooltip">Home Battery Power Capacity (kW)<span class="classic">Specify the home chemical battery power capacity in kW.</span></label>
+				<input type="text" id="BESS_kw" name="BESS_kw" value="{{allInputDataDict.BESS_kw}}" required="required"/>
 			</div>
 			<div class="shortInput">
-				<label class="tooltip">Can grid charge?<span class="classic">Select Yes if the battery can be charged from the grid, otherwise select No.</span></label>
-				<select id="chemBESS" name="chemBESS" value="{{allInputDataDict.chemBESSgridcharge}}"/>
-					<option value="Yes" {{ 'selected' if allInputDataDict.chemBESSgridcharge == 'Yes' }}>Yes</option>
-					<option value="No" {{ 'selected' if allInputDataDict.chemBESSgridcharge == 'No' }}>No</option>
-				</select>
+				<label class="tooltip">Home Battery Energy Capacity (kWh)<span class="classic">Specify the home chemical battery energy capacity in kWh.</span></label>
+				<input type="text" id="BESS_kwh" name="BESS_kwh" value="{{allInputDataDict.BESS_kwh}}" required="required"/>
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Installed Power Cost ($/kW)<span class="classic">Specify the installed cost per kW of the battery.</span></label>
 				<input type="text" id="installed_cost_per_kw" name="installed_cost_per_kw" value="{{allInputDataDict.installed_cost_per_kw}}" pattern="^\d+\.?\d*?$" required="required"/>
 			</div>
 			<div class="shortInput">
-				<label class="tooltip">Battery Minimum Power (kW)<span class="classic">Specify the minimum desired battery power in kW.</span></label>
-				<input type="text" id="min_kw" name="min_kw" value="{{allInputDataDict.min_kw}}" required="required"/>
-			</div>
-			<div class="shortInput">
-				<label class="tooltip">Battery Maximum Power (kW)<span class="classic">Specify the maximum desired battery power in kW.</span></label>
-				<input type="text" id="max_kw" name="max_kw" value="{{allInputDataDict.max_kw}}" required="required"/>
-			</div>
-			<div class="shortInput">
 				<label class="tooltip">Installed Capacity Cost ($/kWh)<span class="classic">Specify the cost in $/kWh.</span></label>
 				<input type="text" id="installed_cost_per_kwh" name="installed_cost_per_kwh" value="{{allInputDataDict.installed_cost_per_kwh}}" pattern="^\d+\.?\d*?$" required="required"/>
-			</div>
-			<div class="shortInput">
-				<label class="tooltip">Battery Minimum Capacity (kWh)<span class="classic">Specify the minimum desired battery capacity in kWh.</span></label>
-				<input type="text" id="min_kwh" name="min_kwh" value="{{allInputDataDict.min_kwh}}" required="required"/>
-			</div>
-			<div class="shortInput">
-				<label class="tooltip">Battery Maximum Capacity (kWh)<span class="classic">Specify the maximum desired battery capacity in kWh.</span></label>
-				<input type="text" id="max_kwh" name="max_kwh" value="{{allInputDataDict.max_kwh}}" required="required"/>
-			</div>
-			<div class="shortInput">
-				<label class="tooltip">Battery MACRS Years<span class="classic">MACRS schedule for financial analysis. Possible inputs are 0, 5 and 7 years.</span></label>
-				<select id="macrs_option_years" name="macrs_option_years" value="{{allInputDataDict.macrs_option_years}}"/>
-					<option value="0" {{ 'selected' if allInputDataDict.batteryMacrsOptionYears == '0' }}>0</option>
-					<option value="5" {{ 'selected' if allInputDataDict.batteryMacrsOptionYears == '5' }}>5</option>
-					<option value="7" {{ 'selected' if allInputDataDict.batteryMacrsOptionYears == '7' }}>7</option>
-				</select>
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Battery ITC (%)<span class="classic">Please enter a number 0-1 for the battery investment tax credit. Format 0.XX</span></label>
