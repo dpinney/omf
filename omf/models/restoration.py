@@ -8,6 +8,7 @@ import plotly as py
 import plotly.graph_objs as go
 import plotly.express as px
 import networkx as nx
+from scipy.stats import percentileofscore
 # from statistics import quantiles
 
 # OMF imports
@@ -441,7 +442,7 @@ def makeLoadOutTimelnAndStatusMap(outputTimeline, loadList, timeList):
 	
 	return dfLoadTimeln, dfStatus
 
-def tradMetricsByMgTable(outputTimeline, loadMgDict, startTime, numTimeSteps, modelDir, loadCciDict, loadBcsDict, taidiDict, mergedLoadPrioritiesFilePath):
+def tradMetricsByMgTable(outputTimeline, loadMgDict, startTime, numTimeSteps, modelDir, loadCciDict, loadCcsDict, loadBcsDict, taidiDict, mergedLoadPrioritiesFilePath):
 	'''
 	Generate table of SAIDI, SAIFI, CAIDI, and CAIFI during the outage simulation period, both for the whole system and broken down by microgrid. 
 	'''
@@ -451,7 +452,7 @@ def tradMetricsByMgTable(outputTimeline, loadMgDict, startTime, numTimeSteps, mo
 
 	def calcTradMetrics(outputTimeline, loadList, startTime, numTimeSteps):
 		''' Calculates SAIDI, SAIFI, CAIDI, CAIFI, CI, CMI, CS, and DCI over the course of the simulation for the loads in the given loadList which should have only unique entries.
-			Also calculates average CCI of the loads in loadList
+			Also calculates average CCI of the loads in loadList by calculating average CCS and ranking it among CCS scores (shouldn't take the average of an index directly)
 			CI = # Customer Interruptions
 			CMI = # Customer Minute Interruptions 
 			CS = # Customers Served
@@ -477,7 +478,8 @@ def tradMetricsByMgTable(outputTimeline, loadMgDict, startTime, numTimeSteps, mo
 		CAIDI = CMI/CI if CI!=0 else 0
 		CAIFI = CI/DCI if DCI!=0 else 0
 		sumBCS = sum([loadBcsDict[load] for load in loadList])
-		averageCCI = sum([loadCciDict[load] for load in loadList])/len(loadList)
+		averageCCS = sum([loadCcsDict[load] for load in loadList])/len(loadList)
+		averageCCI = percentileofscore(list(loadCcsDict.values()),averageCCS)
 		averageCCIxPriorities = sum([mergedLoadWeights[load] for load in loadList])/len(loadList)
 		return {'SAIDI':SAIDI,
 				'SAIFI':SAIFI,
@@ -512,7 +514,7 @@ def tradMetricsByMgTable(outputTimeline, loadMgDict, startTime, numTimeSteps, mo
 					<th>Event CAIFI</th>
 					<th>Loads Served</th>
 					<th>Est. People Served</th>
-					<th>Average CCI</th>
+					<th>CCI of Average Customer</th>
 					<th>Ave. CCI merged w/ Load Priorities</th>
 				</tr>
 			</thead>
@@ -1023,13 +1025,16 @@ def getMicrogridInfo(modelDir, pathToOmd, settingsFile, makeCSV = True):
 	return {'loadMgDict':loadMgDict, 'busMgDict':busMgDict, 'obMgDict':obMgDict, 'mgIDs':mgIDs}
 
 def makeLoadCciDict(modelDir, pathToOmd):
-	''' Returns 2 dictionaries of loads and their CCI's & BCS's respectively in the following format:
+	''' Returns 3 dictionaries of loads and their CCI's, CCS's, & BCS's respectively in the following format:
 		
 		{loadName1:cci1, loadName2:cci2, loadName3:cci3, ...},
+
+		{loadName1:ccs1, loadName2:ccs2, loadName3:ccs3, ...},
 
 		{loadName1:bcs1, loadName2:bcs2, loadName3:bcs3, ...}
 	'''
 	cciDict = {}
+	ccsDict = {}
 	bcsDict = {}
 	# Uncomment to use resilientCommunity. 
 	makeResComOutputCsv(pathToOmd, modelDir, ['line', 'transformer', 'fuse'])
@@ -1038,9 +1043,11 @@ def makeLoadCciDict(modelDir, pathToOmd):
 		for row in reader:
 			obType, obName = row['Object Name'].split('.')
 			obCci = float(row['Community Criticality Index'])
+			obCcs = float(row['Community Criticality Score'])
 			obBcs = float(row['Base Criticality Score'])
 			if obType == 'load':
 				cciDict[obName] = obCci
+				ccsDict[obName] = obCcs
 				bcsDict[obName] = obBcs
 	'''
 	# Uncomment to bypass calling resilientCommunity ##############
@@ -1050,10 +1057,11 @@ def makeLoadCciDict(modelDir, pathToOmd):
 		if ob['object'] == 'load':
 			obName = ob['name']
 			cciDict[obName] = 1
+			ccsDict[obName] = 1
 			bcsDict[obName] = 1
 	###############################################################'''
 
-	return cciDict, bcsDict
+	return cciDict, ccsDict, bcsDict
 
 def combineLoadPriorityWithCCI(modelDir, pathToOmd, loadPriorityFilePath, loadCciDict, cciImpact):
 	'''	Creates a JSON file called loadWeightsMerged.json containing user-input load priorities combined with CCI values via RMS and weighted by cciImpact.
@@ -1245,7 +1253,7 @@ def genProfilesByMicrogrid(mgIDs, obMgDict, powerflow, simTimeSteps, startTime):
 
 	return gensFigure, mgGensFigures
 
-def graphMicrogrid(modelDir, pathToOmd, profit_on_energy_sales, restoration_cost, hardware_cost, pathToJson, pathToCsv, loadPriorityFile, loadMgDict, obMgDict, busMgDict, mgIDs, loadCciDict, loadBcsDict):
+def graphMicrogrid(modelDir, pathToOmd, profit_on_energy_sales, restoration_cost, hardware_cost, pathToJson, pathToCsv, loadPriorityFile, loadMgDict, obMgDict, busMgDict, mgIDs, loadCciDict, loadCcsDict, loadBcsDict):
 	''' Run full microgrid control process. '''
 	# Gather output data.
 	with open(pJoin(modelDir,'output.json')) as inFile:
@@ -1663,7 +1671,7 @@ def graphMicrogrid(modelDir, pathToOmd, profit_on_energy_sales, restoration_cost
 	outageIncidenceFig, mgOIFigs = outageIncidenceGraph(customerOutageData, outputTimeline, startTime, numTimeSteps, loadPriorityFile, loadMgDict)
 	taifiHist, taidiHist, TAIFI, TAIDI = makeTaifiAndTaidiHist(outputTimeline, startTime, numTimeSteps, list(loadMgDict.keys()))
 	cciTaifiScatter, cciTaidiScatter = makeCciTaifiTaidiScatter(loadCciDict, TAIFI, TAIDI)
-	tradMetricsHtml, cciQuartTradMetricsHtml = tradMetricsByMgTable(outputTimeline, loadMgDict, startTime, numTimeSteps, modelDir, loadCciDict, loadBcsDict, TAIDI, loadPriorityFile)
+	tradMetricsHtml, cciQuartTradMetricsHtml = tradMetricsByMgTable(outputTimeline, loadMgDict, startTime, numTimeSteps, modelDir, loadCciDict, loadCcsDict, loadBcsDict, TAIDI, loadPriorityFile)
 
 	customerOutageHtml = customerOutageTable(customerOutageData, outageCost, modelDir)
 	profit_on_energy_sales = float(profit_on_energy_sales)
@@ -1816,7 +1824,7 @@ def work(modelDir, inputDict):
 	
 	pathToLocalFile = copyInputFilesToModelDir(modelDir, inputDict)
 	
-	loadCciDict, loadBcsDict = makeLoadCciDict(
+	loadCciDict, loadCcsDict, loadBcsDict = makeLoadCciDict(
 		modelDir 				= modelDir, 
 		pathToOmd				= omdFilePath
 	)
@@ -1853,6 +1861,7 @@ def work(modelDir, inputDict):
 		busMgDict				= microgridInfo['busMgDict'],
 		mgIDs					= microgridInfo['mgIDs'],
 		loadCciDict				= loadCciDict,
+		loadCcsDict				= loadCcsDict,
 		loadBcsDict				= loadBcsDict
 	)
 
