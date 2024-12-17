@@ -473,14 +473,18 @@ def tradMetricsByMgTable(outputTimeline, loadMgDict, startTime, numTimeSteps, mo
 		CMI = dfStatus.applymap(lambda x:1.0-x).to_numpy().sum()*60
 		# DCI = The number of distinct loads that have been offline at some point
 		DCI = len(dfStatus.columns[dfStatus.isin([0]).any()])
-		SAIDI = CMI/CS
-		SAIFI = CI/CS
+		SAIDI = CMI/CS if CS!=0 else 0
+		SAIFI = CI/CS if CS!=0 else 0
 		CAIDI = CMI/CI if CI!=0 else 0
 		CAIFI = CI/DCI if DCI!=0 else 0
 		sumBCS = sum([loadBcsDict[load] for load in loadList])
-		averageCCS = sum([loadCcsDict[load] for load in loadList])/len(loadList)
-		averageCCI = percentileofscore(list(loadCcsDict.values()),averageCCS)
-		averageCCIxPriorities = sum([mergedLoadWeights[load] for load in loadList])/len(loadList)
+		if CS != 0:
+			averageCCS = sum([loadCcsDict[load] for load in loadList])/len(loadList)
+			averageCCI = percentileofscore(list(loadCcsDict.values()),averageCCS)
+			averageCCIxPriorities = sum([mergedLoadWeights[load] for load in loadList])/len(loadList)
+		else:
+			averageCCI = 'n/a'
+			averageCCIxPriorities = 'n/a'
 		return {'SAIDI':SAIDI,
 				'SAIFI':SAIFI,
 				'CAIDI':CAIDI,
@@ -497,11 +501,11 @@ def tradMetricsByMgTable(outputTimeline, loadMgDict, startTime, numTimeSteps, mo
 	for load,mg in loadMgDict.items():
 		loadsPerMg[mg] = loadsPerMg.get(mg,[])+[load]
 
-	systemwideMetrics = {k:round(v,2) for k,v in calcTradMetrics(outputTimeline, loadMgDict.keys(), startTime, numTimeSteps).items()}
+	systemwideMetrics = {k:(round(v,2) if type(v) == float else v) for k,v in calcTradMetrics(outputTimeline, loadMgDict.keys(), startTime, numTimeSteps).items()}
 
 	metricsPerMg = {}
 	for mg, mgLoadList in loadsPerMg.items():
-		metricsPerMg[mg] = {k:round(v,2) for k,v in calcTradMetrics(outputTimeline, mgLoadList, startTime, numTimeSteps).items()}
+		metricsPerMg[mg] = {k:(round(v,2) if type(v) == float else v) for k,v in calcTradMetrics(outputTimeline, mgLoadList, startTime, numTimeSteps).items()}
 
 	mg_html_str = """
 		<table class="sortable" cellpadding="0" cellspacing="0">
@@ -562,7 +566,7 @@ def tradMetricsByMgTable(outputTimeline, loadMgDict, startTime, numTimeSteps, mo
 
 	metricsPerCciQuart = {}
 	for cciQuart, quartLoadList in loadsPerCciQuart.items():
-		metricsPerCciQuart[cciQuart] = {k:round(v,2) for k,v in calcTradMetrics(outputTimeline, quartLoadList, startTime, numTimeSteps).items()}
+		metricsPerCciQuart[cciQuart] = {k:(round(v,2) if type(v) == float else v) for k,v in calcTradMetrics(outputTimeline, quartLoadList, startTime, numTimeSteps).items()}
 
 	cciQuart_html_str = """
 		<table class="sortable" cellpadding="0" cellspacing="0">
