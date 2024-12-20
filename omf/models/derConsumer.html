@@ -105,6 +105,18 @@
 				<label class="tooltip">Financial Projection Length (years)<span class="classic">Number of years to project out estimated savings. Must be between 1 and 75 years.</span></label>
 				<input type="text" id="projectionLength" name="projectionLength" value="{{allInputDataDict.projectionLength}}" step="1" min="1" max="75" required="required">
 			</div>
+			<div class="shortInput">
+				<label class="tooltip">Energy Compensation Rate ($/kWh)<span class="classic">The dollar amount per kWh compensated to the member-consumer.</span></label>
+				<input type="text" id="rateCompensation" name="rateCompensation" value="{{allInputDataDict.rateCompensation}}" pattern="^\d+\.?\d*?$" min="0" required="required"/>
+			</div>
+			<div class="shortInput">
+				<label class="tooltip">Upfront Subsidy Amount ($)<span class="classic">The total subsidy amount ($) for new installations for the entire analysis duration.</span></label>
+				<input type="text" id="subsidyUpfront" name="subsidyUpfront" value="{{allInputDataDict.subsidyUpfront}}" pattern="^\d+\.?\d*?$" required="required"/>
+			</div>
+			<div class="shortInput">
+				<label class="tooltip">Ongoing Subsidy Amount ($)<span class="classic">The total ongoing subsidy amount ($) occuring monthly.</span></label>
+				<input type="text" id="subsidyOngoing" name="subsidyOngoing" value="{{allInputDataDict.subsidyOngoing}}" pattern="^\d+\.?\d*?$" required="required"/>
+			</div>
 
 			<!-- Fossil Fuel Generator Inputs -->
 			<div class="wideInput"> 
@@ -175,58 +187,6 @@
 				<div class="shortInput">
 				<label class="tooltip">Battery Replacement (years)<span class="classic">Specify a year in which the battery cells will be replaced at the cost specified in Battery Replacement Capacity Cost. Input is an integer less than or equal to the analysis period in years.</span></label>
 				<input type="text" id="battery_replacement_year" name="battery_replacement_year" value="{{allInputDataDict.battery_replacement_year}}" required="required"/>
-			</div>
-
-			<!-- Photovoltaic Inputs -->
-			<div class="wideInput"> 
-				<p class="inputSectionHeader">Photovoltaic Device Inputs</p>
-			</div>
-			<hr style="border-style: solid; border-color: #196b12; margin-top: 10px;">
-			<div class="shortInput solarDisplayInput">
-				<label class="tooltip">Existing photovoltaic size (kW)<span class="classic">Specify the total capacity of any pre-existing photovoltaic installation in kW.</span></label>
-				<input type="text" id="existing_kw_PV" name="existing_kw_PV" value="{{allInputDataDict.existing_kw_PV}}" required="required"/>
-			</div>
-			<div class="shortInput">
-				<label class="tooltip">Additional Utility-Installed PV Size (kW)<span class="classic">Specify the additional desired photovoltaic size amount in kW.</span></label>
-				<input type="text" id="additional_kw_PV" name="additional_kw_PV" value="{{allInputDataDict.additional_kw_PV}}" required="required"/>
-			</div>
-			<div class="shortInput">
-				<label class="tooltip">Photovoltaic Cost ($/kW)<span class="classic">Specify the cost in $/kW.</span></label>
-				<input type="text" id="costPV" name="costPV" value="{{allInputDataDict.costPV}}" pattern="^\d+\.?\d*?$" required="required"/>
-			</div>
-			<div class="shortInput">
-				<label class="tooltip">Photovoltaic Minimum Power (kW)<span class="classic">Specify the minimum desired photovoltaic generation in kW.</span></label>
-				<input type="text" id="min_kw_PV" name="min_kw_PV" value="{{allInputDataDict.min_kw_PV}}" required="required"/>
-			</div>
-			<div class="shortInput">
-				<label class="tooltip">Photovoltaic Maximum Power (kW)<span class="classic">Specify the maximum desired generation in kW.</span></label>
-				<input type="text" id="max_kw_PV" name="max_kw_PV" value="{{allInputDataDict.max_kw_PV}}" required="required"/>
-			</div>
-			<div class="shortInput">
-				<label class="tooltip">Can photovoltaic be curtailed?<span class="classic">Allows for excess photovoltaic power to be automatically curtailed.</span></label>
-				<select id="PVCanCurtail" name="PVCanCurtail">
-					<option value='True' {{ 'selected' if allInputDataDict.PVCanCurtail == True }}>Yes</option>
-					<option value='False' {{ 'selected' if allInputDataDict.PVCanCurtail == False }}>No</option>
-				</select>
-			</div>
-			<div class="shortInput">
-				<label class="tooltip">Can photovoltaic be exported?<span class="classic">Allows for excess photovoltaic power to be sold back to the grid.</span></label>
-				<select id="PVCanExport" name="PVCanExport">
-					<option value='True' {{ 'selected' if allInputDataDict.PVCanExport == True }}>Yes</option>
-					<option value='False' {{ 'selected' if allInputDataDict.PVCanExport == False }}>No</option>
-				</select>
-			</div>
-			<div class="shortInput">
-				<label class="tooltip">Photovoltaic MACRS Years<span class="classic">MACRS schedule for financial analysis. Possible inputs are 0, 5 and 7 years.</span></label>
-				<select id="PVMacrsOptionYears" name="PVMacrsOptionYears" value="{{allInputDataDict.PVMacrsOptionYears}}"/>
-					<option value="0" {{ 'selected' if allInputDataDict.PVMacrsOptionYears == '0' }}>0</option>
-					<option value="5" {{ 'selected' if allInputDataDict.PVMacrsOptionYears == '5' }}>5</option>
-					<option value="7" {{ 'selected' if allInputDataDict.PVMacrsOptionYears == '7' }}>7</option>
-				</select>
-			</div>
-			<div class="shortInput">
-				<label class="tooltip">Photovoltaic ITC (%)<span class="classic">Please enter a number 0-1 for the photovoltaic investment tax credit. Format 0.XX</span></label>
-				<input type="number" id="PVItcPercent" name="PVItcPercent" value="{{allInputDataDict.PVItcPercent}}" step="0.01" min="0.0" max="1.0" required="required"/>
 			</div>
 
 			<!-- vbatDispatch Specific Inputs -->
@@ -318,36 +278,6 @@
 				<label class="tooltip">Discount Rate (%)<span class="classic">Discount rate used in financial analysis.</span></label>
 				<input type="text" id="discountRate" name="discountRate" value="{{allInputDataDict.discountRate}}" pattern="[1-9][0-9]{0,2}" required="required">
 			</div>
-
-			<!-- Program Design Specific Inputs -->
-			<div class="wideInput">
-				<p class="inputSectionHeader">Distributed Energy Resource (DER) Program Design Inputs</p>
-			</div>
-			<hr style="border-style: solid; border-color: #196b12; margin-top: 10px;">
-			<!-- 
-			<div class="shortInput">
-				<label class="tooltip">Enable DER sharing program<span class="classic">Enabling DER sharing program will perform a cost-benefit analysis of a utility's DER sharing program.</span></label>
-				<select id="utilityProgram" name="utilityProgram" value="{{allInputDataDict.utilityProgram}}">
-					<option value="True" {{ 'selected' if allInputDataDict.utilityProgram == 'Yes' }}>Yes</option>
-					<option value="False" {{ 'selected' if allInputDataDict.utilityProgram == 'No' }}>No</option>
-				</select>
-			</div>
-			-->
-			<div class="shortInput">
-				<label class="tooltip">Energy Compensation Rate ($/kWh)<span class="classic">The dollar amount per kWh compensated to the member-consumer.</span></label>
-				<input type="text" id="rateCompensation" name="rateCompensation" value="{{allInputDataDict.rateCompensation}}" pattern="^\d+\.?\d*?$" min="0" required="required"/>
-			</div>
-			<div class="shortInput">
-				<label class="tooltip">Subsidy Amount ($)<span class="classic">The total subsidy amount ($) for the entire analysis duration.</span></label>
-				<input type="text" id="subsidy" name="subsidy" value="{{allInputDataDict.subsidy}}" pattern="^\d+\.?\d*?$" required="required"/>
-			</div>
-			<!-- 
-			<div class="shortInput">
-				<label class="tooltip">Maximum BESS Power Capacity Discharge<span class="classic">The maximum percentage of the Battery Energy Storage System's total power discharge allowed for the utility's control. Must be a percent fraction between 0 and 1. Most programs designate up to 80% (0.80) of total power capacity, leaving the member with at least 20% (0.20) charge.</span></label>
-				<input type="text" id="maxBESSDischarge" name="maxBESSDischarge" value="{{allInputDataDict.maxBESSDischarge}}" pattern="^\d+\.?\d*?$" min="0" max="1" required="required"/>
-			</div>
-			-->
-			
 
 			{{ omfModelButtons }}
 		</form>

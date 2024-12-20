@@ -66,18 +66,6 @@ def create_REopt_jl_jsonFile(modelDir, inputDict):
 		}
 	}
 
-	scenario['PV'] = {
-		'installed_cost_per_kw': float(inputDict['costPV']),
-		'existing_kw': float(inputDict['existing_kw_PV']),
-		'min_kw': float(inputDict['min_kw_PV']),
-		'max_kw': float(inputDict['max_kw_PV']),
-		'can_export_beyond_nem_limit': inputDict['PVCanExport'],
-		'can_curtail': inputDict['PVCanCurtail'],
-		'macrs_option_years': int(inputDict['PVMacrsOptionYears']),
-		'federal_itc_fraction': float(inputDict['PVItcPercent']),
-		}
-
-
 	## Add a Battery Energy Storage System (BESS) section if enabled 
 	scenario['ElectricStorage'] = {
 		##TODO: Add options here, if needed
@@ -107,7 +95,6 @@ def create_REopt_jl_jsonFile(modelDir, inputDict):
 			'fuel_avail_gal': float(inputDict['fuel_available_gal']),
 			'fuel_cost_per_gallon': float(inputDict['fuel_cost_per_gal'])
 		}
-
 
 	## Save the scenario file
 	## NOTE: reopt_jl currently requires a path for the input file, so the file must be saved to a location
@@ -287,25 +274,22 @@ def work(modelDir, inputDict):
 		vbat_discharge = vbpower_series.where(vbpower_series < 0, 0) #negative values = discharging
 		vbat_discharge_flipsign = vbat_discharge.mul(-1) ## flip sign of vbat discharge for plotting purposes
 
+	## Update the financial outputs
+	subsidies = np.full(12, float(inputDict['subsidyOngoing']))
+	subsidies[0] = float(inputDict['subsidyUpfront'])
+	outData['savings'] = np.array(outData['savings']) + subsidies
 
 	## DER Overview plot ###################################################################################################################################################################
 	grid_to_load = reoptResults['ElectricUtility']['electric_to_load_series_kw']
 
 	if 'Generator' in reoptResults:
 		generator = np.array(reoptResults['Generator']['electric_to_load_series_kw']) * 1000.
-
-	if 'PV' in reoptResults: ## PV
-		PV = reoptResults['PV']['electric_to_load_series_kw']
-	else:
-		PV = np.zeros_like(demand)
 	
 	## Using REopt's Battery Energy Storage System (BESS) output
 	if 'ElectricStorage' in reoptResults and any(reoptResults['ElectricStorage']['storage_to_load_series_kw']): ## BESS
 		print("Using REopt's BESS output. \n")
 		BESS = reoptResults['ElectricStorage']['storage_to_load_series_kw']
 		grid_charging_BESS = np.asarray(reoptResults['ElectricUtility']['electric_to_storage_series_kw'])
-		if 'PV' in reoptResults:
-			grid_charging_BESS += np.asarray(reoptResults['PV']['electric_to_storage_series_kw'])
 		outData['chargeLevelBattery'] = reoptResults['ElectricStorage']['soc_series_fraction']
 
 		## Update the monthly consumer savings
@@ -401,8 +385,7 @@ def work(modelDir, inputDict):
 	fig.update_traces(fillpattern_shape='.', selector=dict(name='Additional Load (Charging BESS and vbat)'))
 
 	## Grid serving new load
-	## TODO: Should PV really be in this?
-	grid_serving_new_load = np.asarray(grid_to_load) + np.asarray(grid_charging_BESS) + vbat_charge_component - vbat_discharge_component + np.asarray(PV)
+	grid_serving_new_load = np.asarray(grid_to_load) + np.asarray(grid_charging_BESS) + vbat_charge_component - vbat_discharge_component
 	fig.add_trace(go.Scatter(x=timestamps,
                          y=grid_serving_new_load,
 						 yaxis='y1',
@@ -423,17 +406,6 @@ def work(modelDir, inputDict):
 	#				 showlegend=showlegend))
 	#fig.update_traces(legendgroup='Demand', visible='legendonly', selector=dict(name='Original Load (kW)')) ## Make demand hidden on plot by default
 
-	## PV plot, if enabled
-	if (inputDict['PV'] == 'Yes'):
-		fig.add_trace(go.Scatter(x=timestamps,
-						y=PV,
-						yaxis='y1',
-						mode='none',
-						fill='tozeroy',
-						name='PV Serving Load',
-						fillcolor='rgba(255,246,0,1)',
-						showlegend=showlegend
-						))
 		
 	## Fossil Generator piece
 	if 'Generator' in reoptResults:
@@ -496,29 +468,6 @@ def work(modelDir, inputDict):
 							name='Power Used to Charge TESS',
 							fillcolor='rgba(155,148,225,1)',
 							showlegend=True))
-	
-
-	if inputDict['PV'] == 'Yes':
-		PVcurtailed = reoptResults['PV']['electric_curtailed_series_kw']
-		electric_to_grid = reoptResults['PV']['electric_to_grid_series_kw']
-
-		## PV curtailed (electric_curtailed_series_kw)
-		fig.add_trace(go.Scatter(x=timestamps,
-							y=np.asarray(PVcurtailed),
-							mode='none',
-							fill='tozeroy',
-							name='PV Curtailed',
-							fillcolor='rgba(0,137,83,1)',
-							showlegend=True))
-		
-		## PV exported to grid (electric_to_grid_series_kw)
-		fig.add_trace(go.Scatter(x=timestamps,
-					y=np.asarray(electric_to_grid),
-					mode='none',
-					fill='tozeroy',
-					name='Power Exported to Grid',
-					fillcolor='rgba(33,78,154,1)',
-					showlegend=True))
 		
 	## Power used to meet load (NOTE: Does this mean grid to load?)
 	fig.add_trace(go.Scatter(x=timestamps,
@@ -606,7 +555,6 @@ def work(modelDir, inputDict):
 			showlegend=True
 		))
 
-
 		## Plot layout
 		fig.update_layout(
 			#title='Residential Data',
@@ -624,8 +572,6 @@ def work(modelDir, inputDict):
 				x=1
 				)
 		)
-
-		#fig.show()
 		
 		## Encode plot data as JSON for showing in the HTML side
 		outData['thermalDevicePlotData'] = json.dumps(fig.data, cls=plotly.utils.PlotlyJSONEncoder)
@@ -666,12 +612,14 @@ def new(modelDir):
 		'criticalLoad': criticalLoad_curve,
 		'criticalLoadSwitch': 'Yes',
 		'criticalLoadFactor': '0.50',
-		'PV': 'Yes',
 
 		## Financial Inputs
 		'demandChargeURDB': 'Yes',
 		'demandChargeCost': '0.0', ## Set to zero because a residential consumer would not pay this -- the utility would
 		'projectionLength': '25',
+		'rateCompensation': '0.1', ## unit: $/kWh
+		'subsidyUpfront': '50',
+		'subsidyOngoing': '10',
 
 		## Chemical Battery Inputs
 		'BESS_kw': '5',
@@ -691,17 +639,6 @@ def new(modelDir):
 		'fuel_available_gal': '15.6', ## NOTE: For liquid propane: 3.56 gal/hr
 		'fuel_cost_per_gal': '3.61',
 
-		## Photovoltaic Inputs
-		'existing_kw_PV': '29500.0',
-		'additional_kw_PV': '0.0',
-		'costPV': '0.0',
-		'min_kw_PV': '0',
-		'max_kw_PV': '29500.0',
-		'PVCanCurtail': True,
-		'PVCanExport': True,
-		'PVMacrsOptionYears': '25',
-		'PVItcPercent': '0.0',
-
 		## vbatDispatch inputs:
 		'load_type': '2', ## Heat Pump
 		'number_devices': '1',
@@ -715,12 +652,6 @@ def new(modelDir):
 		'discountRate': '2',
 		'unitDeviceCost': '150',
 		'unitUpkeepCost': '5',
-
-		## DER Program Design inputs:
-		'utilityProgram': 'No',
-		'rateCompensation': '0.1', ## unit: $/kWh
-		#'maxBESSDischarge': '0.80', ## Between 0 and 1 (Percent of total BESS capacity) #TODO: Fix the HTML input for this
-		'subsidy': '50',
 	}
 	return __neoMetaModel__.new(modelDir, defaultInputs)
 
