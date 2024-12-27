@@ -76,29 +76,25 @@ def work(modelDir, inputDict):
 		}
 
 	## Add a Battery Energy Storage System (BESS) section if enabled 
-	if inputDict['chemBESSgridcharge'] == 'Yes':
-		can_grid_charge_bool = True
-	else:
-		can_grid_charge_bool = False
-
-	scenario['ElectricStorage'] = {
-		##TODO: Add options here, if needed
-		'min_kw': float(inputDict['BESS_kw'])*float(inputDict['numberBESS']),
-		'max_kw':  float(inputDict['BESS_kw'])*float(inputDict['numberBESS']),
-		'min_kwh':  float(inputDict['BESS_kwh'])*float(inputDict['numberBESS']),
-		'max_kwh':  float(inputDict['BESS_kwh'])*float(inputDict['numberBESS']),
-		'can_grid_charge': can_grid_charge_bool,
-		'total_rebate_per_kw': 0,
-		'macrs_option_years': 0,
-		'installed_cost_per_kw': 0,
-		'installed_cost_per_kwh': 0,
-		'battery_replacement_year': 0,
-		'inverter_replacement_year': 0,
-		'replace_cost_per_kwh': 0.0,
-		'replace_cost_per_kw': 0.0,
-		'total_rebate_per_kw': 0.0,
-		'total_itc_fraction': 0.0,
-		}
+	if float(inputDict['numberBESS']) > 0:
+		scenario['ElectricStorage'] = {
+			##TODO: Add options here, if needed
+			'min_kw': float(inputDict['BESS_kw'])*float(inputDict['numberBESS']),
+			'max_kw':  float(inputDict['BESS_kw'])*float(inputDict['numberBESS']),
+			'min_kwh':  float(inputDict['BESS_kwh'])*float(inputDict['numberBESS']),
+			'max_kwh':  float(inputDict['BESS_kwh'])*float(inputDict['numberBESS']),
+			'can_grid_charge': True,
+			'total_rebate_per_kw': 0,
+			'macrs_option_years': 0,
+			'installed_cost_per_kw': 0,
+			'installed_cost_per_kwh': 0,
+			'battery_replacement_year': 0,
+			'inverter_replacement_year': 0,
+			'replace_cost_per_kwh': 0.0,
+			'replace_cost_per_kw': 0.0,
+			'total_rebate_per_kw': 0.0,
+			'total_itc_fraction': 0.0,
+			}
 	
 	## Save the scenario file
 	## NOTE: reopt_jl currently requires a path for the input file, so the file must be saved to a location preferrably in the modelDir directory
@@ -145,7 +141,20 @@ def work(modelDir, inputDict):
 		vbatMinPowerCapacity = pd.Series(vbatResults['minPowerSeries'])
 		vbatMaxPowerCapacity = pd.Series(vbatResults['maxPowerSeries'])
 		vbatPower = vbpower_series
+	else:
+		## If vbatDispatch is disabled, set the thermal variables to zero
+		vbpower_series = np.zeros_like(demand)
+		vbat_charge = np.zeros_like(demand)
+		vbat_discharge = np.zeros_like(demand)
+		vbat_discharge_flipsign = np.zeros_like(demand)
+		vbatMinEnergyCapacity = np.zeros_like(demand)
+		vbatMaxEnergyCapacity = np.zeros_like(demand)
+		vbatEnergy = np.zeros_like(demand)
+		vbatMinPowerCapacity = np.zeros_like(demand)
+		vbatMaxPowerCapacity = np.zeros_like(demand)
+		vbatPower = vbpower_series
 
+	## Calculate the subsidies
 	projectionLength = int(inputDict['projectionLength'])
 	subsidyUpfront = float(inputDict['subsidyUpfront'])
 	subsidyRecurring_1year_total = float(inputDict['subsidyRecurring'])
@@ -260,9 +269,14 @@ def work(modelDir, inputDict):
 	lineshape = 'hv'
 	grid_to_load = reoptResults['ElectricUtility']['electric_to_load_series_kw']
 
-	BESS = reoptResults['ElectricStorage']['storage_to_load_series_kw']
-	grid_charging_BESS = reoptResults['ElectricUtility']['electric_to_storage_series_kw']
-	outData['chargeLevelBattery'] = reoptResults['ElectricStorage']['soc_series_fraction']
+	if 'ElectricStorage' in reoptResults:
+		BESS = reoptResults['ElectricStorage']['storage_to_load_series_kw']
+		grid_charging_BESS = reoptResults['ElectricUtility']['electric_to_storage_series_kw']
+		outData['chargeLevelBattery'] = reoptResults['ElectricStorage']['soc_series_fraction']
+	else:
+		BESS = np.zeros_like(demand)
+		grid_charging_BESS = np.zeros_like(demand)
+		outData['chargeLevelBattery'] = np.zeros_like(demand)
 
 	## NOTE: The following 6 lines of code are temporary; it reads in the SOC info from a static REopt test file (a previously completed REopt run) 
 	## This functionality was used when REopt did not produce BESS results, or the results were arrays of zeros.
@@ -284,18 +298,22 @@ def work(modelDir, inputDict):
 		vbat_charge_component = np.zeros_like(demand)
 
 	## Convert all values from kW to Watts for plotting purposes only
-	grid_to_load = np.array(grid_to_load) * 1000.
-	BESS = np.array(BESS) * 1000.
-	grid_charging_BESS = np.array(grid_charging_BESS) * 1000.
-	vbat_discharge_component = vbat_discharge_component * 1000.
-	vbat_charge_component = vbat_charge_component * 1000.
-	demand = np.array(demand) * 1000.
+	grid_to_load_W = np.array(grid_to_load) * 1000.
+	BESS_W = np.array(BESS) * 1000.
+	grid_charging_BESS_W = np.array(grid_charging_BESS) * 1000.
+	vbat_discharge_component_W = vbat_discharge_component * 1000.
+	vbat_charge_component_W = vbat_charge_component * 1000.
+	demand_W = np.array(demand) * 1000.
 	if 'Generator' in reoptResults:
-		generator = np.array(reoptResults['Generator']['electric_to_load_series_kw']) * 1000.
+		generator = np.array(reoptResults['Generator']['electric_to_load_series_kw'])
+		generator_W = generator * 1000.
+	else:
+		generator = np.zeros_like(demand)
+		generator_W = np.zeros_like(demand)
 
 	## Original load piece (minus any vbat or BESS charging aka 'new/additional loads')
 	fig.add_trace(go.Scatter(x=timestamps,
-						y = demand - BESS - vbat_discharge_component,
+						y = demand_W - BESS_W - vbat_discharge_component_W,
 						yaxis='y1',
 						mode='none',
 						name='Original Load',
@@ -321,11 +339,10 @@ def work(modelDir, inputDict):
 	#					 showlegend=showlegend))
 	#fig.update_traces(fillpattern_shape='.', selector=dict(name='Additional Load (Charging BESS and TESS)'))
 	
-
 	## Grid serving new load
-	grid_serving_new_load = grid_to_load + grid_charging_BESS + vbat_charge_component - vbat_discharge_component
+	grid_serving_new_load_W = grid_to_load_W + grid_charging_BESS_W + vbat_charge_component_W - vbat_discharge_component_W
 	fig.add_trace(go.Scatter(x=timestamps,
-                        y=grid_serving_new_load,
+                        y=grid_serving_new_load_W,
 						yaxis='y1',
                         #mode='none',
                         #fill='tozeroy',
@@ -349,7 +366,7 @@ def work(modelDir, inputDict):
 
 	## BESS serving load piece
 	fig.add_trace(go.Scatter(x=timestamps,
-						y = BESS, # + np.asarray(demand) + vbat_discharge_component,
+						y = BESS_W, # + np.asarray(demand) + vbat_discharge_component,
 						yaxis='y1',
 						#mode='none',
 						#fill='tozeroy',
@@ -360,7 +377,7 @@ def work(modelDir, inputDict):
 						showlegend=showlegend))
 
 	fig.add_trace(go.Scatter(x=timestamps,
-                        y=np.asarray(grid_charging_BESS),
+                        y=grid_charging_BESS_W,
 						yaxis='y1',
                         #mode='none',
                         name='Additional Load from Home BESS',
@@ -373,7 +390,7 @@ def work(modelDir, inputDict):
 	##vbatDispatch (TESS) piece
 	if (inputDict['load_type'] != '0') and (int(inputDict['number_devices'])>0): ## Load type 0 corresponds to the "None" option, which disables this vbatDispatch function
 		fig.add_trace(go.Scatter(x=timestamps,
-							y = vbat_discharge_component,
+							y = vbat_discharge_component_W,
 							yaxis='y1',
 							#mode='none',
 							#fill='tozeroy',
@@ -385,7 +402,7 @@ def work(modelDir, inputDict):
 							showlegend=showlegend))
 		
 		fig.add_trace(go.Scatter(x=timestamps,
-    	                    y = vbat_charge_component,
+    	                    y = vbat_charge_component_W,
 							yaxis='y1',
             	            #mode='none',
                 	        name='Additional load from Home TESS',
@@ -398,7 +415,7 @@ def work(modelDir, inputDict):
 	## Fossil Generator piece
 	if 'Generator' in reoptResults:
 		fig.add_trace(go.Scatter(x=timestamps,
-						y = generator,
+						y = generator_W,
 						yaxis='y1',
 						mode='none',
 						fill='tozeroy',
@@ -561,18 +578,37 @@ def work(modelDir, inputDict):
 
 	"""
 
-	## Calculate total residential BESS capacity and compensation
-	total_kw_residential_BESS = int(inputDict['numberBESS']) * float(inputDict['BESS_kw'])
-	total_kwh_residential_BESS = int(inputDict['numberBESS']) * float(inputDict['BESS_kwh'])
-	rateCompensation = float(inputDict['rateCompensation'])
-	total_residential_BESS_compensation = rateCompensation * np.sum(total_kwh_residential_BESS)
-
-	## Calculate monthly BESS costs and savings
+	## Update energy and power variables
 	monthHours = [(0, 744), (744, 1416), (1416, 2160), (2160, 2880), 
 		(2880, 3624), (3624, 4344), (4344, 5088), (5088, 5832), 
 		(5832, 6552), (6552, 7296), (7296, 8016), (8016, 8760)]
-	BESS = reoptResults['ElectricStorage']['storage_to_load_series_kw']
 	electricityCost = float(inputDict['electricityCost'])
+	demandChargeCost = float(inputDict['demandChargeCost'])
+	rateCompensation = float(inputDict['rateCompensation'])
+
+	peakDemand = [max(demand[s:f]) for s, f in monthHours] 
+	outData['peakDemand'] = peakDemand
+	energyMonthly = [sum(demand[s:f]) for s, f in monthHours]
+	outData["energyMonthly"] = energyMonthly
+	outData["energyCost"] = [em*electricityCost for em in energyMonthly]
+	demandAdj_total = [d-p-b-g for d, p, b, g in zip(demand, vbpower_series.to_numpy(), BESS, generator)]
+	outData['demandAdj_total'] = demandAdj_total
+	energyAdjustedMonthly = [sum(demandAdj_total[s:f]) for s, f in monthHours]
+	outData['peakAdjustedDemand_total'] = [max(demandAdj_total[s:f]) for s, f in monthHours]
+	outData['energyAdjustedMonthly_total'] = [sum(demandAdj_total[s:f]) for s, f in monthHours]
+	outData['energyCostAdjusted_total'] = [eam*electricityCost for eam in energyAdjustedMonthly]
+	outData['demandCharge'] = [peak*demandChargeCost for peak in peakDemand]
+	outData['demandChargeAdjusted_total'] = [pad*demandChargeCost for pad in outData['peakAdjustedDemand_total']]
+	outData['totalCost'] = [ec+dcm for ec, dcm in zip(outData['energyCost'], outData['demandCharge'])]
+	outData['totalCostAdjusted_total'] = [eca+dca for eca, dca in zip(outData['energyCostAdjusted_total'], outData['demandChargeAdjusted_total'])]
+	outData['savings'] = [tot-tota for tot, tota in zip(outData['totalCost'], outData['totalCostAdjusted_total'])]
+
+	## Calculate total residential BESS capacity and compensation
+	total_kw_residential_BESS = int(inputDict['numberBESS']) * float(inputDict['BESS_kw'])
+	total_kwh_residential_BESS = int(inputDict['numberBESS']) * float(inputDict['BESS_kwh'])
+	total_residential_BESS_compensation = rateCompensation * np.sum(total_kwh_residential_BESS)
+
+	## Calculate monthly BESS costs and savings
 	BESS_monthly_compensation_to_consumer = np.array([sum(BESS[s:f])*rateCompensation for s, f in monthHours])
 	BESS_yearly_compensation_to_consumer_total = np.sum(BESS_monthly_compensation_to_consumer)
 	BESS_allyears_compensation_to_consumer_array = np.full(projectionLength, BESS_yearly_compensation_to_consumer_total)
@@ -618,31 +654,14 @@ def work(modelDir, inputDict):
 	utilityNetSavings_allyears_total = utilitySavings_allyears_total - utilityCosts_allyears_total
 	utilityNetSavings_allyears_array = np.full(projectionLength, utilityNetSavings_1year_total)
 
-	## Note: The following for-loop would display the net savings as positive. If there are negative savings (when costs are greater than savings), it will only show $0 savings, rather than the negative savings amount. This might not be a useful way to display it, so it is commented for now.
-	## Calculate the net savings and costs for each month
-	#utilityNetSavings_1year_list = []
-	#leftoverCosts = 0
-	#for savings, costs in zip(utilitySavings_1year_array, utilityCosts_1year_array):
-	#	net = costs - savings
-
-	#	## Add leftover costs from previous months
-	#	net_with_leftover = net + leftoverCosts
-		
-	#	## If any leftover costs, then carry them over to the next month
-	#	if net_with_leftover > 0:
-	#		leftoverCosts = net_with_leftover 
-	#		utilityNetSavings_1year_list.append(0)  ## No net savings for this month
-	#	else:
-	#		leftoverCosts = 0  ## No leftover costs if net is covered
-	#		utilityNetSavings_1year_list.append(-net_with_leftover)  ## Record net savings (positive)
-
-	#outData['savings'] = utilityNetSavings_1year_list
-
 	## Update financial parameters
 	outData['savings'] = utilityNetSavings_1year_array
 	outData['totalCost'] = list(np.array(outData['totalCost']) + np.array(utilityCosts_1year_array))
 	outData['NPV'] = utilityNetSavings_allyears_total
-	outData['SPP'] = utilityCosts_allyears_total / utilitySavings_1year_total
+	if utilitySavings_1year_total <= 0:
+		outData['SPP'] = 0.
+	else:
+		outData['SPP'] = utilityCosts_allyears_total / utilitySavings_1year_total
 	outData['netCashflow'] = list(utilityNetSavings_allyears_array)
 	outData['cumulativeCashflow'] = [sum(utilityNetSavings_allyears_array[:i+1]) for i in range(len(utilityNetSavings_allyears_array))]
 	outData['savingsAllYears'] = list(utilitySavings_allyears_array)
@@ -650,7 +669,6 @@ def work(modelDir, inputDict):
 	outData['BESS_compensation_to_consumer_allyears'] = list(BESS_allyears_compensation_to_consumer_array)
 	outData['operationalCosts_ongoing_allyears_total'] = list(operationalCosts_ongoing_allyears_array)
 	outData['operationalCosts_onetime_allyears_total'] = list(operationalCosts_onetime_allyears_array)
-
 
 	# Model operations typically ends here.
 	# Stdout/stderr.
@@ -690,7 +708,6 @@ def new(modelDir):
 
 		## Chemical Battery Inputs
 		'numberBESS': '1000', ## Number of residential Tesla Powerwall 3 batteries
-		'chemBESSgridcharge': 'Yes',  
 		'BESS_operationalCosts_ongoing': '20.0',
 		'BESS_operationalCosts_onetime': '1000', 
 		'BESS_kw': '5',
