@@ -242,7 +242,7 @@ def work(modelDir, inputDict):
 
 def new(modelDir):
 	''' Create a new instance of this model. Returns true on success, false on failure. '''
-	meter_file_name = 'input_mohcaCustom.csv'
+	meter_file_name = 'SecondaryTestCircuit_modified_input_MoHCA.csv'
 	meter_file_path = Path(omf.omfDir,'static','testFiles', 'hostingCapacity', meter_file_name)
 	# meter_file_contents = open(meter_file_path).read()
 	defaultInputs = {
@@ -250,7 +250,7 @@ def new(modelDir):
 		"algorithm": 'sandia1',
 		"AMIDataFileName": meter_file_name,
 		"userAMIDisplayFileName": meter_file_name,
-		"feederName1": 'iowa240.clean.dss',
+		"feederName1": 'nreca_secondaryTestSet',
 		"optionalCircuitFile": 'on',
 		"traditionalHCMaxTestkw": 50000,
 		"dgInverterSetting": 'unityPF',
@@ -262,7 +262,7 @@ def new(modelDir):
 	creationCode = __neoMetaModel__.new(modelDir, defaultInputs)
 	try:
 		shutil.copyfile(
-			Path(__neoMetaModel__._omfDir, "static", "publicFeeders", defaultInputs["feederName1"]+'.omd'),
+			Path(__neoMetaModel__._omfDir, "static", "testFiles", 'hostingCapacity', defaultInputs["feederName1"]+'.omd'),
 			Path(modelDir, defaultInputs["feederName1"]+'.omd'))
 		shutil.copyfile( meter_file_path, Path(modelDir, meter_file_name) )
 	except:
