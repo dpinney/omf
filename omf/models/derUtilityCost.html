@@ -104,7 +104,7 @@
 				<input type="text" id="rateCompensation" name="rateCompensation" value="{{allInputDataDict.rateCompensation}}" pattern="^\d+\.?\d*?$" min="0" required="required"/>
 			</div>
 			<div class="shortInput">
-				<label class="tooltip">Upfront Subsidy Amount ($)<span class="classic">The total upfront one-time only subsidy amount ($) paid to the member-consumer.</span></label>
+				<label class="tooltip">Upfront Subsidy Amount ($)<span class="classic">The total upfront one-time subsidy amount ($) paid to the member-consumer.</span></label>
 				<input type="text" id="subsidyUpfront" name="subsidyUpfront" value="{{allInputDataDict.subsidyUpfront}}" pattern="^\d+\.?\d*?$" required="required"/>
 			</div>
 			<div class="shortInput">
@@ -321,9 +321,10 @@
 					insertMetric("monthlySummaryTable","Adjusted Energy Cost ($)", allOutputData.energyCostAdjusted_total)
 					insertMetric("monthlySummaryTable","Demand Charge ($)", allOutputData.demandCharge)
 					insertMetric("monthlySummaryTable","Adjusted Demand Charge ($)", allOutputData.demandChargeAdjusted_total)
-					insertMetric("monthlySummaryTable","Total Cost ($)", allOutputData.totalCost)
-					insertMetric("monthlySummaryTable","Adjusted Total Cost ($)", allOutputData.totalCostAdjusted_total)
-					insertMetric("monthlySummaryTable","Utility Savings ($)", allOutputData.savings)
+					insertMetric("monthlySummaryTable","Total Cost of Service ($)", allOutputData.totalCost_service)
+					insertMetric("monthlySummaryTable","Adjusted Total Cost of Service ($)", allOutputData.totalCostAdjusted_service)
+					insertMetric("monthlySummaryTable","Consumer Compensation ($)", allOutputData.totalCost_paidToConsumer)
+					insertMetric("monthlySummaryTable","Net Utility Savings ($)", allOutputData.savings_total)
 					//insertMetric("monthlySummaryTable","1 kW Consumer Savings ($)", allOutputData.totalSavingsSmallConsumer)
 					//insertMetric("monthlySummaryTable","10 kW Consumer Savings ($)", allOutputData.totalSavingsLargeConsumer)
 				</script>
@@ -337,15 +338,22 @@
 				new Highcharts.Chart({"credits":{"enabled":false},
 					"plotOptions":{"column":{"stacking":'normal'},"series":{"animation":false,"shadow":false},"spline":{"animation":false,"shadow":false}},
 					"xAxis":{"title":{"text":"Year After Installation","style":{"color":"gray"}},"type":"linear","tickColor":"gray","tickInterval":1,"lineColor":"gray","minorTickColor":"gray", "minorTickInterval":5},
-					"title":{"text":"NPV:$" + allOutputData.NPV.toFixed(0) + ", SPP:" + allOutputData.SPP.toFixed(3), "verticalAlign":"top", "align":"right", "y":35, "x":-10, "style":{"color":"#333333", "fontSize":"12px"}},
+					"title":{"text":"NPV: $" + allOutputData.NPV.toFixed(0) + ", SPP: " + allOutputData.SPP.toFixed(3), "verticalAlign":"top", "align":"right", "y":35, "x":-10, "style":{"color":"#333333", "fontSize":"12px"}},
 					"series":[
-						{"name":"Net Benefits", "data": allOutputData.netCashflow, "color": "rgb(102,102,255)"},
-						{"name":"Utility Savings", "data": allOutputData.savingsAllYears, "color": "green"},
+						//{"name":"Net Benefits", "data": allOutputData.netCashflow, "color": "rgb(102,102,255)"},
+						//{"name":"Total Utility Savings", "data": allOutputData.savingsAllYears, "color": "green"},
+						{"name":"BESS Savings", "data": allOutputData.annualEarnings_BESS, "color": "rgb(0,128,0)"},
+						{"name":"TESS Savings", "data": allOutputData.annualEarnings_TESS, "color": "rgb(143,188,143)"},
+						{"name":"Generator Savings", "data": allOutputData.annualEarnings_generator, "color": "rgb(152,251,152)"},
+						{"name":"Demand Charge Savings", "data": allOutputData.savings_demandCharge_annual, "color": "rgb(139,190,27)"},
 						{"name":"Subsidies", "data": allOutputData.subsidies, "color": "black"},
-						{"name":"Customer BESS Compensations", "data": allOutputData.BESS_compensation_to_consumer_allyears, "color": "rgb(255,102,102)"},
-						{"name":"Ongoing Operational Costs", "data": allOutputData.operationalCosts_ongoing_allyears_total, "color": "orange"},
-						{"name":"One-time Operational Costs", "data": allOutputData.operationalCosts_onetime_allyears_total, "color": "rgb(229,204,255)"},
-						{"name":"Cumulative Return", "type":"spline", "data": allOutputData.cumulativeCashflow, "color": "brown"}
+						{"name":"Consumer BESS Compensation", "data": allOutputData.BESS_compensation_to_consumer_allyears, "color": "rgb(255,102,102)"},
+						{"name":"Grid Costs", "data": allOutputData.energyCostAdjusted_gridCharging_annual, "color": "rgb(169,169,169)"},
+						{"name":"BESS Ongoing Operational Costs", "data": allOutputData.operationalCosts_BESS_ongoing_allyears_total, "color": "orange"},
+						{"name":"BESS One-time Operational Costs", "data": allOutputData.operationalCosts_BESS_onetime_allyears_total, "color": "rgb(229,204,255)"},
+						{"name":"TESS Ongoing Operational Costs", "data": allOutputData.operationalCosts_TESS_ongoing_allyears_total, "color": "red"},
+						{"name":"TESS One-time Operational Costs", "data": allOutputData.operationalCosts_TESS_onetime_allyears_total, "color": "rgb(178,34,34)"},
+						{"name":"Cumulative Return", "type":"spline", "data": allOutputData.cumulativeCashflow_total, "color": "brown"}
 					],
 					"yAxis":{"title":{"text":"Income ($)","style":{"color":"gray"}}},
 					"chart":{"marginBottom":55,"zoomType":"x","renderTo":"cashFlowChartDiv","type":"column","marginRight":20, "height":250,"width":1000},
