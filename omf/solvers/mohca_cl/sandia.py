@@ -11,12 +11,13 @@ def hosting_cap(
         input_csv_path,
         output_csv_path,
         der_pf=None,
-        utc_offset: int = 0
-        ):
+        vv_x=None,
+        vv_y=None,
+        load_pf_est=0.97
+):
     """
     Calculate hosting capacity based on input csv
     export results to output_csv_path
-    optional power factor input for...
 
     Assert OMF format of file at input_csv_path with required columns:
         busname: [any string]
@@ -26,20 +27,58 @@ def hosting_cap(
         kvar_reading: [any float, avg over measurement interval]
 
     Sign Convention of kW and KVAR:
-        Positive for Loading, Negative for Injections
+        Positive for Loading (i.e., flowing into the load bus),
+        Negative for Injections (i.e., flowing out of the load bus)
 
     Sign Convention of optional DER power factor input:
         Positive for capacitve, Negative for inductive
 
-    NOTE: pf and utc_offset currently unused - acting as placeholders.
+    The optional input variable der_pf corresponds to the advanced inverter
+        constant power factor setting for the DER.
+
+    The optional input variables vv_x and vv_y correspond to the x and y
+        coordinates,respectively, for a user-defined Volt-VAR curve. The vv_x
+        values are per unit voltages and the vv_y values are per unit reactive
+        power values, where negative values are inductive and positive values
+        are capacitive. The lengths of vv_x and vv_y must be equal. If the user
+        provides a Volt-VAR curve using these inputs, it will supersede the
+        value of der_pf (if also provided).
+
+    The optional input variable load_pf_est is utilized when reactive power
+        measurements are not available for a customer, and represents an
+        estimated average power factor.
 
     """
     input_data = pd.read_csv(input_csv_path)
+
+    # set the upper bound voltage limit
+    vpu_upperbound = 1.05
 
     # accomodate optional power factor
     # sign convention: capacitive PF (+), inductive PF (-)
     if der_pf is None:
         der_pf = 1.0
+
+    # accomodate optional Volt-VAR mode
+    # sign convention: capacitive VAR (+), inductive VAR (-)
+    if vv_x is not None and vv_y is not None:
+        # Check for valid length
+        if len(vv_x) != len(vv_y):
+            print('Warning:  vv_x and vv_y are different lengths.')
+            print('Using der_pf = 1.0')
+            der_pf = 1.0
+
+        else:
+            # find intercept
+            qpu = np.interp(vpu_upperbound, vv_x, vv_y)
+            if qpu == 0:
+                der_pf = 1.0
+            else:
+                der_pf = np.sign(qpu)*(1-qpu**2)**(1/2)
+
+    # set the estimated X/R ratio
+    # used with load_pf_est when kVAR measurements are unavailable
+    xr_est = 0.5
 
     # ensure numeric values
     numeric_cols = ['v_reading', 'kw_reading', 'kvar_reading']
@@ -47,7 +86,6 @@ def hosting_cap(
         input_data[numeric_col] = pd.to_numeric(input_data[numeric_col])
 
     # ensure datetime column
-    # TODO: handle daylight savings from local time input
     input_data['datetime'] = pd.to_datetime(input_data['datetime'], utc=True)
 
     # Identify unique buses
@@ -157,6 +195,16 @@ def hosting_cap(
             n_skipped += 1
             continue
 
+        # check for PV via kw injections and set has_pv flag
+        has_pv = False
+        injection_noise_threshold = 0.05
+        injection_count_threshold = 10
+
+        n_kw_injections = fixed_data['P'] >= injection_noise_threshold
+        if n_kw_injections.sum() > injection_count_threshold:
+            has_pv = True
+            # print(f'found {n_kw_injections.sum()} injections')
+
         # Calcualte deltas
         fixed_data['p_diff'] = fixed_data['P'].diff()
         fixed_data['v_diff'] = fixed_data['V'].diff()
@@ -166,17 +214,16 @@ def hosting_cap(
         if has_input_q:
             fixed_data['S'] = -1 * np.sqrt(
                 fixed_data['P']**2 + fixed_data['Q']**2
-                )
+            )
             fixed_data['PF'] = fixed_data['P'] / fixed_data['S']
             fixed_data['q_diff'] = fixed_data['Q'].diff()
             fixed_data['pf_diff'] = abs(fixed_data['PF'].diff())
 
-            # ensure non-static power factor
-            # NOTE: arbitrary threshold selected
-            # TODO: allow this, but then process in ~has_input_q 'branch'
+            # handle static power factor
             max_pf_dif = fixed_data['pf_diff'].max()
-
-            if max_pf_dif < 1e-3:
+            # NOTE: arbitrary threshold selected
+            static_pf_threshold = 1e-3
+            if max_pf_dif < static_pf_threshold:
                 has_static_pf = True
                 # skip processing
                 warning_str = (
@@ -185,78 +232,141 @@ def hosting_cap(
                     f"maximum abs dif doesn't exceed {max_pf_dif}"
                 )
                 print(warning_str)
-                # TODO: remove skip once no q handled.
                 n_skipped += 1
-                continue
 
         remaining_bad_data_mask = get_nan_mask(fixed_data)
 
         # fixed data may include nan - removing with this mask
         clean_df = fixed_data[~remaining_bad_data_mask].copy()
-
-        # TODO : allow filters to accomodate for hax input Q
         if ~has_input_q or has_static_pf:
+
+            # static_pf_val from static PF
+            static_pf_val = fixed_data['pf_diff'].mean()
+
             # skip processing
             warning_str = (
                 f"Warning:  Skipped busname '{bus_name}' " +
                 "- Process for no input Q or static PF"
             )
             print(warning_str)
-            continue
 
-        # Filter points to fit according to quantiles
-        # only large changes in P (larger than 25 quantile)
-        filter_1 = (
-            clean_df.p_diff > abs(clean_df.p_diff).quantile(.25)) \
-            | (
-            clean_df.p_diff < -abs(clean_df.p_diff).quantile(.25))
+        if has_input_q and not has_static_pf:
+            # Filter points to fit according to quantiles
+            # only large changes in P (larger than 25 quantile)
+            filter_1 = (
+                clean_df.p_diff > abs(clean_df.p_diff).quantile(.25)) \
+                | (
+                clean_df.p_diff < -abs(clean_df.p_diff).quantile(.25))
 
-        # only large changes in PF (larger than 10th quantile)
-        filter_2 = (
-            clean_df.pf_diff > abs(clean_df.pf_diff).quantile(.10)) \
-            | (
-            clean_df.pf_diff < -abs(clean_df.pf_diff).quantile(.10)) \
-            & filter_1
+            # only large changes in PF (larger than 10th quantile)
+            filter_2 = (
+                clean_df.pf_diff > abs(clean_df.pf_diff).quantile(.10)) \
+                | (
+                clean_df.pf_diff < -abs(clean_df.pf_diff).quantile(.10)) \
+                & filter_1
 
-        # remove large dV outliers (inside 99th quantile)
-        filter_3 = (
-            clean_df.v_diff < abs(clean_df.v_diff).quantile(.99)) \
-            & (
-            clean_df.v_diff > -abs(clean_df.v_diff).quantile(.99)) \
-            & filter_2
+            # remove large dV outliers (inside 99th quantile)
+            filter_3 = (
+                clean_df.v_diff < abs(clean_df.v_diff).quantile(.99)) \
+                & (
+                clean_df.v_diff > -abs(clean_df.v_diff).quantile(.99)) \
+                & filter_2
 
-        # linear fit (bias term included)
-        filtered_powers = pd.concat(
-            [
-                clean_df.p_diff[filter_3],
-                clean_df.q_diff[filter_3]
-            ],
-            axis=1)
-        filtered_v_dif = clean_df.v_diff[filter_3]
+            # if customer has PV, the nighttime filter has to be added to the
+            # diff filters and applied before the regression
+            if has_pv:
+                # print('\n* Using Night hours')
+                before_sunrise = clean_df['datetime'].dt.hour <= 5
+                after_sunset = clean_df['datetime'].dt.hour >= 20
+                nighttime_mask = before_sunrise | after_sunset
+                filter_3 = filter_3 & nighttime_mask
 
-        # NOTE: changed to False 20241004
-        f_pq = linear_model.LinearRegression(fit_intercept=False)
+            # linear fit (bias term included)
+            filtered_powers = pd.concat(
+                [
+                    clean_df.p_diff[filter_3],
+                    clean_df.q_diff[filter_3]
+                ],
+                axis=1)
+            filtered_v_dif = clean_df.v_diff[filter_3]
 
-        # linear fit (V = p00 + p10*P + p01*Q)
-        f_pq.fit(filtered_powers, filtered_v_dif)
+            # NOTE: changed to False 20241004
+            f_pq = linear_model.LinearRegression(fit_intercept=False)
 
-        # TODO: ensure the sigma_final coeefficient still reflects the
-        # real power coeefficient after 'fit_intercept' was set to false.
-        sigma_final = f_pq.coef_[0]
+            # linear fit (V = p00 + p10*P + p01*Q)
+            f_pq.fit(filtered_powers, filtered_v_dif)
 
-        # Calculate kW_max
-        clean_df['kw_max'] = (
-            1.05 * clean_df['v_base'] - clean_df['V']) \
-            / sigma_final
+            sigma_p = f_pq.coef_[0]
+            sigma_q = f_pq.coef_[1]
 
-        # Collect HC
-        # TODO verify/validate utc offset approach - currently not included
-        # Only considering the hours between 9 AM - 3 PM
-        after_sunrise = clean_df['datetime'].dt.hour >= 9  # + utc_offset
-        before_sunset = clean_df['datetime'].dt.hour < 15  # + utc_offset
-        daylight_mask = after_sunrise & before_sunset
+            # Calculate kW_max
+            clean_df['kw_max'] = (
+                1.05 * clean_df['v_base'] - clean_df['V']) \
+                / (sigma_p + (sigma_q*np.tan(np.arccos(der_pf))))
 
-        hc_kw = min(clean_df.kw_max[daylight_mask])
+        # Modifications for missing Q
+        # if has_static_pf: load_pf_est gets overwritten to the static PF
+        if ~has_input_q or has_static_pf:
+
+            warning_str = (
+                f"Warning:  kVAR measurements for busname '{bus_name}' " +
+                "were unavailable or of insufficient quality. " +
+                "HC accuracy may be affected. "
+            )
+            print(warning_str)
+
+            if has_static_pf:
+                # use static pf as load pf estimate
+                load_pf_est = static_pf_val
+
+            # Filter points to fit according to quantiles
+            # only large changes in P (larger than 25 quantile)
+            filter_1_noq = (
+                clean_df.p_diff > abs(clean_df.p_diff).quantile(.25)) \
+                | (
+                clean_df.p_diff < -abs(clean_df.p_diff).quantile(.25))
+
+            # remove large dV outliers (inside 99th quantile)
+            filter_3_noq = (
+                clean_df.v_diff < abs(clean_df.v_diff).quantile(.99)) \
+                & (
+                clean_df.v_diff > -abs(clean_df.v_diff).quantile(.99)) \
+                & filter_1_noq
+
+            # optional nighttime filter if customer has PV
+            if has_pv:
+                # print('\n* Using Night hours')
+                before_sunrise = clean_df['datetime'].dt.hour <= 5
+                after_sunset = clean_df['datetime'].dt.hour >= 20
+                nighttime_mask = before_sunrise | after_sunset
+                filter_3_noq = filter_3_noq & nighttime_mask
+
+            # apply filters
+            filtered_p_noq = clean_df.p_diff[filter_3_noq]
+            filtered_v_dif_noq = clean_df.v_diff[filter_3_noq]
+
+            # calculate the constant offset factor,
+            const_xrpf = (1+xr_est*np.tan(np.arccos(load_pf_est)))
+
+            # apply to offset factor
+            filtered_p_noq_offset = const_xrpf * filtered_p_noq
+
+            # linear fit:
+            f_p_no_q = linear_model.LinearRegression(fit_intercept=False)
+            f_p_no_q.fit(filtered_p_noq_offset.to_frame(), filtered_v_dif_noq)
+
+            sigma_p_noq = f_p_no_q.coef_[0]
+
+            # Calculate kW_max
+            clean_df['kw_max'] = (
+                1.05 * clean_df['v_base'] - clean_df['V']) \
+                / (sigma_p_noq)
+
+        after_sunrise = clean_df['datetime'].dt.hour >= 9
+        before_sunset = clean_df['datetime'].dt.hour < 15
+        hours_of_interest_mask = after_sunrise & before_sunset
+
+        hc_kw = min(clean_df.kw_max[hours_of_interest_mask])
         hc_kw = max(hc_kw, 0)  # Ensures negative HC set to zero
 
         # collect individual HC result
@@ -267,28 +377,28 @@ def hosting_cap(
     hc_results = pd.DataFrame(
         data_all,
         columns=['busname', 'kw_hostable'],
-        )
+    )
 
     # Output CSV File of Results
     hc_results.to_csv(output_csv_path, index=False)
 
-    # # NOTE: printing of fix report 'temporary' solution
-    # print('')
-    # if len(fix_reports) > 0:
-    #     fix_report_df = pd.concat(fix_reports, ignore_index=True)
-    #     fix_report_df = fix_report_df[[
-    #         'busname',
-    #         'start_ndx',
-    #         'duration',
-    #         'end_ndx',
-    #         'action'
-    #     ]]
-    #     print('* Data Fix Report')
-    #     print(fix_report_df)
-    # else:
-    #     fix_report_df = '* No Data Fixes Executed'
+    # NOTE: printing of fix report 'temporary' solution
+    print('')
+    if len(fix_reports) > 0:
+        fix_report_df = pd.concat(fix_reports, ignore_index=True)
+        fix_report_df = fix_report_df[[
+            'busname',
+            'start_ndx',
+            'duration',
+            'end_ndx',
+            'action'
+        ]]
+        print('* Data Fix Report')
+        print(fix_report_df)
+    else:
+        fix_report_df = '* No Data Fixes Executed'
 
-    # print(f"HC calculated for: {n_hc_est}\nSkipped: {n_skipped}")
+    print(f"HC calculated for: {n_hc_est}\nSkipped: {n_skipped}")
 
     return hc_results
 
@@ -390,7 +500,7 @@ def get_held_value_mask(
         df,
         held_n_threshold=4,
         held_value_threshold=0
-        ):
+):
     """
     Return single bool series of rows that are within held value limits
     Ignores nan data

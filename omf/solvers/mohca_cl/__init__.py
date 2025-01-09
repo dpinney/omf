@@ -15,9 +15,9 @@ def hello():
   ''' Hello world test function. '''
   return 'hello mohca'
 
-def sandia1(in_path, out_path):
+def sandia1(in_path, out_path, der_pf, vv_x, vv_y, load_pf_est):
   ''' Execute Sandia hosting capacity algorithm on in_path CSV with output written as CSV to out_path. '''
-  ret_value = sandia.hosting_cap(in_path, out_path)
+  ret_value = sandia.hosting_cap(in_path, out_path, der_pf, vv_x, vv_y, load_pf_est)
   return ret_value
 
 def iastate(in_path, out_path):

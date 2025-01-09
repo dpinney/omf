@@ -129,10 +129,14 @@ def run_ami_algorithm( modelDir, inputDict, outData ):
 	except:
 		errorMessage = "AMI-Data CSV file is incorrect format. Please see valid format definition at <a target='_blank' href='https://github.com/dpinney/omf/wiki/Models-~-hostingCapacity#meter-data-input-csv-file-format'>OMF Wiki hostingCapacity</a>"
 		raise Exception(errorMessage)
+		
+	vv_points_eval = eval(inputDict['vv_points'])
+	vv_x = [x for x,y in vv_points_eval]
+	vv_y = [y for x,y in vv_points_eval]
 	
 	AMI_start_time = time.time()
 	if inputDict[ "algorithm" ] == "sandia1":
-		AMI_output = mohca_cl.sandia1( inputPath, outputPath )
+		AMI_output = mohca_cl.sandia1( in_path=inputPath, out_path=outputPath, der_pf=None, vv_x=vv_x, vv_y=vv_y, load_pf_est=0.97 )
 	elif inputDict[ "algorithm" ] == "iastate":
 		AMI_output = mohca_cl.iastate( inputPath, outputPath )
 	else:
