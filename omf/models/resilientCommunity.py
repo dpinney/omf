@@ -972,7 +972,7 @@ def coordCheck(long, lat, geoList):
 
     return ''
 
-def getDownLineLoadsEquipmentBlockGroupZillow(pathToOmd, equipmentList,avgPeakDemand,pathToZillowData):
+def getDownLineLoadsEquipmentBlockGroupZillow(pathToOmd, equipmentList,avgPeakDemand,pathToZillowData, pathToLoadsFile,loadsTypeList):
     '''
     Retrieves downline loads for specific set of equipment and retrieve nri data for each of the equipment
     pathToOmd -> path to the omdfile
@@ -983,6 +983,7 @@ def getDownLineLoadsEquipmentBlockGroupZillow(pathToOmd, equipmentList,avgPeakDe
     #store census information
 
     omd = json.load(open(pathToOmd))
+    loadsDF = pd.read_csv(pathToLoadsFile)
     blockgroupDict = {}
     loadsDict = {}
     valList = []
@@ -997,56 +998,60 @@ def getDownLineLoadsEquipmentBlockGroupZillow(pathToOmd, equipmentList,avgPeakDe
         key = obType + '.' + obName
         obDict[key] = ob
         if (obType == 'load'):
-            loadsDict[key] = {
-                        "base crit score":None}
-            
-            kw = ob.get('kw',None)
-            kvar = ob.get('kvar',None)
-            kva = ob.get('kva',None)
-            pf = ob.get('pf',None)
-            if kw and kvar:
-                kw = float(kw)
-                kvar = float(kvar)
-            elif kw and pf:
-                kw = float(kw)
-                kva = kw/float(pf)
-                kvar = sqrt(kva^2 - kw^2)
-            elif kva and pf:
-                kw = float(kva)*float(pf)
-                kvar = sqrt(float(kva)^2 - kw^2)
-            else:
-                raise Exception(f'Load {obName} does not have necessary information to calculate kw and kvar')
+            filtered_df = loadsDF[loadsDF["Load Name"] == obName]
+            if (filtered_df["Business Type"].iloc[0].lower() in loadsTypeList):
+                loadsDict[key] = {
+                            "base crit score":None}
+                
+                kw = ob.get('kw',None)
+                kvar = ob.get('kvar',None)
+                kva = ob.get('kva',None)
+                pf = ob.get('pf',avgPeakDemand)
+                if kw and kvar:
+                    kw = float(kw)
+                    kvar = float(kvar)
+                    kva = math.sqrt(kw**2 + kvar**2)
+                elif kw and pf:
+                    kw = float(kw)
+                    kva = kw/float(pf)
+                    kvar = math.sqrt(kva^2 - kw^2)
+                elif kva and pf:
+                    kw = float(kva)*float(pf)
+                    kva = float(kva)
+                    kvar = math.sqrt(kva**2 + kw**2)
+                else:
+                    raise Exception(f'Load {obName} does not have necessary information to calculate kw and kvar')
 
+                loadsDict[key]['kva'] = kva
+                loadsDict[key]["base crit score"]= round(((math.sqrt((kw * kw) + (kvar * kvar) ))/ (avgPeakDemand)) * 4,2)
 
-            loadsDict[key]["base crit score"]= round(((math.sqrt((kw * kw) + (kvar * kvar) ))/ (avgPeakDemand)) * 4,2)
+                long = float(ob['longitude'])
+                lat = float(ob['latitude'])
 
-            long = float(ob['longitude'])
-            lat = float(ob['latitude'])
+                if blockgroupDict:
+                    check = coordCheck(long, lat, blockgroupDict)
 
-            if blockgroupDict:
-                check = coordCheck(long, lat, blockgroupDict)
+                    if check:
+                        loadsDict[key]['blockgroup'] = check
+                        continue
+                    else:
+                        blockgroup = findCensusBlockGroup(lat,long)
 
-                if check:
-                    loadsDict[key]['blockgroup'] = check
-                    continue
                 else:
                     blockgroup = findCensusBlockGroup(lat,long)
-
-            else:
-                blockgroup = findCensusBlockGroup(lat,long)
-            while blockgroup is None:
-                blockgroup = findCensusBlockGroup(lat,long)
-            
-            loadsDict[key]['blockgroup'] = blockgroup
-            blockgroupDict[blockgroup] = buildsviBlockGroup(blockgroup)
-            valList.append(list(all_vals(blockgroupDict[blockgroup])))
-            geoms.append(blockgroupDict[blockgroup]['geometry'])
+                while blockgroup is None:
+                    blockgroup = findCensusBlockGroup(lat,long)
+                
+                loadsDict[key]['blockgroup'] = blockgroup
+                blockgroupDict[blockgroup] = buildsviBlockGroup(blockgroup)
+                valList.append(list(all_vals(blockgroupDict[blockgroup])))
+                geoms.append(blockgroupDict[blockgroup]['geometry'])
 
 
 
     # compute SVI
-
-
+    #with open('/Users/davidarmah/Documents/omf/omf/static/testFiles/resilientCommunity/zillowBlock.json', 'w') as json_file:
+    #    json.dump(loadsDict, json_file, indent=4)
 
     # DO NOT CHANGE ORDER -> matches order of dictionary in buildSVI(TractFIPS)
 
@@ -1055,7 +1060,7 @@ def getDownLineLoadsEquipmentBlockGroupZillow(pathToOmd, equipmentList,avgPeakDe
             'pct_Mobile_Homes_ACS_16_20','pct_Crowd_Occp_U_ACS_16_20','pct_noVehicle','blockgroupFIPS', 'geometry']
         
     sviDF = createDF(valList,cols, geoms)
-    newsviDF = sviDF.merge(newdf_loads, on="blockgroupFIPS", how="left")
+    
     
     pctile_list = ['pct_Prs_Blw_Pov_Lev_ACS_16_20','pct_Civ_emp_16p_ACS_16_20','avg_Agg_HH_INC_ACS_16_20','pct_Not_HS_Grad_ACS_16_20',
             'pct_Pop_65plus_ACS_16_20','pct_u19ACS_16_20','pct_Pop_Disabled_ACS_16_20','pct_singlefamily_u18','pct_MLT_U10p_ACS_16_20',
@@ -1063,19 +1068,18 @@ def getDownLineLoadsEquipmentBlockGroupZillow(pathToOmd, equipmentList,avgPeakDe
     for i in cols:
         if i not in ['blockgroupFIPS', 'geometry']:
             new_str = i + '_pct_rank'
-            newsviDF[new_str] = newsviDF[i].rank(pct=True)
+            sviDF[new_str] = sviDF[i].rank(pct=True)
             pctile_list.append(new_str)
     
-    newsviDF['SOVI_TOTAL']= newsviDF[pctile_list].sum(axis=1)
-    newsviDF['SOVI_SCORE'] = newsviDF['SOVI_TOTAL'].rank(pct=True)
+    sviDF['SOVI_TOTAL']= sviDF[pctile_list].sum(axis=1)
+    sviDF['SOVI_SCORE'] = sviDF['SOVI_TOTAL'].rank(pct=True)
     #sviDF['SOVI_SCORE'] = sviDF[pctile_list].sum(axis=1).rank(pct=True)
-    newsviDF['SOVI_RATNG'] = newsviDF.apply(buildSVIRating, axis=1)
+    sviDF['SOVI_RATNG'] = sviDF.apply(buildSVIRating, axis=1)
 
     
     #sviDF.to_csv('outSVI.csv', index=False)
 
-    sviGeoDF = createGeoDF(newsviDF)
-
+    
 
     # put all
 
@@ -1093,10 +1097,10 @@ def getDownLineLoadsEquipmentBlockGroupZillow(pathToOmd, equipmentList,avgPeakDe
             
             
             currBlockGroup = loadsDict[key]['blockgroup']
-            svi_score = newsviDF[newsviDF['blockgroupFIPS'] == currBlockGroup]['SOVI_SCORE'].values[0]
+            svi_score = sviDF[sviDF['blockgroupFIPS'] == currBlockGroup]['SOVI_SCORE'].values[0]
             avgZillowPrice = zillowPrices[currBlockGroup]['avgPrice']
             loadsDict[key]["community crit score"] = round(loadsDict[key]["base crit score"] *  svi_score * avgZillowPrice,2)
-
+            loadsDict[key]["zillow price"] = avgZillowPrice
             loadsDict[key]['SOVI_SCORE'] = svi_score
 
 
@@ -1114,8 +1118,15 @@ def getDownLineLoadsEquipmentBlockGroupZillow(pathToOmd, equipmentList,avgPeakDe
     avg_community_criticality_score=('community crit score', 'mean'),
     avg_base_criticality_score_index=('base crit index', 'mean'),
     avg_community_criticality_score_index=('community crit index', 'mean'),
-    load_count=('base crit score', 'count')
+    avg_zillow_price=('zillow price', 'mean'),
+    load_count=('base crit score', 'count'),
+    load_amount=('kva', 'sum')
     ).reset_index()
+
+    newsviDF = sviDF.merge(newdf_loads, on="blockgroupFIPS", how="left")
+    sviGeoDF = createGeoDF(newsviDF)
+    newsviDF = newsviDF.drop(columns=['geometry'])
+
 
 
 
@@ -1187,9 +1198,9 @@ def getDownLineLoadsEquipmentBlockGroupZillow(pathToOmd, equipmentList,avgPeakDe
     getPercentile(newObsDict, 'community crit score')
 
 
-    return newObsDict,loadsDict, sviGeoDF
+    return newObsDict,loadsDict, sviGeoDF, newsviDF
 
-def getDownLineLoadsEquipmentTract(pathToOmd, equipmentList, avgPeakDemand, pathToZillowData):
+def getDownLineLoadsEquipmentTractZillow(pathToOmd, equipmentList, avgPeakDemand, pathToZillowData):
     '''
     Retrieves downline loads for specific set of equipment and retrieve nri data for each of the equipment
     pathToOmd -> path to the omdfile
@@ -1535,6 +1546,18 @@ def getDownLineLoadsEquipmentBlockGroup(pathToOmd, equipmentList,avgPeakDemand):
     getPercentile(loadsDict, "base crit score")
     getPercentile(loadsDict, 'community crit score')
 
+    df_loads = pd.DataFrame(loadsDict).T
+    df_loads.rename(columns={"blockgroup": "blockgroupFIPS"}, inplace=True)
+
+    # Group by 'blockgroup' and calculate desired metrics
+    newdf_loads = df_loads.groupby('blockgroupFIPS').agg(
+    avg_base_criticality_score=('base crit score', 'mean'),
+    avg_community_criticality_score=('community crit score', 'mean'),
+    avg_base_criticality_score_index=('base crit index', 'mean'),
+    avg_community_criticality_score_index=('community crit index', 'mean'),
+    load_count=('base crit score', 'count')
+    ).reset_index()
+
 
     del omd
 
@@ -1604,7 +1627,7 @@ def getDownLineLoadsEquipmentBlockGroup(pathToOmd, equipmentList,avgPeakDemand):
     getPercentile(newObsDict, 'community crit score')
 
 
-    return newObsDict,loadsDict, sviGeoDF
+    return newObsDict,loadsDict, sviGeoDF, sviDF
 
 def getDownLineLoadsEquipmentTract(pathToOmd, equipmentList, avgPeakDemand):
     '''
@@ -2132,7 +2155,7 @@ def getDownLineLoadsTract(pathToOmd, avgPeakDemand):
     
     return obDict,loadsDict, sviGeoDF
 
-def getDownLineLoadsEquipmentBlockGroup(pathToOmd, equipmentList):
+def __getDownLineLoadsEquipmentBlockGroup__depreciated(pathToOmd, equipmentList):
     '''
     Retrieves downline loads for specific set of equipment and retrieve nri data for each of the equipment
     pathToOmd -> path to the omdfile
@@ -2196,9 +2219,9 @@ def getDownLineLoadsEquipmentBlockGroup(pathToOmd, equipmentList):
                 blockgroup = findCensusBlockGroup(lat,long)
             
             loadsDict[key]['blockgroup'] = blockgroup
-            #blockgroupDict[blockgroup] = buildsviBlockGroup(blockgroup)
-            #valList.append(list(all_vals(blockgroupDict[blockgroup])))
-            #geoms.append(blockgroupDict[blockgroup]['geometry'])
+            blockgroupDict[blockgroup] = buildsviBlockGroup(blockgroup)
+            valList.append(list(all_vals(blockgroupDict[blockgroup])))
+            geoms.append(blockgroupDict[blockgroup]['geometry'])
 
 
 
@@ -2232,7 +2255,7 @@ def getDownLineLoadsEquipmentBlockGroup(pathToOmd, equipmentList):
     
     #sviDF.to_csv('outSVI.csv', index=False)
 
-    sviGeoDF = createGeoDF(sviDF)
+    #sviGeoDF = createGeoDF(sviDF)
 
 
     # put all
@@ -2254,9 +2277,24 @@ def getDownLineLoadsEquipmentBlockGroup(pathToOmd, equipmentList):
             loadsDict[key]['SOVI_SCORE'] = svi_score
 
 
-
     getPercentile(loadsDict, "base crit score")
     getPercentile(loadsDict, 'community crit score')
+
+    df_loads = pd.DataFrame(loadsDict).T
+    df_loads.rename(columns={"blockgroup": "blockgroupFIPS"}, inplace=True)
+
+    # Group by 'blockgroup' and calculate desired metrics
+    newdf_loads = df_loads.groupby('blockgroupFIPS').agg(
+    avg_base_criticality_score=('base crit score', 'mean'),
+    avg_community_criticality_score=('community crit score', 'mean'),
+    avg_base_criticality_score_index=('base crit index', 'mean'),
+    avg_community_criticality_score_index=('community crit index', 'mean'),
+    load_count=('base crit score', 'count')
+    ).reset_index()
+
+
+    result = pd.merge(sviDF, newdf_loads, on='blockgroupFIPS', how='inner')
+    sviGeoDF = createGeoDF(result)
 
 
     del omd
@@ -2329,7 +2367,7 @@ def getDownLineLoadsEquipmentBlockGroup(pathToOmd, equipmentList):
 
     return newObsDict,loadsDict, sviGeoDF
 
-def getDownLineLoadsEquipmentTract(pathToOmd, equipmentList):
+def __getDownLineLoadsEquipmentTract__depreciated(pathToOmd, equipmentList):
     '''
     Retrieves downline loads for specific set of equipment and retrieve nri data for each of the equipment
     pathToOmd -> path to the omdfile
@@ -3400,18 +3438,18 @@ def cacheZillowData(pathToOmd, pathToLoad):
             long = float(ob['longitude'])
             lat = float(ob['latitude'])
 
-            if loads[key]['cen_tract']:
-                tract = loads[key]['cen_tract']
+            if loads[key]['blockgroup']:
+                blockgroup = loads[key]['blockgroup']
             else:
                 continue
 
-            if tract in zillowDict:
+            if blockgroup in zillowDict:
                 continue
             else:
                 ##  can put this before and add field to use housing data
                 time.sleep(30)
                 zillowJson = get_zillowListings(lat, long)
-                zillowDict[tract] = zillowJson
+                zillowDict[blockgroup] = zillowJson
         
     with open('/Users/davidarmah/Documents/omf/omf/static/testFiles/resilientCommunity/zillowOutput.json', 'w') as f:
         json.dump(zillowDict, f)
@@ -3427,143 +3465,345 @@ def sectionExample(omdFilePath):
     dssTree = omdToTree(omdFilePath)
 
     G = dss_to_networkx('', dssTree)
+    # Add node data from OMD to the graph
+    for ob in omd.get('tree', {}).values():
+        node = ob['name']
+        if node in G.nodes:
+            G.nodes[node].update(ob)
+        else:
+            G.add_node(node, **ob)
+    
+    # Add edge data from OMD to the graph, setting weight to 1 for all edges
+    for ob in omd.get('tree', {}).values():
+        if 'from' in ob and 'to' in ob:
+            if not G.has_edge(ob['from'], ob['to']):
+                length = ob.get('length', 0)
+                if length:
+                    G.add_edge(ob['from'], ob['to'], weight=int(ob['length']))
+                else:
+                    G.add_edge(ob['from'], ob['to'], weight=0)
+            else:
+                length = ob.get('length', 0)
+                #print(len)
+                if length:
+                    G[ob['from']][ob['to']]['weight'] = int(ob['length'])
+                else:
+                    G[ob['from']][ob['to']]['weight'] = 0
 
-
+    
+    # Create edges based on parent relationships
+    for node, data in G.nodes(data=True):
+        if "parent" in data:
+            parent = data["parent"]
+            if parent not in G.nodes:
+                G.add_node(parent)  # Add the parent node if it doesn't exist
+            if not G.has_edge(parent, node):
+                G.add_edge(parent, node, weight=0)  # Add an edge with a default weight
+                #print(f"Edge created between parent '{parent}' and node '{node}'.")
+    
+    # Identify edges with switches
     from_to_tuples_with_switch = [
         (entry.get("from"), entry.get("to"))
         for entry in omd.get('tree', {}).values()
-        if entry.get("switch") == "y" and entry.get("enabled") != "n" and "from" in entry and "to" in entry  # Check for "switch" and valid keys
+        if entry.get("switch") == "y" and entry.get("enabled") != "n" and "from" in entry and "to" in entry
     ]
+    
 
-    print(from_to_tuples_with_switch)
-    
     for i in from_to_tuples_with_switch:
-        G[i[0]][i[1]]['switch'] = True
+        G[i[0]][i[1]]['switch'] = 'y'
     
+    #for u, v, data in G.edges(data=True):
+    #    print(f"Traversing edge {u} -> {v}, Switch: {data.get('switch')}")
+
+
+
+    new1, new2 =  section_circuit_upstream_refined(G, 'bus1')
+
+
+    #directed and has no cycles
+    if G.is_directed():
+        print("The graph is directed.")
+    else:
+        print("The graph is undirected.")
+
+
+    if nx.is_directed_acyclic_graph(G):
+        print("The graph is a directed acyclic graph (DAG).")
+    else:
+        print("The graph is not a directed acyclic graph (it may contain cycles).")
+
+
+    topological_order = list(nx.topological_sort(G))
+    print("Topological Order of Nodes:", topological_order)
+
+        # Track the first section a node is assigned to
+    node_to_section = {}
+
+
 
     # Sectioning logic
     sections = []
     current_section_nodes = set()
     current_section_edges = []
 
-    # Iterate through the edges
     for u, v, data in G.edges(data=True):
-        # Start a new section if a switch is encountered
         if data.get("switch"):
-            if current_section_nodes:  # Save the current section
+            if current_section_nodes:
+                # Save the current section
+                section_id = len(sections) + 1
                 sections.append((list(current_section_nodes), current_section_edges))
-            # Reset pointers for the new section
+                # Assign nodes to the section if not already assigned
+                for node in current_section_nodes:
+                    if node not in node_to_section:
+                        node_to_section[node] = section_id
+            # Reset for the new section
             current_section_nodes = set()
             current_section_edges = []
 
         # Add nodes and edges to the current section
-        current_section_nodes.update([u, v])
+        if u not in node_to_section:
+            current_section_nodes.add(u)
+        if v not in node_to_section:
+            current_section_nodes.add(v)
         current_section_edges.append((u, v))
 
     # Append the last section
     if current_section_nodes:
+        section_id = len(sections) + 1
         sections.append((list(current_section_nodes), current_section_edges))
-    
+        for node in current_section_nodes:
+            if node not in node_to_section:
+                node_to_section[node] = section_id
+
+    # Debug output
+    print("Node to Section Mapping:")
+    for node, section in node_to_section.items():
+        print(f"Node {node} belongs to Section {section}")
+
+    print("Final Sections:")
+    for i, (nodes, edges) in enumerate(sections, start=1):
+        print(f"Section {i}: Nodes={nodes}, Edges={edges}")
+
+
+
+
     sectionDict = {}
     for i, (nodes, edges) in enumerate(sections, start=1):
         for j in nodes:
-            if(j.startswith('load')):
-                sectionDict[j] = int(i)
+            #if(j.startswith('load')):
+            #    sectionDict[j] = int(i)
+            sectionDict[j] = int(i)
+        for k in edges:
+            sectionDict[str(k)] = int(i)
     
-    for section, loads in sorted(sectionDict.items()):
-        print(f"Section {section}:")
-        for load in loads:
-            print(f"  - {load}")
+    with open("omf/static/testFiles/resilientCommunity/loads_section_full.json", "w") as file:
+        json.dump(sectionDict, file)
 
-    print(f"Done")
-    #print("{i}: {section}".format(i=i, section=sectionDict[j]))
-    
-    #output_file = "/Users/davidarmah/Documents/omf/omf/static/testFiles/resilientCommunity/loads_section.json"
-    #with open(output_file, "w") as f:
-    #    json.dump(sectionDict, f, indent=4)
+    source = "source"
+    #target = "t_bus3159_l"
+
+    #shortest_path = nx.dijkstra_path(G, source=target, target=source, weight='weight')
+    #print("Shortest Path from A to D:", shortest_path)
+
+    distance_to_source = calculate_distances_to_source(G, source)
+    nx.set_node_attributes(G, distance_to_source, name="distance_from_source")
+
     return sectionDict
 
-def getDistributionSection(sectionDict):
-    pathToOmd = '/Users/davidarmah/Documents/omf/omf/data/Model/admin/Automated Testing of resilientCommunity/color_test.omd'
+def runSections(omdFilePath):
     
-    # Load the JSON data
-    try:
-        with open(pathToOmd, 'r') as file:
-            omd = json.load(file)
-    except FileNotFoundError:
-        print(f"File not found: {pathToOmd}")
-        return
-    except json.JSONDecodeError:
-        print(f"Error decoding JSON file: {pathToOmd}")
-        return
+    omd = json.load(open(omdFilePath))
+
+    dssTree = omdToTree(omdFilePath)
+
+    G = dss_to_networkx('', dssTree)
+
+    disconnected_nodes = [node for node in G.nodes if G.degree[node] == 0]
+    #print(len(disconnected_nodes))
+
+    for ob in omd.get('tree', {}).values():
+        node = ob['name']
+        if node in G.nodes:
+            G.nodes[node].update(ob)
+        else:
+            G.add_node(node, **ob)
     
-    # Dictionary to store distributions
-    distribution = defaultdict(list)
-    for obj in omd.get('tree', {}).values():
-        obType = obj['object']
-        if (obType == 'load'):
-            ccsVal = obj['community crit score']
-            if isinstance(ccsVal, (int, float)):
-                section = sectionDict[obj['name']]
-                distribution[section].append(ccsVal)
-    # Output results
-    #print("Distribution of community crit scores by section:")
-    #for section, scores in distribution.items():
-    #    print(f"{section}: {scores}")
-    print(len(distribution[4]), len(distribution[6]),len(distribution[7]))
-    # Calculate statistics for each section
-    statistics_results = {}
-    for section, scores in distribution.items():
-        scores_array = np.array(scores)
-        print(scores_array)
-        statistics_results[section] = {
-        "mean": np.mean(scores_array),
-        "median": np.median(scores_array),
-        "std_dev": np.std(scores_array, ddof=1) if len(scores_array) > 1 else 0,
-        "min": np.min(scores_array),
-        "max": np.max(scores_array),
-    }
+    # Add edge data from OMD to the graph, setting weight to 1 for all edges
+    for ob in omd.get('tree', {}).values():
+        if 'from' in ob and 'to' in ob:
+            if ob.get('enabled') == 'n':
+                G.remove_edge(ob['from'], ob['to'])
+            elif not G.has_edge(ob['from'], ob['to']):
+                length = ob.get('length', 0)
+                if length:
+                    G.add_edge(ob['from'], ob['to'], weight=int(ob['length']))
+                else:
+                    G.add_edge(ob['from'], ob['to'], weight=0)
+            else:
+                length = ob.get('length', 0)
+                #print(len)
+                if length:
+                    G[ob['from']][ob['to']]['weight'] = int(ob['length'])
+                else:
+                    G[ob['from']][ob['to']]['weight'] = 0
 
-    # Extract data for plotting
-    sections = list(statistics_results.keys())
-    means = [stats["mean"] for stats in statistics_results.values()]
-    medians = [stats["median"] for stats in statistics_results.values()]
-    std_devs = [stats["std_dev"] for stats in statistics_results.values()]
-    mins = [stats["min"] for stats in statistics_results.values()]
-    maxs = [stats["max"] for stats in statistics_results.values()]
+    
+    # Create edges based on parent relationships
+    for node, data in G.nodes(data=True):
+        if "parent" in data:
+            parent = data["parent"]
+            if parent not in G.nodes:
+                G.add_node(parent)  # Add the parent node if it doesn't exist
+            if not G.has_edge(parent, node):
+                G.add_edge(parent, node, weight=0)  # Add an edge with a default weight
+                #print(f"Edge created between parent '{parent}' and node '{node}'.")
+    
+    # Identify edges with switches
+    from_to_tuples_with_switch = [
+        (entry.get("from"), entry.get("to"))
+        for entry in omd.get('tree', {}).values()
+        if entry.get("switch") == "y" and entry.get("enabled") != "n" and "from" in entry and "to" in entry
+    ]
+    
+    count = 0
+    for i in from_to_tuples_with_switch:
+        G[i[0]][i[1]]['switch'] = True
+        count+=1
 
-    # Plotting
-    x = np.arange(len(sections))  # The label locations
-    width = 0.15  # The width of the bars
+    # Remove disconnected nodes
+    for node in list(nx.isolates(G)):
+        G.remove_node(node)
+    disconnected_nodes = [node for node in G.nodes if G.degree[node] == 0]
+    #print(len(disconnected_nodes))
 
-    fig, ax = plt.subplots(figsize=(10, 6))
+    sections = section_graph_on_switch(G)
 
-    ax.bar(x - 2*width, means, width, label='Mean')
-    ax.bar(x - width, medians, width, label='Median')
-    ax.bar(x, std_devs, width, label='Std Dev')
-    ax.bar(x + width, mins, width, label='Min')
-    ax.bar(x + 2*width, maxs, width, label='Max')
+    # Combine sections into a dictionary
+    sectionDict = {}
+    for section_number, nodes, edges in sections:  # Unpack section_number explicitly
+        for node in nodes:
+            sectionDict[node] = section_number
+        for edge in edges:
+            sectionDict[str(edge)] = section_number
 
-    # Add labels, title, and legend
-    ax.set_xlabel('Sections')
-    ax.set_ylabel('Values')
-    ax.set_title('Community Crit Scores Statistics by Section')
-    ax.set_xticks(x)
-    ax.set_xticklabels(sections)
-    ax.legend()
+    # Save the dictionary to a JSON file
+    #output_file = "omf/static/testFiles/resilientCommunity/loads_section_full.json"
+    #with open(output_file, "w") as file:
+    #    json.dump(sectionDict, file)
+    return sectionDict
 
-    plt.tight_layout()
-    plt.show()
+def section_circuit(graph):
+    visited_edges = set()  # Tracks visited edges
+    sections = []          # List of finalized sections: [(section_number, nodes, edges)]
+    locked_nodes = {}
+    current_section = None # The current active section
+    section_counter = 0    # Counter for section numbering
 
-    output_path = "/Users/davidarmah/Documents/omf/omf/static/testFiles/resilientCommunity/community_crit_scores_statistics.png"
+    def start_new_section(edge):
+        """Start a new section with the given switch edge."""
+        nonlocal current_section, section_counter
+        section_nodes = set(edge)
+        section_edges = {edge}
+        current_section = (section_counter, section_nodes, section_edges)
+        
+        start_node = str(edge[0])
+        if section_counter == 0:
+            section_counter += 1
+            current_section = (section_counter, section_nodes, section_edges)
+            locked_nodes.setdefault(start_node, section_counter)
+        else:
+            locked_nodes.setdefault(start_node, section_counter - 1)
+            section_counter+=1
+            current_section = (section_counter, section_nodes, section_edges)
 
-    plt.savefig(output_path)
+    def finalize_current_section():
+        """Finalize the current active section."""
+        nonlocal current_section
+        if current_section:
+            section_number, section_nodes, section_edges = current_section
+
+            # Filter out locked nodes that belong to a different section
+            valid_nodes = set()
+            for node in section_nodes:
+                if node not in locked_nodes:
+                    valid_nodes.add(node)  # Node is not locked, include in the section
+                elif locked_nodes[node] == section_number:
+                    valid_nodes.add(node)  # Node is locked and in the correct section
+
+            # Finalize the current section with valid nodes and edges
+            sections.append((section_number, valid_nodes, section_edges))
+
+            # Clear the current section after finalizing
+            current_section = None
 
 
-    # Output results
-    print("Statistics of community crit scores by section:")
-    #for section, stats in statistics_results.items():
-    #    print(f"{section}: Mean = {stats['mean']}, Median = {stats['median']}, Std Dev = {stats['std_dev']}, Min = {stats['min']}, Max = {stats['max']}")
+    def traverse_from_node(start_node):
+        """Explore all reachable nodes and edges for the current section."""
+        stack = [start_node]
+        deferred_switches = []  # Store switch edges to process later
+
+        while stack:
+            node = stack.pop()
+
+            for neighbor in graph.neighbors(node):
+                edge = (node, neighbor) if (node, neighbor) in graph.edges else (neighbor, node)
+                if edge in visited_edges or edge[::-1] in visited_edges:
+                    continue  # Skip already visited edges
+
+                visited_edges.add(edge)
+                visited_edges.add(edge[::-1])
+
+                edge_data = graph.get_edge_data(*edge)
+
+                if edge_data.get("switch", False):
+                    # Defer handling switches until all non-switch paths are explored
+                    #print(f"Switch encountered at edge {edge}. Deferring for later.")
+                    deferred_switches.append((neighbor, edge))
+                    continue
+
+                # Add non-switch edge to the current section
+                if current_section:
+                    _, section_nodes, section_edges = current_section
+                    section_nodes.add(neighbor)
+                    section_edges.add(edge)
+                    stack.append(neighbor)
+
+        # Process deferred switches for the current section
+        for neighbor, switch_edge in deferred_switches:
+            finalize_current_section()  # Finalize the current section
+            start_new_section(switch_edge)  # Start a new section at the switch
+            traverse_from_node(neighbor)  # Explore the new section
+
+    # Main edge traversal
+    for u, v, data in graph.edges(data=True):
+        edge = (u, v)
+        if edge in visited_edges or edge[::-1] in visited_edges:
+            continue  # Skip already visited edges
+
+        visited_edges.add(edge)
+        visited_edges.add(edge[::-1])
+
+        if data.get("switch", False):
+            # Switch edge triggers a new section
+            if current_section:
+                finalize_current_section()
+            start_new_section(edge)
+            traverse_from_node(v)  # Start traversal from the v node of (u, v)
+        else:
+            # Non-switch edge starts or extends the current section
+            if current_section:
+                _, section_nodes, section_edges = current_section
+                section_nodes.update([u, v])
+                section_edges.add(edge)
+            else:
+                # If no current section, start a new one
+                start_new_section(edge)
+                traverse_from_node(u)
+
+    # Finalize any remaining section
+    finalize_current_section()
+
+    return sections
 
 def getDistribution():
     import json
@@ -3633,6 +3873,64 @@ def getAverages_loads(loadsDict):
     # Group by census tract and calculate average values
     averages = df.groupby('cen_tract').mean()
 
+def calculate_distances_to_source(graph, source):
+    # Reverse the graph to calculate distances to the source.
+    # This flips the direction of edges, making it easier to compute distances to the source node.
+    reversed_graph = graph.reverse(copy=True)
+
+    # Initialize distances to all nodes as infinity.
+    # Distance to the source itself is set to 0 since it's the starting point.
+    distance_to_source = {node: float("inf") for node in reversed_graph.nodes}
+    distance_to_source[source] = 0
+
+    # Set to keep track of visited nodes to avoid processing the same node multiple times.
+    visited = set()
+
+    # Queue for breadth-first search (BFS). Starts with the source node at distance 0.
+    queue = [(source, 0)]
+
+    # Perform BFS to compute shortest distances.
+    while queue:
+        # Dequeue the next node and its current distance.
+        current_node, current_distance = queue.pop(0)
+
+        # Mark the current node as visited.
+        visited.add(current_node)
+
+        # Process neighbors of the current node in the reversed graph.
+        for neighbor in reversed_graph.neighbors(current_node):
+            # Get the weight of the edge; default to 1 if not specified.
+            edge_weight = reversed_graph[current_node][neighbor].get("weight", 0)
+
+            # Calculate the new potential distance to the neighbor.
+            new_distance = current_distance + edge_weight
+
+            # Update the distance if the new distance is shorter.
+            if new_distance < distance_to_source[neighbor]:
+                distance_to_source[neighbor] = new_distance
+                # Add the neighbor to the queue for further processing.
+                queue.append((neighbor, new_distance))
+
+        # Process predecessors of the current node in the reversed graph.
+        for predecessor in reversed_graph.predecessors(current_node):
+            # Get the weight of the edge; default to 0 if not specified.
+            edge_weight = reversed_graph[predecessor][current_node].get("weight", 0)
+
+            # Calculate the new potential distance to the predecessor.
+            new_distance = current_distance + edge_weight
+
+            # Update the distance if the new distance is shorter.
+            if new_distance < distance_to_source[predecessor]:
+                distance_to_source[predecessor] = new_distance
+                # Add the predecessor to the queue for further processing.
+                queue.append((predecessor, new_distance))
+
+    # print statement to show calculated distances to the source.
+    # print("Distances to source:", distance_to_source)
+
+    # Return the dictionary of distances to the source node.
+    return distance_to_source
+
 def work(modelDir, inputDict):
     ''' Run the model in its directory. '''
     outData = {}
@@ -3643,6 +3941,9 @@ def work(modelDir, inputDict):
     #loads_file_path = pJoin(omf.omfDir,'static','testFiles','resilientCommunity', 'loads2.json')
     #obs_file_path = pJoin(omf.omfDir,'static','testFiles','resilientCommunity', 'objects3.json')
     geoJson_shapes_file = pJoin(modelDir, 'geoshapes.geojson')
+    sviDF_file = pJoin(modelDir, 'sviDF.csv')
+    loadsPath = pJoin(omf.omfDir,'static','testFiles','resilientCommunity','restorationLoads.csv')
+    zillowPricesPath= pJoin(omf.omfDir,'static','testFiles','resilientCommunity','zillowPrices.json')
 
 
     # check if census data json is downloaded
@@ -3663,15 +3964,24 @@ def work(modelDir, inputDict):
     if (inputDict['fuses'].lower() == 'yes' ):
         equipmentList.append('fuse')
 
+    loads_typeList = []
+    if (inputDict['residential'].lower() == 'yes'):
+        loads_typeList.append('residential')
+    elif (inputDict['retail'].lower() == 'yes'):
+        loads_typeList.append('retail')
+    elif (inputDict['agriculture'].lower() == 'yes'):
+        loads_typeList.append('agriculture')
+    
+        
     
 
-
-    
+    #print(inputDict)
+    #print(inputDict['load_types'])
     # check downline loads
-    
-    #obDict, loads, geoDF = getDownLineLoadsEquipmentBlockGroupZillow(omd_file_path, equipmentList,inputDict['averageDemand'], '/Users/davidarmah/Documents/omf/omf/static/testFiles/resilientCommunity/zillowPrices.json')
+    #loads_typeList = [item.lower() for item in inputDict['load_type'] ]
+    obDict, loads, geoDF, sviDF = getDownLineLoadsEquipmentBlockGroupZillow(omd_file_path, equipmentList,inputDict['averageDemand'], zillowPricesPath, loadsPath, loads_typeList)
 
-    obDict, loads, geoDF = getDownLineLoadsEquipmentBlockGroup(omd_file_path, equipmentList)
+    #obDict, loads, geoDF, sviDF = getDownLineLoadsEquipmentBlockGroups(omd_file_path, equipmentList, inputDict['averageDemand'])
     #obDict, loads, geoDF = getDownLineLoadsEquipmentTract(omd_file_path, equipmentList)
 
     # color vals based on selected column
@@ -3693,6 +4003,7 @@ def work(modelDir, inputDict):
     # Load Geojson file more efficiently
 
     geoDF.to_file(geoJson_shapes_file, driver="GeoJSON")
+    sviDF.to_csv(sviDF_file)
 
 
     with open(geoJson_shapes_file) as f1:
@@ -3713,6 +4024,9 @@ def work(modelDir, inputDict):
 
     }
     }
+
+
+    outData['sviData'] =  open(sviDF_file, 'r').read()
 
 
     with open(omd_file_path) as file1:
@@ -3741,14 +4055,15 @@ def work(modelDir, inputDict):
     outData['resilienceMap'] = open( pJoin( modelDir, "geoJson_offline.html"), 'r' ).read()
     outData['geojsonData'] = open(geoJson_shapes_file, 'r').read()
 
-    headers1 = ['Load Name', 'Base Criticality Score', 'Base Criticality Index']
+    headers1 = ['Load Name', 'Base Criticality Score', 'Base Criticality Index','Community Criticality Score', 'Community Criticality Index' ]
     load_names = list(loads.keys())
     base_criticality_score_vals1 = [value.get('base crit score') for key, value in loads.items()]
     base_criticity_index_vals1 = [value.get('base crit index') for key, value in loads.items()]
-
+    community_criticality_score_vals1 = [value.get('community crit score') for key, value in loads.items()]
+    community_criticity_index_vals1 = [value.get('community crit index') for key, value in loads.items()]
 
     outData['loadTableHeadings'] = headers1
-    outData['loadTableValues'] = list(zip(load_names, base_criticality_score_vals1, base_criticity_index_vals1))
+    outData['loadTableValues'] = list(zip(load_names, base_criticality_score_vals1, base_criticity_index_vals1,community_criticality_score_vals1,community_criticity_index_vals1))
 
 
     headers2 = ['Equipment Name', 'Base Criticality Score', 'Base Criticallity Index', 'Community Criticality Score', 'Community Criticality Index']
@@ -3756,11 +4071,11 @@ def work(modelDir, inputDict):
     base_criticality_score_vals2 = [value.get('base crit score') for key, value in obDict.items()]
     base_criticity_index_vals2 = [value.get('base crit index') for key, value in obDict.items()]
     community_criticality_score_vals2 = [value.get('community crit score') for key, value in obDict.items()]
-    community_criticity_index_vals = [value.get('community crit index') for key, value in obDict.items()]
+    community_criticity_index_vals2 = [value.get('community crit index') for key, value in obDict.items()]
 
 
     outData['loadTableHeadings2'] = headers2
-    outData['loadTableValues2'] = list(zip(object_names, base_criticality_score_vals2, base_criticity_index_vals2,community_criticality_score_vals2,community_criticity_index_vals ))
+    outData['loadTableValues2'] = list(zip(object_names, base_criticality_score_vals2, base_criticity_index_vals2,community_criticality_score_vals2,community_criticity_index_vals2 ))
 
 
 
@@ -3769,11 +4084,39 @@ def work(modelDir, inputDict):
 def test():
     pathToOmd = "omf/static/testFiles/resilientCommunity/iowa240_dwp_22_no_show_voltage.dss.omd"
     pathToOmd2 = "/Users/davidarmah/Documents/omf/omf/static/testFiles/resilientCommunity/iowa240_in_Florida_copy2.omd"
-    pathToLoads = "/Users/davidarmah/Documents/omf/omf/static/testFiles/resilientCommunity/loads2.json"
+    pathToLoads = "/Users/davidarmah/Documents/omf/omf/static/testFiles/resilientCommunity/zillowBlock.json"
     modelDir = "omf/static/testFiles/resilientCommunity"
+    pathToZillow = "/Users/davidarmah/Documents/omf/omf/static/testFiles/resilientCommunity/zillowOutput.json"
+
+    with open('/Users/davidarmah/Documents/omf/omf/static/testFiles/resilientCommunity/zillowOutput.json', 'r') as json_file:
+        zillowJson = json.load(json_file)
+
+    zillowPricesDict = {}
+    for key, value in zillowJson.items():
+        avgPrice, avgsqftPrice = calculateAvg_prices(value)
+        zillowPricesDict[key] = {"avgPrice": avgPrice,
+                                "avgsqftPrice":avgsqftPrice}
+    
+    with open('/Users/davidarmah/Documents/omf/omf/static/testFiles/resilientCommunity/zillowPrices.json', 'w') as f:
+        json.dump(zillowPricesDict, f)
+    
     #equipmentList = ['line']
     #obDict = runCalculations(pathToOmd2,modelDir, equipmentList)
-    cacheZillowData(pathToOmd2, pathToLoads)
+    #cacheZillowData(pathToOmd2, pathToLoads)
+    # Define the file path
+    #file_path = '/Users/davidarmah/Documents/omf/omf/static/testFiles/resilientCommunity/restorationLoads.csv'
+
+    #omd = json.load(open(pathToOmd2))
+    #data = []
+    #cols = ['Customer Name','Season','Business Type','Load Name']
+    #for ob in omd.get('tree', {}).values():
+        #obType = ob['object']
+        #if (obType == 'load'):
+            #list1 = [ob['name'], 'summer', 'residential', ob['name']]
+        #data.append(list1)
+    #df = pd.DataFrame(data, columns=cols)
+    # Save the DataFrame as a CSV
+    #df.to_csv(file_path, index=False) 
 
 def new(modelDir):
     omdfileName = 'iowa240_in_Florida_copy2'
@@ -3792,7 +4135,9 @@ def new(modelDir):
         "inputDataFileContent": 'omd',
         "optionalCircuitFile" : 'on',
 		"created":str(datetime.datetime.now()),
-        "load_type":"Residential"
+        "residential":"yes",
+        "retail": "yes",
+        "agriculture": "yes"
 	}
     creationCode = __neoMetaModel__.new(modelDir, defaultInputs)
     try:
@@ -3823,8 +4168,12 @@ def tests():
 
 if __name__ == '__main__':
     print("test")
-    #test()
+    #tests()
     #getDistributionSection(
     #sectionExample("/Users/davidarmah/Documents/omf/omf/static/testFiles/resilientCommunity/iowa240_in_Florida_copy2.omd")
+    #newSection("/Users/davidarmah/Documents/omf/omf/static/testFiles/resilientCommunity/iowa240_in_Florida_copy2.omd")
     #getDistribution()
-	#tests()
+    #test()
+    print("test")
+
+
