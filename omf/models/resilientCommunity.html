@@ -95,17 +95,38 @@
 				</select>
 			</div>
 
-
 			<div class="shortInput">
-				<label class="tooltip">Load Type
-					<span class="classic">Select the type of load you would like to analyze</span>
+				<label class="tooltip">Residential
+					<span class="classic">Select Yes if you would like to include Residential load in the analysis</span>
 				</label>
-				<select name="load_type" id="load_type" value="{{allInputDataDict.load_type}}">
-					<option value="residential" {% if allInputDataDict.load_type | lower == "residential" %}selected{% endif %}>Residential</option>
-					<option value="retail" {% if allInputDataDict.load_type | lower == "retail" %}selected{% endif %}>Retail</option>
-					<option value="agriculture" {% if allInputDataDict.load_type | lower == "agriculture" %}selected{% endif %}>Agriculture</option>
+				<select name="residential" id="residential">
+					<option value="yes" {% if allInputDataDict.get('residential', '').lower() == "yes" %}selected{% endif %}>Yes</option>
+					<option value="no" {% if allInputDataDict.get('residential', '').lower() == "no" %}selected{% endif %}>No</option>
 				</select>
 			</div>
+			
+			<div class="shortInput">
+				<label class="tooltip">Retail
+					<span class="classic">Select Yes if you would like to include Retail load in the analysis</span>
+				</label>
+				<select name="retail" id="retail">
+					<option value="yes" {% if allInputDataDict.get('retail', '').lower() == "yes" %}selected{% endif %}>Yes</option>
+					<option value="no" {% if allInputDataDict.get('retail', '').lower() == "no" %}selected{% endif %}>No</option>
+				</select>
+			</div>
+			
+			<div class="shortInput">
+				<label class="tooltip">Agriculture
+					<span class="classic">Select Yes if you would like to include Agriculture load in the analysis</span>
+				</label>
+				<select name="agriculture" id="agriculture">
+					<option value="yes" {% if allInputDataDict.get('agriculture', '').lower() == "yes" %}selected{% endif %}>Yes</option>
+					<option value="no" {% if allInputDataDict.get('agriculture', '').lower() == "no" %}selected{% endif %}>No</option>
+				</select>
+			</div>
+			
+
+			
 						
 			{{ omfModelButtons }}
 		</form>
