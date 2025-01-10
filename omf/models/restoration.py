@@ -1940,6 +1940,7 @@ def new(modelDir):
 	feeder_file_path= [__neoMetaModel__._omfDir,'static','testFiles','iowa240_in_Florida_copy2_no_show_voltage.dss.omd']
 	# feeder_file_path= [__neoMetaModel__._omfDir,'static','testFiles','ieee8500_forced_layout_converted_with_new_code.omd']
 	# feeder_file_path= [__neoMetaModel__._omfDir,'static','testFiles','3300_bus_feeder_added_conncodes.omd']
+	# feeder_file_path= [__neoMetaModel__._omfDir,'static','testFiles','MasterFlatLoadshapesClean1Day.omd']
 
 	event_file_path = [__neoMetaModel__._omfDir,'static','testFiles','iowa240_dwp_22.events.json']
 	loadPriority_file_path = [__neoMetaModel__._omfDir,'static','testFiles','iowa240_dwp_22.loadPriority.basic.json']
@@ -1975,6 +1976,7 @@ def new(modelDir):
 		'loadPriorityData': loadPriority_file_data,
 		'microgridTaggingFileName': microgridTagging_file_path[-1],
 		'microgridTaggingData': microgridTagging_file_data,
+		'cciImpact': '1.0'
 	}
 	creationCode = __neoMetaModel__.new(modelDir, defaultInputs)
 	try:

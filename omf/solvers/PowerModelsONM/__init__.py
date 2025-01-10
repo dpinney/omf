@@ -33,7 +33,7 @@ def run_julia_script(juliaStr : str, cleanFileFormatting = True):
 		delCommand = f'del "{juliaFileLocation}"'
 	else:
 		raise Exception("Operating System is not Darwin, Linux, or Windows")
-	print(f'Saving script to temp_julia_script.jl:\n{juliaStr}')
+	print(f'Saving script to {juliaFileLocation}:\n{juliaStr}')
 	runCommands([cmdString,delCommand])
 	
 def install_onm(target : list = platform.system()):
