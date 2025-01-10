@@ -512,10 +512,10 @@ def tradMetricsByMgTable(outputTimeline, loadMgDict, startTime, numTimeSteps, mo
 			<thead>
 				<tr>
 					<th>Microgrid</th>
-					<th>Event SAIDI</th>
-					<th>Event SAIFI</th>
-					<th>Event CAIDI</th>
-					<th>Event CAIFI</th>
+					<th>SC-SAIDI</th>
+					<th>SC-SAIFI</th>
+					<th>SC-CAIDI</th>
+					<th>SC-CAIFI</th>
 					<th>Loads Served</th>
 					<th>Est. People Served</th>
 					<th>CCI of Average Customer</th>
@@ -572,14 +572,14 @@ def tradMetricsByMgTable(outputTimeline, loadMgDict, startTime, numTimeSteps, mo
 		<table class="sortable" cellpadding="0" cellspacing="0">
 			<thead>
 				<tr>
-					<th>Microgrid</th>
-					<th>Event SAIDI</th>
-					<th>Event SAIFI</th>
-					<th>Event CAIDI</th>
-					<th>Event CAIFI</th>
+					<th>CCI Quartile</th>
+					<th>SC-SAIDI</th>
+					<th>SC-SAIFI</th>
+					<th>SC-CAIDI</th>
+					<th>SC-CAIFI</th>
 					<th>Loads Served</th>
 					<th>Est. People Served</th>
-					<th>Average CCI</th>
+					<th>CCI of Average Customer</th>
 					<th>Ave. CCI merged w/ Load Priorities</th>
 				</tr>
 			</thead>
