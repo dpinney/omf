@@ -19,6 +19,7 @@
 	<p class="reportTitle">Model Input</p>
 	<div id="input" class="content">
 		<form name="inputForm" action="/runModel/" onsubmit="event.preventDefault(); return isFormValid();" method="post">
+			
 			<!-- Required Inputs -->
 			<div class="shortInput">
 				<label>Model Type <a href="https://github.com/dpinney/omf/wiki/Models-~-derUtilityCost" target="blank">Help?</a></label>
@@ -40,7 +41,8 @@
 				<label>Run Time</label>
 				<input type="text" id="runTime" name="runTime" value="{{allInputDataDict.runTime}}"readonly/>
 			</div>
-			<!-- Model Specific Inputs -->
+
+			<!-- General Model Inputs -->
 			<div class="wideInput">
 				<p class="inputSectionHeader">General Model Inputs</p>
 			</div>
@@ -86,13 +88,6 @@
 				<input type="text" id="urdbLabel" name="urdbLabel" value="{{allInputDataDict.urdbLabel}}" required="required"/>
 			</div>
 			<div class="shortInput">
-				<label class="tooltip">Use URDB label to determine demand charge?<span class="classic">If yes, model will use the URDB label provided above to determine the demand charge rate. If no, specify the demand charge rate ($/kWh) below.</span></label>
-				<select id="demandChargeURDB" name="demandChargeURDB" value="{{allInputDataDict.demandChargeURDB}}">
-					<option value="True" {{ 'selected' if allInputDataDict.demandChargeURDB == 'Yes' }}>Yes</option> <!-- TODO: Make this dropdown menu cause Demand Charge Cost to appear and disappear 8/2024 -->
-					<option value="False" {{ 'selected' if allInputDataDict.demandChargeURDB == 'No' }}>No</option>
-				</select>
-			</div>
-			<div class="shortInput">
 				<label class="tooltip">Demand Charge Cost ($/kW)<span class="classic">User defined demand charge that the utility pays per kWh.</span></label>
 				<input type="text" id="demandChargeCost" name="demandChargeCost" value="{{allInputDataDict.demandChargeCost}}" pattern="^\d+\.?\d*?$" required="required">
 			</div>
@@ -109,50 +104,72 @@
 				<input type="text" id="rateCompensation" name="rateCompensation" value="{{allInputDataDict.rateCompensation}}" pattern="^\d+\.?\d*?$" min="0" required="required"/>
 			</div>
 			<div class="shortInput">
-				<label class="tooltip">Subsidy Amount ($)<span class="classic">The total subsidy amount ($) for the entire analysis duration.</span></label>
-				<input type="text" id="subsidy" name="subsidy" value="{{allInputDataDict.subsidy}}" pattern="^\d+\.?\d*?$" required="required"/>
+				<label class="tooltip">Upfront Subsidy Amount ($)<span class="classic">The total upfront one-time subsidy amount ($) paid to the member-consumer.</span></label>
+				<input type="text" id="subsidyUpfront" name="subsidyUpfront" value="{{allInputDataDict.subsidyUpfront}}" pattern="^\d+\.?\d*?$" required="required"/>
+			</div>
+			<div class="shortInput">
+				<label class="tooltip">Annual Recurring Subsidy Amount ($)<span class="classic">The total annual recurring subsidy amount ($) paid to the member-consumer.</span></label>
+				<input type="text" id="subsidyRecurring" name="subsidyRecurring" value="{{allInputDataDict.subsidyRecurring}}" pattern="^\d+\.?\d*?$" required="required"/>
+			</div>
+
+			<!-- Fossil Fuel Generator Inputs -->
+			<div class="wideInput"> 
+				<p class="inputSectionHeader">Utility-Owned Fossil Fuel Generator Device Inputs</p>
+			</div>
+			<hr style="border-style: solid; border-color: #196b12; margin-top: 10px;">
+			<div class="shortInput">
+				<label class="tooltip">Enable Use of Fossil Fuel Generator?<span class="classic">If yes, model will run with a fossil fuel generator.</span></label>
+				<select id="fossilGenerator" name="fossilGenerator" value="{{allInputDataDict.fossilGenerator}}">
+					<option value='Yes' {{ 'selected' if allInputDataDict.fossilGenerator == 'Yes' }}>Yes</option>
+					<option value='No' {{ 'selected' if allInputDataDict.fossilGenerator == 'No' }}>No</option>
+				</select>
+			</div>
+			<div class="shortInput">
+				<label class="tooltip"> Existing Size (kW)<span class="classic">Specify the size (kW) of the existing fossil fuel generator owned by the utility.</span></label>
+				<input type="text" id="existing_gen_kw" name="existing_gen_kw" value="{{allInputDataDict.existing_gen_kw}}" required="required"/>
+			</div>
+			<div class="shortInput">
+				<label class="tooltip"> Available Fuel (gal)<span class="classic">Specify the amount of generator fuel available (gal).</span></label>
+				<input type="text" id="fuel_available_gal" name="fuel_available_gal" value="{{allInputDataDict.fuel_available_gal}}" required="required"/>
+			</div>
+			<div class="shortInput">
+				<label class="tooltip"> Fuel Cost ($/gal)<span class="classic">Specify the cost of fuel used for the generator ($/gal).</span></label>
+				<input type="text" id="fuel_cost_per_gal" name="fuel_cost_per_gal" value="{{allInputDataDict.fuel_cost_per_gal}}" required="required"/>
 			</div>
 
 			<!-- Chemical BESS Inputs -->
 			<div class="wideInput"> 
-				<p class="inputSectionHeader">Chemical Energy Storage Device Inputs</p>
+				<p class="inputSectionHeader">Home Chemical Energy Storage Device Inputs</p>
 			</div>
 			<hr style="border-style: solid; border-color: #196b12; margin-top: 10px;">
 			<div class="shortInput">
-				<label class="tooltip">Number of Home Chemical Batteries<span class="classic">Total number of residential chemical batteries to model.</span></label>
+				<label class="tooltip">Number of Home Chemical Batteries<span class="classic">Total number of home chemical batteries to model.</span></label>
 				<input type="text" id="numberBESS" name="numberBESS" value="{{allInputDataDict.numberBESS}}" required="required">
 			</div>
 			<div class="shortInput">
-				<label class="tooltip">Can grid charge?<span class="classic">Select Yes if the battery can be charged from the grid, otherwise select No.</span></label>
-				<select id="chemBESSgridcharge" name="chemBESSgridcharge" value="{{allInputDataDict.chemBESSgridcharge}}"/>
-					<option value="Yes" {{ 'selected' if allInputDataDict.chemBESSgridcharge == 'Yes' }}>Yes</option>
-					<option value="No" {{ 'selected' if allInputDataDict.chemBESSgridcharge == 'No' }}>No</option>
-				</select>
+				<label class="tooltip">Ongoing Operational Costs ($/month)<span class="classic">Specify the monthly ongoing operational costs of controlling all member-consumer home chemical batteries (e.g. the API usage cost per month).</span></label>
+				<input type="text" id="BESS_operationalCosts_ongoing" name="BESS_operationalCosts_ongoing" value="{{allInputDataDict.BESS_operationalCosts_ongoing}}" pattern="^\d+\.?\d*?$" required="required"/>
 			</div>
 			<div class="shortInput">
-				<label class="tooltip">Operational Power Capacity Cost ($/kW)<span class="classic">Specify the operational cost per kW of enrolling and controlling a member-consumer's battery (e.g. the API usage cost).</span></label>
-				<input type="text" id="installed_cost_per_kw" name="installed_cost_per_kw" value="{{allInputDataDict.installed_cost_per_kw}}" pattern="^\d+\.?\d*?$" required="required"/>
+				<label class="tooltip">One-time Operational Costs ($)<span class="classic">Specify the total one-time operational costs of controlling all member-consumer home chemical batteries (e.g. the contracting agreement with the device manufacturer).</span></label>
+				<input type="text" id="BESS_operationalCosts_onetime" name="BESS_operationalCosts_onetime" value="{{allInputDataDict.BESS_operationalCosts_onetime}}" pattern="^\d+\.?\d*?$" required="required"/>
 			</div>
 			<div class="shortInput">
-				<label class="tooltip">Operational Energy Capacity Cost ($/kWh)<span class="classic">Specify the operational cost per kWh of enrolling and controlling a member-consumer's battery (e.g. the API usage cost)</span></label>
-				<input type="text" id="installed_cost_per_kwh" name="installed_cost_per_kwh" value="{{allInputDataDict.installed_cost_per_kwh}}" pattern="^\d+\.?\d*?$" required="required"/>
-			</div>
-			<div class="shortInput">
-				<label class="tooltip">Battery Power Capacity (kW)<span class="classic">Specify the battery power capacity in kW for each individual battery enrolled by a member-consumer.</span></label>
+				<label class="tooltip">Home Battery Power Capacity (kW)<span class="classic">Specify the home chemical battery power capacity in kW for each individual battery enrolled by a member-consumer.</span></label>
 				<input type="text" id="BESS_kw" name="BESS_kw" value="{{allInputDataDict.BESS_kw}}" required="required"/>
 			</div>
 			<div class="shortInput">
-				<label class="tooltip">Battery Energy Capacity (kWh)<span class="classic">Specify the battery energy capacity in kWh for each individual battery enrolled by a member-consumer.</span></label>
+				<label class="tooltip">Home Battery Energy Capacity (kWh)<span class="classic">Specify the home chemical battery energy capacity in kWh for each individual battery enrolled by a member-consumer.</span></label>
 				<input type="text" id="BESS_kwh" name="BESS_kwh" value="{{allInputDataDict.BESS_kwh}}" required="required"/>
 			</div>
 
-			<!-- vbatDispatch Specific Inputs -->
+			<!-- Thermal Storage (vbatDispatch) Inputs -->
 			<div class="wideInput"> 
-				<p class="inputSectionHeader">Thermal Energy Storage Device Inputs</p>
+				<p class="inputSectionHeader">Home Thermal Energy Storage Device Inputs</p>
 			</div>
 			<hr style="border-style: solid; border-color: #196b12; margin-top: 10px;">
 			<div class="shortInput">
-				<label class="tooltip">Load Type<span class="classic">Device to be used in calculations</span></label>
+				<label class="tooltip">Load Type<span class="classic">Select what kind of home thermal device to model.</span></label>
 				<select id="load_type" onchange="loadDefaultParameters()" name="load_type">
 				<script type="text/javascript">
 					function loadDefaultParameters(){
@@ -195,40 +212,48 @@
 				</select>
 			</div>
 			<div class="shortInput">
-				<label class="tooltip">Number of Devices<span class="classic">Total number of devices to simulate.</span></label>
+				<label class="tooltip">Number of Devices<span class="classic">Total number of home thermal devices to simulate.</span></label>
 				<input type="text" id="number_devices" name="number_devices" value="{{allInputDataDict.number_devices}}" required="required">
 			</div>
 			<div class="shortInput">
-				<label class="tooltip">Rated Power (kW)<span class="classic">Max power per device. Must be a positive rational number between 0.1 and 7.2.</span></label>
+				<label class="tooltip">Rated Power (kW)<span class="classic">Max power per home thermal device. Must be a positive rational number between 0.1 and 7.2.</span></label>
 				<input type="text" id="power" name="power" value="{{allInputDataDict.power}}" pattern="^\d+\.?\d*?$" required="required">
 			</div>
 			<div class="shortInput">
-				<label class="tooltip">Thermal Capacitance (kWh/&degC)<span class="classic">Capacitance of each device. Must be between 0.2 and 2.5 with exactly one decimal digit.</span></label>
+				<label class="tooltip">Thermal Capacitance (kWh/&degC)<span class="classic">Capacitance of each home thermal device. Must be between 0.2 and 2.5 with exactly one decimal digit.</span></label>
 				<input type="text" id="capacitance" name="capacitance" value="{{allInputDataDict.capacitance}}" pattern="^\d+\.?\d*?$" required="required">
 			</div>
 			<div class="shortInput">
-				<label class="tooltip">Thermal Resistance (&degC/kW)<span class="classic">Resistance of each device. Must be between 1.5 and 140.</span></label>
+				<label class="tooltip">Thermal Resistance (&degC/kW)<span class="classic">Resistance of each home thermal device. Must be between 1.5 and 140.</span></label>
 				<input type="text" id="resistance" name="resistance" value="{{allInputDataDict.resistance}}" pattern="^\d+\.?\d*?$" required="required">
 			</div>			
 			<div class="shortInput">
-				<label class="tooltip">Coefficient of Performance<span class="classic">Coefficient of performance of each device. Must be between 1 and 3.5</span></label>
+				<label class="tooltip">Coefficient of Performance<span class="classic">Coefficient of performance of each home thermal device. Must be between 1 and 3.5</span></label>
 				<input type="text" id="cop" name="cop" value="{{allInputDataDict.cop}}" pattern="^\d+\.?\d*?$" required="required">
 			</div>
 			<div class="shortInput">
-				<label class="tooltip">Temperature Setpoint (&degC)<span class="classic">Setpoint for each device. Must be between 1.7 and 54.</span></label>
+				<label class="tooltip">Temperature Setpoint (&degC)<span class="classic">Setpoint for each home thermal device. Must be between 1.7 and 54.</span></label>
 				<input type="text" id="setpoint" name="setpoint" value="{{allInputDataDict.setpoint}}" pattern="^\d+\.?\d*?$" required="required">
 			</div>
 			<div class="shortInput">
-				<label class="tooltip">Temperature Deadband (&degC)<span class="classic">Deadband for each device. Must be between 0.125 and 2.</span></label>
+				<label class="tooltip">Temperature Deadband (&degC)<span class="classic">Deadband for each home thermal device. Must be between 0.125 and 2.</span></label>
 				<input type="text" id="deadband" name="deadband" value="{{allInputDataDict.deadband}}" pattern="^\d+\.?\d*?$" required="required">
 			</div>
 			<div class="shortInput">
-				<label class="tooltip">Unit Cost ($/unit)<span class="classic">Cost per device for equipping it to respond to load control signals. E.g. for a direct load control program, this would be the cost of a load control switch, typically about $100.</span></label>
+				<label class="tooltip">Unit Cost ($/unit)<span class="classic">Cost per home thermal device for equipping it to respond to load control signals. E.g. for a direct load control program, this would be the cost of a load control switch, typically about $100.</span></label>
 				<input type="text" id="unitDeviceCost" name="unitDeviceCost" value="{{allInputDataDict.unitDeviceCost}}" pattern="^\d+\.?\d*?$" required="required">
 			</div>
 			<div class="shortInput">
-				<label class="tooltip">Upkeep Cost ($/unit/year)<span class="classic">Maintenance cost each year per device for replacing or repairing defective load control equipment.</span></label>
+				<label class="tooltip">Upkeep Cost ($/unit/year)<span class="classic">Maintenance cost each year per home thermal device for replacing or repairing defective load control equipment.</span></label>
 				<input type="text" id="unitUpkeepCost" name="unitUpkeepCost" value="{{allInputDataDict.unitUpkeepCost}}" pattern="^\d+\.?\d*?$" required="required">
+			</div>
+			<div class="shortInput">
+				<label class="tooltip">Ongoing Operational Costs ($/month)<span class="classic">Specify the monthly ongoing operational costs of controlling all member-consumer home thermal energy storage systems (e.g. the API usage cost per month).</span></label>
+				<input type="text" id="TESS_operationalCosts_ongoing" name="TESS_operationalCosts_ongoing" value="{{allInputDataDict.TESS_operationalCosts_ongoing}}" pattern="^\d+\.?\d*?$" required="required"/>
+			</div>
+			<div class="shortInput">
+				<label class="tooltip">One-time Operational Costs ($)<span class="classic">Specify the total one-time operational costs of controlling all member-consumer home thermal energy storage systems (e.g. the contracting agreement with the device manufacturer).</span></label>
+				<input type="text" id="TESS_operationalCosts_onetime" name="TESS_operationalCosts_onetime" value="{{allInputDataDict.TESS_operationalCosts_onetime}}" pattern="^\d+\.?\d*?$" required="required"/>
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Discount Rate (%)<span class="classic">Discount rate used in financial analysis.</span></label>
@@ -246,10 +271,10 @@
 		<p class="reportTitle" style="page-break-before:always">DER Serving Load Overview</p>
 		<div id="derOverviewData" class="tightContent" style="width: 1000px; height: 600px;"></div>
 
-		<p class="reportTitle" style="page-break-before:always">Thermal Battery Power Profile</p>
+		<p class="reportTitle" style="page-break-before:always">Home Thermal Battery Power Profile</p>
 		<div id="thermalBatPowerPlot" class="tightContent" style="width: 1000px; height: 600px;"></div>
 
-		<p class="reportTitle" style="page-break-before:always">Chemical BESS State of Charge</p>
+		<p class="reportTitle" style="page-break-before:always">Home Chemical BESS State of Charge</p>
 		<div id="batteryChargePlotly" class="tightContent" style="width: 1000px; height: 600px;"></div>
 
 		<p class="reportTitle">Monthly Cost Comparison</p>
@@ -289,16 +314,17 @@
 				</script>
 				<script>
 					insertMetric("monthlySummaryTable","Peak Demand (kW)", allOutputData.peakDemand)
-					insertMetric("monthlySummaryTable","Adjusted Peak Demand (kW)", allOutputData.peakAdjustedDemand)
+					insertMetric("monthlySummaryTable","Adjusted Peak Demand (kW)", allOutputData.peakAdjustedDemand_total)
 					insertMetric("monthlySummaryTable","Energy (kWh)", allOutputData.energyMonthly)
-					insertMetric("monthlySummaryTable","Adjusted Energy (kWh)", allOutputData.energyAdjustedMonthly)
+					insertMetric("monthlySummaryTable","Adjusted Energy (kWh)", allOutputData.energyAdjustedMonthly_total)
 					insertMetric("monthlySummaryTable","Energy Cost ($)", allOutputData.energyCost)
-					insertMetric("monthlySummaryTable","Adjusted Energy Cost ($)", allOutputData.energyCostAdjusted)
+					insertMetric("monthlySummaryTable","Adjusted Energy Cost ($)", allOutputData.energyCostAdjusted_total)
 					insertMetric("monthlySummaryTable","Demand Charge ($)", allOutputData.demandCharge)
-					insertMetric("monthlySummaryTable","Adjusted Demand Charge ($)", allOutputData.demandChargeAdjusted)
-					insertMetric("monthlySummaryTable","Total Cost ($)", allOutputData.totalCost)
-					insertMetric("monthlySummaryTable","Adjusted Total Cost ($)", allOutputData.totalCostAdjusted)
-					insertMetric("monthlySummaryTable","Utility Savings ($)", allOutputData.savings)
+					insertMetric("monthlySummaryTable","Adjusted Demand Charge ($)", allOutputData.demandChargeAdjusted_total)
+					insertMetric("monthlySummaryTable","Total Cost of Service ($)", allOutputData.totalCost_service)
+					insertMetric("monthlySummaryTable","Adjusted Total Cost of Service ($)", allOutputData.totalCostAdjusted_service)
+					insertMetric("monthlySummaryTable","Consumer Compensation ($)", allOutputData.totalCost_paidToConsumer)
+					insertMetric("monthlySummaryTable","Net Utility Savings ($)", allOutputData.savings_total)
 					//insertMetric("monthlySummaryTable","1 kW Consumer Savings ($)", allOutputData.totalSavingsSmallConsumer)
 					//insertMetric("monthlySummaryTable","10 kW Consumer Savings ($)", allOutputData.totalSavingsLargeConsumer)
 				</script>
@@ -312,10 +338,22 @@
 				new Highcharts.Chart({"credits":{"enabled":false},
 					"plotOptions":{"column":{"stacking":'normal'},"series":{"animation":false,"shadow":false},"spline":{"animation":false,"shadow":false}},
 					"xAxis":{"title":{"text":"Year After Installation","style":{"color":"gray"}},"type":"linear","tickColor":"gray","tickInterval":1,"lineColor":"gray","minorTickColor":"gray", "minorTickInterval":5},
-					"title":{"text":"NPV:$" + allOutputData.NPV.toFixed(0) + " ;	SPP:" + allOutputData.SPP.toFixed(3), "verticalAlign":"bottom", "align":"right", "y":-50, "x":-10, "style":{"color":"#333333", "fontSize":"12px"}},
-					//"title":{"text":""},
-					"series":[{"name":"Net Benefits", "data":allOutputData.netCashflow},
-						{"name":"Cumulative Return", "type":"spline", "data":allOutputData.cumulativeCashflow}
+					"title":{"text":"NPV: $" + allOutputData.NPV.toFixed(0) + ", SPP: " + allOutputData.SPP.toFixed(3), "verticalAlign":"top", "align":"right", "y":35, "x":-10, "style":{"color":"#333333", "fontSize":"12px"}},
+					"series":[
+						//{"name":"Net Benefits", "data": allOutputData.netCashflow, "color": "rgb(102,102,255)"},
+						//{"name":"Total Utility Savings", "data": allOutputData.savingsAllYears, "color": "green"},
+						{"name":"BESS Savings", "data": allOutputData.annualEarnings_BESS, "color": "rgb(0,128,0)"},
+						{"name":"TESS Savings", "data": allOutputData.annualEarnings_TESS, "color": "rgb(143,188,143)"},
+						{"name":"Generator Savings", "data": allOutputData.annualEarnings_generator, "color": "rgb(152,251,152)"},
+						{"name":"Demand Charge Savings", "data": allOutputData.savings_demandCharge_annual, "color": "rgb(139,190,27)"},
+						{"name":"Subsidies", "data": allOutputData.subsidies, "color": "black"},
+						{"name":"Consumer BESS Compensation", "data": allOutputData.BESS_compensation_to_consumer_allyears, "color": "rgb(255,102,102)"},
+						{"name":"Grid Costs", "data": allOutputData.energyCostAdjusted_gridCharging_annual, "color": "rgb(169,169,169)"},
+						{"name":"BESS Ongoing Operational Costs", "data": allOutputData.operationalCosts_BESS_ongoing_allyears_total, "color": "orange"},
+						{"name":"BESS One-time Operational Costs", "data": allOutputData.operationalCosts_BESS_onetime_allyears_total, "color": "rgb(229,204,255)"},
+						{"name":"TESS Ongoing Operational Costs", "data": allOutputData.operationalCosts_TESS_ongoing_allyears_total, "color": "red"},
+						{"name":"TESS One-time Operational Costs", "data": allOutputData.operationalCosts_TESS_onetime_allyears_total, "color": "rgb(178,34,34)"},
+						{"name":"Cumulative Return", "type":"spline", "data": allOutputData.cumulativeCashflow_total, "color": "brown"}
 					],
 					"yAxis":{"title":{"text":"Income ($)","style":{"color":"gray"}}},
 					"chart":{"marginBottom":55,"zoomType":"x","renderTo":"cashFlowChartDiv","type":"column","marginRight":20, "height":250,"width":1000},

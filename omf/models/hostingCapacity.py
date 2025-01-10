@@ -125,14 +125,18 @@ def run_ami_algorithm( modelDir, inputDict, outData ):
 	AMI_output = []
 
 	try:
-		csvValidateAndLoad(inputAsString, modelDir=modelDir, header=0, nrows=None, ncols=5, dtypes=[str, pd.to_datetime, float, float, float], return_type='df', ignore_nans=False, save_file=None, ignore_errors=False )
+		csvValidateAndLoad(inputAsString, modelDir=modelDir, header=0, nrows=None, ncols=None, dtypes=[], return_type='df', ignore_nans=True, save_file=None, ignore_errors=False )
 	except:
 		errorMessage = "AMI-Data CSV file is incorrect format. Please see valid format definition at <a target='_blank' href='https://github.com/dpinney/omf/wiki/Models-~-hostingCapacity#meter-data-input-csv-file-format'>OMF Wiki hostingCapacity</a>"
 		raise Exception(errorMessage)
+		
+	vv_points_eval = eval(inputDict['vv_points'])
+	vv_x = [x for x,y in vv_points_eval]
+	vv_y = [y for x,y in vv_points_eval]
 	
 	AMI_start_time = time.time()
 	if inputDict[ "algorithm" ] == "sandia1":
-		AMI_output = mohca_cl.sandia1( inputPath, outputPath )
+		AMI_output = mohca_cl.sandia1( in_path=inputPath, out_path=outputPath, der_pf=None, vv_x=vv_x, vv_y=vv_y, load_pf_est=0.97 )
 	elif inputDict[ "algorithm" ] == "iastate":
 		AMI_output = mohca_cl.iastate( inputPath, outputPath )
 	else:
@@ -140,7 +144,7 @@ def run_ami_algorithm( modelDir, inputDict, outData ):
 		raise Exception(errorMessage)
 	AMI_end_time = time.time()
 
-	AMI_results = pd.read_csv( outputPath )
+	AMI_results = pd.read_csv( outputPath, index_col=False)
 	AMI_results.rename(columns={'kw_hostable': 'voltage_cap_kW'}, inplace=True)
 	histogramFigure = px.histogram( AMI_results, x='voltage_cap_kW', template="simple_white", color_discrete_sequence=["MediumPurple"] )
 	histogramFigure.update_layout(bargap=0.5)
@@ -151,20 +155,21 @@ def run_ami_algorithm( modelDir, inputDict, outData ):
 
 	AMI_results['max_cap_allowed_kW'] = np.minimum( AMI_results['voltage_cap_kW'], AMI_results['thermal_cap_kW'])
 
-	sorted_results = AMI_results.sort_values(by='busname')
+	AMI_results_sorted = AMI_results.sort_values(by='busname')
 
-	barChartFigure = px.bar(sorted_results, x='busname', y=['voltage_cap_kW', 'thermal_cap_kW', 'max_cap_allowed_kW'], barmode='group', color_discrete_sequence=["green", "lightblue", "MediumPurple"], template="simple_white" )
-	barChartFigure.add_traces( list(px.line(sorted_results, x='busname', y='max_cap_allowed_kW', markers=True).select_traces()) )
+	barChartFigure = px.bar(AMI_results_sorted, x='busname', y=['voltage_cap_kW', 'thermal_cap_kW', 'max_cap_allowed_kW'], barmode='group', color_discrete_sequence=["green", "lightblue", "MediumPurple"], template="simple_white" )
+	barChartFigure.add_traces( list(px.line(AMI_results_sorted, x='busname', y='max_cap_allowed_kW', markers=True).select_traces()) )
 	outData['histogramFigure'] = json.dumps( histogramFigure, cls=py.utils.PlotlyJSONEncoder )
 	outData['barChartFigure'] = json.dumps( barChartFigure, cls=py.utils.PlotlyJSONEncoder )
-	outData['AMI_tableHeadings'] = sorted_results.columns.values.tolist()
-	outData['AMI_tableValues'] = ( list(sorted_results.itertuples(index=False, name=None)) )
+	outData['AMI_tableHeadings'] = AMI_results_sorted.columns.values.tolist()
+	outData['AMI_tableValues'] = ( list(AMI_results_sorted.itertuples(index=False, name=None)) )
 	outData['AMI_runtime'] = convert_seconds_to_hms_ms( AMI_end_time - AMI_start_time )
 
 def run_traditional_algorithm( modelDir, inputDict, outData ):
 	# traditional hosting capacity if they uploaded an omd circuit file and chose to use it.
 	# Check if the file was uploaded and checks to make sure the name matches
 	feederName = [x for x in os.listdir(modelDir) if x.endswith('.omd')][0]
+	inputDict['feederName1'] = feederName[:-4]
 	path_to_omd = Path(modelDir, feederName)
 	tree = opendss.dssConvert.omdToTree(path_to_omd)
 	opendss.dssConvert.treeToDss(tree, Path(modelDir, 'circuit.dss'))
@@ -241,7 +246,7 @@ def work(modelDir, inputDict):
 
 def new(modelDir):
 	''' Create a new instance of this model. Returns true on success, false on failure. '''
-	meter_file_name = 'input_mohcaCustom.csv'
+	meter_file_name = 'SecondaryTestCircuit_modified_input_MoHCA.csv'
 	meter_file_path = Path(omf.omfDir,'static','testFiles', 'hostingCapacity', meter_file_name)
 	# meter_file_contents = open(meter_file_path).read()
 	defaultInputs = {
@@ -249,16 +254,19 @@ def new(modelDir):
 		"algorithm": 'sandia1',
 		"AMIDataFileName": meter_file_name,
 		"userAMIDisplayFileName": meter_file_name,
-		"feederName1": 'iowa240.clean.dss',
+		"feederName1": 'nreca_secondaryTestSet',
 		"optionalCircuitFile": 'on',
 		"traditionalHCMaxTestkw": 50000,
+		"dgInverterSetting": 'unityPF',
+		"der_pf": 0.95,
+		"vv_points": [(0.8,0.44), (0.92, 0.44), (0.98,0), (1.02,0), (1.08,-0.44), (1.2,-0.44)],
 		"runAmiAlgorithm": 'on',
 		"runDownlineAlgorithm": 'on'
 	}
 	creationCode = __neoMetaModel__.new(modelDir, defaultInputs)
 	try:
 		shutil.copyfile(
-			Path(__neoMetaModel__._omfDir, "static", "publicFeeders", defaultInputs["feederName1"]+'.omd'),
+			Path(__neoMetaModel__._omfDir, "static", "testFiles", 'hostingCapacity', defaultInputs["feederName1"]+'.omd'),
 			Path(modelDir, defaultInputs["feederName1"]+'.omd'))
 		shutil.copyfile( meter_file_path, Path(modelDir, meter_file_name) )
 	except:

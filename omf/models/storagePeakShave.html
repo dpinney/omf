@@ -1,15 +1,27 @@
 <head>
 	{{ omfHeaders }}
 	<style>
-		#Metric {
-			font-weight:bold;
-			width:175px;
-		}
 		#SPP {
 			font-weight:bold;
 		}
+		.metric {
+			font-weight: bold;
+		}
+		#levelizedCostTableDiv .gridjs-wrapper {
+			box-shadow: none !important;
+		}
+		#levelizedCostTableDiv th.gridjs-th {
+			background-color: transparent !important;
+			color: inherit !important;
+			border: none !important;
+		}
+		#levelizedCostTableDiv td.gridjs-td {
+			border: none !important;
+		}
 	</style>
 	<script src="{{pathPrefix}}/static/highcharts4.src.js"></script>
+	<link href="https://unpkg.com/gridjs/dist/theme/mermaid.min.css" rel="stylesheet" />
+	<script src="https://unpkg.com/gridjs/dist/gridjs.umd.js"></script>
 </head>
 <body>
 	{{ omfModelTitle }}
@@ -168,60 +180,39 @@
 	{{ omfRunDebugBlock }}
 	{% if modelStatus == 'finished' %}
 	<div id="output">
-		<script id="globalOutputScripting">
-			function insertMetric(tableId, name, vector) {
-				// Add a vector to a table as a row.
-				table = gebi(tableId)
-				newRow = table.insertRow()
-				newRow.insertCell().innerHTML = "<div id=\"metric\">" + name + "</div>"
-				for (i=0; i<vector.length; i++) {
-					cell = newRow.insertCell()
-					cell.innerHTML = delimitNumbers(vector[i].toFixed(0))
-				}
-			}
-		</script>
-		<script id="globalOutputScripting">
-			function insertDollarMetric(tableId, name, vector) {
-				// Add a vector to a table as a row.
-				table = gebi(tableId)
-				newRow = table.insertRow()
-				newRow.insertCell().innerHTML = "<div id=\"metric\">" + name + "</div>"
-				for (i=0; i<vector.length; i++) {
-					cell = newRow.insertCell()
-					cell.innerHTML = "$" + delimitNumbers(vector[i].toFixed(0))
-				}
-			}
-		</script>
 		<p class="reportTitle">Monthly Cost Comparison</p>
 		<div id="levelizedCostReport" class="tightContent">
-			<div id="levelizedCostTableDiv" style="display:inline-block; width:1000px; height:150px; overflow-y:hidden; overflow-x:auto;">
-				<table id="monthlySummaryTable" style="margin:5px;margin: 5px;width: 990px;font-size: 14pt">
-					<style>td, th {padding:7 0 5 20;text-align: left;font-size:0.7em;}</style>
-					<div id="tableHead">
-						<thead>
-							<th></th>
-							<th>Jan</th>
-							<th>Feb</th>
-							<th>Mar</th>
-							<th>Apr</th>
-							<th>May</th>
-							<th>Jun</th>
-							<th>Jul</th>
-							<th>Aug</th>
-							<th>Sep</th>
-							<th>Oct</th>
-							<th>Nov</th>
-							<th>Dec</th>
-						</thead>
-					</div>
-				</table>
-				<script>
-					insertMetric("monthlySummaryTable","Existing Demand (kW)", allOutputData.monthlyDemand)
-					insertMetric("monthlySummaryTable","Demand with Battery (kW)", allOutputData.monthlyDemandRed)
-					insertMetric("monthlySummaryTable","Reduction Amount (kW)", allOutputData.ps)
-					insertDollarMetric("monthlySummaryTable","Value of Reduction ($)", allOutputData.benefitMonthly)	
-				</script>
-			</div>
+			<div id="levelizedCostTableDiv" style="display:inline-block; width:100%;"></div>
+			<script>
+				const data = [
+					["Existing Demand (kW)", ...allOutputData.monthlyDemand.map(v => delimitNumbers(v.toFixed(0)))],
+					["Demand with Battery (kW)", ...allOutputData.monthlyDemandRed.map(v => delimitNumbers(v.toFixed(0)))],
+					["Reduction Amount (kW)", ...allOutputData.ps.map(v => delimitNumbers(v.toFixed(0)))],
+					["Value of Reduction ($)", ...allOutputData.benefitMonthly.map(v => "$" + delimitNumbers(v.toFixed(0)))]
+				];
+				new gridjs.Grid({
+					columns: [{ name: "", width: "200px", attributes: {class: "metric"}}, "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"],
+					data: data,
+					style: {
+						table: {
+							"margin": "5px",
+							"margin": "5px",
+							"width": "990px",
+							"font-size": "14pt"
+						},
+						th: {
+							"padding": "7 0 5 20",
+							"text-align": "left",
+							"font-size": "0.7em"
+						},
+						td: {
+							"padding": "7 0 5 20",
+							"text-align": "left",
+							"font-size": "0.7em"
+						}
+					},
+				}).render(document.getElementById("levelizedCostTableDiv"));
+			</script>
 		</div>
 		<script type="text/javascript">
 			// Global Highcharts settings.

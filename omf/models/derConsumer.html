@@ -80,27 +80,6 @@
 				<label class="tooltip">Year<span class="classic">Specify the year to which the Demand Curve values corresond.</span></label>
 				<input type="text" id="year" name="year" value="{{allInputDataDict.year}}" pattern="^\d{4}$" required="required"/>
 			</div>
-			<div class="shortInput">
-				<label class="tooltip">Photovoltaic (PV) Panels<span class="classic">Include PV in DER analysis?</span></label>
-				<select id="PV" name="PV" value="{{allInputDataDict.PV}}"/>
-					<option value="Yes" {{ 'selected' if allInputDataDict.solar == 'Yes' }}>Yes</option>
-					<option value="No" {{ 'selected' if allInputDataDict.solar == 'No' }}>No</option>
-				</select>
-			</div>
-			<div class="shortInput">
-				<label class="tooltip">Battery Energy Storage System<span class="classic">Include battery energy storage in DER analysis?</span></label>
-				<select id="BESS" name="BESS" value="{{allInputDataDict.BESS}}"/>
-					<option value="Yes" {{ 'selected' if allInputDataDict.BESS == 'Yes' }}>Yes</option>
-					<option value="No" {{ 'selected' if allInputDataDict.BESS == 'No' }}>No</option>
-				</select>
-			</div>
-			<div class="shortInput">
-				<label class="tooltip">Diesel Generator<span class="classic">Include diesel generator in DER analysis?</span></label>
-				<select id="generator" name="generator" value="{{allInputDataDict.generator}}"/>
-					<option value="Yes" {{ 'selected' if allInputDataDict.generator == 'Yes' }}>Yes</option>
-					<option value="No" {{ 'selected' if allInputDataDict.generator == 'No' }}>No</option>
-				</select>
-			</div>
 			
 			<!-- Financial Inputs -->
 			<div class="wideInput">
@@ -126,6 +105,43 @@
 				<label class="tooltip">Financial Projection Length (years)<span class="classic">Number of years to project out estimated savings. Must be between 1 and 75 years.</span></label>
 				<input type="text" id="projectionLength" name="projectionLength" value="{{allInputDataDict.projectionLength}}" step="1" min="1" max="75" required="required">
 			</div>
+			<div class="shortInput">
+				<label class="tooltip">Energy Compensation Rate ($/kWh)<span class="classic">The dollar amount per kWh compensated to the member-consumer.</span></label>
+				<input type="text" id="rateCompensation" name="rateCompensation" value="{{allInputDataDict.rateCompensation}}" pattern="^\d+\.?\d*?$" min="0" required="required"/>
+			</div>
+			<div class="shortInput">
+				<label class="tooltip">Upfront Subsidy Amount ($)<span class="classic">The total subsidy amount ($) for new installations for the entire analysis duration.</span></label>
+				<input type="text" id="subsidyUpfront" name="subsidyUpfront" value="{{allInputDataDict.subsidyUpfront}}" pattern="^\d+\.?\d*?$" required="required"/>
+			</div>
+			<div class="shortInput">
+				<label class="tooltip">Ongoing Subsidy Amount ($)<span class="classic">The total ongoing subsidy amount ($) occuring monthly.</span></label>
+				<input type="text" id="subsidyOngoing" name="subsidyOngoing" value="{{allInputDataDict.subsidyOngoing}}" pattern="^\d+\.?\d*?$" required="required"/>
+			</div>
+
+			<!-- Fossil Fuel Generator Inputs -->
+			<div class="wideInput"> 
+				<p class="inputSectionHeader">Fossil Fuel Generator Device Inputs</p>
+			</div>
+			<hr style="border-style: solid; border-color: #196b12; margin-top: 10px;">
+			<div class="shortInput">
+				<label class="tooltip">Enable Use of Fossil Fuel Generator?<span class="classic">If yes, model will run with a fossil fuel generator.</span></label>
+				<select id="fossilGenerator" name="fossilGenerator" value="{{allInputDataDict.fossilGenerator}}">
+					<option value='Yes' {{ 'selected' if allInputDataDict.fossilGenerator == 'Yes' }}>Yes</option>
+					<option value='No' {{ 'selected' if allInputDataDict.fossilGenerator == 'No' }}>No</option>
+				</select>
+			</div>
+			<div class="shortInput">
+				<label class="tooltip"> Existing Size (kW)<span class="classic">Specify the size (kW) of the existing fossil fuel generator.</span></label>
+				<input type="text" id="existing_gen_kw" name="existing_gen_kw" value="{{allInputDataDict.existing_gen_kw}}" required="required"/>
+			</div>
+			<div class="shortInput">
+				<label class="tooltip"> Available Fuel (gal)<span class="classic">Specify the amount of generator fuel available (gal).</span></label>
+				<input type="text" id="fuel_available_gal" name="fuel_available_gal" value="{{allInputDataDict.fuel_available_gal}}" required="required"/>
+			</div>
+			<div class="shortInput">
+				<label class="tooltip"> Fuel Cost ($/gal)<span class="classic">Specify the cost of fuel used for the generator ($/gal).</span></label>
+				<input type="text" id="fuel_cost_per_gal" name="fuel_cost_per_gal" value="{{allInputDataDict.fuel_cost_per_gal}}" required="required"/>
+			</div>
 
 			<!-- Chemical BESS Inputs -->
 			<div class="wideInput"> 
@@ -133,47 +149,20 @@
 			</div>
 			<hr style="border-style: solid; border-color: #196b12; margin-top: 10px;">
 			<div class="shortInput">
-				<label class="tooltip">Number of Home Chemical Batteries<span class="classic">Total number of residential chemical batteries to model.</span></label>
-				<input type="text" id="numberBESS" name="numberBESS" value="{{allInputDataDict.numberBESS}}" required="required">
+				<label class="tooltip">Home Battery Power Capacity (kW)<span class="classic">Specify the home chemical battery power capacity in kW.</span></label>
+				<input type="text" id="BESS_kw" name="BESS_kw" value="{{allInputDataDict.BESS_kw}}" required="required"/>
 			</div>
 			<div class="shortInput">
-				<label class="tooltip">Can grid charge?<span class="classic">Select Yes if the battery can be charged from the grid, otherwise select No.</span></label>
-				<select id="chemBESS" name="chemBESS" value="{{allInputDataDict.chemBESSgridcharge}}"/>
-					<option value="Yes" {{ 'selected' if allInputDataDict.chemBESSgridcharge == 'Yes' }}>Yes</option>
-					<option value="No" {{ 'selected' if allInputDataDict.chemBESSgridcharge == 'No' }}>No</option>
-				</select>
+				<label class="tooltip">Home Battery Energy Capacity (kWh)<span class="classic">Specify the home chemical battery energy capacity in kWh.</span></label>
+				<input type="text" id="BESS_kwh" name="BESS_kwh" value="{{allInputDataDict.BESS_kwh}}" required="required"/>
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Installed Power Cost ($/kW)<span class="classic">Specify the installed cost per kW of the battery.</span></label>
 				<input type="text" id="installed_cost_per_kw" name="installed_cost_per_kw" value="{{allInputDataDict.installed_cost_per_kw}}" pattern="^\d+\.?\d*?$" required="required"/>
 			</div>
 			<div class="shortInput">
-				<label class="tooltip">Battery Minimum Power (kW)<span class="classic">Specify the minimum desired battery power in kW.</span></label>
-				<input type="text" id="min_kw" name="min_kw" value="{{allInputDataDict.min_kw}}" required="required"/>
-			</div>
-			<div class="shortInput">
-				<label class="tooltip">Battery Maximum Power (kW)<span class="classic">Specify the maximum desired battery power in kW.</span></label>
-				<input type="text" id="max_kw" name="max_kw" value="{{allInputDataDict.max_kw}}" required="required"/>
-			</div>
-			<div class="shortInput">
 				<label class="tooltip">Installed Capacity Cost ($/kWh)<span class="classic">Specify the cost in $/kWh.</span></label>
 				<input type="text" id="installed_cost_per_kwh" name="installed_cost_per_kwh" value="{{allInputDataDict.installed_cost_per_kwh}}" pattern="^\d+\.?\d*?$" required="required"/>
-			</div>
-			<div class="shortInput">
-				<label class="tooltip">Battery Minimum Capacity (kWh)<span class="classic">Specify the minimum desired battery capacity in kWh.</span></label>
-				<input type="text" id="min_kwh" name="min_kwh" value="{{allInputDataDict.min_kwh}}" required="required"/>
-			</div>
-			<div class="shortInput">
-				<label class="tooltip">Battery Maximum Capacity (kWh)<span class="classic">Specify the maximum desired battery capacity in kWh.</span></label>
-				<input type="text" id="max_kwh" name="max_kwh" value="{{allInputDataDict.max_kwh}}" required="required"/>
-			</div>
-			<div class="shortInput">
-				<label class="tooltip">Battery MACRS Years<span class="classic">MACRS schedule for financial analysis. Possible inputs are 0, 5 and 7 years.</span></label>
-				<select id="macrs_option_years" name="macrs_option_years" value="{{allInputDataDict.macrs_option_years}}"/>
-					<option value="0" {{ 'selected' if allInputDataDict.batteryMacrsOptionYears == '0' }}>0</option>
-					<option value="5" {{ 'selected' if allInputDataDict.batteryMacrsOptionYears == '5' }}>5</option>
-					<option value="7" {{ 'selected' if allInputDataDict.batteryMacrsOptionYears == '7' }}>7</option>
-				</select>
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Battery ITC (%)<span class="classic">Please enter a number 0-1 for the battery investment tax credit. Format 0.XX</span></label>
@@ -198,58 +187,6 @@
 				<div class="shortInput">
 				<label class="tooltip">Battery Replacement (years)<span class="classic">Specify a year in which the battery cells will be replaced at the cost specified in Battery Replacement Capacity Cost. Input is an integer less than or equal to the analysis period in years.</span></label>
 				<input type="text" id="battery_replacement_year" name="battery_replacement_year" value="{{allInputDataDict.battery_replacement_year}}" required="required"/>
-			</div>
-
-			<!-- Photovoltaic Inputs -->
-			<div class="wideInput"> 
-				<p class="inputSectionHeader">Photovoltaic Device Inputs</p>
-			</div>
-			<hr style="border-style: solid; border-color: #196b12; margin-top: 10px;">
-			<div class="shortInput solarDisplayInput">
-				<label class="tooltip">Existing photovoltaic size (kW)<span class="classic">Specify the total capacity of any pre-existing photovoltaic installation in kW.</span></label>
-				<input type="text" id="existing_kw_PV" name="existing_kw_PV" value="{{allInputDataDict.existing_kw_PV}}" required="required"/>
-			</div>
-			<div class="shortInput">
-				<label class="tooltip">Additional Utility-Installed PV Size (kW)<span class="classic">Specify the additional desired photovoltaic size amount in kW.</span></label>
-				<input type="text" id="additional_kw_PV" name="additional_kw_PV" value="{{allInputDataDict.additional_kw_PV}}" required="required"/>
-			</div>
-			<div class="shortInput">
-				<label class="tooltip">Photovoltaic Cost ($/kW)<span class="classic">Specify the cost in $/kW.</span></label>
-				<input type="text" id="costPV" name="costPV" value="{{allInputDataDict.costPV}}" pattern="^\d+\.?\d*?$" required="required"/>
-			</div>
-			<div class="shortInput">
-				<label class="tooltip">Photovoltaic Minimum Power (kW)<span class="classic">Specify the minimum desired photovoltaic generation in kW.</span></label>
-				<input type="text" id="min_kw_PV" name="min_kw_PV" value="{{allInputDataDict.min_kw_PV}}" required="required"/>
-			</div>
-			<div class="shortInput">
-				<label class="tooltip">Photovoltaic Maximum Power (kW)<span class="classic">Specify the maximum desired generation in kW.</span></label>
-				<input type="text" id="max_kw_PV" name="max_kw_PV" value="{{allInputDataDict.max_kw_PV}}" required="required"/>
-			</div>
-			<div class="shortInput">
-				<label class="tooltip">Can photovoltaic be curtailed?<span class="classic">Allows for excess photovoltaic power to be automatically curtailed.</span></label>
-				<select id="PVCanCurtail" name="PVCanCurtail">
-					<option value='True' {{ 'selected' if allInputDataDict.PVCanCurtail == True }}>Yes</option>
-					<option value='False' {{ 'selected' if allInputDataDict.PVCanCurtail == False }}>No</option>
-				</select>
-			</div>
-			<div class="shortInput">
-				<label class="tooltip">Can photovoltaic be exported?<span class="classic">Allows for excess photovoltaic power to be sold back to the grid.</span></label>
-				<select id="PVCanExport" name="PVCanExport">
-					<option value='True' {{ 'selected' if allInputDataDict.PVCanExport == True }}>Yes</option>
-					<option value='False' {{ 'selected' if allInputDataDict.PVCanExport == False }}>No</option>
-				</select>
-			</div>
-			<div class="shortInput">
-				<label class="tooltip">Photovoltaic MACRS Years<span class="classic">MACRS schedule for financial analysis. Possible inputs are 0, 5 and 7 years.</span></label>
-				<select id="PVMacrsOptionYears" name="PVMacrsOptionYears" value="{{allInputDataDict.PVMacrsOptionYears}}"/>
-					<option value="0" {{ 'selected' if allInputDataDict.PVMacrsOptionYears == '0' }}>0</option>
-					<option value="5" {{ 'selected' if allInputDataDict.PVMacrsOptionYears == '5' }}>5</option>
-					<option value="7" {{ 'selected' if allInputDataDict.PVMacrsOptionYears == '7' }}>7</option>
-				</select>
-			</div>
-			<div class="shortInput">
-				<label class="tooltip">Photovoltaic ITC (%)<span class="classic">Please enter a number 0-1 for the photovoltaic investment tax credit. Format 0.XX</span></label>
-				<input type="number" id="PVItcPercent" name="PVItcPercent" value="{{allInputDataDict.PVItcPercent}}" step="0.01" min="0.0" max="1.0" required="required"/>
 			</div>
 
 			<!-- vbatDispatch Specific Inputs -->
@@ -341,36 +278,6 @@
 				<label class="tooltip">Discount Rate (%)<span class="classic">Discount rate used in financial analysis.</span></label>
 				<input type="text" id="discountRate" name="discountRate" value="{{allInputDataDict.discountRate}}" pattern="[1-9][0-9]{0,2}" required="required">
 			</div>
-
-			<!-- Program Design Specific Inputs -->
-			<div class="wideInput">
-				<p class="inputSectionHeader">Distributed Energy Resource (DER) Program Design Inputs</p>
-			</div>
-			<hr style="border-style: solid; border-color: #196b12; margin-top: 10px;">
-			<!-- 
-			<div class="shortInput">
-				<label class="tooltip">Enable DER sharing program<span class="classic">Enabling DER sharing program will perform a cost-benefit analysis of a utility's DER sharing program.</span></label>
-				<select id="utilityProgram" name="utilityProgram" value="{{allInputDataDict.utilityProgram}}">
-					<option value="True" {{ 'selected' if allInputDataDict.utilityProgram == 'Yes' }}>Yes</option>
-					<option value="False" {{ 'selected' if allInputDataDict.utilityProgram == 'No' }}>No</option>
-				</select>
-			</div>
-			-->
-			<div class="shortInput">
-				<label class="tooltip">Energy Compensation Rate ($/kWh)<span class="classic">The dollar amount per kWh compensated to the member-consumer.</span></label>
-				<input type="text" id="rateCompensation" name="rateCompensation" value="{{allInputDataDict.rateCompensation}}" pattern="^\d+\.?\d*?$" min="0" required="required"/>
-			</div>
-			<div class="shortInput">
-				<label class="tooltip">Subsidy Amount ($)<span class="classic">The total subsidy amount ($) for the entire analysis duration.</span></label>
-				<input type="text" id="subsidy" name="subsidy" value="{{allInputDataDict.subsidy}}" pattern="^\d+\.?\d*?$" required="required"/>
-			</div>
-			<!-- 
-			<div class="shortInput">
-				<label class="tooltip">Maximum BESS Power Capacity Discharge<span class="classic">The maximum percentage of the Battery Energy Storage System's total power discharge allowed for the utility's control. Must be a percent fraction between 0 and 1. Most programs designate up to 80% (0.80) of total power capacity, leaving the member with at least 20% (0.20) charge.</span></label>
-				<input type="text" id="maxBESSDischarge" name="maxBESSDischarge" value="{{allInputDataDict.maxBESSDischarge}}" pattern="^\d+\.?\d*?$" min="0" max="1" required="required"/>
-			</div>
-			-->
-			
 
 			{{ omfModelButtons }}
 		</form>
