@@ -3993,7 +3993,7 @@ def new(modelDir):
 		"modelType": modelName,
 		"inputDataFileName": omdfileName + '.omd',
         "feederName1": omdfileName,
-        "averageDemand": 2,
+        "averageDemand": 2.0,
         "lines":'Yes',
         "transformers":'Yes',
         "fuses":'Yes',
