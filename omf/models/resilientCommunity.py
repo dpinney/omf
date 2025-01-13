@@ -1,21 +1,20 @@
 ''' Calculates Social Vulnerability for a given Circuit '''
 # warnings.filterwarnings("ignore")
-# Uncomment commented imports
 import urllib.request
 import shutil, datetime
 from os.path import join as pJoin
 import requests
-#import zipfile
-#import shapefile
+import zipfile
+import shapefile
 from io import BytesIO
 import numpy as np
 import json
 import math
 import pandas as pd
-#from shapely.geometry import Polygon, Point
-#import geopandas as gpd
-#import pygris
+from shapely.geometry import Polygon, Point
+import geopandas as gpd
 import networkx as nx
+import time
 
 # OMF imports
 from omf import geo
@@ -30,9 +29,6 @@ from omf.solvers.opendss.dssConvert import *
 tooltip = "Determines the most vulnerable areas and pieces of equipment within a circuit "
 modelName, template = __neoMetaModel__.metadata(__file__)
 hidden = True
-
-
-
 
 def retrieveCensusNRI():
     '''
@@ -149,7 +145,7 @@ def __getTractDatabyState__depreciated(nrigeoJson,stateName):
                 data.append(properties)
     return geom, data, headers
 
-def getCircuitNRI(pathToOmd):
+def __getCircuitNRI__depreciated(pathToOmd):
     '''
     find census located at specified circuit nodes
     Input:pathToOmd -> path to circuit file
@@ -991,12 +987,36 @@ def getDownLineLoadsEquipmentBlockGroupZillow(pathToOmd, equipmentList,avgPeakDe
     obDict = {}
     bg_outputDict = {}
 
+    # lowercase list
+
+
+    # Section code
+    sectionsDict, distanceDict = runSections(omdToTree(pathToOmd), omd)
+
+
     # Retrieve data to compute SVI
     for ob in omd.get('tree', {}).values():
         obType = ob['object']
         obName = ob['name']
         key = obType + '.' + obName
         obDict[key] = ob
+        from_field = ob.get('from', None)
+        to_field = ob.get('to', None)
+        
+        if from_field and to_field:
+            section_key = str((from_field, to_field))
+            if key in obDict and section_key in sectionsDict:
+                obDict[key]['section'] = sectionsDict[section_key]
+            else:
+                obDict[key]['section'] = None
+        elif obType == 'bus':
+            if key in obDict and section_key in sectionsDict:
+                obDict[key]['section'] = sectionsDict[section_key]
+        else:
+            obDict[key]['section'] = None
+
+        
+
         if (obType == 'load'):
             filtered_df = loadsDF[loadsDF["Load Name"] == obName]
             if (filtered_df["Business Type"].iloc[0].lower() in loadsTypeList):
@@ -1021,9 +1041,13 @@ def getDownLineLoadsEquipmentBlockGroupZillow(pathToOmd, equipmentList,avgPeakDe
                     kvar = math.sqrt(kva**2 + kw**2)
                 else:
                     raise Exception(f'Load {obName} does not have necessary information to calculate kw and kvar')
-
                 loadsDict[key]['kva'] = kva
                 loadsDict[key]["base crit score"]= round(((math.sqrt((kw * kw) + (kvar * kvar) ))/ (avgPeakDemand)) * 4,2)
+
+                if obName in sectionsDict:
+                    loadsDict[key]['section'] = sectionsDict[obName]
+                else:
+                    loadsDict[key]['section'] = None
 
                 long = float(ob['longitude'])
                 lat = float(ob['latitude'])
@@ -1127,6 +1151,18 @@ def getDownLineLoadsEquipmentBlockGroupZillow(pathToOmd, equipmentList,avgPeakDe
     sviGeoDF = createGeoDF(newsviDF)
     newsviDF = newsviDF.drop(columns=['geometry'])
 
+    # Group by 'section' and calculate desired metrics
+    section_loads = df_loads.groupby('section').agg(
+    avg_base_criticality_score=('base crit score', 'mean'),
+    avg_community_criticality_score=('community crit score', 'mean'),
+    avg_base_criticality_score_index=('base crit index', 'mean'),
+    avg_community_criticality_score_index=('community crit index', 'mean'),
+    avg_zillow_price=('zillow price', 'mean'),
+    load_count=('base crit score', 'count'),
+    load_amount=('kva', 'sum')
+    ).reset_index()
+    section_loads = section_loads.round(2)
+
 
 
 
@@ -1198,7 +1234,7 @@ def getDownLineLoadsEquipmentBlockGroupZillow(pathToOmd, equipmentList,avgPeakDe
     getPercentile(newObsDict, 'community crit score')
 
 
-    return newObsDict,loadsDict, sviGeoDF, newsviDF
+    return newObsDict,loadsDict, sviGeoDF, newsviDF, section_loads
 
 def getDownLineLoadsEquipmentTractZillow(pathToOmd, equipmentList, avgPeakDemand, pathToZillowData):
     '''
@@ -3454,198 +3490,39 @@ def cacheZillowData(pathToOmd, pathToLoad):
     with open('/Users/davidarmah/Documents/omf/omf/static/testFiles/resilientCommunity/zillowOutput.json', 'w') as f:
         json.dump(zillowDict, f)
 
-def sectionExample(omdFilePath):
-    import networkx as nx
-    # Load the OMD file and construct the graph
-    #omdFilePath = "/Users/davidarmah/Documents/omf/omf/static/testFiles/resilientCommunity/iowa240_in_Florida_copy2.omd"
-
-    omd = json.load(open(omdFilePath))
+def runSections(dssTree, omd):
     
-    
-    dssTree = omdToTree(omdFilePath)
+    #omd = json.load(open(omdFilePath))
 
-    G = dss_to_networkx('', dssTree)
-    # Add node data from OMD to the graph
-    for ob in omd.get('tree', {}).values():
-        node = ob['name']
-        if node in G.nodes:
-            G.nodes[node].update(ob)
-        else:
-            G.add_node(node, **ob)
-    
-    # Add edge data from OMD to the graph, setting weight to 1 for all edges
-    for ob in omd.get('tree', {}).values():
-        if 'from' in ob and 'to' in ob:
-            if not G.has_edge(ob['from'], ob['to']):
-                length = ob.get('length', 0)
-                if length:
-                    G.add_edge(ob['from'], ob['to'], weight=int(ob['length']))
-                else:
-                    G.add_edge(ob['from'], ob['to'], weight=0)
-            else:
-                length = ob.get('length', 0)
-                #print(len)
-                if length:
-                    G[ob['from']][ob['to']]['weight'] = int(ob['length'])
-                else:
-                    G[ob['from']][ob['to']]['weight'] = 0
-
-    
-    # Create edges based on parent relationships
-    for node, data in G.nodes(data=True):
-        if "parent" in data:
-            parent = data["parent"]
-            if parent not in G.nodes:
-                G.add_node(parent)  # Add the parent node if it doesn't exist
-            if not G.has_edge(parent, node):
-                G.add_edge(parent, node, weight=0)  # Add an edge with a default weight
-                #print(f"Edge created between parent '{parent}' and node '{node}'.")
-    
-    # Identify edges with switches
-    from_to_tuples_with_switch = [
-        (entry.get("from"), entry.get("to"))
-        for entry in omd.get('tree', {}).values()
-        if entry.get("switch") == "y" and entry.get("enabled") != "n" and "from" in entry and "to" in entry
-    ]
-    
-
-    for i in from_to_tuples_with_switch:
-        G[i[0]][i[1]]['switch'] = 'y'
-    
-    #for u, v, data in G.edges(data=True):
-    #    print(f"Traversing edge {u} -> {v}, Switch: {data.get('switch')}")
-
-
-
-    new1, new2 =  section_circuit_upstream_refined(G, 'bus1')
-
-
-    #directed and has no cycles
-    if G.is_directed():
-        print("The graph is directed.")
-    else:
-        print("The graph is undirected.")
-
-
-    if nx.is_directed_acyclic_graph(G):
-        print("The graph is a directed acyclic graph (DAG).")
-    else:
-        print("The graph is not a directed acyclic graph (it may contain cycles).")
-
-
-    topological_order = list(nx.topological_sort(G))
-    print("Topological Order of Nodes:", topological_order)
-
-        # Track the first section a node is assigned to
-    node_to_section = {}
-
-
-
-    # Sectioning logic
-    sections = []
-    current_section_nodes = set()
-    current_section_edges = []
-
-    for u, v, data in G.edges(data=True):
-        if data.get("switch"):
-            if current_section_nodes:
-                # Save the current section
-                section_id = len(sections) + 1
-                sections.append((list(current_section_nodes), current_section_edges))
-                # Assign nodes to the section if not already assigned
-                for node in current_section_nodes:
-                    if node not in node_to_section:
-                        node_to_section[node] = section_id
-            # Reset for the new section
-            current_section_nodes = set()
-            current_section_edges = []
-
-        # Add nodes and edges to the current section
-        if u not in node_to_section:
-            current_section_nodes.add(u)
-        if v not in node_to_section:
-            current_section_nodes.add(v)
-        current_section_edges.append((u, v))
-
-    # Append the last section
-    if current_section_nodes:
-        section_id = len(sections) + 1
-        sections.append((list(current_section_nodes), current_section_edges))
-        for node in current_section_nodes:
-            if node not in node_to_section:
-                node_to_section[node] = section_id
-
-    # Debug output
-    print("Node to Section Mapping:")
-    for node, section in node_to_section.items():
-        print(f"Node {node} belongs to Section {section}")
-
-    print("Final Sections:")
-    for i, (nodes, edges) in enumerate(sections, start=1):
-        print(f"Section {i}: Nodes={nodes}, Edges={edges}")
-
-
-
-
-    sectionDict = {}
-    for i, (nodes, edges) in enumerate(sections, start=1):
-        for j in nodes:
-            #if(j.startswith('load')):
-            #    sectionDict[j] = int(i)
-            sectionDict[j] = int(i)
-        for k in edges:
-            sectionDict[str(k)] = int(i)
-    
-    with open("omf/static/testFiles/resilientCommunity/loads_section_full.json", "w") as file:
-        json.dump(sectionDict, file)
-
-    source = "source"
-    #target = "t_bus3159_l"
-
-    #shortest_path = nx.dijkstra_path(G, source=target, target=source, weight='weight')
-    #print("Shortest Path from A to D:", shortest_path)
-
-    distance_to_source = calculate_distances_to_source(G, source)
-    nx.set_node_attributes(G, distance_to_source, name="distance_from_source")
-
-    return sectionDict
-
-def runSections(omdFilePath):
-    
-    omd = json.load(open(omdFilePath))
-
-    dssTree = omdToTree(omdFilePath)
+    #dssTree = omdToTree(omdFilePath)
 
     G = dss_to_networkx('', dssTree)
 
     disconnected_nodes = [node for node in G.nodes if G.degree[node] == 0]
-    #print(len(disconnected_nodes))
-
+    
+    # add data to nodes
     for ob in omd.get('tree', {}).values():
-        node = ob['name']
+        node = ob.get('name', '')
         if node in G.nodes:
             G.nodes[node].update(ob)
         else:
             G.add_node(node, **ob)
-    
-    # Add edge data from OMD to the graph, setting weight to 1 for all edges
-    for ob in omd.get('tree', {}).values():
+
+        # Add edge data from OMD to the graph, setting weight to 0 for all edges
         if 'from' in ob and 'to' in ob:
             if ob.get('enabled') == 'n':
                 G.remove_edge(ob['from'], ob['to'])
             elif not G.has_edge(ob['from'], ob['to']):
+
                 length = ob.get('length', 0)
-                if length:
-                    G.add_edge(ob['from'], ob['to'], weight=int(ob['length']))
-                else:
-                    G.add_edge(ob['from'], ob['to'], weight=0)
+                name = ob.get('name', '')
+                G[ob['from']][ob['to']]['name'] = name
+                G.add_edge(ob['from'], ob['to'], weight=int(length))
             else:
+
                 length = ob.get('length', 0)
-                #print(len)
-                if length:
-                    G[ob['from']][ob['to']]['weight'] = int(ob['length'])
-                else:
-                    G[ob['from']][ob['to']]['weight'] = 0
+                name = ob.get('name', '')
+                G[ob['from']][ob['to']]['weight'] = int(length)
 
     
     # Create edges based on parent relationships
@@ -3665,10 +3542,9 @@ def runSections(omdFilePath):
         if entry.get("switch") == "y" and entry.get("enabled") != "n" and "from" in entry and "to" in entry
     ]
     
-    count = 0
     for i in from_to_tuples_with_switch:
         G[i[0]][i[1]]['switch'] = True
-        count+=1
+        
 
     # Remove disconnected nodes
     for node in list(nx.isolates(G)):
@@ -3676,23 +3552,25 @@ def runSections(omdFilePath):
     disconnected_nodes = [node for node in G.nodes if G.degree[node] == 0]
     #print(len(disconnected_nodes))
 
-    sections = section_graph_on_switch(G)
+    sections = section_circuit(G)
+    distanceToSource = calculate_distances_to_source(G, 'source')
+
+    #print(distanceToSource)
 
     # Combine sections into a dictionary
     sectionDict = {}
-    for section_number, nodes, edges in sections:  # Unpack section_number explicitly
+    for section_number, nodes, edges in sections:  # Unpack section_number
         for node in nodes:
             sectionDict[node] = section_number
         for edge in edges:
             sectionDict[str(edge)] = section_number
 
-    # Save the dictionary to a JSON file
-    #output_file = "omf/static/testFiles/resilientCommunity/loads_section_full.json"
-    #with open(output_file, "w") as file:
-    #    json.dump(sectionDict, file)
-    return sectionDict
+
+
+    return sectionDict, distanceToSource
 
 def section_circuit(graph):
+
     visited_edges = set()  # Tracks visited edges
     sections = []          # List of finalized sections: [(section_number, nodes, edges)]
     locked_nodes = {}
@@ -3979,7 +3857,7 @@ def work(modelDir, inputDict):
     #print(inputDict['load_types'])
     # check downline loads
     #loads_typeList = [item.lower() for item in inputDict['load_type'] ]
-    obDict, loads, geoDF, sviDF = getDownLineLoadsEquipmentBlockGroupZillow(omd_file_path, equipmentList,inputDict['averageDemand'], zillowPricesPath, loadsPath, loads_typeList)
+    obDict, loads, geoDF, sviDF, loadSections = getDownLineLoadsEquipmentBlockGroupZillow(omd_file_path, equipmentList,inputDict['averageDemand'], zillowPricesPath, loadsPath, loads_typeList)
 
     #obDict, loads, geoDF, sviDF = getDownLineLoadsEquipmentBlockGroups(omd_file_path, equipmentList, inputDict['averageDemand'])
     #obDict, loads, geoDF = getDownLineLoadsEquipmentTract(omd_file_path, equipmentList)
@@ -4055,19 +3933,21 @@ def work(modelDir, inputDict):
     outData['resilienceMap'] = open( pJoin( modelDir, "geoJson_offline.html"), 'r' ).read()
     outData['geojsonData'] = open(geoJson_shapes_file, 'r').read()
 
-    headers1 = ['Load Name', 'Base Criticality Score', 'Base Criticality Index','Community Criticality Score', 'Community Criticality Index' ]
+    headers1 = ['Load Name','Section' 'Base Criticality Score', 'Base Criticality Index','Community Criticality Score', 'Community Criticality Index' ]
     load_names = list(loads.keys())
+    section1 = [value.get('section') for key, value in loads.items()]
     base_criticality_score_vals1 = [value.get('base crit score') for key, value in loads.items()]
     base_criticity_index_vals1 = [value.get('base crit index') for key, value in loads.items()]
     community_criticality_score_vals1 = [value.get('community crit score') for key, value in loads.items()]
     community_criticity_index_vals1 = [value.get('community crit index') for key, value in loads.items()]
 
     outData['loadTableHeadings'] = headers1
-    outData['loadTableValues'] = list(zip(load_names, base_criticality_score_vals1, base_criticity_index_vals1,community_criticality_score_vals1,community_criticity_index_vals1))
+    outData['loadTableValues'] = list(zip(load_names, section1,  base_criticality_score_vals1, base_criticity_index_vals1,community_criticality_score_vals1,community_criticity_index_vals1))
 
 
-    headers2 = ['Equipment Name', 'Base Criticality Score', 'Base Criticallity Index', 'Community Criticality Score', 'Community Criticality Index']
+    headers2 = ['Equipment Name', 'Section', 'Base Criticality Score', 'Base Criticallity Index', 'Community Criticality Score', 'Community Criticality Index']
     object_names = list(obDict.keys())
+    section2 = [value.get('section') for key, value in obDict.items()]
     base_criticality_score_vals2 = [value.get('base crit score') for key, value in obDict.items()]
     base_criticity_index_vals2 = [value.get('base crit index') for key, value in obDict.items()]
     community_criticality_score_vals2 = [value.get('community crit score') for key, value in obDict.items()]
@@ -4075,48 +3955,34 @@ def work(modelDir, inputDict):
 
 
     outData['loadTableHeadings2'] = headers2
-    outData['loadTableValues2'] = list(zip(object_names, base_criticality_score_vals2, base_criticity_index_vals2,community_criticality_score_vals2,community_criticity_index_vals2 ))
+    outData['loadTableValues2'] = list(zip(object_names, section2,  base_criticality_score_vals2, base_criticity_index_vals2,community_criticality_score_vals2,community_criticity_index_vals2 ))
+
+
+    headers3 = ['Section', 'Base Criticality Score', 'Base Criticallity Index', 'Community Criticality Score', 'Community Criticality Index', 'Zillow Price', 'Load Count', 'Load Amount']
+    section_names = loadSections["section"].tolist()
+    base_criticality_score_vals3 = loadSections["avg_base_criticality_score"].tolist()
+    base_criticity_index_vals3 = loadSections["avg_base_criticality_score_index"].tolist()
+    community_criticality_score_vals3 = loadSections["avg_community_criticality_score"].tolist()
+    community_criticity_index_vals3 = loadSections["avg_community_criticality_score_index"].tolist()
+    zillow_prices_vals3 = loadSections["avg_zillow_price"].tolist()
+    load_count_vals = loadSections["load_count"].tolist()
+    load_amount_vals =loadSections["load_amount"].tolist()
+
+    outData['loadTableHeadings3'] = headers3
+    outData['loadTableValues3'] = list(zip(section_names, base_criticality_score_vals3,  base_criticity_index_vals3, community_criticality_score_vals3,community_criticity_index_vals3,zillow_prices_vals3,zillow_prices_vals3,load_count_vals,load_amount_vals))
 
 
 
     return outData
 
 def test():
-    pathToOmd = "omf/static/testFiles/resilientCommunity/iowa240_dwp_22_no_show_voltage.dss.omd"
-    pathToOmd2 = "/Users/davidarmah/Documents/omf/omf/static/testFiles/resilientCommunity/iowa240_in_Florida_copy2.omd"
-    pathToLoads = "/Users/davidarmah/Documents/omf/omf/static/testFiles/resilientCommunity/zillowBlock.json"
-    modelDir = "omf/static/testFiles/resilientCommunity"
-    pathToZillow = "/Users/davidarmah/Documents/omf/omf/static/testFiles/resilientCommunity/zillowOutput.json"
-
-    with open('/Users/davidarmah/Documents/omf/omf/static/testFiles/resilientCommunity/zillowOutput.json', 'r') as json_file:
-        zillowJson = json.load(json_file)
-
-    zillowPricesDict = {}
-    for key, value in zillowJson.items():
-        avgPrice, avgsqftPrice = calculateAvg_prices(value)
-        zillowPricesDict[key] = {"avgPrice": avgPrice,
-                                "avgsqftPrice":avgsqftPrice}
-    
-    with open('/Users/davidarmah/Documents/omf/omf/static/testFiles/resilientCommunity/zillowPrices.json', 'w') as f:
-        json.dump(zillowPricesDict, f)
-    
-    #equipmentList = ['line']
-    #obDict = runCalculations(pathToOmd2,modelDir, equipmentList)
-    #cacheZillowData(pathToOmd2, pathToLoads)
-    # Define the file path
-    #file_path = '/Users/davidarmah/Documents/omf/omf/static/testFiles/resilientCommunity/restorationLoads.csv'
-
-    #omd = json.load(open(pathToOmd2))
-    #data = []
-    #cols = ['Customer Name','Season','Business Type','Load Name']
-    #for ob in omd.get('tree', {}).values():
-        #obType = ob['object']
-        #if (obType == 'load'):
-            #list1 = [ob['name'], 'summer', 'residential', ob['name']]
-        #data.append(list1)
-    #df = pd.DataFrame(data, columns=cols)
-    # Save the DataFrame as a CSV
-    #df.to_csv(file_path, index=False) 
+    pathToOmd = '/Users/davidarmah/Documents/omf/omf/static/testFiles/resilientCommunity/iowa240_in_Florida_copy2.omd'
+    equipmentList = ['lines']
+    avgPeakDemand = 1.8
+    pathToZillowData = '/Users/davidarmah/Documents/omf/omf/static/testFiles/resilientCommunity/zillowPrices.json'
+    pathToLoadsFile = '/Users/davidarmah/Documents/omf/omf/static/testFiles/resilientCommunity/restorationLoads.csv'
+    loadsTypeList = ['residential', 'retail', 'agriculture']
+    obDict, loads, geoDF, sviDF = getDownLineLoadsEquipmentBlockGroupZillow(pathToOmd, equipmentList,avgPeakDemand,pathToZillowData, pathToLoadsFile,loadsTypeList)
 
 def new(modelDir):
     omdfileName = 'iowa240_in_Florida_copy2'
@@ -4167,13 +4033,10 @@ def tests():
 	__neoMetaModel__.renderAndShow(modelLoc)
 
 if __name__ == '__main__':
-    print("test")
-    #tests()
+    #print("test")
+    tests()
     #getDistributionSection(
     #sectionExample("/Users/davidarmah/Documents/omf/omf/static/testFiles/resilientCommunity/iowa240_in_Florida_copy2.omd")
     #newSection("/Users/davidarmah/Documents/omf/omf/static/testFiles/resilientCommunity/iowa240_in_Florida_copy2.omd")
     #getDistribution()
-    #test()
-    print("test")
-
-
+	#test()
