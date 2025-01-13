@@ -157,11 +157,14 @@ def work(modelDir, inputDict):
 	## Calculate the subsidies
 	projectionLength = int(inputDict['projectionLength'])
 	subsidyUpfront = float(inputDict['subsidyUpfront'])
-	subsidyRecurring_1year_total = float(inputDict['subsidyRecurring'])
-	subsidyRecurring_1month_total = subsidyRecurring_1year_total / 12
-	subsidyRecurring_total = subsidyRecurring_1year_total * projectionLength
+	subsidyMonthly = float(inputDict['subsidyRecurring'])
+	
+	subsidyRecurring_1year_total = subsidyMonthly * 12.
+	subsidyRecurring_allyears_array = np.full(projectionLength, subsidyMonthly)
+	subsidyRecurring_allyears_total = subsidyRecurring_1year_total * projectionLength
+
 	total_subsidy_1year = subsidyUpfront + subsidyRecurring_1year_total
-	total_subsidy_1year_array = np.full(12, subsidyRecurring_1month_total)
+	total_subsidy_1year_array = np.full(12, subsidyMonthly)
 	total_subsidy_1year_array[0] += subsidyUpfront
 	total_subsidy_allyears_array = np.full(projectionLength, subsidyRecurring_1year_total)
 	total_subsidy_allyears_array[0] += subsidyUpfront
@@ -729,7 +732,7 @@ def new(modelDir):
 	''' Create a new instance of this model. Returns true on success, false on failure. '''
 	with open(pJoin(__neoMetaModel__._omfDir,'static','testFiles','utility_2018_kW_load.csv')) as f:
 		demand_curve = f.read()
-	with open(pJoin(__neoMetaModel__._omfDir,'static','testFiles','utility_CO_2018_temperatures.csv')) as f:
+	with open(pJoin(__neoMetaModel__._omfDir,'static','testFiles','open-meteo-denverCO-noheaders.csv')) as f:
 		temp_curve = f.read()
 
 	defaultInputs = {
