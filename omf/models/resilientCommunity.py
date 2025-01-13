@@ -3969,7 +3969,7 @@ def work(modelDir, inputDict):
     load_amount_vals =loadSections["load_amount"].tolist()
 
     outData['loadTableHeadings3'] = headers3
-    outData['loadTableValues3'] = list(zip(section_names, base_criticality_score_vals3,  base_criticity_index_vals3, community_criticality_score_vals3,community_criticity_index_vals3,zillow_prices_vals3,zillow_prices_vals3,load_count_vals,load_amount_vals))
+    outData['loadTableValues3'] = list(zip(section_names, base_criticality_score_vals3,  base_criticity_index_vals3, community_criticality_score_vals3,community_criticity_index_vals3,zillow_prices_vals3,load_count_vals,load_amount_vals))
 
 
 
