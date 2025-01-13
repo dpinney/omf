@@ -81,7 +81,7 @@
 			<div class="shortInput">
 				<label class="tooltip">Average Peak Demand (kW)<span class="classic">Enter the average peak demand for a household
 						in the area </span></label>
-				<input type="number" name="averageDemand" id="averageDemand" min="0" step="0.01" required>
+				<input type="number" name="averageDemand" id="averageDemand" value="{{allInputDataDict.averageDemand}}" min="0" step="0.01" required>
 			</div>
 				
 			<div class="shortInput">
@@ -306,6 +306,27 @@
         </thead>
         <tbody>
             {% for values in allOutputDataDict["loadTableValues2"] %}
+            <tr style="border-bottom: 1px solid #ddd;">
+                {% for val in values %}
+                <td style="padding: 8px; text-align: left; border-bottom: 1px solid #ddd;">{{ val }}</td>
+                {% endfor %}
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+<p class="reportTitle">Sections Data Table</p>
+<div id="traditionalSectionsTable" class="tightContent" style="height:300px; overflow-y: scroll;">
+    <table style="width:100%; border-collapse: collapse; font-family: Arial, sans-serif; font-size: 14px;">
+        <thead>
+            <tr style="background-color: #f2f2f2; border-bottom: 2px solid #ddd;">
+                {% for header in allOutputDataDict["loadTableHeadings3"] %}
+                <th style="padding: 8px; text-align: left; border-bottom: 1px solid #ddd;">{{ header }}</th>
+                {% endfor %}
+            </tr>
+        </thead>
+        <tbody>
+            {% for values in allOutputDataDict["loadTableValues3"] %}
             <tr style="border-bottom: 1px solid #ddd;">
                 {% for val in values %}
                 <td style="padding: 8px; text-align: left; border-bottom: 1px solid #ddd;">{{ val }}</td>
