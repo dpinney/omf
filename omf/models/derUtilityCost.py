@@ -266,7 +266,7 @@ def work(modelDir, inputDict):
 
 	"""
 
-	## DER Overview plot ###################################################################################################################################################################
+	## DER Serving Load Overview plot ###################################################################################################################################################################
 	showlegend = True # either enable or disable the legend toggle in the plot
 	#lineshape = 'linear'
 	lineshape = 'hv'
@@ -338,8 +338,9 @@ def work(modelDir, inputDict):
                         #mode='none',
                         #fill='tozeroy',
                         name='Grid Serving Load',
-                        line=dict(color='rgba(192,192,192,1)', width=1),
-						line_shape=lineshape,
+                        line=dict(color='rgba(0,0,0,0)'), #transparent line (to get around the Plotly default line)
+						#line_shape=lineshape,
+						fillcolor='rgba(192,192,192,1)',
 						stackgroup='one',
 						showlegend=showlegend))
 	
@@ -362,23 +363,13 @@ def work(modelDir, inputDict):
 						#mode='none',
 						#fill='tozeroy',
 						name='Home BESS Serving Load',
-						line=dict(color='rgba(0,137,83,1)', width=1),
-						line_shape=lineshape,
+						fillcolor='rgba(0,137,83,1)',
+						line=dict(color='rgba(0,0,0,0)'), #transparent line (to get around the Plotly default line)
+						#line_shape=lineshape,
 						stackgroup='one',
 						showlegend=showlegend))
 
-	fig.add_trace(go.Scatter(x=timestamps,
-                        y=grid_charging_BESS_W,
-						yaxis='y1',
-                        #mode='none',
-                        name='Additional Load from Home BESS',
-                        #fill='tozeroy',
-                        line=dict(color='rgba(118,196,165,1)', width=1),
-						line_shape=lineshape,
-						stackgroup='one',
-						showlegend=showlegend))
-	
-	##vbatDispatch (TESS) piece
+	## vbatDispatch (TESS) piece
 	if (inputDict['load_type'] != '0') and (int(inputDict['number_devices'])>0): ## Load type 0 corresponds to the "None" option, which disables this vbatDispatch function
 		fig.add_trace(go.Scatter(x=timestamps,
 							y = vbat_discharge_component_W,
@@ -387,50 +378,53 @@ def work(modelDir, inputDict):
 							#fill='tozeroy',
 							fillcolor='rgba(127,0,255,1)',
 							name='Home TESS Serving Load',
-							line=dict(color='rgba(127,0,255,1)', width=1),
-							line_shape=lineshape,
-							#stackgroup='one',
+							line=dict(color='rgba(0,0,0,0)'), #transparent line (to get around the Plotly default line)
+							#line_shape=lineshape,
+							stackgroup='one',
 							showlegend=showlegend))
 		
-		fig.add_trace(go.Scatter(x=timestamps,
-    	                    y = vbat_charge_component_W,
-							yaxis='y1',
-            	            #mode='none',
-                	        name='Additional load from Home TESS',
-                    	    #fill='tozeroy',
-                        	line=dict(color='rgba(207,158,255,1)', width=1),
-							line_shape=lineshape,
-							#stackgroup='one',
-							showlegend=showlegend))
-
 	## Fossil Generator piece
 	if 'Generator' in reoptResults:
 		fig.add_trace(go.Scatter(x=timestamps,
 						y = generator_W,
 						yaxis='y1',
 						mode='none',
-						fill='tozeroy',
+						#fill='tozeroy',
 						fillcolor='rgba(153,0,0,1)',
+						line=dict(color='rgba(0,0,0,0)'), #transparent line (to get around the Plotly default line)
 						name='Fossil Generator Serving Load',
+						stackgroup='one',
 						showlegend=showlegend))
-
-	## Original load piece (minus any vbat or BESS charging aka 'new/additional loads')
+		
+	## Grid charging BESS piece
 	fig.add_trace(go.Scatter(x=timestamps,
-						y = demand_W - BESS_W - vbat_discharge_component_W,
+                        y=grid_charging_BESS_W*-1., ## changed to negative sign to indicate charging behavior
 						yaxis='y1',
-						mode='none',
-						name='Original Load',
-						fill='tozeroy',
-						fillcolor='rgba(100,200,210,1)',
+                        #mode='none',
+                        name='Grid Charging Home BESS',
+                        fill='tozeroy',
+						fillcolor='rgba(118,196,165,1)',
+						line=dict(color='rgba(0,0,0,0)'), #transparent line (to get around the Plotly default line)
+						line_shape=lineshape,
 						showlegend=showlegend))
-	## Make original load and its legend name hidden in the plot by default
-	fig.update_traces(legendgroup='Original Load', visible='legendonly', selector=dict(name='Original Load')) 
+	
+	## Grid charging TESS piece
+	fig.add_trace(go.Scatter(x=timestamps,
+    	                    y = vbat_charge_component_W*-1.,  ## changed to negative sign to indicate charging behavior
+							yaxis='y1',
+            	            #mode='none',
+                	        name='Grid Charging Home TESS',
+                    	    fill='tozeroy',
+							fillcolor='rgba(207,158,255,1)',
+							line=dict(color='rgba(0,0,0,0)'), #transparent line (to get around the Plotly default line)
+							line_shape=lineshape,
+							showlegend=showlegend))
 
 	## Plot layout
 	fig.update_layout(
     	xaxis=dict(title='Timestamp'),
     	yaxis=dict(title="Power (W)"),
-    	yaxis2=dict(title='degrees Celsius',
+    	yaxis2=dict(title='degrees Fahrenheit',
                 overlaying='y',
                 side='right'
                 ),
@@ -453,6 +447,76 @@ def work(modelDir, inputDict):
 	## Encode plot data as JSON for showing in the HTML 
 	outData['derOverviewData'] = json.dumps(fig.data, cls=plotly.utils.PlotlyJSONEncoder)
 	outData['derOverviewLayout'] = json.dumps(fig.layout, cls=plotly.utils.PlotlyJSONEncoder)
+
+
+	## Impact to Demand plot ###################################################################################################################################################################
+	showlegend = True # either enable or disable the legend toggle in the plot
+	#lineshape = 'linear'
+	lineshape = 'hv'
+
+	fig = go.Figure()
+	demand_W = demand * 1000.
+	new_demand = demand_W + vbat_charge_component_W + grid_charging_BESS_W - BESS_W - vbat_discharge_component_W - generator_W
+
+	## Original load piece (minus any vbat or BESS charging aka 'new/additional loads')
+	fig.add_trace(go.Scatter(x=timestamps,
+						y = demand_W,
+						yaxis='y1',
+						mode='none',
+						name='Original Demand',
+						fill='tozeroy',
+						fillcolor='rgba(81,40,136,1)',
+						showlegend=showlegend))
+	## Make original load and its legend name hidden in the plot by default
+	#fig.update_traces(legendgroup='Original Demand', visible='legendonly', selector=dict(name='Original Demand')) 
+
+	## New demand piece (minus any vbat or BESS charging aka 'new/additional loads')
+	fig.add_trace(go.Scatter(x=timestamps,
+						y = new_demand,
+						yaxis='y1',
+						mode='none',
+						name='New Demand',
+						fill='tozeroy',
+						fillcolor='rgba(235, 97, 35, 0.5)',
+						showlegend=showlegend))
+	## Make original load and its legend name hidden in the plot by default
+	#fig.update_traces(legendgroup='New Demand', visible='legendonly', selector=dict(name='New Demand')) 
+
+	## Plot layout
+	fig.update_layout(
+    	xaxis=dict(title='Timestamp'),
+    	yaxis=dict(title="Power (W)"),
+    	yaxis2=dict(title='degrees Fahrenheit',
+                overlaying='y',
+                side='right'
+                ),
+    	legend=dict(
+			orientation='h',
+			yanchor='bottom',
+			y=1.02,
+			xanchor='right',
+			x=1
+			)
+	)
+
+	## NOTE: This opens a window that displays the correct figure with the appropriate patterns.
+	## For some reason, the slash-mark patterns are not showing up on the OMF page otherwise.
+	## Eventually we will delete this part.
+	#fig.show()
+	#outData['derOverviewHtml'] = fig.to_html(full_html=False)
+	fig.write_html(pJoin(modelDir, "Plot_NewDemand.html"))
+
+	## Encode plot data as JSON for showing in the HTML 
+	outData['newDemandData'] = json.dumps(fig.data, cls=plotly.utils.PlotlyJSONEncoder)
+	outData['newDemandLayout'] = json.dumps(fig.layout, cls=plotly.utils.PlotlyJSONEncoder)
+
+
+
+
+
+
+
+
 
 	## Create Thermal Battery Power plot object ######################################################################################################################################################
 	if (inputDict['load_type'] != '0') and (int(inputDict['number_devices'])>0): ## If vbatDispatch is enabled:		
