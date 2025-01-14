@@ -4033,8 +4033,8 @@ def tests():
 	__neoMetaModel__.renderAndShow(modelLoc)
 
 if __name__ == '__main__':
-    #print("test")
-    tests()
+    print("test")
+    #tests()
     #getDistributionSection(
     #sectionExample("/Users/davidarmah/Documents/omf/omf/static/testFiles/resilientCommunity/iowa240_in_Florida_copy2.omd")
     #newSection("/Users/davidarmah/Documents/omf/omf/static/testFiles/resilientCommunity/iowa240_in_Florida_copy2.omd")
