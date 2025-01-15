@@ -336,12 +336,11 @@ def work(modelDir, inputDict):
                         y=grid_serving_new_load_W,
 						yaxis='y1',
                         #mode='none',
-                        #fill='tozeroy',
+                        fill='tozeroy',
                         name='Grid Serving Load',
-                        line=dict(color='rgba(0,0,0,0)'), #transparent line (to get around the Plotly default line)
-						#line_shape=lineshape,
 						fillcolor='rgba(192,192,192,1)',
-						stackgroup='one',
+                        line=dict(color='rgba(192,192,192,1)'), ## Plotly default assigns different colors for line and fillcolor
+						#line_shape=lineshape,
 						showlegend=showlegend))
 	
 	## Temperature line on a secondary y-axis (defined in the plot layout)
@@ -361,12 +360,12 @@ def work(modelDir, inputDict):
 						y = BESS_W, # + np.asarray(demand) + vbat_discharge_component,
 						yaxis='y1',
 						#mode='none',
-						#fill='tozeroy',
+						fill='tozeroy',
 						name='Home BESS Serving Load',
 						fillcolor='rgba(0,137,83,1)',
 						line=dict(color='rgba(0,0,0,0)'), #transparent line (to get around the Plotly default line)
-						#line_shape=lineshape,
-						stackgroup='one',
+						line_shape=lineshape,
+						#stackgroup='one',
 						showlegend=showlegend))
 
 	## vbatDispatch (TESS) piece
@@ -375,12 +374,12 @@ def work(modelDir, inputDict):
 							y = vbat_discharge_component_W,
 							yaxis='y1',
 							#mode='none',
-							#fill='tozeroy',
+							fill='tozeroy',
 							fillcolor='rgba(127,0,255,1)',
 							name='Home TESS Serving Load',
 							line=dict(color='rgba(0,0,0,0)'), #transparent line (to get around the Plotly default line)
-							#line_shape=lineshape,
-							stackgroup='one',
+							line_shape=lineshape,
+							#stackgroup='one',
 							showlegend=showlegend))
 		
 	## Fossil Generator piece
@@ -389,11 +388,11 @@ def work(modelDir, inputDict):
 						y = generator_W,
 						yaxis='y1',
 						mode='none',
-						#fill='tozeroy',
+						fill='tozeroy',
 						fillcolor='rgba(153,0,0,1)',
 						line=dict(color='rgba(0,0,0,0)'), #transparent line (to get around the Plotly default line)
 						name='Fossil Generator Serving Load',
-						stackgroup='one',
+						#stackgroup='one',
 						showlegend=showlegend))
 		
 	## Grid charging BESS piece
@@ -482,10 +481,24 @@ def work(modelDir, inputDict):
 	## Make original load and its legend name hidden in the plot by default
 	#fig.update_traces(legendgroup='New Demand', visible='legendonly', selector=dict(name='New Demand')) 
 
+	## Temperature line on a secondary y-axis (defined in the plot layout)
+	fig.add_trace(go.Scatter(x=timestamps,
+						y=temperatures,
+						yaxis='y2',
+						#mode='lines',
+						line=dict(color='red',width=1),
+						name='Average Air Temperature',
+						showlegend=showlegend 
+						))
+	## Make temperature and its legend name hidden in the plot by default
+	fig.update_traces(legendgroup='Average Air Temperature', visible='legendonly', selector=dict(name='Average Air Temperature')) 
+
+
 	## Plot layout
 	fig.update_layout(
     	xaxis=dict(title='Timestamp'),
-    	yaxis=dict(title="Power (W)"),
+    	#yaxis=dict(title='Power (W)',type='log'),
+		yaxis=dict(title='Power (W)'),
     	yaxis2=dict(title='degrees Fahrenheit',
                 overlaying='y',
                 side='right'
