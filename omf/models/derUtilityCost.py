@@ -340,7 +340,8 @@ def work(modelDir, inputDict):
                         name='Grid Serving Load',
 						fillcolor='rgba(192,192,192,1)',
                         line=dict(color='rgba(192,192,192,1)'), ## Plotly default assigns different colors for line and fillcolor
-						#line_shape=lineshape,
+						line_shape=lineshape,
+						#stackgroup='one',
 						showlegend=showlegend))
 	
 	## Temperature line on a secondary y-axis (defined in the plot layout)
@@ -392,6 +393,7 @@ def work(modelDir, inputDict):
 						fillcolor='rgba(153,0,0,1)',
 						line=dict(color='rgba(0,0,0,0)'), #transparent line (to get around the Plotly default line)
 						name='Fossil Generator Serving Load',
+						line_shape=lineshape,
 						#stackgroup='one',
 						showlegend=showlegend))
 		
