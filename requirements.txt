@@ -50,3 +50,6 @@ haversine
 keyring
 openpyxl
 statsmodels
+shapely
+geopandas
+shapefile
