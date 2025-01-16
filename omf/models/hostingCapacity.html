@@ -54,23 +54,30 @@
 				<input type="text" id="runTime" name="runTime" value={{allInputDataDict.runTime}} readonly/>
 			</div>
 			{% endif %}
+			<div class="shortInput">
+				<label class="tooltip">Circuit
+					<span class="classic">Open Circuit Editor</span>
+				</label>
+				<button id="feederButton" type="button" onclick="javascript:editFeeder(allInputData.modelName,1);" style="display:block;width:125px;">Open Editor</button>
+				<input type="text" id="feederName1" name="feederName1" value="{{allInputDataDict.feederName1}}" style="display:none">
+			</div>
 			<div class="wideInput">
 				<p class="inputSectionHeader">AMI-Based Hosting Capacity</p>
 			</div>
 			<hr>
 			<div class="shortInput">
-				<label class="tooltip">Apply AMI-Based Hosting Capacity</label>
+				<label>Apply AMI-Based Hosting Capacity</label>
 				<select id="runAmiAlgorithm" name="runAmiAlgorithm" value="{{allInputDataDict.runAmiAlgorithm}}" required>
 					<option value="off" {% if allInputDataDict.runAmiAlgorithm == 'off' %}selected{% endif %}>Off</option>
 					<option value="on" {% if allInputDataDict.runAmiAlgorithm == 'on' %}selected{% endif %}>On</option>
 				</select>
 			</div>
 			<div class="shortInput">
-				<label class="tooltip">Meter Data Input File <span class="classic">Import a .csv file that includes the meter data. Format for input columns: busname, datetime, v_reading, kw_reading, kvar_reading. Optional input columns: latitude, longitude, service_tx_name, phase_count (1, 3)</span></label>
+				<label class="tooltip">Meter Data Input File <span class="classic">Upload a .csv file of meter data. Format for input columns: busname, datetime, v_reading, kw_reading, kvar_reading. Optional input columns: latitude, longitude, service_tx_name, phase_count (1 or 3)</span></label>
 				<div>{{ file_upload('AMIDataFile', 'userAMIDisplayFileName', 'AMIDataFileName') }}</div>
 			</div>
 			<div class="shortInput">
-				<label>Algorithm</label>
+				<label class="tooltip">Algorithm <span class="classic">Apply physics based model (sandia) or machine learning model (iastate).</span></label>
 				<select id="algorithm" name="algorithm" value="{{allInputDataDict.algorithm}}" required>
 					<option value="sandia1" {% if allInputDataDict.algorithm == 'sandia1' %}selected{% endif %}>sandia1</option>
 					<option value="iastate" {% if allInputDataDict.algorithm == 'iastate' %}selected{% endif %}>iastate</option>
@@ -78,12 +85,14 @@
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Load Power Factor (pu)
-					<span class="classic">Default PF: 1.0. If no reactive power (or q) is given, include an estimate PF to help calculate HC</span>
+					<span class="classic">If no reactive power is given in input dataset, this value will be used to help calculate hosting capacity.</span>
 				</label>
 				<input type="text" id="load_pf_est" name="load_pf_est" value="{{allInputDataDict.load_pf_est}}"/>
 			</div>
 			<div class="shortInput">
-				<label>DG Inverter Setting</label>
+				<label class="tooltip">DG Inverter Setting
+					<span class="classic">Calculate hosting capacity under the assumption the DG is either set at a fixed power factor or is following a volt-VAR curve.</span>
+				</label>
 				<select id="dgInverterSetting" name="dgInverterSetting" value="{{allInputDataDict.dgInverterSetting}}" required>
 					<option value="Unity Power Factor" {% if allInputDataDict.dgInverterSetting == 'unityPF' %}selected{% endif %}>Unity Power Factor</option>
 					<option value="Constant Power Factor" {% if allInputDataDict.dgInverterSetting == 'constantPF' %}selected{% endif %}>Constant Power Factor</option>
@@ -92,33 +101,26 @@
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">DG Power Factor
-					<span class="classic">Default 0.05</span>
+					<span class="classic">Assumed output of DG power factor in hosting capacity results.</span>
 				</label>
 				<input type="text" id="der_pf" name="der_pf" value="{{allInputDataDict.der_pf}}" pattern="[+-]?([0-9]*[.])?[0-9]+"/>
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">volt-VAR Setting
-					<span class="classic">Default: given</span>
+					<span class="classic">Points on the volt-VAR response curve x_1,y_1,x_2,y_2, etc.</span>
 				</label>
 				<input type="text" id="vv_points" name="vv_points" value="{{allInputDataDict.vv_points}}"/>
 			</div>
 			<div class="wideInput">
-				<p class="inputSectionHeader">Model-Based or "Traditional" Hosting Capacity</p>
+				<p class="inputSectionHeader">Model-Based Hosting Capacity</p>
 			</div>
 			<hr>
 			<div class="shortInput">
-				<label class="tooltip">Apply Model-Based Hosting Capacity</label>
+				<label>Apply Model-Based Hosting Capacity</label>
 				<select id="optionalCircuitFile" name="optionalCircuitFile" value="{{allInputDataDict.optionalCircuitFile}}" required>
 					<option value="off" {% if allInputDataDict.optionalCircuitFile == 'off' %}selected{% endif %}>Off</option>
 					<option value="on" {% if allInputDataDict.optionalCircuitFile == 'on' %}selected{% endif %}>On</option>
 				</select>
-			</div>
-			<div class="shortInput">
-				<label class="tooltip">Circuit
-					<span class="classic">An OpenDSS Circuit file with a .dss file type. See Wiki page for more information</span>
-				</label>
-				<button id="feederButton" type="button" onclick="javascript:editFeeder(allInputData.modelName,1);" style="display:block;width:125px;">Open Editor</button>
-				<input type="text" id="feederName1" name="feederName1" value="{{allInputDataDict.feederName1}}" style="display:none">
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Maximum kW Tested
@@ -131,7 +133,7 @@
 			</div>
 			<hr>
 			<div class="shortInput">
-				<label class="tooltip">Apply Downline Hosting Capacity Algorithm (Cannot be run without Model-Based)
+				<label class="tooltip">Apply Downline Hosting Capacity Algorithm
 					<span class="classic">Calculate approximately how much load is downline of every bus on the system which gives a rough estimate of hosting capacity. Useful as a sanity check for other methods.</span>
 				</label>
 				<select id="runDownlineAlgorithm" name="runDownlineAlgorithm" value="{{allInputDataDict.runDownlineAlgorithm}}" required>
