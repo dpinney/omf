@@ -5,6 +5,9 @@ Collection of sandia codes for model free hosting capacity
 import numpy as np
 import pandas as pd
 from sklearn import linear_model
+import logging
+import warnings
+from pathlib import Path
 
 
 def hosting_cap(
@@ -49,6 +52,12 @@ def hosting_cap(
         estimated average power factor.
 
     """
+
+    # logging Setup
+    
+    logging.basicConfig(filename=Path(input_csv_path.parent.absolute(), 'mohca_sandia.log'), encoding="utf-8", level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
+    logger = logging.getLogger(__name__)
+
     input_data = pd.read_csv(input_csv_path)
 
     # set the upper bound voltage limit
@@ -64,8 +73,8 @@ def hosting_cap(
     if vv_x is not None and vv_y is not None:
         # Check for valid length
         if len(vv_x) != len(vv_y):
-            print('Warning:  vv_x and vv_y are different lengths.')
-            print('Using der_pf = 1.0')
+            logger.warning('vv_x and vv_y are different lengths.')
+            logger.info('Using der_pf = 1.0')
             der_pf = 1.0
 
         else:
@@ -126,7 +135,7 @@ def hosting_cap(
                 f"Warning:  Skipped busname '{bus_name}' " +
                 "- unrecoverable datetime issue"
             )
-            print(warning_str)
+            logger.warning(warning_str)
             n_skipped += 1
             continue
 
@@ -138,7 +147,7 @@ def hosting_cap(
                 f"Warning:  Fixed datetime of busname '{bus_name}' - " +
                 "was originally inconsistent"
             )
-            print(warning_str)
+            logger.warning(warning_str)
 
         # check for nan data in any column
         nan_mask = get_nan_mask(df_edit)
@@ -183,7 +192,7 @@ def hosting_cap(
                 f"Warning:  Skipped busname '{bus_name}' " +
                 f"- data quality of {data_quality}%"
             )
-            print(warning_str)
+            logger.warning(warning_str)
 
             nan_str = 'bad data at index ['
             for _, row, in single_fix_report.iterrows():
@@ -191,7 +200,7 @@ def hosting_cap(
                     nan_str += f"{row['start_ndx']}:{row['end_ndx']}, "
 
             nan_str = '* ' + nan_str[:-2] + ']'
-            print(nan_str)
+            logger.info(nan_str)
             n_skipped += 1
             continue
 
@@ -203,7 +212,7 @@ def hosting_cap(
         n_kw_injections = fixed_data['P'] >= injection_noise_threshold
         if n_kw_injections.sum() > injection_count_threshold:
             has_pv = True
-            # print(f'found {n_kw_injections.sum()} injections')
+            logger.info(f'found {n_kw_injections.sum()} injections')
 
         # Calcualte deltas
         fixed_data['p_diff'] = fixed_data['P'].diff()
@@ -231,7 +240,7 @@ def hosting_cap(
                     "- Power Factor too constant - " +
                     f"maximum abs dif doesn't exceed {max_pf_dif}"
                 )
-                print(warning_str)
+                logger.warning(warning_str)
                 n_skipped += 1
 
         remaining_bad_data_mask = get_nan_mask(fixed_data)
@@ -248,7 +257,7 @@ def hosting_cap(
                 f"Warning:  Skipped busname '{bus_name}' " +
                 "- Process for no input Q or static PF"
             )
-            print(warning_str)
+            logger.warning(warning_str)
 
         if has_input_q and not has_static_pf:
             # Filter points to fit according to quantiles
@@ -275,7 +284,7 @@ def hosting_cap(
             # if customer has PV, the nighttime filter has to be added to the
             # diff filters and applied before the regression
             if has_pv:
-                # print('\n* Using Night hours')
+                logger.info('\n* Using Night hours')
                 before_sunrise = clean_df['datetime'].dt.hour <= 5
                 after_sunset = clean_df['datetime'].dt.hour >= 20
                 nighttime_mask = before_sunrise | after_sunset
@@ -313,7 +322,7 @@ def hosting_cap(
                 "were unavailable or of insufficient quality. " +
                 "HC accuracy may be affected. "
             )
-            print(warning_str)
+            logger.warning(warning_str)
 
             if has_static_pf:
                 # use static pf as load pf estimate
@@ -335,7 +344,7 @@ def hosting_cap(
 
             # optional nighttime filter if customer has PV
             if has_pv:
-                # print('\n* Using Night hours')
+                logger.info('\n* Using Night hours')
                 before_sunrise = clean_df['datetime'].dt.hour <= 5
                 after_sunset = clean_df['datetime'].dt.hour >= 20
                 nighttime_mask = before_sunrise | after_sunset
@@ -383,7 +392,7 @@ def hosting_cap(
     hc_results.to_csv(output_csv_path, index=False)
 
     # NOTE: printing of fix report 'temporary' solution
-    print('')
+    logger.info('')
     if len(fix_reports) > 0:
         fix_report_df = pd.concat(fix_reports, ignore_index=True)
         fix_report_df = fix_report_df[[
@@ -393,12 +402,13 @@ def hosting_cap(
             'end_ndx',
             'action'
         ]]
-        print('* Data Fix Report')
-        print(fix_report_df)
+        logger.info('* Data Fix Report')
+        logger.info(fix_report_df)
     else:
         fix_report_df = '* No Data Fixes Executed'
 
-    print(f"HC calculated for: {n_hc_est}\nSkipped: {n_skipped}")
+    logger.info(f"HC calculated for: {n_hc_est}")
+    logger.info("Skipped: {n_skipped}")
 
     return hc_results
 

@@ -77,6 +77,12 @@
 				</select>
 			</div>
 			<div class="shortInput">
+				<label class="tooltip">Load Power Factor (pu)
+					<span class="classic">Default PF: 1.0. If no reactive power (or q) is given, include an estimate PF to help calculate HC</span>
+				</label>
+				<input type="text" id="load_pf_est" name="load_pf_est" value="{{allInputDataDict.load_pf_est}}"/>
+			</div>
+			<div class="shortInput">
 				<label>DG Inverter Setting</label>
 				<select id="dgInverterSetting" name="dgInverterSetting" value="{{allInputDataDict.dgInverterSetting}}" required>
 					<option value="Unity Power Factor" {% if allInputDataDict.dgInverterSetting == 'unityPF' %}selected{% endif %}>Unity Power Factor</option>
@@ -90,9 +96,9 @@
 				</label>
 				<input type="text" id="der_pf" name="der_pf" value="{{allInputDataDict.der_pf}}" pattern="[+-]?([0-9]*[.])?[0-9]+"/>
 			</div>
-				<div class="shortInput">
+			<div class="shortInput">
 				<label class="tooltip">volt-VAR Setting
-					<span class="classic">Default: </span>
+					<span class="classic">Default: given</span>
 				</label>
 				<input type="text" id="vv_points" name="vv_points" value="{{allInputDataDict.vv_points}}"/>
 			</div>

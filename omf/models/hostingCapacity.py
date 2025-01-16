@@ -136,7 +136,7 @@ def run_ami_algorithm( modelDir, inputDict, outData ):
 	
 	AMI_start_time = time.time()
 	if inputDict[ "algorithm" ] == "sandia1":
-		AMI_output = mohca_cl.sandia1( in_path=inputPath, out_path=outputPath, der_pf=None, vv_x=vv_x, vv_y=vv_y, load_pf_est=0.97 )
+		AMI_output = mohca_cl.sandia1( in_path=inputPath, out_path=outputPath, der_pf=inputDict['der_pf'], vv_x=vv_x, vv_y=vv_y, load_pf_est=inputDict['load_pf_est'] )
 	elif inputDict[ "algorithm" ] == "iastate":
 		AMI_output = mohca_cl.iastate( inputPath, outputPath )
 	else:
@@ -244,9 +244,15 @@ def work(modelDir, inputDict):
 	outData['stderr'] = ""
 	return outData
 
+'''
+meter_file_name = input_mohca.csv
+The name choice is a standard name. Every file that gets inputted will be changed into that name.
+This file comes from a sample input from Sandia to match the secondaryTestCircuit
+'''
+
 def new(modelDir):
 	''' Create a new instance of this model. Returns true on success, false on failure. '''
-	meter_file_name = 'SecondaryTestCircuit_modified_input_MoHCA.csv'
+	meter_file_name = 'input_mohcaData.csv'
 	meter_file_path = Path(omf.omfDir,'static','testFiles', 'hostingCapacity', meter_file_name)
 	# meter_file_contents = open(meter_file_path).read()
 	defaultInputs = {
@@ -260,6 +266,7 @@ def new(modelDir):
 		"dgInverterSetting": 'unityPF',
 		"der_pf": 0.95,
 		"vv_points": [(0.8,0.44), (0.92, 0.44), (0.98,0), (1.02,0), (1.08,-0.44), (1.2,-0.44)],
+		"load_pf_est": 1.0,
 		"runAmiAlgorithm": 'on',
 		"runDownlineAlgorithm": 'on'
 	}
