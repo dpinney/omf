@@ -4,15 +4,15 @@ import urllib.request
 import shutil, datetime
 from os.path import join as pJoin
 import requests
-import zipfile
+#import zipfile
 import shapefile
 from io import BytesIO
 import numpy as np
 import json
 import math
 import pandas as pd
-from shapely.geometry import Polygon, Point
-import geopandas as gpd
+#from shapely.geometry import Polygon, Point
+#import geopandas as gpd
 import networkx as nx
 import time
 
