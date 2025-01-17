@@ -5,7 +5,7 @@ import shutil, datetime
 from os.path import join as pJoin
 import requests
 #import zipfile
-import shapefile
+#import shapefile
 from io import BytesIO
 import numpy as np
 import json
