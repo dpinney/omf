@@ -126,7 +126,7 @@
 				<label class="tooltip">Maximum kW Tested
 					<span class="classic">The maximum threshhold of KW added to determine max hosting capacity</span>
 				</label>
-				<input type="text" id="modelBasedHCMaxTestkw" name="modelBasedHCMaxTestkw" value="{{allInputDataDict.modelBasedHCMaxTestkw}}" pattern="^[0-9]*$"/>
+				<input type="text" id="model_basedHCMaxTestkw" name="model_basedHCMaxTestkw" value="{{allInputDataDict.model_basedHCMaxTestkw}}" pattern="^[0-9]*$"/>
 			</div>
 			<div class="wideInput">
 				<p class="inputSectionHeader">Downline Load Hosting Capacity</p>
@@ -149,13 +149,16 @@
 	{% if modelStatus == 'finished' %}
 	<style>td, th {padding:7 0 5 20;text-align: left;font-size:0.8em; border: 1px solid #cccccc;} </style>
 	<div id="output">
+		<!--
+		We want the map to be displayed at the top, but it'll only display if model-based is there since its created there
+		-->
 		<p class="reportTitle" style="page-break-before:always">Hosting Capacity Map</p>
-		<div id="modelBasedHCMap" class="tightContent"></div>
+		<div id="hostingCapacityMap" class="tightContent"></div>
 		<script>
-			var mapContent = allOutputData["modelBasedHCMap"]
+			var mapContent = allOutputData["hostingCapacityMap"]
 			var iframe = document.createElement('iframe');
 			iframe.style = 'width:1000px; height:800px; border-radius:8px;'
-			document.getElementById('modelBasedHCMap').appendChild(iframe);
+			document.getElementById('hostingCapacityMap').appendChild(iframe);
 			iframe.contentWindow.document.open();
 			iframe.contentWindow.document.write(mapContent);
 			iframe.contentWindow.document.close();
@@ -199,25 +202,25 @@
     {% endif %}
 		{% if allInputDataDict['runModelBasedAlgorithm'] == 'on' %}
 			<p class="reportTitle">Model-Based Hosting Capacity Runtime ( H:M:S:MS )</p>
-			<div id="modelBasedRunTime" class="tightContent">
-				<p style="padding: 4px; align-items: center;"> {{ allOutputDataDict['modelBasedRuntime'] }} </p>
+			<div id="model_basedRunTime" class="tightContent">
+				<p style="padding: 4px; align-items: center;"> {{ allOutputDataDict['model_basedRuntime'] }} </p>
 			</div>
 			<p class="reportTitle">Model-Based Hosting Capacity By Bus</p>
-			<div id="modelBasedHCGraph" class="tightContent">
-				<div id="modelBasedHCGraph" style="width:1000px"></div>
+			<div id="model_basedHCGraph" class="tightContent">
+				<div id="model_basedHCGraph" style="width:1000px"></div>
 				<script type="text/javascript">
-					Plotly.newPlot("modelBasedHCGraph", JSON.parse( allOutputData["modelBasedGraphData"]) )
+					Plotly.newPlot("model_basedHCGraph", JSON.parse( allOutputData["model_basedGraphData"]) )
 				</script>
 			</div>
 			<p class="reportTitle">Model-Based Hosting Capacity Full Data Table</p>
-			<div id="modelBasedHostingCapacityTable" class="tightContent" style="height:300px; overflow-y: scroll;">
+			<div id="model_basedHostingCapacityTable" class="tightContent" style="height:300px; overflow-y: scroll;">
 				<table style="width:100%;">
 					<tr>
-							{% for header in allOutputDataDict["modelBasedHCTableHeadings"] %}
+							{% for header in allOutputDataDict["model_basedHCTableHeadings"] %}
 							<th>{{ header }}</th>
 							{% endfor %}
 					</tr>
-					{% for values in allOutputDataDict["modelBasedHCTableValues"] %}
+					{% for values in allOutputDataDict["model_basedHCTableValues"] %}
 					<tr>
 							{% for val in values %}
 							<td>{{ val }}</td>
@@ -229,7 +232,7 @@
 		{% endif %}
 		{% if allInputDataDict['runDownlineAlgorithm'] == 'on' %}
 		<p class="reportTitle">Downline Load Hosting Capacity Runtime ( H:M:S:MS )</p>
-			<div id="modelBasedRunTime" class="tightContent">
+			<div id="model_basedRunTime" class="tightContent">
 				<p style="padding: 4px; align-items: center;";> {{ allOutputDataDict['downline_runtime'] }} </p>
 			</div>
 		<p class="reportTitle">Downline Load Hosting Capacity Full Data Table</p>
