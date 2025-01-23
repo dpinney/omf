@@ -1,4 +1,4 @@
-''' Calculate hosting capacity using traditional and/or AMI-based methods. '''
+''' Calculate hosting capacity using modelBased and/or AMI-based methods. '''
 import shutil
 import plotly as py
 import plotly.express as px
@@ -18,7 +18,7 @@ from omf.solvers import opendss
 from omf.solvers import mohca_cl
 
 # Model metadata:
-tooltip = "Calculate hosting capacity using traditional and/or AMI-based methods."
+tooltip = "Calculate hosting capacity using modelBased and/or AMI-based methods."
 modelName, template = __neoMetaModel__.metadata(__file__)
 hidden = False
 
@@ -46,7 +46,6 @@ def bar_chart_coloring( row ):
 	return color
 
 def run_downline_load_algorithm( modelDir, inputDict, outData ):
-	# This uses the circuit - so the tradition needs to be on to do this. 
 	feederName = [x for x in os.listdir(modelDir) if x.endswith('.omd')][0]
 	path_to_omd = Path(modelDir, feederName)
 	tree = opendss.dssConvert.omdToTree(path_to_omd)
@@ -110,7 +109,7 @@ def run_downline_load_algorithm( modelDir, inputDict, outData ):
 		json.dump(original_file_data, out_file, indent=4)
 	omf.geo.map_omd(original_file, modelDir, open_browser=False )
 
-	outData['traditionalHCMap'] = open(Path(modelDir, "geoJson_offline.html"), 'r' ).read()
+	outData['modelBasedHCMap'] = open(Path(modelDir, "geoJson_offline.html"), 'r' ).read()
 	outData['downline_tableHeadings'] = downline_output.columns.values.tolist()
 	outData['downline_tableValues'] = (list(sorted_downlineDF.itertuples(index=False, name=None)))
 	outData['downline_runtime'] = convert_seconds_to_hms_ms( downline_end_time - downline_start_time )
@@ -164,33 +163,33 @@ def run_ami_algorithm( modelDir, inputDict, outData ):
 	outData['AMI_tableValues'] = ( list(AMI_results_sorted.itertuples(index=False, name=None)) )
 	outData['AMI_runtime'] = convert_seconds_to_hms_ms( AMI_end_time - AMI_start_time )
 
-def run_traditional_algorithm( modelDir, inputDict, outData ):
-	# traditional hosting capacity if they uploaded an omd circuit file and chose to use it.
+def run_modelBased_algorithm( modelDir, inputDict, outData ):
+	# modelBased hosting capacity if they uploaded an omd circuit file and chose to use it.
 	# Check if the file was uploaded and checks to make sure the name matches
 	feederName = [x for x in os.listdir(modelDir) if x.endswith('.omd')][0]
 	inputDict['feederName1'] = feederName[:-4]
 	path_to_omd = Path(modelDir, feederName)
 	tree = opendss.dssConvert.omdToTree(path_to_omd)
 	opendss.dssConvert.treeToDss(tree, Path(modelDir, 'circuit.dss'))
-	traditional_start_time = time.time()
-	traditionalHCResults = opendss.hosting_capacity_all( FNAME = Path(modelDir, 'circuit.dss'), max_test_kw=int(inputDict["traditionalHCMaxTestkw"]), multiprocess=False)
-	traditional_end_time = time.time()
+	modelBased_start_time = time.time()
+	modelBasedHCResults = opendss.hosting_capacity_all( FNAME = Path(modelDir, 'circuit.dss'), max_test_kw=int(inputDict["modelBasedHCMaxTestkw"]), multiprocess=False)
+	modelBased_end_time = time.time()
 	# - opendss.hosting_capacity_all() changes the cwd, so change it back so other code isn't affected
-	tradHCDF = pd.DataFrame( traditionalHCResults )
-	sorted_tradHCDF = tradHCDF.sort_values(by='bus')
-	sorted_tradHCDF.to_csv( "output_tradHC.csv")
+	modelBasedHCDF = pd.DataFrame( modelBasedHCResults )
+	sorted_modelBasedHCDF = modelBasedHCDF.sort_values(by='bus')
+	sorted_modelBasedHCDF.to_csv( "output_tradHC.csv")
 	# Don't color bars anymore..
-	# sorted_tradHCDF['plot_color'] = sorted_tradHCDF.apply ( lambda row: bar_chart_coloring(row), axis=1 )
+	# sorted_modelBasedHCDF['plot_color'] = sorted_modelBasedHCDF.apply ( lambda row: bar_chart_coloring(row), axis=1 )
 	# Plotly has its own colors - need to map the "name" of given colors to theirs
-	traditionalHCFigure = px.bar( sorted_tradHCDF, x='bus', y='max_kw', barmode='group', template='simple_white', color_discrete_sequence=["green"] )
-	traditionalHCFigure.update_xaxes(categoryorder='array', categoryarray=sorted_tradHCDF.bus.values)
+	modelBasedHCFigure = px.bar( sorted_modelBasedHCDF, x='bus', y='max_kw', barmode='group', template='simple_white', color_discrete_sequence=["green"] )
+	modelBasedHCFigure.update_xaxes(categoryorder='array', categoryarray=sorted_modelBasedHCDF.bus.values)
 	
 	'''
 	Other code for bar coloring so there are names when you hover.
 	# Map color to violation type to update key/legend
 	# colorToKey = {'orange':'thermally_limited', 'yellow': 'voltage_limited', 'red': 'both_violation', 'green': 'no_violation'}
 	# Changes the hover mode, key, and legend to show the violation type rather than the color
-	traditionalHCFigure.for_each_trace(
+	modelBasedHCFigure.for_each_trace(
 		lambda t: t.update(
 			name = colorToKey[t.name],
 			legendgroup = colorToKey[t.name],
@@ -198,20 +197,20 @@ def run_traditional_algorithm( modelDir, inputDict, outData ):
 			)
 		)
 	# We don't need the plot_color stuff for anything else, so drop it
-	sorted_tradHCDF.drop(sorted_tradHCDF.columns[len(sorted_tradHCDF.columns)-1], axis=1, inplace=True)
+	sorted_modelBasedHCDF.drop(sorted_modelBasedHCDF.columns[len(sorted_modelBasedHCDF.columns)-1], axis=1, inplace=True)
 	'''
-	color_df = sorted_tradHCDF[['bus','max_kw']]
-	color_df.to_csv(Path(modelDir, 'color_by_traditional.csv'), index=False)
+	color_df = sorted_modelBasedHCDF[['bus','max_kw']]
+	color_df.to_csv(Path(modelDir, 'color_by_modelBased.csv'), index=False)
 	attachment_keys = {
 		"coloringFiles": {
-			"color_by_traditional.csv": {
+			"color_by_modelBased.csv": {
 				"csv": "<content>",
 				"colorOnLoadColumnIndex": "1"
 			},
 		}
 	}
-	data = Path(modelDir, 'color_by_traditional.csv').read_text()
-	attachment_keys['coloringFiles']['color_by_traditional.csv']['csv'] = data
+	data = Path(modelDir, 'color_by_modelBased.csv').read_text()
+	attachment_keys['coloringFiles']['color_by_modelBased.csv']['csv'] = data
 	omd = json.load(open(path_to_omd))
 	new_path = Path(modelDir, 'color_test.omd')
 	omd['attachments'] = attachment_keys
@@ -219,12 +218,12 @@ def run_traditional_algorithm( modelDir, inputDict, outData ):
 		json.dump(omd, out_file, indent=4)
 	omf.geo.map_omd(new_path, modelDir, open_browser=False )
 
-	outData['traditionalHCMap'] = open(Path(modelDir, "geoJson_offline.html"), 'r' ).read()
-	outData['traditionalGraphData'] = json.dumps(traditionalHCFigure, cls=py.utils.PlotlyJSONEncoder )
-	outData['traditionalHCTableHeadings'] = sorted_tradHCDF.columns.values.tolist()
-	outData['traditionalHCTableValues'] = (list(sorted_tradHCDF.itertuples(index=False, name=None)))
-	outData['traditionalRuntime'] = convert_seconds_to_hms_ms( traditional_end_time - traditional_start_time )
-	outData['traditionalHCResults'] = traditionalHCResults
+	outData['modelBasedHCMap'] = open(Path(modelDir, "geoJson_offline.html"), 'r' ).read()
+	outData['modelBasedGraphData'] = json.dumps(modelBasedHCFigure, cls=py.utils.PlotlyJSONEncoder )
+	outData['modelBasedHCTableHeadings'] = sorted_modelBasedHCDF.columns.values.tolist()
+	outData['modelBasedHCTableValues'] = (list(sorted_modelBasedHCDF.itertuples(index=False, name=None)))
+	outData['modelBasedRuntime'] = convert_seconds_to_hms_ms( modelBased_end_time - modelBased_start_time )
+	outData['modelBasedHCResults'] = modelBasedHCResults
 
 def runtimeEstimate(modelDir):
 	''' Estimated runtime of model in minutes. '''
@@ -236,7 +235,7 @@ def work(modelDir, inputDict):
 	if inputDict['runAmiAlgorithm'] == 'on':
 		run_ami_algorithm(modelDir, inputDict, outData)
 	if inputDict.get('runModelBasedAlgorithm', outData) == 'on':
-		run_traditional_algorithm(modelDir, inputDict, outData)
+		run_modelBased_algorithm(modelDir, inputDict, outData)
 	if inputDict.get('runDownlineAlgorithm') == 'on':
 		run_downline_load_algorithm( modelDir, inputDict, outData)
 	outData['stdout'] = "Success"
@@ -263,7 +262,7 @@ def new(modelDir):
 		"runModelBasedAlgorithm": 'on',
 		"runAmiAlgorithm": 'on',
 		"runDownlineAlgorithm": 'on',
-		"traditionalHCMaxTestkw": 50000,
+		"modelBasedHCMaxTestkw": 50000,
 		"dgInverterSetting": 'unityPF',
 		"der_pf": 0.95,
 		"vv_points": "0.8,0.44,0.92,0.44,0.98,0,1.02,0,1.08,-0.44,1.2,-0.44",

@@ -126,7 +126,7 @@
 				<label class="tooltip">Maximum kW Tested
 					<span class="classic">The maximum threshhold of KW added to determine max hosting capacity</span>
 				</label>
-				<input type="text" id="traditionalHCMaxTestkw" name="traditionalHCMaxTestkw" value="{{allInputDataDict.traditionalHCMaxTestkw}}" pattern="^[0-9]*$"/>
+				<input type="text" id="modelBasedHCMaxTestkw" name="modelBasedHCMaxTestkw" value="{{allInputDataDict.modelBasedHCMaxTestkw}}" pattern="^[0-9]*$"/>
 			</div>
 			<div class="wideInput">
 				<p class="inputSectionHeader">Downline Load Hosting Capacity</p>
@@ -150,12 +150,12 @@
 	<style>td, th {padding:7 0 5 20;text-align: left;font-size:0.8em; border: 1px solid #cccccc;} </style>
 	<div id="output">
 		<p class="reportTitle" style="page-break-before:always">Hosting Capacity Map</p>
-		<div id="traditionalHCMap" class="tightContent"></div>
+		<div id="modelBasedHCMap" class="tightContent"></div>
 		<script>
-			var mapContent = allOutputData["traditionalHCMap"]
+			var mapContent = allOutputData["modelBasedHCMap"]
 			var iframe = document.createElement('iframe');
 			iframe.style = 'width:1000px; height:800px; border-radius:8px;'
-			document.getElementById('traditionalHCMap').appendChild(iframe);
+			document.getElementById('modelBasedHCMap').appendChild(iframe);
 			iframe.contentWindow.document.open();
 			iframe.contentWindow.document.write(mapContent);
 			iframe.contentWindow.document.close();
@@ -198,26 +198,26 @@
 			</div>
     {% endif %}
 		{% if allInputDataDict['runModelBasedAlgorithm'] == 'on' %}
-			<p class="reportTitle">Traditional/Model-Based Hosting Capacity Runtime ( H:M:S:MS )</p>
-			<div id="traditionalRunTime" class="tightContent">
-				<p style="padding: 4px; align-items: center;"> {{ allOutputDataDict['traditionalRuntime'] }} </p>
+			<p class="reportTitle">Model-Based Hosting Capacity Runtime ( H:M:S:MS )</p>
+			<div id="modelBasedRunTime" class="tightContent">
+				<p style="padding: 4px; align-items: center;"> {{ allOutputDataDict['modelBasedRuntime'] }} </p>
 			</div>
-			<p class="reportTitle">Traditional/Model-Based Hosting Capacity By Bus</p>
-			<div id="traditionalHCGraph" class="tightContent">
-				<div id="traditionalHCGraph" style="width:1000px"></div>
+			<p class="reportTitle">Model-Based Hosting Capacity By Bus</p>
+			<div id="modelBasedHCGraph" class="tightContent">
+				<div id="modelBasedHCGraph" style="width:1000px"></div>
 				<script type="text/javascript">
-					Plotly.newPlot("traditionalHCGraph", JSON.parse( allOutputData["traditionalGraphData"]) )
+					Plotly.newPlot("modelBasedHCGraph", JSON.parse( allOutputData["modelBasedGraphData"]) )
 				</script>
 			</div>
-			<p class="reportTitle">Traditional/Model-Based Hosting Capacity Full Data Table</p>
-			<div id="traditionalHostingCapacityTable" class="tightContent" style="height:300px; overflow-y: scroll;">
+			<p class="reportTitle">Model-Based Hosting Capacity Full Data Table</p>
+			<div id="modelBasedHostingCapacityTable" class="tightContent" style="height:300px; overflow-y: scroll;">
 				<table style="width:100%;">
 					<tr>
-							{% for header in allOutputDataDict["traditionalHCTableHeadings"] %}
+							{% for header in allOutputDataDict["modelBasedHCTableHeadings"] %}
 							<th>{{ header }}</th>
 							{% endfor %}
 					</tr>
-					{% for values in allOutputDataDict["traditionalHCTableValues"] %}
+					{% for values in allOutputDataDict["modelBasedHCTableValues"] %}
 					<tr>
 							{% for val in values %}
 							<td>{{ val }}</td>
@@ -229,7 +229,7 @@
 		{% endif %}
 		{% if allInputDataDict['runDownlineAlgorithm'] == 'on' %}
 		<p class="reportTitle">Downline Load Hosting Capacity Runtime ( H:M:S:MS )</p>
-			<div id="traditionalRunTime" class="tightContent">
+			<div id="modelBasedRunTime" class="tightContent">
 				<p style="padding: 4px; align-items: center;";> {{ allOutputDataDict['downline_runtime'] }} </p>
 			</div>
 		<p class="reportTitle">Downline Load Hosting Capacity Full Data Table</p>
