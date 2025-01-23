@@ -212,10 +212,13 @@ def run_ami_algorithm( modelDir, inputDict, outData ):
 
 	AMI_start_time = time.time()
 	if inputDict[ "algorithm" ] == "sandia1":
-		if inputDict['dgInverterSetting'] == 'constantPF':
-			mohca_cl.sandia1( in_path=inputPath, out_path=outputPath, der_pf=inputDict['der_pf'], load_pf_est=inputDict['load_pf_est'] )
+		if inputDict["dgInverterSetting"] == 'constantPF':
+			mohca_cl.sandia1( in_path=inputPath, out_path=outputPath, der_pf= float(inputDict['der_pf']), vv_x=None, vv_y=None, load_pf_est=inputDict['load_pf_est'] )
+		elif inputDict["dgInverterSetting"] == 'voltVar':
+			mohca_cl.sandia1( in_path=inputPath, out_path=outputPath, der_pf= float(inputDict['der_pf']), vv_x=vv_x, vv_y=vv_y, load_pf_est=inputDict['load_pf_est'] )
 		else:
-			mohca_cl.sandia1( in_path=inputPath, out_path=outputPath, der_pf=inputDict['der_pf'], vv_x=vv_x, vv_y=vv_y, load_pf_est=inputDict['load_pf_est'] )
+			errorMessage = "DG Error - Should not happen. dgInverterSetting is not either of the 2 options it is supposed to be."
+			raise Exception(errorMessage)
 	elif inputDict[ "algorithm" ] == "iastate":
 		mohca_cl.iastate( inputPath, outputPath )
 	else:
