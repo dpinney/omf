@@ -2,8 +2,6 @@
 import shutil
 import plotly as py
 import plotly.express as px
-import plotly.graph_objects as go
-# from plotly.subplots import make_subplots
 import pandas as pd
 import numpy as np
 from pathlib import Path
@@ -31,19 +29,6 @@ def convert_seconds_to_hms_ms( seconds ):
 	seconds, milliseconds = divmod(remainder, 1000)
 	
 	return "{:02d}:{:02d}:{:02d}.{:03d}".format(int(hours), int(minutes), int(seconds), int(milliseconds))
-
-# Deprecated
-def bar_chart_coloring( row ):
-	color = 'black'
-	if row['thermally_limited'] and not row['voltage_limited']:
-		color = 'orange'
-	elif not row['thermally_limited'] and row['voltage_limited']:
-		color = 'yellow'
-	elif not row['thermally_limited'] and not row['voltage_limited']:
-		color = 'green'
-	else:
-		color = 'red'
-	return color
 
 def run_downline_load_algorithm( modelDir, inputDict, outData ):
 	feederName = [x for x in os.listdir(modelDir) if x.endswith('.omd')][0]
@@ -81,16 +66,13 @@ def run_downline_load_algorithm( modelDir, inputDict, outData ):
 	downline_output = pd.DataFrame(list(buses_output.items()), columns=['bus', 'kw'] )
 	downline_end_time = time.time()
 	sorted_downlineDF = downline_output.sort_values(by='bus')
-
 	buses_to_remove = ['eq_source_bus', 'bus_xfmr']
 	indexes = []
 	for bus in buses_to_remove:
 		indexes.append( sorted_downlineDF[sorted_downlineDF['bus'] == bus].index )
 	for i in indexes:
 		sorted_downlineDF = sorted_downlineDF.drop(i)
-
 	sorted_downlineDF.to_csv(Path(modelDir, 'output_downline_load.csv'), index=False)
-	
 	downline_color_data = Path(modelDir, 'output_downline_load.csv').read_text()
 	downline_color = {
 		"downline_load.csv": {
@@ -98,17 +80,13 @@ def run_downline_load_algorithm( modelDir, inputDict, outData ):
 			"colorOnLoadColumnIndex": "0"
 		}
 	}
-
-	original_file = Path(modelDir, 'color_test.omd') #This should have already been made
+	original_file = Path(modelDir, 'color_test.omd') # This should have already been made
 	original_file_data = json.load( open(original_file) )
-
 	original_file_data['attachments']['coloringFiles'].update(downline_color)
 	original_file_data['attachments']['coloringFiles']['downline_load.csv']['csv'] = downline_color_data
-
 	with open(original_file, 'w+') as out_file:
 		json.dump(original_file_data, out_file, indent=4)
 	omf.geo.map_omd(original_file, modelDir, open_browser=False )
-
 	outData['modelBasedHCMap'] = open(Path(modelDir, "geoJson_offline.html"), 'r' ).read()
 	outData['downline_tableHeadings'] = downline_output.columns.values.tolist()
 	outData['downline_tableValues'] = (list(sorted_downlineDF.itertuples(index=False, name=None)))
@@ -119,25 +97,21 @@ def run_ami_algorithm( modelDir, inputDict, outData ):
 	# mohca data-driven hosting capacity
 	inputPath = Path(modelDir, inputDict['AMIDataFileName'])
 	inputAsString = inputPath.read_text()
-
 	outputPath = Path(modelDir, 'output_MoCHa.csv')
-	AMI_output = []
-
 	try:
 		csvValidateAndLoad(inputAsString, modelDir=modelDir, header=0, nrows=None, ncols=None, dtypes=[], return_type='df', ignore_nans=True, save_file=None, ignore_errors=False )
 	except:
 		errorMessage = "AMI-Data CSV file is incorrect format. Please see valid format definition at <a target='_blank' href='https://github.com/dpinney/omf/wiki/Models-~-hostingCapacity#meter-data-input-csv-file-format'>OMF Wiki hostingCapacity</a>"
 		raise Exception(errorMessage)
-		
 	vv_points_eval = [float(x) for x in inputDict['vv_points'].split(',')]
 	vv_x = [v for i,v in enumerate(vv_points_eval) if i%2==0]
 	vv_y = [v for i,v in enumerate(vv_points_eval) if i%2==1]
-	
+
 	AMI_start_time = time.time()
 	if inputDict[ "algorithm" ] == "sandia1":
-		AMI_output = mohca_cl.sandia1( in_path=inputPath, out_path=outputPath, der_pf=inputDict['der_pf'], vv_x=vv_x, vv_y=vv_y, load_pf_est=inputDict['load_pf_est'] )
+		mohca_cl.sandia1( in_path=inputPath, out_path=outputPath, der_pf=inputDict['der_pf'], vv_x=vv_x, vv_y=vv_y, load_pf_est=inputDict['load_pf_est'] )
 	elif inputDict[ "algorithm" ] == "iastate":
-		AMI_output = mohca_cl.iastate( inputPath, outputPath )
+		mohca_cl.iastate( inputPath, outputPath )
 	else:
 		errorMessage = "Algorithm name error"
 		raise Exception(errorMessage)
@@ -152,9 +126,7 @@ def run_ami_algorithm( modelDir, inputDict, outData ):
 	max_value = 8
 	AMI_results['thermal_cap_kW']  = np.random.randint(min_value, max_value + 1, size=len(AMI_results))
 	AMI_results['max_cap_allowed_kW'] = np.minimum( AMI_results['voltage_cap_kW'], AMI_results['thermal_cap_kW'])
-
 	AMI_results_sorted = AMI_results.sort_values(by='busname')
-
 	barChartFigure = px.bar(AMI_results_sorted, x='busname', y=['voltage_cap_kW', 'thermal_cap_kW', 'max_cap_allowed_kW'], barmode='group', color_discrete_sequence=["green", "lightblue", "MediumPurple"], template="simple_white" )
 	barChartFigure.add_traces( list(px.line(AMI_results_sorted, x='busname', y='max_cap_allowed_kW', markers=True).select_traces()) )
 	outData['histogramFigure'] = json.dumps( histogramFigure, cls=py.utils.PlotlyJSONEncoder )
@@ -164,8 +136,6 @@ def run_ami_algorithm( modelDir, inputDict, outData ):
 	outData['AMI_runtime'] = convert_seconds_to_hms_ms( AMI_end_time - AMI_start_time )
 
 def run_modelBased_algorithm( modelDir, inputDict, outData ):
-	# modelBased hosting capacity if they uploaded an omd circuit file and chose to use it.
-	# Check if the file was uploaded and checks to make sure the name matches
 	feederName = [x for x in os.listdir(modelDir) if x.endswith('.omd')][0]
 	inputDict['feederName1'] = feederName[:-4]
 	path_to_omd = Path(modelDir, feederName)
@@ -178,27 +148,8 @@ def run_modelBased_algorithm( modelDir, inputDict, outData ):
 	modelBasedHCDF = pd.DataFrame( modelBasedHCResults )
 	sorted_modelBasedHCDF = modelBasedHCDF.sort_values(by='bus')
 	sorted_modelBasedHCDF.to_csv( "output_tradHC.csv")
-	# Don't color bars anymore..
-	# sorted_modelBasedHCDF['plot_color'] = sorted_modelBasedHCDF.apply ( lambda row: bar_chart_coloring(row), axis=1 )
-	# Plotly has its own colors - need to map the "name" of given colors to theirs
 	modelBasedHCFigure = px.bar( sorted_modelBasedHCDF, x='bus', y='max_kw', barmode='group', template='simple_white', color_discrete_sequence=["green"] )
 	modelBasedHCFigure.update_xaxes(categoryorder='array', categoryarray=sorted_modelBasedHCDF.bus.values)
-	
-	'''
-	Other code for bar coloring so there are names when you hover.
-	# Map color to violation type to update key/legend
-	# colorToKey = {'orange':'thermally_limited', 'yellow': 'voltage_limited', 'red': 'both_violation', 'green': 'no_violation'}
-	# Changes the hover mode, key, and legend to show the violation type rather than the color
-	modelBasedHCFigure.for_each_trace(
-		lambda t: t.update(
-			name = colorToKey[t.name],
-			legendgroup = colorToKey[t.name],
-			hovertemplate = t.hovertemplate.replace(t.name, colorToKey[t.name])
-			)
-		)
-	# We don't need the plot_color stuff for anything else, so drop it
-	sorted_modelBasedHCDF.drop(sorted_modelBasedHCDF.columns[len(sorted_modelBasedHCDF.columns)-1], axis=1, inplace=True)
-	'''
 	color_df = sorted_modelBasedHCDF[['bus','max_kw']]
 	color_df.to_csv(Path(modelDir, 'color_by_modelBased.csv'), index=False)
 	attachment_keys = {
@@ -231,7 +182,6 @@ def runtimeEstimate(modelDir):
 
 def work(modelDir, inputDict):
 	outData = {}
-	
 	if inputDict['runAmiAlgorithm'] == 'on':
 		run_ami_algorithm(modelDir, inputDict, outData)
 	if inputDict.get('runModelBasedAlgorithm', outData) == 'on':
