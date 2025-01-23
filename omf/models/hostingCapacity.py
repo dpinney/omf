@@ -205,13 +205,17 @@ def run_ami_algorithm( modelDir, inputDict, outData ):
 	except:
 		errorMessage = "AMI-Data CSV file is incorrect format. Please see valid format definition at <a target='_blank' href='https://github.com/dpinney/omf/wiki/Models-~-hostingCapacity#meter-data-input-csv-file-format'>OMF Wiki hostingCapacity</a>"
 		raise Exception(errorMessage)
+
 	vv_points_eval = [float(x) for x in inputDict['vv_points'].split(',')]
 	vv_x = [v for i,v in enumerate(vv_points_eval) if i%2==0]
 	vv_y = [v for i,v in enumerate(vv_points_eval) if i%2==1]
 
 	AMI_start_time = time.time()
 	if inputDict[ "algorithm" ] == "sandia1":
-		mohca_cl.sandia1( in_path=inputPath, out_path=outputPath, der_pf=inputDict['der_pf'], vv_x=vv_x, vv_y=vv_y, load_pf_est=inputDict['load_pf_est'] )
+		if inputDict['dgInverterSetting'] == 'constantPF':
+			mohca_cl.sandia1( in_path=inputPath, out_path=outputPath, der_pf=inputDict['der_pf'], load_pf_est=inputDict['load_pf_est'] )
+		else:
+			mohca_cl.sandia1( in_path=inputPath, out_path=outputPath, der_pf=inputDict['der_pf'], vv_x=vv_x, vv_y=vv_y, load_pf_est=inputDict['load_pf_est'] )
 	elif inputDict[ "algorithm" ] == "iastate":
 		mohca_cl.iastate( inputPath, outputPath )
 	else:
@@ -302,8 +306,8 @@ def new(modelDir):
 		"runAmiAlgorithm": 'on',
 		"runDownlineAlgorithm": 'on',
 		"model_basedHCMaxTestkw": 50000,
-		"dgInverterSetting": 'unityPF',
-		"der_pf": 0.95,
+		"dgInverterSetting": 'constantPF',
+		"der_pf": 1.00,
 		"vv_points": "0.8,0.44,0.92,0.44,0.98,0,1.02,0,1.08,-0.44,1.2,-0.44",
 		"load_pf_est": 1.0
 	}

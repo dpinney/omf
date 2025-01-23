@@ -94,7 +94,6 @@
 					<span class="classic">Calculate hosting capacity under the assumption the DG is either set at a fixed power factor or is following a volt-VAR curve.</span>
 				</label>
 				<select id="dgInverterSetting" name="dgInverterSetting" value="{{allInputDataDict.dgInverterSetting}}" required>
-					<option value="Unity Power Factor" {% if allInputDataDict.dgInverterSetting == 'unityPF' %}selected{% endif %}>Unity Power Factor</option>
 					<option value="Constant Power Factor" {% if allInputDataDict.dgInverterSetting == 'constantPF' %}selected{% endif %}>Constant Power Factor</option>
 					<option value="Volt-VAR" {% if allInputDataDict.dgInverterSetting == 'voltVar' %}selected{% endif %}>volt-VAR</option>
 				</select>
