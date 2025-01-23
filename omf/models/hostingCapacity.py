@@ -152,7 +152,6 @@ def run_ami_algorithm( modelDir, inputDict, outData ):
 	min_value = 5
 	max_value = 8
 	AMI_results['thermal_cap_kW']  = np.random.randint(min_value, max_value + 1, size=len(AMI_results))
-
 	AMI_results['max_cap_allowed_kW'] = np.minimum( AMI_results['voltage_cap_kW'], AMI_results['thermal_cap_kW'])
 
 	AMI_results_sorted = AMI_results.sort_values(by='busname')
@@ -236,7 +235,7 @@ def work(modelDir, inputDict):
 	
 	if inputDict['runAmiAlgorithm'] == 'on':
 		run_ami_algorithm(modelDir, inputDict, outData)
-	if inputDict.get('optionalCircuitFile', outData) == 'on':
+	if inputDict.get('runModelBasedAlgorithm', outData) == 'on':
 		run_traditional_algorithm(modelDir, inputDict, outData)
 	if inputDict.get('runDownlineAlgorithm') == 'on':
 		run_downline_load_algorithm( modelDir, inputDict, outData)
@@ -261,14 +260,14 @@ def new(modelDir):
 		"AMIDataFileName": meter_file_name,
 		"userAMIDisplayFileName": meter_file_name,
 		"feederName1": 'nreca_secondaryTestSet',
-		"optionalCircuitFile": 'on',
+		"runModelBasedAlgorithm": 'on',
+		"runAmiAlgorithm": 'on',
+		"runDownlineAlgorithm": 'on',
 		"traditionalHCMaxTestkw": 50000,
 		"dgInverterSetting": 'unityPF',
 		"der_pf": 0.95,
 		"vv_points": "0.8,0.44,0.92,0.44,0.98,0,1.02,0,1.08,-0.44,1.2,-0.44",
-		"load_pf_est": 1.0,
-		"runAmiAlgorithm": 'on',
-		"runDownlineAlgorithm": 'on'
+		"load_pf_est": 1.0
 	}
 	creationCode = __neoMetaModel__.new(modelDir, defaultInputs)
 	try:

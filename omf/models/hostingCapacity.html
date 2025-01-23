@@ -117,9 +117,9 @@
 			<hr>
 			<div class="shortInput">
 				<label>Apply Model-Based Hosting Capacity</label>
-				<select id="optionalCircuitFile" name="optionalCircuitFile" value="{{allInputDataDict.optionalCircuitFile}}" required>
-					<option value="off" {% if allInputDataDict.optionalCircuitFile == 'off' %}selected{% endif %}>Off</option>
-					<option value="on" {% if allInputDataDict.optionalCircuitFile == 'on' %}selected{% endif %}>On</option>
+				<select id="runModelBasedAlgorithm" name="runModelBasedAlgorithm" value="{{allInputDataDict.runModelBasedAlgorithm}}" required>
+					<option value="off" {% if allInputDataDict.runModelBasedAlgorithm == 'off' %}selected{% endif %}>Off</option>
+					<option value="on" {% if allInputDataDict.runModelBasedAlgorithm == 'on' %}selected{% endif %}>On</option>
 				</select>
 			</div>
 			<div class="shortInput">
@@ -149,6 +149,17 @@
 	{% if modelStatus == 'finished' %}
 	<style>td, th {padding:7 0 5 20;text-align: left;font-size:0.8em; border: 1px solid #cccccc;} </style>
 	<div id="output">
+		<p class="reportTitle" style="page-break-before:always">Hosting Capacity Map</p>
+		<div id="traditionalHCMap" class="tightContent"></div>
+		<script>
+			var mapContent = allOutputData["traditionalHCMap"]
+			var iframe = document.createElement('iframe');
+			iframe.style = 'width:1000px; height:800px; border-radius:8px;'
+			document.getElementById('traditionalHCMap').appendChild(iframe);
+			iframe.contentWindow.document.open();
+			iframe.contentWindow.document.write(mapContent);
+			iframe.contentWindow.document.close();
+		</script>
     {% if allInputDataDict['runAmiAlgorithm'] == 'on' %}
 			<p class="reportTitle">AMI-Based Hosting Capacity Runtime ( H:M:S:MS ) </p>
 			<div id="AMI_runtime" class="tightContent">
@@ -186,22 +197,11 @@
 				</table> 
 			</div>
     {% endif %}
-		{% if allInputDataDict['optionalCircuitFile'] == 'on' %}
+		{% if allInputDataDict['runModelBasedAlgorithm'] == 'on' %}
 			<p class="reportTitle">Traditional/Model-Based Hosting Capacity Runtime ( H:M:S:MS )</p>
 			<div id="traditionalRunTime" class="tightContent">
 				<p style="padding: 4px; align-items: center;"> {{ allOutputDataDict['traditionalRuntime'] }} </p>
 			</div>
-			<p class="reportTitle" style="page-break-before:always">Hosting Capacity Map</p>
-			<div id="traditionalHCMap" class="tightContent"></div>
-			<script>
-				var mapContent = allOutputData["traditionalHCMap"]
-				var iframe = document.createElement('iframe');
-				iframe.style = 'width:1000px; height:800px; border-radius:8px;'
-				document.getElementById('traditionalHCMap').appendChild(iframe);
-				iframe.contentWindow.document.open();
-				iframe.contentWindow.document.write(mapContent);
-				iframe.contentWindow.document.close();
-			</script>
 			<p class="reportTitle">Traditional/Model-Based Hosting Capacity By Bus</p>
 			<div id="traditionalHCGraph" class="tightContent">
 				<div id="traditionalHCGraph" style="width:1000px"></div>
