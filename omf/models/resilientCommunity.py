@@ -4,15 +4,15 @@ import urllib.request
 import shutil, datetime
 from os.path import join as pJoin
 import requests
-#import zipfile
-#import shapefile
+import zipfile
+import shapefile
 from io import BytesIO
 import numpy as np
 import json
 import math
 import pandas as pd
-#from shapely.geometry import Polygon, Point
-#import geopandas as gpd
+from shapely.geometry import Polygon, Point
+import geopandas as gpd
 import networkx as nx
 import time
 
@@ -904,29 +904,68 @@ def __getDownLineLoads__depreciated(pathToOmd,nriGeoJson):
     #BaseCriticallityWeightedAvg(obDict, loads)
     return obDict, loads, geoDF
 
-def getPercentile(loads, columnName):
-    '''
-    Gets percentile of specified column
-    loads -> dict of loads
-    columnName -> specified column name
-    '''
+def getPercentile(loads, columnName, tieBreaker=None):
+    """
+    Gets percentile of specified column, resolving ties with an optional tie-breaker.
 
-    loadServedVals = [v.get(columnName) for k,v in loads.items()]
+    Args:
+        loads (dict): Dictionary of loads with their attributes.
+        columnName (str): The name of the column to calculate percentiles for.
+        tieBreaker (str, optional): Column name used for tie-breaking. Defaults to None.
 
-    # calculate percentile for each load
-    pairs = list(zip(loadServedVals, range(len(loadServedVals))))
+    Raises:
+        ValueError: If `loads` is not a dictionary or if `columnName` is missing from the loads.
+        ValueError: If the lengths of primary and tieBreaker values don't match.
+    """
+    # Validate inputs
+    if not isinstance(loads, dict):
+        raise ValueError("The 'loads' argument must be a dictionary.")
 
-    pairs.sort(key=lambda p: p[0])
-    result = [0 for i in range(len(loadServedVals))]
+    if not isinstance(columnName, str) or not columnName:
+        raise ValueError("The 'columnName' argument must be a non-empty string.")
+
+    if tieBreaker and not isinstance(tieBreaker, str):
+        raise ValueError("The 'tieBreaker' argument must be a string if provided.")
+
+    # Retrieve column values and handle missing data
+    loadServedVals = [v.get(columnName) for k, v in loads.items()]
+    if None in loadServedVals:
+        raise ValueError(f"Missing values detected in column '{columnName}'.")
+
+    # Retrieve tie-breaker values or default to zeros
+    if tieBreaker:
+        tieBreakerVals = [v.get(tieBreaker, 0) for k, v in loads.items()]
+        if None in tieBreakerVals:
+            raise ValueError(f"Missing values detected in tie-breaker column '{tieBreaker}'.")
+    else:
+        tieBreakerVals = [0] * len(loads)
+
+    # Ensure consistent lengths
+    if len(loadServedVals) != len(tieBreakerVals):
+        raise ValueError("Mismatch in lengths of primary and tie-breaker values.")
+
+    # Create pairs of (primary value, tie-breaker, original index)
+    pairs = list(zip(loadServedVals, tieBreakerVals, range(len(loadServedVals))))
+
+    # Sort pairs by primary value, then by tie-breaker
+    pairs.sort(key=lambda p: (p[0], p[1]))
+
+    # Calculate percentiles
+    result = [0 for _ in range(len(loadServedVals))]
     for rank in range(len(loadServedVals)):
-        original_index = pairs[rank][1]
-        result[original_index] = rank * 100.0 / (len(loadServedVals)-1)
-    if (columnName == "base crit score"):
+        original_index = pairs[rank][2]
+        result[original_index] = rank * 100.0 / (len(loadServedVals) - 1)
+
+    # Assign percentiles to the loads dictionary
+    if columnName == "base crit score":
         new_str = 'base crit index'
     else:
         new_str = 'community crit index'
-    for i, (k,v) in enumerate(loads.items()):
-        loads[k][new_str] = round(result[i],2)
+
+    for i, (k, v) in enumerate(loads.items()):
+        if not isinstance(v, dict):
+            raise ValueError(f"Invalid load format for key '{k}'. Expected a dictionary.")
+        loads[k][new_str] = round(result[i], 2)
 
 def __coordCheck__depreciated(long, lat, latlonList):
     point = Point(long, lat)
@@ -950,25 +989,59 @@ def __coordCheck__depreciated(long, lat, latlonList):
     return ''
 
 def coordCheck(long, lat, geoList):
-    point = Point(long, lat)
+    """
+    Check if a point defined by longitude and latitude intersects any polygons in a given geospatial list.
+    
+    Args:
+        long (float): Longitude of the point.
+        lat (float): Latitude of the point.
+        geoList (dict): A dictionary containing geospatial data, where keys represent identifiers
+                        and values include a 'geometry' key with a list of polygon coordinates.
+    
+    Returns:
+        str: The key of the geospatial entry that the point intersects with, or an empty string if none.
+    """
+    try:
+        # Ensure valid input types
+        if not isinstance(long, (int, float)):
+            raise ValueError("Longitude must be a number.")
+        if not isinstance(lat, (int, float)):
+            raise ValueError("Latitude must be a number.")
+        if not isinstance(geoList, dict):
+            raise ValueError("geoList must be a dictionary.")
 
-    for k,v in geoList.items():
-        if (len(v['geometry']) == 1):
-            coords = v['geometry'][0]
-        else:
-            coords = v['geometry']
+        # Create a point from the given coordinates
+        point = Point(long, lat)
 
-        ## Need to figure out when we are dealing with a multipolygon or polygon list
+        # Iterate through the geospatial list
+        for k, v in geoList.items():
+            if 'geometry' not in v or not isinstance(v['geometry'], list):
+                raise KeyError(f"Missing or invalid 'geometry' key in entry {k}.")
 
+            # Handle single polygon or list of polygons
+            if len(v['geometry']) == 1:
+                coords = v['geometry'][0]
+            else:
+                coords = v['geometry']
 
-        poly = Polygon(coords)
-            
-        if poly.intersects(point):
-            return k
+            # Check if the polygon intersects with the point
+            try:
+                poly = Polygon(coords)
+                if poly.intersects(point):
+                    return k
+            except Exception as e:
+                # Handle potential errors in creating or processing polygons
+                print(f"Error processing polygon for key {k}: {e}")
+                continue
 
-    return ''
+        # Return an empty string if no intersection is found
+        return ''
+    
+    except Exception as e:
+        print(f"Error in coordCheck: {e}")
+        return ''
 
-def getDownLineLoadsEquipmentBlockGroupZillow(pathToOmd, equipmentList,avgPeakDemand,pathToZillowData, pathToLoadsFile,loadsTypeList):
+def getDownLineLoadsEquipmentBlockGroupZillow(pathToOmd, equipmentList,avgPeakDemand,pathToZillowData, pathToLoadsFile,loadsTypeList, zillowFlag=None):
     '''
     Retrieves downline loads for specific set of equipment and retrieve nri data for each of the equipment
     pathToOmd -> path to the omdfile
@@ -991,7 +1064,7 @@ def getDownLineLoadsEquipmentBlockGroupZillow(pathToOmd, equipmentList,avgPeakDe
 
 
     # Section code
-    sectionsDict, distanceDict = runSections(omdToTree(pathToOmd), omd)
+    sectionsDict, distanceDict, totalSections = runSections(omdToTree(pathToOmd), omd)
 
 
     # Retrieve data to compute SVI
@@ -1026,7 +1099,7 @@ def getDownLineLoadsEquipmentBlockGroupZillow(pathToOmd, equipmentList,avgPeakDe
                 kw = ob.get('kw',None)
                 kvar = ob.get('kvar',None)
                 kva = ob.get('kva',None)
-                pf = ob.get('pf',avgPeakDemand)
+                pf = ob.get('pf',None)
                 if kw and kvar:
                     kw = float(kw)
                     kvar = float(kvar)
@@ -1042,12 +1115,17 @@ def getDownLineLoadsEquipmentBlockGroupZillow(pathToOmd, equipmentList,avgPeakDe
                 else:
                     raise Exception(f'Load {obName} does not have necessary information to calculate kw and kvar')
                 loadsDict[key]['kva'] = kva
-                loadsDict[key]["base crit score"]= round(((math.sqrt((kw * kw) + (kvar * kvar) ))/ (avgPeakDemand)) * 4,2)
+                loadsDict[key]["base crit score"]= round(((math.sqrt((kw * kw) + (kvar * kvar) ))/ float(avgPeakDemand)) * 4,2)
 
                 if obName in sectionsDict:
                     loadsDict[key]['section'] = sectionsDict[obName]
                 else:
                     loadsDict[key]['section'] = None
+                
+                if obName in distanceDict:
+                    loadsDict[key]['distance_from_source'] = int(distanceDict[obName])
+                else:
+                    loadsDict[key]['distance_from_source'] = 0
 
                 long = float(ob['longitude'])
                 lat = float(ob['latitude'])
@@ -1109,8 +1187,12 @@ def getDownLineLoadsEquipmentBlockGroupZillow(pathToOmd, equipmentList,avgPeakDe
 
     #pathToZillowData = '/Users/davidarmah/Documents/omf/omf/static/testFiles/resilientCommunity/zillowPrices.json'
 
-    with open(pathToZillowData, 'r') as file:
-        zillowPrices = json.load(file)
+    if zillowFlag:
+        with open(pathToZillowData, 'r') as file:
+            zillowPrices = json.load(file)
+    else:
+        zillowPrices = None
+
 
 
     for ob in omd.get('tree', {}).values():
@@ -1118,19 +1200,25 @@ def getDownLineLoadsEquipmentBlockGroupZillow(pathToOmd, equipmentList,avgPeakDe
         obName = ob['name']
         key = obType + '.' + obName
         if (obType == 'load'):
-            
-            
-            currBlockGroup = loadsDict[key]['blockgroup']
-            svi_score = sviDF[sviDF['blockgroupFIPS'] == currBlockGroup]['SOVI_SCORE'].values[0]
-            avgZillowPrice = zillowPrices[currBlockGroup]['avgPrice']
-            loadsDict[key]["community crit score"] = round(loadsDict[key]["base crit score"] *  svi_score * avgZillowPrice,2)
-            loadsDict[key]["zillow price"] = avgZillowPrice
-            loadsDict[key]['SOVI_SCORE'] = svi_score
+            filtered_df = loadsDF[loadsDF["Load Name"] == obName]
+            if (filtered_df["Business Type"].iloc[0].lower() in loadsTypeList):
+                currBlockGroup = loadsDict[key]['blockgroup']
+                svi_score = sviDF[sviDF['blockgroupFIPS'] == currBlockGroup]['SOVI_SCORE'].values[0]
+                if zillowPrices:
+                    avgZillowPrice = zillowPrices[currBlockGroup]['avgPrice']
+                    loadsDict[key]["zillow price"] = avgZillowPrice
+                else:
+                    avgZillowPrice = 1
+                    loadsDict[key]["zillow price"] = avgZillowPrice
+
+                loadsDict[key]["community crit score"] = round((loadsDict[key]["base crit score"] *  svi_score) / (avgZillowPrice/10000),2)
+                loadsDict[key]["affluence score"] = round(avgZillowPrice / 1000,2)
+                loadsDict[key]['SOVI_SCORE'] = round(svi_score,4)
 
 
 
-    getPercentile(loadsDict, "base crit score")
-    getPercentile(loadsDict, 'community crit score')
+    getPercentile(loadsDict, "base crit score", 'distance_from_source')
+    getPercentile(loadsDict, 'community crit score', 'distance_from_source')
 
         # calculate loads data for blockgroups
     df_loads = pd.DataFrame(loadsDict).T
@@ -1158,10 +1246,38 @@ def getDownLineLoadsEquipmentBlockGroupZillow(pathToOmd, equipmentList,avgPeakDe
     avg_base_criticality_score_index=('base crit index', 'mean'),
     avg_community_criticality_score_index=('community crit index', 'mean'),
     avg_zillow_price=('zillow price', 'mean'),
+    avg_svi_score=('SOVI_SCORE', 'mean'),
     load_count=('base crit score', 'count'),
     load_amount=('kva', 'sum')
     ).reset_index()
-    section_loads = section_loads.round(2)
+
+    # Convert existing sections to a set for quick lookup
+    existing_sections = set(section_loads['section'])
+
+    # Iterate from 1 to totalSections to check for missing sections
+    for section in range(1, totalSections + 1):  # Inclusive range
+        if section not in existing_sections:
+            # Append a row with all metrics set to None
+            section_loads = pd.concat([
+                section_loads,
+                pd.DataFrame({
+                    'section': [section],
+                    'avg_base_criticality_score': [None],
+                    'avg_community_criticality_score': [None],
+                    'avg_base_criticality_score_index': [None],
+                    'avg_community_criticality_score_index': [None],
+                    'avg_zillow_price': [None],
+                    'load_count': [None],
+                    'avg_svi_score':[None],
+                    'load_amount': [None]
+                })
+            ], ignore_index=True)
+
+    # Sort the DataFrame by 'section' to maintain order
+    section_loads = section_loads.sort_values(by='section').reset_index(drop=True)
+
+
+
 
 
 
@@ -3333,7 +3449,7 @@ def buildSVIRating(row):
     else:
         return 'Very High'
 
-def runCalculations(pathToOmd,modelDir, equipmentList):
+def runCalculations(pathToOmd,pathToLoadsFile,avgPeakDemand, loadsTypeList, modelDir, equipmentList):
     '''
     Runs computations on circuit for different loads and equipment
 
@@ -3343,58 +3459,43 @@ def runCalculations(pathToOmd,modelDir, equipmentList):
     
     '''
 
-    obDict, loads, geoDF = getDownLineLoadsEquipmentTract(pathToOmd, equipmentList)
 
+    obDict,loads, sviGeoDF, newsviDF, section_loads = getDownLineLoadsEquipmentBlockGroupZillow(pathToOmd, equipmentList,avgPeakDemand,'', pathToLoadsFile,loadsTypeList, )
 
-    #geoDF.to_file('/Users/davidarmah/Documents/omf/omf/static/testFiles/resilientCommunity/dataframe.geojson', driver='GeoJSON')  
-
-    
-
-    cols = ['Object Name', 'Type', 'Base Criticality Score', 'Base Criticality Index',
+    cols = ['Object Name', 'Type','Section', 'Base Criticality Score', 'Base Criticality Index',
             'Community Criticality Score', 'Community Criticality Index']
-    
-    object_names = list(obDict.keys())
+
+
     load_names = list(loads.keys())
-
-
+    section1 = [value.get('section') for key, value in loads.items()]
     base_criticality_score_vals1 = [value.get('base crit score') for key, value in loads.items()]
     base_criticity_index_vals1 = [value.get('base crit index') for key, value in loads.items()]
     community_criticality_score_vals1 = [value.get('community crit score') for key, value in loads.items()]
     community_criticity_index_vals1 = [value.get('community crit index') for key, value in loads.items()]
+    #sovi_vals1 = [value.get('SOVI_SCORE') for key, value in loads.items()]
+    #affluence_vals1 = [value.get('affluence score') for key, value in loads.items()]
     type1 = ['load' for i in range(len(base_criticality_score_vals1))]
-    
-    #print(len(load_names))
-    #print(len(type1))
-    #print(len(base_criticality_score_vals1))
-    #print(len(base_criticity_index_vals1))
-    #print(len(community_criticality_score_vals1))
-    #print(len(community_criticity_index_vals1))
+    loadsList = list(zip(load_names,type1,  section1,  base_criticality_score_vals1, base_criticity_index_vals1,community_criticality_score_vals1,community_criticity_index_vals1))
 
 
-
-    loadsList = list(zip(load_names,type1,base_criticality_score_vals1,base_criticity_index_vals1,community_criticality_score_vals1,community_criticity_index_vals1))
-    
-
+    object_names = list(obDict.keys())
+    section2 = [value.get('section') for key, value in obDict.items()]
     base_criticality_score_vals2 = [value.get('base crit score') for key, value in obDict.items()]
     base_criticity_index_vals2 = [value.get('base crit index') for key, value in obDict.items()]
     community_criticality_score_vals2 = [value.get('community crit score') for key, value in obDict.items()]
     community_criticity_index_vals2 = [value.get('community crit index') for key, value in obDict.items()]
     type2 = ['equipment' for i in range(len(base_criticality_score_vals2))]
 
-    #print(len(object_names))
-    #print(len(type2))
-    #print(len(base_criticality_score_vals2))
-    #print(len(base_criticity_index_vals2))
-    #print(len(community_criticality_score_vals2))
-    #print(len(community_criticity_index_vals2))
 
-    equipList = list(zip(object_names,type2,base_criticality_score_vals2,base_criticity_index_vals2,community_criticality_score_vals2,community_criticity_index_vals2))
+    
+    equipList = list(zip(object_names,type2, section2,  base_criticality_score_vals2, base_criticity_index_vals2,community_criticality_score_vals2,community_criticity_index_vals2 ))
+
 
     finList = loadsList + equipList
 
     newDF = createDF(finList, cols, [])
 
-    newDF.to_csv(pJoin(modelDir, 'resilientCommunityOutput.csv'))
+    newDF.to_csv(pJoin(modelDir, 'resilientCommunityOutput.csv'))  
 
 def get_zillowListings(lat, lon):
     #zillow api
@@ -3567,7 +3668,7 @@ def runSections(dssTree, omd):
 
 
 
-    return sectionDict, distanceToSource
+    return sectionDict, distanceToSource, len(sections)
 
 def section_circuit(graph):
 
@@ -3857,7 +3958,7 @@ def work(modelDir, inputDict):
     #print(inputDict['load_types'])
     # check downline loads
     #loads_typeList = [item.lower() for item in inputDict['load_type'] ]
-    obDict, loads, geoDF, sviDF, loadSections = getDownLineLoadsEquipmentBlockGroupZillow(omd_file_path, equipmentList,inputDict['averageDemand'], zillowPricesPath, loadsPath, loads_typeList)
+    obDict, loads, geoDF, sviDF, loadSections = getDownLineLoadsEquipmentBlockGroupZillow(omd_file_path, equipmentList,inputDict['averageDemand'], zillowPricesPath, loadsPath, loads_typeList, 'Yes')
 
     #obDict, loads, geoDF, sviDF = getDownLineLoadsEquipmentBlockGroups(omd_file_path, equipmentList, inputDict['averageDemand'])
     #obDict, loads, geoDF = getDownLineLoadsEquipmentTract(omd_file_path, equipmentList)
@@ -3933,16 +4034,17 @@ def work(modelDir, inputDict):
     outData['resilienceMap'] = open( pJoin( modelDir, "geoJson_offline.html"), 'r' ).read()
     outData['geojsonData'] = open(geoJson_shapes_file, 'r').read()
 
-    headers1 = ['Load Name','Section' 'Base Criticality Score', 'Base Criticality Index','Community Criticality Score', 'Community Criticality Index' ]
+    headers1 = ['Load Name','Section', 'Base Criticality Score', 'Base Criticality Index','Community Criticality Score', 'Community Criticality Index', 'Social Vulnerability', 'Affluence Score']
     load_names = list(loads.keys())
     section1 = [value.get('section') for key, value in loads.items()]
     base_criticality_score_vals1 = [value.get('base crit score') for key, value in loads.items()]
     base_criticity_index_vals1 = [value.get('base crit index') for key, value in loads.items()]
     community_criticality_score_vals1 = [value.get('community crit score') for key, value in loads.items()]
     community_criticity_index_vals1 = [value.get('community crit index') for key, value in loads.items()]
-
+    sovi_vals1 = [value.get('SOVI_SCORE') for key, value in loads.items()]
+    affluence_vals1 = [value.get('affluence score') for key, value in loads.items()]
     outData['loadTableHeadings'] = headers1
-    outData['loadTableValues'] = list(zip(load_names, section1,  base_criticality_score_vals1, base_criticity_index_vals1,community_criticality_score_vals1,community_criticity_index_vals1))
+    outData['loadTableValues'] = list(zip(load_names, section1,  base_criticality_score_vals1, base_criticity_index_vals1,community_criticality_score_vals1,community_criticity_index_vals1, sovi_vals1,affluence_vals1))
 
 
     headers2 = ['Equipment Name', 'Section', 'Base Criticality Score', 'Base Criticallity Index', 'Community Criticality Score', 'Community Criticality Index']
@@ -3958,31 +4060,48 @@ def work(modelDir, inputDict):
     outData['loadTableValues2'] = list(zip(object_names, section2,  base_criticality_score_vals2, base_criticity_index_vals2,community_criticality_score_vals2,community_criticity_index_vals2 ))
 
 
-    headers3 = ['Section', 'Base Criticality Score', 'Base Criticallity Index', 'Community Criticality Score', 'Community Criticality Index', 'Zillow Price', 'Load Count', 'Load Amount']
+    headers3 = ['Section', 'Base Criticality Score', 'Base Criticallity Index', 'Community Criticality Score', 'Community Criticality Index','Social Vulnerability','Affluent Score', 'Load Count', 'Load Amount']
     section_names = loadSections["section"].tolist()
-    base_criticality_score_vals3 = loadSections["avg_base_criticality_score"].tolist()
-    base_criticity_index_vals3 = loadSections["avg_base_criticality_score_index"].tolist()
-    community_criticality_score_vals3 = loadSections["avg_community_criticality_score"].tolist()
-    community_criticity_index_vals3 = loadSections["avg_community_criticality_score_index"].tolist()
-    zillow_prices_vals3 = loadSections["avg_zillow_price"].tolist()
-    load_count_vals = loadSections["load_count"].tolist()
-    load_amount_vals =loadSections["load_amount"].tolist()
+    base_criticality_score_vals3 = [
+        round(val, 2) if pd.notnull(val) else None for val in loadSections["avg_base_criticality_score"].tolist()
+    ]
+    base_criticity_index_vals3 = [
+        round(val, 2) if pd.notnull(val) else None for val in loadSections["avg_base_criticality_score_index"].tolist()
+    ]
+    community_criticality_score_vals3 = [
+        round(val, 2) if pd.notnull(val) else None for val in loadSections["avg_community_criticality_score"].tolist()
+    ]
+    community_criticity_index_vals3 = [
+        round(val, 2) if pd.notnull(val) else None for val in loadSections["avg_community_criticality_score_index"].tolist()
+    ]
+    zillow_prices_vals3 = [
+        round(val, 2) if pd.notnull(val) else None for val in loadSections["avg_zillow_price"].tolist()
+    ]
+    load_count_vals = [
+        round(val, 2) if pd.notnull(val) else None for val in loadSections["load_count"].tolist()
+    ]
+    load_amount_vals = [
+        round(val, 2) if pd.notnull(val) else None for val in loadSections["load_amount"].tolist()
+    ]
+    SOVI_vals = [
+        round(val, 2) if pd.notnull(val) else None for val in loadSections["avg_svi_score"].tolist()
+    ]
 
     outData['loadTableHeadings3'] = headers3
-    outData['loadTableValues3'] = list(zip(section_names, base_criticality_score_vals3,  base_criticity_index_vals3, community_criticality_score_vals3,community_criticity_index_vals3,zillow_prices_vals3,load_count_vals,load_amount_vals))
+    outData['loadTableValues3'] = list(zip(section_names, base_criticality_score_vals3,  base_criticity_index_vals3, community_criticality_score_vals3,community_criticity_index_vals3,SOVI_vals, zillow_prices_vals3,load_count_vals,load_amount_vals))
 
 
 
     return outData
 
 def test():
-    pathToOmd = '/Users/davidarmah/Documents/omf/omf/static/testFiles/resilientCommunity/iowa240_in_Florida_copy2.omd'
-    equipmentList = ['lines']
-    avgPeakDemand = 1.8
-    pathToZillowData = '/Users/davidarmah/Documents/omf/omf/static/testFiles/resilientCommunity/zillowPrices.json'
-    pathToLoadsFile = '/Users/davidarmah/Documents/omf/omf/static/testFiles/resilientCommunity/restorationLoads.csv'
-    loadsTypeList = ['residential', 'retail', 'agriculture']
-    obDict, loads, geoDF, sviDF = getDownLineLoadsEquipmentBlockGroupZillow(pathToOmd, equipmentList,avgPeakDemand,pathToZillowData, pathToLoadsFile,loadsTypeList)
+    # files
+    pathToOmd = "/Users/davidarmah/Documents/omf/omf/static/testFiles/resilientCommunity/iowa240_in_Florida_copy2.omd"
+    modelDir = "/Users/davidarmah/Documents/omf/omf/static/testFiles/resilientCommunity"
+    pathToLoadsFile = pJoin(omf.omfDir,'static','testFiles','resilientCommunity','restorationLoads.csv')
+    equipmentList = ['lines', 'transformers', 'fuses']
+
+    runCalculations(pathToOmd,pathToLoadsFile,1,  ['residential'], modelDir, equipmentList)
 
 def new(modelDir):
     omdfileName = 'iowa240_in_Florida_copy2'
