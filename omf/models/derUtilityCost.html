@@ -75,7 +75,7 @@
 				<input type="text" id="longitude" name="longitude" value="{{allInputDataDict.longitude}}" pattern="^\-?\d+\.?\d*?$" required="required"/>
 			</div>
 			<div class="shortInput">
-				<label class="tooltip">Year<span class="classic">Specify the year to which the load shape values corresond.</span></label>
+				<label class="tooltip">Year<span class="classic">Specify the year that the Demand Curve and Temperature Curve values correspond to.</span></label>
 				<input type="text" id="year" name="year" value="{{allInputDataDict.year}}" pattern="^\d{4}$" required="required"/>
 			</div>
 			
@@ -117,31 +117,6 @@
 				<input type="text" id="discountRate" name="discountRate" value="{{allInputDataDict.discountRate}}" pattern="[1-9][0-9]{0,2}" required="required">
 			</div>
 
-			<!-- Fossil Fuel Generator Inputs -->
-			<div class="wideInput"> 
-				<p class="inputSectionHeader">Utility-Owned Fossil Fuel Generator Device Inputs</p>
-			</div>
-			<hr style="border-style: solid; border-color: #196b12; margin-top: 10px;">
-			<div class="shortInput">
-				<label class="tooltip">Enable Use of Fossil Fuel Generator?<span class="classic">If yes, model will run with a fossil fuel generator.</span></label>
-				<select id="fossilGenerator" name="fossilGenerator" value="{{allInputDataDict.fossilGenerator}}">
-					<option value='Yes' {{ 'selected' if allInputDataDict.fossilGenerator == 'Yes' }}>Yes</option>
-					<option value='No' {{ 'selected' if allInputDataDict.fossilGenerator == 'No' }}>No</option>
-				</select>
-			</div>
-			<div class="shortInput">
-				<label class="tooltip"> Existing Size (kW)<span class="classic">Specify the size (kW) of the existing fossil fuel generator owned by the utility.</span></label>
-				<input type="text" id="existing_gen_kw" name="existing_gen_kw" value="{{allInputDataDict.existing_gen_kw}}" required="required"/>
-			</div>
-			<div class="shortInput">
-				<label class="tooltip"> Available Fuel (gal)<span class="classic">Specify the amount of generator fuel available (gal).</span></label>
-				<input type="text" id="fuel_available_gal" name="fuel_available_gal" value="{{allInputDataDict.fuel_available_gal}}" required="required"/>
-			</div>
-			<div class="shortInput">
-				<label class="tooltip"> Fuel Cost ($/gal)<span class="classic">Specify the cost of fuel used for the generator ($/gal).</span></label>
-				<input type="text" id="fuel_cost_per_gal" name="fuel_cost_per_gal" value="{{allInputDataDict.fuel_cost_per_gal}}" required="required"/>
-			</div>
-
 			<!-- Chemical BESS Inputs -->
 			<div class="wideInput"> 
 				<p class="inputSectionHeader">Home Chemical Energy Storage Device Inputs</p>
@@ -168,7 +143,32 @@
 				<input type="text" id="BESS_kwh" name="BESS_kwh" value="{{allInputDataDict.BESS_kwh}}" required="required"/>
 			</div>
 
-			<!-- Thermal Storage (vbatDispatch) Inputs -->
+			<!-- Fossil Fuel Generator Inputs -->
+			<div class="wideInput"> 
+				<p class="inputSectionHeader">Utility-Owned Fossil Fuel Generator Device Inputs</p>
+			</div>
+			<hr style="border-style: solid; border-color: #196b12; margin-top: 10px;">
+			<div class="shortInput">
+				<label class="tooltip">Enable Use of Fossil Fuel Generator?<span class="classic">If yes, model will run with a fossil fuel generator.</span></label>
+				<select id="fossilGenerator" name="fossilGenerator" value="{{allInputDataDict.fossilGenerator}}">
+					<option value='Yes' {{ 'selected' if allInputDataDict.fossilGenerator == 'Yes' }}>Yes</option>
+					<option value='No' {{ 'selected' if allInputDataDict.fossilGenerator == 'No' }}>No</option>
+				</select>
+			</div>
+			<div class="shortInput">
+				<label class="tooltip"> Existing Size (kW)<span class="classic">Specify the size (kW) of the existing fossil fuel generator owned by the utility.</span></label>
+				<input type="text" id="existing_gen_kw" name="existing_gen_kw" value="{{allInputDataDict.existing_gen_kw}}" required="required"/>
+			</div>
+			<div class="shortInput">
+				<label class="tooltip"> Available Fuel (gal)<span class="classic">Specify the amount of generator fuel available (gal).</span></label>
+				<input type="text" id="fuel_available_gal" name="fuel_available_gal" value="{{allInputDataDict.fuel_available_gal}}" required="required"/>
+			</div>
+			<div class="shortInput">
+				<label class="tooltip"> Fuel Cost ($/gal)<span class="classic">Specify the cost of fuel used for the generator ($/gal).</span></label>
+				<input type="text" id="fuel_cost_per_gal" name="fuel_cost_per_gal" value="{{allInputDataDict.fuel_cost_per_gal}}" required="required"/>
+			</div>
+
+			<!-- Air Conditioner (vbatDispatch) Inputs -->
 			<div class="wideInput"> 
 				<p class="inputSectionHeader">Home Air Conditioner Device Inputs</p>
 			</div>
@@ -219,7 +219,7 @@
 			</div>
 
 
-			<!-- Heat Pump Thermal Storage (vbatDispatch) Inputs -->
+			<!-- Heat Pump (vbatDispatch) Inputs -->
 			<div class="wideInput"> 
 				<p class="inputSectionHeader">Home Heat Pump Device Inputs</p>
 			</div>
@@ -268,9 +268,103 @@
 				<input type="text" id="TESS_operationalCosts_onetime_hp" name="TESS_operationalCosts_onetime_hp" value="{{allInputDataDict.TESS_operationalCosts_onetime_hp}}" pattern="^\d+\.?\d*?$" required="required"/>
 			</div>
 
+			<!-- Refrigerator (vbatDispatch) Inputs -->
+			<div class="wideInput"> 
+				<p class="inputSectionHeader">Home Refrigerator Device Inputs</p>
+			</div>
+			<hr style="border-style: solid; border-color: #196b12; margin-top: 10px;">
+			<div class="shortInput">
+				<label class="tooltip">Enable Refrigerator?<span class="classic">If yes, model will run with a home refrigerator.</span></label>
+				<select id="load_type_rf" name="load_type_rf" value="{{allInputDataDict.load_type_rf}}">
+					<option value="3" {{ 'selected' if allInputDataDict.load_type_rf == '3' }}>Yes</option>
+					<option value="0" {{ 'selected' if allInputDataDict.load_type_rf == '0' }}>No</option>
+				</select>
+			</div>
+			<div class="shortInput">
+				<label class="tooltip">Number of Devices<span class="classic">Total number of home thermal devices to simulate.</span></label>
+				<input type="text" id="number_devices_rf" name="number_devices_rf" value="{{allInputDataDict.number_devices_rf}}" required="required">
+			</div>
+			<div class="shortInput">
+				<label class="tooltip">Rated Power (kW)<span class="classic">Max power per home thermal device. Must be a positive rational number between 0.1 and 7.2.</span></label>
+				<input type="text" id="power_rf" name="power_rf" value="{{allInputDataDict.power_rf}}" pattern="^\d+\.?\d*?$" required="required">
+			</div>
+			<div class="shortInput">
+				<label class="tooltip">Thermal Capacitance (kWh/&degC)<span class="classic">Capacitance of each home thermal device. Must be between 0.2 and 2.5 with exactly one decimal digit.</span></label>
+				<input type="text" id="capacitance_rf" name="capacitance_rf" value="{{allInputDataDict.capacitance_rf}}" pattern="^\d+\.?\d*?$" required="required">
+			</div>
+			<div class="shortInput">
+				<label class="tooltip">Thermal Resistance (&degC/kW)<span class="classic">Resistance of each home thermal device. Must be between 1.5 and 140.</span></label>
+				<input type="text" id="resistance_rf" name="resistance_rf" value="{{allInputDataDict.resistance_rf}}" pattern="^\d+\.?\d*?$" required="required">
+			</div>			
+			<div class="shortInput">
+				<label class="tooltip">Coefficient of Performance<span class="classic">Coefficient of performance of each home thermal device. Must be between 1 and 3.5</span></label>
+				<input type="text" id="cop_rf" name="cop_rf" value="{{allInputDataDict.cop_rf}}" pattern="^\d+\.?\d*?$" required="required">
+			</div>
+			<div class="shortInput">
+				<label class="tooltip">Temperature Setpoint (&degC)<span class="classic">Setpoint for each home thermal device. Must be between 1.7 and 54.</span></label>
+				<input type="text" id="setpoint_rf" name="setpoint_rf" value="{{allInputDataDict.setpoint_rf}}" pattern="^\d+\.?\d*?$" required="required">
+			</div>
+			<div class="shortInput">
+				<label class="tooltip">Temperature Deadband (&degC)<span class="classic">Deadband for each home thermal device. Must be between 0.125 and 2.</span></label>
+				<input type="text" id="deadband_rf" name="deadband_rf" value="{{allInputDataDict.deadband_rf}}" pattern="^\d+\.?\d*?$" required="required">
+			</div>
+			<div class="shortInput">
+				<label class="tooltip">Ongoing Operational Costs ($/month)<span class="classic">Specify the monthly ongoing operational costs of controlling all member-consumer home thermal energy storage systems (e.g. the API usage cost per month).</span></label>
+				<input type="text" id="TESS_operationalCosts_ongoing_rf" name="TESS_operationalCosts_ongoing_rf" value="{{allInputDataDict.TESS_operationalCosts_ongoing_rf}}" pattern="^\d+\.?\d*?$" required="required"/>
+			</div>
+			<div class="shortInput">
+				<label class="tooltip">One-time Operational Costs ($)<span class="classic">Specify the total one-time operational costs of controlling all member-consumer home thermal energy storage systems (e.g. the contracting agreement with the device manufacturer).</span></label>
+				<input type="text" id="TESS_operationalCosts_onetime_rf" name="TESS_operationalCosts_onetime_rf" value="{{allInputDataDict.TESS_operationalCosts_onetime_rf}}" pattern="^\d+\.?\d*?$" required="required"/>
+			</div>
 
-
-
+			<!-- Water Heater (vbatDispatch) Inputs -->
+			<div class="wideInput"> 
+				<p class="inputSectionHeader">Home Water Heater Device Inputs</p>
+			</div>
+			<hr style="border-style: solid; border-color: #196b12; margin-top: 10px;">
+			<div class="shortInput">
+				<label class="tooltip">Enable Water Heater?<span class="classic">If yes, model will run with a home water heater.</span></label>
+				<select id="load_type_wh" name="load_type_wh" value="{{allInputDataDict.load_type_wh}}">
+					<option value="4" {{ 'selected' if allInputDataDict.load_type_wh == '4' }}>Yes</option>
+					<option value="0" {{ 'selected' if allInputDataDict.load_type_wh == '0' }}>No</option>
+				</select>
+			</div>
+			<div class="shortInput">
+				<label class="tooltip">Number of Devices<span class="classic">Total number of home thermal devices to simulate.</span></label>
+				<input type="text" id="number_devices_wh" name="number_devices_wh" value="{{allInputDataDict.number_devices_wh}}" required="required">
+			</div>
+			<div class="shortInput">
+				<label class="tooltip">Rated Power (kW)<span class="classic">Max power per home thermal device. Must be a positive rational number between 0.1 and 7.2.</span></label>
+				<input type="text" id="power_wh" name="power_wh" value="{{allInputDataDict.power_wh}}" pattern="^\d+\.?\d*?$" required="required">
+			</div>
+			<div class="shortInput">
+				<label class="tooltip">Thermal Capacitance (kWh/&degC)<span class="classic">Capacitance of each home thermal device. Must be between 0.2 and 2.5 with exactly one decimal digit.</span></label>
+				<input type="text" id="capacitance_wh" name="capacitance_wh" value="{{allInputDataDict.capacitance_wh}}" pattern="^\d+\.?\d*?$" required="required">
+			</div>
+			<div class="shortInput">
+				<label class="tooltip">Thermal Resistance (&degC/kW)<span class="classic">Resistance of each home thermal device. Must be between 1.5 and 140.</span></label>
+				<input type="text" id="resistance_wh" name="resistance_wh" value="{{allInputDataDict.resistance_wh}}" pattern="^\d+\.?\d*?$" required="required">
+			</div>			
+			<div class="shortInput">
+				<label class="tooltip">Coefficient of Performance<span class="classic">Coefficient of performance of each home thermal device. Must be between 1 and 3.5</span></label>
+				<input type="text" id="cop_wh" name="cop_wh" value="{{allInputDataDict.cop_wh}}" pattern="^\d+\.?\d*?$" required="required">
+			</div>
+			<div class="shortInput">
+				<label class="tooltip">Temperature Setpoint (&degC)<span class="classic">Setpoint for each home thermal device. Must be between 1.7 and 54.</span></label>
+				<input type="text" id="setpoint_wh" name="setpoint_wh" value="{{allInputDataDict.setpoint_wh}}" pattern="^\d+\.?\d*?$" required="required">
+			</div>
+			<div class="shortInput">
+				<label class="tooltip">Temperature Deadband (&degC)<span class="classic">Deadband for each home thermal device. Must be between 0.125 and 2.</span></label>
+				<input type="text" id="deadband_wh" name="deadband_wh" value="{{allInputDataDict.deadband_wh}}" pattern="^\d+\.?\d*?$" required="required">
+			</div>
+			<div class="shortInput">
+				<label class="tooltip">Ongoing Operational Costs ($/month)<span class="classic">Specify the monthly ongoing operational costs of controlling all member-consumer home thermal energy storage systems (e.g. the API usage cost per month).</span></label>
+				<input type="text" id="TESS_operationalCosts_ongoing_wh" name="TESS_operationalCosts_ongoing_wh" value="{{allInputDataDict.TESS_operationalCosts_ongoing_wh}}" pattern="^\d+\.?\d*?$" required="required"/>
+			</div>
+			<div class="shortInput">
+				<label class="tooltip">One-time Operational Costs ($)<span class="classic">Specify the total one-time operational costs of controlling all member-consumer home thermal energy storage systems (e.g. the contracting agreement with the device manufacturer).</span></label>
+				<input type="text" id="TESS_operationalCosts_onetime_wh" name="TESS_operationalCosts_onetime_wh" value="{{allInputDataDict.TESS_operationalCosts_onetime_wh}}" pattern="^\d+\.?\d*?$" required="required"/>
+			</div>
 
 
 

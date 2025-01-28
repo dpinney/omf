@@ -145,7 +145,7 @@ def work(modelDir, inputDict):
 	}
 	
 	## Define thermal variables that change depending on the thermal technology
-	thermal_suffixes = ['_hp', '_ac'] ## heat pump, air conditioner, (Add more suffixes here after establishing inputs in the defaultInputs and derUtilityCost.html)
+	thermal_suffixes = ['_hp', '_ac', '_rf', '_wh'] ## heat pump, air conditioner, refrigerator, water heater - (Add more suffixes here after establishing inputs in the defaultInputs and derUtilityCost.html)
 	thermal_variables=['load_type','number_devices','power','capacitance','resistance','cop','setpoint','deadband','TESS_operationalCosts_ongoing','TESS_operationalCosts_onetime']
 
 	all_device_suffixes = []
@@ -153,6 +153,7 @@ def work(modelDir, inputDict):
 	for suffix in thermal_suffixes:
 		print('$$$$$$$$$$$$ suffix = ', suffix)
 		print(float(inputDict['load_type'+suffix]))
+
 		## Include only the thermal devices specified by the user
 		if float(inputDict['load_type'+suffix]) > 0 and float(inputDict['number_devices'+suffix]) > 0:
 			print('$$$$$$$$$$$$ suffix passed test = ', suffix)
@@ -938,7 +939,7 @@ def new(modelDir):
 		'cop_ac': '2.5',
 		'setpoint_ac': '22.5',
 		'deadband_ac': '0.625',
-		'TESS_operationalCosts_ongoing_ac': '20.0',
+		'TESS_operationalCosts_ongoing_ac': '10.0',
 		'TESS_operationalCosts_onetime_ac': '1000', 
 
 		## Home Heat Pump inputs (vbatDispatch):
@@ -950,8 +951,32 @@ def new(modelDir):
 		'cop_hp': '3.5',
 		'setpoint_hp': '19.5',
 		'deadband_hp': '0.625',
-		'TESS_operationalCosts_ongoing_hp': '20.0',
+		'TESS_operationalCosts_ongoing_hp': '10.0',
 		'TESS_operationalCosts_onetime_hp': '1000', 
+
+		## Home Refrigerator inputs (vbatDispatch):
+		'load_type_rf': '3', 
+		'number_devices_rf': '2000',
+		'power_rf': '0.3',
+		'capacitance_rf': '0.6',
+		'resistance_rf': '90.0',
+		'cop_rf': '2',
+		'setpoint_rf': '2.5',
+		'deadband_rf': '1.5',
+		'TESS_operationalCosts_ongoing_rf': '10.0',
+		'TESS_operationalCosts_onetime_rf': '1000', 
+
+		## Home Water Heater inputs (vbatDispatch):
+		'load_type_wh': '4', 
+		'number_devices_wh': '2000',
+		'power_wh': '4.5',
+		'capacitance_wh': '0.4',
+		'resistance_wh': '120',
+		'cop_wh': '1',
+		'setpoint_wh': '48.5',
+		'deadband_wh': '3',
+		'TESS_operationalCosts_ongoing_wh': '10.0',
+		'TESS_operationalCosts_onetime_wh': '1000', 
 
 	}
 	
