@@ -144,7 +144,9 @@
 				<select id="defenseVariable" name="defenseVariable" value="{{allInputDataDict.defenseVariable}}">
 					<option value="None" {% if allInputDataDict.defenseVariable == 'None' %}selected{% endif %}>None</option>
 					{% for agentFolderName in allInputDataDict["defenseAgentNames"].split(",") %}
+						{% if agentFolderName != '' %}
 						<option value="{{agentFolderName}}" {% if allInputDataDict.defenseVariable == '{{agentFolderName}}' %}selected{% endif %}>{{agentFolderName}}</option>
+						{% endif %}
 					{% endfor %}
 				</select>
 			</div>
