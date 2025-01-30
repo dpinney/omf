@@ -414,6 +414,7 @@ def hosting_cap(
 
     logger.info(f"HC calculated for: {n_hc_est}")
     logger.info("Skipped: {n_skipped}")
+    logging.shutdown()
 
     return hc_results
 
