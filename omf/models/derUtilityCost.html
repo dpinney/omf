@@ -105,17 +105,70 @@
 				<input type="text" id="rateCompensation" name="rateCompensation" value="{{allInputDataDict.rateCompensation}}" pattern="^\d+\.?\d*?$" min="0" required="required"/>
 			</div>
 			<div class="shortInput">
-				<label class="tooltip">Upfront Subsidy Amount ($)<span class="classic">The total upfront one-time subsidy amount ($) paid to the member-consumer (not including any recurring subsidies).</span></label>
-				<input type="text" id="subsidyUpfront" name="subsidyUpfront" value="{{allInputDataDict.subsidyUpfront}}" pattern="^\d+\.?\d*?$" required="required"/>
+				<label class="tooltip">Home Heat Pumps - Ongoing Operational Costs ($/month)<span class="classic">Specify the monthly ongoing operational costs of controlling all home heat pumps (e.g. the API usage cost per month).</span></label>
+				<input type="text" id="TESS_operationalCosts_ongoing_hp" name="TESS_operationalCosts_ongoing_hp" value="{{allInputDataDict.TESS_operationalCosts_ongoing_hp}}" pattern="^\d+\.?\d*?$" required="required"/>
 			</div>
 			<div class="shortInput">
-				<label class="tooltip">Monthly Recurring Subsidy Amount ($)<span class="classic">The total monthly recurring subsidy amount ($) paid to the member-consumer (not including any upfront subsidies).</span></label>
-				<input type="text" id="subsidyRecurring" name="subsidyRecurring" value="{{allInputDataDict.subsidyRecurring}}" pattern="^\d+\.?\d*?$" required="required"/>
+				<label class="tooltip">Home Heat Pumps - One-time Operational Costs ($)<span class="classic">Specify the total one-time operational costs of controlling all home heat pumps (e.g. the contracting agreement with the device manufacturer).</span></label>
+				<input type="text" id="TESS_operationalCosts_onetime_hp" name="TESS_operationalCosts_onetime_hp" value="{{allInputDataDict.TESS_operationalCosts_onetime_hp}}" pattern="^\d+\.?\d*?$" required="required"/>
 			</div>
 			<div class="shortInput">
-				<label class="tooltip">Discount Rate (%)<span class="classic">Discount rate used in financial analysis to calculate the Net Present Value.</span></label>
-				<input type="text" id="discountRate" name="discountRate" value="{{allInputDataDict.discountRate}}" pattern="[1-9][0-9]{0,2}" required="required">
+				<label class="tooltip">Home Heat Pumps - Upfront Subsidy Amount ($)<span class="classic">The total upfront subsidy amount ($) paid to all member-consumers for home heat pumps (not including any recurring subsidies).</span></label>
+				<input type="text" id="TESS_subsidy_onetime_hp" name="TESS_subsidy_onetime_hp" value="{{allInputDataDict.TESS_subsidy_onetime_hp}}" pattern="^\d+\.?\d*?$" required="required"/>
 			</div>
+			<div class="shortInput">
+				<label class="tooltip">Home Heat Pumps - Monthly Recurring Subsidy Amount ($)<span class="classic">The total monthly recurring subsidy amount ($) paid to all member-consumers for home heat pumps (not including any upfront subsidies).</span></label>
+				<input type="text" id="TESS_subsidy_ongoing_hp" name="TESS_subsidy_ongoing_hp" value="{{allInputDataDict.TESS_subsidy_ongoing_hp}}" pattern="^\d+\.?\d*?$" required="required"/>
+			</div>
+			<div class="shortInput">
+				<label class="tooltip">Home Air Conditioners - Ongoing Operational Costs ($/month)<span class="classic">Specify the monthly ongoing operational costs of controlling all home air conditioners (e.g. the API usage cost per month).</span></label>
+				<input type="text" id="TESS_operationalCosts_ongoing_ac" name="TESS_operationalCosts_ongoing_ac" value="{{allInputDataDict.TESS_operationalCosts_ongoing_ac}}" pattern="^\d+\.?\d*?$" required="required"/>
+			</div>
+			<div class="shortInput">
+				<label class="tooltip">Home Air Conditioners - One-time Operational Costs ($)<span class="classic">Specify the total one-time operational costs of controlling all home air conditioners (e.g. the contracting agreement with the device manufacturer).</span></label>
+				<input type="text" id="TESS_operationalCosts_onetime_ac" name="TESS_operationalCosts_onetime_ac" value="{{allInputDataDict.TESS_operationalCosts_onetime_ac}}" pattern="^\d+\.?\d*?$" required="required"/>
+			</div>
+			<div class="shortInput">
+				<label class="tooltip">Home Air Conditioners - Upfront Subsidy Amount ($)<span class="classic">The total upfront subsidy amount ($) paid to all member-consumers for home air conditioners (not including any recurring subsidies).</span></label>
+				<input type="text" id="TESS_subsidy_onetime_ac" name="TESS_subsidy_onetime_ac" value="{{allInputDataDict.TESS_subsidy_onetime_ac}}" pattern="^\d+\.?\d*?$" required="required"/>
+			</div>
+			<div class="shortInput">
+				<label class="tooltip">Home Air Conditioners - Monthly Recurring Subsidy Amount ($)<span class="classic">The total monthly recurring subsidy amount ($) paid to all member-consumers for home air conditioners (not including any upfront subsidies).</span></label>
+				<input type="text" id="TESS_subsidy_ongoing_ac" name="TESS_subsidy_ongoing_ac" value="{{allInputDataDict.TESS_subsidy_ongoing_ac}}" pattern="^\d+\.?\d*?$" required="required"/>
+			</div>
+			<div class="shortInput">
+				<label class="tooltip">Home Water Heaters - Ongoing Operational Costs ($/month)<span class="classic">Specify the monthly ongoing operational costs of controlling all home water heaters (e.g. the API usage cost per month).</span></label>
+				<input type="text" id="TESS_operationalCosts_ongoing_wh" name="TESS_operationalCosts_ongoing_wh" value="{{allInputDataDict.TESS_operationalCosts_ongoing_wh}}" pattern="^\d+\.?\d*?$" required="required"/>
+			</div>
+			<div class="shortInput">
+				<label class="tooltip">Home Water Heaters - One-time Operational Costs ($)<span class="classic">Specify the total one-time operational costs of controlling all home water heaters (e.g. the contracting agreement with the device manufacturer).</span></label>
+				<input type="text" id="TESS_operationalCosts_onetime_wh" name="TESS_operationalCosts_onetime_wh" value="{{allInputDataDict.TESS_operationalCosts_onetime_wh}}" pattern="^\d+\.?\d*?$" required="required"/>
+			</div>
+			<div class="shortInput">
+				<label class="tooltip">Home Water Heaters - Upfront Subsidy Amount ($)<span class="classic">The total upfront subsidy amount ($) paid to all member-consumers for home water heaters (not including any recurring subsidies).</span></label>
+				<input type="text" id="TESS_subsidy_onetime_wh" name="TESS_subsidy_onetime_wh" value="{{allInputDataDict.TESS_subsidy_onetime_wh}}" pattern="^\d+\.?\d*?$" required="required"/>
+			</div>
+			<div class="shortInput">
+				<label class="tooltip">Home Water Heaters - Monthly Recurring Subsidy Amount ($)<span class="classic">The total monthly recurring subsidy amount ($) paid to all member-consumers for home water heaters (not including any upfront subsidies).</span></label>
+				<input type="text" id="TESS_subsidy_ongoing_wh" name="TESS_subsidy_ongoing_wh" value="{{allInputDataDict.TESS_subsidy_ongoing_wh}}" pattern="^\d+\.?\d*?$" required="required"/>
+			</div>
+			<div class="shortInput">
+				<label class="tooltip">Home BESS - Upfront Subsidy Amount ($)<span class="classic">The total upfront subsidy amount ($) paid to all member-consumers for home battery energy storage systems (not including any recurring subsidies).</span></label>
+				<input type="text" id="BESS_subsidy_onetime" name="BESS_subsidy_onetime" value="{{allInputDataDict.BESS_subsidy_onetime}}" pattern="^\d+\.?\d*?$" required="required"/>
+			</div>
+			<div class="shortInput">
+				<label class="tooltip">Home BESS - Monthly Recurring Subsidy Amount ($)<span class="classic">The total monthly recurring subsidy amount ($) paid to all member-cnsumers for home battery energy storage systems (not including any upfront subsidies).</span></label>
+				<input type="text" id="BESS_subsidy_ongoing" name="BESS_subsidy_ongoing" value="{{allInputDataDict.BESS_subsidy_ongoing}}" pattern="^\d+\.?\d*?$" required="required"/>
+			</div>
+			<div class="shortInput">
+				<label class="tooltip">Home Generator - Upfront Subsidy Amount ($)<span class="classic">The total upfront subsidy amount ($) paid to all member-consumers for home fossil fuel generators (not including any recurring subsidies).</span></label>
+				<input type="text" id="GEN_subsidy_onetime" name="GEN_subsidy_onetime" value="{{allInputDataDict.GEN_subsidy_onetime}}" pattern="^\d+\.?\d*?$" required="required"/>
+			</div>
+			<div class="shortInput">
+				<label class="tooltip">Home Generator - Monthly Recurring Subsidy Amount ($)<span class="classic">The total monthly recurring subsidy amount ($) paid to all member-consumers for home fossil fuel generators (not including any upfront subsidies).</span></label>
+				<input type="text" id="GEN_subsidy_ongoing" name="GEN_subsidy_ongoing" value="{{allInputDataDict.GEN_subsidy_ongoing}}" pattern="^\d+\.?\d*?$" required="required"/>
+			</div>
+			
 
 			<!-- Chemical BESS Inputs -->
 			<div class="wideInput"> 
@@ -209,14 +262,6 @@
 				<label class="tooltip">Temperature Deadband (&degC)<span class="classic">Deadband for each home thermal device. Must be between 0.125 and 2.</span></label>
 				<input type="text" id="deadband_ac" name="deadband_ac" value="{{allInputDataDict.deadband_ac}}" pattern="^\d+\.?\d*?$" required="required">
 			</div>
-			<div class="shortInput">
-				<label class="tooltip">Ongoing Operational Costs ($/month)<span class="classic">Specify the monthly ongoing operational costs of controlling all member-consumer home thermal energy storage systems (e.g. the API usage cost per month).</span></label>
-				<input type="text" id="TESS_operationalCosts_ongoing_ac" name="TESS_operationalCosts_ongoing_ac" value="{{allInputDataDict.TESS_operationalCosts_ongoing_ac}}" pattern="^\d+\.?\d*?$" required="required"/>
-			</div>
-			<div class="shortInput">
-				<label class="tooltip">One-time Operational Costs ($)<span class="classic">Specify the total one-time operational costs of controlling all member-consumer home thermal energy storage systems (e.g. the contracting agreement with the device manufacturer).</span></label>
-				<input type="text" id="TESS_operationalCosts_onetime_ac" name="TESS_operationalCosts_onetime_ac" value="{{allInputDataDict.TESS_operationalCosts_onetime_ac}}" pattern="^\d+\.?\d*?$" required="required"/>
-			</div>
 
 
 			<!-- Heat Pump (vbatDispatch) Inputs -->
@@ -259,63 +304,6 @@
 				<label class="tooltip">Temperature Deadband (&degC)<span class="classic">Deadband for each home thermal device. Must be between 0.125 and 2.</span></label>
 				<input type="text" id="deadband_hp" name="deadband_hp" value="{{allInputDataDict.deadband_hp}}" pattern="^\d+\.?\d*?$" required="required">
 			</div>
-			<div class="shortInput">
-				<label class="tooltip">Ongoing Operational Costs ($/month)<span class="classic">Specify the monthly ongoing operational costs of controlling all member-consumer home thermal energy storage systems (e.g. the API usage cost per month).</span></label>
-				<input type="text" id="TESS_operationalCosts_ongoing_hp" name="TESS_operationalCosts_ongoing_hp" value="{{allInputDataDict.TESS_operationalCosts_ongoing_hp}}" pattern="^\d+\.?\d*?$" required="required"/>
-			</div>
-			<div class="shortInput">
-				<label class="tooltip">One-time Operational Costs ($)<span class="classic">Specify the total one-time operational costs of controlling all member-consumer home thermal energy storage systems (e.g. the contracting agreement with the device manufacturer).</span></label>
-				<input type="text" id="TESS_operationalCosts_onetime_hp" name="TESS_operationalCosts_onetime_hp" value="{{allInputDataDict.TESS_operationalCosts_onetime_hp}}" pattern="^\d+\.?\d*?$" required="required"/>
-			</div>
-
-			<!-- Refrigerator (vbatDispatch) Inputs -->
-			<div class="wideInput"> 
-				<p class="inputSectionHeader">Home Refrigerator Device Inputs</p>
-			</div>
-			<hr style="border-style: solid; border-color: #196b12; margin-top: 10px;">
-			<div class="shortInput">
-				<label class="tooltip">Enable Refrigerator?<span class="classic">If yes, model will run with a home refrigerator.</span></label>
-				<select id="load_type_rf" name="load_type_rf" value="{{allInputDataDict.load_type_rf}}">
-					<option value="3" {{ 'selected' if allInputDataDict.load_type_rf == '3' }}>Yes</option>
-					<option value="0" {{ 'selected' if allInputDataDict.load_type_rf == '0' }}>No</option>
-				</select>
-			</div>
-			<div class="shortInput">
-				<label class="tooltip">Number of Devices<span class="classic">Total number of home thermal devices to simulate.</span></label>
-				<input type="text" id="number_devices_rf" name="number_devices_rf" value="{{allInputDataDict.number_devices_rf}}" required="required">
-			</div>
-			<div class="shortInput">
-				<label class="tooltip">Rated Power (kW)<span class="classic">Max power per home thermal device. Must be a positive rational number between 0.1 and 7.2.</span></label>
-				<input type="text" id="power_rf" name="power_rf" value="{{allInputDataDict.power_rf}}" pattern="^\d+\.?\d*?$" required="required">
-			</div>
-			<div class="shortInput">
-				<label class="tooltip">Thermal Capacitance (kWh/&degC)<span class="classic">Capacitance of each home thermal device. Must be between 0.2 and 2.5 with exactly one decimal digit.</span></label>
-				<input type="text" id="capacitance_rf" name="capacitance_rf" value="{{allInputDataDict.capacitance_rf}}" pattern="^\d+\.?\d*?$" required="required">
-			</div>
-			<div class="shortInput">
-				<label class="tooltip">Thermal Resistance (&degC/kW)<span class="classic">Resistance of each home thermal device. Must be between 1.5 and 140.</span></label>
-				<input type="text" id="resistance_rf" name="resistance_rf" value="{{allInputDataDict.resistance_rf}}" pattern="^\d+\.?\d*?$" required="required">
-			</div>			
-			<div class="shortInput">
-				<label class="tooltip">Coefficient of Performance<span class="classic">Coefficient of performance of each home thermal device. Must be between 1 and 3.5</span></label>
-				<input type="text" id="cop_rf" name="cop_rf" value="{{allInputDataDict.cop_rf}}" pattern="^\d+\.?\d*?$" required="required">
-			</div>
-			<div class="shortInput">
-				<label class="tooltip">Temperature Setpoint (&degC)<span class="classic">Setpoint for each home thermal device. Must be between 1.7 and 54.</span></label>
-				<input type="text" id="setpoint_rf" name="setpoint_rf" value="{{allInputDataDict.setpoint_rf}}" pattern="^\d+\.?\d*?$" required="required">
-			</div>
-			<div class="shortInput">
-				<label class="tooltip">Temperature Deadband (&degC)<span class="classic">Deadband for each home thermal device. Must be between 0.125 and 2.</span></label>
-				<input type="text" id="deadband_rf" name="deadband_rf" value="{{allInputDataDict.deadband_rf}}" pattern="^\d+\.?\d*?$" required="required">
-			</div>
-			<div class="shortInput">
-				<label class="tooltip">Ongoing Operational Costs ($/month)<span class="classic">Specify the monthly ongoing operational costs of controlling all member-consumer home thermal energy storage systems (e.g. the API usage cost per month).</span></label>
-				<input type="text" id="TESS_operationalCosts_ongoing_rf" name="TESS_operationalCosts_ongoing_rf" value="{{allInputDataDict.TESS_operationalCosts_ongoing_rf}}" pattern="^\d+\.?\d*?$" required="required"/>
-			</div>
-			<div class="shortInput">
-				<label class="tooltip">One-time Operational Costs ($)<span class="classic">Specify the total one-time operational costs of controlling all member-consumer home thermal energy storage systems (e.g. the contracting agreement with the device manufacturer).</span></label>
-				<input type="text" id="TESS_operationalCosts_onetime_rf" name="TESS_operationalCosts_onetime_rf" value="{{allInputDataDict.TESS_operationalCosts_onetime_rf}}" pattern="^\d+\.?\d*?$" required="required"/>
-			</div>
 
 			<!-- Water Heater (vbatDispatch) Inputs -->
 			<div class="wideInput"> 
@@ -357,23 +345,6 @@
 				<label class="tooltip">Temperature Deadband (&degC)<span class="classic">Deadband for each home thermal device. Must be between 0.125 and 2.</span></label>
 				<input type="text" id="deadband_wh" name="deadband_wh" value="{{allInputDataDict.deadband_wh}}" pattern="^\d+\.?\d*?$" required="required">
 			</div>
-			<div class="shortInput">
-				<label class="tooltip">Ongoing Operational Costs ($/month)<span class="classic">Specify the monthly ongoing operational costs of controlling all member-consumer home thermal energy storage systems (e.g. the API usage cost per month).</span></label>
-				<input type="text" id="TESS_operationalCosts_ongoing_wh" name="TESS_operationalCosts_ongoing_wh" value="{{allInputDataDict.TESS_operationalCosts_ongoing_wh}}" pattern="^\d+\.?\d*?$" required="required"/>
-			</div>
-			<div class="shortInput">
-				<label class="tooltip">One-time Operational Costs ($)<span class="classic">Specify the total one-time operational costs of controlling all member-consumer home thermal energy storage systems (e.g. the contracting agreement with the device manufacturer).</span></label>
-				<input type="text" id="TESS_operationalCosts_onetime_wh" name="TESS_operationalCosts_onetime_wh" value="{{allInputDataDict.TESS_operationalCosts_onetime_wh}}" pattern="^\d+\.?\d*?$" required="required"/>
-			</div>
-
-
-
-
-
-
-
-
-
 
 
 
