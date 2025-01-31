@@ -28,10 +28,30 @@ def convert_seconds_to_hms_ms( seconds ):
 	seconds, milliseconds = divmod(remainder, 1000)
 	return "{:02d}:{:02d}:{:02d}.{:03d}".format(int(hours), int(minutes), int(seconds), int(milliseconds))
 
+def sandia_algo_post_check(modelDir):
+	retVal = False
+	mohcaLog = [x for x in os.listdir(modelDir) if x.endswith('.log')][0]
+	try:
+		with open( Path(modelDir, mohcaLog), 'r', encoding="utf-8") as file:
+			for line in file:
+				splitLine = line.split(" - ")
+				if len(splitLine) > 3:
+					splitWords = splitLine[3].split(" ")
+					if splitWords[4].lower() == "q":
+						retVal = True
+	except FileNotFoundError as e:
+		print("HostingCapacity - ModelFree Sandia Algorithm - mohca_sandia.log file not found: ", {e})
+	return retVal
+
+
 def hosting_capacity_map( modelDir, inputDict, outData ):
 	feederName = [x for x in os.listdir(modelDir) if x.endswith('.omd')][0]
 	path_to_omd = Path(modelDir, feederName)
-	starting_omd = json.load(open(path_to_omd))
+	starting_omd = json.load(open(path_to_omd)) 
+
+	# Starting there are no warnings
+	outData['mapWarningFlag'] = False
+	outData['hideMap'] = False
 
 	if inputDict['runAmiAlgorithm'] == 'on':
 		model_free_data = Path(modelDir, 'output_mohca.csv')
@@ -45,7 +65,7 @@ def hosting_capacity_map( modelDir, inputDict, outData ):
 		model_free_buses = model_free_data_df['busname'].unique()
 		# Finding the buses from mohca thats in the circuit. this is what we will color
 		model_free_buses_in_omd_file = list(set(model_free_buses).intersection(buses_from_omd_tree))
-		if model_free_buses_in_omd_file != 0:
+		if len(model_free_buses_in_omd_file) != 0:
 			# Great, there are some buses in the mohca file that are in the omd file. That means we can have some color!
 			# Note: If buses are in the omd and not in the Model-Free results, nothing is done.
 			# 			If buses are in the Model-Free results and not in the omd, nothing is done.
@@ -69,12 +89,16 @@ def hosting_capacity_map( modelDir, inputDict, outData ):
 				json.dump(starting_omd, out_file, indent=4)
 			omf.geo.map_omd(new_omd_path, modelDir, open_browser=False)
 			outData['hostingCapacityMap'] = open(Path(modelDir, "geoJson_offline.html"), 'r').read()
+		else:
+			# Warning there are no buses 
+			outData['mapWarningFlag'] = True
+			outData['mapWarningInfo'] = f"There are no buses in the .csv file that was provided for the model-free algorithm that are present in the circuit file. Map display may be affected."
 
 	if inputDict['runModelBasedAlgorithm'] == 'on':
 		# This code is copied from what previously existed in run_model_based_algorithm
 		# Except now, we are gonna check if color.omd is created.
 		# If it is, then we just need to add the results to the already existing stuff
-		# If its not, that means we need to create the map fresh. This would also mean that model_free_flag is false.
+		# If its not, that means we need to create the map fresh.
 		colorPath = Path(modelDir, 'color.omd')
 		if colorPath.exists():
 			# Just add model-based coloring
@@ -146,6 +170,10 @@ def hosting_capacity_map( modelDir, inputDict, outData ):
 			omf.geo.map_omd(new_omd_path, modelDir, open_browser=False )
 			outData['hostingCapacityMap'] = open(Path(modelDir, "geoJson_offline.html"), 'r' ).read()
 
+	if outData["mapWarningFlag"] == True and inputDict['runModelBasedAlgorithm'] == 'off' and inputDict['runDownlineAlgorithm'] == 'off':
+		# If there are no buses in the .csv that match the circuit, and model based and downline load both are not running, we don't need the map
+		outData["hideMap"] = True
+
 def run_downline_load_algorithm( modelDir, inputDict, outData ):
 	feederName = [x for x in os.listdir(modelDir) if x.endswith('.omd')][0]
 	path_to_omd = Path(modelDir, feederName)
@@ -213,12 +241,16 @@ def run_ami_algorithm( modelDir, inputDict, outData ):
 	AMI_start_time = time.time()
 	if inputDict[ "algorithm" ] == "sandia1":
 		if inputDict["dgInverterSetting"] == 'constantPF':
-			mohca_cl.sandia1( in_path=inputPath, out_path=outputPath, der_pf= float(inputDict['der_pf']), vv_x=None, vv_y=None, load_pf_est=inputDict['load_pf_est'] )
+			mohca_cl.sandia1( in_path=inputPath, out_path=outputPath, der_pf= float(inputDict['der_pf']), vv_x=None, vv_y=None, load_pf_est=float(inputDict['load_pf_est'] ))
 		elif inputDict["dgInverterSetting"] == 'voltVar':
-			mohca_cl.sandia1( in_path=inputPath, out_path=outputPath, der_pf= float(inputDict['der_pf']), vv_x=vv_x, vv_y=vv_y, load_pf_est=inputDict['load_pf_est'] )
+			mohca_cl.sandia1( in_path=inputPath, out_path=outputPath, der_pf= float(inputDict['der_pf']), vv_x=vv_x, vv_y=vv_y, load_pf_est=float(inputDict['load_pf_est'] ))
 		else:
 			errorMessage = "DG Error - Should not happen. dgInverterSetting is not either of the 2 options it is supposed to be."
 			raise Exception(errorMessage)
+		present_q_warning = sandia_algo_post_check(modelDir=modelDir)
+		if present_q_warning == True:
+			outData["modelFreeWarningFlag"] = present_q_warning
+			outData["modelFreeWarningInfo"] = f"Reactive power missing from data set. Estimating hosting capacity through power factor from given input 'Load Power Factor'"
 	elif inputDict[ "algorithm" ] == "iastate":
 		mohca_cl.iastate( inputPath, outputPath )
 	else:
