@@ -16,7 +16,7 @@ import omf
 from omf import geo
 from omf.models import __neoMetaModel__
 from omf.models.__neoMetaModel__ import *
-from omf.solvers.opendss import dssConvert
+from omf.solvers.opendss import dssConvertToBeTested as dssConvert
 from omf.solvers import PowerModelsONM
 from omf.comms import createGraph
 from omf.models.resilientCommunity import runCalculations as makeResComOutputCsv
@@ -1109,7 +1109,10 @@ def combineLoadPriorityWithCCI(modelDir, pathToOmd, loadPriorityFilePath, loadCc
 		loadsOnParentBus[loadName] = float(len(circuitTraversalDict[f'bus.{parentBus}']['downlineLoads']))
 	# Scale the max value in merged load weights to be 100 for the sake of how powerModelsONM processes things after our later transformation. Scaling is done after combining so that load priority and CCI are on the same scale
 	scaleValue = 100/max(loadWeightsMerged.values())
+	#scaleValue = 90/(max(loadWeightsMerged.values())-1)
+	#scaleValue = 10/min(loadWeightsMerged.values()) 
 	for load, weight in loadWeightsMerged.items():
+		#scaledWeight = weight*scaleValue+10-scaleValue
 		scaledWeight = weight*scaleValue
 		# In PowerModelsONM, the weight given to each bus that has loads on it is 10 and the weight of each load is the input weight / 100
 		# Effectively, the weight of a bus and the loads on it = 10+SUM_n(w_n/100)
