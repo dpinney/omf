@@ -16,7 +16,7 @@ import omf
 from omf import geo
 from omf.models import __neoMetaModel__
 from omf.models.__neoMetaModel__ import *
-from omf.solvers.opendss import dssConvert
+from omf.solvers.opendss import dssConvertToBeTested as dssConvert
 from omf.solvers import PowerModelsONM
 from omf.comms import createGraph
 from omf.models.resilientCommunity import runCalculations as makeResComOutputCsv
@@ -1041,7 +1041,7 @@ def makeLoadCciDict(modelDir, pathToOmd):
 	ccsDict = {}
 	bcsDict = {}
 	# Uncomment to use resilientCommunity. 
-	makeResComOutputCsv(pathToOmd, modelDir, ['line', 'transformer', 'fuse'])
+	'''makeResComOutputCsv(pathToOmd, modelDir, ['line', 'transformer', 'fuse'])
 	with open(pJoin(modelDir, 'resilientCommunityOutput.csv'), mode='r') as infile:
 		reader = csv.DictReader(infile)
 		for row in reader:
@@ -1060,9 +1060,9 @@ def makeLoadCciDict(modelDir, pathToOmd):
 	for ob in omd.get('tree', {}).values():
 		if ob['object'] == 'load':
 			obName = ob['name']
-			cciDict[obName] = 1
-			ccsDict[obName] = 1
-			bcsDict[obName] = 1
+			cciDict[obName] = 50
+			ccsDict[obName] = 50
+			bcsDict[obName] = 50
 	###############################################################'''
 
 	return cciDict, ccsDict, bcsDict
@@ -1109,7 +1109,10 @@ def combineLoadPriorityWithCCI(modelDir, pathToOmd, loadPriorityFilePath, loadCc
 		loadsOnParentBus[loadName] = float(len(circuitTraversalDict[f'bus.{parentBus}']['downlineLoads']))
 	# Scale the max value in merged load weights to be 100 for the sake of how powerModelsONM processes things after our later transformation. Scaling is done after combining so that load priority and CCI are on the same scale
 	scaleValue = 100/max(loadWeightsMerged.values())
+	#scaleValue = 90/(max(loadWeightsMerged.values())-1)
+	#scaleValue = 10/min(loadWeightsMerged.values()) 
 	for load, weight in loadWeightsMerged.items():
+		#scaledWeight = weight*scaleValue+10-scaleValue
 		scaledWeight = weight*scaleValue
 		# In PowerModelsONM, the weight given to each bus that has loads on it is 10 and the weight of each load is the input weight / 100
 		# Effectively, the weight of a bus and the loads on it = 10+SUM_n(w_n/100)
@@ -1141,7 +1144,7 @@ def runMicrogridControlSim(modelDir, solFidelity, eventsFilename, loadPriorityFi
 	mgFile = microgridTaggingFile if microgridTaggingFile != None else ''
 
 	PowerModelsONM.build_settings_file(
-		circuitPath=pJoin(modelDir,'circuit_clean.dss'),
+		circuitPath=pJoin(modelDir,'circuit.dss'),
 		settingsPath=pJoin(modelDir,'settings.json'), 
 		loadPrioritiesFile=lpFile, 
 		microgridTaggingFile=mgFile)
@@ -1159,7 +1162,7 @@ def runMicrogridControlSim(modelDir, solFidelity, eventsFilename, loadPriorityFi
 		os.remove(outputFile)
 
 	PowerModelsONM.run_onm(
-		circuitPath=pJoin(modelDir,'circuit_clean.dss'),
+		circuitPath=pJoin(modelDir,'circuit.dss'),
 		settingsPath=pJoin(modelDir,'settings.json'),
 		outputPath=pJoin(modelDir,'output.json'),
 		eventsPath=pJoin(modelDir,eventsFilename),
@@ -1935,6 +1938,17 @@ def new(modelDir):
 	loadPriority_file_data = None
 	microgridTagging_file_path = ['']
 	microgridTagging_file_data = None
+	'''
+	# ====== Iowa240 Variant 3MG DER + Coop Resources @ Top of Feeder
+	dest_folder_path 			= [__neoMetaModel__._omfDir,'static','testFiles','restoration','Testing Demo Files']
+	feeder_file_path 			= dest_folder_path+['iowa240_topOfFeeder+DERs.omd']
+	event_file_path 			= dest_folder_path+['iowa240_topOfFeeder+DERs_events.json']
+	loadPriority_file_path 		= dest_folder_path+['iowa240_loadPriority_EMPTY.json']
+	loadPriority_file_data 		= open(pJoin(*loadPriority_file_path)).read()
+	microgridTagging_file_path	= dest_folder_path+['iowa240_topOfFeeder+DERs_mgTagging_3MG.json']
+	microgridTagging_file_data	= open(pJoin(*microgridTagging_file_path)).read()
+
+	'''
 	# ====== Iowa240 Test Case
 	# feeder_file_path= [__neoMetaModel__._omfDir,'static','testFiles','iowa240_dwp_22_no_show_voltage.dss.omd']
 	feeder_file_path= [__neoMetaModel__._omfDir,'static','testFiles','iowa240_in_Florida_copy2_no_show_voltage.dss.omd']
