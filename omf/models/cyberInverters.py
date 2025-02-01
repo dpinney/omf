@@ -99,8 +99,6 @@ def run_pycigar(model_dir, input_dict, start, duration, df):
         battery_status = False
     else:
         raise ValueError()
-
-
     # - The 'hack_start' argument to pycigar.main() should be able to be None, but in reality it must be >= 0 because of
     #   ceds-cigar-external/pycigar/core/kernel/scenario/opendss.py
     # - The 'hack_end' argument to pycigar.main() can be None (like it's supposed to), but to be consistent with 'hack_start' it must be >=
@@ -118,8 +116,6 @@ def run_pycigar(model_dir, input_dict, start, duration, df):
         raise ValueError()
     if hack_end < 0 or hack_end >= len(df) or hack_end <= hack_start:
         raise ValueError()
-
-
     # - The 'percentage_hack' argument to pycigar.main() must be between 0 and 100
     percentage_hack = int(input_dict['percentageHack'])
     if percentage_hack < 0 or percentage_hack > 100:
@@ -299,9 +295,9 @@ def format_output(model_dir, input_dict, start, duration):
 
 
 def new(model_dir):
-        ''' Create a new instance of this model. Returns true on success, false on failure. '''
+    ''' Create a new instance of this model. Returns true on success, false on failure. '''
     # - By convention, we use a try-except block to fail model creation instead of raising an internal exception on the server
-    #try:
+    try:
         # - omf files
         circuit_dir = 'ieee37busdata'
         omd_prefix = 'ieee37_LBL'
@@ -353,9 +349,9 @@ def new(model_dir):
         # - Could grab <feederName1>.omd from publicFeeders/ instead
         # - Must copy the omd here to use the "Open Editor" button
         copy2(Path(omf.omfDir) / 'static' / 'testFiles' / 'pyCIGAR' / 'ieee37busdata' / 'ieee37_LBL.omd', Path(model_dir) / f'{omd_prefix}.omd')
-    #except:
-    #    return False
-        return neometamodel_was_created
+    except:
+        return False
+    return neometamodel_was_created
 
 
 @neoMetaModel_test_setup
