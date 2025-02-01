@@ -3784,6 +3784,42 @@ def section_circuit(graph):
 
     return sections
 
+def getSectionsDistribution(sectionsDict, omd):
+    """
+    Calculates and displays the distribution of Community Criticality Scores (CCS) for each section.
+    
+    sectionsDict: Dictionary mapping section names to lists of object keys in OMD.
+    omd: Dictionary containing the parsed JSON OMD data.
+    """
+    
+    
+    # Iterate through each section
+    for ob in omd.get('tree', {}).values():
+        obType = ob['object']
+        obName = ob['name']
+        key = obType + '.' + obName
+
+        
+        # Calculate statistics
+        mean = np.mean(ccs_list)
+        median = np.median(ccs_list)
+        std_dev = np.std(ccs_list)
+        min_value = np.min(ccs_list)
+        max_value = np.max(ccs_list)
+        
+        # Print statistics for the section
+        print(f"CCS Statistics for Section: {section}")
+        print(f"Mean: {mean:.2f}, Median: {median:.2f}, Std Dev: {std_dev:.2f}, Min: {min_value:.2f}, Max: {max_value:.2f}\n")
+        
+        # Plot histogram
+        plt.figure(figsize=(10, 6))
+        plt.hist(ccs_list, bins=20, edgecolor='black', alpha=0.7)
+        plt.title(f'CCS Distribution for {section}')
+        plt.xlabel('CCS Value')
+        plt.ylabel('Frequency')
+        plt.grid(True)
+        plt.show()
+
 def getDistribution():
     import json
     import numpy as np

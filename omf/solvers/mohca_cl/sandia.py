@@ -54,8 +54,7 @@ def hosting_cap(
     """
 
     # logging Setup
-    
-    logging.basicConfig(filename=Path(input_csv_path.parent.absolute(), 'mohca_sandia.log'), encoding="utf-8", level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
+    logging.basicConfig(filename=Path(input_csv_path).parent.absolute() / 'mohca_sandia.log', encoding="utf-8", level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
     logger = logging.getLogger(__name__)
 
     input_data = pd.read_csv(input_csv_path)
@@ -92,7 +91,12 @@ def hosting_cap(
     # ensure numeric values
     numeric_cols = ['v_reading', 'kw_reading', 'kvar_reading']
     for numeric_col in numeric_cols:
-        input_data[numeric_col] = pd.to_numeric(input_data[numeric_col])
+        if numeric_col in input_data.columns:
+            input_data[numeric_col] = pd.to_numeric(input_data[numeric_col])
+
+    if 'kvar_reading' not in input_data.columns:
+        # handle case where kvar reading is not provided.
+        input_data['kvar_reading'] = np.nan
 
     # ensure datetime column
     input_data['datetime'] = pd.to_datetime(input_data['datetime'], utc=True)
@@ -250,7 +254,8 @@ def hosting_cap(
         if ~has_input_q or has_static_pf:
 
             # static_pf_val from static PF
-            static_pf_val = fixed_data['pf_diff'].mean()
+            if has_static_pf:
+                static_pf_val = fixed_data['pf_diff'].mean()
 
             # skip processing
             warning_str = (
@@ -409,6 +414,7 @@ def hosting_cap(
 
     logger.info(f"HC calculated for: {n_hc_est}")
     logger.info("Skipped: {n_skipped}")
+    logging.shutdown()
 
     return hc_results
 

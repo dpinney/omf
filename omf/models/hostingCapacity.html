@@ -9,6 +9,9 @@
 		table {
 			position: relative;
 		}
+		@media print {
+			#model_basedHostingCapacityTable {overflow-y:visible !important; height:auto !important;}
+		}
 	</style>
 	<!-- Library Imports -->
 	<script src="{{pathPrefix}}/static/highcharts4.src.js"></script>
@@ -151,17 +154,33 @@
 		<!--
 		We want the map to be displayed at the top, but it'll only display if model-based is there since its created there
 		-->
-		<p class="reportTitle" style="page-break-before:always">Hosting Capacity Map</p>
-		<div id="hostingCapacityMap" class="tightContent"></div>
-		<script>
-			var mapContent = allOutputData["hostingCapacityMap"]
-			var iframe = document.createElement('iframe');
-			iframe.style = 'width:1000px; height:800px; border-radius:8px;'
-			document.getElementById('hostingCapacityMap').appendChild(iframe);
-			iframe.contentWindow.document.open();
-			iframe.contentWindow.document.write(mapContent);
-			iframe.contentWindow.document.close();
-		</script>
+		{% if allOutputDataDict['modelFreeWarningFlag'] == True %}
+			<p class="reportTitle" style="page-break-before:always"><b>Model-Free Hosting Capacity Analysis Warning</b></p>
+				<div id="warningInformation" class="tightContent">
+						<p style="font-size: 20px; padding: 8px;"><span style="color: red; font-weight: bold;">WARNING: </span> {{ allOutputDataDict['modelFreeWarningInfo'] }} </p>
+				</div>
+			</p>
+		{% endif %}
+		{% if allOutputDataDict['mapWarningFlag'] == True %}
+			<p class="reportTitle" style="page-break-before:always"><b>Map Display Warning</b></p>
+				<div id="warningInformation" class="tightContent">
+						<p style="font-size: 20px; padding: 8px;"><span style="color: red; font-weight: bold;">WARNING: </span> {{ allOutputDataDict['mapWarningInfo'] }} </p>
+				</div>
+			</p>
+		{% endif %}
+		{% if allOutputDataDict['hideMap'] == False %}
+				<p class="reportTitle" style="page-break-before:always">Hosting Capacity Map</p>
+				<div id="hostingCapacityMap" class="tightContent"></div>
+				<script>
+					var mapContent = allOutputData["hostingCapacityMap"]
+					var iframe = document.createElement('iframe');
+					iframe.style = 'width:1000px; height:800px; border-radius:8px;'
+					document.getElementById('hostingCapacityMap').appendChild(iframe);
+					iframe.contentWindow.document.open();
+					iframe.contentWindow.document.write(mapContent);
+					iframe.contentWindow.document.close();
+				</script>
+		{% endif %}
     {% if allInputDataDict['runAmiAlgorithm'] == 'on' %}
 			<p class="reportTitle">AMI-Based Hosting Capacity Runtime ( H:M:S:MS ) </p>
 			<div id="AMI_runtime" class="tightContent">
