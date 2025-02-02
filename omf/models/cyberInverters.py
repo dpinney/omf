@@ -8,8 +8,6 @@ import pandas as pd
 import datetime
 from omf.models import __neoMetaModel__
 from omf.models.__neoMetaModel__ import *
-import pycigar
-from pycigar.utils.logging import logger
 
 
 # Model metadata:
@@ -59,6 +57,8 @@ def work(model_dir, input_dict):
 def run_pycigar(model_dir, input_dict, start, duration, df):
     '''
     '''
+    # - Must import the package here so that developers who haven't installed pycigar can still use the OMF
+    import pycigar
     # - Set the 'test' argument to pycigar.main() to be 'NO_DEFENSE', 'TRAIN', or 'DEFENSE'
     #   - If the user set Train? to True, then test = 'TRAIN'
     #   - If the user set Train? to True and selected a defense agent, what do we do? (not handled)
@@ -167,6 +167,8 @@ def run_pycigar(model_dir, input_dict, start, duration, df):
 def format_output(model_dir, input_dict, start, duration):
     '''
     '''
+    # - Must import the package here so that developers who haven't installed pycigar can still use the OMF
+    from pycigar.utils.logging import logger
     # - TODO: a lot of the operations we do to set properties on the out_data dict are to create data for visualizations in highchart.js. Should we
     #   instead create the visualizations with a Python library (e.g. plotly) and then simply write those visualization .html pages into the
     #   pycigar_outputs/ directory and load them in cyberInverters.html?
