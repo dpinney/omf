@@ -60,27 +60,27 @@
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Simulation Timestep Units<span class="classic">The unit of time represented by each row in the 'Load and PV Output' .csv file.</span></label>
-				<select id="simStepUnits" name="simStepUnits" value="{{allInputDataDict.simStepUnits}}">
-					<!--<option value="hours" {% if allInputDataDict.simStepUnits == 'hours' %}selected{% endif %}>Hours</option>
-					<option value="minutes" {% if allInputDataDict.simStepUnits == 'minutes' %}selected{% endif %}>Minutes</option>-->
-					<option value="seconds" {% if allInputDataDict.simStepUnits == 'seconds' %}selected{% endif %}>Seconds</option>
+				<select id="durationUnits" name="durationUnits" value="{{allInputDataDict.durationUnits}}">
+					<!--<option value="hours" {% if allInputDataDict.durationUnits == 'hours' %}selected{% endif %}>Hours</option>
+					<option value="minutes" {% if allInputDataDict.durationUnits == 'minutes' %}selected{% endif %}>Minutes</option>-->
+					<option value="seconds" {% if allInputDataDict.durationUnits == 'seconds' %}selected{% endif %}>Seconds</option>
 				</select>
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Simulation Length<span class="classic">Number of timesteps over which the simulation is acting. This number must be less than the number of rows in your load/PV file minus the value entered under "Simulation Entry Point".</span></label>
-				<input type="number" id="simLength" name="simLength"  min ="3" max = "14400" value="{{allInputDataDict.simLength}}"/>
+				<input type="number" id="duration" name="duration" min="3" max="14400" value="{{allInputDataDict.duration}}"/>
 			</div>			
 			<div class="shortInput">
 				<label class="tooltip">Simulation Entry Point<span class="classic">At the beginning of the simulation, the number of timesteps allowed for the powerflow solution to stabilize. Marks the beginning of the experiment (i.e. t=0).</span></label>
-				<input type="number" id="simEntryStep" name="simEntryStep" min ="100" max = "9999" value="{{allInputDataDict.simEntryStep}}"/>
+				<input type="number" id="start" name="start" min="50" max="9999" value="{{allInputDataDict.start}}"/>
 			</div>
-			<!--<div class="shortInput">
+			<div class="shortInput">
 				<label class="tooltip">Include Battery?<span class="classic">Select whether or not to include batteries on the circuit.</span></label>
-				<select id="includeBattery" name="includeBattery" value="{{allInputDataDict.includeBattery}}">
-					<option value="True" {% if allInputDataDict.includeBattery == 'True' %}selected{% endif %}>Yes</option>
-					<option value="False" {% if allInputDataDict.includeBattery == 'False' %}selected{% endif %}>No</option>
+				<select id="batteryStatus" name="batteryStatus" value="{{allInputDataDict.batteryStatus}}">
+					<option value="True" {% if allInputDataDict.batteryStatus == 'True' %}selected{% endif %}>Yes</option>
+					<option value="False" {% if allInputDataDict.batteryStatus == 'False' %}selected{% endif %}>No</option>
 				</select>
-			</div>-->
+			</div>
 <!--TODO: make circuitFileNameDSS also update when a file is uploaded through distNetViz-->
 			<div class="shortInput">
 				<label class="tooltip">Circuit Editor<span class="classic">Use a visual interface to upload, view, and manipulate a .dss circuit file.</span></label>
@@ -99,19 +99,19 @@
 			</div>-->
 			<div class="shortInput">
 				<label class="tooltip">Time-Series Data File Input<span class="classic">Import a .csv file that describes the power output of all loads and PV as well as the control schedules for batteries and switches.</span></label>
-				<div>{{ insert_file_upload_block('loadPVFileName','loadPVFileContent') }}</div>
+				<div>{{ insert_file_upload_block('loadSolarFilename', 'loadSolarFile') }}</div>
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Breakpoints File Input<span class="classic">Import a .csv file containing the breakpoints that describe the volt-var curve of each inverter.</span></label>
-				<div>{{ insert_file_upload_block('breakpointsFileName','breakpointsFileContent') }}</div>
+				<div>{{ insert_file_upload_block('breakpointsFilename', 'breakpointsFile') }}</div>
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Miscellaneous File Input<span class="classic">Import a .csv file that contains hyperparameters for the model. </span></label>
-				<div>{{ insert_file_upload_block('miscFileName','miscFileContent') }}</div>
+				<div>{{ insert_file_upload_block('miscInputsFilename', 'miscInputsFile') }}</div>
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Device File Input<span class="classic">Import a .txt file that describes the characteristics of any switches and battery energy storage systems to be controlled during the simulation.</span></label>
-				<div>{{ insert_file_upload_block('deviceFileName','deviceFileContent') }}</div>
+				<div>{{ insert_file_upload_block('deviceInputsFilename','deviceInputsFile') }}</div>
 			</div>
 			
 			<div class="wideInput">
@@ -120,10 +120,11 @@
 			<hr>
 			<div class="shortInput">
 				<label class="tooltip">Attack Agent Variable<span class="classic">Select the type of attack to occur.</span></label>
-				<select id="attackVariable" name="attackVariable" value="{{allInputDataDict.attackVariable}}">
-					<option value="None" {% if allInputDataDict.attackVariable == 'None' %}selected{% endif %}>None</option>
-					<!--<option value="VOLTAGE_OSCILLATION" {% if allInputDataDict.attackVariable == 'VOLTAGE_OSCILLATION' %}selected{% endif %}>Voltage Oscillation</option>-->
-					<option value="VOLTAGE_IMBALANCE" {% if allInputDataDict.attackVariable == 'VOLTAGE_IMBALANCE' %}selected{% endif %}>Voltage Imbalance</option>
+				<select id="typeAttack" name="typeAttack" value="{{allInputDataDict.typeAttack}}">
+					<option value="None" {% if allInputDataDict.typeAttack == 'None' %}selected{% endif %}>None</option>
+					<!-- Austin (2025-01-31) This type of attack does not work propertly when a defense agent is selected, that's why this option is disabled -->
+					<!--<option value="VOLTAGE_OSCILLATION" {% if allInputDataDict.typeAttack == 'VOLTAGE_OSCILLATION' %}selected{% endif %}>Voltage Oscillation</option>-->
+					<option value="VOLTAGE_IMBALANCE" {% if allInputDataDict.typeAttack == 'VOLTAGE_IMBALANCE' %}selected{% endif %}>Voltage Imbalance</option>
 				</select>
 			</div>
 			<div class="shortInput">
@@ -135,16 +136,19 @@
 				<input type="number" id="hackEnd" name="hackEnd"  value="{{allInputDataDict.hackEnd}}"/>
 			</div>
 			<div class="shortInput">
-				<label class="tooltip">Hack Percentage<span class="classic">The severity of attack represented by percentage</span></label>
-				<input type="number" id="hackPercent" name="hackPercent" min ="0" max = "100" value="{{allInputDataDict.hackPercent}}"/>
+				<label class="tooltip">Hack Percentage<span class="classic">The severity of attack represented by percentage written as an integer between 0 and 100</span></label>
+				<input type="number" id="percentageHack" name="percentageHack" min ="0" max = "100" value="{{allInputDataDict.percentageHack}}"/>
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Defense Agent Variable<span class="classic">Select trained defense agent from the list, or select 'None' and run a training simulation to create one.</span></label>
-				<input id="defenseAgentNames" name="defenseAgentNames" type="hidden"/>
-				<select id="defenseVariable" name="defenseVariable" value="{{allInputDataDict.defenseVariable}}">
-					<option value="None" {% if allInputDataDict.defenseVariable == 'None' %}selected{% endif %}>None</option>
-					{% for agentFolderName in allInputDataDict["defenseAgentNames"].split(",") %}
-						<option value="{{agentFolderName}}" {% if allInputDataDict.defenseVariable == '{{agentFolderName}}' %}selected{% endif %}>{{agentFolderName}}</option>
+				<select id="defenseAgent" name="defenseAgent" value="{{allInputDataDict.defenseAgent}}">
+					<option value="None" {% if allInputDataDict.defenseAgent == "None" %}selected{% endif %}>None</option>
+					{% for agentDir in allInputDataDict["defenseAgentNames"].split(",") %}
+						{% if agentDir == allInputDataDict.defenseAgent %}
+					<option value="{{agentDir}}" selected>{{agentDir}}</option>
+						{% else %}
+					<option value="{{agentDir}}">{{agentDir}}</option>
+						{% endif %}
 					{% endfor %}
 				</select>
 			</div>
@@ -155,9 +159,11 @@
 					<option value="False" {% if allInputDataDict.trainAgent == 'False' %}selected{% endif %}>No</option>
 				</select>
 			</div>
+			<!-- These need fixed values to be passed from allInputData.json to this HTML file, and then written from this HTML file back to allInputData.json-->
+			<input name="defenseAgentNames" value="{{allInputDataDict.defenseAgentNames}}" type="hidden"/>
+			<input name="circuitFilename" value="{{allInputDataDict.circuitFilename}}" type="hidden">
 			{{ omfModelButtons }}
 		</form>
-		<div> PyCigar commit 56fa6a2 </div> <!-- as of 27 FEB 2023 -->
 	</div>
 	{{ omfRunDebugBlock }}
 	{% if modelStatus == 'finished' %}
