@@ -11,6 +11,8 @@
 		}
 		@media print {
 			#model_basedHostingCapacityTable {overflow-y:visible !important; height:auto !important;}
+			#AMIhostingCapacityTable {overflow-y:visible !important; height:auto !important;}
+			#downlineHostingCapacityTable {overflow-y:visible !important; height:auto !important;}
 		}
 	</style>
 	<!-- Library Imports -->
@@ -201,7 +203,7 @@
 				</script>
 			</div>
 			<p class="reportTitle">AMI-Based Full Hosting Capacity Data Table</p>
-			<div id="AMIhostingCapacityTable" class="tightContent">
+			<div id="AMIhostingCapacityTable" class="tightContent" style="height:300px; overflow-y: scroll;">
 				<table style='margin:5px;width:990px;'>
 					<tr>
 					{% for header in allOutputDataDict["AMI_tableHeadings"] %}
