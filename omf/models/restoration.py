@@ -1144,7 +1144,7 @@ def runMicrogridControlSim(modelDir, solFidelity, eventsFilename, loadPriorityFi
 	mgFile = microgridTaggingFile if microgridTaggingFile != None else ''
 
 	PowerModelsONM.build_settings_file(
-		circuitPath=pJoin(modelDir,'circuit.dss'),
+		circuitPath=pJoin(modelDir,'circuit_clean.dss'),
 		settingsPath=pJoin(modelDir,'settings.json'), 
 		loadPrioritiesFile=lpFile, 
 		microgridTaggingFile=mgFile)
@@ -1162,7 +1162,7 @@ def runMicrogridControlSim(modelDir, solFidelity, eventsFilename, loadPriorityFi
 		os.remove(outputFile)
 
 	PowerModelsONM.run_onm(
-		circuitPath=pJoin(modelDir,'circuit.dss'),
+		circuitPath=pJoin(modelDir,'circuit_clean.dss'),
 		settingsPath=pJoin(modelDir,'settings.json'),
 		outputPath=pJoin(modelDir,'output.json'),
 		eventsPath=pJoin(modelDir,eventsFilename),

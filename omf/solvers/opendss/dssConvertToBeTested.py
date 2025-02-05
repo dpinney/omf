@@ -150,7 +150,15 @@ def dss_to_clean_via_save(dss_file, clean_out_path, add_pf_syntax=True, clean_up
 		nice_buses = re.sub(r'([\w_\-\.]+),([\w_\-\.]+),([\w_\-\.]+)', r'setbusxy bus=\1 x=\2 y=\3', bus_data)
 		clean_copies['buscoords.dss'] = 'makebuslist\n' + nice_buses
 	#HACK: This is the order in which things need to be inserted or opendss errors out. Lame! Also note that pluralized things are from subfolders.
-	CANONICAL_DSS_ORDER = ['master.dss', 'loadshape.dss', 'vsource.dss', 'transformer.dss', 'transformers.dss', 'reactor.dss', 'regcontrol.dss', 'cndata.dss', 'wiredata.dss', 'linegeometry.dss', 'linecode.dss', 'spectrum.dss', 'swtcontrol.dss', 'tcc_curve.dss', 'capacitor.dss', 'capacitors.dss', 'growthshape.dss', 'line.dss', 'branches.dss', 'capcontrol.dss', 'generator.dss', 'pvsystem.dss', 'load.dss', 'loads.dss', 'energymeter.dss', 'fault.dss', 'relay.dss', 'recloser.dss', 'fuse.dss', 'indmach012.dss', 'monitor.dss', 'buscoords.dss', 'busvoltagebases.dss']
+	##########
+	# - Saeed
+	##########
+	# Added 'storage.dss' to  CANONICAL_DSS_ORDER after 'pvsystem.dss' and before 'load.dss'
+	# CANONICAL_DSS_ORDER = ['master.dss', 'loadshape.dss', 'vsource.dss', 'transformer.dss', 'transformers.dss', 'reactor.dss', 'regcontrol.dss', 'cndata.dss', 'wiredata.dss', 'linegeometry.dss', 'linecode.dss', 'spectrum.dss', 'swtcontrol.dss', 'tcc_curve.dss', 'capacitor.dss', 'capacitors.dss', 'growthshape.dss', 'line.dss', 'branches.dss', 'capcontrol.dss', 'generator.dss', 'pvsystem.dss', 'load.dss', 'loads.dss', 'energymeter.dss', 'fault.dss', 'relay.dss', 'recloser.dss', 'fuse.dss', 'indmach012.dss', 'monitor.dss', 'buscoords.dss', 'busvoltagebases.dss']
+	CANONICAL_DSS_ORDER = ['master.dss', 'loadshape.dss', 'vsource.dss', 'transformer.dss', 'transformers.dss', 'reactor.dss', 'regcontrol.dss', 'cndata.dss', 'wiredata.dss', 'linegeometry.dss', 'linecode.dss', 'spectrum.dss', 'swtcontrol.dss', 'tcc_curve.dss', 'capacitor.dss', 'capacitors.dss', 'growthshape.dss', 'line.dss', 'branches.dss', 'capcontrol.dss', 'generator.dss', 'pvsystem.dss', 'storage.dss', 'load.dss', 'loads.dss', 'energymeter.dss', 'fault.dss', 'relay.dss', 'recloser.dss', 'fuse.dss', 'indmach012.dss', 'monitor.dss', 'buscoords.dss', 'busvoltagebases.dss']
+	##########
+	# - Saeed
+	##########
 	# Note files we got that aren't in canonical files:
 	for fname in clean_copies:
 		if fname not in CANONICAL_DSS_ORDER:
