@@ -26,7 +26,10 @@ def work(model_dir, input_dict):
         (input_dict['miscInputsFilename'], input_dict['miscInputsFile']),
         (input_dict['breakpointsFilename'], input_dict['breakpointsFile']),
         (input_dict['deviceInputsFilename'], input_dict['deviceInputsFile']),
-        (input_dict['loadSolarFilename'], input_dict['loadSolarFile']))
+        (input_dict['loadSolarFilename'], input_dict['loadSolarFile']),
+        (input_dict['attackNodeDataFilename'], input_dict['attackNodeDataFile']),
+        (input_dict['attackSwitchDataFilename'], input_dict['attackSwitchDataFile']),
+        (input_dict['attackDeviceDataFilename'], input_dict['attackDeviceDataFile']))
     for t in filenames:
         with (Path(model_dir) / 'pycigar_inputs' / t[0]).open('w') as f:
             f.write(t[1])
@@ -83,15 +86,15 @@ def run_pycigar(model_dir, input_dict, start, duration, df):
     #   - Otherwise, I think battery_vvc should be True because that satisfies more if-statements in pycigar.main()
     # - battery_status can be True or False, regardless of the values of type_attack and battery_vvc
     battery_vvc = True
-    if input_dict['typeAttack'] == 'None':
-        type_attack = None
-        battery_vvc = False
-    elif input_dict['typeAttack'] == 'VOLTAGE_IMBALANCE':
-        type_attack = 'VOLTAGE_IMBALANCE'
-    elif input_dict['typeAttack'] == 'VOLTAGE_OSCILLATION':
-        type_attack = 'VOLTAGE_OSCILLATION'
-    else:
-        raise ValueError()
+    #if input_dict['typeAttack'] == 'None':
+    #    type_attack = None
+    #    battery_vvc = False
+    #elif input_dict['typeAttack'] == 'VOLTAGE_IMBALANCE':
+    #    type_attack = 'VOLTAGE_IMBALANCE'
+    #elif input_dict['typeAttack'] == 'VOLTAGE_OSCILLATION':
+    #    type_attack = 'VOLTAGE_OSCILLATION'
+    #else:
+    #    raise ValueError()
     # - The 'battery_status' argument to pycigar.main() must be 'True' or 'False'
     if input_dict['batteryStatus'] == 'True':
         battery_status = True
@@ -104,22 +107,22 @@ def run_pycigar(model_dir, input_dict, start, duration, df):
     # - The 'hack_end' argument to pycigar.main() can be None (like it's supposed to), but to be consistent with 'hack_start' it must be >=
     #   'hack_start'
     #   - Play with these argument values and see what happens
-    if input_dict['hackStart'] == 'None':
-        hack_start = None
-    else:
-        hack_start = int(input_dict['hackStart'])
-    if input_dict['hackEnd'] == 'None':
-        hack_end = None
-    else:
-        hack_end = int(input_dict['hackEnd'])
-    if hack_start < 0 or hack_start >= len(df):
-        raise ValueError()
-    if hack_end < 0 or hack_end >= len(df) or hack_end <= hack_start:
-        raise ValueError()
+    #if input_dict['hackStart'] == 'None':
+    #    hack_start = None
+    #else:
+    #    hack_start = int(input_dict['hackStart'])
+    #if input_dict['hackEnd'] == 'None':
+    #    hack_end = None
+    #else:
+    #    hack_end = int(input_dict['hackEnd'])
+    #if hack_start < 0 or hack_start >= len(df):
+    #    raise ValueError()
+    #if hack_end < 0 or hack_end >= len(df) or hack_end <= hack_start:
+    #    raise ValueError()
     # - The 'percentage_hack' argument to pycigar.main() must be between 0 and 100
-    percentage_hack = int(input_dict['percentageHack'])
-    if percentage_hack < 0 or percentage_hack > 100:
-        raise ValueError()
+    #percentage_hack = int(input_dict['percentageHack'])
+    #if percentage_hack < 0 or percentage_hack > 100:
+    #    raise ValueError()
     # - The 'policy' argument to pycigar.main() should be None or a path to pycigar_inputs/policy_ieee37_imbalance_sample_feb2023
     #   - Currently, there is only one possible defense policy definition
     if input_dict['defenseAgent'] == 'None':
@@ -135,22 +138,25 @@ def run_pycigar(model_dir, input_dict, start, duration, df):
     # TODO: test training functionality
     # TODO: make it possible to re-train a defense when 'TRAIN' is selected and so is one of the pre-trained defenses
     pycigar.main(
-        misc_inputs_path = f'{model_dir}/pycigar_inputs/{input_dict["miscInputsFilename"]}',
-        dss_path = f'{model_dir}/pycigar_inputs/{input_dict["circuitFilename"]}',
-        load_solar_path = f'{model_dir}/pycigar_inputs/{input_dict["loadSolarFilename"]}',
-        breakpoints_path = f'{model_dir}/pycigar_inputs/{input_dict["breakpointsFilename"]}',
-        test = test,
-        output = f'{model_dir}/pycigar_outputs',
-        type_attack = type_attack,
-        policy = policy,
-        start = start,
+        misc_inputs_path=f'{model_dir}/pycigar_inputs/{input_dict["miscInputsFilename"]}',
+        dss_path=f'{model_dir}/pycigar_inputs/{input_dict["circuitFilename"]}',
+        load_solar_path=f'{model_dir}/pycigar_inputs/{input_dict["loadSolarFilename"]}',
+        breakpoints_path=f'{model_dir}/pycigar_inputs/{input_dict["breakpointsFilename"]}',
+        test=test,
+        output=f'{model_dir}/pycigar_outputs',
+        #type_attack=type_attack,
+        policy=policy,
+        start=start,
         duration = duration,
-        hack_start = hack_start,
-        hack_end = hack_end,
-        percentage_hack = percentage_hack,
-        device_path = f'{model_dir}/pycigar_inputs/{input_dict["deviceInputsFilename"]}',
-        battery_status = battery_status,
-        battery_vvc = battery_vvc)
+        #hack_start=hack_start,
+        #hack_end=hack_end,
+        #percentage_hack=percentage_hack,
+        device_path=f'{model_dir}/pycigar_inputs/{input_dict["deviceInputsFilename"]}',
+        battery_status=battery_status,
+        battery_vvc=battery_vvc,
+        attack_node_data_path=f'{model_dir}/pycigar_inputs/{input_dict["attackNodeDataFilename"]}',
+        attack_switch_data_path=f'{model_dir}/pycigar_inputs/{input_dict["attackSwitchDataFilename"]}',
+        attack_device_data_path=f'{model_dir}/pycigar_inputs/{input_dict["attackDeviceDataFilename"]}')
 
         # - Austin (2025-01-29) - this is a leftover comment
         # Report out the agent paths
@@ -308,9 +314,9 @@ def new(model_dir):
         device_inputs_filename = 'device_inputs.txt'
         load_solar_filename = 'load_solar_data.csv'
         misc_inputs_filename = 'misc_inputs.csv'
-        #attack_node_data_filename = 'redteam_attack_node_data.csv'
-        #attack_switch_data_filename = 'redteam_attack_switch_data.csv'
-        #attack_device_data_filename = 'redteam_attack_regulator_data.csv'
+        attack_node_data_filename = 'redteam_attack_node_data.csv'
+        attack_switch_data_filename = 'redteam_attack_switch_data.csv'
+        attack_device_data_filename = 'redteam_attack_regulator_data.csv'
         # - Get file contents
         with (Path(omf.omfDir) / 'static' / 'testFiles' / 'pyCIGAR' / circuit_dir / breakpoints_filename).open() as f:
             breakpoints_data = f.read()
@@ -320,6 +326,12 @@ def new(model_dir):
             load_solar_data = f.read()
         with (Path(omf.omfDir) / 'static' / 'testFiles' / 'pyCIGAR' / circuit_dir / misc_inputs_filename).open() as f:
             misc_inputs_data = f.read()
+        with (Path(omf.omfDir) / 'static' / 'testFiles' / 'pyCIGAR' / circuit_dir / attack_node_data_filename).open() as f:
+            attack_node_data = f.read()
+        with (Path(omf.omfDir) / 'static' / 'testFiles' / 'pyCIGAR' / circuit_dir / attack_switch_data_filename).open() as f:
+            attack_switch_data = f.read()
+        with (Path(omf.omfDir) / 'static' / 'testFiles' / 'pyCIGAR' / circuit_dir / attack_device_data_filename).open() as f:
+            attack_device_data = f.read()
         defaultInputs = {
             'simStartDate': '2019-07-01T00:00:00Z',
             'duration': '2000',                                             # - Max value for the default CSV is 14400
@@ -340,12 +352,19 @@ def new(model_dir):
             'modelType': modelName,
             'zipCode': '59001',
             'trainAgent': 'False',
-            'typeAttack': 'None',
+            #'typeAttack': 'None',
             'defenseAgent': 'None',                                         # - The defense agent selected by the user
-            'hackStart': '100',
-            'hackEnd': '700',
-            'percentageHack': '40',
-            'defenseAgentNames': 'policy_ieee37_imbalance_sample_feb2023'   # - A list of possible defense agents
+            #'hackStart': '100',
+            #'hackEnd': '700',
+            #'percentageHack': '40',
+            'defenseAgentNames': 'policy_ieee37_imbalance_sample_feb2023',  # - A list of possible defense agents
+            'attackNodeDataFilename': attack_node_data_filename,
+            'attackNodeDataFile': attack_node_data,
+            'attackSwitchDataFilename': attack_switch_data_filename,
+            'attackSwitchDataFile': attack_switch_data,
+            'attackDeviceDataFilename': attack_device_data_filename,
+            'attackDeviceDataFile': attack_device_data,
+            'learningAlgorithm': 'None'
         }
         neometamodel_was_created = __neoMetaModel__.new(model_dir, defaultInputs)
         # - Could grab <feederName1>.omd from publicFeeders/ instead
