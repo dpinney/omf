@@ -480,7 +480,7 @@ def tradMetricsByMgTable(outputTimeline, loadMgDict, startTime, numTimeSteps, mo
 		sumBCS = sum([loadBcsDict[load] for load in loadList])
 		if CS != 0:
 			averageCCS = sum([loadCcsDict[load] for load in loadList])/len(loadList)
-			averageCCI = percentileofscore(list(loadCcsDict.values()),averageCCS)
+			averageCCI = float(percentileofscore(list(loadCcsDict.values()),averageCCS))
 			averageCCIxPriorities = sum([mergedLoadWeights[load] for load in loadList])/len(loadList)
 		else:
 			averageCCI = 'n/a'
@@ -1028,7 +1028,7 @@ def getMicrogridInfo(modelDir, pathToOmd, settingsFile, makeCSV = True):
 
 	return {'loadMgDict':loadMgDict, 'busMgDict':busMgDict, 'obMgDict':obMgDict, 'mgIDs':mgIDs}
 
-def makeLoadCciDict(modelDir, pathToOmd):
+def makeLoadCciDict(modelDir, pathToOmd, customerInfo):
 	''' Returns 3 dictionaries of loads and their CCI's, CCS's, & BCS's respectively in the following format:
 		
 		{loadName1:cci1, loadName2:cci2, loadName3:cci3, ...},
@@ -1041,7 +1041,13 @@ def makeLoadCciDict(modelDir, pathToOmd):
 	ccsDict = {}
 	bcsDict = {}
 	# Uncomment to use resilientCommunity. 
-	'''makeResComOutputCsv(pathToOmd, modelDir, ['line', 'transformer', 'fuse'])
+
+	makeResComOutputCsv(pathToOmd		= pathToOmd, 
+						pathToLoadsFile	= customerInfo, 
+						avgPeakDemand	= 4.25,
+						loadsTypeList	= ['residential', 'manufacturing', 'mining', 'construction', 'agriculture', 'finance', 'retail', 'services', 'utilities', 'public'],
+						modelDir		= modelDir,		
+						equipmentList	= ['line', 'transformer', 'fuse'])
 	with open(pJoin(modelDir, 'resilientCommunityOutput.csv'), mode='r') as infile:
 		reader = csv.DictReader(infile)
 		for row in reader:
@@ -1770,6 +1776,7 @@ def copyInputFilesToModelDir(modelDir, inputDict):
 
 		'mgTagging', 'loadPriority', 'customerInfo', 'event'
 	'''
+	# TODO: See if there's any reason it's done this way as opposed to just copying files to the modelDir with shutil.copy(src,dest)
 	pathToLocalFile = {}
 	if inputDict['microgridTaggingFileName'] != '':
 		try:
@@ -1833,7 +1840,8 @@ def work(modelDir, inputDict):
 	
 	loadCciDict, loadCcsDict, loadBcsDict = makeLoadCciDict(
 		modelDir 				= modelDir, 
-		pathToOmd				= omdFilePath
+		pathToOmd				= omdFilePath,
+		customerInfo			= pathToLocalFile['customerInfo']
 	)
 	pathToMergedPriorities, pathToTransformedPriorities = combineLoadPriorityWithCCI(
 		modelDir				= modelDir,
@@ -1961,6 +1969,9 @@ def new(modelDir):
 	loadPriority_file_data = open(pJoin(*loadPriority_file_path)).read()
 	microgridTagging_file_path = [__neoMetaModel__._omfDir,'static','testFiles','iowa240_dwp_22.microgridTagging.basic.json']
 	microgridTagging_file_data = open(pJoin(*microgridTagging_file_path)).read()
+	customerInfo_file_path = [__neoMetaModel__._omfDir,'static','testFiles','restoration','customerInfoExample.csv']
+	customerInfo_file_data = open(pJoin(*customerInfo_file_path)).read()
+
 	# ====== Nreca1824 Test Case
 	# feeder_file_path = [__neoMetaModel__._omfDir,'static','testFiles','nreca1824_dwp.omd']
 	# event_csv_path = [__neoMetaModel__._omfDir,'static','testFiles','nreca1824events.csv']
@@ -1981,8 +1992,8 @@ def new(modelDir):
 		'profit_on_energy_sales': '0.03',
 		'restoration_cost': '100',
 		'hardware_cost': '550',
-		'customerFileName': '',
-		'customerData': '',
+		'customerFileName': customerInfo_file_path[-1],
+		'customerData': customerInfo_file_data,
 		'eventFileName': event_file_path[-1],
 		'eventData': open(pJoin(*event_file_path)).read(),
 		'solFidelity': '0.05',
