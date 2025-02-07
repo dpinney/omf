@@ -113,12 +113,12 @@
 				<input type="text" id="startupCosts" name="startupCosts" value="{{allInputDataDict.startupCosts}}" pattern="^\d+\.?\d*?$" required="required"/>
 			</div>
 			<div class="shortInput">
-				<label class="tooltip">Home Heat Pumps - Ongoing Operational Costs ($/month)<span class="classic">Specify the monthly ongoing operational costs of controlling all home heat pumps (e.g. the API usage cost per month).</span></label>
-				<input type="text" id="TESS_operationalCosts_ongoing_hp" name="TESS_operationalCosts_ongoing_hp" value="{{allInputDataDict.TESS_operationalCosts_ongoing_hp}}" pattern="^\d+\.?\d*?$" required="required"/>
+				<label class="tooltip">Ongoing Operational Costs ($/month)<span class="classic">Specify the monthly ongoing operational costs of controlling all home devices (e.g. the API usage cost per month).</span></label>
+				<input type="text" id="operationalCosts_ongoing" name="operationalCosts_ongoing" value="{{allInputDataDict.operationalCosts_ongoing}}" pattern="^\d+\.?\d*?$" required="required"/>
 			</div>
 			<div class="shortInput">
-				<label class="tooltip">Home Heat Pumps - One-time Operational Costs ($)<span class="classic">Specify the total one-time operational costs of controlling all home heat pumps (e.g. the contracting agreement with the device manufacturer).</span></label>
-				<input type="text" id="TESS_operationalCosts_onetime_hp" name="TESS_operationalCosts_onetime_hp" value="{{allInputDataDict.TESS_operationalCosts_onetime_hp}}" pattern="^\d+\.?\d*?$" required="required"/>
+				<label class="tooltip">One-time Operational Costs ($)<span class="classic">Specify the total one-time operational costs of controlling all home devices (e.g. the contracting agreement with the device manufacturer).</span></label>
+				<input type="text" id="operationalCosts_onetime" name="operationalCosts_onetime" value="{{allInputDataDict.operationalCosts_onetime}}" pattern="^\d+\.?\d*?$" required="required"/>
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Home Heat Pumps - Upfront Subsidy Amount ($)<span class="classic">The total upfront subsidy amount ($) paid to all member-consumers for home heat pumps (not including any recurring subsidies).</span></label>
@@ -129,28 +129,12 @@
 				<input type="text" id="TESS_subsidy_ongoing_hp" name="TESS_subsidy_ongoing_hp" value="{{allInputDataDict.TESS_subsidy_ongoing_hp}}" pattern="^\d+\.?\d*?$" required="required"/>
 			</div>
 			<div class="shortInput">
-				<label class="tooltip">Home Air Conditioners - Ongoing Operational Costs ($/month)<span class="classic">Specify the monthly ongoing operational costs of controlling all home air conditioners (e.g. the API usage cost per month).</span></label>
-				<input type="text" id="TESS_operationalCosts_ongoing_ac" name="TESS_operationalCosts_ongoing_ac" value="{{allInputDataDict.TESS_operationalCosts_ongoing_ac}}" pattern="^\d+\.?\d*?$" required="required"/>
-			</div>
-			<div class="shortInput">
-				<label class="tooltip">Home Air Conditioners - One-time Operational Costs ($)<span class="classic">Specify the total one-time operational costs of controlling all home air conditioners (e.g. the contracting agreement with the device manufacturer).</span></label>
-				<input type="text" id="TESS_operationalCosts_onetime_ac" name="TESS_operationalCosts_onetime_ac" value="{{allInputDataDict.TESS_operationalCosts_onetime_ac}}" pattern="^\d+\.?\d*?$" required="required"/>
-			</div>
-			<div class="shortInput">
 				<label class="tooltip">Home Air Conditioners - Upfront Subsidy Amount ($)<span class="classic">The total upfront subsidy amount ($) paid to all member-consumers for home air conditioners (not including any recurring subsidies).</span></label>
 				<input type="text" id="TESS_subsidy_onetime_ac" name="TESS_subsidy_onetime_ac" value="{{allInputDataDict.TESS_subsidy_onetime_ac}}" pattern="^\d+\.?\d*?$" required="required"/>
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Home Air Conditioners - Monthly Recurring Subsidy Amount ($)<span class="classic">The total monthly recurring subsidy amount ($) paid to all member-consumers for home air conditioners (not including any upfront subsidies).</span></label>
 				<input type="text" id="TESS_subsidy_ongoing_ac" name="TESS_subsidy_ongoing_ac" value="{{allInputDataDict.TESS_subsidy_ongoing_ac}}" pattern="^\d+\.?\d*?$" required="required"/>
-			</div>
-			<div class="shortInput">
-				<label class="tooltip">Home Water Heaters - Ongoing Operational Costs ($/month)<span class="classic">Specify the monthly ongoing operational costs of controlling all home water heaters (e.g. the API usage cost per month).</span></label>
-				<input type="text" id="TESS_operationalCosts_ongoing_wh" name="TESS_operationalCosts_ongoing_wh" value="{{allInputDataDict.TESS_operationalCosts_ongoing_wh}}" pattern="^\d+\.?\d*?$" required="required"/>
-			</div>
-			<div class="shortInput">
-				<label class="tooltip">Home Water Heaters - One-time Operational Costs ($)<span class="classic">Specify the total one-time operational costs of controlling all home water heaters (e.g. the contracting agreement with the device manufacturer).</span></label>
-				<input type="text" id="TESS_operationalCosts_onetime_wh" name="TESS_operationalCosts_onetime_wh" value="{{allInputDataDict.TESS_operationalCosts_onetime_wh}}" pattern="^\d+\.?\d*?$" required="required"/>
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Home Water Heaters - Upfront Subsidy Amount ($)<span class="classic">The total upfront subsidy amount ($) paid to all member-consumers for home water heaters (not including any recurring subsidies).</span></label>
@@ -161,14 +145,6 @@
 				<input type="text" id="TESS_subsidy_ongoing_wh" name="TESS_subsidy_ongoing_wh" value="{{allInputDataDict.TESS_subsidy_ongoing_wh}}" pattern="^\d+\.?\d*?$" required="required"/>
 			</div>
 			<div class="shortInput">
-				<label class="tooltip">Home BESS - Ongoing Operational Costs ($/month)<span class="classic">Specify the monthly ongoing operational costs of controlling all home chemical batteries (e.g. the API usage cost per month).</span></label>
-				<input type="text" id="BESS_operationalCosts_ongoing" name="BESS_operationalCosts_ongoing" value="{{allInputDataDict.BESS_operationalCosts_ongoing}}" pattern="^\d+\.?\d*?$" required="required"/>
-			</div>
-			<div class="shortInput">
-				<label class="tooltip">Home BESS - One-time Operational Costs ($)<span class="classic">Specify the total one-time operational costs of controlling all home chemical batteries (e.g. the contracting agreement with the device manufacturer).</span></label>
-				<input type="text" id="BESS_operationalCosts_onetime" name="BESS_operationalCosts_onetime" value="{{allInputDataDict.BESS_operationalCosts_onetime}}" pattern="^\d+\.?\d*?$" required="required"/>
-			</div>
-			<div class="shortInput">
 				<label class="tooltip">Home BESS - Upfront Subsidy Amount ($)<span class="classic">The total upfront subsidy amount ($) paid to all member-consumers for home battery energy storage systems (not including any recurring subsidies).</span></label>
 				<input type="text" id="BESS_subsidy_onetime" name="BESS_subsidy_onetime" value="{{allInputDataDict.BESS_subsidy_onetime}}" pattern="^\d+\.?\d*?$" required="required"/>
 			</div>
@@ -177,11 +153,11 @@
 				<input type="text" id="BESS_subsidy_ongoing" name="BESS_subsidy_ongoing" value="{{allInputDataDict.BESS_subsidy_ongoing}}" pattern="^\d+\.?\d*?$" required="required"/>
 			</div>
 			<div class="shortInput">
-				<label class="tooltip">Home Generator - Upfront Subsidy Amount ($)<span class="classic">The total upfront subsidy amount ($) paid to all member-consumers for home fossil fuel generators (not including any recurring subsidies).</span></label>
+				<label class="tooltip">Home Generator - Upfront Subsidy Amount ($)<span class="classic">The total upfront subsidy amount ($) paid to all member-consumers for home diesel generators (not including any recurring subsidies).</span></label>
 				<input type="text" id="GEN_subsidy_onetime" name="GEN_subsidy_onetime" value="{{allInputDataDict.GEN_subsidy_onetime}}" pattern="^\d+\.?\d*?$" required="required"/>
 			</div>
 			<div class="shortInput">
-				<label class="tooltip">Home Generator - Monthly Recurring Subsidy Amount ($)<span class="classic">The total monthly recurring subsidy amount ($) paid to all member-consumers for home fossil fuel generators (not including any upfront subsidies).</span></label>
+				<label class="tooltip">Home Generator - Monthly Recurring Subsidy Amount ($)<span class="classic">The total monthly recurring subsidy amount ($) paid to all member-consumers for home diesel generators (not including any upfront subsidies).</span></label>
 				<input type="text" id="GEN_subsidy_ongoing" name="GEN_subsidy_ongoing" value="{{allInputDataDict.GEN_subsidy_ongoing}}" pattern="^\d+\.?\d*?$" required="required"/>
 			</div>
 			
@@ -204,16 +180,16 @@
 				<input type="text" id="BESS_kwh" name="BESS_kwh" value="{{allInputDataDict.BESS_kwh}}" required="required"/>
 			</div>
 
-			<!-- Fossil Fuel Generator Inputs -->
+			<!-- Diesel Generator Inputs -->
 			<div class="wideInput"> 
 				<p class="inputSectionHeader">Home Diesel Generator Device Inputs</p>
 			</div>
 			<hr style="border-style: solid; border-color: #196b12; margin-top: 10px;">
 			<div class="shortInput">
 				<label class="tooltip">Enable Use of Diesel Generator?<span class="classic">If yes, model will run with a diesel generator.</span></label>
-				<select id="fossilGenerator" name="fossilGenerator" value="{{allInputDataDict.fossilGenerator}}">
-					<option value='Yes' {{ 'selected' if allInputDataDict.fossilGenerator == 'Yes' }}>Yes</option>
-					<option value='No' {{ 'selected' if allInputDataDict.fossilGenerator == 'No' }}>No</option>
+				<select id="dieselGenerator" name="dieselGenerator" value="{{allInputDataDict.dieselGenerator}}">
+					<option value='Yes' {{ 'selected' if allInputDataDict.dieselGenerator == 'Yes' }}>Yes</option>
+					<option value='No' {{ 'selected' if allInputDataDict.dieselGenerator == 'No' }}>No</option>
 				</select>
 			</div>
 			<div class="shortInput">
@@ -454,8 +430,7 @@
 						{"name":"Consumer BESS Compensation", "data": allOutputData.BESS_compensation_to_consumer_allyears, "color": "rgb(255,102,102)"},
 						{"name":"Grid Costs", "data": allOutputData.energyCostAdjusted_gridCharging_annual, "color": "rgb(169,169,169)"},
 						{"name":"Startup Costs", "data": allOutputData.startupCosts, "color": "rgb(0,30,179)"},
-						{"name":"BESS Operational Costs", "data": allOutputData.operationalCosts_BESS_allyears, "color": "orange"},
-						{"name":"TESS Operational Costs", "data": allOutputData.operationalCosts_TESS_allyears, "color": "red"},
+						{"name":"Operational Costs", "data": allOutputData.operationalCosts_allyears, "color": "orange"},
 						{"name":"Cumulative Return", "type":"spline", "data": allOutputData.cumulativeCashflow_total, "color": "brown"}
 					],
 					"yAxis":{"title":{"text":"Income ($)","style":{"color":"gray"}}},
