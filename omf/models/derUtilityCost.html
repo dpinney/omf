@@ -206,27 +206,31 @@
 
 			<!-- Fossil Fuel Generator Inputs -->
 			<div class="wideInput"> 
-				<p class="inputSectionHeader">Utility-Owned Fossil Fuel Generator Device Inputs</p>
+				<p class="inputSectionHeader">Home Diesel Generator Device Inputs</p>
 			</div>
 			<hr style="border-style: solid; border-color: #196b12; margin-top: 10px;">
 			<div class="shortInput">
-				<label class="tooltip">Enable Use of Fossil Fuel Generator?<span class="classic">If yes, model will run with a fossil fuel generator.</span></label>
+				<label class="tooltip">Enable Use of Diesel Generator?<span class="classic">If yes, model will run with a diesel generator.</span></label>
 				<select id="fossilGenerator" name="fossilGenerator" value="{{allInputDataDict.fossilGenerator}}">
 					<option value='Yes' {{ 'selected' if allInputDataDict.fossilGenerator == 'Yes' }}>Yes</option>
 					<option value='No' {{ 'selected' if allInputDataDict.fossilGenerator == 'No' }}>No</option>
 				</select>
 			</div>
 			<div class="shortInput">
-				<label class="tooltip"> Existing Size (kW)<span class="classic">Specify the size (kW) of the existing fossil fuel generator owned by the utility.</span></label>
+				<label class="tooltip">Number of Devices<span class="classic">Total number of home diesel generators to model.</span></label>
+				<input type="text" id="number_devices_gen" name="number_devices_gen" value="{{allInputDataDict.number_devices_gen}}" required="required">
+			</div>
+			<div class="shortInput">
+				<label class="tooltip">Average Generator Capacity (kW)<span class="classic">Specify the average capacity size (kW) of each home diesel generator.</span></label>
 				<input type="text" id="existing_gen_kw" name="existing_gen_kw" value="{{allInputDataDict.existing_gen_kw}}" required="required"/>
 			</div>
 			<div class="shortInput">
-				<label class="tooltip"> Available Fuel (gal)<span class="classic">Specify the amount of generator fuel available (gal).</span></label>
-				<input type="text" id="fuel_available_gal" name="fuel_available_gal" value="{{allInputDataDict.fuel_available_gal}}" required="required"/>
+				<label class="tooltip">Available Fuel (btu)<span class="classic"> Specify the maximum amount of diesel available (btu) per device. Default assumes a 95 gallon tank.</span></label>
+				<input type="text" id="fuel_avail_btu" name="fuel_avail_btu" value="{{allInputDataDict.fuel_avail_btu}}" required="required"/>
 			</div>
 			<div class="shortInput">
-				<label class="tooltip"> Fuel Cost ($/gal)<span class="classic">Specify the cost of fuel used for the generator ($/gal).</span></label>
-				<input type="text" id="fuel_cost_per_gal" name="fuel_cost_per_gal" value="{{allInputDataDict.fuel_cost_per_gal}}" required="required"/>
+				<label class="tooltip">Fuel Cost ($/mbtu)<span class="classic">Specify the cost in USD per million BTU of diesel fuel.</span></label>
+				<input type="text" id="fuel_cost_per_mbtu" name="fuel_cost_per_mbtu" value="{{allInputDataDict.fuel_cost_per_mbtu}}" required="required"/>
 			</div>
 
 			<!-- Air Conditioner (vbatDispatch) Inputs -->
@@ -240,8 +244,7 @@
 					<option value="1" {{ 'selected' if allInputDataDict.load_type_ac == '1' }}>Yes</option>
 					<option value="0" {{ 'selected' if allInputDataDict.load_type_ac == '0' }}>No</option>
 				</select>
-			</div>
-			
+			</div>			
 			<div class="shortInput">
 				<label class="tooltip">Number of Devices<span class="classic">Total number of home thermal devices to simulate.</span></label>
 				<input type="text" id="number_devices_ac" name="number_devices_ac" value="{{allInputDataDict.number_devices_ac}}" required="required">
