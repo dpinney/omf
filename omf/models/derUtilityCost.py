@@ -758,11 +758,26 @@ def work(modelDir, inputDict):
 	outData['savings_demandCharge'] = list(np.array(outData['demandCharge']) - np.array(outData['demandChargeAdjusted_total']))
 	outData['savings_demandCharge_annual'] = list(np.full(projectionLength, np.sum(outData['savings_demandCharge'])))
 
-	## Calculate BESS compensation costs and savings
+	## Calculate BESS compensation per kWh
 	BESS_compensation_year1_array = np.array([sum(BESS[s:f])*rateCompensation for s, f in monthHours])
 	BESS_compensation_year1_total = np.sum(BESS_compensation_year1_array)
 	BESS_compensation_allyears_array = np.full(projectionLength, BESS_compensation_year1_total)
 	BESS_monthly_if_bought_from_grid = np.array([sum(BESS[s:f])*electricityCost for s, f in monthHours])
+
+	## Calculate GEN compensation per kWh
+	GEN_compensation_year1_array = np.array([sum(generator[s:f])*rateCompensation for s, f in monthHours])
+	GEN_compensation_year1_total = np.sum(GEN_compensation_year1_array)
+	GEN_compensation_allyears_array = np.full(projectionLength, GEN_compensation_year1_total)
+	GEN_monthly_if_bought_from_grid = np.array([sum(generator[s:f])*electricityCost for s, f in monthHours])
+
+	## Calculate TESS compensation per kWh
+	TESS_compensation_year1_array = np.array([sum(vbat_discharge_component[s:f])*rateCompensation for s, f in monthHours])
+	TESS_compensation_year1_total = np.sum(TESS_compensation_year1_array)
+	TESS_compensation_allyears_array = np.full(projectionLength, TESS_compensation_year1_total)
+	TESS_monthly_if_bought_from_grid = np.array([sum(vbat_discharge_component[s:f])*electricityCost for s, f in monthHours])
+
+	## Combine all DER compensations to calculate the total compensation to consumer
+	allDevices_compensation_year1_array = BESS_compensation_year1_array + GEN_compensation_year1_array + TESS_compensation_year1_array
 	
 	## Calculate total BESS and TESS savings
 	utilitySavings_from_BESS_TESS = np.array(combined_device_results['savingsTESS']) + BESS_monthly_if_bought_from_grid
@@ -840,7 +855,7 @@ def work(modelDir, inputDict):
 
 	## Update financial parameters
 	outData['totalCost_annual'] = list(np.array(utilityCosts_year1_array))
-	outData['totalCost_paidToConsumer'] = list(BESS_compensation_year1_array + allDevices_subsidy_year1_array)
+	outData['totalCost_paidToConsumer'] = list(allDevices_compensation_year1_array + allDevices_subsidy_year1_array)
 	annualEarnings_year1_total = np.sum(outData['savings_adjusted']) - np.sum(outData['totalCost_annual']) ##includes all devices: BESS, generator, combined TESSs
 	annualEarnings_year1_array = np.array(outData['savings_adjusted']) - np.array(outData['totalCost_annual']) - utilityCosts_year1_array ##includes all devices: BESS, generator, combined TESSs
 	#annualEarnings_allyears_array = np.full(projectionLength, annualEarnings_year1_total)
