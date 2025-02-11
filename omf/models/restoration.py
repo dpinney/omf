@@ -16,7 +16,11 @@ import omf
 from omf import geo
 from omf.models import __neoMetaModel__
 from omf.models.__neoMetaModel__ import *
-from omf.solvers.opendss import dssConvertToBeTested as dssConvert
+from omf.solvers.opendss.dssConvert import *
+from omf.solvers.opendss.dssConvert import _dssToOmd_toBeTested as dssToOmd
+from omf.solvers.opendss.dssConvert import _evilDssTreeToGldTree_toBeTested as evilDssTreeToGldTree
+from omf.solvers.opendss.dssConvert import _treeToDss_toBeTested as treeToDss
+from omf.solvers.opendss.dssConvert import _dss_to_clean_via_save_toBeTested as dss_to_clean_via_save
 from omf.solvers import PowerModelsONM
 from omf.comms import createGraph
 from omf.models.resilientCommunity import runCalculations as makeResComOutputCsv
@@ -1549,7 +1553,7 @@ def graphMicrogrid(modelDir, pathToOmd, profit_on_energy_sales, restoration_cost
 	outageCostsByType = {busType: [] for busType in businessTypes}
 	avgkWColumn = []
 	durationColumn = []
-	dssTree = dssConvert.dssToTree(f'{modelDir}/circuit_clean.dss')
+	dssTree = dssToTree(f'{modelDir}/circuit_clean.dss')
 	loadShapeMeanMultiplier = {}
 	loadShapeMeanActual = {}
 	for dssLine in dssTree:
@@ -1744,9 +1748,9 @@ def __buildCustomEvents(eventsCSV='', feeder='', customEvents='customEvents.json
 	if feeder.endswith('.omd'):
 		with open(feeder) as omdFile:
 			tree = json.load(omdFile)['tree']
-		niceDss = dssConvert.evilGldTreeToDssTree(tree)
-		dssConvert.treeToDss(niceDss, 'circuitOmfCompatible.dss')
-		dssTree = dssConvert.dssToTree('circuitOmfCompatible.dss')
+		niceDss = evilGldTreeToDssTree(tree)
+		treeToDss(niceDss, 'circuitOmfCompatible.dss')
+		dssTree = dssToTree('circuitOmfCompatible.dss')
 	else: return('Error: Feeder must be an OMD file.')
 	outageAssets = [] # formerly row[0] for row in outageReader
 	customEventList = []
@@ -1826,12 +1830,12 @@ def work(modelDir, inputDict):
 	tree = omd['tree']
 
 	# Output a .dss file, which will be needed for ONM.
-	niceDss = dssConvert.evilGldTreeToDssTree(tree)
-	dssConvert.treeToDss(niceDss, f'{modelDir}/circuit.dss')
-	# dssConvert.treeToDss(niceDss, f'{modelDir}/circuitOmfCompatible.dss') # for querying loadshapes
-	dssConvert.dss_to_clean_via_save(f'{modelDir}/circuit.dss', f'{modelDir}/circuit_clean.dss')
+	niceDss = evilGldTreeToDssTree(tree)
+	treeToDss(niceDss, f'{modelDir}/circuit.dss')
+	# treeToDss(niceDss, f'{modelDir}/circuitOmfCompatible.dss') # for querying loadshapes
+	dss_to_clean_via_save(f'{modelDir}/circuit.dss', f'{modelDir}/circuit_clean.dss')
 	
-	# dssConvert.dssToOmd(f'{modelDir}/circuit_clean.dss', f'{modelDir}/circuit_clean.dss.omd')
+	# dssToOmd(f'{modelDir}/circuit_clean.dss', f'{modelDir}/circuit_clean.dss.omd')
 	# omdFilePath = f'{modelDir}/circuit_clean.dss.omd'
 
 	omdFilePath = f'{modelDir}/{feederName}.omd'
