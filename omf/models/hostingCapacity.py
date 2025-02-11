@@ -268,6 +268,13 @@ def run_ami_algorithm( modelDir, inputDict, outData ):
 	AMI_results['max_cap_allowed_kW'] = np.minimum( AMI_results['voltage_cap_kW'], AMI_results['thermal_cap_kW'])
 	AMI_results_sorted = AMI_results.sort_values(by='busname')
 	barChartFigure = px.bar(AMI_results_sorted, x='busname', y=['voltage_cap_kW', 'thermal_cap_kW', 'max_cap_allowed_kW'], barmode='group', color_discrete_sequence=["green", "lightblue", "MediumPurple"], template="simple_white" )
+	barChartFigure.update_layout( legend=dict(
+		orientation='h',
+		yanchor='bottom',
+		y=1.02,
+		xanchor='right',
+		x=1
+	) )
 	barChartFigure.add_traces( list(px.line(AMI_results_sorted, x='busname', y='max_cap_allowed_kW', markers=True).select_traces()) )
 	outData['histogramFigure'] = json.dumps( histogramFigure, cls=py.utils.PlotlyJSONEncoder )
 	outData['barChartFigure'] = json.dumps( barChartFigure, cls=py.utils.PlotlyJSONEncoder )
