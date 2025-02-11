@@ -58,7 +58,7 @@
 				</div>
 			</div>
 			<div class="shortInput">
-				<label class="tooltip">Temperature Curve in &degC (.csv file)<span class="classic">Please see the documentation at the help link for the required format and an example temperature file.</span></label>
+				<label class="tooltip">Temperature Curve in &degF (.csv file)<span class="classic">Please see the documentation at the help link for the required format and an example temperature file.</span></label>
 				<input id="tempCurveFile" type="file" style="display:none" onchange="handle_files(this.files,'tempCurve','tempFileName')">
 				<input id="tempCurve" name="tempCurve" value="{{allInputDataDict.tempCurve}}" type="hidden">
 				<div>
@@ -404,7 +404,8 @@
 					insertMetric("monthlySummaryTable","Total Cost of Service ($)", allOutputData.totalCost_service)
 					insertMetric("monthlySummaryTable","Adjusted Total Cost of Service ($)", allOutputData.totalCostAdjusted_service)
 					insertMetric("monthlySummaryTable","Total Consumer Compensation ($)", allOutputData.totalCost_paidToConsumer)
-					insertMetric("monthlySummaryTable","Net Utility Savings ($)", allOutputData.netSavings_year1)
+					insertMetric("monthlySummaryTable","Startup Costs ($)", allOutputData.startupCosts_year1)
+					insertMetric("monthlySummaryTable","Net Utility Savings ($)", allOutputData.totalNetSavings_year1)
 					//insertMetric("monthlySummaryTable","1 kW Consumer Savings ($)", allOutputData.totalSavingsSmallConsumer)
 					//insertMetric("monthlySummaryTable","10 kW Consumer Savings ($)", allOutputData.totalSavingsLargeConsumer)
 				</script>
@@ -429,7 +430,7 @@
 						{"name":"Subsidies", "data": allOutputData.subsidies, "color": "black"},
 						{"name":"Consumer BESS Compensation", "data": allOutputData.BESS_compensation_to_consumer_allyears, "color": "rgb(255,102,102)"},
 						{"name":"Grid Costs", "data": allOutputData.energyCostAdjusted_gridCharging_annual, "color": "rgb(169,169,169)"},
-						{"name":"Startup Costs", "data": allOutputData.startupCosts, "color": "rgb(0,30,179)"},
+						{"name":"Startup Costs", "data": allOutputData.startupCosts_allyears, "color": "rgb(0,30,179)"},
 						{"name":"Operational Costs", "data": allOutputData.operationalCosts_allyears, "color": "orange"},
 						{"name":"Cumulative Return", "type":"spline", "data": allOutputData.cumulativeCashflow_total, "color": "brown"}
 					],
