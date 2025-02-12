@@ -412,9 +412,28 @@
 			</div>
 		</div>
 
-		<p class="reportTitle" style="page-break-before:always">Cash Flow Projection</p>
+		<p class="reportTitle" style="page-break-before:always">Cash Flow Projection - Overview</p>
 		<div id="cashFlowReport" class="tightContent">
 			<div id="cashFlowChartDiv"></div>
+			<script>
+				new Highcharts.Chart({"credits":{"enabled":false},
+					"plotOptions":{"column":{"stacking":'normal'},"series":{"animation":false,"shadow":false},"spline":{"animation":false,"shadow":false}},
+					"xAxis":{"title":{"text":"Year After Installation","style":{"color":"gray"}},"type":"linear","tickColor":"gray","tickInterval":1,"lineColor":"gray","minorTickColor":"gray", "minorTickInterval":5},
+					"title":{"text":"NPV: $" + allOutputData.NPV.toFixed(0) + ", SPP: " + allOutputData.SPP.toFixed(3), "verticalAlign":"top", "align":"right", "y":20, "x":-10, "style":{"color":"#333333", "fontSize":"12px"}},
+					"series":[
+						{"name":"Utility Savings", "data": allOutputData.savingsAllYears, "color": "green"},
+						{"name":"Utility Costs", "data": allOutputData.costsAllYears, "color": "red"},
+						{"name":"Cumulative Return", "type":"spline", "data": allOutputData.cumulativeCashflow_total, "color": "purple"},
+					],
+					"yAxis":{"title":{"text":"Income ($)","style":{"color":"gray"}}},
+					"chart":{"marginBottom":55,"zoomType":"x","renderTo":"cashFlowChartDiv","type":"column","marginRight":20, "height":250,"width":1000},
+					"tooltip":{"valueDecimals":1},
+					"legend":{"verticalAlign":"top","align":"top","borderWidth":0,"x":50,"y":-10,"layout":"horizontal"}})
+			</script>
+		</div>
+		<p class="reportTitle" style="page-break-before:always">Cash Flow Projection - Breakdown</p>
+		<div id="cashFlowReport" class="tightContent">
+			<div id="cashFlowChartDiv2"></div>
 			<script>
 				new Highcharts.Chart({"credits":{"enabled":false},
 					"plotOptions":{"column":{"stacking":'normal'},"series":{"animation":false,"shadow":false},"spline":{"animation":false,"shadow":false}},
@@ -423,19 +442,20 @@
 					"series":[
 						//{"name":"Net Benefits", "data": allOutputData.netCashflow, "color": "rgb(102,102,255)"},
 						//{"name":"Total Utility Savings", "data": allOutputData.savingsAllYears, "color": "green"},
-						{"name":"BESS Savings", "data": allOutputData.annualEarnings_BESS, "color": "rgb(0,128,0)"},
-						{"name":"TESS Savings", "data": allOutputData.annualEarnings_TESS, "color": "rgb(143,188,143)"},
-						{"name":"Generator Savings", "data": allOutputData.annualEarnings_generator, "color": "rgb(152,251,152)"},
-						{"name":"Demand Charge Savings", "data": allOutputData.savings_demandCharge_annual, "color": "rgb(139,190,27)"},
-						{"name":"Subsidies", "data": allOutputData.subsidies, "color": "black"},
-						{"name":"Consumer BESS Compensation", "data": allOutputData.BESS_compensation_to_consumer_allyears, "color": "rgb(255,102,102)"},
-						{"name":"Grid Costs", "data": allOutputData.energyCostAdjusted_gridCharging_annual, "color": "rgb(169,169,169)"},
-						{"name":"Startup Costs", "data": allOutputData.startupCosts_allyears, "color": "rgb(0,30,179)"},
-						{"name":"Operational Costs", "data": allOutputData.operationalCosts_allyears, "color": "orange"},
-						{"name":"Cumulative Return", "type":"spline", "data": allOutputData.cumulativeCashflow_total, "color": "brown"}
+						{"name":"BESS Savings", "data": allOutputData.savings_BESS_allyears, "color": "rgb(0,128,0)"},
+						{"name":"TESS Savings", "data": allOutputData.savings_TESS_allyears, "color": "rgb(143,188,143)"},
+						{"name":"Generator Savings", "data": allOutputData.savings_GEN_allyears, "color": "rgb(139,195,27)"},
+						{"name":"Demand Charge Savings", "data": allOutputData.savings_demandCharge_allyears, "color": "rgb(152,251,152)"},
+						{"name":"Subsidies", "data": allOutputData.subsidies, "color": "rgb(124,10,2)"},
+						{"name":"Consumer BESS Compensation", "data": allOutputData.BESS_compensation_to_consumer_allyears, "color": "rgb(179,21,41)"},
+						{"name":"Consumer TESS Compensation", "data": allOutputData.BESS_compensation_to_consumer_allyears, "color": "rgb(234,60,83)"},
+						{"name":"Consumer GEN Compensation", "data": allOutputData.BESS_compensation_to_consumer_allyears, "color": "rgb(205,92,92)"},
+						{"name":"Startup Costs", "data": allOutputData.startupCosts_allyears, "color": "rgb(240,128,128)"},
+						{"name":"Operational Costs", "data": allOutputData.operationalCosts_allyears, "color": "rgb(246,164,130)"},
+						{"name":"Cumulative Return", "type":"spline", "data": allOutputData.cumulativeCashflow_total, "color": "purple"}
 					],
 					"yAxis":{"title":{"text":"Income ($)","style":{"color":"gray"}}},
-					"chart":{"marginBottom":55,"zoomType":"x","renderTo":"cashFlowChartDiv","type":"column","marginRight":20, "height":250,"width":1000},
+					"chart":{"marginBottom":55,"zoomType":"x","renderTo":"cashFlowChartDiv2","type":"column","marginRight":20, "height":250,"width":1000},
 					"tooltip":{"valueDecimals":1},
 					"legend":{"verticalAlign":"top","align":"top","borderWidth":0,"x":50,"y":-10,"layout":"horizontal"}})
 			</script>
