@@ -734,16 +734,11 @@ def work(modelDir, inputDict):
 
 	## Calculate the adjusted demand and associated costs for all DER technologies
 	outData['demandAdj_total'] = list(demand - BESS - vbat_discharge_component - generator + grid_charging_BESS + vbat_charge_component)
-	outData['demandAdj_BESS'] = list(demand - BESS + grid_charging_BESS)
-	#outData['demandAdj_BESSdischarge'] = list(demand - BESS)
-	#outData['demandAdj_BESScharge'] = list(demand + grid_charging_BESS)
-	outData['demandAdj_TESS'] = list(demand - vbat_discharge_component + vbat_charge_component)
+	outData['demandAdj_BESS'] = list(demand - BESS)
+	outData['demandAdj_TESS'] = list(demand - vbat_discharge_component)
 	outData['demandAdj_GEN'] = list(demand - generator)
 
 	outData['energyAdjustedMonthly_total'] = [sum(outData['demandAdj_total'][s:f]) for s, f in monthHours]
-	#outData['energyCostAdjusted_BESS'] = [eam*electricityCost for eam in outData['energyAdjustedMonthly_BESS']]
-	#outData['energyAdjustedMonthly_BESSdischarge'] = [sum(outData['demandAdj_BESSdischarge'][s:f]) for s, f in monthHours]
-	#outData['energyAdjustedMonthly_BESScharge'] = [sum(outData['demandAdj_BESScharge'][s:f]) for s, f in monthHours]
 	outData['energyAdjustedMonthly_BESS'] = [sum(outData['demandAdj_BESS'][s:f]) for s, f in monthHours]
 	outData['energyAdjustedMonthly_TESS'] = [sum(outData['demandAdj_TESS'][s:f]) for s, f in monthHours]
 	outData['energyAdjustedMonthly_GEN'] = [sum(outData['demandAdj_GEN'][s:f]) for s, f in monthHours]
@@ -779,6 +774,7 @@ def work(modelDir, inputDict):
 	outData['savings_BESS_allyears'] = list(np.full(projectionLength, np.sum(outData['savingsAdjusted_BESS'])))
 	outData['savings_TESS_allyears'] = list(np.full(projectionLength, np.sum(outData['savingsAdjusted_TESS'])))
 	outData['savings_GEN_allyears'] = list(np.full(projectionLength, np.sum(outData['savingsAdjusted_GEN'])))
+	outData['costs_grid_allyears'] = list(-1.0*np.full(projectionLength, np.sum(outData['energyCostAdjusted_total']))) ##costs are negative for plotting purposes
 
 	## Calculate BESS compensation per kWh
 	BESS_compensation_year1_array = np.array([sum(BESS[s:f])*rateCompensation for s, f in monthHours])
@@ -802,7 +798,6 @@ def work(modelDir, inputDict):
 	allDevices_compensation_year1_array = BESS_compensation_year1_array + GEN_compensation_year1_array + TESS_compensation_year1_array
 	allDevices_compensation_year1_total = np.sum(allDevices_compensation_year1_array)
 	allDevices_compensation_allyears_array = BESS_compensation_allyears_array + GEN_compensation_allyears_array + TESS_compensation_allyears_array
-	
 
 	####################################################################################
 	## Calculate the financial costs and savings of controlling member-consumer DERs
@@ -817,6 +812,12 @@ def work(modelDir, inputDict):
 	BESS_subsidy_allyears_array = np.full(projectionLength, BESS_subsidy_ongoing*12.0)
 	BESS_subsidy_allyears_array[0] += BESS_subsidy_onetime
 
+	## Calculate total costs for BESS
+	gridCosts_BESS_year1_total = electricityCost*np.sum(grid_charging_BESS)
+	gridCosts_BESS_allyears_array = np.full(projectionLength, gridCosts_BESS_year1_total)
+	totalCosts_BESS_allyears_array = gridCosts_BESS_allyears_array + BESS_subsidy_allyears_array + BESS_compensation_allyears_array
+	outData['totalCosts_BESS_allyears'] = list(-1.0*totalCosts_BESS_allyears_array) ## Costs are negative for plotting purposes
+
 	## Calculate Generator Subsidy for year 1 and the projection length (all years)
 	## Year 1 includes the onetime subsidy, but subsequent years do not.
 	GEN_subsidy_ongoing = float(inputDict['GEN_subsidy_ongoing'])
@@ -824,12 +825,22 @@ def work(modelDir, inputDict):
 	GEN_subsidy_year1_total =  GEN_subsidy_onetime + (GEN_subsidy_ongoing*12.0)
 	GEN_subsidy_allyears_array = np.full(projectionLength, GEN_subsidy_ongoing*12.0)
 	GEN_subsidy_allyears_array[0] += GEN_subsidy_onetime
+	
+	## Calculate total costs for GEN
+	totalCosts_GEN_allyears_array = GEN_subsidy_allyears_array + GEN_compensation_allyears_array
+	outData['totalCosts_GEN_allyears'] = list(-1.0*totalCosts_GEN_allyears_array) ## Costs are negative for plotting purposes
 
 	## Calculate the total TESS subsidies for year 1 and the projection length (all years)
 	## Year 1 includes the onetime subsidy, but subsequent years do not.
 	combinedTESS_subsidy_year1_total = combined_device_results['combinedTESS_subsidy_onetime'] + (combined_device_results['combinedTESS_subsidy_ongoing']*12.0)
 	combinedTESS_subsidy_allyears_array = np.full(projectionLength, combined_device_results['combinedTESS_subsidy_ongoing']*12.0)
 	combinedTESS_subsidy_allyears_array[0] += combined_device_results['combinedTESS_subsidy_onetime']
+
+	## Calculate total costs for TESS
+	gridCosts_TESS_year1_total = electricityCost*np.sum(vbat_charge_component)
+	gridCosts_TESS_allyears_array = np.full(projectionLength, gridCosts_TESS_year1_total)
+	totalCosts_TESS_allyears_array = gridCosts_TESS_allyears_array + combinedTESS_subsidy_allyears_array + TESS_compensation_allyears_array
+	outData['totalCosts_TESS_allyears'] = list(-1.0*totalCosts_TESS_allyears_array) ## Costs are negative for plotting purposes
 
 	## Calculate the total TESS+BESS+generator subsidies for year 1 and the projection length (all years)
 	## The first month of Year 1 includes the onetime subsidy, but subsequent months and years do not include the onetime subsidy again.
@@ -857,10 +868,13 @@ def work(modelDir, inputDict):
 	## NOTE: utilityCosts_allyears_total (below) assumes that the REopt BESS array will be the same for every year of the entire projectionLength (entire analysis)
 	startupCosts = float(inputDict['startupCosts'])
 	## TODO: Add grid charging costs from BESS and TESS? Currently the charging costs are included in the savings already
-	utilityCosts_year1_total = operationalCosts_year1_total + allDevices_subsidy_year1_total + allDevices_compensation_year1_total + startupCosts
-	utilityCosts_year1_array = np.array(operationalCosts_year1_array) + np.array(allDevices_subsidy_year1_array) + np.array(allDevices_compensation_year1_array)
+	gridCosts_year1_array = np.array(outData['energyCostAdjusted_total'])
+	gridCosts_year1_total = np.sum(gridCosts_year1_array)
+	gridCosts_allyears_array = np.full(projectionLength, gridCosts_year1_total)
+	utilityCosts_year1_total = operationalCosts_year1_total + allDevices_subsidy_year1_total + allDevices_compensation_year1_total + startupCosts + gridCosts_year1_total
+	utilityCosts_year1_array = np.array(operationalCosts_year1_array) + np.array(allDevices_subsidy_year1_array) + np.array(allDevices_compensation_year1_array) + gridCosts_year1_array
 	utilityCosts_year1_array[0] += startupCosts
-	utilityCosts_allyears_array = operationalCosts_allyears_array + allDevices_subsidy_allyears_array + allDevices_compensation_allyears_array
+	utilityCosts_allyears_array = operationalCosts_allyears_array + allDevices_subsidy_allyears_array + allDevices_compensation_allyears_array + gridCosts_allyears_array
 	utilityCosts_allyears_array[0] += startupCosts
 	utilityCosts_allyears_total = np.sum(utilityCosts_allyears_array)
 	
