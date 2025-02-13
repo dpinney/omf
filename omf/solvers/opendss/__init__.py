@@ -573,7 +573,9 @@ def hosting_capacity_max(FNAME, GEN_BUSES, STEPS, KW):
 					new_tree.insert(insertion_index, new_gen)
 			# Calc voltages.
 			dssConvert.treeToDss(new_tree, 'HOSTCAP.dss')
-			voltagePlot('HOSTCAP.dss')
+			runDSS('HOSTCAP.dss')
+			runDssCommand(f'export voltages "{filedir}/volts.csv"')
+			#voltagePlot('HOSTCAP.dss')
 			df = pd.read_csv(volt_file)
 			v_max_pu1, v_max_pu2, v_max_pu3 =  df[' pu1'].max(), df[' pu2'].max(), df[' pu2'].max()
 			v_max_pu_all = max(v_max_pu1, v_max_pu2, v_max_pu3)
