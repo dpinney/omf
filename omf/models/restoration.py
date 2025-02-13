@@ -16,7 +16,11 @@ import omf
 from omf import geo
 from omf.models import __neoMetaModel__
 from omf.models.__neoMetaModel__ import *
-from omf.solvers.opendss import dssConvertToBeTested as dssConvert
+from omf.solvers.opendss.dssConvert import *
+from omf.solvers.opendss.dssConvert import _dssToOmd_toBeTested as dssToOmd
+from omf.solvers.opendss.dssConvert import _evilDssTreeToGldTree_toBeTested as evilDssTreeToGldTree
+from omf.solvers.opendss.dssConvert import _treeToDss_toBeTested as treeToDss
+from omf.solvers.opendss.dssConvert import _dss_to_clean_via_save_toBeTested as dss_to_clean_via_save
 from omf.solvers import PowerModelsONM
 from omf.comms import createGraph
 from omf.models.resilientCommunity import runCalculations as makeResComOutputCsv
@@ -480,7 +484,7 @@ def tradMetricsByMgTable(outputTimeline, loadMgDict, startTime, numTimeSteps, mo
 		sumBCS = sum([loadBcsDict[load] for load in loadList])
 		if CS != 0:
 			averageCCS = sum([loadCcsDict[load] for load in loadList])/len(loadList)
-			averageCCI = percentileofscore(list(loadCcsDict.values()),averageCCS)
+			averageCCI = float(percentileofscore(list(loadCcsDict.values()),averageCCS))
 			averageCCIxPriorities = sum([mergedLoadWeights[load] for load in loadList])/len(loadList)
 		else:
 			averageCCI = 'n/a'
@@ -1028,7 +1032,7 @@ def getMicrogridInfo(modelDir, pathToOmd, settingsFile, makeCSV = True):
 
 	return {'loadMgDict':loadMgDict, 'busMgDict':busMgDict, 'obMgDict':obMgDict, 'mgIDs':mgIDs}
 
-def makeLoadCciDict(modelDir, pathToOmd):
+def makeLoadCciDict(modelDir, pathToOmd, customerInfo):
 	''' Returns 3 dictionaries of loads and their CCI's, CCS's, & BCS's respectively in the following format:
 		
 		{loadName1:cci1, loadName2:cci2, loadName3:cci3, ...},
@@ -1041,7 +1045,13 @@ def makeLoadCciDict(modelDir, pathToOmd):
 	ccsDict = {}
 	bcsDict = {}
 	# Uncomment to use resilientCommunity. 
-	'''makeResComOutputCsv(pathToOmd, modelDir, ['line', 'transformer', 'fuse'])
+
+	makeResComOutputCsv(pathToOmd		= pathToOmd, 
+						pathToLoadsFile	= customerInfo, 
+						avgPeakDemand	= 4.25,
+						loadsTypeList	= ['residential', 'manufacturing', 'mining', 'construction', 'agriculture', 'finance', 'retail', 'services', 'utilities', 'public'],
+						modelDir		= modelDir,		
+						equipmentList	= ['line', 'transformer', 'fuse'])
 	with open(pJoin(modelDir, 'resilientCommunityOutput.csv'), mode='r') as infile:
 		reader = csv.DictReader(infile)
 		for row in reader:
@@ -1543,7 +1553,7 @@ def graphMicrogrid(modelDir, pathToOmd, profit_on_energy_sales, restoration_cost
 	outageCostsByType = {busType: [] for busType in businessTypes}
 	avgkWColumn = []
 	durationColumn = []
-	dssTree = dssConvert.dssToTree(f'{modelDir}/circuit_clean.dss')
+	dssTree = dssToTree(f'{modelDir}/circuit_clean.dss')
 	loadShapeMeanMultiplier = {}
 	loadShapeMeanActual = {}
 	for dssLine in dssTree:
@@ -1738,9 +1748,9 @@ def __buildCustomEvents(eventsCSV='', feeder='', customEvents='customEvents.json
 	if feeder.endswith('.omd'):
 		with open(feeder) as omdFile:
 			tree = json.load(omdFile)['tree']
-		niceDss = dssConvert.evilGldTreeToDssTree(tree)
-		dssConvert.treeToDss(niceDss, 'circuitOmfCompatible.dss')
-		dssTree = dssConvert.dssToTree('circuitOmfCompatible.dss')
+		niceDss = evilGldTreeToDssTree(tree)
+		treeToDss(niceDss, 'circuitOmfCompatible.dss')
+		dssTree = dssToTree('circuitOmfCompatible.dss')
 	else: return('Error: Feeder must be an OMD file.')
 	outageAssets = [] # formerly row[0] for row in outageReader
 	customEventList = []
@@ -1770,6 +1780,7 @@ def copyInputFilesToModelDir(modelDir, inputDict):
 
 		'mgTagging', 'loadPriority', 'customerInfo', 'event'
 	'''
+	# TODO: See if there's any reason it's done this way as opposed to just copying files to the modelDir with shutil.copy(src,dest)
 	pathToLocalFile = {}
 	if inputDict['microgridTaggingFileName'] != '':
 		try:
@@ -1819,12 +1830,12 @@ def work(modelDir, inputDict):
 	tree = omd['tree']
 
 	# Output a .dss file, which will be needed for ONM.
-	niceDss = dssConvert.evilGldTreeToDssTree(tree)
-	dssConvert.treeToDss(niceDss, f'{modelDir}/circuit.dss')
-	# dssConvert.treeToDss(niceDss, f'{modelDir}/circuitOmfCompatible.dss') # for querying loadshapes
-	dssConvert.dss_to_clean_via_save(f'{modelDir}/circuit.dss', f'{modelDir}/circuit_clean.dss')
+	niceDss = evilGldTreeToDssTree(tree)
+	treeToDss(niceDss, f'{modelDir}/circuit.dss')
+	# treeToDss(niceDss, f'{modelDir}/circuitOmfCompatible.dss') # for querying loadshapes
+	dss_to_clean_via_save(f'{modelDir}/circuit.dss', f'{modelDir}/circuit_clean.dss')
 	
-	# dssConvert.dssToOmd(f'{modelDir}/circuit_clean.dss', f'{modelDir}/circuit_clean.dss.omd')
+	# dssToOmd(f'{modelDir}/circuit_clean.dss', f'{modelDir}/circuit_clean.dss.omd')
 	# omdFilePath = f'{modelDir}/circuit_clean.dss.omd'
 
 	omdFilePath = f'{modelDir}/{feederName}.omd'
@@ -1833,7 +1844,8 @@ def work(modelDir, inputDict):
 	
 	loadCciDict, loadCcsDict, loadBcsDict = makeLoadCciDict(
 		modelDir 				= modelDir, 
-		pathToOmd				= omdFilePath
+		pathToOmd				= omdFilePath,
+		customerInfo			= pathToLocalFile['customerInfo']
 	)
 	pathToMergedPriorities, pathToTransformedPriorities = combineLoadPriorityWithCCI(
 		modelDir				= modelDir,
@@ -1961,6 +1973,9 @@ def new(modelDir):
 	loadPriority_file_data = open(pJoin(*loadPriority_file_path)).read()
 	microgridTagging_file_path = [__neoMetaModel__._omfDir,'static','testFiles','iowa240_dwp_22.microgridTagging.basic.json']
 	microgridTagging_file_data = open(pJoin(*microgridTagging_file_path)).read()
+	customerInfo_file_path = [__neoMetaModel__._omfDir,'static','testFiles','restoration','customerInfoExample.csv']
+	customerInfo_file_data = open(pJoin(*customerInfo_file_path)).read()
+
 	# ====== Nreca1824 Test Case
 	# feeder_file_path = [__neoMetaModel__._omfDir,'static','testFiles','nreca1824_dwp.omd']
 	# event_csv_path = [__neoMetaModel__._omfDir,'static','testFiles','nreca1824events.csv']
@@ -1981,8 +1996,8 @@ def new(modelDir):
 		'profit_on_energy_sales': '0.03',
 		'restoration_cost': '100',
 		'hardware_cost': '550',
-		'customerFileName': '',
-		'customerData': '',
+		'customerFileName': customerInfo_file_path[-1],
+		'customerData': customerInfo_file_data,
 		'eventFileName': event_file_path[-1],
 		'eventData': open(pJoin(*event_file_path)).read(),
 		'solFidelity': '0.05',

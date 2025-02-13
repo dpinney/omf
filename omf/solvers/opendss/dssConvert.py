@@ -177,6 +177,124 @@ def dss_to_clean_via_save(dss_file, clean_out_path, add_pf_syntax=True, clean_up
 	with open(clean_out_path, 'w') as out_file:
 		out_file.write(clean_out)
 
+def _dss_to_clean_via_save_toBeTested(dss_file, clean_out_path, add_pf_syntax=True, clean_up=False, fix_rptd_keys=True):
+	''' Contains clearly marked additions that have not been rigorously tested yet.
+	
+	Updated function for OpenDSS v1.7.4 which does everything differently from earlier versions...
+	Converts raw OpenDSS circuit definition files to the *.clean.dss syntax required by OMF.
+	This version uses the opendss save functionality to better preserve dss syntax.'''
+	# Execute opendss's save command reliably on a circuit. opendssdirect fails at this.
+	import os, re, shutil, subprocess
+	dirname = os.path.dirname(dss_file)
+	shutil.rmtree(f'{dirname}/SAVED_DSS', ignore_errors=True)
+	# Make a dss file that can reliably save a dang circuit.
+	contents = open(dss_file,'r').read()
+	contents += '\nsave circuit dir=SAVED_DSS'
+	with open(f'{dirname}/saver.dss','w') as saver_file:
+		saver_file.write(contents)
+	# Run that saver file.
+	subprocess.run(['opendsscmd', 'saver.dss'], cwd=dirname)
+	dss_folder_path = f'{dirname}/SAVED_DSS'
+	# Get the object file paths
+	ob_files = os.listdir(f'{dss_folder_path}')
+	oops_folders = [x for x in ob_files if os.path.isdir(f'{dss_folder_path}/{x}')]
+	# HACK: Handle subfolders
+	for folder in oops_folders:
+		ob_files.extend([f'{folder}/{x}' for x in os.listdir(f'{dss_folder_path}/{folder}')])
+		ob_files.remove(folder)
+	# Generate clean each of the object files.
+	clean_copies = {}
+	print('All files detected:', ob_files)
+	for fname in ob_files:
+		with open(f'{dss_folder_path}/{fname}', 'r') as ob_file:
+			ob_data = ob_file.read().lower() # lowercase everything
+			ob_data = ob_data.replace('"', '') # remove quote characters
+			ob_data = ob_data.replace('\t', ' ') # tabs to spaces
+			ob_data = re.sub(r' +', r' ', ob_data) # remove consecutive spaces
+			ob_data = re.sub(r'(^ +| +$)', r'', ob_data) # remove leading and trailing whitespace
+			ob_data = ob_data.replace('\n~', '') # remove tildes
+			ob_data = re.sub(r' *, *', r',', ob_data) # remove spaces around commas
+			ob_data = re.sub(r', *(\]|\))', r'\1', ob_data) # remove empty final list items
+
+			##########
+			# - Austin
+			##########
+			#ob_data = re.sub(r' +\| +', '|', ob_data) # remove spaces around bar characters
+			ob_data = re.sub(r'\s*\|\s*', '|', ob_data) # remove spaces around bar characters
+			##########
+			# - Austin
+			##########
+
+			ob_data = re.sub(r'(\[|\() *', r'\1', ob_data) # remove spaces after list start
+			ob_data = re.sub(r' *(\]|\))', r'\1', ob_data) # remove spaces before list end
+			ob_data = re.sub(r'(new|edit) ', r'\1 object=', ob_data) # add object= key
+			ob_data = re.sub(r'(\d) +(\d|\-)', r'\1,\2', ob_data) # replace space-separated lists with comma-separated
+			ob_data = re.sub(r'(\d) +(\d|\-)', r'\1,\2', ob_data) # HACK: second space-sep replacement to make sure it works
+			ob_data = re.sub(r'zipv=([\d\.\-,]+)', r'zipv=(\1)', ob_data) # HACK: fix zipv with missing parens
+			ob_data = re.sub(r'(redirect |buscoords |giscoords |makebuslist)', r'! \1', ob_data) # remove troublesome Master.dss redirects.
+			clean_copies[fname.lower()] = ob_data
+	# Move subfolder data into main folder content list
+	# Need to loop through list(clean_copies.keys()), not clean_copies because otherwise you may change dict keys while iterating through that dict, causing an error
+	for fname in list(clean_copies.keys()):
+		if '/' in fname:
+			folder, sub_fname = fname.split('/')
+			if sub_fname in clean_copies:
+				print(f'WARNING! Combining {sub_fname} with other subfolder data')
+				clean_copies[sub_fname] += '\n\n\n' + clean_copies[fname]
+			else:
+				clean_copies[sub_fname] = clean_copies[fname]
+			del clean_copies[fname]
+	print('CLEAN COPIES AFTER MERGE:', clean_copies.keys())
+	# Special handling for buscoords
+	if 'buscoords.dss' in clean_copies:
+		bus_data = clean_copies['buscoords.dss']
+		nice_buses = re.sub(r'([\w_\-\.]+),([\w_\-\.]+),([\w_\-\.]+)', r'setbusxy bus=\1 x=\2 y=\3', bus_data)
+		clean_copies['buscoords.dss'] = 'makebuslist\n' + nice_buses
+	#HACK: This is the order in which things need to be inserted or opendss errors out. Lame! Also note that pluralized things are from subfolders.
+	##########
+	# - Saeed
+	##########
+	# Added 'storage.dss' to  CANONICAL_DSS_ORDER after 'pvsystem.dss' and before 'load.dss'
+	# CANONICAL_DSS_ORDER = ['master.dss', 'loadshape.dss', 'vsource.dss', 'transformer.dss', 'transformers.dss', 'reactor.dss', 'regcontrol.dss', 'cndata.dss', 'wiredata.dss', 'linegeometry.dss', 'linecode.dss', 'spectrum.dss', 'swtcontrol.dss', 'tcc_curve.dss', 'capacitor.dss', 'capacitors.dss', 'growthshape.dss', 'line.dss', 'branches.dss', 'capcontrol.dss', 'generator.dss', 'pvsystem.dss', 'load.dss', 'loads.dss', 'energymeter.dss', 'fault.dss', 'relay.dss', 'recloser.dss', 'fuse.dss', 'indmach012.dss', 'monitor.dss', 'buscoords.dss', 'busvoltagebases.dss']
+	CANONICAL_DSS_ORDER = ['master.dss', 'loadshape.dss', 'vsource.dss', 'transformer.dss', 'transformers.dss', 'reactor.dss', 'regcontrol.dss', 'cndata.dss', 'wiredata.dss', 'linegeometry.dss', 'linecode.dss', 'spectrum.dss', 'swtcontrol.dss', 'tcc_curve.dss', 'capacitor.dss', 'capacitors.dss', 'growthshape.dss', 'line.dss', 'branches.dss', 'capcontrol.dss', 'generator.dss', 'pvsystem.dss', 'storage.dss', 'load.dss', 'loads.dss', 'energymeter.dss', 'fault.dss', 'relay.dss', 'recloser.dss', 'fuse.dss', 'indmach012.dss', 'monitor.dss', 'buscoords.dss', 'busvoltagebases.dss']
+	##########
+	# - Saeed
+	##########
+	# Note files we got that aren't in canonical files:
+	for fname in clean_copies:
+		if fname not in CANONICAL_DSS_ORDER:
+			print(f'File available but ignored: {fname}')
+	# Construct output from files, ignoring master, which is bugged in opendss as of 2023-01-17
+	clean_out = ''
+	for fname in CANONICAL_DSS_ORDER:
+		if fname not in clean_copies:
+			print(f'Missing file: {fname}')
+		else:
+			clean_out += f'\n\n!!!{fname}\n'
+			clean_out += clean_copies[fname]
+	clean_out = clean_out.lower()
+	# Optional: include a slug of code to run powerflow
+	if add_pf_syntax:
+		powerflow_slug = '\n\n!powerflow code\nset maxiterations=1000\nset maxcontroliter=1000\ncalcv\nsolve\nshow quantity=voltage'
+		clean_out = clean_out + powerflow_slug
+	# Optional: Fix repeated wdg=X keys, where x=2
+	if fix_rptd_keys:
+		cleaner_out = ''
+		for line in clean_out.split('\n'):
+			if '\"transformer' in line:
+				line = fix_repeated_keys(line)
+			cleaner_out += line + '\n'
+		clean_out = cleaner_out
+	# Optional: remove intermediate files and write a single clean file.
+	if clean_up:
+		shutil.rmtree(dss_folder_path, ignore_errors=True)
+		try:
+			os.remove(f'{dirname}/saver.dss')
+		except:
+			pass
+	with open(clean_out_path, 'w') as out_file:
+		out_file.write(clean_out)
+
 def dssToTree(pathToDssOrString, is_path=True):
 	''' Convert a .dss file to an in-memory, OMF-compatible 'tree' object.
 	Note that we only support a VERY specifically-formatted DSS file.'''
@@ -233,6 +351,29 @@ def treeToDss(treeObject, outputPath):
 		line = ob['!CMD']
 		for key in ob:
 			if not key.startswith('!'):
+				line = f"{line} {key}={ob[key]}"
+			if key.startswith('!TEST'):
+				line = f"{line} {ob['!TEST']}"
+		outFile.write(line + '\n')
+	outFile.close()
+
+def _treeToDss_toBeTested(treeObject, outputPath):
+	''' Contains clearly marked additions that have not been rigorously tested yet.'''
+	outFile = open(outputPath, 'w')
+	for ob in treeObject:
+		line = ob['!CMD']
+		for key in ob:
+			if not key.startswith('!'):
+				##########
+				# - Saeed
+				##########
+				if key == 'element' and '.' not in ob.get('element'):
+					ob['element'] = f"line.{ob['element']}"
+				if key == 'monitoredobj' and '.' not in ob.get('monitoredobj'):
+					ob['monitoredobj'] = f"line.{ob['monitoredobj']}"
+				##########
+				# - Saeed
+				##########
 				line = f"{line} {key}={ob[key]}"
 			if key.startswith('!TEST'):
 				line = f"{line} {ob['!TEST']}"
@@ -354,6 +495,189 @@ def evilDssTreeToGldTree(dssTree):
 					_extend_with_exc(ob, gldTree[str(g_id)], ['object','!CMD'])
 			elif ob.get('object','').split('.')[0]=='vsource':
 				obtype, name = ob['object'].split('.')
+				conn, connCode = ob.get('bus1').split('.', maxsplit=1)
+				gldTree[str(g_id)] = {
+					'object': obtype,
+					'name': name,
+					'parent': conn,
+					'!CONNCODE': '.' + connCode
+				}
+				_extend_with_exc(ob, gldTree[str(g_id)], ['object','bus1'])
+			elif ob['!CMD'] in ['edit','open','close']:
+				#TODO: handle edited objects? maybe just extend the 'new' block (excluding vsource) because the functionality is basically the same.
+				warnings.warn(f"Ignored 'edit' command: {ob}")
+			elif ob['!CMD'] not in ['new', 'setbusxy', 'edit']:
+				#command-like objects.
+				gldTree[str(g_id)] = {
+					'object': '!CMD',
+					'name': ob['!CMD']
+				}
+				_extend_with_exc(ob, gldTree[str(g_id)], ['!CMD', 'object', 'name'])
+			else:
+				warnings.warn(f"Ignored {ob}")
+			g_id += 1
+		except:
+			raise Exception(f"\n\nError encountered on parsing object {ob}\n")
+	# Warn on buses with no coords.
+	#no_coord_buses = set(bus_names) - set(bus_with_coords)
+	#if len(no_coord_buses) != 0:
+		#warnings.warn(f"Buses without coordinates:{no_coord_buses}")
+	return gldTree
+
+def _evilDssTreeToGldTree_toBeTested(dssTree):
+	''' Contains clearly marked additions that have not been rigorously tested yet.
+	
+	World's worst and ugliest converter. Hence evil. 
+	We built this to do quick-and-dirty viz of openDSS files. '''
+	gldTree = {}
+	g_id = 1
+	# Build bad gld representation of each object
+	bus_names = []
+	bus_with_coords = []
+	# Handle all the components.
+	for ob in dssTree:
+		try:
+			if ob['!CMD'] == 'setbusxy':
+				gldTree[str(g_id)] = {
+					'object': 'bus',
+					'name': ob['bus'],
+					'latitude': ob['y'],
+					'longitude': ob['x']
+				}
+				bus_with_coords.append(ob['bus'])
+			elif ob['!CMD'] == 'new':
+				obtype, name = ob['object'].split('.')
+				if 'bus1' in ob and 'bus2' in ob:
+					# line-like object. includes reactors.
+					fro, froCode = ob['bus1'].split('.', maxsplit=1)
+					to, toCode = ob['bus2'].split('.', maxsplit=1)
+					gldTree[str(g_id)] = {
+						'object': obtype,
+						'name': name,
+						'from': fro,
+						'to': to,
+						'!FROCODE': '.' + froCode,
+						'!TOCODE': '.' + toCode
+					}
+					bus_names.extend([fro, to])
+					stuff = gldTree[str(g_id)]
+					_extend_with_exc(ob, stuff, ['object','bus1','bus2','!CMD'])
+				elif 'buses' in ob:
+					#transformer-like object.
+					bb = ob['buses']
+					bb = bb.replace(']','').replace('[','').split(',')
+					##########
+					# - Austin
+					##########
+					# - TODO: how do we handle delta-connected transformer windings? We don't currently
+					b1 = bb[0]
+					if '.' not in b1:
+						if int(ob.get('phases')) == 1:
+							b1 += '.1'
+						elif int(ob.get('phases')) == 2:
+							b1 += '.1.2'
+						elif int(ob.get('phases')) == 3:
+							b1 += '.1.2.3'
+					fro, froCode = b1.split('.', maxsplit=1)
+					ob['!FROCODE'] = '.' + froCode
+					b2 = bb[1]
+					if '.' not in b2:
+						if int(ob.get('phases')) == 1:
+							b2 += '.1'
+						elif int(ob.get('phases')) == 2:
+							b2 += '.1.2'
+						elif int(ob.get('phases')) == 3:
+							b2 += '.1.2.3'
+					##########
+					# - Austin
+					##########
+					to, toCode = b2.split('.', maxsplit=1)
+					ob['!TOCODE'] = '.' + toCode
+					gldobj = {
+						'object': obtype,
+						'name': name,
+						'from': fro,
+						'to': to
+					}
+					bus_names.extend([fro, to])
+					if len(bb)==3:
+						b3 = bb[2]
+						to2, to2Code = b3.split('.', maxsplit=1)
+						ob['!TO2CODE'] = '.' + to2Code
+						gldobj['to2'] = to2
+						bus_names.append(to2)
+					gldTree[str(g_id)] = gldobj
+					_extend_with_exc(ob, gldTree[str(g_id)], ['object','buses','!CMD'])
+				elif 'bus' in ob:
+					#load-like object.
+					bus_root, connCode = ob['bus'].split('.', maxsplit=1)
+					gldTree[str(g_id)] = {
+						'object': obtype,
+						'name': name,
+						'parent': bus_root,
+						'!CONNCODE': '.' + connCode
+					}
+					bus_names.append(bus_root)
+					_extend_with_exc(ob, gldTree[str(g_id)], ['object','bus','!CMD'])
+				elif 'bus1' in ob and 'bus2' not in ob:
+					#load-like object, alternate syntax
+					try:
+						bus_root, connCode = ob['bus1'].split('.', maxsplit=1)
+						ob['!CONNCODE'] = '.' + connCode
+					except:
+						bus_root = ob['bus1'] # this shoudln't happen if the .clean syntax guide is followed.
+					gldTree[str(g_id)] = {
+						'object': obtype,
+						'name': name,
+						'parent': bus_root,
+					}
+					bus_names.append(bus_root)
+					_extend_with_exc(ob, gldTree[str(g_id)], ['object','bus1','!CMD'])
+				elif 'element' in ob:
+					#control object (connected to another object instead of a bus)
+					#cobtype, cobname, connCode = ob['element'].split('.', maxsplit=2)
+					cobtype, cobname = ob['element'].split('.', maxsplit=1)
+					# if obtype == 'capcontrol':
+					# 	obparent = ob['capacitor']
+					# else:
+					# 	obparent = cobtype + '.' + cobname
+					gldTree[str(g_id)] = {
+						'object': obtype,
+						'name': name,
+				##########
+				# - Saeed
+				##########
+						'parent': cobname,
+					}
+					_extend_with_exc(ob, gldTree[str(g_id)], ['object','element','!CMD'])
+				elif 'monitoredobj' in ob:
+					cobtype, cobname = ob['monitoredobj'].split('.', maxsplit=1)
+					gldTree[str(g_id)] = {
+						'object': obtype,
+						'name': name,
+						'monitoredobj': cobname,
+					}
+					_extend_with_exc(ob, gldTree[str(g_id)], ['object','monitoredobj','!CMD'])
+				##########
+				# - Saeed
+				##########
+				else:
+					#config-like object
+					gldTree[str(g_id)] = {
+						'object': obtype,
+						'name': name
+					}
+					_extend_with_exc(ob, gldTree[str(g_id)], ['object','!CMD'])
+			elif ob.get('object','').split('.')[0]=='vsource':
+				obtype, name = ob['object'].split('.')
+				##########
+				# - Austin
+				##########
+				if '.' not in ob['bus1']:
+					ob['bus1'] += '.1.2.3'
+				##########
+				# - Austin
+				##########
 				conn, connCode = ob.get('bus1').split('.', maxsplit=1)
 				gldTree[str(g_id)] = {
 					'object': obtype,
@@ -567,6 +891,76 @@ def dssToOmd(dssFilePath, omdFilePath, RADIUS=0.0002, write_out=True):
 					x = math.cos(angle)*RADIUS;
 					y = math.sin(angle)*RADIUS;
 					ob['latitude'] = str(float(parent_lat) + x)
+					ob['longitude'] = str(float(parent_lon) + y)
+	if write_out:
+		evilToOmd(evil_glm, omdFilePath)
+	return evil_glm
+
+def _dssToOmd_toBeTested(dssFilePath, omdFilePath, RADIUS=0.0002, write_out=True):
+	''' Contains clearly marked additions that have not been rigorously tested yet.
+	
+	Converts the dss file to an OMD, returns the omd tree
+	SIDE-EFFECTS: creates the OMD file'''
+	# Injecting additional coordinates.
+	#TODO: derive sensible RADIUS from lat/lon numbers.
+	tree = dssToTree(dssFilePath)
+	##########
+	# - Saeed
+	##########
+	evil_glm = _evilDssTreeToGldTree_toBeTested(tree)
+	##########
+	# - Saeed
+	##########
+	name_map = _name_to_key(evil_glm)
+	# print(name_map)
+	for ob in evil_glm.values():
+		ob_name = ob.get('name','')
+		ob_type = ob.get('object','')
+		if 'parent' in ob:
+			parent_name = ob['parent']
+			if ob_type == 'capcontrol':
+				cap_name = ob['capacitor']
+				cap_id = name_map[cap_name]
+				if 'parent' in evil_glm[cap_id]:
+					parent_name = evil_glm[cap_id]['parent']
+				else:
+					parent_name = ob['parent']
+			if ob_type == 'energymeter':
+				##########
+				# - Saeed
+				##########
+				short_parent_name = parent_name.split('.')[1] if len(parent_name.split('.')) == 2 else parent_name
+				##########
+				# - Saeed
+				##########
+				parent_id = name_map[short_parent_name]
+				if 'parent' in evil_glm[parent_id]:
+					parent_name = evil_glm[parent_id]['parent']
+				elif evil_glm[parent_id].get('object','') == 'line':
+					from_name = evil_glm[parent_id].get('from', None)
+					to_name = evil_glm[parent_id].get('from', None)
+					if from_name is not None:
+						parent_name = from_name
+					elif to_name is not None:
+						parent_name = to_name
+					else:
+						parent_name = ob['parent']
+			# Only do child movement if RADIUS > 0.
+			if RADIUS > 0:
+				if name_map.get(parent_name): # Dss files without explicity set bus coords will break on this function without this line.
+					# get location of parent object.
+					parent_loc = name_map[parent_name]
+					parent_ob = evil_glm[parent_loc]
+					parent_lat = parent_ob.get('latitude', None)
+					parent_lon = parent_ob.get('longitude', None)
+					# place randomly on circle around parent.
+					angle = random.random()*3.14159265*2;
+					x = math.cos(angle)*RADIUS;
+					y = math.sin(angle)*RADIUS;
+					try:
+						ob['latitude'] = str(float(parent_lat) + x)
+					except Exception as e:
+						raise(e)
 					ob['longitude'] = str(float(parent_lon) + y)
 	if write_out:
 		evilToOmd(evil_glm, omdFilePath)
