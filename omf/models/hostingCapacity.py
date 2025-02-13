@@ -43,7 +43,6 @@ def sandia_algo_post_check(modelDir):
 		print("HostingCapacity - ModelFree Sandia Algorithm - mohca_sandia.log file not found: ", {e})
 	return retVal
 
-
 def hosting_capacity_map( modelDir, inputDict, outData ):
 	feederName = [x for x in os.listdir(modelDir) if x.endswith('.omd')][0]
 	path_to_omd = Path(modelDir, feederName)
@@ -249,8 +248,8 @@ def run_ami_algorithm( modelDir, inputDict, outData ):
 			raise Exception(errorMessage)
 		present_q_warning = sandia_algo_post_check(modelDir=modelDir)
 		if present_q_warning == True:
-			outData["modelFreeWarningFlag"] = present_q_warning
-			outData["modelFreeWarningInfo"] = f"Reactive power missing from data set. Estimating hosting capacity through power factor from given input 'Load Power Factor'"
+			outData["reactivePowerWarningFlag"] = present_q_warning
+			outData["reactivePowerWarningInfo"] = f"Reactive power missing from data set. Estimating hosting capacity through power factor from given input 'Load Power Factor'"
 	elif inputDict[ "algorithm" ] == "iastate":
 		mohca_cl.iastate( inputPath, outputPath )
 	else:
