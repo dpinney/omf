@@ -63,22 +63,15 @@ def work(modelDir, inputDict):
 		}
 	}
 
-	## Add diesel generator to input scenario
-	if inputDict['dieselGenerator'] == 'Yes':
-		fuel_avail_btu = float(inputDict['fuel_avail_btu']) * float(inputDict['number_devices_gen'])  ## unit: btu
-		fuel_cost_per_mbtu = float(inputDict['fuel_cost_per_mbtu'])  ## unit: $ per million btu
-		btu_per_gal = 137381  ## 1 gallon = 85,098 Btu (natural gas) or 137,381 Btu (diesel)
-		fuel_avail_gal = fuel_avail_btu / btu_per_gal  ## unit: gal
-		fuel_cost_per_gal = (fuel_cost_per_mbtu / 1.e6) * btu_per_gal  ## unit: $/gal
-		#fuel_cost = fuel_avail_btu * fuel_cost_per_btu  ## unit: $
-
+	## Add fossil fuel generator to input scenario
+	if inputDict['fossilGenerator'] == 'Yes':
 		scenario['Generator'] = {
 			'existing_kw': float(inputDict['existing_gen_kw']) * float(inputDict['number_devices_gen']),
 			'max_kw': 0,
 			'min_kw': 0,
 			'only_runs_during_grid_outage': False,
-			'fuel_avail_gal': fuel_avail_gal,
-			'fuel_cost_per_gallon': fuel_cost_per_gal,
+			'fuel_avail_gal': float(inputDict['fuel_avail_gal']) * float(inputDict['number_devices_gen']),
+			'fuel_cost_per_gallon': float(inputDict['fuel_cost_per_gal']),
 		}
 
 	## Add a Battery Energy Storage System (BESS) section if enabled 
@@ -449,7 +442,7 @@ def work(modelDir, inputDict):
 						#stackgroup='one',
 						showlegend=showlegend))
 		
-	## Diesel Generator piece
+	## Fossil Fuel Generator piece
 	if 'Generator' in reoptResults:
 		fig.add_trace(go.Scatter(x=timestamps,
 						y = generator_W,
@@ -458,7 +451,7 @@ def work(modelDir, inputDict):
 						fill='tozeroy',
 						fillcolor='rgba(153,0,0,1)',
 						line=dict(color='rgba(0,0,0,0)'), #transparent line (to get around the Plotly default line)
-						name='Diesel Generator Serving Load',
+						name='Fossil Fuel Generator Serving Load',
 						line_shape=lineshape,
 						#stackgroup='one',
 						showlegend=showlegend))
@@ -963,12 +956,12 @@ def new(modelDir):
 		'demandCurve': demand_curve,
 		'tempCurve': temp_curve,
 
-		## Diesel Generator Inputs
-		'dieselGenerator': 'Yes',
+		## Fossil Fuel Generator Inputs
+		'fossilGenerator': 'Yes',
 		'number_devices_gen': '1000',
-		'existing_gen_kw': '20', ## based on Generac 20 kW model
-		'fuel_avail_btu': '13051195', ## based on Generac 20 kW diesel model with max tank of 95 gallons (95 gal x 137381 BTU/gal = 13051195 BTU)
-		'fuel_cost_per_mbtu': '25.4', ## based on fuel cost of $3.49/gallon of diesel
+		'existing_gen_kw': '20', ## Number is based on Generac 20 kW diesel model
+		'fuel_avail_gal': '95', ## Number is based on Generac 20 kW diesel model with max tank of 95 gallons
+		'fuel_cost_per_gal': '3.49', ## Number is based on fuel cost of diesel
 
 		## Chemical Battery Inputs
 		'numberBESS': '1000', ## Number of residential Tesla Powerwall 3 batteries
