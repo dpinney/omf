@@ -877,9 +877,9 @@ def work(modelDir, inputDict):
 	costs_demandCharge_allyears_array = np.full(projectionLength,costs_demandCharge_year1_total)
 
 	utilityCosts_year1_total = operationalCosts_year1_total + allDevices_subsidy_year1_total + allDevices_compensation_year1_total + startupCosts + gridCosts_year1_total + costs_demandCharge_year1_total
-	utilityCosts_year1_array = operationalCosts_year1_array + allDevices_subsidy_year1_array + allDevices_compensation_year1_array + gridCosts_year1_array + costs_demandCharge_year1_array
+	utilityCosts_year1_array = operationalCosts_year1_array + allDevices_subsidy_year1_array + allDevices_compensation_year1_array #+ gridCosts_year1_array + costs_demandCharge_year1_array
 	utilityCosts_year1_array[0] += startupCosts
-	utilityCosts_allyears_array = operationalCosts_allyears_array + allDevices_subsidy_allyears_array + allDevices_compensation_allyears_array + gridCosts_allyears_array + costs_demandCharge_allyears_array
+	utilityCosts_allyears_array = operationalCosts_allyears_array + allDevices_subsidy_allyears_array + allDevices_compensation_allyears_array #+ gridCosts_allyears_array + costs_demandCharge_allyears_array
 	utilityCosts_allyears_array[0] += startupCosts
 	utilityCosts_allyears_total = np.sum(utilityCosts_allyears_array)
 
