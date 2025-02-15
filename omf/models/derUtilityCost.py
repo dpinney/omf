@@ -919,6 +919,7 @@ def work(modelDir, inputDict):
 	outData['TESS_compensation_to_consumer_allyears'] = list(TESS_compensation_allyears_array*-1.)
 	outData['GEN_compensation_to_consumer_allyears'] = list(GEN_compensation_allyears_array*-1.)
 	outData['operationalCosts_allyears'] = list(operationalCosts_allyears_array*-1.)
+	outData['operationalCosts_year1'] = list(operationalCosts_year1_array*-1.)
 	startupCosts_year1_array = np.zeros(12)
 	startupCosts_year1_array[0] += startupCosts
 	startupCosts_allyears_array = np.full(projectionLength, 0.0)
@@ -926,6 +927,10 @@ def work(modelDir, inputDict):
 	outData['startupCosts_year1'] = list(startupCosts_year1_array*-1.)
 	outData['startupCosts_allyears'] = list(startupCosts_allyears_array*-1.)
 	
+	## Combine the startup and operational costs for displaying in the Monthly Cost Comparison table
+	startup_and_operational_costs_year1_array = startupCosts_year1_array + operationalCosts_year1_array
+	outData['startupAndOperationalCosts_year1'] = list(startup_and_operational_costs_year1_array)
+
 	# Model operations typically ends here.
 	# Stdout/stderr.
 	outData['stdout'] = 'Success'
@@ -974,7 +979,7 @@ def new(modelDir):
 		'electricityCost': '0.04',
 		'rateCompensation': '0.02', ## unit: $/kWh
 		'discountRate': '2',
-		'startupCosts': '2000000',
+		'startupCosts': '200000',
 		'TESS_subsidy_onetime_ac': '5.0',
 		'TESS_subsidy_ongoing_ac': '1.0',
 		'TESS_subsidy_onetime_hp': '10.0',
