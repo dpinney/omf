@@ -1014,6 +1014,45 @@ def getDssCoordinates(omdFilePath, outFilePath):
 			lineStr = "setbusxy bus=" + bus + " x=" + busLon + " y=" + busLat + "\n"
 			coordinateListFile.write(lineStr)
 
+def _transformerDssWdgToArrayFormat_toBeTested(opendss_path, out_path):
+	''' Takes a dss file formatted with windings defined one at a time using the wdg property for transformers and converts it to the accepted format that sets winding values all at once with arrays of values, saved to the out_path. 
+		
+		Example with most properties stripped out for conciseness:
+
+		Old: New object=Transformer.t1 windings=2 wdg=1 conn=wye kv=3 wdg=2 conn=wye kv=4
+
+		New: New object=Transformer.t1 windings=2 conns=[wye,wye] kvs=[3,4]
+	'''
+	listToStr = lambda lst: str(lst).replace("'","").replace(', ',',')
+	with open(opendss_path, 'r') as infile:
+		inputLines = infile.readlines()
+	outStr = ''
+	for line in inputLines:
+		if 'wdg=' not in line.lower():
+			outStr += line
+		else:
+			propertyList = line.replace('\n','').split(' ')
+			propertyDict = {}
+			for prop in propertyList:
+				try:
+					propName,propVal = prop.split('=')
+					propertyDict[propName] = propertyDict.get(propName,[])+[propVal]
+				except:
+					continue
+			# wdg = Integer representing the winding which will become the active winding for subsequent data. Not applicable to new format 
+			del propertyDict['wdg']
+			outLine = propertyList[0]
+			for propName,propValList in propertyDict.items():
+				if len(propValList) == 1 or propName.lower() == 'emerghkva':
+					outLine += f' {propName}={propValList[0]}'
+				elif propName == 'bus':
+					outLine += f' buses={listToStr(propValList)}'
+				else:
+					outLine += f' {propName}s={listToStr(propValList)}'
+			outStr += f'{outLine}\n'	
+	with open(out_path,'w') as outfile:
+		outfile.write(outStr)
+
 def _testsFull():
 	from omf.solvers.opendss import getVoltages, voltageCompare
 	import pandas as pd

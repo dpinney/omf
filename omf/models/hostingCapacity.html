@@ -156,16 +156,16 @@
 		<!--
 		We want the map to be displayed at the top, but it'll only display if model-based is there since its created there
 		-->
-		{% if allOutputDataDict['modelFreeWarningFlag'] == True %}
+		{% if allOutputDataDict['reactivePowerWarningFlag'] == True %}
 			<p class="reportTitle" style="page-break-before:always"><b>Model-Free Hosting Capacity Analysis Warning</b></p>
-				<div id="warningInformation" class="tightContent">
-						<p style="font-size: 20px; padding: 8px;"><span style="color: red; font-weight: bold;">WARNING: </span> {{ allOutputDataDict['modelFreeWarningInfo'] }} </p>
+				<div id="reactivePowerWarningInformation" class="tightContent">
+						<p style="font-size: 20px; padding: 8px;"><span style="color: red; font-weight: bold;">WARNING: </span> {{ allOutputDataDict['reactivePowerWarningInfo'] }} </p>
 				</div>
 			</p>
 		{% endif %}
 		{% if allOutputDataDict['mapWarningFlag'] == True %}
 			<p class="reportTitle" style="page-break-before:always"><b>Map Display Warning</b></p>
-				<div id="warningInformation" class="tightContent">
+				<div id="mapWarningInformation" class="tightContent">
 						<p style="font-size: 20px; padding: 8px;"><span style="color: red; font-weight: bold;">WARNING: </span> {{ allOutputDataDict['mapWarningInfo'] }} </p>
 				</div>
 			</p>

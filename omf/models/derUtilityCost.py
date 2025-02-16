@@ -63,22 +63,15 @@ def work(modelDir, inputDict):
 		}
 	}
 
-	## Add diesel generator to input scenario
-	if inputDict['dieselGenerator'] == 'Yes':
-		fuel_avail_btu = float(inputDict['fuel_avail_btu']) * float(inputDict['number_devices_gen'])  ## unit: btu
-		fuel_cost_per_mbtu = float(inputDict['fuel_cost_per_mbtu'])  ## unit: $ per million btu
-		btu_per_gal = 137381  ## 1 gallon = 85,098 Btu (natural gas) or 137,381 Btu (diesel)
-		fuel_avail_gal = fuel_avail_btu / btu_per_gal  ## unit: gal
-		fuel_cost_per_gal = (fuel_cost_per_mbtu / 1.e6) * btu_per_gal  ## unit: $/gal
-		#fuel_cost = fuel_avail_btu * fuel_cost_per_btu  ## unit: $
-
+	## Add fossil fuel generator to input scenario
+	if inputDict['fossilGenerator'] == 'Yes':
 		scenario['Generator'] = {
 			'existing_kw': float(inputDict['existing_gen_kw']) * float(inputDict['number_devices_gen']),
 			'max_kw': 0,
 			'min_kw': 0,
 			'only_runs_during_grid_outage': False,
-			'fuel_avail_gal': fuel_avail_gal,
-			'fuel_cost_per_gallon': fuel_cost_per_gal,
+			'fuel_avail_gal': float(inputDict['fuel_avail_gal']) * float(inputDict['number_devices_gen']),
+			'fuel_cost_per_gallon': float(inputDict['fuel_cost_per_gal']),
 		}
 
 	## Add a Battery Energy Storage System (BESS) section if enabled 
@@ -449,7 +442,7 @@ def work(modelDir, inputDict):
 						#stackgroup='one',
 						showlegend=showlegend))
 		
-	## Diesel Generator piece
+	## Fossil Fuel Generator piece
 	if 'Generator' in reoptResults:
 		fig.add_trace(go.Scatter(x=timestamps,
 						y = generator_W,
@@ -458,7 +451,7 @@ def work(modelDir, inputDict):
 						fill='tozeroy',
 						fillcolor='rgba(153,0,0,1)',
 						line=dict(color='rgba(0,0,0,0)'), #transparent line (to get around the Plotly default line)
-						name='Diesel Generator Serving Load',
+						name='Fossil Fuel Generator Serving Load',
 						line_shape=lineshape,
 						#stackgroup='one',
 						showlegend=showlegend))
@@ -884,9 +877,9 @@ def work(modelDir, inputDict):
 	costs_demandCharge_allyears_array = np.full(projectionLength,costs_demandCharge_year1_total)
 
 	utilityCosts_year1_total = operationalCosts_year1_total + allDevices_subsidy_year1_total + allDevices_compensation_year1_total + startupCosts + gridCosts_year1_total + costs_demandCharge_year1_total
-	utilityCosts_year1_array = operationalCosts_year1_array + allDevices_subsidy_year1_array + allDevices_compensation_year1_array + gridCosts_year1_array + costs_demandCharge_year1_array
+	utilityCosts_year1_array = operationalCosts_year1_array + allDevices_subsidy_year1_array + allDevices_compensation_year1_array #+ gridCosts_year1_array + costs_demandCharge_year1_array
 	utilityCosts_year1_array[0] += startupCosts
-	utilityCosts_allyears_array = operationalCosts_allyears_array + allDevices_subsidy_allyears_array + allDevices_compensation_allyears_array + gridCosts_allyears_array + costs_demandCharge_allyears_array
+	utilityCosts_allyears_array = operationalCosts_allyears_array + allDevices_subsidy_allyears_array + allDevices_compensation_allyears_array #+ gridCosts_allyears_array + costs_demandCharge_allyears_array
 	utilityCosts_allyears_array[0] += startupCosts
 	utilityCosts_allyears_total = np.sum(utilityCosts_allyears_array)
 
@@ -926,6 +919,7 @@ def work(modelDir, inputDict):
 	outData['TESS_compensation_to_consumer_allyears'] = list(TESS_compensation_allyears_array*-1.)
 	outData['GEN_compensation_to_consumer_allyears'] = list(GEN_compensation_allyears_array*-1.)
 	outData['operationalCosts_allyears'] = list(operationalCosts_allyears_array*-1.)
+	outData['operationalCosts_year1'] = list(operationalCosts_year1_array*-1.)
 	startupCosts_year1_array = np.zeros(12)
 	startupCosts_year1_array[0] += startupCosts
 	startupCosts_allyears_array = np.full(projectionLength, 0.0)
@@ -933,6 +927,10 @@ def work(modelDir, inputDict):
 	outData['startupCosts_year1'] = list(startupCosts_year1_array*-1.)
 	outData['startupCosts_allyears'] = list(startupCosts_allyears_array*-1.)
 	
+	## Combine the startup and operational costs for displaying in the Monthly Cost Comparison table
+	startup_and_operational_costs_year1_array = startupCosts_year1_array + operationalCosts_year1_array
+	outData['startupAndOperationalCosts_year1'] = list(startup_and_operational_costs_year1_array)
+
 	# Model operations typically ends here.
 	# Stdout/stderr.
 	outData['stdout'] = 'Success'
@@ -963,12 +961,12 @@ def new(modelDir):
 		'demandCurve': demand_curve,
 		'tempCurve': temp_curve,
 
-		## Diesel Generator Inputs
-		'dieselGenerator': 'Yes',
+		## Fossil Fuel Generator Inputs
+		'fossilGenerator': 'Yes',
 		'number_devices_gen': '1000',
-		'existing_gen_kw': '20', ## based on Generac 20 kW model
-		'fuel_avail_btu': '13051195', ## based on Generac 20 kW diesel model with max tank of 95 gallons (95 gal x 137381 BTU/gal = 13051195 BTU)
-		'fuel_cost_per_mbtu': '25.4', ## based on fuel cost of $3.49/gallon of diesel
+		'existing_gen_kw': '20', ## Number is based on Generac 20 kW diesel model
+		'fuel_avail_gal': '95', ## Number is based on Generac 20 kW diesel model with max tank of 95 gallons
+		'fuel_cost_per_gal': '3.49', ## Number is based on fuel cost of diesel
 
 		## Chemical Battery Inputs
 		'numberBESS': '1000', ## Number of residential Tesla Powerwall 3 batteries
@@ -981,7 +979,7 @@ def new(modelDir):
 		'electricityCost': '0.04',
 		'rateCompensation': '0.02', ## unit: $/kWh
 		'discountRate': '2',
-		'startupCosts': '2000000',
+		'startupCosts': '200000',
 		'TESS_subsidy_onetime_ac': '5.0',
 		'TESS_subsidy_ongoing_ac': '1.0',
 		'TESS_subsidy_onetime_hp': '10.0',
