@@ -11,7 +11,10 @@ if sys.version_info[0] != 3:
 
 # Detect platform
 major_platform = platform.system()
-linux_distro = subprocess.run(['cat', '/etc/os-release'], stdout=subprocess.PIPE, universal_newlines=True).stdout.lower()
+if major_platform == "Linux":
+	linux_distro = subprocess.run(['cat', '/etc/os-release'], stdout=subprocess.PIPE, universal_newlines=True).stdout.lower()
+else:
+	linux_distro = "NOT-LINUX"
 
 if major_platform == "Linux" and "ubuntu" in linux_distro:
 	os.system("sudo ACCEPT_EULA=Y apt-get -yq install mssql-tools msodbcsql mdbtools") # workaround for the package EULA, which otherwise breaks upgrade!!
