@@ -864,11 +864,11 @@ def getDownLineLoadsEquipmentBlockGroupZillow(pathToOmd, equipmentList,avgPeakDe
 			obDict[key]['section'] = None
 		if (obType == 'load'):
 			filtered_df = loadsDF[loadsDF["Load Name"] == obName]
-			'''try:
+			try:
 				loadIsResidential = filtered_df["Business Type"].iloc[0].lower() in loadsTypeList #== 'residential'
 			except IndexError as ie:
-				raise IndexError(f'{ie}\nNOTE: Your Customer Information (.csv file) likely didn\'t contain an entry for one or more loads')'''
-			if (filtered_df["Business Type"].iloc[0].lower() in loadsTypeList): 
+				raise IndexError(f'{ie}\nNOTE: Your Customer Information (.csv file) likely didn\'t contain an entry for one or more loads')
+			if (loadIsResidential): 
 				loadsDict[key] = {"base crit score":None}
 				kw = ob.get('kw',None)
 				kvar = ob.get('kvar',None)
@@ -894,7 +894,6 @@ def getDownLineLoadsEquipmentBlockGroupZillow(pathToOmd, equipmentList,avgPeakDe
 					loadsDict[key]['section'] = sectionsDict[obName]
 				else:
 					loadsDict[key]['section'] = None
-				
 				if obName in distanceDict:
 					loadsDict[key]['distance_from_source'] = int(distanceDict[obName])
 				else:
@@ -912,7 +911,6 @@ def getDownLineLoadsEquipmentBlockGroupZillow(pathToOmd, equipmentList,avgPeakDe
 				# TODO: Address the potential infinite loop below
 				while blockgroup is None:
 					blockgroup = findCensusBlockGroup(lat,long)
-				
 				loadsDict[key]['blockgroup'] = blockgroup
 				blockgroupDict[blockgroup] = buildsviBlockGroup(blockgroup)
 				valList.append(list(all_vals(blockgroupDict[blockgroup])))
@@ -951,11 +949,11 @@ def getDownLineLoadsEquipmentBlockGroupZillow(pathToOmd, equipmentList,avgPeakDe
 		key = obType + '.' + obName
 		if (obType == 'load'):
 			filtered_df = loadsDF[loadsDF["Load Name"] == obName]
-			'''try:
+			try:
 				loadIsResidential = filtered_df["Business Type"].iloc[0].lower() in loadsTypeList #== 'residential'
 			except IndexError as ie:
-				raise IndexError(f'{ie}\nNOTE: Your Customer Information (.csv file) likely didn\'t contain an entry for one or more loads')'''
-			if (filtered_df["Business Type"].iloc[0].lower() in loadsTypeList):
+				raise IndexError(f'{ie}\nNOTE: Your Customer Information (.csv file) likely didn\'t contain an entry for one or more loads')
+			if (loadIsResidential):
 				currBlockGroup = loadsDict[key]['blockgroup']
 				svi_score = sviDF[sviDF['blockgroupFIPS'] == currBlockGroup]['SOVI_SCORE'].values[0]
 				if zillowPrices:
