@@ -731,6 +731,24 @@ def work(modelDir, inputDict):
 	outData['demandAdj_TESS'] = list(demand - vbat_discharge_component)
 	outData['demandAdj_GEN'] = list(demand - generator)
 
+	## Calculate the BESS, TESS, and GEN contributions to the maximum monthly peak (kW)
+	BESScontribution = np.zeros(8760) ## Initialize contribution arrays with zeros (same length as the full year: 8760)
+	TESScontribution = np.zeros(8760)
+	GENcontribution = np.zeros(8760)
+	for s, f in monthHours:
+		## Gather the monthly demand (kWh) data and identify the maximum peak
+		month_data = outData['demandAdj_total'][s:f]
+		month_peak_kw = max(month_data)
+
+		## Create a mask array where 1=peak and 0=nonpeak
+		peak_mask = np.where(month_data >= month_peak_kw, 1.0, 0.0)
+
+		## Apply the mask and store contributions directly in the full-year arrays
+		BESScontribution[s:f] = BESS[s:f] * peak_mask
+		TESScontribution[s:f] = vbat_discharge_component[s:f] * peak_mask
+		GENcontribution[s:f] = generator[s:f] * peak_mask
+
+
 	outData['energyAdjustedMonthly_total'] = [sum(outData['demandAdj_total'][s:f]) for s, f in monthHours]
 	outData['energyAdjustedMonthly_BESS'] = [sum(outData['demandAdj_BESS'][s:f]) for s, f in monthHours]
 	outData['energyAdjustedMonthly_TESS'] = [sum(outData['demandAdj_TESS'][s:f]) for s, f in monthHours]
@@ -743,11 +761,12 @@ def work(modelDir, inputDict):
 
 	outData['demandCharge'] = [peak*demandChargeCost for peak in outData['peakDemand']]
 	outData['peakAdjustedDemand_total'] = [max(outData['demandAdj_total'][s:f]) for s, f in monthHours]
-	## TODO: find the monthly peaks in the new demand curve, then piece out how much BESS, TESS, GEN contributes to those specific peaks
-	## Redo the following three lines of code accordingly
+
+	## TODO: Redo the following three lines
 	outData['peakAdjustedDemand_BESS'] = [max(outData['demandAdj_BESS'][s:f]) for s, f in monthHours]
 	outData['peakAdjustedDemand_TESS'] = [max(outData['demandAdj_TESS'][s:f]) for s, f in monthHours]
 	outData['peakAdjustedDemand_GEN'] = [max(outData['demandAdj_GEN'][s:f]) for s, f in monthHours]
+
 	outData['demandChargeAdjusted_total'] = [pad*demandChargeCost for pad in outData['peakAdjustedDemand_total']]
 	outData['demandChargeAdjusted_BESS'] = [pad*demandChargeCost for pad in outData['peakAdjustedDemand_BESS']]
 	outData['demandChargeAdjusted_TESS'] = [pad*demandChargeCost for pad in outData['peakAdjustedDemand_TESS']]
