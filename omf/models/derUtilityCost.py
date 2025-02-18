@@ -66,22 +66,22 @@ def work(modelDir, inputDict):
 	## Add fossil fuel generator to input scenario
 	if inputDict['fossilGenerator'] == 'Yes':
 		scenario['Generator'] = {
-			'existing_kw': float(inputDict['existing_gen_kw']) * float(inputDict['number_devices_gen']),
+			'existing_kw': float(inputDict['existing_gen_kw']) * float(inputDict['number_devices_GEN']),
 			'max_kw': 0,
 			'min_kw': 0,
 			'only_runs_during_grid_outage': False,
-			'fuel_avail_gal': float(inputDict['fuel_avail_gal']) * float(inputDict['number_devices_gen']),
+			'fuel_avail_gal': float(inputDict['fuel_avail_gal']) * float(inputDict['number_devices_GEN']),
 			'fuel_cost_per_gallon': float(inputDict['fuel_cost_per_gal']),
 		}
 
 	## Add a Battery Energy Storage System (BESS) section if enabled 
-	if float(inputDict['numberBESS']) > 0:
+	if float(inputDict['number_devices_BESS']) > 0:
 		scenario['ElectricStorage'] = {
 			##TODO: Add options here, if needed
-			'min_kw': float(inputDict['BESS_kw'])*float(inputDict['numberBESS']),
-			'max_kw':  float(inputDict['BESS_kw'])*float(inputDict['numberBESS']),
-			'min_kwh':  float(inputDict['BESS_kwh'])*float(inputDict['numberBESS']),
-			'max_kwh':  float(inputDict['BESS_kwh'])*float(inputDict['numberBESS']),
+			'min_kw': float(inputDict['BESS_kw'])*float(inputDict['number_devices_BESS']),
+			'max_kw':  float(inputDict['BESS_kw'])*float(inputDict['number_devices_BESS']),
+			'min_kwh':  float(inputDict['BESS_kwh'])*float(inputDict['number_devices_BESS']),
+			'max_kwh':  float(inputDict['BESS_kwh'])*float(inputDict['number_devices_BESS']),
 			'can_grid_charge': True,
 			'total_rebate_per_kw': 0,
 			'macrs_option_years': 0,
@@ -170,9 +170,9 @@ def work(modelDir, inputDict):
 			with open(pJoin(newDir, 'vbatResults.json'), 'w') as jsonFile:
 				json.dump(vbatResults, jsonFile)
 			
-			## Update the vbatResults to include operational costs and subsidies
-			vbatResults['TESS_subsidy_onetime'] = inputDict_vbatDispatch['TESS_subsidy_onetime']
-			vbatResults['TESS_subsidy_ongoing'] = inputDict_vbatDispatch['TESS_subsidy_ongoing']
+			## Update the vbatResults to include subsidies
+			vbatResults['TESS_subsidy_onetime'] = float(inputDict_vbatDispatch['TESS_subsidy_onetime'])*float(inputDict['number_devices'+suffix])
+			vbatResults['TESS_subsidy_ongoing'] = float(inputDict_vbatDispatch['TESS_subsidy_ongoing'])*float(inputDict['number_devices'+suffix])
 
 			## Store the results in all_device_results dictionary
 			single_device_results['vbatResults'+suffix] = vbatResults
@@ -228,9 +228,6 @@ def work(modelDir, inputDict):
 		combined_device_results['energyCostAdjustedTESS'] = [sum(x) for x in zip(combined_device_results['energyCostAdjustedTESS'], single_device_results[device_result]['energyCostAdjusted'])]
 		combined_device_results['combinedTESS_subsidy_ongoing'] += float(single_device_results[device_result]['TESS_subsidy_ongoing'])
 		combined_device_results['combinedTESS_subsidy_onetime'] += float(single_device_results[device_result]['TESS_subsidy_onetime'])
-
-		## TODO: Bri - compare these with the manually calculated variables at bottom
-
 
 	## NOTE: temporarily comment out the two derConsumer runs to run the code quicker
 	"""
@@ -737,7 +734,7 @@ def work(modelDir, inputDict):
 	GENcontribution = np.zeros(8760)
 	for s, f in monthHours:
 		## Gather the monthly demand (kWh) data and identify the maximum peak kW that month
-		month_data = demand[s:f]
+		month_data = outData['demandAdj_total'][s:f]
 		month_peak_kw = max(month_data)
 
 		## Create a mask array where 1=peak and 0=nonpeak
@@ -818,8 +815,8 @@ def work(modelDir, inputDict):
 
 	## Calculate the BESS subsidy for year 1 and the projection length (all years)
 	## Year 1 includes the onetime subsidy, but subsequent years do not.
-	BESS_subsidy_ongoing = float(inputDict['BESS_subsidy_ongoing'])
-	BESS_subsidy_onetime = float(inputDict['BESS_subsidy_onetime'])
+	BESS_subsidy_ongoing = float(inputDict['BESS_subsidy_ongoing'])*float(inputDict['number_devices_BESS'])
+	BESS_subsidy_onetime = float(inputDict['BESS_subsidy_onetime'])*float(inputDict['number_devices_BESS'])
 	BESS_subsidy_year1_total =  BESS_subsidy_onetime + (BESS_subsidy_ongoing*12.0)
 	BESS_subsidy_allyears_array = np.full(projectionLength, BESS_subsidy_ongoing*12.0)
 	BESS_subsidy_allyears_array[0] += BESS_subsidy_onetime
@@ -832,8 +829,8 @@ def work(modelDir, inputDict):
 
 	## Calculate Generator Subsidy for year 1 and the projection length (all years)
 	## Year 1 includes the onetime subsidy, but subsequent years do not.
-	GEN_subsidy_ongoing = float(inputDict['GEN_subsidy_ongoing'])
-	GEN_subsidy_onetime = float(inputDict['GEN_subsidy_onetime'])
+	GEN_subsidy_ongoing = float(inputDict['GEN_subsidy_ongoing'])*float(inputDict['number_devices_GEN'])
+	GEN_subsidy_onetime = float(inputDict['GEN_subsidy_onetime'])*float(inputDict['number_devices_GEN'])
 	GEN_subsidy_year1_total =  GEN_subsidy_onetime + (GEN_subsidy_ongoing*12.0)
 	GEN_subsidy_allyears_array = np.full(projectionLength, GEN_subsidy_ongoing*12.0)
 	GEN_subsidy_allyears_array[0] += GEN_subsidy_onetime
@@ -972,13 +969,13 @@ def new(modelDir):
 
 		## Fossil Fuel Generator Inputs
 		'fossilGenerator': 'Yes',
-		'number_devices_gen': '1000',
+		'number_devices_GEN': '1000',
 		'existing_gen_kw': '20', ## Number is based on Generac 20 kW diesel model
 		'fuel_avail_gal': '95', ## Number is based on Generac 20 kW diesel model with max tank of 95 gallons
 		'fuel_cost_per_gal': '3.49', ## Number is based on fuel cost of diesel
 
 		## Chemical Battery Inputs
-		'numberBESS': '1000', ## Number of residential Tesla Powerwall 3 batteries
+		'number_devices_BESS': '1000', ## Number of residential Tesla Powerwall 3 batteries
 		'BESS_kw': '5',
 		'BESS_kwh': '13.5',
 
