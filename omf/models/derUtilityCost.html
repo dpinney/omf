@@ -431,14 +431,14 @@
 					"legend":{"verticalAlign":"top","align":"top","borderWidth":0,"x":50,"y":-10,"layout":"horizontal"}})
 			</script>
 		</div>
-		<p class="reportTitle" style="page-break-before:always">Cash Flow Projection - Breakdown</p>
+		<p class="reportTitle" style="page-break-before:always">Savings Breakdown Per Technology</p>
 		<div id="cashFlowReport" class="tightContent">
 			<div id="cashFlowChartDiv2"></div>
 			<script>
 				new Highcharts.Chart({"credits":{"enabled":false},
 					"plotOptions":{"column":{"stacking":'normal'},"series":{"animation":false,"shadow":false},"spline":{"animation":false,"shadow":false}},
 					"xAxis":{"title":{"text":"Year After Installation","style":{"color":"gray"}},"type":"linear","tickColor":"gray","tickInterval":1,"lineColor":"gray","minorTickColor":"gray", "minorTickInterval":5},
-					"title":{"text":"NPV: $" + allOutputData.NPV.toFixed(0) + ", SPP: " + allOutputData.SPP.toFixed(3), "verticalAlign":"top", "align":"right", "y":35, "x":-10, "style":{"color":"#333333", "fontSize":"12px"}},
+					"title":{"text":"", "verticalAlign":"top", "align":"right", "y":35, "x":-10, "style":{"color":"#333333", "fontSize":"12px"}},
 					"series":[
 						//{"name":"Net Benefits", "data": allOutputData.netCashflow, "color": "rgb(102,102,255)"},
 						//{"name":"Total Utility Savings", "data": allOutputData.savingsAllYears, "color": "green"},
