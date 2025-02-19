@@ -288,7 +288,7 @@ def run_model_based_algorithm( modelDir, inputDict, outData ):
 	tree = opendss.dssConvert.omdToTree(path_to_omd)
 	opendss.dssConvert.treeToDss(tree, Path(modelDir, 'circuit.dss'))
 	model_based_start_time = time.time()
-	model_basedHCResults = opendss.hosting_capacity_all( FNAME = Path(modelDir, 'circuit.dss'), max_test_kw=int(inputDict["model_basedHCMaxTestkw"]), multiprocess=False)
+	model_basedHCResults = opendss.hosting_capacity_all( FNAME = Path(modelDir, 'circuit.dss'), max_test_kw=int(inputDict["model_basedHCMaxTestkw"]))
 	model_based_end_time = time.time()
 	# - opendss.hosting_capacity_all() changes the cwd, so change it back so other code isn't affected
 

@@ -345,104 +345,7 @@ def check_hosting_capacity_of_single_bus(FILE_PATH:str, BUS_NAME:str, kwValue: f
 	therm_violation = True if len(over_df) > 0 else False
 	return {'thermally_limited':therm_violation, 'voltage_limited':volt_violation}
 
-'''
-Hosting Capacity Multiprocessing Exploration - Unused
-
-get_hosting_capacity_of_single_bus_multiprocessing()
-check_hosting_capacity_of_single_bus_multiprocessing()
-multiprocessor_function()
-
-- Exploration to modify hosting capacity with multiprocessing for each bus to run independently instead of locking a file
-- Each bus would have its own "hostcap", volts_, and overloads_ file and the results would be combined
-Issues - Instrinsic OpenDSS to volts.csv
-Works when running VSCode debugger, not when running regular
-'''
-# Unused
-def get_hosting_capacity_of_single_bus_multiprocessing(FILE_PATH: str, BUS_NAME: str, max_test_kw: float):
-    ''' Get the maximum hosting capacity at a single bus before any violations. '''
-    thermally_limited = False
-    voltage_limited = False
-    lower_kw_bound = 1
-    upper_kw_bound = 1
-    while True:
-        results = check_hosting_capacity_of_single_bus_multiprocessing(FILE_PATH, BUS_NAME, upper_kw_bound)
-        thermally_limited = results['thermally_limited']
-        voltage_limited = results['voltage_limited']
-        if thermally_limited or voltage_limited or upper_kw_bound == max_test_kw:
-            break
-        lower_kw_bound = upper_kw_bound
-        upper_kw_bound = lower_kw_bound * 2
-        if upper_kw_bound > max_test_kw:
-            upper_kw_bound = max_test_kw
-    if not thermally_limited and not voltage_limited and upper_kw_bound == max_test_kw:
-        return {'bus': BUS_NAME, 'max_kw': max_test_kw, 'reached_max': False, 'thermally_limited': thermally_limited, 'voltage_limited': voltage_limited}
-    kw_step = (upper_kw_bound - lower_kw_bound) / 2
-    kw = lower_kw_bound + kw_step
-    while kw_step >= 0.1:
-        results = check_hosting_capacity_of_single_bus_multiprocessing(FILE_PATH, BUS_NAME, kw)
-        thermally_limited = results['thermally_limited']
-        voltage_limited = results['voltage_limited']
-        if not thermally_limited and not voltage_limited:
-            lower_kw_bound = kw
-        else:
-            upper_kw_bound = kw
-            thermally_limited = False
-            voltage_limited = False
-        kw_step = (upper_kw_bound - lower_kw_bound) / 2
-        kw = lower_kw_bound + kw_step
-    return {'bus': BUS_NAME, 'max_kw': lower_kw_bound, 'reached_max': True, 'thermally_limited': thermally_limited, 'voltage_limited': voltage_limited}
-
-# Unused
-def check_hosting_capacity_of_single_bus_multiprocessing(FILE_PATH: str, BUS_NAME: str, kwValue: float):
-    ''' Check if a generation value at a bus exceeds voltage levels or causes thermal violations. '''
-    fullpath = os.path.abspath(FILE_PATH)
-    filedir = os.path.dirname(fullpath)
-    dss_file = os.path.join(filedir, f'HOSTCAP_{BUS_NAME}.dss')
-    volts_file = os.path.join(filedir, f'volts_{BUS_NAME}.csv')
-    overloads_file = os.path.join(filedir, f'overloads_{BUS_NAME}.csv')
-    ansi_a_max_pu = 1.05
-    kv_mappings = get_bus_kv_mappings(fullpath)
-    if BUS_NAME not in kv_mappings:
-        raise Exception(f'BUS_NAME {BUS_NAME} not found in circuit.')
-    tree = dssConvert.dssToTree(fullpath)
-    for i, ob in enumerate(tree):
-        if ob.get('!CMD', None) == 'makebuslist':
-            insertion_index = i
-    new_tree = deepcopy(tree)
-    new_gen = {
-        '!CMD': 'new',
-        'object': f'generator.hostcap_{BUS_NAME}',
-        'bus1': f'{BUS_NAME}.1.2.3',
-        'kw': kwValue,
-        'pf': '1.0',
-        'conn': 'wye',
-        'phases': '3',
-        'kv': kv_mappings[BUS_NAME],
-        'model': '1'
-    }
-    new_tree.insert(insertion_index, new_gen)
-    dssConvert.treeToDss(new_tree, dss_file)
-    runDSS(dss_file)
-    runDssCommand(f'export voltages "{volts_file}"')
-    runDssCommand(f'export overloads "{overloads_file}"')
-    volt_df = pd.read_csv(volts_file)
-    v_max_pu1, v_max_pu2, v_max_pu3 = volt_df[' pu1'].max(), volt_df[' pu2'].max(), volt_df[' pu3'].max()
-    v_max_pu_all = float(max(v_max_pu1, v_max_pu2, v_max_pu3))
-    volt_violation = v_max_pu_all > ansi_a_max_pu
-    over_df = pd.read_csv(overloads_file)
-    therm_violation = len(over_df) > 0
-    return {'thermally_limited': therm_violation, 'voltage_limited': volt_violation}
-
-#Unused
-def multiprocessor_function(FILE_PATH: str, max_test_kw: float, BUS_NAME: str):
-    ''' Wrapper function for multiprocessing to handle each bus independently. '''
-    try:
-        return get_hosting_capacity_of_single_bus_multiprocessing(FILE_PATH, BUS_NAME, max_test_kw)
-    except Exception as e:
-        print(f'Error processing BUS_NAME={BUS_NAME} in multiprocessor_function: {e}')
-        return {'bus': BUS_NAME, 'max_kw': None, 'reached_max': False, 'thermally_limited': False, 'voltage_limited': False}
-
-def hosting_capacity_all(FNAME:str, max_test_kw:float=50000, BUS_LIST:list = None, multiprocess=False):
+def hosting_capacity_all(FNAME:str, max_test_kw:float=50000, BUS_LIST:list = None ):
 	''' Generate hosting capacity results for all_buses. '''
 	fullpath = os.path.abspath(FNAME)
 	if not BUS_LIST:
@@ -452,17 +355,12 @@ def hosting_capacity_all(FNAME:str, max_test_kw:float=50000, BUS_LIST:list = Non
 	gen_buses = list(set(gen_buses))
 	all_output = []
 	# print('GEN_BUSES', gen_buses)
-	if multiprocess == True:
-		with multiprocessing.Pool() as pool:
-			all_output = pool.starmap(multiprocessor_function, [(fullpath, max_test_kw, bus) for bus in gen_buses])
-		print(f'Running multiprocessor {len(gen_buses)} times')
-	elif multiprocess == False:
-		for bus in gen_buses:
-			try:
-				single_output = get_hosting_capacity_of_single_bus(fullpath, bus, max_test_kw)
-				all_output.append(single_output)
-			except:
-				print(f'Could not solve hosting capacity for BUS_NAME={bus}')
+	for bus in gen_buses:
+		try:
+			single_output = get_hosting_capacity_of_single_bus(fullpath, bus, max_test_kw)
+			all_output.append(single_output)
+		except:
+			print(f'Could not solve hosting capacity for BUS_NAME={bus}')
 	# print( "multiprocessor false all_output: ", all_output )
 	return all_output
 
