@@ -115,6 +115,16 @@
 				</label>
 				<input type="text" id="vv_points" name="vv_points" value="{{allInputDataDict.vv_points}}"/>
 			</div>
+			<div class="shortInput">
+				<label class="tooltip">Overload Constraint
+					<span class="classic">Sets overload constaint for thermal hosting capacity. Allows transformers to be overloaded by up to 120% (default) of their KVA rating for reverse power flows.</span>
+				</label>
+				<input type="text" id="overload_constraint" name="overload_constraint" value="{{allInputDataDict.overload_constraint}}"/>
+			</div>
+			<div class="shortInput">
+				<label class="tooltip">XF Lookup Table <span class="classic">Upload a .csv file of lookup table of known service transformer kVA readings & impedances. Expected Columns are: 'kVA', 'R_ohms_LV', 'X_ohms_LV'</span></label>
+				<div>{{ file_upload('xf_table_data_file', 'xf_table_display_filename', 'xf_table_data_filename') }}</div>
+			</div>
 			<div class="wideInput">
 				<p class="inputSectionHeader">Model-Based Hosting Capacity</p>
 			</div>

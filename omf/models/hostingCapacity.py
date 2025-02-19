@@ -336,6 +336,8 @@ def new(modelDir):
 	''' Create a new instance of this model. Returns true on success, false on failure. '''
 	meter_file_name = 'input_mohcaData.csv'
 	meter_file_path = Path(omf.omfDir,'static','testFiles', 'hostingCapacity', meter_file_name)
+	xftable_file_name = 'ST_transformer_customer_mapping_expected.csv'
+	xftable_file_path = Path(omf.omfDir,'static','testFiles', 'hostingCapacity', xftable_file_name )
 	# meter_file_contents = open(meter_file_path).read()
 	defaultInputs = {
 		"modelType": modelName,
@@ -350,14 +352,20 @@ def new(modelDir):
 		"dgInverterSetting": 'constantPF',
 		"der_pf": 1.00,
 		"vv_points": "0.8,0.44,0.92,0.44,0.98,0,1.02,0,1.08,-0.44,1.2,-0.44",
-		"load_pf_est": 1.0
+		"load_pf_est": 1.0,
+		"overload_constraint": 1.2,
+		"xf_table_data_time": xftable_file_name,
+		"xf_table_display_filename": xftable_file_name
+
 	}
 	creationCode = __neoMetaModel__.new(modelDir, defaultInputs)
+	# Copy files from the test directory ( or respective places ) and put them in the model for use
 	try:
 		shutil.copyfile(
 			Path(__neoMetaModel__._omfDir, "static", "testFiles", 'hostingCapacity', defaultInputs["feederName1"]+'.omd'),
 			Path(modelDir, defaultInputs["feederName1"]+'.omd'))
 		shutil.copyfile( meter_file_path, Path(modelDir, meter_file_name) )
+		shutil.copyfile( xftable_file_path, Path(modelDir, xftable_file_name) )
 	except:
 		return False
 	return creationCode
