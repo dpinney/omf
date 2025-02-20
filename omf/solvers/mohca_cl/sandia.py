@@ -6,7 +6,6 @@ import numpy as np
 import pandas as pd
 from sklearn import linear_model
 import logging
-import warnings
 from pathlib import Path
 
 
@@ -99,6 +98,7 @@ def hosting_cap(
         input_data['kvar_reading'] = np.nan
 
     # ensure datetime column
+    # NOTE: assume local time. If z offset included, applied to timestamp
     input_data['datetime'] = pd.to_datetime(input_data['datetime'], utc=True)
 
     # Identify unique buses
@@ -136,7 +136,7 @@ def hosting_cap(
             df_edit = fix_inconsistent_time_index(df_edit)
         except ValueError:
             warning_str = (
-                f"Warning:  Skipped busname '{bus_name}' " +
+                f"Warning in hosting_cap():  Skipped busname '{bus_name}' " +
                 "- unrecoverable datetime issue"
             )
             logger.warning(warning_str)
@@ -148,7 +148,7 @@ def hosting_cap(
                 df_edit['datetime'].values, single_bus['datetime'].values):
             # notify of correction, but continue procssing
             warning_str = (
-                f"Warning:  Fixed datetime of busname '{bus_name}' - " +
+                f"Warning in hosting_cap():  Fixed datetime of busname '{bus_name}' - " +
                 "was originally inconsistent"
             )
             logger.warning(warning_str)
@@ -193,7 +193,7 @@ def hosting_cap(
         if data_quality < required_data_quality:
             # skip processing
             warning_str = (
-                f"Warning:  Skipped busname '{bus_name}' " +
+                f"Warning in hosting_cap():  Skipped busname '{bus_name}' " +
                 f"- data quality of {data_quality}%"
             )
             logger.warning(warning_str)
@@ -240,7 +240,7 @@ def hosting_cap(
                 has_static_pf = True
                 # skip processing
                 warning_str = (
-                    f"Warning:  Skipped busname '{bus_name}' " +
+                    f"Warning in hosting_cap():  Skipped busname '{bus_name}' " +
                     "- Power Factor too constant - " +
                     f"maximum abs dif doesn't exceed {max_pf_dif}"
                 )
@@ -259,7 +259,7 @@ def hosting_cap(
 
             # skip processing
             warning_str = (
-                f"Warning:  Skipped busname '{bus_name}' " +
+                f"Warning in hosting_cap():  Skipped busname '{bus_name}' " +
                 "- Process for no input Q or static PF"
             )
             logger.warning(warning_str)
@@ -323,7 +323,7 @@ def hosting_cap(
         if ~has_input_q or has_static_pf:
 
             warning_str = (
-                f"Warning:  kVAR measurements for busname '{bus_name}' " +
+                f"Warning in hosting_cap():  kVAR measurements for busname '{bus_name}' " +
                 "were unavailable or of insufficient quality. " +
                 "HC accuracy may be affected. "
             )
@@ -414,7 +414,10 @@ def hosting_cap(
 
     logger.info(f"HC calculated for: {n_hc_est}")
     logger.info("Skipped: {n_skipped}")
-    logging.shutdown()
+
+    for handler in logger.handlers[:]:  # Iterate over a copy
+        logger.removeHandler(handler)
+        handler.close()
 
     return hc_results
 
