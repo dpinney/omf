@@ -37,7 +37,6 @@ def retrieveCensusNRI():
 	Input: dataURL -> URL to retrieve data from
 	returns geojson of census NRI data
 	'''
-	
 	try:
 		#headers
 		hdr = {'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.11 (KHTML, like Gecko)  Chrome/23.0.1271.64 Safari/537.11','Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8','Accept-Charset': 'ISO-8859-1,utf-8;q=0.7,*;q=0.3','Accept-Encoding': 'none','Accept-Language': 'en-US,en;q=0.8','Connection': 'keep-alive'}
@@ -99,6 +98,31 @@ def findCensusTract(lat, lon):
 	except Exception as e:
 		print("Error trying to retrieve tract information from Census API")
 		print(e)
+
+def repeatFindCensusInfo(lat, long, cInfo:str, lim=10, wait=3):
+	''' Repeatedly attempts to retrieve census blockgroup or census tract, returning the info as soon as it is successful, and raising an exception after a certain number of attempts.
+		Input: lat -> specified latitude value
+		Input: lon -> specified longitude value
+		Input: cInfo -> type of census info to find; either 'blockgroup' or 'tract'
+		Input: lim -> num attempts before an exception is raised
+		Input: wait -> num sec between attempts to avoid overwhelming server
+		Return: censusTract ->  census Tract found at location
+	'''
+	if cInfo == 'blockgroup':
+		findInfo = findCensusBlockGroup
+	elif cInfo == 'tract':
+		findInfo = findCensusTract
+	else:
+		raise Exception(f"ERROR - cInfo argument to repeatFindCensusInfo() must equal 'blockgroup' or 'tract', not '{cInfo}'")
+
+	for i in range(0,lim):
+		if info:=findInfo(lat,long):
+			break
+		elif i == lim-1:
+			raise Exception(f'ERROR - Could not get census {info} in {lim} calls to the server')
+		else:
+			time.sleep(wait)
+	return info
 
 def __getCensusNRIData__depreciated(nrigeoJson, tractList):
 	'''
@@ -434,16 +458,15 @@ def getDownLineLoadsBlockGroup(pathToOmd):
 			long = float(ob['longitude'])
 			lat = float(ob['latitude'])
 			if blockgroupDict:
-				check = coordCheck(long, lat, blockgroupDict)
-				if check:
+				if check := coordCheck(long, lat, blockgroupDict):
 					loadsDict[key]['blockgroup'] = check
 					continue
 				else:
 					blockgroup = findCensusBlockGroup(lat,long)
 			else:
 				blockgroup = findCensusBlockGroup(lat,long)
-			while blockgroup is None:
-				blockgroup = findCensusBlockGroup(lat,long)
+			# Following replaces a potentially infinite loop. Whether it's necessary at all though should be investigated
+			blockgroup = repeatFindCensusInfo(lat,long,'blockgroup')
 			loadsDict[key]['blockgroup'] = blockgroup
 			blockgroupDict[blockgroup] = buildsviBlockGroup(blockgroup)
 			valList.append(list(all_vals(blockgroupDict[blockgroup])))
@@ -537,17 +560,15 @@ def getDownLineLoadsTract(pathToOmd):
 			lat = float(ob['latitude'])
 
 			if tractDict:
-				check = coordCheck(long, lat, tractDict)
-				if check:
+				if check := coordCheck(long, lat, tractDict):
 					loadsDict[key]['tract'] = check
 					continue
 				else:
 					tract = findCensusTract(lat,long)
 			else:
 				tract = findCensusTract(lat,long)
-			while tract is None:
-				tract = findCensusTract(lat,long)
-			
+			# Following replaces a potentially infinite loop. Whether it's necessary at all though should be investigated
+			tract = repeatFindCensusInfo(lat,long,'tract')
 			loadsDict[key]['tract'] = tract
 			tractDict[tract] = buildsviTract(tract)
 			valList.append(list(all_vals(tractDict[tract])))
@@ -637,15 +658,15 @@ def __getDownLineLoads__depreciated(pathToOmd,nriGeoJson):
 			kvar = float(ob['kvar'])
 			kv = float(ob['kv'])
 			# For each load, estimate the number of persons served. 
-			#Use the following equation sqrt(kw^2 + kvar^2)/5 kva = # of homes served by that load
+			#Use the following equation math.sqrt(kw^2 + kvar^2)/5 kva = # of homes served by that load
 			# assume household is 4
 			loads[obName]['base crit score']= ((math.sqrt((kw * kw) + (kvar * kvar) ))/ (5)) * 4
 			lat = float(ob['latitude'])
 			long = float(ob['longitude'])
 			tract = findCensusTract(lat, long)
 			## CHECKS IF WE HAVE ALREADY LOOKED FOR THE TRACT IN QUESTION
-			while tract == None:
-				tract = findCensusTract(lat, long)
+			# Following replaces a potentially infinite loop. Whether it's necessary at all though should be investigated
+			tract = repeatFindCensusInfo(lat,long,'tract')
 			if tract in tracts:
 				svi_score = float(tracts.get(tract)['SOVI_SCORE'])
 				sovi_rtng = tracts.get(tract)['SOVI_RATNG']
@@ -889,7 +910,7 @@ def getDownLineLoadsEquipmentBlockGroupZillow(pathToOmd, equipmentList,avgPeakDe
 				else:
 					raise Exception(f'Load {obName} does not have necessary information to calculate kw and kvar')
 				loadsDict[key]['kva'] = kva
-				loadsDict[key]["base crit score"]= round(((math.sqrt((kw * kw) + (kvar * kvar) ))/ float(avgPeakDemand)) * 4,2)
+				loadsDict[key]["base crit score"] = round(((math.sqrt((kw * kw) + (kvar * kvar) ))/ float(avgPeakDemand)) * 4,2)
 				if obName in sectionsDict:
 					loadsDict[key]['section'] = sectionsDict[obName]
 				else:
@@ -908,9 +929,8 @@ def getDownLineLoadsEquipmentBlockGroupZillow(pathToOmd, equipmentList,avgPeakDe
 						blockgroup = findCensusBlockGroup(lat,long)
 				else:
 					blockgroup = findCensusBlockGroup(lat,long)
-				# TODO: Address the potential infinite loop below
-				while blockgroup is None:
-					blockgroup = findCensusBlockGroup(lat,long)
+				# Following replaces a potentially infinite loop. Whether it's necessary at all though should be investigated
+				blockgroup = repeatFindCensusInfo(lat,long,'blockgroup')
 				loadsDict[key]['blockgroup'] = blockgroup
 				blockgroupDict[blockgroup] = buildsviBlockGroup(blockgroup)
 				valList.append(list(all_vals(blockgroupDict[blockgroup])))
@@ -962,7 +982,7 @@ def getDownLineLoadsEquipmentBlockGroupZillow(pathToOmd, equipmentList,avgPeakDe
 				else:
 					avgZillowPrice = 1
 					loadsDict[key]["zillow price"] = avgZillowPrice
-				loadsDict[key]["community crit score"] = round((loadsDict[key]["base crit score"] *  svi_score) / (avgZillowPrice/10000),2)
+				loadsDict[key]["community crit score"] = round((loadsDict[key]["base crit score"] * svi_score) / (avgZillowPrice/10000),2)
 				loadsDict[key]["affluence score"] = round(avgZillowPrice / 1000,2)
 				loadsDict[key]['SOVI_SCORE'] = round(svi_score,4)
 	getPercentile(loadsDict, "base crit score", 'distance_from_source')
@@ -1094,8 +1114,7 @@ def getDownLineLoadsEquipmentTractZillow(pathToOmd, equipmentList, avgPeakDemand
 			long = float(ob['longitude'])
 			lat = float(ob['latitude'])
 			if tractDict:
-				check = coordCheck(long, lat, tractDict)
-				if check:
+				if check := coordCheck(long, lat, tractDict):
 					loadsDict[key]['tract'] = check
 					continue
 				else:
@@ -1108,8 +1127,11 @@ def getDownLineLoadsEquipmentTractZillow(pathToOmd, equipmentList, avgPeakDemand
 				tract = findCensusTract(lat,long)
 				#zillowJson = get_zillowListings(lat, long)
 				#zillowDict[tract] = zillowJson
-			while tract is None:
-				tract = findCensusTract(lat,long)
+			# Following replaces a potentially infinite loop. Whether it's necessary at all though should be investigated
+			tract = repeatFindCensusInfo(lat,long,'tract')
+			#while tract is None:
+				#tract = findCensusTract(lat,long)
+				#The above was previously uncommented while the below was commented out
 				#if tract is not None:
 					#time.sleep(30)
 					#zillowJson = get_zillowListings(lat, long)
@@ -1223,27 +1245,25 @@ def getDownLineLoadsEquipmentBlockGroup(pathToOmd, equipmentList,avgPeakDemand):
 			elif kw and pf:
 				kw = float(kw)
 				kva = kw/float(pf)
-				kvar = sqrt(kva^2 - kw^2)
+				kvar = math.sqrt(kva^2 - kw^2)
 			elif kva and pf:
 				kw = float(kva)*float(pf)
-				kvar = sqrt(float(kva)^2 - kw^2)
+				kvar = math.sqrt(float(kva)^2 - kw^2)
 			else:
 				raise Exception(f'Load {obName} does not have necessary information to calculate kw and kvar')
 			loadsDict[key]["base crit score"]= round(((math.sqrt((kw * kw) + (kvar * kvar) ))/ (avgPeakDemand)) * 4,2)
 			long = float(ob['longitude'])
 			lat = float(ob['latitude'])
 			if blockgroupDict:
-				check = coordCheck(long, lat, blockgroupDict)
-				if check:
+				if check := coordCheck(long, lat, blockgroupDict):
 					loadsDict[key]['blockgroup'] = check
 					continue
 				else:
 					blockgroup = findCensusBlockGroup(lat,long)
 			else:
 				blockgroup = findCensusBlockGroup(lat,long)
-			while blockgroup is None:
-				blockgroup = findCensusBlockGroup(lat,long)
-			
+			# Following replaces a potentially infinite loop. Whether it's necessary at all though should be investigated
+			blockgroup = repeatFindCensusInfo(lat,long,'blockgroup')
 			loadsDict[key]['blockgroup'] = blockgroup
 			blockgroupDict[blockgroup] = buildsviBlockGroup(blockgroup)
 			valList.append(list(all_vals(blockgroupDict[blockgroup])))
@@ -1360,18 +1380,17 @@ def getDownLineLoadsEquipmentTract(pathToOmd, equipmentList, avgPeakDemand):
 			elif kw and pf:
 				kw = float(kw)
 				kva = kw/float(pf)
-				kvar = sqrt(kva^2 - kw^2)
+				kvar = math.sqrt(kva^2 - kw^2)
 			elif kva and pf:
 				kw = float(kva)*float(pf)
-				kvar = sqrt(float(kva)^2 - kw^2)
+				kvar = math.sqrt(float(kva)^2 - kw^2)
 			else:
 				raise Exception(f'Load {obName} does not have necessary information to calculate kw and kvar')
 			loadsDict[key]["base crit score"]= round(((math.sqrt((kw * kw) + (kvar * kvar) ))/ (5)) * 4,2)
 			long = float(ob['longitude'])
 			lat = float(ob['latitude'])
 			if tractDict:
-				check = coordCheck(long, lat, tractDict)
-				if check:
+				if check := coordCheck(long, lat, tractDict):
 					loadsDict[key]['tract'] = check
 					continue
 				else:
@@ -1384,8 +1403,11 @@ def getDownLineLoadsEquipmentTract(pathToOmd, equipmentList, avgPeakDemand):
 				tract = findCensusTract(lat,long)
 				#zillowJson = get_zillowListings(lat, long)
 				#zillowDict[tract] = zillowJson
-			while tract is None:
-				tract = findCensusTract(lat,long)
+			# Following replaces a potentially infinite loop. Whether it's necessary at all though should be investigated
+			tract = repeatFindCensusInfo(lat,long,'tract')
+			#while tract is None:
+				#tract = findCensusTract(lat,long)
+				#The above was previously uncommented while the below was commented out
 				#if tract is not None:
 					#time.sleep(30)
 					#zillowJson = get_zillowListings(lat, long)
@@ -1495,16 +1517,15 @@ def getDownLineLoadsBlockGroup(pathToOmd, avgPeakDemand):
 			long = float(ob['longitude'])
 			lat = float(ob['latitude'])
 			if blockgroupDict:
-				check = coordCheck(long, lat, blockgroupDict)
-				if check:
+				if check := coordCheck(long, lat, blockgroupDict):
 					loadsDict[key]['blockgroup'] = check
 					continue
 				else:
 					blockgroup = findCensusBlockGroup(lat,long)
 			else:
 				blockgroup = findCensusBlockGroup(lat,long)
-			while blockgroup is None:
-				blockgroup = findCensusBlockGroup(lat,long)
+			# Following replaces a potentially infinite loop. Whether it's necessary at all though should be investigated
+			blockgroup = repeatFindCensusInfo(lat,long,'blockgroup')
 			loadsDict[key]['blockgroup'] = blockgroup
 			blockgroupDict[blockgroup] = buildsviBlockGroup(blockgroup)
 			valList.append(list(all_vals(blockgroupDict[blockgroup])))
@@ -1597,16 +1618,15 @@ def getDownLineLoadsTract(pathToOmd, avgPeakDemand):
 			long = float(ob['longitude'])
 			lat = float(ob['latitude'])
 			if tractDict:
-				check = coordCheck(long, lat, tractDict)
-				if check:
+				if check := coordCheck(long, lat, tractDict):
 					loadsDict[key]['tract'] = check
 					continue
 				else:
 					tract = findCensusTract(lat,long)
 			else:
 				tract = findCensusTract(lat,long)
-			while tract is None:
-				tract = findCensusTract(lat,long)
+			# Following replaces a potentially infinite loop. Whether it's necessary at all though should be investigated
+			tract = repeatFindCensusInfo(lat,long,'tract')
 			loadsDict[key]['tract'] = tract
 			tractDict[tract] = buildsviTract(tract)
 			valList.append(list(all_vals(tractDict[tract])))
@@ -1712,16 +1732,15 @@ def __getDownLineLoadsEquipmentBlockGroup__depreciated(pathToOmd, equipmentList)
 			long = float(ob['longitude'])
 			lat = float(ob['latitude'])
 			if blockgroupDict:
-				check = coordCheck(long, lat, blockgroupDict)
-				if check:
+				if check := coordCheck(long, lat, blockgroupDict):
 					loadsDict[key]['blockgroup'] = check
 					continue
 				else:
 					blockgroup = findCensusBlockGroup(lat,long)
 			else:
 				blockgroup = findCensusBlockGroup(lat,long)
-			while blockgroup is None:
-				blockgroup = findCensusBlockGroup(lat,long)
+			# Following replaces a potentially infinite loop. Whether it's necessary at all though should be investigated
+			blockgroup = repeatFindCensusInfo(lat,long,'blockgroup')
 			loadsDict[key]['blockgroup'] = blockgroup
 			blockgroupDict[blockgroup] = buildsviBlockGroup(blockgroup)
 			valList.append(list(all_vals(blockgroupDict[blockgroup])))
@@ -1838,18 +1857,17 @@ def __getDownLineLoadsEquipmentTract__depreciated(pathToOmd, equipmentList):
 			elif kw and pf:
 				kw = float(kw)
 				kva = kw/float(pf)
-				kvar = sqrt(kva^2 - kw^2)
+				kvar = math.sqrt(kva^2 - kw^2)
 			elif kva and pf:
 				kw = float(kva)*float(pf)
-				kvar = sqrt(float(kva)^2 - kw^2)
+				kvar = math.sqrt(float(kva)^2 - kw^2)
 			else:
 				raise Exception(f'Load {obName} does not have necessary information to calculate kw and kvar')
 			loadsDict[key]["base crit score"]= round(((math.sqrt((kw * kw) + (kvar * kvar) ))/ (5)) * 4,2)
 			long = float(ob['longitude'])
 			lat = float(ob['latitude'])
 			if tractDict:
-				check = coordCheck(long, lat, tractDict)
-				if check:
+				if check := coordCheck(long, lat, tractDict):
 					loadsDict[key]['tract'] = check
 					continue
 				else:
@@ -1862,8 +1880,11 @@ def __getDownLineLoadsEquipmentTract__depreciated(pathToOmd, equipmentList):
 				tract = findCensusTract(lat,long)
 				#zillowJson = get_zillowListings(lat, long)
 				#zillowDict[tract] = zillowJson
-			while tract is None:
-				tract = findCensusTract(lat,long)
+			# Following replaces a potentially infinite loop. Whether it's necessary at all though should be investigated
+			tract = repeatFindCensusInfo(lat,long,'tract')
+			#while tract is None:
+				#tract = findCensusTract(lat,long)
+				#The above was previously uncommented while the below was commented out
 				#if tract is not None:
 					#time.sleep(30)
 					#zillowJson = get_zillowListings(lat, long)
@@ -1981,15 +2002,14 @@ def __getDownLineLoadsEquipment__depreciated(pathToOmd,nriGeoJson, equipmentList
 			kvar = float(ob['kvar'])
 			kv = float(ob['kv'])
 			# For each load, estimate the number of persons served.
-			#Use the following equation sqrt(kw^2 + kvar^2)/5 kva = # of homes served by that load
+			#Use the following equation math.sqrt(kw^2 + kvar^2)/5 kva = # of homes served by that load
 			# assume household is 4
 			loads[key]["base crit score"]= round(((math.sqrt((kw * kw) + (kvar * kvar) ))/ (5)) * 4, 2)
 			long = float(ob['longitude'])
 			lat = float(ob['latitude'])
 			if lon_lat:
 				# we check if we have already seen the coordinates
-				check = coordCheck(long,lat, lon_lat)
-				if check:
+				if check := coordCheck(long,lat, lon_lat):
 					svi_score = round(float(tracts.get(tract)['SOVI_SCORE']),2)
 					loads[key]["community crit score"] = round((((math.sqrt((kw * kw) + (kvar * kvar) ))/ (5)) * 4) *  svi_score,2)
 					loads[key]['SOVI_SCORE'] = svi_score
@@ -1999,8 +2019,10 @@ def __getDownLineLoadsEquipment__depreciated(pathToOmd,nriGeoJson, equipmentList
 			else:
 				tract = findCensusTract(lat, long)
 			# if api call failed. repeat it
-			while tract == None:
-				tract = findCensusTract(lat, long)
+			#while tract == None:
+			#	tract = findCensusTract(lat, long)
+			# Following replaces a potentially infinite loop above. Whether it's necessary at all though should be investigated
+			tract = repeatFindCensusInfo(lat,long,'tract')
 			# CHECKS IF WE HAVE ALREADY LOOKED FOR THE TRACT IN QUESTIO
 			if tract in tracts:
 				svi_score = round(float(tracts.get(tract)['SOVI_SCORE']),2)
