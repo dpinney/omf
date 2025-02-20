@@ -122,8 +122,12 @@
 				<input type="text" id="overload_constraint" name="overload_constraint" value="{{allInputDataDict.overload_constraint}}"/>
 			</div>
 			<div class="shortInput">
+				<label class="tooltip">Transformer Customer Mapping Info<span class="classic"> Transformer Info to compute Transformer Pairing mapping. Expected Columns are: 'busname', 'Transformer Index', 'X', 'Y'</span></label>
+				<div>{{ file_upload('trans_cust_map_data_file', 'trans_cust_map_display_filename', 'trans_cust_map_data_filename') }}</div>
+			</div>
+			<div class="shortInput">
 				<label class="tooltip">XF Lookup Table <span class="classic">Upload a .csv file of lookup table of known service transformer kVA readings & impedances. Expected Columns are: 'kVA', 'R_ohms_LV', 'X_ohms_LV'</span></label>
-				<div>{{ file_upload('xf_table_data_file', 'xf_table_display_filename', 'xf_table_data_filename') }}</div>
+				<div>{{ file_upload('xf_lookup_data_file', 'xf_lookup_display_filename', 'xf_lookup_data_filename') }}</div>
 			</div>
 			<div class="wideInput">
 				<p class="inputSectionHeader">Model-Based Hosting Capacity</p>
