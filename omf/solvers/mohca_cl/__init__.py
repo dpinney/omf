@@ -1,7 +1,10 @@
 ''' mohca_cl, command line interface to the Model-Free Hosting Capacity Algorithm. '''
-import fire
 from . import sandia
+from . import sandia_TCHC
 from . import ISU_PINNbasedHCA
+from . import transformer_customer_mapping_isu
+
+import fire
 import os
 from pathlib import Path
 
@@ -19,6 +22,16 @@ def sandia1(in_path, out_path, der_pf, vv_x, vv_y, load_pf_est):
   ''' Execute Sandia hosting capacity algorithm on in_path CSV with output written as CSV to out_path. '''
   ret_value = sandia.hosting_cap(in_path, out_path, der_pf, vv_x, vv_y, load_pf_est)
   return ret_value
+
+def sandiaTCHC( in_path, out_path, final_results, der_pf, vv_x, vv_y, overload_constraint, xf_lookup):
+  ''' Execute Sandia thermal constrained hosting capacity algorithm on in_path CSV with output written as CSV to out_path'''
+  ret_val = sandia_TCHC.hosting_cap_tchc( in_path, out_path, final_results, der_pf, vv_x, vv_y, overload_constraint, xf_lookup )
+  return ret_val
+
+def isu_transformerCustMapping( input_meter_data_fp, grouping_output_fp, minimum_xfmr_n, fmr_n_is_exact, bus_coords_fp):
+  ''' Execute iowa states transformer customer mapping code. Note: Last 3 inputs can be None, False, None respectively '''
+  ret_val = transformer_customer_mapping_isu.get_groupings( input_meter_data_fp, grouping_output_fp, minimum_xfmr_n, fmr_n_is_exact, bus_coords_fp)
+  return ret_val
 
 def iastate(in_path, out_path):
   ''' Execute ISU hosting capacity algorithm on in_path CSV with output written as CSV to out_path. '''
