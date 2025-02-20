@@ -53,7 +53,7 @@ def hosting_capacity_map( modelDir, inputDict, outData ):
 	outData['hideMap'] = False
 
 	if inputDict['runAmiAlgorithm'] == 'on':
-		model_free_data = Path(modelDir, 'output_mohca.csv')
+		model_free_data = Path(modelDir, 'output_mohca_vchc.csv')
 		model_free_data_df = pd.read_csv(model_free_data)
 		with open(path_to_omd) as f:
 			omd = json.load(f)
@@ -73,15 +73,15 @@ def hosting_capacity_map( modelDir, inputDict, outData ):
 			# 	buses_in_mohca_not_in_omd = set(mohca_buses) - set(buses_from_omd_tree)
 			attachment_keys = {
 				"coloringFiles": {
-					"output_mohca.csv": {
+					"output_mohca_vchc.csv": {
 						"csv": "<content>",
 						"colorOnLoadColumnIndex": "1"
 					}
 				}
 			}
-			model_free_color_data = Path(modelDir, 'output_mohca.csv').read_text()
+			model_free_color_data = Path(modelDir, 'output_mohca_vchc.csv').read_text()
 			# adding the mohca color output to the attachment
-			attachment_keys['coloringFiles']['output_mohca.csv']['csv'] = model_free_color_data
+			attachment_keys['coloringFiles']['output_mohca_vchc.csv']['csv'] = model_free_color_data
 			new_omd_path = Path(modelDir, 'color.omd')
 			starting_omd['attachments'] = attachment_keys
 			with open(new_omd_path, 'w+') as out_file:
@@ -226,7 +226,9 @@ def run_ami_algorithm( modelDir, inputDict, outData ):
 	# mohca data-driven hosting capacity
 	inputPath = Path(modelDir, inputDict['AMIDataFileName'])
 	inputAsString = inputPath.read_text()
-	outputPath = Path(modelDir, 'output_mohca.csv')
+	output_path_vchc = Path(modelDir, 'output_mohca_vchc.csv')
+	output_path_tchc = Path(modelDir, 'output_mohca_tchc.csv')
+
 	try:
 		csvValidateAndLoad(inputAsString, modelDir=modelDir, header=0, nrows=None, ncols=None, dtypes=[], return_type='df', ignore_nans=True, save_file=None, ignore_errors=False )
 	except:
@@ -240,9 +242,16 @@ def run_ami_algorithm( modelDir, inputDict, outData ):
 	AMI_start_time = time.time()
 	if inputDict[ "algorithm" ] == "sandia1":
 		if inputDict["dgInverterSetting"] == 'constantPF':
-			mohca_cl.sandia1( in_path=inputPath, out_path=outputPath, der_pf= float(inputDict['der_pf']), vv_x=None, vv_y=None, load_pf_est=float(inputDict['load_pf_est'] ))
+			# Calculate Voltage Hosting Capacity
+			mohca_cl.sandia1( in_path=inputPath, out_path=output_path_vchc, der_pf= float(inputDict['der_pf']), vv_x=None, vv_y=None, load_pf_est=float(inputDict['load_pf_est'] ))
+			# Calculate Thermal Hosting Capacity
+			# First do customer mapping with ISU's Code
+			# Get final results
+			# Pass that into sandia TCHC
+			# mohca_cl.sandiaTCHC( in_path=inputPath, out_path=output_path_tchc, der_pf= float(inputDict['der_pf']), vv_x=None, vv_y=None, load_pf_est=float(inputDict['load_pf_est'] ))
 		elif inputDict["dgInverterSetting"] == 'voltVar':
-			mohca_cl.sandia1( in_path=inputPath, out_path=outputPath, der_pf= float(inputDict['der_pf']), vv_x=vv_x, vv_y=vv_y, load_pf_est=float(inputDict['load_pf_est'] ))
+			mohca_cl.sandia1( in_path=inputPath, out_path=output_path_vchc, der_pf= float(inputDict['der_pf']), vv_x=vv_x, vv_y=vv_y, load_pf_est=float(inputDict['load_pf_est'] ))
+			# mohca_cl.sandiaTCHC( in_path=inputPath, out_path=output_path_tchc, der_pf= float(inputDict['der_pf']), vv_x=vv_x, vv_y=vv_y, load_pf_est=float(inputDict['load_pf_est'] ))
 		else:
 			errorMessage = "DG Error - Should not happen. dgInverterSetting is not either of the 2 options it is supposed to be."
 			raise Exception(errorMessage)
@@ -251,12 +260,12 @@ def run_ami_algorithm( modelDir, inputDict, outData ):
 			outData["reactivePowerWarningFlag"] = present_q_warning
 			outData["reactivePowerWarningInfo"] = f"Reactive power missing from data set. Estimating hosting capacity through power factor from given input 'Load Power Factor'"
 	elif inputDict[ "algorithm" ] == "iastate":
-		mohca_cl.iastate( inputPath, outputPath )
+		mohca_cl.iastate( inputPath, output_path_vchc )
 	else:
 		errorMessage = "Algorithm name error"
 		raise Exception(errorMessage)
 	AMI_end_time = time.time()
-	AMI_results = pd.read_csv( outputPath, index_col=False)
+	AMI_results = pd.read_csv( output_path_vchc, index_col=False)
 	AMI_results.rename(columns={'kw_hostable': 'voltage_cap_kW'}, inplace=True)
 	histogramFigure = px.histogram( AMI_results, x='voltage_cap_kW', template="simple_white", color_discrete_sequence=["MediumPurple"] )
 	histogramFigure.update_layout(bargap=0.5)
@@ -288,7 +297,7 @@ def run_model_based_algorithm( modelDir, inputDict, outData ):
 	tree = opendss.dssConvert.omdToTree(path_to_omd)
 	opendss.dssConvert.treeToDss(tree, Path(modelDir, 'circuit.dss'))
 	model_based_start_time = time.time()
-	model_basedHCResults = opendss.hosting_capacity_all( FNAME = Path(modelDir, 'circuit.dss'), max_test_kw=int(inputDict["model_basedHCMaxTestkw"]), multiprocess=False)
+	model_basedHCResults = opendss.hosting_capacity_all( FNAME = Path(modelDir, 'circuit.dss'), max_test_kw=int(inputDict["model_basedHCMaxTestkw"]))
 	model_based_end_time = time.time()
 	# - opendss.hosting_capacity_all() changes the cwd, so change it back so other code isn't affected
 
@@ -336,7 +345,10 @@ def new(modelDir):
 	''' Create a new instance of this model. Returns true on success, false on failure. '''
 	meter_file_name = 'input_mohcaData.csv'
 	meter_file_path = Path(omf.omfDir,'static','testFiles', 'hostingCapacity', meter_file_name)
-	# meter_file_contents = open(meter_file_path).read()
+	trans_cust_map_file_name = 'input_transformer_customer_mapping.csv'
+	trans_cust_map_file_path = Path( omf.omfDir,'static','testFiles', 'hostingCapacity', trans_cust_map_file_name )
+	xf_lookup_file_name = "input_xf_lookup.csv"
+	xf_lookup_file_path = Path( omf.omfDir,'static','testFiles', 'hostingCapacity', xf_lookup_file_name )
 	defaultInputs = {
 		"modelType": modelName,
 		"algorithm": 'sandia1',
@@ -350,14 +362,23 @@ def new(modelDir):
 		"dgInverterSetting": 'constantPF',
 		"der_pf": 1.00,
 		"vv_points": "0.8,0.44,0.92,0.44,0.98,0,1.02,0,1.08,-0.44,1.2,-0.44",
-		"load_pf_est": 1.0
+		"load_pf_est": 1.0,
+		"overload_constraint": 1.2,
+		"xf_lookup_data_file": xf_lookup_file_name,
+		"xf_lookup_display_filename": xf_lookup_file_name,
+		"trans_cust_map_data_file": trans_cust_map_file_name,
+		"trans_cust_map_display_filename": trans_cust_map_file_name
+
 	}
 	creationCode = __neoMetaModel__.new(modelDir, defaultInputs)
+	# Copy files from the test directory ( or respective places ) and put them in the model for use
 	try:
 		shutil.copyfile(
 			Path(__neoMetaModel__._omfDir, "static", "testFiles", 'hostingCapacity', defaultInputs["feederName1"]+'.omd'),
 			Path(modelDir, defaultInputs["feederName1"]+'.omd'))
 		shutil.copyfile( meter_file_path, Path(modelDir, meter_file_name) )
+		shutil.copyfile( xf_lookup_file_path, Path(modelDir, xf_lookup_file_name) )
+		shutil.copyfile( trans_cust_map_file_path, Path(modelDir, trans_cust_map_file_name) )
 	except:
 		return False
 	return creationCode
