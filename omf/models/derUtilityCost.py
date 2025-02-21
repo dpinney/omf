@@ -782,9 +782,9 @@ def work(modelDir, inputDict):
 	outData['monthlyTotalSavingsAdjustedService_TESS'] = [tot-tota for tot, tota in zip(outData['monthlyTotalCostService'], outData['monthlyTotalCostAdjustedService_TESS'])] ## total savings from TESS contribution
 	outData['monthlyTotalSavingsAdjustedService_GEN'] = [tot-tota for tot, tota in zip(outData['monthlyTotalCostService'], outData['monthlyTotalCostAdjustedService_GEN'])] ## total savings from GEN contribution
 	outData['monthlyPeakDemandSavings_allDER'] = list(np.array(outData['monthlyPeakDemandCost']) - np.array(outData['monthlyAdjustedPeakDemandCost_allDER'])) ## total demand charge savings from all DERs
-	outData['monthlyPeakDemandSavings_BESS'] = list(np.array(outData['monthlyPeakDemandCost']) - np.array(outData['monthlyAdjustedPeakDemandCost_BESS'])) ## total demand charge savings from BESS only
-	outData['monthlyPeakDemandSavings_TESS'] = list(np.array(outData['monthlyPeakDemandCost']) - np.array(outData['monthlyAdjustedPeakDemandCost_TESS'])) ## total demand charge savings from TESS only
-	outData['monthlyPeakDemandSavings_GEN'] = list(np.array(outData['monthlyPeakDemandCost']) - np.array(outData['monthlyAdjustedPeakDemandCost_GEN'])) ## total demand charge savings from GEN only
+	outData['monthlyPeakDemandSavings_BESS'] = list(np.array(outData['monthlyAdjustedPeakDemandCost_allDER']) - np.array(outData['monthlyAdjustedPeakDemandCost_BESS'])) ## total demand charge savings from BESS only
+	outData['monthlyPeakDemandSavings_TESS'] = list(np.array(outData['monthlyAdjustedPeakDemandCost_allDER']) - np.array(outData['monthlyAdjustedPeakDemandCost_TESS'])) ## total demand charge savings from TESS only
+	outData['monthlyPeakDemandSavings_GEN'] = list(np.array(outData['monthlyAdjustedPeakDemandCost_allDER']) - np.array(outData['monthlyAdjustedPeakDemandCost_GEN'])) ## total demand charge savings from GEN only
 	outData['monthlyEnergyConsumptionSavings_allDER'] = list(np.array(outData['monthlyEnergyConsumptionCost']) - np.array(outData['monthlyAdjustedEnergyConsumptionCost_allDER'])) ## total consumption savings from BESS only
 	outData['monthlyEnergyConsumptionSavings_BESS'] = list(np.array(outData['monthlyEnergyConsumptionCost']) - np.array(outData['monthlyAdjustedEnergyConsumptionCost_BESS'])) ## total consumption savings from BESS only
 	outData['monthlyEnergyConsumptionSavings_TESS'] = list(np.array(outData['monthlyEnergyConsumptionCost']) - np.array(outData['monthlyAdjustedEnergyConsumptionCost_TESS'])) ## total consumption savings from TESS only
@@ -940,6 +940,7 @@ def work(modelDir, inputDict):
 	costs_demandCharge_year1_total = np.sum(costs_demandCharge_year1_array)
 	costs_demandCharge_allyears_array = np.full(projectionLength,costs_demandCharge_year1_total)
 
+	## Calculate total utility costs for year 1 and all years
 	utilityCosts_year1_total = operationalCosts_year1_total + allDevices_subsidy_year1_total + allDevices_compensation_year1_total + startupCosts + costs_demandCharge_year1_total
 	utilityCosts_year1_array = operationalCosts_year1_array + allDevices_subsidy_year1_array + allDevices_compensation_year1_array 
 	utilityCosts_year1_array[0] += startupCosts
@@ -959,6 +960,24 @@ def work(modelDir, inputDict):
 	utilityNetSavings_year1_array = utilitySavings_year1_array - utilityCosts_year1_array
 	utilityNetSavings_allyears_total = utilitySavings_allyears_total - utilityCosts_allyears_total
 	utilityNetSavings_allyears_array = utilitySavings_allyears_array - utilityCosts_allyears_array
+
+	## Calculate sanity check for per-tech vs all tech
+	## Total savings = all tech consumption savings + all tech peak demand savings + time shift savings 
+	## time shift savings = (peak demand - peak adjusted demand)*demandCosts
+	timeshift_savings_allTech = outData['monthlyPeakDemandSavings_allDER']
+	timeshift_savings_allTech_year1_total = sum(outData['monthlyPeakDemandSavings_allDER'])
+	timeshift_savings_allTech_allyears_array = np.full(projectionLength, timeshift_savings_allTech_year1_total)
+	outData['timeshift_savings_allTech_allyears'] = list(timeshift_savings_allTech_allyears_array)
+	peakDemand_savings_allTech = outData['monthlyPeakDemandSavings_allDER']
+	consumption_savings_allTech = outData['monthlyEnergyConsumptionSavings_allDER']
+	totalsavings_year1_array = [a+b+c for a,b,c in zip(timeshift_savings_allTech, peakDemand_savings_allTech,consumption_savings_allTech)]
+	totalsavings_year1_total = sum(totalsavings_year1_array)
+	#print(totalsavings_year1_array)
+	#print('total savings w timeshift year1: ', totalsavings_year1_total)
+	besstotal =  sum(outData['monthlyPeakDemandSavings_BESS'])+sum(outData['monthlyEnergyConsumptionSavings_BESS'])
+	tesstotal = sum(outData['monthlyPeakDemandSavings_TESS'])+sum(outData['monthlyEnergyConsumptionSavings_TESS'])
+	gentotal = sum(outData['monthlyPeakDemandSavings_GEN'])+sum(outData['monthlyEnergyConsumptionSavings_GEN'])
+	#print('demand + consumption + shift total savings: ', besstotal+tesstotal+gentotal+timeshift_savings_allTech_year1_total)
 
 	## Update financial parameters
 	outData['totalCost_year1'] = list(utilityCosts_year1_array)
