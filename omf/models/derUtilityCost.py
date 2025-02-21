@@ -760,10 +760,11 @@ def work(modelDir, inputDict):
 	## NOTE: The sum is done over the entire month's DER contribution because the contribution arrays have zeroes everywhere except for the peak hour per month
 	outData['monthlyPeakDemandCost'] = [peak*demandCost for peak in outData['monthlyPeakDemand']] ## peak demand charge before including DERs
 	outData['monthlyAdjustedPeakDemand_allDER'] = [max(outData['adjustedDemand_allDER'][s:f]) for s, f in monthHours] ## monthly peak demand hours (including DERs)
+	outData['monthlyAdjustedPeakDemandCost_allDER'] = [pad*demandCost for pad in outData['monthlyAdjustedPeakDemand_allDER']] ## peak demand charge after including all DERs
+
 	outData['monthlyAdjustedPeakDemand_BESS'] = [sum(BESScontribution[s:f]) for s, f in monthHours] ## Only the BESS kW contribution to each monthly peak
 	outData['monthlyAdjustedPeakDemand_TESS'] = [sum(TESScontribution[s:f]) for s, f in monthHours] ## Only the TESS kW contribution to each monthly peak
 	outData['monthlyAdjustedPeakDemand_GEN'] = [sum(GENcontribution[s:f]) for s, f in monthHours] ## Only the generator kW contribution to each monthly peak
-	outData['monthlyAdjustedPeakDemandCost_allDER'] = [pad*demandCost for pad in outData['monthlyAdjustedPeakDemand_allDER']] ## peak demand charge after including all DERs
 	outData['monthlyAdjustedPeakDemandCost_BESS'] = [pad*demandCost for pad in outData['monthlyAdjustedPeakDemand_BESS']] ## peak demand charge from only BESS contribution
 	outData['monthlyAdjustedPeakDemandCost_TESS'] = [pad*demandCost for pad in outData['monthlyAdjustedPeakDemand_TESS']] ## peak demand charge from only TESS contribution
 	outData['monthlyAdjustedPeakDemandCost_GEN'] = [pad*demandCost for pad in outData['monthlyAdjustedPeakDemand_GEN']] ## peak demand charge from only GEN contribution
@@ -774,8 +775,8 @@ def work(modelDir, inputDict):
 	outData['monthlyTotalCostAdjustedService_BESS'] = [eca+dca for eca, dca in zip(outData['monthlyAdjustedEnergyConsumptionCost_BESS'], outData['monthlyAdjustedPeakDemandCost_BESS'])] ## total cost of BESS contribution to energy and peak demand reduction
 	outData['monthlyTotalCostAdjustedService_TESS'] = [eca+dca for eca, dca in zip(outData['monthlyAdjustedEnergyConsumptionCost_TESS'], outData['monthlyAdjustedPeakDemandCost_TESS'])] ## total cost of TESS contribution to energy and peak demand reduction
 	outData['monthlyTotalCostAdjustedService_GEN'] = [eca+dca for eca, dca in zip(outData['monthlyAdjustedEnergyConsumptionCost_GEN'], outData['monthlyAdjustedPeakDemandCost_GEN'])] ## total cost of GEN contribution to energy and peak demand reduction
-	
-	## Calculate savings from reduced demand charge and energy consumption
+
+	## Calculate savings from reduced demand charge and energy consumption cost
 	outData['monthlyTotalSavingsAdjustedService_allDER'] = [tot-tota for tot, tota in zip(outData['monthlyTotalCostService'], outData['monthlyTotalCostAdjustedService_allDER'])] ## total savings from all DERs
 	outData['monthlyTotalSavingsAdjustedService_BESS'] = [tot-tota for tot, tota in zip(outData['monthlyTotalCostService'], outData['monthlyTotalCostAdjustedService_BESS'])] ## total savings from BESS contribution
 	outData['monthlyTotalSavingsAdjustedService_TESS'] = [tot-tota for tot, tota in zip(outData['monthlyTotalCostService'], outData['monthlyTotalCostAdjustedService_TESS'])] ## total savings from TESS contribution
@@ -784,9 +785,52 @@ def work(modelDir, inputDict):
 	outData['monthlyPeakDemandSavings_BESS'] = list(np.array(outData['monthlyPeakDemandCost']) - np.array(outData['monthlyAdjustedPeakDemandCost_BESS'])) ## total demand charge savings from BESS only
 	outData['monthlyPeakDemandSavings_TESS'] = list(np.array(outData['monthlyPeakDemandCost']) - np.array(outData['monthlyAdjustedPeakDemandCost_TESS'])) ## total demand charge savings from TESS only
 	outData['monthlyPeakDemandSavings_GEN'] = list(np.array(outData['monthlyPeakDemandCost']) - np.array(outData['monthlyAdjustedPeakDemandCost_GEN'])) ## total demand charge savings from GEN only
+	outData['monthlyEnergyConsumptionSavings_allDER'] = list(np.array(outData['monthlyEnergyConsumptionCost']) - np.array(outData['monthlyAdjustedEnergyConsumptionCost_allDER'])) ## total consumption savings from BESS only
 	outData['monthlyEnergyConsumptionSavings_BESS'] = list(np.array(outData['monthlyEnergyConsumptionCost']) - np.array(outData['monthlyAdjustedEnergyConsumptionCost_BESS'])) ## total consumption savings from BESS only
 	outData['monthlyEnergyConsumptionSavings_TESS'] = list(np.array(outData['monthlyEnergyConsumptionCost']) - np.array(outData['monthlyAdjustedEnergyConsumptionCost_TESS'])) ## total consumption savings from TESS only
 	outData['monthlyEnergyConsumptionSavings_GEN'] = list(np.array(outData['monthlyEnergyConsumptionCost']) - np.array(outData['monthlyAdjustedEnergyConsumptionCost_GEN'])) ## total consumption savings from GEN only
+
+	## NOTE: Begin sanity check code block 
+	## Calculate the individual DER contributions to energy and demand cost/savings
+	BESSdemand = np.array(BESS)-np.array(grid_charging_BESS)
+	TESSdemand = np.array(vbat_discharge_component)-np.array(vbat_charge_component)
+	GENdemand = np.array(generator)
+
+	monthlyBESSconsumption = [sum(BESSdemand[s:f]) for s, f in monthHours]
+	monthlyTESSconsumption = [sum(TESSdemand[s:f]) for s, f in monthHours]
+	monthlyGENconsumption = [sum(GENdemand[s:f]) for s, f in monthHours]
+
+	BESSpeakDemand = np.zeros(8760) ## Initialize contribution arrays with zeros (same length as the full year: 8760)
+	TESSpeakDemand = np.zeros(8760) ## Initialize contribution arrays with zeros (same length as the full year: 8760)
+	GENpeakDemand = np.zeros(8760) ## Initialize contribution arrays with zeros (same length as the full year: 8760)
+	for s, f in monthHours:
+		## Gather the monthly demand (kWh) data and identify the maximum peak kW that month
+		month_data = outData['adjustedDemand_allDER'][s:f]
+		month_peak_kw = max(month_data)
+
+		## Create a mask array where 1=peak and 0=nonpeak
+		peak_mask = np.where(month_data == month_peak_kw, 1.0, 0.0)
+		BESSpeakDemand[s:f] = BESSdemand[s:f] * peak_mask 
+		TESSpeakDemand[s:f] = TESSdemand[s:f] * peak_mask 
+		GENpeakDemand[s:f] = GENdemand[s:f] * peak_mask 
+
+	## Monthly energy consumption savings
+	monthlyBESSconsumption_savings = [monthlyConsumption*consumptionCost for monthlyConsumption in monthlyBESSconsumption]
+	monthlyTESSconsumption_savings = [monthlyConsumption*consumptionCost for monthlyConsumption in monthlyTESSconsumption]
+	monthlyGENconsumption_savings = [monthlyConsumption*consumptionCost for monthlyConsumption in monthlyGENconsumption]
+	monthlyAllDER_consumption_savings = [a+b+c for a,b,c in zip(monthlyBESSconsumption_savings,monthlyTESSconsumption_savings,monthlyGENconsumption_savings)]
+	totalAllDER_consumption_savings = sum(monthlyAllDER_consumption_savings)
+	#print('total consumption savings when adding up individual DERs: ', totalAllDER_consumption_savings)
+	#print('total consumption savings (D-Dadj)*Ecost: ', consumptionCost*(sum(demand)-sum(outData['adjustedDemand_allDER']))) NOTE: These agree, yay!
+
+	## Monthly peak demand savings
+	monthlyBESS_peakDemand_savings = [sum(BESSpeakDemand[s:f])*demandCost for s, f in monthHours]
+	monthlyTESS_peakDemand_savings = [sum(TESSpeakDemand[s:f])*demandCost for s, f in monthHours]
+	monthlyGEN_peakDemand_savings = [sum(GENpeakDemand[s:f])*demandCost for s, f in monthHours]
+	monthlyAllDER_peakDemand_savings = [a+b+c for a,b,c in zip(monthlyBESS_peakDemand_savings,monthlyTESS_peakDemand_savings,monthlyGEN_peakDemand_savings)]
+	totalAllDER_peakDemand_savings = sum(monthlyAllDER_peakDemand_savings)
+	## TODO: Once working, can delete the individual consumption savings since this was coded up as a sanity check.
+	## NOTE: End Sanity Check Code Block - Confirmed, the individual consumption savings match with the outData['monthlyEnergyConsumptionSavings_allDER'] 
 
 	## Extrapolate costs from 1 year to the entire projection length
 	outData['totalPeakDemandSavings_allDER_allyears'] = list(np.full(projectionLength, np.sum(outData['monthlyPeakDemandSavings_allDER'])))
@@ -804,11 +848,6 @@ def work(modelDir, inputDict):
 	outData['savings_total_GEN_allyears'] = list(np.full(projectionLength, np.sum(outData['monthlyTotalSavingsAdjustedService_GEN'])))
 	outData['savings_peakDemand_GEN_allyears'] = list(np.full(projectionLength, np.sum(outData['monthlyPeakDemandSavings_GEN'])))
 	outData['savings_consumption_GEN_allyears'] = list(np.full(projectionLength, np.sum(outData['monthlyEnergyConsumptionSavings_GEN'])))
-	
-	print(sum(outData['monthlyTotalCostAdjustedService_GEN']))
-	print(sum(outData['monthlyAdjustedPeakDemandCost_GEN'])+sum(outData['monthlyAdjustedEnergyConsumptionCost_GEN']))
-	print('savings comparison: \n', sum(outData['monthlyTotalSavingsAdjustedService_GEN']))
-	print(sum(outData['monthlyPeakDemandSavings_GEN'])+sum(outData['monthlyEnergyConsumptionSavings_GEN']))
 
 	outData['savings_TESS_allyears'] = list(np.full(projectionLength, np.sum(outData['monthlyTotalSavingsAdjustedService_TESS'])))
 	outData['savings_GEN_allyears'] = list(np.full(projectionLength, np.sum(outData['monthlyTotalSavingsAdjustedService_GEN'])))
