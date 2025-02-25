@@ -647,6 +647,10 @@ def work(modelDir, inputDict):
 
 	## Calculate the individual costs and savings from the adjusted energy and adjusted demand charges
 	outData['monthlyPeakDemandSavings'] = list(np.array(outData['monthlyPeakDemandCost']) - np.array(outData['monthlyAdjustedPeakDemandCost'])) ## total demand charge savings from all DERs
+	#print('Monthly Peak Demand cost (baseline demand): \n', np.array(outData['monthlyPeakDemandCost']))
+	#print('Monthly Adjusted Peak Demand cost: \n', np.array(outData['monthlyAdjustedPeakDemandCost']))
+	#print('Monthly Peak Demand Savings Dcost x (D-Dadj): \n', outData['monthlyPeakDemandSavings'])
+
 	outData['monthlyEnergyConsumptionSavings'] = list(np.array(outData['monthlyEnergyConsumptionCost']) - np.array(outData['monthlyAdjustedEnergyConsumptionCost'])) ## total consumption savings from BESS only
 	
 	## Calculate the combined costs and savings from the adjusted energy and adjusted demand charges
@@ -811,6 +815,7 @@ def work(modelDir, inputDict):
 	## Total savings = all tech consumption savings + all tech peak demand savings + time shift savings 
 	## time shift savings = (peak demand - peak adjusted demand)*demandCosts ?
 	timeshift_savings_allTech = outData['monthlyPeakDemandSavings']
+	#print(outData['monthlyPeakDemandSavings'])
 	timeshift_savings_allTech_year1_total = sum(outData['monthlyPeakDemandSavings'])
 	timeshift_savings_allTech_allyears_array = np.full(projectionLength, timeshift_savings_allTech_year1_total)
 	outData['timeshift_savings_allTech_allyears'] = list(timeshift_savings_allTech_allyears_array)
@@ -866,6 +871,14 @@ def work(modelDir, inputDict):
 	outData['totalCosts_TESS_allyears'] = list(-1.0*totalCosts_TESS_allyears_array) ## Costs are negative for plotting purposes
 	outData['totalCosts_GEN_allyears'] = list(-1.0*totalCosts_GEN_allyears_array) ## Costs are negative for plotting purposes
 	outData['cumulativeSavings_total'] = list(np.cumsum(utilitySavings_allyears_array))
+
+	## Try alternative calculation to account for shift from baseline demand
+	## e.g. BESS = Peak Demand Cost - Peak Adjusted Demand BESS only cost
+	## NOTE: Nope, terribly off base
+	#outData['savings_peakDemand_BESS_allyears'] = list(np.full(projectionLength, sum(outData['monthlyPeakDemandCost']) - sum(monthlyBESS_peakDemand_savings)))
+	#outData['savings_peakDemand_TESS_allyears'] = list(np.full(projectionLength, sum(outData['monthlyPeakDemandCost']) - sum(monthlyTESS_peakDemand_savings)))
+	#outData['savings_peakDemand_GEN_allyears'] = list(np.full(projectionLength, sum(outData['monthlyPeakDemandCost']) - sum(monthlyGEN_peakDemand_savings)))
+	
 
 	## Model operations typically end here.
 	## Stdout/stderr.
