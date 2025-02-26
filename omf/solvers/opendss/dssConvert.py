@@ -546,7 +546,7 @@ def _evilDssTreeToGldTree_toBeTested(dssTree):
 				}
 				bus_with_coords.append(ob['bus'])
 			elif ob['!CMD'] == 'new':
-				obtype, name = ob['object'].split('.')
+				obtype, name = ob['object'].split('.',1)
 				if 'bus1' in ob and 'bus2' in ob:
 					# line-like object. includes reactors.
 					fro, froCode = ob['bus1'].split('.', maxsplit=1)
@@ -651,7 +651,8 @@ def _evilDssTreeToGldTree_toBeTested(dssTree):
 					}
 					_extend_with_exc(ob, gldTree[str(g_id)], ['object','element','!CMD'])
 				elif 'monitoredobj' in ob:
-					cobtype, cobname = ob['monitoredobj'].split('.', maxsplit=1)
+					# The following method works whether the monitored obj is in the format fuse.fuse_3 or just fuse_3
+					cobname = ob['monitoredobj'].split('.',1)[-1]
 					gldTree[str(g_id)] = {
 						'object': obtype,
 						'name': name,
@@ -979,6 +980,33 @@ def dss_to_networkx(dssFilePath, tree=None, omd=None):
 		tree = dssToTree(dssFilePath)
 	if omd == None:
 		omd = evilDssTreeToGldTree(tree)
+	# Gather edges, leave out source and circuit objects
+	edges = [(ob['from'],ob['to']) for ob in omd.values() if 'from' in ob and 'to' in ob]
+	edges_sub = [
+		(ob['parent'],ob['name']) for ob in omd.values()
+		if 'name' in ob and 'parent' in ob and ob.get('object') not in ['circuit', 'vsource']
+	]
+	full_edges = edges + edges_sub
+	G = nx.DiGraph(full_edges)
+	for ob in omd.values():
+		if 'latitude' in ob and 'longitude' in ob:
+			G.add_node(ob['name'], pos=(float(ob['longitude']), float(ob['latitude'])))
+		else:
+			G.add_node(ob['name'])
+	return G
+
+def _dss_to_networkx_toBeTested(dssFilePath, tree=None, omd=None):
+	''' Return a networkx directed graph from a dss file. If tree is provided, build graph from that instead of the file. '''
+	if tree == None:
+		tree = dssToTree(dssFilePath)
+	if omd == None:
+		##########
+		# - Saeed
+		##########
+		omd = _evilDssTreeToGldTree_toBeTested(tree)
+		##########
+		# - Saeed
+		##########
 	# Gather edges, leave out source and circuit objects
 	edges = [(ob['from'],ob['to']) for ob in omd.values() if 'from' in ob and 'to' in ob]
 	edges_sub = [

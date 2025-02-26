@@ -6,7 +6,7 @@ import shutil, datetime
 from os.path import join as pJoin
 import requests
 import zipfile
-import shapefile
+#import shapefile
 from io import BytesIO
 import numpy as np
 import json
@@ -25,6 +25,11 @@ from omf.models.__neoMetaModel__ import *
 from omf.solvers.opendss import *
 from omf.comms import *
 from omf.solvers.opendss.dssConvert import *
+from omf.solvers.opendss.dssConvert import _dssToOmd_toBeTested as dssToOmd
+from omf.solvers.opendss.dssConvert import _evilDssTreeToGldTree_toBeTested as evilDssTreeToGldTree
+from omf.solvers.opendss.dssConvert import _treeToDss_toBeTested as treeToDss
+from omf.solvers.opendss.dssConvert import _dss_to_clean_via_save_toBeTested as dss_to_clean_via_save
+from omf.solvers.opendss.dssConvert import _dss_to_networkx_toBeTested as dss_to_networkx
 
 # Model metadata:
 tooltip = "Determines the most vulnerable areas and pieces of equipment within a circuit "
@@ -2664,13 +2669,14 @@ def runSections(dssTree, omd):
 			if ob.get('enabled') == 'n':
 				G.remove_edge(ob['from'], ob['to'])
 			elif not G.has_edge(ob['from'], ob['to']):
-				length = ob.get('length', 0)
+				length = float(ob.get('length', 0))
 				name = ob.get('name', '')
 				G[ob['from']][ob['to']]['name'] = name
 				G.add_edge(ob['from'], ob['to'], weight=int(length))
 			else:
-				length = ob.get('length', 0)
+				length = float(ob.get('length', 0))
 				name = ob.get('name', '')
+				# conversion to float then int because the string '0.01' for example can't be converted straight into the int 0
 				G[ob['from']][ob['to']]['weight'] = int(length)
 	# Create edges based on parent relationships
 	for node, data in G.nodes(data=True):

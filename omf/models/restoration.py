@@ -21,6 +21,7 @@ from omf.solvers.opendss.dssConvert import _dssToOmd_toBeTested as dssToOmd
 from omf.solvers.opendss.dssConvert import _evilDssTreeToGldTree_toBeTested as evilDssTreeToGldTree
 from omf.solvers.opendss.dssConvert import _treeToDss_toBeTested as treeToDss
 from omf.solvers.opendss.dssConvert import _dss_to_clean_via_save_toBeTested as dss_to_clean_via_save
+from omf.solvers.opendss.dssConvert import _dss_to_networkx_toBeTested as dss_to_networkx
 from omf.solvers import PowerModelsONM
 from omf.comms import createGraph
 from omf.models.resilientCommunity import runCalculations as makeResComOutputCsv
@@ -1959,15 +1960,11 @@ def new(modelDir):
 	loadPriority_file_data 		= open(pJoin(*loadPriority_file_path)).read()
 	microgridTagging_file_path	= dest_folder_path+['iowa240_topOfFeeder+DERs_mgTagging_3MG.json']
 	microgridTagging_file_data	= open(pJoin(*microgridTagging_file_path)).read()
-
 	'''
+	
 	# ====== Iowa240 Test Case
 	# feeder_file_path= [__neoMetaModel__._omfDir,'static','testFiles','iowa240_dwp_22_no_show_voltage.dss.omd']
 	feeder_file_path= [__neoMetaModel__._omfDir,'static','testFiles','iowa240_in_Florida_copy2_no_show_voltage.dss.omd']
-	# feeder_file_path= [__neoMetaModel__._omfDir,'static','testFiles','ieee8500_forced_layout_converted_with_new_code.omd']
-	# feeder_file_path= [__neoMetaModel__._omfDir,'static','testFiles','3300_bus_feeder_added_conncodes.omd']
-	# feeder_file_path= [__neoMetaModel__._omfDir,'static','testFiles','MasterFlatLoadshapesClean1Day.omd']
-
 	event_file_path = [__neoMetaModel__._omfDir,'static','testFiles','iowa240_dwp_22.events.json']
 	loadPriority_file_path = [__neoMetaModel__._omfDir,'static','testFiles','iowa240_dwp_22.loadPriority.basic.json']
 	loadPriority_file_data = open(pJoin(*loadPriority_file_path)).read()
@@ -1975,7 +1972,20 @@ def new(modelDir):
 	microgridTagging_file_data = open(pJoin(*microgridTagging_file_path)).read()
 	customerInfo_file_path = [__neoMetaModel__._omfDir,'static','testFiles','restoration','customerInfoExample.csv']
 	customerInfo_file_data = open(pJoin(*customerInfo_file_path)).read()
-
+	'''
+	# ====== 3300 bus feeder with PV & Storage test case
+	feeder_file_path= [__neoMetaModel__._omfDir,'static','testFiles','3300 bus feeder with pv and storage','MasterCleanPV&Storage.omd']
+	# create bespoke events file
+	event_file_path = [__neoMetaModel__._omfDir,'static','testFiles','iowa240_dwp_22.events.json']
+	# create bespoke priority file
+	loadPriority_file_path = [__neoMetaModel__._omfDir,'static','testFiles','restoration','Microgrid Tagging','iowa240_dwp_22.microgridTagging.EMPTY.json']
+	loadPriority_file_data = open(pJoin(*loadPriority_file_path)).read()
+	# create bespoke mg tagging file
+	microgridTagging_file_path = [__neoMetaModel__._omfDir,'static','testFiles','restoration','Microgrid Tagging','iowa240_dwp_22.microgridTagging.EMPTY.json']
+	microgridTagging_file_data = open(pJoin(*microgridTagging_file_path)).read()
+	customerInfo_file_path = [__neoMetaModel__._omfDir,'static','testFiles','3300 bus feeder with pv and storage','ExampleCustomerInfoFile.csv']
+	customerInfo_file_data = open(pJoin(*customerInfo_file_path)).read()
+	'''
 	# ====== Nreca1824 Test Case
 	# feeder_file_path = [__neoMetaModel__._omfDir,'static','testFiles','nreca1824_dwp.omd']
 	# event_csv_path = [__neoMetaModel__._omfDir,'static','testFiles','nreca1824events.csv']
