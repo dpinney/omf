@@ -394,15 +394,15 @@
 				</script>
 				<script>
 					insertMetric("monthlySummaryTable","Peak Demand (kW)", allOutputData.monthlyPeakDemand)
-					insertMetric("monthlySummaryTable","Adjusted Peak Demand (kW)", allOutputData.monthlyAdjustedPeakDemand_allDER)
+					insertMetric("monthlySummaryTable","Adjusted Peak Demand (kW)", allOutputData.monthlyAdjustedPeakDemand)
 					insertMetric("monthlySummaryTable","Energy (kWh)", allOutputData.monthlyEnergyConsumption)
-					insertMetric("monthlySummaryTable","Adjusted Energy (kWh)", allOutputData.monthlyAdjustedEnergyConsumption_allDER)
+					insertMetric("monthlySummaryTable","Adjusted Energy (kWh)", allOutputData.monthlyAdjustedEnergyConsumption)
 					insertMetric("monthlySummaryTable","Energy Cost ($)", allOutputData.monthlyEnergyConsumptionCost)
-					insertMetric("monthlySummaryTable","Adjusted Energy Cost ($)", allOutputData.monthlyAdjustedEnergyConsumptionCost_allDER)
+					insertMetric("monthlySummaryTable","Adjusted Energy Cost ($)", allOutputData.monthlyAdjustedEnergyConsumptionCost)
 					insertMetric("monthlySummaryTable","Demand Charge ($)", allOutputData.monthlyPeakDemandCost)
-					insertMetric("monthlySummaryTable","Adjusted Demand Charge ($)", allOutputData.monthlyAdjustedPeakDemandCost_allDER)
+					insertMetric("monthlySummaryTable","Adjusted Demand Charge ($)", allOutputData.monthlyAdjustedPeakDemandCost)
 					insertMetric("monthlySummaryTable","Total Cost of Service ($)", allOutputData.monthlyTotalCostService)
-					insertMetric("monthlySummaryTable","Adjusted Total Cost of Service ($)", allOutputData.monthlyTotalCostAdjustedService_allDER)
+					insertMetric("monthlySummaryTable","Adjusted Total Cost of Service ($)", allOutputData.monthlyTotalCostAdjustedService)
 					insertMetric("monthlySummaryTable","Total Consumer Compensation ($)", allOutputData.totalCost_paidToConsumer)
 					insertMetric("monthlySummaryTable","Program Startup and Operational Costs ($)", allOutputData.startupAndOperationalCosts_year1)
 					insertMetric("monthlySummaryTable","Net Utility Savings ($)", allOutputData.totalNetSavings_year1)
@@ -451,10 +451,11 @@
 						{"name":"BESS Incentives", "data": allOutputData.totalCosts_BESS_allyears, "color": "rgb(116,40,129)"},
 						{"name":"TESS Incentives", "data": allOutputData.totalCosts_TESS_allyears, "color": "rgb(152,110,172)"},
 						{"name":"Generator Incentives", "data": allOutputData.totalCosts_GEN_allyears, "color": "rgb(195,164,207)"},
+						//{"name":"Peak Shift Savings", "data": allOutputData.timeshift_savings_allTech_allyears, "color": "rgb(152,251,152)"},
 						//{"name":"Total Demand Charge Savings", "data": allOutputData.totalPeakDemandSavings_allDER_allyears, "color": "rgb(152,251,152)"},
 						//{"name":"Startup Costs", "data": allOutputData.startupCosts_allyears, "color": "rgb(240,128,128)"},
 						//{"name":"Operational Costs", "data": allOutputData.operationalCosts_allyears, "color": "rgb(246,164,130)"},
-						{"name":"Cumulative Return", "type":"spline", "data": allOutputData.cumulativeCashflow_total, "color": "black"}
+						{"name":"Cumulative Savings", "type":"spline", "data": allOutputData.cumulativeSavings_total, "color": "black"}
 					],
 					"yAxis":{"title":{"text":"Income ($)","style":{"color":"gray"}}},
 					"chart":{"marginBottom":55,"zoomType":"x","renderTo":"cashFlowChartDiv2","type":"column","marginRight":20, "height":250,"width":1000},
