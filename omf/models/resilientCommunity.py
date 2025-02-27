@@ -850,6 +850,31 @@ def coordCheck(long, lat, geoList):
 		print(f"Error in coordCheck: {e}")
 		return ''
 
+def getPowerMeasures(ob):
+	''' Retrieves kw, kvar, kva, and pf from a load object
+		Input: ob -> a load object 
+		Return: -> [kw, kvar, kva]
+	'''
+	kw = ob.get('kw',None)
+	kvar = ob.get('kvar',None)
+	kva = ob.get('kva',None)
+	pf = ob.get('pf',None)
+	if kw and kvar:
+		kw = float(kw)
+		kvar = float(kvar)
+		kva = math.sqrt(kw**2 + kvar**2)
+	elif kw and pf:
+		kw = float(kw)
+		kva = kw/float(pf)
+		kvar = math.sqrt(kva^2 - kw^2)
+	elif kva and pf:
+		kw = float(kva)*float(pf)
+		kva = float(kva)
+		kvar = math.sqrt(kva**2 + kw**2)
+	else:
+		raise Exception(f'Load {ob["name"]} does not have necessary information to calculate kw, kva, and kvar')
+	return kw, kvar, kva
+
 def getDownLineLoadsEquipmentBlockGroupZillow(pathToOmd, equipmentList,avgPeakDemand,pathToZillowData, pathToLoadsFile,loadsTypeList, zillowFlag=None):
 	'''
 	Retrieves downline loads for specific set of equipment and retrieve nri data for each of the equipment
@@ -896,24 +921,7 @@ def getDownLineLoadsEquipmentBlockGroupZillow(pathToOmd, equipmentList,avgPeakDe
 				raise IndexError(f'{ie}\nNOTE: Your Customer Information (.csv file) likely didn\'t contain an entry for one or more loads')
 			if (loadIsResidential): 
 				loadsDict[key] = {"base crit score":None}
-				kw = ob.get('kw',None)
-				kvar = ob.get('kvar',None)
-				kva = ob.get('kva',None)
-				pf = ob.get('pf',None)
-				if kw and kvar:
-					kw = float(kw)
-					kvar = float(kvar)
-					kva = math.sqrt(kw**2 + kvar**2)
-				elif kw and pf:
-					kw = float(kw)
-					kva = kw/float(pf)
-					kvar = math.sqrt(kva^2 - kw^2)
-				elif kva and pf:
-					kw = float(kva)*float(pf)
-					kva = float(kva)
-					kvar = math.sqrt(kva**2 + kw**2)
-				else:
-					raise Exception(f'Load {obName} does not have necessary information to calculate kw and kvar')
+				kw, kvar, kva = getPowerMeasures(ob)
 				loadsDict[key]['kva'] = kva
 				loadsDict[key]["base crit score"] = round(((math.sqrt((kw * kw) + (kvar * kvar) ))/ float(avgPeakDemand)) * 4,2)
 				if obName in sectionsDict:
@@ -1099,22 +1107,7 @@ def getDownLineLoadsEquipmentTractZillow(pathToOmd, equipmentList, avgPeakDemand
 		obDict[key] = ob
 		if (obType == 'load'):
 			loadsDict[key] = {"base crit score":None}
-			kw = ob.get('kw',None)
-			kvar = ob.get('kvar',None)
-			kva = ob.get('kva',None)
-			pf = ob.get('pf',None)
-			if kw and kvar:
-				kw = float(kw)
-				kvar = float(kvar)
-			elif kw and pf:
-				kw = float(kw)
-				kva = kw/float(pf)
-				kvar = math.sqrt(kva^2 - kw^2)
-			elif kva and pf:
-				kw = float(kva)*float(pf)
-				kvar = math.sqrt(float(kva)^2 - kw^2)
-			else:
-				raise Exception(f'Load {obName} does not have necessary information to calculate kw and kvar')
+			kw, kvar, kva = getPowerMeasures(ob)
 			loadsDict[key]["base crit score"]= round(((math.sqrt((kw * kw) + (kvar * kvar) ))/ (5)) * 4,2)
 			long = float(ob['longitude'])
 			lat = float(ob['latitude'])
@@ -1240,22 +1233,7 @@ def getDownLineLoadsEquipmentBlockGroup(pathToOmd, equipmentList,avgPeakDemand):
 		obDict[key] = ob
 		if (obType == 'load'):
 			loadsDict[key] = {"base crit score":None}
-			kw = ob.get('kw',None)
-			kvar = ob.get('kvar',None)
-			kva = ob.get('kva',None)
-			pf = ob.get('pf',None)
-			if kw and kvar:
-				kw = float(kw)
-				kvar = float(kvar)
-			elif kw and pf:
-				kw = float(kw)
-				kva = kw/float(pf)
-				kvar = math.sqrt(kva^2 - kw^2)
-			elif kva and pf:
-				kw = float(kva)*float(pf)
-				kvar = math.sqrt(float(kva)^2 - kw^2)
-			else:
-				raise Exception(f'Load {obName} does not have necessary information to calculate kw and kvar')
+			kw, kvar, kva = getPowerMeasures(ob)
 			loadsDict[key]["base crit score"]= round(((math.sqrt((kw * kw) + (kvar * kvar) ))/ (avgPeakDemand)) * 4,2)
 			long = float(ob['longitude'])
 			lat = float(ob['latitude'])
@@ -1375,22 +1353,7 @@ def getDownLineLoadsEquipmentTract(pathToOmd, equipmentList, avgPeakDemand):
 		obDict[key] = ob
 		if (obType == 'load'):
 			loadsDict[key] = {"base crit score":None}
-			kw = ob.get('kw',None)
-			kvar = ob.get('kvar',None)
-			kva = ob.get('kva',None)
-			pf = ob.get('pf',None)
-			if kw and kvar:
-				kw = float(kw)
-				kvar = float(kvar)
-			elif kw and pf:
-				kw = float(kw)
-				kva = kw/float(pf)
-				kvar = math.sqrt(kva^2 - kw^2)
-			elif kva and pf:
-				kw = float(kva)*float(pf)
-				kvar = math.sqrt(float(kva)^2 - kw^2)
-			else:
-				raise Exception(f'Load {obName} does not have necessary information to calculate kw and kvar')
+			kw, kvar, kva = getPowerMeasures(ob)
 			loadsDict[key]["base crit score"]= round(((math.sqrt((kw * kw) + (kvar * kvar) ))/ (5)) * 4,2)
 			long = float(ob['longitude'])
 			lat = float(ob['latitude'])
@@ -1717,22 +1680,7 @@ def __getDownLineLoadsEquipmentBlockGroup__depreciated(pathToOmd, equipmentList)
 		obDict[key] = ob
 		if (obType == 'load'):
 			loadsDict[key] = {"base crit score":None}
-			kw = ob.get('kw',None)
-			kvar = ob.get('kvar',None)
-			kva = ob.get('kva',None)
-			pf = ob.get('pf',None)
-			if kw and kvar:
-				kw = float(kw)
-				kvar = float(kvar)
-			elif kw and pf:
-				kw = float(kw)
-				kva = kw/float(pf)
-				kvar = math.sqrt(kva^2 - kw^2)
-			elif kva and pf:
-				kw = float(kva)*float(pf)
-				kvar = math.sqrt(float(kva)^2 - kw^2)
-			else:
-				raise Exception(f'Load {obName} does not have necessary information to calculate kw and kvar')
+			kw, kvar, kva = getPowerMeasures(ob)
 			loadsDict[key]["base crit score"]= round(((math.sqrt((kw * kw) + (kvar * kvar) ))/ (5)) * 4,2)
 			long = float(ob['longitude'])
 			lat = float(ob['latitude'])
@@ -1852,22 +1800,7 @@ def __getDownLineLoadsEquipmentTract__depreciated(pathToOmd, equipmentList):
 		obDict[key] = ob
 		if (obType == 'load'):
 			loadsDict[key] = {"base crit score":None}
-			kw = ob.get('kw',None)
-			kvar = ob.get('kvar',None)
-			kva = ob.get('kva',None)
-			pf = ob.get('pf',None)
-			if kw and kvar:
-				kw = float(kw)
-				kvar = float(kvar)
-			elif kw and pf:
-				kw = float(kw)
-				kva = kw/float(pf)
-				kvar = math.sqrt(kva^2 - kw^2)
-			elif kva and pf:
-				kw = float(kva)*float(pf)
-				kvar = math.sqrt(float(kva)^2 - kw^2)
-			else:
-				raise Exception(f'Load {obName} does not have necessary information to calculate kw and kvar')
+			kw, kvar, kva = getPowerMeasures(ob)
 			loadsDict[key]["base crit score"]= round(((math.sqrt((kw * kw) + (kvar * kvar) ))/ (5)) * 4,2)
 			long = float(ob['longitude'])
 			lat = float(ob['latitude'])
