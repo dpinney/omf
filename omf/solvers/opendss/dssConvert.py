@@ -546,7 +546,7 @@ def _evilDssTreeToGldTree_toBeTested(dssTree):
 				}
 				bus_with_coords.append(ob['bus'])
 			elif ob['!CMD'] == 'new':
-				obtype, name = ob['object'].split('.',1)
+				obtype, name = ob['object'].split('.')
 				if 'bus1' in ob and 'bus2' in ob:
 					# line-like object. includes reactors.
 					fro, froCode = ob['bus1'].split('.', maxsplit=1)
@@ -651,8 +651,7 @@ def _evilDssTreeToGldTree_toBeTested(dssTree):
 					}
 					_extend_with_exc(ob, gldTree[str(g_id)], ['object','element','!CMD'])
 				elif 'monitoredobj' in ob:
-					# The following method works whether the monitored obj is in the format fuse.fuse_3 or just fuse_3
-					cobname = ob['monitoredobj'].split('.',1)[-1]
+					cobtype, cobname = ob['monitoredobj'].split('.', maxsplit=1)
 					gldTree[str(g_id)] = {
 						'object': obtype,
 						'name': name,
@@ -930,6 +929,7 @@ def _dssToOmd_toBeTested(dssFilePath, omdFilePath, RADIUS=0.0002, write_out=True
 				##########
 				# - Saeed
 				##########
+				# TODO: This is here to catch issues that have arrived in round-trip-conversions (dss->omd->dss->omd). Investigate if this should be reverted when other problems are taken care of.  
 				short_parent_name = parent_name.split('.')[1] if len(parent_name.split('.')) == 2 else parent_name
 				##########
 				# - Saeed
