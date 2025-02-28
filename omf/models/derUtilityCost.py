@@ -688,15 +688,15 @@ def work(modelDir, inputDict):
 
 		## Create a mask array where 1=peak and 0=nonpeak
 		peak_mask_adjP = np.where(month_data_adjP == month_peak_kw_adjP, 1.0, 0.0)
-		BESSpeakDemand_adjP[s:f] = BESSdemand[s:f] * peak_mask_adjP ## BESS demand at the monthly peak
-		TESSpeakDemand_adjP[s:f] = TESSdemand[s:f] * peak_mask_adjP ## TESS demand at the monthly peak
-		GENpeakDemand_adjP[s:f] = GENdemand[s:f] * peak_mask_adjP ## GEN demand at the monthly peak
+		BESSpeakDemand_adjP[s:f] = BESSdemand[s:f] * peak_mask_adjP ## BESS demand at the monthly adjusted peak
+		TESSpeakDemand_adjP[s:f] = TESSdemand[s:f] * peak_mask_adjP ## TESS demand at the monthly adjusted peak
+		GENpeakDemand_adjP[s:f] = GENdemand[s:f] * peak_mask_adjP ## GEN demand at the monthly adjusted peak
 		peakDemand_adjP[s:f] = demand[s:f] * peak_mask_adjP ## demand at the monthly adjusted demand peak
 		
 		peak_mask_baseP = np.where(month_data_baseP == month_peak_kw_baseP, 1.0, 0.0)
-		BESSpeakDemand_baseP[s:f] = BESSdemand[s:f] * peak_mask_baseP ## BESS demand at the monthly peak
-		TESSpeakDemand_baseP[s:f] = TESSdemand[s:f] * peak_mask_baseP ## TESS demand at the monthly peak
-		GENpeakDemand_baseP[s:f] = GENdemand[s:f] * peak_mask_baseP ## GEN demand at the monthly peak
+		BESSpeakDemand_baseP[s:f] = BESSdemand[s:f] * peak_mask_baseP ## BESS demand at the monthly baseline peak
+		TESSpeakDemand_baseP[s:f] = TESSdemand[s:f] * peak_mask_baseP ## TESS demand at the monthly baseline peak
+		GENpeakDemand_baseP[s:f] = GENdemand[s:f] * peak_mask_baseP ## GEN demand at the monthly baseline peak
 		peakDemand_baseP[s:f] = demand[s:f] * peak_mask_baseP ## demand at the monthly baseline demand peak
 
 	## Monthly BESS, TESS, and GEN energy consumption savings
@@ -757,17 +757,12 @@ def work(modelDir, inputDict):
 	allDevices_compensation_allyears_array = BESS_compensation_allyears_array + GEN_compensation_allyears_array + TESS_compensation_allyears_array
 
 	## Calculate the F_val (the linear scaling factor that accound for the peak demand shift)
-	## NOTE: See CIDER project plan for link to detailed calculation of F_val
+	## NOTE: See CIDER project plan for doc link to detailed calculation of F_val
 	demand_1 = np.array(monthly_peakDemand_baseP) ## peak demand at t=1
 	demand_2 = np.array(monthly_peakDemand_adjP) ## peak demand at t=2
 	D_DER_1 = np.array(monthlyAllDER_peakDemand_baseP) ## DER contribution (kW) at t=1
 	D_DER_2 = np.array(monthlyAllDER_peakDemand_adjP) ## DER contribution (kW) at t=2
 	F_val = (demand_1 - demand_2 + D_DER_2) / D_DER_1
-	#demand_adj2 = np.array(outData['monthlyAdjustedPeakDemand'])
-	#deltaD_2to1 = demand_1 - demand_adj2
-	#deltaD_1 = D_DER_1
-	#F_val = deltaD_2to1 / deltaD_1 ## NOTE: This F_val is equivalent to the F_val above = (demand_1 - demand_2 + D_DER_2) / D_DER_1
-	#print(F_val)
 
 	## Apply the monthly F_val to the monthly BESS, TESS, GEN peak demand savings
 	monthlyBESS_peakDemand_savings = monthlyBESS_peakDemand_savings_baseP*F_val ## change these back to adjP if not working
@@ -974,16 +969,16 @@ def new(modelDir):
 		'rateCompensation': '0.02', ## unit: $/kWh
 		'discountRate': '2',
 		'startupCosts': '200000',
-		'TESS_subsidy_onetime_ac': '5.0',
-		'TESS_subsidy_ongoing_ac': '1.0',
-		'TESS_subsidy_onetime_hp': '10.0',
-		'TESS_subsidy_ongoing_hp': '2.0',
-		'TESS_subsidy_onetime_wh': '15.0',
-		'TESS_subsidy_ongoing_wh': '3.0',
-		'BESS_subsidy_onetime': '30.0',
-		'BESS_subsidy_ongoing': '4.0',
-		'GEN_subsidy_onetime': '35.0',
-		'GEN_subsidy_ongoing': '5.0',
+		'TESS_subsidy_onetime_ac': '100.0',
+		'TESS_subsidy_ongoing_ac': '20.0',
+		'TESS_subsidy_onetime_hp': '100.0',
+		'TESS_subsidy_ongoing_hp': '20.0',
+		'TESS_subsidy_onetime_wh': '50.0',
+		'TESS_subsidy_ongoing_wh': '10.0',
+		'BESS_subsidy_onetime': '200.0',
+		'BESS_subsidy_ongoing': '30.0',
+		'GEN_subsidy_onetime': '100.0',
+		'GEN_subsidy_ongoing': '25.0',
 		'operationalCosts_ongoing': '1000.0',
 		'operationalCosts_onetime': '20000.0',
 
