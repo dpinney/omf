@@ -229,6 +229,22 @@ def run_ami_algorithm( modelDir, inputDict, outData ):
 	output_path_vchc = Path(modelDir, 'output_mohca_vchc.csv')
 	output_path_tchc = Path(modelDir, 'output_mohca_tchc.csv')
 
+	completed_xfmr_cust_pairing_path = Path(modelDir, inputDict['xfmr_cust_completed_data_filename'])
+	completed_xfmr_cust_df = pd.read_csv(completed_xfmr_cust_pairing_path)
+	calculate_xfmr_cust_pairing_path = Path(modelDir, inputDict['xfmr_cust_calculate_data_filename'])
+	calculate_xfmr_cust_df = pd.read_csv(calculate_xfmr_cust_pairing_path)
+
+	bus_coords_input = Path(modelDir, inputDict['bus_coords_data_filename'])
+
+	isu_calc_result_filename = "isu_calc_result.csv"
+	isu_calc_result_filepath = Path(modelDir, isu_calc_result_filename )
+
+	xf_lookup_path = Path(modelDir, inputDict['xf_lookup_data_filename'])
+	xf_lookup_df = pd.read_csv(xf_lookup_path)
+
+	#TODO Default temp file to be deleted Jenny
+	isu_temp = Path(modelDir, "input_xfmr_cust_temp.csv" )
+
 	try:
 		csvValidateAndLoad(inputAsString, modelDir=modelDir, header=0, nrows=None, ncols=None, dtypes=[], return_type='df', ignore_nans=True, save_file=None, ignore_errors=False )
 	except:
@@ -239,19 +255,59 @@ def run_ami_algorithm( modelDir, inputDict, outData ):
 	vv_x = [v for i,v in enumerate(vv_points_eval) if i%2==0]
 	vv_y = [v for i,v in enumerate(vv_points_eval) if i%2==1]
 
+	# TEMP JENNY TODO
+	xf_lookup = pd.DataFrame(columns=['kVA', 'R_ohms_LV', 'X_ohms_LV'])
+	xf_lookup['kVA'] = [50]
+	xf_lookup['R_ohms_LV'] = [0.0135936]
+	xf_lookup['X_ohms_LV'] = [0.0165888]
+
 	AMI_start_time = time.time()
 	if inputDict[ "algorithm" ] == "sandia1":
+		exactFlag = False
 		if inputDict["dgInverterSetting"] == 'constantPF':
 			# Calculate Voltage Hosting Capacity
 			mohca_cl.sandia1( in_path=inputPath, out_path=output_path_vchc, der_pf= float(inputDict['der_pf']), vv_x=None, vv_y=None, load_pf_est=float(inputDict['load_pf_est'] ))
+			#TODO: Check if KVAR is there before continuing
 			# Calculate Thermal Hosting Capacity
-			# First do customer mapping with ISU's Code
-			# Get final results
-			# Pass that into sandia TCHC
-			# mohca_cl.sandiaTCHC( in_path=inputPath, out_path=output_path_tchc, der_pf= float(inputDict['der_pf']), vv_x=None, vv_y=None, load_pf_est=float(inputDict['load_pf_est'] ))
+			# First do customer mapping with ISU's Code and the transformer file they inputted in
+			# Check if user inputted their own completed xfmr <-> customer mappings. If so, calculate with theirs
+			if completed_xfmr_cust_df.empty == False:
+				mohca_cl.sandiaTCHC( in_path=inputPath, out_path=output_path_tchc, final_results=completed_xfmr_cust_df, der_pf=float(inputDict['der_pf']), vv_x=None, vv_y=None, overload_constraint=float(inputDict['overload_constraint']), xf_lookup=xf_lookup )
+			# If they did not include their own, calculate it as best as you can with isu's function, then calculate thermal with that
+			else:
+				#TODO new inputs
+				if inputDict['num_of_xfmrs'] == 0:
+					num_of_xfmr = None
+				else:
+					num_of_xfmr = int( inputDict['num_of_xfmrs'])
+					exactFlag = True
+				isu_xfmr_cust_map_result_df = mohca_cl.isu_transformerCustMapping(input_meter_data_fp=isu_temp, grouping_output_fp=isu_calc_result_filepath, minimum_xfmr_n=num_of_xfmr, fmr_n_is_exact=exactFlag, bus_coords_fp=bus_coords_input )
+				# okay fuck. to calculate, need option number of trans input, and the xy table, and a true/false if thats accurate or not. need new inputs
+				# made the num input
+				# need xy table. thats not the same as xf_lookup, I Don't think.
+				mohca_cl.sandiaTCHC( in_path=inputPath, out_path=output_path_tchc, final_results=isu_xfmr_cust_map_result_df, der_pf=float(inputDict['der_pf']), vv_x=None, vv_y=None, overload_constraint=float(inputDict['overload_constraint']), xf_lookup=xf_lookup )
 		elif inputDict["dgInverterSetting"] == 'voltVar':
+			# Calculate Voltage Hosting Capacity
 			mohca_cl.sandia1( in_path=inputPath, out_path=output_path_vchc, der_pf= float(inputDict['der_pf']), vv_x=vv_x, vv_y=vv_y, load_pf_est=float(inputDict['load_pf_est'] ))
-			# mohca_cl.sandiaTCHC( in_path=inputPath, out_path=output_path_tchc, der_pf= float(inputDict['der_pf']), vv_x=vv_x, vv_y=vv_y, load_pf_est=float(inputDict['load_pf_est'] ))
+			# TODO: Check if KVAR is there
+			# Calculate Thermal Hosting Capacity
+			# First do customer mapping with ISU's Code and the transformer file they inputted in
+			# Check if user inputted their own completed xfmr <-> customer mappings. If so, calculate with theirs
+			if completed_xfmr_cust_df.empty == False:
+				mohca_cl.sandiaTCHC( in_path=inputPath, out_path=output_path_tchc, final_results=completed_xfmr_cust_df, der_pf=float(inputDict['der_pf']), vv_x=vv_x, vv_y=vv_y, overload_constraint=float(inputDict['overload_constraint']), xf_lookup=xf_lookup )
+			# If they did not include their own, calculate it as best as you can with isu's function, then calculate thermal with that
+			else:
+				#TODO new inputs
+				if inputDict['num_of_xfmrs'] == 0:
+					num_of_xfmr = None
+				else:
+					num_of_xfmr = int( inputDict['num_of_xfmrs'])
+					exactFlag = True
+				isu_xfmr_cust_map_result_df = mohca_cl.isu_xfmrformerCustMapping(input_meter_data_fp=isu_temp, grouping_output_fp=isu_calc_result_filepath, minimum_xfmr_n=num_of_xfmr, fmr_n_is_exact=exactFlag, bus_coords_fp=bus_coords_input )
+				# okay fuck. to calculate, need option number of trans input, and the xy table, and a true/false if thats accurate or not. need new inputs
+				# made the num input
+				# need xy table. thats not the same as xf_lookup, I Don't think.
+				mohca_cl.sandiaTCHC( in_path=inputPath, out_path=output_path_tchc, final_results=isu_xfmr_cust_map_result_df, der_pf=float(inputDict['der_pf']), vv_x=vv_x, vv_y=vv_y, overload_constraint=float(inputDict['overload_constraint']), xf_lookup=xf_lookup )
 		else:
 			errorMessage = "DG Error - Should not happen. dgInverterSetting is not either of the 2 options it is supposed to be."
 			raise Exception(errorMessage)
@@ -265,17 +321,18 @@ def run_ami_algorithm( modelDir, inputDict, outData ):
 		errorMessage = "Algorithm name error"
 		raise Exception(errorMessage)
 	AMI_end_time = time.time()
-	AMI_results = pd.read_csv( output_path_vchc, index_col=False)
-	AMI_results.rename(columns={'kw_hostable': 'voltage_cap_kW'}, inplace=True)
-	histogramFigure = px.histogram( AMI_results, x='voltage_cap_kW', template="simple_white", color_discrete_sequence=["MediumPurple"] )
+	model_free_voltage_results = pd.read_csv( output_path_vchc, index_col=False)
+	model_free_voltage_results.rename(columns={'kw_hostable': 'voltage_cap_kW'}, inplace=True)
+	#TODO - Needs to be modified when the MoHCA algorithm supports calculating thermal hosting capacity
+	model_free_thermal_results = pd.read_csv( output_path_tchc )
+	thermal_kw_results = model_free_thermal_results['TCHC (kW)']
+	model_free_voltage_results['thermal_cap_kW'] = thermal_kw_results
+
+	histogramFigure = px.histogram( model_free_voltage_results, x=['voltage_cap_kW', 'thermal_cap_kW'], template="simple_white", color_discrete_sequence=["green", "lightblue"] )
 	histogramFigure.update_layout(bargap=0.5)
-	# TBD - Needs to be modified when the MoHCA algorithm supports calculating thermal hosting capacity
-	min_value = 5
-	max_value = 8
-	AMI_results['thermal_cap_kW']  = np.random.randint(min_value, max_value + 1, size=len(AMI_results))
-	AMI_results['max_cap_allowed_kW'] = np.minimum( AMI_results['voltage_cap_kW'], AMI_results['thermal_cap_kW'])
-	AMI_results_sorted = AMI_results.sort_values(by='busname')
-	barChartFigure = px.bar(AMI_results_sorted, x='busname', y=['voltage_cap_kW', 'thermal_cap_kW', 'max_cap_allowed_kW'], barmode='group', color_discrete_sequence=["green", "lightblue", "MediumPurple"], template="simple_white" )
+	model_free_voltage_results['max_cap_allowed_kW'] = np.minimum( model_free_voltage_results['voltage_cap_kW'], model_free_voltage_results['thermal_cap_kW'])
+	model_free_voltage_results_sorted = model_free_voltage_results.sort_values(by='busname')
+	barChartFigure = px.bar(model_free_voltage_results_sorted, x='busname', y=['voltage_cap_kW', 'thermal_cap_kW', 'max_cap_allowed_kW'], barmode='group', color_discrete_sequence=["green", "lightblue", "MediumPurple"], template="simple_white" )
 	barChartFigure.update_layout( legend=dict(
 		orientation='h',
 		yanchor='bottom',
@@ -283,11 +340,11 @@ def run_ami_algorithm( modelDir, inputDict, outData ):
 		xanchor='right',
 		x=1
 	) )
-	barChartFigure.add_traces( list(px.line(AMI_results_sorted, x='busname', y='max_cap_allowed_kW', markers=True).select_traces()) )
+	barChartFigure.add_traces( list(px.line(model_free_voltage_results_sorted, x='busname', y='max_cap_allowed_kW', markers=True).select_traces()) )
 	outData['histogramFigure'] = json.dumps( histogramFigure, cls=py.utils.PlotlyJSONEncoder )
 	outData['barChartFigure'] = json.dumps( barChartFigure, cls=py.utils.PlotlyJSONEncoder )
-	outData['AMI_tableHeadings'] = AMI_results_sorted.columns.values.tolist()
-	outData['AMI_tableValues'] = ( list(AMI_results_sorted.itertuples(index=False, name=None)) )
+	outData['AMI_tableHeadings'] = model_free_voltage_results_sorted.columns.values.tolist()
+	outData['AMI_tableValues'] = ( list(model_free_voltage_results_sorted.itertuples(index=False, name=None)) )
 	outData['AMI_runtime'] = convert_seconds_to_hms_ms( AMI_end_time - AMI_start_time )
 
 def run_model_based_algorithm( modelDir, inputDict, outData ):
@@ -328,7 +385,6 @@ def work(modelDir, inputDict):
 	if inputDict.get('runDownlineAlgorithm') == 'on':
 		run_downline_load_algorithm( modelDir, inputDict, outData)
 
-	# TODO: All are False, then there's no map.
 	hosting_capacity_map(modelDir=modelDir, inputDict=inputDict, outData=outData)
 
 	outData['stdout'] = "Success"
@@ -345,18 +401,25 @@ def new(modelDir):
 	''' Create a new instance of this model. Returns true on success, false on failure. '''
 	meter_file_name = 'input_mohcaData.csv'
 	meter_file_path = Path(omf.omfDir,'static','testFiles', 'hostingCapacity', meter_file_name)
-	trans_cust_map_file_name = 'input_transformer_customer_mapping.csv'
-	trans_cust_map_file_path = Path( omf.omfDir,'static','testFiles', 'hostingCapacity', trans_cust_map_file_name )
+	xfmr_cust_calculate_file_name = 'input_xfmr_cust_calculate.csv'
+	xfmr_cust_calculate_file_path = Path( omf.omfDir,'static','testFiles', 'hostingCapacity', xfmr_cust_calculate_file_name )
+	xfmr_cust_completed_file_name = 'input_xfmr_cust_completed.csv'
+	xfmr_cust_completed_file_path = Path(omf.omfDir, 'static', 'testFiles', 'hostingCapacity', xfmr_cust_completed_file_name)
 	xf_lookup_file_name = "input_xf_lookup.csv"
-	xf_lookup_file_path = Path( omf.omfDir,'static','testFiles', 'hostingCapacity', xf_lookup_file_name )
+	xf_lookup_file_path = Path( omf.omfDir, 'static','testFiles', 'hostingCapacity', xf_lookup_file_name )
+	bus_coords_file_name = "input_bus_coords.csv"
+	bus_coords_file_path = Path(omf.omfDir, 'static', 'testFiles', 'hostingCapacity', bus_coords_file_name)
+	# Temp TODO Jenny
+	xfmr_temp = Path(omf.omfDir, 'static', 'testFiles', 'hostingCapacity', 'input_xfmr_cust_temp.csv')
+
 	defaultInputs = {
 		"modelType": modelName,
 		"algorithm": 'sandia1',
 		"AMIDataFileName": meter_file_name,
 		"userAMIDisplayFileName": meter_file_name,
 		"feederName1": 'nreca_secondaryTestSet',
-		"runModelBasedAlgorithm": 'on',
 		"runAmiAlgorithm": 'on',
+		"runModelBasedAlgorithm": 'on',
 		"runDownlineAlgorithm": 'on',
 		"model_basedHCMaxTestkw": 50000,
 		"dgInverterSetting": 'constantPF',
@@ -364,10 +427,16 @@ def new(modelDir):
 		"vv_points": "0.8,0.44,0.92,0.44,0.98,0,1.02,0,1.08,-0.44,1.2,-0.44",
 		"load_pf_est": 1.0,
 		"overload_constraint": 1.2,
-		"xf_lookup_data_file": xf_lookup_file_name,
+		"xf_lookup_data_filename": xf_lookup_file_name,
 		"xf_lookup_display_filename": xf_lookup_file_name,
-		"trans_cust_map_data_file": trans_cust_map_file_name,
-		"trans_cust_map_display_filename": trans_cust_map_file_name
+		"xfmr_cust_calculate_data_filename": xfmr_cust_calculate_file_name,
+		"xfmr_cust_calculate_display_filename": xfmr_cust_calculate_file_name,
+		"xfmr_cust_completed_data_filename": xfmr_cust_completed_file_name,
+		"xfmr_cust_completed_display_filename": xfmr_cust_completed_file_name,
+		"bus_coords_display_filename": bus_coords_file_name,
+		"bus_coords_data_filename": bus_coords_file_name,
+		#TODO Jenny change to 0
+		"num_of_xfmrs": 12
 
 	}
 	creationCode = __neoMetaModel__.new(modelDir, defaultInputs)
@@ -378,7 +447,11 @@ def new(modelDir):
 			Path(modelDir, defaultInputs["feederName1"]+'.omd'))
 		shutil.copyfile( meter_file_path, Path(modelDir, meter_file_name) )
 		shutil.copyfile( xf_lookup_file_path, Path(modelDir, xf_lookup_file_name) )
-		shutil.copyfile( trans_cust_map_file_path, Path(modelDir, trans_cust_map_file_name) )
+		shutil.copyfile( xfmr_cust_calculate_file_path, Path(modelDir, xfmr_cust_calculate_file_name) )
+		shutil.copyfile( xfmr_cust_completed_file_path, Path(modelDir, xfmr_cust_completed_file_name) )
+		shutil.copyfile( bus_coords_file_path, Path(modelDir, bus_coords_file_name))
+		# TODO: Temp Jenny
+		shutil.copyfile( xfmr_temp, Path(modelDir, "input_xfmr_cust_temp.csv"))
 	except:
 		return False
 	return creationCode
