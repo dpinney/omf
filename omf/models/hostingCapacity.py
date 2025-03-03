@@ -282,7 +282,6 @@ def run_ami_algorithm( modelDir, inputDict, outData ):
 					num_of_xfmr = int( inputDict['num_of_xfmrs'])
 					exactFlag = True
 				isu_xfmr_cust_map_result_df = mohca_cl.isu_transformerCustMapping(input_meter_data_fp=isu_temp, grouping_output_fp=isu_calc_result_filepath, minimum_xfmr_n=num_of_xfmr, fmr_n_is_exact=exactFlag, bus_coords_fp=bus_coords_input )
-				# okay fuck. to calculate, need option number of trans input, and the xy table, and a true/false if thats accurate or not. need new inputs
 				# made the num input
 				# need xy table. thats not the same as xf_lookup, I Don't think.
 				mohca_cl.sandiaTCHC( in_path=inputPath, out_path=output_path_tchc, final_results=isu_xfmr_cust_map_result_df, der_pf=float(inputDict['der_pf']), vv_x=None, vv_y=None, overload_constraint=float(inputDict['overload_constraint']), xf_lookup=xf_lookup )
@@ -303,8 +302,7 @@ def run_ami_algorithm( modelDir, inputDict, outData ):
 				else:
 					num_of_xfmr = int( inputDict['num_of_xfmrs'])
 					exactFlag = True
-				isu_xfmr_cust_map_result_df = mohca_cl.isu_xfmrformerCustMapping(input_meter_data_fp=isu_temp, grouping_output_fp=isu_calc_result_filepath, minimum_xfmr_n=num_of_xfmr, fmr_n_is_exact=exactFlag, bus_coords_fp=bus_coords_input )
-				# okay fuck. to calculate, need option number of trans input, and the xy table, and a true/false if thats accurate or not. need new inputs
+				isu_xfmr_cust_map_result_df = mohca_cl.isu_transformerCustMapping(input_meter_data_fp=isu_temp, grouping_output_fp=isu_calc_result_filepath, minimum_xfmr_n=num_of_xfmr, fmr_n_is_exact=exactFlag, bus_coords_fp=bus_coords_input )
 				# made the num input
 				# need xy table. thats not the same as xf_lookup, I Don't think.
 				mohca_cl.sandiaTCHC( in_path=inputPath, out_path=output_path_tchc, final_results=isu_xfmr_cust_map_result_df, der_pf=float(inputDict['der_pf']), vv_x=vv_x, vv_y=vv_y, overload_constraint=float(inputDict['overload_constraint']), xf_lookup=xf_lookup )
