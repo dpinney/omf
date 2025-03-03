@@ -239,12 +239,6 @@ def run_ami_algorithm( modelDir, inputDict, outData ):
 	isu_calc_result_filename = "isu_calc_result.csv"
 	isu_calc_result_filepath = Path(modelDir, isu_calc_result_filename )
 
-	xf_lookup_path = Path(modelDir, inputDict['xf_lookup_data_filename'])
-	xf_lookup_df = pd.read_csv(xf_lookup_path)
-
-	#TODO Default temp file to be deleted Jenny
-	isu_temp = Path(modelDir, "input_xfmr_cust_temp.csv" )
-
 	try:
 		csvValidateAndLoad(inputAsString, modelDir=modelDir, header=0, nrows=None, ncols=None, dtypes=[], return_type='df', ignore_nans=True, save_file=None, ignore_errors=False )
 	except:
@@ -255,11 +249,11 @@ def run_ami_algorithm( modelDir, inputDict, outData ):
 	vv_x = [v for i,v in enumerate(vv_points_eval) if i%2==0]
 	vv_y = [v for i,v in enumerate(vv_points_eval) if i%2==1]
 
-	# TEMP JENNY TODO
-	xf_lookup = pd.DataFrame(columns=['kVA', 'R_ohms_LV', 'X_ohms_LV'])
-	xf_lookup['kVA'] = [50]
-	xf_lookup['R_ohms_LV'] = [0.0135936]
-	xf_lookup['X_ohms_LV'] = [0.0165888]
+	xf_lookup_input_df = pd.read_csv( Path(modelDir, inputDict['xf_lookup_data_filename']) )
+	if xf_lookup_input_df.empty:
+		xf_lookup_arg = None
+	else:
+		xf_lookup_arg = xf_lookup_input_df
 
 	AMI_start_time = time.time()
 	if inputDict[ "algorithm" ] == "sandia1":
@@ -269,43 +263,33 @@ def run_ami_algorithm( modelDir, inputDict, outData ):
 			mohca_cl.sandia1( in_path=inputPath, out_path=output_path_vchc, der_pf= float(inputDict['der_pf']), vv_x=None, vv_y=None, load_pf_est=float(inputDict['load_pf_est'] ))
 			#TODO: Check if KVAR is there before continuing
 			# Calculate Thermal Hosting Capacity
-			# First do customer mapping with ISU's Code and the transformer file they inputted in
 			# Check if user inputted their own completed xfmr <-> customer mappings. If so, calculate with theirs
 			if completed_xfmr_cust_df.empty == False:
-				mohca_cl.sandiaTCHC( in_path=inputPath, out_path=output_path_tchc, final_results=completed_xfmr_cust_df, der_pf=float(inputDict['der_pf']), vv_x=None, vv_y=None, overload_constraint=float(inputDict['overload_constraint']), xf_lookup=xf_lookup )
-			# If they did not include their own, calculate it as best as you can with isu's function, then calculate thermal with that
+				mohca_cl.sandiaTCHC( in_path=inputPath, out_path=output_path_tchc, final_results=completed_xfmr_cust_df, der_pf=float(inputDict['der_pf']), vv_x=None, vv_y=None, overload_constraint=float(inputDict['overload_constraint']), xf_lookup=xf_lookup_arg )
+			# If they did not include their own, calculate it as best as you can with ISU's function, then calculate thermal with the result of ISU's
 			else:
-				#TODO new inputs
 				if inputDict['num_of_xfmrs'] == 0:
 					num_of_xfmr = None
 				else:
 					num_of_xfmr = int( inputDict['num_of_xfmrs'])
 					exactFlag = True
-				isu_xfmr_cust_map_result_df = mohca_cl.isu_transformerCustMapping(input_meter_data_fp=isu_temp, grouping_output_fp=isu_calc_result_filepath, minimum_xfmr_n=num_of_xfmr, fmr_n_is_exact=exactFlag, bus_coords_fp=bus_coords_input )
-				# made the num input
-				# need xy table. thats not the same as xf_lookup, I Don't think.
-				mohca_cl.sandiaTCHC( in_path=inputPath, out_path=output_path_tchc, final_results=isu_xfmr_cust_map_result_df, der_pf=float(inputDict['der_pf']), vv_x=None, vv_y=None, overload_constraint=float(inputDict['overload_constraint']), xf_lookup=xf_lookup )
+				isu_xfmr_cust_map_result_df = mohca_cl.isu_transformerCustMapping(input_meter_data_fp=inputPath, grouping_output_fp=isu_calc_result_filepath, minimum_xfmr_n=num_of_xfmr, fmr_n_is_exact=exactFlag, bus_coords_fp=bus_coords_input )
+				mohca_cl.sandiaTCHC( in_path=inputPath, out_path=output_path_tchc, final_results=isu_xfmr_cust_map_result_df, der_pf=float(inputDict['der_pf']), vv_x=None, vv_y=None, overload_constraint=float(inputDict['overload_constraint']), xf_lookup=xf_lookup_arg )
 		elif inputDict["dgInverterSetting"] == 'voltVar':
 			# Calculate Voltage Hosting Capacity
 			mohca_cl.sandia1( in_path=inputPath, out_path=output_path_vchc, der_pf= float(inputDict['der_pf']), vv_x=vv_x, vv_y=vv_y, load_pf_est=float(inputDict['load_pf_est'] ))
 			# TODO: Check if KVAR is there
 			# Calculate Thermal Hosting Capacity
-			# First do customer mapping with ISU's Code and the transformer file they inputted in
-			# Check if user inputted their own completed xfmr <-> customer mappings. If so, calculate with theirs
 			if completed_xfmr_cust_df.empty == False:
-				mohca_cl.sandiaTCHC( in_path=inputPath, out_path=output_path_tchc, final_results=completed_xfmr_cust_df, der_pf=float(inputDict['der_pf']), vv_x=vv_x, vv_y=vv_y, overload_constraint=float(inputDict['overload_constraint']), xf_lookup=xf_lookup )
-			# If they did not include their own, calculate it as best as you can with isu's function, then calculate thermal with that
+				mohca_cl.sandiaTCHC( in_path=inputPath, out_path=output_path_tchc, final_results=completed_xfmr_cust_df, der_pf=float(inputDict['der_pf']), vv_x=vv_x, vv_y=vv_y, overload_constraint=float(inputDict['overload_constraint']), xf_lookup=xf_lookup_arg )
 			else:
-				#TODO new inputs
 				if inputDict['num_of_xfmrs'] == 0:
 					num_of_xfmr = None
 				else:
 					num_of_xfmr = int( inputDict['num_of_xfmrs'])
 					exactFlag = True
-				isu_xfmr_cust_map_result_df = mohca_cl.isu_transformerCustMapping(input_meter_data_fp=isu_temp, grouping_output_fp=isu_calc_result_filepath, minimum_xfmr_n=num_of_xfmr, fmr_n_is_exact=exactFlag, bus_coords_fp=bus_coords_input )
-				# made the num input
-				# need xy table. thats not the same as xf_lookup, I Don't think.
-				mohca_cl.sandiaTCHC( in_path=inputPath, out_path=output_path_tchc, final_results=isu_xfmr_cust_map_result_df, der_pf=float(inputDict['der_pf']), vv_x=vv_x, vv_y=vv_y, overload_constraint=float(inputDict['overload_constraint']), xf_lookup=xf_lookup )
+				isu_xfmr_cust_map_result_df = mohca_cl.isu_transformerCustMapping(input_meter_data_fp=inputPath, grouping_output_fp=isu_calc_result_filepath, minimum_xfmr_n=num_of_xfmr, fmr_n_is_exact=exactFlag, bus_coords_fp=bus_coords_input )
+				mohca_cl.sandiaTCHC( in_path=inputPath, out_path=output_path_tchc, final_results=isu_xfmr_cust_map_result_df, der_pf=float(inputDict['der_pf']), vv_x=vv_x, vv_y=vv_y, overload_constraint=float(inputDict['overload_constraint']), xf_lookup=xf_lookup_arg )
 		else:
 			errorMessage = "DG Error - Should not happen. dgInverterSetting is not either of the 2 options it is supposed to be."
 			raise Exception(errorMessage)
@@ -448,8 +432,6 @@ def new(modelDir):
 		shutil.copyfile( xfmr_cust_calculate_file_path, Path(modelDir, xfmr_cust_calculate_file_name) )
 		shutil.copyfile( xfmr_cust_completed_file_path, Path(modelDir, xfmr_cust_completed_file_name) )
 		shutil.copyfile( bus_coords_file_path, Path(modelDir, bus_coords_file_name))
-		# TODO: Temp Jenny
-		shutil.copyfile( xfmr_temp, Path(modelDir, "input_xfmr_cust_temp.csv"))
 	except:
 		return False
 	return creationCode
