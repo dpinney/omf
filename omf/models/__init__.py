@@ -51,4 +51,5 @@ from omf.models import resilientCommunity
 from omf.models import transformerPairing
 from omf.models import derConsumer
 from omf.models import derUtilityCost
+from omf.models import wildfireAnticipation
 #from omf.models import microgridPlan
