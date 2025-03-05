@@ -75,8 +75,8 @@ def work(modelDir, inputDict):
 			'fuel_cost_per_gallon': float(inputDict['fuel_cost_per_gal']),
 		}
 
-	## Add a Battery Energy Storage System (BESS) section, if enabled 
-	if float(inputDict['number_devices_BESS']) > 0:
+	## Add a Battery Energy Storage System (BESS) section to REopt input scenario, if enabled 
+	if inputDict['enableBESS'] == 'Yes' and float(inputDict['number_devices_BESS']) > 0:
 		scenario['ElectricStorage'] = {
 			'min_kw': float(inputDict['BESS_kw']) * float(inputDict['number_devices_BESS']),
 			'max_kw': float(inputDict['BESS_kw']) * float(inputDict['number_devices_BESS']),
@@ -338,14 +338,19 @@ def work(modelDir, inputDict):
 	lineshape = 'hv'
 	grid_to_load = reoptResults['ElectricUtility']['electric_to_load_series_kw']
 
-	if 'ElectricStorage' in reoptResults:
-		BESS = reoptResults['ElectricStorage']['storage_to_load_series_kw']
-		grid_charging_BESS = reoptResults['ElectricUtility']['electric_to_storage_series_kw']
-		outData['chargeLevelBattery'] = reoptResults['ElectricStorage']['soc_series_fraction']
+	## If REopt outputs any Electric Storage (BESS) that also does not contain all zeros:
+	if 'ElectricStorage' in reoptResults: 
+		if any(value != 0 for value in reoptResults['ElectricStorage']['storage_to_load_series_kw']):
+			BESS = reoptResults['ElectricStorage']['storage_to_load_series_kw']
+			grid_charging_BESS = reoptResults['ElectricUtility']['electric_to_storage_series_kw']
+			outData['chargeLevelBattery'] = reoptResults['ElectricStorage']['soc_series_fraction']
+		else:
+			raise ValueError('Error: The BESS was not built by the REopt model. "storage_to_load_series_kw" contains all zeros.')
 	else:
+		print('No BESS was specified in REopt. Setting BESS variables to zero for plotting purposes.')
 		BESS = np.zeros_like(demand)
 		grid_charging_BESS = np.zeros_like(demand)
-		outData['chargeLevelBattery'] = np.zeros_like(demand)
+		outData['chargeLevelBattery'] = list(np.zeros_like(demand))
 
 	## NOTE: The following 6 lines of code are temporary; it reads in the SOC info from a static REopt test file (a previously completed REopt run) 
 	## NOTE: This functionality was used when REopt did not produce BESS results, or the results were arrays of zeros.
@@ -839,7 +844,14 @@ def work(modelDir, inputDict):
 	utilityCosts_allyears_total = np.sum(utilityCosts_allyears_array)
 
 	## Calculate total costs for BESS, TESS, and GEN
-	totalCosts_BESS_allyears_array = BESS_subsidy_allyears_array + BESS_compensation_allyears_array
+	if np.sum(BESS) > 0:
+		print('BESS is enabled probably')
+		print(np.sum(BESS))
+		totalCosts_BESS_allyears_array = BESS_subsidy_allyears_array + BESS_compensation_allyears_array
+	else:
+		print('Bess is 0 and setting totalcosts/incentives to 0')
+		print(np.sum(BESS))
+		totalCosts_BESS_allyears_array = np.full(projectionLength, 0)
 	totalCosts_TESS_allyears_array = combinedTESS_subsidy_allyears_array + TESS_compensation_allyears_array
 	totalCosts_GEN_allyears_array = GEN_subsidy_allyears_array + GEN_compensation_allyears_array
 
@@ -859,19 +871,6 @@ def work(modelDir, inputDict):
 	utilityNetSavings_allyears_total = utilitySavings_allyears_total - utilityCosts_allyears_total
 	utilityNetSavings_allyears_array = utilitySavings_allyears_array - utilityCosts_allyears_array
 
-	## Calculate sanity check for per-tech vs all tech
-	## Total savings = all tech consumption savings + all tech peak demand savings + time shift savings 
-	## time shift savings = (peak demand - peak adjusted demand)*demandCosts ?
-	timeshift_savings_allTech = outData['monthlyPeakDemandSavings']
-	#print(outData['monthlyPeakDemandSavings'])
-	timeshift_savings_allTech_year1_total = sum(outData['monthlyPeakDemandSavings'])
-	timeshift_savings_allTech_allyears_array = np.full(projectionLength, timeshift_savings_allTech_year1_total)
-	outData['timeshift_savings_allTech_allyears'] = list(timeshift_savings_allTech_allyears_array)
-	peakDemand_savings_allTech = outData['monthlyPeakDemandSavings']
-	consumption_savings_allTech = outData['monthlyEnergyConsumptionSavings']
-	totalsavings_year1_array = [a+b+c for a,b,c in zip(timeshift_savings_allTech, peakDemand_savings_allTech,consumption_savings_allTech)]
-	totalsavings_year1_total = sum(totalsavings_year1_array)
-
 	## Update financial parameters
 	outData['totalCost_year1'] = list(utilityCosts_year1_array)
 	outData['totalSavings_year1'] = list(utilitySavings_year1_array)
@@ -883,7 +882,7 @@ def work(modelDir, inputDict):
 		outData['SPP'] = 0.
 	else:
 		outData['SPP'] = utilityCosts_allyears_total / utilityNetSavings_year1_total
-	outData['totalNetSavings_year1'] = list(utilityNetSavings_year1_array) ## (total cost of service - adjusted total cost of service) - (operational costs + subsidies + compensation to consumer)
+	outData['totalNetSavings_year1'] = list(utilityNetSavings_year1_array) ## (total cost of service - adjusted total cost of service) - (operational costs + subsidies + compensation to consumer + startup costs)
 	outData['cashFlowList_total'] = list(utilityNetSavings_allyears_array)
 	outData['cumulativeCashflow_total'] = list(np.cumsum(utilityNetSavings_allyears_array))
 	outData['savingsAllYears'] = list(utilitySavings_allyears_array)
@@ -952,34 +951,36 @@ def new(modelDir):
 
 		## Fossil Fuel Generator Inputs
 		'fossilGenerator': 'Yes',
-		'number_devices_GEN': '1000',
+		'number_devices_GEN': '500',
 		'existing_gen_kw': '20', ## Number is based on Generac 20 kW diesel model
 		'fuel_avail_gal': '95', ## Number is based on Generac 20 kW diesel model with max tank of 95 gallons
 		'fuel_cost_per_gal': '3.49', ## Number is based on fuel cost of diesel
 
 		## Chemical Battery Inputs
-		'number_devices_BESS': '1000', ## Number of residential Tesla Powerwall 3 batteries
-		'BESS_kw': '5',
+		## Modeled after residential Tesla Powerwall 3 battery specs
+		'enableBESS': 'Yes',
+		'number_devices_BESS': '2000', 
+		'BESS_kw': '5.0',
 		'BESS_kwh': '13.5',
 
 		## Financial Inputs
-		'demandChargeCost': '25', ## used by vbatDispatch
+		'demandChargeCost': '50', ## this input is used by vbatDispatch
 		'projectionLength': '25',
-		'electricityCost': '0.04',
+		'electricityCost': '0.05',
 		'rateCompensation': '0.02', ## unit: $/kWh
 		'discountRate': '2',
 		'startupCosts': '200000',
-		'TESS_subsidy_onetime_ac': '100.0',
-		'TESS_subsidy_ongoing_ac': '20.0',
-		'TESS_subsidy_onetime_hp': '100.0',
-		'TESS_subsidy_ongoing_hp': '20.0',
-		'TESS_subsidy_onetime_wh': '50.0',
-		'TESS_subsidy_ongoing_wh': '10.0',
-		'BESS_subsidy_onetime': '200.0',
-		'BESS_subsidy_ongoing': '30.0',
+		'TESS_subsidy_onetime_ac': '20.0',
+		'TESS_subsidy_ongoing_ac': '0.0',
+		'TESS_subsidy_onetime_hp': '20.0',
+		'TESS_subsidy_ongoing_hp': '0.0',
+		'TESS_subsidy_onetime_wh': '20.0',
+		'TESS_subsidy_ongoing_wh': '0.0',
+		'BESS_subsidy_onetime': '100.0',
+		'BESS_subsidy_ongoing': '0.0',
 		'GEN_subsidy_onetime': '100.0',
-		'GEN_subsidy_ongoing': '25.0',
-		'operationalCosts_ongoing': '1000.0',
+		'GEN_subsidy_ongoing': '0.0',
+		'operationalCosts_ongoing': '500.0',
 		'operationalCosts_onetime': '20000.0',
 
 		## Home Air Conditioner inputs (vbatDispatch):

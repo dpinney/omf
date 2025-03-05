@@ -164,9 +164,16 @@
 
 			<!-- Chemical BESS Inputs -->
 			<div class="wideInput"> 
-				<p class="inputSectionHeader">Home Chemical Energy Storage Device Inputs</p>
+				<p class="inputSectionHeader">Home Chemical Battery Energy Storage Device Inputs</p>
 			</div>
 			<hr style="border-style: solid; border-color: #196b12; margin-top: 10px;">
+			<div class="shortInput">
+				<label class="tooltip">Enable Use of Home Chemical BESS?<span class="classic">If yes, model will run with home chemical batteries.</span></label>
+				<select id="enableBESS" name="enableBESS" value="{{allInputDataDict.enableBESS}}">
+					<option value='Yes' {{ 'selected' if allInputDataDict.enableBESS == 'Yes' }}>Yes</option>
+					<option value='No' {{ 'selected' if allInputDataDict.enableBESS == 'No' }}>No</option>
+				</select>
+			</div>
 			<div class="shortInput">
 				<label class="tooltip">Number of Home Chemical Batteries<span class="classic">Total number of home chemical batteries to model.</span></label>
 				<input type="text" id="number_devices_BESS" name="number_devices_BESS" value="{{allInputDataDict.number_devices_BESS}}" required="required">
