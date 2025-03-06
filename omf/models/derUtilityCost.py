@@ -391,8 +391,8 @@ def work(modelDir, inputDict):
 		'Home TESS Serving Load': vbat_discharge_component_W,
 		'Grid Serving Load': grid_serving_new_load_W,
 		'Home Generator Serving Load': generator_W,
-		'Grid Charging Home BESS': grid_charging_BESS_W * -1.0,
-		'Grid Charging Home TESS': vbat_charge_component_W * -1.0
+		'Grid Charging Home BESS': grid_charging_BESS_W,
+		'Grid Charging Home TESS': vbat_charge_component_W
 	})
 
 	## Define colors for each plot series
@@ -408,7 +408,7 @@ def work(modelDir, inputDict):
 	fig = go.Figure()
 
 	## Discharging DERs to plot
-	for col in ["Grid Serving Load", "Home BESS Serving Load", "Home Generator Serving Load", "Home TESS Serving Load"]:
+	for col in ["Grid Serving Load", "Home BESS Serving Load", "Home Generator Serving Load", "Home TESS Serving Load","Grid Charging Home BESS", "Grid Charging Home TESS"]:
 		fig.add_trace(go.Scatter(
 			x=df["timestamp"],
 			y=df[col],
@@ -418,19 +418,6 @@ def work(modelDir, inputDict):
 			fillcolor=colors[col],
 			line_shape=lineshape,			
 			stackgroup="discharge"  ## Stack all the discharging DERs together
-		))
-
-	## Charging DERs to plot
-	for col in ["Grid Charging Home BESS", "Grid Charging Home TESS"]:
-		fig.add_trace(go.Scatter(
-			x=df["timestamp"],
-			y=df[col],
-			fill="tonexty",
-			mode="none",
-			name=col,
-			fillcolor=colors[col],
-			line_shape=lineshape,
-			stackgroup="charging",
 		))
 
 	## Temperature line on a secondary y-axis (defined in the plot layout)
