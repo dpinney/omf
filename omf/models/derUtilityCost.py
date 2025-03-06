@@ -43,6 +43,10 @@ def work(modelDir, inputDict):
 	year = int(inputDict['year'])
 	projectionLength = int(inputDict['projectionLength'])
 	demand_array = np.asarray([float(value) for value in inputDict['demandCurve'].split('\n') if value.strip()]) ## process input format into an array
+
+	scale_factor = 0.50 ## scale the utility demand curve for plotting purposes
+	demand_array *= scale_factor
+
 	demand = demand_array.tolist() if isinstance(demand_array, np.ndarray) else demand_array ## make demand array into a list	for REopt
 
 	## Create a REopt input dictionary called 'scenario' (required input for omf.solvers.reopt_jl)
@@ -832,13 +836,11 @@ def work(modelDir, inputDict):
 
 	## Calculate total costs for BESS, TESS, and GEN
 	if np.sum(BESS) > 0:
-		print('BESS is enabled probably')
-		print(np.sum(BESS))
 		totalCosts_BESS_allyears_array = BESS_subsidy_allyears_array + BESS_compensation_allyears_array
 	else:
-		print('Bess is 0 and setting totalcosts/incentives to 0')
-		print(np.sum(BESS))
+		print('REopt did not build any BESSdischarge for the year is zero). Setting total BESS costs and incentives to 0 for plotting purposes.')
 		totalCosts_BESS_allyears_array = np.full(projectionLength, 0)
+	
 	totalCosts_TESS_allyears_array = combinedTESS_subsidy_allyears_array + TESS_compensation_allyears_array
 	totalCosts_GEN_allyears_array = GEN_subsidy_allyears_array + GEN_compensation_allyears_array
 
@@ -866,9 +868,10 @@ def work(modelDir, inputDict):
 	## Calculate Net Present Value (NPV) and Simple Payback Period (SPP)
 	outData['NPV'] = npv(float(inputDict['discountRate'])/100., utilityNetSavings_allyears_array)
 	if utilityNetSavings_year1_total == 0: ## Handle division by $0 in savings
-		outData['SPP'] = 0.
+		SPP = 0.
 	else:
-		outData['SPP'] = utilityCosts_allyears_total / utilityNetSavings_year1_total
+		SPP = utilityCosts_allyears_total / utilityNetSavings_year1_total
+	outData['SPP'] = np.abs(SPP)
 	outData['totalNetSavings_year1'] = list(utilityNetSavings_year1_array) ## (total cost of service - adjusted total cost of service) - (operational costs + subsidies + compensation to consumer + startup costs)
 	outData['cashFlowList_total'] = list(utilityNetSavings_allyears_array)
 	outData['cumulativeCashflow_total'] = list(np.cumsum(utilityNetSavings_allyears_array))
