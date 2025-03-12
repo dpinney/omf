@@ -31,6 +31,13 @@
 				<label>User</label>
 				<input type="text" id="user" name="user" value="{{allInputDataDict.user}}" readonly/>
 			</div>
+            <div class="shortInput">
+                <select id="forecastTimeSelect" name="forecastTimeSelect">
+                    <option value="day1Outlook">Day 1 Fire Weather Outlook</option>
+                    <option value="day2Outlook">Day 2 Fire Weather Outlook</option>
+                    <option value="day3to8Outlook">Day 3-8 Fire Weather Outlook</option>
+                </select>
+            </div>
             {% if modelStatus == 'finished' %}
 			<div class="shortInput">
 				<label>Run Time</label>
@@ -43,7 +50,7 @@
             <hr>
             <div class="shortInput">
                 <label>Enter coordinates for areas of interest manually</label>
-                <input type="text" id="manualCoordinateInput" name="manualCoordinateInput" value=""/>
+                <input type="text" id="manualCoordinateInput" name="manualCoordinateInput" value="{{allInputDataDict.manualCoordinateInput}}"/>
             </div>
             <div class="wideInput">
 				<p class="inputSectionHeader">Map Input</p>
@@ -52,13 +59,13 @@
             <div class="wideInput">
                 <label>Draw areas of interest on the map</label>
                 <div id="inputMap" style="width: 100%; height: 800px; border-radius: 8px;"></div>
-                <input type="hidden" id="geojsonInput" name="geojsonData">
+                <input type="hidden" id="geojsonInput" name="geojsonInput" value="{{allInputDataDict.geojsonInput}}">
                 <script>
-                    // Initialize the map in the "inputMap" container
+                    // Initialize the map in the "inputMap" container.
                     const map = L.map('inputMap', { renderer: L.canvas() });
                     map.setView([39.8, -121.6], 10);
                     L.control.scale().addTo(map);
-                    // Create a feature group for drawn items
+                    // Create a feature group for drawn items.
                     const drawnItems = L.featureGroup().addTo(map);
                     // Initialize basemap layers.
                     const esriImages = L.esri.basemapLayer('Imagery').addTo(map);
@@ -91,6 +98,8 @@
                     };
                     // Set up event listeners for draw events.
                     map.on(L.Draw.Event.CREATED, (e) => {
+                        e.layer.feature = e.layer.feature || { type: "Feature", properties: {} };
+                        e.layer.feature.properties.shape_id = L.Util.stamp(e.layer); // Get _leaflet_id of shape.
                         drawnItems.addLayer(e.layer);
                         updateGeoJSONInput();
                     });
@@ -101,27 +110,12 @@
             {{ omfModelButtons }}
         </form>
     </div>
-    <!-- <p class="reportTitle" style="page-break-before: always;">First Choice Map Location</p>
-    <div id="inputMap1" class="tightContent"></div>
-    <script>
-        // JS that inserts leaflet.js map here.
-        const mapContent1 = allOutputData["inputMap"];
-        const iframe1 = document.createElement("iframe");
-        iframe1.style = "width:1000px; height:800px; border-radius:8px;"
-        document.getElementById("inputMap1").appendChild(iframe1);
-        iframe1.contentWindow.document.open();
-        iframe1.contentWindow.document.write(mapContent1);
-        iframe1.contentWindow.document.close();
-    </script> -->
     {{ omfRunDebugBlock }}
     {% if modelStatus == 'finished' %}
     <div id="output">
         {% if allOutputDataDict['sampleOutputIndicator'] == True %}
         <p class="reportTitle">Sample Output</p>
-        <div id="sampleOutput" class="tightContent"></div>
-        <script>
-            // Perhaps use grid.js to map some data from allOutputDataDict to a chart and display it in sampleOutput div. 
-        </script>
+        <div id="sampleOutput" class="tightContent" value="{{allOutputDataDict.sample}}"></div>
         {% endif %}
         {{ rawOutputFiles }}
     </div>
