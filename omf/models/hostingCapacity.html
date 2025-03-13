@@ -149,9 +149,9 @@
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Exact Num of Transformers <span class="classic">Exact = True. Approximate or None = False.</span></label>
-				<select id="exact_xfmr" name="exact_xfmr" value="{{allInputDataDict.exact_xfmr}}" required oninput="check_num_of_xfmrs()">
-					<option value="True" {% if allInputDataDict.exact_xfmr == 'True' %}selected{% endif %}>True</option>
-					<option value="False" {% if allInputDataDict.exact_Xfmr == 'False' %}selected{% endif %}>False</option>
+				<select id="exact_xfmrs" name="exact_xfmrs" value="{{allInputDataDict.exact_xfmrs}}" required>
+					<option value="False" {% if allInputDataDict.exact_xfmrs == 'False' %}selected{% endif %}>False</option>
+					<option value="True" {% if allInputDataDict.exact_xfmrs == 'True' %}selected{% endif %}>True</option>
 				</select>
 			</div>
 			<div class="shortInput">

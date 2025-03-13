@@ -28,21 +28,6 @@ def convert_seconds_to_hms_ms( seconds ):
 	seconds, milliseconds = divmod(remainder, 1000)
 	return "{:02d}:{:02d}:{:02d}.{:03d}".format(int(hours), int(minutes), int(seconds), int(milliseconds))
 
-def sandia_algo_post_check(modelDir):
-	retVal = False
-	mohcaLog = [x for x in os.listdir(modelDir) if x.endswith('.log')][0]
-	try:
-		with open( Path(modelDir, mohcaLog), 'r', encoding="utf-8") as file:
-			for line in file:
-				splitLine = line.split(" - ")
-				if len(splitLine) > 3:
-					splitWords = splitLine[3].split(" ")
-					if splitWords[4].lower() == "q":
-						retVal = True
-	except FileNotFoundError as e:
-		print("HostingCapacity - ModelFree Sandia Algorithm - mohca_sandia.log file not found: ", {e})
-	return retVal
-
 def hosting_capacity_map( modelDir, inputDict, outData ):
 	feederName = [x for x in os.listdir(modelDir) if x.endswith('.omd')][0]
 	path_to_omd = Path(modelDir, feederName)
@@ -230,6 +215,14 @@ def check_kvar_sandia_func( inputPath ):
 	else:
 		return False
 	
+def get_bool( string ):
+	retVal = False
+	if string.lower() == "true":
+		retVal = True
+	elif string.lower() == 'false':
+		retVal = False
+	return retVal
+	
 
 def run_ami_algorithm( modelDir, inputDict, outData ):
 	# mohca data-driven hosting capacity
@@ -279,9 +272,10 @@ def run_ami_algorithm( modelDir, inputDict, outData ):
 				else:
 					if inputDict['num_of_xfmrs'] == 0:
 						num_of_xfmr = None
+						inputDict['exact_xfmrs'] = False
 					else:
 						num_of_xfmr = int( inputDict['num_of_xfmrs'])
-					isu_xfmr_cust_map_result_df = mohca_cl.isu_transformerCustMapping(input_meter_data_fp=inputPath, grouping_output_fp=isu_calc_result_filepath, minimum_xfmr_n=num_of_xfmr, fmr_n_is_exact=inputDict['exact_xfmr'], bus_coords_fp=bus_coords_input )
+					isu_xfmr_cust_map_result_df = mohca_cl.isu_transformerCustMapping(input_meter_data_fp=inputPath, grouping_output_fp=isu_calc_result_filepath, minimum_xfmr_n=num_of_xfmr, fmr_n_is_exact= get_bool(inputDict['exact_xfmrs']), bus_coords_fp=bus_coords_input )
 					mohca_cl.sandiaTCHC( in_path=inputPath, out_path=output_path_tchc, final_results=isu_xfmr_cust_map_result_df, der_pf=float(inputDict['der_pf']), vv_x=None, vv_y=None, overload_constraint=float(inputDict['overload_constraint']), xf_lookup=xf_lookup_arg )
 			else:
 				outData["reactivePowerWarningFlag"] = True
@@ -296,9 +290,10 @@ def run_ami_algorithm( modelDir, inputDict, outData ):
 				else:
 					if inputDict['num_of_xfmrs'] == 0:
 						num_of_xfmr = None
+						inputDict['exact_xfmrs'] = False
 					else:
 						num_of_xfmr = int( inputDict['num_of_xfmrs'])
-					isu_xfmr_cust_map_result_df = mohca_cl.isu_transformerCustMapping(input_meter_data_fp=inputPath, grouping_output_fp=isu_calc_result_filepath, minimum_xfmr_n=num_of_xfmr, fmr_n_is_exact=inputDict['exact_xfmr'], bus_coords_fp=bus_coords_input )
+					isu_xfmr_cust_map_result_df = mohca_cl.isu_transformerCustMapping(input_meter_data_fp=inputPath, grouping_output_fp=isu_calc_result_filepath, minimum_xfmr_n=num_of_xfmr, fmr_n_is_exact=get_bool(inputDict['exact_xfmrs']), bus_coords_fp=bus_coords_input )
 					mohca_cl.sandiaTCHC( in_path=inputPath, out_path=output_path_tchc, final_results=isu_xfmr_cust_map_result_df, der_pf=float(inputDict['der_pf']), vv_x=vv_x, vv_y=vv_y, overload_constraint=float(inputDict['overload_constraint']), xf_lookup=xf_lookup_arg )
 			else:
 				outData["reactivePowerWarningFlag"] = True
