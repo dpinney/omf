@@ -53,7 +53,7 @@ def hosting_capacity_map( modelDir, inputDict, outData ):
 	outData['hideMap'] = False
 
 	if inputDict['runAmiAlgorithm'] == 'on':
-		model_free_data = Path(modelDir, 'output_mohca_vchc.csv')
+		model_free_data = Path(modelDir, 'output_model_free_full.csv')
 		model_free_data_df = pd.read_csv(model_free_data)
 		with open(path_to_omd) as f:
 			omd = json.load(f)
@@ -73,15 +73,15 @@ def hosting_capacity_map( modelDir, inputDict, outData ):
 			# 	buses_in_mohca_not_in_omd = set(mohca_buses) - set(buses_from_omd_tree)
 			attachment_keys = {
 				"coloringFiles": {
-					"output_mohca_vchc.csv": {
+					"output_model_free_full.csv": {
 						"csv": "<content>",
 						"colorOnLoadColumnIndex": "1"
 					}
 				}
 			}
-			model_free_color_data = Path(modelDir, 'output_mohca_vchc.csv').read_text()
+			model_free_color_data = Path(modelDir, 'output_model_free_full.csv').read_text()
 			# adding the mohca color output to the attachment
-			attachment_keys['coloringFiles']['output_mohca_vchc.csv']['csv'] = model_free_color_data
+			attachment_keys['coloringFiles']['output_model_free_full.csv']['csv'] = model_free_color_data
 			new_omd_path = Path(modelDir, 'color.omd')
 			starting_omd['attachments'] = attachment_keys
 			with open(new_omd_path, 'w+') as out_file:
@@ -222,6 +222,15 @@ def run_downline_load_algorithm( modelDir, inputDict, outData ):
 	outData['downline_runtime'] = convert_seconds_to_hms_ms( downline_end_time - downline_start_time )
 	return sorted_downlineDF
 
+def check_kvar_sandia_func( inputPath ):
+	data = pd.read_csv(inputPath)
+	if 'kvar_reading' in data:
+		# Returns False if no q
+		return mohca_cl.sandia.get_has_input_q(data)
+	else:
+		return False
+	
+
 def run_ami_algorithm( modelDir, inputDict, outData ):
 	# mohca data-driven hosting capacity
 	inputPath = Path(modelDir, inputDict['AMIDataFileName'])
@@ -232,7 +241,6 @@ def run_ami_algorithm( modelDir, inputDict, outData ):
 	completed_xfmr_cust_pairing_path = Path(modelDir, inputDict['xfmr_cust_completed_data_filename'])
 	completed_xfmr_cust_df = pd.read_csv(completed_xfmr_cust_pairing_path)
 	calculate_xfmr_cust_pairing_path = Path(modelDir, inputDict['xfmr_cust_calculate_data_filename'])
-	calculate_xfmr_cust_df = pd.read_csv(calculate_xfmr_cust_pairing_path)
 
 	bus_coords_input = Path(modelDir, inputDict['bus_coords_data_filename'])
 
@@ -255,78 +263,96 @@ def run_ami_algorithm( modelDir, inputDict, outData ):
 	else:
 		xf_lookup_arg = xf_lookup_input_df
 
+	hasKvar = check_kvar_sandia_func( inputPath )
+	
 	AMI_start_time = time.time()
 	if inputDict[ "algorithm" ] == "sandia1":
 		exactFlag = False
 		if inputDict["dgInverterSetting"] == 'constantPF':
 			# Calculate Voltage Hosting Capacity
 			mohca_cl.sandia1( in_path=inputPath, out_path=output_path_vchc, der_pf= float(inputDict['der_pf']), vv_x=None, vv_y=None, load_pf_est=float(inputDict['load_pf_est'] ))
-			#TODO: Check if KVAR is there before continuing
-			# Calculate Thermal Hosting Capacity
-			# Check if user inputted their own completed xfmr <-> customer mappings. If so, calculate with theirs
-			if completed_xfmr_cust_df.empty == False:
-				mohca_cl.sandiaTCHC( in_path=inputPath, out_path=output_path_tchc, final_results=completed_xfmr_cust_df, der_pf=float(inputDict['der_pf']), vv_x=None, vv_y=None, overload_constraint=float(inputDict['overload_constraint']), xf_lookup=xf_lookup_arg )
-			# If they did not include their own, calculate it as best as you can with ISU's function, then calculate thermal with the result of ISU's
-			else:
-				if inputDict['num_of_xfmrs'] == 0:
-					num_of_xfmr = None
+			if hasKvar:
+				# Calculate Thermal Hosting Capacity
+				# Check if user inputted their own completed xfmr <-> customer mappings. If so, calculate with theirs
+				if completed_xfmr_cust_df.empty == False:
+					mohca_cl.sandiaTCHC( in_path=inputPath, out_path=output_path_tchc, final_results=completed_xfmr_cust_df, der_pf=float(inputDict['der_pf']), vv_x=None, vv_y=None, overload_constraint=float(inputDict['overload_constraint']), xf_lookup=xf_lookup_arg )
+				# If they did not include their own, calculate it as best as you can with ISU's function, then calculate thermal with the result of ISU's
 				else:
-					num_of_xfmr = int( inputDict['num_of_xfmrs'])
-					exactFlag = True
-				isu_xfmr_cust_map_result_df = mohca_cl.isu_transformerCustMapping(input_meter_data_fp=inputPath, grouping_output_fp=isu_calc_result_filepath, minimum_xfmr_n=num_of_xfmr, fmr_n_is_exact=exactFlag, bus_coords_fp=bus_coords_input )
-				mohca_cl.sandiaTCHC( in_path=inputPath, out_path=output_path_tchc, final_results=isu_xfmr_cust_map_result_df, der_pf=float(inputDict['der_pf']), vv_x=None, vv_y=None, overload_constraint=float(inputDict['overload_constraint']), xf_lookup=xf_lookup_arg )
+					if inputDict['num_of_xfmrs'] == 0:
+						num_of_xfmr = None
+					else:
+						num_of_xfmr = int( inputDict['num_of_xfmrs'])
+						exactFlag = True
+					isu_xfmr_cust_map_result_df = mohca_cl.isu_transformerCustMapping(input_meter_data_fp=inputPath, grouping_output_fp=isu_calc_result_filepath, minimum_xfmr_n=num_of_xfmr, fmr_n_is_exact=exactFlag, bus_coords_fp=bus_coords_input )
+					mohca_cl.sandiaTCHC( in_path=inputPath, out_path=output_path_tchc, final_results=isu_xfmr_cust_map_result_df, der_pf=float(inputDict['der_pf']), vv_x=None, vv_y=None, overload_constraint=float(inputDict['overload_constraint']), xf_lookup=xf_lookup_arg )
+			else:
+				outData["reactivePowerWarningFlag"] = True
+				outData["reactivePowerWarningInfo"] = f"Reactive Power not present in Meter Data Input File. Results will only show ESTIMATED voltage model-free results. Thermal model-free results are NOT avaiable"
 		elif inputDict["dgInverterSetting"] == 'voltVar':
 			# Calculate Voltage Hosting Capacity
 			mohca_cl.sandia1( in_path=inputPath, out_path=output_path_vchc, der_pf= float(inputDict['der_pf']), vv_x=vv_x, vv_y=vv_y, load_pf_est=float(inputDict['load_pf_est'] ))
-			# TODO: Check if KVAR is there
-			# Calculate Thermal Hosting Capacity
-			if completed_xfmr_cust_df.empty == False:
-				mohca_cl.sandiaTCHC( in_path=inputPath, out_path=output_path_tchc, final_results=completed_xfmr_cust_df, der_pf=float(inputDict['der_pf']), vv_x=vv_x, vv_y=vv_y, overload_constraint=float(inputDict['overload_constraint']), xf_lookup=xf_lookup_arg )
-			else:
-				if inputDict['num_of_xfmrs'] == 0:
-					num_of_xfmr = None
+			if hasKvar:
+				# Calculate Thermal Hosting Capacity
+				if completed_xfmr_cust_df.empty == False:
+					mohca_cl.sandiaTCHC( in_path=inputPath, out_path=output_path_tchc, final_results=completed_xfmr_cust_df, der_pf=float(inputDict['der_pf']), vv_x=vv_x, vv_y=vv_y, overload_constraint=float(inputDict['overload_constraint']), xf_lookup=xf_lookup_arg )
 				else:
-					num_of_xfmr = int( inputDict['num_of_xfmrs'])
-					exactFlag = True
-				isu_xfmr_cust_map_result_df = mohca_cl.isu_transformerCustMapping(input_meter_data_fp=inputPath, grouping_output_fp=isu_calc_result_filepath, minimum_xfmr_n=num_of_xfmr, fmr_n_is_exact=exactFlag, bus_coords_fp=bus_coords_input )
-				mohca_cl.sandiaTCHC( in_path=inputPath, out_path=output_path_tchc, final_results=isu_xfmr_cust_map_result_df, der_pf=float(inputDict['der_pf']), vv_x=vv_x, vv_y=vv_y, overload_constraint=float(inputDict['overload_constraint']), xf_lookup=xf_lookup_arg )
+					if inputDict['num_of_xfmrs'] == 0:
+						num_of_xfmr = None
+					else:
+						num_of_xfmr = int( inputDict['num_of_xfmrs'])
+						exactFlag = True
+					isu_xfmr_cust_map_result_df = mohca_cl.isu_transformerCustMapping(input_meter_data_fp=inputPath, grouping_output_fp=isu_calc_result_filepath, minimum_xfmr_n=num_of_xfmr, fmr_n_is_exact=exactFlag, bus_coords_fp=bus_coords_input )
+					mohca_cl.sandiaTCHC( in_path=inputPath, out_path=output_path_tchc, final_results=isu_xfmr_cust_map_result_df, der_pf=float(inputDict['der_pf']), vv_x=vv_x, vv_y=vv_y, overload_constraint=float(inputDict['overload_constraint']), xf_lookup=xf_lookup_arg )
+			else:
+				outData["reactivePowerWarningFlag"] = True
+				outData["reactivePowerWarningInfo"] = f"Reactive power not present in Meter Data Input File. Model-Free Voltage results will be estimated. No model-free thermal results available."
 		else:
 			errorMessage = "DG Error - Should not happen. dgInverterSetting is not either of the 2 options it is supposed to be."
 			raise Exception(errorMessage)
-		present_q_warning = sandia_algo_post_check(modelDir=modelDir)
-		if present_q_warning == True:
-			outData["reactivePowerWarningFlag"] = present_q_warning
-			outData["reactivePowerWarningInfo"] = f"Reactive power missing from data set. Estimating hosting capacity through power factor from given input 'Load Power Factor'"
 	elif inputDict[ "algorithm" ] == "iastate":
 		mohca_cl.iastate( inputPath, output_path_vchc )
 	else:
 		errorMessage = "Algorithm name error"
 		raise Exception(errorMessage)
 	AMI_end_time = time.time()
-	model_free_voltage_results = pd.read_csv( output_path_vchc, index_col=False)
-	model_free_voltage_results.rename(columns={'kw_hostable': 'voltage_cap_kW'}, inplace=True)
-	#TODO - Needs to be modified when the MoHCA algorithm supports calculating thermal hosting capacity
-	model_free_thermal_results = pd.read_csv( output_path_tchc )
-	thermal_kw_results = model_free_thermal_results['TCHC (kW)']
-	model_free_voltage_results['thermal_cap_kW'] = thermal_kw_results
-
-	histogramFigure = px.histogram( model_free_voltage_results, x=['voltage_cap_kW', 'thermal_cap_kW'], template="simple_white", color_discrete_sequence=["green", "lightblue"] )
-	histogramFigure.update_layout(bargap=0.5)
-	model_free_voltage_results['max_cap_allowed_kW'] = np.minimum( model_free_voltage_results['voltage_cap_kW'], model_free_voltage_results['thermal_cap_kW'])
-	model_free_voltage_results_sorted = model_free_voltage_results.sort_values(by='busname')
-	barChartFigure = px.bar(model_free_voltage_results_sorted, x='busname', y=['voltage_cap_kW', 'thermal_cap_kW', 'max_cap_allowed_kW'], barmode='group', color_discrete_sequence=["green", "lightblue", "MediumPurple"], template="simple_white" )
-	barChartFigure.update_layout( legend=dict(
-		orientation='h',
-		yanchor='bottom',
-		y=1.02,
-		xanchor='right',
-		x=1
-	) )
-	barChartFigure.add_traces( list(px.line(model_free_voltage_results_sorted, x='busname', y='max_cap_allowed_kW', markers=True).select_traces()) )
+	model_free_results = pd.read_csv( output_path_vchc, index_col=False)
+	model_free_results.rename(columns={'kw_hostable': 'voltage_cap_kW'}, inplace=True)
+	model_free_results_sorted = model_free_results.sort_values(by='busname')
+	if hasKvar:
+		model_free_thermal_results = pd.read_csv( output_path_tchc )
+		thermal_kw_results = model_free_thermal_results['TCHC (kW)']
+		model_free_results_sorted['thermal_cap_kW'] = thermal_kw_results
+		histogramFigure = px.histogram( model_free_results_sorted, x=['voltage_cap_kW', 'thermal_cap_kW'], template="simple_white", color_discrete_sequence=["lightblue", "MediumPurple"] )
+		histogramFigure.update_layout(bargap=0.5)
+		model_free_results_sorted['min_allowed_kW'] = np.minimum( model_free_results_sorted['voltage_cap_kW'], model_free_results_sorted['thermal_cap_kW'])
+		model_free_results_sorted = model_free_results_sorted[['busname', 'min_allowed_kW', 'voltage_cap_kW', 'thermal_cap_kW']]
+		barChartFigure = px.bar(model_free_results_sorted, x='busname', y=['min_allowed_kW','voltage_cap_kW', 'thermal_cap_kW'], barmode='group', color_discrete_sequence=["green", "lightblue", "MediumPurple"], template="simple_white" )
+		barChartFigure.update_layout( legend=dict(
+			orientation='h',
+			yanchor='bottom',
+			y=1.02,
+			xanchor='right',
+			x=1
+		) )
+	else:
+		histogramFigure = px.histogram( model_free_results_sorted, x=['voltage_cap_kW'], template="simple_white", color_discrete_sequence=["lightblue"] )
+		histogramFigure.update_layout(bargap=0.5)
+		model_free_results_sorted['min_allowed_kW'] = model_free_results_sorted['voltage_cap_kW']
+		model_free_results_sorted = model_free_results_sorted[['busname', 'min_allowed_kW', 'voltage_cap_kW']]
+		barChartFigure = px.bar(model_free_results_sorted, x='busname', y=['min_allowed_kW','voltage_cap_kW'], barmode='group', color_discrete_sequence=["green", "lightblue"], template="simple_white" )
+		barChartFigure.update_layout( legend=dict(
+			orientation='h',
+			yanchor='bottom',
+			y=1.02,
+			xanchor='right',
+			x=1
+		) )
+	model_free_results_sorted.to_csv( Path(modelDir, "output_model_free_full.csv"), index=False )
+	barChartFigure.add_traces( list(px.line(model_free_results_sorted, x='busname', y='min_allowed_kW', markers=True).select_traces()) )
 	outData['histogramFigure'] = json.dumps( histogramFigure, cls=py.utils.PlotlyJSONEncoder )
 	outData['barChartFigure'] = json.dumps( barChartFigure, cls=py.utils.PlotlyJSONEncoder )
-	outData['AMI_tableHeadings'] = model_free_voltage_results_sorted.columns.values.tolist()
-	outData['AMI_tableValues'] = ( list(model_free_voltage_results_sorted.itertuples(index=False, name=None)) )
+	outData['AMI_tableHeadings'] = model_free_results_sorted.columns.values.tolist()
+	outData['AMI_tableValues'] = ( list(model_free_results_sorted.itertuples(index=False, name=None)) )
 	outData['AMI_runtime'] = convert_seconds_to_hms_ms( AMI_end_time - AMI_start_time )
 
 def run_model_based_algorithm( modelDir, inputDict, outData ):
@@ -391,8 +417,6 @@ def new(modelDir):
 	xf_lookup_file_path = Path( omf.omfDir, 'static','testFiles', 'hostingCapacity', xf_lookup_file_name )
 	bus_coords_file_name = "input_bus_coords.csv"
 	bus_coords_file_path = Path(omf.omfDir, 'static', 'testFiles', 'hostingCapacity', bus_coords_file_name)
-	# Temp TODO Jenny
-	xfmr_temp = Path(omf.omfDir, 'static', 'testFiles', 'hostingCapacity', 'input_xfmr_cust_temp.csv')
 
 	defaultInputs = {
 		"modelType": modelName,
@@ -417,7 +441,6 @@ def new(modelDir):
 		"xfmr_cust_completed_display_filename": xfmr_cust_completed_file_name,
 		"bus_coords_display_filename": bus_coords_file_name,
 		"bus_coords_data_filename": bus_coords_file_name,
-		#TODO Jenny change to 0
 		"num_of_xfmrs": 12
 
 	}
