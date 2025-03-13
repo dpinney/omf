@@ -310,7 +310,7 @@ def work(modelDir, inputDict):
 		
 		outData['solverStatus' + indexString] = results['status']
 		outData['hitTimeout' + indexString] = True if results['status'] == "timed-out" else False
-		outData['solverSeconds' + indexString] = results['solver_seconds']
+		outData['solverSeconds' + indexString] = results.get('solver_seconds')
 
 		#resultsSubset = results['outputs']['Scenario']['Site']
 		outData['demandCostBAU' + indexString] = results['ElectricTariff']['lifecycle_demand_cost_after_tax_bau']#['total_demand_cost_bau_us_dollars']

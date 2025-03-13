@@ -1,0 +1,123 @@
+<head>
+    {{ omfHeaders }}
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+    <!-- ESRI -->
+    <script src="https://unpkg.com/esri-leaflet@2.5.0/dist/esri-leaflet.js" integrity="sha512-ucw7Grpc+iEQZa711gcjgMBnmd9qju1CICsRaryvX7HJklK0pGl/prxKvtHwpgm5ZHdvAil7YPxI1oWPOWK3UQ==" crossorigin=""></script>
+     <!-- Leaflet Draw -->
+    <link rel='stylesheet' href='https://unpkg.com/leaflet-draw@1.0.0/dist/leaflet.draw.css'/>
+    <script src='https://unpkg.com/leaflet-draw@1.0.0/dist/leaflet.draw.js'></script>
+    <!-- KMZ -->
+    <script src="https://unpkg.com/leaflet-kmz@1.0.6/dist/leaflet-kmz.js"></script>
+</head>
+<body>
+    {{ omfModelTitle }}
+    <p class="reportTitle">Model Input</p>
+    <div id="input" class="content">
+        <form name="inputForm" action="/runModel/" onsubmit="event.preventDefault(); return isFormValid();" method="post" enctype="multipart/form-data">
+            <div class="shortInput">
+				<label>Model Type <a href="https://github.com/dpinney/omf/wiki/" target="blank">Help?</a></label>
+				<input type="text" id="modelType" name="modelType" value="{{modelName}}" readonly/>
+			</div>
+            <div class="shortInput">
+				<label>Model Name</label>
+				<input type="text" id="modelName" name="modelName" value="{{allInputDataDict.modelName}}" pattern="^[\w\s\d\.-]+$" required="required" readonly>
+			</div>
+            <div class="shortInput ">
+				<label>Created</label>
+				<input type="text" id="created" name="created" value="{{allInputDataDict.created}}" readonly/>
+			</div>
+            <div class="shortInput">
+				<label>User</label>
+				<input type="text" id="user" name="user" value="{{allInputDataDict.user}}" readonly/>
+			</div>
+            <div class="shortInput">
+                <select id="forecastTimeSelect" name="forecastTimeSelect">
+                    <option value="day1Outlook">Day 1 Fire Weather Outlook</option>
+                    <option value="day2Outlook">Day 2 Fire Weather Outlook</option>
+                    <option value="day3to8Outlook">Day 3-8 Fire Weather Outlook</option>
+                </select>
+            </div>
+            {% if modelStatus == 'finished' %}
+			<div class="shortInput">
+				<label>Run Time</label>
+				<input type="text" id="runTime" name="runTime" value={{allInputDataDict.runTime}} readonly/>
+			</div>
+			{% endif %}
+            <div class="wideInput">
+				<p class="inputSectionHeader">Manual Coordinate Input</p>
+			</div>
+            <hr>
+            <div class="shortInput">
+                <label>Enter coordinates for areas of interest manually</label>
+                <input type="text" id="manualCoordinateInput" name="manualCoordinateInput" value="{{allInputDataDict.manualCoordinateInput}}"/>
+            </div>
+            <div class="wideInput">
+				<p class="inputSectionHeader">Map Input</p>
+			</div>
+            <hr>
+            <div class="wideInput">
+                <label>Draw areas of interest on the map</label>
+                <div id="inputMap" style="width: 100%; height: 800px; border-radius: 8px;"></div>
+                <input type="hidden" id="geojsonInput" name="geojsonInput" value="{{allInputDataDict.geojsonInput}}">
+                <script>
+                    // Initialize the map in the "inputMap" container.
+                    const map = L.map('inputMap', { renderer: L.canvas() });
+                    map.setView([39.8, -121.6], 10);
+                    L.control.scale().addTo(map);
+                    // Create a feature group for drawn items.
+                    const drawnItems = L.featureGroup().addTo(map);
+                    // Initialize basemap layers.
+                    const esriImages = L.esri.basemapLayer('Imagery').addTo(map);
+                    const streets = L.esri.basemapLayer('Streets');
+                    L.control.layers(
+                        {
+                            'Streets': streets,
+                            'Imagery': esriImages
+                        },
+                        { 'Drawn Features': drawnItems },
+                        { collapsed: false }
+                    ).addTo(map);
+                    // Add the drawing control.
+                    const drawControl = new L.Control.Draw({
+                        edit: { featureGroup: drawnItems },
+                        draw: {
+                            polygon: true,
+                            rectangle: true,
+                            polyline: false,
+                            marker: false,
+                            circle: false,
+                            circlemarker: false
+                        }
+                    });
+                    map.addControl(drawControl);
+                    // Function to update the hidden input with the current GeoJSON.
+                    const updateGeoJSONInput = () => {
+                        const geojson = drawnItems.toGeoJSON();
+                        document.getElementById('geojsonInput').value = JSON.stringify(geojson);
+                    };
+                    // Set up event listeners for draw events.
+                    map.on(L.Draw.Event.CREATED, (e) => {
+                        e.layer.feature = e.layer.feature || { type: "Feature", properties: {} };
+                        e.layer.feature.properties.shape_id = L.Util.stamp(e.layer); // Get _leaflet_id of shape.
+                        drawnItems.addLayer(e.layer);
+                        updateGeoJSONInput();
+                    });
+                    map.on(L.Draw.Event.EDITED, updateGeoJSONInput);
+                    map.on(L.Draw.Event.DELETED, updateGeoJSONInput);
+                </script>
+            </div>
+            {{ omfModelButtons }}
+        </form>
+    </div>
+    {{ omfRunDebugBlock }}
+    {% if modelStatus == 'finished' %}
+    <div id="output">
+        {% if allOutputDataDict['sampleOutputIndicator'] == True %}
+        <p class="reportTitle">Sample Output</p>
+        <div id="sampleOutput" class="tightContent" value="{{allOutputDataDict.sample}}"></div>
+        {% endif %}
+        {{ rawOutputFiles }}
+    </div>
+    {% endif %}
+</body>

@@ -18,6 +18,18 @@
 	<!-- Library Imports -->
 	<script src="{{pathPrefix}}/static/highcharts4.src.js"></script>
 	<script src="https://cdn.plot.ly/plotly-1.50.1.min.js"></script>
+
+	<!--
+	<script>
+		function check_num_of_xfmrs() {
+			const num_of_xfmrs = document.getElementById('num_of_xfmrs')
+			const exact_bool_elem = document.getElementById('exactXfmrs')
+			if ( num_of_xfmrs === '0' ) {
+				exact_bool.value = 'False'
+			}
+		}
+	</script>-->
+
 	<!--  Macro for direct file upload macro usage:
 		file_upload('fileInputID', 'userInputVoltage', 'voltageDataFileName')
 		line 1: input for the actual file. There should be no value in inputDict that matches this one.
@@ -122,12 +134,33 @@
 				<input type="text" id="overload_constraint" name="overload_constraint" value="{{allInputDataDict.overload_constraint}}"/>
 			</div>
 			<div class="shortInput">
-				<label class="tooltip">Transformer Customer Mapping Info<span class="classic"> Transformer Info to compute Transformer Pairing mapping. Expected Columns are: 'busname', 'Transformer Index', 'X', 'Y'</span></label>
-				<div>{{ file_upload('trans_cust_map_data_file', 'trans_cust_map_display_filename', 'trans_cust_map_data_filename') }}</div>
-			</div>
-			<div class="shortInput">
 				<label class="tooltip">XF Lookup Table <span class="classic">Upload a .csv file of lookup table of known service transformer kVA readings & impedances. Expected Columns are: 'kVA', 'R_ohms_LV', 'X_ohms_LV'</span></label>
 				<div>{{ file_upload('xf_lookup_data_file', 'xf_lookup_display_filename', 'xf_lookup_data_filename') }}</div>
+			</div>
+			<div class="shortInput">
+				<label class="tooltip">Transformer & Customer Calculation Inputs<span class="classic"> Transformer Info to compute Transformer Pairing mapping. Expected Columns are: 'busname', 'Transformer Index', 'X', 'Y'</span></label>
+				<div>{{ file_upload('xfmr_cust_calculate_data_file', 'xfmr_cust_calculate_display_filename', 'xfmr_cust_calculate_data_filename') }}</div>
+			</div>
+			<div class="shortInput">
+				<label class="tooltip">Number of Transformers in the System
+					<span class="classic">To calculate transformer customer mapping.</span>
+				</label>
+				<input type="text" id="num_of_xfmrs" name="num_of_xfmrs" value="{{allInputDataDict.num_of_xfmrs}}" pattern="[+-]?([0-9]*[.])?[0-9]+"/>
+			</div>
+			<div class="shortInput">
+				<label class="tooltip">Exact Num of Transformers <span class="classic">Exact = True. Approximate or None = False.</span></label>
+				<select id="exact_xfmrs" name="exact_xfmrs" value="{{allInputDataDict.exact_xfmrs}}" required>
+					<option value="False" {% if allInputDataDict.exact_xfmrs == 'False' %}selected{% endif %}>False</option>
+					<option value="True" {% if allInputDataDict.exact_xfmrs == 'True' %}selected{% endif %}>True</option>
+				</select>
+			</div>
+			<div class="shortInput">
+				<label class="tooltip">Transformer & Customer Bus Coords Inputs<span class="classic"> Expected Columns are: 'busname', 'X', 'Y'</span></label>
+				<div>{{ file_upload('bus_coords_data_file', 'bus_coords_display_filename', 'bus_coords_data_filename') }}</div>
+			</div>
+			<div class="shortInput">
+				<label class="tooltip">Completed Transformer Labeling Info<span class="classic"> If Transformer Customer mapping is already completed, can input the completed inputs here. Expected Columns are: 'busname', 'Transformer Index', 'X', 'Y'</span></label>
+				<div>{{ file_upload('xfmr_cust_completed_data_file', 'xfmr_cust_completed_display_filename', 'xfmr_cust_completed_data_filename') }}</div>
 			</div>
 			<div class="wideInput">
 				<p class="inputSectionHeader">Model-Based Hosting Capacity</p>
