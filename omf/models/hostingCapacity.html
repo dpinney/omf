@@ -18,6 +18,18 @@
 	<!-- Library Imports -->
 	<script src="{{pathPrefix}}/static/highcharts4.src.js"></script>
 	<script src="https://cdn.plot.ly/plotly-1.50.1.min.js"></script>
+
+	<!--
+	<script>
+		function check_num_of_xfmrs() {
+			const num_of_xfmrs = document.getElementById('num_of_xfmrs')
+			const exact_bool_elem = document.getElementById('exactXfmrs')
+			if ( num_of_xfmrs === '0' ) {
+				exact_bool.value = 'False'
+			}
+		}
+	</script>-->
+
 	<!--  Macro for direct file upload macro usage:
 		file_upload('fileInputID', 'userInputVoltage', 'voltageDataFileName')
 		line 1: input for the actual file. There should be no value in inputDict that matches this one.
@@ -134,6 +146,13 @@
 					<span class="classic">To calculate transformer customer mapping.</span>
 				</label>
 				<input type="text" id="num_of_xfmrs" name="num_of_xfmrs" value="{{allInputDataDict.num_of_xfmrs}}" pattern="[+-]?([0-9]*[.])?[0-9]+"/>
+			</div>
+			<div class="shortInput">
+				<label class="tooltip">Exact Num of Transformers <span class="classic">Exact = True. Approximate or None = False.</span></label>
+				<select id="exact_xfmr" name="exact_xfmr" value="{{allInputDataDict.exact_xfmr}}" required oninput="check_num_of_xfmrs()">
+					<option value="True" {% if allInputDataDict.exact_xfmr == 'True' %}selected{% endif %}>True</option>
+					<option value="False" {% if allInputDataDict.exact_Xfmr == 'False' %}selected{% endif %}>False</option>
+				</select>
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Transformer & Customer Bus Coords Inputs<span class="classic"> Expected Columns are: 'busname', 'X', 'Y'</span></label>

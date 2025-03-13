@@ -267,7 +267,6 @@ def run_ami_algorithm( modelDir, inputDict, outData ):
 	
 	AMI_start_time = time.time()
 	if inputDict[ "algorithm" ] == "sandia1":
-		exactFlag = False
 		if inputDict["dgInverterSetting"] == 'constantPF':
 			# Calculate Voltage Hosting Capacity
 			mohca_cl.sandia1( in_path=inputPath, out_path=output_path_vchc, der_pf= float(inputDict['der_pf']), vv_x=None, vv_y=None, load_pf_est=float(inputDict['load_pf_est'] ))
@@ -282,8 +281,7 @@ def run_ami_algorithm( modelDir, inputDict, outData ):
 						num_of_xfmr = None
 					else:
 						num_of_xfmr = int( inputDict['num_of_xfmrs'])
-						exactFlag = True
-					isu_xfmr_cust_map_result_df = mohca_cl.isu_transformerCustMapping(input_meter_data_fp=inputPath, grouping_output_fp=isu_calc_result_filepath, minimum_xfmr_n=num_of_xfmr, fmr_n_is_exact=exactFlag, bus_coords_fp=bus_coords_input )
+					isu_xfmr_cust_map_result_df = mohca_cl.isu_transformerCustMapping(input_meter_data_fp=inputPath, grouping_output_fp=isu_calc_result_filepath, minimum_xfmr_n=num_of_xfmr, fmr_n_is_exact=inputDict['exact_xfmr'], bus_coords_fp=bus_coords_input )
 					mohca_cl.sandiaTCHC( in_path=inputPath, out_path=output_path_tchc, final_results=isu_xfmr_cust_map_result_df, der_pf=float(inputDict['der_pf']), vv_x=None, vv_y=None, overload_constraint=float(inputDict['overload_constraint']), xf_lookup=xf_lookup_arg )
 			else:
 				outData["reactivePowerWarningFlag"] = True
@@ -300,8 +298,7 @@ def run_ami_algorithm( modelDir, inputDict, outData ):
 						num_of_xfmr = None
 					else:
 						num_of_xfmr = int( inputDict['num_of_xfmrs'])
-						exactFlag = True
-					isu_xfmr_cust_map_result_df = mohca_cl.isu_transformerCustMapping(input_meter_data_fp=inputPath, grouping_output_fp=isu_calc_result_filepath, minimum_xfmr_n=num_of_xfmr, fmr_n_is_exact=exactFlag, bus_coords_fp=bus_coords_input )
+					isu_xfmr_cust_map_result_df = mohca_cl.isu_transformerCustMapping(input_meter_data_fp=inputPath, grouping_output_fp=isu_calc_result_filepath, minimum_xfmr_n=num_of_xfmr, fmr_n_is_exact=inputDict['exact_xfmr'], bus_coords_fp=bus_coords_input )
 					mohca_cl.sandiaTCHC( in_path=inputPath, out_path=output_path_tchc, final_results=isu_xfmr_cust_map_result_df, der_pf=float(inputDict['der_pf']), vv_x=vv_x, vv_y=vv_y, overload_constraint=float(inputDict['overload_constraint']), xf_lookup=xf_lookup_arg )
 			else:
 				outData["reactivePowerWarningFlag"] = True
@@ -441,7 +438,8 @@ def new(modelDir):
 		"xfmr_cust_completed_display_filename": xfmr_cust_completed_file_name,
 		"bus_coords_display_filename": bus_coords_file_name,
 		"bus_coords_data_filename": bus_coords_file_name,
-		"num_of_xfmrs": 12
+		"num_of_xfmrs": 12,
+		'exact_xfmrs': False
 
 	}
 	creationCode = __neoMetaModel__.new(modelDir, defaultInputs)
