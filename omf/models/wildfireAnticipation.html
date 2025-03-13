@@ -33,9 +33,13 @@
 			</div>
             <div class="shortInput">
                 <select id="forecastTimeSelect" name="forecastTimeSelect">
-                    <option value="day1Outlook">Day 1 Fire Weather Outlook</option>
-                    <option value="day2Outlook">Day 2 Fire Weather Outlook</option>
-                    <option value="day3to8Outlook">Day 3-8 Fire Weather Outlook</option>
+                    <option value="0" {% if allInputDataDict.forecastTimeSelect == '0' %} selected {% endif %}>Day 1 Fire Weather Outlook</option>
+                    <option value="1" {% if allInputDataDict.forecastTimeSelect == '1' %} selected {% endif %}>Day 2 Fire Weather Outlook</option>
+                    <option value="2" {% if allInputDataDict.forecastTimeSelect == '2' %} selected {% endif %}>Day 3 Fire Weather Outlook</option>
+                    <option value="3" {% if allInputDataDict.forecastTimeSelect == '3' %} selected {% endif %}>Day 4 Fire Weather Outlook</option>
+                    <option value="4" {% if allInputDataDict.forecastTimeSelect == '4' %} selected {% endif %}>Day 5 Fire Weather Outlook</option>
+                    <option value="5" {% if allInputDataDict.forecastTimeSelect == '5' %} selected {% endif %}>Day 6 Fire Weather Outlook</option>
+                    <option value="6" {% if allInputDataDict.forecastTimeSelect == '6' %} selected {% endif %}>Day 7 Fire Weather Outlook</option>
                 </select>
             </div>
             {% if modelStatus == 'finished' %}
@@ -59,7 +63,7 @@
             <div class="wideInput">
                 <label>Draw areas of interest on the map</label>
                 <div id="inputMap" style="width: 100%; height: 800px; border-radius: 8px;"></div>
-                <input type="hidden" id="geojsonInput" name="geojsonInput" value="{{allInputDataDict.geojsonInput}}">
+                <input type="hidden" id="geojsonInput" name="geojsonInput" value='{{ allInputDataDict.geojsonInput | safe }}'>
                 <script>
                     // Initialize the map in the "inputMap" container.
                     const map = L.map('inputMap', { renderer: L.canvas() });
@@ -105,6 +109,31 @@
                     });
                     map.on(L.Draw.Event.EDITED, updateGeoJSONInput);
                     map.on(L.Draw.Event.DELETED, updateGeoJSONInput);
+                    // Retrieve stored GeoJSON string from hidden input and display it in map.
+                    const storedGeojsonString = document.getElementById("geojsonInput").value;
+                    if (storedGeojsonString) {
+                        try {
+                            const geojsonData = JSON.parse(storedGeojsonString);
+                            const storedLayer = L.geoJSON(geojsonData);
+                            storedLayer.eachLayer(function(layer) {
+                                drawnItems.addLayer(layer);
+                            });
+                        } catch (error) {
+                            console.error("Error parsing stored GeoJSON: ", error);
+                        }
+                    }
+                    // Load risk data into popups if available. 
+                    drawnItems.on("click", function(e) {
+                        const shapeId = e.layer.feature && e.layer.feature.properties && e.layer.feature.properties.shape_id;
+                        if (typeof allOutputData != "undefined" && shapeId) {
+                            const fireRisk = allOutputData.fire_risk_from_map[shapeId] || "Not available"; 
+                            const thunderstormRisk = allOutputData.thunderstorm_risk_from_map[shapeId] || "Not available";
+                            e.layer.bindPopup(
+                                `<strong>Risk From Temperature, Wind, and Relative Humidity:</strong> ${fireRisk}<br/>
+                                <strong>Risk From Dry Thunderstorms:</strong> ${thunderstormRisk}`
+                            ).openPopup();
+                        }
+                    })
                 </script>
             </div>
             {{ omfModelButtons }}
