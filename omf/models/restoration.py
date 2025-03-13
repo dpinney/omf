@@ -1153,10 +1153,12 @@ def runMicrogridControlSim(modelDir, solFidelity, eventsFilename, loadPriorityFi
 
 	lpFile = loadPriorityFile if loadPriorityFile != None else ''
 	mgFile = microgridTaggingFile if microgridTaggingFile != None else ''
+	circuitPath = pJoin(modelDir,'circuit_clean.dss')
+	settingsPath = pJoin(modelDir,'settings.json')
 
 	PowerModelsONM.build_settings_file(
-		circuitPath=pJoin(modelDir,'circuit_clean.dss'),
-		settingsPath=pJoin(modelDir,'settings.json'), 
+		circuitPath=circuitPath,
+		settingsPath=settingsPath, 
 		loadPrioritiesFile=lpFile, 
 		microgridTaggingFile=mgFile)
 	
@@ -1173,8 +1175,8 @@ def runMicrogridControlSim(modelDir, solFidelity, eventsFilename, loadPriorityFi
 		os.remove(outputFile)
 
 	PowerModelsONM.run_onm(
-		circuitPath=pJoin(modelDir,'circuit_clean.dss'),
-		settingsPath=pJoin(modelDir,'settings.json'),
+		circuitPath=circuitPath,
+		settingsPath=settingsPath,
 		outputPath=pJoin(modelDir,'output.json'),
 		eventsPath=pJoin(modelDir,eventsFilename),
 		mip_solver_gap=solFidelityVal
@@ -1974,7 +1976,7 @@ def new(modelDir):
 	customerInfo_file_data = open(pJoin(*customerInfo_file_path)).read()
 	'''
 	# ====== 3300 bus feeder with PV & Storage test case
-	feeder_file_path= [__neoMetaModel__._omfDir,'static','testFiles','3300 bus feeder with pv and storage','MasterCleanPV&Storage.omd']
+	feeder_file_path= [__neoMetaModel__._omfDir,'static','testFiles','3300 bus feeder with pv and storage','MasterNewNames5hr_clean.omd']
 	# create bespoke events file
 	event_file_path = [__neoMetaModel__._omfDir,'static','testFiles','iowa240_dwp_22.events.json']
 	# create bespoke priority file
