@@ -74,14 +74,50 @@
                     // Initialize basemap layers.
                     const esriImages = L.esri.basemapLayer('Imagery').addTo(map);
                     const streets = L.esri.basemapLayer('Streets');
+
+                    function getKMZBlobUrl(base64String) {
+                        // Decode base64 string.
+                        const byteCharacters = atob(base64String);
+                        const byteNumbers = new Array(byteCharacters.length);
+                        for (let i = 0; i < byteCharacters.length; i++) {
+                            byteNumbers[i] = byteCharacters.charCodeAt(i);
+                        }
+                        const byteArray = new Uint8Array(byteNumbers);
+                        // Create a blob from the byte array.
+                        const blob = new Blob([byteArray], {type: 'application/vnd.google-earth.kmz'});
+                        // Create an object URL from the blob.
+                        return URL.createObjectURL(blob);
+                    }
+
+                    if (allOutputData && allOutputData.kmz_base64) {
+                        // Get the Blob URL for the KMZ file.
+                        const kmzBlobUrl = getKMZBlobUrl(allOutputData.kmz_base64);
+                        // Remove previous KMZ layer if it exists.
+                        if (window.currentKMZLayer) {
+                            map.removeLayer(window.currentKMZLayer);
+                        }
+                        // Create a new KMZ layer.
+                        window.currentKMZLayer = L.kmzLayer();
+                        window.currentKMZLayer.on('load', function(e) {
+                            console.log("KMZ layer loaded from blob URL");
+                        });
+                        // Load the KMZ file from the blob URL.
+                        window.currentKMZLayer.load(kmzBlobUrl);
+                        window.currentKMZLayer.addTo(map);
+                    }
+
                     L.control.layers(
                         {
                             'Streets': streets,
                             'Imagery': esriImages
                         },
-                        { 'Drawn Features': drawnItems },
+                        {
+                            'Drawn Features': drawnItems,
+                            'Fire Weather Outlook': window.currentKMZLayer
+                        },
                         { collapsed: false }
                     ).addTo(map);
+
                     // Add the drawing control.
                     const drawControl = new L.Control.Draw({
                         edit: { featureGroup: drawnItems },
@@ -95,11 +131,13 @@
                         }
                     });
                     map.addControl(drawControl);
+
                     // Function to update the hidden input with the current GeoJSON.
                     const updateGeoJSONInput = () => {
                         const geojson = drawnItems.toGeoJSON();
                         document.getElementById('geojsonInput').value = JSON.stringify(geojson);
                     };
+
                     // Set up event listeners for draw events.
                     map.on(L.Draw.Event.CREATED, (e) => {
                         e.layer.feature = e.layer.feature || { type: "Feature", properties: {} };
@@ -109,6 +147,7 @@
                     });
                     map.on(L.Draw.Event.EDITED, updateGeoJSONInput);
                     map.on(L.Draw.Event.DELETED, updateGeoJSONInput);
+
                     // Retrieve stored GeoJSON string from hidden input and display it in map.
                     const storedGeojsonString = document.getElementById("geojsonInput").value;
                     if (storedGeojsonString) {
@@ -122,6 +161,7 @@
                             console.error("Error parsing stored GeoJSON: ", error);
                         }
                     }
+
                     // Load risk data into popups if available. 
                     drawnItems.on("click", function(e) {
                         const shapeId = e.layer.feature && e.layer.feature.properties && e.layer.feature.properties.shape_id;

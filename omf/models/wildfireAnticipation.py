@@ -1,5 +1,5 @@
 '''Return wildfire risk for custom geographic regions in the US.'''
-import shutil
+import base64, requests, shutil
 from pathlib import Path
 from omf.models import __neoMetaModel__
 from omf.models.__neoMetaModel__ import *
@@ -10,7 +10,7 @@ from shapely.ops import unary_union
 # Model metadata:
 tooltip = 'Return wildfire risk for custom geographic regions in the US.'
 modelName, template = __neoMetaModel__.metadata(__file__)
-hidden = False
+hidden = True
 
 def process_risk(api_results, forecast_time):
 	'''
@@ -48,6 +48,18 @@ def process_risk(api_results, forecast_time):
 	rev_thunderstorm_risk_mapping = {v: k for k, v in thunderstorm_risk_mapping.items()}
 	return rev_fire_risk_mapping.get(max_numeric_fire_risk, 'Unknown'), rev_thunderstorm_risk_mapping.get(max_numeric_thunderstorm_risk, 'Unknown')
 
+def get_kmz_base64(forecast_time):
+	''' Map forecast_time to the correct URL and Base64-encode the binary content. '''
+	if forecast_time == 0:
+		url = 'https://www.spc.noaa.gov/products/fire_wx/day1fireotlk.kmz'
+	elif forecast_time == 1:
+		url = 'https://www.spc.noaa.gov/products/fire_wx/day2fireotlk.kmz'
+	else:
+		url = 'https://www.spc.noaa.gov/products/fire_wx/day38fireotlk.kmz'
+	r = requests.get(url, allow_redirects=True)
+	encoded = base64.b64encode(r.content).decode('ascii')
+	return encoded
+
 def work(modelDir, inputDict):
 	outData = {}
 	forecast_time = int(inputDict.get('forecastTimeSelect', '0'))
@@ -55,6 +67,7 @@ def work(modelDir, inputDict):
 	if not geojson_input:
 		outData['fire_risk_from_map'] = {}
 		outData['thunderstorm_risk_from_map'] = {}
+		outData['kmz_base64'] = get_kmz_base64(forecast_time)
 		return outData
 
 	geojson = json.loads(geojson_input)
@@ -82,7 +95,8 @@ def work(modelDir, inputDict):
 		fire_risk_from_map[shape_id] = processed_fire_risk
 		thunderstorm_risk_from_map[shape_id] = processed_thunderstorm_risk
 	outData['fire_risk_from_map'] = fire_risk_from_map
-	outData['thunderstorm_risk_from_map'] = thunderstorm_risk_from_map	
+	outData['thunderstorm_risk_from_map'] = thunderstorm_risk_from_map
+	outData['kmz_base64'] = get_kmz_base64(forecast_time)
 	return outData
 
 def new(modelDir):
