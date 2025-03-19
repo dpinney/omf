@@ -1046,7 +1046,7 @@ def makeLoadCciDict(modelDir, pathToOmd, customerInfo):
 	ccsDict = {}
 	bcsDict = {}
 	# Uncomment to use resilientCommunity. 
-
+	'''
 	makeResComOutputCsv(pathToOmd		= pathToOmd, 
 						pathToLoadsFile	= customerInfo, 
 						avgPeakDemand	= 4.25,
@@ -1074,73 +1074,51 @@ def makeLoadCciDict(modelDir, pathToOmd, customerInfo):
 			cciDict[obName] = 50
 			ccsDict[obName] = 50
 			bcsDict[obName] = 50
-	###############################################################'''
+	###############################################################
 
 	return cciDict, ccsDict, bcsDict
 
-def combineLoadPriorityWithCCI(modelDir, pathToOmd, loadPriorityFilePath, loadCciDict, cciImpact):
+def combineLoadPriorityWithCCI(modelDir, loadPriorityFilePath, loadCciDict, cciImpact):
 	'''	Creates a JSON file called loadWeightsMerged.json containing user-input load priorities combined with CCI values via RMS and weighted by cciImpact.
 
 		If an empty JSON file is provided for loadPriorityFilePath, just returns a JSON file with max(1,cci*cciImpact) for each load.
-	
-		Once load priorities and CCI values are merged, they are scaled so the highest value is 100 and then transformed by the formula (rawMergedWeight-(10.0/loadsOnBus))*100.0 to account for the way load weights are considered in PowerModelsONM.
-		The transformed merged load weights are what are stored in the output file. 
 
-		Returns a touple with (string containing path to merged values, string containing path to transformed values)
+		Returns a string containing the path to loadWeightsMerged.json
 	'''
+	# Previous versions of this function contained code transforming each load priority to nullify a weighting scheme within PowerModelsONM. 
+	# After discussion with David Fobes, one of the primary contributors to PowerModelsONM, we decided not to include this transformation 
+	# because the aforementioned weighting scheme was for weighting load blocks with microgrids in them, not individual loads themselves. 
+	# Block weights are seprate from but related to load priorities in that they help ensure microgrids have higher priority for supporting
+	# themselves rather than reaching out to neighboring blocks. 
+	# 	David Fobes - dfobes@lanl.gov
+	# 	PowerModelsONM Primary Contributor
+	# 	R&D Manager at Los Alamos National Laboratory (LANL)
+	
 	cciImpact = float(cciImpact)
-
 	with open(loadPriorityFilePath) as inFile:
 		loadWeights = {}
 		outOfBoundsLW = {}
 		for load,weight in json.load(inFile).items():
 			weight = float(weight)
 			loadWeights[load] = weight
-			if weight < 0.0 or weight > 100.0:
+			if weight < 1.0 or weight > 100.0:
 				outOfBoundsLW[load] = weight
 		if outOfBoundsLW:
-			raise Exception(f"ERROR - Load priorities must be between 0 and 100 inclusive. The uploaded load priorities include: {outOfBoundsLW}")
-
+			raise Exception(f"ERROR - Load priorities must be between 1 and 100 inclusive. The uploaded load priorities include: {outOfBoundsLW}")
 	# If-statement outside of the function definition so it isn't checked every time the function is called
 	if loadWeights:
-		mergeCciAndWeights = lambda cci,weights : ((cciImpact*cci**2 + weights**2)/(1+cciImpact))**0.5
+		mergeCciAndWeights = lambda cci,weight : ((cciImpact*cci**2 + weight**2)/(1+cciImpact))**0.5
 	else:
-		mergeCciAndWeights = lambda cci,weights : max(1,cci*cciImpact)
-	
-	circuitTraversalDict = makeCicuitTraversalDict(pathToOmd)
+		mergeCciAndWeights = lambda cci,weight : max(1,cci*cciImpact)
 	loadWeightsMerged = {}
-	loadWeightsTransformed = {}
-	loadsOnParentBus = {}
 	for loadName, cci in loadCciDict.items():
 		# Loads defaulting to weight 1 is done to reflect that choice within PowerModelsONM 
 		loadWeight = loadWeights.get(loadName,1)
 		loadWeightsMerged[loadName] = mergeCciAndWeights(cci,loadWeight)
-		# Calculate loads on parent bus for each load for transformation below
-		parentBus = circuitTraversalDict[f'load.{loadName}']['parent']
-		loadsOnParentBus[loadName] = float(len(circuitTraversalDict[f'bus.{parentBus}']['downlineLoads']))
-	# Scale the max value in merged load weights to be 100 for the sake of how powerModelsONM processes things after our later transformation. Scaling is done after combining so that load priority and CCI are on the same scale
-	scaleValue = 100/max(loadWeightsMerged.values())
-	#scaleValue = 90/(max(loadWeightsMerged.values())-1)
-	#scaleValue = 10/min(loadWeightsMerged.values()) 
-	for load, weight in loadWeightsMerged.items():
-		#scaledWeight = weight*scaleValue+10-scaleValue
-		scaledWeight = weight*scaleValue
-		# In PowerModelsONM, the weight given to each bus that has loads on it is 10 and the weight of each load is the input weight / 100
-		# Effectively, the weight of a bus and the loads on it = 10+SUM_n(w_n/100)
-		# We are inverting that by setting w_n = (weight-10/n)*100 where n is the number of loads on a particular bus. 
-		# So the weight of a bus and its loads = 10+SUM_n((weight-10/n)*100/100) = 10+SUM_n(weight-10/n) = 10+SUM_n(weight)-10 = SUM_n(weight)
-		loadWeightsTransformed[load] = (scaledWeight-(10.0/loadsOnParentBus[load]))*100.0
-
-	#Included for users to inspect
 	mergedLoadWeightsFile = pJoin(modelDir, 'loadWeightsMerged.json')
 	with open(mergedLoadWeightsFile, 'w') as outfile:
 		json.dump(loadWeightsMerged, outfile)
-
-	transformedLoadWeightsFile = pJoin(modelDir, 'loadWeightsTransformed.json')
-	with open(transformedLoadWeightsFile, 'w') as outfile:
-		json.dump(loadWeightsTransformed, outfile)
-
-	return mergedLoadWeightsFile, transformedLoadWeightsFile
+	return mergedLoadWeightsFile
 
 def runMicrogridControlSim(modelDir, solFidelity, eventsFilename, loadPriorityFile, microgridTaggingFile):
 	''' Runs a microgrid control simulation using PowerModelsONM to determine optimal control actions during a configured outage event.
@@ -1850,9 +1828,8 @@ def work(modelDir, inputDict):
 		pathToOmd				= omdFilePath,
 		customerInfo			= pathToLocalFile['customerInfo']
 	)
-	pathToMergedPriorities, pathToTransformedPriorities = combineLoadPriorityWithCCI(
+	pathToMergedPriorities = combineLoadPriorityWithCCI(
 		modelDir				= modelDir,
-		pathToOmd				= omdFilePath,
 		loadPriorityFilePath	= pathToLocalFile['loadPriority'],
 		loadCciDict				= loadCciDict,
 		cciImpact				= inputDict['cciImpact']
@@ -1861,7 +1838,7 @@ def work(modelDir, inputDict):
 		modelDir				= modelDir, 
 		solFidelity				= inputDict['solFidelity'],
 		eventsFilename			= inputDict['eventFileName'],
-		loadPriorityFile		= pathToTransformedPriorities,
+		loadPriorityFile		= pathToMergedPriorities,
 		microgridTaggingFile	= pathToLocalFile['mgTagging']
 	)
 	microgridInfo = getMicrogridInfo(
