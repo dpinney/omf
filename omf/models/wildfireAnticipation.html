@@ -53,8 +53,11 @@
 			</div>
             <hr>
             <div class="shortInput">
-                <label>Enter coordinates for areas of interest manually</label>
-                <input type="text" id="manualCoordinateInput" name="manualCoordinateInput" value="{{allInputDataDict.manualCoordinateInput}}"/>
+                <label>Enter coordinates (lat,lon pairs) for areas of interest manually</label>
+                <input type="text" id="manualCoordinateInput" name="manualCoordinateInput" value="{{allInputDataDict.manualCoordinateInput}}" placeholder="E.g. (40.69,-74.04), (40.76,-73.99), etc."/>
+            </div>
+            <div class="shortInput">
+                <button id="addManualShapeBtn" type="button">Add shape from text</button>
             </div>
             <div class="wideInput">
 				<p class="inputSectionHeader">Map Input</p>
@@ -74,6 +77,16 @@
                     // Initialize basemap layers.
                     const esriImages = L.esri.basemapLayer('Imagery').addTo(map);
                     const streets = L.esri.basemapLayer('Streets');
+                    const baseLayers = {
+                        'Streets': streets,
+                        'Imagery': esriImages
+                    };
+                    const overlayLayers = {
+                        'Drawn Features': drawnItems
+                    };
+                    const layerControl = L.control.layers(baseLayers, overlayLayers, {
+                        collapsed: false
+                    }).addTo(map);
 
                     function getKMZBlobUrl(base64String) {
                         // Decode base64 string.
@@ -99,24 +112,12 @@
                         // Create a new KMZ layer.
                         window.currentKMZLayer = L.kmzLayer();
                         window.currentKMZLayer.on('load', function(e) {
-                            console.log("KMZ layer loaded from blob URL");
+                            layerControl.addOverlay(window.currentKMZLayer, "Fire Weather Outlook");
                         });
                         // Load the KMZ file from the blob URL.
                         window.currentKMZLayer.load(kmzBlobUrl);
                         window.currentKMZLayer.addTo(map);
                     }
-
-                    L.control.layers(
-                        {
-                            'Streets': streets,
-                            'Imagery': esriImages
-                        },
-                        {
-                            'Drawn Features': drawnItems,
-                            'Fire Weather Outlook': window.currentKMZLayer
-                        },
-                        { collapsed: false }
-                    ).addTo(map);
 
                     // Add the drawing control.
                     const drawControl = new L.Control.Draw({
@@ -174,6 +175,52 @@
                             ).openPopup();
                         }
                     })
+
+                    function parseCoordString(coordString) {
+                        // Look for coordinate pairs using a regex.
+                        // This matches: ( optional whitespace? a float , a float ), repeated.
+                        const pattern = /\(\s*([+-]?\d+(?:\.\d+)?)\s*,\s*([+-]?\d+(?:\.\d+)?)\s*\)/g;
+                        let match;
+                        const coords = [];
+                        while ((match = pattern.exec(coordString)) !== null) {
+                            // match[1] is the lat, match[2] is the lon as strings.
+                            const lat = parseFloat(match[1]);
+                            const lon = parseFloat(match[2]);
+                            coords.push([lat, lon]);
+                        }
+                        if (coords.length < 3) {
+                            alert("Please provide at least three coordinate pairs to form a polygon.");
+                            return;
+                        }
+                        return coords;
+                    }
+
+                    function createManualPolygon(latlngs) {
+                        // Create a Leaflet polygon from the array of [lat, lon].
+                        const poly = L.polygon(latlngs);
+                        // Attach a feature property with shape_id. We can reuse L.Util.stamp().
+                        poly.feature = poly.feature || { type: "Feature", properties: {} };
+                        poly.feature.properties.shape_id = L.Util.stamp(poly);
+                        // Add it to the drawnItems layer group.
+                        drawnItems.addLayer(poly);
+                        updateGeoJSONInput();
+                    }
+
+                    document.getElementById("addManualShapeBtn").addEventListener("click", function() {
+                        const inputTextElem = document.getElementById("manualCoordinateInput");
+                        const inputText = inputTextElem.value.trim();
+                        if (!inputText) {
+                            alert("Please enter coordinates.");
+                            return;
+                        }
+                        try {
+                            const latlngs = parseCoordString(inputText);
+                            createManualPolygon(latlngs);
+                            inputTextElem.value = "";
+                        } catch (err) {
+                            alert("Error: " + err.message);
+                        }
+                    });
                 </script>
             </div>
             {{ omfModelButtons }}

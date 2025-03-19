@@ -10,7 +10,7 @@ from shapely.ops import unary_union
 # Model metadata:
 tooltip = 'Return wildfire risk for custom geographic regions in the US.'
 modelName, template = __neoMetaModel__.metadata(__file__)
-hidden = True
+hidden = False
 
 def process_risk(api_results, forecast_time):
 	'''
@@ -30,20 +30,22 @@ def process_risk(api_results, forecast_time):
 		'Isolated': 1,
 		'Scattered': 2,
 	}
-	max_numeric_fire_risk = 0
-	max_numeric_thunderstorm_risk = 0
+	max_numeric_fire_risk = -1
+	max_numeric_thunderstorm_risk = -1
 	resolution_points = api_results.get('dwml', {}).get('data', {}).get('parameters', [])
 	for point in resolution_points:
-		fire_weather_list = point.get('fire-weather', [])
+		fire_weather_list = point.get('fire-weather')
+		# if not fire_weather_list:
+		# 	continue
 		for risk_type_object in fire_weather_list:
 			day_forecasts = risk_type_object.get('value', [])
 			if forecast_time > len(day_forecasts) - 1:
 				raise IndexError(f'{forecast_time} is greater than available days ({len(day_forecasts)} days).')
 			risk_str = day_forecasts[forecast_time]
 			if risk_type_object.get('@type', '').lower().find('temperature, wind, and relative humidity') != -1:
-				max_numeric_fire_risk = max(max_numeric_fire_risk, fire_risk_mapping.get(risk_str, 0))
+				max_numeric_fire_risk = max(max_numeric_fire_risk, fire_risk_mapping.get(risk_str, -1))
 			elif risk_type_object.get('@type', '').lower().find('dry thunderstorms') != -1:
-				max_numeric_thunderstorm_risk = max(max_numeric_thunderstorm_risk, thunderstorm_risk_mapping.get(risk_str, 0))
+				max_numeric_thunderstorm_risk = max(max_numeric_thunderstorm_risk, thunderstorm_risk_mapping.get(risk_str, -1))
 	rev_fire_risk_mapping = {v: k for k, v in fire_risk_mapping.items()}
 	rev_thunderstorm_risk_mapping = {v: k for k, v in thunderstorm_risk_mapping.items()}
 	return rev_fire_risk_mapping.get(max_numeric_fire_risk, 'Unknown'), rev_thunderstorm_risk_mapping.get(max_numeric_thunderstorm_risk, 'Unknown')
