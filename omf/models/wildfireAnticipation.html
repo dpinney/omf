@@ -72,6 +72,86 @@
                     const map = L.map('inputMap', { renderer: L.canvas() });
                     map.setView([39.8, -121.6], 10);
                     L.control.scale().addTo(map);
+
+                    // Create a control that embeds a file input.
+                    const UploadControl = L.Control.extend({
+                        options: { position: 'topright' },
+                        onAdd: function(map) {
+                            const container = L.DomUtil.create('div', 'leaflet-bar leaflet-control');
+                            // Create a file input.
+                            const fileInput = L.DomUtil.create('input', '', container);
+                            fileInput.type = 'file';
+                            fileInput.accept = '.geojson';
+                            fileInput.title = 'Upload GeoJSON file(s)';
+                            // Prevent clicks on the input from affecting the map.
+                            L.DomEvent.disableClickPropagation(container);
+                            // Listen for file changes.
+                            fileInput.addEventListener('change', function(e) {
+                                const files = e.target.files;
+                                if (files.length === 0) {
+                                    return;
+                                }
+                                // Process each file (if allowing multiple uploads).
+                                Array.from(files).forEach(file => {
+                                    const reader = new FileReader();
+                                    reader.onload = function(evt) {
+                                        try {
+                                            const geojsonData = JSON.parse(evt.target.result);
+                                            // Create a Leaflet GeoJSON layer for the uploaded data.
+                                            const uploadedLayer = L.geoJSON(geojsonData);
+                                            // Add the uploaded layer drawnItems layer group.
+                                            uploadedLayer.eachLayer(function(layer) {
+                                                drawnItems.addLayer(layer);
+                                            });
+                                            updateGeoJSONInput();
+                                        } catch (error) {
+                                            console.error("Error parsing uploaded file:", error);
+                                            alert("Failed to parse the GeoJSON file.");
+                                        }
+                                    };
+                                    reader.readAsText(file);
+                                });
+                                // Clear the input value so the user can re-upload more files as needed.
+                                fileInput.value = '';
+                            });
+                            
+                            return container;
+                        }
+                    });
+                    map.addControl(new UploadControl());
+
+                    function saveGeoJSON() {
+                        const geojson = drawnItems.toGeoJSON();
+                        const dataStr = JSON.stringify(geojson, null, 2);
+                        const blob = new Blob([dataStr], { type: 'application/json' });
+                        const url = URL.createObjectURL(blob);
+                        const a = document.createElement('a');
+                        a.href = url;
+                        a.download = 'drawnItems.geojson';
+                        document.body.appendChild(a);
+                        a.click();
+                        document.body.removeChild(a);
+                        URL.revokeObjectURL(url);
+                    }
+
+                    const SaveControl = L.Control.extend({
+                        options: { position: 'topright' },
+                        onAdd: function(map) {
+                            const container = L.DomUtil.create('div', 'leaflet-bar leaflet-control');
+                            const button = L.DomUtil.create('a', '', container);
+                            button.innerHTML = '&#128190;'; // Floppy disk icon.
+                            button.href = '#';
+                            button.title = 'Save drawn features as GeoJSON';
+                            L.DomEvent.disableClickPropagation(container);
+                            L.DomEvent.on(button, 'click', function(e) {
+                                L.DomEvent.preventDefault(e);
+                                saveGeoJSON();
+                            });
+                            return container;
+                        }
+                    });
+                    map.addControl(new SaveControl());
+
                     // Create a feature group for drawn items.
                     const drawnItems = L.featureGroup().addTo(map);
                     // Initialize basemap layers.
@@ -85,7 +165,8 @@
                         'Drawn Features': drawnItems
                     };
                     const layerControl = L.control.layers(baseLayers, overlayLayers, {
-                        collapsed: false
+                        collapsed: false,
+                        position: 'topleft'
                     }).addTo(map);
 
                     function getKMZBlobUrl(base64String) {
