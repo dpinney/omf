@@ -65,7 +65,8 @@ def work(modelDir, inputDict):
 	}
 
 	## Add fossil fuel generator to input scenario, if enabled
-	if inputDict['fossilGenerator'] == 'Yes':
+	if inputDict['fossilGenerator'] == 'Yes' and float(inputDict['number_devices_GEN']) > 0:
+		GENcheck = 'enabled'
 		scenario['Generator'] = {
 			'existing_kw': float(inputDict['existing_gen_kw']) * float(inputDict['number_devices_GEN']),
 			'max_kw': 0,
@@ -74,9 +75,12 @@ def work(modelDir, inputDict):
 			'fuel_avail_gal': float(inputDict['fuel_avail_gal']) * float(inputDict['number_devices_GEN']),
 			'fuel_cost_per_gallon': float(inputDict['fuel_cost_per_gal']),
 		}
+	else:
+		GENcheck = 'disabled'
 
 	## Add a Battery Energy Storage System (BESS) section to REopt input scenario, if enabled 
 	if inputDict['enableBESS'] == 'Yes' and float(inputDict['number_devices_BESS']) > 0:
+		BESScheck = 'enabled'
 		scenario['ElectricStorage'] = {
 			'min_kw': float(inputDict['BESS_kw']) * float(inputDict['number_devices_BESS']),
 			'max_kw': float(inputDict['BESS_kw']) * float(inputDict['number_devices_BESS']),
@@ -94,6 +98,8 @@ def work(modelDir, inputDict):
 			'total_rebate_per_kw': 0.0,
 			'total_itc_fraction': 0.0,
 			}
+	else:
+		BESScheck = 'disabled'
 	
 	## Save the scenario file
 	## NOTE: reopt_jl currently requires a path for the input file, so the file must be saved to a location preferrably in the modelDir directory
@@ -523,7 +529,10 @@ def work(modelDir, inputDict):
 	colors = ['green', 'blue', 'black']
 	titles = ['Minimum Calculated Power Capacity', 'Maximum Calculated Power Capacity', 'Actual Power Utilized']
 
+	dataCheckList = []
 	for data_name, color, title in zip(data_names, colors, titles):
+		dataCheck = np.sum(combined_device_results[data_name])
+		dataCheckList.append(dataCheck)
 		fig.add_trace(go.Scatter(
 			x=timestamps, 
 			y=combined_device_results[data_name], 
@@ -536,6 +545,9 @@ def work(modelDir, inputDict):
 
 	fig.update_layout(xaxis=dict(title='Timestamp'), yaxis=dict(title='Power (kW)'),
 		legend=dict(orientation='h',yanchor='bottom',y=1.02,xanchor='right',x=1))
+	
+	## Add a thermal battery variable that signals to the HTML plot if all of the thermal series contain no data
+	outData['thermalDataCheck'] = float(sum(np.array(dataCheckList)))
 	
 	## Encode plot data as JSON for showing in the HTML side
 	outData['thermalBatPowerPlot'] = json.dumps(fig.data, cls=plotly.utils.PlotlyJSONEncoder)
@@ -767,33 +779,50 @@ def work(modelDir, inputDict):
 	## e.g. subsidies, operational costs, startup costs
 	######################################################################################################################################################
 	projectionLength = int(inputDict['projectionLength'])
+	## If the DER tech is disabled, then set all their subsidies equal to zero.
+	if BESScheck == 'enabled':
+		BESS_subsidy_ongoing = float(inputDict['BESS_subsidy_ongoing'])*float(inputDict['number_devices_BESS'])
+		BESS_subsidy_onetime = float(inputDict['BESS_subsidy_onetime'])*float(inputDict['number_devices_BESS'])
+	else:
+		BESS_subsidy_ongoing = 0
+		BESS_subsidy_onetime = 0
+
+	if GENcheck == 'enabled':
+		GEN_subsidy_ongoing = float(inputDict['GEN_subsidy_ongoing'])*float(inputDict['number_devices_GEN'])
+		GEN_subsidy_onetime = float(inputDict['GEN_subsidy_onetime'])*float(inputDict['number_devices_GEN'])
+	else:
+		GEN_subsidy_ongoing = 0
+		GEN_subsidy_onetime = 0
+
+	if sum(np.array(vbat_discharge_component)) == 0:
+		TESS_subsidy_ongoing = 0
+		TESS_subsidy_onetime = 0
+	else:
+		TESS_subsidy_ongoing = combined_device_results['combinedTESS_subsidy_ongoing']
+		TESS_subsidy_onetime = combined_device_results['combinedTESS_subsidy_onetime']
 
 	## Calculate the BESS subsidy for year 1 and the projection length (all years)
 	## Year 1 includes the onetime subsidy, but subsequent years do not.
-	BESS_subsidy_ongoing = float(inputDict['BESS_subsidy_ongoing'])*float(inputDict['number_devices_BESS'])
-	BESS_subsidy_onetime = float(inputDict['BESS_subsidy_onetime'])*float(inputDict['number_devices_BESS'])
 	BESS_subsidy_year1_total =  BESS_subsidy_onetime + (BESS_subsidy_ongoing*12.0)
 	BESS_subsidy_allyears_array = np.full(projectionLength, BESS_subsidy_ongoing*12.0)
 	BESS_subsidy_allyears_array[0] += BESS_subsidy_onetime
 
 	## Calculate the total TESS subsidies for year 1 and the projection length (all years)
 	## Year 1 includes the onetime subsidy, but subsequent years do not.
-	combinedTESS_subsidy_year1_total = combined_device_results['combinedTESS_subsidy_onetime'] + (combined_device_results['combinedTESS_subsidy_ongoing']*12.0)
-	combinedTESS_subsidy_allyears_array = np.full(projectionLength, combined_device_results['combinedTESS_subsidy_ongoing']*12.0)
-	combinedTESS_subsidy_allyears_array[0] += combined_device_results['combinedTESS_subsidy_onetime']
+	combinedTESS_subsidy_year1_total = TESS_subsidy_onetime + (TESS_subsidy_ongoing*12.0)
+	combinedTESS_subsidy_allyears_array = np.full(projectionLength, TESS_subsidy_ongoing*12.0)
+	combinedTESS_subsidy_allyears_array[0] += TESS_subsidy_onetime
 
 	## Calculate Generator Subsidy for year 1 and the projection length (all years)
 	## Year 1 includes the onetime subsidy, but subsequent years do not.
-	GEN_subsidy_ongoing = float(inputDict['GEN_subsidy_ongoing'])*float(inputDict['number_devices_GEN'])
-	GEN_subsidy_onetime = float(inputDict['GEN_subsidy_onetime'])*float(inputDict['number_devices_GEN'])
 	GEN_subsidy_year1_total =  GEN_subsidy_onetime + (GEN_subsidy_ongoing*12.0)
 	GEN_subsidy_allyears_array = np.full(projectionLength, GEN_subsidy_ongoing*12.0)
 	GEN_subsidy_allyears_array[0] += GEN_subsidy_onetime
 	
 	## Calculate the total TESS+BESS+generator subsidies for year 1 and the projection length (all years)
 	## The first month of Year 1 includes the onetime subsidy, but subsequent months and years do not include the onetime subsidy again.
-	allDevices_subsidy_ongoing = GEN_subsidy_ongoing + BESS_subsidy_ongoing + combined_device_results['combinedTESS_subsidy_ongoing']
-	allDevices_subsidy_onetime = GEN_subsidy_onetime + BESS_subsidy_onetime + combined_device_results['combinedTESS_subsidy_onetime']
+	allDevices_subsidy_ongoing = GEN_subsidy_ongoing + BESS_subsidy_ongoing + TESS_subsidy_ongoing
+	allDevices_subsidy_onetime = GEN_subsidy_onetime + BESS_subsidy_onetime + TESS_subsidy_onetime
 	allDevices_subsidy_year1_total = allDevices_subsidy_onetime + (allDevices_subsidy_ongoing*12.0)
 	allDevices_subsidy_year1_array = np.full(12, allDevices_subsidy_ongoing)
 	allDevices_subsidy_year1_array[0] += allDevices_subsidy_onetime
@@ -831,6 +860,7 @@ def work(modelDir, inputDict):
 	utilityCosts_allyears_total = np.sum(utilityCosts_allyears_array)
 
 	## Calculate total costs for BESS, TESS, and GEN
+	"""
 	if np.sum(BESS) > 0:
 		totalCosts_BESS_allyears_array = BESS_subsidy_allyears_array + BESS_compensation_allyears_array
 	else:
@@ -842,7 +872,9 @@ def work(modelDir, inputDict):
 	else:
 		print('REopt did not build a Generator (the discharge array for the year is zero). Setting total GEN costs and incentives to 0 for plotting purposes.')
 		totalCosts_GEN_allyears_array = np.full(projectionLength, 0)
-
+	"""
+	totalCosts_GEN_allyears_array = GEN_subsidy_allyears_array + GEN_compensation_allyears_array
+	totalCosts_BESS_allyears_array = BESS_subsidy_allyears_array + BESS_compensation_allyears_array
 	totalCosts_TESS_allyears_array = combinedTESS_subsidy_allyears_array + TESS_compensation_allyears_array
 
 	######################################################################################################################################################
@@ -910,6 +942,9 @@ def work(modelDir, inputDict):
 	outData['totalCosts_GEN_allyears'] = list(-1.0*totalCosts_GEN_allyears_array) ## Costs are negative for plotting purposes
 	outData['cumulativeSavings_total'] = list(np.cumsum(utilitySavings_allyears_array))
 
+	## Add a flag for the case when no DER technology is specified. The Savings Breakdown plot will then display a placeholder plot with no available data.
+	outData['techCheck'] = float(sum(BESS) + sum(vbat_discharge_component) + sum(generator))
+
 	## Model operations typically end here.
 	## Stdout/stderr.
 	outData['stdout'] = 'Success'
@@ -976,7 +1011,7 @@ def new(modelDir):
 
 		## Home Air Conditioner inputs (vbatDispatch):
 		'load_type_ac': '1', 
-		'number_devices_ac': '2000',
+		'number_devices_ac': '0',
 		'power_ac': '5.6',
 		'capacitance_ac': '2',
 		'resistance_ac': '2',
@@ -986,7 +1021,7 @@ def new(modelDir):
 
 		## Home Heat Pump inputs (vbatDispatch):
 		'load_type_hp': '2', 
-		'number_devices_hp': '2000',
+		'number_devices_hp': '0',
 		'power_hp': '5.6',
 		'capacitance_hp': '2',
 		'resistance_hp': '2',
@@ -996,15 +1031,13 @@ def new(modelDir):
 
 		## Home Water Heater inputs (vbatDispatch):
 		'load_type_wh': '4', 
-		'number_devices_wh': '2000',
+		'number_devices_wh': '0',
 		'power_wh': '4.5',
 		'capacitance_wh': '0.4',
 		'resistance_wh': '120',
 		'cop_wh': '1',
 		'setpoint_wh': '48.5',
 		'deadband_wh': '3',
-
-
 	}
 	
 	return __neoMetaModel__.new(modelDir, defaultInputs)
