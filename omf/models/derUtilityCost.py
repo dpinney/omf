@@ -43,10 +43,6 @@ def work(modelDir, inputDict):
 	year = int(inputDict['year'])
 	projectionLength = int(inputDict['projectionLength'])
 	demand_array = np.asarray([float(value) for value in inputDict['demandCurve'].split('\n') if value.strip()]) ## process input format into an array
-
-	scale_factor = 0.50 ## scale the utility demand curve for plotting purposes
-	demand_array *= scale_factor
-
 	demand = demand_array.tolist() if isinstance(demand_array, np.ndarray) else demand_array ## make demand array into a list	for REopt
 
 	## Create a REopt input dictionary called 'scenario' (required input for omf.solvers.reopt_jl)
@@ -870,7 +866,7 @@ def work(modelDir, inputDict):
 	if utilityNetSavings_year1_total == 0: ## Handle division by $0 in savings
 		SPP = 0.
 	else:
-		SPP = utilityCosts_allyears_total / utilityNetSavings_year1_total
+		SPP = utilityCosts_allyears_total / utilityNetSavings_allyears_total
 	outData['SPP'] = np.abs(SPP)
 	outData['totalNetSavings_year1'] = list(utilityNetSavings_year1_array) ## (total cost of service - adjusted total cost of service) - (operational costs + subsidies + compensation to consumer + startup costs)
 	outData['cashFlowList_total'] = list(utilityNetSavings_allyears_array)
@@ -949,7 +945,7 @@ def new(modelDir):
 		## Chemical Battery Inputs
 		## Modeled after residential Tesla Powerwall 3 battery specs
 		'enableBESS': 'Yes',
-		'number_devices_BESS': '2000', 
+		'number_devices_BESS': '2000',
 		'BESS_kw': '5.0',
 		'BESS_kwh': '13.5',
 
@@ -1030,4 +1026,3 @@ def _tests_disabled():
 if __name__ == '__main__':
 	_tests_disabled() ## NOTE: Workaround for failing test. When model is ready, change back to just _tests()
 	pass
-
