@@ -834,11 +834,16 @@ def work(modelDir, inputDict):
 	if np.sum(BESS) > 0:
 		totalCosts_BESS_allyears_array = BESS_subsidy_allyears_array + BESS_compensation_allyears_array
 	else:
-		print('REopt did not build any BESSdischarge for the year is zero). Setting total BESS costs and incentives to 0 for plotting purposes.')
+		print('REopt did not build a BESS (the discharge array for the year is zero). Setting total BESS costs and incentives to 0 for plotting purposes.')
 		totalCosts_BESS_allyears_array = np.full(projectionLength, 0)
 	
+	if np.sum(generator) > 0:
+		totalCosts_GEN_allyears_array = GEN_subsidy_allyears_array + GEN_compensation_allyears_array
+	else:
+		print('REopt did not build a Generator (the discharge array for the year is zero). Setting total GEN costs and incentives to 0 for plotting purposes.')
+		totalCosts_GEN_allyears_array = np.full(projectionLength, 0)
+
 	totalCosts_TESS_allyears_array = combinedTESS_subsidy_allyears_array + TESS_compensation_allyears_array
-	totalCosts_GEN_allyears_array = GEN_subsidy_allyears_array + GEN_compensation_allyears_array
 
 	######################################################################################################################################################
 	## SAVINGS

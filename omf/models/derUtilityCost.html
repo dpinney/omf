@@ -4,6 +4,18 @@
 	<script src="{{pathPrefix}}/static/highcharts4.src.js"></script>
 	<!-- Include Plotly -->
 	<script src="https://cdn.plot.ly/plotly-1.50.1.min.js"></script>
+	{% if allOutputDataDict.chargeLevelBattery|sum == 0 %}
+	<script type="text/javascript">	
+			$(window).on('pageshow',function(){
+			Plotly.newPlot('derOverviewData', JSON.parse(allOutputData['derOverviewData']),JSON.parse(allOutputData['derOverviewLayout']));
+			Plotly.newPlot('newDemandData', JSON.parse(allOutputData['newDemandData']),JSON.parse(allOutputData['newDemandLayout']));
+			$("#batteryChargePlotly").html("<p>&#160;&#160;&#160;No Home Chemical BESS was specified or built by the model.</p>")
+			Plotly.newPlot('thermalBatPowerPlot', JSON.parse(allOutputData['thermalBatPowerPlot']), JSON.parse(allOutputData['thermalBatPowerPlotLayout']) || {});
+			Plotly.newPlot('resiliencePlotly', JSON.parse(allOutputData['resilienceData']), JSON.parse(allOutputData['resilienceLayout']) || {});
+			Plotly.newPlot('resilienceProbPlotly', JSON.parse(allOutputData['resilienceProbData']), JSON.parse(allOutputData['resilienceProbLayout']) || {});
+		});
+	</script>
+	{% endif %}
 	<script type="text/javascript">
 		$(window).on('pageshow',function(){
 			Plotly.newPlot('derOverviewData', JSON.parse(allOutputData['derOverviewData']),JSON.parse(allOutputData['derOverviewLayout']));
@@ -360,7 +372,7 @@
 
 		<p class="reportTitle" style="page-break-before:always">Home Thermal Battery Power Profile</p>
 		<div id="thermalBatPowerPlot" class="tightContent" style="width: 1000px; height: 600px;"></div>
-
+			
 		<p class="reportTitle" style="page-break-before:always">Home Chemical BESS State of Charge</p>
 		<div id="batteryChargePlotly" class="tightContent" style="width: 1000px; height: 600px;"></div>
 
