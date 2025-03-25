@@ -200,7 +200,7 @@ def work(modelDir, inputDict):
 		'vbatPower_series': [0]*8760,
 		'vbat_charge': [0]*8760,
 		'vbat_discharge': [0]*8760,
-		'vbat_discharge_flipsign': [0]*8760,
+		'vbat_charge_flipsign': [0]*8760,
 		'vbatMinEnergyCapacity': [0]*8760,
 		'vbatMaxEnergyCapacity':[0]*8760,
 		'vbatEnergy':[0]*8760,
@@ -223,9 +223,9 @@ def work(modelDir, inputDict):
 		combined_device_results['vbatPower'] = [sum(x) for x in zip(combined_device_results['vbatPower'], single_device_results[device_result]['VBpower'])]
 		vbatPower_series = pd.Series(combined_device_results['vbatPower'])
 		combined_device_results['vbatPower_series'] = vbatPower_series
-		combined_device_results['vbat_charge'] = vbatPower_series.where(vbatPower_series > 0, 0) ##positive values = charging
-		combined_device_results['vbat_discharge'] = vbatPower_series.where(vbatPower_series < 0, 0) ##negative values = discharging
-		combined_device_results['vbat_discharge_flipsign'] = combined_device_results['vbat_discharge'].mul(-1) ## flip sign of vbat discharge for plotting purposes
+		combined_device_results['vbat_discharge'] = vbatPower_series.where(vbatPower_series > 0, 0) ##positive values = discharging
+		combined_device_results['vbat_charge'] = vbatPower_series.where(vbatPower_series < 0, 0) ##negative values = charging
+		combined_device_results['vbat_charge_flipsign'] = combined_device_results['vbat_charge'].mul(-1) ## flip sign of vbat charge to positive values for plotting purposes
 		combined_device_results['vbatMinEnergyCapacity'] = [sum(x) for x in zip(combined_device_results['vbatMinEnergyCapacity'], single_device_results[device_result]['minEnergySeries'])]
 		combined_device_results['vbatMaxEnergyCapacity'] = [sum(x) for x in zip(combined_device_results['vbatMaxEnergyCapacity'], single_device_results[device_result]['maxEnergySeries'])]
 		combined_device_results['vbatEnergy'] = [sum(x) for x in zip(combined_device_results['vbatEnergy'], single_device_results[device_result]['VBenergy'])]
@@ -371,8 +371,8 @@ def work(modelDir, inputDict):
 	fig = go.Figure()
 
 	## vbatDispatch variables
-	vbat_discharge_component = np.array(combined_device_results['vbat_discharge_flipsign'])
-	vbat_charge_component = np.array(combined_device_results['vbat_charge'])
+	vbat_discharge_component = np.array(combined_device_results['vbat_discharge'])
+	vbat_charge_component = np.array(combined_device_results['vbat_charge_flipsign'])
 
 	## Convert all values from kW to Watts for plotting purposes only
 	grid_to_load_W = np.array(grid_to_load) * 1000.
@@ -852,7 +852,7 @@ def work(modelDir, inputDict):
 	costs_demandCharge_allyears_array = np.full(projectionLength,costs_demandCharge_year1_total)
 
 	## Calculate total utility costs for year 1 and all years
-	utilityCosts_year1_total = operationalCosts_year1_total + allDevices_subsidy_year1_total + allDevices_compensation_year1_total + startupCosts + costs_demandCharge_year1_total
+	utilityCosts_year1_total = operationalCosts_year1_total + allDevices_subsidy_year1_total + allDevices_compensation_year1_total + startupCosts
 	utilityCosts_year1_array = operationalCosts_year1_array + allDevices_subsidy_year1_array + allDevices_compensation_year1_array 
 	utilityCosts_year1_array[0] += startupCosts
 	utilityCosts_allyears_array = operationalCosts_allyears_array + allDevices_subsidy_allyears_array + allDevices_compensation_allyears_array 
@@ -900,13 +900,14 @@ def work(modelDir, inputDict):
 
 	## Calculate Net Present Value (NPV) and Simple Payback Period (SPP)
 	outData['NPV'] = npv(float(inputDict['discountRate'])/100., utilityNetSavings_allyears_array)
-	if utilityNetSavings_year1_total == 0: ## Handle division by $0 in savings
-		SPP = 0.
-	else:
-		SPP = utilityCosts_allyears_total / utilityNetSavings_allyears_total
+	#SPP = utilityCosts_year1_total / utilityNetSavings_year1_total
+	initialInvestment = startupCosts + operationalCosts_onetime + allDevices_subsidy_onetime
+	utilityCosts_year1_minus_onetime_costs = (operationalCosts_ongoing*12.0) + (allDevices_subsidy_ongoing*12.0) + allDevices_compensation_year1_total
+	utilityNetSavings_year1_total_minus_onetime_costs = utilitySavings_year1_total - utilityCosts_year1_minus_onetime_costs
+	SPP = initialInvestment/utilityNetSavings_year1_total_minus_onetime_costs
 	outData['SPP'] = np.abs(SPP)
 	outData['totalNetSavings_year1'] = list(utilityNetSavings_year1_array) ## (total cost of service - adjusted total cost of service) - (operational costs + subsidies + compensation to consumer + startup costs)
-	outData['cashFlowList_total'] = list(utilityNetSavings_allyears_array)
+	outData['totalNetSavings_allyears'] = list(utilityNetSavings_allyears_array)
 	outData['cumulativeCashflow_total'] = list(np.cumsum(utilityNetSavings_allyears_array))
 	outData['savingsAllYears'] = list(utilitySavings_allyears_array)
 	outData['costsAllYears'] = list(utilityCosts_allyears_array*-1.) ## Show as negative for plotting purposes
@@ -953,9 +954,9 @@ def work(modelDir, inputDict):
 
 def new(modelDir):
 	''' Create a new instance of this model. Returns true on success, false on failure. '''
-	with open(pJoin(__neoMetaModel__._omfDir,'static','testFiles','utility_2018_kW_load.csv')) as f:
+	with open(pJoin(__neoMetaModel__._omfDir,'static','testFiles','derUtilityCost','utility_2018_kW_load.csv')) as f:
 		demand_curve = f.read()
-	with open(pJoin(__neoMetaModel__._omfDir,'static','testFiles','open-meteo-denverCO-noheaders.csv')) as f:
+	with open(pJoin(__neoMetaModel__._omfDir,'static','testFiles','derUtilityCost','open-meteo-denverCO-noheaders.csv')) as f:
 		temp_curve = f.read()
 
 	defaultInputs = {
@@ -977,7 +978,7 @@ def new(modelDir):
 
 		## Fossil Fuel Generator Inputs
 		'fossilGenerator': 'Yes',
-		'number_devices_GEN': '500',
+		'number_devices_GEN': '5',
 		'existing_gen_kw': '20', ## Number is based on Generac 20 kW diesel model
 		'fuel_avail_gal': '95', ## Number is based on Generac 20 kW diesel model with max tank of 95 gallons
 		'fuel_cost_per_gal': '3.49', ## Number is based on fuel cost of diesel
@@ -985,7 +986,7 @@ def new(modelDir):
 		## Chemical Battery Inputs
 		## Modeled after residential Tesla Powerwall 3 battery specs
 		'enableBESS': 'Yes',
-		'number_devices_BESS': '2000',
+		'number_devices_BESS': '20000',
 		'BESS_kw': '5.0',
 		'BESS_kwh': '13.5',
 
@@ -996,22 +997,22 @@ def new(modelDir):
 		'rateCompensation': '0.02', ## unit: $/kWh
 		'discountRate': '2',
 		'startupCosts': '200000',
-		'TESS_subsidy_onetime_ac': '20.0',
+		'TESS_subsidy_onetime_ac': '0.0',
 		'TESS_subsidy_ongoing_ac': '0.0',
-		'TESS_subsidy_onetime_hp': '20.0',
+		'TESS_subsidy_onetime_hp': '0.0',
 		'TESS_subsidy_ongoing_hp': '0.0',
-		'TESS_subsidy_onetime_wh': '20.0',
+		'TESS_subsidy_onetime_wh': '0.0',
 		'TESS_subsidy_ongoing_wh': '0.0',
-		'BESS_subsidy_onetime': '100.0',
+		'BESS_subsidy_onetime': '5.0',
 		'BESS_subsidy_ongoing': '0.0',
-		'GEN_subsidy_onetime': '100.0',
+		'GEN_subsidy_onetime': '0.0',
 		'GEN_subsidy_ongoing': '0.0',
-		'operationalCosts_ongoing': '500.0',
+		'operationalCosts_ongoing': '1000.0',
 		'operationalCosts_onetime': '20000.0',
 
 		## Home Air Conditioner inputs (vbatDispatch):
 		'load_type_ac': '1', 
-		'number_devices_ac': '0',
+		'number_devices_ac': '33000',
 		'power_ac': '5.6',
 		'capacitance_ac': '2',
 		'resistance_ac': '2',
@@ -1021,7 +1022,7 @@ def new(modelDir):
 
 		## Home Heat Pump inputs (vbatDispatch):
 		'load_type_hp': '2', 
-		'number_devices_hp': '0',
+		'number_devices_hp': '33000',
 		'power_hp': '5.6',
 		'capacitance_hp': '2',
 		'resistance_hp': '2',
@@ -1031,7 +1032,7 @@ def new(modelDir):
 
 		## Home Water Heater inputs (vbatDispatch):
 		'load_type_wh': '4', 
-		'number_devices_wh': '0',
+		'number_devices_wh': '33000',
 		'power_wh': '4.5',
 		'capacitance_wh': '0.4',
 		'resistance_wh': '120',
