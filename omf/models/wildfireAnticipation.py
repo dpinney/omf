@@ -10,7 +10,7 @@ from shapely.ops import unary_union
 # Model metadata:
 tooltip = 'Return wildfire risk for custom geographic regions in the US.'
 modelName, template = __neoMetaModel__.metadata(__file__)
-hidden = False
+hidden = True
 
 def process_risk(api_results, forecast_time):
 	'''

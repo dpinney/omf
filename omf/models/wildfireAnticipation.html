@@ -9,6 +9,29 @@
     <script src='https://unpkg.com/leaflet-draw@1.0.0/dist/leaflet.draw.js'></script>
     <!-- KMZ -->
     <script src="https://unpkg.com/leaflet-kmz@1.0.6/dist/leaflet-kmz.js"></script>
+    <link href="https://unpkg.com/gridjs/dist/theme/mermaid.min.css" rel="stylesheet" />
+	<script src="https://unpkg.com/gridjs/dist/gridjs.umd.js"></script>
+    <style>
+        /* Override some gridjs defaults. */
+        #riskTableDiv .gridjs-wrapper {
+            box-shadow: none !important;
+        }
+        #riskTableDiv th.gridjs-th {
+            background-color: transparent !important;
+            color: inherit !important;
+            border: none !important;
+        }
+        #riskTableDiv td.gridjs-td {
+            border: none !important;
+        }
+        .gridjs-tbody,
+        td.gridjs-td {
+            background-color: transparent !important;
+        }
+        table.gridjs-table {
+            margin: unset !important;
+        }
+    </style>
 </head>
 <body>
     {{ omfModelTitle }}
@@ -251,7 +274,8 @@
                             const fireRisk = allOutputData.fire_risk_from_map[shapeId] || "Not available"; 
                             const thunderstormRisk = allOutputData.thunderstorm_risk_from_map[shapeId] || "Not available";
                             e.layer.bindPopup(
-                                `<strong>Risk From Temperature, Wind, and Relative Humidity:</strong> ${fireRisk}<br/>
+                                `<strong>Shape ID:</strong> ${shapeId}<br/>
+                                <strong>Risk From Temperature, Wind, and Relative Humidity:</strong> ${fireRisk}<br/>
                                 <strong>Risk From Dry Thunderstorms:</strong> ${thunderstormRisk}`
                             ).openPopup();
                         }
@@ -279,7 +303,7 @@
                     function createManualPolygon(latlngs) {
                         // Create a Leaflet polygon from the array of [lat, lon].
                         const poly = L.polygon(latlngs);
-                        // Attach a feature property with shape_id. We can reuse L.Util.stamp().
+                        // Attach a feature property with shape_id.
                         poly.feature = poly.feature || { type: "Feature", properties: {} };
                         poly.feature.properties.shape_id = L.Util.stamp(poly);
                         // Add it to the drawnItems layer group.
@@ -310,10 +334,43 @@
     {{ omfRunDebugBlock }}
     {% if modelStatus == 'finished' %}
     <div id="output">
-        {% if allOutputDataDict['sampleOutputIndicator'] == True %}
-        <p class="reportTitle">Sample Output</p>
-        <div id="sampleOutput" class="tightContent" value="{{allOutputDataDict.sample}}"></div>
-        {% endif %}
+        <p class="reportTitle">Shape and Risk Chart</p>
+        <div id="levelizedCostReport" class="tightContent">
+			<div id="riskTableDiv"></div>
+            <script>
+                if (allOutputData && allOutputData.fire_risk_from_map && allOutputData.thunderstorm_risk_from_map) {
+                    // Extract the shape IDs (keys)
+                    const shapeIds = Object.keys(allOutputData.fire_risk_from_map);
+                    // [ shape id, fire risk, thunderstorm risk ]
+                    const gridData = shapeIds.map(id => [
+                        id,
+                        allOutputData.fire_risk_from_map[id] || "Not available",
+                        allOutputData.thunderstorm_risk_from_map[id] || "Not available"
+                    ]);
+                    new gridjs.Grid({
+                        columns: ["Shape ID", "Fire Risk", "Thunderstorm Risk"],
+                        data: gridData,
+                        style: {
+                            table: {
+                                "margin": "5px",
+                                "width": "600px",
+                                "font-size": "14pt"
+                            },
+                            th: {
+                                "padding": "7px 20px",
+                                "text-align": "left",
+                                "font-size": "0.8em"
+                            },
+                            td: {
+                                "padding": "7px 20px",
+                                "text-align": "left",
+                                "font-size": "0.8em"
+                            }
+                        },
+                    }).render(document.getElementById("riskTableDiv"));
+                }
+            </script>                
+		</div>
         {{ rawOutputFiles }}
     </div>
     {% endif %}
