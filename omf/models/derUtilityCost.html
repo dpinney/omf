@@ -11,6 +11,7 @@
 			Plotly.newPlot('newDemandData', JSON.parse(allOutputData['newDemandData']),JSON.parse(allOutputData['newDemandLayout']));
 		});
 	</script>
+
 	<!-- Include the ChargeLevelBattery plot only when BESS exists in the model -->
 	{% if allOutputDataDict.chargeLevelBattery|sum == 0 %}
 		<script type="text/javascript">    
@@ -392,11 +393,31 @@
 		<p class="reportTitle" style="page-break-before:always">Impact to Demand</p>
 		<div id="newDemandData" class="tightContent" style="width: 1000px; height: 600px;"></div>
 
+		<!-- Include the ThermalBatteryPower plot only when thermal data exists in the model -->
 		<p class="reportTitle" style="page-break-before:always">Home Thermal Battery Power Profile</p>
-		<div id="thermalBatPowerPlot" class="tightContent" style="width: 1000px; height: 600px;"></div>
-			
+		{% if allOutputDataDict.thermalDataCheck == 0 %}
+			<div id="thermalBatPowerPlot" class="tightContent"></div>
+			<script type="text/javascript">    
+				$(window).on('pageshow', function(){
+					$("#thermalBatPowerPlot").html("<p>&#160;&#160;&#160;No Home TESS was specified or built by the model.</p>");
+				});
+			</script>
+		{% else %}
+			<div id="thermalBatPowerPlot" class="tightContent" style="width: 1000px; height: 600px;"></div>
+		{% endif %}
+
+		<!-- Include the ChargeLevelBattery plot only when BESS exists in the model -->
 		<p class="reportTitle" style="page-break-before:always">Home Chemical BESS State of Charge</p>
-		<div id="batteryChargePlotly" class="tightContent" style="width: 1000px; height: 600px;"></div>
+		{% if allOutputDataDict.chargeLevelBattery|sum == 0 %}
+			<div id="batteryChargePlotly" class="tightContent"></div>
+			<script type="text/javascript">    
+				$(window).on('pageshow', function(){
+					$("#batteryChargePlotly").html("<p>&#160;&#160;&#160;No Home Chemical BESS was specified or built by the model.</p>");
+				});
+			</script>
+		{% else %}
+			<div id="batteryChargePlotly" class="tightContent" style="width: 1000px; height: 600px;"></div>
+		{% endif %}
 
 		<p class="reportTitle">Monthly Cost Comparison</p>
 		<div id="levelizedCostReport" class="tightContent">
