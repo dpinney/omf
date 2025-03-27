@@ -30,17 +30,17 @@ class TestSandiaTCHC(unittest.TestCase):
 		self.min_xfmr = 12
 		self.overload_constraint = 1.2
 
-	@unittest.skip("12TrueNone Skip")
 	def test12TrueNone(self):
+		'''
+		Testing 12, True, None
+		'''
 		mohca_cl.isu_transformerCustMapping(input_meter_data_fp=self.mohca_input, grouping_output_fp=Path(self.testDir, "transPairing_12_True_None_output.csv"), minimum_xfmr_n=self.min_xfmr, fmr_n_is_exact=True, bus_coords_fp=None )
 
 		# None, 0 None
 		# 12, True, None
 		# Both produce files with no bus_coords. Both break sandiaTCHC => KEYERROR
-
 		mohca_cl.sandiaTCHC( in_path=self.mohca_input, out_path=Path(self.testDir, "tchc_12_True_None.csv"), final_results=pd.read_csv("transPairing_12_True_None_output.csv"), der_pf=1.0, vv_x=None, vv_y=None, overload_constraint=self.overload_constraint, xf_lookup=xf_lookup )
 
-	@unittest.skip("NoneFalseNone Skip")
 	def testNoneFalseNone(self):
 		mohca_cl.isu_transformerCustMapping(input_meter_data_fp=self.mohca_input, grouping_output_fp=Path(self.testDir, "transPairing_None_False_None_output.csv"), minimum_xfmr_n=None, fmr_n_is_exact=False, bus_coords_fp=None )
 		mohca_cl.sandiaTCHC( in_path=self.mohca_input, out_path=Path(self.testDir, "tchc_None_False_None.csv"), final_results=pd.read_csv("transPairing_None_False_None_output.csv"), der_pf=1.0, vv_x=None, vv_y=None, overload_constraint=self.overload_constraint, xf_lookup=xf_lookup )
@@ -52,8 +52,6 @@ class TestSandiaTCHC(unittest.TestCase):
 	def test15FalseBus(self):
 		mohca_cl.isu_transformerCustMapping(input_meter_data_fp=self.mohca_input, grouping_output_fp=Path(self.testDir, "transPairing_15_False_bus.csv"), minimum_xfmr_n=15, fmr_n_is_exact=False, bus_coords_fp=self.buscoords )
 		mohca_cl.sandiaTCHC( in_path=self.mohca_input, out_path=Path(self.testDir, "tchc_15_False_bus.csv"), final_results=pd.read_csv("transPairing_15_False_bus.csv"), der_pf=1.0, vv_x=None, vv_y=None, overload_constraint=self.overload_constraint, xf_lookup=xf_lookup )
-
-
 
 if __name__ == "__main__":
 	unittest.main()
