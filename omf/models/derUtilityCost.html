@@ -4,15 +4,50 @@
 	<script src="{{pathPrefix}}/static/highcharts4.src.js"></script>
 	<!-- Include Plotly -->
 	<script src="https://cdn.plot.ly/plotly-1.50.1.min.js"></script>
-	<script type="text/javascript">
+	<!-- Add Plotly plots -->
+	<script type="text/javascript">	
 		$(window).on('pageshow',function(){
 			Plotly.newPlot('derOverviewData', JSON.parse(allOutputData['derOverviewData']),JSON.parse(allOutputData['derOverviewLayout']));
 			Plotly.newPlot('newDemandData', JSON.parse(allOutputData['newDemandData']),JSON.parse(allOutputData['newDemandLayout']));
-			Plotly.newPlot('batteryChargePlotly', JSON.parse(allOutputData['batteryChargeData']), JSON.parse(allOutputData['batteryChargeLayout']));
-			Plotly.newPlot('thermalBatPowerPlot', JSON.parse(allOutputData['thermalBatPowerPlot']), JSON.parse(allOutputData['thermalBatPowerPlotLayout']) || {});
-			Plotly.newPlot('resiliencePlotly', JSON.parse(allOutputData['resilienceData']), JSON.parse(allOutputData['resilienceLayout']) || {});
-			Plotly.newPlot('resilienceProbPlotly', JSON.parse(allOutputData['resilienceProbData']), JSON.parse(allOutputData['resilienceProbLayout']) || {});
 		});
+	</script>
+
+	<!-- Include the ChargeLevelBattery plot only when BESS exists in the model -->
+	{% if allOutputDataDict.chargeLevelBattery|sum == 0 %}
+		<script type="text/javascript">    
+			$(window).on('pageshow', function(){
+				$("#batteryChargePlotly").html("<p>&#160;&#160;&#160;No Home Chemical BESS was specified or built by the model.</p>");
+			});
+		</script>
+	{% else %}
+		<script type="text/javascript">    
+			$(window).on('pageshow', function(){
+				Plotly.newPlot('batteryChargePlotly', JSON.parse(allOutputData['batteryChargeData']), JSON.parse(allOutputData['batteryChargeLayout']));
+			});
+		</script>
+	{% endif %}
+
+	<!-- Include the ThermalBatteryPower plot only when thermal data exists in the model -->
+	{% if allOutputDataDict.thermalDataCheck == 0 %}
+		<script type="text/javascript">    
+			$(window).on('pageshow', function(){
+				$("#thermalBatPowerPlot").html("<p>&#160;&#160;&#160;No Home TESS was specified or built by the model.</p>");
+			});
+		</script>
+	{% else %}
+		<script type="text/javascript">    
+			$(window).on('pageshow', function(){
+				Plotly.newPlot('thermalBatPowerPlot', JSON.parse(allOutputData['thermalBatPowerPlot']), JSON.parse(allOutputData['thermalBatPowerPlotLayout']) || {});
+			});
+		</script>
+	{% endif %}
+
+	<!-- Continue adding Plotly plots -->
+	<script type="text/javascript">	
+		$(window).on('pageshow',function(){
+		Plotly.newPlot('resiliencePlotly', JSON.parse(allOutputData['resilienceData']), JSON.parse(allOutputData['resilienceLayout']) || {});
+		Plotly.newPlot('resilienceProbPlotly', JSON.parse(allOutputData['resilienceProbData']), JSON.parse(allOutputData['resilienceProbLayout']) || {});
+	});
 	</script>
 </head>
 <body>
@@ -358,11 +393,31 @@
 		<p class="reportTitle" style="page-break-before:always">Impact to Demand</p>
 		<div id="newDemandData" class="tightContent" style="width: 1000px; height: 600px;"></div>
 
+		<!-- Include the ThermalBatteryPower plot only when thermal data exists in the model -->
 		<p class="reportTitle" style="page-break-before:always">Home Thermal Battery Power Profile</p>
-		<div id="thermalBatPowerPlot" class="tightContent" style="width: 1000px; height: 600px;"></div>
+		{% if allOutputDataDict.thermalDataCheck == 0 %}
+			<div id="thermalBatPowerPlot" class="tightContent"></div>
+			<script type="text/javascript">    
+				$(window).on('pageshow', function(){
+					$("#thermalBatPowerPlot").html("<p>&#160;&#160;&#160;No Home TESS was specified or built by the model.</p>");
+				});
+			</script>
+		{% else %}
+			<div id="thermalBatPowerPlot" class="tightContent" style="width: 1000px; height: 600px;"></div>
+		{% endif %}
 
+		<!-- Include the ChargeLevelBattery plot only when BESS exists in the model -->
 		<p class="reportTitle" style="page-break-before:always">Home Chemical BESS State of Charge</p>
-		<div id="batteryChargePlotly" class="tightContent" style="width: 1000px; height: 600px;"></div>
+		{% if allOutputDataDict.chargeLevelBattery|sum == 0 %}
+			<div id="batteryChargePlotly" class="tightContent"></div>
+			<script type="text/javascript">    
+				$(window).on('pageshow', function(){
+					$("#batteryChargePlotly").html("<p>&#160;&#160;&#160;No Home Chemical BESS was specified or built by the model.</p>");
+				});
+			</script>
+		{% else %}
+			<div id="batteryChargePlotly" class="tightContent" style="width: 1000px; height: 600px;"></div>
+		{% endif %}
 
 		<p class="reportTitle">Monthly Cost Comparison</p>
 		<div id="levelizedCostReport" class="tightContent">
@@ -441,6 +496,11 @@
 		<p class="reportTitle" style="page-break-before:always">Savings Breakdown Per Technology</p>
 		<div id="cashFlowReport" class="tightContent">
 			<div id="cashFlowChartDiv2"></div>
+			{% if allOutputDataDict.techCheck == 0 %}
+			<script type="text/javascript">	
+				$("#cashFlowChartDiv2").html("<p>&#160;&#160;&#160;No DER technologies were specified or built by the model.</p>")
+			</script>
+			{% else %}
 			<script>
 				new Highcharts.Chart({"credits":{"enabled":false},
 					"plotOptions":{"column":{"stacking":'normal'},"series":{"animation":false,"shadow":false},"spline":{"animation":false,"shadow":false}},
@@ -469,6 +529,7 @@
 					"tooltip":{"valueDecimals":1},
 					"legend":{"verticalAlign":"top","align":"top","borderWidth":0,"x":50,"y":-10,"layout":"horizontal"}})
 			</script>
+			{% endif %}
 		</div>
 	</div>
 

@@ -5,10 +5,33 @@
     <!-- ESRI -->
     <script src="https://unpkg.com/esri-leaflet@2.5.0/dist/esri-leaflet.js" integrity="sha512-ucw7Grpc+iEQZa711gcjgMBnmd9qju1CICsRaryvX7HJklK0pGl/prxKvtHwpgm5ZHdvAil7YPxI1oWPOWK3UQ==" crossorigin=""></script>
      <!-- Leaflet Draw -->
-    <link rel='stylesheet' href='https://unpkg.com/leaflet-draw@1.0.0/dist/leaflet.draw.css'/>
-    <script src='https://unpkg.com/leaflet-draw@1.0.0/dist/leaflet.draw.js'></script>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet-draw@1.0.0/dist/leaflet.draw.css"/>
+    <script src="https://unpkg.com/leaflet-draw@1.0.0/dist/leaflet.draw.js"></script>
     <!-- KMZ -->
     <script src="https://unpkg.com/leaflet-kmz@1.0.6/dist/leaflet-kmz.js"></script>
+    <link href="https://unpkg.com/gridjs/dist/theme/mermaid.min.css" rel="stylesheet" />
+	<script src="https://unpkg.com/gridjs/dist/gridjs.umd.js"></script>
+    <style>
+        /* Override some gridjs defaults. */
+        #riskTableDiv .gridjs-wrapper {
+            box-shadow: none !important;
+        }
+        #riskTableDiv th.gridjs-th {
+            background-color: transparent !important;
+            color: inherit !important;
+            border: none !important;
+        }
+        #riskTableDiv td.gridjs-td {
+            border: none !important;
+        }
+        .gridjs-tbody,
+        td.gridjs-td {
+            background-color: transparent !important;
+        }
+        table.gridjs-table {
+            margin: unset !important;
+        }
+    </style>
 </head>
 <body>
     {{ omfModelTitle }}
@@ -33,9 +56,13 @@
 			</div>
             <div class="shortInput">
                 <select id="forecastTimeSelect" name="forecastTimeSelect">
-                    <option value="day1Outlook">Day 1 Fire Weather Outlook</option>
-                    <option value="day2Outlook">Day 2 Fire Weather Outlook</option>
-                    <option value="day3to8Outlook">Day 3-8 Fire Weather Outlook</option>
+                    <option value="0" {% if allInputDataDict.forecastTimeSelect == '0' %} selected {% endif %}>Day 1 Fire Weather Outlook</option>
+                    <option value="1" {% if allInputDataDict.forecastTimeSelect == '1' %} selected {% endif %}>Day 2 Fire Weather Outlook</option>
+                    <option value="2" {% if allInputDataDict.forecastTimeSelect == '2' %} selected {% endif %}>Day 3 Fire Weather Outlook</option>
+                    <option value="3" {% if allInputDataDict.forecastTimeSelect == '3' %} selected {% endif %}>Day 4 Fire Weather Outlook</option>
+                    <option value="4" {% if allInputDataDict.forecastTimeSelect == '4' %} selected {% endif %}>Day 5 Fire Weather Outlook</option>
+                    <option value="5" {% if allInputDataDict.forecastTimeSelect == '5' %} selected {% endif %}>Day 6 Fire Weather Outlook</option>
+                    <option value="6" {% if allInputDataDict.forecastTimeSelect == '6' %} selected {% endif %}>Day 7 Fire Weather Outlook</option>
                 </select>
             </div>
             {% if modelStatus == 'finished' %}
@@ -49,8 +76,11 @@
 			</div>
             <hr>
             <div class="shortInput">
-                <label>Enter coordinates for areas of interest manually</label>
-                <input type="text" id="manualCoordinateInput" name="manualCoordinateInput" value="{{allInputDataDict.manualCoordinateInput}}"/>
+                <label>Enter coordinates (lat,lon pairs) for areas of interest manually</label>
+                <input type="text" id="manualCoordinateInput" name="manualCoordinateInput" value="{{allInputDataDict.manualCoordinateInput}}" placeholder="E.g. (40.69,-74.04), (40.76,-73.99), etc."/>
+            </div>
+            <div class="shortInput">
+                <button id="addManualShapeBtn" type="button">Add shape from text</button>
             </div>
             <div class="wideInput">
 				<p class="inputSectionHeader">Map Input</p>
@@ -59,25 +89,150 @@
             <div class="wideInput">
                 <label>Draw areas of interest on the map</label>
                 <div id="inputMap" style="width: 100%; height: 800px; border-radius: 8px;"></div>
-                <input type="hidden" id="geojsonInput" name="geojsonInput" value="{{allInputDataDict.geojsonInput}}">
+                <input type="hidden" id="geojsonInput" name="geojsonInput" value='{{ allInputDataDict.geojsonInput | safe }}'>
                 <script>
                     // Initialize the map in the "inputMap" container.
                     const map = L.map('inputMap', { renderer: L.canvas() });
                     map.setView([39.8, -121.6], 10);
                     L.control.scale().addTo(map);
+
+                    // Create a control that embeds a file input.
+                    const UploadControl = L.Control.extend({
+                        options: { position: 'topright' },
+                        onAdd: function(map) {
+                            const container = L.DomUtil.create('div', 'leaflet-bar leaflet-control');
+                            // Create a file input.
+                            const fileInput = L.DomUtil.create('input', '', container);
+                            fileInput.type = 'file';
+                            fileInput.accept = '.geojson';
+                            fileInput.title = 'Upload GeoJSON file(s)';
+                            // Prevent clicks on the input from affecting the map.
+                            L.DomEvent.disableClickPropagation(container);
+                            // Listen for file changes.
+                            fileInput.addEventListener('change', function(e) {
+                                const files = e.target.files;
+                                if (files.length === 0) {
+                                    return;
+                                }
+                                // Process each file (if allowing multiple uploads).
+                                Array.from(files).forEach(file => {
+                                    const reader = new FileReader();
+                                    reader.onload = function(evt) {
+                                        try {
+                                            const geojsonData = JSON.parse(evt.target.result);
+                                            // Create a Leaflet GeoJSON layer for the uploaded data.
+                                            const uploadedLayer = L.geoJSON(geojsonData);
+                                            // Add the uploaded layer drawnItems layer group.
+                                            uploadedLayer.eachLayer(function(layer) {
+                                                drawnItems.addLayer(layer);
+                                            });
+                                            updateGeoJSONInput();
+                                        } catch (error) {
+                                            console.error("Error parsing uploaded file:", error);
+                                            alert("Failed to parse the GeoJSON file.");
+                                        }
+                                    };
+                                    reader.readAsText(file);
+                                });
+                                // Clear the input value so the user can re-upload more files as needed.
+                                fileInput.value = "";
+                            });
+                            
+                            return container;
+                        }
+                    });
+                    map.addControl(new UploadControl());
+
+                    function saveGeoJSON() {
+                        const geojson = drawnItems.toGeoJSON();
+                        const dataStr = JSON.stringify(geojson, null, 2);
+                        const blob = new Blob([dataStr], { type: "application/json" });
+                        const url = URL.createObjectURL(blob);
+                        const a = document.createElement("a");
+                        a.href = url;
+                        a.download = "drawnItems.geojson";
+                        document.body.appendChild(a);
+                        a.click();
+                        document.body.removeChild(a);
+                        URL.revokeObjectURL(url);
+                    }
+
+                    const SaveControl = L.Control.extend({
+                        options: { position: "topright" },
+                        onAdd: function(map) {
+                            const container = L.DomUtil.create("div", "leaflet-bar leaflet-control");
+                            const button = L.DomUtil.create("a", "", container);
+                            button.innerHTML = "&#128190;"; // Floppy disk icon.
+                            button.href = "#";
+                            button.title = "Save drawn features as GeoJSON";
+                            L.DomEvent.disableClickPropagation(container);
+                            L.DomEvent.on(button, "click", function(e) {
+                                L.DomEvent.preventDefault(e);
+                                saveGeoJSON();
+                            });
+                            return container;
+                        }
+                    });
+                    map.addControl(new SaveControl());
+
                     // Create a feature group for drawn items.
                     const drawnItems = L.featureGroup().addTo(map);
                     // Initialize basemap layers.
-                    const esriImages = L.esri.basemapLayer('Imagery').addTo(map);
-                    const streets = L.esri.basemapLayer('Streets');
-                    L.control.layers(
-                        {
-                            'Streets': streets,
-                            'Imagery': esriImages
-                        },
-                        { 'Drawn Features': drawnItems },
-                        { collapsed: false }
-                    ).addTo(map);
+                    const esriImages = L.esri.basemapLayer("Imagery").addTo(map);
+                    const streets = L.esri.basemapLayer("Streets");
+                    const esriLandsat = L.esri.imageMapLayer({
+                        url: "https://landsat2.arcgis.com/arcgis/rest/services/Landsat/MS/ImageServer",
+                        attribution: "USGS, NASA"
+                    });
+                    const esriSentinel = L.esri.imageMapLayer({
+                        url: "https://sentinel.arcgis.com/arcgis/rest/services/Sentinel2/ImageServer",
+                        attribution: "USGS, NASA"
+                    });
+                    const baseLayers = {
+                        "Streets": streets,
+                        "Imagery": esriImages,
+                        "Esri Landsat": esriLandsat,
+                        "Esri Sentinel": esriSentinel
+                    };
+                    const overlayLayers = {
+                        "Drawn Features": drawnItems
+                    };
+                    const layerControl = L.control.layers(baseLayers, overlayLayers, {
+                        collapsed: false,
+                        position: "topleft"
+                    }).addTo(map);
+
+                    function getKMZBlobUrl(base64String) {
+                        // Decode base64 string.
+                        const byteCharacters = atob(base64String);
+                        const byteNumbers = new Array(byteCharacters.length);
+                        for (let i = 0; i < byteCharacters.length; i++) {
+                            byteNumbers[i] = byteCharacters.charCodeAt(i);
+                        }
+                        const byteArray = new Uint8Array(byteNumbers);
+                        // Create a blob from the byte array.
+                        const blob = new Blob([byteArray], {type: "application/vnd.google-earth.kmz"});
+                        // Create an object URL from the blob.
+                        return URL.createObjectURL(blob);
+                    }
+
+                    if (allOutputData && allOutputData.kmz_base64) {
+                        // Get the Blob URL for the KMZ file.
+                        const kmzBlobUrl = getKMZBlobUrl(allOutputData.kmz_base64);
+                        // Remove previous KMZ layer if it exists.
+                        if (window.currentKMZLayer) {
+                            map.removeLayer(window.currentKMZLayer);
+                        }
+                        // Create a new KMZ layer.
+                        window.currentKMZLayer = L.kmzLayer();
+                        window.currentKMZLayer.on("load", function(e) {
+                            layerControl.addOverlay(window.currentKMZLayer, "Fire Weather Outlook");
+                        });
+                        // Load the KMZ file from the blob URL.
+                        window.currentKMZLayer.load(kmzBlobUrl);
+                        window.currentKMZLayer.addTo(map);
+                    }
+
                     // Add the drawing control.
                     const drawControl = new L.Control.Draw({
                         edit: { featureGroup: drawnItems },
@@ -91,11 +246,13 @@
                         }
                     });
                     map.addControl(drawControl);
+
                     // Function to update the hidden input with the current GeoJSON.
                     const updateGeoJSONInput = () => {
                         const geojson = drawnItems.toGeoJSON();
-                        document.getElementById('geojsonInput').value = JSON.stringify(geojson);
+                        document.getElementById("geojsonInput").value = JSON.stringify(geojson);
                     };
+
                     // Set up event listeners for draw events.
                     map.on(L.Draw.Event.CREATED, (e) => {
                         e.layer.feature = e.layer.feature || { type: "Feature", properties: {} };
@@ -105,6 +262,87 @@
                     });
                     map.on(L.Draw.Event.EDITED, updateGeoJSONInput);
                     map.on(L.Draw.Event.DELETED, updateGeoJSONInput);
+
+                    // Retrieve stored GeoJSON string from hidden input and display it in map.
+                    const storedGeojsonString = document.getElementById("geojsonInput").value;
+                    if (storedGeojsonString) {
+                        try {
+                            const geojsonData = JSON.parse(storedGeojsonString);
+                            const storedLayer = L.geoJSON(geojsonData);
+                            storedLayer.eachLayer(function(layer) {
+                                drawnItems.addLayer(layer);
+                            });
+                        } catch (error) {
+                            console.error("Error parsing stored GeoJSON: ", error);
+                        }
+                    }
+
+                    // Load risk data into popups if available. 
+                    drawnItems.on("click", function(e) {
+                        const shapeId = e.layer.feature && e.layer.feature.properties && e.layer.feature.properties.shape_id;
+                        if (typeof allOutputData != "undefined" && shapeId) {
+                            const fireRisk = allOutputData.fire_risk_from_map[shapeId] || "Not available"; 
+                            const thunderstormRisk = allOutputData.thunderstorm_risk_from_map[shapeId] || "Not available";
+                            e.layer.bindPopup(
+                                `<strong>Shape ID:</strong> ${shapeId}<br/>
+                                <strong>Risk From Temperature, Wind, and Relative Humidity:</strong> ${fireRisk}<br/>
+                                <strong>Risk From Dry Thunderstorms:</strong> ${thunderstormRisk}`
+                            ).openPopup();
+                        }
+                    })
+
+                    function parseCoordString(coordString) {
+                        // Look for coordinate pairs using a regex.
+                        // This matches: ( optional whitespace? a float , a float ), repeated.
+                        const pattern = /\(\s*([+-]?\d+(?:\.\d+)?)\s*,\s*([+-]?\d+(?:\.\d+)?)\s*\)/g;
+                        let match;
+                        const coords = [];
+                        while ((match = pattern.exec(coordString)) !== null) {
+                            // match[1] is the lat, match[2] is the lon as strings.
+                            const lat = parseFloat(match[1]);
+                            const lon = parseFloat(match[2]);
+                            coords.push([lat, lon]);
+                        }
+                        if (coords.length < 3) {
+                            alert("Please provide at least three coordinate pairs to form a polygon.");
+                            return;
+                        }
+                        return coords;
+                    }
+
+                    function createManualPolygon(latlngs) {
+                        // Create a Leaflet polygon from the array of [lat, lon].
+                        const poly = L.polygon(latlngs);
+                        // Attach a feature property with shape_id.
+                        poly.feature = poly.feature || { type: "Feature", properties: {} };
+                        poly.feature.properties.shape_id = L.Util.stamp(poly);
+                        // Add it to the drawnItems layer group.
+                        drawnItems.addLayer(poly);
+                        updateGeoJSONInput();
+                    }
+                    
+                    // Prevent enter from submitting form when in manual coodinate input field.
+                    document.getElementById("manualCoordinateInput").addEventListener("keydown", function(event) {
+                        if (event.key === "Enter") {
+                            event.preventDefault();
+                        }
+                    });
+
+                    document.getElementById("addManualShapeBtn").addEventListener("click", function() {
+                        const inputTextElem = document.getElementById("manualCoordinateInput");
+                        const inputText = inputTextElem.value.trim();
+                        if (!inputText) {
+                            alert("Please enter coordinates.");
+                            return;
+                        }
+                        try {
+                            const latlngs = parseCoordString(inputText);
+                            createManualPolygon(latlngs);
+                            inputTextElem.value = "";
+                        } catch (err) {
+                            alert("Error: " + err.message);
+                        }
+                    });
                 </script>
             </div>
             {{ omfModelButtons }}
@@ -113,10 +351,43 @@
     {{ omfRunDebugBlock }}
     {% if modelStatus == 'finished' %}
     <div id="output">
-        {% if allOutputDataDict['sampleOutputIndicator'] == True %}
-        <p class="reportTitle">Sample Output</p>
-        <div id="sampleOutput" class="tightContent" value="{{allOutputDataDict.sample}}"></div>
-        {% endif %}
+        <p class="reportTitle">Shape and Risk Chart</p>
+        <div id="levelizedCostReport" class="tightContent">
+			<div id="riskTableDiv"></div>
+            <script>
+                if (allOutputData && allOutputData.fire_risk_from_map && allOutputData.thunderstorm_risk_from_map) {
+                    // Extract the shape IDs (keys)
+                    const shapeIds = Object.keys(allOutputData.fire_risk_from_map);
+                    // [ shape id, fire risk, thunderstorm risk ]
+                    const gridData = shapeIds.map(id => [
+                        id,
+                        allOutputData.fire_risk_from_map[id] || "Not available",
+                        allOutputData.thunderstorm_risk_from_map[id] || "Not available"
+                    ]);
+                    new gridjs.Grid({
+                        columns: ["Shape ID", "Fire Risk", "Thunderstorm Risk"],
+                        data: gridData,
+                        style: {
+                            table: {
+                                "margin": "5px",
+                                "width": "600px",
+                                "font-size": "14pt"
+                            },
+                            th: {
+                                "padding": "7px 20px",
+                                "text-align": "left",
+                                "font-size": "0.8em"
+                            },
+                            td: {
+                                "padding": "7px 20px",
+                                "text-align": "left",
+                                "font-size": "0.8em"
+                            }
+                        },
+                    }).render(document.getElementById("riskTableDiv"));
+                }
+            </script>                
+		</div>
         {{ rawOutputFiles }}
     </div>
     {% endif %}
