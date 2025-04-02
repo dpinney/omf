@@ -21,7 +21,6 @@ from omf.solvers.opendss.dssConvert import _dssToOmd_toBeTested as dssToOmd
 from omf.solvers.opendss.dssConvert import _evilDssTreeToGldTree_toBeTested as evilDssTreeToGldTree
 from omf.solvers.opendss.dssConvert import _treeToDss_toBeTested as treeToDss
 from omf.solvers.opendss.dssConvert import _dss_to_clean_via_save_toBeTested as dss_to_clean_via_save
-from omf.solvers.opendss.dssConvert import _dss_to_networkx_toBeTested as dss_to_networkx
 from omf.solvers import PowerModelsONM
 from omf.comms import createGraph
 from omf.models.resilientCommunity import runCalculations as makeResComOutputCsv

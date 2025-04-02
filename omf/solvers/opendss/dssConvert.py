@@ -647,6 +647,7 @@ def _evilDssTreeToGldTree_toBeTested(dssTree):
 				##########
 				# - Saeed
 				##########
+				# TODO: Scrutinize this change extra -Saeed
 						'parent': cobname,
 					}
 					_extend_with_exc(ob, gldTree[str(g_id)], ['object','element','!CMD'])
@@ -980,33 +981,6 @@ def dss_to_networkx(dssFilePath, tree=None, omd=None):
 		tree = dssToTree(dssFilePath)
 	if omd == None:
 		omd = evilDssTreeToGldTree(tree)
-	# Gather edges, leave out source and circuit objects
-	edges = [(ob['from'],ob['to']) for ob in omd.values() if 'from' in ob and 'to' in ob]
-	edges_sub = [
-		(ob['parent'],ob['name']) for ob in omd.values()
-		if 'name' in ob and 'parent' in ob and ob.get('object') not in ['circuit', 'vsource']
-	]
-	full_edges = edges + edges_sub
-	G = nx.DiGraph(full_edges)
-	for ob in omd.values():
-		if 'latitude' in ob and 'longitude' in ob:
-			G.add_node(ob['name'], pos=(float(ob['longitude']), float(ob['latitude'])))
-		else:
-			G.add_node(ob['name'])
-	return G
-
-def _dss_to_networkx_toBeTested(dssFilePath, tree=None, omd=None):
-	''' Return a networkx directed graph from a dss file. If tree is provided, build graph from that instead of the file. '''
-	if tree == None:
-		tree = dssToTree(dssFilePath)
-	if omd == None:
-		##########
-		# - Saeed
-		##########
-		omd = _evilDssTreeToGldTree_toBeTested(tree)
-		##########
-		# - Saeed
-		##########
 	# Gather edges, leave out source and circuit objects
 	edges = [(ob['from'],ob['to']) for ob in omd.values() if 'from' in ob and 'to' in ob]
 	edges_sub = [
