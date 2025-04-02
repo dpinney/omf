@@ -12,6 +12,7 @@ import plotly.graph_objs as go
 import plotly.utils
 import requests
 import matplotlib.pyplot as plt
+from numpy_financial import npv
 
 # OMF imports
 from omf.models import __neoMetaModel__
@@ -297,7 +298,8 @@ def work(modelDir, inputDict):
 		monthHours = [(0, 744), (744, 1416), (1416, 2160), (2160, 2880), 
 				(2880, 3624), (3624, 4344), (4344, 5088), (5088, 5832), 
 				(5832, 6552), (6552, 7296), (7296, 8016), (8016, 8760)]
-		BESS_compensation_monthly = np.asarray([sum(BESS[s:f]) for s, f in monthHours])
+		rateCompensation = float(inputDict['rateCompensation'])
+		BESS_compensation_monthly = np.asarray([rateCompensation*sum(BESS[s:f]) for s, f in monthHours])
 		outData['savings'] = list(np.asarray(outData['savings'])+np.asarray(BESS_compensation_monthly)) ## NOTE: There is likely a better way to add two lists together, but this works for now
 
 	else:
@@ -577,6 +579,33 @@ def work(modelDir, inputDict):
 		outData['thermalDevicePlotData'] = json.dumps(fig.data, cls=plotly.utils.PlotlyJSONEncoder)
 		outData['thermalDevicePlotLayout'] = json.dumps(fig.layout, cls=plotly.utils.PlotlyJSONEncoder)
 
+	## Calculate Net Present Value (NPV) and Simple Payback Period (SPP)
+	## Consumer costs = generator fuel cost + installed cost of BESS (per kW and per kWh) + BESS replacement cost + BESS inverter replacement cost + TESS unit cost + TESS upkeep cost
+	## Consumer income = upfront subsidy + ongoing subsidy + energy compensation rate for DERs + BESS rebate 
+	## Initial investment = BESS installation cost and TESS unit cost
+	## ongoing costs are everything else
+	projectionLength = int(inputDict['projectionLength'])
+	#SPP = utilityCosts_year1_total / utilityNetSavings_year1_total
+	BESS_initial_cost = reoptResults['ElectricStorage']['initial_capital_cost']
+	TESS_initial_cost = float(inputDict['unitDeviceCost']) * float(inputDict['number_devices'])
+	BESS_compensation = sum(BESS) * rateCompensation
+	TESS_compensation = sum(vbat_discharge_flipsign) * rateCompensation
+	TESS_upkeep_cost = float(inputDict['unitUpkeepCost']) * float(inputDict['number_devices'])
+	subsidy_upfront = float(inputDict['subsidyUpfront']) 
+	subsidy_ongoing = float(inputDict['subsidyOngoing']) * 12
+	subsidies = subsidy_upfront + subsidy_ongoing
+	initialInvestment = BESS_initial_cost + TESS_initial_cost
+	total_costs = initialInvestment + TESS_upkeep_cost
+	total_costs_minus_initial_investment = total_costs - initialInvestment
+	savings = subsidies + BESS_compensation + TESS_compensation
+	net_savings = savings - total_costs_minus_initial_investment
+	consumerNetSavings_allyears_array = np.full(projectionLength, net_savings)
+	outData['NPV'] = npv(float(inputDict['discountRate'])/100., consumerNetSavings_allyears_array)
+	#utilityCosts_year1_minus_onetime_costs = (operationalCosts_ongoing*12.0) + (allDevices_subsidy_ongoing*12.0) + allDevices_compensation_year1_total
+	#utilityNetSavings_year1_total_minus_onetime_costs = utilitySavings_year1_total - utilityCosts_year1_minus_onetime_costs
+	SPP = initialInvestment/net_savings
+	outData['SPP'] = SPP
+
 	# Stdout/stderr.
 	outData['stdout'] = 'Success'
 	outData['stderr'] = ''
@@ -585,11 +614,11 @@ def work(modelDir, inputDict):
 
 def new(modelDir):
 	''' Create a new instance of this model. Returns true on success, false on failure. '''
-	with open(pJoin(__neoMetaModel__._omfDir,'static','testFiles','residential_PV_load.csv')) as f:
+	with open(pJoin(__neoMetaModel__._omfDir,'static','testFiles','derConsumer','residential_PV_load.csv')) as f:
 		demand_curve = f.read()
-	with open(pJoin(__neoMetaModel__._omfDir,'static','testFiles','residential_extended_temperature_data.csv')) as f:
+	with open(pJoin(__neoMetaModel__._omfDir,'static','testFiles','derConsumer','residential_extended_temperature_data.csv')) as f:
 		temp_curve = f.read()
-	with open(pJoin(__neoMetaModel__._omfDir,'static','testFiles','residential_critical_load.csv')) as f:
+	with open(pJoin(__neoMetaModel__._omfDir,'static','testFiles','derConsumer','residential_critical_load.csv')) as f:
 		criticalLoad_curve = f.read()
 	
 	defaultInputs = {
