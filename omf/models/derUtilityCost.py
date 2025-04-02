@@ -905,7 +905,7 @@ def work(modelDir, inputDict):
 	utilityCosts_year1_minus_onetime_costs = (operationalCosts_ongoing*12.0) + (allDevices_subsidy_ongoing*12.0) + allDevices_compensation_year1_total
 	utilityNetSavings_year1_total_minus_onetime_costs = utilitySavings_year1_total - utilityCosts_year1_minus_onetime_costs
 	SPP = initialInvestment/utilityNetSavings_year1_total_minus_onetime_costs
-	outData['SPP'] = np.abs(SPP)
+	outData['SPP'] = SPP
 	outData['totalNetSavings_year1'] = list(utilityNetSavings_year1_array) ## (total cost of service - adjusted total cost of service) - (operational costs + subsidies + compensation to consumer + startup costs)
 	outData['totalNetSavings_allyears'] = list(utilityNetSavings_allyears_array)
 	outData['cumulativeCashflow_total'] = list(np.cumsum(utilityNetSavings_allyears_array))
@@ -997,13 +997,13 @@ def new(modelDir):
 		'rateCompensation': '0.02', ## unit: $/kWh
 		'discountRate': '2',
 		'startupCosts': '200000',
-		'TESS_subsidy_onetime_ac': '0.0',
+		'TESS_subsidy_onetime_ac': '25.0',
 		'TESS_subsidy_ongoing_ac': '0.0',
-		'TESS_subsidy_onetime_hp': '0.0',
+		'TESS_subsidy_onetime_hp': '100.0',
 		'TESS_subsidy_ongoing_hp': '0.0',
-		'TESS_subsidy_onetime_wh': '0.0',
+		'TESS_subsidy_onetime_wh': '25.0',
 		'TESS_subsidy_ongoing_wh': '0.0',
-		'BESS_subsidy_onetime': '5.0',
+		'BESS_subsidy_onetime': '100.0',
 		'BESS_subsidy_ongoing': '0.0',
 		'GEN_subsidy_onetime': '0.0',
 		'GEN_subsidy_ongoing': '0.0',
@@ -1022,7 +1022,7 @@ def new(modelDir):
 
 		## Home Heat Pump inputs (vbatDispatch):
 		'load_type_hp': '2', 
-		'number_devices_hp': '33000',
+		'number_devices_hp': '16500',
 		'power_hp': '5.6',
 		'capacitance_hp': '2',
 		'resistance_hp': '2',
