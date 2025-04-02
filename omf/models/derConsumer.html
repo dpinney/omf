@@ -87,14 +87,7 @@
 			</div>
 			<hr style="border-style: solid; border-color: #196b12; margin-top: 10px;">
 			<div class="shortInput">
-				<label class="tooltip">Use URDB label to determine demand charge?<span class="classic">If yes, model will use the URDB label provided above to determine the demand charge rate. If no, specify the demand charge rate ($/kWh) below.</span></label>
-				<select id="demandChargeURDB" name="demandChargeURDB" value="{{allInputDataDict.demandChargeURDB}}">
-					<option value="True" {{ 'selected' if allInputDataDict.demandChargeURDB == 'Yes' }}>Yes</option> <!-- TODO: Make this dropdown menu cause Demand Charge Cost to appear and disappear 8/2024 -->
-					<option value="False" {{ 'selected' if allInputDataDict.demandChargeURDB == 'No' }}>No</option>
-				</select>
-			</div>
-			<div class="shortInput">
-				<label class="tooltip">Demand Charge Cost ($/kW)<span class="classic">User defined demand charge that the utility pays per kWh.</span></label>
+				<label class="tooltip">Demand Charge Cost ($/kW)<span class="classic">Specify the demand charge that the utility pays per kW.</span></label>
 				<input type="text" id="demandChargeCost" name="demandChargeCost" value="{{allInputDataDict.demandChargeCost}}" pattern="^\d+\.?\d*?$" required="required">
 			</div>
 			<div class="shortInput">
@@ -135,7 +128,7 @@
 				<input type="text" id="existing_gen_kw" name="existing_gen_kw" value="{{allInputDataDict.existing_gen_kw}}" required="required"/>
 			</div>
 			<div class="shortInput">
-				<label class="tooltip"> Available Fuel (gal)<span class="classic">Specify the amount of generator fuel available (gal).</span></label>
+				<label class="tooltip"> Available Fuel (gal)<span class="classic">Specify the annual amount of generator fuel available (gal).</span></label>
 				<input type="text" id="fuel_available_gal" name="fuel_available_gal" value="{{allInputDataDict.fuel_available_gal}}" required="required"/>
 			</div>
 			<div class="shortInput">

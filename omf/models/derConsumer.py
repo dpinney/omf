@@ -334,7 +334,7 @@ def work(modelDir, inputDict):
 
 	## BESS serving load piece
 	fig.add_trace(go.Scatter(x=timestamps,
-						y=np.asarray(BESS) + np.asarray(demand) + vbat_discharge_component,
+						y=np.asarray(BESS), #+ np.asarray(demand) + vbat_discharge_component,
 						yaxis='y1',
 						mode='none',
 						fill='tozeroy',
@@ -354,7 +354,7 @@ def work(modelDir, inputDict):
 						  ))
 	
 	fig.add_trace(go.Scatter(x=timestamps,
-						y=vbat_discharge_component + np.asarray(demand),
+						y=vbat_discharge_component, # + np.asarray(demand),
 						yaxis='y1',
 						mode='none',
 						fill='tozeroy',
@@ -365,7 +365,7 @@ def work(modelDir, inputDict):
 
 	## Original load piece (minus any vbat or BESS charging aka 'new/additional loads')
 	fig.add_trace(go.Scatter(x=timestamps,
-						y=np.asarray(demand)-np.asarray(BESS)-vbat_discharge_component,
+						y=np.asarray(demand),#-np.asarray(BESS)-vbat_discharge_component,
 						yaxis='y1',
 						mode='none',
 						name='Original Load',
@@ -387,7 +387,7 @@ def work(modelDir, inputDict):
 	fig.update_traces(fillpattern_shape='.', selector=dict(name='Additional Load (Charging BESS and vbat)'))
 
 	## Grid serving new load
-	grid_serving_new_load = np.asarray(grid_to_load) + np.asarray(grid_charging_BESS) + vbat_charge_component - vbat_discharge_component
+	grid_serving_new_load = np.asarray(grid_to_load), #  + np.asarray(grid_charging_BESS) + vbat_charge_component - vbat_discharge_component
 	fig.add_trace(go.Scatter(x=timestamps,
                          y=grid_serving_new_load,
 						 yaxis='y1',
@@ -408,7 +408,6 @@ def work(modelDir, inputDict):
 	#				 showlegend=showlegend))
 	#fig.update_traces(legendgroup='Demand', visible='legendonly', selector=dict(name='Original Load (kW)')) ## Make demand hidden on plot by default
 
-		
 	## Fossil Generator piece
 	if 'Generator' in reoptResults:
 		fig.add_trace(go.Scatter(x=timestamps,
@@ -429,13 +428,7 @@ def work(modelDir, inputDict):
                 overlaying='y',
                 side='right'
                 ),
-    	legend=dict(
-			orientation='h',
-			yanchor='bottom',
-			y=1.02,
-			xanchor='right',
-			x=1
-			)
+		legend=dict(orientation='h',yanchor='bottom',y=1.02,xanchor='right',x=1)
 	)
 
 	## NOTE: This opens a window that displays the correct figure with the appropriate patterns.
@@ -594,6 +587,8 @@ def work(modelDir, inputDict):
 	subsidy_upfront = float(inputDict['subsidyUpfront']) 
 	subsidy_ongoing = float(inputDict['subsidyOngoing']) * 12
 	subsidies = subsidy_upfront + subsidy_ongoing
+	#GEN_fuel_cost_year1 = reoptResults['Generator']['year_one_fuel_cost_before_tax_bau']
+	#GEN_fuel_cost_allyears = reoptResults['Generator']['lifecycle_fuel_cost_after_tax']
 	initialInvestment = BESS_initial_cost + TESS_initial_cost
 	total_costs = initialInvestment + TESS_upkeep_cost
 	total_costs_minus_initial_investment = total_costs - initialInvestment
@@ -665,8 +660,8 @@ def new(modelDir):
 		## Fossil Fuel Generator
 		'fossilGenerator': 'Yes',
 		'existing_gen_kw': '22', ## NOTE: Generac Guardian 22 kW model
-		'fuel_available_gal': '15.6', ## NOTE: For liquid propane: 3.56 gal/hr
-		'fuel_cost_per_gal': '3.61',
+		'fuel_available_gal': '1000', ## NOTE: For liquid propane: 3.56 gal/hr
+		'fuel_cost_per_gal': '1.00',
 
 		## vbatDispatch inputs:
 		'load_type': '2', ## Heat Pump
