@@ -2,6 +2,7 @@
 Collection of sandia codes for model free hosting capacity
 """
 
+import time
 import numpy as np
 import pandas as pd
 from sklearn import linear_model
@@ -53,10 +54,18 @@ def hosting_cap(
     """
 
     # logging Setup
-    logging.basicConfig(filename=Path(input_csv_path).parent.absolute() / 'mohca_sandia.log', encoding="utf-8", level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
+    logging.basicConfig(
+        filename=Path(input_csv_path).parent.absolute() / 'mohca_sandia.log',
+        encoding="utf-8",
+        level=logging.DEBUG,
+        format='%(asctime)s - %(levelname)s - %(message)s')
     logger = logging.getLogger(__name__)
+    logger.info('*** Start of Run')
 
+    t1 = time.perf_counter()
     input_data = pd.read_csv(input_csv_path)
+    t2 = time.perf_counter()
+    logger.info("Elapsed Load Time: %f", t2-t1)
 
     # set the upper bound voltage limit
     vpu_upperbound = 1.05
@@ -72,7 +81,6 @@ def hosting_cap(
         # Check for valid length
         if len(vv_x) != len(vv_y):
             logger.warning('vv_x and vv_y are different lengths.')
-            logger.info('Using der_pf = 1.0')
             der_pf = 1.0
 
         else:
@@ -82,6 +90,8 @@ def hosting_cap(
                 der_pf = 1.0
             else:
                 der_pf = np.sign(qpu)*(1-qpu**2)**(1/2)
+
+    logger.info('Using der_pf = %f', der_pf)
 
     # set the estimated X/R ratio
     # used with load_pf_est when kVAR measurements are unavailable
@@ -101,8 +111,12 @@ def hosting_cap(
     # NOTE: assume local time. If z offset included, applied to timestamp
     input_data['datetime'] = pd.to_datetime(input_data['datetime'], utc=True)
 
+    # convert to category for more performant masking
+    input_data['busname'] = input_data['busname'].astype('category')
+
     # Identify unique buses
     unique_buses = input_data['busname'].unique()  # list of buses/customers
+    n_unique_buses = len(unique_buses)
 
     data_all = []  # storing data for all buses
     fix_reports = []
@@ -216,7 +230,7 @@ def hosting_cap(
         n_kw_injections = fixed_data['P'] >= injection_noise_threshold
         if n_kw_injections.sum() > injection_count_threshold:
             has_pv = True
-            logger.info(f'found {n_kw_injections.sum()} injections')
+            logger.info('found %d injections', n_kw_injections.sum())
 
         # Calcualte deltas
         fixed_data['p_diff'] = fixed_data['P'].diff()
@@ -412,12 +426,11 @@ def hosting_cap(
     else:
         fix_report_df = '* No Data Fixes Executed'
 
-    logger.info(f"HC calculated for: {n_hc_est}")
-    logger.info("Skipped: {n_skipped}")
-
-    for handler in logger.handlers[:]:  # Iterate over a copy
-        logger.removeHandler(handler)
-        handler.close()
+    logger.info("Identified %d unique buses in input data.", n_unique_buses)
+    logger.info("HC calculated for: %d", n_hc_est)
+    logger.info("Skipped: %d", n_skipped)
+    logger.info('*** End of Run')
+    logging.shutdown()
 
     return hc_results
 

@@ -66,6 +66,8 @@ def hosting_cap_tchc(
     """
     # read in the smart meter data
     input_data = pd.read_csv(input_csv_path)
+    # convert to category for more performant masking...
+    input_data['busname'] = input_data['busname'].astype('category')
 
     # set the upper bound voltage limit
     vpu_upperbound = 1.05
@@ -105,6 +107,9 @@ def hosting_cap_tchc(
 
     # estimate the P, Q, and V values at the LV terminals of all xfmrs
     df_xfmr_estimated = get_est_xfmr_measurements(input_data, Final_results)
+
+    # convert to category...
+    Final_results['Transformer Index'] = Final_results['Transformer Index'].astype('category')
 
     # initialize dataframe to log xfmr parameters
     df_xfmr_info = pd.DataFrame()
