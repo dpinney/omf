@@ -977,10 +977,11 @@ def new(modelDir):
 		'tempCurve': temp_curve,
 
 		## Fossil Fuel Generator Inputs
+		## Modeled after Generac 20 kW diesel model with max tank of 95 gallons
 		'fossilGenerator': 'Yes',
 		'number_devices_GEN': '5',
 		'existing_gen_kw': '20', ## Number is based on Generac 20 kW diesel model
-		'fuel_avail_gal': '95', ## Number is based on Generac 20 kW diesel model with max tank of 95 gallons
+		'fuel_avail_gal': '95', 
 		'fuel_cost_per_gal': '3.49', ## Number is based on fuel cost of diesel
 
 		## Chemical Battery Inputs
