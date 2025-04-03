@@ -9,6 +9,7 @@
     <script src="https://unpkg.com/leaflet-draw@1.0.0/dist/leaflet.draw.js"></script>
     <!-- KMZ -->
     <script src="https://unpkg.com/leaflet-kmz@1.0.6/dist/leaflet-kmz.js"></script>
+    <!-- Grid.js -->
     <link href="https://unpkg.com/gridjs/dist/theme/mermaid.min.css" rel="stylesheet" />
 	<script src="https://unpkg.com/gridjs/dist/gridjs.umd.js"></script>
     <style>
@@ -93,7 +94,7 @@
                 <script>
                     // Initialize the map in the "inputMap" container.
                     const map = L.map('inputMap', { renderer: L.canvas() });
-                    map.setView([39.8, -121.6], 10);
+                    map.setView([39.8283, -98.5795], 4);
                     L.control.scale().addTo(map);
 
                     // Create a control that embeds a file input.
@@ -352,7 +353,7 @@
     {% if modelStatus == 'finished' %}
     <div id="output">
         <p class="reportTitle">Shape and Risk Chart</p>
-        <div id="levelizedCostReport" class="tightContent">
+        <div class="tightContent">
 			<div id="riskTableDiv"></div>
             <script>
                 if (allOutputData && allOutputData.fire_risk_from_map && allOutputData.thunderstorm_risk_from_map) {

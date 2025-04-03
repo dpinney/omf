@@ -1,0 +1,221 @@
+<head>
+    {{ omfHeaders }}
+    <!-- Leaflet.js -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+    <!-- ESRI Base Map Layer -->
+    <script src="https://unpkg.com/esri-leaflet@2.5.0/dist/esri-leaflet.js" integrity="sha512-ucw7Grpc+iEQZa711gcjgMBnmd9qju1CICsRaryvX7HJklK0pGl/prxKvtHwpgm5ZHdvAil7YPxI1oWPOWK3UQ==" crossorigin=""></script>
+    <!-- Grid.js -->
+    <link href="https://unpkg.com/gridjs/dist/theme/mermaid.min.css" rel="stylesheet" />
+	<script src="https://unpkg.com/gridjs/dist/gridjs.umd.js"></script>
+    <style>
+        /* Override some gridjs defaults. */
+        #fuelStationTableDiv .gridjs-wrapper {
+            box-shadow: none !important;
+        }
+        #fuelStationTableDiv th.gridjs-th {
+            background-color: transparent !important;
+            color: inherit !important;
+            border: none !important;
+        }
+        #fuelStationTableDiv td.gridjs-td {
+            border: none !important;
+        }
+        .gridjs-tbody,
+        td.gridjs-td {
+            background-color: transparent !important;
+        }
+        table.gridjs-table {
+            margin: unset !important;
+        }
+        #fuelStationTableDiv .gridjs-container {
+            padding: 0 !important;
+        }
+        /* Hack around conflict between omf.css and Leaflet.js popup tip css. */
+        div.modifiedTightContent {
+            width: 1000px;
+            margin-left: auto; 
+            margin-right: auto; 
+            margin-top: 0px; 
+            margin-bottom: 20px; 
+            background-color: white;
+            border: 0.5px solid lightgray;
+            border-radius: 8px;
+            box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.15) !important;
+        }
+        div.modifiedTightContent div {
+            border: none;
+        }
+    </style>
+</head>
+<body>
+    {{ omfModelTitle }}
+    <p class="reportTitle">Model Input</p>
+    <div id="input" class="content">
+        <form name="inputForm" action="/runModel/" onsubmit="event.preventDefault(); return isFormValid();" method="post" enctype="multipart/form-data">
+            <div class="shortInput">
+				<label>Model Type <a href="https://github.com/dpinney/omf/wiki/" target="blank">Help?</a></label>
+				<input type="text" id="modelType" name="modelType" value="{{modelName}}" readonly/>
+			</div>
+            <div class="shortInput">
+				<label>Model Name</label>
+				<input type="text" id="modelName" name="modelName" value="{{allInputDataDict.modelName}}" pattern="^[\w\s\d\.-]+$" required="required" readonly>
+			</div>
+            <div class="shortInput ">
+				<label>Created</label>
+				<input type="text" id="created" name="created" value="{{allInputDataDict.created}}" readonly/>
+			</div>
+            <div class="shortInput">
+				<label>User</label>
+				<input type="text" id="user" name="user" value="{{allInputDataDict.user}}" readonly/>
+			</div>
+            <div class="shortInput">
+                <label>EV Range Radius (miles)</label>
+                <input id="initialRangeMiles" name="initialRangeMiles" type="number" value="{{allInputDataDict.initialRangeMiles}}" min="0" {% if modelStatus == 'finished' %} readonly {% endif %}>
+            </div>
+            <div class="shortInput">
+                <label>Refresh Cached Results</label>
+                <input type="checkbox" id="refreshCachedResults" name="refreshCachedResults" value="true" {% if allInputDataDict.refreshCachedResults %}checked{% endif %}>
+            </div>
+            {% if modelStatus == 'finished' %}
+            <div class="shortInput">
+				<label>Run Time</label>
+				<input type="text" value={{allInputDataDict.runTime}} id="runTime" name="runTime" readonly/>
+			</div>
+			{% endif %}
+            {{ omfModelButtons }}
+        </form>
+    </div>
+    {{ omfRunDebugBlock }}
+    {% if modelStatus == 'finished' %}
+    <div id="output">
+        <p class="reportTitle">EV Range Map</p>
+        <div class="modifiedTightContent">
+            <div id="outputMap" style="height: 800px; border-radius: 8px;"></div>
+        </div>
+        <!-- <p class="reportTitle">Fuel Station Table</p>
+        <div class="tightContent">
+            <div id="fuelStationTableDiv"></div>
+            <script>
+                if (allOutputData && allOutputData.fuel_stations) {
+                    const gridData = allOutputData.fuel_stations.map(station => {
+                        return [
+                            station.id || "",
+                            station.station_name || "",
+                            station.latitude || "",
+                            station.longitude || "",
+                            station.street_address || "",
+                            station.city || "",
+                            station.state || "",
+                            station.zip || "",
+                            station.ev_network || "",
+                            station.ev_connector_types || "",
+                            station.ev_pricing || "",
+                            station.maximum_vehicle_class || "",
+                            station.ev_level1_evse_num || 0,
+                            station.ev_level2_evse_num || 0,
+                            station.ev_dc_fast_num || 0,
+                            station.access_days_time || "",
+                            station.station_phone || "",
+                            station.date_last_confirmed || ""
+                        ];
+                    });
+                    new gridjs.Grid({
+                        columns: ["Station ID", "Station Name", "Latitude", "Longitude", "Street Address", "City", "State", "Zip Code", "EV Network", "EV Connector Types", "EV Pricing", "Max Vehicle Class", "# Level 1 EVSE ports", "# Level 2 EVSE ports", "# DC Fast EVSE ports", "Hours", "Phone", "Date Last Confirmed by DoE"],
+                        data: gridData,
+                        style: {
+                            table: {
+                                "margin": "5px",
+                                "width": "600px",
+                                "font-size": "14pt"
+                            },
+                            th: {
+                                "padding": "7px 20px",
+                                "text-align": "left",
+                                "font-size": "0.8em",
+                                "white-space": "normal"
+                            },
+                            td: {
+                                "padding": "7px 20px",
+                                "text-align": "left",
+                                "font-size": "0.8em"
+                            }
+                        },
+                    }).render(document.getElementById("fuelStationTableDiv"));
+                }
+            </script>
+        </div> -->
+        {{ rawOutputFiles }}
+    </div>
+    <!-- Map and Fuel Station Functionality -->
+    <script>
+        const map = L.map("outputMap", { renderer: L.canvas() });
+        map.setView([39.8283, -98.5795], 4);
+        L.control.scale().addTo(map);
+        L.esri.basemapLayer("Streets").addTo(map);
+        
+        // Feature group to hold fuel station circles.
+        const fuelStationLayer = L.featureGroup().addTo(map);
+        
+        // Function to update fuel station circles given a range in meters
+        const updateFuelStations = (rangeMeters) => {
+            fuelStationLayer.clearLayers();
+            if (allOutputData && allOutputData.fuel_stations) {
+                allOutputData.fuel_stations.forEach(station => {
+                    const lat = parseFloat(station.latitude);
+                    const lon = parseFloat(station.longitude);
+                    if (!isNaN(lat) && !isNaN(lon)) {
+                        const circle = L.circle([lat, lon], {
+                            radius: rangeMeters,
+                            color: "black",
+                            fillColor: "yellow",
+                            fillOpacity: 0.4,
+                            weight: 1
+                        });
+                        // Bind a popup with station info
+                        // const popupText = `<strong>${station.station_name || "Unknown"}</strong><br>${station.street_address || "Unknown Address"} ${station.city || "Unknown City"}, ${station.state || "Unknown State"}`;
+                        const popupText = `<strong>${station.station_name || "Unknown"}</strong>`;
+                        circle.bindPopup(popupText);
+                        circle.addTo(fuelStationLayer);
+                    }
+                });
+            }
+        };
+        
+        // Initial EV range in miles and conversion to meters.
+        const initialRangeMiles = allOutputData.initial_range_miles;
+        updateFuelStations(initialRangeMiles * 1609.34);
+        
+        // Create a custom Leaflet control for adjusting EV range.
+        const evRangeControl = L.Control.extend({
+            options: { position: 'topright' },
+            onAdd: (map) => {
+                const container = L.DomUtil.create('div', 'leaflet-bar leaflet-control');
+                container.style.background = 'white';
+                container.style.padding = '5px';
+                container.style.fontFamily = 'Arial, sans-serif';
+                container.style.fontSize = '12px';
+                
+                container.innerHTML = `
+                <label for="evRangeInput">EV Range (miles):</label>
+                <input id="evRangeInput" type="number" value="${initialRangeMiles}" min="0" style="width:60px; margin-top:3px;">
+                `;
+                // Prevent clicks from propagating to the map.
+                L.DomEvent.disableClickPropagation(container);
+                return container;
+            }
+        });
+        
+        // Add the custom control to the map.
+        map.addControl(new evRangeControl());
+        
+        // Listen for changes on the EV range input.
+        const evRangeInput = document.getElementById("evRangeInput");
+        evRangeInput.addEventListener("change", (e) => {
+            const newRangeMiles = Number(e.target.value);
+            const newRangeMeters = newRangeMiles * 1609.34;
+            updateFuelStations(newRangeMeters);
+        });
+    </script>
+    {% endif %}
+</body>

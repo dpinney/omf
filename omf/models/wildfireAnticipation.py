@@ -4,8 +4,7 @@ from pathlib import Path
 from omf.models import __neoMetaModel__
 from omf.models.__neoMetaModel__ import *
 from omf.weather import getSubGridData
-from shapely.geometry import shape, Point
-from shapely.ops import unary_union
+from shapely.geometry import shape
 
 # Model metadata:
 tooltip = 'Return wildfire risk for custom geographic regions in the US.'
