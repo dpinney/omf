@@ -6,8 +6,6 @@
 	<script src="https://cdn.plot.ly/plotly-1.50.1.min.js"></script>		
 	<script type="text/javascript">
 		$(window).on('pageshow',function(){
-			//Plotly.newPlot('derBESSplot', JSON.parse(allOutputData['derBESSplot']),JSON.parse(allOutputData['derBESSplotLayout']));
-			//Plotly.newPlot('thermalDevicePlotData', JSON.parse(allOutputData['thermalDevicePlotData']), JSON.parse(allOutputData['thermalDevicePlotLayout']) || {});
 			Plotly.newPlot('derOverviewData', JSON.parse(allOutputData['derOverviewData']),JSON.parse(allOutputData['derOverviewLayout']));
 			Plotly.newPlot('exportedPowerData', JSON.parse(allOutputData['exportedPowerData']),JSON.parse(allOutputData['exportedPowerLayout']));
 			Plotly.newPlot('resiliencePlotly', JSON.parse(allOutputData['resilienceData']), JSON.parse(allOutputData['resilienceLayout']) || {});
@@ -73,10 +71,6 @@
 				<input type="text" id="longitude" name="longitude" value="{{allInputDataDict.longitude}}" pattern="^\-?\d+\.?\d*?$" required="required"/>
 			</div>
 			<div class="shortInput">
-				<label class="tooltip">URDB Label<span class="classic">Input the string found at the end of the URDB Rate URL, For example https://openei.org/apps/<br>IURDB/rate/view/<br> 5b75cfe95457a3454faf0aea <br> would yield "5b75cfe95457a3454faf0aea"</span></label>
-				<input type="text" id="urdbLabel" name="urdbLabel" value="{{allInputDataDict.urdbLabel}}" required="required"/>
-			</div>
-			<div class="shortInput">
 				<label class="tooltip">Year<span class="classic">Specify the year to which the Demand Curve values corresond.</span></label>
 				<input type="text" id="year" name="year" value="{{allInputDataDict.year}}" pattern="^\d{4}$" required="required"/>
 			</div>
@@ -86,6 +80,14 @@
 				<p class="inputSectionHeader">Financial Inputs</p>
 			</div>
 			<hr style="border-style: solid; border-color: #196b12; margin-top: 10px;">
+			<div class="shortInput">
+				<label class="tooltip">URDB Label<span class="classic">Input the string found at the end of the URDB Rate URL, For example https://openei.org/apps/<br>IURDB/rate/view/<br> 5b75cfe95457a3454faf0aea <br> would yield "5b75cfe95457a3454faf0aea"</span></label>
+				<input type="text" id="urdbLabel" name="urdbLabel" value="{{allInputDataDict.urdbLabel}}" required="required"/>
+			</div>
+			<div class="shortInput">
+				<label class="tooltip">Discount Rate (%)<span class="classic">Discount rate used in financial analysis.</span></label>
+				<input type="text" id="discountRate" name="discountRate" value="{{allInputDataDict.discountRate}}" pattern="[1-9][0-9]{0,2}" required="required">
+			</div>
 			<div class="shortInput">
 				<label class="tooltip">Demand Charge Cost ($/kW)<span class="classic">Specify the demand charge that the utility pays per kW.</span></label>
 				<input type="text" id="demandChargeCost" name="demandChargeCost" value="{{allInputDataDict.demandChargeCost}}" pattern="^\d+\.?\d*?$" required="required">
@@ -109,6 +111,46 @@
 			<div class="shortInput">
 				<label class="tooltip">Ongoing Subsidy Amount ($)<span class="classic">The total ongoing subsidy amount ($) occuring monthly.</span></label>
 				<input type="text" id="subsidyOngoing" name="subsidyOngoing" value="{{allInputDataDict.subsidyOngoing}}" pattern="^\d+\.?\d*?$" required="required"/>
+			</div>
+			<div class="shortInput">
+				<label class="tooltip">Home BESS - Upfront Subsidy Amount ($)<span class="classic">The total upfront subsidy amount ($) paid to a member-consumer for each home battery energy storage system (not including any recurring subsidies).</span></label>
+				<input type="text" id="BESS_subsidy_onetime" name="BESS_subsidy_onetime" value="{{allInputDataDict.BESS_subsidy_onetime}}" pattern="^\d+\.?\d*?$" required="required"/>
+			</div>
+			<div class="shortInput">
+				<label class="tooltip">Home BESS - Monthly Recurring Subsidy Amount ($)<span class="classic">The total monthly recurring subsidy amount ($) paid to a member-consumer for each home battery energy storage system (not including any upfront subsidies).</span></label>
+				<input type="text" id="BESS_subsidy_ongoing" name="BESS_subsidy_ongoing" value="{{allInputDataDict.BESS_subsidy_ongoing}}" pattern="^\d+\.?\d*?$" required="required"/>
+			</div>
+			<div class="shortInput">
+				<label class="tooltip">Home Heat Pumps - Upfront Subsidy Amount ($)<span class="classic">The total upfront subsidy amount ($) paid to a member-consumer for each home heat pump (not including any recurring subsidies).</span></label>
+				<input type="text" id="TESS_subsidy_onetime_hp" name="TESS_subsidy_onetime_hp" value="{{allInputDataDict.TESS_subsidy_onetime_hp}}" pattern="^\d+\.?\d*?$" required="required"/>
+			</div>
+			<div class="shortInput">
+				<label class="tooltip">Home Heat Pumps - Monthly Recurring Subsidy Amount ($)<span class="classic">The total monthly recurring subsidy amount ($) paid to a member-consumer for each home heat pump (not including any upfront subsidies).</span></label>
+				<input type="text" id="TESS_subsidy_ongoing_hp" name="TESS_subsidy_ongoing_hp" value="{{allInputDataDict.TESS_subsidy_ongoing_hp}}" pattern="^\d+\.?\d*?$" required="required"/>
+			</div>
+			<div class="shortInput">
+				<label class="tooltip">Home Air Conditioners - Upfront Subsidy Amount ($)<span class="classic">The total upfront subsidy amount ($) paid to a member-consumer for each home air conditioner (not including any recurring subsidies).</span></label>
+				<input type="text" id="TESS_subsidy_onetime_ac" name="TESS_subsidy_onetime_ac" value="{{allInputDataDict.TESS_subsidy_onetime_ac}}" pattern="^\d+\.?\d*?$" required="required"/>
+			</div>
+			<div class="shortInput">
+				<label class="tooltip">Home Air Conditioners - Monthly Recurring Subsidy Amount ($)<span class="classic">The total monthly recurring subsidy amount ($) paid to a member-consumer for each home air conditioner (not including any upfront subsidies).</span></label>
+				<input type="text" id="TESS_subsidy_ongoing_ac" name="TESS_subsidy_ongoing_ac" value="{{allInputDataDict.TESS_subsidy_ongoing_ac}}" pattern="^\d+\.?\d*?$" required="required"/>
+			</div>
+			<div class="shortInput">
+				<label class="tooltip">Home Water Heaters - Upfront Subsidy Amount ($)<span class="classic">The total upfront subsidy amount ($) paid to a member-consumer for each home water heater (not including any recurring subsidies).</span></label>
+				<input type="text" id="TESS_subsidy_onetime_wh" name="TESS_subsidy_onetime_wh" value="{{allInputDataDict.TESS_subsidy_onetime_wh}}" pattern="^\d+\.?\d*?$" required="required"/>
+			</div>
+			<div class="shortInput">
+				<label class="tooltip">Home Water Heaters - Monthly Recurring Subsidy Amount ($)<span class="classic">The total monthly recurring subsidy amount ($) paid to a member-consumer for each home water heater (not including any upfront subsidies).</span></label>
+				<input type="text" id="TESS_subsidy_ongoing_wh" name="TESS_subsidy_ongoing_wh" value="{{allInputDataDict.TESS_subsidy_ongoing_wh}}" pattern="^\d+\.?\d*?$" required="required"/>
+			</div>
+			<div class="shortInput">
+				<label class="tooltip">Home Generator - Upfront Subsidy Amount ($)<span class="classic">The total upfront subsidy amount ($) paid to a member-consumer for each home fossil fuel generator (not including any recurring subsidies).</span></label>
+				<input type="text" id="GEN_subsidy_onetime" name="GEN_subsidy_onetime" value="{{allInputDataDict.GEN_subsidy_onetime}}" pattern="^\d+\.?\d*?$" required="required"/>
+			</div>
+			<div class="shortInput">
+				<label class="tooltip">Home Generator - Monthly Recurring Subsidy Amount ($)<span class="classic">The total monthly recurring subsidy amount ($) paid to a member-consumer for each home fossil fuel generator (not including any upfront subsidies).</span></label>
+				<input type="text" id="GEN_subsidy_ongoing" name="GEN_subsidy_ongoing" value="{{allInputDataDict.GEN_subsidy_ongoing}}" pattern="^\d+\.?\d*?$" required="required"/>
 			</div>
 
 			<!-- Fossil Fuel Generator Inputs -->
@@ -142,6 +184,13 @@
 			</div>
 			<hr style="border-style: solid; border-color: #196b12; margin-top: 10px;">
 			<div class="shortInput">
+				<label class="tooltip">Enable Use of Home Chemical BESS?<span class="classic">If yes, model will run with home chemical batteries.</span></label>
+				<select id="enableBESS" name="enableBESS" value="{{allInputDataDict.enableBESS}}">
+					<option value='Yes' {{ 'selected' if allInputDataDict.enableBESS == 'Yes' }}>Yes</option>
+					<option value='No' {{ 'selected' if allInputDataDict.enableBESS == 'No' }}>No</option>
+				</select>
+			</div>
+			<div class="shortInput">
 				<label class="tooltip">Home Battery Power Capacity (kW)<span class="classic">Specify the home chemical battery power capacity in kW.</span></label>
 				<input type="text" id="BESS_kw" name="BESS_kw" value="{{allInputDataDict.BESS_kw}}" required="required"/>
 			</div>
@@ -150,20 +199,16 @@
 				<input type="text" id="BESS_kwh" name="BESS_kwh" value="{{allInputDataDict.BESS_kwh}}" required="required"/>
 			</div>
 			<div class="shortInput">
-				<label class="tooltip">Installed Power Cost ($/kW)<span class="classic">Specify the installed cost per kW of the battery.</span></label>
-				<input type="text" id="installed_cost_per_kw" name="installed_cost_per_kw" value="{{allInputDataDict.installed_cost_per_kw}}" pattern="^\d+\.?\d*?$" required="required"/>
-			</div>
-			<div class="shortInput">
-				<label class="tooltip">Installed Capacity Cost ($/kWh)<span class="classic">Specify the cost in $/kWh.</span></label>
-				<input type="text" id="installed_cost_per_kwh" name="installed_cost_per_kwh" value="{{allInputDataDict.installed_cost_per_kwh}}" pattern="^\d+\.?\d*?$" required="required"/>
+				<label class="tooltip">Installed Cost ($)<span class="classic">Specify the total installed cost of the battery.</span></label>
+				<input type="text" id="BESS_installed_cost" name="BESS_installed_cost" value="{{allInputDataDict.BESS_installed_cost}}" pattern="^\d+\.?\d*?$" required="required"/>
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Battery ITC (%)<span class="classic">Please enter a number 0-1 for the battery investment tax credit. Format 0.XX</span></label>
 				<input type="number" id="total_itc_fraction" name="total_itc_fraction" value="{{allInputDataDict.total_itc_fraction}}" step="0.01" min="0.0" max="1.0" required="required"/>
 			</div>
 			<div class="shortInput">
-				<label class="tooltip">Total Rebate ($/kW)<span class="classic"> Total rebate amount per kW of battery power capacity. </span></label>
-				<input type="text" id="total_rebate_per_kw" name="total_rebate_per_kw" value="{{allInputDataDict.total_rebate_per_kw}}" required="required"/>
+				<label class="tooltip">Total Government Rebate ($)<span class="classic"> Total rebate from government incentives. </span></label>
+				<input type="text" id="total_govt_rebate" name="total_govt_rebate" value="{{allInputDataDict.total_govt_rebate}}" required="required"/>
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Battery Replacement Power Cost ($/kW)<span class="classic">Specify the cost of replacing the battery inverter at the specified year in $/kW.</span></label>
@@ -182,94 +227,140 @@
 				<input type="text" id="battery_replacement_year" name="battery_replacement_year" value="{{allInputDataDict.battery_replacement_year}}" required="required"/>
 			</div>
 
-			<!-- vbatDispatch Specific Inputs -->
+			<!-- Air Conditioner (vbatDispatch) Inputs -->
 			<div class="wideInput"> 
-				<p class="inputSectionHeader"> Thermal Device Inputs</p>
+				<p class="inputSectionHeader">Home Air Conditioner Device Inputs</p>
 			</div>
 			<hr style="border-style: solid; border-color: #196b12; margin-top: 10px;">
 			<div class="shortInput">
-				<label class="tooltip">Load Type<span class="classic">Device to be used in calculations</span></label>
-				<select id="load_type" onchange="loadDefaultParameters()" name="load_type">
-				<script type="text/javascript">
-					function loadDefaultParameters(){
-						var x = gebi('load_type').value;
-						if (x == 1){ //AC
-							gebi('capacitance').value = '2';
-							gebi('resistance').value = '2';
-							gebi('power').value = '5.6';
-							gebi('cop').value = '2.5';
-							gebi('deadband').value = '0.625';
-							gebi('setpoint').value = '22.5';
-						} else if (x == 2){ //HP
-							gebi('capacitance').value = '2';
-							gebi('resistance').value = '2';
-							gebi('power').value = '5.6';
-							gebi('cop').value = '3.5';
-							gebi('deadband').value = '0.625';
-							gebi('setpoint').value = '19.5';
-						} else if (x == 3) { //RG
-							gebi('capacitance').value = '0.6';
-							gebi('resistance').value = '90';
-							gebi('power').value = '0.3';
-							gebi('cop').value = '2';
-							gebi('deadband').value = '1.5';
-							gebi('setpoint').value = '2.5';
-						} else { //WH
-							gebi('capacitance').value = '0.4';
-							gebi('resistance').value = '120';
-							gebi('power').value = '4.5';
-							gebi('cop').value = '1';
-							gebi('deadband').value = '3';
-							gebi('setpoint').value = '48.5';
-						}
-					}
-				</script>
-					<option value="0" {{ 'selected' if allInputDataDict.load_type == '0' }}>None</option>
-					<option value="1" {{ 'selected' if allInputDataDict.load_type == '1' }}>Air Conditioner</option>
-					<option value="2" {{ 'selected' if allInputDataDict.load_type == '2' }}>Heat Pump</option>
-					<option value="3" {{ 'selected' if allInputDataDict.load_type == '3' }}>Refrigerator</option>
-					<option value="4" {{ 'selected' if allInputDataDict.load_type == '4' }}>Water Heater</option>
+				<label class="tooltip">Enable Air Conditioner?<span class="classic">If yes, model will run with home air conditioner device(s).</span></label>
+				<select id="load_type_ac" name="load_type_ac" value="{{allInputDataDict.load_type_ac}}">
+					<option value="1" {{ 'selected' if allInputDataDict.load_type_ac == '1' }}>Yes</option>
+					<option value="0" {{ 'selected' if allInputDataDict.load_type_ac == '0' }}>No</option>
 				</select>
-			</div>
-			<div class="shortInput">
-				<label class="tooltip">Number of Devices<span class="classic">Total number of devices to simulate.</span></label>
-				<input type="text" id="number_devices" name="number_devices" value="{{allInputDataDict.number_devices}}" required="required">
-			</div>
-			<div class="shortInput">
-				<label class="tooltip">Rated Power (kW)<span class="classic">Max power per device. Must be a positive rational number between 0.1 and 7.2.</span></label>
-				<input type="text" id="power" name="power" value="{{allInputDataDict.power}}" pattern="^\d+\.?\d*?$" required="required">
-			</div>
-			<div class="shortInput">
-				<label class="tooltip">Thermal Capacitance (kWh/&degC)<span class="classic">Capacitance of each device. Must be between 0.2 and 2.5 with exactly one decimal digit.</span></label>
-				<input type="text" id="capacitance" name="capacitance" value="{{allInputDataDict.capacitance}}" pattern="^\d+\.?\d*?$" required="required">
-			</div>
-			<div class="shortInput">
-				<label class="tooltip">Thermal Resistance (&degC/kW)<span class="classic">Resistance of each device. Must be between 1.5 and 140.</span></label>
-				<input type="text" id="resistance" name="resistance" value="{{allInputDataDict.resistance}}" pattern="^\d+\.?\d*?$" required="required">
 			</div>			
 			<div class="shortInput">
-				<label class="tooltip">Coefficient of Performance<span class="classic">Coefficient of performance of each device. Must be a number between 1 and 3.5</span></label>
-				<input type="text" id="cop" name="cop" value="{{allInputDataDict.cop}}" pattern="^\d+\.?\d*?$" required="required">
+				<label class="tooltip">Rated Power (kW)<span class="classic">Max power per home thermal device. Must be a positive rational number between 0.1 and 7.2.</span></label>
+				<input type="text" id="power_ac" name="power_ac" value="{{allInputDataDict.power_ac}}" pattern="^\d+\.?\d*?$" required="required">
 			</div>
 			<div class="shortInput">
-				<label class="tooltip">Temperature Setpoint (&degC)<span class="classic">Setpoint for each device. Must be between 1.7 and 54.</span></label>
-				<input type="text" id="setpoint" name="setpoint" value="{{allInputDataDict.setpoint}}" pattern="^\d+\.?\d*?$" required="required">
+				<label class="tooltip">Thermal Capacitance (kWh/&degC)<span class="classic">Capacitance of each home thermal device. Must be between 0.2 and 2.5 with exactly one decimal digit.</span></label>
+				<input type="text" id="capacitance_ac" name="capacitance_ac" value="{{allInputDataDict.capacitance_ac}}" pattern="^\d+\.?\d*?$" required="required">
 			</div>
 			<div class="shortInput">
-				<label class="tooltip">Temperature Deadband (&degC)<span class="classic">Deadband for each device. Must be between 0.125 and 2.</span></label>
-				<input type="text" id="deadband" name="deadband" value="{{allInputDataDict.deadband}}" pattern="^\d+\.?\d*?$" required="required">
+				<label class="tooltip">Thermal Resistance (&degC/kW)<span class="classic">Resistance of each home thermal device. Must be between 1.5 and 140.</span></label>
+				<input type="text" id="resistance_ac" name="resistance_ac" value="{{allInputDataDict.resistance_ac}}" pattern="^\d+\.?\d*?$" required="required">
+			</div>			
+			<div class="shortInput">
+				<label class="tooltip">Coefficient of Performance<span class="classic">Coefficient of performance of each home thermal device. Must be between 1 and 3.5</span></label>
+				<input type="text" id="cop_ac" name="cop_ac" value="{{allInputDataDict.cop_ac}}" pattern="^\d+\.?\d*?$" required="required">
+			</div>
+			<div class="shortInput">
+				<label class="tooltip">Temperature Setpoint (&degC)<span class="classic">Setpoint for each home thermal device. Must be between 1.7 and 54.</span></label>
+				<input type="text" id="setpoint_ac" name="setpoint_ac" value="{{allInputDataDict.setpoint_ac}}" pattern="^\d+\.?\d*?$" required="required">
+			</div>
+			<div class="shortInput">
+				<label class="tooltip">Temperature Deadband (&degC)<span class="classic">Deadband for each home thermal device. Must be between 0.125 and 2.</span></label>
+				<input type="text" id="deadband_ac" name="deadband_ac" value="{{allInputDataDict.deadband_ac}}" pattern="^\d+\.?\d*?$" required="required">
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Unit Cost ($/unit)<span class="classic">Cost per device for equipping it to respond to load control signals. E.g. for a direct load control program, this would be the cost of a load control switch, typically about $100.</span></label>
-				<input type="text" id="unitDeviceCost" name="unitDeviceCost" value="{{allInputDataDict.unitDeviceCost}}" pattern="^\d+\.?\d*?$" required="required">
+				<input type="text" id="unitDeviceCost_ac" name="unitDeviceCost_ac" value="{{allInputDataDict.unitDeviceCost_ac}}" pattern="^\d+\.?\d*?$" required="required">
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Upkeep Cost ($/unit/year)<span class="classic">Maintenance cost each year per device for replacing or repairing defective load control equipment.</span></label>
-				<input type="text" id="unitUpkeepCost" name="unitUpkeepCost" value="{{allInputDataDict.unitUpkeepCost}}" pattern="^\d+\.?\d*?$" required="required">
+				<input type="text" id="unitUpkeepCost_ac" name="unitUpkeepCost_ac" value="{{allInputDataDict.unitUpkeepCost_ac}}" pattern="^\d+\.?\d*?$" required="required">
+			</div>
+
+
+			<!-- Heat Pump (vbatDispatch) Inputs -->
+			<div class="wideInput"> 
+				<p class="inputSectionHeader">Home Heat Pump Device Inputs</p>
+			</div>
+			<hr style="border-style: solid; border-color: #196b12; margin-top: 10px;">
+			<div class="shortInput">
+				<label class="tooltip">Enable Heat Pump?<span class="classic">If yes, model will run with a home heat pump.</span></label>
+				<select id="load_type_hp" name="load_type_hp" value="{{allInputDataDict.load_type_hp}}">
+					<option value="2" {{ 'selected' if allInputDataDict.load_type_hp == '2' }}>Yes</option>
+					<option value="0" {{ 'selected' if allInputDataDict.load_type_hp == '0' }}>No</option>
+				</select>
 			</div>
 			<div class="shortInput">
-				<label class="tooltip">Discount Rate (%)<span class="classic">Discount rate used in financial analysis.</span></label>
-				<input type="text" id="discountRate" name="discountRate" value="{{allInputDataDict.discountRate}}" pattern="[1-9][0-9]{0,2}" required="required">
+				<label class="tooltip">Rated Power (kW)<span class="classic">Max power per home thermal device. Must be a positive rational number between 0.1 and 7.2.</span></label>
+				<input type="text" id="power_hp" name="power_hp" value="{{allInputDataDict.power_hp}}" pattern="^\d+\.?\d*?$" required="required">
+			</div>
+			<div class="shortInput">
+				<label class="tooltip">Thermal Capacitance (kWh/&degC)<span class="classic">Capacitance of each home thermal device. Must be between 0.2 and 2.5 with exactly one decimal digit.</span></label>
+				<input type="text" id="capacitance_hp" name="capacitance_hp" value="{{allInputDataDict.capacitance_hp}}" pattern="^\d+\.?\d*?$" required="required">
+			</div>
+			<div class="shortInput">
+				<label class="tooltip">Thermal Resistance (&degC/kW)<span class="classic">Resistance of each home thermal device. Must be between 1.5 and 140.</span></label>
+				<input type="text" id="resistance_hp" name="resistance_hp" value="{{allInputDataDict.resistance_hp}}" pattern="^\d+\.?\d*?$" required="required">
+			</div>			
+			<div class="shortInput">
+				<label class="tooltip">Coefficient of Performance<span class="classic">Coefficient of performance of each home thermal device. Must be between 1 and 3.5</span></label>
+				<input type="text" id="cop_hp" name="cop_hp" value="{{allInputDataDict.cop_hp}}" pattern="^\d+\.?\d*?$" required="required">
+			</div>
+			<div class="shortInput">
+				<label class="tooltip">Temperature Setpoint (&degC)<span class="classic">Setpoint for each home thermal device. Must be between 1.7 and 54.</span></label>
+				<input type="text" id="setpoint_hp" name="setpoint_hp" value="{{allInputDataDict.setpoint_hp}}" pattern="^\d+\.?\d*?$" required="required">
+			</div>
+			<div class="shortInput">
+				<label class="tooltip">Temperature Deadband (&degC)<span class="classic">Deadband for each home thermal device. Must be between 0.125 and 2.</span></label>
+				<input type="text" id="deadband_hp" name="deadband_hp" value="{{allInputDataDict.deadband_hp}}" pattern="^\d+\.?\d*?$" required="required">
+			</div>
+			<div class="shortInput">
+				<label class="tooltip">Unit Cost ($/unit)<span class="classic">Cost per device for equipping it to respond to load control signals. E.g. for a direct load control program, this would be the cost of a load control switch, typically about $100.</span></label>
+				<input type="text" id="unitDeviceCost_hp" name="unitDeviceCost_hp" value="{{allInputDataDict.unitDeviceCost_hp}}" pattern="^\d+\.?\d*?$" required="required">
+			</div>
+			<div class="shortInput">
+				<label class="tooltip">Upkeep Cost ($/unit/year)<span class="classic">Maintenance cost each year per device for replacing or repairing defective load control equipment.</span></label>
+				<input type="text" id="unitUpkeepCost_hp" name="unitUpkeepCost_hp" value="{{allInputDataDict.unitUpkeepCost_hp}}" pattern="^\d+\.?\d*?$" required="required">
+			</div>
+
+			<!-- Water Heater (vbatDispatch) Inputs -->
+			<div class="wideInput"> 
+				<p class="inputSectionHeader">Home Water Heater Device Inputs</p>
+			</div>
+			<hr style="border-style: solid; border-color: #196b12; margin-top: 10px;">
+			<div class="shortInput">
+				<label class="tooltip">Enable Water Heater?<span class="classic">If yes, model will run with a home water heater.</span></label>
+				<select id="load_type_wh" name="load_type_wh" value="{{allInputDataDict.load_type_wh}}">
+					<option value="4" {{ 'selected' if allInputDataDict.load_type_wh == '4' }}>Yes</option>
+					<option value="0" {{ 'selected' if allInputDataDict.load_type_wh == '0' }}>No</option>
+				</select>
+			</div>
+			<div class="shortInput">
+				<label class="tooltip">Rated Power (kW)<span class="classic">Max power per home thermal device. Must be a positive rational number between 0.1 and 7.2.</span></label>
+				<input type="text" id="power_wh" name="power_wh" value="{{allInputDataDict.power_wh}}" pattern="^\d+\.?\d*?$" required="required">
+			</div>
+			<div class="shortInput">
+				<label class="tooltip">Thermal Capacitance (kWh/&degC)<span class="classic">Capacitance of each home thermal device. Must be between 0.2 and 2.5 with exactly one decimal digit.</span></label>
+				<input type="text" id="capacitance_wh" name="capacitance_wh" value="{{allInputDataDict.capacitance_wh}}" pattern="^\d+\.?\d*?$" required="required">
+			</div>
+			<div class="shortInput">
+				<label class="tooltip">Thermal Resistance (&degC/kW)<span class="classic">Resistance of each home thermal device. Must be between 1.5 and 140.</span></label>
+				<input type="text" id="resistance_wh" name="resistance_wh" value="{{allInputDataDict.resistance_wh}}" pattern="^\d+\.?\d*?$" required="required">
+			</div>			
+			<div class="shortInput">
+				<label class="tooltip">Coefficient of Performance<span class="classic">Coefficient of performance of each home thermal device. Must be between 1 and 3.5</span></label>
+				<input type="text" id="cop_wh" name="cop_wh" value="{{allInputDataDict.cop_wh}}" pattern="^\d+\.?\d*?$" required="required">
+			</div>
+			<div class="shortInput">
+				<label class="tooltip">Temperature Setpoint (&degC)<span class="classic">Setpoint for each home thermal device. Must be between 1.7 and 54.</span></label>
+				<input type="text" id="setpoint_wh" name="setpoint_wh" value="{{allInputDataDict.setpoint_wh}}" pattern="^\d+\.?\d*?$" required="required">
+			</div>
+			<div class="shortInput">
+				<label class="tooltip">Temperature Deadband (&degC)<span class="classic">Deadband for each home thermal device. Must be between 0.125 and 2.</span></label>
+				<input type="text" id="deadband_wh" name="deadband_wh" value="{{allInputDataDict.deadband_wh}}" pattern="^\d+\.?\d*?$" required="required">
+			</div>
+			<div class="shortInput">
+				<label class="tooltip">Unit Cost ($/unit)<span class="classic">Cost per device for equipping it to respond to load control signals. E.g. for a direct load control program, this would be the cost of a load control switch, typically about $100.</span></label>
+				<input type="text" id="unitDeviceCost_wh" name="unitDeviceCost_wh" value="{{allInputDataDict.unitDeviceCost_wh}}" pattern="^\d+\.?\d*?$" required="required">
+			</div>
+			<div class="shortInput">
+				<label class="tooltip">Upkeep Cost ($/unit/year)<span class="classic">Maintenance cost each year per device for replacing or repairing defective load control equipment.</span></label>
+				<input type="text" id="unitUpkeepCost_wh" name="unitUpkeepCost_wh" value="{{allInputDataDict.unitUpkeepCost_wh}}" pattern="^\d+\.?\d*?$" required="required">
 			</div>
 
 			{{ omfModelButtons }}
@@ -281,13 +372,6 @@
 	{% if modelStatus == 'finished' %}
 	<!-- Output tables, graphs, etc -->
 	<div id="output">
-		<!-- 
-		<p class="reportTitle" style="page-break-before:always">DER dispatch schedule with new BESS</p>
-		<div id="derBESSplot" class="tightContent" style="width: 1000px; height: 600px;"></div>
-
-		<p class="reportTitle" style="page-break-before:always">Thermal Device Temperature Profile</p>
-		<div id="thermalDevicePlotData" class="tightContent" style="width: 1000px; height: 600px;"></div>
-		-->
 		<p class="reportTitle" style="page-break-before:always">DER Serving Load Overview (using REopt)</p>
 		<div id="derOverviewData" class="tightContent" style="width: 1000px; height: 600px;"></div>
 
@@ -330,16 +414,16 @@
 					}
 				</script>
 				<script>
-					insertMetric("monthlySummaryTable","Peak Demand (kW)", allOutputData.peakDemand)
-					insertMetric("monthlySummaryTable","Adjusted Peak Demand (kW)", allOutputData.peakAdjustedDemand)
-					insertMetric("monthlySummaryTable","Energy (kWh)", allOutputData.energyMonthly)
-					insertMetric("monthlySummaryTable","Adjusted Energy (kWh)", allOutputData.energyAdjustedMonthly)
-					insertMetric("monthlySummaryTable","Energy Cost ($)", allOutputData.energyCost)
-					insertMetric("monthlySummaryTable","Adjusted Energy Cost ($)", allOutputData.energyCostAdjusted)
-					insertMetric("monthlySummaryTable","Demand Charge ($)", allOutputData.demandCharge)
-					insertMetric("monthlySummaryTable","Adjusted Demand Charge ($)", allOutputData.demandChargeAdjusted)
-					insertMetric("monthlySummaryTable","Total Cost ($)", allOutputData.totalCost)
-					insertMetric("monthlySummaryTable","Adjusted Total Cost ($)", allOutputData.totalCostAdjusted)
+					insertMetric("monthlySummaryTable","Peak Demand (kW)", allOutputData.monthlyPeakDemand)
+					insertMetric("monthlySummaryTable","Adjusted Peak Demand (kW)", allOutputData.monthlyAdjustedPeakDemand)
+					insertMetric("monthlySummaryTable","Energy (kWh)", allOutputData.monthlyEnergyConsumption)
+					insertMetric("monthlySummaryTable","Adjusted Energy (kWh)", allOutputData.monthlyAdjustedEnergyConsumption)
+					insertMetric("monthlySummaryTable","Energy Cost ($)", allOutputData.monthlyEnergyConsumptionCost)
+					insertMetric("monthlySummaryTable","Adjusted Energy Cost ($)", allOutputData.monthlyAdjustedEnergyConsumptionCost)
+					insertMetric("monthlySummaryTable","Demand Charge ($)", allOutputData.monthlyPeakDemandCost)
+					insertMetric("monthlySummaryTable","Adjusted Demand Charge ($)", allOutputData.monthlyAdjustedPeakDemandCost)
+					insertMetric("monthlySummaryTable","Total Cost of Service ($)", allOutputData.monthlyTotalCostService)
+					insertMetric("monthlySummaryTable","Adjusted Total Cost of Service ($)", allOutputData.monthlyTotalCostAdjustedService)
 					insertMetric("monthlySummaryTable","Consumer Savings ($)", allOutputData.savings)
 				</script>
 			</div>
@@ -354,8 +438,10 @@
 					"xAxis":{"title":{"text":"Year After Installation","style":{"color":"gray"}},"type":"linear","tickColor":"gray","tickInterval":1,"lineColor":"gray","minorTickColor":"gray", "minorTickInterval":5},
 					"title":{"text":"NPV:$" + allOutputData.NPV.toFixed(0) + " ;	SPP:" + allOutputData.SPP.toFixed(3), "verticalAlign":"bottom", "align":"right", "y":-50, "x":-10, "style":{"color":"#333333", "fontSize":"12px"}},
 					//"title":{"text":""},
-					"series":[{"name":"Net Benefits", "data":allOutputData.netCashflow},
-						{"name":"Cumulative Return", "type":"spline", "data":allOutputData.cumulativeCashflow}
+					"series":[
+						{"name":"Utility Savings", "data": allOutputData.savingsAllYears, "color": "rgb(41,94,17)"},
+						{"name":"Utility Costs", "data": allOutputData.costsAllYears, "color": "rgb(88,9,79)"},
+						{"name":"Cumulative Return", "type":"spline", "data": allOutputData.cumulativeCashflow_total, "color": "purple"},
 					],
 					"yAxis":{"title":{"text":"Income ($)","style":{"color":"gray"}}},
 					"chart":{"marginBottom":55,"zoomType":"x","renderTo":"cashFlowChartDiv","type":"column","marginRight":20, "height":250,"width":1000},
