@@ -970,7 +970,7 @@ def new(modelDir):
 		'latitude' : '39.986771', 
 		'longitude' : '-104.812599', ## Brighton, CO
 		'year' : '2018',
-		'urdbLabel' : '612ff9c15457a3ec18a5f7d3', ## Brighton, CO
+		'urdbLabel' : '5b311c595457a3496d8367be', #'612ff9c15457a3ec18a5f7d3' the commented URDB is Brighton, CO non-TOU residential rate
 		'fileName': 'utility_2018_kW_load.csv',
 		'tempFileName': 'open-meteo-denverCO-noheaders.csv',
 		'demandCurve': demand_curve,
