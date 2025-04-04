@@ -26,7 +26,7 @@ tooltip = ('The derConsumer model evaluates the financial costs of controlling b
 		   Laboratory (NREL) Renewable Energy Optimization Tool (REopt) and the OMF virtual battery dispatch \
 		   module (vbatDispatch).')
 modelName, template = __neoMetaModel__.metadata(__file__)
-hidden = False ## Keep the model hidden=True during active development
+hidden = True ## Keep the model hidden=True during active development
 
 
 def get_tou_rates(modelDir, inputDict): 
@@ -196,7 +196,7 @@ def work(modelDir, inputDict):
 			'macrs_option_years': 0.0,
 			'replace_cost_per_kw': float(inputDict['replace_cost_per_kw']),
 			'replace_cost_per_kwh': float(inputDict['replace_cost_per_kwh']),
-			'total_itc_fraction': float(inputDict['total_itc_fraction']),
+			#'total_itc_fraction': float(inputDict['total_itc_fraction']),
 			'inverter_replacement_year': float(inputDict['inverter_replacement_year']),
 			'battery_replacement_year': float(inputDict['battery_replacement_year']),
 			}
@@ -509,7 +509,7 @@ def work(modelDir, inputDict):
 	allDevices_subsidy_allyears_array[0] += allDevices_subsidy_onetime
 
 
-	total_govt_rebate = float(inputDict['total_govt_rebate'])
+	#total_govt_rebate = float(inputDict['total_govt_rebate'])
 
 
 	## DER Overview plot ###################################################################################################################################################################
@@ -793,10 +793,10 @@ def new(modelDir):
 		'criticalLoadFactor': '0.50',
 
 		## Financial Inputs
-		'demandChargeCost': '0.0', ## Set to zero because a residential consumer would not pay this -- the utility would
+		'demandChargeCost': '0.0', ## Set to zero because this component is not usually included in residential retail rates
 		'projectionLength': '25',
 		'electricityCost': '0.16',
-		'discountRate': '2',
+		'discountRate': '1',
 		'rateCompensation': '0.1', ## unit: $/kWh
 		'subsidyUpfront': '50',
 		'subsidyOngoing': '10',
@@ -816,13 +816,16 @@ def new(modelDir):
 		'enableBESS': 'Yes',
 		'BESS_kw': '5',
 		'BESS_kwh': '13.5',
-		'total_govt_rebate': '10.0', ## Assuming $10/kW incentive
-		'replace_cost_per_kw': '460.0', 
-		'replace_cost_per_kwh': '240.0', 
-		'BESS_installed_cost': '2400', 
-		'total_itc_fraction': '0.0', ## No ITC included unless specified
-		'inverter_replacement_year': '10', 
+		'BESS_retrofit_cost': '0.0',
+		'utility_BESS_portion': '20',
+		'total_govt_rebate': '0.0', ## No incentives considered
+		'replace_cost_per_kw': '324.0', 
+		'replace_cost_per_kwh': '351.0', 
 		'battery_replacement_year': '10',  
+		'BESS_installed_cost': '0', 
+		'total_itc_fraction': '0.0', ## No ITC
+		'inverter_replacement_year': '10',
+		'replace_cost_inverter': '2400',
 
 		## Fossil Fuel Generator
 		## Modeled after Generac Guardian 22 kW model ## NOTE: For liquid propane: 3.56 gal/hr
@@ -834,8 +837,8 @@ def new(modelDir):
 
 		## Home Air Conditioner inputs (vbatDispatch):
 		'load_type_ac': '1', 
-		'unitDeviceCost_ac': '150',
-		'unitUpkeepCost_ac': '5',
+		'unitDeviceCost_ac': '8', #a cheap wifi-enabled smart outlet to plug the AC into tis about $8
+		'unitUpkeepCost_ac': '0',
 		'power_ac': '5.6',
 		'capacitance_ac': '2',
 		'resistance_ac': '2',
@@ -846,7 +849,7 @@ def new(modelDir):
 		## Home Heat Pump inputs (vbatDispatch):
 		'load_type_hp': '2', 
 		'unitDeviceCost_hp': '150',
-		'unitUpkeepCost_hp': '5',
+		'unitUpkeepCost_hp': '0',
 		'power_hp': '5.6',
 		'capacitance_hp': '2',
 		'resistance_hp': '2',
@@ -856,8 +859,8 @@ def new(modelDir):
 
 		## Home Water Heater inputs (vbatDispatch):
 		'load_type_wh': '4', 
-		'unitDeviceCost_wh': '150',
-		'unitUpkeepCost_wh': '5',
+		'unitDeviceCost_wh': '175',
+		'unitUpkeepCost_wh': '0',
 		'power_wh': '4.5',
 		'capacitance_wh': '0.4',
 		'resistance_wh': '120',
