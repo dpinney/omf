@@ -26,7 +26,7 @@ tooltip = ('The derConsumer model evaluates the financial costs of controlling b
 		   Laboratory (NREL) Renewable Energy Optimization Tool (REopt) and the OMF virtual battery dispatch \
 		   module (vbatDispatch).')
 modelName, template = __neoMetaModel__.metadata(__file__)
-hidden = True ## Keep the model hidden=True during active development
+hidden = False ## Keep the model hidden=True during active development
 
 
 def get_tou_rates(modelDir, inputDict): 
@@ -734,9 +734,7 @@ def work(modelDir, inputDict):
 	BESS_compensation = sum(BESS) * rateCompensation
 	TESS_compensation = sum(vbat_discharge_component) * rateCompensation
 	#TESS_upkeep_cost = float(inputDict['unitUpkeepCost']) * float(inputDict['number_devices'])
-	subsidy_upfront = float(inputDict['subsidyUpfront']) 
-	subsidy_ongoing = float(inputDict['subsidyOngoing']) * 12
-	subsidies = subsidy_upfront + subsidy_ongoing
+	subsidies = allDevices_subsidy_ongoing + allDevices_subsidy_onetime
 	#GEN_fuel_cost_year1 = reoptResults['Generator']['year_one_fuel_cost_before_tax_bau']
 	#GEN_fuel_cost_allyears = reoptResults['Generator']['lifecycle_fuel_cost_after_tax']
 	initialInvestment = BESS_initial_cost #+ TESS_initial_cost
@@ -830,6 +828,7 @@ def new(modelDir):
 		## Modeled after Generac Guardian 22 kW model ## NOTE: For liquid propane: 3.56 gal/hr
 		'fossilGenerator': 'Yes',
 		'existing_gen_kw': '22',
+		'gen_retrofit_cost': '0',
 		'fuel_available_gal': '1000', 
 		'fuel_cost_per_gal': '1.00',
 
