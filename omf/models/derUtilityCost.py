@@ -339,10 +339,6 @@ def work(modelDir, inputDict):
 	########################################################################################################################################################
 	## DER Serving Load Overview plot 
 	########################################################################################################################################################
-	showlegend = True ## either enable or disable the legend toggle in the plot
-	#lineshape = 'linear'
-	lineshape = 'hv'
-	grid_to_load = reoptResults['ElectricUtility']['electric_to_load_series_kw']
 
 	## If REopt outputs any Electric Storage (BESS) that also does not contain all zeros:
 	if 'ElectricStorage' in reoptResults: 
@@ -367,14 +363,12 @@ def work(modelDir, inputDict):
 	#outData['chargeLevelBattery'] = static_reopt_results['outputs']['ElectricStorage']['soc_series_fraction']
 	#outData.update(static_reopt_results['outputs'])
 
-	## Create DER overview plot object
-	fig = go.Figure()
-
 	## vbatDispatch variables
 	vbat_discharge_component = np.array(combined_device_results['vbat_discharge'])
 	vbat_charge_component = np.array(combined_device_results['vbat_charge_flipsign'])
 
 	## Convert all values from kW to Watts for plotting purposes only
+	grid_to_load = reoptResults['ElectricUtility']['electric_to_load_series_kw']
 	grid_to_load_W = np.array(grid_to_load) * 1000.
 	BESS_W = np.array(BESS) * 1000.
 	grid_charging_BESS_W = np.array(grid_charging_BESS) * 1000.
@@ -411,6 +405,9 @@ def work(modelDir, inputDict):
 		'Grid Charging Home TESS': 'rgba(128, 0, 128, 0.4)'  ## Purple w/ half opacity
 	}
 
+	## Plot options
+	showlegend = True ## either enable or disable the legend toggle in the plot
+	lineshape = 'hv'
 	fig = go.Figure()
 
 	## Discharging DERs to plot
@@ -535,7 +532,7 @@ def work(modelDir, inputDict):
 		dataCheckList.append(dataCheck)
 		fig.add_trace(go.Scatter(
 			x=timestamps, 
-			y=combined_device_results[data_name], 
+			y=np.array(combined_device_results[data_name])*1000., ## convert from kW to W
 			yaxis='y1',
 			mode='lines',
 			line=dict(color=color, width=1),
@@ -543,7 +540,7 @@ def work(modelDir, inputDict):
 			showlegend=True
 		))
 
-	fig.update_layout(xaxis=dict(title='Timestamp'), yaxis=dict(title='Power (kW)'),
+	fig.update_layout(xaxis=dict(title='Timestamp'), yaxis=dict(title='Power (W)'),
 		legend=dict(orientation='h',yanchor='bottom',y=1.02,xanchor='right',x=1))
 	
 	## Add a thermal battery variable that signals to the HTML plot if all of the thermal series contain no data
